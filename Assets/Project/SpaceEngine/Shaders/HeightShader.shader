@@ -42,8 +42,7 @@
 
 		float CurrentNoiseF(float3 p)
 		{
-			return Fbm(p) * _Displacement;
-			//return Fbm(p, 4) * _Displacement;
+			return Fbm(p, 12) * _Displacement;
 		}
 
 		void disp(inout appdata v)

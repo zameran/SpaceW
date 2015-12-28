@@ -53,6 +53,7 @@ const float pi = 3.14159265358;
 
 //-----------------------------------------------------------------------------
 //#define IMPROVED_TEX_PERLIN
+//#define USETEXLOD
 //#define PACKED_NORMALS      1
 //-----------------------------------------------------------------------------
 //#define ATLAS_RES_X         8
@@ -640,7 +641,6 @@ Surface GetSurfaceColor(float height, float slope, float vary)
 #endif
 */
 
-#define USETEXLOD
 //So, texNDlod produce, but bugged.
 
 //-----------------------------------------------------------------------------
@@ -727,7 +727,7 @@ float4    NoiseDeriv(float3 p)
 	float h = dot(tex1Dlod(PermGradSampler, AA.w + one).rgb, p + float3(-1, -1, -1));
 
 	#else
-	float4 AA = tex2D(PermSampler, P.xy)) + P.z;
+	float4 AA = tex2D(PermSampler, P.xy) + P.z;
 
 	float a = dot(tex1D(PermGradSampler, AA.x).rgb, p);
 	float b = dot(tex1D(PermGradSampler, AA.z).rgb, p + float3(-1, 0, 0));
@@ -1112,17 +1112,17 @@ float3 OFFSETOUT = float3(0.5, 0.5, 0.5);
 //-----------------------------------------------------------------------------
 float NoiseNearestU(float3 p)
 {
-	return tex3D(NoiseSampler, p).a;
+	return tex3Dlod(NoiseSampler, float4(p.xyz, 0)).a;
 }
 
 float3 NoiseNearestUVec3(float3 p)
 {
-	return tex3D(NoiseSampler, p).rgb;
+	return tex3Dlod(NoiseSampler, float4(p.xyz, 0)).rgb;
 }
 
-float4 NoiseNearestUVec4(float p)
+float4 NoiseNearestUVec4(float3 p)
 {
-	return tex3D(NoiseSampler, p);
+	return tex3Dlod(NoiseSampler, float4(p, 0));
 }
 
 float3 NoiseNearestUVec3A(float p)
@@ -2024,7 +2024,11 @@ float   MareNoise(float3 ppoint, float globalLand, float bottomLand, out float m
 
 	for (int i = 0; i<3; i++)
 	{
+		#ifdef IMPROVEDVORONOI
+		cell = Cell3NoiseF0(ppoint + 0.07 * Fbm3D(ppoint), noiseOctaves, 1);
+		#else
 		cell = Cell2Noise(ppoint + 0.07 * Fbm3D(ppoint));
+		#endif
 		lastLand = newLand;
 		newLand = MareHeightFunc(lastLand, bottomLand, amplitude, cell * radFactor, mareFloor);
 		ppoint = ppoint * 1.3 + Randomize;
