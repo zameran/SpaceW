@@ -38,7 +38,7 @@ uniform float4    cycloneParams;  // (cycloneMagn,    cycloneFreq,    sqrt(cyclo
 
 uniform float2 TexCoord;
 
-uniform sampler3D   NoiseSampler;       // precomputed noise texture
+uniform sampler2D   NoiseSampler;       // precomputed noise texture
 uniform sampler2D   PermSampler;        // permutation table for Perlin noise
 uniform sampler1D   PermGradSampler;    // permutted gradient table for Perlin noise
 uniform sampler2D   NormalMap;          // normals map to calculate slope
@@ -934,6 +934,19 @@ float3   Fbm(float3 ppoint, float o)
 	return summ;
 }
 
+float Fbm2(float3 ppoint)
+{
+	float summ = 0.0;
+	float ampl = 1.0;
+	for (int i = 0; i<cloudsOctaves; ++i)
+	{
+		summ += Noise(ppoint) * ampl;
+		ampl *= 0.333;
+		ppoint *= 3.1416;
+	}
+	return summ;
+}
+
 float3    Fbm3D(float3 ppoint)
 {
 	float3  summ = float3(0, 0, 0);
@@ -944,6 +957,19 @@ float3    Fbm3D(float3 ppoint)
 		summ += NoiseVec3(ppoint) * ampl;
 		ampl *= gain;
 		ppoint *= noiseLacunarity;
+	}
+	return summ;
+}
+
+float3 Fbm3D2(float3 ppoint)
+{
+	float3  summ = float3(0, 0, 0);
+	float ampl = 1.0;
+	for (int i = 0; i<cloudsOctaves; ++i)
+	{
+		summ += NoiseVec3(ppoint) * ampl;
+		ampl *= 0.333;
+		ppoint *= 3.1416;
 	}
 	return summ;
 }
@@ -1099,35 +1125,30 @@ float   JordanTurbulence(float3 ppoint,
 //-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
-#define NOISE_TEX_3D_SIZE 64.0
+#define NOISE_TEX_3D_SIZE 64
 
-#define IMPROVEDVORONOI 1
+//#define IMPROVEDVORONOI
 
 float4 RND_M = float4(1, 1, 1, 1);
 
 float3 OFFSET = float3(0.5, 0.5, 0.5);
-float3 OFFSETOUT = float3(0.5, 0.5, 0.5);
+float3 OFFSETOUT = float3(1.5, 1.5, 1.5);
 //-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
 float NoiseNearestU(float3 p)
 {
-	return tex3Dlod(NoiseSampler, float4(p.xyz, 0)).a;
+	return tex2Dlod(NoiseSampler, float4(p, 0)).a;
 }
 
 float3 NoiseNearestUVec3(float3 p)
 {
-	return tex3Dlod(NoiseSampler, float4(p.xyz, 0)).rgb;
+	return tex2Dlod(NoiseSampler, float4(p, 0)).rgb;
 }
 
 float4 NoiseNearestUVec4(float3 p)
 {
-	return tex3Dlod(NoiseSampler, float4(p, 0));
-}
-
-float3 NoiseNearestUVec3A(float p)
-{
-	return NoiseNearestUVec3(p) * NoiseNearestU(p);
+	return tex2Dlod(NoiseSampler, float4(p, 0));
 }
 //-----------------------------------------------------------------------------
 
@@ -1141,11 +1162,11 @@ float   Cell2Noise(float3 p)
 	float3  d;
 	float dist;
 	float distMin = 1.0e38;
-	for (d.z = -1.0; d.z<1.0; d.z += 1.0)
+	for (d.z = -1.0; d.z<=1.0; d.z += 1.0)
 	{
-		for (d.y = -1.0; d.y<1.0; d.y += 1.0)
+		for (d.y = -1.0; d.y<=1.0; d.y += 1.0)
 		{
-			for (d.x = -1.0; d.x<1.0; d.x += 1.0)
+			for (d.x = -1.0; d.x<=1.0; d.x += 1.0)
 			{
 				rnd = NoiseNearestUVec4((cell + d) / NOISE_TEX_3D_SIZE).xyz + d;
 				//rnd = NoiseNearestUVec4((cell + d) / NOISE_TEX_3D_SIZE).xyz;
@@ -1169,11 +1190,11 @@ float2    Cell2Noise2(float3 p)
 	float dist;
 	float distMin1 = 1.0e38;
 	float distMin2 = 1.0e38;
-	for (d.z = -1.0; d.z<1.0; d.z += 1.0)
+	for (d.z = -1.0; d.z<=1.0; d.z += 1.0)
 	{
-		for (d.y = -1.0; d.y<1.0; d.y += 1.0)
+		for (d.y = -1.0; d.y<=1.0; d.y += 1.0)
 		{
-			for (d.x = -1.0; d.x<1.0; d.x += 1.0)
+			for (d.x = -1.0; d.x<=1.0; d.x += 1.0)
 			{
 				rnd = NoiseNearestUVec4((cell + d) / NOISE_TEX_3D_SIZE).xyz + d;
 				pos = rnd - offs;
@@ -1201,11 +1222,11 @@ float4    Cell2NoiseVec(float3 p)
 	float3  d;
 	float distMin = 1.0e38;
 	float dist;
-	for (d.z = -1.0; d.z<1.0; d.z += 1.0)
+	for (d.z = -1.0; d.z<=1.0; d.z += 1.0)
 	{
-		for (d.y = -1.0; d.y<1.0; d.y += 1.0)
+		for (d.y = -1.0; d.y<=1.0; d.y += 1.0)
 		{
-			for (d.x = -1.0; d.x<1.0; d.x += 1.0)
+			for (d.x = -1.0; d.x<=1.0; d.x += 1.0)
 			{
 				rnd = NoiseNearestUVec4((cell + d) / NOISE_TEX_3D_SIZE).xyz + d;
 				pos = rnd - offs;
@@ -1232,11 +1253,11 @@ float   Cell2NoiseColor(float3 p, out float4 color)
 	float3  d;
 	float distMin = 1.0e38;
 	float dist;
-	for (d.z = -1.0; d.z<1.0; d.z += 1.0)
+	for (d.z = -1.0; d.z<=1.0; d.z += 1.0)
 	{
-		for (d.y = -1.0; d.y<1.0; d.y += 1.0)
+		for (d.y = -1.0; d.y<=1.0; d.y += 1.0)
 		{
-			for (d.x = -1.0; d.x<1.0; d.x += 1.0)
+			for (d.x = -1.0; d.x<=1.0; d.x += 1.0)
 			{
 				rnd = NoiseNearestUVec4((cell + d) / NOISE_TEX_3D_SIZE);
 				pos = rnd.xyz + d - offs;
@@ -1264,11 +1285,11 @@ float4    Cell2NoiseSphere(float3 p, float Radius)
 	float3  d;
 	float distMin = 1.0e38;
 	float dist;
-	for (d.z = -1.0; d.z<1.0; d.z += 1.0)
+	for (d.z = -1.0; d.z<=1.0; d.z += 1.0)
 	{
-		for (d.y = -1.0; d.y<1.0; d.y += 1.0)
+		for (d.y = -1.0; d.y<=1.0; d.y += 1.0)
 		{
-			for (d.x = -1.0; d.x<1.0; d.x += 1.0)
+			for (d.x = -1.0; d.x<=1.0; d.x += 1.0)
 			{
 				rnd = NoiseNearestUVec4((cell + d) / NOISE_TEX_3D_SIZE).xyz + d;
 				pos = rnd - offs;
@@ -1296,11 +1317,11 @@ void    Cell2Noise2Sphere(float3 p, float Radius, out float4 point1, out float4 
 	float distMin1 = 1.0e38;
 	float distMin2 = 1.0e38;
 	float dist;
-	for (d.z = -1.0; d.z<1.0; d.z += 1.0)
+	for (d.z = -1.0; d.z<=1.0; d.z += 1.0)
 	{
-		for (d.y = -1.0; d.y<1.0; d.y += 1.0)
+		for (d.y = -1.0; d.y<=1.0; d.y += 1.0)
 		{
-			for (d.x = -1.0; d.x<1.0; d.x += 1.0)
+			for (d.x = -1.0; d.x<=1.0; d.x += 1.0)
 			{
 				rnd = NoiseNearestUVec4((cell + d) / NOISE_TEX_3D_SIZE).xyz + d;
 				pos = rnd - offs;
@@ -1337,11 +1358,11 @@ float4    Cell2NoiseVecSphere(float3 p, float Radius)
 	float3  d;
 	float distMin = 1.0e38;
 	float dist;
-	for (d.z = -1.0; d.z<1.0; d.z += 1.0)
+	for (d.z = -1.0; d.z<=1.0; d.z += 1.0)
 	{
-		for (d.y = -1.0; d.y<1.0; d.y += 1.0)
+		for (d.y = -1.0; d.y<=1.0; d.y += 1.0)
 		{
-			for (d.x = -1.0; d.x<1.0; d.x += 1.0)
+			for (d.x = -1.0; d.x<=1.0; d.x += 1.0)
 			{
 				rnd = NoiseNearestUVec4((cell + d) / NOISE_TEX_3D_SIZE).xyz + d;
 				pos = rnd - offs;
@@ -1367,13 +1388,13 @@ float   Cell3Noise(float3 p)
 	float3  d;
 	float dist;
 	float distMin = 1.0e38;
-	for (d.z = -1.0; d.z<2.0; d.z += 1.0)
+	for (d.z = -1.0; d.z<=2.0; d.z += 1.0)
 	{
-		for (d.y = -1.0; d.y<2.0; d.y += 1.0)
+		for (d.y = -1.0; d.y<=2.0; d.y += 1.0)
 		{
-			for (d.x = -1.0; d.x<2.0; d.x += 1.0)
+			for (d.x = -1.0; d.x<=2.0; d.x += 1.0)
 			{
-				rnd = NoiseNearestUVec3A((cell + d) / NOISE_TEX_3D_SIZE).xyz + d;
+				rnd = NoiseNearestUVec3((cell + d) / NOISE_TEX_3D_SIZE).xyz + d;
 				pos = rnd - offs;
 				dist = dot(pos, pos);
 				distMin = min(distMin, dist);
@@ -1392,11 +1413,11 @@ float   Cell3NoiseSmooth(float3 p, float falloff)
 	float3  d;
 	float dist;
 	float res = 0.0;
-	for (d.z = -1.0; d.z<2.0; d.z += 1.0)
+	for (d.z = -1.0; d.z<=2.0; d.z += 1.0)
 	{
-		for (d.y = -1.0; d.y<2.0; d.y += 1.0)
+		for (d.y = -1.0; d.y<=2.0; d.y += 1.0)
 		{
-			for (d.x = -1.0; d.x<2.0; d.x += 1.0)
+			for (d.x = -1.0; d.x<=2.0; d.x += 1.0)
 			{
 				rnd = NoiseNearestUVec4((cell + d) / NOISE_TEX_3D_SIZE);
 				pos = rnd.xyz + d - offs;
@@ -1418,11 +1439,11 @@ float2    Cell3Noise2(float3 p)
 	float dist;
 	float distMin1 = 1.0e38;
 	float distMin2 = 1.0e38;
-	for (d.z = -1.0; d.z<2.0; d.z += 1.0)
+	for (d.z = -1.0; d.z<=2.0; d.z += 1.0)
 	{
-		for (d.y = -1.0; d.y<2.0; d.y += 1.0)
+		for (d.y = -1.0; d.y<=2.0; d.y += 1.0)
 		{
-			for (d.x = -1.0; d.x<2.0; d.x += 1.0)
+			for (d.x = -1.0; d.x<=2.0; d.x += 1.0)
 			{
 				rnd = NoiseNearestUVec4((cell + d) / NOISE_TEX_3D_SIZE).xyz + d;
 				pos = rnd - offs;
@@ -1450,11 +1471,11 @@ float4    Cell3NoiseVec(float3 p)
 	float3  d;
 	float dist;
 	float distMin = 1.0e38;
-	for (d.z = -1.0; d.z<2.0; d.z += 1.0)
+	for (d.z = -1.0; d.z<=2.0; d.z += 1.0)
 	{
-		for (d.y = -1.0; d.y<2.0; d.y += 1.0)
+		for (d.y = -1.0; d.y<=2.0; d.y += 1.0)
 		{
-			for (d.x = -1.0; d.x<2.0; d.x += 1.0)
+			for (d.x = -1.0; d.x<=2.0; d.x += 1.0)
 			{
 				rnd = NoiseNearestUVec4((cell + d) / NOISE_TEX_3D_SIZE).xyz + d;
 				pos = rnd - offs;
@@ -1481,11 +1502,11 @@ float   Cell3NoiseColor(float3 p, out float4 color)
 	float3  d;
 	float dist;
 	float distMin = 1.0e38;
-	for (d.z = -1.0; d.z<2.0; d.z += 1.0)
+	for (d.z = -1.0; d.z<=2.0; d.z += 1.0)
 	{
-		for (d.y = -1.0; d.y<2.0; d.y += 1.0)
+		for (d.y = -1.0; d.y<=2.0; d.y += 1.0)
 		{
-			for (d.x = -1.0; d.x<2.0; d.x += 1.0)
+			for (d.x = -1.0; d.x<=2.0; d.x += 1.0)
 			{
 				rnd = NoiseNearestUVec4((cell + d) / NOISE_TEX_3D_SIZE);
 				pos = rnd.xyz + d - offs;
@@ -1513,11 +1534,11 @@ float2    Cell3Noise2Color(float3 p, out float4 color)
 	float dist;
 	float distMin1 = 1.0e38;
 	float distMin2 = 1.0e38;
-	for (d.z = -1.0; d.z<2.0; d.z += 1.0)
+	for (d.z = -1.0; d.z<=2.0; d.z += 1.0)
 	{
-		for (d.y = -1.0; d.y<2.0; d.y += 1.0)
+		for (d.y = -1.0; d.y<=2.0; d.y += 1.0)
 		{
-			for (d.x = -1.0; d.x<2.0; d.x += 1.0)
+			for (d.x = -1.0; d.x<=2.0; d.x += 1.0)
 			{
 				rnd = NoiseNearestUVec4((cell + d) / NOISE_TEX_3D_SIZE);
 				pos = rnd.xyz + d - offs;
@@ -1548,11 +1569,11 @@ float   Cell3NoiseSmoothColor(float3 p, float falloff, out float4 color)
 	float dist;
 	float distMin = 1.0e38;
 	float res = 0.0;
-	for (d.z = -1.0; d.z<2.0; d.z += 1.0)
+	for (d.z = -1.0; d.z<=2.0; d.z += 1.0)
 	{
-		for (d.y = -1.0; d.y<2.0; d.y += 1.0)
+		for (d.y = -1.0; d.y<=2.0; d.y += 1.0)
 		{
-			for (d.x = -1.0; d.x<2.0; d.x += 1.0)
+			for (d.x = -1.0; d.x<=2.0; d.x += 1.0)
 			{
 				rnd = NoiseNearestUVec4((cell + d) / NOISE_TEX_3D_SIZE);
 				pos = rnd.xyz + d - offs;
@@ -1657,6 +1678,27 @@ float Cell3NoiseF0(float3 p, int octaves, float lacunarity)
 		amp *= gain;
 	}
 	return sum / 2;
+}
+
+float4 Cell3NoiseF0Vec(float3 p, int octaves, float lacunarity)
+{
+	float3 cell = floor(p);
+	float freq = 1, amp = 0.5;
+	float sum = 0;
+	float gain = pow(lacunarity, -noiseH);
+	for (int i = 0; i < octaves; i++)
+	{
+		float2 F = inoise(p * freq, 1) * amp;
+
+		sum += 0.1 + sqrt(F[0]);
+
+		freq *= lacunarity;
+		amp *= gain;
+	}
+
+	p = normalize(p + cell + OFFSETOUT);
+
+	return float4(p, sum / 2);
 }
 
 float Cell3NoiseF1F0(float3 p, int octaves, float lacunarity)
@@ -1769,11 +1811,7 @@ float   CraterNoise(float3 ppoint, float cratMagn, float cratFreq, float cratSqr
 		//cell = Cell2NoiseSphere(ppoint + dist, craterSphereRadius, dist).w;
 		//craterSphereRadius *= 1.83;
 
-		#ifdef IMPROVEDVORONOI
-		cell = Cell3NoiseF0(ppoint + craterRoundDist * Fbm3D(ppoint*2.56), noiseOctaves, 1);
-		#else
 		cell = Cell3Noise(ppoint + craterRoundDist * Fbm3D(ppoint*2.56));
-		#endif
 
 		lastlastlastLand = lastlastLand;
 		lastlastLand = lastLand;
@@ -2024,11 +2062,7 @@ float   MareNoise(float3 ppoint, float globalLand, float bottomLand, out float m
 
 	for (int i = 0; i<3; i++)
 	{
-		#ifdef IMPROVEDVORONOI
-		cell = Cell3NoiseF0(ppoint + 0.07 * Fbm3D(ppoint), noiseOctaves, 1);
-		#else
 		cell = Cell2Noise(ppoint + 0.07 * Fbm3D(ppoint));
-		#endif
 		lastLand = newLand;
 		newLand = MareHeightFunc(lastLand, bottomLand, amplitude, cell * radFactor, mareFloor);
 		ppoint = ppoint * 1.3 + Randomize;
@@ -2359,5 +2393,49 @@ float HeightMapAsteroid(float3 ppoint, float freq, float mfreq, float hfreq, flo
 
 	//return crater;
 	return (height + crater);
+}
+
+
+//TODO Fix dat.
+float HeightMapClouds(float3 ppoint)
+{
+	float zone = cos(ppoint.y * twistZones);
+	float ang = zone * twistMagn;
+	float3  twistedPoint = ppoint;
+	float coverage = cloudsCoverage;
+	float weight = 1.0;
+
+	// Compute the cyclons
+	float3  cycloneCenter = (tidalLock > 0.0) ? float3(0, 1, 0) : Cell3NoiseVec((ppoint + Randomize) * cycloneFreq).xyz;
+	float cycloneRadius = length(cycloneCenter - ppoint) / cycloneSqrtDensity;
+	float cycloneAmpl = -tidalLock * cycloneMagn * sign(cycloneCenter.y);
+	if (cycloneRadius < 1.0)
+	{
+		float dist = 1.0 - cycloneRadius;
+		float fi = lerp(log(cycloneRadius), pow(dist, 3.0), cycloneRadius);
+		twistedPoint = Rotate(cycloneAmpl*fi, cycloneCenter, ppoint);
+		weight = saturate(1.0 - cycloneRadius / 0.05);
+		weight = (1.0 - weight * weight) * (1.0 + dist);
+		coverage = lerp(coverage, 1.0, dist);
+	}
+
+	// Compute the Coriolis effect
+	float sina = sin(ang);
+	float cosa = cos(ang);
+	twistedPoint = float3(cosa*twistedPoint.x - sina*twistedPoint.z, twistedPoint.y, sina*twistedPoint.x + cosa*twistedPoint.z);
+	twistedPoint = twistedPoint * cloudsFreq + Randomize;
+
+	// Compute the flow-like distortion
+	float3 p = twistedPoint * cloudsFreq * 6.37;
+	float3 q = p + Fbm3D2(p);
+	float3 r = p + Fbm3D2(q);
+	float f = Fbm2(r) * 0.7 + coverage - 0.3;
+	float global = saturate(f) * weight;
+
+	// Compute turbilence features
+	//noiseOctaves = cloudsOctaves;
+	//float turbulence = (Fbm(point * 100.0 * cloudsFreq + Randomize) + 1.5);// * smoothstep(0.0, 0.05, global);
+
+	return global;
 }
 //-----------------------------------------------------------------------------

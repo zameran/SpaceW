@@ -4,10 +4,9 @@ using System.Collections;
 [ExecuteInEditMode]
 public class NoiseParametersSetter : MonoBehaviour
 {
-    public Texture3D Noise = null;
-
-    private Texture2D GradientTable = null;
-    private Texture2D PermutationTable = null;
+    public Texture2D Noise = null;
+    public Texture2D GradientTable = null;
+    public Texture2D PermutationTable = null;
 
     public Material MaterialToUpdate = null;
 
@@ -19,8 +18,6 @@ public class NoiseParametersSetter : MonoBehaviour
 
     public ImprovedPerlinNoise Perlin = null;
 
-    public bool Initiated = false;
-
     public void Update()
     {
         UpdateUniforms();
@@ -29,22 +26,17 @@ public class NoiseParametersSetter : MonoBehaviour
     [ContextMenu("Update Uniforms")]
     public void UpdateUniforms()
     {
-        if (!Initiated)
+        if (Perlin == null)
         {
-            if (Perlin == null)
-            {
-                Perlin = new ImprovedPerlinNoise(0);
-            }
-
-            Perlin.LoadResourcesFor3DNoise();
-            Perlin.LoadPrecomputedRandomVolume();
-
-            PermutationTable = Perlin.GetPermutationTable2D();
-            GradientTable = Perlin.GetGradient3D();
-            Noise = Perlin.GetPermutationTable3D();
-
-            Initiated = true;
+            Perlin = new ImprovedPerlinNoise(0);
         }
+
+        Perlin.LoadResourcesFor3DNoise();
+        Perlin.LoadPrecomputedRandomVolume();
+
+        PermutationTable = Perlin.GetPermutationTable2D();
+        GradientTable = Perlin.GetGradient3D();
+        Noise = Perlin.GetPermutationTable2D();
 
         SetUniforms(MaterialToUpdate);
     }

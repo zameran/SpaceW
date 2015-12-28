@@ -41,10 +41,9 @@
 
 			float4 frag(v2f i) : COLOR
 			{
-				noiseOctaves = 4.0;
-				//float ns = HeightMapAsteroid(i.srcPos, 1, 1, 2, 0.15, 0.15) / 2 + 0.5;
-				float ns = RidgedMultifractalEroded(i.srcPos, 1, 1);
-				return float4(ns, ns, ns, 1.0f);
+				float4 color;
+				float ns = Cell2NoiseColor(i.srcPos, color);
+				return color;
 			}
 			ENDCG
 		}

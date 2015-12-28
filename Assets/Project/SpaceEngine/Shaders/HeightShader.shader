@@ -2,8 +2,7 @@
 {
 	Properties
 	{
-		_Frequency("Frequency", float) = 1
-		_Displacement("Displacement", float) = 3
+		_Displacement("Displacement", float) = 1
 		_Color("Color", color) = (1,1,1,0)
 	}
 
@@ -19,9 +18,8 @@
 
 		#include "TCCommon.cginc"
 
-		float4 _Color;
-		float _Frequency;
 		float _Displacement;
+		float4 _Color;
 
 		struct appdata
 		{
@@ -42,7 +40,7 @@
 
 		float CurrentNoiseF(float3 p)
 		{
-			return Fbm(p, 12) * _Displacement;
+			return Cell2Noise(p) * _Displacement;
 		}
 
 		void disp(inout appdata v)
@@ -56,7 +54,7 @@
 		{
 			float3 objectPos = mul(_World2Object, float4(IN.worldPos, 1)).xyz;
 
-			float noise = CurrentNoiseF(objectPos) * 2;
+			float noise = CurrentNoiseF(objectPos);
 
 			o.Albedo = noise * _Color.rgb;
 		}
