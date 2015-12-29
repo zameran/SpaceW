@@ -45,7 +45,7 @@
 
 		void disp(inout appdata v)
 		{
-			float noise = CurrentNoiseF(v.vertex.xyz);
+			float noise = CurrentNoiseF(v.vertex);
 
 			v.vertex.xyz += v.normal * noise;
 		}

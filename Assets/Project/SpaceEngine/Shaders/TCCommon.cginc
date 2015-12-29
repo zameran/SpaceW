@@ -53,13 +53,16 @@ const float pi = 3.14159265358;
 
 //-----------------------------------------------------------------------------
 #define IMPROVED_TEX_PERLIN
+#define USESAVEPOW
 #define USETEXLOD
-//#define PACKED_NORMALS      1
+#define PACKED_NORMALS
 //-----------------------------------------------------------------------------
-//#define ATLAS_RES_X         8
-//#define ATLAS_RES_Y         16
-//#define ATLAS_TILE_RES      256
-//#define ATLAS_TILE_RES_LOG2 8
+
+//-----------------------------------------------------------------------------
+#define ATLAS_RES_X         8
+#define ATLAS_RES_Y         16
+#define ATLAS_TILE_RES      256
+#define ATLAS_TILE_RES_LOG2 8
 //-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
@@ -142,6 +145,7 @@ const float pi = 3.14159265358;
 #define     saturate(x) clamp(x, 0.0, 1.0)
 //-----------------------------------------------------------------------------
 
+//-----------------------------------------------------------------------------
 float smin(float a, float b, float k)
 {
 	float h = clamp(0.5 + 0.5 * (b - a) / k, 0.0, 1.0);
@@ -154,13 +158,14 @@ float softExpMaxMin(float a, float b, float k)
 	return log(res) / k;
 }
 
-float3    Rotate(float Angle, float3 Axis, float3 Vector)
+float3 Rotate(float Angle, float3 Axis, float3 Vector)
 {
 	float cosa = cos(Angle);
 	float sina = sin(Angle);
 	float t = 1.0 - cosa;
 
-	float3x3 M = float3x3(
+	float3x3 M = float3x3
+	(
 		t * Axis.x * Axis.x + cosa,
 		t * Axis.x * Axis.y - sina * Axis.z,
 		t * Axis.x * Axis.z + sina * Axis.y,
@@ -169,13 +174,15 @@ float3    Rotate(float Angle, float3 Axis, float3 Vector)
 		t * Axis.y * Axis.z - sina * Axis.x,
 		t * Axis.x * Axis.z - sina * Axis.y,
 		t * Axis.y * Axis.z + sina * Axis.x,
-		t * Axis.z * Axis.z + cosa);
+		t * Axis.z * Axis.z + cosa
+	);
 
 	return mul(M, Vector);
 }
+//-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
-float3    SphericalToCartesian(float2 spherical)
+float3 SphericalToCartesian(float2 spherical)
 {
 	float2 alpha = float2(sin(spherical.x), cos(spherical.x));
 	float2 delta = float2(sin(spherical.y), cos(spherical.y));
@@ -183,40 +190,44 @@ float3    SphericalToCartesian(float2 spherical)
 }
 //-----------------------------------------------------------------------------
 
-/*
-float3    GetSurfacePoint()
+//-----------------------------------------------------------------------------
+float3 GetSurfacePoint(float2 texcoord)
 {
-	float2 spherical;
+	float2 spherical = float2(0, 0);
 
-	if (faceParams.w == 6.0)    // global
+	if (faceParams.w == 6.0) //global
 	{
-		spherical.x = (TexCoord.x * 2 - 0.5) * pi;
-		spherical.y = (0.5 - TexCoord.y) * pi;
+		spherical.x = (texcoord.x * 2 - 0.5) * pi;
+		spherical.y = (0.5 - texcoord.y) * pi;
+
 		float2 alpha = float2(sin(spherical.x), cos(spherical.x));
 		float2 delta = float2(sin(spherical.y), cos(spherical.y));
-		return float3(delta.y*alpha.x, delta.x, delta.y*alpha.y);
+
+		return float3(delta.y * alpha.x, delta.x, delta.y * alpha.y);
 	}
-	else                        // cubemap
+	else //cubemap
 	{
-		spherical = TexCoord.xy * faceParams.z + faceParams.xy;
-		float3 p = normalize(vec3(spherical, 1.0));
+		spherical = texcoord.xy * faceParams.z + faceParams.xy;
+
+		float3 p = normalize(float3(spherical, 1.0));
+
 		if (faceParams.w == 0.0)
-			return float3(p.z, -p.y, -p.x);  // neg_x
+			return float3(p.z, -p.y, -p.x); //neg_x
 		else if (faceParams.w == 1.0)
-			return float3(-p.z, -p.y, p.x);  // pos_x
+			return float3(-p.z, -p.y, p.x); //pos_x
 		else if (faceParams.w == 2.0)
-			return float3(p.x, -p.z, -p.y);  // neg_y
+			return float3(p.x, -p.z, -p.y); //neg_y
 		else if (faceParams.w == 3.0)
-			return float3(p.x, p.z, p.y);  // pos_y
+			return float3(p.x, p.z, p.y); //pos_y
 		else if (faceParams.w == 4.0)
-			return float3(-p.x, -p.y, -p.z);  // neg_z
+			return float3(-p.x, -p.y, -p.z); //neg_z
 		else
-			return float3(p.x, -p.y, p.z);  // pos_z
+			return float3(p.x, -p.y, p.z); //pos_z
 	}
 }
-*/
 //-----------------------------------------------------------------------------
 
+//-----------------------------------------------------------------------------
 float3 rgb2hsl(float3 rgb)
 {
 	float Max = max(rgb.r, max(rgb.g, rgb.b));
@@ -286,9 +297,10 @@ float3 hsl2rgb(float3 hsl)
 
 	return rgb;
 }
+//-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
-float3  UnitToColor24(in float unit)
+float3 UnitToColor24(in float unit)
 {
 	const float3  factor = float3(1.0, 255.0, 65025.0);
 	const float mask = 1.0 / 256.0;
@@ -305,47 +317,71 @@ float ColorToUnit24(in float3 color)
 //-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
-/*
 #ifndef PACKED_NORMALS
-float   GetSurfaceHeight()
+float GetSurfaceHeight(float2 texcoord)
 {
-	float2  texCoord = TexCoord.xy * scaleParams.z + scaleParams.xy;
-	return texture(NormalMap, texCoord).a;
+	float2  texCoord = texcoord.xy * scaleParams.z + scaleParams.xy;
+
+	#ifdef USETEXLOD
+	return tex2Dlod(NormalMap, float4(texCoord, 0, 0)).a;
+	#else
+	return tex2D(NormalMap, texCoord).a;
+	#endif
 }
 
-void    GetSurfaceHeightAndSlope(inout float height, inout float slope)
+void GetSurfaceHeightAndSlope(inout float height, inout float slope, float2 texcoord)
 {
-	vec2  texCoord = TexCoord.xy * scaleParams.z + scaleParams.xy;
-	vec4  bumpData = texture(NormalMap, texCoord);
-	vec3  norm = 2.0 * bumpData.xyz - 1.0;
+	float2 texCoord = texcoord.xy * scaleParams.z + scaleParams.xy;
+
+	#ifdef USETEXLOD
+	float4 bumpData = tex2Dlod(NormalMap, float4(texCoord, 0, 0));
+	#else
+	float4 bumpData = tex2D(NormalMap, texCoord);
+	#endif
+
+	float3 norm = 2.0 * bumpData.xyz - 1.0;
+
 	slope = clamp(1.0 - pow(norm.z, 6.0), 0.0, 1.0);
 	height = bumpData.a;
 }
 
 #else
 
-float   GetSurfaceHeight()
+float GetSurfaceHeight(float2 texcoord)
 {
-	vec2  texCoord = TexCoord.xy * scaleParams.z + scaleParams.xy;
-	vec4  bumpData = texture(NormalMap, texCoord);
-	return dot(bumpData.zw, vec2(0.00390625, 1.0));
+	float2 texCoord = TexCoord.xy * scaleParams.z + scaleParams.xy;
+
+	#ifdef USETEXLOD
+	float4 bumpData = tex2Dlod(NormalMap, float4(texCoord, 0, 0));
+	#else
+	float4 bumpData = tex2D(NormalMap, texCoord);
+	#endif
+
+	return dot(bumpData.zw, float2(0.00390625, 1.0));
 }
 
-void    GetSurfaceHeightAndSlope(inout float height, inout float slope)
+void GetSurfaceHeightAndSlope(inout float height, inout float slope, float2 texcoord)
 {
-	vec2  texCoord = TexCoord.xy * scaleParams.z + scaleParams.xy;
-	vec4  bumpData = texture(NormalMap, texCoord);
-	vec2  norm = 2.0 * bumpData.xy - 1.0;
+	float2 texCoord = texcoord.xy * scaleParams.z + scaleParams.xy;
+
+	#ifdef USETEXLOD
+	float4 bumpData = tex2Dlod(NormalMap, float4(texCoord, 0, 0));
+	#else
+	float4 bumpData = tex2D(NormalMap, texCoord);
+	#endif
+
+	float2 norm = 2.0 * bumpData.xy - 1.0;
+
 	slope = 1.0 - dot(norm.xy, norm.xy);
 	slope = clamp(1.0 - pow(slope, 3.0), 0.0, 1.0);
-	height = dot(bumpData.zw, vec2(0.00390625, 1.0));
+	height = dot(bumpData.zw, float2(0.00390625, 1.0));
 }
 #endif
-*/
+//-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
 #define     GetCloudsColor(height)           tex1D(CloudsColorTable, height)
-#define     GetGasGiantCloudsColor(height)   tex2D(MaterialTable, float2(height, 0.0))
+#define     GetGasGiantCloudsColor(height)   tex2D(MaterialTable, float2(height, 0))
 //-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
@@ -381,8 +417,8 @@ Surface BlendSmart(Surface s0, Surface s1, float t)
 //-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
-float3    hash3(float2 p) { return frac(sin(float3(dot(p, float2(127.1, 311.7)), dot(p, float2(269.5, 183.3)), dot(p, float2(419.2, 371.9)))) * 43758.5453); }
-float4    hash4(float2 p) { return frac(sin(float4(dot(p, float2(127.1, 311.7)), dot(p, float2(269.5, 183.3)), dot(p, float2(419.2, 371.9)), dot(p, float2(398.1, 176.7)))) * 43758.5453); }
+float3 hash3(float2 p) { return frac(sin(float3(dot(p, float2(127.1, 311.7)), dot(p, float2(269.5, 183.3)), dot(p, float2(419.2, 371.9)))) * 43758.5453); }
+float4 hash4(float2 p) { return frac(sin(float4(dot(p, float2(127.1, 311.7)), dot(p, float2(269.5, 183.3)), dot(p, float2(419.2, 371.9)), dot(p, float2(398.1, 176.7)))) * 43758.5453); }
 
 void FAST32_hash_3D(float3 gridcell, out float4 lowz_hash_0, out float4 lowz_hash_1, out float4 lowz_hash_2, out float4 highz_hash_0, out float4 highz_hash_1, out float4 highz_hash_2)
 {
@@ -423,6 +459,7 @@ float3 Interpolation_C2(float3 x) { return x * x * x * (x * (x * 6.0 - 15.0) + 1
 float3 Interpolation_C2_Deriv(float3 x) { return x * x * (x * (x * 30.0 - 60.0) + 30.0); }
 //-----------------------------------------------------------------------------
 
+//-----------------------------------------------------------------------------
 // Texture atlas sampling function
 // height, slope defines the tile based on MaterialTable texture
 // vary sets one of 4 different tiles of the same material
@@ -540,6 +577,7 @@ Surface    GetSurfaceColorAtlas(float height, float slope, float vary)
 	return  res;
 }
 #endif
+//-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
 // Planet surface color function (uses the texture atlas sampling function)
@@ -640,8 +678,7 @@ Surface GetSurfaceColor(float height, float slope, float vary)
 }
 #endif
 */
-
-//So, texNDlod produce, but bugged.
+//-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
 #ifdef IMPROVED_TEX_PERLIN
@@ -649,7 +686,7 @@ Surface GetSurfaceColor(float height, float slope, float vary)
 // http://www.iquilezles.org/www/articles/morenoise/morenoise.htm
 
 // 3D Perlin noise
-float   Noise(float3 p)
+float Noise(float3 p)
 {
 	const float one = 1.0 / 256.0;
 
@@ -700,7 +737,7 @@ float   Noise(float3 p)
 }
 
 // 3D Perlin noise with derivatives, returns vec4(xderiv, yderiv, zderiv, noise)
-float4    NoiseDeriv(float3 p)
+float4 NoiseDeriv(float3 p)
 {
 	const float one = 1.0 / 256;
 
@@ -876,40 +913,71 @@ const float3 vwd = float3(1.13, 2.73, 6.37);
 //-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
-float2    NoiseVec2(float3 p) { return float2(Noise(p), Noise(p + vyd)); }
-float3    NoiseVec3(float3 p) { return float3(Noise(p), Noise(p + vyd), Noise(p + vzd)); }
-float4    NoiseVec4(float3 p) { return float4(Noise(p), Noise(p + vyd), Noise(p + vzd), Noise(p + vwd)); }
-float   NoiseU(float3 p) { return Noise(p) * 0.5 + 0.5; }
-float3    NoiseUVec3(float3 p) { return NoiseVec3(p) * 0.5 + float3(0.5, 0.5, 0.5); }
-float4    NoiseUVec4(float3 p) { return NoiseVec4(p) * 0.5 + float4(0.5, 0.5, 0.5, 0.5); }
+float2 NoiseVec2(float3 p) { return float2(Noise(p), Noise(p + vyd)); }
+float3 NoiseVec3(float3 p) { return float3(Noise(p), Noise(p + vyd), Noise(p + vzd)); }
+float4 NoiseVec4(float3 p) { return float4(Noise(p), Noise(p + vyd), Noise(p + vzd), Noise(p + vwd)); }
+float NoiseU(float3 p) { return Noise(p) * 0.5 + 0.5; }
+float3 NoiseUVec3(float3 p) { return NoiseVec3(p) * 0.5 + float3(0.5, 0.5, 0.5); }
+float4 NoiseUVec4(float3 p) { return NoiseVec4(p) * 0.5 + float4(0.5, 0.5, 0.5, 0.5); }
 //-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
-float   DistNoise(float3 p, float d) { return Noise(p + NoiseVec3(p + 0.5) * d); }
-float3    DistNoise3D(float3 p, float d) { return NoiseVec3(p + NoiseVec3(p + 0.5) * d); }
-float4    DistNoise4D(float3 p, float d) { return NoiseVec4(p + NoiseVec3(p + 0.5) * d); }
-float   FiltNoise(float3 p, float w) { return Noise(p) * (1 - smoothstep(0.2, 0.6, w)); }
-float3    FiltNoise3D(float3 p, float w) { return NoiseVec3(p) * (1 - smoothstep(0.2, 0.6, w)); }
-float4    FiltNoise4D(float3 p, float w) { return NoiseVec4(p) * (1 - smoothstep(0.2, 0.6, w)); }
-float   FiltDistNoise(float3 p, float w, float d) { return DistNoise(p, d) * (1 - smoothstep(0.2, 0.6, w)); }
-float3    FiltDistNoise3D(float3 p, float w, float d) { return DistNoise3D(p, d) * (1 - smoothstep(0.2, 0.6, w)); }
-float4    FiltDistNoise4D(float3 p, float w, float d) { return DistNoise4D(p, d) * (1 - smoothstep(0.2, 0.6, w)); }
+float DistNoise(float3 p, float d) { return Noise(p + NoiseVec3(p + 0.5) * d); }
+float3 DistNoise3D(float3 p, float d) { return NoiseVec3(p + NoiseVec3(p + 0.5) * d); }
+float4 DistNoise4D(float3 p, float d) { return NoiseVec4(p + NoiseVec3(p + 0.5) * d); }
+float FiltNoise(float3 p, float w) { return Noise(p) * (1 - smoothstep(0.2, 0.6, w)); }
+float3 FiltNoise3D(float3 p, float w) { return NoiseVec3(p) * (1 - smoothstep(0.2, 0.6, w)); }
+float4 FiltNoise4D(float3 p, float w) { return NoiseVec4(p) * (1 - smoothstep(0.2, 0.6, w)); }
+float FiltDistNoise(float3 p, float w, float d) { return DistNoise(p, d) * (1 - smoothstep(0.2, 0.6, w)); }
+float3 FiltDistNoise3D(float3 p, float w, float d) { return DistNoise3D(p, d) * (1 - smoothstep(0.2, 0.6, w)); }
+float4 FiltDistNoise4D(float3 p, float w, float d) { return DistNoise4D(p, d) * (1 - smoothstep(0.2, 0.6, w)); }
 //-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
-uniform float   noiseOctaves;// = 4;
-uniform float   noiseLacunarity;// = 2.218281828459;
-uniform float   noiseH;// = 0.5;
-uniform float   noiseOffset;// = 0.8;
-uniform float   noiseRidgeSmooth;// = 0.0001;
+
+uniform float noiseOctaves;// = 4;
+uniform float noiseLacunarity;// = 2.218281828459;
+uniform float noiseH;// = 0.5;
+uniform float noiseOffset;// = 0.8;
+uniform float noiseRidgeSmooth;// = 0.0001;
+
 //-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
-float   Fbm(float3 ppoint)
+float SavePow(float f, float p) 
+{ 
+	#ifdef USESAVEPOW 
+	return pow(abs(f), p);
+	#else
+	return pow(f, p);
+	#endif
+}
+
+float Lacunarity() 
+{ 
+	#ifdef USESAVEPOW 
+	return pow(abs(noiseLacunarity), -noiseH); 
+	#else
+	return pow(noiseLacunarity, -noiseH);
+	#endif
+}
+
+float Frequency(float frequency)
+{
+	#ifdef USESAVEPOW 
+	return pow(abs(frequency), -noiseH);
+	#else
+	return pow(frequency, -noiseH);
+	#endif
+}
+//-----------------------------------------------------------------------------
+
+//-----------------------------------------------------------------------------
+float Fbm(float3 ppoint)
 {
 	float summ = 0.0;
 	float ampl = 1.0;
-	float gain = pow(noiseLacunarity, -noiseH);
+	float gain = SavePow(noiseLacunarity, -noiseH);
 	for (int i = 0; i<noiseOctaves; ++i)
 	{
 		summ += Noise(ppoint) * ampl;
@@ -919,11 +987,11 @@ float   Fbm(float3 ppoint)
 	return summ;
 }
 
-float   Fbm(float3 ppoint, float o)
+float Fbm(float3 ppoint, float o)
 {
 	float summ = 0.0;
 	float ampl = 1.0;
-	float gain = pow(noiseLacunarity, -noiseH);
+	float gain = SavePow(noiseLacunarity, -noiseH);
 	for (int i = 0; i<o; ++i)
 	{
 		summ += Noise(ppoint) * ampl;
@@ -946,11 +1014,11 @@ float FbmClouds(float3 ppoint)
 	return summ;
 }
 
-float3    Fbm3D(float3 ppoint)
+float3 Fbm3D(float3 ppoint)
 {
 	float3  summ = float3(0, 0, 0);
 	float ampl = 1.0;
-	float gain = pow(noiseLacunarity, -noiseH);
+	float gain = SavePow(noiseLacunarity, -noiseH);
 	for (int i = 0; i<noiseOctaves; ++i)
 	{
 		summ += NoiseVec3(ppoint) * ampl;
@@ -973,11 +1041,11 @@ float3 Fbm3D2(float3 ppoint)
 	return summ;
 }
 
-float   DistFbm(float3 ppoint, float dist)
+float DistFbm(float3 ppoint, float dist)
 {
 	float summ = 0.0;
 	float ampl = 1.0;
-	float gain = pow(noiseLacunarity, -noiseH);
+	float gain = SavePow(noiseLacunarity, -noiseH);
 	for (int i = 0; i<noiseOctaves; ++i)
 	{
 		summ += DistNoise(ppoint, dist) * ampl;
@@ -987,11 +1055,11 @@ float   DistFbm(float3 ppoint, float dist)
 	return summ;
 }
 
-float3    DistFbm3D(float3 ppoint, float dist)
+float3 DistFbm3D(float3 ppoint, float dist)
 {
 	float3 summ = float3(0, 0, 0);
 	float ampl = 1.0;
-	float gain = pow(noiseLacunarity, -noiseH);
+	float gain = SavePow(noiseLacunarity, -noiseH);
 	for (int i = 0; i<noiseOctaves; ++i)
 	{
 		summ += DistNoise3D(ppoint, dist) * ampl;
@@ -1001,7 +1069,7 @@ float3    DistFbm3D(float3 ppoint, float dist)
 	return summ;
 }
 
-float   RidgedMultifractal(float3 ppoint, float gain)
+float RidgedMultifractal(float3 ppoint, float gain)
 {
 	float signal = 1.0;
 	float summ = 0.0;
@@ -1013,13 +1081,13 @@ float   RidgedMultifractal(float3 ppoint, float gain)
 		signal = Noise(ppoint * frequency);
 		signal = noiseOffset - sqrt(noiseRidgeSmooth + signal*signal);
 		signal *= signal * weight;
-		summ += signal * pow(frequency, -noiseH);
+		summ += signal * SavePow(frequency, -noiseH);
 		frequency *= noiseLacunarity;
 	}
 	return summ;
 }
 
-float   RidgedMultifractalDetail(float3 ppoint, float gain, float firstOctaveValue)
+float RidgedMultifractalDetail(float3 ppoint, float gain, float firstOctaveValue)
 {
 	float signal = firstOctaveValue;
 	float summ = firstOctaveValue;
@@ -1031,7 +1099,7 @@ float   RidgedMultifractalDetail(float3 ppoint, float gain, float firstOctaveVal
 		signal = Noise(ppoint * frequency);
 		signal = noiseOffset - sqrt(noiseRidgeSmooth + signal*signal);
 		signal *= signal * weight;
-		summ += signal * pow(frequency, -noiseH);
+		summ += signal * SavePow(frequency, -noiseH);
 		frequency *= noiseLacunarity;
 	}
 	return summ;
@@ -1041,7 +1109,7 @@ float   RidgedMultifractalDetail(float3 ppoint, float gain, float firstOctaveVal
 //-----------------------------------------------------------------------------
 // Ridged multifractal with "procedural erosion" by Giliam de Carpentier
 // http://www.decarpentier.nl/scape-procedural-extensions
-float   RidgedMultifractalEroded(float3 ppoint, float gain, float warp)
+float RidgedMultifractalEroded(float3 ppoint, float gain, float warp)
 {
 	float frequency = 1.0;
 	float amplitude = 1.0;
@@ -1056,7 +1124,7 @@ float   RidgedMultifractalEroded(float3 ppoint, float gain, float warp)
 		weight = saturate(signal * gain);
 		signal = noiseOffset - sqrt(noiseRidgeSmooth + noiseDeriv.w*noiseDeriv.w);
 		signal *= signal * weight;
-		amplitude = pow(abs(frequency), -noiseH);
+		amplitude = SavePow(abs(frequency), -noiseH);
 		summ += signal * amplitude;
 		frequency *= noiseLacunarity;
 		dsum -= amplitude * noiseDeriv.xyz * noiseDeriv.w;
@@ -1066,7 +1134,7 @@ float   RidgedMultifractalEroded(float3 ppoint, float gain, float warp)
 
 // Ridged multifractal with "procedural erosion" by Giliam de Carpentier
 // http://www.decarpentier.nl/scape-procedural-extensions
-float   RidgedMultifractalErodedDetail(float3 ppoint, float gain, float warp, float firstOctaveValue)
+float RidgedMultifractalErodedDetail(float3 ppoint, float gain, float warp, float firstOctaveValue)
 {
 	float frequency = 1.0;
 	float amplitude = 1.0;
@@ -1081,7 +1149,7 @@ float   RidgedMultifractalErodedDetail(float3 ppoint, float gain, float warp, fl
 		weight = saturate(signal * gain);
 		signal = noiseOffset - sqrt(noiseRidgeSmooth + noiseDeriv.w*noiseDeriv.w);
 		signal *= signal * weight;
-		amplitude = pow(frequency, -noiseH);
+		amplitude = SavePow(frequency, -noiseH);
 		summ += signal * amplitude;
 		frequency *= noiseLacunarity;
 		dsum -= amplitude * noiseDeriv.xyz * noiseDeriv.w;
@@ -1092,17 +1160,20 @@ float   RidgedMultifractalErodedDetail(float3 ppoint, float gain, float warp, fl
 //-----------------------------------------------------------------------------
 // "Jordan turbulence" function by Giliam de Carpentier
 // http://www.decarpentier.nl/scape-procedural-extensions
-float   JordanTurbulence(float3 ppoint,
+float JordanTurbulence
+(
+	float3 ppoint,
 	float gain0, float gain,
 	float warp0, float warp,
 	float damp0, float damp,
-	float dampScale)
+	float dampScale
+)
 {
-	float4  noiseDeriv = NoiseDeriv(ppoint);
-	float4  noiseDeriv2 = noiseDeriv * noiseDeriv.w;
+	float4 noiseDeriv = NoiseDeriv(ppoint);
+	float4 noiseDeriv2 = noiseDeriv * noiseDeriv.w;
 	float summ = noiseDeriv2.w;
-	float3  dsumWarp = warp0 * noiseDeriv2.xyz;
-	float3  dsumDamp = damp0 * noiseDeriv2.xyz;
+	float3 dsumWarp = warp0 * noiseDeriv2.xyz;
+	float3 dsumDamp = damp0 * noiseDeriv2.xyz;
 
 	float amp = gain0;
 	float freq = noiseLacunarity;
@@ -1119,6 +1190,7 @@ float   JordanTurbulence(float3 ppoint,
 		amp *= gain;
 		dampedAmp = amp * (1.0 - dampScale / (1.0 + dot(dsumDamp, dsumDamp)));
 	}
+
 	return summ;
 }
 //-----------------------------------------------------------------------------
@@ -1152,13 +1224,13 @@ float4 NoiseNearestUVec4(float3 p)
 //-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
-float   Cell2Noise(float3 p)
+float Cell2Noise(float3 p)
 {
-	float3  cell = floor(p);
-	float3  offs = p - cell - OFFSET;
-	float3  pos;
-	float3  rnd;
-	float3  d;
+	float3 cell = floor(p);
+	float3 offs = p - cell - OFFSET;
+	float3 pos;
+	float3 rnd;
+	float3 d;
 	float dist;
 	float distMin = 1.0e38;
 	for (d.z = -1.0; d.z<=1.0; d.z += 1.0)
@@ -1179,13 +1251,13 @@ float   Cell2Noise(float3 p)
 	return sqrt(distMin);
 }
 
-float2    Cell2Noise2(float3 p)
+float2 Cell2Noise2(float3 p)
 {
-	float3  cell = floor(p);
-	float3  offs = p - cell - OFFSET;
-	float3  pos;
-	float3  rnd;
-	float3  d;
+	float3 cell = floor(p);
+	float3 offs = p - cell - OFFSET;
+	float3 pos;
+	float3 rnd;
+	float3 d;
 	float dist;
 	float distMin1 = 1.0e38;
 	float distMin2 = 1.0e38;
@@ -1211,14 +1283,14 @@ float2    Cell2Noise2(float3 p)
 	return sqrt(float2(distMin1, distMin2));
 }
 
-float4    Cell2NoiseVec(float3 p)
+float4 Cell2NoiseVec(float3 p)
 {
-	float3  cell = floor(p);
-	float3  offs = p - cell - OFFSET;
-	float3  pos;
-	float3  ppoint = float3(0, 0, 0);
-	float3  rnd;
-	float3  d;
+	float3 cell = floor(p);
+	float3 offs = p - cell - OFFSET;
+	float3 pos;
+	float3 ppoint = float3(0, 0, 0);
+	float3 rnd;
+	float3 d;
 	float distMin = 1.0e38;
 	float dist;
 	for (d.z = -1.0; d.z<=1.0; d.z += 1.0)
@@ -1242,14 +1314,14 @@ float4    Cell2NoiseVec(float3 p)
 	return float4(ppoint, sqrt(distMin));
 }
 
-float   Cell2NoiseColor(float3 p, out float4 color)
+float Cell2NoiseColor(float3 p, out float4 color)
 {
-	float3  cell = floor(p);
-	float3  offs = p - cell - OFFSET;
-	float3  pos;
-	float4  rndM = RND_M;
-	float4  rnd;
-	float3  d;
+	float3 cell = floor(p);
+	float3 offs = p - cell - OFFSET;
+	float3 pos;
+	float4 rndM = RND_M;
+	float4 rnd;
+	float3 d;
 	float distMin = 1.0e38;
 	float dist;
 	for (d.z = -1.0; d.z<=1.0; d.z += 1.0)
@@ -1273,15 +1345,15 @@ float   Cell2NoiseColor(float3 p, out float4 color)
 	return sqrt(distMin);
 }
 
-float4    Cell2NoiseSphere(float3 p, float Radius)
+float4 Cell2NoiseSphere(float3 p, float Radius)
 {
 	p *= Radius;
-	float3  cell = floor(p);
-	float3  offs = p - cell - OFFSET;
-	float3  pos;
-	float3  ppoint = float3(0, 0, 0);
-	float3  rnd;
-	float3  d;
+	float3 cell = floor(p);
+	float3 offs = p - cell - OFFSET;
+	float3 pos;
+	float3 ppoint = float3(0, 0, 0);
+	float3 rnd;
+	float3 d;
 	float distMin = 1.0e38;
 	float dist;
 	for (d.z = -1.0; d.z<=1.0; d.z += 1.0)
@@ -1305,14 +1377,14 @@ float4    Cell2NoiseSphere(float3 p, float Radius)
 	return float4(ppoint, length(ppoint * Radius - p));
 }
 
-void    Cell2Noise2Sphere(float3 p, float Radius, out float4 point1, out float4 point2)
+void Cell2Noise2Sphere(float3 p, float Radius, out float4 point1, out float4 point2)
 {
 	p *= Radius;
-	float3  cell = floor(p);
-	float3  offs = p - cell - OFFSET;
-	float3  pos;
-	float3  rnd;
-	float3  d;
+	float3 cell = floor(p);
+	float3 offs = p - cell - OFFSET;
+	float3 pos;
+	float3 rnd;
+	float3 d;
 	float distMin1 = 1.0e38;
 	float distMin2 = 1.0e38;
 	float dist;
@@ -1346,15 +1418,15 @@ void    Cell2Noise2Sphere(float3 p, float Radius, out float4 point1, out float4 
 	point2.w = distMin2;
 }
 
-float4    Cell2NoiseVecSphere(float3 p, float Radius)
+float4 Cell2NoiseVecSphere(float3 p, float Radius)
 {
 	p *= Radius;
-	float3  cell = floor(p);
-	float3  offs = p - cell - OFFSET;
-	float3  pos;
-	float3  ppoint = float3(0, 0, 0);
-	float3  rnd;
-	float3  d;
+	float3 cell = floor(p);
+	float3 offs = p - cell - OFFSET;
+	float3 pos;
+	float3 ppoint = float3(0, 0, 0);
+	float3 rnd;
+	float3 d;
 	float distMin = 1.0e38;
 	float dist;
 	for (d.z = -1.0; d.z<=1.0; d.z += 1.0)
@@ -1378,13 +1450,13 @@ float4    Cell2NoiseVecSphere(float3 p, float Radius)
 	return float4(ppoint, length(ppoint * Radius - p));
 }
 
-float   Cell3Noise(float3 p)
+float Cell3Noise(float3 p)
 {
-	float3  cell = floor(p);
-	float3  offs = p - cell;
-	float3  pos;
-	float3  rnd;
-	float3  d;
+	float3 cell = floor(p);
+	float3 offs = p - cell;
+	float3 pos;
+	float3 rnd;
+	float3 d;
 	float dist;
 	float distMin = 1.0e38;
 	for (d.z = -1.0; d.z<=2.0; d.z += 1.0)
@@ -1403,13 +1475,13 @@ float   Cell3Noise(float3 p)
 	return sqrt(distMin);
 }
 
-float   Cell3NoiseSmooth(float3 p, float falloff)
+float Cell3NoiseSmooth(float3 p, float falloff)
 {
-	float3  cell = floor(p);
-	float3  offs = p - cell;
-	float3  pos;
-	float4  rnd;
-	float3  d;
+	float3 cell = floor(p);
+	float3 offs = p - cell;
+	float3 pos;
+	float4 rnd;
+	float3 d;
 	float dist;
 	float res = 0.0;
 	for (d.z = -1.0; d.z<=2.0; d.z += 1.0)
@@ -1421,20 +1493,20 @@ float   Cell3NoiseSmooth(float3 p, float falloff)
 				rnd = NoiseNearestUVec4((cell + d) / NOISE_TEX_3D_SIZE);
 				pos = rnd.xyz + d - offs;
 				dist = dot(pos, pos);
-				res += pow(dist, -falloff);
+				res += SavePow(dist, -falloff);
 			}
 		}
 	}
-	return pow(res, -0.5 / falloff);
+	return SavePow(res, -0.5 / falloff);
 }
 
-float2    Cell3Noise2(float3 p)
+float2 Cell3Noise2(float3 p)
 {
-	float3  cell = floor(p);
-	float3  offs = p - cell;
-	float3  pos;
-	float3  rnd;
-	float3  d;
+	float3 cell = floor(p);
+	float3 offs = p - cell;
+	float3 pos;
+	float3 rnd;
+	float3 d;
 	float dist;
 	float distMin1 = 1.0e38;
 	float distMin2 = 1.0e38;
@@ -1460,14 +1532,14 @@ float2    Cell3Noise2(float3 p)
 	return sqrt(float2(distMin1, distMin2));
 }
 
-float4    Cell3NoiseVec(float3 p)
+float4 Cell3NoiseVec(float3 p)
 {
-	float3  cell = floor(p);
-	float3  offs = p - cell;
-	float3  pos;
-	float3  ppoint = float3(0, 0, 0);
-	float3  rnd;
-	float3  d;
+	float3 cell = floor(p);
+	float3 offs = p - cell;
+	float3 pos;
+	float3 ppoint = float3(0, 0, 0);
+	float3 rnd;
+	float3 d;
 	float dist;
 	float distMin = 1.0e38;
 	for (d.z = -1.0; d.z<=2.0; d.z += 1.0)
@@ -1491,14 +1563,14 @@ float4    Cell3NoiseVec(float3 p)
 	return float4(ppoint, sqrt(distMin));
 }
 
-float   Cell3NoiseColor(float3 p, out float4 color)
+float Cell3NoiseColor(float3 p, out float4 color)
 {
-	float3  cell = floor(p);
-	float3  offs = p - cell;
-	float3  pos;
-	float4  rnd;
-	float4  rndM = RND_M;
-	float3  d;
+	float3 cell = floor(p);
+	float3 offs = p - cell;
+	float3 pos;
+	float4 rnd;
+	float4 rndM = RND_M;
+	float3 d;
 	float dist;
 	float distMin = 1.0e38;
 	for (d.z = -1.0; d.z<=2.0; d.z += 1.0)
@@ -1522,14 +1594,14 @@ float   Cell3NoiseColor(float3 p, out float4 color)
 	return sqrt(distMin);
 }
 
-float2    Cell3Noise2Color(float3 p, out float4 color)
+float2 Cell3Noise2Color(float3 p, out float4 color)
 {
-	float3  cell = floor(p);
-	float3  offs = p - cell;
-	float3  pos;
-	float4  rnd;
-	float4  rndM = RND_M;
-	float3  d;
+	float3 cell = floor(p);
+	float3 offs = p - cell;
+	float3 pos;
+	float4 rnd;
+	float4 rndM = RND_M;
+	float3 d;
 	float dist;
 	float distMin1 = 1.0e38;
 	float distMin2 = 1.0e38;
@@ -1557,14 +1629,14 @@ float2    Cell3Noise2Color(float3 p, out float4 color)
 	return sqrt(float2(distMin1, distMin2));
 }
 
-float   Cell3NoiseSmoothColor(float3 p, float falloff, out float4 color)
+float Cell3NoiseSmoothColor(float3 p, float falloff, out float4 color)
 {
-	float3  cell = floor(p);
-	float3  offs = p - cell;
-	float3  pos;
-	float4  rnd;
-	float4  rndM = RND_M;
-	float3  d;
+	float3 cell = floor(p);
+	float3 offs = p - cell;
+	float3 pos;
+	float4 rnd;
+	float4 rndM = RND_M;
+	float3 d;
 	float dist;
 	float distMin = 1.0e38;
 	float res = 0.0;
@@ -1582,11 +1654,11 @@ float   Cell3NoiseSmoothColor(float3 p, float falloff, out float4 color)
 					distMin = dist;
 					rndM = rnd;
 				}
-				res += pow(dist, -falloff);
+				res += SavePow(dist, -falloff);
 			}
 		}
 	}
-	res = pow(res, -0.5 / falloff);
+	res = SavePow(res, -0.5 / falloff);
 	color = rndM;
 	return res;
 }
@@ -1666,7 +1738,7 @@ float Cell3NoiseF0(float3 p, int octaves, float lacunarity)
 {
 	float freq = 1, amp = 0.5;
 	float sum = 0;
-	float gain = pow(lacunarity, -noiseH);
+	float gain = SavePow(lacunarity, -noiseH);
 	for (int i = 0; i < octaves; i++)
 	{
 		float2 F = inoise(p * freq, 1) * amp;
@@ -1684,7 +1756,7 @@ float4 Cell3NoiseF0Vec(float3 p, int octaves, float lacunarity)
 	float3 cell = floor(p);
 	float freq = 1, amp = 0.5;
 	float sum = 0;
-	float gain = pow(lacunarity, -noiseH);
+	float gain = SavePow(lacunarity, -noiseH);
 	for (int i = 0; i < octaves; i++)
 	{
 		float2 F = inoise(p * freq, 1) * amp;
@@ -1704,7 +1776,7 @@ float Cell3NoiseF1F0(float3 p, int octaves, float lacunarity)
 {
 	float freq = 1, amp = 0.5;
 	float sum = 0;
-	float gain = pow(lacunarity, -noiseH);
+	float gain = SavePow(lacunarity, -noiseH);
 	for (int i = 0; i < octaves; i++)
 	{
 		float2 F = inoise(p * freq, 1) * amp;
@@ -1735,7 +1807,7 @@ float4 craterRaysColor;
 //-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
-float   CraterHeightFunc(float lastlastLand, float lastLand, float height, float r)
+float CraterHeightFunc(float lastlastLand, float lastLand, float height, float r)
 {
 	float t;
 
@@ -1765,39 +1837,19 @@ float   CraterHeightFunc(float lastlastLand, float lastLand, float height, float
 	}
 	else
 		return lastLand;
-
-	//t = 1.0 - r/radPeak;
-	//float peak = heightPeak * craterDistortion * smoothstep(0.0, 1.0, t);
-
-	//t = saturate((r - radInner) / (radRim - radInner));
-	//float innerRim = height * heightRim * craterDistortion * t*t*t;
-
-	//float lastlastMask = 1.0 - t*t*t;
-
-	//t = saturate(1.0 - (r - radRim) / (radOuter - radRim));
-	//float outerRim = height * craterDistortion * mix(0.1, heightRim, t*t);
-
-	//t = saturate(1.0 - (r - radOuter) / (1.0 - radOuter));
-	//float halo = 0.1 * height * craterDistortion * t;
-
-	//float lastMask = step(radOuter, r);
-
-	//return (lastlastLand + height * heightFloor) * lastlastMask * lastMask + lastLand + peak + innerRim + outerRim + halo;
 }
 
-float   CraterNoise(float3 ppoint, float cratMagn, float cratFreq, float cratSqrtDensity, float cratOctaves)
+float CraterNoise(float3 ppoint, float cratMagn, float cratFreq, float cratSqrtDensity, float cratOctaves)
 {
-	//craterSphereRadius = cratFreq * cratSqrtDensity;
-	//point *= craterSphereRadius;
 	ppoint = (ppoint * cratFreq + Randomize) * cratSqrtDensity;
 
-	float  newLand = 0.0;
-	float  lastLand = 0.0;
-	float  lastlastLand = 0.0;
-	float  lastlastlastLand = 0.0;
-	float  amplitude = 1.0;
-	float  cell;
-	float  radFactor = 1.0 / cratSqrtDensity;
+	float newLand = 0.0;
+	float lastLand = 0.0;
+	float lastlastLand = 0.0;
+	float lastlastlastLand = 0.0;
+	float amplitude = 1.0;
+	float cell;
+	float radFactor = 1.0 / cratSqrtDensity;
 
 	radPeak = 0.02;
 	radInner = 0.15;
@@ -1806,10 +1858,6 @@ float   CraterNoise(float3 ppoint, float cratMagn, float cratFreq, float cratSqr
 
 	for (int i = 0; i<cratOctaves; i++)
 	{
-		//vec3 dist = craterRoundDist * Fbm3D(ppoint*2.56);
-		//cell = Cell2NoiseSphere(ppoint + dist, craterSphereRadius, dist).w;
-		//craterSphereRadius *= 1.83;
-
 		cell = Cell3Noise(ppoint + craterRoundDist * Fbm3D(ppoint*2.56));
 
 		lastlastlastLand = lastlastLand;
@@ -1823,23 +1871,24 @@ float   CraterNoise(float3 ppoint, float cratMagn, float cratFreq, float cratSqr
 		radInner *= 0.60;
 	}
 
-	return  cratMagn * newLand;
+	return cratMagn * newLand;
 }
 
-float   RayedCraterColorFunc(float r, float fi, float rnd)
+float RayedCraterColorFunc(float r, float fi, float rnd)
 {
 	if (r < radOuter)
 	{
 		float t = 1.0 - (r - radRim) / (radOuter - radRim);
-		//float d = NoiseU(float3(10.3 * fract(13.31 * fi + 3.022), rnd, rnd));
-		float d = pow(NoiseU(float3(70.3 * fi, rnd, rnd)), 4);
-		return sqrt(t) * saturate(pow(d, 4) + 1.0 - smoothstep(d, d + 0.75, r));
+
+		float d = SavePow(NoiseU(float3(70.3 * fi, rnd, rnd)), 4);
+
+		return sqrt(t) * saturate(SavePow(d, 4) + 1.0 - smoothstep(d, d + 0.75, r));
 	}
 	else
 		return 0.0;
 }
 
-float   RayedCraterNoise(float3 ppoint, float cratMagn, float cratFreq, float cratSqrtDensity, float cratOctaves)
+float RayedCraterNoise(float3 ppoint, float cratMagn, float cratFreq, float cratSqrtDensity, float cratOctaves)
 {
 	craterSphereRadius = cratFreq * cratSqrtDensity;
 
@@ -1859,7 +1908,6 @@ float   RayedCraterNoise(float3 ppoint, float cratMagn, float cratFreq, float cr
 	for (int i = 0; i<cratOctaves; i++)
 	{
 		cell = Cell2NoiseSphere(ppoint, craterSphereRadius).w;
-		//cell = Cell2NoiseVec(ppoint * craterSphereRadius).w;
 
 		lastlastlastLand = lastlastLand;
 		lastlastLand = lastLand;
@@ -1876,14 +1924,14 @@ float   RayedCraterNoise(float3 ppoint, float cratMagn, float cratFreq, float cr
 	return  cratMagn * newLand;
 }
 
-float   RayedCraterColorNoise(float3 ppoint, float cratFreq, float cratSqrtDensity, float cratOctaves)
+float RayedCraterColorNoise(float3 ppoint, float cratFreq, float cratSqrtDensity, float cratOctaves)
 {
-	float3   binormal = normalize(cross(ppoint, float3(0, 1, 0)));
+	float3 binormal = normalize(cross(ppoint, float3(0, 1, 0)));
 	craterSphereRadius = cratFreq * cratSqrtDensity;
 
 	float color = 0.0;
 	float fi;
-	float4  cell;
+	float4 cell;
 	float radFactor = 1.0 / cratSqrtDensity;
 
 	radPeak = 0.002;
@@ -1893,7 +1941,6 @@ float   RayedCraterColorNoise(float3 ppoint, float cratFreq, float cratSqrtDensi
 
 	for (int i = 0; i<cratOctaves; i++)
 	{
-		//cell = Cell2NoiseSphere(ppoint, craterSphereRadius);
 		cell = Cell2NoiseVec(ppoint * craterSphereRadius);
 		fi = acos(dot(binormal, normalize(cell.xyz - ppoint))) / (pi*2.0);
 		color += RayedCraterColorFunc(cell.w * radFactor, fi, 48.3 * dot(cell.xyz, Randomize));
@@ -1904,23 +1951,23 @@ float   RayedCraterColorNoise(float3 ppoint, float cratFreq, float cratSqrtDensi
 	return color;
 }
 
-float   VolcanoHeightFunc(float r, float fi, float rnd, float dist, float depth)
+float VolcanoHeightFunc(float r, float fi, float rnd, float dist, float depth)
 {
 	float t, d;
-	float cone = pow(smoothstep(0.0, 0.9, 1.0 - 2.0 * r), 3);
+	float cone = SavePow(smoothstep(0.0, 0.9, 1.0 - 2.0 * r), 3);
 
 	t = (r - radInner) / (radRim - radInner);
 	float caldera = clamp(1.0 - t*t*t, 0.0, 0.9);
 
 	t = saturate(1.0 - (r - radRim) / (radOuter - radRim));
-	d = pow(NoiseU(float3(22.3 * fi, rnd, rnd)) - 0.25 * t*t, volcanoFlows);
+	d = SavePow(NoiseU(float3(22.3 * fi, rnd, rnd)) - 0.25 * t*t, volcanoFlows);
 	float flows = (1.0 - smoothstep(d, d + 0.05, 0.5 * r)) * clamp(t, 0.0, 0.9);
 
-	float  lava = softExpMaxMin(caldera, flows, 32);
-	return cone - depth * lava + dist * pow(1.0 - lava, 4) * saturate((0.5 - r) * 20.0);
+	float lava = softExpMaxMin(caldera, flows, 32);
+	return cone - depth * lava + dist * SavePow(1.0 - lava, 4) * saturate((0.5 - r) * 20.0);
 }
 
-float   VolcanoGlowFunc(float r, float fi, float rnd)
+float VolcanoGlowFunc(float r, float fi, float rnd)
 {
 	float t, d;
 
@@ -1928,24 +1975,24 @@ float   VolcanoGlowFunc(float r, float fi, float rnd)
 	float caldera = clamp(1.0 - t*t*t, 0.0, 1.0);
 
 	t = saturate(1.0 - (r - radRim) / (radOuter - radRim));
-	d = pow(NoiseU(float3(22.3 * fi, rnd, rnd)) - 0.25 * t*t, volcanoFlows);
+	d = SavePow(NoiseU(float3(22.3 * fi, rnd, rnd)) - 0.25 * t*t, volcanoFlows);
 	float flows = (1.0 - smoothstep(d, d + 0.05, 0.5 * r));
 
 	return max(caldera, flows);
 }
 
-float   VolcanoNoise(float3 ppoint, float globalLand, float localLand)
+float VolcanoNoise(float3 ppoint, float globalLand, float localLand)
 {
 	ppoint += craterRoundDist * Fbm3D(ppoint * 183.61);
 	craterSphereRadius = volcanoFreq * volcanoSqrtDensity;
 
-	float3   binormal = normalize(cross(ppoint, float3(0, 1, 0)));
-	float  newLand = localLand;
-	float  amplitude = volcanoMagn;
-	float  radFactor = 2.0 / (volcanoSqrtDensity * volcanoRadius);
-	float  volcano, dist, fi, r;
-	float  shape = 0.7; // 1.0 - shield volcano, 0.5 - conic volcano
-	float4   cell;
+	float3 binormal = normalize(cross(ppoint, float3(0, 1, 0)));
+	float newLand = localLand;
+	float amplitude = volcanoMagn;
+	float radFactor = 2.0 / (volcanoSqrtDensity * volcanoRadius);
+	float volcano, dist, fi, r;
+	float shape = 0.7; // 1.0 - shield volcano, 0.5 - conic volcano
+	float4 cell;
 
 	radInner = 0.02;
 	radRim = 0.03;
@@ -1961,7 +2008,7 @@ float   VolcanoNoise(float3 ppoint, float globalLand, float localLand)
 		//cell = Cell3NoiseVec(ppoint + craterSphereRadius);
 
 		fi = acos(dot(binormal, normalize(cell.xyz - ppoint))) / (pi*2.0);
-		r = pow(cell.w * radFactor, shape);
+		r = SavePow(cell.w * radFactor, shape);
 		volcano = globalLand - 1.0 + 2.0 * amplitude * VolcanoHeightFunc(r, fi, 48.3 * dot(cell.xyz, Randomize), dist, 0.1 * shape);
 		newLand = softExpMaxMin(newLand, volcano, 32);
 
@@ -1977,17 +2024,17 @@ float   VolcanoNoise(float3 ppoint, float globalLand, float localLand)
 	return newLand;
 }
 
-float   VolcanoGlowNoise(float3 ppoint)
+float VolcanoGlowNoise(float3 ppoint)
 {
 	ppoint += craterRoundDist * Fbm3D(ppoint * 183.61);
 	craterSphereRadius = volcanoFreq * volcanoSqrtDensity;
 
-	float3   binormal = normalize(cross(ppoint, float3(0, 1, 0)));
-	float  lavaTemp = 0.0;
-	float  radFactor = 2.0 / (volcanoSqrtDensity * volcanoRadius);
-	float  fi, r;
-	float  shape = 0.7; // 1.0 - shield volcano, 0.5 - conic volcano
-	float4   cell;
+	float3 binormal = normalize(cross(ppoint, float3(0, 1, 0)));
+	float lavaTemp = 0.0;
+	float radFactor = 2.0 / (volcanoSqrtDensity * volcanoRadius);
+	float fi, r;
+	float shape = 0.7; // 1.0 - shield volcano, 0.5 - conic volcano
+	float4 cell;
 
 	radInner = 0.02;
 	radRim = 0.03;
@@ -1999,7 +2046,7 @@ float   VolcanoGlowNoise(float3 ppoint)
 		//cell = Cell3NoiseVec(ppoint + craterSphereRadius);
 
 		fi = acos(dot(binormal, normalize(cell.xyz - ppoint))) / (pi*2.0);
-		r = pow(cell.w * radFactor, shape);
+		r = SavePow(cell.w * radFactor, shape);
 		lavaTemp = max(lavaTemp, VolcanoGlowFunc(r, fi, 48.3 * dot(cell.xyz, Randomize)));
 
 		craterSphereRadius *= 0.57;
@@ -2013,7 +2060,7 @@ float   VolcanoGlowNoise(float3 ppoint)
 	return lavaTemp;
 }
 
-float   MareHeightFunc(float lastLand, float lastlastLand, float height, float r, out float mareFloor)
+float MareHeightFunc(float lastLand, float lastlastLand, float height, float r, out float mareFloor)
 {
 	float t;
 
@@ -2042,15 +2089,15 @@ float   MareHeightFunc(float lastLand, float lastlastLand, float height, float r
 	}
 }
 
-float   MareNoise(float3 ppoint, float globalLand, float bottomLand, out float mareFloor)
+float MareNoise(float3 ppoint, float globalLand, float bottomLand, out float mareFloor)
 {
 	ppoint = (ppoint * mareFreq + Randomize) * mareSqrtDensity;
 
-	float  amplitude = 0.7;
-	float  newLand = globalLand;
-	float  lastLand;
-	float  cell;
-	float  radFactor = 1.0 / mareSqrtDensity;
+	float amplitude = 0.7;
+	float newLand = globalLand;
+	float lastLand;
+	float cell;
+	float radFactor = 1.0 / mareSqrtDensity;
 
 	radPeak = 0.0;
 	radInner = 0.5;
@@ -2070,10 +2117,11 @@ float   MareNoise(float3 ppoint, float globalLand, float bottomLand, out float m
 	}
 
 	mareFloor = 1.0 - mareFloor;
+
 	return newLand;
 }
 
-float   CrackHeightFunc(float lastLand, float lastlastLand, float height, float r)
+float CrackHeightFunc(float lastLand, float lastlastLand, float height, float r)
 {
 	float t;
 
@@ -2089,7 +2137,7 @@ float   CrackHeightFunc(float lastLand, float lastlastLand, float height, float 
 	}
 }
 
-float   CrackColorFunc(float r)
+float CrackColorFunc(float r)
 {
 	float t;
 
@@ -2105,15 +2153,15 @@ float   CrackColorFunc(float r)
 	}
 }
 
-float   CrackNoise(float3 ppoint, float distrort)
+float CrackNoise(float3 ppoint, float distrort)
 {
 	ppoint = (ppoint + Randomize) * cracksFreq;
 
-	float  newLand = 0.0;
-	float  lastLand = 0.0;
-	float  lastlastLand = 0.0;
-	float2   cell;
-	float  dist;
+	float newLand = 0.0;
+	float lastLand = 0.0;
+	float lastlastLand = 0.0;
+	float2 cell;
+	float dist;
 
 	for (int i = 0; i<cracksOctaves; i++)
 	{
@@ -2129,15 +2177,15 @@ float   CrackNoise(float3 ppoint, float distrort)
 	return newLand;
 }
 
-float   CrackNoise(float3 ppoint, float distrort, float freq, float mod)
+float CrackNoise(float3 ppoint, float distrort, float freq, float mod)
 {
 	ppoint = (ppoint + Randomize) * freq;
 
-	float  newLand = 0.0;
-	float  lastLand = 0.0;
-	float  lastlastLand = 0.0;
-	float2   cell;
-	float  dist;
+	float newLand = 0.0;
+	float lastLand = 0.0;
+	float lastlastLand = 0.0;
+	float2 cell;
+	float dist;
 
 	for (int i = 0; i<cracksOctaves; i++)
 	{
@@ -2153,13 +2201,13 @@ float   CrackNoise(float3 ppoint, float distrort, float freq, float mod)
 	return cell * mod;//newLand * mod;
 }
 
-float   CrackColorNoise(float3 ppoint)
+float CrackColorNoise(float3 ppoint)
 {
 	ppoint = (ppoint + Randomize) * cracksFreq;
 
-	float  color = 0.0;
-	float  dist;
-	float2   cell;
+	float color = 0.0;
+	float dist;
+	float2 cell;
 
 	for (int i = 0; i<cracksOctaves; i++)
 	{
@@ -2169,13 +2217,13 @@ float   CrackColorNoise(float3 ppoint)
 		ppoint = ppoint * 1.2 + Randomize;
 	}
 
-	return pow(saturate(1.0 - color), 2.0);
+	return SavePow(saturate(1.0 - color), 2.0);
 }
 
-float   DunesNoise(float3 ppoint, float octaves)
+float DunesNoise(float3 ppoint, float octaves)
 {
 	float dir = Noise(ppoint * 3.86) * 197.3 * dunesFreq;
-	float3  p = ppoint;
+	float3 p = ppoint;
 
 	float glob = saturate(Fbm(p * 7.21) + 0.3);
 	float dwin = 1.0 / (octaves - 1.0);
@@ -2202,10 +2250,10 @@ float   DunesNoise(float3 ppoint, float octaves)
 	return dunes;
 }
 
-float   DunesNoise(float3 ppoint, float octaves, float freq, float mod)
+float DunesNoise(float3 ppoint, float octaves, float freq, float mod)
 {
 	float dir = Noise(ppoint * 3.86) * 197.3 * freq;
-	float3  p = ppoint;
+	float3 p = ppoint;
 
 	float glob = saturate(Fbm(p * 7.21) + 0.3);
 	float dwin = 1.0 / (octaves - 1.0);
@@ -2232,7 +2280,7 @@ float   DunesNoise(float3 ppoint, float octaves, float freq, float mod)
 	return dunes * mod;
 }
 
-void	SolarSpotsHeightNoise(float3 ppoint, out float botMask, out float filMask, out float filaments)
+void SolarSpotsHeightNoise(float3 ppoint, out float botMask, out float filMask, out float filaments)
 {
 	float3 binormal = normalize(cross(ppoint, float3(0, 1, 0)));
 	craterSphereRadius = mareFreq * mareSqrtDensity;
@@ -2243,7 +2291,7 @@ void	SolarSpotsHeightNoise(float3 ppoint, out float botMask, out float filMask, 
 
 	float filam, botmask, filmask;
 	float fi, rnd, t;
-	float4  cell;
+	float4 cell;
 	float radFactor = 2.0 / mareSqrtDensity;
 
 	radInner = 0.4;
@@ -2274,7 +2322,7 @@ void	SolarSpotsHeightNoise(float3 ppoint, out float botMask, out float filMask, 
 	}
 }
 
-void	SolarSpotsTempNoise(float3 ppoint, out float botMask, out float filMask, out float filaments)
+void SolarSpotsTempNoise(float3 ppoint, out float botMask, out float filMask, out float filaments)
 {
 	float3 binormal = normalize(cross(ppoint, float3(0, 1, 0)));
 	craterSphereRadius = mareFreq * mareSqrtDensity;
@@ -2285,7 +2333,7 @@ void	SolarSpotsTempNoise(float3 ppoint, out float botMask, out float filMask, ou
 
 	float filam, botmask, filmask;
 	float fi, rnd, t;
-	float4  cell;
+	float4 cell;
 	float radFactor = 2.0 / mareSqrtDensity;
 
 	radInner = 0.4;
@@ -2411,7 +2459,7 @@ float HeightMapClouds(float3 ppoint)
 	if (cycloneRadius < 1.0)
 	{
 		float dist = 1.0 - cycloneRadius;
-		float fi = lerp(log(cycloneRadius), pow(dist, 3.0), cycloneRadius);
+		float fi = lerp(log(cycloneRadius), SavePow(dist, 3.0), cycloneRadius);
 		twistedPoint = Rotate(cycloneAmpl*fi, cycloneCenter, ppoint);
 		weight = saturate(1.0 - cycloneRadius / 0.05);
 		weight = (1.0 - weight * weight) * (1.0 + dist);

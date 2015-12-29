@@ -33,10 +33,11 @@ void CSMain (uint3 id : SV_DispatchThreadID)
 
     GenerationConstants constants = terrainGenerationConstants[0];
 
-    float2 sampleCoord = float2((id.x + constants.patchCenter.x), 
+    float3 sampleCoord = float3((id.x + constants.patchCenter.x),
+								0, 
 								(id.y + constants.patchCenter.y));
 
-	float noise = Fbm(float3(id.x, outBuffOffset, id.y));
+	float noise = Fbm(float3(id.x, 0, id.y));
 
     float height = constants.scale * max(noise, constants.noiseSeaLevel) * 20;
 

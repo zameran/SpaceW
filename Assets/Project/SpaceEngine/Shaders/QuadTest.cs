@@ -22,8 +22,8 @@ public struct GenerationConstants
     public GenerationConstants(float scale)
     {
         this.scale = scale;
-        this.noiseSeaLevel = 0;
-        this.spacing = 1;
+        this.noiseSeaLevel = 0.1f;
+        this.spacing = 10;
 
         this.patchCenter = new Vector4(0.0f, 0.0f, 0.0f, 0.0f);
     }

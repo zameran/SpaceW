@@ -41,9 +41,8 @@
 
 			float4 frag(v2f i) : COLOR
 			{
-				float4 color;
-				float ns = Cell2NoiseColor(i.srcPos, color);
-				return color;
+				float ns = Cell2Noise(i.srcPos);
+				return float4(ns, ns, ns, 1);
 			}
 			ENDCG
 		}
