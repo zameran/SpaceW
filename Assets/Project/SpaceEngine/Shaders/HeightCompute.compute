@@ -1,0 +1,46 @@
+﻿#pragma kernel CSMain
+
+#define threadsPerGroup_X 32
+#define threadsPerGroup_Y 32
+#define nVerticesPerSide 128
+
+#define TWO_PI 6.283185
+
+#include "TCCommon.cginc"
+
+struct GenerationConstants
+{
+    float scale;
+    float noiseSeaLevel;
+    float spacing;
+    float4 patchCenter;
+};
+
+struct OutputStruct
+{
+    float4 pos;
+};
+
+StructuredBuffer<GenerationConstants> terrainGenerationConstants;
+RWStructuredBuffer<OutputStruct> patchOutput;
+
+[numthreads(threadsPerGroup_X,threadsPerGroup_Y,1)]
+
+//We lookup the the index into the flat array by using x + y * x_stride
+void CSMain (uint3 id : SV_DispatchThreadID)
+{
+    int outBuffOffset = id.x + id.y * nVerticesPerSide;
+
+    GenerationConstants constants = terrainGenerationConstants[0];
+
+    float2 sampleCoord = float2((id.x + constants.patchCenter.x), 
+								(id.y + constants.patchCenter.y));
+
+	float noise = Fbm(float3(id.x, outBuffOffset, id.y));
+
+    float height = constants.scale * max(noise, constants.noiseSeaLevel) * 20;
+
+    float4 output = float4(-1 + id.x * constants.spacing, height, -1 + id.y * constants.spacing, 1);
+
+    patchOutput[outBuffOffset].pos = output;
+}

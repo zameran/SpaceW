@@ -8,6 +8,7 @@ public class NoiseParametersSetter : MonoBehaviour
     public Texture2D GradientTable = null;
     public Texture2D PermutationTable = null;
 
+    public ComputeShader ComputeShaderToUpdate = null;
     public Material MaterialToUpdate = null;
 
     public float Octaves = 4f;
@@ -18,6 +19,11 @@ public class NoiseParametersSetter : MonoBehaviour
 
     public ImprovedPerlinNoise Perlin = null;
 
+    void Start()
+    {
+        LoadAndInit();
+    }
+
     public void Update()
     {
         UpdateUniforms();
@@ -26,19 +32,30 @@ public class NoiseParametersSetter : MonoBehaviour
     [ContextMenu("Update Uniforms")]
     public void UpdateUniforms()
     {
+        LoadAndInit();
+
+        SetUniforms(MaterialToUpdate);
+        SetUniforms(ComputeShaderToUpdate);
+    }
+
+    public void Init()
+    {
         if (Perlin == null)
         {
             Perlin = new ImprovedPerlinNoise(0);
         }
+    }
+
+    public void LoadAndInit()
+    {
+        Init();
 
         Perlin.LoadResourcesFor3DNoise();
-        Perlin.LoadPrecomputedRandomVolume();
+        //Perlin.LoadPrecomputedRandomVolume();
 
         PermutationTable = Perlin.GetPermutationTable2D();
         GradientTable = Perlin.GetGradient3D();
         Noise = Perlin.GetPermutationTable2D();
-
-        SetUniforms(MaterialToUpdate);
     }
 
     public void SetUniforms(Material mat)
@@ -55,5 +72,21 @@ public class NoiseParametersSetter : MonoBehaviour
         mat.SetTexture("NoiseSampler", Noise);
         mat.SetTexture("PermGradSampler", GradientTable);
         mat.SetTexture("PermSampler", PermutationTable);
+    }
+
+    public void SetUniforms(ComputeShader shader)
+    {
+        if (shader == null)
+            return;
+
+        shader.SetFloat("noiseOctaves", Octaves);
+        shader.SetFloat("noiseLacunarity", Lacunarity);
+        shader.SetFloat("noiseH", H);
+        shader.SetFloat("noiseOffset", Offset);
+        shader.SetFloat("noiseRidgeSmooth", RidgeSmooth);
+
+        shader.SetTexture(0, "NoiseSampler", Noise);
+        shader.SetTexture(0, "PermGradSampler", GradientTable);
+        shader.SetTexture(0, "PermSampler", PermutationTable);
     }
 }

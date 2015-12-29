@@ -52,8 +52,8 @@ const float pi = 3.14159265358;
 //-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
-//#define IMPROVED_TEX_PERLIN
-//#define USETEXLOD
+#define IMPROVED_TEX_PERLIN
+#define USETEXLOD
 //#define PACKED_NORMALS      1
 //-----------------------------------------------------------------------------
 //#define ATLAS_RES_X         8
@@ -847,10 +847,9 @@ float4 NoiseDeriv(float3 p)
 	float v = blend.y;
 	float w = blend.z;
 
-	float noiseresult = dotval0_grad0
-		+ u * (k0_gk0 + v * k3_gk3)
-		+ v * (k1_gk1 + w * k5_gk5)
-		+ w * (k2_gk2 + u * (k4_gk4 + v * k6_gk6));
+	float noiseresult = dotval0_grad0 + (u * (k0_gk0 + v * k3_gk3)) 
+									  + (v * (k1_gk1 + w * k5_gk5)) 
+									  + (w * (k2_gk2 + u * (k4_gk4 + v * k6_gk6)));
 
 	float4 result = float4(0, 0, 0, noiseresult);
 
@@ -906,7 +905,7 @@ uniform float   noiseRidgeSmooth;// = 0.0001;
 //-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
-float3   Fbm(float3 ppoint)
+float   Fbm(float3 ppoint)
 {
 	float summ = 0.0;
 	float ampl = 1.0;
@@ -920,7 +919,7 @@ float3   Fbm(float3 ppoint)
 	return summ;
 }
 
-float3   Fbm(float3 ppoint, float o)
+float   Fbm(float3 ppoint, float o)
 {
 	float summ = 0.0;
 	float ampl = 1.0;
@@ -934,7 +933,7 @@ float3   Fbm(float3 ppoint, float o)
 	return summ;
 }
 
-float Fbm2(float3 ppoint)
+float FbmClouds(float3 ppoint)
 {
 	float summ = 0.0;
 	float ampl = 1.0;
@@ -1057,7 +1056,7 @@ float   RidgedMultifractalEroded(float3 ppoint, float gain, float warp)
 		weight = saturate(signal * gain);
 		signal = noiseOffset - sqrt(noiseRidgeSmooth + noiseDeriv.w*noiseDeriv.w);
 		signal *= signal * weight;
-		amplitude = pow(frequency, -noiseH);
+		amplitude = pow(abs(frequency), -noiseH);
 		summ += signal * amplitude;
 		frequency *= noiseLacunarity;
 		dsum -= amplitude * noiseDeriv.xyz * noiseDeriv.w;
@@ -1127,7 +1126,7 @@ float   JordanTurbulence(float3 ppoint,
 //-----------------------------------------------------------------------------
 #define NOISE_TEX_3D_SIZE 64
 
-//#define IMPROVEDVORONOI
+#define IMPROVEDVORONOI
 
 float4 RND_M = float4(1, 1, 1, 1);
 
@@ -2429,7 +2428,7 @@ float HeightMapClouds(float3 ppoint)
 	float3 p = twistedPoint * cloudsFreq * 6.37;
 	float3 q = p + Fbm3D2(p);
 	float3 r = p + Fbm3D2(q);
-	float f = Fbm2(r) * 0.7 + coverage - 0.3;
+	float f = FbmClouds(r) * 0.7 + coverage - 0.3;
 	float global = saturate(f) * weight;
 
 	// Compute turbilence features
