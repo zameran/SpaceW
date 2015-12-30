@@ -4,8 +4,6 @@
 #define threadsPerGroup_Y 32
 #define nVerticesPerSide 128
 
-#define TWO_PI 6.283185
-
 #include "TCCommon.cginc"
 
 struct GenerationConstants
@@ -16,30 +14,33 @@ struct GenerationConstants
     float4 patchCenter;
 };
 
+struct InputStruct
+{
+	float2 uv1;
+	float2 uv2;
+};
+
 struct OutputStruct
 {
     float4 pos;
 };
 
 StructuredBuffer<GenerationConstants> terrainGenerationConstants;
+RWStructuredBuffer<InputStruct> patchInput;
 RWStructuredBuffer<OutputStruct> patchOutput;
 
-[numthreads(threadsPerGroup_X,threadsPerGroup_Y,1)]
-
-//We lookup the the index into the flat array by using x + y * x_stride
+[numthreads(threadsPerGroup_X, threadsPerGroup_Y, 1)]
 void CSMain (uint3 id : SV_DispatchThreadID)
 {
     int outBuffOffset = id.x + id.y * nVerticesPerSide;
 
     GenerationConstants constants = terrainGenerationConstants[0];
 
-    float3 sampleCoord = float3((id.x + constants.patchCenter.x),
-								0, 
-								(id.y + constants.patchCenter.y));
+    float3 sampleCoord = float3(patchInput[outBuffOffset].uv1, 0);
 
-	float noise = Fbm(float3(id.x, 0, id.y));
+	float noise = HeightMapAsteroid(sampleCoord, 0.5, 0.75, 0.45, 0.25, 0.35);
 
-    float height = constants.scale * max(noise, constants.noiseSeaLevel) * 20;
+    float height = noise / 2;
 
     float4 output = float4(-1 + id.x * constants.spacing, height, -1 + id.y * constants.spacing, 1);
 

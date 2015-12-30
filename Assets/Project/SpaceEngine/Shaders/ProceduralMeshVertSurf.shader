@@ -14,7 +14,7 @@
 		LOD 200
 
 		CGPROGRAM
-		#define nVerticesPerSide 128
+		#define nVerticesPerSide 100
 		//#define SHOW_GRIDLINES
 
 		#include "UnityCG.cginc"

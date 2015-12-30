@@ -2,6 +2,7 @@
 
 public class QS
 {
+    public static int nRealVertsCount { get { return 101; } }
     public static int nVertsPerEdge { get { return 128; } }
     public static int nVerts { get { return nVertsPerEdge * nVertsPerEdge; } }
     public static int THREADS_PER_GROUP_X { get { return 32; } }
@@ -29,6 +30,12 @@ public struct GenerationConstants
     }
 }
 
+public struct InputStruct
+{
+    public Vector2 uv1;
+    public Vector2 uv2;
+}
+
 public struct OutputStruct
 {
     public Vector4 pos;
@@ -49,17 +56,38 @@ public class QuadTest : MonoBehaviour
         Dispatch();
     }
 
+    void OnDestroy()
+    {
+        if (ToShaderData != null)
+            ToShaderData.Release();
+    }
+
     [ContextMenu("Create Dummy Mesh")]
     public void CreateDummyMesh()
     {
         this.GetComponent<MeshFilter>().sharedMesh = SetupDummyMesh();
     }
 
+    //TODO fast data get.
+    public InputStruct[] GetInputData()
+    {
+        InputStruct[] temp = new InputStruct[101 * 101];
+        Mesh mesh = this.GetComponent<MeshFilter>().sharedMesh;
+
+        for (int i = 0; i < QS.nRealVertsCount; i++)
+        {
+            for (int j = 0; j < QS.nRealVertsCount; j++)
+            {
+                temp[i + j * QS.nRealVertsCount].uv1 = mesh.uv[i + j * QS.nRealVertsCount] * 0.25f;
+            }
+        }
+
+        return temp;
+    }
+
     [ContextMenu("Displatch!")]
     public void Dispatch()
     {
-        System.GC.KeepAlive(ToShaderData);
-
         if (ToShaderData != null)
             ToShaderData.Release();
 
@@ -70,12 +98,15 @@ public class QuadTest : MonoBehaviour
         }
 
         ComputeBuffer GConstatns;
+        ComputeBuffer InData;
         ComputeBuffer OutData;
 
         GenerationConstants[] generationConstantsData = new GenerationConstants[1] { new GenerationConstants(2.0f / QS.nVertsPerEdge) };
+        InputStruct[] inputStructData = GetInputData();
         OutputStruct[] outputStructData = new OutputStruct[QS.nVerts];
 
         GConstatns = new ComputeBuffer(1, 28);
+        InData = new ComputeBuffer(QS.nVerts, 16);
         OutData = new ComputeBuffer(QS.nVerts, 16);
         ToShaderData = new ComputeBuffer(QS.nVerts, 16);
 
@@ -84,6 +115,9 @@ public class QuadTest : MonoBehaviour
 
         GConstatns.SetData(generationConstantsData);
         CShader.SetBuffer(0, "terrainGenerationConstants", GConstatns);
+
+        InData.SetData(inputStructData);
+        CShader.SetBuffer(0, "patchInput", InData);
 
         OutData.SetData(outputStructData);
         CShader.SetBuffer(0, "patchOutput", OutData);
@@ -110,6 +144,7 @@ public class QuadTest : MonoBehaviour
         QuadMaterial.SetBuffer("data", ToShaderData);
 
         GConstatns.Release();
+        InData.Release();
         OutData.Release();
     }
 
