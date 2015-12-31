@@ -11,7 +11,12 @@ struct GenerationConstants
     float scale;
     float noiseSeaLevel;
     float spacing;
-    float4 patchCenter;
+	float planetRadius;
+	float terrainMaxHeight;
+
+	float3 cubeFaceEastDirection;
+	float3 cubeFaceNorthDirection;
+    float3 patchCubeCenter;
 };
 
 struct InputStruct
@@ -26,7 +31,9 @@ struct OutputStruct
 };
 
 StructuredBuffer<GenerationConstants> terrainGenerationConstants;
-RWStructuredBuffer<InputStruct> patchInput;
+
+StructuredBuffer<InputStruct> patchInput;
+
 RWStructuredBuffer<OutputStruct> patchOutput;
 
 [numthreads(threadsPerGroup_X, threadsPerGroup_Y, 1)]
@@ -34,15 +41,33 @@ void CSMain (uint3 id : SV_DispatchThreadID)
 {
     int outBuffOffset = id.x + id.y * nVerticesPerSide;
 
-    GenerationConstants constants = terrainGenerationConstants[0];
+	GenerationConstants constants = terrainGenerationConstants[0];
+
+	float eastValue = (id.x - ((nVerticesPerSide - 1) / 2.0)) * constants.spacing;
+	float northValue = (id.y - ((nVerticesPerSide - 1) / 2.0)) * constants.spacing;
+
+	float3 cubeCoordEast = constants.cubeFaceEastDirection * eastValue;
+    float3 cubeCoordNorth = constants.cubeFaceNorthDirection * northValue;
+	float3 cubeCoord = cubeCoordEast + cubeCoordNorth + constants.patchCubeCenter;
+
+	float3 patchCenter = normalize(constants.patchCubeCenter) * constants.planetRadius;
+	float3 patchNormalizedCoord = normalize(cubeCoord);
+	float3 patchCoord =  constants.planetRadius * patchNormalizedCoord;
+	float3 patchCoordCentered = patchCoord - patchCenter;
 
     float3 sampleCoord = float3(patchInput[outBuffOffset].uv1, 0);
 
-	float noise = HeightMapAsteroid(sampleCoord, 0.5, 0.75, 0.45, 0.25, 0.35);
+	//float noise = HeightMapAsteroid(1 * patchCoord, 0.5, 0.75, 0.45, 0.25, 0.35);
+	float noise = HeightMapAsteroid(0.25 * sampleCoord, 0.5, 0.75, 0.45, 0.25, 0.35);
+	//float noise = Noise(sampleCoord);
 
-    float height = noise / 2;
+    float height = noise * constants.terrainMaxHeight;
 
-    float4 output = float4(-1 + id.x * constants.spacing, height, -1 + id.y * constants.spacing, 1);
+	patchCoordCentered += patchNormalizedCoord * height;
+
+    //float4 output = float4(patchCoordCentered.x, patchCoordCentered.y, patchCoordCentered.z, 1);
+
+	float4 output = float4(1, noise, 1, 1);
 
     patchOutput[outBuffOffset].pos = output;
 }

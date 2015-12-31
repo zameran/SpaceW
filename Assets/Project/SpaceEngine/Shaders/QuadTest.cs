@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 
+[System.Serializable]
 public class QS
 {
     public static int nRealVertsCount { get { return 101; } }
@@ -12,30 +13,41 @@ public class QS
     public static int THREADGROUP_SIZE_Z { get { return 1; } }
 }
 
+[System.Serializable]
 public struct GenerationConstants
 {
     public float scale;
     public float noiseSeaLevel;
     public float spacing;
+    public float planetRadius;
+    public float terrainMaxHeight;
 
-    public Vector4 patchCenter;
+    public Vector3 cubeFaceEastDirection;
+    public Vector3 cubeFaceNorthDirection;
+    public Vector3 patchCubeCenter;
 
-    public GenerationConstants(float scale)
+    public GenerationConstants(float scale, float spacing)
     {
         this.scale = scale;
         this.noiseSeaLevel = 0.1f;
-        this.spacing = 10;
+        this.spacing = spacing;
+        this.planetRadius = 1.0f;
+        this.terrainMaxHeight = 1.0f;
 
-        this.patchCenter = new Vector4(0.0f, 0.0f, 0.0f, 0.0f);
+        this.cubeFaceEastDirection = new Vector3(0, 0, 0);
+        this.cubeFaceNorthDirection = new Vector3(0, 0, 0);
+        this.patchCubeCenter = new Vector3(0.5f, 0.5f, 0.5f);
     }
 }
 
+[System.Serializable]
 public struct InputStruct
 {
     public Vector2 uv1;
     public Vector2 uv2;
 }
 
+[System.Serializable]
 public struct OutputStruct
 {
     public Vector4 pos;
@@ -43,6 +55,8 @@ public struct OutputStruct
 
 public class QuadTest : MonoBehaviour
 {
+    public bool DebugEnabled = false;
+
     public NoiseParametersSetter Setter;
 
     public ComputeShader CShader;
@@ -50,6 +64,8 @@ public class QuadTest : MonoBehaviour
     public Material QuadMaterial;
 
     public ComputeBuffer ToShaderData;
+
+    public InputStruct[] inputData;
 
     void Start()
     {
@@ -71,23 +87,42 @@ public class QuadTest : MonoBehaviour
     //TODO fast data get.
     public InputStruct[] GetInputData()
     {
-        InputStruct[] temp = new InputStruct[101 * 101];
+        InputStruct[] temp = new InputStruct[QS.nRealVertsCount * QS.nRealVertsCount];
+
         Mesh mesh = this.GetComponent<MeshFilter>().sharedMesh;
 
-        for (int i = 0; i < QS.nRealVertsCount; i++)
+        for (int i = 0; i < temp.Length; i++)
         {
-            for (int j = 0; j < QS.nRealVertsCount; j++)
-            {
-                temp[i + j * QS.nRealVertsCount].uv1 = mesh.uv[i + j * QS.nRealVertsCount] * 0.25f;
-            }
+            temp[i].uv1 = mesh.uv[i];
         }
 
         return temp;
     }
 
+    [ContextMenu("Unbake Input Data")]
+    public void UnbakeInputData()
+    {
+        inputData = null;
+    }
+
+    [ContextMenu("Bake Input Data")]
+    public void BakeInputData()
+    {
+        inputData = GetInputData();
+    }
+
     [ContextMenu("Displatch!")]
     public void Dispatch()
     {
+        if(inputData == null || inputData.Length == 0 || inputData.Length < QS.nRealVertsCount * QS.nRealVertsCount)
+        {
+            BakeInputData();
+
+            Log("Input data was null, or something wrong with it - new one was created and calculated.");
+        }
+
+        float time = Time.realtimeSinceStartup;
+
         if (ToShaderData != null)
             ToShaderData.Release();
 
@@ -101,17 +136,17 @@ public class QuadTest : MonoBehaviour
         ComputeBuffer InData;
         ComputeBuffer OutData;
 
-        GenerationConstants[] generationConstantsData = new GenerationConstants[1] { new GenerationConstants(2.0f / QS.nVertsPerEdge) };
-        InputStruct[] inputStructData = GetInputData();
+        GenerationConstants[] generationConstantsData = new GenerationConstants[1] { new GenerationConstants(2.0f / QS.nVertsPerEdge, 2.0f / (QS.nVertsPerEdge - 1.0f)) };
+        InputStruct[] inputStructData = inputData;
         OutputStruct[] outputStructData = new OutputStruct[QS.nVerts];
 
-        GConstatns = new ComputeBuffer(1, 28);
+        GConstatns = new ComputeBuffer(1, 72);
         InData = new ComputeBuffer(QS.nVerts, 16);
         OutData = new ComputeBuffer(QS.nVerts, 16);
         ToShaderData = new ComputeBuffer(QS.nVerts, 16);
 
-        Debug.Log("GConstatns Buffer count: " + GConstatns.count);
-        Debug.Log("OutData Buffer count: " + OutData.count);
+        Log("GConstatns Buffer count: " + GConstatns.count);
+        Log("OutData Buffer count: " + OutData.count);
 
         GConstatns.SetData(generationConstantsData);
         CShader.SetBuffer(0, "terrainGenerationConstants", GConstatns);
@@ -127,7 +162,7 @@ public class QuadTest : MonoBehaviour
         QS.THREADGROUP_SIZE_Y,
         QS.THREADGROUP_SIZE_Z);
 
-        Debug.Log("Dispatched!");
+        Log("Dispatched!");
 
         OutData.GetData(outputStructData);
         ToShaderData.SetData(outputStructData);
@@ -139,13 +174,15 @@ public class QuadTest : MonoBehaviour
             averageData += outputStructData[i].pos;
         }
 
-        Debug.Log("Average Output Position Data: " + averageData.ToString());
+        Log("Average Output Position Data: " + averageData.ToString());
 
         QuadMaterial.SetBuffer("data", ToShaderData);
 
         GConstatns.Release();
         InData.Release();
         OutData.Release();
+
+        Log("Dispatched in " + (Time.realtimeSinceStartup - time).ToString() + "ms");
     }
 
     private Mesh SetupDummyMesh()
@@ -207,5 +244,11 @@ public class QuadTest : MonoBehaviour
         dummyMesh.SetTriangles(triangles, 0);
 
         return dummyMesh;
+    }
+
+    private void Log(string msg)
+    {
+        if (DebugEnabled)
+            Debug.Log(msg);
     }
 }

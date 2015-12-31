@@ -54,7 +54,7 @@
 		{
 			float4 position = data[v.id];
 
-			float3 adjustPos = (v.normal * position);
+			float3 adjustPos = (v.normal * position.y);
 
 			v.vertex.xyz += adjustPos;
 
@@ -68,8 +68,8 @@
 		void surf(Input IN, inout SurfaceOutputStandard o)
 		{
 			#ifdef SHOW_GRIDLINES
-				float2 fract = fmod(IN.uv_MainTex*nVerticesPerSide, float2(1,1));
-				fixed4 gridLine = any(step(float2(0.9,0.9), fract));
+				float2 fract = fmod(IN.uv_MainTex * nVerticesPerSide, float2(1, 1));
+				fixed4 gridLine = any(step(float2(0.9, 0.9), fract));
 			#else
 				fixed4 gridLine = 0;
 			#endif
@@ -79,7 +79,7 @@
 
 			fixed4 c = terrainColor + gridLine;
 
-			o.Albedo = clamp(c.rgb, fixed3(0,0,0), fixed3(1,1,1));
+			o.Albedo = clamp(c.rgb, fixed3(0, 0, 0), fixed3(1, 1 ,1));
 
 			// Metallic and smoothness come from slider variables
 			o.Metallic = _Metallic;

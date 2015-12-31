@@ -30,7 +30,7 @@ uniform float4    cracksParams;   // (cracksMagn,     cracksFreq,     cracksOcta
 uniform float4    craterParams;   // (craterMagn,     craterFreq,     sqrt(craterDensity),    craterOctaves)
 uniform float4    volcanoParams1; // (volcanoMagn,    volcanoFreq,    sqrt(volcanoDensity),   volcanoOctaves)
 uniform float4    volcanoParams2; // (volcanoActivity,volcanoFlows,   volcanoRadius,          volcanoTemp)
-uniform float4    lavaParams;		// (lavaCoverage,   lavaTemperature,surfTemperature,        heightTempGrad)
+uniform float4    lavaParams;	  // (lavaCoverage,   lavaTemperature,surfTemperature,        heightTempGrad)
 uniform float4    textureParams;  // (texScale,       texColorConv,   venusMagn,              venusFreq)
 uniform float4    cloudsParams1;  // (cloudsFreq,     cloudsOctaves,  twistZones,             twistMagn)
 uniform float4    cloudsParams2;  // (cloudsLayer,    cloudsNLayers,  cloudsStyle,            cloudsCoverage)
