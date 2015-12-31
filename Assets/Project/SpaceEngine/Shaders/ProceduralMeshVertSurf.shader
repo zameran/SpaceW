@@ -24,6 +24,13 @@
 
 		#pragma target 5.0
 
+		struct OutputStruct
+		{
+			float noise;
+
+			float4 pos;
+		};
+
 		struct appdata_full_compute 
 		{
 			float4 vertex : POSITION;
@@ -42,22 +49,27 @@
 		sampler2D _MainTex;
 
 		#ifdef SHADER_API_D3D11
-		StructuredBuffer<float4> data;
+		StructuredBuffer<OutputStruct> data;
 		#endif
 
 		struct Input 
 		{
+			float noise;
+
 			float2 uv_MainTex;
 		};
 
 		void vert(inout appdata_full_compute v, out Input o) 
 		{
-			float4 position = data[v.id];
+			float noise = data[v.id].noise;
+
+			float4 position = data[v.id].pos;
 
 			float3 adjustPos = (v.normal * position.y);
 
 			v.vertex.xyz += adjustPos;
 
+			o.noise = noise;
 			o.uv_MainTex = v.texcoord.xy;
 		}
 
@@ -76,6 +88,9 @@
 
 			// Terrain color comes from a texture tinted by color
 			fixed4 terrainColor = tex2D(_MainTex, IN.uv_MainTex) * _Color;
+
+			if(IN.noise != 0)
+				terrainColor -= fixed4(abs(IN.noise) * 2, abs(IN.noise) * 2, abs(IN.noise) * 2, 1.0);
 
 			fixed4 c = terrainColor + gridLine;
 

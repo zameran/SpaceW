@@ -2198,7 +2198,7 @@ float CrackNoise(float3 ppoint, float distrort, float freq, float mod)
 		distrort /= 1.2;
 	}
 
-	return cell * mod;//newLand * mod;
+	return newLand * mod;
 }
 
 float CrackColorNoise(float3 ppoint)

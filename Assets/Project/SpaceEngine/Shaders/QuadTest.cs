@@ -50,6 +50,8 @@ public struct InputStruct
 [System.Serializable]
 public struct OutputStruct
 {
+    public float noise;
+
     public Vector4 pos;
 }
 
@@ -142,8 +144,8 @@ public class QuadTest : MonoBehaviour
 
         GConstatns = new ComputeBuffer(1, 72);
         InData = new ComputeBuffer(QS.nVerts, 16);
-        OutData = new ComputeBuffer(QS.nVerts, 16);
-        ToShaderData = new ComputeBuffer(QS.nVerts, 16);
+        OutData = new ComputeBuffer(QS.nVerts, 20);
+        ToShaderData = new ComputeBuffer(QS.nVerts, 20);
 
         Log("GConstatns Buffer count: " + GConstatns.count);
         Log("OutData Buffer count: " + OutData.count);
