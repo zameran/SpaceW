@@ -225,6 +225,11 @@ float3 GetSurfacePoint(float2 texcoord)
 			return float3(p.x, -p.y, p.z); //pos_z
 	}
 }
+
+float3 GetSurfacePoint()
+{
+	return GetSurfacePoint(TexCoord);
+}
 //-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
@@ -317,69 +322,6 @@ float ColorToUnit24(in float3 color)
 //-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
-#ifndef PACKED_NORMALS
-float GetSurfaceHeight(float2 texcoord)
-{
-	float2  texCoord = texcoord.xy * scaleParams.z + scaleParams.xy;
-
-	#ifdef USETEXLOD
-	return tex2Dlod(NormalMap, float4(texCoord, 0, 0)).a;
-	#else
-	return tex2D(NormalMap, texCoord).a;
-	#endif
-}
-
-void GetSurfaceHeightAndSlope(inout float height, inout float slope, float2 texcoord)
-{
-	float2 texCoord = texcoord.xy * scaleParams.z + scaleParams.xy;
-
-	#ifdef USETEXLOD
-	float4 bumpData = tex2Dlod(NormalMap, float4(texCoord, 0, 0));
-	#else
-	float4 bumpData = tex2D(NormalMap, texCoord);
-	#endif
-
-	float3 norm = 2.0 * bumpData.xyz - 1.0;
-
-	slope = clamp(1.0 - pow(norm.z, 6.0), 0.0, 1.0);
-	height = bumpData.a;
-}
-
-#else
-
-float GetSurfaceHeight(float2 texcoord)
-{
-	float2 texCoord = TexCoord.xy * scaleParams.z + scaleParams.xy;
-
-	#ifdef USETEXLOD
-	float4 bumpData = tex2Dlod(NormalMap, float4(texCoord, 0, 0));
-	#else
-	float4 bumpData = tex2D(NormalMap, texCoord);
-	#endif
-
-	return dot(bumpData.zw, float2(0.00390625, 1.0));
-}
-
-void GetSurfaceHeightAndSlope(inout float height, inout float slope, float2 texcoord)
-{
-	float2 texCoord = texcoord.xy * scaleParams.z + scaleParams.xy;
-
-	#ifdef USETEXLOD
-	float4 bumpData = tex2Dlod(NormalMap, float4(texCoord, 0, 0));
-	#else
-	float4 bumpData = tex2D(NormalMap, texCoord);
-	#endif
-
-	float2 norm = 2.0 * bumpData.xy - 1.0;
-
-	slope = 1.0 - dot(norm.xy, norm.xy);
-	slope = clamp(1.0 - pow(slope, 3.0), 0.0, 1.0);
-	height = dot(bumpData.zw, float2(0.00390625, 1.0));
-}
-#endif
-//-----------------------------------------------------------------------------
-
-//-----------------------------------------------------------------------------
 #define     GetCloudsColor(height)           tex1D(CloudsColorTable, height)
 #define     GetGasGiantCloudsColor(height)   tex2D(MaterialTable, float2(height, 0))
 //-----------------------------------------------------------------------------
@@ -408,55 +350,96 @@ Surface BlendSmart(Surface s0, Surface s1, float t)
 	float ma = max(a0, a1) - 0.5;
 	float b0 = max(a0 - ma, 0);
 	float b1 = max(a1 - ma, 0);
+
 	ma = b0 + b1;
+
 	Surface res;
+
 	res.color = (s0.color  * b0 + s1.color  * b1) / ma;
 	res.height = (s0.height * b0 + s1.height * b1) / ma;
+
 	return res;
 }
-//-----------------------------------------------------------------------------
 
-//-----------------------------------------------------------------------------
-float3 hash3(float2 p) { return frac(sin(float3(dot(p, float2(127.1, 311.7)), dot(p, float2(269.5, 183.3)), dot(p, float2(419.2, 371.9)))) * 43758.5453); }
-float4 hash4(float2 p) { return frac(sin(float4(dot(p, float2(127.1, 311.7)), dot(p, float2(269.5, 183.3)), dot(p, float2(419.2, 371.9)), dot(p, float2(398.1, 176.7)))) * 43758.5453); }
-
-void FAST32_hash_3D(float3 gridcell, out float4 lowz_hash_0, out float4 lowz_hash_1, out float4 lowz_hash_2, out float4 highz_hash_0, out float4 highz_hash_1, out float4 highz_hash_2)
+#ifndef PACKED_NORMALS
+float GetSurfaceHeight(float2 texcoord)
 {
-	//generates 3 random numbers for each of the 8 cell corners
-	//gridcell is assumed to be an integer coordinate
+	float2  texCoord = texcoord.xy * scaleParams.z + scaleParams.xy;
 
-	//TODO:these constants need tweaked to find the best possible noise.
-	//probably requires some kind of brute force computational searching or something....
-	const float2 OFFSET = float2(50.0, 161.0);
-	const float DOMAIN = 69.0;
-	const float3 SOMELARGEFLOATS = float3(635.298681, 682.357502, 668.926525);
-	const float3 ZINC = float3(48.500388, 65.294118, 63.934599);
-
-	//truncate the domain
-	gridcell.xyz = gridcell.xyz - floor(gridcell.xyz * (1.0 / DOMAIN)) * DOMAIN;
-	float3 gridcell_inc1 = step(gridcell, float3(DOMAIN - 1.5, DOMAIN - 1.5, DOMAIN - 1.5)) * (gridcell + 1.0);
-
-	//calculate the noise
-	float4 P = float4(gridcell.xy, gridcell_inc1.xy) + OFFSET.xyxy;
-
-	P *= P;
-	P = P.xzxz * P.yyww;
-
-	float3 lowz_mod = float3(1.0 / (SOMELARGEFLOATS.xyz + gridcell.zzz * ZINC.xyz));
-	float3 highz_mod = float3(1.0 / (SOMELARGEFLOATS.xyz + gridcell_inc1.zzz * ZINC.xyz));
-
-	lowz_hash_0 = frac(P * lowz_mod.xxxx);
-	highz_hash_0 = frac(P * highz_mod.xxxx);
-	lowz_hash_1 = frac(P * lowz_mod.yyyy);
-	highz_hash_1 = frac(P * highz_mod.yyyy);
-	lowz_hash_2 = frac(P * lowz_mod.zzzz);
-	highz_hash_2 = frac(P * highz_mod.zzzz);
+	#ifdef USETEXLOD
+	return tex2Dlod(NormalMap, float4(texCoord, 0, 0)).a;
+	#else
+	return tex2D(NormalMap, texCoord).a;
+	#endif
 }
-//-----------------------------------------------------------------------------
 
-//-----------------------------------------------------------------------------
-float3 Interpolation_C2(float3 x) { return x * x * x * (x * (x * 6.0 - 15.0) + 10.0); }
-float3 Interpolation_C2_Deriv(float3 x) { return x * x * (x * (x * 30.0 - 60.0) + 30.0); }
+float GetSurfaceHeight()
+{
+	return GetSurfaceHeight(TexCoord);
+}
+
+void GetSurfaceHeightAndSlope(inout float height, inout float slope, float2 texcoord)
+{
+	float2 texCoord = texcoord.xy * scaleParams.z + scaleParams.xy;
+
+	#ifdef USETEXLOD
+	float4 bumpData = tex2Dlod(NormalMap, float4(texCoord, 0, 0));
+	#else
+	float4 bumpData = tex2D(NormalMap, texCoord);
+	#endif
+
+	float3 norm = 2.0 * bumpData.xyz - 1.0;
+
+	slope = clamp(1.0 - pow(norm.z, 6.0), 0.0, 1.0);
+	height = bumpData.a;
+}
+
+void GetSurfaceHeightAndSlope(inout float height, inout float slope)
+{
+	GetSurfaceHeightAndSlope(height, slope, TexCoord);
+}
+#else
+
+float GetSurfaceHeight(float2 texcoord)
+{
+	float2 texCoord = texCoord.xy * scaleParams.z + scaleParams.xy;
+
+	#ifdef USETEXLOD
+	float4 bumpData = tex2Dlod(NormalMap, float4(texCoord, 0, 0));
+	#else
+	float4 bumpData = tex2D(NormalMap, texCoord);
+	#endif
+
+	return dot(bumpData.zw, float2(0.00390625, 1.0));
+}
+
+float GetSurfaceHeight()
+{
+	return GetSurfaceHeight(TexCoord);
+}
+
+void GetSurfaceHeightAndSlope(inout float height, inout float slope, float2 texcoord)
+{
+	float2 texCoord = texcoord.xy * scaleParams.z + scaleParams.xy;
+
+	#ifdef USETEXLOD
+	float4 bumpData = tex2Dlod(NormalMap, float4(texCoord, 0, 0));
+	#else
+	float4 bumpData = tex2D(NormalMap, texCoord);
+	#endif
+
+	float2 norm = 2.0 * bumpData.xy - 1.0;
+
+	slope = 1.0 - dot(norm.xy, norm.xy);
+	slope = clamp(1.0 - pow(slope, 3.0), 0.0, 1.0);
+	height = dot(bumpData.zw, float2(0.00390625, 1.0));
+}
+
+void GetSurfaceHeightAndSlope(inout float height, inout float slope)
+{
+	GetSurfaceHeightAndSlope(height, slope, TexCoord);
+}
+#endif
 //-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
@@ -464,15 +447,14 @@ float3 Interpolation_C2_Deriv(float3 x) { return x * x * (x * (x * 30.0 - 60.0) 
 // height, slope defines the tile based on MaterialTable texture
 // vary sets one of 4 different tiles of the same material
 
-/*
 #if (TILING_FIX_MODE <= 1)
-Surface    GetSurfaceColorAtlas(float height, float slope, float vary)
+Surface GetSurfaceColorAtlas(float height, float slope, float vary)
 {
-	const vec4  PackFactors = float4(1.0 / ATLAS_RES_X, 1.0 / ATLAS_RES_Y, ATLAS_TILE_RES, ATLAS_TILE_RES_LOG2);
+	const float4 PackFactors = float4(1.0 / ATLAS_RES_X, 1.0 / ATLAS_RES_Y, ATLAS_TILE_RES, ATLAS_TILE_RES_LOG2);
 	slope = saturate(slope * 0.5);
 
-	float4  IdScale = texture(MaterialTable, float2(height, slope + 0.5));
-	int   materialID = min(int(IdScale.x) + int(vary), int(ATLAS_RES_X * ATLAS_RES_Y - 1));
+	float4  IdScale = tex2D(MaterialTable, float2(height, slope + 0.5));
+	int materialID = min(int(IdScale.x) + int(vary), int(ATLAS_RES_X * ATLAS_RES_Y - 1));
 	float2  tileOffs = float2(materialID % ATLAS_RES_X, materialID / ATLAS_RES_X) * PackFactors.xy;
 
 	Surface res;
@@ -484,13 +466,13 @@ Surface    GetSurfaceColorAtlas(float height, float slope, float vary)
 	//float lod = clamp(0.5 * log2(max(dot(dx, dx), dot(dy, dy))), 0.0, PackFactors.w);
 	float lod = clamp(0.5, 0.0, PackFactors.w);
 	float2  invSize = float2(pow(2.0, lod - PackFactors.w), 0) * PackFactors.xy;
-	float2  uv = tileOffs + fract(tileUV) * (PackFactors.xy - invSize) + 0.5 * invSize;
+	float4  uv = float4(tileOffs + frac(tileUV) * (PackFactors.xy - invSize) + 0.5 * invSize, 0, 0);
 
 	#if   (TILING_FIX_MODE == 0)
-	res.color = tex2Dlod(AtlasDiffSampler, uv, lod);
+		res.color = tex2Dlod(AtlasDiffSampler, uv);
 	#elif (TILING_FIX_MODE == 1)
-	vec2  uv2 = tileOffs + fract(-0.173 * tileUV) * (PackFactors.xy - invSize) + 0.5 * invSize;
-	res.color = mix(tex2Dlod(AtlasDiffSampler, uv, lod), tex2Dlod(AtlasDiffSampler, uv2, lod), 0.5);
+	float4 uv2 = (tileOffs + frac(-0.173 * tileUV) * (PackFactors.xy - invSize) + 0.5 * invSize, 0, 0);
+		res.color = mix(tex2Dlod(AtlasDiffSampler, uv), tex2Dlod(AtlasDiffSampler, uv2), 0.5);
 	#endif
 
 	res.height = res.color.a;
@@ -549,8 +531,9 @@ Surface    GetSurfaceColorAtlas(float height, float slope, float vary)
 			float  w = pow(1.0 - smoothstep(0.0, 2.0, d*d), 1.0 + 16.0 * magOffs);
 
 			#if   (TILING_FIX_MODE == 2)
-			float2   uv = frac(tileUV + magOffs * o.zy);
+				float2   uv = frac(tileUV + magOffs * o.zy);
 			#elif (TILING_FIX_MODE == 3)
+
 			float  a = o.w * IdScale.z; // magnitude of the texture coordinates rotation (zero for sand tiles)
 			float2   sc = float2(sin(a), cos(a));
 			float2x2 rot = float2x2(sc.y, sc.x, -sc.x, sc.y);
@@ -677,7 +660,49 @@ Surface GetSurfaceColor(float height, float slope, float vary)
 	return   BlendSmart(surfV0, surfV1, dv);
 }
 #endif
-*/
+//-----------------------------------------------------------------------------
+
+//-----------------------------------------------------------------------------
+float3 hash3(float2 p) { return frac(sin(float3(dot(p, float2(127.1, 311.7)), dot(p, float2(269.5, 183.3)), dot(p, float2(419.2, 371.9)))) * 43758.5453); }
+float4 hash4(float2 p) { return frac(sin(float4(dot(p, float2(127.1, 311.7)), dot(p, float2(269.5, 183.3)), dot(p, float2(419.2, 371.9)), dot(p, float2(398.1, 176.7)))) * 43758.5453); }
+
+void FAST32_hash_3D(float3 gridcell, out float4 lowz_hash_0, out float4 lowz_hash_1, out float4 lowz_hash_2, out float4 highz_hash_0, out float4 highz_hash_1, out float4 highz_hash_2)
+{
+	//generates 3 random numbers for each of the 8 cell corners
+	//gridcell is assumed to be an integer coordinate
+
+	//TODO:these constants need tweaked to find the best possible noise.
+	//probably requires some kind of brute force computational searching or something....
+	const float2 OFFSET = float2(50.0, 161.0);
+	const float DOMAIN = 69.0;
+	const float3 SOMELARGEFLOATS = float3(635.298681, 682.357502, 668.926525);
+	const float3 ZINC = float3(48.500388, 65.294118, 63.934599);
+
+	//truncate the domain
+	gridcell.xyz = gridcell.xyz - floor(gridcell.xyz * (1.0 / DOMAIN)) * DOMAIN;
+	float3 gridcell_inc1 = step(gridcell, float3(DOMAIN - 1.5, DOMAIN - 1.5, DOMAIN - 1.5)) * (gridcell + 1.0);
+
+	//calculate the noise
+	float4 P = float4(gridcell.xy, gridcell_inc1.xy) + OFFSET.xyxy;
+
+	P *= P;
+	P = P.xzxz * P.yyww;
+
+	float3 lowz_mod = float3(1.0 / (SOMELARGEFLOATS.xyz + gridcell.zzz * ZINC.xyz));
+	float3 highz_mod = float3(1.0 / (SOMELARGEFLOATS.xyz + gridcell_inc1.zzz * ZINC.xyz));
+
+	lowz_hash_0 = frac(P * lowz_mod.xxxx);
+	highz_hash_0 = frac(P * highz_mod.xxxx);
+	lowz_hash_1 = frac(P * lowz_mod.yyyy);
+	highz_hash_1 = frac(P * highz_mod.yyyy);
+	lowz_hash_2 = frac(P * lowz_mod.zzzz);
+	highz_hash_2 = frac(P * highz_mod.zzzz);
+}
+//-----------------------------------------------------------------------------
+
+//-----------------------------------------------------------------------------
+float3 Interpolation_C2(float3 x) { return x * x * x * (x * (x * 6.0 - 15.0) + 10.0); }
+float3 Interpolation_C2_Deriv(float3 x) { return x * x * (x * (x * 30.0 - 60.0) + 30.0); }
 //-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------

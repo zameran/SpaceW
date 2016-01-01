@@ -28,6 +28,8 @@
 		{
 			float noise;
 
+			float3 patchCenter;
+
 			float4 pos;
 		};
 
@@ -62,12 +64,14 @@
 		void vert(inout appdata_full_compute v, out Input o) 
 		{
 			float noise = data[v.id].noise;
-
+			float3 patchCenter = data[v.id].patchCenter;
 			float4 position = data[v.id].pos;
 
-			float3 adjustPos = (v.normal * position.y);
-
+			float3 adjustPos = (v.normal * position);
 			v.vertex.xyz += adjustPos;
+
+			//position.xyz += patchCenter;
+			//v.vertex.xyz += position;
 
 			o.noise = noise;
 			o.uv_MainTex = v.texcoord.xy;
@@ -89,8 +93,10 @@
 			// Terrain color comes from a texture tinted by color
 			fixed4 terrainColor = tex2D(_MainTex, IN.uv_MainTex) * _Color;
 
-			if(IN.noise != 0)
-				terrainColor -= fixed4(abs(IN.noise) * 2, abs(IN.noise) * 2, abs(IN.noise) * 2, 1.0);
+			//if(IN.noise != 0)
+				//terrainColor -= fixed4(abs(IN.noise) * 2, abs(IN.noise) * 2, abs(IN.noise) * 2, 1.0);
+
+			terrainColor = fixed4(IN.noise * 1, IN.noise * 1, IN.noise * 1, 1.0);
 
 			fixed4 c = terrainColor + gridLine;
 

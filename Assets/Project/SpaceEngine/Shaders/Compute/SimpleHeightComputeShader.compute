@@ -1,0 +1,15 @@
+﻿#pragma kernel CSMain
+
+#define threadsPerGroup_X 32
+#define threadsPerGroup_Y 32
+#define nVerticesPerSide 128
+
+#include "Assets/Project/SpaceEngine/Shaders/TCCommon.cginc"
+
+RWTexture2D<float4> Result;
+
+[numthreads(threadsPerGroup_X, threadsPerGroup_Y, 1)]
+void CSMain (uint3 id : SV_DispatchThreadID)
+{
+	Result[id.xy] = float4(id.x & id.y, (id.x & 15)/15.0, (id.y & 15)/15.0, 0.0);
+}

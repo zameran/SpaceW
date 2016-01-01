@@ -10,12 +10,12 @@ struct GenerationConstants
 {
     float scale;
     float noiseSeaLevel;
-    float spacing;
-	float planetRadius;
-	float terrainMaxHeight;
+    float planetRadius;
+	float spacing;
+    float terrainMaxHeight;
 
-	float3 cubeFaceEastDirection;
-	float3 cubeFaceNorthDirection;
+    float3 cubeFaceEastDirection;
+    float3 cubeFaceNorthDirection;
     float3 patchCubeCenter;
 };
 
@@ -29,12 +29,14 @@ struct OutputStruct
 {
 	float noise;
 
+	float3 patchCenter;
+
     float4 pos;
 };
 
-StructuredBuffer<GenerationConstants> terrainGenerationConstants;
+RWStructuredBuffer<GenerationConstants> terrainGenerationConstants;
 
-StructuredBuffer<InputStruct> patchInput;
+RWStructuredBuffer<InputStruct> patchInput;
 
 RWStructuredBuffer<OutputStruct> patchOutput;
 
@@ -60,18 +62,21 @@ void CSMain (uint3 id : SV_DispatchThreadID)
     float3 sampleCoord = float3(patchInput[outBuffOffset].uv1, 0);
 
 	//float noise = HeightMapAsteroid(1 * patchCoord, 0.5, 0.75, 0.45, 0.25, 0.35);
-	float noise = HeightMapAsteroid(0.25 * sampleCoord, 0.5, 0.75, 0.45, 0.25, 0.35);
+	float noise = HeightMapAsteroid(sampleCoord, 0.5, 0.75, 0.45, 0.25, 0.35);
 	//float noise = Noise(sampleCoord);
 
     //float height = ((noise * 2) - 1) * constants.terrainMaxHeight;
-	float height = noise;
+	float height = noise * 16;
 
 	patchCoordCentered += patchNormalizedCoord * height;
+
+	//float4 output = float4(constants.spacing, constants.spacing, constants.spacing, 1);
 
     //float4 output = float4(patchCoordCentered.x, patchCoordCentered.y, patchCoordCentered.z, 1);
 
 	float4 output = float4(1, height, 1, 1);
 
+	patchOutput[outBuffOffset].patchCenter = patchCenter;
 	patchOutput[outBuffOffset].noise = height;
     patchOutput[outBuffOffset].pos = output;
 }
