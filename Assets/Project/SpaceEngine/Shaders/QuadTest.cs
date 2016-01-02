@@ -39,7 +39,7 @@ public struct GenerationConstants
         temp.planetRadius = 1000.0f;
         //temp.spacing = 2.0f / (QS.nVertsPerEdge - 1.0f);
         temp.spacing = 2.0f * temp.planetRadius / QS.nVertsPerEdge;
-        temp.terrainMaxHeight = 10.0f;
+        temp.terrainMaxHeight = 64.0f;
 
         temp.cubeFaceEastDirection = new Vector3(1, 0, 0);
         temp.cubeFaceNorthDirection = new Vector3(0, 1, 0);
@@ -173,7 +173,7 @@ public class QuadTest : MonoBehaviour
         InputStruct[] inputStructData = inputData;
         OutputStruct[] outputStructData = new OutputStruct[QS.nVerts];
 
-        GConstatns = new ComputeBuffer(QS.nVerts, 72);
+        GConstatns = new ComputeBuffer(1, 72);
         InData = new ComputeBuffer(QS.nVerts, 16);
         OutData = new ComputeBuffer(QS.nVerts, 32);
         ToShaderData = new ComputeBuffer(QS.nVerts, 32);
@@ -183,12 +183,11 @@ public class QuadTest : MonoBehaviour
         Log("OutData Buffer count: " + OutData.count);
 
         GConstatns.SetData(generationConstantsData);
-        CShader.SetBuffer(0, "terrainGenerationConstants", GConstatns);
-
         InData.SetData(inputStructData);
-        CShader.SetBuffer(0, "patchInput", InData);
-
         OutData.SetData(outputStructData);
+
+        CShader.SetBuffer(0, "terrainGenerationConstants", GConstatns);    
+        CShader.SetBuffer(0, "patchInput", InData); 
         CShader.SetBuffer(0, "patchOutput", OutData);
 
         CShader.Dispatch(0,
@@ -215,6 +214,10 @@ public class QuadTest : MonoBehaviour
         GConstatns.Release();
         InData.Release();
         OutData.Release();
+
+        GConstatns.Dispose();
+        InData.Dispose();
+        OutData.Dispose();
 
         Log("Dispatched in " + (Time.realtimeSinceStartup - time).ToString() + "ms");
     }

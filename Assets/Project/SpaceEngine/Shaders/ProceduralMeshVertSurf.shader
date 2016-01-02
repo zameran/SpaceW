@@ -14,8 +14,8 @@
 		LOD 200
 
 		CGPROGRAM
-		#define nVerticesPerSide 100
-		//#define SHOW_GRIDLINES
+		#define nVerticesPerSide 128
+		#define SHOW_GRIDLINES
 
 		#include "UnityCG.cginc"
 
@@ -59,6 +59,8 @@
 			float noise;
 
 			float2 uv_MainTex;
+
+			float4 color : Color;
 		};
 
 		void vert(inout appdata_full_compute v, out Input o) 
@@ -67,12 +69,16 @@
 			float3 patchCenter = data[v.id].patchCenter;
 			float4 position = data[v.id].pos;
 
-			float3 adjustPos = (v.normal * position);
-			v.vertex.xyz += adjustPos;
+			//float3 adjustPos = (v.normal * position);
+			//v.vertex.xyz += adjustPos;
 
-			//position.xyz += patchCenter;
-			//v.vertex.xyz += position;
+			//o.noise = noise;
+			//o.uv_MainTex = v.texcoord.xy;
 
+			position.xyz += patchCenter;
+			v.vertex.xyz += position;
+
+			o.color = float4(noise, noise, noise, 1);
 			o.noise = noise;
 			o.uv_MainTex = v.texcoord.xy;
 		}
@@ -84,25 +90,23 @@
 		void surf(Input IN, inout SurfaceOutputStandard o)
 		{
 			#ifdef SHOW_GRIDLINES
-				float2 fract = fmod(IN.uv_MainTex * nVerticesPerSide, float2(1, 1));
+				float2 fract = fmod(IN.uv_MainTex * (nVerticesPerSide - 1), float2(1, 1));
 				fixed4 gridLine = any(step(float2(0.9, 0.9), fract));
 			#else
 				fixed4 gridLine = 0;
 			#endif
 
 			// Terrain color comes from a texture tinted by color
-			fixed4 terrainColor = tex2D(_MainTex, IN.uv_MainTex) * _Color;
+			//fixed4 terrainColor = tex2D(_MainTex, IN.uv_MainTex) * _Color;
 
-			//if(IN.noise != 0)
-				//terrainColor -= fixed4(abs(IN.noise) * 2, abs(IN.noise) * 2, abs(IN.noise) * 2, 1.0);
+			//terrainColor += fixed4(-IN.noise * 2, -IN.noise * 2, -IN.noise * 2, 1.0);
 
-			terrainColor = fixed4(IN.noise * 1, IN.noise * 1, IN.noise * 1, 1.0);
+			//fixed4 c = terrainColor + gridLine;
 
-			fixed4 c = terrainColor + gridLine;
+			fixed4 c = IN.color * gridLine;
 
 			o.Albedo = clamp(c.rgb, fixed3(0, 0, 0), fixed3(1, 1 ,1));
 
-			// Metallic and smoothness come from slider variables
 			o.Metallic = _Metallic;
 			o.Smoothness = _Glossiness;
 			o.Alpha = c.a;

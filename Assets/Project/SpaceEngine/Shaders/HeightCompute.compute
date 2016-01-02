@@ -37,14 +37,13 @@ struct OutputStruct
 RWStructuredBuffer<GenerationConstants> terrainGenerationConstants;
 
 RWStructuredBuffer<InputStruct> patchInput;
-
 RWStructuredBuffer<OutputStruct> patchOutput;
 
 [numthreads(threadsPerGroup_X, threadsPerGroup_Y, 1)]
 void CSMain (uint3 id : SV_DispatchThreadID)
 {
     int outBuffOffset = id.x + id.y * nVerticesPerSide;
-
+	
 	GenerationConstants constants = terrainGenerationConstants[0];
 
 	float eastValue = (id.x - ((nVerticesPerSide - 1) / 2.0)) * constants.spacing;
@@ -61,20 +60,20 @@ void CSMain (uint3 id : SV_DispatchThreadID)
 
     float3 sampleCoord = float3(patchInput[outBuffOffset].uv1, 0);
 
-	//float noise = HeightMapAsteroid(1 * patchCoord, 0.5, 0.75, 0.45, 0.25, 0.35);
-	float noise = HeightMapAsteroid(sampleCoord, 0.5, 0.75, 0.45, 0.25, 0.35);
+	float noise = HeightMapAsteroid(0.001 * patchCoord, 0.5, 0.75, 0.45, 0.25, 0.35);
+	//float noise = HeightMapAsteroid(sampleCoord, 0.5, 0.75, 0.45, 0.25, 0.35);
 	//float noise = Noise(sampleCoord);
 
-    //float height = ((noise * 2) - 1) * constants.terrainMaxHeight;
-	float height = noise * 16;
+    float height = ((noise * 2) - 1) * constants.terrainMaxHeight;
+	//float height = (noise * 16);
 
 	patchCoordCentered += patchNormalizedCoord * height;
 
 	//float4 output = float4(constants.spacing, constants.spacing, constants.spacing, 1);
 
-    //float4 output = float4(patchCoordCentered.x, patchCoordCentered.y, patchCoordCentered.z, 1);
+    float4 output = float4(patchCoordCentered.x, patchCoordCentered.y, patchCoordCentered.z, 0);
 
-	float4 output = float4(1, height, 1, 1);
+	//float4 output = float4(constants.spacing, height, 0, 0);
 
 	patchOutput[outBuffOffset].patchCenter = patchCenter;
 	patchOutput[outBuffOffset].noise = height;
