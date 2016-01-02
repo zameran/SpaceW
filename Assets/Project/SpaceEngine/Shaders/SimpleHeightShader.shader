@@ -1,4 +1,4 @@
-﻿Shader "Custom/SimpleHeightShader" 
+﻿Shader "SpaceEngine/SimpleHeightShader" 
 {
 	Properties 
 	{

@@ -1,4 +1,4 @@
-﻿Shader "Custom/HeightShader" 
+﻿Shader "SpaceEngine/HeightShader" 
 {
 	Properties
 	{
