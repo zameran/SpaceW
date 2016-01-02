@@ -17,6 +17,8 @@ public class PlanetoidTest : MonoBehaviour
     [ContextMenu("Dispatch")]
     public void Dispatch()
     {
+        float time = Time.realtimeSinceStartup;
+
         if (Quads.Count == 0)
             return;
 
@@ -25,6 +27,8 @@ public class PlanetoidTest : MonoBehaviour
             if (Quads[i] != null)
                 Quads[i].Dispatch();
         }
+
+        Log("Planet dispatched in " + (Time.realtimeSinceStartup - time).ToString() + "ms");
     }
 
     [ContextMenu("DestroyQuads")]

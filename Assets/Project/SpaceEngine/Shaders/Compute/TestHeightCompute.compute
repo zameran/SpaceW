@@ -1,10 +1,8 @@
-﻿#pragma kernel CSMain
-
-#define threadsPerGroup_X 32
+﻿#define threadsPerGroup_X 32
 #define threadsPerGroup_Y 32
 #define nVerticesPerSide 128
 
-#include "Assets/Project/SpaceEngine/Shaders/TCCommon.cginc"
+#include "Assets/Project/SpaceEngine/Shaders/TCCommonAsteroid.cginc"
 
 struct GenerationConstants
 {
@@ -28,15 +26,17 @@ struct OutputStruct
     float4 pos;
 };
 
-RWStructuredBuffer<GenerationConstants> terrainGenerationConstants;
+RWStructuredBuffer<GenerationConstants> generationConstants;
+RWStructuredBuffer<OutputStruct> patchPreOutput;
 RWStructuredBuffer<OutputStruct> patchOutput;
 
+#pragma kernel CSMain
 [numthreads(threadsPerGroup_X, threadsPerGroup_Y, 1)]
 void CSMain (uint3 id : SV_DispatchThreadID)
 {
     int outBuffOffset = id.x + id.y * nVerticesPerSide;
 	
-	GenerationConstants constants = terrainGenerationConstants[0];
+	GenerationConstants constants = generationConstants[0];
 	
 	float eastValue = (id.x - ((nVerticesPerSide - 1) / 2.0)) * constants.spacing;
 	float northValue = (id.y - ((nVerticesPerSide - 1) / 2.0)) * constants.spacing;
@@ -59,7 +59,37 @@ void CSMain (uint3 id : SV_DispatchThreadID)
 
     float4 output = float4(patchCoordCentered.x, patchCoordCentered.y, patchCoordCentered.z, 0);
 
-	patchOutput[outBuffOffset].patchCenter = patchCenter;
-	patchOutput[outBuffOffset].noise = noise;
-    patchOutput[outBuffOffset].pos = output;
+	patchPreOutput[outBuffOffset].noise = noise;
+	patchPreOutput[outBuffOffset].patchCenter = patchCenter;
+    patchPreOutput[outBuffOffset].pos = output;
+}
+
+RWTexture2D<float4> Height;
+RWTexture2D<float4> Normal;
+
+#pragma kernel CSSubMain
+[numthreads(threadsPerGroup_X, threadsPerGroup_Y, 1)]
+void CSSubMain (uint3 id : SV_DispatchThreadID)
+{
+	int outBuffOffset = id.x + id.y * nVerticesPerSide;
+	
+	GenerationConstants constants = generationConstants[0];
+
+	float noise = patchPreOutput[outBuffOffset].noise;
+
+	float4 pos = patchPreOutput[outBuffOffset].pos;
+
+	Height[id.xy] = float4(pos.xyz, noise);
+
+	float left = patchPreOutput[(id.x - 1) + id.y * nVerticesPerSide].noise * 2;
+	float right = patchPreOutput[(id.x + 1) + id.y * nVerticesPerSide].noise * 2;
+	float up = patchPreOutput[id.x + (id.y - 1) * nVerticesPerSide].noise * 2;
+	float down = patchPreOutput[id.x + (id.y + 1) * nVerticesPerSide].noise * 2;
+
+	float xdelta = ((left - right) + 1) * 0.5;
+	float ydelta = ((up - down) + 1) * 0.5;
+
+	Normal[id.xy] = float4(xdelta, ydelta, 1, 0);
+
+	patchOutput[outBuffOffset] = patchPreOutput[outBuffOffset];
 }

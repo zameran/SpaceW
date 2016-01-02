@@ -2,9 +2,10 @@
 {
 	Properties
 	{
-		_Color("Color", Color) = (1,1,1,1)
-		_colorDeepWater("Deep Water", Color) = (0.03, 0.16, 0.35, 1.0)
+		_Color("Color", Color) = (1,1,1,1)	
 		_MainTex("Albedo (RGB)", 2D) = "white" {}
+		_HeightTexture("Height (RGBA)", 2D) = "white" {}
+		_NormalTexture("Normal (RGB)", 2D) = "white" {}
 		_Glossiness("Smoothness", Range(0,1)) = 0.5
 		_Metallic("Metallic", Range(0,1)) = 0.0
 	}
@@ -49,6 +50,8 @@
 		};
 
 		sampler2D _MainTex;
+		sampler2D _HeightTexture;
+		sampler2D _NormalTexture;
 
 		#ifdef SHADER_API_D3D11
 		StructuredBuffer<OutputStruct> data;
@@ -66,15 +69,6 @@
 			float noise = data[v.id].noise;
 			float3 patchCenter = data[v.id].patchCenter;
 			float4 position = data[v.id].pos;
-
-			//float3 adjustPos = (v.normal * position);
-			//v.vertex.xyz += adjustPos;
-
-			//o.noise = noise;
-			//o.uv_MainTex = v.texcoord.xy;
-		
-			//position.xyz += patchCenter;
-			//v.vertex.xyz += position;
 
 			position.w = 1.0;
 			position.xyz += patchCenter;
@@ -104,10 +98,9 @@
 			fixed4 c = terrainColor + gridLine;
 
 			o.Albedo = clamp(c.rgb, fixed3(0, 0, 0), fixed3(1, 1 ,1));
-
+			o.Normal = UnpackNormal(tex2D(_NormalTexture, IN.uv_MainTex));
 			o.Metallic = _Metallic;
 			o.Smoothness = _Glossiness;
-			o.Alpha = c.a;
 		}
 	ENDCG
 	}

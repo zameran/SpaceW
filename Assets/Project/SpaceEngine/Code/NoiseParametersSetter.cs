@@ -7,6 +7,7 @@ public class NoiseParametersSetter : MonoBehaviour
     public Texture2D Noise = null;
     public Texture2D GradientTable = null;
     public Texture2D PermutationTable = null;
+    public Texture2D PlanetAtlas = null;
 
     public ComputeShader ComputeShaderToUpdate = null;
     public Material MaterialToUpdate = null;
@@ -63,11 +64,18 @@ public class NoiseParametersSetter : MonoBehaviour
         Init();
 
         Perlin.LoadResourcesFor3DNoise();
-        //Perlin.LoadPrecomputedRandomVolume();
 
+        PlanetAtlas = LoadTextureFromResources("PlanetAtlas");
         PermutationTable = Perlin.GetPermutationTable2D();
         GradientTable = Perlin.GetGradient3D();
         Noise = Perlin.GetPermutationTable2D();
+    }
+
+    public Texture2D LoadTextureFromResources(string name)
+    {
+        Texture2D temp = Resources.Load("Textures/" + name, typeof(Texture2D)) as Texture2D;
+
+        return temp;
     }
 
     public void SetUniforms(Material mat)
@@ -84,6 +92,7 @@ public class NoiseParametersSetter : MonoBehaviour
         mat.SetTexture("NoiseSampler", Noise);
         mat.SetTexture("PermGradSampler", GradientTable);
         mat.SetTexture("PermSampler", PermutationTable);
+        mat.SetTexture("AtlasDiffSampler", PlanetAtlas);
     }
 
     public void SetUniforms(ComputeShader shader)
@@ -100,5 +109,23 @@ public class NoiseParametersSetter : MonoBehaviour
         shader.SetTexture(0, "NoiseSampler", Noise);
         shader.SetTexture(0, "PermGradSampler", GradientTable);
         shader.SetTexture(0, "PermSampler", PermutationTable);
+        shader.SetTexture(0, "AtlasDiffSampler", PlanetAtlas);
+    }
+
+    public void SetUniforms(ComputeShader shader, int kernel)
+    {
+        if (shader == null)
+            return;
+
+        shader.SetFloat("noiseOctaves", Octaves);
+        shader.SetFloat("noiseLacunarity", Lacunarity);
+        shader.SetFloat("noiseH", H);
+        shader.SetFloat("noiseOffset", Offset);
+        shader.SetFloat("noiseRidgeSmooth", RidgeSmooth);
+
+        shader.SetTexture(kernel, "NoiseSampler", Noise);
+        shader.SetTexture(kernel, "PermGradSampler", GradientTable);
+        shader.SetTexture(kernel, "PermSampler", PermutationTable);
+        shader.SetTexture(kernel, "AtlasDiffSampler", PlanetAtlas);
     }
 }

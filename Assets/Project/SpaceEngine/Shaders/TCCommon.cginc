@@ -3,14 +3,14 @@
 // 0 - hard mix (no blending)
 // 1 - soft blending
 // 2 - "smart" blening (tile heightmap based)
-//#define TILE_BLEND_MODE 2
+#define TILE_BLEND_MODE 0
 //-----------------------------------------------------------------------------
 // tiling fix method:
 // 0 - no tiling fix
 // 1 - sampling texture 2 times at different scales
 // 2 - voronoi random offset
 // 3 - voronoi random offset and rotation
-//#define TILING_FIX_MODE 3
+#define TILING_FIX_MODE 0
 //-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
@@ -186,7 +186,7 @@ float3 SphericalToCartesian(float2 spherical)
 {
 	float2 alpha = float2(sin(spherical.x), cos(spherical.x));
 	float2 delta = float2(sin(spherical.y), cos(spherical.y));
-	return float3(delta.y*alpha.x, delta.x, delta.y*alpha.y);
+	return float3(delta.y * alpha.x, delta.x, delta.y * alpha.y);
 }
 //-----------------------------------------------------------------------------
 
@@ -2368,7 +2368,7 @@ void SolarSpotsTempNoise(float3 ppoint, out float botMask, out float filMask, ou
 	ppoint += dist * 0.5;
 
 	//for (int i=0; i<3; i++)
-	{
+	//{
 		cell = Cell2NoiseSphere(ppoint, craterSphereRadius);
 		//cell = Cell2NoiseVec(ppoint * craterSphereRadius);
 		fi = acos(dot(binormal, normalize(cell.xyz - ppoint))) / (pi*2.0);
@@ -2386,88 +2386,12 @@ void SolarSpotsTempNoise(float3 ppoint, out float botMask, out float filMask, ou
 		craterSphereRadius *= 1.83;
 		radInner *= 0.60;
 		radOuter = 0.60;
-	}
+	//}
 }
 //-----------------------------------------------------------------------------
 
 
 //-----------------------------------------------------------------------------
-float HeightMapAsteroid(float ppoint)
-{
-	mainFreq = 0.59;
-	montesFreq = 0.789;
-	hillsMagn = 0.66972;
-	hillsFraction = 0.25184;
-
-	// Global landscape
-	noiseOctaves = 8.0;
-	float3 p = ppoint * mainFreq + Randomize;
-	float height = (Fbm(p) + 0.7) * 0.7;
-
-	noiseOctaves = 8; // Height distortion
-	float distort = 0.01 * Fbm(ppoint * montesFreq + Randomize);
-	//height += distort;
-	height *= distort;
-
-	// Hills
-	noiseOctaves = 5;
-	float hills = (0.5 + 1.5 * Fbm(p * 0.0721)) * hillsFreq;
-	hills = Fbm(p * hills) * 0.15;
-	noiseOctaves = 2;
-	float hillsMod = smoothstep(0, 1, Fbm(p * hillsFraction) * 3.0);
-	height *= 1.0 + hillsMagn * hills * hillsMod;
-
-	// Craters
-	noiseOctaves = 4;   // Craters roundness distortion
-	craterDistortion = 1.0;
-	craterRoundDist = 0.03;
-	heightFloor = -0.1;
-	heightPeak = 0.6;
-	heightRim = 1.0;
-	float crater = CraterNoise(ppoint, craterMagn, craterFreq, craterSqrtDensity, craterOctaves);
-
-	return (height + crater);
-}
-
-float HeightMapAsteroid(float3 ppoint, float freq, float mfreq, float hfreq, float hmagn, float hfraction)
-{
-	// Global landscape
-	noiseOctaves = 2;
-	float3 p = ppoint * freq + Randomize;
-	float height = (Fbm(p) + 0.7) * 0.7;
-
-	noiseOctaves = 8; // Height distortion
-	float distort = 0.01 * Fbm(ppoint * mfreq + Randomize);
-	//height += distort;
-	height *= distort;
-
-	// Hills
-	noiseOctaves = 5;
-	float hills = (0.5 + 1.5 * Fbm(p * 0.0721)) * hfreq;
-	hills = Fbm(p * hills) * 0.15;
-
-	noiseOctaves = 2;
-	float hillsMod = smoothstep(0, 1, Fbm(p * hfraction) * 3.0);
-	height *= 1.0 + hmagn * hills * hillsMod;
-
-	// Craters
-	noiseOctaves = 3;   // Craters roundness distortion
-	craterOctaves = 4;
-	craterSqrtDensity = 2;
-	craterFreq = 1;
-	craterMagn = 1;
-	craterDistortion = 0.05;
-	craterRoundDist = 0.03;
-	heightFloor = -0.1;
-	heightPeak = 0.6;
-	heightRim = 1.0;
-	float crater = CraterNoise(ppoint, craterMagn, craterFreq, craterSqrtDensity, craterOctaves);
-
-	//return crater;
-	return (height + crater);
-}
-
-
 //TODO Fix dat.
 float HeightMapClouds(float3 ppoint)
 {
