@@ -36,13 +36,13 @@ public struct GenerationConstants
 
         temp.scale = 2.0f / (QS.nVertsPerEdge);
         temp.noiseSeaLevel = 0.1f;
-        temp.planetRadius = 1000.0f;
-        //temp.spacing = 2.0f / (QS.nVertsPerEdge - 1.0f);
-        temp.spacing = 2.0f * temp.planetRadius / QS.nVertsPerEdge;
+        temp.planetRadius = 1024.0f;
+        temp.spacing = 2.0f / (QS.nVertsPerEdge - 1.0f);
+        //temp.spacing = 2.0f * temp.planetRadius / (QS.nVertsPerEdge - 1.0f);
         temp.terrainMaxHeight = 64.0f;
 
         temp.cubeFaceEastDirection = new Vector3(1, 0, 0);
-        temp.cubeFaceNorthDirection = new Vector3(0, 1, 0);
+        temp.cubeFaceNorthDirection = new Vector3(0, -1, 0);
         temp.patchCubeCenter = new Vector3(0, 0, temp.planetRadius);
 
         return temp;
@@ -97,6 +97,7 @@ public class QuadTest : MonoBehaviour
     public void CreateDummyMesh()
     {
         this.GetComponent<MeshFilter>().sharedMesh = SetupDummyMesh();
+        this.GetComponent<MeshFilter>().sharedMesh.bounds = new Bounds(Vector3.zero, new Vector3(1000, 1000, 1000));
     }
 
     //TODO fast data get.
@@ -169,7 +170,7 @@ public class QuadTest : MonoBehaviour
         ComputeBuffer InData;
         ComputeBuffer OutData;
 
-        GenerationConstants[] generationConstantsData = generationConstants;
+        GenerationConstants[] generationConstantsData = new GenerationConstants[] { generationConstants[0], generationConstants[0] }; //Here we add 2 equal elements in to the buffer data, and nex we will set buffer size to 1. Bugfix. Idk.
         InputStruct[] inputStructData = inputData;
         OutputStruct[] outputStructData = new OutputStruct[QS.nVerts];
 

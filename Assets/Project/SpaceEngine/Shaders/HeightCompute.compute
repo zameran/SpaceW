@@ -46,11 +46,21 @@ void CSMain (uint3 id : SV_DispatchThreadID)
 	
 	GenerationConstants constants = terrainGenerationConstants[0];
 
-	float eastValue = (id.x - ((nVerticesPerSide - 1) / 2.0)) * constants.spacing;
-	float northValue = (id.y - ((nVerticesPerSide - 1) / 2.0)) * constants.spacing;
+	//float eastValue = (id.x - ((nVerticesPerSide - 1) / 2.0)) * constants.spacing;
+	//float northValue = (id.y - ((nVerticesPerSide - 1) / 2.0)) * constants.spacing;
 
+	//float3 cubeCoordEast = constants.cubeFaceEastDirection * eastValue;
+    //float3 cubeCoordNorth = constants.cubeFaceNorthDirection * northValue;
+
+	float eastValue = id.x - ((nVerticesPerSide - 1) / 2.0); 
+	eastValue *= constants.spacing;                            
 	float3 cubeCoordEast = constants.cubeFaceEastDirection * eastValue;
-    float3 cubeCoordNorth = constants.cubeFaceNorthDirection * northValue;
+
+	float northValue = id.y - ((nVerticesPerSide - 1) / 2.0);
+	northValue *= constants.spacing;
+	float3 cubeCoordNorth = constants.cubeFaceNorthDirection * northValue;
+
+
 	float3 cubeCoord = cubeCoordEast + cubeCoordNorth + constants.patchCubeCenter;
 
 	float3 patchCenter = normalize(constants.patchCubeCenter) * constants.planetRadius;
