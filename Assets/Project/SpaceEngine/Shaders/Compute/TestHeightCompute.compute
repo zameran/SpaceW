@@ -2,7 +2,7 @@
 #define threadsPerGroup_Y 32
 #define nVerticesPerSide 128
 
-#include "Assets/Resources/Shaders/TCCommonAsteroid.cginc"
+#include "Assets/Project/SpaceEngine/Shaders/TCCommonAsteroid.cginc"
 
 struct GenerationConstants
 {
@@ -53,7 +53,9 @@ void CSMain (uint3 id : SV_DispatchThreadID)
 	float3 patchCoordCentered = patchCoord - patchCenter;
 
 	//float noise = HeightMapAsteroid(0.001 * patchCoord, 0.5, 0.75, 0.45, 0.25, 0.35);
-	float noise = Cell2Noise(0.002 * patchCoord);
+	//float noise = Noise(0.002 * patchCoord);
+	
+	float noise = 0;
 
     float height = ((noise * 4) - 1) * constants.terrainMaxHeight;
 

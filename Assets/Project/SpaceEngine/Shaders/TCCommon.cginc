@@ -38,7 +38,7 @@ uniform float4    cycloneParams;  // (cycloneMagn,    cycloneFreq,    sqrt(cyclo
 
 uniform float2 TexCoord;
 
-uniform sampler2D   NoiseSampler;       // precomputed noise texture
+uniform sampler3D   NoiseSampler;       // precomputed noise texture
 uniform sampler2D   PermSampler;        // permutation table for Perlin noise
 uniform sampler1D   PermGradSampler;    // permutted gradient table for Perlin noise
 uniform sampler2D   NormalMap;          // normals map to calculate slope
@@ -1361,12 +1361,12 @@ float Cell3NoiseF1F0(float3 p, int octaves, float lacunarity)
 //-----------------------------------------------------------------------------
 float NoiseNearestU(float3 ppoint)
 {
-	return tex2D(NoiseSampler, ppoint.xy).a;
+	return tex3D(NoiseSampler, ppoint).a;
 }
 
 float3 NoiseNearestUVec3(float3 ppoint)
 {
-	return tex2D(NoiseSampler, ppoint.xy).rgb;
+	return tex3D(NoiseSampler, ppoint).rgb;
 }
 
 float4 NoiseNearestUVec4(float3 ppoint)
