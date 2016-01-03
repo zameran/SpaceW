@@ -93,7 +93,7 @@
 
 			fixed4 terrainColor = tex2D(_MainTex, IN.uv_MainTex) * _Color;
 
-			terrainColor += fixed4(IN.noise * 8, IN.noise * 8, IN.noise * 8, 1.0);
+			terrainColor += fixed4(IN.noise, IN.noise, IN.noise, 1.0);
 
 			fixed4 c = terrainColor + gridLine;
 

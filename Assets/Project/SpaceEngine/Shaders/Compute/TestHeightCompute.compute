@@ -48,22 +48,20 @@ void CSMain (uint3 id : SV_DispatchThreadID)
 
 	float3 patchCenter = normalize(constants.patchCubeCenter) * constants.planetRadius;
 	float3 patchNormalizedCoord = normalize(cubeCoord);
-
+	
 	float3 patchCoord =  constants.planetRadius * patchNormalizedCoord;
 	float3 patchCoordCentered = patchCoord - patchCenter;
-
-	//float noise = HeightMapAsteroid(0.001 * patchCoord, 0.5, 0.75, 0.45, 0.25, 0.35);
-	//float noise = Noise(0.002 * patchCoord);
 	
-	float noise = 0;
+	float noise = HeightMapAsteroid(0.001 * patchCoord, 0.5, 0.75, 0.45, 0.25, 0.35);
+	//float noise = Fbm(0.002 * patchCoord);
 
-    float height = ((noise * 4) - 1) * constants.terrainMaxHeight;
+    float height = ((noise * 2) - 1) * constants.terrainMaxHeight;
 
 	patchCoordCentered += patchNormalizedCoord * height;
 
     float4 output = float4(patchCoordCentered.x, patchCoordCentered.y, patchCoordCentered.z, 0);
-
-	patchPreOutput[outBuffOffset].noise = noise;
+	
+	patchPreOutput[outBuffOffset].noise = ((noise * 2) - 1);
 	patchPreOutput[outBuffOffset].patchCenter = patchCenter;
     patchPreOutput[outBuffOffset].pos = output;
 }
@@ -83,7 +81,7 @@ void CSSubMain (uint3 id : SV_DispatchThreadID)
 
 	float4 pos = patchPreOutput[outBuffOffset].pos;
 
-	Height[id.xy] = float4(pos.xyz, noise);
+	Height[id.xy] = float4(0, 0, 0, noise);
 
 	float left = patchPreOutput[(id.x - 1) + id.y * nVerticesPerSide].noise * 2;
 	float right = patchPreOutput[(id.x + 1) + id.y * nVerticesPerSide].noise * 2;
