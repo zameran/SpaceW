@@ -52,7 +52,7 @@ const float pi = 3.14159265358;
 //-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
-//#define IMPROVED_TEX_PERLIN
+#define IMPROVED_TEX_PERLIN
 #define USESAVEPOW
 //#define USETEXLOD
 #define PACKED_NORMALS
@@ -1232,19 +1232,146 @@ float3 OFFSETOUT = float3(1.5, 1.5, 1.5);
 //-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
-float NoiseNearestU(float3 p)
+float3 mod(float3 x, float y) { return x - y * floor(x / y); }
+float2 mod(float2 x, float y) { return x - y * floor(x / y); }
+//-----------------------------------------------------------------------------
+
+//-----------------------------------------------------------------------------
+float3 Permutation(float3 x)
 {
-	return tex2D(NoiseSampler, p.xy).a;
+	return mod((34.0 * x + 1.0) * x, 289.0);
+}
+//-----------------------------------------------------------------------------
+
+//-----------------------------------------------------------------------------
+#ifdef IMPROVEDVORONOI
+
+#define K 0.142857142857
+#define Ko 0.428571428571
+//-----------------------------------------------------------------------------
+
+//-----------------------------------------------------------------------------
+float2 inoise(float3 P, float jitter)
+{
+	float3 Pi = mod(floor(P), 289.0);
+	float3 Pf = frac(P);
+	float3 oi = float3(-1.0, 0.0, 1.0);
+	float3 of = float3(-0.5, 0.5, 1.5);
+	float3 px = Permutation(Pi.x + oi);
+	float3 py = Permutation(Pi.y + oi);
+
+	float3 p, ox, oy, oz, dx, dy, dz;
+	float2 F = 1e6;
+
+	for (int i = 0; i < 3; i++)
+	{
+		for (int j = 0; j < 3; j++)
+		{
+			p = Permutation(px[i] + py[j] + Pi.z + oi); // pij1, pij2, pij3
+
+			ox = frac(p*K) - Ko;
+			oy = mod(floor(p*K), 7.0)*K - Ko;
+
+			p = Permutation(p);
+
+			oz = frac(p*K) - Ko;
+
+			dx = Pf.x - of[i] + jitter*ox;
+			dy = Pf.y - of[j] + jitter*oy;
+			dz = Pf.z - of + jitter*oz;
+
+			float3 d = dx * dx + dy * dy + dz * dz; // dij1, dij2 and dij3, squared
+
+													//Find lowest and second lowest distances
+			for (int n = 0; n < 3; n++)
+			{
+				if (d[n] < F[0])
+				{
+					F[1] = F[0];
+					F[0] = d[n];
+				}
+				else if (d[n] < F[1])
+				{
+					F[1] = d[n];
+				}
+			}
+		}
+	}
+
+	return F;
 }
 
-float3 NoiseNearestUVec3(float3 p)
+float Cell3NoiseF0(float3 p, int octaves, float lacunarity)
 {
-	return tex2D(NoiseSampler, p.xy).rgb;
+	float freq = 1, amp = 0.5;
+	float sum = 0;
+	float gain = SavePow(lacunarity, -noiseH);
+	for (int i = 0; i < octaves; i++)
+	{
+		float2 F = inoise(p * freq, 1) * amp;
+
+		sum += 0.1 + sqrt(F[0]);
+
+		freq *= lacunarity;
+		amp *= gain;
+	}
+	return sum / 2;
 }
 
-float4 NoiseNearestUVec4(float3 p)
+float4 Cell3NoiseF0Vec(float3 p, int octaves, float lacunarity)
 {
-	return tex2D(NoiseSampler, p.xy);
+	float3 cell = floor(p);
+	float freq = 1, amp = 0.5;
+	float sum = 0;
+	float gain = SavePow(lacunarity, -noiseH);
+	for (int i = 0; i < octaves; i++)
+	{
+		float2 F = inoise(p * freq, 1) * amp;
+
+		sum += 0.1 + sqrt(F[0]);
+
+		freq *= lacunarity;
+		amp *= gain;
+	}
+
+	p = normalize(p + cell + OFFSETOUT);
+
+	return float4(p, sum / 2);
+}
+
+float Cell3NoiseF1F0(float3 p, int octaves, float lacunarity)
+{
+	float freq = 1, amp = 0.5;
+	float sum = 0;
+	float gain = SavePow(lacunarity, -noiseH);
+	for (int i = 0; i < octaves; i++)
+	{
+		float2 F = inoise(p * freq, 1) * amp;
+
+		sum += 0.1 + sqrt(F[1]) - sqrt(F[0]);
+
+		freq *= lacunarity;
+		amp *= gain;
+	}
+	return sum / 2;
+}
+#endif
+//-----------------------------------------------------------------------------
+
+//-----------------------------------------------------------------------------
+float NoiseNearestU(float3 ppoint)
+{
+	return tex2D(NoiseSampler, ppoint.xy).a;
+}
+
+float3 NoiseNearestUVec3(float3 ppoint)
+{
+	return tex2D(NoiseSampler, ppoint.xy).rgb;
+}
+
+float4 NoiseNearestUVec4(float3 ppoint)
+{
+	return float4(NoiseNearestUVec3(ppoint), 0);
 }
 //-----------------------------------------------------------------------------
 
@@ -1264,9 +1391,7 @@ float Cell2Noise(float3 p)
 		{
 			for (d.x = -1.0; d.x<=1.0; d.x += 1.0)
 			{
-				rnd = NoiseNearestUVec3((cell + d) / NOISE_TEX_3D_SIZE).xyz + d;
-				//rnd = NoiseNearestUVec4((cell + d) / NOISE_TEX_3D_SIZE).xyz + d;
-
+				rnd = NoiseNearestUVec4((cell + d) / NOISE_TEX_3D_SIZE).xyz + d;
 				//rnd = NoiseNearestUVec4((cell + d) / NOISE_TEX_3D_SIZE).xyz;
 				//rnd = CellularWeightSamples3(rnd) * 0.166666666 + d;
 				pos = rnd - offs;
@@ -1294,9 +1419,7 @@ float2 Cell2Noise2(float3 p)
 		{
 			for (d.x = -1.0; d.x<=1.0; d.x += 1.0)
 			{
-				rnd = NoiseNearestUVec3((cell + d) / NOISE_TEX_3D_SIZE).xyz + d;
-				//rnd = NoiseNearestUVec4((cell + d) / NOISE_TEX_3D_SIZE).xyz + d;
-
+				rnd = NoiseNearestUVec4((cell + d) / NOISE_TEX_3D_SIZE).xyz + d;
 				pos = rnd - offs;
 				dist = dot(pos, pos);
 				if (dist < distMin1)
@@ -1328,9 +1451,7 @@ float4 Cell2NoiseVec(float3 p)
 		{
 			for (d.x = -1.0; d.x<=1.0; d.x += 1.0)
 			{
-				rnd = NoiseNearestUVec3((cell + d) / NOISE_TEX_3D_SIZE).xyz + d;
-				//rnd = NoiseNearestUVec4((cell + d) / NOISE_TEX_3D_SIZE).xyz + d;
-
+				rnd = NoiseNearestUVec4((cell + d) / NOISE_TEX_3D_SIZE).xyz + d;
 				pos = rnd - offs;
 				dist = dot(pos, pos);
 				if (distMin > dist)
@@ -1350,10 +1471,8 @@ float Cell2NoiseColor(float3 p, out float4 color)
 	float3 cell = floor(p);
 	float3 offs = p - cell - OFFSET;
 	float3 pos;
-	//float4 rndM = RND_M;
-	//float4 rnd;
-	float3 rndM = RND_M.xyz;
-	float3 rnd;
+	float4 rndM = RND_M;
+	float4 rnd;
 	float3 d;
 	float distMin = 1.0e38;
 	float dist;
@@ -1363,9 +1482,7 @@ float Cell2NoiseColor(float3 p, out float4 color)
 		{
 			for (d.x = -1.0; d.x<=1.0; d.x += 1.0)
 			{
-				rnd = NoiseNearestUVec3((cell + d) / NOISE_TEX_3D_SIZE);
-				//rnd = NoiseNearestUVec4((cell + d) / NOISE_TEX_3D_SIZE);
-
+				rnd = NoiseNearestUVec4((cell + d) / NOISE_TEX_3D_SIZE);
 				pos = rnd.xyz + d - offs;
 				dist = dot(pos, pos);
 				if (distMin > dist)
@@ -1376,8 +1493,7 @@ float Cell2NoiseColor(float3 p, out float4 color)
 			}
 		}
 	}
-	color = float4(rndM, 1);
-	//color = rndM;
+	color = rndM;
 	return sqrt(distMin);
 }
 
@@ -1398,9 +1514,7 @@ float4 Cell2NoiseSphere(float3 p, float Radius)
 		{
 			for (d.x = -1.0; d.x<=1.0; d.x += 1.0)
 			{
-				rnd = NoiseNearestUVec3((cell + d) / NOISE_TEX_3D_SIZE).xyz + d;
-				//rnd = NoiseNearestUVec4((cell + d) / NOISE_TEX_3D_SIZE).xyz + d;
-
+				rnd = NoiseNearestUVec4((cell + d) / NOISE_TEX_3D_SIZE).xyz + d;
 				pos = rnd - offs;
 				dist = dot(pos, pos);
 				if (distMin > dist)
@@ -1432,9 +1546,7 @@ void Cell2Noise2Sphere(float3 p, float Radius, out float4 point1, out float4 poi
 		{
 			for (d.x = -1.0; d.x<=1.0; d.x += 1.0)
 			{
-				rnd = NoiseNearestUVec3((cell + d) / NOISE_TEX_3D_SIZE).xyz + d;
-				//rnd = NoiseNearestUVec4((cell + d) / NOISE_TEX_3D_SIZE).xyz + d;
-
+				rnd = NoiseNearestUVec4((cell + d) / NOISE_TEX_3D_SIZE).xyz + d;
 				pos = rnd - offs;
 				dist = dot(pos, pos);
 				if (dist < distMin1)
@@ -1475,9 +1587,7 @@ float4 Cell2NoiseVecSphere(float3 p, float Radius)
 		{
 			for (d.x = -1.0; d.x<=1.0; d.x += 1.0)
 			{
-				rnd = NoiseNearestUVec3((cell + d) / NOISE_TEX_3D_SIZE).xyz + d;
-				//rnd = NoiseNearestUVec4((cell + d) / NOISE_TEX_3D_SIZE).xyz + d;
-
+				rnd = NoiseNearestUVec4((cell + d) / NOISE_TEX_3D_SIZE).xyz + d;
 				pos = rnd - offs;
 				dist = dot(pos, pos);
 				if (distMin > dist)
@@ -1707,134 +1817,6 @@ float Cell3NoiseSmoothColor(float3 p, float falloff, out float4 color)
 //-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
-#ifdef IMPROVEDVORONOI
-
-#define K 0.142857142857
-#define Ko 0.428571428571
-//-----------------------------------------------------------------------------
-
-//-----------------------------------------------------------------------------
-float3 mod(float3 x, float y) { return x - y * floor(x / y); }
-float2 mod(float2 x, float y) { return x - y * floor(x / y); }
-//-----------------------------------------------------------------------------
-
-//-----------------------------------------------------------------------------
-float3 Permutation(float3 x)
-{
-	return mod((34.0 * x + 1.0) * x, 289.0);
-}
-//-----------------------------------------------------------------------------
-
-//-----------------------------------------------------------------------------
-float2 inoise(float3 P, float jitter)
-{
-	float3 Pi = mod(floor(P), 289.0);
-	float3 Pf = frac(P);
-	float3 oi = float3(-1.0, 0.0, 1.0);
-	float3 of = float3(-0.5, 0.5, 1.5);
-	float3 px = Permutation(Pi.x + oi);
-	float3 py = Permutation(Pi.y + oi);
-
-	float3 p, ox, oy, oz, dx, dy, dz;
-	float2 F = 1e6;
-
-	for (int i = 0; i < 3; i++)
-	{
-		for (int j = 0; j < 3; j++)
-		{
-			p = Permutation(px[i] + py[j] + Pi.z + oi); // pij1, pij2, pij3
-
-			ox = frac(p*K) - Ko;
-			oy = mod(floor(p*K), 7.0)*K - Ko;
-
-			p = Permutation(p);
-
-			oz = frac(p*K) - Ko;
-
-			dx = Pf.x - of[i] + jitter*ox;
-			dy = Pf.y - of[j] + jitter*oy;
-			dz = Pf.z - of + jitter*oz;
-
-			float3 d = dx * dx + dy * dy + dz * dz; // dij1, dij2 and dij3, squared
-
-													//Find lowest and second lowest distances
-			for (int n = 0; n < 3; n++)
-			{
-				if (d[n] < F[0])
-				{
-					F[1] = F[0];
-					F[0] = d[n];
-				}
-				else if (d[n] < F[1])
-				{
-					F[1] = d[n];
-				}
-			}
-		}
-	}
-
-	return F;
-}
-
-float Cell3NoiseF0(float3 p, int octaves, float lacunarity)
-{
-	float freq = 1, amp = 0.5;
-	float sum = 0;
-	float gain = SavePow(lacunarity, -noiseH);
-	for (int i = 0; i < octaves; i++)
-	{
-		float2 F = inoise(p * freq, 1) * amp;
-
-		sum += 0.1 + sqrt(F[0]);
-
-		freq *= lacunarity;
-		amp *= gain;
-	}
-	return sum / 2;
-}
-
-float4 Cell3NoiseF0Vec(float3 p, int octaves, float lacunarity)
-{
-	float3 cell = floor(p);
-	float freq = 1, amp = 0.5;
-	float sum = 0;
-	float gain = SavePow(lacunarity, -noiseH);
-	for (int i = 0; i < octaves; i++)
-	{
-		float2 F = inoise(p * freq, 1) * amp;
-
-		sum += 0.1 + sqrt(F[0]);
-
-		freq *= lacunarity;
-		amp *= gain;
-	}
-
-	p = normalize(p + cell + OFFSETOUT);
-
-	return float4(p, sum / 2);
-}
-
-float Cell3NoiseF1F0(float3 p, int octaves, float lacunarity)
-{
-	float freq = 1, amp = 0.5;
-	float sum = 0;
-	float gain = SavePow(lacunarity, -noiseH);
-	for (int i = 0; i < octaves; i++)
-	{
-		float2 F = inoise(p * freq, 1) * amp;
-
-		sum += 0.1 + sqrt(F[1]) - sqrt(F[0]);
-
-		freq *= lacunarity;
-		amp *= gain;
-	}
-	return sum / 2;
-}
-#endif
-//-----------------------------------------------------------------------------
-
-
-//-----------------------------------------------------------------------------
 float radPeak;
 float radInner;
 float radRim;
@@ -1900,7 +1882,7 @@ float CraterNoise(float3 ppoint, float cratMagn, float cratFreq, float cratSqrtD
 
 	for (int i = 0; i<cratOctaves; i++)
 	{
-		cell = Cell3Noise(ppoint + craterRoundDist * Fbm3D(ppoint*2.56));
+		cell = Cell3NoiseF0(ppoint + craterRoundDist * Fbm3D(ppoint * 2.56), 4, 1);
 
 		lastlastlastLand = lastlastLand;
 		lastlastLand = lastLand;

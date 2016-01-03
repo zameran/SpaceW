@@ -63,11 +63,12 @@ public class NoiseParametersSetter : MonoBehaviour
     {
         Init();
 
+        Perlin.LoadResourcesFor2DNoise();
         Perlin.LoadResourcesFor3DNoise();
 
         PlanetAtlas = LoadTextureFromResources("PlanetAtlas");
         PermutationTable = Perlin.GetPermutationTable2D();
-        GradientTable = Perlin.GetGradient3D();
+        GradientTable = Perlin.GetGradient2D();
         Noise = Perlin.GetPermutationTable2D();
     }
 

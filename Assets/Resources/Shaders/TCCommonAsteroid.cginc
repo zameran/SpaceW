@@ -7,7 +7,7 @@ float HeightMapAsteroid(float ppoint)
 	montesFreq = 0.789;
 	hillsMagn = 0.66972;
 	hillsFraction = 0.25184;
-
+	
 	// Global landscape
 	noiseOctaves = 8.0;
 	float3 p = ppoint * mainFreq + Randomize;

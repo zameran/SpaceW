@@ -2,7 +2,7 @@
 #define threadsPerGroup_Y 32
 #define nVerticesPerSide 128
 
-#include "Assets/Project/SpaceEngine/Shaders/TCCommonAsteroid.cginc"
+#include "Assets/Resources/Shaders/TCCommonAsteroid.cginc"
 
 struct GenerationConstants
 {
