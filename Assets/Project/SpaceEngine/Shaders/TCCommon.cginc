@@ -52,9 +52,9 @@ const float pi = 3.14159265358;
 //-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
-#define IMPROVED_TEX_PERLIN
+//#define IMPROVED_TEX_PERLIN
 #define USESAVEPOW
-#define USETEXLOD
+//#define USETEXLOD
 #define PACKED_NORMALS
 //-----------------------------------------------------------------------------
 
@@ -1221,7 +1221,7 @@ float JordanTurbulence
 //-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
-#define NOISE_TEX_3D_SIZE 64
+#define NOISE_TEX_3D_SIZE 128
 
 #define IMPROVEDVORONOI
 
@@ -1234,17 +1234,17 @@ float3 OFFSETOUT = float3(1.5, 1.5, 1.5);
 //-----------------------------------------------------------------------------
 float NoiseNearestU(float3 p)
 {
-	return tex2Dlod(NoiseSampler, float4(p, 0)).a;
+	return tex2D(NoiseSampler, p.xy).a;
 }
 
 float3 NoiseNearestUVec3(float3 p)
 {
-	return tex2Dlod(NoiseSampler, float4(p, 0)).rgb;
+	return tex2D(NoiseSampler, p.xy).rgb;
 }
 
 float4 NoiseNearestUVec4(float3 p)
 {
-	return tex2Dlod(NoiseSampler, float4(p, 0));
+	return tex2D(NoiseSampler, p.xy);
 }
 //-----------------------------------------------------------------------------
 
@@ -1264,7 +1264,9 @@ float Cell2Noise(float3 p)
 		{
 			for (d.x = -1.0; d.x<=1.0; d.x += 1.0)
 			{
-				rnd = NoiseNearestUVec4((cell + d) / NOISE_TEX_3D_SIZE).xyz + d;
+				rnd = NoiseNearestUVec3((cell + d) / NOISE_TEX_3D_SIZE).xyz + d;
+				//rnd = NoiseNearestUVec4((cell + d) / NOISE_TEX_3D_SIZE).xyz + d;
+
 				//rnd = NoiseNearestUVec4((cell + d) / NOISE_TEX_3D_SIZE).xyz;
 				//rnd = CellularWeightSamples3(rnd) * 0.166666666 + d;
 				pos = rnd - offs;
@@ -1292,7 +1294,9 @@ float2 Cell2Noise2(float3 p)
 		{
 			for (d.x = -1.0; d.x<=1.0; d.x += 1.0)
 			{
-				rnd = NoiseNearestUVec4((cell + d) / NOISE_TEX_3D_SIZE).xyz + d;
+				rnd = NoiseNearestUVec3((cell + d) / NOISE_TEX_3D_SIZE).xyz + d;
+				//rnd = NoiseNearestUVec4((cell + d) / NOISE_TEX_3D_SIZE).xyz + d;
+
 				pos = rnd - offs;
 				dist = dot(pos, pos);
 				if (dist < distMin1)
@@ -1324,7 +1328,9 @@ float4 Cell2NoiseVec(float3 p)
 		{
 			for (d.x = -1.0; d.x<=1.0; d.x += 1.0)
 			{
-				rnd = NoiseNearestUVec4((cell + d) / NOISE_TEX_3D_SIZE).xyz + d;
+				rnd = NoiseNearestUVec3((cell + d) / NOISE_TEX_3D_SIZE).xyz + d;
+				//rnd = NoiseNearestUVec4((cell + d) / NOISE_TEX_3D_SIZE).xyz + d;
+
 				pos = rnd - offs;
 				dist = dot(pos, pos);
 				if (distMin > dist)
@@ -1344,8 +1350,10 @@ float Cell2NoiseColor(float3 p, out float4 color)
 	float3 cell = floor(p);
 	float3 offs = p - cell - OFFSET;
 	float3 pos;
-	float4 rndM = RND_M;
-	float4 rnd;
+	//float4 rndM = RND_M;
+	//float4 rnd;
+	float3 rndM = RND_M.xyz;
+	float3 rnd;
 	float3 d;
 	float distMin = 1.0e38;
 	float dist;
@@ -1355,7 +1363,9 @@ float Cell2NoiseColor(float3 p, out float4 color)
 		{
 			for (d.x = -1.0; d.x<=1.0; d.x += 1.0)
 			{
-				rnd = NoiseNearestUVec4((cell + d) / NOISE_TEX_3D_SIZE);
+				rnd = NoiseNearestUVec3((cell + d) / NOISE_TEX_3D_SIZE);
+				//rnd = NoiseNearestUVec4((cell + d) / NOISE_TEX_3D_SIZE);
+
 				pos = rnd.xyz + d - offs;
 				dist = dot(pos, pos);
 				if (distMin > dist)
@@ -1366,7 +1376,8 @@ float Cell2NoiseColor(float3 p, out float4 color)
 			}
 		}
 	}
-	color = rndM;
+	color = float4(rndM, 1);
+	//color = rndM;
 	return sqrt(distMin);
 }
 
@@ -1387,7 +1398,9 @@ float4 Cell2NoiseSphere(float3 p, float Radius)
 		{
 			for (d.x = -1.0; d.x<=1.0; d.x += 1.0)
 			{
-				rnd = NoiseNearestUVec4((cell + d) / NOISE_TEX_3D_SIZE).xyz + d;
+				rnd = NoiseNearestUVec3((cell + d) / NOISE_TEX_3D_SIZE).xyz + d;
+				//rnd = NoiseNearestUVec4((cell + d) / NOISE_TEX_3D_SIZE).xyz + d;
+
 				pos = rnd - offs;
 				dist = dot(pos, pos);
 				if (distMin > dist)
@@ -1419,7 +1432,9 @@ void Cell2Noise2Sphere(float3 p, float Radius, out float4 point1, out float4 poi
 		{
 			for (d.x = -1.0; d.x<=1.0; d.x += 1.0)
 			{
-				rnd = NoiseNearestUVec4((cell + d) / NOISE_TEX_3D_SIZE).xyz + d;
+				rnd = NoiseNearestUVec3((cell + d) / NOISE_TEX_3D_SIZE).xyz + d;
+				//rnd = NoiseNearestUVec4((cell + d) / NOISE_TEX_3D_SIZE).xyz + d;
+
 				pos = rnd - offs;
 				dist = dot(pos, pos);
 				if (dist < distMin1)
@@ -1460,7 +1475,9 @@ float4 Cell2NoiseVecSphere(float3 p, float Radius)
 		{
 			for (d.x = -1.0; d.x<=1.0; d.x += 1.0)
 			{
-				rnd = NoiseNearestUVec4((cell + d) / NOISE_TEX_3D_SIZE).xyz + d;
+				rnd = NoiseNearestUVec3((cell + d) / NOISE_TEX_3D_SIZE).xyz + d;
+				//rnd = NoiseNearestUVec4((cell + d) / NOISE_TEX_3D_SIZE).xyz + d;
+
 				pos = rnd - offs;
 				dist = dot(pos, pos);
 				if (distMin > dist)

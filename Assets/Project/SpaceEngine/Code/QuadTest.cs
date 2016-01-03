@@ -49,7 +49,6 @@ public class QuadTest : MonoBehaviour
     public RenderTexture HeightTexture;
     public RenderTexture NormalTexture;
 
-    [HideInInspector]
     public GenerationConstants[] generationConstants;
 
     void Start()

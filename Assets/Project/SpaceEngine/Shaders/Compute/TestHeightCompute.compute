@@ -52,8 +52,10 @@ void CSMain (uint3 id : SV_DispatchThreadID)
 	float3 patchCoord =  constants.planetRadius * patchNormalizedCoord;
 	float3 patchCoordCentered = patchCoord - patchCenter;
 
-	float noise = HeightMapAsteroid(0.001 * patchCoord, 0.5, 0.75, 0.45, 0.25, 0.35);
-    float height = ((noise * 2) - 1) * constants.terrainMaxHeight;
+	//float noise = HeightMapAsteroid(0.001 * patchCoord, 0.5, 0.75, 0.45, 0.25, 0.35);
+	float noise = Cell2Noise(0.002 * patchCoord);
+
+    float height = ((noise * 4) - 1) * constants.terrainMaxHeight;
 
 	patchCoordCentered += patchNormalizedCoord * height;
 

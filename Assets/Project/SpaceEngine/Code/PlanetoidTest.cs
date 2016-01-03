@@ -86,35 +86,36 @@ public class PlanetoidTest : MonoBehaviour
 
         switch (quadPosition)
         {
+            //-1 +1 range, but with -PlanetRadius +PlanetRadius works too.
             case QuadPostion.Top:
-                gc.cubeFaceEastDirection = new Vector3(0, 0, -PlanetRadius);
-                gc.cubeFaceNorthDirection = new Vector3(PlanetRadius, 0, 0);
-                gc.patchCubeCenter = new Vector3(0, PlanetRadius, 0);
+                gc.cubeFaceEastDirection = new Vector3(0, 0, -1);
+                gc.cubeFaceNorthDirection = new Vector3(1, 0, 0);
+                gc.patchCubeCenter = new Vector3(0, 1, 0);
                 break;
             case QuadPostion.Bottom:
-                gc.cubeFaceEastDirection = new Vector3(0, 0, -PlanetRadius);
-                gc.cubeFaceNorthDirection = new Vector3(-PlanetRadius, 0, 0);
-                gc.patchCubeCenter = new Vector3(0, -PlanetRadius, 0);
+                gc.cubeFaceEastDirection = new Vector3(0, 0, -1);
+                gc.cubeFaceNorthDirection = new Vector3(-1, 0, 0);
+                gc.patchCubeCenter = new Vector3(0, -1, 0);
                 break;
             case QuadPostion.Left:
-                gc.cubeFaceEastDirection = new Vector3(0, -PlanetRadius, 0);
-                gc.cubeFaceNorthDirection = new Vector3(0, 0, -PlanetRadius);
-                gc.patchCubeCenter = new Vector3(-PlanetRadius, 0, 0);
+                gc.cubeFaceEastDirection = new Vector3(0, -1, 0);
+                gc.cubeFaceNorthDirection = new Vector3(0, 0, -1);
+                gc.patchCubeCenter = new Vector3(-1, 0, 0);
                 break;
             case QuadPostion.Right:
-                gc.cubeFaceEastDirection = new Vector3(0, -PlanetRadius, 0);
-                gc.cubeFaceNorthDirection = new Vector3(0, 0, PlanetRadius);
-                gc.patchCubeCenter = new Vector3(PlanetRadius, 0, 0);
+                gc.cubeFaceEastDirection = new Vector3(0, -1, 0);
+                gc.cubeFaceNorthDirection = new Vector3(0, 0, 1);
+                gc.patchCubeCenter = new Vector3(1, 0, 0);
                 break;
             case QuadPostion.Front:
-                gc.cubeFaceEastDirection = new Vector3(PlanetRadius, 0, 0);
-                gc.cubeFaceNorthDirection = new Vector3(0, -PlanetRadius, 0);
-                gc.patchCubeCenter = new Vector3(0, 0, PlanetRadius);
+                gc.cubeFaceEastDirection = new Vector3(1, 0, 0);
+                gc.cubeFaceNorthDirection = new Vector3(0, -1, 0);
+                gc.patchCubeCenter = new Vector3(0, 0, 1);
                 break;
             case QuadPostion.Back:
-                gc.cubeFaceEastDirection = new Vector3(-PlanetRadius, 0, 0);
-                gc.cubeFaceNorthDirection = new Vector3(0, -PlanetRadius, 0);
-                gc.patchCubeCenter = new Vector3(0, 0, -PlanetRadius);
+                gc.cubeFaceEastDirection = new Vector3(-1, 0, 0);
+                gc.cubeFaceNorthDirection = new Vector3(0, -1, 0);
+                gc.patchCubeCenter = new Vector3(0, 0, -1);
                 break;
         }
 
