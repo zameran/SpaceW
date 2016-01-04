@@ -173,6 +173,93 @@ public class Quad : MonoBehaviour
         }
     }
 
+    public Vector3 GetCubeFaceEastDirection(QuadPostion quadPosition)
+    {
+        Vector3 temp = Vector3.zero;
+
+        switch (quadPosition)
+        {
+            case QuadPostion.Top:
+                temp = new Vector3(0, 0, -1);
+                break;
+            case QuadPostion.Bottom:
+                temp = new Vector3(0, 0, -1);
+                break;
+            case QuadPostion.Left:
+                temp = new Vector3(0, -1, 0);
+                break;
+            case QuadPostion.Right:
+                temp = new Vector3(0, -1, 0);
+                break;
+            case QuadPostion.Front:
+                temp = new Vector3(1, 0, 0);
+                break;
+            case QuadPostion.Back:
+                temp = new Vector3(-1, 0, 0);
+                break;
+        }
+
+        return temp;
+    }
+
+    public Vector3 GetCubeFaceNorthDirection(QuadPostion quadPosition)
+    {
+        Vector3 temp = Vector3.zero;
+
+        switch (quadPosition)
+        {
+            case QuadPostion.Top:
+                temp = new Vector3(1, 0, 0);
+                break;
+            case QuadPostion.Bottom:
+                temp = new Vector3(-1, 0, 0);
+                break;
+            case QuadPostion.Left:
+                temp = new Vector3(0, 0, -1);
+                break;
+            case QuadPostion.Right:
+                temp = new Vector3(0, 0, 1);
+                break;
+            case QuadPostion.Front:
+                temp = new Vector3(0, -1, 0);
+                break;
+            case QuadPostion.Back:
+                temp = new Vector3(0, -1, 0);
+                break;
+        }
+
+        return temp;
+    }
+
+    public Vector3 GetPatchCubeCenter(QuadPostion quadPosition)
+    {
+        Vector3 temp = Vector3.zero;
+
+        switch (quadPosition)
+        {
+            case QuadPostion.Top:
+                temp = new Vector3(0, 1, 0);
+                break;
+            case QuadPostion.Bottom:
+                temp = new Vector3(0, -1, 0);
+                break;
+            case QuadPostion.Left:
+                temp = new Vector3(-1, 0, 0);
+                break;
+            case QuadPostion.Right:
+                temp = new Vector3(1, 0, 0);
+                break;
+            case QuadPostion.Front:
+                temp = new Vector3(0, 0, 1);
+                break;
+            case QuadPostion.Back:
+                temp = new Vector3(0, 0, -1);
+                break;
+        }
+
+        return temp;
+    }
+
     private void Log(string msg)
     {
         if (Planetoid.DebugEnabled)
