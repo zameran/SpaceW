@@ -4,10 +4,8 @@
 
 #include "Assets/Project/SpaceEngine/Shaders/TCCommonAsteroid.cginc"
 
-struct GenerationConstants
+struct QuadGenerationConstants
 {
-    float scale;
-    float noiseSeaLevel;
     float planetRadius;
 	float spacing;
     float terrainMaxHeight;
@@ -26,7 +24,7 @@ struct OutputStruct
     float4 pos;
 };
 
-RWStructuredBuffer<GenerationConstants> generationConstants;
+RWStructuredBuffer<QuadGenerationConstants> quadGenerationConstants;
 RWStructuredBuffer<OutputStruct> patchPreOutput;
 RWStructuredBuffer<OutputStruct> patchOutput;
 
@@ -36,7 +34,7 @@ void CSMain (uint3 id : SV_DispatchThreadID)
 {
     int outBuffOffset = id.x + id.y * nVerticesPerSide;
 	
-	GenerationConstants constants = generationConstants[0];
+	QuadGenerationConstants constants = quadGenerationConstants[0];
 	
 	float eastValue = (id.x - ((nVerticesPerSide - 1) / 2.0)) * constants.spacing;
 	float northValue = (id.y - ((nVerticesPerSide - 1) / 2.0)) * constants.spacing;
@@ -75,7 +73,7 @@ void CSSubMain (uint3 id : SV_DispatchThreadID)
 {
 	int outBuffOffset = id.x + id.y * nVerticesPerSide;
 	
-	GenerationConstants constants = generationConstants[0];
+	QuadGenerationConstants constants = quadGenerationConstants[0];
 
 	float noise = patchPreOutput[outBuffOffset].noise;
 

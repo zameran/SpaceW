@@ -82,7 +82,7 @@ public class Planetoid : MonoBehaviour
         quadComponent.HeightShader = HeightShader;
         quadComponent.Planetoid = this;
 
-        GenerationConstants gc = GenerationConstants.Init();
+        QuadGenerationConstants gc = QuadGenerationConstants.Init();
         gc.planetRadius = PlanetRadius;
 
         gc.cubeFaceEastDirection = quadComponent.GetCubeFaceEastDirection(quadPosition);
@@ -90,8 +90,7 @@ public class Planetoid : MonoBehaviour
         gc.patchCubeCenter = quadComponent.GetPatchCubeCenter(quadPosition);
 
         quadComponent.Position = quadPosition;
-        quadComponent.LODType = QuadLODType.Main;
-        quadComponent.generationConstants = gc;
+        quadComponent.quadGenerationConstants = gc;
         quadComponent.Planetoid = this;
 
         mf.sharedMesh = MeshFactory.SetupQuadMesh();
@@ -100,48 +99,6 @@ public class Planetoid : MonoBehaviour
         quadComponent.Dispatch();
 
         Quads.Add(quadComponent);
-    }
-
-    public Quad SetupSubQuad(QuadPostion quadPosition, QuadLODType lodType)
-    {
-        GameObject go = new GameObject("Quad" + "_" + quadPosition.ToString());
-        go.transform.position = Vector3.zero;
-        go.transform.rotation = Quaternion.identity;
-        //go.transform.parent = this.transform;
-
-        MeshFilter mf = go.AddComponent<MeshFilter>();
-
-        MeshRenderer mr = go.AddComponent<MeshRenderer>();
-        mr.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.On;
-        mr.receiveShadows = true;
-        mr.sharedMaterial = new Material(ColorShader);
-        mr.sharedMaterial.name += "_" + quadPosition.ToString() + "(Instance)";
-
-        NoiseParametersSetter nps = go.AddComponent<NoiseParametersSetter>();
-        nps.ComputeShaderToUpdate = HeightShader;
-        nps.MaterialToUpdate = mr.sharedMaterial;
-
-        Quad quadComponent = go.AddComponent<Quad>();
-        quadComponent.Setter = nps;
-        quadComponent.HeightShader = HeightShader;
-        quadComponent.Planetoid = this;
-
-        GenerationConstants gc = GenerationConstants.Init();
-        gc.planetRadius = PlanetRadius;
-
-        quadComponent.Position = quadPosition;
-        quadComponent.LODType = lodType;
-        quadComponent.generationConstants = gc;
-        quadComponent.Planetoid = this;
-
-        mf.sharedMesh = MeshFactory.SetupQuadMesh();
-        mf.sharedMesh.bounds = new Bounds(Vector3.zero, new Vector3(PlanetRadius * 2, PlanetRadius * 2, PlanetRadius * 2));
-
-        quadComponent.Dispatch();
-
-        Quads.Add(quadComponent);
-
-        return quadComponent;
     }
 
     private void Log(string msg)
@@ -159,10 +116,4 @@ public enum QuadPostion
     Right,
     Front,
     Back
-}
-
-public enum QuadLODType
-{
-    Main,
-    Sub
 }
