@@ -42,6 +42,9 @@ public struct OutputStruct
 
 public class Quad : MonoBehaviour
 {
+    public QuadPostion Position;
+    public QuadLODType LODType;
+
     public Planetoid Planetoid;
 
     public NoiseParametersSetter Setter;
@@ -60,7 +63,7 @@ public class Quad : MonoBehaviour
 
     public Quad Parent;
 
-    public List<Quad> Subquads;
+    public List<Quad> Subquads = new List<Quad>();
 
     void Start()
     {
@@ -76,18 +79,44 @@ public class Quad : MonoBehaviour
     [ContextMenu("Split")]
     public void Split()
     {
+        if (LODType == QuadLODType.Sub)
+            return;
+
+        int id = 0;
+
         for (int i = 0; i < 2; i++)
         {
-            for (int j = 0; j < 2; j++)
+            for (int j = 0; j < 2; j++, id++)
             {
                 int x = i + 1;
                 int y = j + 1;
 
-                float mod = 0.5f;
+                Quad quad = Planetoid.SetupSubQuad(Position, QuadLODType.Sub);
+                quad.Parent = this;
+                quad.transform.parent = this.transform;
+                quad.gameObject.name += "_" + x + "_" + y + "_" + id;
 
-                Debug.Log(x + "|" + y + "|" + mod);
+                quad.SetupVectors(quad, Position, LODType, x, y, id);
+                quad.Dispatch();
+
+                this.Subquads.Add(quad);
             }
         }
+
+        this.ReleaseAndDisposeBuffer(ToShaderData);
+    }
+
+    [ContextMenu("Unsplit")]
+    public void Unsplit()
+    {
+        for (int i = 0; i < Subquads.Count; i++)
+        {
+            this.Planetoid.Quads.Remove(Subquads[i]);
+            DestroyImmediate(Subquads[i].gameObject);
+        }
+
+        this.Subquads.Clear();
+        this.Dispatch();
     }
 
     [ContextMenu("Displatch!")]
@@ -181,12 +210,24 @@ public class Quad : MonoBehaviour
         }
     }
 
+    private void ReleaseAndDisposeBuffer(ComputeBuffer buffer)
+    {
+        if (buffer != null)
+        {
+            buffer.Release();
+            buffer.Dispose();
+        }
+    }
+
     private void ReleaseAndDisposeBuffers(params ComputeBuffer[] buffers)
     {
         for (int i = 0; i < buffers.Length; i++)
         {
-            buffers[i].Release();
-            buffers[i].Dispose();
+            if (buffers[i] != null)
+            {
+                buffers[i].Release();
+                buffers[i].Dispose();
+            }
         }
     }
 
@@ -275,6 +316,96 @@ public class Quad : MonoBehaviour
         }
 
         return temp;
+    }
+
+    public Vector3 GetPatchCubeCenterSplitted(QuadPostion quadPosition, QuadLODType lodType, int id)
+    {
+        Vector3 temp = Vector3.zero;
+
+        float v = 0.0f;
+
+        if (Parent != null)
+            if (Parent.LODType == QuadLODType.Main)
+                v = 1.0f;
+
+        switch (quadPosition)
+        {
+            case QuadPostion.Top:
+                if (id == 0)
+                    temp = new Vector3(-v / 2, 1.0f, v / 2);
+                else if (id == 1)
+                    temp = new Vector3(v / 2, 1.0f, v / 2);
+                else if (id == 2)
+                    temp = new Vector3(-v / 2, 1.0f, -v / 2);
+                else if (id == 3)
+                    temp = new Vector3(v / 2, 1.0f, -v / 2);
+                break;
+            case QuadPostion.Bottom:
+                if (id == 0)
+                    temp = new Vector3(-1.0f / 2, -1.0f, -1.0f / 2);
+                else if (id == 1)
+                    temp = new Vector3(1.0f / 2, -1.0f, -1.0f / 2);
+                else if (id == 2)
+                    temp = new Vector3(-1.0f / 2, -1.0f, 1.0f / 2);
+                else if (id == 3)
+                    temp = new Vector3(1.0f / 2, -1.0f, 1.0f / 2);
+                break;
+            case QuadPostion.Left:
+                if (id == 0)
+                    temp = new Vector3(-1.0f, 1.0f / 2, 1.0f / 2);
+                else if (id == 1)
+                    temp = new Vector3(-1.0f, 1.0f / 2, -1.0f / 2);
+                else if (id == 2)
+                    temp = new Vector3(-1.0f, -1.0f / 2, 1.0f / 2);
+                else if (id == 3)
+                    temp = new Vector3(-1.0f, -1.0f / 2, -1.0f / 2);
+                break;
+            case QuadPostion.Right:
+                if (id == 0)
+                    temp = new Vector3(1.0f, 1.0f / 2, -1.0f / 2);
+                else if (id == 1)
+                    temp = new Vector3(1.0f, 1.0f / 2, 1.0f / 2);
+                else if (id == 2)
+                    temp = new Vector3(1.0f, -1.0f / 2, -1.0f / 2);
+                else if (id == 3)
+                    temp = new Vector3(1.0f, -1.0f / 2, 1.0f / 2);
+                break;
+            case QuadPostion.Front:
+                if (id == 0)
+                    temp = new Vector3(1.0f / 2, 1.0f / 2, 1.0f);
+                else if (id == 1)
+                    temp = new Vector3(-1.0f / 2, 1.0f / 2, 1.0f);
+                else if (id == 2)
+                    temp = new Vector3(1.0f / 2, -1.0f / 2, 1.0f);
+                else if (id == 3)
+                    temp = new Vector3(-1.0f / 2, -1.0f / 2, 1.0f);
+                break;
+            case QuadPostion.Back:
+                if (id == 0)
+                    temp = new Vector3(-1.0f / 2, 1.0f / 2, -1.0f);
+                else if (id == 1)
+                    temp = new Vector3(1.0f / 2, 1.0f / 2, -1.0f);
+                else if (id == 2)
+                    temp = new Vector3(-1.0f / 2, -1.0f / 2, -1.0f);
+                else if (id == 3)
+                    temp = new Vector3(1.0f / 2, -1.0f / 2, -1.0f);
+                break;
+        }
+
+        return temp;
+    }
+
+    public void SetupVectors(Quad quad, QuadPostion quadPosition, QuadLODType lodType, int x, int y, int id)
+    {
+        Vector3 cubeFaceEastDirection = quad.Parent.generationConstants.cubeFaceEastDirection / 2.0f;
+        Vector3 cubeFaceNorthDirection = quad.Parent.generationConstants.cubeFaceNorthDirection / 2.0f;
+
+        quad.generationConstants.cubeFaceEastDirection = cubeFaceEastDirection;
+        quad.generationConstants.cubeFaceNorthDirection = cubeFaceNorthDirection;
+
+        Vector3 patchCubeCenter = quad.GetPatchCubeCenterSplitted(quadPosition, lodType, id);
+
+        quad.generationConstants.patchCubeCenter = patchCubeCenter;
     }
 
     private void Log(string msg)

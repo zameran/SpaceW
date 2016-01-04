@@ -25,7 +25,8 @@ public class Planetoid : MonoBehaviour
         for (int i = 0; i < Quads.Count; i++)
         {
             if (Quads[i] != null)
-                Quads[i].Dispatch();
+                if(Quads[i].Subquads.Count == 0)
+                    Quads[i].Dispatch();
         }
 
         Log("Planet dispatched in " + (Time.realtimeSinceStartup - time).ToString() + "ms");
@@ -49,15 +50,15 @@ public class Planetoid : MonoBehaviour
         if (Quads.Count > 0)
             return;
 
-        SetupQuad(QuadPostion.Top);
-        SetupQuad(QuadPostion.Bottom);
-        SetupQuad(QuadPostion.Left);
-        SetupQuad(QuadPostion.Right);
-        SetupQuad(QuadPostion.Front);
-        SetupQuad(QuadPostion.Back);
+        SetupMainQuad(QuadPostion.Top);
+        SetupMainQuad(QuadPostion.Bottom);
+        SetupMainQuad(QuadPostion.Left);
+        SetupMainQuad(QuadPostion.Right);
+        SetupMainQuad(QuadPostion.Front);
+        SetupMainQuad(QuadPostion.Back);
     }
 
-    public void SetupQuad(QuadPostion quadPosition)
+    public void SetupMainQuad(QuadPostion quadPosition)
     {
         GameObject go = new GameObject("Quad" + "_" + quadPosition.ToString());
         go.transform.position = Vector3.zero;
@@ -87,7 +88,9 @@ public class Planetoid : MonoBehaviour
         gc.cubeFaceEastDirection = quadComponent.GetCubeFaceEastDirection(quadPosition);
         gc.cubeFaceNorthDirection = quadComponent.GetCubeFaceNorthDirection(quadPosition);
         gc.patchCubeCenter = quadComponent.GetPatchCubeCenter(quadPosition);
-        
+
+        quadComponent.Position = quadPosition;
+        quadComponent.LODType = QuadLODType.Main;
         quadComponent.generationConstants = gc;
         quadComponent.Planetoid = this;
 
@@ -97,6 +100,48 @@ public class Planetoid : MonoBehaviour
         quadComponent.Dispatch();
 
         Quads.Add(quadComponent);
+    }
+
+    public Quad SetupSubQuad(QuadPostion quadPosition, QuadLODType lodType)
+    {
+        GameObject go = new GameObject("Quad" + "_" + quadPosition.ToString());
+        go.transform.position = Vector3.zero;
+        go.transform.rotation = Quaternion.identity;
+        //go.transform.parent = this.transform;
+
+        MeshFilter mf = go.AddComponent<MeshFilter>();
+
+        MeshRenderer mr = go.AddComponent<MeshRenderer>();
+        mr.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.On;
+        mr.receiveShadows = true;
+        mr.sharedMaterial = new Material(ColorShader);
+        mr.sharedMaterial.name += "_" + quadPosition.ToString() + "(Instance)";
+
+        NoiseParametersSetter nps = go.AddComponent<NoiseParametersSetter>();
+        nps.ComputeShaderToUpdate = HeightShader;
+        nps.MaterialToUpdate = mr.sharedMaterial;
+
+        Quad quadComponent = go.AddComponent<Quad>();
+        quadComponent.Setter = nps;
+        quadComponent.HeightShader = HeightShader;
+        quadComponent.Planetoid = this;
+
+        GenerationConstants gc = GenerationConstants.Init();
+        gc.planetRadius = PlanetRadius;
+
+        quadComponent.Position = quadPosition;
+        quadComponent.LODType = lodType;
+        quadComponent.generationConstants = gc;
+        quadComponent.Planetoid = this;
+
+        mf.sharedMesh = MeshFactory.SetupQuadMesh();
+        mf.sharedMesh.bounds = new Bounds(Vector3.zero, new Vector3(PlanetRadius * 2, PlanetRadius * 2, PlanetRadius * 2));
+
+        quadComponent.Dispatch();
+
+        Quads.Add(quadComponent);
+
+        return quadComponent;
     }
 
     private void Log(string msg)
@@ -114,4 +159,10 @@ public enum QuadPostion
     Right,
     Front,
     Back
+}
+
+public enum QuadLODType
+{
+    Main,
+    Sub
 }
