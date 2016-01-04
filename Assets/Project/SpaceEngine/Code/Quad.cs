@@ -73,6 +73,23 @@ public class Quad : MonoBehaviour
             ToShaderData.Release();
     }
 
+    [ContextMenu("Split")]
+    public void Split()
+    {
+        for (int i = 0; i < 2; i++)
+        {
+            for (int j = 0; j < 2; j++)
+            {
+                int x = i + 1;
+                int y = j + 1;
+
+                float mod = 0.5f;
+
+                Debug.Log(x + "|" + y + "|" + mod);
+            }
+        }
+    }
+
     [ContextMenu("Displatch!")]
     public void Dispatch()
     {
