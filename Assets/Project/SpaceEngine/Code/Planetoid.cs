@@ -3,13 +3,13 @@
 using System.Collections;
 using System.Collections.Generic;
 
-public class PlanetoidTest : MonoBehaviour
+public class Planetoid : MonoBehaviour
 {
     public float PlanetRadius = 1024;
 
     public bool DebugEnabled = false;
 
-    public List<QuadTest> Quads = new List<QuadTest>();
+    public List<Quad> Quads = new List<Quad>();
 
     public Shader ColorShader;
     public ComputeShader HeightShader;
@@ -76,7 +76,7 @@ public class PlanetoidTest : MonoBehaviour
         nps.ComputeShaderToUpdate = HeightShader;
         nps.MaterialToUpdate = mr.sharedMaterial;
 
-        QuadTest quadComponent = go.AddComponent<QuadTest>();
+        Quad quadComponent = go.AddComponent<Quad>();
         quadComponent.Setter = nps;
         quadComponent.HeightShader = HeightShader;
         quadComponent.Planetoid = this;
@@ -119,7 +119,7 @@ public class PlanetoidTest : MonoBehaviour
                 break;
         }
 
-        quadComponent.generationConstants = new GenerationConstants[] { gc };
+        quadComponent.generationConstants = gc;
         quadComponent.Planetoid = this;
 
         mf.sharedMesh = MeshFactory.SetupQuadMesh();

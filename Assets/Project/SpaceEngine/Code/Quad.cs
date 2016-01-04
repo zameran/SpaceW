@@ -1,6 +1,10 @@
 ﻿using UnityEngine;
 
-[System.Serializable]
+using System;
+using System.Collections;
+using System.Collections.Generic;
+
+[Serializable]
 public struct GenerationConstants
 {
     public float scale;
@@ -26,7 +30,7 @@ public struct GenerationConstants
     }
 }
 
-[System.Serializable]
+[Serializable]
 public struct OutputStruct
 {
     public float noise;
@@ -36,20 +40,27 @@ public struct OutputStruct
     public Vector4 pos;
 }
 
-public class QuadTest : MonoBehaviour
+public class Quad : MonoBehaviour
 {
-    public PlanetoidTest Planetoid;
+    public Planetoid Planetoid;
 
     public NoiseParametersSetter Setter;
 
     public ComputeShader HeightShader;
 
+    public ComputeBuffer GenerationConstantsBuffer;
+    public ComputeBuffer PreOutDataBuffer;
+    public ComputeBuffer OutDataBuffer;
     public ComputeBuffer ToShaderData;
 
     public RenderTexture HeightTexture;
     public RenderTexture NormalTexture;
 
-    public GenerationConstants[] generationConstants;
+    public GenerationConstants generationConstants;
+
+    public Quad Parent;
+
+    public List<Quad> Subquads;
 
     void Start()
     {
@@ -76,11 +87,7 @@ public class QuadTest : MonoBehaviour
             Setter.SetUniforms(HeightShader);
         }
 
-        ComputeBuffer GenerationConstantsBuffer;
-        ComputeBuffer PreOutDataBuffer;
-        ComputeBuffer OutDataBuffer;
-
-        GenerationConstants[] generationConstantsData = new GenerationConstants[] { generationConstants[0], generationConstants[0] }; //Here we add 2 equal elements in to the buffer data, and nex we will set buffer size to 1. Bugfix. Idk.
+        GenerationConstants[] generationConstantsData = new GenerationConstants[] { generationConstants, generationConstants }; //Here we add 2 equal elements in to the buffer data, and nex we will set buffer size to 1. Bugfix. Idk.
         OutputStruct[] outputStructData = new OutputStruct[QS.nVerts];
 
         GenerationConstantsBuffer = new ComputeBuffer(1, 72);
@@ -88,23 +95,14 @@ public class QuadTest : MonoBehaviour
         OutDataBuffer = new ComputeBuffer(QS.nVerts, 32);
         ToShaderData = new ComputeBuffer(QS.nVerts, 32);
 
-        HeightTexture = new RenderTexture(128, 128, 24);
-        HeightTexture.enableRandomWrite = true;
-        HeightTexture.Create();
-
-        NormalTexture = new RenderTexture(128, 128, 24);
-        NormalTexture.enableRandomWrite = true;
-        NormalTexture.Create();
+        HeightTexture = RTExtensions.CreateRTexture(QS.nVertsPerEdge, 24);
+        NormalTexture = RTExtensions.CreateRTexture(QS.nVertsPerEdge, 24);
 
         GenerationConstantsBuffer.SetData(generationConstantsData);
         PreOutDataBuffer.SetData(outputStructData);
         OutDataBuffer.SetData(outputStructData);
 
-        HeightShader.SetBuffer(0, "generationConstants", GenerationConstantsBuffer);    
-        HeightShader.SetBuffer(0, "patchPreOutput", PreOutDataBuffer);
-        HeightShader.SetBuffer(0, "patchOutput", OutDataBuffer);
-        HeightShader.SetTexture(0, "Height", HeightTexture);
-        HeightShader.SetTexture(0, "Normal", NormalTexture);
+        SetupComputeShader(0);
 
         Log("Buffers for first kernel ready!");
 
@@ -115,11 +113,7 @@ public class QuadTest : MonoBehaviour
 
         Log("First kernel ready!");
 
-        HeightShader.SetBuffer(1, "generationConstants", GenerationConstantsBuffer);
-        HeightShader.SetBuffer(1, "patchPreOutput", PreOutDataBuffer);
-        HeightShader.SetBuffer(1, "patchOutput", OutDataBuffer);
-        HeightShader.SetTexture(1, "Height", HeightTexture);
-        HeightShader.SetTexture(1, "Normal", NormalTexture);
+        SetupComputeShader(1);
 
         Log("Buffers for second kernel ready!");
 
@@ -140,15 +134,43 @@ public class QuadTest : MonoBehaviour
             Setter.MaterialToUpdate.SetTexture("_NormalTexture", NormalTexture);
         }
 
-        GenerationConstantsBuffer.Release();
-        PreOutDataBuffer.Release();
-        OutDataBuffer.Release();
-
-        GenerationConstantsBuffer.Dispose();
-        PreOutDataBuffer.Dispose();
-        OutDataBuffer.Dispose();
+        ReleaseAndDisposeBuffers(GenerationConstantsBuffer, PreOutDataBuffer, OutDataBuffer);
 
         Log("Dispatched in " + (Time.realtimeSinceStartup - time).ToString() + "ms");
+    }
+
+    private void SetupComputeShader(int kernel)
+    {
+        HeightShader.SetBuffer(kernel, "generationConstants", GenerationConstantsBuffer);
+        HeightShader.SetBuffer(kernel, "patchPreOutput", PreOutDataBuffer);
+        HeightShader.SetBuffer(kernel, "patchOutput", OutDataBuffer);
+        HeightShader.SetTexture(kernel, "Height", HeightTexture);
+        HeightShader.SetTexture(kernel, "Normal", NormalTexture);
+    }
+
+    private void ReleaseBuffers(params ComputeBuffer[] buffers)
+    {
+        for (int i = 0; i < buffers.Length; i++)
+        {
+            buffers[i].Release();
+        }
+    }
+
+    private void DisposeBuffers(params ComputeBuffer[] buffers)
+    {
+        for (int i = 0; i < buffers.Length; i++)
+        {
+            buffers[i].Dispose();
+        }
+    }
+
+    private void ReleaseAndDisposeBuffers(params ComputeBuffer[] buffers)
+    {
+        for (int i = 0; i < buffers.Length; i++)
+        {
+            buffers[i].Release();
+            buffers[i].Dispose();
+        }
     }
 
     private void Log(string msg)

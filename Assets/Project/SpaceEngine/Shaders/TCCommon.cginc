@@ -52,7 +52,6 @@ const float pi = 3.14159265358;
 //-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
-//#define IMPROVED_TEX_PERLIN
 #define USESAVEPOW
 #define USETEXLOD
 #define PACKED_NORMALS
@@ -179,6 +178,11 @@ float3 Rotate(float Angle, float3 Axis, float3 Vector)
 
 	return mul(M, Vector);
 }
+//-----------------------------------------------------------------------------
+
+//-----------------------------------------------------------------------------
+float3 hash3(float2 p) { return frac(sin(float3(dot(p, float2(127.1, 311.7)), dot(p, float2(269.5, 183.3)), dot(p, float2(419.2, 371.9)))) * 43758.5453); }
+float4 hash4(float2 p) { return frac(sin(float4(dot(p, float2(127.1, 311.7)), dot(p, float2(269.5, 183.3)), dot(p, float2(419.2, 371.9)), dot(p, float2(398.1, 176.7)))) * 43758.5453); }
 //-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
@@ -663,9 +667,6 @@ Surface GetSurfaceColor(float height, float slope, float vary)
 //-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
-float3 hash3(float2 p) { return frac(sin(float3(dot(p, float2(127.1, 311.7)), dot(p, float2(269.5, 183.3)), dot(p, float2(419.2, 371.9)))) * 43758.5453); }
-float4 hash4(float2 p) { return frac(sin(float4(dot(p, float2(127.1, 311.7)), dot(p, float2(269.5, 183.3)), dot(p, float2(419.2, 371.9)), dot(p, float2(398.1, 176.7)))) * 43758.5453); }
-
 void FAST32_hash_3D(float3 gridcell, out float4 lowz_hash_0, out float4 lowz_hash_1, out float4 lowz_hash_2, out float4 highz_hash_0, out float4 highz_hash_1, out float4 highz_hash_2)
 {
 	//generates 3 random numbers for each of the 8 cell corners
@@ -706,117 +707,73 @@ float3 Interpolation_C2_Deriv(float3 x) { return x * x * (x * (x * 30.0 - 60.0) 
 //-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
-#ifdef IMPROVED_TEX_PERLIN
-// Improved Perlin noise with derivatives
-// http://www.iquilezles.org/www/articles/morenoise/morenoise.htm
+float3 mod(float3 x, float y) { return x - y * floor(x / y); }
+float2 mod(float2 x, float y) { return x - y * floor(x / y); }
 
-// 3D Perlin noise
-float Noise(float3 p)
+float3 Permutation(float3 x) { return mod((34.0 * x + 1.0) * x, 289.0); }
+//-----------------------------------------------------------------------------
+
+//-----------------------------------------------------------------------------
+float K = 0.142857142857;
+float Ko = 0.428571428571;
+//-----------------------------------------------------------------------------
+
+//-----------------------------------------------------------------------------
+float4 RND_M = float4(1, 1, 1, 1);
+float3 OFFSET = float3(0.5, 0.5, 0.5);
+float3 OFFSETOUT = float3(1.5, 1.5, 1.5);
+//-----------------------------------------------------------------------------
+
+//-----------------------------------------------------------------------------
+float2 iNoise(float3 P, float jitter)
 {
-	const float one = 1.0 / 256.0;
+	float3 Pi = mod(floor(P), 289.0);
+	float3 Pf = frac(P);
+	float3 oi = float3(-1.0, 0.0, 1.0);
+	float3 of = float3(-0.5, 0.5, 1.5);
+	float3 px = Permutation(Pi.x + oi);
+	float3 py = Permutation(Pi.y + oi);
 
-	// Find unit cube that contains point
-	// Find relative x,y,z of point in cube
-	float3 P = fmod(floor(p), 256.0) * one;
-	p -= floor(p);
+	float3 p, ox, oy, oz, dx, dy, dz;
+	float2 F = float2(1e6, 1e6);
 
-	// Compute fade curves for each of x,y,z
-	float3 ff = p * p * p * (p * (p * 6.0 - 15.0) + 10.0);
+	for (int i = 0; i < 3; i++)
+	{
+		for (int j = 0; j < 3; j++)
+		{
+			p = Permutation(px[i] + py[j] + Pi.z + oi); // pij1, pij2, pij3
 
-	// Hash coordinates of the 8 cube corners
-	#ifdef USETEXLOD
-	float4 AA = tex2Dlod(PermSampler, float4(P.xyz, 0));
+			ox = frac(p * K) - Ko;
+			oy = mod(floor(p * K), 7.0) * K - Ko;
 
-	float a = dot(tex1Dlod(PermGradSampler, AA.x).rgb, p);
-	float b = dot(tex1Dlod(PermGradSampler, AA.z).rgb, p + float3(-1, 0, 0));
-	float c = dot(tex1Dlod(PermGradSampler, AA.y).rgb, p + float3(0, -1, 0));
-	float d = dot(tex1Dlod(PermGradSampler, AA.w).rgb, p + float3(-1, -1, 0));
-	float e = dot(tex1Dlod(PermGradSampler, AA.x + one).rgb, p + float3(0, 0, -1));
-	float f = dot(tex1Dlod(PermGradSampler, AA.z + one).rgb, p + float3(-1, 0, -1));
-	float g = dot(tex1Dlod(PermGradSampler, AA.y + one).rgb, p + float3(0, -1, -1));
-	float h = dot(tex1Dlod(PermGradSampler, AA.w + one).rgb, p + float3(-1, -1, -1));
+			p = Permutation(p);
 
-	#else
-	float4 AA = tex2D(PermSampler, P.xy) + P.z;
+			oz = frac(p*K) - Ko;
 
-	float a = dot(tex1D(PermGradSampler, AA.x).rgb, p);
-	float b = dot(tex1D(PermGradSampler, AA.z).rgb, p + float3(-1, 0, 0));
-	float c = dot(tex1D(PermGradSampler, AA.y).rgb, p + float3(0, -1, 0));
-	float d = dot(tex1D(PermGradSampler, AA.w).rgb, p + float3(-1, -1, 0));
-	float e = dot(tex1D(PermGradSampler, AA.x + one).rgb, p + float3(0, 0, -1));
-	float f = dot(tex1D(PermGradSampler, AA.z + one).rgb, p + float3(-1, 0, -1));
-	float g = dot(tex1D(PermGradSampler, AA.y + one).rgb, p + float3(0, -1, -1));
-	float h = dot(tex1D(PermGradSampler, AA.w + one).rgb, p + float3(-1, -1, -1));
-	#endif
+			dx = Pf.x - of[i] + jitter*ox;
+			dy = Pf.y - of[j] + jitter*oy;
+			dz = Pf.z - of + jitter*oz;
 
-	float k0 = a;
-	float k1 = b - a;
-	float k2 = c - a;
-	float k3 = e - a;
-	float k4 = a - b - c + d;
-	float k5 = a - c - e + g;
-	float k6 = a - b - e + f;
-	float k7 = -a + b + c - d + e - f - g + h;
+			float3 d = dx * dx + dy * dy + dz * dz; // dij1, dij2 and dij3, squared
 
-	return k0 + k1*ff.x + k2*ff.y + k3*ff.z + k4*ff.x*ff.y + k5*ff.y*ff.z + k6*ff.z*ff.x + k7*ff.x*ff.y*ff.z;
+													//Find lowest and second lowest distances
+			for (int n = 0; n < 3; n++)
+			{
+				if (d[n] < F[0])
+				{
+					F[1] = F[0];
+					F[0] = d[n];
+				}
+				else if (d[n] < F[1])
+				{
+					F[1] = d[n];
+				}
+			}
+		}
+	}
+
+	return F;
 }
-
-// 3D Perlin noise with derivatives, returns vec4(xderiv, yderiv, zderiv, noise)
-float4 NoiseDeriv(float3 p)
-{
-	const float one = 1.0 / 256;
-
-	// Find unit cube that contains point
-	// Find relative x,y,z of point in cube
-	float3 P = fmod(floor(p), 256.0) * one;
-	p -= floor(p);
-
-	// Compute fade curves for each of x,y,z
-	float3 df = 30.0 * p * p * (p * (p - 2.0) + 1.0);
-	float3 ff = p * p * p * (p * (p * 6.0 - 15.0) + 10.0);
-
-	// Hash coordinates of the 8 cube corners
-	#ifdef USETEXLOD
-	float4 AA = tex2Dlod(PermSampler, float4(P.xyz, 0));
-
-	float a = dot(tex1Dlod(PermGradSampler, AA.x).rgb, p);
-	float b = dot(tex1Dlod(PermGradSampler, AA.z).rgb, p + float3(-1, 0, 0));
-	float c = dot(tex1Dlod(PermGradSampler, AA.y).rgb, p + float3(0, -1, 0));
-	float d = dot(tex1Dlod(PermGradSampler, AA.w).rgb, p + float3(-1, -1, 0));
-	float e = dot(tex1Dlod(PermGradSampler, AA.x + one).rgb, p + float3(0, 0, -1));
-	float f = dot(tex1Dlod(PermGradSampler, AA.z + one).rgb, p + float3(-1, 0, -1));
-	float g = dot(tex1Dlod(PermGradSampler, AA.y + one).rgb, p + float3(0, -1, -1));
-	float h = dot(tex1Dlod(PermGradSampler, AA.w + one).rgb, p + float3(-1, -1, -1));
-
-	#else
-	float4 AA = tex2D(PermSampler, P.xy) + P.z;
-
-	float a = dot(tex1D(PermGradSampler, AA.x).rgb, p);
-	float b = dot(tex1D(PermGradSampler, AA.z).rgb, p + float3(-1, 0, 0));
-	float c = dot(tex1D(PermGradSampler, AA.y).rgb, p + float3(0, -1, 0));
-	float d = dot(tex1D(PermGradSampler, AA.w).rgb, p + float3(-1, -1, 0));
-	float e = dot(tex1D(PermGradSampler, AA.x + one).rgb, p + float3(0, 0, -1));
-	float f = dot(tex1D(PermGradSampler, AA.z + one).rgb, p + float3(-1, 0, -1));
-	float g = dot(tex1D(PermGradSampler, AA.y + one).rgb, p + float3(0, -1, -1));
-	float h = dot(tex1D(PermGradSampler, AA.w + one).rgb, p + float3(-1, -1, -1));
-	#endif
-
-	float k0 = a;
-	float k1 = b - a;
-	float k2 = c - a;
-	float k3 = e - a;
-	float k4 = a - b - c + d;
-	float k5 = a - c - e + g;
-	float k6 = a - b - e + f;
-	float k7 = -a + b + c - d + e - f - g + h;
-
-	return float4(df.x * (k1 + k4*ff.y + k6*ff.z + k7*ff.y*ff.z),
-		df.y * (k2 + k5*ff.z + k4*ff.x + k7*ff.z*ff.x),
-		df.z * (k3 + k6*ff.x + k5*ff.y + k7*ff.x*ff.y),
-		k0 + k1*ff.x + k2*ff.y + k3*ff.z + k4*ff.x*ff.y + k5*ff.y*ff.z + k6*ff.z*ff.x + k7*ff.x*ff.y*ff.z);
-}
-
-#else
 
 float Noise(float3 p)
 {
@@ -833,6 +790,7 @@ float Noise(float3 p)
 	float4 grad_x1 = hashx1 - 0.49999;
 	float4 grad_y1 = hashy1 - 0.49999;
 	float4 grad_z1 = hashz1 - 0.49999;
+
 	float4 grad_results_0 = 1 / sqrt(grad_x0 * grad_x0 + grad_y0 * grad_y0 + grad_z0 * grad_z0) * (float2(Pf.x, Pf_min1.x).xyxy * grad_x0 + float2(Pf.y, Pf_min1.y).xxyy * grad_y0 + Pf.zzzz * grad_z0);
 	float4 grad_results_1 = 1 / sqrt(grad_x1 * grad_x1 + grad_y1 * grad_y1 + grad_z1 * grad_z1) * (float2(Pf.x, Pf_min1.x).xyxy * grad_x1 + float2(Pf.y, Pf_min1.y).xxyy * grad_y1 + Pf_min1.zzzz * grad_z1);
 
@@ -840,7 +798,7 @@ float Noise(float3 p)
 	float4 blend2 = float4(blend.xy, float2(1.0 - blend.xy));
 	float4 res0 = lerp(grad_results_0, grad_results_1, blend.z);
 	float final = dot(res0, blend2.zxzx * blend2.wwyy);
-	final *= 1.1547005383792515290182975610039;
+	final *= 1.1547005383792515290182975610039; //Normalization.
 	return final;
 }
 
@@ -924,7 +882,6 @@ float4 NoiseDeriv(float3 p)
 	//normalize and return
 	return result *= 1.1547005383792515290182975610039;
 }
-#endif
 //-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
@@ -1223,86 +1180,6 @@ float JordanTurbulence
 //-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
-#define NOISE_TEX_3D_SIZE 1 //Leave it one, if NoiseRandomUVec3 used in Cell noise.
-
-#define IMPROVEDVORONOI
-
-float4 RND_M = float4(1, 1, 1, 1);
-
-float3 OFFSET = float3(0.5, 0.5, 0.5);
-float3 OFFSETOUT = float3(1.5, 1.5, 1.5);
-//-----------------------------------------------------------------------------
-
-//-----------------------------------------------------------------------------
-float3 mod(float3 x, float y) { return x - y * floor(x / y); }
-float2 mod(float2 x, float y) { return x - y * floor(x / y); }
-//-----------------------------------------------------------------------------
-
-//-----------------------------------------------------------------------------
-float3 Permutation(float3 x)
-{
-	return mod((34.0 * x + 1.0) * x, 289.0);
-}
-//-----------------------------------------------------------------------------
-
-//-----------------------------------------------------------------------------
-#ifdef IMPROVEDVORONOI
-
-#define K 0.142857142857
-#define Ko 0.428571428571
-//-----------------------------------------------------------------------------
-
-//-----------------------------------------------------------------------------
-float2 inoise(float3 P, float jitter)
-{
-	float3 Pi = mod(floor(P), 289.0);
-	float3 Pf = frac(P);
-	float3 oi = float3(-1.0, 0.0, 1.0);
-	float3 of = float3(-0.5, 0.5, 1.5);
-	float3 px = Permutation(Pi.x + oi);
-	float3 py = Permutation(Pi.y + oi);
-
-	float3 p, ox, oy, oz, dx, dy, dz;
-	float2 F = 1e6;
-
-	for (int i = 0; i < 3; i++)
-	{
-		for (int j = 0; j < 3; j++)
-		{
-			p = Permutation(px[i] + py[j] + Pi.z + oi); // pij1, pij2, pij3
-
-			ox = frac(p*K) - Ko;
-			oy = mod(floor(p*K), 7.0)*K - Ko;
-
-			p = Permutation(p);
-
-			oz = frac(p*K) - Ko;
-
-			dx = Pf.x - of[i] + jitter*ox;
-			dy = Pf.y - of[j] + jitter*oy;
-			dz = Pf.z - of + jitter*oz;
-
-			float3 d = dx * dx + dy * dy + dz * dz; // dij1, dij2 and dij3, squared
-
-													//Find lowest and second lowest distances
-			for (int n = 0; n < 3; n++)
-			{
-				if (d[n] < F[0])
-				{
-					F[1] = F[0];
-					F[0] = d[n];
-				}
-				else if (d[n] < F[1])
-				{
-					F[1] = d[n];
-				}
-			}
-		}
-	}
-
-	return F;
-}
-
 float Cell3NoiseF0(float3 p, int octaves, float lacunarity)
 {
 	float freq = 1, amp = 0.5;
@@ -1310,7 +1187,7 @@ float Cell3NoiseF0(float3 p, int octaves, float lacunarity)
 	float gain = SavePow(lacunarity, -noiseH);
 	for (int i = 0; i < octaves; i++)
 	{
-		float2 F = inoise(p * freq, 1) * amp;
+		float2 F = iNoise(p * freq, 1) * amp;
 
 		sum += 0.1 + sqrt(F[0]);
 
@@ -1328,7 +1205,7 @@ float4 Cell3NoiseF0Vec(float3 p, int octaves, float lacunarity)
 	float gain = SavePow(lacunarity, -noiseH);
 	for (int i = 0; i < octaves; i++)
 	{
-		float2 F = inoise(p * freq, 1) * amp;
+		float2 F = iNoise(p * freq, 1) * amp;
 
 		sum += 0.1 + sqrt(F[0]);
 
@@ -1348,7 +1225,7 @@ float Cell3NoiseF1F0(float3 p, int octaves, float lacunarity)
 	float gain = SavePow(lacunarity, -noiseH);
 	for (int i = 0; i < octaves; i++)
 	{
-		float2 F = inoise(p * freq, 1) * amp;
+		float2 F = iNoise(p * freq, 1) * amp;
 
 		sum += 0.1 + sqrt(F[1]) - sqrt(F[0]);
 
@@ -1357,7 +1234,6 @@ float Cell3NoiseF1F0(float3 p, int octaves, float lacunarity)
 	}
 	return sum / 2;
 }
-#endif
 //-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
@@ -1377,21 +1253,6 @@ float3 NoiseRandomUVec3(float3 c)
 
 	return r - 0.5;
 }
-
-float NoiseNearestU(float3 ppoint)
-{
-	return tex2Dlod(NoiseSampler, float4(ppoint, 0)).a;
-}
-
-float3 NoiseNearestUVec3(float3 ppoint)
-{
-	return tex2Dlod(NoiseSampler, float4(ppoint, 0)).rgb;
-}
-
-float4 NoiseNearestUVec4(float3 ppoint)
-{
-	return float4(NoiseNearestUVec3(ppoint), 0);
-}
 //-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
@@ -1410,9 +1271,8 @@ float Cell2Noise(float3 p)
 		{
 			for (d.x = -1.0; d.x<=1.0; d.x += 1.0)
 			{
-				rnd = NoiseRandomUVec3((cell + d) / NOISE_TEX_3D_SIZE).xyz + d;
-				//rnd = NoiseNearestUVec4((cell + d) / NOISE_TEX_3D_SIZE).xyz;
-				//rnd = CellularWeightSamples3(rnd) * 0.166666666 + d;
+				rnd = NoiseRandomUVec3((cell + d)).xyz + d;
+
 				pos = rnd - offs;
 				dist = dot(pos, pos);
 				distMin = min(distMin, dist);
@@ -1438,7 +1298,7 @@ float2 Cell2Noise2(float3 p)
 		{
 			for (d.x = -1.0; d.x<=1.0; d.x += 1.0)
 			{
-				rnd = NoiseRandomUVec3((cell + d) / NOISE_TEX_3D_SIZE).xyz + d;
+				rnd = NoiseRandomUVec3((cell + d)).xyz + d;
 				pos = rnd - offs;
 				dist = dot(pos, pos);
 				if (dist < distMin1)
@@ -1470,7 +1330,7 @@ float4 Cell2NoiseVec(float3 p)
 		{
 			for (d.x = -1.0; d.x<=1.0; d.x += 1.0)
 			{
-				rnd = NoiseRandomUVec3((cell + d) / NOISE_TEX_3D_SIZE).xyz + d;
+				rnd = NoiseRandomUVec3((cell + d)).xyz + d;
 				pos = rnd - offs;
 				dist = dot(pos, pos);
 				if (distMin > dist)
@@ -1501,7 +1361,7 @@ float Cell2NoiseColor(float3 p, out float4 color)
 		{
 			for (d.x = -1.0; d.x<=1.0; d.x += 1.0)
 			{
-				rnd = float4(NoiseRandomUVec3((cell + d) / NOISE_TEX_3D_SIZE), 0);
+				rnd = float4(NoiseRandomUVec3((cell + d)), 0);
 				pos = rnd.xyz + d - offs;
 				dist = dot(pos, pos);
 				if (distMin > dist)
@@ -1533,7 +1393,7 @@ float4 Cell2NoiseSphere(float3 p, float Radius)
 		{
 			for (d.x = -1.0; d.x<=1.0; d.x += 1.0)
 			{
-				rnd = NoiseRandomUVec3((cell + d) / NOISE_TEX_3D_SIZE).xyz + d;
+				rnd = NoiseRandomUVec3((cell + d)).xyz + d;
 				pos = rnd - offs;
 				dist = dot(pos, pos);
 				if (distMin > dist)
@@ -1565,7 +1425,7 @@ void Cell2Noise2Sphere(float3 p, float Radius, out float4 point1, out float4 poi
 		{
 			for (d.x = -1.0; d.x<=1.0; d.x += 1.0)
 			{
-				rnd = NoiseRandomUVec3((cell + d) / NOISE_TEX_3D_SIZE).xyz + d;
+				rnd = NoiseRandomUVec3((cell + d)).xyz + d;
 				pos = rnd - offs;
 				dist = dot(pos, pos);
 				if (dist < distMin1)
@@ -1606,7 +1466,7 @@ float4 Cell2NoiseVecSphere(float3 p, float Radius)
 		{
 			for (d.x = -1.0; d.x<=1.0; d.x += 1.0)
 			{
-				rnd = NoiseRandomUVec3((cell + d) / NOISE_TEX_3D_SIZE).xyz + d;
+				rnd = NoiseRandomUVec3((cell + d)).xyz + d;
 				pos = rnd - offs;
 				dist = dot(pos, pos);
 				if (distMin > dist)
@@ -1636,7 +1496,7 @@ float Cell3Noise(float3 p)
 		{
 			for (d.x = -1.0; d.x<=2.0; d.x += 1.0)
 			{
-				rnd = NoiseRandomUVec3((cell + d) / NOISE_TEX_3D_SIZE).xyz + d;
+				rnd = NoiseRandomUVec3((cell + d)).xyz + d;
 				pos = rnd - offs;
 				dist = dot(pos, pos);
 				distMin = min(distMin, dist);
@@ -1661,7 +1521,7 @@ float Cell3NoiseSmooth(float3 p, float falloff)
 		{
 			for (d.x = -1.0; d.x<=2.0; d.x += 1.0)
 			{
-				rnd = float4(NoiseRandomUVec3((cell + d) / NOISE_TEX_3D_SIZE), 0);
+				rnd = float4(NoiseRandomUVec3((cell + d)), 0);
 				pos = rnd.xyz + d - offs;
 				dist = dot(pos, pos);
 				res += SavePow(dist, -falloff);
@@ -1687,7 +1547,7 @@ float2 Cell3Noise2(float3 p)
 		{
 			for (d.x = -1.0; d.x<=2.0; d.x += 1.0)
 			{
-				rnd = NoiseRandomUVec3((cell + d) / NOISE_TEX_3D_SIZE).xyz + d;
+				rnd = NoiseRandomUVec3((cell + d)).xyz + d;
 				pos = rnd - offs;
 				dist = dot(pos, pos);
 				if (dist < distMin1)
@@ -1719,7 +1579,7 @@ float4 Cell3NoiseVec(float3 p)
 		{
 			for (d.x = -1.0; d.x<=2.0; d.x += 1.0)
 			{
-				rnd = NoiseRandomUVec3((cell + d) / NOISE_TEX_3D_SIZE).xyz + d;
+				rnd = NoiseRandomUVec3((cell + d)).xyz + d;
 				pos = rnd - offs;
 				dist = dot(pos, pos);
 				if (distMin > dist)
@@ -1750,7 +1610,7 @@ float Cell3NoiseColor(float3 p, out float4 color)
 		{
 			for (d.x = -1.0; d.x<=2.0; d.x += 1.0)
 			{
-				rnd = float4(NoiseRandomUVec3((cell + d) / NOISE_TEX_3D_SIZE), 0);
+				rnd = float4(NoiseRandomUVec3((cell + d)), 0);
 				pos = rnd.xyz + d - offs;
 				dist = dot(pos, pos);
 				if (dist < distMin)
@@ -1782,7 +1642,7 @@ float2 Cell3Noise2Color(float3 p, out float4 color)
 		{
 			for (d.x = -1.0; d.x<=2.0; d.x += 1.0)
 			{
-				rnd = float4(NoiseRandomUVec3((cell + d) / NOISE_TEX_3D_SIZE), 0);
+				rnd = float4(NoiseRandomUVec3((cell + d)), 0);
 				pos = rnd.xyz + d - offs;
 				dist = dot(pos, pos);
 				if (dist < distMin1)
@@ -1817,7 +1677,7 @@ float Cell3NoiseSmoothColor(float3 p, float falloff, out float4 color)
 		{
 			for (d.x = -1.0; d.x<=2.0; d.x += 1.0)
 			{
-				rnd = float4(NoiseRandomUVec3((cell + d) / NOISE_TEX_3D_SIZE), 0);
+				rnd = float4(NoiseRandomUVec3((cell + d)), 0);
 				pos = rnd.xyz + d - offs;
 				dist = dot(pos, pos);
 				if (dist < distMin)
