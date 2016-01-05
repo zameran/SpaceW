@@ -3,9 +3,11 @@
 [Serializable]
 public static class QS
 {
-    public static int nRealVertsCount { get { return 128; } }
+    public static int nRealVertsPerEdge { get { return 130; } }
     public static int nVertsPerEdge { get { return 128; } }
+    public static int nRealVerts { get { return nRealVertsPerEdge * nRealVertsPerEdge; } }
     public static int nVerts { get { return nVertsPerEdge * nVertsPerEdge; } }
+    public static float nRealSpacing { get { return 2.0f / (nRealVertsPerEdge - 1.0f); } }
     public static float nSpacing { get { return 2.0f / (nVertsPerEdge - 1.0f); } }
     public static int THREADS_PER_GROUP_X { get { return 32; } }
     public static int THREADS_PER_GROUP_Y { get { return 32; } }

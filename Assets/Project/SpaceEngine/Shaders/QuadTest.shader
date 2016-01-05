@@ -2,8 +2,6 @@
 {
 	Properties
 	{
-		_Color("Color", Color) = (1,1,1,1)	
-		_MainTex("Albedo (RGB)", 2D) = "white" {}
 		_HeightTexture("Height (RGBA)", 2D) = "white" {}
 		_NormalTexture("Normal (RGB)", 2D) = "white" {}
 		_Glossiness("Smoothness", Range(0,1)) = 0.5
@@ -15,10 +13,8 @@
 		LOD 200
 
 		CGPROGRAM
-		#define nVerticesPerSide 128
-		//#define SHOW_GRIDLINES
-
 		#include "UnityCG.cginc"
+		#include "TCCommon.cginc"
 
 		#pragma surface surf Standard fullforwardshadows
 		#pragma vertex vert
@@ -31,6 +27,7 @@
 
 			float3 patchCenter;
 
+			float4 vcolor;
 			float4 pos;
 		};
 
@@ -44,12 +41,9 @@
 			float4 texcoord2 : TEXCOORD2;
 			float4 texcoord3 : TEXCOORD3;
 
-			fixed4 color : COLOR;
-
 			uint id: SV_VertexID;
 		};
 
-		sampler2D _MainTex;
 		sampler2D _HeightTexture;
 		sampler2D _NormalTexture;
 
@@ -60,48 +54,40 @@
 		struct Input 
 		{
 			float noise;
+			
+			float2 uv;
 
-			float2 uv_MainTex;
+			float4 color;
 		};
 
 		void vert(inout appdata_full_compute v, out Input o) 
 		{
 			float noise = data[v.id].noise;
 			float3 patchCenter = data[v.id].patchCenter;
+			float4 vcolor = data[v.id].vcolor;
 			float4 position = data[v.id].pos;
 
 			position.w = 1.0;
 			position.xyz += patchCenter;
+
 			v.vertex = position;
 
-			o.noise = noise;
-			o.uv_MainTex = v.texcoord.xy;
+			o.noise = noise + 0.5;
+			o.uv = v.texcoord.xy;
+			o.color = vcolor;
 		}
 
 		half _Glossiness;
 		half _Metallic;
-		fixed4 _Color;
 
 		void surf(Input IN, inout SurfaceOutputStandard o)
 		{
-			#ifdef SHOW_GRIDLINES
-				float2 fract = fmod(IN.uv_MainTex * (nVerticesPerSide - 1), float2(1, 1));
-				fixed4 gridLine = any(step(float2(0.9, 0.9), fract));
-			#else
-				fixed4 gridLine = 0;
-			#endif
+			fixed4 terrainColor = lerp(fixed4(IN.noise, IN.noise, IN.noise, 1.0), IN.color, 0);
 
-			fixed4 terrainColor = tex2D(_MainTex, IN.uv_MainTex) * _Color;
-
-			terrainColor += fixed4(IN.noise, IN.noise, IN.noise, 1.0);
-
-			fixed4 c = terrainColor + gridLine;
-
-			o.Albedo = clamp(c.rgb, fixed3(0, 0, 0), fixed3(1, 1 ,1));
-			o.Normal = UnpackNormal(tex2D(_NormalTexture, IN.uv_MainTex));
+			o.Albedo = terrainColor.rgb;
 			o.Metallic = _Metallic;
 			o.Smoothness = _Glossiness;
 		}
-	ENDCG
+		ENDCG
 	}
 }

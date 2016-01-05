@@ -382,6 +382,22 @@ float GetSurfaceHeight()
 	return GetSurfaceHeight(TexCoord);
 }
 
+void GetSurfaceHeightAndSlope(inout float height, inout float slope, float2 texcoord, sampler2D normalMap)
+{
+	float2 texCoord = texcoord.xy * scaleParams.z + scaleParams.xy;
+
+	#ifdef USETEXLOD
+	float4 bumpData = tex2Dlod(normalMap, float4(texCoord, 0, 0));
+	#else
+	float4 bumpData = tex2D(normalMap, texCoord);
+	#endif
+
+	float3 norm = 2.0 * bumpData.xyz - 1.0;
+
+	slope = clamp(1.0 - pow(norm.z, 6.0), 0.0, 1.0);
+	height = bumpData.a;
+}
+
 void GetSurfaceHeightAndSlope(inout float height, inout float slope, float2 texcoord)
 {
 	float2 texCoord = texcoord.xy * scaleParams.z + scaleParams.xy;
@@ -402,6 +418,7 @@ void GetSurfaceHeightAndSlope(inout float height, inout float slope)
 {
 	GetSurfaceHeightAndSlope(height, slope, TexCoord);
 }
+
 #else
 
 float GetSurfaceHeight(float2 texcoord)
@@ -420,6 +437,23 @@ float GetSurfaceHeight(float2 texcoord)
 float GetSurfaceHeight()
 {
 	return GetSurfaceHeight(TexCoord);
+}
+
+void GetSurfaceHeightAndSlope(inout float height, inout float slope, float2 texcoord, sampler2D normalMap)
+{
+	float2 texCoord = texcoord.xy * scaleParams.z + scaleParams.xy;
+
+	#ifdef USETEXLOD
+	float4 bumpData = tex2Dlod(normalMap, float4(texCoord, 0, 0));
+	#else
+	float4 bumpData = tex2D(normalMap, texCoord);
+	#endif
+
+	float2 norm = 2.0 * bumpData.xy - 1.0;
+
+	slope = 1.0 - dot(norm.xy, norm.xy);
+	slope = clamp(1.0 - pow(slope, 3.0), 0.0, 1.0);
+	height = dot(bumpData.zw, float2(0.00390625, 1.0));
 }
 
 void GetSurfaceHeightAndSlope(inout float height, inout float slope, float2 texcoord)

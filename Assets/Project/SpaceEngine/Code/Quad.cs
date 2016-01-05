@@ -33,6 +33,7 @@ public struct OutputStruct
 
     public Vector3 patchCenter;
 
+    public Vector4 vcolor;
     public Vector4 pos;
 }
 
@@ -89,9 +90,9 @@ public class Quad : MonoBehaviour
         OutputStruct[] outputStructData = new OutputStruct[QS.nVerts];
 
         QuadGenerationConstantsBuffer = new ComputeBuffer(1, 64);
-        PreOutDataBuffer = new ComputeBuffer(QS.nVerts, 32);
-        OutDataBuffer = new ComputeBuffer(QS.nVerts, 32);
-        ToShaderData = new ComputeBuffer(QS.nVerts, 32);
+        PreOutDataBuffer = new ComputeBuffer(QS.nVerts, 48);
+        OutDataBuffer = new ComputeBuffer(QS.nVerts, 48);
+        ToShaderData = new ComputeBuffer(QS.nVerts, 48);
 
         HeightTexture = RTExtensions.CreateRTexture(QS.nVertsPerEdge, 24);
         NormalTexture = RTExtensions.CreateRTexture(QS.nVertsPerEdge, 24);

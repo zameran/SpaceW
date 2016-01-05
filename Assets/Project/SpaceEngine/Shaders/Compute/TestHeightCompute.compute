@@ -2,7 +2,7 @@
 #define threadsPerGroup_Y 32
 #define nVerticesPerSide 128
 
-#include "Assets/Project/SpaceEngine/Shaders/TCCommonAsteroid.cginc"
+#include "Assets/Project/SpaceEngine/Shaders/TCCommonTerra.cginc"
 
 struct QuadGenerationConstants
 {
@@ -21,6 +21,7 @@ struct OutputStruct
 
 	float3 patchCenter;
 
+	float4 vcolor;
     float4 pos;
 };
 
@@ -50,8 +51,10 @@ void CSMain (uint3 id : SV_DispatchThreadID)
 	float3 patchCoord =  constants.planetRadius * patchNormalizedCoord;
 	float3 patchCoordCentered = patchCoord - patchCenter;
 	
-	float noise = HeightMapAsteroid(0.001 * patchCoord, 0.5, 0.75, 0.45, 0.25, 0.35);
-	//float noise = Fbm(0.002 * patchCoord);
+	//float noise = HeightMapAsteroid(0.001 * patchCoord, 0.5, 0.75, 0.45, 0.15, 0.15);
+	float noise = HeightMapTerra(0.002 * patchCoord);
+
+	float4 color = ColorMapTerra(0.002 * patchCoord);
 
     float height = ((noise * 2) - 1) * constants.terrainMaxHeight;
 
@@ -61,6 +64,7 @@ void CSMain (uint3 id : SV_DispatchThreadID)
 	
 	patchPreOutput[outBuffOffset].noise = ((noise * 2) - 1);
 	patchPreOutput[outBuffOffset].patchCenter = patchCenter;
+	patchPreOutput[outBuffOffset].vcolor = color;
     patchPreOutput[outBuffOffset].pos = output;
 }
 
