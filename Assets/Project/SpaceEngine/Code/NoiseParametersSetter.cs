@@ -18,6 +18,8 @@ public class NoiseParametersSetter : MonoBehaviour
     public float Offset = 0.8f;
     public float RidgeSmooth = 0.0001f;
 
+    public bool SetDefaultParameters = false;
+
     public ImprovedPerlinNoise Perlin = null;
 
     void Start()
@@ -85,11 +87,14 @@ public class NoiseParametersSetter : MonoBehaviour
         if (mat == null)
             return;
 
-        mat.SetFloat("noiseOctaves", Octaves);
-        mat.SetFloat("noiseLacunarity", Lacunarity);
-        mat.SetFloat("noiseH", H);
-        mat.SetFloat("noiseOffset", Offset);
-        mat.SetFloat("noiseRidgeSmooth", RidgeSmooth);
+        if (SetDefaultParameters)
+        {
+            mat.SetFloat("noiseOctaves", Octaves);
+            mat.SetFloat("noiseLacunarity", Lacunarity);
+            mat.SetFloat("noiseH", H);
+            mat.SetFloat("noiseOffset", Offset);
+            mat.SetFloat("noiseRidgeSmooth", RidgeSmooth);
+        }
 
         mat.SetTexture("NoiseSampler", Noise);
         mat.SetTexture("PermGradSampler", GradientTable);
@@ -102,11 +107,14 @@ public class NoiseParametersSetter : MonoBehaviour
         if (shader == null)
             return;
 
-        shader.SetFloat("noiseOctaves", Octaves);
-        shader.SetFloat("noiseLacunarity", Lacunarity);
-        shader.SetFloat("noiseH", H);
-        shader.SetFloat("noiseOffset", Offset);
-        shader.SetFloat("noiseRidgeSmooth", RidgeSmooth);
+        if (SetDefaultParameters)
+        {
+            shader.SetFloat("noiseOctaves", Octaves);
+            shader.SetFloat("noiseLacunarity", Lacunarity);
+            shader.SetFloat("noiseH", H);
+            shader.SetFloat("noiseOffset", Offset);
+            shader.SetFloat("noiseRidgeSmooth", RidgeSmooth);
+        }
 
         shader.SetTexture(0, "NoiseSampler", Noise);
         shader.SetTexture(0, "PermGradSampler", GradientTable);
@@ -119,11 +127,14 @@ public class NoiseParametersSetter : MonoBehaviour
         if (shader == null)
             return;
 
-        shader.SetFloat("noiseOctaves", Octaves);
-        shader.SetFloat("noiseLacunarity", Lacunarity);
-        shader.SetFloat("noiseH", H);
-        shader.SetFloat("noiseOffset", Offset);
-        shader.SetFloat("noiseRidgeSmooth", RidgeSmooth);
+        if (SetDefaultParameters)
+        {
+            shader.SetFloat("noiseOctaves", Octaves);
+            shader.SetFloat("noiseLacunarity", Lacunarity);
+            shader.SetFloat("noiseH", H);
+            shader.SetFloat("noiseOffset", Offset);
+            shader.SetFloat("noiseRidgeSmooth", RidgeSmooth);
+        }
 
         shader.SetTexture(kernel, "NoiseSampler", Noise);
         shader.SetTexture(kernel, "PermGradSampler", GradientTable);

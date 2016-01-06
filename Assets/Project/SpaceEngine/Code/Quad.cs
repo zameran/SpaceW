@@ -41,6 +41,7 @@ public struct OutputStruct
 public class Quad : MonoBehaviour
 {
     public QuadPostion Position;
+    public QuadID ID;
 
     public Planetoid Planetoid;
 
@@ -98,6 +99,7 @@ public class Quad : MonoBehaviour
                 Quad quad = Planetoid.SetupSubQuad(Position);
                 quad.Parent = this;
                 quad.LODLevel = quad.Parent.LODLevel + 1;
+                quad.ID = (QuadID)id;
 
                 if (quad.LODLevel == 1)
                     quad.OneLODParent = quad.Parent;
@@ -356,33 +358,449 @@ public class Quad : MonoBehaviour
         return temp;
     }
 
-    public Vector3 Reposition(Vector3 vector, int LODLevel)
+    public Vector3 Reposition(QuadPostion quadPosition, Vector3 vector, int LODLevel)
     {
+        #region LODLVL_1
         if (LODLevel == 1)
-            vector = vector - this.Parent.quadGenerationConstants.cubeFaceEastDirection
-                            - this.Parent.quadGenerationConstants.cubeFaceNorthDirection;
-
-        if (LODLevel == 2)
-            vector = vector - this.OneLODParent.quadGenerationConstants.cubeFaceEastDirection
-                            - this.OneLODParent.quadGenerationConstants.cubeFaceNorthDirection;
-
-        if (LODLevel == 3)
         {
-            vector = vector - this.OneLODParent.quadGenerationConstants.cubeFaceEastDirection
-                            - this.OneLODParent.quadGenerationConstants.cubeFaceNorthDirection;
+            if (quadPosition == QuadPostion.Top)
+            {
+                #region TOP
+                if (this.Parent.ID == QuadID.One)
+                {
+                    if (this.ID == QuadID.One)
+                        vector = vector - this.quadGenerationConstants.cubeFaceEastDirection
+                                        - this.quadGenerationConstants.cubeFaceNorthDirection;
+                    else if (this.ID == QuadID.Two)
+                        vector = vector - this.quadGenerationConstants.cubeFaceEastDirection
+                                        - this.quadGenerationConstants.cubeFaceNorthDirection * 3;
+                    else if (this.ID == QuadID.Three)
+                        vector = vector - this.quadGenerationConstants.cubeFaceEastDirection * 3
+                                        - this.quadGenerationConstants.cubeFaceNorthDirection;
+                    else if (this.ID == QuadID.Four)
+                        vector = vector - this.quadGenerationConstants.cubeFaceEastDirection * 3
+                                        - this.quadGenerationConstants.cubeFaceNorthDirection * 3;
+                }
+                else if (this.Parent.ID == QuadID.Two)
+                {
+                    if (this.ID == QuadID.One)
+                        vector = vector - this.quadGenerationConstants.cubeFaceEastDirection
+                                        - this.quadGenerationConstants.cubeFaceNorthDirection * 3;
+                    else if (this.ID == QuadID.Two)
+                        vector = vector - this.quadGenerationConstants.cubeFaceEastDirection
+                                        - this.quadGenerationConstants.cubeFaceNorthDirection;
+                    else if (this.ID == QuadID.Three)
+                        vector = vector - this.quadGenerationConstants.cubeFaceEastDirection * 3
+                                        - this.quadGenerationConstants.cubeFaceNorthDirection * 3;
+                    else if (this.ID == QuadID.Four)
+                        vector = vector - this.quadGenerationConstants.cubeFaceEastDirection * 3
+                                        - this.quadGenerationConstants.cubeFaceNorthDirection;
 
-            vector = vector - this.Parent.quadGenerationConstants.cubeFaceEastDirection
-                            - this.Parent.quadGenerationConstants.cubeFaceNorthDirection;
+                    vector.x = -vector.x;
+                }
+                else if (this.Parent.ID == QuadID.Three)
+                {
+                    if (this.ID == QuadID.One)
+                        vector = vector - this.quadGenerationConstants.cubeFaceEastDirection * 3
+                                        - this.quadGenerationConstants.cubeFaceNorthDirection;
+                    else if (this.ID == QuadID.Two)
+                        vector = vector - this.quadGenerationConstants.cubeFaceEastDirection * 3
+                                        - this.quadGenerationConstants.cubeFaceNorthDirection * 3;
+                    else if (this.ID == QuadID.Three)
+                        vector = vector - this.quadGenerationConstants.cubeFaceEastDirection
+                                        - this.quadGenerationConstants.cubeFaceNorthDirection;
+                    else if (this.ID == QuadID.Four)
+                        vector = vector - this.quadGenerationConstants.cubeFaceEastDirection
+                                        - this.quadGenerationConstants.cubeFaceNorthDirection * 3;
+
+                    vector.z = -vector.z;
+                }
+                else if (this.Parent.ID == QuadID.Four)
+                {
+                    if (this.ID == QuadID.One)
+                        vector = vector - this.quadGenerationConstants.cubeFaceEastDirection * 3
+                                        - this.quadGenerationConstants.cubeFaceNorthDirection * 3;
+                    else if (this.ID == QuadID.Two)
+                        vector = vector - this.quadGenerationConstants.cubeFaceEastDirection * 3
+                                        - this.quadGenerationConstants.cubeFaceNorthDirection;
+                    else if (this.ID == QuadID.Three)
+                        vector = vector - this.quadGenerationConstants.cubeFaceEastDirection
+                                        - this.quadGenerationConstants.cubeFaceNorthDirection * 3;
+                    else if (this.ID == QuadID.Four)
+                        vector = vector - this.quadGenerationConstants.cubeFaceEastDirection
+                                        - this.quadGenerationConstants.cubeFaceNorthDirection;
+
+                    vector.x = -vector.x;
+                    vector.z = -vector.z;
+                }
+                #endregion
+            }
+            else if (quadPosition == QuadPostion.Bottom)
+            {
+                #region BOTTOM
+                if (this.Parent.ID == QuadID.One)
+                {
+                    if (this.ID == QuadID.One)
+                        vector = vector - this.quadGenerationConstants.cubeFaceEastDirection
+                                        - this.quadGenerationConstants.cubeFaceNorthDirection;
+                    else if (this.ID == QuadID.Two)
+                        vector = vector - this.quadGenerationConstants.cubeFaceEastDirection
+                                        - this.quadGenerationConstants.cubeFaceNorthDirection * 3;
+                    else if (this.ID == QuadID.Three)
+                        vector = vector - this.quadGenerationConstants.cubeFaceEastDirection * 3
+                                        - this.quadGenerationConstants.cubeFaceNorthDirection;
+                    else if (this.ID == QuadID.Four)
+                        vector = vector - this.quadGenerationConstants.cubeFaceEastDirection * 3
+                                        - this.quadGenerationConstants.cubeFaceNorthDirection * 3;
+
+                    vector.x = -vector.x;
+                    vector.z = -vector.z;
+                }
+                else if (this.Parent.ID == QuadID.Two)
+                {
+                    if (this.ID == QuadID.One)
+                        vector = vector - this.quadGenerationConstants.cubeFaceEastDirection
+                                        - this.quadGenerationConstants.cubeFaceNorthDirection * 3;
+                    else if (this.ID == QuadID.Two)
+                        vector = vector - this.quadGenerationConstants.cubeFaceEastDirection
+                                        - this.quadGenerationConstants.cubeFaceNorthDirection;
+                    else if (this.ID == QuadID.Three)
+                        vector = vector - this.quadGenerationConstants.cubeFaceEastDirection * 3
+                                        - this.quadGenerationConstants.cubeFaceNorthDirection * 3;
+                    else if (this.ID == QuadID.Four)
+                        vector = vector - this.quadGenerationConstants.cubeFaceEastDirection * 3
+                                        - this.quadGenerationConstants.cubeFaceNorthDirection;
+
+                    vector.z = -vector.z;
+                }
+                else if (this.Parent.ID == QuadID.Three)
+                {
+                    if (this.ID == QuadID.One)
+                        vector = vector - this.quadGenerationConstants.cubeFaceEastDirection * 3
+                                        - this.quadGenerationConstants.cubeFaceNorthDirection;
+                    else if (this.ID == QuadID.Two)
+                        vector = vector - this.quadGenerationConstants.cubeFaceEastDirection * 3
+                                        - this.quadGenerationConstants.cubeFaceNorthDirection * 3;
+                    else if (this.ID == QuadID.Three)
+                        vector = vector - this.quadGenerationConstants.cubeFaceEastDirection
+                                        - this.quadGenerationConstants.cubeFaceNorthDirection;
+                    else if (this.ID == QuadID.Four)
+                        vector = vector - this.quadGenerationConstants.cubeFaceEastDirection
+                                        - this.quadGenerationConstants.cubeFaceNorthDirection * 3;
+
+                    vector.x = -vector.x;
+                }
+                else if (this.Parent.ID == QuadID.Four)
+                {
+                    if (this.ID == QuadID.One)
+                        vector = vector - this.quadGenerationConstants.cubeFaceEastDirection * 3
+                                        - this.quadGenerationConstants.cubeFaceNorthDirection * 3;
+                    else if (this.ID == QuadID.Two)
+                        vector = vector - this.quadGenerationConstants.cubeFaceEastDirection * 3
+                                        - this.quadGenerationConstants.cubeFaceNorthDirection;
+                    else if (this.ID == QuadID.Three)
+                        vector = vector - this.quadGenerationConstants.cubeFaceEastDirection
+                                        - this.quadGenerationConstants.cubeFaceNorthDirection * 3;
+                    else if (this.ID == QuadID.Four)
+                        vector = vector - this.quadGenerationConstants.cubeFaceEastDirection
+                                        - this.quadGenerationConstants.cubeFaceNorthDirection;
+                }
+                #endregion
+            }
+            else if (quadPosition == QuadPostion.Left)
+            {
+                #region LEFT
+                if (this.Parent.ID == QuadID.One)
+                {
+                    if (this.ID == QuadID.One)
+                        vector = vector - this.quadGenerationConstants.cubeFaceEastDirection
+                                        - this.quadGenerationConstants.cubeFaceNorthDirection;
+                    else if (this.ID == QuadID.Two)
+                        vector = vector - this.quadGenerationConstants.cubeFaceEastDirection
+                                        - this.quadGenerationConstants.cubeFaceNorthDirection * 3;
+                    else if (this.ID == QuadID.Three)
+                        vector = vector - this.quadGenerationConstants.cubeFaceEastDirection * 3
+                                        - this.quadGenerationConstants.cubeFaceNorthDirection;
+                    else if (this.ID == QuadID.Four)
+                        vector = vector - this.quadGenerationConstants.cubeFaceEastDirection * 3
+                                        - this.quadGenerationConstants.cubeFaceNorthDirection * 3;
+
+                    vector.x = -vector.x;
+                }
+                else if (this.Parent.ID == QuadID.Two)
+                {
+                    if (this.ID == QuadID.One)
+                        vector = vector - this.quadGenerationConstants.cubeFaceEastDirection
+                                        - this.quadGenerationConstants.cubeFaceNorthDirection * 3;
+                    else if (this.ID == QuadID.Two)
+                        vector = vector - this.quadGenerationConstants.cubeFaceEastDirection
+                                        - this.quadGenerationConstants.cubeFaceNorthDirection;
+                    else if (this.ID == QuadID.Three)
+                        vector = vector - this.quadGenerationConstants.cubeFaceEastDirection * 3
+                                        - this.quadGenerationConstants.cubeFaceNorthDirection * 3;
+                    else if (this.ID == QuadID.Four)
+                        vector = vector - this.quadGenerationConstants.cubeFaceEastDirection * 3
+                                        - this.quadGenerationConstants.cubeFaceNorthDirection;
+
+                    vector.z = -vector.z;
+                }
+                else if (this.Parent.ID == QuadID.Three)
+                {
+                    if (this.ID == QuadID.One)
+                        vector = vector - this.quadGenerationConstants.cubeFaceEastDirection * 3
+                                        - this.quadGenerationConstants.cubeFaceNorthDirection;
+                    else if (this.ID == QuadID.Two)
+                        vector = vector - this.quadGenerationConstants.cubeFaceEastDirection * 3
+                                        - this.quadGenerationConstants.cubeFaceNorthDirection * 3;
+                    else if (this.ID == QuadID.Three)
+                        vector = vector - this.quadGenerationConstants.cubeFaceEastDirection
+                                        - this.quadGenerationConstants.cubeFaceNorthDirection;
+                    else if (this.ID == QuadID.Four)
+                        vector = vector - this.quadGenerationConstants.cubeFaceEastDirection
+                                        - this.quadGenerationConstants.cubeFaceNorthDirection * 3;
+
+                    vector.y = -vector.y;
+                }
+                else if (this.Parent.ID == QuadID.Four)
+                {
+                    if (this.ID == QuadID.One)
+                        vector = vector - this.quadGenerationConstants.cubeFaceEastDirection * 3
+                                        - this.quadGenerationConstants.cubeFaceNorthDirection * 3;
+                    else if (this.ID == QuadID.Two)
+                        vector = vector - this.quadGenerationConstants.cubeFaceEastDirection * 3
+                                        - this.quadGenerationConstants.cubeFaceNorthDirection;
+                    else if (this.ID == QuadID.Three)
+                        vector = vector - this.quadGenerationConstants.cubeFaceEastDirection
+                                        - this.quadGenerationConstants.cubeFaceNorthDirection * 3;
+                    else if (this.ID == QuadID.Four)
+                        vector = vector - this.quadGenerationConstants.cubeFaceEastDirection
+                                        - this.quadGenerationConstants.cubeFaceNorthDirection;
+
+                    vector.y = -vector.y;
+                    vector.z = -vector.z;
+                }
+                #endregion
+            }
+            else if (quadPosition == QuadPostion.Right)
+            {
+                #region RIGHT
+                if (this.Parent.ID == QuadID.One)
+                {
+                    if (this.ID == QuadID.One)
+                        vector = vector - this.quadGenerationConstants.cubeFaceEastDirection
+                                        - this.quadGenerationConstants.cubeFaceNorthDirection;
+                    else if (this.ID == QuadID.Two)
+                        vector = vector - this.quadGenerationConstants.cubeFaceEastDirection
+                                        - this.quadGenerationConstants.cubeFaceNorthDirection * 3;
+                    else if (this.ID == QuadID.Three)
+                        vector = vector - this.quadGenerationConstants.cubeFaceEastDirection * 3
+                                        - this.quadGenerationConstants.cubeFaceNorthDirection;
+                    else if (this.ID == QuadID.Four)
+                        vector = vector - this.quadGenerationConstants.cubeFaceEastDirection * 3
+                                        - this.quadGenerationConstants.cubeFaceNorthDirection * 3;
+
+                    vector.x = -vector.x;
+                }
+                else if (this.Parent.ID == QuadID.Two)
+                {
+                    if (this.ID == QuadID.One)
+                        vector = vector - this.quadGenerationConstants.cubeFaceEastDirection
+                                        - this.quadGenerationConstants.cubeFaceNorthDirection * 3;
+                    else if (this.ID == QuadID.Two)
+                        vector = vector - this.quadGenerationConstants.cubeFaceEastDirection
+                                        - this.quadGenerationConstants.cubeFaceNorthDirection;
+                    else if (this.ID == QuadID.Three)
+                        vector = vector - this.quadGenerationConstants.cubeFaceEastDirection * 3
+                                        - this.quadGenerationConstants.cubeFaceNorthDirection * 3;
+                    else if (this.ID == QuadID.Four)
+                        vector = vector - this.quadGenerationConstants.cubeFaceEastDirection * 3
+                                        - this.quadGenerationConstants.cubeFaceNorthDirection;
+
+                    vector.z = -vector.z;
+                }
+                else if (this.Parent.ID == QuadID.Three)
+                {
+                    if (this.ID == QuadID.One)
+                        vector = vector - this.quadGenerationConstants.cubeFaceEastDirection * 3
+                                        - this.quadGenerationConstants.cubeFaceNorthDirection;
+                    else if (this.ID == QuadID.Two)
+                        vector = vector - this.quadGenerationConstants.cubeFaceEastDirection * 3
+                                        - this.quadGenerationConstants.cubeFaceNorthDirection * 3;
+                    else if (this.ID == QuadID.Three)
+                        vector = vector - this.quadGenerationConstants.cubeFaceEastDirection
+                                        - this.quadGenerationConstants.cubeFaceNorthDirection;
+                    else if (this.ID == QuadID.Four)
+                        vector = vector - this.quadGenerationConstants.cubeFaceEastDirection
+                                        - this.quadGenerationConstants.cubeFaceNorthDirection * 3;
+
+                    vector.y = -vector.y;
+                }
+                else if (this.Parent.ID == QuadID.Four)
+                {
+                    if (this.ID == QuadID.One)
+                        vector = vector - this.quadGenerationConstants.cubeFaceEastDirection * 3
+                                        - this.quadGenerationConstants.cubeFaceNorthDirection * 3;
+                    else if (this.ID == QuadID.Two)
+                        vector = vector - this.quadGenerationConstants.cubeFaceEastDirection * 3
+                                        - this.quadGenerationConstants.cubeFaceNorthDirection;
+                    else if (this.ID == QuadID.Three)
+                        vector = vector - this.quadGenerationConstants.cubeFaceEastDirection
+                                        - this.quadGenerationConstants.cubeFaceNorthDirection * 3;
+                    else if (this.ID == QuadID.Four)
+                        vector = vector - this.quadGenerationConstants.cubeFaceEastDirection
+                                        - this.quadGenerationConstants.cubeFaceNorthDirection;
+
+                    vector.y = -vector.y;
+                    vector.z = -vector.z;
+                }
+                #endregion
+            }
+            else if (quadPosition == QuadPostion.Front)
+            {
+                #region FRONT
+                if (this.Parent.ID == QuadID.One)
+                {
+                    if (this.ID == QuadID.One)
+                        vector = vector - this.quadGenerationConstants.cubeFaceEastDirection
+                                        - this.quadGenerationConstants.cubeFaceNorthDirection;
+                    else if (this.ID == QuadID.Two)
+                        vector = vector - this.quadGenerationConstants.cubeFaceEastDirection * 3
+                                        - this.quadGenerationConstants.cubeFaceNorthDirection;
+                    else if (this.ID == QuadID.Three)
+                        vector = vector - this.quadGenerationConstants.cubeFaceEastDirection
+                                        - this.quadGenerationConstants.cubeFaceNorthDirection * 3;
+                    else if (this.ID == QuadID.Four)
+                        vector = vector - this.quadGenerationConstants.cubeFaceEastDirection * 3
+                                        - this.quadGenerationConstants.cubeFaceNorthDirection * 3;
+
+                    vector.x = -vector.x;
+                }
+                else if (this.Parent.ID == QuadID.Two)
+                {
+                    if (this.ID == QuadID.One)
+                        vector = vector - this.quadGenerationConstants.cubeFaceEastDirection * 3
+                                        - this.quadGenerationConstants.cubeFaceNorthDirection;
+                    else if (this.ID == QuadID.Two)
+                        vector = vector - this.quadGenerationConstants.cubeFaceEastDirection
+                                        - this.quadGenerationConstants.cubeFaceNorthDirection;
+                    else if (this.ID == QuadID.Three)
+                        vector = vector - this.quadGenerationConstants.cubeFaceEastDirection * 3
+                                        - this.quadGenerationConstants.cubeFaceNorthDirection * 3;
+                    else if (this.ID == QuadID.Four)
+                        vector = vector - this.quadGenerationConstants.cubeFaceEastDirection
+                                        - this.quadGenerationConstants.cubeFaceNorthDirection * 3;
+                }
+                else if (this.Parent.ID == QuadID.Three)
+                {
+                    if (this.ID == QuadID.One)
+                        vector = vector - this.quadGenerationConstants.cubeFaceEastDirection
+                                        - this.quadGenerationConstants.cubeFaceNorthDirection * 3;
+                    else if (this.ID == QuadID.Two)
+                        vector = vector - this.quadGenerationConstants.cubeFaceEastDirection * 3
+                                        - this.quadGenerationConstants.cubeFaceNorthDirection * 3;
+                    else if (this.ID == QuadID.Three)
+                        vector = vector - this.quadGenerationConstants.cubeFaceEastDirection
+                                        - this.quadGenerationConstants.cubeFaceNorthDirection;
+                    else if (this.ID == QuadID.Four)
+                        vector = vector - this.quadGenerationConstants.cubeFaceEastDirection * 3
+                                        - this.quadGenerationConstants.cubeFaceNorthDirection;
+
+                    vector.x = -vector.x;
+                    vector.y = -vector.y;
+                }
+                else if (this.Parent.ID == QuadID.Four)
+                {
+                    if (this.ID == QuadID.One)
+                        vector = vector - this.quadGenerationConstants.cubeFaceEastDirection * 3
+                                        - this.quadGenerationConstants.cubeFaceNorthDirection * 3;
+                    else if (this.ID == QuadID.Two)
+                        vector = vector - this.quadGenerationConstants.cubeFaceEastDirection
+                                        - this.quadGenerationConstants.cubeFaceNorthDirection * 3;
+                    else if (this.ID == QuadID.Three)
+                        vector = vector - this.quadGenerationConstants.cubeFaceEastDirection * 3
+                                        - this.quadGenerationConstants.cubeFaceNorthDirection;
+                    else if (this.ID == QuadID.Four)
+                        vector = vector - this.quadGenerationConstants.cubeFaceEastDirection
+                                        - this.quadGenerationConstants.cubeFaceNorthDirection;
+
+                    vector.y = -vector.y;
+                }
+                #endregion
+            }
+            else if (quadPosition == QuadPostion.Back)
+            {
+                #region BACK
+                if (this.Parent.ID == QuadID.One)
+                {
+                    if (this.ID == QuadID.One)
+                        vector = vector - this.quadGenerationConstants.cubeFaceEastDirection
+                                        - this.quadGenerationConstants.cubeFaceNorthDirection;
+                    else if (this.ID == QuadID.Two)
+                        vector = vector - this.quadGenerationConstants.cubeFaceEastDirection * 3
+                                        - this.quadGenerationConstants.cubeFaceNorthDirection;
+                    else if (this.ID == QuadID.Three)
+                        vector = vector - this.quadGenerationConstants.cubeFaceEastDirection
+                                        - this.quadGenerationConstants.cubeFaceNorthDirection * 3;
+                    else if (this.ID == QuadID.Four)
+                        vector = vector - this.quadGenerationConstants.cubeFaceEastDirection * 3
+                                        - this.quadGenerationConstants.cubeFaceNorthDirection * 3;
+
+                    vector.x = -vector.x;
+                }
+                else if (this.Parent.ID == QuadID.Two)
+                {
+                    if (this.ID == QuadID.One)
+                        vector = vector - this.quadGenerationConstants.cubeFaceEastDirection * 3
+                                        - this.quadGenerationConstants.cubeFaceNorthDirection;
+                    else if (this.ID == QuadID.Two)
+                        vector = vector - this.quadGenerationConstants.cubeFaceEastDirection
+                                        - this.quadGenerationConstants.cubeFaceNorthDirection;
+                    else if (this.ID == QuadID.Three)
+                        vector = vector - this.quadGenerationConstants.cubeFaceEastDirection * 3
+                                        - this.quadGenerationConstants.cubeFaceNorthDirection * 3;
+                    else if (this.ID == QuadID.Four)
+                        vector = vector - this.quadGenerationConstants.cubeFaceEastDirection
+                                        - this.quadGenerationConstants.cubeFaceNorthDirection * 3;
+                }
+                else if (this.Parent.ID == QuadID.Three)
+                {
+                    if (this.ID == QuadID.One)
+                        vector = vector - this.quadGenerationConstants.cubeFaceEastDirection
+                                        - this.quadGenerationConstants.cubeFaceNorthDirection * 3;
+                    else if (this.ID == QuadID.Two)
+                        vector = vector - this.quadGenerationConstants.cubeFaceEastDirection * 3
+                                        - this.quadGenerationConstants.cubeFaceNorthDirection * 3;
+                    else if (this.ID == QuadID.Three)
+                        vector = vector - this.quadGenerationConstants.cubeFaceEastDirection
+                                        - this.quadGenerationConstants.cubeFaceNorthDirection;
+                    else if (this.ID == QuadID.Four)
+                        vector = vector - this.quadGenerationConstants.cubeFaceEastDirection * 3
+                                        - this.quadGenerationConstants.cubeFaceNorthDirection;
+
+                    vector.x = -vector.x;
+                    vector.y = -vector.y;
+                }
+                else if (this.Parent.ID == QuadID.Four)
+                {
+                    if (this.ID == QuadID.One)
+                        vector = vector - this.quadGenerationConstants.cubeFaceEastDirection * 3
+                                        - this.quadGenerationConstants.cubeFaceNorthDirection * 3;
+                    else if (this.ID == QuadID.Two)
+                        vector = vector - this.quadGenerationConstants.cubeFaceEastDirection
+                                        - this.quadGenerationConstants.cubeFaceNorthDirection * 3;
+                    else if (this.ID == QuadID.Three)
+                        vector = vector - this.quadGenerationConstants.cubeFaceEastDirection * 3
+                                        - this.quadGenerationConstants.cubeFaceNorthDirection;
+                    else if (this.ID == QuadID.Four)
+                        vector = vector - this.quadGenerationConstants.cubeFaceEastDirection
+                                        - this.quadGenerationConstants.cubeFaceNorthDirection;
+
+                    vector.y = -vector.y;
+                }
+                #endregion
+            }
         }
-
-        if (LODLevel == 4)
-        {
-            vector = vector - this.Parent.OneLODParent.quadGenerationConstants.cubeFaceEastDirection
-                            - this.Parent.OneLODParent.quadGenerationConstants.cubeFaceNorthDirection;
-
-            vector = vector - (this.Parent.quadGenerationConstants.cubeFaceEastDirection) * 3
-                            - (this.Parent.quadGenerationConstants.cubeFaceNorthDirection) * 3;
-        }
+        #endregion
 
         return vector;
     }
@@ -392,6 +810,8 @@ public class Quad : MonoBehaviour
         Vector3 temp = Vector3.zero;
 
         float v = this.Planetoid.PlanetRadius;
+
+        temp = Reposition(quadPosition, temp, this.LODLevel);
 
         switch (quadPosition)
         {

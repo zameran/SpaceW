@@ -4,29 +4,31 @@ public class TCCommonParametersSetter : MonoBehaviour
 {
     public Planetoid Planet;
 
-    public Vector3 Randomize;       // Randomize
+    public Vector3 Randomize;
 
-    public Vector4f faceParams;     // (x0,             y0,             size,                   face)
-    public Vector4f scaleParams;    // (offsU,          offsV,          scale,                  tidalLock)
-    public Vector4f mainParams;     // (mainFreq,       terraceProb,    surfType,               snowLevel)
-    public Vector4f colorParams;    // (colorDistMagn,  colorDistFreq,  latIceCaps,             latTropic)
-    public Vector4f climateParams;  // (climatePole,    climateTropic,  climateEquator,         tropicWidth)
-    public Vector4f mareParams;     // (seaLevel,       mareFreq,       sqrt(mareDensity),      icecapHeight)
-    public Vector4f montesParams;   // (montesMagn,     montesFreq,     montesFraction,         montesSpiky)
-    public Vector4f dunesParams;    // (dunesMagn,      dunesFreq,      dunesDensity,           drivenDarkening)
-    public Vector4f hillsParams;    // (hillsMagn,      hillsFreq,      hillsDensity,           hills2Density)
-    public Vector4f canyonsParams;  // (canyonsMagn,    canyonsFreq,    canyonsFraction,        erosion)
-    public Vector4f riversParams;   // (riversMagn,     riversFreq,     riversSin,              riversOctaves)
-    public Vector4f cracksParams;   // (cracksMagn,     cracksFreq,     cracksOctaves,          craterRayedFactor)
-    public Vector4f craterParams;   // (craterMagn,     craterFreq,     sqrt(craterDensity),    craterOctaves)
-    public Vector4f volcanoParams1; // (volcanoMagn,    volcanoFreq,    sqrt(volcanoDensity),   volcanoOctaves)
-    public Vector4f volcanoParams2; // (volcanoActivity,volcanoFlows,   volcanoRadius,          volcanoTemp)
-    public Vector4f lavaParams;	    // (lavaCoverage,   lavaTemperature,surfTemperature,        heightTempGrad)
-    public Vector4f textureParams;  // (texScale,       texColorConv,   venusMagn,              venusFreq)
-    public Vector4f cloudsParams1;  // (cloudsFreq,     cloudsOctaves,  twistZones,             twistMagn)
-    public Vector4f cloudsParams2;  // (cloudsLayer,    cloudsNLayers,  cloudsStyle,            cloudsCoverage)
-    public Vector4f cycloneParams;  // (cycloneMagn,    cycloneFreq,    sqrt(cycloneDensity),   cycloneOctaves)
-    
+    public Vector4 faceParams;
+    public Vector4 scaleParams;
+    public Vector4 mainParams;
+    public Vector4 colorParams;
+    public Vector4 climateParams;
+    public Vector4 mareParams;
+    public Vector4 montesParams;
+    public Vector4 dunesParams;
+    public Vector4 hillsParams;
+    public Vector4 canyonsParams;
+    public Vector4 riversParams;
+    public Vector4 cracksParams;
+    public Vector4 craterParams;
+    public Vector4 volcanoParams1;
+    public Vector4 volcanoParams2;
+    public Vector4 lavaParams;
+    public Vector4 textureParams;
+    public Vector4 cloudsParams1;
+    public Vector4 cloudsParams2;
+    public Vector4 cycloneParams;
+
+    public bool AutoUpdate = false;
+
     [ContextMenu("UpdateUniforms")]
     public void UpdateUniforms()
     {

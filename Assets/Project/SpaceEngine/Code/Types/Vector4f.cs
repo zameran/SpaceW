@@ -9,12 +9,48 @@ public struct Vector4f
     public float Z;
     public float W;
 
+    public string Xs;
+    public string Ys;
+    public string Zs;
+    public string Ws;
+
     public Vector4f(float X, float Y, float Z, float W)
     {
         this.X = X;
         this.Y = Y;
         this.Z = Z;
         this.W = W;
+
+        this.Xs = "";
+        this.Ys = "";
+        this.Zs = "";
+        this.Ws = "";
+    }
+
+    public Vector4f(string Xs, string Ys, string Zs, string Ws)
+    {
+        this.X = 0;
+        this.Y = 0;
+        this.Z = 0;
+        this.W = 0;
+
+        this.Xs = Xs;
+        this.Ys = Ys;
+        this.Zs = Zs;
+        this.Ws = Ws;
+    }
+
+    public Vector4f(float X, float Y, float Z, float W, string Xs, string Ys, string Zs, string Ws)
+    {
+        this.X = X;
+        this.Y = Y;
+        this.Z = Z;
+        this.W = W;
+
+        this.Xs = Xs;
+        this.Ys = Ys;
+        this.Zs = Zs;
+        this.Ws = Ws;
     }
 
     public static implicit operator Vector4(Vector4f Vector)
@@ -24,7 +60,7 @@ public struct Vector4f
 
     public static implicit operator Vector4f(Vector4 Vector)
     {
-        return new Vector4f(Vector.x, Vector.y, Vector.z, Vector.w);
+        return new Vector4f(Vector.x, Vector.y, Vector.z, Vector.w, "", "", "", "");
     }
 
     public override string ToString()

@@ -48,8 +48,8 @@ float3 CubeCoord(QuadGenerationConstants constants, float VerticesPerSide, uint3
 float NoiseFunction(float3 coord)
 {
 	//float noise = HeightMapAsteroid(0.001 * coord, 0.5, 0.75, 0.45, 0.15, 0.15);
-	//float noise = HeightMapTerra(0.002 * coord);
-	float noise = Noise(0.002 * coord);
+	float noise = HeightMapTerra(0.002 * coord);
+	//float noise = Noise(0.002 * coord);
 
 	return noise;
 }

@@ -92,6 +92,7 @@ public class Planetoid : MonoBehaviour
         gc.patchCubeCenter = quadComponent.GetPatchCubeCenter(quadPosition);
 
         quadComponent.Position = quadPosition;
+        quadComponent.ID = QuadID.One;
         quadComponent.quadGenerationConstants = gc;
         quadComponent.Planetoid = this;
 
@@ -158,4 +159,12 @@ public enum QuadPostion
     Right,
     Front,
     Back
+}
+
+public enum QuadID
+{
+    One,
+    Two,
+    Three,
+    Four
 }
