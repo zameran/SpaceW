@@ -29,6 +29,7 @@
 
 			float4 vcolor;
 			float4 pos;
+			float4 cpos;
 		};
 
 		struct appdata_full_compute 

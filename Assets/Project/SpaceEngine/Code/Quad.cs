@@ -35,6 +35,7 @@ public struct OutputStruct
 
     public Vector4 vcolor;
     public Vector4 pos;
+    public Vector4 cpos;
 }
 
 public class Quad : MonoBehaviour
@@ -58,8 +59,18 @@ public class Quad : MonoBehaviour
     public QuadGenerationConstants quadGenerationConstants;
 
     public Quad Parent;
+    public Quad OneLODParent;
 
     public List<Quad> Subquads = new List<Quad>();
+
+    public int LODLevel = -1;
+
+    public bool HaveSubQuads = false;
+
+    public Quad()
+    {
+
+    }
 
     void Start()
     {
@@ -70,6 +81,65 @@ public class Quad : MonoBehaviour
     {
         if (ToShaderData != null)
             ToShaderData.Release();
+    }
+
+    [ContextMenu("Split")]
+    public void Split()
+    {
+        if (this.Subquads.Count != 0)
+            Unsplit();
+
+        int id = 0;
+
+        for (int i = 0; i < 2; i++)
+        {
+            for (int j = 0; j < 2; j++, id++)
+            {
+                Quad quad = Planetoid.SetupSubQuad(Position);
+                quad.Parent = this;
+                quad.LODLevel = quad.Parent.LODLevel + 1;
+
+                if (quad.LODLevel == 1)
+                    quad.OneLODParent = quad.Parent;
+                else if (quad.LODLevel > 1)
+                    quad.OneLODParent = quad.Parent.OneLODParent;
+
+                quad.transform.parent = this.transform;
+                quad.gameObject.name += "_ID" + id + "_LOD" + quad.LODLevel;
+                quad.SetupVectors(quad, id);
+                quad.Dispatch();
+
+                this.Subquads.Add(quad);
+                this.ReleaseAndDisposeBuffer(ToShaderData);
+
+                this.HaveSubQuads = true;
+            }
+        }
+    }
+
+    [ContextMenu("Unslpit")]
+    public void Unsplit()
+    {
+        for (int i = 0; i < this.Subquads.Count; i++)
+        {
+            if(this.Subquads[i].HaveSubQuads)
+            {
+                this.Subquads[i].Unsplit();
+            }
+
+            if (this.Planetoid.Quads.Contains(this.Subquads[i]))
+            {
+                this.Planetoid.Quads.Remove(this.Subquads[i]);
+            }
+
+            if (this.Subquads[i] != null)
+            {
+                DestroyImmediate(this.Subquads[i].gameObject);
+            }
+        }
+
+        this.Subquads.Clear();
+        this.Dispatch();
     }
 
     [ContextMenu("Displatch!")]
@@ -90,9 +160,9 @@ public class Quad : MonoBehaviour
         OutputStruct[] outputStructData = new OutputStruct[QS.nVerts];
 
         QuadGenerationConstantsBuffer = new ComputeBuffer(1, 64);
-        PreOutDataBuffer = new ComputeBuffer(QS.nVerts, 48);
-        OutDataBuffer = new ComputeBuffer(QS.nVerts, 48);
-        ToShaderData = new ComputeBuffer(QS.nVerts, 48);
+        PreOutDataBuffer = new ComputeBuffer(QS.nVerts, 64);
+        OutDataBuffer = new ComputeBuffer(QS.nVerts, 64);
+        ToShaderData = new ComputeBuffer(QS.nVerts, 64);
 
         HeightTexture = RTExtensions.CreateRTexture(QS.nVertsPerEdge, 24);
         NormalTexture = RTExtensions.CreateRTexture(QS.nVertsPerEdge, 24);
@@ -101,25 +171,28 @@ public class Quad : MonoBehaviour
         PreOutDataBuffer.SetData(outputStructData);
         OutDataBuffer.SetData(outputStructData);
 
-        SetupComputeShader(0);
+        int kernel1 = HeightShader.FindKernel("CSMainNoise");
+        int kernel2 = HeightShader.FindKernel("CSTexturesMain");
+
+        SetupComputeShader(kernel1);
 
         Log("Buffers for first kernel ready!");
 
-        HeightShader.Dispatch(0,
-        QS.THREADGROUP_SIZE_X,
-        QS.THREADGROUP_SIZE_Y,
-        QS.THREADGROUP_SIZE_Z);
+        HeightShader.Dispatch(kernel1,
+        QS.THREADGROUP_SIZE_X_REAL,
+        QS.THREADGROUP_SIZE_Y_REAL,
+        QS.THREADGROUP_SIZE_Z_REAL);
 
         Log("First kernel ready!");
 
-        SetupComputeShader(1);
+        SetupComputeShader(kernel2);
 
         Log("Buffers for second kernel ready!");
 
-        HeightShader.Dispatch(1,
-        QS.THREADGROUP_SIZE_X,
-        QS.THREADGROUP_SIZE_Y,
-        QS.THREADGROUP_SIZE_Z);
+        HeightShader.Dispatch(kernel2,
+        QS.THREADGROUP_SIZE_X_REAL,
+        QS.THREADGROUP_SIZE_Y_REAL,
+        QS.THREADGROUP_SIZE_Z_REAL);
 
         Log("Second kernel ready!");
 
@@ -194,25 +267,27 @@ public class Quad : MonoBehaviour
     {
         Vector3 temp = Vector3.zero;
 
+        float r = this.Planetoid.PlanetRadius;
+
         switch (quadPosition)
         {
             case QuadPostion.Top:
-                temp = new Vector3(0, 0, -1);
+                temp = new Vector3(0.0f, 0.0f, -r);
                 break;
             case QuadPostion.Bottom:
-                temp = new Vector3(0, 0, -1);
+                temp = new Vector3(0.0f, 0.0f, -r);
                 break;
             case QuadPostion.Left:
-                temp = new Vector3(0, -1, 0);
+                temp = new Vector3(0.0f, -r, 0.0f);
                 break;
             case QuadPostion.Right:
-                temp = new Vector3(0, -1, 0);
+                temp = new Vector3(0.0f, -r, 0.0f);
                 break;
             case QuadPostion.Front:
-                temp = new Vector3(1, 0, 0);
+                temp = new Vector3(r, 0.0f, 0.0f);
                 break;
             case QuadPostion.Back:
-                temp = new Vector3(-1, 0, 0);
+                temp = new Vector3(-r, 0.0f, 0.0f);
                 break;
         }
 
@@ -223,25 +298,27 @@ public class Quad : MonoBehaviour
     {
         Vector3 temp = Vector3.zero;
 
+        float r = this.Planetoid.PlanetRadius;
+
         switch (quadPosition)
         {
             case QuadPostion.Top:
-                temp = new Vector3(1, 0, 0);
+                temp = new Vector3(r, 0.0f, 0.0f);
                 break;
             case QuadPostion.Bottom:
-                temp = new Vector3(-1, 0, 0);
+                temp = new Vector3(-r, 0.0f, 0.0f);
                 break;
             case QuadPostion.Left:
-                temp = new Vector3(0, 0, -1);
+                temp = new Vector3(0.0f, 0.0f, -r);
                 break;
             case QuadPostion.Right:
-                temp = new Vector3(0, 0, 1);
+                temp = new Vector3(0.0f, 0.0f, r);
                 break;
             case QuadPostion.Front:
-                temp = new Vector3(0, -1, 0);
+                temp = new Vector3(0.0f, -r, 0);
                 break;
             case QuadPostion.Back:
-                temp = new Vector3(0, -1, 0);
+                temp = new Vector3(0.0f, -r, 0.0f);
                 break;
         }
 
@@ -252,29 +329,145 @@ public class Quad : MonoBehaviour
     {
         Vector3 temp = Vector3.zero;
 
+        float r = this.Planetoid.PlanetRadius;
+
         switch (quadPosition)
         {
             case QuadPostion.Top:
-                temp = new Vector3(0, 1, 0);
+                temp = new Vector3(0.0f, r, 0.0f);
                 break;
             case QuadPostion.Bottom:
-                temp = new Vector3(0, -1, 0);
+                temp = new Vector3(0.0f, -r, 0.0f);
                 break;
             case QuadPostion.Left:
-                temp = new Vector3(-1, 0, 0);
+                temp = new Vector3(-r, 0.0f, 0.0f);
                 break;
             case QuadPostion.Right:
-                temp = new Vector3(1, 0, 0);
+                temp = new Vector3(r, 0.0f, 0.0f);
                 break;
             case QuadPostion.Front:
-                temp = new Vector3(0, 0, 1);
+                temp = new Vector3(0.0f, 0.0f, r);
                 break;
             case QuadPostion.Back:
-                temp = new Vector3(0, 0, -1);
+                temp = new Vector3(0.0f, 0.0f, -r);
                 break;
         }
 
         return temp;
+    }
+
+    public Vector3 Reposition(Vector3 vector, int LODLevel)
+    {
+        if (LODLevel == 1)
+            vector = vector - this.Parent.quadGenerationConstants.cubeFaceEastDirection
+                            - this.Parent.quadGenerationConstants.cubeFaceNorthDirection;
+
+        if (LODLevel == 2)
+            vector = vector - this.OneLODParent.quadGenerationConstants.cubeFaceEastDirection
+                            - this.OneLODParent.quadGenerationConstants.cubeFaceNorthDirection;
+
+        if (LODLevel == 3)
+        {
+            vector = vector - this.OneLODParent.quadGenerationConstants.cubeFaceEastDirection
+                            - this.OneLODParent.quadGenerationConstants.cubeFaceNorthDirection;
+
+            vector = vector - this.Parent.quadGenerationConstants.cubeFaceEastDirection
+                            - this.Parent.quadGenerationConstants.cubeFaceNorthDirection;
+        }
+
+        if (LODLevel == 4)
+        {
+            vector = vector - this.Parent.OneLODParent.quadGenerationConstants.cubeFaceEastDirection
+                            - this.Parent.OneLODParent.quadGenerationConstants.cubeFaceNorthDirection;
+
+            vector = vector - (this.Parent.quadGenerationConstants.cubeFaceEastDirection) * 3
+                            - (this.Parent.quadGenerationConstants.cubeFaceNorthDirection) * 3;
+        }
+
+        return vector;
+    }
+
+    public Vector3 GetPatchCubeCenterSplitted(QuadPostion quadPosition, int id)
+    {
+        Vector3 temp = Vector3.zero;
+
+        float v = this.Planetoid.PlanetRadius;
+
+        switch (quadPosition)
+        {
+            case QuadPostion.Top:
+                if (id == 0)
+                    temp += new Vector3(-v / 2, v, v / 2);
+                else if (id == 1)
+                    temp += new Vector3(v / 2, v, v / 2);
+                else if (id == 2)
+                    temp += new Vector3(-v / 2, v, -v / 2);
+                else if (id == 3)
+                    temp += new Vector3(v / 2, v, -v / 2);
+                break;
+            case QuadPostion.Bottom:
+                if (id == 0)
+                    temp += new Vector3(-v / 2, -v, -v / 2);
+                else if (id == 1)
+                    temp += new Vector3(v / 2, -v, -v / 2);
+                else if (id == 2)
+                    temp += new Vector3(-v / 2, -v, v / 2);
+                else if (id == 3)
+                    temp += new Vector3(v / 2, -v, v / 2);
+                break;
+            case QuadPostion.Left:
+                if (id == 0)
+                    temp += new Vector3(-v, v / 2, v / 2);
+                else if (id == 1)
+                    temp += new Vector3(-v, v / 2, -v / 2);
+                else if (id == 2)
+                    temp += new Vector3(-v, -v / 2, v / 2);
+                else if (id == 3)
+                    temp += new Vector3(-v, -v / 2, -v / 2);
+                break;
+            case QuadPostion.Right:
+                if (id == 0)
+                    temp += new Vector3(v, v / 2, -v / 2);
+                else if (id == 1)
+                    temp += new Vector3(v, v / 2, v / 2);
+                else if (id == 2)
+                    temp += new Vector3(v, -v / 2, -v / 2);
+                else if (id == 3)
+                    temp += new Vector3(v, -v / 2, v / 2);
+                break;
+            case QuadPostion.Front:
+                if (id == 0)
+                    temp += new Vector3(v / 2, v / 2, v);
+                else if (id == 1)
+                    temp += new Vector3(-v / 2, v / 2, v);
+                else if (id == 2)
+                    temp += new Vector3(v / 2, -v / 2, v);
+                else if (id == 3)
+                    temp += new Vector3(-v / 2, -v / 2, v);
+                break;
+            case QuadPostion.Back:
+                if (id == 0)
+                    temp += new Vector3(-v / 2, v / 2, -v);
+                else if (id == 1)
+                    temp += new Vector3(v / 2, v / 2, -v);
+                else if (id == 2)
+                    temp += new Vector3(-v / 2, -v / 2, -v);
+                else if (id == 3)
+                    temp += new Vector3(v / 2, -v / 2, -v);
+                break;
+        }
+
+        return temp;
+    }
+
+    public void SetupVectors(Quad quad, int id)
+    {
+        Vector3 cfed = Parent.quadGenerationConstants.cubeFaceEastDirection / 2;
+        Vector3 cfnd = Parent.quadGenerationConstants.cubeFaceNorthDirection / 2;
+
+        quad.quadGenerationConstants.cubeFaceEastDirection = cfed;
+        quad.quadGenerationConstants.cubeFaceNorthDirection = cfnd;
+        quad.quadGenerationConstants.patchCubeCenter = quad.GetPatchCubeCenterSplitted(quad.Position, id);
     }
 
     private void Log(string msg)

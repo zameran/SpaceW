@@ -1,5 +1,6 @@
 ﻿#define threadsPerGroup_X 32
 #define threadsPerGroup_Y 32
+
 #define nVerticesPerSide 128
 
 #include "Assets/Project/SpaceEngine/Shaders/TCCommonTerra.cginc"
@@ -18,32 +19,50 @@ struct QuadGenerationConstants
 struct OutputStruct
 {
 	float noise;
-
+	
 	float3 patchCenter;
 
 	float4 vcolor;
     float4 pos;
+	float4 cpos;
 };
 
 RWStructuredBuffer<QuadGenerationConstants> quadGenerationConstants;
+
 RWStructuredBuffer<OutputStruct> patchPreOutput;
 RWStructuredBuffer<OutputStruct> patchOutput;
 
-#pragma kernel CSMain
-[numthreads(threadsPerGroup_X, threadsPerGroup_Y, 1)]
-void CSMain (uint3 id : SV_DispatchThreadID)
+float3 CubeCoord(QuadGenerationConstants constants, float VerticesPerSide, uint3 id)
 {
-    int outBuffOffset = id.x + id.y * nVerticesPerSide;
-	
-	QuadGenerationConstants constants = quadGenerationConstants[0];
-	
-	float eastValue = (id.x - ((nVerticesPerSide - 1) / 2.0)) * constants.spacing;
-	float northValue = (id.y - ((nVerticesPerSide - 1) / 2.0)) * constants.spacing;
+	float eastValue = (id.x - ((VerticesPerSide - 1) / 2.0)) * constants.spacing;
+	float northValue = (id.y - ((VerticesPerSide - 1) / 2.0)) * constants.spacing;
 
 	float3 cubeCoordEast = constants.cubeFaceEastDirection * eastValue;
     float3 cubeCoordNorth = constants.cubeFaceNorthDirection * northValue;
 
 	float3 cubeCoord = cubeCoordEast + cubeCoordNorth + constants.patchCubeCenter;
+
+	return cubeCoord;
+}
+
+float NoiseFunction(float3 coord)
+{
+	//float noise = HeightMapAsteroid(0.001 * coord, 0.5, 0.75, 0.45, 0.15, 0.15);
+	//float noise = HeightMapTerra(0.002 * coord);
+	float noise = Noise(0.002 * coord);
+
+	return noise;
+}
+
+#pragma kernel CSMainNoise
+[numthreads(threadsPerGroup_X, threadsPerGroup_Y, 1)]
+void CSMainNoise (uint3 id : SV_DispatchThreadID)
+{
+    int outBuffOffset = id.x + id.y * nVerticesPerSide;
+
+	QuadGenerationConstants constants = quadGenerationConstants[0];
+
+	float3 cubeCoord = CubeCoord(constants, nVerticesPerSide, id);
 
 	float3 patchCenter = normalize(constants.patchCubeCenter) * constants.planetRadius;
 	float3 patchNormalizedCoord = normalize(cubeCoord);
@@ -51,37 +70,38 @@ void CSMain (uint3 id : SV_DispatchThreadID)
 	float3 patchCoord =  constants.planetRadius * patchNormalizedCoord;
 	float3 patchCoordCentered = patchCoord - patchCenter;
 	
-	//float noise = HeightMapAsteroid(0.001 * patchCoord, 0.5, 0.75, 0.45, 0.15, 0.15);
-	float noise = HeightMapTerra(0.002 * patchCoord);
+	float noise = NoiseFunction(patchCoord);
 
-	float4 color = ColorMapTerra(0.002 * patchCoord);
+	float4 color = NoiseFunction(patchCoord);
 
     float height = ((noise * 2) - 1) * constants.terrainMaxHeight;
 
 	patchCoordCentered += patchNormalizedCoord * height;
 
-    float4 output = float4(patchCoordCentered.x, patchCoordCentered.y, patchCoordCentered.z, 0);
-	
+    float4 output = float4(patchCoordCentered.xyz, 0);
+	float4 cubeOutput = float4(patchCoordCentered.xyz, 0);
+
 	patchPreOutput[outBuffOffset].noise = ((noise * 2) - 1);
 	patchPreOutput[outBuffOffset].patchCenter = patchCenter;
 	patchPreOutput[outBuffOffset].vcolor = color;
     patchPreOutput[outBuffOffset].pos = output;
+	patchPreOutput[outBuffOffset].cpos = cubeOutput;
 }
 
 RWTexture2D<float4> Height;
 RWTexture2D<float4> Normal;
 
-#pragma kernel CSSubMain
+#pragma kernel CSTexturesMain
 [numthreads(threadsPerGroup_X, threadsPerGroup_Y, 1)]
-void CSSubMain (uint3 id : SV_DispatchThreadID)
+void CSTexturesMain (uint3 id : SV_DispatchThreadID)
 {
 	int outBuffOffset = id.x + id.y * nVerticesPerSide;
-	
+
 	QuadGenerationConstants constants = quadGenerationConstants[0];
 
 	float noise = patchPreOutput[outBuffOffset].noise;
 
-	float4 pos = patchPreOutput[outBuffOffset].pos;
+	float4 cpos = patchPreOutput[outBuffOffset].cpos;
 
 	Height[id.xy] = float4(0, 0, 0, noise);
 
@@ -93,7 +113,10 @@ void CSSubMain (uint3 id : SV_DispatchThreadID)
 	float xdelta = ((left - right) + 1) * 0.5;
 	float ydelta = ((up - down) + 1) * 0.5;
 
-	Normal[id.xy] = float4(xdelta, ydelta, 1, 0);
+	float3 normal = float3(xdelta, ydelta, 1);
+	float slope = dot(normal, -normalize(cpos.xyz)) + 1;
+
+	Normal[id.xy] = float4(normal, slope);
 
 	patchOutput[outBuffOffset] = patchPreOutput[outBuffOffset];
 }

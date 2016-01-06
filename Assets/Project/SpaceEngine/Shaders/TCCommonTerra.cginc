@@ -5,30 +5,30 @@ float HeightMapTerra(float3 ppoint)
 {
 	erosion = 1;
 
-	mainFreq = 0.27;
-	hillsFreq = 0.09;
-	canyonsFreq = 0.57;
-	dunesFreq = 0.11;
-	montesFreq = 0.02;
-	riversFreq = 0.03;
+	mainFreq = 0.37;
+	hillsFreq = 0.59;
+	canyonsFreq = 0.37;
+	dunesFreq = 0.62;
+	montesFreq = 0.41;
+	riversFreq = 0.33;
 	venusMagn = 0;
-	dunesMagn = 0.05;
-	hillsMagn = 0.05;
-	canyonsMagn = 0.35;
-	montesMagn = 0.19;
+	dunesMagn = 0.07;
+	hillsMagn = 0.08;
+	canyonsMagn = 0.09;
+	montesMagn = 0.09;
 	riversMagn = 0.07;
 	seaLevel = 0;
-	montesSpiky = 0.35;
+	montesSpiky = 0.25;
 	dunesFraction = 0.18;
-	hillsFraction = 0.08;
-	hills2Fraction = 0.02;
-	canyonsFraction = 0.2;
+	hillsFraction = 0.18;
+	hills2Fraction = 0.21;
+	canyonsFraction = 0.15;
 
 	mareSqrtDensity = 0.0;
 	craterSqrtDensity = 0.0;
 
-	cracksOctaves = 2;
-	riversOctaves = 2;
+	cracksOctaves = 0;
+	riversOctaves = 0;
 	volcanoOctaves = 0;
 
 	riversSin = 0.5;
@@ -237,41 +237,6 @@ float HeightMapTerra(float3 ppoint)
 //-----------------------------------------------------------------------------
 float4 ColorMapTerra(float3 ppoint)
 {
-	erosion = 1;
-
-	mainFreq = 0.27;
-	hillsFreq = 0.09;
-	canyonsFreq = 0.57;
-	dunesFreq = 0.11;
-	montesFreq = 0.02;
-	riversFreq = 0.03;
-	venusMagn = 0;
-	dunesMagn = 0.05;
-	hillsMagn = 0.05;
-	canyonsMagn = 0.35;
-	montesMagn = 0.19;
-	riversMagn = 0.07;
-	seaLevel = 0;
-	montesSpiky = 0.35;
-	dunesFraction = 0.18;
-	hillsFraction = 0.08;
-	hills2Fraction = 0.02;
-	canyonsFraction = 0.2;
-
-	mareSqrtDensity = 0.0;
-	craterSqrtDensity = 0.0;
-
-	cracksOctaves = 2;
-	riversOctaves = 2;
-	volcanoOctaves = 0;
-
-	riversSin = 0.5;
-
-	cloudsStyle = 1;
-
-	latIceCaps = 1.5;
-	icecapHeight = 0.1;
-
 	float3  p = ppoint * mainFreq + Randomize;
 	float4  col;
 	noiseOctaves = 6;
