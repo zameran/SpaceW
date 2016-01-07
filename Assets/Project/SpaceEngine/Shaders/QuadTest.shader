@@ -4,6 +4,7 @@
 	{
 		_HeightTexture("Height (RGBA)", 2D) = "white" {}
 		_NormalTexture("Normal (RGB)", 2D) = "white" {}
+		_Mixing("Mixing", Range(0,1)) = 0.5
 		_Glossiness("Smoothness", Range(0,1)) = 0.5
 		_Metallic("Metallic", Range(0,1)) = 0.0
 	}
@@ -77,13 +78,14 @@
 			o.uv = v.texcoord.xy;
 			o.color = vcolor;
 		}
-
+		
+		half _Mixing;
 		half _Glossiness;
 		half _Metallic;
 
 		void surf(Input IN, inout SurfaceOutputStandard o)
 		{
-			fixed4 terrainColor = lerp(fixed4(IN.noise, IN.noise, IN.noise, 1.0), IN.color, 0);
+			fixed4 terrainColor = lerp(fixed4(IN.noise, IN.noise, IN.noise, 1.0), float4(IN.color.xyz, 1), _Mixing);
 
 			o.Albedo = terrainColor.rgb;
 			o.Metallic = _Metallic;

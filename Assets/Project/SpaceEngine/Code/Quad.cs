@@ -73,6 +73,16 @@ public class Quad : MonoBehaviour
 
     }
 
+    public Vector3 CombineVectors(Vector3 v1, Vector3 v2, Vector3 v3)
+    {
+        return v1 + v2 + v3;
+    }
+
+    public Vector3 Abs(Vector3 v)
+    {
+        return new Vector3(Mathf.Abs(v.x), Mathf.Abs(v.y), Mathf.Abs(v.z));
+    }
+
     void Start()
     {
         Dispatch();

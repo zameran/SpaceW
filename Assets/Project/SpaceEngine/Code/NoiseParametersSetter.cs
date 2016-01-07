@@ -90,11 +90,12 @@ public class NoiseParametersSetter : MonoBehaviour
         if (SetDefaultParameters)
         {
             mat.SetFloat("noiseOctaves", Octaves);
-            mat.SetFloat("noiseLacunarity", Lacunarity);
-            mat.SetFloat("noiseH", H);
-            mat.SetFloat("noiseOffset", Offset);
-            mat.SetFloat("noiseRidgeSmooth", RidgeSmooth);
         }
+
+        mat.SetFloat("noiseLacunarity", Lacunarity);
+        mat.SetFloat("noiseH", H);
+        mat.SetFloat("noiseOffset", Offset);
+        mat.SetFloat("noiseRidgeSmooth", RidgeSmooth);
 
         mat.SetTexture("NoiseSampler", Noise);
         mat.SetTexture("PermGradSampler", GradientTable);
@@ -110,11 +111,12 @@ public class NoiseParametersSetter : MonoBehaviour
         if (SetDefaultParameters)
         {
             shader.SetFloat("noiseOctaves", Octaves);
-            shader.SetFloat("noiseLacunarity", Lacunarity);
-            shader.SetFloat("noiseH", H);
-            shader.SetFloat("noiseOffset", Offset);
-            shader.SetFloat("noiseRidgeSmooth", RidgeSmooth);
         }
+
+        shader.SetFloat("noiseLacunarity", Lacunarity);
+        shader.SetFloat("noiseH", H);
+        shader.SetFloat("noiseOffset", Offset);
+        shader.SetFloat("noiseRidgeSmooth", RidgeSmooth);
 
         shader.SetTexture(0, "NoiseSampler", Noise);
         shader.SetTexture(0, "PermGradSampler", GradientTable);
@@ -130,11 +132,12 @@ public class NoiseParametersSetter : MonoBehaviour
         if (SetDefaultParameters)
         {
             shader.SetFloat("noiseOctaves", Octaves);
-            shader.SetFloat("noiseLacunarity", Lacunarity);
-            shader.SetFloat("noiseH", H);
-            shader.SetFloat("noiseOffset", Offset);
-            shader.SetFloat("noiseRidgeSmooth", RidgeSmooth);
         }
+
+        shader.SetFloat("noiseLacunarity", Lacunarity);
+        shader.SetFloat("noiseH", H);
+        shader.SetFloat("noiseOffset", Offset);
+        shader.SetFloat("noiseRidgeSmooth", RidgeSmooth);
 
         shader.SetTexture(kernel, "NoiseSampler", Noise);
         shader.SetTexture(kernel, "PermGradSampler", GradientTable);

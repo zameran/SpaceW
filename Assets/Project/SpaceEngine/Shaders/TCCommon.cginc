@@ -66,7 +66,7 @@ const float pi = 3.14159265358;
 
 //-----------------------------------------------------------------------------
 #define     tidalLock           scaleParams.w
-#define     mainFreq            mainParams.x
+#define		mainFreq			mainParams.x
 #define     terraceProb         mainParams.y
 #define     surfType            mainParams.z
 #define     snowLevel           mainParams.w

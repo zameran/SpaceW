@@ -27,6 +27,8 @@ public class TCCommonParametersSetterEditor : Editor
         EditorGUILayout.BeginVertical();
         EditorGUILayout.LabelField("Landscape Properties: ", EditorStyles.boldLabel);
 
+		setter.scaleParams.w = EditorGUILayout.Slider("tidalLock ", setter.scaleParams.w, -1.0f, 1.0f);
+		
         setter.Randomize.x = EditorGUILayout.Slider("Randomize.x ", setter.Randomize.x, -2.0f, 2.0f);
         setter.Randomize.y = EditorGUILayout.Slider("Randomize.y ", setter.Randomize.y, -2.0f, 2.0f);
         setter.Randomize.z = EditorGUILayout.Slider("Randomize.z ", setter.Randomize.z, -2.0f, 2.0f);
@@ -96,7 +98,7 @@ public class TCCommonParametersSetterEditor : Editor
 
         setter.craterParams.x = EditorGUILayout.Slider("craterMagn", setter.craterParams.x, 0.0f, 2.0f);
         setter.craterParams.y = EditorGUILayout.Slider("craterFreq", setter.craterParams.y, 0.0f, 60.0f);
-        setter.craterParams.z = EditorGUILayout.Slider("craterDensity", setter.craterParams.z, 0.0f, 1.0f);
+        setter.craterParams.z = EditorGUILayout.Slider("craterDensity", setter.craterParams.z, 0.0f, 2.0f);
         setter.craterParams.w = (float)Mathf.RoundToInt(EditorGUILayout.Slider("craterOctaves", setter.craterParams.w, 0.0f, 20.0f));
 
         setter.cracksParams.w = EditorGUILayout.Slider("craterRayedFactor", setter.cracksParams.w, 0.0f, 1.0f);

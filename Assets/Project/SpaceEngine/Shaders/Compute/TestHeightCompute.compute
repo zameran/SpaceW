@@ -2,6 +2,7 @@
 #define threadsPerGroup_Y 32
 
 #define nVerticesPerSide 128
+//#define defaultNoise
 
 #include "Assets/Project/SpaceEngine/Shaders/TCCommonTerra.cginc"
 
@@ -47,11 +48,33 @@ float3 CubeCoord(QuadGenerationConstants constants, float VerticesPerSide, uint3
 
 float NoiseFunction(float3 coord)
 {
+	//float noise = HeightMapAsteroid(0.001 * coord, mainFreq, montesFreq, hillsFreq, hillsMagn, hillsFraction, craterOctaves, craterSqrtDensity, craterFreq, craterMagn);
 	//float noise = HeightMapAsteroid(0.001 * coord, 0.5, 0.75, 0.45, 0.15, 0.15);
-	float noise = HeightMapTerra(0.002 * coord);
-	//float noise = Noise(0.002 * coord);
-
+	//float noise = HeightMapTerra(0.001 * coord, venusFreq, mainFreq, hillsFreq, canyonsFreq, dunesFreq, montesFreq, riversFreq, venusMagn, dunesMagn, hillsMagn, canyonsMagn, montesMagn, riversMagn, seaLevel, montesSpiky, dunesFraction, hillsFraction, hills2Fraction, canyonsFraction, mareSqrtDensity, craterSqrtDensity, cracksOctaves, riversOctaves, volcanoOctaves, riversSin, cloudsStyle, latIceCaps, icecapHeight, erosion);
+	//float noise = HeightMapTerra(0.001 * coord);
+	//float noise = Noise(0.001 * coord);
+	
+	#ifdef defaultNoise
+	float noise = Noise(0.001 * coord);
+	#else
+	//float noise = HeightMapTerra(0.001 * coord / 100, venusFreq, mainFreq, hillsFreq, canyonsFreq, dunesFreq, montesFreq, riversFreq, venusMagn, dunesMagn, hillsMagn, canyonsMagn, montesMagn, riversMagn, seaLevel, montesSpiky, dunesFraction, hillsFraction, hills2Fraction, canyonsFraction, mareSqrtDensity, craterSqrtDensity, cracksOctaves, riversOctaves, volcanoOctaves, riversSin, cloudsStyle, latIceCaps, icecapHeight, erosion);
+	float noise = HeightMapTerra(0.001 * coord);
+	#endif
+	
 	return noise;
+}
+
+float3 ColorFunction(float3 coord, float height, float slope)
+{
+	//return float3(0, 0, 0);
+	//return ColorMapAsteroid(coord, height, slope).xyz;
+	#ifdef defaultNoise
+	float3 color = float3(0, 0, 0);
+	#else
+	float3 color = ColorMapTerra(coord, mainFreq, dunesFraction, hillsFraction, hills2Fraction, canyonsFraction).xyz;
+	#endif
+	
+	return color;
 }
 
 #pragma kernel CSMainNoise
@@ -101,9 +124,8 @@ void CSTexturesMain (uint3 id : SV_DispatchThreadID)
 
 	float noise = patchPreOutput[outBuffOffset].noise;
 
+	float4 pos = patchPreOutput[outBuffOffset].pos;
 	float4 cpos = patchPreOutput[outBuffOffset].cpos;
-
-	Height[id.xy] = float4(0, 0, 0, noise);
 
 	float left = patchPreOutput[(id.x - 1) + id.y * nVerticesPerSide].noise * 2;
 	float right = patchPreOutput[(id.x + 1) + id.y * nVerticesPerSide].noise * 2;
@@ -114,9 +136,15 @@ void CSTexturesMain (uint3 id : SV_DispatchThreadID)
 	float ydelta = ((up - down) + 1) * 0.5;
 
 	float3 normal = float3(xdelta, ydelta, 1);
-	float slope = dot(normal, -normalize(cpos.xyz)) + 1;
-
+	
+	float slope = 0.5 / max(dot(normal, float3(0, 1, 0)), 0.001);
+	//float slope = dot(normal, -normalize(cpos.xyz)) + 1;
+	
 	Normal[id.xy] = float4(normal, slope);
+
+	float3 c = ColorFunction(pos.xyz, noise, slope);
+	
+	Height[id.xy] = float4(c, noise);
 
 	patchOutput[outBuffOffset] = patchPreOutput[outBuffOffset];
 }
