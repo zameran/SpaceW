@@ -67,7 +67,7 @@ float NoiseFunction(float3 coord)
 	return noise;
 }
 
-float3 ColorFunction(float3 coord, float height, float slope)
+float4 ColorFunction(float3 coord, float height, float slope)
 {
 	#ifdef defaultNoise
 	float3 color = float3(0, 0, 0);
@@ -76,7 +76,7 @@ float3 ColorFunction(float3 coord, float height, float slope)
 	//float3 color = ColorMapTerra(0.001 * coord, mainFreq, dunesFraction, hillsFraction, hills2Fraction, canyonsFraction).xyz;
 	#endif
 	
-	return color;
+	return float4(color, 1);
 }
 
 #pragma kernel CSMainNoise
@@ -96,9 +96,6 @@ void CSMainNoise (uint3 id : SV_DispatchThreadID)
 	float3 patchCoordCentered = patchCoord - patchCenter;
 	
 	float noise = NoiseFunction(patchCoord);
-
-	float4 color = NoiseFunction(patchCoord);
-
     float height = ((noise * 2) - 1) * constants.terrainMaxHeight;
 
 	patchCoordCentered += patchNormalizedCoord * height;
@@ -108,7 +105,7 @@ void CSMainNoise (uint3 id : SV_DispatchThreadID)
 
 	patchPreOutput[outBuffOffset].noise = ((noise * 2) - 1);
 	patchPreOutput[outBuffOffset].patchCenter = patchCenter;
-	patchPreOutput[outBuffOffset].vcolor = color;
+	patchPreOutput[outBuffOffset].vcolor = float4(noise, noise, noise, 1);
     patchPreOutput[outBuffOffset].pos = output;
 	patchPreOutput[outBuffOffset].cpos = cubeOutput;
 }
@@ -125,7 +122,7 @@ void CSTexturesMain (uint3 id : SV_DispatchThreadID)
 	QuadGenerationConstants constants = quadGenerationConstants[0];
 
 	float noise = patchPreOutput[outBuffOffset].noise;
-
+	float3 patchCenter = patchPreOutput[outBuffOffset].patchCenter;
 	float4 pos = patchPreOutput[outBuffOffset].pos;
 	float4 cpos = patchPreOutput[outBuffOffset].cpos;
 
@@ -133,24 +130,19 @@ void CSTexturesMain (uint3 id : SV_DispatchThreadID)
 	float right = patchPreOutput[(id.x + 1) + id.y * nVerticesPerSide].noise * 2;
 	float up = patchPreOutput[id.x + (id.y - 1) * nVerticesPerSide].noise * 2;
 	float down = patchPreOutput[id.x + (id.y + 1) * nVerticesPerSide].noise * 2;
-
 	float xdelta = ((left - right) + 1) * 0.5;
 	float ydelta = ((up - down) + 1) * 0.5;
 
 	float3 normal = float3(xdelta, ydelta, 1);
-	
 	float slope = 0.5 / max(dot(normal, float3(0, 1, 0)), 0.001);
-	//float slope = dot(normal, -normalize(cpos.xyz)) + 1;
-	
-	Normal[id.xy] = float4(normal, slope);
+	float4 color = ColorFunction(pos.xyz, noise, slope);
 
-	float3 c = ColorFunction(pos.xyz, noise, slope);
-	
-	Height[id.xy] = float4(c, noise);
+	Normal[id.xy] = float4(normal, slope);	
+	Height[id.xy] = float4(color.xyz, noise);
 
-	patchOutput[outBuffOffset].noise = patchPreOutput[outBuffOffset].noise;
-	patchOutput[outBuffOffset].patchCenter = patchPreOutput[outBuffOffset].patchCenter;
-	patchOutput[outBuffOffset].vcolor = float4(c, 1);
+	patchOutput[outBuffOffset].noise = noise;
+	patchOutput[outBuffOffset].patchCenter = patchCenter;
+	patchOutput[outBuffOffset].vcolor = color;
     patchOutput[outBuffOffset].pos = pos;
 	patchOutput[outBuffOffset].cpos = cpos;
 }
