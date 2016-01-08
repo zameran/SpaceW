@@ -20,7 +20,7 @@ struct QuadGenerationConstants
     float3 bottomRightCorner;
     float3 topRightCorner;
     float3 bottomLeftCorner;
-    float3 middle;
+    float3 middleNormalized;
 };
 
 struct OutputStruct

@@ -44,4 +44,9 @@ public static class BufferHelper
             }
         }
     }
+
+    public static void ReleaseAndDisposeQuadBuffers(Quad quad)
+    {
+        ReleaseAndDisposeBuffers(quad.QuadGenerationConstantsBuffer, quad.PreOutDataBuffer, quad.OutDataBuffer, quad.ToShaderData);
+    }
 }
