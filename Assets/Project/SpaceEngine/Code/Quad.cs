@@ -81,7 +81,7 @@ public class Quad : MonoBehaviour
 
     private void Start()
     {
-        Dispatch();
+        this.Dispatch();
     }
 
     private void OnDestroy()
@@ -93,16 +93,6 @@ public class Quad : MonoBehaviour
 
         if (this.NormalTexture != null && this.NormalTexture.IsCreated())
             this.NormalTexture.Release();
-    }
-
-    private void OnEnable()
-    {
-        this.Dispatch();
-    }
-
-    private void OnDisable()
-    {
-        this.OnDestroy();
     }
 
     private void OnDrawGizmosSelected()
