@@ -7,7 +7,9 @@ float HeightMapTerra(float3 ppoint, float vfreq, float freq, float hfreq, float 
 									float dfraction, float hfraction, float h2fraction, float cfraction,
 									float md, float cd,
 									float cro, float ro, float vo,
-									float rsin, float cldsstyle, float latcap, float caph, float eros)
+									float rsin, float cldsstyle, float latcap, float caph, float eros,
+									float crato, float crm, float crf,
+									float volcfreq, float vdens, float vradi, float volcocta)
 {
 	//venusFreq = 0.01;
 	//mainFreq = 0.37;
@@ -138,9 +140,9 @@ float HeightMapTerra(float3 ppoint, float vfreq, float freq, float hfreq, float 
 		}
 	}
 	
-	/*
 	height *= shore;
-
+	
+	/*
 	// Mare
 	float mare = global;
 	float mareFloor = global;
@@ -215,9 +217,52 @@ float HeightMapTerra(float3 ppoint, float vfreq, float freq, float hfreq, float 
 		height = VolcanoNoise(ppoint, global, height); // global - 1.0 to fix flooding of the canyons and river beds with lava
 	}
 	*/
+
+	//--------------------------------------------------------------------------------------------------------
+	// Craters
+	float crater = 0.0;
+
+	noiseOctaves = 3;  // Craters roundness distortion
+	craterDistortion = 1.0;
+	craterRoundDist = 0.03;
+	heightFloor = -0.1;
+	heightPeak = 0.6;
+	heightRim = 1.0;
+	crater = CraterNoise(ppoint, 0.5 * crm, crf, cd, crato);
+	noiseOctaves = 10.0;
+	noiseH = 1.0;
+	noiseOffset = 1.0;
+	crater = RidgedMultifractalErodedDetail(ppoint * 0.3 * mfreq + Randomize, 2.0, eros, 0.25 * crater);
+	
+	height += crater;
+	//--------------------------------------------------------------------------------------------------------
+	
+	//--------------------------------------------------------------------------------------------------------
+	// Pseudo rivers
+	noiseOctaves = ro;
+	noiseLacunarity = 2.218281828459;
+	noiseH = 0.5;
+	noiseOffset = 0.8;
+	p = ppoint * freq + Randomize;
+	distort = 0.035 * Fbm3D(p * rsin * 5.0);
+	distort += 0.350 * Fbm3D(p * rsin);
+	cell = Cell3Noise2(rfreq * p + distort);
+	float pseudoRivers = 1.0 - saturate(abs(cell.y - cell.x) * rmagn);
+	pseudoRivers = smoothstep(0.0, 1.0, pseudoRivers);
+	pseudoRivers *= 1.0 - smoothstep(0.06, 0.10, global - slvl); // disable rivers inside continents
+	pseudoRivers *= 1.0 - smoothstep(0.00, 0.01, slvl - height); // disable rivers inside oceans
+	height = lerp(height, slvl - 0.02, pseudoRivers);
+	//--------------------------------------------------------------------------------------------------------
+	
+	//--------------------------------------------------------------------------------------------------------
+	// Shield volcano
+	noiseOctaves = 3;  // volcano roundness distortion
+	craterRoundDist = 0.001;
+	height = VolcanoNoise(ppoint, global, height, volcfreq, vdens, vradi, volcocta); // global - 1.0 to fix flooding of the canyons and river beds with lava
+	//--------------------------------------------------------------------------------------------------------
 	
 	// Assign a climate type
-	noiseOctaves = (cloudsStyle == 1.0) ? 5.0 : 12.0;
+	noiseOctaves = (cldsstyle == 1.0) ? 5.0 : 12.0;
 	noiseH = 0.5;
 	noiseLacunarity = 2.218281828459;
 	noiseOffset = 0.8;
@@ -244,6 +289,14 @@ float HeightMapTerra(float3 ppoint, float vfreq, float freq, float hfreq, float 
 
 float HeightMapTerra(float3 ppoint)
 {
+	//#define useMareOnTerra;
+	//#define useCracksOnTerra;
+	//#define useCratersOnTerra;
+	//#define useRiversOnTerra;
+	//#define useVolcanosOnTerra;
+
+	#define sheet;
+	
 	//venusFreq = 0.01;
 	//mainFreq = 0.37;
 	//hillsFreq = 0.59;
@@ -264,97 +317,21 @@ float HeightMapTerra(float3 ppoint)
 	//hills2Fraction = 0.21;
 	//canyonsFraction = 0.15;
 
-	mareSqrtDensity = 0.0;
-	craterSqrtDensity = 0.0;
+	//mareSqrtDensity = 0.0;
+	//craterSqrtDensity = 0.0;
 
-	cracksOctaves = 0;
-	riversOctaves = 0;
-	volcanoOctaves = 0;
+	//cracksOctaves = 0;
+	//riversOctaves = 0;
+	//volcanoOctaves = 0; //volcanoParams1.w
 
-	riversSin = 0.5;
+	//riversSin = 0.5; //riversParams.z
 	
-	cloudsStyle = 1;
+	//cloudsStyle = 1; //cloudsParams2.z
 
-	latIceCaps = 1.5;
-	icecapHeight = 0.1;
+	//latIceCaps = 1.5; //colorParams.z
+	//icecapHeight = 0.1; //mareParams.w
 
-	erosion = 1;
-	
-	//-----------------------------------------------------------------------------
-	#define     tidalLock           scaleParams.w
-	#define		mainFreq			mainParams.x
-	#define     terraceProb         mainParams.y
-	#define     surfType            mainParams.z
-	#define     snowLevel           mainParams.w
-	#define     colorDistMagn       colorParams.x
-	#define     colorDistFreq       colorParams.y
-	#define     latIceCaps          colorParams.z
-	#define     latTropic           colorParams.w
-	#define     climatePole         climateParams.x
-	#define     climateTropic       climateParams.y
-	#define     climateEquator      climateParams.z
-	#define     tropicWidth         climateParams.w
-	#define     seaLevel            mareParams.x
-	#define     mareFreq            mareParams.y
-	#define     mareSqrtDensity     mareParams.z
-	#define     icecapHeight        mareParams.w
-	#define     montesMagn          montesParams.x
-	#define     montesFreq          montesParams.y
-	#define     montesFraction      montesParams.z
-	#define     montesSpiky         montesParams.w
-	#define     dunesMagn           dunesParams.x
-	#define     dunesFreq           dunesParams.y
-	#define     dunesFraction       dunesParams.z
-	#define     drivenDarkening     dunesParams.w
-	#define     hillsMagn           hillsParams.x
-	#define     hillsFreq           hillsParams.y
-	#define     hillsFraction       hillsParams.z
-	#define     hills2Fraction      hillsParams.w
-	#define     canyonsMagn         canyonsParams.x
-	#define     canyonsFreq         canyonsParams.y
-	#define     canyonsFraction     canyonsParams.z
-	#define     erosion             canyonsParams.w
-	#define     riversMagn          riversParams.x
-	#define     riversFreq          riversParams.y
-	#define     riversSin           riversParams.z
-	#define     riversOctaves       riversParams.w
-	#define     cracksMagn          cracksParams.x
-	#define     cracksFreq          cracksParams.y
-	#define     cracksOctaves       cracksParams.z
-	#define     craterRayedFactor   cracksParams.w
-	#define     craterMagn          craterParams.x
-	#define     craterFreq          craterParams.y
-	#define     craterSqrtDensity   craterParams.z
-	#define     craterOctaves       craterParams.w
-	#define     volcanoMagn         volcanoParams1.x
-	#define     volcanoFreq         volcanoParams1.y
-	#define     volcanoSqrtDensity  volcanoParams1.z
-	#define     volcanoOctaves      volcanoParams1.w
-	#define     volcanoActivity     volcanoParams2.x
-	#define     volcanoFlows        volcanoParams2.y
-	#define     volcanoRadius       volcanoParams2.z
-	#define     volcanoTemp         volcanoParams2.w
-	#define     lavaCoverage        lavaParams.x
-	#define     lavaTemperature     lavaParams.y
-	#define     surfTemperature     lavaParams.z
-	#define     heightTempGrad      lavaParams.w
-	#define     texScale            textureParams.x
-	#define     texColorConv        textureParams.y
-	#define     venusMagn           textureParams.z
-	#define     venusFreq           textureParams.w
-	#define     cloudsFreq          cloudsParams1.x
-	#define     cloudsOctaves       cloudsParams1.y
-	#define     twistZones          cloudsParams1.z
-	#define     twistMagn           cloudsParams1.w
-	#define     cloudsLayer         cloudsParams2.x
-	#define     cloudsNLayers       cloudsParams2.y
-	#define     cloudsStyle         cloudsParams2.z
-	#define     cloudsCoverage      cloudsParams2.w
-	#define     cycloneMagn         cycloneParams.x
-	#define     cycloneFreq         cycloneParams.y
-	#define     cycloneSqrtDensity  cycloneParams.z
-	#define     cycloneOctaves      cycloneParams.w
-	//-----------------------------------------------------------------------------
+	//erosion = 1; canyonsParams.w
 	
     // Global landscape
     float3  p = ppoint * mainParams.x + Randomize;
@@ -425,7 +402,7 @@ float HeightMapTerra(float3 ppoint)
         noiseH       = 0.9;
         noiseLacunarity = 4.0;
         noiseOffset  = montesParams.w;
-        height = -canyonsParams.x * montRage * RidgedMultifractalErodedDetail(ppoint * 4.0 * canyonsParams.y * inv2montesSpiky + Randomize, 2.0, erosion, montBiomeScale);
+        height = -canyonsParams.x * montRage * RidgedMultifractalErodedDetail(ppoint * 4.0 * canyonsParams.y * inv2montesSpiky + Randomize, 2.0, canyonsParams.w, montBiomeScale);
 
         //if (terrace < terraceProb)
         {
@@ -440,7 +417,7 @@ float HeightMapTerra(float3 ppoint)
         noiseOctaves = 10.0;
         noiseH       = 1.0;
         noiseOffset  = montesParams.w;
-        height = montesParams.x * montRage * RidgedMultifractalErodedDetail(ppoint * montesParams.y * inv2montesSpiky + Randomize, 2.0, erosion, montBiomeScale);
+        height = montesParams.x * montRage * RidgedMultifractalErodedDetail(ppoint * montesParams.y * inv2montesSpiky + Randomize, 2.0, canyonsParams.w, montBiomeScale);
 
         if (terrace < terraceProb)
         {
@@ -450,87 +427,126 @@ float HeightMapTerra(float3 ppoint)
     }
 
     height *= shore;
-
-    // Mare
-    float mare = global;
-    float mareFloor = global;
-    float mareSuppress = 1.0;
-    if (mareSqrtDensity > 0.05)
-    {
-        //noiseOctaves = 2;
-        //mareFloor = 0.6 * (1.0 - Cell3Noise(0.3*p));
-        noiseH           = 0.5;
-        noiseLacunarity  = 2.218281828459;
-        noiseOffset      = 0.8;
-        craterDistortion = 1.0;
-        noiseOctaves     = 6.0;  // Mare roundness distortion
-        mare = MareNoise(ppoint, global, 0.0, mareSuppress);
-    }
-
-    // Ice cracks
-    if (cracksOctaves > 0.0)
-    {
-        // Rim height distortion
-        noiseH          = 0.5;
-        noiseLacunarity = 2.218281828459;
-        noiseOffset     = 0.8;
-        noiseOctaves    = 4.0;
-        float dunes = 2 * cracksMagn * (0.2 + dunesParams.x * max(Fbm(ppoint * dunesParams.y) + 0.7, 0.0));
-        noiseOctaves    = 6.0;  // Cracks roundness distortion
-        height += CrackNoise(ppoint, dunes);
-    }
-
+	
+	//#ifdef sheet
+	
+	/*
+	float mare = global;
+	float mareFloor = global;
+	float mareSuppress = 1.0;
+	
+	//#ifdef useMareOnTerra
+	// Mare
+	//if (useMareOnTerra == true)//if (mareParams.z > 0.05)
+	//{
+		//noiseOctaves = 2;
+		//mareFloor = 0.6 * (1.0 - Cell3Noise(0.3*p));
+		noiseH           = 0.5;
+		noiseLacunarity  = 2.218281828459;
+		noiseOffset      = 0.8;
+		craterDistortion = 1.0;
+		noiseOctaves     = 6.0;  // Mare roundness distortion
+		mare = MareNoise(ppoint, global, 0.0, mareSuppress);
+	//}
+	//else
+	//{
+		//mare = global;
+	//}
+	//#endif
+	
+	//#ifdef useCracksOnTerra
+	//Ice cracks
+	//if (useCracksOnTerra == true)//if (cracksParams.z > 0.0)
+	//{
+		// Rim height distortion
+		noiseH          = 0.5;
+		noiseLacunarity = 2.218281828459;
+		noiseOffset     = 0.8;
+		noiseOctaves    = 4.0;
+		float dunes = 2 * cracksMagn * (0.2 + dunesParams.x * max(Fbm(ppoint * dunesParams.y) + 0.7, 0.0));
+		noiseOctaves    = 6.0;  // Cracks roundness distortion
+		height += CrackNoise(ppoint, dunes);
+	//}
+	//else
+	//{
+		//height += 0;
+	//}
+	//#endif
+	
+	float crater = 0.0;
+	//#ifdef useCratersOnTerra
     // Craters
-    float crater = 0.0;
-    if (craterSqrtDensity > 0.05)
-    {
+    //if (useCratersOnTerra == true)//if (craterParams.z > 0.05)
+    //{
         noiseOctaves = 3;  // Craters roundness distortion
         craterDistortion = 1.0;
         craterRoundDist  = 0.03;
         heightFloor = -0.1;
         heightPeak  = 0.6;
         heightRim   = 1.0;
-        crater = CraterNoise(ppoint, 0.5 * craterMagn, craterFreq, craterSqrtDensity, craterOctaves);
+        crater = CraterNoise(ppoint, 0.5 * craterParams.x, craterParams.y, craterParams.z, craterParams.w);
         noiseOctaves = 10.0;
         noiseH       = 1.0;
         noiseOffset  = 1.0;
-        crater = RidgedMultifractalErodedDetail(ppoint * 0.3 * montesParams.y + Randomize, 2.0, erosion, 0.25 * crater);
-    }
+        crater = RidgedMultifractalErodedDetail(ppoint * 0.3 * montesParams.y + Randomize, 2.0, canyonsParams.w, 0.25 * crater);
+    //}
+	//else
+	//{
+		//crater = 0.0;
+	//}
+	//#endif
 
     height += mare + crater;
-
+	
+	//#ifdef useRiversOnTerra
     // Pseudo rivers
-    if (riversOctaves > 0)
-    {
-        noiseOctaves     = riversOctaves;
+    //if (useRiversOnTerra == true)//if (riversParams.w > 0)
+    //{
+        noiseOctaves     = riversParams.w;
         noiseLacunarity  = 2.218281828459;
         noiseH           = 0.5;
         noiseOffset      = 0.8;
         p = ppoint * mainFreq + Randomize;
-        distort  = 0.035 * Fbm3D(p * riversSin * 5.0);
-        distort += 0.350 * Fbm3D(p * riversSin);
+        distort  = 0.035 * Fbm3D(p * riversParams.z * 5.0);
+        distort += 0.350 * Fbm3D(p * riversParams.z);
         cell = Cell3Noise2(riversParams.y * p + distort);
         float pseudoRivers = 1.0 - saturate(abs(cell.y - cell.x) * riversParams.x);
         pseudoRivers = smoothstep(0.0, 1.0, pseudoRivers);
         pseudoRivers *= 1.0 - smoothstep(0.06, 0.10, global - mareParams.x); // disable rivers inside continents
         pseudoRivers *= 1.0 - smoothstep(0.00, 0.01, mareParams.x - height); // disable rivers inside oceans
         height = lerp(height, mareParams.x-0.02, pseudoRivers);
-    }
-
+    //}
+	//else
+	//{
+		//height += 0;
+	//}
+	//#endif
+	
+	//#ifdef useVolcanosOnTerra
     // Shield volcano
-    if (volcanoOctaves > 0)
-    {
+    //if (useVolcanosOnTerra == true)//if (volcanoParams1.w > 0)
+    //{
         noiseOctaves = 3;  // volcano roundness distortion
         craterRoundDist = 0.001;
         height = VolcanoNoise(ppoint, global, height); // global - 1.0 to fix flooding of the canyons and river beds with lava
-    }
-
+    //}
+	//else
+	//{
+		//height += 0;
+	//}
+	//#endif
+	
+	#endif
+	*/
+	
     // Assign a climate type
-    noiseOctaves = (cloudsStyle == 1.0) ? 5.0 : 12.0;
+    noiseOctaves = (cloudsParams2.z == 1.0) ? 5.0 : 12.0;
     noiseH          = 0.5;
     noiseLacunarity = 2.218281828459;
     noiseOffset     = 0.8;
+	
     float latitude;
+	
     if (tidalLock <= 0.0)
     {
         latitude = abs(ppoint.y);
@@ -545,8 +561,8 @@ float HeightMapTerra(float3 ppoint)
 
     // Ice caps;
     // cloudsStyle = 0.1 for oceania, 1.0 for other planets
-    float iceCap = saturate((latitude / latIceCaps - 1.0) * 50.0 * cloudsStyle);
-    height = height * cloudsStyle + icecapHeight * smoothstep(0.0, 1.0, iceCap);
+    float iceCap = saturate((latitude / colorParams.z - 1.0) * 50.0 * cloudsParams2.z);
+    height = height * cloudsParams2.z + mareParams.w * smoothstep(0.0, 1.0, iceCap);
 
     return height;
 }

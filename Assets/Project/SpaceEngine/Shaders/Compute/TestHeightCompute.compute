@@ -4,7 +4,7 @@
 #define nVerticesPerSide 128
 //#define defaultNoise
 
-#include "Assets/Project/SpaceEngine/Shaders/TCCommonTerra.cginc"
+#include "Assets/Project/SpaceEngine/Shaders/TCCommonAsteroid.cginc"
 
 struct QuadGenerationConstants
 {
@@ -15,6 +15,12 @@ struct QuadGenerationConstants
     float3 cubeFaceEastDirection;
     float3 cubeFaceNorthDirection;
     float3 patchCubeCenter;
+
+	float3 topLeftCorner;
+    float3 bottomRightCorner;
+    float3 topRightCorner;
+    float3 bottomLeftCorner;
+    float3 middle;
 };
 
 struct OutputStruct
@@ -49,16 +55,13 @@ float3 CubeCoord(QuadGenerationConstants constants, float VerticesPerSide, uint3
 float NoiseFunction(float3 coord)
 {
 	//float noise = HeightMapAsteroid(0.001 * coord, mainFreq, montesFreq, hillsFreq, hillsMagn, hillsFraction, craterOctaves, craterSqrtDensity, craterFreq, craterMagn);
-	//float noise = HeightMapAsteroid(0.001 * coord, 0.5, 0.75, 0.45, 0.15, 0.15);
-	//float noise = HeightMapTerra(0.001 * coord, venusFreq, mainFreq, hillsFreq, canyonsFreq, dunesFreq, montesFreq, riversFreq, venusMagn, dunesMagn, hillsMagn, canyonsMagn, montesMagn, riversMagn, seaLevel, montesSpiky, dunesFraction, hillsFraction, hills2Fraction, canyonsFraction, mareSqrtDensity, craterSqrtDensity, cracksOctaves, riversOctaves, volcanoOctaves, riversSin, cloudsStyle, latIceCaps, icecapHeight, erosion);
-	//float noise = HeightMapTerra(0.001 * coord);
-	//float noise = Noise(0.001 * coord);
+	//float noise = HeightMapTerra(0.001 * coord, venusFreq, mainFreq, hillsFreq, canyonsFreq, dunesFreq, montesFreq, riversFreq, venusMagn, dunesMagn, hillsMagn, canyonsMagn, montesMagn, riversMagn, seaLevel, montesSpiky, dunesFraction, hillsFraction, hills2Fraction, canyonsFraction, mareSqrtDensity, craterSqrtDensity, cracksOctaves, riversOctaves, volcanoOctaves, riversSin, cloudsStyle, latIceCaps, icecapHeight, erosion, craterOctaves, craterMagn, craterFreq, volcanoFreq, volcanoSqrtDensity, volcanoRadius, volcanoOctaves);
 	
 	#ifdef defaultNoise
 	float noise = Noise(0.001 * coord);
 	#else
-	//float noise = HeightMapTerra(0.001 * coord / 100, venusFreq, mainFreq, hillsFreq, canyonsFreq, dunesFreq, montesFreq, riversFreq, venusMagn, dunesMagn, hillsMagn, canyonsMagn, montesMagn, riversMagn, seaLevel, montesSpiky, dunesFraction, hillsFraction, hills2Fraction, canyonsFraction, mareSqrtDensity, craterSqrtDensity, cracksOctaves, riversOctaves, volcanoOctaves, riversSin, cloudsStyle, latIceCaps, icecapHeight, erosion);
-	float noise = HeightMapTerra(0.001 * coord);
+	float noise = HeightMapAsteroid(0.001 * coord, mainFreq, montesFreq, hillsFreq, hillsMagn, hillsFraction, craterOctaves, craterSqrtDensity, craterFreq, craterMagn);
+	//float noise = HeightMapTerra(0.001 * coord, venusFreq, mainFreq, hillsFreq, canyonsFreq, dunesFreq, montesFreq, riversFreq, venusMagn, dunesMagn, hillsMagn, canyonsMagn, montesMagn, riversMagn, seaLevel, montesSpiky, dunesFraction, hillsFraction, hills2Fraction, canyonsFraction, mareSqrtDensity, craterSqrtDensity, cracksOctaves, riversOctaves, volcanoOctaves, riversSin, cloudsStyle, latIceCaps, icecapHeight, erosion, craterOctaves, craterMagn, craterFreq, volcanoFreq, volcanoSqrtDensity, volcanoRadius, volcanoOctaves);
 	#endif
 	
 	return noise;
@@ -66,12 +69,11 @@ float NoiseFunction(float3 coord)
 
 float3 ColorFunction(float3 coord, float height, float slope)
 {
-	//return float3(0, 0, 0);
-	//return ColorMapAsteroid(coord, height, slope).xyz;
 	#ifdef defaultNoise
 	float3 color = float3(0, 0, 0);
 	#else
-	float3 color = ColorMapTerra(coord, mainFreq, dunesFraction, hillsFraction, hills2Fraction, canyonsFraction).xyz;
+	float3 color = ColorMapAsteroid(coord, height, slope).xyz;
+	//float3 color = ColorMapTerra(0.001 * coord, mainFreq, dunesFraction, hillsFraction, hills2Fraction, canyonsFraction).xyz;
 	#endif
 	
 	return color;
@@ -146,5 +148,9 @@ void CSTexturesMain (uint3 id : SV_DispatchThreadID)
 	
 	Height[id.xy] = float4(c, noise);
 
-	patchOutput[outBuffOffset] = patchPreOutput[outBuffOffset];
+	patchOutput[outBuffOffset].noise = patchPreOutput[outBuffOffset].noise;
+	patchOutput[outBuffOffset].patchCenter = patchPreOutput[outBuffOffset].patchCenter;
+	patchOutput[outBuffOffset].vcolor = float4(c, 1);
+    patchOutput[outBuffOffset].pos = pos;
+	patchOutput[outBuffOffset].cpos = cpos;
 }

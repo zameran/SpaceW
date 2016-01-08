@@ -5,6 +5,8 @@ using System.Collections.Generic;
 
 public class Planetoid : MonoBehaviour
 {
+    public Transform LODTarget = null;
+
     public float PlanetRadius = 1024;
 
     public bool DebugEnabled = false;
@@ -25,7 +27,7 @@ public class Planetoid : MonoBehaviour
         for (int i = 0; i < Quads.Count; i++)
         {
             if (Quads[i] != null)
-                if (Quads[i].Subquads.Count == 0)
+                if (!Quads[i].HaveSubQuads)
                 {
                     Quads[i].Dispatch();
                 }
@@ -90,11 +92,12 @@ public class Planetoid : MonoBehaviour
         gc.cubeFaceEastDirection = quadComponent.GetCubeFaceEastDirection(quadPosition);
         gc.cubeFaceNorthDirection = quadComponent.GetCubeFaceNorthDirection(quadPosition);
         gc.patchCubeCenter = quadComponent.GetPatchCubeCenter(quadPosition);
-
+		
         quadComponent.Position = quadPosition;
         quadComponent.ID = QuadID.One;
-        quadComponent.quadGenerationConstants = gc;
+        quadComponent.quadGC = gc;
         quadComponent.Planetoid = this;
+        quadComponent.SetupCorners(quadPosition);
 
         mf.sharedMesh = MeshFactory.SetupQuadMesh();
         mf.sharedMesh.bounds = new Bounds(Vector3.zero, new Vector3(PlanetRadius * 2, PlanetRadius * 2, PlanetRadius * 2));
@@ -126,12 +129,13 @@ public class Planetoid : MonoBehaviour
         quadComponent.Setter = nps;
         quadComponent.HeightShader = HeightShader;
         quadComponent.Planetoid = this;
+        quadComponent.SetupCorners(quadPosition);
 
         QuadGenerationConstants gc = QuadGenerationConstants.Init();
         gc.planetRadius = PlanetRadius;
 
         quadComponent.Position = quadPosition;
-        quadComponent.quadGenerationConstants = gc;
+        quadComponent.quadGC = gc;
         quadComponent.Planetoid = this;
 
         mf.sharedMesh = MeshFactory.SetupQuadMesh();

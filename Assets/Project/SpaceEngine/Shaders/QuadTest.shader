@@ -3,8 +3,8 @@
 	Properties
 	{
 		_HeightTexture("Height (RGBA)", 2D) = "white" {}
-		_NormalTexture("Normal (RGB)", 2D) = "white" {}
-		_Mixing("Mixing", Range(0,1)) = 0.5
+		_NormalTexture("Normal (RGBA)", 2D) = "white" {}
+		_Mixing("Mixing", Range(0,1)) = 0.0
 		_Glossiness("Smoothness", Range(0,1)) = 0.5
 		_Metallic("Metallic", Range(0,1)) = 0.0
 	}

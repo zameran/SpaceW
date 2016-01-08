@@ -1,0 +1,12 @@
+﻿#define threadsPerGroup_X 32
+#define threadsPerGroup_Y 32
+
+#define nVerticesPerSide 128
+#define nRealVerticesPerSide nVerticesPerSide + 2
+
+#pragma kernel HeightMain
+[numthreads(threadsPerGroup_X, threadsPerGroup_Y, 1)]
+void HeightMain (uint3 id : SV_DispatchThreadID)
+{
+	
+}

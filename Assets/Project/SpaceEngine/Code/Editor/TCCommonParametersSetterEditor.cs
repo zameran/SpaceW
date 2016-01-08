@@ -28,6 +28,7 @@ public class TCCommonParametersSetterEditor : Editor
         EditorGUILayout.LabelField("Landscape Properties: ", EditorStyles.boldLabel);
 
 		setter.scaleParams.w = EditorGUILayout.Slider("tidalLock ", setter.scaleParams.w, -1.0f, 1.0f);
+		setter.cloudsParams2.z = EditorGUILayout.Slider("cloudsStyle ", setter.cloudsParams2.z, -1.0f, 1.0f);
 		
         setter.Randomize.x = EditorGUILayout.Slider("Randomize.x ", setter.Randomize.x, -2.0f, 2.0f);
         setter.Randomize.y = EditorGUILayout.Slider("Randomize.y ", setter.Randomize.y, -2.0f, 2.0f);

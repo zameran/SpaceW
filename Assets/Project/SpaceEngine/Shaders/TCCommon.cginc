@@ -1961,6 +1961,49 @@ float VolcanoNoise(float3 ppoint, float globalLand, float localLand)
 	return newLand;
 }
 
+float VolcanoNoise(float3 ppoint, float globalLand, float localLand, float volcfreq, float vdens, float vradi, float volcocta)
+{
+	ppoint += craterRoundDist * Fbm3D(ppoint * 183.61);
+	craterSphereRadius = volcfreq * vdens;
+
+	float3 binormal = normalize(cross(ppoint, float3(0, 1, 0)));
+	float newLand = localLand;
+	float amplitude = volcanoMagn;
+	float radFactor = 2.0 / (vdens * vradi);
+	float volcano, dist, fi, r;
+	float shape = 0.7; // 1.0 - shield volcano, 0.5 - conic volcano
+	float4 cell;
+
+	radInner = 0.02;
+	radRim = 0.03;
+	radOuter = 0.80;
+
+	//dist = 0.08 * JordanTurbulence(ppoint * 2400.0 + Randomize, 0.8, 0.5, 0.6, 0.35, 1.0, 0.8, 1.0);
+	//dist = 0.01 * DistFbm(ppoint * montesFreq * 23.8 + Randomize, 0.35);
+	dist = 0.005 * Fbm(ppoint * montesFreq * 23.8 + Randomize);
+
+	for (int i = 0; i<volcocta; i++)
+	{
+		cell = Cell2NoiseVecSphere(ppoint, craterSphereRadius);
+		//cell = Cell3NoiseVec(ppoint + craterSphereRadius);
+
+		fi = acos(dot(binormal, normalize(cell.xyz - ppoint))) / (pi*2.0);
+		r = SavePow(cell.w * radFactor, shape);
+		volcano = globalLand - 1.0 + 2.0 * amplitude * VolcanoHeightFunc(r, fi, 48.3 * dot(cell.xyz, Randomize), dist, 0.1 * shape);
+		newLand = softExpMaxMin(newLand, volcano, 32);
+
+		craterSphereRadius *= 0.57;
+		//craterSphereRadius *= 1.83;
+		//amplitude *= 0.60;
+		//radInner  *= 0.60;
+		//radRim    *= 0.60;
+		//radOuter  *= 0.60;
+		shape = max(shape * 0.5, 0.5);
+	}
+
+	return newLand;
+}
+
 float VolcanoGlowNoise(float3 ppoint)
 {
 	ppoint += craterRoundDist * Fbm3D(ppoint * 183.61);
