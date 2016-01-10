@@ -73,6 +73,9 @@ public class Quad : MonoBehaviour
 
     public bool HaveSubQuads = false;
 
+    public float lodUpdateInterval = 0.25f;
+    public float lastLodUpdateTime = 0.00f;
+
     public Quad()
     {
 
@@ -81,6 +84,28 @@ public class Quad : MonoBehaviour
     private void Start()
     {
         this.Dispatch();
+    }
+
+    private void Update()
+    {
+        if (Time.time > this.lastLodUpdateTime + this.lodUpdateInterval)
+        {
+            this.lastLodUpdateTime = Time.time;
+
+            if (this.LODLevel != this.Planetoid.LODMaxLevel)
+            {
+                if (this.Planetoid.LODDistances[this.LODLevel + 1] > GetClosestDistance())
+                {
+                    if (!this.HaveSubQuads)
+                        this.Split();
+                }
+                else
+                {
+                    if (this.HaveSubQuads)
+                        this.Unsplit();
+                }
+            }
+        }
     }
 
     private void OnDestroy()
@@ -96,18 +121,24 @@ public class Quad : MonoBehaviour
 
     private void OnDrawGizmosSelected()
     {
-        if (!this.HaveSubQuads)
+        if (this.Planetoid.DrawGizmos)
         {
-            //Gizmos.color = Color.red;
-            //Gizmos.DrawWireSphere(this.quadGC.topLeftCorner, 100);
-            //Gizmos.color = Color.green;
-            //Gizmos.DrawWireSphere(this.quadGC.topRightCorner, 100);
-            //Gizmos.color = Color.blue;
-            //Gizmos.DrawWireSphere(this.quadGC.bottomLeftCorner, 100);
-            //Gizmos.color = Color.yellow;
-            //Gizmos.DrawWireSphere(this.quadGC.bottomRightCorner, 100);
-            Gizmos.color = Color.magenta;
-            Gizmos.DrawWireSphere(this.quadGC.middleNormalized, 100);
+            //Gizmos.color = Color.cyan;
+            //Gizmos.DrawWireCube(this.quadGC.middleNormalized, GetBoundsSize(this));
+
+            if (!this.HaveSubQuads)
+            {
+                //Gizmos.color = Color.red;
+                //Gizmos.DrawWireSphere(this.quadGC.topLeftCorner, 100);
+                //Gizmos.color = Color.green;
+                //Gizmos.DrawWireSphere(this.quadGC.topRightCorner, 100);
+                //Gizmos.color = Color.blue;
+                //Gizmos.DrawWireSphere(this.quadGC.bottomLeftCorner, 100);
+                //Gizmos.color = Color.yellow;
+                //Gizmos.DrawWireSphere(this.quadGC.bottomRightCorner, 100);
+                Gizmos.color = Color.magenta;
+                Gizmos.DrawWireSphere(this.quadGC.middleNormalized, 100);
+            }
         }
     }
 
@@ -374,6 +405,70 @@ public class Quad : MonoBehaviour
     public void SetupID(Quad quad, int id)
     {
         quad.ID = (QuadID)id;
+    }
+
+    public void SetupBounds(Quad quad, Mesh mesh)
+    {
+        Vector3 middle = quad.quadGC.middleNormalized;
+
+        mesh.bounds = new Bounds(middle, GetBoundsSize(quad));
+    }
+
+    public float GetClosestDistance()
+    {
+        float closestDistance = Mathf.Infinity;
+
+        Vector3 topLeftCorner = this.quadGC.topLeftCorner.NormalizeToRadius(this.Planetoid.PlanetRadius);
+        Vector3 topRightCorner = this.quadGC.topRightCorner.NormalizeToRadius(this.Planetoid.PlanetRadius);
+        Vector3 middlePoint = this.quadGC.middleNormalized;
+        Vector3 bottomLeftCorner = this.quadGC.bottomLeftCorner.NormalizeToRadius(this.Planetoid.PlanetRadius);
+        Vector3 bottomRightCorner = this.quadGC.bottomRightCorner.NormalizeToRadius(this.Planetoid.PlanetRadius);
+
+        float d = Vector3.Distance(this.Planetoid.LODTarget.position, transform.TransformPoint(topLeftCorner));
+
+        if (d < closestDistance)
+        {
+            closestDistance = d;
+        }
+
+        d = Vector3.Distance(this.Planetoid.LODTarget.position, transform.TransformPoint(topRightCorner));
+
+        if (d < closestDistance)
+        {
+            closestDistance = d;
+        }
+
+        d = Vector3.Distance(this.Planetoid.LODTarget.position, transform.TransformPoint(middlePoint));
+
+        if (d < closestDistance)
+        {
+            closestDistance = d;
+        }
+
+        d = Vector3.Distance(this.Planetoid.LODTarget.position, transform.TransformPoint(bottomLeftCorner));
+
+        if (d < closestDistance)
+        {
+            closestDistance = d;
+        }
+
+        d = Vector3.Distance(this.Planetoid.LODTarget.position, transform.TransformPoint(bottomRightCorner));
+
+        if (d < closestDistance)
+        {
+            closestDistance = d;
+        }
+
+        return closestDistance;
+    }
+
+    public Vector3 GetBoundsSize(Quad quad)
+    {
+        Vector3 tlc = quad.quadGC.topLeftCorner;
+        tlc = tlc.Abs();
+        tlc = tlc * 2;
+
+        return tlc;
     }
 
     public Vector3 GetCubeFaceEastDirection(QuadPostion quadPosition)

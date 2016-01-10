@@ -5,6 +5,8 @@ using System.Collections.Generic;
 
 public class Planetoid : MonoBehaviour
 {
+    public bool DrawGizmos = false;
+
     public Transform LODTarget = null;
 
     public float PlanetRadius = 1024;
@@ -15,6 +17,13 @@ public class Planetoid : MonoBehaviour
 
     public Shader ColorShader;
     public ComputeShader HeightShader;
+
+    public Mesh QuadMeshCache;
+
+    [HideInInspector]
+    public int LODMaxLevel = 6;
+
+    public int[] LODDistances = new int[7] { 2048, 1024, 512, 256, 128, 64, 32 };
 
     [ContextMenu("Dispatch")]
     public void Dispatch()
@@ -46,6 +55,8 @@ public class Planetoid : MonoBehaviour
         }
 
         Quads.Clear();
+
+        QuadMeshCache = null;
     }
 
     [ContextMenu("SetupQuads")]
@@ -53,6 +64,9 @@ public class Planetoid : MonoBehaviour
     {
         if (Quads.Count > 0)
             return;
+
+        if (QuadMeshCache == null)
+            QuadMeshCache = MeshFactory.SetupQuadMesh();
 
         SetupMainQuad(QuadPostion.Top);
         SetupMainQuad(QuadPostion.Bottom);
@@ -99,7 +113,11 @@ public class Planetoid : MonoBehaviour
         quadComponent.Planetoid = this;
         quadComponent.SetupCorners(quadPosition);
 
-        mf.sharedMesh = MeshFactory.SetupQuadMesh();
+        if (QuadMeshCache == null)
+            mf.sharedMesh = MeshFactory.SetupQuadMesh();
+        else
+            mf.sharedMesh = QuadMeshCache;
+
         mf.sharedMesh.bounds = new Bounds(Vector3.zero, new Vector3(PlanetRadius * 2, PlanetRadius * 2, PlanetRadius * 2));
 
         quadComponent.Dispatch();
@@ -138,7 +156,11 @@ public class Planetoid : MonoBehaviour
         quadComponent.quadGC = gc;
         quadComponent.Planetoid = this;
 
-        mf.sharedMesh = MeshFactory.SetupQuadMesh();
+        if (QuadMeshCache == null)
+            mf.sharedMesh = MeshFactory.SetupQuadMesh();
+        else
+            mf.sharedMesh = QuadMeshCache;
+
         mf.sharedMesh.bounds = new Bounds(Vector3.zero, new Vector3(PlanetRadius * 2, PlanetRadius * 2, PlanetRadius * 2));
 
         quadComponent.Dispatch();
