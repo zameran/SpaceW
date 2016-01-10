@@ -187,10 +187,10 @@ public class Quad : MonoBehaviour
                 quad.transform.parent = this.transform;
                 quad.gameObject.name += "_ID" + id + "_LOD" + quad.LODLevel;
 
-                quad.Dispatch();
-
                 this.Subquads.Add(quad);
                 this.HaveSubQuads = true;
+
+                quad.Dispatch();
 
                 BufferHelper.ReleaseAndDisposeQuadBuffers(this);
             }
