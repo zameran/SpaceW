@@ -38,9 +38,6 @@ uniform float4    cycloneParams;  // (cycloneMagn,    cycloneFreq,    sqrt(cyclo
 
 uniform float2 TexCoord;
 
-uniform sampler2D   NoiseSampler;       // precomputed noise texture
-uniform sampler2D   PermSampler;        // permutation table for Perlin noise
-uniform sampler1D   PermGradSampler;    // permutted gradient table for Perlin noise
 uniform sampler2D   NormalMap;          // normals map to calculate slope
 uniform sampler2D   MaterialTable;      // material parameters table
 uniform sampler1D   CloudsColorTable;   // clouds color table

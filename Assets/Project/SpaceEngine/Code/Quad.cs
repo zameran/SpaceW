@@ -66,7 +66,6 @@ public class Quad : MonoBehaviour
     public QuadGenerationConstants quadGC;
 
     public Quad Parent;
-    public Quad OneLODParent;
 
     public List<Quad> Subquads = new List<Quad>();
 
@@ -183,15 +182,11 @@ public class Quad : MonoBehaviour
                 quad.SetupParent(this);
                 quad.SetupLODLevel(quad);
                 quad.SetupID(quad, id);
-
-                if (quad.LODLevel == 1)
-                    quad.OneLODParent = quad.Parent;
-                else if (quad.LODLevel > 1)
-                    quad.OneLODParent = quad.Parent.OneLODParent;
+                quad.SetupVectors(quad, id, staticX, staticY, staticZ);
 
                 quad.transform.parent = this.transform;
                 quad.gameObject.name += "_ID" + id + "_LOD" + quad.LODLevel;
-                quad.SetupVectors(quad, id, staticX, staticY, staticZ);
+
                 quad.Dispatch();
 
                 this.Subquads.Add(quad);
@@ -233,14 +228,9 @@ public class Quad : MonoBehaviour
     {
         float time = Time.realtimeSinceStartup;
 
-        if (ToShaderData != null)
-            ToShaderData.Release();
+        BufferHelper.ReleaseAndDisposeBuffers(QuadGenerationConstantsBuffer, PreOutDataBuffer, OutDataBuffer, ToShaderData);
 
-        if (Setter != null)
-        {
-            Setter.LoadAndInit();
-            Setter.SetUniforms(HeightShader);
-        }
+        Setter.LoadAndInit();
 
         QuadGenerationConstants[] quadGenerationConstantsData = new QuadGenerationConstants[] { quadGC, quadGC }; //Here we add 2 equal elements in to the buffer data, and nex we will set buffer size to 1. Bugfix. Idk.
         OutputStruct[] outputStructData = new OutputStruct[QS.nVerts];
@@ -265,9 +255,9 @@ public class Quad : MonoBehaviour
         Log("Buffers for first kernel ready!");
 
         HeightShader.Dispatch(kernel1,
-        QS.THREADGROUP_SIZE_X_REAL,
-        QS.THREADGROUP_SIZE_Y_REAL,
-        QS.THREADGROUP_SIZE_Z_REAL);
+        QS.THREADGROUP_SIZE_X,
+        QS.THREADGROUP_SIZE_Y,
+        QS.THREADGROUP_SIZE_Z);
 
         Log("First kernel ready!");
 
@@ -276,21 +266,18 @@ public class Quad : MonoBehaviour
         Log("Buffers for second kernel ready!");
 
         HeightShader.Dispatch(kernel2,
-        QS.THREADGROUP_SIZE_X_REAL,
-        QS.THREADGROUP_SIZE_Y_REAL,
-        QS.THREADGROUP_SIZE_Z_REAL);
+        QS.THREADGROUP_SIZE_X,
+        QS.THREADGROUP_SIZE_Y,
+        QS.THREADGROUP_SIZE_Z);
 
         Log("Second kernel ready!");
 
         OutDataBuffer.GetData(outputStructData);
         ToShaderData.SetData(outputStructData);
 
-        if (Setter != null)
-        {
-            Setter.MaterialToUpdate.SetBuffer("data", ToShaderData);
-            Setter.MaterialToUpdate.SetTexture("_HeightTexture", HeightTexture);
-            Setter.MaterialToUpdate.SetTexture("_NormalTexture", NormalTexture);
-        }
+        Setter.MaterialToUpdate.SetBuffer("data", ToShaderData);
+        Setter.MaterialToUpdate.SetTexture("_HeightTexture", HeightTexture);
+        Setter.MaterialToUpdate.SetTexture("_NormalTexture", NormalTexture);
 
         BufferHelper.ReleaseAndDisposeBuffers(QuadGenerationConstantsBuffer, PreOutDataBuffer, OutDataBuffer);
 
@@ -304,6 +291,8 @@ public class Quad : MonoBehaviour
         HeightShader.SetBuffer(kernel, "patchOutput", OutDataBuffer);
         HeightShader.SetTexture(kernel, "Height", HeightTexture);
         HeightShader.SetTexture(kernel, "Normal", NormalTexture);
+
+        Setter.SetUniforms(HeightShader, kernel);
     }
 
     public void SetupVectors(Quad quad, int id, bool staticX, bool staticY, bool staticZ)
