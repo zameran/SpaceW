@@ -24,15 +24,7 @@ float HeightMapAsteroid(float3 ppoint, float freq, float mfreq, float hfreq, flo
 
 	// Craters
 	noiseOctaves = 3;   // Craters roundness distortion
-						//craterOctaves = 4;
-						//craterSqrtDensity = 2;
-						//craterFreq = 1;
-						//craterMagn = 1;
-	craterDistortion = 0.05;
-	craterRoundDist = 0.03;
-	heightFloor = -0.1;
-	heightPeak = 0.6;
-	heightRim = 1.0;
+
 	float crater = CraterNoise(ppoint, cm, cf, cd, co);
 
 	//return crater;
@@ -41,7 +33,7 @@ float HeightMapAsteroid(float3 ppoint, float freq, float mfreq, float hfreq, flo
 //-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
-float4 ColorMapAsteroid(float3 ppoint, float height, float slope)
+float4 ColorMapAsteroid(float3 ppoint, float height, float slope, float cdfreq)
 {
 	noiseOctaves = 2.0;
 
@@ -49,14 +41,14 @@ float4 ColorMapAsteroid(float3 ppoint, float height, float slope)
 
 	noiseOctaves = 5;
 
-	float3 p = ppoint * colorDistFreq * 2.3;
+	float3 p = ppoint * cdfreq * 2.3;
 
 	p += Fbm3D(p * 0.5) * 1.2;
 
 	float vary = saturate((Fbm(p) + 0.7) * 0.7);
+	float ccc = (vary * slope) / height;
 
-	float4 c = float4(0.1, 0.1, 0.1, 0.1);
-	c *= 0.5 + slope;
+	float4 c = float4(0.1, 0.1, 0.1, 1) * (0.5 + slope);
 
 	return c;
 
@@ -65,10 +57,5 @@ float4 ColorMapAsteroid(float3 ppoint, float height, float slope)
 	//surf.color.rgb *= 0.5 + slope;
 
 	//return surf.color;
-}
-
-float4 GetColor(float3 p, float h, float s)
-{
-	return ColorMapAsteroid(p, h, s);
 }
 //-----------------------------------------------------------------------------

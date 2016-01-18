@@ -38,7 +38,7 @@ public class TCCommonParametersSetterEditor : Editor
         setter.textureParams.y = EditorGUILayout.Slider("texColorConv ", setter.textureParams.y, 0.0f, 1.0f);
 
         setter.colorParams.x = EditorGUILayout.Slider("colorDistMagn ", setter.colorParams.x, 0.0f, 1.0f);
-        setter.colorParams.y = EditorGUILayout.Slider("colorDistFreq ", setter.colorParams.y, 1.0f, 10000.0f);
+        setter.colorParams.y = EditorGUILayout.Slider("colorDistFreq ", setter.colorParams.y, 0.0f, 10000.0f);
 
         setter.mainParams.x = EditorGUILayout.Slider("mainFreq ", setter.mainParams.x, 0.0f, 5.0f);
 
@@ -103,6 +103,21 @@ public class TCCommonParametersSetterEditor : Editor
         setter.craterParams.w = (float)Mathf.RoundToInt(EditorGUILayout.Slider("craterOctaves", setter.craterParams.w, 0.0f, 20.0f));
 
         setter.cracksParams.w = EditorGUILayout.Slider("craterRayedFactor", setter.cracksParams.w, 0.0f, 1.0f);
+
+        setter.radParams.x = EditorGUILayout.Slider("radPeak", setter.radParams.x, 0.0f, 0.5f);
+        setter.radParams.y = EditorGUILayout.Slider("radInner", setter.radParams.y, 0.0f, 0.5f);
+        setter.radParams.z = EditorGUILayout.Slider("radRim", setter.radParams.z, 0.0f, 0.5f);
+        setter.radParams.w = EditorGUILayout.Slider("radOuter", setter.radParams.w, 0.0f, 0.5f);
+
+        setter.crHeightParams.x = EditorGUILayout.Slider("heightFloor", setter.crHeightParams.x, -1.0f, 1.0f);
+        setter.crHeightParams.y = EditorGUILayout.Slider("heightPeak", setter.crHeightParams.y, 0.0f, 1.0f);
+        setter.crHeightParams.z = EditorGUILayout.Slider("heightRim", setter.crHeightParams.z, 0.0f, 1.0f);
+        setter.crHeightParams.w = EditorGUILayout.Slider("heightCrew", setter.crHeightParams.w, 0.0f, 1.0f);
+
+        setter.craterParams1.x = EditorGUILayout.Slider("craterSphereRadius", setter.craterParams1.x, 0.0f, 1.0f);
+        setter.craterParams1.y = EditorGUILayout.Slider("craterRoundDist", setter.craterParams1.y, 0.0f, 1.0f);
+        setter.craterParams1.z = EditorGUILayout.Slider("craterDistortion", setter.craterParams1.z, 0.0f, 1.0f);
+        setter.craterParams1.w = EditorGUILayout.Slider("craterRaysColor", setter.craterParams1.w, 0.0f, 1.0f);
 
         setter.volcanoParams1.x = EditorGUILayout.Slider("volcanoMagn", setter.volcanoParams1.x, 0.0f, 2.0f);
         setter.volcanoParams1.y = EditorGUILayout.Slider("volcanoFreq", setter.volcanoParams1.y, 0.0f, 5.0f);

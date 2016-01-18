@@ -66,7 +66,7 @@ public class Planetoid : MonoBehaviour
             return;
 
         if (QuadMeshCache == null)
-            QuadMeshCache = MeshFactory.SetupQuadMesh();
+            QuadMeshCache = MeshFactory.SetupQuadMesh(QS.nVertsPerEdge);
 
         SetupMainQuad(QuadPostion.Top);
         SetupMainQuad(QuadPostion.Bottom);
@@ -163,7 +163,7 @@ public class Planetoid : MonoBehaviour
 
         mf.sharedMesh.bounds = new Bounds(Vector3.zero, new Vector3(PlanetRadius * 2, PlanetRadius * 2, PlanetRadius * 2));
 
-        quadComponent.Dispatch();
+        //quadComponent.Dispatch();
 
         Quads.Add(quadComponent);
 

@@ -1,12 +1,152 @@
 ﻿#define threadsPerGroup_X 32
 #define threadsPerGroup_Y 32
 
-#define nVerticesPerSide 128
-#define nRealVerticesPerSide nVerticesPerSide + 2
+#define nVerticesPerSide 120
+#define nVertsPerSideWithBorder 128
+
+//#define defaultNoise
+
+#include "Assets/Project/SpaceEngine/Shaders/TCCommonAsteroid.cginc"
+
+struct QuadGenerationConstants
+{
+    float planetRadius;
+	float spacing;
+    float terrainMaxHeight;
+
+    float3 cubeFaceEastDirection;
+    float3 cubeFaceNorthDirection;
+    float3 patchCubeCenter;
+};
+
+struct OutputStruct
+{
+	float noise;
+
+	float3 patchCenter;
+
+	float4 vcolor;
+    float4 pos;
+	float4 cpos;
+};
+
+float LODLevel;
+float FaceID;
+
+RWTexture2D<float4> Height;
+RWTexture2D<float4> Normal;
+
+RWStructuredBuffer<QuadGenerationConstants> quadGenerationConstants;
+
+RWStructuredBuffer<OutputStruct> patchPreOutput;
+RWStructuredBuffer<OutputStruct> patchOutput;
+
+float3 CubeCoord(QuadGenerationConstants constants, float VerticesPerSide, uint3 id)
+{
+	//32 : 1;
+	//64 : 3;
+	//128 : 7;
+
+	float mod = 7; //So... magic? Again?!
+
+	float eastValue = (id.x - ((VerticesPerSide - mod) / 2.0)) * constants.spacing;
+	float northValue = (id.y - ((VerticesPerSide - mod) / 2.0)) * constants.spacing;
+
+	float3 cubeCoordEast = constants.cubeFaceEastDirection * eastValue;
+    float3 cubeCoordNorth = constants.cubeFaceNorthDirection * northValue;
+
+	float3 cubeCoord = cubeCoordEast + cubeCoordNorth + constants.patchCubeCenter;
+
+	return cubeCoord;
+}
+
+float NoiseFunction(float3 coord)
+{
+	#ifdef defaultNoise
+	float noise = Noise(0.001 * coord);
+	#else
+	float noise = HeightMapAsteroid(0.001 * coord, mainFreq, montesFreq, hillsFreq, hillsMagn, hillsFraction, craterOctaves, craterSqrtDensity, craterFreq, craterMagn);
+	#endif
+	
+	return noise;
+}
+
+float4 ColorFunction(float3 coord, float height, float slope)
+{
+	#ifdef defaultNoise
+	float3 color = float3(0, 0, 0);
+	#else
+	float3 color = ColorMapAsteroid(coord, height, slope, colorDistFreq).xyz;
+	#endif
+	
+	return float4(color, 1);
+}
 
 #pragma kernel HeightMain
-[numthreads(threadsPerGroup_X, threadsPerGroup_Y, 1)]
+[numthreads(32, 32, 1)]
 void HeightMain (uint3 id : SV_DispatchThreadID)
 {
+	int outBuffOffset = id.x + id.y * nVertsPerSideWithBorder;
+
+	QuadGenerationConstants constants = quadGenerationConstants[0];
+
+	float3 cubeCoord = CubeCoord(constants, nVertsPerSideWithBorder, id);
+
+	float3 patchCenter = normalize(constants.patchCubeCenter) * constants.planetRadius;
+	float3 patchNormalizedCoord = normalize(cubeCoord);
 	
+	float3 patchCoord =  constants.planetRadius * patchNormalizedCoord;
+	float3 patchCoordCentered = patchCoord - patchCenter;
+	
+	float noise = NoiseFunction(patchCoord);
+
+    float height = ((noise * 2) - 1) * constants.terrainMaxHeight;
+
+	patchCoordCentered += patchNormalizedCoord * height;
+
+    float4 output = float4(patchCoordCentered.xyz, 0);
+	float4 cubeOutput = float4(cubeCoord.xyz, 0);
+
+	patchPreOutput[outBuffOffset].noise = ((noise * 2) - 1);
+	patchPreOutput[outBuffOffset].patchCenter = patchCenter;
+	patchPreOutput[outBuffOffset].vcolor = float4(noise, noise, noise, 1);
+    patchPreOutput[outBuffOffset].pos = output;
+	patchPreOutput[outBuffOffset].cpos = cubeOutput;
+}
+
+#pragma kernel TexturesMain
+[numthreads(30, 30, 1)]
+void TexturesMain(uint3 id : SV_DispatchThreadID)
+{
+	int inBuffOffset = (id.x + 1) + (id.y + 1) * nVertsPerSideWithBorder;
+    int outBuffOffset = id.x + id.y * nVerticesPerSide;
+
+	QuadGenerationConstants constants = quadGenerationConstants[0];
+	
+	float noise = patchPreOutput[inBuffOffset].noise;
+	float3 patchCenter = patchPreOutput[inBuffOffset].patchCenter;
+	float4 pos = patchPreOutput[inBuffOffset].pos;
+	float4 cpos = patchPreOutput[inBuffOffset].cpos;
+	
+	float l = patchPreOutput[(id.x + 0) + (id.y + 1) * nVertsPerSideWithBorder].noise * LODLevel;
+	float r = patchPreOutput[(id.x + 2) + (id.y + 1) * nVertsPerSideWithBorder].noise * LODLevel;
+	float u = patchPreOutput[(id.x + 1) + (id.y + 0) * nVertsPerSideWithBorder].noise * LODLevel;
+	float d = patchPreOutput[(id.x + 1) + (id.y + 2) * nVertsPerSideWithBorder].noise * LODLevel;
+	float xdelta = ((l - r) + 1) * 0.5;
+	float ydelta = ((u - d) + 1) * 0.5;
+
+	float3 normal = float3(xdelta, ydelta, 1);
+
+	float slope = 0.5 / max(dot(normal, float3(0, 1, 0)), 0.001);
+	float4 color = ColorFunction(cpos.xyz, noise, slope);
+	float4 normalColor = float4(normal, slope);
+	
+	Normal[id.yx] = normalColor;
+	Height[id.yx] = float4(color.xyz, noise + 0.5);
+
+	patchOutput[outBuffOffset].noise = noise;
+	patchOutput[outBuffOffset].patchCenter = patchCenter;
+	patchOutput[outBuffOffset].vcolor = color;
+    patchOutput[outBuffOffset].pos = pos;
+	patchOutput[outBuffOffset].cpos = cpos;
 }

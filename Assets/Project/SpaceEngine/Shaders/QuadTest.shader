@@ -5,7 +5,7 @@
 		_HeightTexture("Height (RGBA)", 2D) = "white" {}
 		_NormalTexture("Normal (RGBA)", 2D) = "white" {}
 		_Mixing("Mixing", Range(0,1)) = 0.0
-		_Glossiness("Smoothness", Range(0,1)) = 0.5
+		_Glossiness("Glossiness", Range(0,1)) = 0.0
 		_Metallic("Metallic", Range(0,1)) = 0.0
 	}
 	SubShader
@@ -43,7 +43,7 @@
 			float4 texcoord2 : TEXCOORD2;
 			float4 texcoord3 : TEXCOORD3;
 
-			uint id: SV_VertexID;
+			uint id : SV_VertexID;
 		};
 
 		sampler2D _HeightTexture;
@@ -64,6 +64,21 @@
 			float3 vb = normalize(float3(float2(0.0, 0.1), ht3 - ht2));
 
 			return cross(va, vb);
+		}
+
+		float4 FindTangent(float3 normal)
+		{
+			float4 tangent = float4(0, 0, 0, 0);
+
+			fixed3 worldNormal = normalize(mul(_Object2World, fixed4(normal, 0.0)).xyz);
+
+			tangent.xyz = cross(normal, mul(_World2Object, fixed4(0.0, sign(worldNormal.x), 0.0, 0.0)).xyz) + 
+						  cross(normal, mul(_World2Object, fixed4(0.0, 0.0, sign(worldNormal.y), 0.0)).xyz) + 
+						  cross(normal, mul(_World2Object, fixed4(0.0, sign(worldNormal.z), 0.0, 0.0)).xyz);
+
+			tangent.w = -worldNormal;
+
+			return tangent;
 		}
 
 		struct Input 
@@ -87,7 +102,7 @@
 			position.xyz += patchCenter;
 
 			v.vertex = position;
-
+			v.tangent = FindTangent(tex2Dlod(_NormalTexture, float4(v.texcoord.xy, 0, 0)));
 			o.noise = noise + 0.5;
 			o.uv_HeightTexture = v.texcoord.xy;
 			o.uv_NormalTexture = v.texcoord.xy;
@@ -106,8 +121,8 @@
 			fixed4 terrainNormalTexture = tex2D(_NormalTexture, IN.uv_NormalTexture);
 
 			o.Albedo = terrainTexture.rgb;
-			//o.Normal = UnpackNormal(terrainNormalTexture);
-			//o.Normal = FindNormal(IN.uv_HeightTexture, 1.0 / float2(128, 128));
+			o.Normal = UnpackNormal(terrainNormalTexture);
+			//o.Normal = FindNormal(IN.uv_HeightTexture, 1.0 / float2(120, 120));
 			o.Metallic = _Metallic;
 			o.Smoothness = _Glossiness;
 		}

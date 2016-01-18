@@ -26,7 +26,7 @@ public class NoiseParametersSetter : MonoBehaviour
 
     void Update()
     {
-        UpdateUniforms();
+        //UpdateUniforms();
     }
 
     [ContextMenu("Update Uniforms")]

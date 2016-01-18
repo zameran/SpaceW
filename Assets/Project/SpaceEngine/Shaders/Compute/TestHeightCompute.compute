@@ -72,7 +72,7 @@ float4 ColorFunction(float3 coord, float height, float slope)
 	#ifdef defaultNoise
 	float3 color = float3(0, 0, 0);
 	#else
-	float3 color = ColorMapAsteroid(coord, height, slope).xyz;
+	float3 color = ColorMapAsteroid(coord, height, slope, colorDistFreq).xyz;
 	//float3 color = ColorMapTerra(0.001 * coord, mainFreq, dunesFraction, hillsFraction, hills2Fraction, canyonsFraction).xyz;
 	#endif
 	

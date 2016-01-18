@@ -27,6 +27,10 @@ public class TCCommonParametersSetter : MonoBehaviour
     public Vector4 cloudsParams2;
     public Vector4 cycloneParams;
 
+    public Vector4 radParams;
+    public Vector4 crHeightParams;
+    public Vector4 craterParams1;
+
     public bool AutoUpdate = false;
 
     [ContextMenu("UpdateUniforms")]
@@ -68,5 +72,9 @@ public class TCCommonParametersSetter : MonoBehaviour
         shader.SetVector("cloudsParams1", cloudsParams1);
         shader.SetVector("cloudsParams2", cloudsParams2);
         shader.SetVector("cycloneParams", cycloneParams);
+
+        shader.SetVector("radParams", radParams);
+        shader.SetVector("crHeightParams", crHeightParams);
+        shader.SetVector("craterParams1", craterParams1);
     }
 }

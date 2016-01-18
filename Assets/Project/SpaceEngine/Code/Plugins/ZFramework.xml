@@ -1,0 +1,2547 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>ZFramework</name>
+    </assembly>
+    <members>
+        <member name="T:ZFramework.CPUNoise.IModule2D">
+            <summary>
+            Global 2D module interface.
+            </summary>
+        </member>
+        <member name="T:ZFramework.CPUNoise.IModule3D">
+            <summary>
+            Global 3D module interface.
+            </summary>
+        </member>
+        <member name="T:ZFramework.CPUNoise.NamespaceDocumentationContainer">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="T:ZFramework.Math.MathUtils">
+            <summary>
+            That class contains some methods and tools to work with math. 
+            Some methods from that class uses own, faster inplementation of trigonometrical functions, such as
+            Cos/Sin/Tg/Ctg etc.
+            </summary>
+        </member>
+        <member name="P:ZFramework.Math.MathUtils.NanoToSec">
+            <summary>
+            Readonly. NanoToSec = 1 / 1000000000f
+            </summary>
+        </member>
+        <member name="P:ZFramework.Math.MathUtils.PI">
+            <summary>
+            Readonly. PI = 3.1415927f
+            </summary>
+        </member>
+        <member name="P:ZFramework.Math.MathUtils.TwoPI">
+            <summary>
+            Readonly. TwoPI = PI * 2
+            </summary>
+        </member>
+        <member name="P:ZFramework.Math.MathUtils.PIOver2">
+            <summary>
+            Readonly. PIOver2 = PI / 2
+            </summary>
+        </member>
+        <member name="P:ZFramework.Math.MathUtils.PIOver4">
+            <summary>
+            Readonly. PIOver2 = PI / 4
+            </summary>
+        </member>
+        <member name="P:ZFramework.Math.MathUtils.E">
+            <summary>
+            Readonly. E = 2.7182818f
+            </summary>
+        </member>
+        <member name="P:ZFramework.Math.MathUtils.Rad2Deg">
+            <summary>
+            Readonly.
+            </summary>
+        </member>
+        <member name="P:ZFramework.Math.MathUtils.Deg2Rad">
+            <summary>
+            Readonly.
+            </summary>
+        </member>
+        <member name="M:ZFramework.Math.MathUtils.Sin(System.Single)">
+            <summary>
+            Sinuse function.
+            </summary>
+            <param name="radians">Angle in radians.</param>
+            <returns>Sinuse value for angle in radians.</returns>
+        </member>
+        <member name="M:ZFramework.Math.MathUtils.Cos(System.Single)">
+            <summary>
+            Cosinuse function.
+            </summary>
+            <param name="radians">Angle in radians.</param>
+            <returns>Cosinuse value for angle in radians.</returns>
+        </member>
+        <member name="M:ZFramework.Math.MathUtils.SinDegree(System.Single)">
+            <summary>
+            Sinuse function.
+            </summary>
+            <param name="degrees">Angle in degrees.</param>
+            <returns>Sinuse value for angle in degrees.</returns>
+        </member>
+        <member name="M:ZFramework.Math.MathUtils.CosDegree(System.Single)">
+            <summary>
+            Cosinuse function.
+            </summary>
+            <param name="degrees">Angle in degrees.</param>
+            <returns>Cosinuse value for angle in degrees.</returns>
+        </member>
+        <member name="M:ZFramework.Math.MathUtils.Tg(System.Single)">
+            <summary>
+            Tangens function.
+            </summary>
+            <param name="radians">Angle in radians.</param>
+            <returns>Tangens value for angle in radians.</returns>
+        </member>
+        <member name="M:ZFramework.Math.MathUtils.TgDegree(System.Single)">
+            <summary>
+            Tangens function.
+            </summary>
+            <param name="degrees">Angle in degrees.</param>
+            <returns>Tangens value for angle in degrees.</returns>
+        </member>
+        <member name="M:ZFramework.Math.MathUtils.Ctg(System.Single)">
+            <summary>
+            Cotangent function.
+            </summary>
+            <param name="radians">Angle in radians.</param>
+            <returns>Cotangent value for angle in radians.</returns>
+        </member>
+        <member name="M:ZFramework.Math.MathUtils.CtgDegree(System.Single)">
+            <summary>
+            Cotangent function.
+            </summary>
+            <param name="degrees">Angle in degrees.</param>
+            <returns>Cotangent value for angle in degrees.</returns>
+        </member>
+        <member name="M:ZFramework.Math.MathUtils.Sec(System.Single)">
+            <summary>
+            Secans function.
+            </summary>
+            <param name="radians">Angle in radians.</param>
+            <returns>Secans value for angle in radians.</returns>
+        </member>
+        <member name="M:ZFramework.Math.MathUtils.SecDegree(System.Single)">
+            <summary>
+            Secans function.
+            </summary>
+            <param name="degrees">Angle in degrees.</param>
+            <returns>Secans value for angle in degrees.</returns>
+        </member>
+        <member name="M:ZFramework.Math.MathUtils.Cosec(System.Single)">
+            <summary>
+            Cosecant function.
+            </summary>
+            <param name="radians">Angle in radians.</param>
+            <returns>Cosecant value for angle in radians.</returns>
+        </member>
+        <member name="M:ZFramework.Math.MathUtils.CosecDegree(System.Single)">
+            <summary>
+            Cosecant function.
+            </summary>
+            <param name="degrees">Angle in degrees.</param>
+            <returns>Cosecant value for angle in degrees.</returns>
+        </member>
+        <member name="M:ZFramework.Math.MathUtils.AtanTwo(System.Single,System.Single)">
+            <summary>
+            Compute arc tangent with two parameters.
+            </summary>
+            <param name="y">Proportion of the y-coordinate.</param>
+            <param name="x">Proportion of the x-coordinate.</param>
+            <returns>The principal value of the arc tangent of y/x, expressed in radians.</returns>
+        </member>
+        <member name="M:ZFramework.Math.MathUtils.RandomIntInRange(System.Int32)">
+            <summary>
+            Compute random int value in range.
+            </summary>
+            <param name="range">Range.</param>
+            <returns>Random value.</returns>
+        </member>
+        <member name="M:ZFramework.Math.MathUtils.RandomIntInRange(System.Int32,System.Int32)">
+            <summary>
+            Compute random int value in range.
+            </summary>
+            <param name="min">Min value.</param>
+            <param name="max">Max value.</param>
+            <returns>Random value in range [Min, Max].</returns>
+        </member>
+        <member name="M:ZFramework.Math.MathUtils.RandomBoolean(System.Single)">
+            <summary>
+            Compute a random bool.
+            </summary>
+            <param name="chance">Chache to get true.</param>
+            <returns>True if a random value between 0.0 and 1.0 is less than the specified chance value.</returns>
+        </member>
+        <member name="M:ZFramework.Math.MathUtils.RandomFloat">
+            <summary>
+            Compute random float value.
+            </summary>
+            <returns>Random value.</returns>
+        </member>
+        <member name="M:ZFramework.Math.MathUtils.RandomDouble">
+            <summary>
+            Compute random double value.
+            </summary>
+            <returns>Random value.</returns>
+        </member>
+        <member name="M:ZFramework.Math.MathUtils.RandomFloatInRange(System.Single)">
+            <summary>
+            Compute random float value in range.
+            </summary>
+            <param name="range">Range.</param>
+            <returns>Random value.</returns>
+        </member>
+        <member name="M:ZFramework.Math.MathUtils.RandomFloatInRange(System.Single,System.Single)">
+            <summary>
+            Compute random float value in range.
+            </summary>
+            <param name="min">Min value.</param>
+            <param name="max">Max value.</param>
+            <returns>Random value in range [Min, Max].</returns>
+        </member>
+        <member name="M:ZFramework.Math.MathUtils.RandomSign">
+            <summary>
+            Cumpute random 'sign' value.
+            </summary>
+            <returns>Value, that equals 1 or -1.</returns>
+        </member>
+        <member name="M:ZFramework.Math.MathUtils.RandomDifference">
+            <summary>
+            Compute difference between two random float values.
+            </summary>
+            <returns>Difference between two random float values.</returns>
+        </member>
+        <member name="M:ZFramework.Math.MathUtils.RandomDifference(System.Single)">
+            <summary>
+            Compute difference between two random float values, multiplied by modifier.
+            </summary>
+            <param name="max">Modifier.</param>
+            <returns>Difference between two random float values, multiplied by modifier.</returns>
+        </member>
+        <member name="M:ZFramework.Math.MathUtils.IsPowerOfTwo(System.Int32)">
+            <summary>
+            Value is power of two?
+            </summary>
+            <param name="value">Value to check.</param>
+            <returns>Returns true, if a number is a power of two</returns>
+        </member>
+        <member name="M:ZFramework.Math.MathUtils.Abs(System.Int32)">
+            <summary>
+            Returns the absolute value.
+            </summary>
+            <param name="value">Value type of int</param>
+            <returns>The absolute value.</returns>
+        </member>
+        <member name="M:ZFramework.Math.MathUtils.Abs(System.Int64)">
+            <summary>
+            Returns the absolute value.
+            </summary>
+            <param name="value">Value type of long</param>
+            <returns>The absolute value.</returns>
+        </member>
+        <member name="M:ZFramework.Math.MathUtils.Abs(System.Single)">
+            <summary>
+            Returns the absolute value.
+            </summary>
+            <param name="value">Value type of float</param>
+            <returns>The absolute value.</returns>
+        </member>
+        <member name="M:ZFramework.Math.MathUtils.Abs(System.Double)">
+            <summary>
+            Returns the absolute value.
+            </summary>
+            <param name="value">Value type of double</param>
+            <returns>The absolute value.</returns>
+        </member>
+        <member name="M:ZFramework.Math.MathUtils.FastIntAbs(System.Int32)">
+            <summary>
+            Returns the absolute value. This method is faster then MathUtils.Abs(int value).
+            </summary>
+            <param name="value">Value type of int</param>
+            <returns>The absolute value.</returns>
+        </member>
+        <member name="M:ZFramework.Math.MathUtils.Clamp(System.Int32,System.Int32,System.Int32)">
+            <summary>
+            Clamps value between min and max and returns value.
+            </summary>
+            <param name="value">Value.</param>
+            <param name="min">Min.</param>
+            <param name="max">Max.</param>
+            <returns>Clamped value.</returns>
+        </member>
+        <member name="M:ZFramework.Math.MathUtils.Clamp(System.Int64,System.Int64,System.Int64)">
+            <summary>
+            Clamps value between min and max and returns value.
+            </summary>
+            <param name="value">Value.</param>
+            <param name="min">Min.</param>
+            <param name="max">Max.</param>
+            <returns>Clamped value.</returns>
+        </member>
+        <member name="M:ZFramework.Math.MathUtils.Clamp(System.Single,System.Single,System.Single)">
+            <summary>
+            Clamps value between min and max and returns value.
+            </summary>
+            <param name="value">Value.</param>
+            <param name="min">Min.</param>
+            <param name="max">Max.</param>
+            <returns>Clamped value.</returns>
+        </member>
+        <member name="M:ZFramework.Math.MathUtils.Clamp(System.Double,System.Double,System.Double)">
+            <summary>
+            Clamps value between min and max and returns value.
+            </summary>
+            <param name="value">Value.</param>
+            <param name="min">Min.</param>
+            <param name="max">Max.</param>
+            <returns>Clamped value.</returns>
+        </member>
+        <member name="M:ZFramework.Math.MathUtils.Clamp``1(``0,``0,``0)">
+            <summary>
+            Clamps value between min and max and returns value.
+            Universsl method, only for IComparable types.
+            </summary>
+            <typeparam name="T">Type of.</typeparam>
+            <param name="value">Value.</param>
+            <param name="min">Min.</param>
+            <param name="max">Max.</param>
+            <returns>Clamped value.</returns>
+        </member>
+        <member name="M:ZFramework.Math.MathUtils.Lerp(System.Single,System.Single,System.Single)">
+            <summary>
+            Linearly interpolates between values by progress.
+            </summary>
+            <param name="fromValue">From.</param>
+            <param name="toValue">To.</param>
+            <param name="progress">Progress.</param>
+            <returns>Linear interpolation between values by progress.</returns>
+        </member>
+        <member name="M:ZFramework.Math.MathUtils.Lerp(System.Double,System.Double,System.Double)">
+            <summary>
+            Linearly interpolates between values by progress.
+            </summary>
+            <param name="fromValue">From.</param>
+            <param name="toValue">To.</param>
+            <param name="progress">Progress.</param>
+            <returns>Linear interpolation between values by progress.</returns>
+        </member>
+        <member name="M:ZFramework.Math.MathUtils.Floor(System.Single)">
+            <summary>
+            Round a value downward to it's nearest integer.
+            </summary>
+            <param name="value">Value.</param>
+            <returns>The largest integer less than or equal to the specified value.</returns>
+        </member>
+        <member name="M:ZFramework.Math.MathUtils.FloorPositive(System.Single)">
+            <summary>
+            Round a value downward to it's nearest integer.
+            </summary>
+            <param name="value">Value.</param>
+            <returns>The largest integer less than or equal to the specified value.</returns>
+        </member>
+        <member name="M:ZFramework.Math.MathUtils.Ceil(System.Single)">
+            <summary>
+            Round a value upward to it's nearest integer.
+            </summary>
+            <param name="value">Value.</param>
+            <returns>The smallest integer greater than or equal to the specified value.</returns>
+        </member>
+        <member name="M:ZFramework.Math.MathUtils.CeilPositive(System.Single)">
+            <summary>
+            Round a value upward to it's nearest integer.
+            </summary>
+            <param name="value">Value.</param>
+            <returns>The smallest integer greater than or equal to the specified value.</returns>
+        </member>
+        <member name="M:ZFramework.Math.MathUtils.Round(System.Single)">
+            <summary>
+            Round a value to it's nearest integer.
+            </summary>
+            <param name="value"></param>
+            <returns>The closest integer to the specified value.</returns>
+        </member>
+        <member name="M:ZFramework.Math.MathUtils.RoundPositive(System.Single)">
+            <summary>
+            Round a value to it's nearest integer.
+            </summary>
+            <param name="value"></param>
+            <returns>The closest integer to the specified value.</returns>
+        </member>
+        <member name="M:ZFramework.Math.MathUtils.isZero(System.Single)">
+            <summary>
+            Is value is zero?
+            </summary>
+            <param name="value">Value.</param>
+            <returns>True if the value is zero (using the default tolerance as upper bound).</returns>
+        </member>
+        <member name="M:ZFramework.Math.MathUtils.isZero(System.Single,System.Single)">
+            <summary>
+            Is value is zero?
+            </summary>
+            <param name="value">Value.</param>
+            <param name="tolerance">Tolerance.</param>
+            <returns>True if the value is zero.</returns>
+        </member>
+        <member name="M:ZFramework.Math.MathUtils.isEqual(System.Single,System.Single)">
+            <summary>
+            Is first value equals second?
+            </summary>
+            <param name="a">First value.</param>
+            <param name="b">Second value.</param>
+            <returns>True if first value is nearly equal to second value (using the default tolerance).</returns>
+        </member>
+        <member name="M:ZFramework.Math.MathUtils.isEqual(System.Single,System.Single,System.Single)">
+            <summary>
+            Is first value equals second?
+            </summary>
+            <param name="a">First value.</param>
+            <param name="b">Second value.</param>
+            <param name="tolerance">Tolerance.</param>
+            <returns>True if first value is nearly equal to second value.</returns>
+        </member>
+        <member name="M:ZFramework.Math.MathUtils.GetSmaller(System.Double,System.Double)">
+            <summary>
+            Get smaller value of two specified values.
+            </summary>
+            <param name="a">First value.</param>
+            <param name="b">Second value.</param>
+            <returns>Smaller value of two specified values.</returns>
+        </member>
+        <member name="M:ZFramework.Math.MathUtils.GetLarger(System.Double,System.Double)">
+            <summary>
+            Get larger value of two specified values.
+            </summary>
+            <param name="a">First value.</param>
+            <param name="b">Second value.</param>
+            <returns>Larger value of two specified values.</returns>
+        </member>
+        <member name="M:ZFramework.Math.MathUtils.GetSmaller(System.Single,System.Single)">
+            <summary>
+            Get smaller value of two specified values.
+            </summary>
+            <param name="a">First value.</param>
+            <param name="b">Second value.</param>
+            <returns>Smaller value of two specified values.</returns>
+        </member>
+        <member name="M:ZFramework.Math.MathUtils.GetLarger(System.Single,System.Single)">
+            <summary>
+            Get larger value of two specified values.
+            </summary>
+            <param name="a">First value.</param>
+            <param name="b">Second value.</param>
+            <returns>Larger value of two specified values.</returns>
+        </member>
+        <member name="M:ZFramework.Math.MathUtils.GetSmaller(System.Int32,System.Int32)">
+            <summary>
+            Get smaller value of two specified values.
+            </summary>
+            <param name="a">First value.</param>
+            <param name="b">Second value.</param>
+            <returns>Smaller value of two specified values.</returns>
+        </member>
+        <member name="M:ZFramework.Math.MathUtils.GetLarger(System.Int32,System.Int32)">
+            <summary>
+            Get larger value of two specified values.
+            </summary>
+            <param name="a">First value.</param>
+            <param name="b">Second value.</param>
+            <returns>Larger value of two specified values.</returns>
+        </member>
+        <member name="M:ZFramework.Math.MathUtils.SwapValues``1(``0@,``0@)">
+            <summary>
+            Swap values method for IComparable types only.
+            </summary>
+        </member>
+        <member name="M:ZFramework.Math.MathUtils.Factorial(System.Int32)">
+            <summary>
+            Factorial of value.
+            </summary>
+            <param name="value">Value.</param>
+            <returns>Factorial of value, but -1, if value bigger, that 12.</returns>
+        </member>
+        <member name="M:ZFramework.Math.MathUtils.Average(System.Single,System.Single)">
+            <summary>
+            Calculate the average of two float values.
+            </summary>
+            <param name="firstValue">First value.</param>
+            <param name="secondValue">Second value.</param>
+            <returns>Average of given values.</returns>
+        </member>
+        <member name="M:ZFramework.Math.MathUtils.Average(System.Single,System.Single,System.Single)">
+            <summary>
+            Calculate the average of three float values.
+            </summary>
+            <param name="firstValue">First value.</param>
+            <param name="secondValue">Second value.</param>
+            <param name="thirdValue">Third value.</param>
+            <returns>Average of given values.</returns>
+        </member>
+        <member name="M:ZFramework.Math.MathUtils.Average(System.Single[])">
+            <summary>
+            Calculate the average of float array values.
+            </summary>
+            <param name="values">Values.</param>
+            <returns>Average of given values.</returns>
+        </member>
+        <member name="M:ZFramework.Math.MathUtils.Average(System.Double,System.Double)">
+            <summary>
+            Calculate the average of two double values.
+            </summary>
+            <param name="firstValue">First value.</param>
+            <param name="secondValue">Second value.</param>
+            <returns>Average of given values.</returns>
+        </member>
+        <member name="M:ZFramework.Math.MathUtils.Average(System.Double,System.Double,System.Double)">
+            <summary>
+            Calculate the average of three double values.
+            </summary>
+            <param name="firstValue">First value.</param>
+            <param name="secondValue">Second value.</param>
+            <param name="thirdValue">Third value.</param>
+            <returns>Average of given values.</returns>
+        </member>
+        <member name="M:ZFramework.Math.MathUtils.Average(System.Double[])">
+            <summary>
+            Calculate the average of double array values.
+            </summary>
+            <param name="values">Values.</param>
+            <returns>Average of given values.</returns>
+        </member>
+        <member name="M:ZFramework.Math.MathUtils.Pow(System.Int32)">
+            <summary>
+            Integer version of 2^x.
+            </summary>
+            <param name="x">Power.</param>
+            <returns>A 2 raised to the specified power.</returns>
+        </member>
+        <member name="T:ZFramework.Math.NamespaceDocumentationContainer">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="T:ZFramework.Extensions.ArrayExtensions">
+            <summary>
+            Extension class for array.
+            </summary>
+        </member>
+        <member name="M:ZFramework.Extensions.ArrayExtensions.RemoveAt``1(``0[],System.Int32)">
+            <summary>
+            Element removing from array.
+            </summary>
+            <typeparam name="T">Array type.</typeparam>
+            <param name="source">Source array.</param>
+            <param name="index">Index of element, wich will be deleted.</param>
+        </member>
+        <member name="M:ZFramework.Extensions.ArrayExtensions.Push``1(``0[]@,``0)">
+            <summary>
+            Array element push.
+            </summary>
+            <typeparam name="T">Array type.</typeparam>
+            <param name="array">Source array.</param>
+            <param name="element">Element.</param>
+        </member>
+        <member name="M:ZFramework.Extensions.ArrayExtensions.Push``1(``0[]@,``0[])">
+            <summary>
+            Array elements push.
+            </summary>
+            <typeparam name="T">Array type.</typeparam>
+            <param name="array">Source array.</param>
+            <param name="elements">Elements.</param>
+        </member>
+        <member name="M:ZFramework.Extensions.ArrayExtensions.Shift``1(``0[]@)">
+            <summary>
+            Array shift.
+            </summary>
+            <typeparam name="T">Array type.</typeparam>
+            <param name="array">Source array.</param>
+        </member>
+        <member name="M:ZFramework.Extensions.ArrayExtensions.Splice``1(``0[]@,System.Int32,System.Int32,``0[])">
+            <summary>
+            Array splice.
+            </summary>
+            <typeparam name="T">Array type.</typeparam>
+            <param name="array">Source array.</param>
+            <param name="index">Index.</param>
+            <param name="removeCount">Count of elements, which will be removed.</param>
+            <param name="elements">Elements.</param>
+        </member>
+        <member name="M:ZFramework.Extensions.ArrayExtensions.Unshift``1(``0[]@,``0)">
+            <summary>
+            Array unshift.
+            </summary>
+            <typeparam name="T">Array type.</typeparam>
+            <param name="array">Source array.</param>
+            <param name="element">Element.</param>
+        </member>
+        <member name="M:ZFramework.Extensions.ArrayExtensions.UnshiftVoid``1(``0[]@,``0)">
+            <summary>
+            Array unshift method.
+            </summary>
+            <typeparam name="T">Array type.</typeparam>
+            <param name="array">Source array.</param>
+            <param name="element">Element.</param>
+        </member>
+        <member name="M:ZFramework.Extensions.ArrayExtensions.Unshift``1(``0[]@,``0[])">
+            <summary>
+            Array unshift.
+            </summary>
+            <typeparam name="T">Array type.</typeparam>
+            <param name="array">Source array.</param>
+            <param name="elements">Elements.</param>
+        </member>
+        <member name="T:ZFramework.Extensions.AttributeUtils">
+            <summary>
+            Extension class for working with Attribute.
+            Contains some helpful methods to working with attributes.
+            
+            AttributeUtils is a collection of methods developed 
+            to help retrieve Attribute information for Types and methods in C# through Reflection.
+            
+            AttributeUtils uses caching to rise up speed of access.
+            </summary>
+        </member>
+        <member name="T:ZFramework.Extensions.BitmapExtensions">
+            <summary>
+            Extension class for Bitmap and Image.
+            </summary>
+        </member>
+        <member name="M:ZFramework.Extensions.BitmapExtensions.ExecuteForEachPixel(System.Drawing.Bitmap,System.Action{System.Drawing.Point,System.Drawing.Bitmap})">
+            <summary>
+            Execute Action for each pixel of bitmap.
+            </summary>
+            <param name="bitmap">Birmap.</param>
+            <param name="action">Action to execute.</param>
+        </member>
+        <member name="M:ZFramework.Extensions.BitmapExtensions.ExecuteForEachPixel(System.Drawing.Bitmap,System.Action{System.Drawing.Point})">
+            <summary>
+            Execute Action for each pixel of bitmap.
+            </summary>
+            <param name="bitmap">Birmap.</param>
+            <param name="action">Action to execute.</param>
+        </member>
+        <member name="M:ZFramework.Extensions.BitmapExtensions.Raster(System.Drawing.Color[0:,0:],System.Drawing.Bitmap@)">
+            <summary>
+            This method provide simple convertation of Color array to bitmap. 
+            </summary>
+            <param name="colors">Array of colors.</param>
+            <param name="image">Output Bitmap image.</param>
+        </member>
+        <member name="M:ZFramework.Extensions.BitmapExtensions.SaveAndDispose(System.Drawing.Bitmap,System.String)">
+            <summary>
+            Save bitmap and dispose it.
+            </summary>
+            <param name="bm">Bitmap to save.</param>
+            <param name="fileName">File name.</param>
+        </member>
+        <member name="M:ZFramework.Extensions.BitmapExtensions.SaveAndDispose(System.Drawing.Bitmap,System.String,System.Drawing.Imaging.ImageFormat)">
+            <summary>
+            Save bitmap and dispose it.
+            </summary>
+            <param name="bm">Bitmap to save.</param>
+            <param name="fileName">File name.</param>
+            <param name="format">Bitmap saving format.</param>
+        </member>
+        <member name="M:ZFramework.Extensions.BitmapExtensions.SaveAndDispose(System.Drawing.Bitmap,System.IO.Stream,System.Drawing.Imaging.ImageFormat)">
+            <summary>
+            Save bitmap and dispose it.
+            </summary>
+            <param name="bm">Bitmap to save.</param>
+            <param name="stream">Bitmap data stream.</param>
+            <param name="format">Bitmap saving format.</param>
+        </member>
+        <member name="M:ZFramework.Extensions.BitmapExtensions.SaveAndDispose(System.Drawing.Image,System.String)">
+            <summary>
+            Save image and dispose it.
+            </summary>
+            <param name="i">Image to save.</param>
+            <param name="fileName">File name.</param>
+        </member>
+        <member name="M:ZFramework.Extensions.BitmapExtensions.SaveAndDispose(System.Drawing.Image,System.String,System.Drawing.Imaging.ImageFormat)">
+            <summary>
+            Save image and dispose it.
+            </summary>
+            <param name="i">Image to save.</param>
+            <param name="fileName">File name.</param>
+            <param name="format">Image saving format.</param>
+        </member>
+        <member name="M:ZFramework.Extensions.BitmapExtensions.SaveAndDispose(System.Drawing.Image,System.IO.Stream,System.Drawing.Imaging.ImageFormat)">
+            <summary>
+            Save image and dispose it.
+            </summary>
+            <param name="i">Image to save.</param>
+            <param name="stream">Image data stream.</param>
+            <param name="format">Image saving format.</param>
+        </member>
+        <member name="T:ZFramework.Extensions.FloatExtensions">
+            <summary>
+            Extension class for float type.
+            </summary>
+        </member>
+        <member name="M:ZFramework.Extensions.FloatExtensions.IsZero(System.Single)">
+            <summary>
+            Is float equals zero?
+            </summary>
+            <param name="number">Number type of float.</param>
+            <returns>True = 0; False != 0.</returns>
+        </member>
+        <member name="M:ZFramework.Extensions.FloatExtensions.ToString(System.Nullable{System.Single},System.String)">
+            <summary>
+            ToString() Analog.
+            </summary>
+            <param name="value"></param>
+            <param name="defaultvalue"></param>
+            <returns>Null if 'value' == null.</returns>
+        </member>
+        <member name="T:ZFramework.Extensions.GlobalExtensions">
+            <summary>
+            Extension class. Contains global extensions.
+            </summary>
+        </member>
+        <member name="M:ZFramework.Extensions.GlobalExtensions.IsValidEmailAddress(System.String)">
+            <summary>
+            String to Email validation with regex.
+            </summary>
+            <param name="text">String to check.</param>
+            <returns>True, if Email is valid, otherwise False.</returns>
+        </member>
+        <member name="M:ZFramework.Extensions.GlobalExtensions.IsValidUrl(System.String)">
+            <summary>
+            String to url validation with regex.
+            </summary>
+            <param name="text">String to check.</param>
+            <returns>True, if url is valid, otherwise False.</returns>
+        </member>
+        <member name="M:ZFramework.Extensions.GlobalExtensions.IsValid(System.String,System.Text.RegularExpressions.Regex)">
+            <summary>
+            String validation with custom regex.
+            </summary>
+            <param name="s">String to check.</param>
+            <param name="validationRegex">Custom validation regex.</param>
+            <returns>True, if valid, otherwise False.</returns>
+        </member>
+        <member name="M:ZFramework.Extensions.GlobalExtensions.Transpose``1(System.Collections.Generic.IEnumerable{System.Collections.Generic.IEnumerable{``0}})">
+            <summary>
+            Transposes the rows and columns of it's argument. Recursive.
+            </summary>
+            <typeparam name="T">Type.</typeparam>
+            <param name="values">IEnumerable values.</param>
+            <returns></returns>
+        </member>
+        <member name="M:ZFramework.Extensions.GlobalExtensions.IndexOf``1(System.Collections.Generic.IEnumerable{``0},``0)">
+            <summary>
+            Returns the index of the first occurrence in a sequence by using the default equality comparer.
+            </summary>
+            <typeparam name="TSource">The type of the elements of source.</typeparam>
+            <param name="list">A sequence in which to locate a value.</param>
+            <param name="value">The object to locate in the sequence</param>
+            <returns>The zero-based index of the first occurrence of value within the entire sequence, if found; otherwise, –1.</returns>
+        </member>
+        <member name="M:ZFramework.Extensions.GlobalExtensions.IndexOf``1(System.Collections.Generic.IEnumerable{``0},``0,System.Collections.Generic.IEqualityComparer{``0})">
+            <summary>
+            Returns the index of the first occurrence in a sequence by using a specified IEqualityComparer.
+            </summary>
+            <typeparam name="TSource">The type of the elements of source.</typeparam>
+            <param name="list">A sequence in which to locate a value.</param>
+            <param name="value">The object to locate in the sequence</param>
+            <param name="comparer">An equality comparer to compare values.</param>
+            <returns>The zero-based index of the first occurrence of value within the entire sequence, if found; otherwise, –1.</returns>
+        </member>
+        <member name="T:ZFramework.Extensions.IntExtensions">
+            <summary>
+            Extension class for int.
+            </summary>
+        </member>
+        <member name="M:ZFramework.Extensions.IntExtensions.IsZero(System.Int32)">
+            <summary>
+            Is int equals zero?
+            </summary>
+            <param name="number">Number type of int.</param>
+            <returns>True = 0; False != 0.</returns>
+        </member>
+        <member name="M:ZFramework.Extensions.IntExtensions.ToString(System.Nullable{System.Int32},System.String)">
+            <summary>
+            ToString() Analog.
+            </summary>
+            <param name="value"></param>
+            <param name="defaultvalue"></param>
+            <returns>Null if 'value' == null.</returns>
+        </member>
+        <member name="T:ZFramework.Extensions.IOExtensions">
+            <summary>
+            Extension class, that provide some IO methods.
+            </summary>
+        </member>
+        <member name="M:ZFramework.Extensions.IOExtensions.CreateDirectory(System.IO.DirectoryInfo)">
+            <summary>
+            Recursively create directory based on the given path. 
+            If the given path doesn't exist, it will create until all the folders in the path are satisfied.
+            </summary>
+            <param name="dirInfo">Folder path to create.</param>
+        </member>
+        <member name="M:ZFramework.Extensions.IOExtensions.CreateDirectory(System.String)">
+            <summary>
+            Recursively create directory based on the given path. 
+            If the given path doesn't exist, it will create until all the folders in the path are satisfied.
+            </summary>
+            <param name="dirPath">Folder path to create.</param>
+        </member>
+        <member name="M:ZFramework.Extensions.IOExtensions.ReadToEnd(System.IO.Stream)">
+            <summary>
+            Small utility for getting all data from Stream in byte array.
+            </summary>
+            <param name="stream">Stream to read from.</param>
+            <returns>Array of byte data.</returns>
+        </member>
+        <member name="T:ZFramework.Extensions.ListExtensions">
+            <summary>
+            Extension class for list.
+            </summary>
+        </member>
+        <member name="M:ZFramework.Extensions.ListExtensions.RemoveAtFast``1(System.Collections.Generic.List{``0},System.Int32)">
+            <summary>
+            Fast alternative version of the RemoveAt function. 
+            Overwrites the element at the specified index with the last element in the list, then removes the last element, thus lowering the inherent O(n) cost to O(1). 
+            Intended to be used on "unordered" lists only.
+            </summary>
+            <param name="source">List.</param>
+            <param name="index">Index of the element to be removed.</param>
+        </member>
+        <member name="T:ZFramework.Extensions.ShortcutExtensions">
+            <summary>
+            Shortcuts for some operators.
+            </summary>
+        </member>
+        <member name="T:ZFramework.Extensions.StringExtensions">
+            <summary>
+            Extension class for string.
+            </summary>
+        </member>
+        <member name="T:ZFramework.Extensions.NamespaceDocumentationContainer">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="T:ZFramework.NamespaceDocumentationContainer">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="T:ZFramework.NeuronNets.NamespaceDocumentationContainer">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="T:ZFramework.NeuronNets.Teaching.NamespaceDocumentationContainer">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="T:ZFramework.NeuronNets.Teaching.NeuronNetTeacher">
+            <summary>
+            Simple neuron net teacher.
+            </summary>
+        </member>
+        <member name="F:ZFramework.NeuronNets.Teaching.NeuronNetTeacher.TeachIterationsCount">
+            <summary>
+            Count of teach iterations.
+            </summary>
+        </member>
+        <member name="F:ZFramework.NeuronNets.Teaching.NeuronNetTeacher.neuronNetToTeach">
+            <summary>
+            Neuron net to teach.
+            </summary>
+        </member>
+        <member name="F:ZFramework.NeuronNets.Teaching.NeuronNetTeacher.teachTasks">
+            <summary>
+            Teacher tasks.
+            </summary>
+        </member>
+        <member name="M:ZFramework.NeuronNets.Teaching.NeuronNetTeacher.#ctor(ZFramework.NeuronNets.NeuronNet,System.Int32)">
+            <summary>
+            Neuron net teacher constructor.
+            </summary>
+            <param name="neuronNetToTeach">Neuron net to teach.</param>
+            <param name="TeachIteraionsCount">Count of teach iterations.</param>
+        </member>
+        <member name="M:ZFramework.NeuronNets.Teaching.NeuronNetTeacher.AddTeachTask(ZFramework.NeuronNets.Teaching.NeuronNetTeacherTask)">
+            <summary>
+            Add some work for teacher.
+            </summary>
+            <param name="teachTask"></param>
+        </member>
+        <member name="M:ZFramework.NeuronNets.Teaching.NeuronNetTeacher.Teach(ZFramework.NeuronNets.NeuronNet)">
+            <summary>
+            Teach neuron net.
+            </summary>
+            <param name="neuronNetToTeach">Neuron net to teach.</param>
+        </member>
+        <member name="M:ZFramework.NeuronNets.Teaching.NeuronNetTeacher.Teach``1(``0,ZFramework.NeuronNets.NeuronNet)">
+            <summary>
+            Teach neuron net.
+            </summary>
+            <typeparam name="T">Teaching algoripthm type</typeparam>
+            <param name="neuronNetToTeach">Neuron net to teach.</param>
+            <param name="TA">Teaching algoripthm.</param>
+        </member>
+        <member name="M:ZFramework.NeuronNets.Teaching.NeuronNetTeacher.Teach(ZFramework.NeuronNets.TeachCycleType,ZFramework.NeuronNets.NeuronNet)">
+            <summary>
+            Teach neuron net.
+            </summary>
+            <param name="teachCycleType">Teach cycle type.</param>
+            <param name="neuronNetToTeach">Neuron net to teach.</param>
+        </member>
+        <member name="M:ZFramework.NeuronNets.Teaching.NeuronNetTeacher.Teach``1(``0,ZFramework.NeuronNets.TeachCycleType,ZFramework.NeuronNets.NeuronNet)">
+            <summary>
+            Teach neuron net.
+            </summary>
+            <param name="teachCycleType">Teach cycle type.</param>
+            <param name="neuronNetToTeach">Neuron net to teach.</param>
+            <param name="TA">Teaching algoripthm.</param>
+        </member>
+        <member name="T:ZFramework.NeuronNets.Teaching.NeuronNetTeacherTask">
+            <summary>
+            Simple teach task for neuron net teacher.
+            </summary>
+        </member>
+        <member name="F:ZFramework.NeuronNets.Teaching.NeuronNetTeacherTask.Input">
+            <summary>
+            Input values.
+            </summary>
+        </member>
+        <member name="F:ZFramework.NeuronNets.Teaching.NeuronNetTeacherTask.Output">
+            <summary>
+            Output values.
+            </summary>
+        </member>
+        <member name="M:ZFramework.NeuronNets.Teaching.NeuronNetTeacherTask.Teach(ZFramework.NeuronNets.NeuronNet)">
+            <summary>
+            Teach neuron net.
+            </summary>
+            <param name="neuronNetToTeach">Neuron net to teach.</param>
+        </member>
+        <member name="M:ZFramework.NeuronNets.Teaching.NeuronNetTeacherTask.Teach``1(ZFramework.NeuronNets.NeuronNet,``0)">
+            <summary>
+            Teach neuron net.
+            </summary>
+            <typeparam name="T">Teaching algoripthm type</typeparam>
+            <param name="neuronNetToTeach">Neuron net to teach.</param>
+            <param name="TA">Teaching algoripthm.</param>
+        </member>
+        <member name="T:ZFramework.NeuronNets.Teaching.ITeachingAlgorithm">
+            <summary>
+            Global teacher algorithm interface.
+            </summary>
+        </member>
+        <member name="M:ZFramework.NeuronNets.Teaching.ITeachingAlgorithm.Teach(ZFramework.NeuronNets.NeuronNet,System.Single[],System.Single[])">
+            <summary>
+            Teach all neurons int net with defined values.
+            </summary>
+            <param name="neuronNet">Neuron net to teach.</param>
+            <param name='Inputs'>Input values.</param>
+            <param name='Outputs'>Output values.</param>
+        </member>
+        <member name="T:ZFramework.NeuronNets.Teaching.SimpleTeachingAlgoripthm">
+            <summary>
+            Class, that contains simple teaching algorithm for neuron net.
+            </summary>
+        </member>
+        <member name="M:ZFramework.NeuronNets.Teaching.SimpleTeachingAlgoripthm.Teach(ZFramework.NeuronNets.NeuronNet,System.Single[],System.Single[])">
+            <summary>
+            Teach all neurons in net with defined values of Inputs and Outputs.
+            </summary>
+            <param name="neuronNet">Neuron net to teach.</param>
+            <param name='Inputs'>Input values.</param>
+            <param name='Outputs'>Output values.</param>
+            <exception cref="T:System.Exception">Throws Exception if count of input values not equal to count of output
+            or count of output values not equal to count of input values.</exception>
+            <exception cref="T:System.NullReferenceException">Throws NullReferenceException, if neuronNet is null.</exception>
+        </member>
+        <member name="T:ZFramework.NeuronNets.Teaching.SimpleTeachingFastAlgoripthm">
+            <summary>
+            Class, that contains simple teaching algorithm for neuron net, but with "booster".
+            </summary>
+        </member>
+        <member name="M:ZFramework.NeuronNets.Teaching.SimpleTeachingFastAlgoripthm.Teach(ZFramework.NeuronNets.NeuronNet,System.Single[],System.Single[])">
+            <summary>
+            Teach all neurons in net with defined values of Inputs and Outputs.
+            </summary>
+            <param name="neuronNet">Neuron net to teach.</param>
+            <param name='Inputs'>Input values.</param>
+            <param name='Outputs'>Output values.</param>
+            <exception cref="T:System.Exception">Throws Exception if count of input values not equal to count of output
+            or count of output values not equal to count of input values.</exception>
+            <exception cref="T:System.NullReferenceException">Throws NullReferenceException, if neuronNet is null.</exception>
+        </member>
+        <member name="T:ZFramework.NeuronNets.Persistence.NamespaceDocumentationContainer">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="T:ZFramework.NeuronNets.Persistence.Data">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="M:ZFramework.NeuronNets.Persistence.Data.#ctor">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="M:ZFramework.NeuronNets.Persistence.Data.#ctor(System.Object[])">
+            <summary>
+            
+            </summary>
+            <param name="args"></param>
+        </member>
+        <member name="M:ZFramework.NeuronNets.Persistence.Data.Add(System.Boolean)">
+            <summary>
+            
+            </summary>
+            <param name="value"></param>
+        </member>
+        <member name="M:ZFramework.NeuronNets.Persistence.Data.Add(System.Byte)">
+            <summary>
+            
+            </summary>
+            <param name="value"></param>
+        </member>
+        <member name="M:ZFramework.NeuronNets.Persistence.Data.Add(System.Byte[])">
+            <summary>
+            
+            </summary>
+            <param name="value"></param>
+        </member>
+        <member name="M:ZFramework.NeuronNets.Persistence.Data.Add(System.Char)">
+            <summary>
+            
+            </summary>
+            <param name="value"></param>
+        </member>
+        <member name="M:ZFramework.NeuronNets.Persistence.Data.Add(System.Object)">
+            <summary>
+            
+            </summary>
+            <param name="value"></param>
+        </member>
+        <member name="M:ZFramework.NeuronNets.Persistence.Data.Add(System.String)">
+            <summary>
+            
+            </summary>
+            <param name="value"></param>
+        </member>
+        <member name="M:ZFramework.NeuronNets.Persistence.Data.Add(System.UInt16)">
+            <summary>
+            
+            </summary>
+            <param name="value"></param>
+        </member>
+        <member name="M:ZFramework.NeuronNets.Persistence.Data.Add(System.Object[])">
+            <summary>
+            
+            </summary>
+            <param name="values"></param>
+        </member>
+        <member name="M:ZFramework.NeuronNets.Persistence.Data.Add(System.UInt32)">
+            <summary>
+            
+            </summary>
+            <param name="value"></param>
+        </member>
+        <member name="M:ZFramework.NeuronNets.Persistence.Data.Add(System.Collections.Generic.Dictionary{System.Object,System.Object})">
+            <summary>
+            
+            </summary>
+            <param name="values"></param>
+        </member>
+        <member name="M:ZFramework.NeuronNets.Persistence.Data.Add(System.UInt64)">
+            <summary>
+            
+            </summary>
+            <param name="value"></param>
+        </member>
+        <member name="M:ZFramework.NeuronNets.Persistence.Data.Add(System.Double)">
+            <summary>
+            
+            </summary>
+            <param name="value"></param>
+        </member>
+        <member name="M:ZFramework.NeuronNets.Persistence.Data.Add(System.Int16)">
+            <summary>
+            
+            </summary>
+            <param name="value"></param>
+        </member>
+        <member name="M:ZFramework.NeuronNets.Persistence.Data.Add``2(System.Collections.Generic.Dictionary{``0,``1})">
+            <summary>
+            
+            </summary>
+            <typeparam name="K"></typeparam>
+            <typeparam name="V"></typeparam>
+            <param name="values"></param>
+        </member>
+        <member name="M:ZFramework.NeuronNets.Persistence.Data.Add(System.Int32)">
+            <summary>
+            
+            </summary>
+            <param name="value"></param>
+        </member>
+        <member name="M:ZFramework.NeuronNets.Persistence.Data.Add(System.Int64)">
+            <summary>
+            
+            </summary>
+            <param name="value"></param>
+        </member>
+        <member name="M:ZFramework.NeuronNets.Persistence.Data.Add(System.Single)">
+            <summary>
+            
+            </summary>
+            <param name="value"></param>
+        </member>
+        <member name="M:ZFramework.NeuronNets.Persistence.Data.Add(ZFramework.NeuronNets.Persistence.IDataSerializable{System.Byte[]})">
+            <summary>
+            
+            </summary>
+            <param name="packet"></param>
+        </member>
+        <member name="M:ZFramework.NeuronNets.Persistence.Data.Add(ZFramework.NeuronNets.Persistence.IDataSerializable{System.String})">
+            <summary>
+            
+            </summary>
+            <param name="packet"></param>
+        </member>
+        <member name="M:ZFramework.NeuronNets.Persistence.Data.Add(ZFramework.NeuronNets.Persistence.IDataSerializable{ZFramework.NeuronNets.Persistence.Data})">
+            <summary>
+            
+            </summary>
+            <param name="packet"></param>
+        </member>
+        <member name="M:ZFramework.NeuronNets.Persistence.Data.Add``1(``0[])">
+            <summary>
+            
+            </summary>
+            <typeparam name="T"></typeparam>
+            <param name="values"></param>
+        </member>
+        <member name="M:ZFramework.NeuronNets.Persistence.Data.Clear">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="M:ZFramework.NeuronNets.Persistence.Data.GetArray">
+            <summary>
+            
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:ZFramework.NeuronNets.Persistence.Data.GetArray``1">
+            <summary>
+            
+            </summary>
+            <typeparam name="T"></typeparam>
+            <returns></returns>
+        </member>
+        <member name="M:ZFramework.NeuronNets.Persistence.Data.GetBool">
+            <summary>
+            
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:ZFramework.NeuronNets.Persistence.Data.GetByte">
+            <summary>
+            
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:ZFramework.NeuronNets.Persistence.Data.GetBytes">
+            <summary>
+            
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:ZFramework.NeuronNets.Persistence.Data.GetBytes``1">
+            <summary>
+            
+            </summary>
+            <typeparam name="T"></typeparam>
+            <returns></returns>
+        </member>
+        <member name="M:ZFramework.NeuronNets.Persistence.Data.GetBytesArray``1">
+            <summary>
+            
+            </summary>
+            <typeparam name="T"></typeparam>
+            <returns></returns>
+        </member>
+        <member name="M:ZFramework.NeuronNets.Persistence.Data.GetChar">
+            <summary>
+            
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:ZFramework.NeuronNets.Persistence.Data.GetDictionary">
+            <summary>
+            
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:ZFramework.NeuronNets.Persistence.Data.GetDictionary``2">
+            <summary>
+            
+            </summary>
+            <typeparam name="K"></typeparam>
+            <typeparam name="V"></typeparam>
+            <returns></returns>
+        </member>
+        <member name="M:ZFramework.NeuronNets.Persistence.Data.GetDouble">
+            <summary>
+            
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:ZFramework.NeuronNets.Persistence.Data.GetFloat">
+            <summary>
+            
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:ZFramework.NeuronNets.Persistence.Data.GetInt">
+            <summary>
+            
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:ZFramework.NeuronNets.Persistence.Data.GetLong">
+            <summary>
+            
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:ZFramework.NeuronNets.Persistence.Data.GetObject">
+            <summary>
+            
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:ZFramework.NeuronNets.Persistence.Data.GetObject``1">
+            <summary>
+            
+            </summary>
+            <typeparam name="T"></typeparam>
+            <returns></returns>
+        </member>
+        <member name="M:ZFramework.NeuronNets.Persistence.Data.GetPacket``1">
+            <summary>
+            
+            </summary>
+            <typeparam name="T"></typeparam>
+            <returns></returns>
+        </member>
+        <member name="M:ZFramework.NeuronNets.Persistence.Data.GetPacketsArray``1">
+            <summary>
+            
+            </summary>
+            <typeparam name="T"></typeparam>
+            <returns></returns>
+        </member>
+        <member name="M:ZFramework.NeuronNets.Persistence.Data.GetShort">
+            <summary>
+            
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:ZFramework.NeuronNets.Persistence.Data.GetString">
+            <summary>
+            
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:ZFramework.NeuronNets.Persistence.Data.GetString``1">
+            <summary>
+            
+            </summary>
+            <typeparam name="T"></typeparam>
+            <returns></returns>
+        </member>
+        <member name="M:ZFramework.NeuronNets.Persistence.Data.GetStringArray``1">
+            <summary>
+            
+            </summary>
+            <typeparam name="T"></typeparam>
+            <returns></returns>
+        </member>
+        <member name="M:ZFramework.NeuronNets.Persistence.Data.GetTypeId">
+            <summary>
+            
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:ZFramework.NeuronNets.Persistence.Data.GetUint">
+            <summary>
+            
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:ZFramework.NeuronNets.Persistence.Data.GetUlong">
+            <summary>
+            
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:ZFramework.NeuronNets.Persistence.Data.GetUshort">
+            <summary>
+            
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:ZFramework.NeuronNets.Persistence.Data.ResetRead">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="M:ZFramework.NeuronNets.Persistence.Data.ThrowException(System.Int16)">
+            <summary>
+            
+            </summary>
+            <param name="code"></param>
+        </member>
+        <member name="P:ZFramework.NeuronNets.Persistence.Data.All">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="P:ZFramework.NeuronNets.Persistence.Data.hasData">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="P:ZFramework.NeuronNets.Persistence.Data.SerializeData">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="T:ZFramework.NeuronNets.Persistence.Data.EncryptDataDelegate">
+            <summary>
+            
+            </summary>
+            <param name="value"></param>
+            <returns></returns>
+        </member>
+        <member name="T:ZFramework.NeuronNets.Persistence.DataSerializer">
+            <summary>
+            Class - persister.
+            </summary>
+        </member>
+        <member name="T:ZFramework.NeuronNets.Persistence.IDataSerializable`1">
+            <summary>
+            Data serialization interface.
+            </summary>
+            <typeparam name="T">Data type.</typeparam>
+        </member>
+        <member name="T:ZFramework.NeuronNets.Persistence.NamedData">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="M:ZFramework.NeuronNets.Persistence.NamedData.Add(System.String,System.Object)">
+            <summary>
+            
+            </summary>
+            <param name="name"></param>
+            <param name="value"></param>
+        </member>
+        <member name="M:ZFramework.NeuronNets.Persistence.NamedData.Get(System.String)">
+            <summary>
+            
+            </summary>
+            <param name="name"></param>
+        </member>
+        <member name="M:ZFramework.NeuronNets.Persistence.NamedData.Get``1(System.String)">
+            <summary>
+            
+            </summary>
+            <typeparam name="T"></typeparam>
+            <param name="name"></param>
+        </member>
+        <member name="M:ZFramework.NeuronNets.Persistence.NamedData.Get``1(System.String,``0@)">
+            <summary>
+            
+            </summary>
+            <typeparam name="T"></typeparam>
+            <param name="name"></param>
+            <param name="value"></param>
+            <returns></returns>
+        </member>
+        <member name="P:ZFramework.NeuronNets.Persistence.NamedData.SerializeData">
+            <summary>
+            Data serialization.
+            </summary>
+        </member>
+        <member name="T:ZFramework.NeuronNets.Neuron">
+            <summary>
+            Primitive neuron model.
+            </summary>
+        </member>
+        <member name="F:ZFramework.NeuronNets.Neuron.LearningAbility">
+            <summary>
+            Learning ability of neuron.
+            </summary>
+        </member>
+        <member name="F:ZFramework.NeuronNets.Neuron.Dentrites">
+            <summary>
+            List of dentrites. Input.
+            </summary>
+        </member>
+        <member name="F:ZFramework.NeuronNets.Neuron.Axons">
+            <summary>
+            List of axons. Output.
+            </summary>
+        </member>
+        <member name="M:ZFramework.NeuronNets.Neuron.ConnectAxonWithNeuron(ZFramework.NeuronNets.Neuron)">
+            <summary>
+            Create connection between axon and neuron.
+            </summary>
+            <param name="neuronToConnectWith"></param>
+        </member>
+        <member name="M:ZFramework.NeuronNets.Neuron.CalculateNeuronValue">
+            <summary>
+            Neuron value calculation using Sigmoid activation function.
+            </summary>
+        </member>
+        <member name="M:ZFramework.NeuronNets.Neuron.CalculateNeuronError">
+            <summary>
+            Neuron error value calculation.
+            </summary>
+        </member>
+        <member name="M:ZFramework.NeuronNets.Neuron.CalculateBiasValue">
+            <summary>
+            Neuron bias value calculation.
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:ZFramework.NeuronNets.Neuron.UpdateNeuronError">
+            <summary>
+            Neuron error value update.
+            </summary>
+        </member>
+        <member name="M:ZFramework.NeuronNets.Neuron.UpdateNeuronValue">
+            <summary>
+            Neuron value update.
+            </summary>
+        </member>
+        <member name="M:ZFramework.NeuronNets.Neuron.UpdateNeuronBias">
+            <summary>
+            Neuron bias value update.
+            </summary>
+        </member>
+        <member name="M:ZFramework.NeuronNets.Neuron.UpdateDentriteConnectionWeight">
+            <summary>
+            Dentrite weight value update.
+            </summary>
+        </member>
+        <member name="P:ZFramework.NeuronNets.Neuron.SerializeData">
+            <summary>
+            Data serialization.
+            </summary>
+        </member>
+        <member name="T:ZFramework.NeuronNets.NeuronConnection">
+            <summary>
+            Neuron primitive connection.
+            </summary>
+        </member>
+        <member name="F:ZFramework.NeuronNets.NeuronConnection.Neuron">
+            <summary>
+            Parent neuron.
+            </summary>
+        </member>
+        <member name="F:ZFramework.NeuronNets.NeuronConnection.ConnectionWeight">
+            <summary>
+            Weight of connection.
+            </summary>
+        </member>
+        <member name="T:ZFramework.NeuronNets.NeuronNet">
+            <summary>
+            Class, that defines primitive neuron net.
+            </summary>
+        </member>
+        <member name="F:ZFramework.NeuronNets.NeuronNet.InputLayer">
+            <summary>
+            Input layer.
+            </summary>
+        </member>
+        <member name="F:ZFramework.NeuronNets.NeuronNet.HiddenLayers">
+            <summary>
+            Hidden layers.
+            Ideal count of neurons in single hidden layer is:
+            Sqrt((InputLayer.Neurons.Count ^ 2) + (OutputLayer.Neurons.Count ^ 2))
+            </summary>
+        </member>
+        <member name="F:ZFramework.NeuronNets.NeuronNet.OutputLayer">
+            <summary>
+            Output layer.
+            </summary>
+        </member>
+        <member name="M:ZFramework.NeuronNets.NeuronNet.#ctor(System.Int32,System.Int32[],System.Int32)">
+            <summary>
+            Neuron net constuctor.
+            </summary>
+            <param name="InputNeuronLayerCount">Neurons count in neuron net input layer.</param>
+            <param name="HiddenLayerNeuronCounts">Neurons count in neuron net hidden layers.</param>
+            <param name="OutputLayerNeuronCount">Neurons count in neuron net output layer.</param>
+            <exception cref='T:System.Exception'>Throws exception, if count of hidden layers is zero.</exception>
+        </member>
+        <member name="M:ZFramework.NeuronNets.NeuronNet.Teach(System.Single[],System.Single[])">
+            <summary>
+            Teach all neurons int net with defined values. SimpleTeachingAlgoripthm will be used by default.
+            </summary>
+            <param name='Inputs'>Input values.</param>
+            <param name='Outputs'>Output values.</param>
+            <exception cref="T:System.Exception">Throws Exception if count of input values not equal to count of output
+            or count of output values not equal to count of input values.</exception>
+            <exception cref="T:System.NullReferenceException">Throws NullReferenceException,
+            if neuronNet is null.</exception>
+        </member>
+        <member name="M:ZFramework.NeuronNets.NeuronNet.Teach``1(System.Single[],System.Single[],``0)">
+            <summary>
+            Teach all neurons int net with defined values.
+            </summary>
+            <typeparam name="T">Teaching algoripthm type</typeparam>
+            <param name='Inputs'>Input values.</param>
+            <param name='Outputs'>Output values.</param>
+            <param name="TA">Teaching algoripthm.</param>
+            <exception cref="T:System.Exception">Throws Exception if count of input values not equal to count of output
+            or count of output values not equal to count of input values.</exception>
+            <exception cref="T:System.NullReferenceException">Throws NullReferenceException,
+            if neuronNet is null.</exception>
+        </member>
+        <member name="M:ZFramework.NeuronNets.NeuronNet.CalculateValues(System.Single[],System.Single[]@)">
+            <summary>
+            Setup neuron values for all neurons in net and calculate it.
+            </summary>
+            <param name='Inputs'>Input values.</param>
+            <param name='Ouputs'>Output values.</param>
+        </member>
+        <member name="P:ZFramework.NeuronNets.NeuronNet.AllNeurons">
+            <summary>
+            All neurons from current neuron net.
+            </summary>
+        </member>
+        <member name="P:ZFramework.NeuronNets.NeuronNet.AllLayers">
+            <summary>
+            All neuron layers from current neuron net.
+            </summary>
+        </member>
+        <member name="M:ZFramework.NeuronNets.NeuronNet.SquaredOutputError">
+            <summary>
+            Summed squared error of all neurons in current neuron net.
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="P:ZFramework.NeuronNets.NeuronNet.SerializeData">
+            <summary>
+            Data serialization.
+            </summary>
+        </member>
+        <member name="T:ZFramework.NeuronNets.NeuronNetLayer">
+            <summary>
+            Neuron net layer.
+            </summary>
+        </member>
+        <member name="F:ZFramework.NeuronNets.NeuronNetLayer.PreviousLayer">
+            <summary>
+            Previous layer in neuron net.
+            </summary>
+        </member>
+        <member name="F:ZFramework.NeuronNets.NeuronNetLayer.NextLayer">
+            <summary>
+            Next layer in neuron net.
+            </summary>
+        </member>
+        <member name="F:ZFramework.NeuronNets.NeuronNetLayer.Neurons">
+            <summary>
+            List of neurons in layer.
+            </summary>
+        </member>
+        <member name="M:ZFramework.NeuronNets.NeuronNetLayer.#ctor(System.Int32)">
+            <summary>
+            Neuron net layer constuctor.
+            </summary>
+            <param name="quantity">Count of neurons in layer.</param>
+        </member>
+        <member name="M:ZFramework.NeuronNets.NeuronNetLayer.#ctor">
+            <summary>
+            Empty neron net layer constructor.
+            </summary>
+        </member>
+        <member name="M:ZFramework.NeuronNets.NeuronNetLayer.ConnectAxonsWith(ZFramework.NeuronNets.NeuronNetLayer)">
+            <summary>
+            Connect each neuron from this layer with each neuron from another one layer.
+            </summary>
+            <param name="LayerConnectTo"></param>
+        </member>
+        <member name="M:ZFramework.NeuronNets.NeuronNetLayer.CalculateValues">
+            <summary>
+            Neuron value calculation for all neurons in layer.
+            </summary>
+        </member>
+        <member name="M:ZFramework.NeuronNets.NeuronNetLayer.CalculateErrors">
+            <summary>
+            Neuron error value calculation for all neurons in layer.
+            </summary>
+        </member>
+        <member name="M:ZFramework.NeuronNets.NeuronNetLayer.CalculateBiases">
+            <summary>
+            Neuron bias value calculation for all neurons in layer.
+            </summary>
+        </member>
+        <member name="M:ZFramework.NeuronNets.NeuronNetLayer.CalculateWeights">
+            <summary>
+            Dentrite weight value calculation for all neurons in layer.
+            </summary>
+        </member>
+        <member name="T:ZFramework.NeuronNets.TeachAlgoripthmType">
+            <summary>
+            Simply switcher for teaching algorithms.
+            </summary>
+        </member>
+        <member name="T:ZFramework.NeuronNets.TeachCycleType">
+            <summary>
+            Teacher teach type switcher.
+            Normal type is when we teaching for each iteration for each task.
+            Reverse type is when we teaching for each task for each iteration.
+            Combined type is when we teaching for each iteration for each task for each iteration.
+            </summary>
+        </member>
+        <member name="T:ZFramework.NeuronNets.Utils">
+            <summary>
+            Helper class.
+            </summary>
+        </member>
+        <member name="M:ZFramework.NeuronNets.Utils.RasterizeNeuronNet(ZFramework.NeuronNets.NeuronNet,System.Int32,System.Int32)">
+            <summary>
+            Visualize neuron net to Bitmap using System.Drawing.Graphics features.
+            </summary>
+            <param name="nn">Neuron net to visualize.</param>
+            <param name="w">Output image width.</param>
+            <param name="h">Output image height.</param>
+            <returns>Bitmap with visualized neuron net.</returns>
+        </member>
+        <member name="T:ZFramework.Random.NamespaceDocumentationContainer">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="T:ZFramework.Random.Distribution">
+            <summary>
+            Distribution abstract class for other distribution variants.
+            </summary>
+        </member>
+        <member name="P:ZFramework.Random.Distribution.Generator">
+            <summary>
+            Pseudo - Random number generator.
+            </summary>
+        </member>
+        <member name="M:ZFramework.Random.Distribution.NextDouble">
+            <summary>
+            Next distributed random number.
+            </summary>
+            <returns>Returns a distributed floating point random number.</returns>
+        </member>
+        <member name="P:ZFramework.Random.Distribution.Minimum">
+            <summary>
+            Gets the minimum possible value of distributed random numbers.
+            </summary>
+        </member>
+        <member name="P:ZFramework.Random.Distribution.Maximum">
+            <summary>
+            Gets the maximum possible value of distributed random numbers.
+            </summary>
+        </member>
+        <member name="P:ZFramework.Random.Distribution.Mean">
+            <summary>
+            Gets the mean of distributed random numbers.
+            If the mean can't be computed, the Double.NaN constant will be returned.
+            </summary>
+        </member>
+        <member name="P:ZFramework.Random.Distribution.Median">
+            <summary>
+            Gets the median of distributed random numbers.
+            If the median can't be computed, the Double.NaN constant will be returned.
+            </summary>
+        </member>
+        <member name="P:ZFramework.Random.Distribution.Variance">
+            <summary>
+            Gets the variance of distributed random numbers.
+            If the variance can't be computed, the Double.NaN constant will be returned.
+            </summary>
+        </member>
+        <member name="P:ZFramework.Random.Distribution.Mode">
+            <summary>
+            Gets the mode of distributed random numbers.
+            If the mode can't be computed, an empty array will be returned.
+            </summary>
+        </member>
+        <member name="T:ZFramework.Random.Generator">
+            <summary>
+            Pseudo - Random number Generator abstract class for other PRN Generator variants.
+            </summary>
+        </member>
+        <member name="M:ZFramework.Random.Generator.#ctor">
+            <summary>
+            Generator constructor.
+            </summary>
+        </member>
+        <member name="M:ZFramework.Random.Generator.Next">
+            <summary>
+            Next random number.
+            </summary>
+            <returns>Returns a nonnegative random number less than Int32.MaxValue; that is, 
+            the range of return values includes 0 but not Int32.MaxValue.</returns>
+        </member>
+        <member name="M:ZFramework.Random.Generator.Next(System.Int32)">
+            <summary>
+            Next random number.
+            </summary>
+            <param name="maxValue">Max bound. Must be greater than or equal to 0.</param>
+            <returns>Returns a nonnegative random number less than the specified maximum; that is, 
+            the range of return values includes 0 but not maxValue.</returns>
+        </member>
+        <member name="M:ZFramework.Random.Generator.Next(System.Int32,System.Int32)">
+            <summary>
+            Next random number.
+            </summary>
+            <param name="minValue">Min bound. Must be smaller than maxValue.</param>
+            <param name="maxValue">Max bound. Must be greater than or equal to minValue.</param>
+            <returns>Returns a random number within the specified range; that is, 
+            the range of return values includes minValue but not maxValue.</returns>
+        </member>
+        <member name="M:ZFramework.Random.Generator.NextBoolean">
+            <summary>
+            Next random boolean.
+            </summary>
+            <returns>Returns a random Boolean value.</returns>
+        </member>
+        <member name="M:ZFramework.Random.Generator.NextBytes(System.Byte[])">
+            <summary>
+            Fills the elements of a specified array of bytes with random numbers.
+            Each element of the array of bytes is set to a random number greater than or equal to 0, and less than or equal to Byte.MaxValue.
+            </summary>
+            <param name="buffer"></param>
+        </member>
+        <member name="M:ZFramework.Random.Generator.NextDouble">
+            <summary>
+            Next random number.
+            </summary>
+            <returns>Returns a nonnegative floating point random number less than 1.0; 
+            that is, the range of return values includes 0.0 but not 1.0.</returns>
+        </member>
+        <member name="M:ZFramework.Random.Generator.NextDouble(System.Double)">
+            <summary>
+            Next random number.
+            </summary>
+            <param name="maxValue">Max bound. Must be greater than or equal to 0.0.</param>
+            <returns>Returns a nonnegative floating point random number less than the specified maximum; 
+            that is, the range of return values includes 0.0 but not maxValue.</returns>
+        </member>
+        <member name="M:ZFramework.Random.Generator.NextDouble(System.Double,System.Double)">
+            <summary>
+            Next random number.
+            </summary>
+            <param name="minValue">Min bound. Must be smaller than maxValue.</param>
+            <param name="maxValue">Max bound. Must be greater than or equal to minValue</param>
+            <returns>Returns a floating point random number within the specified range; 
+            that is, the range of return values includes minValue but not maxValue.</returns>
+        </member>
+        <member name="M:ZFramework.Random.Generator.Reset">
+            <summary>
+            Resets the random number generator, so that it produces the same random number sequence again.
+            </summary>
+            <returns>Returns true, if the random number generator was reset; otherwise, false.</returns>
+        </member>
+        <member name="P:ZFramework.Random.Generator.CanReset">
+            <summary>
+            Gets a value indicating whether the random number generator can be reset, so that it produces the same random number sequence again.
+            </summary>
+        </member>
+        <member name="T:ZFramework.Random.ALFGenerator">
+            <summary>
+            Representation of Lagged Fibonacci generator. http://en.wikipedia.org/wiki/Lagged_Fibonacci_generator
+            </summary>
+        </member>
+        <member name="M:ZFramework.Random.ALFGenerator.#ctor">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="M:ZFramework.Random.ALFGenerator.#ctor(System.Int32)">
+            <summary>
+            
+            </summary>
+            <param name="seed"></param>
+        </member>
+        <member name="T:ZFramework.Random.MT19937Generator">
+            <summary>
+            Representation of Mersenne Twister's generator. Sooo fast! Period: 2^19937-1.
+            </summary>
+        </member>
+        <member name="M:ZFramework.Random.MT19937Generator.#ctor">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="M:ZFramework.Random.MT19937Generator.#ctor(System.Int32)">
+            <summary>
+            
+            </summary>
+            <param name="seed"></param>
+        </member>
+        <member name="T:ZFramework.Random.StandardGenerator">
+            <summary>
+            Analog of System.Random.
+            </summary>
+        </member>
+        <member name="M:ZFramework.Random.StandardGenerator.#ctor">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="M:ZFramework.Random.StandardGenerator.#ctor(System.Int32)">
+            <summary>
+            
+            </summary>
+            <param name="seed"></param>
+        </member>
+        <member name="T:ZFramework.Random.XorShift128Generator">
+            <summary>
+            This type is based upon the implementation presented in the CP article 
+            "A fast equivalent for System.Random" 
+            and the theoretical background on xorshift random number generators published by George Marsaglia in the paper "Xorshift RNGs".
+            </summary>
+        </member>
+        <member name="M:ZFramework.Random.XorShift128Generator.#ctor">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="M:ZFramework.Random.XorShift128Generator.#ctor(System.Int32)">
+            <summary>
+            
+            </summary>
+            <param name="seed"></param>
+        </member>
+        <member name="M:ZFramework.Random.XorShift128Generator.#ctor(System.UInt32)">
+            <summary>
+            
+            </summary>
+            <param name="seed"></param>
+        </member>
+        <member name="T:ZFramework.Random.Resources.ExceptionMessagesFile">
+            <summary>
+              A strongly-typed resource class, for looking up localized strings, etc.
+            </summary>
+        </member>
+        <member name="P:ZFramework.Random.Resources.ExceptionMessagesFile.ResourceManager">
+            <summary>
+              Returns the cached ResourceManager instance used by this class.
+            </summary>
+        </member>
+        <member name="P:ZFramework.Random.Resources.ExceptionMessagesFile.Culture">
+            <summary>
+              Overrides the current thread's CurrentUICulture property for all
+              resource lookups using this strongly typed resource class.
+            </summary>
+        </member>
+        <member name="P:ZFramework.Random.Resources.ExceptionMessagesFile.ArgumentNull">
+            <summary>
+              Looks up a localized string similar to {0} is a null reference.
+            </summary>
+        </member>
+        <member name="P:ZFramework.Random.Resources.ExceptionMessagesFile.ArgumentOutOfRangeGreaterEqual">
+            <summary>
+              Looks up a localized string similar to {0} must be greater than or equal to {1}.
+            </summary>
+        </member>
+        <member name="P:ZFramework.Random.Resources.ExceptionMessagesFile.ArgumentRangeLessEqual">
+            <summary>
+              Looks up a localized string similar to The range between {0} and {1} must be less than or equal to {2}.
+            </summary>
+        </member>
+        <member name="T:ZFramework.RNG.NamespaceDocumentationContainer">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="T:ZFramework.RNG.Generators.NamespaceDocumentationContainer">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="T:ZFramework.RNG.CensusListStripper">
+            <summary>
+            Additional class, that makes work with Census Data more easier.
+            </summary>
+        </member>
+        <member name="T:ZFramework.RNG.FileCompressor">
+            <summary>
+            Additional class, that makes work with text files more easier.
+            </summary>
+        </member>
+        <member name="T:ZFramework.Unity.NamespaceDocumentationContainer">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="T:ZFramework.Unity.Common.NamespaceDocumentationContainer">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="T:ZFramework.Unity.Common.PerfomanceMonitor.NamespaceDocumentationContainer">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="T:ZFramework.Unity.Common.PerfomanceMonitor.MicroStopwatch">
+            <summary>
+            Microstopwatch class represents a Stopwatch analog with some additions.
+            </summary>
+        </member>
+        <member name="F:ZFramework.Unity.Common.PerfomanceMonitor.MicroStopwatch.microSecPerTick">
+            <summary>
+            Tic.
+            </summary>
+        </member>
+        <member name="M:ZFramework.Unity.Common.PerfomanceMonitor.MicroStopwatch.#ctor">
+            <summary>
+            Constuctor.
+            </summary>
+        </member>
+        <member name="P:ZFramework.Unity.Common.PerfomanceMonitor.MicroStopwatch.ElapsedMicroseconds">
+            <summary>
+            Wasted time.
+            </summary>
+        </member>
+        <member name="T:ZFramework.Unity.Common.PerfomanceMonitor.PerformanceMonitor">
+            <summary>
+            Class for method execution time measure.
+            </summary>
+        </member>
+        <member name="T:ZFramework.Unity.Common.PerfomanceMonitor.PerformanceMonitor.Counter">
+            <summary>
+            Counter class. Simple counter.
+            </summary>
+        </member>
+        <member name="P:ZFramework.Unity.Common.PerfomanceMonitor.PerformanceMonitor.Counter.Name">
+            <summary>
+            Name of counter.
+            </summary>
+        </member>
+        <member name="P:ZFramework.Unity.Common.PerfomanceMonitor.PerformanceMonitor.Counter.Time">
+            <summary>
+            Time of counter.
+            </summary>
+        </member>
+        <member name="P:ZFramework.Unity.Common.PerfomanceMonitor.PerformanceMonitor.Counter.Last">
+            <summary>
+            Last time of counter.
+            </summary>
+        </member>
+        <member name="P:ZFramework.Unity.Common.PerfomanceMonitor.PerformanceMonitor.Counter.Max">
+            <summary>
+            Max value of counter.
+            </summary>
+        </member>
+        <member name="P:ZFramework.Unity.Common.PerfomanceMonitor.PerformanceMonitor.Counter.Count">
+            <summary>
+            Count of counters.
+            </summary>
+        </member>
+        <member name="P:ZFramework.Unity.Common.PerfomanceMonitor.PerformanceMonitor.Counter.Average">
+            <summary>
+            Average time of counter.
+            </summary>
+        </member>
+        <member name="M:ZFramework.Unity.Common.PerfomanceMonitor.PerformanceMonitor.Counter.#ctor(System.String,System.Int64)">
+            <summary>
+            Constructor of counter class.
+            </summary>
+            <param name="name">Name.</param>
+            <param name="time">Time.</param>
+        </member>
+        <member name="M:ZFramework.Unity.Common.PerfomanceMonitor.PerformanceMonitor.Counter.Increment(System.Int64)">
+            <summary>
+            Counter incr. im ms.
+            </summary>
+            <param name="ms"></param>
+        </member>
+        <member name="M:ZFramework.Unity.Common.PerfomanceMonitor.PerformanceMonitor.Counter.CompareTo(ZFramework.Unity.Common.PerfomanceMonitor.PerformanceMonitor.Counter)">
+            <summary>
+            Comparer.
+            </summary>
+            <param name="other">Counter compare to.</param>
+            <returns></returns>
+        </member>
+        <member name="F:ZFramework.Unity.Common.PerfomanceMonitor.PerformanceMonitor.counters">
+            <summary>
+            Counter dictionary.
+            </summary>
+        </member>
+        <member name="M:ZFramework.Unity.Common.PerfomanceMonitor.PerformanceMonitor.#cctor">
+            <summary>
+            Constructor.
+            </summary>
+        </member>
+        <member name="P:ZFramework.Unity.Common.PerfomanceMonitor.PerformanceMonitor.Counters">
+            <summary>
+            Returns all counters in List.
+            </summary>
+        </member>
+        <member name="M:ZFramework.Unity.Common.PerfomanceMonitor.PerformanceMonitor.IncrementCounter(System.String,System.Int64)">
+            <summary>
+            Incr. of counter with defined name to defined ms.
+            </summary>
+            <param name="name">Name of counter inct. to.</param>
+            <param name="ms">Count of ms to incr..</param>
+        </member>
+        <member name="M:ZFramework.Unity.Common.PerfomanceMonitor.PerformanceMonitor.Clear">
+            <summary>
+            Dictionary of counter clean up method.
+            </summary>
+        </member>
+        <member name="T:ZFramework.Unity.Common.PerfomanceMonitor.Timer">
+            <summary>
+            Simple timer class.
+            </summary>
+            <example>
+            <code>
+            using (new Timer("Timer Name"))
+            {
+            
+            }
+            </code>
+            </example>
+        </member>
+        <member name="F:ZFramework.Unity.Common.PerfomanceMonitor.Timer.name">
+            <summary>
+            Name of timer.
+            </summary>
+        </member>
+        <member name="M:ZFramework.Unity.Common.PerfomanceMonitor.Timer.#ctor(System.String)">
+            <summary>
+            Constructor.
+            </summary>
+            <param name="name">Name of timer.</param>
+        </member>
+        <member name="T:ZFramework.Unity.Common.Secure.NamespaceDocumentationContainer">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="T:ZFramework.Unity.Common.Secure.AES">
+            <summary>
+            From: http://habrahabr.ru/post/249681/
+            AES (Advanced Encryption Standard) with 128-bit key. (By default).
+            128-bit AES is like NIST, but without 256-bit AES.
+            256-bit AES slower, than 128-bit AES. (~40%).
+            Dont try to secure data in/from RAM!
+            </summary>
+        </member>
+        <member name="F:ZFramework.Unity.Common.Secure.AES.KeyLength">
+            <summary>
+            Key length.
+            </summary>
+        </member>
+        <member name="T:ZFramework.Unity.Common.Secure.B64X">
+            <summary>
+            From: http://habrahabr.ru/post/249681/
+            Simple and fast Base64 XOR crypt method with dynamic key generation on run. 
+            Use this method to protect data in/from RAM. 
+            Don't use this method to protect data outside of RAM.
+            </summary>
+        </member>
+        <member name="F:ZFramework.Unity.Common.Secure.B64X.Key">
+            <summary>
+            Crypto key.
+            </summary>
+        </member>
+        <member name="T:ZFramework.Unity.Common.Secure.GooglePlayPurchaseGuard">
+            <summary>
+            From: http://habrahabr.ru/post/249681/
+            Class, that contain method's to protect your in-game purchases from Google Play.
+            </summary>
+        </member>
+        <member name="M:ZFramework.Unity.Common.Secure.GooglePlayPurchaseGuard.Verify(System.String,System.String,System.String)">
+            <summary>
+            Request validation. More info: http://mrtn.me/blog/2012/11/15/checking-google-play-signatures-on-net/
+            </summary>
+            <param name="purchaseJson">Purchare JSON.</param>
+            <param name="base64Signature">Base Signature.</param>
+            <param name="xmlPublicKey">XML key. Use: http://superdry.apphb.com/tools/online-rsa-key-converter to convert from RSA key.</param>
+            <returns></returns>
+        </member>
+        <member name="T:ZFramework.Unity.Common.Types.NamespaceDocumentationContainer">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="T:ZFramework.Unity.Common.Types.Vector2i">
+            <summary>
+            UnityEngine.Vector2 analog, but coords now int.
+            </summary>
+        </member>
+        <member name="F:ZFramework.Unity.Common.Types.Vector2i.Zero">
+            <summary>
+            Zero vector. Vector2i(0, 0).
+            </summary>
+        </member>
+        <member name="F:ZFramework.Unity.Common.Types.Vector2i.One">
+            <summary>
+            Unit vector. Vector2i(1, 1).
+            </summary>
+        </member>
+        <member name="F:ZFramework.Unity.Common.Types.Vector2i.Up">
+            <summary>
+            Vector2i(0, 1).
+            </summary>
+        </member>
+        <member name="F:ZFramework.Unity.Common.Types.Vector2i.Down">
+            <summary>
+            Vector2i(0, -1).
+            </summary>
+        </member>
+        <member name="F:ZFramework.Unity.Common.Types.Vector2i.Left">
+            <summary>
+            Vector2i(-1, 0).
+            </summary>
+        </member>
+        <member name="F:ZFramework.Unity.Common.Types.Vector2i.Right">
+            <summary>
+            Vector2i(1, 0).
+            </summary>
+        </member>
+        <member name="P:ZFramework.Unity.Common.Types.Vector2i.Magnitude">
+            <summary>
+            Vector magnitude.
+            </summary>
+        </member>
+        <member name="M:ZFramework.Unity.Common.Types.Vector2i.Min(ZFramework.Unity.Common.Types.Vector2i,ZFramework.Unity.Common.Types.Vector2i)">
+            <summary>
+            Returns smallest vector of two.
+            </summary>
+            <param name="FirstVector">Vector A.</param>
+            <param name="SecondVector">Vector B.</param>
+        </member>
+        <member name="M:ZFramework.Unity.Common.Types.Vector2i.Max(ZFramework.Unity.Common.Types.Vector2i,ZFramework.Unity.Common.Types.Vector2i)">
+            <summary>
+            Returns bigest vector of two.
+            </summary>
+            <param name="FirstVector">Vector A.</param>
+            <param name="SecondVector">Vector B.</param>
+        </member>
+        <member name="M:ZFramework.Unity.Common.Types.Vector2i.Floor(UnityEngine.Vector2)">
+            <summary>
+            Floor to int vector coords.
+            </summary>
+            <param name="v">Vector.</param>
+        </member>
+        <member name="M:ZFramework.Unity.Common.Types.Vector2i.Ceil(UnityEngine.Vector2)">
+            <summary>
+            Ceil to int vector coords.
+            </summary>
+            <param name="v">Vector.</param>
+        </member>
+        <member name="M:ZFramework.Unity.Common.Types.Vector2i.Round(UnityEngine.Vector2)">
+            <summary>
+            Round to int vector coords.
+            </summary>
+            <param name="v">Vector.</param>
+        </member>
+        <member name="M:ZFramework.Unity.Common.Types.Vector2i.Distance(ZFramework.Unity.Common.Types.Vector2i,ZFramework.Unity.Common.Types.Vector2i)">
+            <summary>
+            Distance between vectors.
+            </summary>
+            <param name="From">Vector A.</param>
+            <param name="To">Vector B.</param>
+        </member>
+        <member name="M:ZFramework.Unity.Common.Types.Vector2i.DistanceSqrt(ZFramework.Unity.Common.Types.Vector2i,ZFramework.Unity.Common.Types.Vector2i)">
+            <summary>
+            Distance between vectors. (Without Mathf.Sqrt(...))
+            </summary>
+            <param name="From">Vector A.</param>
+            <param name="To">Vector B.</param>
+        </member>
+        <member name="M:ZFramework.Unity.Common.Types.Vector2i.Normalize">
+            <summary>
+            Vector normalization.
+            </summary>
+        </member>
+        <member name="M:ZFramework.Unity.Common.Types.Vector2i.Length">
+            <summary>
+            Vector length.
+            </summary>
+        </member>
+        <member name="T:ZFramework.Unity.Common.Types.Vector3i">
+            <summary>
+            UnityEngine.Vector3 analog, but coords now int.
+            </summary>
+        </member>
+        <member name="F:ZFramework.Unity.Common.Types.Vector3i.Zero">
+            <summary>
+            Zero vector. Vector3i(0, 0, 0).
+            </summary>
+        </member>
+        <member name="F:ZFramework.Unity.Common.Types.Vector3i.One">
+            <summary>
+            Unit vector. Vector3i(1, 1, 1).
+            </summary>
+        </member>
+        <member name="F:ZFramework.Unity.Common.Types.Vector3i.Forward">
+            <summary>
+            Vector3i(0, 0, 1).
+            </summary>
+        </member>
+        <member name="F:ZFramework.Unity.Common.Types.Vector3i.Back">
+            <summary>
+            Vector3i(0, 0, -1).
+            </summary>
+        </member>
+        <member name="F:ZFramework.Unity.Common.Types.Vector3i.Up">
+            <summary>
+            Vector3i(0, 1, 0).
+            </summary>
+        </member>
+        <member name="F:ZFramework.Unity.Common.Types.Vector3i.Down">
+            <summary>
+            Vector3i(0, -1, 0).
+            </summary>
+        </member>
+        <member name="F:ZFramework.Unity.Common.Types.Vector3i.Left">
+            <summary>
+            Vector3i(-1, 0, 0).
+            </summary>
+        </member>
+        <member name="F:ZFramework.Unity.Common.Types.Vector3i.Right">
+            <summary>
+            Vector3i(1, 0, 0).
+            </summary>
+        </member>
+        <member name="P:ZFramework.Unity.Common.Types.Vector3i.Magnitude">
+            <summary>
+            Vector magnitude.
+            </summary>
+        </member>
+        <member name="M:ZFramework.Unity.Common.Types.Vector3i.Min(ZFramework.Unity.Common.Types.Vector3i,ZFramework.Unity.Common.Types.Vector3i)">
+            <summary>
+            Returns smallest vector of two.
+            </summary>
+            <param name="FirstVector">Vector A.</param>
+            <param name="SecondVector">Vector B.</param>
+        </member>
+        <member name="M:ZFramework.Unity.Common.Types.Vector3i.Max(ZFramework.Unity.Common.Types.Vector3i,ZFramework.Unity.Common.Types.Vector3i)">
+            <summary>
+            Returns bigest vector of two.
+            </summary>
+            <param name="FirstVector">Vector A.</param>
+            <param name="SecondVector">Vector B.</param>
+        </member>
+        <member name="M:ZFramework.Unity.Common.Types.Vector3i.Floor(UnityEngine.Vector3)">
+            <summary>
+            Floor to int vector coords.
+            </summary>
+            <param name="v">Vector.</param>
+        </member>
+        <member name="M:ZFramework.Unity.Common.Types.Vector3i.Ceil(UnityEngine.Vector3)">
+            <summary>
+            Ceil to int vector coords.
+            </summary>
+            <param name="v">Vector.</param>
+        </member>
+        <member name="M:ZFramework.Unity.Common.Types.Vector3i.Round(UnityEngine.Vector3)">
+            <summary>
+            Round to int vector coords.
+            </summary>
+            <param name="v">Vector.</param>
+        </member>
+        <member name="M:ZFramework.Unity.Common.Types.Vector3i.Distance(ZFramework.Unity.Common.Types.Vector3i,ZFramework.Unity.Common.Types.Vector3i)">
+            <summary>
+            Distance between vectors.
+            </summary>
+            <param name="From">Vector A.</param>
+            <param name="To">Vector B.</param>
+        </member>
+        <member name="M:ZFramework.Unity.Common.Types.Vector3i.DistanceSqrt(ZFramework.Unity.Common.Types.Vector3i,ZFramework.Unity.Common.Types.Vector3i)">
+            <summary>
+            Distance between vectors. (Without Mathf.Sqrt(...))
+            </summary>
+            <param name="From">Vector A.</param>
+            <param name="To">Vector B.</param>
+        </member>
+        <member name="M:ZFramework.Unity.Common.Types.Vector3i.Normalize">
+            <summary>
+            Vector normalization.
+            </summary>
+        </member>
+        <member name="M:ZFramework.Unity.Common.Types.Vector3i.Length">
+            <summary>
+            Vector length.
+            </summary>
+        </member>
+        <member name="T:ZFramework.Unity.Common.Utils.NamespaceDocumentationContainer">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="T:ZFramework.Unity.Common.Utils.BitmapUtils">
+            <summary>
+            Class, that contains some helpfull methods for "Drawing" on UnityEngine.Texture2D, like on default System.Drawing.Bitmap.
+            </summary>
+        </member>
+        <member name="M:ZFramework.Unity.Common.Utils.BitmapUtils.DrawPixel(UnityEngine.Texture2D,System.Int32,System.Int32,UnityEngine.Color)">
+            <summary>
+            Draws a pixel just like SetPixel except 0,0 is the left top corner.
+            </summary>
+        </member>
+        <member name="M:ZFramework.Unity.Common.Utils.BitmapUtils.DrawPixel(UnityEngine.Texture2D,System.Int32,System.Int32,System.Int32,System.Int32,UnityEngine.Color)">
+            <summary>
+            Draws a pixel.
+            </summary>
+        </member>
+        <member name="M:ZFramework.Unity.Common.Utils.BitmapUtils.DrawCircle(UnityEngine.Texture2D,System.Int32,System.Int32,System.Int32,UnityEngine.Color)">
+            <summary>
+            Draws a circle with the midpoint being x0, x1.
+            Implementation of Bresenham's circle algorithm.
+            </summary>
+        </member>
+        <member name="M:ZFramework.Unity.Common.Utils.BitmapUtils.DrawFilledCircle(UnityEngine.Texture2D,System.Int32,System.Int32,System.Int32,UnityEngine.Color)">
+            <summary>
+            Draws a filled circle with the midpoint being x0, x1.
+            Implementation of Bresenham's circle algorithm.
+            </summary>
+        </member>
+        <member name="M:ZFramework.Unity.Common.Utils.BitmapUtils.FloodFill(UnityEngine.Texture2D,System.Int32,System.Int32,UnityEngine.Color)">
+            <summary>
+            Starts a flood fill at point startX, startY.
+            This is a pretty slow flood fill, biggest bottle neck is comparing two colors which happens
+            a lot. Should be a way to make it much faster.
+            O(n) space.  n = width*height - makes a copy of the bitmap temporarily in the memory
+            </summary>
+        </member>
+        <member name="M:ZFramework.Unity.Common.Utils.BitmapUtils.DrawRectangle(UnityEngine.Texture2D,UnityEngine.Rect,UnityEngine.Color)">
+            <summary>
+            Draws a rectangle.
+            </summary>
+        </member>
+        <member name="M:ZFramework.Unity.Common.Utils.BitmapUtils.DrawFilledRectangle(UnityEngine.Texture2D,UnityEngine.Rect,UnityEngine.Color)">
+            <summary>
+            Draws a filled rectangle.
+            </summary>
+        </member>
+        <member name="M:ZFramework.Unity.Common.Utils.BitmapUtils.DrawLine(UnityEngine.Texture2D,UnityEngine.Vector3,UnityEngine.Vector3,UnityEngine.Color)">
+            <summary>
+            Draws a line.
+            </summary>
+        </member>
+        <member name="M:ZFramework.Unity.Common.Utils.BitmapUtils.DrawLine(UnityEngine.Texture2D,UnityEngine.Vector2,UnityEngine.Vector2,UnityEngine.Color)">
+            <summary>
+            Draws a line.
+            </summary>
+        </member>
+        <member name="M:ZFramework.Unity.Common.Utils.BitmapUtils.DrawLine(UnityEngine.Texture2D,System.Int32,System.Int32,System.Int32,System.Int32,UnityEngine.Color)">
+            <summary>
+            Draws a line.
+            </summary>
+        </member>
+        <member name="M:ZFramework.Unity.Common.Utils.BitmapUtils.Swap(System.Int32@,System.Int32@)">
+            <summary>
+            Swap two ints by reference.
+            </summary>
+        </member>
+        <member name="M:ZFramework.Unity.Common.Utils.BitmapUtils.TransformToLeftTop_y(System.Int32,System.Int32)">
+            <summary>
+            Transforms a point in the texture plane so that 0,0 points at left-top corner.
+            </summary>
+        </member>
+        <member name="M:ZFramework.Unity.Common.Utils.BitmapUtils.TransformToLeftTop_y(System.Single,System.Int32)">
+            <summary>
+            Transforms a point in the texture plane so that 0,0 points at left-top corner.
+            </summary>
+        </member>
+        <member name="T:ZFramework.Unity.Common.Utils.GlobalUtils">
+            <summary>
+            Global utils and helper method's for use from Unity.
+            </summary>
+        </member>
+        <member name="T:ZFramework.Unity.Common.Utils.TransformUtils">
+            <summary>
+            UnityEngine.Transform utils and helper method's for use from Unity.
+            </summary>
+        </member>
+        <member name="M:ZFramework.Unity.Common.Utils.TransformUtils.Search(UnityEngine.Transform,System.String)">
+            <summary>
+            Recursive method to find out needed transfrom with specified name. 
+            </summary>
+            <param name="target">Transfrom where search process will be.</param>
+            <param name="name">Name of target transform.</param>
+            <returns></returns>
+        </member>
+        <member name="T:ZFramework.Unity.NeuronNets.NamespaceDocumentationContainer">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="T:ZFramework.Unity.NeuronNets.Persistance.NamespaceDocumentationContainer">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="T:ZFramework.Unity.NeuronNets.Persistence.UnityGenericPersister`1">
+            <summary>
+            
+            </summary>
+            <typeparam name="T"></typeparam>
+        </member>
+        <member name="M:ZFramework.Unity.NeuronNets.Persistence.UnityGenericPersister`1.#ctor">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="M:ZFramework.Unity.NeuronNets.Persistence.UnityGenericPersister`1.Load">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="M:ZFramework.Unity.NeuronNets.Persistence.UnityGenericPersister`1.OnApplicationQuit">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="M:ZFramework.Unity.NeuronNets.Persistence.UnityGenericPersister`1.OnDestroy">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="M:ZFramework.Unity.NeuronNets.Persistence.UnityGenericPersister`1.Save">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="M:ZFramework.Unity.NeuronNets.Persistence.UnityGenericPersister`1.Start">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="T:ZFramework.Unity.NeuronNets.UnityNeuronNet">
+            <summary>
+            Class, that defines primitive neuron net model for using in Unity3D Engine.
+            </summary>
+        </member>
+        <member name="F:ZFramework.Unity.NeuronNets.UnityNeuronNet.neuronNet">
+            <summary>
+            Neuron net.
+            </summary>
+        </member>
+        <member name="F:ZFramework.Unity.NeuronNets.UnityNeuronNet.InputNeuronsCount">
+            <summary>
+            Input neurons count.
+            </summary>
+        </member>
+        <member name="F:ZFramework.Unity.NeuronNets.UnityNeuronNet.HiddenNeuronsCount">
+            <summary>
+            Hidden neurons count.
+            </summary>
+        </member>
+        <member name="F:ZFramework.Unity.NeuronNets.UnityNeuronNet.OutputNeuronsCount">
+            <summary>
+            Output neurons count.
+            </summary>
+        </member>
+        <member name="M:ZFramework.Unity.NeuronNets.UnityNeuronNet.Teach(System.Single[],System.Single[])">
+            <summary>
+            Teach all neurons int net with defined values.
+            </summary>
+            <param name='Inputs'>Input values.</param>
+            <param name='Outputs'>Output values.</param>
+            <exception cref="T:System.Exception">Throws Exception if count of input values not equal to count of output
+            or count of output values not equal to count of input values.</exception>
+            <exception cref="T:System.NullReferenceException">Throws NullReferenceException,
+            if neuronNet is null.</exception>
+        </member>
+        <member name="M:ZFramework.Unity.NeuronNets.UnityNeuronNet.Teach``1(``0,System.Single[],System.Single[])">
+            <summary>
+            Teach all neurons int net with defined values and with defined teaching algorithm.
+            </summary>
+            <typeparam name="T">Type of teaching algorithm.</typeparam>
+            <param name="TA">Teaching algorithm.</param>
+            <param name='Inputs'>Input values.</param>
+            <param name='Outputs'>Output values.</param>
+            <exception cref="T:System.Exception">Throws Exception if count of input values not equal to count of output
+            or count of output values not equal to count of input values.</exception>
+            <exception cref="T:System.NullReferenceException">Throws NullReferenceException,
+            if neuronNet is null.</exception>
+        </member>
+        <member name="M:ZFramework.Unity.NeuronNets.UnityNeuronNet.CalculateValues(System.Single[],System.Single[]@)">
+            <summary>
+            Setup neuron values for all neurons in net and calculate it.
+            </summary>
+            <param name='Inputs'>Input values.</param>
+            <param name='Outputs'>Output values.</param>
+        </member>
+        <member name="P:ZFramework.Unity.NeuronNets.UnityNeuronNet.SerializeData">
+            <summary>
+            Data serialization.
+            </summary>
+        </member>
+        <member name="T:ZFramework.Unity.NeuronNets.UnityNeuronNetTeacher">
+            <summary>
+            Simple neuron net teacher for using in Unity3D Engine.
+            </summary>
+        </member>
+        <member name="F:ZFramework.Unity.NeuronNets.UnityNeuronNetTeacher.neuronTeacher">
+            <summary>
+            Teacher instance for that neuron net.
+            </summary>
+        </member>
+        <member name="F:ZFramework.Unity.NeuronNets.UnityNeuronNetTeacher.neuronNetToTeach">
+            <summary>
+            Neuron net to train.
+            </summary>
+        </member>
+        <member name="F:ZFramework.Unity.NeuronNets.UnityNeuronNetTeacher.TeachIterationsCount">
+            <summary>
+            Count of teach iterations.
+            </summary>
+        </member>
+        <member name="T:ZFramework.Unity.NeuronNets.UnityNeuronNetTeacherTask">
+            <summary>
+            Simple teach task for neuron net teacher for using in Unity3D Engine.
+            </summary>
+        </member>
+        <member name="F:ZFramework.Unity.NeuronNets.UnityNeuronNetTeacherTask.TeacherTask">
+            <summary>
+            Teacher task for neuron net teacher.
+            </summary>
+        </member>
+        <member name="F:ZFramework.Unity.NeuronNets.UnityNeuronNetTeacherTask.Teacher">
+            <summary>
+            Neuron net teacher.
+            </summary>
+        </member>
+        <member name="F:ZFramework.Unity.NeuronNets.UnityNeuronNetTeacherTask.Input">
+            <summary>
+            Input values.
+            </summary>
+        </member>
+        <member name="F:ZFramework.Unity.NeuronNets.UnityNeuronNetTeacherTask.Output">
+            <summary>
+            Output values.
+            </summary>
+        </member>
+    </members>
+</doc>

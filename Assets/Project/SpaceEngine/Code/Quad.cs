@@ -4,22 +4,20 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 
+using ZFramework.Unity.Common.PerfomanceMonitor;
+
 [Serializable]
 public struct QuadGenerationConstants
 {
-    public float planetRadius;
-    public float spacing;
-    public float terrainMaxHeight;
+    public float planetRadius; //4
+    public float spacing; //4
+    public float terrainMaxHeight; //4
 
-    public Vector3 cubeFaceEastDirection;
-    public Vector3 cubeFaceNorthDirection;
-    public Vector3 patchCubeCenter;
+    public Vector3 cubeFaceEastDirection; //12
+    public Vector3 cubeFaceNorthDirection; //12
+    public Vector3 patchCubeCenter; //12
 
-    public Vector3 topLeftCorner;
-    public Vector3 bottomRightCorner;
-    public Vector3 topRightCorner;
-    public Vector3 bottomLeftCorner;
-    public Vector3 middleNormalized;
+    //12 * 3 + 4 * 3 = 36 + 12 = 48
 
     public static QuadGenerationConstants Init()
     {
@@ -76,6 +74,12 @@ public class Quad : MonoBehaviour
     public float lodUpdateInterval = 0.25f;
     public float lastLodUpdateTime = 0.00f;
 
+    public Vector3 topLeftCorner;
+    public Vector3 bottomRightCorner;
+    public Vector3 topRightCorner;
+    public Vector3 bottomLeftCorner;
+    public Vector3 middleNormalized;
+
     public Quad()
     {
 
@@ -94,7 +98,7 @@ public class Quad : MonoBehaviour
 
             if (this.LODLevel != this.Planetoid.LODMaxLevel)
             {
-                if (this.Planetoid.LODDistances[this.LODLevel + 1] > GetClosestDistance())
+                if (this.Planetoid.LODDistances[this.LODLevel + 1] > GetClosestDistance(-64))
                 {
                     if (!this.HaveSubQuads)
                         this.Split();
@@ -124,32 +128,32 @@ public class Quad : MonoBehaviour
         if (this.Planetoid.DrawGizmos)
         {
             //Gizmos.color = Color.cyan;
-            //Gizmos.DrawWireCube(this.quadGC.middleNormalized, GetBoundsSize(this));
+            //Gizmos.DrawWireCube(this.middleNormalized, GetBoundsSize(this));
 
             if (!this.HaveSubQuads)
             {
-                //Gizmos.color = Color.red;
-                //Gizmos.DrawWireSphere(this.quadGC.topLeftCorner, 100);
-                //Gizmos.color = Color.green;
-                //Gizmos.DrawWireSphere(this.quadGC.topRightCorner, 100);
-                //Gizmos.color = Color.blue;
-                //Gizmos.DrawWireSphere(this.quadGC.bottomLeftCorner, 100);
-                //Gizmos.color = Color.yellow;
-                //Gizmos.DrawWireSphere(this.quadGC.bottomRightCorner, 100);
+                Gizmos.color = Color.red;
+                Gizmos.DrawWireSphere(this.topLeftCorner.NormalizeToRadius(this.Planetoid.PlanetRadius), 100);
+                Gizmos.color = Color.green;
+                Gizmos.DrawWireSphere(this.topRightCorner.NormalizeToRadius(this.Planetoid.PlanetRadius), 100);
+                Gizmos.color = Color.blue;
+                Gizmos.DrawWireSphere(this.bottomLeftCorner.NormalizeToRadius(this.Planetoid.PlanetRadius), 100);
+                Gizmos.color = Color.yellow;
+                Gizmos.DrawWireSphere(this.bottomRightCorner.NormalizeToRadius(this.Planetoid.PlanetRadius), 100);
                 Gizmos.color = Color.magenta;
-                Gizmos.DrawWireSphere(this.quadGC.middleNormalized, 100);
+                Gizmos.DrawWireSphere(this.middleNormalized.NormalizeToRadius(this.Planetoid.PlanetRadius), 100);
             }
         }
     }
 
     public void InitCorners(Vector3 topLeft, Vector3 bottmoRight, Vector3 topRight, Vector3 bottomLeft)
     {
-        this.quadGC.topLeftCorner = topLeft;
-        this.quadGC.bottomRightCorner = bottmoRight;
-        this.quadGC.topRightCorner = topRight;
-        this.quadGC.bottomLeftCorner = bottomLeft;
+        this.topLeftCorner = topLeft;
+        this.bottomRightCorner = bottmoRight;
+        this.topRightCorner = topRight;
+        this.bottomLeftCorner = bottomLeft;
 
-        this.quadGC.middleNormalized = this.CalculateMiddlePoint(topLeft, bottmoRight, topRight, bottmoRight);
+        this.middleNormalized = this.CalculateMiddlePoint(topLeft, bottmoRight, topRight, bottmoRight);
     }
 
     [ContextMenu("Split")]
@@ -162,7 +166,7 @@ public class Quad : MonoBehaviour
 
         int subdivisions = 2;
 
-        Vector3 size = this.quadGC.bottomRightCorner - this.quadGC.topLeftCorner;
+        Vector3 size = this.bottomRightCorner - this.topLeftCorner;
         Vector3 step = size / subdivisions;
 
         Log("Size: " + size.ToString());
@@ -185,27 +189,27 @@ public class Quad : MonoBehaviour
 
                 if (staticX)
                 {
-                    subTopLeft = new Vector3(this.quadGC.topLeftCorner.x, this.quadGC.topLeftCorner.y + step.y * sY, this.quadGC.topLeftCorner.z + step.z * sX);
-                    subBottomRight = new Vector3(this.quadGC.topLeftCorner.x, this.quadGC.topLeftCorner.y + step.y * (sY + 1), this.quadGC.topLeftCorner.z + step.z * (sX + 1));
+                    subTopLeft = new Vector3(this.topLeftCorner.x, this.topLeftCorner.y + step.y * sY, this.topLeftCorner.z + step.z * sX);
+                    subBottomRight = new Vector3(this.topLeftCorner.x, this.topLeftCorner.y + step.y * (sY + 1), this.topLeftCorner.z + step.z * (sX + 1));
 
-                    subTopRight = new Vector3(this.quadGC.topLeftCorner.x, this.quadGC.topLeftCorner.y + step.y * sY, this.quadGC.topLeftCorner.z + step.z * (sX + 1));
-                    subBottomLeft = new Vector3(this.quadGC.topLeftCorner.x, this.quadGC.topLeftCorner.y + step.y * (sY + 1), this.quadGC.topLeftCorner.z + step.z * sX);
+                    subTopRight = new Vector3(this.topLeftCorner.x, this.topLeftCorner.y + step.y * sY, this.topLeftCorner.z + step.z * (sX + 1));
+                    subBottomLeft = new Vector3(this.topLeftCorner.x, this.topLeftCorner.y + step.y * (sY + 1), this.topLeftCorner.z + step.z * sX);
                 }
                 if (staticY)
                 {
-                    subTopLeft = new Vector3(this.quadGC.topLeftCorner.x + step.x * sX, this.quadGC.topLeftCorner.y, this.quadGC.topLeftCorner.z + step.z * sY);
-                    subBottomRight = new Vector3(this.quadGC.topLeftCorner.x + step.x * (sX + 1), this.quadGC.topLeftCorner.y, this.quadGC.topLeftCorner.z + step.z * (sY + 1));
+                    subTopLeft = new Vector3(this.topLeftCorner.x + step.x * sX, this.topLeftCorner.y, this.topLeftCorner.z + step.z * sY);
+                    subBottomRight = new Vector3(this.topLeftCorner.x + step.x * (sX + 1), this.topLeftCorner.y, this.topLeftCorner.z + step.z * (sY + 1));
 
-                    subTopRight = new Vector3(this.quadGC.topLeftCorner.x + step.x * (sX + 1), this.quadGC.topLeftCorner.y, this.quadGC.topLeftCorner.z + step.z * sY);
-                    subBottomLeft = new Vector3(this.quadGC.topLeftCorner.x + step.x * sX, this.quadGC.topLeftCorner.y, this.quadGC.topLeftCorner.z + step.z * (sY + 1));
+                    subTopRight = new Vector3(this.topLeftCorner.x + step.x * (sX + 1), this.topLeftCorner.y, this.topLeftCorner.z + step.z * sY);
+                    subBottomLeft = new Vector3(this.topLeftCorner.x + step.x * sX, this.topLeftCorner.y, this.topLeftCorner.z + step.z * (sY + 1));
                 }
                 if (staticZ)
                 {
-                    subTopLeft = new Vector3(this.quadGC.topLeftCorner.x + step.x * sX, this.quadGC.topLeftCorner.y + step.y * sY, this.quadGC.topLeftCorner.z);
-                    subBottomRight = new Vector3(this.quadGC.topLeftCorner.x + step.x * (sX + 1), this.quadGC.topLeftCorner.y + step.y * (sY + 1), this.quadGC.topLeftCorner.z);
+                    subTopLeft = new Vector3(this.topLeftCorner.x + step.x * sX, this.topLeftCorner.y + step.y * sY, this.topLeftCorner.z);
+                    subBottomRight = new Vector3(this.topLeftCorner.x + step.x * (sX + 1), this.topLeftCorner.y + step.y * (sY + 1), this.topLeftCorner.z);
 
-                    subTopRight = new Vector3(this.quadGC.topLeftCorner.x + step.x * (sX + 1), this.quadGC.topLeftCorner.y + step.y * sY, this.quadGC.topLeftCorner.z);
-                    subBottomLeft = new Vector3(this.quadGC.topLeftCorner.x + step.x * sX, this.quadGC.topLeftCorner.y + step.y * (sY + 1), this.quadGC.topLeftCorner.z);
+                    subTopRight = new Vector3(this.topLeftCorner.x + step.x * (sX + 1), this.topLeftCorner.y + step.y * sY, this.topLeftCorner.z);
+                    subBottomLeft = new Vector3(this.topLeftCorner.x + step.x * sX, this.topLeftCorner.y + step.y * (sY + 1), this.topLeftCorner.z);
                 }
 
                 Quad quad = Planetoid.SetupSubQuad(Position);
@@ -264,38 +268,39 @@ public class Quad : MonoBehaviour
         Setter.LoadAndInit();
 
         QuadGenerationConstants[] quadGenerationConstantsData = new QuadGenerationConstants[] { quadGC, quadGC }; //Here we add 2 equal elements in to the buffer data, and nex we will set buffer size to 1. Bugfix. Idk.
+        OutputStruct[] preOutputStructData = new OutputStruct[QS.nRealVerts];
         OutputStruct[] outputStructData = new OutputStruct[QS.nVerts];
 
-        QuadGenerationConstantsBuffer = new ComputeBuffer(1, 144);
-        PreOutDataBuffer = new ComputeBuffer(QS.nVerts, 64);
+        QuadGenerationConstantsBuffer = new ComputeBuffer(1, 48);
+        PreOutDataBuffer = new ComputeBuffer(QS.nRealVerts, 64);
         OutDataBuffer = new ComputeBuffer(QS.nVerts, 64);
         ToShaderData = new ComputeBuffer(QS.nVerts, 64);
 
-        HeightTexture = RTExtensions.CreateRTexture(QS.nVertsPerEdge, 24);
-        NormalTexture = RTExtensions.CreateRTexture(QS.nVertsPerEdge, 24);
+        HeightTexture = RTExtensions.CreateRTexture(QS.nVertsPerEdge, 0);
+        NormalTexture = RTExtensions.CreateRTexture(QS.nVertsPerEdge, 0);
 
         QuadGenerationConstantsBuffer.SetData(quadGenerationConstantsData);
-        PreOutDataBuffer.SetData(outputStructData);
+        PreOutDataBuffer.SetData(preOutputStructData);
         OutDataBuffer.SetData(outputStructData);
 
-        int kernel1 = HeightShader.FindKernel("CSMainNoise");
-        int kernel2 = HeightShader.FindKernel("CSTexturesMain");
+        int kernel1 = HeightShader.FindKernel("HeightMain");
+        int kernel2 = HeightShader.FindKernel("TexturesMain");
 
         SetupComputeShader(kernel1);
 
         Log("Buffers for first kernel ready!");
 
         HeightShader.Dispatch(kernel1,
-        QS.THREADGROUP_SIZE_X,
-        QS.THREADGROUP_SIZE_Y,
-        QS.THREADGROUP_SIZE_Z);
+        QS.THREADGROUP_SIZE_X_REAL,
+        QS.THREADGROUP_SIZE_Y_REAL,
+        QS.THREADGROUP_SIZE_Z_REAL);
 
         Log("First kernel ready!");
 
         SetupComputeShader(kernel2);
 
         Log("Buffers for second kernel ready!");
-
+        
         HeightShader.Dispatch(kernel2,
         QS.THREADGROUP_SIZE_X,
         QS.THREADGROUP_SIZE_Y,
@@ -317,6 +322,8 @@ public class Quad : MonoBehaviour
 
     private void SetupComputeShader(int kernel)
     {
+        HeightShader.SetInt("FaceID", (int)Position);
+        HeightShader.SetFloat("LODLevel", ((1 << LODLevel + 2) * (this.Planetoid.PlanetRadius / (LODLevel + 2)) - ((this.Planetoid.PlanetRadius / (LODLevel + 2)) / 2)) / this.Planetoid.PlanetRadius);
         HeightShader.SetBuffer(kernel, "quadGenerationConstants", QuadGenerationConstantsBuffer);
         HeightShader.SetBuffer(kernel, "patchPreOutput", PreOutDataBuffer);
         HeightShader.SetBuffer(kernel, "patchOutput", OutDataBuffer);
@@ -343,53 +350,53 @@ public class Quad : MonoBehaviour
         switch (pos)
         {
             case QuadPostion.Top:
-                this.quadGC.topLeftCorner = new Vector3(-v, v, v);
-                this.quadGC.bottomRightCorner = new Vector3(v, v, -v);
+                this.topLeftCorner = new Vector3(-v, v, v);
+                this.bottomRightCorner = new Vector3(v, v, -v);
 
-                this.quadGC.topRightCorner = new Vector3(v, v, v);
-                this.quadGC.bottomLeftCorner = new Vector3(-v, v, -v);
+                this.topRightCorner = new Vector3(v, v, v);
+                this.bottomLeftCorner = new Vector3(-v, v, -v);
                 break;
             case QuadPostion.Bottom:
-                this.quadGC.topLeftCorner = new Vector3(-v, -v, -v);
-                this.quadGC.bottomRightCorner = new Vector3(v, -v, v);
+                this.topLeftCorner = new Vector3(-v, -v, -v);
+                this.bottomRightCorner = new Vector3(v, -v, v);
 
-                this.quadGC.topRightCorner = new Vector3(v, -v, -v);
-                this.quadGC.bottomLeftCorner = new Vector3(-v, -v, v);
+                this.topRightCorner = new Vector3(v, -v, -v);
+                this.bottomLeftCorner = new Vector3(-v, -v, v);
                 break;
             case QuadPostion.Left:
-                this.quadGC.topLeftCorner = new Vector3(-v, v, v);
-                this.quadGC.bottomRightCorner = new Vector3(-v, -v, -v);
+                this.topLeftCorner = new Vector3(-v, v, v);
+                this.bottomRightCorner = new Vector3(-v, -v, -v);
 
-                this.quadGC.topRightCorner = new Vector3(-v, v, -v);
-                this.quadGC.bottomLeftCorner = new Vector3(-v, -v, v);
+                this.topRightCorner = new Vector3(-v, v, -v);
+                this.bottomLeftCorner = new Vector3(-v, -v, v);
                 break;
             case QuadPostion.Right:
-                this.quadGC.topLeftCorner = new Vector3(v, v, -v);
-                this.quadGC.bottomRightCorner = new Vector3(v, -v, v);
+                this.topLeftCorner = new Vector3(v, v, -v);
+                this.bottomRightCorner = new Vector3(v, -v, v);
 
-                this.quadGC.topRightCorner = new Vector3(v, v, v);
-                this.quadGC.bottomLeftCorner = new Vector3(v, -v, -v);
+                this.topRightCorner = new Vector3(v, v, v);
+                this.bottomLeftCorner = new Vector3(v, -v, -v);
                 break;
             case QuadPostion.Front:
-                this.quadGC.topLeftCorner = new Vector3(v, v, v);
-                this.quadGC.bottomRightCorner = new Vector3(-v, -v, v);
+                this.topLeftCorner = new Vector3(v, v, v);
+                this.bottomRightCorner = new Vector3(-v, -v, v);
 
-                this.quadGC.topRightCorner = new Vector3(-v, v, v);
-                this.quadGC.bottomLeftCorner = new Vector3(v, -v, v);
+                this.topRightCorner = new Vector3(-v, v, v);
+                this.bottomLeftCorner = new Vector3(v, -v, v);
                 break;
             case QuadPostion.Back:
-                this.quadGC.topLeftCorner = new Vector3(-v, v, -v);
-                this.quadGC.bottomRightCorner = new Vector3(v, -v, -v);
+                this.topLeftCorner = new Vector3(-v, v, -v);
+                this.bottomRightCorner = new Vector3(v, -v, -v);
 
-                this.quadGC.topRightCorner = new Vector3(v, v, -v);
-                this.quadGC.bottomLeftCorner = new Vector3(-v, -v, -v);
+                this.topRightCorner = new Vector3(v, v, -v);
+                this.bottomLeftCorner = new Vector3(-v, -v, -v);
                 break;
         }
 
-        this.quadGC.middleNormalized = this.CalculateMiddlePoint(this.quadGC.topLeftCorner,
-                                                                 this.quadGC.bottomRightCorner,
-                                                                 this.quadGC.topRightCorner,
-                                                                 this.quadGC.bottomLeftCorner);
+        this.middleNormalized = this.CalculateMiddlePoint(this.topLeftCorner,
+                                                          this.bottomRightCorner,
+                                                          this.topRightCorner,
+                                                          this.bottomLeftCorner);
     }
 
     public void SetupParent(Quad parent)
@@ -409,54 +416,54 @@ public class Quad : MonoBehaviour
 
     public void SetupBounds(Quad quad, Mesh mesh)
     {
-        Vector3 middle = quad.quadGC.middleNormalized;
+        Vector3 middle = quad.middleNormalized;
 
         mesh.bounds = new Bounds(middle, GetBoundsSize(quad));
     }
 
-    public float GetClosestDistance()
+    public float GetClosestDistance(float offset)
     {
         float closestDistance = Mathf.Infinity;
 
-        Vector3 topLeftCorner = this.quadGC.topLeftCorner.NormalizeToRadius(this.Planetoid.PlanetRadius);
-        Vector3 topRightCorner = this.quadGC.topRightCorner.NormalizeToRadius(this.Planetoid.PlanetRadius);
-        Vector3 middlePoint = this.quadGC.middleNormalized;
-        Vector3 bottomLeftCorner = this.quadGC.bottomLeftCorner.NormalizeToRadius(this.Planetoid.PlanetRadius);
-        Vector3 bottomRightCorner = this.quadGC.bottomRightCorner.NormalizeToRadius(this.Planetoid.PlanetRadius);
+        Vector3 topLeftCorner = this.topLeftCorner.NormalizeToRadius(this.Planetoid.PlanetRadius);
+        Vector3 topRightCorner = this.topRightCorner.NormalizeToRadius(this.Planetoid.PlanetRadius);
+        Vector3 middlePoint = this.middleNormalized;
+        Vector3 bottomLeftCorner = this.bottomLeftCorner.NormalizeToRadius(this.Planetoid.PlanetRadius);
+        Vector3 bottomRightCorner = this.bottomRightCorner.NormalizeToRadius(this.Planetoid.PlanetRadius);
 
-        float d = Vector3.Distance(this.Planetoid.LODTarget.position, transform.TransformPoint(topLeftCorner));
+        float d = Vector3.Distance(this.Planetoid.LODTarget.position, topLeftCorner);
 
         if (d < closestDistance)
         {
-            closestDistance = d;
+            closestDistance = d + offset;
         }
 
-        d = Vector3.Distance(this.Planetoid.LODTarget.position, transform.TransformPoint(topRightCorner));
+        d = Vector3.Distance(this.Planetoid.LODTarget.position, topRightCorner);
 
         if (d < closestDistance)
         {
-            closestDistance = d;
+            closestDistance = d + offset;
         }
 
-        d = Vector3.Distance(this.Planetoid.LODTarget.position, transform.TransformPoint(middlePoint));
+        d = Vector3.Distance(this.Planetoid.LODTarget.position, middlePoint);
 
         if (d < closestDistance)
         {
-            closestDistance = d;
+            closestDistance = d + offset;
         }
 
-        d = Vector3.Distance(this.Planetoid.LODTarget.position, transform.TransformPoint(bottomLeftCorner));
+        d = Vector3.Distance(this.Planetoid.LODTarget.position, bottomLeftCorner);
 
         if (d < closestDistance)
         {
-            closestDistance = d;
+            closestDistance = d + offset;
         }
 
-        d = Vector3.Distance(this.Planetoid.LODTarget.position, transform.TransformPoint(bottomRightCorner));
+        d = Vector3.Distance(this.Planetoid.LODTarget.position, bottomRightCorner);
 
         if (d < closestDistance)
         {
-            closestDistance = d;
+            closestDistance = d + offset;
         }
 
         return closestDistance;
@@ -464,7 +471,8 @@ public class Quad : MonoBehaviour
 
     public Vector3 GetBoundsSize(Quad quad)
     {
-        Vector3 tlc = quad.quadGC.topLeftCorner;
+        Vector3 tlc = quad.topLeftCorner;
+
         tlc = tlc.Abs();
         tlc = tlc * 2;
 
