@@ -285,6 +285,7 @@ public class Quad : MonoBehaviour
 
         int kernel1 = HeightShader.FindKernel("HeightMain");
         int kernel2 = HeightShader.FindKernel("TexturesMain");
+        //int kernel3 = HeightShader.FindKernel("Simple");
 
         SetupComputeShader(kernel1);
 
@@ -306,10 +307,10 @@ public class Quad : MonoBehaviour
         QS.THREADGROUP_SIZE_Y,
         QS.THREADGROUP_SIZE_Z);
 
-        Log("Second kernel ready!");
-
         OutDataBuffer.GetData(outputStructData);
         ToShaderData.SetData(outputStructData);
+
+        Log("Second kernel ready!");
 
         Setter.MaterialToUpdate.SetBuffer("data", ToShaderData);
         Setter.MaterialToUpdate.SetTexture("_HeightTexture", HeightTexture);

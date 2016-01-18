@@ -76,7 +76,7 @@
 						  cross(normal, mul(_World2Object, fixed4(0.0, 0.0, sign(worldNormal.y), 0.0)).xyz) + 
 						  cross(normal, mul(_World2Object, fixed4(0.0, sign(worldNormal.z), 0.0, 0.0)).xyz);
 
-			tangent.w = -worldNormal;
+			tangent.w = -worldNormal.x;
 
 			return tangent;
 		}

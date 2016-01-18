@@ -13,6 +13,7 @@ public class Planetoid : MonoBehaviour
 
     public bool DebugEnabled = false;
 
+    public List<Quad> MainQuads = new List<Quad>();
     public List<Quad> Quads = new List<Quad>();
 
     public Shader ColorShader;
@@ -30,7 +31,7 @@ public class Planetoid : MonoBehaviour
     {
         float time = Time.realtimeSinceStartup;
 
-        if (Quads.Count == 0)
+        if (Quads.Count == 0 || MainQuads.Count == 0)
             return;
 
         for (int i = 0; i < Quads.Count; i++)
@@ -55,6 +56,7 @@ public class Planetoid : MonoBehaviour
         }
 
         Quads.Clear();
+        MainQuads.Clear();
 
         QuadMeshCache = null;
     }
@@ -123,6 +125,7 @@ public class Planetoid : MonoBehaviour
         quadComponent.Dispatch();
 
         Quads.Add(quadComponent);
+        MainQuads.Add(quadComponent);
     }
 
     public Quad SetupSubQuad(QuadPostion quadPosition)
