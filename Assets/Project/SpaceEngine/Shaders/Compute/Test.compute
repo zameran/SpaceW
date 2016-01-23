@@ -1,8 +1,10 @@
 ﻿#define threadsPerGroup_X 32
 #define threadsPerGroup_Y 32
 
-#define nVerticesPerSide 120
-#define nVertsPerSideWithBorder 128
+#define nVerticesPerSide 60
+#define nVertsPerSideWithBorder 64
+#define nVerticesPerSideSub 240
+#define nVertsPerSideWithBorderSub 256
 
 //#define defaultNoise
 
@@ -12,6 +14,8 @@ struct QuadGenerationConstants
 {
     float planetRadius;
 	float spacing;
+	float spacingreal;
+	float spacingsub;
     float terrainMaxHeight;
 
     float3 cubeFaceEastDirection;
@@ -33,6 +37,8 @@ struct OutputStruct
 float LODLevel;
 float FaceID;
 
+float3 Direction;
+
 RWTexture2D<float4> Height;
 RWTexture2D<float4> Normal;
 
@@ -40,17 +46,18 @@ RWStructuredBuffer<QuadGenerationConstants> quadGenerationConstants;
 
 RWStructuredBuffer<OutputStruct> patchPreOutput;
 RWStructuredBuffer<OutputStruct> patchOutput;
+RWStructuredBuffer<OutputStruct> patchPreOutputSub;
 
-float3 CubeCoord(QuadGenerationConstants constants, float VerticesPerSide, uint3 id)
+float3 CubeCoord(QuadGenerationConstants constants, float VerticesPerSide, uint3 id, int mod, float spacing)
 {
 	//32 : 1;
 	//64 : 3;
 	//128 : 7;
-
-	float mod = 7; //So... magic? Again?!
-
-	float eastValue = (id.x - ((VerticesPerSide - mod) / 2.0)) * constants.spacing;
-	float northValue = (id.y - ((VerticesPerSide - mod) / 2.0)) * constants.spacing;
+	//256 : 17;
+	//512 : 41;
+	//TODO modifier calculation. Seems to 1,3,7 are normal, but bigger... fail.
+	float eastValue = (id.x - ((VerticesPerSide - mod) / 2.0)) * spacing;
+	float northValue = (id.y - ((VerticesPerSide - mod) / 2.0)) * spacing;
 
 	float3 cubeCoordEast = constants.cubeFaceEastDirection * eastValue;
     float3 cubeCoordNorth = constants.cubeFaceNorthDirection * northValue;
@@ -76,21 +83,21 @@ float4 ColorFunction(float3 coord, float height, float slope)
 	#ifdef defaultNoise
 	float3 color = float3(0.0, 0.0, 0.0);
 	#else
-	float3 color = ColorMapAsteroid(coord, height, slope, colorDistFreq).xyz;
+	float3 color = ColorMapAsteroid(0.001 * coord, height, slope, colorDistFreq).xyz;
 	#endif
 	
-	return float4(color, 1);
+	return float4(color, 1.0);
 }
 
 #pragma kernel HeightMain
 [numthreads(32, 32, 1)]
 void HeightMain (uint3 id : SV_DispatchThreadID)
 {
-	int outBuffOffset = id.x + id.y * nVertsPerSideWithBorder;
-
 	QuadGenerationConstants constants = quadGenerationConstants[0];
 
-	float3 cubeCoord = CubeCoord(constants, nVertsPerSideWithBorder, id);
+	int outBuffOffset = id.x + id.y * nVertsPerSideWithBorder;
+
+	float3 cubeCoord = CubeCoord(constants, nVertsPerSideWithBorder, id, 3, constants.spacing);
 
 	float3 patchCenter = normalize(constants.patchCubeCenter) * constants.planetRadius;
 	float3 patchNormalizedCoord = normalize(cubeCoord);
@@ -114,45 +121,93 @@ void HeightMain (uint3 id : SV_DispatchThreadID)
 	patchPreOutput[outBuffOffset].cpos = cubeOutput;
 }
 
-#pragma kernel TexturesMain
+#pragma kernel MeshDataMain
 [numthreads(30, 30, 1)]
-void TexturesMain(uint3 id : SV_DispatchThreadID)
+void MeshDataMain(uint3 id : SV_DispatchThreadID)
 {
 	int inBuffOffset = (id.x + 1) + (id.y + 1) * nVertsPerSideWithBorder;
     int outBuffOffset = id.x + id.y * nVerticesPerSide;
+
+	patchOutput[outBuffOffset] = patchPreOutput[inBuffOffset];
+}
+
+#pragma kernel HeightSub
+[numthreads(32, 32, 1)]
+void HeightSub(uint3 id : SV_DispatchThreadID)
+{
+	QuadGenerationConstants constants = quadGenerationConstants[0];
+
+	int outBuffOffset = id.x + id.y * nVertsPerSideWithBorderSub;
+
+	float3 cubeCoord = CubeCoord(constants, nVertsPerSideWithBorderSub, id, 17, constants.spacingsub);
+
+	float3 patchCenter = normalize(constants.patchCubeCenter) * constants.planetRadius;
+	float3 patchNormalizedCoord = normalize(cubeCoord);
 	
-	float noise = patchPreOutput[inBuffOffset].noise;
-	float3 patchCenter = patchPreOutput[inBuffOffset].patchCenter;
-	float4 pos = patchPreOutput[inBuffOffset].pos;
-	float4 cpos = patchPreOutput[inBuffOffset].cpos;
+	float3 patchCoord =  constants.planetRadius * patchNormalizedCoord;
+	float3 patchCoordCentered = patchCoord - patchCenter;
 	
-	float l = patchPreOutput[(id.x + 0) + (id.y + 1) * nVertsPerSideWithBorder].noise * LODLevel;
-	float r = patchPreOutput[(id.x + 2) + (id.y + 1) * nVertsPerSideWithBorder].noise * LODLevel;
-	float u = patchPreOutput[(id.x + 1) + (id.y + 0) * nVertsPerSideWithBorder].noise * LODLevel;
-	float d = patchPreOutput[(id.x + 1) + (id.y + 2) * nVertsPerSideWithBorder].noise * LODLevel;
+	float noise = NoiseFunction(patchCoord);
+
+    float height = ((noise * 2.0) - 1.0) * constants.terrainMaxHeight;
+
+	patchCoordCentered += patchNormalizedCoord * height;
+
+    float4 output = float4(patchCoordCentered.xyz, 0.0);
+	float4 cubeOutput = float4(cubeCoord.xyz, 0.0);
+
+	patchPreOutputSub[outBuffOffset].noise = ((noise * 2.0) - 1.0);
+	patchPreOutputSub[outBuffOffset].patchCenter = patchCenter;
+	patchPreOutputSub[outBuffOffset].vcolor = float4(noise, noise, noise, 1.0);
+    patchPreOutputSub[outBuffOffset].pos = output;
+	patchPreOutputSub[outBuffOffset].cpos = cubeOutput;
+}
+
+#pragma kernel TexturesSub
+[numthreads(30, 30, 1)]
+void TexturesSub(uint3 id : SV_DispatchThreadID)
+{
+	int inBuffOffset = (id.x + 1) + (id.y + 1) * nVertsPerSideWithBorderSub;
+    int outBuffOffset = id.x + id.y * nVerticesPerSideSub;
+	
+	float noise = patchPreOutputSub[inBuffOffset].noise;
+	float3 patchCenter = patchPreOutputSub[inBuffOffset].patchCenter;
+	float4 pos = patchPreOutputSub[inBuffOffset].pos;
+	float4 cpos = patchPreOutputSub[inBuffOffset].cpos;
+	
+	float l = patchPreOutputSub[(id.x + 0) + (id.y + 1) * nVertsPerSideWithBorderSub].noise * LODLevel;
+	float r = patchPreOutputSub[(id.x + 2) + (id.y + 1) * nVertsPerSideWithBorderSub].noise * LODLevel;
+	float u = patchPreOutputSub[(id.x + 1) + (id.y + 0) * nVertsPerSideWithBorderSub].noise * LODLevel;
+	float d = patchPreOutputSub[(id.x + 1) + (id.y + 2) * nVertsPerSideWithBorderSub].noise * LODLevel;
+
 	float xdelta = ((l - r) + 1.0) * 0.5;
 	float ydelta = ((u - d) + 1.0) * 0.5;
+	float zdelta = ((r - l) + 1.0) * 0.5;
+	float wdelta = ((d - u) + 1.0) * 0.5;
 
-	float3 normal = float3(xdelta, ydelta, 1.0);
+	float3 xnormal = float3(xdelta, ydelta, 1.0);
+	float3 ynormal = float3(ydelta, xdelta, 1.0);
+	float3 znormal = float3(zdelta, wdelta, 1.0);
+	float3 wnormal = float3(wdelta, zdelta, 1.0);
 
-	float slope = 0.5 / max(dot(normal, float3(0.0, 1.0, 0.0)), 0.001);
+	float xslope = 0.5 / max(dot(xnormal, float3(0.0, 1.0, 0.0)), 0.001);
+	float yslope = 0.5 / max(dot(ynormal, float3(0.0, 1.0, 0.0)), 0.001);
+	float zslope = 0.5 / max(dot(znormal, float3(0.0, 1.0, 0.0)), 0.001);
+	float wslope = 0.5 / max(dot(wnormal, float3(0.0, 1.0, 0.0)), 0.001);
+
+	float slope = min(min(xslope, yslope), min(zslope, wslope));
+
 	float4 color = ColorFunction(cpos.xyz, noise, slope);
-	float4 normalColor = float4(normal, slope);
+	float4 normalColor = float4(xnormal, slope);
 	float4 heightColor = float4(color.xyz, noise + 0.5);
 	
 	Normal[id.yx] = normalColor;
 	Height[id.yx] = heightColor;
-
-	patchOutput[outBuffOffset].noise = noise;
-	patchOutput[outBuffOffset].patchCenter = patchCenter;
-	patchOutput[outBuffOffset].vcolor = color;
-    patchOutput[outBuffOffset].pos = pos;
-	patchOutput[outBuffOffset].cpos = cpos;
 }
 
-#pragma kernel Simple
+#pragma kernel Transfer
 [numthreads(30, 30, 1)]
-void Simple(uint3 id : SV_DispatchThreadID)
+void Transfer(uint3 id : SV_DispatchThreadID)
 {
 	int inBuffOffset = (id.x + 1) + (id.y + 1) * nVertsPerSideWithBorder;
     int outBuffOffset = id.x + id.y * nVerticesPerSide;

@@ -47,6 +47,20 @@ public class TCCommonParametersSetter : MonoBehaviour
         Planet.Dispatch();
     }
 
+    public void UpdateUniforms(bool dispatch)
+    {
+        if (Planet.Quads.Count == 0) return;
+        if (Planet.Quads == null) return;
+
+        for (int i = 0; i < Planet.Quads.Count; i++)
+        {
+            UpdateUniforms(Planet.Quads[i].HeightShader);
+        }
+
+        if (dispatch)
+            Planet.Dispatch();
+    }
+
     public void UpdateUniforms(ComputeShader shader)
     {
         if (shader == null) return;

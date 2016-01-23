@@ -34,6 +34,11 @@ public class Planetoid : MonoBehaviour
         if (Quads.Count == 0 || MainQuads.Count == 0)
             return;
 
+        if (this.GetComponentInChildren<TCCommonParametersSetter>() != null)
+            GetComponentInChildren<TCCommonParametersSetter>().UpdateUniforms(false);
+        else
+            Log("TCCCommon prmeters setter not found in children!");
+
         for (int i = 0; i < Quads.Count; i++)
         {
             if (Quads[i] != null)
@@ -76,6 +81,13 @@ public class Planetoid : MonoBehaviour
         SetupMainQuad(QuadPostion.Right);
         SetupMainQuad(QuadPostion.Front);
         SetupMainQuad(QuadPostion.Back);
+    }
+
+    [ContextMenu("ReSetupQuads")]
+    public void ReSetupQuads()
+    {
+        DestroyQuads();
+        SetupQuads();
     }
 
     public void SetupMainQuad(QuadPostion quadPosition)

@@ -55,10 +55,10 @@
 
 		float3 FindNormal(float2 uv, float2 u)
 		{
-			float ht0 = tex2D(_HeightTexture, uv + float2(-u.x, 0));
-			float ht1 = tex2D(_HeightTexture, uv + float2(u.x, 0));
-			float ht2 = tex2D(_HeightTexture, uv + float2(0, -u.y));
-			float ht3 = tex2D(_HeightTexture, uv + float2(0, u.y));
+			float ht0 = tex2D(_HeightTexture, uv + float2(-u.x, 0)).a;
+			float ht1 = tex2D(_HeightTexture, uv + float2(u.x, 0)).a;
+			float ht2 = tex2D(_HeightTexture, uv + float2(0, -u.y)).a;
+			float ht3 = tex2D(_HeightTexture, uv + float2(0, u.y)).a;
 
 			float3 va = normalize(float3(float2(0.1, 0.0), ht1 - ht0));
 			float3 vb = normalize(float3(float2(0.0, 0.1), ht3 - ht2));
@@ -66,19 +66,15 @@
 			return cross(va, vb);
 		}
 
-		float4 FindTangent(float3 normal)
+		float3 FindTangent(float3 normal, float epsilon)
 		{
-			float4 tangent = float4(0, 0, 0, 0);
+			float refVectorSign = sign(1.0 - abs(normal.x) - epsilon);
 
-			fixed3 worldNormal = normalize(mul(_Object2World, fixed4(normal, 0.0)).xyz);
+			float3 refVector = refVectorSign * float3(1.0, 0.0, 0.0);
 
-			tangent.xyz = cross(normal, mul(_World2Object, fixed4(0.0, sign(worldNormal.x), 0.0, 0.0)).xyz) + 
-						  cross(normal, mul(_World2Object, fixed4(0.0, 0.0, sign(worldNormal.y), 0.0)).xyz) + 
-						  cross(normal, mul(_World2Object, fixed4(0.0, sign(worldNormal.z), 0.0, 0.0)).xyz);
+			float3 biTangent = refVectorSign * cross(normal, refVector);
 
-			tangent.w = -worldNormal.x;
-
-			return tangent;
+			return cross(-normal, biTangent);
 		}
 
 		struct Input 
@@ -102,7 +98,14 @@
 			position.xyz += patchCenter;
 
 			v.vertex = position;
-			v.tangent = FindTangent(tex2Dlod(_NormalTexture, float4(v.texcoord.xy, 0, 0)));
+
+			v.tangent = float4(FindTangent(tex2Dlod(_NormalTexture, float4(v.texcoord.xy, 0, 0)), 0.01), 1);
+			v.tangent.xyz += position;
+
+			//v.normal = FindNormal(v.texcoord, 1 / float2(240, 240));
+			v.normal = tex2Dlod(_NormalTexture, v.texcoord) * 2;
+			v.normal.xyz += position;
+
 			o.noise = noise + 0.5;
 			o.uv_HeightTexture = v.texcoord.xy;
 			o.uv_NormalTexture = v.texcoord.xy;
@@ -117,12 +120,12 @@
 		{
 			fixed4 terrainNoiseColor = fixed4(IN.noise, IN.noise, IN.noise, 1.0);
 			fixed4 terrainColor = lerp(terrainNoiseColor, IN.color, _Mixing);
-			fixed4 terrainTexture = lerp(tex2D(_HeightTexture, IN.uv_HeightTexture), terrainNoiseColor, 1.0);
-			fixed4 terrainNormalTexture = tex2D(_NormalTexture, IN.uv_NormalTexture);
+			fixed4 terrainTexture = lerp(tex2D(_HeightTexture, IN.uv_HeightTexture), terrainNoiseColor, _Mixing);
+			fixed4 terrainNormalTexture = normalize(tex2D(_NormalTexture, IN.uv_NormalTexture));
 
 			o.Albedo = terrainTexture.rgb;
-			o.Normal = UnpackNormal(terrainNormalTexture);
-			//o.Normal = FindNormal(IN.uv_HeightTexture, 1.0 / float2(120, 120));
+			//o.Normal = UnpackNormal(terrainNormalTexture);
+			//o.Normal = FindNormal(float4(IN.uv_NormalTexture, 0, 0), 1 / float2(240, 240));
 			o.Metallic = _Metallic;
 			o.Smoothness = _Glossiness;
 		}

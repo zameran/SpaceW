@@ -35,6 +35,7 @@ float HeightMapAsteroid(float3 ppoint, float freq, float mfreq, float hfreq, flo
 //-----------------------------------------------------------------------------
 float4 ColorMapAsteroid(float3 ppoint, float height, float slope, float cdfreq)
 {
+	slope = 1 - slope;
 	noiseOctaves = 2.0;
 
 	height = DistFbm((ppoint + Randomize) * 3.7, 1.5) * 0.7 + 0.5;
@@ -48,7 +49,7 @@ float4 ColorMapAsteroid(float3 ppoint, float height, float slope, float cdfreq)
 	float vary = saturate((Fbm(p) + 0.7) * 0.7);
 	float ccc = (vary * slope) / height;
 
-	float4 c = float4(0.1, 0.1, 0.1, 1) * (0.5 + slope);
+	float4 c = float4(0.41, 0.41, 0.41, 1) * (0.5 + slope) + (0.0125 * height) + (0.05 * vary);
 
 	return c;
 
