@@ -4,30 +4,24 @@
 float HeightMapAsteroid(float3 ppoint, float freq, float mfreq, float hfreq, float hmagn, float hfraction, float co, float cd, float cf, float cm)
 {
 	// Global landscape
-	noiseOctaves = 2;
 	float3 p = ppoint * freq + Randomize;
-	float height = (Fbm(p) + 0.7) * 0.7;
+	float height = (Fbm(p, 2) + 0.7) * 0.7;
 
-	noiseOctaves = 8; // Height distortion
-	float distort = 0.01 * Fbm(ppoint * mfreq + Randomize);
+	// Height distortion
+	float distort = 0.01 * Fbm(ppoint * mfreq + Randomize, 8);
 	height += distort;
-	//height *= distort;
 
 	// Hills
-	noiseOctaves = 5;
-	float hills = (0.5 + 1.5 * Fbm(p * 0.0721)) * hfreq;
-	hills = Fbm(p * hills) * 0.15;
+	float hills = (0.5 + 1.5 * Fbm(p * 0.0721, 5)) * hfreq;
+	hills = Fbm(p * hills, 5) * 0.15;
 
-	noiseOctaves = 2;
-	float hillsMod = smoothstep(0, 1, Fbm(p * hfraction) * 3.0);
+	float hillsMod = smoothstep(0, 1, Fbm(p * hfraction, 2) * 3.0);
 	height *= 1.0 + hmagn * hills * hillsMod;
 
 	// Craters
-	noiseOctaves = 3;   // Craters roundness distortion
-
+	noiseOctaves = 3; // Craters roundness distortion
 	float crater = CraterNoise(ppoint, cm, cf, cd, co);
 
-	//return crater;
 	return (height + crater);
 }
 //-----------------------------------------------------------------------------

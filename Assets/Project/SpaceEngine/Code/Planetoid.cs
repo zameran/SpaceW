@@ -12,6 +12,7 @@ public class Planetoid : MonoBehaviour
     public float PlanetRadius = 1024;
 
     public bool DebugEnabled = false;
+    public bool DebugExtra = false;
 
     public List<Quad> MainQuads = new List<Quad>();
     public List<Quad> Quads = new List<Quad>();
@@ -43,9 +44,7 @@ public class Planetoid : MonoBehaviour
         {
             if (Quads[i] != null)
                 if (!Quads[i].HaveSubQuads)
-                {
                     Quads[i].Dispatch();
-                }
         }
 
         Log("Planet dispatched in " + (Time.realtimeSinceStartup - time).ToString() + "ms");
@@ -128,7 +127,7 @@ public class Planetoid : MonoBehaviour
         quadComponent.SetupCorners(quadPosition);
 
         if (QuadMeshCache == null)
-            mf.sharedMesh = MeshFactory.SetupQuadMesh();
+            mf.sharedMesh = MeshFactory.SetupQuadMesh(QS.nVertsPerEdge);
         else
             mf.sharedMesh = QuadMeshCache;
 
@@ -172,7 +171,7 @@ public class Planetoid : MonoBehaviour
         quadComponent.Planetoid = this;
 
         if (QuadMeshCache == null)
-            mf.sharedMesh = MeshFactory.SetupQuadMesh();
+            mf.sharedMesh = MeshFactory.SetupQuadMesh(QS.nVertsPerEdge);
         else
             mf.sharedMesh = QuadMeshCache;
 
@@ -184,28 +183,15 @@ public class Planetoid : MonoBehaviour
 
         return quadComponent;
     }
-
     private void Log(string msg)
     {
         if (DebugEnabled)
             Debug.Log(msg);
     }
-}
 
-public enum QuadPostion
-{
-    Top,
-    Bottom,
-    Left,
-    Right,
-    Front,
-    Back
-}
-
-public enum QuadID
-{
-    One,
-    Two,
-    Three,
-    Four
+    private void Log(string msg, bool state)
+    {
+        if (state)
+            Debug.Log(msg);
+    }
 }

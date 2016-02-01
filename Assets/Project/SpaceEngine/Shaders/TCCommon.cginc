@@ -658,7 +658,7 @@ float2 iNoise(float3 P, float jitter)
 
 			float3 d = dx * dx + dy * dy + dz * dz; // dij1, dij2 and dij3, squared
 
-													//Find lowest and second lowest distances
+			//Find lowest and second lowest distances
 			for (int n = 0; n < 3; n++)
 			{
 				if (d[n] < F[0])
@@ -683,24 +683,29 @@ float Noise(float3 p)
 	float3 Pf = p - Pi;
 	float3 Pf_min1 = Pf - 1.0;
 
+	float hashOffset = 0.49999;
+
 	float4 hashx0, hashy0, hashz0, hashx1, hashy1, hashz1;
+
 	FAST32_hash_3D(Pi, hashx0, hashy0, hashz0, hashx1, hashy1, hashz1);
 
-	float4 grad_x0 = hashx0 - 0.49999;
-	float4 grad_y0 = hashy0 - 0.49999;
-	float4 grad_z0 = hashz0 - 0.49999;
-	float4 grad_x1 = hashx1 - 0.49999;
-	float4 grad_y1 = hashy1 - 0.49999;
-	float4 grad_z1 = hashz1 - 0.49999;
+	float4 grad_x0 = hashx0 - hashOffset;
+	float4 grad_y0 = hashy0 - hashOffset;
+	float4 grad_z0 = hashz0 - hashOffset;
+	float4 grad_x1 = hashx1 - hashOffset;
+	float4 grad_y1 = hashy1 - hashOffset;
+	float4 grad_z1 = hashz1 - hashOffset;
 
 	float4 grad_results_0 = 1 / sqrt(grad_x0 * grad_x0 + grad_y0 * grad_y0 + grad_z0 * grad_z0) * (float2(Pf.x, Pf_min1.x).xyxy * grad_x0 + float2(Pf.y, Pf_min1.y).xxyy * grad_y0 + Pf.zzzz * grad_z0);
 	float4 grad_results_1 = 1 / sqrt(grad_x1 * grad_x1 + grad_y1 * grad_y1 + grad_z1 * grad_z1) * (float2(Pf.x, Pf_min1.x).xyxy * grad_x1 + float2(Pf.y, Pf_min1.y).xxyy * grad_y1 + Pf_min1.zzzz * grad_z1);
 
 	float3 blend = Interpolation_C2(Pf);
+
 	float4 blend2 = float4(blend.xy, float2(1.0 - blend.xy));
 	float4 res0 = lerp(grad_results_0, grad_results_1, blend.z);
-	float final = dot(res0, blend2.zxzx * blend2.wwyy);
-	final *= 1.1547005383792515290182975610039; //Normalization.
+
+	float final = dot(res0, blend2.zxzx * blend2.wwyy) * 1.1547005383792515290182975610039;
+
 	return final;
 }
 
@@ -918,6 +923,22 @@ float3 Fbm3D(float3 ppoint)
 	float gain = SavePow(noiseLacunarity, -noiseH);
 
 	for (int i = 0; i < noiseOctaves; ++i)
+	{
+		summ += NoiseVec3(ppoint) * ampl;
+		ampl *= gain;
+		ppoint *= noiseLacunarity;
+	}
+
+	return summ;
+}
+
+float3 Fbm3D(float3 ppoint, float o)
+{
+	float3  summ = float3(0.0, 0.0, 0.0);
+	float ampl = 1.0;
+	float gain = SavePow(noiseLacunarity, -noiseH);
+
+	for (int i = 0; i < o; ++i)
 	{
 		summ += NoiseVec3(ppoint) * ampl;
 		ampl *= gain;

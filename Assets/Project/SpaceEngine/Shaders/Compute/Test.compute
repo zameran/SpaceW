@@ -48,6 +48,36 @@ RWStructuredBuffer<OutputStruct> patchPreOutput;
 RWStructuredBuffer<OutputStruct> patchOutput;
 RWStructuredBuffer<OutputStruct> patchPreOutputSub;
 
+float3 FindBiTangent(float3 normal, float epsilon, float3 dir)
+{
+	float refVectorSign = sign(1.0 - abs(normal.x) - epsilon);
+
+	float3 refVector = refVectorSign * dir;
+	float3 biTangent = refVectorSign * cross(normal, refVector);
+
+	return biTangent;
+}
+
+float3 FindTangent(float3 normal, float epsilon)
+{
+	float refVectorSign = sign(1.0 - abs(normal.x) - epsilon);
+
+	float3 refVector = refVectorSign * float3(0.0, 1.0, 0.0);
+	float3 biTangent = refVectorSign * cross(normal, refVector);
+
+	return cross(-normal, biTangent);
+}
+
+float3 FindTangent(float3 normal, float epsilon, float3 dir)
+{
+	float refVectorSign = sign(1.0 - abs(normal.x) - epsilon);
+
+	float3 refVector = refVectorSign * dir;
+	float3 biTangent = refVectorSign * cross(normal, refVector);
+
+	return cross(-normal, biTangent);
+}
+
 float3 CubeCoord(QuadGenerationConstants constants, float VerticesPerSide, uint3 id, int mod, float spacing)
 {
 	//32 : 1;
@@ -70,7 +100,7 @@ float3 CubeCoord(QuadGenerationConstants constants, float VerticesPerSide, uint3
 float NoiseFunction(float3 coord)
 {
 	#ifdef defaultNoise
-	float noise = Noise(0.001 * coord);
+	float noise = Fbm(0.001 * coord, 4);
 	#else
 	float noise = HeightMapAsteroid(0.001 * coord, mainFreq, montesFreq, hillsFreq, hillsMagn, hillsFraction, craterOctaves, craterSqrtDensity, craterFreq, craterMagn);
 	#endif
@@ -167,6 +197,8 @@ void HeightSub(uint3 id : SV_DispatchThreadID)
 [numthreads(30, 30, 1)]
 void TexturesSub(uint3 id : SV_DispatchThreadID)
 {
+	QuadGenerationConstants constants = quadGenerationConstants[0];
+
 	int inBuffOffset = (id.x + 1) + (id.y + 1) * nVertsPerSideWithBorderSub;
     int outBuffOffset = id.x + id.y * nVerticesPerSideSub;
 	
@@ -189,6 +221,9 @@ void TexturesSub(uint3 id : SV_DispatchThreadID)
 	float3 ynormal = float3(ydelta, xdelta, 1.0);
 	float3 znormal = float3(zdelta, wdelta, 1.0);
 	float3 wnormal = float3(wdelta, zdelta, 1.0);
+	
+	//float3 normal = xnormal * FindTangent(xnormal, 0.01); //Closer and closer...
+	float3 normal = xnormal;
 
 	float xslope = 0.5 / max(dot(xnormal, float3(0.0, 1.0, 0.0)), 0.001);
 	float yslope = 0.5 / max(dot(ynormal, float3(0.0, 1.0, 0.0)), 0.001);
@@ -198,7 +233,7 @@ void TexturesSub(uint3 id : SV_DispatchThreadID)
 	float slope = min(min(xslope, yslope), min(zslope, wslope));
 
 	float4 color = ColorFunction(cpos.xyz, noise, slope);
-	float4 normalColor = float4(xnormal, slope);
+	float4 normalColor = float4(normal, slope);
 	float4 heightColor = float4(color.xyz, noise + 0.5);
 	
 	Normal[id.yx] = normalColor;

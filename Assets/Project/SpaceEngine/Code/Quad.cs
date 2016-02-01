@@ -85,9 +85,29 @@ public class Quad : MonoBehaviour
     public Vector3 bottomLeftCorner;
     public Vector3 middleNormalized;
 
+    public delegate void QuadDelegate(Quad q);
+    public event QuadDelegate DispatchStarted, DispatchReady, GPUGetDataReady;
+
+    private void QuadDispatchStarted(Quad q)
+    {
+        Log("DispatchStarted event fire!");
+    }
+
+    private void QuadDispatchReady(Quad q)
+    {
+        Log("DispatchReady event fire!");
+    }
+
+    private void QuadGPUGetDataReady(Quad q)
+    {
+        Log("GPUGetDataReady event fire!");
+    }
+
     public Quad()
     {
-
+        this.DispatchStarted += QuadDispatchStarted;
+        this.DispatchReady += QuadDispatchReady;
+        this.GPUGetDataReady += QuadGPUGetDataReady;
     }
 
     private void Start()
@@ -126,6 +146,15 @@ public class Quad : MonoBehaviour
 
         if (this.NormalTexture != null && this.NormalTexture.IsCreated())
             this.NormalTexture.Release();
+
+        if (this.DispatchStarted != null)
+            this.DispatchStarted -= QuadDispatchStarted;
+
+        if (this.DispatchReady != null)
+            this.DispatchReady -= QuadDispatchReady;
+
+        if (this.GPUGetDataReady != null)
+            this.GPUGetDataReady -= QuadGPUGetDataReady;
     }
 
     private void OnDrawGizmosSelected()
@@ -242,7 +271,7 @@ public class Quad : MonoBehaviour
     {
         for (int i = 0; i < this.Subquads.Count; i++)
         {
-            if(this.Subquads[i].HaveSubQuads)
+            if (this.Subquads[i].HaveSubQuads)
             {
                 this.Subquads[i].Unsplit();
             }
@@ -266,6 +295,9 @@ public class Quad : MonoBehaviour
     [ContextMenu("Displatch!")]
     public void Dispatch()
     {
+        if (DispatchStarted != null)
+            DispatchStarted(this);
+
         float time = Time.realtimeSinceStartup;
 
         BufferHelper.ReleaseAndDisposeBuffers(QuadGenerationConstantsBuffer, PreOutDataBuffer, OutDataBuffer, ToShaderData);
@@ -324,7 +356,17 @@ public class Quad : MonoBehaviour
         QS.THREADGROUP_SIZE_Y_SUB,
         QS.THREADGROUP_SIZE_Z_SUB); Log("Fourth kernel ready!");
 
-        OutDataBuffer.GetData(outputStructData);
+        //GetData method takes so long... Render pipeine stalls here...
+        //Solutions:
+        // - StartCoroutine and wait for several frames or some sort of preclculated time.
+        //  - Up to 2x speed up... fffffuck.
+        // - Use delegates and fire up a event on bool switch.
+        //  - Fucked as a coroutine method...
+        // - Forget about dat shit and keep coding.
+        // - Make a native plugin with full async GetData method inplemetation...
+        //  - No info.
+        //  - No base.
+        OutDataBuffer.GetData(outputStructData); if (GPUGetDataReady != null) GPUGetDataReady(this);
         ToShaderData.SetData(outputStructData);
 
         Setter.MaterialToUpdate.SetBuffer("data", ToShaderData);
@@ -333,12 +375,15 @@ public class Quad : MonoBehaviour
 
         BufferHelper.ReleaseAndDisposeBuffers(QuadGenerationConstantsBuffer, PreOutDataBuffer, PreOutDataSubBuffer, OutDataBuffer);
 
+        if (DispatchReady != null)
+            DispatchReady(this);
+
         Log("Dispatched in " + (Time.realtimeSinceStartup - time).ToString() + "ms");
     }
 
     private void SetupComputeShader(int kernel)
     {
-        HeightShader.SetInt("FaceID", (int)Position);
+        HeightShader.SetInt("FaceID", (int)this.Position);
         HeightShader.SetFloat("LODLevel", (((1 << LODLevel + 2) * (this.Planetoid.PlanetRadius / (LODLevel + 2)) - ((this.Planetoid.PlanetRadius / (LODLevel + 2)) / 2)) / this.Planetoid.PlanetRadius) - 0.0f);
         HeightShader.SetVector("Direction", Vector3.Normalize(this.quadGC.cubeFaceEastDirection + this.quadGC.cubeFaceNorthDirection));
         HeightShader.SetBuffer(kernel, "quadGenerationConstants", QuadGenerationConstantsBuffer);
@@ -669,13 +714,17 @@ public class Quad : MonoBehaviour
         if (staticZ)
             tempStatic = temp.z;
 
+        //TODO : Make a formula!
+        //So. We have exponential modifier... WTF!?
+        //Fuck dat shit. 7 LOD level more than i need. fuck. dat.
+
         //WARNING!!! Magic! Ya, it works...
         if (this.LODLevel >= 1)
         {
-            if(this.LODLevel == 1)
-                temp = Vector3.Lerp(temp, this.Parent.quadGC.patchCubeCenter * 2.0f, 0.5f); //0.5f
+            if (this.LODLevel == 1)
+                temp = Vector3.Lerp(temp, this.Parent.quadGC.patchCubeCenter * (15.0f / 7.5f), 0.5f); //0.5f
             else if (this.LODLevel == 2)
-                temp = Vector3.Lerp(temp, this.Parent.quadGC.patchCubeCenter * 1.33333333333f, 0.75f); //0.5f + 0.5f / 2.0f
+                temp = Vector3.Lerp(temp, this.Parent.quadGC.patchCubeCenter * (15.0f / 11.25f), 0.75f); //0.5f + 0.5f / 2.0f
             else if (this.LODLevel == 3)
                 temp = Vector3.Lerp(temp, this.Parent.quadGC.patchCubeCenter * (15.0f / 13.125f), 0.875f); //0.75f + ((0.5f / 2.0f) / 2.0f)
             else if (this.LODLevel == 4)
@@ -738,6 +787,12 @@ public class Quad : MonoBehaviour
     private void Log(string msg)
     {
         if (Planetoid.DebugEnabled)
+            Debug.Log(msg);
+    }
+
+    private void Log(string msg, bool state)
+    {
+        if (state)
             Debug.Log(msg);
     }
 }

@@ -71,7 +71,6 @@
 			float refVectorSign = sign(1.0 - abs(normal.x) - epsilon);
 
 			float3 refVector = refVectorSign * float3(1.0, 0.0, 0.0);
-
 			float3 biTangent = refVectorSign * cross(normal, refVector);
 
 			return cross(-normal, biTangent);
@@ -98,12 +97,11 @@
 			position.xyz += patchCenter;
 
 			v.vertex = position;
-
+			
 			v.tangent = float4(FindTangent(tex2Dlod(_NormalTexture, float4(v.texcoord.xy, 0, 0)), 0.01), 1);
 			v.tangent.xyz += position;
 
-			//v.normal = FindNormal(v.texcoord, 1 / float2(240, 240));
-			v.normal = tex2Dlod(_NormalTexture, v.texcoord) * 2;
+			v.normal = tex2Dlod(_NormalTexture, v.texcoord);
 			v.normal.xyz += position;
 
 			o.noise = noise + 0.5;
