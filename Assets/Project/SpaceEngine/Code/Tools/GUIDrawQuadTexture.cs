@@ -8,6 +8,7 @@ public class GUIDrawQuadTexture : MonoBehaviour
 
     public QuadPostion quadPosition = QuadPostion.Top;
     public TextureType textureType = TextureType.Height;
+    public TextureFlip textureFlip = TextureFlip.None;
     public float scale = 0.5f;
     public float x = 10.0f;
     public float y = 10.0f;
@@ -32,11 +33,26 @@ public class GUIDrawQuadTexture : MonoBehaviour
                             break;
                     }
 
+                    Vector2 dim = new Vector2(tex.width, tex.height);
+
+                    switch (textureFlip)
+                    {
+                        case TextureFlip.None:
+                            dim = new Vector2(dim.x, dim.y);
+                            break;
+                        case TextureFlip.X:
+                            dim = new Vector2(-dim.x, dim.y);
+                            break;
+                        case TextureFlip.Y:
+                            dim = new Vector2(dim.x, -dim.y);
+                            break;
+                    }
+
                     if (q.Position == quadPosition)
                     {
-                        GUI.DrawTexture(new Rect(x, y, 
-                                                 q.HeightTexture.width * scale, 
-                                                 q.HeightTexture.height * scale),
+                        GUI.DrawTexture(new Rect(x, y,
+                                                 dim.x * scale,
+                                                 dim.y * scale),
                                                  tex, ScaleMode.StretchToFill, false);
                     }
                 }
@@ -49,4 +65,11 @@ public enum TextureType
 {
     Height,
     Normal
+}
+
+public enum TextureFlip
+{
+    None,
+    X,
+    Y
 }

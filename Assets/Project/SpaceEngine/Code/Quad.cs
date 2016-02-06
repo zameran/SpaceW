@@ -14,6 +14,8 @@ public struct QuadGenerationConstants
     public float spacingreal;
     public float spacingsub;
     public float terrainMaxHeight; //4
+    public float LODLevel; //4
+    public float orientation;
 
     public Vector3 cubeFaceEastDirection; //12
     public Vector3 cubeFaceNorthDirection; //12
@@ -304,12 +306,15 @@ public class Quad : MonoBehaviour
 
         Setter.LoadAndInit();
 
+        quadGC.LODLevel = (((1 << LODLevel + 2) * (this.Planetoid.PlanetRadius / (LODLevel + 2)) - ((this.Planetoid.PlanetRadius / (LODLevel + 2)) / 2)) / this.Planetoid.PlanetRadius);
+        quadGC.orientation = (float)this.Position;
+
         QuadGenerationConstants[] quadGenerationConstantsData = new QuadGenerationConstants[] { quadGC, quadGC }; //Here we add 2 equal elements in to the buffer data, and nex we will set buffer size to 1. Bugfix. Idk.
         OutputStruct[] preOutputStructData = new OutputStruct[QS.nVertsReal];
         OutputStruct[] preOutputSubStructData = new OutputStruct[QS.nRealVertsSub];
         OutputStruct[] outputStructData = new OutputStruct[QS.nVerts];
 
-        QuadGenerationConstantsBuffer = new ComputeBuffer(1, 56);
+        QuadGenerationConstantsBuffer = new ComputeBuffer(1, 64);
         PreOutDataBuffer = new ComputeBuffer(QS.nVertsReal, 64);
         PreOutDataSubBuffer = new ComputeBuffer(QS.nRealVertsSub, 64);
         OutDataBuffer = new ComputeBuffer(QS.nVerts, 64);
@@ -358,7 +363,7 @@ public class Quad : MonoBehaviour
 
         //GetData method takes so long... Render pipeine stalls here...
         //Solutions:
-        // - StartCoroutine and wait for several frames or some sort of preclculated time.
+        // - StartCoroutine and wait for several frames or some sort of precalculated time.
         //  - Up to 2x speed up... fffffuck.
         // - Use delegates and fire up a event on bool switch.
         //  - Fucked as a coroutine method...
@@ -369,9 +374,7 @@ public class Quad : MonoBehaviour
         OutDataBuffer.GetData(outputStructData); if (GPUGetDataReady != null) GPUGetDataReady(this);
         ToShaderData.SetData(outputStructData);
 
-        Setter.MaterialToUpdate.SetBuffer("data", ToShaderData);
-        Setter.MaterialToUpdate.SetTexture("_HeightTexture", HeightTexture);
-        Setter.MaterialToUpdate.SetTexture("_NormalTexture", NormalTexture);
+        SetupShader(ToShaderData, HeightTexture, NormalTexture);
 
         BufferHelper.ReleaseAndDisposeBuffers(QuadGenerationConstantsBuffer, PreOutDataBuffer, PreOutDataSubBuffer, OutDataBuffer);
 
@@ -383,9 +386,6 @@ public class Quad : MonoBehaviour
 
     private void SetupComputeShader(int kernel)
     {
-        HeightShader.SetInt("FaceID", (int)this.Position);
-        HeightShader.SetFloat("LODLevel", (((1 << LODLevel + 2) * (this.Planetoid.PlanetRadius / (LODLevel + 2)) - ((this.Planetoid.PlanetRadius / (LODLevel + 2)) / 2)) / this.Planetoid.PlanetRadius) - 0.0f);
-        HeightShader.SetVector("Direction", Vector3.Normalize(this.quadGC.cubeFaceEastDirection + this.quadGC.cubeFaceNorthDirection));
         HeightShader.SetBuffer(kernel, "quadGenerationConstants", QuadGenerationConstantsBuffer);
         HeightShader.SetBuffer(kernel, "patchPreOutput", PreOutDataBuffer);
         HeightShader.SetBuffer(kernel, "patchPreOutputSub", PreOutDataSubBuffer);
@@ -394,6 +394,18 @@ public class Quad : MonoBehaviour
         HeightShader.SetTexture(kernel, "Normal", NormalTexture);
 
         Setter.SetUniforms(HeightShader, kernel);
+    }
+
+    private void SetupShader()
+    {
+
+    }
+
+    private void SetupShader(ComputeBuffer data, RenderTexture heightTex, RenderTexture normalTex)
+    {
+        Setter.MaterialToUpdate.SetBuffer("data", data);
+        Setter.MaterialToUpdate.SetTexture("_HeightTexture", heightTex);
+        Setter.MaterialToUpdate.SetTexture("_NormalTexture", normalTex);
     }
 
     public void SetupVectors(Quad quad, int id, bool staticX, bool staticY, bool staticZ)

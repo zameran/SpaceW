@@ -17,6 +17,8 @@ struct QuadGenerationConstants
 	float spacingreal;
 	float spacingsub;
     float terrainMaxHeight;
+	float lodLevel;
+	float orientation;
 
     float3 cubeFaceEastDirection;
     float3 cubeFaceNorthDirection;
@@ -33,11 +35,6 @@ struct OutputStruct
     float4 pos;
 	float4 cpos;
 };
-
-float LODLevel;
-float FaceID;
-
-float3 Direction;
 
 RWTexture2D<float4> Height;
 RWTexture2D<float4> Normal;
@@ -207,10 +204,10 @@ void TexturesSub(uint3 id : SV_DispatchThreadID)
 	float4 pos = patchPreOutputSub[inBuffOffset].pos;
 	float4 cpos = patchPreOutputSub[inBuffOffset].cpos;
 	
-	float l = patchPreOutputSub[(id.x + 0) + (id.y + 1) * nVertsPerSideWithBorderSub].noise * LODLevel;
-	float r = patchPreOutputSub[(id.x + 2) + (id.y + 1) * nVertsPerSideWithBorderSub].noise * LODLevel;
-	float u = patchPreOutputSub[(id.x + 1) + (id.y + 0) * nVertsPerSideWithBorderSub].noise * LODLevel;
-	float d = patchPreOutputSub[(id.x + 1) + (id.y + 2) * nVertsPerSideWithBorderSub].noise * LODLevel;
+	float l = patchPreOutputSub[(id.x + 0) + (id.y + 1) * nVertsPerSideWithBorderSub].noise * constants.lodLevel;
+	float r = patchPreOutputSub[(id.x + 2) + (id.y + 1) * nVertsPerSideWithBorderSub].noise * constants.lodLevel;
+	float u = patchPreOutputSub[(id.x + 1) + (id.y + 0) * nVertsPerSideWithBorderSub].noise * constants.lodLevel;
+	float d = patchPreOutputSub[(id.x + 1) + (id.y + 2) * nVertsPerSideWithBorderSub].noise * constants.lodLevel;
 
 	float xdelta = ((l - r) + 1.0) * 0.5;
 	float ydelta = ((u - d) + 1.0) * 0.5;
@@ -221,9 +218,24 @@ void TexturesSub(uint3 id : SV_DispatchThreadID)
 	float3 ynormal = float3(ydelta, xdelta, 1.0);
 	float3 znormal = float3(zdelta, wdelta, 1.0);
 	float3 wnormal = float3(wdelta, zdelta, 1.0);
+
+	float3 xynormal = float3(ydelta, zdelta, 1.0);
 	
 	//float3 normal = xnormal * FindTangent(xnormal, 0.01); //Closer and closer...
-	float3 normal = xnormal;
+	float3 normal = float3(0, 0, 0);
+
+	if(constants.orientation == 0) // Top
+		normal = ynormal;
+	else if(constants.orientation == 1) // Bottom
+		normal = ynormal;
+	else if(constants.orientation == 2) // Left
+		normal = xynormal;
+	else if(constants.orientation == 3) // Right
+		normal = xynormal;
+	else if(constants.orientation == 4) // Front
+		normal = znormal;
+	else if(constants.orientation == 5) // Back
+		normal = znormal;
 
 	float xslope = 0.5 / max(dot(xnormal, float3(0.0, 1.0, 0.0)), 0.001);
 	float yslope = 0.5 / max(dot(ynormal, float3(0.0, 1.0, 0.0)), 0.001);
@@ -234,7 +246,7 @@ void TexturesSub(uint3 id : SV_DispatchThreadID)
 
 	float4 color = ColorFunction(cpos.xyz, noise, slope);
 	float4 normalColor = float4(normal, slope);
-	float4 heightColor = float4(color.xyz, noise + 0.5);
+	float4 heightColor = float4(color.xyz, noise);
 	
 	Normal[id.yx] = normalColor;
 	Height[id.yx] = heightColor;
