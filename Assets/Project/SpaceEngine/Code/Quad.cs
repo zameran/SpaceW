@@ -87,6 +87,9 @@ public class Quad : MonoBehaviour
     public Vector3 bottomLeftCorner;
     public Vector3 middleNormalized;
 
+    public int subX, subY;
+    public float uvStartX, uvStartY, uvResolution;
+
     public delegate void QuadDelegate(Quad q);
     public event QuadDelegate DispatchStarted, DispatchReady, GPUGetDataReady;
 
@@ -110,6 +113,20 @@ public class Quad : MonoBehaviour
         this.DispatchStarted += QuadDispatchStarted;
         this.DispatchReady += QuadDispatchReady;
         this.GPUGetDataReady += QuadGPUGetDataReady;
+
+        if (this.LODLevel == -1)
+        {
+            uvResolution = 1.0f;
+        }
+        else
+        {
+            this.uvResolution = this.Parent.uvResolution / 2f;
+            this.uvStartX += this.Parent.uvStartX;
+            this.uvStartY += this.Parent.uvStartY;
+        }
+
+        this.uvStartX += this.subX * uvResolution;
+        this.uvStartY += this.subY * uvResolution;
     }
 
     private void Start()
@@ -254,6 +271,9 @@ public class Quad : MonoBehaviour
                 quad.SetupLODLevel(quad);
                 quad.SetupID(quad, id);
                 quad.SetupVectors(quad, id, staticX, staticY, staticZ);
+
+                quad.subX = sX;
+                quad.subY = sY;
 
                 quad.transform.parent = this.transform;
                 quad.gameObject.name += "_ID" + id + "_LOD" + quad.LODLevel;

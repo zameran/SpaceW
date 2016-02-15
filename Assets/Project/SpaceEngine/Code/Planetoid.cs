@@ -20,8 +20,6 @@ public class Planetoid : MonoBehaviour
     public Shader ColorShader;
     public ComputeShader HeightShader;
 
-    public Mesh QuadMeshCache;
-
     [HideInInspector]
     public int LODMaxLevel = 6;
 
@@ -61,8 +59,6 @@ public class Planetoid : MonoBehaviour
 
         Quads.Clear();
         MainQuads.Clear();
-
-        QuadMeshCache = null;
     }
 
     [ContextMenu("SetupQuads")]
@@ -70,9 +66,6 @@ public class Planetoid : MonoBehaviour
     {
         if (Quads.Count > 0)
             return;
-
-        if (QuadMeshCache == null)
-            QuadMeshCache = MeshFactory.SetupQuadMesh(QS.nVertsPerEdge);
 
         SetupMainQuad(QuadPostion.Top);
         SetupMainQuad(QuadPostion.Bottom);
@@ -126,10 +119,7 @@ public class Planetoid : MonoBehaviour
         quadComponent.Planetoid = this;
         quadComponent.SetupCorners(quadPosition);
 
-        if (QuadMeshCache == null)
-            mf.sharedMesh = MeshFactory.SetupQuadMesh(QS.nVertsPerEdge);
-        else
-            mf.sharedMesh = QuadMeshCache;
+        mf.sharedMesh = MeshFactory.GenerateQuadMesh(QS.nVertsPerEdge, this, quadComponent);
 
         mf.sharedMesh.bounds = new Bounds(Vector3.zero, new Vector3(PlanetRadius * 2, PlanetRadius * 2, PlanetRadius * 2));
 
@@ -170,10 +160,7 @@ public class Planetoid : MonoBehaviour
         quadComponent.quadGC = gc;
         quadComponent.Planetoid = this;
 
-        if (QuadMeshCache == null)
-            mf.sharedMesh = MeshFactory.SetupQuadMesh(QS.nVertsPerEdge);
-        else
-            mf.sharedMesh = QuadMeshCache;
+        mf.sharedMesh = MeshFactory.GenerateQuadMesh(QS.nVertsPerEdge, this, quadComponent);
 
         mf.sharedMesh.bounds = new Bounds(Vector3.zero, new Vector3(PlanetRadius * 2, PlanetRadius * 2, PlanetRadius * 2));
 

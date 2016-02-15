@@ -190,6 +190,43 @@ void HeightSub(uint3 id : SV_DispatchThreadID)
 	patchPreOutputSub[outBuffOffset].cpos = cubeOutput;
 }
 
+float3 FindNormalSobel(uint3 id, float zoom, float lodLevel) 
+{
+	float tl = patchPreOutputSub[(id.x + 0) + (id.y + 0) * nVertsPerSideWithBorderSub].noise * lodLevel;   // top left
+	float  l = patchPreOutputSub[(id.x + 0) + (id.y + 1) * nVertsPerSideWithBorderSub].noise * lodLevel;   // left
+
+	float bl = patchPreOutputSub[(id.x + 0) + (id.y + 2) * nVertsPerSideWithBorderSub].noise * lodLevel;   // bottom left
+	float  t = patchPreOutputSub[(id.x + 1) + (id.y + 0) * nVertsPerSideWithBorderSub].noise * lodLevel;   // top
+
+	float  b = patchPreOutputSub[(id.x + 1) + (id.y + 2) * nVertsPerSideWithBorderSub].noise * lodLevel;   // bottom
+	float tr = patchPreOutputSub[(id.x + 2) + (id.y + 0) * nVertsPerSideWithBorderSub].noise * lodLevel;   // top right
+
+	float  r = patchPreOutputSub[(id.x + 2) + (id.y + 1) * nVertsPerSideWithBorderSub].noise * lodLevel;   // right
+	float br = patchPreOutputSub[(id.x + 2) + (id.y + 2) * nVertsPerSideWithBorderSub].noise * lodLevel;   // bottom right
+
+	// Compute dx using Sobel:
+	//           -1 0 1 
+	//           -2 0 2
+	//           -1 0 1
+	float dX = tr + 2.0 * r + br - tl - 2.0 * l - bl;
+ 
+	// Compute dy using Sobel:
+	//           -1 -2 -1 
+	//            0  0  0
+	//            1  2  1
+	float dY = bl + 2.0 * b + br - tl - 2.0 * t - tr;
+
+	float normalStrength = 0.125 / ((zoom + 1.0) * (zoom + 1.0));
+ 
+	// Build the normalized normal
+	float3 normal = normalize(float3(dX, dY, 2.0 * normalStrength));
+
+   // normal = normal * 0.5 + 0.5;
+ 
+	//convert (-1.0 , 1.0) to (0.0 , 1.0), if needed
+	return normal;
+}
+
 #pragma kernel TexturesSub
 [numthreads(30, 30, 1)]
 void TexturesSub(uint3 id : SV_DispatchThreadID)
@@ -203,44 +240,50 @@ void TexturesSub(uint3 id : SV_DispatchThreadID)
 	float3 patchCenter = patchPreOutputSub[inBuffOffset].patchCenter;
 	float4 pos = patchPreOutputSub[inBuffOffset].pos;
 	float4 cpos = patchPreOutputSub[inBuffOffset].cpos;
+
+	float normalStrength = 0.5 / ((constants.lodLevel / 10.0 + 1.0) * (constants.lodLevel / 10.0 + 1.0));
 	
-	float l = patchPreOutputSub[(id.x + 0) + (id.y + 1) * nVertsPerSideWithBorderSub].noise * constants.lodLevel;
-	float r = patchPreOutputSub[(id.x + 2) + (id.y + 1) * nVertsPerSideWithBorderSub].noise * constants.lodLevel;
-	float u = patchPreOutputSub[(id.x + 1) + (id.y + 0) * nVertsPerSideWithBorderSub].noise * constants.lodLevel;
-	float d = patchPreOutputSub[(id.x + 1) + (id.y + 2) * nVertsPerSideWithBorderSub].noise * constants.lodLevel;
+	float tl = patchPreOutputSub[(id.x + 0) + (id.y + 0) * nVertsPerSideWithBorderSub].noise * constants.lodLevel;
+	float  l = patchPreOutputSub[(id.x + 0) + (id.y + 1) * nVertsPerSideWithBorderSub].noise * constants.lodLevel;
+	float bl = patchPreOutputSub[(id.x + 0) + (id.y + 2) * nVertsPerSideWithBorderSub].noise * constants.lodLevel;
+	float  t = patchPreOutputSub[(id.x + 1) + (id.y + 0) * nVertsPerSideWithBorderSub].noise * constants.lodLevel;
+	float  b = patchPreOutputSub[(id.x + 1) + (id.y + 2) * nVertsPerSideWithBorderSub].noise * constants.lodLevel;
+	float tr = patchPreOutputSub[(id.x + 2) + (id.y + 0) * nVertsPerSideWithBorderSub].noise * constants.lodLevel;
+	float  r = patchPreOutputSub[(id.x + 2) + (id.y + 1) * nVertsPerSideWithBorderSub].noise * constants.lodLevel;
+	float br = patchPreOutputSub[(id.x + 2) + (id.y + 2) * nVertsPerSideWithBorderSub].noise * constants.lodLevel;
 
-	float xdelta = ((l - r) + 1.0) * 0.5;
-	float ydelta = ((u - d) + 1.0) * 0.5;
-	float zdelta = ((r - l) + 1.0) * 0.5;
-	float wdelta = ((d - u) + 1.0) * 0.5;
+	float left  = patchPreOutputSub[(id.x + 0) + (id.y + 1) * nVertsPerSideWithBorderSub].noise * constants.lodLevel;
+	float right = patchPreOutputSub[(id.x + 2) + (id.y + 1) * nVertsPerSideWithBorderSub].noise * constants.lodLevel;
+	float up    = patchPreOutputSub[(id.x + 1) + (id.y + 0) * nVertsPerSideWithBorderSub].noise * constants.lodLevel;
+	float down  = patchPreOutputSub[(id.x + 1) + (id.y + 2) * nVertsPerSideWithBorderSub].noise * constants.lodLevel;
 
-	float3 xnormal = float3(xdelta, ydelta, 1.0);
-	float3 ynormal = float3(ydelta, xdelta, 1.0);
-	float3 znormal = float3(zdelta, wdelta, 1.0);
-	float3 wnormal = float3(wdelta, zdelta, 1.0);
+	float xdeltaSlope = ((left - right) + 1.0) * 0.5;
+	float ydeltaSlope = ((up - down) + 1.0) * 0.5;
+	float zdeltaSlope = ((right - left) + 1.0) * 0.5;
+	float wdeltaSlope = ((down - up) + 1.0) * 0.5;
 
-	float3 xynormal = float3(ydelta, zdelta, 1.0);
-	
-	//float3 normal = xnormal * FindTangent(xnormal, 0.01); //Closer and closer...
-	float3 normal = float3(0, 0, 0);
+	float3 xnormalSlope = float3(xdeltaSlope, ydeltaSlope, 1.0);
+	float3 ynormalSlope = float3(ydeltaSlope, xdeltaSlope, 1.0);
+	float3 znormalSlope = float3(zdeltaSlope, wdeltaSlope, 1.0);
+	float3 wnormalSlope = float3(wdeltaSlope, zdeltaSlope, 1.0);
 
-	if(constants.orientation == 0) // Top
-		normal = ynormal;
-	else if(constants.orientation == 1) // Bottom
-		normal = ynormal;
-	else if(constants.orientation == 2) // Left
-		normal = xynormal;
-	else if(constants.orientation == 3) // Right
-		normal = xynormal;
-	else if(constants.orientation == 4) // Front
-		normal = znormal;
-	else if(constants.orientation == 5) // Back
-		normal = znormal;
+	float xdelta = tr + 2.0 * r + br - tl - 2.0 * l - bl;
+	float ydelta = bl + 2.0 * b + br - tl - 2.0 * t - tr;
+	float zdelta = tl + 2.0 * l + bl - tr - 2.0 * r - br;
+	float wdelta = br + 2.0 * t + bl - tr - 2.0 * b - tl;
 
-	float xslope = 0.5 / max(dot(xnormal, float3(0.0, 1.0, 0.0)), 0.001);
-	float yslope = 0.5 / max(dot(ynormal, float3(0.0, 1.0, 0.0)), 0.001);
-	float zslope = 0.5 / max(dot(znormal, float3(0.0, 1.0, 0.0)), 0.001);
-	float wslope = 0.5 / max(dot(wnormal, float3(0.0, 1.0, 0.0)), 0.001);
+	float3 xnormal = normalize(float3(xdelta, ydelta, 2.0 * normalStrength));
+	float3 ynormal = normalize(float3(ydelta, xdelta, 2.0 * normalStrength));
+	float3 znormal = normalize(float3(zdelta, wdelta, 2.0 * normalStrength));
+	float3 wnormal = normalize(float3(wdelta, zdelta, 2.0 * normalStrength));
+	//float3 normal = normalize(float3(xdelta, ydelta, 2.0 * normalStrength));
+
+	float3 normal = xnormal * FindTangent(xnormalSlope, 0.01); //Closer and closer...
+
+	float xslope = 0.5 / max(dot(xnormalSlope, float3(0.0, 1.0, 0.0)), 0.001);
+	float yslope = 0.5 / max(dot(ynormalSlope, float3(0.0, 1.0, 0.0)), 0.001);
+	float zslope = 0.5 / max(dot(znormalSlope, float3(0.0, 1.0, 0.0)), 0.001);
+	float wslope = 0.5 / max(dot(wnormalSlope, float3(0.0, 1.0, 0.0)), 0.001);
 
 	float slope = min(min(xslope, yslope), min(zslope, wslope));
 
