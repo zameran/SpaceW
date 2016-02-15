@@ -189,93 +189,12 @@ public static class MeshFactory
         return dummyMesh;
     }
 
-    public static Vector2 CartesianToPolar(Vector3 xyz)
-    {
-        var longitude = Mathf.Atan2(xyz.x, xyz.z);
-        var latitude = Mathf.Asin(xyz.y / xyz.magnitude);
-
-        return new Vector2(longitude, latitude);
-    }
-
-    public static Vector2 CartesianToPolarUV(Vector3 xyz)
-    {
-        var uv = CartesianToPolar(xyz);
-
-        uv.x = Mathf.Repeat(0.5f - uv.x / (Mathf.PI * 2.0f), 1.0f);
-        uv.y = 0.5f + uv.y / Mathf.PI;
-
-        return uv;
-    }
-
-    public static Vector2 GetSgtSphericalUv(Vector3 vertex)
-    {
-        return CartesianToPolarUV(vertex);
-    }
-
-    public static Vector2 GetSurfaceUV(int detail, int col, int row)
-    {
-        return new Vector2((float)row / detail, (float)col / detail);
-    }
-
-    public static Vector2 GetContinuousUV(int detail, int col, int row, float uvResolution, float uvStartX, float uvStartY)
-    {
-        return new Vector2(uvStartX + ((float)row / (detail - 1)) * uvResolution,
-                          (uvStartY + ((float)col / (detail - 1)) * uvResolution));
-    }
-
-    public static Vector2 GetSphericalUv(int detail, int col, int row, Vector3 vertex, bool staticX, bool staticY)
-    {
-        Vector2 uv = new Vector2();
-
-        uv.x = -(Mathf.Atan2(vertex.x, vertex.z) / (2f * Mathf.PI) + 0.5f);
-        uv.y = (Mathf.Asin(vertex.y) / Mathf.PI + .5f);
-
-        if (staticX)
-        {
-            if (vertex.x < 0)
-            {
-                if ((row == detail - 1) && vertex.z > -0.01f && vertex.z < 0.01f) uv.x = 0;
-                if ((row == 0) && vertex.z > -0.01f && vertex.z < 0.01f) uv.x = 1;
-            }
-        }
-        else if (staticY)
-        {
-            if (vertex.y > 0)
-            {
-                if ((col == detail - 1) && vertex.x < 0 && vertex.z > -0.01f && vertex.z < 0.01f) uv.x = 0;
-                if ((col == 0) && vertex.x < 0 && vertex.z > -0.01f && vertex.z < 0.01f) uv.x = 1;
-            }
-            else
-            {
-                if ((col == detail - 1) && vertex.x < 0 && vertex.z > -0.01f && vertex.z < 0.01f) uv.x = 1;
-                if ((col == 0) && vertex.x < 0 && vertex.z < 0.01f && vertex.z > -0.01f) uv.x = 0;
-            }
-        }
-        return uv;
-    }
-
-    public static Vector3 SperifyPoint(Vector3 point)
-    {
-        float dX2 = point.x * point.x;
-        float dY2 = point.y * point.y;
-        float dZ2 = point.z * point.z;
-
-        float dX2Half = dX2 * 0.5f;
-        float dY2Half = dY2 * 0.5f;
-        float dZ2Half = dZ2 * 0.5f;
-
-        point.x = point.x * Mathf.Sqrt(1f - dY2Half - dZ2Half + (dY2 * dZ2) * (1f / 3f));
-        point.y = point.y * Mathf.Sqrt(1f - dZ2Half - dX2Half + (dZ2 * dX2) * (1f / 3f));
-        point.z = point.z * Mathf.Sqrt(1f - dX2Half - dY2Half + (dX2 * dY2) * (1f / 3f));
-
-        return point;
-    }
-
-    public static void CalculateNormalsFromCanvas(int detail, int col, int row,
-                                                  int previousCol, int previousRow, bool staticX, bool staticY, bool staticZ,
-                                                  float stepX, float stepY, float stepZ,
-                                                  Vector3[] vertices, out Vector3 line1, out Vector3 line2, 
-                                                  Vector3 topleft, Planetoid planet)
+    public static void CalculateQuadNormals(int detail, int col, int row,
+                                            int previousCol, int previousRow, 
+                                            bool staticX, bool staticY, bool staticZ,
+                                            float stepX, float stepY, float stepZ,
+                                            Vector3[] vertices, out Vector3 line1, out Vector3 line2, 
+                                            Vector3 topleft, Planetoid planet)
     {
         if (previousCol >= 0)
         {
@@ -294,13 +213,12 @@ public static class MeshFactory
             if (staticZ)
                 previous = new Vector3(topleft.x + stepX * row, topleft.y - stepY, topleft.z);
 
-            //previous = SperifyPoint(previous);
+            previous = VectorHelper.SperifySpherePoint(previous);
 
-            //float disp = 1;
+            float disp = 1;
 
-            //previous += previous * disp;
-            //previous += previous;
-            //previous *= planet.PlanetRadius;
+            previous += previous * disp;
+            previous *= planet.PlanetRadius;
 
             line1.x = vertices[col * detail + row].x - previous.x;
             line1.y = vertices[col * detail + row].y - previous.y;
@@ -324,13 +242,12 @@ public static class MeshFactory
             if (staticZ)
                 previous = new Vector3(topleft.x - stepX, topleft.y + stepY * col, topleft.z);
 
-            //previous = SperifyPoint(previous);
+            previous = VectorHelper.SperifySpherePoint(previous);
 
-            //float disp = 1;
+            float disp = 1;
 
-            //previous += previous * disp;
-            //previous += previous;
-            //previous *= planet.PlanetRadius;
+            previous += previous * disp;
+            previous *= planet.PlanetRadius;
 
             line2.x = vertices[col * detail + row].x - previous.x;
             line2.y = vertices[col * detail + row].y - previous.y;
@@ -361,20 +278,20 @@ public static class MeshFactory
             mesh.Optimize();
         };
 
-        CalculateGeometryFromCanvas(detail, out vertices, out vertexColors, out uv1s, out normals, out indexbuffer, planet, quad);
+        CalculateQuadGeometry(detail, out vertices, out vertexColors, out uv1s, out normals, out indexbuffer, planet, quad);
         ApplyMesh();
 
         return mesh;
     }
 
-    public static void CalculateGeometryFromCanvas(int detail, 
-                                                   out Vector3[] vertices, 
-                                                   out Color[] vertexColors, 
-                                                   out Vector2[] uv1s, 
-                                                   out Vector3[] normals, 
-                                                   out int[] indexbuffer,
-                                                   Planetoid planet,
-                                                   Quad quad)
+    public static void CalculateQuadGeometry(int detail, 
+                                             out Vector3[] vertices, 
+                                             out Color[] vertexColors, 
+                                             out Vector2[] uv1s, 
+                                             out Vector3[] normals, 
+                                             out int[] indexbuffer,
+                                             Planetoid planet,
+                                             Quad quad)
     {
         // downward facing vertices at border of the surface to prevent seams appearing
         int borders = 0;
@@ -432,22 +349,22 @@ public static class MeshFactory
                     vertices[col * detail + row] = new Vector3(tlc.x + stepX * row, tlc.y + stepY * col, tlc.z);
 
                 // map the point on to the sphere
-                //vertices[col * detail + row] = SperifyPoint(vertices[col * detail + row]);
+                vertices[col * detail + row] = VectorHelper.SperifySpherePoint(vertices[col * detail + row]);
 
                 // calculate noise displacement
-                //float displacement = 1;
+                float disp = 1;
 
                 // displace vertex position
-                //vertices[col * detail + row] += vertices[col * detail + row];
+                vertices[col * detail + row] += vertices[col * detail + row] * disp;
 
                 // calculate uv's
-                //uv1s[col * detail + row] = GetSphericalUv(detail, col, row, vertices[col * detail + row], staticY, staticZ);
-                //uv1s[col * detail + row] = GetSgtSphericalUv(vertices[col * detail + row]);
-                //uv1s[col * detail + row] = GetContinuousUV(detail, col, row, quad.uvResolution, quad.uvStartX, quad.uvStartY);
-                //uv1s[col * detail + row] = GetSurfaceUV(detail, col, row);
+                //uv1s[col * detail + row] = UVFactory.GetSphericalUv(detail, col, row, vertices[col * detail + row], staticY, staticZ);
+                uv1s[col * detail + row] = UVFactory.GetSgtSphericalUv(vertices[col * detail + row]);
+                //uv1s[col * detail + row] = UVFactory.GetContinuousUV(detail, col, row, quad.uvResolution, quad.uvStartX, quad.uvStartY);
+                //uv1s[col * detail + row] = UVFactory.GetSurfaceUV(detail, col, row);
 
                 // scale to planet Radius
-                //vertices[col * detail + row] *= planet.PlanetRadius;
+                vertices[col * detail + row] *= planet.PlanetRadius;
 
                 // calculate triangle indexes
                 if (col < detail - 1 && row < detail - 1)
@@ -471,8 +388,8 @@ public static class MeshFactory
                 int previousCol = col - 1;
                 int previousRow = row - 1;
 
-                CalculateNormalsFromCanvas(detail, col, row, previousCol, previousRow, staticX, staticY, staticZ,
-                                           stepX, stepY, stepZ, vertices, out line1, out line2, tlc, planet);
+                CalculateQuadNormals(detail, col, row, previousCol, previousRow, staticX, staticY, staticZ,
+                                     stepX, stepY, stepZ, vertices, out line1, out line2, tlc, planet);
 
                 normals[col * detail + row] = Vector3.Cross(line1, line2).normalized;
 

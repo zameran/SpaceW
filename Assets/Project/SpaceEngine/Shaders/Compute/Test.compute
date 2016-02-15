@@ -278,7 +278,8 @@ void TexturesSub(uint3 id : SV_DispatchThreadID)
 	float3 wnormal = normalize(float3(wdelta, zdelta, 2.0 * normalStrength));
 	//float3 normal = normalize(float3(xdelta, ydelta, 2.0 * normalStrength));
 
-	float3 normal = xnormal * FindTangent(xnormalSlope, 0.01); //Closer and closer...
+	//float3 normal = xnormal * FindTangent(xnormalSlope, 0.01); //Closer and closer...
+	float3 normal = xnormal;
 
 	float xslope = 0.5 / max(dot(xnormalSlope, float3(0.0, 1.0, 0.0)), 0.001);
 	float yslope = 0.5 / max(dot(ynormalSlope, float3(0.0, 1.0, 0.0)), 0.001);

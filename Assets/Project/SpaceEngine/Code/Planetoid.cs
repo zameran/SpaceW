@@ -119,7 +119,8 @@ public class Planetoid : MonoBehaviour
         quadComponent.Planetoid = this;
         quadComponent.SetupCorners(quadPosition);
 
-        mf.sharedMesh = MeshFactory.GenerateQuadMesh(QS.nVertsPerEdge, this, quadComponent);
+        //mf.sharedMesh = MeshFactory.GenerateQuadMesh(QS.nVertsPerEdge, this, quadComponent);
+        mf.sharedMesh = MeshFactory.SetupQuadMesh(QS.nVertsPerEdge);
 
         mf.sharedMesh.bounds = new Bounds(Vector3.zero, new Vector3(PlanetRadius * 2, PlanetRadius * 2, PlanetRadius * 2));
 
@@ -160,7 +161,8 @@ public class Planetoid : MonoBehaviour
         quadComponent.quadGC = gc;
         quadComponent.Planetoid = this;
 
-        mf.sharedMesh = MeshFactory.GenerateQuadMesh(QS.nVertsPerEdge, this, quadComponent);
+        //mf.sharedMesh = MeshFactory.GenerateQuadMesh(QS.nVertsPerEdge, this, quadComponent);
+        mf.sharedMesh = MeshFactory.SetupQuadMesh(QS.nVertsPerEdge);
 
         mf.sharedMesh.bounds = new Bounds(Vector3.zero, new Vector3(PlanetRadius * 2, PlanetRadius * 2, PlanetRadius * 2));
 

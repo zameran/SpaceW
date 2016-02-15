@@ -23,4 +23,39 @@ public static class VectorHelper
     {
         return v.normalized * radius;
     }
+
+    public static Vector2 CartesianToPolar(Vector3 xyz)
+    {
+        var longitude = Mathf.Atan2(xyz.x, xyz.z);
+        var latitude = Mathf.Asin(xyz.y / xyz.magnitude);
+
+        return new Vector2(longitude, latitude);
+    }
+
+    public static Vector2 CartesianToPolarUV(Vector3 xyz)
+    {
+        var uv = CartesianToPolar(xyz);
+
+        uv.x = Mathf.Repeat(0.5f - uv.x / (Mathf.PI * 2.0f), 1.0f);
+        uv.y = 0.5f + uv.y / Mathf.PI;
+
+        return uv;
+    }
+
+    public static Vector3 SperifySpherePoint(Vector3 point)
+    {
+        float dX2 = point.x * point.x;
+        float dY2 = point.y * point.y;
+        float dZ2 = point.z * point.z;
+
+        float dX2Half = dX2 * 0.5f;
+        float dY2Half = dY2 * 0.5f;
+        float dZ2Half = dZ2 * 0.5f;
+
+        point.x = point.x * Mathf.Sqrt(1f - dY2Half - dZ2Half + (dY2 * dZ2) * (1f / 3f));
+        point.y = point.y * Mathf.Sqrt(1f - dZ2Half - dX2Half + (dZ2 * dX2) * (1f / 3f));
+        point.z = point.z * Mathf.Sqrt(1f - dX2Half - dY2Half + (dX2 * dY2) * (1f / 3f));
+
+        return point;
+    }
 }

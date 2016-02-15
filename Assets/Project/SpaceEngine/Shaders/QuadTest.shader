@@ -141,7 +141,7 @@
 
 			v.normal = tex2Dlod(_NormalTexture, v.texcoord);
 			v.normal.xyz += position.xyz;
-
+			
 			o.noise = noise + 0.5;
 			o.uv_HeightTexture = v.texcoord.xy;
 			o.uv_NormalTexture = v.texcoord.xy;
