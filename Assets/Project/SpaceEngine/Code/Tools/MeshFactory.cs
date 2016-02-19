@@ -88,6 +88,9 @@ public static class MeshFactory
 
                 Vector2 uv = new Vector2();
 
+                //uv.x = r / (float)((float)nVertsPerEdge - 0.5f);
+                //uv.y = c / (float)((float)nVertsPerEdge - 0.5f);
+
                 uv.x = r / (float)(nVertsPerEdge - 1);
                 uv.y = c / (float)(nVertsPerEdge - 1);
 
@@ -359,7 +362,7 @@ public static class MeshFactory
 
                 // calculate uv's
                 //uv1s[col * detail + row] = UVFactory.GetSphericalUv(detail, col, row, vertices[col * detail + row], staticY, staticZ);
-                uv1s[col * detail + row] = UVFactory.GetSgtSphericalUv(vertices[col * detail + row]);
+                //uv1s[col * detail + row] = UVFactory.GetSgtSphericalUv(vertices[col * detail + row]);
                 //uv1s[col * detail + row] = UVFactory.GetContinuousUV(detail, col, row, quad.uvResolution, quad.uvStartX, quad.uvStartY);
                 //uv1s[col * detail + row] = UVFactory.GetSurfaceUV(detail, col, row);
 

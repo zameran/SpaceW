@@ -46,11 +46,13 @@
 			uint id : SV_VertexID;
 		};
 
-		sampler2D _HeightTexture;
-		sampler2D _NormalTexture;
+		uniform sampler2D _HeightTexture;
+		uniform sampler2D _NormalTexture;
+
+		uniform float2x2 _Rotation; 
 
 		#ifdef SHADER_API_D3D11
-		StructuredBuffer<OutputStruct> data;
+		uniform StructuredBuffer<OutputStruct> data;
 		#endif
 
 		float3 FindNormalSobel(float2 uv, float zoom) 
@@ -160,7 +162,7 @@
 			fixed4 terrainNormalTexture = normalize(tex2D(_NormalTexture, IN.uv_NormalTexture));
 
 			o.Albedo = terrainTexture.rgb;
-			//o.Normal = terrainNormalTexture;
+			o.Normal = terrainNormalTexture * 10; 
 			//o.Normal = FindNormal(float4(IN.uv_NormalTexture, 0, 0), 1 / float2(240, 240));
 			//o.Normal = FindNormalSobel(IN.uv_NormalTexture, 0.1);
 			o.Metallic = _Metallic;

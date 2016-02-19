@@ -6,7 +6,7 @@
 #define nVerticesPerSideSub 240
 #define nVertsPerSideWithBorderSub 256
 
-//#define defaultNoise
+#define defaultNoise
 
 #include "Assets/Project/SpaceEngine/Shaders/TCCommonAsteroid.cginc"
 
@@ -97,7 +97,9 @@ float3 CubeCoord(QuadGenerationConstants constants, float VerticesPerSide, uint3
 float NoiseFunction(float3 coord)
 {
 	#ifdef defaultNoise
-	float noise = Fbm(0.001 * coord, 4);
+	float noise = Noise(0.001 * coord);
+	noise = RidgedMultifractalErodedDetail(coord * 0.003 + Randomize, 2.0, 1, 0.5 * noise, 4);
+	noise *= 2;
 	#else
 	float noise = HeightMapAsteroid(0.001 * coord, mainFreq, montesFreq, hillsFreq, hillsMagn, hillsFraction, craterOctaves, craterSqrtDensity, craterFreq, craterMagn);
 	#endif
@@ -128,18 +130,20 @@ void HeightMain (uint3 id : SV_DispatchThreadID)
 
 	float3 patchCenter = normalize(constants.patchCubeCenter) * constants.planetRadius;
 	float3 patchNormalizedCoord = normalize(cubeCoord);
-	
+	float3 ddd = 0;
+
 	float3 patchCoord =  constants.planetRadius * patchNormalizedCoord;
 	float3 patchCoordCentered = patchCoord - patchCenter;
-	
+	float3 patchCubeCoordCentered = patchNormalizedCoord;
 	float noise = NoiseFunction(patchCoord);
 
-    float height = ((noise * 2.0) - 1.0) * constants.terrainMaxHeight;
+    float height = ((noise - (-1.0)) / (1.0 - (-1.0))) * constants.terrainMaxHeight;
 
 	patchCoordCentered += patchNormalizedCoord * height;
+	patchCubeCoordCentered += patchNormalizedCoord * height;
 
     float4 output = float4(patchCoordCentered.xyz, 0.0);
-	float4 cubeOutput = float4(cubeCoord.xyz, 0.0);
+	float4 cubeOutput = float4(patchCubeCoordCentered.xyz, 0.0);
 
 	patchPreOutput[outBuffOffset].noise = ((noise * 2.0) - 1.0);
 	patchPreOutput[outBuffOffset].patchCenter = patchCenter;
@@ -170,61 +174,25 @@ void HeightSub(uint3 id : SV_DispatchThreadID)
 
 	float3 patchCenter = normalize(constants.patchCubeCenter) * constants.planetRadius;
 	float3 patchNormalizedCoord = normalize(cubeCoord);
-	
+
 	float3 patchCoord =  constants.planetRadius * patchNormalizedCoord;
 	float3 patchCoordCentered = patchCoord - patchCenter;
-	
+	float3 patchCubeCoordCentered = patchNormalizedCoord;
 	float noise = NoiseFunction(patchCoord);
 
-    float height = ((noise * 2.0) - 1.0) * constants.terrainMaxHeight;
+    float height = ((noise - (-1.0)) / (1.0 - (-1.0))) * constants.terrainMaxHeight;
 
 	patchCoordCentered += patchNormalizedCoord * height;
+	patchCubeCoordCentered += patchNormalizedCoord * height;
 
     float4 output = float4(patchCoordCentered.xyz, 0.0);
-	float4 cubeOutput = float4(cubeCoord.xyz, 0.0);
+	float4 cubeOutput = float4(patchCubeCoordCentered.xyz, 0.0);
 
 	patchPreOutputSub[outBuffOffset].noise = ((noise * 2.0) - 1.0);
 	patchPreOutputSub[outBuffOffset].patchCenter = patchCenter;
 	patchPreOutputSub[outBuffOffset].vcolor = float4(noise, noise, noise, 1.0);
     patchPreOutputSub[outBuffOffset].pos = output;
 	patchPreOutputSub[outBuffOffset].cpos = cubeOutput;
-}
-
-float3 FindNormalSobel(uint3 id, float zoom, float lodLevel) 
-{
-	float tl = patchPreOutputSub[(id.x + 0) + (id.y + 0) * nVertsPerSideWithBorderSub].noise * lodLevel;   // top left
-	float  l = patchPreOutputSub[(id.x + 0) + (id.y + 1) * nVertsPerSideWithBorderSub].noise * lodLevel;   // left
-
-	float bl = patchPreOutputSub[(id.x + 0) + (id.y + 2) * nVertsPerSideWithBorderSub].noise * lodLevel;   // bottom left
-	float  t = patchPreOutputSub[(id.x + 1) + (id.y + 0) * nVertsPerSideWithBorderSub].noise * lodLevel;   // top
-
-	float  b = patchPreOutputSub[(id.x + 1) + (id.y + 2) * nVertsPerSideWithBorderSub].noise * lodLevel;   // bottom
-	float tr = patchPreOutputSub[(id.x + 2) + (id.y + 0) * nVertsPerSideWithBorderSub].noise * lodLevel;   // top right
-
-	float  r = patchPreOutputSub[(id.x + 2) + (id.y + 1) * nVertsPerSideWithBorderSub].noise * lodLevel;   // right
-	float br = patchPreOutputSub[(id.x + 2) + (id.y + 2) * nVertsPerSideWithBorderSub].noise * lodLevel;   // bottom right
-
-	// Compute dx using Sobel:
-	//           -1 0 1 
-	//           -2 0 2
-	//           -1 0 1
-	float dX = tr + 2.0 * r + br - tl - 2.0 * l - bl;
- 
-	// Compute dy using Sobel:
-	//           -1 -2 -1 
-	//            0  0  0
-	//            1  2  1
-	float dY = bl + 2.0 * b + br - tl - 2.0 * t - tr;
-
-	float normalStrength = 0.125 / ((zoom + 1.0) * (zoom + 1.0));
- 
-	// Build the normalized normal
-	float3 normal = normalize(float3(dX, dY, 2.0 * normalStrength));
-
-   // normal = normal * 0.5 + 0.5;
- 
-	//convert (-1.0 , 1.0) to (0.0 , 1.0), if needed
-	return normal;
 }
 
 #pragma kernel TexturesSub
@@ -243,14 +211,48 @@ void TexturesSub(uint3 id : SV_DispatchThreadID)
 
 	float normalStrength = 0.5 / ((constants.lodLevel / 10.0 + 1.0) * (constants.lodLevel / 10.0 + 1.0));
 	
-	float tl = patchPreOutputSub[(id.x + 0) + (id.y + 0) * nVertsPerSideWithBorderSub].noise * constants.lodLevel;
-	float  l = patchPreOutputSub[(id.x + 0) + (id.y + 1) * nVertsPerSideWithBorderSub].noise * constants.lodLevel;
-	float bl = patchPreOutputSub[(id.x + 0) + (id.y + 2) * nVertsPerSideWithBorderSub].noise * constants.lodLevel;
-	float  t = patchPreOutputSub[(id.x + 1) + (id.y + 0) * nVertsPerSideWithBorderSub].noise * constants.lodLevel;
-	float  b = patchPreOutputSub[(id.x + 1) + (id.y + 2) * nVertsPerSideWithBorderSub].noise * constants.lodLevel;
-	float tr = patchPreOutputSub[(id.x + 2) + (id.y + 0) * nVertsPerSideWithBorderSub].noise * constants.lodLevel;
-	float  r = patchPreOutputSub[(id.x + 2) + (id.y + 1) * nVertsPerSideWithBorderSub].noise * constants.lodLevel;
-	float br = patchPreOutputSub[(id.x + 2) + (id.y + 2) * nVertsPerSideWithBorderSub].noise * constants.lodLevel;
+	float tl;
+	float  l;
+	float bl;
+	float  t;
+	float  b;
+	float tr;
+	float  r;
+	float br;
+
+	if(constants.orientation == 0 || constants.orientation == 1) //Top
+	{
+		tl = patchPreOutputSub[(id.x + 0) + (id.y + 0) * nVertsPerSideWithBorderSub].cpos.y * constants.lodLevel;
+		 l = patchPreOutputSub[(id.x + 0) + (id.y + 1) * nVertsPerSideWithBorderSub].cpos.y * constants.lodLevel;
+		bl = patchPreOutputSub[(id.x + 0) + (id.y + 2) * nVertsPerSideWithBorderSub].cpos.y * constants.lodLevel;
+		 t = patchPreOutputSub[(id.x + 1) + (id.y + 0) * nVertsPerSideWithBorderSub].cpos.y * constants.lodLevel;
+		 b = patchPreOutputSub[(id.x + 1) + (id.y + 2) * nVertsPerSideWithBorderSub].cpos.y * constants.lodLevel;
+		tr = patchPreOutputSub[(id.x + 2) + (id.y + 0) * nVertsPerSideWithBorderSub].cpos.y * constants.lodLevel;
+		 r = patchPreOutputSub[(id.x + 2) + (id.y + 1) * nVertsPerSideWithBorderSub].cpos.y * constants.lodLevel;
+		br = patchPreOutputSub[(id.x + 2) + (id.y + 2) * nVertsPerSideWithBorderSub].cpos.y * constants.lodLevel;
+	}
+	else if(constants.orientation == 2 || constants.orientation == 3)
+	{
+		tl = -patchPreOutputSub[(id.x + 0) + (id.y + 0) * nVertsPerSideWithBorderSub].cpos.x * constants.lodLevel;
+		 l = -patchPreOutputSub[(id.x + 0) + (id.y + 1) * nVertsPerSideWithBorderSub].cpos.x * constants.lodLevel;
+		bl = -patchPreOutputSub[(id.x + 0) + (id.y + 2) * nVertsPerSideWithBorderSub].cpos.x * constants.lodLevel;
+		 t = -patchPreOutputSub[(id.x + 1) + (id.y + 0) * nVertsPerSideWithBorderSub].cpos.x * constants.lodLevel;
+		 b = -patchPreOutputSub[(id.x + 1) + (id.y + 2) * nVertsPerSideWithBorderSub].cpos.x * constants.lodLevel;
+		tr = -patchPreOutputSub[(id.x + 2) + (id.y + 0) * nVertsPerSideWithBorderSub].cpos.x * constants.lodLevel;
+		 r = -patchPreOutputSub[(id.x + 2) + (id.y + 1) * nVertsPerSideWithBorderSub].cpos.x * constants.lodLevel;
+		br = -patchPreOutputSub[(id.x + 2) + (id.y + 2) * nVertsPerSideWithBorderSub].cpos.x * constants.lodLevel;
+	}
+	else
+	{
+		tl = patchPreOutputSub[(id.x + 0) + (id.y + 0) * nVertsPerSideWithBorderSub].cpos.z * constants.lodLevel;
+		 l = patchPreOutputSub[(id.x + 0) + (id.y + 1) * nVertsPerSideWithBorderSub].cpos.z * constants.lodLevel;
+		bl = patchPreOutputSub[(id.x + 0) + (id.y + 2) * nVertsPerSideWithBorderSub].cpos.z * constants.lodLevel;
+		 t = patchPreOutputSub[(id.x + 1) + (id.y + 0) * nVertsPerSideWithBorderSub].cpos.z * constants.lodLevel;
+		 b = patchPreOutputSub[(id.x + 1) + (id.y + 2) * nVertsPerSideWithBorderSub].cpos.z * constants.lodLevel;
+		tr = patchPreOutputSub[(id.x + 2) + (id.y + 0) * nVertsPerSideWithBorderSub].cpos.z * constants.lodLevel;
+		 r = patchPreOutputSub[(id.x + 2) + (id.y + 1) * nVertsPerSideWithBorderSub].cpos.z * constants.lodLevel;
+		br = patchPreOutputSub[(id.x + 2) + (id.y + 2) * nVertsPerSideWithBorderSub].cpos.z * constants.lodLevel;
+	}
 
 	float left  = patchPreOutputSub[(id.x + 0) + (id.y + 1) * nVertsPerSideWithBorderSub].noise * constants.lodLevel;
 	float right = patchPreOutputSub[(id.x + 2) + (id.y + 1) * nVertsPerSideWithBorderSub].noise * constants.lodLevel;
@@ -276,10 +278,22 @@ void TexturesSub(uint3 id : SV_DispatchThreadID)
 	float3 ynormal = normalize(float3(ydelta, xdelta, 2.0 * normalStrength));
 	float3 znormal = normalize(float3(zdelta, wdelta, 2.0 * normalStrength));
 	float3 wnormal = normalize(float3(wdelta, zdelta, 2.0 * normalStrength));
-	//float3 normal = normalize(float3(xdelta, ydelta, 2.0 * normalStrength));
 
 	//float3 normal = xnormal * FindTangent(xnormalSlope, 0.01); //Closer and closer...
 	float3 normal = xnormal;
+
+	if(constants.orientation == 0 || constants.orientation == 1) //Top
+	{
+		normal = xnormal;
+	}
+	else if(constants.orientation == 2 || constants.orientation == 3)
+	{
+		normal = ynormal;
+	}
+	else
+	{
+		normal = xnormal;
+	}
 
 	float xslope = 0.5 / max(dot(xnormalSlope, float3(0.0, 1.0, 0.0)), 0.001);
 	float yslope = 0.5 / max(dot(ynormalSlope, float3(0.0, 1.0, 0.0)), 0.001);

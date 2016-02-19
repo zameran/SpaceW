@@ -1030,6 +1030,26 @@ float RidgedMultifractal(float3 ppoint, float gain)
 	return summ;
 }
 
+float RidgedMultifractal(float3 ppoint, float gain, float o)
+{
+	float signal = 1.0;
+	float summ = 0.0;
+	float frequency = 1.0;
+	float weight;
+
+	for (int i = 0; i < o; ++i)
+	{
+		weight = saturate(signal * gain);
+		signal = Noise(ppoint * frequency);
+		signal = noiseOffset - sqrt(noiseRidgeSmooth + signal*signal);
+		signal *= signal * weight;
+		summ += signal * SavePow(frequency, -noiseH);
+		frequency *= noiseLacunarity;
+	}
+
+	return summ;
+}
+
 float RidgedMultifractalDetail(float3 ppoint, float gain, float firstOctaveValue)
 {
 	float signal = firstOctaveValue;
@@ -1079,6 +1099,31 @@ float RidgedMultifractalEroded(float3 ppoint, float gain, float warp)
 	return summ;
 }
 
+float RidgedMultifractalEroded(float3 ppoint, float gain, float warp, float o)
+{
+	float frequency = 1.0;
+	float amplitude = 1.0;
+	float summ = 0.0;
+	float signal = 1.0;
+	float weight;
+	float3  dsum = float3(0.0, 0.0, 0.0);
+	float4  noiseDeriv;
+
+	for (int i = 0; i < o; ++i)
+	{
+		noiseDeriv = NoiseDeriv((ppoint + warp * dsum) * frequency);
+		weight = saturate(signal * gain);
+		signal = noiseOffset - sqrt(noiseRidgeSmooth + noiseDeriv.w*noiseDeriv.w);
+		signal *= signal * weight;
+		amplitude = SavePow(abs(frequency), -noiseH);
+		summ += signal * amplitude;
+		frequency *= noiseLacunarity;
+		dsum -= amplitude * noiseDeriv.xyz * noiseDeriv.w;
+	}
+
+	return summ;
+}
+
 // Ridged multifractal with "procedural erosion" by Giliam de Carpentier
 // http://www.decarpentier.nl/scape-procedural-extensions
 float RidgedMultifractalErodedDetail(float3 ppoint, float gain, float warp, float firstOctaveValue)
@@ -1092,6 +1137,31 @@ float RidgedMultifractalErodedDetail(float3 ppoint, float gain, float warp, floa
 	float4  noiseDeriv;
 
 	for (int i = 0; i < noiseOctaves; ++i)
+	{
+		noiseDeriv = NoiseDeriv((ppoint + warp * dsum) * frequency);
+		weight = saturate(signal * gain);
+		signal = noiseOffset - sqrt(noiseRidgeSmooth + noiseDeriv.w*noiseDeriv.w);
+		signal *= signal * weight;
+		amplitude = SavePow(frequency, -noiseH);
+		summ += signal * amplitude;
+		frequency *= noiseLacunarity;
+		dsum -= amplitude * noiseDeriv.xyz * noiseDeriv.w;
+	}
+
+	return summ;
+}
+
+float RidgedMultifractalErodedDetail(float3 ppoint, float gain, float warp, float firstOctaveValue, float o)
+{
+	float frequency = 1.0;
+	float amplitude = 1.0;
+	float summ = firstOctaveValue;
+	float signal = firstOctaveValue;
+	float weight;
+	float3  dsum = float3(0.0, 0.0, 0.0);
+	float4  noiseDeriv;
+
+	for (int i = 0; i < o; ++i)
 	{
 		noiseDeriv = NoiseDeriv((ppoint + warp * dsum) * frequency);
 		weight = saturate(signal * gain);

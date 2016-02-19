@@ -12,6 +12,7 @@ public class GUIDrawQuadTexture : MonoBehaviour
     public float scale = 0.5f;
     public float x = 10.0f;
     public float y = 10.0f;
+    public float rotationAngle = 0.0f;
 
     private void OnGUI()
     {
@@ -46,14 +47,20 @@ public class GUIDrawQuadTexture : MonoBehaviour
                         case TextureFlip.Y:
                             dim = new Vector2(dim.x, -dim.y);
                             break;
+                        case TextureFlip.XY:
+                            dim = new Vector2(-dim.x, -dim.y);
+                            break;
                     }
 
                     if (q.Position == quadPosition)
                     {
+                        GUI.BeginGroup(new Rect(0, 0, Screen.width, Screen.height));
+                        GUIUtility.RotateAroundPivot(rotationAngle, new Vector2(x + (dim.x * scale) / 2, y + (dim.y * scale) / 2));
                         GUI.DrawTexture(new Rect(x, y,
                                                  dim.x * scale,
                                                  dim.y * scale),
                                                  tex, ScaleMode.StretchToFill, false);
+                        GUI.EndGroup();
                     }
                 }
             }
@@ -71,5 +78,6 @@ public enum TextureFlip
 {
     None,
     X,
-    Y
+    Y,
+    XY,
 }
