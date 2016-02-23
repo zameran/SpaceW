@@ -6,6 +6,11 @@ using System.Collections.Generic;
 
 public static class NormalSolver
 {
+    public static void RecalculateNormals(this Mesh mesh)
+    {
+        throw new NotImplementedException();
+    }
+
     public static void RecalculateNormals(this Mesh mesh, float angle)
     {
         var triangles = mesh.GetTriangles(0);

@@ -89,22 +89,30 @@ public class Planetoid : MonoBehaviour
         go.transform.rotation = Quaternion.identity;
         go.transform.parent = this.transform;
 
+        Mesh mesh = MeshFactory.SetupQuadMesh(QS.nVertsPerEdge);
+        mesh.bounds = new Bounds(Vector3.zero, new Vector3(PlanetRadius * 2, PlanetRadius * 2, PlanetRadius * 2));
+
+        Material material = new Material(ColorShader);
+        material.name += "_" + quadPosition.ToString() + "(Instance)";
+
         MeshFilter mf = go.AddComponent<MeshFilter>();
+        mf.sharedMesh = mesh;
 
         MeshRenderer mr = go.AddComponent<MeshRenderer>();
         mr.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.On;
         mr.receiveShadows = true;
-        mr.sharedMaterial = new Material(ColorShader);
-        mr.sharedMaterial.name += "_" + quadPosition.ToString() + "(Instance)";
+        mr.sharedMaterial = material;
 
         NoiseParametersSetter nps = go.AddComponent<NoiseParametersSetter>();
         nps.ComputeShaderToUpdate = HeightShader;
-        nps.MaterialToUpdate = mr.sharedMaterial;
+        nps.MaterialToUpdate = material;
 
         Quad quadComponent = go.AddComponent<Quad>();
         quadComponent.Setter = nps;
         quadComponent.HeightShader = HeightShader;
         quadComponent.Planetoid = this;
+        quadComponent.QuadMesh = mesh;
+        quadComponent.QuadMaterial = material;
 
         QuadGenerationConstants gc = QuadGenerationConstants.Init();
         gc.planetRadius = PlanetRadius;
@@ -119,11 +127,6 @@ public class Planetoid : MonoBehaviour
         quadComponent.Planetoid = this;
         quadComponent.SetupCorners(quadPosition);
 
-        //mf.sharedMesh = MeshFactory.GenerateQuadMesh(QS.nVertsPerEdge, this, quadComponent);
-        mf.sharedMesh = MeshFactory.SetupQuadMesh(QS.nVertsPerEdge);
-
-        mf.sharedMesh.bounds = new Bounds(Vector3.zero, new Vector3(PlanetRadius * 2, PlanetRadius * 2, PlanetRadius * 2));
-
         quadComponent.Dispatch();
 
         Quads.Add(quadComponent);
@@ -136,22 +139,30 @@ public class Planetoid : MonoBehaviour
         go.transform.position = Vector3.zero;
         go.transform.rotation = Quaternion.identity;
 
+        Mesh mesh = MeshFactory.SetupQuadMesh(QS.nVertsPerEdge);
+        mesh.bounds = new Bounds(Vector3.zero, new Vector3(PlanetRadius * 2, PlanetRadius * 2, PlanetRadius * 2));
+
+        Material material = new Material(ColorShader);
+        material.name += "_" + quadPosition.ToString() + "(Instance)";
+
         MeshFilter mf = go.AddComponent<MeshFilter>();
+        mf.sharedMesh = mesh;
 
         MeshRenderer mr = go.AddComponent<MeshRenderer>();
         mr.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.On;
         mr.receiveShadows = true;
-        mr.sharedMaterial = new Material(ColorShader);
-        mr.sharedMaterial.name += "_" + quadPosition.ToString() + "(Instance)";
+        mr.sharedMaterial = material;
 
         NoiseParametersSetter nps = go.AddComponent<NoiseParametersSetter>();
         nps.ComputeShaderToUpdate = HeightShader;
-        nps.MaterialToUpdate = mr.sharedMaterial;
+        nps.MaterialToUpdate = material;
 
         Quad quadComponent = go.AddComponent<Quad>();
         quadComponent.Setter = nps;
         quadComponent.HeightShader = HeightShader;
         quadComponent.Planetoid = this;
+        quadComponent.QuadMesh = mesh;
+        quadComponent.QuadMaterial = material;
         quadComponent.SetupCorners(quadPosition);
 
         QuadGenerationConstants gc = QuadGenerationConstants.Init();
@@ -160,11 +171,6 @@ public class Planetoid : MonoBehaviour
         quadComponent.Position = quadPosition;
         quadComponent.quadGC = gc;
         quadComponent.Planetoid = this;
-
-        //mf.sharedMesh = MeshFactory.GenerateQuadMesh(QS.nVertsPerEdge, this, quadComponent);
-        mf.sharedMesh = MeshFactory.SetupQuadMesh(QS.nVertsPerEdge);
-
-        mf.sharedMesh.bounds = new Bounds(Vector3.zero, new Vector3(PlanetRadius * 2, PlanetRadius * 2, PlanetRadius * 2));
 
         //quadComponent.Dispatch();
 

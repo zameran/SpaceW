@@ -97,9 +97,7 @@ float3 CubeCoord(QuadGenerationConstants constants, float VerticesPerSide, uint3
 float NoiseFunction(float3 coord)
 {
 	#ifdef defaultNoise
-	float noise = Noise(0.001 * coord);
-	noise = RidgedMultifractalErodedDetail(coord * 0.003 + Randomize, 2.0, 1, 0.5 * noise, 4);
-	noise *= 2;
+	float noise = RidgedMultifractalEroded(coord * 0.003 + Randomize, 1, 1, 4);
 	#else
 	float noise = HeightMapAsteroid(0.001 * coord, mainFreq, montesFreq, hillsFreq, hillsMagn, hillsFraction, craterOctaves, craterSqrtDensity, craterFreq, craterMagn);
 	#endif
@@ -130,7 +128,6 @@ void HeightMain (uint3 id : SV_DispatchThreadID)
 
 	float3 patchCenter = normalize(constants.patchCubeCenter) * constants.planetRadius;
 	float3 patchNormalizedCoord = normalize(cubeCoord);
-	float3 ddd = 0;
 
 	float3 patchCoord =  constants.planetRadius * patchNormalizedCoord;
 	float3 patchCoordCentered = patchCoord - patchCenter;
@@ -145,7 +142,7 @@ void HeightMain (uint3 id : SV_DispatchThreadID)
     float4 output = float4(patchCoordCentered.xyz, 0.0);
 	float4 cubeOutput = float4(patchCubeCoordCentered.xyz, 0.0);
 
-	patchPreOutput[outBuffOffset].noise = ((noise * 2.0) - 1.0);
+	patchPreOutput[outBuffOffset].noise = (noise - (-1.0)) / (1.0 - (-1.0));
 	patchPreOutput[outBuffOffset].patchCenter = patchCenter;
 	patchPreOutput[outBuffOffset].vcolor = float4(noise, noise, noise, 1.0);
     patchPreOutput[outBuffOffset].pos = output;
@@ -188,7 +185,7 @@ void HeightSub(uint3 id : SV_DispatchThreadID)
     float4 output = float4(patchCoordCentered.xyz, 0.0);
 	float4 cubeOutput = float4(patchCubeCoordCentered.xyz, 0.0);
 
-	patchPreOutputSub[outBuffOffset].noise = ((noise * 2.0) - 1.0);
+	patchPreOutputSub[outBuffOffset].noise = (noise - (-1.0)) / (1.0 - (-1.0));
 	patchPreOutputSub[outBuffOffset].patchCenter = patchCenter;
 	patchPreOutputSub[outBuffOffset].vcolor = float4(noise, noise, noise, 1.0);
     patchPreOutputSub[outBuffOffset].pos = output;
@@ -211,6 +208,16 @@ void TexturesSub(uint3 id : SV_DispatchThreadID)
 
 	float normalStrength = 0.5 / ((constants.lodLevel / 10.0 + 1.0) * (constants.lodLevel / 10.0 + 1.0));
 	
+	float tl = patchPreOutputSub[(id.x + 0) + (id.y + 0) * nVertsPerSideWithBorderSub].noise * normalStrength;
+	float  l = patchPreOutputSub[(id.x + 0) + (id.y + 1) * nVertsPerSideWithBorderSub].noise * normalStrength;
+	float bl = patchPreOutputSub[(id.x + 0) + (id.y + 2) * nVertsPerSideWithBorderSub].noise * normalStrength;
+	float  t = patchPreOutputSub[(id.x + 1) + (id.y + 0) * nVertsPerSideWithBorderSub].noise * normalStrength;
+	float  b = patchPreOutputSub[(id.x + 1) + (id.y + 2) * nVertsPerSideWithBorderSub].noise * normalStrength;
+	float tr = patchPreOutputSub[(id.x + 2) + (id.y + 0) * nVertsPerSideWithBorderSub].noise * normalStrength;
+	float  r = patchPreOutputSub[(id.x + 2) + (id.y + 1) * nVertsPerSideWithBorderSub].noise * normalStrength;
+	float br = patchPreOutputSub[(id.x + 2) + (id.y + 2) * nVertsPerSideWithBorderSub].noise * normalStrength;
+
+	/*
 	float tl;
 	float  l;
 	float bl;
@@ -219,7 +226,7 @@ void TexturesSub(uint3 id : SV_DispatchThreadID)
 	float tr;
 	float  r;
 	float br;
-
+		
 	if(constants.orientation == 0 || constants.orientation == 1) //Top
 	{
 		tl = patchPreOutputSub[(id.x + 0) + (id.y + 0) * nVertsPerSideWithBorderSub].cpos.y * constants.lodLevel;
@@ -253,6 +260,7 @@ void TexturesSub(uint3 id : SV_DispatchThreadID)
 		 r = patchPreOutputSub[(id.x + 2) + (id.y + 1) * nVertsPerSideWithBorderSub].cpos.z * constants.lodLevel;
 		br = patchPreOutputSub[(id.x + 2) + (id.y + 2) * nVertsPerSideWithBorderSub].cpos.z * constants.lodLevel;
 	}
+	*/
 
 	float left  = patchPreOutputSub[(id.x + 0) + (id.y + 1) * nVertsPerSideWithBorderSub].noise * constants.lodLevel;
 	float right = patchPreOutputSub[(id.x + 2) + (id.y + 1) * nVertsPerSideWithBorderSub].noise * constants.lodLevel;
@@ -262,7 +270,7 @@ void TexturesSub(uint3 id : SV_DispatchThreadID)
 	float xdeltaSlope = ((left - right) + 1.0) * 0.5;
 	float ydeltaSlope = ((up - down) + 1.0) * 0.5;
 	float zdeltaSlope = ((right - left) + 1.0) * 0.5;
-	float wdeltaSlope = ((down - up) + 1.0) * 0.5;
+	float wdeltaSlope = ((up - down) + 1.0) * 0.5;
 
 	float3 xnormalSlope = float3(xdeltaSlope, ydeltaSlope, 1.0);
 	float3 ynormalSlope = float3(ydeltaSlope, xdeltaSlope, 1.0);
@@ -271,30 +279,18 @@ void TexturesSub(uint3 id : SV_DispatchThreadID)
 
 	float xdelta = tr + 2.0 * r + br - tl - 2.0 * l - bl;
 	float ydelta = bl + 2.0 * b + br - tl - 2.0 * t - tr;
-	float zdelta = tl + 2.0 * l + bl - tr - 2.0 * r - br;
-	float wdelta = br + 2.0 * t + bl - tr - 2.0 * b - tl;
 
 	float3 xnormal = normalize(float3(xdelta, ydelta, 2.0 * normalStrength));
 	float3 ynormal = normalize(float3(ydelta, xdelta, 2.0 * normalStrength));
-	float3 znormal = normalize(float3(zdelta, wdelta, 2.0 * normalStrength));
-	float3 wnormal = normalize(float3(wdelta, zdelta, 2.0 * normalStrength));
 
-	//float3 normal = xnormal * FindTangent(xnormalSlope, 0.01); //Closer and closer...
-	float3 normal = xnormal;
+	float3 no = xnormal;
+	float3 ta = FindTangent(no, 0.01, float3(0.0, 0.0, 0.0));
+	float3 bi = FindBiTangent(no, 0.01, float3(0.0, 0.0, 0.0));
 
-	if(constants.orientation == 0 || constants.orientation == 1) //Top
-	{
-		normal = xnormal;
-	}
-	else if(constants.orientation == 2 || constants.orientation == 3)
-	{
-		normal = ynormal;
-	}
-	else
-	{
-		normal = xnormal;
-	}
+	float3x3 tbn = float3x3(ta, bi, no);
 
+	float3 normal = mul(no, tbn);
+	
 	float xslope = 0.5 / max(dot(xnormalSlope, float3(0.0, 1.0, 0.0)), 0.001);
 	float yslope = 0.5 / max(dot(ynormalSlope, float3(0.0, 1.0, 0.0)), 0.001);
 	float zslope = 0.5 / max(dot(znormalSlope, float3(0.0, 1.0, 0.0)), 0.001);

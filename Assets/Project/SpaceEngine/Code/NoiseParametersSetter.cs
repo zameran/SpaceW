@@ -1,9 +1,10 @@
 ﻿using UnityEngine;
 using System.Collections;
 
-[ExecuteInEditMode]
 public class NoiseParametersSetter : MonoBehaviour
 {
+    public Texture2D PermSampler = null;
+    public Texture2D PermGradSampler = null;
     public Texture2D PlanetAtlas = null;
 
     public ComputeShader ComputeShaderToUpdate = null;
@@ -26,7 +27,7 @@ public class NoiseParametersSetter : MonoBehaviour
 
     void Update()
     {
-        //UpdateUniforms();
+        UpdateUniforms();
     }
 
     [ContextMenu("Update Uniforms")]
@@ -43,6 +44,9 @@ public class NoiseParametersSetter : MonoBehaviour
         if (Perlin == null)
         {
             Perlin = new ImprovedPerlinNoise(0);
+            Perlin.LoadResourcesFor2DNoise();
+            Perlin.LoadResourcesFor3DNoise();
+            Perlin.LoadResourcesFor4DNoise();
         }
     }
 
@@ -50,7 +54,11 @@ public class NoiseParametersSetter : MonoBehaviour
     {
         Init();
 
-        PlanetAtlas = LoadTextureFromResources("PlanetAtlas");
+        PermSampler = Perlin.GetPermutationTable2D();
+        PermGradSampler = Perlin.GetGradient3D();
+
+        if (PlanetAtlas == null)
+            PlanetAtlas = LoadTextureFromResources("PlanetAtlas");
     }
 
     public Texture2D LoadTextureFromResources(string name)
@@ -75,6 +83,8 @@ public class NoiseParametersSetter : MonoBehaviour
         mat.SetFloat("noiseOffset", Offset);
         mat.SetFloat("noiseRidgeSmooth", RidgeSmooth);
 
+        mat.SetTexture("PermSampler", PermSampler);
+        mat.SetTexture("PermGradSampler", PermGradSampler);
         mat.SetTexture("AtlasDiffSampler", PlanetAtlas);
     }
 
@@ -93,6 +103,8 @@ public class NoiseParametersSetter : MonoBehaviour
         shader.SetFloat("noiseOffset", Offset);
         shader.SetFloat("noiseRidgeSmooth", RidgeSmooth);
 
+        shader.SetTexture(0, "PermSampler", PermSampler);
+        shader.SetTexture(0, "PermGradSampler", PermGradSampler);
         shader.SetTexture(0, "AtlasDiffSampler", PlanetAtlas);
     }
 
@@ -111,6 +123,8 @@ public class NoiseParametersSetter : MonoBehaviour
         shader.SetFloat("noiseOffset", Offset);
         shader.SetFloat("noiseRidgeSmooth", RidgeSmooth);
 
+        shader.SetTexture(kernel, "PermSampler", PermSampler);
+        shader.SetTexture(kernel, "PermGradSampler", PermGradSampler);
         shader.SetTexture(kernel, "AtlasDiffSampler", PlanetAtlas);
     }
 }

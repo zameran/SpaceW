@@ -67,10 +67,7 @@
 				position.xyz += patchCenter;
 
 				v.vertex = position;
-				v.normal = tex2Dlod(_NormalTexture, v.texcoord);
-				float direction = v.normal * normalize(patchCenter);
-				float nDirection = normalize(direction);
-				//v.normal *= direction;
+				//v.normal = tex2Dlod(_NormalTexture, v.texcoord);
 
 				o.pos = mul(UNITY_MATRIX_MVP, v.vertex);
 				o.color.xyz = v.normal * 0.5 + 0.5;

@@ -144,7 +144,7 @@
 			v.normal = tex2Dlod(_NormalTexture, v.texcoord);
 			v.normal.xyz += position.xyz;
 			
-			o.noise = noise + 0.5;
+			o.noise = noise;
 			o.uv_HeightTexture = v.texcoord.xy;
 			o.uv_NormalTexture = v.texcoord.xy;
 			o.color = vcolor;
@@ -159,10 +159,10 @@
 			fixed4 terrainNoiseColor = fixed4(IN.noise, IN.noise, IN.noise, 1.0);
 			fixed4 terrainColor = lerp(terrainNoiseColor, IN.color, _Mixing);
 			fixed4 terrainTexture = lerp(tex2D(_HeightTexture, IN.uv_HeightTexture), terrainNoiseColor, _Mixing);
-			fixed4 terrainNormalTexture = normalize(tex2D(_NormalTexture, IN.uv_NormalTexture));
+			fixed4 terrainNormalTexture = tex2D(_NormalTexture, IN.uv_NormalTexture);
 
 			o.Albedo = terrainTexture.rgb;
-			o.Normal = terrainNormalTexture * 10; 
+			o.Normal = terrainNormalTexture.rgb; 
 			//o.Normal = FindNormal(float4(IN.uv_NormalTexture, 0, 0), 1 / float2(240, 240));
 			//o.Normal = FindNormalSobel(IN.uv_NormalTexture, 0.1);
 			o.Metallic = _Metallic;

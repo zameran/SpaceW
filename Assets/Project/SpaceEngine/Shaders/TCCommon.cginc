@@ -1,4 +1,8 @@
 //-----------------------------------------------------------------------------
+//#define USE_SPACE_ENGINE_NOISE
+//-----------------------------------------------------------------------------
+
+//-----------------------------------------------------------------------------
 // tile blending method:
 // 0 - hard mix (no blending)
 // 1 - soft blending
@@ -60,6 +64,8 @@ uniform float2 TexCoord;
 //-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
+uniform sampler2D	PermSampler;
+uniform sampler2D	PermGradSampler;
 uniform sampler2D   NormalMap;          // normals map to calculate slope
 uniform sampler2D   MaterialTable;      // material parameters table
 uniform sampler1D   CloudsColorTable;   // clouds color table
@@ -676,7 +682,92 @@ float2 iNoise(float3 P, float jitter)
 
 	return F;
 }
+//-----------------------------------------------------------------------------
 
+#ifdef USE_SPACE_ENGINE_NOISE
+//-----------------------------------------------------------------------------
+// 3D Perlin noise
+float Noise(float3 p)
+{
+	const float one = 1.0 / 256.0;
+
+	// Find unit cube that contains point
+	// Find relative x,y,z of point in cube
+	float3 P = fmod(floor(p), 256.0) * one;
+	p -= floor(p);
+
+	// Compute fade curves for each of x,y,z
+	float3 ff = p * p * p * (p * (p * 6.0 - 15.0) + 10.0);
+
+	// Hash coordinates of the 8 cube corners
+	float4 AA = tex2Dlod(PermSampler, float4(P.xyz, 0));
+
+	float a = dot(tex2Dlod(PermGradSampler, AA.x).rgb, p);
+	float b = dot(tex2Dlod(PermGradSampler, AA.z).rgb, p + float3(-1, 0, 0));
+	float c = dot(tex2Dlod(PermGradSampler, AA.y).rgb, p + float3(0, -1, 0));
+	float d = dot(tex2Dlod(PermGradSampler, AA.w).rgb, p + float3(-1, -1, 0));
+	float e = dot(tex2Dlod(PermGradSampler, AA.x + one).rgb, p + float3(0, 0, -1));
+	float f = dot(tex2Dlod(PermGradSampler, AA.z + one).rgb, p + float3(-1, 0, -1));
+	float g = dot(tex2Dlod(PermGradSampler, AA.y + one).rgb, p + float3(0, -1, -1));
+	float h = dot(tex2Dlod(PermGradSampler, AA.w + one).rgb, p + float3(-1, -1, -1));
+
+	float k0 = a;
+	float k1 = b - a;
+	float k2 = c - a;
+	float k3 = e - a;
+	float k4 = a - b - c + d;
+	float k5 = a - c - e + g;
+	float k6 = a - b - e + f;
+	float k7 = -a + b + c - d + e - f - g + h;
+
+	return k0 + k1*ff.x + k2*ff.y + k3*ff.z + k4*ff.x*ff.y + k5*ff.y*ff.z + k6*ff.z*ff.x + k7*ff.x*ff.y*ff.z;
+}
+//-----------------------------------------------------------------------------
+
+//-----------------------------------------------------------------------------
+// 3D Perlin noise with derivatives, returns vec4(xderiv, yderiv, zderiv, noise)
+float4 NoiseDeriv(float3 p)
+{
+	const float one = 1.0 / 256;
+
+	// Find unit cube that contains point
+	// Find relative x,y,z of point in cube
+	float3 P = fmod(floor(p), 256.0) * one;
+	p -= floor(p);
+
+	// Compute fade curves for each of x,y,z
+	float3 df = 30.0 * p * p * (p * (p - 2.0) + 1.0);
+	float3 ff = p * p * p * (p * (p * 6.0 - 15.0) + 10.0);
+
+	// Hash coordinates of the 8 cube corners
+	float4 AA = tex2Dlod(PermSampler, float4(P.xyz, 0));
+
+	float a = dot(tex2Dlod(PermGradSampler, AA.x).rgb, p);
+	float b = dot(tex2Dlod(PermGradSampler, AA.z).rgb, p + float3(-1, 0, 0));
+	float c = dot(tex2Dlod(PermGradSampler, AA.y).rgb, p + float3(0, -1, 0));
+	float d = dot(tex2Dlod(PermGradSampler, AA.w).rgb, p + float3(-1, -1, 0));
+	float e = dot(tex2Dlod(PermGradSampler, AA.x + one).rgb, p + float3(0, 0, -1));
+	float f = dot(tex2Dlod(PermGradSampler, AA.z + one).rgb, p + float3(-1, 0, -1));
+	float g = dot(tex2Dlod(PermGradSampler, AA.y + one).rgb, p + float3(0, -1, -1));
+	float h = dot(tex2Dlod(PermGradSampler, AA.w + one).rgb, p + float3(-1, -1, -1));
+
+	float k0 = a;
+	float k1 = b - a;
+	float k2 = c - a;
+	float k3 = e - a;
+	float k4 = a - b - c + d;
+	float k5 = a - c - e + g;
+	float k6 = a - b - e + f;
+	float k7 = -a + b + c - d + e - f - g + h;
+
+	return float4(df.x * (k1 + k4*ff.y + k6*ff.z + k7*ff.y*ff.z),
+		df.y * (k2 + k5*ff.z + k4*ff.x + k7*ff.z*ff.x),
+		df.z * (k3 + k6*ff.x + k5*ff.y + k7*ff.x*ff.y),
+		k0 + k1*ff.x + k2*ff.y + k3*ff.z + k4*ff.x*ff.y + k5*ff.y*ff.z + k6*ff.z*ff.x + k7*ff.x*ff.y*ff.z);
+}
+//-----------------------------------------------------------------------------
+#else
+//-----------------------------------------------------------------------------
 float Noise(float3 p)
 {
 	float3 Pi = floor(p);
@@ -708,7 +799,9 @@ float Noise(float3 p)
 
 	return final;
 }
+//-----------------------------------------------------------------------------
 
+//-----------------------------------------------------------------------------
 float4 NoiseDeriv(float3 p)
 {
 	//establish our grid cell and unit position
@@ -789,6 +882,7 @@ float4 NoiseDeriv(float3 p)
 	//normalize and return
 	return result *= 1.1547005383792515290182975610039;
 }
+#endif
 //-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
