@@ -90,6 +90,7 @@ public class Planetoid : MonoBehaviour
         go.transform.parent = this.transform;
 
         Mesh mesh = MeshFactory.SetupQuadMesh(QS.nVertsPerEdge);
+        //Mesh mesh = MeshFactory.MakePlane(QS.nVertsPerEdge, QS.nVertsPerEdge, MeshFactory.PLANE.XY, true, true);
         mesh.bounds = new Bounds(Vector3.zero, new Vector3(PlanetRadius * 2, PlanetRadius * 2, PlanetRadius * 2));
 
         Material material = new Material(ColorShader);
@@ -140,6 +141,7 @@ public class Planetoid : MonoBehaviour
         go.transform.rotation = Quaternion.identity;
 
         Mesh mesh = MeshFactory.SetupQuadMesh(QS.nVertsPerEdge);
+        //Mesh mesh = MeshFactory.MakePlane(QS.nVertsPerEdge, QS.nVertsPerEdge, MeshFactory.PLANE.XY, true, true);
         mesh.bounds = new Bounds(Vector3.zero, new Vector3(PlanetRadius * 2, PlanetRadius * 2, PlanetRadius * 2));
 
         Material material = new Material(ColorShader);

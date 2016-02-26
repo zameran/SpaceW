@@ -412,6 +412,7 @@ public class Quad : MonoBehaviour
         Setter.MaterialToUpdate.SetBuffer("data", data);
         Setter.MaterialToUpdate.SetTexture("_HeightTexture", heightTex);
         Setter.MaterialToUpdate.SetTexture("_NormalTexture", normalTex);
+        Setter.MaterialToUpdate.SetFloat("LODLevel", quadGC.LODLevel);
     }
 
     public void SetupVectors(Quad quad, int id, bool staticX, bool staticY, bool staticZ)

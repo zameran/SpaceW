@@ -48,50 +48,11 @@
 
 		uniform sampler2D _HeightTexture;
 		uniform sampler2D _NormalTexture;
-
-		uniform float2x2 _Rotation; 
+		uniform float LODLevel;
 
 		#ifdef SHADER_API_D3D11
 		uniform StructuredBuffer<OutputStruct> data;
 		#endif
-
-		float3 FindNormalSobel(float2 uv, float zoom) 
-		{
-			float vTEXEL_ONE = 1.0 / 240;
-			float tl = tex2D(_HeightTexture, uv + vTEXEL_ONE * float2(0, 0)).a;   // top left
-			float  l = tex2D(_HeightTexture, uv + vTEXEL_ONE * float2(0, 1)).a;   // left
-
-			float bl = tex2D(_HeightTexture, uv + vTEXEL_ONE * float2(0, 2)).a;   // bottom left
-			float  t = tex2D(_HeightTexture, uv + vTEXEL_ONE * float2(1, 0)).a;   // top
-
-			float  b = tex2D(_HeightTexture, uv + vTEXEL_ONE * float2(1, 2)).a;   // bottom
-			float tr = tex2D(_HeightTexture, uv + vTEXEL_ONE * float2(2, 0)).a;   // top right
-
-			float  r = tex2D(_HeightTexture, uv + vTEXEL_ONE * float2(2, 1)).a;   // right
-			float br = tex2D(_HeightTexture, uv + vTEXEL_ONE * float2(2, 2)).a;   // bottom right
- 
-			// Compute dx using Sobel:
-			//           -1 0 1 
-			//           -2 0 2
-			//           -1 0 1
-			float dX = tr + 2.0 * r + br - tl - 2.0 * l - bl;
- 
-			// Compute dy using Sobel:
-			//           -1 -2 -1 
-			//            0  0  0
-			//            1  2  1
-			float dY = bl + 2.0 * b + br - tl - 2.0 * t - tr;
-
-			float normalStrength = 0.125 / ((zoom + 1.0) * (zoom + 1.0));
- 
-			// Build the normalized normal
-			float3 normal = normalize(float3(dX, dY, 2.0 * normalStrength));
-
-		   // normal = normal * 0.5 + 0.5;
- 
-			//convert (-1.0 , 1.0) to (0.0 , 1.0), if needed
-			return normal;
-		}
 
 		float3 FindNormal(float2 uv, float2 u)
 		{
@@ -106,11 +67,21 @@
 			return cross(va, vb);
 		}
 
-		float3 FindTangent(float3 normal, float epsilon)
+		float3 FindBiTangent(float3 normal, float epsilon, float3 dir)
 		{
 			float refVectorSign = sign(1.0 - abs(normal.x) - epsilon);
 
-			float3 refVector = refVectorSign * float3(1.0, 0.0, 0.0);
+			float3 refVector = refVectorSign * dir;
+			float3 biTangent = refVectorSign * cross(normal, refVector);
+
+			return biTangent;
+		}
+
+		float3 FindTangent(float3 normal, float epsilon, float3 dir)
+		{
+			float refVectorSign = sign(1.0 - abs(normal.x) - epsilon);
+
+			float3 refVector = refVectorSign * dir;
 			float3 biTangent = refVectorSign * cross(normal, refVector);
 
 			return cross(-normal, biTangent);
@@ -137,13 +108,14 @@
 			position.xyz += patchCenter;
 
 			v.vertex = position;
-			
-			v.tangent = float4(FindTangent(tex2Dlod(_NormalTexture, float4(v.texcoord.xy, 0, 0)), 0.01), 1);
+
+			v.tangent = float4(FindTangent(tex2Dlod(_NormalTexture, float4(v.texcoord.xy, 0, 0)), 0.01, float3(0, 1, 0)), 1);
 			v.tangent.xyz += position.xyz;
 
-			v.normal = tex2Dlod(_NormalTexture, v.texcoord);
+			//v.normal = tex2Dlod(_NormalTexture, float4(v.texcoord.xy, 0, 0));
 			v.normal.xyz += position.xyz;
-			
+			v.normal.xyz = normalize(v.normal.xyz);
+
 			o.noise = noise;
 			o.uv_HeightTexture = v.texcoord.xy;
 			o.uv_NormalTexture = v.texcoord.xy;
@@ -162,9 +134,8 @@
 			fixed4 terrainNormalTexture = tex2D(_NormalTexture, IN.uv_NormalTexture);
 
 			o.Albedo = terrainTexture.rgb;
-			o.Normal = terrainNormalTexture.rgb; 
+			o.Normal = UnpackNormal(terrainNormalTexture); 
 			//o.Normal = FindNormal(float4(IN.uv_NormalTexture, 0, 0), 1 / float2(240, 240));
-			//o.Normal = FindNormalSobel(IN.uv_NormalTexture, 0.1);
 			o.Metallic = _Metallic;
 			o.Smoothness = _Glossiness;
 		}
