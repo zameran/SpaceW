@@ -2484,6 +2484,31 @@ void SolarSpotsTempNoise(float3 ppoint, out float botMask, out float filMask, ou
 }
 //-----------------------------------------------------------------------------
 
+//-----------------------------------------------------------------------------
+float GetTerraced(float value, float n, float power)
+{
+	float dValue = value * n;
+	float f = frac(dValue);
+	float i = floor(dValue);
+
+	return (i + pow(f, power)) / n;
+}
+
+float RidgedMultifractalTerraced(float3 ppoint, float n, float power)
+{
+	float total = 0.0;
+	float modifier = 1.5;
+
+	float value = RidgedMultifractal(ppoint + Randomize, 1, 12);
+	value = value * value;
+	total += value * modifier;
+	modifier *= 0.5;
+
+	total = GetTerraced(total, n, power);
+
+	return total;
+}
+//-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
 //TODO Fix dat.

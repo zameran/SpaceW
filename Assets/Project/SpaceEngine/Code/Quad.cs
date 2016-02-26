@@ -752,6 +752,10 @@ public class Quad : MonoBehaviour
                 temp = Vector3.Lerp(temp, this.Parent.quadGC.patchCubeCenter * (15.0f / 14.53125f), 0.96875f); //0.9375f + ((((0.5f / 2.0f) / 2.0f) / 2.0f) / 2.0f)
             else if (this.LODLevel == 6)
                 temp = Vector3.Lerp(temp, this.Parent.quadGC.patchCubeCenter * (15.0f / 14.765625f), 0.984375f); //0.96875f + (((((0.5f / 2.0f) / 2.0f) / 2.0f) / 2.0f) / 2.0f)
+            else if (this.LODLevel == 7) //Experimental! Maybe float precision have place on small planet radius!
+                temp = Vector3.Lerp(temp, this.Parent.quadGC.patchCubeCenter * (15.0f / 14.8828125f), 0.9921875f); //0.984375f + ((((((0.5f / 2.0f) / 2.0f) / 2.0f) / 2.0f) / 2.0f) / 2.0f)
+            else if (this.LODLevel == 8) //Experimental! Maybe float precision have place on small planet radius!
+                temp = Vector3.Lerp(temp, this.Parent.quadGC.patchCubeCenter * (15.0f / 14.94140625f), 0.99609375f); //0.9921875f + (((((((0.5f / 2.0f) / 2.0f) / 2.0f) / 2.0f) / 2.0f) / 2.0f) / 2.0f)
         }
         //End of magic here.
 

@@ -112,7 +112,7 @@
 			v.tangent = float4(FindTangent(tex2Dlod(_NormalTexture, float4(v.texcoord.xy, 0, 0)), 0.01, float3(0, 1, 0)), 1);
 			v.tangent.xyz += position.xyz;
 
-			//v.normal = tex2Dlod(_NormalTexture, float4(v.texcoord.xy, 0, 0));
+			v.normal = tex2Dlod(_NormalTexture, float4(v.texcoord.xy, 0, 0));
 			v.normal.xyz += position.xyz;
 			v.normal.xyz = normalize(v.normal.xyz);
 
@@ -132,9 +132,10 @@
 			fixed4 terrainColor = lerp(terrainNoiseColor, IN.color, _Mixing);
 			fixed4 terrainTexture = lerp(tex2D(_HeightTexture, IN.uv_HeightTexture), terrainNoiseColor, _Mixing);
 			fixed4 terrainNormalTexture = tex2D(_NormalTexture, IN.uv_NormalTexture);
+			fixed4 terrainNormal = terrainNormalTexture / 2;
 
 			o.Albedo = terrainTexture.rgb;
-			o.Normal = UnpackNormal(terrainNormalTexture); 
+			o.Normal = UnpackNormal(terrainNormal); 
 			//o.Normal = FindNormal(float4(IN.uv_NormalTexture, 0, 0), 1 / float2(240, 240));
 			o.Metallic = _Metallic;
 			o.Smoothness = _Glossiness;

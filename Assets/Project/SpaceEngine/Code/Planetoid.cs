@@ -20,10 +20,8 @@ public class Planetoid : MonoBehaviour
     public Shader ColorShader;
     public ComputeShader HeightShader;
 
-    [HideInInspector]
-    public int LODMaxLevel = 6;
-
-    public int[] LODDistances = new int[7] { 2048, 1024, 512, 256, 128, 64, 32 };
+    public int LODMaxLevel = 8;
+    public int[] LODDistances = new int[9] { 2048, 1024, 512, 256, 128, 64, 32, 16, 8 };
 
     [ContextMenu("Dispatch")]
     public void Dispatch()
