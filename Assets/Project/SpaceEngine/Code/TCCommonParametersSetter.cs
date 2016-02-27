@@ -4,6 +4,8 @@ public class TCCommonParametersSetter : MonoBehaviour
 {
     public Planetoid Planet;
 
+    public float Jitter;
+
     public Vector3 Randomize;
 
     public Vector4 faceParams;
@@ -32,6 +34,12 @@ public class TCCommonParametersSetter : MonoBehaviour
     public Vector4 craterParams1;
 
     public bool AutoUpdate = false;
+
+    private void Start()
+    {
+        if ((Planet != null))
+            UpdateUniforms();
+    }
 
     [ContextMenu("UpdateUniforms")]
     public void UpdateUniforms()
@@ -65,6 +73,7 @@ public class TCCommonParametersSetter : MonoBehaviour
     {
         if (shader == null) return;
 
+        shader.SetFloat("jitter", Jitter);
         shader.SetVector("Randomize", Randomize);
         shader.SetVector("faceParams", faceParams);
         shader.SetVector("scaleParams", scaleParams);

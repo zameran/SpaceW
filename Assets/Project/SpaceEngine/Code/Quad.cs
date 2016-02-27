@@ -117,7 +117,7 @@ public class Quad : MonoBehaviour
 
     private void Start()
     {
-        this.Dispatch();
+        //this.Dispatch();
     }
 
     private void Update()

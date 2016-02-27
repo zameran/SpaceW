@@ -9,7 +9,7 @@ float HeightMapTerra(float3 ppoint, float vfreq, float freq, float hfreq, float 
 									float cro, float ro, float vo,
 									float rsin, float cldsstyle, float latcap, float caph, float eros,
 									float crato, float crm, float crf,
-									float volcfreq, float vdens, float vradi, float volcocta)
+									float volcfreq, float vdens, float vradi, float craf)
 {
 	//venusFreq = 0.01;
 	//mainFreq = 0.37;
@@ -158,7 +158,7 @@ float HeightMapTerra(float3 ppoint, float vfreq, float freq, float hfreq, float 
 		noiseOctaves = 6.0;  // Mare roundness distortion
 		mare = MareNoise(ppoint, global, 0.0, mareSuppress);
 	}
-
+	
 	// Ice cracks
 	if (cro > 0.0)
 	{
@@ -217,6 +217,32 @@ float HeightMapTerra(float3 ppoint, float vfreq, float freq, float hfreq, float 
 		height = VolcanoNoise(ppoint, global, height); // global - 1.0 to fix flooding of the canyons and river beds with lava
 	}
 	*/
+	
+	//--------------------------------------------------------------------------------------------------------
+	// Mare
+	float mare = global;
+	float mareFloor = global;
+	float mareSuppress = 1.0;
+
+	noiseH = 0.5;
+	noiseLacunarity = 2.218281828459;
+	noiseOffset = 0.8;
+	craterDistortion = 1.0;
+	noiseOctaves = 6.0;  // Mare roundness distortion
+	mare = MareNoise(ppoint, global, 0.0, mareSuppress);
+	//--------------------------------------------------------------------------------------------------------
+	
+	//--------------------------------------------------------------------------------------------------------
+	// Ice cracks
+	// Rim height distortion
+	noiseH = 0.5;
+	noiseLacunarity = 2.218281828459;
+	noiseOffset = 0.8;
+	noiseOctaves = 4.0;
+	float dunes = 2 * cracksMagn * (0.2 + dmagn * max(Fbm(ppoint * dfreq) + 0.7, 0.0));
+	noiseOctaves = 6.0;  // Cracks roundness distortion
+	height += CrackNoise(ppoint, dunes, craf, cro, 1);
+	//--------------------------------------------------------------------------------------------------------
 
 	//--------------------------------------------------------------------------------------------------------
 	// Craters
@@ -232,11 +258,11 @@ float HeightMapTerra(float3 ppoint, float vfreq, float freq, float hfreq, float 
 	noiseOctaves = 10.0;
 	noiseH = 1.0;
 	noiseOffset = 1.0;
-	crater = RidgedMultifractalErodedDetail(ppoint * 0.3 * mfreq + Randomize, 2.0, eros, 0.25 * crater);
-	
-	height += crater;
+	crater = RidgedMultifractalErodedDetail(ppoint * 0.3 * mfreq + Randomize, 2.0, eros, 0.25 * crater);	
 	//--------------------------------------------------------------------------------------------------------
 	
+	height += mare + crater;
+
 	//--------------------------------------------------------------------------------------------------------
 	// Pseudo rivers
 	noiseOctaves = ro;
@@ -256,9 +282,9 @@ float HeightMapTerra(float3 ppoint, float vfreq, float freq, float hfreq, float 
 	
 	//--------------------------------------------------------------------------------------------------------
 	// Shield volcano
-	noiseOctaves = 3;  // volcano roundness distortion
-	craterRoundDist = 0.001;
-	height = VolcanoNoise(ppoint, global, height, volcfreq, vdens, vradi, volcocta); // global - 1.0 to fix flooding of the canyons and river beds with lava
+	//noiseOctaves = 3;  // volcano roundness distortion
+	//craterRoundDist = 0.001;
+	//height = VolcanoNoise(ppoint, global, height, volcfreq, vdens, vradi, vo); // global - 1.0 to fix flooding of the canyons and river beds with lava
 	//--------------------------------------------------------------------------------------------------------
 	
 	// Assign a climate type

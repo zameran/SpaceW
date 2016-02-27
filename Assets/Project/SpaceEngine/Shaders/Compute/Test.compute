@@ -8,7 +8,7 @@
 
 //#define defaultNoise
 
-#include "Assets/Project/SpaceEngine/Shaders/TCCommonAsteroid.cginc"
+#include "Assets/Project/SpaceEngine/Shaders/TCCommonTerra.cginc"
 
 struct QuadGenerationConstants
 {
@@ -97,9 +97,17 @@ float3 CubeCoord(QuadGenerationConstants constants, float VerticesPerSide, uint3
 float NoiseFunction(float3 coord)
 {
 	#ifdef defaultNoise
-	float noise = RidgedMultifractalEroded(coord * 0.003 + Randomize, 1, 1, 8);
+	float noise = Cell3NoiseF0(coord * 0.001, 2, 5);
 	#else
-	float noise = HeightMapAsteroid(0.001 * coord, mainFreq, montesFreq, hillsFreq, hillsMagn, hillsFraction, craterOctaves, craterSqrtDensity, craterFreq, craterMagn);
+	//float noise = HeightMapAsteroid(0.001 * coord, mainFreq, montesFreq, hillsFreq, hillsMagn, hillsFraction, craterOctaves, craterSqrtDensity, craterFreq, craterMagn);
+	float noise = HeightMapTerra(coord * 0.001, venusFreq, mainFreq, hillsFreq, canyonsFreq, dunesFreq, montesFreq, riversFreq, venusMagn,
+												dunesMagn, hillsMagn, canyonsMagn, montesMagn, riversMagn, seaLevel, montesSpiky, 
+												dunesFraction, hillsFraction, hills2Fraction, canyonsFraction, 
+												mareSqrtDensity, craterSqrtDensity,
+												cracksOctaves, riversOctaves, volcanoOctaves,
+												riversSin, cloudsStyle, latIceCaps, icecapHeight, erosion,
+												craterOctaves, craterMagn, craterFreq,
+												volcanoFreq, volcanoSqrtDensity, volcanoRadius, cracksFreq);
 	#endif
 	
 	return noise;
@@ -110,7 +118,8 @@ float4 ColorFunction(float3 coord, float height, float slope)
 	#ifdef defaultNoise
 	float3 color = float3(0.0, 0.0, 0.0);
 	#else
-	float3 color = ColorMapAsteroid(0.001 * coord, height, slope, colorDistFreq).xyz;
+	//float3 color = ColorMapAsteroid(0.001 * coord, height, slope, colorDistFreq).xyz;
+	float3 color = float3(0.0, 0.0, 0.0);
 	#endif
 	
 	return float4(color, 1.0);

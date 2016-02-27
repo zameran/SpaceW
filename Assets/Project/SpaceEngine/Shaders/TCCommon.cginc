@@ -615,74 +615,11 @@ float3 Interpolation_C2_Deriv(float3 x) { return x * x * (x * (x * 30.0 - 60.0) 
 //-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
-float3 mod(float3 x, float y) { return x - y * floor(x / y); }
-float2 mod(float2 x, float y) { return x - y * floor(x / y); }
-
-float3 Permutation(float3 x) { return mod((34.0 * x + 1.0) * x, 289.0); }
-//-----------------------------------------------------------------------------
-
-//-----------------------------------------------------------------------------
-float K = 0.142857142857;
-float Ko = 0.428571428571;
-//-----------------------------------------------------------------------------
-
-//-----------------------------------------------------------------------------
 float4 RND_M = float4(1.0, 1.0, 1.0, 1.0);
 float3 OFFSET = float3(0.5, 0.5, 0.5);
 float3 OFFSETOUT = float3(1.5, 1.5, 1.5);
-//-----------------------------------------------------------------------------
 
-//-----------------------------------------------------------------------------
-float2 iNoise(float3 P, float jitter)
-{
-	float3 Pi = mod(floor(P), 289.0);
-	float3 Pf = frac(P);
-	float3 oi = float3(-1.0, 0.0, 1.0);
-	float3 of = float3(-0.5, 0.5, 1.5);
-	float3 px = Permutation(Pi.x + oi);
-	float3 py = Permutation(Pi.y + oi);
 
-	float3 p, ox, oy, oz, dx, dy, dz;
-	float2 F = float2(1e6, 1e6);
-
-	for (int i = 0; i < 3; i++)
-	{
-		for (int j = 0; j < 3; j++)
-		{
-			p = Permutation(px[i] + py[j] + Pi.z + oi); // pij1, pij2, pij3
-
-			ox = frac(p * K) - Ko;
-			oy = mod(floor(p * K), 7.0) * K - Ko;
-
-			p = Permutation(p);
-
-			oz = frac(p*K) - Ko;
-
-			dx = Pf.x - of[i] + jitter*ox;
-			dy = Pf.y - of[j] + jitter*oy;
-			dz = Pf.z - of + jitter*oz;
-
-			float3 d = dx * dx + dy * dy + dz * dz; // dij1, dij2 and dij3, squared
-
-			//Find lowest and second lowest distances
-			for (int n = 0; n < 3; n++)
-			{
-				if (d[n] < F[0])
-				{
-					F[1] = F[0];
-					F[0] = d[n];
-				}
-				else if (d[n] < F[1])
-				{
-					F[1] = d[n];
-				}
-			}
-		}
-	}
-
-	return F;
-}
-//-----------------------------------------------------------------------------
 
 #ifdef USE_SPACE_ENGINE_NOISE
 //-----------------------------------------------------------------------------
@@ -1309,68 +1246,6 @@ float JordanTurbulence
 //-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
-float Cell3NoiseF0(float3 p, int octaves, float lacunarity)
-{
-	float freq = 1.0, amp = 0.5;
-	float sum = 0.0;
-	float gain = SavePow(lacunarity, -noiseH);
-
-	for (int i = 0; i < octaves; i++)
-	{
-		float2 F = iNoise(p * freq, 1.0) * amp;
-
-		sum += 0.1 + sqrt(F[0]);
-
-		freq *= lacunarity;
-		amp *= gain;
-	}
-
-	return sum / 2.0;
-}
-
-float4 Cell3NoiseF0Vec(float3 p, int octaves, float lacunarity)
-{
-	float3 cell = floor(p);
-	float freq = 1.0, amp = 0.5;
-	float sum = 0.0;
-	float gain = SavePow(lacunarity, -noiseH);
-
-	for (int i = 0; i < octaves; i++)
-	{
-		float2 F = iNoise(p * freq, 1.0) * amp;
-
-		sum += 0.1 + sqrt(F[0]);
-
-		freq *= lacunarity;
-		amp *= gain;
-	}
-
-	p = normalize(p + cell + OFFSETOUT);
-
-	return float4(p, sum / 2.0);
-}
-
-float Cell3NoiseF1F0(float3 p, int octaves, float lacunarity)
-{
-	float freq = 1.0, amp = 0.5;
-	float sum = 0.0;
-	float gain = SavePow(lacunarity, -noiseH);
-
-	for (int i = 0; i < octaves; i++)
-	{
-		float2 F = iNoise(p * freq, 1.0) * amp;
-
-		sum += 0.1 + sqrt(F[1]) - sqrt(F[0]);
-
-		freq *= lacunarity;
-		amp *= gain;
-	}
-
-	return sum / 2.0;
-}
-//-----------------------------------------------------------------------------
-
-//-----------------------------------------------------------------------------
 float3 NoiseRandomUVec3(float3 c)
 {
 	float j = 4096.0 * sin(dot(c, float3(17.0, 59.4, 15.0)));
@@ -1881,6 +1756,68 @@ float Cell3NoiseSmoothColor(float3 p, float falloff, out float4 color)
 //-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
+float Cell3NoiseF0(float3 p, int octaves, float amp)
+{
+	float freq = 1.0;
+	float sum = 0.0;
+	float gain = SavePow(Lacunarity(), -noiseH);
+
+	for (int i = 0; i < octaves; i++)
+	{
+		float2 F = Cell3Noise2(p * freq) * amp;
+
+		sum += 0.1 + sqrt(F[0]);
+
+		freq *= Lacunarity();
+		amp *= gain;
+	}
+
+	return sum / 2.0;
+}
+
+float4 Cell3NoiseF0Vec(float3 p, int octaves, float amp)
+{
+	float3 cell = floor(p);
+	float freq = 1.0;
+	float sum = 0.0;
+	float gain = SavePow(Lacunarity(), -noiseH);
+
+	for (int i = 0; i < octaves; i++)
+	{
+		float2 F = Cell3Noise2(p * freq) * amp;
+
+		sum += 0.1 + sqrt(F[0]);
+
+		freq *= Lacunarity();
+		amp *= gain;
+	}
+
+	p = normalize(p + cell + OFFSETOUT);
+
+	return float4(p, sum / 2.0);
+}
+
+float Cell3NoiseF1F0(float3 p, int octaves, float amp)
+{
+	float freq = 1.0;
+	float sum = 0.0;
+	float gain = SavePow(Lacunarity(), -noiseH);
+
+	for (int i = 0; i < octaves; i++)
+	{
+		float2 F = Cell3Noise2(p * freq) * amp;
+
+		sum += 0.1 + sqrt(F[0]) - sqrt(F[1]);
+
+		freq *= Lacunarity();
+		amp *= gain;
+	}
+
+	return sum / 2.0;
+}
+//-----------------------------------------------------------------------------
+
+//-----------------------------------------------------------------------------
 float CraterHeightFunc(float lastlastLand, float lastLand, float height, float r)
 {
 	float t;
@@ -1932,6 +1869,8 @@ float CraterNoise(float3 ppoint, float cratMagn, float cratFreq, float cratSqrtD
 
 	for (int i = 0; i < cratOctaves; i++)
 	{
+		float id = (i + 1) * 0.25;
+
 		cell = Cell3Noise(ppoint + craterRoundDist * Fbm3D(ppoint * 2.56));
 
 		lastlastlastLand = lastlastLand;
@@ -2295,7 +2234,7 @@ float CrackNoise(float3 ppoint, float distrort)
 	return newLand;
 }
 
-float CrackNoise(float3 ppoint, float distrort, float freq, float mod)
+float CrackNoise(float3 ppoint, float distrort, float freq, float o, float mod)
 {
 	ppoint = (ppoint + Randomize) * freq;
 
@@ -2305,7 +2244,7 @@ float CrackNoise(float3 ppoint, float distrort, float freq, float mod)
 	float2 cell;
 	float dist;
 
-	for (int i = 0; i < cracksOctaves; i++)
+	for (int i = 0; i < o; i++)
 	{
 		cell = Cell2Noise2(ppoint + 0.02 * Fbm3D(1.8 * ppoint));
 		dist = smoothstep(0.0, 1.0, 250.0 * abs(cell.y - cell.x));
