@@ -34,38 +34,12 @@ public class Planetoid : MonoBehaviour
 
     private void Update()
     {
-        if (LODQueue.Count > 6)
-            Working = true;
-        else
-            Working = false;
+
     }
 
     private void OnGUI()
     {
-        GUI.Label(new Rect(10, 10, 250, 50), Working ? "Generating " + (LODQueue.Count - MainQuads.Count) + " more..." : "Ready!");
-    }
 
-    [ContextMenu("Dispatch")]
-    public void Dispatch()
-    {
-        float time = Time.realtimeSinceStartup;
-
-        if (Quads.Count == 0 || MainQuads.Count == 0)
-            return;
-
-        if (this.GetComponentInChildren<TCCommonParametersSetter>() != null)
-            GetComponentInChildren<TCCommonParametersSetter>().UpdateUniforms(false);
-        else
-            Log("TCCCommon prmeters setter not found in children!");
-
-        for (int i = 0; i < Quads.Count; i++)
-        {
-            if (Quads[i] != null)
-                if (!Quads[i].HaveSubQuads)
-                    Quads[i].Dispatch(null);
-        }
-
-        Log("Planet dispatched in " + (Time.realtimeSinceStartup - time).ToString() + "ms");
     }
 
     [ContextMenu("DestroyQuads")]
@@ -111,19 +85,10 @@ public class Planetoid : MonoBehaviour
         go.transform.parent = this.transform;
 
         Mesh mesh = MeshFactory.SetupQuadMesh(QS.nVertsPerEdge);
-        //Mesh mesh = MeshFactory.MakePlane(QS.nVertsPerEdge, QS.nVertsPerEdge, MeshFactory.PLANE.XY, true, true);
         mesh.bounds = new Bounds(Vector3.zero, new Vector3(PlanetRadius * 2, PlanetRadius * 2, PlanetRadius * 2));
 
         Material material = new Material(ColorShader);
         material.name += "_" + quadPosition.ToString() + "(Instance)";
-
-        //MeshFilter mf = go.AddComponent<MeshFilter>();
-        //mf.sharedMesh = mesh;
-
-        //MeshRenderer mr = go.AddComponent<MeshRenderer>();
-        //mr.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.On;
-        //mr.receiveShadows = true;
-        //mr.sharedMaterial = material;
 
         NoiseParametersSetter nps = go.AddComponent<NoiseParametersSetter>();
         nps.ComputeShaderToUpdate = CoreShader;
@@ -149,8 +114,6 @@ public class Planetoid : MonoBehaviour
         quadComponent.Planetoid = this;
         quadComponent.SetupCorners(quadPosition);
 
-        quadComponent.Dispatch(null);
-
         Quads.Add(quadComponent);
         LODQueue.Add(quadComponent);
         MainQuads.Add(quadComponent);
@@ -163,19 +126,10 @@ public class Planetoid : MonoBehaviour
         go.transform.rotation = Quaternion.identity;
 
         Mesh mesh = MeshFactory.SetupQuadMesh(QS.nVertsPerEdge);
-        //Mesh mesh = MeshFactory.MakePlane(QS.nVertsPerEdge, QS.nVertsPerEdge, MeshFactory.PLANE.XY, true, true);
         mesh.bounds = new Bounds(Vector3.zero, new Vector3(PlanetRadius * 2, PlanetRadius * 2, PlanetRadius * 2));
 
         Material material = new Material(ColorShader);
         material.name += "_" + quadPosition.ToString() + "(Instance)";
-
-        //MeshFilter mf = go.AddComponent<MeshFilter>();
-        //mf.sharedMesh = mesh;
-
-        //MeshRenderer mr = go.AddComponent<MeshRenderer>();
-        //mr.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.On;
-        //mr.receiveShadows = true;
-        //mr.sharedMaterial = material;
 
         NoiseParametersSetter nps = go.AddComponent<NoiseParametersSetter>();
         nps.ComputeShaderToUpdate = CoreShader;
@@ -196,10 +150,7 @@ public class Planetoid : MonoBehaviour
         quadComponent.generationConstants = gc;
         quadComponent.Planetoid = this;
 
-        //quadComponent.Dispatch();
-
         Quads.Add(quadComponent);
-        LODQueue.Add(quadComponent);
 
         return quadComponent;
     }

@@ -65,9 +65,9 @@ public class Quad : MonoBehaviour
 
     public ComputeBuffer QuadGenerationConstantsBuffer;
     public ComputeBuffer PreOutDataBuffer;
-    public ComputeBuffer PreOutDataSubBuffer;
+    //public ComputeBuffer PreOutDataSubBuffer;
     public ComputeBuffer OutDataBuffer;
-    public ComputeBuffer ToShaderData;
+    //public ComputeBuffer ToShaderData;
 
     public RenderTexture HeightTexture;
     public RenderTexture NormalTexture;
@@ -104,8 +104,6 @@ public class Quad : MonoBehaviour
     {
         Log("DispatchReady event fire!");
 
-        BufferHelper.ReleaseAndDisposeBuffers(QuadGenerationConstantsBuffer, PreOutDataBuffer, PreOutDataSubBuffer, OutDataBuffer);
-
         Generated = true;
     }
 
@@ -123,15 +121,15 @@ public class Quad : MonoBehaviour
 
     private void Start()
     {
-        //this.Dispatch();
+        QuadGenerationConstantsBuffer = new ComputeBuffer(1, 64);
+        PreOutDataBuffer = new ComputeBuffer(QS.nVertsReal, 64);
+        //PreOutDataSubBuffer = new ComputeBuffer(QS.nRealVertsSub, 64);
+        OutDataBuffer = new ComputeBuffer(QS.nVerts, 64);
     }
 
     private void Update()
     {
-        bool playing = Application.isPlaying;
-
-        if (Generated && !HaveSubQuads && !(this.Parent != null && !this.Parent.AllSubquadsGenerated()))
-            Graphics.DrawMesh(QuadMesh, Vector3.zero, Quaternion.identity, Setter.MaterialToUpdate, 0);
+        bool playing = false; //Disable lod for a moment... //Application.isPlaying;
 
         if (playing)
         {
@@ -146,14 +144,6 @@ public class Quad : MonoBehaviour
                         if (!this.Planetoid.Working)
                             if (!this.HaveSubQuads)
                                 this.Split();
-
-                        if (!this.HaveSubQuads)
-                        {
-                            ThreadScheduler.RunOnThread(() =>
-                            {
-                                UpdateLOD(playing);
-                            });
-                        }
                     }
                     else
                     {
@@ -169,54 +159,13 @@ public class Quad : MonoBehaviour
 
     private void UpdateLOD(bool playing)
     {
-        List<Quad> temp = new List<Quad>();
 
-        foreach (Quad q in this.Planetoid.LODQueue)
-        {
-            if (!q.HaveSubQuads && !q.Generated)
-            {
-                Action check = () =>
-                {
-                    temp.Add(q);
-
-                    if (AllSubquadsGenerated())
-                    {
-                        BufferHelper.ReleaseAndDisposeQuadBuffers(this);
-                        this.HaveSubQuads = true;
-
-                        for (int j = 0; j < temp.Count; j++)
-                        {
-                            if (this.Planetoid.LODQueue.Contains(temp[j]))
-                                this.Planetoid.LODQueue.Remove(temp[j]);
-                        }
-                    }
-                };
-
-                ThreadScheduler.RunOnMainThread(() =>
-                {
-                    for (int j = 0; j < temp.Count; j++)
-                    {
-                        if (this.Planetoid.LODQueue.Contains(temp[j]))
-                            this.Planetoid.LODQueue.Remove(temp[j]);
-                    }
-
-                    q.Dispatch(check);
-
-                    for (int j = 0; j < temp.Count; j++)
-                    {
-                        if (this.Planetoid.LODQueue.Contains(temp[j]))
-                            this.Planetoid.LODQueue.Remove(temp[j]);
-                    }
-                });
-            }
-        }
-
-        temp.Clear();
     }
 
     private void OnDestroy()
     {
-        BufferHelper.ReleaseAndDisposeBuffers(this.QuadGenerationConstantsBuffer, this.PreOutDataBuffer, this.OutDataBuffer, this.ToShaderData);
+        //BufferHelper.ReleaseAndDisposeBuffers(this.QuadGenerationConstantsBuffer, this.PreOutDataBuffer, this.OutDataBuffer, this.ToShaderData);
+        BufferHelper.ReleaseAndDisposeBuffers(QuadGenerationConstantsBuffer, PreOutDataBuffer, OutDataBuffer);
 
         if (this.HeightTexture != null)
             this.HeightTexture.ReleaseAndDestroy();
@@ -265,7 +214,17 @@ public class Quad : MonoBehaviour
 
     private void OnRenderObject()
     {
+        Dispatch();
 
+        QuadMaterial.SetPass(0);
+        QuadMaterial.SetBuffer("data", OutDataBuffer);
+        //QuadMaterial.SetTexture("_HeightTexture", HeightTexture);
+        //QuadMaterial.SetTexture("_NormalTexture", NormalTexture);
+
+        if (Generated && !HaveSubQuads && !(this.Parent != null && !this.Parent.AllSubquadsGenerated()))
+        {
+            Graphics.DrawProcedural(MeshTopology.Points, OutDataBuffer.count);
+        }
     }
 
     public void InitCorners(Vector3 topLeft, Vector3 bottmoRight, Vector3 topRight, Vector3 bottomLeft)
@@ -278,7 +237,6 @@ public class Quad : MonoBehaviour
         this.middleNormalized = this.CalculateMiddlePoint(topLeft, bottmoRight, topRight, bottmoRight);
     }
 
-    [ContextMenu("Split")]
     public void Split()
     {
         if (this.Subquads.Count != 0)
@@ -347,18 +305,8 @@ public class Quad : MonoBehaviour
                 this.Subquads.Add(quad);
             }
         }
-
-        //this.HaveSubQuads = true;
-
-        //foreach (Quad q in this.Subquads) 
-		//{
-            //q.Dispatch();
-        //}
-
-		//BufferHelper.ReleaseAndDisposeQuadBuffers(this);
     }
 
-    [ContextMenu("Unslpit")]
     public void Unsplit()
     {
         for (int i = 0; i < this.Subquads.Count; i++)
@@ -386,31 +334,14 @@ public class Quad : MonoBehaviour
 
         this.HaveSubQuads = false;
         this.Subquads.Clear();
-        this.Dispatch(null);
     }
 
-    [ContextMenu("Displatch!")]
-    public void Dispatch(Action OnIteration)
-    {
-        //if(Application.isPlaying)
-        //{
-            //StartCoroutine(DispatchAndWait());
-        //}
-        //else
-        //{
-            DispatchAndNoWait();
-        //}
-
-        if (OnIteration != null)
-            OnIteration();
-    }
-
-    public void DispatchAndNoWait()
+    public void Dispatch()
     {
         if (DispatchStarted != null)
             DispatchStarted(this);
 
-        BufferHelper.ReleaseAndDisposeBuffers(QuadGenerationConstantsBuffer, PreOutDataBuffer, OutDataBuffer, ToShaderData);
+        //BufferHelper.ReleaseAndDisposeQuadBuffers(this);
 
         Setter.LoadAndInit();
         Setter.UpdateUniforms();
@@ -420,174 +351,49 @@ public class Quad : MonoBehaviour
 
         QuadGenerationConstants[] quadGenerationConstantsData = new QuadGenerationConstants[] { generationConstants, generationConstants }; //Here we add 2 equal elements in to the buffer data, and nex we will set buffer size to 1. Bugfix. Idk.
         OutputStruct[] preOutputStructData = new OutputStruct[QS.nVertsReal];
-        OutputStruct[] preOutputSubStructData = new OutputStruct[QS.nRealVertsSub];
+        //OutputStruct[] preOutputSubStructData = new OutputStruct[QS.nRealVertsSub];
         OutputStruct[] outputStructData = new OutputStruct[QS.nVerts];
 
-        QuadGenerationConstantsBuffer = new ComputeBuffer(1, 64);
-        PreOutDataBuffer = new ComputeBuffer(QS.nVertsReal, 64);
-        PreOutDataSubBuffer = new ComputeBuffer(QS.nRealVertsSub, 64);
-        OutDataBuffer = new ComputeBuffer(QS.nVerts, 64);
-        ToShaderData = new ComputeBuffer(QS.nVerts, 64);
-
-        HeightTexture = RTExtensions.CreateRTexture(QS.nVertsPerEdgeSub, 0);
-        NormalTexture = RTExtensions.CreateRTexture(QS.nVertsPerEdgeSub, 0);
+        //HeightTexture = RTExtensions.CreateRTexture(QS.nVertsPerEdgeSub, 0);
+        //NormalTexture = RTExtensions.CreateRTexture(QS.nVertsPerEdgeSub, 0);
 
         QuadGenerationConstantsBuffer.SetData(quadGenerationConstantsData);
         PreOutDataBuffer.SetData(preOutputStructData);
-        PreOutDataSubBuffer.SetData(preOutputSubStructData);
+        //PreOutDataSubBuffer.SetData(preOutputSubStructData);
         OutDataBuffer.SetData(outputStructData);
 
         int kernel1 = CoreShader.FindKernel("HeightMain");
         int kernel2 = CoreShader.FindKernel("Transfer");
-        int kernel3 = CoreShader.FindKernel("HeightSub");
-        int kernel4 = CoreShader.FindKernel("TexturesSub");
+        //int kernel3 = CoreShader.FindKernel("HeightSub");
+        //int kernel4 = CoreShader.FindKernel("TexturesSub");
 
-        SetupComputeShader(kernel1); Log("Buffers for first kernel ready!");
+        SetupComputeShader(kernel1, QuadGenerationConstantsBuffer, PreOutDataBuffer, OutDataBuffer); Log("Buffers for first kernel ready!");
 
         CoreShader.Dispatch(kernel1,
         QS.THREADGROUP_SIZE_X_REAL,
         QS.THREADGROUP_SIZE_Y_REAL,
         QS.THREADGROUP_SIZE_Z_REAL); Log("First kernel ready!");
 
-        SetupComputeShader(kernel2); Log("Buffers for second kernel ready!");
+        SetupComputeShader(kernel2, QuadGenerationConstantsBuffer, PreOutDataBuffer, OutDataBuffer); Log("Buffers for second kernel ready!");
 
         CoreShader.Dispatch(kernel2,
         QS.THREADGROUP_SIZE_X,
         QS.THREADGROUP_SIZE_Y,
         QS.THREADGROUP_SIZE_Z); Log("Second kernel ready!");
 
-        SetupComputeShader(kernel3); Log("Buffers for third kernel ready!");
+        //SetupComputeShader(kernel3); Log("Buffers for third kernel ready!");
 
-        CoreShader.Dispatch(kernel3,
-        QS.THREADGROUP_SIZE_X_SUB_REAL,
-        QS.THREADGROUP_SIZE_Y_SUB_REAL,
-        QS.THREADGROUP_SIZE_Z_SUB_REAL); Log("Third kernel ready!");
+        //CoreShader.Dispatch(kernel3,
+        //QS.THREADGROUP_SIZE_X_SUB_REAL,
+        //QS.THREADGROUP_SIZE_Y_SUB_REAL,
+        //QS.THREADGROUP_SIZE_Z_SUB_REAL); Log("Third kernel ready!");
 
-        SetupComputeShader(kernel4); Log("Buffers for fourth kernel ready!");
+        //SetupComputeShader(kernel4); Log("Buffers for fourth kernel ready!");
 
-        CoreShader.Dispatch(kernel4,
-        QS.THREADGROUP_SIZE_X_SUB,
-        QS.THREADGROUP_SIZE_Y_SUB,
-        QS.THREADGROUP_SIZE_Z_SUB); Log("Fourth kernel ready!");
-
-        //GetData method takes so long... Render pipeine stalls here...
-        //Solutions:
-        // - StartCoroutine and wait for several frames or some sort of precalculated time.
-        //  - Up to 2x speed up... fffffuck.
-        // - Use delegates and fire up a event on bool switch.
-        //  - Fucked as a coroutine method...
-        // - Forget about dat shit and keep coding.
-        // - Make a native plugin with full async GetData method inplementation...
-        //  - No info.
-        //  - No base.
-
-        TransferData(OutDataBuffer, ToShaderData, preOutputStructData, HeightTexture, NormalTexture);
-
-        //OutDataBuffer.GetData(outputStructData);
-        //OutDataBuffer.GetData(outputStructData, new Action(() =>
-        //{
-            //if (GPUGetDataReady != null) GPUGetDataReady(this);
-
-            //ToShaderData.SetData(outputStructData);
-
-            //SetupShader(ToShaderData, HeightTexture, NormalTexture);
-        //}));
-
-        if (DispatchReady != null)
-            DispatchReady(this);
-    }
-
-	public IEnumerator DispatchAndWait()
-	{
-		if (DispatchStarted != null)
-			DispatchStarted(this);
-
-		BufferHelper.ReleaseAndDisposeBuffers(QuadGenerationConstantsBuffer, PreOutDataBuffer, OutDataBuffer, ToShaderData);
-
-		Setter.LoadAndInit();
-		Setter.UpdateUniforms();
-
-		generationConstants.LODLevel = (((1 << LODLevel + 2) * (this.Planetoid.PlanetRadius / (LODLevel + 2)) - ((this.Planetoid.PlanetRadius / (LODLevel + 2)) / 2)) / this.Planetoid.PlanetRadius);
-		generationConstants.orientation = (float)this.Position;
-
-		QuadGenerationConstants[] quadGenerationConstantsData = new QuadGenerationConstants[] { generationConstants, generationConstants }; //Here we add 2 equal elements in to the buffer data, and nex we will set buffer size to 1. Bugfix. Idk.
-		OutputStruct[] preOutputStructData = new OutputStruct[QS.nVertsReal];
-		OutputStruct[] preOutputSubStructData = new OutputStruct[QS.nRealVertsSub];
-		OutputStruct[] outputStructData = new OutputStruct[QS.nVerts];
-
-		QuadGenerationConstantsBuffer = new ComputeBuffer(1, 64);
-		PreOutDataBuffer = new ComputeBuffer(QS.nVertsReal, 64);
-		PreOutDataSubBuffer = new ComputeBuffer(QS.nRealVertsSub, 64);
-		OutDataBuffer = new ComputeBuffer(QS.nVerts, 64);
-		ToShaderData = new ComputeBuffer(QS.nVerts, 64);
-
-        HeightTexture = RTExtensions.CreateRTexture(QS.nVertsPerEdgeSub, 0);
-        NormalTexture = RTExtensions.CreateRTexture(QS.nVertsPerEdgeSub, 0);
-
-        QuadGenerationConstantsBuffer.SetData(quadGenerationConstantsData);
-		PreOutDataBuffer.SetData(preOutputStructData);
-		PreOutDataSubBuffer.SetData(preOutputSubStructData);
-		OutDataBuffer.SetData(outputStructData);
-
-		int kernel1 = CoreShader.FindKernel("HeightMain");
-		int kernel2 = CoreShader.FindKernel("Transfer");
-		int kernel3 = CoreShader.FindKernel("HeightSub");
-		int kernel4 = CoreShader.FindKernel("TexturesSub");
-
-		SetupComputeShader(kernel1); Log("Buffers for first kernel ready!");
-
-		CoreShader.Dispatch(kernel1,
-		QS.THREADGROUP_SIZE_X_REAL,
-		QS.THREADGROUP_SIZE_Y_REAL,
-		QS.THREADGROUP_SIZE_Z_REAL); Log("First kernel ready!");
-
-		SetupComputeShader(kernel2); Log("Buffers for second kernel ready!");
-
-        CoreShader.Dispatch(kernel2,
-		QS.THREADGROUP_SIZE_X,
-		QS.THREADGROUP_SIZE_Y,
-		QS.THREADGROUP_SIZE_Z); Log("Second kernel ready!");
-
-		SetupComputeShader(kernel3); Log("Buffers for third kernel ready!");
-
-        CoreShader.Dispatch(kernel3,
-		QS.THREADGROUP_SIZE_X_SUB_REAL,
-		QS.THREADGROUP_SIZE_Y_SUB_REAL,
-		QS.THREADGROUP_SIZE_Z_SUB_REAL); Log("Third kernel ready!");
-
-        SetupComputeShader(kernel4); Log("Buffers for fourth kernel ready!");
-
-        CoreShader.Dispatch(kernel4,
-		QS.THREADGROUP_SIZE_X_SUB,
-		QS.THREADGROUP_SIZE_Y_SUB,
-		QS.THREADGROUP_SIZE_Z_SUB); Log("Fourth kernel ready!");
-
-        //GetData method takes so long... Render pipeine stalls here...
-        //Solutions:
-        // - StartCoroutine and wait for several frames or some sort of precalculated time.
-        //  - Up to 2x speed up... fffffuck.
-        // - Use delegates and fire up a event on bool switch.
-        //  - Fucked as a coroutine method...
-        // - Forget about dat shit and keep coding.
-        // - Make a native plugin with full async GetData method inplementation...
-        //  - No info.
-        //  - No base.
-
-        Log("Dispatch wait start!");
-        yield return new WaitForSeconds(2);
-        Log("Dispatch wait finish!");
-
-        TransferData(OutDataBuffer, ToShaderData, preOutputStructData, HeightTexture, NormalTexture);
-
-        //OutDataBuffer.GetData(outputStructData);
-        //OutDataBuffer.GetData(outputStructData, new Action(() => 
-        //{
-            //if (GPUGetDataReady != null) GPUGetDataReady(this);
-
-            //ToShaderData.SetData(outputStructData);
-
-            //SetupShader(ToShaderData, HeightTexture, NormalTexture);
-        //}));
+        //CoreShader.Dispatch(kernel4,
+        //QS.THREADGROUP_SIZE_X_SUB,
+        //QS.THREADGROUP_SIZE_Y_SUB,
+        //QS.THREADGROUP_SIZE_Z_SUB); Log("Fourth kernel ready!");
 
         if (DispatchReady != null)
             DispatchReady(this);
@@ -604,28 +410,16 @@ public class Quad : MonoBehaviour
             return false;
     }
 
-    private void TransferData(ComputeBuffer from, ComputeBuffer to, Array data, RenderTexture tex1, RenderTexture tex2)
-    {
-        from.GetData(data, new Action(() =>
-        {
-            if (GPUGetDataReady != null) GPUGetDataReady(this);
-
-            to.SetData(data);
-
-            SetupShader(to, tex1, tex2);
-        }));
-    }
-
-    private void SetupComputeShader(int kernel)
+    private void SetupComputeShader(int kernel, ComputeBuffer QuadGenerationConstantsBuffer, ComputeBuffer PreOutDataBuffer, ComputeBuffer OutDataBuffer)
     {
         if (CoreShader == null) return;
 
         CoreShader.SetBuffer(kernel, "quadGenerationConstants", QuadGenerationConstantsBuffer);
         CoreShader.SetBuffer(kernel, "patchPreOutput", PreOutDataBuffer);
-        CoreShader.SetBuffer(kernel, "patchPreOutputSub", PreOutDataSubBuffer);
+        //CoreShader.SetBuffer(kernel, "patchPreOutputSub", PreOutDataSubBuffer);
         CoreShader.SetBuffer(kernel, "patchOutput", OutDataBuffer);
-        CoreShader.SetTexture(kernel, "Height", HeightTexture);
-        CoreShader.SetTexture(kernel, "Normal", NormalTexture);
+        //CoreShader.SetTexture(kernel, "Height", HeightTexture);
+        //CoreShader.SetTexture(kernel, "Normal", NormalTexture);
 
         Setter.SetUniforms(CoreShader, kernel);
     }
@@ -633,16 +427,6 @@ public class Quad : MonoBehaviour
     private void SetupShader()
     {
 
-    }
-
-    private void SetupShader(ComputeBuffer data, RenderTexture heightTex, RenderTexture normalTex)
-    {
-        if (Setter.MaterialToUpdate == null) return;
-
-        Setter.MaterialToUpdate.SetBuffer("data", data);
-        Setter.MaterialToUpdate.SetTexture("_HeightTexture", heightTex);
-        Setter.MaterialToUpdate.SetTexture("_NormalTexture", normalTex);
-        Setter.MaterialToUpdate.SetFloat("LODLevel", generationConstants.LODLevel);
     }
 
     public void SetupVectors(Quad quad, int id, bool staticX, bool staticY, bool staticZ)

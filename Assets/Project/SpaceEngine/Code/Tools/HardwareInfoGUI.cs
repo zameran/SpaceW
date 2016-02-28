@@ -5,11 +5,6 @@ public class HardwareInfoGUI : MonoBehaviour
 {
     public Rect debugInfoBounds = new Rect(10, 10, 500, 500);
 
-    static HardwareInfoGUI()
-    {
-        Setup();
-    }
-
     private void Awake()
     {
         Setup();
