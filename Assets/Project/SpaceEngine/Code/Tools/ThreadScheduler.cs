@@ -8,7 +8,7 @@ public class ThreadScheduler : MonoBehaviour
 {
     private static bool initialized = false;
 
-    private static int totalThreads = 32;
+    private static int totalThreads = 16;
 
     public int TotalThreads
     {
@@ -64,7 +64,7 @@ public class ThreadScheduler : MonoBehaviour
         initialized = true;
     }
 
-    static void Initialize()
+    public static void Initialize()
     {
         if (!initialized)
         {

@@ -34,4 +34,10 @@ public static class RTExtensions
 
         return rt;
     }
+
+    public static void ReleaseAndDestroy(this RenderTexture rt)
+    {
+        rt.Release();
+        GameObject.DestroyImmediate(rt);
+    }
 }

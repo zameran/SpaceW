@@ -5,6 +5,9 @@ using System.Collections.Generic;
 
 public class Planetoid : MonoBehaviour
 {
+    [HideInInspector]
+    public bool Working = false;
+
     public bool DrawGizmos = false;
 
     public Transform LODTarget = null;
@@ -16,12 +19,31 @@ public class Planetoid : MonoBehaviour
 
     public List<Quad> MainQuads = new List<Quad>();
     public List<Quad> Quads = new List<Quad>();
+    public List<Quad> LODQueue = new List<Quad>();
 
     public Shader ColorShader;
-    public ComputeShader HeightShader;
+    public ComputeShader CoreShader;
 
     public int LODMaxLevel = 8;
     public int[] LODDistances = new int[9] { 2048, 1024, 512, 256, 128, 64, 32, 16, 8 };
+
+    private void Start()
+    {
+        ThreadScheduler.Initialize();
+    }
+
+    private void Update()
+    {
+        if (LODQueue.Count > 6)
+            Working = true;
+        else
+            Working = false;
+    }
+
+    private void OnGUI()
+    {
+        GUI.Label(new Rect(10, 10, 250, 50), Working ? "Generating " + (LODQueue.Count - MainQuads.Count) + " more..." : "Ready!");
+    }
 
     [ContextMenu("Dispatch")]
     public void Dispatch()
@@ -40,7 +62,7 @@ public class Planetoid : MonoBehaviour
         {
             if (Quads[i] != null)
                 if (!Quads[i].HaveSubQuads)
-                    Quads[i].Dispatch();
+                    Quads[i].Dispatch(null);
         }
 
         Log("Planet dispatched in " + (Time.realtimeSinceStartup - time).ToString() + "ms");
@@ -57,6 +79,7 @@ public class Planetoid : MonoBehaviour
 
         Quads.Clear();
         MainQuads.Clear();
+        LODQueue.Clear();
     }
 
     [ContextMenu("SetupQuads")]
@@ -94,21 +117,21 @@ public class Planetoid : MonoBehaviour
         Material material = new Material(ColorShader);
         material.name += "_" + quadPosition.ToString() + "(Instance)";
 
-        MeshFilter mf = go.AddComponent<MeshFilter>();
-        mf.sharedMesh = mesh;
+        //MeshFilter mf = go.AddComponent<MeshFilter>();
+        //mf.sharedMesh = mesh;
 
-        MeshRenderer mr = go.AddComponent<MeshRenderer>();
-        mr.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.On;
-        mr.receiveShadows = true;
-        mr.sharedMaterial = material;
+        //MeshRenderer mr = go.AddComponent<MeshRenderer>();
+        //mr.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.On;
+        //mr.receiveShadows = true;
+        //mr.sharedMaterial = material;
 
         NoiseParametersSetter nps = go.AddComponent<NoiseParametersSetter>();
-        nps.ComputeShaderToUpdate = HeightShader;
+        nps.ComputeShaderToUpdate = CoreShader;
         nps.MaterialToUpdate = material;
 
         Quad quadComponent = go.AddComponent<Quad>();
         quadComponent.Setter = nps;
-        quadComponent.HeightShader = HeightShader;
+        quadComponent.CoreShader = CoreShader;
         quadComponent.Planetoid = this;
         quadComponent.QuadMesh = mesh;
         quadComponent.QuadMaterial = material;
@@ -122,13 +145,14 @@ public class Planetoid : MonoBehaviour
 		
         quadComponent.Position = quadPosition;
         quadComponent.ID = QuadID.One;
-        quadComponent.quadGC = gc;
+        quadComponent.generationConstants = gc;
         quadComponent.Planetoid = this;
         quadComponent.SetupCorners(quadPosition);
 
-        quadComponent.Dispatch();
+        quadComponent.Dispatch(null);
 
         Quads.Add(quadComponent);
+        LODQueue.Add(quadComponent);
         MainQuads.Add(quadComponent);
     }
 
@@ -145,21 +169,21 @@ public class Planetoid : MonoBehaviour
         Material material = new Material(ColorShader);
         material.name += "_" + quadPosition.ToString() + "(Instance)";
 
-        MeshFilter mf = go.AddComponent<MeshFilter>();
-        mf.sharedMesh = mesh;
+        //MeshFilter mf = go.AddComponent<MeshFilter>();
+        //mf.sharedMesh = mesh;
 
-        MeshRenderer mr = go.AddComponent<MeshRenderer>();
-        mr.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.On;
-        mr.receiveShadows = true;
-        mr.sharedMaterial = material;
+        //MeshRenderer mr = go.AddComponent<MeshRenderer>();
+        //mr.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.On;
+        //mr.receiveShadows = true;
+        //mr.sharedMaterial = material;
 
         NoiseParametersSetter nps = go.AddComponent<NoiseParametersSetter>();
-        nps.ComputeShaderToUpdate = HeightShader;
+        nps.ComputeShaderToUpdate = CoreShader;
         nps.MaterialToUpdate = material;
 
         Quad quadComponent = go.AddComponent<Quad>();
         quadComponent.Setter = nps;
-        quadComponent.HeightShader = HeightShader;
+        quadComponent.CoreShader = CoreShader;
         quadComponent.Planetoid = this;
         quadComponent.QuadMesh = mesh;
         quadComponent.QuadMaterial = material;
@@ -169,15 +193,17 @@ public class Planetoid : MonoBehaviour
         gc.planetRadius = PlanetRadius;
 
         quadComponent.Position = quadPosition;
-        quadComponent.quadGC = gc;
+        quadComponent.generationConstants = gc;
         quadComponent.Planetoid = this;
 
         //quadComponent.Dispatch();
 
         Quads.Add(quadComponent);
+        LODQueue.Add(quadComponent);
 
         return quadComponent;
     }
+
     private void Log(string msg)
     {
         if (DebugEnabled)

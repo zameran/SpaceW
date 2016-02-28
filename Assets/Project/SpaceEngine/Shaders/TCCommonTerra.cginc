@@ -118,7 +118,7 @@ float HeightMapTerra(float3 ppoint, float vfreq, float freq, float hfreq, float 
 		noiseOffset = montspiky;
 		height = -cmagn * montRage * RidgedMultifractalErodedDetail(ppoint * 4.0 * cfreq * inv2montesSpiky + Randomize, 2.0, eros, montBiomeScale);
 
-		//if (terrace < terraceProb)
+		if (terrace < terraceProb)
 		{
 			terraceLayers *= 5.0;
 			float h = height * terraceLayers;
@@ -142,7 +142,6 @@ float HeightMapTerra(float3 ppoint, float vfreq, float freq, float hfreq, float 
 	
 	height *= shore;
 	
-	/*
 	// Mare
 	float mare = global;
 	float mareFloor = global;
@@ -169,7 +168,7 @@ float HeightMapTerra(float3 ppoint, float vfreq, float freq, float hfreq, float 
 		noiseOctaves = 4.0;
 		float dunes = 2 * cracksMagn * (0.2 + dmagn * max(Fbm(ppoint * dfreq) + 0.7, 0.0));
 		noiseOctaves = 6.0;  // Cracks roundness distortion
-		height += CrackNoise(ppoint, dunes);
+		height += CrackNoise(ppoint, dunes, craf, cro, 1);
 	}
 	
 	// Craters
@@ -216,8 +215,8 @@ float HeightMapTerra(float3 ppoint, float vfreq, float freq, float hfreq, float 
 		craterRoundDist = 0.001;
 		height = VolcanoNoise(ppoint, global, height); // global - 1.0 to fix flooding of the canyons and river beds with lava
 	}
-	*/
-	
+
+	/*
 	//--------------------------------------------------------------------------------------------------------
 	// Mare
 	float mare = global;
@@ -286,7 +285,8 @@ float HeightMapTerra(float3 ppoint, float vfreq, float freq, float hfreq, float 
 	//craterRoundDist = 0.001;
 	//height = VolcanoNoise(ppoint, global, height, volcfreq, vdens, vradi, vo); // global - 1.0 to fix flooding of the canyons and river beds with lava
 	//--------------------------------------------------------------------------------------------------------
-	
+	*/
+
 	// Assign a climate type
 	noiseOctaves = (cldsstyle == 1.0) ? 5.0 : 12.0;
 	noiseH = 0.5;
@@ -604,7 +604,6 @@ float4 ColorMapTerra(float3 ppoint, float mfreq, float dfraction, float hfractio
 	float2  cell = Cell3Noise2Color(distort, col);
 	float biome = col.r;
 	float biomeScale = saturate(2.0 * (pow(abs(cell.y - cell.x), 0.7) - 0.05));
-	float vary;
 
 	float4  colorOverlay;
 	if (biome < dfraction)

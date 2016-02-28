@@ -1,14 +1,14 @@
 ﻿#define threadsPerGroup_X 32
 #define threadsPerGroup_Y 32
 
-#define nVerticesPerSide 60
-#define nVertsPerSideWithBorder 64
-#define nVerticesPerSideSub 240
-#define nVertsPerSideWithBorderSub 256
+#define nVerticesPerSide 30
+#define nVertsPerSideWithBorder 32
+#define nVerticesPerSideSub 60
+#define nVertsPerSideWithBorderSub 64
 
 //#define defaultNoise
 
-#include "Assets/Project/SpaceEngine/Shaders/TCCommonTerra.cginc"
+#include "Assets/Project/SpaceEngine/Shaders/TCCommonAsteroid.cginc"
 
 struct QuadGenerationConstants
 {
@@ -97,17 +97,17 @@ float3 CubeCoord(QuadGenerationConstants constants, float VerticesPerSide, uint3
 float NoiseFunction(float3 coord)
 {
 	#ifdef defaultNoise
-	float noise = Cell3NoiseF0(coord * 0.001, 2, 5);
+	float noise = Fbm(coord * 0.001, 2);
 	#else
-	//float noise = HeightMapAsteroid(0.001 * coord, mainFreq, montesFreq, hillsFreq, hillsMagn, hillsFraction, craterOctaves, craterSqrtDensity, craterFreq, craterMagn);
-	float noise = HeightMapTerra(coord * 0.001, venusFreq, mainFreq, hillsFreq, canyonsFreq, dunesFreq, montesFreq, riversFreq, venusMagn,
-												dunesMagn, hillsMagn, canyonsMagn, montesMagn, riversMagn, seaLevel, montesSpiky, 
-												dunesFraction, hillsFraction, hills2Fraction, canyonsFraction, 
-												mareSqrtDensity, craterSqrtDensity,
-												cracksOctaves, riversOctaves, volcanoOctaves,
-												riversSin, cloudsStyle, latIceCaps, icecapHeight, erosion,
-												craterOctaves, craterMagn, craterFreq,
-												volcanoFreq, volcanoSqrtDensity, volcanoRadius, cracksFreq);
+	float noise = HeightMapAsteroid(0.001 * coord, mainFreq, montesFreq, hillsFreq, hillsMagn, hillsFraction, craterOctaves, craterSqrtDensity, craterFreq, craterMagn);
+	//float noise = HeightMapTerra(coord * 0.001, venusFreq, mainFreq, hillsFreq, canyonsFreq, dunesFreq, montesFreq, riversFreq, venusMagn,
+	//											dunesMagn, hillsMagn, canyonsMagn, montesMagn, riversMagn, seaLevel, montesSpiky, 
+	//											dunesFraction, hillsFraction, hills2Fraction, canyonsFraction, 
+	//											mareSqrtDensity, craterSqrtDensity,
+	//											cracksOctaves, riversOctaves, volcanoOctaves,
+	//											riversSin, cloudsStyle, latIceCaps, icecapHeight, erosion,
+	//											craterOctaves, craterMagn, craterFreq,
+	//											volcanoFreq, volcanoSqrtDensity, volcanoRadius, cracksFreq);
 	#endif
 	
 	return noise;
@@ -118,8 +118,8 @@ float4 ColorFunction(float3 coord, float height, float slope)
 	#ifdef defaultNoise
 	float3 color = float3(0.0, 0.0, 0.0);
 	#else
-	//float3 color = ColorMapAsteroid(0.001 * coord, height, slope, colorDistFreq).xyz;
-	float3 color = float3(0.0, 0.0, 0.0);
+	float3 color = ColorMapAsteroid(0.001 * coord, height, slope, colorDistFreq).xyz;
+	//float3 color = ColorMapTerra(0.001 * coord, mainFreq, dunesFraction, hillsFraction, hills2Fraction, canyonsFraction);
 	#endif
 	
 	return float4(color, 1.0);
@@ -133,7 +133,7 @@ void HeightMain (uint3 id : SV_DispatchThreadID)
 
 	int outBuffOffset = id.x + id.y * nVertsPerSideWithBorder;
 
-	float3 cubeCoord = CubeCoord(constants, nVertsPerSideWithBorder, id, 3, constants.spacing);
+	float3 cubeCoord = CubeCoord(constants, nVertsPerSideWithBorder, id, 1, constants.spacing);
 
 	float3 patchCenter = normalize(constants.patchCubeCenter) * constants.planetRadius;
 	float3 patchNormalizedCoord = normalize(cubeCoord);
@@ -177,7 +177,7 @@ void HeightSub(uint3 id : SV_DispatchThreadID)
 
 	int outBuffOffset = id.x + id.y * nVertsPerSideWithBorderSub;
 
-	float3 cubeCoord = CubeCoord(constants, nVertsPerSideWithBorderSub, id, 17, constants.spacingsub);
+	float3 cubeCoord = CubeCoord(constants, nVertsPerSideWithBorderSub, id, 3, constants.spacingsub);
 
 	float3 patchCenter = normalize(constants.patchCubeCenter) * constants.planetRadius;
 	float3 patchNormalizedCoord = normalize(cubeCoord);

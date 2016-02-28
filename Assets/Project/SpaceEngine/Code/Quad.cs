@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 
 using System;
+using System.Linq;
 using System.Collections;
 using System.Collections.Generic;
 
@@ -57,7 +58,7 @@ public class Quad : MonoBehaviour
 
     public NoiseParametersSetter Setter;
 
-    public ComputeShader HeightShader;
+    public ComputeShader CoreShader;
 
     public Mesh QuadMesh;
     public Material QuadMaterial;
@@ -71,7 +72,7 @@ public class Quad : MonoBehaviour
     public RenderTexture HeightTexture;
     public RenderTexture NormalTexture;
 
-    public QuadGenerationConstants quadGC;
+    public QuadGenerationConstants generationConstants;
 
     public Quad Parent;
 
@@ -80,6 +81,7 @@ public class Quad : MonoBehaviour
     public int LODLevel = -1;
 
     public bool HaveSubQuads = false;
+    public bool Generated = false;
 
     public float lodUpdateInterval = 0.25f;
     public float lastLodUpdateTime = 0.00f;
@@ -101,6 +103,10 @@ public class Quad : MonoBehaviour
     private void QuadDispatchReady(Quad q)
     {
         Log("DispatchReady event fire!");
+
+        BufferHelper.ReleaseAndDisposeBuffers(QuadGenerationConstantsBuffer, PreOutDataBuffer, PreOutDataSubBuffer, OutDataBuffer);
+
+        Generated = true;
     }
 
     private void QuadGPUGetDataReady(Quad q)
@@ -122,38 +128,107 @@ public class Quad : MonoBehaviour
 
     private void Update()
     {
-        //if(!HaveSubQuads)
-        //    Graphics.DrawMesh(QuadMesh, Vector3.zero, Quaternion.identity, QuadMaterial, 0);
+        bool playing = Application.isPlaying;
 
-        if (Time.time > this.lastLodUpdateTime + this.lodUpdateInterval)
+        if (Generated && !HaveSubQuads && !(this.Parent != null && !this.Parent.AllSubquadsGenerated()))
+            Graphics.DrawMesh(QuadMesh, Vector3.zero, Quaternion.identity, Setter.MaterialToUpdate, 0);
+
+        if (playing)
         {
-            this.lastLodUpdateTime = Time.time;
-
-            if (this.LODLevel != this.Planetoid.LODMaxLevel)
+            if (Time.time > this.lastLodUpdateTime + this.lodUpdateInterval)
             {
-                if (this.Planetoid.LODDistances[this.LODLevel + 1] > GetClosestDistance(-64))
+                this.lastLodUpdateTime = Time.time;
+
+                if (this.LODLevel != this.Planetoid.LODMaxLevel && this.Generated)
                 {
-                    if (!this.HaveSubQuads)
-                        this.Split();
-                }
-                else
-                {
-                    if (this.HaveSubQuads)
-                        this.Unsplit();
+                    if (this.Planetoid.LODDistances[this.LODLevel + 1] > GetClosestDistance(0)) // was -64 offset
+                    {
+                        if (!this.Planetoid.Working)
+                            if (!this.HaveSubQuads)
+                                this.Split();
+
+                        if (!this.HaveSubQuads)
+                        {
+                            ThreadScheduler.RunOnThread(() =>
+                            {
+                                UpdateLOD(playing);
+                            });
+                        }
+                    }
+                    else
+                    {
+                        if (this.HaveSubQuads && this.Generated)
+                        {
+                            this.Unsplit();
+                        }
+                    }
                 }
             }
         }
+    }
+
+    private void UpdateLOD(bool playing)
+    {
+        List<Quad> temp = new List<Quad>();
+
+        foreach (Quad q in this.Planetoid.LODQueue)
+        {
+            if (!q.HaveSubQuads && !q.Generated)
+            {
+                Action check = () =>
+                {
+                    temp.Add(q);
+
+                    if (AllSubquadsGenerated())
+                    {
+                        BufferHelper.ReleaseAndDisposeQuadBuffers(this);
+                        this.HaveSubQuads = true;
+
+                        for (int j = 0; j < temp.Count; j++)
+                        {
+                            if (this.Planetoid.LODQueue.Contains(temp[j]))
+                                this.Planetoid.LODQueue.Remove(temp[j]);
+                        }
+                    }
+                };
+
+                ThreadScheduler.RunOnMainThread(() =>
+                {
+                    for (int j = 0; j < temp.Count; j++)
+                    {
+                        if (this.Planetoid.LODQueue.Contains(temp[j]))
+                            this.Planetoid.LODQueue.Remove(temp[j]);
+                    }
+
+                    q.Dispatch(check);
+
+                    for (int j = 0; j < temp.Count; j++)
+                    {
+                        if (this.Planetoid.LODQueue.Contains(temp[j]))
+                            this.Planetoid.LODQueue.Remove(temp[j]);
+                    }
+                });
+            }
+        }
+
+        temp.Clear();
     }
 
     private void OnDestroy()
     {
         BufferHelper.ReleaseAndDisposeBuffers(this.QuadGenerationConstantsBuffer, this.PreOutDataBuffer, this.OutDataBuffer, this.ToShaderData);
 
-        if (this.HeightTexture != null && this.HeightTexture.IsCreated())
-            this.HeightTexture.Release();
+        if (this.HeightTexture != null)
+            this.HeightTexture.ReleaseAndDestroy();
 
-        if (this.NormalTexture != null && this.NormalTexture.IsCreated())
-            this.NormalTexture.Release();
+        if (this.NormalTexture != null)
+            this.NormalTexture.ReleaseAndDestroy();
+
+        if (this.QuadMesh != null)
+            DestroyImmediate(this.QuadMesh);
+
+        if (this.QuadMaterial != null)
+            DestroyImmediate(this.QuadMaterial);
 
         if (this.DispatchStarted != null)
             this.DispatchStarted -= QuadDispatchStarted;
@@ -186,6 +261,11 @@ public class Quad : MonoBehaviour
                 Gizmos.DrawWireSphere(this.middleNormalized.NormalizeToRadius(this.Planetoid.PlanetRadius), 100);
             }
         }
+    }
+
+    private void OnRenderObject()
+    {
+
     }
 
     public void InitCorners(Vector3 topLeft, Vector3 bottmoRight, Vector3 topRight, Vector3 bottomLeft)
@@ -265,13 +345,17 @@ public class Quad : MonoBehaviour
                 quad.gameObject.name += "_ID" + id + "_LOD" + quad.LODLevel;
 
                 this.Subquads.Add(quad);
-                this.HaveSubQuads = true;
-
-                quad.Dispatch();
-
-                BufferHelper.ReleaseAndDisposeQuadBuffers(this);
             }
         }
+
+        //this.HaveSubQuads = true;
+
+        //foreach (Quad q in this.Subquads) 
+		//{
+            //q.Dispatch();
+        //}
+
+		//BufferHelper.ReleaseAndDisposeQuadBuffers(this);
     }
 
     [ContextMenu("Unslpit")]
@@ -289,6 +373,11 @@ public class Quad : MonoBehaviour
                 this.Planetoid.Quads.Remove(this.Subquads[i]);
             }
 
+            if(this.Planetoid.LODQueue.Contains(this.Subquads[i]))
+            {
+                this.Planetoid.LODQueue.Remove(this.Subquads[i]);
+            }
+
             if (this.Subquads[i] != null)
             {
                 DestroyImmediate(this.Subquads[i].gameObject);
@@ -297,25 +386,39 @@ public class Quad : MonoBehaviour
 
         this.HaveSubQuads = false;
         this.Subquads.Clear();
-        this.Dispatch();
+        this.Dispatch(null);
     }
 
     [ContextMenu("Displatch!")]
-    public void Dispatch()
+    public void Dispatch(Action OnIteration)
+    {
+        //if(Application.isPlaying)
+        //{
+            //StartCoroutine(DispatchAndWait());
+        //}
+        //else
+        //{
+            DispatchAndNoWait();
+        //}
+
+        if (OnIteration != null)
+            OnIteration();
+    }
+
+    public void DispatchAndNoWait()
     {
         if (DispatchStarted != null)
             DispatchStarted(this);
 
-        float time = Time.realtimeSinceStartup;
-
         BufferHelper.ReleaseAndDisposeBuffers(QuadGenerationConstantsBuffer, PreOutDataBuffer, OutDataBuffer, ToShaderData);
 
         Setter.LoadAndInit();
+        Setter.UpdateUniforms();
 
-        quadGC.LODLevel = (((1 << LODLevel + 2) * (this.Planetoid.PlanetRadius / (LODLevel + 2)) - ((this.Planetoid.PlanetRadius / (LODLevel + 2)) / 2)) / this.Planetoid.PlanetRadius);
-        quadGC.orientation = (float)this.Position;
+        generationConstants.LODLevel = (((1 << LODLevel + 2) * (this.Planetoid.PlanetRadius / (LODLevel + 2)) - ((this.Planetoid.PlanetRadius / (LODLevel + 2)) / 2)) / this.Planetoid.PlanetRadius);
+        generationConstants.orientation = (float)this.Position;
 
-        QuadGenerationConstants[] quadGenerationConstantsData = new QuadGenerationConstants[] { quadGC, quadGC }; //Here we add 2 equal elements in to the buffer data, and nex we will set buffer size to 1. Bugfix. Idk.
+        QuadGenerationConstants[] quadGenerationConstantsData = new QuadGenerationConstants[] { generationConstants, generationConstants }; //Here we add 2 equal elements in to the buffer data, and nex we will set buffer size to 1. Bugfix. Idk.
         OutputStruct[] preOutputStructData = new OutputStruct[QS.nVertsReal];
         OutputStruct[] preOutputSubStructData = new OutputStruct[QS.nRealVertsSub];
         OutputStruct[] outputStructData = new OutputStruct[QS.nVerts];
@@ -334,35 +437,35 @@ public class Quad : MonoBehaviour
         PreOutDataSubBuffer.SetData(preOutputSubStructData);
         OutDataBuffer.SetData(outputStructData);
 
-        int kernel1 = HeightShader.FindKernel("HeightMain");
-        int kernel2 = HeightShader.FindKernel("Transfer");
-        int kernel3 = HeightShader.FindKernel("HeightSub");
-        int kernel4 = HeightShader.FindKernel("TexturesSub");
+        int kernel1 = CoreShader.FindKernel("HeightMain");
+        int kernel2 = CoreShader.FindKernel("Transfer");
+        int kernel3 = CoreShader.FindKernel("HeightSub");
+        int kernel4 = CoreShader.FindKernel("TexturesSub");
 
         SetupComputeShader(kernel1); Log("Buffers for first kernel ready!");
 
-        HeightShader.Dispatch(kernel1,
+        CoreShader.Dispatch(kernel1,
         QS.THREADGROUP_SIZE_X_REAL,
         QS.THREADGROUP_SIZE_Y_REAL,
         QS.THREADGROUP_SIZE_Z_REAL); Log("First kernel ready!");
 
         SetupComputeShader(kernel2); Log("Buffers for second kernel ready!");
 
-        HeightShader.Dispatch(kernel2,
+        CoreShader.Dispatch(kernel2,
         QS.THREADGROUP_SIZE_X,
         QS.THREADGROUP_SIZE_Y,
         QS.THREADGROUP_SIZE_Z); Log("Second kernel ready!");
 
         SetupComputeShader(kernel3); Log("Buffers for third kernel ready!");
 
-        HeightShader.Dispatch(kernel3,
+        CoreShader.Dispatch(kernel3,
         QS.THREADGROUP_SIZE_X_SUB_REAL,
         QS.THREADGROUP_SIZE_Y_SUB_REAL,
         QS.THREADGROUP_SIZE_Z_SUB_REAL); Log("Third kernel ready!");
 
         SetupComputeShader(kernel4); Log("Buffers for fourth kernel ready!");
 
-        HeightShader.Dispatch(kernel4,
+        CoreShader.Dispatch(kernel4,
         QS.THREADGROUP_SIZE_X_SUB,
         QS.THREADGROUP_SIZE_Y_SUB,
         QS.THREADGROUP_SIZE_Z_SUB); Log("Fourth kernel ready!");
@@ -374,32 +477,157 @@ public class Quad : MonoBehaviour
         // - Use delegates and fire up a event on bool switch.
         //  - Fucked as a coroutine method...
         // - Forget about dat shit and keep coding.
-        // - Make a native plugin with full async GetData method inplemetation...
+        // - Make a native plugin with full async GetData method inplementation...
         //  - No info.
         //  - No base.
-        OutDataBuffer.GetData(outputStructData); if (GPUGetDataReady != null) GPUGetDataReady(this);
-        ToShaderData.SetData(outputStructData);
 
-        SetupShader(ToShaderData, HeightTexture, NormalTexture);
+        TransferData(OutDataBuffer, ToShaderData, preOutputStructData, HeightTexture, NormalTexture);
 
-        BufferHelper.ReleaseAndDisposeBuffers(QuadGenerationConstantsBuffer, PreOutDataBuffer, PreOutDataSubBuffer, OutDataBuffer);
+        //OutDataBuffer.GetData(outputStructData);
+        //OutDataBuffer.GetData(outputStructData, new Action(() =>
+        //{
+            //if (GPUGetDataReady != null) GPUGetDataReady(this);
+
+            //ToShaderData.SetData(outputStructData);
+
+            //SetupShader(ToShaderData, HeightTexture, NormalTexture);
+        //}));
 
         if (DispatchReady != null)
             DispatchReady(this);
+    }
 
-        Log("Dispatched in " + (Time.realtimeSinceStartup - time).ToString() + "ms");
+	public IEnumerator DispatchAndWait()
+	{
+		if (DispatchStarted != null)
+			DispatchStarted(this);
+
+		BufferHelper.ReleaseAndDisposeBuffers(QuadGenerationConstantsBuffer, PreOutDataBuffer, OutDataBuffer, ToShaderData);
+
+		Setter.LoadAndInit();
+		Setter.UpdateUniforms();
+
+		generationConstants.LODLevel = (((1 << LODLevel + 2) * (this.Planetoid.PlanetRadius / (LODLevel + 2)) - ((this.Planetoid.PlanetRadius / (LODLevel + 2)) / 2)) / this.Planetoid.PlanetRadius);
+		generationConstants.orientation = (float)this.Position;
+
+		QuadGenerationConstants[] quadGenerationConstantsData = new QuadGenerationConstants[] { generationConstants, generationConstants }; //Here we add 2 equal elements in to the buffer data, and nex we will set buffer size to 1. Bugfix. Idk.
+		OutputStruct[] preOutputStructData = new OutputStruct[QS.nVertsReal];
+		OutputStruct[] preOutputSubStructData = new OutputStruct[QS.nRealVertsSub];
+		OutputStruct[] outputStructData = new OutputStruct[QS.nVerts];
+
+		QuadGenerationConstantsBuffer = new ComputeBuffer(1, 64);
+		PreOutDataBuffer = new ComputeBuffer(QS.nVertsReal, 64);
+		PreOutDataSubBuffer = new ComputeBuffer(QS.nRealVertsSub, 64);
+		OutDataBuffer = new ComputeBuffer(QS.nVerts, 64);
+		ToShaderData = new ComputeBuffer(QS.nVerts, 64);
+
+        HeightTexture = RTExtensions.CreateRTexture(QS.nVertsPerEdgeSub, 0);
+        NormalTexture = RTExtensions.CreateRTexture(QS.nVertsPerEdgeSub, 0);
+
+        QuadGenerationConstantsBuffer.SetData(quadGenerationConstantsData);
+		PreOutDataBuffer.SetData(preOutputStructData);
+		PreOutDataSubBuffer.SetData(preOutputSubStructData);
+		OutDataBuffer.SetData(outputStructData);
+
+		int kernel1 = CoreShader.FindKernel("HeightMain");
+		int kernel2 = CoreShader.FindKernel("Transfer");
+		int kernel3 = CoreShader.FindKernel("HeightSub");
+		int kernel4 = CoreShader.FindKernel("TexturesSub");
+
+		SetupComputeShader(kernel1); Log("Buffers for first kernel ready!");
+
+		CoreShader.Dispatch(kernel1,
+		QS.THREADGROUP_SIZE_X_REAL,
+		QS.THREADGROUP_SIZE_Y_REAL,
+		QS.THREADGROUP_SIZE_Z_REAL); Log("First kernel ready!");
+
+		SetupComputeShader(kernel2); Log("Buffers for second kernel ready!");
+
+        CoreShader.Dispatch(kernel2,
+		QS.THREADGROUP_SIZE_X,
+		QS.THREADGROUP_SIZE_Y,
+		QS.THREADGROUP_SIZE_Z); Log("Second kernel ready!");
+
+		SetupComputeShader(kernel3); Log("Buffers for third kernel ready!");
+
+        CoreShader.Dispatch(kernel3,
+		QS.THREADGROUP_SIZE_X_SUB_REAL,
+		QS.THREADGROUP_SIZE_Y_SUB_REAL,
+		QS.THREADGROUP_SIZE_Z_SUB_REAL); Log("Third kernel ready!");
+
+        SetupComputeShader(kernel4); Log("Buffers for fourth kernel ready!");
+
+        CoreShader.Dispatch(kernel4,
+		QS.THREADGROUP_SIZE_X_SUB,
+		QS.THREADGROUP_SIZE_Y_SUB,
+		QS.THREADGROUP_SIZE_Z_SUB); Log("Fourth kernel ready!");
+
+        //GetData method takes so long... Render pipeine stalls here...
+        //Solutions:
+        // - StartCoroutine and wait for several frames or some sort of precalculated time.
+        //  - Up to 2x speed up... fffffuck.
+        // - Use delegates and fire up a event on bool switch.
+        //  - Fucked as a coroutine method...
+        // - Forget about dat shit and keep coding.
+        // - Make a native plugin with full async GetData method inplementation...
+        //  - No info.
+        //  - No base.
+
+        Log("Dispatch wait start!");
+        yield return new WaitForSeconds(2);
+        Log("Dispatch wait finish!");
+
+        TransferData(OutDataBuffer, ToShaderData, preOutputStructData, HeightTexture, NormalTexture);
+
+        //OutDataBuffer.GetData(outputStructData);
+        //OutDataBuffer.GetData(outputStructData, new Action(() => 
+        //{
+            //if (GPUGetDataReady != null) GPUGetDataReady(this);
+
+            //ToShaderData.SetData(outputStructData);
+
+            //SetupShader(ToShaderData, HeightTexture, NormalTexture);
+        //}));
+
+        if (DispatchReady != null)
+            DispatchReady(this);
+    }
+
+    private bool AllSubquadsGenerated()
+    {
+        if (this.Subquads.Count != 0)
+        {
+            var state = true;
+            return this.Subquads.All(s => s.Generated == state);
+        }
+        else
+            return false;
+    }
+
+    private void TransferData(ComputeBuffer from, ComputeBuffer to, Array data, RenderTexture tex1, RenderTexture tex2)
+    {
+        from.GetData(data, new Action(() =>
+        {
+            if (GPUGetDataReady != null) GPUGetDataReady(this);
+
+            to.SetData(data);
+
+            SetupShader(to, tex1, tex2);
+        }));
     }
 
     private void SetupComputeShader(int kernel)
     {
-        HeightShader.SetBuffer(kernel, "quadGenerationConstants", QuadGenerationConstantsBuffer);
-        HeightShader.SetBuffer(kernel, "patchPreOutput", PreOutDataBuffer);
-        HeightShader.SetBuffer(kernel, "patchPreOutputSub", PreOutDataSubBuffer);
-        HeightShader.SetBuffer(kernel, "patchOutput", OutDataBuffer);
-        HeightShader.SetTexture(kernel, "Height", HeightTexture);
-        HeightShader.SetTexture(kernel, "Normal", NormalTexture);
+        if (CoreShader == null) return;
 
-        Setter.SetUniforms(HeightShader, kernel);
+        CoreShader.SetBuffer(kernel, "quadGenerationConstants", QuadGenerationConstantsBuffer);
+        CoreShader.SetBuffer(kernel, "patchPreOutput", PreOutDataBuffer);
+        CoreShader.SetBuffer(kernel, "patchPreOutputSub", PreOutDataSubBuffer);
+        CoreShader.SetBuffer(kernel, "patchOutput", OutDataBuffer);
+        CoreShader.SetTexture(kernel, "Height", HeightTexture);
+        CoreShader.SetTexture(kernel, "Normal", NormalTexture);
+
+        Setter.SetUniforms(CoreShader, kernel);
     }
 
     private void SetupShader()
@@ -409,20 +637,22 @@ public class Quad : MonoBehaviour
 
     private void SetupShader(ComputeBuffer data, RenderTexture heightTex, RenderTexture normalTex)
     {
+        if (Setter.MaterialToUpdate == null) return;
+
         Setter.MaterialToUpdate.SetBuffer("data", data);
         Setter.MaterialToUpdate.SetTexture("_HeightTexture", heightTex);
         Setter.MaterialToUpdate.SetTexture("_NormalTexture", normalTex);
-        Setter.MaterialToUpdate.SetFloat("LODLevel", quadGC.LODLevel);
+        Setter.MaterialToUpdate.SetFloat("LODLevel", generationConstants.LODLevel);
     }
 
     public void SetupVectors(Quad quad, int id, bool staticX, bool staticY, bool staticZ)
     {
-        Vector3 cfed = Parent.quadGC.cubeFaceEastDirection / 2;
-        Vector3 cfnd = Parent.quadGC.cubeFaceNorthDirection / 2;
+        Vector3 cfed = Parent.generationConstants.cubeFaceEastDirection / 2;
+        Vector3 cfnd = Parent.generationConstants.cubeFaceNorthDirection / 2;
 
-        quad.quadGC.cubeFaceEastDirection = cfed;
-        quad.quadGC.cubeFaceNorthDirection = cfnd;
-        quad.quadGC.patchCubeCenter = quad.GetPatchCubeCenterSplitted(quad.Position, id, staticX, staticY, staticZ);
+        quad.generationConstants.cubeFaceEastDirection = cfed;
+        quad.generationConstants.cubeFaceNorthDirection = cfnd;
+        quad.generationConstants.patchCubeCenter = quad.GetPatchCubeCenterSplitted(quad.Position, id, staticX, staticY, staticZ);
     }
 
     public void SetupCorners(QuadPostion pos)
@@ -741,21 +971,21 @@ public class Quad : MonoBehaviour
         if (this.LODLevel >= 1)
         {
             if (this.LODLevel == 1)
-                temp = Vector3.Lerp(temp, this.Parent.quadGC.patchCubeCenter * (15.0f / 7.5f), 0.5f); //0.5f
+                temp = Vector3.Lerp(temp, this.Parent.generationConstants.patchCubeCenter * (15.0f / 7.5f), 0.5f); //0.5f
             else if (this.LODLevel == 2)
-                temp = Vector3.Lerp(temp, this.Parent.quadGC.patchCubeCenter * (15.0f / 11.25f), 0.75f); //0.5f + 0.5f / 2.0f
+                temp = Vector3.Lerp(temp, this.Parent.generationConstants.patchCubeCenter * (15.0f / 11.25f), 0.75f); //0.5f + 0.5f / 2.0f
             else if (this.LODLevel == 3)
-                temp = Vector3.Lerp(temp, this.Parent.quadGC.patchCubeCenter * (15.0f / 13.125f), 0.875f); //0.75f + ((0.5f / 2.0f) / 2.0f)
+                temp = Vector3.Lerp(temp, this.Parent.generationConstants.patchCubeCenter * (15.0f / 13.125f), 0.875f); //0.75f + ((0.5f / 2.0f) / 2.0f)
             else if (this.LODLevel == 4)
-                temp = Vector3.Lerp(temp, this.Parent.quadGC.patchCubeCenter * (15.0f / 14.0625f), 0.9375f); //0.875f + (((0.5f / 2.0f) / 2.0f) / 2.0f)
+                temp = Vector3.Lerp(temp, this.Parent.generationConstants.patchCubeCenter * (15.0f / 14.0625f), 0.9375f); //0.875f + (((0.5f / 2.0f) / 2.0f) / 2.0f)
             else if (this.LODLevel == 5)
-                temp = Vector3.Lerp(temp, this.Parent.quadGC.patchCubeCenter * (15.0f / 14.53125f), 0.96875f); //0.9375f + ((((0.5f / 2.0f) / 2.0f) / 2.0f) / 2.0f)
+                temp = Vector3.Lerp(temp, this.Parent.generationConstants.patchCubeCenter * (15.0f / 14.53125f), 0.96875f); //0.9375f + ((((0.5f / 2.0f) / 2.0f) / 2.0f) / 2.0f)
             else if (this.LODLevel == 6)
-                temp = Vector3.Lerp(temp, this.Parent.quadGC.patchCubeCenter * (15.0f / 14.765625f), 0.984375f); //0.96875f + (((((0.5f / 2.0f) / 2.0f) / 2.0f) / 2.0f) / 2.0f)
+                temp = Vector3.Lerp(temp, this.Parent.generationConstants.patchCubeCenter * (15.0f / 14.765625f), 0.984375f); //0.96875f + (((((0.5f / 2.0f) / 2.0f) / 2.0f) / 2.0f) / 2.0f)
             else if (this.LODLevel == 7) //Experimental! Maybe float precision have place on small planet radius!
-                temp = Vector3.Lerp(temp, this.Parent.quadGC.patchCubeCenter * (15.0f / 14.8828125f), 0.9921875f); //0.984375f + ((((((0.5f / 2.0f) / 2.0f) / 2.0f) / 2.0f) / 2.0f) / 2.0f)
+                temp = Vector3.Lerp(temp, this.Parent.generationConstants.patchCubeCenter * (15.0f / 14.8828125f), 0.9921875f); //0.984375f + ((((((0.5f / 2.0f) / 2.0f) / 2.0f) / 2.0f) / 2.0f) / 2.0f)
             else if (this.LODLevel == 8) //Experimental! Maybe float precision have place on small planet radius!
-                temp = Vector3.Lerp(temp, this.Parent.quadGC.patchCubeCenter * (15.0f / 14.94140625f), 0.99609375f); //0.9921875f + (((((((0.5f / 2.0f) / 2.0f) / 2.0f) / 2.0f) / 2.0f) / 2.0f) / 2.0f)
+                temp = Vector3.Lerp(temp, this.Parent.generationConstants.patchCubeCenter * (15.0f / 14.94140625f), 0.99609375f); //0.9921875f + (((((((0.5f / 2.0f) / 2.0f) / 2.0f) / 2.0f) / 2.0f) / 2.0f) / 2.0f)
         }
         //End of magic here.
 

@@ -20,14 +20,31 @@ public class NoiseParametersSetter : MonoBehaviour
 
     public ImprovedPerlinNoise Perlin = null;
 
-    void Start()
+    private void Start()
     {
         LoadAndInit();
     }
 
-    void Update()
+    private void Update()
     {
-        UpdateUniforms();
+        //UpdateUniforms();
+    }
+
+    private void OnDestroy()
+    {
+        /*
+        if (this.PermSampler != null)
+            DestroyImmediate(this.PermSampler);
+
+        if (this.PermGradSampler != null)
+            DestroyImmediate(this.PermGradSampler);
+
+        if (this.PlanetAtlas != null)
+            DestroyImmediate(this.PlanetAtlas);
+
+        if (this.MaterialToUpdate != null)
+            DestroyImmediate(this.MaterialToUpdate);
+        */
     }
 
     [ContextMenu("Update Uniforms")]
@@ -54,11 +71,12 @@ public class NoiseParametersSetter : MonoBehaviour
     {
         Init();
 
-        PermSampler = Perlin.GetPermutationTable2D();
-        PermGradSampler = Perlin.GetGradient3D();
+		if (PermSampler == null) PermSampler = Perlin.GetPermutationTable2D();
+		if (PermGradSampler == null) PermGradSampler = Perlin.GetGradient3D();
 
-        if (PlanetAtlas == null)
-            PlanetAtlas = LoadTextureFromResources("PlanetAtlas");
+        if (PlanetAtlas == null) PlanetAtlas = LoadTextureFromResources("PlanetAtlas");
+
+		//UpdateUniforms();
     }
 
     public Texture2D LoadTextureFromResources(string name)
@@ -70,8 +88,7 @@ public class NoiseParametersSetter : MonoBehaviour
 
     public void SetUniforms(Material mat)
     {
-        if (mat == null)
-            return;
+        if (mat == null) return;
 
         if (SetDefaultParameters)
         {
@@ -90,8 +107,7 @@ public class NoiseParametersSetter : MonoBehaviour
 
     public void SetUniforms(ComputeShader shader)
     {
-        if (shader == null)
-            return;
+        if (shader == null) return;
 
         if (SetDefaultParameters)
         {
@@ -110,8 +126,7 @@ public class NoiseParametersSetter : MonoBehaviour
 
     public void SetUniforms(ComputeShader shader, int kernel)
     {
-        if (shader == null)
-            return;
+        if (shader == null) return;
 
         if (SetDefaultParameters)
         {

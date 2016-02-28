@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System;
+using UnityEngine;
 
 public static class BufferHelper
 {
@@ -48,5 +49,13 @@ public static class BufferHelper
     public static void ReleaseAndDisposeQuadBuffers(Quad quad)
     {
         ReleaseAndDisposeBuffers(quad.QuadGenerationConstantsBuffer, quad.PreOutDataBuffer, quad.OutDataBuffer, quad.ToShaderData);
+    }
+
+    public static void GetData(this ComputeBuffer buffer, Array data, Action onGetDataAction)
+    {
+        buffer.GetData(data);
+
+        if (onGetDataAction != null)
+            onGetDataAction();
     }
 }
