@@ -9,6 +9,7 @@ public class Planetoid : MonoBehaviour
     public bool Working = false;
 
     public bool DrawGizmos = false;
+    public bool DrawWireframe = false;
 
     public Transform LODTarget = null;
 
@@ -34,7 +35,10 @@ public class Planetoid : MonoBehaviour
 
     private void Update()
     {
-
+        if(Input.GetKeyDown(KeyCode.F1))
+        {
+            DrawWireframe = !DrawWireframe;
+        }
     }
 
     private void OnGUI()

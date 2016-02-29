@@ -223,6 +223,7 @@ public class Quad : MonoBehaviour
         QuadMaterial.SetBuffer("data", OutDataBuffer);
         QuadMaterial.SetTexture("_HeightTexture", HeightTexture);
         QuadMaterial.SetTexture("_NormalTexture", NormalTexture);
+        QuadMaterial.SetFloat("_Wireframe", this.Planetoid.DrawWireframe ? 1.0f : 0.0f);
 
         if (Generated && !HaveSubQuads && !(this.Parent != null && !this.Parent.AllSubquadsGenerated()))
         {
