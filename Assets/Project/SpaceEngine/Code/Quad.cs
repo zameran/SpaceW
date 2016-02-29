@@ -65,7 +65,7 @@ public class Quad : MonoBehaviour
 
     public ComputeBuffer QuadGenerationConstantsBuffer;
     public ComputeBuffer PreOutDataBuffer;
-    //public ComputeBuffer PreOutDataSubBuffer;
+    public ComputeBuffer PreOutDataSubBuffer;
     public ComputeBuffer OutDataBuffer;
     //public ComputeBuffer ToShaderData;
 
@@ -123,8 +123,11 @@ public class Quad : MonoBehaviour
     {
         QuadGenerationConstantsBuffer = new ComputeBuffer(1, 64);
         PreOutDataBuffer = new ComputeBuffer(QS.nVertsReal, 64);
-        //PreOutDataSubBuffer = new ComputeBuffer(QS.nRealVertsSub, 64);
+        PreOutDataSubBuffer = new ComputeBuffer(QS.nRealVertsSub, 64);
         OutDataBuffer = new ComputeBuffer(QS.nVerts, 64);
+
+        HeightTexture = RTExtensions.CreateRTexture(QS.nVertsPerEdgeSub, 0);
+        NormalTexture = RTExtensions.CreateRTexture(QS.nVertsPerEdgeSub, 0);
     }
 
     private void Update()
@@ -165,7 +168,7 @@ public class Quad : MonoBehaviour
     private void OnDestroy()
     {
         //BufferHelper.ReleaseAndDisposeBuffers(this.QuadGenerationConstantsBuffer, this.PreOutDataBuffer, this.OutDataBuffer, this.ToShaderData);
-        BufferHelper.ReleaseAndDisposeBuffers(QuadGenerationConstantsBuffer, PreOutDataBuffer, OutDataBuffer);
+        BufferHelper.ReleaseAndDisposeBuffers(QuadGenerationConstantsBuffer, PreOutDataBuffer, PreOutDataSubBuffer, OutDataBuffer);
 
         if (this.HeightTexture != null)
             this.HeightTexture.ReleaseAndDestroy();
@@ -218,12 +221,13 @@ public class Quad : MonoBehaviour
 
         QuadMaterial.SetPass(0);
         QuadMaterial.SetBuffer("data", OutDataBuffer);
-        //QuadMaterial.SetTexture("_HeightTexture", HeightTexture);
-        //QuadMaterial.SetTexture("_NormalTexture", NormalTexture);
+        QuadMaterial.SetTexture("_HeightTexture", HeightTexture);
+        QuadMaterial.SetTexture("_NormalTexture", NormalTexture);
 
         if (Generated && !HaveSubQuads && !(this.Parent != null && !this.Parent.AllSubquadsGenerated()))
         {
-            Graphics.DrawProcedural(MeshTopology.Points, OutDataBuffer.count);
+            //Graphics.DrawProcedural(MeshTopology.Points, OutDataBuffer.count);
+            Graphics.DrawMeshNow(QuadMesh, Vector3.zero, Quaternion.identity);
         }
     }
 
@@ -351,7 +355,7 @@ public class Quad : MonoBehaviour
 
         QuadGenerationConstants[] quadGenerationConstantsData = new QuadGenerationConstants[] { generationConstants, generationConstants }; //Here we add 2 equal elements in to the buffer data, and nex we will set buffer size to 1. Bugfix. Idk.
         OutputStruct[] preOutputStructData = new OutputStruct[QS.nVertsReal];
-        //OutputStruct[] preOutputSubStructData = new OutputStruct[QS.nRealVertsSub];
+        OutputStruct[] preOutputSubStructData = new OutputStruct[QS.nRealVertsSub];
         OutputStruct[] outputStructData = new OutputStruct[QS.nVerts];
 
         //HeightTexture = RTExtensions.CreateRTexture(QS.nVertsPerEdgeSub, 0);
@@ -359,41 +363,41 @@ public class Quad : MonoBehaviour
 
         QuadGenerationConstantsBuffer.SetData(quadGenerationConstantsData);
         PreOutDataBuffer.SetData(preOutputStructData);
-        //PreOutDataSubBuffer.SetData(preOutputSubStructData);
+        PreOutDataSubBuffer.SetData(preOutputSubStructData);
         OutDataBuffer.SetData(outputStructData);
 
         int kernel1 = CoreShader.FindKernel("HeightMain");
         int kernel2 = CoreShader.FindKernel("Transfer");
-        //int kernel3 = CoreShader.FindKernel("HeightSub");
-        //int kernel4 = CoreShader.FindKernel("TexturesSub");
+        int kernel3 = CoreShader.FindKernel("HeightSub");
+        int kernel4 = CoreShader.FindKernel("TexturesSub");
 
-        SetupComputeShader(kernel1, QuadGenerationConstantsBuffer, PreOutDataBuffer, OutDataBuffer); Log("Buffers for first kernel ready!");
+        SetupComputeShader(kernel1, QuadGenerationConstantsBuffer, PreOutDataBuffer, PreOutDataSubBuffer, OutDataBuffer); Log("Buffers for first kernel ready!");
 
         CoreShader.Dispatch(kernel1,
         QS.THREADGROUP_SIZE_X_REAL,
         QS.THREADGROUP_SIZE_Y_REAL,
         QS.THREADGROUP_SIZE_Z_REAL); Log("First kernel ready!");
 
-        SetupComputeShader(kernel2, QuadGenerationConstantsBuffer, PreOutDataBuffer, OutDataBuffer); Log("Buffers for second kernel ready!");
+        SetupComputeShader(kernel2, QuadGenerationConstantsBuffer, PreOutDataBuffer, PreOutDataSubBuffer, OutDataBuffer); Log("Buffers for second kernel ready!");
 
         CoreShader.Dispatch(kernel2,
         QS.THREADGROUP_SIZE_X,
         QS.THREADGROUP_SIZE_Y,
         QS.THREADGROUP_SIZE_Z); Log("Second kernel ready!");
 
-        //SetupComputeShader(kernel3); Log("Buffers for third kernel ready!");
+        SetupComputeShader(kernel3, QuadGenerationConstantsBuffer, PreOutDataBuffer, PreOutDataSubBuffer, OutDataBuffer); Log("Buffers for third kernel ready!");
 
-        //CoreShader.Dispatch(kernel3,
-        //QS.THREADGROUP_SIZE_X_SUB_REAL,
-        //QS.THREADGROUP_SIZE_Y_SUB_REAL,
-        //QS.THREADGROUP_SIZE_Z_SUB_REAL); Log("Third kernel ready!");
+        CoreShader.Dispatch(kernel3,
+        QS.THREADGROUP_SIZE_X_SUB_REAL,
+        QS.THREADGROUP_SIZE_Y_SUB_REAL,
+        QS.THREADGROUP_SIZE_Z_SUB_REAL); Log("Third kernel ready!");
 
-        //SetupComputeShader(kernel4); Log("Buffers for fourth kernel ready!");
+        SetupComputeShader(kernel4, QuadGenerationConstantsBuffer, PreOutDataBuffer, PreOutDataSubBuffer, OutDataBuffer); Log("Buffers for fourth kernel ready!");
 
-        //CoreShader.Dispatch(kernel4,
-        //QS.THREADGROUP_SIZE_X_SUB,
-        //QS.THREADGROUP_SIZE_Y_SUB,
-        //QS.THREADGROUP_SIZE_Z_SUB); Log("Fourth kernel ready!");
+        CoreShader.Dispatch(kernel4,
+        QS.THREADGROUP_SIZE_X_SUB,
+        QS.THREADGROUP_SIZE_Y_SUB,
+        QS.THREADGROUP_SIZE_Z_SUB); Log("Fourth kernel ready!");
 
         if (DispatchReady != null)
             DispatchReady(this);
@@ -410,16 +414,16 @@ public class Quad : MonoBehaviour
             return false;
     }
 
-    private void SetupComputeShader(int kernel, ComputeBuffer QuadGenerationConstantsBuffer, ComputeBuffer PreOutDataBuffer, ComputeBuffer OutDataBuffer)
+    private void SetupComputeShader(int kernel, ComputeBuffer QuadGenerationConstantsBuffer, ComputeBuffer PreOutDataBuffer, ComputeBuffer PreOutDataSubBuffer, ComputeBuffer OutDataBuffer)
     {
         if (CoreShader == null) return;
 
         CoreShader.SetBuffer(kernel, "quadGenerationConstants", QuadGenerationConstantsBuffer);
         CoreShader.SetBuffer(kernel, "patchPreOutput", PreOutDataBuffer);
-        //CoreShader.SetBuffer(kernel, "patchPreOutputSub", PreOutDataSubBuffer);
+        CoreShader.SetBuffer(kernel, "patchPreOutputSub", PreOutDataSubBuffer);
         CoreShader.SetBuffer(kernel, "patchOutput", OutDataBuffer);
-        //CoreShader.SetTexture(kernel, "Height", HeightTexture);
-        //CoreShader.SetTexture(kernel, "Normal", NormalTexture);
+        CoreShader.SetTexture(kernel, "Height", HeightTexture);
+        CoreShader.SetTexture(kernel, "Normal", NormalTexture);
 
         Setter.SetUniforms(CoreShader, kernel);
     }
