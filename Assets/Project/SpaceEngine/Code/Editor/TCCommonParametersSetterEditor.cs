@@ -112,7 +112,7 @@ public class TCCommonParametersSetterEditor : Editor
 
     private void DrawGUIForHills(TCCommonParametersSetter setter)
     {
-        setter.hillsParams.x = EditorGUILayout.Slider("hillsMagn", setter.hillsParams.x, 0.0f, 1.0f);
+        setter.hillsParams.x = EditorGUILayout.Slider("hillsMagn", setter.hillsParams.x, 0.0f, 10.0f);
         setter.hillsParams.y = EditorGUILayout.Slider("hillsFreq", setter.hillsParams.y, 0.0f, 1000.0f);
         setter.hillsParams.z = EditorGUILayout.Slider("hillsDensity", setter.hillsParams.z, 0.0f, 1.0f);
         setter.hillsParams.w = EditorGUILayout.Slider("hills2Density", setter.hillsParams.w, 0.0f, 1.0f);

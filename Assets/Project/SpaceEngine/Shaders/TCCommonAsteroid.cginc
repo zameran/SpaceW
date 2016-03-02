@@ -8,7 +8,7 @@ float HeightMapAsteroid(float3 ppoint, float freq, float mfreq, float hfreq, flo
 	float height = (Fbm(p, 2) + 0.7) * 0.7;
 
 	// Height distortion
-	float distort = 0.01 * Fbm(ppoint * mfreq + Randomize, 8);
+	float distort = 0.1 * Fbm(ppoint * mfreq + Randomize, 8);
 	height += distort;
 
 	// Hills

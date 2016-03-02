@@ -1,10 +1,10 @@
 ﻿#define threadsPerGroup_X 32
 #define threadsPerGroup_Y 32
 
-#define nVerticesPerSide 60
-#define nVertsPerSideWithBorder 64
-#define nVerticesPerSideSub 120
-#define nVertsPerSideWithBorderSub 128
+#define nVerticesPerSide 120
+#define nVertsPerSideWithBorder 128
+#define nVerticesPerSideSub 240
+#define nVertsPerSideWithBorderSub 256
 
 //#define defaultNoise
 
@@ -133,7 +133,7 @@ void HeightMain (uint3 id : SV_DispatchThreadID)
 
 	int outBuffOffset = id.x + id.y * nVertsPerSideWithBorder;
 
-	float3 cubeCoord = CubeCoord(constants, nVertsPerSideWithBorder, id, 3, constants.spacing);
+	float3 cubeCoord = CubeCoord(constants, nVertsPerSideWithBorder, id, 7, constants.spacing);
 
 	float3 patchCenter = normalize(constants.patchCubeCenter) * constants.planetRadius;
 	float3 patchNormalizedCoord = normalize(cubeCoord);
@@ -177,7 +177,7 @@ void HeightSub(uint3 id : SV_DispatchThreadID)
 
 	int outBuffOffset = id.x + id.y * nVertsPerSideWithBorderSub;
 
-	float3 cubeCoord = CubeCoord(constants, nVertsPerSideWithBorderSub, id, 7, constants.spacingsub);
+	float3 cubeCoord = CubeCoord(constants, nVertsPerSideWithBorderSub, id, 17, constants.spacingsub);
 
 	float3 patchCenter = normalize(constants.patchCubeCenter) * constants.planetRadius;
 	float3 patchNormalizedCoord = normalize(cubeCoord);

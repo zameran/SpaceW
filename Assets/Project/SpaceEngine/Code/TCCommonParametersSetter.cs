@@ -50,6 +50,9 @@ public class TCCommonParametersSetter : MonoBehaviour
         for (int i = 0; i < Planet.Quads.Count; i++)
         {
             UpdateUniforms(Planet.Quads[i].CoreShader);
+
+            if (Application.isPlaying)
+                Planet.Quads[i].Dispatch();
         }
     }
 

@@ -3,8 +3,8 @@
 [Serializable]
 public static class QS
 {
-    public static int nVertsPerEdgeReal { get { return 64; } }
-    public static int nVertsPerEdge { get { return 60; } }
+    public static int nVertsPerEdgeReal { get { return 128; } }
+    public static int nVertsPerEdge { get { return 120; } }
     public static int nVertsPerEdgeSubReal { get { return nVertsPerEdgeReal * 2; } }
     public static int nVertsPerEdgeSub { get { return nVertsPerEdge * 2; } }
 

@@ -48,12 +48,12 @@ public static class BufferHelper
 
     public static void ReleaseAndDisposeQuadBuffers(Quad quad)
     {
-        //ReleaseAndDisposeBuffers(quad.QuadGenerationConstantsBuffer, quad.PreOutDataBuffer, quad.PreOutDataSubBuffer, quad.OutDataBuffer, quad.ToShaderData);
+        ReleaseAndDisposeBuffers(quad.QuadGenerationConstantsBuffer, quad.PreOutDataBuffer, quad.PreOutDataSubBuffer, quad.OutDataBuffer);
     }
 
     public static void ReleaseQuadBuffers(Quad quad)
     {
-        //ReleaseBuffers(quad.QuadGenerationConstantsBuffer, quad.PreOutDataBuffer, quad.PreOutDataSubBuffer, quad.ToShaderData);
+        ReleaseBuffers(quad.QuadGenerationConstantsBuffer, quad.PreOutDataBuffer, quad.PreOutDataSubBuffer, quad.OutDataBuffer);
     }
 
     public static void GetData(this ComputeBuffer buffer, Array data, Action onGetDataAction)

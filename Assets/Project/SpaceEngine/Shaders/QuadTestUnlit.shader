@@ -4,8 +4,8 @@
 	{
 		_HeightTexture("Height (RGBA)", 2D) = "white" {}
 		_NormalTexture("Normal (RGBA)", 2D) = "white" {}
-		_WireframeBackgroundColor("Wireframe Background Color", Color) = (1,1,1,1)
-		_Wireframe("Wireframe", Range(0,1)) = 0.0
+		_WireframeColor("Wireframe Background Color", Color) = (0, 0, 0, 1)
+		_Wireframe("Wireframe", Range(0, 1)) = 0.0
 	}
 	SubShader
 	{
@@ -13,6 +13,8 @@
 
 		Pass
 		{
+			Fog { Mode Off }
+
 			CGPROGRAM
 			#pragma target 5.0
 			#pragma vertex vert
@@ -53,7 +55,7 @@
 				float4 cpos;
 			};
 			
-			half4 _WireframeBackgroundColor;
+			half4 _WireframeColor;
 			float _Wireframe;
 
 			uniform sampler2D _HeightTexture;
@@ -74,10 +76,12 @@
 				position.xyz += patchCenter;
 
 				v2fg o;
-				o.vertex = mul(UNITY_MATRIX_MVP, position);
+
+				o.color = float4(noise, noise, noise, 1); //tex2Dlod(_HeightTexture, v.texcoord);	
 				o.uv = v.texcoord;
 				o.uv1 = v.texcoord1;
-				o.color = float4(noise, noise, noise, 1);
+				o.vertex = mul(UNITY_MATRIX_MVP, position);
+
 				return o;
 			}
 
@@ -96,36 +100,40 @@
 
 				float area = abs(v1.x * v2.y - v1.y * v2.x);
 			
-				v2fg OUT;
-				OUT.vertex = IN[0].vertex;
+				v2fg OUT;		
+				OUT.color = IN[0].color;
 				OUT.uv = IN[0].uv;
 				OUT.uv1 = float3(area / length(v0), 0, 0);
-				OUT.color = IN[0].color;
+				OUT.vertex = IN[0].vertex;
 				triStream.Append(OUT);
 
-				OUT.vertex = IN[1].vertex;
+				OUT.color = IN[1].color;
 				OUT.uv = IN[1].uv;
 				OUT.uv1 = float3(0, area / length(v1), 0);
-				OUT.color = IN[1].color;
+				OUT.vertex = IN[1].vertex;
 				triStream.Append(OUT);
 
-				OUT.vertex = IN[2].vertex;
+				OUT.color = IN[2].color;
 				OUT.uv = IN[2].uv;
 				OUT.uv1 = float3(0, 0, area / length(v2));
-				OUT.color = IN[2].color;
+				OUT.vertex = IN[2].vertex;		
 				triStream.Append(OUT);			
 			}
-			
-			fixed4 frag (v2fg IN) : COLOR
+
+			void frag(v2fg IN, out half4 outDiffuse : COLOR0, out half4 outNormal : COLOR1)
 			{
 				float d = min(IN.uv1.x, min(IN.uv1.y, IN.uv1.z));
  				float I = exp2(-4.0 * d * d);
 
- 				fixed4 wireframeColor = lerp(_WireframeBackgroundColor, IN.color, I);
 				fixed4 terrainColor = fixed4(IN.color.x, IN.color.y, IN.color.z, 1);
+ 				fixed4 wireframeColor = lerp(terrainColor, _WireframeColor, I);
 				fixed4 outputColor = lerp(terrainColor, wireframeColor, _Wireframe);
 
- 				return outputColor;		
+				fixed3 terrainNormal = UnpackNormal(tex2D(_NormalTexture, IN.uv));
+				fixed4 outputNormal = fixed4(terrainNormal * 0.5 + 0.5, 1);
+
+ 				outDiffuse = outputColor;	
+				outNormal = outputNormal;	
 			}
 			ENDCG
 		}

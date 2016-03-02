@@ -5,11 +5,9 @@ using System.Collections.Generic;
 
 public class Planetoid : MonoBehaviour
 {
-    [HideInInspector]
-    public bool Working = false;
-
-    public bool DrawGizmos = false;
     public bool DrawWireframe = false;
+
+    public bool Working = false;
 
     public Transform LODTarget = null;
 
@@ -20,7 +18,6 @@ public class Planetoid : MonoBehaviour
 
     public List<Quad> MainQuads = new List<Quad>();
     public List<Quad> Quads = new List<Quad>();
-    public List<Quad> LODQueue = new List<Quad>();
 
     public Shader ColorShader;
     public ComputeShader CoreShader;
@@ -43,7 +40,7 @@ public class Planetoid : MonoBehaviour
 
     private void OnGUI()
     {
-
+        GUI.Label(new Rect(10.0f, 10.0f, 250.0f, 50.0f), this.gameObject.name + ": " + (Working ? "Generating..." : "Idle..."));
     }
 
     [ContextMenu("DestroyQuads")]
@@ -57,7 +54,6 @@ public class Planetoid : MonoBehaviour
 
         Quads.Clear();
         MainQuads.Clear();
-        LODQueue.Clear();
     }
 
     [ContextMenu("SetupQuads")]
@@ -117,9 +113,9 @@ public class Planetoid : MonoBehaviour
         quadComponent.generationConstants = gc;
         quadComponent.Planetoid = this;
         quadComponent.SetupCorners(quadPosition);
+        quadComponent.ShouldDraw = true;
 
         Quads.Add(quadComponent);
-        LODQueue.Add(quadComponent);
         MainQuads.Add(quadComponent);
     }
 
@@ -153,6 +149,7 @@ public class Planetoid : MonoBehaviour
         quadComponent.Position = quadPosition;
         quadComponent.generationConstants = gc;
         quadComponent.Planetoid = this;
+        quadComponent.ShouldDraw = false;
 
         Quads.Add(quadComponent);
 
