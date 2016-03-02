@@ -249,7 +249,7 @@ void TexturesSub(uint3 id : SV_DispatchThreadID)
 	//float3 xnormal = normalize(float3(xdelta, ydelta, 2.0 * normalStrength));
 	//float3 ynormal = normalize(float3(ydelta, xdelta, 2.0 * normalStrength));
 
-	//float3 no = xnormal;
+	//float3 no = xnormalSlope;
 	//float3 ta = FindTangent(no, 0.01, float3(0.0, -1.0, 0.0));
 	//float3 bi = FindBiTangent(no, 0.01, float3(0.0, -1.0, 0.0));
 

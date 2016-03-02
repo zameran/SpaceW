@@ -9,7 +9,7 @@
 	}
 	SubShader
 	{
-		Tags { "RenderType"="Opaque" }
+		Tags { "RenderType"="Opaque" "LightMode" = "ForwardBase"}
 
 		Pass
 		{
@@ -22,6 +22,7 @@
 			#pragma fragment frag
 			
 			#include "UnityCG.cginc"
+			#include "UnityLightingCommon.cginc"
 
 			struct appdata_full_compute 
 			{
@@ -38,7 +39,8 @@
 
 			struct v2fg
 			{
-				float4 color : COLOR;
+				float4 color : COLOR0;
+				float4 light : COLOR1;
 				float2 uv : TEXCOORD0;
 				float3 uv1 : TEXCOORD1;
 				float4 vertex : SV_POSITION;
@@ -64,6 +66,26 @@
 			#ifdef SHADER_API_D3D11
 			uniform StructuredBuffer<OutputStruct> data;
 			#endif
+
+			float3 FindTangent(float3 normal, float epsilon, float3 dir)
+			{
+				float refVectorSign = sign(1.0 - abs(normal.x) - epsilon);
+
+				float3 refVector = refVectorSign * dir;
+				float3 biTangent = refVectorSign * cross(normal, refVector);
+
+				return cross(-normal, biTangent);
+			}
+
+			float3 FindBiTangent(float3 normal, float epsilon, float3 dir)
+			{
+				float refVectorSign = sign(1.0 - abs(normal.x) - epsilon);
+
+				float3 refVector = refVectorSign * dir;
+				float3 biTangent = refVectorSign * cross(normal, refVector);
+
+				return biTangent;
+			}
 		
 			v2fg vert (in appdata_full_compute v)
 			{
@@ -75,12 +97,27 @@
 				position.w = 1.0;
 				position.xyz += patchCenter;
 
+				v.vertex = position;
+
+				v.tangent = float4(FindTangent(tex2Dlod(_NormalTexture, float4(v.texcoord.xy, 0, 0)), 0.01, float3(0, 1, 0)), 1);
+				v.tangent.xyz += position.xyz;
+
+				v.normal = UnpackNormal(tex2Dlod(_NormalTexture, float4(v.texcoord.xy, 0, 0)));
+				v.normal.xyz += position.xyz;
+
+				float atten = 1.0;
+				float3 normalDirection = normalize(mul(float4(v.normal, 0), _Object2World).xyz);
+				float3 lightDirection = normalize(_WorldSpaceLightPos0.xyz - float3(0, 0, -8192));	
+				float3 diffuseReflection = atten * _LightColor0.xyz * max(0, dot(normalDirection, lightDirection));
+				float3 lightFinal = diffuseReflection * UNITY_LIGHTMODEL_AMBIENT.xyz;
+
 				v2fg o;
 
 				o.color = float4(noise, noise, noise, 1); //tex2Dlod(_HeightTexture, v.texcoord);	
+				o.light = float4(lightFinal, 1);
 				o.uv = v.texcoord;
 				o.uv1 = v.texcoord1;
-				o.vertex = mul(UNITY_MATRIX_MVP, position);
+				o.vertex = mul(UNITY_MATRIX_MVP, v.vertex);
 
 				return o;
 			}
@@ -102,18 +139,21 @@
 			
 				v2fg OUT;		
 				OUT.color = IN[0].color;
+				OUT.light = IN[0].light;
 				OUT.uv = IN[0].uv;
 				OUT.uv1 = float3(area / length(v0), 0, 0);
 				OUT.vertex = IN[0].vertex;
 				triStream.Append(OUT);
 
 				OUT.color = IN[1].color;
+				OUT.light = IN[1].light;
 				OUT.uv = IN[1].uv;
 				OUT.uv1 = float3(0, area / length(v1), 0);
 				OUT.vertex = IN[1].vertex;
 				triStream.Append(OUT);
 
 				OUT.color = IN[2].color;
+				OUT.light = IN[2].light;
 				OUT.uv = IN[2].uv;
 				OUT.uv1 = float3(0, 0, area / length(v2));
 				OUT.vertex = IN[2].vertex;		
@@ -130,9 +170,9 @@
 				fixed4 outputColor = lerp(terrainColor, wireframeColor, _Wireframe);
 
 				fixed3 terrainNormal = UnpackNormal(tex2D(_NormalTexture, IN.uv));
-				fixed4 outputNormal = fixed4(terrainNormal * 0.5 + 0.5, 1);
+				fixed4 outputNormal = fixed4(terrainNormal, 1);
 
- 				outDiffuse = outputColor;	
+ 				outDiffuse = outputColor * IN.light * 2;	
 				outNormal = outputNormal;	
 			}
 			ENDCG
