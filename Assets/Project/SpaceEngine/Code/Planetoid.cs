@@ -25,9 +25,15 @@ public class Planetoid : MonoBehaviour
     public int LODMaxLevel = 8;
     public int[] LODDistances = new int[9] { 2048, 1024, 512, 256, 128, 64, 32, 16, 8 };
 
+    public QuadStorage Cache = null;
+
     private void Start()
     {
         ThreadScheduler.Initialize();
+
+        if (Cache == null)
+            if (this.gameObject.GetComponentInChildren<QuadStorage>() != null)
+                Cache = this.gameObject.GetComponentInChildren<QuadStorage>();
     }
 
     private void Update()
@@ -40,7 +46,7 @@ public class Planetoid : MonoBehaviour
 
     private void OnGUI()
     {
-        GUI.Label(new Rect(10.0f, 10.0f, 250.0f, 50.0f), this.gameObject.name + ": " + (Working ? "Generating..." : "Idle..."));
+        //GUI.Label(new Rect(10.0f, 10.0f, 250.0f, 50.0f), this.gameObject.name + ": " + (Working ? "Generating..." : "Idle..."));
     }
 
     [ContextMenu("DestroyQuads")]

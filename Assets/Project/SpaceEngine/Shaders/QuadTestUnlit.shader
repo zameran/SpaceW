@@ -103,7 +103,7 @@
 				v.tangent.xyz += position.xyz;
 
 				v.normal = UnpackNormal(tex2Dlod(_NormalTexture, float4(v.texcoord.xy, 0, 0)));
-				v.normal.xyz += position.xyz;
+				//v.normal.xyz += position.xyz;
 
 				float atten = 1.0;
 				float3 normalDirection = normalize(mul(float4(v.normal, 0), _Object2World).xyz);
@@ -172,7 +172,7 @@
 				fixed3 terrainNormal = UnpackNormal(tex2D(_NormalTexture, IN.uv));
 				fixed4 outputNormal = fixed4(terrainNormal, 1);
 
- 				outDiffuse = outputColor * IN.light * 2;	
+ 				outDiffuse = outputColor;// * IN.light * 2;	
 				outNormal = outputNormal;	
 			}
 			ENDCG

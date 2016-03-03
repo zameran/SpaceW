@@ -63,4 +63,11 @@ public static class BufferHelper
         if (onGetDataAction != null)
             onGetDataAction();
     }
+
+    public static void TransferData<T>(ComputeBuffer from, ComputeBuffer to)
+    {
+        T[] data = new T[from.count];
+        from.GetData(data);
+        to.SetData(data);
+    }
 }
