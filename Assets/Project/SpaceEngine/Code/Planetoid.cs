@@ -57,7 +57,7 @@ public class Planetoid : MonoBehaviour
 
     private void OnGUI()
     {
-        GUI.Label(new Rect(10.0f, 10.0f, 250.0f, 20.0f), this.gameObject.name + ": " + (Working ? "Generating..." : "Idle..."));
+
     }
 
     [ContextMenu("DestroyQuads")]
