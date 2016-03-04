@@ -24,24 +24,12 @@ public class NoiseParametersSetter : MonoBehaviour
 
     private void Update()
     {
-        //UpdateUniforms();
+
     }
 
     private void OnDestroy()
     {
-        /*
-        if (this.PermSampler != null)
-            DestroyImmediate(this.PermSampler);
 
-        if (this.PermGradSampler != null)
-            DestroyImmediate(this.PermGradSampler);
-
-        if (this.PlanetAtlas != null)
-            DestroyImmediate(this.PlanetAtlas);
-
-        if (this.MaterialToUpdate != null)
-            DestroyImmediate(this.MaterialToUpdate);
-        */
     }
 
     [ContextMenu("Update Uniforms")]
@@ -70,8 +58,6 @@ public class NoiseParametersSetter : MonoBehaviour
 		if (PermGradSampler == null) PermGradSampler = Perlin.GetGradient3D();
 
         if (PlanetAtlas == null) PlanetAtlas = LoadTextureFromResources("PlanetAtlas");
-
-		//UpdateUniforms();
     }
 
     public Texture2D LoadTextureFromResources(string name)
