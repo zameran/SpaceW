@@ -7,9 +7,6 @@ public class NoiseParametersSetter : MonoBehaviour
     public Texture2D PermGradSampler = null;
     public Texture2D PlanetAtlas = null;
 
-    public ComputeShader ComputeShaderToUpdate = null;
-    public Material MaterialToUpdate = null;
-
     public float Octaves = 4f;
     public float Lacunarity = 2.218281828459f;
     public float H = 0.5f;
@@ -48,12 +45,10 @@ public class NoiseParametersSetter : MonoBehaviour
     }
 
     [ContextMenu("Update Uniforms")]
-    public void UpdateUniforms()
+    public void UpdateUniforms(Material mat, ComputeShader cs)
     {
-        LoadAndInit();
-
-        SetUniforms(MaterialToUpdate);
-        SetUniforms(ComputeShaderToUpdate);
+        SetUniforms(mat);
+        SetUniforms(cs);
     }
 
     public void Init()

@@ -127,8 +127,6 @@ public class Quad : MonoBehaviour
 
     public Planetoid Planetoid;
 
-    public NoiseParametersSetter Setter;
-
     public ComputeShader CoreShader;
 
     public Mesh QuadMesh;
@@ -318,11 +316,11 @@ public class Quad : MonoBehaviour
             Graphics.DrawMeshNow(QuadMesh, transform.localToWorldMatrix, 0);
         }
 
-        if (Generated && Planetoid.Cache.HaveDataInCache(this.GetId()))
-        {
+        //if (Generated && Planetoid.Cache.HaveDataInCache(this.GetId()))
+        //{
             //QuadCache cache = Planetoid.Cache.AddToCache(new QuadCache(this.GetId()));
             //cache.TransferFrom(this);
-        }
+        //}
     }
 
     public void InitCorners(Vector3 topLeft, Vector3 bottmoRight, Vector3 topRight, Vector3 bottomLeft)
@@ -403,7 +401,7 @@ public class Quad : MonoBehaviour
 
                 Subquads.Add(quad);
 
-                for (int wait = 0; wait < 16; wait++)
+                for (int wait = 0; wait < 8; wait++)
                 {
                     yield return new WaitForEndOfFrame();
                 }
@@ -454,8 +452,7 @@ public class Quad : MonoBehaviour
         if (DispatchStarted != null)
             DispatchStarted(this);
 
-        Setter.LoadAndInit();
-        Setter.UpdateUniforms();
+        Planetoid.NPS.UpdateUniforms(QuadMaterial, CoreShader);
 
         generationConstants.LODLevel = (((1 << LODLevel + 2) * (Planetoid.PlanetRadius / (LODLevel + 2)) - ((Planetoid.PlanetRadius / (LODLevel + 2)) / 2)) / Planetoid.PlanetRadius);
         generationConstants.orientation = (float)Position;
@@ -559,7 +556,7 @@ public class Quad : MonoBehaviour
         CoreShader.SetTexture(kernel, "Height", HeightTexture);
         CoreShader.SetTexture(kernel, "Normal", NormalTexture);
 
-        Setter.SetUniforms(CoreShader, kernel);
+        Planetoid.NPS.SetUniforms(CoreShader, kernel);
     }
 
     public void SetupVectors(Quad quad, int id, bool staticX, bool staticY, bool staticZ)

@@ -126,7 +126,7 @@ public static class MeshFactory
         dummyMesh.vertices = dummyVerts;
         dummyMesh.uv = uv0;
         dummyMesh.SetTriangles(triangles, 0);
-        dummyMesh.RecalculateNormals(60);
+        //dummyMesh.RecalculateNormals(60);
 
         return dummyMesh;
     }

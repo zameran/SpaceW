@@ -25,7 +25,10 @@ public class Planetoid : MonoBehaviour
     public int LODMaxLevel = 8;
     public int[] LODDistances = new int[9] { 2048, 1024, 512, 256, 128, 64, 32, 16, 8 };
 
+    public Mesh PrototypeMesh;
+
     public QuadStorage Cache = null;
+    public NoiseParametersSetter NPS = null;
 
     private void Start()
     {
@@ -34,6 +37,12 @@ public class Planetoid : MonoBehaviour
         if (Cache == null)
             if (this.gameObject.GetComponentInChildren<QuadStorage>() != null)
                 Cache = this.gameObject.GetComponentInChildren<QuadStorage>();
+
+        if (NPS != null)
+            NPS.LoadAndInit();
+
+        if (PrototypeMesh == null)
+            PrototypeMesh = MeshFactory.SetupQuadMesh(QS.nVertsPerEdge);
     }
 
     private void Update()
@@ -60,6 +69,8 @@ public class Planetoid : MonoBehaviour
 
         Quads.Clear();
         MainQuads.Clear();
+
+        DestroyImmediate(PrototypeMesh);
     }
 
     [ContextMenu("SetupQuads")]
@@ -74,6 +85,12 @@ public class Planetoid : MonoBehaviour
         SetupMainQuad(QuadPostion.Right);
         SetupMainQuad(QuadPostion.Front);
         SetupMainQuad(QuadPostion.Back);
+
+        if (NPS != null)
+            NPS.LoadAndInit();
+
+        if (PrototypeMesh == null)
+            PrototypeMesh = MeshFactory.SetupQuadMesh(QS.nVertsPerEdge);
     }
 
     [ContextMenu("ReSetupQuads")]
@@ -90,18 +107,13 @@ public class Planetoid : MonoBehaviour
         go.transform.rotation = Quaternion.identity;
         go.transform.parent = this.transform;
 
-        Mesh mesh = MeshFactory.SetupQuadMesh(QS.nVertsPerEdge);
+        Mesh mesh = PrototypeMesh;
         mesh.bounds = new Bounds(Vector3.zero, new Vector3(PlanetRadius * 2, PlanetRadius * 2, PlanetRadius * 2));
 
         Material material = new Material(ColorShader);
         material.name += "_" + quadPosition.ToString() + "(Instance)";
 
-        NoiseParametersSetter nps = go.AddComponent<NoiseParametersSetter>();
-        nps.ComputeShaderToUpdate = CoreShader;
-        nps.MaterialToUpdate = material;
-
         Quad quadComponent = go.AddComponent<Quad>();
-        quadComponent.Setter = nps;
         quadComponent.CoreShader = CoreShader;
         quadComponent.Planetoid = this;
         quadComponent.QuadMesh = mesh;
@@ -131,18 +143,13 @@ public class Planetoid : MonoBehaviour
         go.transform.position = Vector3.zero;
         go.transform.rotation = Quaternion.identity;
 
-        Mesh mesh = MeshFactory.SetupQuadMesh(QS.nVertsPerEdge);
+        Mesh mesh = PrototypeMesh;
         mesh.bounds = new Bounds(Vector3.zero, new Vector3(PlanetRadius * 2, PlanetRadius * 2, PlanetRadius * 2));
 
         Material material = new Material(ColorShader);
         material.name += "_" + quadPosition.ToString() + "(Instance)";
 
-        NoiseParametersSetter nps = go.AddComponent<NoiseParametersSetter>();
-        nps.ComputeShaderToUpdate = CoreShader;
-        nps.MaterialToUpdate = material;
-
         Quad quadComponent = go.AddComponent<Quad>();
-        quadComponent.Setter = nps;
         quadComponent.CoreShader = CoreShader;
         quadComponent.Planetoid = this;
         quadComponent.QuadMesh = mesh;
