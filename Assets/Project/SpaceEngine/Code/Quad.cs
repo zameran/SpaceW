@@ -288,6 +288,7 @@ public class Quad : MonoBehaviour
         QuadMaterial.SetTexture("_HeightTexture", HeightTexture);
         QuadMaterial.SetTexture("_NormalTexture", NormalTexture);
         QuadMaterial.SetFloat("_Wireframe", Planetoid.DrawWireframe ? 1.0f : 0.0f);
+        QuadMaterial.SetFloat("_Side", (float)Position);
 
         if (Generated && ShouldDraw)
         {

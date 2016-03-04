@@ -6,6 +6,7 @@
 		_NormalTexture("Normal (RGBA)", 2D) = "white" {}
 		_WireframeColor("Wireframe Background Color", Color) = (0, 0, 0, 1)
 		_Wireframe("Wireframe", Range(0, 1)) = 0.0
+		_Side("Side", Range(0, 5)) = 0.0
 	}
 	SubShader
 	{
@@ -58,7 +59,8 @@
 			};
 			
 			half4 _WireframeColor;
-			float _Wireframe;
+			uniform float _Wireframe;
+			uniform float _Side;
 
 			uniform sampler2D _HeightTexture;
 			uniform sampler2D _NormalTexture;
@@ -99,15 +101,47 @@
 
 				v.vertex = position;
 
-				v.tangent = float4(FindTangent(tex2Dlod(_NormalTexture, float4(v.texcoord.xy, 0, 0)), 0.01, float3(0, 1, 0)), 1);
-				v.tangent.xyz += position.xyz;
+				float3 normal = tex2Dlod(_NormalTexture, float4(v.texcoord.xy, 0, 0)).rgb;
+				float3 normal_unpack = UnpackNormal(tex2Dlod(_NormalTexture, float4(v.texcoord.xy, 0, 0))).rgb;
 
-				v.normal = UnpackNormal(tex2Dlod(_NormalTexture, float4(v.texcoord.xy, 0, 0)));
-				//v.normal.xyz += position.xyz;
+				v.tangent = float4(FindTangent(tex2Dlod(_NormalTexture, float4(v.texcoord.xy, 0, 0)), 0.01, float3(0, 1, 0)), 1);
+				v.normal = normal;
+
+				if (_Side == 0)//top
+				{
+
+				}
+				else if (_Side == 1)//bottom
+				{
+
+				}
+				else if (_Side == 2)//left
+				{
+
+				}
+				else if (_Side == 3)//right
+				{
+
+				}
+				else if (_Side == 4)//front
+				{
+
+				}
+				else if (_Side == 5)//back
+				{
+
+				}
+
+				float3 tangent = -FindTangent(normal, 0.01, float3(0, -1, 0));
+				float3 binormal = cross(normalize(normal), normalize(v.tangent.xyz)) * v.tangent.w;
+				float3x3 rotation = float3x3(v.tangent.xyz, binormal, normal);
+				
+				v.tangent.xyz += mul(position.xyz, -rotation);
+				v.normal.xyz += mul(position.xyz, -rotation);
 
 				float atten = 1.0;
 				float3 normalDirection = normalize(mul(float4(v.normal, 0), _Object2World).xyz);
-				float3 lightDirection = normalize(_WorldSpaceLightPos0.xyz - float3(0, 0, -8192));	
+				float3 lightDirection = normalize(_WorldSpaceLightPos0.xyz - float3(4096, 4096, 8192));	
 				float3 diffuseReflection = atten * _LightColor0.xyz * max(0, dot(normalDirection, lightDirection));
 				float3 lightFinal = diffuseReflection * UNITY_LIGHTMODEL_AMBIENT.xyz;
 
@@ -172,7 +206,7 @@
 				fixed3 terrainNormal = UnpackNormal(tex2D(_NormalTexture, IN.uv));
 				fixed4 outputNormal = fixed4(terrainNormal, 1);
 
- 				outDiffuse = outputColor;// * IN.light * 2;	
+ 				outDiffuse = outputColor * IN.light * 2;	
 				outNormal = outputNormal;	
 			}
 			ENDCG
