@@ -220,9 +220,7 @@ public class Quad : MonoBehaviour
 
     private void Update()
     {
-        bool LODEnabled = true;
-
-        if (Time.time > lastLodUpdateTime + lodUpdateInterval && LODEnabled)
+        if (Time.time > lastLodUpdateTime + lodUpdateInterval && Planetoid.UseLOD)
         {
             this.lastLodUpdateTime = Time.time;
 
@@ -293,7 +291,8 @@ public class Quad : MonoBehaviour
 
         if (Generated && ShouldDraw)
         {
-            Graphics.DrawMeshNow(QuadMesh, transform.localToWorldMatrix, 0);
+            if (QuadMesh != null)
+                Graphics.DrawMeshNow(QuadMesh, transform.localToWorldMatrix, 0);
         }
     }
 

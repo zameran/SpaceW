@@ -11,6 +11,7 @@ public class FlyCamera : MonoBehaviour
     public Planetoid planetoid;
 
     private float currentSpeed;
+    private float zRotation = 0;
 
     private Vector3 velocity = Vector3.zero;
     private Quaternion targetRotation = Quaternion.identity;
@@ -21,6 +22,7 @@ public class FlyCamera : MonoBehaviour
     private float farClipPlaneCache;
 
     public bool dynamicClipPlanes = false;
+    public bool aligned = false;
 
     void Start()
     {
@@ -59,7 +61,21 @@ public class FlyCamera : MonoBehaviour
             cameraComponent.farClipPlane = farClipPlaneCache;
         }
 
-        // turn camera towards mouse
+        if (Input.GetKey(KeyCode.E))
+        {
+            zRotation -= 10;
+        }
+        else if (Input.GetKey(KeyCode.Q))
+        {
+            zRotation += 10;
+        }
+        else
+        {
+            zRotation = 0;
+        }
+
+        zRotation = Mathf.Clamp(zRotation, -100, 100);
+
         if (Input.GetMouseButton(0))
         {
             Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
@@ -67,15 +83,24 @@ public class FlyCamera : MonoBehaviour
             targetRotation = Quaternion.LookRotation((ray.origin + ray.direction * 10f) - transform.position, transform.up);
 
             transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, Time.fixedDeltaTime * rotationSpeed);
+
+            if (!aligned)
+                transform.Rotate(new Vector3(0, 0, zRotation) * Time.fixedDeltaTime * rotationSpeed);
+        }
+        else
+        {
+            if (!aligned)
+                transform.Rotate(new Vector3(0, 0, zRotation) * Time.fixedDeltaTime * rotationSpeed);
         }
 
-        // align to planet surface
         if (planetoid != null)
         {
             distanceToPlanetCore = Vector3.Distance(transform.position, planetoid.transform.position);
 
             if (distanceToPlanetCore < alignDistance)
             {
+                aligned = true;
+
                 Vector3 gravityVector = planetoid.transform.position - transform.position;
 
                 targetRotation = Quaternion.LookRotation(transform.forward, -gravityVector);
@@ -93,6 +118,10 @@ public class FlyCamera : MonoBehaviour
             currentSpeed = speed * 10f;
         if (Input.GetKey(KeyCode.LeftAlt))
             currentSpeed = speed * 100f;
+        if (Input.GetKey(KeyCode.LeftShift) && Input.GetKey(KeyCode.LeftAlt))
+            currentSpeed = speed * 1000f;
+        if (Input.GetKey(KeyCode.LeftControl))
+            currentSpeed = speed / 10f;
 
         transform.Translate(velocity * currentSpeed);
     }

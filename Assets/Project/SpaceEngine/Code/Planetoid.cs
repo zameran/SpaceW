@@ -30,6 +30,8 @@ public class Planetoid : MonoBehaviour
     public QuadStorage Cache = null;
     public NoiseParametersSetter NPS = null;
 
+    public bool UseLOD = true;
+
     private void Start()
     {
         ThreadScheduler.Initialize();
