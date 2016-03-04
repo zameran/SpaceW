@@ -81,6 +81,9 @@ public class Planetoid : MonoBehaviour
         if (Quads.Count > 0)
             return;
 
+        if (PrototypeMesh == null)
+            PrototypeMesh = MeshFactory.SetupQuadMesh(QS.nVertsPerEdge);
+
         SetupMainQuad(QuadPostion.Top);
         SetupMainQuad(QuadPostion.Bottom);
         SetupMainQuad(QuadPostion.Left);
@@ -90,9 +93,6 @@ public class Planetoid : MonoBehaviour
 
         if (NPS != null)
             NPS.LoadAndInit();
-
-        if (PrototypeMesh == null)
-            PrototypeMesh = MeshFactory.SetupQuadMesh(QS.nVertsPerEdge);
     }
 
     [ContextMenu("ReSetupQuads")]

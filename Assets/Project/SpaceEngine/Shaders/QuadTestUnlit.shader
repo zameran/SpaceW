@@ -107,6 +107,10 @@
 				v.tangent = float4(FindTangent(tex2Dlod(_NormalTexture, float4(v.texcoord.xy, 0, 0)), 0.01, float3(0, 1, 0)), 1);
 				v.normal = normal;
 
+				v.tangent.xyz += position.xyz;
+				v.normal.xyz += position.xyz;
+
+				/*
 				if (_Side == 0)//top
 				{
 
@@ -138,10 +142,11 @@
 				
 				v.tangent.xyz += mul(position.xyz, -rotation);
 				v.normal.xyz += mul(position.xyz, -rotation);
+				*/
 
 				float atten = 1.0;
 				float3 normalDirection = normalize(mul(float4(v.normal, 0), _Object2World).xyz);
-				float3 lightDirection = normalize(_WorldSpaceLightPos0.xyz - float3(4096, 4096, 8192));	
+				float3 lightDirection = normalize(_WorldSpaceLightPos0.xyz - float3(0, 0, -8192));	//float3(4096, 4096, 8192));
 				float3 diffuseReflection = atten * _LightColor0.xyz * max(0, dot(normalDirection, lightDirection));
 				float3 lightFinal = diffuseReflection * UNITY_LIGHTMODEL_AMBIENT.xyz;
 

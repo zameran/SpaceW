@@ -107,6 +107,10 @@ public class FlyCamera : MonoBehaviour
 
                 transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, Time.fixedDeltaTime * rotationSpeed * 3f);
             }
+            else
+            {
+                aligned = false;
+            }
         }
 
         velocity.z = Input.GetAxis("Vertical");

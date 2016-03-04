@@ -152,6 +152,7 @@ public class Quad : MonoBehaviour
     public bool Generated = false;
     public bool ShouldDraw = false;
     public bool ReadyForDispatch = false;
+    public bool Splitting = false;
 
     public float lodUpdateInterval = 0.25f;
     public float lastLodUpdateTime = 0.00f;
@@ -228,14 +229,14 @@ public class Quad : MonoBehaviour
             {
                 if (Generated && !HaveSubQuads && !Planetoid.Working)
                 {
-                    if (GetDistanceToClosestCorner() < Planetoid.LODDistances[LODLevel + 1])
+                    if (GetDistanceToClosestCorner() < Planetoid.LODDistances[LODLevel + 1] && !Splitting)
                     {
                         StartCoroutine(Split());
                     }
                 }
                 else
                 {
-                    if (GetDistanceToClosestCorner() > Planetoid.LODDistances[LODLevel + 1])
+                    if (GetDistanceToClosestCorner() > Planetoid.LODDistances[LODLevel + 1] && !Splitting)
                     {
                         Unsplit();
                     }
@@ -254,8 +255,8 @@ public class Quad : MonoBehaviour
         if (NormalTexture != null)
             NormalTexture.ReleaseAndDestroy();
 
-        if (QuadMesh != null)
-            DestroyImmediate(QuadMesh);
+        //if (QuadMesh != null)
+        //    DestroyImmediate(QuadMesh);
 
         if (QuadMaterial != null)
             DestroyImmediate(QuadMaterial);
@@ -325,6 +326,7 @@ public class Quad : MonoBehaviour
 
         Planetoid.Working = true;
         HaveSubQuads = true;
+        Splitting = true;
 
         for (int sY = 0; sY < 2; sY++)
         {
@@ -361,6 +363,7 @@ public class Quad : MonoBehaviour
                 }
 
                 Quad quad = Planetoid.SetupSubQuad(Position);
+                quad.Splitting = true;
                 quad.ShouldDraw = false;
                 quad.InitCorners(subTopLeft, subBottomRight, subTopRight, subBottomLeft);
                 quad.SetupParent(this);
@@ -368,7 +371,9 @@ public class Quad : MonoBehaviour
                 quad.SetupID(quad, id);
                 quad.SetupVectors(quad, id, staticX, staticY, staticZ);
 
-                quad.transform.parent = transform;
+                if (quad.Parent.transform != null)
+                    quad.transform.parent = quad.Parent.transform;
+
                 quad.gameObject.name += "_ID" + id + "_LOD" + quad.LODLevel;
 
                 quad.ReadyForDispatch = true;
@@ -384,12 +389,14 @@ public class Quad : MonoBehaviour
 
         foreach (Quad q in Subquads)
         {
+            q.Splitting = false;
             q.ShouldDraw = true;
         }
 
         ShouldDraw = false;
 
         Planetoid.Working = false;
+        Splitting = false;
     }
 
     public void Unsplit()
@@ -400,7 +407,7 @@ public class Quad : MonoBehaviour
         {
             if (Subquads[i].HaveSubQuads)
             {
-                //Subquads[i].Unsplit();
+                Subquads[i].Unsplit();
             }
 
             if (Planetoid.Quads.Contains(Subquads[i]))
