@@ -159,16 +159,6 @@ void HeightMain (uint3 id : SV_DispatchThreadID)
 	patchPreOutput[outBuffOffset].cpos = cubeOutput;
 }
 
-#pragma kernel MeshDataMain
-[numthreads(30, 30, 1)]
-void MeshDataMain(uint3 id : SV_DispatchThreadID)
-{
-	int inBuffOffset = (id.x + 1) + (id.y + 1) * nVertsPerSideWithBorder;
-    int outBuffOffset = id.x + id.y * nVerticesPerSide;
-
-	patchOutput[outBuffOffset] = patchPreOutput[inBuffOffset];
-}
-
 #pragma kernel HeightSub
 [numthreads(32, 32, 1)]
 void HeightSub(uint3 id : SV_DispatchThreadID)

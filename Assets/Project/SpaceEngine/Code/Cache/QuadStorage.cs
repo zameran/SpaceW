@@ -1,87 +1,67 @@
 ﻿using UnityEngine;
+
+using System.Linq;
 using System.Collections;
 using System.Collections.Generic;
 
 public class QuadStorage : MonoBehaviour
 {
-    public List<QuadCache> Quads = new List<QuadCache>();
+    public List<QuadCache> Cache = new List<QuadCache>();
 
-    public bool ShouldAdd(Quad.Id id)
+    public int CacheCurrentSize { get { return Cache.Count; } }
+
+    public bool ShouldAddToCache(Quad.Id id)
     {
-        foreach (QuadCache qc in Quads)
+        return !Cache.Any(item => item.ID.Equals(id));
+    }
+
+    public QuadCache AddToCache(QuadCache q)
+    {
+        q.Init();
+
+        //if (ShouldAddToCache(q.ID))
+            Cache.Add(q);
+
+            //Cache = Cache.Distinct().ToList();
+
+        return q;
+    }
+
+    public bool HaveDataInCache(Quad.Id id)
+    {
+        for (int i = 0; i < Cache.Count; i++)
         {
-            if (qc.ID == id)
+            if (Cache[i].ID.Equals(id))
                 return false;
         }
 
         return true;
     }
 
-    public QuadCache Add(QuadCache q)
+    public QuadCache TakeCache(Quad.Id id)
     {
-        q.Init();
+        return Cache.Find(s => s.ID.Equals(id));
+    }
 
-        if (ShouldAdd(q.ID))
-            Quads.Add(q);
+    public QuadCache RemoveFromCache(QuadCache q)
+    {
+        if (Cache.Contains(q))
+            Cache.Remove(q);
+
+        ClearAllNullCache();
 
         return q;
     }
 
-    public QuadCache GetQuad(int LODLevel, int ID, int Position)
+    public void ClearAllNullCache()
     {
-        Quad.Id id = new Quad.Id(LODLevel, ID, Position);
-
-        foreach (QuadCache q in Quads)
-        {
-            if (q.ID == id)
-            {
-                return q;
-            }
-            else
-                return null;
-        }
-
-        return null;
-    }
-
-    public QuadCache GetQuad(Quad.Id id)
-    {
-        foreach (QuadCache q in Quads)
-        {
-            if (q.ID == id)
-            {
-                return q;
-            }
-            else
-                return null;
-        }
-
-        return null;
-    }
-
-    public QuadCache Remove(QuadCache q)
-    {
-        if (Quads.Contains(q))
-            Quads.Remove(q);
-
-        ClearAllNull();
-
-        return q;
-    }
-
-    public void ClearAllNull()
-    {
-        Quads.RemoveAll(s => s == null);
+        Cache.RemoveAll(s => s == null);
     }
 
     private void OnDestroy()
     {
-        foreach (QuadCache q in Quads)
+        foreach (QuadCache q in Cache)
         {
-            BufferHelper.ReleaseAndDisposeBuffers(q.QuadGenerationConstantsBuffer,
-                                                  q.PreOutDataBuffer,
-                                                  q.PreOutDataSubBuffer,
-                                                  q.OutDataBuffer);
             if (q.HeightTexture != null)
                 q.HeightTexture.ReleaseAndDestroy();
 

@@ -113,7 +113,7 @@
 
 				v2fg o;
 
-				o.color = float4(noise, noise, noise, 1); //tex2Dlod(_HeightTexture, v.texcoord);	
+				o.color = lerp(float4(noise, noise, noise, 1), tex2Dlod(_HeightTexture, v.texcoord), 0.75);	
 				o.light = float4(lightFinal, 1);
 				o.uv = v.texcoord;
 				o.uv1 = v.texcoord1;

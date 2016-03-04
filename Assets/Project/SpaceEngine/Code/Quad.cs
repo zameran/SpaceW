@@ -54,13 +54,34 @@ public class Quad : MonoBehaviour
     [Serializable]
     public class Id
     {
-        public int LODLevel, ID, Position;
+        public int LODLevel;
+        public int ID;
+        public int Position;
+
+        public string Name;
+
+        public Vector3 cubeFaceEastDirection;
+        public Vector3 cubeFaceNorthDirection;
+        public Vector3 patchCubeCenter;
 
         public Id(int LODLevel, int ID, int Position)
         {
             this.LODLevel = LODLevel;
             this.ID = ID;
             this.Position = Position;
+        }
+
+        public Id(int LODLevel, int ID, int Position, string Name, Vector3 cubeFaceEastDirection, Vector3 cubeFaceNorthDirection, Vector3 patchCubeCenter)
+        {
+            this.LODLevel = LODLevel;
+            this.ID = ID;
+            this.Position = Position;
+
+            this.Name = Name;
+
+            this.cubeFaceEastDirection = cubeFaceEastDirection;
+            this.cubeFaceNorthDirection = cubeFaceNorthDirection;
+            this.patchCubeCenter = patchCubeCenter;
         }
 
         public int Compare(Id id)
@@ -70,7 +91,10 @@ public class Quad : MonoBehaviour
 
         public bool Equals(Id id)
         {
-            return (LODLevel == id.LODLevel && ID == id.ID && Position == id.Position);
+            return (LODLevel == id.LODLevel && ID == id.ID && Position == id.Position && Name == id.Name &&
+                    cubeFaceEastDirection == id.cubeFaceEastDirection &&
+                    cubeFaceNorthDirection == id.cubeFaceNorthDirection &&
+                    patchCubeCenter == id.patchCubeCenter);
         }
 
         public override int GetHashCode()
@@ -82,14 +106,6 @@ public class Quad : MonoBehaviour
         public override string ToString()
         {
             return LODLevel.ToString() + "," + ID.ToString() + "," + Position.ToString();
-        }
-    }
-
-    public class ComparerID : IComparer<Id>
-    {
-        public int Compare(Id a, Id b)
-        {
-            return a.Compare(b);
         }
     }
 
@@ -139,6 +155,8 @@ public class Quad : MonoBehaviour
     public bool Generated = false;
     public bool ShouldDraw = false;
     public bool Cached = false;
+    public bool LoadedFromCache = false;
+    public bool ReadyForDispatch = false;
 
     public float lodUpdateInterval = 0.25f;
     public float lastLodUpdateTime = 0.00f;
@@ -169,12 +187,15 @@ public class Quad : MonoBehaviour
 
     public Id GetId()
     {
-        return GetId(LODLevel, (int)ID, (int)Position);
+        return GetId(LODLevel, (int)ID, (int)Position, this.gameObject.name,
+                     generationConstants.cubeFaceEastDirection, 
+                     generationConstants.cubeFaceNorthDirection,
+                     generationConstants.patchCubeCenter);
     }
 
-    public static Id GetId(int LODLevel, int ID, int Position)
+    public static Id GetId(int LODLevel, int ID, int Position, string Name, Vector3 cubeFaceEastDirection, Vector3 cubeFaceNorthDirection, Vector3 patchCubeCenter)
     {
-        return new Id(LODLevel, ID, Position);
+        return new Id(LODLevel, ID, Position, Name, cubeFaceEastDirection, cubeFaceEastDirection, cubeFaceNorthDirection);
     }
 
     private void QuadDispatchStarted(Quad q)
@@ -278,10 +299,13 @@ public class Quad : MonoBehaviour
 
     private void OnRenderObject()
     {
-        ReadFromCache();
+        if (ReadyForDispatch)
+        {
+            SetupCached(this);
 
-        if (!Generated)
-            Dispatch();
+            if (!Generated)
+                Dispatch();
+        }
 
         QuadMaterial.SetPass(0);
         QuadMaterial.SetBuffer("data", OutDataBuffer);
@@ -293,20 +317,11 @@ public class Quad : MonoBehaviour
         {
             Graphics.DrawMeshNow(QuadMesh, transform.localToWorldMatrix, 0);
         }
-    }
 
-    public void ReadFromCache()
-    {
-        QuadCache cache = Planetoid.Cache.GetQuad(GetId());
-
-        if (cache != null)
+        if (Generated && Planetoid.Cache.HaveDataInCache(this.GetId()))
         {
-            cache.TransferTo(this);
-            Cached = true;
-        }
-        else
-        {
-            Cached = false;
+            QuadCache cache = Planetoid.Cache.AddToCache(new QuadCache(this.GetId()));
+            cache.TransferFrom(this);
         }
     }
 
@@ -384,9 +399,11 @@ public class Quad : MonoBehaviour
                 quad.transform.parent = transform;
                 quad.gameObject.name += "_ID" + id + "_LOD" + quad.LODLevel;
 
+                quad.ReadyForDispatch = true;
+
                 Subquads.Add(quad);
 
-                for (int wait = 0; wait < 8; wait++)
+                for (int wait = 0; wait < 16; wait++)
                 {
                     yield return new WaitForEndOfFrame();
                 }
@@ -395,6 +412,7 @@ public class Quad : MonoBehaviour
 
         foreach (Quad q in Subquads)
         {
+            q.SetupCached(q);
             q.ShouldDraw = true;
         }
 
@@ -428,7 +446,7 @@ public class Quad : MonoBehaviour
         if (HaveSubQuads == true) ShouldDraw = true;
         HaveSubQuads = false;
         Subquads.Clear();
-        Planetoid.Working = false;
+        //Planetoid.Working = false;
     }
 
     public void Dispatch()
@@ -457,24 +475,26 @@ public class Quad : MonoBehaviour
         int kernel3 = CoreShader.FindKernel("HeightSub");
         int kernel4 = CoreShader.FindKernel("TexturesSub");
 
-        SetupComputeShader(kernel1, QuadGenerationConstantsBuffer, PreOutDataBuffer, PreOutDataSubBuffer, OutDataBuffer); Log("Buffers for first kernel ready!");
-
-        CoreShader.Dispatch(kernel1,
-        QS.THREADGROUP_SIZE_X_REAL,
-        QS.THREADGROUP_SIZE_Y_REAL,
-        QS.THREADGROUP_SIZE_Z_REAL); Log("First kernel ready!");
-
-        SetupComputeShader(kernel2, QuadGenerationConstantsBuffer, PreOutDataBuffer, PreOutDataSubBuffer, OutDataBuffer); Log("Buffers for second kernel ready!");
-
-        CoreShader.Dispatch(kernel2,
-        QS.THREADGROUP_SIZE_X,
-        QS.THREADGROUP_SIZE_Y,
-        QS.THREADGROUP_SIZE_Z); Log("Second kernel ready!");
-
-        SetupComputeShader(kernel3, QuadGenerationConstantsBuffer, PreOutDataBuffer, PreOutDataSubBuffer, OutDataBuffer); Log("Buffers for third kernel ready!");
-
         if (!Cached)
         {
+            Log("Quad textures not found on cache...");
+
+            SetupComputeShader(kernel1, QuadGenerationConstantsBuffer, PreOutDataBuffer, PreOutDataSubBuffer, OutDataBuffer); Log("Buffers for first kernel ready!");
+
+            CoreShader.Dispatch(kernel1,
+            QS.THREADGROUP_SIZE_X_REAL,
+            QS.THREADGROUP_SIZE_Y_REAL,
+            QS.THREADGROUP_SIZE_Z_REAL); Log("First kernel ready!");
+
+            SetupComputeShader(kernel2, QuadGenerationConstantsBuffer, PreOutDataBuffer, PreOutDataSubBuffer, OutDataBuffer); Log("Buffers for second kernel ready!");
+
+            CoreShader.Dispatch(kernel2,
+            QS.THREADGROUP_SIZE_X,
+            QS.THREADGROUP_SIZE_Y,
+            QS.THREADGROUP_SIZE_Z); Log("Second kernel ready!");
+
+            SetupComputeShader(kernel3, QuadGenerationConstantsBuffer, PreOutDataBuffer, PreOutDataSubBuffer, OutDataBuffer); Log("Buffers for third kernel ready!");
+
             CoreShader.Dispatch(kernel3,
             QS.THREADGROUP_SIZE_X_SUB_REAL,
             QS.THREADGROUP_SIZE_Y_SUB_REAL,
@@ -487,8 +507,31 @@ public class Quad : MonoBehaviour
             QS.THREADGROUP_SIZE_Y_SUB,
             QS.THREADGROUP_SIZE_Z_SUB); Log("Fourth kernel ready!");
 
-            QuadCache cache = Planetoid.Cache.Add(new QuadCache(GetId()));
-            cache.TransferFrom(this);
+            //QuadCache cache = Planetoid.Cache.AddToCache(new QuadCache(GetId()));
+            //cache.TransferFrom(this);
+        }
+        else
+        {
+            Log("Loading quad textures from cache...");
+
+            SetupComputeShader(kernel1, QuadGenerationConstantsBuffer, PreOutDataBuffer, PreOutDataSubBuffer, OutDataBuffer); Log("Buffers for first kernel ready!");
+
+            CoreShader.Dispatch(kernel1,
+            QS.THREADGROUP_SIZE_X_REAL,
+            QS.THREADGROUP_SIZE_Y_REAL,
+            QS.THREADGROUP_SIZE_Z_REAL); Log("First kernel ready!");
+
+            SetupComputeShader(kernel2, QuadGenerationConstantsBuffer, PreOutDataBuffer, PreOutDataSubBuffer, OutDataBuffer); Log("Buffers for second kernel ready!");
+
+            CoreShader.Dispatch(kernel2,
+            QS.THREADGROUP_SIZE_X,
+            QS.THREADGROUP_SIZE_Y,
+            QS.THREADGROUP_SIZE_Z); Log("Second kernel ready!");
+
+            QuadCache cache = Planetoid.Cache.TakeCache(GetId());
+            cache.TransferTo(this);
+
+            LoadedFromCache = true;
         }
 
         Generated = true;
@@ -601,6 +644,16 @@ public class Quad : MonoBehaviour
     public void SetupID(Quad quad, int id)
     {
         quad.ID = (QuadID)id;
+    }
+
+    public void SetupCached()
+    {
+        Cached = !Planetoid.Cache.HaveDataInCache(this.GetId());
+    }
+
+    public void SetupCached(Quad quad)
+    {
+        quad.Cached = !Planetoid.Cache.HaveDataInCache(quad.GetId());
     }
 
     public void SetupBounds(Quad quad, Mesh mesh)
