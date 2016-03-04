@@ -24,6 +24,7 @@
 			
 			#include "UnityCG.cginc"
 			#include "UnityLightingCommon.cginc"
+			#include "TCCommon.cginc"
 
 			struct appdata_full_compute 
 			{
@@ -151,6 +152,11 @@
 				float3 lightFinal = diffuseReflection * UNITY_LIGHTMODEL_AMBIENT.xyz;
 
 				v2fg o;
+
+				//GLSL
+				//vec3 color = mix(snowColor, slateColor, smoothstep(1.5, 1.6, slope + .2*fBm(worldSpacePosition, .4f, 1.918, 4)));
+				//HLSL
+				//float4 color = lerp(noiseColor, mapColor, smoothstep(1.5, 1.6, slope + 0.4 * Fbm(v.vertex * 0.0001, 4)));
 
 				o.color = lerp(float4(noise, noise, noise, 1), tex2Dlod(_HeightTexture, v.texcoord), 0.75);	
 				o.light = float4(lightFinal, 1);

@@ -9,6 +9,7 @@
 //#define defaultNoise
 
 #include "Assets/Project/SpaceEngine/Shaders/TCCommonAsteroid.cginc"
+//#include "Assets/Project/SpaceEngine/Shaders/TCCommonTerra.cginc"
 
 struct QuadGenerationConstants
 {
@@ -30,7 +31,7 @@ struct OutputStruct
 	float noise;
 
 	float3 patchCenter;
-
+	
 	float4 vcolor;
     float4 pos;
 	float4 cpos;

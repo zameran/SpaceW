@@ -174,7 +174,9 @@ public class Quad : MonoBehaviour
                      generationConstants.patchCubeCenter);
     }
 
-    public static Id GetId(int LODLevel, int ID, int Position, string Name, Vector3 cubeFaceEastDirection, Vector3 cubeFaceNorthDirection, Vector3 patchCubeCenter)
+    public static Id GetId(int LODLevel, int ID, int Position, string Name, Vector3 cubeFaceEastDirection, 
+                                                                            Vector3 cubeFaceNorthDirection, 
+                                                                            Vector3 patchCubeCenter)
     {
         return new Id(LODLevel, ID, Position, Name, cubeFaceEastDirection, cubeFaceEastDirection, cubeFaceNorthDirection);
     }
@@ -283,6 +285,8 @@ public class Quad : MonoBehaviour
             if (!Generated)
                 Dispatch();
         }
+
+        SetupBounds(this, QuadMesh);
 
         QuadMaterial.SetPass(0);
         QuadMaterial.SetBuffer("data", OutDataBuffer);
@@ -715,7 +719,7 @@ public class Quad : MonoBehaviour
         Vector3 tlc = quad.topLeftCorner;
 
         tlc = tlc.Abs();
-        tlc = tlc * 2;
+        //tlc = tlc;
 
         return tlc;
     }
