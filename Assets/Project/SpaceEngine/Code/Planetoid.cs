@@ -22,6 +22,8 @@ public class Planetoid : MonoBehaviour
     public Shader ColorShader;
     public ComputeShader CoreShader;
 
+    public readonly int DispatchSkipFramesCount = 8;
+
     public int LODMaxLevel = 8;
     public int[] LODDistances = new int[9] { 2048, 1024, 512, 256, 128, 64, 32, 16, 8 };
 
@@ -56,6 +58,11 @@ public class Planetoid : MonoBehaviour
     }
 
     private void OnGUI()
+    {
+
+    }
+
+    private void OnRenderObject()
     {
 
     }

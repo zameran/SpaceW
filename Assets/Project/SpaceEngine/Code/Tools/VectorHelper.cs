@@ -24,6 +24,11 @@ public static class VectorHelper
         return v.normalized * radius;
     }
 
+    public static Vector3 NormalizeToRadius1(this Vector3 v, float radius)
+    {
+        return v * radius;
+    }
+
     public static Vector2 CartesianToPolar(Vector3 xyz)
     {
         var longitude = Mathf.Atan2(xyz.x, xyz.z);
@@ -42,7 +47,7 @@ public static class VectorHelper
         return uv;
     }
 
-    public static Vector3 SperifySpherePoint(Vector3 point)
+    public static Vector3 SpherifyPoint(Vector3 point)
     {
         float dX2 = point.x * point.x;
         float dY2 = point.y * point.y;

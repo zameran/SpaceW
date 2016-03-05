@@ -1,18 +1,19 @@
-﻿using UnityEngine;
+﻿using System;
 
-using System.Collections;
+using UnityEngine;
 
+[Serializable]
 public class QuadTextureCache : QuadCache
 {
     public RenderTexture HeightTexture;
     public RenderTexture NormalTexture;
 
-    public QuadTextureCache(Quad.Id id) : base(id)
+    public QuadTextureCache(Quad.Id id, QuadStorage owner) : base(id, owner)
     {
 
     }
 
-    protected override void Init()
+    public override void Init()
     {
         this.HeightTexture = RTExtensions.CreateRTexture(QS.nVertsPerEdgeSub, 0);
         this.NormalTexture = RTExtensions.CreateRTexture(QS.nVertsPerEdgeSub, 0);
@@ -22,25 +23,50 @@ public class QuadTextureCache : QuadCache
         base.Init();
     }
 
-    protected override void TransferTo(Quad q)
+    public override void TransferTo(Quad q)
     {
-        ThreadScheduler.RunOnMainThread(() =>
+        if (Owner.Multithreaded)
         {
-            Graphics.Blit(this.HeightTexture, q.HeightTexture);
-            Graphics.Blit(this.NormalTexture, q.NormalTexture);
-        });
+            ThreadScheduler.RunOnMainThread(() =>
+            {
+                Graphics.Blit(this.HeightTexture, q.HeightTexture);
+                Graphics.Blit(this.NormalTexture, q.NormalTexture);
+            });
+        }
+        else
+        {
+
+        }
 
         base.TransferTo(q);
     }
 
-    protected override void TransferFrom(Quad q)
+    public override void TransferFrom(Quad q)
     {
-        ThreadScheduler.RunOnMainThread(() =>
+        if (Owner.Multithreaded)
         {
-            Graphics.Blit(q.HeightTexture, this.HeightTexture);
-            Graphics.Blit(q.NormalTexture, this.NormalTexture);
-        });
+            ThreadScheduler.RunOnMainThread(() =>
+            {
+                Graphics.Blit(q.HeightTexture, this.HeightTexture);
+                Graphics.Blit(q.NormalTexture, this.NormalTexture);
+            });
+        }
+        else
+        {
+
+        }
 
         base.TransferTo(q);
+    }
+
+    public override void OnDestroy()
+    {
+        if (this.HeightTexture != null)
+            this.HeightTexture.ReleaseAndDestroy();
+
+        if (this.NormalTexture != null)
+            this.NormalTexture.ReleaseAndDestroy();
+
+        base.OnDestroy();
     }
 }

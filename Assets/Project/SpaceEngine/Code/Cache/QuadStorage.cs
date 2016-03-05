@@ -6,17 +6,16 @@ using System.Collections.Generic;
 
 public class QuadStorage : MonoBehaviour
 {
-    public List<QuadTextureCache> Cache = new List<QuadTextureCache>();
+    public bool Multithreaded = false;
+
+    public List<QuadFullCache> Cache = new List<QuadFullCache>();
 
     private void OnDestroy()
     {
-        foreach (QuadTextureCache q in Cache)
+        foreach (QuadFullCache q in Cache)
         {
-            if (q.HeightTexture != null)
-                q.HeightTexture.ReleaseAndDestroy();
-
-            if (q.NormalTexture != null)
-                q.NormalTexture.ReleaseAndDestroy();
+            if (q != null)
+                q.OnDestroy();
         }
     }
 }

@@ -5,6 +5,7 @@ using System.Linq;
 using System.Collections;
 using System.Collections.Generic;
 
+using ZFramework.Math;
 using ZFramework.Unity.Common.PerfomanceMonitor;
 
 [Serializable]
@@ -168,7 +169,7 @@ public class Quad : MonoBehaviour
 
     public Id GetId()
     {
-        return GetId(LODLevel, (int)ID, (int)Position, this.gameObject.name,
+        return GetId(LODLevel, (int)ID, (int)Position, gameObject.name,
                      generationConstants.cubeFaceEastDirection,
                      generationConstants.cubeFaceNorthDirection,
                      generationConstants.patchCubeCenter);
@@ -223,9 +224,11 @@ public class Quad : MonoBehaviour
 
     private void Update()
     {
+        Render();
+
         if (Time.time > lastLodUpdateTime + lodUpdateInterval && Planetoid.UseLOD)
         {
-            this.lastLodUpdateTime = Time.time;
+            lastLodUpdateTime = Time.time;
 
             if (LODLevel < Planetoid.LODMaxLevel)
             {
@@ -235,12 +238,20 @@ public class Quad : MonoBehaviour
                     {
                         StartCoroutine(Split());
                     }
+                    else
+                    {
+
+                    }
                 }
                 else
                 {
                     if (GetDistanceToClosestCorner() > Planetoid.LODDistances[LODLevel + 1] && !Splitting)
                     {
                         Unsplit();
+                    }
+                    else
+                    {
+
                     }
                 }
             }
@@ -280,6 +291,16 @@ public class Quad : MonoBehaviour
 
     private void OnRenderObject()
     {
+
+    }
+
+    private void OnDrawGizmos()
+    {
+
+    }
+
+    private void Render()
+    {
         if (ReadyForDispatch)
         {
             if (!Generated)
@@ -298,8 +319,66 @@ public class Quad : MonoBehaviour
         if (Generated && ShouldDraw)
         {
             if (QuadMesh != null)
-                Graphics.DrawMeshNow(QuadMesh, transform.localToWorldMatrix, 0);
+            {
+                Graphics.DrawMesh(QuadMesh, transform.localToWorldMatrix, QuadMaterial, 0, null, 0, null, true, true);
+            }
         }
+    }
+    
+    public void RenderOutline(Camera camera, Material lineMaterial)
+    {
+        #if UNITY_EDITOR
+        if (UnityEditor.SceneView.currentDrawingSceneView != null) return; //Do not draw at Scene tab in editor.
+        #endif
+
+        Color lineColor = Color.blue;
+
+        int[,] ORDER = new int[,] { { 1, 0 }, { 2, 3 }, { 0, 2 }, { 3, 1 } };
+
+        Vector3[] verts = new Vector3[8];
+
+        Vector3 tl = this.topLeftCorner.NormalizeToRadius(Planetoid.PlanetRadius);
+        Vector3 tr = this.topRightCorner.NormalizeToRadius(Planetoid.PlanetRadius);
+        Vector3 bl = this.bottomLeftCorner.NormalizeToRadius(Planetoid.PlanetRadius);
+        Vector3 br = this.bottomRightCorner.NormalizeToRadius(Planetoid.PlanetRadius);
+
+        verts[0] = tl.NormalizeToRadius(Planetoid.PlanetRadius + 100);
+        verts[1] = tr.NormalizeToRadius(Planetoid.PlanetRadius + 100);
+        verts[2] = bl.NormalizeToRadius(Planetoid.PlanetRadius + 100);
+        verts[3] = br.NormalizeToRadius(Planetoid.PlanetRadius + 100);
+
+        verts[4] = tl.NormalizeToRadius(Planetoid.PlanetRadius - 100);
+        verts[5] = tr.NormalizeToRadius(Planetoid.PlanetRadius - 100);
+        verts[6] = bl.NormalizeToRadius(Planetoid.PlanetRadius - 100);
+        verts[7] = br.NormalizeToRadius(Planetoid.PlanetRadius - 100);
+
+        GL.PushMatrix();
+        GL.LoadIdentity();
+        GL.MultMatrix(Camera.main.worldToCameraMatrix * transform.localToWorldMatrix);
+        GL.LoadProjectionMatrix(camera.projectionMatrix);
+
+        lineMaterial.SetPass(0);
+
+        GL.Begin(GL.LINES);
+        GL.Color(lineColor);
+
+        for (int i = 0; i < 4; i++)
+        {
+            //Draw bottom quad
+            GL.Vertex3(verts[ORDER[i, 0]].x, verts[ORDER[i, 0]].y, verts[ORDER[i, 0]].z);
+            GL.Vertex3(verts[ORDER[i, 1]].x, verts[ORDER[i, 1]].y, verts[ORDER[i, 1]].z);
+
+            //Draw top quad
+            GL.Vertex3(verts[ORDER[i, 0] + 4].x, verts[ORDER[i, 0] + 4].y, verts[ORDER[i, 0] + 4].z);
+            GL.Vertex3(verts[ORDER[i, 1] + 4].x, verts[ORDER[i, 1] + 4].y, verts[ORDER[i, 1] + 4].z);
+
+            //Draw verticals
+            GL.Vertex3(verts[ORDER[i, 0]].x, verts[ORDER[i, 0]].y, verts[ORDER[i, 0]].z);
+            GL.Vertex3(verts[ORDER[i, 0] + 4].x, verts[ORDER[i, 0] + 4].y, verts[ORDER[i, 0] + 4].z);
+        }
+
+        GL.End();
+        GL.PopMatrix();
     }
 
     public void InitCorners(Vector3 topLeft, Vector3 bottmoRight, Vector3 topRight, Vector3 bottomLeft)
@@ -384,7 +463,7 @@ public class Quad : MonoBehaviour
 
                 Subquads.Add(quad);
 
-                for (int wait = 0; wait < 8; wait++)
+                for (int wait = 0; wait < Planetoid.DispatchSkipFramesCount; wait++)
                 {
                     yield return new WaitForEndOfFrame();
                 }
@@ -426,9 +505,9 @@ public class Quad : MonoBehaviour
         }
 
         if (HaveSubQuads == true) ShouldDraw = true;
+
         HaveSubQuads = false;
         Subquads.Clear();
-        //Planetoid.Working = false;
     }
 
     public void Dispatch()
@@ -719,7 +798,7 @@ public class Quad : MonoBehaviour
         Vector3 tlc = quad.topLeftCorner;
 
         tlc = tlc.Abs();
-        //tlc = tlc;
+        tlc = tlc * 2;
 
         return tlc;
     }
