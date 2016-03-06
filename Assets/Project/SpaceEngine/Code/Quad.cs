@@ -154,6 +154,7 @@ public class Quad : MonoBehaviour
     public bool ShouldDraw = false;
     public bool ReadyForDispatch = false;
     public bool Splitting = false;
+    public bool Unsplitted = false;
 
     public float lodUpdateInterval = 0.25f;
     public float lastLodUpdateTime = 0.00f;
@@ -324,7 +325,7 @@ public class Quad : MonoBehaviour
             }
         }
     }
-    
+
     public void RenderOutline(Camera camera, Material lineMaterial)
     {
         #if UNITY_EDITOR
@@ -410,6 +411,7 @@ public class Quad : MonoBehaviour
         Planetoid.Working = true;
         HaveSubQuads = true;
         Splitting = true;
+        Unsplitted = false;
 
         for (int sY = 0; sY < 2; sY++)
         {
@@ -484,6 +486,8 @@ public class Quad : MonoBehaviour
 
     public void Unsplit()
     {
+        if (Unsplitted) return;
+
         StopAllCoroutines();
 
         for (int i = 0; i < Subquads.Count; i++)
@@ -507,6 +511,7 @@ public class Quad : MonoBehaviour
         if (HaveSubQuads == true) ShouldDraw = true;
 
         HaveSubQuads = false;
+        Unsplitted = true;
         Subquads.Clear();
     }
 
@@ -795,12 +800,7 @@ public class Quad : MonoBehaviour
 
     public Vector3 GetBoundsSize(Quad quad)
     {
-        Vector3 tlc = quad.topLeftCorner;
-
-        tlc = tlc.Abs();
-        tlc = tlc * 2;
-
-        return tlc;
+        return new Vector3(9e37f, 9e37f, 9e37f);
     }
 
     public Vector3 GetCubeFaceEastDirection(QuadPostion quadPosition)

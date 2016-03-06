@@ -22,7 +22,7 @@ public class Planetoid : MonoBehaviour
     public Shader ColorShader;
     public ComputeShader CoreShader;
 
-    public readonly int DispatchSkipFramesCount = 8;
+    public int DispatchSkipFramesCount = 8;
 
     public int LODMaxLevel = 8;
     public int[] LODDistances = new int[9] { 2048, 1024, 512, 256, 128, 64, 32, 16, 8 };
@@ -55,6 +55,8 @@ public class Planetoid : MonoBehaviour
         {
             DrawWireframe = !DrawWireframe;
         }
+
+        CheckCutoff();
     }
 
     private void OnGUI()
@@ -176,6 +178,20 @@ public class Planetoid : MonoBehaviour
         Quads.Add(quadComponent);
 
         return quadComponent;
+    }
+
+    public void CheckCutoff()
+    {
+        //Prevent fast jumping of lod distances check and working state.
+        if(Vector3.Distance(LODTarget.transform.position, this.transform.position) > this.PlanetRadius * 2 + LODDistances[0])
+        {
+            for (int i = 0; i < Quads.Count; i++)
+            {
+                Quads[i].StopAllCoroutines();
+            }
+
+            this.Working = false;
+        }
     }
 
     private void Log(string msg)

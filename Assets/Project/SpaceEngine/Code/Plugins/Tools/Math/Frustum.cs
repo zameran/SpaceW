@@ -1,6 +1,8 @@
-﻿public class Frustum
+﻿using UnityEngine;
+
+public class Frustum
 {
-    public enum VISIBILTY { FULLY = 0, PARTIALLY = 1, INVISIBLE = 3 };
+    public enum VISIBILITY { FULLY = 0, PARTIALLY = 1, INVISIBLE = 3 };
 
     static public Vector4d[] GetFrustumPlanes(Matrix4x4d mat)
     {
@@ -47,50 +49,94 @@
         return frustumPlanes;
     }
 
-    static public VISIBILTY GetVisibility(Vector4d[] frustumPlanes, Box3d box)
+    static public Vector4d[] GetFrustumPlanes(Matrix4x4 mat)
     {
+        //extract frustum planes from a projection matrix
+        Vector4d[] frustumPlanes = new Vector4d[6];
 
-        VISIBILTY v0 = GetVisibility(frustumPlanes[0], box);
-        if (v0 == VISIBILTY.INVISIBLE)
-        {
-            return VISIBILTY.INVISIBLE;
-        }
+        // Extract the LEFT plane
+        frustumPlanes[0] = new Vector4d();
+        frustumPlanes[0].x = mat.m30 + mat.m00;
+        frustumPlanes[0].y = mat.m31 + mat.m01;
+        frustumPlanes[0].z = mat.m32 + mat.m02;
+        frustumPlanes[0].w = mat.m33 + mat.m03;
+        // Extract the RIGHT plane
+        frustumPlanes[1] = new Vector4d();
+        frustumPlanes[1].x = mat.m30 - mat.m00;
+        frustumPlanes[1].y = mat.m31 - mat.m01;
+        frustumPlanes[1].z = mat.m32 - mat.m02;
+        frustumPlanes[1].w = mat.m33 - mat.m03;
+        // Extract the BOTTOM plane
+        frustumPlanes[2] = new Vector4d();
+        frustumPlanes[2].x = mat.m30 + mat.m10;
+        frustumPlanes[2].y = mat.m31 + mat.m11;
+        frustumPlanes[2].z = mat.m32 + mat.m12;
+        frustumPlanes[2].w = mat.m33 + mat.m13;
+        // Extract the TOP plane
+        frustumPlanes[3] = new Vector4d();
+        frustumPlanes[3].x = mat.m30 - mat.m10;
+        frustumPlanes[3].y = mat.m31 - mat.m11;
+        frustumPlanes[3].z = mat.m32 - mat.m12;
+        frustumPlanes[3].w = mat.m33 - mat.m13;
+        // Extract the NEAR plane
+        frustumPlanes[4] = new Vector4d();
+        frustumPlanes[4].x = mat.m30 + mat.m20;
+        frustumPlanes[4].y = mat.m31 + mat.m21;
+        frustumPlanes[4].z = mat.m32 + mat.m22;
+        frustumPlanes[4].w = mat.m33 + mat.m23;
+        // Extract the FAR plane
+        frustumPlanes[5] = new Vector4d();
+        frustumPlanes[5].x = mat.m30 - mat.m20;
+        frustumPlanes[5].y = mat.m31 - mat.m21;
+        frustumPlanes[5].z = mat.m32 - mat.m22;
+        frustumPlanes[5].w = mat.m33 - mat.m23;
 
-        VISIBILTY v1 = GetVisibility(frustumPlanes[1], box);
-        if (v1 == VISIBILTY.INVISIBLE)
-        {
-            return VISIBILTY.INVISIBLE;
-        }
-
-        VISIBILTY v2 = GetVisibility(frustumPlanes[2], box);
-        if (v2 == VISIBILTY.INVISIBLE)
-        {
-            return VISIBILTY.INVISIBLE;
-        }
-
-        VISIBILTY v3 = GetVisibility(frustumPlanes[3], box);
-        if (v3 == VISIBILTY.INVISIBLE)
-        {
-            return VISIBILTY.INVISIBLE;
-        }
-
-        VISIBILTY v4 = GetVisibility(frustumPlanes[4], box);
-        if (v4 == VISIBILTY.INVISIBLE)
-        {
-            return VISIBILTY.INVISIBLE;
-        }
-
-        if (v0 == VISIBILTY.FULLY && v1 == VISIBILTY.FULLY &&
-            v2 == VISIBILTY.FULLY && v3 == VISIBILTY.FULLY &&
-            v4 == VISIBILTY.FULLY)
-        {
-            return VISIBILTY.FULLY;
-        }
-
-        return VISIBILTY.PARTIALLY;
+        return frustumPlanes;
     }
 
-    static VISIBILTY GetVisibility(Vector4d clip, Box3d box)
+    static public VISIBILITY GetVisibility(Vector4d[] frustumPlanes, Box3d box)
+    {
+        VISIBILITY v0 = GetVisibility(frustumPlanes[0], box);
+        if (v0 == VISIBILITY.INVISIBLE)
+        {
+            return VISIBILITY.INVISIBLE;
+        }
+
+        VISIBILITY v1 = GetVisibility(frustumPlanes[1], box);
+        if (v1 == VISIBILITY.INVISIBLE)
+        {
+            return VISIBILITY.INVISIBLE;
+        }
+
+        VISIBILITY v2 = GetVisibility(frustumPlanes[2], box);
+        if (v2 == VISIBILITY.INVISIBLE)
+        {
+            return VISIBILITY.INVISIBLE;
+        }
+
+        VISIBILITY v3 = GetVisibility(frustumPlanes[3], box);
+        if (v3 == VISIBILITY.INVISIBLE)
+        {
+            return VISIBILITY.INVISIBLE;
+        }
+
+        VISIBILITY v4 = GetVisibility(frustumPlanes[4], box);
+        if (v4 == VISIBILITY.INVISIBLE)
+        {
+            return VISIBILITY.INVISIBLE;
+        }
+
+        if (v0 == VISIBILITY.FULLY && v1 == VISIBILITY.FULLY &&
+            v2 == VISIBILITY.FULLY && v3 == VISIBILITY.FULLY &&
+            v4 == VISIBILITY.FULLY)
+        {
+            return VISIBILITY.FULLY;
+        }
+
+        return VISIBILITY.PARTIALLY;
+    }
+
+    static VISIBILITY GetVisibility(Vector4d clip, Box3d box)
     {
         double x0 = box.xmin * clip.x;
         double x1 = box.xmax * clip.x;
@@ -109,12 +155,14 @@
 
         if (p1 <= 0 && p2 <= 0 && p3 <= 0 && p4 <= 0 && p5 <= 0 && p6 <= 0 && p7 <= 0 && p8 <= 0)
         {
-            return VISIBILTY.INVISIBLE;
+            return VISIBILITY.INVISIBLE;
         }
+
         if (p1 > 0 && p2 > 0 && p3 > 0 && p4 > 0 && p5 > 0 && p6 > 0 && p7 > 0 && p8 > 0)
         {
-            return VISIBILTY.FULLY;
+            return VISIBILITY.FULLY;
         }
-        return VISIBILTY.PARTIALLY;
+
+        return VISIBILITY.PARTIALLY;
     }
 }
