@@ -33,6 +33,7 @@ public class Planetoid : MonoBehaviour
     public NoiseParametersSetter NPS = null;
 
     public bool UseLOD = true;
+    public bool RenderPerUpdate = false;
 
     private void Start()
     {

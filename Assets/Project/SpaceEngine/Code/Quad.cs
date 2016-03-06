@@ -225,7 +225,8 @@ public class Quad : MonoBehaviour
 
     private void Update()
     {
-        Render();
+        if (Planetoid.RenderPerUpdate)
+            Render();
 
         if (Time.time > lastLodUpdateTime + lodUpdateInterval && Planetoid.UseLOD)
         {
@@ -292,7 +293,8 @@ public class Quad : MonoBehaviour
 
     private void OnRenderObject()
     {
-
+        if (!Planetoid.RenderPerUpdate)
+            Render();
     }
 
     private void OnDrawGizmos()
@@ -321,7 +323,10 @@ public class Quad : MonoBehaviour
         {
             if (QuadMesh != null)
             {
-                Graphics.DrawMesh(QuadMesh, transform.localToWorldMatrix, QuadMaterial, 0, null, 0, null, true, true);
+                if (Planetoid.RenderPerUpdate)
+                    Graphics.DrawMesh(QuadMesh, transform.localToWorldMatrix, QuadMaterial, 0, null, 0, null, true, true);
+                else
+                    Graphics.DrawMeshNow(QuadMesh, transform.localToWorldMatrix);
             }
         }
     }
