@@ -24,6 +24,10 @@ public class FlyCamera : MonoBehaviour
     public bool dynamicClipPlanes = false;
     public bool aligned = false;
 
+    private float x;
+    private float y;
+    private float z;
+
     void Start()
     {
         Init();
@@ -36,6 +40,10 @@ public class FlyCamera : MonoBehaviour
 
         nearClipPlaneCache = cameraComponent.nearClipPlane;
         farClipPlaneCache = cameraComponent.farClipPlane;
+
+        Vector3 angles = transform.eulerAngles;
+        x = angles.y;
+        y = angles.x;
     }
 
     void FixedUpdate()
@@ -93,6 +101,16 @@ public class FlyCamera : MonoBehaviour
                 transform.Rotate(new Vector3(0, 0, zRotation) * Time.fixedDeltaTime * rotationSpeed);
         }
 
+        if (Input.GetMouseButton(1))
+        {
+            x += (Input.GetAxis("Mouse X") * (0.006f * distanceToPlanetCore) * 0.02f);
+            y -= (Input.GetAxis("Mouse Y") * (0.003f * distanceToPlanetCore) * 0.02f);
+            z = zRotation;
+
+            if (!aligned)
+                Rotate(x, y, z, new Vector3(0, 0, -distanceToPlanetCore));
+        }
+
         if (planetoid != null)
         {
             distanceToPlanetCore = Vector3.Distance(transform.position, planetoid.transform.position);
@@ -118,6 +136,7 @@ public class FlyCamera : MonoBehaviour
 
         currentSpeed = speed;
 
+        /*
         if (Input.GetKey(KeyCode.LeftShift))
             currentSpeed = speed * 10f;
         if (Input.GetKey(KeyCode.LeftAlt))
@@ -126,7 +145,31 @@ public class FlyCamera : MonoBehaviour
             currentSpeed = speed * 1000f;
         if (Input.GetKey(KeyCode.LeftControl))
             currentSpeed = speed / 10f;
+        */
+
+        speed += Mathf.RoundToInt(Input.GetAxis("Mouse ScrollWheel") * 10.0f);
+        speed = Mathf.Clamp(speed, 1, 100);
 
         transform.Translate(velocity * currentSpeed);
+    }
+
+    public float ClampAngle(float angle, float min, float max)
+    {
+        if (angle < -360)
+            angle += 360;
+        if (angle > 360)
+            angle -= 360;
+
+        return Mathf.Clamp(angle, min, max);
+    }
+
+    void Rotate(float x, float y, float z, Vector3 distanceVector)
+    {
+        Quaternion rotation = Quaternion.Euler(y, x, z);
+
+        Vector3 position = rotation * distanceVector + planetoid.transform.position;
+
+        transform.rotation = rotation;
+        transform.position = position;
     }
 }
