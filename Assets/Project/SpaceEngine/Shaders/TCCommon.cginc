@@ -700,7 +700,7 @@ Surface GetSurfaceColor(float height, float slope, float vary)
 
 #elif (TILE_BLEND_MODE == 1)
 
-Surface GetSurfaceColor_1(float height, float slope, float vary)
+Surface GetSurfaceColor(float height, float slope, float vary)
 {
 	height = clamp(height - 0.0625, 0.0, 1.0);
 	slope = clamp(slope  + 0.1250, 0.0, 1.0);

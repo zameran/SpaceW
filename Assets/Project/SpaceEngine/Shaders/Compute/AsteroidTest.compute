@@ -6,7 +6,7 @@
 #define nVerticesPerSideSub 240
 #define nVertsPerSideWithBorderSub 256
 
-#define defaultNoise
+//#define defaultNoise
 
 #include "Assets/Project/SpaceEngine/Shaders/TCCommonAsteroid.cginc"
 //#include "Assets/Project/SpaceEngine/Shaders/TCCommonTerra.cginc"
