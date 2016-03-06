@@ -6,24 +6,24 @@
 #define nVerticesPerSideSub 240
 #define nVertsPerSideWithBorderSub 256
 
-//#define defaultNoise
+#define defaultNoise
 
 #include "Assets/Project/SpaceEngine/Shaders/TCCommonAsteroid.cginc"
 //#include "Assets/Project/SpaceEngine/Shaders/TCCommonTerra.cginc"
 
 struct QuadGenerationConstants
 {
-    float planetRadius;
+	float planetRadius;
 	float spacing;
 	float spacingreal;
 	float spacingsub;
-    float terrainMaxHeight;
+	float terrainMaxHeight;
 	float lodLevel;
 	float orientation;
 
-    float3 cubeFaceEastDirection;
-    float3 cubeFaceNorthDirection;
-    float3 patchCubeCenter;
+	float3 cubeFaceEastDirection;
+	float3 cubeFaceNorthDirection;
+	float3 patchCubeCenter;
 };
 
 struct OutputStruct
@@ -33,7 +33,7 @@ struct OutputStruct
 	float3 patchCenter;
 	
 	float4 vcolor;
-    float4 pos;
+	float4 pos;
 	float4 cpos;
 };
 
@@ -88,7 +88,7 @@ float3 CubeCoord(QuadGenerationConstants constants, float VerticesPerSide, uint3
 	float northValue = (id.y - ((VerticesPerSide - mod) / 2.0)) * spacing;
 
 	float3 cubeCoordEast = constants.cubeFaceEastDirection * eastValue;
-    float3 cubeCoordNorth = constants.cubeFaceNorthDirection * northValue;
+	float3 cubeCoordNorth = constants.cubeFaceNorthDirection * northValue;
 
 	float3 cubeCoord = cubeCoordEast + cubeCoordNorth + constants.patchCubeCenter;
 
@@ -98,8 +98,9 @@ float3 CubeCoord(QuadGenerationConstants constants, float VerticesPerSide, uint3
 float NoiseFunction(float3 coord)
 {
 	#ifdef defaultNoise
-	float noise = Fbm(coord * 0.001 + Randomize, 2);
+	float noise = Fbm(coord * 0.001 + Randomize, 2) * 2;
 	#else
+	//float noise = HeightMapAsteroid_Eroded(0.001 * coord, craterMagn, craterFreq, mainFreq, craterSqrtDensity, craterOctaves, erosion * 2);
 	float noise = HeightMapAsteroid(0.001 * coord, mainFreq, montesFreq, hillsFreq, hillsMagn, hillsFraction, craterOctaves, craterSqrtDensity, craterFreq, craterMagn);
 	//float noise = HeightMapTerra(coord * 0.001, venusFreq, mainFreq, hillsFreq, canyonsFreq, dunesFreq, montesFreq, riversFreq, venusMagn,
 	//											dunesMagn, hillsMagn, canyonsMagn, montesMagn, riversMagn, seaLevel, montesSpiky, 
@@ -119,7 +120,9 @@ float4 ColorFunction(float3 coord, float height, float slope)
 	#ifdef defaultNoise
 	float3 color = float3(0.0, 0.0, 0.0);
 	#else
-	float3 color = ColorMapAsteroid(0.001 * coord, height, slope, colorDistFreq).xyz;
+	float3 colorMapColor = ColorMapAsteroid(0.001 * coord, height, slope, colorDistFreq).xyz;
+	float3 glowMapColor = GlowMapAsteroid(0.001 * coord, height, slope, colorDistFreq, surfTemperature, lavaCoverage).xyz;
+	float3 color = colorMapColor + glowMapColor;
 	//float3 color = ColorMapTerra(0.001 * coord, mainFreq, dunesFraction, hillsFraction, hills2Fraction, canyonsFraction);
 	#endif
 	
@@ -144,19 +147,19 @@ void HeightMain (uint3 id : SV_DispatchThreadID)
 	float3 patchCubeCoordCentered = patchNormalizedCoord;
 	float noise = NoiseFunction(patchCoord);
 
-    //float height = ((noise - (-1.0)) / (1.0 - (-1.0))) * constants.terrainMaxHeight;
+	//float height = ((noise - (-1.0)) / (1.0 - (-1.0))) * constants.terrainMaxHeight;
 	float height = noise * constants.terrainMaxHeight;
 
 	patchCoordCentered += patchNormalizedCoord * height;
 	patchCubeCoordCentered += patchNormalizedCoord * height;
 
-    float4 output = float4(patchCoordCentered.xyz, 0.0);
+	float4 output = float4(patchCoordCentered.xyz, 0.0);
 	float4 cubeOutput = float4(patchCubeCoordCentered.xyz, 0.0);
 
 	patchPreOutput[outBuffOffset].noise = noise;
 	patchPreOutput[outBuffOffset].patchCenter = patchCenter;
 	patchPreOutput[outBuffOffset].vcolor = float4(noise, noise, noise, 1.0);
-    patchPreOutput[outBuffOffset].pos = output;
+	patchPreOutput[outBuffOffset].pos = output;
 	patchPreOutput[outBuffOffset].cpos = cubeOutput;
 }
 
@@ -178,19 +181,19 @@ void HeightSub(uint3 id : SV_DispatchThreadID)
 	float3 patchCubeCoordCentered = patchNormalizedCoord;
 	float noise = NoiseFunction(patchCoord);
 
-    //float height = ((noise - (-1.0)) / (1.0 - (-1.0))) * constants.terrainMaxHeight;
+	//float height = ((noise - (-1.0)) / (1.0 - (-1.0))) * constants.terrainMaxHeight;
 	float height = noise * constants.terrainMaxHeight;
 
 	patchCoordCentered += patchNormalizedCoord * height;
 	patchCubeCoordCentered += patchNormalizedCoord * height;
 
-    float4 output = float4(patchCoordCentered.xyz, 0.0);
+	float4 output = float4(patchCoordCentered.xyz, 0.0);
 	float4 cubeOutput = float4(patchCubeCoordCentered.xyz, 0.0);
 
 	patchPreOutputSub[outBuffOffset].noise = noise;
 	patchPreOutputSub[outBuffOffset].patchCenter = patchCenter;
 	patchPreOutputSub[outBuffOffset].vcolor = float4(noise, noise, noise, 1.0);
-    patchPreOutputSub[outBuffOffset].pos = output;
+	patchPreOutputSub[outBuffOffset].pos = output;
 	patchPreOutputSub[outBuffOffset].cpos = cubeOutput;
 }
 
@@ -201,7 +204,7 @@ void TexturesSub(uint3 id : SV_DispatchThreadID)
 	QuadGenerationConstants constants = quadGenerationConstants[0];
 
 	int inBuffOffset = (id.x + 1) + (id.y + 1) * nVertsPerSideWithBorderSub;
-    int outBuffOffset = id.x + id.y * nVerticesPerSideSub;
+	int outBuffOffset = id.x + id.y * nVerticesPerSideSub;
 	
 	float noise = patchPreOutputSub[inBuffOffset].noise;
 	float3 patchCenter = patchPreOutputSub[inBuffOffset].patchCenter;
@@ -269,7 +272,7 @@ void TexturesSub(uint3 id : SV_DispatchThreadID)
 void Transfer(uint3 id : SV_DispatchThreadID)
 {
 	int inBuffOffset = (id.x + 1) + (id.y + 1) * nVertsPerSideWithBorder;
-    int outBuffOffset = id.x + id.y * nVerticesPerSide;
+	int outBuffOffset = id.x + id.y * nVerticesPerSide;
 
 	patchOutput[outBuffOffset] = patchPreOutput[inBuffOffset];
 }

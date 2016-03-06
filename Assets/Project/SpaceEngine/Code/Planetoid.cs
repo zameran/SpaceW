@@ -5,205 +5,205 @@ using System.Collections.Generic;
 
 public class Planetoid : MonoBehaviour
 {
-    public bool DrawWireframe = false;
+	public bool DrawWireframe = false;
 
-    public bool Working = false;
+	public bool Working = false;
 
-    public Transform LODTarget = null;
+	public Transform LODTarget = null;
 
-    public float PlanetRadius = 1024;
+	public float PlanetRadius = 1024;
 
-    public bool DebugEnabled = false;
-    public bool DebugExtra = false;
+	public bool DebugEnabled = false;
+	public bool DebugExtra = false;
 
-    public List<Quad> MainQuads = new List<Quad>();
-    public List<Quad> Quads = new List<Quad>();
+	public List<Quad> MainQuads = new List<Quad>();
+	public List<Quad> Quads = new List<Quad>();
 
-    public Shader ColorShader;
-    public ComputeShader CoreShader;
+	public Shader ColorShader;
+	public ComputeShader CoreShader;
 
-    public int DispatchSkipFramesCount = 8;
+	public int DispatchSkipFramesCount = 8;
 
-    public int LODMaxLevel = 8;
-    public int[] LODDistances = new int[9] { 2048, 1024, 512, 256, 128, 64, 32, 16, 8 };
+	public int LODMaxLevel = 8;
+	public int[] LODDistances = new int[9] { 2048, 1024, 512, 256, 128, 64, 32, 16, 8 };
 
-    public Mesh PrototypeMesh;
+	public Mesh PrototypeMesh;
 
-    public QuadStorage Cache = null;
-    public NoiseParametersSetter NPS = null;
+	public QuadStorage Cache = null;
+	public NoiseParametersSetter NPS = null;
 
-    public bool UseLOD = true;
-    public bool RenderPerUpdate = false;
+	public bool UseLOD = true;
+	public bool RenderPerUpdate = false;
 
-    private void Start()
-    {
-        ThreadScheduler.Initialize();
+	private void Start()
+	{
+		ThreadScheduler.Initialize();
 
-        if (Cache == null)
-            if (this.gameObject.GetComponentInChildren<QuadStorage>() != null)
-                Cache = this.gameObject.GetComponentInChildren<QuadStorage>();
+		if (Cache == null)
+			if (this.gameObject.GetComponentInChildren<QuadStorage>() != null)
+				Cache = this.gameObject.GetComponentInChildren<QuadStorage>();
 
-        if (NPS != null)
-            NPS.LoadAndInit();
+		if (NPS != null)
+			NPS.LoadAndInit();
 
-        if (PrototypeMesh == null)
-            PrototypeMesh = MeshFactory.SetupQuadMesh(QS.nVertsPerEdge);
-    }
+		if (PrototypeMesh == null)
+			PrototypeMesh = MeshFactory.SetupQuadMesh(QS.nVertsPerEdge);
+	}
 
-    private void Update()
-    {
-        if(Input.GetKeyDown(KeyCode.F1))
-        {
-            DrawWireframe = !DrawWireframe;
-        }
+	private void Update()
+	{
+		if(Input.GetKeyDown(KeyCode.F1))
+		{
+			DrawWireframe = !DrawWireframe;
+		}
 
-        CheckCutoff();
-    }
+		CheckCutoff();
+	}
 
-    private void OnGUI()
-    {
+	private void OnGUI()
+	{
 
-    }
+	}
 
-    private void OnRenderObject()
-    {
+	private void OnRenderObject()
+	{
 
-    }
+	}
 
-    [ContextMenu("DestroyQuads")]
-    public void DestroyQuads()
-    {
-        for (int i = 0; i < Quads.Count; i++)
-        {
-            if(Quads[i] != null)
-                DestroyImmediate(Quads[i].gameObject);
-        }
+	[ContextMenu("DestroyQuads")]
+	public void DestroyQuads()
+	{
+		for (int i = 0; i < Quads.Count; i++)
+		{
+			if(Quads[i] != null)
+				DestroyImmediate(Quads[i].gameObject);
+		}
 
-        Quads.Clear();
-        MainQuads.Clear();
+		Quads.Clear();
+		MainQuads.Clear();
 
-        DestroyImmediate(PrototypeMesh);
-    }
+		DestroyImmediate(PrototypeMesh);
+	}
 
-    [ContextMenu("SetupQuads")]
-    public void SetupQuads()
-    {
-        if (Quads.Count > 0)
-            return;
+	[ContextMenu("SetupQuads")]
+	public void SetupQuads()
+	{
+		if (Quads.Count > 0)
+			return;
 
-        if (PrototypeMesh == null)
-            PrototypeMesh = MeshFactory.SetupQuadMesh(QS.nVertsPerEdge);
+		if (PrototypeMesh == null)
+			PrototypeMesh = MeshFactory.SetupQuadMesh(QS.nVertsPerEdge);
 
-        SetupMainQuad(QuadPostion.Top);
-        SetupMainQuad(QuadPostion.Bottom);
-        SetupMainQuad(QuadPostion.Left);
-        SetupMainQuad(QuadPostion.Right);
-        SetupMainQuad(QuadPostion.Front);
-        SetupMainQuad(QuadPostion.Back);
+		SetupMainQuad(QuadPostion.Top);
+		SetupMainQuad(QuadPostion.Bottom);
+		SetupMainQuad(QuadPostion.Left);
+		SetupMainQuad(QuadPostion.Right);
+		SetupMainQuad(QuadPostion.Front);
+		SetupMainQuad(QuadPostion.Back);
 
-        if (NPS != null)
-            NPS.LoadAndInit();
-    }
+		if (NPS != null)
+			NPS.LoadAndInit();
+	}
 
-    [ContextMenu("ReSetupQuads")]
-    public void ReSetupQuads()
-    {
-        DestroyQuads();
-        SetupQuads();
-    }
+	[ContextMenu("ReSetupQuads")]
+	public void ReSetupQuads()
+	{
+		DestroyQuads();
+		SetupQuads();
+	}
 
-    public void SetupMainQuad(QuadPostion quadPosition)
-    {
-        GameObject go = new GameObject("Quad" + "_" + quadPosition.ToString());
-        go.transform.position = Vector3.zero;
-        go.transform.rotation = Quaternion.identity;
-        go.transform.parent = this.transform;
+	public void SetupMainQuad(QuadPostion quadPosition)
+	{
+		GameObject go = new GameObject("Quad" + "_" + quadPosition.ToString());
+		go.transform.position = Vector3.zero;
+		go.transform.rotation = Quaternion.identity;
+		go.transform.parent = this.transform;
 
-        Mesh mesh = PrototypeMesh;
-        mesh.bounds = new Bounds(Vector3.zero, new Vector3(PlanetRadius * 2, PlanetRadius * 2, PlanetRadius * 2));
+		Mesh mesh = PrototypeMesh;
+		mesh.bounds = new Bounds(Vector3.zero, new Vector3(PlanetRadius * 2, PlanetRadius * 2, PlanetRadius * 2));
 
-        Material material = new Material(ColorShader);
-        material.name += "_" + quadPosition.ToString() + "(Instance)";
+		Material material = new Material(ColorShader);
+		material.name += "_" + quadPosition.ToString() + "(Instance)";
 
-        Quad quadComponent = go.AddComponent<Quad>();
-        quadComponent.CoreShader = CoreShader;
-        quadComponent.Planetoid = this;
-        quadComponent.QuadMesh = mesh;
-        quadComponent.QuadMaterial = material;
+		Quad quadComponent = go.AddComponent<Quad>();
+		quadComponent.CoreShader = CoreShader;
+		quadComponent.Planetoid = this;
+		quadComponent.QuadMesh = mesh;
+		quadComponent.QuadMaterial = material;
 
-        QuadGenerationConstants gc = QuadGenerationConstants.Init();
-        gc.planetRadius = PlanetRadius;
+		QuadGenerationConstants gc = QuadGenerationConstants.Init();
+		gc.planetRadius = PlanetRadius;
 
-        gc.cubeFaceEastDirection = quadComponent.GetCubeFaceEastDirection(quadPosition);
-        gc.cubeFaceNorthDirection = quadComponent.GetCubeFaceNorthDirection(quadPosition);
-        gc.patchCubeCenter = quadComponent.GetPatchCubeCenter(quadPosition);
+		gc.cubeFaceEastDirection = quadComponent.GetCubeFaceEastDirection(quadPosition);
+		gc.cubeFaceNorthDirection = quadComponent.GetCubeFaceNorthDirection(quadPosition);
+		gc.patchCubeCenter = quadComponent.GetPatchCubeCenter(quadPosition);
 		
-        quadComponent.Position = quadPosition;
-        quadComponent.ID = QuadID.One;
-        quadComponent.generationConstants = gc;
-        quadComponent.Planetoid = this;
-        quadComponent.SetupCorners(quadPosition);
-        quadComponent.ShouldDraw = true;
+		quadComponent.Position = quadPosition;
+		quadComponent.ID = QuadID.One;
+		quadComponent.generationConstants = gc;
+		quadComponent.Planetoid = this;
+		quadComponent.SetupCorners(quadPosition);
+		quadComponent.ShouldDraw = true;
 
-        Quads.Add(quadComponent);
-        MainQuads.Add(quadComponent);
-    }
+		Quads.Add(quadComponent);
+		MainQuads.Add(quadComponent);
+	}
 
-    public Quad SetupSubQuad(QuadPostion quadPosition)
-    {
-        GameObject go = new GameObject("Quad" + "_" + quadPosition.ToString());
-        go.transform.position = Vector3.zero;
-        go.transform.rotation = Quaternion.identity;
+	public Quad SetupSubQuad(QuadPostion quadPosition)
+	{
+		GameObject go = new GameObject("Quad" + "_" + quadPosition.ToString());
+		go.transform.position = Vector3.zero;
+		go.transform.rotation = Quaternion.identity;
 
-        Mesh mesh = PrototypeMesh;
-        mesh.bounds = new Bounds(Vector3.zero, new Vector3(PlanetRadius * 2, PlanetRadius * 2, PlanetRadius * 2));
+		Mesh mesh = PrototypeMesh;
+		mesh.bounds = new Bounds(Vector3.zero, new Vector3(PlanetRadius * 2, PlanetRadius * 2, PlanetRadius * 2));
 
-        Material material = new Material(ColorShader);
-        material.name += "_" + quadPosition.ToString() + "(Instance)";
+		Material material = new Material(ColorShader);
+		material.name += "_" + quadPosition.ToString() + "(Instance)";
 
-        Quad quadComponent = go.AddComponent<Quad>();
-        quadComponent.CoreShader = CoreShader;
-        quadComponent.Planetoid = this;
-        quadComponent.QuadMesh = mesh;
-        quadComponent.QuadMaterial = material;
-        quadComponent.SetupCorners(quadPosition);
+		Quad quadComponent = go.AddComponent<Quad>();
+		quadComponent.CoreShader = CoreShader;
+		quadComponent.Planetoid = this;
+		quadComponent.QuadMesh = mesh;
+		quadComponent.QuadMaterial = material;
+		quadComponent.SetupCorners(quadPosition);
 
-        QuadGenerationConstants gc = QuadGenerationConstants.Init();
-        gc.planetRadius = PlanetRadius;
+		QuadGenerationConstants gc = QuadGenerationConstants.Init();
+		gc.planetRadius = PlanetRadius;
 
-        quadComponent.Position = quadPosition;
-        quadComponent.generationConstants = gc;
-        quadComponent.Planetoid = this;
-        quadComponent.ShouldDraw = false;
+		quadComponent.Position = quadPosition;
+		quadComponent.generationConstants = gc;
+		quadComponent.Planetoid = this;
+		quadComponent.ShouldDraw = false;
 
-        Quads.Add(quadComponent);
+		Quads.Add(quadComponent);
 
-        return quadComponent;
-    }
+		return quadComponent;
+	}
 
-    public void CheckCutoff()
-    {
-        //Prevent fast jumping of lod distances check and working state.
-        if(Vector3.Distance(LODTarget.transform.position, this.transform.position) > this.PlanetRadius * 2 + LODDistances[0])
-        {
-            for (int i = 0; i < Quads.Count; i++)
-            {
-                Quads[i].StopAllCoroutines();
-            }
+	public void CheckCutoff()
+	{
+		//Prevent fast jumping of lod distances check and working state.
+		if(Vector3.Distance(LODTarget.transform.position, this.transform.position) > this.PlanetRadius * 2 + LODDistances[0])
+		{
+			for (int i = 0; i < Quads.Count; i++)
+			{
+				Quads[i].StopAllCoroutines();
+			}
 
-            this.Working = false;
-        }
-    }
+			this.Working = false;
+		}
+	}
 
-    private void Log(string msg)
-    {
-        if (DebugEnabled)
-            Debug.Log(msg);
-    }
+	private void Log(string msg)
+	{
+		if (DebugEnabled)
+			Debug.Log(msg);
+	}
 
-    private void Log(string msg, bool state)
-    {
-        if (state)
-            Debug.Log(msg);
-    }
+	private void Log(string msg, bool state)
+	{
+		if (state)
+			Debug.Log(msg);
+	}
 }

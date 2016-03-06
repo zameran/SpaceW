@@ -1,5 +1,19 @@
 //-----------------------------------------------------------------------------
-//#define USE_SPACE_ENGINE_NOISE
+// noise engine:
+// NOISE_ENGINE_SE - space engine
+// NOISE_ENGINE_ZNE - zameran noise engine
+// NOISE_ENGINE_I - space engine
+//#define NOISE_ENGINE_SE
+//#define NOISE_ENGINE_ZNE
+#define NOISE_ENGINE_I
+//-----------------------------------------------------------------------------
+
+//-----------------------------------------------------------------------------
+// noise engine technique: (Works only with NOISE_ENGINE ->|<- 2)
+// 0 - classic noise - OK.
+// 1 - Ken Perlin's "improved" - OK.
+// 2 - fast "improved" - OK.
+#define NOISE_ENGINE_TECHNIQUE 2
 //-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
@@ -7,7 +21,7 @@
 // 0 - hard mix (no blending)
 // 1 - soft blending
 // 2 - "smart" blening (tile heightmap based)
-#define TILE_BLEND_MODE 1
+#define TILE_BLEND_MODE 2
 //-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
@@ -16,13 +30,19 @@
 // 1 - sampling texture 2 times at different scales
 // 2 - voronoi random offset
 // 3 - voronoi random offset and rotation
-#define TILING_FIX_MODE 2
+#define TILING_FIX_MODE 3
 //-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
 #define USESAVEPOW
 #define USETEXLOD
 #define PACKED_NORMALS
+
+//-----------------------------------------------------------------------------
+// color space to use:
+// 0 - rgb
+// 1 - hsl
+#define COLOR_SPACE 0
 //-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
@@ -57,6 +77,9 @@ uniform float4    cycloneParams;  // (cycloneMagn,    cycloneFreq,    sqrt(cyclo
 uniform float4	  radParams;	  // ()
 uniform float4	  crHeightParams; // ()
 uniform float4	  craterParams1;  // ()
+uniform float4	  craterParams2;  // ()
+uniform float	  texturingHeightOffset; // ()
+uniform float	  texturingSlopeOffset;  // ()
 //-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
@@ -171,6 +194,10 @@ const float pi2 = 6.28318531;
 #define		craterRoundDist		craterParams1.y
 #define		craterDistortion	craterParams1.z
 #define		craterRaysColor		craterParams1.w
+#define		craterAmplitudePerOctave	craterParams2.x;
+#define		craterHeightPeakPerOctave	craterParams2.y;
+#define		craterHeightFloorPerOctave	craterParams2.z;
+#define		craterRadInnerPerOctave		craterParams2.w;
 //-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
@@ -180,6 +207,17 @@ const float pi2 = 6.28318531;
 //-----------------------------------------------------------------------------
 #define     GetCloudsColor(height)           tex1D(CloudsColorTable, height)
 #define     GetGasGiantCloudsColor(height)   tex2D(MaterialTable, float2(height, 0.0))
+//-----------------------------------------------------------------------------
+
+//-----------------------------------------------------------------------------
+float SavePow(float f, float p) 
+{ 
+	#ifdef USESAVEPOW 
+	return pow(abs(f), p);
+	#else
+	return pow(f, p);
+	#endif
+}
 //-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
@@ -367,6 +405,16 @@ float ColorToUnit24(in float3 color)
 }
 //-----------------------------------------------------------------------------
 
+float dFdx(float2 p)
+{
+	return p.x * p.x - p.y;
+}
+
+float dFdy(float2 p)
+{
+	return p.y * p.y - p.x;
+}
+
 //-----------------------------------------------------------------------------
 struct  Surface
 {
@@ -518,6 +566,7 @@ void GetSurfaceHeightAndSlope(inout float height, inout float slope)
 //-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
+#if (TILING_FIX_MODE <= 1)
 // Texture atlas sampling function
 // height, slope defines the tile based on MaterialTable texture
 // vary sets one of 4 different tiles of the same material
@@ -526,45 +575,121 @@ Surface GetSurfaceColorAtlas(float height, float slope, float vary)
 	float4 PackFactors = float4(1.0 / ATLAS_RES_X, 1.0 / ATLAS_RES_Y, ATLAS_TILE_RES, ATLAS_TILE_RES_LOG2);
 	slope = saturate(slope * 0.5);
 
-	float4  IdScale = tex2Dlod(MaterialTable, float4(height, slope + 0.5, 0, 0));
-	int materialID = min(int(IdScale.x) + int(vary), int(ATLAS_RES_X * ATLAS_RES_Y - 1));
-	float2  tileOffs = float2(materialID % ATLAS_RES_X, materialID / ATLAS_RES_X) * PackFactors.xy;
+	float4 IdScale = tex2Dlod(MaterialTable, float4(height + texturingHeightOffset, (slope + 0.5) + texturingSlopeOffset, 0, 0));
+	uint materialID = min(int(IdScale.x) + int(vary), int(ATLAS_RES_X * ATLAS_RES_Y - 1));
+	float2 tileOffs = float2(materialID % ATLAS_RES_X, materialID / ATLAS_RES_X) * PackFactors.xy;
 
 	Surface res;
-	float2  tileUV = (TexCoord.xy * faceParams.z + faceParams.xy) * texScale * IdScale.y;
-	//float2  dx = dFdx(tileUV * PackFactors.z);
-	//float2  dy = dFdy(tileUV * PackFactors.z);
-	float2  dx = 0.0;
-	float2  dy = 0.0;
-	//float lod = clamp(0.5 * log2(max(dot(dx, dx), dot(dy, dy))), 0.0, PackFactors.w);
-	float lod = clamp(0.5, 0.0, PackFactors.w);
-	float2  invSize = float2(pow(2.0, lod - PackFactors.w), 0.0) * PackFactors.xy;
-	float4  uv = float4(tileOffs + frac(tileUV) * (PackFactors.xy - invSize) + 0.5 * invSize, 0.0, 0.0);
+	float2 tileUV = (TexCoord.xy * faceParams.z + faceParams.xy) * texScale * IdScale.y;
+	float dx = dFdx(tileUV * PackFactors.z);
+	float dy = dFdy(tileUV * PackFactors.z);
+
+	float lod = clamp(0.5 * log2(max(dot(dx, dx), dot(dy, dy))), 0.0, PackFactors.w);
+
+	float2 invSize = float2(pow(2.0, lod - PackFactors.w), 0.0) * PackFactors.xy;
+	float4 uv = float4(tileOffs + frac(tileUV) * (PackFactors.xy - invSize) + 0.5 * invSize, 0.0, 0.0);
 	
-	//#if   (TILING_FIX_MODE == 0)
-	//	res.color = tex2Dlod(AtlasDiffSampler, uv);
-	//#elif (TILING_FIX_MODE == 1)
-	//	float4 uv2 = (tileOffs + frac(-0.173 * tileUV) * (PackFactors.xy - invSize) + 0.5 * invSize, 0, 0);
-	//	res.color = mix(tex2Dlod(AtlasDiffSampler, uv), tex2Dlod(AtlasDiffSampler, uv2), 0.5);
-	//#endif
+	#if (TILING_FIX_MODE == 0)
+		res.color = tex2Dlod(AtlasDiffSampler, uv);
+	#elif (TILING_FIX_MODE == 1)
+		float4 uv2 = (tileOffs + frac(-0.173 * tileUV) * (PackFactors.xy - invSize) + 0.5 * invSize, 0, 0);
+		res.color = mix(tex2Dlod(AtlasDiffSampler, uv), tex2Dlod(AtlasDiffSampler, uv2), 0.5);
+	#endif
 
-	res.color = tex2Dlod(AtlasDiffSampler, uv);
-	res.height = res.color.a;
-
-	float4 adjust = tex2Dlod(MaterialTable, float4(height, slope, 0.0, 0.0));
+	float4 adjust = tex2Dlod(MaterialTable, float4(height + texturingHeightOffset, slope + texturingSlopeOffset, 0, 0));
 	adjust.xyz *= texColorConv;
-	float3 hsl = rgb2hsl(res.color.rgb);
-	hsl.x = frac(hsl.x + adjust.x);
-	hsl.yz = clamp(hsl.yz + adjust.yz, 0.0, 1.0);
-	res.color.rgb = hsl2rgb(hsl);
-
+	
+	#if (COLOR_SPACE == 1)
+		float3 hsl = rgb2hsl(res.color.rgb);
+		hsl.x = frac(hsl.x + adjust.x);
+		hsl.yz = clamp(hsl.yz + adjust.yz, 0.0, 1.0);
+		res.color.rgb = hsl2rgb(hsl);
+	#endif
+	
+	res.height = res.color.a;
 	res.color.a = adjust.a;
 
 	return  res;
 }
+
+#else
+
+Surface GetSurfaceColorAtlas(float height, float slope, float vary)
+{
+	float4 PackFactors = float4(1.0 / ATLAS_RES_X, 1.0 / ATLAS_RES_Y, ATLAS_TILE_RES, ATLAS_TILE_RES_LOG2);
+	slope = saturate(slope * 0.5);
+
+	float4 IdScale = tex2Dlod(MaterialTable, float4(height + texturingHeightOffset, (slope + 0.5) + texturingSlopeOffset, 0, 0));
+	uint materialID = min(int(IdScale.x) + int(vary), int(ATLAS_RES_X * ATLAS_RES_Y - 1));
+	float2 tileOffs = float2(materialID % ATLAS_RES_X, materialID / ATLAS_RES_X) * PackFactors.xy;
+
+	float2 tileUV = (TexCoord.xy * faceParams.z + faceParams.xy) * texScale * IdScale.y;
+	float dx = dFdx(tileUV * PackFactors.z);
+	float dy = dFdy(tileUV * PackFactors.z);
+
+	float lod = clamp(0.5 * log2(max(dot(dx, dx), dot(dy, dy))), 0.0, PackFactors.w);
+
+	float2 invSize = float2(pow(2.0, lod - PackFactors.w), 0.0) * PackFactors.xy;
+
+	// Voronoi-based random offset for tile texture coordinates and rotation
+	float magOffs = 1.0; // magnitude of the texture coordinates offset
+	float2 uvo = tileOffs + 0.5 * invSize;
+	float2 uvs = PackFactors.xy - invSize;
+	float2 p = floor(tileUV);
+	float2 f = frac(tileUV);
+	float4 color = float4(0, 0, 0, 0);
+	float weight = 0.0;
+
+	float4 adjust = tex2Dlod(MaterialTable, float4(height + texturingHeightOffset, slope + texturingSlopeOffset, 0, 0));
+	adjust.xyz *= texColorConv;
+
+	for(int j = -1; j <= 1; j++)
+	{
+		for(int i = -1; i <= 1; i++)
+		{
+			float2 g = float2(float(i), float(j));
+			float4 o = hash4(p + g);
+			float2 r = g - f + o.xy;
+			float d = dot(r, r);
+			float w = SavePow(1.0 - smoothstep(0.0, 2.0, d * d), 1.0 + 16.0 * magOffs);
+
+			#if (TILING_FIX_MODE == 2)
+				float2 uv = frac(tileUV + magOffs * o.zy);
+			#elif (TILING_FIX_MODE == 3)
+				float a = o.w * IdScale.z; // magnitude of the texture coordinates rotation (zero for sand tiles)
+				float2 sc  = float2(sin(a), cos(a));
+				float2x2 rot = float2x2(sc.y, sc.x, -sc.x, sc.y);
+				float2 uv = frac(mul((tileUV + magOffs * o.zy), rot));
+			#endif
+
+			// color conversion must be done before summarize, because hls color space is not additive
+			float4 rgb = tex2Dlod(AtlasDiffSampler, float4(uv * uvs + uvo, 0, 0));
+
+			#if (COLOR_SPACE == 1)
+				float3 hsl = rgb2hsl(rgb.rgb);
+				hsl.x = frac(hsl.x + adjust.x);
+				hsl.yz = clamp(hsl.yz + adjust.yz, 0.0, 1.0);
+				rgb.rgb = hsl2rgb(hsl);
+			#endif
+
+			color += w * rgb;
+			weight += w;
+		}
+	}
+	
+	Surface res;
+	res.color = color / weight;
+	res.height = res.color.a;
+	res.color.a = adjust.a;
+
+	return  res;
+}
+
+#endif
 //-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
+#if (TILE_BLEND_MODE == 0)
 // Planet surface color function (uses the texture atlas sampling function)
 // height, slope defines the tile based on MaterialTable texture
 // vary sets one of 4 different tiles of the same material
@@ -572,6 +697,95 @@ Surface GetSurfaceColor(float height, float slope, float vary)
 {
 	return GetSurfaceColorAtlas(height, slope, vary * 4.0);
 }
+
+#elif (TILE_BLEND_MODE == 1)
+
+Surface GetSurfaceColor_1(float height, float slope, float vary)
+{
+	height = clamp(height - 0.0625, 0.0, 1.0);
+	slope = clamp(slope  + 0.1250, 0.0, 1.0);
+
+	float h0 = floor(height * 8.0) * 0.125;
+	float h1 = h0 + 0.125;
+	float dh = (height - h0) * 8.0;
+	float s0 = floor(slope  * 4.0) * 0.25;
+	float s1 = s0 - 0.25;
+	float ds = 1.0 - (slope - s0) * 4.0;
+	float v0 = floor(vary * 16.0) * 0.25;
+	float v1 = v0 - 0.25;
+	float dv = 1.0 - (vary * 4.0 - v0) * 4.0;
+
+	Surface surfH0, surfH1;
+	Surface surfS0, surfS1;
+	Surface surfV0, surfV1;
+
+	surfH0 = GetSurfaceColorAtlas(h0, s0, v0);
+	surfH1 = GetSurfaceColorAtlas(h1, s0, v0);
+	surfS0 = Blend(surfH0, surfH1, dh);
+
+	surfH0 = GetSurfaceColorAtlas(h0, s1, v0);
+	surfH1 = GetSurfaceColorAtlas(h1, s1, v0);
+	surfS1 = Blend(surfH0, surfH1, dh);
+
+	surfV0 = Blend(surfS0, surfS1, ds);
+
+	surfH0 = GetSurfaceColorAtlas(h0, s0, v1);
+	surfH1 = GetSurfaceColorAtlas(h1, s0, v1);
+	surfS0 = Blend(surfH0, surfH1, dh);
+
+	surfH0 = GetSurfaceColorAtlas(h0, s1, v1);
+	surfH1 = GetSurfaceColorAtlas(h1, s1, v1);
+	surfS1 = Blend(surfH0, surfH1, dh);
+
+	surfV1 = Blend(surfS0, surfS1, ds);
+
+	return Blend(surfV0, surfV1, dv);
+}
+
+#elif (TILE_BLEND_MODE == 2)
+
+Surface GetSurfaceColor(float height, float slope, float vary)
+{
+	height = clamp(height - 0.0625, 0.0, 1.0);
+	slope  = clamp(slope  + 0.1250, 0.0, 1.0);
+
+	float h0 = floor(height * 8.0) * 0.125;
+	float h1 = h0 + 0.125;
+	float dh = (height - h0) * 8.0;
+	float s0 = floor(slope  * 4.0) * 0.25;
+	float s1 = s0 - 0.25;
+	float ds = 1.0 - (slope - s0) * 4.0;
+	float v0 = floor(vary * 16.0) * 0.25;
+	float v1 = v0 - 0.25;
+	float dv = 1.0 - (vary * 4.0 - v0) * 4.0;
+
+	Surface surfH0, surfH1;
+	Surface surfS0, surfS1;
+	Surface surfV0, surfV1;
+
+	surfH0 = GetSurfaceColorAtlas(h0, s0, v0);
+	surfH1 = GetSurfaceColorAtlas(h1, s0, v0);
+	surfS0 = BlendSmart(surfH0, surfH1, dh);
+
+	surfH0 = GetSurfaceColorAtlas(h0, s1, v0);
+	surfH1 = GetSurfaceColorAtlas(h1, s1, v0);
+	surfS1 = BlendSmart(surfH0, surfH1, dh);
+
+	surfV0 = BlendSmart(surfS0, surfS1, ds);
+
+	surfH0 = GetSurfaceColorAtlas(h0, s0, v1);
+	surfH1 = GetSurfaceColorAtlas(h1, s0, v1);
+	surfS0 = BlendSmart(surfH0, surfH1, dh);
+
+	surfH0 = GetSurfaceColorAtlas(h0, s1, v1);
+	surfH1 = GetSurfaceColorAtlas(h1, s1, v1);
+	surfS1 = BlendSmart(surfH0, surfH1, dh);
+
+	surfV1 = BlendSmart(surfS0, surfS1, ds);
+
+	return BlendSmart(surfV0, surfV1, dv);
+}
+#endif
 //-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
@@ -607,6 +821,27 @@ void FAST32_hash_3D(float3 gridcell, out float4 lowz_hash_0, out float4 lowz_has
 	lowz_hash_2 = frac(P * lowz_mod.zzzz);
 	highz_hash_2 = frac(P * highz_mod.zzzz);
 }
+
+void FAST32_hash_3D(float3 gridcell, out float4 lowz_hash, out float4 highz_hash)
+{
+	// g ridcell is assumed to be an integer coordinate
+	const float2 OFFSET = float2(50.0, 161.0);
+	const float DOMAIN = 69.0;
+	const float SOMELARGEFLOAT = 635.298681;
+	const float ZINC = 48.500388;
+
+	//	truncate the domain
+	gridcell.xyz = gridcell.xyz - floor(gridcell.xyz * (1.0 / DOMAIN)) * DOMAIN;
+	float3 gridcell_inc1 = step(gridcell, float3(DOMAIN - 1.5, DOMAIN - 1.5, DOMAIN - 1.5)) * (gridcell + 1.0);
+
+	//	calculate the noise
+	float4 P = float4(gridcell.xy, gridcell_inc1.xy) + OFFSET.xyxy;
+	P *= P;
+	P = P.xzxz * P.yyww;
+	highz_hash.xy = float2(1.0 / (SOMELARGEFLOAT + float2(gridcell.z, gridcell_inc1.z) * ZINC));
+	lowz_hash  = frac(P * highz_hash.xxxx );
+	highz_hash = frac(P * highz_hash.yyyy );
+}
 //-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
@@ -618,10 +853,10 @@ float3 Interpolation_C2_Deriv(float3 x) { return x * x * (x * (x * 30.0 - 60.0) 
 float4 RND_M = float4(1.0, 1.0, 1.0, 1.0);
 float3 OFFSET = float3(0.5, 0.5, 0.5);
 float3 OFFSETOUT = float3(1.5, 1.5, 1.5);
+//-----------------------------------------------------------------------------
 
 
-
-#ifdef USE_SPACE_ENGINE_NOISE
+#ifdef NOISE_ENGINE_SE
 //-----------------------------------------------------------------------------
 // 3D Perlin noise
 float Noise(float3 p)
@@ -703,7 +938,11 @@ float4 NoiseDeriv(float3 p)
 		k0 + k1*ff.x + k2*ff.y + k3*ff.z + k4*ff.x*ff.y + k5*ff.y*ff.z + k6*ff.z*ff.x + k7*ff.x*ff.y*ff.z);
 }
 //-----------------------------------------------------------------------------
-#else
+
+#endif
+
+#ifdef NOISE_ENGINE_ZNE
+
 //-----------------------------------------------------------------------------
 float Noise(float3 p)
 {
@@ -759,8 +998,8 @@ float4 NoiseDeriv(float3 p)
 	float4 grad_y1 = hashy1 - 0.49999;
 	float4 grad_z1 = hashz1 - 0.49999;
 
-	float4 norm_0 = 1 / sqrt(grad_x0 * grad_x0 + grad_y0 * grad_y0 + grad_z0 * grad_z0);
-	float4 norm_1 = 1 / sqrt(grad_x1 * grad_x1 + grad_y1 * grad_y1 + grad_z1 * grad_z1);
+	float4 norm_0 = rsqrt(grad_x0 * grad_x0 + grad_y0 * grad_y0 + grad_z0 * grad_z0);
+	float4 norm_1 = rsqrt(grad_x1 * grad_x1 + grad_y1 * grad_y1 + grad_z1 * grad_z1);
 
 	grad_x0 *= norm_0;
 	grad_y0 *= norm_0;
@@ -819,6 +1058,196 @@ float4 NoiseDeriv(float3 p)
 	//normalize and return
 	return result *= 1.1547005383792515290182975610039;
 }
+
+#endif
+
+#ifdef NOISE_ENGINE_I
+
+float4 lessThan(float4 a, float4 b)
+{
+	float undefSign = -10;
+	float trueSign = 1;
+	float falseSign = -1;
+
+	float4 r = float4(undefSign, undefSign, undefSign, undefSign);
+
+	if(a.x > b.x)
+		r.x = trueSign;
+	else
+		r.x = falseSign;
+
+	if(a.y > b.y)
+		r.y = trueSign;
+	else
+		r.y = falseSign;
+
+	if(a.z > b.z)
+		r.z = trueSign;
+	else
+		r.z = falseSign;
+
+	if(a.w > b.w)
+		r.w = trueSign;
+	else
+		r.w = falseSign;
+
+	return r;
+}
+
+float Noise(float3 p)
+{
+	// Establish our grid cell and unit position
+	float3 Pi = floor(p);
+	float3 Pf = p - Pi;
+	float3 Pf_min1 = Pf - 1.0;
+
+	#if (NOISE_ENGINE_TECHNIQUE == 0)
+		// Classic noise. Requires 3 random values per point.
+		// With an efficent hash function will run faster than improved noise.
+
+		// Calculate the hash
+		float4 hashx0, hashy0, hashz0, hashx1, hashy1, hashz1;
+		FAST32_hash_3D(Pi, hashx0, hashy0, hashz0, hashx1, hashy1, hashz1);
+
+		// Calculate the gradients
+		float4 grad_x0 = hashx0 - 0.49999;
+		float4 grad_y0 = hashy0 - 0.49999;
+		float4 grad_z0 = hashz0 - 0.49999;
+		float4 grad_x1 = hashx1 - 0.49999;
+		float4 grad_y1 = hashy1 - 0.49999;
+		float4 grad_z1 = hashz1 - 0.49999;
+		float4 grad_results_0 = rsqrt(grad_x0 * grad_x0 + grad_y0 * grad_y0 + grad_z0 * grad_z0) * (float2(Pf.x, Pf_min1.x).xyxy * grad_x0 + float2(Pf.y, Pf_min1.y).xxyy * grad_y0 + Pf.zzzz * grad_z0);
+		float4 grad_results_1 = rsqrt(grad_x1 * grad_x1 + grad_y1 * grad_y1 + grad_z1 * grad_z1) * (float2(Pf.x, Pf_min1.x).xyxy * grad_x1 + float2(Pf.y, Pf_min1.y).xxyy * grad_y1 + Pf_min1.zzzz * grad_z1);
+
+		// Classic Perlin Interpolation
+		float3 blend = Interpolation_C2(Pf);
+		float4 res0 = lerp(grad_results_0, grad_results_1, blend.z);
+		float2 res1 = lerp(res0.xy, res0.zw, blend.y);
+		float final = lerp(res1.x, res1.y, blend.x);
+		final *= 1.1547005383792515290182975610039; // (optionally) scale things to a strict -1.0->1.0 rang *= 1.0/sqrt(0.75)
+		return final;
+	#else
+		// Improved noise. Requires 1 random value per point.
+		// Will run faster than classic noise if a slow hashing function is used.
+
+		// Calculate the hash
+		float4 hash_lowz, hash_highz;
+		FAST32_hash_3D(Pi, hash_lowz, hash_highz);
+
+		#if (NOISE_ENGINE_TECHNIQUE == 1)
+			// This will implement Ken Perlins "improved" classic noise using the 12 mid-edge gradient points.
+			// NOTE: mid-edge gradients give us a nice strict -1.0->1.0 range without additional scaling.
+			// [1,1,0] [-1,1,0] [1,-1,0] [-1,-1,0]
+			// [1,0,1] [-1,0,1] [1,0,-1] [-1,0,-1]
+			// [0,1,1] [0,-1,1] [0,1,-1] [0,-1,-1]
+			hash_lowz *= 3.0;
+			float4 grad_results_0_0 = lerp(float2(Pf.y, Pf_min1.y).xxyy, float2(Pf.x, Pf_min1.x).xyxy, lessThan(hash_lowz, float4(2.0, 2.0, 2.0, 2.0)));
+			float4 grad_results_0_1 = lerp(Pf.zzzz, float2(Pf.y, Pf_min1.y).xxyy, lessThan(hash_lowz, float4(1.0, 1.0, 1.0, 1.0)));
+			hash_lowz = frac(hash_lowz) - 0.5;
+			float4 grad_results_0 = grad_results_0_0 * sign(hash_lowz) + grad_results_0_1 * sign(abs(hash_lowz) - float4(0.25, 0.25, 0.25, 0.25));
+
+			hash_highz *= 3.0;
+			float4 grad_results_1_0 = lerp(float2(Pf.y, Pf_min1.y).xxyy, float2(Pf.x, Pf_min1.x).xyxy, lessThan(hash_highz, float4(2.0, 2.0, 2.0, 2.0)));
+			float4 grad_results_1_1 = lerp(Pf_min1.zzzz, float2(Pf.y, Pf_min1.y).xxyy, lessThan(hash_highz, float4(1.0, 1.0, 1.0, 1.0)));
+			hash_highz = frac(hash_highz) - 0.5;
+			float4 grad_results_1 = grad_results_1_0 * sign(hash_highz) + grad_results_1_1 * sign(abs(hash_highz) - float4(0.25, 0.25, 0.25, 0.25));
+
+			// Blend the gradients and return
+			float3 blend = Interpolation_C2(Pf);
+			float4 res0 = lerp(grad_results_0, grad_results_1, blend.z);
+			float2 res1 = lerp(res0.xy, res0.zw, blend.y);
+			return lerp(res1.x, res1.y, blend.x);
+		#else
+			// "Improved" noise using 8 corner gradients. Faster than the 12 mid-edge point method.
+			// Ken mentions using diagonals like this can cause "clumping", but we'll live with that.
+			// [1,1,1]  [-1,1,1]  [1,-1,1]  [-1,-1,1]
+			// [1,1,-1] [-1,1,-1] [1,-1,-1] [-1,-1,-1]
+			hash_lowz -= float4(0.5, 0.5, 0.5, 0.5);
+			float4 grad_results_0_0 = float2(Pf.x, Pf_min1.x).xyxy * sign(hash_lowz);
+			hash_lowz = abs(hash_lowz) - float4(0.25, 0.25, 0.25, 0.25);
+			float4 grad_results_0_1 = float2(Pf.y, Pf_min1.y).xxyy * sign(hash_lowz);
+			float4 grad_results_0_2 = Pf.zzzz * sign(abs(hash_lowz) - float4(0.125, 0.125, 0.125, 0.125));
+			float4 grad_results_0 = grad_results_0_0 + grad_results_0_1 + grad_results_0_2;
+
+			hash_highz -= float4(0.5, 0.5, 0.5, 0.5);
+			float4 grad_results_1_0 = float2(Pf.x, Pf_min1.x).xyxy * sign(hash_highz);
+			hash_highz = abs(hash_highz) - float4(0.25, 0.25, 0.25, 0.25);
+			float4 grad_results_1_1 = float2(Pf.y, Pf_min1.y).xxyy * sign(hash_highz);
+			float4 grad_results_1_2 = Pf_min1.zzzz * sign(abs(hash_highz) - float4(0.125, 0.125, 0.125, 0.125));
+			float4 grad_results_1 = grad_results_1_0 + grad_results_1_1 + grad_results_1_2;
+
+			// Blend the gradients and return
+			float3 blend = Interpolation_C2(Pf);
+			float4 res0 = lerp(grad_results_0, grad_results_1, blend.z);
+			float2 res1 = lerp(res0.xy, res0.zw, blend.y);
+			return lerp(res1.x, res1.y, blend.x) * (2.0 / 3.0);   // (optionally) mult by (2.0/3.0)to scale to a strict -1.0->1.0 range
+		#endif
+	#endif
+}
+//-----------------------------------------------------------------------------
+
+//-----------------------------------------------------------------------------
+float4 NoiseDeriv(float3 p)
+{
+	// Establish our grid cell and unit position
+	float3 Pi = floor(p);
+	float3 Pf = p - Pi;
+	float3 Pf_min1 = Pf - 1.0;
+
+	// calculate the hash
+	// (various hashing methods listed in order of speed)
+	float4 hashx0, hashy0, hashz0, hashx1, hashy1, hashz1;
+	FAST32_hash_3D(Pi, hashx0, hashy0, hashz0, hashx1, hashy1, hashz1);
+
+	// calculate the gradients
+	float4 grad_x0 = hashx0 - 0.49999;
+	float4 grad_y0 = hashy0 - 0.49999;
+	float4 grad_z0 = hashz0 - 0.49999;
+	float4 norm_0 = rsqrt(grad_x0 * grad_x0 + grad_y0 * grad_y0 + grad_z0 * grad_z0);
+	grad_x0 *= norm_0;
+	grad_y0 *= norm_0;
+	grad_z0 *= norm_0;
+	float4 grad_x1 = hashx1 - 0.49999;
+	float4 grad_y1 = hashy1 - 0.49999;
+	float4 grad_z1 = hashz1 - 0.49999;
+	float4 norm_1 = rsqrt(grad_x1 * grad_x1 + grad_y1 * grad_y1 + grad_z1 * grad_z1);
+	grad_x1 *= norm_1;
+	grad_y1 *= norm_1;
+	grad_z1 *= norm_1;
+	float4 grad_results_0 = float2(Pf.x, Pf_min1.x).xyxy * grad_x0 + float2(Pf.y, Pf_min1.y).xxyy * grad_y0 + Pf.zzzz * grad_z0;
+	float4 grad_results_1 = float2(Pf.x, Pf_min1.x).xyxy * grad_x1 + float2(Pf.y, Pf_min1.y).xxyy * grad_y1 + Pf_min1.zzzz * grad_z1;
+
+	// get lengths in the x+y plane
+	float3 Pf_sq = Pf * Pf;
+	float3 Pf_min1_sq = Pf_min1 * Pf_min1;
+	float4 vecs_len_sq = float2(Pf_sq.x, Pf_min1_sq.x).xyxy + float2(Pf_sq.y, Pf_min1_sq.y).xxyy;
+
+	// evaluate the surflet
+	float4 m_0 = vecs_len_sq + Pf_sq.zzzz;
+	m_0 = max(1.0 - m_0, 0.0);
+	float4 m2_0 = m_0 * m_0;
+	float4 m3_0 = m_0 * m2_0;
+
+	float4 m_1 = vecs_len_sq + Pf_min1_sq.zzzz;
+	m_1 = max(1.0 - m_1, 0.0);
+	float4 m2_1 = m_1 * m_1;
+	float4 m3_1 = m_1 * m2_1;
+
+	// calculate the derivatives
+	float4 temp_0 = -6.0 * m2_0 * grad_results_0;
+	float xderiv_0 = dot(temp_0, float2(Pf.x, Pf_min1.x).xyxy) + dot(m3_0, grad_x0);
+	float yderiv_0 = dot(temp_0, float2(Pf.y, Pf_min1.y).xxyy) + dot(m3_0, grad_y0);
+	float zderiv_0 = dot(temp_0, Pf.zzzz) + dot(m3_0, grad_z0);
+
+	float4 temp_1 = -6.0 * m2_1 * grad_results_1;
+	float xderiv_1 = dot(temp_1, float2(Pf.x, Pf_min1.x).xyxy) + dot(m3_1, grad_x1);
+	float yderiv_1 = dot(temp_1, float2(Pf.y, Pf_min1.y).xxyy) + dot(m3_1, grad_y1);
+	float zderiv_1 = dot(temp_1, Pf_min1.zzzz) + dot(m3_1, grad_z1);
+
+	const float FINAL_NORMALIZATION = 2.3703703703703703703703703703704;	// scales the final result to a strict (-1.0, 1.0) range
+	return float4(float3(xderiv_0, yderiv_0, zderiv_0) + float3(xderiv_1, yderiv_1, zderiv_1),
+				 dot(m3_0, grad_results_0) + dot(m3_1, grad_results_1)) * FINAL_NORMALIZATION;
+}
 #endif
 //-----------------------------------------------------------------------------
 
@@ -826,6 +1255,83 @@ float4 NoiseDeriv(float3 p)
 float4 permute(float4 x) { return fmod((x * 34.0 + 1.0) * x, 289.0); }
 float3 permute3(float3 x) { return fmod((x * 34.0 + 1.0) * x, 289.0); }
 float4 taylorInvSqrt(float4 r) { return 1.79284291400159 - 0.85373472095314 * r; }
+
+// 3D simplex noise
+float sNoise(float3 v)
+{
+	v *= 0.25;
+
+	float2 C = float2(1.0 / 6.0, 1.0 / 3.0);
+	float4 D = float4(0.0, 0.5, 1.0, 2.0);
+
+	// First corner
+	float3 i  = floor(v + dot(v, C.yyy));
+	float3 x0 =   v - i + dot(i, C.xxx);
+
+	// Other corners
+	float3 g = step(x0.yzx, x0.xyz);
+	float3 l = 1.0 - g;
+	float3 i1 = min(g.xyz, l.zxy);
+	float3 i2 = max(g.xyz, l.zxy);
+
+	//   x0 = x0 - 0.0 + 0.0 * C.xxx;
+	//   x1 = x0 - i1  + 1.0 * C.xxx;
+	//   x2 = x0 - i2  + 2.0 * C.xxx;
+	//   x3 = x0 - 1.0 + 3.0 * C.xxx;
+	float3 x1 = x0 - i1 + C.xxx;
+	float3 x2 = x0 - i2 + C.yyy; // 2.0*C.x = 1/3 = C.y
+	float3 x3 = x0 - D.yyy;      // -1.0+3.0*C.x = -0.5 = -D.y
+
+	// Permutations
+	i = fmod(i, 289.0); 
+	float4 p = permute(permute(permute(
+		  i.z + float4(0.0, i1.z, i2.z, 1.0))
+		+ i.y + float4(0.0, i1.y, i2.y, 1.0))
+		+ i.x + float4(0.0, i1.x, i2.x, 1.0));
+
+	// Gradients: 7x7 points over a square, mapped onto an octahedron.
+	// The ring size 17*17 = 289 is close to a multiple of 49 (49*6 = 294)
+	float n_ = 0.142857142857; // 1.0/7.0
+	float3 ns = n_ * D.wyz - D.xzx;
+
+	float4 j = p - 49.0 * floor(p * ns.z * ns.z);  //  mod(p,7*7)
+
+	float4 x_ = floor(j * ns.z);
+	float4 y_ = floor(j - 7.0 * x_);    // mod(j,N)
+
+	float4 x = x_ *ns.x + ns.yyyy;
+	float4 y = y_ *ns.x + ns.yyyy;
+	float4 h = 1.0 - abs(x) - abs(y);
+
+	float4 b0 = float4(x.xy, y.xy);
+	float4 b1 = float4(x.zw, y.zw);
+
+	//vec4 s0 = vec4(lessThan(b0,0.0))*2.0 - 1.0;
+	//vec4 s1 = vec4(lessThan(b1,0.0))*2.0 - 1.0;
+	float4 s0 = floor(b0) * 2.0 + 1.0;
+	float4 s1 = floor(b1) * 2.0 + 1.0;
+	float4 sh = -step(h, float4(0, 0, 0, 0));
+
+	float4 a0 = b0.xzyw + s0.xzyw * sh.xxyy;
+	float4 a1 = b1.xzyw + s1.xzyw * sh.zzww;
+
+	float3 p0 = float3(a0.xy,h.x);
+	float3 p1 = float3(a0.zw,h.y);
+	float3 p2 = float3(a1.xy,h.z);
+	float3 p3 = float3(a1.zw,h.w);
+
+	//Normalise gradients
+	float4 norm = taylorInvSqrt(float4(dot(p0,p0), dot(p1,p1), dot(p2, p2), dot(p3,p3)));
+	p0 *= norm.x;
+	p1 *= norm.y;
+	p2 *= norm.z;
+	p3 *= norm.w;
+
+	// Mix final noise value
+	float4 m = max(0.6 - float4(dot(x0,x0), dot(x1,x1), dot(x2,x2), dot(x3,x3)), 0.0);
+	m = m * m;
+	return 42.0 * dot(m*m, float4(dot(p0,x0), dot(p1,x1), dot(p2,x2), dot(p3,x3)));
+}
 //-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
@@ -856,15 +1362,6 @@ float4 FiltDistNoise4D(float3 p, float w, float d) { return DistNoise4D(p, d) * 
 //-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
-float SavePow(float f, float p) 
-{ 
-	#ifdef USESAVEPOW 
-	return pow(abs(f), p);
-	#else
-	return pow(f, p);
-	#endif
-}
-
 float Lacunarity() 
 { 
 	#ifdef USESAVEPOW 
@@ -1878,10 +2375,10 @@ float CraterNoise(float3 ppoint, float cratMagn, float cratFreq, float cratSqrtD
 		lastLand = newLand;
 		newLand = CraterHeightFunc(lastlastlastLand, lastLand, amplitude, cell * radFactor);
 		ppoint *= 1.81818182;
-		amplitude *= 0.55;
-		heightPeak *= 0.25;
-		heightFloor *= 1.2;
-		radInner *= 0.60;
+		amplitude *= craterAmplitudePerOctave;
+		heightPeak *= craterHeightPeakPerOctave;
+		heightFloor *= craterHeightFloorPerOctave;
+		radInner *= craterRadInnerPerOctave;
 	}
 
 	return cratMagn * newLand;
@@ -1928,10 +2425,14 @@ float RayedCraterNoise(float3 ppoint, float cratMagn, float cratFreq, float crat
 		newLand = CraterHeightFunc(lastlastlastLand, lastLand, amplitude, cell * radFactor);
 
 		craterSphereRadius *= 1.81818182;
-		amplitude *= 0.55;
-		heightPeak *= 0.25;
-		heightFloor *= 1.2;
-		radInner *= 0.60;
+		//amplitude *= 0.55;
+		//heightPeak *= 0.25;
+		//heightFloor *= 1.2;
+		//radInner *= 0.60;
+		amplitude *= craterAmplitudePerOctave;
+		heightPeak *= craterHeightPeakPerOctave;
+		heightFloor *= craterHeightFloorPerOctave;
+		radInner *= craterRadInnerPerOctave;
 	}
 
 	return  cratMagn * newLand;

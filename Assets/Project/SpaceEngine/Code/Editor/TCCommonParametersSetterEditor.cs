@@ -50,12 +50,18 @@ public class TCCommonParametersSetterEditor : Editor
 
     private void DrawGUIForTexturing(TCCommonParametersSetter setter)
     {
-        setter.textureParams.x = EditorGUILayout.Slider("texScale ", setter.textureParams.x, 1.0f, (1.0486f * 10e6f));
-        setter.textureParams.y = EditorGUILayout.Slider("texColorConv ", setter.textureParams.y, 0.0f, 1.0f);
+        setter.textureParams.x = EditorGUILayout.Slider("texScale ", setter.textureParams.x, 0.0f, 1.0f);
+        setter.textureParams.y = EditorGUILayout.Slider("texColorConv ", setter.textureParams.y, -1.0f, 1.0f);
+
+        setter.texturingHeightOffset = EditorGUILayout.Slider("texturingHeightOffset ", setter.texturingHeightOffset, -1.0f, 1.0f);
+        setter.texturingSlopeOffset = EditorGUILayout.Slider("texturingSlopeOffset ", setter.texturingSlopeOffset, -1.0f, 1.0f);
 
         setter.colorParams.x = EditorGUILayout.Slider("colorDistMagn ", setter.colorParams.x, 0.0f, 1.0f);
         setter.colorParams.y = EditorGUILayout.Slider("colorDistFreq ", setter.colorParams.y, 0.0f, 10000.0f);
 
+        setter.lavaParams.x = EditorGUILayout.Slider("lavaCoverage ", setter.lavaParams.x, -10.0f, 1.0f);
+        setter.lavaParams.y = EditorGUILayout.Slider("lavaTemperature ", setter.lavaParams.y, 0.0f, 373.0f);
+        setter.lavaParams.z = EditorGUILayout.Slider("surfTemperature ", setter.lavaParams.z, 0.0f, 373.0f);
         setter.lavaParams.w = EditorGUILayout.Slider("heightTempGrad ", setter.lavaParams.w, 0.0f, 1.0f);
 
         setter.dunesParams.w = EditorGUILayout.Slider("drivenDarkening ", setter.dunesParams.w, -1.0f, 1.0f);
@@ -152,6 +158,16 @@ public class TCCommonParametersSetterEditor : Editor
         setter.craterParams1.y = EditorGUILayout.Slider("craterRoundDist", setter.craterParams1.y, 0.0f, 1.0f);
         setter.craterParams1.z = EditorGUILayout.Slider("craterDistortion", setter.craterParams1.z, 0.0f, 1.0f);
         setter.craterParams1.w = EditorGUILayout.Slider("craterRaysColor", setter.craterParams1.w, 0.0f, 1.0f);
+
+        setter.craterParams2.x = EditorGUILayout.Slider("craterAmplitudePerOctave", setter.craterParams2.x, 0.0f, 1.0f);
+        setter.craterParams2.y = EditorGUILayout.Slider("craterHeightPeakPerOctave", setter.craterParams2.y, 0.0f, 1.0f);
+        setter.craterParams2.z = EditorGUILayout.Slider("craterHeightFloorPerOctave", setter.craterParams2.z, 0.0f, 2.0f);
+        setter.craterParams2.w = EditorGUILayout.Slider("craterRadInnerPerOctave", setter.craterParams2.w, 0.0f, 1.0f);
+
+        //amplitude *= 0.55;
+        //heightPeak *= 0.25;
+        //heightFloor *= 1.2;
+        //radInner *= 0.60;
     }
 
     private void DrawGUIForRadials(TCCommonParametersSetter setter)

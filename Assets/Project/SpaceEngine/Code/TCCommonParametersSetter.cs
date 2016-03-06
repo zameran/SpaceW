@@ -5,6 +5,8 @@ public class TCCommonParametersSetter : MonoBehaviour
     public Planetoid Planet;
 
     public float Jitter;
+    public float texturingHeightOffset;
+    public float texturingSlopeOffset;
 
     public Vector3 Randomize;
 
@@ -32,6 +34,7 @@ public class TCCommonParametersSetter : MonoBehaviour
     public Vector4 radParams;
     public Vector4 crHeightParams;
     public Vector4 craterParams1;
+    public Vector4 craterParams2;
 
     public bool AutoUpdate = false;
 
@@ -61,6 +64,9 @@ public class TCCommonParametersSetter : MonoBehaviour
         if (shader == null) return;
 
         shader.SetFloat("jitter", Jitter);
+        shader.SetFloat("texturingHeightOffset", texturingHeightOffset);
+        shader.SetFloat("texturingSlopeOffset", texturingSlopeOffset);
+
         shader.SetVector("Randomize", Randomize);
         shader.SetVector("faceParams", faceParams);
         shader.SetVector("scaleParams", scaleParams);
@@ -86,5 +92,6 @@ public class TCCommonParametersSetter : MonoBehaviour
         shader.SetVector("radParams", radParams);
         shader.SetVector("crHeightParams", crHeightParams);
         shader.SetVector("craterParams1", craterParams1);
+        shader.SetVector("craterParams2", craterParams2);
     }
 }
