@@ -8,6 +8,8 @@ public class TCCommonParametersSetter : MonoBehaviour
     public float texturingHeightOffset;
     public float texturingSlopeOffset;
 
+    public Vector2 TexCoord;
+
     public Vector3 Randomize;
 
     public Vector4 faceParams;
@@ -37,6 +39,7 @@ public class TCCommonParametersSetter : MonoBehaviour
     public Vector4 craterParams2;
 
     public bool AutoUpdate = false;
+    public bool UseCustomTexCoord = false;
 
     private void Start()
     {
@@ -66,6 +69,9 @@ public class TCCommonParametersSetter : MonoBehaviour
         shader.SetFloat("jitter", Jitter);
         shader.SetFloat("texturingHeightOffset", texturingHeightOffset);
         shader.SetFloat("texturingSlopeOffset", texturingSlopeOffset);
+
+        if (UseCustomTexCoord)
+            shader.SetVector("TexCoord", TexCoord);
 
         shader.SetVector("Randomize", Randomize);
         shader.SetVector("faceParams", faceParams);

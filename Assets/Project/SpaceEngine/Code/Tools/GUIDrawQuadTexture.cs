@@ -14,6 +14,8 @@ public class GUIDrawQuadTexture : MonoBehaviour
     public float y = 10.0f;
     public float rotationAngle = 0.0f;
 
+    public bool alphaBelnded = false;
+
     private void OnGUI()
     {
         if (planetoid != null)
@@ -59,7 +61,7 @@ public class GUIDrawQuadTexture : MonoBehaviour
                         GUI.DrawTexture(new Rect(x, y,
                                                  dim.x * scale,
                                                  dim.y * scale),
-                                                 tex, ScaleMode.StretchToFill, false);
+                                                 tex, ScaleMode.StretchToFill, alphaBelnded);
                         GUI.EndGroup();
                     }
                 }

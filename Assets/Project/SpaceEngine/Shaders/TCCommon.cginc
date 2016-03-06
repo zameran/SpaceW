@@ -587,7 +587,7 @@ Surface GetSurfaceColorAtlas(float height, float slope, float vary)
 	float lod = clamp(0.5 * log2(max(dot(dx, dx), dot(dy, dy))), 0.0, PackFactors.w);
 
 	float2 invSize = float2(pow(2.0, lod - PackFactors.w), 0.0) * PackFactors.xy;
-	float4 uv = float4(tileOffs + frac(tileUV) * (PackFactors.xy - invSize) + 0.5 * invSize, 0.0, 0.0);
+	float4 uv = float4(tileOffs + frac(tileUV) * (PackFactors.xy - invSize) + 0.5 * invSize, 0, 0);
 	
 	#if (TILING_FIX_MODE == 0)
 		res.color = tex2Dlod(AtlasDiffSampler, uv);
@@ -604,6 +604,11 @@ Surface GetSurfaceColorAtlas(float height, float slope, float vary)
 		hsl.x = frac(hsl.x + adjust.x);
 		hsl.yz = clamp(hsl.yz + adjust.yz, 0.0, 1.0);
 		res.color.rgb = hsl2rgb(hsl);
+	#else //WIP
+		//float rgb = res.color.rgb;
+		//rgb.x = frac(rgb.x + adjust.x);
+		//rgb.yz = clamp(rgb.yz + adjust.yz, 0.0, 1.0);
+		//res.color.rgb = rgb;
 	#endif
 	
 	res.height = res.color.a;
@@ -670,6 +675,9 @@ Surface GetSurfaceColorAtlas(float height, float slope, float vary)
 				hsl.x = frac(hsl.x + adjust.x);
 				hsl.yz = clamp(hsl.yz + adjust.yz, 0.0, 1.0);
 				rgb.rgb = hsl2rgb(hsl);
+			#else //WIP
+				//rgb.x = frac(rgb.x + adjust.x);
+				//rgb.yz = clamp(rgb.yz + adjust.yz, 0.0, 1.0);
 			#endif
 
 			color += w * rgb;

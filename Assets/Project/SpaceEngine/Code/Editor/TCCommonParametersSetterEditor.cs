@@ -20,6 +20,11 @@ public class TCCommonParametersSetterEditor : Editor
 
         EditorGUILayout.Space();
 
+        EditorGUILayout.LabelField("Use Custom TexCoord: ", EditorStyles.boldLabel);
+        setter.UseCustomTexCoord = EditorGUILayout.Toggle(setter.UseCustomTexCoord);
+
+        EditorGUILayout.Space();
+
         EditorGUILayout.LabelField("Planetoid to setup: ", EditorStyles.boldLabel);
         setter.Planet = EditorGUILayout.ObjectField(setter.Planet, typeof(Planetoid), true) as Planetoid;
 
@@ -50,8 +55,16 @@ public class TCCommonParametersSetterEditor : Editor
 
     private void DrawGUIForTexturing(TCCommonParametersSetter setter)
     {
-        setter.textureParams.x = EditorGUILayout.Slider("texScale ", setter.textureParams.x, 0.0f, 1.0f);
+        setter.faceParams.x = EditorGUILayout.Slider("x0 ", setter.faceParams.x, 0.0f, 1.0f);
+        setter.faceParams.y = EditorGUILayout.Slider("y0 ", setter.faceParams.y, 0.0f, 1.0f);
+        setter.faceParams.z = EditorGUILayout.Slider("size", setter.faceParams.z, 0.0f, 480.0f);
+        setter.faceParams.w = EditorGUILayout.Slider("face ", setter.faceParams.w, 0.0f, 5.0f);
+
+        setter.textureParams.x = EditorGUILayout.Slider("texScale ", setter.textureParams.x, 0.0f, 10.0f);
         setter.textureParams.y = EditorGUILayout.Slider("texColorConv ", setter.textureParams.y, -1.0f, 1.0f);
+
+        setter.TexCoord.x = EditorGUILayout.Slider("TexCoord.x ", setter.TexCoord.x, 0.0f, 1.0f);
+        setter.TexCoord.y = EditorGUILayout.Slider("TexCoord.y ", setter.TexCoord.y, 0.0f, 1.0f);
 
         setter.texturingHeightOffset = EditorGUILayout.Slider("texturingHeightOffset ", setter.texturingHeightOffset, -1.0f, 1.0f);
         setter.texturingSlopeOffset = EditorGUILayout.Slider("texturingSlopeOffset ", setter.texturingSlopeOffset, -1.0f, 1.0f);
