@@ -103,8 +103,8 @@ public class FlyCamera : MonoBehaviour
 
         if (Input.GetMouseButton(1))
         {
-            x += (Input.GetAxis("Mouse X") * (0.006f * distanceToPlanetCore) * 0.02f);
-            y -= (Input.GetAxis("Mouse Y") * (0.003f * distanceToPlanetCore) * 0.02f);
+            x += (Input.GetAxis("Mouse X") * 60.0f * 0.02f);
+            y -= (Input.GetAxis("Mouse Y") * 30.0f * 0.02f);
             z = zRotation;
 
             if (!aligned)
@@ -165,11 +165,11 @@ public class FlyCamera : MonoBehaviour
 
     void Rotate(float x, float y, float z, Vector3 distanceVector)
     {
-        Quaternion rotation = Quaternion.Euler(y, x, z);
+        Quaternion rotation = Quaternion.Euler(y + targetRotation.x, x + targetRotation.y, z + targetRotation.z);
 
         Vector3 position = rotation * distanceVector + planetoid.transform.position;
 
-        transform.rotation = rotation;
+        transform.rotation = Quaternion.Slerp(transform.rotation, rotation, Time.fixedDeltaTime * rotationSpeed);
         transform.position = position;
     }
 }
