@@ -8,7 +8,10 @@ public class NoiseParametersSetter : MonoBehaviour
 	public Texture2D PlanetAtlas = null;
 	public Texture2D PlanetColor = null;
 
-	public float Octaves = 4f;
+    //public ComputeBuffer PlanetAtlasB = null;
+    //public ComputeBuffer PlanetColorB = null;
+
+    public float Octaves = 4f;
 	public float Lacunarity = 2.218281828459f;
 	public float H = 0.5f;
 	public float Offset = 0.8f;
@@ -18,7 +21,7 @@ public class NoiseParametersSetter : MonoBehaviour
 
 	public ImprovedPerlinNoise Perlin = null;
 
-	private void Start()
+	private void Awake()
 	{
 		LoadAndInit();
 	}
@@ -30,8 +33,8 @@ public class NoiseParametersSetter : MonoBehaviour
 
 	private void OnDestroy()
 	{
-
-	}
+        //BufferHelper.ReleaseAndDisposeBuffers(PlanetColorB, PlanetAtlasB);
+    }
 
 	[ContextMenu("Update Uniforms")]
 	public void UpdateUniforms(Material mat, ComputeShader cs)
@@ -51,18 +54,30 @@ public class NoiseParametersSetter : MonoBehaviour
 		}
 	}
 
-	public void LoadAndInit()
-	{
-		Init();
+    public void LoadAndInit()
+    {
+        Init();
 
-		if (PermSampler == null) PermSampler = Perlin.GetPermutationTable2D();
-		if (PermGradSampler == null) PermGradSampler = Perlin.GetGradient3D();
+        if (PermSampler == null) PermSampler = Perlin.GetPermutationTable2D();
+        if (PermGradSampler == null) PermGradSampler = Perlin.GetGradient3D();
 
-		if (PlanetAtlas == null) PlanetAtlas = LoadTextureFromResources("PlanetAtlas");
-		if (PlanetColor == null) PlanetColor = LoadTextureFromResources("PlanetColorHeightGradient");
-	}
+        if (PlanetAtlas == null) PlanetAtlas = LoadTextureFromResources("PlanetAtlas");
+        if (PlanetColor == null) PlanetColor = LoadTextureFromResources("PlanetColorHeightGradient");
 
-	public Texture2D LoadTextureFromResources(string name)
+        //PlanetColorB = new ComputeBuffer(PlanetColor.width * PlanetColor.height, 16);
+        //PlanetAtlasB = new ComputeBuffer(PlanetAtlas.width * PlanetAtlas.height, 16);
+
+        //Vector4[] colorData = new Vector4[PlanetColor.width * PlanetColor.height];
+        //Vector4[] atlasData = new Vector4[PlanetAtlas.width * PlanetAtlas.height];
+
+        //colorData = PlanetColor.GetPixels().ConvertColorDataToVector();
+        //atlasData = PlanetAtlas.GetPixels().ConvertColorDataToVector();
+
+        //PlanetColorB.SetData(colorData);
+        //PlanetAtlasB.SetData(atlasData);
+    }
+
+    public Texture2D LoadTextureFromResources(string name)
 	{
 		Texture2D temp = Resources.Load("Textures/" + name, typeof(Texture2D)) as Texture2D;
 
@@ -85,9 +100,10 @@ public class NoiseParametersSetter : MonoBehaviour
 
 		mat.SetTexture("PermSampler", PermSampler);
 		mat.SetTexture("PermGradSampler", PermGradSampler);
-		mat.SetTexture("AtlasDiffSampler", PlanetAtlas);
-		mat.SetTexture("MaterialTable", PlanetColor);
-	}
+
+        mat.SetTexture("AtlasDiffSampler", PlanetAtlas);
+        mat.SetTexture("MaterialTable", PlanetColor);
+    }
 
 	public void SetUniforms(ComputeShader shader)
 	{
@@ -105,9 +121,10 @@ public class NoiseParametersSetter : MonoBehaviour
 
 		shader.SetTexture(0, "PermSampler", PermSampler);
 		shader.SetTexture(0, "PermGradSampler", PermGradSampler);
-		shader.SetTexture(0, "AtlasDiffSampler", PlanetAtlas);
-		shader.SetTexture(0, "MaterialTable", PlanetColor);
-	}
+
+        shader.SetTexture(0, "AtlasDiffSampler", PlanetAtlas);
+        shader.SetTexture(0, "MaterialTable", PlanetColor);
+    }
 
 	public void SetUniforms(ComputeShader shader, int kernel)
 	{
@@ -125,8 +142,8 @@ public class NoiseParametersSetter : MonoBehaviour
 
 		shader.SetTexture(kernel, "PermSampler", PermSampler);
 		shader.SetTexture(kernel, "PermGradSampler", PermGradSampler);
-		shader.SetTexture(kernel, "AtlasDiffSampler", PlanetAtlas);
-		shader.SetTexture(kernel, "MaterialTable", PlanetColor);
 
-	}
+        shader.SetTexture(kernel, "AtlasDiffSampler", PlanetAtlas);
+        shader.SetTexture(kernel, "MaterialTable", PlanetColor);
+    }
 }

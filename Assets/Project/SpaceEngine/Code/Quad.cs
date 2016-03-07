@@ -36,6 +36,18 @@ public struct QuadGenerationConstants
 
         return temp;
     }
+
+    public static QuadGenerationConstants Init(float terrainMaxHeight)
+    {
+        QuadGenerationConstants temp = new QuadGenerationConstants();
+
+        temp.spacing = QS.nSpacing;
+        temp.spacingreal = QS.nSpacingReal;
+        temp.spacingsub = QS.nSpacingSub;
+        temp.terrainMaxHeight = terrainMaxHeight;
+
+        return temp;
+    }
 }
 
 [Serializable]
@@ -211,7 +223,7 @@ public class Quad : MonoBehaviour
         PreOutDataBuffer = new ComputeBuffer(QS.nVertsReal, 64);
         PreOutDataSubBuffer = new ComputeBuffer(QS.nRealVertsSub, 64);
         OutDataBuffer = new ComputeBuffer(QS.nVerts, 64);
-
+        
         HeightTexture = RTExtensions.CreateRTexture(QS.nVertsPerEdgeSub, 0);
         NormalTexture = RTExtensions.CreateRTexture(QS.nVertsPerEdgeSub, 0);
 
@@ -598,6 +610,10 @@ public class Quad : MonoBehaviour
         CoreShader.SetBuffer(kernel, "patchPreOutput", PreOutDataBuffer);
         CoreShader.SetBuffer(kernel, "patchPreOutputSub", PreOutDataSubBuffer);
         CoreShader.SetBuffer(kernel, "patchOutput", OutDataBuffer);
+
+        //CoreShader.SetBuffer(kernel, "MaterialTableBuffer", Planetoid.NPS.PlanetColorB);
+        //CoreShader.SetBuffer(kernel, "AtlasDiffSamplerBuffer", Planetoid.NPS.PlanetAtlasB);
+               
         CoreShader.SetTexture(kernel, "Height", HeightTexture);
         CoreShader.SetTexture(kernel, "Normal", NormalTexture);
 

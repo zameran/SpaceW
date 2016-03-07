@@ -35,6 +35,8 @@ public class Planetoid : MonoBehaviour
 	public bool UseLOD = true;
 	public bool RenderPerUpdate = false;
 
+	public float TerrainMaxHeight = 64.0f;
+
 	private void Start()
 	{
 		ThreadScheduler.Initialize();
@@ -131,7 +133,7 @@ public class Planetoid : MonoBehaviour
 		quadComponent.QuadMesh = mesh;
 		quadComponent.QuadMaterial = material;
 
-		QuadGenerationConstants gc = QuadGenerationConstants.Init();
+		QuadGenerationConstants gc = QuadGenerationConstants.Init(TerrainMaxHeight);
 		gc.planetRadius = PlanetRadius;
 
 		gc.cubeFaceEastDirection = quadComponent.GetCubeFaceEastDirection(quadPosition);
@@ -144,6 +146,7 @@ public class Planetoid : MonoBehaviour
 		quadComponent.Planetoid = this;
 		quadComponent.SetupCorners(quadPosition);
 		quadComponent.ShouldDraw = true;
+		quadComponent.ReadyForDispatch = true;
 
 		Quads.Add(quadComponent);
 		MainQuads.Add(quadComponent);
@@ -168,7 +171,7 @@ public class Planetoid : MonoBehaviour
 		quadComponent.QuadMaterial = material;
 		quadComponent.SetupCorners(quadPosition);
 
-		QuadGenerationConstants gc = QuadGenerationConstants.Init();
+		QuadGenerationConstants gc = QuadGenerationConstants.Init(TerrainMaxHeight);
 		gc.planetRadius = PlanetRadius;
 
 		quadComponent.Position = quadPosition;

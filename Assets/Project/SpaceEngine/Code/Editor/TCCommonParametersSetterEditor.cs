@@ -60,7 +60,7 @@ public class TCCommonParametersSetterEditor : Editor
         setter.faceParams.z = EditorGUILayout.Slider("size", setter.faceParams.z, 0.0f, 480.0f);
         setter.faceParams.w = EditorGUILayout.Slider("face ", setter.faceParams.w, 0.0f, 5.0f);
 
-        setter.textureParams.x = EditorGUILayout.Slider("texScale ", setter.textureParams.x, 0.0f, 10.0f);
+        setter.textureParams.x = EditorGUILayout.Slider("texScale ", setter.textureParams.x, 0.0f, 1000.0f);
         setter.textureParams.y = EditorGUILayout.Slider("texColorConv ", setter.textureParams.y, -1.0f, 1.0f);
 
         setter.TexCoord.x = EditorGUILayout.Slider("TexCoord.x ", setter.TexCoord.x, 0.0f, 1.0f);

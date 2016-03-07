@@ -21,7 +21,7 @@
 // 0 - hard mix (no blending)
 // 1 - soft blending
 // 2 - "smart" blening (tile heightmap based)
-#define TILE_BLEND_MODE 2
+#define TILE_BLEND_MODE 0
 //-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
@@ -30,19 +30,16 @@
 // 1 - sampling texture 2 times at different scales
 // 2 - voronoi random offset
 // 3 - voronoi random offset and rotation
-#define TILING_FIX_MODE 3
+#define TILING_FIX_MODE 0
 //-----------------------------------------------------------------------------
-
-//-----------------------------------------------------------------------------
-#define USESAVEPOW
-#define USETEXLOD
-#define PACKED_NORMALS
 
 //-----------------------------------------------------------------------------
 // color space to use:
-// 0 - rgb
-// 1 - hsl
-#define COLOR_SPACE 0
+// 0 - hsl with adjusting.
+// 1 - rgb with adjusting.
+// 2 - default with adjusting.
+// 3 - default without adjusting.
+#define COLOR_SPACE 3
 //-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
@@ -50,6 +47,12 @@
 #define ATLAS_RES_Y         16
 #define ATLAS_TILE_RES      256
 #define ATLAS_TILE_RES_LOG2 8
+//-----------------------------------------------------------------------------
+
+//-----------------------------------------------------------------------------
+#define USESAVEPOW
+#define USETEXLOD
+#define PACKED_NORMALS
 //-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
@@ -90,9 +93,17 @@ uniform float2 TexCoord;
 uniform sampler2D	PermSampler;
 uniform sampler2D	PermGradSampler;
 uniform sampler2D   NormalMap;          // normals map to calculate slope
-uniform sampler2D   MaterialTable;      // material parameters table
 uniform sampler1D   CloudsColorTable;   // clouds color table
+
+uniform sampler2D   MaterialTable;      // material parameters table
+//uniform RWTexture2D<float> MaterialTable;      // material parameters table
+//uniform Texture2D<float> MaterialTable;      // material parameters table
+//RWStructuredBuffer<float4> MaterialTableBuffer;
+
 uniform sampler2D   AtlasDiffSampler;   // detail texture diffuse atlas
+//uniform RWTexture2D<float> AtlasDiffSampler;   // detail texture diffuse atlas
+//uniform Texture2D<float> AtlasDiffSampler;   // detail texture diffuse atlas
+//RWStructuredBuffer<float4> AtlasDiffSamplerBuffer;
 //-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
@@ -258,11 +269,6 @@ float3 Rotate(float Angle, float3 Axis, float3 Vector)
 //-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
-float3 hash3(float2 p) { return frac(sin(float3(dot(p, float2(127.1, 311.7)), dot(p, float2(269.5, 183.3)), dot(p, float2(419.2, 371.9)))) * 43758.5453); }
-float4 hash4(float2 p) { return frac(sin(float4(dot(p, float2(127.1, 311.7)), dot(p, float2(269.5, 183.3)), dot(p, float2(419.2, 371.9)), dot(p, float2(398.1, 176.7)))) * 43758.5453); }
-//-----------------------------------------------------------------------------
-
-//-----------------------------------------------------------------------------
 float3 SphericalToCartesian(float2 spherical)
 {
 	float2 Alpha = float2(sin(spherical.x), cos(spherical.x));
@@ -314,78 +320,6 @@ float3 GetSurfacePoint()
 //-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
-float3 rgb2hsl(float3 rgb)
-{
-	float Max = max(rgb.r, max(rgb.g, rgb.b));
-	float Min = min(rgb.r, min(rgb.g, rgb.b));
-
-	float3 hsl = float3(0.0, 0.0, 0.0);
-
-	hsl.z = (Min + Max) * 0.5;
-
-	if (hsl.z <= 0.0) return hsl;
-
-	float delta = Max - Min;
-
-	if (delta == 0.0)
-	{
-		hsl.x = 0.0; // undefined (gray color)
-		hsl.y = 0.0;
-	}
-	else
-	{
-		if (hsl.z <= 0.5) hsl.y = delta / (Max + Min);
-		else              hsl.y = delta / (2.0 - Max - Min);
-
-		float3 rgb2 = (float3(Max, 0, 0) - rgb) / delta;
-
-		if (rgb.r == Max) hsl.x = (Min == rgb.g) ? 5.0 + rgb2.b : 1.0 - rgb2.g;
-		else if (rgb.g == Max) hsl.x = (Min == rgb.b) ? 1.0 + rgb2.r : 3.0 - rgb2.b;
-		else                   hsl.x = (Min == rgb.r) ? 3.0 + rgb2.g : 5.0 - rgb2.r;
-
-		hsl.x *= 1.0 / 6.0;
-	}
-
-	return hsl;
-}
-
-float3 hsl2rgb(float3 hsl)
-{
-	float3  rgb;
-	float q = (hsl.z <= 0.5) ? (hsl.z * (1.0 + hsl.y)) : (hsl.z + hsl.y - hsl.z * hsl.y);
-
-	if (q <= 0)
-	{
-		rgb = float3(hsl.z, 0, 0);
-	}
-	else
-	{
-		float p = 2.0 * hsl.z - q;
-		float tr = 6.0 * frac(hsl.x + 1.0 / 3.0);
-		float tg = 6.0 * frac(hsl.x);
-		float tb = 6.0 * frac(hsl.x - 1.0 / 3.0);
-
-		if (tr < 1.0) rgb.r = p + (q - p)*tr;
-		else if (tr < 3.0) rgb.r = q;
-		else if (tr < 4.0) rgb.r = p + (q - p)*(4.0 - tr);
-		else               rgb.r = p;
-
-		if (tg < 1.0) rgb.g = p + (q - p)*tg;
-		else if (tg < 3.0) rgb.g = q;
-		else if (tg < 4.0) rgb.g = p + (q - p)*(4.0 - tg);
-		else               rgb.g = p;
-
-		if (tb < 1.0) rgb.b = p + (q - p)*tb;
-		else if (tb < 3.0) rgb.b = q;
-		else if (tb < 4.0) rgb.b = p + (q - p)*(4.0 - tb);
-		else               rgb.b = p;
-	}
-
-	return rgb;
-}
-//-----------------------------------------------------------------------------
-
-//-----------------------------------------------------------------------------
 float3 UnitToColor24(in float unit)
 {
 	float mask = 1.0 / 256.0;
@@ -405,50 +339,12 @@ float ColorToUnit24(in float3 color)
 }
 //-----------------------------------------------------------------------------
 
-float dFdx(float2 p)
-{
-	return p.x * p.x - p.y;
-}
-
-float dFdy(float2 p)
-{
-	return p.y * p.y - p.x;
-}
-
 //-----------------------------------------------------------------------------
 struct  Surface
 {
 	float4 color;
 	float  height;
 };
-
-Surface Blend(Surface s0, Surface s1, float t)
-{
-	Surface output;
-
-	output.color = lerp(s0.color, s1.color, t);
-	output.height = lerp(s0.height, s1.height, t);
-
-	return output;
-}
-
-Surface BlendSmart(Surface s0, Surface s1, float t)
-{
-	float a0 = s0.height + 1.0 - t;
-	float a1 = s1.height + t;
-	float ma = max(a0, a1) - 0.5;
-	float b0 = max(a0 - ma, 0.0);
-	float b1 = max(a1 - ma, 0.0);
-
-	ma = b0 + b1;
-
-	Surface res;
-
-	res.color = (s0.color  * b0 + s1.color  * b1) / ma;
-	res.height = (s0.height * b0 + s1.height * b1) / ma;
-
-	return res;
-}
 
 #ifndef PACKED_NORMALS
 float GetSurfaceHeight(float2 texcoord)
@@ -566,6 +462,121 @@ void GetSurfaceHeightAndSlope(inout float height, inout float slope)
 //-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
+float dFdx(float2 p)
+{
+	return p.x * p.x - p.y;
+}
+
+float dFdy(float2 p)
+{
+	return p.y * p.y - p.x;
+}
+
+float3 rgb2hsl(float3 rgb)
+{
+	float Max = max(rgb.r, max(rgb.g, rgb.b));
+	float Min = min(rgb.r, min(rgb.g, rgb.b));
+
+	float3 hsl = float3(0.0, 0.0, 0.0);
+
+	hsl.z = (Min + Max) * 0.5;
+
+	if (hsl.z <= 0.0) return hsl;
+
+	float delta = Max - Min;
+
+	if (delta == 0.0)
+	{
+		hsl.x = 0.0; // undefined (gray color)
+		hsl.y = 0.0;
+	}
+	else
+	{
+		if (hsl.z <= 0.5) hsl.y = delta / (Max + Min);
+		else              hsl.y = delta / (2.0 - Max - Min);
+
+		float3 rgb2 = (float3(Max, 0, 0) - rgb) / delta;
+
+		if (rgb.r == Max) hsl.x = (Min == rgb.g) ? 5.0 + rgb2.b : 1.0 - rgb2.g;
+		else if (rgb.g == Max) hsl.x = (Min == rgb.b) ? 1.0 + rgb2.r : 3.0 - rgb2.b;
+		else                   hsl.x = (Min == rgb.r) ? 3.0 + rgb2.g : 5.0 - rgb2.r;
+
+		hsl.x *= 1.0 / 6.0;
+	}
+
+	return hsl;
+}
+
+float3 hsl2rgb(float3 hsl)
+{
+	float3  rgb;
+	float q = (hsl.z <= 0.5) ? (hsl.z * (1.0 + hsl.y)) : (hsl.z + hsl.y - hsl.z * hsl.y);
+
+	if (q <= 0)
+	{
+		rgb = float3(hsl.z, 0, 0);
+	}
+	else
+	{
+		float p = 2.0 * hsl.z - q;
+		float tr = 6.0 * frac(hsl.x + 1.0 / 3.0);
+		float tg = 6.0 * frac(hsl.x);
+		float tb = 6.0 * frac(hsl.x - 1.0 / 3.0);
+
+		if (tr < 1.0) rgb.r = p + (q - p)*tr;
+		else if (tr < 3.0) rgb.r = q;
+		else if (tr < 4.0) rgb.r = p + (q - p)*(4.0 - tr);
+		else               rgb.r = p;
+
+		if (tg < 1.0) rgb.g = p + (q - p)*tg;
+		else if (tg < 3.0) rgb.g = q;
+		else if (tg < 4.0) rgb.g = p + (q - p)*(4.0 - tg);
+		else               rgb.g = p;
+
+		if (tb < 1.0) rgb.b = p + (q - p)*tb;
+		else if (tb < 3.0) rgb.b = q;
+		else if (tb < 4.0) rgb.b = p + (q - p)*(4.0 - tb);
+		else               rgb.b = p;
+	}
+
+	return rgb;
+}
+
+float3 hash3(float2 p) { return frac(sin(float3(dot(p, float2(127.1, 311.7)), dot(p, float2(269.5, 183.3)), dot(p, float2(419.2, 371.9)))) * 43758.5453); }
+float4 hash4(float2 p) { return frac(sin(float4(dot(p, float2(127.1, 311.7)), dot(p, float2(269.5, 183.3)), dot(p, float2(419.2, 371.9)), dot(p, float2(398.1, 176.7)))) * 43758.5453); }
+//-----------------------------------------------------------------------------
+
+//-----------------------------------------------------------------------------
+Surface Blend(Surface s0, Surface s1, float t)
+{
+	Surface output;
+
+	output.color = lerp(s0.color, s1.color, t);
+	output.height = lerp(s0.height, s1.height, t);
+
+	return output;
+}
+
+Surface BlendSmart(Surface s0, Surface s1, float t)
+{
+	float a0 = s0.height + 1.0 - t;
+	float a1 = s1.height + t;
+	float ma = max(a0, a1) - 0.5;
+	float b0 = max(a0 - ma, 0.0);
+	float b1 = max(a1 - ma, 0.0);
+
+	ma = b0 + b1;
+
+	Surface res;
+
+	res.color = (s0.color  * b0 + s1.color  * b1) / ma;
+	res.height = (s0.height * b0 + s1.height * b1) / ma;
+
+	return res;
+}
+//-----------------------------------------------------------------------------
+
+//-----------------------------------------------------------------------------
 #if (TILING_FIX_MODE <= 1)
 // Texture atlas sampling function
 // height, slope defines the tile based on MaterialTable texture
@@ -576,6 +587,9 @@ Surface GetSurfaceColorAtlas(float height, float slope, float vary)
 	slope = saturate(slope * 0.5);
 
 	float4 IdScale = tex2Dlod(MaterialTable, float4(height + texturingHeightOffset, (slope + 0.5) + texturingSlopeOffset, 0, 0));
+	//float2 IdScaleUV = float2(height + texturingHeightOffset, (slope + 0.5) + texturingSlopeOffset);
+	//float4 IdScale = MaterialTable[IdScaleUV.xy];
+
 	uint materialID = min(int(IdScale.x) + int(vary), int(ATLAS_RES_X * ATLAS_RES_Y - 1));
 	float2 tileOffs = float2(materialID % ATLAS_RES_X, materialID / ATLAS_RES_X) * PackFactors.xy;
 
@@ -591,24 +605,35 @@ Surface GetSurfaceColorAtlas(float height, float slope, float vary)
 	
 	#if (TILING_FIX_MODE == 0)
 		res.color = tex2Dlod(AtlasDiffSampler, uv);
+		//res.color = AtlasDiffSampler[uv.xy];
 	#elif (TILING_FIX_MODE == 1)
 		float4 uv2 = (tileOffs + frac(-0.173 * tileUV) * (PackFactors.xy - invSize) + 0.5 * invSize, 0, 0);
-		res.color = mix(tex2Dlod(AtlasDiffSampler, uv), tex2Dlod(AtlasDiffSampler, uv2), 0.5);
+		res.color = lerp(tex2Dlod(AtlasDiffSampler, uv), tex2Dlod(AtlasDiffSampler, uv2), 0.5);
+		//res.color = lerp(AtlasDiffSampler[uv.xy], AtlasDiffSampler[uv2.xy], 0.5);
 	#endif
-
+	
 	float4 adjust = tex2Dlod(MaterialTable, float4(height + texturingHeightOffset, slope + texturingSlopeOffset, 0, 0));
+	//float2 adjustUV = float2(height + texturingHeightOffset, slope + texturingSlopeOffset);
+	//float adjust = MaterialTable[adjustUV.xy];
+
 	adjust.xyz *= texColorConv;
 	
-	#if (COLOR_SPACE == 1)
+	#if (COLOR_SPACE == 0)
 		float3 hsl = rgb2hsl(res.color.rgb);
 		hsl.x = frac(hsl.x + adjust.x);
 		hsl.yz = clamp(hsl.yz + adjust.yz, 0.0, 1.0);
 		res.color.rgb = hsl2rgb(hsl);
-	#else //WIP
-		//float rgb = res.color.rgb;
-		//rgb.x = frac(rgb.x + adjust.x);
-		//rgb.yz = clamp(rgb.yz + adjust.yz, 0.0, 1.0);
-		//res.color.rgb = rgb;
+	#elif (COLOR_SPACE == 1)
+		float3 rgb = res.color.rgb;
+		rgb.x = frac(rgb.x + adjust.x);
+		rgb.yz = clamp(rgb.yz + adjust.yz, 0.0, 1.0);
+		res.color.rgb = rgb;
+	#elif (COLOR_SPACE == 2)
+		float3 rgb = res.color.rgb;
+		rgb.xyz += adjust.xyz;
+		res.color.rgb = rgb;
+	#else
+		
 	#endif
 	
 	res.height = res.color.a;
@@ -625,6 +650,10 @@ Surface GetSurfaceColorAtlas(float height, float slope, float vary)
 	slope = saturate(slope * 0.5);
 
 	float4 IdScale = tex2Dlod(MaterialTable, float4(height + texturingHeightOffset, (slope + 0.5) + texturingSlopeOffset, 0, 0));
+	//float2 IdScaleUV = float2(height + texturingHeightOffset, (slope + 0.5) + texturingSlopeOffset);
+	//float4 IdScale = MaterialTable[IdScaleUV.xy];
+	//float4 IdScale = MaterialTableBuffer[IdScaleUV.x + IdScaleUV.y * 256];
+
 	uint materialID = min(int(IdScale.x) + int(vary), int(ATLAS_RES_X * ATLAS_RES_Y - 1));
 	float2 tileOffs = float2(materialID % ATLAS_RES_X, materialID / ATLAS_RES_X) * PackFactors.xy;
 
@@ -646,6 +675,10 @@ Surface GetSurfaceColorAtlas(float height, float slope, float vary)
 	float weight = 0.0;
 
 	float4 adjust = tex2Dlod(MaterialTable, float4(height + texturingHeightOffset, slope + texturingSlopeOffset, 0, 0));
+	//float2 adjustUV = float2(height + texturingHeightOffset, slope + texturingSlopeOffset);
+	//float4 adjust = MaterialTable[adjustUV.xy];
+	//float4 adjust = MaterialTableBuffer[adjustUV.x + adjustUV.y * 256];
+
 	adjust.xyz *= texColorConv;
 
 	for(int j = -1; j <= 1; j++)
@@ -669,15 +702,23 @@ Surface GetSurfaceColorAtlas(float height, float slope, float vary)
 
 			// color conversion must be done before summarize, because hls color space is not additive
 			float4 rgb = tex2Dlod(AtlasDiffSampler, float4(uv * uvs + uvo, 0, 0));
+			//float2 rgbUV = float2(uv * uvs + uvo);
+			//float4 rgb = AtlasDiffSampler[rgbUV.xy];
+			//float4 rgb = AtlasDiffSamplerBuffer[rgbUV.x + rgbUV.y * 4096];
 
-			#if (COLOR_SPACE == 1)
+			#if (COLOR_SPACE == 0)
 				float3 hsl = rgb2hsl(rgb.rgb);
 				hsl.x = frac(hsl.x + adjust.x);
 				hsl.yz = clamp(hsl.yz + adjust.yz, 0.0, 1.0);
 				rgb.rgb = hsl2rgb(hsl);
-			#else //WIP
-				//rgb.x = frac(rgb.x + adjust.x);
-				//rgb.yz = clamp(rgb.yz + adjust.yz, 0.0, 1.0);
+			#elif (COLOR_SPACE == 1)
+				rgb.x = frac(rgb.x + adjust.x);
+				rgb.yz = clamp(rgb.yz + adjust.yz, 0.0, 1.0);
+			#elif (COLOR_SPACE == 2)
+				rgb.xyz += adjust.xyz;
+				res.color.rgb = rgb;
+			#else
+				
 			#endif
 
 			color += w * rgb;
@@ -3002,5 +3043,58 @@ float HeightMapClouds(float3 ppoint)
 	//float turbulence = (Fbm(point * 100.0 * cloudsFreq + Randomize) + 1.5);// * smoothstep(0.0, 0.05, global);
 
 	return global;
+}
+//-----------------------------------------------------------------------------
+
+//-----------------------------------------------------------------------------
+float4 ColorMapAsteroid(float3 ppoint, float height, float slope, float cdfreq)
+{
+	slope = 1 - slope;
+	noiseOctaves = 2.0;
+
+	height = DistFbm((ppoint + Randomize) * 3.7, 1.5) * 0.7 + 0.5;
+
+	noiseOctaves = 5;
+
+	float3 p = ppoint * cdfreq * 2.3;
+
+	p += Fbm3D(p * 0.5) * 1.2;
+
+	float vary = saturate((Fbm(p) + 0.7) * 0.7);
+	float ccc = (vary * slope) / height;
+
+	//float4 c = float4(0.41, 0.41, 0.41, 1) * (0.5 + slope) + (0.0125 * height) + (0.05 * vary);
+
+	//return c;
+
+	Surface surf = GetSurfaceColor(height, slope, vary);
+
+	surf.color.rgb *= 0.5 + slope;
+
+	return surf.color;
+}
+//-----------------------------------------------------------------------------
+
+//-----------------------------------------------------------------------------
+float4 GlowMapAsteroid(float3 ppoint, float height, float slope, float cdfreq, float st, float lc)
+{
+	// Thermal emission temperature (in thousand Kelvins)
+	noiseOctaves = 5;
+	float3  p = ppoint * 600.0 + Randomize;
+	float dist = 10.0 * cdfreq * Fbm(p * 0.2);
+	noiseOctaves = 3;
+	float globTemp = 0.95 - abs(Fbm((p + dist) * 0.01)) * 0.08;
+	noiseOctaves = 8;
+	float varyTemp = abs(Fbm(p + dist));
+
+	// Global surface melting
+	float surfTemp = st *
+		(globTemp + varyTemp * 0.08) *
+		saturate(2.0 * (lc * 0.4 + 0.4 - 0.8 * height));
+
+	float4 outColor;
+	outColor.rgb = UnitToColor24(log(surfTemp) * 0.188 + 0.1316);
+	outColor.a = 1.0;
+	return outColor;
 }
 //-----------------------------------------------------------------------------

@@ -35,6 +35,39 @@ public static class RTExtensions
         return rt;
     }
 
+    public static RenderTexture CreateRTexture(Vector2 size)
+    {
+        RenderTexture rt;
+
+        rt = new RenderTexture((int)size.x, (int)size.y, 24, RenderTextureFormat.ARGB32);
+        rt.enableRandomWrite = true;
+        rt.Create();
+
+        return rt;
+    }
+
+    public static RenderTexture CreateRTexture(Vector2 size, int depth)
+    {
+        RenderTexture rt;
+
+        rt = new RenderTexture((int)size.x, (int)size.y, depth, RenderTextureFormat.ARGB32);
+        rt.enableRandomWrite = true;
+        rt.Create();
+
+        return rt;
+    }
+
+    public static RenderTexture CreateRTexture(Vector2 size, int depth, RenderTextureFormat format)
+    {
+        RenderTexture rt;
+
+        rt = new RenderTexture((int)size.x, (int)size.y, depth, format);
+        rt.enableRandomWrite = true;
+        rt.Create();
+
+        return rt;
+    }
+
     public static void ReleaseAndDestroy(this RenderTexture rt)
     {
         rt.Release();

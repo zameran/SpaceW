@@ -15,7 +15,7 @@
 
 		CGPROGRAM
 		#include "UnityCG.cginc"
-		#include "TCCommon.cginc"
+		//#include "TCCommon.cginc"
 
 		#pragma surface surf Standard fullforwardshadows
 		#pragma vertex vert

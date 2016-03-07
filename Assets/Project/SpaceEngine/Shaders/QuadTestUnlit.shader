@@ -150,7 +150,7 @@
 				float3 lightDirection = normalize(_WorldSpaceLightPos0.xyz - float3(0, 0, -8192));	//float3(4096, 4096, 8192));
 				float3 diffuseReflection = atten * _LightColor0.xyz * max(0, dot(normalDirection, lightDirection));
 				float3 lightFinal = diffuseReflection * UNITY_LIGHTMODEL_AMBIENT.xyz;
-
+				
 				v2fg o;
 
 				//GLSL
@@ -158,7 +158,7 @@
 				//HLSL
 				//float4 color = lerp(noiseColor, mapColor, smoothstep(1.5, 1.6, slope + 0.4 * Fbm(v.vertex * 0.0001, 4)));
 
-				o.color = lerp(float4(noise, noise, noise, 1), tex2Dlod(_HeightTexture, v.texcoord), 0.75);	
+				o.color = lerp(float4(noise, noise, noise, 1), tex2Dlod(_HeightTexture, v.texcoord), 1);	
 				o.light = float4(lightFinal, 1);
 				o.uv = v.texcoord;
 				o.uv1 = v.texcoord1;
@@ -208,16 +208,16 @@
 			void frag(v2fg IN, out half4 outDiffuse : COLOR0, out half4 outNormal : COLOR1)
 			{
 				float d = min(IN.uv1.x, min(IN.uv1.y, IN.uv1.z));
- 				float I = exp2(-4.0 * d * d);
+				float I = exp2(-4.0 * d * d);
 
 				fixed4 terrainColor = fixed4(IN.color.x, IN.color.y, IN.color.z, 1);
- 				fixed4 wireframeColor = lerp(terrainColor, _WireframeColor, I);
+				fixed4 wireframeColor = lerp(terrainColor, _WireframeColor, I);
 				fixed4 outputColor = lerp(terrainColor, wireframeColor, _Wireframe);
 
 				fixed3 terrainNormal = UnpackNormal(tex2D(_NormalTexture, IN.uv));
 				fixed4 outputNormal = fixed4(terrainNormal, 1);
 
- 				outDiffuse = outputColor * IN.light * 2;	
+				outDiffuse = outputColor * IN.light * 2;	
 				outNormal = outputNormal;	
 			}
 			ENDCG
