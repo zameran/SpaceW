@@ -6,7 +6,7 @@
 #define nVerticesPerSideSub 240
 #define nVertsPerSideWithBorderSub 256
 
-//#define defaultNoise
+#define defaultNoise
 
 #include "Assets/Project/SpaceEngine/Shaders/TCCommon.cginc"
 
@@ -101,16 +101,8 @@ float NoiseFunction(float3 coord)
 	#ifdef defaultNoise
 	float noise = Fbm(p + Randomize, 2);
 	#else
-	//float noise = HeightMapAsteroid(p);
-	float noise = HeightMapTerra(p);
-	//float noise = HeightMapTerra(p, venusFreq, mainFreq, hillsFreq, canyonsFreq, dunesFreq, montesFreq, riversFreq, venusMagn,
-	//											  dunesMagn, hillsMagn, canyonsMagn, montesMagn, riversMagn, seaLevel, montesSpiky, 
-	//											  dunesFraction, hillsFraction, hills2Fraction, canyonsFraction, 
-	//											  mareSqrtDensity, craterSqrtDensity,
-	//											  cracksOctaves, riversOctaves, volcanoOctaves,
-	//											  riversSin, cloudsStyle, latIceCaps, icecapHeight, erosion,
-	//											  craterOctaves, craterMagn, craterFreq,
-	//											  volcanoFreq, volcanoSqrtDensity, volcanoRadius, cracksFreq);
+	float noise = HeightMapAsteroid(p);
+	//float noise = HeightMapTerra(p);
 	#endif
 	
 	return noise;
@@ -121,12 +113,12 @@ float4 ColorFunction(float3 coord, float height, float slope)
 	float3 p = 0.001 * coord;
 
 	#ifdef defaultNoise
-	float4 color = float4(0.0, 0.0, 0.0, 0.0);
+	float4 color = float4(1.0, 1.0, 1.0, 1.0);
 	#else
-	//float4 colorMapColor = ColorMapAsteroid(p, height, slope);
-	//float4 glowMapColor = GlowMapAsteroid(p, height, slope);
-	//float4 color = colorMapColor + glowMapColor;
-	float4 color = ColorMapTerra(p, height, slope);
+	float4 colorMapColor = ColorMapAsteroid(p, height, slope);
+	float4 glowMapColor = GlowMapAsteroid(p, height, slope);
+	float4 color = colorMapColor + glowMapColor;
+	//float4 color = ColorMapTerra(p, height, slope);
 	#endif
 	
 	return color;

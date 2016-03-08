@@ -13,7 +13,7 @@
 // 0 - classic noise - OK.
 // 1 - Ken Perlin's "improved" - OK.
 // 2 - fast "improved" - OK.
-#define NOISE_ENGINE_TECHNIQUE 2
+#define NOISE_ENGINE_TECHNIQUE 1
 //-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
@@ -558,7 +558,7 @@ float4 hash4(float2 p) { return frac(sin(float4(dot(p, float2(127.1, 311.7)), do
 //-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
-Surface Blend(Surface s0, Surface s1, float t)
+inline Surface Blend(Surface s0, Surface s1, float t)
 {
 	Surface output;
 
@@ -568,7 +568,7 @@ Surface Blend(Surface s0, Surface s1, float t)
 	return output;
 }
 
-Surface BlendSmart(Surface s0, Surface s1, float t)
+inline Surface BlendSmart(Surface s0, Surface s1, float t)
 {
 	float a0 = s0.height + 1.0 - t;
 	float a1 = s1.height + t;
@@ -1067,12 +1067,19 @@ float4 NoiseDeriv(float3 p)
 	float4 norm_0 = rsqrt(grad_x0 * grad_x0 + grad_y0 * grad_y0 + grad_z0 * grad_z0);
 	float4 norm_1 = rsqrt(grad_x1 * grad_x1 + grad_y1 * grad_y1 + grad_z1 * grad_z1);
 
-	grad_x0 *= norm_0;
-	grad_y0 *= norm_0;
-	grad_z0 *= norm_0;
-	grad_x1 *= norm_1;
-	grad_y1 *= norm_1;
-	grad_z1 *= norm_1;
+	//grad_x0 *= norm_0;
+	//grad_y0 *= norm_0;
+	//grad_z0 *= norm_0;
+	//grad_x1 *= norm_1;
+	//grad_y1 *= norm_1;
+	//grad_z1 *= norm_1;
+
+	grad_x0 = mul(grad_x0, norm_0);
+	grad_y0 = mul(grad_y0, norm_0);
+	grad_z0 = mul(grad_z0, norm_0);
+	grad_x1 = mul(grad_x1, norm_1);
+	grad_y1 = mul(grad_y1, norm_1);
+	grad_z1 = mul(grad_z1, norm_1);
 
 	//calculate the dot products
 	float4 dotval_0 = float2(Pf.x, Pf_min1.x).xyxy * grad_x0 + float2(Pf.y, Pf_min1.y).xxyy * grad_y0 + Pf.zzzz * grad_z0;
@@ -1129,35 +1136,9 @@ float4 NoiseDeriv(float3 p)
 
 #ifdef NOISE_ENGINE_I
 
-float4 lessThan(float4 a, float4 b)
+inline float4 LessThan(float4 x, float4 y)
 {
-	float undefSign = -10;
-	float trueSign = 1;
-	float falseSign = -1;
-
-	float4 r = float4(undefSign, undefSign, undefSign, undefSign);
-
-	if(a.x > b.x)
-		r.x = trueSign;
-	else
-		r.x = falseSign;
-
-	if(a.y > b.y)
-		r.y = trueSign;
-	else
-		r.y = falseSign;
-
-	if(a.z > b.z)
-		r.z = trueSign;
-	else
-		r.z = falseSign;
-
-	if(a.w > b.w)
-		r.w = trueSign;
-	else
-		r.w = falseSign;
-
-	return r;
+	return 1.0 - step(y, x);
 }
 
 float Noise(float3 p)
@@ -1207,14 +1188,14 @@ float Noise(float3 p)
 			// [1,0,1] [-1,0,1] [1,0,-1] [-1,0,-1]
 			// [0,1,1] [0,-1,1] [0,1,-1] [0,-1,-1]
 			hash_lowz *= 3.0;
-			float4 grad_results_0_0 = lerp(float2(Pf.y, Pf_min1.y).xxyy, float2(Pf.x, Pf_min1.x).xyxy, lessThan(hash_lowz, float4(2.0, 2.0, 2.0, 2.0)));
-			float4 grad_results_0_1 = lerp(Pf.zzzz, float2(Pf.y, Pf_min1.y).xxyy, lessThan(hash_lowz, float4(1.0, 1.0, 1.0, 1.0)));
+			float4 grad_results_0_0 = lerp(float2(Pf.y, Pf_min1.y).xxyy, float2(Pf.x, Pf_min1.x).xyxy, LessThan(hash_lowz, float4(2.0, 2.0, 2.0, 2.0)));
+			float4 grad_results_0_1 = lerp(Pf.zzzz, float2(Pf.y, Pf_min1.y).xxyy, LessThan(hash_lowz, float4(1.0, 1.0, 1.0, 1.0)));
 			hash_lowz = frac(hash_lowz) - 0.5;
 			float4 grad_results_0 = grad_results_0_0 * sign(hash_lowz) + grad_results_0_1 * sign(abs(hash_lowz) - float4(0.25, 0.25, 0.25, 0.25));
 
 			hash_highz *= 3.0;
-			float4 grad_results_1_0 = lerp(float2(Pf.y, Pf_min1.y).xxyy, float2(Pf.x, Pf_min1.x).xyxy, lessThan(hash_highz, float4(2.0, 2.0, 2.0, 2.0)));
-			float4 grad_results_1_1 = lerp(Pf_min1.zzzz, float2(Pf.y, Pf_min1.y).xxyy, lessThan(hash_highz, float4(1.0, 1.0, 1.0, 1.0)));
+			float4 grad_results_1_0 = lerp(float2(Pf.y, Pf_min1.y).xxyy, float2(Pf.x, Pf_min1.x).xyxy, LessThan(hash_highz, float4(2.0, 2.0, 2.0, 2.0)));
+			float4 grad_results_1_1 = lerp(Pf_min1.zzzz, float2(Pf.y, Pf_min1.y).xxyy, LessThan(hash_highz, float4(1.0, 1.0, 1.0, 1.0)));
 			hash_highz = frac(hash_highz) - 0.5;
 			float4 grad_results_1 = grad_results_1_0 * sign(hash_highz) + grad_results_1_1 * sign(abs(hash_highz) - float4(0.25, 0.25, 0.25, 0.25));
 
@@ -1270,16 +1251,22 @@ float4 NoiseDeriv(float3 p)
 	float4 grad_y0 = hashy0 - 0.49999;
 	float4 grad_z0 = hashz0 - 0.49999;
 	float4 norm_0 = rsqrt(grad_x0 * grad_x0 + grad_y0 * grad_y0 + grad_z0 * grad_z0);
-	grad_x0 *= norm_0;
-	grad_y0 *= norm_0;
-	grad_z0 *= norm_0;
+	//grad_x0 *= norm_0;
+	//grad_y0 *= norm_0;
+	//grad_z0 *= norm_0;
+	grad_x0 = mul(grad_x0, norm_0);
+	grad_y0 = mul(grad_y0, norm_0);
+	grad_z0 = mul(grad_z0, norm_0);
 	float4 grad_x1 = hashx1 - 0.49999;
 	float4 grad_y1 = hashy1 - 0.49999;
 	float4 grad_z1 = hashz1 - 0.49999;
 	float4 norm_1 = rsqrt(grad_x1 * grad_x1 + grad_y1 * grad_y1 + grad_z1 * grad_z1);
-	grad_x1 *= norm_1;
-	grad_y1 *= norm_1;
-	grad_z1 *= norm_1;
+	//grad_x1 *= norm_1;
+	//grad_y1 *= norm_1;
+	//grad_z1 *= norm_1;
+	grad_x1 = mul(grad_x1, norm_1);
+	grad_y1 = mul(grad_y1, norm_1);
+	grad_z1 = mul(grad_z1, norm_1);
 	float4 grad_results_0 = float2(Pf.x, Pf_min1.x).xyxy * grad_x0 + float2(Pf.y, Pf_min1.y).xxyy * grad_y0 + Pf.zzzz * grad_z0;
 	float4 grad_results_1 = float2(Pf.x, Pf_min1.x).xyxy * grad_x1 + float2(Pf.y, Pf_min1.y).xxyy * grad_y1 + Pf_min1.zzzz * grad_z1;
 
