@@ -93,22 +93,21 @@ public class FlyCamera : MonoBehaviour
             transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, Time.fixedDeltaTime * rotationSpeed);
 
             if (!aligned)
-                transform.Rotate(new Vector3(0, 0, zRotation) * Time.fixedDeltaTime * rotationSpeed);
+                transform.Rotate(new Vector3(0, 0, zRotation));
         }
-        else
-        {
-            if (!aligned)
-                transform.Rotate(new Vector3(0, 0, zRotation) * Time.fixedDeltaTime * rotationSpeed);
-        }
-
-        if (Input.GetMouseButton(1))
+        else if (Input.GetMouseButton(1))
         {
             x += (Input.GetAxis("Mouse X") * 60.0f * 0.02f);
             y -= (Input.GetAxis("Mouse Y") * 30.0f * 0.02f);
             z = zRotation;
 
             if (!aligned)
-                Rotate(x, y, z, new Vector3(0, 0, -distanceToPlanetCore));
+                RotateAround(x, y, z, new Vector3(0, 0, -distanceToPlanetCore));
+        }
+        else
+        {
+            if (!aligned)
+                transform.Rotate(new Vector3(0, 0, zRotation));
         }
 
         if (planetoid != null)
@@ -136,7 +135,6 @@ public class FlyCamera : MonoBehaviour
 
         currentSpeed = speed;
 
-        /*
         if (Input.GetKey(KeyCode.LeftShift))
             currentSpeed = speed * 10f;
         if (Input.GetKey(KeyCode.LeftAlt))
@@ -145,7 +143,6 @@ public class FlyCamera : MonoBehaviour
             currentSpeed = speed * 1000f;
         if (Input.GetKey(KeyCode.LeftControl))
             currentSpeed = speed / 10f;
-        */
 
         speed += Mathf.RoundToInt(Input.GetAxis("Mouse ScrollWheel") * 10.0f);
         speed = Mathf.Clamp(speed, 1, 100);
@@ -163,7 +160,7 @@ public class FlyCamera : MonoBehaviour
         return Mathf.Clamp(angle, min, max);
     }
 
-    void Rotate(float x, float y, float z, Vector3 distanceVector)
+    void RotateAround(float x, float y, float z, Vector3 distanceVector)
     {
         Quaternion rotation = Quaternion.Euler(y + targetRotation.x, x + targetRotation.y, z + targetRotation.z);
 

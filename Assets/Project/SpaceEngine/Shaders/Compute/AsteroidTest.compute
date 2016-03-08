@@ -8,8 +8,7 @@
 
 //#define defaultNoise
 
-#include "Assets/Project/SpaceEngine/Shaders/TCCommonAsteroid.cginc"
-//#include "Assets/Project/SpaceEngine/Shaders/TCCommonTerra.cginc"
+#include "Assets/Project/SpaceEngine/Shaders/TCCommon.cginc"
 
 struct QuadGenerationConstants
 {
@@ -100,16 +99,15 @@ float NoiseFunction(float3 coord)
 	#ifdef defaultNoise
 	float noise = Fbm(coord * 0.001 + Randomize, 2) * 2;
 	#else
-	//float noise = HeightMapAsteroid_Eroded(0.001 * coord, craterMagn, craterFreq, mainFreq, craterSqrtDensity, craterOctaves, erosion * 2);
-	float noise = HeightMapAsteroid(0.001 * coord, mainFreq, montesFreq, hillsFreq, hillsMagn, hillsFraction, craterOctaves, craterSqrtDensity, craterFreq, craterMagn);
+	float noise = HeightMapAsteroid(0.001 * coord);
 	//float noise = HeightMapTerra(coord * 0.001, venusFreq, mainFreq, hillsFreq, canyonsFreq, dunesFreq, montesFreq, riversFreq, venusMagn,
-	//											dunesMagn, hillsMagn, canyonsMagn, montesMagn, riversMagn, seaLevel, montesSpiky, 
-	//											dunesFraction, hillsFraction, hills2Fraction, canyonsFraction, 
-	//											mareSqrtDensity, craterSqrtDensity,
-	//											cracksOctaves, riversOctaves, volcanoOctaves,
-	//											riversSin, cloudsStyle, latIceCaps, icecapHeight, erosion,
-	//											craterOctaves, craterMagn, craterFreq,
-	//											volcanoFreq, volcanoSqrtDensity, volcanoRadius, cracksFreq);
+	//											  dunesMagn, hillsMagn, canyonsMagn, montesMagn, riversMagn, seaLevel, montesSpiky, 
+	//											  dunesFraction, hillsFraction, hills2Fraction, canyonsFraction, 
+	//											  mareSqrtDensity, craterSqrtDensity,
+	//											  cracksOctaves, riversOctaves, volcanoOctaves,
+	//											  riversSin, cloudsStyle, latIceCaps, icecapHeight, erosion,
+	//											  craterOctaves, craterMagn, craterFreq,
+	//											  volcanoFreq, volcanoSqrtDensity, volcanoRadius, cracksFreq);
 	#endif
 	
 	return noise;
@@ -120,15 +118,15 @@ float4 ColorFunction(float3 coord, float height, float slope)
 	float3 p = 0.001 * coord;
 
 	#ifdef defaultNoise
-	float3 color = float3(0.0, 0.0, 0.0);
+	float4 color = float4(0.0, 0.0, 0.0, 0.0);
 	#else
-	float3 colorMapColor = ColorMapAsteroid(p, height, slope, colorDistFreq).xyz;
-	float3 glowMapColor = GlowMapAsteroid(p, height, slope, colorDistFreq, surfTemperature, lavaCoverage).xyz;
-	float3 color = colorMapColor + glowMapColor;
-	//float3 color = ColorMapTerra(0.001 * coord, mainFreq, dunesFraction, hillsFraction, hills2Fraction, canyonsFraction);
+	float4 colorMapColor = ColorMapAsteroid(p, height, slope);
+	float4 glowMapColor = GlowMapAsteroid(p, height, slope);
+	float4 color = colorMapColor + glowMapColor;
+	//float3 color = ColorMapTerra(p, height, slope);
 	#endif
 	
-	return float4(color, 1.0);
+	return color;
 }
 
 #pragma kernel HeightMain
@@ -252,7 +250,7 @@ void TexturesSub(uint3 id : SV_DispatchThreadID)
 	//float3x3 tbn = float3x3(ta, bi, no);
 
 	//float3 normal = mul(no, tbn);
-	float3 normal = xnormalSlope;
+	float3 normal = ynormalSlope;
 	
 	float xslope = 0.5 / max(dot(xnormalSlope, float3(0.0, 1.0, 0.0)), 0.001);
 	float yslope = 0.5 / max(dot(ynormalSlope, float3(0.0, 1.0, 0.0)), 0.001);
@@ -264,7 +262,7 @@ void TexturesSub(uint3 id : SV_DispatchThreadID)
 	float4 color = ColorFunction(cpos.xyz, noise, slope);
 	float4 normalColor = float4(normal, slope);
 	float4 heightColor = float4(color.xyz, noise);
-	
+
 	Normal[id.yx] = normalColor;
 	Height[id.yx] = heightColor;
 }

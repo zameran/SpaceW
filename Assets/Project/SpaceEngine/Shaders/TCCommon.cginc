@@ -17,11 +17,18 @@
 //-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
+// noise engine technique: (Works only with NOISE_ENGINE ->|<- 2)
+// 0 - space engine.
+// 1 - soa.
+#define COLORING_TECHNIQUE 0
+//-----------------------------------------------------------------------------
+
+//-----------------------------------------------------------------------------
 // tile blending method:
 // 0 - hard mix (no blending)
 // 1 - soft blending
 // 2 - "smart" blening (tile heightmap based)
-#define TILE_BLEND_MODE 0
+#define TILE_BLEND_MODE 2
 //-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
@@ -30,7 +37,7 @@
 // 1 - sampling texture 2 times at different scales
 // 2 - voronoi random offset
 // 3 - voronoi random offset and rotation
-#define TILING_FIX_MODE 0
+#define TILING_FIX_MODE 3
 //-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
@@ -39,7 +46,7 @@
 // 1 - rgb with adjusting.
 // 2 - default with adjusting.
 // 3 - default without adjusting.
-#define COLOR_SPACE 3
+#define COLOR_SPACE 2
 //-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
@@ -81,8 +88,10 @@ uniform float4	  radParams;	  // ()
 uniform float4	  crHeightParams; // ()
 uniform float4	  craterParams1;  // ()
 uniform float4	  craterParams2;  // ()
+uniform float4	  planetGlobalColor;	 // ()
 uniform float	  texturingHeightOffset; // ()
 uniform float	  texturingSlopeOffset;  // ()
+uniform float2	  texturingUVAtlasOffset;// ()
 //-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
@@ -104,6 +113,8 @@ uniform sampler2D   AtlasDiffSampler;   // detail texture diffuse atlas
 //uniform RWTexture2D<float> AtlasDiffSampler;   // detail texture diffuse atlas
 //uniform Texture2D<float> AtlasDiffSampler;   // detail texture diffuse atlas
 //RWStructuredBuffer<float4> AtlasDiffSamplerBuffer;
+
+uniform sampler2D	ColorMap;
 //-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
@@ -576,6 +587,8 @@ Surface BlendSmart(Surface s0, Surface s1, float t)
 }
 //-----------------------------------------------------------------------------
 
+#if (COLORING_TECHNIQUE == 0)
+
 //-----------------------------------------------------------------------------
 #if (TILING_FIX_MODE <= 1)
 // Texture atlas sampling function
@@ -604,11 +617,11 @@ Surface GetSurfaceColorAtlas(float height, float slope, float vary)
 	float4 uv = float4(tileOffs + frac(tileUV) * (PackFactors.xy - invSize) + 0.5 * invSize, 0, 0);
 	
 	#if (TILING_FIX_MODE == 0)
-		res.color = tex2Dlod(AtlasDiffSampler, uv);
+		res.color = tex2Dlod(AtlasDiffSampler, uv * texturingUVAtlasOffset);
 		//res.color = AtlasDiffSampler[uv.xy];
 	#elif (TILING_FIX_MODE == 1)
 		float4 uv2 = (tileOffs + frac(-0.173 * tileUV) * (PackFactors.xy - invSize) + 0.5 * invSize, 0, 0);
-		res.color = lerp(tex2Dlod(AtlasDiffSampler, uv), tex2Dlod(AtlasDiffSampler, uv2), 0.5);
+		res.color = lerp(tex2Dlod(AtlasDiffSampler, uv * texturingUVAtlasOffset), tex2Dlod(AtlasDiffSampler, uv2 * texturingUVAtlasOffset), 0.5);
 		//res.color = lerp(AtlasDiffSampler[uv.xy], AtlasDiffSampler[uv2.xy], 0.5);
 	#endif
 	
@@ -636,6 +649,7 @@ Surface GetSurfaceColorAtlas(float height, float slope, float vary)
 		
 	#endif
 	
+	res.color = res.color * planetGlobalColor;
 	res.height = res.color.a;
 	res.color.a = adjust.a;
 
@@ -701,7 +715,7 @@ Surface GetSurfaceColorAtlas(float height, float slope, float vary)
 			#endif
 
 			// color conversion must be done before summarize, because hls color space is not additive
-			float4 rgb = tex2Dlod(AtlasDiffSampler, float4(uv * uvs + uvo, 0, 0));
+			float4 rgb = tex2Dlod(AtlasDiffSampler, float4(uv * uvs + uvo * texturingUVAtlasOffset, 0, 0));
 			//float2 rgbUV = float2(uv * uvs + uvo);
 			//float4 rgb = AtlasDiffSampler[rgbUV.xy];
 			//float4 rgb = AtlasDiffSamplerBuffer[rgbUV.x + rgbUV.y * 4096];
@@ -716,7 +730,6 @@ Surface GetSurfaceColorAtlas(float height, float slope, float vary)
 				rgb.yz = clamp(rgb.yz + adjust.yz, 0.0, 1.0);
 			#elif (COLOR_SPACE == 2)
 				rgb.xyz += adjust.xyz;
-				res.color.rgb = rgb;
 			#else
 				
 			#endif
@@ -727,7 +740,7 @@ Surface GetSurfaceColorAtlas(float height, float slope, float vary)
 	}
 	
 	Surface res;
-	res.color = color / weight;
+	res.color = color / weight * planetGlobalColor;
 	res.height = res.color.a;
 	res.color.a = adjust.a;
 
@@ -751,8 +764,8 @@ Surface GetSurfaceColor(float height, float slope, float vary)
 
 Surface GetSurfaceColor(float height, float slope, float vary)
 {
-	height = clamp(height - 0.0625, 0.0, 1.0);
-	slope = clamp(slope  + 0.1250, 0.0, 1.0);
+	height = clamp(height - 0.000625, 0.0, 1.0);
+	slope  = clamp(slope  + 0.001250, 0.0, 1.0);
 
 	float h0 = floor(height * 8.0) * 0.125;
 	float h1 = h0 + 0.125;
@@ -795,8 +808,8 @@ Surface GetSurfaceColor(float height, float slope, float vary)
 
 Surface GetSurfaceColor(float height, float slope, float vary)
 {
-	height = clamp(height - 0.0625, 0.0, 1.0);
-	slope  = clamp(slope  + 0.1250, 0.0, 1.0);
+	height = clamp(height - 0.000625, 0.0, 1.0);
+	slope  = clamp(slope  + 0.001250, 0.0, 1.0);
 
 	float h0 = floor(height * 8.0) * 0.125;
 	float h1 = h0 + 0.125;
@@ -836,6 +849,10 @@ Surface GetSurfaceColor(float height, float slope, float vary)
 }
 #endif
 //-----------------------------------------------------------------------------
+
+#elif (COLORING_TECHNIQUE == 1)
+
+#endif
 
 //-----------------------------------------------------------------------------
 void FAST32_hash_3D(float3 gridcell, out float4 lowz_hash_0, out float4 lowz_hash_1, out float4 lowz_hash_2, out float4 highz_hash_0, out float4 highz_hash_1, out float4 highz_hash_2)
@@ -3047,54 +3064,501 @@ float HeightMapClouds(float3 ppoint)
 //-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
-float4 ColorMapAsteroid(float3 ppoint, float height, float slope, float cdfreq)
+float HeightMapAsteroid(float3 ppoint)
 {
-	slope = 1 - slope;
+	// Global landscape
 	noiseOctaves = 2.0;
+	float3  p = ppoint * mainFreq + Randomize;
+	float height = (Fbm(p) + 0.7) * 0.7;
 
+	noiseOctaves = 8; // Height distortion
+	float distort = 0.01 * Fbm(ppoint * montesFreq + Randomize);
+	height += distort;
+
+	// Hills
+	noiseOctaves = 5;
+	float hills = (0.5 + 1.5 * Fbm(p * 0.0721)) * hillsFreq;
+	hills = Fbm(p * hills) * 0.15;
+	noiseOctaves = 2;
+	float hillsMod = smoothstep(0, 1, Fbm(p * hillsFraction) * 3.0);
+	height *= 1.0 + hillsMagn * hills * hillsMod;
+
+	// Craters
+	noiseOctaves = 3;
+	craterDistortion = 1.0;
+	craterRoundDist  = 0.03;
+	heightFloor = -0.1;
+	heightPeak  = 0.6;
+	heightRim   = 1.0;
+	float crater = CraterNoise(ppoint, craterMagn, craterFreq, craterSqrtDensity, craterOctaves);
+
+	return height + crater;
+}
+//-----------------------------------------------------------------------------
+
+//-----------------------------------------------------------------------------
+float4 ColorMapAsteroid(float3 ppoint, float height, float slope)
+{
+	noiseOctaves = 2.0;
 	height = DistFbm((ppoint + Randomize) * 3.7, 1.5) * 0.7 + 0.5;
 
 	noiseOctaves = 5;
-
-	float3 p = ppoint * cdfreq * 2.3;
-
+	float3 p = ppoint * colorDistFreq * 2.3;
 	p += Fbm3D(p * 0.5) * 1.2;
-
 	float vary = saturate((Fbm(p) + 0.7) * 0.7);
-	float ccc = (vary * slope) / height;
 
 	//float4 c = float4(0.41, 0.41, 0.41, 1) * (0.5 + slope) + (0.0125 * height) + (0.05 * vary);
-
 	//return c;
 
 	Surface surf = GetSurfaceColor(height, slope, vary);
-
 	surf.color.rgb *= 0.5 + slope;
-
 	return surf.color;
 }
 //-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
-float4 GlowMapAsteroid(float3 ppoint, float height, float slope, float cdfreq, float st, float lc)
+float4 GlowMapAsteroid(float3 ppoint, float height, float slope)
 {
 	// Thermal emission temperature (in thousand Kelvins)
 	noiseOctaves = 5;
 	float3  p = ppoint * 600.0 + Randomize;
-	float dist = 10.0 * cdfreq * Fbm(p * 0.2);
+	float dist = 10.0 * colorDistMagn * Fbm(p * 0.2);
 	noiseOctaves = 3;
 	float globTemp = 0.95 - abs(Fbm((p + dist) * 0.01)) * 0.08;
 	noiseOctaves = 8;
 	float varyTemp = abs(Fbm(p + dist));
 
 	// Global surface melting
-	float surfTemp = st *
+	float surfTemp = surfTemperature *
 		(globTemp + varyTemp * 0.08) *
-		saturate(2.0 * (lc * 0.4 + 0.4 - 0.8 * height));
+		saturate(2.0 * (lavaCoverage * 0.4 + 0.4 - 0.8 * height));
 
 	float4 outColor;
 	outColor.rgb = UnitToColor24(log(surfTemp) * 0.188 + 0.1316);
 	outColor.a = 1.0;
 	return outColor;
+}
+//-----------------------------------------------------------------------------
+
+//-----------------------------------------------------------------------------
+float HeightMapTerra(float3 ppoint, float vfreq, float freq, float hfreq, float cfreq, float dfreq, float mfreq, float rfreq,
+									float vmagn, float dmagn, float hmagn, float cmagn, float mmagn, float rmagn,
+									float slvl, float montspiky,
+									float dfraction, float hfraction, float h2fraction, float cfraction,
+									float md, float cd,
+									float cro, float ro, float vo,
+									float rsin, float cldsstyle, float latcap, float caph, float eros,
+									float crato, float crm, float crf,
+									float volcfreq, float vdens, float vradi, float craf)
+{
+	// Global landscape
+	float3 p = ppoint * freq + Randomize;
+	noiseOctaves = 5;
+	float3 distort = 0.35 * Fbm3D(p * 2.37);
+	noiseOctaves = 4;
+	distort += 0.005 * (1.0 - abs(Fbm3D(p * 132.3)));
+	float global = 1.0 - Cell3Noise(p + distort);
+
+	// Venus-like structure
+	float venus = 0.0;
+	if (vmagn > 0.05)
+	{
+		noiseOctaves = 4;
+		distort = Fbm3D(ppoint * 0.3) * 1.5;
+		noiseOctaves = 6;
+		venus = Fbm((ppoint + distort) * vfreq) * vmagn;
+	}
+
+	global = (global + venus - slvl) * 0.5 + slvl;
+	float shore = saturate(70.0 * (global - slvl));
+
+	float4  col;
+	noiseOctaves = 6;
+	p = p * 2.3 + 13.5 * Fbm3D(p * 0.06);
+	float2  cell = Cell3Noise2Color(p, col);
+	float biome = col.r;
+	float biomeScale = saturate(2.0 * (pow(abs(cell.y - cell.x), 0.7) - 0.05));
+	float terrace = col.g;
+	float terraceLayers = max(col.b * 10.0 + 3.0, 3.0);
+	terraceLayers += Fbm(p * 5.41);
+
+	float montRage = saturate(DistNoise(ppoint * 22.6 + Randomize, 2.5) + 0.5);
+	montRage *= montRage;
+	float montBiomeScale = min(pow(2.2 * biomeScale, 2.5), 1.0) * montRage;
+
+	float inv2montesSpiky = 1.0 / (montspiky * montspiky);
+	float height = 0.0;
+	float dist;
+
+	if (biome < dfraction)
+	{
+		// Dunes
+		noiseOctaves = 2.0;
+		dist = dfreq + Fbm(p * 1.21);
+		height = max(Fbm(p * dist * 0.3) + 0.7, 0.0);
+		height = biomeScale * dmagn * (height + DunesNoise(ppoint, 3));
+	}
+	else if (biome < hfraction)
+	{
+		// "Eroded" hills
+		noiseOctaves = 10.0;
+		noiseH = 1.0;
+		noiseOffset = 1.0;
+		height = biomeScale * hmagn * (1.5 - RidgedMultifractal(ppoint * hfreq + Randomize, 2.0));
+	}
+	else if (biome < h2fraction)
+	{
+		// "Eroded" hills 2
+		noiseOctaves = 10.0;
+		noiseLacunarity = 2.0;
+		height = biomeScale * hmagn * JordanTurbulence(ppoint * hfreq + Randomize, 0.8, 0.5, 0.6, 0.35, 1.0, 0.8, 1.0);
+	}
+	else if (biome < cfraction)
+	{
+		// Canyons
+		noiseOctaves = 5.0;
+		noiseH = 0.9;
+		noiseLacunarity = 4.0;
+		noiseOffset = montspiky;
+		height = -cmagn * montRage * RidgedMultifractalErodedDetail(ppoint * 4.0 * cfreq * inv2montesSpiky + Randomize, 2.0, eros, montBiomeScale);
+
+		if (terrace < terraceProb)
+		{
+			terraceLayers *= 5.0;
+			float h = height * terraceLayers;
+			height = (floor(h) + smoothstep(0.1, 0.9, frac(h))) / terraceLayers;
+		}
+	}
+	else
+	{
+		// Mountains
+		noiseOctaves = 10.0;
+		noiseH = 1.0;
+		noiseOffset = montspiky;
+		height = mmagn * montRage * RidgedMultifractalErodedDetail(ppoint * mfreq * inv2montesSpiky + Randomize, 2.0, eros, montBiomeScale);
+
+		if (terrace < terraceProb)
+		{
+			float h = height * terraceLayers;
+			height = (floor(h) + smoothstep(0.1, 0.9, frac(h))) / terraceLayers;
+		}
+	}
+	
+	height *= shore;
+	
+	// Mare
+	float mare = global;
+	float mareFloor = global;
+	float mareSuppress = 1.0;
+	if (md > 0.05)
+	{
+		//noiseOctaves = 2;
+		//mareFloor = 0.6 * (1.0 - Cell3Noise(0.3*p));
+		noiseH = 0.5;
+		noiseLacunarity = 2.218281828459;
+		noiseOffset = 0.8;
+		craterDistortion = 1.0;
+		noiseOctaves = 6.0;  // Mare roundness distortion
+		mare = MareNoise(ppoint, global, 0.0, mareSuppress);
+	}
+	
+	// Ice cracks
+	if (cro > 0.0)
+	{
+		// Rim height distortion
+		noiseH = 0.5;
+		noiseLacunarity = 2.218281828459;
+		noiseOffset = 0.8;
+		noiseOctaves = 4.0;
+		float dunes = 2 * cracksMagn * (0.2 + dmagn * max(Fbm(ppoint * dfreq) + 0.7, 0.0));
+		noiseOctaves = 6.0;  // Cracks roundness distortion
+		height += CrackNoise(ppoint, dunes, craf, cro, 1);
+	}
+	
+	// Craters
+	float crater = 0.0;
+	if (cd > 0.05)
+	{
+		noiseOctaves = 3;  // Craters roundness distortion
+		craterDistortion = 1.0;
+		craterRoundDist = 0.03;
+		heightFloor = -0.1;
+		heightPeak = 0.6;
+		heightRim = 1.0;
+		crater = CraterNoise(ppoint, 0.5 * craterMagn, craterFreq, cd, craterOctaves);
+		noiseOctaves = 10.0;
+		noiseH = 1.0;
+		noiseOffset = 1.0;
+		crater = RidgedMultifractalErodedDetail(ppoint * 0.3 * montesFreq + Randomize, 2.0, eros, 0.25 * crater);
+	}
+
+	height += mare + crater;
+
+	// Pseudo rivers
+	if (ro > 0)
+	{
+		noiseOctaves = ro;
+		noiseLacunarity = 2.218281828459;
+		noiseH = 0.5;
+		noiseOffset = 0.8;
+		p = ppoint * freq + Randomize;
+		distort = 0.035 * Fbm3D(p * rsin * 5.0);
+		distort += 0.350 * Fbm3D(p * rsin);
+		cell = Cell3Noise2(rfreq * p + distort);
+		float pseudoRivers = 1.0 - saturate(abs(cell.y - cell.x) * rmagn);
+		pseudoRivers = smoothstep(0.0, 1.0, pseudoRivers);
+		pseudoRivers *= 1.0 - smoothstep(0.06, 0.10, global - slvl); // disable rivers inside continents
+		pseudoRivers *= 1.0 - smoothstep(0.00, 0.01, slvl - height); // disable rivers inside oceans
+		height = lerp(height, slvl - 0.02, pseudoRivers);
+	}
+
+	// Shield volcano
+	if (vo > 0)
+	{
+		noiseOctaves = 3;  // volcano roundness distortion
+		craterRoundDist = 0.001;
+		height = VolcanoNoise(ppoint, global, height); // global - 1.0 to fix flooding of the canyons and river beds with lava
+	}
+
+	/*
+	//--------------------------------------------------------------------------------------------------------
+	// Mare
+	float mare = global;
+	float mareFloor = global;
+	float mareSuppress = 1.0;
+
+	noiseH = 0.5;
+	noiseLacunarity = 2.218281828459;
+	noiseOffset = 0.8;
+	craterDistortion = 1.0;
+	noiseOctaves = 6.0;  // Mare roundness distortion
+	mare = MareNoise(ppoint, global, 0.0, mareSuppress);
+	//--------------------------------------------------------------------------------------------------------
+	
+	//--------------------------------------------------------------------------------------------------------
+	// Ice cracks
+	// Rim height distortion
+	noiseH = 0.5;
+	noiseLacunarity = 2.218281828459;
+	noiseOffset = 0.8;
+	noiseOctaves = 4.0;
+	float dunes = 2 * cracksMagn * (0.2 + dmagn * max(Fbm(ppoint * dfreq) + 0.7, 0.0));
+	noiseOctaves = 6.0;  // Cracks roundness distortion
+	height += CrackNoise(ppoint, dunes, craf, cro, 1);
+	//--------------------------------------------------------------------------------------------------------
+
+	//--------------------------------------------------------------------------------------------------------
+	// Craters
+	float crater = 0.0;
+
+	noiseOctaves = 3;  // Craters roundness distortion
+	craterDistortion = 1.0;
+	craterRoundDist = 0.03;
+	heightFloor = -0.1;
+	heightPeak = 0.6;
+	heightRim = 1.0;
+	crater = CraterNoise(ppoint, 0.5 * crm, crf, cd, crato);
+	noiseOctaves = 10.0;
+	noiseH = 1.0;
+	noiseOffset = 1.0;
+	crater = RidgedMultifractalErodedDetail(ppoint * 0.3 * mfreq + Randomize, 2.0, eros, 0.25 * crater);	
+	//--------------------------------------------------------------------------------------------------------
+	
+	height += mare + crater;
+
+	//--------------------------------------------------------------------------------------------------------
+	// Pseudo rivers
+	noiseOctaves = ro;
+	noiseLacunarity = 2.218281828459;
+	noiseH = 0.5;
+	noiseOffset = 0.8;
+	p = ppoint * freq + Randomize;
+	distort = 0.035 * Fbm3D(p * rsin * 5.0);
+	distort += 0.350 * Fbm3D(p * rsin);
+	cell = Cell3Noise2(rfreq * p + distort);
+	float pseudoRivers = 1.0 - saturate(abs(cell.y - cell.x) * rmagn);
+	pseudoRivers = smoothstep(0.0, 1.0, pseudoRivers);
+	pseudoRivers *= 1.0 - smoothstep(0.06, 0.10, global - slvl); // disable rivers inside continents
+	pseudoRivers *= 1.0 - smoothstep(0.00, 0.01, slvl - height); // disable rivers inside oceans
+	height = lerp(height, slvl - 0.02, pseudoRivers);
+	//--------------------------------------------------------------------------------------------------------
+	
+	//--------------------------------------------------------------------------------------------------------
+	// Shield volcano
+	//noiseOctaves = 3;  // volcano roundness distortion
+	//craterRoundDist = 0.001;
+	//height = VolcanoNoise(ppoint, global, height, volcfreq, vdens, vradi, vo); // global - 1.0 to fix flooding of the canyons and river beds with lava
+	//--------------------------------------------------------------------------------------------------------
+	*/
+
+	// Assign a climate type
+	noiseOctaves = (cldsstyle == 1.0) ? 5.0 : 12.0;
+	noiseH = 0.5;
+	noiseLacunarity = 2.218281828459;
+	noiseOffset = 0.8;
+	float latitude;
+	if (tidalLock <= 0.0)
+	{
+		latitude = abs(ppoint.y);
+		latitude += 0.15 * (Fbm(ppoint * 0.7 + Randomize) - 1.0);
+		latitude = saturate(latitude);
+	}
+	else
+	{
+		latitude = 1.0 - ppoint.x;
+		latitude += 0.15 * (Fbm(ppoint * 0.7 + Randomize) - 1.0);
+	}
+
+	// Ice caps;
+	// cloudsStyle = 0.1 for oceania, 1.0 for other planets
+	float iceCap = saturate((latitude / latcap - 1.0) * 50.0 * cldsstyle);
+	height = height * cldsstyle + caph * smoothstep(0.0, 1.0, iceCap);
+
+	return height;
+}
+//-----------------------------------------------------------------------------
+
+//-----------------------------------------------------------------------------
+//#define VISUALIZE_BIOMES
+float4 ColorMapTerra(float3 ppoint, float height, float slope)
+{
+	float3  p = ppoint * mainFreq + Randomize;
+	float4  col;
+	noiseOctaves = 6;
+	float3  distort = p * 2.3 + 13.5 * Fbm3D(p * 0.06);
+	float2  cell = Cell3Noise2Color(distort, col);
+	float biome = col.r;
+	float biomeScale = saturate(2.0 * (pow(abs(cell.y - cell.x), 0.7) - 0.05));
+	float vary;
+
+	#ifdef VISUALIZE_BIOMES
+	float4  colorOverlay;
+	if (biome < dunesFraction)
+		colorOverlay = float4(1.0, 1.0, 0.0, 0.0);
+	else if (biome < hillsFraction)
+		colorOverlay = float4(0.0, 1.0, 0.0, 0.0);
+	else if (biome < hills2Fraction)
+		colorOverlay = float4(0.0, 1.0, 0.5, 0.0);
+	else if (biome < canyonsFraction)
+		colorOverlay = float4(1.0, 0.0, 0.0, 0.0);
+	else
+		colorOverlay = float4(1.0, 1.0, 1.0, 0.0);
+	#endif
+
+	noiseOctaves = 2;
+	distort  = 0.035 * Fbm3D(p * 53.1);
+	distort += 0.350 * Fbm3D(p *  5.8);
+	cell = Cell3Noise2(3.1 * p + distort);
+	float pseudoRivers = saturate(1.0 - abs(cell.y - cell.x) * 60.0);
+	pseudoRivers *= 1.0 - saturate((height / seaLevel - 1.0) * 2.0);
+
+	Surface surf;
+
+	// Assign a climate type
+	noiseOctaves    = 6.0;
+	noiseH          = 0.5;
+	noiseLacunarity = 2.218281828459;
+	noiseOffset     = 0.8;
+
+	float climate, latitude, dist;
+
+	if (tidalLock <= 0.0)
+	{
+		latitude = abs(ppoint.y);
+		latitude += 0.15 * (Fbm(ppoint * 0.7 + Randomize) - 1.0);
+		latitude = saturate(latitude);
+		if (latitude < latTropic - tropicWidth)
+			climate = lerp(climateTropic, climateEquator, (latTropic - tropicWidth - latitude) / latTropic);
+		else if (latitude > latTropic + tropicWidth)
+			climate = lerp(climateTropic, climatePole, (latitude - latTropic - tropicWidth) / (1.0 - latTropic));
+		else
+			climate = climateTropic;
+	}
+	else
+	{
+		latitude = 1.0 - ppoint.x;
+		latitude += 0.15 * (Fbm(ppoint * 0.7 + Randomize) - 1.0);
+		climate = lerp(climateTropic, climatePole, saturate(latitude));
+	}
+
+	// Change climate with elevation
+	float montHeight = saturate((height - seaLevel) / (snowLevel - seaLevel));
+	vary = 0.125 * montHeight * Fbm(ppoint * 1700.0 + Randomize);
+	climate = min(climate + heightTempGrad * montHeight + vary, climatePole);
+
+	// Beach
+	float beach = saturate((height / seaLevel - 1.0) * 50.0);
+	climate = lerp(0.375, climate, beach);
+
+	// Dunes must be made of sand only
+	float dunes = step(dunesFraction, biome) * biomeScale;
+	slope *= dunes;
+
+	// Ice caps
+	float iceCap = saturate((latitude / latIceCaps - 1.0) * 50.0);
+	climate = lerp(climate, climatePole, iceCap);
+
+	// Flatland climate distortion
+	noiseOctaves = 4;
+	float3  pp = (ppoint + Randomize) * (0.0005 * hillsFreq / (hillsMagn * hillsMagn));
+	float fr = 0.20 * (1.5 - RidgedMultifractal(pp,         2.0)) +
+			   0.05 * (1.5 - RidgedMultifractal(pp * 10.0,  2.0)) +
+			   0.02 * (1.5 - RidgedMultifractal(pp * 100.0, 2.0));
+	p = ppoint * (colorDistFreq * 0.005) + float3(fr, fr, fr);
+	p += Fbm3D(p * 0.38) * 1.2;
+	vary = (Fbm(p) + 0.7) * 0.7 * 0.5;
+	climate += vary * beach * saturate(1.0 - 3.0 * slope) * saturate(1.0 - 1.333 * climate);
+
+	// Dunes must be made of sand only
+	//climate = lerp(0.0, climate, dunes);
+
+	// Color texture distortion
+	noiseOctaves = 5;
+	p = ppoint * colorDistFreq * 0.371;
+	p += Fbm3D(p * 0.5) * 1.2;
+	vary = saturate((Fbm(p) + 0.7) * 0.7);
+
+	// Shield volcano lava
+	float lavaMask = 0.0;
+	if (volcanoOctaves > 0)
+	{
+		// Global volcano activity mask
+		noiseOctaves = 3;
+		float volcActivity = saturate((Fbm(ppoint * 1.37 + Randomize) - 1.0 + volcanoActivity) * 5.0);
+		// Lava in volcano caldera and flows
+		noiseOctaves = 3;  // volcano roundness distortion
+		craterRoundDist = 0.001;
+		lavaMask = VolcanoGlowNoise(ppoint) * volcActivity;
+		// Model lava as rocks texture
+		climate = lerp(climate, 0.375, lavaMask);
+		slope   = lerp(slope,   1.0,   lavaMask);
+	}
+
+	surf = GetSurfaceColor(climate, slope, vary);
+
+	// Sedimentary layers
+	noiseOctaves = 4;
+	float layers = Fbm(float3(height * 168.4 + 0.17 * vary, 0.43 * (p.x + p.y), 0.43 * (p.z - p.y)));
+	//layers *= smoothstep(0.75, 0.8, climate) * (1.0 - smoothstep(0.825, 0.875, climate)); // only rock texture
+	layers *= smoothstep(0.5, 0.55, slope);     // only steep slopes
+	layers *= step(surf.color.a, 0.01);         // do not make layers on snow
+	layers *= saturate(1.0 - 5.0 * lavaMask);   // do not make layers on lava
+	surf.color.rgb *= float3(1.0, 1.0, 1.0) - float3(0.0, 0.5, 1.0) * layers;
+
+	// Albedo variations
+	noiseOctaves = 4;
+	distort = Fbm3D((ppoint + Randomize) * 0.07) * 1.5;
+	noiseOctaves = 5;
+	vary = Fbm((ppoint + distort) * 0.78);
+	surf.color *= 1.0 - 0.5 * vary;
+
+	#ifdef VISUALIZE_BIOMES
+		surf.color = lerp(surf.color, colorOverlay * biomeScale, 0.25);
+	#endif
+
+	if (surfType <= 3)   // water mask for planets with oceans
+		surf.color.a += saturate((seaLevel - height) * 200.0);
+
+	return surf.color;
 }
 //-----------------------------------------------------------------------------

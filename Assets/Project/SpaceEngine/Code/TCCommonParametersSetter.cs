@@ -38,6 +38,10 @@ public class TCCommonParametersSetter : MonoBehaviour
     public Vector4 craterParams1;
     public Vector4 craterParams2;
 
+    public Vector2 texturingUVAtlasOffset;
+
+    public Color PlanetGlobalColor = Color.white;
+
     public bool AutoUpdate = false;
     public bool UseCustomTexCoord = false;
 
@@ -99,5 +103,9 @@ public class TCCommonParametersSetter : MonoBehaviour
         shader.SetVector("crHeightParams", crHeightParams);
         shader.SetVector("craterParams1", craterParams1);
         shader.SetVector("craterParams2", craterParams2);
+
+        shader.SetVector("texturingUVAtlasOffset", texturingUVAtlasOffset);
+
+        shader.SetVector("planetGlobalColor", new Vector4(PlanetGlobalColor.r, PlanetGlobalColor.g, PlanetGlobalColor.b, PlanetGlobalColor.a));
     }
 }

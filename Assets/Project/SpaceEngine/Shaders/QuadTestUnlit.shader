@@ -107,10 +107,14 @@
 
 				v.tangent = float4(FindTangent(tex2Dlod(_NormalTexture, float4(v.texcoord.xy, 0, 0)), 0.01, float3(0, 1, 0)), 1);
 				v.normal = normal;
-
+				
+				TANGENT_SPACE_ROTATION;
 				v.tangent.xyz += position.xyz;
 				v.normal.xyz += position.xyz;
 
+				v.tangent.xyz = mul(v.tangent.xyz, rotation);
+				v.normal.xyz = mul(v.normal.xyz, rotation);
+				
 				/*
 				if (_Side == 0)//top
 				{

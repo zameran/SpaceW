@@ -32,6 +32,7 @@ public class Planetoid : MonoBehaviour
 	public QuadStorage Cache = null;
 	public NoiseParametersSetter NPS = null;
 
+	public bool UseUnityCulling = true;
 	public bool UseLOD = true;
 	public bool RenderPerUpdate = false;
 

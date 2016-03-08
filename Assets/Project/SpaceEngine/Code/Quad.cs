@@ -311,7 +311,8 @@ public class Quad : MonoBehaviour
 
     private void OnDrawGizmos()
     {
-
+        //Gizmos.color = Color.blue;
+        //Gizmos.DrawWireCube(QuadMesh.bounds.center, QuadMesh.bounds.size);
     }
 
     private void Render()
@@ -821,7 +822,16 @@ public class Quad : MonoBehaviour
 
     public Vector3 GetBoundsSize(Quad quad)
     {
-        return new Vector3(9e37f, 9e37f, 9e37f);
+        if (Planetoid.UseUnityCulling)
+        {
+            Vector3 size = bottomRightCorner - topLeftCorner;
+
+            return VectorHelper.Abs(size * 2.0f - VectorHelper.Abs(middleNormalized));
+        }
+        else
+        {
+            return new Vector3(9e37f, 9e37f, 9e37f);
+        }
     }
 
     public Vector3 GetCubeFaceEastDirection(QuadPostion quadPosition)
