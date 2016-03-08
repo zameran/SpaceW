@@ -13,7 +13,7 @@
 // 0 - classic noise - OK.
 // 1 - Ken Perlin's "improved" - OK.
 // 2 - fast "improved" - OK.
-#define NOISE_ENGINE_TECHNIQUE 1
+#define NOISE_ENGINE_TECHNIQUE 2
 //-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
@@ -585,6 +585,11 @@ inline Surface BlendSmart(Surface s0, Surface s1, float t)
 
 	return res;
 }
+
+float2 ruvy(float2 uv)
+{
+	return float2(uv.x, 1.0 - uv.y);
+}
 //-----------------------------------------------------------------------------
 
 #if (COLORING_TECHNIQUE == 0)
@@ -663,7 +668,7 @@ Surface GetSurfaceColorAtlas(float height, float slope, float vary)
 	float4 PackFactors = float4(1.0 / ATLAS_RES_X, 1.0 / ATLAS_RES_Y, ATLAS_TILE_RES, ATLAS_TILE_RES_LOG2);
 	slope = saturate(slope * 0.5);
 
-	float4 IdScale = tex2Dlod(MaterialTable, float4(height + texturingHeightOffset, (slope + 0.5) + texturingSlopeOffset, 0, 0));
+	float4 IdScale = tex2Dlod(MaterialTable, float4(ruvy(float2(height + texturingHeightOffset, (slope + 0.5) + texturingSlopeOffset)), 0, 0));
 	//float2 IdScaleUV = float2(height + texturingHeightOffset, (slope + 0.5) + texturingSlopeOffset);
 	//float4 IdScale = MaterialTable[IdScaleUV.xy];
 	//float4 IdScale = MaterialTableBuffer[IdScaleUV.x + IdScaleUV.y * 256];
@@ -688,7 +693,7 @@ Surface GetSurfaceColorAtlas(float height, float slope, float vary)
 	float4 color = float4(0, 0, 0, 0);
 	float weight = 0.0;
 
-	float4 adjust = tex2Dlod(MaterialTable, float4(height + texturingHeightOffset, slope + texturingSlopeOffset, 0, 0));
+	float4 adjust = tex2Dlod(MaterialTable, float4(ruvy(float2(height + texturingHeightOffset, slope + texturingSlopeOffset)), 0, 0));
 	//float2 adjustUV = float2(height + texturingHeightOffset, slope + texturingSlopeOffset);
 	//float4 adjust = MaterialTable[adjustUV.xy];
 	//float4 adjust = MaterialTableBuffer[adjustUV.x + adjustUV.y * 256];
@@ -715,7 +720,7 @@ Surface GetSurfaceColorAtlas(float height, float slope, float vary)
 			#endif
 
 			// color conversion must be done before summarize, because hls color space is not additive
-			float4 rgb = tex2Dlod(AtlasDiffSampler, float4(uv * uvs + uvo * texturingUVAtlasOffset, 0, 0));
+			float4 rgb = tex2Dlod(AtlasDiffSampler, float4(ruvy(uv * uvs + uvo * texturingUVAtlasOffset), 0, 0));
 			//float2 rgbUV = float2(uv * uvs + uvo);
 			//float4 rgb = AtlasDiffSampler[rgbUV.xy];
 			//float4 rgb = AtlasDiffSamplerBuffer[rgbUV.x + rgbUV.y * 4096];
