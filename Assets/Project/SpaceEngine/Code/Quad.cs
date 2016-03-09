@@ -248,7 +248,7 @@ public class Quad : MonoBehaviour
             {
                 if (Generated && !HaveSubQuads && !Planetoid.Working)
                 {
-                    if (GetDistanceToClosestCorner() < Planetoid.LODDistances[LODLevel + 1] && !Splitting)
+                    if (GetDistanceToClosestCorner() < Planetoid.LODDistances[LODLevel + 1] * Planetoid.LODDistanceMultiplier && !Splitting)
                     {
                         StartCoroutine(Split());
                     }
@@ -259,7 +259,7 @@ public class Quad : MonoBehaviour
                 }
                 else
                 {
-                    if (GetDistanceToClosestCorner() > Planetoid.LODDistances[LODLevel + 1] && !Splitting)
+                    if (GetDistanceToClosestCorner() > Planetoid.LODDistances[LODLevel + 1] * Planetoid.LODDistanceMultiplier && !Splitting)
                     {
                         Unsplit();
                     }

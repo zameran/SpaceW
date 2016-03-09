@@ -23,7 +23,7 @@ float HeightMapPlanet(float3 ppoint)
 	float total = 0;
 
 	float t0 = Fbm(ppoint * 2.5, 2);
-	float v0 = RidgedMultifractal(ppoint * 2.5, 1.5, 12) / 2;
+	float v0 = pow(2.0, RidgedMultifractalExtra(ppoint, 18, 1, 1.75, 0.6));
 
 	total = GetTerraced(v0, 8, 2);
 
@@ -35,6 +35,11 @@ float HeightMapPlanet(float3 ppoint)
 float4 ColorMapPlanet(float3 ppoint, float height, float slope)
 {
 	Surface surf = GetSurfaceColor(height, slope, 1);
+
+	float4 slopeColor = float4(0.95, 0.75, 0.25, 0.0) * (1 - slope);
+	float4 lookupColor = tex2Dlod(MaterialTable, float4(height / 2, 0, 0, 0));
+
+	surf.color = lookupColor + slopeColor;
 
 	return surf.color;
 }

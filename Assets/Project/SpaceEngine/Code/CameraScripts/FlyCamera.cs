@@ -71,15 +71,15 @@ public class FlyCamera : MonoBehaviour
 
         if (Input.GetKey(KeyCode.E))
         {
-            zRotation -= 10;
+            zRotation -= 1 * Time.deltaTime;
         }
         else if (Input.GetKey(KeyCode.Q))
         {
-            zRotation += 10;
+            zRotation += 1 * Time.deltaTime;
         }
         else
         {
-            zRotation = 0;
+            zRotation = Mathf.Lerp(zRotation, 0, Time.deltaTime * 2);
         }
 
         zRotation = Mathf.Clamp(zRotation, -100, 100);

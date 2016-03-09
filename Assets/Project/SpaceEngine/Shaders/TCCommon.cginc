@@ -869,11 +869,8 @@ Surface GetSurfaceColor(float height, float slope, float vary)
 
 Surface GetSurfaceColor(float height, float slope, float vary)
 {
-	float4 rgb = float4(0.0, 0.15 * (height + 1), 0.0, 1.0) * slope + float4(222 / 255, 155 / 255, 50 / 255, 1.0) * (1.0 - slope);
-
 	Surface surf;
 	surf.height = height;
-	surf.color = rgb;
 
 	return surf;
 }
@@ -1677,6 +1674,28 @@ float RidgedMultifractalDetail(float3 ppoint, float gain, float firstOctaveValue
 
 	return summ;
 }
+
+float RidgedNoise(float3 p)
+{
+	float n = 1.0f - abs(Noise(p) * 2.0);
+	return n * n - 0.5;
+}
+
+float RidgedMultifractalExtra(float3 ppoint, int octaves, float frequency, float lacunarity, float gain)
+{
+	float sum = 0;
+	float ampl = 1.0;
+
+	for(int i = 0; i < octaves; i++)
+	{
+		float n = RidgedNoise(ppoint * frequency);
+		sum += n * ampl;
+		frequency *= lacunarity;
+		ampl *= gain;
+	}
+
+	return sum;
+}
 //-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
@@ -1696,7 +1715,7 @@ float RidgedMultifractalEroded(float3 ppoint, float gain, float warp)
 	{
 		noiseDeriv = NoiseDeriv((ppoint + warp * dsum) * frequency);
 		weight = saturate(signal * gain);
-		signal = noiseOffset - sqrt(noiseRidgeSmooth + noiseDeriv.w*noiseDeriv.w);
+		signal = noiseOffset - sqrt(noiseRidgeSmooth + noiseDeriv.w * noiseDeriv.w);
 		signal *= signal * weight;
 		amplitude = SavePow(abs(frequency), -noiseH);
 		summ += signal * amplitude;
@@ -1721,7 +1740,7 @@ float RidgedMultifractalEroded(float3 ppoint, float gain, float warp, float o)
 	{
 		noiseDeriv = NoiseDeriv((ppoint + warp * dsum) * frequency);
 		weight = saturate(signal * gain);
-		signal = noiseOffset - sqrt(noiseRidgeSmooth + noiseDeriv.w*noiseDeriv.w);
+		signal = noiseOffset - sqrt(noiseRidgeSmooth + noiseDeriv.w * noiseDeriv.w);
 		signal *= signal * weight;
 		amplitude = SavePow(abs(frequency), -noiseH);
 		summ += signal * amplitude;
@@ -1748,7 +1767,7 @@ float RidgedMultifractalErodedDetail(float3 ppoint, float gain, float warp, floa
 	{
 		noiseDeriv = NoiseDeriv((ppoint + warp * dsum) * frequency);
 		weight = saturate(signal * gain);
-		signal = noiseOffset - sqrt(noiseRidgeSmooth + noiseDeriv.w*noiseDeriv.w);
+		signal = noiseOffset - sqrt(noiseRidgeSmooth + noiseDeriv.w * noiseDeriv.w);
 		signal *= signal * weight;
 		amplitude = SavePow(frequency, -noiseH);
 		summ += signal * amplitude;
@@ -1773,7 +1792,7 @@ float RidgedMultifractalErodedDetail(float3 ppoint, float gain, float warp, floa
 	{
 		noiseDeriv = NoiseDeriv((ppoint + warp * dsum) * frequency);
 		weight = saturate(signal * gain);
-		signal = noiseOffset - sqrt(noiseRidgeSmooth + noiseDeriv.w*noiseDeriv.w);
+		signal = noiseOffset - sqrt(noiseRidgeSmooth + noiseDeriv.w * noiseDeriv.w);
 		signal *= signal * weight;
 		amplitude = SavePow(frequency, -noiseH);
 		summ += signal * amplitude;

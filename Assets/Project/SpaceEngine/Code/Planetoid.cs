@@ -24,6 +24,7 @@ public class Planetoid : MonoBehaviour
 
 	public int DispatchSkipFramesCount = 8;
 
+    public int LODDistanceMultiplier = 1;
 	public int LODMaxLevel = 8;
 	public int[] LODDistances = new int[9] { 2048, 1024, 512, 256, 128, 64, 32, 16, 8 };
 
