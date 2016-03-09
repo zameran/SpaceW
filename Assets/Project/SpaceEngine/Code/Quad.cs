@@ -246,7 +246,7 @@ public class Quad : MonoBehaviour
 
             if (LODLevel < Planetoid.LODMaxLevel)
             {
-                if (Generated && !HaveSubQuads)
+                if (Generated && !HaveSubQuads && (Planetoid.OneSplittingQuad ? !Planetoid.Working : (!Planetoid.Working || Planetoid.Working)))
                 {
                     if (GetDistanceToClosestCorner() < Planetoid.LODDistances[LODLevel + 1] * Planetoid.LODDistanceMultiplier && !Splitting)
                     {

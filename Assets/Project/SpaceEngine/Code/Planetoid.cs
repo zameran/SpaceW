@@ -36,6 +36,7 @@ public class Planetoid : MonoBehaviour
 	public bool UseUnityCulling = true;
 	public bool UseLOD = true;
 	public bool RenderPerUpdate = false;
+    public bool OneSplittingQuad = true;
 
 	public float TerrainMaxHeight = 64.0f;
 
