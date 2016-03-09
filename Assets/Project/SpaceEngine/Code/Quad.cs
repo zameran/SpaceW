@@ -611,9 +611,6 @@ public class Quad : MonoBehaviour
         CoreShader.SetBuffer(kernel, "patchPreOutput", PreOutDataBuffer);
         CoreShader.SetBuffer(kernel, "patchPreOutputSub", PreOutDataSubBuffer);
         CoreShader.SetBuffer(kernel, "patchOutput", OutDataBuffer);
-
-        //CoreShader.SetBuffer(kernel, "MaterialTableBuffer", Planetoid.NPS.PlanetColorB);
-        //CoreShader.SetBuffer(kernel, "AtlasDiffSamplerBuffer", Planetoid.NPS.PlanetAtlasB);
                
         CoreShader.SetTexture(kernel, "Height", HeightTexture);
         CoreShader.SetTexture(kernel, "Normal", NormalTexture);
