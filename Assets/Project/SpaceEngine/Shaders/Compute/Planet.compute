@@ -94,6 +94,29 @@ float3 CubeCoord(QuadGenerationConstants constants, float VerticesPerSide, uint3
 	return cubeCoord;
 }
 
+//-----------------------------------------------------------------------------
+float HeightMapPlanet(float3 ppoint)
+{
+	float total = 0;
+
+	float t0 = Fbm(ppoint * 2.5, 2);
+	float v0 = RidgedMultifractal(ppoint * 2.5, 1.5, 12) / 2;
+
+	total = GetTerraced(v0, 8, 2);
+
+	return total;
+}
+//-----------------------------------------------------------------------------
+
+//-----------------------------------------------------------------------------
+float4 ColorMapPlanet(float3 ppoint, float height, float slope)
+{
+	Surface surf = GetSurfaceColor(height, slope, 1);
+
+	return surf.color;
+}
+//-----------------------------------------------------------------------------
+
 float NoiseFunction(float3 coord)
 {
 	float3 p = 0.001 * coord;
@@ -101,8 +124,9 @@ float NoiseFunction(float3 coord)
 	#ifdef defaultNoise
 	float noise = Fbm(p + Randomize, 2);
 	#else
-	float noise = HeightMapAsteroid(p);
+	//float noise = HeightMapAsteroid(p);
 	//float noise = HeightMapTerra(p);
+	float noise = HeightMapPlanet(p);
 	#endif
 	
 	return noise;
@@ -115,10 +139,11 @@ float4 ColorFunction(float3 coord, float height, float slope)
 	#ifdef defaultNoise
 	float4 color = float4(1.0, 1.0, 1.0, 1.0);
 	#else
-	float4 colorMapColor = ColorMapAsteroid(p, height, slope);
-	float4 glowMapColor = GlowMapAsteroid(p, height, slope);
-	float4 color = colorMapColor + glowMapColor;
+	//float4 colorMapColor = ColorMapAsteroid(p, height, slope);
+	//float4 glowMapColor = GlowMapAsteroid(p, height, slope);
+	//float4 color = colorMapColor + glowMapColor;
 	//float4 color = ColorMapTerra(p, height, slope);
+	float4 color = ColorMapPlanet(p, height, slope);
 	#endif
 	
 	return color;

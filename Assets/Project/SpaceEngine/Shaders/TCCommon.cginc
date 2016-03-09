@@ -13,14 +13,14 @@
 // 0 - classic noise - OK.
 // 1 - Ken Perlin's "improved" - OK.
 // 2 - fast "improved" - OK.
-#define NOISE_ENGINE_TECHNIQUE 2
+#define NOISE_ENGINE_TECHNIQUE 1
 //-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
 // noise engine technique: (Works only with NOISE_ENGINE_I)
 // 0 - space engine.
 // 1 - own.
-#define COLORING_TECHNIQUE 0
+#define COLORING_TECHNIQUE 1
 //-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
@@ -28,7 +28,7 @@
 // 0 - hard mix (no blending)
 // 1 - soft blending
 // 2 - "smart" blening (tile heightmap based)
-#define TILE_BLEND_MODE 0
+#define TILE_BLEND_MODE 2
 //-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
@@ -37,7 +37,7 @@
 // 1 - sampling texture 2 times at different scales
 // 2 - voronoi random offset
 // 3 - voronoi random offset and rotation
-#define TILING_FIX_MODE 0
+#define TILING_FIX_MODE 3
 //-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
@@ -869,7 +869,7 @@ Surface GetSurfaceColor(float height, float slope, float vary)
 
 Surface GetSurfaceColor(float height, float slope, float vary)
 {
-	float4 rgb = float4(0.0, 0.15 * height, 0.0, 1.0) * slope + float4(0.1, 0.1, 0.1, 1.0) * (1.0 - slope);
+	float4 rgb = float4(0.0, 0.15 * (height + 1), 0.0, 1.0) * slope + float4(222 / 255, 155 / 255, 50 / 255, 1.0) * (1.0 - slope);
 
 	Surface surf;
 	surf.height = height;
