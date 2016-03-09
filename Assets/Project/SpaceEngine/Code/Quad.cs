@@ -246,7 +246,7 @@ public class Quad : MonoBehaviour
 
             if (LODLevel < Planetoid.LODMaxLevel)
             {
-                if (Generated && !HaveSubQuads && !Planetoid.Working)
+                if (Generated && !HaveSubQuads)
                 {
                     if (GetDistanceToClosestCorner() < Planetoid.LODDistances[LODLevel + 1] * Planetoid.LODDistanceMultiplier && !Splitting)
                     {
@@ -1026,6 +1026,11 @@ public class Quad : MonoBehaviour
                 temp = Vector3.Lerp(temp, Parent.generationConstants.patchCubeCenter * (15.0f / 14.8828125f), 0.9921875f); //0.984375f + ((((((0.5f / 2.0f) / 2.0f) / 2.0f) / 2.0f) / 2.0f) / 2.0f)
             else if (LODLevel == 8) //Experimental! Maybe float precision have place on small planet radius!
                 temp = Vector3.Lerp(temp, Parent.generationConstants.patchCubeCenter * (15.0f / 14.94140625f), 0.99609375f); //0.9921875f + (((((((0.5f / 2.0f) / 2.0f) / 2.0f) / 2.0f) / 2.0f) / 2.0f) / 2.0f)
+            else if (LODLevel == 9) //Experimental! Maybe float precision have place on small planet radius!
+                temp = Vector3.Lerp(temp, Parent.generationConstants.patchCubeCenter * (15.0f / 14.970703100f), 0.998046875f); //0.99609375f + ((((((((0.5f / 2.0f) / 2.0f) / 2.0f) / 2.0f) / 2.0f) / 2.0f) / 2.0f) / 2.0f)
+            else if (LODLevel == 10) //Sooooo deep... what i'am doing?
+                temp = Vector3.Lerp(temp, Parent.generationConstants.patchCubeCenter * (15.0f / 14.9853515000f), 0.999023438f); //0.998046875f + (((((((((0.5f / 2.0f) / 2.0f) / 2.0f) / 2.0f) / 2.0f) / 2.0f) / 2.0f) / 2.0f) / 2.0f)
+            //OMG...
         }
         //End of magic here.
 
