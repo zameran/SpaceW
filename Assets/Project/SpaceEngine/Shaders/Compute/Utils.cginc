@@ -68,3 +68,53 @@ float3 CubeCoord(QuadGenerationConstants constants, float VerticesPerSide, uint3
 	return cubeCoord;
 }
 //-----------------------------------------------------------------------------
+
+float3x3 TBN(float3 normal)
+{
+	float3 n = normal;
+	
+	float3 t; 
+
+	float3 c1 = cross(n, float3(0.0, 0.0, 1.0)); 
+	float3 c2 = cross(n, float3(0.0, 1.0, 0.0)); 
+
+	if(length(c1) > length(c2))
+	{
+		t = c1;	
+	}
+	else
+	{
+		t = c2;	
+	}
+
+	t = normalize(t);
+
+	float3 b = cross(t, n);
+
+	return float3x3(t, b, n);
+}
+
+float3x3 TBN(float3 normal, float4x4 modelMatrix)
+{
+	float3 n = mul(normal, modelMatrix);
+	
+	float3 t; 
+
+	float3 c1 = cross(n, float3(0.0, 0.0, 1.0)); 
+	float3 c2 = cross(n, float3(0.0, 1.0, 0.0)); 
+
+	if(length(c1) > length(c2))
+	{
+		t = c1;	
+	}
+	else
+	{
+		t = c2;	
+	}
+
+	t = normalize(mul(t, modelMatrix));
+
+	float3 b = mul(cross(t, n), modelMatrix);
+
+	return float3x3(t, b, n);
+}

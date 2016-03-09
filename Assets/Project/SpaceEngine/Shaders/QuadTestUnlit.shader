@@ -24,7 +24,8 @@
 			
 			#include "UnityCG.cginc"
 			#include "UnityLightingCommon.cginc"
-			#include "TCCommon.cginc"
+			#include "Assets/Project/SpaceEngine/Shaders/Compute/Utils.cginc"
+			#include "Assets/Project/SpaceEngine/Shaders/TCCommon.cginc"
 
 			struct appdata_full_compute 
 			{
@@ -47,19 +48,8 @@
 				float3 uv1 : TEXCOORD1;
 				float4 vertex : SV_POSITION;
 			};
-
-			struct OutputStruct
-			{
-				float noise;
-
-				float3 patchCenter;
-
-				float4 vcolor;
-				float4 pos;
-				float4 cpos;
-			};
-			
-			half4 _WireframeColor;
+		
+			uniform half4 _WireframeColor;
 			uniform float _Wireframe;
 			uniform float _Side;
 
@@ -69,27 +59,7 @@
 			#ifdef SHADER_API_D3D11
 			uniform StructuredBuffer<OutputStruct> data;
 			#endif
-
-			float3 FindTangent(float3 normal, float epsilon, float3 dir)
-			{
-				float refVectorSign = sign(1.0 - abs(normal.x) - epsilon);
-
-				float3 refVector = refVectorSign * dir;
-				float3 biTangent = refVectorSign * cross(normal, refVector);
-
-				return cross(-normal, biTangent);
-			}
-
-			float3 FindBiTangent(float3 normal, float epsilon, float3 dir)
-			{
-				float refVectorSign = sign(1.0 - abs(normal.x) - epsilon);
-
-				float3 refVector = refVectorSign * dir;
-				float3 biTangent = refVectorSign * cross(normal, refVector);
-
-				return biTangent;
-			}
-		
+	
 			v2fg vert (in appdata_full_compute v)
 			{
 				float noise = data[v.id].noise;
@@ -108,12 +78,16 @@
 				v.tangent = float4(FindTangent(tex2Dlod(_NormalTexture, float4(v.texcoord.xy, 0, 0)), 0.01, float3(0, 1, 0)), 1);
 				v.normal = normal;
 				
-				TANGENT_SPACE_ROTATION;
 				v.tangent.xyz += position.xyz;
 				v.normal.xyz += position.xyz;
 
+				//TANGENT_SPACE_ROTATION;
 				//v.tangent.xyz = mul(v.tangent.xyz, rotation);
 				//v.normal.xyz = mul(v.normal.xyz, rotation);
+
+				//float3x3 tbn = TBN(normal);
+				//v.tangent.xyz = mul(v.tangent.xyz, -tbn);
+				//v.normal.xyz = mul(v.normal.xyz, -tbn);
 				
 				/*
 				if (_Side == 0)//top
@@ -140,18 +114,11 @@
 				{
 
 				}
-
-				float3 tangent = -FindTangent(normal, 0.01, float3(0, -1, 0));
-				float3 binormal = cross(normalize(normal), normalize(v.tangent.xyz)) * v.tangent.w;
-				float3x3 rotation = float3x3(v.tangent.xyz, binormal, normal);
-				
-				v.tangent.xyz += mul(position.xyz, -rotation);
-				v.normal.xyz += mul(position.xyz, -rotation);
 				*/
 
 				float atten = 1.0;
 				float3 normalDirection = normalize(mul(float4(v.normal, 0), _Object2World).xyz);
-				float3 lightDirection = normalize(_WorldSpaceLightPos0.xyz - float3(0, 0, -8192));	//float3(4096, 4096, 8192));
+				float3 lightDirection = normalize(_WorldSpaceLightPos0.xyz - float3(0, 0, -8192));	// - float3(4096, 4096, 8192) || - float3(0, 0, -8192)
 				float3 diffuseReflection = atten * _LightColor0.xyz * max(0, dot(normalDirection, lightDirection));
 				float3 lightFinal = diffuseReflection * UNITY_LIGHTMODEL_AMBIENT.xyz;
 				
