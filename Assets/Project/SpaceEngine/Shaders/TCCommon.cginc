@@ -947,6 +947,12 @@ float3 OFFSET = float3(0.5, 0.5, 0.5);
 float3 OFFSETOUT = float3(1.5, 1.5, 1.5);
 //-----------------------------------------------------------------------------
 
+//-----------------------------------------------------------------------------
+inline float4 LessThan(float4 x, float4 y)
+{
+	return 1.0 - step(y, x);
+}
+//-----------------------------------------------------------------------------
 
 #ifdef NOISE_ENGINE_SE
 //-----------------------------------------------------------------------------
@@ -984,7 +990,7 @@ float Noise(float3 p)
 	float k6 = a - b - e + f;
 	float k7 = -a + b + c - d + e - f - g + h;
 
-	return k0 + k1*ff.x + k2*ff.y + k3*ff.z + k4*ff.x*ff.y + k5*ff.y*ff.z + k6*ff.z*ff.x + k7*ff.x*ff.y*ff.z;
+	return k0 + k1 * ff.x + k2 * ff.y + k3 * ff.z + k4 * ff.x * ff.y + k5 * ff.y * ff.z + k6 * ff.z * ff.x + k7 * ff.x * ff.y * ff.z;
 }
 //-----------------------------------------------------------------------------
 
@@ -1024,10 +1030,10 @@ float4 NoiseDeriv(float3 p)
 	float k6 = a - b - e + f;
 	float k7 = -a + b + c - d + e - f - g + h;
 
-	return float4(df.x * (k1 + k4*ff.y + k6*ff.z + k7*ff.y*ff.z),
-		df.y * (k2 + k5*ff.z + k4*ff.x + k7*ff.z*ff.x),
-		df.z * (k3 + k6*ff.x + k5*ff.y + k7*ff.x*ff.y),
-		k0 + k1*ff.x + k2*ff.y + k3*ff.z + k4*ff.x*ff.y + k5*ff.y*ff.z + k6*ff.z*ff.x + k7*ff.x*ff.y*ff.z);
+	return float4(df.x * (k1 + k4 * ff.y + k6 * ff.z + k7 * ff.y * ff.z),
+						  df.y * (k2 + k5 * ff.z + k4 * ff.x + k7 * ff.z * ff.x),
+						  df.z * (k3 + k6 * ff.x + k5 * ff.y + k7 * ff.x * ff.y),
+						  k0 + k1 * ff.x + k2 * ff.y + k3 * ff.z + k4 * ff.x * ff.y + k5 * ff.y * ff.z + k6 * ff.z * ff.x + k7 * ff.x * ff.y * ff.z);
 }
 //-----------------------------------------------------------------------------
 
@@ -1055,8 +1061,8 @@ float Noise(float3 p)
 	float4 grad_y1 = hashy1 - hashOffset;
 	float4 grad_z1 = hashz1 - hashOffset;
 
-	float4 grad_results_0 = 1 / sqrt(grad_x0 * grad_x0 + grad_y0 * grad_y0 + grad_z0 * grad_z0) * (float2(Pf.x, Pf_min1.x).xyxy * grad_x0 + float2(Pf.y, Pf_min1.y).xxyy * grad_y0 + Pf.zzzz * grad_z0);
-	float4 grad_results_1 = 1 / sqrt(grad_x1 * grad_x1 + grad_y1 * grad_y1 + grad_z1 * grad_z1) * (float2(Pf.x, Pf_min1.x).xyxy * grad_x1 + float2(Pf.y, Pf_min1.y).xxyy * grad_y1 + Pf_min1.zzzz * grad_z1);
+	float4 grad_results_0 = rsqrt(grad_x0 * grad_x0 + grad_y0 * grad_y0 + grad_z0 * grad_z0) * (float2(Pf.x, Pf_min1.x).xyxy * grad_x0 + float2(Pf.y, Pf_min1.y).xxyy * grad_y0 + Pf.zzzz * grad_z0);
+	float4 grad_results_1 = rsqrt(grad_x1 * grad_x1 + grad_y1 * grad_y1 + grad_z1 * grad_z1) * (float2(Pf.x, Pf_min1.x).xyxy * grad_x1 + float2(Pf.y, Pf_min1.y).xxyy * grad_y1 + Pf_min1.zzzz * grad_z1);
 
 	float3 blend = Interpolation_C2(Pf);
 
@@ -1162,11 +1168,6 @@ float4 NoiseDeriv(float3 p)
 
 #ifdef NOISE_ENGINE_I
 
-inline float4 LessThan(float4 x, float4 y)
-{
-	return 1.0 - step(y, x);
-}
-
 float Noise(float3 p)
 {
 	// Establish our grid cell and unit position
@@ -1196,9 +1197,9 @@ float Noise(float3 p)
 		float3 blend = Interpolation_C2(Pf);
 		float4 res0 = lerp(grad_results_0, grad_results_1, blend.z);
 		float2 res1 = lerp(res0.xy, res0.zw, blend.y);
-		float final = lerp(res1.x, res1.y, blend.x);
-		final *= 1.1547005383792515290182975610039; // (optionally) scale things to a strict -1.0->1.0 rang *= 1.0/sqrt(0.75)
-		return final;
+		float finalValue = lerp(res1.x, res1.y, blend.x);
+		finalValue *= 1.1547005383792515290182975610039; // (optionally) scale things to a strict -1.0->1.0 rang *= 1.0/sqrt(0.75)
+		return finalValue;
 	#else
 		// Improved noise. Requires 1 random value per point.
 		// Will run faster than classic noise if a slow hashing function is used.
@@ -1378,8 +1379,8 @@ float sNoise(float3 v)
 	float4 x_ = floor(j * ns.z);
 	float4 y_ = floor(j - 7.0 * x_);    // mod(j,N)
 
-	float4 x = x_ *ns.x + ns.yyyy;
-	float4 y = y_ *ns.x + ns.yyyy;
+	float4 x = x_ * ns.x + ns.yyyy;
+	float4 y = y_ * ns.x + ns.yyyy;
 	float4 h = 1.0 - abs(x) - abs(y);
 
 	float4 b0 = float4(x.xy, y.xy);
@@ -1394,22 +1395,22 @@ float sNoise(float3 v)
 	float4 a0 = b0.xzyw + s0.xzyw * sh.xxyy;
 	float4 a1 = b1.xzyw + s1.xzyw * sh.zzww;
 
-	float3 p0 = float3(a0.xy,h.x);
-	float3 p1 = float3(a0.zw,h.y);
-	float3 p2 = float3(a1.xy,h.z);
-	float3 p3 = float3(a1.zw,h.w);
+	float3 p0 = float3(a0.xy, h.x);
+	float3 p1 = float3(a0.zw, h.y);
+	float3 p2 = float3(a1.xy, h.z);
+	float3 p3 = float3(a1.zw, h.w);
 
 	//Normalise gradients
-	float4 norm = taylorInvSqrt(float4(dot(p0,p0), dot(p1,p1), dot(p2, p2), dot(p3,p3)));
+	float4 norm = taylorInvSqrt(float4(dot(p0, p0), dot(p1, p1), dot(p2, p2), dot(p3, p3)));
 	p0 *= norm.x;
 	p1 *= norm.y;
 	p2 *= norm.z;
 	p3 *= norm.w;
 
 	// Mix final noise value
-	float4 m = max(0.6 - float4(dot(x0,x0), dot(x1,x1), dot(x2,x2), dot(x3,x3)), 0.0);
+	float4 m = max(0.6 - float4(dot(x0, x0), dot(x1, x1), dot(x2, x2), dot(x3, x3)), 0.0);
 	m = m * m;
-	return 42.0 * dot(m*m, float4(dot(p0,x0), dot(p1,x1), dot(p2,x2), dot(p3,x3)));
+	return 42.0 * dot(m * m, float4(dot(p0, x0), dot(p1, x1), dot(p2, x2), dot(p3, x3)));
 }
 //-----------------------------------------------------------------------------
 
