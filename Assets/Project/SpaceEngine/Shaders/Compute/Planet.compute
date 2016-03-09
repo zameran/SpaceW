@@ -22,10 +22,10 @@ float HeightMapPlanet(float3 ppoint)
 {
 	float total = 0;
 
-	float t0 = Fbm(ppoint * 2.5, 2);
-	float v0 = pow(2.0, RidgedMultifractalExtra(ppoint, 18, 1, 1.75, 0.6));
+	float t0 = Fbm(ppoint * 0.75, 4);
+	float v0 = t0 + pow(2.0, RidgedMultifractalExtra(ppoint, 18, 1, 1.75, 0.6));
 
-	total = GetTerraced(v0, 8, 2);
+	total = GetTerraced(v0, 4, 2);
 
 	return total;
 }
@@ -37,7 +37,7 @@ float4 ColorMapPlanet(float3 ppoint, float height, float slope)
 	Surface surf = GetSurfaceColor(height, slope, 1);
 
 	float4 slopeColor = float4(0.95, 0.75, 0.25, 0.0) * (1 - slope);
-	float4 lookupColor = tex2Dlod(MaterialTable, float4(height / 2, 0, 0, 0));
+	float4 lookupColor = tex2Dlod(MaterialTable, float4(height / 2, slope - height, 0, 0));
 
 	surf.color = lookupColor + slopeColor;
 
@@ -157,16 +157,16 @@ void TexturesSub(uint3 id : SV_DispatchThreadID)
 	float4 pos = patchPreOutputSub[inBuffOffset].pos;
 	float4 cpos = patchPreOutputSub[inBuffOffset].cpos;
 
-	//float normalStrength = 0.5 / ((constants.lodLevel / 2.0 + 1.0) * (constants.lodLevel / 2.0 + 1.0));
+	float normalStrength = 0.5 / ((constants.lodLevel / 200.0 + 1.0) * (constants.lodLevel / 200.0 + 1.0));
 	
-	//float tl = patchPreOutputSub[(id.x + 0) + (id.y + 0) * nVerticesPerSideWithBorderSub].noise * constants.lodLevel;
-	//float  l = patchPreOutputSub[(id.x + 0) + (id.y + 1) * nVerticesPerSideWithBorderSub].noise * constants.lodLevel;
-	//float bl = patchPreOutputSub[(id.x + 0) + (id.y + 2) * nVerticesPerSideWithBorderSub].noise * constants.lodLevel;
-	//float  t = patchPreOutputSub[(id.x + 1) + (id.y + 0) * nVerticesPerSideWithBorderSub].noise * constants.lodLevel;
-	//float  b = patchPreOutputSub[(id.x + 1) + (id.y + 2) * nVerticesPerSideWithBorderSub].noise * constants.lodLevel;
-	//float tr = patchPreOutputSub[(id.x + 2) + (id.y + 0) * nVerticesPerSideWithBorderSub].noise * constants.lodLevel;
-	//float  r = patchPreOutputSub[(id.x + 2) + (id.y + 1) * nVerticesPerSideWithBorderSub].noise * constants.lodLevel;
-	//float br = patchPreOutputSub[(id.x + 2) + (id.y + 2) * nVerticesPerSideWithBorderSub].noise * constants.lodLevel;
+	float tl = patchPreOutputSub[(id.x + 0) + (id.y + 0) * nVerticesPerSideWithBorderSub].noise * constants.lodLevel;
+	float  l = patchPreOutputSub[(id.x + 0) + (id.y + 1) * nVerticesPerSideWithBorderSub].noise * constants.lodLevel;
+	float bl = patchPreOutputSub[(id.x + 0) + (id.y + 2) * nVerticesPerSideWithBorderSub].noise * constants.lodLevel;
+	float  t = patchPreOutputSub[(id.x + 1) + (id.y + 0) * nVerticesPerSideWithBorderSub].noise * constants.lodLevel;
+	float  b = patchPreOutputSub[(id.x + 1) + (id.y + 2) * nVerticesPerSideWithBorderSub].noise * constants.lodLevel;
+	float tr = patchPreOutputSub[(id.x + 2) + (id.y + 0) * nVerticesPerSideWithBorderSub].noise * constants.lodLevel;
+	float  r = patchPreOutputSub[(id.x + 2) + (id.y + 1) * nVerticesPerSideWithBorderSub].noise * constants.lodLevel;
+	float br = patchPreOutputSub[(id.x + 2) + (id.y + 2) * nVerticesPerSideWithBorderSub].noise * constants.lodLevel;
 
 	float left  = patchPreOutputSub[(id.x + 0) + (id.y + 1) * nVerticesPerSideWithBorderSub].noise * constants.lodLevel;
 	float right = patchPreOutputSub[(id.x + 2) + (id.y + 1) * nVerticesPerSideWithBorderSub].noise * constants.lodLevel;
@@ -183,20 +183,20 @@ void TexturesSub(uint3 id : SV_DispatchThreadID)
 	float3 znormalSlope = float3(zdeltaSlope, wdeltaSlope, 1.0);
 	float3 wnormalSlope = float3(wdeltaSlope, zdeltaSlope, 1.0);
 
-	//float xdelta = tr + 2.0 * r + br - tl - 2.0 * l - bl;
-	//float ydelta = bl + 2.0 * b + br - tl - 2.0 * t - tr;
+	float xdelta = tr + 2.0 * r + br - tl - 2.0 * l - bl;
+	float ydelta = bl + 2.0 * b + br - tl - 2.0 * t - tr;
 
-	//float3 xnormal = normalize(float3(xdelta, ydelta, 2.0 * normalStrength));
-	//float3 ynormal = normalize(float3(ydelta, xdelta, 2.0 * normalStrength));
+	float3 xnormal = normalize(float3(xdelta, ydelta, 2.0 * normalStrength));
+	float3 ynormal = normalize(float3(ydelta, xdelta, 2.0 * normalStrength));
 
-	//float3 no = xnormalSlope;
-	//float3 ta = FindTangent(no, 0.01, float3(0.0, -1.0, 0.0));
-	//float3 bi = FindBiTangent(no, 0.01, float3(0.0, -1.0, 0.0));
+	float3 no = xnormal;
+	float3 ta = FindTangent(no, 0.01, float3(0.0, -1.0, 0.0));
+	float3 bi = FindBiTangent(no, 0.01, float3(0.0, -1.0, 0.0));
 
-	//float3x3 tbn = float3x3(ta, bi, no);
+	float3x3 tbn = float3x3(ta, bi, no);
 
 	//float3 normal = mul(no, tbn);
-	float3 normal = xnormalSlope;
+	float3 normal = xnormal;
 	
 	float xslope = 0.5 / max(dot(xnormalSlope, float3(0.0, 1.0, 0.0)), 0.001);
 	float yslope = 0.5 / max(dot(ynormalSlope, float3(0.0, 1.0, 0.0)), 0.001);

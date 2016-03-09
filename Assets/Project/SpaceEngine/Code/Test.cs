@@ -7,12 +7,12 @@ public class Test : MonoBehaviour
     [ContextMenu("CreateMesh")]
     public void CreateMesh()
     {
-        this.GetComponent<MeshFilter>().sharedMesh = MeshFactory.SetupQuadMesh(nVertsPerEdge);
+        //this.GetComponent<MeshFilter>().sharedMesh = MeshFactory.SetupQuadMesh(nVertsPerEdge);
     }
 
     [ContextMenu("CreateMeshExtra")]
     public void CreateMeshExtra()
     {
-        this.GetComponent<MeshFilter>().sharedMesh = MeshFactory.SetupQuadMeshExtra(nVertsPerEdge);
+        //this.GetComponent<MeshFilter>().sharedMesh = MeshFactory.SetupQuadMeshExtra(nVertsPerEdge);
     }
 }

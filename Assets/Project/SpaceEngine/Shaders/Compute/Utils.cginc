@@ -93,3 +93,28 @@ float3x3 TBN(float3 normal)
 
 	return float3x3(t, b, n);
 }
+
+float3x3 TBN(float3 normal, float3 tc1d, float3 tc2d)
+{
+	float3 n = normal;
+	
+	float3 t; 
+
+	float3 c1 = cross(n, tc1d); 
+	float3 c2 = cross(n, tc2d); 
+
+	if(length(c1) > length(c2))
+	{
+		t = c1;	
+	}
+	else
+	{
+		t = c2;	
+	}
+
+	t = normalize(t);
+
+	float3 b = cross(t, n);
+
+	return float3x3(t, b, n);
+}
