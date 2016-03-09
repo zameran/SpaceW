@@ -253,7 +253,7 @@ void TexturesSub(uint3 id : SV_DispatchThreadID)
 	float wslope = 0.5 / max(dot(wnormalSlope, float3(0.0, 1.0, 0.0)), 0.001);
 
 	float slope = min(min(xslope, yslope), min(zslope, wslope));
-
+	
 	float4 color = ColorFunction(cpos.xyz, noise, slope);
 	float4 normalColor = float4(normal, slope);
 	float4 heightColor = float4(color.xyz, noise);

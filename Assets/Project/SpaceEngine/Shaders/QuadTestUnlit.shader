@@ -112,8 +112,8 @@
 				v.tangent.xyz += position.xyz;
 				v.normal.xyz += position.xyz;
 
-				v.tangent.xyz = mul(v.tangent.xyz, rotation);
-				v.normal.xyz = mul(v.normal.xyz, rotation);
+				//v.tangent.xyz = mul(v.tangent.xyz, rotation);
+				//v.normal.xyz = mul(v.normal.xyz, rotation);
 				
 				/*
 				if (_Side == 0)//top

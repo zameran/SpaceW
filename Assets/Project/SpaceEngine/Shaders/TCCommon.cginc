@@ -1,6 +1,6 @@
 //-----------------------------------------------------------------------------
 // noise engine:
-// NOISE_ENGINE_SE - space engine
+// NOISE_ENGINE_SE - space engine texture lookup
 // NOISE_ENGINE_ZNE - zameran noise engine
 // NOISE_ENGINE_I - space engine
 //#define NOISE_ENGINE_SE
@@ -9,7 +9,7 @@
 //-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
-// noise engine technique: (Works only with NOISE_ENGINE ->|<- 2)
+// noise engine technique: (Works only with NOISE_ENGINE_I)
 // 0 - classic noise - OK.
 // 1 - Ken Perlin's "improved" - OK.
 // 2 - fast "improved" - OK.
@@ -17,9 +17,9 @@
 //-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
-// noise engine technique: (Works only with NOISE_ENGINE ->|<- 2)
+// noise engine technique: (Works only with NOISE_ENGINE_I)
 // 0 - space engine.
-// 1 - soa.
+// 1 - own.
 #define COLORING_TECHNIQUE 0
 //-----------------------------------------------------------------------------
 
@@ -28,7 +28,7 @@
 // 0 - hard mix (no blending)
 // 1 - soft blending
 // 2 - "smart" blening (tile heightmap based)
-#define TILE_BLEND_MODE 2
+#define TILE_BLEND_MODE 0
 //-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
@@ -37,7 +37,7 @@
 // 1 - sampling texture 2 times at different scales
 // 2 - voronoi random offset
 // 3 - voronoi random offset and rotation
-#define TILING_FIX_MODE 3
+#define TILING_FIX_MODE 0
 //-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
@@ -92,6 +92,7 @@ uniform float4	  planetGlobalColor;	 // ()
 uniform float	  texturingHeightOffset; // ()
 uniform float	  texturingSlopeOffset;  // ()
 uniform float2	  texturingUVAtlasOffset;// ()
+uniform float2	  InvSize;				 // ()
 //-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
@@ -473,14 +474,28 @@ void GetSurfaceHeightAndSlope(inout float height, inout float slope)
 //-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
-float dFdx(float2 p)
+float2 dFdx(float2 p)
 {
-	return p.x * p.x - p.y;
+	return float2(p.x * p.x - p.y, p.y);
 }
 
-float dFdy(float2 p)
+float2 dFdy(float2 p)
 {
-	return p.y * p.y - p.x;
+	return float2(p.y * p.y - p.x, p.y);
+}
+
+float2 Fwidth(float2 texCoord, float2 size)
+{
+	float2 pixel_step = float2(size.x, size.y);       
+
+	float2 current = dFdx(texCoord);
+
+	float2 dfdx = dFdx(texCoord + pixel_step.x) - current;
+	float2 dfdy = dFdx(texCoord + pixel_step.y) - current;
+
+	float2 fw = abs(dfdx) + abs(dfdy);
+
+	return fw;
 }
 
 float3 rgb2hsl(float3 rgb)
@@ -586,9 +601,19 @@ inline Surface BlendSmart(Surface s0, Surface s1, float t)
 	return res;
 }
 
-float2 ruvy(float2 uv)
+inline float2 ruvy(float2 uv)
 {
 	return float2(uv.x, 1.0 - uv.y);
+}
+
+inline float3 ruvy(float3 uv)
+{
+	return float3(uv.x, 1.0 - uv.y, uv.z);
+}
+
+inline float4 ruvy(float4 uv)
+{
+	return float4(uv.x, 1.0 - uv.y, uv.z, uv.w);
 }
 //-----------------------------------------------------------------------------
 
@@ -604,35 +629,29 @@ Surface GetSurfaceColorAtlas(float height, float slope, float vary)
 	float4 PackFactors = float4(1.0 / ATLAS_RES_X, 1.0 / ATLAS_RES_Y, ATLAS_TILE_RES, ATLAS_TILE_RES_LOG2);
 	slope = saturate(slope * 0.5);
 
-	float4 IdScale = tex2Dlod(MaterialTable, float4(height + texturingHeightOffset, (slope + 0.5) + texturingSlopeOffset, 0, 0));
-	//float2 IdScaleUV = float2(height + texturingHeightOffset, (slope + 0.5) + texturingSlopeOffset);
-	//float4 IdScale = MaterialTable[IdScaleUV.xy];
+	float4 IdScale = tex2Dlod(MaterialTable, float4(ruvy(float2(height + texturingHeightOffset, (slope + 0.5) + texturingSlopeOffset)), 0, 0));
 
 	uint materialID = min(int(IdScale.x) + int(vary), int(ATLAS_RES_X * ATLAS_RES_Y - 1));
 	float2 tileOffs = float2(materialID % ATLAS_RES_X, materialID / ATLAS_RES_X) * PackFactors.xy;
 
 	Surface res;
-	float2 tileUV = (TexCoord.xy * faceParams.z + faceParams.xy) * texScale * IdScale.y;
-	float dx = dFdx(tileUV * PackFactors.z);
-	float dy = dFdy(tileUV * PackFactors.z);
+	float2 tileUV = (float2(1, 1) * faceParams.z + faceParams.xy) * texScale * IdScale.y;//(TexCoord.xy * faceParams.z + faceParams.xy) * texScale * IdScale.y;
+	float2 dx = Fwidth(tileUV * PackFactors.z, PackFactors.xy); //dFdx(tileUV * PackFactors.z);
+	float2 dy = Fwidth(tileUV * PackFactors.z, PackFactors.xy); //dFdy(tileUV * PackFactors.z);
 
-	float lod = clamp(0.5 * log2(max(dot(dx, dx), dot(dy, dy))), 0.0, PackFactors.w);
+	float lod = 4;//clamp(0.5 * log2(max(dot(dx, dx), dot(dy, dy))), 0.0, PackFactors.w);
 
-	float2 invSize = float2(pow(2.0, lod - PackFactors.w), 0.0) * PackFactors.xy;
+	float2 invSize = InvSize * PackFactors.xy; //float2(pow(2.0, lod - PackFactors.w), 0.0) * PackFactors.xy;
 	float4 uv = float4(tileOffs + frac(tileUV) * (PackFactors.xy - invSize) + 0.5 * invSize, 0, 0);
 	
 	#if (TILING_FIX_MODE == 0)
-		res.color = tex2Dlod(AtlasDiffSampler, uv * texturingUVAtlasOffset);
-		//res.color = AtlasDiffSampler[uv.xy];
+		res.color = tex2Dlod(AtlasDiffSampler, float4(ruvy(float2(uv.xy * texturingUVAtlasOffset.xy)).xy, 0, 0));
 	#elif (TILING_FIX_MODE == 1)
 		float4 uv2 = (tileOffs + frac(-0.173 * tileUV) * (PackFactors.xy - invSize) + 0.5 * invSize, 0, 0);
-		res.color = lerp(tex2Dlod(AtlasDiffSampler, uv * texturingUVAtlasOffset), tex2Dlod(AtlasDiffSampler, uv2 * texturingUVAtlasOffset), 0.5);
-		//res.color = lerp(AtlasDiffSampler[uv.xy], AtlasDiffSampler[uv2.xy], 0.5);
+		res.color = lerp(tex2Dlod(AtlasDiffSampler, ruvy(uv * texturingUVAtlasOffset)), tex2Dlod(AtlasDiffSampler, ruvy(uv2 * texturingUVAtlasOffset)), 0.5);
 	#endif
 	
-	float4 adjust = tex2Dlod(MaterialTable, float4(height + texturingHeightOffset, slope + texturingSlopeOffset, 0, 0));
-	//float2 adjustUV = float2(height + texturingHeightOffset, slope + texturingSlopeOffset);
-	//float adjust = MaterialTable[adjustUV.xy];
+	float4 adjust = tex2Dlod(MaterialTable, float4(ruvy(float2(height + texturingHeightOffset, slope + texturingSlopeOffset)), 0, 0));
 
 	adjust.xyz *= texColorConv;
 	
@@ -669,20 +688,17 @@ Surface GetSurfaceColorAtlas(float height, float slope, float vary)
 	slope = saturate(slope * 0.5);
 
 	float4 IdScale = tex2Dlod(MaterialTable, float4(ruvy(float2(height + texturingHeightOffset, (slope + 0.5) + texturingSlopeOffset)), 0, 0));
-	//float2 IdScaleUV = float2(height + texturingHeightOffset, (slope + 0.5) + texturingSlopeOffset);
-	//float4 IdScale = MaterialTable[IdScaleUV.xy];
-	//float4 IdScale = MaterialTableBuffer[IdScaleUV.x + IdScaleUV.y * 256];
 
 	uint materialID = min(int(IdScale.x) + int(vary), int(ATLAS_RES_X * ATLAS_RES_Y - 1));
 	float2 tileOffs = float2(materialID % ATLAS_RES_X, materialID / ATLAS_RES_X) * PackFactors.xy;
 
-	float2 tileUV = (TexCoord.xy * faceParams.z + faceParams.xy) * texScale * IdScale.y;
-	float dx = dFdx(tileUV * PackFactors.z);
-	float dy = dFdy(tileUV * PackFactors.z);
+	float2 tileUV = (float2(1, 1) * faceParams.z + faceParams.xy) * texScale * IdScale.y;//(TexCoord.xy * faceParams.z + faceParams.xy) * texScale * IdScale.y;
+	float2 dx = Fwidth(tileUV * PackFactors.z, PackFactors.xy); //dFdx(tileUV * PackFactors.z);
+	float2 dy = Fwidth(tileUV * PackFactors.z, PackFactors.xy); //dFdy(tileUV * PackFactors.z);
 
-	float lod = clamp(0.5 * log2(max(dot(dx, dx), dot(dy, dy))), 0.0, PackFactors.w);
+	float lod = 4;//clamp(0.5 * log2(max(dot(dx, dx), dot(dy, dy))), 0.0, PackFactors.w);
 
-	float2 invSize = float2(pow(2.0, lod - PackFactors.w), 0.0) * PackFactors.xy;
+	float2 invSize = InvSize * PackFactors.xy; //float2(pow(2.0, lod - PackFactors.w), 0.0) * PackFactors.xy;
 
 	// Voronoi-based random offset for tile texture coordinates and rotation
 	float magOffs = 1.0; // magnitude of the texture coordinates offset
@@ -694,9 +710,6 @@ Surface GetSurfaceColorAtlas(float height, float slope, float vary)
 	float weight = 0.0;
 
 	float4 adjust = tex2Dlod(MaterialTable, float4(ruvy(float2(height + texturingHeightOffset, slope + texturingSlopeOffset)), 0, 0));
-	//float2 adjustUV = float2(height + texturingHeightOffset, slope + texturingSlopeOffset);
-	//float4 adjust = MaterialTable[adjustUV.xy];
-	//float4 adjust = MaterialTableBuffer[adjustUV.x + adjustUV.y * 256];
 
 	adjust.xyz *= texColorConv;
 
@@ -721,9 +734,6 @@ Surface GetSurfaceColorAtlas(float height, float slope, float vary)
 
 			// color conversion must be done before summarize, because hls color space is not additive
 			float4 rgb = tex2Dlod(AtlasDiffSampler, float4(ruvy(uv * uvs + uvo * texturingUVAtlasOffset), 0, 0));
-			//float2 rgbUV = float2(uv * uvs + uvo);
-			//float4 rgb = AtlasDiffSampler[rgbUV.xy];
-			//float4 rgb = AtlasDiffSamplerBuffer[rgbUV.x + rgbUV.y * 4096];
 
 			#if (COLOR_SPACE == 0)
 				float3 hsl = rgb2hsl(rgb.rgb);
@@ -856,6 +866,17 @@ Surface GetSurfaceColor(float height, float slope, float vary)
 //-----------------------------------------------------------------------------
 
 #elif (COLORING_TECHNIQUE == 1)
+
+Surface GetSurfaceColor(float height, float slope, float vary)
+{
+	float4 rgb = float4(0.0, 0.15 * height, 0.0, 1.0) * slope + float4(0.1, 0.1, 0.1, 1.0) * (1.0 - slope);
+
+	Surface surf;
+	surf.height = height;
+	surf.color = rgb;
+
+	return surf;
+}
 
 #endif
 
@@ -3092,7 +3113,7 @@ float HeightMapAsteroid(float3 ppoint)
 float4 ColorMapAsteroid(float3 ppoint, float height, float slope)
 {
 	noiseOctaves = 2.0;
-	height = DistFbm((ppoint + Randomize) * 3.7, 1.5) * 0.7 + 0.5;
+	//height = DistFbm((ppoint + Randomize) * 3.7, 1.5) * 0.7 + 0.5;
 
 	noiseOctaves = 5;
 	float3 p = ppoint * colorDistFreq * 2.3;
@@ -3129,213 +3150,6 @@ float4 GlowMapAsteroid(float3 ppoint, float height, float slope)
 	outColor.rgb = UnitToColor24(log(surfTemp) * 0.188 + 0.1316);
 	outColor.a = 1.0;
 	return outColor;
-}
-//-----------------------------------------------------------------------------
-
-//-----------------------------------------------------------------------------
-float HeightMapTerra(float3 ppoint, float vfreq, float freq, float hfreq, float cfreq, float dfreq, float mfreq, float rfreq,
-									float vmagn, float dmagn, float hmagn, float cmagn, float mmagn, float rmagn,
-									float slvl, float montspiky,
-									float dfraction, float hfraction, float h2fraction, float cfraction,
-									float md, float cd,
-									float cro, float ro, float vo,
-									float rsin, float cldsstyle, float latcap, float caph, float eros,
-									float crato, float crm, float crf,
-									float volcfreq, float vdens, float vradi, float craf)
-{
-	// Global landscape
-	float3 p = ppoint * freq + Randomize;
-	noiseOctaves = 5;
-	float3 distort = 0.35 * Fbm3D(p * 2.37);
-	noiseOctaves = 4;
-	distort += 0.005 * (1.0 - abs(Fbm3D(p * 132.3)));
-	float global = 1.0 - Cell3Noise(p + distort);
-
-	// Venus-like structure
-	float venus = 0.0;
-	if (vmagn > 0.05)
-	{
-		noiseOctaves = 4;
-		distort = Fbm3D(ppoint * 0.3) * 1.5;
-		noiseOctaves = 6;
-		venus = Fbm((ppoint + distort) * vfreq) * vmagn;
-	}
-
-	global = (global + venus - slvl) * 0.5 + slvl;
-	float shore = saturate(70.0 * (global - slvl));
-
-	float4  col;
-	noiseOctaves = 6;
-	p = p * 2.3 + 13.5 * Fbm3D(p * 0.06);
-	float2  cell = Cell3Noise2Color(p, col);
-	float biome = col.r;
-	float biomeScale = saturate(2.0 * (pow(abs(cell.y - cell.x), 0.7) - 0.05));
-	float terrace = col.g;
-	float terraceLayers = max(col.b * 10.0 + 3.0, 3.0);
-	terraceLayers += Fbm(p * 5.41);
-
-	float montRage = saturate(DistNoise(ppoint * 22.6 + Randomize, 2.5) + 0.5);
-	montRage *= montRage;
-	float montBiomeScale = min(pow(2.2 * biomeScale, 2.5), 1.0) * montRage;
-
-	float inv2montesSpiky = 1.0 / (montspiky * montspiky);
-	float height = 0.0;
-	float dist;
-
-	if (biome < dfraction)
-	{
-		// Dunes
-		noiseOctaves = 2.0;
-		dist = dfreq + Fbm(p * 1.21);
-		height = max(Fbm(p * dist * 0.3) + 0.7, 0.0);
-		height = biomeScale * dmagn * (height + DunesNoise(ppoint, 3));
-	}
-	else if (biome < hfraction)
-	{
-		// "Eroded" hills
-		noiseOctaves = 10.0;
-		noiseH = 1.0;
-		noiseOffset = 1.0;
-		height = biomeScale * hmagn * (1.5 - RidgedMultifractal(ppoint * hfreq + Randomize, 2.0));
-	}
-	else if (biome < h2fraction)
-	{
-		// "Eroded" hills 2
-		noiseOctaves = 10.0;
-		noiseLacunarity = 2.0;
-		height = biomeScale * hmagn * JordanTurbulence(ppoint * hfreq + Randomize, 0.8, 0.5, 0.6, 0.35, 1.0, 0.8, 1.0);
-	}
-	else if (biome < cfraction)
-	{
-		// Canyons
-		noiseOctaves = 5.0;
-		noiseH = 0.9;
-		noiseLacunarity = 4.0;
-		noiseOffset = montspiky;
-		height = -cmagn * montRage * RidgedMultifractalErodedDetail(ppoint * 4.0 * cfreq * inv2montesSpiky + Randomize, 2.0, eros, montBiomeScale);
-
-		if (terrace < terraceProb)
-		{
-			terraceLayers *= 5.0;
-			float h = height * terraceLayers;
-			height = (floor(h) + smoothstep(0.1, 0.9, frac(h))) / terraceLayers;
-		}
-	}
-	else
-	{
-		// Mountains
-		noiseOctaves = 10.0;
-		noiseH = 1.0;
-		noiseOffset = montspiky;
-		height = mmagn * montRage * RidgedMultifractalErodedDetail(ppoint * mfreq * inv2montesSpiky + Randomize, 2.0, eros, montBiomeScale);
-
-		if (terrace < terraceProb)
-		{
-			float h = height * terraceLayers;
-			height = (floor(h) + smoothstep(0.1, 0.9, frac(h))) / terraceLayers;
-		}
-	}
-	
-	height *= shore;
-	
-	// Mare
-	float mare = global;
-	float mareFloor = global;
-	float mareSuppress = 1.0;
-	if (md > 0.05)
-	{
-		//noiseOctaves = 2;
-		//mareFloor = 0.6 * (1.0 - Cell3Noise(0.3*p));
-		noiseH = 0.5;
-		noiseLacunarity = 2.218281828459;
-		noiseOffset = 0.8;
-		craterDistortion = 1.0;
-		noiseOctaves = 6.0;  // Mare roundness distortion
-		mare = MareNoise(ppoint, global, 0.0, mareSuppress);
-	}
-	
-	// Ice cracks
-	if (cro > 0.0)
-	{
-		// Rim height distortion
-		noiseH = 0.5;
-		noiseLacunarity = 2.218281828459;
-		noiseOffset = 0.8;
-		noiseOctaves = 4.0;
-		float dunes = 2 * cracksMagn * (0.2 + dmagn * max(Fbm(ppoint * dfreq) + 0.7, 0.0));
-		noiseOctaves = 6.0;  // Cracks roundness distortion
-		height += CrackNoise(ppoint, dunes, craf, cro, 1);
-	}
-	
-	// Craters
-	float crater = 0.0;
-	if (cd > 0.05)
-	{
-		noiseOctaves = 3;  // Craters roundness distortion
-		craterDistortion = 1.0;
-		craterRoundDist = 0.03;
-		heightFloor = -0.1;
-		heightPeak = 0.6;
-		heightRim = 1.0;
-		crater = CraterNoise(ppoint, 0.5 * craterMagn, craterFreq, cd, craterOctaves);
-		noiseOctaves = 10.0;
-		noiseH = 1.0;
-		noiseOffset = 1.0;
-		crater = RidgedMultifractalErodedDetail(ppoint * 0.3 * montesFreq + Randomize, 2.0, eros, 0.25 * crater);
-	}
-
-	height += mare + crater;
-
-	// Pseudo rivers
-	if (ro > 0)
-	{
-		noiseOctaves = ro;
-		noiseLacunarity = 2.218281828459;
-		noiseH = 0.5;
-		noiseOffset = 0.8;
-		p = ppoint * freq + Randomize;
-		distort = 0.035 * Fbm3D(p * rsin * 5.0);
-		distort += 0.350 * Fbm3D(p * rsin);
-		cell = Cell3Noise2(rfreq * p + distort);
-		float pseudoRivers = 1.0 - saturate(abs(cell.y - cell.x) * rmagn);
-		pseudoRivers = smoothstep(0.0, 1.0, pseudoRivers);
-		pseudoRivers *= 1.0 - smoothstep(0.06, 0.10, global - slvl); // disable rivers inside continents
-		pseudoRivers *= 1.0 - smoothstep(0.00, 0.01, slvl - height); // disable rivers inside oceans
-		height = lerp(height, slvl - 0.02, pseudoRivers);
-	}
-
-	// Shield volcano
-	if (vo > 0)
-	{
-		noiseOctaves = 3;  // volcano roundness distortion
-		craterRoundDist = 0.001;
-		height = VolcanoNoise(ppoint, global, height); // global - 1.0 to fix flooding of the canyons and river beds with lava
-	}
-
-	// Assign a climate type
-	noiseOctaves = (cldsstyle == 1.0) ? 5.0 : 12.0;
-	noiseH = 0.5;
-	noiseLacunarity = 2.218281828459;
-	noiseOffset = 0.8;
-	float latitude;
-	if (tidalLock <= 0.0)
-	{
-		latitude = abs(ppoint.y);
-		latitude += 0.15 * (Fbm(ppoint * 0.7 + Randomize) - 1.0);
-		latitude = saturate(latitude);
-	}
-	else
-	{
-		latitude = 1.0 - ppoint.x;
-		latitude += 0.15 * (Fbm(ppoint * 0.7 + Randomize) - 1.0);
-	}
-
-	// Ice caps;
-	// cloudsStyle = 0.1 for oceania, 1.0 for other planets
-	float iceCap = saturate((latitude / latcap - 1.0) * 50.0 * cldsstyle);
-	height = height * cldsstyle + caph * smoothstep(0.0, 1.0, iceCap);
-
-	return height;
 }
 //-----------------------------------------------------------------------------
 
@@ -3605,7 +3419,7 @@ float4 ColorMapTerra(float3 ppoint, float height, float slope)
 
 	// Change climate with elevation
 	float montHeight = saturate((height - seaLevel) / (snowLevel - seaLevel));
-	vary = 0.125 * montHeight * Fbm(ppoint * 1700.0 + Randomize);
+	vary = 0.125 * montHeight; // * Fbm(ppoint * 1700.0 + Randomize);
 	climate = min(climate + heightTempGrad * montHeight + vary, climatePole);
 
 	// Beach
@@ -3628,7 +3442,7 @@ float4 ColorMapTerra(float3 ppoint, float height, float slope)
 			   0.02 * (1.5 - RidgedMultifractal(pp * 100.0, 2.0));
 	p = ppoint * (colorDistFreq * 0.005) + float3(fr, fr, fr);
 	p += Fbm3D(p * 0.38) * 1.2;
-	vary = (Fbm(p) + 0.7) * 0.7 * 0.5;
+	//vary = (Fbm(p) + 0.7) * 0.7 * 0.5;
 	climate += vary * beach * saturate(1.0 - 3.0 * slope) * saturate(1.0 - 1.333 * climate);
 
 	// Dunes must be made of sand only
@@ -3656,23 +3470,24 @@ float4 ColorMapTerra(float3 ppoint, float height, float slope)
 		slope   = lerp(slope,   1.0,   lavaMask);
 	}
 
-	surf = GetSurfaceColor(climate, slope, vary);
+	//surf = GetSurfaceColor(climate, slope, vary);
+	surf = GetSurfaceColor(height, slope, vary);
 
 	// Sedimentary layers
 	noiseOctaves = 4;
-	float layers = Fbm(float3(height * 168.4 + 0.17 * vary, 0.43 * (p.x + p.y), 0.43 * (p.z - p.y)));
+	float layers = Fbm(float3(height * (168.4 / 100) + 0.17 * vary, 0.43 * (p.x + p.y), 0.43 * (p.z - p.y)));
 	//layers *= smoothstep(0.75, 0.8, climate) * (1.0 - smoothstep(0.825, 0.875, climate)); // only rock texture
-	layers *= smoothstep(0.5, 0.55, slope);     // only steep slopes
-	layers *= step(surf.color.a, 0.01);         // do not make layers on snow
-	layers *= saturate(1.0 - 5.0 * lavaMask);   // do not make layers on lava
+	layers *= smoothstep(0.0, 1.0, slope);     // only steep slopes
+	//layers *= step(surf.color.a, 0.01);         // do not make layers on snow
+	//layers *= saturate(1.0 - 5.0 * lavaMask);   // do not make layers on lava
 	surf.color.rgb *= float3(1.0, 1.0, 1.0) - float3(0.0, 0.5, 1.0) * layers;
 
 	// Albedo variations
 	noiseOctaves = 4;
 	distort = Fbm3D((ppoint + Randomize) * 0.07) * 1.5;
 	noiseOctaves = 5;
-	vary = Fbm((ppoint + distort) * 0.78);
-	surf.color *= 1.0 - 0.5 * vary;
+	//vary = Fbm((ppoint + distort) * 0.78);
+	//surf.color *= 1.0 - 0.5 * vary;
 
 	#ifdef VISUALIZE_BIOMES
 		surf.color = lerp(surf.color, colorOverlay * biomeScale, 0.25);

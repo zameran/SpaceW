@@ -39,6 +39,7 @@ public class TCCommonParametersSetter : MonoBehaviour
     public Vector4 craterParams2;
 
     public Vector2 texturingUVAtlasOffset;
+    public Vector2 InvSize;
 
     public Color PlanetGlobalColor = Color.white;
 
@@ -105,6 +106,7 @@ public class TCCommonParametersSetter : MonoBehaviour
         shader.SetVector("craterParams2", craterParams2);
 
         shader.SetVector("texturingUVAtlasOffset", texturingUVAtlasOffset);
+        shader.SetVector("InvSize", InvSize);
 
         shader.SetVector("planetGlobalColor", new Vector4(PlanetGlobalColor.r, PlanetGlobalColor.g, PlanetGlobalColor.b, PlanetGlobalColor.a));
     }

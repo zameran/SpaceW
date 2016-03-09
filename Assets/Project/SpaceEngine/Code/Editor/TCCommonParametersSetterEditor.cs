@@ -57,19 +57,22 @@ public class TCCommonParametersSetterEditor : Editor
     {
         setter.PlanetGlobalColor = EditorGUILayout.ColorField("Global Color ", setter.PlanetGlobalColor);
 
+        setter.InvSize.x = EditorGUILayout.Slider("InvSize x ", setter.InvSize.x, 0.0f, 64.0f);
+        setter.InvSize.y = EditorGUILayout.Slider("InvSize y ", setter.InvSize.y, 0.0f, 64.0f);
+
         setter.texturingUVAtlasOffset.x = EditorGUILayout.Slider("UV offset x ", setter.texturingUVAtlasOffset.x, 0.0f, 2.0f);
         setter.texturingUVAtlasOffset.y = EditorGUILayout.Slider("UV offset y ", setter.texturingUVAtlasOffset.y, 0.0f, 2.0f);
 
-        setter.faceParams.x = EditorGUILayout.Slider("x0 ", setter.faceParams.x, -1.0f, 1.0f);
-        setter.faceParams.y = EditorGUILayout.Slider("y0 ", setter.faceParams.y, -1.0f, 1.0f);
-        setter.faceParams.z = EditorGUILayout.Slider("size ", setter.faceParams.z, 0.0f, 480.0f);
+        setter.faceParams.x = EditorGUILayout.Slider("x0 ", setter.faceParams.x, -10.0f, 10.0f);
+        setter.faceParams.y = EditorGUILayout.Slider("y0 ", setter.faceParams.y, -10.0f, 10.0f);
+        setter.faceParams.z = EditorGUILayout.Slider("size ", setter.faceParams.z, 0.0f, 4096.0f);
         setter.faceParams.w = EditorGUILayout.Slider("face ", setter.faceParams.w, 0.0f, 6.0f);
 
-        setter.textureParams.x = EditorGUILayout.Slider("texScale ", setter.textureParams.x, 0.0f, 1000.0f);
+        setter.textureParams.x = EditorGUILayout.Slider("texScale ", setter.textureParams.x, 0.0f, 4096.0f);
         setter.textureParams.y = EditorGUILayout.Slider("texColorConv ", setter.textureParams.y, -1.0f, 1.0f);
 
-        setter.TexCoord.x = EditorGUILayout.Slider("TexCoord.x ", setter.TexCoord.x, -1.0f, 1.0f);
-        setter.TexCoord.y = EditorGUILayout.Slider("TexCoord.y ", setter.TexCoord.y, -1.0f, 1.0f);
+        setter.TexCoord.x = EditorGUILayout.Slider("TexCoord.x ", setter.TexCoord.x, -10.0f, 10.0f);
+        setter.TexCoord.y = EditorGUILayout.Slider("TexCoord.y ", setter.TexCoord.y, -10.0f, 10.0f);
 
         setter.texturingHeightOffset = EditorGUILayout.Slider("texturingHeightOffset ", setter.texturingHeightOffset, -1.0f, 1.0f);
         setter.texturingSlopeOffset = EditorGUILayout.Slider("texturingSlopeOffset ", setter.texturingSlopeOffset, -1.0f, 1.0f);
@@ -106,6 +109,8 @@ public class TCCommonParametersSetterEditor : Editor
     {
         setter.mareParams.x = EditorGUILayout.Slider("seaLevel ", setter.mareParams.x, -1.0f, 1.0f);
         setter.mainParams.w = EditorGUILayout.Slider("snowLevel ", setter.mainParams.w, 0.0f, 1.0f);
+
+        setter.mainParams.z = EditorGUILayout.Slider("surfType ", setter.mainParams.z, 0.0f, 6.0f);
 
         setter.climateParams.x = EditorGUILayout.Slider("climatePole ", setter.climateParams.x, 0.0f, 1.0f);
         setter.climateParams.y = EditorGUILayout.Slider("climateTropic ", setter.climateParams.y, 0.0f, 1.0f);
