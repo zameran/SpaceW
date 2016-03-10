@@ -110,7 +110,8 @@
     			reflectance.rgb = tan(1.37 * reflectance.rgb) / tan(1.37); //RGB to reflectance
     			float3 sunL;
 			    float3 skyE;
-			    SunRadianceAndSkyIrradiance(p, fn, WSD, sunL, skyE);
+			    //SunRadianceAndSkyIrradiance(p, fn, WSD, sunL, skyE);
+				SunRadianceAndSkyIrradiance(p, p / 56, WSD, sunL, skyE); //disable normal mapping for irradiance, but keep color in bueaty...
 		    	float cTheta = dot(fn, WSD); // diffuse ground color
 			    float3 groundColor = 1.5 * reflectance.rgb * (sunL * max(cTheta, 0.0) + skyE) / 3.14159265;
 			    float3 extinction;

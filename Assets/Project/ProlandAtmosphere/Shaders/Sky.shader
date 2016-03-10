@@ -108,20 +108,8 @@ Shader "Proland/Atmo/Sky"
 			    
 			    return float4(hdr(finalColor),1);
 
-			}
-			
+			}		
 			ENDCG
-
     	}
 	}
 }
-
-
-
-
-
-
-
-
-
-

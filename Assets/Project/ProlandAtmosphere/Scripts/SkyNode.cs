@@ -55,7 +55,9 @@ namespace Proland
 
         Mesh m_mesh;
 
-        RenderTexture m_transmittance, m_inscatter, m_irradiance, m_skyMap;
+        public RenderTexture m_transmittance, m_inscatter, m_irradiance, m_skyMap;
+
+        private int WaitBeforeReloadCount = 0;
 
         // Use this for initialization
         protected override void Start()
@@ -64,7 +66,15 @@ namespace Proland
 
             m_mesh = MeshFactory.MakePlane(2, 2, MeshFactory.PLANE.XY, false, false, false);
             m_mesh.bounds = new Bounds(Vector3.zero, new Vector3(1e8f, 1e8f, 1e8f));
+            
+            InitTextures();
 
+            InitUniforms(m_skyMaterial);
+            InitUniforms(m_skyMapMaterial);
+        }
+
+        public void InitTextures()
+        {
             //The sky map is used to create a reflection of the sky for objects that need it (like the ocean)
             m_skyMap = new RenderTexture(512, 512, 0, RenderTextureFormat.ARGBHalf);
             m_skyMap.filterMode = FilterMode.Trilinear;
@@ -119,9 +129,6 @@ namespace Proland
             buffer = new ComputeBuffer(RES_MU_S * RES_NU * RES_MU * RES_R, sizeof(float) * 4);
             CBUtility.WriteIntoRenderTexture(m_inscatter, 4, path, buffer, m_manager.GetWriteData());
             buffer.Release();
-
-            InitUniforms(m_skyMaterial);
-            InitUniforms(m_skyMapMaterial);
         }
 
         protected override void OnDestroy()
@@ -143,6 +150,22 @@ namespace Proland
             m_skyMaterial.SetMatrix("_Sun_WorldToLocal", m_manager.GetSunNode().GetWorldToLocalRotation());
 
             Graphics.DrawMesh(m_mesh, Matrix4x4.identity, m_skyMaterial, 0, Camera.main);
+
+            if (!m_inscatter.IsCreated() || !m_transmittance.IsCreated() || !m_irradiance.IsCreated())
+            {
+                WaitBeforeReloadCount++;
+
+                if (WaitBeforeReloadCount >= 1)
+                {
+                    m_inscatter.Release();
+                    m_transmittance.Release();
+                    m_irradiance.Release();
+
+                    InitTextures();
+
+                    WaitBeforeReloadCount = 0;
+                }
+            }
 
             //Graphics.DrawMeshNow(m_mesh, transform.localToWorldMatrix);
 
