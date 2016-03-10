@@ -49,8 +49,8 @@ Shader "Proland/Atmo/Sky"
 			#pragma vertex vert
 			#pragma fragment frag
 			
-			#include "Assets/Proland/Shaders/Core/Utility.cginc"
-			#include "Assets/Proland/Shaders/Atmo/Atmosphere.cginc"
+			#include "Utility.cginc"
+			#include "Atmosphere.cginc"
 			
 			uniform float4x4 _Globals_CameraToWorld;
 			uniform float4x4 _Globals_ScreenToCamera;

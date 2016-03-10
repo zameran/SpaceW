@@ -86,9 +86,9 @@ public class Matrix4x4d
         return kProd;
     }
 
-    public static Vector3d2 operator *(Matrix4x4d m, Vector3d2 v)
+    public static Vector3d operator *(Matrix4x4d m, Vector3d v)
     {
-        Vector3d2 kProd = new Vector3d2();
+        Vector3d kProd = new Vector3d();
 
         double fInvW = 1.0 / (m.m[3, 0] * v.x + m.m[3, 1] * v.y + m.m[3, 2] * v.z + m.m[3, 3]);
 
@@ -279,7 +279,7 @@ public class Matrix4x4d
         return mat;
     }
 
-    static public Matrix4x4d Translate(Vector3d2 v)
+    static public Matrix4x4d Translate(Vector3d v)
     {
         return new Matrix4x4d(1, 0, 0, v.x,
                               0, 1, 0, v.y,
@@ -295,7 +295,7 @@ public class Matrix4x4d
                               0, 0, 0, 1);
     }
 
-    static public Matrix4x4d Scale(Vector3d2 v)
+    static public Matrix4x4d Scale(Vector3d v)
     {
         return new Matrix4x4d(v.x, 0, 0, 0,
                               0, v.y, 0, 0,

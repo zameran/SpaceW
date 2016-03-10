@@ -73,7 +73,7 @@ Shader "Proland/Atmo/SkyMap"
 			#pragma vertex vert
 			#pragma fragment frag
 			
-			#include "Assets/Proland/Shaders/Atmo/Atmosphere.cginc"
+			#include "Atmosphere.cginc"
 			
 			uniform float3 _Sun_WorldSunDir;
 		

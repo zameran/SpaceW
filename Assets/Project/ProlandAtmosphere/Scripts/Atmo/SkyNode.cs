@@ -52,7 +52,7 @@ namespace Proland
 		[SerializeField]
 		float m_mieG = 0.85f;
 
-		string m_filePath = "/Proland/Textures/Atmo";
+        string m_filePath = "/Project/ProlandAtmosphere/Textures/Atmo";
 
 		Mesh m_mesh;
 
@@ -63,7 +63,7 @@ namespace Proland
 		{
 			base.Start ();
 
-			m_mesh = MeshFactory.MakePlane(2, 2, MeshFactory.PLANE.XY, false);
+			m_mesh = MeshFactory.MakePlane(2, 2, MeshFactory.PLANE.XY, false, false, false);
 			m_mesh.bounds = new Bounds(Vector3.zero, new Vector3(1e8f, 1e8f, 1e8f));
 
 			//The sky map is used to create a reflection of the sky for objects that need it (like the ocean)
