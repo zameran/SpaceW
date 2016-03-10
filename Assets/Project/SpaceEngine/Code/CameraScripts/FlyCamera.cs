@@ -92,6 +92,9 @@ public class FlyCamera : MonoBehaviour
 
             x += (Input.GetAxis("Mouse X") * 60.0f * 0.02f);
             y -= (Input.GetAxis("Mouse Y") * 30.0f * 0.02f);
+
+            if (planetoidGameObject != null && !aligned)
+                RotateAround(x, y, zRotation, new Vector3(0, 0, -distanceToPlanetCore));
         }
         else
         {
@@ -168,7 +171,7 @@ public class FlyCamera : MonoBehaviour
     {
         Quaternion rotation = Quaternion.Euler(y + targetRotation.x, x + targetRotation.y, z + targetRotation.z);
 
-        Vector3 position = rotation * distanceVector + planetoid.transform.position;
+        Vector3 position = rotation * distanceVector + planetoidGameObject.transform.position;
 
         transform.rotation = Quaternion.Slerp(transform.rotation, rotation, Time.fixedDeltaTime * rotationSpeed);
         transform.position = position;
