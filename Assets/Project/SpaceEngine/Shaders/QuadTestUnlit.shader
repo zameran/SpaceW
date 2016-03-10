@@ -10,7 +10,7 @@
 	}
 	SubShader
 	{
-		Tags { "RenderType"="Opaque" "LightMode" = "ForwardBase"}
+		Tags { "Queue" = "Geometry" "RenderType"="" }
 
 		Pass
 		{
@@ -26,6 +26,8 @@
 			#include "UnityLightingCommon.cginc"
 			#include "Assets/Project/SpaceEngine/Shaders/Compute/Utils.cginc"
 			#include "Assets/Project/SpaceEngine/Shaders/TCCommon.cginc"
+			#include "Assets/Project/ProlandAtmosphere/Shaders/Utility.cginc"
+			#include "Assets/Project/ProlandAtmosphere/Shaders/Atmosphere.cginc"
 
 			struct appdata_full_compute 
 			{
@@ -46,6 +48,7 @@
 				float4 light : COLOR1;
 				float2 uv : TEXCOORD0;
 				float3 uv1 : TEXCOORD1;
+				float3 normal : NORMAL;
 				float4 vertex : SV_POSITION;
 			};
 		
@@ -85,14 +88,14 @@
 				v.tangent = float4(FindTangent(normal, 0.01, float3(0, 1, 0)), 1);
 				v.normal = normal;
 				
-				//v.tangent.xyz += position.xyz;
-				//v.normal.xyz += position.xyz;
+				v.tangent.xyz += position.xyz;
+				v.normal.xyz += position.xyz;
 
 				//TANGENT_SPACE_ROTATION;
 				//v.tangent.xyz = mul(v.tangent.xyz, rotation);
 				//v.normal.xyz = mul(v.normal.xyz, rotation);
 
-				float atten = 0.5;
+				float atten = 1;
 				float3 normalDirection = normalize(mul(float4(v.normal, 0), _Object2World).xyz);
 				float3 lightDirection = normalize(_WorldSpaceLightPos0.xyz - float3(0, 0, -8192));	// - float3(4096, 4096, 8192) || - float3(0, 0, -8192)
 				float3 diffuseReflection = atten * _LightColor0.xyz * max(0, dot(normalDirection, lightDirection));
@@ -104,6 +107,7 @@
 				o.light = float4(lightFinal, 1);
 				o.uv = v.texcoord;
 				o.uv1 = v.texcoord1;
+				o.normal = v.normal;
 				o.vertex = mul(UNITY_MATRIX_MVP, v.vertex);
 
 				return o;
@@ -129,6 +133,7 @@
 				OUT.light = IN[0].light;
 				OUT.uv = IN[0].uv;
 				OUT.uv1 = float3(area / length(v0), 0, 0);
+				OUT.normal = IN[0].normal;
 				OUT.vertex = IN[0].vertex;
 				triStream.Append(OUT);
 
@@ -136,6 +141,7 @@
 				OUT.light = IN[1].light;
 				OUT.uv = IN[1].uv;
 				OUT.uv1 = float3(0, area / length(v1), 0);
+				OUT.normal = IN[1].normal;
 				OUT.vertex = IN[1].vertex;
 				triStream.Append(OUT);
 
@@ -143,12 +149,13 @@
 				OUT.light = IN[2].light;
 				OUT.uv = IN[2].uv;
 				OUT.uv1 = float3(0, 0, area / length(v2));
+				OUT.normal = IN[2].normal;
 				OUT.vertex = IN[2].vertex;		
 				triStream.Append(OUT);			
 			}
 
-			void frag(v2fg IN, out half4 outDiffuse : COLOR0, out half4 outNormal : COLOR1)
-			{
+			void frag(v2fg IN, out float4 outDiffuse : COLOR0, out float4 outNormal : COLOR1)
+			{		
 				float d = min(IN.uv1.x, min(IN.uv1.y, IN.uv1.z));
 				float I = exp2(-4.0 * d * d);
 
@@ -159,7 +166,18 @@
 				fixed3 terrainNormal = UnpackNormal(tex2D(_NormalTexture, IN.uv));
 				fixed4 outputNormal = fixed4(terrainNormal, 1);
 
-				outDiffuse = outputColor * IN.light;	
+				float3 WCP = _Globals_WorldCameraPos;
+				float3 WSD = _Sun_WorldSunDir;
+
+				float3 sunL;
+			    float3 skyE;
+			    SunRadianceAndSkyIrradiance(IN.vertex, IN.normal, WSD, sunL, skyE);
+				float3 extinction;
+			    float3 inscatter = InScattering(WCP, IN.vertex, WSD, extinction, 0.0);
+				float3 groundColor = 1.5 * terrainColor.rgb * (sunL + skyE) / 3.14159265;
+			    float3 finalColor = hdr(groundColor * extinction + inscatter);
+
+				outDiffuse = terrainColor * IN.light * 2;	
 				outNormal = outputNormal;	
 			}
 			ENDCG

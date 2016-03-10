@@ -237,8 +237,8 @@ public class Quad : MonoBehaviour
 
     private void Update()
     {
-        if (Planetoid.RenderPerUpdate)
-            Render();
+        //if (Planetoid.RenderPerUpdate)
+            //Render();
 
         if (Time.time > lastLodUpdateTime + lodUpdateInterval && Planetoid.UseLOD)
         {
@@ -319,7 +319,7 @@ public class Quad : MonoBehaviour
         //Gizmos.DrawWireCube(QuadMesh.bounds.center, QuadMesh.bounds.size);
     }
 
-    private void Render()
+    public void Render()
     {
         if (ReadyForDispatch)
         {
@@ -329,19 +329,20 @@ public class Quad : MonoBehaviour
 
         SetupBounds(this, QuadMesh);
 
-        QuadMaterial.SetPass(0);
         QuadMaterial.SetBuffer("data", OutDataBuffer);
         QuadMaterial.SetTexture("_HeightTexture", HeightTexture);
         QuadMaterial.SetTexture("_NormalTexture", NormalTexture);
         QuadMaterial.SetFloat("_Wireframe", Planetoid.DrawWireframe ? 1.0f : 0.0f);
         QuadMaterial.SetFloat("_Side", (float)Position);
+        QuadMaterial.renderQueue = Planetoid.RenderQueue;
+        QuadMaterial.SetPass(0);
 
         if (Generated && ShouldDraw)
         {
             if (QuadMesh != null)
             {
                 if (Planetoid.RenderPerUpdate)
-                    Graphics.DrawMesh(QuadMesh, transform.localToWorldMatrix, QuadMaterial, 0, null, 0, null, true, true);
+                    Graphics.DrawMesh(QuadMesh, transform.localToWorldMatrix, QuadMaterial, 0, Camera.main, 0, null, true, true);
                 else
                     Graphics.DrawMeshNow(QuadMesh, transform.localToWorldMatrix);
             }

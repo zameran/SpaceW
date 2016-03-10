@@ -68,6 +68,9 @@
 #define M_PI 3.141592657
 #endif
 
+uniform float3 _Sun_WorldSunDir;
+uniform float3 _Globals_WorldCameraPos;
+
 // ----------------------------------------------------------------------------
 // PHYSICAL MODEL PARAMETERS
 // ----------------------------------------------------------------------------
