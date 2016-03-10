@@ -75,7 +75,7 @@ Shader "Proland/Atmo/SkyMap"
 			
 			#include "Atmosphere.cginc"
 			
-			uniform float3 _Sun_WorldSunDir;
+			//uniform float3 _Sun_WorldSunDir;
 		
 			struct v2f 
 			{

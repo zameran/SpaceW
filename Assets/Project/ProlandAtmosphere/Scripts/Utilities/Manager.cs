@@ -14,6 +14,7 @@ namespace Proland
     public class Manager : MonoBehaviour
     {
         public Camera ruleCamera;
+        public Planetoid planet;
 
         public enum DEFORM { PLANE, SPHERE };
 
@@ -91,6 +92,20 @@ namespace Proland
 
             m_sunNode.UpdateNode();
             m_skyNode.UpdateNode();
+
+            if (planet != null)
+            {
+                foreach (Quad q in planet.Quads)
+                {
+                    m_sunNode.SetUniforms(q.QuadMaterial);
+                    m_skyNode.SetUniforms(q.QuadMaterial);
+                    m_skyNode.InitUniforms(q.QuadMaterial);
+
+                    SetUniforms(q.QuadMaterial);
+
+                    q.Render();
+                }
+            }
         }
     }
 }

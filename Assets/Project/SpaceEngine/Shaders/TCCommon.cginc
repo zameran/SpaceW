@@ -3540,7 +3540,7 @@ float4 ColorMapPlanet(float3 ppoint, float height, float slope)
 	Surface surf = GetSurfaceColor(height, slope, 1);
 
 	float4 slopeColor = float4(0.95, 0.75, 0.25, 0.0) * (1 - slope);
-	float4 lookupColor = tex2Dlod(MaterialTable, float4(height / 2, slope - height, 0, 0));
+	float4 lookupColor = tex2Dlod(MaterialTable, float4(height, slope - height, 0, 0));
 
 	surf.color = lookupColor + slopeColor;
 

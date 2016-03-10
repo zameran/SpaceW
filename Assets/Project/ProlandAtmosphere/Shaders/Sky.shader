@@ -35,7 +35,7 @@ Shader "Proland/Atmo/Sky"
 	}
 	SubShader 
 	{
-		Tags {"Queue" = "Background" "RenderType"="" }
+		Tags { "Queue" = "Overlay" "RenderType"="Transparent" }
 	
     	Pass 
     	{
@@ -54,11 +54,11 @@ Shader "Proland/Atmo/Sky"
 			
 			uniform float4x4 _Globals_CameraToWorld;
 			uniform float4x4 _Globals_ScreenToCamera;
-			uniform float3 _Globals_WorldCameraPos;
+			//uniform float3 _Globals_WorldCameraPos;
 			uniform float3 _Globals_Origin;
 			
 			uniform sampler2D _Sun_Glare;
-			uniform float3 _Sun_WorldSunDir;
+			//uniform float3 _Sun_WorldSunDir;
 			uniform float4x4 _Sun_WorldToLocal;
 			
 			struct v2f 

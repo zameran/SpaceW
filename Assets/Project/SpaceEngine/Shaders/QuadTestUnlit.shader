@@ -10,7 +10,7 @@
 	}
 	SubShader
 	{
-		Tags { "RenderType"="Opaque" "LightMode" = "ForwardBase"}
+		Tags { "Queue" = "Geometry" "RenderType"="Opaque" }
 
 		Pass
 		{
@@ -26,6 +26,8 @@
 			#include "UnityLightingCommon.cginc"
 			#include "Assets/Project/SpaceEngine/Shaders/Compute/Utils.cginc"
 			#include "Assets/Project/SpaceEngine/Shaders/TCCommon.cginc"
+			#include "Assets/Project/ProlandAtmosphere/Shaders/Utility.cginc"
+			#include "Assets/Project/ProlandAtmosphere/Shaders/Atmosphere.cginc"
 
 			struct appdata_full_compute 
 			{
@@ -43,10 +45,12 @@
 			struct v2fg
 			{
 				float4 color : COLOR0;
-				float4 light : COLOR1;
+				float4 scatter : COLOR1;
 				float2 uv : TEXCOORD0;
 				float3 uv1 : TEXCOORD1;
-				float4 vertex : SV_POSITION;
+				float3 uv2 : TEXCOORD2;
+				float3 normal : NORMAL;
+				float4 vertex : POSITION;
 			};
 		
 			uniform half4 _WireframeColor;
@@ -92,18 +96,34 @@
 				//v.tangent.xyz = mul(v.tangent.xyz, rotation);
 				//v.normal.xyz = mul(v.normal.xyz, rotation);
 
-				float atten = 0.5;
-				float3 normalDirection = normalize(mul(float4(v.normal, 0), _Object2World).xyz);
-				float3 lightDirection = normalize(_WorldSpaceLightPos0.xyz - float3(0, 0, -8192));	// - float3(4096, 4096, 8192) || - float3(0, 0, -8192)
-				float3 diffuseReflection = atten * _LightColor0.xyz * max(0, dot(normalDirection, lightDirection));
-				float3 lightFinal = diffuseReflection * UNITY_LIGHTMODEL_AMBIENT.xyz;
-				
+				float4 terrainColor = tex2Dlod(_HeightTexture, float4(v.texcoord.xy, 0, 0));
+				float3 WCP = _Globals_WorldCameraPos;
+				float3 WSD = _Sun_WorldSunDir;
+    			float3 p = v.vertex.xyz;
+				float3 fn;
+				//fn.xy = normal.xy;
+				fn.xy = -normal.xy; //invert z to make it work!		
+				//fn.z = sqrt(max(0.0, 1.0 - dot(fn.xy, fn.xy)));
+   				fn.z = sqrt(max(0.0, -1.0 + dot(fn.xy, fn.xy))); //invert z to make it work!		
+    			float4 reflectance = terrainColor;
+    			reflectance.rgb = tan(1.37 * reflectance.rgb) / tan(1.37); //RGB to reflectance
+    			float3 sunL;
+			    float3 skyE;
+			    SunRadianceAndSkyIrradiance(p, fn, WSD, sunL, skyE);
+		    	float cTheta = dot(fn, WSD); // diffuse ground color
+			    float3 groundColor = 1.5 * reflectance.rgb * (sunL * max(cTheta, 0.0) + skyE) / 3.14159265;
+			    float3 extinction;
+			    float3 inscatter = InScattering(WCP, p, WSD, extinction, 0.0);
+			    float3 finalColor = hdr(groundColor * extinction + inscatter);
+
 				v2fg o;
 
-				o.color = lerp(float4(noise, noise, noise, 1), tex2Dlod(_HeightTexture, float4(v.texcoord.xy, 0, 0)), 1);	
-				o.light = float4(lightFinal, 1);
+				o.color = lerp(float4(noise, noise, noise, 1), terrainColor, 1);	
+				o.scatter = float4(finalColor, 1);
 				o.uv = v.texcoord;
 				o.uv1 = v.texcoord1;
+				o.uv2 = v.texcoord2;
+				o.normal = v.normal;
 				o.vertex = mul(UNITY_MATRIX_MVP, v.vertex);
 
 				return o;
@@ -126,40 +146,46 @@
 			
 				v2fg OUT;		
 				OUT.color = IN[0].color;
-				OUT.light = IN[0].light;
+				OUT.scatter = IN[0].scatter;
 				OUT.uv = IN[0].uv;
 				OUT.uv1 = float3(area / length(v0), 0, 0);
+				OUT.uv2 = IN[0].uv2;
+				OUT.normal = IN[0].normal;
 				OUT.vertex = IN[0].vertex;
 				triStream.Append(OUT);
 
 				OUT.color = IN[1].color;
-				OUT.light = IN[1].light;
+				OUT.scatter = IN[1].scatter;
 				OUT.uv = IN[1].uv;
 				OUT.uv1 = float3(0, area / length(v1), 0);
+				OUT.uv2 = IN[1].uv2;
+				OUT.normal = IN[1].normal;
 				OUT.vertex = IN[1].vertex;
 				triStream.Append(OUT);
 
 				OUT.color = IN[2].color;
-				OUT.light = IN[2].light;
+				OUT.scatter = IN[2].scatter;
 				OUT.uv = IN[2].uv;
 				OUT.uv1 = float3(0, 0, area / length(v2));
-				OUT.vertex = IN[2].vertex;		
+				OUT.uv2 = IN[2].uv2;
+				OUT.normal = IN[2].normal;
+				OUT.vertex = IN[2].vertex;	
 				triStream.Append(OUT);			
 			}
 
-			void frag(v2fg IN, out half4 outDiffuse : COLOR0, out half4 outNormal : COLOR1)
-			{
+			void frag(v2fg IN, out float4 outDiffuse : COLOR0, out float4 outNormal : COLOR1)
+			{		
 				float d = min(IN.uv1.x, min(IN.uv1.y, IN.uv1.z));
 				float I = exp2(-4.0 * d * d);
 
-				fixed4 terrainColor = fixed4(IN.color.x, IN.color.y, IN.color.z, 1);
+				float4 terrainColor = IN.scatter;
 				fixed4 wireframeColor = lerp(terrainColor, _WireframeColor, I);
 				fixed4 outputColor = lerp(terrainColor, wireframeColor, _Wireframe);
 
 				fixed3 terrainNormal = UnpackNormal(tex2D(_NormalTexture, IN.uv));
 				fixed4 outputNormal = fixed4(terrainNormal, 1);
 
-				outDiffuse = outputColor * IN.light;	
+				outDiffuse = outputColor;
 				outNormal = outputNormal;	
 			}
 			ENDCG

@@ -5,6 +5,8 @@ using System.Collections.Generic;
 
 public class Planetoid : MonoBehaviour
 {
+    public Proland.Manager manager;
+
 	public bool DrawWireframe = false;
 
 	public bool Working = false;
@@ -21,6 +23,8 @@ public class Planetoid : MonoBehaviour
 
 	public Shader ColorShader;
 	public ComputeShader CoreShader;
+
+    public int RenderQueue = 2000;
 
 	public int DispatchSkipFramesCount = 8;
 

@@ -144,6 +144,8 @@ namespace Proland
 
             Graphics.DrawMesh(m_mesh, Matrix4x4.identity, m_skyMaterial, 0, Camera.main);
 
+            //Graphics.DrawMeshNow(m_mesh, transform.localToWorldMatrix);
+
             //Update the sky map if...
             //The sun has moved
             //Or if this is first frame

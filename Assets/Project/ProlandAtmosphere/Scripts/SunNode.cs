@@ -71,13 +71,13 @@ namespace Proland
 
             m_hasMoved = false;
 
-            //if (Input.GetMouseButton(1))
-            //{
-            //    float y = Input.GetAxis("Mouse Y");
-            //    float x = -Input.GetAxis("Mouse X");
-            //    transform.Rotate(new Vector3(x, y, 0), Space.Self);
-            //    m_hasMoved = true;
-            //}
+            if (Input.GetMouseButton(2))
+            {
+                float y = Input.GetAxis("Mouse Y");
+                float x = -Input.GetAxis("Mouse X");
+                transform.Rotate(new Vector3(x, y, 0), Space.Self);
+                m_hasMoved = true;
+            }
 
             Quaternion q = Quaternion.FromToRotation(GetDirection(), Z_AXIS);
             m_worldToLocalRotation = Matrix4x4.TRS(Vector3.zero, q, Vector3.one);
