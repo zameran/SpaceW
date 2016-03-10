@@ -79,12 +79,12 @@
 				float3 normal = tex2Dlod(_NormalTexture, float4(v.texcoord.xy, 0, 0)).rgb;
 				float3 normal_unpack = UnpackNormal(half4(normal, 0)).rgb;
 
-				//float3 up = normalize(v.vertex);
-				//float3 right = normalize(cross(up, float3(0, 1, 0)));
-				//float3 forward = normalize(cross(right, up));
+				float3 up = normalize(v.vertex);
+				float3 right = normalize(cross(up, float3(0, 1, 0)));
+				float3 forward = normalize(cross(right, up));
  
-				//float3 localNormal = float3(dot(normal, right), dot(normal, up), dot(normal, forward));
-				//float3 localNormalUnpack = UnpackNormal(half4(localNormal, 0)).rgb;
+				float3 localNormal = float3(dot(normal, right), dot(normal, up), dot(normal, forward));
+				float3 localNormalUnpack = UnpackNormal(half4(localNormal, 0)).rgb;
 
 				v.tangent = float4(FindTangent(normal, 0.01, float3(0, 1, 0)), 1);
 				v.normal = normal;
@@ -105,6 +105,7 @@
 				fn.xy = -normal.xy; //invert z to make it work!		
 				//fn.z = sqrt(max(0.0, 1.0 - dot(fn.xy, fn.xy)));
    				fn.z = sqrt(max(0.0, -1.0 + dot(fn.xy, fn.xy))); //invert z to make it work!		
+				fn = float3(0, 0, 0); //disable normal mapping... bruuuutaal!
     			float4 reflectance = terrainColor;
     			reflectance.rgb = tan(1.37 * reflectance.rgb) / tan(1.37); //RGB to reflectance
     			float3 sunL;

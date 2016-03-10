@@ -167,8 +167,8 @@ void TexturesSub(uint3 id : SV_DispatchThreadID)
 
 	float3x3 tbn = float3x3(ta, bi, no);
 
-	float3 normal = mul(no, tbn);
-	//float3 normal = xnormal;
+	//float3 normal = mul(no, tbn);
+	float3 normal = xnormal;
 	
 	float xslope = 0.5 / max(dot(xnormalSlope, float3(0.0, 1.0, 0.0)), 0.001);
 	float yslope = 0.5 / max(dot(ynormalSlope, float3(0.0, 1.0, 0.0)), 0.001);
