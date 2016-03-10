@@ -71,96 +71,34 @@
 				position.xyz += patchCenter;
 
 				v.vertex = position;
-				// - float2(0.001, 0.001) texcoordsoffset
+
 				float3 normal = tex2Dlod(_NormalTexture, float4(v.texcoord.xy, 0, 0)).rgb;
 				float3 normal_unpack = UnpackNormal(half4(normal, 0)).rgb;
 
-				float3 up = normalize(v.vertex);
-				float3 right = normalize(cross(up, float3(0, 1, 0)));
-				float3 forward = normalize(cross(right, up));
+				//float3 up = normalize(v.vertex);
+				//float3 right = normalize(cross(up, float3(0, 1, 0)));
+				//float3 forward = normalize(cross(right, up));
  
-				float3 localNormal = float3(dot(normal, right), dot(normal, up), dot(normal, forward));
-				float3 localNormalUnpack = UnpackNormal(half4(localNormal, 0)).rgb;
+				//float3 localNormal = float3(dot(normal, right), dot(normal, up), dot(normal, forward));
+				//float3 localNormalUnpack = UnpackNormal(half4(localNormal, 0)).rgb;
 
-				v.tangent = float4(FindTangent(localNormal, 0.01, float3(0, 1, 0)), 1);
+				v.tangent = float4(FindTangent(normal, 0.01, float3(0, 1, 0)), 1);
 				v.normal = normal;
 				
-				v.tangent.xyz += position.xyz;
-				v.normal.xyz += position.xyz;
+				//v.tangent.xyz += position.xyz;
+				//v.normal.xyz += position.xyz;
 
 				//TANGENT_SPACE_ROTATION;
 				//v.tangent.xyz = mul(v.tangent.xyz, rotation);
 				//v.normal.xyz = mul(v.normal.xyz, rotation);
 
-				/*
-				if (_Side == 0)//top
-				{
-					float3 d1 = float3(0, 0, 1);
-					float3 d2 = float3(1, 0, 1);
-
-					float3x3 tbn = TBN(normal, d1, d2);
-					v.tangent.xyz = mul(v.tangent.xyz, -tbn);
-					v.normal.xyz = mul(v.normal.xyz, -tbn);
-				}
-				else if (_Side == 1)//bottom
-				{
-					float3 d1 = float3(0, 0, 1);
-					float3 d2 = float3(-1, 0, 1);
-
-					float3x3 tbn = TBN(normal, d1, d2);
-					v.tangent.xyz = mul(v.tangent.xyz, -tbn);
-					v.normal.xyz = mul(v.normal.xyz, -tbn);
-				}
-				else if (_Side == 2)//left
-				{
-					float3 d1 = float3(0, 0, 1);
-					float3 d2 = float3(0, 1, 0);
-
-					float3x3 tbn = TBN(normal, d1, d2);
-					v.tangent.xyz = mul(v.tangent.xyz, -tbn);
-					v.normal.xyz = mul(v.normal.xyz, -tbn);
-				}
-				else if (_Side == 3)//right
-				{
-					float3 d1 = float3(0, 0, 1);
-					float3 d2 = float3(0, -1, 0);
-
-					float3x3 tbn = TBN(normal, d1, d2);
-					v.tangent.xyz = mul(v.tangent.xyz, -tbn);
-					v.normal.xyz = mul(v.normal.xyz, -tbn);
-				}
-				else if (_Side == 4)//front
-				{
-					float3 d1 = float3(1, -1, 0);
-					float3 d2 = float3(1, 1, 0);
-
-					float3x3 tbn = TBN(normal, d1, d2);
-					v.tangent.xyz = mul(v.tangent.xyz, -tbn);
-					v.normal.xyz = mul(v.normal.xyz, -tbn);
-				}
-				else if (_Side == 5)//back
-				{
-					float3 d1 = float3(0, 1, 0);
-					float3 d2 = float3(0, 0, 1);
-
-					float3x3 tbn = TBN(normal, d1, d2);
-					v.tangent.xyz = mul(v.tangent.xyz, -tbn);
-					v.normal.xyz = mul(v.normal.xyz, -tbn);
-				}
-				*/
-
-				float atten = 0.25;
+				float atten = 0.5;
 				float3 normalDirection = normalize(mul(float4(v.normal, 0), _Object2World).xyz);
 				float3 lightDirection = normalize(_WorldSpaceLightPos0.xyz - float3(0, 0, -8192));	// - float3(4096, 4096, 8192) || - float3(0, 0, -8192)
 				float3 diffuseReflection = atten * _LightColor0.xyz * max(0, dot(normalDirection, lightDirection));
 				float3 lightFinal = diffuseReflection * UNITY_LIGHTMODEL_AMBIENT.xyz;
 				
 				v2fg o;
-
-				//GLSL
-				//vec3 color = mix(snowColor, slateColor, smoothstep(1.5, 1.6, slope + .2*fBm(worldSpacePosition, .4f, 1.918, 4)));
-				//HLSL
-				//float4 color = lerp(noiseColor, mapColor, smoothstep(1.5, 1.6, slope + 0.4 * Fbm(v.vertex * 0.0001, 4)));
 
 				o.color = lerp(float4(noise, noise, noise, 1), tex2Dlod(_HeightTexture, float4(v.texcoord.xy, 0, 0)), 1);	
 				o.light = float4(lightFinal, 1);
@@ -221,7 +159,7 @@
 				fixed3 terrainNormal = UnpackNormal(tex2D(_NormalTexture, IN.uv));
 				fixed4 outputNormal = fixed4(terrainNormal, 1);
 
-				outDiffuse = outputColor * IN.light * 2;	
+				outDiffuse = outputColor * IN.light;	
 				outNormal = outputNormal;	
 			}
 			ENDCG

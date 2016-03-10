@@ -22,6 +22,8 @@ public class HardwareInfoGUI : MonoBehaviour
 
     private void OnGUI()
     {
+        GUI.depth = -100;
+
         GUILayout.BeginArea(debugInfoBounds);
 
         GUILayoutExtensions.LabelWithSpace("Device Type: " + SI.deviceType, -10);

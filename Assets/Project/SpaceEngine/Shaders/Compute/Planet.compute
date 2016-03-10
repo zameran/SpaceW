@@ -17,44 +17,16 @@ RWStructuredBuffer<OutputStruct> patchPreOutput;
 RWStructuredBuffer<OutputStruct> patchOutput;
 RWStructuredBuffer<OutputStruct> patchPreOutputSub;
 
-//-----------------------------------------------------------------------------
-float HeightMapPlanet(float3 ppoint)
-{
-	float total = 0;
-
-	float t0 = Fbm(ppoint * 0.75, 4);
-	float v0 = t0 + pow(2.0, RidgedMultifractalExtra(ppoint, 18, 1, 1.75, 0.6));
-
-	total = GetTerraced(v0, 4, 2);
-
-	return total;
-}
-//-----------------------------------------------------------------------------
-
-//-----------------------------------------------------------------------------
-float4 ColorMapPlanet(float3 ppoint, float height, float slope)
-{
-	Surface surf = GetSurfaceColor(height, slope, 1);
-
-	float4 slopeColor = float4(0.95, 0.75, 0.25, 0.0) * (1 - slope);
-	float4 lookupColor = tex2Dlod(MaterialTable, float4(height / 2, slope - height, 0, 0));
-
-	surf.color = lookupColor + slopeColor;
-
-	return surf.color;
-}
-//-----------------------------------------------------------------------------
-
 float NoiseFunction(float3 coord)
 {
 	float3 p = 0.001 * coord;
-
+	
 	#ifdef defaultNoise
 	float noise = Fbm(p + Randomize, 2);
 	#else
-	//float noise = HeightMapAsteroid(p);
+	float noise = HeightMapAsteroid(p);
 	//float noise = HeightMapTerra(p);
-	float noise = HeightMapPlanet(p);
+	//float noise = HeightMapPlanet(p);
 	#endif
 	
 	return noise;
@@ -67,11 +39,11 @@ float4 ColorFunction(float3 coord, float height, float slope)
 	#ifdef defaultNoise
 	float4 color = float4(1.0, 1.0, 1.0, 1.0);
 	#else
-	//float4 colorMapColor = ColorMapAsteroid(p, height, slope);
-	//float4 glowMapColor = GlowMapAsteroid(p, height, slope);
-	//float4 color = colorMapColor + glowMapColor;
+	float4 colorMapColor = ColorMapAsteroid(p, height, slope);
+	float4 glowMapColor = GlowMapAsteroid(p, height, slope);
+	float4 color = colorMapColor + glowMapColor;
 	//float4 color = ColorMapTerra(p, height, slope);
-	float4 color = ColorMapPlanet(p, height, slope);
+	//float4 color = ColorMapPlanet(p, height, slope);
 	#endif
 	
 	return color;
@@ -195,8 +167,8 @@ void TexturesSub(uint3 id : SV_DispatchThreadID)
 
 	float3x3 tbn = float3x3(ta, bi, no);
 
-	//float3 normal = mul(no, tbn);
-	float3 normal = xnormal;
+	float3 normal = mul(no, tbn);
+	//float3 normal = xnormal;
 	
 	float xslope = 0.5 / max(dot(xnormalSlope, float3(0.0, 1.0, 0.0)), 0.001);
 	float yslope = 0.5 / max(dot(ynormalSlope, float3(0.0, 1.0, 0.0)), 0.001);

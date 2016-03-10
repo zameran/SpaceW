@@ -871,7 +871,7 @@ Surface GetSurfaceColor(float height, float slope, float vary)
 {
 	Surface surf;
 	surf.height = height;
-
+	surf.color = float4(height, height, height, 1);
 	return surf;
 }
 
@@ -3515,6 +3515,34 @@ float4 ColorMapTerra(float3 ppoint, float height, float slope)
 
 	if (surfType <= 3)   // water mask for planets with oceans
 		surf.color.a += saturate((seaLevel - height) * 200.0);
+
+	return surf.color;
+}
+//-----------------------------------------------------------------------------
+
+//-----------------------------------------------------------------------------
+float HeightMapPlanet(float3 ppoint)
+{
+	float total = 0;
+
+	float t0 = Fbm(ppoint * 0.75, 4);
+	float v0 = t0 + pow(2.0, RidgedMultifractalExtra(ppoint, 18, 1, 1.75, 0.6));
+
+	total = GetTerraced(v0, 4, 2);
+
+	return total;
+}
+//-----------------------------------------------------------------------------
+
+//-----------------------------------------------------------------------------
+float4 ColorMapPlanet(float3 ppoint, float height, float slope)
+{
+	Surface surf = GetSurfaceColor(height, slope, 1);
+
+	float4 slopeColor = float4(0.95, 0.75, 0.25, 0.0) * (1 - slope);
+	float4 lookupColor = tex2Dlod(MaterialTable, float4(height / 2, slope - height, 0, 0));
+
+	surf.color = lookupColor + slopeColor;
 
 	return surf.color;
 }

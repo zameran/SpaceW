@@ -246,26 +246,30 @@ public class Quad : MonoBehaviour
 
             if (LODLevel < Planetoid.LODMaxLevel)
             {
-                if (Generated && !HaveSubQuads && (Planetoid.OneSplittingQuad ? !Planetoid.Working : (!Planetoid.Working || Planetoid.Working)))
+                if (!Planetoid.OneSplittingQuad)
                 {
-                    if (GetDistanceToClosestCorner() < Planetoid.LODDistances[LODLevel + 1] * Planetoid.LODDistanceMultiplier && !Splitting)
+                    if (Generated && !HaveSubQuads)
                     {
-                        StartCoroutine(Split());
+                        if (GetDistanceToClosestCorner() < Planetoid.LODDistances[LODLevel + 1] * Planetoid.LODDistanceMultiplier && !Splitting)
+                            StartCoroutine(Split());
                     }
                     else
                     {
-
+                        if (GetDistanceToClosestCorner() > Planetoid.LODDistances[LODLevel + 1] * Planetoid.LODDistanceMultiplier && !Splitting)
+                            Unsplit();
                     }
                 }
                 else
                 {
-                    if (GetDistanceToClosestCorner() > Planetoid.LODDistances[LODLevel + 1] * Planetoid.LODDistanceMultiplier && !Splitting)
+                    if (Generated && !HaveSubQuads && !Planetoid.Working)
                     {
-                        Unsplit();
+                        if (GetDistanceToClosestCorner() < Planetoid.LODDistances[LODLevel + 1] * Planetoid.LODDistanceMultiplier && !Splitting)
+                            StartCoroutine(Split());
                     }
                     else
                     {
-
+                        if (GetDistanceToClosestCorner() > Planetoid.LODDistances[LODLevel + 1] * Planetoid.LODDistanceMultiplier && !Splitting)
+                            Unsplit();
                     }
                 }
             }

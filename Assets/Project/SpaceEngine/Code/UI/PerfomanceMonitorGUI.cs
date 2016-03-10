@@ -6,6 +6,8 @@ public class PerfomanceMonitorGUI : MonoBehaviour
 {
     void OnGUI()
     {
+        GUI.depth = -100;
+
         using (new Timer("Monitor GUI Draw"))
         {
             ShowPerformanceCounters();

@@ -10,6 +10,8 @@ public class DetectLeaksGUI : MonoBehaviour
 
     private void OnGUI()
     {
+        GUI.depth = -100;
+
         GUILayout.BeginArea(debugInfoBounds);
 
         ScrollPosition = GUILayout.BeginScrollView(ScrollPosition, false, true, GUILayout.Width(250), GUILayout.Height(250));
