@@ -39,6 +39,7 @@ namespace Proland
         {
             return m_worldToLocalRotation;
         }
+
         //The rotation needed to move the sun direction from the z axis 
         public Matrix4x4 GetLocalToWorldRotation()
         {

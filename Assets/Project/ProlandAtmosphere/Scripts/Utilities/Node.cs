@@ -12,11 +12,6 @@ namespace Proland
     {
         protected Manager m_manager;
 
-        public TerrainView GetView()
-        {
-            return m_manager.GetController().GetView();
-        }
-
         protected virtual void Awake()
         {
             FindManger();

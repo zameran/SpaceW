@@ -148,8 +148,8 @@ namespace Proland
             //The sun has moved
             //Or if this is first frame
             //And if this is not a deformed terrain (ie a planet). Planet sky map not supported
-            if ((!m_manager.IsDeformed() && m_manager.GetSunNode().GetHasMoved()) || Time.frameCount == 1)
-                Graphics.Blit(null, m_skyMap, m_skyMapMaterial);
+            //if ((m_manager.GetSunNode().GetHasMoved()) || Time.frameCount == 1)
+            //    Graphics.Blit(null, m_skyMap, m_skyMapMaterial);
         }
 
         public void SetUniforms(Material mat)
