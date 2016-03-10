@@ -15,7 +15,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
+ 
 /*
  * Proland is distributed under a dual-license scheme.
  * You can obtain a specific license from Inria: proland-licensing@inria.fr.
