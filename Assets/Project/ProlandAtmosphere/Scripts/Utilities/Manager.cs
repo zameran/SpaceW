@@ -14,7 +14,6 @@ namespace Proland
     public class Manager : MonoBehaviour
     {
         public Camera ruleCamera;
-        public int RenderQueue = 2000;
         public Planetoid planet;
 
         public enum DEFORM { PLANE, SPHERE };
@@ -35,11 +34,6 @@ namespace Proland
         SunNode m_sunNode;
 
         Vector3 m_origin;
-
-        public int GetRenderQueue()
-        {
-            return RenderQueue;
-        }
 
         public float GetRadius()
         {
@@ -103,8 +97,12 @@ namespace Proland
             {
                 foreach (Quad q in planet.Quads)
                 {
-                    q.QuadMaterial.SetVector("_Globals_WorldCameraPos", ruleCamera.transform.position);
-                    q.QuadMaterial.SetVector("_Sun_WorldSunDir", GetSunNode().GetDirection());
+                    m_sunNode.SetUniforms(q.QuadMaterial);
+                    m_skyNode.SetUniforms(q.QuadMaterial);
+                    m_skyNode.InitUniforms(q.QuadMaterial);
+
+                    SetUniforms(q.QuadMaterial);
+
                     q.Render();
                 }
             }

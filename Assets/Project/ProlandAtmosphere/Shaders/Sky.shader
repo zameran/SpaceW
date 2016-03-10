@@ -35,7 +35,7 @@ Shader "Proland/Atmo/Sky"
 	}
 	SubShader 
 	{
-		Tags { "Queue" = "Background" "RenderType"="" }
+		Tags { "Queue" = "Overlay" "RenderType"="Transparent" }
 	
     	Pass 
     	{

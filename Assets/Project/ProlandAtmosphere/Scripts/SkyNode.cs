@@ -141,8 +141,6 @@ namespace Proland
 
             m_manager.SetUniforms(m_skyMaterial);
             m_skyMaterial.SetMatrix("_Sun_WorldToLocal", m_manager.GetSunNode().GetWorldToLocalRotation());
-            m_skyMaterial.renderQueue = m_manager.GetRenderQueue();
-            m_skyMaterial.SetPass(0);
 
             Graphics.DrawMesh(m_mesh, Matrix4x4.identity, m_skyMaterial, 0, Camera.main);
 

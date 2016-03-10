@@ -71,7 +71,7 @@ namespace Proland
 
             m_hasMoved = false;
 
-            if (Input.GetMouseButton(1))
+            if (Input.GetMouseButton(2))
             {
                 float y = Input.GetAxis("Mouse Y");
                 float x = -Input.GetAxis("Mouse X");
