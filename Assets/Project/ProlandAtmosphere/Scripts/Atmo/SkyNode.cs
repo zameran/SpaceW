@@ -123,7 +123,6 @@ namespace Proland
 
 			InitUniforms(m_skyMaterial);
 			InitUniforms(m_skyMapMaterial);
-
 		}
 
 		protected override void OnDestroy()
@@ -135,8 +134,7 @@ namespace Proland
 			m_inscatter.Release();
 			m_skyMap.Release();
 		}
-		
-		// Update is called once per frame
+
 		public void UpdateNode() 
 		{
 			SetUniforms(m_skyMaterial);
@@ -201,16 +199,3 @@ namespace Proland
 
 	}
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
