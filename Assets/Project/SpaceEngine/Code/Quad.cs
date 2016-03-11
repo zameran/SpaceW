@@ -340,6 +340,7 @@ public class Quad : MonoBehaviour
 		QuadMaterial.SetFloat("_Wireframe", Planetoid.DrawWireframe ? 1.0f : 0.0f);
 		QuadMaterial.SetFloat("_Side", (float)Position);
 		QuadMaterial.SetMatrix("_WorldToTangentFrame", GetTangentFrame(this));
+		QuadMaterial.SetVector("_Origin", Planetoid.Origin);
 		QuadMaterial.renderQueue = Planetoid.RenderQueue;
 		QuadMaterial.SetPass(0);
 

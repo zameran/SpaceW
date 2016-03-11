@@ -63,6 +63,7 @@
 			uniform sampler2D _NormalTexture;
 
 			uniform float4x4 _WorldToTangentFrame;
+			uniform float3 _Origin;
 
 			#ifdef SHADER_API_D3D11
 			uniform StructuredBuffer<OutputStruct> data;
@@ -73,11 +74,11 @@
 				return float4(tan(1.37 * inColor.rgb) / tan(1.37), inColor.a);
 			}
 
-			float3 GroundFinalColor(float4 terrainColor, float3 p, float3 n)
+			float4 GroundFinalColor(float4 terrainColor, float3 p, float3 n)
 			{
 				float3 WCP = _Globals_WorldCameraPos;
 				float3 WSD = _Sun_WorldSunDir;
-
+				
 				float3 fn;
 				//fn.xy = n.xy - default.
 				//fn.xy = -n.xy - inverted.
@@ -88,7 +89,7 @@
 				fn.z = sqrt(max(0.0, -1.0 + dot(fn.xy, fn.xy)));
 
 				//fn = float3(0, 0, 0); //disable normal mapping... bruuuutaal!
-
+				
 				float4 reflectance = RGB2Reflectance(terrainColor);
 
 				float3 sunL;
@@ -103,9 +104,9 @@
 
 				float3 groundColor = 1.5 * reflectance.rgb * (sunL * max(cTheta, 0.0) + skyE) / M_PI;
 				float3 extinction;
-				float3 inscatter = InScattering(WCP, p, WSD, extinction, 0.0);
-				float3 finalColor = groundColor * extinction + inscatter;
-
+				float4 inscatter = InScattering(WCP, p, WSD, extinction, 1.0);
+				float4 finalColor = float4(groundColor, 1) * float4(extinction, 1) + inscatter;
+		
 				return finalColor;
 			}
 	
@@ -139,12 +140,13 @@
 				//v.normal.xyz = mul(v.normal.xyz, rotation);
 
 				float4 terrainColor = tex2Dlod(_HeightTexture, v.texcoord);
-				float3 scatteringColor = hdr(GroundFinalColor(terrainColor, v.vertex.xyz, v.normal.xyz));
+				float4 groundFinalColor = GroundFinalColor(terrainColor, v.vertex.xyz, v.normal.xyz);
+				float4 scatteringColor = float4(hdr(groundFinalColor.xyz), groundFinalColor.w);
 
 				v2fg o;
 
 				o.terrainColor = terrainColor;	
-				o.scatterColor = float4(scatteringColor, 1);
+				o.scatterColor = scatteringColor;
 				o.uv0 = v.texcoord;
 				o.uv1 = v.texcoord1;
 				o.uv2 = v.texcoord2;

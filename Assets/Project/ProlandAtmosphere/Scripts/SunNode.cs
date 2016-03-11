@@ -8,14 +8,14 @@ namespace Proland
         static readonly Vector3 Z_AXIS = new Vector3(0, 0, 1);
 
         [SerializeField]
-        Vector3 startSunDirection = Z_AXIS;
+        Vector3 m_startSunDirection = Z_AXIS;
 
         [SerializeField]
-        float sunIntensity = 100.0f;
+        float m_sunIntensity = 100.0f;
 
-        Matrix4x4 worldToLocalRotation;
+        Matrix4x4 m_worldToLocalRotation;
 
-        bool hasMoved = false;
+        bool m_hasMoved = false;
 
         public Vector3 GetDirection()
         {
@@ -24,53 +24,57 @@ namespace Proland
 
         public bool GetHasMoved()
         {
-            return hasMoved;
+            return m_hasMoved;
         }
 
         //The rotation needed to move the sun direction back to the z axis.
         //The sky shader requires that the sun direction is always at the z axis
         public Matrix4x4 GetWorldToLocalRotation()
         {
-            return worldToLocalRotation;
+            return m_worldToLocalRotation;
         }
 
         //The rotation needed to move the sun direction from the z axis 
         public Matrix4x4 GetLocalToWorldRotation()
         {
-            return worldToLocalRotation.inverse;
+            return m_worldToLocalRotation.inverse;
         }
 
         void Start()
         {
             //if the sun direction entered is (0,0,0) which is not valid, change to default
-            if (startSunDirection.magnitude < Mathf.Epsilon)
-                startSunDirection = Z_AXIS;
+            if (m_startSunDirection.magnitude < Mathf.Epsilon)
+                m_startSunDirection = Z_AXIS;
 
-            transform.forward = startSunDirection.normalized;
+            transform.forward = m_startSunDirection.normalized;
         }
 
         public void SetUniforms(Material mat)
         {
+            //Sets uniforms that this or other gameobjects may need
             if (mat == null) return;
 
-            mat.SetFloat("_Sun_Intensity", sunIntensity);
+            mat.SetFloat("_Sun_Intensity", m_sunIntensity);
             mat.SetVector("_Sun_WorldSunDir", GetDirection());
         }
 
+        // Update is called once per frame
         public void UpdateNode()
         {
-            hasMoved = false;
+            //Rotate the sun when the right mouse is held down and dragged.
+
+            m_hasMoved = false;
 
             if (Input.GetMouseButton(2))
             {
                 float y = Input.GetAxis("Mouse Y");
                 float x = -Input.GetAxis("Mouse X");
                 transform.Rotate(new Vector3(x, y, 0), Space.Self);
-                hasMoved = true;
+                m_hasMoved = true;
             }
 
             Quaternion q = Quaternion.FromToRotation(GetDirection(), Z_AXIS);
-            worldToLocalRotation = Matrix4x4.TRS(Vector3.zero, q, Vector3.one);
+            m_worldToLocalRotation = Matrix4x4.TRS(Vector3.zero, q, Vector3.one);
         }
     }
 }

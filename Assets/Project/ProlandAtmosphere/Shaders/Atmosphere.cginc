@@ -1,6 +1,7 @@
 #define OPTIMIZE
 #define ATMO_FULL
-//#define HORIZON_HACK
+#define HORIZON_HACK
+//#define FIX_1
 //#define ANALYTIC_TRANSMITTANCE
 
 #if !defined (M_PI)
@@ -424,13 +425,13 @@ void SunRadianceAndSkyIrradiance(float3 worldP, float3 worldN, float3 worldS, ou
 // point=point on the ground
 // sundir=unit vector towards the sun
 // return scattered light and extinction coefficient
-float3 InScattering(float3 camera, float3 _point, float3 sundir, out float3 extinction, float shaftWidth) 
+float4 InScattering(float3 camera, float3 _point, float3 sundir, out float3 extinction, float shaftWidth) 
 {
 	#if defined(ATMO_INSCATTER_ONLY) || defined(ATMO_FULL)
 		camera *= scale;
 		_point *= scale;
 
-		float3 result;
+		float4 result;
 		float3 viewdir = _point - camera;
 		float d = length(viewdir);
 		viewdir = viewdir / d;
@@ -496,7 +497,12 @@ float3 InScattering(float3 camera, float3 _point, float3 sundir, out float3 exti
 			#endif
 
 			#ifdef HORIZON_HACK
-				const float EPS = 0.004;
+				#ifdef FIX_1
+					const float EPS = 0.4;
+				#else
+					const float EPS = 0.004; //0.004 - default. 0.4 - maybe normal?
+				#endif
+
 				float lim = -sqrt(1.0 - (Rg / r) * (Rg / r));
 
 				if (abs(mu - lim) < EPS) 
@@ -506,7 +512,6 @@ float3 InScattering(float3 camera, float3 _point, float3 sundir, out float3 exti
 					mu = lim - EPS;
 					r1 = sqrt(r * r + d * d + 2.0 * r * d * mu);
 					mu1 = (r * mu + d) / r1;
-
 					float4 inScatter0 = Texture4D(_Sky_Inscatter, r, mu, muS, nu);
 					float4 inScatter1 = Texture4D(_Sky_Inscatter, r1, mu1, muS1, nu);
 					float4 inScatterA = max(inScatter0 - inScatter1 * extinction.rgbr, 0.0);
@@ -516,7 +521,7 @@ float3 InScattering(float3 camera, float3 _point, float3 sundir, out float3 exti
 					mu1 = (r * mu + d) / r1;
 					inScatter0 = Texture4D(_Sky_Inscatter, r, mu, muS, nu);
 					inScatter1 = Texture4D(_Sky_Inscatter, r1, mu1, muS1, nu);
-					float4 inScatterB = max(inScatter0 + inScatter1 * extinction.rgbr, 0.0);
+					float4 inScatterB = max(inScatter0 - inScatter1 * extinction.rgbr, 0.0);
 
 					inScatter = lerp(inScatterA, inScatterB, a);
 				} 
@@ -529,7 +534,6 @@ float3 InScattering(float3 camera, float3 _point, float3 sundir, out float3 exti
 			#else
 				float4 inScatter0 = Texture4D(_Sky_Inscatter, r, mu, muS, nu);
 				float4 inScatter1 = Texture4D(_Sky_Inscatter, r1, mu1, muS1, nu);
-
 				inScatter = max(inScatter0 - inScatter1 * extinction.rgbr, 0.0);
 			#endif
 
@@ -539,21 +543,21 @@ float3 InScattering(float3 camera, float3 _point, float3 sundir, out float3 exti
 
 			// avoids imprecision problems in Mie scattering when sun is below horizon
 			inScatter.w *= smoothstep(0.00, 0.02, muS);
-
-			float3 inScatterM = GetMie(inScatter);
+			
+			float4 inScatterM = float4(GetMie(inScatter), 1);
 			float phase = PhaseFunctionR(nu);
 			float phaseM = PhaseFunctionM(nu);
-			result = inScatter.rgb * phase + inScatterM * phaseM;
+			result = inScatter * phase + inScatterM * phaseM;
 		}
 		else 
 		{
-			result = float3(0, 0, 0);
+			result = float4(0, 0, 0, 0);
 			extinction = float3(1, 1, 1);
 		}
 
 		return result * _Sun_Intensity;
 	#else
-		extinction = float3(1, 1, 1);
-		return float3(0, 0, 0);
+		extinction = float4(1, 1, 1);
+		return float4(0, 0, 0, 0);
 	#endif
 }

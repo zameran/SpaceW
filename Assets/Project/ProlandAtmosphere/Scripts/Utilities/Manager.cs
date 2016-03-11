@@ -18,7 +18,7 @@ namespace Proland
         [SerializeField]
         float radius = 6360000.0f;
 
-        SkyNode skuNode;
+        SkyNode skyNode;
         SunNode sunNode;
 
         public Vector3 origin;
@@ -40,7 +40,7 @@ namespace Proland
 
         public SkyNode GetSkyNode()
         {
-            return skuNode;
+            return skyNode;
         }
 
         public SunNode GetSunNode()
@@ -53,7 +53,7 @@ namespace Proland
             origin = Vector3.zero;
 
             //Get the nodes that are children of the manager
-            skuNode = GetComponentInChildren<SkyNode>();
+            skyNode = GetComponentInChildren<SkyNode>();
             sunNode = GetComponentInChildren<SunNode>();
         }
 
@@ -75,7 +75,7 @@ namespace Proland
         void Update()
         {
             sunNode.UpdateNode();
-            skuNode.UpdateNode();
+            skyNode.UpdateNode();
         }
     }
 }
