@@ -1,30 +1,4 @@
-﻿/*
- * Proland: a procedural landscape rendering library.
- * Copyright (c) 2008-2011 INRIA
- *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
- *
- * Proland is distributed under a dual-license scheme.
- * You can obtain a specific license from Inria: proland-licensing@inria.fr.
- *
- * Authors: Eric Bruneton, Antoine Begault, Guillaume Piolat.
- * Modified and ported to Unity by Justin Hawkins 2014
- * 
- * 
- */
-
-#pragma warning disable 162
+﻿#pragma warning disable 162
 
 using UnityEngine;
 
@@ -100,49 +74,49 @@ namespace Proland
             transmittanceT = new RenderTexture(TRANSMITTANCE_W, TRANSMITTANCE_H, 0, RenderTextureFormat.ARGBFloat);
             transmittanceT.enableRandomWrite = true;
             transmittanceT.Create();
-
+            Debug.Log("1");
             irradianceT[0] = new RenderTexture(SKY_W, SKY_H, 0, RenderTextureFormat.ARGBFloat);
             irradianceT[0].enableRandomWrite = true;
             irradianceT[0].Create();
-
+            Debug.Log("2");
             irradianceT[1] = new RenderTexture(SKY_W, SKY_H, 0, RenderTextureFormat.ARGBFloat);
             irradianceT[1].enableRandomWrite = true;
             irradianceT[1].Create();
-
+            Debug.Log("3");
             inscatterT[0] = new RenderTexture(RES_MU_S * RES_NU, RES_MU, 0, RenderTextureFormat.ARGBFloat);
             inscatterT[0].isVolume = true;
             inscatterT[0].enableRandomWrite = true;
             inscatterT[0].volumeDepth = RES_R;
             inscatterT[0].Create();
-
+            Debug.Log("4");
             inscatterT[1] = new RenderTexture(RES_MU_S * RES_NU, RES_MU, 0, RenderTextureFormat.ARGBFloat);
             inscatterT[1].isVolume = true;
             inscatterT[1].enableRandomWrite = true;
             inscatterT[1].volumeDepth = RES_R;
             inscatterT[1].Create();
-
+            Debug.Log("5");
             deltaET = new RenderTexture(SKY_W, SKY_H, 0, RenderTextureFormat.ARGBFloat);
             deltaET.enableRandomWrite = true;
             deltaET.Create();
-
+            Debug.Log("6");
             deltaSRT = new RenderTexture(RES_MU_S * RES_NU, RES_MU, 0, RenderTextureFormat.ARGBFloat);
             deltaSRT.isVolume = true;
             deltaSRT.enableRandomWrite = true;
             deltaSRT.volumeDepth = RES_R;
             deltaSRT.Create();
-
+            Debug.Log("7");
             deltaSMT = new RenderTexture(RES_MU_S * RES_NU, RES_MU, 0, RenderTextureFormat.ARGBFloat);
             deltaSMT.isVolume = true;
             deltaSMT.enableRandomWrite = true;
             deltaSMT.volumeDepth = RES_R;
             deltaSMT.Create();
-
+            Debug.Log("8");
             deltaJT = new RenderTexture(RES_MU_S * RES_NU, RES_MU, 0, RenderTextureFormat.ARGBFloat);
             deltaJT.isVolume = true;
             deltaJT.enableRandomWrite = true;
             deltaJT.volumeDepth = RES_R;
             deltaJT.Create();
-
+            Debug.Log("9");
             SetParameters(copyInscatter1);
             SetParameters(copyInscatterN);
             SetParameters(copyIrradiance);
@@ -190,12 +164,14 @@ namespace Proland
         {
             if (step == 0)
             {
+                Debug.Log("Step 0 start");
                 // computes transmittance texture T (line 1 in algorithm 4.1)
                 transmittance.SetTexture(0, "transmittanceWrite", transmittanceT);
                 transmittance.Dispatch(0, TRANSMITTANCE_W / NUM_THREADS, TRANSMITTANCE_H / NUM_THREADS, 1);
             }
             else if (step == 1)
             {
+                Debug.Log("Step 1 start");
                 // computes irradiance texture deltaE (line 2 in algorithm 4.1)
                 irradiance1.SetTexture(0, "transmittanceRead", transmittanceT);
                 irradiance1.SetTexture(0, "deltaEWrite", deltaET);
@@ -206,6 +182,7 @@ namespace Proland
             }
             else if (step == 2)
             {
+                Debug.Log("Step 2 start");
                 // computes single scattering texture deltaS (line 3 in algorithm 4.1)
                 // Rayleigh and Mie separated in deltaSR + deltaSM
                 inscatter1.SetTexture(0, "transmittanceRead", transmittanceT);
@@ -228,6 +205,7 @@ namespace Proland
             }
             else if (step == 3)
             {
+                Debug.Log("Step 3 start");
                 // copies deltaE into irradiance texture E (line 4 in algorithm 4.1)
                 copyIrradiance.SetFloat("k", 0.0f);
                 copyIrradiance.SetTexture(0, "deltaERead", deltaET);
@@ -239,6 +217,7 @@ namespace Proland
             }
             else if (step == 4)
             {
+                Debug.Log("Step 4 start");
                 // copies deltaS into inscatter texture S (line 5 in algorithm 4.1)
                 copyInscatter1.SetTexture(0, "deltaSRRead", deltaSRT);
                 copyInscatter1.SetTexture(0, "deltaSMRead", deltaSMT);
@@ -256,6 +235,7 @@ namespace Proland
             }
             else if (step == 5)
             {
+                Debug.Log("Step 5 start");
                 // computes deltaJ (line 7 in algorithm 4.1)
                 inscatterS.SetInt("first", (order == 2) ? 1 : 0);
                 inscatterS.SetTexture(0, "transmittanceRead", transmittanceT);
@@ -274,6 +254,7 @@ namespace Proland
             }
             else if (step == 6)
             {
+                Debug.Log("Step 6 start");
                 // computes deltaE (line 8 in algorithm 4.1)
                 irradianceN.SetInt("first", (order == 2) ? 1 : 0);
                 irradianceN.SetTexture(0, "deltaSRRead", deltaSRT);
@@ -283,6 +264,7 @@ namespace Proland
             }
             else if (step == 7)
             {
+                Debug.Log("Step 7 start");
                 // computes deltaS (line 9 in algorithm 4.1)
                 inscatterN.SetTexture(0, "transmittanceRead", transmittanceT);
                 inscatterN.SetTexture(0, "deltaJRead", deltaJT);
@@ -298,6 +280,7 @@ namespace Proland
             }
             else if (step == 8)
             {
+                Debug.Log("Step 8 start");
                 // adds deltaE into irradiance texture E (line 10 in algorithm 4.1)
                 copyIrradiance.SetFloat("k", 1.0f);
                 copyIrradiance.SetTexture(0, "deltaERead", deltaET);
@@ -309,7 +292,7 @@ namespace Proland
             }
             else if (step == 9)
             {
-
+                Debug.Log("Step 9 start");
                 // adds deltaS into inscatter texture S (line 11 in algorithm 4.1)
                 copyInscatterN.SetTexture(0, "deltaSRead", deltaSRT);
                 copyInscatterN.SetTexture(0, "inscatterRead", inscatterT[READ]);
@@ -333,6 +316,7 @@ namespace Proland
             }
             else if (step == 10)
             {
+                Debug.Log("Step 10 start");
                 SaveAsRaw(TRANSMITTANCE_W * TRANSMITTANCE_H, 3, "/transmittance", transmittanceT);
 
                 SaveAsRaw(SKY_W * SKY_H, 3, "/irradiance", irradianceT[READ]);
@@ -350,6 +334,7 @@ namespace Proland
             }
             else if (step == 11)
             {
+                Debug.Log("Step 11 start");
                 finished = true;
                 Debug.Log("Proland::PreProcessAtmo::Preprocess - Preprocess done. Files saved to - " + texturesPath);
             }
