@@ -21,6 +21,7 @@
 		#pragma vertex vert
 
 		#pragma target 5.0
+		#pragma only_renderers d3d11
 
 		struct OutputStruct
 		{

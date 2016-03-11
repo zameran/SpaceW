@@ -18,6 +18,7 @@
 
 			CGPROGRAM
 			#pragma target 5.0
+			#pragma only_renderers d3d11
 			#pragma vertex vert
 			#pragma geometry geom
 			#pragma fragment frag
@@ -44,12 +45,13 @@
 
 			struct v2fg
 			{
-				float4 color : COLOR0;
-				float4 scatter : COLOR1;
-				float2 uv : TEXCOORD0;
+				float4 terrainColor : COLOR0;
+				float4 scatterColor : COLOR1;
+				float2 uv0 : TEXCOORD0;
 				float3 uv1 : TEXCOORD1;
 				float3 uv2 : TEXCOORD2;
-				float3 normal : NORMAL;
+				float3 normal0 : NORMAL0;
+				float3 normal1 : NORMAL1;
 				float4 vertex : POSITION;
 			};
 		
@@ -60,9 +62,52 @@
 			uniform sampler2D _HeightTexture;
 			uniform sampler2D _NormalTexture;
 
+			uniform float4x4 _WorldToTangentFrame;
+
 			#ifdef SHADER_API_D3D11
 			uniform StructuredBuffer<OutputStruct> data;
 			#endif
+
+			float4 RGB2Reflectance(float4 inColor)
+			{
+				return float4(tan(1.37 * inColor.rgb) / tan(1.37), inColor.a);
+			}
+
+			float3 GroundFinalColor(float4 terrainColor, float3 p, float3 n)
+			{
+				float3 WCP = _Globals_WorldCameraPos;
+				float3 WSD = _Sun_WorldSunDir;
+
+				float3 fn;
+				//fn.xy = n.xy - default.
+				//fn.xy = -n.xy - inverted.
+				fn.xy = -n.xy;
+
+				//1.0 - dot(fn.xy, fn.xy) - default.
+				//-1.0 + dot(fn.xy, fn.xy) - inverted.
+				fn.z = sqrt(max(0.0, -1.0 + dot(fn.xy, fn.xy)));
+
+				fn = float3(0, 0, 0); //disable normal mapping... bruuuutaal!
+
+				float4 reflectance = RGB2Reflectance(terrainColor);
+
+				float3 sunL;
+				float3 skyE;
+
+				//SunRadianceAndSkyIrradiance(p, fn, WSD, sunL, skyE); - default.
+				//SunRadianceAndSkyIrradiance(p, p / 256, WSD, sunL, skyE); - disabled normal mapping for irradiance, but keeping color in bueaty...
+
+				SunRadianceAndSkyIrradiance(p, p / 256, WSD, sunL, skyE);
+
+				float cTheta = dot(fn, WSD); // diffuse ground color
+
+				float3 groundColor = 1.5 * reflectance.rgb * (sunL * max(cTheta, 0.0) + skyE) / M_PI;
+				float3 extinction;
+				float3 inscatter = InScattering(WCP, p, WSD, extinction, 0.0);
+				float3 finalColor = groundColor * extinction + inscatter;
+
+				return finalColor;
+			}
 	
 			v2fg vert (in appdata_full_compute v)
 			{
@@ -71,45 +116,60 @@
 				float4 vcolor = data[v.id].vcolor;
 				float4 position = data[v.id].pos;
 
+				float3 normal = tex2Dlod(_NormalTexture, v.texcoord).rgb;
+
 				position.w = 1.0;
 				position.xyz += patchCenter;
 
 				v.vertex = position;
 
-				float3 normal = tex2Dlod(_NormalTexture, float4(v.texcoord.xy, 0, 0)).rgb;
-				float3 normal_unpack = UnpackNormal(half4(normal, 0)).rgb;
-
-				float3 up = normalize(v.vertex);
-				float3 right = normalize(cross(up, float3(0, 1, 0)));
-				float3 forward = normalize(cross(right, up));
- 
-				float3 localNormal = float3(dot(normal, right), dot(normal, up), dot(normal, forward));
-				float3 localNormalUnpack = UnpackNormal(half4(localNormal, 0)).rgb;
-
 				v.tangent = float4(FindTangent(normal, 0.01, float3(0, 1, 0)), 1);
 				v.normal = normal;
-				
+
+				//v.tangent.xyz = mul(v.tangent.xyz, _WorldToTangentFrame);
+				//v.normal.xyz = mul(v.normal.xyz, _WorldToTangentFrame);
+
 				//v.tangent.xyz += position.xyz;
 				//v.normal.xyz += position.xyz;
 
-				TANGENT_SPACE_ROTATION;
-				v.tangent.xyz = mul(v.tangent.xyz, rotation);
-				v.normal.xyz = mul(v.normal.xyz, rotation);
+				//v.tangent.xyz = mul(UNITY_MATRIX_MVP, position.xyz);
+				//v.normal.xyz = mul(UNITY_MATRIX_MVP, position.xyz);
+
+				//TANGENT_SPACE_ROTATION;
+				//v.tangent.xyz = mul(v.tangent.xyz, rotation);
+				//v.normal.xyz = mul(v.normal.xyz, rotation);
 
 				float4 terrainColor = tex2Dlod(_HeightTexture, v.texcoord);
 				float3 scatteringColor = hdr(GroundFinalColor(terrainColor, v.vertex.xyz, v.normal.xyz));
 
 				v2fg o;
 
-				o.color = lerp(float4(noise, noise, noise, 1), terrainColor, 1);	
-				o.scatter = float4(scatteringColor, 1);
-				o.uv = v.texcoord;
+				o.terrainColor = terrainColor;	
+				o.scatterColor = float4(scatteringColor, 1);
+				o.uv0 = v.texcoord;
 				o.uv1 = v.texcoord1;
 				o.uv2 = v.texcoord2;
-				o.normal = v.normal;
+				o.normal0 = v.normal;
+				o.normal1 = normal;
 				o.vertex = mul(UNITY_MATRIX_MVP, v.vertex);
 
 				return o;
+			}
+
+			v2fg PutData(v2fg FROM, float3 customUV1)
+			{	
+				v2fg OUT;
+
+				OUT.terrainColor = FROM.terrainColor;
+				OUT.scatterColor = FROM.scatterColor;
+				OUT.uv0 = FROM.uv0;
+				OUT.uv1 = customUV1;
+				OUT.uv2 = FROM.uv2;
+				OUT.normal0 = FROM.normal0;
+				OUT.normal1 = FROM.normal1;
+				OUT.vertex = FROM.vertex;
+
+				return OUT;
 			}
 
 			[maxvertexcount(3)]
@@ -127,33 +187,9 @@
 
 				float area = abs(v1.x * v2.y - v1.y * v2.x);
 			
-				v2fg OUT;		
-				OUT.color = IN[0].color;
-				OUT.scatter = IN[0].scatter;
-				OUT.uv = IN[0].uv;
-				OUT.uv1 = float3(area / length(v0), 0, 0);
-				OUT.uv2 = IN[0].uv2;
-				OUT.normal = IN[0].normal;
-				OUT.vertex = IN[0].vertex;
-				triStream.Append(OUT);
-
-				OUT.color = IN[1].color;
-				OUT.scatter = IN[1].scatter;
-				OUT.uv = IN[1].uv;
-				OUT.uv1 = float3(0, area / length(v1), 0);
-				OUT.uv2 = IN[1].uv2;
-				OUT.normal = IN[1].normal;
-				OUT.vertex = IN[1].vertex;
-				triStream.Append(OUT);
-
-				OUT.color = IN[2].color;
-				OUT.scatter = IN[2].scatter;
-				OUT.uv = IN[2].uv;
-				OUT.uv1 = float3(0, 0, area / length(v2));
-				OUT.uv2 = IN[2].uv2;
-				OUT.normal = IN[2].normal;
-				OUT.vertex = IN[2].vertex;	
-				triStream.Append(OUT);			
+				triStream.Append(PutData(IN[0], float3(area / length(v0), 0, 0)));
+				triStream.Append(PutData(IN[1], float3(0, area / length(v1), 0)));
+				triStream.Append(PutData(IN[2], float3(0, 0, area / length(v2))));
 			}
 
 			void frag(v2fg IN, out float4 outDiffuse : COLOR0, out float4 outNormal : COLOR1)
@@ -161,12 +197,13 @@
 				float d = min(IN.uv1.x, min(IN.uv1.y, IN.uv1.z));
 				float I = exp2(-4.0 * d * d);
 
-				float4 terrainColor = IN.scatter;
+				float4 terrainColor = IN.scatterColor;
 				fixed4 wireframeColor = lerp(terrainColor, _WireframeColor, I);
 				fixed4 outputColor = lerp(terrainColor, wireframeColor, _Wireframe);
 
-				fixed3 terrainNormal = UnpackNormal(tex2D(_NormalTexture, IN.uv));
-				fixed4 outputNormal = fixed4(terrainNormal, 1);
+				fixed3 terrainWorldNormal = IN.normal0;
+				fixed3 terrainLocalNormal = IN.normal1;
+				fixed4 outputNormal = fixed4(terrainWorldNormal * terrainLocalNormal, 1);
 
 				outDiffuse = outputColor;
 				outNormal = outputNormal;	

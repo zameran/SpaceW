@@ -27,18 +27,9 @@
 #pragma warning disable 162
 
 using UnityEngine;
-using System.Collections;
-using System.IO;
 
 namespace Proland
 {
-    /**
-     * Precomputes the tables for the given atmosphere parameters.
-     * To run this just create a new scene and add this script to a game object and then attach the compute shaders.
-     * Once the scene is run the tables will be saved to the file path.
-     * If you change some of the settings, like the table dimensions then you will need to open up the SkyNode.cs script
-     * and make sure the setting for the tables match the settings in that script.
-     */
     public class PreProcessAtmo : MonoBehaviour
     {
         //Dont change these
@@ -84,91 +75,90 @@ namespace Proland
         //public float HR = 8.0f; // default;
         //public float HM = 1.2f; // default;
 
-        RenderTexture m_transmittanceT;
-        RenderTexture m_deltaET, m_deltaSRT, m_deltaSMT, m_deltaJT;
-        RenderTexture[] m_irradianceT, m_inscatterT;
+        RenderTexture transmittanceT;
+        RenderTexture deltaET, deltaSRT, deltaSMT, deltaJT;
+        RenderTexture[] irradianceT, inscatterT;
 
         //This is where the tables will be saved to
-        public string m_filePath = "/Project/ProlandAtmosphere/Textures/";
+        public string texturesPath = "/Project/ProlandAtmosphere/Textures/";
 
-        public ComputeShader m_copyInscatter1, m_copyInscatterN, m_copyIrradiance;
-        public ComputeShader m_inscatter1, m_inscatterN, m_inscatterS;
-        public ComputeShader m_irradiance1, m_irradianceN, m_transmittance;
-        public ComputeShader m_readData;
+        public ComputeShader copyInscatter1, copyInscatterN, copyIrradiance;
+        public ComputeShader inscatter1, inscatterN, inscatterS;
+        public ComputeShader irradiance1, irradianceN, transmittance;
+        public ComputeShader readData;
 
-        int m_step, m_order;
-        bool m_finished = false;
+        int step, order;
+        bool finished = false;
 
         const bool WRITE_DEBUG_TEX = false;
 
         void Start()
         {
+            irradianceT = new RenderTexture[2];
+            inscatterT = new RenderTexture[2];
 
-            m_irradianceT = new RenderTexture[2];
-            m_inscatterT = new RenderTexture[2];
+            transmittanceT = new RenderTexture(TRANSMITTANCE_W, TRANSMITTANCE_H, 0, RenderTextureFormat.ARGBFloat);
+            transmittanceT.enableRandomWrite = true;
+            transmittanceT.Create();
 
-            m_transmittanceT = new RenderTexture(TRANSMITTANCE_W, TRANSMITTANCE_H, 0, RenderTextureFormat.ARGBFloat);
-            m_transmittanceT.enableRandomWrite = true;
-            m_transmittanceT.Create();
+            irradianceT[0] = new RenderTexture(SKY_W, SKY_H, 0, RenderTextureFormat.ARGBFloat);
+            irradianceT[0].enableRandomWrite = true;
+            irradianceT[0].Create();
 
-            m_irradianceT[0] = new RenderTexture(SKY_W, SKY_H, 0, RenderTextureFormat.ARGBFloat);
-            m_irradianceT[0].enableRandomWrite = true;
-            m_irradianceT[0].Create();
+            irradianceT[1] = new RenderTexture(SKY_W, SKY_H, 0, RenderTextureFormat.ARGBFloat);
+            irradianceT[1].enableRandomWrite = true;
+            irradianceT[1].Create();
 
-            m_irradianceT[1] = new RenderTexture(SKY_W, SKY_H, 0, RenderTextureFormat.ARGBFloat);
-            m_irradianceT[1].enableRandomWrite = true;
-            m_irradianceT[1].Create();
+            inscatterT[0] = new RenderTexture(RES_MU_S * RES_NU, RES_MU, 0, RenderTextureFormat.ARGBFloat);
+            inscatterT[0].isVolume = true;
+            inscatterT[0].enableRandomWrite = true;
+            inscatterT[0].volumeDepth = RES_R;
+            inscatterT[0].Create();
 
-            m_inscatterT[0] = new RenderTexture(RES_MU_S * RES_NU, RES_MU, 0, RenderTextureFormat.ARGBFloat);
-            m_inscatterT[0].isVolume = true;
-            m_inscatterT[0].enableRandomWrite = true;
-            m_inscatterT[0].volumeDepth = RES_R;
-            m_inscatterT[0].Create();
+            inscatterT[1] = new RenderTexture(RES_MU_S * RES_NU, RES_MU, 0, RenderTextureFormat.ARGBFloat);
+            inscatterT[1].isVolume = true;
+            inscatterT[1].enableRandomWrite = true;
+            inscatterT[1].volumeDepth = RES_R;
+            inscatterT[1].Create();
 
-            m_inscatterT[1] = new RenderTexture(RES_MU_S * RES_NU, RES_MU, 0, RenderTextureFormat.ARGBFloat);
-            m_inscatterT[1].isVolume = true;
-            m_inscatterT[1].enableRandomWrite = true;
-            m_inscatterT[1].volumeDepth = RES_R;
-            m_inscatterT[1].Create();
+            deltaET = new RenderTexture(SKY_W, SKY_H, 0, RenderTextureFormat.ARGBFloat);
+            deltaET.enableRandomWrite = true;
+            deltaET.Create();
 
-            m_deltaET = new RenderTexture(SKY_W, SKY_H, 0, RenderTextureFormat.ARGBFloat);
-            m_deltaET.enableRandomWrite = true;
-            m_deltaET.Create();
+            deltaSRT = new RenderTexture(RES_MU_S * RES_NU, RES_MU, 0, RenderTextureFormat.ARGBFloat);
+            deltaSRT.isVolume = true;
+            deltaSRT.enableRandomWrite = true;
+            deltaSRT.volumeDepth = RES_R;
+            deltaSRT.Create();
 
-            m_deltaSRT = new RenderTexture(RES_MU_S * RES_NU, RES_MU, 0, RenderTextureFormat.ARGBFloat);
-            m_deltaSRT.isVolume = true;
-            m_deltaSRT.enableRandomWrite = true;
-            m_deltaSRT.volumeDepth = RES_R;
-            m_deltaSRT.Create();
+            deltaSMT = new RenderTexture(RES_MU_S * RES_NU, RES_MU, 0, RenderTextureFormat.ARGBFloat);
+            deltaSMT.isVolume = true;
+            deltaSMT.enableRandomWrite = true;
+            deltaSMT.volumeDepth = RES_R;
+            deltaSMT.Create();
 
-            m_deltaSMT = new RenderTexture(RES_MU_S * RES_NU, RES_MU, 0, RenderTextureFormat.ARGBFloat);
-            m_deltaSMT.isVolume = true;
-            m_deltaSMT.enableRandomWrite = true;
-            m_deltaSMT.volumeDepth = RES_R;
-            m_deltaSMT.Create();
+            deltaJT = new RenderTexture(RES_MU_S * RES_NU, RES_MU, 0, RenderTextureFormat.ARGBFloat);
+            deltaJT.isVolume = true;
+            deltaJT.enableRandomWrite = true;
+            deltaJT.volumeDepth = RES_R;
+            deltaJT.Create();
 
-            m_deltaJT = new RenderTexture(RES_MU_S * RES_NU, RES_MU, 0, RenderTextureFormat.ARGBFloat);
-            m_deltaJT.isVolume = true;
-            m_deltaJT.enableRandomWrite = true;
-            m_deltaJT.volumeDepth = RES_R;
-            m_deltaJT.Create();
+            SetParameters(copyInscatter1);
+            SetParameters(copyInscatterN);
+            SetParameters(copyIrradiance);
+            SetParameters(inscatter1);
+            SetParameters(inscatterN);
+            SetParameters(inscatterS);
+            SetParameters(irradiance1);
+            SetParameters(irradianceN);
+            SetParameters(transmittance);
 
-            SetParameters(m_copyInscatter1);
-            SetParameters(m_copyInscatterN);
-            SetParameters(m_copyIrradiance);
-            SetParameters(m_inscatter1);
-            SetParameters(m_inscatterN);
-            SetParameters(m_inscatterS);
-            SetParameters(m_irradiance1);
-            SetParameters(m_irradianceN);
-            SetParameters(m_transmittance);
+            step = 0;
+            order = 2;
 
-            m_step = 0;
-            m_order = 2;
+            RTUtility.ClearColor(irradianceT);
 
-            RTUtility.ClearColor(m_irradianceT);
-
-            while (!m_finished)
+            while (!finished)
             {
                 Preprocess();
             }
@@ -198,193 +188,193 @@ namespace Proland
 
         void Preprocess()
         {
-            if (m_step == 0)
+            if (step == 0)
             {
                 // computes transmittance texture T (line 1 in algorithm 4.1)
-                m_transmittance.SetTexture(0, "transmittanceWrite", m_transmittanceT);
-                m_transmittance.Dispatch(0, TRANSMITTANCE_W / NUM_THREADS, TRANSMITTANCE_H / NUM_THREADS, 1);
+                transmittance.SetTexture(0, "transmittanceWrite", transmittanceT);
+                transmittance.Dispatch(0, TRANSMITTANCE_W / NUM_THREADS, TRANSMITTANCE_H / NUM_THREADS, 1);
             }
-            else if (m_step == 1)
+            else if (step == 1)
             {
                 // computes irradiance texture deltaE (line 2 in algorithm 4.1)
-                m_irradiance1.SetTexture(0, "transmittanceRead", m_transmittanceT);
-                m_irradiance1.SetTexture(0, "deltaEWrite", m_deltaET);
-                m_irradiance1.Dispatch(0, SKY_W / NUM_THREADS, SKY_H / NUM_THREADS, 1);
+                irradiance1.SetTexture(0, "transmittanceRead", transmittanceT);
+                irradiance1.SetTexture(0, "deltaEWrite", deltaET);
+                irradiance1.Dispatch(0, SKY_W / NUM_THREADS, SKY_H / NUM_THREADS, 1);
 
                 if (WRITE_DEBUG_TEX)
-                    SaveAs8bit(SKY_W, SKY_H, 4, "/deltaE_debug", m_deltaET);
+                    SaveAs8bit(SKY_W, SKY_H, 4, "/deltaE_debug", deltaET);
             }
-            else if (m_step == 2)
+            else if (step == 2)
             {
                 // computes single scattering texture deltaS (line 3 in algorithm 4.1)
                 // Rayleigh and Mie separated in deltaSR + deltaSM
-                m_inscatter1.SetTexture(0, "transmittanceRead", m_transmittanceT);
-                m_inscatter1.SetTexture(0, "deltaSRWrite", m_deltaSRT);
-                m_inscatter1.SetTexture(0, "deltaSMWrite", m_deltaSMT);
+                inscatter1.SetTexture(0, "transmittanceRead", transmittanceT);
+                inscatter1.SetTexture(0, "deltaSRWrite", deltaSRT);
+                inscatter1.SetTexture(0, "deltaSMWrite", deltaSMT);
 
                 //The inscatter calc's can be quite demanding for some cards so process 
                 //the calc's in layers instead of the whole 3D data set.
                 for (int i = 0; i < RES_R; i++)
                 {
-                    m_inscatter1.SetInt("layer", i);
-                    m_inscatter1.Dispatch(0, (RES_MU_S * RES_NU) / NUM_THREADS, RES_MU / NUM_THREADS, 1);
+                    inscatter1.SetInt("layer", i);
+                    inscatter1.Dispatch(0, (RES_MU_S * RES_NU) / NUM_THREADS, RES_MU / NUM_THREADS, 1);
                 }
 
                 if (WRITE_DEBUG_TEX)
-                    SaveAs8bit(RES_MU_S * RES_NU, RES_MU * RES_R, 4, "/deltaSR_debug", m_deltaSRT);
+                    SaveAs8bit(RES_MU_S * RES_NU, RES_MU * RES_R, 4, "/deltaSR_debug", deltaSRT);
 
                 if (WRITE_DEBUG_TEX)
-                    SaveAs8bit(RES_MU_S * RES_NU, RES_MU * RES_R, 4, "/deltaSM_debug", m_deltaSMT);
+                    SaveAs8bit(RES_MU_S * RES_NU, RES_MU * RES_R, 4, "/deltaSM_debug", deltaSMT);
             }
-            else if (m_step == 3)
+            else if (step == 3)
             {
                 // copies deltaE into irradiance texture E (line 4 in algorithm 4.1)
-                m_copyIrradiance.SetFloat("k", 0.0f);
-                m_copyIrradiance.SetTexture(0, "deltaERead", m_deltaET);
-                m_copyIrradiance.SetTexture(0, "irradianceRead", m_irradianceT[READ]);
-                m_copyIrradiance.SetTexture(0, "irradianceWrite", m_irradianceT[WRITE]);
-                m_copyIrradiance.Dispatch(0, SKY_W / NUM_THREADS, SKY_H / NUM_THREADS, 1);
+                copyIrradiance.SetFloat("k", 0.0f);
+                copyIrradiance.SetTexture(0, "deltaERead", deltaET);
+                copyIrradiance.SetTexture(0, "irradianceRead", irradianceT[READ]);
+                copyIrradiance.SetTexture(0, "irradianceWrite", irradianceT[WRITE]);
+                copyIrradiance.Dispatch(0, SKY_W / NUM_THREADS, SKY_H / NUM_THREADS, 1);
 
-                RTUtility.Swap(m_irradianceT);
+                RTUtility.Swap(irradianceT);
             }
-            else if (m_step == 4)
+            else if (step == 4)
             {
                 // copies deltaS into inscatter texture S (line 5 in algorithm 4.1)
-                m_copyInscatter1.SetTexture(0, "deltaSRRead", m_deltaSRT);
-                m_copyInscatter1.SetTexture(0, "deltaSMRead", m_deltaSMT);
-                m_copyInscatter1.SetTexture(0, "inscatterWrite", m_inscatterT[WRITE]);
+                copyInscatter1.SetTexture(0, "deltaSRRead", deltaSRT);
+                copyInscatter1.SetTexture(0, "deltaSMRead", deltaSMT);
+                copyInscatter1.SetTexture(0, "inscatterWrite", inscatterT[WRITE]);
 
                 //The inscatter calc's can be quite demanding for some cards so process 
                 //the calc's in layers instead of the whole 3D data set.
                 for (int i = 0; i < RES_R; i++)
                 {
-                    m_copyInscatter1.SetInt("layer", i);
-                    m_copyInscatter1.Dispatch(0, (RES_MU_S * RES_NU) / NUM_THREADS, RES_MU / NUM_THREADS, 1);
+                    copyInscatter1.SetInt("layer", i);
+                    copyInscatter1.Dispatch(0, (RES_MU_S * RES_NU) / NUM_THREADS, RES_MU / NUM_THREADS, 1);
                 }
 
-                RTUtility.Swap(m_inscatterT);
+                RTUtility.Swap(inscatterT);
             }
-            else if (m_step == 5)
+            else if (step == 5)
             {
                 // computes deltaJ (line 7 in algorithm 4.1)
-                m_inscatterS.SetInt("first", (m_order == 2) ? 1 : 0);
-                m_inscatterS.SetTexture(0, "transmittanceRead", m_transmittanceT);
-                m_inscatterS.SetTexture(0, "deltaERead", m_deltaET);
-                m_inscatterS.SetTexture(0, "deltaSRRead", m_deltaSRT);
-                m_inscatterS.SetTexture(0, "deltaSMRead", m_deltaSMT);
-                m_inscatterS.SetTexture(0, "deltaJWrite", m_deltaJT);
+                inscatterS.SetInt("first", (order == 2) ? 1 : 0);
+                inscatterS.SetTexture(0, "transmittanceRead", transmittanceT);
+                inscatterS.SetTexture(0, "deltaERead", deltaET);
+                inscatterS.SetTexture(0, "deltaSRRead", deltaSRT);
+                inscatterS.SetTexture(0, "deltaSMRead", deltaSMT);
+                inscatterS.SetTexture(0, "deltaJWrite", deltaJT);
 
                 //The inscatter calc's can be quite demanding for some cards so process 
                 //the calc's in layers instead of the whole 3D data set.
                 for (int i = 0; i < RES_R; i++)
                 {
-                    m_inscatterS.SetInt("layer", i);
-                    m_inscatterS.Dispatch(0, (RES_MU_S * RES_NU) / NUM_THREADS, RES_MU / NUM_THREADS, 1);
+                    inscatterS.SetInt("layer", i);
+                    inscatterS.Dispatch(0, (RES_MU_S * RES_NU) / NUM_THREADS, RES_MU / NUM_THREADS, 1);
                 }
             }
-            else if (m_step == 6)
+            else if (step == 6)
             {
                 // computes deltaE (line 8 in algorithm 4.1)
-                m_irradianceN.SetInt("first", (m_order == 2) ? 1 : 0);
-                m_irradianceN.SetTexture(0, "deltaSRRead", m_deltaSRT);
-                m_irradianceN.SetTexture(0, "deltaSMRead", m_deltaSMT);
-                m_irradianceN.SetTexture(0, "deltaEWrite", m_deltaET);
-                m_irradianceN.Dispatch(0, SKY_W / NUM_THREADS, SKY_H / NUM_THREADS, 1);
+                irradianceN.SetInt("first", (order == 2) ? 1 : 0);
+                irradianceN.SetTexture(0, "deltaSRRead", deltaSRT);
+                irradianceN.SetTexture(0, "deltaSMRead", deltaSMT);
+                irradianceN.SetTexture(0, "deltaEWrite", deltaET);
+                irradianceN.Dispatch(0, SKY_W / NUM_THREADS, SKY_H / NUM_THREADS, 1);
             }
-            else if (m_step == 7)
+            else if (step == 7)
             {
                 // computes deltaS (line 9 in algorithm 4.1)
-                m_inscatterN.SetTexture(0, "transmittanceRead", m_transmittanceT);
-                m_inscatterN.SetTexture(0, "deltaJRead", m_deltaJT);
-                m_inscatterN.SetTexture(0, "deltaSRWrite", m_deltaSRT);
+                inscatterN.SetTexture(0, "transmittanceRead", transmittanceT);
+                inscatterN.SetTexture(0, "deltaJRead", deltaJT);
+                inscatterN.SetTexture(0, "deltaSRWrite", deltaSRT);
 
                 //The inscatter calc's can be quite demanding for some cards so process 
                 //the calc's in layers instead of the whole 3D data set.
                 for (int i = 0; i < RES_R; i++)
                 {
-                    m_inscatterN.SetInt("layer", i);
-                    m_inscatterN.Dispatch(0, (RES_MU_S * RES_NU) / NUM_THREADS, RES_MU / NUM_THREADS, 1);
+                    inscatterN.SetInt("layer", i);
+                    inscatterN.Dispatch(0, (RES_MU_S * RES_NU) / NUM_THREADS, RES_MU / NUM_THREADS, 1);
                 }
             }
-            else if (m_step == 8)
+            else if (step == 8)
             {
                 // adds deltaE into irradiance texture E (line 10 in algorithm 4.1)
-                m_copyIrradiance.SetFloat("k", 1.0f);
-                m_copyIrradiance.SetTexture(0, "deltaERead", m_deltaET);
-                m_copyIrradiance.SetTexture(0, "irradianceRead", m_irradianceT[READ]);
-                m_copyIrradiance.SetTexture(0, "irradianceWrite", m_irradianceT[WRITE]);
-                m_copyIrradiance.Dispatch(0, SKY_W / NUM_THREADS, SKY_H / NUM_THREADS, 1);
+                copyIrradiance.SetFloat("k", 1.0f);
+                copyIrradiance.SetTexture(0, "deltaERead", deltaET);
+                copyIrradiance.SetTexture(0, "irradianceRead", irradianceT[READ]);
+                copyIrradiance.SetTexture(0, "irradianceWrite", irradianceT[WRITE]);
+                copyIrradiance.Dispatch(0, SKY_W / NUM_THREADS, SKY_H / NUM_THREADS, 1);
 
-                RTUtility.Swap(m_irradianceT);
+                RTUtility.Swap(irradianceT);
             }
-            else if (m_step == 9)
+            else if (step == 9)
             {
 
                 // adds deltaS into inscatter texture S (line 11 in algorithm 4.1)
-                m_copyInscatterN.SetTexture(0, "deltaSRead", m_deltaSRT);
-                m_copyInscatterN.SetTexture(0, "inscatterRead", m_inscatterT[READ]);
-                m_copyInscatterN.SetTexture(0, "inscatterWrite", m_inscatterT[WRITE]);
+                copyInscatterN.SetTexture(0, "deltaSRead", deltaSRT);
+                copyInscatterN.SetTexture(0, "inscatterRead", inscatterT[READ]);
+                copyInscatterN.SetTexture(0, "inscatterWrite", inscatterT[WRITE]);
 
                 //The inscatter calc's can be quite demanding for some cards so process 
                 //the calc's in layers instead of the whole 3D data set.
                 for (int i = 0; i < RES_R; i++)
                 {
-                    m_copyInscatterN.SetInt("layer", i);
-                    m_copyInscatterN.Dispatch(0, (RES_MU_S * RES_NU) / NUM_THREADS, RES_MU / NUM_THREADS, 1);
+                    copyInscatterN.SetInt("layer", i);
+                    copyInscatterN.Dispatch(0, (RES_MU_S * RES_NU) / NUM_THREADS, RES_MU / NUM_THREADS, 1);
                 }
 
-                RTUtility.Swap(m_inscatterT);
+                RTUtility.Swap(inscatterT);
 
-                if (m_order < 4)
+                if (order < 4)
                 {
-                    m_step = 4;
-                    m_order += 1;
+                    step = 4;
+                    order += 1;
                 }
             }
-            else if (m_step == 10)
+            else if (step == 10)
             {
-                SaveAsRaw(TRANSMITTANCE_W * TRANSMITTANCE_H, 3, "/transmittance", m_transmittanceT);
+                SaveAsRaw(TRANSMITTANCE_W * TRANSMITTANCE_H, 3, "/transmittance", transmittanceT);
 
-                SaveAsRaw(SKY_W * SKY_H, 3, "/irradiance", m_irradianceT[READ]);
+                SaveAsRaw(SKY_W * SKY_H, 3, "/irradiance", irradianceT[READ]);
 
-                SaveAsRaw((RES_MU_S * RES_NU) * RES_MU * RES_R, 4, "/inscatter", m_inscatterT[READ]);
+                SaveAsRaw((RES_MU_S * RES_NU) * RES_MU * RES_R, 4, "/inscatter", inscatterT[READ]);
 
                 if (WRITE_DEBUG_TEX)
                 {
-                    SaveAs8bit(TRANSMITTANCE_W, TRANSMITTANCE_H, 4, "/transmittance_debug", m_transmittanceT);
+                    SaveAs8bit(TRANSMITTANCE_W, TRANSMITTANCE_H, 4, "/transmittance_debug", transmittanceT);
 
-                    SaveAs8bit(SKY_W, SKY_H, 4, "/irradiance_debug", m_irradianceT[READ], 10.0f);
+                    SaveAs8bit(SKY_W, SKY_H, 4, "/irradiance_debug", irradianceT[READ], 10.0f);
 
-                    SaveAs8bit(RES_MU_S * RES_NU, RES_MU * RES_R, 4, "/inscater_debug", m_inscatterT[READ]);
+                    SaveAs8bit(RES_MU_S * RES_NU, RES_MU * RES_R, 4, "/inscater_debug", inscatterT[READ]);
                 }
             }
-            else if (m_step == 11)
+            else if (step == 11)
             {
-                m_finished = true;
-                Debug.Log("Proland::PreProcessAtmo::Preprocess - Preprocess done. Files saved to - " + m_filePath);
+                finished = true;
+                Debug.Log("Proland::PreProcessAtmo::Preprocess - Preprocess done. Files saved to - " + texturesPath);
             }
 
-            m_step += 1;
+            step += 1;
         }
 
         void OnDestroy()
         {
-            m_transmittanceT.Release();
-            m_irradianceT[0].Release();
-            m_irradianceT[1].Release();
-            m_inscatterT[0].Release();
-            m_inscatterT[1].Release();
-            m_deltaET.Release();
-            m_deltaSRT.Release();
-            m_deltaSMT.Release();
-            m_deltaJT.Release();
+            transmittanceT.Release();
+            irradianceT[0].Release();
+            irradianceT[1].Release();
+            inscatterT[0].Release();
+            inscatterT[1].Release();
+            deltaET.Release();
+            deltaSRT.Release();
+            deltaSMT.Release();
+            deltaJT.Release();
         }
 
         void SaveAsRaw(int size, int channels, string fileName, RenderTexture rtex)
         {
             ComputeBuffer buffer = new ComputeBuffer(size, sizeof(float) * channels);
 
-            CBUtility.ReadFromRenderTexture(rtex, channels, buffer, m_readData);
+            CBUtility.ReadFromRenderTexture(rtex, channels, buffer, readData);
 
             float[] data = new float[size * channels];
 
@@ -392,18 +382,16 @@ namespace Proland
 
             byte[] byteArray = new byte[size * 4 * channels];
             System.Buffer.BlockCopy(data, 0, byteArray, 0, byteArray.Length);
-            System.IO.File.WriteAllBytes(Application.dataPath + m_filePath + fileName + ".raw", byteArray);
+            System.IO.File.WriteAllBytes(Application.dataPath + texturesPath + fileName + ".raw", byteArray);
 
             buffer.Release();
         }
 
         void SaveAs8bit(int width, int height, int channels, string fileName, RenderTexture rtex, float scale = 1.0f)
         {
-            //Only used to get a visible image for debugging.
-
             ComputeBuffer buffer = new ComputeBuffer(width * height, sizeof(float) * channels);
 
-            CBUtility.ReadFromRenderTexture(rtex, channels, buffer, m_readData);
+            CBUtility.ReadFromRenderTexture(rtex, channels, buffer, readData);
 
             float[] data = new float[width * height * channels];
 
@@ -433,7 +421,7 @@ namespace Proland
 
             byte[] bytes = tex.EncodeToPNG();
 
-            System.IO.File.WriteAllBytes(Application.dataPath + m_filePath + fileName + ".png", bytes);
+            System.IO.File.WriteAllBytes(Application.dataPath + texturesPath + fileName + ".png", bytes);
 
             buffer.Release();
         }

@@ -1,5 +1,3 @@
-
-
 uniform float _Exposure;
 
 float mod(float x, float y) { return x - y * floor(x/y); }

@@ -1,69 +1,60 @@
 ﻿using UnityEngine;
-using System.Collections;
-using System.Collections.Generic;
 
 namespace Proland
 {
-    /*
-     * A manger to organise what order update functions are called, the running of tasks and the drawing of the terrain.
-     * Provides a location for common settings and allows the nodes to access each other.
-     * Also sets uniforms that are considered global.
-     * Must have a scheduler script attached to the same gameobject
-     * 
-     */
     public class Manager : MonoBehaviour
     {
         public Camera ruleCamera;
 
         [SerializeField]
-        ComputeShader m_writeData;
+        ComputeShader writeDataShader;
 
         [SerializeField]
-        ComputeShader m_readData;
+        ComputeShader readDataShader;
 
         [SerializeField]
-        float m_HDRExposure = 0.2f;
+        float HDRExposure = 0.2f;
 
         [SerializeField]
-        float m_radius = 6360000.0f;
+        float radius = 6360000.0f;
 
-        SkyNode m_skyNode;
-        SunNode m_sunNode;
+        SkyNode skuNode;
+        SunNode sunNode;
 
-        public Vector3 m_origin;
+        public Vector3 origin;
 
         public float GetRadius()
         {
-            return m_radius;
+            return radius;
         }
 
         public ComputeShader GetWriteData()
         {
-            return m_writeData;
+            return writeDataShader;
         }
 
         public ComputeShader GetReadData()
         {
-            return m_readData;
+            return readDataShader;
         }
 
         public SkyNode GetSkyNode()
         {
-            return m_skyNode;
+            return skuNode;
         }
 
         public SunNode GetSunNode()
         {
-            return m_sunNode;
+            return sunNode;
         }
 
         void Awake()
         {
-            m_origin = Vector3.zero;
+            origin = Vector3.zero;
 
             //Get the nodes that are children of the manager
-            m_skyNode = GetComponentInChildren<SkyNode>();
-            m_sunNode = GetComponentInChildren<SunNode>();
+            skuNode = GetComponentInChildren<SkyNode>();
+            sunNode = GetComponentInChildren<SunNode>();
         }
 
         public void SetUniforms(Material mat)
@@ -77,14 +68,14 @@ namespace Proland
             mat.SetMatrix("_Globals_ScreenToCamera", ruleCamera.GetScreenToCamera());
             mat.SetVector("_Globals_WorldCameraPos", ruleCamera.transform.position);
 
-            mat.SetVector("_Globals_Origin", -m_origin);
-            mat.SetFloat("_Exposure", m_HDRExposure);
+            mat.SetVector("_Globals_Origin", -origin);
+            mat.SetFloat("_Exposure", HDRExposure);
         }
 
         void Update()
         {
-            m_sunNode.UpdateNode();
-            m_skyNode.UpdateNode();
+            sunNode.UpdateNode();
+            skuNode.UpdateNode();
         }
     }
 }

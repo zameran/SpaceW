@@ -339,6 +339,7 @@ public class Quad : MonoBehaviour
 		QuadMaterial.SetTexture("_NormalTexture", NormalTexture);
 		QuadMaterial.SetFloat("_Wireframe", Planetoid.DrawWireframe ? 1.0f : 0.0f);
 		QuadMaterial.SetFloat("_Side", (float)Position);
+		QuadMaterial.SetMatrix("_WorldToTangentFrame", GetTangentFrame(this));
 		QuadMaterial.renderQueue = Planetoid.RenderQueue;
 		QuadMaterial.SetPass(0);
 
@@ -1090,6 +1091,26 @@ public class Quad : MonoBehaviour
 			middle.z = tempStatic;
 
 		return middle;
+	}
+
+	public Matrix4x4 GetTangentFrame(Quad q)
+	{
+		double tx = q.generationConstants.patchCubeCenter.x;
+		double ty = q.generationConstants.patchCubeCenter.y;
+		double tz = q.generationConstants.patchCubeCenter.z;
+
+		Vector3d pc = new Vector3d(tx, ty, tz);
+
+		Vector3d uz = pc.Normalized();
+		Vector3d ux = (new Vector3d(0, 1, 0)).Cross(uz).Normalized();
+		Vector3d uy = uz.Cross(ux);
+
+		Matrix4x4d worldToTangentFrame = new Matrix4x4d(ux.x, ux.y, ux.z, 0.0,
+														uy.x, uy.y, uy.z, 0.0,
+														uz.x, uz.y, uz.z, 0.0,
+														0.0, 0.0, 0.0, 0.0);
+
+		return worldToTangentFrame.ToMatrix4x4();
 	}
 
 	private void Log(string msg)

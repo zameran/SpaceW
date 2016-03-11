@@ -69,52 +69,31 @@ float3 CubeCoord(QuadGenerationConstants constants, float VerticesPerSide, uint3
 }
 //-----------------------------------------------------------------------------
 
-float3x3 TBN(float3 normal)
+//-----------------------------------------------------------------------------
+// Project the surface gradient (dhdx, dhdy) onto the surface (n, dpdx, dpdy)
+float3 CalculateSurfaceGradient(float3 n, float3 dpdx, float3 dpdy, float dhdx, float dhdy) 
 {
-	float3 n = normal;
-	
-	float3 t; 
-
-	float3 c1 = cross(n, float3(0.0, 0.0, 1.0)); 
-	float3 c2 = cross(n, float3(0.0, 1.0, 0.0)); 
-
-	if(length(c1) > length(c2))
-	{
-		t = c1;	
-	}
-	else
-	{
-		t = c2;	
-	}
-
-	t = normalize(t);
-
-	float3 b = cross(t, n);
-
-	return float3x3(t, b, n);
+	float3 r1 = cross(dpdy, n);
+	float3 r2 = cross(n, dpdx);
+  
+	return (r1 * dhdx + r2 * dhdy) / dot(dpdx, r1);
+}
+ 
+// Move the normal away from the surface normal in the opposite surface gradient direction
+float3 PerturbNormal(float3 normal, float3 dpdx, float3 dpdy, float dhdx, float dhdy) 
+{
+	return normalize(normal - CalculateSurfaceGradient(normal, dpdx, dpdy, dhdx, dhdy));
 }
 
-float3x3 TBN(float3 normal, float3 tc1d, float3 tc2d)
+// Calculate the surface normal using screen-space partial derivatives of the height field
+float3 CalculateSurfaceNormal_HeightMap(float3 position, float3 normal, float height)
 {
-	float3 n = normal;
-	
-	float3 t; 
-
-	float3 c1 = cross(n, tc1d); 
-	float3 c2 = cross(n, tc2d); 
-
-	if(length(c1) > length(c2))
-	{
-		t = c1;	
-	}
-	else
-	{
-		t = c2;	
-	}
-
-	t = normalize(t);
-
-	float3 b = cross(t, n);
-
-	return float3x3(t, b, n);
+	float3 dpdx = ddx(position);
+	float3 dpdy = ddy(position);
+		   
+	float dhdx = ddx(height);
+	float dhdy = ddy(height);
+  
+	return PerturbNormal(normal, dpdx, dpdy, dhdx, dhdy);
 }
+//-----------------------------------------------------------------------------

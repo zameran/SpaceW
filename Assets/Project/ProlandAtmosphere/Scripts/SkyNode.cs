@@ -1,24 +1,15 @@
 ﻿using UnityEngine;
-using System.Collections;
-using System.IO;
 
 namespace Proland
 {
-    /*
-     * Loads the tables required for the atmospheric scattering and sets any uniforms for shaders
-     * that need them. If you create new tables using the PreprocessAtmo.cs script and changed some of  
-     * the settings (like the tables dimensions) you need to make sure the settings match here.
-     * You can adjust some of these settings (mieG, betaR) to change the look of the scattering but
-     * as precomputed tables are used there is a limit to how much the scattering will change.
-     * For large changes you will need to create new table with the settings you want.
-     * NOTE - all scenes must contain a skyNode
-     */
+
     public class SkyNode : Node
     {
-        //The radius of the planet (Rg), radius of the atmosphere (Rt)
-        const float Rg = 6360000.0f;
-        const float Rt = 6420000.0f;
-        const float RL = 6421000.0f;
+        public float AtmosphereHeight = 1.0f;
+
+        private float Rg;
+        private float Rt;
+        private float Rl;
 
         //Dimensions of the tables
         const int TRANSMITTANCE_W = 256;
@@ -31,112 +22,119 @@ namespace Proland
         const int RES_NU = 8;
 
         const float AVERAGE_GROUND_REFLECTANCE = 0.1f;
+
         //Half heights for the atmosphere air density (HR) and particle density (HM)
         //This is the height in km that half the particles are found below
         const float HR = 8.0f;
         const float HM = 1.2f;
+
         //scatter coefficient for mie
         readonly Vector3 BETA_MSca = new Vector3(4e-3f, 4e-3f, 4e-3f);
 
-        public Shader SkyShader;
-        public Shader SkyMapShader;
+        public Shader skyShader;
+        public Shader skyMapShader;
 
-        public Texture SunGlareTexture;
+        public Texture sunGlareTexture;
 
-        Material m_skyMaterial;
-        Material m_skyMapMaterial;
+        Material skyMaterial;
+        Material skyMapMaterial;
 
-        //scatter coefficient for rayliegh
         [SerializeField]
-        Vector3 m_betaR = new Vector3(5.8e-3f, 1.35e-2f, 3.31e-2f);
+        Vector3 betaR = new Vector3(5.8e-3f, 1.35e-2f, 3.31e-2f);
+
         //Asymmetry factor for the mie phase function
         //A higher number meands more light is scattered in the forward direction
         [SerializeField]
-        float m_mieG = 0.85f;
+        float mieG = 0.85f;
 
-        string m_filePath = "/Project/ProlandAtmosphere/Textures/";
+        string texturesPath = "/Project/ProlandAtmosphere/Textures/";
 
-        Mesh m_mesh;
+        public bool drawSkyMap = false;
 
-        RenderTexture m_transmittance, m_inscatter, m_irradiance, m_skyMap;
+        Mesh mesh;
 
-        private int WaitBeforeReloadCount = 0;
+        RenderTexture transmittance, inscatter, irradiance, skyMap;
 
-        // Use this for initialization
+        private int waitBeforeReloadCount = 0;
+
         protected override void Start()
         {
             base.Start();
 
-            m_mesh = MeshFactory.MakePlane(2, 2, MeshFactory.PLANE.XY, false, false, false);
-            m_mesh.bounds = new Bounds(Vector3.zero, new Vector3(1e8f, 1e8f, 1e8f));
-            
+            Rg = m_manager.GetRadius();
+            Rt = (64200f / 63600f) * Rg * AtmosphereHeight;
+            Rl = (64210.0f / 63600f) * Rg;
+
+            mesh = MeshFactory.MakePlane(2, 2, MeshFactory.PLANE.XY, false, false, false);
+            mesh.bounds = new Bounds(Vector3.zero, new Vector3(1e8f, 1e8f, 1e8f));
+
             InitTextures();
 
-            m_skyMaterial = new Material(SkyShader);
-            m_skyMaterial.name = "Sky" + "(Instance)" + Random.Range(float.MinValue, float.MaxValue);
+            skyMaterial = new Material(skyShader);
+            skyMaterial.name = "Sky" + "(Instance)" + Random.Range(float.MinValue, float.MaxValue);
 
-            m_skyMapMaterial = new Material(SkyMapShader);
-            m_skyMapMaterial.name = "SkyMap" + "(Instance)" + Random.Range(float.MinValue, float.MaxValue);
+            skyMapMaterial = new Material(skyMapShader);
+            skyMapMaterial.name = "SkyMap" + "(Instance)" + Random.Range(float.MinValue, float.MaxValue);
 
-            InitUniforms(m_skyMaterial);
-            InitUniforms(m_skyMapMaterial);
+            InitUniforms(skyMaterial);
+            InitUniforms(skyMapMaterial);
         }
 
         public void InitTextures()
         {
             //The sky map is used to create a reflection of the sky for objects that need it (like the ocean)
-            m_skyMap = new RenderTexture(512, 512, 0, RenderTextureFormat.ARGBHalf);
-            m_skyMap.filterMode = FilterMode.Trilinear;
-            m_skyMap.wrapMode = TextureWrapMode.Clamp;
-            m_skyMap.anisoLevel = 9;
-            m_skyMap.useMipMap = true;
+            skyMap = new RenderTexture(512, 512, 0, RenderTextureFormat.ARGBHalf);
+            skyMap.filterMode = FilterMode.Trilinear;
+            skyMap.wrapMode = TextureWrapMode.Clamp;
+            skyMap.anisoLevel = 9;
+            skyMap.useMipMap = true;
             //m_skyMap.mipMapBias = -0.5f;
-            m_skyMap.Create();
+            skyMap.Create();
 
             //Transmittance is responsible for the change in the sun color as it moves
             //The raw file is a 2D array of 32 bit floats with a range of 0 to 1
-            string path = Application.dataPath + m_filePath + "/transmittance.raw";
+            string path = Application.dataPath + texturesPath + "/transmittance.raw";
 
-            m_transmittance = new RenderTexture(TRANSMITTANCE_W, TRANSMITTANCE_H, 0, RenderTextureFormat.ARGBHalf);
-            m_transmittance.wrapMode = TextureWrapMode.Clamp;
-            m_transmittance.filterMode = FilterMode.Bilinear;
-            m_transmittance.enableRandomWrite = true;
-            m_transmittance.Create();
+            transmittance = new RenderTexture(TRANSMITTANCE_W, TRANSMITTANCE_H, 0, RenderTextureFormat.ARGBHalf);
+            transmittance.wrapMode = TextureWrapMode.Clamp;
+            transmittance.filterMode = FilterMode.Bilinear;
+            transmittance.enableRandomWrite = true;
+            transmittance.Create();
 
             ComputeBuffer buffer = new ComputeBuffer(TRANSMITTANCE_W * TRANSMITTANCE_H, sizeof(float) * 3);
-            CBUtility.WriteIntoRenderTexture(m_transmittance, 3, path, buffer, m_manager.GetWriteData());
+            CBUtility.WriteIntoRenderTexture(transmittance, 3, path, buffer, m_manager.GetWriteData());
             buffer.Release();
 
             //Iirradiance is responsible for the change in the sky color as the sun moves
             //The raw file is a 2D array of 32 bit floats with a range of 0 to 1
-            path = Application.dataPath + m_filePath + "/irradiance.raw";
+            path = Application.dataPath + texturesPath + "/irradiance.raw";
 
-            m_irradiance = new RenderTexture(SKY_W, SKY_H, 0, RenderTextureFormat.ARGBHalf);
-            m_irradiance.wrapMode = TextureWrapMode.Clamp;
-            m_irradiance.filterMode = FilterMode.Bilinear;
-            m_irradiance.enableRandomWrite = true;
-            m_irradiance.Create();
+            irradiance = new RenderTexture(SKY_W, SKY_H, 0, RenderTextureFormat.ARGBHalf);
+            irradiance.wrapMode = TextureWrapMode.Clamp;
+            irradiance.filterMode = FilterMode.Bilinear;
+            irradiance.enableRandomWrite = true;
+            irradiance.Create();
 
             buffer = new ComputeBuffer(SKY_W * SKY_H, sizeof(float) * 3);
-            CBUtility.WriteIntoRenderTexture(m_irradiance, 3, path, buffer, m_manager.GetWriteData());
+            CBUtility.WriteIntoRenderTexture(irradiance, 3, path, buffer, m_manager.GetWriteData());
             buffer.Release();
 
             //Inscatter is responsible for the change in the sky color as the sun moves
             //The raw file is a 4D array of 32 bit floats with a range of 0 to 1.589844
             //As there is not such thing as a 4D texture the data is packed into a 3D texture 
             //and the shader manually performs the sample for the 4th dimension
-            path = Application.dataPath + m_filePath + "/inscatter.raw";
+            path = Application.dataPath + texturesPath + "/inscatter.raw";
 
-            m_inscatter = new RenderTexture(RES_MU_S * RES_NU, RES_MU, 0, RenderTextureFormat.ARGBHalf);
-            m_inscatter.volumeDepth = RES_R;
-            m_inscatter.wrapMode = TextureWrapMode.Clamp;
-            m_inscatter.filterMode = FilterMode.Bilinear;
-            m_inscatter.isVolume = true;
-            m_inscatter.enableRandomWrite = true;
-            m_inscatter.Create();
+            inscatter = new RenderTexture(RES_MU_S * RES_NU, RES_MU, 0, RenderTextureFormat.ARGBHalf);
+            inscatter.volumeDepth = RES_R;
+            inscatter.wrapMode = TextureWrapMode.Clamp;
+            inscatter.filterMode = FilterMode.Bilinear;
+            inscatter.isVolume = true;
+            inscatter.enableRandomWrite = true;
+            inscatter.Create();
 
             buffer = new ComputeBuffer(RES_MU_S * RES_NU * RES_MU * RES_R, sizeof(float) * 4);
-            CBUtility.WriteIntoRenderTexture(m_inscatter, 4, path, buffer, m_manager.GetWriteData());
+            CBUtility.WriteIntoRenderTexture(inscatter, 4, path, buffer, m_manager.GetWriteData());
             buffer.Release();
         }
 
@@ -144,75 +142,75 @@ namespace Proland
         {
             base.OnDestroy();
 
-            DestroyImmediate(m_skyMapMaterial);
-            DestroyImmediate(m_skyMaterial);
+            DestroyImmediate(skyMapMaterial);
+            DestroyImmediate(skyMaterial);
 
-            m_transmittance.Release();
-            m_irradiance.Release();
-            m_inscatter.Release();
-            m_skyMap.Release();
+            transmittance.Release();
+            irradiance.Release();
+            inscatter.Release();
+            skyMap.Release();
         }
 
         public void UpdateNode()
         {
-            SetUniforms(m_skyMaterial);
-            SetUniforms(m_skyMapMaterial);
+            Rg = m_manager.GetRadius();
+            Rt = (64200f / 63600f) * Rg * AtmosphereHeight;
+            Rl = (64210.0f / 63600f) * Rg;
 
-            m_manager.SetUniforms(m_skyMaterial);
-            m_skyMaterial.SetMatrix("_Sun_WorldToLocal", m_manager.GetSunNode().GetWorldToLocalRotation());
+            SetUniforms(skyMaterial);
+            SetUniforms(skyMapMaterial);
 
-            Graphics.DrawMesh(m_mesh, Matrix4x4.identity, m_skyMaterial, 0, Camera.main);
+            m_manager.SetUniforms(skyMaterial);
+            skyMaterial.SetMatrix("_Sun_WorldToLocal", m_manager.GetSunNode().GetWorldToLocalRotation());
 
-            if (!m_inscatter.IsCreated() || !m_transmittance.IsCreated() || !m_irradiance.IsCreated())
+            Graphics.DrawMesh(mesh, Matrix4x4.identity, skyMaterial, 0, Camera.main);
+
+            if (!inscatter.IsCreated() || !transmittance.IsCreated() || !irradiance.IsCreated())
             {
-                WaitBeforeReloadCount++;
+                waitBeforeReloadCount++;
 
-                if (WaitBeforeReloadCount >= 1)
+                if (waitBeforeReloadCount >= 1)
                 {
-                    m_inscatter.Release();
-                    m_transmittance.Release();
-                    m_irradiance.Release();
+                    inscatter.Release();
+                    transmittance.Release();
+                    irradiance.Release();
 
                     InitTextures();
 
-                    WaitBeforeReloadCount = 0;
+                    waitBeforeReloadCount = 0;
                 }
             }
 
-            //Graphics.DrawMeshNow(m_mesh, transform.localToWorldMatrix);
-
-            //Update the sky map if...
-            //The sun has moved
-            //Or if this is first frame
-            //And if this is not a deformed terrain (ie a planet). Planet sky map not supported
-            //if ((m_manager.GetSunNode().GetHasMoved()) || Time.frameCount == 1)
-            //    Graphics.Blit(null, m_skyMap, m_skyMapMaterial);
+            if (drawSkyMap && ((m_manager.GetSunNode().GetHasMoved()) || Time.frameCount == 1))
+                Graphics.Blit(null, skyMap, skyMapMaterial);
         }
 
         public void SetUniforms(Material mat)
         {
-            //Sets uniforms that this or other gameobjects may need
             if (mat == null) return;
 
-            mat.SetVector("betaR", m_betaR / 1000.0f);
-            mat.SetFloat("mieG", Mathf.Clamp(m_mieG, 0.0f, 0.99f));
-            mat.SetTexture("_Sky_Transmittance", m_transmittance);
-            mat.SetTexture("_Sky_Inscatter", m_inscatter);
-            mat.SetTexture("_Sky_Irradiance", m_irradiance);
-            mat.SetTexture("_Sky_Map", m_skyMap);
+            mat.SetFloat("scale", Rg / m_manager.GetRadius());
+            mat.SetFloat("Rg", Rg);
+            mat.SetFloat("Rt", Rt);
+            mat.SetFloat("RL", Rl);
+            mat.SetVector("betaR", betaR / 1000.0f);
+            mat.SetFloat("mieG", Mathf.Clamp(mieG, 0.0f, 0.99f));
+            mat.SetTexture("_Sky_Transmittance", transmittance);
+            mat.SetTexture("_Sky_Inscatter", inscatter);
+            mat.SetTexture("_Sky_Irradiance", irradiance);
+            mat.SetTexture("_Sky_Map", skyMap);
 
             m_manager.GetSunNode().SetUniforms(mat);
         }
 
         public void InitUniforms(Material mat)
         {
-            //Init uniforms that this or other gameobjects may need
             if (mat == null) return;
 
             mat.SetFloat("scale", Rg / m_manager.GetRadius());
             mat.SetFloat("Rg", Rg);
             mat.SetFloat("Rt", Rt);
-            mat.SetFloat("RL", RL);
+            mat.SetFloat("RL", Rl);
             mat.SetFloat("TRANSMITTANCE_W", TRANSMITTANCE_W);
             mat.SetFloat("TRANSMITTANCE_H", TRANSMITTANCE_H);
             mat.SetFloat("SKY_W", SKY_W);
@@ -226,12 +224,13 @@ namespace Proland
             mat.SetFloat("HM", HM * 1000.0f);
             mat.SetVector("betaMSca", BETA_MSca / 1000.0f);
             mat.SetVector("betaMEx", (BETA_MSca / 1000.0f) / 0.9f);
-            mat.SetTexture("_Sun_Glare", SunGlareTexture);
+            mat.SetTexture("_Sun_Glare", sunGlareTexture);
         }
 
         void OnGUI()
         {
-            //GUI.DrawTexture(new Rect(0,0,512, 512), m_skyMap);
+            if (drawSkyMap)
+                GUI.DrawTexture(new Rect(0, 0, 512, 512), skyMap);
         }
     }
 }

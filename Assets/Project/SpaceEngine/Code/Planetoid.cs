@@ -53,7 +53,7 @@ public class Planetoid : MonoBehaviour
 	private void Awake()
 	{
 		Origin = transform.position;
-		if (manager != null) manager.m_origin = Origin;
+		if (manager != null) manager.origin = Origin;
 	}
 
 	private void Start()
@@ -78,7 +78,7 @@ public class Planetoid : MonoBehaviour
 		CheckCutoff();
 
 		Origin = transform.position;
-		if (manager != null) manager.m_origin = Origin;
+		if (manager != null) manager.origin = Origin;
 	}
 
 	private void OnGUI()

@@ -17,10 +17,10 @@
 //-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
-// noise engine technique: (Works only with NOISE_ENGINE_I)
+// noise engine technique:
 // 0 - space engine.
 // 1 - own.
-#define COLORING_TECHNIQUE 1
+#define COLORING_TECHNIQUE 0
 //-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
@@ -3542,7 +3542,8 @@ float4 ColorMapPlanet(float3 ppoint, float height, float slope)
 	float4 slopeColor = float4(0.95, 0.75, 0.25, 0.0) * (1 - slope);
 	float4 lookupColor = tex2Dlod(MaterialTable, float4(height, slope - height, 0, 0));
 
-	surf.color = lookupColor + slopeColor;
+	//surf.color = lookupColor + slopeColor;
+	surf.color = GetSurfaceColor(height, slope, lookupColor.r).color;
 
 	return surf.color;
 }
