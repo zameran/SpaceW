@@ -30,7 +30,7 @@ namespace Proland
         SkyNode m_skyNode;
         SunNode m_sunNode;
 
-        Vector3 m_origin;
+        public Vector3 m_origin;
 
         public float GetRadius()
         {
@@ -77,14 +77,12 @@ namespace Proland
             mat.SetMatrix("_Globals_ScreenToCamera", ruleCamera.GetScreenToCamera());
             mat.SetVector("_Globals_WorldCameraPos", ruleCamera.transform.position);
 
-            mat.SetVector("_Globals_Origin", m_origin);
+            mat.SetVector("_Globals_Origin", -m_origin);
             mat.SetFloat("_Exposure", m_HDRExposure);
         }
 
         void Update()
         {
-            m_origin = this.transform.position;
-
             m_sunNode.UpdateNode();
             m_skyNode.UpdateNode();
         }

@@ -24,12 +24,14 @@ float NoiseFunction(float3 coord)
 	#ifdef defaultNoise
 	float noise = Fbm(p + Randomize, 2);
 	#else
-	float noise = HeightMapAsteroid(p);
+	//float noise = HeightMapAsteroid(p);
 	//float noise = HeightMapTerra(p);
-	//float noise = HeightMapPlanet(p);
+	float noise = HeightMapPlanet(p);
 	#endif
-	
-	return noise;
+
+	float normalized = (noise + 1.0) / 2;
+
+	return normalized;
 }
 
 float4 ColorFunction(float3 coord, float height, float slope)

@@ -1,11 +1,10 @@
 ﻿using UnityEngine;
 
-using System.Collections;
 using System.Collections.Generic;
 
 public class Planetoid : MonoBehaviour
 {
-    public Proland.Manager manager;
+	public Proland.Manager manager;
 
 	public bool DrawWireframe = false;
 
@@ -24,20 +23,20 @@ public class Planetoid : MonoBehaviour
 	public Shader ColorShader;
 	public ComputeShader CoreShader;
 
-    public int RenderQueue = 2000;
+	public int RenderQueue = 2000;
 
 	public int DispatchSkipFramesCount = 8;
 
-    public int LODDistanceMultiplier = 1;
+	public int LODDistanceMultiplier = 1;
 	public int LODMaxLevel = 8;
 	public int[] LODDistances = new int[11] { 2048, 1024, 512, 256, 128, 64, 32, 16, 8, 4, 2 };
 
 	public Mesh TopPrototypeMesh;
-    public Mesh BottomPrototypeMesh;
-    public Mesh LeftPrototypeMesh;
-    public Mesh RightPrototypeMesh;
-    public Mesh FrontPrototypeMesh;
-    public Mesh BackPrototypeMesh;
+	public Mesh BottomPrototypeMesh;
+	public Mesh LeftPrototypeMesh;
+	public Mesh RightPrototypeMesh;
+	public Mesh FrontPrototypeMesh;
+	public Mesh BackPrototypeMesh;
 
 	public QuadStorage Cache = null;
 	public NoiseParametersSetter NPS = null;
@@ -45,16 +44,17 @@ public class Planetoid : MonoBehaviour
 	public bool UseUnityCulling = true;
 	public bool UseLOD = true;
 	public bool RenderPerUpdate = false;
-    public bool OneSplittingQuad = true;
+	public bool OneSplittingQuad = true;
 
 	public float TerrainMaxHeight = 64.0f;
 
-    public Vector3 Origin = Vector3.zero;
+	public Vector3 Origin = Vector3.zero;
 
-    private void Awake()
-    {
-        Origin = transform.position;
-    }
+	private void Awake()
+	{
+		Origin = transform.position;
+		if (manager != null) manager.m_origin = Origin;
+	}
 
 	private void Start()
 	{
@@ -77,7 +77,8 @@ public class Planetoid : MonoBehaviour
 
 		CheckCutoff();
 
-        Origin = transform.position;
+		Origin = transform.position;
+		if (manager != null) manager.m_origin = Origin;
 	}
 
 	private void OnGUI()
@@ -102,68 +103,68 @@ public class Planetoid : MonoBehaviour
 		Quads.Clear();
 		MainQuads.Clear();
 
-        if (TopPrototypeMesh != null) DestroyImmediate(TopPrototypeMesh);
-        if (BottomPrototypeMesh != null) DestroyImmediate(BottomPrototypeMesh);
-        if (LeftPrototypeMesh != null) DestroyImmediate(LeftPrototypeMesh);
-        if (RightPrototypeMesh != null) DestroyImmediate(RightPrototypeMesh);
-        if (FrontPrototypeMesh != null) DestroyImmediate(FrontPrototypeMesh);
-        if (BackPrototypeMesh != null) DestroyImmediate(BackPrototypeMesh);
+		if (TopPrototypeMesh != null) DestroyImmediate(TopPrototypeMesh);
+		if (BottomPrototypeMesh != null) DestroyImmediate(BottomPrototypeMesh);
+		if (LeftPrototypeMesh != null) DestroyImmediate(LeftPrototypeMesh);
+		if (RightPrototypeMesh != null) DestroyImmediate(RightPrototypeMesh);
+		if (FrontPrototypeMesh != null) DestroyImmediate(FrontPrototypeMesh);
+		if (BackPrototypeMesh != null) DestroyImmediate(BackPrototypeMesh);
 	}
 
-    [ContextMenu("SetupMeshes")]
-    public void SetupMeshes()
-    {
-        if (TopPrototypeMesh != null) DestroyImmediate(TopPrototypeMesh);
-        if (BottomPrototypeMesh != null) DestroyImmediate(BottomPrototypeMesh);
-        if (LeftPrototypeMesh != null) DestroyImmediate(LeftPrototypeMesh);
-        if (RightPrototypeMesh != null) DestroyImmediate(RightPrototypeMesh);
-        if (FrontPrototypeMesh != null) DestroyImmediate(FrontPrototypeMesh);
-        if (BackPrototypeMesh != null) DestroyImmediate(BackPrototypeMesh);
+	[ContextMenu("SetupMeshes")]
+	public void SetupMeshes()
+	{
+		if (TopPrototypeMesh != null) DestroyImmediate(TopPrototypeMesh);
+		if (BottomPrototypeMesh != null) DestroyImmediate(BottomPrototypeMesh);
+		if (LeftPrototypeMesh != null) DestroyImmediate(LeftPrototypeMesh);
+		if (RightPrototypeMesh != null) DestroyImmediate(RightPrototypeMesh);
+		if (FrontPrototypeMesh != null) DestroyImmediate(FrontPrototypeMesh);
+		if (BackPrototypeMesh != null) DestroyImmediate(BackPrototypeMesh);
 
-        //bool uv_01 = true;
-        bool invert = false;
+		//bool uv_01 = true;
+		bool invert = false;
 
-        TopPrototypeMesh = MeshFactory.SetupQuadMesh(QS.nVertsPerEdge, MeshFactory.PLANE.XZ, !invert); //MeshFactory.MakePlane(QS.nVertsPerEdge, QS.nVertsPerEdge, MeshFactory.PLANE.XZ, uv_01, false, !invert);
+		TopPrototypeMesh = MeshFactory.SetupQuadMesh(QS.nVertsPerEdge, MeshFactory.PLANE.XZ, !invert); //MeshFactory.MakePlane(QS.nVertsPerEdge, QS.nVertsPerEdge, MeshFactory.PLANE.XZ, uv_01, false, !invert);
 
-        BottomPrototypeMesh = MeshFactory.SetupQuadMesh(QS.nVertsPerEdge, MeshFactory.PLANE.XZ, invert); //MeshFactory.MakePlane(QS.nVertsPerEdge, QS.nVertsPerEdge, MeshFactory.PLANE.XZ, uv_01, false, invert);
+		BottomPrototypeMesh = MeshFactory.SetupQuadMesh(QS.nVertsPerEdge, MeshFactory.PLANE.XZ, invert); //MeshFactory.MakePlane(QS.nVertsPerEdge, QS.nVertsPerEdge, MeshFactory.PLANE.XZ, uv_01, false, invert);
 
-        LeftPrototypeMesh = MeshFactory.SetupQuadMesh(QS.nVertsPerEdge, MeshFactory.PLANE.YZ, !invert); //MeshFactory.MakePlane(QS.nVertsPerEdge, QS.nVertsPerEdge, MeshFactory.PLANE.YZ, uv_01, false, !invert);
+		LeftPrototypeMesh = MeshFactory.SetupQuadMesh(QS.nVertsPerEdge, MeshFactory.PLANE.YZ, !invert); //MeshFactory.MakePlane(QS.nVertsPerEdge, QS.nVertsPerEdge, MeshFactory.PLANE.YZ, uv_01, false, !invert);
 
-        RightPrototypeMesh = MeshFactory.SetupQuadMesh(QS.nVertsPerEdge, MeshFactory.PLANE.YZ, invert); //MeshFactory.MakePlane(QS.nVertsPerEdge, QS.nVertsPerEdge, MeshFactory.PLANE.YZ, uv_01, false, invert);
+		RightPrototypeMesh = MeshFactory.SetupQuadMesh(QS.nVertsPerEdge, MeshFactory.PLANE.YZ, invert); //MeshFactory.MakePlane(QS.nVertsPerEdge, QS.nVertsPerEdge, MeshFactory.PLANE.YZ, uv_01, false, invert);
 
-        FrontPrototypeMesh = MeshFactory.SetupQuadMesh(QS.nVertsPerEdge, MeshFactory.PLANE.XY, !invert); //MeshFactory.MakePlane(QS.nVertsPerEdge, QS.nVertsPerEdge, MeshFactory.PLANE.XY, uv_01, false, !invert);
+		FrontPrototypeMesh = MeshFactory.SetupQuadMesh(QS.nVertsPerEdge, MeshFactory.PLANE.XY, !invert); //MeshFactory.MakePlane(QS.nVertsPerEdge, QS.nVertsPerEdge, MeshFactory.PLANE.XY, uv_01, false, !invert);
 
-        BackPrototypeMesh = MeshFactory.SetupQuadMesh(QS.nVertsPerEdge, MeshFactory.PLANE.XY, invert); //MeshFactory.MakePlane(QS.nVertsPerEdge, QS.nVertsPerEdge, MeshFactory.PLANE.XY, uv_01, false, invert);
-    }
+		BackPrototypeMesh = MeshFactory.SetupQuadMesh(QS.nVertsPerEdge, MeshFactory.PLANE.XY, invert); //MeshFactory.MakePlane(QS.nVertsPerEdge, QS.nVertsPerEdge, MeshFactory.PLANE.XY, uv_01, false, invert);
+	}
 
-    public Mesh GetMesh(QuadPostion position)
-    {
-        Mesh temp = null;
+	public Mesh GetMesh(QuadPostion position)
+	{
+		Mesh temp = null;
 
-        switch(position)
-        {
-            case QuadPostion.Top:
-                temp = TopPrototypeMesh;
-                break;
-            case QuadPostion.Bottom:
-                temp = BottomPrototypeMesh;
-                break;
-            case QuadPostion.Left:
-                temp = LeftPrototypeMesh;
-                break;
-            case QuadPostion.Right:
-                temp = RightPrototypeMesh;
-                break;
-            case QuadPostion.Front:
-                temp = FrontPrototypeMesh;
-                break;
-            case QuadPostion.Back:
-                temp = BackPrototypeMesh;
-                break;
-        }
+		switch(position)
+		{
+			case QuadPostion.Top:
+				temp = TopPrototypeMesh;
+				break;
+			case QuadPostion.Bottom:
+				temp = BottomPrototypeMesh;
+				break;
+			case QuadPostion.Left:
+				temp = LeftPrototypeMesh;
+				break;
+			case QuadPostion.Right:
+				temp = RightPrototypeMesh;
+				break;
+			case QuadPostion.Front:
+				temp = FrontPrototypeMesh;
+				break;
+			case QuadPostion.Back:
+				temp = BackPrototypeMesh;
+				break;
+		}
 
-        return temp;
-    }
+		return temp;
+	}
 
 	[ContextMenu("SetupQuads")]
 	public void SetupQuads()
@@ -171,7 +172,7 @@ public class Planetoid : MonoBehaviour
 		if (Quads.Count > 0)
 			return;
 
-        SetupMeshes();
+		SetupMeshes();
 
 		SetupMainQuad(QuadPostion.Top);
 		SetupMainQuad(QuadPostion.Bottom);
@@ -198,7 +199,7 @@ public class Planetoid : MonoBehaviour
 		go.transform.rotation = Quaternion.identity;
 		go.transform.parent = this.transform;
 
-        Mesh mesh = GetMesh(quadPosition);
+		Mesh mesh = GetMesh(quadPosition);
 		mesh.bounds = new Bounds(Vector3.zero, new Vector3(PlanetRadius * 2, PlanetRadius * 2, PlanetRadius * 2));
 
 		Material material = new Material(ColorShader);
@@ -235,7 +236,7 @@ public class Planetoid : MonoBehaviour
 		go.transform.position = Vector3.zero;
 		go.transform.rotation = Quaternion.identity;
 
-        Mesh mesh = GetMesh(quadPosition);
+		Mesh mesh = GetMesh(quadPosition);
 		mesh.bounds = new Bounds(Vector3.zero, new Vector3(PlanetRadius * 2, PlanetRadius * 2, PlanetRadius * 2));
 
 		Material material = new Material(ColorShader);
