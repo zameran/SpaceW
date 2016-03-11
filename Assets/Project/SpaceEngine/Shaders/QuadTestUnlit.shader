@@ -92,36 +92,17 @@
 				//v.tangent.xyz += position.xyz;
 				//v.normal.xyz += position.xyz;
 
-				//TANGENT_SPACE_ROTATION;
-				//v.tangent.xyz = mul(v.tangent.xyz, rotation);
-				//v.normal.xyz = mul(v.normal.xyz, rotation);
+				TANGENT_SPACE_ROTATION;
+				v.tangent.xyz = mul(v.tangent.xyz, rotation);
+				v.normal.xyz = mul(v.normal.xyz, rotation);
 
-				float4 terrainColor = tex2Dlod(_HeightTexture, float4(v.texcoord.xy, 0, 0));
-				float3 WCP = _Globals_WorldCameraPos;
-				float3 WSD = _Sun_WorldSunDir;
-    			float3 p = v.vertex.xyz;
-				float3 fn;
-				//fn.xy = normal.xy;
-				fn.xy = -normal.xy; //invert z to make it work!		
-				//fn.z = sqrt(max(0.0, 1.0 - dot(fn.xy, fn.xy)));
-   				fn.z = sqrt(max(0.0, -1.0 + dot(fn.xy, fn.xy))); //invert z to make it work!		
-				fn = float3(0, 0, 0); //disable normal mapping... bruuuutaal!
-    			float4 reflectance = terrainColor;
-    			reflectance.rgb = tan(1.37 * reflectance.rgb) / tan(1.37); //RGB to reflectance
-    			float3 sunL;
-			    float3 skyE;
-			    //SunRadianceAndSkyIrradiance(p, fn, WSD, sunL, skyE);
-				SunRadianceAndSkyIrradiance(p, p / 256, WSD, sunL, skyE); //disable normal mapping for irradiance, but keep color in bueaty...
-		    	float cTheta = dot(fn, WSD); // diffuse ground color
-			    float3 groundColor = 1.5 * reflectance.rgb * (sunL * max(cTheta, 0.0) + skyE) / 3.14159265;
-			    float3 extinction;
-			    float3 inscatter = InScattering(WCP, p, WSD, extinction, 0.0);
-			    float3 finalColor = hdr(groundColor * extinction + inscatter);
+				float4 terrainColor = tex2Dlod(_HeightTexture, v.texcoord);
+				float3 scatteringColor = hdr(GroundFinalColor(terrainColor, v.vertex.xyz, v.normal.xyz));
 
 				v2fg o;
 
 				o.color = lerp(float4(noise, noise, noise, 1), terrainColor, 1);	
-				o.scatter = float4(finalColor, 1);
+				o.scatter = float4(scatteringColor, 1);
 				o.uv = v.texcoord;
 				o.uv1 = v.texcoord1;
 				o.uv2 = v.texcoord2;

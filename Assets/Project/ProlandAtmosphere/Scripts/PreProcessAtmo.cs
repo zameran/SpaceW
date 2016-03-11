@@ -48,9 +48,13 @@ namespace Proland
 
         //You can change these
         //The radius of the planet (Rg), radius of the atmosphere (Rt)
-        const float Rg = 6360.0f;
-        const float Rt = 6420.0f;
-        const float RL = 6421.0f;
+        public float Rg = 6360.0f;
+        public float Rt = 6420.0f;
+        public float RL = 6421.0f;
+        //public float Rg = 6360.0f; // default;
+        //public float Rt = 6420.0f; // default;
+        //public float RL = 6421.0f; // default;
+
         //Dimensions of the tables
         const int TRANSMITTANCE_W = 256;
         const int TRANSMITTANCE_H = 64;
@@ -60,24 +64,32 @@ namespace Proland
         const int RES_MU = 128;
         const int RES_MU_S = 32;
         const int RES_NU = 8;
+
         //Physical settings, Mie and Rayliegh values
         const float AVERAGE_GROUND_REFLECTANCE = 0.1f;
-        readonly Vector4 BETA_R = new Vector4(5.8e-3f, 1.35e-2f, 3.31e-2f, 0.0f);
-        readonly Vector4 BETA_MSca = new Vector4(4e-6f, 4e-6f, 4e-6f, 0.0f);
+        public Vector4 BETA_R = new Vector4(5.8e-3f, 1.35e-2f, 3.31e-2f, 0.0f);
+        public Vector4 BETA_MSca = new Vector4(4e-6f, 4e-6f, 4e-6f, 0.0f);
+        //public Vector4 BETA_R = new Vector4(5.8e-3f, 1.35e-2f, 3.31e-2f, 0.0f); // default;
+        //public Vector4 BETA_MSca = new Vector4(4e-6f, 4e-6f, 4e-6f, 0.0f); // default;
+
         //Asymmetry factor for the mie phase function
         //A higher number meands more light is scattered in the forward direction
-        const float MIE_G = 0.8f;
+        public float MIE_G = 0.8f;
+        //public float MIE_G = 0.8f; // default;
+
         //Half heights for the atmosphere air density (HR) and particle density (HM)
         //This is the height in km that half the particles are found below
-        const float HR = 8.0f;
-        const float HM = 1.2f;
+        public float HR = 8.0f;
+        public float HM = 1.2f;
+        //public float HR = 8.0f; // default;
+        //public float HM = 1.2f; // default;
 
         RenderTexture m_transmittanceT;
         RenderTexture m_deltaET, m_deltaSRT, m_deltaSMT, m_deltaJT;
         RenderTexture[] m_irradianceT, m_inscatterT;
 
         //This is where the tables will be saved to
-        public string m_filePath = "/Proland/Textures/Atmo";
+        public string m_filePath = "/Project/ProlandAtmosphere/Textures/";
 
         public ComputeShader m_copyInscatter1, m_copyInscatterN, m_copyIrradiance;
         public ComputeShader m_inscatter1, m_inscatterN, m_inscatterS;
