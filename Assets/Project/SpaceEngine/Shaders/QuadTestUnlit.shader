@@ -87,7 +87,7 @@
 				//-1.0 + dot(fn.xy, fn.xy) - inverted.
 				fn.z = sqrt(max(0.0, -1.0 + dot(fn.xy, fn.xy)));
 
-				fn = float3(0, 0, 0); //disable normal mapping... bruuuutaal!
+				//fn = float3(0, 0, 0); //disable normal mapping... bruuuutaal!
 
 				float4 reflectance = RGB2Reflectance(terrainColor);
 
@@ -97,7 +97,7 @@
 				//SunRadianceAndSkyIrradiance(p, fn, WSD, sunL, skyE); - default.
 				//SunRadianceAndSkyIrradiance(p, p / 256, WSD, sunL, skyE); - disabled normal mapping for irradiance, but keeping color in bueaty...
 
-				SunRadianceAndSkyIrradiance(p, p / 256, WSD, sunL, skyE);
+				SunRadianceAndSkyIrradiance(p, fn, WSD, sunL, skyE);
 
 				float cTheta = dot(fn, WSD); // diffuse ground color
 

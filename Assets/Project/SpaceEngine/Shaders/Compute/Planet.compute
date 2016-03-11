@@ -17,9 +17,14 @@ RWStructuredBuffer<OutputStruct> patchPreOutput;
 RWStructuredBuffer<OutputStruct> patchOutput;
 RWStructuredBuffer<OutputStruct> patchPreOutputSub;
 
+float3 ScaledCoordinate(float3 coord)
+{
+	return 0.0001 * coord;
+}
+
 float NoiseFunction(float3 coord)
 {
-	float3 p = 0.001 * coord;
+	float3 p = ScaledCoordinate(coord);
 	
 	#ifdef defaultNoise
 	float noise = Fbm(p + Randomize, 2);
@@ -36,7 +41,7 @@ float NoiseFunction(float3 coord)
 
 float4 ColorFunction(float3 coord, float height, float slope)
 {
-	float3 p = 0.001 * coord;
+	float3 p = ScaledCoordinate(coord);
 
 	#ifdef defaultNoise
 	float4 color = float4(1.0, 1.0, 1.0, 1.0);

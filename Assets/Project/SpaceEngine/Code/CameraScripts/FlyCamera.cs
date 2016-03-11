@@ -42,36 +42,24 @@ public class FlyCamera : MonoBehaviour
             if (planetoidGameObject != null)
                 planetoid = planetoidGameObject.GetComponent<Planetoid>();
 
+        if (planetoidGameObject != null)
+        {
+            distanceToPlanetCore = Vector3.Distance(transform.position, planetoidGameObject.transform.position);
+        }
+
         nearClipPlaneCache = cameraComponent.nearClipPlane;
         farClipPlaneCache = cameraComponent.farClipPlane;
 
         Vector3 angles = transform.eulerAngles;
         x = angles.y;
         y = angles.x;
+
+        UpdateClipPlanes();
     }
 
     void FixedUpdate()
     {
-        if (dynamicClipPlanes)
-        {
-            if (planetoid != null)
-            {
-                float h = (distanceToPlanetCore - planetoid.PlanetRadius);
-
-                cameraComponent.nearClipPlane = Mathf.Clamp(0.1f * h, 0.01f, 1000.0f);
-                cameraComponent.farClipPlane = Mathf.Clamp(1e6f * h, 1000.0f, 1e10f);
-            }
-            else
-            {
-                cameraComponent.nearClipPlane = nearClipPlaneCache;
-                cameraComponent.farClipPlane = farClipPlaneCache;
-            }
-        }
-        else
-        {
-            cameraComponent.nearClipPlane = nearClipPlaneCache;
-            cameraComponent.farClipPlane = farClipPlaneCache;
-        }
+        UpdateClipPlanes();
 
         if (Input.GetMouseButton(0))
         {
@@ -155,6 +143,30 @@ public class FlyCamera : MonoBehaviour
         speed = Mathf.Clamp(speed, 1, 100);
 
         transform.Translate(velocity * currentSpeed);
+    }
+
+    public void UpdateClipPlanes()
+    {
+        if (dynamicClipPlanes)
+        {
+            if (planetoid != null)
+            {
+                float h = (distanceToPlanetCore - planetoid.PlanetRadius);
+
+                cameraComponent.nearClipPlane = Mathf.Clamp(0.1f * h, 0.01f, 1000.0f);
+                cameraComponent.farClipPlane = Mathf.Clamp(1e6f * h, 1000.0f, 1e10f);
+            }
+            else
+            {
+                cameraComponent.nearClipPlane = nearClipPlaneCache;
+                cameraComponent.farClipPlane = farClipPlaneCache;
+            }
+        }
+        else
+        {
+            cameraComponent.nearClipPlane = nearClipPlaneCache;
+            cameraComponent.farClipPlane = farClipPlaneCache;
+        }
     }
 
     public float ClampAngle(float angle, float min, float max)
