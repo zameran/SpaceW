@@ -38,11 +38,14 @@ namespace Proland
         //scatter coefficient for mie
         readonly Vector3 BETA_MSca = new Vector3(4e-3f, 4e-3f, 4e-3f);
 
-        [SerializeField]
-        Material m_skyMaterial;
+        public Shader SkyShader;
+        public Shader SkyMapShader;
 
-        [SerializeField]
+        public Texture SunGlareTexture;
+
+        Material m_skyMaterial;
         Material m_skyMapMaterial;
+
         //scatter coefficient for rayliegh
         [SerializeField]
         Vector3 m_betaR = new Vector3(5.8e-3f, 1.35e-2f, 3.31e-2f);
@@ -55,7 +58,7 @@ namespace Proland
 
         Mesh m_mesh;
 
-        public RenderTexture m_transmittance, m_inscatter, m_irradiance, m_skyMap;
+        RenderTexture m_transmittance, m_inscatter, m_irradiance, m_skyMap;
 
         private int WaitBeforeReloadCount = 0;
 
@@ -68,6 +71,12 @@ namespace Proland
             m_mesh.bounds = new Bounds(Vector3.zero, new Vector3(1e8f, 1e8f, 1e8f));
             
             InitTextures();
+
+            m_skyMaterial = new Material(SkyShader);
+            m_skyMaterial.name = "Sky" + "(Instance)" + Random.Range(float.MinValue, float.MaxValue);
+
+            m_skyMapMaterial = new Material(SkyMapShader);
+            m_skyMapMaterial.name = "SkyMap" + "(Instance)" + Random.Range(float.MinValue, float.MaxValue);
 
             InitUniforms(m_skyMaterial);
             InitUniforms(m_skyMapMaterial);
@@ -134,6 +143,9 @@ namespace Proland
         protected override void OnDestroy()
         {
             base.OnDestroy();
+
+            DestroyImmediate(m_skyMapMaterial);
+            DestroyImmediate(m_skyMaterial);
 
             m_transmittance.Release();
             m_irradiance.Release();
@@ -214,7 +226,7 @@ namespace Proland
             mat.SetFloat("HM", HM * 1000.0f);
             mat.SetVector("betaMSca", BETA_MSca / 1000.0f);
             mat.SetVector("betaMEx", (BETA_MSca / 1000.0f) / 0.9f);
-
+            mat.SetTexture("_Sun_Glare", SunGlareTexture);
         }
 
         void OnGUI()
