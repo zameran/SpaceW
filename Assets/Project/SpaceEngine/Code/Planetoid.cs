@@ -49,6 +49,13 @@ public class Planetoid : MonoBehaviour
 
 	public float TerrainMaxHeight = 64.0f;
 
+    public Vector3 Origin = Vector3.zero;
+
+    private void Awake()
+    {
+        Origin = transform.position;
+    }
+
 	private void Start()
 	{
 		ThreadScheduler.Initialize();
@@ -69,6 +76,8 @@ public class Planetoid : MonoBehaviour
 		}
 
 		CheckCutoff();
+
+        Origin = transform.position;
 	}
 
 	private void OnGUI()
@@ -125,8 +134,6 @@ public class Planetoid : MonoBehaviour
         FrontPrototypeMesh = MeshFactory.SetupQuadMesh(QS.nVertsPerEdge, MeshFactory.PLANE.XY, !invert); //MeshFactory.MakePlane(QS.nVertsPerEdge, QS.nVertsPerEdge, MeshFactory.PLANE.XY, uv_01, false, !invert);
 
         BackPrototypeMesh = MeshFactory.SetupQuadMesh(QS.nVertsPerEdge, MeshFactory.PLANE.XY, invert); //MeshFactory.MakePlane(QS.nVertsPerEdge, QS.nVertsPerEdge, MeshFactory.PLANE.XY, uv_01, false, invert);
-
-        //Debug.Log("Meshes Created!");
     }
 
     public Mesh GetMesh(QuadPostion position)
@@ -195,7 +202,7 @@ public class Planetoid : MonoBehaviour
 		mesh.bounds = new Bounds(Vector3.zero, new Vector3(PlanetRadius * 2, PlanetRadius * 2, PlanetRadius * 2));
 
 		Material material = new Material(ColorShader);
-		material.name += "_" + quadPosition.ToString() + "(Instance)";
+		material.name += "_" + quadPosition.ToString() + "(Instance)" + "_" + Random.Range(float.MinValue, float.MaxValue);
 
 		Quad quadComponent = go.AddComponent<Quad>();
 		quadComponent.CoreShader = CoreShader;
@@ -232,7 +239,7 @@ public class Planetoid : MonoBehaviour
 		mesh.bounds = new Bounds(Vector3.zero, new Vector3(PlanetRadius * 2, PlanetRadius * 2, PlanetRadius * 2));
 
 		Material material = new Material(ColorShader);
-		material.name += "_" + quadPosition.ToString() + "(Instance)";
+		material.name += "_" + quadPosition.ToString() + "(Instance)" + "_" + Random.Range(float.MinValue, float.MaxValue);
 
 		Quad quadComponent = go.AddComponent<Quad>();
 		quadComponent.CoreShader = CoreShader;

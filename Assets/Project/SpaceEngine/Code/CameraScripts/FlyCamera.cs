@@ -9,6 +9,7 @@ public class FlyCamera : MonoBehaviour
     public float alignDistance = 1024.0f;
 
     public Planetoid planetoid;
+    public GameObject planetoidGameObject;
 
     private float currentSpeed;
     private float zRotation = 0;
@@ -26,7 +27,6 @@ public class FlyCamera : MonoBehaviour
 
     private float x;
     private float y;
-    private float z;
 
     void Start()
     {
@@ -37,6 +37,10 @@ public class FlyCamera : MonoBehaviour
     {
         if (cameraComponent == null)
             cameraComponent = this.GetComponent<Camera>();
+
+        if (planetoid == null)
+            if (planetoidGameObject != null)
+                planetoid = planetoidGameObject.GetComponent<Planetoid>();
 
         nearClipPlaneCache = cameraComponent.nearClipPlane;
         farClipPlaneCache = cameraComponent.farClipPlane;
@@ -69,23 +73,10 @@ public class FlyCamera : MonoBehaviour
             cameraComponent.farClipPlane = farClipPlaneCache;
         }
 
-        if (Input.GetKey(KeyCode.E))
-        {
-            zRotation -= 1 * Time.deltaTime;
-        }
-        else if (Input.GetKey(KeyCode.Q))
-        {
-            zRotation += 1 * Time.deltaTime;
-        }
-        else
-        {
-            zRotation = Mathf.Lerp(zRotation, 0, Time.deltaTime * 2);
-        }
-
-        zRotation = Mathf.Clamp(zRotation, -100, 100);
-
         if (Input.GetMouseButton(0))
         {
+            zRotation = 0;
+
             Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
 
             targetRotation = Quaternion.LookRotation((ray.origin + ray.direction * 10f) - transform.position, transform.up);
@@ -97,28 +88,44 @@ public class FlyCamera : MonoBehaviour
         }
         else if (Input.GetMouseButton(1))
         {
+            zRotation = 0;
+
             x += (Input.GetAxis("Mouse X") * 60.0f * 0.02f);
             y -= (Input.GetAxis("Mouse Y") * 30.0f * 0.02f);
-            z = zRotation;
 
-            if (!aligned)
-                RotateAround(x, y, z, new Vector3(0, 0, -distanceToPlanetCore));
+            if (planetoidGameObject != null && !aligned)
+                RotateAround(x, y, zRotation, new Vector3(0, 0, -distanceToPlanetCore));
         }
         else
         {
+            if (Input.GetKey(KeyCode.E))
+            {
+                zRotation -= 1 * Time.deltaTime;
+            }
+            else if (Input.GetKey(KeyCode.Q))
+            {
+                zRotation += 1 * Time.deltaTime;
+            }
+            else
+            {
+                zRotation = Mathf.Lerp(zRotation, 0, Time.deltaTime * 2);
+            }
+
+            zRotation = Mathf.Clamp(zRotation, -100, 100);
+
             if (!aligned)
                 transform.Rotate(new Vector3(0, 0, zRotation));
         }
 
-        if (planetoid != null)
+        if (planetoidGameObject != null)
         {
-            distanceToPlanetCore = Vector3.Distance(transform.position, planetoid.transform.position);
+            distanceToPlanetCore = Vector3.Distance(transform.position, planetoidGameObject.transform.position);
 
             if (distanceToPlanetCore < alignDistance)
             {
                 aligned = true;
 
-                Vector3 gravityVector = planetoid.transform.position - transform.position;
+                Vector3 gravityVector = planetoidGameObject.transform.position - transform.position;
 
                 targetRotation = Quaternion.LookRotation(transform.forward, -gravityVector);
 
@@ -164,7 +171,7 @@ public class FlyCamera : MonoBehaviour
     {
         Quaternion rotation = Quaternion.Euler(y + targetRotation.x, x + targetRotation.y, z + targetRotation.z);
 
-        Vector3 position = rotation * distanceVector + planetoid.transform.position;
+        Vector3 position = rotation * distanceVector + planetoidGameObject.transform.position;
 
         transform.rotation = Quaternion.Slerp(transform.rotation, rotation, Time.fixedDeltaTime * rotationSpeed);
         transform.position = position;

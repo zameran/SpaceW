@@ -38,11 +38,14 @@ namespace Proland
         //scatter coefficient for mie
         readonly Vector3 BETA_MSca = new Vector3(4e-3f, 4e-3f, 4e-3f);
 
-        [SerializeField]
-        Material m_skyMaterial;
+        public Shader SkyShader;
+        public Shader SkyMapShader;
 
-        [SerializeField]
+        public Texture SunGlareTexture;
+
+        Material m_skyMaterial;
         Material m_skyMapMaterial;
+
         //scatter coefficient for rayliegh
         [SerializeField]
         Vector3 m_betaR = new Vector3(5.8e-3f, 1.35e-2f, 3.31e-2f);
@@ -57,6 +60,8 @@ namespace Proland
 
         RenderTexture m_transmittance, m_inscatter, m_irradiance, m_skyMap;
 
+        private int WaitBeforeReloadCount = 0;
+
         // Use this for initialization
         protected override void Start()
         {
@@ -64,7 +69,21 @@ namespace Proland
 
             m_mesh = MeshFactory.MakePlane(2, 2, MeshFactory.PLANE.XY, false, false, false);
             m_mesh.bounds = new Bounds(Vector3.zero, new Vector3(1e8f, 1e8f, 1e8f));
+            
+            InitTextures();
 
+            m_skyMaterial = new Material(SkyShader);
+            m_skyMaterial.name = "Sky" + "(Instance)" + Random.Range(float.MinValue, float.MaxValue);
+
+            m_skyMapMaterial = new Material(SkyMapShader);
+            m_skyMapMaterial.name = "SkyMap" + "(Instance)" + Random.Range(float.MinValue, float.MaxValue);
+
+            InitUniforms(m_skyMaterial);
+            InitUniforms(m_skyMapMaterial);
+        }
+
+        public void InitTextures()
+        {
             //The sky map is used to create a reflection of the sky for objects that need it (like the ocean)
             m_skyMap = new RenderTexture(512, 512, 0, RenderTextureFormat.ARGBHalf);
             m_skyMap.filterMode = FilterMode.Trilinear;
@@ -119,14 +138,14 @@ namespace Proland
             buffer = new ComputeBuffer(RES_MU_S * RES_NU * RES_MU * RES_R, sizeof(float) * 4);
             CBUtility.WriteIntoRenderTexture(m_inscatter, 4, path, buffer, m_manager.GetWriteData());
             buffer.Release();
-
-            InitUniforms(m_skyMaterial);
-            InitUniforms(m_skyMapMaterial);
         }
 
         protected override void OnDestroy()
         {
             base.OnDestroy();
+
+            DestroyImmediate(m_skyMapMaterial);
+            DestroyImmediate(m_skyMaterial);
 
             m_transmittance.Release();
             m_irradiance.Release();
@@ -143,6 +162,22 @@ namespace Proland
             m_skyMaterial.SetMatrix("_Sun_WorldToLocal", m_manager.GetSunNode().GetWorldToLocalRotation());
 
             Graphics.DrawMesh(m_mesh, Matrix4x4.identity, m_skyMaterial, 0, Camera.main);
+
+            if (!m_inscatter.IsCreated() || !m_transmittance.IsCreated() || !m_irradiance.IsCreated())
+            {
+                WaitBeforeReloadCount++;
+
+                if (WaitBeforeReloadCount >= 1)
+                {
+                    m_inscatter.Release();
+                    m_transmittance.Release();
+                    m_irradiance.Release();
+
+                    InitTextures();
+
+                    WaitBeforeReloadCount = 0;
+                }
+            }
 
             //Graphics.DrawMeshNow(m_mesh, transform.localToWorldMatrix);
 
@@ -191,7 +226,7 @@ namespace Proland
             mat.SetFloat("HM", HM * 1000.0f);
             mat.SetVector("betaMSca", BETA_MSca / 1000.0f);
             mat.SetVector("betaMEx", (BETA_MSca / 1000.0f) / 0.9f);
-
+            mat.SetTexture("_Sun_Glare", SunGlareTexture);
         }
 
         void OnGUI()

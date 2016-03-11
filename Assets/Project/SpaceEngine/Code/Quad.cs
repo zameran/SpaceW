@@ -237,8 +237,8 @@ public class Quad : MonoBehaviour
 
     private void Update()
     {
-        //if (Planetoid.RenderPerUpdate)
-            //Render();
+        if (Planetoid.RenderPerUpdate)
+            Render();
 
         if (Time.time > lastLodUpdateTime + lodUpdateInterval && Planetoid.UseLOD)
         {
@@ -328,6 +328,11 @@ public class Quad : MonoBehaviour
         }
 
         SetupBounds(this, QuadMesh);
+		
+		Planetoid.manager.GetSunNode().SetUniforms(QuadMaterial);
+        Planetoid.manager.GetSkyNode().SetUniforms(QuadMaterial);
+        Planetoid.manager.GetSkyNode().InitUniforms(QuadMaterial);
+        Planetoid.manager.SetUniforms(QuadMaterial);
 
         QuadMaterial.SetBuffer("data", OutDataBuffer);
         QuadMaterial.SetTexture("_HeightTexture", HeightTexture);
