@@ -122,7 +122,6 @@
 				position.xyz += patchCenter;
 
 				v.vertex = position;
-
 				v.tangent = float4(FindTangent(normal, 0.01, float3(0, 1, 0)), 1);
 				v.normal = normal;
 
