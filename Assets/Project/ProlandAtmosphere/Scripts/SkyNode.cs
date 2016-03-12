@@ -94,7 +94,7 @@ namespace Proland
             //Transmittance is responsible for the change in the sun color as it moves
             //The raw file is a 2D array of 32 bit floats with a range of 0 to 1
             string path = Application.dataPath + texturesPath + "/transmittance.raw";
-            Debug.Log(path);
+            if (!Application.isEditor) Debug.Log(path);
             transmittance = new RenderTexture(TRANSMITTANCE_W, TRANSMITTANCE_H, 0, RenderTextureFormat.ARGBHalf);
             transmittance.wrapMode = TextureWrapMode.Clamp;
             transmittance.filterMode = FilterMode.Bilinear;
@@ -108,7 +108,7 @@ namespace Proland
             //Iirradiance is responsible for the change in the sky color as the sun moves
             //The raw file is a 2D array of 32 bit floats with a range of 0 to 1
             path = Application.dataPath + texturesPath + "/irradiance.raw";
-            Debug.Log(path);
+            if (!Application.isEditor) Debug.Log(path);
             irradiance = new RenderTexture(SKY_W, SKY_H, 0, RenderTextureFormat.ARGBHalf);
             irradiance.wrapMode = TextureWrapMode.Clamp;
             irradiance.filterMode = FilterMode.Bilinear;
@@ -124,7 +124,7 @@ namespace Proland
             //As there is not such thing as a 4D texture the data is packed into a 3D texture 
             //and the shader manually performs the sample for the 4th dimension
             path = Application.dataPath + texturesPath + "/inscatter.raw";
-            Debug.Log(path);
+            if (!Application.isEditor) Debug.Log(path);
             inscatter = new RenderTexture(RES_MU_S * RES_NU, RES_MU, 0, RenderTextureFormat.ARGBHalf);
             inscatter.volumeDepth = RES_R;
             inscatter.wrapMode = TextureWrapMode.Clamp;

@@ -39,6 +39,7 @@ public class Planetoid : MonoBehaviour
 	public Mesh FrontPrototypeMesh;
 	public Mesh BackPrototypeMesh;
 
+	public GameObject QuadsRoot = null;
 	public QuadStorage Cache = null;
 	public NoiseParametersSetter NPS = null;
 
@@ -50,10 +51,13 @@ public class Planetoid : MonoBehaviour
 	public float TerrainMaxHeight = 64.0f;
 
 	public Vector3 Origin = Vector3.zero;
+	public Quaternion OriginRotation = Quaternion.identity;
 
 	private void Awake()
 	{
 		Origin = transform.position;
+		OriginRotation = QuadsRoot.transform.rotation;
+
 		if (manager != null) manager.origin = Origin;
 	}
 
@@ -84,6 +88,8 @@ public class Planetoid : MonoBehaviour
 		CheckCutoff();
 
 		Origin = transform.position;
+		OriginRotation = QuadsRoot.transform.rotation;
+
 		if (manager != null) manager.origin = Origin;
 	}
 
@@ -108,6 +114,8 @@ public class Planetoid : MonoBehaviour
 
 		Quads.Clear();
 		MainQuads.Clear();
+
+		if (QuadsRoot != null) DestroyImmediate(QuadsRoot);
 
 		if (TopPrototypeMesh != null) DestroyImmediate(TopPrototypeMesh);
 		if (BottomPrototypeMesh != null) DestroyImmediate(BottomPrototypeMesh);
@@ -179,6 +187,7 @@ public class Planetoid : MonoBehaviour
 			return;
 
 		SetupMeshes();
+		SetupRoot();
 
 		SetupMainQuad(QuadPostion.Top);
 		SetupMainQuad(QuadPostion.Bottom);
@@ -198,12 +207,27 @@ public class Planetoid : MonoBehaviour
 		SetupQuads();
 	}
 
+	public void SetupRoot()
+	{
+		if (QuadsRoot == null)
+		{
+			QuadsRoot = new GameObject("Quads_Root");
+			QuadsRoot.transform.position = transform.position;
+			QuadsRoot.transform.rotation = transform.rotation;
+			QuadsRoot.transform.parent = transform;
+		}
+		else
+		{
+			return;
+		}
+	}
+
 	public void SetupMainQuad(QuadPostion quadPosition)
 	{
 		GameObject go = new GameObject("Quad" + "_" + quadPosition.ToString());
 		go.transform.position = Vector3.zero;
 		go.transform.rotation = Quaternion.identity;
-		go.transform.parent = this.transform;
+		go.transform.parent = QuadsRoot.transform;
 
 		Mesh mesh = GetMesh(quadPosition);
 		mesh.bounds = new Bounds(Vector3.zero, new Vector3(PlanetRadius * 2, PlanetRadius * 2, PlanetRadius * 2));

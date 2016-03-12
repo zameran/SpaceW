@@ -77,7 +77,7 @@
 			}
 
 			float4 GroundFinalColor(float4 terrainColor, float3 p, float3 n)
-			{
+			{			
 				float3 WCP = _Globals_WorldCameraPos;
 				float3 WSD = _Sun_WorldSunDir;
 				
@@ -92,6 +92,11 @@
 
 				//fn = float3(0, 0, 0); //disable normal mapping... bruuuutaal!
 				
+				p = mul(_Object2World, p);
+				fn = mul(_Object2World, fn);
+				//WCP = mul(_Object2World, WCP);
+				//WSD = mul(_Object2World, WCP);
+
 				float4 reflectance = RGB2Reflectance(terrainColor);
 
 				float3 sunL;

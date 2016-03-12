@@ -350,9 +350,9 @@ public class Quad : MonoBehaviour
 			if (QuadMesh != null)
 			{
 				if (Planetoid.RenderPerUpdate)
-					Graphics.DrawMesh(QuadMesh, Planetoid.Origin, Quaternion.identity, QuadMaterial, 0, Camera.main, 0, null, true, true);
+					Graphics.DrawMesh(QuadMesh, Planetoid.Origin, Planetoid.OriginRotation, QuadMaterial, 0, Camera.main, 0, null, true, true);
 				else
-					Graphics.DrawMeshNow(QuadMesh, Planetoid.Origin, Quaternion.identity);
+					Graphics.DrawMeshNow(QuadMesh, Planetoid.Origin, Planetoid.OriginRotation);
 			}
 		}
 	}
@@ -805,11 +805,11 @@ public class Quad : MonoBehaviour
 
 		Vector3 closestCorner = new Vector3(Mathf.Infinity, Mathf.Infinity, Mathf.Infinity);
 
-		Vector3 tl = topLeftCorner.NormalizeToRadius(Planetoid.PlanetRadius);
-		Vector3 tr = topRightCorner.NormalizeToRadius(Planetoid.PlanetRadius);
-		Vector3 middlePoint = middleNormalized;
-		Vector3 bl = bottomLeftCorner.NormalizeToRadius(Planetoid.PlanetRadius);
-		Vector3 br = bottomRightCorner.NormalizeToRadius(Planetoid.PlanetRadius);
+		Vector3 tl = transform.TransformPoint(topLeftCorner.NormalizeToRadius(Planetoid.PlanetRadius));
+		Vector3 tr = transform.TransformPoint(topRightCorner.NormalizeToRadius(Planetoid.PlanetRadius));
+		Vector3 middlePoint = transform.TransformPoint(middleNormalized);
+		Vector3 bl = transform.TransformPoint(bottomLeftCorner.NormalizeToRadius(Planetoid.PlanetRadius));
+		Vector3 br = transform.TransformPoint(bottomRightCorner.NormalizeToRadius(Planetoid.PlanetRadius));
 
 		float d = Vector3.Distance(Planetoid.LODTarget.position, tl);
 
