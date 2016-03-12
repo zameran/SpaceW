@@ -19,7 +19,7 @@ RWStructuredBuffer<OutputStruct> patchPreOutputSub;
 
 float3 ScaledCoordinate(float3 coord)
 {
-	return 0.0001 * coord;
+	return 0.000025 * coord;
 }
 
 float NoiseFunction(float3 coord)
@@ -154,6 +154,11 @@ void TexturesSub(uint3 id : SV_DispatchThreadID)
 	float up    = patchPreOutputSub[(id.x + 1) + (id.y + 0) * nVerticesPerSideWithBorderSub].noise * constants.lodLevel;
 	float down  = patchPreOutputSub[(id.x + 1) + (id.y + 2) * nVerticesPerSideWithBorderSub].noise * constants.lodLevel;
 
+	float3 p0 = patchPreOutputSub[(id.x + 0) + (id.y + 1) * nVerticesPerSideWithBorderSub].pos.xyz; // * constants.lodLevel;
+	float3 p1 = patchPreOutputSub[(id.x + 2) + (id.y + 1) * nVerticesPerSideWithBorderSub].pos.xyz; // * constants.lodLevel;
+	float3 p2 = patchPreOutputSub[(id.x + 1) + (id.y + 0) * nVerticesPerSideWithBorderSub].pos.xyz; // * constants.lodLevel;
+	float3 p3 = patchPreOutputSub[(id.x + 1) + (id.y + 2) * nVerticesPerSideWithBorderSub].pos.xyz; // * constants.lodLevel;
+
 	float xdeltaSlope = ((left - right) + 1.0) * 0.5;
 	float ydeltaSlope = ((up - down) + 1.0) * 0.5;
 	float zdeltaSlope = ((right - left) + 1.0) * 0.5;
@@ -170,15 +175,19 @@ void TexturesSub(uint3 id : SV_DispatchThreadID)
 	float3 xnormal = normalize(float3(xdelta, ydelta, 2.0 * normalStrength));
 	float3 ynormal = normalize(float3(ydelta, xdelta, 2.0 * normalStrength));
 
-	float3 no = xnormalSlope;
-	float3 ta = FindTangent(no, 0.01, float3(0.0, -1.0, 0.0));
-	float3 bi = FindBiTangent(no, 0.01, float3(0.0, -1.0, 0.0));
+	float3 pdelta0 = normalize(((p1 - p0) + 1.0) * 0.5);	
+	float3 pdelta1 = normalize(((p3 - p2) + 1.0) * 0.5);	
 
-	float3x3 tbn = float3x3(ta, bi, no);
+	float3 pnormal = float3(normalize(cross(pdelta0, pdelta1)).xy, 0.5);
 
-	//float3 normal = mul(no, tbn);
-	float3 normal = xnormalSlope;
-	
+	//float3 no = xnormal;
+	//float3 ta = FindTangent(no, 0.01, float3(0.0, 1.0, 0.0));
+	//float3 bi = FindBiTangent(no, 0.01, float3(0.0, 1.0, 0.0));
+
+	//float3x3 tbn = float3x3(ta, bi, no);
+
+	float3 normal = pnormal;
+
 	float xslope = 0.5 / max(dot(xnormalSlope, float3(0.0, 1.0, 0.0)), 0.001);
 	float yslope = 0.5 / max(dot(ynormalSlope, float3(0.0, 1.0, 0.0)), 0.001);
 	float zslope = 0.5 / max(dot(znormalSlope, float3(0.0, 1.0, 0.0)), 0.001);

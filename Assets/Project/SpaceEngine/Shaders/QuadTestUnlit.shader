@@ -6,6 +6,7 @@
 		_NormalTexture("Normal (RGBA)", 2D) = "white" {}
 		_WireframeColor("Wireframe Background Color", Color) = (0, 0, 0, 1)
 		_Wireframe("Wireframe", Range(0, 1)) = 0.0
+		_Normale("Normale", Range(0, 1)) = 0.0
 		_Side("Side", Range(0, 5)) = 0.0
 	}
 	SubShader
@@ -57,6 +58,7 @@
 		
 			uniform half4 _WireframeColor;
 			uniform float _Wireframe;
+			uniform float _Normale;
 			uniform float _Side;
 
 			uniform sampler2D _HeightTexture;
@@ -102,11 +104,11 @@
 
 				float cTheta = dot(fn, WSD); // diffuse ground color
 
-				float3 groundColor = 1.5 * reflectance.rgb * (sunL * max(cTheta, 0.0) + skyE) / M_PI;
+				float3 groundColor = 1.5 * reflectance.rgb * (sunL * max(cTheta, 0.1) + skyE) / M_PI;
 				float3 extinction;
 				float4 inscatter = InScattering(WCP, p, WSD, extinction, 1.0);
 				float4 finalColor = float4(groundColor, 1) * float4(extinction, 1) + inscatter;
-		
+				
 				return finalColor;
 			}
 	
@@ -203,10 +205,10 @@
 				fixed4 outputColor = lerp(terrainColor, wireframeColor, _Wireframe);
 
 				fixed3 terrainWorldNormal = IN.normal0;
-				fixed3 terrainLocalNormal = IN.normal1;
-				fixed4 outputNormal = fixed4(terrainWorldNormal * terrainLocalNormal, 1);
+				//fixed3 terrainLocalNormal = CalculateSurfaceNormal_HeightMap(IN.vertex, IN.normal0, IN.terrainColor.a); //IN.normal1;
+				fixed4 outputNormal = float4(terrainWorldNormal, 1); //fixed4(terrainWorldNormal * terrainLocalNormal, 1);
 
-				outDiffuse = outputColor;
+				outDiffuse = lerp(outputColor, outputNormal, _Normale);
 				outNormal = outputNormal;	
 			}
 			ENDCG

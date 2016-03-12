@@ -338,13 +338,14 @@ public class Quad : MonoBehaviour
 		QuadMaterial.SetTexture("_HeightTexture", HeightTexture);
 		QuadMaterial.SetTexture("_NormalTexture", NormalTexture);
 		QuadMaterial.SetFloat("_Wireframe", Planetoid.DrawWireframe ? 1.0f : 0.0f);
+		QuadMaterial.SetFloat("_Normale", Planetoid.DrawNormals ? 1.0f : 0.0f);
 		QuadMaterial.SetFloat("_Side", (float)Position);
 		QuadMaterial.SetMatrix("_WorldToTangentFrame", GetTangentFrame(this));
 		QuadMaterial.SetVector("_Origin", Planetoid.Origin);
 		QuadMaterial.renderQueue = Planetoid.RenderQueue;
 		QuadMaterial.SetPass(0);
 
-		if (Generated && ShouldDraw)
+		if (Generated && ShouldDraw && PlaneFrustumCheck(Planetoid.manager.ruleCamera))
 		{
 			if (QuadMesh != null)
 			{
@@ -354,6 +355,96 @@ public class Quad : MonoBehaviour
 					Graphics.DrawMeshNow(QuadMesh, Planetoid.Origin, Quaternion.identity);
 			}
 		}
+	}
+
+	public Vector3[] GetFlatBox(float offset = 0)
+	{
+		Vector3[] verts = new Vector3[4];
+
+		Vector3 tl = this.topLeftCorner.NormalizeToRadius(Planetoid.PlanetRadius);
+		Vector3 tr = this.topRightCorner.NormalizeToRadius(Planetoid.PlanetRadius);
+		Vector3 bl = this.bottomLeftCorner.NormalizeToRadius(Planetoid.PlanetRadius);
+		Vector3 br = this.bottomRightCorner.NormalizeToRadius(Planetoid.PlanetRadius);
+
+		verts[0] = tl.NormalizeToRadius(Planetoid.PlanetRadius + offset);
+		verts[1] = tr.NormalizeToRadius(Planetoid.PlanetRadius + offset);
+		verts[2] = bl.NormalizeToRadius(Planetoid.PlanetRadius + offset);
+		verts[3] = br.NormalizeToRadius(Planetoid.PlanetRadius + offset);
+
+		return verts;
+	}
+
+	public Vector3[] GetVolumeBox(float height, float offset = 0)
+	{
+		Vector3[] verts = new Vector3[8];
+
+		Vector3 tl = this.topLeftCorner.NormalizeToRadius(Planetoid.PlanetRadius);
+		Vector3 tr = this.topRightCorner.NormalizeToRadius(Planetoid.PlanetRadius);
+		Vector3 bl = this.bottomLeftCorner.NormalizeToRadius(Planetoid.PlanetRadius);
+		Vector3 br = this.bottomRightCorner.NormalizeToRadius(Planetoid.PlanetRadius);
+
+		verts[0] = tl.NormalizeToRadius(Planetoid.PlanetRadius + height + offset);
+		verts[1] = tr.NormalizeToRadius(Planetoid.PlanetRadius + height + offset);
+		verts[2] = bl.NormalizeToRadius(Planetoid.PlanetRadius + height + offset);
+		verts[3] = br.NormalizeToRadius(Planetoid.PlanetRadius + height + offset);
+
+		verts[4] = tl.NormalizeToRadius(Planetoid.PlanetRadius - height - offset);
+		verts[5] = tr.NormalizeToRadius(Planetoid.PlanetRadius - height - offset);
+		verts[6] = bl.NormalizeToRadius(Planetoid.PlanetRadius - height - offset);
+		verts[7] = br.NormalizeToRadius(Planetoid.PlanetRadius - height - offset);
+
+		return verts;
+	}
+
+	public bool PlaneFrustumCheck(Camera camera)
+	{
+		bool state = false;
+
+		if (Parent == null || !Generated || Splitting)
+			return true;
+ 
+		Vector3[] verts = GetFlatBox(Planetoid.TerrainMaxHeight);
+
+		foreach(Vector3 v in verts)
+		{
+			state |= BorderFrustumCheck(camera, v);
+		}
+
+		return state;
+	}
+
+	public bool BorderFrustumCheck(Camera camera, Vector3 border)
+	{
+		float offset = 128.0f;
+		float disturbtionOffset = 8.0f;
+
+		bool useOffset = true;
+		bool useDisturbtion = false;
+
+		Plane[] planes = GeometryUtility.CalculateFrustumPlanes(camera);
+
+		for (int i = 0; i < planes.Length; i++)
+		{
+			if (useDisturbtion)
+			{
+				for (int j = (int)(offset - disturbtionOffset); j < offset + disturbtionOffset; j++)
+				{
+					if (planes[i].GetDistanceToPoint(transform.TransformPoint(border)) <= (useOffset ? 0 - offset + j : 0 + j))
+					{
+						return false;
+					}
+				}
+			}
+			else
+			{
+				if (planes[i].GetDistanceToPoint(transform.TransformPoint(border)) <= (useOffset ? 0 - offset : 0))
+				{
+					return false;
+				}
+			}
+		}
+
+		return true;
 	}
 
 	public void RenderOutline(Camera camera, Material lineMaterial)
@@ -366,22 +457,7 @@ public class Quad : MonoBehaviour
 
 		int[,] ORDER = new int[,] { { 1, 0 }, { 2, 3 }, { 0, 2 }, { 3, 1 } };
 
-		Vector3[] verts = new Vector3[8];
-
-		Vector3 tl = this.topLeftCorner.NormalizeToRadius(Planetoid.PlanetRadius);
-		Vector3 tr = this.topRightCorner.NormalizeToRadius(Planetoid.PlanetRadius);
-		Vector3 bl = this.bottomLeftCorner.NormalizeToRadius(Planetoid.PlanetRadius);
-		Vector3 br = this.bottomRightCorner.NormalizeToRadius(Planetoid.PlanetRadius);
-
-		verts[0] = tl.NormalizeToRadius(Planetoid.PlanetRadius + 100);
-		verts[1] = tr.NormalizeToRadius(Planetoid.PlanetRadius + 100);
-		verts[2] = bl.NormalizeToRadius(Planetoid.PlanetRadius + 100);
-		verts[3] = br.NormalizeToRadius(Planetoid.PlanetRadius + 100);
-
-		verts[4] = tl.NormalizeToRadius(Planetoid.PlanetRadius - 100);
-		verts[5] = tr.NormalizeToRadius(Planetoid.PlanetRadius - 100);
-		verts[6] = bl.NormalizeToRadius(Planetoid.PlanetRadius - 100);
-		verts[7] = br.NormalizeToRadius(Planetoid.PlanetRadius - 100);
+		Vector3[] verts = GetVolumeBox(Planetoid.TerrainMaxHeight * 3);
 
 		GL.PushMatrix();
 		GL.LoadIdentity();

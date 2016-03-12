@@ -7,6 +7,7 @@ public class Planetoid : MonoBehaviour
 	public Proland.Manager manager;
 
 	public bool DrawWireframe = false;
+	public bool DrawNormals = false;
 
 	public bool Working = false;
 
@@ -73,6 +74,11 @@ public class Planetoid : MonoBehaviour
 		if(Input.GetKeyDown(KeyCode.F1))
 		{
 			DrawWireframe = !DrawWireframe;
+		}
+
+		if (Input.GetKeyDown(KeyCode.F2))
+		{
+			DrawNormals = !DrawNormals;
 		}
 
 		CheckCutoff();
