@@ -54,7 +54,7 @@ namespace Proland
         RenderTexture[] irradianceT, inscatterT;
 
         //This is where the tables will be saved to
-        public string texturesPath = "/Project/ProlandAtmosphere/Textures/";
+        public string texturesPath = "/Resources/Textures/Atmosphere/";
 
         public ComputeShader copyInscatter1, copyInscatterN, copyIrradiance;
         public ComputeShader inscatter1, inscatterN, inscatterS;
