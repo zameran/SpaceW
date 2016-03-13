@@ -287,6 +287,19 @@ float3 SphericalToCartesian(float2 spherical)
 	float2 Delta = float2(sin(spherical.y), cos(spherical.y));
 	return float3(Delta.y * Alpha.x, Delta.x, Delta.y * Alpha.y);
 }
+
+float3 Cartesian2Spherical(float3 cartesian)
+{
+	float X = cartesian.x;
+	float Y = cartesian.y;
+	float Z = cartesian.z;
+
+	float radius = length(cartesian);
+	float theta = atan2(Y, X);
+	float phi = acos(Z / radius);
+
+	return float3(radius, theta, phi);
+}
 //-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------

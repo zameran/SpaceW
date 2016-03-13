@@ -1172,20 +1172,34 @@ public class Quad : MonoBehaviour
 
 	public Matrix4x4 GetTangentFrame(Quad q)
 	{
-		double tx = q.generationConstants.patchCubeCenter.x;
-		double ty = q.generationConstants.patchCubeCenter.y;
-		double tz = q.generationConstants.patchCubeCenter.z;
+		Matrix4x4d worldToTangentFrame = new Matrix4x4d();
 
-		Vector3d pc = new Vector3d(tx, ty, tz);
+		Quad mq = Planetoid.GetMainQuad(q.Position);
+
+		double D = mq.generationConstants.spacing * QS.nVertsPerEdge;
+		double R = D / 2.0;
+
+		double tx = mq.generationConstants.patchCubeCenter.x;
+		double ty = mq.generationConstants.patchCubeCenter.y;
+		double tz = mq.generationConstants.patchCubeCenter.z;
+
+		double x0 = (tx) * D - R;
+		double x1 = (tx + 1) * D - R;
+		double y0 = (ty) * D - R;
+		double y1 = (ty + 1) * D - R;
+		double z0 = (tz) * D - R;
+		double z1 = (tz + 1) * D - R;
+
+		Vector3d pc = new Vector3d((x0 + x1) * 0.5, (y0 + y1) * 0.5, (z0 + z1) * 0.5);
 
 		Vector3d uz = pc.Normalized();
 		Vector3d ux = (new Vector3d(0, 1, 0)).Cross(uz).Normalized();
 		Vector3d uy = uz.Cross(ux);
 
-		Matrix4x4d worldToTangentFrame = new Matrix4x4d(ux.x, ux.y, ux.z, 0.0,
-														uy.x, uy.y, uy.z, 0.0,
-														uz.x, uz.y, uz.z, 0.0,
-														0.0, 0.0, 0.0, 0.0);
+		worldToTangentFrame = new Matrix4x4d(ux.x, ux.y, ux.z, 0.0,
+											 uy.x, uy.y, uy.z, 0.0,
+											 uz.x, uz.y, uz.z, 0.0,
+											 0.0, 0.0, 0.0, 0.0);
 
 		return worldToTangentFrame.ToMatrix4x4();
 	}

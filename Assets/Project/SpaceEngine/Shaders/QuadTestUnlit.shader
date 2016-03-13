@@ -90,10 +90,11 @@
 				//-1.0 + dot(fn.xy, fn.xy) - inverted.
 				fn.z = sqrt(max(0.0, -1.0 + dot(fn.xy, fn.xy)));
 
-				//fn = float3(0, 0, 0); //disable normal mapping... bruuuutaal!
+				fn = float3(0, 0, 0); //disable normal mapping... bruuuutaal!
 				
-				p = mul(_Object2World, p);
-				fn = mul(_Object2World, fn);
+				//p = mul(_Object2World, p);
+				//fn = mul(_Object2World, fn);
+
 				//WCP = mul(_Object2World, WCP);
 				//WSD = mul(_Object2World, WCP);
 
@@ -158,7 +159,7 @@
 				o.uv1 = v.texcoord1;
 				o.uv2 = v.texcoord2;
 				o.normal0 = v.normal;
-				o.normal1 = normal;
+				o.normal1 = v.normal;
 				o.vertex = mul(UNITY_MATRIX_MVP, v.vertex);
 
 				return o;
@@ -210,8 +211,8 @@
 				fixed4 outputColor = lerp(terrainColor, wireframeColor, _Wireframe);
 
 				fixed3 terrainWorldNormal = IN.normal0;
-				//fixed3 terrainLocalNormal = CalculateSurfaceNormal_HeightMap(IN.vertex, IN.normal0, IN.terrainColor.a); //IN.normal1;
-				fixed4 outputNormal = float4(terrainWorldNormal, 1); //fixed4(terrainWorldNormal * terrainLocalNormal, 1);
+				fixed3 terrainLocalNormal = CalculateSurfaceNormal_HeightMap(IN.vertex, IN.normal0, IN.terrainColor.a); //IN.normal1;
+				fixed4 outputNormal = fixed4(terrainWorldNormal, 1); //fixed4(terrainWorldNormal * terrainLocalNormal, 1);
 
 				outDiffuse = lerp(outputColor, outputNormal, _Normale);
 				outNormal = outputNormal;	

@@ -151,6 +151,17 @@ public class Planetoid : MonoBehaviour
 		BackPrototypeMesh = MeshFactory.SetupQuadMesh(QS.nVertsPerEdge, MeshFactory.PLANE.XY, invert); //MeshFactory.MakePlane(QS.nVertsPerEdge, QS.nVertsPerEdge, MeshFactory.PLANE.XY, uv_01, false, invert);
 	}
 
+	public Quad GetMainQuad(QuadPostion position)
+	{
+		foreach (Quad q in MainQuads)
+		{
+			if (q.Position == position)
+				return q;
+		}
+
+		return null;
+	}
+
 	public Mesh GetMesh(QuadPostion position)
 	{
 		Mesh temp = null;

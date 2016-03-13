@@ -88,11 +88,11 @@ float3 PerturbNormal(float3 normal, float3 dpdx, float3 dpdy, float dhdx, float 
 // Calculate the surface normal using screen-space partial derivatives of the height field
 float3 CalculateSurfaceNormal_HeightMap(float3 position, float3 normal, float height)
 {
-	float3 dpdx = ddx(position);
-	float3 dpdy = ddy(position);
+	float3 dpdx = ddx_fine(position);
+	float3 dpdy = ddy_fine(position);
 		   
-	float dhdx = ddx(height);
-	float dhdy = ddy(height);
+	float dhdx = ddx_fine(height);
+	float dhdy = ddy_fine(height);
   
 	return PerturbNormal(normal, dpdx, dpdy, dhdx, dhdy);
 }
