@@ -2,7 +2,7 @@
 
 using ZFramework.Unity.Common.PerfomanceMonitor;
 
-public class PerfomanceMonitorGUI : MonoBehaviour
+public class PerfomanceMonitorGUI : DebugGUI
 {
     void OnGUI()
     {

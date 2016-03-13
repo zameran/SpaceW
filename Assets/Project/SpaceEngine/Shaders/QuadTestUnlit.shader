@@ -28,8 +28,8 @@
 			#include "UnityLightingCommon.cginc"
 			#include "Assets/Project/SpaceEngine/Shaders/Compute/Utils.cginc"
 			#include "Assets/Project/SpaceEngine/Shaders/TCCommon.cginc"
-			#include "Assets/Project/ProlandAtmosphere/Shaders/Utility.cginc"
-			#include "Assets/Project/ProlandAtmosphere/Shaders/Atmosphere.cginc"
+			#include "Assets/Project/SpaceEngine/Shaders/Utility.cginc"
+			#include "Assets/Project/SpaceEngine/Shaders/Atmosphere.cginc"
 
 			struct appdata_full_compute 
 			{

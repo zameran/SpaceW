@@ -1,10 +1,8 @@
 ﻿using UnityEngine;
 
-public class PlanetoidInfoGUI : MonoBehaviour
+public class PlanetoidInfoGUI : DebugGUI
 {
     public Planetoid Planetoid;
-
-    public Rect debugInfoBounds = new Rect(10, 10, 500, 500);
 
     private void OnGUI()
     {

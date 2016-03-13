@@ -4,7 +4,6 @@
 public class MainRenderer : MonoBehaviour
 {
     public Planetoid Planet;
-    public Proland.Manager Manager;
 
     void Start()
     {
@@ -13,8 +12,6 @@ public class MainRenderer : MonoBehaviour
 
     void OnPostRender()
     {
-        Manager.GetSkyNode().PostRender();
-
         foreach (Quad q in Planet.Quads)
         {
             q.Render();

@@ -1,10 +1,8 @@
 using UnityEngine;
 
 [ExecuteInEditMode]
-public class HardwareInfoGUI : MonoBehaviour
+public class HardwareInfoGUI : DebugGUI
 {
-    public Rect debugInfoBounds = new Rect(10, 10, 500, 500);
-
     private void Awake()
     {
         Setup();

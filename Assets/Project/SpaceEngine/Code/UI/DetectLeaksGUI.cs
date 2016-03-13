@@ -2,10 +2,8 @@ using System.Collections.Generic;
 
 using UnityEngine;
 
-public class DetectLeaksGUI : MonoBehaviour
+public class DetectLeaksGUI : DebugGUI
 {
-    public Rect debugInfoBounds = new Rect(10, 10, 500, 500);
-
     private Vector2 ScrollPosition;
 
     private void OnGUI()

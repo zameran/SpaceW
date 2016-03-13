@@ -328,11 +328,9 @@ public class Quad : MonoBehaviour
 		}
 
 		SetupBounds(this, QuadMesh);
-		
-		Planetoid.manager.GetSunNode().SetUniforms(QuadMaterial);
-		Planetoid.manager.GetSkyNode().SetUniforms(QuadMaterial);
-		Planetoid.manager.GetSkyNode().InitUniforms(QuadMaterial);
-		Planetoid.manager.SetUniforms(QuadMaterial);
+
+		Planetoid.Atmosphere.InitUniforms(QuadMaterial);
+		Planetoid.Atmosphere.SetUniforms(QuadMaterial);
 
 		QuadMaterial.SetBuffer("data", OutDataBuffer);
 		QuadMaterial.SetTexture("_HeightTexture", HeightTexture);
@@ -345,14 +343,17 @@ public class Quad : MonoBehaviour
 		QuadMaterial.renderQueue = Planetoid.RenderQueue;
 		QuadMaterial.SetPass(0);
 
-		if (Generated && ShouldDraw && PlaneFrustumCheck(Planetoid.manager.ruleCamera))
+		if (Generated && ShouldDraw)
 		{
 			if (QuadMesh != null)
 			{
 				if (Planetoid.RenderPerUpdate)
 					Graphics.DrawMesh(QuadMesh, Planetoid.Origin, Planetoid.OriginRotation, QuadMaterial, 0, Camera.main, 0, null, true, true);
 				else
-					Graphics.DrawMeshNow(QuadMesh, Planetoid.Origin, Planetoid.OriginRotation);
+				{
+					if (PlaneFrustumCheck(Camera.main))
+						Graphics.DrawMeshNow(QuadMesh, Planetoid.Origin, Planetoid.OriginRotation);
+				}
 			}
 		}
 	}
@@ -361,10 +362,10 @@ public class Quad : MonoBehaviour
 	{
 		Vector3[] verts = new Vector3[4];
 
-		Vector3 tl = this.topLeftCorner.NormalizeToRadius(Planetoid.PlanetRadius);
-		Vector3 tr = this.topRightCorner.NormalizeToRadius(Planetoid.PlanetRadius);
-		Vector3 bl = this.bottomLeftCorner.NormalizeToRadius(Planetoid.PlanetRadius);
-		Vector3 br = this.bottomRightCorner.NormalizeToRadius(Planetoid.PlanetRadius);
+		Vector3 tl = this.topLeftCorner;
+		Vector3 tr = this.topRightCorner;
+		Vector3 bl = this.bottomLeftCorner;
+		Vector3 br = this.bottomRightCorner;
 
 		verts[0] = tl.NormalizeToRadius(Planetoid.PlanetRadius + offset);
 		verts[1] = tr.NormalizeToRadius(Planetoid.PlanetRadius + offset);
@@ -374,14 +375,33 @@ public class Quad : MonoBehaviour
 		return verts;
 	}
 
+	public Vector3[] GetFlatBoxWithMiddle(float offset = 0)
+	{
+		Vector3[] verts = new Vector3[5];
+
+		Vector3 tl = this.topLeftCorner;
+		Vector3 tr = this.topRightCorner;
+		Vector3 bl = this.bottomLeftCorner;
+		Vector3 br = this.bottomRightCorner;
+		Vector3 mi = this.middleNormalized;
+
+		verts[0] = tl.NormalizeToRadius(Planetoid.PlanetRadius + offset);
+		verts[1] = tr.NormalizeToRadius(Planetoid.PlanetRadius + offset);
+		verts[2] = mi;
+		verts[3] = bl.NormalizeToRadius(Planetoid.PlanetRadius + offset);
+		verts[4] = br.NormalizeToRadius(Planetoid.PlanetRadius + offset);
+
+		return verts;
+	}
+
 	public Vector3[] GetVolumeBox(float height, float offset = 0)
 	{
 		Vector3[] verts = new Vector3[8];
 
-		Vector3 tl = this.topLeftCorner.NormalizeToRadius(Planetoid.PlanetRadius);
-		Vector3 tr = this.topRightCorner.NormalizeToRadius(Planetoid.PlanetRadius);
-		Vector3 bl = this.bottomLeftCorner.NormalizeToRadius(Planetoid.PlanetRadius);
-		Vector3 br = this.bottomRightCorner.NormalizeToRadius(Planetoid.PlanetRadius);
+		Vector3 tl = this.topLeftCorner;
+		Vector3 tr = this.topRightCorner;
+		Vector3 bl = this.bottomLeftCorner;
+		Vector3 br = this.bottomRightCorner;
 
 		verts[0] = tl.NormalizeToRadius(Planetoid.PlanetRadius + height + offset);
 		verts[1] = tr.NormalizeToRadius(Planetoid.PlanetRadius + height + offset);
@@ -398,14 +418,20 @@ public class Quad : MonoBehaviour
 
 	public bool PlaneFrustumCheck(Camera camera)
 	{
-		bool state = false;
-
 		if (Parent == null || !Generated || Splitting)
 			return true;
- 
-		Vector3[] verts = GetFlatBox(Planetoid.TerrainMaxHeight);
 
-		foreach(Vector3 v in verts)
+		Vector3[] verts0 = GetFlatBox(Planetoid.TerrainMaxHeight); //Full sized box to check.
+		Vector3[] verts1 = GetFlatBox(Planetoid.TerrainMaxHeight * 2); //Expanded box for better results, and flickering fix.
+
+		bool state = false;
+
+		foreach (Vector3 v in verts0)
+		{
+			state |= BorderFrustumCheck(camera, v);
+		}
+
+		foreach (Vector3 v in verts1)
 		{
 			state |= BorderFrustumCheck(camera, v);
 		}
@@ -416,31 +442,16 @@ public class Quad : MonoBehaviour
 	public bool BorderFrustumCheck(Camera camera, Vector3 border)
 	{
 		float offset = 128.0f;
-		float disturbtionOffset = 8.0f;
 
 		bool useOffset = true;
-		bool useDisturbtion = false;
 
 		Plane[] planes = GeometryUtility.CalculateFrustumPlanes(camera);
 
 		for (int i = 0; i < planes.Length; i++)
 		{
-			if (useDisturbtion)
+			if (planes[i].GetDistanceToPoint(transform.TransformPoint(border)) <= (useOffset ? 0 - offset : 0))
 			{
-				for (int j = (int)(offset - disturbtionOffset); j < offset + disturbtionOffset; j++)
-				{
-					if (planes[i].GetDistanceToPoint(transform.TransformPoint(border)) <= (useOffset ? 0 - offset + j : 0 + j))
-					{
-						return false;
-					}
-				}
-			}
-			else
-			{
-				if (planes[i].GetDistanceToPoint(transform.TransformPoint(border)) <= (useOffset ? 0 - offset : 0))
-				{
-					return false;
-				}
+				return false;
 			}
 		}
 
@@ -462,8 +473,9 @@ public class Quad : MonoBehaviour
 		GL.PushMatrix();
 		GL.LoadIdentity();
 		GL.MultMatrix(Camera.main.worldToCameraMatrix * transform.localToWorldMatrix);
-		GL.LoadProjectionMatrix(camera.projectionMatrix);
+		GL.LoadProjectionMatrix(Camera.main.projectionMatrix);
 
+		lineMaterial.renderQueue = 5000;
 		lineMaterial.SetPass(0);
 
 		GL.Begin(GL.LINES);

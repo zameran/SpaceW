@@ -4,7 +4,7 @@ using System.Collections.Generic;
 
 public class Planetoid : MonoBehaviour
 {
-	public Proland.Manager manager;
+	public Atmosphere Atmosphere;
 
 	public bool DrawWireframe = false;
 	public bool DrawNormals = false;
@@ -58,7 +58,7 @@ public class Planetoid : MonoBehaviour
 		Origin = transform.position;
 		OriginRotation = QuadsRoot.transform.rotation;
 
-		if (manager != null) manager.origin = Origin;
+		if (Atmosphere != null) Atmosphere.Origin = Origin;
 	}
 
 	private void Start()
@@ -75,7 +75,7 @@ public class Planetoid : MonoBehaviour
 
 	private void Update()
 	{
-		if(Input.GetKeyDown(KeyCode.F1))
+		if (Input.GetKeyDown(KeyCode.F1))
 		{
 			DrawWireframe = !DrawWireframe;
 		}
@@ -90,7 +90,16 @@ public class Planetoid : MonoBehaviour
 		Origin = transform.position;
 		OriginRotation = QuadsRoot.transform.rotation;
 
-		if (manager != null) manager.origin = Origin;
+		if (Atmosphere != null)
+		{
+			Atmosphere.Origin = Origin;
+
+			if (!DrawWireframe)
+			{
+				Atmosphere.Sun.UpdateNode();
+				Atmosphere.UpdateNode();
+			}
+		}
 	}
 
 	private void OnGUI()

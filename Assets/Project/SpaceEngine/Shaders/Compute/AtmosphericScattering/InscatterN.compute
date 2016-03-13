@@ -1,0 +1,56 @@
+﻿// computes higher order scattering (line 9 in algorithm 4.1)
+ 
+#pragma kernel CSMain
+
+#include "Assets/Project/SpaceEngine/Shaders/PreprocessCommon.cginc"
+
+int layer;
+
+Texture3D<float4> deltaJRead;
+
+RWTexture3D<float4> deltaSRWrite;
+
+float3 Integrand(float r, float mu, float muS, float nu, float t) 
+{ 
+    float ri = sqrt(r * r + t * t + 2.0 * r * mu * t); 
+    float mui = (r * mu + t) / ri; 
+    float muSi = (nu * t + muS * r) / ri; 
+
+    return Texture4D(deltaJRead, ri, mui, muSi, nu).rgb * Transmittance(r, mu, t); 
+} 
+ 
+float3 Inscatter(float r, float mu, float muS, float nu) 
+{ 
+    float3 raymie = float3(0, 0, 0); 
+
+    float dx = Limit(r, mu) / float(INSCATTER_INTEGRAL_SAMPLES); 
+    float xi = 0.0; 
+
+    float3 raymiei = Integrand(r, mu, muS, nu, 0.0); 
+    
+    for (int i = 1; i <= INSCATTER_INTEGRAL_SAMPLES; ++i) 
+    { 
+        float xj = float(i) * dx; 
+
+        float3 raymiej = Integrand(r, mu, muS, nu, xj); 
+
+        raymie += (raymiei + raymiej) / 2.0 * dx; 
+        xi = xj; 
+        raymiei = raymiej; 
+    } 
+    
+    return raymie; 
+} 
+
+[numthreads(NUM_THREADS,NUM_THREADS,1)]
+void CSMain (uint3 id : SV_DispatchThreadID)
+{
+    float4 dhdH;
+    float mu, muS, nu, r; 
+    float2 coords = float2(id.xy) + 0.5;  
+    
+    GetLayer(layer, r, dhdH); 
+    GetMuMuSNu(coords, r, dhdH, mu, muS, nu); 
+
+    deltaSRWrite[uint3(id.xy,layer)] = float4(Inscatter(r, mu, muS, nu), 0);
+}
