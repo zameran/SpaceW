@@ -4,10 +4,8 @@ using System.Collections;
 using System.Collections.Generic;
 
 [RequireComponent(typeof(LineRenderer))]
-
 public class PlanetTrail : MonoBehaviour
 {
-
     LineRenderer _lineRenderer;
     Transform _transform;
 
@@ -30,7 +28,6 @@ public class PlanetTrail : MonoBehaviour
 
     IEnumerator UpdateTrail()
     {
-
         if (trailPositions.Count > maxPositionCount) trailPositions.RemoveAt(0);
 
         trailPositions.Add(_transform.position);

@@ -3537,11 +3537,19 @@ float4 ColorMapTerra(float3 ppoint, float height, float slope)
 float HeightMapPlanet(float3 ppoint)
 {
 	float total = 0;
+	float latitude = 0;
+
+	latitude = abs(normalize(ppoint).y);
+	latitude += 0.15 * (Fbm(ppoint * 0.0007 + Randomize) - 1.0);
+	latitude = saturate(latitude);
 
 	float t0 = Fbm(ppoint * 0.75, 4);
 	float v0 = t0 + pow(2.0, RidgedMultifractalExtra(ppoint, 18, 1, 1.75, 0.6));
 
 	total = GetTerraced(v0, 4, 2);
+
+	float iceCap = saturate((latitude / latIceCaps - 1.0) * 50.0 * 1);
+	total = total * 1 + icecapHeight * smoothstep(0.0, 1.0, iceCap);
 
 	return total;
 }
@@ -3551,6 +3559,9 @@ float HeightMapPlanet(float3 ppoint)
 float4 ColorMapPlanet(float3 ppoint, float height, float slope)
 {
 	Surface surf = GetSurfaceColor(height, slope, 1);
+
+	float latitude = 0;
+	float climate = 0;
 
 	float4 slopeColor = float4(0.95, 0.75, 0.25, 0.0) * (1 - slope);
 	float4 lookupColor = tex2Dlod(MaterialTable, float4(height, slope - height, 0, 0));

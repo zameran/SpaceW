@@ -90,7 +90,7 @@
 				//-1.0 + dot(fn.xy, fn.xy) - inverted.
 				fn.z = sqrt(max(0.0, -1.0 + dot(fn.xy, fn.xy)));
 
-				fn = float3(0, 0, 0); //disable normal mapping... bruuuutaal!
+				//fn = float3(0, 0, 0); //disable normal mapping... bruuuutaal!
 				
 				//p = mul(_Object2World, p);
 				//fn = mul(_Object2World, fn);

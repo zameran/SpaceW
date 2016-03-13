@@ -118,8 +118,15 @@ float3 GetHeightNormalFromPosition(QuadGenerationConstants constants, RWStructur
 	float3 ydeltaSlope = normalize(((up - down) + 1.0) * 0.5);
 
 	float3 normal = float3(normalize(cross(xdeltaSlope, ydeltaSlope)).xy, 0.5);
+	
+	//OMG! IT WORKS! Results like in proland!
+	//Now i'am gonna sleep...
+	float longtitude = normalize(buffer[id.x + id.y * size].pos.z) + constants.patchCubeCenter.z * constants.planetRadius;
 
-	normal.z = sqrt(max(0.0, 1.0 - dot(normal.xy, normal.xy)));
+	if(longtitude > 0)
+		normal.z = sqrt(max(0.0, 1.0 - dot(normal.xy, normal.xy)));
+	else
+		normal.z = sqrt(max(0.0, -1.0 + dot(normal.xy, normal.xy)));
 
 	return normal;
 }

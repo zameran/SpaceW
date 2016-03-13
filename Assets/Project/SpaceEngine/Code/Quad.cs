@@ -421,22 +421,24 @@ public class Quad : MonoBehaviour
 		if (Parent == null || !Generated || Splitting)
 			return true;
 
-		Vector3[] verts0 = GetFlatBox(Planetoid.TerrainMaxHeight); //Full sized box to check.
-		Vector3[] verts1 = GetFlatBox(Planetoid.TerrainMaxHeight * 2); //Expanded box for better results, and flickering fix.
+		Vector3[] verts0 = GetFlatBoxWithMiddle(Planetoid.TerrainMaxHeight); //Full sized box to check.
+		Vector3[] verts1 = GetFlatBox(Planetoid.TerrainMaxHeight / 2); //Smaller box for better results, and flickering fix.
 
-		bool state = false;
+		Vector3[] vertsAll = new Vector3[verts0.Length + verts1.Length];
 
-		foreach (Vector3 v in verts0)
+		Array.Copy(verts0, vertsAll, verts0.Length);
+		Array.Copy(verts1, 0, vertsAll, verts0.Length, verts1.Length);
+
+		bool[] states = new bool[vertsAll.Length];
+
+		states.All(s => s = false);
+
+		for (int i = 0; i < states.Length; i++)
 		{
-			state |= BorderFrustumCheck(camera, v);
+			states[i] = BorderFrustumCheck(camera, vertsAll[i]);
 		}
 
-		foreach (Vector3 v in verts1)
-		{
-			state |= BorderFrustumCheck(camera, v);
-		}
-
-		return state;
+		return states.Any(s => s == true); ;
 	}
 
 	public bool BorderFrustumCheck(Camera camera, Vector3 border)
