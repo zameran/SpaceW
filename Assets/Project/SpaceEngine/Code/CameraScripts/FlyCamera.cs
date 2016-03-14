@@ -189,7 +189,7 @@ public class FlyCamera : MonoBehaviour
 
         Vector3 position = rotation * distanceVector + planetoidGameObject.transform.position;
 
-        transform.rotation = Quaternion.Slerp(transform.rotation, rotation, Time.fixedDeltaTime * rotationSpeed);
-        transform.position = Vector3.Slerp(transform.position, position, (Time.deltaTime * rotationSpeed) * 10);
+        transform.rotation = Quaternion.Slerp(transform.rotation, rotation, (Time.fixedDeltaTime * rotationSpeed) * 10);
+        transform.position = Vector3.Slerp(transform.position, position, (Time.deltaTime * rotationSpeed) * 5);
     }
 }
