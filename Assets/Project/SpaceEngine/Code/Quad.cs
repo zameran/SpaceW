@@ -453,7 +453,7 @@ public class Quad : MonoBehaviour
 
 		GL.PushMatrix();
 		GL.LoadIdentity();
-		GL.MultMatrix(Camera.main.worldToCameraMatrix * transform.localToWorldMatrix);
+		GL.MultMatrix(Camera.main.worldToCameraMatrix * Planetoid.transform.localToWorldMatrix);
 		GL.LoadProjectionMatrix(Camera.main.projectionMatrix);
 
 		lineMaterial.renderQueue = 5000;
