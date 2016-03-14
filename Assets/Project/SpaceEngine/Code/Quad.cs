@@ -333,6 +333,7 @@ public class Quad : MonoBehaviour
 		Planetoid.Atmosphere.SetUniforms(QuadMaterial);
 
 		QuadMaterial.SetBuffer("data", OutDataBuffer);
+		QuadMaterial.SetBuffer("quadGenerationConstants", QuadGenerationConstantsBuffer);
 		QuadMaterial.SetTexture("_HeightTexture", HeightTexture);
 		QuadMaterial.SetTexture("_NormalTexture", NormalTexture);
 		QuadMaterial.SetFloat("_Wireframe", Planetoid.DrawWireframe ? 1.0f : 0.0f);

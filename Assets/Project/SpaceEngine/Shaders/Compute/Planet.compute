@@ -113,22 +113,19 @@ float3 GetHeightNormalFromPosition(QuadGenerationConstants constants, RWStructur
 	float3 right = buffer[(id.x + 2) + (id.y + 1) * size].pos.xyz * constants.lodLevel;
 	float3 up	 = buffer[(id.x + 1) + (id.y + 0) * size].pos.xyz * constants.lodLevel;
 	float3 down  = buffer[(id.x + 1) + (id.y + 2) * size].pos.xyz * constants.lodLevel;
+	float3 curr	 = buffer[(id.x + 1) + (id.y + 1) * size].pos.xyz * constants.lodLevel;
 
-	float3 xdeltaSlope = normalize(((left - right) + 1.0) * 0.5);	
-	float3 ydeltaSlope = normalize(((up - down) + 1.0) * 0.5);
+	float3 e0 = curr - left;
+	float3 e1 = curr - right;
+	float3 e2 = curr - up;
+	float3 e3 = curr - down;
 
-	float3 normal = float3(normalize(cross(xdeltaSlope, ydeltaSlope)).xy, 0.5);
-	
-	//OMG! IT WORKS! Results like in proland!
-	//Now i'am gonna sleep...
-	float longtitude = normalize(buffer[id.x + id.y * size].pos.z) + constants.patchCubeCenter.z * constants.planetRadius;
+	float3 n0 = cross(e0, e2);
+	float3 n1 = cross(e1, e3);
 
-	if(longtitude > 0)
-		normal.z = sqrt(max(0.0, 1.0 - dot(normal.xy, normal.xy)));
-	else
-		normal.z = sqrt(max(0.0, -1.0 + dot(normal.xy, normal.xy)));
+	float3 n = normalize(n0 + n1);
 
-	return normal;
+	return -n;
 }
 
 #pragma kernel HeightMain
