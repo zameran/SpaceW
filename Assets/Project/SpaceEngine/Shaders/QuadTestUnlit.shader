@@ -64,7 +64,8 @@
 			uniform sampler2D _HeightTexture;
 			uniform sampler2D _NormalTexture;
 
-			uniform float4x4 _WorldToTangentFrame;
+			uniform float3 _Rotation;
+
 			uniform float3 _Origin;
 
 			#ifdef SHADER_API_D3D11
@@ -104,13 +105,16 @@
 				float3 sunL = 0;
 				float3 skyE = 0;
 
-				SunRadianceAndSkyIrradiance(p, fn, WSD, sunL, skyE);
+				float3 rotatedPointY = Rotate(_Rotation.y, float3(0, 1, 0), p); //Vertex rotation on Y axis. Just for testing.
+				float3 rotatedPoint = rotatedPointY;
+
+				SunRadianceAndSkyIrradiance(rotatedPoint, fn, WSD, sunL, skyE);
 
 				float cTheta = dot(fn, WSD); // diffuse ground color
 
 				float3 groundColor = 1.5 * reflectance.rgb * (sunL * max(cTheta, 0.1) + skyE) / M_PI;
 				float3 extinction;
-				float4 inscatter = InScattering(WCP, p, WSD, extinction, 1.0);
+				float4 inscatter = InScattering(WCP, rotatedPoint, WSD, extinction, 1.0);
 				float4 finalColor = float4(groundColor, 1) * float4(extinction, 1) + inscatter;
 				
 				return finalColor;
@@ -131,9 +135,6 @@
 				v.vertex = position;
 				v.tangent = float4(FindTangent(normal, 0.01, float3(0, 1, 0)), 1);
 				v.normal = normal;
-
-				//v.tangent.xyz = mul(v.tangent.xyz, _WorldToTangentFrame);
-				//v.normal.xyz = mul(v.normal.xyz, _WorldToTangentFrame);
 
 				//v.tangent.xyz += position.xyz;
 				//v.normal.xyz += position.xyz;
