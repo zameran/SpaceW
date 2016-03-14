@@ -71,30 +71,11 @@ public class Quad : MonoBehaviour
 		public int ID;
 		public int Position;
 
-		public string Name;
-
-		public Vector3 cubeFaceEastDirection;
-		public Vector3 cubeFaceNorthDirection;
-		public Vector3 patchCubeCenter;
-
 		public Id(int LODLevel, int ID, int Position)
 		{
 			this.LODLevel = LODLevel;
 			this.ID = ID;
 			this.Position = Position;
-		}
-
-		public Id(int LODLevel, int ID, int Position, string Name, Vector3 cubeFaceEastDirection, Vector3 cubeFaceNorthDirection, Vector3 patchCubeCenter)
-		{
-			this.LODLevel = LODLevel;
-			this.ID = ID;
-			this.Position = Position;
-
-			this.Name = Name;
-
-			this.cubeFaceEastDirection = cubeFaceEastDirection;
-			this.cubeFaceNorthDirection = cubeFaceNorthDirection;
-			this.patchCubeCenter = patchCubeCenter;
 		}
 
 		public int Compare(Id id)
@@ -104,10 +85,17 @@ public class Quad : MonoBehaviour
 
 		public bool Equals(Id id)
 		{
-			return (LODLevel == id.LODLevel && ID == id.ID && Position == id.Position && Name == id.Name &&
-					cubeFaceEastDirection == id.cubeFaceEastDirection &&
-					cubeFaceNorthDirection == id.cubeFaceNorthDirection &&
-					patchCubeCenter == id.patchCubeCenter);
+			if (ReferenceEquals(this, id))
+			{
+				return true;
+			}
+
+			if ((this == null) || (id == null))
+			{
+				return false;
+			}
+
+			return (this.LODLevel == id.LODLevel && this.ID == id.ID && this.Position == id.Position);
 		}
 
 		public override int GetHashCode()
@@ -180,19 +168,9 @@ public class Quad : MonoBehaviour
 	public delegate void QuadDelegate(Quad q);
 	public event QuadDelegate DispatchStarted, DispatchReady, GPUGetDataReady;
 
-	public Id GetId()
+	public Quad.Id GetId()
 	{
-		return GetId(LODLevel, (int)ID, (int)Position, gameObject.name,
-					 generationConstants.cubeFaceEastDirection,
-					 generationConstants.cubeFaceNorthDirection,
-					 generationConstants.patchCubeCenter);
-	}
-
-	public static Id GetId(int LODLevel, int ID, int Position, string Name, Vector3 cubeFaceEastDirection, 
-																			Vector3 cubeFaceNorthDirection, 
-																			Vector3 patchCubeCenter)
-	{
-		return new Id(LODLevel, ID, Position, Name, cubeFaceEastDirection, cubeFaceEastDirection, cubeFaceNorthDirection);
+		return new Quad.Id(LODLevel, (int)ID, (int)Position);
 	}
 
 	private void QuadDispatchStarted(Quad q)
@@ -330,7 +308,7 @@ public class Quad : MonoBehaviour
 		SetupBounds(this, QuadMesh);
 
 		Planetoid.Atmosphere.InitUniforms(QuadMaterial);
-		Planetoid.Atmosphere.SetUniforms(QuadMaterial);
+		Planetoid.Atmosphere.SetUniformsForPlanetQuad(QuadMaterial);
 
 		QuadMaterial.SetBuffer("data", OutDataBuffer);
 		QuadMaterial.SetBuffer("quadGenerationConstants", QuadGenerationConstantsBuffer);
@@ -363,10 +341,10 @@ public class Quad : MonoBehaviour
 	{
 		Vector3[] verts = new Vector3[4];
 
-		Vector3 tl = this.topLeftCorner;
-		Vector3 tr = this.topRightCorner;
-		Vector3 bl = this.bottomLeftCorner;
-		Vector3 br = this.bottomRightCorner;
+		Vector3 tl = topLeftCorner;
+		Vector3 tr = topRightCorner;
+		Vector3 bl = bottomLeftCorner;
+		Vector3 br = bottomRightCorner;
 
 		verts[0] = tl.NormalizeToRadius(Planetoid.PlanetRadius + offset);
 		verts[1] = tr.NormalizeToRadius(Planetoid.PlanetRadius + offset);
@@ -380,11 +358,11 @@ public class Quad : MonoBehaviour
 	{
 		Vector3[] verts = new Vector3[5];
 
-		Vector3 tl = this.topLeftCorner;
-		Vector3 tr = this.topRightCorner;
-		Vector3 bl = this.bottomLeftCorner;
-		Vector3 br = this.bottomRightCorner;
-		Vector3 mi = this.middleNormalized;
+		Vector3 tl = topLeftCorner;
+		Vector3 tr = topRightCorner;
+		Vector3 bl = bottomLeftCorner;
+		Vector3 br = bottomRightCorner;
+		Vector3 mi = middleNormalized;
 
 		verts[0] = tl.NormalizeToRadius(Planetoid.PlanetRadius + offset);
 		verts[1] = tr.NormalizeToRadius(Planetoid.PlanetRadius + offset);
@@ -399,10 +377,10 @@ public class Quad : MonoBehaviour
 	{
 		Vector3[] verts = new Vector3[8];
 
-		Vector3 tl = this.topLeftCorner;
-		Vector3 tr = this.topRightCorner;
-		Vector3 bl = this.bottomLeftCorner;
-		Vector3 br = this.bottomRightCorner;
+		Vector3 tl = topLeftCorner;
+		Vector3 tr = topRightCorner;
+		Vector3 bl = bottomLeftCorner;
+		Vector3 br = bottomRightCorner;
 
 		verts[0] = tl.NormalizeToRadius(Planetoid.PlanetRadius + height + offset);
 		verts[1] = tr.NormalizeToRadius(Planetoid.PlanetRadius + height + offset);
@@ -645,6 +623,9 @@ public class Quad : MonoBehaviour
 
 		generationConstants.LODLevel = (((1 << LODLevel + 2) * (Planetoid.PlanetRadius / (LODLevel + 2)) - ((Planetoid.PlanetRadius / (LODLevel + 2)) / 2)) / Planetoid.PlanetRadius);
 		generationConstants.orientation = (float)Position;
+
+		bool cached = Planetoid.Cache.ExistInTexturesCache(this);
+		if (cached) Log("Textures founded in cache!"); else Log("Textures not found in cache!");
 
 		QuadGenerationConstants[] quadGenerationConstantsData = new QuadGenerationConstants[] { generationConstants };
 		OutputStruct[] preOutputStructData = new OutputStruct[QS.nVertsReal];

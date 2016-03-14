@@ -12,6 +12,8 @@ public class AtmosphereSun : MonoBehaviour
 
     bool HasMoved = false;
 
+    public Vector3 Origin;
+
     public Vector3 GetDirection()
     {
         return transform.forward;
@@ -53,7 +55,7 @@ public class AtmosphereSun : MonoBehaviour
         }
 
         Quaternion q = Quaternion.FromToRotation(GetDirection(), Z_AXIS);
-        WorldToLocalRotation = Matrix4x4.TRS(Vector3.zero, q, Vector3.one);
+        WorldToLocalRotation = Matrix4x4.TRS(Vector3.zero + Origin, q, Vector3.one);
     }
 
     public void SetUniforms(Material mat)

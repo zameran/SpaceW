@@ -35,7 +35,8 @@ public class QuadTextureCache : QuadCache
         }
         else
         {
-
+            Graphics.Blit(this.HeightTexture, q.HeightTexture);
+            Graphics.Blit(this.NormalTexture, q.NormalTexture);
         }
 
         base.TransferTo(q);
@@ -53,7 +54,8 @@ public class QuadTextureCache : QuadCache
         }
         else
         {
-
+            Graphics.Blit(q.HeightTexture, this.HeightTexture);
+            Graphics.Blit(q.NormalTexture, this.NormalTexture);
         }
 
         base.TransferTo(q);

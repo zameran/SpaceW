@@ -16,7 +16,6 @@ public class Planetoid : MonoBehaviour
 	public float PlanetRadius = 1024;
 
 	public bool DebugEnabled = false;
-	public bool DebugExtra = false;
 
 	public List<Quad> MainQuads = new List<Quad>();
 	public List<Quad> Quads = new List<Quad>();

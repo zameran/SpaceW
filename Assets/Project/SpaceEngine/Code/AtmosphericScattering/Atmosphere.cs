@@ -89,6 +89,8 @@ public class Atmosphere : MonoBehaviour
             }
         }
 
+        Sun.Origin = Origin;
+
         SetUniforms(SkyMaterial);
 
         Graphics.DrawMesh(AtmosphereMesh, transform.localToWorldMatrix, SkyMaterial, 0);
@@ -207,6 +209,37 @@ public class Atmosphere : MonoBehaviour
 
         mat.SetVector("_Globals_Origin", -Origin);
         mat.SetFloat("_Exposure", HDRExposure);     
+
+        if (Sun != null)
+        {
+            mat.SetMatrix("_Sun_WorldToLocal", Sun.GetWorldToLocalRotation());
+            Sun.SetUniforms(mat);
+        }
+    }
+
+    public void SetUniformsForPlanetQuad(Material mat)
+    {
+        if (mat == null) return;
+
+        mat.SetFloat("scale", Rg / AtmosphereRadius);
+        mat.SetFloat("Rg", Rg);
+        mat.SetFloat("Rt", Rt);
+        mat.SetFloat("RL", Rl);
+        mat.SetVector("betaR", betaR / 1000.0f);
+        mat.SetFloat("mieG", Mathf.Clamp(mieG, 0.0f, 0.99f));
+        mat.SetTexture("_Sky_Transmittance", Transmittance);
+        mat.SetTexture("_Sky_Inscatter", Inscatter);
+        mat.SetTexture("_Sky_Irradiance", Irradiance);
+        mat.SetTexture("_Sky_Map", null);
+
+        mat.SetMatrix("_Globals_WorldToCamera", Camera.main.GetWorldToCamera());
+        mat.SetMatrix("_Globals_CameraToWorld", Camera.main.GetCameraToWorld());
+        mat.SetMatrix("_Globals_CameraToScreen", Camera.main.GetCameraToScreen());
+        mat.SetMatrix("_Globals_ScreenToCamera", Camera.main.GetScreenToCamera());
+        mat.SetVector("_Globals_WorldCameraPos", Camera.main.transform.position - Origin); // Apply origin to vector on planetoid quads. 
+
+        mat.SetVector("_Globals_Origin", -Origin);
+        mat.SetFloat("_Exposure", HDRExposure);
 
         if (Sun != null)
         {

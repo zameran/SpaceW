@@ -1,5 +1,8 @@
 ﻿using UnityEngine;
 
+using System;
+
+[Serializable]
 public class QuadFullCache : QuadCache
 {
     public QuadCBCache QuadComputeBuffers;
