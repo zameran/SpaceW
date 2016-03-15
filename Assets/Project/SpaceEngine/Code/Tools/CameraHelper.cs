@@ -12,26 +12,30 @@ public static class CameraHelper
         return camera.cameraToWorldMatrix;
     }
 
-    public static Matrix4x4 GetCameraToScreen(this Camera camera)
+    public static Matrix4x4 GetCameraToScreen(this Camera camera, bool useRTFix = false)
     {
         Matrix4x4 p = camera.projectionMatrix;
-        bool d3d = SystemInfo.graphicsDeviceVersion.IndexOf("Direct3D") > -1;
 
-        if (d3d)
+        if (useRTFix)
         {
-            if (camera.actualRenderingPath == RenderingPath.DeferredLighting)
+            bool d3d = SystemInfo.graphicsDeviceVersion.IndexOf("Direct3D") > -1;
+
+            if (d3d)
             {
-                // Invert Y for rendering to a render texture
+                if (camera.actualRenderingPath == RenderingPath.DeferredLighting)
+                {
+                    // Invert Y for rendering to a render texture
+                    for (int i = 0; i < 4; i++)
+                    {
+                        p[1, i] = -p[1, i];
+                    }
+                }
+
+                // Scale and bias depth range
                 for (int i = 0; i < 4; i++)
                 {
-                    p[1, i] = -p[1, i];
+                    p[2, i] = p[2, i] * 0.5f + p[3, i] * 0.5f;
                 }
-            }
-
-            // Scale and bias depth range
-            for (int i = 0; i < 4; i++)
-            {
-                p[2, i] = p[2, i] * 0.5f + p[3, i] * 0.5f;
             }
         }
 

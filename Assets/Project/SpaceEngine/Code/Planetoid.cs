@@ -70,6 +70,11 @@ public class Planetoid : MonoBehaviour
 
 		if (NPS != null)
 			NPS.LoadAndInit();
+
+        foreach (Quad q in MainQuads)
+        {
+            Atmosphere.InitUniforms(q.QuadMaterial);
+        }
 	}
 
 	private void Update()
@@ -158,6 +163,19 @@ public class Planetoid : MonoBehaviour
 
 		BackPrototypeMesh = MeshFactory.SetupQuadMesh(QS.nVertsPerEdge, MeshFactory.PLANE.XY, invert); //MeshFactory.MakePlane(QS.nVertsPerEdge, QS.nVertsPerEdge, MeshFactory.PLANE.XY, uv_01, false, invert);
 	}
+
+    public int GetCulledQuadsCount()
+    {
+        int count = 0;
+
+        for (int i = 0; i < Quads.Count; i++)
+        {
+            if (!Quads[i].Visible)
+                count++;
+        }
+
+        return count;
+    }
 
 	public Quad GetMainQuad(QuadPostion position)
 	{
@@ -258,9 +276,9 @@ public class Planetoid : MonoBehaviour
 		quadComponent.CoreShader = CoreShader;
 		quadComponent.Planetoid = this;
 		quadComponent.QuadMesh = mesh;
-		quadComponent.QuadMaterial = material;
+		quadComponent.QuadMaterial = material;       
 
-		QuadGenerationConstants gc = QuadGenerationConstants.Init(TerrainMaxHeight);
+        QuadGenerationConstants gc = QuadGenerationConstants.Init(TerrainMaxHeight);
 		gc.planetRadius = PlanetRadius;
 
 		gc.cubeFaceEastDirection = quadComponent.GetCubeFaceEastDirection(quadPosition);
@@ -297,8 +315,9 @@ public class Planetoid : MonoBehaviour
 		quadComponent.QuadMesh = mesh;
 		quadComponent.QuadMaterial = material;
 		quadComponent.SetupCorners(quadPosition);
+        Atmosphere.InitUniforms(quadComponent.QuadMaterial);
 
-		QuadGenerationConstants gc = QuadGenerationConstants.Init(TerrainMaxHeight);
+        QuadGenerationConstants gc = QuadGenerationConstants.Init(TerrainMaxHeight);
 		gc.planetRadius = PlanetRadius;
 
 		quadComponent.Position = quadPosition;
