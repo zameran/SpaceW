@@ -157,8 +157,8 @@ public class FlyCamera : MonoBehaviour
             {
                 float h = (distanceToPlanetCore - planetoid.PlanetRadius);
 
-                cameraComponent.nearClipPlane = Mathf.Clamp(0.1f * h, 0.01f, 1000.0f);
-                cameraComponent.farClipPlane = Mathf.Clamp(1e6f * h, 1000.0f, 1e10f);
+                cameraComponent.nearClipPlane = Mathf.Clamp(0.1f * Mathf.Abs(h), 0.01f, 1000.0f);
+                cameraComponent.farClipPlane = Mathf.Clamp(1e6f * Mathf.Abs(h), 1000.0f, 1e8f);
             }
             else
             {
