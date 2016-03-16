@@ -133,16 +133,21 @@ namespace NBody
 
                         // Determine if the body is contained within the bounds of the subtree under 
                         // consideration. 
-                        if (Math.Abs(subtreeLocation.X - body.Location.X) <= subtreeWidth / 2
-                         && Math.Abs(subtreeLocation.Y - body.Location.Y) <= subtreeWidth / 2
-                         && Math.Abs(subtreeLocation.Z - body.Location.Z) <= subtreeWidth / 2)
+                        if (Math.Abs(subtreeLocation.X - body.Location.X) <= subtreeWidth / 2 && 
+                            Math.Abs(subtreeLocation.Y - body.Location.Y) <= subtreeWidth / 2 && 
+                            Math.Abs(subtreeLocation.Z - body.Location.Z) <= subtreeWidth / 2)
                         {
 
                             if (_subtrees[subtreeIndex] == null)
+                            {
                                 _subtrees[subtreeIndex] = new Octree(subtreeLocation, subtreeWidth);
+                            }
+
                             _subtrees[subtreeIndex].Add(body);
+
                             return;
                         }
+
                         subtreeIndex++;
                     }
                 }
@@ -178,12 +183,14 @@ namespace NBody
                 body.Acceleration.Y += normAcc * dy;
                 body.Acceleration.Z += normAcc * dz;
             }
-
-            // Case 3. More granularity is needed so we accelerate at the subtrees. 
-            else if (_subtrees != null)
-                foreach (Octree subtree in _subtrees)
-                    if (subtree != null)
-                        subtree.Accelerate(body);
+            else if (_subtrees != null) // Case 3. More granularity is needed so we accelerate at the subtrees.
+            {
+                for (int i = 0; i < _subtrees.Length; i++)
+                {
+                    if (_subtrees[i] != null)
+                        _subtrees[i].Accelerate(body);
+                }
+            }
         }
 
         /// <summary>
@@ -192,13 +199,16 @@ namespace NBody
         public void Draw()
         {
             Gizmos.color = Color.red;
-            Gizmos.DrawWireCube(_location, 
-                                new Vector3((float)_width, (float)_width, (float)_width));
+            Gizmos.DrawWireCube(_location, new Vector3((float)_width, (float)_width, (float)_width));
 
             if (_subtrees != null)
-                foreach (Octree subtree in _subtrees)
-                    if (subtree != null)
-                        subtree.Draw();
+            {
+                for (int i = 0; i < _subtrees.Length; i++)
+                {
+                    if (_subtrees[i] != null)
+                        _subtrees[i].Draw();
+                }
+            }
         }
     }
 }

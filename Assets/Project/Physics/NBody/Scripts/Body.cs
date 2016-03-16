@@ -101,7 +101,9 @@ namespace NBody
                 // Apply relativistic velocity addition. 
                 Vector parallelAcc = Vector.Projection(Acceleration, Velocity);
                 Vector orthogonalAcc = Vector.Rejection(Acceleration, Velocity);
+
                 double alpha = Math.Sqrt(1 - Math.Pow(speed / World.C, 2));
+
                 Velocity = (Velocity + parallelAcc + alpha * orthogonalAcc) / (1 + Vector.Dot(Velocity, Acceleration) / (World.C * World.C));
             }
 
@@ -125,6 +127,7 @@ namespace NBody
             Velocity += point;
             Velocity = Velocity.Rotate(point, direction, angle);
             Velocity -= point;
+
             Acceleration += point;
             Acceleration = Acceleration.Rotate(point, direction, angle);
             Acceleration -= point;

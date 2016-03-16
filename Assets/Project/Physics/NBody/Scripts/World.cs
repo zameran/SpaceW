@@ -142,17 +142,13 @@ namespace NBody
                 // slightly larger than twice the determined half width. 
                 _tree = new Octree(2.1 * halfWidth);
 
-                foreach (Body body in _bodies)
+                for (int i = 0; i < _bodies.Length; i++)
                 {
-                    if (body != null)
-                        _tree.Add(body);
-                }
-
-                // Accelerate the bodies in parallel. 
-                foreach (Body b in _bodies)
-                {
-                    if (b != null)
-                        _tree.Accelerate(b);
+                    if(_bodies[i] != null)
+                    {
+                        _tree.Add(_bodies[i]);
+                        _tree.Accelerate(_bodies[i]);
+                    }
                 }
             }
         }
