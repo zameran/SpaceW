@@ -2,13 +2,23 @@ using System.Collections.Generic;
 
 using UnityEngine;
 
-public class DetectLeaksGUI : DebugGUI
+public class DebugLeaksGUI : DebugGUI
 {
     private Vector2 ScrollPosition;
 
-    private void OnGUI()
+    protected override void Awake()
     {
-        GUI.depth = -100;
+        base.Awake();
+    }
+
+    protected override void Start()
+    {
+        base.Start();
+    }
+
+    protected override void OnGUI()
+    {
+        base.OnGUI();
 
         GUILayout.BeginArea(debugInfoBounds);
 
@@ -41,7 +51,7 @@ public class DetectLeaksGUI : DebugGUI
 
             foreach (KeyValuePair<string, int> entry in myList)
             {
-                GUILayoutExtensions.LabelWithSpace(entry.Key + ": " + entry.Value, -10);
+                GUILayoutExtensions.LabelWithSpace(entry.Key + " : " + entry.Value, -10);
             }
 
         }

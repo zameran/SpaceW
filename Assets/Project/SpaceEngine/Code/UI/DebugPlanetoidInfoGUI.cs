@@ -1,15 +1,25 @@
 ﻿using UnityEngine;
 
-public class PlanetoidInfoGUI : DebugGUI
+public class DebugPlanetoidInfoGUI : DebugGUI
 {
     public Planetoid Planetoid;
 
-    private void OnGUI()
+    protected override void Awake()
     {
+        base.Awake();
+    }
+
+    protected override void Start()
+    {
+        base.Start();
+    }
+
+    protected override void OnGUI()
+    {
+        base.OnGUI();
+
         if (Planetoid != null)
         {
-            GUI.depth = -100;
-
             int quadsCount = Planetoid.Quads.Count;
             int quadsCulledCount = Planetoid.GetCulledQuadsCount();
             int vertsRendered = (quadsCount - quadsCulledCount) * QS.nVerts;

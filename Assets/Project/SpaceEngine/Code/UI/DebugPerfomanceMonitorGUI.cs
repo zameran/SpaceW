@@ -2,11 +2,21 @@
 
 using ZFramework.Unity.Common.PerfomanceMonitor;
 
-public class PerfomanceMonitorGUI : DebugGUI
+public class DebugPerfomanceMonitorGUI : DebugGUI
 {
-    void OnGUI()
+    protected override void Awake()
     {
-        GUI.depth = -100;
+        base.Awake();
+    }
+
+    protected override void Start()
+    {
+        base.Start();
+    }
+
+    protected override void OnGUI()
+    {
+        base.OnGUI();
 
         using (new Timer("Monitor GUI Draw"))
         {

@@ -155,7 +155,7 @@ public class Quad : MonoBehaviour
 	public bool ReadyForDispatch = false;
 	public bool Splitting = false;
 	public bool Unsplitted = false;
-    public bool Visible = false;
+	public bool Visible = false;
 
 	public float lodUpdateInterval = 0.25f;
 	public float lastLodUpdateTime = 0.00f;
@@ -207,7 +207,7 @@ public class Quad : MonoBehaviour
 		NormalTexture = RTExtensions.CreateRTexture(QS.nVertsPerEdgeSub, 0);
 
 		RTUtility.ClearColor(new RenderTexture[] { HeightTexture, NormalTexture });
-    }
+	}
 
 	private void Start()
 	{
@@ -324,9 +324,9 @@ public class Quad : MonoBehaviour
 
 		if (Generated && ShouldDraw)
 		{
-            Visible = PlaneFrustumCheck(Camera.main);
+			Visible = PlaneFrustumCheck(Camera.main);
 
-            if (QuadMesh != null)
+			if (QuadMesh != null)
 			{
 				if (Planetoid.RenderPerUpdate)
 					Graphics.DrawMesh(QuadMesh, Planetoid.Origin, Planetoid.OriginRotation, QuadMaterial, 0, Camera.main, 0, null, true, true);
@@ -335,7 +335,7 @@ public class Quad : MonoBehaviour
 					if (Visible)
 						Graphics.DrawMeshNow(QuadMesh, Planetoid.Origin, Planetoid.OriginRotation);
 				}
-            }
+			}
 		}
 	}
 
@@ -689,23 +689,23 @@ public class Quad : MonoBehaviour
 			return false;
 	}
 
-    private void SetupComputeShader(int kernel, ComputeBuffer QuadGenerationConstantsBuffer, ComputeBuffer PreOutDataBuffer, ComputeBuffer PreOutDataSubBuffer, ComputeBuffer OutDataBuffer)
-    {
-        if (CoreShader == null) return;
+	private void SetupComputeShader(int kernel, ComputeBuffer QuadGenerationConstantsBuffer, ComputeBuffer PreOutDataBuffer, ComputeBuffer PreOutDataSubBuffer, ComputeBuffer OutDataBuffer)
+	{
+		if (CoreShader == null) return;
 
-        CoreShader.SetBuffer(kernel, "quadGenerationConstants", QuadGenerationConstantsBuffer);
-        CoreShader.SetBuffer(kernel, "patchPreOutput", PreOutDataBuffer);
-        CoreShader.SetBuffer(kernel, "patchPreOutputSub", PreOutDataSubBuffer);
-        CoreShader.SetBuffer(kernel, "patchOutput", OutDataBuffer);
+		CoreShader.SetBuffer(kernel, "quadGenerationConstants", QuadGenerationConstantsBuffer);
+		CoreShader.SetBuffer(kernel, "patchPreOutput", PreOutDataBuffer);
+		CoreShader.SetBuffer(kernel, "patchPreOutputSub", PreOutDataSubBuffer);
+		CoreShader.SetBuffer(kernel, "patchOutput", OutDataBuffer);
 
-        CoreShader.SetTexture(kernel, "Height", HeightTexture);
-        CoreShader.SetTexture(kernel, "Normal", NormalTexture);
+		CoreShader.SetTexture(kernel, "Height", HeightTexture);
+		CoreShader.SetTexture(kernel, "Normal", NormalTexture);
 
-        Planetoid.NPS.SetUniforms(CoreShader, kernel);
+		Planetoid.NPS.SetUniforms(CoreShader, kernel);
 
-        if (Planetoid.transform.GetComponentInChildren<TCCommonParametersSetter>() != null)
-            Planetoid.transform.GetComponentInChildren<TCCommonParametersSetter>().UpdateUniforms(CoreShader);
-    }
+		if (Planetoid.transform.GetComponentInChildren<TCCommonParametersSetter>() != null)
+			Planetoid.transform.GetComponentInChildren<TCCommonParametersSetter>().UpdateUniforms(CoreShader);
+	}
 
 	public void SetupVectors(Quad quad, int id, bool staticX, bool staticY, bool staticZ)
 	{

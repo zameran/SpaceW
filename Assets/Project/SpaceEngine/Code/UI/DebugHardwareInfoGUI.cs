@@ -1,26 +1,23 @@
 using UnityEngine;
 
 [ExecuteInEditMode]
-public class HardwareInfoGUI : DebugGUI
+public class DebugHardwareInfoGUI : DebugGUI
 {
-    private void Awake()
+    protected override void Awake()
     {
-        Setup();
+        base.Awake();
+
+        SI.Get();
     }
 
-    private void Start()
+    protected override void Start()
     {
-        Setup();
+        base.Start();
     }
 
-    private void OnEnable()
+    protected override void OnGUI()
     {
-        Setup();
-    }
-
-    private void OnGUI()
-    {
-        GUI.depth = -100;
+        base.OnGUI();
 
         GUILayout.BeginArea(debugInfoBounds);
 
@@ -50,11 +47,6 @@ public class HardwareInfoGUI : DebugGUI
         GUILayoutExtensions.LabelWithSpace("Depth Textures: " + SI.supportsDepthRenderTextureFormat, -10);
 
         GUILayout.EndArea();
-    }
-
-    private static void Setup()
-    {
-        SI.Get();
     }
 }
 
