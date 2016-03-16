@@ -302,7 +302,7 @@ public class Quad : MonoBehaviour
 	{
 		if (ReadyForDispatch)
 		{
-			if (!Generated)
+			if (!Generated && !Planetoid.Cache.Working)
 				Dispatch();
 		}
 

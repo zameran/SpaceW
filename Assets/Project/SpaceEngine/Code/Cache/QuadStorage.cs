@@ -7,11 +7,14 @@ using System.Collections.Generic;
 public class QuadStorage : MonoBehaviour
 {
     public bool Multithreaded = false;
+    public bool Working = false;
 
     public List<QuadTextureCache> TexturesCache = new List<QuadTextureCache>();
 
     public void AddToTexturesCache(Quad q)
     {
+        Working = true;
+
         if (!ExistInTexturesCache(q))
         {
             QuadTextureCache qtc = new QuadTextureCache(q.GetId(), this);
@@ -20,12 +23,18 @@ public class QuadStorage : MonoBehaviour
 
             TexturesCache.Add(qtc);
         }
+
+        Working = false;
     }
 
     public void GetFromTexturesCache(Quad q)
     {
+        Working = true;
+
         QuadTextureCache qtc = TexturesCache.Find(s => s.ID.Equals(q.GetId()));
         qtc.TransferTo(q);
+
+        Working = false;
     }
 
     public bool ExistInTexturesCache(Quad q)
