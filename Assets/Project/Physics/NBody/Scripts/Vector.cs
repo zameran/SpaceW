@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
 
+using UnityEngine;
+
 namespace NBody
 {
     [StructLayout(LayoutKind.Sequential)]
@@ -94,6 +96,11 @@ namespace NBody
             return !object.Equals(a, b);
         }
 
+        public static implicit operator Vector3(Vector v)
+        {
+            return new Vector3((float)v.X, (float)v.Y, (float)v.Z);
+        }
+
         public static double Dot(Vector a, Vector b)
         {
             return (((a.X * b.X) + (a.Y * b.Y)) + (a.Z * b.Z));
@@ -149,7 +156,7 @@ namespace NBody
 
         public Vector Unit()
         {
-            return (Vector)(this / this.Magnitude());
+            return (this / this.Magnitude());
         }
 
         public double Magnitude()
@@ -160,16 +167,18 @@ namespace NBody
         public static Vector Sum(ICollection<Vector> vectors)
         {
             Vector vector = new Vector();
+
             foreach (Vector vector2 in vectors)
             {
                 vector += vector2;
             }
+
             return vector;
         }
 
         public static Vector Average(ICollection<Vector> vectors)
         {
-            return (Vector)(Sum(vectors) / ((double)vectors.Count));
+            return (Sum(vectors) / ((double)vectors.Count));
         }
 
         public override string ToString()
@@ -184,10 +193,10 @@ namespace NBody
 
         public override int GetHashCode()
         {
-            int num = BitConverter.DoubleToInt64Bits(this.X).GetHashCode() * 0x1f;
-            num += BitConverter.DoubleToInt64Bits(this.Y).GetHashCode();
-            num *= 0x1f;
-            return (num + BitConverter.DoubleToInt64Bits(this.Z).GetHashCode());
+            int code = BitConverter.DoubleToInt64Bits(this.X).GetHashCode() * 0x1f;
+            code += BitConverter.DoubleToInt64Bits(this.Y).GetHashCode();
+            code *= 0x1f;
+            return (code + BitConverter.DoubleToInt64Bits(this.Z).GetHashCode());
         }
 
         static Vector()

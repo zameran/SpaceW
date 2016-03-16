@@ -1,7 +1,5 @@
 ﻿using System;
 
-using Lattice;
-
 using UnityEngine;
 
 namespace NBody
@@ -194,7 +192,7 @@ namespace NBody
         public void Draw()
         {
             Gizmos.color = Color.red;
-            Gizmos.DrawWireCube(new Vector3((float)_location.X, (float)_location.Y, (float)_location.Z), 
+            Gizmos.DrawWireCube(_location, 
                                 new Vector3((float)_width, (float)_width, (float)_width));
 
             if (_subtrees != null)

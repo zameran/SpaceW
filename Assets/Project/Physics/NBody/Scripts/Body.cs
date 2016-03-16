@@ -1,7 +1,5 @@
 ﻿using System;
 
-using Lattice;
-
 using UnityEngine;
 
 namespace NBody
