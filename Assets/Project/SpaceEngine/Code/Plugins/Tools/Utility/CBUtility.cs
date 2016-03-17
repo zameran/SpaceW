@@ -227,6 +227,39 @@ static public class CBUtility
         writeData.Dispatch(kernel, Mathf.Max(1, width / 8 + padX), Mathf.Max(1, height / 8 + padY), Mathf.Max(1, depth / 8 + padZ));
     }
 
+    static public void Three2Three(RenderTexture from, RenderTexture to, ComputeShader transfer)
+    {
+        int kernel = transfer.FindKernel("Three2Three");
+        int depth = from.volumeDepth;
+
+        if (transfer == null)
+        {
+            Debug.Log("CBUtility::Three2Three - Computer shader is null");
+            return;
+        }
+
+        if (kernel == -1)
+        {
+            Debug.Log("CBUtility::Three2Three - could not find kernel " + "Three2Three");
+            return;
+        }
+
+        int width = from.width;
+        int height = from.height;
+
+        transfer.SetTexture(kernel, "_From", from);
+        transfer.SetTexture(kernel, "_To", to);
+        transfer.SetInt("_Width", width);
+        transfer.SetInt("_Height", height);
+        transfer.SetInt("_Depth", depth);
+
+        int padX = (width % 8 == 0) ? 0 : 1;
+        int padY = (height % 8 == 0) ? 0 : 1;
+        int padZ = (depth % 8 == 0) ? 0 : 1;
+
+        transfer.Dispatch(kernel, Mathf.Max(1, width / 8 + padX), Mathf.Max(1, height / 8 + padY), Mathf.Max(1, depth / 8 + padZ));
+    }
+
     static public void WriteIntoRenderTexture(RenderTexture tex, int channels, string path, ComputeBuffer buffer, ComputeShader writeData)
     {
         if (tex == null)

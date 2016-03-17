@@ -1,0 +1,15 @@
+﻿#pragma kernel Three2Three
+
+uint _Width;
+uint _Height;
+uint _Depth;
+
+RWTexture3D<float4> _From;
+RWTexture3D<float4> _To;
+
+[numthreads(8, 8, 8)]
+void Three2Three(uint3 id : SV_DispatchThreadID)
+{
+	//if(id.x < _Width && id.y < _Height && id.z < _Depth)
+	//	_To[id].xyz = _From[id].xyz;
+}

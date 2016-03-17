@@ -138,26 +138,28 @@ namespace Proland
             }
         }
 
-        void SetParameters(ComputeShader mat)
+        public void SetParameters(ComputeShader cs)
         {
-            mat.SetFloat("Rg", Rg);
-            mat.SetFloat("Rt", Rt);
-            mat.SetFloat("RL", RL);
-            mat.SetInt("TRANSMITTANCE_W", TRANSMITTANCE_W);
-            mat.SetInt("TRANSMITTANCE_H", TRANSMITTANCE_H);
-            mat.SetInt("SKY_W", SKY_W);
-            mat.SetInt("SKY_H", SKY_H);
-            mat.SetInt("RES_R", RES_R);
-            mat.SetInt("RES_MU", RES_MU);
-            mat.SetInt("RES_MU_S", RES_MU_S);
-            mat.SetInt("RES_NU", RES_NU);
-            mat.SetFloat("AVERAGE_GROUND_REFLECTANCE", AVERAGE_GROUND_REFLECTANCE);
-            mat.SetFloat("HR", HR);
-            mat.SetFloat("HM", HM);
-            mat.SetVector("betaR", BETA_R);
-            mat.SetVector("betaMSca", BETA_MSca);
-            mat.SetVector("betaMEx", BETA_MSca / 0.9f);
-            mat.SetFloat("mieG", Mathf.Clamp(MIE_G, 0.0f, 0.99f));
+            if (cs == null) return;
+
+            cs.SetFloat("Rg", Rg);
+            cs.SetFloat("Rt", Rt);
+            cs.SetFloat("RL", RL);
+            cs.SetInt("TRANSMITTANCE_W", TRANSMITTANCE_W);
+            cs.SetInt("TRANSMITTANCE_H", TRANSMITTANCE_H);
+            cs.SetInt("SKY_W", SKY_W);
+            cs.SetInt("SKY_H", SKY_H);
+            cs.SetInt("RES_R", RES_R);
+            cs.SetInt("RES_MU", RES_MU);
+            cs.SetInt("RES_MU_S", RES_MU_S);
+            cs.SetInt("RES_NU", RES_NU);
+            cs.SetFloat("AVERAGE_GROUND_REFLECTANCE", AVERAGE_GROUND_REFLECTANCE);
+            cs.SetFloat("HR", HR);
+            cs.SetFloat("HM", HM);
+            cs.SetVector("betaR", BETA_R);
+            cs.SetVector("betaMSca", BETA_MSca);
+            cs.SetVector("betaMEx", BETA_MSca / 0.9f);
+            cs.SetFloat("mieG", Mathf.Clamp(MIE_G, 0.0f, 0.99f));
         }
 
         void Preprocess()

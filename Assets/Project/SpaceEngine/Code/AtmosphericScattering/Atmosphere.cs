@@ -51,6 +51,7 @@ public class Atmosphere : MonoBehaviour
     public Mesh AtmosphereMesh;
 
     public AtmosphereSun Sun;
+    public AtmosphereRunTimeBaking artb = null;
 
     public Vector3 Origin;
 
@@ -130,27 +131,30 @@ public class Atmosphere : MonoBehaviour
 
     public void InitTextures()
     {
-        ComputeBuffer buffer;
-
-        string TransmittancePath = Application.dataPath + texturesPath + "/transmittance.raw";
-        string IrradiancePath = Application.dataPath + texturesPath + "/irradiance.raw";
-        string InscatterPath = Application.dataPath + texturesPath + "/inscatter.raw";
-
         Transmittance = RTExtensions.CreateRTexture(new Vector2(TRANSMITTANCE_W, TRANSMITTANCE_H), 0, RenderTextureFormat.ARGBHalf, FilterMode.Bilinear, TextureWrapMode.Clamp);
         Irradiance = RTExtensions.CreateRTexture(new Vector2(SKY_W, SKY_H), 0, RenderTextureFormat.ARGBHalf, FilterMode.Bilinear, TextureWrapMode.Clamp);
         Inscatter = RTExtensions.CreateRTexture(new Vector2(RES_MU_S * RES_NU, RES_MU), 0, RenderTextureFormat.ARGBHalf, FilterMode.Bilinear, TextureWrapMode.Clamp, RES_R);
 
-        buffer = new ComputeBuffer(TRANSMITTANCE_W * TRANSMITTANCE_H, sizeof(float) * 3);
-        CBUtility.WriteIntoRenderTexture(Transmittance, 3, TransmittancePath, buffer, WriteDataCore);
-        buffer.Release();
+        if (artb == null)
+        {
+            ComputeBuffer buffer;
 
-        buffer = new ComputeBuffer(SKY_W * SKY_H, sizeof(float) * 3);
-        CBUtility.WriteIntoRenderTexture(Irradiance, 3, IrradiancePath, buffer, WriteDataCore);
-        buffer.Release();
+            string TransmittancePath = Application.dataPath + texturesPath + "/transmittance.raw";
+            string IrradiancePath = Application.dataPath + texturesPath + "/irradiance.raw";
+            string InscatterPath = Application.dataPath + texturesPath + "/inscatter.raw";
 
-        buffer = new ComputeBuffer(RES_MU_S * RES_NU * RES_MU * RES_R, sizeof(float) * 4);
-        CBUtility.WriteIntoRenderTexture(Inscatter, 4, InscatterPath, buffer, WriteDataCore);
-        buffer.Release();
+            buffer = new ComputeBuffer(TRANSMITTANCE_W * TRANSMITTANCE_H, sizeof(float) * 3);
+            CBUtility.WriteIntoRenderTexture(Transmittance, 3, TransmittancePath, buffer, WriteDataCore);
+            buffer.Release();
+
+            buffer = new ComputeBuffer(SKY_W * SKY_H, sizeof(float) * 3);
+            CBUtility.WriteIntoRenderTexture(Irradiance, 3, IrradiancePath, buffer, WriteDataCore);
+            buffer.Release();
+
+            buffer = new ComputeBuffer(RES_MU_S * RES_NU * RES_MU * RES_R, sizeof(float) * 4);
+            CBUtility.WriteIntoRenderTexture(Inscatter, 4, InscatterPath, buffer, WriteDataCore);
+            buffer.Release();
+        }
     }
 
     public void InitMesh()
@@ -209,9 +213,20 @@ public class Atmosphere : MonoBehaviour
         mat.SetVector("betaR", betaR / 1000.0f);
         mat.SetFloat("mieG", Mathf.Clamp(mieG, 0.0f, 0.99f));
         mat.SetFloat("_Sun_Glare_Scale", SunGlareScale);
-        mat.SetTexture("_Sky_Transmittance", Transmittance);
-        mat.SetTexture("_Sky_Inscatter", Inscatter);
-        mat.SetTexture("_Sky_Irradiance", Irradiance);
+
+        if (artb == null)
+        {
+            mat.SetTexture("_Sky_Transmittance", Transmittance);
+            mat.SetTexture("_Sky_Inscatter", Inscatter);
+            mat.SetTexture("_Sky_Irradiance", Irradiance);
+        }
+        else
+        {
+            mat.SetTexture("_Sky_Transmittance", artb.transmittanceT);
+            mat.SetTexture("_Sky_Inscatter", artb.inscatterT_Read);
+            mat.SetTexture("_Sky_Irradiance", artb.irradianceT_Read);
+        }
+
         mat.SetTexture("_Sky_Map", null);
 
         mat.SetMatrix("_Globals_WorldToCamera", Camera.main.GetWorldToCamera());

@@ -3,7 +3,7 @@
 [RequireComponent(typeof(Camera))]
 public class MainRenderer : MonoBehaviour
 {
-    public Planetoid Planet;
+    public Atmosphere atmosphere;
 
     void Start()
     {
@@ -12,11 +12,11 @@ public class MainRenderer : MonoBehaviour
 
     void OnRenderObject()
     {
-        Planet.Atmosphere.Render(true);
-
-        foreach (Quad q in Planet.Quads)
+        if(atmosphere != null)
         {
-            q.Render();
+            atmosphere.Sun.UpdateNode();
+            atmosphere.UpdateNode();
+            atmosphere.Render(true);
         }
     }
 }
