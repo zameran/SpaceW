@@ -16,9 +16,10 @@ public class Atmosphere : MonoBehaviour
     const float HR = 8.0f;
     const float HM = 1.2f;
 
-    private float Rg;
-    private float Rt;
-    private float Rl;
+    public float AtmosphereScale = 1.0f;
+    public float Rg;
+    public float Rt;
+    public float Rl;
 
     [Range(0.0f, 0.99f)]
     public float mieG = 0.85f;
@@ -28,8 +29,7 @@ public class Atmosphere : MonoBehaviour
 
     public int AtmosphereMeshResolution = 2;
 
-    public float AtmosphereHeight = 1.0f;
-    public float AtmosphereRadius;
+    //public float AtmosphereHeight = 1.0f;
     public float HDRExposure = 0.2f;
 
     public Shader SkyShader;
@@ -69,9 +69,9 @@ public class Atmosphere : MonoBehaviour
 
     public void UpdateNode()
     {
-        Rg = AtmosphereRadius;
-        Rt = (64200f / 63600f) * Rg * AtmosphereHeight;
-        Rl = (64210.0f / 63600f) * Rg;
+        //Rg = AtmosphereScale;
+        //Rt = (64200f / 63600f) * Rg * AtmosphereHeight;
+        //Rl = (64210.0f / 63600f) * Rg;
 
         if (!Inscatter.IsCreated() || !Transmittance.IsCreated() || !Irradiance.IsCreated())
         {
@@ -150,9 +150,9 @@ public class Atmosphere : MonoBehaviour
 
     public void InitMisc()
     {
-        Rg = AtmosphereRadius;
-        Rt = (64200f / 63600f) * Rg * AtmosphereHeight;
-        Rl = (64210.0f / 63600f) * Rg;
+        //Rg = AtmosphereScale;
+        //Rt = (64200f / 63600f) * Rg * AtmosphereHeight;
+        //Rl = (64210.0f / 63600f) * Rg;
     }
 
     public void InitSuns()
@@ -166,7 +166,7 @@ public class Atmosphere : MonoBehaviour
     {
         if (mat == null) return;
 
-        mat.SetFloat("scale", Rg / AtmosphereRadius);
+        mat.SetFloat("scale", Rg / AtmosphereScale);
         mat.SetFloat("Rg", Rg);
         mat.SetFloat("Rt", Rt);
         mat.SetFloat("RL", Rl);
@@ -190,7 +190,7 @@ public class Atmosphere : MonoBehaviour
     {
         if (mat == null) return;
 
-        mat.SetFloat("scale", Rg / AtmosphereRadius);
+        mat.SetFloat("scale", Rg / AtmosphereScale);
         mat.SetFloat("Rg", Rg);
         mat.SetFloat("Rt", Rt);
         mat.SetFloat("RL", Rl);
@@ -221,7 +221,7 @@ public class Atmosphere : MonoBehaviour
     {
         if (mat == null) return;
 
-        mat.SetFloat("scale", Rg / AtmosphereRadius);
+        mat.SetFloat("scale", Rg / AtmosphereScale);
         mat.SetFloat("Rg", Rg);
         mat.SetFloat("Rt", Rt);
         mat.SetFloat("RL", Rl);
