@@ -8,7 +8,7 @@ public class AtmosphereSun : MonoBehaviour
 
     Matrix4x4 WorldToLocalRotation;
 
-    float SunIntensity = 100.0f;
+    public float SunIntensity = 100.0f;
 
     bool HasMoved = false;
 
@@ -50,7 +50,7 @@ public class AtmosphereSun : MonoBehaviour
         {
             float y = Input.GetAxis("Mouse Y");
             float x = -Input.GetAxis("Mouse X");
-            transform.Rotate(new Vector3(x, y, 0), Space.Self);
+            transform.Rotate(new Vector3(x, y, 0), Space.World);
             HasMoved = true;
         }
 

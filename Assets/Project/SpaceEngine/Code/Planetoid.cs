@@ -46,6 +46,7 @@ public class Planetoid : MonoBehaviour
 	public bool UseLOD = true;
 	public bool RenderPerUpdate = false;
 	public bool OneSplittingQuad = true;
+	public bool ExternalRendering = false;
 
 	public float TerrainMaxHeight = 64.0f;
 
@@ -102,6 +103,7 @@ public class Planetoid : MonoBehaviour
 			{
 				Atmosphere.Sun.UpdateNode();
 				Atmosphere.UpdateNode();
+				Atmosphere.Render(false);
 			}
 		}
 	}

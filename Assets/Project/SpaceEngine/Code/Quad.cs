@@ -217,8 +217,9 @@ public class Quad : MonoBehaviour
 
 	private void Update()
 	{
-		if (Planetoid.RenderPerUpdate)
-			Render();
+		if (!Planetoid.ExternalRendering)
+			if (Planetoid.RenderPerUpdate)
+				Render();
 
 		if (Time.time > lastLodUpdateTime + lodUpdateInterval && Planetoid.UseLOD)
 		{
@@ -286,8 +287,9 @@ public class Quad : MonoBehaviour
 
 	private void OnRenderObject()
 	{
-		if (!Planetoid.RenderPerUpdate)
-			Render();
+		if (!Planetoid.ExternalRendering)
+			if (!Planetoid.RenderPerUpdate)
+				Render();
 	}
 
 	private void OnDrawGizmos()
@@ -396,7 +398,7 @@ public class Quad : MonoBehaviour
 
 	public bool PlaneFrustumCheck(Camera camera)
 	{
-		if (Parent == null || !Generated || Splitting)
+		if (Parent == null || !Generated || Splitting || Planetoid.UseUnityCulling)
 			return true;
 
 		Vector3[] verts0 = GetVolumeBox(Planetoid.TerrainMaxHeight * 1);

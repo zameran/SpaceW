@@ -40,6 +40,9 @@ public class Atmosphere : MonoBehaviour
     public Material SkyMaterial;
 
     public Texture SunGlareTexture;
+    public float SunGlareScale = 1;
+
+    public int RenderQueue = 1999;
 
     public RenderTexture Transmittance;
     public RenderTexture Inscatter;
@@ -90,10 +93,18 @@ public class Atmosphere : MonoBehaviour
         }
 
         Sun.Origin = Origin;
+    }
 
+    public void Render(bool now)
+    {
         SetUniforms(SkyMaterial);
+        SkyMaterial.renderQueue = RenderQueue;
+        SkyMaterial.SetPass(0);
 
-        Graphics.DrawMesh(AtmosphereMesh, transform.localToWorldMatrix, SkyMaterial, 0);
+        if (!now)
+            Graphics.DrawMesh(AtmosphereMesh, transform.localToWorldMatrix, SkyMaterial, 0);
+        else
+            Graphics.DrawMeshNow(AtmosphereMesh, transform.localToWorldMatrix);
     }
 
     private void OnDestroy()
@@ -184,6 +195,7 @@ public class Atmosphere : MonoBehaviour
         mat.SetVector("betaMSca", BETA_MSca / 1000.0f);
         mat.SetVector("betaMEx", (BETA_MSca / 1000.0f) / 0.9f);
         mat.SetTexture("_Sun_Glare", SunGlareTexture);
+        mat.SetFloat("_Sun_Glare_Scale", SunGlareScale);
     }
 
     public void SetUniforms(Material mat)
@@ -196,6 +208,7 @@ public class Atmosphere : MonoBehaviour
         mat.SetFloat("RL", Rl);
         mat.SetVector("betaR", betaR / 1000.0f);
         mat.SetFloat("mieG", Mathf.Clamp(mieG, 0.0f, 0.99f));
+        mat.SetFloat("_Sun_Glare_Scale", SunGlareScale);
         mat.SetTexture("_Sky_Transmittance", Transmittance);
         mat.SetTexture("_Sky_Inscatter", Inscatter);
         mat.SetTexture("_Sky_Irradiance", Irradiance);

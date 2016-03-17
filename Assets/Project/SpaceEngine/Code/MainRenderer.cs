@@ -10,8 +10,10 @@ public class MainRenderer : MonoBehaviour
 
     }
 
-    void OnPostRender()
+    void OnRenderObject()
     {
+        Planet.Atmosphere.Render(true);
+
         foreach (Quad q in Planet.Quads)
         {
             q.Render();

@@ -3,17 +3,21 @@
 	Properties
 	{
 		_Sun_Glare("Sun Glare", 2D) = "black" {}
+		_Sun_Glare_Scale("Sun Glare Scale", Float) = 1.0
+		_Sun_Glare_Color("Sun Glare Color", Color) = (1, 1, 1, 1)
 	}
 	SubShader 
 	{
-		Tags { "Queue" = "Overlay" "RenderType"="Transparent" }
+		Tags { "Queue" = "Geometry-1" }
 	
 		Pass 
 		{
-			ZWrite Off
-			ZTest Always
+			ZWrite On
+			ZTest Always  
 			Fog { Mode Off }
-			cull off
+			Blend SrcAlpha OneMinusSrcAlpha
+
+			Cull Off
 
 			CGPROGRAM
 			#include "UnityCG.cginc"		
@@ -30,6 +34,8 @@
 			uniform float3 _Globals_Origin;
 			
 			uniform sampler2D _Sun_Glare;
+			uniform float _Sun_Glare_Scale;
+			uniform float4 _Sun_Glare_Color;
 			uniform float4x4 _Sun_WorldToLocal;
 			
 			struct v2f 
@@ -55,10 +61,10 @@
 				return OUT;
 			}
 			
-			// assumes sundir=vec3(0.0, 0.0, 1.0)
 			float3 OuterSunRadiance(float3 viewdir)
 			{
-				float3 data = viewdir.z > 0.0 ? tex2D(_Sun_Glare, float2(0.5, 0.5) + viewdir.xy * 4.0).rgb : float3(0, 0, 0);
+				float3 data = viewdir.z > 0.0 ? (tex2D(_Sun_Glare, float2(0.5, 0.5) + viewdir.xy / _Sun_Glare_Scale).rgb * _Sun_Glare_Color) : float3(0, 0, 0);
+
 				return pow(max(0, data), 2.2) * _Sun_Intensity;
 			}
 			
