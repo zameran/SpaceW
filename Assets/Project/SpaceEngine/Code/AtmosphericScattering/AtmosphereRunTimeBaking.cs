@@ -1,4 +1,7 @@
-﻿using UnityEngine;
+﻿using System;
+using System.Collections;
+
+using UnityEngine;
 
 public sealed class AtmosphereRunTimeBaking : MonoBehaviour
 {
@@ -45,18 +48,18 @@ public sealed class AtmosphereRunTimeBaking : MonoBehaviour
 
     private void Start()
     {
-        Go();
+        StartCoroutine(Go());
     }
 
     private void Update()
     {
         if(Input.GetKeyDown(KeyCode.F))
         {
-            Go();
+            StartCoroutine(Go());
         }
     }
 
-    private void Go()
+    private IEnumerator Go()
     {
         finished = false;
         step = 0;
@@ -70,6 +73,10 @@ public sealed class AtmosphereRunTimeBaking : MonoBehaviour
         while (!finished)
         {
             Calculate();
+
+            yield return new WaitForEndOfFrame();
+            yield return new WaitForEndOfFrame();
+            yield return new WaitForEndOfFrame();
         }
     }
 
@@ -276,7 +283,7 @@ public sealed class AtmosphereRunTimeBaking : MonoBehaviour
         }
         else if (step == 10)
         {
-
+            //placeholder
         }
         else if (step == 11)
         {
