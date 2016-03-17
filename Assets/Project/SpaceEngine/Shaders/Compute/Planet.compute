@@ -51,7 +51,8 @@ float4 ColorFunction(float3 coord, float height, float slope)
 	//float4 glowMapColor = GlowMapAsteroid(p, height, slope);
 	//float4 color = colorMapColor + glowMapColor;
 	//float4 color = ColorMapTerra(p, height, slope);
-	float4 color = ColorMapPlanet(p, height, slope);
+	//float4 color = ColorMapPlanet(p, height, slope);
+	float4 color = float4(height, height, height, 1);
 	#endif
 	
 	return color;
