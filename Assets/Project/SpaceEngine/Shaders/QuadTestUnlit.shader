@@ -92,13 +92,7 @@
 				//fn.z = sqrt(max(0.0, 1.0 - dot(fn.xy, fn.xy))); // - default.
 				//fn.z = sqrt(max(0.0, -1.0 + dot(fn.xy, fn.xy))); // - inverted.
 
-				//fn = float3(0, 0, 0); //disable normal mapping... bruuuutaal!
-
-				//p = mul(_Object2World, p);
-				//fn = mul(_Object2World, fn);
-
-				//WCP = mul(_Object2World, WCP);
-				//WSD = mul(_Object2World, WCP);
+				fn = float3(0, 0, 0); //disable normal mapping... bruuuutaal!
 
 				float4 reflectance = RGB2Reflectance(terrainColor);
 
@@ -119,7 +113,7 @@
 				float4 inscatter = InScattering(WCP, rotatedPoint, WSD, extinction, 1.0);
 				float4 finalColor = float4(groundColor, 1) * float4(extinction, 1) + inscatter;
 				
-				return finalColor;
+				return float4(hdr(finalColor.xyz), finalColor.w);
 			}
 	
 			v2fg vert (in appdata_full_compute v)
@@ -150,7 +144,7 @@
 
 				float4 terrainColor = tex2Dlod(_HeightTexture, v.texcoord);
 				float4 groundFinalColor = GroundFinalColor(terrainColor, v.vertex.xyz, v.normal.xyz);
-				float4 scatteringColor = float4(hdr(groundFinalColor.xyz), groundFinalColor.w);
+				float4 scatteringColor = float4(groundFinalColor.xyz, groundFinalColor.w);
 
 				v2fg o;
 

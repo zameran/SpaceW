@@ -11,7 +11,8 @@
 		Pass 
 		{
 			ZWrite Off
-			//ZTest Always
+			ZTest Always
+			Fog { Mode Off }
 			cull off
 
 			CGPROGRAM

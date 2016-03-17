@@ -1,7 +1,7 @@
 ﻿#define nVerticesPerSide 120
 #define nVerticesPerSideWithBorder 128
-#define nVerticesPerSideSub 240
-#define nVerticesPerSideWithBorderSub 256
+#define nVerticesPerSideSub 120
+#define nVerticesPerSideWithBorderSub 128
 
 //#define defaultNoise
 
@@ -170,7 +170,7 @@ void HeightSub(uint3 id : SV_DispatchThreadID)
 
 	int outBuffOffset = id.x + id.y * nVerticesPerSideWithBorderSub;
 
-	float3 cubeCoord = CubeCoord(constants, nVerticesPerSideWithBorderSub, id, 17, constants.spacingsub);
+	float3 cubeCoord = CubeCoord(constants, nVerticesPerSideWithBorderSub, id, 7, constants.spacingsub);
 
 	float3 patchCenter = normalize(constants.patchCubeCenter) * constants.planetRadius;
 	float3 patchNormalizedCoord = normalize(cubeCoord);
@@ -233,4 +233,11 @@ void Transfer(uint3 id : SV_DispatchThreadID)
 	int outBuffOffset = id.x + id.y * nVerticesPerSide;
 
 	patchOutput[outBuffOffset] = patchPreOutput[inBuffOffset];
+}
+
+#pragma kernel GetCorners
+[numthreads(30, 30, 1)]
+void GetCorners(uint3 id : SV_DispatchThreadID)
+{
+
 }

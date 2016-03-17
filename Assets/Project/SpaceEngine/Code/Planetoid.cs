@@ -276,7 +276,7 @@ public class Planetoid : MonoBehaviour
 		quadComponent.CoreShader = CoreShader;
 		quadComponent.Planetoid = this;
 		quadComponent.QuadMesh = mesh;
-		quadComponent.QuadMaterial = material;       
+		quadComponent.QuadMaterial = material;
 
 		QuadGenerationConstants gc = QuadGenerationConstants.Init(TerrainMaxHeight);
 		gc.planetRadius = PlanetRadius;

@@ -156,6 +156,7 @@ public class Quad : MonoBehaviour
 	public bool Splitting = false;
 	public bool Unsplitted = false;
 	public bool Visible = false;
+	public bool Cached = false;
 
 	public float lodUpdateInterval = 0.25f;
 	public float lastLodUpdateTime = 0.00f;
@@ -203,8 +204,8 @@ public class Quad : MonoBehaviour
 		PreOutDataSubBuffer = new ComputeBuffer(QS.nRealVertsSub, 64);
 		OutDataBuffer = new ComputeBuffer(QS.nVerts, 64);
 		
-		HeightTexture = RTExtensions.CreateRTexture(QS.nVertsPerEdgeSub, 0);
-		NormalTexture = RTExtensions.CreateRTexture(QS.nVertsPerEdgeSub, 0);
+		HeightTexture = RTExtensions.CreateRTexture(QS.nVertsPerEdgeSub, 0, RenderTextureFormat.ARGB32);
+		NormalTexture = RTExtensions.CreateRTexture(QS.nVertsPerEdgeSub, 0, RenderTextureFormat.ARGB32);
 
 		RTUtility.ClearColor(new RenderTexture[] { HeightTexture, NormalTexture });
 	}
@@ -265,9 +266,6 @@ public class Quad : MonoBehaviour
 		if (NormalTexture != null)
 			NormalTexture.ReleaseAndDestroy();
 
-		//if (QuadMesh != null)
-		//    DestroyImmediate(QuadMesh);
-
 		if (QuadMaterial != null)
 			DestroyImmediate(QuadMaterial);
 
@@ -294,8 +292,7 @@ public class Quad : MonoBehaviour
 
 	private void OnDrawGizmos()
 	{
-		//Gizmos.color = Color.blue;
-		//Gizmos.DrawWireCube(QuadMesh.bounds.center, QuadMesh.bounds.size);
+
 	}
 
 	public void Render()
@@ -402,15 +399,7 @@ public class Quad : MonoBehaviour
 		if (Parent == null || !Generated || Splitting)
 			return true;
 
-		Vector3[] verts0 = GetFlatBoxWithMiddle(Planetoid.TerrainMaxHeight);
-		Vector3[] verts1 = GetFlatBox(Planetoid.TerrainMaxHeight / 2);
-		Vector3[] verts2 = GetFlatBox(Planetoid.TerrainMaxHeight * 2);
-
-		Vector3[] vertsAll = new Vector3[verts0.Length + verts1.Length + verts2.Length];
-
-		Array.Copy(verts0, vertsAll, verts0.Length);
-		Array.Copy(verts1, 0, vertsAll, verts0.Length, verts1.Length);
-		Array.Copy(verts2, 0, vertsAll, verts0.Length + verts1.Length, verts2.Length);
+		Vector3[] verts0 = GetVolumeBox(Planetoid.TerrainMaxHeight * 1);
 
 		bool[] states = new bool[verts0.Length];
 
@@ -424,7 +413,7 @@ public class Quad : MonoBehaviour
 
 	public bool BorderFrustumCheck(Camera camera, Vector3 border)
 	{
-		float offset = 512.0f;
+		float offset = 1024.0f;
 
 		bool useOffset = true;
 
@@ -621,13 +610,14 @@ public class Quad : MonoBehaviour
 		if (DispatchStarted != null)
 			DispatchStarted(this);
 
-		Planetoid.NPS.UpdateUniforms(QuadMaterial, CoreShader);
-
 		generationConstants.LODLevel = (((1 << LODLevel + 2) * (Planetoid.PlanetRadius / (LODLevel + 2)) - ((Planetoid.PlanetRadius / (LODLevel + 2)) / 2)) / Planetoid.PlanetRadius);
 		generationConstants.orientation = (float)Position;
 
-		bool cached = Planetoid.Cache.ExistInTexturesCache(this);
-		if (cached) Log("Textures founded in cache!"); else Log("Textures not found in cache!");
+		SetupComputeShaderUniforms();
+
+		Cached = Planetoid.Cache.ExistInTexturesCache(this);
+
+		if (Cached) Log("Textures founded in cache!"); else Log("Textures not found in cache!");
 
 		QuadGenerationConstants[] quadGenerationConstantsData = new QuadGenerationConstants[] { generationConstants };
 		OutputStruct[] preOutputStructData = new OutputStruct[QS.nVertsReal];
@@ -644,28 +634,28 @@ public class Quad : MonoBehaviour
 		int kernel3 = CoreShader.FindKernel("HeightSub");
 		int kernel4 = CoreShader.FindKernel("TexturesSub");
 
-		SetupComputeShader(kernel1, QuadGenerationConstantsBuffer, PreOutDataBuffer, PreOutDataSubBuffer, OutDataBuffer); Log("Buffers for first kernel ready!");
+		SetupComputeShaderKernelUniforfms(kernel1, QuadGenerationConstantsBuffer, PreOutDataBuffer, PreOutDataSubBuffer, OutDataBuffer); Log("Buffers for first kernel ready!");
 
 		CoreShader.Dispatch(kernel1,
 		QS.THREADGROUP_SIZE_X_REAL,
 		QS.THREADGROUP_SIZE_Y_REAL,
 		QS.THREADGROUP_SIZE_Z_REAL); Log("First kernel ready!");
 
-		SetupComputeShader(kernel2, QuadGenerationConstantsBuffer, PreOutDataBuffer, PreOutDataSubBuffer, OutDataBuffer); Log("Buffers for second kernel ready!");
+		SetupComputeShaderKernelUniforfms(kernel2, QuadGenerationConstantsBuffer, PreOutDataBuffer, PreOutDataSubBuffer, OutDataBuffer); Log("Buffers for second kernel ready!");
 
 		CoreShader.Dispatch(kernel2,
 		QS.THREADGROUP_SIZE_X,
 		QS.THREADGROUP_SIZE_Y,
 		QS.THREADGROUP_SIZE_Z); Log("Second kernel ready!");
 
-		SetupComputeShader(kernel3, QuadGenerationConstantsBuffer, PreOutDataBuffer, PreOutDataSubBuffer, OutDataBuffer); Log("Buffers for third kernel ready!");
+		SetupComputeShaderKernelUniforfms(kernel3, QuadGenerationConstantsBuffer, PreOutDataBuffer, PreOutDataSubBuffer, OutDataBuffer); Log("Buffers for third kernel ready!");
 
 		CoreShader.Dispatch(kernel3,
 		QS.THREADGROUP_SIZE_X_SUB_REAL,
 		QS.THREADGROUP_SIZE_Y_SUB_REAL,
 		QS.THREADGROUP_SIZE_Z_SUB_REAL); Log("Third kernel ready!");
 
-		SetupComputeShader(kernel4, QuadGenerationConstantsBuffer, PreOutDataBuffer, PreOutDataSubBuffer, OutDataBuffer); Log("Buffers for fourth kernel ready!");
+		SetupComputeShaderKernelUniforfms(kernel4, QuadGenerationConstantsBuffer, PreOutDataBuffer, PreOutDataSubBuffer, OutDataBuffer); Log("Buffers for fourth kernel ready!");
 
 		CoreShader.Dispatch(kernel4,
 		QS.THREADGROUP_SIZE_X_SUB,
@@ -689,7 +679,16 @@ public class Quad : MonoBehaviour
 			return false;
 	}
 
-	private void SetupComputeShader(int kernel, ComputeBuffer QuadGenerationConstantsBuffer, ComputeBuffer PreOutDataBuffer, ComputeBuffer PreOutDataSubBuffer, ComputeBuffer OutDataBuffer)
+	private void SetupComputeShaderUniforms()
+	{
+		if (Planetoid.NPS != null)
+			Planetoid.NPS.UpdateUniforms(QuadMaterial, CoreShader);
+
+		if (Planetoid.transform.GetComponentInChildren<TCCommonParametersSetter>() != null)
+			Planetoid.transform.GetComponentInChildren<TCCommonParametersSetter>().UpdateUniforms(CoreShader);
+	}
+
+	private void SetupComputeShaderKernelUniforfms(int kernel, ComputeBuffer QuadGenerationConstantsBuffer, ComputeBuffer PreOutDataBuffer, ComputeBuffer PreOutDataSubBuffer, ComputeBuffer OutDataBuffer)
 	{
 		if (CoreShader == null) return;
 
@@ -700,11 +699,6 @@ public class Quad : MonoBehaviour
 
 		CoreShader.SetTexture(kernel, "Height", HeightTexture);
 		CoreShader.SetTexture(kernel, "Normal", NormalTexture);
-
-		Planetoid.NPS.SetUniforms(CoreShader, kernel);
-
-		if (Planetoid.transform.GetComponentInChildren<TCCommonParametersSetter>() != null)
-			Planetoid.transform.GetComponentInChildren<TCCommonParametersSetter>().UpdateUniforms(CoreShader);
 	}
 
 	public void SetupVectors(Quad quad, int id, bool staticX, bool staticY, bool staticZ)

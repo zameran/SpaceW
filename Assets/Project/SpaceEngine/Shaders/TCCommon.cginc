@@ -28,7 +28,7 @@
 // 0 - hard mix (no blending)
 // 1 - soft blending
 // 2 - "smart" blening (tile heightmap based)
-#define TILE_BLEND_MODE 2
+#define TILE_BLEND_MODE 0
 //-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
@@ -37,7 +37,7 @@
 // 1 - sampling texture 2 times at different scales
 // 2 - voronoi random offset
 // 3 - voronoi random offset and rotation
-#define TILING_FIX_MODE 3
+#define TILING_FIX_MODE 0
 //-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
@@ -46,7 +46,7 @@
 // 1 - rgb with adjusting.
 // 2 - default with adjusting.
 // 3 - default without adjusting.
-#define COLOR_SPACE 2
+#define COLOR_SPACE 3
 //-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
@@ -3558,16 +3558,11 @@ float HeightMapPlanet(float3 ppoint)
 //-----------------------------------------------------------------------------
 float4 ColorMapPlanet(float3 ppoint, float height, float slope)
 {
-	Surface surf = GetSurfaceColor(height, slope, 1);
+	Surface surf;
 
-	float latitude = 0;
-	float climate = 0;
+	float4 lookupColor = tex2Dlod(MaterialTable, float4(height, slope, 0, 0));
 
-	float4 slopeColor = float4(0.95, 0.75, 0.25, 0.0) * (1 - slope);
-	float4 lookupColor = tex2Dlod(MaterialTable, float4(height, slope - height, 0, 0));
-
-	//surf.color = lookupColor + slopeColor;
-	surf.color = GetSurfaceColor(height, slope, lookupColor.r).color;
+	surf = GetSurfaceColor(height, slope, lookupColor.r);
 
 	return surf.color;
 }

@@ -9,9 +9,6 @@ public class NoiseParametersSetter : MonoBehaviour
 	public Texture2D PlanetColor = null;
 	public Texture2D PlanetColorMap = null;
 
-	//public ComputeBuffer PlanetAtlasB = null;
-	//public ComputeBuffer PlanetColorB = null;
-
 	public float Octaves = 4f;
 	public float Lacunarity = 2.218281828459f;
 	public float H = 0.5f;
@@ -34,7 +31,7 @@ public class NoiseParametersSetter : MonoBehaviour
 
 	private void OnDestroy()
 	{
-		//BufferHelper.ReleaseAndDisposeBuffers(PlanetColorB, PlanetAtlasB);
+
 	}
 
 	[ContextMenu("Update Uniforms")]
@@ -65,18 +62,6 @@ public class NoiseParametersSetter : MonoBehaviour
 		if (PlanetAtlas == null) PlanetAtlas = LoadTextureFromResources("PlanetAtlas");
 		if (PlanetColor == null) PlanetColor = LoadTextureFromResources("PlanetColorHeightGradient");
 		if (PlanetColorMap == null) PlanetColorMap = LoadTextureFromResources("PlanetColorHumanityToTemp");
-
-		//PlanetColorB = new ComputeBuffer(PlanetColor.width * PlanetColor.height, 16);
-		//PlanetAtlasB = new ComputeBuffer(PlanetAtlas.width * PlanetAtlas.height, 16);
-
-		//Vector4[] colorData = new Vector4[PlanetColor.width * PlanetColor.height];
-		//Vector4[] atlasData = new Vector4[PlanetAtlas.width * PlanetAtlas.height];
-
-		//colorData = PlanetColor.GetPixels().ConvertColorDataToVector();
-		//atlasData = PlanetAtlas.GetPixels().ConvertColorDataToVector();
-
-		//PlanetColorB.SetData(colorData);
-		//PlanetAtlasB.SetData(atlasData);
 	}
 
 	public Texture2D LoadTextureFromResources(string name)
