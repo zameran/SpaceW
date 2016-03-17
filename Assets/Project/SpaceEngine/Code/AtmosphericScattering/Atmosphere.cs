@@ -77,16 +77,13 @@ public class Atmosphere : MonoBehaviour
         //Rt = (64200f / 63600f) * Rg * AtmosphereHeight;
         //Rl = (64210.0f / 63600f) * Rg;
 
-        if (!Inscatter.IsCreated() || !Transmittance.IsCreated() || !Irradiance.IsCreated())
+        if ((!Inscatter.IsCreated() || !Transmittance.IsCreated() || !Irradiance.IsCreated()))
         {
             waitBeforeReloadCount++;
 
             if (waitBeforeReloadCount >= 2)
             {
-                Inscatter.ReleaseAndDestroy();
-                Transmittance.ReleaseAndDestroy();
-                Irradiance.ReleaseAndDestroy();
-
+                CollectGarbage();
                 InitTextures();
 
                 waitBeforeReloadCount = 0;
@@ -118,6 +115,13 @@ public class Atmosphere : MonoBehaviour
 
         if (Irradiance != null)
             Irradiance.ReleaseAndDestroy();
+    }
+
+    public void CollectGarbage(bool all = true)
+    {
+        if (Transmittance != null) Transmittance.ReleaseAndDestroy();
+        if (Inscatter != null) Inscatter.ReleaseAndDestroy();
+        if (Irradiance != null) Irradiance.ReleaseAndDestroy();
     }
 
     public void InitMaterials()
@@ -216,15 +220,15 @@ public class Atmosphere : MonoBehaviour
 
         if (artb == null)
         {
-            mat.SetTexture("_Sky_Transmittance", Transmittance);
-            mat.SetTexture("_Sky_Inscatter", Inscatter);
-            mat.SetTexture("_Sky_Irradiance", Irradiance);
+            if(Transmittance != null) mat.SetTexture("_Sky_Transmittance", Transmittance);
+            if (Inscatter != null) mat.SetTexture("_Sky_Inscatter", Inscatter);
+            if (Irradiance != null) mat.SetTexture("_Sky_Irradiance", Irradiance);
         }
         else
         {
-            mat.SetTexture("_Sky_Transmittance", artb.transmittanceT);
-            mat.SetTexture("_Sky_Inscatter", artb.inscatterT_Read);
-            mat.SetTexture("_Sky_Irradiance", artb.irradianceT_Read);
+            if (artb.transmittanceT != null) mat.SetTexture("_Sky_Transmittance", artb.transmittanceT);
+            if (artb.inscatterT_Read != null) mat.SetTexture("_Sky_Inscatter", artb.inscatterT_Read);
+            if (artb.irradianceT_Read != null) mat.SetTexture("_Sky_Irradiance", artb.irradianceT_Read);
         }
 
         mat.SetTexture("_Sky_Map", null);
@@ -255,9 +259,20 @@ public class Atmosphere : MonoBehaviour
         mat.SetFloat("RL", Rl);
         mat.SetVector("betaR", betaR / 1000.0f);
         mat.SetFloat("mieG", Mathf.Clamp(mieG, 0.0f, 0.99f));
-        mat.SetTexture("_Sky_Transmittance", Transmittance);
-        mat.SetTexture("_Sky_Inscatter", Inscatter);
-        mat.SetTexture("_Sky_Irradiance", Irradiance);
+
+        if (artb == null)
+        {
+            if (Transmittance != null) mat.SetTexture("_Sky_Transmittance", Transmittance);
+            if (Inscatter != null) mat.SetTexture("_Sky_Inscatter", Inscatter);
+            if (Irradiance != null) mat.SetTexture("_Sky_Irradiance", Irradiance);
+        }
+        else
+        {
+            if (artb.transmittanceT != null) mat.SetTexture("_Sky_Transmittance", artb.transmittanceT);
+            if (artb.inscatterT_Read != null) mat.SetTexture("_Sky_Inscatter", artb.inscatterT_Read);
+            if (artb.irradianceT_Read != null) mat.SetTexture("_Sky_Irradiance", artb.irradianceT_Read);
+        }
+
         mat.SetTexture("_Sky_Map", null);
 
         mat.SetMatrix("_Globals_WorldToCamera", Camera.main.GetWorldToCamera());

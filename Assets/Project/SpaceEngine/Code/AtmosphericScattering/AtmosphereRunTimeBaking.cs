@@ -53,7 +53,7 @@ public sealed class AtmosphereRunTimeBaking : MonoBehaviour
 
     private void Update()
     {
-        if(Input.GetKeyDown(KeyCode.F))
+        if(Input.GetKey(KeyCode.LeftShift) && Input.GetKeyDown(KeyCode.F))
         {
             StartCoroutine(Go());
         }
