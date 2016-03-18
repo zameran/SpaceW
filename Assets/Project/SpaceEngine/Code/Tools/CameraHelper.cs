@@ -12,7 +12,7 @@ public static class CameraHelper
         return camera.cameraToWorldMatrix;
     }
 
-    public static Matrix4x4 GetCameraToScreen(this Camera camera, bool useRTFix = false)
+    public static Matrix4x4 GetCameraToScreen(this Camera camera, bool useRTFix = true)
     {
         Matrix4x4 p = camera.projectionMatrix;
 

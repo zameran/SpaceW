@@ -34,6 +34,12 @@ public sealed class AtmosphereRunTimeBaking : MonoBehaviour
     const int RES_NU = 8;
     const int NUM_THREADS = 8;
 
+    const int TRANSMITTANCE_INTEGRAL_SAMPLES = 512;	        //500
+    const int INSCATTER_INTEGRAL_SAMPLES = 64;			    //50
+    const int IRRADIANCE_INTEGRAL_SAMPLES = 32;	            //32
+    const int IRRADIANCE_INTEGRAL_SAMPLES_HALF = 16;        //16
+    const int INSCATTER_SPHERICAL_INTEGRAL_SAMPLES = 8;     //16
+
     public RenderTexture transmittanceT;
     public RenderTexture irradianceT_Read, irradianceT_Write, inscatterT_Read, inscatterT_Write;
     public RenderTexture deltaET, deltaSRT, deltaSMT, deltaJT;
@@ -205,6 +211,11 @@ public sealed class AtmosphereRunTimeBaking : MonoBehaviour
         }
         else if (step == 5)
         {
+            //Here Nvidia GTX 430 driver will crash.
+            //If only ray1 or mie1 calculated - slow, but all is alright.
+            //But if both - driver crash.
+            //INSCATTER_SPHERICAL_INTEGRAL_SAMPLES = 8 - limit for GTX 430.
+
             // computes deltaJ (line 7 in algorithm 4.1)
             inscatterS.SetInt("first", (order == 2) ? 1 : 0);
             inscatterS.SetTexture(0, "transmittanceRead", transmittanceT);
@@ -221,7 +232,7 @@ public sealed class AtmosphereRunTimeBaking : MonoBehaviour
                 inscatterS.Dispatch(0, (RES_MU_S * RES_NU) / NUM_THREADS, RES_MU / NUM_THREADS, 1);
             }
         }
-        else if (step == 6)
+        else if (step == 6) 
         {
             // computes deltaE (line 8 in algorithm 4.1)
             irradianceN.SetInt("first", (order == 2) ? 1 : 0);
@@ -311,6 +322,13 @@ public sealed class AtmosphereRunTimeBaking : MonoBehaviour
         cs.SetFloat("AVERAGE_GROUND_REFLECTANCE", AVERAGE_GROUND_REFLECTANCE);
         cs.SetFloat("HR", HR);
         cs.SetFloat("HM", HM);
+
+        cs.SetInt("TRANSMITTANCE_INTEGRAL_SAMPLES", TRANSMITTANCE_INTEGRAL_SAMPLES);
+        cs.SetInt("INSCATTER_INTEGRAL_SAMPLES", INSCATTER_INTEGRAL_SAMPLES);
+        cs.SetInt("IRRADIANCE_INTEGRAL_SAMPLES", IRRADIANCE_INTEGRAL_SAMPLES);
+        cs.SetInt("IRRADIANCE_INTEGRAL_SAMPLES_HALF", IRRADIANCE_INTEGRAL_SAMPLES_HALF);
+        cs.SetInt("INSCATTER_SPHERICAL_INTEGRAL_SAMPLES", INSCATTER_SPHERICAL_INTEGRAL_SAMPLES);
+
         cs.SetVector("betaR", BETA_R);
         cs.SetVector("betaMSca", BETA_MSca);
         cs.SetVector("betaMEx", BETA_MSca / 0.9f);
@@ -335,6 +353,13 @@ public sealed class AtmosphereRunTimeBaking : MonoBehaviour
         cs.SetFloat("AVERAGE_GROUND_REFLECTANCE", AVERAGE_GROUND_REFLECTANCE);
         cs.SetFloat("HR", HR);
         cs.SetFloat("HM", HM);
+
+        cs.SetInt("TRANSMITTANCE_INTEGRAL_SAMPLES", TRANSMITTANCE_INTEGRAL_SAMPLES);
+        cs.SetInt("INSCATTER_INTEGRAL_SAMPLES", INSCATTER_INTEGRAL_SAMPLES);
+        cs.SetInt("IRRADIANCE_INTEGRAL_SAMPLES", IRRADIANCE_INTEGRAL_SAMPLES);
+        cs.SetInt("IRRADIANCE_INTEGRAL_SAMPLES_HALF", IRRADIANCE_INTEGRAL_SAMPLES_HALF);
+        cs.SetInt("INSCATTER_SPHERICAL_INTEGRAL_SAMPLES", INSCATTER_SPHERICAL_INTEGRAL_SAMPLES);
+
         cs.SetVector("betaR", BETA_R);
         cs.SetVector("betaMSca", BETA_MSca);
         cs.SetVector("betaMEx", BETA_MSca / 0.9f);

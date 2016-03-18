@@ -4,7 +4,7 @@
  */
  
  // copies deltaS into S (line 5 in algorithm 4.1)
- #pragma kernel CSMain
+#pragma kernel CSMain
 #define NUM_THREADS 8
 
 int layer;

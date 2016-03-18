@@ -35,7 +35,7 @@ void CSMain (uint3 id : SV_DispatchThreadID)
 	{ 
 		float phi = (float(iphi) + 0.5) * dphi; 
 
-		for (int itheta = 0; itheta < IRRADIANCE_INTEGRAL_SAMPLES / 2; ++itheta) 
+		for (int itheta = 0; itheta < IRRADIANCE_INTEGRAL_SAMPLES_HALF; ++itheta) 
 		{ 
 
 			float theta = (float(itheta) + 0.5) * dtheta; 
@@ -64,5 +64,6 @@ void CSMain (uint3 id : SV_DispatchThreadID)
 			} 
 		} 
 	} 
+
 	deltaEWrite[id.xy] = float4(result, 1.0); 
 }
