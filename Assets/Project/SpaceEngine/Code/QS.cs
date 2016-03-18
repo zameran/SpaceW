@@ -5,8 +5,8 @@ public static class QS
 {
     public static int nVertsPerEdgeReal { get { return 128; } }
     public static int nVertsPerEdge { get { return 120; } }
-    public static int nVertsPerEdgeSubReal { get { return nVertsPerEdgeReal * 1; } }
-    public static int nVertsPerEdgeSub { get { return nVertsPerEdge * 1; } }
+    public static int nVertsPerEdgeSubReal { get { return nVertsPerEdgeReal * 2; } }
+    public static int nVertsPerEdgeSub { get { return nVertsPerEdge * 2; } }
 
     public static int nVertsReal { get { return nVertsPerEdgeReal * nVertsPerEdgeReal; } }
     public static int nVerts { get { return nVertsPerEdge * nVertsPerEdge; } }

@@ -1,5 +1,4 @@
 ﻿using UnityEngine;
-using System.Collections;
 
 public class NoiseParametersSetter : MonoBehaviour
 {
@@ -34,11 +33,16 @@ public class NoiseParametersSetter : MonoBehaviour
 
 	}
 
-	[ContextMenu("Update Uniforms")]
 	public void UpdateUniforms(Material mat, ComputeShader cs)
 	{
 		SetUniforms(mat);
 		SetUniforms(cs);
+	}
+
+	public void UpdateUniforms(Material mat, ComputeShader cs, int kernel)
+	{
+		SetUniforms(mat);
+		SetUniforms(cs, kernel);
 	}
 
 	public void Init()

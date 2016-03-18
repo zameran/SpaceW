@@ -53,7 +53,8 @@
 				float3 uv2 : TEXCOORD2;
 				float3 normal0 : NORMAL0;
 				float3 normal1 : NORMAL1;
-				float4 vertex : POSITION;
+				float4 vertex : POSITION0;
+				float4 vertexw : POSITION1;
 			};
 		
 			uniform half4 _WireframeColor;
@@ -68,23 +69,27 @@
 
 			uniform float3 _Origin;
 
-			#ifdef SHADER_API_D3D11
 			uniform StructuredBuffer<OutputStruct> data;
 			uniform StructuredBuffer<QuadGenerationConstants> quadGenerationConstants;
-			#endif
 
 			float4 RGB2Reflectance(float4 inColor)
 			{
 				return float4(tan(1.37 * inColor.rgb) / tan(1.37), inColor.a);
 			}
 
-			float4 GroundFinalColor(float4 terrainColor, float3 p, float3 n)
+			float4 GroundFinalColor(appdata_full_compute v, float4 terrainColor, float3 p, float3 n)
 			{	
 				QuadGenerationConstants constants = quadGenerationConstants[0];
 	
 				float3 WCP = _Globals_WorldCameraPos;
 				float3 WSD = _Sun_WorldSunDir;
 				
+				float3 originalPoint = p;
+				float3 rotatedPointX = Rotate(_Rotation.x, float3(1, 0, 0), originalPoint);
+				float3 rotatedPointY = Rotate(_Rotation.y, float3(0, 1, 0), rotatedPointX);
+				float3 rotatedPointZ = Rotate(_Rotation.z, float3(0, 0, 1), rotatedPointY);
+				float3 rotatedPoint = rotatedPointZ;
+
 				float3 fn = n;
 				//fn.xy = n.xy; // - default.
 				//fn.xy = -n.xy; // - inverted.
@@ -93,16 +98,11 @@
 				//fn.z = sqrt(max(0.0, -1.0 + dot(fn.xy, fn.xy))); // - inverted.
 
 				fn = float3(0, 0, 0); //disable normal mapping... bruuuutaal!
-				
+
 				float4 reflectance = RGB2Reflectance(terrainColor);
 
 				float3 sunL = 0;
 				float3 skyE = 0;
-
-				float3 originalPoint = p;
-				float3 rotatedPointX = Rotate(_Rotation.x, float3(1, 0, 0), originalPoint);
-				float3 rotatedPointY = Rotate(_Rotation.y, float3(0, 1, 0), rotatedPointX);
-				float3 rotatedPoint = rotatedPointY;
 
 				SunRadianceAndSkyIrradiance(rotatedPoint, fn, WSD, sunL, skyE);
 
@@ -143,7 +143,7 @@
 				//v.normal.xyz = mul(v.normal.xyz, rotation);
 
 				float4 terrainColor = tex2Dlod(_HeightTexture, v.texcoord);
-				float4 groundFinalColor = GroundFinalColor(terrainColor, v.vertex.xyz, v.normal.xyz);
+				float4 groundFinalColor = GroundFinalColor(v, terrainColor, v.vertex.xyz, v.normal.xyz);
 				float4 scatteringColor = float4(groundFinalColor.xyz, groundFinalColor.w);
 
 				v2fg o;
@@ -156,6 +156,7 @@
 				o.normal0 = v.normal;
 				o.normal1 = v.normal;
 				o.vertex = mul(UNITY_MATRIX_MVP, v.vertex);
+				o.vertexw = v.vertex;
 
 				return o;
 			}
@@ -172,6 +173,7 @@
 				OUT.normal0 = FROM.normal0;
 				OUT.normal1 = FROM.normal1;
 				OUT.vertex = FROM.vertex;
+				OUT.vertexw = FROM.vertexw;
 
 				return OUT;
 			}
@@ -198,6 +200,8 @@
 
 			void frag(v2fg IN, out float4 outDiffuse : COLOR0, out float4 outNormal : COLOR1)
 			{		
+				QuadGenerationConstants constants = quadGenerationConstants[0];
+
 				float d = min(IN.uv1.x, min(IN.uv1.y, IN.uv1.z));
 				float I = exp2(-4.0 * d * d);
 
@@ -206,7 +210,7 @@
 				fixed4 outputColor = lerp(terrainColor, wireframeColor, _Wireframe);
 
 				fixed3 terrainWorldNormal = IN.normal0;
-				fixed3 terrainLocalNormal = CalculateSurfaceNormal_HeightMap(IN.vertex, IN.normal0, IN.terrainColor.a); //IN.normal1;
+				fixed3 terrainLocalNormal = CalculateSurfaceNormal_HeightMap(IN.vertex, IN.vertexw, IN.terrainColor.a); //IN.normal1;
 				fixed4 outputNormal = fixed4(terrainWorldNormal, 1); //fixed4(terrainWorldNormal * terrainLocalNormal, 1);
 
 				outDiffuse = lerp(outputColor, outputNormal, _Normale);

@@ -683,9 +683,6 @@ public class Quad : MonoBehaviour
 
 	private void SetupComputeShaderUniforms()
 	{
-		if (Planetoid.NPS != null)
-			Planetoid.NPS.UpdateUniforms(QuadMaterial, CoreShader);
-
 		if (Planetoid.transform.GetComponentInChildren<TCCommonParametersSetter>() != null)
 			Planetoid.transform.GetComponentInChildren<TCCommonParametersSetter>().UpdateUniforms(CoreShader);
 	}
@@ -701,6 +698,9 @@ public class Quad : MonoBehaviour
 
 		CoreShader.SetTexture(kernel, "Height", HeightTexture);
 		CoreShader.SetTexture(kernel, "Normal", NormalTexture);
+
+		if (Planetoid.NPS != null)
+			Planetoid.NPS.UpdateUniforms(QuadMaterial, CoreShader, kernel);
 	}
 
 	public void SetupVectors(Quad quad, int id, bool staticX, bool staticY, bool staticZ)

@@ -106,14 +106,8 @@ uniform sampler2D   NormalMap;          // normals map to calculate slope
 uniform sampler1D   CloudsColorTable;   // clouds color table
 
 uniform sampler2D   MaterialTable;      // material parameters table
-//uniform RWTexture2D<float> MaterialTable;      // material parameters table
-//uniform Texture2D<float> MaterialTable;      // material parameters table
-//RWStructuredBuffer<float4> MaterialTableBuffer;
 
 uniform sampler2D   AtlasDiffSampler;   // detail texture diffuse atlas
-//uniform RWTexture2D<float> AtlasDiffSampler;   // detail texture diffuse atlas
-//uniform Texture2D<float> AtlasDiffSampler;   // detail texture diffuse atlas
-//RWStructuredBuffer<float4> AtlasDiffSamplerBuffer;
 
 uniform sampler2D	ColorMap;
 //-----------------------------------------------------------------------------
@@ -3560,9 +3554,9 @@ float4 ColorMapPlanet(float3 ppoint, float height, float slope)
 {
 	Surface surf;
 
-	//float4 lookupColor = tex2Dlod(MaterialTable, float4(height, slope, 0, 0));
+	float4 lookupColor = tex2Dlod(MaterialTable, float4(height, slope, 0, 0));
 
-	surf = GetSurfaceColor(height, slope, height + slope);
+	surf = GetSurfaceColor(height, slope, length(lookupColor));
 
 	return surf.color;
 }

@@ -1,7 +1,7 @@
 ﻿#define nVerticesPerSide 120
 #define nVerticesPerSideWithBorder 128
-#define nVerticesPerSideSub 120
-#define nVerticesPerSideWithBorderSub 128
+#define nVerticesPerSideSub 240
+#define nVerticesPerSideWithBorderSub 256
 
 //#define defaultNoise
 
@@ -51,8 +51,8 @@ float4 ColorFunction(float3 coord, float height, float slope)
 	//float4 glowMapColor = GlowMapAsteroid(p, height, slope);
 	//float4 color = colorMapColor + glowMapColor;
 	//float4 color = ColorMapTerra(p, height, slope);
-	//float4 color = ColorMapPlanet(p, height, slope);
-	float4 color = float4(height, height, height, 1);
+	float4 color = ColorMapPlanet(p, height, slope);
+	//float4 color = float4(height, height, height, 1);
 	#endif
 	
 	return color;
@@ -171,7 +171,7 @@ void HeightSub(uint3 id : SV_DispatchThreadID)
 
 	int outBuffOffset = id.x + id.y * nVerticesPerSideWithBorderSub;
 
-	float3 cubeCoord = CubeCoord(constants, nVerticesPerSideWithBorderSub, id, 7, constants.spacingsub);
+	float3 cubeCoord = CubeCoord(constants, nVerticesPerSideWithBorderSub, id, 17, constants.spacingsub);
 
 	float3 patchCenter = normalize(constants.patchCubeCenter) * constants.planetRadius;
 	float3 patchNormalizedCoord = normalize(cubeCoord);
