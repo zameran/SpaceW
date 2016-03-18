@@ -345,16 +345,4 @@ public class Planetoid : MonoBehaviour
 			this.Working = false;
 		}
 	}
-
-	private void Log(string msg)
-	{
-		if (DebugEnabled)
-			Debug.Log(msg);
-	}
-
-	private void Log(string msg, bool state)
-	{
-		if (state)
-			Debug.Log(msg);
-	}
 }

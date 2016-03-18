@@ -18,12 +18,12 @@ namespace NBody
         /// <summary>
         /// The gravitational constant. 
         /// </summary>
-        public static double G = 67;
+        public static double G = 6.6740831;
 
         /// <summary>
         /// The maximum speed. 
         /// </summary>
-        public static double C = 1e4;
+        public static double C = 299792458;
 
         /// <summary>
         /// The number of bodies allocated in the simulation. 
@@ -86,7 +86,7 @@ namespace NBody
         /// <summary>
         /// The collection of bodies in the simulation. 
         /// </summary>
-        private Body[] _bodies = new Body[16];
+        private Body[] _bodies = new Body[32];
 
         /// <summary>
         /// The tree for calculating forces. 
