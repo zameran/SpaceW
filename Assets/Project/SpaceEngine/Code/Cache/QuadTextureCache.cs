@@ -2,6 +2,8 @@
 
 using UnityEngine;
 
+using ZFramework.Unity.Common.Threading;
+
 [Serializable]
 public class QuadTextureCache : QuadCache
 {
@@ -27,7 +29,7 @@ public class QuadTextureCache : QuadCache
     {
         if (Owner.Multithreaded)
         {
-            ThreadScheduler.RunOnMainThread(() =>
+            Dispatcher.InvokeAsync(() =>
             {
                 Graphics.Blit(this.HeightTexture, q.HeightTexture);
                 Graphics.Blit(this.NormalTexture, q.NormalTexture);
@@ -35,8 +37,11 @@ public class QuadTextureCache : QuadCache
         }
         else
         {
-            Graphics.Blit(this.HeightTexture, q.HeightTexture);
-            Graphics.Blit(this.NormalTexture, q.NormalTexture);
+            Dispatcher.Invoke(() =>
+            {
+                Graphics.Blit(this.HeightTexture, q.HeightTexture);
+                Graphics.Blit(this.NormalTexture, q.NormalTexture);
+            });
         }
 
         base.TransferTo(q);
@@ -46,7 +51,7 @@ public class QuadTextureCache : QuadCache
     {
         if (Owner.Multithreaded)
         {
-            ThreadScheduler.RunOnMainThread(() =>
+            Dispatcher.InvokeAsync(() =>
             {
                 Graphics.Blit(q.HeightTexture, this.HeightTexture);
                 Graphics.Blit(q.NormalTexture, this.NormalTexture);
@@ -54,8 +59,11 @@ public class QuadTextureCache : QuadCache
         }
         else
         {
-            Graphics.Blit(q.HeightTexture, this.HeightTexture);
-            Graphics.Blit(q.NormalTexture, this.NormalTexture);
+            Dispatcher.Invoke(() =>
+            {
+                Graphics.Blit(q.HeightTexture, this.HeightTexture);
+                Graphics.Blit(q.NormalTexture, this.NormalTexture);
+            });
         }
 
         base.TransferTo(q);

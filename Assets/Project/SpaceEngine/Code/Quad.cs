@@ -6,6 +6,7 @@ using System.Collections;
 using System.Collections.Generic;
 
 using ZFramework.Math;
+using ZFramework.Unity.Common.Threading;
 using ZFramework.Unity.Common.PerfomanceMonitor;
 
 [Serializable]
@@ -307,12 +308,12 @@ public class Quad : MonoBehaviour
 		if (ReadyForDispatch)
 		{
 			if (!Generated && !Planetoid.Cache.Working)
-				Dispatch();
+				Dispatcher.InvokeAsync(() => { Dispatch(); });
 		}
 
 		SetupBounds(this, QuadMesh);
 
-		Planetoid.Atmosphere.SetUniformsForPlanetQuad(QuadMaterial);
+		Dispatcher.InvokeAsync(() => { Planetoid.Atmosphere.SetUniformsForPlanetQuad(QuadMaterial); }); 
 
 		QuadMaterial.SetBuffer("data", OutDataBuffer);
 		QuadMaterial.SetBuffer("quadGenerationConstants", QuadGenerationConstantsBuffer);

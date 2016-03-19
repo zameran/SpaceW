@@ -2,6 +2,8 @@
 
 using UnityEngine;
 
+using ZFramework.Unity.Common.Threading;
+
 [Serializable]
 public class QuadCBCache : QuadCache
 {
@@ -17,20 +19,40 @@ public class QuadCBCache : QuadCache
 
     public override void TransferTo(Quad q)
     {
-        ThreadScheduler.RunOnMainThread(() =>
+        if (Owner.Multithreaded)
         {
+            Dispatcher.InvokeAsync(() =>
+            {
 
-        });
+            });
+        }
+        else
+        {
+            Dispatcher.Invoke(() =>
+            {
+
+            });
+        }
 
         base.TransferTo(q);
     }
 
     public override void TransferFrom(Quad q)
     {
-        ThreadScheduler.RunOnMainThread(() =>
+        if (Owner.Multithreaded)
         {
+            Dispatcher.InvokeAsync(() =>
+            {
 
-        });
+            });
+        }
+        else
+        {
+            Dispatcher.Invoke(() =>
+            {
+
+            });
+        }
 
         base.TransferTo(q);
     }

@@ -34,4 +34,24 @@ public abstract class QuadCache
     {
 
     }
+
+    public void BeginTransfer()
+    {
+        GUILayer[] gui = GameObject.FindObjectsOfType<GUILayer>();
+
+        for (int i = 0; i < gui.Length; i++)
+        {
+            gui[i].enabled = false;
+        }
+    }
+
+    public void EndTransfer()
+    {
+        GUILayer[] gui = GameObject.FindObjectsOfType<GUILayer>();
+
+        for (int i = 0; i < gui.Length; i++)
+        {
+            gui[i].enabled = true;
+        }
+    }
 }

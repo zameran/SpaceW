@@ -16,7 +16,7 @@
         </member>
         <member name="T:ZFramework.CPUNoise.NamespaceDocumentationContainer">
             <summary>
-            
+            CPU side based noise engine.
             </summary>
         </member>
         <member name="T:ZFramework.Math.MathUtils">
@@ -252,6 +252,7 @@
             Returns the absolute value.
             </summary>
             <param name="value">Value type of float</param>
+            <exception cref="T:System.OverflowException"></exception>
             <returns>The absolute value.</returns>
         </member>
         <member name="M:ZFramework.Math.MathUtils.Abs(System.Double)">
@@ -259,6 +260,7 @@
             Returns the absolute value.
             </summary>
             <param name="value">Value type of double</param>
+            <exception cref="T:System.OverflowException"></exception>
             <returns>The absolute value.</returns>
         </member>
         <member name="M:ZFramework.Math.MathUtils.FastIntAbs(System.Int32)">
@@ -266,6 +268,7 @@
             Returns the absolute value. This method is faster then MathUtils.Abs(int value).
             </summary>
             <param name="value">Value type of int</param>
+            <exception cref="T:System.OverflowException"></exception>
             <returns>The absolute value.</returns>
         </member>
         <member name="M:ZFramework.Math.MathUtils.Clamp(System.Int32,System.Int32,System.Int32)">
@@ -524,13 +527,36 @@
         </member>
         <member name="T:ZFramework.Math.NamespaceDocumentationContainer">
             <summary>
-            
+            Optimized, table based math functions math core.
             </summary>
         </member>
         <member name="T:ZFramework.Extensions.ArrayExtensions">
             <summary>
             Extension class for array.
             </summary>
+        </member>
+        <member name="M:ZFramework.Extensions.ArrayExtensions.ClearAll(System.Array,System.Int32)">
+            <summary>
+            Method, that clears the array.
+            </summary>
+            <param name="array">Array to clear.</param>
+            <param name="fromIndex">Optional. Index to start from.</param>
+        </member>
+        <member name="M:ZFramework.Extensions.ArrayExtensions.ClearAll``1(``0[],System.Int32)">
+            <summary>
+            Method, that clears the array.
+            </summary>
+            <typeparam name="T">Array type.</typeparam>
+            <param name="array">Array to clear.</param>
+            <param name="fromIndex">Optional. Index to start from.</param>
+        </member>
+        <member name="M:ZFramework.Extensions.ArrayExtensions.ToDataTable``1(``0[])">
+            <summary>
+            Method, that converts array to a data table.
+            </summary>
+            <typeparam name="T">Array type.</typeparam>
+            <param name="array">Array to convert.</param>
+            <returns>Array as a DataTable.</returns>
         </member>
         <member name="M:ZFramework.Extensions.ArrayExtensions.RemoveAt``1(``0[],System.Int32)">
             <summary>
@@ -608,9 +634,28 @@
             AttributeUtils uses caching to rise up speed of access.
             </summary>
         </member>
+        <member name="P:ZFramework.Extensions.AttributeUtils.AttributeCache">
+            <summary>
+            Attribute cache. Readonly.
+            </summary>
+        </member>
+        <member name="M:ZFramework.Extensions.AttributeUtils.GetTypeAttributes``1">
+            <summary>
+            Gets all attributes of type.
+            </summary>
+            <typeparam name="TType">Type.</typeparam>
+            <returns>Returns list, that contains all attributes of defined type.</returns>
+        </member>
+        <member name="M:ZFramework.Extensions.AttributeUtils.GetTypeAttributes(System.Type)">
+            <summary>
+            Gets all attributes of type.
+            </summary>
+            <param name="type">Type.</param>
+            <returns>Returns list, that contains all attributes of defined type.</returns>
+        </member>
         <member name="T:ZFramework.Extensions.BitmapExtensions">
             <summary>
-            Extension class for Bitmap and Image.
+            Extension class for Bitmap and Image classes.
             </summary>
         </member>
         <member name="M:ZFramework.Extensions.BitmapExtensions.ExecuteForEachPixel(System.Drawing.Bitmap,System.Action{System.Drawing.Point,System.Drawing.Bitmap})">
@@ -624,8 +669,22 @@
             <summary>
             Execute Action for each pixel of bitmap.
             </summary>
-            <param name="bitmap">Birmap.</param>
+            <param name="bitmap">Bitmap.</param>
             <param name="action">Action to execute.</param>
+        </member>
+        <member name="M:ZFramework.Extensions.BitmapExtensions.SetEachPixelColour(System.Drawing.Bitmap,System.Func{System.Drawing.Point,System.Drawing.Color})">
+            <summary>
+            Execute Func for each pixel of bitmap.
+            </summary>
+            <param name="bitmap">Bitmap.</param>
+            <param name="colourFunc">Func to execute</param>
+        </member>
+        <member name="M:ZFramework.Extensions.BitmapExtensions.SetEachPixelColour(System.Drawing.Bitmap,System.Func{System.Drawing.Point,System.Drawing.Color,System.Drawing.Color})">
+            <summary>
+            Execute Func for each pixel of bitmap.
+            </summary>
+            <param name="bitmap">Bitmap.</param>
+            <param name="colourFunc">Func to execute</param>
         </member>
         <member name="M:ZFramework.Extensions.BitmapExtensions.Raster(System.Drawing.Color[0:,0:],System.Drawing.Bitmap@)">
             <summary>
@@ -687,18 +746,18 @@
         </member>
         <member name="M:ZFramework.Extensions.FloatExtensions.IsZero(System.Single)">
             <summary>
-            Is float equals zero?
+            Is float equal to zero?
             </summary>
             <param name="number">Number type of float.</param>
-            <returns>True = 0; False != 0.</returns>
+            <returns>False, if number are't equal to zero. Otherwise - true.</returns>
         </member>
         <member name="M:ZFramework.Extensions.FloatExtensions.ToString(System.Nullable{System.Single},System.String)">
             <summary>
-            ToString() Analog.
+            ToString() analog.
             </summary>
             <param name="value"></param>
-            <param name="defaultvalue"></param>
-            <returns>Null if 'value' == null.</returns>
+            <param name="defaultValue"></param>
+            <returns>DefaultValue if value is null.</returns>
         </member>
         <member name="T:ZFramework.Extensions.GlobalExtensions">
             <summary>
@@ -754,24 +813,33 @@
             <param name="comparer">An equality comparer to compare values.</param>
             <returns>The zero-based index of the first occurrence of value within the entire sequence, if found; otherwise, –1.</returns>
         </member>
+        <member name="M:ZFramework.Extensions.GlobalExtensions.ChunkBy``1(System.Collections.Generic.List{``0},System.Int32)">
+            <summary>
+            Array chunking method.
+            </summary>
+            <typeparam name="T">Type.</typeparam>
+            <param name="source">Source array.</param>
+            <param name="chunkSize">Chunk size.</param>
+            <returns></returns>
+        </member>
         <member name="T:ZFramework.Extensions.IntExtensions">
             <summary>
             Extension class for int.
             </summary>
         </member>
-        <member name="M:ZFramework.Extensions.IntExtensions.IsZero(System.Int32)">
+        <member name="M:ZFramework.Extensions.IntExtensions.IsZero(System.Single)">
             <summary>
-            Is int equals zero?
+            Is int equal to zero?
             </summary>
-            <param name="number">Number type of int.</param>
-            <returns>True = 0; False != 0.</returns>
+            <param name="number">Number type of float.</param>
+            <returns>False, if number are't equal to zero. Otherwise - true.</returns>
         </member>
         <member name="M:ZFramework.Extensions.IntExtensions.ToString(System.Nullable{System.Int32},System.String)">
             <summary>
             ToString() Analog.
             </summary>
             <param name="value"></param>
-            <param name="defaultvalue"></param>
+            <param name="defaultValue"></param>
             <returns>Null if 'value' == null.</returns>
         </member>
         <member name="T:ZFramework.Extensions.IOExtensions">
@@ -793,11 +861,12 @@
             </summary>
             <param name="dirPath">Folder path to create.</param>
         </member>
-        <member name="M:ZFramework.Extensions.IOExtensions.ReadToEnd(System.IO.Stream)">
+        <member name="M:ZFramework.Extensions.IOExtensions.ReadToEnd(System.IO.Stream,System.Int32)">
             <summary>
             Small utility for getting all data from Stream in byte array.
             </summary>
             <param name="stream">Stream to read from.</param>
+            <param name="bufferSize">Optional. Read buffer size.</param>
             <returns>Array of byte data.</returns>
         </member>
         <member name="T:ZFramework.Extensions.ListExtensions">
@@ -826,12 +895,42 @@
         </member>
         <member name="T:ZFramework.Extensions.NamespaceDocumentationContainer">
             <summary>
-            
+            Couple of extension methods for base types, and shortcut extensions for loops.
+            <see cref="T:System.Array"/>
+            <see cref="T:System.Attribute"/>
+            <see cref="T:System.Drawing.Bitmap"/>
+            <see cref="T:System.Single"/>
+            <see cref="T:System.Int32"/>
+            <see cref="N:System.IO"/>
+            <see cref="T:System.Collections.Generic.List`1"/>
+            <see cref="T:System.String"/>
             </summary>
+        </member>
+        <member name="T:ZFramework.Monads.Maybe">
+            <summary>
+            Maybe monade class.
+            </summary>
+        </member>
+        <member name="M:ZFramework.Monads.Maybe.ExceptionIfNull``1(``0,System.String)">
+            <summary>
+            Check if null.
+            </summary>
+            <typeparam name="T">Class type.</typeparam>
+            <param name="value">Value.</param>
+            <param name="name">Value name. Added to exception info.</param>
         </member>
         <member name="T:ZFramework.NamespaceDocumentationContainer">
             <summary>
-            
+            ZFramework is a helpful library for Standalone and in Unity Engine usage.
+            Provedes some useful extensions methods, and splitted in modules.
+            <see cref="N:ZFramework.CPUNoise"/>
+            <see cref="N:ZFramework.Extensions"/>
+            <see cref="N:ZFramework.Math"/>
+            <see cref="N:ZFramework.Monads"/>
+            <see cref="N:ZFramework.NeuronNets"/>
+            <see cref="N:ZFramework.Random"/>
+            <see cref="N:ZFramework.RNG"/>
+            <see cref="N:ZFramework.Unity"/>
             </summary>
         </member>
         <member name="T:ZFramework.NeuronNets.NamespaceDocumentationContainer">
@@ -1635,7 +1734,7 @@
         </member>
         <member name="T:ZFramework.Random.NamespaceDocumentationContainer">
             <summary>
-            
+            Random libriary.
             </summary>
         </member>
         <member name="T:ZFramework.Random.Distribution">
@@ -1875,12 +1974,12 @@
         </member>
         <member name="T:ZFramework.RNG.NamespaceDocumentationContainer">
             <summary>
-            
+            Random name generator.
             </summary>
         </member>
         <member name="T:ZFramework.RNG.Generators.NamespaceDocumentationContainer">
             <summary>
-            
+            Random name generator generator's.
             </summary>
         </member>
         <member name="T:ZFramework.RNG.CensusListStripper">
@@ -1895,7 +1994,7 @@
         </member>
         <member name="T:ZFramework.Unity.NamespaceDocumentationContainer">
             <summary>
-            
+            Unity sheet.
             </summary>
         </member>
         <member name="T:ZFramework.Unity.Common.NamespaceDocumentationContainer">
@@ -2390,6 +2489,40 @@
             <param name="target">Transfrom where search process will be.</param>
             <param name="name">Name of target transform.</param>
             <returns></returns>
+        </member>
+        <member name="T:ZFramework.Unity.Common.Attributes.ExecutionOrderAttribute">
+            <summary>
+            Taken from github. Only unity5. 
+            </summary>
+        </member>
+        <member name="T:ZFramework.Unity.Common.Threading.Dispatcher">
+            <summary>
+            A system for dispatching code to execute on the main thread.
+            </summary>
+        </member>
+        <member name="F:ZFramework.Unity.Common.Threading.Dispatcher.InstanceExist">
+            <summary>
+            We can't use the behaviour reference from other threads, so we use a separate bool
+            to track the instance so we can use that on the other threads.
+            </summary>
+        </member>
+        <member name="P:ZFramework.Unity.Common.Threading.Dispatcher.isMainThread">
+            <summary>
+            Gets a value indicating whether or not the current thread is the game's main thread.
+            </summary>
+        </member>
+        <member name="M:ZFramework.Unity.Common.Threading.Dispatcher.InvokeAsync(System.Action)">
+            <summary>
+            Queues an action to be invoked on the main game thread.
+            </summary>
+            <param name="action">The action to be queued.</param>
+        </member>
+        <member name="M:ZFramework.Unity.Common.Threading.Dispatcher.Invoke(System.Action)">
+            <summary>
+            Queues an action to be invoked on the main game thread and blocks the
+            current thread until the action has been executed.
+            </summary>
+            <param name="action">The action to be queued.</param>
         </member>
         <member name="T:ZFramework.Unity.NeuronNets.NamespaceDocumentationContainer">
             <summary>
