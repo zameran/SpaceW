@@ -158,8 +158,9 @@ public class Quad : MonoBehaviour
 	public bool Visible = false;
 	public bool Cached = false;
 
-	public float lodUpdateInterval = 0.25f;
-	public float lastLodUpdateTime = 0.00f;
+	public float LODUpdateInterval = 0.25f;
+	public float LastLODUpdateTime = 0.00f;
+	public float DistanceToClosestCorner = Mathf.Infinity;
 
 	public Vector3 topLeftCorner;
 	public Vector3 bottomRightCorner;
@@ -221,22 +222,26 @@ public class Quad : MonoBehaviour
 			if (Planetoid.RenderPerUpdate)
 				Render();
 
-		if (Time.time > lastLodUpdateTime + lodUpdateInterval && Planetoid.UseLOD)
+		if (Time.time > LastLODUpdateTime + LODUpdateInterval && Planetoid.UseLOD)
 		{
-			lastLodUpdateTime = Time.time;
+			LastLODUpdateTime = Time.time;
+
+			DistanceToClosestCorner = GetDistanceToClosestCorner();
 
 			if (LODLevel < Planetoid.LODMaxLevel)
 			{
+				float LODDistance = Planetoid.LODDistances[LODLevel + 1] * Planetoid.LODDistanceMultiplier;
+
 				if (!Planetoid.OneSplittingQuad)
 				{
 					if (Generated && !HaveSubQuads)
 					{
-						if (GetDistanceToClosestCorner() < Planetoid.LODDistances[LODLevel + 1] * Planetoid.LODDistanceMultiplier && !Splitting)
+						if (DistanceToClosestCorner < LODDistance && !Splitting)
 							StartCoroutine(Split());
 					}
 					else
 					{
-						if (GetDistanceToClosestCorner() > Planetoid.LODDistances[LODLevel + 1] * Planetoid.LODDistanceMultiplier && !Splitting)
+						if (DistanceToClosestCorner > LODDistance && !Splitting)
 							Unsplit();
 					}
 				}
@@ -244,12 +249,12 @@ public class Quad : MonoBehaviour
 				{
 					if (Generated && !HaveSubQuads && !Planetoid.Working)
 					{
-						if (GetDistanceToClosestCorner() < Planetoid.LODDistances[LODLevel + 1] * Planetoid.LODDistanceMultiplier && !Splitting)
+						if (DistanceToClosestCorner < LODDistance && !Splitting)
 							StartCoroutine(Split());
 					}
 					else
 					{
-						if (GetDistanceToClosestCorner() > Planetoid.LODDistances[LODLevel + 1] * Planetoid.LODDistanceMultiplier && !Splitting)
+						if (DistanceToClosestCorner > LODDistance && !Splitting)
 							Unsplit();
 					}
 				}
@@ -323,12 +328,18 @@ public class Quad : MonoBehaviour
 
 		if (Generated && ShouldDraw)
 		{
-			Visible = PlaneFrustumCheck(Camera.main);
+			if (!Planetoid.UseUnityCulling)
+				Visible = PlaneFrustumCheck(Camera.main);
+			else
+				Visible = true;
 
 			if (QuadMesh != null)
 			{
 				if (Planetoid.RenderPerUpdate)
-					Graphics.DrawMesh(QuadMesh, Planetoid.Origin, Planetoid.OriginRotation, QuadMaterial, 0, Camera.main, 0, null, true, true);
+				{
+					if (Visible)
+						Graphics.DrawMesh(QuadMesh, Planetoid.Origin, Planetoid.OriginRotation, QuadMaterial, 0, Camera.main, 0, null, true, true);
+				}
 				else
 				{
 					if (Visible)
@@ -403,23 +414,23 @@ public class Quad : MonoBehaviour
 
 		Vector3[] verts0 = GetVolumeBox(Planetoid.TerrainMaxHeight * 1);
 
+		Plane[] planes = GeometryUtility.CalculateFrustumPlanes(camera);
+
 		bool[] states = new bool[verts0.Length];
 
 		for (int i = 0; i < states.Length; i++)
 		{
-			states[i] = BorderFrustumCheck(camera, verts0[i]);
+			states[i] = BorderFrustumCheck(planes, verts0[i]);
 		}
 
 		return states.Contains(true);
 	}
 
-	public bool BorderFrustumCheck(Camera camera, Vector3 border)
+	public bool BorderFrustumCheck(Plane[] planes, Vector3 border)
 	{
 		float offset = 1024.0f;
 
 		bool useOffset = true;
-
-		Plane[] planes = GeometryUtility.CalculateFrustumPlanes(camera);
 
 		for (int i = 0; i < planes.Length; i++)
 		{
@@ -430,48 +441,6 @@ public class Quad : MonoBehaviour
 		}
 
 		return true;
-	}
-
-	public void RenderOutline(Camera camera, Material lineMaterial)
-	{
-		#if UNITY_EDITOR
-		if (UnityEditor.SceneView.currentDrawingSceneView != null) return; //Do not draw at Scene tab in editor.
-		#endif
-
-		Color lineColor = Color.blue;
-
-		int[,] ORDER = new int[,] { { 1, 0 }, { 2, 3 }, { 0, 2 }, { 3, 1 } };
-
-		Vector3[] verts = GetVolumeBox(Planetoid.TerrainMaxHeight * 3);
-
-		GL.PushMatrix();
-		GL.LoadIdentity();
-		GL.MultMatrix(Camera.main.worldToCameraMatrix * Planetoid.transform.localToWorldMatrix);
-		GL.LoadProjectionMatrix(Camera.main.projectionMatrix);
-
-		lineMaterial.renderQueue = 5000;
-		lineMaterial.SetPass(0);
-
-		GL.Begin(GL.LINES);
-		GL.Color(lineColor);
-
-		for (int i = 0; i < 4; i++)
-		{
-			//Draw bottom quad
-			GL.Vertex3(verts[ORDER[i, 0]].x, verts[ORDER[i, 0]].y, verts[ORDER[i, 0]].z);
-			GL.Vertex3(verts[ORDER[i, 1]].x, verts[ORDER[i, 1]].y, verts[ORDER[i, 1]].z);
-
-			//Draw top quad
-			GL.Vertex3(verts[ORDER[i, 0] + 4].x, verts[ORDER[i, 0] + 4].y, verts[ORDER[i, 0] + 4].z);
-			GL.Vertex3(verts[ORDER[i, 1] + 4].x, verts[ORDER[i, 1] + 4].y, verts[ORDER[i, 1] + 4].z);
-
-			//Draw verticals
-			GL.Vertex3(verts[ORDER[i, 0]].x, verts[ORDER[i, 0]].y, verts[ORDER[i, 0]].z);
-			GL.Vertex3(verts[ORDER[i, 0] + 4].x, verts[ORDER[i, 0] + 4].y, verts[ORDER[i, 0] + 4].z);
-		}
-
-		GL.End();
-		GL.PopMatrix();
 	}
 
 	public void InitCorners(Vector3 topLeft, Vector3 bottmoRight, Vector3 topRight, Vector3 bottomLeft)

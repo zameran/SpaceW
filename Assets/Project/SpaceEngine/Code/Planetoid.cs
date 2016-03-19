@@ -53,6 +53,30 @@ public class Planetoid : MonoBehaviour
 	public Vector3 Origin = Vector3.zero;
 	public Quaternion OriginRotation = Quaternion.identity;
 
+	public QuadDistanceToClosestCornerComparer qdtccc;
+
+	public class QuadDistanceToClosestCornerComparer : IComparer<Quad>
+	{
+		public int Compare(Quad x, Quad y)
+		{
+			if (x.DistanceToClosestCorner > y.DistanceToClosestCorner)
+				return 1;
+			if (x.DistanceToClosestCorner < y.DistanceToClosestCorner)
+				return -1;
+			else
+				return 0;
+		}
+
+		/* faster comparer. Slighty faster... 0.1-0.2 ms per 100 iterations.
+		public int Compare(Quad x, Quad y)
+		{
+			int result = x.DistanceToClosestCorner.CompareTo(y.DistanceToClosestCorner);
+
+			return result;
+		}
+		*/
+	}
+
 	private void Awake()
 	{
 		Origin = transform.position;
@@ -106,16 +130,27 @@ public class Planetoid : MonoBehaviour
 				Atmosphere.Render(false);
 			}
 		}
-	}
 
-	private void OnGUI()
-	{
-
+		if (ExternalRendering && RenderPerUpdate)
+		{
+			Render();
+		}
 	}
 
 	private void OnRenderObject()
 	{
+		if (ExternalRendering && !RenderPerUpdate)
+		{
+			Render();
+		}
+	}
 
+	public void Render()
+	{
+		for (int i = 0; i < Quads.Count; i++)
+		{
+			Quads[i].Render();
+		}
 	}
 
 	[ContextMenu("DestroyQuads")]
@@ -327,7 +362,11 @@ public class Planetoid : MonoBehaviour
 		quadComponent.Planetoid = this;
 		quadComponent.ShouldDraw = false;
 
+		if (qdtccc == null)
+			qdtccc = new QuadDistanceToClosestCornerComparer();
+
 		Quads.Add(quadComponent);
+		Quads.Sort(qdtccc);
 
 		return quadComponent;
 	}

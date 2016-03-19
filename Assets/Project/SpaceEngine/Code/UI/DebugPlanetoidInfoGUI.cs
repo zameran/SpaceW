@@ -29,6 +29,7 @@ public class DebugPlanetoidInfoGUI : DebugGUI
             GUILayoutExtensions.LabelWithSpace((Planetoid.gameObject.name + ": " + (Planetoid.Working ? "Generating..." : "Idle...")), -10);
             GUILayoutExtensions.LabelWithSpace("Quads count: " + quadsCount, -10);
             GUILayoutExtensions.LabelWithSpace("Quads culled count: " + quadsCulledCount, -10);
+            GUILayoutExtensions.LabelWithSpace("Quads culling machine: " + (Planetoid.UseUnityCulling ? "Unity Culling" : "Custom Culling"), -10);
             GUILayoutExtensions.LabelWithSpace("Verts rendered per frame (Only Quads): " + vertsRendered, -10);
 
             GUILayout.EndArea();

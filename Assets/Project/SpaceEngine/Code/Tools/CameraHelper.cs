@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 
 public static class CameraHelper
-{
+{ 
     public static Matrix4x4 GetWorldToCamera(this Camera camera)
     {
         return camera.worldToCameraMatrix;

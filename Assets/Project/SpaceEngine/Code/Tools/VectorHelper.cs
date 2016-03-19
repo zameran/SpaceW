@@ -63,4 +63,12 @@ public static class VectorHelper
 
         return point;
     }
+
+
+    public static Vector3 Plane3Intersect(Plane p1, Plane p2, Plane p3)
+    {
+        return ((-p1.distance * Vector3.Cross(p2.normal, p3.normal)) +
+                (-p2.distance * Vector3.Cross(p3.normal, p1.normal)) +
+                (-p3.distance * Vector3.Cross(p1.normal, p2.normal))) / (Vector3.Dot(p1.normal, Vector3.Cross(p2.normal, p3.normal)));
+    }
 }
