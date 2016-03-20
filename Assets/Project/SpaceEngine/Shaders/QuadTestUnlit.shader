@@ -55,8 +55,8 @@
 				float3 uv2 : TEXCOORD2;
 				float3 normal0 : NORMAL0;
 				float3 normal1 : NORMAL1;
-				float4 vertex : POSITION0;
-				float4 vertexw : POSITION1;
+				float4 vertex0 : POSITION0;
+				float4 vertex1 : POSITION1;
 			};
 		
 			uniform half4 _WireframeColor;
@@ -157,8 +157,8 @@
 				o.uv2 = v.texcoord2;
 				o.normal0 = v.normal;
 				o.normal1 = v.normal;
-				o.vertex = mul(UNITY_MATRIX_MVP, v.vertex);
-				o.vertexw = v.vertex;
+				o.vertex0 = mul(UNITY_MATRIX_MVP, v.vertex);
+				o.vertex1 = v.vertex;
 
 				return o;
 			}
@@ -174,8 +174,8 @@
 				OUT.uv2 = FROM.uv2;
 				OUT.normal0 = FROM.normal0;
 				OUT.normal1 = FROM.normal1;
-				OUT.vertex = FROM.vertex;
-				OUT.vertexw = FROM.vertexw;
+				OUT.vertex0 = FROM.vertex0;
+				OUT.vertex1 = FROM.vertex1;
 
 				return OUT;
 			}
@@ -191,8 +191,8 @@
 				OUT.uv2 = FROM.uv2;
 				OUT.normal0 = FROM.normal0;
 				OUT.normal1 = FROM.normal1;
-				OUT.vertex = FROM.vertex;
-				OUT.vertexw = FROM.vertexw;
+				OUT.vertex0 = FROM.vertex0;
+				OUT.vertex1 = FROM.vertex1;
 
 				return OUT;
 			}
@@ -204,9 +204,9 @@
 				{
 					float2 SCREEN_SCALE = float2(_ScreenParams.x / 2.0, _ScreenParams.y / 2.0);
 				
-					float2 p0 = SCREEN_SCALE * IN[0].vertex.xy / IN[0].vertex.w;
-					float2 p1 = SCREEN_SCALE * IN[1].vertex.xy / IN[1].vertex.w;
-					float2 p2 = SCREEN_SCALE * IN[2].vertex.xy / IN[2].vertex.w;
+					float2 p0 = SCREEN_SCALE * IN[0].vertex0.xy / IN[0].vertex0.w;
+					float2 p1 = SCREEN_SCALE * IN[1].vertex0.xy / IN[1].vertex0.w;
+					float2 p2 = SCREEN_SCALE * IN[2].vertex0.xy / IN[2].vertex0.w;
 				
 					float2 v0 = p2 - p1;
 					float2 v1 = p2 - p0;
@@ -238,7 +238,7 @@
 				fixed4 outputColor = lerp(terrainColor, wireframeColor, _Wireframe);
 
 				fixed3 terrainWorldNormal = IN.normal0;
-				fixed3 terrainLocalNormal = CalculateSurfaceNormal_HeightMap(IN.vertex, IN.vertexw, IN.terrainColor.a); //IN.normal1;
+				fixed3 terrainLocalNormal = CalculateSurfaceNormal_HeightMap(IN.vertex0, IN.vertex1, IN.terrainColor.a); //IN.normal1;
 				fixed4 outputNormal = fixed4(terrainWorldNormal, 1); //fixed4(terrainWorldNormal * terrainLocalNormal, 1);
 
 				outDiffuse = lerp(outputColor, outputNormal, _Normale);
