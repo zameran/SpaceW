@@ -2,7 +2,7 @@
 
 using ZFramework.Unity.Common.PerfomanceMonitor;
 
-public class DebugPerfomanceMonitorGUI : DebugGUI
+public class DebugGUIPerfomanceMonitor : DebugGUI
 {
     protected override void Awake()
     {

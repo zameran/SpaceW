@@ -1,7 +1,7 @@
 using UnityEngine;
 
 [ExecuteInEditMode]
-public class DebugHardwareInfoGUI : DebugGUI
+public class DebugGUIHardwareInfo : DebugGUI
 {
     protected override void Awake()
     {

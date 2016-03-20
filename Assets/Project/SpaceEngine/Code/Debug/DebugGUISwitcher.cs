@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 
-public class DebugGUISwitcher : MonoBehaviour
+public class DebugGUISwitcher : MonoBehaviour, IDebugSwitcher
 {
     public DebugGUI[] GUIs;
 

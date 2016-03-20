@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 
-public abstract class DebugGUI : MonoBehaviour
+public abstract class DebugGUI : MonoBehaviour, IDebug
 {
     public Rect debugInfoBounds = new Rect(10, 10, 500, 500);
 

@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 
-public abstract class DebugDraw : MonoBehaviour
+public abstract class DebugDraw : MonoBehaviour, IDebug
 {
     public Planetoid Planet = null;
     public Material lineMaterial = null;
