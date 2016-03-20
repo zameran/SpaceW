@@ -19,6 +19,8 @@ public class QuadCBCache : QuadCache
 
     public override void TransferTo(Quad q)
     {
+        QuadCacheUtility.BeginTransfer();
+
         if (Owner.Multithreaded)
         {
             Dispatcher.InvokeAsync(() =>
@@ -35,10 +37,14 @@ public class QuadCBCache : QuadCache
         }
 
         base.TransferTo(q);
+
+        QuadCacheUtility.EndTransfer();
     }
 
     public override void TransferFrom(Quad q)
     {
+        QuadCacheUtility.BeginTransfer();
+
         if (Owner.Multithreaded)
         {
             Dispatcher.InvokeAsync(() =>
@@ -55,6 +61,8 @@ public class QuadCBCache : QuadCache
         }
 
         base.TransferTo(q);
+
+        QuadCacheUtility.EndTransfer();
     }
 
     public override void OnDestroy()
