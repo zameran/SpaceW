@@ -161,6 +161,23 @@
 				return o;
 			}
 
+			v2fg PutData(v2fg FROM)
+			{	
+				v2fg OUT;
+
+				OUT.terrainColor = FROM.terrainColor;
+				OUT.scatterColor = FROM.scatterColor;
+				OUT.uv0 = FROM.uv0;
+				OUT.uv1 = FROM.uv1;
+				OUT.uv2 = FROM.uv2;
+				OUT.normal0 = FROM.normal0;
+				OUT.normal1 = FROM.normal1;
+				OUT.vertex = FROM.vertex;
+				OUT.vertexw = FROM.vertexw;
+
+				return OUT;
+			}
+
 			v2fg PutData(v2fg FROM, float3 customUV1)
 			{	
 				v2fg OUT;
@@ -181,21 +198,30 @@
 			[maxvertexcount(3)]
 			void geom(triangle v2fg IN[3], inout TriangleStream<v2fg> triStream)
 			{	
-				float2 WIN_SCALE = float2(_ScreenParams.x / 2.0, _ScreenParams.y / 2.0);
+				if (_Wireframe > 0)
+				{
+					float2 SCREEN_SCALE = float2(_ScreenParams.x / 2.0, _ScreenParams.y / 2.0);
 				
-				float2 p0 = WIN_SCALE * IN[0].vertex.xy / IN[0].vertex.w;
-				float2 p1 = WIN_SCALE * IN[1].vertex.xy / IN[1].vertex.w;
-				float2 p2 = WIN_SCALE * IN[2].vertex.xy / IN[2].vertex.w;
+					float2 p0 = SCREEN_SCALE * IN[0].vertex.xy / IN[0].vertex.w;
+					float2 p1 = SCREEN_SCALE * IN[1].vertex.xy / IN[1].vertex.w;
+					float2 p2 = SCREEN_SCALE * IN[2].vertex.xy / IN[2].vertex.w;
 				
-				float2 v0 = p2 - p1;
-				float2 v1 = p2 - p0;
-				float2 v2 = p1 - p0;
+					float2 v0 = p2 - p1;
+					float2 v1 = p2 - p0;
+					float2 v2 = p1 - p0;
 
-				float area = abs(v1.x * v2.y - v1.y * v2.x);
+					float area = abs(v1.x * v2.y - v1.y * v2.x);
 			
-				triStream.Append(PutData(IN[0], float3(area / length(v0), 0, 0)));
-				triStream.Append(PutData(IN[1], float3(0, area / length(v1), 0)));
-				triStream.Append(PutData(IN[2], float3(0, 0, area / length(v2))));
+					triStream.Append(PutData(IN[0], float3(area / length(v0), 0, 0)));
+					triStream.Append(PutData(IN[1], float3(0, area / length(v1), 0)));
+					triStream.Append(PutData(IN[2], float3(0, 0, area / length(v2))));
+				}
+				else
+				{
+					triStream.Append(PutData(IN[0]));
+					triStream.Append(PutData(IN[1]));
+					triStream.Append(PutData(IN[2]));
+				}
 			}
 
 			void frag(v2fg IN, out float4 outDiffuse : COLOR0, out float4 outNormal : COLOR1)
