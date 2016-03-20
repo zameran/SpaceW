@@ -79,7 +79,7 @@
 				return float4(tan(1.37 * inColor.rgb) / tan(1.37), inColor.a);
 			}
 
-			float4 GroundFinalColor(appdata_full_compute v, float4 terrainColor, float3 p, float3 n)
+			float4 GroundFinalColor(appdata_full_compute v, float4 terrainColor, float3 p, float3 fn)
 			{	
 				QuadGenerationConstants constants = quadGenerationConstants[0];
 	
@@ -90,11 +90,10 @@
 				float3 rotatedPointX = Rotate(_Rotation.x, float3(1, 0, 0), originalPoint);
 				float3 rotatedPointY = Rotate(_Rotation.y, float3(0, 1, 0), rotatedPointX);
 				float3 rotatedPointZ = Rotate(_Rotation.z, float3(0, 0, 1), rotatedPointY);
-				float3 rotatedPoint = rotatedPointZ;
+				float3 rotatedPoint = rotatedPointZ;	
 
-				float3 fn = n;
-				//fn.xy = n.xy; // - default.
-				//fn.xy = -n.xy; // - inverted.
+				//fn.xy = fn.xy; // - default.
+				//fn.xy = -fn.xy; // - inverted.
 
 				//fn.z = sqrt(max(0.0, 1.0 - dot(fn.xy, fn.xy))); // - default.
 				//fn.z = sqrt(max(0.0, -1.0 + dot(fn.xy, fn.xy))); // - inverted.
