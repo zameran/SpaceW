@@ -24,26 +24,18 @@ public class QuadFullCache : QuadCache
 
     public override void TransferTo(Quad q)
     {
-        QuadCacheUtility.BeginTransfer();
-
         QuadComputeBuffers.TransferTo(q);
         QuadTextures.TransferTo(q);
 
         base.TransferTo(q);
-
-        QuadCacheUtility.EndTransfer();
     }
 
     public override void TransferFrom(Quad q)
     {
-        QuadCacheUtility.BeginTransfer();
-
         QuadComputeBuffers.TransferFrom(q);
         QuadTextures.TransferFrom(q);
 
         base.TransferTo(q);
-
-        QuadCacheUtility.EndTransfer();
     }
 
     public override void OnDestroy()

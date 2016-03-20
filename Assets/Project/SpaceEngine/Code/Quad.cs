@@ -313,7 +313,7 @@ public class Quad : MonoBehaviour
 
 		SetupBounds(this, QuadMesh);
 
-		Dispatcher.InvokeAsync(() => { Planetoid.Atmosphere.SetUniformsForPlanetQuad(QuadMaterial); }); 
+		Planetoid.Atmosphere.SetUniformsForPlanetQuad(QuadMaterial); 
 
 		QuadMaterial.SetBuffer("data", OutDataBuffer);
 		QuadMaterial.SetBuffer("quadGenerationConstants", QuadGenerationConstantsBuffer);
