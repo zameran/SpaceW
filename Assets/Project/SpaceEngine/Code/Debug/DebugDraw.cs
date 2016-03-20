@@ -3,6 +3,7 @@
 public abstract class DebugDraw : MonoBehaviour, IDebug
 {
     public Planetoid Planet = null;
+    public Shader lineShader = null;
     public Material lineMaterial = null;
 
     protected virtual void Start()
@@ -21,9 +22,11 @@ public abstract class DebugDraw : MonoBehaviour, IDebug
 
     protected virtual void CreateLineMaterial()
     {
+        if (lineShader == null) throw new System.NullReferenceException("Line Shader is null!");
+
         if (!lineMaterial)
         {
-            lineMaterial = new Material(Shader.Find("Lines/Colored Blended"));
+            lineMaterial = new Material(lineShader);
 
             lineMaterial.hideFlags = HideFlags.HideAndDontSave;
             lineMaterial.shader.hideFlags = HideFlags.HideAndDontSave;
