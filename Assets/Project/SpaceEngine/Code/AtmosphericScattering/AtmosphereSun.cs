@@ -16,7 +16,7 @@ public class AtmosphereSun : MonoBehaviour
 
     public Vector3 GetDirection()
     {
-        return transform.forward;
+        return -transform.forward;
     }
 
     public bool GetHasMoved()
