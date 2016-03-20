@@ -15,6 +15,8 @@
 
 		Pass
 		{
+			ZWrite On
+			ZTest LEqual  
 			Fog { Mode Off }
 
 			CGPROGRAM
