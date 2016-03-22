@@ -86,7 +86,14 @@ namespace NBody
         /// </summary>
         public void Update()
         {
+            Simulate(out Location, ref Acceleration);
+        }
+
+        public void Simulate(out Vector location, ref Vector acceleration)
+        {
             double speed = Velocity.Magnitude();
+
+            location = this.Location;
 
             if (speed > World.C)
             {
@@ -95,20 +102,22 @@ namespace NBody
             }
 
             if (speed == 0)
-                Velocity += Acceleration * World.S;
+                Velocity += acceleration * World.S;
             else
             {
                 // Apply relativistic velocity addition. 
-                Vector parallelAcc = Vector.Projection(Acceleration, Velocity);
-                Vector orthogonalAcc = Vector.Rejection(Acceleration, Velocity);
+                Vector parallelAcc = Vector.Projection(acceleration, Velocity);
+                Vector orthogonalAcc = Vector.Rejection(acceleration, Velocity);
 
                 double alpha = Math.Sqrt(1 - Math.Pow(speed / World.C, 2));
 
-                Velocity = (Velocity + parallelAcc + alpha * orthogonalAcc) / (1 + Vector.Dot(Velocity, Acceleration) / (World.C * World.C));
+                Velocity = (Velocity + parallelAcc + alpha * orthogonalAcc) /
+                           (1 + Vector.Dot(Velocity, acceleration) /
+                           (World.C * World.C));
             }
 
-            Location += Velocity * World.S;
-            Acceleration = Vector.Zero;
+            location += Velocity;
+            acceleration = Vector.Zero;
         }
 
         /// <summary>
