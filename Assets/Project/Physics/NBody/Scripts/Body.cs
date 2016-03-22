@@ -95,7 +95,7 @@ namespace NBody
             }
 
             if (speed == 0)
-                Velocity += Acceleration;
+                Velocity += Acceleration * World.S;
             else
             {
                 // Apply relativistic velocity addition. 
@@ -107,7 +107,7 @@ namespace NBody
                 Velocity = (Velocity + parallelAcc + alpha * orthogonalAcc) / (1 + Vector.Dot(Velocity, Acceleration) / (World.C * World.C));
             }
 
-            Location += Velocity;
+            Location += Velocity * World.S;
             Acceleration = Vector.Zero;
         }
 

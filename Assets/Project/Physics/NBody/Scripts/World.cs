@@ -25,6 +25,8 @@ namespace NBody
         /// </summary>
         public static double C = 299792458;
 
+        public static double S = 1;
+
         /// <summary>
         /// The number of bodies allocated in the simulation. 
         /// </summary>
@@ -375,6 +377,7 @@ namespace NBody
         public void Draw()
         {
             for (int i = 0; i < _bodies.Length; i++)
+            {
                 if (_bodies[i] != null)
                 {
                     Body body = _bodies[i];
@@ -382,6 +385,7 @@ namespace NBody
                     Gizmos.color = Color.white;
                     Gizmos.DrawWireSphere(new Vector3((float)body.Location.X, (float)body.Location.Y, (float)body.Location.Z), (float)body.Radius);
                 }
+            }
 
             if (DrawTree)
                 if (_tree != null)
