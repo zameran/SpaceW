@@ -1,4 +1,4 @@
-﻿public enum QuadPostion
+﻿public enum QuadPosition
 {
     Top,        //0
     Bottom,     //1

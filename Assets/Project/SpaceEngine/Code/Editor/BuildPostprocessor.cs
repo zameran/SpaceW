@@ -29,6 +29,7 @@ public class BuildPostprocessor
         string atmosphereTexturesPath = resourcesPath + "/Textures/Atmosphere";
 
         Directory.CreateDirectory(atmosphereTexturesPath);
+        Directory.CreateDirectory(dataPath + "/Mods");
 
         FileUtil.CopyFileOrDirectory(transmittancePath, atmosphereTexturesPath + transmittanceName);
         FileUtil.CopyFileOrDirectory(irradiancePath, atmosphereTexturesPath + irradianceName);

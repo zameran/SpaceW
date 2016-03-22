@@ -6,7 +6,7 @@ public class GUIDrawQuadTexture : MonoBehaviour
 {
     public Planetoid planetoid = null;
 
-    public QuadPostion quadPosition = QuadPostion.Top;
+    public QuadPosition quadPosition = QuadPosition.Top;
     public TextureType textureType = TextureType.Height;
     public TextureFlip textureFlip = TextureFlip.None;
     public float scale = 0.5f;

@@ -124,7 +124,7 @@ public class Quad : MonoBehaviour
 		}
 	}
 
-	public QuadPostion Position;
+	public QuadPosition Position;
 	public QuadID ID;
 
 	public Planetoid Planetoid;
@@ -683,48 +683,48 @@ public class Quad : MonoBehaviour
 		quad.generationConstants.patchCubeCenter = quad.GetPatchCubeCenterSplitted(quad.Position, id, staticX, staticY, staticZ);
 	}
 
-	public void SetupCorners(QuadPostion pos)
+	public void SetupCorners(QuadPosition pos)
 	{
 		float v = Planetoid.PlanetRadius / 2;
 
 		switch (pos)
 		{
-			case QuadPostion.Top:
+			case QuadPosition.Top:
 				topLeftCorner = new Vector3(-v, v, v);
 				bottomRightCorner = new Vector3(v, v, -v);
 
 				topRightCorner = new Vector3(v, v, v);
 				bottomLeftCorner = new Vector3(-v, v, -v);
 				break;
-			case QuadPostion.Bottom:
+			case QuadPosition.Bottom:
 				topLeftCorner = new Vector3(-v, -v, -v);
 				bottomRightCorner = new Vector3(v, -v, v);
 
 				topRightCorner = new Vector3(v, -v, -v);
 				bottomLeftCorner = new Vector3(-v, -v, v);
 				break;
-			case QuadPostion.Left:
+			case QuadPosition.Left:
 				topLeftCorner = new Vector3(-v, v, v);
 				bottomRightCorner = new Vector3(-v, -v, -v);
 
 				topRightCorner = new Vector3(-v, v, -v);
 				bottomLeftCorner = new Vector3(-v, -v, v);
 				break;
-			case QuadPostion.Right:
+			case QuadPosition.Right:
 				topLeftCorner = new Vector3(v, v, -v);
 				bottomRightCorner = new Vector3(v, -v, v);
 
 				topRightCorner = new Vector3(v, v, v);
 				bottomLeftCorner = new Vector3(v, -v, -v);
 				break;
-			case QuadPostion.Front:
+			case QuadPosition.Front:
 				topLeftCorner = new Vector3(v, v, v);
 				bottomRightCorner = new Vector3(-v, -v, v);
 
 				topRightCorner = new Vector3(-v, v, v);
 				bottomLeftCorner = new Vector3(v, -v, v);
 				break;
-			case QuadPostion.Back:
+			case QuadPosition.Back:
 				topLeftCorner = new Vector3(-v, v, -v);
 				bottomRightCorner = new Vector3(v, -v, -v);
 
@@ -886,7 +886,7 @@ public class Quad : MonoBehaviour
 		}
 	}
 
-	public Vector3 GetCubeFaceEastDirection(QuadPostion quadPosition)
+	public Vector3 GetCubeFaceEastDirection(QuadPosition quadPosition)
 	{
 		Vector3 temp = Vector3.zero;
 
@@ -894,22 +894,22 @@ public class Quad : MonoBehaviour
 
 		switch (quadPosition)
 		{
-			case QuadPostion.Top:
+			case QuadPosition.Top:
 				temp = new Vector3(0.0f, 0.0f, -r);
 				break;
-			case QuadPostion.Bottom:
+			case QuadPosition.Bottom:
 				temp = new Vector3(0.0f, 0.0f, -r);
 				break;
-			case QuadPostion.Left:
+			case QuadPosition.Left:
 				temp = new Vector3(0.0f, -r, 0.0f);
 				break;
-			case QuadPostion.Right:
+			case QuadPosition.Right:
 				temp = new Vector3(0.0f, -r, 0.0f);
 				break;
-			case QuadPostion.Front:
+			case QuadPosition.Front:
 				temp = new Vector3(r, 0.0f, 0.0f);
 				break;
-			case QuadPostion.Back:
+			case QuadPosition.Back:
 				temp = new Vector3(-r, 0.0f, 0.0f);
 				break;
 		}
@@ -917,7 +917,7 @@ public class Quad : MonoBehaviour
 		return temp;
 	}
 
-	public Vector3 GetCubeFaceNorthDirection(QuadPostion quadPosition)
+	public Vector3 GetCubeFaceNorthDirection(QuadPosition quadPosition)
 	{
 		Vector3 temp = Vector3.zero;
 
@@ -925,22 +925,22 @@ public class Quad : MonoBehaviour
 
 		switch (quadPosition)
 		{
-			case QuadPostion.Top:
+			case QuadPosition.Top:
 				temp = new Vector3(r, 0.0f, 0.0f);
 				break;
-			case QuadPostion.Bottom:
+			case QuadPosition.Bottom:
 				temp = new Vector3(-r, 0.0f, 0.0f);
 				break;
-			case QuadPostion.Left:
+			case QuadPosition.Left:
 				temp = new Vector3(0.0f, 0.0f, -r);
 				break;
-			case QuadPostion.Right:
+			case QuadPosition.Right:
 				temp = new Vector3(0.0f, 0.0f, r);
 				break;
-			case QuadPostion.Front:
+			case QuadPosition.Front:
 				temp = new Vector3(0.0f, -r, 0);
 				break;
-			case QuadPostion.Back:
+			case QuadPosition.Back:
 				temp = new Vector3(0.0f, -r, 0.0f);
 				break;
 		}
@@ -948,7 +948,7 @@ public class Quad : MonoBehaviour
 		return temp;
 	}
 
-	public Vector3 GetPatchCubeCenter(QuadPostion quadPosition)
+	public Vector3 GetPatchCubeCenter(QuadPosition quadPosition)
 	{
 		Vector3 temp = Vector3.zero;
 
@@ -956,22 +956,22 @@ public class Quad : MonoBehaviour
 
 		switch (quadPosition)
 		{
-			case QuadPostion.Top:
+			case QuadPosition.Top:
 				temp = new Vector3(0.0f, r, 0.0f);
 				break;
-			case QuadPostion.Bottom:
+			case QuadPosition.Bottom:
 				temp = new Vector3(0.0f, -r, 0.0f);
 				break;
-			case QuadPostion.Left:
+			case QuadPosition.Left:
 				temp = new Vector3(-r, 0.0f, 0.0f);
 				break;
-			case QuadPostion.Right:
+			case QuadPosition.Right:
 				temp = new Vector3(r, 0.0f, 0.0f);
 				break;
-			case QuadPostion.Front:
+			case QuadPosition.Front:
 				temp = new Vector3(0.0f, 0.0f, r);
 				break;
-			case QuadPostion.Back:
+			case QuadPosition.Back:
 				temp = new Vector3(0.0f, 0.0f, -r);
 				break;
 		}
@@ -979,7 +979,7 @@ public class Quad : MonoBehaviour
 		return temp;
 	}
 
-	public Vector3 GetPatchCubeCenterSplitted(QuadPostion quadPosition, int id, bool staticX, bool staticY, bool staticZ)
+	public Vector3 GetPatchCubeCenterSplitted(QuadPosition quadPosition, int id, bool staticX, bool staticY, bool staticZ)
 	{
 		Vector3 temp = Vector3.zero;
 
@@ -987,7 +987,7 @@ public class Quad : MonoBehaviour
 
 		switch (quadPosition)
 		{
-			case QuadPostion.Top:
+			case QuadPosition.Top:
 				if (id == 0)
 					temp += new Vector3(-v / 2, v, v / 2);
 				else if (id == 1)
@@ -997,7 +997,7 @@ public class Quad : MonoBehaviour
 				else if (id == 3)
 					temp += new Vector3(v / 2, v, -v / 2);
 				break;
-			case QuadPostion.Bottom:
+			case QuadPosition.Bottom:
 				if (id == 0)
 					temp += new Vector3(-v / 2, -v, -v / 2);
 				else if (id == 1)
@@ -1007,7 +1007,7 @@ public class Quad : MonoBehaviour
 				else if (id == 3)
 					temp += new Vector3(v / 2, -v, v / 2);
 				break;
-			case QuadPostion.Left:
+			case QuadPosition.Left:
 				if (id == 0)
 					temp += new Vector3(-v, v / 2, v / 2);
 				else if (id == 1)
@@ -1017,7 +1017,7 @@ public class Quad : MonoBehaviour
 				else if (id == 3)
 					temp += new Vector3(-v, -v / 2, -v / 2);
 				break;
-			case QuadPostion.Right:
+			case QuadPosition.Right:
 				if (id == 0)
 					temp += new Vector3(v, v / 2, -v / 2);
 				else if (id == 1)
@@ -1027,7 +1027,7 @@ public class Quad : MonoBehaviour
 				else if (id == 3)
 					temp += new Vector3(v, -v / 2, v / 2);
 				break;
-			case QuadPostion.Front:
+			case QuadPosition.Front:
 				if (id == 0)
 					temp += new Vector3(v / 2, v / 2, v);
 				else if (id == 1)
@@ -1037,7 +1037,7 @@ public class Quad : MonoBehaviour
 				else if (id == 3)
 					temp += new Vector3(-v / 2, -v / 2, v);
 				break;
-			case QuadPostion.Back:
+			case QuadPosition.Back:
 				if (id == 0)
 					temp += new Vector3(-v / 2, v / 2, -v);
 				else if (id == 1)
