@@ -1,22 +1,22 @@
 ﻿using System;
 
 [AttributeUsage(AttributeTargets.Class, AllowMultiple = false, Inherited = true)]
-public class ExternalMonoBehaviour : Attribute
+public class SpaceMonoBehaviour : Attribute
 {
     public StartupEnum Startup;
 
     public bool StartupOnce;
 
-    public ExternalMonoBehaviour(StartupEnum Startup, bool StartupOnce)
+    public SpaceMonoBehaviour(StartupEnum Startup, bool StartupOnce)
     {
         this.Startup = Startup;
 
         this.StartupOnce = StartupOnce;
     }
 
-    public enum StartupEnum
+    public enum StartupEnum : int
     {
-        MainMenu = 0,
-        MainScene = 1
+        Init = 0,
+        MainMenu = 1,
     }
 }

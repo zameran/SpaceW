@@ -10,15 +10,43 @@ using UnityEngine.SceneManagement;
 
 public class AssemblyLoader : MonoBehaviour
 {
+    private bool Loaded = false;
+
     public string AssembliesFolderName = "/Mods";
 
     public List<AssemblyExternal> ExternalAssemblies = new List<AssemblyExternal>();
 
     private void Awake()
     {
-        LoadAssemblies();
+        Init();
+    }
 
-        Dumper.DumpAssembliesExternal(ExternalAssemblies);
+    private void OnLevelWasLoaded(int level)
+    {
+        Init();
+    }
+
+    private void Init()
+    {
+        DontDestroyOnLoad(this.gameObject);
+
+        Debug.Log("AssemblyLoader started at scene: " + SceneManager.GetActiveScene().buildIndex);
+
+        if (!Loaded)
+        {
+            LoadAssemblies();
+
+            Dumper.DumpAssembliesExternal(ExternalAssemblies);
+
+            Loaded = true;
+        }
+
+        FirePlugins(ExternalAssemblies);
+
+        if (SceneManager.GetActiveScene().buildIndex == 0)
+        {
+            SceneManager.LoadScene(1);
+        }
     }
 
     private void DetectAssembies(out List<string> allPaths)
@@ -40,8 +68,6 @@ public class AssemblyLoader : MonoBehaviour
         }
 
         Debug.Log(string.Format("Assembies Detected: {0}", allPaths.Count));
-
-        Dumper.DumpStringList(allPaths);
     }
 
     private void LoadAssemblies()
@@ -57,8 +83,8 @@ public class AssemblyLoader : MonoBehaviour
                 try
                 {
                     Assembly assembly = Assembly.LoadFile(dll);
-                    ExternalAssembly ea = assembly.GetCustomAttributes(typeof(ExternalAssembly), false)[0] as ExternalAssembly;
-                    List<Type> mb = GetAllSubclassesOf<Type, ExternalMonoBehaviour, MonoBehaviour>(assembly);
+                    SpaceAssembly ea = assembly.GetCustomAttributes(typeof(SpaceAssembly), false)[0] as SpaceAssembly;
+                    List<Type> mb = GetAllSubclassesOf<Type, SpaceMonoBehaviour, MonoBehaviour>(assembly);
                     AssemblyExternalTypes aet = new AssemblyExternalTypes(typeof(MonoBehaviour), mb);
                     AssemblyExternal ae = new AssemblyExternal(dll, ea.Name, ea.Version, assembly, aet);
 
@@ -96,11 +122,17 @@ public class AssemblyLoader : MonoBehaviour
         return output;
     }
 
-    private void FirePlugins(List<Type> types)
+    private void FirePlugins(List<AssemblyExternal> ExternalAssemblies)
     {
-        foreach (Type type in types)
+        foreach (AssemblyExternal assembly in ExternalAssemblies)
         {
-            FirePlugin(type);
+            foreach (KeyValuePair<Type, List<Type>> kvp in assembly.Types)
+            {
+                foreach (Type v in kvp.Value)
+                {
+                    FirePlugin(v);
+                }
+            }
         }
     }
 
@@ -108,11 +140,11 @@ public class AssemblyLoader : MonoBehaviour
     {
         int currentScene = SceneManager.GetActiveScene().buildIndex;
 
-        ExternalMonoBehaviour atr = AttributeUtils.GetTypeAttribute<ExternalMonoBehaviour>(type);
+        SpaceMonoBehaviour atr = AttributeUtils.GetTypeAttribute<SpaceMonoBehaviour>(type);
 
         if (atr != null)
         {
-            if (currentScene == (int)atr.Startup)
+            if ((int)atr.Startup == currentScene)
             {
                 GameObject go = new GameObject(type.Name);
                 go.transform.position = Vector3.zero;
