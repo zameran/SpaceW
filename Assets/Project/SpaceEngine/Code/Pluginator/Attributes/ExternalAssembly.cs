@@ -4,10 +4,9 @@
 public class ExternalAssembly : Attribute
 {
     public string Name;
+    public string Version;
 
-    public Version Version;
-
-    public ExternalAssembly(string Name, Version Version)
+    public ExternalAssembly(string Name, string Version)
     {
         this.Name = Name;
 

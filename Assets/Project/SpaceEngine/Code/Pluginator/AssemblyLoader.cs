@@ -12,19 +12,13 @@ public class AssemblyLoader : MonoBehaviour
 {
     public string AssembliesFolderName = "/Mods";
 
+    public List<AssemblyExternal> ExternalAssemblies = new List<AssemblyExternal>();
+
     private void Awake()
     {
-        List<string> allPaths;
-        List<Assembly> allAssemblies;
-        List<Type> allTypes;
-        List<Type> allMonoBehaviours;
-        List<Type> allMonoBehavioursToStart;
+        LoadAssemblies();
 
-        DetectAssembies(out allPaths);
-        LoadAssemblies(out allAssemblies, out allTypes, out allMonoBehaviours, out allMonoBehavioursToStart, allPaths);
-
-        Dumper.DumpAssembliesInfo(allAssemblies);
-        Dumper.DumpTypesNames(allTypes);
+        Dumper.DumpAssembliesExternal(ExternalAssemblies);
     }
 
     private void DetectAssembies(out List<string> allPaths)
@@ -50,22 +44,11 @@ public class AssemblyLoader : MonoBehaviour
         Dumper.DumpStringList(allPaths);
     }
 
-    private void LoadAssemblies(out List<Assembly> allAssemblies,
-                                out List<Type> allTypes,
-                                out List<Type> allMonoBehaviours,
-                                out List<Type> allMonoBehavioursToStart,
-                                List<string> allPaths)
+    private void LoadAssemblies()
     {
-        allAssemblies = new List<Assembly>();
-        allTypes = new List<Type>();
-        allMonoBehaviours = new List<Type>();
-        allMonoBehavioursToStart = new List<Type>();
+        List<string> allPaths;
 
-        if (allPaths == null)
-        {
-            Debug.LogWarning("Path's array is null! Don't try to load without detect!");
-            DetectAssembies(out allPaths);
-        }
+        DetectAssembies(out allPaths);
 
         try
         {
@@ -74,8 +57,12 @@ public class AssemblyLoader : MonoBehaviour
                 try
                 {
                     Assembly assembly = Assembly.LoadFile(dll);
+                    ExternalAssembly ea = assembly.GetCustomAttributes(typeof(ExternalAssembly), false)[0] as ExternalAssembly;
+                    List<Type> mb = GetAllSubclassesOf<Type, ExternalMonoBehaviour, MonoBehaviour>(assembly);
+                    AssemblyExternalTypes aet = new AssemblyExternalTypes(typeof(MonoBehaviour), mb);
+                    AssemblyExternal ae = new AssemblyExternal(dll, ea.Name, ea.Version, assembly, aet);
 
-                    allAssemblies.Add(assembly);
+                    ExternalAssemblies.Add(ae);
                 }
                 catch (Exception ex)
                 {
@@ -87,37 +74,26 @@ public class AssemblyLoader : MonoBehaviour
         {
             Debug.LogError("Get Files Exception: " + ex.Message);
         }
+    }
 
-        try
+    public List<T> GetAllSubclassesOf<T, U, Y>(Assembly assembly) where T : Type where U : Attribute
+    {
+        Type[] types = assembly.GetTypes();
+
+        List<T> output = new List<T>();
+
+        foreach (Type type in types)
         {
-            foreach (Assembly dll in allAssemblies)
+            if (type.IsSubclassOf(typeof(Y)))
             {
-                Type[] types = dll.GetTypes();
+                U atr = AttributeUtils.GetTypeAttribute<U>(type);
 
-                foreach (Type type in types)
-                {
-                    if (type.IsSubclassOf(typeof(MonoBehaviour)))
-                    {
-                        ExternalMonoBehaviour atr = AttributeUtils.GetTypeAttribute<ExternalMonoBehaviour>(type);
-
-                        if (atr != null)
-                        {
-                            allMonoBehavioursToStart.Add(type);
-                        }
-
-                        allMonoBehaviours.Add(type);
-                    }
-                }
-
-                allTypes.AddRange(types);
+                if (atr != null)
+                    output.Add(type as T);
             }
         }
-        catch (Exception ex)
-        {
-            Debug.LogError("Get Types Exception: " + ex.Message);
-        }
 
-        Debug.Log(string.Format("Types Count: {0}; Base MonoBehaviour Types count: {1}; Plugin MonoBehaviour Types count: {2}", allTypes.Count, allMonoBehaviours.Count, allMonoBehavioursToStart.Count));
+        return output;
     }
 
     private void FirePlugins(List<Type> types)

@@ -27,6 +27,43 @@ public static class Dumper
         Debug.Log(sb.ToString());
     }
 
+    public static void DumpAssembliesExternal(List<AssemblyExternal> assemblies)
+    {
+        if (assemblies == null)
+            return;
+
+        foreach (AssemblyExternal assembly in assemblies)
+        {
+            StringBuilder sb = new StringBuilder();
+
+            if (assembly != null)
+            {
+                if (assembly.Assembly != null)
+                {
+                    sb.AppendLine(string.Format("Name: {0};", assembly.Name));
+                    sb.AppendLine(string.Format("Path: {0};", assembly.Path));
+                    sb.AppendLine(string.Format("Version: {0};", assembly.Version));
+
+                    sb.AppendLine(string.Format("Types: "));
+
+                    foreach (KeyValuePair<Type, List<Type>> kvp in assembly.Types)
+                    {
+                        StringBuilder values_sb = new StringBuilder();
+
+                        foreach (Type v in kvp.Value)
+                        {
+                            values_sb.Append(string.Format("{0} ", v));
+                        }
+
+                        sb.AppendLine(string.Format("Key: {0}, Values: {1}", kvp.Key, values_sb.ToString()));
+                    }
+                }
+            }
+
+            Debug.Log(sb.ToString());
+        }
+    }
+
     public static void DumpAssembliesInfo(List<Assembly> assemblies)
     {
         StringBuilder sb = new StringBuilder();
