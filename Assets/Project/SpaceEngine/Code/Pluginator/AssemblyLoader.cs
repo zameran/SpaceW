@@ -12,51 +12,80 @@ public class AssemblyLoader : MonoBehaviour
 {
     public string AssembliesFolderName = "/Mods";
 
-    private void Start()
+    private void Awake()
     {
+        List<string> allPaths;
         List<Assembly> allAssemblies;
         List<Type> allTypes;
         List<Type> allMonoBehaviours;
+        List<Type> allMonoBehavioursToStart;
 
-        DetectAndLoadAssemblies(out allAssemblies, out allTypes, out allMonoBehaviours);
+        DetectAssembies(out allPaths);
+        LoadAssemblies(out allAssemblies, out allTypes, out allMonoBehaviours, out allMonoBehavioursToStart, allPaths);
 
-        DumpTypesNames(allTypes, "Type");
-        DumpTypesNames(allMonoBehaviours, "MonoBehaviour");
-
-        SceneManager.LoadScene(1, LoadSceneMode.Single);
+        Dumper.DumpAssembliesInfo(allAssemblies);
+        Dumper.DumpTypesNames(allTypes);
     }
 
-    private void DetectAndLoadAssemblies(out List<Assembly> allAssemblies,
-                                         out List<Type> allTypes,
-                                         out List<Type> allMonoBehaviours)
+    private void DetectAssembies(out List<string> allPaths)
     {
         string path = Application.dataPath + AssembliesFolderName;
 
-        allAssemblies = new List<Assembly>();
-        allTypes = new List<Type>();
-        allMonoBehaviours = new List<Type>();
+        allPaths = new List<string>();
 
         try
         {
             foreach (string dll in Directory.GetFiles(path, "*.dll", SearchOption.AllDirectories))
             {
+                allPaths.Add(dll);
+            }
+        }
+        catch (Exception ex)
+        {
+            Debug.LogError("Get Files Exception: " + ex.Message);
+        }
+
+        Debug.Log(string.Format("Assembies Detected: {0}", allPaths.Count));
+
+        Dumper.DumpStringList(allPaths);
+    }
+
+    private void LoadAssemblies(out List<Assembly> allAssemblies,
+                                out List<Type> allTypes,
+                                out List<Type> allMonoBehaviours,
+                                out List<Type> allMonoBehavioursToStart,
+                                List<string> allPaths)
+    {
+        allAssemblies = new List<Assembly>();
+        allTypes = new List<Type>();
+        allMonoBehaviours = new List<Type>();
+        allMonoBehavioursToStart = new List<Type>();
+
+        if (allPaths == null)
+        {
+            Debug.LogWarning("Path's array is null! Don't try to load without detect!");
+            DetectAssembies(out allPaths);
+        }
+
+        try
+        {
+            foreach (string dll in allPaths)
+            {
                 try
                 {
                     Assembly assembly = Assembly.LoadFile(dll);
-
-                    DumpAsseblyInfo(assembly);
 
                     allAssemblies.Add(assembly);
                 }
                 catch (Exception ex)
                 {
-                    Debug.LogError("AssemblyLoader.DetectAssemblies() Load Exception: " + ex.Message);
+                    Debug.LogError("Load Exception: " + ex.Message);
                 }
             }
         }
         catch (Exception ex)
         {
-            Debug.LogError("AssemblyLoader.DetectAssemblies() Get Files Exception: " + ex.Message);
+            Debug.LogError("Get Files Exception: " + ex.Message);
         }
 
         try
@@ -69,6 +98,13 @@ public class AssemblyLoader : MonoBehaviour
                 {
                     if (type.IsSubclassOf(typeof(MonoBehaviour)))
                     {
+                        ExternalMonoBehaviour atr = AttributeUtils.GetTypeAttribute<ExternalMonoBehaviour>(type);
+
+                        if (atr != null)
+                        {
+                            allMonoBehavioursToStart.Add(type);
+                        }
+
                         allMonoBehaviours.Add(type);
                     }
                 }
@@ -78,33 +114,34 @@ public class AssemblyLoader : MonoBehaviour
         }
         catch (Exception ex)
         {
-            Debug.LogError("AssemblyLoader.DetectAssemblies() Get Types Exception: " + ex.Message);
+            Debug.LogError("Get Types Exception: " + ex.Message);
         }
 
-        Debug.Log("AssemblyLoader.DetectAssemblies() Types count: " + allTypes.Count);
-        Debug.Log("AssemblyLoader.DetectAssemblies() MonoBehaviour Types count: " + allMonoBehaviours.Count);
+        Debug.Log(string.Format("Types Count: {0}; Base MonoBehaviour Types count: {1}; Plugin MonoBehaviour Types count: {2}", allTypes.Count, allMonoBehaviours.Count, allMonoBehavioursToStart.Count));
     }
 
-    private void DumpAsseblyInfo(Assembly assembly)
+    private void FirePlugins(List<Type> types)
     {
-        if (assembly != null)
+        foreach (Type type in types)
         {
-            Debug.Log("AssemblyLoader.DumpAsseblyInfo() Full Name: " + assembly.FullName);
-            Debug.Log("AssemblyLoader.DumpAsseblyInfo() Image Runtime Version: " + assembly.ImageRuntimeVersion);
+            FirePlugin(type);
         }
     }
 
-    private void DumpTypesNames(List<Type> types, string prefix = "")
+    private void FirePlugin(Type type)
     {
-        if (types != null && types.Count > 0)
+        int currentScene = SceneManager.GetActiveScene().buildIndex;
+
+        ExternalMonoBehaviour atr = AttributeUtils.GetTypeAttribute<ExternalMonoBehaviour>(type);
+
+        if (atr != null)
         {
-            foreach (Type type in types)
+            if (currentScene == (int)atr.Startup)
             {
-                if (type != null)
-                    if(!prefix.IsNotNullOrEmpty())
-                        Debug.Log("AssemblyLoader.DumpTypesNames() Type: " + type.Name);
-                    else
-                        Debug.Log("AssemblyLoader.DumpTypesNames() Type: " + "(" + prefix + ")" + " " + type.Name);
+                GameObject go = new GameObject(type.Name);
+                go.transform.position = Vector3.zero;
+                go.transform.rotation = Quaternion.identity;
+                go.AddComponent(type);
             }
         }
     }
