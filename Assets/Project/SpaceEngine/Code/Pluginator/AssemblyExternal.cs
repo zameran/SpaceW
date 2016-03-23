@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Reflection;
 
-public class AssemblyExternal
+public sealed class AssemblyExternal
 {
     public string Path;
     public string Name;

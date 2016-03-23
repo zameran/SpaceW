@@ -8,7 +8,7 @@ using ZFramework.Extensions;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
-public class AssemblyLoader : MonoBehaviour
+public sealed class AssemblyLoader : MonoBehaviour
 {
     private bool Loaded = false;
 
@@ -83,8 +83,8 @@ public class AssemblyLoader : MonoBehaviour
                 try
                 {
                     Assembly assembly = Assembly.LoadFile(dll);
-                    SpaceAssembly ea = assembly.GetCustomAttributes(typeof(SpaceAssembly), false)[0] as SpaceAssembly;
-                    List<Type> mb = GetAllSubclassesOf<Type, SpaceMonoBehaviour, MonoBehaviour>(assembly);
+                    SpaceAddonAssembly ea = assembly.GetCustomAttributes(typeof(SpaceAddonAssembly), false)[0] as SpaceAddonAssembly;
+                    List<Type> mb = GetAllSubclassesOf<Type, SpaceAddonMonoBehaviour, MonoBehaviour>(assembly);
                     AssemblyExternalTypes aet = new AssemblyExternalTypes(typeof(MonoBehaviour), mb);
                     AssemblyExternal ae = new AssemblyExternal(dll, ea.Name, ea.Version, assembly, aet);
 
@@ -140,7 +140,7 @@ public class AssemblyLoader : MonoBehaviour
     {
         int currentScene = SceneManager.GetActiveScene().buildIndex;
 
-        SpaceMonoBehaviour atr = AttributeUtils.GetTypeAttribute<SpaceMonoBehaviour>(type);
+        SpaceAddonMonoBehaviour atr = AttributeUtils.GetTypeAttribute<SpaceAddonMonoBehaviour>(type);
 
         if (atr != null)
         {
