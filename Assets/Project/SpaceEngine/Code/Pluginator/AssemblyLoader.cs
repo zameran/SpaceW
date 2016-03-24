@@ -1,6 +1,7 @@
 ﻿using System;
 using System.IO;
 using System.Reflection;
+using System.Collections;
 using System.Collections.Generic;
 
 using ZFramework.Extensions;
@@ -64,6 +65,8 @@ public sealed class AssemblyLoader : MonoBehaviour
 
         if (SceneManager.GetActiveScene().buildIndex == 0 && Loaded)
         {
+            FirePlugins(ExternalAssemblies, 0);
+
             SceneManager.LoadScene(1);
         }
     }
@@ -152,6 +155,20 @@ public sealed class AssemblyLoader : MonoBehaviour
         return output;
     }
 
+    private void FirePlugins(List<AssemblyExternal> ExternalAssemblies, int level)
+    {
+        foreach (AssemblyExternal assembly in ExternalAssemblies)
+        {
+            foreach (KeyValuePair<Type, List<Type>> kvp in assembly.Types)
+            {
+                foreach (Type v in kvp.Value)
+                {
+                    FirePlugin(v, level);
+                }
+            }
+        }
+    }
+
     private void FirePlugins(List<AssemblyExternal> ExternalAssemblies)
     {
         foreach (AssemblyExternal assembly in ExternalAssemblies)
@@ -162,6 +179,22 @@ public sealed class AssemblyLoader : MonoBehaviour
                 {
                     FirePlugin(v);
                 }
+            }
+        }
+    }
+
+    private void FirePlugin(Type type, int level)
+    {
+        SpaceAddonMonoBehaviour atr = AttributeUtils.GetTypeAttribute<SpaceAddonMonoBehaviour>(type);
+
+        if (atr != null)
+        {
+            if ((int)atr.Startup == level)
+            {
+                GameObject go = new GameObject(type.Name);
+                go.transform.position = Vector3.zero;
+                go.transform.rotation = Quaternion.identity;
+                go.AddComponent(type);
             }
         }
     }

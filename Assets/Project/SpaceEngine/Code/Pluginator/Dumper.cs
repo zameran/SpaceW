@@ -44,7 +44,7 @@ public static class Dumper
                     sb.AppendLine(string.Format("Path: {0};", assembly.Path));
                     sb.AppendLine(string.Format("Version: {0};", assembly.Version));
 
-                    sb.AppendLine(string.Format("Types: "));
+                    sb.AppendLine(string.Format("Assembly Types List ({0}) Start.", assembly.Types.Count));
 
                     foreach (KeyValuePair<Type, List<Type>> kvp in assembly.Types)
                     {
@@ -57,6 +57,8 @@ public static class Dumper
 
                         sb.AppendLine(string.Format("Key: {0}, Values: {1}", kvp.Key, values_sb.ToString()));
                     }
+
+                    sb.AppendLine(string.Format("Assembly Types List ({0}) End.", assembly.Types.Count));
                 }
             }
 

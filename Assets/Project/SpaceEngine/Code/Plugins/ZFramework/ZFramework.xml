@@ -2490,11 +2490,6 @@
             <param name="name">Name of target transform.</param>
             <returns></returns>
         </member>
-        <member name="T:ZFramework.Unity.Common.Attributes.ExecutionOrderAttribute">
-            <summary>
-            Taken from github. Only unity5. 
-            </summary>
-        </member>
         <member name="T:ZFramework.Unity.Common.Threading.Dispatcher">
             <summary>
             A system for dispatching code to execute on the main thread.
