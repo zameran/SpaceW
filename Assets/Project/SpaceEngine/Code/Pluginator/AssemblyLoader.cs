@@ -11,8 +11,9 @@ using UnityEngine.SceneManagement;
 public sealed class AssemblyLoader : MonoBehaviour
 {
     private bool Loaded = false;
+    private bool ShowGUI = false;
 
-    public string AssembliesFolderName = "/Mods";
+    public int Total = 0;
 
     public List<AssemblyExternal> ExternalAssemblies = new List<AssemblyExternal>();
 
@@ -23,7 +24,25 @@ public sealed class AssemblyLoader : MonoBehaviour
 
     private void OnLevelWasLoaded(int level)
     {
-        Init();
+        ShowGUI = !Loaded;
+
+        FirePlugins(ExternalAssemblies);
+    }
+
+    private void OnGUI()
+    {
+        if (ShowGUI)
+        {
+            GUI.Box(new Rect(Screen.width / 2 - (Screen.width / 1.25f) / 2,
+                             Screen.height / 1.25f,
+                             Screen.width / 1.25f,
+                             15), "");
+
+            GUI.Label(new Rect(Screen.width / 2 - 50,
+                               Screen.height / 1.25f - 3,
+                               Screen.width / 1.25f,
+                               25), string.Format("Loading {0} dll's...", Total));
+        }
     }
 
     private void Init()
@@ -31,6 +50,8 @@ public sealed class AssemblyLoader : MonoBehaviour
         DontDestroyOnLoad(this.gameObject);
 
         Debug.Log("AssemblyLoader started at scene: " + SceneManager.GetActiveScene().buildIndex);
+
+        ShowGUI = !Loaded;
 
         if (!Loaded)
         {
@@ -41,9 +62,7 @@ public sealed class AssemblyLoader : MonoBehaviour
             Loaded = true;
         }
 
-        FirePlugins(ExternalAssemblies);
-
-        if (SceneManager.GetActiveScene().buildIndex == 0)
+        if (SceneManager.GetActiveScene().buildIndex == 0 && Loaded)
         {
             SceneManager.LoadScene(1);
         }
@@ -51,7 +70,7 @@ public sealed class AssemblyLoader : MonoBehaviour
 
     private void DetectAssembies(out List<string> allPaths)
     {
-        string path = Application.dataPath + AssembliesFolderName;
+        string path = PathGlobals.GlobalModFolderPath;
 
         allPaths = new List<string>();
 
@@ -67,6 +86,8 @@ public sealed class AssemblyLoader : MonoBehaviour
             Debug.LogError("Get Files Exception: " + ex.Message);
         }
 
+        Total = allPaths.Count;
+
         Debug.Log(string.Format("Assembies Detected: {0}", allPaths.Count));
     }
 
@@ -76,29 +97,38 @@ public sealed class AssemblyLoader : MonoBehaviour
 
         DetectAssembies(out allPaths);
 
-        try
+        for (int i = 0; i < allPaths.Count; i++)
         {
-            foreach (string dll in allPaths)
+            string dll = allPaths[i];
+
+            try
             {
-                try
+                Assembly assembly = Assembly.LoadFile(dll);
+
+                SpaceAddonAssembly[] attrbutes = assembly.GetCustomAttributes(typeof(SpaceAddonAssembly), false) as SpaceAddonAssembly[];
+
+                if (attrbutes.Length == 0 || attrbutes == null)
                 {
-                    Assembly assembly = Assembly.LoadFile(dll);
-                    SpaceAddonAssembly ea = assembly.GetCustomAttributes(typeof(SpaceAddonAssembly), false)[0] as SpaceAddonAssembly;
+                    Debug.Log("This is not an adddon assymbly! " + dll);
+                }
+                else
+                {
+                    SpaceAddonAssembly ea = attrbutes[0] as SpaceAddonAssembly;
                     List<Type> mb = GetAllSubclassesOf<Type, SpaceAddonMonoBehaviour, MonoBehaviour>(assembly);
                     AssemblyExternalTypes aet = new AssemblyExternalTypes(typeof(MonoBehaviour), mb);
                     AssemblyExternal ae = new AssemblyExternal(dll, ea.Name, ea.Version, assembly, aet);
 
                     ExternalAssemblies.Add(ae);
                 }
-                catch (Exception ex)
-                {
-                    Debug.LogError("Load Exception: " + ex.Message);
-                }
             }
-        }
-        catch (Exception ex)
-        {
-            Debug.LogError("Get Files Exception: " + ex.Message);
+            catch (Exception ex)
+            {
+                Debug.LogError("Load Exception: " + ex.Message);
+            }
+            finally
+            {
+
+            }
         }
     }
 
