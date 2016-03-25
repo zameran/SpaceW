@@ -1,6 +1,7 @@
+using System;
 using UnityEngine;
 
-public class FlyCamera : MonoBehaviour
+public class FlyCamera : GameCamera
 {
     public Camera cameraComponent = null;
 
@@ -29,37 +30,20 @@ public class FlyCamera : MonoBehaviour
     private float x;
     private float y;
 
-    void Start()
+    protected override void Start()
     {
-        Init();
+        base.Start();
     }
 
-    private void Init()
+    protected override void Update()
     {
-        if (cameraComponent == null)
-            cameraComponent = this.GetComponent<Camera>();
-
-        if (planetoid == null)
-            if (planetoidGameObject != null)
-                planetoid = planetoidGameObject.GetComponent<Planetoid>();
-
-        if (planetoidGameObject != null)
-        {
-            distanceToPlanetCore = Vector3.Distance(transform.position, planetoidGameObject.transform.position);
-        }
-
-        nearClipPlaneCache = cameraComponent.nearClipPlane;
-        farClipPlaneCache = cameraComponent.farClipPlane;
-
-        Vector3 angles = transform.eulerAngles;
-        x = angles.y;
-        y = angles.x;
-
-        UpdateClipPlanes();
+        base.Update();
     }
 
-    void FixedUpdate()
+    protected override void FixedUpdate()
     {
+        base.FixedUpdate();
+
         UpdateClipPlanes();
 
         if (controllable)
@@ -149,7 +133,31 @@ public class FlyCamera : MonoBehaviour
         }
     }
 
-    public void UpdateClipPlanes()
+    protected override void Init()
+    {
+        if (cameraComponent == null)
+            cameraComponent = this.GetComponent<Camera>();
+
+        if (planetoid == null)
+            if (planetoidGameObject != null)
+                planetoid = planetoidGameObject.GetComponent<Planetoid>();
+
+        if (planetoidGameObject != null)
+        {
+            distanceToPlanetCore = Vector3.Distance(transform.position, planetoidGameObject.transform.position);
+        }
+
+        nearClipPlaneCache = cameraComponent.nearClipPlane;
+        farClipPlaneCache = cameraComponent.farClipPlane;
+
+        Vector3 angles = transform.eulerAngles;
+        x = angles.y;
+        y = angles.x;
+
+        UpdateClipPlanes();
+    }
+
+    private void UpdateClipPlanes()
     {
         if (dynamicClipPlanes)
         {
@@ -173,7 +181,7 @@ public class FlyCamera : MonoBehaviour
         }
     }
 
-    public float ClampAngle(float angle, float min, float max)
+    private float ClampAngle(float angle, float min, float max)
     {
         if (angle < -360)
             angle += 360;
@@ -183,7 +191,7 @@ public class FlyCamera : MonoBehaviour
         return Mathf.Clamp(angle, min, max);
     }
 
-    void RotateAround(float x, float y, float z, Vector3 distanceVector)
+    private void RotateAround(float x, float y, float z, Vector3 distanceVector)
     {
         Quaternion rotation = Quaternion.Euler(y + targetRotation.x, x + targetRotation.y, z + targetRotation.z);
 

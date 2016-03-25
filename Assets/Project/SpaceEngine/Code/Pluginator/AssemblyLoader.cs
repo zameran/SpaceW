@@ -56,7 +56,7 @@ public sealed class AssemblyLoader : MonoBehaviour
 
         if (!Loaded)
         {
-            LoadAssemblies();
+            DetectAndLoadAssemblies();
 
             Dumper.DumpAssembliesExternal(ExternalAssemblies);
 
@@ -94,65 +94,55 @@ public sealed class AssemblyLoader : MonoBehaviour
         Debug.Log(string.Format("Assembies Detected: {0}", allPaths.Count));
     }
 
-    private void LoadAssemblies()
+    private void DetectAndLoadAssemblies()
     {
-        List<string> allPaths;
+        List<string> allPaths; DetectAssembies(out allPaths);
 
-        DetectAssembies(out allPaths);
+        LoadDetectedAssemblies(allPaths);
+    }
 
-        for (int i = 0; i < allPaths.Count; i++)
+    private void LoadAssembly(string path)
+    {
+        try
         {
-            string dll = allPaths[i];
+            Assembly assembly = Assembly.LoadFile(path);
 
-            try
+            SpaceAddonAssembly[] attrbutes = assembly.GetCustomAttributes(typeof(SpaceAddonAssembly), false) as SpaceAddonAssembly[];
+
+            if (attrbutes.Length == 0 || attrbutes == null)
             {
-                Assembly assembly = Assembly.LoadFile(dll);
-
-                SpaceAddonAssembly[] attrbutes = assembly.GetCustomAttributes(typeof(SpaceAddonAssembly), false) as SpaceAddonAssembly[];
-
-                if (attrbutes.Length == 0 || attrbutes == null)
-                {
-                    Debug.Log("This is not an adddon assymbly! " + dll);
-                }
-                else
-                {
-                    SpaceAddonAssembly ea = attrbutes[0] as SpaceAddonAssembly;
-                    List<Type> mb = GetAllSubclassesOf<Type, SpaceAddonMonoBehaviour, MonoBehaviour>(assembly);
-                    AssemblyExternalTypes aet = new AssemblyExternalTypes(typeof(MonoBehaviour), mb);
-                    AssemblyExternal ae = new AssemblyExternal(dll, ea.Name, ea.Version, assembly, aet);
-
-                    ExternalAssemblies.Add(ae);
-                }
+                Debug.Log("This is not an adddon assymbly! " + path);
             }
-            catch (Exception ex)
+            else
             {
-                Debug.LogError("Load Exception: " + ex.Message);
-            }
-            finally
-            {
+                SpaceAddonAssembly ea = attrbutes[0] as SpaceAddonAssembly;
+                List<Type> mb = GetAllSubclassesOf<Type, SpaceAddonMonoBehaviour, MonoBehaviour>(assembly);
+                AssemblyExternalTypes aet = new AssemblyExternalTypes(typeof(MonoBehaviour), mb);
+                AssemblyExternal ae = new AssemblyExternal(path, ea.Name, ea.Version, assembly, aet);
 
+                ExternalAssemblies.Add(ae);
             }
+        }
+        catch (Exception ex)
+        {
+            Debug.LogError("Load Exception: " + ex.Message);
+        }
+        finally
+        {
+
         }
     }
 
-    public List<T> GetAllSubclassesOf<T, U, Y>(Assembly assembly) where T : Type where U : Attribute
+    private void LoadDetectedAssemblies(List<string> allPaths)
     {
-        Type[] types = assembly.GetTypes();
+        if(allPaths == null) { DetectAssembies(out allPaths); Debug.Log("Something wrong with path's array! Detecting assemblies again!"); }
 
-        List<T> output = new List<T>();
-
-        foreach (Type type in types)
+        for (int i = 0; i < allPaths.Count; i++)
         {
-            if (type.IsSubclassOf(typeof(Y)))
-            {
-                U atr = AttributeUtils.GetTypeAttribute<U>(type);
+            string path = allPaths[i];
 
-                if (atr != null)
-                    output.Add(type as T);
-            }
+            LoadAssembly(path);
         }
-
-        return output;
     }
 
     private void FirePlugins(List<AssemblyExternal> ExternalAssemblies, int level)
@@ -215,5 +205,25 @@ public sealed class AssemblyLoader : MonoBehaviour
                 go.AddComponent(type);
             }
         }
+    }
+
+    public List<T> GetAllSubclassesOf<T, U, Y>(Assembly assembly) where T : Type where U : Attribute
+    {
+        Type[] types = assembly.GetTypes();
+
+        List<T> output = new List<T>();
+
+        foreach (Type type in types)
+        {
+            if (type.IsSubclassOf(typeof(Y)))
+            {
+                U atr = AttributeUtils.GetTypeAttribute<U>(type);
+
+                if (atr != null)
+                    output.Add(type as T);
+            }
+        }
+
+        return output;
     }
 }

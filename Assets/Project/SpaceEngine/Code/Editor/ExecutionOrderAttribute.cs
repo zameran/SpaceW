@@ -11,7 +11,6 @@ using UnityEngine;
 [AttributeUsage(AttributeTargets.Class, Inherited = false, AllowMultiple = false)]
 sealed class ExecutionOrderAttribute : Attribute
 {
-
     public readonly int ExecutionOrder = 0;
 
     public ExecutionOrderAttribute(int executionOrder)
