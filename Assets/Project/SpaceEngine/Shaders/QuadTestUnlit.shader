@@ -99,7 +99,7 @@
 				//fn.z = sqrt(max(0.0, -1.0 + dot(fn.xy, fn.xy))); // - inverted.
 
 				fn = float3(0, 0, 0); //disable normal mapping... bruuuutaal!
-
+				
 				float4 reflectance = RGB2Reflectance(terrainColor);
 
 				float3 sunL = 0;

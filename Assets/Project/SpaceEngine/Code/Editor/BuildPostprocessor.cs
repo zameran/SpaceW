@@ -28,7 +28,19 @@ public class BuildPostprocessor
 
         string atmosphereTexturesPath = resourcesPath + "/Textures/Atmosphere";
 
+        if (target == BuildTarget.StandaloneWindows || target == BuildTarget.StandaloneWindows64)
+        {
+            string pureBuildPath = Path.GetDirectoryName(pathToBuiltProject);
+
+            foreach (string file in Directory.GetFiles(pureBuildPath, "*.pdb"))
+            {
+                File.Delete(file);
+            }
+        }
+
         Directory.CreateDirectory(atmosphereTexturesPath);
+        Directory.CreateDirectory(PathGlobals.GlobalModFolderPathEditor(dataPath));
+        Directory.CreateDirectory(PathGlobals.GlobalConfigFolderPathEditor(dataPath));
 
         FileUtil.CopyFileOrDirectory(transmittancePath, atmosphereTexturesPath + transmittanceName);
         FileUtil.CopyFileOrDirectory(irradiancePath, atmosphereTexturesPath + irradianceName);

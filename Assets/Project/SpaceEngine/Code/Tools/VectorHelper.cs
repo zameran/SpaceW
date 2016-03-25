@@ -24,7 +24,7 @@ public static class VectorHelper
         return v.normalized * radius;
     }
 
-    public static Vector3 NormalizeToRadius1(this Vector3 v, float radius)
+    public static Vector3 NormalizeToRadiusUnNormalized(this Vector3 v, float radius)
     {
         return v * radius;
     }
@@ -69,6 +69,7 @@ public static class VectorHelper
     {
         return ((-p1.distance * Vector3.Cross(p2.normal, p3.normal)) +
                 (-p2.distance * Vector3.Cross(p3.normal, p1.normal)) +
-                (-p3.distance * Vector3.Cross(p1.normal, p2.normal))) / (Vector3.Dot(p1.normal, Vector3.Cross(p2.normal, p3.normal)));
+                (-p3.distance * Vector3.Cross(p1.normal, p2.normal))) / 
+                               (Vector3.Dot(p1.normal, Vector3.Cross(p2.normal, p3.normal)));
     }
 }

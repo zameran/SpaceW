@@ -70,16 +70,4 @@ public static class BufferHelper
         from.GetData(data);
         to.SetData(data);
     }
-
-    public static Vector4[] ConvertColorDataToVector(this Color[] data)
-    {
-        Vector4[] temp = new Vector4[data.Length];
-
-        for (int i = 0; i < data.Length; i++)
-        {
-            temp[i] = new Vector4(data[i].r, data[i].g, data[i].b, data[i].a);
-        }
-
-        return temp;
-    }
 }

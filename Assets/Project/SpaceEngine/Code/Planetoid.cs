@@ -214,7 +214,7 @@ public class Planetoid : MonoBehaviour
 		return count;
 	}
 
-	public Quad GetMainQuad(QuadPostion position)
+	public Quad GetMainQuad(QuadPosition position)
 	{
 		foreach (Quad q in MainQuads)
 		{
@@ -225,28 +225,28 @@ public class Planetoid : MonoBehaviour
 		return null;
 	}
 
-	public Mesh GetMesh(QuadPostion position)
+	public Mesh GetMesh(QuadPosition position)
 	{
 		Mesh temp = null;
 
 		switch(position)
 		{
-			case QuadPostion.Top:
+			case QuadPosition.Top:
 				temp = TopPrototypeMesh;
 				break;
-			case QuadPostion.Bottom:
+			case QuadPosition.Bottom:
 				temp = BottomPrototypeMesh;
 				break;
-			case QuadPostion.Left:
+			case QuadPosition.Left:
 				temp = LeftPrototypeMesh;
 				break;
-			case QuadPostion.Right:
+			case QuadPosition.Right:
 				temp = RightPrototypeMesh;
 				break;
-			case QuadPostion.Front:
+			case QuadPosition.Front:
 				temp = FrontPrototypeMesh;
 				break;
-			case QuadPostion.Back:
+			case QuadPosition.Back:
 				temp = BackPrototypeMesh;
 				break;
 		}
@@ -263,12 +263,12 @@ public class Planetoid : MonoBehaviour
 		SetupMeshes();
 		SetupRoot();
 
-		SetupMainQuad(QuadPostion.Top);
-		SetupMainQuad(QuadPostion.Bottom);
-		SetupMainQuad(QuadPostion.Left);
-		SetupMainQuad(QuadPostion.Right);
-		SetupMainQuad(QuadPostion.Front);
-		SetupMainQuad(QuadPostion.Back);
+		SetupMainQuad(QuadPosition.Top);
+		SetupMainQuad(QuadPosition.Bottom);
+		SetupMainQuad(QuadPosition.Left);
+		SetupMainQuad(QuadPosition.Right);
+		SetupMainQuad(QuadPosition.Front);
+		SetupMainQuad(QuadPosition.Back);
 
 		if (NPS != null)
 			NPS.LoadAndInit();
@@ -296,7 +296,7 @@ public class Planetoid : MonoBehaviour
 		}
 	}
 
-	public void SetupMainQuad(QuadPostion quadPosition)
+	public void SetupMainQuad(QuadPosition quadPosition)
 	{
 		GameObject go = new GameObject("Quad" + "_" + quadPosition.ToString());
 		go.transform.position = Vector3.zero;
@@ -334,7 +334,7 @@ public class Planetoid : MonoBehaviour
 		MainQuads.Add(quadComponent);
 	}
 
-	public Quad SetupSubQuad(QuadPostion quadPosition)
+	public Quad SetupSubQuad(QuadPosition quadPosition)
 	{
 		GameObject go = new GameObject("Quad" + "_" + quadPosition.ToString());
 		go.transform.position = Vector3.zero;

@@ -25,6 +25,8 @@ namespace NBody
         /// </summary>
         public static double C = 299792458;
 
+        public static double S = 1;
+
         /// <summary>
         /// The number of bodies allocated in the simulation. 
         /// </summary>
@@ -77,11 +79,7 @@ namespace NBody
         /// <summary>
         /// Determines whether to draw the tree structure for calculating forces. 
         /// </summary>
-        public bool DrawTree
-        {
-            get;
-            set;
-        }
+        public bool DrawTree = false;
 
         /// <summary>
         /// The collection of bodies in the simulation. 
@@ -92,6 +90,8 @@ namespace NBody
         /// The tree for calculating forces. 
         /// </summary>
         private Octree _tree;
+
+        private Octree _predictionTree;
 
         private void Start()
         {
@@ -105,7 +105,6 @@ namespace NBody
 
         private void OnDrawGizmos()
         {
-            DrawTree = true;
             Draw();
         }
 
@@ -127,14 +126,14 @@ namespace NBody
                 // Update the bodies and determine the required tree width. 
                 double halfWidth = 0;
 
-                foreach (Body body in _bodies)
+                for (int i = 0; i < _bodies.Length; i++)
                 {
-                    if (body != null)
+                    if (_bodies[i] != null)
                     {
-                        body.Update();
-                        halfWidth = Math.Max(Math.Abs(body.Location.X), halfWidth);
-                        halfWidth = Math.Max(Math.Abs(body.Location.Y), halfWidth);
-                        halfWidth = Math.Max(Math.Abs(body.Location.Z), halfWidth);
+                        _bodies[i].Update();
+                        halfWidth = Math.Max(Math.Abs(_bodies[i].Location.X), halfWidth);
+                        halfWidth = Math.Max(Math.Abs(_bodies[i].Location.Y), halfWidth);
+                        halfWidth = Math.Max(Math.Abs(_bodies[i].Location.Z), halfWidth);
                     }
                 }
 
@@ -375,6 +374,7 @@ namespace NBody
         public void Draw()
         {
             for (int i = 0; i < _bodies.Length; i++)
+            {
                 if (_bodies[i] != null)
                 {
                     Body body = _bodies[i];
@@ -382,6 +382,7 @@ namespace NBody
                     Gizmos.color = Color.white;
                     Gizmos.DrawWireSphere(new Vector3((float)body.Location.X, (float)body.Location.Y, (float)body.Location.Z), (float)body.Radius);
                 }
+            }
 
             if (DrawTree)
                 if (_tree != null)

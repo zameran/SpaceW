@@ -1,8 +1,9 @@
-﻿using System;
-using UnityEngine;
+﻿using UnityEngine;
 
 public static class MeshFactory
 {
+    public enum PLANE { XY, XZ, YZ };
+
     public static Mesh SetupQuadMesh()
     {
         int nVerts = QS.nVerts;
@@ -60,7 +61,6 @@ public static class MeshFactory
         dummyMesh.vertices = dummyVerts;
         dummyMesh.uv = uv0;
         dummyMesh.SetTriangles(triangles, 0);
-        //dummyMesh.RecalculateNormals(60);
 
         return dummyMesh;
     }
@@ -74,8 +74,6 @@ public static class MeshFactory
         Vector2[] uv0 = new Vector2[nVerts];
 
         int[] triangles = new int[(nVertsPerEdge - 1) * (nVertsPerEdge - 1) * 2 * 3];
-
-        //float height = 0;
 
         for (int r = 0; r < nVertsPerEdge; r++)
         {
@@ -97,13 +95,8 @@ public static class MeshFactory
                 uv.x = r / (float)(nVertsPerEdge - 1);
                 uv.y = c / (float)(nVertsPerEdge - 1);
 
-                //if (_01)
-                //    p = uv;
-                //else
-                //{
-                    p.x = (uv.x - 0.5f) * 2.0f;
-                    p.y = (uv.y - 0.5f) * 2.0f;
-                //}
+                p.x = (uv.x - 0.5f) * 2.0f;
+                p.y = (uv.y - 0.5f) * 2.0f;
 
                 switch ((int)plane)
                 {
@@ -146,7 +139,6 @@ public static class MeshFactory
                         break;
                 }
 
-                //dummyVerts[vertID] = new Vector3(c, height, r);
                 dummyVerts[vertID] = pos;
                 dummyNormals[vertID] = norm;
                 uv0[vertID] = uv;
@@ -179,75 +171,9 @@ public static class MeshFactory
         dummyMesh.vertices = dummyVerts;
         dummyMesh.uv = uv0;
         dummyMesh.SetTriangles(triangles, 0);
-        //dummyMesh.RecalculateNormals(60);
 
         return dummyMesh;
     }
-
-    public static Mesh SetupQuadMeshExtra(int nVertsPerEdge)
-    {
-        nVertsPerEdge = nVertsPerEdge + 2;
-
-        int nVerts = nVertsPerEdge * nVertsPerEdge;
-
-        Vector3[] dummyVerts = new Vector3[nVerts];
-        Vector2[] uv0 = new Vector2[nVerts];
-
-        int[] triangles = new int[(nVertsPerEdge - 1) * (nVertsPerEdge - 1) * 2 * 3];
-
-        float height = 0;
-
-        for (int r = 0; r < nVertsPerEdge; r++)
-        {
-            int rowStartID = r * nVertsPerEdge;
-
-            for (int c = 0; c < nVertsPerEdge; c++)
-            {
-                int vertID = rowStartID + c;
-
-                dummyVerts[vertID] = new Vector3(c - 1, height, r - 1);
-
-                Vector2 uv = new Vector2();
-
-                uv.x = r / (float)(nVertsPerEdge - 2);
-                uv.y = c / (float)(nVertsPerEdge - 2);
-
-                uv0[vertID] = uv;
-            }
-        }
-
-        int triangleIndex = 0;
-
-        for (int r = 0; r < nVertsPerEdge - 1; r++)
-        {
-            int rowStartID = r * nVertsPerEdge;
-            int rowAboveStartID = (r + 1) * nVertsPerEdge;
-
-            for (int c = 0; c < nVertsPerEdge - 1; c++)
-            {
-                int vertID = rowStartID + c;
-                int vertAboveID = rowAboveStartID + c;
-
-                triangles[triangleIndex++] = vertID;
-                triangles[triangleIndex++] = vertAboveID;
-                triangles[triangleIndex++] = vertAboveID + 1;
-
-                triangles[triangleIndex++] = vertID;
-                triangles[triangleIndex++] = vertAboveID + 1;
-                triangles[triangleIndex++] = vertID + 1;
-            }
-        }
-
-        Mesh dummyMesh = new Mesh();
-        dummyMesh.vertices = dummyVerts;
-        dummyMesh.uv = uv0;
-        dummyMesh.SetTriangles(triangles, 0);
-        //dummyMesh.RecalculateNormals(60);
-
-        return dummyMesh;
-    }
-
-    public enum PLANE { XY, XZ, YZ };
 
     public static Mesh MakePlane(int w, int h, PLANE plane, bool _01, bool cw, bool invert)
     {

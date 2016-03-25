@@ -96,6 +96,11 @@ namespace NBody
             return !object.Equals(a, b);
         }
 
+        public static explicit operator Vector(Vector3 v)
+        {
+            return new Vector((double)v.x, (double)v.y, (double)v.z);
+        }
+
         public static implicit operator Vector3(Vector v)
         {
             return new Vector3((float)v.X, (float)v.Y, (float)v.Z);
@@ -133,25 +138,20 @@ namespace NBody
 
         public Vector Rotate(double pointX, double pointY, double pointZ, double directionX, double directionY, double directionZ, double angle)
         {
-            double num = 1.0 / Math.Sqrt(((directionX * directionX) + (directionY * directionY)) + (directionZ * directionZ));
-            directionX *= num;
-            directionY *= num;
-            directionZ *= num;
-            double num2 = Math.Cos(angle);
-            double num3 = Math.Sin(angle);
-            double x = ((((pointX * ((directionY * directionY) + (directionZ * directionZ))) - (directionX * (((((pointY * directionY) + (pointZ * directionZ)) - (directionX * this.X)) - (directionY * this.Y)) - (directionZ * this.Z)))) * (1.0 - num2)) + (this.X * num2)) + (((((-pointZ * directionY) + (pointY * directionZ)) - (directionZ * this.Y)) + (directionY * this.Z)) * num3);
-            double y = ((((pointY * ((directionX * directionX) + (directionZ * directionZ))) - (directionY * (((((pointX * directionX) + (pointZ * directionZ)) - (directionX * this.X)) - (directionY * this.Y)) - (directionZ * this.Z)))) * (1.0 - num2)) + (this.Y * num2)) + (((((pointZ * directionX) - (pointX * directionZ)) + (directionZ * this.X)) - (directionX * this.Z)) * num3);
-            return new Vector(x, y, ((((pointZ * ((directionX * directionX) + (directionY * directionY))) - (directionZ * (((((pointX * directionX) + (pointY * directionY)) - (directionX * this.X)) - (directionY * this.Y)) - (directionZ * this.Z)))) * (1.0 - num2)) + (this.Z * num2)) + (((((-pointY * directionX) + (pointX * directionY)) - (directionY * this.X)) + (directionX * this.Y)) * num3));
+            double length = 1.0 / Math.Sqrt(((directionX * directionX) + (directionY * directionY)) + (directionZ * directionZ));
+            directionX *= length;
+            directionY *= length;
+            directionZ *= length;
+            double cosa = Math.Cos(angle);
+            double sina = Math.Sin(angle);
+            double x = ((((pointX * ((directionY * directionY) + (directionZ * directionZ))) - (directionX * (((((pointY * directionY) + (pointZ * directionZ)) - (directionX * this.X)) - (directionY * this.Y)) - (directionZ * this.Z)))) * (1.0 - cosa)) + (this.X * cosa)) + (((((-pointZ * directionY) + (pointY * directionZ)) - (directionZ * this.Y)) + (directionY * this.Z)) * sina);
+            double y = ((((pointY * ((directionX * directionX) + (directionZ * directionZ))) - (directionY * (((((pointX * directionX) + (pointZ * directionZ)) - (directionX * this.X)) - (directionY * this.Y)) - (directionZ * this.Z)))) * (1.0 - cosa)) + (this.Y * cosa)) + (((((pointZ * directionX) - (pointX * directionZ)) + (directionZ * this.X)) - (directionX * this.Z)) * sina);
+            return new Vector(x, y, ((((pointZ * ((directionX * directionX) + (directionY * directionY))) - (directionZ * (((((pointX * directionX) + (pointY * directionY)) - (directionX * this.X)) - (directionY * this.Y)) - (directionZ * this.Z)))) * (1.0 - cosa)) + (this.Z * cosa)) + (((((-pointY * directionX) + (pointX * directionY)) - (directionY * this.X)) + (directionX * this.Y)) * sina));
         }
 
         public Vector Rotate(Vector point, Vector direction, double angle)
         {
             return this.Rotate(point.X, point.Y, point.Z, direction.X, direction.Y, direction.Z, angle);
-        }
-
-        public Vector To(Vector a)
-        {
-            return (a - this);
         }
 
         public Vector Unit()

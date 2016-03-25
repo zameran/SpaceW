@@ -145,6 +145,7 @@ void HeightMain (uint3 id : SV_DispatchThreadID)
 	float3 patchCoord =  constants.planetRadius * patchNormalizedCoord;
 	float3 patchCoordCentered = patchCoord - patchCenter;
 	float3 patchCubeCoordCentered = patchNormalizedCoord;
+	float3 patchCubeCoordCenteredFlat = patchNormalizedCoord;
 
 	float noise = NoiseFunction(patchCoord);
 
@@ -152,13 +153,14 @@ void HeightMain (uint3 id : SV_DispatchThreadID)
 
 	patchCoordCentered += patchNormalizedCoord * height;
 	patchCubeCoordCentered += patchNormalizedCoord * height;
-
+	patchCubeCoordCenteredFlat += patchNormalizedCoord;
+	
 	float4 output = float4(patchCoordCentered.xyz, 0.0);
 	float4 cubeOutput = float4(patchCubeCoordCentered.xyz, 0.0);
 
 	patchPreOutput[outBuffOffset].noise = noise;
 	patchPreOutput[outBuffOffset].patchCenter = patchCenter;
-	patchPreOutput[outBuffOffset].vcolor = float4(noise, noise, noise, 1.0);
+	patchPreOutput[outBuffOffset].vcolor = float4(patchCubeCoordCenteredFlat, 0);
 	patchPreOutput[outBuffOffset].pos = output;
 	patchPreOutput[outBuffOffset].cpos = float4(patchCoordCentered, 0);
 }
@@ -179,20 +181,22 @@ void HeightSub(uint3 id : SV_DispatchThreadID)
 	float3 patchCoord =  constants.planetRadius * patchNormalizedCoord;
 	float3 patchCoordCentered = patchCoord - patchCenter;
 	float3 patchCubeCoordCentered = patchNormalizedCoord;
-
+	float3 patchCubeCoordCenteredFlat = patchNormalizedCoord;
+	
 	float noise = NoiseFunction(patchCoord);
 
 	float height = noise * constants.terrainMaxHeight;
 
 	patchCoordCentered += patchNormalizedCoord * height;
 	patchCubeCoordCentered += patchNormalizedCoord * height;
-
+	patchCubeCoordCenteredFlat += patchNormalizedCoord;
+	
 	float4 output = float4(patchCoordCentered.xyz, 0.0);
 	float4 cubeOutput = float4(patchCubeCoordCentered.xyz, 0.0);
 
 	patchPreOutputSub[outBuffOffset].noise = noise;
 	patchPreOutputSub[outBuffOffset].patchCenter = patchCenter;
-	patchPreOutputSub[outBuffOffset].vcolor = float4(noise, noise, noise, 1.0);
+	patchPreOutputSub[outBuffOffset].vcolor = float4(patchCubeCoordCenteredFlat, 0);
 	patchPreOutputSub[outBuffOffset].pos = output;
 	patchPreOutputSub[outBuffOffset].cpos = float4(patchCoordCentered, 0);
 }

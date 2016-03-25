@@ -6,9 +6,8 @@ public class GUIDrawQuadTexture : MonoBehaviour
 {
     public Planetoid planetoid = null;
 
-    public QuadPostion quadPosition = QuadPostion.Top;
+    public QuadPosition quadPosition = QuadPosition.Top;
     public TextureType textureType = TextureType.Height;
-    public TextureFlip textureFlip = TextureFlip.None;
     public float scale = 0.5f;
     public float x = 10.0f;
     public float y = 10.0f;
@@ -39,22 +38,6 @@ public class GUIDrawQuadTexture : MonoBehaviour
                     if (tex == null) return;
 
                     Vector2 dim = new Vector2(tex.width, tex.height);
-
-                    switch (textureFlip)
-                    {
-                        case TextureFlip.None:
-                            dim = new Vector2(dim.x, dim.y);
-                            break;
-                        case TextureFlip.X:
-                            dim = new Vector2(-dim.x, dim.y);
-                            break;
-                        case TextureFlip.Y:
-                            dim = new Vector2(dim.x, -dim.y);
-                            break;
-                        case TextureFlip.XY:
-                            dim = new Vector2(-dim.x, -dim.y);
-                            break;
-                    }
 
                     if (q.Position == quadPosition)
                     {
@@ -99,12 +82,4 @@ public enum TextureType
 {
     Height,
     Normal
-}
-
-public enum TextureFlip
-{
-    None,
-    X,
-    Y,
-    XY,
 }
