@@ -13,10 +13,7 @@ public static class PathGlobals
     {
         get
         {
-            string path = Application.dataPath + "/../" + GlobalConfigFolderName;
-            string outputPath = Path.GetFullPath(path);
-
-            return outputPath;
+            return Path.GetFullPath(Application.dataPath + "/../" + GlobalConfigFolderName); ;
         }
     }
 
@@ -24,10 +21,7 @@ public static class PathGlobals
     {
         get
         {
-            string path = Application.dataPath + "/../" + GlobalModFolderName;
-            string outputPath = Path.GetFullPath(path);
-
-            return outputPath;
+            return Path.GetFullPath(Application.dataPath + "/../" + GlobalModFolderName); ;
         }
     }
 
@@ -35,34 +29,30 @@ public static class PathGlobals
     {
         get
         {
-            string path = Application.dataPath + "/../" + GlobalMainLogFileName;
-            string outputPath = Path.GetFullPath(path);
+            return Path.GetFullPath(Application.dataPath + "/../" + GlobalMainLogFileName); ;
+        }
+    }
 
-            return outputPath;
+    public static string GlobalRootPath
+    {
+        get
+        {
+            return Path.GetFullPath(Application.dataPath + "/../");
         }
     }
 
     public static string GlobalConfigFolderPathEditor(string dataPath)
     {
-        string path = dataPath + "/../" + GlobalConfigFolderName;
-        string outputPath = Path.GetFullPath(path);
-
-        return outputPath;
+        return Path.GetFullPath(dataPath + "/../" + GlobalConfigFolderName);
     }
 
     public static string GlobalModFolderPathEditor(string dataPath)
     {
-        string path = dataPath + "/../" + GlobalModFolderName;
-        string outputPath = Path.GetFullPath(path);
-
-        return outputPath;
+        return Path.GetFullPath(dataPath + "/../" + GlobalModFolderName);
     }
 
     public static string GlobalMainLogPathEditor(string dataPath)
     {
-        string path = dataPath + "/../" + GlobalMainLogFileName;
-        string outputPath = Path.GetFullPath(path);
-
-        return outputPath;
+        return Path.GetFullPath(dataPath + "/../" + GlobalMainLogFileName); ;
     }
 }

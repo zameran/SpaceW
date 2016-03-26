@@ -5,6 +5,7 @@
 		_HeightTexture("Height (RGBA)", 2D) = "white" {}
 		_NormalTexture("Normal (RGBA)", 2D) = "white" {}
 		_WireframeColor("Wireframe Background Color", Color) = (0, 0, 0, 1)
+		_Atmosphere("Atmosphere", Range(0, 1)) = 0.0
 		_Wireframe("Wireframe", Range(0, 1)) = 0.0
 		_Normale("Normale", Range(0, 1)) = 0.0
 		_Side("Side", Range(0, 5)) = 0.0
@@ -60,6 +61,8 @@
 			};
 		
 			uniform half4 _WireframeColor;
+
+			uniform float _Atmosphere;
 			uniform float _Wireframe;
 			uniform float _Normale;
 			uniform float _Side;

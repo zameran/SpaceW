@@ -5,10 +5,15 @@ using System.Collections;
 using System.Collections.Generic;
 
 using ZFramework.Extensions;
+using ZFramework.Unity.Common;
 
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
+using Logger = ZFramework.Unity.Common.Logger;
+
+[UseLogger(Category.Data)]
+[UseLoggerFile("AssemblyLoader")]
 public sealed class AssemblyLoader : MonoBehaviour
 {
     private bool Loaded = false;
@@ -25,7 +30,7 @@ public sealed class AssemblyLoader : MonoBehaviour
         {
             if (instance == null)
             {
-                Debug.Log("AssemblyLoader Instance get fail!");
+                Logger.Log("AssemblyLoader Instance get fail!");
 
                 return null;
             }
@@ -41,9 +46,7 @@ public sealed class AssemblyLoader : MonoBehaviour
 
     private void OnLevelWasLoaded(int level)
     {
-        ShowGUI = !Loaded;
-
-        FirePlugins(ExternalAssemblies);
+        if (SceneManager.GetActiveScene().buildIndex != 0 && Loaded) FirePlugins(ExternalAssemblies);
     }
 
     private void OnGUI()
@@ -65,26 +68,19 @@ public sealed class AssemblyLoader : MonoBehaviour
     private void Init()
     {
         instance = this;
-
         DontDestroyOnLoad(this.gameObject);
 
-        Debug.Log("AssemblyLoader started at scene: " + SceneManager.GetActiveScene().buildIndex);
-
-        ShowGUI = !Loaded;
+        Logger.Log("AssemblyLoader Initiated at scene №: " + SceneManager.GetActiveScene().buildIndex);
 
         if (!Loaded)
         {
             DetectAndLoadAssemblies();
-
-            Dumper.DumpAssembliesExternal(ExternalAssemblies);
-
             Loaded = true;
         }
 
         if (SceneManager.GetActiveScene().buildIndex == 0 && Loaded)
         {
             FirePlugins(ExternalAssemblies, 0);
-
             SceneManager.LoadScene(1);
         }
     }
@@ -104,12 +100,12 @@ public sealed class AssemblyLoader : MonoBehaviour
         }
         catch (Exception ex)
         {
-            Debug.LogError("Get Files Exception: " + ex.Message);
+            Logger.Log("DetectAssembies Exception: " + ex.Message);
         }
 
         Total = allPaths.Count;
 
-        Debug.Log(string.Format("Assembies Detected: {0}", allPaths.Count));
+        Logger.Log(string.Format("Assembies Detected: {0}", allPaths.Count));
     }
 
     private void DetectAndLoadAssemblies()
@@ -129,7 +125,7 @@ public sealed class AssemblyLoader : MonoBehaviour
 
             if (attrbutes.Length == 0 || attrbutes == null)
             {
-                Debug.Log("This is not an adddon assymbly! " + path);
+                Logger.Log("This is not an adddon assembly! " + path);
             }
             else
             {
@@ -138,12 +134,14 @@ public sealed class AssemblyLoader : MonoBehaviour
                 AssemblyExternalTypes aet = new AssemblyExternalTypes(typeof(MonoBehaviour), mb);
                 AssemblyExternal ae = new AssemblyExternal(path, ea.Name, ea.Version, assembly, aet);
 
+                FireHotPlugin(ae);
+
                 ExternalAssemblies.Add(ae);
             }
         }
         catch (Exception ex)
         {
-            Debug.LogError("Load Exception: " + ex.Message);
+            Logger.Log("LoadAssembly Exception: " + ex.Message);
         }
         finally
         {
@@ -153,7 +151,7 @@ public sealed class AssemblyLoader : MonoBehaviour
 
     private void LoadDetectedAssemblies(List<string> allPaths)
     {
-        if(allPaths == null) { DetectAssembies(out allPaths); Debug.Log("Something wrong with path's array! Detecting assemblies again!"); }
+        if(allPaths == null) { DetectAssembies(out allPaths); Logger.Log("Something wrong with path's array! Detecting assemblies again!"); }
 
         for (int i = 0; i < allPaths.Count; i++)
         {
@@ -175,6 +173,8 @@ public sealed class AssemblyLoader : MonoBehaviour
                 }
             }
         }
+
+        Logger.Log("Plugins fired at scene №: " + level);
     }
 
     private void FirePlugins(List<AssemblyExternal> ExternalAssemblies)
@@ -189,6 +189,21 @@ public sealed class AssemblyLoader : MonoBehaviour
                 }
             }
         }
+
+        Logger.Log("Plugins fired at scene №: " + SceneManager.GetActiveScene().buildIndex);
+    }
+
+    private void FireHotPlugin(AssemblyExternal Addon)
+    {
+        foreach (KeyValuePair<Type, List<Type>> kvp in Addon.Types)
+        {
+            foreach (Type v in kvp.Value)
+            {
+                FirePlugin(v, -1);
+            }
+        }
+
+        Logger.Log(string.Format("Hot plugin {0} fired at scene №: {1}", Addon.Name, SceneManager.GetActiveScene().buildIndex));
     }
 
     private void FirePlugin(Type type, int level)
@@ -197,7 +212,7 @@ public sealed class AssemblyLoader : MonoBehaviour
 
         if (atr != null)
         {
-            if ((int)atr.Startup == level)
+            if ((int)atr.EntryPoint == level)
             {
                 GameObject go = new GameObject(type.Name);
                 go.transform.position = Vector3.zero;
@@ -215,7 +230,7 @@ public sealed class AssemblyLoader : MonoBehaviour
 
         if (atr != null)
         {
-            if ((int)atr.Startup == currentScene)
+            if ((int)atr.EntryPoint == currentScene)
             {
                 GameObject go = new GameObject(type.Name);
                 go.transform.position = Vector3.zero;

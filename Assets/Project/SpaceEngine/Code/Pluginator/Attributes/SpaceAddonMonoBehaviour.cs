@@ -3,13 +3,13 @@
 [AttributeUsage(AttributeTargets.Class, AllowMultiple = false, Inherited = true)]
 public sealed class SpaceAddonMonoBehaviour : Attribute
 {
-    public StartupEnum Startup;
+    public EntryPoint @EntryPoint;
 
     public bool StartupOnce;
 
-    public SpaceAddonMonoBehaviour(StartupEnum Startup, bool StartupOnce)
+    public SpaceAddonMonoBehaviour(EntryPoint @EntryPoint, bool StartupOnce)
     {
-        this.Startup = Startup;
+        this.EntryPoint = EntryPoint;
 
         this.StartupOnce = StartupOnce;
     }

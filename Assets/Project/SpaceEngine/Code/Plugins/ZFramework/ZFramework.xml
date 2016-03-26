@@ -2493,6 +2493,7 @@
         <member name="T:ZFramework.Unity.Common.Threading.Dispatcher">
             <summary>
             A system for dispatching code to execute on the main thread.
+            Do not use with Unity coroutines.
             </summary>
         </member>
         <member name="F:ZFramework.Unity.Common.Threading.Dispatcher.InstanceExist">

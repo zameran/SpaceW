@@ -1,4 +1,6 @@
-﻿using UnityEngine;
+﻿using System;
+
+using UnityEngine;
 
 public static class GUILayoutExtensions
 {
@@ -18,5 +20,12 @@ public static class GUILayoutExtensions
     {
         GUILayout.Label(image);
         GUILayout.Space(space);
+    }
+
+    public static void Horizontal(Action body)
+    {
+        GUILayout.BeginHorizontal();
+        if (body != null) body();
+        GUILayout.EndHorizontal();
     }
 }

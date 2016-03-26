@@ -34,7 +34,14 @@ public class BuildPostprocessor
 
             foreach (string file in Directory.GetFiles(pureBuildPath, "*.pdb"))
             {
-                File.Delete(file);
+                if (File.Exists(file))
+                    File.Delete(file);
+            }
+
+            foreach (string file in Directory.GetFiles(pureBuildPath, "*Log*.txt"))
+            {
+                if (File.Exists(file))
+                    File.Delete(file);
             }
         }
 

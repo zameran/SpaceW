@@ -53,10 +53,17 @@ float3 CubeCoord(QuadGenerationConstants constants, float VerticesPerSide, uint3
 {
 	//32 : 1;
 	//64 : 3;
-	//128 : 7;
+	//128 : 7; 
 	//256 : 17;
 	//512 : 41;
-	//TODO modifier calculation. Seems to 1,3,7 are normal, but bigger... fail.
+
+	//32  : x = i = 1;					i = VerticesPerSide / 32 = 1;		VerticesPerSide = 32;
+	//64  : x = i + 1 = 3;				i = VerticesPerSide / 32 = 2;		VerticesPerSide = 64;
+	//128 : x = i + 1 + 3 = 7;			i = VerticesPerSide / 32 = 4;		VerticesPerSide = 128;
+	//...next : fail
+
+	//TODO modifier calculation.
+
 	float eastValue = (id.x - ((VerticesPerSide - mod) / 2.0)) * spacing;
 	float northValue = (id.y - ((VerticesPerSide - mod) / 2.0)) * spacing;
 

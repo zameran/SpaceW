@@ -5,6 +5,7 @@ using System;
 
 using UnityEngine;
 
+[Obsolete("Don't use this with ZFramework's Logger class. Only for unity internal usage.")]
 public static class Dumper
 {
     public static void DumpStringList(List<string> items)
