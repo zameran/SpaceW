@@ -3,42 +3,9 @@ using System.Collections;
 
 using UnityEngine;
 
-public sealed class AtmosphereRunTimeBaking : MonoBehaviour
+public sealed class AtmosphereRunTimeBaker : MonoBehaviour
 {
-    //Asymmetry factor for the mie phase function
-    //A higher number meands more light is scattered in the forward direction
-    public float MIE_G = 0.8f;
-
-    //Half heights for the atmosphere air density (HR) and particle density (HM)
-    //This is the height in km that half the particles are found below
-    public float HR = 8.0f;
-    public float HM = 1.2f;
-
-    //Physical settings, Mie and Rayliegh values
-    public float AVERAGE_GROUND_REFLECTANCE = 0.1f;
-    public Vector4 BETA_R = new Vector4(5.8e-3f, 1.35e-2f, 3.31e-2f, 0.0f);
-    public Vector4 BETA_MSca = new Vector4(4e-6f, 4e-6f, 4e-6f, 0.0f);
-
-    public float Rg = 6360.0f;
-    public float Rt = 6420.0f;
-    public float RL = 6421.0f;
-
-    //Dimensions of the tables
-    const int TRANSMITTANCE_W = 256;
-    const int TRANSMITTANCE_H = 64;
-    const int SKY_W = 64;
-    const int SKY_H = 16;
-    const int RES_R = 32;
-    const int RES_MU = 128;
-    const int RES_MU_S = 32;
-    const int RES_NU = 8;
     const int NUM_THREADS = 8;
-
-    const int TRANSMITTANCE_INTEGRAL_SAMPLES = 512;	        //500
-    const int INSCATTER_INTEGRAL_SAMPLES = 64;			    //50
-    const int IRRADIANCE_INTEGRAL_SAMPLES = 32;	            //32
-    const int IRRADIANCE_INTEGRAL_SAMPLES_HALF = 16;        //16
-    const int INSCATTER_SPHERICAL_INTEGRAL_SAMPLES = 8;     //16
 
     public RenderTexture transmittanceT;
     public RenderTexture irradianceT_Read, irradianceT_Write, inscatterT_Read, inscatterT_Write;
@@ -52,37 +19,31 @@ public sealed class AtmosphereRunTimeBaking : MonoBehaviour
     int step, order;
     bool finished = false;
 
-    private void Start()
+    [ContextMenu("Bake default")]
+    public void Bake()
     {
-        StartCoroutine(Go());
+        Go(AtmosphereParameters.Default);
     }
 
-    private void Update()
+    public void Bake(AtmosphereParameters AP)
     {
-        if(Input.GetKey(KeyCode.LeftShift) && Input.GetKeyDown(KeyCode.F))
-        {
-            StartCoroutine(Go());
-        }
+        Go(AP);
     }
 
-    private IEnumerator Go()
+    private void Go(AtmosphereParameters AP)
     {
         finished = false;
         step = 0;
         order = 2;
 
         CollectGarbage();
-        CreateTextures();
-        SetParametersForAll();
+        CreateTextures(AP);
+        SetParametersForAll(AP);
         ClearAll();
 
         while (!finished)
         {
-            Calculate();
-
-            yield return new WaitForEndOfFrame();
-            yield return new WaitForEndOfFrame();
-            yield return new WaitForEndOfFrame();
+            Calculate(AP);
         }
     }
 
@@ -108,34 +69,34 @@ public sealed class AtmosphereRunTimeBaking : MonoBehaviour
         if (deltaJT != null) deltaJT.ReleaseAndDestroy();
     }
 
-    public void CreateTextures()
+    public void CreateTextures(AtmosphereParameters AP)
     {
-        transmittanceT = RTExtensions.CreateRTexture(new Vector2(TRANSMITTANCE_W, TRANSMITTANCE_H), 0, RenderTextureFormat.ARGBFloat);
+        transmittanceT = RTExtensions.CreateRTexture(new Vector2(AP.TRANSMITTANCE_W, AP.TRANSMITTANCE_H), 0, RenderTextureFormat.ARGBFloat);
 
-        irradianceT_Read = RTExtensions.CreateRTexture(new Vector2(SKY_W, SKY_H), 0, RenderTextureFormat.ARGBFloat);
-        irradianceT_Write = RTExtensions.CreateRTexture(new Vector2(SKY_W, SKY_H), 0, RenderTextureFormat.ARGBFloat);
+        irradianceT_Read = RTExtensions.CreateRTexture(new Vector2(AP.SKY_W, AP.SKY_H), 0, RenderTextureFormat.ARGBFloat);
+        irradianceT_Write = RTExtensions.CreateRTexture(new Vector2(AP.SKY_W, AP.SKY_H), 0, RenderTextureFormat.ARGBFloat);
 
-        inscatterT_Read = RTExtensions.CreateRTexture(new Vector2(RES_MU_S * RES_NU, RES_MU), 0, RenderTextureFormat.ARGBFloat, FilterMode.Bilinear, TextureWrapMode.Clamp, RES_R);
-        inscatterT_Write = RTExtensions.CreateRTexture(new Vector2(RES_MU_S * RES_NU, RES_MU), 0, RenderTextureFormat.ARGBFloat, FilterMode.Bilinear, TextureWrapMode.Clamp, RES_R);
+        inscatterT_Read = RTExtensions.CreateRTexture(new Vector2(AP.RES_MU_S * AP.RES_NU, AP.RES_MU), 0, RenderTextureFormat.ARGBFloat, FilterMode.Bilinear, TextureWrapMode.Clamp, AP.RES_R);
+        inscatterT_Write = RTExtensions.CreateRTexture(new Vector2(AP.RES_MU_S * AP.RES_NU, AP.RES_MU), 0, RenderTextureFormat.ARGBFloat, FilterMode.Bilinear, TextureWrapMode.Clamp, AP.RES_R);
 
-        deltaET = RTExtensions.CreateRTexture(new Vector2(SKY_W, SKY_H), 0, RenderTextureFormat.ARGBFloat);
+        deltaET = RTExtensions.CreateRTexture(new Vector2(AP.SKY_W, AP.SKY_H), 0, RenderTextureFormat.ARGBFloat);
 
-        deltaSRT = RTExtensions.CreateRTexture(new Vector2(RES_MU_S * RES_NU, RES_MU), 0, RenderTextureFormat.ARGBFloat, FilterMode.Bilinear, TextureWrapMode.Clamp, RES_R);
-        deltaSMT = RTExtensions.CreateRTexture(new Vector2(RES_MU_S * RES_NU, RES_MU), 0, RenderTextureFormat.ARGBFloat, FilterMode.Bilinear, TextureWrapMode.Clamp, RES_R);
-        deltaJT = RTExtensions.CreateRTexture(new Vector2(RES_MU_S * RES_NU, RES_MU), 0, RenderTextureFormat.ARGBFloat, FilterMode.Bilinear, TextureWrapMode.Clamp, RES_R);
+        deltaSRT = RTExtensions.CreateRTexture(new Vector2(AP.RES_MU_S * AP.RES_NU, AP.RES_MU), 0, RenderTextureFormat.ARGBFloat, FilterMode.Bilinear, TextureWrapMode.Clamp, AP.RES_R);
+        deltaSMT = RTExtensions.CreateRTexture(new Vector2(AP.RES_MU_S * AP.RES_NU, AP.RES_MU), 0, RenderTextureFormat.ARGBFloat, FilterMode.Bilinear, TextureWrapMode.Clamp, AP.RES_R);
+        deltaJT = RTExtensions.CreateRTexture(new Vector2(AP.RES_MU_S * AP.RES_NU, AP.RES_MU), 0, RenderTextureFormat.ARGBFloat, FilterMode.Bilinear, TextureWrapMode.Clamp, AP.RES_R);
     }
 
-    public void SetParametersForAll()
+    public void SetParametersForAll(AtmosphereParameters AP)
     {
-        SetParameters(copyInscatter1);
-        SetParameters(copyInscatterN);
-        SetParameters(copyIrradiance);
-        SetParameters(inscatter1);
-        SetParameters(inscatterN);
-        SetParameters(inscatterS);
-        SetParameters(irradiance1);
-        SetParameters(irradianceN);
-        SetParameters(transmittance);
+        SetParameters(copyInscatter1, AP);
+        SetParameters(copyInscatterN, AP);
+        SetParameters(copyIrradiance, AP);
+        SetParameters(inscatter1, AP);
+        SetParameters(inscatterN, AP);
+        SetParameters(inscatterS, AP);
+        SetParameters(irradiance1, AP);
+        SetParameters(irradianceN, AP);
+        SetParameters(transmittance, AP);
     }
 
     public void ClearAll()
@@ -148,20 +109,20 @@ public sealed class AtmosphereRunTimeBaking : MonoBehaviour
         RTUtility.ClearColor(deltaET);
     }
 
-    public void Calculate()
+    public void Calculate(AtmosphereParameters AP)
     {
         if (step == 0)
         {
             // computes transmittance texture T (line 1 in algorithm 4.1)
             transmittance.SetTexture(0, "transmittanceWrite", transmittanceT);
-            transmittance.Dispatch(0, TRANSMITTANCE_W / NUM_THREADS, TRANSMITTANCE_H / NUM_THREADS, 1);
+            transmittance.Dispatch(0, AP.TRANSMITTANCE_W / NUM_THREADS, AP.TRANSMITTANCE_H / NUM_THREADS, 1);
         }
         else if (step == 1)
         {
             // computes irradiance texture deltaE (line 2 in algorithm 4.1)
             irradiance1.SetTexture(0, "transmittanceRead", transmittanceT);
             irradiance1.SetTexture(0, "deltaEWrite", deltaET);
-            irradiance1.Dispatch(0, SKY_W / NUM_THREADS, SKY_H / NUM_THREADS, 1);
+            irradiance1.Dispatch(0, AP.SKY_W / NUM_THREADS, AP.SKY_H / NUM_THREADS, 1);
         }
         else if (step == 2)
         {
@@ -173,10 +134,10 @@ public sealed class AtmosphereRunTimeBaking : MonoBehaviour
 
             //The inscatter calc's can be quite demanding for some cards so process 
             //the calc's in layers instead of the whole 3D data set.
-            for (int i = 0; i < RES_R; i++)
+            for (int i = 0; i < AP.RES_R; i++)
             {
                 inscatter1.SetInt("layer", i);
-                inscatter1.Dispatch(0, (RES_MU_S * RES_NU) / NUM_THREADS, RES_MU / NUM_THREADS, 1);
+                inscatter1.Dispatch(0, (AP.RES_MU_S * AP.RES_NU) / NUM_THREADS, AP.RES_MU / NUM_THREADS, 1);
             }
         }
         else if (step == 3)
@@ -186,7 +147,7 @@ public sealed class AtmosphereRunTimeBaking : MonoBehaviour
             copyIrradiance.SetTexture(0, "deltaERead", deltaET);
             copyIrradiance.SetTexture(0, "irradianceRead", irradianceT_Read);
             copyIrradiance.SetTexture(0, "irradianceWrite", irradianceT_Write);
-            copyIrradiance.Dispatch(0, SKY_W / NUM_THREADS, SKY_H / NUM_THREADS, 1);
+            copyIrradiance.Dispatch(0, AP.SKY_W / NUM_THREADS, AP.SKY_H / NUM_THREADS, 1);
 
             //Swap irradianceT_Read - irradianceT_Write
             RTUtility.Swap(ref irradianceT_Read, ref irradianceT_Write);
@@ -200,10 +161,10 @@ public sealed class AtmosphereRunTimeBaking : MonoBehaviour
 
             //The inscatter calc's can be quite demanding for some cards so process 
             //the calc's in layers instead of the whole 3D data set.
-            for (int i = 0; i < RES_R; i++)
+            for (int i = 0; i < AP.RES_R; i++)
             {
                 copyInscatter1.SetInt("layer", i);
-                copyInscatter1.Dispatch(0, (RES_MU_S * RES_NU) / NUM_THREADS, RES_MU / NUM_THREADS, 1);
+                copyInscatter1.Dispatch(0, (AP.RES_MU_S * AP.RES_NU) / NUM_THREADS, AP.RES_MU / NUM_THREADS, 1);
             }
 
             //Swap inscatterT_Write - inscatterT_Read
@@ -226,10 +187,10 @@ public sealed class AtmosphereRunTimeBaking : MonoBehaviour
 
             //The inscatter calc's can be quite demanding for some cards so process 
             //the calc's in layers instead of the whole 3D data set.
-            for (int i = 0; i < RES_R; i++)
+            for (int i = 0; i < AP.RES_R; i++)
             {
                 inscatterS.SetInt("layer", i);
-                inscatterS.Dispatch(0, (RES_MU_S * RES_NU) / NUM_THREADS, RES_MU / NUM_THREADS, 1);
+                inscatterS.Dispatch(0, (AP.RES_MU_S * AP.RES_NU) / NUM_THREADS, AP.RES_MU / NUM_THREADS, 1);
             }
         }
         else if (step == 6) 
@@ -239,7 +200,7 @@ public sealed class AtmosphereRunTimeBaking : MonoBehaviour
             irradianceN.SetTexture(0, "deltaSRRead", deltaSRT);
             irradianceN.SetTexture(0, "deltaSMRead", deltaSMT);
             irradianceN.SetTexture(0, "deltaEWrite", deltaET);
-            irradianceN.Dispatch(0, SKY_W / NUM_THREADS, SKY_H / NUM_THREADS, 1);
+            irradianceN.Dispatch(0, AP.SKY_W / NUM_THREADS, AP.SKY_H / NUM_THREADS, 1);
         }
         else if (step == 7)
         {
@@ -250,10 +211,10 @@ public sealed class AtmosphereRunTimeBaking : MonoBehaviour
 
             //The inscatter calc's can be quite demanding for some cards so process 
             //the calc's in layers instead of the whole 3D data set.
-            for (int i = 0; i < RES_R; i++)
+            for (int i = 0; i < AP.RES_R; i++)
             {
                 inscatterN.SetInt("layer", i);
-                inscatterN.Dispatch(0, (RES_MU_S * RES_NU) / NUM_THREADS, RES_MU / NUM_THREADS, 1);
+                inscatterN.Dispatch(0, (AP.RES_MU_S * AP.RES_NU) / NUM_THREADS, AP.RES_MU / NUM_THREADS, 1);
             }
         }
         else if (step == 8)
@@ -263,7 +224,7 @@ public sealed class AtmosphereRunTimeBaking : MonoBehaviour
             copyIrradiance.SetTexture(0, "deltaERead", deltaET);
             copyIrradiance.SetTexture(0, "irradianceRead", irradianceT_Read);
             copyIrradiance.SetTexture(0, "irradianceWrite", irradianceT_Write);
-            copyIrradiance.Dispatch(0, SKY_W / NUM_THREADS, SKY_H / NUM_THREADS, 1);
+            copyIrradiance.Dispatch(0, AP.SKY_W / NUM_THREADS, AP.SKY_H / NUM_THREADS, 1);
 
             //Swap irradianceT_Read - irradianceT_Write
             RTUtility.Swap(ref irradianceT_Read, ref irradianceT_Write);
@@ -277,10 +238,10 @@ public sealed class AtmosphereRunTimeBaking : MonoBehaviour
 
             //The inscatter calc's can be quite demanding for some cards so process 
             //the calc's in layers instead of the whole 3D data set.
-            for (int i = 0; i < RES_R; i++)
+            for (int i = 0; i < AP.RES_R; i++)
             {
                 copyInscatterN.SetInt("layer", i);
-                copyInscatterN.Dispatch(0, (RES_MU_S * RES_NU) / NUM_THREADS, RES_MU / NUM_THREADS, 1);
+                copyInscatterN.Dispatch(0, (AP.RES_MU_S * AP.RES_NU) / NUM_THREADS, AP.RES_MU / NUM_THREADS, 1);
             }
 
             //Swap inscatterT_Read - inscatterT_Write
@@ -304,65 +265,65 @@ public sealed class AtmosphereRunTimeBaking : MonoBehaviour
         step++;
     }
 
-    public void SetParameters(ComputeShader cs)
+    public void SetParameters(ComputeShader cs, AtmosphereParameters AP)
     {
         if (cs == null) return;
 
-        cs.SetFloat("Rg", Rg);
-        cs.SetFloat("Rt", Rt);
-        cs.SetFloat("RL", RL);
-        cs.SetInt("TRANSMITTANCE_W", TRANSMITTANCE_W);
-        cs.SetInt("TRANSMITTANCE_H", TRANSMITTANCE_H);
-        cs.SetInt("SKY_W", SKY_W);
-        cs.SetInt("SKY_H", SKY_H);
-        cs.SetInt("RES_R", RES_R);
-        cs.SetInt("RES_MU", RES_MU);
-        cs.SetInt("RES_MU_S", RES_MU_S);
-        cs.SetInt("RES_NU", RES_NU);
-        cs.SetFloat("AVERAGE_GROUND_REFLECTANCE", AVERAGE_GROUND_REFLECTANCE);
-        cs.SetFloat("HR", HR);
-        cs.SetFloat("HM", HM);
+        cs.SetFloat("Rg", AP.Rg);
+        cs.SetFloat("Rt", AP.Rt);
+        cs.SetFloat("RL", AP.Rl);
+        cs.SetInt("TRANSMITTANCE_W", AP.TRANSMITTANCE_W);
+        cs.SetInt("TRANSMITTANCE_H", AP.TRANSMITTANCE_H);
+        cs.SetInt("SKY_W", AP.SKY_W);
+        cs.SetInt("SKY_H", AP.SKY_H);
+        cs.SetInt("RES_R", AP.RES_R);
+        cs.SetInt("RES_MU", AP.RES_MU);
+        cs.SetInt("RES_MU_S", AP.RES_MU_S);
+        cs.SetInt("RES_NU", AP.RES_NU);
+        cs.SetFloat("AVERAGE_GROUND_REFLECTANCE", AP.AVERAGE_GROUND_REFLECTANCE);
+        cs.SetFloat("HR", AP.HR);
+        cs.SetFloat("HM", AP.HM);
 
-        cs.SetInt("TRANSMITTANCE_INTEGRAL_SAMPLES", TRANSMITTANCE_INTEGRAL_SAMPLES);
-        cs.SetInt("INSCATTER_INTEGRAL_SAMPLES", INSCATTER_INTEGRAL_SAMPLES);
-        cs.SetInt("IRRADIANCE_INTEGRAL_SAMPLES", IRRADIANCE_INTEGRAL_SAMPLES);
-        cs.SetInt("IRRADIANCE_INTEGRAL_SAMPLES_HALF", IRRADIANCE_INTEGRAL_SAMPLES_HALF);
-        cs.SetInt("INSCATTER_SPHERICAL_INTEGRAL_SAMPLES", INSCATTER_SPHERICAL_INTEGRAL_SAMPLES);
+        cs.SetInt("TRANSMITTANCE_INTEGRAL_SAMPLES", AtmosphereConstants.TRANSMITTANCE_INTEGRAL_SAMPLES);
+        cs.SetInt("INSCATTER_INTEGRAL_SAMPLES", AtmosphereConstants.INSCATTER_INTEGRAL_SAMPLES);
+        cs.SetInt("IRRADIANCE_INTEGRAL_SAMPLES", AtmosphereConstants.IRRADIANCE_INTEGRAL_SAMPLES);
+        cs.SetInt("IRRADIANCE_INTEGRAL_SAMPLES_HALF", AtmosphereConstants.IRRADIANCE_INTEGRAL_SAMPLES_HALF);
+        cs.SetInt("INSCATTER_SPHERICAL_INTEGRAL_SAMPLES", AtmosphereConstants.INSCATTER_SPHERICAL_INTEGRAL_SAMPLES);
 
-        cs.SetVector("betaR", BETA_R);
-        cs.SetVector("betaMSca", BETA_MSca);
-        cs.SetVector("betaMEx", BETA_MSca / 0.9f);
-        cs.SetFloat("mieG", Mathf.Clamp(MIE_G, 0.0f, 0.99f));
+        cs.SetVector("betaR", AP.BETA_R);
+        cs.SetVector("betaMSca", AP.BETA_MSca);
+        cs.SetVector("betaMEx", AP.BETA_MSca / 0.9f);
+        cs.SetFloat("mieG", Mathf.Clamp(AP.MIE_G, 0.0f, 0.99f));
     }
 
-    public void SetParameters(int kernel, ComputeShader cs)
+    public void SetParameters(int kernel, ComputeShader cs, AtmosphereParameters AP)
     {
         if (cs == null) return;
 
-        cs.SetFloat("Rg", Rg);
-        cs.SetFloat("Rt", Rt);
-        cs.SetFloat("RL", RL);
-        cs.SetInt("TRANSMITTANCE_W", TRANSMITTANCE_W);
-        cs.SetInt("TRANSMITTANCE_H", TRANSMITTANCE_H);
-        cs.SetInt("SKY_W", SKY_W);
-        cs.SetInt("SKY_H", SKY_H);
-        cs.SetInt("RES_R", RES_R);
-        cs.SetInt("RES_MU", RES_MU);
-        cs.SetInt("RES_MU_S", RES_MU_S);
-        cs.SetInt("RES_NU", RES_NU);
-        cs.SetFloat("AVERAGE_GROUND_REFLECTANCE", AVERAGE_GROUND_REFLECTANCE);
-        cs.SetFloat("HR", HR);
-        cs.SetFloat("HM", HM);
+        cs.SetFloat("Rg", AP.Rg);
+        cs.SetFloat("Rt", AP.Rt);
+        cs.SetFloat("RL", AP.Rl);
+        cs.SetInt("TRANSMITTANCE_W", AP.TRANSMITTANCE_W);
+        cs.SetInt("TRANSMITTANCE_H", AP.TRANSMITTANCE_H);
+        cs.SetInt("SKY_W", AP.SKY_W);
+        cs.SetInt("SKY_H", AP.SKY_H);
+        cs.SetInt("RES_R", AP.RES_R);
+        cs.SetInt("RES_MU", AP.RES_MU);
+        cs.SetInt("RES_MU_S", AP.RES_MU_S);
+        cs.SetInt("RES_NU", AP.RES_NU);
+        cs.SetFloat("AVERAGE_GROUND_REFLECTANCE", AP.AVERAGE_GROUND_REFLECTANCE);
+        cs.SetFloat("HR", AP.HR);
+        cs.SetFloat("HM", AP.HM);
 
-        cs.SetInt("TRANSMITTANCE_INTEGRAL_SAMPLES", TRANSMITTANCE_INTEGRAL_SAMPLES);
-        cs.SetInt("INSCATTER_INTEGRAL_SAMPLES", INSCATTER_INTEGRAL_SAMPLES);
-        cs.SetInt("IRRADIANCE_INTEGRAL_SAMPLES", IRRADIANCE_INTEGRAL_SAMPLES);
-        cs.SetInt("IRRADIANCE_INTEGRAL_SAMPLES_HALF", IRRADIANCE_INTEGRAL_SAMPLES_HALF);
-        cs.SetInt("INSCATTER_SPHERICAL_INTEGRAL_SAMPLES", INSCATTER_SPHERICAL_INTEGRAL_SAMPLES);
+        cs.SetInt("TRANSMITTANCE_INTEGRAL_SAMPLES", AtmosphereConstants.TRANSMITTANCE_INTEGRAL_SAMPLES);
+        cs.SetInt("INSCATTER_INTEGRAL_SAMPLES", AtmosphereConstants.INSCATTER_INTEGRAL_SAMPLES);
+        cs.SetInt("IRRADIANCE_INTEGRAL_SAMPLES", AtmosphereConstants.IRRADIANCE_INTEGRAL_SAMPLES);
+        cs.SetInt("IRRADIANCE_INTEGRAL_SAMPLES_HALF", AtmosphereConstants.IRRADIANCE_INTEGRAL_SAMPLES_HALF);
+        cs.SetInt("INSCATTER_SPHERICAL_INTEGRAL_SAMPLES", AtmosphereConstants.INSCATTER_SPHERICAL_INTEGRAL_SAMPLES);
 
-        cs.SetVector("betaR", BETA_R);
-        cs.SetVector("betaMSca", BETA_MSca);
-        cs.SetVector("betaMEx", BETA_MSca / 0.9f);
-        cs.SetFloat("mieG", Mathf.Clamp(MIE_G, 0.0f, 0.99f));
+        cs.SetVector("betaR", AP.BETA_R);
+        cs.SetVector("betaMSca", AP.BETA_MSca);
+        cs.SetVector("betaMEx", AP.BETA_MSca / 0.9f);
+        cs.SetFloat("mieG", Mathf.Clamp(AP.MIE_G, 0.0f, 0.99f));
     }
 }

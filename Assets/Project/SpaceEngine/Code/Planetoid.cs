@@ -66,15 +66,6 @@ public class Planetoid : MonoBehaviour
 			else
 				return 0;
 		}
-
-		/* faster comparer. Slighty faster... 0.1-0.2 ms per 100 iterations.
-		public int Compare(Quad x, Quad y)
-		{
-			int result = x.DistanceToClosestCorner.CompareTo(y.DistanceToClosestCorner);
-
-			return result;
-		}
-		*/
 	}
 
 	private void Awake()

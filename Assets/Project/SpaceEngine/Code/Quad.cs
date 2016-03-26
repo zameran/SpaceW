@@ -308,7 +308,10 @@ public class Quad : MonoBehaviour
 		if (ReadyForDispatch)
 		{
 			if (!Generated && !Planetoid.Cache.Working)
-				Dispatcher.InvokeAsync(() => { Dispatch(); });
+			{
+				//Dispatcher.InvokeAsync(() => { Dispatch(); });
+				Dispatch();
+			}
 		}
 
 		SetupBounds(this, QuadMesh);

@@ -2,34 +2,11 @@
 
 public class Atmosphere : MonoBehaviour
 {
-    const int TRANSMITTANCE_W = 256;
-    const int TRANSMITTANCE_H = 64;
-    const int SKY_W = 64;
-    const int SKY_H = 16;
-    const int RES_R = 32;
-    const int RES_MU = 128;
-    const int RES_MU_S = 32;
-    const int RES_NU = 8;
-
-    const float AVERAGE_GROUND_REFLECTANCE = 0.1f;
-
-    const float HR = 8.0f;
-    const float HM = 1.2f;
-
-    public float AtmosphereScale = 1.0f;
-    public float Rg;
-    public float Rt;
-    public float Rl;
-
-    [Range(0.0f, 0.99f)]
-    public float mieG = 0.85f;
-
     readonly Vector3 BETA_MSca = new Vector3(4e-3f, 4e-3f, 4e-3f);
     readonly Vector3 betaR = new Vector3(5.8e-3f, 1.35e-2f, 3.31e-2f);
 
     public int AtmosphereMeshResolution = 2;
 
-    //public float AtmosphereHeight = 1.0f;
     public float HDRExposure = 0.2f;
 
     public Shader SkyShader;
@@ -50,16 +27,18 @@ public class Atmosphere : MonoBehaviour
 
     public Mesh AtmosphereMesh;
 
+    public bool RunTimeBaking = false;
+
     public AtmosphereSun Sun;
-    public AtmosphereRunTimeBaking artb = null;
+    public AtmosphereParameters atmosphereParameters = AtmosphereParameters.Default;
+    public AtmosphereRunTimeBaker artb = null;
 
     public Vector3 Origin;
 
-    string texturesPath = "/Resources/Textures/Atmosphere/";
-    int waitBeforeReloadCount = 0;
-
     private void Start()
     {
+        if (RunTimeBaking && artb != null) artb.Bake(atmosphereParameters);;
+
         InitMisc();
         InitMaterials();
         InitTextures();
@@ -76,19 +55,6 @@ public class Atmosphere : MonoBehaviour
         //Rg = AtmosphereScale;
         //Rt = (64200f / 63600f) * Rg * AtmosphereHeight;
         //Rl = (64210.0f / 63600f) * Rg;
-
-        if ((!Inscatter.IsCreated() || !Transmittance.IsCreated() || !Irradiance.IsCreated()))
-        {
-            waitBeforeReloadCount++;
-
-            if (waitBeforeReloadCount >= 2)
-            {
-                CollectGarbage();
-                InitTextures();
-
-                waitBeforeReloadCount = 0;
-            }
-        }
 
         Sun.Origin = Origin;
     }
@@ -135,27 +101,33 @@ public class Atmosphere : MonoBehaviour
 
     public void InitTextures()
     {
-        Transmittance = RTExtensions.CreateRTexture(new Vector2(TRANSMITTANCE_W, TRANSMITTANCE_H), 0, RenderTextureFormat.ARGBHalf, FilterMode.Bilinear, TextureWrapMode.Clamp);
-        Irradiance = RTExtensions.CreateRTexture(new Vector2(SKY_W, SKY_H), 0, RenderTextureFormat.ARGBHalf, FilterMode.Bilinear, TextureWrapMode.Clamp);
-        Inscatter = RTExtensions.CreateRTexture(new Vector2(RES_MU_S * RES_NU, RES_MU), 0, RenderTextureFormat.ARGBHalf, FilterMode.Bilinear, TextureWrapMode.Clamp, RES_R);
+        Transmittance = RTExtensions.CreateRTexture(new Vector2(atmosphereParameters.TRANSMITTANCE_W, atmosphereParameters.TRANSMITTANCE_H), 0, RenderTextureFormat.ARGBHalf, FilterMode.Bilinear, TextureWrapMode.Clamp);
+        Irradiance = RTExtensions.CreateRTexture(new Vector2(atmosphereParameters.SKY_W, atmosphereParameters.SKY_H), 0, RenderTextureFormat.ARGBHalf, FilterMode.Bilinear, TextureWrapMode.Clamp);
+        Inscatter = RTExtensions.CreateRTexture(new Vector2(atmosphereParameters.RES_MU_S * atmosphereParameters.RES_NU, atmosphereParameters.RES_MU), 0, RenderTextureFormat.ARGBHalf, FilterMode.Bilinear, TextureWrapMode.Clamp, atmosphereParameters.RES_R);
 
-        if (artb == null)
+        if (RunTimeBaking && artb != null)
         {
+
+        }
+        else
+        {
+            string texturesPath = "/Resources/Textures/Atmosphere/";
+
             ComputeBuffer buffer;
 
             string TransmittancePath = Application.dataPath + texturesPath + "/transmittance.raw";
             string IrradiancePath = Application.dataPath + texturesPath + "/irradiance.raw";
             string InscatterPath = Application.dataPath + texturesPath + "/inscatter.raw";
 
-            buffer = new ComputeBuffer(TRANSMITTANCE_W * TRANSMITTANCE_H, sizeof(float) * 3);
+            buffer = new ComputeBuffer(atmosphereParameters.TRANSMITTANCE_W * atmosphereParameters.TRANSMITTANCE_H, sizeof(float) * 3);
             CBUtility.WriteIntoRenderTexture(Transmittance, 3, TransmittancePath, buffer, WriteDataCore);
             buffer.Release();
 
-            buffer = new ComputeBuffer(SKY_W * SKY_H, sizeof(float) * 3);
+            buffer = new ComputeBuffer(atmosphereParameters.SKY_W * atmosphereParameters.SKY_H, sizeof(float) * 3);
             CBUtility.WriteIntoRenderTexture(Irradiance, 3, IrradiancePath, buffer, WriteDataCore);
             buffer.Release();
 
-            buffer = new ComputeBuffer(RES_MU_S * RES_NU * RES_MU * RES_R, sizeof(float) * 4);
+            buffer = new ComputeBuffer(atmosphereParameters.RES_MU_S * atmosphereParameters.RES_NU * atmosphereParameters.RES_MU * atmosphereParameters.RES_R, sizeof(float) * 4);
             CBUtility.WriteIntoRenderTexture(Inscatter, 4, InscatterPath, buffer, WriteDataCore);
             buffer.Release();
         }
@@ -185,21 +157,21 @@ public class Atmosphere : MonoBehaviour
     {
         if (mat == null) return;
 
-        mat.SetFloat("scale", Rg / AtmosphereScale);
-        mat.SetFloat("Rg", Rg);
-        mat.SetFloat("Rt", Rt);
-        mat.SetFloat("RL", Rl);
-        mat.SetFloat("TRANSMITTANCE_W", TRANSMITTANCE_W);
-        mat.SetFloat("TRANSMITTANCE_H", TRANSMITTANCE_H);
-        mat.SetFloat("SKY_W", SKY_W);
-        mat.SetFloat("SKY_H", SKY_H);
-        mat.SetFloat("RES_R", RES_R);
-        mat.SetFloat("RES_MU", RES_MU);
-        mat.SetFloat("RES_MU_S", RES_MU_S);
-        mat.SetFloat("RES_NU", RES_NU);
-        mat.SetFloat("AVERAGE_GROUND_REFLECTANCE", AVERAGE_GROUND_REFLECTANCE);
-        mat.SetFloat("HR", HR * 1000.0f);
-        mat.SetFloat("HM", HM * 1000.0f);
+        mat.SetFloat("scale", atmosphereParameters.Rg / atmosphereParameters.SCALE);
+        mat.SetFloat("Rg", atmosphereParameters.Rg);
+        mat.SetFloat("Rt", atmosphereParameters.Rt);
+        mat.SetFloat("RL", atmosphereParameters.Rl);
+        mat.SetFloat("TRANSMITTANCE_W", atmosphereParameters.TRANSMITTANCE_W);
+        mat.SetFloat("TRANSMITTANCE_H", atmosphereParameters.TRANSMITTANCE_H);
+        mat.SetFloat("SKY_W", atmosphereParameters.SKY_W);
+        mat.SetFloat("SKY_H", atmosphereParameters.SKY_H);
+        mat.SetFloat("RES_R", atmosphereParameters.RES_R);
+        mat.SetFloat("RES_MU", atmosphereParameters.RES_MU);
+        mat.SetFloat("RES_MU_S", atmosphereParameters.RES_MU_S);
+        mat.SetFloat("RES_NU", atmosphereParameters.RES_NU);
+        mat.SetFloat("AVERAGE_GROUND_REFLECTANCE", atmosphereParameters.AVERAGE_GROUND_REFLECTANCE);
+        mat.SetFloat("HR", atmosphereParameters.HR * 1000.0f);
+        mat.SetFloat("HM", atmosphereParameters.HM * 1000.0f);
         mat.SetVector("betaMSca", BETA_MSca / 1000.0f);
         mat.SetVector("betaMEx", (BETA_MSca / 1000.0f) / 0.9f);
         mat.SetTexture("_Sun_Glare", SunGlareTexture);
@@ -210,25 +182,25 @@ public class Atmosphere : MonoBehaviour
     {
         if (mat == null) return;
 
-        mat.SetFloat("scale", Rg / AtmosphereScale);
-        mat.SetFloat("Rg", Rg);
-        mat.SetFloat("Rt", Rt);
-        mat.SetFloat("RL", Rl);
+        mat.SetFloat("scale", atmosphereParameters.Rg / atmosphereParameters.SCALE);
+        mat.SetFloat("Rg", atmosphereParameters.Rg);
+        mat.SetFloat("Rt", atmosphereParameters.Rt);
+        mat.SetFloat("RL", atmosphereParameters.Rl);
         mat.SetVector("betaR", betaR / 1000.0f);
-        mat.SetFloat("mieG", Mathf.Clamp(mieG, 0.0f, 0.99f));
+        mat.SetFloat("mieG", Mathf.Clamp(atmosphereParameters.MIE_G, 0.0f, 0.99f));
         mat.SetFloat("_Sun_Glare_Scale", SunGlareScale);
 
-        if (artb == null)
-        {
-            if(Transmittance != null) mat.SetTexture("_Sky_Transmittance", Transmittance);
-            if (Inscatter != null) mat.SetTexture("_Sky_Inscatter", Inscatter);
-            if (Irradiance != null) mat.SetTexture("_Sky_Irradiance", Irradiance);
-        }
-        else
+        if (RunTimeBaking && artb != null)
         {
             if (artb.transmittanceT != null) mat.SetTexture("_Sky_Transmittance", artb.transmittanceT);
             if (artb.inscatterT_Read != null) mat.SetTexture("_Sky_Inscatter", artb.inscatterT_Read);
             if (artb.irradianceT_Read != null) mat.SetTexture("_Sky_Irradiance", artb.irradianceT_Read);
+        }
+        else
+        {
+            if (Transmittance != null) mat.SetTexture("_Sky_Transmittance", Transmittance);
+            if (Inscatter != null) mat.SetTexture("_Sky_Inscatter", Inscatter);
+            if (Irradiance != null) mat.SetTexture("_Sky_Irradiance", Irradiance);
         }
 
         mat.SetTexture("_Sky_Map", null);
@@ -253,24 +225,24 @@ public class Atmosphere : MonoBehaviour
     {
         if (mat == null) return;
 
-        mat.SetFloat("scale", Rg / AtmosphereScale);
-        mat.SetFloat("Rg", Rg);
-        mat.SetFloat("Rt", Rt);
-        mat.SetFloat("RL", Rl);
+        mat.SetFloat("scale", atmosphereParameters.Rg / atmosphereParameters.SCALE);
+        mat.SetFloat("Rg", atmosphereParameters.Rg);
+        mat.SetFloat("Rt", atmosphereParameters.Rt);
+        mat.SetFloat("RL", atmosphereParameters.Rl);
         mat.SetVector("betaR", betaR / 1000.0f);
-        mat.SetFloat("mieG", Mathf.Clamp(mieG, 0.0f, 0.99f));
+        mat.SetFloat("mieG", Mathf.Clamp(atmosphereParameters.MIE_G, 0.0f, 0.99f));
 
-        if (artb == null)
-        {
-            if (Transmittance != null) mat.SetTexture("_Sky_Transmittance", Transmittance);
-            if (Inscatter != null) mat.SetTexture("_Sky_Inscatter", Inscatter);
-            if (Irradiance != null) mat.SetTexture("_Sky_Irradiance", Irradiance);
-        }
-        else
+        if (RunTimeBaking && artb != null)
         {
             if (artb.transmittanceT != null) mat.SetTexture("_Sky_Transmittance", artb.transmittanceT);
             if (artb.inscatterT_Read != null) mat.SetTexture("_Sky_Inscatter", artb.inscatterT_Read);
             if (artb.irradianceT_Read != null) mat.SetTexture("_Sky_Irradiance", artb.irradianceT_Read);
+        }
+        else
+        {
+            if (Transmittance != null) mat.SetTexture("_Sky_Transmittance", Transmittance);
+            if (Inscatter != null) mat.SetTexture("_Sky_Inscatter", Inscatter);
+            if (Irradiance != null) mat.SetTexture("_Sky_Irradiance", Irradiance);
         }
 
         mat.SetTexture("_Sky_Map", null);
