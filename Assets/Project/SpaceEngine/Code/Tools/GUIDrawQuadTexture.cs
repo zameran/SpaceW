@@ -23,6 +23,8 @@ public class GUIDrawQuadTexture : MonoBehaviour
             {
                 foreach (Quad q in planetoid.MainQuads)
                 {
+                    if (q.HeightTexture == null || q.NormalTexture == null) return;
+
                     RenderTexture tex = new RenderTexture(10, 10, 24);
 
                     switch (textureType)
@@ -34,8 +36,6 @@ public class GUIDrawQuadTexture : MonoBehaviour
                             tex = q.NormalTexture;
                             break;
                     }
-
-                    if (tex == null) return;
 
                     Vector2 dim = new Vector2(tex.width, tex.height);
 
@@ -57,22 +57,27 @@ public class GUIDrawQuadTexture : MonoBehaviour
     public Texture2D Rotate(Texture2D image, int centerX, int centerY, float angle)
     {
         var radians = (Mathf.PI / 180) * angle;
+
         var cos = Mathf.Cos(radians);
         var sin = Mathf.Sin(radians);
+
         var newImage = new Texture2D(image.width, image.height);
 
         for (var x = 0; x < image.width; x++)
+        {
             for (var y = 0; y < image.height; y++)
             {
                 var m = x - centerX;
                 var n = y - centerY;
                 var j = ((int)(m * cos + n * sin)) + centerX;
                 var k = ((int)(n * cos - m * sin)) + centerY;
+
                 if (j >= 0 && j < image.width && k >= 0 && k < image.height)
                 {
                     newImage.SetPixel(x, y, image.GetPixel(j, k));
                 }
             }
+        }
 
         return newImage;
     }

@@ -18,6 +18,22 @@ public sealed class AssemblyLoader : MonoBehaviour
 
     public List<AssemblyExternal> ExternalAssemblies = new List<AssemblyExternal>();
 
+    static AssemblyLoader instance;
+    public static AssemblyLoader Instance
+    {
+        get
+        {
+            if (instance == null)
+            {
+                Debug.Log("AssemblyLoader Instance get fail!");
+
+                return null;
+            }
+
+            return instance;
+        }
+    }
+
     private void Awake()
     {
         Init();
@@ -48,6 +64,8 @@ public sealed class AssemblyLoader : MonoBehaviour
 
     private void Init()
     {
+        instance = this;
+
         DontDestroyOnLoad(this.gameObject);
 
         Debug.Log("AssemblyLoader started at scene: " + SceneManager.GetActiveScene().buildIndex);

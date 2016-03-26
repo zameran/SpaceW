@@ -5,11 +5,15 @@ using UnityEngine;
 
 public static class PathGlobals
 {
+    public const string GlobalConfigFolderName = "Config";
+    public const string GlobalModFolderName = "Mods";
+    public const string GlobalMainLogFileName = "Log.txt";
+
     public static string GlobalConfigFolderPath
     {
         get
         {
-            string path = Application.dataPath + "/../Config/";
+            string path = Application.dataPath + "/../" + GlobalConfigFolderName;
             string outputPath = Path.GetFullPath(path);
 
             return outputPath;
@@ -20,24 +24,43 @@ public static class PathGlobals
     {
         get
         {
-            string path = Application.dataPath + "/../Mods";
+            string path = Application.dataPath + "/../" + GlobalModFolderName;
             string outputPath = Path.GetFullPath(path);
 
             return outputPath;
         }
     }
 
-    public static string GlobalModFolderPathEditor(string dataPath)
+    public static string GlobalMainLogPath
     {
-        string path = dataPath + "/../Mods";
+        get
+        {
+            string path = Application.dataPath + "/../" + GlobalMainLogFileName;
+            string outputPath = Path.GetFullPath(path);
+
+            return outputPath;
+        }
+    }
+
+    public static string GlobalConfigFolderPathEditor(string dataPath)
+    {
+        string path = dataPath + "/../" + GlobalConfigFolderName;
         string outputPath = Path.GetFullPath(path);
 
         return outputPath;
     }
 
-    public static string GlobalConfigFolderPathEditor(string dataPath)
+    public static string GlobalModFolderPathEditor(string dataPath)
     {
-        string path = dataPath + "/../Config";
+        string path = dataPath + "/../" + GlobalModFolderName;
+        string outputPath = Path.GetFullPath(path);
+
+        return outputPath;
+    }
+
+    public static string GlobalMainLogPathEditor(string dataPath)
+    {
+        string path = dataPath + "/../" + GlobalMainLogFileName;
         string outputPath = Path.GetFullPath(path);
 
         return outputPath;
