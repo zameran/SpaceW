@@ -1,6 +1,6 @@
 using UnityEngine;
 
-public class ImprovedPerlinNoise
+public sealed class ImprovedPerlinNoise
 {
     const int SIZE = 256;
 

@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 
-public class DebugDrawSwitcher : MonoBehaviour, IDebugSwitcher
+public sealed class DebugDrawSwitcher : MonoBehaviour, IDebugSwitcher
 {
     public DebugDraw[] GUIs;
 

@@ -8,7 +8,7 @@ using System.Linq;
 using System.Reflection;
 using System.Text;
 
-public class SunGlare : MonoBehaviour
+public sealed class SunGlare : MonoBehaviour
 {
     /*
     public Shader sunglareShader;

@@ -1,4 +1,4 @@
-﻿public interface ICamera
+﻿internal interface ICamera
 {
 
 }

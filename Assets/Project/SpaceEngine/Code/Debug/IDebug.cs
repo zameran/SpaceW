@@ -1,4 +1,4 @@
-﻿public interface IDebug
+﻿internal interface IDebug
 {
 
 }

@@ -2,7 +2,7 @@
 
 using System.Collections.Generic;
 
-public class Planetoid : MonoBehaviour
+public sealed class Planetoid : MonoBehaviour
 {
 	public Atmosphere Atmosphere;
 

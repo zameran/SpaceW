@@ -9,7 +9,7 @@ using System.Collections.Generic;
 
 [UseLoggerFile("StressTest")]
 [UseLogger(Category.Other)]
-public class LoggerStressTest : MonoBehaviour
+public sealed class LoggerStressTest : MonoBehaviour
 {
     private void Start()
     {

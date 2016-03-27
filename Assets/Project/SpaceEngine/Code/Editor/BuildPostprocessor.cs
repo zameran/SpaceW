@@ -4,7 +4,7 @@ using UnityEditor.Callbacks;
 
 using System.IO;
 
-public class BuildPostprocessor
+public sealed class BuildPostprocessor
 {
     [PostProcessBuild(1)]
     public static void OnPostprocessBuild(BuildTarget target, string pathToBuiltProject)

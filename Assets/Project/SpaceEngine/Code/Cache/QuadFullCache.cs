@@ -3,7 +3,7 @@
 using System;
 
 [Serializable]
-public class QuadFullCache : QuadCache
+public sealed class QuadFullCache : QuadCache
 {
     public QuadCBCache QuadComputeBuffers;
     public QuadTextureCache QuadTextures;

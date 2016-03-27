@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 
-public class TCCommonParametersSetter : MonoBehaviour
+public sealed class TCCommonParametersSetter : MonoBehaviour
 {
     public Planetoid Planet;
 

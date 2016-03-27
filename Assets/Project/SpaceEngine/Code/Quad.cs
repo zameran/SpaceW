@@ -63,7 +63,7 @@ public struct OutputStruct
 	public Vector4 cpos;
 }
 
-public class Quad : MonoBehaviour
+public sealed class Quad : MonoBehaviour
 {
 	[Serializable]
 	public class Id

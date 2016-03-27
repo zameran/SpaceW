@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 
-public class NoiseParametersSetter : MonoBehaviour
+public sealed class NoiseParametersSetter : MonoBehaviour
 {
 	public Texture2D PermSampler = null;
 	public Texture2D PermGradSampler = null;

@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
 
-public class DebugDrawFrustumView : DebugDraw
+public sealed class DebugDrawFrustumView : DebugDraw
 {
     protected override void Start()
     {

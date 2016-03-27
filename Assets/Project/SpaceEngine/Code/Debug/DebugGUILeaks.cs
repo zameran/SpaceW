@@ -2,7 +2,7 @@ using System.Collections.Generic;
 
 using UnityEngine;
 
-public class DebugGUILeaks : DebugGUI
+public sealed class DebugGUILeaks : DebugGUI
 {
     private Vector2 ScrollPosition;
 

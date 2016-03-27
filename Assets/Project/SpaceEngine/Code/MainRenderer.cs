@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 
 [RequireComponent(typeof(Camera))]
-public class MainRenderer : MonoBehaviour
+public sealed class MainRenderer : MonoBehaviour
 {
     public Atmosphere atmosphere;
 

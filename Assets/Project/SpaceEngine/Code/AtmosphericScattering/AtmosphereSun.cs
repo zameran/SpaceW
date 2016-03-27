@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 
-public class AtmosphereSun : MonoBehaviour
+public sealed class AtmosphereSun : MonoBehaviour
 {
     static readonly Vector3 Z_AXIS = new Vector3(0, 0, 1);
 

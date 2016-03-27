@@ -5,7 +5,7 @@ using UnityEngine;
 using ZFramework.Unity.Common.Threading;
 
 [Serializable]
-public class QuadCBCache : QuadCache
+public sealed class QuadCBCache : QuadCache
 {
     public QuadCBCache(Quad.Id id, QuadStorage owner) : base(id, owner)
     {

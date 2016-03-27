@@ -1,7 +1,7 @@
 using System;
 using UnityEngine;
 
-public class FlyCamera : GameCamera
+public sealed class FlyCamera : GameCamera
 {
     public Camera cameraComponent = null;
 

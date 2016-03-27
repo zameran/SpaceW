@@ -5,7 +5,7 @@ using UnityEngine;
 using ZFramework.Unity.Common.Threading;
 
 [Serializable]
-public class QuadTextureCache : QuadCache
+public sealed class QuadTextureCache : QuadCache
 {
     public RenderTexture HeightTexture;
     public RenderTexture NormalTexture;

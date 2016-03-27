@@ -2,7 +2,7 @@
 using UnityEditor;
 
 [CustomEditor(typeof(TCCommonParametersSetter))]
-public class TCCommonParametersSetterEditor : Editor
+public sealed class TCCommonParametersSetterEditor : Editor
 {
     public enum Tab
     {

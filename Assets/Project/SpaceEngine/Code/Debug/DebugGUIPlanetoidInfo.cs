@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 
-public class DebugGUIPlanetoidInfo : DebugGUI
+public sealed class DebugGUIPlanetoidInfo : DebugGUI
 {
     public Planetoid Planetoid;
 

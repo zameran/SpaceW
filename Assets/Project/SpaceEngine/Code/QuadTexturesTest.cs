@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 
-public class QuadTexturesTest : MonoBehaviour
+public sealed class QuadTexturesTest : MonoBehaviour
 {
     public RenderTexture tex;
 

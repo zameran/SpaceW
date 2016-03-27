@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 
-public class Atmosphere : MonoBehaviour
+public sealed class Atmosphere : MonoBehaviour
 {
     readonly Vector3 BETA_MSca = new Vector3(4e-3f, 4e-3f, 4e-3f);
     readonly Vector3 betaR = new Vector3(5.8e-3f, 1.35e-2f, 3.31e-2f);

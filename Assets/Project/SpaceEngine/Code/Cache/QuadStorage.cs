@@ -4,7 +4,7 @@ using System.Linq;
 using System.Collections;
 using System.Collections.Generic;
 
-public class QuadStorage : MonoBehaviour
+public sealed class QuadStorage : MonoBehaviour
 {
     public bool Multithreaded = false;
     public bool Working = false;
