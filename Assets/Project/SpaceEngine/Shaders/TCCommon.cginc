@@ -3550,14 +3550,13 @@ float HeightMapPlanet(float3 ppoint)
 //-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
-float4 ColorMapPlanet(float3 ppoint, float height, float slope)
+float4 ColorMapPlanet(float3 pos, float3 ppoint, float height, float slope)
 {
 	Surface surf;
 
 	float4 lookupColor = tex2Dlod(MaterialTable, float4(height, slope, 0, 0));
 
 	surf = GetSurfaceColor(height, slope, length(lookupColor));
-
 	return surf.color;
 }
 //-----------------------------------------------------------------------------

@@ -25,14 +25,14 @@ float3 ScaledCoordinate(float3 coord)
 
 float NoiseFunction(float3 coord)
 {
-	float3 p = ScaledCoordinate(coord);
+	float3 scaledCoord = ScaledCoordinate(coord);
 	
 	#ifdef defaultNoise
 	float noise = Fbm(p + Randomize, 2);
 	#else
-	//float noise = HeightMapAsteroid(p);
-	//float noise = HeightMapTerra(p);
-	float noise = HeightMapPlanet(p);
+	//float noise = HeightMapAsteroid(scaledCoord);
+	//float noise = HeightMapTerra(scaledCoord);
+	float noise = HeightMapPlanet(scaledCoord);
 	#endif
 
 	//float normalized = (noise + 1.0) / 2;
@@ -40,18 +40,18 @@ float NoiseFunction(float3 coord)
 	return noise;
 }
 
-float4 ColorFunction(float3 coord, float height, float slope)
+float4 ColorFunction(float3 pos, float3 coord, float height, float slope)
 {
-	float3 p = ScaledCoordinate(coord);
+	float3 scaledCoord = ScaledCoordinate(coord);
 
 	#ifdef defaultNoise
 	float4 color = float4(1.0, 1.0, 1.0, 1.0);
 	#else
-	//float4 colorMapColor = ColorMapAsteroid(p, height, slope);
-	//float4 glowMapColor = GlowMapAsteroid(p, height, slope);
+	//float4 colorMapColor = ColorMapAsteroid(scaledCoord, height, slope);
+	//float4 glowMapColor = GlowMapAsteroid(scaledCoord, height, slope);
 	//float4 color = colorMapColor + glowMapColor;
-	//float4 color = ColorMapTerra(p, height, slope);
-	float4 color = ColorMapPlanet(p, height, slope);
+	//float4 color = ColorMapTerra(scaledCoord, height, slope);
+	float4 color = ColorMapPlanet(pos, scaledCoord, height, slope);
 	//float4 color = float4(height, height, height, 1);
 	#endif
 	
@@ -222,7 +222,7 @@ void TexturesSub(uint3 id : SV_DispatchThreadID)
 
 	float3 normal = positionNormal;	
 
-	float4 color = ColorFunction(cpos.xyz, noise, slope);
+	float4 color = ColorFunction(pos.xyz, cpos.xyz, noise, slope);
 	float4 normalColor = float4(normal, slope);
 	float4 heightColor = float4(color.xyz, noise);
 

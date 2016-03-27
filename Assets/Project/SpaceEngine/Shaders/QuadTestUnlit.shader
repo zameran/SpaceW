@@ -114,7 +114,7 @@
 
 				float cTheta = dot(fn, WSD); // diffuse ground color
 
-				float3 groundColor = 1.5 * reflectance.rgb * (sunL * max(cTheta, 0.1) + skyE) / M_PI;
+				float3 groundColor = 1.5 * reflectance.rgb * (sunL * max(cTheta, 1) + skyE) / M_PI;
 				float3 extinction;
 				float4 inscatter = InScattering(WCP, rotatedPoint, WSD, extinction, 1.0);
 				float4 finalColor = float4(groundColor, 1) * float4(extinction, 1) + inscatter;
