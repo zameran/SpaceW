@@ -24,7 +24,7 @@
 			#pragma target 5.0
 			#pragma only_renderers d3d11
 			#pragma vertex vert
-			#pragma geometry geom
+			//#pragma geometry geom //FPS drop down.
 			#pragma fragment frag
 			
 			#include "UnityCG.cginc"
@@ -79,7 +79,7 @@
 			uniform StructuredBuffer<OutputStruct> data;
 			uniform StructuredBuffer<QuadGenerationConstants> quadGenerationConstants;
 
-			float4 RGB2Reflectance(float4 inColor)
+			inline float4 RGB2Reflectance(float4 inColor)
 			{
 				return float4(tan(1.37 * inColor.rgb) / tan(1.37), inColor.a);
 			}
@@ -135,7 +135,7 @@
 				position.xyz += patchCenter;
 
 				v.vertex = position;
-				v.tangent = float4(FindTangent(normal, 0.01, float3(0, 1, 0)), 1);
+				//v.tangent = float4(FindTangent(normal, 0.01, float3(0, 1, 0)), 1);
 				v.normal = normal;
 
 				//v.tangent.xyz += position.xyz;
@@ -173,7 +173,7 @@
 				return o;
 			}
 
-			v2fg PutData(v2fg FROM)
+			inline v2fg PutData(v2fg FROM)
 			{	
 				v2fg OUT;
 
@@ -192,7 +192,7 @@
 				return OUT;
 			}
 
-			v2fg PutData(v2fg FROM, float3 customUV1)
+			inline v2fg PutData(v2fg FROM, float3 customUV1)
 			{	
 				v2fg OUT;
 
@@ -211,7 +211,7 @@
 				return OUT;
 			}
 
-			[maxvertexcount(3)]
+			[maxvertexcount(16)]
 			void geom(triangle v2fg IN[3], inout TriangleStream<v2fg> triStream)
 			{	
 				if (_Wireframe > 0)
@@ -234,9 +234,9 @@
 				}
 				else
 				{
-					triStream.Append(PutData(IN[0]));
-					triStream.Append(PutData(IN[1]));
-					triStream.Append(PutData(IN[2]));
+					triStream.Append(IN[0]);
+					triStream.Append(IN[1]);
+					triStream.Append(IN[2]);
 				}
 			}
 
@@ -252,7 +252,7 @@
 				fixed4 outputColor = lerp(terrainColor, wireframeColor, _Wireframe);
 
 				fixed3 terrainWorldNormal = IN.normal0;
-				fixed3 terrainLocalNormal = CalculateSurfaceNormal_HeightMap(IN.vertex0, IN.vertex1, IN.terrainColor.a); //IN.normal1;
+				fixed3 terrainLocalNormal = CalculateSurfaceNormal_HeightMap(IN.vertex0, IN.vertex1, IN.terrainColor.a);
 				fixed4 outputNormal = fixed4(terrainWorldNormal, 1); //fixed4(terrainWorldNormal * terrainLocalNormal, 1);
 
 				outDiffuse = lerp(outputColor, outputNormal, _Normale);

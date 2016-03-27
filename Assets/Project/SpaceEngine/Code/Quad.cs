@@ -238,12 +238,18 @@ public sealed class Quad : MonoBehaviour
 					if (Generated && !HaveSubQuads)
 					{
 						if (DistanceToClosestCorner < LODDistance && !Splitting)
+						{
 							StartCoroutine(Split());
+							Log("Split Call");
+						}
 					}
 					else
 					{
 						if (DistanceToClosestCorner > LODDistance && !Splitting)
+						{
 							Unsplit();
+							Log("Unsplit Call");
+						}
 					}
 				}
 				else
@@ -251,12 +257,18 @@ public sealed class Quad : MonoBehaviour
 					if (Generated && !HaveSubQuads && !Planetoid.Working)
 					{
 						if (DistanceToClosestCorner < LODDistance && !Splitting)
+						{
 							StartCoroutine(Split());
+							Log("Split Call");
+						}
 					}
 					else
 					{
 						if (DistanceToClosestCorner > LODDistance && !Splitting)
+						{
 							Unsplit();
+							Log("Unsplit Call");
+						}
 					}
 				}
 			}
