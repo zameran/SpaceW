@@ -26,6 +26,8 @@
 			#pragma vertex vert
 			//#pragma geometry geom //FPS drop down.
 			#pragma fragment frag
+
+			#pragma fragmentoption ARB_precision_hint_fastest
 			
 			#include "UnityCG.cginc"
 			#include "UnityLightingCommon.cginc"
