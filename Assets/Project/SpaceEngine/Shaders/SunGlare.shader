@@ -4,11 +4,11 @@
 	{
 		Tags {"Queue" = "Transparent" "RenderType"="Transparent" }
 	
-    	Pass 
-    	{
-    		ZWrite Off
-    		ZTest Off
-    		cull off
+		Pass 
+		{
+			ZWrite Off
+			ZTest Off
+			cull off
 
 			Blend One OneMinusSrcColor //"reverse" soft-additive
 
@@ -53,37 +53,37 @@
 			
 			struct v2f 
 			{
-    			float4 pos : SV_POSITION;
-    			float2 uv : TEXCOORD0;
+				float4 pos : SV_POSITION;
+				float2 uv : TEXCOORD0;
 			};
 
 			v2f vert(appdata_base v)
 			{
 				v2f OUT;
-    			OUT.pos = float4(v.vertex.xy, 1.0, 1.0);
-    			OUT.uv = v.texcoord.xy;
-    			return OUT;
+				OUT.pos = float4(v.vertex.xy, 1.0, 1.0);
+				OUT.uv = v.texcoord.xy;
+				return OUT;
 			}
 			
 			float2 GetTransmittanceUV(float r, float mu) 
 			{
-    			float uR, uMu;
+				float uR, uMu;
 
-    			uR = sqrt((r - Rg) / (Rt - Rg));
-    			uMu = atan((mu + 0.15) / (1.0 + 0.15) * tan(1.5)) / 1.5;
+				uR = sqrt((r - Rg) / (Rt - Rg));
+				uMu = atan((mu + 0.15) / (1.0 + 0.15) * tan(1.5)) / 1.5;
 
-    			return float2(uMu, uR);
+				return float2(uMu, uR);
 			}
 			
 			float3 Transmittance(float r, float mu) 
 			{
-    			float2 uv = GetTransmittanceUV(r, mu);
-    			return tex2D(_Sky_Transmittance, uv).rgb; //shouldn't need tex2Dlod
+				float2 uv = GetTransmittanceUV(r, mu);
+				return tex2D(_Sky_Transmittance, uv).rgb; //shouldn't need tex2Dlod
 			}
 			
 			float SQRT(float f, float err)
 			{
-    			return f >= 0.0 ? sqrt(f) : err;
+				return f >= 0.0 ? sqrt(f) : err;
 			}
 			
 			float3 getExtinction(float3 camera, float3 viewdir)
@@ -94,67 +94,64 @@
 				float rMu = dot(camera, viewdir);
 				float mu = rMu / r;
 
-    			float deltaSq = SQRT(rMu * rMu - r * r + Rt*Rt,1e30);
+				float deltaSq = SQRT(rMu * rMu - r * r + Rt*Rt,1e30);
 
-    			float din = max(-rMu - deltaSq, 0.0);
-    			if (din > 0.0)
-    			{
-        			camera += din * viewdir;
-        			rMu += din;
-        			mu = rMu / Rt;
-        			r = Rt;
-    			}
+				float din = max(-rMu - deltaSq, 0.0);
+				if (din > 0.0)
+				{
+					camera += din * viewdir;
+					rMu += din;
+					mu = rMu / Rt;
+					r = Rt;
+				}
 
-    			extinction = (r > Rt) ? float3(1,1,1) : Transmittance(r, mu);
+				extinction = (r > Rt) ? float3(1,1,1) : Transmittance(r, mu);
 
-    			return extinction;
-    		}
+				return extinction;
+			}
 			
 
 			float4 frag(v2f IN) : COLOR
 			{
-			    float3 WSD = _Sun_WorldSunDir;
-			    float3 WCP = _Globals_WorldCameraPos;
-			    
+				float3 WSD = _Sun_WorldSunDir;
+				float3 WCP = _Globals_WorldCameraPos;
+				
 				float3 sunColor=0;
 		
 				//move aspectRatio precomputations to CPU?
 				sunColor+=flareSettings.x * (tex2D(sunFlare,(IN.uv.xy-sunViewPortPos.xy)*float2(aspectRatio * flareSettings.y,1)* flareSettings.z * sunGlareScale+0.5).rgb);
-			    sunColor+=spikesSettings.x * (tex2D(sunSpikes,(IN.uv.xy-sunViewPortPos.xy)*float2(aspectRatio * spikesSettings.y ,1)* spikesSettings.z * sunGlareScale+0.5).rgb); 
-    
+				sunColor+=spikesSettings.x * (tex2D(sunSpikes,(IN.uv.xy-sunViewPortPos.xy)*float2(aspectRatio * spikesSettings.y ,1)* spikesSettings.z * sunGlareScale+0.5).rgb); 
+	
 				float2 toScreenCenter = sunViewPortPos.xy - 0.5;
-			   	float3 ghosts = 0;
-			   	
+				float3 ghosts = 0;
+				
 				for (int i = 0; i < 4; ++i)
-    			{			
-        			ghosts += ghost1Settings[i].x * (tex2D(sunGhost1,(IN.uv.xy - sunViewPortPos.xy + (toScreenCenter * ghost1Settings[i].w)) *
-        				float2(aspectRatio * ghost1Settings[i].y, 1) * ghost1Settings[i].z + 0.5).rgb);
+				{			
+					ghosts += ghost1Settings[i].x * (tex2D(sunGhost1,(IN.uv.xy - sunViewPortPos.xy + (toScreenCenter * ghost1Settings[i].w)) *
+						float2(aspectRatio * ghost1Settings[i].y, 1) * ghost1Settings[i].z + 0.5).rgb);
 				}
 					
 				for (int j = 0; j < 4; ++j)
-    			{
-        			ghosts += ghost2Settings[j].x * (tex2D(sunGhost2,(IN.uv.xy - sunViewPortPos.xy + (toScreenCenter * ghost2Settings[j].w)) *
-        				float2(aspectRatio * ghost2Settings[j].y, 1) * ghost2Settings[j].z + 0.5).rgb);
+				{
+					ghosts += ghost2Settings[j].x * (tex2D(sunGhost2,(IN.uv.xy - sunViewPortPos.xy + (toScreenCenter * ghost2Settings[j].w)) *
+						float2(aspectRatio * ghost2Settings[j].y, 1) * ghost2Settings[j].z + 0.5).rgb);
 				}
 				
-			   	ghosts*=smoothstep(0,1,1-length(toScreenCenter));
-			   	
-			   	sunColor+=ghosts;
-			    
-				float depth =  tex2D(_customDepthTexture,sunViewPortPos.xy);  //if there's something in the way don't render the flare	
+				ghosts*=smoothstep(0,1,1-length(toScreenCenter));
+				
+				sunColor+=ghosts;
+				
+				float depth =  tex2D(_customDepthTexture, sunViewPortPos.xy);  //if there's something in the way don't render the flare	
 
-			    float3 extinction = getExtinction(WCP,WSD);
+				float3 extinction = getExtinction(WCP,WSD);
 
 				float3 tempSuncolor= (depth < 1) ? 0 : sunColor;
 				
-				tempSuncolor= (useTransmittance > 0.0) ? tempSuncolor * extinction : tempSuncolor;
+				tempSuncolor = (useTransmittance > 0.0) ? tempSuncolor * extinction : tempSuncolor;
 
-
-				return float4(tempSuncolor,1.0);
-				
-			}
-			
+				return float4(tempSuncolor,1.0);				
+			}			
 			ENDCG
-    	}
+		}
 	}
 }

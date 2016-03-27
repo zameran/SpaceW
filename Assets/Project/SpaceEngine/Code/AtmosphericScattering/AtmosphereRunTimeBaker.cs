@@ -17,7 +17,9 @@ public sealed class AtmosphereRunTimeBaker : MonoBehaviour
     public ComputeShader readData;
 
     int step, order;
-    bool finished = false;
+
+    [HideInInspector]
+    public bool finished = false;
 
     [ContextMenu("Bake default")]
     public void Bake()
@@ -30,16 +32,26 @@ public sealed class AtmosphereRunTimeBaker : MonoBehaviour
         Go(AP);
     }
 
+    public void PreBake(AtmosphereParameters AP)
+    {
+        PreGo(AP);
+    }
+
+    private void PreGo(AtmosphereParameters AP)
+    {
+        CollectGarbage();
+        CreateTextures(AP);
+        SetParametersForAll(AP);
+        ClearAll();
+    }
+
     private void Go(AtmosphereParameters AP)
     {
         finished = false;
         step = 0;
         order = 2;
 
-        CollectGarbage();
-        CreateTextures(AP);
-        SetParametersForAll(AP);
-        ClearAll();
+        PreGo(AP);
 
         while (!finished)
         {

@@ -54,10 +54,12 @@
 				float2 uv0 : TEXCOORD0;
 				float3 uv1 : TEXCOORD1;
 				float3 uv2 : TEXCOORD2;
+				float3 uv3 : TEXCOORD3;
 				float3 normal0 : NORMAL0;
 				float3 normal1 : NORMAL1;
 				float4 vertex0 : POSITION0;
 				float4 vertex1 : POSITION1;
+				float depth : DEPTH;
 			};
 		
 			uniform half4 _WireframeColor;
@@ -157,10 +159,16 @@
 				o.uv0 = v.texcoord;
 				o.uv1 = v.texcoord1;
 				o.uv2 = v.texcoord2;
+				o.uv3 = v.texcoord3;
 				o.normal0 = v.normal;
 				o.normal1 = v.normal;
 				o.vertex0 = mul(UNITY_MATRIX_MVP, v.vertex);
 				o.vertex1 = v.vertex;
+				o.depth = 1;
+
+				//o.vertex0.z = log2(max(1e-6, 1.0 + o.vertex0.w)) * (2.0 / log2(_ProjectionParams.z + 1.0)) - 1.0;
+				//o.vertex0.z *= o.vertex0.w;
+				//o.depth = log2(1.0 + o.vertex0.w) * (0.5 * (2.0 / log2(_ProjectionParams.z + 1.0)));
 
 				return o;
 			}
@@ -174,10 +182,12 @@
 				OUT.uv0 = FROM.uv0;
 				OUT.uv1 = FROM.uv1;
 				OUT.uv2 = FROM.uv2;
+				OUT.uv3 = FROM.uv3;
 				OUT.normal0 = FROM.normal0;
 				OUT.normal1 = FROM.normal1;
 				OUT.vertex0 = FROM.vertex0;
 				OUT.vertex1 = FROM.vertex1;
+				OUT.depth = FROM.depth;
 
 				return OUT;
 			}
@@ -191,10 +201,12 @@
 				OUT.uv0 = FROM.uv0;
 				OUT.uv1 = customUV1;
 				OUT.uv2 = FROM.uv2;
+				OUT.uv3 = FROM.uv3;
 				OUT.normal0 = FROM.normal0;
 				OUT.normal1 = FROM.normal1;
 				OUT.vertex0 = FROM.vertex0;
 				OUT.vertex1 = FROM.vertex1;
+				OUT.depth = FROM.depth;
 
 				return OUT;
 			}

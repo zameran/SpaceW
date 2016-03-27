@@ -128,6 +128,11 @@ public class Planetoid : MonoBehaviour
 		}
 	}
 
+	private void LateUpdate()
+	{
+
+	}
+
 	private void OnRenderObject()
 	{
 		if (ExternalRendering && !RenderPerUpdate)

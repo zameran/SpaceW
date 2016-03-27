@@ -34,10 +34,10 @@ public class Atmosphere : MonoBehaviour
     public AtmosphereRunTimeBaker artb = null;
 
     public Vector3 Origin;
-
+    
     private void Start()
     {
-        if (RunTimeBaking && artb != null) artb.Bake(atmosphereParameters);;
+        if (RunTimeBaking && artb != null) artb.Bake(atmosphereParameters);
 
         InitMisc();
         InitMaterials();
