@@ -51,16 +51,12 @@ float3 FindTangent(float3 normal, float epsilon, float3 dir)
 //-----------------------------------------------------------------------------
 float3 CubeCoord(QuadGenerationConstants constants, float VerticesPerSide, uint3 id, int mod, float spacing)
 {
-	//32 : 1;
-	//64 : 3;
-	//128 : 7; 
-	//256 : 17;
-	//512 : 41;
-
-	//32  : x = i = 1;					i = VerticesPerSide / 32 = 1;		VerticesPerSide = 32;
-	//64  : x = i + 1 = 3;				i = VerticesPerSide / 32 = 2;		VerticesPerSide = 64;
-	//128 : x = i + 1 + 3 = 7;			i = VerticesPerSide / 32 = 4;		VerticesPerSide = 128;
-	//...next : fail
+	//32 : 1;     x = 32; y = 32;   z0 = y / x + 0 + 0;
+	//64 : 3;     x = 32; y = 64;   z1 = y / x + z0 + 0;
+	//128 : 7;    x = 32; y = 128;  z2 = y / x + z1 + 0;
+	//256 : 17;   x = 32; y = 256;  z3 = y / x + z2 + 2; = 15
+	//512 : 41;   x = 32; y = 512;  z4 = y / x + z3 + 8; = 41
+	//1024 : 105; x = 32; y = 1024; z5 = y / x + z4 + 32; = 105
 
 	//TODO modifier calculation.
 
