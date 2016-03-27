@@ -199,11 +199,9 @@ public sealed class AssemblyLoader : MonoBehaviour
         {
             foreach (Type v in kvp.Value)
             {
-                FirePlugin(v, -1);
+                FirePlugin(v, 0);
             }
         }
-
-        Logger.Log(string.Format("Hot plugin {0} fired at scene №: {1}", Addon.Name, SceneManager.GetActiveScene().buildIndex));
     }
 
     private void FirePlugin(Type type, int level)
