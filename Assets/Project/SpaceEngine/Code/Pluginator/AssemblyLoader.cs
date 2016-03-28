@@ -19,7 +19,7 @@ public sealed class AssemblyLoader : MonoBehaviour
     private bool Loaded = false;
     private bool ShowGUI = false;
 
-    public int Total = 0;
+    public int TotalDetected = 0;
 
     public List<AssemblyExternal> ExternalAssemblies = new List<AssemblyExternal>();
 
@@ -61,7 +61,7 @@ public sealed class AssemblyLoader : MonoBehaviour
             GUI.Label(new Rect(Screen.width / 2 - 50,
                                Screen.height / 1.25f - 3,
                                Screen.width / 1.25f,
-                               25), string.Format("Loading {0} dll's...", Total));
+                               25), string.Format("Loading {0} dll's...", TotalDetected));
         }
     }
 
@@ -80,7 +80,6 @@ public sealed class AssemblyLoader : MonoBehaviour
 
         if (SceneManager.GetActiveScene().buildIndex == 0 && Loaded)
         {
-            FirePlugins(ExternalAssemblies, 0);
             SceneManager.LoadScene(1);
         }
     }
@@ -103,7 +102,7 @@ public sealed class AssemblyLoader : MonoBehaviour
             Logger.Log("DetectAssembies Exception: " + ex.Message);
         }
 
-        Total = allPaths.Count;
+        TotalDetected = allPaths.Count;
 
         Logger.Log(string.Format("Assembies Detected: {0}", allPaths.Count));
     }
@@ -202,6 +201,8 @@ public sealed class AssemblyLoader : MonoBehaviour
                 FirePlugin(v, 0);
             }
         }
+
+        Logger.Log("Hot Plugins fired at scene № " + SceneManager.GetActiveScene().buildIndex);
     }
 
     private void FirePlugin(Type type, int level)
