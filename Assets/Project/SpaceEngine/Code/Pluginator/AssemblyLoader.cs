@@ -13,44 +13,38 @@ using UnityEngine.SceneManagement;
 using Logger = ZFramework.Unity.Common.Logger;
 
 [UseLogger(Category.Data)]
-[UseLoggerFile("AssemblyLoader")]
-public sealed class AssemblyLoader : MonoBehaviour
+[UseLoggerFile("Loader")]
+public sealed class AssemblyLoader : Loader
 {
     private bool Loaded = false;
-    private bool ShowGUI = false;
+    private bool ShowGUI = true;
 
     public int TotalDetected = 0;
+    public int TotalLoaded = 0;
 
     public List<AssemblyExternal> ExternalAssemblies = new List<AssemblyExternal>();
 
-    static AssemblyLoader instance;
-    public static AssemblyLoader Instance
+    protected override void Start()
     {
-        get
-        {
-            if (instance == null)
-            {
-                Logger.Log("AssemblyLoader Instance get fail!");
-
-                return null;
-            }
-
-            return instance;
-        }
+        base.Start();
     }
 
-    private void Awake()
+    protected override void Awake()
     {
-        Init();
+        base.Awake();
+
+        Pass();
     }
 
-    private void OnLevelWasLoaded(int level)
+    protected override void Update()
     {
-        if (SceneManager.GetActiveScene().buildIndex != 0 && Loaded) FirePlugins(ExternalAssemblies);
+        base.Update();
     }
 
-    private void OnGUI()
+    protected override void OnGUI()
     {
+        base.OnGUI();
+
         if (ShowGUI)
         {
             GUI.Box(new Rect(Screen.width / 2 - (Screen.width / 1.25f) / 2,
@@ -61,16 +55,22 @@ public sealed class AssemblyLoader : MonoBehaviour
             GUI.Label(new Rect(Screen.width / 2 - 50,
                                Screen.height / 1.25f - 3,
                                Screen.width / 1.25f,
-                               25), string.Format("Loading {0} dll's...", TotalDetected));
+                               25), string.Format("Loading {0}/{1} dll's...", TotalLoaded, TotalDetected));
         }
     }
 
-    private void Init()
+    protected override void OnLevelWasLoaded(int level)
     {
-        instance = this;
-        DontDestroyOnLoad(this.gameObject);
+        base.OnLevelWasLoaded(level);
 
-        Logger.Log("AssemblyLoader Initiated at scene №: " + SceneManager.GetActiveScene().buildIndex);
+        ShowGUI = false;
+
+        if (SceneManager.GetActiveScene().buildIndex != 0 && Loaded) FirePlugins(ExternalAssemblies);
+    }
+
+    protected override void Pass()
+    {
+        Logger.Log(string.Format("AssemblyLoader Initiated at scene №: {0}", SceneManager.GetActiveScene().buildIndex));
 
         if (!Loaded)
         {
@@ -80,10 +80,11 @@ public sealed class AssemblyLoader : MonoBehaviour
 
         if (SceneManager.GetActiveScene().buildIndex == 0 && Loaded)
         {
-            SceneManager.LoadScene(1);
+            Delay(TotalDetected * 2, () => { SceneManager.LoadScene(1); });      
         }
     }
 
+    #region AssemblyLoader Logic
     private void DetectAssembies(out List<string> allPaths)
     {
         string path = PathGlobals.GlobalModFolderPath;
@@ -99,7 +100,7 @@ public sealed class AssemblyLoader : MonoBehaviour
         }
         catch (Exception ex)
         {
-            Logger.Log("DetectAssembies Exception: " + ex.Message);
+            Logger.Log(string.Format("DetectAssembies Exception: {0}", ex.Message));
         }
 
         TotalDetected = allPaths.Count;
@@ -124,7 +125,7 @@ public sealed class AssemblyLoader : MonoBehaviour
 
             if (attrbutes.Length == 0 || attrbutes == null)
             {
-                Logger.Log("This is not an adddon assembly! " + path);
+                Logger.Log(string.Format("This is not an adddon assembly! {0}", path));
             }
             else
             {
@@ -133,14 +134,16 @@ public sealed class AssemblyLoader : MonoBehaviour
                 AssemblyExternalTypes aet = new AssemblyExternalTypes(typeof(MonoBehaviour), mb);
                 AssemblyExternal ae = new AssemblyExternal(path, ea.Name, ea.Version, assembly, aet);
 
-                FireHotPlugin(ae);
-
                 ExternalAssemblies.Add(ae);
+
+                TotalLoaded++;
+
+                FireHotPlugin(ae);
             }
         }
         catch (Exception ex)
         {
-            Logger.Log("LoadAssembly Exception: " + ex.Message);
+            Logger.Log(string.Format("LoadAssembly Exception: {0}", ex.Message));
         }
         finally
         {
@@ -156,72 +159,109 @@ public sealed class AssemblyLoader : MonoBehaviour
         {
             string path = allPaths[i];
 
-            LoadAssembly(path);
+            Delay(0.5f, () => { LoadAssembly(path); });
         }
     }
 
     private void FirePlugins(List<AssemblyExternal> ExternalAssemblies, int level)
     {
+        int counter = 0;
+
         foreach (AssemblyExternal assembly in ExternalAssemblies)
         {
             foreach (KeyValuePair<Type, List<Type>> kvp in assembly.Types)
             {
                 foreach (Type v in kvp.Value)
                 {
-                    FirePlugin(v, level);
+                    if (FirePlugin(v, level))
+                        counter++;
                 }
             }
         }
 
-        Logger.Log("Plugins fired at scene №: " + level);
+        Logger.Log(string.Format("{0} plugins fired at scene №: {1}", counter, level));
     }
 
     private void FirePlugins(List<AssemblyExternal> ExternalAssemblies)
     {
+        int counter = 0;
+
         foreach (AssemblyExternal assembly in ExternalAssemblies)
         {
             foreach (KeyValuePair<Type, List<Type>> kvp in assembly.Types)
             {
                 foreach (Type v in kvp.Value)
                 {
-                    FirePlugin(v);
+                    if (FirePlugin(v))
+                        counter++;
                 }
             }
         }
 
-        Logger.Log("Plugins fired at scene №: " + SceneManager.GetActiveScene().buildIndex);
+        Logger.Log(string.Format("{0} plugins fired at scene №: {1}", counter, SceneManager.GetActiveScene().buildIndex));
     }
 
     private void FireHotPlugin(AssemblyExternal Addon)
     {
+        int counter = 0;
+
         foreach (KeyValuePair<Type, List<Type>> kvp in Addon.Types)
         {
             foreach (Type v in kvp.Value)
             {
-                FirePlugin(v, 0);
+                if (FirePlugin(v, 0))
+                    counter++;
             }
         }
 
-        Logger.Log("Hot Plugins fired at scene № " + SceneManager.GetActiveScene().buildIndex);
+        Logger.Log(string.Format("{0} plugins fired at scene №: {1}", counter, SceneManager.GetActiveScene().buildIndex));
     }
 
-    private void FirePlugin(Type type, int level)
+    private bool FirePlugin(Type type, int level, string msg)
     {
         SpaceAddonMonoBehaviour atr = AttributeUtils.GetTypeAttribute<SpaceAddonMonoBehaviour>(type);
 
-        if (atr != null)
+        if ((int)atr.EntryPoint == level)
         {
-            if ((int)atr.EntryPoint == level)
+            if (atr != null)
             {
                 GameObject go = new GameObject(type.Name);
                 go.transform.position = Vector3.zero;
                 go.transform.rotation = Quaternion.identity;
                 go.AddComponent(type);
+
+                return true;
             }
         }
+        else
+        {
+            if (!msg.IsNullOrWhiteSpace()) Logger.Log(msg);
+        }
+
+        return false;
     }
 
-    private void FirePlugin(Type type)
+    private bool FirePlugin(Type type, int level)
+    {
+        SpaceAddonMonoBehaviour atr = AttributeUtils.GetTypeAttribute<SpaceAddonMonoBehaviour>(type);
+
+        if ((int)atr.EntryPoint == level)
+        {
+            if (atr != null)
+            {
+                GameObject go = new GameObject(type.Name);
+                go.transform.position = Vector3.zero;
+                go.transform.rotation = Quaternion.identity;
+                go.AddComponent(type);
+
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private bool FirePlugin(Type type)
     {
         int currentScene = SceneManager.GetActiveScene().buildIndex;
 
@@ -235,8 +275,12 @@ public sealed class AssemblyLoader : MonoBehaviour
                 go.transform.position = Vector3.zero;
                 go.transform.rotation = Quaternion.identity;
                 go.AddComponent(type);
+
+                return true;
             }
         }
+
+        return false;
     }
 
     public List<T> GetAllSubclassesOf<T, U, Y>(Assembly assembly) where T : Type where U : Attribute
@@ -258,4 +302,5 @@ public sealed class AssemblyLoader : MonoBehaviour
 
         return output;
     }
+    #endregion
 }

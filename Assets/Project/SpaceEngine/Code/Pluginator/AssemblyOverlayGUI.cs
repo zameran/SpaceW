@@ -21,7 +21,7 @@ public sealed class AssemblyOverlayGUI : MonoBehaviour
 
     private void Awake()
     {
-        if (loader == null) loader = AssemblyLoader.Instance;
+        if (loader == null) loader = AssemblyLoader.Instance as AssemblyLoader;
     }
 
     private void OnGUI()
