@@ -40,7 +40,12 @@ public class PlayerCameraFade : MonoBehaviour
     public Color m_DeltaColor = new Color(0, 0, 0, 0);						// the delta-color is basically the "speed / second" at which the current color should change
     public int m_FadeGUIDepth = -1000;										// make sure this texture is drawn on top of everything
 
-    public Action m_OnFadeFinish = null;
+    private static Action m_OnFadeFinish = null;
+    private Action OnFadeFinish
+    {
+        get { return m_OnFadeFinish; }
+        set { m_OnFadeFinish = value; }
+    }
 
     // Initialize the texture, background-style and initial color:
     public void init()
@@ -62,8 +67,8 @@ public class PlayerCameraFade : MonoBehaviour
                 SetScreenOverlayColor(instance.m_CurrentScreenOverlayColor);
                 instance.m_DeltaColor = new Color(0, 0, 0, 0);
 
-                if (instance.m_OnFadeFinish != null)
-                    instance.m_OnFadeFinish();
+                if (instance.OnFadeFinish != null)
+                    instance.OnFadeFinish();
 
                 Die();
             }
@@ -95,6 +100,23 @@ public class PlayerCameraFade : MonoBehaviour
         instance.m_FadeTexture.Apply();
     }
 
+    private static void SetAction(Action action)
+    {
+        m_OnFadeFinish = action;
+    }
+
+    public static void FadeIn(float fadeDuration, Action onFinish = null)
+    {
+        StartAlphaFade(new Color(0, 0, 0, 1), false, fadeDuration);
+        SetAction(onFinish);
+    }
+
+    public static void FadeOut(float fadeDuration, Action onFinish = null)
+    {
+        StartAlphaFade(new Color(0, 0, 0, 1), true, fadeDuration);
+        SetAction(onFinish);
+    }
+
     /// <summary>
     /// Starts the fade from color newScreenOverlayColor. If isFadeIn, start fully opaque, else start transparent.
     /// </summary>
@@ -104,7 +126,7 @@ public class PlayerCameraFade : MonoBehaviour
     /// <param name='fadeDuration'>
     /// Fade duration.
     /// </param>
-    public static void StartAlphaFade(Color newScreenOverlayColor, bool isFadeIn, float fadeDuration)
+    private static void StartAlphaFade(Color newScreenOverlayColor, bool isFadeIn, float fadeDuration)
     {
         if (fadeDuration <= 0.0f)
         {
@@ -139,7 +161,7 @@ public class PlayerCameraFade : MonoBehaviour
     /// <param name='OnFadeFinish'>
     /// On fade finish, doWork().
     /// </param>
-    public static void StartAlphaFade(Color newScreenOverlayColor, bool isFadeIn, float fadeDuration, /*float fadeDelay,*/ Action OnFadeFinish)
+    private static void StartAlphaFade(Color newScreenOverlayColor, bool isFadeIn, float fadeDuration, /*float fadeDelay,*/ Action OnFadeFinish)
     {
         if (fadeDuration <= 0.0f)
         {
@@ -147,7 +169,7 @@ public class PlayerCameraFade : MonoBehaviour
         }
         else
         {
-            instance.m_OnFadeFinish = OnFadeFinish;
+            instance.OnFadeFinish = OnFadeFinish;
 
             if (isFadeIn)
             {
