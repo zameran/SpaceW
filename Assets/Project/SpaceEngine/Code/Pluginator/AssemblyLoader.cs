@@ -80,7 +80,7 @@ public sealed class AssemblyLoader : Loader
 
         if (SceneManager.GetActiveScene().buildIndex == 0 && Loaded)
         {
-            Delay(TotalDetected * 2, () => { SceneManager.LoadScene(1); });      
+            Delay((TotalDetected + 1) * 4, () => { SceneManager.LoadScene(1); });      
         }
     }
 

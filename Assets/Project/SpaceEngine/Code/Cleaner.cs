@@ -7,7 +7,7 @@ using UnityEngine;
 
 using Logger = ZFramework.Unity.Common.Logger;
 
-[UseLogger(Category.Data)]
+[UseLogger(Category.Important)]
 [UseLoggerFile("Misc")]
 public sealed class Cleaner : MonoBehaviour
 {
