@@ -105,8 +105,8 @@
 				//fn.z = sqrt(max(0.0, 1.0 - dot(fn.xy, fn.xy))); // - default.
 				//fn.z = sqrt(max(0.0, -1.0 + dot(fn.xy, fn.xy))); // - inverted.
 
-				fn = float3(0, 0, 0); //disable normal mapping... bruuuutaal!
-				
+				//fn = float3(0, 0, 0); //disable normal mapping... bruuuutaal!
+
 				float4 reflectance = RGB2Reflectance(terrainColor);
 
 				float3 sunL = 0;
@@ -137,7 +137,7 @@
 				position.xyz += patchCenter;
 
 				v.vertex = position;
-				//v.tangent = float4(FindTangent(normal, 0.01, float3(0, 1, 0)), 1);
+				v.tangent = float4(FindTangent(normal, 0.01, float3(0, 1, 0)), 1);
 				v.normal = normal;
 
 				//v.tangent.xyz += position.xyz;
