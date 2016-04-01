@@ -78,6 +78,8 @@
 
 			uniform float3 _Origin;
 
+			uniform float4x4 _TTW;
+
 			uniform StructuredBuffer<OutputStruct> data;
 			uniform StructuredBuffer<QuadGenerationConstants> quadGenerationConstants;
 
@@ -99,6 +101,8 @@
 				float3 rotatedPointZ = Rotate(_Rotation.z, float3(0, 0, 1), rotatedPointY);
 				float3 rotatedPoint = rotatedPointZ;	
 
+				//fn = mul(_TTW, fn);
+
 				//fn.xy = fn.xy; // - default.
 				//fn.xy = -fn.xy; // - inverted.
 
@@ -116,7 +120,7 @@
 
 				float cTheta = dot(fn, WSD); // diffuse ground color
 
-				float3 groundColor = 1.5 * reflectance.rgb * (sunL * max(cTheta, 1) + skyE) / M_PI;
+				float3 groundColor = 1.5 * reflectance.rgb * (sunL * max(cTheta, 0) + skyE) / M_PI;
 				float3 extinction;
 				float4 inscatter = InScattering(WCP, rotatedPoint, WSD, extinction, 1.0);
 				float4 finalColor = float4(groundColor, 1) * float4(extinction, 1) + inscatter;

@@ -340,6 +340,7 @@ public sealed class Quad : MonoBehaviour
 		QuadMaterial.SetFloat("_Side", (float)Position);
 		QuadMaterial.SetVector("_Rotation", Planetoid.QuadsRoot.transform.rotation.eulerAngles * Mathf.Deg2Rad);
 		QuadMaterial.SetVector("_Origin", Planetoid.Origin);
+		QuadMaterial.SetMatrix("_TTW", GetTangentFrame(this));
 		QuadMaterial.renderQueue = Planetoid.RenderQueue;
 		QuadMaterial.SetPass(0);
 
@@ -1153,38 +1154,48 @@ public sealed class Quad : MonoBehaviour
 		return middle;
 	}
 
+	public Matrix4x4d GetLocalToWorld(Quad q)
+	{
+		Matrix4x4d m_faceToLocal;
+
+		Vector3d[] faces = new Vector3d[]{  new Vector3d(0,0,0), new Vector3d(90,0,0), new Vector3d(90,90,0),
+											new Vector3d(90,180,0), new Vector3d(90,270,0), new Vector3d(0,180,180)};
+
+		m_faceToLocal = Matrix4x4d.Identity();
+		m_faceToLocal = Matrix4x4d.Rotate(faces[(int)q.Position]);
+
+		return m_faceToLocal;
+	}
+
 	public Matrix4x4 GetTangentFrame(Quad q)
 	{
-		Matrix4x4d worldToTangentFrame = new Matrix4x4d();
+		double R = q.generationConstants.planetRadius;
 
-		Quad mq = Planetoid.GetMainQuad(q.Position);
+		double ox = q.bottomLeftCorner.x;
+		double oy = q.bottomLeftCorner.y;
+		double l = Vector3.Magnitude(q.topLeftCorner + q.bottomRightCorner);
 
-		double D = mq.generationConstants.spacing * QS.nVertsPerEdge;
-		double R = D / 2.0;
-
-		double tx = mq.generationConstants.patchCubeCenter.x;
-		double ty = mq.generationConstants.patchCubeCenter.y;
-		double tz = mq.generationConstants.patchCubeCenter.z;
-
-		double x0 = (tx) * D - R;
-		double x1 = (tx + 1) * D - R;
-		double y0 = (ty) * D - R;
-		double y1 = (ty + 1) * D - R;
-		double z0 = (tz) * D - R;
-		double z1 = (tz + 1) * D - R;
-
-		Vector3d pc = new Vector3d((x0 + x1) * 0.5, (y0 + y1) * 0.5, (z0 + z1) * 0.5);
+		Vector3d p0 = new Vector3d(ox, oy, R);
+		Vector3d p3 = new Vector3d(ox + l, oy + l, R);
+		Vector3d pc = (p0 + p3) * 0.5;
 
 		Vector3d uz = pc.Normalized();
 		Vector3d ux = (new Vector3d(0, 1, 0)).Cross(uz).Normalized();
 		Vector3d uy = uz.Cross(ux);
 
-		worldToTangentFrame = new Matrix4x4d(ux.x, ux.y, ux.z, 0.0,
-											 uy.x, uy.y, uy.z, 0.0,
-											 uz.x, uz.y, uz.z, 0.0,
-											 0.0, 0.0, 0.0, 0.0);
+		Matrix4x4d ltow = q.GetLocalToWorld(q);
 
-		return worldToTangentFrame.ToMatrix4x4();
+		Matrix3x3d tangentFrameToWorld = new Matrix3x3d(ltow.m[0, 0], ltow.m[0, 1], ltow.m[0, 2],
+														ltow.m[1, 0], ltow.m[1, 1], ltow.m[1, 2],
+														ltow.m[2, 0], ltow.m[2, 1], ltow.m[2, 2]);
+
+		Matrix3x3d m = new Matrix3x3d(ux.x, uy.x, uz.x,
+									  ux.y, uy.y, uz.y,
+									  ux.z, uy.z, uz.z);
+
+		Matrix3x3d output = tangentFrameToWorld * m;
+
+		return output.ToMatrix4x4();
 	}
 
 	private void Log(string msg)
