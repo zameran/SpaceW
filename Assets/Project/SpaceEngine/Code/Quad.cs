@@ -340,7 +340,7 @@ public sealed class Quad : MonoBehaviour
 		QuadMaterial.SetFloat("_Side", (float)Position);
 		QuadMaterial.SetVector("_Rotation", Planetoid.QuadsRoot.transform.rotation.eulerAngles * Mathf.Deg2Rad);
 		QuadMaterial.SetVector("_Origin", Planetoid.Origin);
-		QuadMaterial.SetMatrix("_TTW", GetTangentFrame(this));
+		//QuadMaterial.SetMatrix("_TTW", GetTangentFrame(this));
 		QuadMaterial.renderQueue = Planetoid.RenderQueue;
 		QuadMaterial.SetPass(0);
 
@@ -955,7 +955,7 @@ public sealed class Quad : MonoBehaviour
 				temp = new Vector3(0.0f, 0.0f, r);
 				break;
 			case QuadPosition.Front:
-				temp = new Vector3(0.0f, -r, 0);
+				temp = new Vector3(0.0f, -r, 0.0f);
 				break;
 			case QuadPosition.Back:
 				temp = new Vector3(0.0f, -r, 0.0f);
@@ -1001,6 +1001,7 @@ public sealed class Quad : MonoBehaviour
 		Vector3 temp = Vector3.zero;
 
 		float v = Planetoid.PlanetRadius;
+		float tempStatic = 0;
 
 		switch (quadPosition)
 		{
@@ -1066,54 +1067,12 @@ public sealed class Quad : MonoBehaviour
 				break;
 		}
 
-		float tempStatic = 0;
+		BrainFuckMath.LockAxis(ref tempStatic, ref temp, staticX, staticY, staticZ);
+		BrainFuckMath.CalculatePatchCubeCenter(LODLevel, Parent.generationConstants.patchCubeCenter, ref temp);
+		BrainFuckMath.UnlockAxis(ref temp, ref tempStatic, staticX, staticY, staticZ);
 
-		if (staticX)
-			tempStatic = temp.x;
-		if (staticY)
-			tempStatic = temp.y;
-		if (staticZ)
-			tempStatic = temp.z;
-
-		//TODO : Make a formula!
-		//So. We have exponential modifier... WTF!?
-		//Fuck dat shit. 7 LOD level more than i need. fuck. dat.
-
-		//WARNING!!! Magic! Ya, it works...
-		if (LODLevel >= 1)
-		{
-			if (LODLevel == 1)
-				temp = Vector3.Lerp(temp, Parent.generationConstants.patchCubeCenter * (15.0f / 7.5f), 0.5f); //0.5f
-			else if (LODLevel == 2)
-				temp = Vector3.Lerp(temp, Parent.generationConstants.patchCubeCenter * (15.0f / 11.25f), 0.75f); //0.5f + 0.5f / 2.0f
-			else if (LODLevel == 3)
-				temp = Vector3.Lerp(temp, Parent.generationConstants.patchCubeCenter * (15.0f / 13.125f), 0.875f); //0.75f + ((0.5f / 2.0f) / 2.0f)
-			else if (LODLevel == 4)
-				temp = Vector3.Lerp(temp, Parent.generationConstants.patchCubeCenter * (15.0f / 14.0625f), 0.9375f); //0.875f + (((0.5f / 2.0f) / 2.0f) / 2.0f)
-			else if (LODLevel == 5)
-				temp = Vector3.Lerp(temp, Parent.generationConstants.patchCubeCenter * (15.0f / 14.53125f), 0.96875f); //0.9375f + ((((0.5f / 2.0f) / 2.0f) / 2.0f) / 2.0f)
-			else if (LODLevel == 6)
-				temp = Vector3.Lerp(temp, Parent.generationConstants.patchCubeCenter * (15.0f / 14.765625f), 0.984375f); //0.96875f + (((((0.5f / 2.0f) / 2.0f) / 2.0f) / 2.0f) / 2.0f)
-			else if (LODLevel == 7) //Experimental! Maybe float precision have place on small planet radius!
-				temp = Vector3.Lerp(temp, Parent.generationConstants.patchCubeCenter * (15.0f / 14.8828125f), 0.9921875f); //0.984375f + ((((((0.5f / 2.0f) / 2.0f) / 2.0f) / 2.0f) / 2.0f) / 2.0f)
-			else if (LODLevel == 8) //Experimental! Maybe float precision have place on small planet radius!
-				temp = Vector3.Lerp(temp, Parent.generationConstants.patchCubeCenter * (15.0f / 14.94140625f), 0.99609375f); //0.9921875f + (((((((0.5f / 2.0f) / 2.0f) / 2.0f) / 2.0f) / 2.0f) / 2.0f) / 2.0f)
-			else if (LODLevel == 9) //Experimental! Maybe float precision have place on small planet radius!
-				temp = Vector3.Lerp(temp, Parent.generationConstants.patchCubeCenter * (15.0f / 14.970703100f), 0.998046875f); //0.99609375f + ((((((((0.5f / 2.0f) / 2.0f) / 2.0f) / 2.0f) / 2.0f) / 2.0f) / 2.0f) / 2.0f)
-			else if (LODLevel == 10) //Sooooo deep... what i'am doing?
-				temp = Vector3.Lerp(temp, Parent.generationConstants.patchCubeCenter * (15.0f / 14.9853515000f), 0.999023438f); //0.998046875f + (((((((((0.5f / 2.0f) / 2.0f) / 2.0f) / 2.0f) / 2.0f) / 2.0f) / 2.0f) / 2.0f) / 2.0f)
-			//OMG...
-		}
-		//End of magic here.
-
-		if (staticX)
-			temp.x = tempStatic;
-		if (staticY)
-			temp.y = tempStatic;
-		if (staticZ)
-			temp.z = tempStatic;
-
-		temp = new Vector3(Mathf.RoundToInt(temp.x), Mathf.RoundToInt(temp.y), Mathf.RoundToInt(temp.z)); //Just make sure that our values is rounded...
+		//Just make sure that our vector values is rounded...
+		temp = new Vector3(Mathf.RoundToInt(temp.x), Mathf.RoundToInt(temp.y), Mathf.RoundToInt(temp.z));
 
 		return temp;
 	}
@@ -1125,35 +1084,20 @@ public sealed class Quad : MonoBehaviour
 
 		bool staticX = false, staticY = false, staticZ = false;
 
-		if (size.x == 0)
-			staticX = true;
-		else if (size.y == 0)
-			staticY = true;
-		else if (size.z == 0)
-			staticZ = true;
-
 		float tempStatic = 0;
+
+		BrainFuckMath.DefineAxis(ref staticX, ref staticY, ref staticZ, size);
 
 		middle = (topLeft + bottmoRight) * (1 / Mathf.Abs(LODLevel));
 		middle = middle.NormalizeToRadius(Planetoid.PlanetRadius);
 
-		if (staticX)
-			tempStatic = middle.x;
-		if (staticY)
-			tempStatic = middle.y;
-		if (staticZ)
-			tempStatic = middle.z;
-
-		if (staticX)
-			middle.x = tempStatic;
-		if (staticY)
-			middle.y = tempStatic;
-		if (staticZ)
-			middle.z = tempStatic;
+		BrainFuckMath.LockAxis(ref tempStatic, ref middle, staticX, staticY, staticZ);
+		BrainFuckMath.UnlockAxis(ref middle, ref tempStatic, staticX, staticY, staticZ);
 
 		return middle;
 	}
 
+	[Obsolete]
 	public Matrix4x4d GetLocalToWorld(Quad q)
 	{
 		Matrix4x4d m_faceToLocal;
@@ -1167,6 +1111,7 @@ public sealed class Quad : MonoBehaviour
 		return m_faceToLocal;
 	}
 
+	[Obsolete]
 	public Matrix4x4 GetTangentFrame(Quad q)
 	{
 		double R = q.generationConstants.planetRadius;
