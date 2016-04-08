@@ -37,6 +37,36 @@ public sealed class QuadStorage : MonoBehaviour
         Working = false;
     }
 
+    public void LinkQuadToCache(QuadCBCache qcbc, Quad q)
+    {
+
+    }
+
+    public void LinkQuadToCache(QuadTextureCache qtc, Quad q)
+    {
+
+    }
+
+    public void LinkQuadToCache(QuadFullCache qfc, Quad q)
+    {
+
+    }
+
+    public void LinkCacheToQuad(Quad q, QuadCBCache qcbc)
+    {
+
+    }
+
+    public void LinkCacheToQuad(Quad q, QuadTextureCache qtc)
+    {
+
+    }
+
+    public void LinkCacheToQuad(Quad q, QuadFullCache qfc)
+    {
+
+    }
+
     public bool ExistInTexturesCache(Quad q)
     {
         return TexturesCache.Any(s => s.ID.Equals(q.GetId()));
