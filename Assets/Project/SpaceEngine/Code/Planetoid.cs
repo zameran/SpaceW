@@ -105,6 +105,11 @@ public sealed class Planetoid : MonoBehaviour
 			DrawNormals = !DrawNormals;
 		}
 
+		if (Input.GetKeyDown(KeyCode.F3))
+		{
+			if (Atmosphere != null) Atmosphere.TryBake();
+		}
+
 		CheckCutoff();
 
 		Origin = transform.position;

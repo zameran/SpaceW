@@ -23,6 +23,10 @@ public struct AtmosphereParameters
     public float Rt;
     public float Rl;
 
+    public float bRg;
+    public float bRt;
+    public float bRl;
+
     public float SCALE;
 
     //Dimensions of the tables
@@ -35,37 +39,12 @@ public struct AtmosphereParameters
     public int RES_MU_S;
     public int RES_NU;
 
-    public AtmosphereParameters(float Rg, float Rt, float Rl)
-    {
-        MIE_G = 0.8f;
-
-        HR = 8.0f;
-        HM = 1.2f;
-
-        AVERAGE_GROUND_REFLECTANCE = 0.1f;
-        BETA_R = new Vector4(5.8e-3f, 1.35e-2f, 3.31e-2f, 0.0f);
-        BETA_MSca = new Vector4(4e-6f, 4e-6f, 4e-6f, 0.0f);
-
-        this.Rg = Rg;
-        this.Rt = Rt;
-        this.Rl = Rl;
-
-        SCALE = Rg;
-
-        TRANSMITTANCE_W = 256;
-        TRANSMITTANCE_H = 64;
-        SKY_W = 64;
-        SKY_H = 16;
-        RES_R = 32;
-        RES_MU = 128;
-        RES_MU_S = 32;
-        RES_NU = 8;
-    }
-
     public AtmosphereParameters(float MIE_G, float HR, float HM, float AVERAGE_GROUND_REFLECTANCE,
                                 Vector4 BETA_R, 
                                 Vector4 BETA_MSca,
-                                float Rg, float Rt, float Rl, float SCALE,
+                                float Rg, float Rt, float Rl, 
+                                float bRg, float bRt, float bRl,
+                                float SCALE,
                                 int TRANSMITTANCE_W, int TRANSMITTANCE_H, int SKY_W, int SKY_H, int RES_R, int RES_MU, int RES_MU_S, int RES_NU)
     {
         this.MIE_G = MIE_G;
@@ -80,6 +59,10 @@ public struct AtmosphereParameters
         this.Rg = Rg;
         this.Rt = Rt;
         this.Rl = Rl;
+
+        this.bRg = bRg;
+        this.bRt = bRt;
+        this.bRl = bRl;
 
         this.SCALE = SCALE;
 
@@ -100,7 +83,9 @@ public struct AtmosphereParameters
             AtmosphereParameters ap = new AtmosphereParameters(0.8f, 8.0f, 1.2f, 0.1f,
                                                                new Vector4(5.8e-3f, 1.35e-2f, 3.31e-2f, 0.0f),
                                                                new Vector4(4e-6f, 4e-6f, 4e-6f, 0.0f),
-                                                               6360.0f, 6420.0f, 6421.0f, 6360.0f,
+                                                               6360.0f, 6420.0f, 6421.0f,
+                                                               6360.0f, 6420.0f, 6421.0f,
+                                                               6360.0f,
                                                                256, 64, 64, 16, 32, 128, 32, 8);
 
             return ap;

@@ -37,7 +37,7 @@ public sealed class Atmosphere : MonoBehaviour
     
     private void Start()
     {
-        if (RunTimeBaking && artb != null) artb.Bake(atmosphereParameters);
+        TryBake();
 
         InitMisc();
         InitMaterials();
@@ -48,6 +48,11 @@ public sealed class Atmosphere : MonoBehaviour
         InitUniforms(SkyMaterial);
 
         SetUniforms(SkyMaterial);
+    }
+
+    public void TryBake()
+    {
+        if (RunTimeBaking && artb != null) artb.Bake(atmosphereParameters);
     }
 
     public void UpdateNode()
@@ -73,14 +78,7 @@ public sealed class Atmosphere : MonoBehaviour
 
     private void OnDestroy()
     {
-        if (Transmittance != null)
-            Transmittance.ReleaseAndDestroy();
-
-        if (Inscatter != null)
-            Inscatter.ReleaseAndDestroy();
-
-        if (Irradiance != null)
-            Irradiance.ReleaseAndDestroy();
+        CollectGarbage();
     }
 
     public void CollectGarbage(bool all = true)
@@ -216,7 +214,7 @@ public sealed class Atmosphere : MonoBehaviour
 
         if (Sun != null)
         {
-            mat.SetMatrix("_Sun_WorldToLocal", Sun.GetWorldToLocalRotation());
+            mat.SetMatrix("_Sun_WorldToLocal", Sun.WorldToLocalRotation);
             Sun.SetUniforms(mat);
         }
     }
@@ -258,7 +256,7 @@ public sealed class Atmosphere : MonoBehaviour
 
         if (Sun != null)
         {
-            mat.SetMatrix("_Sun_WorldToLocal", Sun.GetWorldToLocalRotation());
+            mat.SetMatrix("_Sun_WorldToLocal", Sun.WorldToLocalRotation);
             Sun.SetUniforms(mat);
         }
     }

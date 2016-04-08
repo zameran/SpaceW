@@ -110,11 +110,11 @@ float3 GetHeightNormal(QuadGenerationConstants constants, RWStructuredBuffer<Out
 
 float3 GetHeightNormalFromPosition(QuadGenerationConstants constants, RWStructuredBuffer<OutputStruct> buffer, int size, uint3 id)
 {
-	float3 left	 = (buffer[(id.x + 0) + (id.y + 1) * size].cpos.xyz);// * constants.lodLevel;
-	float3 right = (buffer[(id.x + 2) + (id.y + 1) * size].cpos.xyz);// * constants.lodLevel;
-	float3 up	 = (buffer[(id.x + 1) + (id.y + 0) * size].cpos.xyz);// * constants.lodLevel;
-	float3 down  = (buffer[(id.x + 1) + (id.y + 2) * size].cpos.xyz);// * constants.lodLevel;
-	float3 curr	 = (buffer[(id.x + 1) + (id.y + 1) * size].cpos.xyz);// * constants.lodLevel;
+	float3 left	 = (buffer[(id.x + 0) + (id.y + 1) * size].pos.xyz);// * constants.lodLevel;
+	float3 right = (buffer[(id.x + 2) + (id.y + 1) * size].pos.xyz);// * constants.lodLevel;
+	float3 up	 = (buffer[(id.x + 1) + (id.y + 0) * size].pos.xyz);// * constants.lodLevel;
+	float3 down  = (buffer[(id.x + 1) + (id.y + 2) * size].pos.xyz);// * constants.lodLevel;
+	float3 curr	 = (buffer[(id.x + 1) + (id.y + 1) * size].pos.xyz);// * constants.lodLevel;
 	
 	float3 e0 = curr - left;
 	float3 e1 = curr - right;
@@ -220,7 +220,7 @@ void TexturesSub(uint3 id : SV_DispatchThreadID)
 	float3 heightNormal = GetHeightNormal(constants, patchPreOutputSub, nVerticesPerSideWithBorderSub, id, slope);
 	float3 positionNormal = GetHeightNormalFromPosition(constants, patchPreOutputSub, nVerticesPerSideWithBorderSub, id);
 
-	float3 normal = positionNormal;	
+	float3 normal = positionNormal;
 
 	float4 color = ColorFunction(pos.xyz, cpos.xyz, noise, slope);
 	float4 normalColor = float4(normal, slope);

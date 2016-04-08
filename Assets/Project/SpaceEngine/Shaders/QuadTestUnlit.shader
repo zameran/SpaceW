@@ -24,7 +24,7 @@
 			#pragma target 5.0
 			#pragma only_renderers d3d11
 			#pragma vertex vert
-			//#pragma geometry geom //FPS drop down.
+			//#pragma geometry geom //FPS drop down on geometry shader program.
 			#pragma fragment frag
 
 			#pragma fragmentoption ARB_precision_hint_fastest
@@ -101,7 +101,9 @@
 				float3 rotatedPointZ = Rotate(_Rotation.z, float3(0, 0, 1), rotatedPointY);
 				float3 rotatedPoint = rotatedPointZ;	
 
-				//fn = mul(_TTW, fn);
+				//fn = mul(_Object2World, fn);
+				
+				fn = normalize(fn + WSD); //use this for normal light intens. but disabled normals.
 
 				//fn.xy = fn.xy; // - default.
 				//fn.xy = -fn.xy; // - inverted.
@@ -172,6 +174,7 @@
 				o.vertex1 = v.vertex;
 				o.depth = 1;
 
+				//Log. depth
 				//o.vertex0.z = log2(max(1e-6, 1.0 + o.vertex0.w)) * (2.0 / log2(_ProjectionParams.z + 1.0)) - 1.0;
 				//o.vertex0.z *= o.vertex0.w;
 				//o.depth = log2(1.0 + o.vertex0.w) * (0.5 * (2.0 / log2(_ProjectionParams.z + 1.0)));

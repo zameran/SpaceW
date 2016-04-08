@@ -6,11 +6,28 @@ public sealed class AtmosphereSun : MonoBehaviour
 
     Vector3 m_startSunDirection = Z_AXIS;
 
-    Matrix4x4 WorldToLocalRotation;
+    private bool HasMoved = false;
+
+    public Matrix4x4 WorldToLocalRotation
+    {
+        get
+        {
+            Quaternion q = Quaternion.FromToRotation(GetDirection(), Z_AXIS);
+            return Matrix4x4.TRS(Vector3.zero + Origin, q, Vector3.one);
+        }
+        private set { WorldToLocalRotation = value; }
+    }
+
+    public Matrix4x4 LocalToWorldRotation
+    {
+        get
+        {
+            return WorldToLocalRotation.inverse;
+        }
+        private set { LocalToWorldRotation = value; }
+    }
 
     public float SunIntensity = 100.0f;
-
-    bool HasMoved = false;
 
     public Vector3 Origin;
 
@@ -22,16 +39,6 @@ public sealed class AtmosphereSun : MonoBehaviour
     public bool GetHasMoved()
     {
         return HasMoved;
-    }
-
-    public Matrix4x4 GetWorldToLocalRotation()
-    {
-        return WorldToLocalRotation;
-    }
-
-    public Matrix4x4 GetLocalToWorldRotation()
-    {
-        return WorldToLocalRotation.inverse;
     }
 
     private void Start()
@@ -46,16 +53,11 @@ public sealed class AtmosphereSun : MonoBehaviour
     {
         HasMoved = false;
 
-        if (Input.GetMouseButton(2))
-        {
-            float y = Input.GetAxis("Mouse Y");
-            float x = -Input.GetAxis("Mouse X");
-            transform.Rotate(new Vector3(x, y, 0), Space.World);
-            HasMoved = true;
-        }
+        float h = Input.GetAxis("HorizontalArrows") * 0.75f;
+        float v = Input.GetAxis("VerticalArrows") * 0.75f;
 
-        Quaternion q = Quaternion.FromToRotation(GetDirection(), Z_AXIS);
-        WorldToLocalRotation = Matrix4x4.TRS(Vector3.zero + Origin, q, Vector3.one);
+        transform.Rotate(new Vector3(v, h, 0), Space.World);
+        HasMoved = true;
     }
 
     public void SetUniforms(Material mat)

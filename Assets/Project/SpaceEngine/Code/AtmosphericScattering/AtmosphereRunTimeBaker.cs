@@ -281,9 +281,9 @@ public sealed class AtmosphereRunTimeBaker : MonoBehaviour
     {
         if (cs == null) return;
 
-        cs.SetFloat("Rg", AP.Rg);
-        cs.SetFloat("Rt", AP.Rt);
-        cs.SetFloat("RL", AP.Rl);
+        cs.SetFloat("Rg", AP.bRg);
+        cs.SetFloat("Rt", AP.bRt);
+        cs.SetFloat("RL", AP.bRl);
         cs.SetInt("TRANSMITTANCE_W", AP.TRANSMITTANCE_W);
         cs.SetInt("TRANSMITTANCE_H", AP.TRANSMITTANCE_H);
         cs.SetInt("SKY_W", AP.SKY_W);
@@ -312,9 +312,9 @@ public sealed class AtmosphereRunTimeBaker : MonoBehaviour
     {
         if (cs == null) return;
 
-        cs.SetFloat("Rg", AP.Rg);
-        cs.SetFloat("Rt", AP.Rt);
-        cs.SetFloat("RL", AP.Rl);
+        cs.SetFloat("Rg", AP.bRg);
+        cs.SetFloat("Rt", AP.bRt);
+        cs.SetFloat("RL", AP.bRl);
         cs.SetInt("TRANSMITTANCE_W", AP.TRANSMITTANCE_W);
         cs.SetInt("TRANSMITTANCE_H", AP.TRANSMITTANCE_H);
         cs.SetInt("SKY_W", AP.SKY_W);
