@@ -66,9 +66,9 @@
             w = (double)cosa;
         }
 
-        public Quat(Vector3d to, Vector3d _from)
+        public Quat(Vector3d to, Vector3d from)
         {
-            Vector3d f = _from.Normalized();
+            Vector3d f = from.Normalized();
             Vector3d t = to.Normalized();
 
             double dotProdPlus1 = 1.0 + f.Dot(t);
