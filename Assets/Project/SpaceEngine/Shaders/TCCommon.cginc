@@ -227,7 +227,7 @@ const float pi2 = 6.28318531;
 //-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
-float SavePow(float f, float p) 
+inline float SavePow(float f, float p) 
 { 
 	#ifdef USESAVEPOW 
 	return pow(abs(f), p);
@@ -244,10 +244,14 @@ float smin(float a, float b, float k)
 	return lerp(b, a, h) - k * h * (1.0 - h);
 }
 
-float softExpMaxMin(float a, float b, float k)
+inline float softExpMaxMin(float a, float b, float k)
 {
-	float res = exp(k * a) + exp(k * b);
-	return log(res) / k;
+	return log(exp(k * a) + exp(k * b)) / k;
+}
+
+inline float AngleBetween(float3 a, float3 b) 
+{
+	return acos(dot(a, b) / (length(a) * length(b)));
 }
 
 float3 Rotate(float Angle, float3 Axis, float3 Vector)
@@ -352,7 +356,7 @@ float3 UnitToColor24(in float unit)
 	return clamp(color, 0.0, 1.0);
 }
 
-float ColorToUnit24(in float3 color)
+inline float ColorToUnit24(in float3 color)
 {
 	return dot(color, float3(1.0, 1.0 / 255.0, 1.0 / 65025.0));
 }
@@ -481,12 +485,12 @@ void GetSurfaceHeightAndSlope(inout float height, inout float slope)
 //-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
-float2 dFdx(float2 p)
+inline float2 dFdx(float2 p)
 {
 	return float2(p.x * p.x - p.y, p.y);
 }
 
-float2 dFdy(float2 p)
+inline float2 dFdy(float2 p)
 {
 	return float2(p.y * p.y - p.x, p.y);
 }
@@ -575,8 +579,8 @@ float3 hsl2rgb(float3 hsl)
 	return rgb;
 }
 
-float3 hash3(float2 p) { return frac(sin(float3(dot(p, float2(127.1, 311.7)), dot(p, float2(269.5, 183.3)), dot(p, float2(419.2, 371.9)))) * 43758.5453); }
-float4 hash4(float2 p) { return frac(sin(float4(dot(p, float2(127.1, 311.7)), dot(p, float2(269.5, 183.3)), dot(p, float2(419.2, 371.9)), dot(p, float2(398.1, 176.7)))) * 43758.5453); }
+inline float3 hash3(float2 p) { return frac(sin(float3(dot(p, float2(127.1, 311.7)), dot(p, float2(269.5, 183.3)), dot(p, float2(419.2, 371.9)))) * 43758.5453); }
+inline float4 hash4(float2 p) { return frac(sin(float4(dot(p, float2(127.1, 311.7)), dot(p, float2(269.5, 183.3)), dot(p, float2(419.2, 371.9)), dot(p, float2(398.1, 176.7)))) * 43758.5453); }
 //-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
@@ -941,8 +945,8 @@ void FAST32_hash_3D(float3 gridcell, out float4 lowz_hash, out float4 highz_hash
 //-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
-float3 Interpolation_C2(float3 x) { return x * x * x * (x * (x * 6.0 - 15.0) + 10.0); }
-float3 Interpolation_C2_Deriv(float3 x) { return x * x * (x * (x * 30.0 - 60.0) + 30.0); }
+inline float3 Interpolation_C2(float3 x) { return x * x * x * (x * (x * 6.0 - 15.0) + 10.0); }
+inline float3 Interpolation_C2_Deriv(float3 x) { return x * x * (x * (x * 30.0 - 60.0) + 30.0); }
 //-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
@@ -1336,9 +1340,9 @@ float4 NoiseDeriv(float3 p)
 //-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
-float4 permute(float4 x) { return fmod((x * 34.0 + 1.0) * x, 289.0); }
-float3 permute3(float3 x) { return fmod((x * 34.0 + 1.0) * x, 289.0); }
-float4 taylorInvSqrt(float4 r) { return 1.79284291400159 - 0.85373472095314 * r; }
+inline float4 permute(float4 x) { return fmod((x * 34.0 + 1.0) * x, 289.0); }
+inline float3 permute3(float3 x) { return fmod((x * 34.0 + 1.0) * x, 289.0); }
+inline float4 taylorInvSqrt(float4 r) { return 1.79284291400159 - 0.85373472095314 * r; }
 
 // 3D simplex noise
 float sNoise(float3 v)
@@ -1446,7 +1450,7 @@ float4 FiltDistNoise4D(float3 p, float w, float d) { return DistNoise4D(p, d) * 
 //-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
-float Lacunarity() 
+inline float Lacunarity() 
 { 
 	#ifdef USESAVEPOW 
 	return pow(abs(noiseLacunarity), -noiseH); 
@@ -1455,7 +1459,7 @@ float Lacunarity()
 	#endif
 }
 
-float Frequency(float frequency)
+inline float Frequency(float frequency)
 {
 	#ifdef USESAVEPOW 
 	return pow(abs(frequency), -noiseH);
@@ -3362,7 +3366,7 @@ float HeightMapTerra(float3 ppoint)
 
 	if (tidalLock <= 0.0)
 	{
-		latitude = abs(ppoint.y);
+		latitude = abs(normalize(ppoint).y);
 		latitude += 0.15 * (Fbm(ppoint * 0.7 + Randomize) - 1.0);
 		latitude = saturate(latitude);
 	}
@@ -3427,7 +3431,7 @@ float4 ColorMapTerra(float3 ppoint, float height, float slope)
 
 	if (tidalLock <= 0.0)
 	{
-		latitude = abs(ppoint.y);
+		latitude = abs(normalize(ppoint).y);
 		latitude += 0.15 * (Fbm(ppoint * 0.7 + Randomize) - 1.0);
 		latitude = saturate(latitude);
 		if (latitude < latTropic - tropicWidth)
@@ -3497,24 +3501,24 @@ float4 ColorMapTerra(float3 ppoint, float height, float slope)
 		slope   = lerp(slope,   1.0,   lavaMask);
 	}
 
-	//surf = GetSurfaceColor(climate, slope, vary);
-	surf = GetSurfaceColor(height, slope, vary);
+	surf = GetSurfaceColor(climate, slope, vary);
+	//surf = GetSurfaceColor(height, slope, vary);
 
 	// Sedimentary layers
 	noiseOctaves = 4;
-	float layers = Fbm(float3(height * (168.4 / 100) + 0.17 * vary, 0.43 * (p.x + p.y), 0.43 * (p.z - p.y)));
+	float layers = Fbm(float3(height * 168.4 + 0.17 * vary, 0.43 * (p.x + p.y), 0.43 * (p.z - p.y)));
 	//layers *= smoothstep(0.75, 0.8, climate) * (1.0 - smoothstep(0.825, 0.875, climate)); // only rock texture
 	layers *= smoothstep(0.0, 1.0, slope);     // only steep slopes
-	//layers *= step(surf.color.a, 0.01);         // do not make layers on snow
-	//layers *= saturate(1.0 - 5.0 * lavaMask);   // do not make layers on lava
+	layers *= step(surf.color.a, 0.01);         // do not make layers on snow
+	layers *= saturate(1.0 - 5.0 * lavaMask);   // do not make layers on lava
 	surf.color.rgb *= float3(1.0, 1.0, 1.0) - float3(0.0, 0.5, 1.0) * layers;
 
 	// Albedo variations
 	noiseOctaves = 4;
 	distort = Fbm3D((ppoint + Randomize) * 0.07) * 1.5;
 	noiseOctaves = 5;
-	//vary = Fbm((ppoint + distort) * 0.78);
-	//surf.color *= 1.0 - 0.5 * vary;
+	vary = Fbm((ppoint + distort) * 0.78);
+	surf.color *= 1.0 - 0.5 * vary;
 
 	#ifdef VISUALIZE_BIOMES
 		surf.color = lerp(surf.color, colorOverlay * biomeScale, 0.25);
