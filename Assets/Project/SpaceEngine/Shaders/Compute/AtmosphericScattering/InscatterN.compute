@@ -1,4 +1,10 @@
-﻿// computes higher order scattering (line 9 in algorithm 4.1)
+﻿/**
+ * Author: Eric Bruneton
+ * Modified and ported to Unity by Justin Hawkins 2014
+ * Modified by Denis Ovchinnikov 2015-2016
+ */
+
+// computes higher order scattering (line 9 in algorithm 4.1)
  
 #pragma kernel CSMain
 

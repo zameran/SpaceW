@@ -1,6 +1,7 @@
 ﻿/**
  * Author: Eric Bruneton
  * Modified and ported to Unity by Justin Hawkins 2014
+ * Modified by Denis Ovchinnikov 2015-2016
  */
  
 // computes ground irradiance due to direct sunlight E[L0] (line 2 in algorithm 4.1)

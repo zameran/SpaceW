@@ -96,10 +96,17 @@
 				float3 WSD = _Sun_WorldSunDir;
 				
 				float3 originalPoint = p;
-				float3 rotatedPointX = Rotate(_Rotation.x, float3(1, 0, 0), originalPoint);
-				float3 rotatedPointY = Rotate(_Rotation.y, float3(0, 1, 0), rotatedPointX);
-				float3 rotatedPointZ = Rotate(_Rotation.z, float3(0, 0, 1), rotatedPointY);
-				float3 rotatedPoint = rotatedPointZ;	
+				float3 originalNormal = fn;
+
+				float3 rotatedPoint = Rotate(_Rotation.x, float3(1, 0, 0), 
+									  Rotate(_Rotation.y, float3(0, 1, 0), 
+									  Rotate(_Rotation.z, float3(0, 0, 1), originalPoint)));	
+
+				float3 rotatedNormal = Rotate(_Rotation.x, float3(1, 0, 0), 
+									   Rotate(_Rotation.y, float3(0, 1, 0), 
+									   Rotate(_Rotation.z, float3(0, 0, 1), originalNormal)));	
+				
+				fn = rotatedNormal;
 
 				//fn = mul(_Object2World, fn);
 				
