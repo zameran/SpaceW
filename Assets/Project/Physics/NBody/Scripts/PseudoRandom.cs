@@ -54,18 +54,18 @@ namespace NBody
             return ((UInt64() & ((ulong)1L)) == 0L);
         }
 
-        public static Vector DirectionVector(double magnitude = 1)
+        public static pVector3d DirectionVector(double magnitude = 1)
         {
-            Vector vector;
+            pVector3d vector;
 
             do
             {
-                vector = new Vector(Double(-1.0, 1.0), Double(-1.0, 1.0), Double(-1.0, 1.0));
+                vector = new pVector3d(Double(-1.0, 1.0), Double(-1.0, 1.0), Double(-1.0, 1.0));
             }
 
             while (vector.Magnitude() == 0.0);
 
-            return (Vector)((magnitude / vector.Magnitude()) * vector);
+            return (pVector3d)((magnitude / vector.Magnitude()) * vector);
         }
 
         public static double Double()
@@ -94,9 +94,9 @@ namespace NBody
             return seed;
         }
 
-        public static Vector Vector(double maximumMagnitude = 1)
+        public static pVector3d Vector(double maximumMagnitude = 1)
         {
-            return (Vector)(Double(maximumMagnitude, 0.0) * DirectionVector(1.0));
+            return (pVector3d)(Double(maximumMagnitude, 0.0) * DirectionVector(1.0));
         }
     }
 }

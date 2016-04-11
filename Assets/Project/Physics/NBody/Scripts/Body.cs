@@ -58,18 +58,18 @@ namespace NBody
         /// <summary>
         /// The spatial location of the body. 
         /// </summary>
-        public Vector Location = Vector.Zero;
+        public pVector3d Location = pVector3d.Zero;
         
         /// <summary>
         /// The velocity of the body. 
         /// </summary>
-        public Vector Velocity = Vector.Zero;
+        public pVector3d Velocity = pVector3d.Zero;
 
         /// <summary>
         /// The acceleration accumulated for the body during a single simulation 
         /// step. 
         /// </summary>
-        public Vector Acceleration = Vector.Zero;
+        public pVector3d Acceleration = pVector3d.Zero;
 
         /// <summary>
         /// The mass of the body. 
@@ -105,7 +105,7 @@ namespace NBody
         /// <param name="location">The location of the new body.</param>
         /// <param name="mass">The mass of the new body.</param>
         /// <param name="velocity">The velocity of the new body.</param>
-        public Body(Vector location, double mass = 1e6, Vector velocity = new Vector())
+        public Body(pVector3d location, double mass = 1e6, pVector3d velocity = new pVector3d())
             : this(mass)
         {
             Location = location;
@@ -121,7 +121,7 @@ namespace NBody
             Simulate(out Location, ref Acceleration);
         }
 
-        public void Simulate(out Vector location, ref Vector acceleration)
+        public void Simulate(out pVector3d location, ref pVector3d acceleration)
         {
             double speed = Velocity.Magnitude();
 
@@ -138,18 +138,18 @@ namespace NBody
             else
             {
                 // Apply relativistic velocity addition. 
-                Vector parallelAcc = Vector.Projection(acceleration, Velocity);
-                Vector orthogonalAcc = Vector.Rejection(acceleration, Velocity);
+                pVector3d parallelAcc = pVector3d.Projection(acceleration, Velocity);
+                pVector3d orthogonalAcc = pVector3d.Rejection(acceleration, Velocity);
 
                 double alpha = Math.Sqrt(1 - Math.Pow(speed / World.C, 2));
 
                 Velocity = (Velocity + parallelAcc + alpha * orthogonalAcc) /
-                           (1 + Vector.Dot(Velocity, acceleration) /
+                           (1 + pVector3d.Dot(Velocity, acceleration) /
                            (World.C * World.C));
             }
 
             location += Velocity;
-            acceleration = Vector.Zero;
+            acceleration = pVector3d.Zero;
         }
 
         /// <summary>
@@ -158,7 +158,7 @@ namespace NBody
         /// <param name="point">The starting point for the axis of rotation.</param>
         /// <param name="direction">The direction for the axis of rotation</param>
         /// <param name="angle">The angle to rotate by.</param>
-        public void Rotate(Vector point, Vector direction, double angle)
+        public void Rotate(pVector3d point, pVector3d direction, double angle)
         {
             Location = Location.Rotate(point, direction, angle);
 

@@ -78,7 +78,7 @@ namespace NBody
         /// <summary>
         /// The location of the center of the tree's bounds. 
         /// </summary>
-        private Vector _location;
+        private pVector3d _location;
 
         /// <summary>
         /// The width of the tree's bounds. 
@@ -88,7 +88,7 @@ namespace NBody
         /// <summary>
         /// The location of the center of mass of the bodies contained in the tree. 
         /// </summary>
-        private Vector _centerOfMass = Vector.Zero;
+        private pVector3d _centerOfMass = pVector3d.Zero;
 
         /// <summary>
         /// The first body added to the tree. This is used when the first Body must 
@@ -110,7 +110,7 @@ namespace NBody
         /// </summary>
         /// <param name="location">The location of the center of the new tree.</param>
         /// <param name="width">The width of the new tree.</param>
-        public Octree(Vector location, double width)
+        public Octree(pVector3d location, double width)
             : this(width)
         {
             _location = _centerOfMass = location;
@@ -161,7 +161,7 @@ namespace NBody
                 {
                     for (int k = -1; k <= 1; k += 2)
                     {
-                        Vector subtreeLocation = _location + (subtreeWidth / 2) * new Vector(i, j, k);
+                        pVector3d subtreeLocation = _location + (subtreeWidth / 2) * new pVector3d(i, j, k);
 
                         // Determine if the body is contained within the bounds of the subtree under 
                         // consideration. 

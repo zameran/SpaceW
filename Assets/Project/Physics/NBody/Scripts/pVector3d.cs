@@ -39,136 +39,136 @@ using UnityEngine;
 namespace NBody
 {
     [StructLayout(LayoutKind.Sequential)]
-    public struct Vector : IEquatable<Vector>
+    public struct pVector3d : IEquatable<pVector3d>
     {
-        public static readonly Vector Zero;
-        public static readonly Vector XAxis;
-        public static readonly Vector YAxis;
-        public static readonly Vector ZAxis;
+        public static readonly pVector3d Zero;
+        public static readonly pVector3d XAxis;
+        public static readonly pVector3d YAxis;
+        public static readonly pVector3d ZAxis;
 
         public double X;
         public double Y;
         public double Z;
 
-        public Vector(double x, double y, double z)
+        public pVector3d(double x, double y, double z)
         {
             this.X = x;
             this.Y = y;
             this.Z = z;
         }
 
-        public static Vector Multiply(Vector a, double b)
+        public static pVector3d Multiply(pVector3d a, double b)
         {
-            return new Vector(a.X * b, a.Y * b, a.Z * b);
+            return new pVector3d(a.X * b, a.Y * b, a.Z * b);
         }
 
-        public static Vector operator *(Vector a, double b)
+        public static pVector3d operator *(pVector3d a, double b)
         {
             return Multiply(a, b);
         }
 
-        public static Vector operator *(double a, Vector b)
+        public static pVector3d operator *(double a, pVector3d b)
         {
             return Multiply(b, a);
         }
 
-        public static Vector Divide(Vector a, double b)
+        public static pVector3d Divide(pVector3d a, double b)
         {
             double num = 1.0 / b;
-            return new Vector(a.X * num, a.Y * num, a.Z * num);
+            return new pVector3d(a.X * num, a.Y * num, a.Z * num);
         }
 
-        public static Vector operator /(Vector a, double b)
+        public static pVector3d operator /(pVector3d a, double b)
         {
             return Divide(a, b);
         }
 
-        public static Vector Add(Vector a, Vector b)
+        public static pVector3d Add(pVector3d a, pVector3d b)
         {
-            return new Vector(a.X + b.X, a.Y + b.Y, a.Z + b.Z);
+            return new pVector3d(a.X + b.X, a.Y + b.Y, a.Z + b.Z);
         }
 
-        public static Vector operator +(Vector a, Vector b)
+        public static pVector3d operator +(pVector3d a, pVector3d b)
         {
             return Add(a, b);
         }
 
-        public static Vector Subtract(Vector a, Vector b)
+        public static pVector3d Subtract(pVector3d a, pVector3d b)
         {
-            return new Vector(a.X - b.X, a.Y - b.Y, a.Z - b.Z);
+            return new pVector3d(a.X - b.X, a.Y - b.Y, a.Z - b.Z);
         }
 
-        public static Vector operator -(Vector a, Vector b)
+        public static pVector3d operator -(pVector3d a, pVector3d b)
         {
             return Subtract(a, b);
         }
 
-        public static Vector Negate(Vector a)
+        public static pVector3d Negate(pVector3d a)
         {
-            return new Vector(-a.X, -a.Y, -a.Z);
+            return new pVector3d(-a.X, -a.Y, -a.Z);
         }
 
-        public static Vector operator -(Vector a)
+        public static pVector3d operator -(pVector3d a)
         {
             return Negate(a);
         }
 
-        public bool Equals(Vector a)
+        public bool Equals(pVector3d a)
         {
             return (((this.X == a.X) && (this.Y == a.Y)) && (this.Z == a.Z));
         }
 
-        public static bool operator ==(Vector a, Vector b)
+        public static bool operator ==(pVector3d a, pVector3d b)
         {
             return object.Equals(a, b);
         }
 
-        public static bool operator !=(Vector a, Vector b)
+        public static bool operator !=(pVector3d a, pVector3d b)
         {
             return !object.Equals(a, b);
         }
 
-        public static explicit operator Vector(Vector3 v)
+        public static explicit operator pVector3d(Vector3 v)
         {
-            return new Vector((double)v.x, (double)v.y, (double)v.z);
+            return new pVector3d((double)v.x, (double)v.y, (double)v.z);
         }
 
-        public static implicit operator Vector3(Vector v)
+        public static implicit operator Vector3(pVector3d v)
         {
             return new Vector3((float)v.X, (float)v.Y, (float)v.Z);
         }
 
-        public static double Dot(Vector a, Vector b)
+        public static double Dot(pVector3d a, pVector3d b)
         {
             return (((a.X * b.X) + (a.Y * b.Y)) + (a.Z * b.Z));
         }
 
-        public static Vector Cross(Vector a, Vector b)
+        public static pVector3d Cross(pVector3d a, pVector3d b)
         {
-            return new Vector((a.Y * b.Z) - (a.Z * b.Y), (a.Z * b.X) - (a.X * b.Z), (a.X * b.Y) - (a.Y * b.X));
+            return new pVector3d((a.Y * b.Z) - (a.Z * b.Y), (a.Z * b.X) - (a.X * b.Z), (a.X * b.Y) - (a.Y * b.X));
         }
 
-        public static double Angle(Vector a, Vector b)
+        public static double Angle(pVector3d a, pVector3d b)
         {
             return Math.Acos(Dot(a, b) / (a.Magnitude() * b.Magnitude()));
         }
 
-        public static double Distance(Vector a, Vector b)
+        public static double Distance(pVector3d a, pVector3d b)
         {
             return Math.Sqrt((((a.X - b.X) * (a.X - b.X)) + ((a.Y - b.Y) * (a.Y - b.Y))) + ((a.Z - b.Z) * (a.Z - b.Z)));
         }
 
-        public static Vector Projection(Vector a, Vector b)
+        public static pVector3d Projection(pVector3d a, pVector3d b)
         {
-            return (Vector)((Dot(a, b) / Dot(b, b)) * b);
+            return (pVector3d)((Dot(a, b) / Dot(b, b)) * b);
         }
 
-        public static Vector Rejection(Vector a, Vector b)
+        public static pVector3d Rejection(pVector3d a, pVector3d b)
         {
             return (a - Projection(a, b));
         }
 
-        public Vector Rotate(double pointX, double pointY, double pointZ, double directionX, double directionY, double directionZ, double angle)
+        public pVector3d Rotate(double pointX, double pointY, double pointZ, double directionX, double directionY, double directionZ, double angle)
         {
             double length = 1.0 / Math.Sqrt(((directionX * directionX) + (directionY * directionY)) + (directionZ * directionZ));
             directionX *= length;
@@ -178,15 +178,15 @@ namespace NBody
             double sina = Math.Sin(angle);
             double x = ((((pointX * ((directionY * directionY) + (directionZ * directionZ))) - (directionX * (((((pointY * directionY) + (pointZ * directionZ)) - (directionX * this.X)) - (directionY * this.Y)) - (directionZ * this.Z)))) * (1.0 - cosa)) + (this.X * cosa)) + (((((-pointZ * directionY) + (pointY * directionZ)) - (directionZ * this.Y)) + (directionY * this.Z)) * sina);
             double y = ((((pointY * ((directionX * directionX) + (directionZ * directionZ))) - (directionY * (((((pointX * directionX) + (pointZ * directionZ)) - (directionX * this.X)) - (directionY * this.Y)) - (directionZ * this.Z)))) * (1.0 - cosa)) + (this.Y * cosa)) + (((((pointZ * directionX) - (pointX * directionZ)) + (directionZ * this.X)) - (directionX * this.Z)) * sina);
-            return new Vector(x, y, ((((pointZ * ((directionX * directionX) + (directionY * directionY))) - (directionZ * (((((pointX * directionX) + (pointY * directionY)) - (directionX * this.X)) - (directionY * this.Y)) - (directionZ * this.Z)))) * (1.0 - cosa)) + (this.Z * cosa)) + (((((-pointY * directionX) + (pointX * directionY)) - (directionY * this.X)) + (directionX * this.Y)) * sina));
+            return new pVector3d(x, y, ((((pointZ * ((directionX * directionX) + (directionY * directionY))) - (directionZ * (((((pointX * directionX) + (pointY * directionY)) - (directionX * this.X)) - (directionY * this.Y)) - (directionZ * this.Z)))) * (1.0 - cosa)) + (this.Z * cosa)) + (((((-pointY * directionX) + (pointX * directionY)) - (directionY * this.X)) + (directionX * this.Y)) * sina));
         }
 
-        public Vector Rotate(Vector point, Vector direction, double angle)
+        public pVector3d Rotate(pVector3d point, pVector3d direction, double angle)
         {
             return this.Rotate(point.X, point.Y, point.Z, direction.X, direction.Y, direction.Z, angle);
         }
 
-        public Vector Unit()
+        public pVector3d Unit()
         {
             return (this / this.Magnitude());
         }
@@ -196,11 +196,11 @@ namespace NBody
             return Math.Sqrt(((this.X * this.X) + (this.Y * this.Y)) + (this.Z * this.Z));
         }
 
-        public static Vector Sum(ICollection<Vector> vectors)
+        public static pVector3d Sum(ICollection<pVector3d> vectors)
         {
-            Vector vector = new Vector();
+            pVector3d vector = new pVector3d();
 
-            foreach (Vector vector2 in vectors)
+            foreach (pVector3d vector2 in vectors)
             {
                 vector += vector2;
             }
@@ -208,7 +208,7 @@ namespace NBody
             return vector;
         }
 
-        public static Vector Average(ICollection<Vector> vectors)
+        public static pVector3d Average(ICollection<pVector3d> vectors)
         {
             return (Sum(vectors) / ((double)vectors.Count));
         }
@@ -220,7 +220,7 @@ namespace NBody
 
         public override bool Equals(object a)
         {
-            return ((a is Vector) && this.Equals((Vector)a));
+            return ((a is pVector3d) && this.Equals((pVector3d)a));
         }
 
         public override int GetHashCode()
@@ -231,12 +231,12 @@ namespace NBody
             return (code + BitConverter.DoubleToInt64Bits(this.Z).GetHashCode());
         }
 
-        static Vector()
+        static pVector3d()
         {
-            Zero = new Vector();
-            XAxis = new Vector(1.0, 0.0, 0.0);
-            YAxis = new Vector(0.0, 1.0, 0.0);
-            ZAxis = new Vector(0.0, 0.0, 1.0);
+            Zero = new pVector3d();
+            XAxis = new pVector3d(1.0, 0.0, 0.0);
+            YAxis = new pVector3d(0.0, 1.0, 0.0);
+            ZAxis = new pVector3d(0.0, 0.0, 1.0);
         }
     }
 }

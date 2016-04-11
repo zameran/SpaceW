@@ -27,7 +27,7 @@ namespace NodeEditorFramework.NoiseEngine
             return node;
         }
 
-        protected internal override void NodeGUI()
+        protected override void NodeGUI() //protected internal override void NodeGUI()
         {
             GUILayout.BeginHorizontal();
             GUILayout.BeginVertical();

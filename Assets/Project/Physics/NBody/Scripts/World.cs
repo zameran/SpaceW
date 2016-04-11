@@ -204,9 +204,9 @@ namespace NBody
                         {
                             double distance = PseudoRandom.Double(1e6);
                             double angle = PseudoRandom.Double(Math.PI * 2);
-                            Vector location = new Vector(Math.Cos(angle) * distance, PseudoRandom.Double(-2e5, 2e5), Math.Sin(angle) * distance);
+                            pVector3d location = new pVector3d(Math.Cos(angle) * distance, PseudoRandom.Double(-2e5, 2e5), Math.Sin(angle) * distance);
                             double mass = PseudoRandom.Double(1e6) + 3e4;
-                            Vector velocity = PseudoRandom.Vector(5);
+                            pVector3d velocity = PseudoRandom.Vector(5);
                             _bodies[i] = new Body(location, mass, velocity);
                         }
                     }
@@ -219,9 +219,9 @@ namespace NBody
                         {
                             double distance = PseudoRandom.Double(1e6);
                             double angle = PseudoRandom.Double(Math.PI * 2);
-                            Vector location = new Vector(Math.Cos(angle) * distance, PseudoRandom.Double(-2e5, 2e5), Math.Sin(angle) * distance);
+                            pVector3d location = new pVector3d(Math.Cos(angle) * distance, PseudoRandom.Double(-2e5, 2e5), Math.Sin(angle) * distance);
                             double mass = PseudoRandom.Double(1e6) + 3e4;
-                            Vector velocity = PseudoRandom.Vector(5e3);
+                            pVector3d velocity = PseudoRandom.Vector(5e3);
                             _bodies[i] = new Body(location, mass, velocity);
                         }
                     }
@@ -230,11 +230,11 @@ namespace NBody
                 // Generate massive body demonstration. 
                 case SystemType.MassiveBody:
                     {
-                        _bodies[0] = new Body(Vector.Zero, 1e10);
+                        _bodies[0] = new Body(pVector3d.Zero, 1e10);
 
-                        Vector location1 = PseudoRandom.Vector(8e3) + new Vector(-3e5, 1e5 + _bodies[0].Radius, 0);
+                        pVector3d location1 = PseudoRandom.Vector(8e3) + new pVector3d(-3e5, 1e5 + _bodies[0].Radius, 0);
                         double mass1 = 1e6;
-                        Vector velocity1 = new Vector(2e3, 0, 0);
+                        pVector3d velocity1 = new pVector3d(2e3, 0, 0);
                         _bodies[1] = new Body(location1, mass1, velocity1);
 
                         for (int i = 2; i < _bodies.Length; i++)
@@ -242,10 +242,10 @@ namespace NBody
                             double distance = PseudoRandom.Double(2e5) + _bodies[1].Radius;
                             double angle = PseudoRandom.Double(Math.PI * 2);
                             double vertical = Math.Min(2e8 / distance, 2e4);
-                            Vector location = (new Vector(Math.Cos(angle) * distance, PseudoRandom.Double(-vertical, vertical), Math.Sin(angle) * distance) + _bodies[1].Location);
+                            pVector3d location = (new pVector3d(Math.Cos(angle) * distance, PseudoRandom.Double(-vertical, vertical), Math.Sin(angle) * distance) + _bodies[1].Location);
                             double mass = PseudoRandom.Double(5e5) + 1e5;
                             double speed = Math.Sqrt(_bodies[1].Mass * _bodies[1].Mass * G / ((_bodies[1].Mass + mass) * distance));
-                            Vector velocity = Vector.Cross(location, Vector.YAxis).Unit() * speed + velocity1;
+                            pVector3d velocity = pVector3d.Cross(location, pVector3d.YAxis).Unit() * speed + velocity1;
                             location = location.Rotate(0, 0, 0, 1, 1, 1, Math.PI * 0.1);
                             velocity = velocity.Rotate(0, 0, 0, 1, 1, 1, Math.PI * 0.1);
                             _bodies[i] = new Body(location, mass, velocity);
@@ -262,10 +262,10 @@ namespace NBody
                         {
                             double distance = PseudoRandom.Double(1e6) + _bodies[0].Radius;
                             double angle = PseudoRandom.Double(Math.PI * 2);
-                            Vector location = new Vector(Math.Cos(angle) * distance, PseudoRandom.Double(-2e4, 2e4), Math.Sin(angle) * distance);
+                            pVector3d location = new pVector3d(Math.Cos(angle) * distance, PseudoRandom.Double(-2e4, 2e4), Math.Sin(angle) * distance);
                             double mass = PseudoRandom.Double(1e6) + 3e4;
                             double speed = Math.Sqrt(_bodies[0].Mass * _bodies[0].Mass * G / ((_bodies[0].Mass + mass) * distance));
-                            Vector velocity = Vector.Cross(location, Vector.YAxis).Unit() * speed;
+                            pVector3d velocity = pVector3d.Cross(location, pVector3d.YAxis).Unit() * speed;
                             _bodies[i] = new Body(location, mass, velocity);
                         }
                     }
@@ -280,12 +280,12 @@ namespace NBody
                         double distance0 = PseudoRandom.Double(1e5) + 3e4;
                         double distance1 = distance0 / 2;
                         double distance2 = distance0 / 2;
-                        Vector location1 = new Vector(Math.Cos(angle0) * distance1, 0, Math.Sin(angle0) * distance1);
-                        Vector location2 = new Vector(-Math.Cos(angle0) * distance2, 0, -Math.Sin(angle0) * distance2);
+                        pVector3d location1 = new pVector3d(Math.Cos(angle0) * distance1, 0, Math.Sin(angle0) * distance1);
+                        pVector3d location2 = new pVector3d(-Math.Cos(angle0) * distance2, 0, -Math.Sin(angle0) * distance2);
                         double speed1 = Math.Sqrt(mass2 * mass2 * G / ((mass1 + mass2) * distance0));
                         double speed2 = Math.Sqrt(mass1 * mass1 * G / ((mass1 + mass2) * distance0));
-                        Vector velocity1 = Vector.Cross(location1, Vector.YAxis).Unit() * speed1;
-                        Vector velocity2 = Vector.Cross(location2, Vector.YAxis).Unit() * speed2;
+                        pVector3d velocity1 = pVector3d.Cross(location1, pVector3d.YAxis).Unit() * speed1;
+                        pVector3d velocity2 = pVector3d.Cross(location2, pVector3d.YAxis).Unit() * speed2;
                         _bodies[0] = new Body(location1, mass1, velocity1);
                         _bodies[1] = new Body(location2, mass2, velocity2);
 
@@ -293,11 +293,11 @@ namespace NBody
                         {
                             double distance = PseudoRandom.Double(1e6);
                             double angle = PseudoRandom.Double(Math.PI * 2);
-                            Vector location = new Vector(Math.Cos(angle) * distance, PseudoRandom.Double(-2e4, 2e4), Math.Sin(angle) * distance);
+                            pVector3d location = new pVector3d(Math.Cos(angle) * distance, PseudoRandom.Double(-2e4, 2e4), Math.Sin(angle) * distance);
                             double mass = PseudoRandom.Double(1e6) + 3e4;
                             double speed = Math.Sqrt((mass1 + mass2) * (mass1 + mass2) * G / ((mass1 + mass2 + mass) * distance));
                             speed /= distance >= distance0 / 2 ? 1 : (distance0 / 2 / distance);
-                            Vector velocity = Vector.Cross(location, Vector.YAxis).Unit() * speed;
+                            pVector3d velocity = pVector3d.Cross(location, pVector3d.YAxis).Unit() * speed;
                             _bodies[i] = new Body(location, mass, velocity);
                         }
                     }
@@ -315,10 +315,10 @@ namespace NBody
                             int planetK = k;
                             double distance = PseudoRandom.Double(2e6) + 1e5 + _bodies[0].Radius;
                             double angle = PseudoRandom.Double(Math.PI * 2);
-                            Vector location = new Vector(Math.Cos(angle) * distance, PseudoRandom.Double(-2e4, 2e4), Math.Sin(angle) * distance);
+                            pVector3d location = new pVector3d(Math.Cos(angle) * distance, PseudoRandom.Double(-2e4, 2e4), Math.Sin(angle) * distance);
                             double mass = PseudoRandom.Double(1e8) + 1e7;
                             double speed = Math.Sqrt(_bodies[0].Mass * _bodies[0].Mass * G / ((_bodies[0].Mass + mass) * distance));
-                            Vector velocity = Vector.Cross(location, Vector.YAxis).Unit() * speed;
+                            pVector3d velocity = pVector3d.Cross(location, pVector3d.YAxis).Unit() * speed;
                             _bodies[k++] = new Body(location, mass, velocity);
 
                             // Generate rings.
@@ -329,10 +329,10 @@ namespace NBody
                                 {
                                     double ringDistance = PseudoRandom.Double(1e1) + 1e4 + _bodies[planetK].Radius;
                                     double ringAngle = PseudoRandom.Double(Math.PI * 2);
-                                    Vector ringLocation = location + new Vector(Math.Cos(ringAngle) * ringDistance, 0, Math.Sin(ringAngle) * ringDistance);
+                                    pVector3d ringLocation = location + new pVector3d(Math.Cos(ringAngle) * ringDistance, 0, Math.Sin(ringAngle) * ringDistance);
                                     double ringMass = PseudoRandom.Double(1e3) + 1e3;
                                     double ringSpeed = Math.Sqrt(_bodies[planetK].Mass * _bodies[planetK].Mass * G / ((_bodies[planetK].Mass + ringMass) * ringDistance));
-                                    Vector ringVelocity = Vector.Cross(location - ringLocation, Vector.YAxis).Unit() * ringSpeed + velocity;
+                                    pVector3d ringVelocity = pVector3d.Cross(location - ringLocation, pVector3d.YAxis).Unit() * ringSpeed + velocity;
                                     _bodies[k++] = new Body(ringLocation, ringMass, ringVelocity);
                                 }
                                 continue;
@@ -344,10 +344,10 @@ namespace NBody
                             {
                                 double moonDistance = PseudoRandom.Double(1e4) + 5e3 + _bodies[planetK].Radius;
                                 double moonAngle = PseudoRandom.Double(Math.PI * 2);
-                                Vector moonLocation = location + new Vector(Math.Cos(moonAngle) * moonDistance, PseudoRandom.Double(-2e3, 2e3), Math.Sin(moonAngle) * moonDistance);
+                                pVector3d moonLocation = location + new pVector3d(Math.Cos(moonAngle) * moonDistance, PseudoRandom.Double(-2e3, 2e3), Math.Sin(moonAngle) * moonDistance);
                                 double moonMass = PseudoRandom.Double(1e6) + 1e5;
                                 double moonSpeed = Math.Sqrt(_bodies[planetK].Mass * _bodies[planetK].Mass * G / ((_bodies[planetK].Mass + moonMass) * moonDistance));
-                                Vector moonVelocity = Vector.Cross(moonLocation - location, Vector.YAxis).Unit() * moonSpeed + velocity;
+                                pVector3d moonVelocity = pVector3d.Cross(moonLocation - location, pVector3d.YAxis).Unit() * moonSpeed + velocity;
                                 _bodies[k++] = new Body(moonLocation, moonMass, moonVelocity);
                             }
                         }
@@ -357,10 +357,10 @@ namespace NBody
                         {
                             double asteroidDistance = PseudoRandom.Double(4e5) + 1e6;
                             double asteroidAngle = PseudoRandom.Double(Math.PI * 2);
-                            Vector asteroidLocation = new Vector(Math.Cos(asteroidAngle) * asteroidDistance, PseudoRandom.Double(-1e3, 1e3), Math.Sin(asteroidAngle) * asteroidDistance);
+                            pVector3d asteroidLocation = new pVector3d(Math.Cos(asteroidAngle) * asteroidDistance, PseudoRandom.Double(-1e3, 1e3), Math.Sin(asteroidAngle) * asteroidDistance);
                             double asteroidMass = PseudoRandom.Double(1e6) + 3e4;
                             double asteroidSpeed = Math.Sqrt(_bodies[0].Mass * _bodies[0].Mass * G / ((_bodies[0].Mass + asteroidMass) * asteroidDistance));
-                            Vector asteroidVelocity = Vector.Cross(asteroidLocation, Vector.YAxis).Unit() * asteroidSpeed;
+                            pVector3d asteroidVelocity = pVector3d.Cross(asteroidLocation, pVector3d.YAxis).Unit() * asteroidSpeed;
                             _bodies[k++] = new Body(asteroidLocation, asteroidMass, asteroidVelocity);
                         }
                     }
@@ -378,7 +378,7 @@ namespace NBody
                         for (int a = 0; a < side; a++)
                             for (int b = 0; b < side; b++)
                                 for (int c = 0; c < side; c++)
-                                    _bodies[k++] = new Body(distance * (new Vector(a - side / 2, b - side / 2, c - side / 2)), mass);
+                                    _bodies[k++] = new Body(distance * (new pVector3d(a - side / 2, b - side / 2, c - side / 2)), mass);
                     }
                     break;
             }
@@ -390,7 +390,7 @@ namespace NBody
         /// <param name="point">The starting point for the axis of rotation.</param>
         /// <param name="direction">The direction for the axis of rotation</param>
         /// <param name="angle">The angle to rotate by.</param>
-        public void Rotate(Vector point, Vector direction, double angle)
+        public void Rotate(pVector3d point, pVector3d direction, double angle)
         {
             foreach (Body b in _bodies)
             {

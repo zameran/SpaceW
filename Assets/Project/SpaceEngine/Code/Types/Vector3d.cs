@@ -26,6 +26,8 @@
 
 namespace UnityEngine
 {
+    using System;
+
     public class Vector3d
     {
         public double x, y, z;
@@ -159,6 +161,38 @@ namespace UnityEngine
             z *= invLength;
         }
 
+        public static Vector3d Projection(Vector3d a, Vector3d b)
+        {
+            return ((Dot(a, b) / Dot(b, b)) * b);
+        }
+
+        public Vector3d Rotate(double pointX, double pointY, double pointZ, double directionX, double directionY, double directionZ, double angle)
+        {
+            double length = 1.0 / Math.Sqrt(((directionX * directionX) + (directionY * directionY)) + (directionZ * directionZ));
+
+            directionX *= length;
+            directionY *= length;
+            directionZ *= length;
+
+            double cosa = Math.Cos(angle);
+            double sina = Math.Sin(angle);
+
+            double x = ((((pointX * ((directionY * directionY) + (directionZ * directionZ))) - (directionX * (((((pointY * directionY) + (pointZ * directionZ)) - (directionX * this.x)) - (directionY * this.y)) - (directionZ * this.z)))) * (1.0 - cosa)) + (this.x * cosa)) + (((((-pointZ * directionY) + (pointY * directionZ)) - (directionZ * this.y)) + (directionY * this.z)) * sina);
+            double y = ((((pointY * ((directionX * directionX) + (directionZ * directionZ))) - (directionY * (((((pointX * directionX) + (pointZ * directionZ)) - (directionX * this.x)) - (directionY * this.y)) - (directionZ * this.z)))) * (1.0 - cosa)) + (this.y * cosa)) + (((((pointZ * directionX) - (pointX * directionZ)) + (directionZ * this.x)) - (directionX * this.z)) * sina);
+
+            return new Vector3d(x, y, ((((pointZ * ((directionX * directionX) + (directionY * directionY))) - (directionZ * (((((pointX * directionX) + (pointY * directionY)) - (directionX * this.x)) - (directionY * this.y)) - (directionZ * this.z)))) * (1.0 - cosa)) + (this.z * cosa)) + (((((-pointY * directionX) + (pointX * directionY)) - (directionY * this.x)) + (directionX * this.y)) * sina));
+        }
+
+        public Vector3d Rotate(Vector3d point, Vector3d direction, double angle)
+        {
+            return Rotate(point.x, point.y, point.z, direction.x, direction.y, direction.z, angle);
+        }
+
+        public static Vector3d Rejection(Vector3d a, Vector3d b)
+        {
+            return (a - Projection(a, b));
+        }
+
         public Vector3d Normalized()
         {
             double invLength = 1.0 / System.Math.Sqrt(x * x + y * y + z * z);
@@ -202,10 +236,16 @@ namespace UnityEngine
             return new Vector3((float)x, (float)y, (float)z);
         }
 
+        public Vector3d Unit()
+        {
+            return (this / this.Magnitude());
+        }
+
         public static Vector3d UnitX()
         {
             return new Vector3d(1, 0, 0);
         }
+
         public static Vector3d UnitY()
         {
             return new Vector3d(0, 1, 0);
@@ -214,11 +254,6 @@ namespace UnityEngine
         public static Vector3d UnitZ()
         {
             return new Vector3d(0, 0, 1);
-        }
-
-        public static Vector3d Zero()
-        {
-            return new Vector3d(0, 0, 0);
         }
 
         public static Vector3d zero
