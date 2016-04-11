@@ -1,0 +1,13 @@
+﻿using UnityEngine;
+using UnityEditor;
+
+using NUnit.Framework;
+
+public class #SCRIPTNAME# 
+{
+    [Test]
+    public void EditorTest()
+    {
+
+    }
+}

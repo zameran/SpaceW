@@ -1,3 +1,4 @@
+#region License And Usage
 /// TaskManager.cs
 /// Copyright (c) 2011, Ken Rockot  <k-e-n-@-REMOVE-CAPS-AND-HYPHENS-oz.gs>.  All rights reserved.
 /// Everyone is granted non-exclusive license to do anything at all with this code.
@@ -52,6 +53,7 @@
 /// behind the scenes.
 ///
 /// Task also provides an event that is triggered when the coroutine exits.
+#endregion
 
 using UnityEngine;
 using System.Collections;

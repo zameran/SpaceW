@@ -308,3 +308,253 @@ int main()
         o.print();
     }
 }
+
+Ported to C#
+
+using System;
+using UnityEngine;
+
+namespace Experimental
+{
+    public static class Constants
+    {
+        public static double Em11 = 0.00000000001;
+        public static double G = 6.67300 * Em11;
+        public static double E24 = 1000000000000000000000000.0;
+        public static double E24m11 = 10000000000000.0;
+        public static double km = 1000.0;
+    }
+
+    public class Body
+    {
+        protected double GM;
+        protected double r;
+
+        public double mass { get { return GM / Constants.G; } }
+        public double gm { get { return GM; } }
+        public double radius { get { return r; } }
+
+        public Body(double GM, double r)
+        {
+            this.GM = GM;
+            this.r = r;
+        }
+    }
+
+    public class Orbit
+    {
+        protected double a, e, i, l, w, t;
+        protected Vector3d epoch;
+        protected Body refb;
+
+        public Orbit(Body refb, double a, double e, double i, double l, double w, double t)
+        {
+            this.refb = refb;
+
+            this.a = a;
+            this.e = e;
+            this.i = i;
+            this.l = l;
+            this.w = w;
+            this.t = t;
+        }
+
+        public Orbit(Body refb, Vector3d r, Vector3d v)
+        {
+            this.refb = refb;
+
+            this.caclFromPosVel(r, v);
+        }
+
+        public Body reference() { return refb; }
+        public double semiMajorAxis() { return a; }
+        public double eccentricity() { return e; }
+        public double inclination() { return i; }
+        public double longitudeOfAscendingNode() { return l; }
+        public double argumentOfPeriapsis() { return w; }
+        public double trueAnomaly() { return t; }
+
+        public double semiMinorAxis()
+        {
+            return Math.Sqrt(a * a * (1.0 - e * e));
+        }
+
+        public double period()
+        {
+            double u = refb.gm;
+
+            return 2 * Math.PI * Math.Sqrt(a * a * a / u);
+        }
+
+        public double eccentricAnomaly()
+        {
+            double E = Math.Acos((e + Math.Cos(t)) / (1.0 + e * Math.Cos(t)));
+
+            if (t > Math.PI && E < Math.PI) { E = 2 * Math.PI - E; }
+
+            return E;
+        }
+
+        public double meanAnomaly()
+        {
+            double E = eccentricAnomaly();
+            double M = E - e * Math.Sin(E);
+
+            if (E > Math.PI && M < Math.PI) { M = 2 * Math.PI - M; }
+
+            return M;
+        }
+
+        public double meanMotion()
+        {
+            double u = refb.gm;
+
+            return Math.Sqrt(u / (a * a * a));
+        }
+
+        public double timeSincePeriapsis()
+        {
+            return meanAnomaly() / meanMotion();
+        }
+
+        public double semiParameter()
+        {
+            return a * (1.0 - e * e);
+        }
+
+        Vector3d position()
+        {
+            double p = semiParameter();
+
+            Vector3d r = Vector3d.zero;
+
+            r.x = p * (Math.Cos(l) * Math.Cos(w + t) - Math.Sin(l) * Math.Cos(i) * Math.Sin(w + t));
+            r.y = p * (Math.Sin(l) * Math.Cos(w + t) + Math.Cos(l) * Math.Cos(i) * Math.Sin(w + t));
+            r.z = p * Math.Sin(i) * Math.Sin(w + t);
+
+            return r - epoch;
+        }
+
+        Vector3d velocity()
+        {
+            double p = semiParameter();
+            double u = refb.gm;
+            double g = Math.Sqrt(u / p);
+
+            Vector3d v = Vector3d.zero;
+
+            v.x = g * (Math.Cos(l) * (Math.Sin(w + t) + e * Math.Sin(w)) +
+                       Math.Sin(l) * Math.Cos(i) * (Math.Cos(w + t) + e * Math.Cos(w)));
+            v.y = g * (Math.Sin(l) * (Math.Sin(w + t) + e * Math.Sin(w)) -
+                       Math.Cos(l) * Math.Cos(i) * (Math.Cos(w + t) + e * Math.Cos(w)));
+            v.z = g * (Math.Sin(i) * (Math.Cos(w + t) + e * Math.Cos(w)));
+
+            return v;
+        }
+
+        public void caclFromPosVel(Vector3d r, Vector3d v)
+        {
+            Vector3d h = r * v;
+            Vector3d n = new Vector3d(-h.y, h.x, 0);
+
+            double u = refb.gm;
+            double E = v.Magnitude() * 0.5 - u / r.SqrMagnitude();
+
+            Vector3d e = ((v * h) * (1.0 / u)) - (r * (1.0 / r.SqrMagnitude()));
+            
+            this.e = e.SqrMagnitude();
+            this.a = -u / (E * 2.0);
+            this.i = Math.Acos(h.z / h.SqrMagnitude());
+
+            if (this.i == 0.0)
+                this.l = 0;
+            else if (n.y >= 0.0)
+                this.l = Math.Acos(n.x / n.SqrMagnitude());
+            else
+                this.l = 2.0 * Math.PI - Math.Acos(n.x / n.SqrMagnitude());
+
+            if (this.i == 0.0)
+                this.w = Math.Acos(e.x / e.SqrMagnitude());
+            else if (e.z >= 0.0)
+                this.w = Math.Acos(n.Dot(e) / (n.SqrMagnitude() * e.SqrMagnitude()));
+            else
+                this.w = 2.0 * Math.PI - Math.Acos(n.Dot(e) / (n.SqrMagnitude() * e.SqrMagnitude()));
+
+            if (r.Dot(v) >= 0.0)
+                this.t = Math.Acos(e.Dot(r) / (e.SqrMagnitude() * r.SqrMagnitude()));
+            else
+                this.t = 2 * Math.PI - Math.Acos(e.Dot(r) / (e.SqrMagnitude() * r.SqrMagnitude()));
+
+            this.epoch = Vector3d.zero;
+            this.epoch = position() - r;
+        }
+
+        public double estimateTrueAnomaly(double meanAnomaly)
+        {
+            return meanAnomaly * 2.0 * e * Math.Sin(meanAnomaly) + 1.25 * e * e * Math.Sin(2.0 * meanAnomaly);
+        }
+
+        public double calcEccentricAnomaly(double meanAnomaly)
+        {
+            double t = estimateTrueAnomaly(meanAnomaly);
+            double E = Math.Acos((e + Math.Cos(t)) / (1.0 + e * Math.Cos(t)));
+            double M = E - e * Math.Sin(E);
+            double rate = 0.01;
+
+            bool lastDec = false;
+
+            while(true)
+            {
+                if (Math.Abs(M - meanAnomaly) < 0.0000000000001)
+                    break;
+
+                if (M > meanAnomaly)
+                {
+                    E -= rate;
+                    lastDec = true;
+                }
+                else
+                {
+                    E += rate;
+
+                    if (lastDec)
+                        rate *= 0.1;
+                }
+
+                M = E - e * Math.Sin(E);
+            }
+
+            if (meanAnomaly > Math.PI && E < Math.PI)
+                E = 2.0 * Math.PI - E;
+
+            return E;
+        }
+
+        public void calcTrueAnomaly(double eccentricAnomaly)
+        {
+            double E = eccentricAnomaly;
+            this.t = Math.Acos((Math.Cos(E) - e) / (1.0 - e * Math.Cos(E)));
+
+            if (eccentricAnomaly > Math.PI && this.t < Math.PI)
+                this.t = 2.0 * Math.PI - this.t;
+        }
+
+        public void step(double time)
+        {
+            double M = meanAnomaly();
+            M += meanMotion() * time;
+
+            while (M < -2.0 * Math.PI)
+                M = M + 2.0 * Math.PI;
+
+            if (M < 0.0)
+                M = 2.0 * Math.PI + M;
+
+            while (M > 2.0 * Math.PI)
+                M = M - 2.0 * Math.PI;
+
+            double E = calcEccentricAnomaly(M);
+            calcTrueAnomaly(E);
+        }
+    }
+}

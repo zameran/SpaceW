@@ -1,3 +1,4 @@
+#region License
 /*
  * Improved perlin noise.
  * Copyright (c) 2008-2011 INRIA
@@ -21,6 +22,7 @@
  * Authors: Justin Hawkins 2014.
  * Modified by Denis Ovchinnikov 2015-2016
  */
+#endregion
 
 using UnityEngine;
 

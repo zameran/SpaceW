@@ -96,6 +96,11 @@ namespace UnityEngine
             return new Vector3d(v1.x - v2.x, v1.y - v2.y, v1.z - v2.z);
         }
 
+        public static Vector3d operator -(Vector3d v1)
+        {
+            return new Vector3d(-v1.x, -v1.y, -v1.z);
+        }
+
         public static Vector3d operator *(Vector3d v1, Vector3d v2)
         {
             return new Vector3d(v1.x * v2.x, v1.y * v2.y, v1.z * v2.z);
@@ -141,6 +146,11 @@ namespace UnityEngine
             return (x * v.x + y * v.y + z * v.z);
         }
 
+        public static double Dot(Vector3d lhs, Vector3d rhs)
+        {
+            return lhs.x * rhs.x + lhs.y * rhs.y + lhs.z * rhs.z;
+        }
+
         public void Normalize()
         {
             double invLength = 1.0 / System.Math.Sqrt(x * x + y * y + z * z);
@@ -158,8 +168,7 @@ namespace UnityEngine
 
         public Vector3d Normalized(double l)
         {
-            double length = System.Math.Sqrt(x * x + y * y + z * z);
-            double invLength = l / length;
+            double invLength = l / System.Math.Sqrt(x * x + y * y + z * z); ;
 
             return new Vector3d(x * invLength, y * invLength, z * invLength);
         }
@@ -176,6 +185,11 @@ namespace UnityEngine
         public Vector3d Cross(Vector3d v)
         {
             return new Vector3d(y * v.z - z * v.y, z * v.x - x * v.z, x * v.y - y * v.x);
+        }
+
+        public static Vector3d Cross(Vector3d lhs, Vector3d rhs)
+        {
+            return new Vector3d(lhs.y * rhs.z - lhs.z * rhs.y, lhs.z * rhs.x - lhs.x * rhs.z, lhs.x * rhs.y - lhs.y * rhs.x);
         }
 
         public Vector2d XY()
@@ -205,6 +219,78 @@ namespace UnityEngine
         public static Vector3d Zero()
         {
             return new Vector3d(0, 0, 0);
+        }
+
+        public static Vector3d zero
+        {
+            get
+            {
+                return new Vector3d(0.0, 0.0, 0.0);
+            }
+        }
+
+        public static Vector3d one
+        {
+            get
+            {
+                return new Vector3d(1.0, 1.0, 1.0);
+            }
+        }
+
+        public static Vector3d forward
+        {
+            get
+            {
+                return new Vector3d(0.0, 0.0, 1.0);
+            }
+        }
+
+        public static Vector3d back
+        {
+            get
+            {
+                return new Vector3d(0.0, 0.0, -1.0);
+            }
+        }
+
+        public static Vector3d up
+        {
+            get
+            {
+                return new Vector3d(0.0, 1.0, 0.0);
+            }
+        }
+
+        public static Vector3d down
+        {
+            get
+            {
+                return new Vector3d(0.0, -1.0, 0.0);
+            }
+        }
+
+        public static Vector3d left
+        {
+            get
+            {
+                return new Vector3d(-1.0, 0.0, 0.0);
+            }
+        }
+
+        public static Vector3d right
+        {
+            get
+            {
+                return new Vector3d(1.0, 0.0, 0.0);
+            }
+        }
+
+        public Vector3d xzy
+        {
+            get
+            {
+                return new Vector3d(this.x, this.z, this.y);
+            }
         }
     } 
 }

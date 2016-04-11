@@ -1,0 +1,1 @@
+Put and replace this .txt files in to UNITY_INSTALLATION_FOLDER/Editor/Data/Resources/ScriptTemplates

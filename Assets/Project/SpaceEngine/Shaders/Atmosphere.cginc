@@ -61,6 +61,7 @@
 /*
  * Author: Eric Bruneton
  * Modified and ported to Unity by Justin Hawkins 2014
+ * Modified by Denis Ovchinnikov 2015-2016
  */
 
 #define OPTIMIZE

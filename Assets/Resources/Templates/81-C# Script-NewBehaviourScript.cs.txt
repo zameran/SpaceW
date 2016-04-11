@@ -1,0 +1,40 @@
+﻿using UnityEngine;
+using System.Collections;
+
+public class #SCRIPTNAME# : MonoBehaviour 
+{
+	private void Awake()
+	{
+	
+	}
+	
+	private void Start() 
+	{
+	
+	}
+	
+	private void OnEnable()
+	{
+	
+	}
+	
+	private void OnDisable()
+	{
+	
+	}
+	
+	private void Update() 
+	{
+	
+	}
+	
+	private void LateUpdate()
+	{
+	
+	}
+	
+	private void FixedUpdate()
+	{
+	
+	}
+}
