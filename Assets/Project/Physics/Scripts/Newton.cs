@@ -3,8 +3,6 @@
 using System.Collections;
 using System.Collections.Generic;
 
-using ZFramework.Unity.Common.PerfomanceMonitor;
-
 public class Newton : MonoBehaviour
 {
     // Gravitational constant

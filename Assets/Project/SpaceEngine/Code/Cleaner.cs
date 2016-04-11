@@ -32,7 +32,6 @@
 
 using System.IO;
 
-using ZFramework.Extensions;
 using ZFramework.Unity.Common;
 
 using UnityEngine;

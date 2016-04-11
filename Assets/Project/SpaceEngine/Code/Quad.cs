@@ -37,10 +37,6 @@ using System.Linq;
 using System.Collections;
 using System.Collections.Generic;
 
-using ZFramework.Math;
-using ZFramework.Unity.Common.Threading;
-using ZFramework.Unity.Common.PerfomanceMonitor;
-
 [Serializable]
 public struct QuadGenerationConstants
 {

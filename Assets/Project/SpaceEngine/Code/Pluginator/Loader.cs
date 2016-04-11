@@ -34,7 +34,6 @@ using System;
 using System.Collections;
 using UnityEngine;
 
-using ZFramework.Extensions;
 using ZFramework.Unity.Common;
 
 using Logger = ZFramework.Unity.Common.Logger;

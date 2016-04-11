@@ -33,11 +33,9 @@
 using UnityEngine;
 
 using ZFramework.Unity.Common;
-using ZFramework.Unity.Common.Threading;
 using Logger = ZFramework.Unity.Common.Logger;
 
 using System.Collections;
-using System.Collections.Generic;
 
 [UseLoggerFile("StressTest")]
 [UseLogger(Category.Other)]
