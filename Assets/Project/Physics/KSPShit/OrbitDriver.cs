@@ -159,7 +159,6 @@
                         TrackRigidbody(referenceBody);
                         CheckDominantBody(driverTransform.position);
                     }
-                    //updateFromParameters();
                     break;
                 case UpdateMode.UPDATE:
                     if (vessel != null)
@@ -206,7 +205,7 @@
             //    RecalculateOrbit(FlightGlobals.getMainBody(refPos));
             //}
 
-            RecalculateOrbit(vessel.db);
+            RecalculateOrbit(FlightGlobals.getMainBody(refPos));
         }
 
         private void TrackRigidbody(CelestialBody refBody)

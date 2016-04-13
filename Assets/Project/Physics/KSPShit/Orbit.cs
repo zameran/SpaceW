@@ -11,15 +11,7 @@ namespace Experimental
     [Serializable]
     public class Orbit
     {
-        public enum ObjectType
-        {
-            VESSEL,
-            SPACE_DEBRIS,
-            CELESTIAL_BODIES,
-            UNKNOWN_MISC,
-            KERBAL
-        }
-
+        /*
         public enum EncounterSolutionLevel
         {
             NONE,
@@ -38,142 +30,101 @@ namespace Experimental
             MANEUVER,
             IMPACT
         }
+        */
 
         public CelestialBody referenceBody;
 
         public double inclination;
-
         public double eccentricity;
-
         public double semiMajorAxis;
-
         public double LAN;
-
         public double argumentOfPeriapsis;
-
         public double epoch;
 
         public Vector3d pos;
-
         public Vector3d vel;
 
         public double orbitalEnergy;
-
         public double meanAnomaly;
-
         public double trueAnomaly;
-
         public double eccentricAnomaly;
-
         public double radius;
-
         public double altitude;
-
         public double orbitalSpeed;
-
         public double orbitPercent;
-
         public double ObT;
-
         public double ObTAtEpoch;
-
         public double timeToPe;
-
         public double timeToAp;
 
         public Vector3d h;
-
         public Vector3d eccVec;
-
         public Vector3d an;
 
         public double meanAnomalyAtEpoch;
-
         public double period;
 
+        /*
         public Vector3 debugPos;
-
         public Vector3 debugVel;
-
         public Vector3 debugH;
-
         public Vector3 debugAN;
-
         public Vector3 debugEccVec;
+        */
 
         public double mag;
 
         private double drawResolution = 4.0;
 
         public double FEVp;
-
         public double FEVs;
-
         public double SEVp;
-
         public double SEVs;
 
         public double UTappr;
-
         public double UTsoi;
 
         public double ClAppr;
-
         public double CrAppr;
 
         public double ClEctr1;
-
         public double ClEctr2;
 
         public double timeToTransition1;
-
         public double timeToTransition2;
 
         public double nearestTT;
-
         public double nextTT;
 
         public Vector3d secondaryPosAtTransition1;
-
         public Vector3d secondaryPosAtTransition2;
 
         public double closestTgtApprUT;
-
         public double StartUT;
-
         public double EndUT;
 
+        /*
         public bool activePatch;
 
         public Orbit closestEncounterPatch;
 
         public CelestialBody closestEncounterBody;
 
-        public Orbit.EncounterSolutionLevel closestEncounterLevel;
-
-        public Orbit.PatchTransitionType patchStartTransition;
-
-        public Orbit.PatchTransitionType patchEndTransition;
+        public EncounterSolutionLevel closestEncounterLevel;
+        public PatchTransitionType patchStartTransition;
+        public PatchTransitionType patchEndTransition;
 
         public Orbit nextPatch;
-
         public Orbit previousPatch;
 
         public double fromE;
-
         public double toE;
-
         public double sampleInterval;
-
         public double E;
-
         public double V;
-
         public double fromV;
-
         public double toV;
-
-        public bool debug_returnFullEllipseTrajectory;
+        */
 
         public double semiMinorAxis
         {
@@ -347,11 +298,13 @@ namespace Experimental
             this.pos = pos;
             this.vel = vel;
 
+            /*
             debugPos = pos.ToVector3();
             debugVel = vel.ToVector3();
             debugH = h.ToVector3();
             debugAN = an.ToVector3();
             debugEccVec = eccVec.ToVector3();
+            */
         }
 
         public void UpdateFromUT(double UT)
@@ -438,11 +391,13 @@ namespace Experimental
                 timeToAp = 0.0;
             }
 
+            /*
             debugPos = pos.ToVector3();
             debugVel = vel.ToVector3();
             debugH = h.ToVector3();
             debugAN = an.ToVector3();
             debugEccVec = eccVec.ToVector3();
+            */
         }
 
         public double GetDTforTrueAnomaly(double tA, double wrapAfterSeconds)
@@ -559,11 +514,12 @@ namespace Experimental
             return an;
         }
 
-        //public Vector3d GetVel()
-        //{
-        //    Vector3d vector3d = this.GetFrameVel() - ((!FlightGlobals.ActiveVessel) ? Vector3d.zero : FlightGlobals.ActiveVessel.orbitDriver.referenceBody.GetFrameVel());
-        //    return new Vector3d(vector3d.x, vector3d.z, vector3d.y);
-        //}
+        public Vector3d GetVel()
+        {
+            Vector3d vel = GetFrameVel() - ((!FlightGlobals.ActiveVessel) ? Vector3d.zero : FlightGlobals.ActiveVessel.orbitDriver.referenceBody.GetFrameVel());
+
+            return new Vector3d(vel.x, vel.z, vel.y);
+        }
 
         public Vector3d GetRelativeVel()
         {
@@ -588,14 +544,15 @@ namespace Experimental
             return getOrbitalVelocityAtUT(UT) + referenceBody.GetFrameVelAtUT(UT);
         }
 
-        //public Vector3d GetWorldSpaceVel()
-        //{
-        //    return this.GetVel() - ((!this.referenceBody.inverseRotation) ? Vector3d.zero : this.referenceBody.getRFrmVel(this.pos + this.referenceBody.position));
-        //}
+        public Vector3d GetWorldSpaceVel()
+        {
+            return GetVel() - ((!referenceBody.inverseRotation) ? Vector3d.zero : referenceBody.getRFrmVel(pos + referenceBody.position));
+        }
 
         public double GetTimeToPeriapsis()
         {
-            if (eccentricity < 1.0 && patchEndTransition != PatchTransitionType.FINAL && StartUT + timeToPe > EndUT)
+            //if (eccentricity < 1.0 && patchEndTransition != PatchTransitionType.FINAL && StartUT + timeToPe > EndUT)
+            if (eccentricity < 1.0 && StartUT + timeToPe > EndUT)
                 return timeToPe - period;
 
             return timeToPe;
@@ -1154,7 +1111,9 @@ namespace Experimental
             return result;
         }
 
-        /*
+        /*      
+        public bool debug_returnFullEllipseTrajectory;
+
         public Trajectory GetPatchTrajectory(int sampleCount)
         {
             Vector3d[] array = new Vector3d[sampleCount];
