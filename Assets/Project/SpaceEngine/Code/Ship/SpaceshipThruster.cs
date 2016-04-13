@@ -73,7 +73,7 @@ public class SpaceshipThruster : MonoBehaviour
             Debug.LogError("Thruster has no parent with rigidbody that it can apply the force to.");
         }
 
-        _cacheLight = transform.GetComponent<Light>().GetComponent<Light>();
+        _cacheLight = transform.GetComponent<Light>();
 
         if (_cacheLight == null)
         {
@@ -84,29 +84,35 @@ public class SpaceshipThruster : MonoBehaviour
 
         if (_cacheParticleSystem == null)
         {
-            Debug.LogError("Thruster has no particle system. Recreate the thruster using the original prefab.");
+            //Debug.LogError("Thruster has no particle system. Recreate the thruster using the original prefab.");
         }
 
-        GetComponent<AudioSource>().loop = true;
-        GetComponent<AudioSource>().volume = soundEffectVolume;
-        GetComponent<AudioSource>().mute = true;
-        GetComponent<AudioSource>().Play();
+        if (GetComponent<AudioSource>() != null)
+        {
+            GetComponent<AudioSource>().loop = true;
+            GetComponent<AudioSource>().volume = soundEffectVolume;
+            GetComponent<AudioSource>().mute = true;
+            GetComponent<AudioSource>().Play();
+        }
     }
 
     void Update()
     {
-        if (_cacheLight != null)
+        if (_cacheLight != null && _cacheParticleSystem != null)
         {
             _cacheLight.intensity = _cacheParticleSystem.particleCount / 20;
         }
 
         if (isActive)
         {
-            if (GetComponent<AudioSource>().mute)
-                GetComponent<AudioSource>().mute = false;
+            if (GetComponent<AudioSource>() != null)
+            {
+                if (GetComponent<AudioSource>().mute)
+                    GetComponent<AudioSource>().mute = false;
 
-            if (GetComponent<AudioSource>().volume < soundEffectVolume)
-                GetComponent<AudioSource>().volume += 5f * Time.deltaTime;
+                if (GetComponent<AudioSource>().volume < soundEffectVolume)
+                    GetComponent<AudioSource>().volume += 5f * Time.deltaTime;
+            }
 
             if (_cacheParticleSystem != null)
             {
@@ -116,10 +122,13 @@ public class SpaceshipThruster : MonoBehaviour
         }
         else
         {
-            if (GetComponent<AudioSource>().volume > 0.01f)
-                GetComponent<AudioSource>().volume -= 5f * Time.deltaTime;
-            else
-                GetComponent<AudioSource>().mute = true;
+            if (GetComponent<AudioSource>() != null)
+            {
+                if (GetComponent<AudioSource>().volume > 0.01f)
+                    GetComponent<AudioSource>().volume -= 5f * Time.deltaTime;
+                else
+                    GetComponent<AudioSource>().mute = true;
+            }
 
             if (_cacheParticleSystem != null)
             {
@@ -135,6 +144,6 @@ public class SpaceshipThruster : MonoBehaviour
             if (addForceAtPosition)
                 _cacheParentRigidbody.AddForceAtPosition(_cacheTransform.up * thrusterForce * thurstCoeff, _cacheTransform.position);
             else
-                _cacheParentRigidbody.AddRelativeForce(Vector3.forward * thrusterForce * thurstCoeff);
+                _cacheParentRigidbody.AddRelativeForce(transform.forward * thrusterForce * thurstCoeff);
     }
 }

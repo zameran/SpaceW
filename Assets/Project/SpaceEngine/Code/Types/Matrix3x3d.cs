@@ -100,7 +100,7 @@ namespace UnityEngine
 
         public static Vector3d operator *(Matrix3x3d m, Vector3d v)
         {
-            Vector3d kProd = new Vector3d();
+            Vector3d kProd = Vector3d.zero;
 
             kProd.x = m.m[0, 0] * v.x + m.m[0, 1] * v.y + m.m[0, 2] * v.z;
             kProd.y = m.m[1, 0] * v.x + m.m[1, 1] * v.y + m.m[1, 2] * v.z;
