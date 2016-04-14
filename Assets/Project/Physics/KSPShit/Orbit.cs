@@ -196,6 +196,21 @@ namespace Experimental
             Init();
         }
 
+        public Orbit(Orbit reference)
+        {
+            this.inclination = reference.inclination;
+            this.eccentricity = reference.eccentricity;
+            this.semiMajorAxis = reference.semiMajorAxis;
+            this.LAN = reference.LAN;
+            this.argumentOfPeriapsis = reference.argumentOfPeriapsis;
+            this.meanAnomalyAtEpoch = reference.meanAnomalyAtEpoch;
+            this.epoch = reference.epoch;
+
+            this.referenceBody = reference.referenceBody;
+
+            Init();
+        }
+
         public void Init()
         {
             period = MathUtils.TwoPI * Math.Sqrt(Math.Pow(Math.Abs(semiMajorAxis), 3.0) / referenceBody.gravParameter);
@@ -943,7 +958,7 @@ namespace Experimental
                 }
             }
 
-            Debug.DrawLine(getPositionAtT(ObT), referenceBody.position, Color.green);
+            Debug.DrawLine(getPositionAtT(ObT), referenceBody.position, Color.white);
             Debug.DrawLine(referenceBody.position, referenceBody.position + an.xzy * radius, Color.cyan);
             Debug.DrawLine(referenceBody.position, getPositionAtT(0.0), Color.magenta);
 

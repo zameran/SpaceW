@@ -32,6 +32,8 @@
 
 using UnityEngine;
 
+using Experimental;
+
 public class SpaceshipThruster : MonoBehaviour
 {
     public float thrusterForce = 10000;
@@ -140,10 +142,24 @@ public class SpaceshipThruster : MonoBehaviour
 
     void FixedUpdate()
     {
-        if (isActive)
-            if (addForceAtPosition)
-                _cacheParentRigidbody.AddForceAtPosition(_cacheTransform.up * thrusterForce * thurstCoeff, _cacheTransform.position);
+        if (_cacheParentRigidbody != null)
+        {
+            if (_cacheParentRigidbody.gameObject.GetComponent<Vessel>() == null)
+            {
+                if (isActive)
+                    if (addForceAtPosition)
+                        _cacheParentRigidbody.AddForceAtPosition(_cacheTransform.up * thrusterForce * thurstCoeff, _cacheTransform.position);
+                    else
+                        _cacheParentRigidbody.AddRelativeForce(transform.forward * thrusterForce * thurstCoeff);
+            }
             else
-                _cacheParentRigidbody.AddRelativeForce(transform.forward * thrusterForce * thurstCoeff);
+            {
+                if (isActive)
+                {
+                    Vessel vessel = _cacheParentRigidbody.gameObject.GetComponent<Vessel>();
+                    vessel.velocity += transform.forward * (thrusterForce * thurstCoeff) / 1000.0f;
+                }
+            }
+        }
     }
 }

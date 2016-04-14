@@ -14,6 +14,8 @@ namespace Experimental
 
         public OrbitDriver orbitDriver;
 
+        public Orbit tempOrbit;
+
         private bool rails = false;
 
         public Vector3 findLocalCenterOfMass()
@@ -35,7 +37,7 @@ namespace Experimental
         {
             if (Input.GetKeyDown(KeyCode.F))
             {
-                GetComponent<OrbitDriver>().ro();
+                orbitDriver.ro();
             }
 
             if (Input.GetKeyDown(KeyCode.E))
@@ -47,21 +49,49 @@ namespace Experimental
                 else
                     GoOffRails();
             }
+
+            if (Input.GetKey(KeyCode.G))
+            {
+                orbitDriver.updateFromParameters();
+            }
         }
 
         public void GoOnRails()
         {
-            GetComponent<OrbitDriver>().SetOrbitMode(OrbitDriver.UpdateMode.UPDATE);
+            orbitDriver.SetOrbitMode(OrbitDriver.UpdateMode.PLANET);
+
+            tempOrbit = new Orbit(orbitDriver.orbit);
+
+            rb.isKinematic = true;
+
+            PauseVelocity();
         }
 
         public void GoOffRails()
         {
-            GetComponent<OrbitDriver>().SetOrbitMode(OrbitDriver.UpdateMode.TRACK_Phys);
+            orbitDriver.SetOrbitMode(OrbitDriver.UpdateMode.VESSEL);
+
+            orbitDriver.orbit = new Orbit(tempOrbit);
+            orbitDriver.updateFromParameters();
+
+            rb.isKinematic = false;
+
+            ResumeVelocity();
         }
 
-        public void ChangeWorldVelocity(Vector3d velOffset)
+        public void PauseVelocity()
         {
-            rb.AddForce(velOffset, ForceMode.VelocityChange);
+            this.velocity = Vector3d.zero;
+        }
+
+        public void ResumeVelocity()
+        {
+            Vector3 velocity = Vector3.zero;
+
+            //velocity = orbitDriver.orbit.GetVel() - orbitDriver.referenceBody.getRFrmVel(transform.position); 
+            velocity = orbitDriver.orbit.GetVel() - ((orbitDriver.orbit.referenceBody.inverseRotation) ? Vector3d.zero : orbitDriver.referenceBody.getRFrmVel(transform.position));
+
+            this.velocity = velocity;
         }
     }
 }

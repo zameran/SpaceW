@@ -39,66 +39,6 @@ namespace Experimental
 
         public bool isHomeWorld;
 
-        public bool ocean;
-
-        public bool oceanUseFog = true;
-
-        public double oceanFogPQSDepth = 1000.0;
-
-        public float oceanFogPQSDepthRecip = 0.001f;
-
-        public float oceanFogDensityStart = 0.015f;
-
-        public float oceanFogDensityEnd = 0.13f;
-
-        public float oceanFogDensityPQSMult = 0.02f;
-
-        public float oceanFogDensityAltScalar = -0.0008f;
-
-        public float oceanFogDensityExponent = 1f;
-
-        public Color oceanFogColorStart = new Color(0f, 0.3372549f, 0.4862745f, 1f);
-
-        public Color oceanFogColorEnd = new Color(0f, 0.084f, 0.122f, 1f);
-
-        public float oceanFogDawnFactor = 10f;
-
-        public float oceanSkyColorMult = 1.2f;
-
-        public float oceanSkyColorOpacityBase = 0.2f;
-
-        public float oceanSkyColorOpacityAltMult = 2f;
-
-        public double oceanDensity = 1.0;
-
-        public float oceanAFGBase = 0.6f;
-
-        public float oceanAFGAltMult = 0.05f;
-
-        public float oceanAFGMin = 0.05f;
-
-        public float oceanSunBase = 0.5f;
-
-        public float oceanSunAltMult = 0.01f;
-
-        public float oceanSunMin = 0.05f;
-
-        public bool oceanAFGLerp;
-
-        public float oceanMinAlphaFogDistance = 200f;
-
-        public float oceanMaxAlbedoFog = 0.95f;
-
-        public float oceanMaxAlphaFog = 0.9f;
-
-        public float oceanAlbedoDistanceScalar = 0.01f;
-
-        public float oceanAlphaDistanceScalar = 0.01f;
-
-        public bool atmosphere;
-
-        public bool atmosphereContainsOxygen;
-
         public double atmosphereDepth;
 
         public double atmosphereTemperatureSeaLevel = 288.0;
@@ -280,13 +220,13 @@ namespace Experimental
 
         public void SetupConstants()
         {
-            if (atmosphere)
-            {
-                atmosphereTemperatureLapseRate = atmosphereTemperatureSeaLevel / atmosphereDepth;
-                atmosphereGasMassLapseRate = GeeASL * 9.81 * atmosphereMolarMass / (PhysicsGlobals.idealGasConstant * atmosphereTemperatureLapseRate);
-                radiusAtmoFactor = Radius / atmosphereDepth * -Math.Log(1E-06);
-                atmDensityASL = GetDensity(GetPressure(0.0), GetTemperature(0.0));
-            }
+            //if (atmosphere)
+            //{
+            //    atmosphereTemperatureLapseRate = atmosphereTemperatureSeaLevel / atmosphereDepth;
+            //    atmosphereGasMassLapseRate = GeeASL * 9.81 * atmosphereMolarMass / (PhysicsGlobals.idealGasConstant * atmosphereTemperatureLapseRate);
+            //    radiusAtmoFactor = Radius / atmosphereDepth * -Math.Log(1E-06);
+            //    atmDensityASL = GetDensity(GetPressure(0.0), GetTemperature(0.0));
+            //}
 
             double R2 = Radius * Radius;
 
@@ -400,7 +340,6 @@ namespace Experimental
             }
 
             SetupConstants();
-            oceanFogPQSDepthRecip = (float)(1.0 / oceanFogPQSDepth);
         }
 
         public void CBUpdate()
@@ -586,101 +525,6 @@ namespace Experimental
             }
 
             return false;
-        }
-
-        public Transform GetTransform()
-        {
-            return bodyTransform;
-        }
-
-        public Vector3 GetObtVelocity()
-        {
-            //if (PhysicsGlobals.CelestialBodyTargetingMode == VesselTargetModes.Direction || PhysicsGlobals.CelestialBodyTargetingMode == VesselTargetModes.None)
-            //{
-            //    return Vector3d.zero;
-            //}
-
-            return orbit.GetRelativeVel();
-        }
-
-        //public Vector3 GetSrfVelocity()
-        //{
-            //if (PhysicsGlobals.CelestialBodyTargetingMode == VesselTargetModes.Direction || PhysicsGlobals.CelestialBodyTargetingMode == VesselTargetModes.None)
-            //{
-            //    return Vector3d.zero;
-            //}
-            //
-            //return this.orbit.GetVel() - FlightGlobals.currentMainBody.getRFrmVel(this.bodyTransform.position);
-        //}
-
-        public Vector3 GetFwdVector()
-        {
-            return bodyTransform.forward;
-        }
-
-        //public Vessel GetVessel()
-        //{
-        //    return null;
-        //}
-
-        public string GetName()
-        {
-            return bodyName;
-        }
-
-        public Orbit GetOrbit()
-        {
-            return orbit;
-        }
-
-        public OrbitDriver GetOrbitDriver()
-        {
-            return orbitDriver;
-        }
-
-        //public VesselTargetModes GetTargetingMode()
-        //{
-        //    return PhysicsGlobals.CelestialBodyTargetingMode;
-        //}
-
-        public string RevealName()
-        {
-            return name;
-        }
-
-        public double RevealSpeed()
-        {
-            return orbit.GetRelativeVel().magnitude;
-        }
-
-        public double RevealAltitude()
-        {
-            return orbit.altitude;
-        }
-
-        public string RevealSituationString()
-        {
-            return ((orbit.eccentricity >= 1.0) ? "On Hyperbolic orbit around " : "Orbiting ") + referenceBody.theName;
-        }
-
-        public string RevealType()
-        {
-            if (double.IsInfinity(sphereOfInfluence))
-            {
-                return "Sun";
-            }
-
-            if (double.IsInfinity(referenceBody.sphereOfInfluence))
-            {
-                return "Planet";
-            }
-
-            return "Moon";
-        }
-
-        public float RevealMass()
-        {
-            return (float)Mass;
         }
     }
 }

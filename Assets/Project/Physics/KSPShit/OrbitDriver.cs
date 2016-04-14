@@ -7,21 +7,17 @@
     {
         public enum UpdateMode
         {
-            TRACK_Phys,
-            UPDATE,
-            IDLE
+            PLANET,
+            VESSEL
         }
 
         public delegate void CelestialBodyDelegate(CelestialBody body);
 
         public Vector3d pos;
-
         public Vector3d vel;
 
         public Vector3 startVel;
-
         public Vector3 localCoM;
-
         public Vector3 CoMoffset;
 
         private bool isHyperbolic;
@@ -29,11 +25,8 @@
         public Orbit orbit = new Orbit();
 
         public bool drawOrbit;
-
         public bool reverse;
-
         public bool frameShift;
-
         public bool QueuedUpdate;
 
         public UpdateMode updateMode;
@@ -47,10 +40,6 @@
         public CelestialBody celestialBody;
 
         public Color orbitColor = Color.grey;
-
-        public float lowerCamVsSmaRatio = 0.03f;
-
-        public float upperCamVsSmaRatio = 25f;
 
         public Transform driverTransform;
 
@@ -68,34 +57,17 @@
             }
         }
 
-        /*
-        public ITargetable Targetable
-        {
-            get
-            {
-                if (vessel != null)
-                {
-                    return vessel;
-                }
-                if (celestialBody != null)
-                {
-                    return celestialBody;
-                }
-                return null;
-            }
-        }
-        */
-
         private void Awake()
         {
             driverTransform = transform;
             vessel = GetComponent<Vessel>();
+
             if(celestialBody == null) celestialBody = GetComponent<CelestialBody>();
         }
 
         public void ro()
         {
-            if (vessel)
+            if (vessel != null && referenceBody != null)
                 orbit = Orbit.CreateRandomOrbitAround(referenceBody);
         }
 
@@ -103,15 +75,14 @@
         {
             switch (updateMode)
             {
-                case UpdateMode.TRACK_Phys:
-                case UpdateMode.IDLE:
-                    if (!referenceBody)
+                case UpdateMode.VESSEL:
+                    if (referenceBody == null)
                     {
-                        //referenceBody = FlightGlobals.getMainBody(driverTransform.position);
+                        referenceBody = FlightGlobals.getMainBody(driverTransform.position);
                     }
                     TrackRigidbody(referenceBody);
                     break;
-                case UpdateMode.UPDATE:
+                case UpdateMode.PLANET:
                     orbit.Init();
                     updateFromParameters();
                     break;
@@ -132,8 +103,6 @@
             if (Planetarium.Orbits == null) return;
 
             Planetarium.Orbits.Remove(this);
-
-            //if (Renderer) Destroy(Renderer);
         }
 
         private void FixedUpdate()
@@ -145,22 +114,22 @@
 
         public void UpdateOrbit()
         {
-            if (!ready)
-            {
-                return;
-            }
+            if (!ready) return;
+
             switch (updateMode)
             {
-                case UpdateMode.TRACK_Phys:
-                case UpdateMode.IDLE:
-                    //if (!(vessel.rootPart == null) && !(vessel.rootPart.rb == null))
-                    if (!(vessel.rb == null))
+                case UpdateMode.VESSEL:
+                    if (vessel != null)
                     {
-                        TrackRigidbody(referenceBody);
+                        if (vessel.rb != null)
+                        {
+                            TrackRigidbody(referenceBody);
+                        }
+
                         CheckDominantBody(driverTransform.position);
                     }
                     break;
-                case UpdateMode.UPDATE:
+                case UpdateMode.PLANET:
                     if (vessel != null)
                     {
                         CheckDominantBody(referenceBody.position + pos);
@@ -185,7 +154,7 @@
                 }
             }
 
-            Debug.DrawRay(driverTransform.position, orbit.vel.xzy * Time.deltaTime, (updateMode != UpdateMode.UPDATE) ? Color.white : Color.cyan); //TimeWarp.fixedDeltaTime
+            Debug.DrawRay(driverTransform.position, orbit.vel.xzy * 100 * Time.deltaTime, (updateMode != UpdateMode.PLANET) ? Color.red : Color.cyan); //TimeWarp.fixedDeltaTime
 
             if (drawOrbit)
             {
@@ -201,38 +170,37 @@
         private void CheckDominantBody(Vector3d refPos)
         {
             //if (referenceBody != FlightGlobals.getMainBody(refPos) && !FlightGlobals.overrideOrbit)
-            //{
-            //    RecalculateOrbit(FlightGlobals.getMainBody(refPos));
-            //}
-
-            RecalculateOrbit(FlightGlobals.getMainBody(refPos));
+            if (referenceBody != FlightGlobals.getMainBody(refPos))
+            {
+                RecalculateOrbit(FlightGlobals.getMainBody(refPos));
+            }
         }
 
         private void TrackRigidbody(CelestialBody refBody)
         {
             localCoM = vessel.findLocalCenterOfMass();
-            pos = ((Vector3d)(driverTransform.position + driverTransform.rotation * localCoM - (Vector3)refBody.position)).xzy;
 
-            if (updateMode == UpdateMode.IDLE)
+            //pos = ((Vector3d)(driverTransform.position + driverTransform.rotation * localCoM - (Vector3)refBody.position)).xzy;
+            pos = ((Vector3d)((driverTransform.position + driverTransform.rotation * localCoM - (Vector3)refBody.position)) - (Vector3d)driverTransform.position).xzy;
+
+            if (updateMode == UpdateMode.VESSEL)
             {
                 vel = orbit.GetRotFrameVel(referenceBody);
             }
 
-            //if (vessel.rootPart != null && vessel.rootPart.rb != null && !vessel.rootPart.rb.isKinematic)
             if (vessel.rb != null && !vessel.rb.isKinematic)
             {
                 //vel = vessel.rootPart.rb.GetPointVelocity(driverTransform.TransformPoint(localCoM));// + Krakensbane.GetFrameVelocity();
-                vel = vessel.rb.GetPointVelocity(driverTransform.TransformPoint(localCoM)) + Krakensbane.GetFrameVelocity().ToVector3();
-                //vel = vessel.velocity + Krakensbane.GetFrameVelocity().ToVector3();
+                vel = vessel.velocity + vessel.rb.GetPointVelocity(driverTransform.TransformPoint(localCoM));
                 vel = vel.xzy + orbit.GetRotFrameVel(referenceBody);
             }
 
             vel = vel + referenceBody.GetFrameVel() - refBody.GetFrameVel();
-            pos += vel * Time.fixedDeltaTime; //TimeWarp
+            pos += vel * Time.fixedDeltaTime;
             orbit.UpdateFromStateVectors(pos, vel, refBody, Planetarium.GetUniversalTime());
         }
 
-        private void updateFromParameters()
+        public void updateFromParameters()
         {
             orbit.UpdateFromUT(Planetarium.GetUniversalTime());
             pos = orbit.pos.xzy;
@@ -242,20 +210,17 @@
             {
                 if (vessel)
                 {
-                    //Debug.LogWarning("[OrbitDriver Warning!]: " + vessel.vesselName + " had a NaN Orbit and was removed.");
-                    //vessel.Unload();
-                    //Destroy(vessel.gameObject);
+                    //Shit happens...
                 }
             }
             if (!reverse)
             {
                 if (vessel)
                 {
-                    CoMoffset = driverTransform.rotation * localCoM;
+                    //CoMoffset = driverTransform.rotation * localCoM;
                     vessel.SetPosition(referenceBody.position + pos - (Vector3d)CoMoffset);
                 }
                 else if (celestialBody)
-                //if(celestialBody)
                 {
                     celestialBody.position = referenceBody.position + pos;
                 }
@@ -277,7 +242,7 @@
             frameShift = true;
 
             //CelestialBody referenceBody = referenceBody;
-            if (updateMode == UpdateMode.UPDATE && Time.timeScale > 0f)
+            if (updateMode == UpdateMode.PLANET && Time.timeScale > 0f)
             {
                 OnRailsSOITransition(orbit, newReferenceBody);
             }
@@ -305,24 +270,20 @@
         {
             double universalTime = Planetarium.GetUniversalTime();
             double vMin = universalTime - 1.0 * 1.0;//(double)TimeWarp.CurrentRate;
-            double uT = universalTime;
             double SOIsqr = 0.0;
-            //int num = 0;
 
             if (orbit.referenceBody.HasChild(to))
             {
                 SOIsqr = to.sphereOfInfluence * to.sphereOfInfluence;
-                //num = BSPSolver(ref uT, 1.0 * 1.0, (double t) => Math.Abs((ownOrbit.getPositionAtUT(t) - to.getPositionAtUT(t)).sqrMagnitude - SOIsqr), vMin, universalTime, 0.01, 64); //(double)TimeWarp.CurrentRate
-                BSPSolver(ref uT, 1.0 * 1.0, (double t) => Math.Abs((ownOrbit.getPositionAtUT(t) - to.getPositionAtUT(t)).sqrMagnitude - SOIsqr), vMin, universalTime, 0.01, 64); //(double)TimeWarp.CurrentRate
+                BSPSolver(ref universalTime, 1.0 * 1.0, (double t) => Math.Abs((ownOrbit.getPositionAtUT(t) - to.getPositionAtUT(t)).sqrMagnitude - SOIsqr), vMin, universalTime, 0.01, 64); //(double)TimeWarp.CurrentRate
             }
             else if (to.HasChild(orbit.referenceBody))
             {
                 SOIsqr = orbit.referenceBody.sphereOfInfluence * orbit.referenceBody.sphereOfInfluence;
-                //num = BSPSolver(ref uT, 1.0 * 1.0, (double t) => Math.Abs(ownOrbit.getRelativePositionAtUT(t).sqrMagnitude - SOIsqr), vMin, universalTime, 0.01, 64); //(double)TimeWarp.CurrentRate
-                BSPSolver(ref uT, 1.0 * 1.0, (double t) => Math.Abs(ownOrbit.getRelativePositionAtUT(t).sqrMagnitude - SOIsqr), vMin, universalTime, 0.01, 64); //(double)TimeWarp.CurrentRate
+                BSPSolver(ref universalTime, 1.0 * 1.0, (double t) => Math.Abs(ownOrbit.getRelativePositionAtUT(t).sqrMagnitude - SOIsqr), vMin, universalTime, 0.01, 64); //(double)TimeWarp.CurrentRate
             }
 
-            ownOrbit.UpdateFromOrbitAtUT(ownOrbit, uT, to);
+            ownOrbit.UpdateFromOrbitAtUT(ownOrbit, universalTime, to);
         }
 
         private void unlockFrameSwitch()
