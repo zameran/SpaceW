@@ -28,16 +28,10 @@ namespace UnityEngine
 {
     using System;
 
-    public class Vector3d
+    [Serializable]
+    public struct Vector3d
     {
         public double x, y, z;
-
-        public Vector3d()
-        {
-            this.x = 0.0f;
-            this.y = 0.0f;
-            this.z = 0.0f;
-        }
 
         public Vector3d(double v)
         {
@@ -128,9 +122,54 @@ namespace UnityEngine
             return new Vector3d(v1.x / v2.x, v1.y / v2.y, v1.z / v2.z);
         }
 
+        public static bool operator !=(Vector3d v1, Vector3d v2)
+        {
+            return v1.x != v2.x || v1.y != v2.y || v1.z != v2.z;
+        }
+
+        public static bool operator ==(Vector3d v1, Vector3d v2)
+        {
+            return v1.x == v2.x && v1.y == v2.y && v1.z == v2.z;
+        }
+
+        public static implicit operator Vector3(Vector3d v)
+        {
+            return new Vector3((float)v.x, (float)v.y, (float)v.z);
+        }
+
+        public static implicit operator Vector3d(Vector3 v)
+        {
+            return new Vector3d((double)v.x, (double)v.y, (double)v.z);
+        }
+
+        public override int GetHashCode()
+        {
+            return x.GetHashCode() + y.GetHashCode() << 2 + z.GetHashCode();
+        }
+
+        public override bool Equals(object obj)
+        {
+            if (!(obj is Vector3d))
+                return false;
+
+            Vector3d Vector = (Vector3d)obj;
+
+            return x == Vector.x && y == Vector.y && z == Vector.z;
+        }
+
         public override string ToString()
         {
             return "(" + x + "," + y + "," + z + ")";
+        }
+
+        public double magnitude
+        {
+            get { return Magnitude(); }
+        }
+
+        public double sqrMagnitude
+        {
+            get { return SqrMagnitude(); }
         }
 
         public double Magnitude()
@@ -153,6 +192,14 @@ namespace UnityEngine
             return lhs.x * rhs.x + lhs.y * rhs.y + lhs.z * rhs.z;
         }
 
+        public Vector3d normalized
+        {
+            get
+            {
+                return Normalize(this);
+            }
+        }
+
         public void Normalize()
         {
             double invLength = 1.0 / System.Math.Sqrt(x * x + y * y + z * z);
@@ -161,9 +208,22 @@ namespace UnityEngine
             z *= invLength;
         }
 
+        public static Vector3d Normalize(Vector3d value)
+        {
+            double magnitude = value.Magnitude();
+
+            if (magnitude > 9.9999997473787516E-06) return value / magnitude; else return zero;
+        }
+
         public static Vector3d Projection(Vector3d a, Vector3d b)
         {
             return ((Dot(a, b) / Dot(b, b)) * b);
+        }
+
+        public static double Distance(Vector3d a, Vector3d b)
+        {
+            Vector3d v = new Vector3d(a.x - b.x, a.y - b.y, a.z - b.z);
+            return Math.Sqrt(v.x * v.x + v.y * v.y + v.z * v.z);
         }
 
         public Vector3d Rotate(double pointX, double pointY, double pointZ, double directionX, double directionY, double directionZ, double angle)
@@ -239,6 +299,16 @@ namespace UnityEngine
         public Vector3d Unit()
         {
             return (this / this.Magnitude());
+        }
+
+        public Vector3d Zero()
+        {
+            return new Vector3d(0.0, 0.0, 0.0);
+        }
+
+        public bool IsZero()
+        {
+            return this.Equals(new Vector3d(0.0, 0.0, 0.0));
         }
 
         public static Vector3d UnitX()

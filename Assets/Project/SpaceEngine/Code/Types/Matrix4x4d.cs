@@ -114,7 +114,7 @@ namespace UnityEngine
 
         public static Vector3d operator *(Matrix4x4d m, Vector3d v)
         {
-            Vector3d kProd = new Vector3d();
+            Vector3d kProd = Vector3d.zero;
 
             double fInvW = 1.0 / (m.m[3, 0] * v.x + m.m[3, 1] * v.y + m.m[3, 2] * v.z + m.m[3, 3]);
 
