@@ -66,7 +66,11 @@ public class UserInterface : MonoBehaviour
 
     public void Quit()
     {
+        #if UNITY_EDITOR
+        Debug.Break();
+        #else
         Application.Quit();
+        #endif
     }
 
     #endregion
