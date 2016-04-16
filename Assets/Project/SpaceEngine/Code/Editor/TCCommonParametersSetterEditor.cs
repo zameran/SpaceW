@@ -124,17 +124,13 @@ public sealed class TCCommonParametersSetterEditor : Editor
     {
         setter.cloudsParams2.z = EditorGUILayout.Slider("cloudsStyle ", setter.cloudsParams2.z, -1.0f, 1.0f);
 
-        //TODO Clouds settings.
+        setter.cloudsParams1.z = EditorGUILayout.Slider("twistZones ", setter.cloudsParams1.z, 0.0f, 10.0f);
+        setter.cloudsParams1.w = EditorGUILayout.Slider("twistMagn ", setter.cloudsParams1.w, 0.0f, 5.0f);
 
-        //twistZones 0-10
-        //twistMagn 0-5
-        //mainFreq 0-3
-        //mainOctaves 0-15
-        //Coverage 0-1
-        //cycloneMagn 0-20
-        //cycloneFreq 0-1
-        //cycloneDensity 0-1
-        //cycloneOctaves 0-5
+        setter.cycloneParams.x = EditorGUILayout.Slider("cycloneMagn ", setter.cycloneParams.x, 0.0f, 20.0f);
+        setter.cycloneParams.y = EditorGUILayout.Slider("cycloneFreq ", setter.cycloneParams.y, 0.0f, 10000.0f);
+        setter.cycloneParams.z = EditorGUILayout.Slider("cycloneSqrtDensity ", setter.cycloneParams.z, 0.0f, 1.0f);
+        setter.cycloneParams.w = (float)Mathf.RoundToInt(EditorGUILayout.Slider("cycloneOctaves ", setter.cycloneParams.w, 0.0f, 5.0f));
     }
 
     private void DrawGUIForNature(TCCommonParametersSetter setter)

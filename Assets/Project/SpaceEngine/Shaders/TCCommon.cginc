@@ -262,8 +262,8 @@ const float pi2 = 6.28318531;
 //-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
-#define     GetCloudsColor(height)           tex1D(CloudsColorTable, height)
-#define     GetGasGiantCloudsColor(height)   tex2D(MaterialTable, float2(height, 0.0))
+#define     GetCloudsColor(height)           tex2Dlod(CloudsColorTable, float2(height, 0.0)
+#define     GetGasGiantCloudsColor(height)   tex2Dlod(MaterialTable, float4(height, 0.0, 0.0, 0.0))
 //-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
@@ -3101,6 +3101,45 @@ float RidgedMultifractalTerraced(float3 ppoint, float n, float power)
 //-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
+float4 CycloneNoise(float3 ppoint, float o)
+{
+	float3 twistedPoint = ppoint;
+	float3 p = ppoint;
+	float3 v;
+	float4 cell;
+	float radius, dist, dist2, fi;
+	float freq   = cycloneFreq;
+	float dens   = 1.0 / cycloneSqrtDensity;
+	float offset = 0.0;
+	float offs   = 1.0;
+
+	for (int i = 0; i < o; i++)
+	{
+		cell = Cell3NoiseVec(p * freq);
+		v = cell.xyz - p;
+		v.y *= 1.6;
+		radius = length(v) * dens;
+
+		if (radius < 1.0)
+		{
+			dist  = 1.0 - radius;
+			dist2 = 0.5 - radius;
+			fi    = SavePow(dist, 2.5) * (exp(-60.0 * dist2 * dist2) + 0.5);
+			twistedPoint = Rotate(cycloneMagn * sign(cell.y) * fi, cell.xyz, ppoint);
+			offset += offs * fi;
+		}
+
+		freq *= 4.3;
+		dens *= 2.9;
+		offs *= 0.2;
+		ppoint = twistedPoint;
+	}
+
+	return float4(twistedPoint, offset);
+}
+//-----------------------------------------------------------------------------
+
+//-----------------------------------------------------------------------------
 //TODO Fix dat.
 float HeightMapClouds(float3 ppoint)
 {
@@ -3141,7 +3180,7 @@ float HeightMapClouds(float3 ppoint)
 
 	// Compute turbilence features
 	//noiseOctaves = cloudsOctaves;
-	//float turbulence = (Fbm(point * 100.0 * cloudsFreq + Randomize) + 1.5);// * smoothstep(0.0, 0.05, global);
+	//float turbulence = (Fbm(ppoint * 100.0 * cloudsFreq + Randomize) + 1.5);// * smoothstep(0.0, 0.05, global);
 
 	return global;
 }
@@ -3602,5 +3641,65 @@ float4 ColorMapPlanet(float3 pos, float3 ppoint, float height, float slope)
 
 	surf = GetSurfaceColor(height, slope, length(lookupColor));
 	return surf.color;
+}
+//-----------------------------------------------------------------------------
+
+//-----------------------------------------------------------------------------
+//TODO: Fix dat.
+float HeightMapCloudsGasGiant(float3 ppoint)
+{
+	float3 twistedPoint = ppoint;
+
+	if (cloudsStyle < 1.0 && cloudsStyle > -1.0) //if (cloudsStyle == 0.0)
+	{
+		noiseOctaves = 10.0;
+		twistedPoint *= float3(1.0, 1.0, 1.0) + 0.337 * Fbm3D(ppoint * 0.193);
+	}
+
+	float offset = 0.0;
+	float zone = Noise(float3(0.0, twistedPoint.y * twistZones * 0.5, 0.0)) * 2.0;
+	//float zone = Fbm(float3(0.0, twistedPoint.y * twistZones * 0.5, 0.0), 2) * 2.0;
+
+	noiseOctaves = 10.0;
+
+	// Compute cyclons
+	if (cycloneOctaves > 0.0)
+	{
+		float4 cyclone = CycloneNoise(twistedPoint, cycloneOctaves);
+		twistedPoint = cyclone.xyz;
+		offset = cyclone.w;
+	}
+
+	// Compute stripes
+	float turbulence, height;
+	if (cloudsStyle < 1.0 && cloudsStyle > -1.0) //if (cloudsStyle == 0.0)
+	{
+		float ang = zone * twistMagn;
+		float sina = sin(ang);
+		float cosa = cos(ang);
+		twistedPoint = float3(cosa * twistedPoint.x - sina * twistedPoint.z, twistedPoint.y, sina * twistedPoint.x + cosa * twistedPoint.z);
+		twistedPoint = twistedPoint * mainFreq + Randomize;
+		turbulence = Fbm(colorDistFreq * twistedPoint);
+		twistedPoint *= 10.0 + 5.0 * turbulence;
+		height = (Fbm(twistedPoint) + 0.7) * 0.7;
+	}
+	else
+	{
+		turbulence = Fbm(twistedPoint * 0.2);
+		twistedPoint = twistedPoint * mainFreq + Randomize;
+		twistedPoint.y *= 2.0 + turbulence * twistMagn;
+		height = (Fbm(twistedPoint) + 0.7) * 0.7;
+	}
+
+	height = 0.5 * (0.5 + 0.6 * zone) + colorDistMagn * height + offset;
+
+	return height;
+}
+//-----------------------------------------------------------------------------
+
+//-----------------------------------------------------------------------------
+float4 ColorMapCloudsGasGiant(float3 pos, float3 ppoint, float height, float slope)
+{
+	return height * GetGasGiantCloudsColor(height);
 }
 //-----------------------------------------------------------------------------
