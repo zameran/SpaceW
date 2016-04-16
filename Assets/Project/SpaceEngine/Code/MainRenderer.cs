@@ -35,14 +35,15 @@ using UnityEngine;
 [RequireComponent(typeof(Camera))]
 public sealed class MainRenderer : MonoBehaviour
 {
+    public Planetoid planet;
     public Atmosphere atmosphere;
 
-    void Start()
+    private void Start()
     {
 
     }
 
-    void OnRenderObject()
+    private void OnRenderObject()
     {
         if(atmosphere != null)
         {

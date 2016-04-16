@@ -30,10 +30,37 @@
  */
 #endregion
 
+using System.Collections.Generic;
 using UnityEngine;
 
 public sealed class DebugDrawQuadBox : DebugDraw
 {
+    private struct ColorForQuad
+    {
+        public Color color;
+
+        public QuadPosition quadPosition;
+
+        public ColorForQuad(Color color, QuadPosition quadPosition)
+        {
+            this.color = color;
+
+            this.quadPosition = quadPosition;
+        }
+    }
+
+    private List<ColorForQuad> colorsForQuad = new List<ColorForQuad>(6)
+    {
+        new ColorForQuad(Color.blue, QuadPosition.Top),
+        new ColorForQuad(Color.red, QuadPosition.Bottom),
+        new ColorForQuad(Color.yellow, QuadPosition.Front),
+        new ColorForQuad(Color.green, QuadPosition.Back),
+        new ColorForQuad(Color.magenta, QuadPosition.Left),
+        new ColorForQuad(Color.cyan, QuadPosition.Right)
+    };
+
+    public bool useColorPerMainQuad = true;
+
     protected override void Start()
     {
         base.Start();
@@ -62,6 +89,13 @@ public sealed class DebugDrawQuadBox : DebugDraw
             if (q.Generated && q.ShouldDraw)
             {
                 Color lineColor = Color.blue;
+
+                if (!useColorPerMainQuad)
+                    lineColor = Color.blue;
+                else
+                {
+                    colorsForQuad.ForEach(delegate(ColorForQuad c) { if (q.Position == c.quadPosition) lineColor = c.color; });
+                }
 
                 int[,] ORDER = new int[,] { { 1, 0 }, { 2, 3 }, { 0, 2 }, { 3, 1 } };
 

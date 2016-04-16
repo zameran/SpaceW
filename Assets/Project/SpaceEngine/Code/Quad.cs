@@ -37,6 +37,8 @@ using System.Linq;
 using System.Collections;
 using System.Collections.Generic;
 
+using ZFramework.Unity.Common.PerfomanceMonitor;
+
 [Serializable]
 public struct QuadGenerationConstants
 {
@@ -356,19 +358,18 @@ public sealed class Quad : MonoBehaviour
 
 		SetupBounds(this, QuadMesh);
 
-		Planetoid.Atmosphere.SetUniformsForPlanetQuad(QuadMaterial); 
+		if(Planetoid.Atmosphere != null) Planetoid.Atmosphere.SetUniformsForPlanetQuad(QuadMaterial); 
 
 		QuadMaterial.SetBuffer("data", OutDataBuffer);
 		QuadMaterial.SetBuffer("quadGenerationConstants", QuadGenerationConstantsBuffer);
 		QuadMaterial.SetTexture("_HeightTexture", HeightTexture);
 		QuadMaterial.SetTexture("_NormalTexture", NormalTexture);
-		QuadMaterial.SetFloat("_Atmosphere", 1.0f);
+		QuadMaterial.SetFloat("_Atmosphere", (Planetoid.Atmosphere != null) ? 1.0f : 0.0f);
 		QuadMaterial.SetFloat("_Wireframe", Planetoid.DrawWireframe ? 1.0f : 0.0f);
 		QuadMaterial.SetFloat("_Normale", Planetoid.DrawNormals ? 1.0f : 0.0f);
 		QuadMaterial.SetFloat("_Side", (float)Position);
 		QuadMaterial.SetVector("_Rotation", new Vector3(Planetoid.QuadsRoot.transform.rotation.eulerAngles.x, Planetoid.QuadsRoot.transform.rotation.eulerAngles.y, Planetoid.QuadsRoot.transform.rotation.eulerAngles.z) * Mathf.Deg2Rad);
 		QuadMaterial.SetVector("_Origin", Planetoid.Origin);
-		//QuadMaterial.SetMatrix("_TTW", GetTangentFrame(this));
 		QuadMaterial.renderQueue = Planetoid.RenderQueue;
 		QuadMaterial.SetPass(0);
 
@@ -535,8 +536,7 @@ public sealed class Quad : MonoBehaviour
 					subTopRight = new Vector3(topLeftCorner.x, topLeftCorner.y + step.y * sY, topLeftCorner.z + step.z * (sX + 1));
 					subBottomLeft = new Vector3(topLeftCorner.x, topLeftCorner.y + step.y * (sY + 1), topLeftCorner.z + step.z * sX);
 				}
-
-				if (staticY)
+				else if (staticY)
 				{
 					subTopLeft = new Vector3(topLeftCorner.x + step.x * sX, topLeftCorner.y, topLeftCorner.z + step.z * sY);
 					subBottomRight = new Vector3(topLeftCorner.x + step.x * (sX + 1), topLeftCorner.y, topLeftCorner.z + step.z * (sY + 1));
@@ -544,8 +544,7 @@ public sealed class Quad : MonoBehaviour
 					subTopRight = new Vector3(topLeftCorner.x + step.x * (sX + 1), topLeftCorner.y, topLeftCorner.z + step.z * sY);
 					subBottomLeft = new Vector3(topLeftCorner.x + step.x * sX, topLeftCorner.y, topLeftCorner.z + step.z * (sY + 1));
 				}
-
-				if (staticZ)
+				else if (staticZ)
 				{
 					subTopLeft = new Vector3(topLeftCorner.x + step.x * sX, topLeftCorner.y + step.y * sY, topLeftCorner.z);
 					subBottomRight = new Vector3(topLeftCorner.x + step.x * (sX + 1), topLeftCorner.y + step.y * (sY + 1), topLeftCorner.z);
@@ -652,27 +651,24 @@ public sealed class Quad : MonoBehaviour
 		int kernel4 = CoreShader.FindKernel("TexturesSub");
 
 		SetupComputeShaderKernelUniforfms(kernel1, QuadGenerationConstantsBuffer, PreOutDataBuffer, PreOutDataSubBuffer, OutDataBuffer); Log("Buffers for first kernel ready!");
+		SetupComputeShaderKernelUniforfms(kernel2, QuadGenerationConstantsBuffer, PreOutDataBuffer, PreOutDataSubBuffer, OutDataBuffer); Log("Buffers for second kernel ready!");
+		SetupComputeShaderKernelUniforfms(kernel3, QuadGenerationConstantsBuffer, PreOutDataBuffer, PreOutDataSubBuffer, OutDataBuffer); Log("Buffers for third kernel ready!");
+		SetupComputeShaderKernelUniforfms(kernel4, QuadGenerationConstantsBuffer, PreOutDataBuffer, PreOutDataSubBuffer, OutDataBuffer); Log("Buffers for fourth kernel ready!");
 
 		CoreShader.Dispatch(kernel1,
 		QS.THREADGROUP_SIZE_X_REAL,
 		QS.THREADGROUP_SIZE_Y_REAL,
 		QS.THREADGROUP_SIZE_Z_REAL); Log("First kernel ready!");
 
-		SetupComputeShaderKernelUniforfms(kernel2, QuadGenerationConstantsBuffer, PreOutDataBuffer, PreOutDataSubBuffer, OutDataBuffer); Log("Buffers for second kernel ready!");
-
 		CoreShader.Dispatch(kernel2,
 		QS.THREADGROUP_SIZE_X,
 		QS.THREADGROUP_SIZE_Y,
 		QS.THREADGROUP_SIZE_Z); Log("Second kernel ready!");
 
-		SetupComputeShaderKernelUniforfms(kernel3, QuadGenerationConstantsBuffer, PreOutDataBuffer, PreOutDataSubBuffer, OutDataBuffer); Log("Buffers for third kernel ready!");
-
 		CoreShader.Dispatch(kernel3,
 		QS.THREADGROUP_SIZE_X_SUB_REAL,
 		QS.THREADGROUP_SIZE_Y_SUB_REAL,
 		QS.THREADGROUP_SIZE_Z_SUB_REAL); Log("Third kernel ready!");
-
-		SetupComputeShaderKernelUniforfms(kernel4, QuadGenerationConstantsBuffer, PreOutDataBuffer, PreOutDataSubBuffer, OutDataBuffer); Log("Buffers for fourth kernel ready!");
 
 		CoreShader.Dispatch(kernel4,
 		QS.THREADGROUP_SIZE_X_SUB,

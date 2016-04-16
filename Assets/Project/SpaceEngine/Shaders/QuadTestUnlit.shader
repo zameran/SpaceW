@@ -78,8 +78,6 @@
 
 			uniform float3 _Origin;
 
-			uniform float4x4 _TTW;
-
 			uniform StructuredBuffer<OutputStruct> data;
 			uniform StructuredBuffer<QuadGenerationConstants> quadGenerationConstants;
 
@@ -88,7 +86,14 @@
 				return float4(tan(1.37 * inColor.rgb) / tan(1.37), inColor.a);
 			}
 
-			float4 GroundFinalColor(appdata_full_compute v, float4 terrainColor, float3 p, float3 fn)
+			float GroundFinalColorWithoutAtmosphere(appdata_full_compute v, float4 terrainColor, float3 p, float n)
+			{
+				float4 finaColor = terrainColor;
+
+				return finaColor;
+			}
+
+			float4 GroundFinalColorWithAtmosphere(appdata_full_compute v, float4 terrainColor, float3 p, float3 n)
 			{	
 				QuadGenerationConstants constants = quadGenerationConstants[0];
 	
@@ -96,7 +101,7 @@
 				float3 WSD = _Sun_WorldSunDir;
 				
 				float3 originalPoint = p;
-				float3 originalNormal = fn;
+				float3 originalNormal = n;
 
 				float3 rotatedPoint = Rotate(_Rotation.x, float3(1, 0, 0), 
 									  Rotate(_Rotation.y, float3(0, 1, 0), 
@@ -106,28 +111,28 @@
 									   Rotate(_Rotation.y, float3(0, 1, 0), 
 									   Rotate(_Rotation.z, float3(0, 0, 1), originalNormal)));	
 				
-				fn = rotatedNormal;
+				n = rotatedNormal;
 
-				//fn = mul(_Object2World, fn);
+				//n = mul(_Object2World, n);
 				
-				fn = normalize(fn + WSD); //use this for normal light intens. but disabled normals.
+				n = normalize(n + WSD); //use this for normal light intens. but disabled normals.
 
-				//fn.xy = fn.xy; // - default.
-				//fn.xy = -fn.xy; // - inverted.
+				//n.xy = n.xy; // - default.
+				//n.xy = -n.xy; // - inverted.
 
-				//fn.z = sqrt(max(0.0, 1.0 - dot(fn.xy, fn.xy))); // - default.
-				//fn.z = sqrt(max(0.0, -1.0 + dot(fn.xy, fn.xy))); // - inverted.
+				//n.z = sqrt(max(0.0, 1.0 - dot(n.xy, n.xy))); // - default.
+				//n.z = sqrt(max(0.0, -1.0 + dot(n.xy, n.xy))); // - inverted.
 
-				//fn = float3(0, 0, 0); //disable normal mapping... bruuuutaal!
+				//n = float3(0, 0, 0); //disable normal mapping... bruuuutaal!
 
 				float4 reflectance = RGB2Reflectance(terrainColor);
 
 				float3 sunL = 0;
 				float3 skyE = 0;
 
-				SunRadianceAndSkyIrradiance(rotatedPoint, fn, WSD, sunL, skyE);
+				SunRadianceAndSkyIrradiance(rotatedPoint, n, WSD, sunL, skyE);
 
-				float cTheta = dot(fn, WSD); // diffuse ground color
+				float cTheta = dot(n, WSD); // diffuse ground color
 
 				float3 groundColor = 1.5 * reflectance.rgb * (sunL * max(cTheta, 0) + skyE) / M_PI;
 				float3 extinction;
@@ -164,8 +169,11 @@
 				//v.normal.xyz = mul(v.normal.xyz, rotation);
 
 				float4 terrainColor = tex2Dlod(_HeightTexture, v.texcoord);
-				float4 groundFinalColor = GroundFinalColor(v, terrainColor, v.vertex.xyz, v.normal.xyz);
-				float4 scatteringColor = float4(groundFinalColor.xyz, groundFinalColor.w);
+				//float4 groundFinalColor = GroundFinalColorWithAtmosphere(v, terrainColor, v.vertex.xyz, v.normal.xyz);
+				float4 groundFinalColor = _Atmosphere > 0.0 ? 
+										  GroundFinalColorWithAtmosphere(v, terrainColor, v.vertex.xyz, v.normal.xyz) : 
+										  terrainColor;//GroundFinalColorWithoutAtmosphere(v, terrainColor, v.vertex.xyz, v.normal.xyz);
+				float4 scatteringColor = groundFinalColor;
 
 				v2fg o;
 
