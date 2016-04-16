@@ -183,6 +183,8 @@ namespace Experimental
                      double LAN, double argumentOfPeriapsis, double meanAnomalyAtEpoch,
                      double epoch, CelestialBody referenceBody)
         {
+            this.referenceBody = referenceBody;
+
             this.inclination = inclination;
             this.eccentricity = eccentricity;
             this.semiMajorAxis = semiMajorAxis;
@@ -191,13 +193,13 @@ namespace Experimental
             this.meanAnomalyAtEpoch = meanAnomalyAtEpoch;
             this.epoch = epoch;
 
-            this.referenceBody = referenceBody;
-
             Init();
         }
 
         public Orbit(Orbit reference)
         {
+            this.referenceBody = reference.referenceBody;
+
             this.inclination = reference.inclination;
             this.eccentricity = reference.eccentricity;
             this.semiMajorAxis = reference.semiMajorAxis;
@@ -205,8 +207,6 @@ namespace Experimental
             this.argumentOfPeriapsis = reference.argumentOfPeriapsis;
             this.meanAnomalyAtEpoch = reference.meanAnomalyAtEpoch;
             this.epoch = reference.epoch;
-
-            this.referenceBody = reference.referenceBody;
 
             Init();
         }
@@ -533,7 +533,7 @@ namespace Experimental
         {
             Vector3d vel = GetFrameVel() - ((!FlightGlobals.ActiveVessel) ? Vector3d.zero : FlightGlobals.ActiveVessel.orbitDriver.referenceBody.GetFrameVel());
 
-            return new Vector3d(vel.x, vel.z, vel.y);
+            return vel.xzy;
         }
 
         public Vector3d GetRelativeVel()
@@ -964,6 +964,34 @@ namespace Experimental
 
             Debug.DrawRay(getPositionAtT(ObT), new Vector3d(vel.x, vel.z, vel.y) * 0.0099999997764825821, Color.white);
             Debug.DrawRay(referenceBody.position, h.xzy, Color.blue);
+        }
+
+        public void DrawOrbit(float colorMod)
+        {
+            if (eccentricity < 1.0)
+            {
+                for (double i = 0.0; i < MathUtils.TwoPI; i += drawResolution * MathUtils.Deg2Rad)
+                {
+                    Vector3 v = getPositionFromTrueAnomaly(i % MathUtils.TwoPI).ToVector3();
+                    Vector3 v2 = getPositionFromTrueAnomaly((i + drawResolution * MathUtils.Deg2Rad) % MathUtils.TwoPI).ToVector3();
+
+                    Debug.DrawLine(v, v2, Color.Lerp(Color.yellow * colorMod, Color.green * colorMod, Mathf.InverseLerp((float)getOrbitalSpeedAtDistance(PeR), (float)getOrbitalSpeedAtDistance(ApR), (float)getOrbitalSpeedAtPos(v))));
+                }
+            }
+            else
+            {
+                for (double i = -Math.Acos(-(1.0 / eccentricity)) + drawResolution * MathUtils.Deg2Rad; i < Math.Acos(-(1.0 / eccentricity)) - drawResolution * MathUtils.Deg2Rad; i += drawResolution * MathUtils.Deg2Rad)
+                {
+                    Debug.DrawLine(getPositionFromTrueAnomaly(i), getPositionFromTrueAnomaly(Math.Min(Math.Acos(-(1.0 / eccentricity)), i + drawResolution * MathUtils.Deg2Rad)), Color.green * colorMod);
+                }
+            }
+
+            Debug.DrawLine(getPositionAtT(ObT), referenceBody.position, Color.white * colorMod);
+            Debug.DrawLine(referenceBody.position, referenceBody.position + an.xzy * radius, Color.cyan * colorMod);
+            Debug.DrawLine(referenceBody.position, getPositionAtT(0.0), Color.magenta * colorMod);
+
+            Debug.DrawRay(getPositionAtT(ObT), new Vector3d(vel.x, vel.z, vel.y) * 0.0099999997764825821, Color.white * colorMod);
+            Debug.DrawRay(referenceBody.position, h.xzy, Color.blue * colorMod);
         }
 
         public static bool PeApIntersects(Orbit primary, Orbit secondary, double threshold)

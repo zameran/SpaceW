@@ -8,7 +8,8 @@
         public enum UpdateMode
         {
             PLANET,
-            VESSEL
+            VESSEL,
+            VESSEL_ACTIVE
         }
 
         public delegate void CelestialBodyDelegate(CelestialBody body);
@@ -82,6 +83,13 @@
                     }
                     TrackRigidbody(referenceBody);
                     break;
+                case UpdateMode.VESSEL_ACTIVE:
+                    if (referenceBody == null)
+                    {
+                        referenceBody = FlightGlobals.getMainBody(driverTransform.position);
+                    }
+                    TrackRigidbody(referenceBody);
+                    break;
                 case UpdateMode.PLANET:
                     orbit.Init();
                     updateFromParameters();
@@ -128,6 +136,18 @@
 
                         CheckDominantBody(driverTransform.position);
                     }
+                    break;
+                case UpdateMode.VESSEL_ACTIVE:
+                    if (vessel != null)
+                    {
+                        if (vessel.rb != null)
+                        {
+                            TrackRigidbody(referenceBody);
+                        }
+
+                        CheckDominantBody(driverTransform.position);
+                    }
+                    //updateFromParametersForVessel();
                     break;
                 case UpdateMode.PLANET:
                     if (vessel != null)
@@ -191,7 +211,7 @@
             if (vessel.rb != null && !vessel.rb.isKinematic)
             {
                 //vel = vessel.rootPart.rb.GetPointVelocity(driverTransform.TransformPoint(localCoM));// + Krakensbane.GetFrameVelocity();
-                vel = vessel.velocity + vessel.rb.GetPointVelocity(driverTransform.TransformPoint(localCoM));
+                vel = vessel.velocity;// + vessel.rb.GetPointVelocity(driverTransform.TransformPoint(localCoM));
                 vel = vel.xzy + orbit.GetRotFrameVel(referenceBody);
             }
 
@@ -203,6 +223,7 @@
         public void updateFromParameters()
         {
             orbit.UpdateFromUT(Planetarium.GetUniversalTime());
+
             pos = orbit.pos.xzy;
             vel = orbit.vel;
 
