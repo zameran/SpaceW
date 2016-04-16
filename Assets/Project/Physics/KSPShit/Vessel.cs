@@ -6,21 +6,18 @@ namespace Experimental
     {
         public Rigidbody rb;
 
-        public Transform com;
+        public Transform centerOfMass;
 
-        public CelestialBody db;
-
+        public Vector3 velocityLast;
         public Vector3 velocity;
 
         public OrbitDriver orbitDriver;
-
-        public Orbit tempOrbit;
 
         private bool rails = false;
 
         public Vector3 findLocalCenterOfMass()
         {
-            return com.transform.position;
+            return centerOfMass.transform.position;
         }
 
         public void SetPosition(Vector3 position)
@@ -56,11 +53,16 @@ namespace Experimental
             }
         }
 
+        private void FixedUpdate()
+        {
+
+        }
+
         public void GoOnRails()
         {
-            orbitDriver.SetOrbitMode(OrbitDriver.UpdateMode.PLANET);
+            Debug.Log("Vessel now on rails!");
 
-            tempOrbit = new Orbit(orbitDriver.orbit);
+            orbitDriver.SetOrbitMode(OrbitDriver.UpdateMode.PLANET);
 
             rb.isKinematic = true;
 
@@ -69,11 +71,10 @@ namespace Experimental
 
         public void GoOffRails()
         {
-            orbitDriver.SetOrbitMode(OrbitDriver.UpdateMode.VESSEL);
-
-            orbitDriver.orbit = new Orbit(tempOrbit);
-            orbitDriver.updateFromParameters();
-
+            Debug.Log("Vessel now off rails!");
+                     
+            orbitDriver.SetOrbitMode(OrbitDriver.UpdateMode.VESSEL_ACTIVE);
+           
             rb.isKinematic = false;
 
             ResumeVelocity();
@@ -81,17 +82,14 @@ namespace Experimental
 
         public void PauseVelocity()
         {
-            this.velocity = Vector3d.zero;
+            this.velocityLast = velocity;
+            this.velocity = Vector3.zero;
         }
 
         public void ResumeVelocity()
         {
-            Vector3 velocity = Vector3.zero;
-
-            //velocity = orbitDriver.orbit.GetVel() - orbitDriver.referenceBody.getRFrmVel(transform.position); 
-            velocity = orbitDriver.orbit.GetVel() - ((orbitDriver.orbit.referenceBody.inverseRotation) ? Vector3d.zero : orbitDriver.referenceBody.getRFrmVel(transform.position));
-
-            this.velocity = velocity;
+            this.velocityLast = Vector3.zero;
+            this.velocity = orbitDriver.orbit.GetVel() - ((orbitDriver.orbit.referenceBody.inverseRotation) ? Vector3d.zero : orbitDriver.referenceBody.getRFrmVel(transform.position));
         }
     }
 }
