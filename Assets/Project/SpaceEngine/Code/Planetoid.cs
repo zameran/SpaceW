@@ -205,6 +205,22 @@ public sealed class Planetoid : MonoBehaviour
 		PrototypeMesh = MeshFactory.SetupQuadMesh();
 	}
 
+	[ContextMenu("UpdateLODDistances")]
+	public void UpdateLODDistances()
+	{
+		LODDistances = new int[LODMaxLevel + 1];
+
+		for (int i = 0; i < LODDistances.Length; i++)
+		{
+			if (i == 0)
+				LODDistances[i] = Mathf.RoundToInt(PlanetRadius);
+			else
+			{
+				LODDistances[i] = LODDistances[i - 1] / 2;
+			}
+		}
+	}
+
 	public int GetCulledQuadsCount()
 	{
 		int count = 0;
@@ -249,6 +265,8 @@ public sealed class Planetoid : MonoBehaviour
 		SetupMainQuad(QuadPosition.Right);
 		SetupMainQuad(QuadPosition.Front);
 		SetupMainQuad(QuadPosition.Back);
+
+		UpdateLODDistances();
 
 		if (NPS != null)
 			NPS.LoadAndInit();
