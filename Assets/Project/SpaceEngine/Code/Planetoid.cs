@@ -108,11 +108,14 @@ public sealed class Planetoid : MonoBehaviour
 		ThreadScheduler.Initialize();
 
 		if (Cache == null)
-			if (this.gameObject.GetComponentInChildren<QuadStorage>() != null)
-				Cache = this.gameObject.GetComponentInChildren<QuadStorage>();
+			if (gameObject.GetComponentInChildren<QuadStorage>() != null)
+				Cache = gameObject.GetComponentInChildren<QuadStorage>();
 
 		if (NPS != null)
 			NPS.LoadAndInit();
+
+		if (PrototypeMesh == null)
+			SetupMesh();
 
 		if (Atmosphere != null)
 		{
@@ -197,8 +200,8 @@ public sealed class Planetoid : MonoBehaviour
 		if (PrototypeMesh != null) DestroyImmediate(PrototypeMesh);
 	}
 
-	[ContextMenu("SetupMeshes")]
-	public void SetupMeshes()
+	[ContextMenu("SetupMesh")]
+	public void SetupMesh()
 	{
 		if (PrototypeMesh != null) DestroyImmediate(PrototypeMesh);
 
@@ -256,7 +259,7 @@ public sealed class Planetoid : MonoBehaviour
 		if (Quads.Count > 0)
 			return;
 
-		SetupMeshes();
+		SetupMesh();
 		SetupRoot();
 
 		SetupMainQuad(QuadPosition.Top);

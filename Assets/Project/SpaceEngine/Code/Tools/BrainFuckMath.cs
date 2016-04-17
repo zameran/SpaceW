@@ -93,6 +93,10 @@ public static class BrainFuckMath
                 temp = Vector3.Lerp(temp, patchCubeCenter * (15.0f / 14.970703100f), 0.998046875f); //0.99609375f + ((((((((0.5f / 2.0f) / 2.0f) / 2.0f) / 2.0f) / 2.0f) / 2.0f) / 2.0f) / 2.0f)
             else if (lodLevel == 10) //Sooooo deep... what i'am doing?
                 temp = Vector3.Lerp(temp, patchCubeCenter * (15.0f / 14.9853515000f), 0.999023438f); //0.998046875f + (((((((((0.5f / 2.0f) / 2.0f) / 2.0f) / 2.0f) / 2.0f) / 2.0f) / 2.0f) / 2.0f) / 2.0f)
+            else if (lodLevel == 11) //WHY?!
+                temp = Vector3.Lerp(temp, patchCubeCenter * (15.0f / 14.99267570000f), 0.99951171925f); //0.999023438f + ((((((((((0.5f / 2.0f) / 2.0f) / 2.0f) / 2.0f) / 2.0f) / 2.0f) / 2.0f) / 2.0f) / 2.0f) / 2.0f)
+            else if (lodLevel == 12) //NOOOOO! STOP IT! STOP THIS!
+                temp = Vector3.Lerp(temp, patchCubeCenter * (15.0f / 14.996337800000f), 0.999755859875f); //0.99951171925f + (((((((((((0.5f / 2.0f) / 2.0f) / 2.0f) / 2.0f) / 2.0f) / 2.0f) / 2.0f) / 2.0f) / 2.0f) / 2.0f) / 2.0f)
             //OMG...
         }
         //End of magic here.

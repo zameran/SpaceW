@@ -1278,7 +1278,7 @@ float Noise(float3 p)
 			float3 blend = Interpolation_C2(Pf);
 			float4 res0 = lerp(grad_results_0, grad_results_1, blend.z);
 			float2 res1 = lerp(res0.xy, res0.zw, blend.y);
-			return lerp(res1.x, res1.y, blend.x);
+			return lerp(res1.x, res1.y, blend.x) * 0.66666666666; //0.66666666666 = (2.0 / 3.0) //(2.0 / 3.0);   // (optionally) mult by (2.0/3.0)to scale to a strict -1.0->1.0 range
 		#else
 			// "Improved" noise using 8 corner gradients. Faster than the 12 mid-edge point method.
 			// Ken mentions using diagonals like this can cause "clumping", but we'll live with that.
@@ -1302,7 +1302,7 @@ float Noise(float3 p)
 			float3 blend = Interpolation_C2(Pf);
 			float4 res0 = lerp(grad_results_0, grad_results_1, blend.z);
 			float2 res1 = lerp(res0.xy, res0.zw, blend.y);
-			return lerp(res1.x, res1.y, blend.x) * (2.0 / 3.0);   // (optionally) mult by (2.0/3.0)to scale to a strict -1.0->1.0 range
+			return lerp(res1.x, res1.y, blend.x) * 0.66666666666; //0.66666666666 = (2.0 / 3.0) //(2.0 / 3.0);   // (optionally) mult by (2.0/3.0)to scale to a strict -1.0->1.0 range
 		#endif
 	#endif
 }
@@ -1526,7 +1526,7 @@ float Fbm(float3 ppoint)
 	return summ;
 }
 
-float Fbm(float3 ppoint, float o)
+float Fbm(float3 ppoint, int o)
 {
 	float summ = 0.0;
 	float ampl = 1.0;
@@ -1557,7 +1557,7 @@ float FbmClouds(float3 ppoint)
 	return summ;
 }
 
-float FbmClouds(float3 ppoint, float o)
+float FbmClouds(float3 ppoint, int o)
 {
 	float summ = 0.0;
 	float ampl = 1.0;
@@ -1588,7 +1588,7 @@ float3 Fbm3D(float3 ppoint)
 	return summ;
 }
 
-float3 Fbm3D(float3 ppoint, float o)
+float3 Fbm3D(float3 ppoint, int o)
 {
 	float3  summ = float3(0.0, 0.0, 0.0);
 	float ampl = 1.0;
@@ -1619,7 +1619,7 @@ float3 Fbm3DClouds(float3 ppoint)
 	return summ;
 }
 
-float3 Fbm3DClouds(float3 ppoint, float o)
+float3 Fbm3DClouds(float3 ppoint, int o)
 {
 	float3  summ = float3(0.0, 0.0, 0.0);
 	float ampl = 1.0;
@@ -1641,6 +1641,22 @@ float DistFbm(float3 ppoint, float dist)
 	float gain = SavePow(noiseLacunarity, -noiseH);
 
 	for (int i = 0; i < noiseOctaves; ++i)
+	{
+		summ += DistNoise(ppoint, dist) * ampl;
+		ampl *= gain;
+		ppoint *= noiseLacunarity;
+	}
+
+	return summ;
+}
+
+float DistFbm(float3 ppoint, float dist, int o)
+{
+	float summ = 0.0;
+	float ampl = 1.0;
+	float gain = SavePow(noiseLacunarity, -noiseH);
+
+	for (int i = 0; i < o; ++i)
 	{
 		summ += DistNoise(ppoint, dist) * ampl;
 		ampl *= gain;
@@ -1686,7 +1702,7 @@ float RidgedMultifractal(float3 ppoint, float gain)
 	return summ;
 }
 
-float RidgedMultifractal(float3 ppoint, float gain, float o)
+float RidgedMultifractal(float3 ppoint, float gain, int o)
 {
 	float signal = 1.0;
 	float summ = 0.0;
@@ -1777,7 +1793,7 @@ float RidgedMultifractalEroded(float3 ppoint, float gain, float warp)
 	return summ;
 }
 
-float RidgedMultifractalEroded(float3 ppoint, float gain, float warp, float o)
+float RidgedMultifractalEroded(float3 ppoint, float gain, float warp, int o)
 {
 	float frequency = 1.0;
 	float amplitude = 1.0;
@@ -1829,7 +1845,7 @@ float RidgedMultifractalErodedDetail(float3 ppoint, float gain, float warp, floa
 	return summ;
 }
 
-float RidgedMultifractalErodedDetail(float3 ppoint, float gain, float warp, float firstOctaveValue, float o)
+float RidgedMultifractalErodedDetail(float3 ppoint, float gain, float warp, float firstOctaveValue, int o)
 {
 	float frequency = 1.0;
 	float amplitude = 1.0;
@@ -1906,6 +1922,26 @@ float3 NoiseRandomUVec3(float3 c)
 	j *= 0.125;
 
 	r.y = frac(512.0 * j);
+
+	return r - 0.5;
+}
+
+float4 NoiseRandomUVec4(float3 c)
+{
+	float j = 4096.0 * sin(dot(c, float3(17.0, 59.4, 15.0)));
+
+	float4 r;
+
+	r.z = frac(512.0 * j);
+	j *= 0.125;
+
+	r.x = frac(512.0 * j);
+	j *= 0.125;
+
+	r.y = frac(512.0 * j);
+	j *= 0.125;
+
+	r.w = frac(512.0 * j);
 
 	return r - 0.5;
 }
@@ -2469,28 +2505,32 @@ float CraterHeightFunc(float lastlastLand, float lastLand, float height, float r
 {
 	float t;
 
-	if (r < radPeak)
-	{   // central peak
+	if (r < radPeak) // central peak
+	{   
 		t = 1.0 - r / radPeak;
+
 		return lastlastLand + height * heightFloor + heightPeak * craterDistortion * smoothstep(0.0, 1.0, t);
 	}
-	else if (r < radInner)
-	{   // crater bottom
+	else if (r < radInner) // crater bottom
+	{   
 		return lastlastLand + height * heightFloor;
 	}
-	else if (r < radRim)
-	{   // inner rim
+	else if (r < radRim) // inner rim
+	{  
 		t = (r - radInner) / (radRim - radInner);
+
 		return lerp(lastlastLand + height * heightFloor, lastLand + height * heightRim * craterDistortion, t * t * t);
 	}
-	else if (r < radOuter)
-	{   // outer rim
+	else if (r < radOuter) // outer rim
+	{  
 		t = 1.0 - (r - radRim) / (radOuter - radRim);
+
 		return lastLand + height * craterDistortion * lerp(0.1, heightRim, t * t);
 	}
-	else if (r < 1.0)
-	{   // outer area
+	else if (r < 1.0) // outer area
+	{  
 		t = 1.0 - (r - radOuter) / (1.0 - radOuter);
+
 		return lastLand + 0.1 * height * craterDistortion * t;
 	}
 	else
@@ -2607,7 +2647,8 @@ float RayedCraterColorNoise(float3 ppoint, float cratFreq, float cratSqrtDensity
 	for (int i = 0; i < cratOctaves; i++)
 	{
 		cell = Cell2NoiseVec(ppoint * craterSphereRadius);
-		fi = acos(dot(binormal, normalize(cell.xyz - ppoint))) / (pi * 2.0);
+		//fi = acos(dot(binormal, normalize(cell.xyz - ppoint))) / (pi * 2.0); //10 * Y = 10 / (3.14159265359 * 2.0) //Y = 0.159155
+		fi = acos(dot(binormal, normalize(cell.xyz - ppoint))) * 0.159155;
 		color += RayedCraterColorFunc(cell.w * radFactor, fi, 48.3 * dot(cell.xyz, Randomize));
 		craterSphereRadius *= 1.81818182;
 		radInner *= 0.60;
@@ -2772,27 +2813,31 @@ float MareHeightFunc(float lastLand, float lastlastLand, float height, float r, 
 {
 	float t;
 
-	if (r < radInner)
-	{   // crater bottom
+	if (r < radInner) // crater bottom
+	{  
 		mareFloor = 1.0;
+
 		return lastlastLand + height * heightFloor;
 	}
-	else if (r < radRim)
-	{   // inner rim
+	else if (r < radRim) // inner rim
+	{   
 		t = (r - radInner) / (radRim - radInner);
 		t = smoothstep(0.0, 1.0, t);
 		mareFloor = 1.0 - t;
+
 		return lerp(lastlastLand + height * heightFloor, lastLand + height * heightRim * craterDistortion, t);
 	}
-	else if (r < radOuter)
-	{   // outer rim
+	else if (r < radOuter) // outer rim
+	{  
 		t = 1.0 - (r - radRim) / (radOuter - radRim);
 		mareFloor = 0.0;
+
 		return lerp(lastLand, lastLand + height * heightRim * craterDistortion, smoothstep(0.0, 1.0, t * t));
 	}
 	else
 	{
 		mareFloor = 0.0;
+
 		return lastLand;
 	}
 }
@@ -2833,14 +2878,16 @@ float CrackHeightFunc(float lastLand, float lastlastLand, float height, float r)
 {
 	float t;
 
-	if (r < 0.5)
-	{   // inner rim
+	if (r < 0.5) // inner rim
+	{   
 		t = 2.0 * r;
+
 		return height - (1.5 * height - lastLand) * smoothstep(0.0, 1.0, 1.0 - t);
 	}
-	else
-	{   // outer rim
+	else // outer rim
+	{   
 		t = 2.0 * (r - 0.5);
+
 		return height - (height - lastlastLand) * smoothstep(0.0, 1.0, t);
 	}
 }
@@ -2849,14 +2896,16 @@ float CrackColorFunc(float r)
 {
 	float t;
 
-	if (r < 0.5)
-	{   // inner rim
+	if (r < 0.5) // inner rim
+	{  
 		t = 2.0 * r;
+
 		return smoothstep(0.0, 1.0, 1.0 - t);
 	}
-	else
-	{   // outer rim
+	else // outer rim
+	{  
 		t = 2.0 * (r - 0.5);
+
 		return smoothstep(0.0, 1.0, t);
 	}
 }
@@ -2879,7 +2928,8 @@ float CrackNoise(float3 ppoint, float distrort)
 		lastLand = newLand;
 		newLand = CrackHeightFunc(lastlastLand, lastLand, distrort, dist);
 		ppoint = ppoint * 1.2 + Randomize;
-		distrort /= 1.2;
+		//distrort /= 1.2; //10 / 1.2 = 10 * x; x = 0.833333
+		distrort *= 0.833333;
 	}
 
 	return newLand;
@@ -2903,7 +2953,8 @@ float CrackNoise(float3 ppoint, float distrort, float freq, float o, float mod)
 		lastLand = newLand;
 		newLand = CrackHeightFunc(lastlastLand, lastLand, distrort, dist);
 		ppoint = ppoint * 1.2 + Randomize;
-		distrort /= 1.2;
+		//distrort /= 1.2; //10 / 1.2 = 10 * x; x = 0.833333
+		distrort *= 0.833333;
 	}
 
 	return newLand * mod;
@@ -3190,20 +3241,17 @@ float HeightMapClouds(float3 ppoint)
 float HeightMapAsteroid(float3 ppoint)
 {
 	// Global landscape
-	noiseOctaves = 2.0;
 	float3  p = ppoint * mainFreq + Randomize;
-	float height = (Fbm(p) + 0.7) * 0.7;
+	float height = (Fbm(p, 2) + 0.7) * 0.7;
 
-	noiseOctaves = 8; // Height distortion
-	float distort = 0.01 * Fbm(ppoint * montesFreq + Randomize);
+	float distort = 0.01 * Fbm(ppoint * montesFreq + Randomize, 8);
 	height += distort;
 
 	// Hills
-	noiseOctaves = 5;
-	float hills = (0.5 + 1.5 * Fbm(p * 0.0721)) * hillsFreq;
-	hills = Fbm(p * hills) * 0.15;
-	noiseOctaves = 2;
-	float hillsMod = smoothstep(0, 1, Fbm(p * hillsFraction) * 3.0);
+	float hills = (0.5 + 1.5 * Fbm(p * 0.0721, 5)) * hillsFreq;
+	hills = Fbm(p * hills, 5) * 0.15;
+
+	float hillsMod = smoothstep(0, 1, Fbm(p * hillsFraction, 2) * 3.0);
 	height *= 1.0 + hillsMagn * hills * hillsMod;
 
 	// Craters
@@ -3222,12 +3270,11 @@ float HeightMapAsteroid(float3 ppoint)
 //-----------------------------------------------------------------------------
 float4 ColorMapAsteroid(float3 ppoint, float height, float slope)
 {
-	noiseOctaves = 2.0;
-	//height = DistFbm((ppoint + Randomize) * 3.7, 1.5) * 0.7 + 0.5;
+	//height = DistFbm((ppoint + Randomize) * 3.7, 1.5, 2) * 0.7 + 0.5;
 
-	noiseOctaves = 5;
 	float3 p = ppoint * colorDistFreq * 2.3;
-	p += Fbm3D(p * 0.5) * 1.2;
+	p += Fbm3D(p * 0.5, 5) * 1.2;
+
 	float vary = saturate((Fbm(p) + 0.7) * 0.7);
 
 	//float4 c = float4(0.41, 0.41, 0.41, 1) * (0.5 + slope) + (0.0125 * height) + (0.05 * vary);
@@ -3243,18 +3290,13 @@ float4 ColorMapAsteroid(float3 ppoint, float height, float slope)
 float4 GlowMapAsteroid(float3 ppoint, float height, float slope)
 {
 	// Thermal emission temperature (in thousand Kelvins)
-	noiseOctaves = 5;
 	float3  p = ppoint * 600.0 + Randomize;
-	float dist = 10.0 * colorDistMagn * Fbm(p * 0.2);
-	noiseOctaves = 3;
-	float globTemp = 0.95 - abs(Fbm((p + dist) * 0.01)) * 0.08;
-	noiseOctaves = 8;
-	float varyTemp = abs(Fbm(p + dist));
+	float dist = 10.0 * colorDistMagn * Fbm(p * 0.2, 5);
+	float globTemp = 0.95 - abs(Fbm((p + dist) * 0.01, 3)) * 0.08;
+	float varyTemp = abs(Fbm(p + dist, 8));
 
 	// Global surface melting
-	float surfTemp = surfTemperature *
-		(globTemp + varyTemp * 0.08) *
-		saturate(2.0 * (lavaCoverage * 0.4 + 0.4 - 0.8 * height));
+	float surfTemp = surfTemperature * (globTemp + varyTemp * 0.08) * saturate(2.0 * (lavaCoverage * 0.4 + 0.4 - 0.8 * height));
 
 	float4 outColor;
 	outColor.rgb = UnitToColor24(log(surfTemp) * 0.188 + 0.1316);
@@ -3652,8 +3694,7 @@ float HeightMapCloudsGasGiant(float3 ppoint)
 
 	if (cloudsStyle < 1.0 && cloudsStyle > -1.0) //if (cloudsStyle == 0.0)
 	{
-		noiseOctaves = 10.0;
-		twistedPoint *= float3(1.0, 1.0, 1.0) + 0.337 * Fbm3D(ppoint * 0.193);
+		twistedPoint *= float3(1.0, 1.0, 1.0) + 0.337 * Fbm3D(ppoint * 0.193, 10);
 	}
 
 	float offset = 0.0;

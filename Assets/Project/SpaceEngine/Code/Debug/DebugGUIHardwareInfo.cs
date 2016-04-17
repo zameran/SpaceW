@@ -75,7 +75,8 @@ public sealed class DebugGUIHardwareInfo : DebugGUI
         GUILayoutExtensions.LabelWithSpace("RenderTextures: " + SI.supportsRenderTextures, -10);
         GUILayoutExtensions.LabelWithSpace("3DTextures: " + SI.supports3DTextures, -10);
         GUILayoutExtensions.LabelWithSpace("Graphics Multithreading: " + SI.graphicsMultiThreaded, -10);
-        GUILayoutExtensions.LabelWithSpace("ARGBFloat: " + SI.supportsARGBFloatTextureFormat, -10);
+        GUILayoutExtensions.LabelWithSpace("ARGB4444: " + SI.supportsARGB4444TextureFormat, -10);
+        GUILayoutExtensions.LabelWithSpace("ARGB32: " + SI.supportsARGB32TextureFormat, -10);
         GUILayoutExtensions.LabelWithSpace("Depth Textures: " + SI.supportsDepthRenderTextureFormat, -10);
 
         GUILayout.EndArea();
@@ -107,7 +108,8 @@ public static class SI
     public static string supportsRenderTextures;
     public static string supports3DTextures;
     public static string graphicsMultiThreaded;
-    public static string supportsARGBFloatTextureFormat;
+    public static string supportsARGB4444TextureFormat;
+    public static string supportsARGB32TextureFormat;
     public static string supportsDepthRenderTextureFormat;
 
     public static void Get()
@@ -134,7 +136,8 @@ public static class SI
         supportsRenderTextures = Supports(SystemInfo.supportsRenderTextures);
         supports3DTextures = Supports(SystemInfo.supports3DTextures);
         graphicsMultiThreaded = Supports(SystemInfo.graphicsMultiThreaded);
-        supportsARGBFloatTextureFormat = Supports(SystemInfo.SupportsRenderTextureFormat(RenderTextureFormat.ARGBFloat));
+        supportsARGB4444TextureFormat = Supports(SystemInfo.SupportsRenderTextureFormat(RenderTextureFormat.ARGB4444));
+        supportsARGB32TextureFormat = Supports(SystemInfo.SupportsRenderTextureFormat(RenderTextureFormat.ARGB32));
         supportsDepthRenderTextureFormat = Supports(SystemInfo.SupportsRenderTextureFormat(RenderTextureFormat.Depth));
     }
 

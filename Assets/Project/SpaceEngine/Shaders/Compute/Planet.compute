@@ -58,7 +58,7 @@ float NoiseFunction(float3 coord)
 	float3 scaledCoord = ScaledCoordinate(coord);
 	
 	#ifdef defaultNoise
-	float noise = RidgedMultifractalEroded(scaledCoord * 2 + Randomize, 1, 1, 4) * 2;
+	float noise = RidgedMultifractalEroded(scaledCoord * 2 + Randomize, 1, 1, 4) * 2;	
 	#else
 	//float noise = HeightMapAsteroid(scaledCoord);
 	//float noise = HeightMapTerra(scaledCoord);
@@ -76,7 +76,7 @@ float4 ColorFunction(float3 pos, float3 coord, float height, float slope)
 	float3 scaledCoord = ScaledCoordinate(coord);
 
 	#ifdef defaultNoise
-	float4 color = float4(height / 2, height / 2, height / 2, slope);
+	float4 color = float4(height, height, height, slope);
 	#else
 	//float4 colorMapColor = ColorMapAsteroid(scaledCoord, height, slope);
 	//float4 glowMapColor = GlowMapAsteroid(scaledCoord, height, slope);

@@ -60,6 +60,7 @@ public sealed class DebugDrawQuadBox : DebugDraw
     };
 
     public bool useColorPerMainQuad = true;
+    public bool useLODCriticalColoring = true;
 
     protected override void Start()
     {
@@ -96,6 +97,10 @@ public sealed class DebugDrawQuadBox : DebugDraw
                 {
                     colorsForQuad.ForEach(delegate(ColorForQuad c) { if (q.Position == c.quadPosition) lineColor = c.color; });
                 }
+
+                if (useLODCriticalColoring)
+                    if (q.LODLevel == q.Planetoid.LODMaxLevel)
+                        lineColor = Color.white;
 
                 int[,] ORDER = new int[,] { { 1, 0 }, { 2, 3 }, { 0, 2 }, { 3, 1 } };
 
