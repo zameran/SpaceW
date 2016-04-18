@@ -32,9 +32,13 @@
 
 using UnityEngine;
 
+using Experimental;
+
 [RequireComponent(typeof(Rigidbody))]
 public class SpaceshipController : MonoBehaviour
 {
+    public Vessel vessel;
+
     public SpaceshipThruster[] fowrwardThrusters;
     public SpaceshipThruster[] backwardThrusters;
 
@@ -56,6 +60,8 @@ public class SpaceshipController : MonoBehaviour
     {
         if (Input.GetButtonDown("Fire1"))
         {
+            if (vessel != null) { vessel.rails = false; vessel.UpdateRails(); }
+
             foreach (SpaceshipThruster _thruster in fowrwardThrusters)
             {
                 _thruster.StartThruster();
@@ -65,6 +71,8 @@ public class SpaceshipController : MonoBehaviour
 
         if (Input.GetButtonUp("Fire1"))
         {
+            if (vessel != null) { vessel.rails = true; vessel.UpdateRails(); }
+
             foreach (SpaceshipThruster _thruster in fowrwardThrusters)
             {
                 _thruster.StopThruster();
@@ -74,6 +82,8 @@ public class SpaceshipController : MonoBehaviour
 
         if (Input.GetButtonDown("Fire2"))
         {
+            if (vessel != null) { vessel.rails = false; vessel.UpdateRails(); }
+
             foreach (SpaceshipThruster _thruster in backwardThrusters)
             {
                 _thruster.StartThruster();
@@ -83,6 +93,8 @@ public class SpaceshipController : MonoBehaviour
 
         if (Input.GetButtonUp("Fire2"))
         {
+            if (vessel != null) { vessel.rails = true; vessel.UpdateRails(); }
+
             foreach (SpaceshipThruster _thruster in backwardThrusters)
             {
                 _thruster.StopThruster();

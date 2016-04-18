@@ -13,7 +13,7 @@ namespace Experimental
 
         public OrbitDriver orbitDriver;
 
-        private bool rails = false;
+        public bool rails = false;
 
         public Vector3 findLocalCenterOfMass()
         {
@@ -30,17 +30,12 @@ namespace Experimental
 
         }
 
-        private void Update()
+        public void UpdateRails()
         {
-            if (Input.GetKeyDown(KeyCode.E))
-            {
-                rails = !rails;
-
-                if (rails)
-                    GoOnRails();
-                else
-                    GoOffRails();
-            }
+            if (rails)
+                GoOnRails();
+            else
+                GoOffRails();
         }
 
         private void FixedUpdate()

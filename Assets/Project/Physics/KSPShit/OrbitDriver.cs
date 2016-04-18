@@ -177,10 +177,10 @@
         private void CheckDominantBody(Vector3d refPos)
         {
             //if (referenceBody != FlightGlobals.getMainBody(refPos) && !FlightGlobals.overrideOrbit)
-            //if (referenceBody != FlightGlobals.getMainBody(refPos))
-            //{
+            if (referenceBody != FlightGlobals.getMainBody(refPos))
+            {
                 RecalculateOrbit(FlightGlobals.getMainBody(refPos));
-            //}
+            }
         }
 
         private void TrackRigidbody(CelestialBody refBody)
@@ -198,7 +198,7 @@
             if (vessel.rb != null && !vessel.rb.isKinematic)
             {
                 //vel = vessel.rootPart.rb.GetPointVelocity(driverTransform.TransformPoint(localCoM));// + Krakensbane.GetFrameVelocity();
-                vel = vessel.velocity;// + vessel.rb.GetPointVelocity(driverTransform.TransformPoint(localCoM));
+                vel = vessel.velocity + vessel.rb.GetPointVelocity(driverTransform.TransformPoint(localCoM));
                 vel = vel.xzy + orbit.GetRotFrameVel(referenceBody);
             }
 

@@ -45,7 +45,7 @@ public class SpaceshipThruster : MonoBehaviour
 
     public float soundEffectVolume = 1.0f;
 
-    private bool isActive = false;
+    public bool isActive = false;
 
     private Transform _cacheTransform;
     private Rigidbody _cacheParentRigidbody;
@@ -154,9 +154,10 @@ public class SpaceshipThruster : MonoBehaviour
             }
             else
             {
+                Vessel vessel = _cacheParentRigidbody.gameObject.GetComponent<Vessel>();
+
                 if (isActive)
                 {
-                    Vessel vessel = _cacheParentRigidbody.gameObject.GetComponent<Vessel>();
                     vessel.velocity += transform.forward * (thrusterForce * thurstCoeff) / 1000.0f;
                 }
             }
