@@ -69,9 +69,9 @@ public class SpaceshipController : MonoBehaviour
 
     private void FixedUpdate()
     {
-        _cacheRigidbody.AddRelativeTorque(new Vector3(0, 0, rollInput));
-        _cacheRigidbody.AddRelativeTorque(new Vector3(0, yawInput, 0));
-        _cacheRigidbody.AddRelativeTorque(new Vector3(pitchInput, 0, 0));
+        _cacheRigidbody.AddTorque(new Vector3(0, 0, rollInput));
+        _cacheRigidbody.AddTorque(new Vector3(0, yawInput, 0));
+        _cacheRigidbody.AddTorque(new Vector3(pitchInput, 0, 0));
     }
 
     private void CheckInput()
