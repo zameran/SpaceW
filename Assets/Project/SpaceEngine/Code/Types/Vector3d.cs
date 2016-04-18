@@ -208,6 +208,18 @@ namespace UnityEngine
             z *= invLength;
         }
 
+        public static Vector3d Exclude(Vector3d excludeThis, Vector3d fromThat)
+        {
+            return fromThat - Vector3d.Project(fromThat, excludeThis);
+        }
+
+        public static Vector3d Project(Vector3d vector, Vector3d onNormal)
+        {
+            double dot = Dot(onNormal, onNormal);
+
+            return (dot >= 1.40129846432482E-45 ? (onNormal * Dot(vector, onNormal)) / dot : zero); ;
+        }
+
         public static Vector3d Normalize(Vector3d value)
         {
             double magnitude = value.Magnitude();

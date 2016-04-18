@@ -32,15 +32,11 @@
 
         public UpdateMode updateMode;
 
-        //public OrbitRenderer Renderer;
-
         private bool ready;
 
         public Vessel vessel;
 
         public CelestialBody celestialBody;
-
-        public Color orbitColor = Color.grey;
 
         public Transform driverTransform;
 
@@ -64,12 +60,6 @@
             vessel = GetComponent<Vessel>();
 
             if(celestialBody == null) celestialBody = GetComponent<CelestialBody>();
-        }
-
-        public void ro()
-        {
-            if (vessel != null && referenceBody != null)
-                orbit = Orbit.CreateRandomOrbitAround(referenceBody);
         }
 
         private void Start()
@@ -117,7 +107,7 @@
         {
             if (QueuedUpdate) return;
 
-            //UpdateOrbit();
+            UpdateOrbit();
         }
 
         public void UpdateOrbit()
@@ -160,19 +150,15 @@
             if (isHyperbolic && orbit.eccentricity < 1.0)
             {
                 isHyperbolic = false;
-                if (vessel != null)
-                {
-                    //GameEvents.onVesselOrbitClosed.Fire(vessel);
-                }
+
+                if (vessel != null) { }
             }
 
             if (!isHyperbolic && orbit.eccentricity > 1.0)
             {
                 isHyperbolic = true;
-                if (vessel != null)
-                {
-                    //GameEvents.onVesselOrbitEscaped.Fire(vessel);
-                }
+
+                if (vessel != null) { }
             }
 
             Debug.DrawRay(driverTransform.position, orbit.vel.xzy * 100 * Time.deltaTime, (updateMode != UpdateMode.PLANET) ? Color.red : Color.cyan); //TimeWarp.fixedDeltaTime
@@ -191,10 +177,10 @@
         private void CheckDominantBody(Vector3d refPos)
         {
             //if (referenceBody != FlightGlobals.getMainBody(refPos) && !FlightGlobals.overrideOrbit)
-            if (referenceBody != FlightGlobals.getMainBody(refPos))
-            {
+            //if (referenceBody != FlightGlobals.getMainBody(refPos))
+            //{
                 RecalculateOrbit(FlightGlobals.getMainBody(refPos));
-            }
+            //}
         }
 
         private void TrackRigidbody(CelestialBody refBody)
@@ -218,6 +204,7 @@
 
             vel = vel + referenceBody.GetFrameVel() - refBody.GetFrameVel();
             pos += vel * Time.fixedDeltaTime;
+
             orbit.UpdateFromStateVectors(pos, vel, refBody, Planetarium.GetUniversalTime());
         }
 
@@ -263,7 +250,6 @@
 
             frameShift = true;
 
-            //CelestialBody referenceBody = referenceBody;
             if (updateMode == UpdateMode.PLANET && Time.timeScale > 0f)
             {
                 OnRailsSOITransition(orbit, newReferenceBody);
@@ -279,12 +265,6 @@
                 OnReferenceBodyChange(newReferenceBody);
             }
 
-            if (vessel != null)
-            {
-                //GameEvents.onVesselSOIChanged.Fire(new GameEvents.HostedFromToAction<Vessel, CelestialBody>(vessel, referenceBody, newReferenceBody));
-                //ModuleTripLogger.ForceVesselLog(vessel, FlightLog.EntryType.Flyby, newReferenceBody);
-            }
-
             Invoke("unlockFrameSwitch", 0.5f);
         }
 
@@ -297,12 +277,12 @@
             if (orbit.referenceBody.HasChild(to))
             {
                 SOIsqr = to.sphereOfInfluence * to.sphereOfInfluence;
-                BSPSolver(ref universalTime, 1.0 * 1.0, (double t) => Math.Abs((ownOrbit.getPositionAtUT(t) - to.getPositionAtUT(t)).sqrMagnitude - SOIsqr), vMin, universalTime, 0.01, 64); //(double)TimeWarp.CurrentRate
+                UtilMath.BSPSolver(ref universalTime, 1.0 * 1.0, (double t) => Math.Abs((ownOrbit.getPositionAtUT(t) - to.getPositionAtUT(t)).sqrMagnitude - SOIsqr), vMin, universalTime, 0.01, 64); //(double)TimeWarp.CurrentRate
             }
             else if (to.HasChild(orbit.referenceBody))
             {
                 SOIsqr = orbit.referenceBody.sphereOfInfluence * orbit.referenceBody.sphereOfInfluence;
-                BSPSolver(ref universalTime, 1.0 * 1.0, (double t) => Math.Abs(ownOrbit.getRelativePositionAtUT(t).sqrMagnitude - SOIsqr), vMin, universalTime, 0.01, 64); //(double)TimeWarp.CurrentRate
+                UtilMath.BSPSolver(ref universalTime, 1.0 * 1.0, (double t) => Math.Abs(ownOrbit.getRelativePositionAtUT(t).sqrMagnitude - SOIsqr), vMin, universalTime, 0.01, 64); //(double)TimeWarp.CurrentRate
             }
 
             ownOrbit.UpdateFromOrbitAtUT(ownOrbit, universalTime, to);
@@ -311,64 +291,6 @@
         private void unlockFrameSwitch()
         {
             frameShift = false;
-        }
-
-        public static int BSPSolver(ref double v0, double dv, Func<double, double> solveFor, double vMin, double vMax, double epsilon, int maxIterations)
-        {
-            int result;
-
-            if (v0 < vMin)
-            {
-                result = 0;
-            }
-            else
-            {
-                if (v0 > vMax)
-                {
-                    result = 0;
-                }
-                else
-                {
-                    int num = 0;
-                    double num2 = solveFor(v0);
-                    while (dv > epsilon && num2 < maxIterations)
-                    {
-                        double num3 = solveFor(v0 + dv);
-                        double num4 = solveFor(v0 - dv);
-
-                        if (v0 - dv < vMin)
-                        {
-                            num4 = 1.7976931348623157E+308;
-                        }
-
-                        if (v0 + dv > vMax)
-                        {
-                            num3 = 1.7976931348623157E+308;
-                        }
-
-                        num3 = Math.Abs(num3);
-                        num4 = Math.Abs(num4);
-                        num2 = Math.Min(num2, Math.Min(num3, num4));
-
-                        if (num2 == num4)
-                        {
-                            v0 -= dv;
-                        }
-                        else
-                        {
-                            if (num2 == num3)
-                            {
-                                v0 += dv;
-                            }
-                        }
-
-                        dv /= 2.0;
-                        num++;
-                    }
-                    result = num;
-                }
-            }
-            return result;
         }
     }
 }

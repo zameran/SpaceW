@@ -22,7 +22,7 @@ namespace Experimental
 
         public void SetPosition(Vector3 position)
         {
-            this.transform.position = position;
+            transform.position = position;
         }
 
         private void Start()
@@ -32,11 +32,6 @@ namespace Experimental
 
         private void Update()
         {
-            if (Input.GetKeyDown(KeyCode.F))
-            {
-                orbitDriver.ro();
-            }
-
             if (Input.GetKeyDown(KeyCode.E))
             {
                 rails = !rails;
@@ -45,11 +40,6 @@ namespace Experimental
                     GoOnRails();
                 else
                     GoOffRails();
-            }
-
-            if (Input.GetKey(KeyCode.G))
-            {
-                orbitDriver.updateFromParameters();
             }
         }
 
@@ -74,7 +64,7 @@ namespace Experimental
         {
             Debug.Log("Vessel now off rails!");
                      
-            orbitDriver.SetOrbitMode(OrbitDriver.UpdateMode.VESSEL_ACTIVE);
+            orbitDriver.SetOrbitMode(OrbitDriver.UpdateMode.VESSEL);
            
             rb.isKinematic = false;
 
@@ -83,14 +73,14 @@ namespace Experimental
 
         public void PauseVelocity()
         {
-            this.velocityLast = velocity;
-            this.velocity = Vector3.zero;
+            velocityLast = velocity;
+            velocity = Vector3.zero;
         }
 
         public void ResumeVelocity()
         {
-            this.velocityLast = Vector3.zero;
-            this.velocity = orbitDriver.orbit.GetVel() - ((orbitDriver.orbit.referenceBody.inverseRotation) ? Vector3d.zero : orbitDriver.referenceBody.getRFrmVel(transform.position));
+            velocityLast = Vector3.zero;
+            velocity = orbitDriver.orbit.GetVel() - ((orbitDriver.orbit.referenceBody.inverseRotation) ? Vector3d.zero : orbitDriver.referenceBody.getRFrmVel(transform.position));
         }
     }
 }
