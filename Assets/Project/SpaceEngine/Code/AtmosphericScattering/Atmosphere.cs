@@ -62,6 +62,11 @@ public sealed class Atmosphere : MonoBehaviour
         //Rt = (64200f / 63600f) * Rg * AtmosphereHeight;
         //Rl = (64210.0f / 63600f) * Rg;
 
+        if (!Transmittance.IsCreated() || !Inscatter.IsCreated() || !Irradiance.IsCreated())
+        {
+            Debug.Log("Atmosphere: fail with textures!");
+        }
+
         Sun.Origin = Origin;
     }
 
