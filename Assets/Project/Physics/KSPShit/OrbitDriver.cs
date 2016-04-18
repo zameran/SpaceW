@@ -117,7 +117,7 @@
         {
             if (QueuedUpdate) return;
 
-            UpdateOrbit();
+            //UpdateOrbit();
         }
 
         public void UpdateOrbit()
@@ -147,7 +147,6 @@
 
                         CheckDominantBody(driverTransform.position);
                     }
-                    //updateFromParametersForVessel();
                     break;
                 case UpdateMode.PLANET:
                     if (vessel != null)
@@ -157,6 +156,7 @@
                     updateFromParameters();
                     break;
             }
+
             if (isHyperbolic && orbit.eccentricity < 1.0)
             {
                 isHyperbolic = false;
@@ -165,6 +165,7 @@
                     //GameEvents.onVesselOrbitClosed.Fire(vessel);
                 }
             }
+
             if (!isHyperbolic && orbit.eccentricity > 1.0)
             {
                 isHyperbolic = true;

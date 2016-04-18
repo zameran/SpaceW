@@ -55,7 +55,8 @@ namespace Experimental
 
         private void FixedUpdate()
         {
-
+            if (orbitDriver != null)
+                orbitDriver.UpdateOrbit();
         }
 
         public void GoOnRails()
