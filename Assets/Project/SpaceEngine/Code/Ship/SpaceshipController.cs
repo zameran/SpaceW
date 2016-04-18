@@ -54,6 +54,8 @@ public class SpaceshipController : MonoBehaviour
 
     private Rigidbody _cacheRigidbody;
 
+    public bool input = false;
+
     private void Start()
     {
         if (_cacheRigidbody == null)
@@ -62,14 +64,24 @@ public class SpaceshipController : MonoBehaviour
 
     private void Update()
     {
+        CheckInput();
+    }
+
+    private void FixedUpdate()
+    {
+        _cacheRigidbody.AddRelativeTorque(new Vector3(0, 0, rollInput));
+        _cacheRigidbody.AddRelativeTorque(new Vector3(0, yawInput, 0));
+        _cacheRigidbody.AddRelativeTorque(new Vector3(pitchInput, 0, 0));
+    }
+
+    private void CheckInput()
+    {
         rollInput = -Input.GetAxis("Diagonal") * rollRate;
         yawInput = Input.GetAxis("Horizontal") * yawRate;
         pitchInput = Input.GetAxis("Vertical") * pitchRate;
 
         if (Input.GetButtonDown("Fire1"))
         {
-            if (vessel != null) { vessel.rails = false; vessel.UpdateRails(); }
-
             foreach (SpaceshipThruster _thruster in fowrwardThrusters)
             {
                 _thruster.StartThruster();
@@ -79,8 +91,6 @@ public class SpaceshipController : MonoBehaviour
 
         if (Input.GetButtonUp("Fire1"))
         {
-            if (vessel != null) { vessel.rails = true; vessel.UpdateRails(); }
-
             foreach (SpaceshipThruster _thruster in fowrwardThrusters)
             {
                 _thruster.StopThruster();
@@ -90,8 +100,6 @@ public class SpaceshipController : MonoBehaviour
 
         if (Input.GetButtonDown("Fire2"))
         {
-            if (vessel != null) { vessel.rails = false; vessel.UpdateRails(); }
-
             foreach (SpaceshipThruster _thruster in backwardThrusters)
             {
                 _thruster.StartThruster();
@@ -101,20 +109,14 @@ public class SpaceshipController : MonoBehaviour
 
         if (Input.GetButtonUp("Fire2"))
         {
-            if (vessel != null) { vessel.rails = true; vessel.UpdateRails(); }
-
             foreach (SpaceshipThruster _thruster in backwardThrusters)
             {
                 _thruster.StopThruster();
                 _thruster.thurstCoeff = forceModifier;
             }
         }
-    }
 
-    private void FixedUpdate()
-    {
-        _cacheRigidbody.AddRelativeTorque(new Vector3(0, 0, rollInput));
-        _cacheRigidbody.AddRelativeTorque(new Vector3(0, yawInput, 0));
-        _cacheRigidbody.AddRelativeTorque(new Vector3(pitchInput, 0, 0));
+        input = rollInput != 0.0 || yawInput != 0.0 || pitchInput != 0.0 || Input.GetButton("Fire1") || Input.GetButton("Fire2");
+        if (vessel != null) { vessel.rails = !input; vessel.UpdateRails(); }
     }
 }

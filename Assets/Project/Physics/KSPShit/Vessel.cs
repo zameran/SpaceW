@@ -27,7 +27,8 @@ namespace Experimental
 
         private void Start()
         {
-
+            if (rb != null)
+                rb.velocity = new Vector3(0, 0, 50);
         }
 
         private void Update()
@@ -84,7 +85,7 @@ namespace Experimental
         {
             velocityLast = velocity;
             velocity = Vector3.zero;
-            rb.velocity = velocity;
+            rb.velocity = Vector3.zero;
         }
 
         public void ResumeVelocity()

@@ -145,10 +145,14 @@ public class SpaceshipThruster : MonoBehaviour
         if (_cacheParentRigidbody != null)
         {
             if (isActive)
+            {
                 if (addForceAtPosition)
-                    _cacheParentRigidbody.AddForceAtPosition(_cacheTransform.up * thrusterForce * thurstCoeff, _cacheTransform.position);
+                    _cacheParentRigidbody.AddForceAtPosition(transform.up * thrusterForce * thurstCoeff, _cacheTransform.position);
                 else
-                    _cacheParentRigidbody.AddRelativeForce(transform.forward * thrusterForce * thurstCoeff);
+                {
+                    _cacheParentRigidbody.AddForce(transform.forward * thrusterForce * thurstCoeff);
+                }
+            }
         }
     }
 }
