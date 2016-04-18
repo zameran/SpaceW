@@ -15,6 +15,9 @@ namespace Experimental
 
         public bool rails = false;
 
+        public bool alreadyOnRails = false;
+        public bool alreadyOffRails = false;
+
         public Vector3 findLocalCenterOfMass()
         {
             return centerOfMass.transform.position;
@@ -61,22 +64,30 @@ namespace Experimental
 
         public void GoOnRails()
         {
+            if (alreadyOnRails) return;
+
             Debug.Log("Vessel now on rails!");
 
             orbitDriver.SetOrbitMode(OrbitDriver.UpdateMode.PLANET);
 
             rb.isKinematic = true;
+            alreadyOnRails = true;
+            alreadyOffRails = false;
 
             PauseVelocity();
         }
 
         public void GoOffRails()
         {
+            if (alreadyOffRails) return;
+
             Debug.Log("Vessel now off rails!");
                      
             orbitDriver.SetOrbitMode(OrbitDriver.UpdateMode.VESSEL);
            
             rb.isKinematic = false;
+            alreadyOnRails = false;
+            alreadyOffRails = true;
 
             ResumeVelocity();
         }
