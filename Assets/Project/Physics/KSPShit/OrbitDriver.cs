@@ -188,7 +188,7 @@
             localCoM = vessel.findLocalCenterOfMass();
 
             //pos = ((Vector3d)(driverTransform.position + driverTransform.rotation * localCoM - (Vector3)refBody.position)).xzy;
-            pos = ((Vector3d)((driverTransform.position + driverTransform.rotation * localCoM - (Vector3)refBody.position)) - (Vector3d)driverTransform.position).xzy;
+            pos = ((Vector3d)((driverTransform.position + localCoM - (Vector3)refBody.position)) - (Vector3d)driverTransform.position).xzy;
 
             if (updateMode == UpdateMode.VESSEL)
             {
@@ -198,7 +198,7 @@
             if (vessel.rb != null && !vessel.rb.isKinematic)
             {
                 //vel = vessel.rootPart.rb.GetPointVelocity(driverTransform.TransformPoint(localCoM));// + Krakensbane.GetFrameVelocity();
-                vel = vessel.velocity + vessel.rb.GetPointVelocity(driverTransform.TransformPoint(localCoM));
+                vel = vessel.rb.GetPointVelocity(localCoM);
                 vel = vel.xzy + orbit.GetRotFrameVel(referenceBody);
             }
 
@@ -265,24 +265,25 @@
                 OnReferenceBodyChange(newReferenceBody);
             }
 
-            Invoke("unlockFrameSwitch", 0.5f);
+            Invoke("unlockFrameSwitch", 1.0f);
         }
 
         public void OnRailsSOITransition(Orbit ownOrbit, CelestialBody to)
         {
             double universalTime = Planetarium.GetUniversalTime();
-            double vMin = universalTime - 1.0 * 1.0;//(double)TimeWarp.CurrentRate;
+            double timeRate = 1.0 * 1.0;
+            double vMin = universalTime - timeRate;
             double SOIsqr = 0.0;
 
             if (orbit.referenceBody.HasChild(to))
             {
                 SOIsqr = to.sphereOfInfluence * to.sphereOfInfluence;
-                UtilMath.BSPSolver(ref universalTime, 1.0 * 1.0, (double t) => Math.Abs((ownOrbit.getPositionAtUT(t) - to.getPositionAtUT(t)).sqrMagnitude - SOIsqr), vMin, universalTime, 0.01, 64); //(double)TimeWarp.CurrentRate
+                UtilMath.BSPSolver(ref universalTime, timeRate, (double t) => Math.Abs((ownOrbit.getPositionAtUT(t) - to.getPositionAtUT(t)).sqrMagnitude - SOIsqr), vMin, universalTime, 0.01, 64); //(double)TimeWarp.CurrentRate
             }
             else if (to.HasChild(orbit.referenceBody))
             {
                 SOIsqr = orbit.referenceBody.sphereOfInfluence * orbit.referenceBody.sphereOfInfluence;
-                UtilMath.BSPSolver(ref universalTime, 1.0 * 1.0, (double t) => Math.Abs(ownOrbit.getRelativePositionAtUT(t).sqrMagnitude - SOIsqr), vMin, universalTime, 0.01, 64); //(double)TimeWarp.CurrentRate
+                UtilMath.BSPSolver(ref universalTime, timeRate, (double t) => Math.Abs(ownOrbit.getRelativePositionAtUT(t).sqrMagnitude - SOIsqr), vMin, universalTime, 0.01, 64); //(double)TimeWarp.CurrentRate
             }
 
             ownOrbit.UpdateFromOrbitAtUT(ownOrbit, universalTime, to);

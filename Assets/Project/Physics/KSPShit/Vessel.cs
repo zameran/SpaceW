@@ -30,6 +30,20 @@ namespace Experimental
 
         }
 
+        private void Update()
+        {
+            if (orbitDriver != null)
+            {
+                if (orbitDriver.orbit != null)
+                {
+                    if (orbitDriver.orbit.vel.xzy != Vector3d.zero)
+                    {
+                        //transform.rotation = Quaternion.LookRotation(orbitDriver.orbit.vel.xzy);
+                    }
+                }
+            }
+        }
+
         public void UpdateRails()
         {
             if (rails)
@@ -70,12 +84,14 @@ namespace Experimental
         {
             velocityLast = velocity;
             velocity = Vector3.zero;
+            rb.velocity = velocity;
         }
 
         public void ResumeVelocity()
         {
             velocityLast = Vector3.zero;
-            velocity = orbitDriver.orbit.GetVel() - ((orbitDriver.orbit.referenceBody.inverseRotation) ? Vector3d.zero : orbitDriver.referenceBody.getRFrmVel(transform.position));
+            velocity = orbitDriver.orbit.GetVel() - (Vector3d)velocityLast - ((orbitDriver.orbit.referenceBody.inverseRotation) ? Vector3d.zero : orbitDriver.referenceBody.getRFrmVel(transform.position));
+            rb.velocity = velocity;
         }
     }
 }

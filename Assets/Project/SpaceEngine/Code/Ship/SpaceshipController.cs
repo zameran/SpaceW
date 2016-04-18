@@ -42,9 +42,13 @@ public class SpaceshipController : MonoBehaviour
     public SpaceshipThruster[] fowrwardThrusters;
     public SpaceshipThruster[] backwardThrusters;
 
-    public float rollRate = 100.0f;
-    public float yawRate = 30.0f;
-    public float pitchRate = 100.0f;
+    public float rollRate = 10.0f;
+    public float yawRate = 3.0f;
+    public float pitchRate = 10.0f;
+
+    private float rollInput = 0.0f;
+    private float yawInput = 0.0f;
+    private float pitchInput = 0.0f;
 
     public float forceModifier = 1.0f;
 
@@ -58,6 +62,10 @@ public class SpaceshipController : MonoBehaviour
 
     private void Update()
     {
+        rollInput = -Input.GetAxis("Diagonal") * rollRate;
+        yawInput = Input.GetAxis("Horizontal") * yawRate;
+        pitchInput = Input.GetAxis("Vertical") * pitchRate;
+
         if (Input.GetButtonDown("Fire1"))
         {
             if (vessel != null) { vessel.rails = false; vessel.UpdateRails(); }
@@ -105,10 +113,8 @@ public class SpaceshipController : MonoBehaviour
 
     private void FixedUpdate()
     {
-        _cacheRigidbody.AddRelativeTorque(new Vector3(0, 0, -Input.GetAxis("Horizontal") * rollRate * _cacheRigidbody.mass));
-
-        _cacheRigidbody.AddRelativeTorque(new Vector3(0, Input.GetAxis("Horizontal") * yawRate * _cacheRigidbody.mass, 0));
-
-        _cacheRigidbody.AddRelativeTorque(new Vector3(Input.GetAxis("Vertical") * pitchRate * _cacheRigidbody.mass, 0, 0));
+        _cacheRigidbody.AddRelativeTorque(new Vector3(0, 0, rollInput));
+        _cacheRigidbody.AddRelativeTorque(new Vector3(0, yawInput, 0));
+        _cacheRigidbody.AddRelativeTorque(new Vector3(pitchInput, 0, 0));
     }
 }
