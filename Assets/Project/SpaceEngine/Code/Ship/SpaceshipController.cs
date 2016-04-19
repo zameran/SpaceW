@@ -54,7 +54,8 @@ public class SpaceshipController : MonoBehaviour
 
     private Rigidbody _cacheRigidbody;
 
-    public bool input = false;
+    public bool vInput = false;
+    public bool mInput = false;
 
     private void Start()
     {
@@ -116,7 +117,11 @@ public class SpaceshipController : MonoBehaviour
             }
         }
 
-        input = rollInput != 0.0 || yawInput != 0.0 || pitchInput != 0.0 || Input.GetButton("Fire1") || Input.GetButton("Fire2");
+        vInput = Input.GetButton("Fire1") || Input.GetButton("Fire2");
+        mInput = rollInput != 0.0 || yawInput != 0.0 || pitchInput != 0.0;
+
+        bool input = vInput;// || mInput;
+
         if (vessel != null) { vessel.rails = !input; vessel.UpdateRails(); }
     }
 }

@@ -64,14 +64,6 @@ namespace Experimental
         public double meanAnomalyAtEpoch;
         public double period;
 
-        /*
-        public Vector3 debugPos;
-        public Vector3 debugVel;
-        public Vector3 debugH;
-        public Vector3 debugAN;
-        public Vector3 debugEccVec;
-        */
-
         public double mag;
 
         private double drawResolution = 4.0;
@@ -312,14 +304,6 @@ namespace Experimental
 
             this.pos = pos;
             this.vel = vel;
-
-            /*
-            debugPos = pos.ToVector3();
-            debugVel = vel.ToVector3();
-            debugH = h.ToVector3();
-            debugAN = an.ToVector3();
-            debugEccVec = eccVec.ToVector3();
-            */
         }
 
         public void UpdateFromUT(double UT)
@@ -405,14 +389,6 @@ namespace Experimental
                 timeToPe = -ObT;
                 timeToAp = 0.0;
             }
-
-            /*
-            debugPos = pos.ToVector3();
-            debugVel = vel.ToVector3();
-            debugH = h.ToVector3();
-            debugAN = an.ToVector3();
-            debugEccVec = eccVec.ToVector3();
-            */
         }
 
         public double GetDTforTrueAnomaly(double tA, double wrapAfterSeconds)
@@ -946,6 +922,9 @@ namespace Experimental
                 {
                     Vector3 v = getPositionFromTrueAnomaly(i % MathUtils.TwoPI).ToVector3();
                     Vector3 v2 = getPositionFromTrueAnomaly((i + drawResolution * MathUtils.Deg2Rad) % MathUtils.TwoPI).ToVector3();
+
+                    if (Vector3.Distance(v, v2) > drawResolution * MathUtils.Deg2Rad)
+                        i -= drawResolution * MathUtils.Deg2Rad;
 
                     Debug.DrawLine(v, v2, Color.Lerp(Color.yellow, Color.green, Mathf.InverseLerp((float)getOrbitalSpeedAtDistance(PeR), (float)getOrbitalSpeedAtDistance(ApR), (float)getOrbitalSpeedAtPos(v))));
                 }

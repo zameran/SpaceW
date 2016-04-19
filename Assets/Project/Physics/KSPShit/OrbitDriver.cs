@@ -188,7 +188,7 @@
             localCoM = vessel.findLocalCenterOfMass();
 
             //pos = ((Vector3d)(driverTransform.position + driverTransform.rotation * localCoM - (Vector3)refBody.position)).xzy;
-            pos = ((Vector3d)((driverTransform.position + localCoM - (Vector3)refBody.position)) - (Vector3d)driverTransform.position).xzy;
+            pos = ((Vector3d)(((driverTransform.position + localCoM) - (Vector3)refBody.position)) - (Vector3d)driverTransform.position).xzy;
 
             if (updateMode == UpdateMode.VESSEL)
             {

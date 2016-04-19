@@ -25,7 +25,8 @@ namespace Experimental
 
         public void SetPosition(Vector3 position)
         {
-            transform.position = position;
+            if (position.magnitude != float.NaN)
+                transform.position = position;
         }
 
         private void Start()
@@ -70,7 +71,7 @@ namespace Experimental
 
             orbitDriver.SetOrbitMode(OrbitDriver.UpdateMode.PLANET);
 
-            rb.isKinematic = true;
+            //rb.isKinematic = true;
             alreadyOnRails = true;
             alreadyOffRails = false;
 
@@ -85,7 +86,7 @@ namespace Experimental
                      
             orbitDriver.SetOrbitMode(OrbitDriver.UpdateMode.VESSEL);
            
-            rb.isKinematic = false;
+            //rb.isKinematic = false;
             alreadyOnRails = false;
             alreadyOffRails = true;
 
