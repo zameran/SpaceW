@@ -4,6 +4,29 @@ namespace Experimental
 {
     public class Vessel : MonoBehaviour
     {
+        private class CenterVectorHelper
+        {
+            public Vector3 center;
+
+            public float c;
+
+            public CenterVectorHelper()
+            {
+                this.center = Vector3.zero;
+                this.c = 0f;
+            }
+
+            public void Clear()
+            {
+                this.center.x = 0f;
+                this.center.y = 0f;
+                this.center.z = 0f;
+                this.c = 0f;
+            }
+        }
+
+        private CenterVectorHelper centerHelper = new CenterVectorHelper();
+
         public Rigidbody rb;
 
         public Transform centerOfMass;
@@ -18,6 +41,8 @@ namespace Experimental
         public bool alreadyOnRails = false;
         public bool alreadyOffRails = false;
 
+        public OrbitDriver.UpdateMode targetMode = OrbitDriver.UpdateMode.VESSEL_ACTIVE;
+
         public Vector3 findLocalCenterOfMass()
         {
             return centerOfMass.transform.position;
@@ -25,8 +50,22 @@ namespace Experimental
 
         public void SetPosition(Vector3 position)
         {
-            if (position.magnitude != float.NaN)
+            if (position.x != float.NaN && position.y != float.NaN && position.z != float.NaN)
                 transform.position = position;
+        }
+
+        private void recurseCoMs(Vessel part)
+        {
+            if (part.transform == null)
+            {
+
+            }
+
+            if (part.rb != null)
+            {
+                centerHelper.center = centerHelper.center + (part.rb.worldCenterOfMass * part.rb.mass);
+                centerHelper.c = centerHelper.c + part.rb.mass;
+            }
         }
 
         private void Start()
@@ -47,6 +86,16 @@ namespace Experimental
                     }
                 }
             }
+
+            if(Input.GetKeyDown(KeyCode.F))
+            {
+                if (targetMode == OrbitDriver.UpdateMode.VESSEL)
+                    targetMode = OrbitDriver.UpdateMode.VESSEL_ACTIVE;
+                else if (targetMode == OrbitDriver.UpdateMode.VESSEL_ACTIVE)
+                    targetMode = OrbitDriver.UpdateMode.VESSEL;
+            }
+
+            Debug.DrawLine(transform.position, transform.position + transform.forward * 200, XKCDColors.Adobe);
         }
 
         public void UpdateRails()
@@ -84,7 +133,7 @@ namespace Experimental
 
             Debug.Log("Vessel now off rails!");
                      
-            orbitDriver.SetOrbitMode(OrbitDriver.UpdateMode.VESSEL);
+            orbitDriver.SetOrbitMode(targetMode);
            
             //rb.isKinematic = false;
             alreadyOnRails = false;

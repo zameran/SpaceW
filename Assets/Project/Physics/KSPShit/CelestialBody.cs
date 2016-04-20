@@ -342,7 +342,7 @@ namespace Experimental
             SetupConstants();
         }
 
-        public void CBUpdate()
+        public void Update()
         {
             gMagnitudeAtCenter = GeeASL * 9.81 * Radius * Radius;
             Mass = Radius * Radius * (GeeASL * 9.81) / 6.674E-11;
@@ -405,7 +405,6 @@ namespace Experimental
                 if (num == 0.0) solarDayLength = 1.7976931348623157E+308;
                 else solarDayLength = currentCelestialBody.orbit.period * rotationPeriod / num;
             }
-
             else solarDayLength = 1.0;
         }
 

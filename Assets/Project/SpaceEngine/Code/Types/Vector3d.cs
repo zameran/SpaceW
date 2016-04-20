@@ -210,7 +210,7 @@ namespace UnityEngine
 
         public static Vector3d Exclude(Vector3d excludeThis, Vector3d fromThat)
         {
-            return fromThat - Vector3d.Project(fromThat, excludeThis);
+            return fromThat - Project(fromThat, excludeThis);
         }
 
         public static Vector3d Project(Vector3d vector, Vector3d onNormal)

@@ -132,7 +132,7 @@
                     {
                         if (vessel.rb != null)
                         {
-                            TrackRigidbody(referenceBody);
+                            TrackActiveRigidbody(referenceBody);
                         }
 
                         CheckDominantBody(driverTransform.position);
@@ -198,14 +198,43 @@
             if (vessel.rb != null && !vessel.rb.isKinematic)
             {
                 //vel = vessel.rootPart.rb.GetPointVelocity(driverTransform.TransformPoint(localCoM));// + Krakensbane.GetFrameVelocity();
-                vel = vessel.rb.GetPointVelocity(localCoM);
+                vel = vessel.rb.GetPointVelocity(driverTransform.TransformPoint(localCoM));
                 vel = vel.xzy + orbit.GetRotFrameVel(referenceBody);
             }
 
-            vel = vel + referenceBody.GetFrameVel() - refBody.GetFrameVel();
+            //vel = vel + referenceBody.GetFrameVel() - refBody.GetFrameVel();
+            vel = (vel + referenceBody.GetFrameVel()) - refBody.GetFrameVel();
             pos += vel * Time.fixedDeltaTime;
 
             orbit.UpdateFromStateVectors(pos, vel, refBody, Planetarium.GetUniversalTime());
+            //orbit.UpdateFromOrbitAtUT(orbit, Planetarium.GetUniversalTime(), refBody);
+        }
+
+        private void TrackActiveRigidbody(CelestialBody refBody)
+        {
+            localCoM = vessel.findLocalCenterOfMass();
+
+            //pos = ((Vector3d)(driverTransform.position + driverTransform.rotation * localCoM - (Vector3)refBody.position)).xzy;
+            pos = ((Vector3d)(((driverTransform.position + localCoM) - (Vector3)refBody.position)) - (Vector3d)driverTransform.position).xzy;
+
+            if (updateMode == UpdateMode.VESSEL_ACTIVE)
+            {
+                vel = orbit.GetRotFrameVel(referenceBody);
+            }
+
+            if (vessel.rb != null && !vessel.rb.isKinematic)
+            {
+                //vel = vessel.rootPart.rb.GetPointVelocity(driverTransform.TransformPoint(localCoM));// + Krakensbane.GetFrameVelocity();
+                vel = vessel.rb.GetPointVelocity(driverTransform.TransformPoint(localCoM));
+                vel = vel.xzy + orbit.GetRotFrameVel(referenceBody);
+            }
+
+            //vel = vel + referenceBody.GetFrameVel() - refBody.GetFrameVel();
+            vel = (vel + referenceBody.GetFrameVel()) - refBody.GetFrameVel();
+            pos += vel * Time.fixedDeltaTime;
+
+            orbit.UpdateFromStateVectors(pos, vel, refBody, Planetarium.GetUniversalTime());
+            //orbit.UpdateFromOrbitAtUT(orbit, Planetarium.GetUniversalTime(), refBody);
         }
 
         public void updateFromParameters()
@@ -265,7 +294,7 @@
                 OnReferenceBodyChange(newReferenceBody);
             }
 
-            Invoke("unlockFrameSwitch", 1.0f);
+            Invoke("unlockFrameSwitch", 0.5f);
         }
 
         public void OnRailsSOITransition(Orbit ownOrbit, CelestialBody to)

@@ -85,6 +85,31 @@
             return body;
         }
 
+        public static Vector3d getCentrifugalAcc(Vector3d pos, CelestialBody body)
+        {
+            if (!body.inverseRotation) return Vector3d.zero;
+
+            pos = body.position - pos;
+
+            return Vector3d.Cross(body.angularVelocity, Vector3d.Cross(body.angularVelocity, pos));
+        }
+
+        public static Vector3d getCoriolisAcc(Vector3d vel, CelestialBody body)
+        {
+            if (!body.inverseRotation) return Vector3d.zero;
+
+            return -2 * Vector3d.Cross(body.angularVelocity, vel);
+        }
+
+        public static Vector3d getGeeForceAtPosition(Vector3d pos)
+        {
+            CelestialBody mainBody = getMainBody(pos);
+
+            double magn = (mainBody.position - pos).sqrMagnitude;
+
+            return Vector3d.Normalize(pos - mainBody.position) * -(mainBody.gMagnitudeAtCenter / magn);
+        }
+
         public static CelestialBody getMainBody()
         {
             if (ActiveVessel)

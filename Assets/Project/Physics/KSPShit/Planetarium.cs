@@ -172,20 +172,16 @@
             {
                 time += fixedDeltaTime * timeScale;
 
-                if (Sun)
-                {
-                    CurrentMainBody = FindRootBody(Sun);
-                    UpdateCBsRecursive(CurrentMainBody);
-                }
+                UpdateCBs();
             }
         }
 
         public void UpdateCBs()
         {
-            if (Sun)
+            if (Sun != null)
             {
                 CurrentMainBody = FindRootBody(Sun);
-                UpdateCBsRecursive(CurrentMainBody);
+                //UpdateCBsRecursive(CurrentMainBody);
             }
         }
 
@@ -208,7 +204,7 @@
 
         private void UpdateCBsRecursive(CelestialBody cb)
         {
-            cb.CBUpdate();
+            cb.Update();
 
             int count = cb.orbitingBodies.Count;
 
