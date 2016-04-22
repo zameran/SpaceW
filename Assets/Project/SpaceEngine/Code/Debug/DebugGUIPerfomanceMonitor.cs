@@ -52,7 +52,7 @@ public sealed class DebugGUIPerfomanceMonitor : DebugGUI
 
         using (new Timer("Monitor GUI Draw"))
         {
-            GUI.Window(0, debugInfoBounds, UI, "Perfomance Monitor");
+            GUI.Window(0, debugInfoBounds, UI, "Perfomance Monitor (in milliseconds)");
         }
     }
     
