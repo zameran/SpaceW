@@ -52,11 +52,14 @@ public sealed class DebugGUILeaks : DebugGUI
     {
         base.OnGUI();
 
-        GUILayout.BeginArea(debugInfoBounds);
+        GUILayout.Window(0, debugInfoBounds, UI, "Leaks Info");
+    }
 
-        ScrollPosition = GUILayout.BeginScrollView(ScrollPosition, false, true, GUILayout.Width(250), GUILayout.Height(250));
+    private void UI(int id)
+    {
+        ScrollPosition = GUILayout.BeginScrollView(ScrollPosition, false, true, GUILayout.Width(debugInfoBounds.width), GUILayout.Height(debugInfoBounds.height));
         {
-            Object[] objects = FindObjectsOfType(typeof(UnityEngine.Object));
+            Object[] objects = FindObjectsOfType(typeof(Object));
 
             Dictionary<string, int> dictionary = new Dictionary<string, int>();
 
@@ -76,20 +79,25 @@ public sealed class DebugGUILeaks : DebugGUI
 
             List<KeyValuePair<string, int>> myList = new List<KeyValuePair<string, int>>(dictionary);
 
-            myList.Sort(delegate(KeyValuePair<string, int> firstPair, KeyValuePair<string, int> nextPair)
+            myList.Sort(delegate (KeyValuePair<string, int> firstPair, KeyValuePair<string, int> nextPair)
             {
                 return nextPair.Value.CompareTo((firstPair.Value));
             });
 
-            foreach (KeyValuePair<string, int> entry in myList)
+            GUILayout.BeginVertical();
+
+            for (int i = 0; i < myList.Count; i++)
             {
-                GUILayoutExtensions.LabelWithSpace(entry.Key + " : " + entry.Value, -10);
+                KeyValuePair<string, int> entry = myList[i];
+
+                GUILayoutExtensions.LabelWithSpace(entry.Key + " : " + entry.Value, -8);
             }
 
+            GUILayout.Space(10);
+
+            GUILayout.EndVertical();
         }
 
         GUILayout.EndScrollView();
-
-        GUILayout.EndArea();
     }
 }

@@ -51,35 +51,40 @@ public sealed class DebugGUIHardwareInfo : DebugGUI
     {
         base.OnGUI();
 
-        GUILayout.BeginArea(debugInfoBounds);
+        GUILayout.Window(0, debugInfoBounds, UI, "Hardware Info");
+    }
 
-        GUILayoutExtensions.LabelWithSpace("Device Type: " + SI.deviceType, -10);
-        GUILayoutExtensions.LabelWithSpace("Operation System: " + SI.operatingSystem, -10);
-        GUILayoutExtensions.LabelWithSpace("Unity Version: " + SI.unityVersion, -10);
-        GUILayoutExtensions.LabelWithSpace("Graphics Device: " + SI.graphicsDeviceName, -10);
-        GUILayoutExtensions.LabelWithSpace("Graphics Device API: " + SI.graphicsDeviceVersion, -10);
-        GUILayoutExtensions.LabelWithSpace("Graphics Device ID: " + SI.graphicsDeviceID, -10);
-        GUILayoutExtensions.LabelWithSpace("Graphics Memory Size: " + SI.graphicsMemorySize, -10);
-        GUILayoutExtensions.LabelWithSpace("Supported Shader Level: " + SI.graphicsShaderLevel, -10);
+    private void UI(int id)
+    {
+        GUILayout.BeginVertical();
 
-        GUILayoutExtensions.LabelWithSpace("CPU: " + SI.processorType, -10);
-        GUILayoutExtensions.LabelWithSpace("CPU Cores Count (Threads Count): " + SI.processorCount, -10);
-        GUILayoutExtensions.LabelWithSpace("CPU Current Frequency: " + SI.processorFrequency + "Hz", -10);
+        GUILayoutExtensions.LabelWithSpace("Device Type: " + SI.deviceType, -8);
+        GUILayoutExtensions.LabelWithSpace("Operation System: " + SI.operatingSystem, -8);
+        GUILayoutExtensions.LabelWithSpace("Unity Version: " + SI.unityVersion, -8);
+        GUILayoutExtensions.LabelWithSpace("Graphics Device: " + SI.graphicsDeviceName, -8);
+        GUILayoutExtensions.LabelWithSpace("Graphics Device API: " + SI.graphicsDeviceVersion, -8);
+        GUILayoutExtensions.LabelWithSpace("Graphics Device ID: " + SI.graphicsDeviceID, -8);
+        GUILayoutExtensions.LabelWithSpace("Graphics Memory Size: " + SI.graphicsMemorySize, -8);
+        GUILayoutExtensions.LabelWithSpace("Supported Shader Level: " + SI.graphicsShaderLevel, -8);
 
-        GUILayoutExtensions.LabelWithSpace("RAM: " + SI.systemMemorySize, -10);
+        GUILayoutExtensions.LabelWithSpace("CPU: " + SI.processorType, -8);
+        GUILayoutExtensions.LabelWithSpace("CPU Cores Count (Threads Count): " + SI.processorCount, -8);
+        GUILayoutExtensions.LabelWithSpace("CPU Current Frequency: " + SI.processorFrequency + "Hz", -8);
 
-        GUILayoutExtensions.LabelWithSpace("Maximum Texture Size: " + SI.maxTextureSize, -10);
-        GUILayoutExtensions.LabelWithSpace("Non-Power-Of-Two Texture Support: " + SI.npotSupport, -10);
+        GUILayoutExtensions.LabelWithSpace("RAM: " + SI.systemMemorySize, -8);
 
-        GUILayoutExtensions.LabelWithSpace("ComputeShaders: " + SI.supportsComputeShaders, -10);
-        GUILayoutExtensions.LabelWithSpace("RenderTextures: " + SI.supportsRenderTextures, -10);
-        GUILayoutExtensions.LabelWithSpace("3DTextures: " + SI.supports3DTextures, -10);
-        GUILayoutExtensions.LabelWithSpace("Graphics Multithreading: " + SI.graphicsMultiThreaded, -10);
-        GUILayoutExtensions.LabelWithSpace("ARGB4444: " + SI.supportsARGB4444TextureFormat, -10);
-        GUILayoutExtensions.LabelWithSpace("ARGB32: " + SI.supportsARGB32TextureFormat, -10);
-        GUILayoutExtensions.LabelWithSpace("Depth Textures: " + SI.supportsDepthRenderTextureFormat, -10);
+        GUILayoutExtensions.LabelWithSpace("Maximum Texture Size: " + SI.maxTextureSize, -8);
+        GUILayoutExtensions.LabelWithSpace("Non-Power-Of-Two Texture Support: " + SI.npotSupport, -8);
 
-        GUILayout.EndArea();
+        GUILayoutExtensions.LabelWithSpace("ComputeShaders: " + SI.supportsComputeShaders, -8);
+        GUILayoutExtensions.LabelWithSpace("RenderTextures: " + SI.supportsRenderTextures, -8);
+        GUILayoutExtensions.LabelWithSpace("3DTextures: " + SI.supports3DTextures, -8);
+        GUILayoutExtensions.LabelWithSpace("Graphics Multithreading: " + SI.graphicsMultiThreaded, -8);
+        GUILayoutExtensions.LabelWithSpace("ARGB4444: " + SI.supportsARGB4444TextureFormat, -8);
+        GUILayoutExtensions.LabelWithSpace("ARGB32: " + SI.supportsARGB32TextureFormat, -8);
+        GUILayoutExtensions.LabelWithSpace("Depth Textures: " + SI.supportsDepthRenderTextureFormat, -8);
+
+        GUILayout.EndVertical();
     }
 }
 

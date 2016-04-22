@@ -34,6 +34,8 @@ using UnityEngine;
 
 public sealed class DebugGUISwitcher : MonoBehaviour, IDebugSwitcher
 {
+    public GUISkin skin;
+
     public DebugGUI[] GUIs;
 
     public int state = 0;

@@ -50,21 +50,34 @@ public sealed class DebugGUIPlanetoidInfo : DebugGUI
     {
         base.OnGUI();
 
+        GUILayout.Window(0, debugInfoBounds, UI, "Planetoid Info");
+    }
+
+    private void UI(int id)
+    {
         if (Planetoid != null)
         {
             int quadsCount = Planetoid.Quads.Count;
             int quadsCulledCount = Planetoid.GetCulledQuadsCount();
             int vertsRendered = (quadsCount - quadsCulledCount) * QS.nVerts;
 
-            GUILayout.BeginArea(debugInfoBounds);
+            GUILayout.BeginVertical();
 
-            GUILayoutExtensions.LabelWithSpace((Planetoid.gameObject.name + ": " + (Planetoid.Working ? "Generating..." : "Idle...")), -10);
-            GUILayoutExtensions.LabelWithSpace("Quads count: " + quadsCount, -10);
-            GUILayoutExtensions.LabelWithSpace("Quads culled count: " + quadsCulledCount, -10);
-            GUILayoutExtensions.LabelWithSpace("Quads culling machine: " + (Planetoid.UseUnityCulling ? "Unity Culling" : "Custom Culling"), -10);
-            GUILayoutExtensions.LabelWithSpace("Verts rendered per frame (Only Quads): " + vertsRendered, -10);
+            GUILayoutExtensions.LabelWithSpace((Planetoid.gameObject.name + ": " + (Planetoid.Working ? "Generating..." : "Idle...")), -8);
+            GUILayoutExtensions.LabelWithSpace("Quads count: " + quadsCount, -8);
+            GUILayoutExtensions.LabelWithSpace("Quads culled count: " + quadsCulledCount, -8);
+            GUILayoutExtensions.LabelWithSpace("Quads culling machine: " + (Planetoid.UseUnityCulling ? "Unity Culling" : "Custom Culling"), -8);
+            GUILayoutExtensions.LabelWithSpace("Verts rendered per frame (Only Quads): " + vertsRendered, -8);
 
-            GUILayout.EndArea();
+            GUILayout.EndVertical();
+        }
+        else
+        {
+            GUILayout.BeginVertical();
+
+            GUILayoutExtensions.LabelWithSpace("No Planetoid!?", -8);
+
+            GUILayout.EndVertical();
         }
     }
 }

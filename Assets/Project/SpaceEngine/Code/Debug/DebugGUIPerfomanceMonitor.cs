@@ -52,11 +52,11 @@ public sealed class DebugGUIPerfomanceMonitor : DebugGUI
 
         using (new Timer("Monitor GUI Draw"))
         {
-            ShowPerformanceCounters();
+            GUI.Window(0, debugInfoBounds, UI, "Perfomance Monitor");
         }
     }
     
-    private void ShowPerformanceCounters()
+    private void UI(int id)
     {
         const int ColumnZero = 10;
         const int ColumnOne = ColumnZero + 230;
@@ -69,15 +69,19 @@ public sealed class DebugGUIPerfomanceMonitor : DebugGUI
         //Collect our counters...
         var counters = PerformanceMonitor.Counters;
 
+        debugInfoBounds.width = Screen.width - 20;
+        debugInfoBounds.height = Mathf.Max(counters.Count * 20 + 5 + 60, 205);
+
         //Draw ui..
-        GUI.Box(new Rect(0, 0, Screen.width - 0, Mathf.Max(counters.Count * 20 + 5 + 60, 205)), "");
-        GUI.Label(new Rect(Screen.width / 2 - 125, 0, 500, 30), string.Format("<b>Performance Monitor</b> (in milliseconds)"));
+        //GUI.Box(new Rect(0, 0, Screen.width - 0, Mathf.Max(counters.Count * 20 + 5 + 60, 205)), "");
+        //GUI.Label(new Rect(Screen.width / 2 - 125, 0, 500, 30), string.Format("<b>Performance Monitor</b> (in milliseconds)"));
         GUI.Label(new Rect(ColumnZero, 30, ColumnOne - ColumnZero, 30), string.Format("Name"));
         GUI.Label(new Rect(ColumnOne, 30, ColumnTwo - ColumnOne, 30), string.Format("Total"));
         GUI.Label(new Rect(ColumnTwo, 30, ColumnThree - ColumnTwo, 30), string.Format("Average"));
         GUI.Label(new Rect(ColumnThree, 30, ColumnFour - ColumnThree, 30), string.Format("Last"));
         GUI.Label(new Rect(ColumnFour, 30, ColumnFive - ColumnFour, 30), string.Format("Max"));
         GUI.Label(new Rect(ColumnFive, 30, ColumnSix - ColumnFive, 30), string.Format("Count"));
+
         var y = 60;
 
         foreach (var counter in counters)

@@ -36,9 +36,12 @@ public abstract class DebugGUI : MonoBehaviour, IDebug
 {
     public Rect debugInfoBounds = new Rect(10, 10, 500, 500);
 
+    private DebugGUISwitcher switcher;
+
     protected virtual void Awake()
     {
-
+        if (switcher == null)
+            switcher = GetComponent<DebugGUISwitcher>();
     }
 
     protected virtual void Start()
@@ -48,6 +51,10 @@ public abstract class DebugGUI : MonoBehaviour, IDebug
 
     protected virtual void OnGUI()
     {
+        if (switcher != null)
+            if (switcher.skin != null)
+                GUI.skin = switcher.skin;
+
         GUI.depth = -100;
     }
 }
