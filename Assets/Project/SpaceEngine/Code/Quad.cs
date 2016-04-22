@@ -351,7 +351,6 @@ public sealed class Quad : MonoBehaviour
 		{
 			if (!Generated && !Planetoid.Cache.Working)
 			{
-				//Dispatcher.InvokeAsync(() => { Dispatch(); });
 				Dispatch();
 			}
 		}

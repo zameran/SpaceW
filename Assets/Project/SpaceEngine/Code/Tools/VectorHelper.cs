@@ -51,6 +51,11 @@ public static class VectorHelper
         return summ;
     }
 
+    public static Vector3 Middle(this Vector3 v1, Vector3 v2)
+    {
+        return v1 - v2;
+    }
+
     public static Vector3 Abs(this Vector3 v)
     {
         return new Vector3(Mathf.Abs(v.x), Mathf.Abs(v.y), Mathf.Abs(v.z));
