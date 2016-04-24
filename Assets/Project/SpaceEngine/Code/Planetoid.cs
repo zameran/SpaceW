@@ -95,6 +95,21 @@ public sealed class Planetoid : MonoBehaviour
 		}
 	}
 
+	public void QuadDispatchStarted(Quad q)
+	{
+
+	}
+
+	public void QuadDispatchReady(Quad q)
+	{
+
+	}
+
+	public void QuadGPUGetDataReady(Quad q)
+	{
+
+	}
+
 	private void Awake()
 	{
 		Origin = transform.position;
@@ -117,13 +132,7 @@ public sealed class Planetoid : MonoBehaviour
 		if (PrototypeMesh == null)
 			SetupMesh();
 
-		if (Atmosphere != null)
-		{
-			foreach (Quad q in MainQuads)
-			{
-				Atmosphere.InitUniforms(q.QuadMaterial);
-			}
-		}
+		Atmosphere.InitPlanetoidUniforms(this);
 	}
 
 	private void Update()
@@ -315,6 +324,7 @@ public sealed class Planetoid : MonoBehaviour
 		quadComponent.Planetoid = this;
 		quadComponent.QuadMesh = mesh;
 		quadComponent.QuadMaterial = material;
+		quadComponent.SetupEvents(quadComponent);
 
 		QuadGenerationConstants gc = QuadGenerationConstants.Init(TerrainMaxHeight);
 		gc.planetRadius = PlanetRadius;
@@ -326,7 +336,6 @@ public sealed class Planetoid : MonoBehaviour
 		quadComponent.Position = quadPosition;
 		quadComponent.ID = QuadID.One;
 		quadComponent.generationConstants = gc;
-		quadComponent.Planetoid = this;
 		quadComponent.SetupCorners(quadPosition);
 		quadComponent.ShouldDraw = true;
 		quadComponent.ReadyForDispatch = true;
@@ -352,6 +361,7 @@ public sealed class Planetoid : MonoBehaviour
 		quadComponent.Planetoid = this;
 		quadComponent.QuadMesh = mesh;
 		quadComponent.QuadMaterial = material;
+		quadComponent.SetupEvents(quadComponent);
 		quadComponent.SetupCorners(quadPosition);
 
 		if(Atmosphere != null) Atmosphere.InitUniforms(quadComponent.QuadMaterial);
@@ -361,7 +371,6 @@ public sealed class Planetoid : MonoBehaviour
 
 		quadComponent.Position = quadPosition;
 		quadComponent.generationConstants = gc;
-		quadComponent.Planetoid = this;
 		quadComponent.ShouldDraw = false;
 
 		if (qdtccc == null)

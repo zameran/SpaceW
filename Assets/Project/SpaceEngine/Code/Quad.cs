@@ -209,24 +209,22 @@ public sealed class Quad : MonoBehaviour
 
 	private void QuadDispatchStarted(Quad q)
 	{
-		Log("DispatchStarted event fire!");
+
 	}
 
 	private void QuadDispatchReady(Quad q)
 	{
-		Log("DispatchReady event fire!");
+
 	}
 
 	private void QuadGPUGetDataReady(Quad q)
 	{
-		Log("GPUGetDataReady event fire!");
+
 	}
 
 	public Quad()
 	{
-		DispatchStarted += QuadDispatchStarted;
-		DispatchReady += QuadDispatchReady;
-		GPUGetDataReady += QuadGPUGetDataReady;
+
 	}
 
 	private void Awake()
@@ -319,13 +317,22 @@ public sealed class Quad : MonoBehaviour
 			DestroyImmediate(QuadMaterial);
 
 		if (DispatchStarted != null)
+		{
 			DispatchStarted -= QuadDispatchStarted;
+			DispatchStarted -= Planetoid.QuadDispatchStarted;
+		}
 
 		if (DispatchReady != null)
+		{
 			DispatchReady -= QuadDispatchReady;
+			DispatchReady -= Planetoid.QuadDispatchReady;
+		}
 
 		if (GPUGetDataReady != null)
+		{
 			GPUGetDataReady -= QuadGPUGetDataReady;
+			GPUGetDataReady -= Planetoid.QuadGPUGetDataReady;
+		}
 	}
 
 	private void OnWillRenderObject()
@@ -649,30 +656,30 @@ public sealed class Quad : MonoBehaviour
 		int kernel3 = CoreShader.FindKernel("HeightSub");
 		int kernel4 = CoreShader.FindKernel("TexturesSub");
 
-		SetupComputeShaderKernelUniforfms(kernel1, QuadGenerationConstantsBuffer, PreOutDataBuffer, PreOutDataSubBuffer, OutDataBuffer); Log("Buffers for first kernel ready!");
-		SetupComputeShaderKernelUniforfms(kernel2, QuadGenerationConstantsBuffer, PreOutDataBuffer, PreOutDataSubBuffer, OutDataBuffer); Log("Buffers for second kernel ready!");
-		SetupComputeShaderKernelUniforfms(kernel3, QuadGenerationConstantsBuffer, PreOutDataBuffer, PreOutDataSubBuffer, OutDataBuffer); Log("Buffers for third kernel ready!");
-		SetupComputeShaderKernelUniforfms(kernel4, QuadGenerationConstantsBuffer, PreOutDataBuffer, PreOutDataSubBuffer, OutDataBuffer); Log("Buffers for fourth kernel ready!");
+		SetupComputeShaderKernelUniforfms(kernel1, QuadGenerationConstantsBuffer, PreOutDataBuffer, PreOutDataSubBuffer, OutDataBuffer);
+		SetupComputeShaderKernelUniforfms(kernel2, QuadGenerationConstantsBuffer, PreOutDataBuffer, PreOutDataSubBuffer, OutDataBuffer);
+		SetupComputeShaderKernelUniforfms(kernel3, QuadGenerationConstantsBuffer, PreOutDataBuffer, PreOutDataSubBuffer, OutDataBuffer);
+		SetupComputeShaderKernelUniforfms(kernel4, QuadGenerationConstantsBuffer, PreOutDataBuffer, PreOutDataSubBuffer, OutDataBuffer);
 
 		CoreShader.Dispatch(kernel1,
 		QS.THREADGROUP_SIZE_X_REAL,
 		QS.THREADGROUP_SIZE_Y_REAL,
-		QS.THREADGROUP_SIZE_Z_REAL); Log("First kernel ready!");
+		QS.THREADGROUP_SIZE_Z_REAL);
 
 		CoreShader.Dispatch(kernel2,
 		QS.THREADGROUP_SIZE_X,
 		QS.THREADGROUP_SIZE_Y,
-		QS.THREADGROUP_SIZE_Z); Log("Second kernel ready!");
+		QS.THREADGROUP_SIZE_Z);
 
 		CoreShader.Dispatch(kernel3,
 		QS.THREADGROUP_SIZE_X_SUB_REAL,
 		QS.THREADGROUP_SIZE_Y_SUB_REAL,
-		QS.THREADGROUP_SIZE_Z_SUB_REAL); Log("Third kernel ready!");
+		QS.THREADGROUP_SIZE_Z_SUB_REAL);
 
 		CoreShader.Dispatch(kernel4,
 		QS.THREADGROUP_SIZE_X_SUB,
 		QS.THREADGROUP_SIZE_Y_SUB,
-		QS.THREADGROUP_SIZE_Z_SUB); Log("Fourth kernel ready!");
+		QS.THREADGROUP_SIZE_Z_SUB);
 
 		Generated = true;
 
@@ -711,6 +718,25 @@ public sealed class Quad : MonoBehaviour
 
 		if (Planetoid.NPS != null)
 			Planetoid.NPS.UpdateUniforms(QuadMaterial, CoreShader, kernel);
+	}
+
+	public void SetupEvents(Quad q)
+	{
+		SetupQuadEvents(q);
+
+		if (q.Planetoid != null)
+		{
+			q.DispatchStarted += q.Planetoid.QuadDispatchStarted;
+			q.DispatchReady += q.Planetoid.QuadDispatchReady;
+			q.GPUGetDataReady += q.Planetoid.QuadGPUGetDataReady;
+		}
+	}
+
+	private void SetupQuadEvents(Quad q)
+	{
+		q.DispatchStarted += q.QuadDispatchStarted;
+		q.DispatchReady += q.QuadDispatchReady;
+		q.GPUGetDataReady += q.QuadGPUGetDataReady;
 	}
 
 	public void SetupVectors(Quad quad, int id, bool staticX, bool staticY, bool staticZ)

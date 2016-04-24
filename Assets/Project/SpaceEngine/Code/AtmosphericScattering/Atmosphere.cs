@@ -28,6 +28,7 @@ public sealed class Atmosphere : MonoBehaviour
     public Mesh AtmosphereMesh;
 
     public bool RunTimeBaking = false;
+    public bool LostFocusForceRebake = false;
 
     public AtmosphereSun Sun;
     public AtmosphereParameters atmosphereParameters = AtmosphereParameters.Default;
@@ -50,7 +51,7 @@ public sealed class Atmosphere : MonoBehaviour
         SetUniforms(SkyMaterial);
     }
 
-    [ContextMenu("Rebake")]
+    [ContextMenu("TryBake")]
     public void TryBake()
     {
         if (RunTimeBaking && artb != null) artb.Bake(atmosphereParameters);
@@ -60,14 +61,22 @@ public sealed class Atmosphere : MonoBehaviour
     {
         //Rg = AtmosphereScale;
         //Rt = (64200f / 63600f) * Rg * AtmosphereHeight;
-        //Rl = (64210.0f / 63600f) * Rg;
-
-        if (!Transmittance.IsCreated() || !Inscatter.IsCreated() || !Irradiance.IsCreated())
-        {
-            Debug.Log("Atmosphere: fail with textures!");
-        }
+        //Rl = (64210.0f / 63600f) * Rg;   
 
         Sun.Origin = Origin;
+    }
+
+    public void OnApplicationFocus(bool focusStatus)
+    {
+        if (focusStatus == true && LostFocusForceRebake == true)
+        {
+            if (Transmittance == null || Inscatter == null || Irradiance == null) return;
+
+            if (!Transmittance.IsCreated() || !Inscatter.IsCreated() || !Irradiance.IsCreated())
+            {
+                Debug.Log("Atmosphere: fail with textures!");
+            }
+        }
     }
 
     public void Render(bool now)
@@ -180,6 +189,30 @@ public sealed class Atmosphere : MonoBehaviour
         mat.SetVector("betaMEx", (BETA_MSca / 1000.0f) / 0.9f);
         mat.SetTexture("_Sun_Glare", SunGlareTexture);
         mat.SetFloat("_Sun_Glare_Scale", SunGlareScale);
+    }
+
+    public void InitPlanetoidUniforms(Planetoid planetoid)
+    {
+        if (planetoid.Atmosphere != null)
+        {
+            foreach (Quad q in planetoid.MainQuads)
+            {
+                if (q != null)
+                    planetoid.Atmosphere.InitUniforms(q.QuadMaterial);
+            }
+        }
+    }
+
+    public void SetPlanetoidUniforms(Planetoid planetoid)
+    {
+        if (planetoid.Atmosphere != null)
+        {
+            foreach (Quad q in planetoid.MainQuads)
+            {
+                if (q != null)
+                    planetoid.Atmosphere.SetUniformsForPlanetQuad(q.QuadMaterial);
+            }
+        }
     }
 
     public void SetUniforms(Material mat)
