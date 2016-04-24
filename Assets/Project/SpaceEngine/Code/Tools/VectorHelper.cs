@@ -114,4 +114,9 @@ public static class VectorHelper
                 (-p3.distance * Vector3.Cross(p1.normal, p2.normal))) / 
                                (Vector3.Dot(p1.normal, Vector3.Cross(p2.normal, p3.normal)));
     }
+
+    public static Vector3 RoundToInt(this Vector3 v)
+    {
+        return new Vector3(Mathf.RoundToInt(v.x), Mathf.RoundToInt(v.y), Mathf.RoundToInt(v.z));
+    }
 }

@@ -1058,6 +1058,7 @@ public sealed class Quad : MonoBehaviour
 	{
 		Vector3 temp = Vector3.zero;
 
+		float mod = 0.5f;
 		float v = Planetoid.PlanetRadius;
 		float tempStatic = 0;
 
@@ -1065,63 +1066,63 @@ public sealed class Quad : MonoBehaviour
 		{
 			case QuadPosition.Top:
 				if (id == 0)
-					temp += new Vector3(-v / 2, v, v / 2);
+					temp += new Vector3(-v * mod, v, v * mod);
 				else if (id == 1)
-					temp += new Vector3(v / 2, v, v / 2);
+					temp += new Vector3(v * mod, v, v * mod);
 				else if (id == 2)
-					temp += new Vector3(-v / 2, v, -v / 2);
+					temp += new Vector3(-v * mod, v, -v * mod);
 				else if (id == 3)
-					temp += new Vector3(v / 2, v, -v / 2);
+					temp += new Vector3(v * mod, v, -v * mod);
 				break;
 			case QuadPosition.Bottom:
 				if (id == 0)
-					temp += new Vector3(-v / 2, -v, -v / 2);
+					temp += new Vector3(-v * mod, -v, -v * mod);
 				else if (id == 1)
-					temp += new Vector3(v / 2, -v, -v / 2);
+					temp += new Vector3(v * mod, -v, -v * mod);
 				else if (id == 2)
-					temp += new Vector3(-v / 2, -v, v / 2);
+					temp += new Vector3(-v * mod, -v, v * mod);
 				else if (id == 3)
-					temp += new Vector3(v / 2, -v, v / 2);
+					temp += new Vector3(v * mod, -v, v * mod);
 				break;
 			case QuadPosition.Left:
 				if (id == 0)
-					temp += new Vector3(-v, v / 2, v / 2);
+					temp += new Vector3(-v, v * mod, v * mod);
 				else if (id == 1)
-					temp += new Vector3(-v, v / 2, -v / 2);
+					temp += new Vector3(-v, v * mod, -v * mod);
 				else if (id == 2)
-					temp += new Vector3(-v, -v / 2, v / 2);
+					temp += new Vector3(-v, -v * mod, v * mod);
 				else if (id == 3)
-					temp += new Vector3(-v, -v / 2, -v / 2);
+					temp += new Vector3(-v, -v * mod, -v * mod);
 				break;
 			case QuadPosition.Right:
 				if (id == 0)
-					temp += new Vector3(v, v / 2, -v / 2);
+					temp += new Vector3(v, v * mod, -v * mod);
 				else if (id == 1)
-					temp += new Vector3(v, v / 2, v / 2);
+					temp += new Vector3(v, v * mod, v * mod);
 				else if (id == 2)
-					temp += new Vector3(v, -v / 2, -v / 2);
+					temp += new Vector3(v, -v * mod, -v * mod);
 				else if (id == 3)
-					temp += new Vector3(v, -v / 2, v / 2);
+					temp += new Vector3(v, -v * mod, v * mod);
 				break;
 			case QuadPosition.Front:
 				if (id == 0)
-					temp += new Vector3(v / 2, v / 2, v);
+					temp += new Vector3(v * mod, v * mod, v);
 				else if (id == 1)
-					temp += new Vector3(-v / 2, v / 2, v);
+					temp += new Vector3(-v * mod, v * mod, v);
 				else if (id == 2)
-					temp += new Vector3(v / 2, -v / 2, v);
+					temp += new Vector3(v * mod, -v * mod, v);
 				else if (id == 3)
-					temp += new Vector3(-v / 2, -v / 2, v);
+					temp += new Vector3(-v * mod, -v * mod, v);
 				break;
 			case QuadPosition.Back:
 				if (id == 0)
-					temp += new Vector3(-v / 2, v / 2, -v);
+					temp += new Vector3(-v * mod, v * mod, -v);
 				else if (id == 1)
-					temp += new Vector3(v / 2, v / 2, -v);
+					temp += new Vector3(v * mod, v * mod, -v);
 				else if (id == 2)
-					temp += new Vector3(-v / 2, -v / 2, -v);
+					temp += new Vector3(-v * mod, -v * mod, -v);
 				else if (id == 3)
-					temp += new Vector3(v / 2, -v / 2, -v);
+					temp += new Vector3(v * mod, -v * mod, -v);
 				break;
 		}
 
@@ -1130,7 +1131,7 @@ public sealed class Quad : MonoBehaviour
 		BrainFuckMath.UnlockAxis(ref temp, ref tempStatic, staticX, staticY, staticZ);
 
 		//Just make sure that our vector values is rounded...
-		temp = new Vector3(Mathf.RoundToInt(temp.x), Mathf.RoundToInt(temp.y), Mathf.RoundToInt(temp.z));
+		temp = temp.RoundToInt();
 
 		return temp;
 	}
