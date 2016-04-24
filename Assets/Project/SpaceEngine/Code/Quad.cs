@@ -93,6 +93,15 @@ public struct OutputStruct
 	public Vector4 cpos;
 }
 
+[Serializable]
+public struct QuadOutputStruct
+{
+	public Vector3 topLeftCorner;
+	public Vector3 topRightCorner;
+	public Vector3 bottomLeftCorner;
+	public Vector3 bottomRightCorner;
+}
+
 public sealed class Quad : MonoBehaviour
 {
 	[Serializable]
@@ -202,9 +211,9 @@ public sealed class Quad : MonoBehaviour
 	public delegate void QuadDelegate(Quad q);
 	public event QuadDelegate DispatchStarted, DispatchReady, GPUGetDataReady;
 
-	public Quad.Id GetId()
+	public Id GetId()
 	{
-		return new Quad.Id(LODLevel, (int)ID, (int)Position);
+		return new Id(LODLevel, (int)ID, (int)Position);
 	}
 
 	private void QuadDispatchStarted(Quad q)
