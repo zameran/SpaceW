@@ -202,8 +202,8 @@
                 vel = vel.xzy + orbit.GetRotFrameVel(referenceBody);
             }
 
-            //vel = vel + referenceBody.GetFrameVel() - refBody.GetFrameVel();
-            vel = (vel + referenceBody.GetFrameVel()) - refBody.GetFrameVel();
+            vel = (vel + referenceBody.rotvel) - refBody.rotvel;
+            Debug.Log(referenceBody.name + "|" + referenceBody.rotvel + "|" + refBody.name + "|" + refBody.rotvel);
             pos += vel * Time.fixedDeltaTime;
 
             orbit.UpdateFromStateVectors(pos, vel, refBody, Planetarium.GetUniversalTime());
@@ -229,7 +229,6 @@
                 vel = vel.xzy + orbit.GetRotFrameVel(referenceBody);
             }
 
-            //vel = vel + referenceBody.GetFrameVel() - refBody.GetFrameVel();
             vel = (vel + referenceBody.GetFrameVel()) - refBody.GetFrameVel();
             pos += vel * Time.fixedDeltaTime;
 

@@ -34,18 +34,16 @@ namespace Experimental
         public Vector3 velocityLast;
         public Vector3 velocity;
 
-        public OrbitDriver orbitDriver;
+        public OrbitDriverD orbitDriver;
 
         public bool rails = false;
 
         public bool alreadyOnRails = false;
         public bool alreadyOffRails = false;
 
-        public OrbitDriver.UpdateMode targetMode = OrbitDriver.UpdateMode.VESSEL_ACTIVE;
-
         public Vector3 findLocalCenterOfMass()
         {
-            return centerOfMass.transform.position;
+            return transform.InverseTransformPoint(centerOfMass.transform.position);
         }
 
         public void SetPosition(Vector3 position)
@@ -82,17 +80,9 @@ namespace Experimental
                 {
                     if (orbitDriver.orbit.vel.xzy != Vector3d.zero)
                     {
-                        //transform.rotation = Quaternion.LookRotation(orbitDriver.orbit.vel.xzy);
+                        transform.rotation = Quaternion.LookRotation(orbitDriver.orbit.vel.xzy);
                     }
                 }
-            }
-
-            if(Input.GetKeyDown(KeyCode.F))
-            {
-                if (targetMode == OrbitDriver.UpdateMode.VESSEL)
-                    targetMode = OrbitDriver.UpdateMode.VESSEL_ACTIVE;
-                else if (targetMode == OrbitDriver.UpdateMode.VESSEL_ACTIVE)
-                    targetMode = OrbitDriver.UpdateMode.VESSEL;
             }
 
             Debug.DrawLine(transform.position, transform.position + transform.forward * 200, XKCDColors.Adobe);
@@ -118,9 +108,9 @@ namespace Experimental
 
             Debug.Log("Vessel now on rails!");
 
-            orbitDriver.SetOrbitMode(OrbitDriver.UpdateMode.PLANET);
+            orbitDriver.SetOrbitMode(OrbitDriverD.UpdateMode.UPDATE);
 
-            //rb.isKinematic = true;
+            rb.isKinematic = true;
             alreadyOnRails = true;
             alreadyOffRails = false;
 
@@ -133,9 +123,9 @@ namespace Experimental
 
             Debug.Log("Vessel now off rails!");
                      
-            orbitDriver.SetOrbitMode(targetMode);
+            orbitDriver.SetOrbitMode(OrbitDriverD.UpdateMode.TRACK_Phys);
            
-            //rb.isKinematic = false;
+            rb.isKinematic = false;
             alreadyOnRails = false;
             alreadyOffRails = true;
 

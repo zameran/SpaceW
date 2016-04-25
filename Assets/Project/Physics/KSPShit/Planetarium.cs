@@ -180,7 +180,7 @@
         {
             if (Sun != null)
             {
-                CurrentMainBody = FindRootBody(Sun);
+                //CurrentMainBody = FindRootBody(Sun);
                 //UpdateCBsRecursive(CurrentMainBody);
             }
         }

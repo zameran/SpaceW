@@ -9,6 +9,8 @@ namespace Experimental
 {
     public class CelestialBody : MonoBehaviour
     {
+        public Vector3d rotvel = Vector3d.zero;
+
         public string bodyName = "Unnamed";
 
         public string bodyDescription = "A mysterious uncharted celestial body.";
@@ -113,7 +115,7 @@ namespace Experimental
 
         public QuaternionD rotation;
 
-        public OrbitDriver orbitDriver;
+        public OrbitDriverD orbitDriver;
 
         public GameObject scaledBody;
 
@@ -305,7 +307,7 @@ namespace Experimental
         {
             bodyTransform = transform;
             _position = bodyTransform.position;
-            orbitDriver = GetComponent<OrbitDriver>();
+            orbitDriver = GetComponent<OrbitDriverD>();
             gMagnitudeAtCenter = GeeASL * 9.81 * Math.Pow(Radius, 2.0);
             Mass = Radius * Radius * (GeeASL * 9.81) / 6.674E-11;
             gravParameter = Mass * 6.674E-11;
@@ -385,7 +387,12 @@ namespace Experimental
                 }
             }
 
-            if (orbitDriver) orbitDriver.UpdateOrbit();
+            if (orbitDriver)
+            {
+                orbitDriver.UpdateOrbit();
+
+                rotvel = GetFrameVel();
+            }
 
             CelestialBody currentCelestialBody = this;
             CelestialBody sunCelestialBody;
@@ -424,17 +431,19 @@ namespace Experimental
 
         public Vector3d GetFrameVel()
         {
-            if (orbitDriver && orbitDriver.enabled)
+            if (orbitDriver != null && orbitDriver.enabled)
             {
                 return orbit.vel + orbit.referenceBody.GetFrameVel();
             }
-
-            return Vector3d.zero;
+            else
+            {
+                return Vector3d.zero;
+            }
         }
 
         public Vector3d GetFrameVelAtUT(double UT)
         {
-            if (orbitDriver && orbitDriver.enabled)
+            if (orbitDriver != null && orbitDriver.enabled)
             {
                 return orbit.getOrbitalVelocityAtUT(UT) + orbit.referenceBody.GetFrameVelAtUT(UT);
             }
