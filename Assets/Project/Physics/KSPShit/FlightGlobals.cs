@@ -7,17 +7,17 @@
 
     public class FlightGlobals : MonoBehaviour
     {
-        private static FlightGlobals _fetch;
-        public static FlightGlobals fetch
+        private static FlightGlobals instance;
+        public static FlightGlobals Instance
         {
             get
             {
-                if (_fetch == null)
+                if (instance == null)
                 {
-                    _fetch = (FlightGlobals)FindObjectOfType(typeof(FlightGlobals));
+                    instance = (FlightGlobals)FindObjectOfType(typeof(FlightGlobals));
                 }
 
-                return _fetch;
+                return instance;
             }
         }
 
@@ -26,7 +26,7 @@
         {
             get
             {
-                return fetch.activeVessel;
+                return Instance.activeVessel;
             }
         }
 
@@ -35,7 +35,7 @@
         {
             get
             {
-                return fetch.vessels;
+                return Instance.vessels;
             }
         }
 
@@ -44,25 +44,25 @@
         {
             get
             {
-                return fetch.bodies;
+                return Instance.bodies;
             }
         }
 
         public static List<GameObject> physicalObjects = new List<GameObject>();
 
-        public static Vector3d getUpAxis(Vector3d position)
+        public static Vector3d GetUpAxis(Vector3d position)
         {
-            return (position - getMainBody(position).position).normalized;
+            return (position - GetMainBody(position).Position).normalized;
         }
 
-        public static Vector3d getUpAxis(CelestialBody body, Vector3d position)
+        public static Vector3d GetUpAxis(CelestialBody body, Vector3d position)
         {
-            return (position - body.position).normalized;
+            return (position - body.Position).normalized;
         }
 
-        public static CelestialBody getMainBody(Vector3d refPos)
+        public static CelestialBody GetMainBody(Vector3d refPos)
         {
-            return inSOI(refPos, fetch.bodies[0]);
+            return inSOI(refPos, Instance.bodies[0]);
         }
 
         private static CelestialBody inSOI(Vector3d pos, CelestialBody body)
@@ -75,7 +75,7 @@
                 {
                     CelestialBody celestialBody = body.orbitingBodies[i];
 
-                    if ((pos - celestialBody.position).sqrMagnitude < celestialBody.sphereOfInfluence * celestialBody.sphereOfInfluence)
+                    if ((pos - celestialBody.Position).sqrMagnitude < celestialBody.sphereOfInfluence * celestialBody.sphereOfInfluence)
                     {
                         return inSOI(pos, celestialBody);
                     }
@@ -85,39 +85,39 @@
             return body;
         }
 
-        public static Vector3d getCentrifugalAcc(Vector3d pos, CelestialBody body)
+        public static Vector3d GetCentrifugalAcc(Vector3d pos, CelestialBody body)
         {
             if (!body.inverseRotation) return Vector3d.zero;
 
-            pos = body.position - pos;
+            pos = body.Position - pos;
 
             return Vector3d.Cross(body.angularVelocity, Vector3d.Cross(body.angularVelocity, pos));
         }
 
-        public static Vector3d getCoriolisAcc(Vector3d vel, CelestialBody body)
+        public static Vector3d GetCoriolisAcc(Vector3d vel, CelestialBody body)
         {
             if (!body.inverseRotation) return Vector3d.zero;
 
             return -2 * Vector3d.Cross(body.angularVelocity, vel);
         }
 
-        public static Vector3d getGeeForceAtPosition(Vector3d pos)
+        public static Vector3d GetGeeForceAtPosition(Vector3d pos)
         {
-            CelestialBody mainBody = getMainBody(pos);
+            CelestialBody mainBody = GetMainBody(pos);
 
-            double magn = (mainBody.position - pos).sqrMagnitude;
+            double magn = (mainBody.Position - pos).sqrMagnitude;
 
-            return Vector3d.Normalize(pos - mainBody.position) * -(mainBody.gMagnitudeAtCenter / magn);
+            return Vector3d.Normalize(pos - mainBody.Position) * -(mainBody.gMagnitudeAtCenter / magn);
         }
 
-        public static CelestialBody getMainBody()
+        public static CelestialBody GetMainBody()
         {
             if (ActiveVessel)
             {
-                return ActiveVessel.orbitDriver.referenceBody;
+                return ActiveVessel.orbitDriver.ReferenceBody;
             }
 
-            return getMainBody(Vector3.zero);
+            return GetMainBody(Vector3.zero);
         }
 
         public CelestialBody currentMainBody;

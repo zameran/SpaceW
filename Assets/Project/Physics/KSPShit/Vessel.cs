@@ -34,7 +34,7 @@ namespace Experimental
         public Vector3 velocityLast;
         public Vector3 velocity;
 
-        public OrbitDriverD orbitDriver;
+        public OrbitDriver orbitDriver;
 
         public bool rails = false;
 
@@ -108,7 +108,7 @@ namespace Experimental
 
             Debug.Log("Vessel now on rails!");
 
-            orbitDriver.SetOrbitMode(OrbitDriverD.UpdateMode.UPDATE);
+            orbitDriver.SetOrbitMode(OrbitDriver.UpdateMode.UPDATE);
 
             rb.isKinematic = true;
             alreadyOnRails = true;
@@ -123,7 +123,7 @@ namespace Experimental
 
             Debug.Log("Vessel now off rails!");
                      
-            orbitDriver.SetOrbitMode(OrbitDriverD.UpdateMode.TRACK_Phys);
+            orbitDriver.SetOrbitMode(OrbitDriver.UpdateMode.TRACK_Phys);
            
             rb.isKinematic = false;
             alreadyOnRails = false;
@@ -142,7 +142,7 @@ namespace Experimental
         public void ResumeVelocity()
         {
             velocityLast = Vector3.zero;
-            velocity = orbitDriver.orbit.GetVel() - (Vector3d)velocityLast - ((orbitDriver.orbit.referenceBody.inverseRotation) ? Vector3d.zero : orbitDriver.referenceBody.getRFrmVel(transform.position));
+            velocity = orbitDriver.orbit.GetVel() - (Vector3d)velocityLast - ((orbitDriver.orbit.referenceBody.inverseRotation) ? Vector3d.zero : orbitDriver.ReferenceBody.GetRFrmVel(transform.position));
             rb.velocity = velocity;
         }
     }

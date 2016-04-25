@@ -217,7 +217,7 @@
                 if (!celestialBody.orbitDriver || !celestialBody.orbitDriver.reverse) UpdateCBsRecursive(celestialBody);
             }
 
-            if (cb.orbitDriver && cb.orbitDriver.reverse) UpdateCBsRecursive(cb.referenceBody);
+            if (cb.orbitDriver && cb.orbitDriver.reverse) UpdateCBsRecursive(cb.ReferenceBody);
         }
 
         public static double GetUniversalTime()

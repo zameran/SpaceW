@@ -10,8 +10,6 @@
 
         public Transform originTarget;
 
-        //private List<MapObject> scaledSpaceObjects = new List<MapObject>();
-
         private static Vector3d totalOffset;
 
         public static ScaledSpace Instance

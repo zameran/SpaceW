@@ -4,21 +4,13 @@ namespace Experimental
 {
     public class UtilMath
     {
-        public static double TwoPI;
+        public static double TwoPI = 6.28318530717959;
 
-        public static float TwoPIf;
+        public static float TwoPIf = 6.28318548f;
 
-        public static double HalfPI;
+        public static double HalfPI = 1.5707963267949;
 
-        public static float HalfPIf;
-
-        static UtilMath()
-        {
-            TwoPI = 6.28318530717959;
-            TwoPIf = 6.28318548f;
-            HalfPI = 1.5707963267949;
-            HalfPIf = 1.57079637f;
-        }
+        public static float HalfPIf = 1.57079637f;
 
         public static double ACosh(double x)
         {
@@ -145,7 +137,7 @@ namespace Experimental
             return 1 - 1 / (Math.Pow(1 / midPoint * Math.Abs(z), easing) + 1) * (double)Math.Sign(z);
         }
 
-        public static bool IsDivisible(int n, int byN)
+        public static bool isDivisible(int n, int byN)
         {
             while (byN % 2 == 0)
             {
@@ -160,7 +152,7 @@ namespace Experimental
             return n % byN == 0;
         }
 
-        public static bool IsPowerOfTwo(int x)
+        public static bool isPowerOfTwo(int x)
         {
             return (x & checked(x - 1)) == 0;
         }
@@ -179,9 +171,9 @@ namespace Experimental
 
         public static float RoundToPlaces(float value, int decimalPlaces)
         {
-            float single = (float)Math.Pow(10, (double)decimalPlaces);
+            float single = (float)Math.Pow(10, decimalPlaces);
 
-            return (float)(Math.Round((double)(value * single)) / (double)single);
+            return (float)(Math.Round((value * single)) / single);
         }
 
         public static double RoundToPlaces(double value, int decimalPlaces)

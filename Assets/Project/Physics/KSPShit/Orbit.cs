@@ -223,7 +223,7 @@ namespace Experimental
 
         public void UpdateFromOrbitAtUT(Orbit orbit, double UT, CelestialBody toBody)
         {
-            pos = (orbit.getTruePositionAtUT(UT) - toBody.getTruePositionAtUT(UT)).xzy;
+            pos = (orbit.getTruePositionAtUT(UT) - toBody.GetTruePositionAtUT(UT)).xzy;
             vel = orbit.getOrbitalVelocityAtUT(UT) + orbit.referenceBody.GetFrameVelAtUT(UT) - toBody.GetFrameVelAtUT(UT);
 
             UpdateFromStateVectors(pos, vel, toBody, UT);
@@ -429,7 +429,7 @@ namespace Experimental
 
         public Vector3d getTruePositionAtUT(double UT)
         {
-            return getRelativePositionAtUT(UT).xzy + referenceBody.getTruePositionAtUT(UT);
+            return getRelativePositionAtUT(UT).xzy + referenceBody.GetTruePositionAtUT(UT);
         }
 
         public Vector3d getRelativePositionAtUT(double UT)
@@ -507,7 +507,7 @@ namespace Experimental
 
         public Vector3d GetVel()
         {
-            Vector3d vel = GetFrameVel() - ((!FlightGlobals.ActiveVessel) ? Vector3d.zero : FlightGlobals.ActiveVessel.orbitDriver.referenceBody.GetFrameVel());
+            Vector3d vel = GetFrameVel() - ((!FlightGlobals.ActiveVessel) ? Vector3d.zero : FlightGlobals.ActiveVessel.orbitDriver.ReferenceBody.GetFrameVel());
 
             return vel.xzy;
         }
@@ -537,7 +537,7 @@ namespace Experimental
 
         public Vector3d GetWorldSpaceVel()
         {
-            return GetVel() - ((!referenceBody.inverseRotation) ? Vector3d.zero : referenceBody.getRFrmVel(pos + referenceBody.position));
+            return GetVel() - ((!referenceBody.inverseRotation) ? Vector3d.zero : referenceBody.GetRFrmVel(pos + referenceBody.Position));
         }
 
         public double GetTimeToPeriapsis()
@@ -746,7 +746,7 @@ namespace Experimental
 
         public Vector3d getPositionAtT(double T)
         {
-            return referenceBody.position + getRelativePositionAtT(T).xzy;
+            return referenceBody.Position + getRelativePositionAtT(T).xzy;
         }
 
         public Vector3d getRelativePositionAtT(double T)
@@ -789,7 +789,7 @@ namespace Experimental
 
         public Vector3d getPositionFromMeanAnomaly(double M)
         {
-            return referenceBody.position + getRelativePositionFromMeanAnomaly(M).xzy;
+            return referenceBody.Position + getRelativePositionFromMeanAnomaly(M).xzy;
         }
 
         public Vector3d getRelativePositionFromMeanAnomaly(double M)
@@ -799,7 +799,7 @@ namespace Experimental
 
         public Vector3d getPositionFromEccAnomaly(double E)
         {
-            return referenceBody.position + getRelativePositionFromEccAnomaly(E).xzy;
+            return referenceBody.Position + getRelativePositionFromEccAnomaly(E).xzy;
         }
 
         public Vector3d getRelativePositionFromEccAnomaly(double E)
@@ -840,7 +840,7 @@ namespace Experimental
 
         public Vector3d getPositionFromTrueAnomaly(double tA)
         {
-            return referenceBody.position + getRelativePositionFromTrueAnomaly(tA).xzy;
+            return referenceBody.Position + getRelativePositionFromTrueAnomaly(tA).xzy;
         }
 
         public Vector3d getRelativePositionFromTrueAnomaly(double tA)
@@ -867,7 +867,7 @@ namespace Experimental
 
         public double getOrbitalSpeedAtPos(Vector3d pos)
         {
-            return getOrbitalSpeedAtDistance((referenceBody.position - pos).magnitude);
+            return getOrbitalSpeedAtDistance((referenceBody.Position - pos).magnitude);
         }
 
         public double getOrbitalSpeedAtDistance(double d)
@@ -934,12 +934,12 @@ namespace Experimental
                 }
             }
 
-            Debug.DrawLine(getPositionAtT(ObT), referenceBody.position, Color.white);
-            Debug.DrawLine(referenceBody.position, referenceBody.position + an.xzy * radius, Color.cyan);
-            Debug.DrawLine(referenceBody.position, getPositionAtT(0.0), Color.magenta);
+            Debug.DrawLine(getPositionAtT(ObT), referenceBody.Position, Color.white);
+            Debug.DrawLine(referenceBody.Position, referenceBody.Position + an.xzy * radius, Color.cyan);
+            Debug.DrawLine(referenceBody.Position, getPositionAtT(0.0), Color.magenta);
 
             Debug.DrawRay(getPositionAtT(ObT), vel.xzy * 0.0099999997764825821, Color.white);
-            Debug.DrawRay(referenceBody.position, h.xzy, Color.blue);
+            Debug.DrawRay(referenceBody.Position, h.xzy, Color.blue);
         }
 
         public static bool PeApIntersects(Orbit primary, Orbit secondary, double threshold)
@@ -958,7 +958,7 @@ namespace Experimental
 
             Vector3d vector3d = Vector3d.Cross(s.h, p.h);
 
-            Debug.DrawRay(ScaledSpace.LocalToScaledSpace(p.referenceBody.position), vector3d.xzy * 1000.0, Color.white);
+            Debug.DrawRay(ScaledSpace.LocalToScaledSpace(p.referenceBody.Position), vector3d.xzy * 1000.0, Color.white);
 
             double num4 = 1.0 / Math.Sin(dInc) * (Math.Sin(pInc) * Math.Cos(sInc) - Math.Sin(sInc) * Math.Cos(pInc) * Math.Cos(p.LAN * MathUtils.Deg2Rad - s.LAN * MathUtils.Deg2Rad));
             double num5 = 1.0 / Math.Sin(dInc) * (Math.Sin(sInc) * Math.Sin(p.LAN * MathUtils.Deg2Rad - s.LAN * MathUtils.Deg2Rad));
@@ -981,16 +981,16 @@ namespace Experimental
 
             CD = SolveClosestBSP(ref FFp, ref FFs, dInc, MathUtils.PI, p, s, 0.0001, maxIterations, ref iterationCount);
 
-            Debug.DrawLine(p.referenceBody.position, p.getPositionFromTrueAnomaly(FFp), Color.green);
-            Debug.DrawLine(s.referenceBody.position, s.getPositionFromTrueAnomaly(FFs), Color.grey);
+            Debug.DrawLine(p.referenceBody.Position, p.getPositionFromTrueAnomaly(FFp), Color.green);
+            Debug.DrawLine(s.referenceBody.Position, s.getPositionFromTrueAnomaly(FFs), Color.grey);
 
             SFp = FFp + MathUtils.PI;
             SFs = FFs + MathUtils.PI;
 
             CCD = SolveClosestBSP(ref SFp, ref SFs, dInc, MathUtils.PIOver2, p, s, 0.0001, maxIterations, ref iterationCount);
 
-            Debug.DrawLine(p.referenceBody.position, p.getPositionFromTrueAnomaly(SFp), Color.cyan);
-            Debug.DrawLine(s.referenceBody.position, s.getPositionFromTrueAnomaly(SFs), Color.magenta);
+            Debug.DrawLine(p.referenceBody.Position, p.getPositionFromTrueAnomaly(SFp), Color.cyan);
+            Debug.DrawLine(s.referenceBody.Position, s.getPositionFromTrueAnomaly(SFs), Color.magenta);
 
             CD = Math.Sqrt(CD);
             CCD = Math.Sqrt(CCD);
@@ -1058,7 +1058,7 @@ namespace Experimental
 
                 iterationCount++;
 
-                Debug.DrawLine(p.referenceBody.position, p.getPositionAtUT(UT), Color.yellow * 0.5f);
+                Debug.DrawLine(p.referenceBody.Position, p.getPositionAtUT(UT), Color.yellow * 0.5f);
             }
 
             return Math.Sqrt(pM);
@@ -1097,7 +1097,7 @@ namespace Experimental
                 dT /= 2.0;
                 iterationCount++;
 
-                Debug.DrawLine(p.referenceBody.position, p.getPositionAtUT(UT), Color.magenta * 0.5f);
+                Debug.DrawLine(p.referenceBody.Position, p.getPositionAtUT(UT), Color.magenta * 0.5f);
             }
             return result;
         }
@@ -1239,7 +1239,7 @@ namespace Experimental
             double periapsis = Math.Max(tgtBody.Radius * 3.0, tgtBody.sphereOfInfluence * Random.Range(0f, 1.1f));
             double deltaVatPeriapsis = Random.Range(100f, 500f);
 
-            return CreateRandomOrbitFlyBy(tgtBody.orbit, daysToClosestApproach * 24.0 * 60.0 * 60.0, periapsis, deltaVatPeriapsis);
+            return CreateRandomOrbitFlyBy(tgtBody.Orbit, daysToClosestApproach * 24.0 * 60.0 * 60.0, periapsis, deltaVatPeriapsis);
         }
 
         public static Orbit CreateRandomOrbitFlyBy(Orbit targetOrbit, double timeToPeriapsis, double periapsis, double deltaVatPeriapsis)

@@ -1,15 +1,15 @@
-﻿namespace Experimental
-{
-    using System;
-    using UnityEngine;
+﻿using System;
+using UnityEngine;
 
+namespace Experimental
+{
     public class OrbitDriver : MonoBehaviour
     {
         public enum UpdateMode
         {
-            PLANET,
-            VESSEL,
-            VESSEL_ACTIVE
+            TRACK_Phys,
+            UPDATE,
+            IDLE
         }
 
         public delegate void CelestialBodyDelegate(CelestialBody body);
@@ -17,9 +17,8 @@
         public Vector3d pos;
         public Vector3d vel;
 
-        public Vector3 startVel;
-        public Vector3 localCoM;
-        public Vector3 CoMoffset;
+        public Vector3 CoMLocal;
+        public Vector3 CoMOffset;
 
         private bool isHyperbolic;
 
@@ -28,21 +27,21 @@
         public bool drawOrbit;
         public bool reverse;
         public bool frameShift;
-        public bool QueuedUpdate;
+        public bool queuedUpdate;
 
         public UpdateMode updateMode;
+        public OrbitRenderer Renderer;
 
         private bool ready;
 
         public Vessel vessel;
-
         public CelestialBody celestialBody;
 
         public Transform driverTransform;
 
         public CelestialBodyDelegate OnReferenceBodyChange;
 
-        public CelestialBody referenceBody
+        public CelestialBody ReferenceBody
         {
             get
             {
@@ -58,54 +57,43 @@
         {
             driverTransform = transform;
             vessel = GetComponent<Vessel>();
-
-            if(celestialBody == null) celestialBody = GetComponent<CelestialBody>();
+            celestialBody = GetComponent<CelestialBody>();
         }
 
         private void Start()
         {
             switch (updateMode)
             {
-                case UpdateMode.VESSEL:
-                    if (referenceBody == null)
+                case UpdateMode.TRACK_Phys:
+                case UpdateMode.IDLE:
+                    if (!ReferenceBody)
                     {
-                        referenceBody = FlightGlobals.getMainBody(driverTransform.position);
+                        ReferenceBody = FlightGlobals.GetMainBody(driverTransform.position);
                     }
-                    TrackRigidbody(referenceBody);
+                    TrackRigidbody(ReferenceBody);
                     break;
-                case UpdateMode.VESSEL_ACTIVE:
-                    if (referenceBody == null)
-                    {
-                        referenceBody = FlightGlobals.getMainBody(driverTransform.position);
-                    }
-                    TrackRigidbody(referenceBody);
-                    break;
-                case UpdateMode.PLANET:
+                case UpdateMode.UPDATE:
                     orbit.Init();
                     updateFromParameters();
                     break;
             }
 
             ready = true;
+            //Planetarium.Orbits.Add(this);
 
-            Planetarium.Orbits.Add(this);
-
-            if (OnReferenceBodyChange != null)
-            {
-                OnReferenceBodyChange(referenceBody);
-            }
+            if (OnReferenceBodyChange != null) OnReferenceBodyChange(ReferenceBody);
         }
 
         private void OnDestroy()
         {
-            if (Planetarium.Orbits == null) return;
+            //if (Planetarium.Orbits == null) return;
 
-            Planetarium.Orbits.Remove(this);
+            //Planetarium.Orbits.Remove(this);
         }
 
         private void FixedUpdate()
         {
-            if (QueuedUpdate) return;
+            if (queuedUpdate) return;
 
             UpdateOrbit();
         }
@@ -116,32 +104,18 @@
 
             switch (updateMode)
             {
-                case UpdateMode.VESSEL:
-                    if (vessel != null)
+                case UpdateMode.TRACK_Phys:
+                case UpdateMode.IDLE:
+                    if (!(vessel == null) && !(vessel.rb == null))
                     {
-                        if (vessel.rb != null)
-                        {
-                            TrackRigidbody(referenceBody);
-                        }
-
+                        TrackRigidbody(ReferenceBody);
                         CheckDominantBody(driverTransform.position);
                     }
                     break;
-                case UpdateMode.VESSEL_ACTIVE:
+                case UpdateMode.UPDATE:
                     if (vessel != null)
                     {
-                        if (vessel.rb != null)
-                        {
-                            TrackActiveRigidbody(referenceBody);
-                        }
-
-                        CheckDominantBody(driverTransform.position);
-                    }
-                    break;
-                case UpdateMode.PLANET:
-                    if (vessel != null)
-                    {
-                        CheckDominantBody(referenceBody.position + pos);
+                        CheckDominantBody(ReferenceBody.Position + pos);
                     }
                     updateFromParameters();
                     break;
@@ -161,12 +135,9 @@
                 if (vessel != null) { }
             }
 
-            Debug.DrawRay(driverTransform.position, orbit.vel.xzy * 100 * Time.deltaTime, (updateMode != UpdateMode.PLANET) ? Color.red : Color.cyan); //TimeWarp.fixedDeltaTime
+            Debug.DrawRay(driverTransform.position, orbit.vel.xzy * Time.fixedDeltaTime, (updateMode != OrbitDriver.UpdateMode.UPDATE) ? Color.white : Color.cyan);
 
-            if (drawOrbit)
-            {
-                orbit.DrawOrbit();
-            }
+            if (drawOrbit) orbit.DrawOrbit();
         }
 
         public void SetOrbitMode(UpdateMode mode)
@@ -176,67 +147,36 @@
 
         private void CheckDominantBody(Vector3d refPos)
         {
-            //if (referenceBody != FlightGlobals.getMainBody(refPos) && !FlightGlobals.overrideOrbit)
-            if (referenceBody != FlightGlobals.getMainBody(refPos))
+            if (ReferenceBody != FlightGlobals.GetMainBody(refPos))
             {
-                RecalculateOrbit(FlightGlobals.getMainBody(refPos));
+                RecalculateOrbit(FlightGlobals.GetMainBody(refPos));
             }
         }
 
         private void TrackRigidbody(CelestialBody refBody)
         {
-            localCoM = vessel.findLocalCenterOfMass();
+            CoMLocal = vessel.findLocalCenterOfMass();
+            pos = (driverTransform.position + driverTransform.rotation * CoMLocal - (Vector3)refBody.Position);
+            pos = pos.xzy;
 
-            //pos = ((Vector3d)(driverTransform.position + driverTransform.rotation * localCoM - (Vector3)refBody.position)).xzy;
-            pos = ((Vector3d)(((driverTransform.position + localCoM) - (Vector3)refBody.position)) - (Vector3d)driverTransform.position).xzy;
-
-            if (updateMode == UpdateMode.VESSEL)
+            if (updateMode == UpdateMode.IDLE)
             {
-                vel = orbit.GetRotFrameVel(referenceBody);
+                vel = orbit.GetRotFrameVel(ReferenceBody);
             }
 
-            if (vessel.rb != null && !vessel.rb.isKinematic)
+            if (vessel != null && vessel.rb != null && !vessel.rb.isKinematic)
             {
-                //vel = vessel.rootPart.rb.GetPointVelocity(driverTransform.TransformPoint(localCoM));// + Krakensbane.GetFrameVelocity();
-                vel = vessel.rb.GetPointVelocity(driverTransform.TransformPoint(localCoM));
-                vel = vel.xzy + orbit.GetRotFrameVel(referenceBody);
+                vel = vessel.rb.GetPointVelocity(driverTransform.TransformPoint(CoMLocal));// + Krakensbane.GetFrameVelocity();
+                vel = vel.xzy + orbit.GetRotFrameVel(ReferenceBody);
             }
 
-            vel = (vel + referenceBody.rotvel) - refBody.rotvel;
-            Debug.Log(referenceBody.name + "|" + referenceBody.rotvel + "|" + refBody.name + "|" + refBody.rotvel);
+            vel = vel + ReferenceBody.GetFrameVel() - refBody.GetFrameVel();
             pos += vel * Time.fixedDeltaTime;
 
             orbit.UpdateFromStateVectors(pos, vel, refBody, Planetarium.GetUniversalTime());
-            //orbit.UpdateFromOrbitAtUT(orbit, Planetarium.GetUniversalTime(), refBody);
         }
 
-        private void TrackActiveRigidbody(CelestialBody refBody)
-        {
-            localCoM = vessel.findLocalCenterOfMass();
-
-            //pos = ((Vector3d)(driverTransform.position + driverTransform.rotation * localCoM - (Vector3)refBody.position)).xzy;
-            pos = ((Vector3d)(((driverTransform.position + localCoM) - (Vector3)refBody.position)) - (Vector3d)driverTransform.position).xzy;
-
-            if (updateMode == UpdateMode.VESSEL_ACTIVE)
-            {
-                vel = orbit.GetRotFrameVel(referenceBody);
-            }
-
-            if (vessel.rb != null && !vessel.rb.isKinematic)
-            {
-                //vel = vessel.rootPart.rb.GetPointVelocity(driverTransform.TransformPoint(localCoM));// + Krakensbane.GetFrameVelocity();
-                vel = vessel.rb.GetPointVelocity(driverTransform.TransformPoint(localCoM));
-                vel = vel.xzy + orbit.GetRotFrameVel(referenceBody);
-            }
-
-            vel = (vel + referenceBody.GetFrameVel()) - refBody.GetFrameVel();
-            pos += vel * Time.fixedDeltaTime;
-
-            orbit.UpdateFromStateVectors(pos, vel, refBody, Planetarium.GetUniversalTime());
-            //orbit.UpdateFromOrbitAtUT(orbit, Planetarium.GetUniversalTime(), refBody);
-        }
-
-        public void updateFromParameters()
+        private void updateFromParameters()
         {
             orbit.UpdateFromUT(Planetarium.GetUniversalTime());
 
@@ -245,79 +185,109 @@
 
             if (double.IsNaN(pos.x))
             {
+                Debug.Log(string.Format("[OrbitDriver]: ObT : {0} nM : {1} nE : {2} nV : {3} nRadius : {4} nVel {5} nAN : {6} nPeriod : {7}",
+                                        orbit.ObT, orbit.meanAnomaly, orbit.eccentricAnomaly,
+                                        orbit.trueAnomaly, orbit.radius, vel, orbit.an, orbit.period));
+
                 if (vessel)
                 {
-                    //Shit happens...
+                    Debug.LogWarning("[OrbitDriver Warning!]: " + vessel.gameObject.name + " had a NaN Orbit and was removed.");
+
+                    //vessel.Unload();
+
+                    Destroy(vessel.gameObject);
                 }
             }
+
             if (!reverse)
             {
                 if (vessel)
                 {
-                    //CoMoffset = driverTransform.rotation * localCoM;
-                    vessel.SetPosition(referenceBody.position + pos - (Vector3d)CoMoffset);
+                    CoMOffset = driverTransform.rotation * CoMLocal;
+                    vessel.SetPosition(ReferenceBody.Position + pos - (Vector3d)CoMOffset);
                 }
                 else if (celestialBody)
                 {
-                    celestialBody.position = referenceBody.position + pos;
+                    celestialBody.Position = ReferenceBody.Position + pos;
                 }
                 else
                 {
-                    driverTransform.position = referenceBody.position + pos;
+                    driverTransform.position = ReferenceBody.Position + pos;
                 }
             }
             else
             {
-                referenceBody.position = ((!celestialBody) ? (Vector3d)driverTransform.position : celestialBody.position) - pos;
+                ReferenceBody.Position = ((!celestialBody) ? (Vector3d)driverTransform.position : celestialBody.Position) - pos;
             }
         }
 
         public void RecalculateOrbit(CelestialBody newReferenceBody)
         {
             if (frameShift) return;
-
             frameShift = true;
 
-            if (updateMode == UpdateMode.PLANET && Time.timeScale > 0f)
+            CelestialBody referenceBody = this.ReferenceBody;
+
+            if (updateMode == UpdateMode.UPDATE && Time.timeScale > 0f)
             {
                 OnRailsSOITransition(orbit, newReferenceBody);
             }
             else
             {
+                Debug.Log(string.Format("[OrbitDriver]: Recalculating orbit for {0}: rPos: {1}; rVel: {2} | {3}",
+                                        name, referenceBody.gameObject.name, pos, vel, vel.magnitude));
+
                 TrackRigidbody(newReferenceBody);
-                orbit.epoch = Planetarium.GetUniversalTime() - Time.fixedDeltaTime; //(double)TimeWarp.fixedDeltaTime;
+
+                Debug.Log(string.Format("[OrbitDriver]: Recalculated orbit for {0}: rPos: {1}; rVel: {2} | {3}",
+                                        name, newReferenceBody.gameObject.name, pos, orbit.GetVel(), vel.magnitude));
+
+                orbit.epoch = Planetarium.GetUniversalTime() - Time.fixedDeltaTime;
             }
 
-            if (OnReferenceBodyChange != null)
+            if (OnReferenceBodyChange != null) OnReferenceBodyChange(newReferenceBody);
+
+            if (vessel != null)
             {
-                OnReferenceBodyChange(newReferenceBody);
+                //GameEvents.onVesselSOIChanged.Fire(new GameEvents.HostedFromToAction<Vessel, CelestialBody>(this.vessel, referenceBody, newReferenceBody));
+                //ModuleTripLogger.ForceVesselLog(this.vessel, FlightLog.EntryType.Flyby, newReferenceBody);
             }
 
-            Invoke("unlockFrameSwitch", 0.5f);
+            Invoke("UnlockFrameSwitch", 1.0f);
         }
 
         public void OnRailsSOITransition(Orbit ownOrbit, CelestialBody to)
         {
-            double universalTime = Planetarium.GetUniversalTime();
-            double timeRate = 1.0 * 1.0;
-            double vMin = universalTime - timeRate;
+            double TimeWarpCurrentRate = 1;
+            double UT = Planetarium.GetUniversalTime();
+            double time = UT;
+            double vMin = UT - 1.0 * TimeWarpCurrentRate;
             double SOIsqr = 0.0;
+
+            int bsp = 0;
 
             if (orbit.referenceBody.HasChild(to))
             {
                 SOIsqr = to.sphereOfInfluence * to.sphereOfInfluence;
-                UtilMath.BSPSolver(ref universalTime, timeRate, (double t) => Math.Abs((ownOrbit.getPositionAtUT(t) - to.getPositionAtUT(t)).sqrMagnitude - SOIsqr), vMin, universalTime, 0.01, 64); //(double)TimeWarp.CurrentRate
+                bsp = UtilMath.BSPSolver(ref UT, 1.0 * TimeWarpCurrentRate, (double t) => Math.Abs((ownOrbit.getPositionAtUT(t) - to.GetPositionAtUT(t)).sqrMagnitude - SOIsqr), vMin, time, 0.01, 64);
             }
             else if (to.HasChild(orbit.referenceBody))
             {
                 SOIsqr = orbit.referenceBody.sphereOfInfluence * orbit.referenceBody.sphereOfInfluence;
-                UtilMath.BSPSolver(ref universalTime, timeRate, (double t) => Math.Abs(ownOrbit.getRelativePositionAtUT(t).sqrMagnitude - SOIsqr), vMin, universalTime, 0.01, 64); //(double)TimeWarp.CurrentRate
+                bsp = UtilMath.BSPSolver(ref UT, 1.0 * TimeWarpCurrentRate, (double t) => Math.Abs(ownOrbit.getRelativePositionAtUT(t).sqrMagnitude - SOIsqr), vMin, time, 0.01, 64);
             }
 
-            ownOrbit.UpdateFromOrbitAtUT(ownOrbit, universalTime, to);
+            ownOrbit.UpdateFromOrbitAtUT(ownOrbit, UT, to);
+
+            Debug.Log(string.Format("[OrbitDriver]: On-Rails SOI Transition from {0} to {1}. Transition UT Range: {2} - {3}. Transition UT: {4}. Iterations: {5}.",
+                                    ReferenceBody.gameObject.name, to.gameObject.name,
+                                    vMin.ToString("0.###"),
+                                    time.ToString("0.###"),
+                                    UT.ToString("0.###"),
+                                    bsp));
         }
 
-        private void unlockFrameSwitch()
+        private void UnlockFrameSwitch()
         {
             frameShift = false;
         }
