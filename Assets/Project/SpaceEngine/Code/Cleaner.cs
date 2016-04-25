@@ -39,7 +39,7 @@ using UnityEngine;
 using Logger = ZFramework.Unity.Common.Logger;
 
 [UseLogger(Category.Important)]
-[UseLoggerFile("Misc")]
+[UseLoggerFile(false, "Misc")]
 public sealed class Cleaner : MonoBehaviour
 {
     private void Awake()

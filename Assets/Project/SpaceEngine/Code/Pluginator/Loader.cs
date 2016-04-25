@@ -39,7 +39,7 @@ using ZFramework.Unity.Common;
 using Logger = ZFramework.Unity.Common.Logger;
 
 [UseLogger(Category.Data)]
-[UseLoggerFile("Loader")]
+[UseLoggerFile(false, "Loader")]
 public abstract class Loader : MonoBehaviour
 {
     public bool ShouldDontDestroyOnLoad = true;
@@ -81,12 +81,12 @@ public abstract class Loader : MonoBehaviour
 
     public void Delay(float waitTime, Action action)
     {
-        Logger.Log(string.Format("Delay method invoked. Will wait for {0} seconds. BUGAGA!", waitTime));
+        Logger.Log(string.Format("Delay method invoked! Will wait for {0} seconds...", waitTime));
 
         StartCoroutine(DelayImpl(waitTime, action));
     }
 
-    IEnumerator DelayImpl(float waitTime, Action action)
+    private IEnumerator DelayImpl(float waitTime, Action action)
     {
         yield return new WaitForSeconds(waitTime);
 
