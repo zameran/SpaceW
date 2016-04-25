@@ -1188,7 +1188,7 @@ namespace Experimental
             Orbit orbit = new Orbit();
             orbit.referenceBody = body;
             orbit.eccentricity = Random.Range(0.0001f, 0.01f);
-            orbit.semiMajorAxis = Random.Range((float)body.atmosphereDepth, (float)body.sphereOfInfluence);
+            orbit.semiMajorAxis = Random.Range((float)body.Radius, (float)body.sphereOfInfluence);
             orbit.inclination = Random.Range(-0.001f, 0.001f);
             orbit.LAN = Random.Range(0.999f, 1.001f);
             orbit.argumentOfPeriapsis = Random.Range(0.999f, 1.001f);
