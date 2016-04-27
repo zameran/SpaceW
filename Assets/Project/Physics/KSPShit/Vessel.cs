@@ -34,6 +34,11 @@ namespace Experimental
         public Vector3 velocityLast;
         public Vector3 velocity;
 
+        public Vector3 CoM;
+        public Vector3 geeForce;
+        public Vector3 centrifugalForce;
+        public Vector3 coriolisForce;
+
         public OrbitDriver orbitDriver;
 
         public bool rails = false;
@@ -64,6 +69,12 @@ namespace Experimental
                 centerHelper.center = centerHelper.center + (part.rb.worldCenterOfMass * part.rb.mass);
                 centerHelper.c = centerHelper.c + part.rb.mass;
             }
+        }
+
+        private void OnDrawGizmos()
+        {
+            Gizmos.color = XKCDColors.Liliac;
+            Gizmos.DrawWireSphere(CoM, 50);
         }
 
         private void Start()
@@ -98,6 +109,8 @@ namespace Experimental
 
         private void FixedUpdate()
         {
+            CoM = transform.position + findLocalCenterOfMass();
+
             if (orbitDriver != null)
             {
                 orbitDriver.UpdateOrbit();
@@ -114,24 +127,23 @@ namespace Experimental
         {
             if (rails) return;
 
-            if(rb != null)
+            if (rb != null)
             {
                 CelestialBody rB = orbitDriver.orbit.referenceBody;
 
-                Vector3d CoM = findLocalCenterOfMass();
-
-                Vector3 geeForce = FlightGlobals.GetGeeForceAtPosition(CoM) / 100000;
-                Vector3 centrifugalForce = FlightGlobals.GetCentrifugalAcc(CoM, rB) / 100000;
-                Vector3 coriolisForce = FlightGlobals.GetCoriolisAcc(rb.velocity, rB) / 100000;
+                geeForce = FlightGlobals.GetGeeForceAtPosition(CoM);
+                centrifugalForce = FlightGlobals.GetCentrifugalAcc(CoM, rB);
+                coriolisForce = FlightGlobals.GetCoriolisAcc(rb.velocity, rB);
 
                 rb.centerOfMass = CoM;
-                //rb.AddForce(geeForce, ForceMode.Acceleration);
-                //rb.AddForce(centrifugalForce, ForceMode.Acceleration);
-                //rb.AddForce(coriolisForce, ForceMode.Acceleration);
 
-                Debug.DrawLine(transform.position, geeForce * 100000, XKCDColors.Amber);
-                Debug.DrawLine(transform.position, centrifugalForce * 100000, XKCDColors.Bluegreen);
-                Debug.DrawLine(transform.position, coriolisForce * 100000, XKCDColors.Yellowish);
+                rb.AddForce(geeForce, ForceMode.Acceleration);
+                rb.AddForce(centrifugalForce, ForceMode.Acceleration);
+                rb.AddForce(coriolisForce, ForceMode.Acceleration);
+
+                Debug.DrawLine(transform.position, geeForce, XKCDColors.Moss);
+                Debug.DrawLine(transform.position, centrifugalForce, XKCDColors.Bluegreen);
+                Debug.DrawLine(transform.position, coriolisForce, XKCDColors.Yellowish);
             }
         }
 
@@ -155,9 +167,9 @@ namespace Experimental
             if (alreadyOffRails) return;
 
             Debug.Log("Vessel now off rails!");
-                     
+
             orbitDriver.SetOrbitMode(OrbitDriver.UpdateMode.IDLE);
-           
+
             rb.isKinematic = false;
             alreadyOnRails = false;
             alreadyOffRails = true;
@@ -177,6 +189,13 @@ namespace Experimental
             velocityLast = Vector3.zero;
             velocity = orbitDriver.orbit.GetVel() - (Vector3d)velocityLast - ((orbitDriver.orbit.referenceBody.inverseRotation) ? Vector3d.zero : orbitDriver.ReferenceBody.GetRFrmVel(transform.position));
             rb.velocity = velocity;
+        }
+
+        public void ChangeWorldVelocity(Vector3d velOffset)
+        {
+            if (rails) return;
+
+            if(rb != null) rb.AddForce(velOffset, ForceMode.VelocityChange);
         }
     }
 }

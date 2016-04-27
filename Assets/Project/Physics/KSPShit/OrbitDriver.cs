@@ -168,7 +168,7 @@ namespace Experimental
 
             if (vessel != null && vessel.rb != null && !vessel.rb.isKinematic)
             {
-                vel = vessel.rb.GetPointVelocity(driverTransform.TransformPoint(CoMLocal));// + Krakensbane.GetFrameVelocity();
+                vel = vessel.rb.GetPointVelocity(driverTransform.TransformPoint(vessel.CoM)) + (Vector3)Krakensbane.GetFrameVelocity();
                 vel = vel.xzy + orbit.GetRotFrameVel(ReferenceBody);
             }
 
