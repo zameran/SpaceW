@@ -101,13 +101,10 @@
             return -2 * Vector3d.Cross(body.angularVelocity, vel);
         }
 
-        public static Vector3d GetGeeForceAtPosition(Vector3d pos)
+        public static Vector3d GetGeeForceAtPosition(Vector3d pos, CelestialBody body)
         {
-            CelestialBody mainBody = GetMainBody(pos);
-
-            double magn = (mainBody.Position - pos).sqrMagnitude;
-
-            return Vector3d.Normalize(pos - mainBody.Position) * -(mainBody.gMagnitudeAtCenter / magn);
+            return Vector3d.Normalize(pos - body.Position) * 
+                                    -(body.gMagnitudeAtCenter / (body.Position - pos).sqrMagnitude);
         }
 
         public static CelestialBody GetMainBody()

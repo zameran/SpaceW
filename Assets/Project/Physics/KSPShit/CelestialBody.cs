@@ -217,6 +217,12 @@ namespace Experimental
                 Gizmos.color = Color.gray;
                 Gizmos.DrawWireSphere(Position, (float)sphereOfInfluence);
             }
+
+            if(Radius != 0.0)
+            {
+                Gizmos.color = Color.red;
+                Gizmos.DrawWireSphere(Position, (float)Radius);
+            }
         }
 
         public Vector3d GetFrameVel()

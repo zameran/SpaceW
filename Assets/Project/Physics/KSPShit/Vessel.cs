@@ -80,7 +80,7 @@ namespace Experimental
         private void Start()
         {
             if (rb != null)
-                rb.velocity = new Vector3(0, 0, 50);
+                rb.velocity = new Vector3(0, 0, 100);
         }
 
         private void Update()
@@ -127,7 +127,7 @@ namespace Experimental
             {
                 CelestialBody rB = orbitDriver.orbit.referenceBody;
 
-                geeForce = FlightGlobals.GetGeeForceAtPosition(CoM);
+                geeForce = FlightGlobals.GetGeeForceAtPosition(CoM, rB);
                 centrifugalForce = FlightGlobals.GetCentrifugalAcc(CoM, rB);
                 coriolisForce = FlightGlobals.GetCoriolisAcc(rb.velocity, rB);
 
