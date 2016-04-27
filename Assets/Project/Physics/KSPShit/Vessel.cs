@@ -116,10 +116,6 @@ namespace Experimental
                 orbitDriver.UpdateOrbit();
 
                 Integrate();
-
-                if (!rails)
-                    if (rb != null)
-                        rb.velocity = orbitDriver.vel.xzy;
             }
         }
 
