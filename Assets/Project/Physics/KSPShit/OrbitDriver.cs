@@ -65,6 +65,7 @@ namespace Experimental
             switch (updateMode)
             {
                 case UpdateMode.TRACK_Phys:
+                    break;
                 case UpdateMode.IDLE:
                     if (!ReferenceBody)
                     {
@@ -105,8 +106,9 @@ namespace Experimental
             switch (updateMode)
             {
                 case UpdateMode.TRACK_Phys:
+                    break;
                 case UpdateMode.IDLE:
-                    if (!(vessel == null) && !(vessel.rb == null))
+                    if (vessel != null && vessel.rb != null)
                     {
                         TrackRigidbody(ReferenceBody);
                         CheckDominantBody(driverTransform.position);
@@ -170,7 +172,7 @@ namespace Experimental
                 vel = vel.xzy + orbit.GetRotFrameVel(ReferenceBody);
             }
 
-            vel = vel + ReferenceBody.GetFrameVel() - refBody.GetFrameVel();
+            vel += ReferenceBody.GetFrameVel() - refBody.GetFrameVel();
             pos += vel * Time.fixedDeltaTime;
 
             orbit.UpdateFromStateVectors(pos, vel, refBody, Planetarium.GetUniversalTime());

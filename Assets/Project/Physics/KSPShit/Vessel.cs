@@ -80,7 +80,7 @@ namespace Experimental
                 {
                     if (orbitDriver.orbit.vel.xzy != Vector3d.zero)
                     {
-                        transform.rotation = Quaternion.LookRotation(orbitDriver.orbit.vel.xzy);
+                        //transform.rotation = Quaternion.LookRotation(orbitDriver.orbit.vel.xzy);
                     }
                 }
             }
@@ -99,7 +99,40 @@ namespace Experimental
         private void FixedUpdate()
         {
             if (orbitDriver != null)
+            {
                 orbitDriver.UpdateOrbit();
+
+                Integrate();
+
+                if (!rails)
+                    if (rb != null)
+                        rb.velocity = orbitDriver.vel.xzy;
+            }
+        }
+
+        public void Integrate()
+        {
+            if (rails) return;
+
+            if(rb != null)
+            {
+                CelestialBody rB = orbitDriver.orbit.referenceBody;
+
+                Vector3d CoM = findLocalCenterOfMass();
+
+                Vector3 geeForce = FlightGlobals.GetGeeForceAtPosition(CoM) / 100000;
+                Vector3 centrifugalForce = FlightGlobals.GetCentrifugalAcc(CoM, rB) / 100000;
+                Vector3 coriolisForce = FlightGlobals.GetCoriolisAcc(rb.velocity, rB) / 100000;
+
+                rb.centerOfMass = CoM;
+                //rb.AddForce(geeForce, ForceMode.Acceleration);
+                //rb.AddForce(centrifugalForce, ForceMode.Acceleration);
+                //rb.AddForce(coriolisForce, ForceMode.Acceleration);
+
+                Debug.DrawLine(transform.position, geeForce * 100000, XKCDColors.Amber);
+                Debug.DrawLine(transform.position, centrifugalForce * 100000, XKCDColors.Bluegreen);
+                Debug.DrawLine(transform.position, coriolisForce * 100000, XKCDColors.Yellowish);
+            }
         }
 
         public void GoOnRails()
@@ -123,7 +156,7 @@ namespace Experimental
 
             Debug.Log("Vessel now off rails!");
                      
-            orbitDriver.SetOrbitMode(OrbitDriver.UpdateMode.TRACK_Phys);
+            orbitDriver.SetOrbitMode(OrbitDriver.UpdateMode.IDLE);
            
             rb.isKinematic = false;
             alreadyOnRails = false;
