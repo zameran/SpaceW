@@ -80,16 +80,17 @@ namespace Experimental
             }
 
             ready = true;
-            //Planetarium.Orbits.Add(this);
+
+            Planetarium.Orbits.Add(this);
 
             if (OnReferenceBodyChange != null) OnReferenceBodyChange(ReferenceBody);
         }
 
         private void OnDestroy()
         {
-            //if (Planetarium.Orbits == null) return;
+            if (Planetarium.Orbits == null) return;
 
-            //Planetarium.Orbits.Remove(this);
+            Planetarium.Orbits.Remove(this);
         }
 
         private void FixedUpdate()

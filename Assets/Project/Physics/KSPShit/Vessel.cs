@@ -12,16 +12,18 @@ namespace Experimental
 
             public CenterVectorHelper()
             {
-                this.center = Vector3.zero;
-                this.c = 0f;
+                center = Vector3.zero;
+
+                c = 0f;
             }
 
             public void Clear()
             {
-                this.center.x = 0f;
-                this.center.y = 0f;
-                this.center.z = 0f;
-                this.c = 0f;
+                center.x = 0f;
+                center.y = 0f;
+                center.z = 0f;
+
+                c = 0f;
             }
         }
 
