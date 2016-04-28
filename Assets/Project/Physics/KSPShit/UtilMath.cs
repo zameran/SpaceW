@@ -4,13 +4,15 @@ namespace Experimental
 {
     public class UtilMath
     {
-        public static double TwoPI = 6.28318530717959;
+        public static double Coth(double x)
+        {
+            return Math.Cosh(x) / Math.Sinh(x);
+        }
 
-        public static float TwoPIf = 6.28318548f;
-
-        public static double HalfPI = 1.5707963267949;
-
-        public static float HalfPIf = 1.57079637f;
+        public static double Csch(double x)
+        {
+            return 1 / Math.Sinh(x);
+        }
 
         public static double ACosh(double x)
         {
@@ -40,6 +42,11 @@ namespace Experimental
         public static double ATanh(double x)
         {
             return Math.Log((1 + x) / (1 - x)) / 2;
+        }
+
+        public static double Flatten(double z, double midPoint, double easing)
+        {
+            return 1 - 1 / (Math.Pow(1 / midPoint * Math.Abs(z), easing) + 1) * (double)Math.Sign(z);
         }
 
         public static int BSPSolver(ref double v0, double dv, Func<double, double> solveFor, double vMin, double vMax, double epsilon, int maxIterations)
@@ -122,21 +129,6 @@ namespace Experimental
             return num;
         }
 
-        public static double Coth(double x)
-        {
-            return Math.Cosh(x) / Math.Sinh(x);
-        }
-
-        public static double Csch(double x)
-        {
-            return 1 / Math.Sinh(x);
-        }
-
-        public static double Flatten(double z, double midPoint, double easing)
-        {
-            return 1 - 1 / (Math.Pow(1 / midPoint * Math.Abs(z), easing) + 1) * (double)Math.Sign(z);
-        }
-
         public static bool isDivisible(int n, int byN)
         {
             while (byN % 2 == 0)
@@ -150,63 +142,6 @@ namespace Experimental
             }
 
             return n % byN == 0;
-        }
-
-        public static bool isPowerOfTwo(int x)
-        {
-            return (x & checked(x - 1)) == 0;
-        }
-
-        public static double Lerp(double a, double b, double t)
-        {
-            t = Math.Min(1, Math.Max(0, t));
-
-            return (1 - t) * a + t * b;
-        }
-
-        public static double LerpUnclamped(double a, double b, double t)
-        {
-            return (1 - t) * a + t * b;
-        }
-
-        public static float RoundToPlaces(float value, int decimalPlaces)
-        {
-            float single = (float)Math.Pow(10, decimalPlaces);
-
-            return (float)(Math.Round((value * single)) / single);
-        }
-
-        public static double RoundToPlaces(double value, int decimalPlaces)
-        {
-            double place = Math.Pow(10, decimalPlaces);
-
-            return Math.Round(value * place) / place;
-        }
-
-        public static double Sech(double x)
-        {
-            return 1 / Math.Cosh(x);
-        }
-
-        public static float WrapAround(float value, float min, float max)
-        {
-            if (value < min) value = value + max;
-
-            return value % max;
-        }
-
-        public static double WrapAround(double value, double min, double max)
-        {
-            if (value < min) value = value + max;
-
-            return value % max;
-        }
-
-        public static int WrapAround(int value, int min, int max)
-        {
-            if (value < min) value = checked(value + max);
-
-            return value % max;
         }
     }
 }

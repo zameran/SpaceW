@@ -133,7 +133,7 @@ namespace Experimental
                 centrifugalForce = FlightGlobals.GetCentrifugalAcc(CoM, rB);
                 coriolisForce = FlightGlobals.GetCoriolisAcc(rb.velocity, rB);
 
-                rb.centerOfMass = CoM;
+                rb.centerOfMass = CoM;          
 
                 rb.AddForce(geeForce, ForceMode.Acceleration);
                 rb.AddForce(centrifugalForce, ForceMode.Acceleration);
@@ -149,8 +149,6 @@ namespace Experimental
         {
             if (alreadyOnRails) return;
 
-            Debug.Log("Vessel now on rails!");
-
             orbitDriver.SetOrbitMode(OrbitDriver.UpdateMode.UPDATE);
 
             rb.isKinematic = true;
@@ -163,8 +161,6 @@ namespace Experimental
         public void GoOffRails()
         {
             if (alreadyOffRails) return;
-
-            Debug.Log("Vessel now off rails!");
 
             orbitDriver.SetOrbitMode(OrbitDriver.UpdateMode.IDLE);
 

@@ -227,7 +227,7 @@
 
             if (EventSystem.current.IsPointerOverGameObject() || !orbitLine.active) return false;
 
-            hitInfo.orbitOrigin = orbit.referenceBody.Position;
+            hitInfo.orbitOrigin = orbit.referenceBody.Position.LocalToScaledSpace();
 
             Plane plane = new Plane(orbit.h.xzy.normalized, hitInfo.orbitOrigin);
 
@@ -258,7 +258,7 @@
                 hitInfo.mouseTA = MathUtils.TwoPI - hitInfo.mouseTA;
             }
 
-            hitInfo.radiusAtTA = orbit.RadiusAtTrueAnomaly(hitInfo.mouseTA);
+            hitInfo.radiusAtTA = orbit.RadiusAtTrueAnomaly(hitInfo.mouseTA) * ScaledSpace.InverseScaleFactor;
             hitInfo.orbitPoint = (hitInfo.hitPoint.normalized * (float)hitInfo.radiusAtTA) + hitInfo.orbitOrigin;
             hitInfo.UTatTA = orbit.GetUTforTrueAnomaly(hitInfo.mouseTA, 0);
             hitInfo.orbitScreenPoint = Camera.main.WorldToScreenPoint(hitInfo.orbitPoint);
@@ -304,9 +304,10 @@
             }
 
             Vector3[] scaledOrbitPoints = new Vector3[orbitPoints.Length];
+
             for (i = 0; i < orbitPoints.Length; i++)
             {
-                scaledOrbitPoints[i] = orbitPoints[i];
+                scaledOrbitPoints[i] = orbitPoints[i].LocalToScaledSpace();
             }
 
             orbitLine.MakeSpline(scaledOrbitPoints, orbit.eccentricity < 1);
@@ -343,9 +344,9 @@
             public Vector3 GetUpdatedOrbitPoint()
             {
                 if (driver.updateMode != OrbitDriver.UpdateMode.IDLE)
-                    return or.orbit.getPositionFromTrueAnomaly(mouseTA);
+                    return or.orbit.getPositionFromTrueAnomaly(mouseTA).LocalToScaledSpace();
 
-                return or.transform.position;
+                return ScaledSpace.LocalToScaledSpace(or.transform.position);
             }
         }
     }

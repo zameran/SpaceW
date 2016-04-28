@@ -91,7 +91,7 @@ namespace Experimental
 
         public void SetupConstants()
         {
-            double R2 = Radius * Radius;
+            double R2 = Math.Pow(Radius, 2.0);
 
             Density = Mass / (4.1887902047863905 * R2 * Radius);
             SurfaceArea = 12.566370614359172 * R2;
@@ -105,7 +105,7 @@ namespace Experimental
             position = bodyTransform.position;
             orbitDriver = GetComponent<OrbitDriver>();
             gMagnitudeAtCenter = GeeASL * 9.81 * Math.Pow(Radius, 2.0);
-            Mass = Radius * Radius * (GeeASL * 9.81) / 6.674E-11;
+            Mass = Math.Pow(Radius, 2.0) * (GeeASL * 9.81) / 6.674E-11;
             gravParameter = Mass * 6.674E-11;
 
             if (orbitDriver)
@@ -141,8 +141,8 @@ namespace Experimental
 
         public void Update()
         {
-            gMagnitudeAtCenter = GeeASL * 9.81 * Radius * Radius;
-            Mass = Radius * Radius * (GeeASL * 9.81) / 6.674E-11;
+            gMagnitudeAtCenter = GeeASL * 9.81 * Math.Pow(Radius, 2.0);
+            Mass = Math.Pow(Radius, 2.0) * (GeeASL * 9.81) / 6.674E-11;
             gravParameter = Mass * 6.674E-11;
 
             if (rotates && rotationPeriod != 0.0 && (!tidallyLocked || (Orbit != null && Orbit.period != 0.0)))
@@ -215,13 +215,13 @@ namespace Experimental
             if (sphereOfInfluence != 0.0)
             {
                 Gizmos.color = Color.gray;
-                Gizmos.DrawWireSphere(Position, (float)sphereOfInfluence);
+                Gizmos.DrawWireSphere(Position.LocalToScaledSpace(), (float)sphereOfInfluence * ScaledSpace.InverseScaleFactor);
             }
 
             if(Radius != 0.0)
             {
                 Gizmos.color = Color.red;
-                Gizmos.DrawWireSphere(Position, (float)Radius);
+                Gizmos.DrawWireSphere(Position.LocalToScaledSpace(), (float)Radius * ScaledSpace.InverseScaleFactor);
             }
         }
 

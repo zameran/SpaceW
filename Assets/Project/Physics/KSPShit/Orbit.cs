@@ -920,26 +920,26 @@ namespace Experimental
             {
                 for (double i = 0.0; i < MathUtils.TwoPI; i += drawResolution * MathUtils.Deg2Rad)
                 {
-                    Vector3 v = getPositionFromTrueAnomaly(i % MathUtils.TwoPI).ToVector3();
-                    Vector3 v2 = getPositionFromTrueAnomaly((i + drawResolution * MathUtils.Deg2Rad) % MathUtils.TwoPI).ToVector3();
+                    Vector3d v = getPositionFromTrueAnomaly(i % MathUtils.TwoPI).ToVector3();
+                    Vector3d v2 = getPositionFromTrueAnomaly((i + drawResolution * MathUtils.Deg2Rad) % MathUtils.TwoPI).ToVector3();
 
-                    Debug.DrawLine(v, v2, Color.Lerp(Color.yellow, Color.green, Mathf.InverseLerp((float)getOrbitalSpeedAtDistance(PeR), (float)getOrbitalSpeedAtDistance(ApR), (float)getOrbitalSpeedAtPos(v))));
+                    Debug.DrawLine(v.LocalToScaledSpace(), v2.LocalToScaledSpace(), Color.Lerp(Color.yellow, Color.green, Mathf.InverseLerp((float)getOrbitalSpeedAtDistance(PeR), (float)getOrbitalSpeedAtDistance(ApR), (float)getOrbitalSpeedAtPos(v))));
                 }
             }
             else
             {
                 for (double i = -Math.Acos(-(1.0 / eccentricity)) + drawResolution * MathUtils.Deg2Rad; i < Math.Acos(-(1.0 / eccentricity)) - drawResolution * MathUtils.Deg2Rad; i += drawResolution * MathUtils.Deg2Rad)
                 {
-                    Debug.DrawLine(getPositionFromTrueAnomaly(i), getPositionFromTrueAnomaly(Math.Min(Math.Acos(-(1.0 / eccentricity)), i + drawResolution * MathUtils.Deg2Rad)), Color.green);
+                    Debug.DrawLine(getPositionFromTrueAnomaly(i).LocalToScaledSpace(), getPositionFromTrueAnomaly(Math.Min(Math.Acos(-(1.0 / eccentricity)), i + drawResolution * MathUtils.Deg2Rad)).LocalToScaledSpace(), Color.green);
                 }
             }
 
-            Debug.DrawLine(getPositionAtT(ObT), referenceBody.Position, Color.white);
-            Debug.DrawLine(referenceBody.Position, referenceBody.Position + an.xzy * radius, Color.cyan);
-            Debug.DrawLine(referenceBody.Position, getPositionAtT(0.0), Color.magenta);
+            Debug.DrawLine(getPositionAtT(ObT).LocalToScaledSpace(), referenceBody.Position.LocalToScaledSpace(), Color.white);
+            Debug.DrawLine(referenceBody.Position.LocalToScaledSpace(), referenceBody.Position.LocalToScaledSpace() + (an.xzy * radius), Color.cyan);
+            Debug.DrawLine(referenceBody.Position.LocalToScaledSpace(), getPositionAtT(0.0).LocalToScaledSpace(), Color.magenta);
 
-            Debug.DrawRay(getPositionAtT(ObT), vel.xzy * 0.0099999997764825821, Color.white);
-            Debug.DrawRay(referenceBody.Position, h.xzy, Color.blue);
+            Debug.DrawRay(getPositionAtT(ObT).LocalToScaledSpace(), vel.xzy * 0.0099999997764825821, Color.white);
+            Debug.DrawRay(referenceBody.Position.LocalToScaledSpace(), h.xzy.LocalToScaledSpace(), Color.blue);
         }
 
         public static bool PeApIntersects(Orbit primary, Orbit secondary, double threshold)
@@ -958,7 +958,7 @@ namespace Experimental
 
             Vector3d vector3d = Vector3d.Cross(s.h, p.h);
 
-            Debug.DrawRay(ScaledSpace.LocalToScaledSpace(p.referenceBody.Position), vector3d.xzy * 1000.0, Color.white);
+            Debug.DrawRay(p.referenceBody.Position.LocalToScaledSpace(), vector3d.xzy * 1000.0, Color.white);
 
             double num4 = 1.0 / Math.Sin(dInc) * (Math.Sin(pInc) * Math.Cos(sInc) - Math.Sin(sInc) * Math.Cos(pInc) * Math.Cos(p.LAN * MathUtils.Deg2Rad - s.LAN * MathUtils.Deg2Rad));
             double num5 = 1.0 / Math.Sin(dInc) * (Math.Sin(sInc) * Math.Sin(p.LAN * MathUtils.Deg2Rad - s.LAN * MathUtils.Deg2Rad));
@@ -981,16 +981,16 @@ namespace Experimental
 
             CD = SolveClosestBSP(ref FFp, ref FFs, dInc, MathUtils.PI, p, s, 0.0001, maxIterations, ref iterationCount);
 
-            Debug.DrawLine(p.referenceBody.Position, p.getPositionFromTrueAnomaly(FFp), Color.green);
-            Debug.DrawLine(s.referenceBody.Position, s.getPositionFromTrueAnomaly(FFs), Color.grey);
+            Debug.DrawLine(p.referenceBody.Position.LocalToScaledSpace(), p.getPositionFromTrueAnomaly(FFp).LocalToScaledSpace(), Color.green);
+            Debug.DrawLine(s.referenceBody.Position.LocalToScaledSpace(), s.getPositionFromTrueAnomaly(FFs).LocalToScaledSpace(), Color.grey);
 
             SFp = FFp + MathUtils.PI;
             SFs = FFs + MathUtils.PI;
 
             CCD = SolveClosestBSP(ref SFp, ref SFs, dInc, MathUtils.PIOver2, p, s, 0.0001, maxIterations, ref iterationCount);
 
-            Debug.DrawLine(p.referenceBody.Position, p.getPositionFromTrueAnomaly(SFp), Color.cyan);
-            Debug.DrawLine(s.referenceBody.Position, s.getPositionFromTrueAnomaly(SFs), Color.magenta);
+            Debug.DrawLine(p.referenceBody.Position.LocalToScaledSpace(), p.getPositionFromTrueAnomaly(SFp).LocalToScaledSpace(), Color.cyan);
+            Debug.DrawLine(s.referenceBody.Position.LocalToScaledSpace(), s.getPositionFromTrueAnomaly(SFs).LocalToScaledSpace(), Color.magenta);
 
             CD = Math.Sqrt(CD);
             CCD = Math.Sqrt(CCD);
@@ -1004,21 +1004,21 @@ namespace Experimental
 
             iterationCount = 0;
 
-            double num3 = (p.getRelativePositionFromTrueAnomaly(Fp) - s.getRelativePositionFromTrueAnomaly(Fs)).sqrMagnitude;
+            double pM = (p.getRelativePositionFromTrueAnomaly(Fp) - s.getRelativePositionFromTrueAnomaly(Fs)).sqrMagnitude;
 
             while (DF > 0.0001 && iterationCount < maxIterations)
             {
                 double sqrMagnitude1 = (p.getRelativePositionFromTrueAnomaly(Fp + DF) - s.getRelativePositionFromTrueAnomaly(Fs + DF)).sqrMagnitude;
                 double sqrMagnitude2 = (p.getRelativePositionFromTrueAnomaly(Fp - DF) - s.getRelativePositionFromTrueAnomaly(Fs - DF)).sqrMagnitude;
 
-                num3 = Math.Min(num3, Math.Min(sqrMagnitude1, sqrMagnitude2));
+                pM = Math.Min(pM, Math.Min(sqrMagnitude1, sqrMagnitude2));
 
-                if (num3 == sqrMagnitude1)
+                if (pM == sqrMagnitude1)
                 {
                     Fp += DF;
                     Fs += DF;
                 }
-                else if (num3 == sqrMagnitude2)
+                else if (pM == sqrMagnitude2)
                 {
                     Fp -= DF;
                     Fs -= DF;
@@ -1029,7 +1029,7 @@ namespace Experimental
                 iterationCount++;
             }
 
-            return num3;
+            return pM;
         }
 
         public static double SolveClosestApproach(Orbit p, Orbit s, ref double UT, double dT, double threshold, double MinUT, double MaxUT, double epsilon, int maxIterations, ref int iterationCount)
@@ -1058,7 +1058,7 @@ namespace Experimental
 
                 iterationCount++;
 
-                Debug.DrawLine(p.referenceBody.Position, p.getPositionAtUT(UT), Color.yellow * 0.5f);
+                Debug.DrawLine(p.referenceBody.Position.LocalToScaledSpace(), p.getPositionAtUT(UT).LocalToScaledSpace(), Color.yellow * 0.5f);
             }
 
             return Math.Sqrt(pM);
@@ -1097,8 +1097,9 @@ namespace Experimental
                 dT /= 2.0;
                 iterationCount++;
 
-                Debug.DrawLine(p.referenceBody.Position, p.getPositionAtUT(UT), Color.magenta * 0.5f);
+                Debug.DrawLine(p.referenceBody.Position.LocalToScaledSpace(), p.getPositionAtUT(UT).LocalToScaledSpace(), XKCDColors.LightMagenta * 0.5f);
             }
+
             return result;
         }
 

@@ -3,6 +3,7 @@
     using System;
     using System.Runtime.CompilerServices;
 
+    [Serializable]
     public struct QuaternionD
     {
         public const double kEpsilon = 1E-06;

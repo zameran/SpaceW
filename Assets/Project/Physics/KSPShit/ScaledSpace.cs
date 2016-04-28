@@ -2,7 +2,21 @@
 {
     using System;
     using System.Collections.Generic;
+
     using UnityEngine;
+
+    public static class ScaledSpaceExtensions
+    {
+        public static Vector3d LocalToScaledSpace(this Vector3d localSpacePoint)
+        {
+            return localSpacePoint * ScaledSpace.InverseScaleFactor - ScaledSpace.TotalOffset;
+        }
+
+        public static Vector3d ScaledToLocalSpace(this Vector3d scaledSpacePoint)
+        {
+            return (scaledSpacePoint + ScaledSpace.TotalOffset) * ScaledSpace.ScaleFactor;
+        }
+    }
 
     public class ScaledSpace : MonoBehaviour
     {
@@ -11,6 +25,14 @@
         public Transform originTarget;
 
         private static Vector3d totalOffset;
+
+        public static Vector3d TotalOffset
+        {
+            get
+            {
+                return totalOffset;
+            }
+        }
 
         public static ScaledSpace Instance
         {

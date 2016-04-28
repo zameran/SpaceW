@@ -165,11 +165,13 @@ namespace Experimental
             if (updateMode == UpdateMode.IDLE)
             {
                 vel = orbit.GetRotFrameVel(ReferenceBody);
-            }
+            }      
 
             if (vessel != null && vessel.rb != null && !vessel.rb.isKinematic)
             {
-                vel = vessel.rb.GetPointVelocity(driverTransform.TransformPoint(vessel.CoM)) + (Vector3)Krakensbane.GetFrameVelocity();
+                Vector3d vesselVel = vessel.rb.GetPointVelocity(vessel.CoM);
+
+                vel = vesselVel;
                 vel = vel.xzy + orbit.GetRotFrameVel(ReferenceBody);
             }
 
@@ -194,9 +196,7 @@ namespace Experimental
 
                 if (vessel)
                 {
-                    Debug.LogWarning("[OrbitDriver Warning!]: " + vessel.gameObject.name + " had a NaN Orbit and was removed.");
-
-                    //vessel.Unload();
+                    Debug.LogWarning("[OrbitDriver : Warning!]: " + vessel.gameObject.name + " had a NaN Orbit and was removed.");
 
                     Destroy(vessel.gameObject);
                 }

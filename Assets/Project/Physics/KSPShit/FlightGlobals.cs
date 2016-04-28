@@ -103,8 +103,9 @@
 
         public static Vector3d GetGeeForceAtPosition(Vector3d pos, CelestialBody body)
         {
-            return Vector3d.Normalize(pos - body.Position) * 
-                                    -(body.gMagnitudeAtCenter / (body.Position - pos).sqrMagnitude);
+            Vector3d D = pos - body.Position;
+
+            return D.Normalized() * -(body.gMagnitudeAtCenter / D.sqrMagnitude);
         }
 
         public static CelestialBody GetMainBody()
