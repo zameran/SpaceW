@@ -14,6 +14,7 @@
     {
         public AnimationCurve splineEccentricOffset;
         public Texture2D orbitTexture;
+        public Texture2D orbitFadeTexture;
         public Material orbitMaterial;
         public OrbitDriver orbitDriver;
         public Vessel orbitVessel;
@@ -28,8 +29,9 @@
 
         public Color orbitColor = Color.grey;
 
+        public bool isJunk;
         public bool isFocused;
-        public bool is3DLine;
+        public bool isOffsettable;
 
         public DrawMode drawMode = DrawMode.REDRAW_AND_RECALCULATE;
 
@@ -77,7 +79,8 @@
 
         private void OnDestroy()
         {
-            VectorLine.Destroy(ref orbitLine);
+            if (orbitLine != null) VectorLine.Destroy(ref orbitLine);
+            if (orbitMaterial != null) orbitMaterial.SetTextureOffset("_MainTex", new Vector2(0, 0));
         }
 
         public void DrawOrbit(DrawMode mode)
@@ -108,7 +111,6 @@
                         }
                     case DrawMode.REDRAW_AND_RECALCULATE:
                         {
-                            UpdateSpline();
                             DrawSpline();
                             break;
                         }
@@ -117,6 +119,7 @@
                             goto case DrawMode.OFF;
                         }
                 }
+
                 return;
             }
         }
@@ -129,19 +132,14 @@
             }
             else
             {
-                double off = 0.0174532923847437;
-
-                eccOffset = (orbit.eccentricAnomaly - off) % MathUtils.TwoPI / MathUtils.TwoPI;
-                twkOffset = (float)eccOffset * GetEccOffset((float)eccOffset, (float)orbit.eccentricity, 4f);
+                eccOffset = (orbit.eccentricAnomaly - MathUtils.Deg2Rad / 2) % MathUtils.TwoPI / MathUtils.TwoPI;
+                twkOffset = (float)eccOffset * GetEccOffset((float)eccOffset, (float)orbit.eccentricity, 4.0f);
             }
 
             MakeLine(ref orbitLine);
             UpdateSpline();
 
-            if (is3DLine)
-                orbitLine.Draw3D();
-            else
-                orbitLine.Draw();
+            orbitLine.Draw3D();
         }
 
         private float GetEccOffset(float eccOffset, float ecc, float eccOffsetPower)
@@ -152,7 +150,7 @@
 
         private Color GetOrbitColour()
         {
-            return (!isFocused ? orbitColor : XKCDColors.ElectricLime);
+            return (!isFocused ? (isJunk ? XKCDColors.OffWhite : orbitColor) : XKCDColors.ElectricLime);
         }
 
         private int GetSegmentCount(double sampleResolution, int lineSegments)
@@ -164,47 +162,39 @@
         {
             if (l != null) VectorLine.Destroy(ref l);
 
-            if (vectorCanvas == null && !is3DLine)
-            {
-                GameObject vectorCanvasScene = GameObject.Find("VectorCanvas");
+            string orbitName = string.Concat(name, "'s Orbit");
 
-                if (vectorCanvasScene != null)
-                {
-                    vectorCanvas = vectorCanvasScene;
-                    vectorCanvas.hideFlags = HideFlags.HideInHierarchy;
-                }
-            }
-
-            l = new VectorLine(string.Concat(name, "'s Orbit"), 
-                new List<Vector3>(GetSegmentCount(lineSampleResolution, lineSegments)), 
-                lineWidth, 
+            l = new VectorLine(orbitName,
+                new List<Vector3>(GetSegmentCount(lineSampleResolution, lineSegments)),
+                lineWidth,
                 LineType.Discrete);
 
-            l.texture = orbitTexture;
+            l.texture = isOffsettable ? orbitFadeTexture : orbitTexture;
             l.material = orbitMaterial;
+            l.material.SetTextureOffset("_MainTex", isOffsettable ? new Vector2(-(float)eccOffset, 0) : new Vector2(0, 0));
+            l.textureOffset = -(float)eccOffset;
             l.continuousTexture = true;
-            l.UpdateImmediate = true;
-            l.ContinuousTextureOffset = twkOffset;
             l.color = GetOrbitColour();
             l.rectTransform.gameObject.layer = 31;
+            l.rectTransform.gameObject.hideFlags = HideFlags.HideInHierarchy;
             l.joins = Joins.Weld;
         }
 
         public OrbitDriver TargetCastSplines(out OrbitCastHit orbitHit)
         {
             orbitHit = new OrbitCastHit();
-            OrbitCastHit orbitCastHit = new OrbitCastHit();
+            OrbitCastHit tempOrbitHit = new OrbitCastHit();
 
             foreach (OrbitDriver orbit in Planetarium.Orbits)
             {
                 if (orbit.Renderer != null)
                 {
-                    if (!orbit.Renderer.OrbitCast(Input.mousePosition, out orbitCastHit, 18f))
+                    if (!orbit.Renderer.OrbitCast(Input.mousePosition, out tempOrbitHit, 18f))
                     {
                         continue;
                     }
 
-                    orbitHit = orbitCastHit;
+                    orbitHit = tempOrbitHit;
 
                     break;
                 }
@@ -242,7 +232,7 @@
             if (orbit.eccVec == Vector3d.zero)
             {
                 pos = Quaternion.Inverse(
-                      Quaternion.LookRotation(-orbit.getPositionFromTrueAnomaly(0).normalized, 
+                      Quaternion.LookRotation(-orbit.getPositionFromTrueAnomaly(0).normalized,
                                                orbit.h.xzy)) * hitInfo.hitPoint;
             }
             else

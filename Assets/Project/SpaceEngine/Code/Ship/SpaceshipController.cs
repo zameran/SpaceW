@@ -81,6 +81,36 @@ public class SpaceshipController : MonoBehaviour
         yawInput = Input.GetAxis("Horizontal") * yawRate;
         pitchInput = Input.GetAxis("Vertical") * pitchRate;
 
+        if (Input.GetButtonDown("Fire3"))
+        {
+            foreach (SpaceshipThruster _thruster in fowrwardThrusters)
+            {
+                _thruster.StartThruster();
+                _thruster.thurstCoeff = forceModifier;
+            }
+
+            foreach (SpaceshipThruster _thruster in backwardThrusters)
+            {
+                _thruster.StartThruster();
+                _thruster.thurstCoeff = forceModifier;
+            }
+        }
+
+        if (Input.GetButtonUp("Fire3"))
+        {
+            foreach (SpaceshipThruster _thruster in fowrwardThrusters)
+            {
+                _thruster.StopThruster();
+                _thruster.thurstCoeff = forceModifier;
+            }
+
+            foreach (SpaceshipThruster _thruster in backwardThrusters)
+            {
+                _thruster.StopThruster();
+                _thruster.thurstCoeff = forceModifier;
+            }
+        }
+
         if (Input.GetButtonDown("Fire1"))
         {
             foreach (SpaceshipThruster _thruster in fowrwardThrusters)
@@ -117,7 +147,7 @@ public class SpaceshipController : MonoBehaviour
             }
         }
 
-        vInput = Input.GetButton("Fire1") || Input.GetButton("Fire2");
+        vInput = Input.GetButton("Fire1") || Input.GetButton("Fire2") || Input.GetButton("Fire3");
         mInput = rollInput != 0.0 || yawInput != 0.0 || pitchInput != 0.0;
 
         bool input = vInput;// || mInput;

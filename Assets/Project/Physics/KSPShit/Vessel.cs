@@ -136,12 +136,14 @@ namespace Experimental
                 rb.centerOfMass = CoM;          
 
                 rb.AddForce(geeForce, ForceMode.Acceleration);
-                rb.AddForce(centrifugalForce, ForceMode.Acceleration);
-                rb.AddForce(coriolisForce, ForceMode.Acceleration);
+                //rb.AddForce(centrifugalForce, ForceMode.Acceleration);
+                //rb.AddForce(coriolisForce, ForceMode.Acceleration);
 
-                Debug.DrawLine(transform.position, geeForce, XKCDColors.Moss);
-                Debug.DrawLine(transform.position, centrifugalForce, XKCDColors.Bluegreen);
-                Debug.DrawLine(transform.position, coriolisForce, XKCDColors.Yellowish);
+                Debug.DrawLine(CoM, geeForce, XKCDColors.Moss);
+                //Debug.DrawLine(CoM, centrifugalForce, XKCDColors.Bluegreen);
+                //Debug.DrawLine(CoM, coriolisForce, XKCDColors.Yellowish);
+
+                Debug.DrawLine(rB.Position, geeForce, XKCDColors.Red);
             }
         }
 
