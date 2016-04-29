@@ -43,6 +43,7 @@
         public double eccOffset;
 
         public float twkOffset;
+        public float textureOffset;
 
         private Vector3d[] orbitPoints;
 
@@ -128,12 +129,14 @@
         {
             if (orbit.eccentricity >= 1)
             {
-
+                textureOffset = 0;
             }
             else
             {
-                eccOffset = (orbit.eccentricAnomaly - MathUtils.Deg2Rad / 2) % MathUtils.TwoPI / MathUtils.TwoPI;
+                eccOffset = (orbit.eccentricAnomaly - 0.0174532923847437) % MathUtils.TwoPI / MathUtils.TwoPI;
                 twkOffset = (float)eccOffset * GetEccOffset((float)eccOffset, (float)orbit.eccentricity, 4.0f);
+
+                textureOffset = 1.0f - twkOffset;
             }
 
             MakeLine(ref orbitLine);
@@ -145,7 +148,7 @@
         private float GetEccOffset(float eccOffset, float ecc, float eccOffsetPower)
         {
             float spline = splineEccentricOffset.Evaluate(eccOffset);
-            return 1f + (spline - 1f) * (Mathf.Pow(ecc, eccOffsetPower) / Mathf.Pow(0.9f, eccOffsetPower));
+            return 1.0f + (spline - 1.0f) * (Mathf.Pow(ecc, eccOffsetPower) / Mathf.Pow(0.9f, eccOffsetPower));
         }
 
         private Color GetOrbitColour()
@@ -171,8 +174,8 @@
 
             l.texture = isOffsettable ? orbitFadeTexture : orbitTexture;
             l.material = orbitMaterial;
-            l.material.SetTextureOffset("_MainTex", isOffsettable ? new Vector2(-(float)eccOffset, 0) : new Vector2(0, 0));
-            l.textureOffset = -(float)eccOffset;
+            l.material.SetTextureOffset("_MainTex", isOffsettable ? new Vector2(textureOffset, 0) : new Vector2(0, 0));
+            l.textureOffset = textureOffset;
             l.continuousTexture = true;
             l.color = GetOrbitColour();
             l.rectTransform.gameObject.layer = 31;

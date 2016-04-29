@@ -110,12 +110,12 @@
 				float3 rotatedNormal = Rotate(_Rotation.x, float3(1, 0, 0), 
 									   Rotate(_Rotation.y, float3(0, 1, 0), 
 									   Rotate(_Rotation.z, float3(0, 0, 1), originalNormal)));	
-				
-				n = rotatedNormal;
+
+				n = normalize(rotatedPoint + rotatedNormal); //So. Good variant, but without normal bumping.
 
 				//n = mul(_Object2World, n);
 				
-				n = normalize(n + WSD); //use this for normal light intens. but disabled normals.
+				//n = normalize(n + WSD); //use this for normal light intens. but disabled normals.
 
 				//n.xy = n.xy; // - default.
 				//n.xy = -n.xy; // - inverted.

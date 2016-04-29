@@ -133,15 +133,15 @@ namespace Experimental
                 centrifugalForce = FlightGlobals.GetCentrifugalAcc(CoM, rB);
                 coriolisForce = FlightGlobals.GetCoriolisAcc(rb.velocity, rB);
 
-                rb.centerOfMass = CoM;          
+                rb.centerOfMass = CoM;
 
                 rb.AddForce(geeForce, ForceMode.Acceleration);
-                //rb.AddForce(centrifugalForce, ForceMode.Acceleration);
-                //rb.AddForce(coriolisForce, ForceMode.Acceleration);
+                rb.AddForce(centrifugalForce, ForceMode.Acceleration);
+                rb.AddForce(coriolisForce, ForceMode.Acceleration);
 
+                Debug.DrawLine(CoM, coriolisForce, XKCDColors.Yellowish);
+                Debug.DrawLine(CoM, centrifugalForce, XKCDColors.Bluegreen);
                 Debug.DrawLine(CoM, geeForce, XKCDColors.Moss);
-                //Debug.DrawLine(CoM, centrifugalForce, XKCDColors.Bluegreen);
-                //Debug.DrawLine(CoM, coriolisForce, XKCDColors.Yellowish);
 
                 Debug.DrawLine(rB.Position, geeForce, XKCDColors.Red);
             }
@@ -191,7 +191,7 @@ namespace Experimental
         {
             if (rails) return;
 
-            if(rb != null) rb.AddForce(velOffset, ForceMode.VelocityChange);
+            if (rb != null) rb.AddForce(velOffset, ForceMode.VelocityChange);
         }
     }
 }
