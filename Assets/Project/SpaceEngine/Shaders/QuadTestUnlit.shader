@@ -113,6 +113,9 @@
 
 				n = normalize(rotatedPoint + rotatedNormal); //So. Good variant, but without normal bumping.
 
+				//n.xz = n.xz;
+				//n.y = sqrt(max(0.0, 1.0 - dot(n.xz, n.xz)));
+
 				//n = mul(_Object2World, n);
 				
 				//n = normalize(n + WSD); //use this for normal light intens. but disabled normals.
@@ -149,7 +152,7 @@
 				float4 vcolor = data[v.id].vcolor;
 				float4 position = data[v.id].pos;
 
-				float3 normal = tex2Dlod(_NormalTexture, v.texcoord).rgb;
+				float3 normal = tex2Dlod(_NormalTexture, v.texcoord);
 
 				position.w = 1.0;
 				position.xyz += patchCenter;
