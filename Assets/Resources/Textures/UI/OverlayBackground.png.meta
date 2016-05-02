@@ -1,5 +1,7 @@
 fileFormatVersion: 2
 guid: e599c2f26f937b44892bd18bc8433b34
+labels:
+- Gui
 timeCreated: 1459066505
 licenseType: Pro
 TextureImporter:

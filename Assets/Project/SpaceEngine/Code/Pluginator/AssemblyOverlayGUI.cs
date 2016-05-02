@@ -53,20 +53,20 @@ public sealed class AssemblyOverlayGUI : MonoBehaviour
 
     private void Awake()
     {
-        if (loader == null) loader = AssemblyLoader.Instance as AssemblyLoader;
+        if (loader == null) loader = Loader.Instance as AssemblyLoader;
     }
 
     private void OnGUI()
     {
         if (loader == null) return;
 
-        this.position = GUILayout.Window(this.GetInstanceID(), this.position, this.Window, String.Empty, this.windowStyle);
-        this.CheckScrollViewUsage();
+        position = GUILayout.Window(GetInstanceID(), position, Window, string.Empty, windowStyle);
+        CheckScrollViewUsage();
     }
 
     private void Start()
     {
-        this.InitialiseStyles();
+        InitialiseStyles();
     }
 
     private void Update()
@@ -76,18 +76,18 @@ public sealed class AssemblyOverlayGUI : MonoBehaviour
 
     private void CheckScrollViewUsage()
     {
-        if (this.position.height < Screen.height * 0.5f || this.useScrollView)
+        if (position.height < Screen.height * 0.5f || useScrollView)
         {
             return;
         }
 
-        this.useScrollView = true;
-        this.position.height = Screen.height * 0.5f;
+        useScrollView = true;
+        position.height = Screen.height * 0.5f;
     }
 
     private void DrawAddonBoxEnd()
     {
-        if (this.useScrollView)
+        if (useScrollView)
         {
             GUILayout.EndScrollView();
         }
@@ -99,9 +99,9 @@ public sealed class AssemblyOverlayGUI : MonoBehaviour
 
     private void DrawAddonBoxStart()
     {
-        if (this.useScrollView)
+        if (useScrollView)
         {
-            this.scrollPosition = GUILayout.BeginScrollView(this.scrollPosition, GUILayout.Height(Screen.height * 0.5f));
+            scrollPosition = GUILayout.BeginScrollView(scrollPosition, GUILayout.Height(Screen.height * 0.5f));
         }
         else
         {
@@ -111,21 +111,21 @@ public sealed class AssemblyOverlayGUI : MonoBehaviour
 
     private void DrawAddonList()
     {
-        this.DrawAddonBoxStart();
-        this.DrawAddons();
-        this.DrawAddonBoxEnd();
+        DrawAddonBoxStart();
+        DrawAddons();
+        DrawAddonBoxEnd();
     }
 
     private void DrawAddons()
     {
-        this.addonList = String.Empty;
+        addonList = string.Empty;
 
         foreach (var addon in loader.ExternalAssemblies)
         {
-            var nameStyle = this.labelGreen;
-            var versionStyle = this.labelYellow;
+            var nameStyle = labelGreen;
+            var versionStyle = labelYellow;
 
-            this.addonList += Environment.NewLine + addon.Name + " - " + addon.Version;
+            addonList += Environment.NewLine + addon.Name + " - " + addon.Version;
 
             GUILayout.BeginHorizontal();
             GUILayout.Label(addon.Name, nameStyle);
@@ -139,7 +139,7 @@ public sealed class AssemblyOverlayGUI : MonoBehaviour
 
     private void InitialiseStyles()
     {
-        this.windowStyle = new GUIStyle
+        windowStyle = new GUIStyle
         {
             normal =
             {
@@ -149,7 +149,7 @@ public sealed class AssemblyOverlayGUI : MonoBehaviour
             padding = new RectOffset(10, 10, 1, 5)
         };
 
-        this.labelGreen = new GUIStyle
+        labelGreen = new GUIStyle
         {
             normal =
             {
@@ -157,7 +157,7 @@ public sealed class AssemblyOverlayGUI : MonoBehaviour
             }
         };
 
-        this.labelYellow = new GUIStyle
+        labelYellow = new GUIStyle
         {
             normal =
             {
@@ -172,17 +172,17 @@ public sealed class AssemblyOverlayGUI : MonoBehaviour
         GUILayout.Label("Loaded Add-ons: " + loader.TotalDetected);
         GUILayout.FlexibleSpace();
 
-        if (GUILayout.Toggle(this.showAddons, "Show Add-ons") != this.showAddons)
+        if (GUILayout.Toggle(showAddons, "List Add-ons: ") != showAddons)
         {
-            this.showAddons = !this.showAddons;
-            this.position.height = 0.0f;
+            showAddons = !showAddons;
+            position.height = 0.0f;
         }
 
         GUILayout.EndHorizontal();
 
-        if (this.showAddons)
+        if (showAddons)
         {
-            this.DrawAddonList();
+            DrawAddonList();
         }
     }
 }

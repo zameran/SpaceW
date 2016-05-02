@@ -32,7 +32,14 @@
 
 using UnityEngine;
 
+using System;
 using System.Collections.Generic;
+
+[Serializable]
+public struct PlanetoidGenerationConstants
+{
+
+}
 
 public sealed class Planetoid : MonoBehaviour
 {
@@ -54,6 +61,8 @@ public sealed class Planetoid : MonoBehaviour
 
     public Shader ColorShader;
     public ComputeShader CoreShader;
+
+    public PlanetoidGenerationConstants GenerationConstants;
 
     public int RenderQueue = 2000;
 
@@ -319,7 +328,7 @@ public sealed class Planetoid : MonoBehaviour
         mesh.bounds = new Bounds(Vector3.zero, new Vector3(PlanetRadius * 2, PlanetRadius * 2, PlanetRadius * 2));
 
         Material material = new Material(ColorShader);
-        material.name += "_" + quadPosition.ToString() + "(Instance)" + "_" + Random.Range(float.MinValue, float.MaxValue);
+        material.name += "_" + quadPosition.ToString() + "(Instance)" + "_" + UnityEngine.Random.Range(float.MinValue, float.MaxValue);
 
         Quad quadComponent = go.AddComponent<Quad>();
         quadComponent.CoreShader = CoreShader;
@@ -356,7 +365,7 @@ public sealed class Planetoid : MonoBehaviour
         mesh.bounds = new Bounds(Vector3.zero, new Vector3(PlanetRadius * 2, PlanetRadius * 2, PlanetRadius * 2));
 
         Material material = new Material(ColorShader);
-        material.name += "_" + quadPosition.ToString() + "(Instance)" + "_" + Random.Range(float.MinValue, float.MaxValue);
+        material.name += "_" + quadPosition.ToString() + "(Instance)" + "_" + UnityEngine.Random.Range(float.MinValue, float.MaxValue);
 
         Quad quadComponent = go.AddComponent<Quad>();
         quadComponent.CoreShader = CoreShader;

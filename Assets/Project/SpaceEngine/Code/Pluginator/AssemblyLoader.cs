@@ -47,6 +47,8 @@ using Logger = ZFramework.Unity.Common.Logger;
 [UseLoggerFile(false, "Loader")]
 public sealed class AssemblyLoader : Loader
 {
+    public GUISkin UISkin = null;
+
     private bool Loaded = false;
     private bool ShowGUI = true;
 
@@ -64,7 +66,7 @@ public sealed class AssemblyLoader : Loader
     {
         base.Awake();
 
-        Delay(2, () => { Pass(); });
+        Pass();
     }
 
     protected override void Update()
@@ -78,13 +80,15 @@ public sealed class AssemblyLoader : Loader
 
         if (ShowGUI)
         {
+            if (UISkin != null) GUI.skin = UISkin;
+
             GUI.Box(new Rect(Screen.width / 2 - (Screen.width / 1.25f) / 2,
                              Screen.height / 1.25f,
                              Screen.width / 1.25f,
                              15), "");
 
             GUI.Label(new Rect(Screen.width / 2 - 50,
-                               Screen.height / 1.25f - 3,
+                               Screen.height / 1.25f,
                                Screen.width / 1.25f,
                                25), string.Format("Loading {0}/{1} dll's...", TotalLoaded, TotalDetected));
         }
@@ -111,7 +115,7 @@ public sealed class AssemblyLoader : Loader
 
         if (SceneManager.GetActiveScene().buildIndex == 0 && Loaded)
         {
-            Delay((TotalDetected + 1) * 2, () => { SceneManager.LoadScene(1); });      
+            Delay((TotalDetected + 1) * 2, () => { SceneManager.LoadScene(1); });
         }
     }
 
@@ -184,7 +188,7 @@ public sealed class AssemblyLoader : Loader
 
     private void LoadDetectedAssemblies(List<string> allPaths)
     {
-        if(allPaths == null) { DetectAssembies(out allPaths); Logger.Log("Something wrong with path's array! Detecting assemblies again!"); }
+        if (allPaths == null) { DetectAssembies(out allPaths); Logger.Log("Something wrong with path's array! Detecting assemblies again!"); }
 
         for (int i = 0; i < allPaths.Count; i++)
         {

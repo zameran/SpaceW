@@ -2490,12 +2490,19 @@
             <param name="name">Name of target transform.</param>
             <returns></returns>
         </member>
-        <member name="T:ZFramework.Unity.Common.MessengerHelper">
+        <member name="T:ZFramework.Unity.Common.Messenger.Messenger">
+            <summary>
+            Based on Rod Hyde's "CSharpMessenger" and Magnus Wolffelt's "CSharpMessenger Extended".   
+            Messenger cleans up its evenTable automatically upon loading of a new level.
+            Don't forget that the messages that should survive the cleanup, should be marked with Messenger.MarkAsPermanent(string)
+            </summary>
+        </member>
+        <member name="T:ZFramework.Unity.Common.Messenger.MessengerHelper">
             <summary>
             This manager will ensure that the messenger's eventTable will be cleaned up upon loading of a new level.
             </summary>
         </member>
-        <member name="M:ZFramework.Unity.Common.MessengerHelper.OnLevelWasLoaded(System.Int32)">
+        <member name="M:ZFramework.Unity.Common.Messenger.MessengerHelper.OnLevelWasLoaded(System.Int32)">
             <summary>
             Clean up eventTable every time a new level loads.
             </summary>
