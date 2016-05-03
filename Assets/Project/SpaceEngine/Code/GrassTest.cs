@@ -43,7 +43,7 @@ public class GrassTest : MonoBehaviour
     public Shader grassShader;
     public Material grassMaterial;
 
-    public List<Grass> grass = new List<Grass>();
+    public Grass[][] grass;
 
     public int size = 10;
 
@@ -62,12 +62,18 @@ public class GrassTest : MonoBehaviour
 
         grassMesh = MeshFactory.MakePlane(2, 2, MeshFactory.PLANE.XZ, true, false, false);
 
-        for (int i = 0; i < size; i++)
+        grass = new Grass[size][];
+
+        for (int k = 0; k < grass.GetLength(0); k++)
         {
-            for (int j = 0; j < size; j++)
+            grass[k] = new Grass[size];
+        }
+
+        for (int i = 0; i < grass.GetLength(0); i++)
+        {
+            for (int j = 0; j < grass[i].Length; j++)
             {
-                if (grassMesh != null)
-                    grass.Add(new Grass(grassMesh, new Vector3(i, 0, j)));
+                grass[i][j] = new Grass(new Vector3(i, 0, j));
             }
         }
 
@@ -83,16 +89,16 @@ public class GrassTest : MonoBehaviour
     {
         if (!canRender) return;
 
-        for (int i = 0; i < size; i++)
+        for (int i = 0; i < grass.GetLength(0); i++)
         {
-            for (int j = 0; j < size; j++)
+            for (int j = 0; j < grass[i].Length; j++)
             {
-                if (grass[i * j].grassMesh == null) return;
+                if (grass[i][j] == null) return;
 
                 grassMaterial.SetPass(0);
-                Graphics.DrawMeshNow(grass[i * j].grassMesh, grass[i * j].position, Quaternion.identity);
+                Graphics.DrawMeshNow(grassMesh, grass[i][j].position, Quaternion.identity);
                 //grassMaterial.SetPass(1);
-                //Graphics.DrawMeshNow(grass[i * j].grassMesh, grass[i * j].position, Quaternion.identity);
+                //Graphics.DrawMeshNow(grassMesh, grass[i][j].position, Quaternion.identity);
             }
         }
     }
@@ -106,14 +112,10 @@ public class GrassTest : MonoBehaviour
 [Serializable]
 public class Grass
 {
-    public Mesh grassMesh;
-
     public Vector3 position;
 
-    public Grass(Mesh grassMesh, Vector3 position)
+    public Grass(Vector3 position)
     {
-        this.grassMesh = grassMesh;
-
         this.position = position;
     }
 }

@@ -44,7 +44,7 @@ using UnityEngine.SceneManagement;
 using Logger = ZFramework.Unity.Common.Logger;
 
 [UseLogger(Category.Data)]
-[UseLoggerFile(false, "Loader")]
+[UseLoggerFile(false, "Log")]
 public sealed class AssemblyLoader : Loader
 {
     public GUISkin UISkin = null;

@@ -39,7 +39,7 @@ using ZFramework.Unity.Common;
 using Logger = ZFramework.Unity.Common.Logger;
 
 [UseLogger(Category.Data)]
-[UseLoggerFile(false, "Loader")]
+[UseLoggerFile(false, "Log")]
 public abstract class Loader : MonoBehaviour
 {
     public bool ShouldDontDestroyOnLoad = true;

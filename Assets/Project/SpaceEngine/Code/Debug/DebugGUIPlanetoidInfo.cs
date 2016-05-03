@@ -53,6 +53,16 @@ public sealed class DebugGUIPlanetoidInfo : DebugGUI
         GUILayout.Window(0, debugInfoBounds, UI, "Planetoid Info");
     }
 
+    public double CalculateTexturesVMU(int quadsCount)
+    {
+        int size = QS.nVertsPerEdgeSub * QS.nVertsPerEdgeSub;
+
+        double sizeInBytes = size * 8; //8 bit per channel.
+        double sizeInMegabytes = (sizeInBytes / 1024.0) / 1024.0;
+
+        return sizeInMegabytes * quadsCount;
+    }
+
     private void UI(int id)
     {
         if (Planetoid != null)
@@ -61,12 +71,15 @@ public sealed class DebugGUIPlanetoidInfo : DebugGUI
             int quadsCulledCount = Planetoid.GetCulledQuadsCount();
             int vertsRendered = (quadsCount - quadsCulledCount) * QS.nVerts;
 
+            double quadsTexturesVideoMemoryUsage = CalculateTexturesVMU(quadsCount);
+
             GUILayout.BeginVertical();
 
             GUILayoutExtensions.LabelWithSpace((Planetoid.gameObject.name + ": " + (Planetoid.Working ? "Generating..." : "Idle...")), -8);
             GUILayoutExtensions.LabelWithSpace("Quads count: " + quadsCount, -8);
             GUILayoutExtensions.LabelWithSpace("Quads culled count: " + quadsCulledCount, -8);
             GUILayoutExtensions.LabelWithSpace("Quads culling machine: " + (Planetoid.UseUnityCulling ? "Unity Culling" : "Custom Culling"), -8);
+            GUILayoutExtensions.LabelWithSpace("Quads textures VMU (MB): " + quadsTexturesVideoMemoryUsage.ToString("0.00"), -8);
             GUILayoutExtensions.LabelWithSpace("Verts rendered per frame (Only Quads): " + vertsRendered, -8);
 
             GUILayout.EndVertical();

@@ -12,13 +12,13 @@ Shader "Custom/GrassBillboard"
 		_MaxCameraDistance ("Max Camera Distance", float) = 250
 		_Transition ("Transition", float) = 30
 		_Cutoff ("Alpha Cutoff", Range(0,1)) = 0.1
+		_Freq ("Frequency", Range(0.1, 100)) = 0.1
 	}
 
 	SubShader 
 	{
 		Tags { "Queue" = "Geometry" "RenderType"="Opaque" }
 
-		// base pass
 		Pass
 		{
 			Tags { "LightMode" = "ForwardBase"}
@@ -62,6 +62,7 @@ Shader "Custom/GrassBillboard"
 
 				// for billboard
 				uniform fixed _Cutoff;
+				uniform fixed _Freq;
 				uniform float _MinSize, _MaxSize;
 				uniform fixed4 _HealthyColor, _DryColor;
 				uniform float _MaxCameraDistance;
@@ -77,7 +78,7 @@ Shader "Custom/GrassBillboard"
 					
 					// set output values
 					vOut.worldPosition =  mul(_Object2World, vIn.position);
-					vOut.parameters.x = tex2Dlod(_NoiseTexture, float4(vIn.uv_Noise.xyz, 0)).r;
+					vOut.parameters.x = tex2Dlod(_NoiseTexture, vIn.uv_Noise * _Freq).a;
 					vOut.parameters.y = vIn.sizeFactor;
 
 					return vOut;
@@ -234,6 +235,7 @@ Shader "Custom/GrassBillboard"
 
 			// for billboard
 			uniform fixed _Cutoff;
+			uniform fixed _Freq;
 			uniform float _MinSize, _MaxSize;
 			uniform float _MaxCameraDistance;
 			uniform float _Transition;
@@ -244,7 +246,7 @@ Shader "Custom/GrassBillboard"
 
 				// set output values
 				vOut.worldPosition =  mul(_Object2World, v.position);
-				vOut.parameters.x = tex2Dlod(_NoiseTexture, float4(v.uv_Noise.xyz, 0)).r;
+				vOut.parameters.x = tex2Dlod(_NoiseTexture, v.uv_Noise * _Freq).a;
 				vOut.parameters.y = v.sizeFactor;
 
 				return vOut;

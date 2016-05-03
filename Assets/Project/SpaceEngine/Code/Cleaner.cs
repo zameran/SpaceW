@@ -39,7 +39,7 @@ using UnityEngine;
 using Logger = ZFramework.Unity.Common.Logger;
 
 [UseLogger(Category.Important)]
-[UseLoggerFile(false, "Misc")]
+[UseLoggerFile(false, "Log")]
 public sealed class Cleaner : MonoBehaviour
 {
     private void Awake()
@@ -48,8 +48,6 @@ public sealed class Cleaner : MonoBehaviour
         {
             if (File.Exists(file))
                 File.Delete(file);
-
-            Logger.Log(string.Format("Redutant log file deleted at {0}", file));
         }
     }
 }

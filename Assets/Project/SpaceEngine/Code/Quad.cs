@@ -256,10 +256,64 @@ public sealed class Quad : MonoBehaviour
 
     private void Update()
     {
+        CheckLOD();
+
         if (!Planetoid.ExternalRendering)
             if (Planetoid.RenderPerUpdate)
                 Render();
+    }
 
+    private void OnDestroy()
+    {
+        BufferHelper.ReleaseAndDisposeBuffers(QuadGenerationConstantsBuffer, PreOutDataBuffer, PreOutDataSubBuffer, OutDataBuffer);
+
+        if (HeightTexture != null)
+            HeightTexture.ReleaseAndDestroy();
+
+        if (NormalTexture != null)
+            NormalTexture.ReleaseAndDestroy();
+
+        if (QuadMaterial != null)
+            DestroyImmediate(QuadMaterial);
+
+        if (DispatchStarted != null)
+        {
+            DispatchStarted -= QuadDispatchStarted;
+            DispatchStarted -= Planetoid.QuadDispatchStarted;
+        }
+
+        if (DispatchReady != null)
+        {
+            DispatchReady -= QuadDispatchReady;
+            DispatchReady -= Planetoid.QuadDispatchReady;
+        }
+
+        if (GPUGetDataReady != null)
+        {
+            GPUGetDataReady -= QuadGPUGetDataReady;
+            GPUGetDataReady -= Planetoid.QuadGPUGetDataReady;
+        }
+    }
+
+    private void OnWillRenderObject()
+    {
+
+    }
+
+    private void OnRenderObject()
+    {
+        if (!Planetoid.ExternalRendering)
+            if (!Planetoid.RenderPerUpdate)
+                Render();
+    }
+
+    private void OnDrawGizmos()
+    {
+
+    }
+
+    public void CheckLOD()
+    {
         if (Time.time > LastLODUpdateTime + LODUpdateInterval && Planetoid.UseLOD)
         {
             LastLODUpdateTime = Time.time;
@@ -310,55 +364,6 @@ public sealed class Quad : MonoBehaviour
                 }
             }
         }
-    }
-
-    private void OnDestroy()
-    {
-        BufferHelper.ReleaseAndDisposeBuffers(QuadGenerationConstantsBuffer, PreOutDataBuffer, PreOutDataSubBuffer, OutDataBuffer);
-
-        if (HeightTexture != null)
-            HeightTexture.ReleaseAndDestroy();
-
-        if (NormalTexture != null)
-            NormalTexture.ReleaseAndDestroy();
-
-        if (QuadMaterial != null)
-            DestroyImmediate(QuadMaterial);
-
-        if (DispatchStarted != null)
-        {
-            DispatchStarted -= QuadDispatchStarted;
-            DispatchStarted -= Planetoid.QuadDispatchStarted;
-        }
-
-        if (DispatchReady != null)
-        {
-            DispatchReady -= QuadDispatchReady;
-            DispatchReady -= Planetoid.QuadDispatchReady;
-        }
-
-        if (GPUGetDataReady != null)
-        {
-            GPUGetDataReady -= QuadGPUGetDataReady;
-            GPUGetDataReady -= Planetoid.QuadGPUGetDataReady;
-        }
-    }
-
-    private void OnWillRenderObject()
-    {
-
-    }
-
-    private void OnRenderObject()
-    {
-        if (!Planetoid.ExternalRendering)
-            if (!Planetoid.RenderPerUpdate)
-                Render();
-    }
-
-    private void OnDrawGizmos()
-    {
-
     }
 
     public void Render()

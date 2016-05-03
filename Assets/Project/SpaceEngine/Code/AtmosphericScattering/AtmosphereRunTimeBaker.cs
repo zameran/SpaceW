@@ -5,6 +5,10 @@ using UnityEngine;
 
 public sealed class AtmosphereRunTimeBaker : MonoBehaviour
 {
+    public RenderTextureFormat Format = RenderTextureFormat.ARGBFloat;
+
+    public bool ClearAfterBake = true;
+
     const int NUM_THREADS = 8;
 
     public RenderTexture transmittanceT;
@@ -57,6 +61,8 @@ public sealed class AtmosphereRunTimeBaker : MonoBehaviour
         {
             Calculate(AP);
         }
+
+        if (ClearAfterBake) CollectGarbage(false, true);
     }
 
     private void OnDestroy()
@@ -64,7 +70,7 @@ public sealed class AtmosphereRunTimeBaker : MonoBehaviour
         CollectGarbage();
     }
 
-    public void CollectGarbage(bool all = true)
+    public void CollectGarbage(bool all = true, bool afterBake = false)
     {
         if (all)
         {
@@ -73,29 +79,41 @@ public sealed class AtmosphereRunTimeBaker : MonoBehaviour
             if (inscatterT_Read != null) inscatterT_Read.ReleaseAndDestroy();
         }
 
-        if (irradianceT_Write != null) irradianceT_Write.ReleaseAndDestroy();      
+        if (irradianceT_Write != null) irradianceT_Write.ReleaseAndDestroy();
         if (inscatterT_Write != null) inscatterT_Write.ReleaseAndDestroy();
-        if (deltaET != null) deltaET.ReleaseAndDestroy();
+
+        if (all) if (deltaET != null) deltaET.ReleaseAndDestroy();
+
         if (deltaSRT != null) deltaSRT.ReleaseAndDestroy();
         if (deltaSMT != null) deltaSMT.ReleaseAndDestroy();
         if (deltaJT != null) deltaJT.ReleaseAndDestroy();
+
+        if (afterBake)
+        {
+            irradianceT_Write = null;
+            inscatterT_Write = null;
+
+            deltaSRT = null;
+            deltaSMT = null;
+            deltaJT = null;
+        }
     }
 
     public void CreateTextures(AtmosphereParameters AP)
     {
-        transmittanceT = RTExtensions.CreateRTexture(new Vector2(AP.TRANSMITTANCE_W, AP.TRANSMITTANCE_H), 0, RenderTextureFormat.ARGBFloat);
+        transmittanceT = RTExtensions.CreateRTexture(new Vector2(AP.TRANSMITTANCE_W, AP.TRANSMITTANCE_H), 0, Format);
 
-        irradianceT_Read = RTExtensions.CreateRTexture(new Vector2(AP.SKY_W, AP.SKY_H), 0, RenderTextureFormat.ARGBFloat);
-        irradianceT_Write = RTExtensions.CreateRTexture(new Vector2(AP.SKY_W, AP.SKY_H), 0, RenderTextureFormat.ARGBFloat);
+        irradianceT_Read = RTExtensions.CreateRTexture(new Vector2(AP.SKY_W, AP.SKY_H), 0, Format);
+        irradianceT_Write = RTExtensions.CreateRTexture(new Vector2(AP.SKY_W, AP.SKY_H), 0, Format);
 
-        inscatterT_Read = RTExtensions.CreateRTexture(new Vector2(AP.RES_MU_S * AP.RES_NU, AP.RES_MU), 0, RenderTextureFormat.ARGBFloat, FilterMode.Bilinear, TextureWrapMode.Clamp, AP.RES_R);
-        inscatterT_Write = RTExtensions.CreateRTexture(new Vector2(AP.RES_MU_S * AP.RES_NU, AP.RES_MU), 0, RenderTextureFormat.ARGBFloat, FilterMode.Bilinear, TextureWrapMode.Clamp, AP.RES_R);
+        inscatterT_Read = RTExtensions.CreateRTexture(new Vector2(AP.RES_MU_S * AP.RES_NU, AP.RES_MU), 0, Format, FilterMode.Bilinear, TextureWrapMode.Clamp, AP.RES_R);
+        inscatterT_Write = RTExtensions.CreateRTexture(new Vector2(AP.RES_MU_S * AP.RES_NU, AP.RES_MU), 0, Format, FilterMode.Bilinear, TextureWrapMode.Clamp, AP.RES_R);
 
-        deltaET = RTExtensions.CreateRTexture(new Vector2(AP.SKY_W, AP.SKY_H), 0, RenderTextureFormat.ARGBFloat);
+        deltaET = RTExtensions.CreateRTexture(new Vector2(AP.SKY_W, AP.SKY_H), 0, Format);
 
-        deltaSRT = RTExtensions.CreateRTexture(new Vector2(AP.RES_MU_S * AP.RES_NU, AP.RES_MU), 0, RenderTextureFormat.ARGBFloat, FilterMode.Bilinear, TextureWrapMode.Clamp, AP.RES_R);
-        deltaSMT = RTExtensions.CreateRTexture(new Vector2(AP.RES_MU_S * AP.RES_NU, AP.RES_MU), 0, RenderTextureFormat.ARGBFloat, FilterMode.Bilinear, TextureWrapMode.Clamp, AP.RES_R);
-        deltaJT = RTExtensions.CreateRTexture(new Vector2(AP.RES_MU_S * AP.RES_NU, AP.RES_MU), 0, RenderTextureFormat.ARGBFloat, FilterMode.Bilinear, TextureWrapMode.Clamp, AP.RES_R);
+        deltaSRT = RTExtensions.CreateRTexture(new Vector2(AP.RES_MU_S * AP.RES_NU, AP.RES_MU), 0, Format, FilterMode.Bilinear, TextureWrapMode.Clamp, AP.RES_R);
+        deltaSMT = RTExtensions.CreateRTexture(new Vector2(AP.RES_MU_S * AP.RES_NU, AP.RES_MU), 0, Format, FilterMode.Bilinear, TextureWrapMode.Clamp, AP.RES_R);
+        deltaJT = RTExtensions.CreateRTexture(new Vector2(AP.RES_MU_S * AP.RES_NU, AP.RES_MU), 0, Format, FilterMode.Bilinear, TextureWrapMode.Clamp, AP.RES_R);
     }
 
     public void SetParametersForAll(AtmosphereParameters AP)
@@ -184,7 +202,7 @@ public sealed class AtmosphereRunTimeBaker : MonoBehaviour
         }
         else if (step == 5)
         {
-            //Here Nvidia GTX 430 driver will crash.
+            //Here Nvidia GTX 430 or lower driver will crash.
             //If only ray1 or mie1 calculated - slow, but all is alright.
             //But if both - driver crash.
             //INSCATTER_SPHERICAL_INTEGRAL_SAMPLES = 8 - limit for GTX 430.
@@ -205,7 +223,7 @@ public sealed class AtmosphereRunTimeBaker : MonoBehaviour
                 inscatterS.Dispatch(0, (AP.RES_MU_S * AP.RES_NU) / NUM_THREADS, AP.RES_MU / NUM_THREADS, 1);
             }
         }
-        else if (step == 6) 
+        else if (step == 6)
         {
             // computes deltaE (line 8 in algorithm 4.1)
             irradianceN.SetInt("first", (order == 2) ? 1 : 0);
