@@ -171,8 +171,10 @@ public sealed class Planetoid : MonoBehaviour
 
         if (Atmosphere != null)
         {
+            if (Atmosphere.Sun_1 != null) Atmosphere.Sun_1.UpdateNode();
+            if (Atmosphere.Sun_2 != null) Atmosphere.Sun_2.UpdateNode();
+
             Atmosphere.Origin = Origin;
-            Atmosphere.Sun.UpdateNode();
             Atmosphere.UpdateNode();
             Atmosphere.Render(false);
         }

@@ -75,6 +75,8 @@
 #endif
 
 uniform float3 _Sun_WorldSunDir;
+uniform float3 _Sun_WorldSunDir_1;
+uniform float3 _Sun_WorldSunDir_2;
 uniform float3 _Globals_WorldCameraPos;
 
 // ----------------------------------------------------------------------------

@@ -1,5 +1,7 @@
 ﻿using UnityEngine;
 
+using System.Collections.Generic;
+
 public sealed class Atmosphere : MonoBehaviour
 {
     readonly Vector3 BETA_MSca = new Vector3(4e-3f, 4e-3f, 4e-3f);
@@ -30,12 +32,14 @@ public sealed class Atmosphere : MonoBehaviour
     public bool RunTimeBaking = false;
     public bool LostFocusForceRebake = false;
 
-    public AtmosphereSun Sun;
+    public AtmosphereSun Sun_1;
+    public AtmosphereSun Sun_2;
+
     public AtmosphereParameters atmosphereParameters = AtmosphereParameters.Default;
     public AtmosphereRunTimeBaker artb = null;
 
     public Vector3 Origin;
-    
+
     private void Start()
     {
         TryBake();
@@ -57,13 +61,62 @@ public sealed class Atmosphere : MonoBehaviour
         if (RunTimeBaking && artb != null) artb.Bake(atmosphereParameters);
     }
 
+
+    public List<string> GetKeywords()
+    {
+        List<string> Keywords = new List<string>();
+
+        if (Sun_1 != null)
+            Keywords.Add("LIGHT_1");
+
+        if (Sun_2 != null)
+            Keywords.Add("LIGHT_2");
+
+        if (Sun_1 != null && Sun_2 != null)
+            Keywords.Remove("LIGHT_1");
+
+        return Keywords;
+    }
+
+    public void SetKeywords(Material m, List<string> keywords)
+    {
+        if (m != null && ArraysEqual(m.shaderKeywords, keywords) == false)
+        {
+            m.shaderKeywords = keywords.ToArray();
+        }
+    }
+
+    public bool ArraysEqual<T>(T[] a, List<T> b)
+    {
+        if (a != null && b == null) return false;
+        if (a == null && b != null) return false;
+
+        if (a != null && b != null)
+        {
+            if (a.Length != b.Count) return false;
+
+            var comparer = EqualityComparer<T>.Default;
+
+            for (var i = 0; i < a.Length; i++)
+            {
+                if (comparer.Equals(a[i], b[i]) == false)
+                {
+                    return false;
+                }
+            }
+        }
+
+        return true;
+    }
+
     public void UpdateNode()
     {
         //Rg = AtmosphereScale;
         //Rt = (64200f / 63600f) * Rg * AtmosphereHeight;
         //Rl = (64210.0f / 63600f) * Rg;   
 
-        Sun.Origin = Origin;
+        if (Sun_1 != null) Sun_1.Origin = Origin;
+        if (Sun_2 != null) Sun_2.Origin = Origin;
     }
 
     public void OnApplicationFocus(bool focusStatus)
@@ -163,12 +216,15 @@ public sealed class Atmosphere : MonoBehaviour
     {
         AtmosphereSun[] suns = FindObjectsOfType<AtmosphereSun>();
 
-        if (Sun == null) Sun = suns[0];
+        if (suns.Length > 0) if (Sun_1 == null && suns[0] != null) Sun_1 = suns[0];
+        if (suns.Length > 1) if (Sun_2 == null && suns[1] != null) Sun_2 = suns[1];
     }
 
     public void InitUniforms(Material mat)
     {
         if (mat == null) return;
+
+        SetKeywords(mat, GetKeywords());
 
         mat.SetFloat("scale", atmosphereParameters.Rg / atmosphereParameters.SCALE);
         mat.SetFloat("Rg", atmosphereParameters.Rg);
@@ -219,6 +275,8 @@ public sealed class Atmosphere : MonoBehaviour
     {
         if (mat == null) return;
 
+        SetKeywords(mat, GetKeywords());
+
         mat.SetFloat("scale", atmosphereParameters.Rg / atmosphereParameters.SCALE);
         mat.SetFloat("Rg", atmosphereParameters.Rg);
         mat.SetFloat("Rt", atmosphereParameters.Rt);
@@ -249,18 +307,17 @@ public sealed class Atmosphere : MonoBehaviour
         mat.SetVector("_Globals_WorldCameraPos", Camera.main.transform.position);
 
         mat.SetVector("_Globals_Origin", -Origin);
-        mat.SetFloat("_Exposure", HDRExposure);     
+        mat.SetFloat("_Exposure", HDRExposure);
 
-        if (Sun != null)
-        {
-            mat.SetMatrix("_Sun_WorldToLocal", Sun.WorldToLocalRotation);
-            Sun.SetUniforms(mat);
-        }
+        if (Sun_1 != null) Sun_1.SetUniforms(mat);
+        if (Sun_2 != null) Sun_2.SetUniforms(mat);
     }
 
     public void SetUniformsForPlanetQuad(Material mat)
     {
         if (mat == null) return;
+
+        SetKeywords(mat, GetKeywords());
 
         mat.SetFloat("scale", atmosphereParameters.Rg / atmosphereParameters.SCALE);
         mat.SetFloat("Rg", atmosphereParameters.Rg);
@@ -293,10 +350,7 @@ public sealed class Atmosphere : MonoBehaviour
         mat.SetVector("_Globals_Origin", -Origin);
         mat.SetFloat("_Exposure", HDRExposure);
 
-        if (Sun != null)
-        {
-            mat.SetMatrix("_Sun_WorldToLocal", Sun.WorldToLocalRotation);
-            Sun.SetUniforms(mat);
-        }
+        if (Sun_1 != null) Sun_1.SetUniforms(mat);
+        if (Sun_2 != null) Sun_2.SetUniforms(mat);
     }
 }

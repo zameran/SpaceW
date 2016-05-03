@@ -2,6 +2,9 @@
 
 public sealed class AtmosphereSun : MonoBehaviour
 {
+    [Range(1, 2)]
+    public int sunID = 1;
+
     static readonly Vector3 Z_AXIS = new Vector3(0, 0, 1);
 
     Vector3 m_startSunDirection = Z_AXIS;
@@ -51,13 +54,17 @@ public sealed class AtmosphereSun : MonoBehaviour
 
     public void UpdateNode()
     {
-        HasMoved = false;
+        if ((sunID == 1 && Input.GetKey(KeyCode.RightControl)) || (sunID == 2 && Input.GetKey(KeyCode.RightShift)))
+        {
+            HasMoved = false;
 
-        float h = Input.GetAxis("HorizontalArrows") * 0.75f;
-        float v = Input.GetAxis("VerticalArrows") * 0.75f;
+            float h = Input.GetAxis("HorizontalArrows") * 0.75f;
+            float v = Input.GetAxis("VerticalArrows") * 0.75f;
 
-        transform.Rotate(new Vector3(v, h, 0), Space.World);
-        HasMoved = true;
+            transform.Rotate(new Vector3(v, h, 0), Space.World);
+
+            HasMoved = true;
+        }
     }
 
     public void SetUniforms(Material mat)
@@ -65,6 +72,7 @@ public sealed class AtmosphereSun : MonoBehaviour
         if (mat == null) return;
 
         mat.SetFloat("_Sun_Intensity", SunIntensity);
-        mat.SetVector("_Sun_WorldSunDir", GetDirection());
+        mat.SetVector("_Sun_WorldSunDir_" + sunID, GetDirection());
+        mat.SetMatrix("_Sun_WorldToLocal_" + sunID, WorldToLocalRotation);
     }
 }

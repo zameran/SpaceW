@@ -90,6 +90,8 @@ Shader "Proland/Atmo/Sky"
 			#include "Utility.cginc"
 			#include "Atmosphere.cginc"
 
+			#pragma multi_compile LIGHT_1 LIGHT_2
+
 			#pragma target 5.0
 			#pragma only_renderers d3d11
 			#pragma vertex vert
@@ -102,14 +104,23 @@ Shader "Proland/Atmo/Sky"
 			uniform sampler2D _Sun_Glare;
 			uniform float _Sun_Glare_Scale;
 			uniform float4 _Sun_Glare_Color;
-			uniform float4x4 _Sun_WorldToLocal;
-			
+			uniform float4x4 _Sun_WorldToLocal_1;
+			uniform float4x4 _Sun_WorldToLocal_2;
+
 			struct v2f 
 			{
 				float4 pos : SV_POSITION;
 				float2 uv : TEXCOORD0;
 				float3 dir : TEXCOORD1;
-				float3 relativeDir : TEXCOORD2;
+
+				#ifdef LIGHT_1 
+					float3 relativeDir_1 : TEXCOORD2;
+				#endif
+
+				#ifdef LIGHT_2
+					float3 relativeDir_1 : TEXCOORD2;
+					float3 relativeDir_2 : TEXCOORD3;
+				#endif
 			};
 
 			v2f vert(appdata_base v)
@@ -117,10 +128,24 @@ Shader "Proland/Atmo/Sky"
 				v2f OUT;
 				OUT.dir = (mul(_Globals_CameraToWorld, float4((mul(_Globals_ScreenToCamera, v.vertex)).xyz, 0.0))).xyz;
 
-				float3x3 wtl = _Sun_WorldToLocal;
+				#ifdef LIGHT_1 
+					float3x3 wtl_1 = _Sun_WorldToLocal_1; 
+				#endif
+
+				#ifdef LIGHT_2 
+					float3x3 wtl_1 = _Sun_WorldToLocal_1;
+					float3x3 wtl_2 = _Sun_WorldToLocal_2; 
+				#endif
 				
 				// apply this rotation to view dir to get relative viewdir
-				OUT.relativeDir = mul(wtl, OUT.dir);
+				#ifdef LIGHT_1 
+					OUT.relativeDir_1 = mul(wtl_1, OUT.dir); 
+				#endif
+
+				#ifdef LIGHT_2 
+					OUT.relativeDir_1 = mul(wtl_1, OUT.dir); 
+					OUT.relativeDir_2 = mul(wtl_2, OUT.dir); 
+				#endif
 	
 				OUT.pos = float4(v.vertex.xy, 1.0, 1.0);
 				OUT.uv = v.texcoord.xy;
@@ -136,20 +161,50 @@ Shader "Proland/Atmo/Sky"
 			
 			float4 frag(v2f IN) : COLOR
 			{			
-				float3 WSD = _Sun_WorldSunDir;
 				float3 WCP = _Globals_WorldCameraPos;
-
 				float3 d = normalize(IN.dir);
 
-				float3 sunColor = OuterSunRadiance(IN.relativeDir);
+				#ifdef LIGHT_1
+					float3 WSD_1 = _Sun_WorldSunDir_1;
 
-				float3 extinction;
-				float3 inscatter = SkyRadiance(WCP + _Globals_Origin, d, WSD, extinction, 0.0);
+					float3 sun1Color = OuterSunRadiance(IN.relativeDir_1);
 
-				float3 finalColor = sunColor * extinction + inscatter;
-				
-				return float4(hdr(finalColor), 1);
+					float3 extinction1;
 
+					float3 inscatter1 = SkyRadiance(WCP + _Globals_Origin, d, WSD_1, extinction1, 0.0);
+
+					float sunColor = sun1Color;
+					float3 extinction = extinction1;
+					float3 inscatter = inscatter1;
+
+					float3 finalColor = sunColor * extinction + inscatter;
+
+					return float4(hdr(finalColor), 1);
+				#endif
+
+				#ifdef LIGHT_2
+					float3 WSD_1 = _Sun_WorldSunDir_1;
+					float3 WSD_2 = _Sun_WorldSunDir_2;
+
+					float3 sun1Color = OuterSunRadiance(IN.relativeDir_1);
+					float3 sun2Color = OuterSunRadiance(IN.relativeDir_2);
+
+					float3 extinction1;
+					float3 extinction2;
+
+					float3 inscatter1 = SkyRadiance(WCP + _Globals_Origin, d, WSD_1, extinction1, 0.0);
+					float3 inscatter2 = SkyRadiance(WCP + _Globals_Origin, d, WSD_2, extinction2, 0.0);
+
+					float sunColor = sun1Color + sun2Color;
+					float3 extinction = extinction1 + extinction2;
+					float3 inscatter = inscatter1 + inscatter2;
+
+					float3 finalColor = sunColor * extinction + inscatter;
+
+					return float4(hdr(finalColor), 1);
+				#endif
+
+				return float4(0, 0, 0, 0);
 			}		
 			ENDCG
 		}
