@@ -80,6 +80,10 @@
 
 			uniform float3 _Origin;
 
+			uniform float4x4 _Globals_CameraToWorld;
+			uniform float4x4 _Globals_ScreenToCamera;
+			uniform float3 _Globals_Origin;
+
 			uniform StructuredBuffer<OutputStruct> data;
 			uniform StructuredBuffer<QuadGenerationConstants> quadGenerationConstants;
 
@@ -135,13 +139,15 @@
 				float3 skyE = 0;
 
 				SunRadianceAndSkyIrradiance(rotatedPoint, n, WSD, sunL, skyE);
-
+				float extinctionGroundFade = 0;
 				float cTheta = dot(n, WSD); // diffuse ground color
-
+				float4 eclipse = float4(ApplyEclipse(WCP, mul(_Object2World, rotatedPoint) - WCP, _Globals_Origin), 1.0);
 				float3 groundColor = 1.5 * reflectance.rgb * (sunL * max(cTheta, 0) + skyE) / M_PI;
 				float3 extinction;
 				float4 inscatter = InScattering(WCP, rotatedPoint, WSD, extinction, 1.0);
-				float4 finalColor = float4(groundColor, 1) * float4(extinction, 1) + inscatter;
+				extinction *= eclipse;
+				extinction = float3(1.0, 1.0, 1.0) * extinctionGroundFade + (1 - extinctionGroundFade) * extinction;
+				float4 finalColor = float4(groundColor, 1) * float4(extinction, 1) + inscatter * eclipse;
 				
 				return finalColor;//float4(hdr(finalColor.xyz), finalColor.w);
 			}

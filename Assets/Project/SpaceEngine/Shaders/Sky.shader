@@ -176,8 +176,10 @@ Shader "Proland/Atmo/Sky"
 					float sunColor = sun1Color;
 					float3 extinction = extinction1;
 					float3 inscatter = inscatter1;
+					
+					float3 eclipse = ApplyEclipse(WCP, d, _Globals_Origin);
 
-					float3 finalColor = sunColor * extinction + inscatter;
+					float3 finalColor = sunColor * extinction + inscatter * eclipse;
 
 					return float4(hdr(finalColor), 1);
 				#endif
@@ -199,7 +201,9 @@ Shader "Proland/Atmo/Sky"
 					float3 extinction = extinction1 + extinction2;
 					float3 inscatter = inscatter1 + inscatter2;
 
-					float3 finalColor = sunColor * extinction + inscatter;
+					float3 eclipse = ApplyEclipse(WCP, d, _Globals_Origin);
+
+					float3 finalColor = sunColor * extinction + inscatter * eclipse;
 
 					return float4(hdr(finalColor), 1);
 				#endif

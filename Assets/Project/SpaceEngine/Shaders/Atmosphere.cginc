@@ -128,6 +128,98 @@ uniform sampler2D _Sky_Transmittance;
 uniform sampler2D _Sky_Irradiance;
 uniform sampler3D _Sky_Inscatter;
 
+uniform float4 sunPosAndRadius; //xyz sun pos w radius
+uniform float4x4 lightOccluders1; //array of light occluders for each float4 xyz pos w radius
+uniform float4x4 lightOccluders2; //array of light occluders for each float4 xyz pos w radius
+
+float IntersectInnerSphere(float3 p1, float3 d, float3 p3, float r)
+{
+	float a = dot(d, d);
+	float b = 2.0 * dot(d, p1 - p3);
+	float c = dot(p3, p3) + dot(p1, p1) - 2.0 * dot(p3, p1) - r * r;
+
+	float test = b*b - 4.0*a*c;
+
+	if (test < 0) return -1.0;
+
+  	float u = (-b - sqrt(test)) / (2.0 * a);	
+  								
+	return u;
+}
+
+float IntersectOuterSphere(float3 p1, float3 d, float3 p3, float r)
+{
+	// p1 starting point
+	// d look direction
+	// p3 is the sphere center
+
+	float a = dot(d, d);
+	float b = 2.0 * dot(d, p1 - p3);
+	float c = dot(p3, p3) + dot(p1, p1) - 2.0 * dot(p3, p1) - r * r;
+	float test = b * b - 4.0 * a * c;
+
+	if (test < 0) return -1.0;
+
+	float u = (-b - sqrt(test)) / (2.0 * a);
+
+	u = (u < 0) ? (-b + sqrt(test)) / (2.0 * a) : u;
+			
+	return u;
+}
+
+float GetEclipseShadow(float3 worldPos, float3 worldLightPos,float3 occluderSpherePosition,
+					   float3 occluderSphereRadius, float3 lightSourceRadius)		
+{											
+	float3 lightDirection = float3(worldLightPos - worldPos);
+	float3 lightDistance = length(lightDirection);
+
+	lightDirection = lightDirection / lightDistance;
+               
+	// computation of level of shadowing w  
+	float3 sphereDirection = float3(occluderSpherePosition - worldPos);  //occluder planet
+	float sphereDistance = length(sphereDirection);
+
+	sphereDirection = sphereDirection / sphereDistance;
+            		
+	float dd = lightDistance * (asin(min(1.0, length(cross(lightDirection, sphereDirection)))) 
+			   - asin(min(1.0, occluderSphereRadius / sphereDistance)));
+            
+	float w = smoothstep(-1.0, 1.0, -dd / lightSourceRadius);
+
+	w = w * smoothstep(0.0, 0.2, dot(lightDirection, sphereDirection));
+            		
+	return (1 - w);
+}
+
+
+float3 ApplyEclipse(float3 WCP, float3 d, float3 _Globals_Origin)
+{
+	float eclipseShadow = 1;
+
+	float interSectPt = IntersectOuterSphere(WCP, d, _Globals_Origin, Rt);
+
+	if (interSectPt != -1)
+	{
+		float3 worldPos = WCP + d * interSectPt;  //worldPos, actually relative to planet origin
+		
+	    for (int i = 0; i < 4; ++i)
+		{
+    		if (lightOccluders1[i].w <= 0) break;
+
+			eclipseShadow *= GetEclipseShadow(worldPos, sunPosAndRadius.xyz, lightOccluders1[i].xyz, lightOccluders1[i].w, sunPosAndRadius.w);
+		}
+						
+		for (int j = 0; j < 4; ++j)
+    	{
+			if (lightOccluders2[j].w <= 0) break;
+
+			eclipseShadow *= GetEclipseShadow(worldPos, sunPosAndRadius.xyz, lightOccluders2[j].xyz, lightOccluders2[j].w, sunPosAndRadius.w);
+		}
+	}
+
+	return eclipseShadow;
+}
+
 float2 GetTransmittanceUV(float r, float mu) 
 {
 	float uR, uMu;

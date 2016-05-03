@@ -35,6 +35,8 @@ public sealed class Atmosphere : MonoBehaviour
     public AtmosphereSun Sun_1;
     public AtmosphereSun Sun_2;
 
+    public List<GameObject> eclipseCasters;
+
     public AtmosphereParameters atmosphereParameters = AtmosphereParameters.Default;
     public AtmosphereRunTimeBaker artb = null;
 
@@ -84,6 +86,34 @@ public sealed class Atmosphere : MonoBehaviour
         {
             m.shaderKeywords = keywords.ToArray();
         }
+    }
+
+    public void SetEclipses(Material mat)
+    {
+        Matrix4x4 castersMatrix1 = Matrix4x4.zero;
+        Matrix4x4 castersMatrix2 = Matrix4x4.zero;
+
+        Vector4 casterPosRelPlanet = Vector4.zero;
+        Vector4 sunPosRelPlanet = Vector4.zero;
+
+        sunPosRelPlanet = Sun_1.transform.position;
+        sunPosRelPlanet.w = 250000;
+
+        for (int i = 0; i < Mathf.Min(4, eclipseCasters.Count); i++)
+        {
+            casterPosRelPlanet = eclipseCasters[i].transform.position;
+            castersMatrix1.SetRow(i, new Vector4(casterPosRelPlanet.x, casterPosRelPlanet.y, casterPosRelPlanet.z, 250000));
+        }
+
+        for (int i = 4; i < Mathf.Min(8, eclipseCasters.Count); i++)
+        {
+            casterPosRelPlanet = eclipseCasters[i].transform.position;
+            castersMatrix2.SetRow(i - 4, new Vector4(casterPosRelPlanet.x, casterPosRelPlanet.y, casterPosRelPlanet.z, 250000));
+        }
+
+        mat.SetVector("sunPosAndRadius", sunPosRelPlanet);
+        mat.SetMatrix("lightOccluders1", castersMatrix1);
+        mat.SetMatrix("lightOccluders2", castersMatrix2);
     }
 
     public bool ArraysEqual<T>(T[] a, List<T> b)
@@ -225,6 +255,7 @@ public sealed class Atmosphere : MonoBehaviour
         if (mat == null) return;
 
         SetKeywords(mat, GetKeywords());
+        SetEclipses(mat);
 
         mat.SetFloat("scale", atmosphereParameters.Rg / atmosphereParameters.SCALE);
         mat.SetFloat("Rg", atmosphereParameters.Rg);
@@ -276,6 +307,7 @@ public sealed class Atmosphere : MonoBehaviour
         if (mat == null) return;
 
         SetKeywords(mat, GetKeywords());
+        SetEclipses(mat);
 
         mat.SetFloat("scale", atmosphereParameters.Rg / atmosphereParameters.SCALE);
         mat.SetFloat("Rg", atmosphereParameters.Rg);
@@ -318,6 +350,7 @@ public sealed class Atmosphere : MonoBehaviour
         if (mat == null) return;
 
         SetKeywords(mat, GetKeywords());
+        SetEclipses(mat);
 
         mat.SetFloat("scale", atmosphereParameters.Rg / atmosphereParameters.SCALE);
         mat.SetFloat("Rg", atmosphereParameters.Rg);
