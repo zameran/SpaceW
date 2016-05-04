@@ -47,6 +47,7 @@ public sealed class Planetoid : MonoBehaviour
 
     public bool DrawWireframe = false;
     public bool DrawNormals = false;
+    public bool DrawGizmos = false;
 
     public bool GetData = false;
 

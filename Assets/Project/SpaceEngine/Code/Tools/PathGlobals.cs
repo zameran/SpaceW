@@ -85,6 +85,6 @@ public static class PathGlobals
 
     public static string GlobalMainLogPathEditor(string dataPath)
     {
-        return Path.GetFullPath(dataPath + "/../" + GlobalMainLogFileName); ;
+        return Path.GetFullPath(dataPath + "/../" + GlobalMainLogFileName);
     }
 }

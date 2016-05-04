@@ -314,9 +314,7 @@ public sealed class Quad : MonoBehaviour
 
     private void OnDrawGizmos()
     {
-        bool DrawGizmos = false;
-
-        if (DrawGizmos)
+        if (Planetoid.DrawGizmos)
         {
             Gizmos.color = Color.red;
 
@@ -427,15 +425,17 @@ public sealed class Quad : MonoBehaviour
 
             if (QuadMesh != null)
             {
+                Matrix4x4 PlanetoidTRS = Matrix4x4.TRS(Planetoid.Origin, Planetoid.OriginRotation, Planetoid.transform.localScale);
+
                 if (Planetoid.RenderPerUpdate)
                 {
                     if (Visible)
-                        Graphics.DrawMesh(QuadMesh, Planetoid.Origin, Planetoid.OriginRotation, QuadMaterial, 0, Camera.main, 0, null, true, true);
+                        Graphics.DrawMesh(QuadMesh, PlanetoidTRS, QuadMaterial, 0, Camera.main, 0, null, true, true);
                 }
                 else
                 {
                     if (Visible)
-                        Graphics.DrawMeshNow(QuadMesh, Planetoid.Origin, Planetoid.OriginRotation);
+                        Graphics.DrawMeshNow(QuadMesh, PlanetoidTRS);
                 }
             }
 
@@ -488,9 +488,9 @@ public sealed class Quad : MonoBehaviour
         return verts;
     }
 
-    public Vector3[] GetVolumeBox(float height, float offset = 0)
+    public Vector3[] GetVolumeBox(float height, float offset = 0, bool forCulling = false)
     {
-        Vector3[] verts = new Vector3[8];
+        Vector3[] verts = new Vector3[forCulling ? 12 : 8];
 
         Vector3 tl = topLeftCorner;
         Vector3 tr = topRightCorner;
@@ -507,6 +507,14 @@ public sealed class Quad : MonoBehaviour
         verts[6] = bl.NormalizeToRadius(Planetoid.PlanetRadius - height - offset);
         verts[7] = br.NormalizeToRadius(Planetoid.PlanetRadius - height - offset);
 
+        if (forCulling)
+        {
+            verts[8] = verts[0] - verts[4];
+            verts[9] = verts[1] - verts[5];
+            verts[10] = verts[2] - verts[6];
+            verts[11] = verts[3] - verts[7];
+        }
+
         return verts;
     }
 
@@ -515,7 +523,7 @@ public sealed class Quad : MonoBehaviour
         if (Parent == null || !Generated || Splitting || Planetoid.UseUnityCulling)
             return true;
 
-        Vector3[] verts0 = GetVolumeBox(Planetoid.TerrainMaxHeight * 1);
+        Vector3[] verts0 = GetVolumeBox(Planetoid.TerrainMaxHeight * 1, 0, true);
 
         Plane[] planes = GeometryUtility.CalculateFrustumPlanes(camera);
 
