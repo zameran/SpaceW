@@ -55,6 +55,10 @@ public static class QS
     public static int THREADS_PER_GROUP_X_REAL { get { return 32; } }
     public static int THREADS_PER_GROUP_Y_REAL { get { return 32; } }
 
+    public static int THREADGROUP_SIZE_X_UNIT { get { return 1; } }
+    public static int THREADGROUP_SIZE_Y_UNIT { get { return 1; } }
+    public static int THREADGROUP_SIZE_Z_UNIT { get { return 1; } }
+
     public static int THREADGROUP_SIZE_X { get { return nVertsPerEdge / THREADS_PER_GROUP_X; } }
     public static int THREADGROUP_SIZE_Y { get { return nVertsPerEdge / THREADS_PER_GROUP_Y; } }
     public static int THREADGROUP_SIZE_Z { get { return 1; } }

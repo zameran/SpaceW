@@ -72,7 +72,7 @@ public sealed class AtmosphereSun : MonoBehaviour
         if (mat == null) return;
 
         mat.SetFloat("_Sun_Intensity", SunIntensity);
-        mat.SetVector("_Sun_WorldSunDir_" + sunID, GetDirection());
-        mat.SetMatrix("_Sun_WorldToLocal_" + sunID, WorldToLocalRotation);
+        mat.SetVector(string.Format("_Sun_WorldSunDir_{0}", sunID), GetDirection());
+        mat.SetMatrix(string.Format("_Sun_WorldToLocal_{0}", sunID), WorldToLocalRotation);
     }
 }

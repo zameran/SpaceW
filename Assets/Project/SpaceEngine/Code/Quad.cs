@@ -94,12 +94,12 @@ public struct OutputStruct
 }
 
 [Serializable]
-public struct QuadOutputStruct
+public struct QuadCorners
 {
-    public Vector3 topLeftCorner;
-    public Vector3 topRightCorner;
-    public Vector3 bottomLeftCorner;
-    public Vector3 bottomRightCorner;
+    public Vector4 topLeftCorner;
+    public Vector4 topRightCorner;
+    public Vector4 bottomLeftCorner;
+    public Vector4 bottomRightCorner;
 }
 
 public sealed class Quad : MonoBehaviour
@@ -177,6 +177,7 @@ public sealed class Quad : MonoBehaviour
     public ComputeBuffer PreOutDataBuffer;
     public ComputeBuffer PreOutDataSubBuffer;
     public ComputeBuffer OutDataBuffer;
+    public ComputeBuffer QuadCornersBuffer;
 
     public RenderTexture HeightTexture;
     public RenderTexture NormalTexture;
@@ -197,6 +198,7 @@ public sealed class Quad : MonoBehaviour
     public bool Unsplitted = false;
     public bool Visible = false;
     public bool Cached = false;
+    public bool Uniformed = false;
 
     public float LODUpdateInterval = 0.25f;
     public float LastLODUpdateTime = 0.00f;
@@ -207,6 +209,8 @@ public sealed class Quad : MonoBehaviour
     public Vector3 topRightCorner;
     public Vector3 bottomLeftCorner;
     public Vector3 middleNormalized;
+
+    public QuadCorners quadCorners;
 
     public delegate void QuadDelegate(Quad q);
     public event QuadDelegate DispatchStarted, DispatchReady, GPUGetDataReady;
@@ -242,6 +246,7 @@ public sealed class Quad : MonoBehaviour
         PreOutDataBuffer = new ComputeBuffer(QS.nVertsReal, 64);
         PreOutDataSubBuffer = new ComputeBuffer(QS.nRealVertsSub, 64);
         OutDataBuffer = new ComputeBuffer(QS.nVerts, 64);
+        QuadCornersBuffer = new ComputeBuffer(1, 64);
 
         HeightTexture = RTExtensions.CreateRTexture(QS.nVertsPerEdgeSub, 0, RenderTextureFormat.ARGB32);
         NormalTexture = RTExtensions.CreateRTexture(QS.nVertsPerEdgeSub, 0, RenderTextureFormat.ARGB32);
@@ -265,7 +270,7 @@ public sealed class Quad : MonoBehaviour
 
     private void OnDestroy()
     {
-        BufferHelper.ReleaseAndDisposeBuffers(QuadGenerationConstantsBuffer, PreOutDataBuffer, PreOutDataSubBuffer, OutDataBuffer);
+        BufferHelper.ReleaseAndDisposeBuffers(QuadGenerationConstantsBuffer, PreOutDataBuffer, PreOutDataSubBuffer, OutDataBuffer, QuadCornersBuffer);
 
         if (HeightTexture != null)
             HeightTexture.ReleaseAndDestroy();
@@ -392,6 +397,11 @@ public sealed class Quad : MonoBehaviour
         QuadMaterial.SetVector("_Origin", Planetoid.Origin);
         QuadMaterial.renderQueue = Planetoid.RenderQueue;
         QuadMaterial.SetPass(0);
+
+        if (!Uniformed)
+        {
+            Uniformed = true;
+        }
 
         if (Generated && ShouldDraw)
         {
@@ -668,21 +678,25 @@ public sealed class Quad : MonoBehaviour
         OutputStruct[] preOutputStructData = new OutputStruct[QS.nVertsReal];
         OutputStruct[] preOutputSubStructData = new OutputStruct[QS.nRealVertsSub];
         OutputStruct[] outputStructData = new OutputStruct[QS.nVerts];
+        QuadCorners[] quadCorners = new QuadCorners[] { new QuadCorners() };
 
         QuadGenerationConstantsBuffer.SetData(quadGenerationConstantsData);
         PreOutDataBuffer.SetData(preOutputStructData);
         PreOutDataSubBuffer.SetData(preOutputSubStructData);
         OutDataBuffer.SetData(outputStructData);
+        QuadCornersBuffer.SetData(quadCorners);
 
         int kernel1 = CoreShader.FindKernel("HeightMain");
         int kernel2 = CoreShader.FindKernel("Transfer");
         int kernel3 = CoreShader.FindKernel("HeightSub");
         int kernel4 = CoreShader.FindKernel("TexturesSub");
+        int kernel5 = CoreShader.FindKernel("GetCorners");
 
-        SetupComputeShaderKernelUniforfms(kernel1, QuadGenerationConstantsBuffer, PreOutDataBuffer, PreOutDataSubBuffer, OutDataBuffer);
-        SetupComputeShaderKernelUniforfms(kernel2, QuadGenerationConstantsBuffer, PreOutDataBuffer, PreOutDataSubBuffer, OutDataBuffer);
-        SetupComputeShaderKernelUniforfms(kernel3, QuadGenerationConstantsBuffer, PreOutDataBuffer, PreOutDataSubBuffer, OutDataBuffer);
-        SetupComputeShaderKernelUniforfms(kernel4, QuadGenerationConstantsBuffer, PreOutDataBuffer, PreOutDataSubBuffer, OutDataBuffer);
+        SetupComputeShaderKernelUniforfms(kernel1, QuadGenerationConstantsBuffer, PreOutDataBuffer, PreOutDataSubBuffer, OutDataBuffer, QuadCornersBuffer);
+        SetupComputeShaderKernelUniforfms(kernel2, QuadGenerationConstantsBuffer, PreOutDataBuffer, PreOutDataSubBuffer, OutDataBuffer, QuadCornersBuffer);
+        SetupComputeShaderKernelUniforfms(kernel3, QuadGenerationConstantsBuffer, PreOutDataBuffer, PreOutDataSubBuffer, OutDataBuffer, QuadCornersBuffer);
+        SetupComputeShaderKernelUniforfms(kernel4, QuadGenerationConstantsBuffer, PreOutDataBuffer, PreOutDataSubBuffer, OutDataBuffer, QuadCornersBuffer);
+        SetupComputeShaderKernelUniforfms(kernel5, QuadGenerationConstantsBuffer, PreOutDataBuffer, PreOutDataSubBuffer, OutDataBuffer, QuadCornersBuffer);
 
         CoreShader.Dispatch(kernel1,
         QS.THREADGROUP_SIZE_X_REAL,
@@ -703,6 +717,17 @@ public sealed class Quad : MonoBehaviour
         QS.THREADGROUP_SIZE_X_SUB,
         QS.THREADGROUP_SIZE_Y_SUB,
         QS.THREADGROUP_SIZE_Z_SUB);
+
+        CoreShader.Dispatch(kernel5,
+        QS.THREADGROUP_SIZE_X_UNIT,
+        QS.THREADGROUP_SIZE_Y_UNIT,
+        QS.THREADGROUP_SIZE_Z_UNIT);
+
+        if (Planetoid.GetData)
+        {
+            QuadCornersBuffer.GetData(quadCorners);
+            this.quadCorners = quadCorners[0];
+        }
 
         Generated = true;
 
@@ -727,7 +752,7 @@ public sealed class Quad : MonoBehaviour
             Planetoid.transform.GetComponentInChildren<TCCommonParametersSetter>().UpdateUniforms(CoreShader);
     }
 
-    private void SetupComputeShaderKernelUniforfms(int kernel, ComputeBuffer QuadGenerationConstantsBuffer, ComputeBuffer PreOutDataBuffer, ComputeBuffer PreOutDataSubBuffer, ComputeBuffer OutDataBuffer)
+    private void SetupComputeShaderKernelUniforfms(int kernel, ComputeBuffer QuadGenerationConstantsBuffer, ComputeBuffer PreOutDataBuffer, ComputeBuffer PreOutDataSubBuffer, ComputeBuffer OutDataBuffer, ComputeBuffer QuadCornersBuffer)
     {
         if (CoreShader == null) return;
 
@@ -735,6 +760,7 @@ public sealed class Quad : MonoBehaviour
         CoreShader.SetBuffer(kernel, "patchPreOutput", PreOutDataBuffer);
         CoreShader.SetBuffer(kernel, "patchPreOutputSub", PreOutDataSubBuffer);
         CoreShader.SetBuffer(kernel, "patchOutput", OutDataBuffer);
+        CoreShader.SetBuffer(kernel, "quadCorners", QuadCornersBuffer);
 
         CoreShader.SetTexture(kernel, "Height", HeightTexture);
         CoreShader.SetTexture(kernel, "Normal", NormalTexture);

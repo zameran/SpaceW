@@ -54,6 +54,14 @@ struct OutputStruct
 	float4 pos;
 	float4 cpos;
 };
+
+struct QuadCorners
+{
+	float4 topLeftCorner;
+	float4 topRightCorner;
+	float4 bottomLeftCorner;
+	float4 bottomRightCorner;
+};
 //-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------

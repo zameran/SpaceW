@@ -48,6 +48,8 @@ public sealed class Planetoid : MonoBehaviour
     public bool DrawWireframe = false;
     public bool DrawNormals = false;
 
+    public bool GetData = false;
+
     public bool Working = false;
 
     public Transform LODTarget = null;
