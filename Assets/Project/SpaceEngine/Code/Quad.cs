@@ -314,7 +314,24 @@ public sealed class Quad : MonoBehaviour
 
     private void OnDrawGizmos()
     {
+        bool DrawGizmos = false;
 
+        if (DrawGizmos)
+        {
+            Gizmos.color = Color.red;
+
+            Gizmos.DrawWireSphere(Planetoid.transform.TransformPoint(topLeftCorner), 10000);
+            Gizmos.DrawWireSphere(Planetoid.transform.TransformPoint(topRightCorner), 10000);
+            Gizmos.DrawWireSphere(Planetoid.transform.TransformPoint(bottomLeftCorner), 10000);
+            Gizmos.DrawWireSphere(Planetoid.transform.TransformPoint(bottomRightCorner), 10000);
+
+            Gizmos.color = Color.green;
+
+            Gizmos.DrawWireSphere(Planetoid.transform.TransformPoint(topLeftCorner.NormalizeToRadius(Planetoid.PlanetRadius)), 15000);
+            Gizmos.DrawWireSphere(Planetoid.transform.TransformPoint(topRightCorner.NormalizeToRadius(Planetoid.PlanetRadius)), 15000);
+            Gizmos.DrawWireSphere(Planetoid.transform.TransformPoint(bottomLeftCorner.NormalizeToRadius(Planetoid.PlanetRadius)), 15000);
+            Gizmos.DrawWireSphere(Planetoid.transform.TransformPoint(bottomRightCorner.NormalizeToRadius(Planetoid.PlanetRadius)), 15000);
+        }
     }
 
     public void CheckLOD()
@@ -520,7 +537,7 @@ public sealed class Quad : MonoBehaviour
 
         for (int i = 0; i < planes.Length; i++)
         {
-            if (planes[i].GetDistanceToPoint(transform.TransformPoint(border)) < (useOffset ? 0 - offset : 0))
+            if (planes[i].GetDistanceToPoint(Planetoid.transform.TransformPoint(border)) < (useOffset ? 0 - offset : 0))
             {
                 return false;
             }
@@ -887,11 +904,11 @@ public sealed class Quad : MonoBehaviour
 
         Vector3 closestCorner = new Vector3(Mathf.Infinity, Mathf.Infinity, Mathf.Infinity);
 
-        Vector3 tl = transform.TransformPoint(topLeftCorner.NormalizeToRadius(Planetoid.PlanetRadius));
-        Vector3 tr = transform.TransformPoint(topRightCorner.NormalizeToRadius(Planetoid.PlanetRadius));
-        Vector3 middlePoint = transform.TransformPoint(middleNormalized);
-        Vector3 bl = transform.TransformPoint(bottomLeftCorner.NormalizeToRadius(Planetoid.PlanetRadius));
-        Vector3 br = transform.TransformPoint(bottomRightCorner.NormalizeToRadius(Planetoid.PlanetRadius));
+        Vector3 tl = Planetoid.transform.TransformPoint(topLeftCorner.NormalizeToRadius(Planetoid.PlanetRadius));
+        Vector3 tr = Planetoid.transform.TransformPoint(topRightCorner.NormalizeToRadius(Planetoid.PlanetRadius));
+        Vector3 middlePoint = Planetoid.transform.TransformPoint(middleNormalized);
+        Vector3 bl = Planetoid.transform.TransformPoint(bottomLeftCorner.NormalizeToRadius(Planetoid.PlanetRadius));
+        Vector3 br = Planetoid.transform.TransformPoint(bottomRightCorner.NormalizeToRadius(Planetoid.PlanetRadius));
 
         float d = Vector3.Distance(Planetoid.LODTarget.position, tl);
 
@@ -943,11 +960,11 @@ public sealed class Quad : MonoBehaviour
     {
         float closestDistance = Mathf.Infinity;
 
-        Vector3 tl = topLeftCorner.NormalizeToRadius(Planetoid.PlanetRadius);
-        Vector3 tr = topRightCorner.NormalizeToRadius(Planetoid.PlanetRadius);
-        Vector3 middlePoint = middleNormalized;
-        Vector3 bl = bottomLeftCorner.NormalizeToRadius(Planetoid.PlanetRadius);
-        Vector3 br = bottomRightCorner.NormalizeToRadius(Planetoid.PlanetRadius);
+        Vector3 tl = Planetoid.transform.TransformPoint(topLeftCorner.NormalizeToRadius(Planetoid.PlanetRadius));
+        Vector3 tr = Planetoid.transform.TransformPoint(topRightCorner.NormalizeToRadius(Planetoid.PlanetRadius));
+        Vector3 middlePoint = Planetoid.transform.TransformPoint(middleNormalized);
+        Vector3 bl = Planetoid.transform.TransformPoint(bottomLeftCorner.NormalizeToRadius(Planetoid.PlanetRadius));
+        Vector3 br = Planetoid.transform.TransformPoint(bottomRightCorner.NormalizeToRadius(Planetoid.PlanetRadius));
 
         float d = Vector3.Distance(Planetoid.LODTarget.position, tl);
 
@@ -1194,52 +1211,6 @@ public sealed class Quad : MonoBehaviour
         BrainFuckMath.UnlockAxis(ref middle, ref tempStatic, staticX, staticY, staticZ);
 
         return middle;
-    }
-
-    [Obsolete]
-    public Matrix4x4d GetLocalToWorld(Quad q)
-    {
-        Matrix4x4d m_faceToLocal;
-
-        Vector3d[] faces = new Vector3d[]{  new Vector3d(0,0,0), new Vector3d(90,0,0), new Vector3d(90,90,0),
-                                            new Vector3d(90,180,0), new Vector3d(90,270,0), new Vector3d(0,180,180)};
-
-        m_faceToLocal = Matrix4x4d.Identity();
-        m_faceToLocal = Matrix4x4d.Rotate(faces[(int)q.Position]);
-
-        return m_faceToLocal;
-    }
-
-    [Obsolete]
-    public Matrix4x4 GetTangentFrame(Quad q)
-    {
-        double R = q.generationConstants.planetRadius;
-
-        double ox = q.bottomLeftCorner.x;
-        double oy = q.bottomLeftCorner.y;
-        double l = Vector3.Magnitude(q.topLeftCorner + q.bottomRightCorner);
-
-        Vector3d p0 = new Vector3d(ox, oy, R);
-        Vector3d p3 = new Vector3d(ox + l, oy + l, R);
-        Vector3d pc = (p0 + p3) * 0.5;
-
-        Vector3d uz = pc.Normalized();
-        Vector3d ux = (new Vector3d(0, 1, 0)).Cross(uz).Normalized();
-        Vector3d uy = uz.Cross(ux);
-
-        Matrix4x4d ltow = q.GetLocalToWorld(q);
-
-        Matrix3x3d tangentFrameToWorld = new Matrix3x3d(ltow.m[0, 0], ltow.m[0, 1], ltow.m[0, 2],
-                                                        ltow.m[1, 0], ltow.m[1, 1], ltow.m[1, 2],
-                                                        ltow.m[2, 0], ltow.m[2, 1], ltow.m[2, 2]);
-
-        Matrix3x3d m = new Matrix3x3d(ux.x, uy.x, uz.x,
-                                      ux.y, uy.y, uz.y,
-                                      ux.z, uy.z, uz.z);
-
-        Matrix3x3d output = tangentFrameToWorld * m;
-
-        return output.ToMatrix4x4();
     }
 
     private void Log(string msg)

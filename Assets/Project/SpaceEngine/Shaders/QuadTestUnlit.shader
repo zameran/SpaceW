@@ -117,12 +117,6 @@
 									   Rotate(_Rotation.z, float3(0, 0, 1), originalNormal)));	
 
 				n = normalize(rotatedPoint + rotatedNormal); //So. Good variant, but without normal bumping.
-
-				//n.xz = n.xz;
-				//n.y = sqrt(max(0.0, 1.0 - dot(n.xz, n.xz)));
-
-				//n = mul(_Object2World, n);
-				
 				//n = normalize(n + WSD); //use this for normal light intens. but disabled normals.
 
 				//n.xy = n.xy; // - default.
@@ -137,19 +131,24 @@
 
 				float3 sunL = 0;
 				float3 skyE = 0;
+				float3 extinction = 0;
+
+				float extinctionGroundFade = 0;
+				float cTheta = dot(n, WSD);
 
 				SunRadianceAndSkyIrradiance(rotatedPoint, n, WSD, sunL, skyE);
-				float extinctionGroundFade = 0;
-				float cTheta = dot(n, WSD); // diffuse ground color
-				float4 eclipse = float4(ApplyEclipse(WCP, mul(_Object2World, rotatedPoint) - WCP, _Globals_Origin), 1.0);
-				float3 groundColor = 1.5 * reflectance.rgb * (sunL * max(cTheta, 0) + skyE) / M_PI;
-				float3 extinction;
+
+				float4 eclipse = float4(ApplyEclipse(WCP, WCP - rotatedPoint, _Globals_Origin), 1.0);
 				float4 inscatter = InScattering(WCP, rotatedPoint, WSD, extinction, 1.0);
+
+				float3 groundColor = 1.5 * reflectance.rgb * (sunL * max(cTheta, 0) + skyE) / M_PI;
+
 				extinction *= eclipse;
 				extinction = float3(1.0, 1.0, 1.0) * extinctionGroundFade + (1 - extinctionGroundFade) * extinction;
+
 				float4 finalColor = float4(groundColor, 1) * float4(extinction, 1) + inscatter * eclipse;
 				
-				return finalColor;//float4(hdr(finalColor.xyz), finalColor.w);
+				return finalColor;
 			}
 	
 			v2fg vert (in appdata_full_compute v)
@@ -167,16 +166,6 @@
 				v.vertex = position;
 				v.tangent = float4(FindTangent(normal, 0.01, float3(0, 1, 0)), 1);
 				v.normal = normal;
-
-				//v.tangent.xyz += position.xyz;
-				//v.normal.xyz += position.xyz;
-
-				//v.tangent.xyz = mul(UNITY_MATRIX_MVP, position.xyz);
-				//v.normal.xyz = mul(UNITY_MATRIX_MVP, position.xyz);
-
-				//TANGENT_SPACE_ROTATION;
-				//v.tangent.xyz = mul(v.tangent.xyz, rotation);
-				//v.normal.xyz = mul(v.normal.xyz, rotation);
 
 				float4 terrainColor = tex2Dlod(_HeightTexture, v.texcoord);
 				float4 scatteringColor = float4(0, 0, 0, 0);
@@ -290,7 +279,7 @@
 				}
 			}
 
-			void frag(v2fg IN, out float4 outDiffuse : COLOR0, out float4 outNormal : COLOR1)
+			void frag(v2fg IN, out float4 outDiffuse : COLOR0)
 			{		
 				QuadGenerationConstants constants = quadGenerationConstants[0];
 
@@ -302,11 +291,10 @@
 				fixed4 outputColor = lerp(terrainColor, wireframeColor, _Wireframe);
 
 				fixed3 terrainWorldNormal = IN.normal0;
-				fixed3 terrainLocalNormal = CalculateSurfaceNormal_HeightMap(IN.vertex0, IN.vertex1, IN.terrainColor.a);
+				fixed3 terrainLocalNormal = CalculateSurfaceNormal_HeightMap(IN.vertex1, IN.normal0, IN.terrainColor.a);
 				fixed4 outputNormal = fixed4(terrainWorldNormal, 1); //fixed4(terrainWorldNormal * terrainLocalNormal, 1);
 
 				outDiffuse = lerp(outputColor, outputNormal, _Normale);
-				outNormal = outputNormal;	
 			}
 			ENDCG
 		}
