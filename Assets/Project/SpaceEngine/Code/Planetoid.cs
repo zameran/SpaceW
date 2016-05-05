@@ -167,6 +167,14 @@ public sealed class Planetoid : MonoBehaviour
             if (Atmosphere != null) Atmosphere.TryBake();
         }
 
+        if (Input.GetKeyDown(KeyCode.F4))
+        {
+            if (Atmosphere != null)
+            {
+                Atmosphere.ReanimateAtmosphereUniforms(Atmosphere, this);
+            }
+        }
+
         CheckCutoff();
 
         Origin = transform.position;
@@ -198,6 +206,17 @@ public sealed class Planetoid : MonoBehaviour
         if (ExternalRendering && !RenderPerUpdate)
         {
             Render();
+        }
+    }
+
+    private void OnApplicationFocus(bool focusStatus)
+    {
+        if (focusStatus == true)
+        {
+            if (Atmosphere != null)
+            {
+                Atmosphere.ReanimateAtmosphereUniforms(Atmosphere, this);
+            }
         }
     }
 

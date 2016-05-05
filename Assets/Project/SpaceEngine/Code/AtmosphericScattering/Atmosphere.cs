@@ -90,30 +90,30 @@ public sealed class Atmosphere : MonoBehaviour
 
     public void SetEclipses(Material mat)
     {
-        Matrix4x4 castersMatrix1 = Matrix4x4.zero;
-        Matrix4x4 castersMatrix2 = Matrix4x4.zero;
+        Matrix4x4 OccludersMatrix1 = Matrix4x4.zero;
+        Matrix4x4 OccludersMatrix2 = Matrix4x4.zero;
 
-        Vector4 casterPosRelPlanet = Vector4.zero;
-        Vector4 sunPosRelPlanet = Vector4.zero;
+        Vector4 OccluderPlanetPos = Vector4.zero;
+        Vector4 SunPosition = Vector4.zero;
 
-        sunPosRelPlanet = Sun_1.transform.position;
-        sunPosRelPlanet.w = 250000;
+        SunPosition = Sun_1.transform.position;
+        SunPosition.w = 250000;
 
         for (int i = 0; i < Mathf.Min(4, eclipseCasters.Count); i++)
         {
-            casterPosRelPlanet = eclipseCasters[i].transform.position;
-            castersMatrix1.SetRow(i, new Vector4(casterPosRelPlanet.x, casterPosRelPlanet.y, casterPosRelPlanet.z, 250000));
+            OccluderPlanetPos = eclipseCasters[i].transform.position;
+            OccludersMatrix1.SetRow(i, new Vector4(OccluderPlanetPos.x, OccluderPlanetPos.y, OccluderPlanetPos.z, 250000));
         }
 
         for (int i = 4; i < Mathf.Min(8, eclipseCasters.Count); i++)
         {
-            casterPosRelPlanet = eclipseCasters[i].transform.position;
-            castersMatrix2.SetRow(i - 4, new Vector4(casterPosRelPlanet.x, casterPosRelPlanet.y, casterPosRelPlanet.z, 250000));
+            OccluderPlanetPos = eclipseCasters[i].transform.position;
+            OccludersMatrix2.SetRow(i - 4, new Vector4(OccluderPlanetPos.x, OccluderPlanetPos.y, OccluderPlanetPos.z, 250000));
         }
 
-        mat.SetVector("sunPosAndRadius", sunPosRelPlanet);
-        mat.SetMatrix("lightOccluders1", castersMatrix1);
-        mat.SetMatrix("lightOccluders2", castersMatrix2);
+        mat.SetVector("_Sun_WorldSunPosRadius", SunPosition);
+        mat.SetMatrix("_Sky_LightOccluders_1", OccludersMatrix1);
+        mat.SetMatrix("_Sky_LightOccluders_2", OccludersMatrix2);
     }
 
     public bool ArraysEqual<T>(T[] a, List<T> b)
@@ -141,10 +141,6 @@ public sealed class Atmosphere : MonoBehaviour
 
     public void UpdateNode()
     {
-        //Rg = AtmosphereScale;
-        //Rt = (64200f / 63600f) * Rg * AtmosphereHeight;
-        //Rl = (64210.0f / 63600f) * Rg;   
-
         if (Sun_1 != null) Sun_1.Origin = Origin;
         if (Sun_2 != null) Sun_2.Origin = Origin;
     }
@@ -237,9 +233,7 @@ public sealed class Atmosphere : MonoBehaviour
 
     public void InitMisc()
     {
-        //Rg = AtmosphereScale;
-        //Rt = (64200f / 63600f) * Rg * AtmosphereHeight;
-        //Rl = (64210.0f / 63600f) * Rg;
+
     }
 
     public void InitSuns()
@@ -300,6 +294,24 @@ public sealed class Atmosphere : MonoBehaviour
                     planetoid.Atmosphere.SetUniformsForPlanetQuad(q.QuadMaterial);
             }
         }
+    }
+
+    public void InitSetAtmosphereUniforms()
+    {
+        InitUniforms(SkyMaterial);
+        SetUniforms(SkyMaterial);
+    }
+
+    public void ReanimateAtmosphereUniforms(Atmosphere atmosphere, Planetoid planetoid)
+    {
+        if (atmosphere != null && planetoid != null)
+        {
+            atmosphere.InitPlanetoidUniforms(planetoid);
+            atmosphere.SetPlanetoidUniforms(planetoid);
+            atmosphere.InitSetAtmosphereUniforms();
+        }
+        else
+            Debug.Log("Atmosphere: Reanimation fail!");
     }
 
     public void SetUniforms(Material mat)

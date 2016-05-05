@@ -121,7 +121,7 @@ Shader "Proland/Atmo/SkyMap"
 				float3 r = float3(2.0 * u, 1.0 - l) / (1.0 + l);
 				
 				float3 earthPos = float3(0, 0, Rg);
-				float3 L = _Sun_WorldSunDir;
+				float3 L = _Sun_WorldSunDir_1;
 				
 				float3 extinction;
 				float3 inscatter = SkyRadiance(earthPos, r, L, extinction, 1.0);
