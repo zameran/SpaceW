@@ -266,6 +266,8 @@ const float pi2 = 6.28318531;
 #define     GetGasGiantCloudsColor(height)   tex2Dlod(MaterialTable, float4(height, 0.0, 0.0, 0.0))
 //-----------------------------------------------------------------------------
 
+//TODO: LODOM for all planettypes/planet height functions.
+
 //-----------------------------------------------------------------------------
 inline float SavePow(float f, float p) 
 { 
