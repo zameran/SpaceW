@@ -37,6 +37,7 @@ struct QuadGenerationConstants
 	float spacingsub;
 	float terrainMaxHeight;
 	float lodLevel;
+	float lodOctaveModifier;
 	float orientation;
 
 	float3 cubeFaceEastDirection;

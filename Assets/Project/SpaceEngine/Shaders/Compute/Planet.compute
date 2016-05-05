@@ -55,7 +55,7 @@ float3 ScaledCoordinate(float3 coord)
 	return 0.00005 * coord;
 }
 
-float NoiseFunction(float3 coord)
+float NoiseFunction(float3 coord, float lodom)
 {
 	float3 scaledCoord = ScaledCoordinate(coord);
 	
@@ -64,7 +64,7 @@ float NoiseFunction(float3 coord)
 	#else
 	//float noise = HeightMapAsteroid(scaledCoord);
 	//float noise = HeightMapTerra(scaledCoord);
-	float noise = HeightMapPlanet(scaledCoord);
+	float noise = HeightMapPlanet(scaledCoord, lodom);
 	//float noise = HeightMapCloudsGasGiant(scaledCoord);
 	#endif
 
@@ -181,7 +181,7 @@ void HeightMain (uint3 id : SV_DispatchThreadID)
 	float3 patchCubeCoordCentered = patchNormalizedCoord;
 	float3 patchCubeCoordCenteredFlat = patchNormalizedCoord;
 
-	float noise = NoiseFunction(patchCoord);
+	float noise = NoiseFunction(patchCoord, constants.lodOctaveModifier);
 
 	float height = noise * constants.terrainMaxHeight;
 
@@ -217,7 +217,7 @@ void HeightSub(uint3 id : SV_DispatchThreadID)
 	float3 patchCubeCoordCentered = patchNormalizedCoord;
 	float3 patchCubeCoordCenteredFlat = patchNormalizedCoord;
 	
-	float noise = NoiseFunction(patchCoord);
+	float noise = NoiseFunction(patchCoord, constants.lodOctaveModifier);
 
 	float height = noise * constants.terrainMaxHeight;
 

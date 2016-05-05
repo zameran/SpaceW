@@ -48,6 +48,7 @@ public struct QuadGenerationConstants
     public float spacingsub;
     public float terrainMaxHeight; //4
     public float LODLevel; //4
+    public float LODOctaveModifier;
     public float orientation;
 
     public Vector3 cubeFaceEastDirection; //12
@@ -242,7 +243,7 @@ public sealed class Quad : MonoBehaviour
 
     private void Awake()
     {
-        QuadGenerationConstantsBuffer = new ComputeBuffer(1, 64);
+        QuadGenerationConstantsBuffer = new ComputeBuffer(1, 68);
         PreOutDataBuffer = new ComputeBuffer(QS.nVertsReal, 64);
         PreOutDataSubBuffer = new ComputeBuffer(QS.nRealVertsSub, 64);
         OutDataBuffer = new ComputeBuffer(QS.nVerts, 64);
@@ -698,6 +699,7 @@ public sealed class Quad : MonoBehaviour
             DispatchStarted(this);
 
         generationConstants.LODLevel = (((1 << LODLevel + 2) * (Planetoid.PlanetRadius / (LODLevel + 2)) - ((Planetoid.PlanetRadius / (LODLevel + 2)) / 2)) / Planetoid.PlanetRadius);
+        generationConstants.LODOctaveModifier = Planetoid.GetLODOctaveModifier(LODLevel + 1);
         generationConstants.orientation = (float)Position;
 
         SetupComputeShaderUniforms();

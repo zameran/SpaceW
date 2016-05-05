@@ -73,8 +73,9 @@ public sealed class Planetoid : MonoBehaviour
 
     public float LODDistanceMultiplier = 1;
 
-    public int LODMaxLevel = 8;
-    public int[] LODDistances = new int[11] { 2048, 1024, 512, 256, 128, 64, 32, 16, 8, 4, 2 };
+    public int LODMaxLevel = 12;
+    public int[] LODDistances = new int[13] { 2048, 1024, 512, 256, 128, 64, 32, 16, 8, 4, 2, 1, 0 };
+    public float[] LODOctaves = new float[6] { 0.5f, 0.5f, 0.5f, 0.75f, 0.75f, 1.0f };
 
     public Mesh PrototypeMesh;
 
@@ -267,6 +268,18 @@ public sealed class Planetoid : MonoBehaviour
                 LODDistances[i] = LODDistances[i - 1] / 2;
             }
         }
+    }
+
+    public float GetLODOctaveModifier(int LODLevel, bool invert = false)
+    {
+        int id = invert ?
+            (LODDistances.Length / (LODLevel + 1 + ((LODDistances.Length - LODOctaves.Length) / LODOctaves.Length))) :
+            LODOctaves.Length - (LODDistances.Length / (LODLevel + 1 + ((LODDistances.Length - LODOctaves.Length) / LODOctaves.Length)));
+
+        if (LODOctaves != null && LODOctaves.Length > 1 && !(id > LODOctaves.Length))
+            return LODOctaves[id];
+        else
+            return 1.0f;
     }
 
     public int GetCulledQuadsCount()
