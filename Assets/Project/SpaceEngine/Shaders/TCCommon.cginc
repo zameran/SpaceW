@@ -934,7 +934,7 @@ void FAST32_hash_3D(float3 gridcell, out float4 lowz_hash_0, out float4 lowz_has
 	//generates 3 random numbers for each of the 8 cell corners
 	//gridcell is assumed to be an integer coordinate
 
-	//TODO:these constants need tweaked to find the best possible noise.
+	//TODO: these constants need tweaked to find the best possible noise.
 	//probably requires some kind of brute force computational searching or something....
 	const float2 OFFSET = float2(50.0, 161.0);
 	const float DOMAIN = 69.0;
@@ -3191,7 +3191,7 @@ float4 CycloneNoise(float3 ppoint, float o)
 //-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
-//TODO Fix dat.
+//TODO: Fix dat.
 float HeightMapClouds(float3 ppoint)
 {
 	float zone = cos(ppoint.y * twistZones);

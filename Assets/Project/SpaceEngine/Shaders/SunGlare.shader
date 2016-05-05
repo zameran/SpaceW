@@ -88,7 +88,7 @@
 							  float2(aspectRatio * ghost2Settings[j].y, 1.0) * ghost2Settings[j].z + 0.5).rgb);
 				}
 				
-				float3 extinction = 1; //TODO Inside atmosphere coloring.
+				float3 extinction = 1; //TODO: Inside atmosphere glare coloring.
 
 				ghosts *= smoothstep(0.0, 1.0, 1.0 - length(toScreenCenter));		
 				sunColor += ghosts;		

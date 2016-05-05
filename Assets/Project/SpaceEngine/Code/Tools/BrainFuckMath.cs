@@ -66,7 +66,7 @@ public static class BrainFuckMath
 
     public static void CalculatePatchCubeCenter(int lodLevel, Vector3 patchCubeCenter, ref Vector3 temp)
     {
-        //TODO : Make a formula!
+        //TODO: Make a formula!
         //So. We have exponential modifier... WTF!?
         //Fuck dat shit. 7 LOD level more than i need. fuck. dat.
 

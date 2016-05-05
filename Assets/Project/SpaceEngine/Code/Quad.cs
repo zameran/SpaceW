@@ -386,6 +386,12 @@ public sealed class Quad : MonoBehaviour
         }
     }
 
+    public Matrix4x4 GetFrame()
+    {
+        //TODO: Rotate normals towards sun.
+        return Matrix4x4d.Identity().ToMatrix4x4();
+    }
+
     public void Render()
     {
         if (ReadyForDispatch)
@@ -410,6 +416,7 @@ public sealed class Quad : MonoBehaviour
         QuadMaterial.SetFloat("_Side", (float)Position);
         QuadMaterial.SetVector("_Rotation", new Vector3(Planetoid.QuadsRoot.transform.rotation.eulerAngles.x, Planetoid.QuadsRoot.transform.rotation.eulerAngles.y, Planetoid.QuadsRoot.transform.rotation.eulerAngles.z) * Mathf.Deg2Rad);
         QuadMaterial.SetVector("_Origin", Planetoid.Origin);
+        QuadMaterial.SetMatrix("_TTW", GetFrame());
         QuadMaterial.renderQueue = Planetoid.RenderQueue;
         QuadMaterial.SetPass(0);
 

@@ -84,6 +84,8 @@
 			uniform float4x4 _Globals_ScreenToCamera;
 			uniform float3 _Globals_Origin;
 
+			uniform float4x4 _TTW;
+
 			uniform StructuredBuffer<OutputStruct> data;
 			uniform StructuredBuffer<QuadGenerationConstants> quadGenerationConstants;
 
@@ -115,7 +117,7 @@
 				float3 rotatedNormal = Rotate(_Rotation.x, float3(1, 0, 0), 
 									   Rotate(_Rotation.y, float3(0, 1, 0), 
 									   Rotate(_Rotation.z, float3(0, 0, 1), originalNormal)));	
-
+			
 				n = normalize(rotatedPoint + rotatedNormal); //So. Good variant, but without normal bumping.
 				//n = normalize(n + WSD); //use this for normal light intens. but disabled normals.
 
@@ -126,6 +128,8 @@
 				//n.z = sqrt(max(0.0, -1.0 + dot(n.xy, n.xy))); // - inverted.
 
 				//n = float3(0, 0, 0); //disable normal mapping... bruuuutaal!
+
+				//n = mul(_TTW, n);
 
 				float4 reflectance = RGB2Reflectance(terrainColor);
 
@@ -289,6 +293,8 @@
 				float4 terrainColor = IN.scatterColor;
 				fixed4 wireframeColor = lerp(terrainColor, _WireframeColor, I);
 				fixed4 outputColor = lerp(terrainColor, wireframeColor, _Wireframe);
+
+				IN.normal0 = mul(_TTW, IN.normal0);
 
 				fixed3 terrainWorldNormal = IN.normal0;
 				fixed3 terrainLocalNormal = CalculateSurfaceNormal_HeightMap(IN.vertex1, IN.normal0, IN.terrainColor.a);

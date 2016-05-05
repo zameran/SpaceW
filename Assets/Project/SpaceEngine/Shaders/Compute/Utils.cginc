@@ -96,7 +96,7 @@ float3 CubeCoord(QuadGenerationConstants constants, float VerticesPerSide, uint3
 	//512 : 41;   x = 32; y = 512;  z4 = y / x + z3 + 8; = 41
 	//1024 : 105; x = 32; y = 1024; z5 = y / x + z4 + 32; = 105
 
-	//TODO modifier calculation.
+	//TODO: modifier calculation.
 
 	float eastValue = (id.x - ((VerticesPerSide - mod) * 0.5)) * spacing;
 	float northValue = (id.y - ((VerticesPerSide - mod) * 0.5)) * spacing;
