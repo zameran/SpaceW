@@ -57,7 +57,6 @@ public sealed class Atmosphere : MonoBehaviour
         SetUniforms(SkyMaterial);
     }
 
-    [ContextMenu("TryBake")]
     public void TryBake()
     {
         if (RunTimeBaking && artb != null) artb.Bake(atmosphereParameters);

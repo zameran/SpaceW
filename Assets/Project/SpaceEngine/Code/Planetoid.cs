@@ -52,6 +52,7 @@ public sealed class Planetoid : MonoBehaviour
     public bool DrawNormals = false;
     public bool DrawGizmos = false;
 
+    public bool OctaveFade = false;
     public bool GetData = false;
 
     public bool Working = false;
@@ -281,14 +282,21 @@ public sealed class Planetoid : MonoBehaviour
 
     public float GetLODOctaveModifier(int LODLevel, bool invert = false)
     {
-        int id = invert ?
-            (LODDistances.Length / (LODLevel + 1 + ((LODDistances.Length - LODOctaves.Length) / LODOctaves.Length))) :
-            LODOctaves.Length - (LODDistances.Length / (LODLevel + 1 + ((LODDistances.Length - LODOctaves.Length) / LODOctaves.Length)));
+        if (OctaveFade)
+        {
+            int id = invert ?
+                (LODDistances.Length / (LODLevel + 1 + ((LODDistances.Length - LODOctaves.Length) / LODOctaves.Length))) :
+                LODOctaves.Length - (LODDistances.Length / (LODLevel + 1 + ((LODDistances.Length - LODOctaves.Length) / LODOctaves.Length)));
 
-        if (LODOctaves != null && LODOctaves.Length > 1 && !(id > LODOctaves.Length))
-            return LODOctaves[id];
+            if (LODOctaves != null && LODOctaves.Length > 1 && !(id > LODOctaves.Length))
+                return LODOctaves[id];
+            else
+                return 1.0f;
+        }
         else
+        {
             return 1.0f;
+        }
     }
 
     public int GetCulledQuadsCount()

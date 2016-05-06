@@ -36,7 +36,11 @@ public sealed class TCCommonParametersSetter : MonoBehaviour
 {
     public Planetoid Planet;
 
-    public float Jitter;
+    public float Lacunarity = 2.218281828459f;
+    public float H = 0.5f;
+    public float Offset = 0.8f;
+    public float RidgeSmooth = 0.0001f;
+
     public float texturingHeightOffset;
     public float texturingSlopeOffset;
 
@@ -103,7 +107,11 @@ public sealed class TCCommonParametersSetter : MonoBehaviour
     {
         if (shader == null) return;
 
-        shader.SetFloat("jitter", Jitter);
+        shader.SetFloat("noiseLacunarity", Lacunarity);
+        shader.SetFloat("noiseH", H);
+        shader.SetFloat("noiseOffset", Offset);
+        shader.SetFloat("noiseRidgeSmooth", RidgeSmooth);
+
         shader.SetFloat("texturingHeightOffset", texturingHeightOffset);
         shader.SetFloat("texturingSlopeOffset", texturingSlopeOffset);
 

@@ -36,7 +36,7 @@ using UnityEditor;
 [CustomEditor(typeof(TCCommonParametersSetter))]
 public sealed class TCCommonParametersSetterEditor : Editor
 {
-    public enum Tab
+    private enum Tab
     {
         Main, Noise, Texturing, Clouds, Nature, Montes, Dunes, Hills, Canyons, Rivers, Cracks, Craters, Radials, Volcanoes, Mare, Venus
     }
@@ -65,7 +65,11 @@ public sealed class TCCommonParametersSetterEditor : Editor
 
     private void DrawGUIForNoise(TCCommonParametersSetter setter)
     {
-        setter.Jitter = EditorGUILayout.Slider("jitter ", setter.Jitter, -1000.0f, 1000.0f);
+        setter.Lacunarity = EditorGUILayout.Slider("Lacunarity ", setter.Lacunarity, 0.25f, 8.0f);
+        setter.H = EditorGUILayout.Slider("H ", setter.H, 0.0f, 1.0f);
+        setter.Offset = EditorGUILayout.Slider("Offset ", setter.Offset, 0.0f, 1.0f);
+        setter.RidgeSmooth = EditorGUILayout.Slider("Ridge Smooth ", setter.RidgeSmooth, 0.0000001f, 0.01f);
+        EditorGUILayout.Separator();
 
         setter.scaleParams.w = EditorGUILayout.Slider("tidalLock ", setter.scaleParams.w, -1.0f, 1.0f);
 
@@ -266,7 +270,7 @@ public sealed class TCCommonParametersSetterEditor : Editor
         EditorGUILayout.EndVertical();
         EditorGUILayout.Space();
 
-        switch(currentTab)
+        switch (currentTab)
         {
             case Tab.Main:
                 DrawGUIForMain(setter);
@@ -318,7 +322,7 @@ public sealed class TCCommonParametersSetterEditor : Editor
                 break;
         }
 
-        if(setter.AutoUpdate)
+        if (setter.AutoUpdate)
         {
             if (GUI.changed)
                 setter.UpdateUniforms();

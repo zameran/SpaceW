@@ -8,6 +8,7 @@ public sealed class AtmosphereRunTimeBaker : MonoBehaviour
     public RenderTextureFormat Format = RenderTextureFormat.ARGBFloat;
 
     public bool ClearAfterBake = true;
+    public bool UseCoroutine = true;
 
     const int NUM_THREADS = 8;
 
@@ -28,12 +29,18 @@ public sealed class AtmosphereRunTimeBaker : MonoBehaviour
     [ContextMenu("Bake default")]
     public void Bake()
     {
-        Go(AtmosphereParameters.Default);
+        if (UseCoroutine)
+            StartCoroutine(DoWorkCoroutine(AtmosphereParameters.Default));
+        else
+            DoWork(AtmosphereParameters.Default);
     }
 
     public void Bake(AtmosphereParameters AP)
     {
-        Go(AP);
+        if (UseCoroutine)
+            StartCoroutine(DoWorkCoroutine(AP));
+        else
+            DoWork(AP);
     }
 
     public void PreBake(AtmosphereParameters AP)
@@ -49,7 +56,7 @@ public sealed class AtmosphereRunTimeBaker : MonoBehaviour
         ClearAll();
     }
 
-    private void Go(AtmosphereParameters AP)
+    private void DoWork(AtmosphereParameters AP)
     {
         finished = false;
         step = 0;
@@ -60,6 +67,27 @@ public sealed class AtmosphereRunTimeBaker : MonoBehaviour
         while (!finished)
         {
             Calculate(AP);
+        }
+
+        if (ClearAfterBake) CollectGarbage(false, true);
+    }
+
+    private IEnumerator DoWorkCoroutine(AtmosphereParameters AP)
+    {
+        finished = false;
+        step = 0;
+        order = 2;
+
+        PreGo(AP);
+
+        while (!finished)
+        {
+            Calculate(AP);
+
+            for (int i = 0; i < 8; i++)
+            {
+                yield return new WaitForEndOfFrame();
+            }
         }
 
         if (ClearAfterBake) CollectGarbage(false, true);
