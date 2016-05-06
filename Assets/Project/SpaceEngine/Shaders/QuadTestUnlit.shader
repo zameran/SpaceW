@@ -29,6 +29,8 @@
 
 			#pragma multi_compile LIGHT_1 LIGHT_2
 
+			#pragma enable_d3d11_debug_symbols //RenderDoc debugging
+
 			#pragma fragmentoption ARB_precision_hint_fastest
 			
 			#include "UnityCG.cginc"
