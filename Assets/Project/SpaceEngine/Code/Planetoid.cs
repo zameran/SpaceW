@@ -35,6 +35,9 @@ using UnityEngine;
 using System;
 using System.Collections.Generic;
 
+using Amib;
+using Amib.Threading;
+
 [Serializable]
 public struct PlanetoidGenerationConstants
 {
@@ -97,6 +100,8 @@ public sealed class Planetoid : MonoBehaviour
     public Quaternion OriginRotation = Quaternion.identity;
 
     public QuadDistanceToClosestCornerComparer qdtccc;
+    public TCCommonParametersSetter tccps;
+    public SmartThreadPool stp = new SmartThreadPool();
 
     public class QuadDistanceToClosestCornerComparer : IComparer<Quad>
     {
@@ -136,11 +141,15 @@ public sealed class Planetoid : MonoBehaviour
 
     private void Start()
     {
-        ThreadScheduler.Initialize();
+        stp.Start();
 
         if (Cache == null)
             if (gameObject.GetComponentInChildren<QuadStorage>() != null)
                 Cache = gameObject.GetComponentInChildren<QuadStorage>();
+
+        if (tccps == null)
+            if (gameObject.GetComponentInChildren<TCCommonParametersSetter>() != null)
+                tccps = gameObject.GetComponentInChildren<TCCommonParametersSetter>();
 
         if (NPS != null)
             NPS.LoadAndInit();
@@ -316,6 +325,10 @@ public sealed class Planetoid : MonoBehaviour
     {
         if (Quads.Count > 0)
             return;
+
+        if (tccps == null)
+            if (gameObject.GetComponentInChildren<TCCommonParametersSetter>() != null)
+                tccps = gameObject.GetComponentInChildren<TCCommonParametersSetter>();
 
         SetupMesh();
         SetupRoot();

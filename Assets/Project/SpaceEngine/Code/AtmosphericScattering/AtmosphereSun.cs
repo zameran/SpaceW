@@ -16,6 +16,7 @@ public sealed class AtmosphereSun : MonoBehaviour
         get
         {
             Quaternion q = Quaternion.FromToRotation(GetDirection(), Z_AXIS);
+
             return Matrix4x4.TRS(Vector3.zero + Origin, q, Vector3.one);
         }
         private set { WorldToLocalRotation = value; }
@@ -72,7 +73,21 @@ public sealed class AtmosphereSun : MonoBehaviour
         if (mat == null) return;
 
         mat.SetFloat("_Sun_Intensity", SunIntensity);
-        mat.SetVector(string.Format("_Sun_WorldSunDir_{0}", sunID), GetDirection());
-        mat.SetMatrix(string.Format("_Sun_WorldToLocal_{0}", sunID), WorldToLocalRotation);
+
+        switch (sunID)
+        {
+            case 1:
+                mat.SetVector("_Sun_WorldSunDir_1", GetDirection());
+                mat.SetMatrix("_Sun_WorldToLocal_1", WorldToLocalRotation);
+                break;
+            case 2:
+                mat.SetVector("_Sun_WorldSunDir_2", GetDirection());
+                mat.SetMatrix("_Sun_WorldToLocal_2", WorldToLocalRotation);
+                break;
+            default:
+                mat.SetVector("_Sun_WorldSunDir", GetDirection());
+                mat.SetMatrix("_Sun_WorldToLocal", WorldToLocalRotation);
+                break;
+        }
     }
 }

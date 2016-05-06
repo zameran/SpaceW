@@ -782,8 +782,8 @@ public sealed class Quad : MonoBehaviour
 
     private void SetupComputeShaderUniforms()
     {
-        if (Planetoid.transform.GetComponentInChildren<TCCommonParametersSetter>() != null)
-            Planetoid.transform.GetComponentInChildren<TCCommonParametersSetter>().UpdateUniforms(CoreShader);
+        if (Planetoid.tccps != null)
+            Planetoid.tccps.UpdateUniforms(CoreShader);
     }
 
     private void SetupComputeShaderKernelUniforfms(int kernel, ComputeBuffer QuadGenerationConstantsBuffer, ComputeBuffer PreOutDataBuffer, ComputeBuffer PreOutDataSubBuffer, ComputeBuffer OutDataBuffer, ComputeBuffer QuadCornersBuffer)
