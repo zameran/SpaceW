@@ -121,6 +121,23 @@ namespace Experimental
             }
         }
 
+        private void OnGUI()
+        {
+            if (rb != null)
+            {
+                GUILayout.BeginVertical();
+
+                GUILayout.Label("Vessel rails: " + rails);
+                GUILayout.Label("Vessel centerOfMass: " + rb.centerOfMass);
+                GUILayout.Label("Vessel CoM: " + CoM);
+                GUILayout.Label("Vessel velocity: " + rb.velocity);
+                GUILayout.Label("Vessel point velocity: " + rb.GetPointVelocity(CoM));
+                GUILayout.Label("Vessel angular velocity: " + rb.angularVelocity);
+
+                GUILayout.EndVertical();
+            }
+        }
+
         public void Integrate()
         {
             if (rails) return;

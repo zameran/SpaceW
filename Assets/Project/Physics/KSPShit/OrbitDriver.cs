@@ -165,7 +165,7 @@ namespace Experimental
             if (updateMode == UpdateMode.IDLE)
             {
                 vel = orbit.GetRotFrameVel(ReferenceBody);
-            }      
+            }
 
             if (vessel != null && vessel.rb != null && !vessel.rb.isKinematic)
             {
