@@ -88,6 +88,8 @@
 
 			uniform float4x4 _TTW;
 
+			uniform float3 _Sun_Position;
+
 			uniform StructuredBuffer<OutputStruct> data;
 			uniform StructuredBuffer<QuadGenerationConstants> quadGenerationConstants;
 
@@ -120,7 +122,9 @@
 									   Rotate(_Rotation.y, float3(0, 1, 0), 
 									   Rotate(_Rotation.z, float3(0, 0, 1), originalNormal)));	
 			
-				n = normalize(rotatedPoint + rotatedNormal); //So. Good variant, but without normal bumping.
+				n = rotatedNormal;
+
+				//n = normalize(rotatedPoint + rotatedNormal); //So. Good variant, but without normal bumping.
 				//n = normalize(n + WSD); //use this for normal light intens. but disabled normals.
 
 				//n.xy = n.xy; // - default.
@@ -139,8 +143,8 @@
 				float3 skyE = 0;
 				float3 extinction = 0;
 
-				float extinctionGroundFade = 0;
-				float cTheta = dot(n, WSD);
+				float extinctionGroundFade = 0.000025;
+				float cTheta = dot(n, -WSD);
 
 				SunRadianceAndSkyIrradiance(rotatedPoint, n, WSD, sunL, skyE);
 

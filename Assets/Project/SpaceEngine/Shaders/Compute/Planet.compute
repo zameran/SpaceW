@@ -144,11 +144,13 @@ float3 GetHeightNormal(QuadGenerationConstants constants, RWStructuredBuffer<Out
 
 float3 GetHeightNormalFromPosition(QuadGenerationConstants constants, RWStructuredBuffer<OutputStruct> buffer, int size, uint3 id)
 {
-	float3 left	 = (buffer[(id.x + 0) + (id.y + 1) * size].pos.xyz);// * constants.lodLevel;
-	float3 right = (buffer[(id.x + 2) + (id.y + 1) * size].pos.xyz);// * constants.lodLevel;
-	float3 up	 = (buffer[(id.x + 1) + (id.y + 0) * size].pos.xyz);// * constants.lodLevel;
-	float3 down  = (buffer[(id.x + 1) + (id.y + 2) * size].pos.xyz);// * constants.lodLevel;
-	float3 curr	 = (buffer[(id.x + 1) + (id.y + 1) * size].pos.xyz);// * constants.lodLevel;
+	float r = constants.planetRadius;
+
+	float3 left	 = (buffer[(id.x + 0) + (id.y + 1) * size].pos.xyz) / r;// * constants.lodLevel;
+	float3 right = (buffer[(id.x + 2) + (id.y + 1) * size].pos.xyz) / r;// * constants.lodLevel;
+	float3 up	 = (buffer[(id.x + 1) + (id.y + 0) * size].pos.xyz) / r;// * constants.lodLevel;
+	float3 down  = (buffer[(id.x + 1) + (id.y + 2) * size].pos.xyz) / r;// * constants.lodLevel;
+	float3 curr	 = (buffer[(id.x + 1) + (id.y + 1) * size].pos.xyz) / r;// * constants.lodLevel;
 	
 	float3 e0 = curr - left;
 	float3 e1 = curr - right;
@@ -158,9 +160,10 @@ float3 GetHeightNormalFromPosition(QuadGenerationConstants constants, RWStructur
 	float3 n0 = cross(e0, e2);
 	float3 n1 = cross(e1, e3);
 
-	float3 n = normalize(n0 + n1);
+	float3 n = n0 + n1;
+	float3 normal = normalize(float3(-n.x, -n.y, n.z));
 
-	return -n;
+	return normal;
 }
 
 #pragma kernel HeightMain

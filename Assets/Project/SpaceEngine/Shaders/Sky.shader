@@ -74,14 +74,14 @@ Shader "Proland/Atmo/Sky"
 	}
 	SubShader 
 	{
-		Tags { "Queue" = "Background" "RenderType" = "Background" "IgnoreProjector" = "True" }
+		Tags { "Queue" = "Transparent" "RenderType" = "Transparent" "IgnoreProjector" = "True" }
 	
 		Pass 
 		{
 			ZWrite On
 			ZTest Always  
 			Fog { Mode Off }
-			Blend SrcAlpha OneMinusSrcAlpha
+			Blend SrcAlpha OneMinusSrcColor
 
 			Cull Off
 

@@ -3657,15 +3657,26 @@ float4 ColorMapTerra(float3 ppoint, float height, float slope)
 //-----------------------------------------------------------------------------
 float HeightMapPlanet(float3 ppoint, float lodom)
 {
+	float3 p = ppoint * mainFreq + Randomize;
+
 	float total = 0;
 	float latitude = 0;
 
-	latitude = abs(normalize(ppoint).y);
-	latitude += 0.15 * (Fbm(ppoint * 0.0007 + Randomize) - 1.0);
-	latitude = saturate(latitude);
+	if (tidalLock <= 0.0)
+	{
+		latitude = abs(normalize(ppoint).y);
+		latitude += 0.15 * (Fbm(ppoint * 0.007 + Randomize) - 1.0);
+		latitude = saturate(latitude);
+	}
+	else
+	{
+		latitude = 1.0 - normalize(ppoint).z;
+		latitude += 0.15 * (Fbm(ppoint * 0.007 + Randomize) - 1.0);
+		latitude = saturate(latitude);
+	}
 
-	float t0 = Fbm(ppoint * 0.75, 4 * lodom);
-	float v0 = t0 + pow(2.0, RidgedMultifractalExtra(ppoint, 18 * lodom, 1, 1.75, 0.6));
+	float t0 = Fbm(p * 0.75, 4 * lodom);
+	float v0 = t0 + pow(2.0, RidgedMultifractalExtra(p, 18 * lodom, 1, 1.75, 0.6));
 
 	total = GetTerraced(v0, 4, 2);
 

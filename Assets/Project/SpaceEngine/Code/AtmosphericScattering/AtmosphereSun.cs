@@ -89,5 +89,7 @@ public sealed class AtmosphereSun : MonoBehaviour
                 mat.SetMatrix("_Sun_WorldToLocal", WorldToLocalRotation);
                 break;
         }
+
+        mat.SetVector("_Sun_Position", transform.position);
     }
 }
