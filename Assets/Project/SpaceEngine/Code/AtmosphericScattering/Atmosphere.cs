@@ -7,6 +7,9 @@ public sealed class Atmosphere : MonoBehaviour
     readonly Vector3 BETA_MSca = new Vector3(4e-3f, 4e-3f, 4e-3f);
     readonly Vector3 betaR = new Vector3(5.8e-3f, 1.35e-2f, 3.31e-2f);
 
+    [Range(0.0f, 1.0f)]
+    public float Density = 1.0f;
+
     public int AtmosphereMeshResolution = 2;
 
     public float HDRExposure = 0.2f;
@@ -250,6 +253,7 @@ public sealed class Atmosphere : MonoBehaviour
         SetKeywords(mat, GetKeywords());
         SetEclipses(mat);
 
+        mat.SetFloat("density", Density);
         mat.SetFloat("scale", atmosphereParameters.Rg / atmosphereParameters.SCALE);
         mat.SetFloat("Rg", atmosphereParameters.Rg);
         mat.SetFloat("Rt", atmosphereParameters.Rt);
@@ -320,6 +324,7 @@ public sealed class Atmosphere : MonoBehaviour
         SetKeywords(mat, GetKeywords());
         SetEclipses(mat);
 
+        mat.SetFloat("density", Density);
         mat.SetFloat("scale", atmosphereParameters.Rg / atmosphereParameters.SCALE);
         mat.SetFloat("Rg", atmosphereParameters.Rg);
         mat.SetFloat("Rt", atmosphereParameters.Rt);
@@ -363,6 +368,7 @@ public sealed class Atmosphere : MonoBehaviour
         SetKeywords(mat, GetKeywords());
         SetEclipses(mat);
 
+        mat.SetFloat("density", Density);
         mat.SetFloat("scale", atmosphereParameters.Rg / atmosphereParameters.SCALE);
         mat.SetFloat("Rg", atmosphereParameters.Rg);
         mat.SetFloat("Rt", atmosphereParameters.Rt);

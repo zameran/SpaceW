@@ -96,14 +96,14 @@ float3 GetSobelNormal(QuadGenerationConstants constants, RWStructuredBuffer<Outp
 {
 	float normalStrength = 0.5 / ((constants.lodLevel / 20.0 + 1.0) * (constants.lodLevel / 20.0 + 1.0));
 	
-	float tl = buffer[(id.x + 0) + (id.y + 0) * size].noise * constants.lodLevel;
-	float  l = buffer[(id.x + 0) + (id.y + 1) * size].noise * constants.lodLevel;
-	float bl = buffer[(id.x + 0) + (id.y + 2) * size].noise * constants.lodLevel;
-	float  t = buffer[(id.x + 1) + (id.y + 0) * size].noise * constants.lodLevel;
-	float  b = buffer[(id.x + 1) + (id.y + 2) * size].noise * constants.lodLevel;
-	float tr = buffer[(id.x + 2) + (id.y + 0) * size].noise * constants.lodLevel;
-	float  r = buffer[(id.x + 2) + (id.y + 1) * size].noise * constants.lodLevel;
-	float br = buffer[(id.x + 2) + (id.y + 2) * size].noise * constants.lodLevel;
+	float tl = buffer[(id.x + 0) + (id.y + 0) * size].noise;// * constants.lodLevel;
+	float  l = buffer[(id.x + 0) + (id.y + 1) * size].noise;// * constants.lodLevel;
+	float bl = buffer[(id.x + 0) + (id.y + 2) * size].noise;// * constants.lodLevel;
+	float  t = buffer[(id.x + 1) + (id.y + 0) * size].noise;// * constants.lodLevel;
+	float  b = buffer[(id.x + 1) + (id.y + 2) * size].noise;// * constants.lodLevel;
+	float tr = buffer[(id.x + 2) + (id.y + 0) * size].noise;// * constants.lodLevel;
+	float  r = buffer[(id.x + 2) + (id.y + 1) * size].noise;// * constants.lodLevel;
+	float br = buffer[(id.x + 2) + (id.y + 2) * size].noise;// * constants.lodLevel;
 
 	float xdelta = tr + 2.0 * r + br - tl - 2.0 * l - bl;
 	float ydelta = bl + 2.0 * b + br - tl - 2.0 * t - tr;

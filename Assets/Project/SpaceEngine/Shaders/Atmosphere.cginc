@@ -67,7 +67,7 @@
 //#define OPTIMIZE
 #define ATMO_FULL
 #define HORIZON_HACK
-//#define FIX_1
+//#define HORIZON_HACK_BIG_EPSILON
 #define ANALYTIC_TRANSMITTANCE
 
 #if !defined (M_PI)
@@ -81,7 +81,7 @@ uniform float3 _Globals_WorldCameraPos;
 // ----------------------------------------------------------------------------
 // PHYSICAL MODEL PARAMETERS
 // ----------------------------------------------------------------------------
-
+uniform float density;
 uniform float scale;
 uniform float Rg;
 uniform float Rt;
@@ -422,7 +422,12 @@ float3 Transmittance(float r, float mu)
 // uses analytic formula instead of transmittance texture
 float3 AnalyticTransmittance(float r, float mu, float d) 
 {
-	return exp(- betaR * OpticalDepth(HR, r, mu, d) - betaMEx * OpticalDepth(HM, r, mu, d)); //using default eq.
+	float3 tr = exp(- betaR * OpticalDepth(HR, r, mu, d) - betaMEx * OpticalDepth(HM, r, mu, d)); //using default eq.
+
+	if(isnan(tr.x)) tr = float3(1.0, 1.0, 1.0);
+
+	return lerp(float3(1.0, 1.0, 1.0), tr, density);
+
 	//return exp(- betaR * OpticalDepth(HR, r, mu) - betaMEx * OpticalDepth(HM, r, mu)); //using Eric's eq.
 }
 
@@ -430,7 +435,7 @@ float3 AnalyticTransmittance(float r, float mu, float d)
 // (mu=cos(view zenith angle)), or zero if ray intersects ground
 float3 TransmittanceWithShadow(float r, float mu) 
 {
-	return mu < -sqrt(1.0 - (Rg / r) * (Rg / r)) ? float3(0, 0, 0) : Transmittance(r, mu);
+	return mu < -sqrt(1.0 - (Rg / r) * (Rg / r)) ? float3(0, 0, 0) : lerp(float3(1.0, 1.0, 1.0), Transmittance(r, mu), density);
 }
 
 // transmittance(=transparency) of atmosphere between x and x0
@@ -452,7 +457,7 @@ float3 Transmittance(float r, float mu, float3 v, float3 x0)
 		result = min(Transmittance(r1, -mu1) / Transmittance(r, -mu), 1.0);
 	}
 
-	return result;
+	return lerp(float3(1.0, 1.0, 1.0), result, density);
 }
 
 // transmittance(=transparency) of atmosphere between x and x0
@@ -474,7 +479,7 @@ float3 Transmittance(float r, float mu, float d)
 		result = min(Transmittance(r1, -mu1) / Transmittance(r, -mu), 1.0);
 	}
 
-	return result;
+	return lerp(float3(1.0, 1.0, 1.0), result, density);
 }
 
 float3 Irradiance(sampler2D samp, float r, float muS) 
@@ -709,7 +714,7 @@ float4 InScattering(float3 camera, float3 _point, float3 sundir, out float3 exti
 			#endif
 
 			#ifdef HORIZON_HACK
-				#ifdef FIX_1
+				#ifdef HORIZON_HACK_BIG_EPSILON
 					const float EPS = 0.4;
 				#else
 					const float EPS = 0.004; //0.004 - default. 0.4 - maybe normal?
