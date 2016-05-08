@@ -273,6 +273,8 @@ public sealed class Quad : MonoBehaviour
     {
         BufferHelper.ReleaseAndDisposeBuffers(QuadGenerationConstantsBuffer, PreOutDataBuffer, PreOutDataSubBuffer, OutDataBuffer, QuadCornersBuffer);
 
+        RenderTexture.active = null; //Fixing RenderTexture.active on OnDestroy. Maybe custom GC for RenderTexture.active?
+
         if (HeightTexture != null)
             HeightTexture.ReleaseAndDestroy();
 
