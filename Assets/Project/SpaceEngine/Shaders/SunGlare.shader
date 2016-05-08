@@ -41,6 +41,7 @@
 			uniform float4x4 ghost3Settings;
 			
 			uniform float useTransmittance;
+			uniform float eclipse;
 		
 			uniform float3 sunViewPortPos;
 			uniform float aspectRatio;
@@ -79,7 +80,7 @@
          			r = Rt;
      			}
  
-     			return (r > Rt) ? float3(1.0 ,1.0, 1.0) : Transmittance(r, mu);
+     			return (r > Rt) ? float3(1.0, 1.0, 1.0) : Transmittance(r, mu);
      		}
 
 			float4 frag(v2f IN) : COLOR
@@ -89,6 +90,7 @@
 				
 				float2 toScreenCenter = sunViewPortPos.xy - 0.5;
 
+				float3 outputColor = 0;
 				float3 sunColor = 0;
 				float3 ghosts = 0;
 
@@ -103,7 +105,7 @@
 							  (tex2D(sunGhost1, (IN.uv.xy - sunViewPortPos.xy + (toScreenCenter * ghost1Settings[i].w)) * 
 							  float2(aspectRatio * ghost1Settings[i].y, 1.0) * ghost1Settings[i].z + 0.5).rgb);
 				}
-					
+				
 				for (int j = 0; j < 4; ++j)
 				{
 					ghosts += ghost2Settings[j].x * 
@@ -121,11 +123,14 @@
 				float3 extinction = Extinction(WCP, WSD);
 
 				ghosts = ghosts * smoothstep(0.0, 1.0, 1.0 - length(toScreenCenter));		
-				sunColor += ghosts;	
-				sunColor *= sunGlareFade;
-				sunColor = (useTransmittance > 0.0) ? sunColor * extinction : sunColor;
+				
+				outputColor += sunColor;
+				outputColor += ghosts;
+				outputColor *= sunGlareFade;
+				outputColor = (useTransmittance > 0.0) ? outputColor * extinction : outputColor;
+				//outputColor = (eclipse > 0.0) ? sunColor : outputColor;
 
-				return float4(sunColor, 1.0);				
+				return float4(outputColor, 1.0);				
 			}			
 			ENDCG
 		}

@@ -299,19 +299,46 @@ public sealed class Atmosphere : MonoBehaviour
         }
     }
 
+    public void InitSetPlanetoidUniforms(Planetoid planetoid)
+    {
+        InitPlanetoidUniforms(planetoid);
+        SetPlanetoidUniforms(planetoid);
+    }
+
     public void InitSetAtmosphereUniforms()
     {
         InitUniforms(SkyMaterial);
         SetUniforms(SkyMaterial);
     }
 
+    public void InitSetAtmosphereUniforms(Atmosphere atmosphere)
+    {
+        InitUniforms(atmosphere.SkyMaterial);
+        SetUniforms(atmosphere.SkyMaterial);
+    }
+
     public void ReanimateAtmosphereUniforms(Atmosphere atmosphere, Planetoid planetoid)
     {
         if (atmosphere != null && planetoid != null)
         {
-            atmosphere.InitPlanetoidUniforms(planetoid);
-            atmosphere.SetPlanetoidUniforms(planetoid);
+            atmosphere.InitSetPlanetoidUniforms(planetoid);
             atmosphere.InitSetAtmosphereUniforms();
+
+            if (Sun_1 != null)
+            {
+                SunGlare sg_1 = Sun_1.GetComponent<SunGlare>();
+
+                if (sg_1 != null)
+                    sg_1.InitSetAtmosphereUniforms();
+            }
+
+            if (Sun_2 != null)
+            {
+                SunGlare sg_2 = Sun_2.GetComponent<SunGlare>();
+
+                if (sg_2 != null)
+                    sg_2.InitSetAtmosphereUniforms();
+            }
         }
         else
             Debug.Log("Atmosphere: Reanimation fail!");
