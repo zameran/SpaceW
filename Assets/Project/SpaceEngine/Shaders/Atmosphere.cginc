@@ -76,6 +76,8 @@
 
 uniform float3 _Sun_WorldSunDir_1;
 uniform float3 _Sun_WorldSunDir_2;
+uniform float4 _Sun_WorldSunPosRadius;
+
 uniform float3 _Globals_WorldCameraPos;
 
 // ----------------------------------------------------------------------------
@@ -127,7 +129,6 @@ uniform sampler2D _Sky_Transmittance;
 uniform sampler2D _Sky_Irradiance;
 uniform sampler3D _Sky_Inscatter;
 
-uniform float4 _Sun_WorldSunPosRadius;
 uniform float4x4 _Sky_LightOccluders_1;
 uniform float4x4 _Sky_LightOccluders_2;
 

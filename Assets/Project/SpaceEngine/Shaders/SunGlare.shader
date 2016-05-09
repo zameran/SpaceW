@@ -62,23 +62,28 @@
 				return OUT;
 			}
 
- 			float3 Extinction(float3 camera, float3 viewdir)
+ 			float3 Extinction(float3 camera, float3 p)
  			{
+				float3 viewdir = p;
+
  				float r = length(camera);
  				float rMu = dot(camera, viewdir);
  				float mu = rMu / r;
- 
+				float d = length(viewdir - camera);
      			float deltaSq = SQRT(rMu * rMu - r * r + Rt * Rt, 0.000001);
  
      			float din = max(-rMu - deltaSq, 0.0);
 
-     			if (din > 0.0)
-     			{
-         			camera += din * viewdir;
-         			rMu += din;
-         			mu = rMu / Rt;
-         			r = Rt;
-     			}
+				//viewdir = viewdir / d;
+
+				if (din > 0.0 && din < d) 
+				{
+					camera += din * viewdir;
+					rMu += din;
+					mu = rMu / Rt;
+					r = Rt;
+					d -= din;
+				}
  
      			return (r > Rt) ? float3(1.0, 1.0, 1.0) : Transmittance(r, mu);
      		}
@@ -118,8 +123,8 @@
 					ghosts += ghost3Settings[k].x *
 							  (tex2D(sunGhost3, (IN.uv.xy - sunViewPortPos.xy + (toScreenCenter * ghost3Settings[k].w)) * 
 							  float2(aspectRatio * ghost3Settings[k].y, 1.0) * ghost3Settings[k].z + 0.5).rgb);
-				}
-				
+				}		
+
 				float3 extinction = Extinction(WCP, WSD);
 
 				ghosts = ghosts * smoothstep(0.0, 1.0, 1.0 - length(toScreenCenter));		

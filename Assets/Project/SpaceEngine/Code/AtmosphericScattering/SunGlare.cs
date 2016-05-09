@@ -26,7 +26,10 @@ public sealed class SunGlare : MonoBehaviour
     private float sunGlareScale = 1;
     private float sunGlareFade = 1;
 
-    public float sunGlareFadeDistance = 1000000;
+    public AnimationCurve fadeCurve = new AnimationCurve(new Keyframe[] { new Keyframe(0.0f, 0.0f),
+                                                                          new Keyframe(1.0f, 1.0f),
+                                                                          new Keyframe(9.0f, 1.0f),
+                                                                          new Keyframe(10.0f, 0.0f) });
 
     Mesh screenMesh;
 
@@ -125,8 +128,8 @@ public sealed class SunGlare : MonoBehaviour
 
         sunViewPortPos = Camera.main.WorldToViewportPoint(Sun.transform.position);
         sunGlareScale = dist / 2266660f;
-        sunGlareFade = Mathf.SmoothStep(0.0f, 1.0f, (dist / sunGlareFadeDistance) - 0.25f);
-        
+        sunGlareFade = fadeCurve.Evaluate(sunGlareScale);
+
         eclipse = false;
         eclipse = Physics.Raycast(Camera.main.transform.position, (Sun.transform.position - Camera.main.transform.position).normalized, out hit, Mathf.Infinity);
 
