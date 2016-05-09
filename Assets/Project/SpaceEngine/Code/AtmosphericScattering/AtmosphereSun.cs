@@ -2,7 +2,7 @@
 
 public sealed class AtmosphereSun : MonoBehaviour
 {
-    [Range(1, 2)]
+    [Range(1, 4)]
     public int sunID = 1;
 
     static readonly Vector3 Z_AXIS = new Vector3(0, 0, 1);
@@ -83,6 +83,14 @@ public sealed class AtmosphereSun : MonoBehaviour
             case 2:
                 mat.SetVector("_Sun_WorldSunDir_2", GetDirection());
                 mat.SetMatrix("_Sun_WorldToLocal_2", WorldToLocalRotation);
+                break;
+            case 3:
+                mat.SetVector("_Sun_WorldSunDir_3", GetDirection());
+                mat.SetMatrix("_Sun_WorldToLocal_3", WorldToLocalRotation);
+                break;
+            case 4:
+                mat.SetVector("_Sun_WorldSunDir_4", GetDirection());
+                mat.SetMatrix("_Sun_WorldToLocal_4", WorldToLocalRotation);
                 break;
             default:
                 mat.SetVector("_Sun_WorldSunDir", GetDirection());

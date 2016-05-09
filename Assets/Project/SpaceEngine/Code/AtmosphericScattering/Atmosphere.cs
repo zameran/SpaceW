@@ -57,6 +57,8 @@ public sealed class Atmosphere : MonoBehaviour
 
     public AtmosphereSun Sun_1;
     public AtmosphereSun Sun_2;
+    public AtmosphereSun Sun_3;
+    public AtmosphereSun Sun_4;
 
     public List<GameObject> eclipseCasters;
 
@@ -106,6 +108,8 @@ public sealed class Atmosphere : MonoBehaviour
 
     public List<string> GetKeywords()
     {
+        //TODO: Remake this keyword shit.
+
         List<string> Keywords = new List<string>();
 
         if (Sun_1 != null)
@@ -116,6 +120,19 @@ public sealed class Atmosphere : MonoBehaviour
 
         if (Sun_1 != null && Sun_2 != null)
             Keywords.Remove("LIGHT_1");
+
+        if (Sun_3 != null)
+            Keywords.Add("LIGHT_3");
+
+        if (Sun_4 != null)
+            Keywords.Add("LIGHT_4");
+
+        if (Sun_1 != null && Sun_2 != null)
+            if (Sun_3 != null && Sun_4 != null)
+                Keywords.Remove("LIGHT_2");
+
+        if (Sun_3 != null && Sun_4 != null)
+            Keywords.Remove("LIGHT_3");
 
         return Keywords;
     }
@@ -188,6 +205,8 @@ public sealed class Atmosphere : MonoBehaviour
 
         if (Sun_1 != null) Sun_1.Origin = Origin;
         if (Sun_2 != null) Sun_2.Origin = Origin;
+        if (Sun_3 != null) Sun_3.Origin = Origin;
+        if (Sun_4 != null) Sun_4.Origin = Origin;
     }
 
     public void OnApplicationFocus(bool focusStatus)
@@ -306,6 +325,8 @@ public sealed class Atmosphere : MonoBehaviour
 
         if (suns.Length > 0) if (Sun_1 == null && suns[0] != null) Sun_1 = suns[0];
         if (suns.Length > 1) if (Sun_2 == null && suns[1] != null) Sun_2 = suns[1];
+        if (suns.Length > 0) if (Sun_3 == null && suns[2] != null) Sun_3 = suns[2];
+        if (suns.Length > 1) if (Sun_4 == null && suns[3] != null) Sun_4 = suns[3];
     }
 
     public void InitUniforms(Material mat)
@@ -401,6 +422,22 @@ public sealed class Atmosphere : MonoBehaviour
                 if (sg_2 != null)
                     sg_2.InitSetAtmosphereUniforms();
             }
+
+            if (Sun_3 != null)
+            {
+                SunGlare sg_3 = Sun_3.GetComponent<SunGlare>();
+
+                if (sg_3 != null)
+                    sg_3.InitSetAtmosphereUniforms();
+            }
+
+            if (Sun_4 != null)
+            {
+                SunGlare sg_4 = Sun_4.GetComponent<SunGlare>();
+
+                if (sg_4 != null)
+                    sg_4.InitSetAtmosphereUniforms();
+            }
         }
         else
             Debug.Log("Atmosphere: Reanimation fail!");
@@ -450,6 +487,8 @@ public sealed class Atmosphere : MonoBehaviour
 
         if (Sun_1 != null) Sun_1.SetUniforms(mat);
         if (Sun_2 != null) Sun_2.SetUniforms(mat);
+        if (Sun_3 != null) Sun_3.SetUniforms(mat);
+        if (Sun_4 != null) Sun_4.SetUniforms(mat);
     }
 
     public void SetUniformsForPlanetQuad(Material mat)
@@ -495,5 +534,7 @@ public sealed class Atmosphere : MonoBehaviour
 
         if (Sun_1 != null) Sun_1.SetUniforms(mat);
         if (Sun_2 != null) Sun_2.SetUniforms(mat);
+        if (Sun_3 != null) Sun_3.SetUniforms(mat);
+        if (Sun_4 != null) Sun_4.SetUniforms(mat);
     }
 }

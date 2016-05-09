@@ -27,7 +27,7 @@
 			//#pragma geometry geom //FPS drop down on geometry shader program.
 			#pragma fragment frag
 
-			#pragma multi_compile LIGHT_1 LIGHT_2
+			#pragma multi_compile LIGHT_1 LIGHT_2 LIGHT_3 LIGHT_4
 
 			#pragma enable_d3d11_debug_symbols //RenderDoc debugging
 
@@ -198,6 +198,42 @@
 										   GroundFinalColorWithoutAtmosphere(v, terrainColor, v.vertex.xyz, v.normal.xyz);
 
 				scatteringColor = hdr(groundFinalColor1 + groundFinalColor2);
+				#endif
+
+				#ifdef LIGHT_3
+				float4 groundFinalColor1 = _Atmosphere > 0.0 ? 
+										   GroundFinalColorWithAtmosphere(v, terrainColor, v.vertex.xyz, v.normal.xyz, _Sun_WorldSunDir_1) : 
+										   GroundFinalColorWithoutAtmosphere(v, terrainColor, v.vertex.xyz, v.normal.xyz);
+
+				float4 groundFinalColor2 = _Atmosphere > 0.0 ? 
+										   GroundFinalColorWithAtmosphere(v, terrainColor, v.vertex.xyz, v.normal.xyz, _Sun_WorldSunDir_2) : 
+										   GroundFinalColorWithoutAtmosphere(v, terrainColor, v.vertex.xyz, v.normal.xyz);
+
+				float4 groundFinalColor3 = _Atmosphere > 0.0 ? 
+										   GroundFinalColorWithAtmosphere(v, terrainColor, v.vertex.xyz, v.normal.xyz, _Sun_WorldSunDir_3) : 
+										   GroundFinalColorWithoutAtmosphere(v, terrainColor, v.vertex.xyz, v.normal.xyz);
+
+				scatteringColor = hdr(groundFinalColor1 + groundFinalColor2 + groundFinalColor3);
+				#endif
+
+				#ifdef LIGHT_4
+				float4 groundFinalColor1 = _Atmosphere > 0.0 ? 
+										   GroundFinalColorWithAtmosphere(v, terrainColor, v.vertex.xyz, v.normal.xyz, _Sun_WorldSunDir_1) : 
+										   GroundFinalColorWithoutAtmosphere(v, terrainColor, v.vertex.xyz, v.normal.xyz);
+
+				float4 groundFinalColor2 = _Atmosphere > 0.0 ? 
+										   GroundFinalColorWithAtmosphere(v, terrainColor, v.vertex.xyz, v.normal.xyz, _Sun_WorldSunDir_2) : 
+										   GroundFinalColorWithoutAtmosphere(v, terrainColor, v.vertex.xyz, v.normal.xyz);
+
+				float4 groundFinalColor3 = _Atmosphere > 0.0 ? 
+										   GroundFinalColorWithAtmosphere(v, terrainColor, v.vertex.xyz, v.normal.xyz, _Sun_WorldSunDir_3) : 
+										   GroundFinalColorWithoutAtmosphere(v, terrainColor, v.vertex.xyz, v.normal.xyz);
+
+				float4 groundFinalColor4 = _Atmosphere > 0.0 ? 
+										   GroundFinalColorWithAtmosphere(v, terrainColor, v.vertex.xyz, v.normal.xyz, _Sun_WorldSunDir_4) : 
+										   GroundFinalColorWithoutAtmosphere(v, terrainColor, v.vertex.xyz, v.normal.xyz);
+
+				scatteringColor = hdr(groundFinalColor1 + groundFinalColor2 + groundFinalColor3 + groundFinalColor4);
 				#endif
 
 				v2fg o;

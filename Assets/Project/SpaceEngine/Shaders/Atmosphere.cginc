@@ -76,6 +76,8 @@
 
 uniform float3 _Sun_WorldSunDir_1;
 uniform float3 _Sun_WorldSunDir_2;
+uniform float3 _Sun_WorldSunDir_3;
+uniform float3 _Sun_WorldSunDir_4;
 uniform float4 _Sun_WorldSunPosRadius;
 
 uniform float3 _Globals_WorldCameraPos;
