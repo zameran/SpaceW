@@ -195,4 +195,23 @@ public struct AtmosphereParameters
 
         private set { }
     }
+
+    public static AtmosphereParameters Sun
+    {
+        get
+        {
+            AtmosphereParameters ap = new AtmosphereParameters(0.2f, 20.0f, 8.0f, 0.1f,
+                                                               new Vector4(0.00058f, 0.00135f, 0.00331f, 0.0f),
+                                                               new Vector4(0.00878f, 0.00786f, 0.00367f, 0.0f),
+                                                               new Vector4(0.00878f, 0.00786f, 0.00367f, 0.0f),
+                                                               3387.792f, 3487.792f, 3488.792f,
+                                                               3387.792f, 3487.792f, 3488.792f,
+                                                               3387.792f,
+                                                               256, 64, 64, 16, 32, 128, 32, 8);
+
+            return ap;
+        }
+
+        private set { }
+    }
 }
