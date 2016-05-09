@@ -79,7 +79,6 @@ public sealed class Atmosphere : MonoBehaviour
         if (RunTimeBaking && artb != null) artb.Bake(atmosphereParameters);
     }
 
-
     public List<string> GetKeywords()
     {
         List<string> Keywords = new List<string>();
