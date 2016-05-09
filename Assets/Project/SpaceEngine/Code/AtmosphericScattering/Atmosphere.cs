@@ -336,11 +336,12 @@ public sealed class Atmosphere : MonoBehaviour
         SetKeywords(mat, GetKeywords());
         SetEclipses(mat);
 
-        mat.SetFloat("density", Density);
-        mat.SetFloat("scale", atmosphereParameters.Rg / atmosphereParameters.SCALE);
+        mat.SetTexture("_Sun_Glare", SunGlareTexture);
+
         mat.SetFloat("Rg", atmosphereParameters.Rg);
         mat.SetFloat("Rt", atmosphereParameters.Rt);
         mat.SetFloat("RL", atmosphereParameters.Rl);
+
         mat.SetFloat("TRANSMITTANCE_W", atmosphereParameters.TRANSMITTANCE_W);
         mat.SetFloat("TRANSMITTANCE_H", atmosphereParameters.TRANSMITTANCE_H);
         mat.SetFloat("SKY_W", atmosphereParameters.SKY_W);
@@ -352,10 +353,6 @@ public sealed class Atmosphere : MonoBehaviour
         mat.SetFloat("AVERAGE_GROUND_REFLECTANCE", atmosphereParameters.AVERAGE_GROUND_REFLECTANCE);
         mat.SetFloat("HR", atmosphereParameters.HR * 1000.0f);
         mat.SetFloat("HM", atmosphereParameters.HM * 1000.0f);
-        mat.SetVector("betaMSca", atmosphereParameters.BETA_MSca);
-        mat.SetVector("betaMEx", atmosphereParameters.BETA_MEx);
-        mat.SetTexture("_Sun_Glare", SunGlareTexture);
-        mat.SetFloat("_Sun_Glare_Scale", SunGlareScale);
     }
 
     public void InitPlanetoidUniforms(Planetoid planetoid)
