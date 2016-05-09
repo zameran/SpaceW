@@ -325,8 +325,8 @@ public sealed class Atmosphere : MonoBehaviour
 
         if (suns.Length > 0) if (Sun_1 == null && suns[0] != null) Sun_1 = suns[0];
         if (suns.Length > 1) if (Sun_2 == null && suns[1] != null) Sun_2 = suns[1];
-        if (suns.Length > 0) if (Sun_3 == null && suns[2] != null) Sun_3 = suns[2];
-        if (suns.Length > 1) if (Sun_4 == null && suns[3] != null) Sun_4 = suns[3];
+        if (suns.Length > 2) if (Sun_3 == null && suns[2] != null) Sun_3 = suns[2];
+        if (suns.Length > 3) if (Sun_4 == null && suns[3] != null) Sun_4 = suns[3];
     }
 
     public void InitUniforms(Material mat)
