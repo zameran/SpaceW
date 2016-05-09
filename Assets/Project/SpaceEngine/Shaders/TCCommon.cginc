@@ -64,6 +64,13 @@
 //-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
+// coloring engine tweak
+// 0 - disable wip.
+// 1 - enable wip.
+#define TEST 0
+//-----------------------------------------------------------------------------
+
+//-----------------------------------------------------------------------------
 // tile blending method:
 // 0 - hard mix (no blending)
 // 1 - soft blending
@@ -674,6 +681,7 @@ inline float4 ruvy(float4 uv)
 
 //-----------------------------------------------------------------------------
 #if (TILING_FIX_MODE <= 1)
+#if (TEST == 0)
 // Texture atlas sampling function
 // height, slope defines the tile based on MaterialTable texture
 // vary sets one of 4 different tiles of the same material
@@ -732,6 +740,47 @@ Surface GetSurfaceColorAtlas(float height, float slope, float vary)
 
 	return  res;
 }
+
+#else
+
+Surface GetSurfaceColorAtlas(float height, float slope, float vary)
+{
+    float4 PackFactors = float4(1.0 / ATLAS_RES_X, 1.0 / ATLAS_RES_Y, ATLAS_TILE_RES, ATLAS_TILE_RES_LOG2);
+    slope = saturate(slope * 0.5);
+
+    float4 IdScale = tex2Dlod(MaterialTable, float4(height, slope + 0.5, 0, 0));
+    int materialID = min(int(IdScale.x) + int(vary), int(ATLAS_RES_X * ATLAS_RES_Y - 1));
+    float2 tileOffs = float2(materialID % (uint)ATLAS_RES_X, materialID / (uint)ATLAS_RES_X) * PackFactors.xy;
+
+    Surface res;
+    float2 tileUV = (TexCoord.xy * faceParams.z + faceParams.xy) * texScale * IdScale.y;
+    float2 dx = dFdx(tileUV * PackFactors.z);
+    float2 dy = dFdy(tileUV * PackFactors.z);
+    float lod = 0;//clamp(0.5 * log2(max(dot(dx, dx), dot(dy, dy))), 0.0, PackFactors.w);
+    float2 invSize = float2(pow(2.0, lod - PackFactors.w), pow(2.0, lod - PackFactors.w)) * PackFactors.xy; //,
+    float2 uv = tileOffs + frac(tileUV) * (PackFactors.xy - invSize) + 0.5 * invSize;
+
+	#if (TILING_FIX_MODE == 0)
+    res.color = tex2Dlod(AtlasDiffSampler, float4(uv, 0, 0));
+	#elif (TILING_FIX_MODE == 1)
+    float2 uv2 = tileOffs + frac(-0.173 * tileUV) * (PackFactors.xy - invSize) + 0.5 * invSize;
+    res.color = lerp(tex2Dlod(AtlasDiffSampler, float4(uv, 0, 0)), tex2Dlod(AtlasDiffSampler, float4(uv2, 0, 0)), 0.5);
+	#endif
+
+    res.height = res.color.a;
+
+    float4 adjust = tex2Dlod(MaterialTable, float4(height, slope, 0, 0));
+    adjust.xyz *= texColorConv;
+    float3 hsl = rgb2hsl(res.color.rgb);
+    hsl.x  = frac(hsl.x  + adjust.x);
+    hsl.yz = clamp(hsl.yz + adjust.yz, 0.0, 1.0);
+    res.color.rgb = hsl2rgb(hsl);
+
+    res.color.a = adjust.a;
+    return  res;
+}
+
+#endif
 
 #else
 
@@ -3694,7 +3743,22 @@ float4 ColorMapPlanet(float3 pos, float3 ppoint, float height, float slope)
 
 	float4 lookupColor = tex2Dlod(MaterialTable, float4(height, slope, 0, 0));
 
-	surf = GetSurfaceColor(height, slope, length(lookupColor));
+	float3 p = ppoint * mainFreq + Randomize;
+	float3 pp = (ppoint + Randomize) * (0.0005 * hillsFreq / (hillsMagn * hillsMagn));
+
+	float vary = 0;
+	float fr = 0.20 * (1.5 - RidgedMultifractal(pp,         2.0, 4)) +
+			   0.05 * (1.5 - RidgedMultifractal(pp * 10.0,  2.0, 4)) +
+			   0.02 * (1.5 - RidgedMultifractal(pp * 100.0, 2.0, 4));
+
+	p = ppoint * (colorDistFreq * 0.005) + float3(fr, fr, fr);
+	p += Fbm3D(p * 0.38, 4) * 1.2;
+	p = ppoint * colorDistFreq * 0.371;
+	p += Fbm3D(p * 0.5, 5) * 1.2;
+	vary = saturate((Fbm(p, 5) + 0.7) * 0.7);
+
+	surf = GetSurfaceColor(height, slope, vary);
+
 	return surf.color;
 }
 //-----------------------------------------------------------------------------
