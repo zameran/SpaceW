@@ -75,6 +75,8 @@ public sealed class DebugGUIPlanetoidInfo : DebugGUI
 
             GUILayout.BeginVertical();
 
+            GUILayout.Label("Planetoid stats: ", boldLabel);
+
             GUILayoutExtensions.LabelWithSpace((Planetoid.gameObject.name + ": " + (Planetoid.Working ? "Generating..." : "Idle...")), -8);
             GUILayoutExtensions.LabelWithSpace("Quads count: " + quadsCount, -8);
             GUILayoutExtensions.LabelWithSpace("Quads culled count: " + quadsCulledCount, -8);
@@ -83,6 +85,39 @@ public sealed class DebugGUIPlanetoidInfo : DebugGUI
             GUILayoutExtensions.LabelWithSpace("Verts rendered per frame (Only Quads): " + vertsRendered, -8);
 
             GUILayout.EndVertical();
+
+            if (Planetoid.Atmosphere != null)
+            {
+                GUILayout.Space(10);
+
+                GUILayout.BeginVertical();
+
+                GUILayout.Label("Atmosphere parameters: ", boldLabel);
+
+                GUILayout.Label("Preset: ");
+                Planetoid.Atmosphere.AtmosphereBase = (AtmosphereBase)GUILayout.SelectionGrid((int)Planetoid.Atmosphere.AtmosphereBase, System.Enum.GetNames(typeof(AtmosphereBase)), 2);
+
+                GUILayout.Space(10);
+
+                GUILayout.Label("Density: ");
+                float.TryParse(GUILayout.TextField(Planetoid.Atmosphere.Density.ToString("0.0")), out Planetoid.Atmosphere.Density);
+
+                GUILayout.Label("Radius: ");
+                float.TryParse(GUILayout.TextField(Planetoid.Atmosphere.Radius.ToString("0.0")), out Planetoid.Atmosphere.Radius);
+
+                GUILayout.Label("Height: ");
+                float.TryParse(GUILayout.TextField(Planetoid.Atmosphere.Height.ToString("0.0")), out Planetoid.Atmosphere.Height);
+
+                GUILayout.EndVertical();
+            }
+            else
+            {
+                GUILayout.BeginVertical();
+
+                GUILayoutExtensions.LabelWithSpace("No Atmosphere!?", -8);
+
+                GUILayout.EndVertical();
+            }
         }
         else
         {

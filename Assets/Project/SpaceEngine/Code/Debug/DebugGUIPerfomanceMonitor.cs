@@ -55,7 +55,7 @@ public sealed class DebugGUIPerfomanceMonitor : DebugGUI
             GUI.Window(0, debugInfoBounds, UI, "Perfomance Monitor (in milliseconds)");
         }
     }
-    
+
     private void UI(int id)
     {
         const int ColumnZero = 10;
@@ -75,22 +75,22 @@ public sealed class DebugGUIPerfomanceMonitor : DebugGUI
         //Draw ui..
         //GUI.Box(new Rect(0, 0, Screen.width - 0, Mathf.Max(counters.Count * 20 + 5 + 60, 205)), "");
         //GUI.Label(new Rect(Screen.width / 2 - 125, 0, 500, 30), string.Format("<b>Performance Monitor</b> (in milliseconds)"));
-        GUI.Label(new Rect(ColumnZero, 30, ColumnOne - ColumnZero, 30), string.Format("Name"));
-        GUI.Label(new Rect(ColumnOne, 30, ColumnTwo - ColumnOne, 30), string.Format("Total"));
-        GUI.Label(new Rect(ColumnTwo, 30, ColumnThree - ColumnTwo, 30), string.Format("Average"));
-        GUI.Label(new Rect(ColumnThree, 30, ColumnFour - ColumnThree, 30), string.Format("Last"));
-        GUI.Label(new Rect(ColumnFour, 30, ColumnFive - ColumnFour, 30), string.Format("Max"));
-        GUI.Label(new Rect(ColumnFive, 30, ColumnSix - ColumnFive, 30), string.Format("Count"));
+        GUI.Label(new Rect(ColumnZero, 30, ColumnOne - ColumnZero, 30), string.Format("Name"), boldLabel);
+        GUI.Label(new Rect(ColumnOne, 30, ColumnTwo - ColumnOne, 30), string.Format("Total"), boldLabel);
+        GUI.Label(new Rect(ColumnTwo, 30, ColumnThree - ColumnTwo, 30), string.Format("Average"), boldLabel);
+        GUI.Label(new Rect(ColumnThree, 30, ColumnFour - ColumnThree, 30), string.Format("Last"), boldLabel);
+        GUI.Label(new Rect(ColumnFour, 30, ColumnFive - ColumnFour, 30), string.Format("Max"), boldLabel);
+        GUI.Label(new Rect(ColumnFive, 30, ColumnSix - ColumnFive, 30), string.Format("Count"), boldLabel);
 
         var y = 60;
 
         foreach (var counter in counters)
         {
             GUI.Label(new Rect(ColumnZero, y, ColumnOne - ColumnZero, 30), counter.Name);
-            GUI.Label(new Rect(ColumnOne, y, ColumnTwo - ColumnOne, 30), string.Format("{0}", counter.Time / 1000));
-            GUI.Label(new Rect(ColumnTwo, y, ColumnThree - ColumnTwo, 30), string.Format("{0:0.00}", counter.Average / 1000f));
-            GUI.Label(new Rect(ColumnThree, y, ColumnFour - ColumnThree, 30), string.Format("{0:0.0}", counter.Last / 1000f));
-            GUI.Label(new Rect(ColumnFour, y, ColumnFive - ColumnFour, 30), string.Format("{0:0.0}", counter.Max / 1000f));
+            GUI.Label(new Rect(ColumnOne, y, ColumnTwo - ColumnOne, 30), string.Format("{0}", counter.Time / 1000.0f));
+            GUI.Label(new Rect(ColumnTwo, y, ColumnThree - ColumnTwo, 30), string.Format("{0:0.00}", counter.Average / 1000.0f));
+            GUI.Label(new Rect(ColumnThree, y, ColumnFour - ColumnThree, 30), string.Format("{0:0.0}", counter.Last / 1000.0f));
+            GUI.Label(new Rect(ColumnFour, y, ColumnFive - ColumnFour, 30), string.Format("{0:0.0}", counter.Max / 1000.0f));
             GUI.Label(new Rect(ColumnFive, y, ColumnSix - ColumnFive, 30), string.Format("{0}", counter.Count));
 
             y += 20;

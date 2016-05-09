@@ -33,22 +33,30 @@
 using UnityEngine;
 
 [ExecuteInEditMode()]
-[RequireComponent(typeof(Planetoid))]
 public class GUIDrawQuadTexture : MonoBehaviour
 {
+    public enum TextureType
+    {
+        Height,
+        Normal
+    }
+
     public Planetoid planetoid = null;
 
     public QuadPosition quadPosition = QuadPosition.Top;
     public TextureType textureType = TextureType.Height;
+
+    public float angle = 0.0f;
     public float scale = 0.5f;
     public float x = 10.0f;
     public float y = 10.0f;
-    public float rotationAngle = 0.0f;
 
     public bool alphaBelnded = false;
 
     private void OnGUI()
     {
+        //DrawBox();
+
         if (planetoid != null)
         {
             if (planetoid.MainQuads != null && planetoid.MainQuads.Count != 0)
@@ -57,28 +65,15 @@ public class GUIDrawQuadTexture : MonoBehaviour
                 {
                     if (q.HeightTexture == null || q.NormalTexture == null) return;
 
-                    RenderTexture tex = new RenderTexture(10, 10, 24);
-
-                    switch (textureType)
-                    {
-                        case TextureType.Height:
-                            tex = q.HeightTexture;
-                            break;
-                        case TextureType.Normal:
-                            tex = q.NormalTexture;
-                            break;
-                    }
-
-                    Vector2 dim = new Vector2(tex.width, tex.height);
+                    Vector2 size = new Vector2(QS.nVertsPerEdgeSub, QS.nVertsPerEdgeSub);
 
                     if (q.Position == quadPosition)
                     {
-                        GUI.BeginGroup(new Rect(0, 0, Screen.width, Screen.height));
-                        GUIUtility.RotateAroundPivot(rotationAngle, new Vector2(x + (dim.x * scale) / 2, y + (dim.y * scale) / 2));
-                        GUI.DrawTexture(new Rect(x, y,
-                                                 dim.x * scale,
-                                                 dim.y * scale),
-                                                 tex, ScaleMode.StretchToFill, alphaBelnded);
+                        GUI.BeginGroup(new Rect(0, 0, Screen.width * 10, Screen.height * 10));
+                        GUIUtility.RotateAroundPivot(angle, new Vector2(x + QS.nVertsPerEdge * scale,
+                                                                        y + QS.nVertsPerEdge * scale));
+                        GUI.DrawTexture(new Rect(x, y, size.x * scale, size.y * scale),
+                                                 GetTexture(q, textureType), ScaleMode.ScaleAndCrop, alphaBelnded);
                         GUI.EndGroup();
                     }
                 }
@@ -86,37 +81,86 @@ public class GUIDrawQuadTexture : MonoBehaviour
         }
     }
 
-    public Texture2D Rotate(Texture2D image, int centerX, int centerY, float angle)
+    private void DrawBox()
     {
-        var radians = (Mathf.PI / 180) * angle;
+        Vector2 size = new Vector2(QS.nVertsPerEdgeSub * scale, QS.nVertsPerEdgeSub * scale);
 
-        var cos = Mathf.Cos(radians);
-        var sin = Mathf.Sin(radians);
-
-        var newImage = new Texture2D(image.width, image.height);
-
-        for (var x = 0; x < image.width; x++)
+        if (planetoid != null)
         {
-            for (var y = 0; y < image.height; y++)
+            if (planetoid.MainQuads != null && planetoid.MainQuads.Count != 0)
             {
-                var m = x - centerX;
-                var n = y - centerY;
-                var j = ((int)(m * cos + n * sin)) + centerX;
-                var k = ((int)(n * cos - m * sin)) + centerY;
-
-                if (j >= 0 && j < image.width && k >= 0 && k < image.height)
+                foreach (Quad q in planetoid.MainQuads)
                 {
-                    newImage.SetPixel(x, y, image.GetPixel(j, k));
+                    Rect topRect = new Rect(x, y, size.x, size.y);
+                    Rect leftRect = new Rect(topRect.x - topRect.width, topRect.y, size.x, size.y);
+                    Rect rightRect = new Rect(topRect.x + topRect.width, topRect.y, size.x, size.y);
+                    Rect backRect = new Rect(topRect.x, topRect.y - topRect.height, size.x, size.y);
+                    Rect frontRect = new Rect(topRect.x, topRect.y + topRect.height, size.x, size.y);
+                    Rect bottomRect = new Rect(frontRect.x, frontRect.y + frontRect.height, size.x, size.y);
+
+                    if (q.Position == QuadPosition.Top)
+                    {
+                        GUI.DrawTexture(topRect, GetTexture(q, textureType), ScaleMode.ScaleAndCrop, alphaBelnded);
+                    }
+                    else if (q.Position == QuadPosition.Bottom)
+                    {
+                        GUI.BeginGroup(new Rect(0, 0, Screen.width * 10, Screen.height * 10));
+                        GUIUtility.RotateAroundPivot(180, new Vector2(x + QS.nVertsPerEdge * scale,
+                                                                      y + QS.nVertsPerEdge * scale));
+
+                        GUI.DrawTexture(bottomRect, GetTexture(q, textureType), ScaleMode.ScaleAndCrop, alphaBelnded);
+                        GUI.EndGroup();
+                    }
+                    else if (q.Position == QuadPosition.Left)
+                    {
+                        GUI.BeginGroup(new Rect(0, 0, Screen.width * 10, Screen.height * 10));
+                        GUIUtility.RotateAroundPivot(-90, new Vector2(x + QS.nVertsPerEdge * scale,
+                                                                      y + QS.nVertsPerEdge * scale));
+
+                        GUI.DrawTexture(leftRect, GetTexture(q, textureType), ScaleMode.ScaleAndCrop, alphaBelnded);
+                        GUI.EndGroup();
+                    }
+                    else if (q.Position == QuadPosition.Right)
+                    {
+                        GUI.BeginGroup(new Rect(0, 0, Screen.width * 10, Screen.height * 10));
+                        GUIUtility.RotateAroundPivot(90, new Vector2(x + QS.nVertsPerEdge * scale,
+                                                                     y + QS.nVertsPerEdge * scale));
+
+                        GUI.DrawTexture(rightRect, GetTexture(q, textureType), ScaleMode.ScaleAndCrop, alphaBelnded);
+                        GUI.EndGroup();
+                    }
+                    else if (q.Position == QuadPosition.Front)
+                    {
+                        GUI.BeginGroup(new Rect(0, 0, Screen.width * 10, Screen.height * 10));
+                        GUIUtility.RotateAroundPivot(90, new Vector2(x + QS.nVertsPerEdge * scale,
+                                                                     y + QS.nVertsPerEdge * scale));
+
+                        GUI.DrawTexture(frontRect, GetTexture(q, textureType), ScaleMode.ScaleAndCrop, alphaBelnded);
+                        GUI.EndGroup();
+                    }
+                    else if (q.Position == QuadPosition.Back)
+                    {
+                        GUI.BeginGroup(new Rect(0, 0, Screen.width * 10, Screen.height * 10));
+                        GUIUtility.RotateAroundPivot(-90, new Vector2(x + QS.nVertsPerEdge * scale,
+                                                                      y + QS.nVertsPerEdge * scale));
+
+                        GUI.DrawTexture(backRect, GetTexture(q, textureType), ScaleMode.ScaleAndCrop, alphaBelnded);
+                        GUI.EndGroup();
+                    }
                 }
             }
         }
-
-        return newImage;
     }
-}
 
-public enum TextureType
-{
-    Height,
-    Normal
+    private RenderTexture GetTexture(Quad q, TextureType textureType)
+    {
+        switch (textureType)
+        {
+            case TextureType.Height:
+                return q.HeightTexture;
+            case TextureType.Normal:
+                return q.NormalTexture;
+            default: return null;
+        }
+    }
 }

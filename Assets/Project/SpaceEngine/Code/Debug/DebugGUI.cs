@@ -36,7 +36,11 @@ public abstract class DebugGUI : MonoBehaviour, IDebug
 {
     public Rect debugInfoBounds = new Rect(10, 10, 500, 500);
 
-    private DebugGUISwitcher switcher;
+    [HideInInspector]
+    public DebugGUISwitcher switcher;
+
+    [HideInInspector]
+    public GUIStyle boldLabel;
 
     protected virtual void Awake()
     {
@@ -56,5 +60,12 @@ public abstract class DebugGUI : MonoBehaviour, IDebug
                 GUI.skin = switcher.skin;
 
         GUI.depth = -100;
+
+        if (switcher != null)
+            if (switcher.skin != null)
+                if (GUI.skin.FindStyle("label_Bold") != null)
+                    boldLabel = GUI.skin.FindStyle("label_Bold");
+                else if (GUI.skin.FindStyle("label") != null)
+                    boldLabel = GUI.skin.FindStyle("label");
     }
 }
