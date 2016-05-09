@@ -8,8 +8,8 @@ public sealed class SunGlare : MonoBehaviour
     public Atmosphere Atmosphere;
     public AtmosphereSun Sun;
 
-    public Shader sunglareShader;
-    private Material sunglareMaterial;
+    public Shader sunGlareShader;
+    private Material sunGlareMaterial;
 
     public Texture2D sunSpikes;
     public Texture2D sunFlare;
@@ -21,15 +21,15 @@ public sealed class SunGlare : MonoBehaviour
 
     private bool eclipse = false;
 
-    private Vector3 sunViewPortPos = Vector3.zero;
+    private Vector3 sunViewPortPosition = Vector3.zero;
 
     private float sunGlareScale = 1;
     private float sunGlareFade = 1;
 
-    public AnimationCurve fadeCurve = new AnimationCurve(new Keyframe[] { new Keyframe(0.0f, 0.0f),
-                                                                          new Keyframe(1.0f, 1.0f),
-                                                                          new Keyframe(9.0f, 1.0f),
-                                                                          new Keyframe(10.0f, 0.0f) });
+    public AnimationCurve sunGlareFadeCurve = new AnimationCurve(new Keyframe[] { new Keyframe(0.0f, 0.0f),
+                                                                                  new Keyframe(1.0f, 1.0f),
+                                                                                  new Keyframe(9.0f, 1.0f),
+                                                                                  new Keyframe(10.0f, 0.0f) });
 
     Mesh screenMesh;
 
@@ -50,8 +50,8 @@ public sealed class SunGlare : MonoBehaviour
             if (GetComponent<AtmosphereSun>() != null)
                 Sun = GetComponent<AtmosphereSun>();
 
-        sunglareMaterial = new Material(sunglareShader);
-        sunglareMaterial.renderQueue = RenderQueue;
+        sunGlareMaterial = new Material(sunGlareShader);
+        sunGlareMaterial.renderQueue = RenderQueue;
 
         screenMesh = MeshFactory.MakePlane(2, 2, MeshFactory.PLANE.XY, false, false, false);
         screenMesh.bounds = new Bounds(Vector4.zero, new Vector3(9e37f, 9e37f, 9e37f));
@@ -65,7 +65,7 @@ public sealed class SunGlare : MonoBehaviour
         for (int i = 0; i < ghost3SettingsList.Count; i++)
             ghost3Settings.SetRow(i, ghost3SettingsList[i]);
 
-        InitUniforms(sunglareMaterial);
+        InitUniforms(sunGlareMaterial);
     }
 
     public void InitSetAtmosphereUniforms()
@@ -76,46 +76,46 @@ public sealed class SunGlare : MonoBehaviour
 
     public void InitUniforms()
     {
-        InitUniforms(sunglareMaterial);
+        InitUniforms(sunGlareMaterial);
     }
 
     public void InitUniforms(Material mat)
     {
         if (mat == null) return;
 
-        sunglareMaterial.SetTexture("sunSpikes", sunSpikes);
-        sunglareMaterial.SetTexture("sunFlare", sunFlare);
-        sunglareMaterial.SetTexture("sunGhost1", sunGhost1);
-        sunglareMaterial.SetTexture("sunGhost2", sunGhost2);
-        sunglareMaterial.SetTexture("sunGhost3", sunGhost3);
+        sunGlareMaterial.SetTexture("sunSpikes", sunSpikes);
+        sunGlareMaterial.SetTexture("sunFlare", sunFlare);
+        sunGlareMaterial.SetTexture("sunGhost1", sunGhost1);
+        sunGlareMaterial.SetTexture("sunGhost2", sunGhost2);
+        sunGlareMaterial.SetTexture("sunGhost3", sunGhost3);
 
-        sunglareMaterial.SetVector("flareSettings", flareSettings);
-        sunglareMaterial.SetVector("spikesSettings", spikesSettings);
-        sunglareMaterial.SetMatrix("ghost1Settings", ghost1Settings);
-        sunglareMaterial.SetMatrix("ghost2Settings", ghost2Settings);
-        sunglareMaterial.SetMatrix("ghost3Settings", ghost2Settings);
+        sunGlareMaterial.SetVector("flareSettings", flareSettings);
+        sunGlareMaterial.SetVector("spikesSettings", spikesSettings);
+        sunGlareMaterial.SetMatrix("ghost1Settings", ghost1Settings);
+        sunGlareMaterial.SetMatrix("ghost2Settings", ghost2Settings);
+        sunGlareMaterial.SetMatrix("ghost3Settings", ghost2Settings);
 
-        if (Atmosphere != null) Atmosphere.InitUniforms(sunglareMaterial);
+        if (Atmosphere != null) Atmosphere.InitUniforms(sunGlareMaterial);
     }
 
     public void SetUniforms()
     {
-        SetUniforms(sunglareMaterial);
+        SetUniforms(sunGlareMaterial);
     }
 
     public void SetUniforms(Material mat)
     {
         if (mat == null) return;
 
-        sunglareMaterial.SetVector("sunViewPortPos", sunViewPortPos);
+        sunGlareMaterial.SetVector("sunViewPortPos", sunViewPortPosition);
 
-        sunglareMaterial.SetFloat("aspectRatio", Camera.main.aspect);
-        sunglareMaterial.SetFloat("sunGlareScale", sunGlareScale);
-        sunglareMaterial.SetFloat("sunGlareFade", sunGlareFade);
-        sunglareMaterial.SetFloat("useTransmittance", 1.0f);
-        sunglareMaterial.SetFloat("eclipse", eclipse ? 1.0f : 0.0f);
+        sunGlareMaterial.SetFloat("aspectRatio", Camera.main.aspect);
+        sunGlareMaterial.SetFloat("sunGlareScale", sunGlareScale);
+        sunGlareMaterial.SetFloat("sunGlareFade", sunGlareFade);
+        sunGlareMaterial.SetFloat("useTransmittance", 1.0f);
+        sunGlareMaterial.SetFloat("eclipse", eclipse ? 1.0f : 0.0f);
 
-        Atmosphere.SetUniforms(sunglareMaterial);
+        Atmosphere.SetUniforms(sunGlareMaterial);
     }
 
     public void UpdateNode()
@@ -126,9 +126,9 @@ public sealed class SunGlare : MonoBehaviour
 
         RaycastHit hit;
 
-        sunViewPortPos = Camera.main.WorldToViewportPoint(Sun.transform.position);
+        sunViewPortPosition = Camera.main.WorldToViewportPoint(Sun.transform.position);
         sunGlareScale = dist / 2266660f;
-        sunGlareFade = fadeCurve.Evaluate(sunGlareScale);
+        sunGlareFade = sunGlareFadeCurve.Evaluate(sunGlareScale);
 
         eclipse = false;
         eclipse = Physics.Raycast(Camera.main.transform.position, (Sun.transform.position - Camera.main.transform.position).normalized, out hit, Mathf.Infinity);
@@ -136,16 +136,16 @@ public sealed class SunGlare : MonoBehaviour
         if (!eclipse)
             eclipse = Physics.Raycast(Camera.main.transform.position, (Sun.transform.position - Camera.main.transform.position).normalized, out hit, Mathf.Infinity);
 
-        SetUniforms(sunglareMaterial);
+        SetUniforms(sunGlareMaterial);
     }
 
     public void Update()
     {
         UpdateNode();
 
-        if (sunViewPortPos.z > 0)
+        if (sunViewPortPosition.z > 0)
         {
-            Graphics.DrawMesh(screenMesh, Vector3.zero, Quaternion.identity, sunglareMaterial, 10, Camera.main, 0, null, false, false);
+            Graphics.DrawMesh(screenMesh, Vector3.zero, Quaternion.identity, sunGlareMaterial, 10, Camera.main, 0, null, false, false);
         }
     }
 }
