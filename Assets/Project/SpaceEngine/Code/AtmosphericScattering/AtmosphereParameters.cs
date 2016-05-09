@@ -16,8 +16,10 @@ public struct AtmosphereParameters
 
     //Physical settings, Mie and Rayliegh values
     public float AVERAGE_GROUND_REFLECTANCE;
+
     public Vector4 BETA_R;
     public Vector4 BETA_MSca;
+    public Vector4 BETA_MEx;
 
     public float Rg;
     public float Rt;
@@ -40,9 +42,10 @@ public struct AtmosphereParameters
     public int RES_NU;
 
     public AtmosphereParameters(float MIE_G, float HR, float HM, float AVERAGE_GROUND_REFLECTANCE,
-                                Vector4 BETA_R, 
+                                Vector4 BETA_R,
                                 Vector4 BETA_MSca,
-                                float Rg, float Rt, float Rl, 
+                                Vector4 BETA_MEx,
+                                float Rg, float Rt, float Rl,
                                 float bRg, float bRt, float bRl,
                                 float SCALE,
                                 int TRANSMITTANCE_W, int TRANSMITTANCE_H, int SKY_W, int SKY_H, int RES_R, int RES_MU, int RES_MU_S, int RES_NU)
@@ -53,8 +56,10 @@ public struct AtmosphereParameters
         this.HM = HM;
 
         this.AVERAGE_GROUND_REFLECTANCE = AVERAGE_GROUND_REFLECTANCE;
+
         this.BETA_R = BETA_R;
         this.BETA_MSca = BETA_MSca;
+        this.BETA_MEx = BETA_MEx;
 
         this.Rg = Rg;
         this.Rt = Rt;
@@ -76,16 +81,113 @@ public struct AtmosphereParameters
         this.RES_NU = RES_NU;
     }
 
-    public static AtmosphereParameters Default
+    public static AtmosphereParameters Earth
     {
         get
         {
-            AtmosphereParameters ap = new AtmosphereParameters(0.8f, 8.0f, 1.2f, 0.1f,
-                                                               new Vector4(5.8e-3f, 1.35e-2f, 3.31e-2f, 0.0f),
-                                                               new Vector4(4e-6f, 4e-6f, 4e-6f, 0.0f),
+            AtmosphereParameters ap = new AtmosphereParameters(0.8f, 8.0f, 2.0f, 0.1f,
+                                                               new Vector4(0.0058f, 0.0135f, 0.0331f, 0.0f),
+                                                               new Vector4(0.0040f, 0.0040f, 0.0040f, 0.0f),
+                                                               new Vector4(0.0040f, 0.0040f, 0.0040f, 0.0f),
                                                                6360.0f, 6420.0f, 6421.0f,
                                                                6360.0f, 6420.0f, 6421.0f,
                                                                6360.0f,
+                                                               256, 64, 64, 16, 32, 128, 32, 8);
+
+            return ap;
+        }
+
+        private set { }
+    }
+
+    public static AtmosphereParameters Venus
+    {
+        get
+        {
+            AtmosphereParameters ap = new AtmosphereParameters(0.6f, 12.0f, 8.0f, 0.1f,
+                                                               new Vector4(0.010f, 0.008f, 0.004f, 0.0f),
+                                                               new Vector4(0.005f, 0.004f, 0.002f, 0.0f),
+                                                               new Vector4(0.005f, 0.004f, 0.002f, 0.0f),
+                                                               6052.0f, 6132.0f, 6133.0f,
+                                                               6052.0f, 6132.0f, 6133.0f,
+                                                               6052.0f,
+                                                               256, 64, 64, 16, 32, 128, 32, 8);
+
+            return ap;
+        }
+
+        private set { }
+    }
+
+    public static AtmosphereParameters Mars
+    {
+        get
+        {
+            AtmosphereParameters ap = new AtmosphereParameters(0.4f, 8.0f, 2.0f, 0.1f,
+                                                               new Vector4(0.0213f, 0.0168f, 0.0113f, 0.0f),
+                                                               new Vector4(0.0085f, 0.0067f, 0.0045f, 0.0f),
+                                                               new Vector4(0.0040f, 0.0040f, 0.0040f, 0.0f),
+                                                               3387.792f, 3487.792f, 3488.792f,
+                                                               3387.792f, 3487.792f, 3488.792f,
+                                                               3387.792f,
+                                                               256, 64, 64, 16, 32, 128, 32, 8);
+
+            return ap;
+        }
+
+        private set { }
+    }
+
+    public static AtmosphereParameters Jupiter
+    {
+        get
+        {
+            AtmosphereParameters ap = new AtmosphereParameters(0.8f, 12.0f, 2.0f, 0.1f,
+                                                               new Vector4(0.0117f, 0.0135f, 0.0180f, 0.0f),
+                                                               new Vector4(0.0040f, 0.0040f, 0.0040f, 0.0f),
+                                                               new Vector4(0.0040f, 0.0040f, 0.0040f, 0.0f),
+                                                               7149.2f, 7209.2f, 7210.2f,
+                                                               7149.2f, 7209.2f, 7210.2f,
+                                                               7149.2f,
+                                                               256, 64, 64, 16, 32, 128, 32, 8);
+
+            return ap;
+        }
+
+        private set { }
+    }
+
+
+    public static AtmosphereParameters Titan
+    {
+        get
+        {
+            AtmosphereParameters ap = new AtmosphereParameters(0.0f, 10.0f, 8.0f, 0.1f,
+                                                               new Vector4(0.0040f, 0.0040f, 0.0100f, 0.0f),
+                                                               new Vector4(0.0010f, 0.0100f, 0.0600f, 0.0f),
+                                                               new Vector4(0.0010f, 0.0100f, 0.0600f, 0.0f),
+                                                               2574.91f, 2634.91f, 2635.91f,
+                                                               2574.91f, 2634.91f, 2635.91f,
+                                                               2574.91f,
+                                                               256, 64, 64, 16, 32, 128, 32, 8);
+
+            return ap;
+        }
+
+        private set { }
+    }
+
+    public static AtmosphereParameters Neptune
+    {
+        get
+        {
+            AtmosphereParameters ap = new AtmosphereParameters(0.6f, 8.0f, 4.5f, 0.1f,
+                                                               new Vector4(0.0058f, 0.0135f, 0.0331f, 0.0f),
+                                                               new Vector4(0.00058f, 0.0027f, 0.01f, 0.0f),
+                                                               new Vector4(0.00058f, 0.000027f, 0.005f, 0.0f),
+                                                               6371.0f, 6431.0f, 6432.0f,
+                                                               6371.0f, 6431.0f, 6432.0f,
+                                                               6371.0f,
                                                                256, 64, 64, 16, 32, 128, 32, 8);
 
             return ap;

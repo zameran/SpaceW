@@ -30,9 +30,9 @@ public sealed class AtmosphereRunTimeBaker : MonoBehaviour
     public void Bake()
     {
         if (UseCoroutine)
-            StartCoroutine(DoWorkCoroutine(AtmosphereParameters.Default));
+            StartCoroutine(DoWorkCoroutine(AtmosphereParameters.Earth));
         else
-            DoWork(AtmosphereParameters.Default);
+            DoWork(AtmosphereParameters.Earth);
     }
 
     public void Bake(AtmosphereParameters AP)
@@ -350,7 +350,7 @@ public sealed class AtmosphereRunTimeBaker : MonoBehaviour
 
         cs.SetVector("betaR", AP.BETA_R);
         cs.SetVector("betaMSca", AP.BETA_MSca);
-        cs.SetVector("betaMEx", AP.BETA_MSca / 0.9f);
+        cs.SetVector("betaMEx", AP.BETA_MEx);
         cs.SetFloat("mieG", Mathf.Clamp(AP.MIE_G, 0.0f, 0.99f));
     }
 
@@ -381,7 +381,7 @@ public sealed class AtmosphereRunTimeBaker : MonoBehaviour
 
         cs.SetVector("betaR", AP.BETA_R);
         cs.SetVector("betaMSca", AP.BETA_MSca);
-        cs.SetVector("betaMEx", AP.BETA_MSca / 0.9f);
+        cs.SetVector("betaMEx", AP.BETA_MEx);
         cs.SetFloat("mieG", Mathf.Clamp(AP.MIE_G, 0.0f, 0.99f));
     }
 }

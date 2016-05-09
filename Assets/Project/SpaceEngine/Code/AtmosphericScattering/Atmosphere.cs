@@ -4,9 +4,6 @@ using System.Collections.Generic;
 
 public sealed class Atmosphere : MonoBehaviour
 {
-    readonly Vector3 BETA_MSca = new Vector3(4e-3f, 4e-3f, 4e-3f);
-    readonly Vector3 betaR = new Vector3(5.8e-3f, 1.35e-2f, 3.31e-2f);
-
     [Range(0.0f, 1.0f)]
     public float Density = 1.0f;
 
@@ -40,7 +37,7 @@ public sealed class Atmosphere : MonoBehaviour
 
     public List<GameObject> eclipseCasters;
 
-    public AtmosphereParameters atmosphereParameters = AtmosphereParameters.Default;
+    public AtmosphereParameters atmosphereParameters = AtmosphereParameters.Earth;
     public AtmosphereRunTimeBaker artb = null;
 
     public Vector3 Origin;
@@ -58,6 +55,23 @@ public sealed class Atmosphere : MonoBehaviour
         InitUniforms(SkyMaterial);
 
         SetUniforms(SkyMaterial);
+    }
+
+    private void ApplyTestPresset(AtmosphereParameters p)
+    {
+        // For Testing purpose...
+
+        float Rg = atmosphereParameters.Rg;
+        float Rt = atmosphereParameters.Rt;
+        float Rl = atmosphereParameters.Rl;
+        float Scale = atmosphereParameters.SCALE;
+
+        atmosphereParameters = p;
+
+        atmosphereParameters.Rg = Rg;
+        atmosphereParameters.Rt = Rt;
+        atmosphereParameters.Rl = Rl;
+        atmosphereParameters.SCALE = Scale;
     }
 
     public void TryBake()
@@ -269,8 +283,8 @@ public sealed class Atmosphere : MonoBehaviour
         mat.SetFloat("AVERAGE_GROUND_REFLECTANCE", atmosphereParameters.AVERAGE_GROUND_REFLECTANCE);
         mat.SetFloat("HR", atmosphereParameters.HR * 1000.0f);
         mat.SetFloat("HM", atmosphereParameters.HM * 1000.0f);
-        mat.SetVector("betaMSca", BETA_MSca / 1000.0f);
-        mat.SetVector("betaMEx", (BETA_MSca / 1000.0f) / 0.9f);
+        mat.SetVector("betaMSca", atmosphereParameters.BETA_MSca / 1000.0f);
+        mat.SetVector("betaMEx", atmosphereParameters.BETA_MEx / 1000.0f);
         mat.SetTexture("_Sun_Glare", SunGlareTexture);
         mat.SetFloat("_Sun_Glare_Scale", SunGlareScale);
     }
@@ -356,7 +370,7 @@ public sealed class Atmosphere : MonoBehaviour
         mat.SetFloat("Rg", atmosphereParameters.Rg);
         mat.SetFloat("Rt", atmosphereParameters.Rt);
         mat.SetFloat("RL", atmosphereParameters.Rl);
-        mat.SetVector("betaR", betaR / 1000.0f);
+        mat.SetVector("betaR", atmosphereParameters.BETA_R / 1000.0f);
         mat.SetFloat("mieG", Mathf.Clamp(atmosphereParameters.MIE_G, 0.0f, 0.99f));
         mat.SetFloat("_Sun_Glare_Scale", SunGlareScale);
 
@@ -400,7 +414,7 @@ public sealed class Atmosphere : MonoBehaviour
         mat.SetFloat("Rg", atmosphereParameters.Rg);
         mat.SetFloat("Rt", atmosphereParameters.Rt);
         mat.SetFloat("RL", atmosphereParameters.Rl);
-        mat.SetVector("betaR", betaR / 1000.0f);
+        mat.SetVector("betaR", atmosphereParameters.BETA_R / 1000.0f);
         mat.SetFloat("mieG", Mathf.Clamp(atmosphereParameters.MIE_G, 0.0f, 0.99f));
 
         if (RunTimeBaking && artb != null)
