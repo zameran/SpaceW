@@ -233,8 +233,8 @@ public struct AtmosphereParameters
         {
             AtmosphereParameters ap = new AtmosphereParameters(0.6f, 8.0f, 4.5f, 0.1f,
                                                                new Vector4(0.0058f, 0.0135f, 0.0331f, 0.0f),
-                                                               new Vector4(0.00058f, 0.0027f, 0.01f, 0.0f),
-                                                               new Vector4(0.00058f, 0.000027f, 0.005f, 0.0f),
+                                                               new Vector4(0.00058f, 0.0027f, 0.1f, 0.0f),
+                                                               new Vector4(0.00058f, 0.00027f, 0.005f, 0.0f),
                                                                6371.0f, 6431.0f, 6432.0f,
                                                                6371.0f, 6431.0f, 6432.0f,
                                                                6371.0f,
