@@ -41,6 +41,41 @@ public struct AtmosphereParameters
     public int RES_MU_S;
     public int RES_NU;
 
+    public AtmosphereParameters(AtmosphereParameters from)
+    {
+        //TODO: copy via reflection.
+
+        this.MIE_G = from.MIE_G;
+
+        this.HR = from.HR;
+        this.HM = from.HM;
+
+        this.AVERAGE_GROUND_REFLECTANCE = from.AVERAGE_GROUND_REFLECTANCE;
+
+        this.BETA_R = from.BETA_R;
+        this.BETA_MSca = from.BETA_MSca;
+        this.BETA_MEx = from.BETA_MEx;
+
+        this.Rg = from.Rg;
+        this.Rt = from.Rt;
+        this.Rl = from.Rl;
+
+        this.bRg = from.bRg;
+        this.bRt = from.bRt;
+        this.bRl = from.bRl;
+
+        this.SCALE = from.SCALE;
+
+        this.TRANSMITTANCE_W = from.TRANSMITTANCE_W;
+        this.TRANSMITTANCE_H = from.TRANSMITTANCE_H;
+        this.SKY_W = from.SKY_W;
+        this.SKY_H = from.SKY_H;
+        this.RES_R = from.RES_R;
+        this.RES_MU = from.RES_MU;
+        this.RES_MU_S = from.RES_MU_S;
+        this.RES_NU = from.RES_NU;
+    }
+
     public AtmosphereParameters(float MIE_G, float HR, float HM, float AVERAGE_GROUND_REFLECTANCE,
                                 Vector4 BETA_R,
                                 Vector4 BETA_MSca,
@@ -81,6 +116,22 @@ public struct AtmosphereParameters
         this.RES_NU = RES_NU;
     }
 
+    public static AtmosphereParameters Get(AtmosphereBase preset)
+    {
+        switch (preset)
+        {
+            case AtmosphereBase.Default: return Earth;
+            case AtmosphereBase.Earth: return Earth;
+            case AtmosphereBase.Venus: return Venus;
+            case AtmosphereBase.Mars: return Mars;
+            case AtmosphereBase.Jupiter: return Jupiter;
+            case AtmosphereBase.Titan: return Titan;
+            case AtmosphereBase.Neptune: return Neptune;
+            case AtmosphereBase.Sun: return Sun;
+            default: { Debug.Log("Atmosphere: AtmosphereParameters.Get(...) fail!"); return Earth; }
+        }
+    }
+    //TODO: Maybe methods? Propertyed pressets... fuuuucking shit.
     public static AtmosphereParameters Earth
     {
         get
@@ -156,7 +207,6 @@ public struct AtmosphereParameters
 
         private set { }
     }
-
 
     public static AtmosphereParameters Titan
     {

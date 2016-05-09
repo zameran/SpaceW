@@ -158,7 +158,16 @@ public sealed class Planetoid : MonoBehaviour
         if (PrototypeMesh == null)
             SetupMesh();
 
+        if (Atmosphere != null)
+            Atmosphere.OnBaked += OnAtmosphereBaked;
+
         Atmosphere.InitPlanetoidUniforms(this);
+    }
+
+    private void OnDestroy()
+    {
+        if (Atmosphere != null)
+            Atmosphere.OnBaked -= OnAtmosphereBaked;
     }
 
     private void Update()
@@ -228,6 +237,14 @@ public sealed class Planetoid : MonoBehaviour
             {
                 Atmosphere.ReanimateAtmosphereUniforms(Atmosphere, this);
             }
+        }
+    }
+
+    private void OnAtmosphereBaked(Atmosphere a)
+    {
+        if (a != null)
+        {
+            a.ReanimateAtmosphereUniforms(a, this);
         }
     }
 

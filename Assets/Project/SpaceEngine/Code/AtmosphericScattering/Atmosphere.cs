@@ -4,8 +4,31 @@ using System.Collections.Generic;
 
 public sealed class Atmosphere : MonoBehaviour
 {
+    private AtmosphereBase atmosphereBase = AtmosphereBase.Earth;
+    private AtmosphereBase atmosphereBasePrev = AtmosphereBase.Earth;
+
+    public AtmosphereBase AtmosphereBase
+    {
+        get { return atmosphereBase; }
+        set
+        {
+            atmosphereBasePrev = atmosphereBase;
+            atmosphereBase = value;
+
+            if (atmosphereBasePrev != value)
+                if (OnPresetChanged != null)
+                    OnPresetChanged(this);
+        }
+    }
+
+    public delegate void AtmosphereDelegate(Atmosphere a);
+    public event AtmosphereDelegate OnPresetChanged, OnBaked;
+
     [Range(0.0f, 1.0f)]
     public float Density = 1.0f;
+
+    public float Radius = 2048f;
+    public float Height = 100.0f;
 
     public int AtmosphereMeshResolution = 2;
 
@@ -37,13 +60,16 @@ public sealed class Atmosphere : MonoBehaviour
 
     public List<GameObject> eclipseCasters;
 
-    public AtmosphereParameters atmosphereParameters = AtmosphereParameters.Earth;
+    private AtmosphereParameters atmosphereParameters;
+
     public AtmosphereRunTimeBaker artb = null;
 
     public Vector3 Origin;
 
     private void Start()
     {
+        ApplyTestPresset(AtmosphereParameters.Get(atmosphereBase));
+
         TryBake();
 
         InitMisc();
@@ -52,31 +78,30 @@ public sealed class Atmosphere : MonoBehaviour
         InitMesh();
         InitSuns();
 
-        InitUniforms(SkyMaterial);
+        InitSetAtmosphereUniforms();
 
-        SetUniforms(SkyMaterial);
+        if (OnPresetChanged == null) //TODO: Need make some sort of Planetoid scale event manager.
+            OnPresetChanged += AtmosphereOnPresetChanged;
+
+        if (OnBaked == null)
+            OnBaked += AtmosphereOnBaked;
     }
 
     private void ApplyTestPresset(AtmosphereParameters p)
     {
-        // For Testing purpose...
+        atmosphereParameters = new AtmosphereParameters(p);
 
-        float Rg = atmosphereParameters.Rg;
-        float Rt = atmosphereParameters.Rt;
-        float Rl = atmosphereParameters.Rl;
-        float Scale = atmosphereParameters.SCALE;
-
-        atmosphereParameters = p;
-
-        atmosphereParameters.Rg = Rg;
-        atmosphereParameters.Rt = Rt;
-        atmosphereParameters.Rl = Rl;
-        atmosphereParameters.SCALE = Scale;
+        atmosphereParameters.Rg = Radius;
+        atmosphereParameters.Rt = Radius + Height;
+        atmosphereParameters.Rl = Radius + Height * 1.05f;
+        atmosphereParameters.SCALE = Radius;
     }
 
     public void TryBake()
     {
         if (RunTimeBaking && artb != null) artb.Bake(atmosphereParameters);
+
+        if (OnBaked != null) OnBaked(this);
     }
 
     public List<string> GetKeywords()
@@ -156,6 +181,11 @@ public sealed class Atmosphere : MonoBehaviour
 
     public void UpdateNode()
     {
+        atmosphereParameters.Rg = Radius;
+        atmosphereParameters.Rt = Radius + Height;
+        atmosphereParameters.Rl = Radius + Height * 1.05f;
+        atmosphereParameters.SCALE = Radius;
+
         if (Sun_1 != null) Sun_1.Origin = Origin;
         if (Sun_2 != null) Sun_2.Origin = Origin;
     }
@@ -188,6 +218,25 @@ public sealed class Atmosphere : MonoBehaviour
     private void OnDestroy()
     {
         CollectGarbage();
+
+        if (OnPresetChanged != null)
+            OnPresetChanged -= AtmosphereOnPresetChanged;
+
+        if (OnBaked != null)
+            OnBaked -= AtmosphereOnBaked;
+    }
+
+    private void AtmosphereOnPresetChanged(Atmosphere a)
+    {
+        //Debug.Log("Atmosphere: AtmosphereOnPresetChanged() - " + a.gameObject.name);
+
+        ApplyTestPresset(AtmosphereParameters.Get(AtmosphereBase));
+        TryBake();
+    }
+
+    private void AtmosphereOnBaked(Atmosphere a)
+    {
+
     }
 
     public void CollectGarbage(bool all = true)
@@ -282,8 +331,8 @@ public sealed class Atmosphere : MonoBehaviour
         mat.SetFloat("AVERAGE_GROUND_REFLECTANCE", atmosphereParameters.AVERAGE_GROUND_REFLECTANCE);
         mat.SetFloat("HR", atmosphereParameters.HR * 1000.0f);
         mat.SetFloat("HM", atmosphereParameters.HM * 1000.0f);
-        mat.SetVector("betaMSca", atmosphereParameters.BETA_MSca / 1000.0f);
-        mat.SetVector("betaMEx", atmosphereParameters.BETA_MEx / 1000.0f);
+        mat.SetVector("betaMSca", atmosphereParameters.BETA_MSca);
+        mat.SetVector("betaMEx", atmosphereParameters.BETA_MEx);
         mat.SetTexture("_Sun_Glare", SunGlareTexture);
         mat.SetFloat("_Sun_Glare_Scale", SunGlareScale);
     }
@@ -369,7 +418,9 @@ public sealed class Atmosphere : MonoBehaviour
         mat.SetFloat("Rg", atmosphereParameters.Rg);
         mat.SetFloat("Rt", atmosphereParameters.Rt);
         mat.SetFloat("RL", atmosphereParameters.Rl);
-        mat.SetVector("betaR", atmosphereParameters.BETA_R / 1000.0f);
+        mat.SetVector("betaR", atmosphereParameters.BETA_R / 1000);
+        mat.SetVector("betaMSca", atmosphereParameters.BETA_MSca / 1000);
+        mat.SetVector("betaMEx", atmosphereParameters.BETA_MEx / 1000);
         mat.SetFloat("mieG", Mathf.Clamp(atmosphereParameters.MIE_G, 0.0f, 0.99f));
         mat.SetFloat("_Sun_Glare_Scale", SunGlareScale);
 
@@ -413,7 +464,9 @@ public sealed class Atmosphere : MonoBehaviour
         mat.SetFloat("Rg", atmosphereParameters.Rg);
         mat.SetFloat("Rt", atmosphereParameters.Rt);
         mat.SetFloat("RL", atmosphereParameters.Rl);
-        mat.SetVector("betaR", atmosphereParameters.BETA_R / 1000.0f);
+        mat.SetVector("betaR", atmosphereParameters.BETA_R / 1000);
+        mat.SetVector("betaMSca", atmosphereParameters.BETA_MSca / 1000);
+        mat.SetVector("betaMEx", atmosphereParameters.BETA_MEx / 1000);
         mat.SetFloat("mieG", Mathf.Clamp(atmosphereParameters.MIE_G, 0.0f, 0.99f));
 
         if (RunTimeBaking && artb != null)
