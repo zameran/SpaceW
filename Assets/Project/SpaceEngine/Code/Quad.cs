@@ -230,7 +230,7 @@ public sealed class Quad : MonoBehaviour
 
     private void QuadDispatchReady(Quad q)
     {
-        if (LODLevel > 4 && Planetoid.GenerateColliders && GPUDataRecieved)
+        if (LODLevel == 6 && Planetoid.GenerateColliders && GPUDataRecieved)
         {
             MeshCollider mc = gameObject.AddComponent<MeshCollider>();
             mc.sharedMesh = MeshFactory.SetupQuadColliderMesh(outputStructData);
