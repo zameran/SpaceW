@@ -36,13 +36,12 @@ public static class MeshFactory
 {
     public enum PLANE { XY, XZ, YZ };
 
-    public static Mesh SetupQuadMesh(OutputStruct[] outputStructData)
+    public static Mesh SetupQuadColliderMesh(OutputStruct[] outputStructData)
     {
         int nVerts = QS.nVerts;
         int nVertsPerEdge = QS.nVertsPerEdge;
 
         Vector3[] dummyVerts = new Vector3[nVerts];
-        Vector2[] uv0 = new Vector2[nVerts];
 
         int[] triangles = new int[(nVertsPerEdge - 1) * (nVertsPerEdge - 1) * 2 * 3];
 
@@ -56,13 +55,6 @@ public static class MeshFactory
 
                 outputStructData[vertID].pos.w = 1.0f;
                 dummyVerts[vertID] = outputStructData[vertID].pos + (Vector4)outputStructData[vertID].patchCenter;
-
-                Vector2 uv = new Vector2();
-
-                uv.x = r / (float)(nVertsPerEdge - 1);
-                uv.y = c / (float)(nVertsPerEdge - 1);
-
-                uv0[vertID] = uv;
             }
         }
 
@@ -90,8 +82,7 @@ public static class MeshFactory
 
         Mesh dummyMesh = new Mesh();
         dummyMesh.vertices = dummyVerts;
-        dummyMesh.uv = uv0;
-        dummyMesh.SetTriangles(triangles, 0);
+        dummyMesh.triangles = triangles;
 
         return dummyMesh;
     }

@@ -52,6 +52,8 @@ public sealed class Planetoid : MonoBehaviour
     public bool DrawNormals = false;
     public bool DrawGizmos = false;
 
+    public bool GenerateColliders = false;
+
     public bool OctaveFade = false;
     public bool GetData = false;
 

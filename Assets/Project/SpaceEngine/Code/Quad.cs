@@ -213,6 +213,7 @@ public sealed class Quad : MonoBehaviour
     public Vector3 middleNormalized;
 
     public QuadCorners quadCorners;
+    public OutputStruct[] outputStructData;
 
     public delegate void QuadDelegate(Quad q);
     public event QuadDelegate DispatchStarted, DispatchReady, GPUGetDataReady;
@@ -229,7 +230,11 @@ public sealed class Quad : MonoBehaviour
 
     private void QuadDispatchReady(Quad q)
     {
-
+        if (LODLevel > 4 && Planetoid.GenerateColliders && GPUDataRecieved)
+        {
+            MeshCollider mc = gameObject.AddComponent<MeshCollider>();
+            mc.sharedMesh = MeshFactory.SetupQuadColliderMesh(outputStructData);
+        }
     }
 
     private void QuadGPUGetDataReady(Quad q)
@@ -774,9 +779,6 @@ public sealed class Quad : MonoBehaviour
 
         Generated = true;
 
-        if (DispatchReady != null)
-            DispatchReady(this);
-
         if (LODLevel == -1)
         {
             yield return null;
@@ -795,9 +797,13 @@ public sealed class Quad : MonoBehaviour
             OutDataBuffer.GetData(outputStructData);
 
             this.quadCorners = quadCorners[0];
+            this.outputStructData = outputStructData;
 
             this.GPUDataRecieved = true;
         }
+
+        if (DispatchReady != null)
+            DispatchReady(this);
     }
 
     private bool AllSubquadsGenerated()
