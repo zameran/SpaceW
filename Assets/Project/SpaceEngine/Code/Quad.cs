@@ -200,6 +200,7 @@ public sealed class Quad : MonoBehaviour
     public bool Visible = false;
     public bool Cached = false;
     public bool Uniformed = false;
+    public bool GPUDataRecieved = false;
 
     public float LODUpdateInterval = 0.25f;
     public float LastLODUpdateTime = 0.00f;
@@ -321,17 +322,24 @@ public sealed class Quad : MonoBehaviour
         {
             Gizmos.color = Color.red;
 
-            Gizmos.DrawWireSphere(Planetoid.transform.TransformPoint(topLeftCorner), 10000);
-            Gizmos.DrawWireSphere(Planetoid.transform.TransformPoint(topRightCorner), 10000);
-            Gizmos.DrawWireSphere(Planetoid.transform.TransformPoint(bottomLeftCorner), 10000);
-            Gizmos.DrawWireSphere(Planetoid.transform.TransformPoint(bottomRightCorner), 10000);
+            Gizmos.DrawWireSphere(Planetoid.transform.TransformPoint(topLeftCorner), 100);
+            Gizmos.DrawWireSphere(Planetoid.transform.TransformPoint(topRightCorner), 100);
+            Gizmos.DrawWireSphere(Planetoid.transform.TransformPoint(bottomLeftCorner), 100);
+            Gizmos.DrawWireSphere(Planetoid.transform.TransformPoint(bottomRightCorner), 100);
 
             Gizmos.color = Color.green;
 
-            Gizmos.DrawWireSphere(Planetoid.transform.TransformPoint(topLeftCorner.NormalizeToRadius(Planetoid.PlanetRadius)), 15000);
-            Gizmos.DrawWireSphere(Planetoid.transform.TransformPoint(topRightCorner.NormalizeToRadius(Planetoid.PlanetRadius)), 15000);
-            Gizmos.DrawWireSphere(Planetoid.transform.TransformPoint(bottomLeftCorner.NormalizeToRadius(Planetoid.PlanetRadius)), 15000);
-            Gizmos.DrawWireSphere(Planetoid.transform.TransformPoint(bottomRightCorner.NormalizeToRadius(Planetoid.PlanetRadius)), 15000);
+            Gizmos.DrawWireSphere(Planetoid.transform.TransformPoint(topLeftCorner.NormalizeToRadius(Planetoid.PlanetRadius)), 175);
+            Gizmos.DrawWireSphere(Planetoid.transform.TransformPoint(topRightCorner.NormalizeToRadius(Planetoid.PlanetRadius)), 175);
+            Gizmos.DrawWireSphere(Planetoid.transform.TransformPoint(bottomLeftCorner.NormalizeToRadius(Planetoid.PlanetRadius)), 175);
+            Gizmos.DrawWireSphere(Planetoid.transform.TransformPoint(bottomRightCorner.NormalizeToRadius(Planetoid.PlanetRadius)), 175);
+
+            Gizmos.color = Color.blue;
+
+            Gizmos.DrawWireSphere(Planetoid.transform.TransformPoint(quadCorners.topLeftCorner), 150);
+            Gizmos.DrawWireSphere(Planetoid.transform.TransformPoint(quadCorners.topRightCorner), 150);
+            Gizmos.DrawWireSphere(Planetoid.transform.TransformPoint(quadCorners.bottomLeftCorner), 150);
+            Gizmos.DrawWireSphere(Planetoid.transform.TransformPoint(quadCorners.bottomRightCorner), 150);
         }
     }
 
@@ -697,6 +705,11 @@ public sealed class Quad : MonoBehaviour
 
     public void Dispatch()
     {
+        StartCoroutine(DispatchCoroutine());
+    }
+
+    public IEnumerator DispatchCoroutine()
+    {
         if (DispatchStarted != null)
             DispatchStarted(this);
 
@@ -759,16 +772,32 @@ public sealed class Quad : MonoBehaviour
         QS.THREADGROUP_SIZE_Y_UNIT,
         QS.THREADGROUP_SIZE_Z_UNIT);
 
-        if (Planetoid.GetData)
-        {
-            QuadCornersBuffer.GetData(quadCorners);
-            this.quadCorners = quadCorners[0];
-        }
-
         Generated = true;
 
         if (DispatchReady != null)
             DispatchReady(this);
+
+        if (LODLevel == -1)
+        {
+            yield return null;
+        }
+        else
+        {
+            for (int i = 0; i < (Planetoid.DispatchSkipFramesCount / 2); i++)
+            {
+                yield return new WaitForEndOfFrame();
+            }
+        }
+
+        if (Planetoid.GetData)
+        {
+            QuadCornersBuffer.GetData(quadCorners);
+            OutDataBuffer.GetData(outputStructData);
+
+            this.quadCorners = quadCorners[0];
+
+            this.GPUDataRecieved = true;
+        }
     }
 
     private bool AllSubquadsGenerated()
