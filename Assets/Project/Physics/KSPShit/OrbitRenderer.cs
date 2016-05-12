@@ -189,7 +189,7 @@
 
             if(hitDriver != null)
             {
-                Vector2 position = Input.mousePosition;
+                Vector2 position = orbitCastHit.orbitScreenPoint;
                 Vector2 dimension = new Vector2(200, 100);
 
                 GUILayout.BeginArea(new Rect(position, dimension));
@@ -239,7 +239,8 @@
                 driver = orbitDriver
             };
 
-            //if (EventSystem.current.IsPointerOverGameObject() || !orbitLine.active) return false;
+            if(EventSystem.current != null && orbitLine != null)
+                if (EventSystem.current.IsPointerOverGameObject() || !orbitLine.active) return false;
 
             hitInfo.orbitOrigin = orbit.referenceBody.Position.LocalToScaledSpace();
 
@@ -281,6 +282,8 @@
             if (Vector3.Distance(hitInfo.orbitScreenPoint, Input.mousePosition) < orbitPixelWidth)
             {
                 Debug.DrawLine(hitInfo.orbitOrigin, hitInfo.orbitPoint, Color.green);
+
+                hitInfo.orbitScreenPoint = new Vector3(hitInfo.orbitScreenPoint.x, Screen.height - hitInfo.orbitScreenPoint.y, 0f);
 
                 return true;
             }
