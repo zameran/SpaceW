@@ -20,6 +20,7 @@ namespace Experimental
             SOI_INTERSECT_2,
             SOI_INTERSECT_1
         }
+        */
 
         public enum PatchTransitionType
         {
@@ -30,7 +31,9 @@ namespace Experimental
             MANEUVER,
             IMPACT
         }
-        */
+
+        public PatchTransitionType patchStartTransition;
+        public PatchTransitionType patchEndTransition;
 
         public CelestialBody referenceBody;
 
@@ -309,15 +312,15 @@ namespace Experimental
         public void UpdateFromUT(double UT)
         {
             ObT = getObtAtUT(UT);
-            an = QuaternionD.AngleAxis(LAN, Planetarium.Zup.Z) * Planetarium.Zup.X;
+            an = Quat.AngleAxis(LAN, Planetarium.Zup.Z) * Planetarium.Zup.X;
 
             if (!Planetarium.Pause)
             {
                 mag = Vector3d.Cross(pos, vel).magnitude;
-                h = QuaternionD.AngleAxis(inclination, an) * Planetarium.Zup.Z * ((!double.IsNaN(mag)) ? Math.Max(mag, 1.0) : 1.0);
+                h = Quat.AngleAxis(inclination, an) * Planetarium.Zup.Z * ((!double.IsNaN(mag)) ? Math.Max(mag, 1.0) : 1.0);
             }
 
-            eccVec = QuaternionD.AngleAxis(argumentOfPeriapsis, h) * an * eccentricity;
+            eccVec = Quat.AngleAxis(argumentOfPeriapsis, h) * an * eccentricity;
 
             if (eccentricity < 1.0)
             {
@@ -349,7 +352,7 @@ namespace Experimental
             }
 
             orbitPercent = meanAnomaly / MathUtils.TwoPI;
-            pos = QuaternionD.AngleAxis(argumentOfPeriapsis + trueAnomaly * MathUtils.Rad2Deg, h) * an * radius;
+            pos = Quat.AngleAxis(argumentOfPeriapsis + trueAnomaly * MathUtils.Rad2Deg, h) * an * radius;
 
             if (eccentricity > 1e-05 && eccentricity < 1.0)
             {
@@ -364,7 +367,7 @@ namespace Experimental
 
                 if (ObT > period / 2.0) T = angle + T;
 
-                vel = QuaternionD.AngleAxis(T * MathUtils.Rad2Deg, h) * relativePositionAtT.normalized * orbitalSpeed;
+                vel = Quat.AngleAxis(T * MathUtils.Rad2Deg, h) * relativePositionAtT.normalized * orbitalSpeed;
             }
             else
             {
@@ -467,9 +470,9 @@ namespace Experimental
         {
             if (Planetarium.FrameIsRotating())
             {
-                Vector3d axis = QuaternionD.AngleAxis(LAN, Planetarium.Zup.Z) * Planetarium.Zup.X;
+                Vector3d axis = Quat.AngleAxis(LAN, Planetarium.Zup.Z) * Planetarium.Zup.X;
 
-                return QuaternionD.AngleAxis(inclination, axis) * Planetarium.Zup.Z;
+                return Quat.AngleAxis(inclination, axis) * Planetarium.Zup.Z;
             }
 
             return h;
@@ -479,8 +482,8 @@ namespace Experimental
         {
             if (Planetarium.FrameIsRotating())
             {
-                axis = QuaternionD.AngleAxis(LAN, Planetarium.Zup.Z) * Planetarium.Zup.X;
-                normal = QuaternionD.AngleAxis(inclination, axis) * Planetarium.Zup.Z;
+                axis = Quat.AngleAxis(LAN, Planetarium.Zup.Z) * Planetarium.Zup.X;
+                normal = Quat.AngleAxis(inclination, axis) * Planetarium.Zup.Z;
             }
         }
 
@@ -488,10 +491,10 @@ namespace Experimental
         {
             if (Planetarium.FrameIsRotating())
             {
-                Vector3d axis = QuaternionD.AngleAxis(LAN, Planetarium.Zup.Z) * Planetarium.Zup.X;
-                Vector3d normal = QuaternionD.AngleAxis(inclination, axis) * Planetarium.Zup.Z;
+                Vector3d axis = Quat.AngleAxis(LAN, Planetarium.Zup.Z) * Planetarium.Zup.X;
+                Vector3d normal = Quat.AngleAxis(inclination, axis) * Planetarium.Zup.Z;
 
-                return QuaternionD.AngleAxis(argumentOfPeriapsis, normal) * axis;
+                return Quat.AngleAxis(argumentOfPeriapsis, normal) * axis;
             }
 
             return eccVec;
@@ -500,7 +503,7 @@ namespace Experimental
         public Vector3d GetANVector()
         {
             if (Planetarium.FrameIsRotating())
-                return QuaternionD.AngleAxis(LAN, Planetarium.Zup.Z) * Planetarium.Zup.X;
+                return Quat.AngleAxis(LAN, Planetarium.Zup.Z) * Planetarium.Zup.X;
 
             return an;
         }
@@ -781,10 +784,10 @@ namespace Experimental
                 d = -semiMajorAxis * (eccentricity * eccentricity - 1.0) / (1.0 + eccentricity * Math.Cos(trueAnomaly));
             }
 
-            Vector3d normal = QuaternionD.AngleAxis(LAN, Planetarium.Zup.Z) * Planetarium.Zup.X;
-            Vector3d axis = QuaternionD.AngleAxis(inclination, normal) * Planetarium.Zup.Z;
+            Vector3d normal = Quat.AngleAxis(LAN, Planetarium.Zup.Z) * Planetarium.Zup.X;
+            Vector3d axis = Quat.AngleAxis(inclination, normal) * Planetarium.Zup.Z;
 
-            return QuaternionD.AngleAxis(argumentOfPeriapsis + trueAnomaly * MathUtils.Rad2Deg, axis) * normal * d;
+            return Quat.AngleAxis(argumentOfPeriapsis + trueAnomaly * MathUtils.Rad2Deg, axis) * normal * d;
         }
 
         public Vector3d getPositionFromMeanAnomaly(double M)
@@ -826,12 +829,12 @@ namespace Experimental
             }
 
             Vector3d pos = new Vector3d(x, y, 0.0);
-            Vector3d normal = QuaternionD.AngleAxis(LAN, Planetarium.Zup.Z) * Planetarium.Zup.X;
-            Vector3d axis = QuaternionD.AngleAxis(inclination, normal) * Planetarium.Zup.Z;
+            Vector3d normal = Quat.AngleAxis(LAN, Planetarium.Zup.Z) * Planetarium.Zup.X;
+            Vector3d axis = Quat.AngleAxis(inclination, normal) * Planetarium.Zup.Z;
 
-            QuaternionD rotation = QuaternionD.AngleAxis(argumentOfPeriapsis, axis) *
-                                   QuaternionD.AngleAxis(inclination, normal) *
-                                   QuaternionD.AngleAxis(LAN - Planetarium.InverseRotAngle, Planetarium.Zup.Z);
+            Quat rotation = Quat.AngleAxis(argumentOfPeriapsis, axis) *
+                                   Quat.AngleAxis(inclination, normal) *
+                                   Quat.AngleAxis(LAN - Planetarium.InverseRotAngle, Planetarium.Zup.Z);
 
             pos = rotation * pos;
 
@@ -849,10 +852,10 @@ namespace Experimental
                        (-semiMajorAxis * (eccentricity * eccentricity - 1.0) / (1.0 + eccentricity * Math.Cos(tA))) :
                        (semiLatusRectum * (1.0 / (1.0 + eccentricity * Math.Cos(tA))));
 
-            Vector3d normal = QuaternionD.AngleAxis(LAN, Planetarium.Zup.Z) * Planetarium.Zup.X;
-            Vector3d axis = QuaternionD.AngleAxis(inclination, normal) * Planetarium.Zup.Z;
+            Vector3d normal = Quat.AngleAxis(LAN, Planetarium.Zup.Z) * Planetarium.Zup.X;
+            Vector3d axis = Quat.AngleAxis(inclination, normal) * Planetarium.Zup.Z;
 
-            return QuaternionD.AngleAxis(argumentOfPeriapsis + tA * MathUtils.Rad2Deg, axis) * normal * d;
+            return Quat.AngleAxis(argumentOfPeriapsis + tA * MathUtils.Rad2Deg, axis) * normal * d;
         }
 
         public double getOrbitalSpeedAt(double time)
@@ -889,10 +892,10 @@ namespace Experimental
 
                 if (ObT > period / 2.0) T = angle + T;
 
-                Vector3d normal = QuaternionD.AngleAxis(LAN, Planetarium.Zup.Z) * Planetarium.Zup.X;
-                Vector3d axis = QuaternionD.AngleAxis(inclination, normal) * Planetarium.Zup.Z;
+                Vector3d normal = Quat.AngleAxis(LAN, Planetarium.Zup.Z) * Planetarium.Zup.X;
+                Vector3d axis = Quat.AngleAxis(inclination, normal) * Planetarium.Zup.Z;
 
-                return QuaternionD.AngleAxis(T * MathUtils.Rad2Deg, axis) * relativePositionAtT.normalized * d;
+                return Quat.AngleAxis(T * MathUtils.Rad2Deg, axis) * relativePositionAtT.normalized * d;
             }
 
             Vector3d relativePositionAtT2 = getRelativePositionAtT(ObT);
@@ -1103,86 +1106,104 @@ namespace Experimental
             return result;
         }
 
-        /*      
-        public bool debug_returnFullEllipseTrajectory;
+        private double fromE;
+        private double toE;
+        private double sampleInterval;
+        private double E;
+        private double V;
+        private double fromV;
+        private double toV;
+
+        private bool returnFullEllipseTrajectory = false;
 
         public Trajectory GetPatchTrajectory(int sampleCount)
         {
-            Vector3d[] array = new Vector3d[sampleCount];
-            double[] array2 = new double[sampleCount];
-            float[] array3 = new float[sampleCount];
-            if (this.eccentricity < 1.0)
+            Vector3d[] positions = new Vector3d[sampleCount];
+
+            double[] trueAnomalies = new double[sampleCount];
+            float[] times = new float[sampleCount];
+
+            if (eccentricity < 1.0)
             {
-                if (this.patchEndTransition == Orbit.PatchTransitionType.FINAL || this.debug_returnFullEllipseTrajectory)
+                if (patchEndTransition == PatchTransitionType.FINAL || returnFullEllipseTrajectory)
                 {
-                    this.sampleInterval = MathUtils.TwoPI / (double)sampleCount;
+                    sampleInterval = MathUtils.TwoPI / (double)sampleCount;
+
                     for (int i = 0; i < sampleCount; i++)
                     {
-                        this.E = (double)i * this.sampleInterval;
-                        this.V = this.getTrueAnomaly(this.E);
-                        array3[i] = (float)(this.StartUT + this.GetDTforTrueAnomaly(this.V, 1.7976931348623157E+308));
-                        array[i] = this.getRelativePositionFromEccAnomaly(this.E).xzy;
+                        E = i * sampleInterval;
+                        V = getTrueAnomaly(E);
+
+                        times[i] = (float)(StartUT + GetDTforTrueAnomaly(V, 1.7976931348623157E+308));
+                        positions[i] = getRelativePositionFromEccAnomaly(E).xzy;
                     }
                 }
                 else
                 {
-                    this.fromV = this.TrueAnomalyAtUT(this.StartUT);
-                    this.toV = this.TrueAnomalyAtUT(this.EndUT);
-                    this.fromE = this.GetEccentricAnomaly(this.fromV);
-                    this.toE = this.GetEccentricAnomaly(this.toV);
-                    if (this.fromV > this.toV)
-                    {
-                        this.fromE = -(MathUtils.TwoPI - this.fromE);
-                    }
-                    this.sampleInterval = (this.toE - this.fromE) / (double)(sampleCount - 5);
-                    this.fromE -= this.sampleInterval * 2.0;
-                    double dTforTrueAnomaly = this.GetDTforTrueAnomaly(this.fromV, 0.0);
+                    fromV = TrueAnomalyAtUT(StartUT);
+                    toV = TrueAnomalyAtUT(EndUT);
+                    fromE = GetEccentricAnomaly(fromV);
+                    toE = GetEccentricAnomaly(toV);
+
+                    if (fromV > toV) fromE = -(MathUtils.TwoPI - fromE);
+
+                    sampleInterval = (toE - fromE) / (sampleCount - 5);
+                    fromE -= sampleInterval * 2.0;
+
+                    double dTforTrueAnomaly = GetDTforTrueAnomaly(fromV, 0.0);
+
                     for (int j = 0; j < sampleCount; j++)
                     {
-                        this.E = this.fromE + this.sampleInterval * (double)j;
-                        this.V = this.getTrueAnomaly(this.E);
-                        array2[j] = this.V;
-                        array3[j] = (float)(this.StartUT + this.GetDTforTrueAnomaly(this.V, dTforTrueAnomaly));
-                        array[j] = this.getRelativePositionFromEccAnomaly(this.E).xzy;
+                        E = fromE + sampleInterval * j;
+                        V = getTrueAnomaly(E);
+
+                        trueAnomalies[j] = V;
+                        times[j] = (float)(StartUT + GetDTforTrueAnomaly(V, dTforTrueAnomaly));
+
+                        positions[j] = getRelativePositionFromEccAnomaly(E).xzy;
                     }
                 }
             }
             else
             {
-                this.fromV = this.TrueAnomalyAtUT(this.StartUT);
-                this.toV = this.TrueAnomalyAtUT(this.EndUT);
-                this.fromE = this.GetEccentricAnomaly(this.fromV);
-                this.toE = this.GetEccentricAnomaly(this.toV);
-                if (this.fromV > 3.1415926535897931)
-                {
-                    this.fromE = -this.fromE;
-                }
-                this.sampleInterval = (this.toE - this.fromE) / (double)(sampleCount - 1);
+                fromV = TrueAnomalyAtUT(StartUT);
+                toV = TrueAnomalyAtUT(EndUT);
+                fromE = GetEccentricAnomaly(fromV);
+                toE = GetEccentricAnomaly(toV);
+
+                if (fromV > MathUtils.PI) fromE = -fromE;
+
+                sampleInterval = (toE - fromE) / (sampleCount - 1);
+
                 for (int k = 0; k < sampleCount; k++)
                 {
-                    this.E = this.fromE + this.sampleInterval * (double)k;
-                    this.V = this.getTrueAnomaly(this.E);
-                    array3[k] = (float)(this.StartUT + this.GetDTforTrueAnomaly(this.V, 1.7976931348623157E+308));
-                    array[k] = this.getRelativePositionFromEccAnomaly(this.E).xzy;
+                    E = fromE + sampleInterval * k;
+                    V = getTrueAnomaly(E);
+
+                    times[k] = (float)(StartUT + GetDTforTrueAnomaly(V, 1.7976931348623157E+308));
+                    positions[k] = getRelativePositionFromEccAnomaly(E).xzy;
                 }
             }
-            Vector3d pe;
-            Vector3d ap;
-            if (this.eccentricity < 1.0)
+
+            Vector3d periapsis;
+            Vector3d apoapsis;
+
+            if (eccentricity < 1.0)
             {
-                pe = this.getRelativePositionAtT(0.0).xzy;
-                ap = this.getRelativePositionAtT(this.period * 0.5).xzy;
+                periapsis = getRelativePositionAtT(0.0).xzy;
+                apoapsis = getRelativePositionAtT(period * 0.5).xzy;
             }
             else
             {
-                pe = this.GetEccVector().xzy.normalized * (-this.semiMajorAxis * (this.eccentricity - 1.0));
-                ap = Vector3d.zero;
+                periapsis = GetEccVector().xzy.normalized * (-semiMajorAxis * (eccentricity - 1.0));
+                apoapsis = Vector3d.zero;
             }
-            Vector3d xzy = this.getRelativePositionAtUT(this.StartUT).xzy;
-            Vector3d xzy2 = this.getRelativePositionAtUT(this.EndUT).xzy;
-            return new Trajectory(array, array3, array2, pe, ap, xzy, xzy2, Vector3d.zero, this);
+
+            Vector3d patchStartPoint = getRelativePositionAtUT(StartUT).xzy;
+            Vector3d patchEndPoint = getRelativePositionAtUT(EndUT).xzy;
+
+            return new Trajectory(positions, times, trueAnomalies, periapsis, apoapsis, patchStartPoint, patchEndPoint, Vector3d.zero, this);
         }
-        */
 
         public static Orbit CreateRandomOrbitAround(CelestialBody body)
         {

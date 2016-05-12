@@ -22,7 +22,7 @@
 
         private GameObject vectorCanvas;
 
-        public int lineSampleResolution = 15;
+        public int lineSampleResolution = 16;
         public int lineSegments = 8;
 
         public float lineWidth = 2.5f;
@@ -32,18 +32,15 @@
         public bool isJunk;
         public bool isFocused;
         public bool isOffsettable;
+        public bool is3DLine;
+        public bool UseEccOrbitData;
 
         public DrawMode drawMode = DrawMode.REDRAW_AND_RECALCULATE;
 
-        private double st;
-        private double end;
-        private double rng;
-        private double itv;
+        private double eccOffset;
 
-        public double eccOffset;
-
-        public float twkOffset;
-        public float textureOffset;
+        private float twkOffset;
+        private float textureOffset;
 
         private Vector3d[] orbitPoints;
 
@@ -107,11 +104,14 @@
                         }
                     case DrawMode.REDRAW_AND_FOLLOW:
                         {
+                            UpdateSpline();
                             DrawSpline();
                             break;
                         }
                     case DrawMode.REDRAW_AND_RECALCULATE:
                         {
+                            MakeLine(ref orbitLine);
+                            UpdateSpline();
                             DrawSpline();
                             break;
                         }
@@ -133,16 +133,16 @@
             }
             else
             {
-                eccOffset = (orbit.eccentricAnomaly - 0.0174532923847437) % MathUtils.TwoPI / MathUtils.TwoPI;
+                eccOffset = (orbit.eccentricAnomaly - MathUtils.Deg2Rad * 2) % MathUtils.TwoPI / MathUtils.TwoPI;
                 twkOffset = (float)eccOffset * GetEccOffset((float)eccOffset, (float)orbit.eccentricity, 4.0f);
 
                 textureOffset = 1.0f - twkOffset;
             }
 
-            MakeLine(ref orbitLine);
-            UpdateSpline();
-
-            orbitLine.Draw3D();
+            if (is3DLine)
+                orbitLine.Draw3D();
+            else
+                orbitLine.Draw();
         }
 
         private float GetEccOffset(float eccOffset, float ecc, float eccOffsetPower)
@@ -170,12 +170,11 @@
             l = new VectorLine(orbitName,
                 new List<Vector3>(GetSegmentCount(lineSampleResolution, lineSegments)),
                 lineWidth,
-                LineType.Discrete);
+                LineType.Continuous);
 
             l.texture = isOffsettable ? orbitFadeTexture : orbitTexture;
             l.material = orbitMaterial;
-            l.material.SetTextureOffset("_MainTex", isOffsettable ? new Vector2(textureOffset, 0) : new Vector2(0, 0));
-            l.textureOffset = textureOffset;
+            l.textureOffset = textureOffset / textureOffset - 1.0f;
             l.continuousTexture = true;
             l.color = GetOrbitColour();
             l.rectTransform.gameObject.layer = 31;
@@ -183,7 +182,29 @@
             l.joins = Joins.Weld;
         }
 
-        public OrbitDriver TargetCastSplines(out OrbitCastHit orbitHit)
+        private void OnGUI()
+        {
+            OrbitCastHit orbitCastHit;
+            OrbitDriver hitDriver = TargetCastSplines(out orbitCastHit, lineWidth);
+
+            if(hitDriver != null)
+            {
+                Vector2 position = Input.mousePosition;
+                Vector2 dimension = new Vector2(200, 100);
+
+                GUILayout.BeginArea(new Rect(position, dimension));
+
+                GUILayout.Window(0, new Rect(position, dimension), (x) => 
+                {
+                    GUILayout.Label(orbitCastHit.mouseTA.ToString("0.00"));
+                    GUILayout.Label(orbitCastHit.orbitScreenPoint.ToString());
+                }, "Orbit Hit Info");
+
+                GUILayout.EndArea();
+            }
+        }
+
+        public OrbitDriver TargetCastSplines(out OrbitCastHit orbitHit, float orbitPixelWidth = 18f)
         {
             orbitHit = new OrbitCastHit();
             OrbitCastHit tempOrbitHit = new OrbitCastHit();
@@ -192,7 +213,7 @@
             {
                 if (orbit.Renderer != null)
                 {
-                    if (!orbit.Renderer.OrbitCast(Input.mousePosition, out tempOrbitHit, 18f))
+                    if (!orbit.Renderer.OrbitCast(Input.mousePosition, out tempOrbitHit, orbitPixelWidth))
                     {
                         continue;
                     }
@@ -218,7 +239,7 @@
                 driver = orbitDriver
             };
 
-            if (EventSystem.current.IsPointerOverGameObject() || !orbitLine.active) return false;
+            //if (EventSystem.current.IsPointerOverGameObject() || !orbitLine.active) return false;
 
             hitInfo.orbitOrigin = orbit.referenceBody.Position.LocalToScaledSpace();
 
@@ -271,34 +292,54 @@
 
         private void UpdateSpline()
         {
-            int i;
-
             if (orbit.eccentricity >= 1)
             {
+                double st;
+                double end;
+                double rng;
+                double itv;
+
                 st = -Math.Acos(-(1 / orbit.eccentricity));
                 end = Math.Acos(-(1 / orbit.eccentricity));
 
                 rng = end - st;
                 itv = rng / (orbitPoints.Length - 1);
 
-                for (i = 0; i < orbitPoints.Length; i++)
+                for (int i = 0; i < orbitPoints.Length; i++)
                 {
-                    orbitPoints[i] = orbit.getPositionFromEccAnomaly(st + itv * i);
+                    if (UseEccOrbitData)
+                        orbitPoints[i] = orbit.getPositionFromEccAnomaly(st + itv * i);
+                    else
+                        orbitPoints[i] = orbit.getPositionFromTrueAnomaly(st + itv * i);
+                }
+
+                if (!UseEccOrbitData)
+                {
+                    int fixCount = 2;
+
+                    for (int i = 0; i < fixCount; i++)
+                    {
+                        orbitPoints[i] = orbitPoints[fixCount + 1];
+                        orbitPoints[orbitPoints.Length - i - 1] = orbitPoints[orbitPoints.Length - (fixCount + 1) - 1];
+                    }
                 }
             }
             else
             {
                 int resolution = (int)Math.Floor(360 / (double)lineSampleResolution);
 
-                for (i = 0; i < resolution; i++)
+                for (int i = 0; i < resolution; i++)
                 {
-                    orbitPoints[i] = orbit.getPositionFromEccAnomaly(i * lineSampleResolution * MathUtils.Deg2Rad);
+                    if (UseEccOrbitData)
+                        orbitPoints[i] = orbit.getPositionFromEccAnomaly(orbitDriver.orbit.eccentricAnomaly + i * lineSampleResolution * MathUtils.Deg2Rad);
+                    else
+                        orbitPoints[i] = orbit.getPositionFromTrueAnomaly(orbitDriver.orbit.trueAnomaly + i * lineSampleResolution * MathUtils.Deg2Rad);
                 }
             }
 
             Vector3[] scaledOrbitPoints = new Vector3[orbitPoints.Length];
 
-            for (i = 0; i < orbitPoints.Length; i++)
+            for (int i = 0; i < orbitPoints.Length; i++)
             {
                 scaledOrbitPoints[i] = orbitPoints[i].LocalToScaledSpace();
             }
@@ -337,7 +378,10 @@
             public Vector3 GetUpdatedOrbitPoint()
             {
                 if (driver.updateMode != OrbitDriver.UpdateMode.IDLE)
-                    return or.orbit.getPositionFromTrueAnomaly(mouseTA).LocalToScaledSpace();
+                    return ScaledSpace.LocalToScaledSpace(or.orbit.getPositionFromTrueAnomaly(mouseTA));
+
+                if (or.orbitCB)
+                    return ScaledSpace.LocalToScaledSpace(or.orbitCB.transform.position);
 
                 return ScaledSpace.LocalToScaledSpace(or.transform.position);
             }

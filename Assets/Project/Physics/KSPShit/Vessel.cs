@@ -169,6 +169,7 @@ namespace Experimental
             if (alreadyOnRails) return;
 
             orbitDriver.SetOrbitMode(OrbitDriver.UpdateMode.UPDATE);
+            if (orbitDriver.Renderer != null) orbitDriver.Renderer.drawMode = OrbitRenderer.DrawMode.REDRAW_AND_RECALCULATE;
 
             rb.isKinematic = true;
             alreadyOnRails = true;
@@ -182,6 +183,7 @@ namespace Experimental
             if (alreadyOffRails) return;
 
             orbitDriver.SetOrbitMode(OrbitDriver.UpdateMode.IDLE);
+            if (orbitDriver.Renderer != null) orbitDriver.Renderer.drawMode = OrbitRenderer.DrawMode.REDRAW_AND_RECALCULATE;
 
             rb.isKinematic = false;
             alreadyOnRails = false;

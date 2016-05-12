@@ -46,17 +46,15 @@
 
         public static Planetarium fetch;
 
-        public QuaternionD rotation;
+        public Quat rotation;
 
-        public QuaternionD zUpRotation;
+        public Quat zUpRotation;
 
         public double inverseRotAngle;
 
         public static ZupVectors Zup;
 
         public CelestialBody Sun;
-
-        public CelestialBody Home;
 
         public CelestialBody CurrentMainBody;
 
@@ -93,7 +91,7 @@
             }
         }
 
-        public static QuaternionD Rotation
+        public static Quat Rotation
         {
             get
             {
@@ -105,7 +103,7 @@
             }
         }
 
-        public static QuaternionD ZupRotation
+        public static Quat ZupRotation
         {
             get
             {
@@ -162,8 +160,8 @@
 
             fetch = this;
 
-            rotation = Quaternion.Inverse(QuaternionD.AngleAxis(inverseRotAngle, Vector3d.down));
-            zUpRotation = Quaternion.Inverse(QuaternionD.AngleAxis(inverseRotAngle, Vector3d.back));
+            rotation = Quaternion.Inverse(Quat.AngleAxis(inverseRotAngle, Vector3d.down));
+            zUpRotation = Quaternion.Inverse(Quat.AngleAxis(inverseRotAngle, Vector3d.back));
         }
 
         private void FixedUpdate()
