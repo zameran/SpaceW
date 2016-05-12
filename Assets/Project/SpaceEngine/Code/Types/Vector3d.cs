@@ -174,7 +174,7 @@ namespace UnityEngine
 
         public double Magnitude()
         {
-            return System.Math.Sqrt(x * x + y * y + z * z);
+            return Math.Sqrt(x * x + y * y + z * z);
         }
 
         public double SqrMagnitude()
@@ -267,21 +267,21 @@ namespace UnityEngine
 
         public Vector3d Normalized()
         {
-            double invLength = 1.0 / System.Math.Sqrt(x * x + y * y + z * z);
+            double invLength = 1.0 / Math.Sqrt(x * x + y * y + z * z);
 
             return new Vector3d(x * invLength, y * invLength, z * invLength);
         }
 
         public Vector3d Normalized(double l)
         {
-            double invLength = l / System.Math.Sqrt(x * x + y * y + z * z); ;
+            double invLength = l / Math.Sqrt(x * x + y * y + z * z); ;
 
             return new Vector3d(x * invLength, y * invLength, z * invLength);
         }
 
         public Vector3d Normalized(ref double previousLength)
         {
-            previousLength = System.Math.Sqrt(x * x + y * y + z * z);
+            previousLength = Math.Sqrt(x * x + y * y + z * z);
 
             double invLength = 1.0 / previousLength;
 
@@ -296,6 +296,13 @@ namespace UnityEngine
         public static Vector3d Cross(Vector3d lhs, Vector3d rhs)
         {
             return new Vector3d(lhs.y * rhs.z - lhs.z * rhs.y, lhs.z * rhs.x - lhs.x * rhs.z, lhs.x * rhs.y - lhs.y * rhs.x);
+        }
+
+        public static Vector3d Lerp(Vector3d from, Vector3d to, float t)
+        {
+            t = Mathf.Clamp01(t);
+
+            return new Vector3d(from.x + (to.x - from.x) * t, from.y + (to.y - from.y) * t, from.z + (to.z - from.z) * t);
         }
 
         public Vector2d XY()

@@ -36,8 +36,6 @@ using ZFramework.Unity.Common;
 
 using UnityEngine;
 
-using Logger = ZFramework.Unity.Common.Logger;
-
 [UseLogger(Category.Important)]
 [UseLoggerFile(false, "Log")]
 public sealed class Cleaner : MonoBehaviour

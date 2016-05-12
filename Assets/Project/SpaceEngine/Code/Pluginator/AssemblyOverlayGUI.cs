@@ -172,7 +172,7 @@ public sealed class AssemblyOverlayGUI : MonoBehaviour
         GUILayout.Label("Loaded Add-ons: " + loader.TotalDetected);
         GUILayout.FlexibleSpace();
 
-        if (GUILayout.Toggle(showAddons, "List Add-ons: ") != showAddons)
+        if (GUILayout.Toggle(showAddons, "List Add-ons") != showAddons)
         {
             showAddons = !showAddons;
             position.height = 0.0f;

@@ -26,11 +26,10 @@
 
 namespace UnityEngine
 {
-    public class Quat
+    [System.Serializable]
+    public struct Quat
     {
         public double x, y, z, w;
-
-        public Quat() { }
 
         public Quat(double x, double y, double z, double w)
         {
@@ -135,6 +134,35 @@ namespace UnityEngine
             }
         }
 
+        public static Quat AngleAxis(double angle, Vector3d axis)
+        {
+            double x;
+            double y;
+            double z;
+            double w;
+
+            double magnitude = axis.magnitude;
+
+            if (magnitude <= 0.0001)
+            {
+                w = 1;
+                x = 0;
+                y = 0;
+                z = 0;
+            }
+            else
+            {
+                double cosa = System.Math.Cos(angle * 0.0174532925199433 / 2);
+                double sina = System.Math.Sin(angle * 0.0174532925199433 / 2);
+
+                x = axis.x / magnitude * sina;
+                y = axis.y / magnitude * sina;
+                z = axis.z / magnitude * sina;
+                w = cosa;
+            }
+            return new Quat(x, y, z, w);
+        }
+
         public static Quat operator *(Quat q1, Quat q2)
         {
             return new Quat(q2.w * q1.x + q2.x * q1.w + q2.y * q1.z - q2.z * q1.y,
@@ -146,6 +174,16 @@ namespace UnityEngine
         public static Vector3d operator *(Quat q, Vector3d v)
         {
             return q.ToMatrix3x3d() * v;
+        }
+
+        public static implicit operator Quaternion(Quat q)
+        {
+            return new Quaternion((float)q.x, (float)q.y, (float)q.z, (float)q.w);
+        }
+
+        public static implicit operator Quat(Quaternion q)
+        {
+            return new Quat(q.x, q.y, q.z, q.w);
         }
 
         public Matrix3x3 ToMatrix3x3()

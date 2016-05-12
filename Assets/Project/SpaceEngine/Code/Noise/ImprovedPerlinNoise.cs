@@ -33,7 +33,6 @@ public sealed class ImprovedPerlinNoise
     int[] m_perm = new int[SIZE + SIZE];
 
     Texture2D m_permTable1D, m_permTable2D, m_gradient2D, m_gradient3D, m_gradient4D;
-    Texture3D m_permTable3D;
 
     public Texture2D GetPermutationTable1D() { return m_permTable1D; }
     public Texture2D GetPermutationTable2D() { return m_permTable2D; }
@@ -41,13 +40,12 @@ public sealed class ImprovedPerlinNoise
     public Texture2D GetGradient3D() { return m_gradient3D; }
     public Texture2D GetGradient4D() { return m_gradient4D; }
 
-    public Texture3D GetPermutationTable3D() { return m_permTable3D; }
-
     public ImprovedPerlinNoise(int seed)
     {
         Random.seed = seed;
 
         int i, j, k;
+
         for (i = 0; i < SIZE; i++)
         {
             m_perm[i] = i;
@@ -80,11 +78,6 @@ public sealed class ImprovedPerlinNoise
         LoadGradient3D();
     }
 
-    public void LoadPrecomputedRandomVolume()
-    {
-        LoadPermTable3D();
-    }
-
     public void LoadResourcesFor4DNoise()
     {
         LoadPermTable1D();
@@ -102,14 +95,12 @@ public sealed class ImprovedPerlinNoise
 
         for (int x = 0; x < SIZE; x++)
         {
-            m_permTable1D.SetPixel(x, 1, new Color(0, 0, 0, (float)m_perm[x] / (float)(SIZE - 1)));
+            m_permTable1D.SetPixel(x, 1, new Color(0, 0, 0, m_perm[x] / (float)(SIZE - 1)));
         }
 
         m_permTable1D.Apply();
     }
 
-    //This is special table that has been optimesed for 3D noise. 
-    //It can also be use in 4D noise for some optimisation but the 1D perm table is still needed.
     void LoadPermTable2D()
     {
         if (m_permTable2D) return;
@@ -135,51 +126,6 @@ public sealed class ImprovedPerlinNoise
         }
 
         m_permTable2D.Apply();
-    }
-
-    void LoadPermTable3D()
-    {
-        int size = SIZE / 2;
-
-        size = size / 2;
-
-        if (m_permTable3D) return;
-
-        m_permTable3D = new Texture3D(size, size, size, TextureFormat.ARGB32, false);
-
-        var cols = new Color[size * size * size];
-
-        int idx = 0;
-
-        m_permTable3D.filterMode = FilterMode.Point;
-        m_permTable3D.wrapMode = TextureWrapMode.Repeat;
-
-        for (int x = 0; x < size; x++)
-        {
-            for (int y = 0; y < size; y++)
-            {
-                for (int z = 0; z < size; z++, idx++)
-                {
-                    int A = m_perm[x] + y;
-                    int AA = m_perm[A];
-                    int AB = m_perm[A + 1];
-
-                    int B = m_perm[x + 1] + y;
-                    int BA = m_perm[B];
-                    int BB = m_perm[B + 1];
-
-                    float Red = (float)AA / 255.0f;
-                    float Green = (float)AB / 255.0f;
-                    float Blue = (float)BA / 255.0f;
-                    float Alpha = (float)BB / 255.0f;
-
-                    cols[idx] = new Color(Red, Green, Blue, Alpha);
-                }
-            }
-        }
-
-        m_permTable3D.SetPixels(cols);
-        m_permTable3D.Apply();
     }
 
     void LoadGradient2D()

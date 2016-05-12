@@ -64,11 +64,86 @@ public static class BrainFuckMath
             temp.z = tempAxisValue;
     }
 
+    public static decimal CalculateK(int lodLevel)
+    {
+        if (lodLevel == 1)
+            return 0.5M;
+        else
+        {
+            decimal prev = CalculateK(lodLevel - 1);
+            decimal summ = 1.0M;
+
+            for (int i = 0; i < lodLevel; i++)
+            {
+                summ = summ / 2.0M;
+            }
+
+            return prev + summ;
+        }
+    }
+
+    public static decimal CalculateJ(int lodLevel)
+    {
+        if (lodLevel == 0)
+            return 15.0M;
+        else if (lodLevel == 1)
+            return 7.5M;
+
+        decimal prev1 = CalculateJ(lodLevel - 1);
+        decimal prev2 = CalculateJ(lodLevel - 2);
+
+        decimal summ = System.Math.Abs(prev1 - prev2) / 2.0M;
+
+        return prev1 + summ;
+    }
+
+    public static decimal CalculateI(decimal J)
+    {
+        return 15.0M / J;
+    }
+
     public static void CalculatePatchCubeCenter(int lodLevel, Vector3 patchCubeCenter, ref Vector3 temp)
     {
-        //TODO: Make a formula!
+        /*
+        1 : 15.0 / 7,5f | 0,5f
+        2 : 15.0 / 11,25f | 0,75f
+        3 : 15.0 / 13,125f | 0,875f
+        4 : 15.0 / 14,0625f | 0,9375f
+        5 : 15.0 / 14,53125f | 0,96875f
+        6 : 15.0 / 14,765625f | 0,984375f
+        7 : 15.0 / 14,8828125f | 0,9921875f
+        8 : 15.0 / 14,94140625f | 0,99609375f
+        9 : 15.0 / 14,970703125f | 0,998046875f
+        10 : 15.0 / 14,9853515625f | 0,9990234375f
+        11 : 15.0 / 14,99267578125f | 0,99951171875f
+        12 : 15.0 / 14,996337890625f | 0,999755859375f
+        13 : 15.0 / 14,9981689453125f | 0,9998779296875f
+        14 : 15.0 / 14,99908447265625f | 0,99993896484375f
+        15 : 15.0 / 14,999542236328125f | 0,999969482421875f
+        16 : 15.0 / 14,9997711181640625f | 0,9999847412109375f
+        17 : 15.0 / 14,99988555908203125f | 0,99999237060546875f
+        18 : 15.0 / 14,999942779541015625f | 0,999996185302734375f
+        19 : 15.0 / 14,9999713897705078125f | 0,9999980926513671875f
+        20 : 15.0 / 14,99998569488525390625f | 0,99999904632568359375f
+        21 : 15.0 / 14,999992847442626953125f | 0,999999523162841796875f
+        22 : 15.0 / 14,9999964237213134765625f | 0,9999997615814208984375f
+        23 : 15.0 / 14,99999821186065673828125f | 0,99999988079071044921875f
+        24 : 15.0 / 14,999999105930328369140625f | 0,999999940395355224609375f
+        25 : 15.0 / 14,9999995529651641845703125f | 0,9999999701976776123046875f
+        26 : 15.0 / 14,99999977648258209228515625f | 0,99999998509883880615234375f
+        27 : 15.0 / 14,999999888241291046142578125f | 0,999999992549419403076171875f
+        28 : 15.0 / 14,999999944120645523071289062f | 0,9999999962747097015380859375f
+        29 : 15.0 / 14,999999972060322761535644530f | 0,9999999981373548507690429687f
+        30 : 15.0 / 14,999999986030161380767822264f | 0,9999999990686774253845214843f
+        31 : 15.0 / 14,999999993015080690383911131f | 0,9999999995343387126922607421f
+        32 : 15.0 / 14,999999996507540345191955564f | 0,9999999997671693563461303710f
+        */
+
+        //TODO: Make a formula! - Formula is done!
         //So. We have exponential modifier... WTF!?
         //Fuck dat shit. 7 LOD level more than i need. fuck. dat.
+        //Too small numbers... So. Solution is planet radius scaling. 1 unit = 1 milion unity units,
+        //then i simply gonna "scale" the overhaul planet.
 
         //WARNING!!! Magic! Ya, it works...
         if (lodLevel >= 1)
@@ -85,18 +160,18 @@ public static class BrainFuckMath
                 temp = Vector3.Lerp(temp, patchCubeCenter * (15.0f / 14.53125f), 0.96875f); //0.9375f + ((((0.5f / 2.0f) / 2.0f) / 2.0f) / 2.0f)
             else if (lodLevel == 6)
                 temp = Vector3.Lerp(temp, patchCubeCenter * (15.0f / 14.765625f), 0.984375f); //0.96875f + (((((0.5f / 2.0f) / 2.0f) / 2.0f) / 2.0f) / 2.0f)
-            else if (lodLevel == 7) //Experimental! Maybe float precision have place on small planet radius!
+            else if (lodLevel == 7) //Experimental!
                 temp = Vector3.Lerp(temp, patchCubeCenter * (15.0f / 14.8828125f), 0.9921875f); //0.984375f + ((((((0.5f / 2.0f) / 2.0f) / 2.0f) / 2.0f) / 2.0f) / 2.0f)
-            else if (lodLevel == 8) //Experimental! Maybe float precision have place on small planet radius!
+            else if (lodLevel == 8) //Experimental!
                 temp = Vector3.Lerp(temp, patchCubeCenter * (15.0f / 14.94140625f), 0.99609375f); //0.9921875f + (((((((0.5f / 2.0f) / 2.0f) / 2.0f) / 2.0f) / 2.0f) / 2.0f) / 2.0f)
             else if (lodLevel == 9) //Experimental! Maybe float precision have place on small planet radius!
-                temp = Vector3.Lerp(temp, patchCubeCenter * (15.0f / 14.970703100f), 0.998046875f); //0.99609375f + ((((((((0.5f / 2.0f) / 2.0f) / 2.0f) / 2.0f) / 2.0f) / 2.0f) / 2.0f) / 2.0f)
+                temp = Vector3.Lerp(temp, patchCubeCenter * (15.0f / 14.970703125f), 0.998046875f); //0.99609375f + ((((((((0.5f / 2.0f) / 2.0f) / 2.0f) / 2.0f) / 2.0f) / 2.0f) / 2.0f) / 2.0f)
             else if (lodLevel == 10) //Sooooo deep... what i'am doing?
-                temp = Vector3.Lerp(temp, patchCubeCenter * (15.0f / 14.9853515000f), 0.999023438f); //0.998046875f + (((((((((0.5f / 2.0f) / 2.0f) / 2.0f) / 2.0f) / 2.0f) / 2.0f) / 2.0f) / 2.0f) / 2.0f)
+                temp = Vector3.Lerp(temp, patchCubeCenter * (15.0f / 14.9853515625f), 0.9990234375f); //0.998046875f + (((((((((0.5f / 2.0f) / 2.0f) / 2.0f) / 2.0f) / 2.0f) / 2.0f) / 2.0f) / 2.0f) / 2.0f)
             else if (lodLevel == 11) //WHY?!
-                temp = Vector3.Lerp(temp, patchCubeCenter * (15.0f / 14.99267570000f), 0.99951171925f); //0.999023438f + ((((((((((0.5f / 2.0f) / 2.0f) / 2.0f) / 2.0f) / 2.0f) / 2.0f) / 2.0f) / 2.0f) / 2.0f) / 2.0f)
+                temp = Vector3.Lerp(temp, patchCubeCenter * (15.0f / 14.99267578125f), 0.99951171875f); //0.9990234375f + ((((((((((0.5f / 2.0f) / 2.0f) / 2.0f) / 2.0f) / 2.0f) / 2.0f) / 2.0f) / 2.0f) / 2.0f) / 2.0f)
             else if (lodLevel == 12) //NOOOOO! STOP IT! STOP THIS!
-                temp = Vector3.Lerp(temp, patchCubeCenter * (15.0f / 14.996337800000f), 0.999755859875f); //0.99951171925f + (((((((((((0.5f / 2.0f) / 2.0f) / 2.0f) / 2.0f) / 2.0f) / 2.0f) / 2.0f) / 2.0f) / 2.0f) / 2.0f) / 2.0f)
+                temp = Vector3.Lerp(temp, patchCubeCenter * (15.0f / 14.996337890625f), 0.999755859375f); //0.99951171875f + (((((((((((0.5f / 2.0f) / 2.0f) / 2.0f) / 2.0f) / 2.0f) / 2.0f) / 2.0f) / 2.0f) / 2.0f) / 2.0f) / 2.0f)
             //OMG...
         }
         //End of magic here.

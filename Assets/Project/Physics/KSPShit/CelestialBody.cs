@@ -29,7 +29,7 @@ namespace Experimental
         public double shockTemperatureMultiplier = 1.0;
 
         private Vector3d position;
-        private QuaternionD rotation;
+        private Quat rotation;
 
         public OrbitDriver orbitDriver;
         public GameObject scaledBody;
@@ -57,8 +57,8 @@ namespace Experimental
 
         public List<CelestialBody> orbitingBodies = new List<CelestialBody>();
 
-        private QuaternionD newRot;
-        private QuaternionD newZupRot;
+        private Quat newRot;
+        private Quat newZupRot;
 
         public Transform bodyTransform;
 
@@ -165,8 +165,8 @@ namespace Experimental
                 if (!inverseRotation)
                 {
                     directRotAngle = (rotationAngle - Planetarium.InverseRotAngle) % 360.0;
-                    newRot = QuaternionD.AngleAxis(directRotAngle, Vector3d.down);
-                    newZupRot = QuaternionD.AngleAxis(directRotAngle, Vector3d.back);
+                    newRot = Quat.AngleAxis(directRotAngle, Vector3d.down);
+                    newZupRot = Quat.AngleAxis(directRotAngle, Vector3d.back);
                     bodyTransform.rotation = newRot;
                     rotation = newRot;
                 }
@@ -174,8 +174,8 @@ namespace Experimental
                 {
                     Planetarium.InverseRotAngle = (rotationAngle - directRotAngle) % 360.0;
 
-                    newRot = QuaternionD.AngleAxis(Planetarium.InverseRotAngle, Vector3d.down);
-                    newZupRot = QuaternionD.AngleAxis(Planetarium.InverseRotAngle, Vector3d.back);
+                    newRot = Quat.AngleAxis(Planetarium.InverseRotAngle, Vector3d.down);
+                    newZupRot = Quat.AngleAxis(Planetarium.InverseRotAngle, Vector3d.back);
 
                     Planetarium.Rotation = Quaternion.Inverse(newRot);
                     Planetarium.ZupRotation = newZupRot;
@@ -264,17 +264,17 @@ namespace Experimental
 
         public static Vector3d GetRSrfNVector(double lat, double lon)
         {
-            return QuaternionD.AngleAxis(lon, Vector3d.down) * QuaternionD.AngleAxis(lat, Vector3d.forward) * Vector3d.right;
+            return Quat.AngleAxis(lon, Vector3d.down) * Quat.AngleAxis(lat, Vector3d.forward) * Vector3d.right;
         }
 
         public Vector3d GetRelSurfaceNVector(double lat, double lon)
         {
-            return QuaternionD.AngleAxis(lon, Vector3d.down) * QuaternionD.AngleAxis(lat, Vector3d.forward) * Vector3d.right;
+            return Quat.AngleAxis(lon, Vector3d.down) * Quat.AngleAxis(lat, Vector3d.forward) * Vector3d.right;
         }
 
         public Vector3d GetSurfaceNVector(double lat, double lon)
         {
-            return QuaternionD.AngleAxis(directRotAngle, Vector3d.down) * QuaternionD.AngleAxis(lon, Vector3d.down) * QuaternionD.AngleAxis(lat, Vector3d.forward) * Vector3d.right;
+            return Quat.AngleAxis(directRotAngle, Vector3d.down) * Quat.AngleAxis(lon, Vector3d.down) * Quat.AngleAxis(lat, Vector3d.forward) * Vector3d.right;
         }
 
         public Vector3d GetRelSurfacePosition(double lat, double lon, double alt)
@@ -284,7 +284,7 @@ namespace Experimental
 
         public Vector3d GetRelSurfacePosition(Vector3d worldPosition)
         {
-            return QuaternionD.AngleAxis(directRotAngle, Vector3d.down) * worldPosition;
+            return Quat.AngleAxis(directRotAngle, Vector3d.down) * worldPosition;
         }
 
         public Vector3d GetWorldSurfacePosition(double lat, double lon, double alt)

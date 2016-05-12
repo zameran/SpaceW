@@ -168,7 +168,7 @@ public sealed class FlyCamera : GameCamera
     protected override void Init()
     {
         if (cameraComponent == null)
-            cameraComponent = this.GetComponent<Camera>();
+            cameraComponent = GetComponent<Camera>();
 
         if (planetoid == null)
             if (planetoidGameObject != null)
