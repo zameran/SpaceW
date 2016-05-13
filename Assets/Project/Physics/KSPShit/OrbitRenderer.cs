@@ -187,18 +187,18 @@
             OrbitCastHit orbitCastHit;
             OrbitDriver hitDriver = TargetCastSplines(out orbitCastHit, lineWidth);
 
-            if(hitDriver != null)
+            if(hitDriver != null && orbitLine != null)
             {
                 Vector2 position = orbitCastHit.orbitScreenPoint;
-                Vector2 dimension = new Vector2(200, 100);
+                Vector2 dimension = new Vector2(200, 50);
 
                 GUILayout.BeginArea(new Rect(position, dimension));
 
                 GUILayout.Window(0, new Rect(position, dimension), (x) => 
                 {
-                    GUILayout.Label(orbitCastHit.mouseTA.ToString("0.00"));
-                    GUILayout.Label(orbitCastHit.orbitScreenPoint.ToString());
-                }, "Orbit Hit Info");
+                    GUILayout.Label("Velocity: " + hitDriver.orbit.vel.magnitude.ToString("0.0") + " m/s");
+                    GUILayout.Label("Altitude: " + hitDriver.orbit.altitude.ToString("N0") + " m");
+                }, orbitLine.name + " Info");
 
                 GUILayout.EndArea();
             }
