@@ -31,23 +31,22 @@
 #endregion
 
 using UnityEngine;
+using UnityEngine.UI;
 
-public sealed class InGamePauseMenuUI : UserInterface, IUserInterface
+public sealed class AddonItemUI : MonoBehaviour
 {
-    private bool Paused = false;
+    public Text addonNameText;
+    public Text addonVersionText;
 
-    private void Update()
+    public void SetCaption(Text textHandler, string caption)
     {
-        if (Input.GetKeyDown(KeyCode.Escape))
+        if(textHandler != null)
         {
-            Paused = !Paused;
-
-            if (Paused)
-                FreezeTime();
-            else
-                UnFreezeTime();
+            textHandler.text = caption;
         }
-
-        Controllable.SetActive(Paused);
+        else
+        {
+            //TODO : Logging
+        }
     }
 }

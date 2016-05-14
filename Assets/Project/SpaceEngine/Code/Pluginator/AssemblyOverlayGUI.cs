@@ -33,6 +33,7 @@
 using System;
 using UnityEngine;
 
+[Obsolete("Moved to MainMenuUI using Unity5 UI System")]
 public sealed class AssemblyOverlayGUI : MonoBehaviour
 {
     public AssemblyLoader loader = null;

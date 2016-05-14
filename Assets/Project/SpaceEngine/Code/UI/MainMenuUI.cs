@@ -33,12 +33,13 @@
 using UnityEngine;
 using UnityEngine.UI;
 
-public class MainMenuUI : UserInterface, IUserInterface
+public sealed class MainMenuUI : UserInterface, IUserInterface
 {
     public AssemblyLoader loader = null;
 
     public CanvasRenderer addonsCanvasRenderer;
     public Toggle addonsShowToggle;
+    public Text addonsCounterText;
     public ScrollRect addonsScrollView;
     public GameObject addonsItemPrefab;
 
@@ -52,11 +53,45 @@ public class MainMenuUI : UserInterface, IUserInterface
     public void InitUI()
     {
         ShowAddonsToggle_OnValueChanged(addonsShowToggle);
+
+        if (loader != null)
+        {
+            if (loader.ExternalAssemblies.Count != 0)
+            {
+                for (int i = 0; i < loader.ExternalAssemblies.Count; i++)
+                {
+                    AssemblyExternal assembly = loader.ExternalAssemblies[i];
+
+                    if (assembly != null)
+                        AddToScrollView(addonsItemPrefab, addonsScrollView, assembly.Name, assembly.Version);
+                    else
+                    {
+                        //TODO : Logging...
+                    }
+                }
+            }
+            else
+            {
+
+            }
+        }
+
+        if (addonsShowToggle != null)
+            addonsShowToggle.interactable = (loader != null);
+
+        if (addonsCounterText != null)
+            addonsCounterText.text = addonsCounterText.text + " " + ((loader == null) ? "0" : loader.ExternalAssemblies.Count.ToString());
     }
 
-    public void AddToScrollView(GameObject item, ScrollRect scrollRect)
+    public void AddToScrollView(GameObject item, ScrollRect scrollView, string name = "", string version = "")
     {
-        GameObject createdItem = GameObject.Instantiate(item);
+        GameObject createdItem = Instantiate(item);
+        createdItem.transform.SetParent(scrollView.content.transform);
+        createdItem.transform.localScale = Vector3.one; //Must have.
+
+        AddonItemUI aiUI = createdItem.GetComponent<AddonItemUI>();
+        aiUI.SetCaption(aiUI.addonNameText, name);
+        aiUI.SetCaption(aiUI.addonVersionText, version);
     }
 
     public void ShowAddonsToggle_OnValueChanged(Toggle t)
