@@ -244,11 +244,6 @@
             //onRotatingFrameTransition
         }
 
-        public static void SetRotatingFrame(bool rotating)
-        {
-            fetch.setRotatingFrame(rotating);
-        }
-
         private void Start()
         {
             dominantBody = Planetarium.fetch.CurrentMainBody;
