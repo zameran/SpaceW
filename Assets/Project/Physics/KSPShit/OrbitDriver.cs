@@ -196,7 +196,7 @@ namespace Experimental
 
                 if (vessel)
                 {
-                    Debug.LogWarning("[OrbitDriver : Warning!]: " + vessel.gameObject.name + " had a NaN Orbit and was removed.");
+                    Debug.LogWarning("[OrbitDriver : Warning!]: " + vessel.name + " had a NaN Orbit and was removed.");
 
                     Destroy(vessel.gameObject);
                 }
@@ -229,7 +229,7 @@ namespace Experimental
             if (frameShift) return;
             frameShift = true;
 
-            CelestialBody referenceBody = this.ReferenceBody;
+            CelestialBody referenceBody = ReferenceBody;
 
             if (updateMode == UpdateMode.UPDATE && Time.timeScale > 0f)
             {
@@ -238,12 +238,12 @@ namespace Experimental
             else
             {
                 Debug.Log(string.Format("[OrbitDriver]: Recalculating orbit for {0}: rPos: {1}; rVel: {2} | {3}",
-                                        name, referenceBody.gameObject.name, pos, vel, vel.magnitude));
+                                        name, referenceBody.name, pos, vel, vel.magnitude));
 
                 TrackRigidbody(newReferenceBody);
 
                 Debug.Log(string.Format("[OrbitDriver]: Recalculated orbit for {0}: rPos: {1}; rVel: {2} | {3}",
-                                        name, newReferenceBody.gameObject.name, pos, orbit.GetVel(), vel.magnitude));
+                                        name, newReferenceBody.name, pos, orbit.GetVel(), vel.magnitude));
 
                 orbit.epoch = Planetarium.GetUniversalTime() - Time.fixedDeltaTime;
             }
@@ -278,16 +278,16 @@ namespace Experimental
             {
                 SOIsqr = orbit.referenceBody.sphereOfInfluence * orbit.referenceBody.sphereOfInfluence;
                 bsp = UtilMath.BSPSolver(ref UT, 1.0 * TimeWarpCurrentRate, (double t) => Math.Abs(ownOrbit.getRelativePositionAtUT(t).sqrMagnitude - SOIsqr), vMin, time, 0.01, 64);
-            }
-
-            ownOrbit.UpdateFromOrbitAtUT(ownOrbit, UT, to);
+            }   
 
             Debug.Log(string.Format("[OrbitDriver]: On-Rails SOI Transition from {0} to {1}. Transition UT Range: {2} - {3}. Transition UT: {4}. Iterations: {5}.",
-                                    ReferenceBody.gameObject.name, to.gameObject.name,
+                                    ReferenceBody.name, to.name,
                                     vMin.ToString("0.###"),
                                     time.ToString("0.###"),
                                     UT.ToString("0.###"),
                                     bsp));
+
+            ownOrbit.UpdateFromOrbitAtUT(ownOrbit, UT, to);
         }
 
         private void UnlockFrameSwitch()

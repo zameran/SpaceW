@@ -182,6 +182,7 @@
                     Debug.Log(string.Concat(str), item.gameObject);
                 }
             }
+
             if (FlightGlobals.physicalObjects.Count > 0)
             {
                 for (int l = 0; l < FlightGlobals.physicalObjects.Count; l++)
@@ -210,7 +211,7 @@
 
             if (orbit.ReferenceBody.orbitDriver != null)
             {
-                this.SetReverseOrbit(orbit.ReferenceBody.orbitDriver);
+                SetReverseOrbit(orbit.ReferenceBody.orbitDriver);
             }
         }
 
