@@ -653,92 +653,6 @@
             <param name="type">Type.</param>
             <returns>Returns list, that contains all attributes of defined type.</returns>
         </member>
-        <member name="T:ZFramework.Extensions.BitmapExtensions">
-            <summary>
-            Extension class for Bitmap and Image classes.
-            </summary>
-        </member>
-        <member name="M:ZFramework.Extensions.BitmapExtensions.ExecuteForEachPixel(System.Drawing.Bitmap,System.Action{System.Drawing.Point,System.Drawing.Bitmap})">
-            <summary>
-            Execute Action for each pixel of bitmap.
-            </summary>
-            <param name="bitmap">Birmap.</param>
-            <param name="action">Action to execute.</param>
-        </member>
-        <member name="M:ZFramework.Extensions.BitmapExtensions.ExecuteForEachPixel(System.Drawing.Bitmap,System.Action{System.Drawing.Point})">
-            <summary>
-            Execute Action for each pixel of bitmap.
-            </summary>
-            <param name="bitmap">Bitmap.</param>
-            <param name="action">Action to execute.</param>
-        </member>
-        <member name="M:ZFramework.Extensions.BitmapExtensions.SetEachPixelColour(System.Drawing.Bitmap,System.Func{System.Drawing.Point,System.Drawing.Color})">
-            <summary>
-            Execute Func for each pixel of bitmap.
-            </summary>
-            <param name="bitmap">Bitmap.</param>
-            <param name="colourFunc">Func to execute</param>
-        </member>
-        <member name="M:ZFramework.Extensions.BitmapExtensions.SetEachPixelColour(System.Drawing.Bitmap,System.Func{System.Drawing.Point,System.Drawing.Color,System.Drawing.Color})">
-            <summary>
-            Execute Func for each pixel of bitmap.
-            </summary>
-            <param name="bitmap">Bitmap.</param>
-            <param name="colourFunc">Func to execute</param>
-        </member>
-        <member name="M:ZFramework.Extensions.BitmapExtensions.Raster(System.Drawing.Color[0:,0:],System.Drawing.Bitmap@)">
-            <summary>
-            This method provide simple convertation of Color array to bitmap. 
-            </summary>
-            <param name="colors">Array of colors.</param>
-            <param name="image">Output Bitmap image.</param>
-        </member>
-        <member name="M:ZFramework.Extensions.BitmapExtensions.SaveAndDispose(System.Drawing.Bitmap,System.String)">
-            <summary>
-            Save bitmap and dispose it.
-            </summary>
-            <param name="bm">Bitmap to save.</param>
-            <param name="fileName">File name.</param>
-        </member>
-        <member name="M:ZFramework.Extensions.BitmapExtensions.SaveAndDispose(System.Drawing.Bitmap,System.String,System.Drawing.Imaging.ImageFormat)">
-            <summary>
-            Save bitmap and dispose it.
-            </summary>
-            <param name="bm">Bitmap to save.</param>
-            <param name="fileName">File name.</param>
-            <param name="format">Bitmap saving format.</param>
-        </member>
-        <member name="M:ZFramework.Extensions.BitmapExtensions.SaveAndDispose(System.Drawing.Bitmap,System.IO.Stream,System.Drawing.Imaging.ImageFormat)">
-            <summary>
-            Save bitmap and dispose it.
-            </summary>
-            <param name="bm">Bitmap to save.</param>
-            <param name="stream">Bitmap data stream.</param>
-            <param name="format">Bitmap saving format.</param>
-        </member>
-        <member name="M:ZFramework.Extensions.BitmapExtensions.SaveAndDispose(System.Drawing.Image,System.String)">
-            <summary>
-            Save image and dispose it.
-            </summary>
-            <param name="i">Image to save.</param>
-            <param name="fileName">File name.</param>
-        </member>
-        <member name="M:ZFramework.Extensions.BitmapExtensions.SaveAndDispose(System.Drawing.Image,System.String,System.Drawing.Imaging.ImageFormat)">
-            <summary>
-            Save image and dispose it.
-            </summary>
-            <param name="i">Image to save.</param>
-            <param name="fileName">File name.</param>
-            <param name="format">Image saving format.</param>
-        </member>
-        <member name="M:ZFramework.Extensions.BitmapExtensions.SaveAndDispose(System.Drawing.Image,System.IO.Stream,System.Drawing.Imaging.ImageFormat)">
-            <summary>
-            Save image and dispose it.
-            </summary>
-            <param name="i">Image to save.</param>
-            <param name="stream">Image data stream.</param>
-            <param name="format">Image saving format.</param>
-        </member>
         <member name="T:ZFramework.Extensions.FloatExtensions">
             <summary>
             Extension class for float type.
@@ -847,6 +761,13 @@
             Extension class, that provide some IO methods.
             </summary>
         </member>
+        <member name="M:ZFramework.Extensions.IOExtensions.WriteToFile(System.Object,System.String)">
+            <summary>
+            Writes object to specifed path (file).
+            </summary>
+            <param name="str">Object to dump.</param>
+            <param name="file">Path to output file.</param>
+        </member>
         <member name="M:ZFramework.Extensions.IOExtensions.CreateDirectory(System.IO.DirectoryInfo)">
             <summary>
             Recursively create directory based on the given path. 
@@ -898,7 +819,6 @@
             Couple of extension methods for base types, and shortcut extensions for loops.
             <see cref="T:System.Array"/>
             <see cref="T:System.Attribute"/>
-            <see cref="T:System.Drawing.Bitmap"/>
             <see cref="T:System.Single"/>
             <see cref="T:System.Int32"/>
             <see cref="N:System.IO"/>
@@ -1717,20 +1637,6 @@
             Reverse type is when we teaching for each task for each iteration.
             Combined type is when we teaching for each iteration for each task for each iteration.
             </summary>
-        </member>
-        <member name="T:ZFramework.NeuronNets.Utils">
-            <summary>
-            Helper class.
-            </summary>
-        </member>
-        <member name="M:ZFramework.NeuronNets.Utils.RasterizeNeuronNet(ZFramework.NeuronNets.NeuronNet,System.Int32,System.Int32)">
-            <summary>
-            Visualize neuron net to Bitmap using System.Drawing.Graphics features.
-            </summary>
-            <param name="nn">Neuron net to visualize.</param>
-            <param name="w">Output image width.</param>
-            <param name="h">Output image height.</param>
-            <returns>Bitmap with visualized neuron net.</returns>
         </member>
         <member name="T:ZFramework.Random.NamespaceDocumentationContainer">
             <summary>
