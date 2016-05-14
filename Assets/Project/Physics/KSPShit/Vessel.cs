@@ -150,27 +150,27 @@ namespace Experimental
 
         public void Integrate()
         {
+            CelestialBody refBody = orbitDriver.ReferenceBody;//FlightGlobals.GetMainBody(CoM);
+
+            geeForce = FlightGlobals.GetGeeForceAtPosition(CoM, refBody);
+            centrifugalForce = FlightGlobals.GetCentrifugalAcc(CoM, refBody);
+            coriolisForce = FlightGlobals.GetCoriolisAcc(rb.velocity, refBody);
+
             if (rails) return;
 
             if (rb != null)
             {
-                CelestialBody rB = FlightGlobals.GetMainBody(CoM);
-
-                geeForce = FlightGlobals.GetGeeForceAtPosition(CoM, rB);
-                centrifugalForce = FlightGlobals.GetCentrifugalAcc(CoM, rB);
-                coriolisForce = FlightGlobals.GetCoriolisAcc(rb.velocity, rB);
-
                 rb.centerOfMass = CoM;
 
                 rb.AddForce(geeForce, ForceMode.Acceleration);
                 rb.AddForce(centrifugalForce, ForceMode.Acceleration);
-                //rb.AddForce(coriolisForce, ForceMode.Acceleration);
+                rb.AddForce(coriolisForce, ForceMode.Acceleration);
 
-                Debug.DrawLine(CoM, coriolisForce, XKCDColors.Yellowish);
-                Debug.DrawLine(CoM, centrifugalForce, XKCDColors.Bluegreen);
-                //Debug.DrawLine(CoM, geeForce, XKCDColors.Moss);
+                Debug.DrawLine(CoM, CoM - coriolisForce * 100, XKCDColors.Yellowish);
+                Debug.DrawLine(CoM, CoM - centrifugalForce * 100, XKCDColors.Bluegreen);
+                Debug.DrawLine(CoM, CoM - geeForce * 100, XKCDColors.Moss);
 
-                //Debug.DrawLine(rB.Position, geeForce, XKCDColors.Red);
+                //Debug.DrawLine(refBody.Position, CoM - geeForce, XKCDColors.Red);
             }
         }
 

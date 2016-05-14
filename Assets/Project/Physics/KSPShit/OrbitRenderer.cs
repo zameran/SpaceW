@@ -165,9 +165,7 @@
         {
             if (l != null) VectorLine.Destroy(ref l);
 
-            string orbitName = string.Concat(name, "'s Orbit");
-
-            l = new VectorLine(orbitName,
+            l = new VectorLine("Orbit",
                 new List<Vector3>(GetSegmentCount(lineSampleResolution, lineSegments)),
                 lineWidth,
                 LineType.Continuous);
@@ -178,7 +176,7 @@
             l.continuousTexture = true;
             l.color = GetOrbitColour();
             l.rectTransform.gameObject.layer = 31;
-            //l.rectTransform.gameObject.hideFlags = HideFlags.HideInHierarchy;
+            l.rectTransform.gameObject.hideFlags = HideFlags.HideInHierarchy;
             l.joins = Joins.Weld;
         }
 

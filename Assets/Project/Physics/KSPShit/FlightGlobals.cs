@@ -98,7 +98,7 @@
         {
             if (!body.inverseRotation) return Vector3d.zero;
 
-            return -2 * Vector3d.Cross(body.angularVelocity, vel);
+            return -2.0f * Vector3d.Cross(body.angularVelocity, vel);
         }
 
         public static Vector3d GetGeeForceAtPosition(Vector3d pos, CelestialBody body)

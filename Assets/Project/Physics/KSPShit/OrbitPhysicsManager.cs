@@ -139,8 +139,11 @@
         private void setDominantBody(CelestialBody body)
         {
             dominantBody = body;
+
             Vector3[] component = new Vector3[FlightGlobals.physicalObjects.Count];
-            print(string.Concat("setting new dominant body: ", dominantBody.name, "\nFlightGlobals.mainBody: ", Planetarium.fetch.CurrentMainBody.name));
+
+            Debug.Log(string.Format("Setting new dominant body: {0} \nFlightGlobals.mainBody: {1}", dominantBody.name, 
+                                                                                                    Planetarium.fetch.CurrentMainBody.name));
 
             foreach (OrbitDriver orbit in Planetarium.Orbits)
             {
@@ -168,18 +171,19 @@
 
             for (int j = 0; j < FlightGlobals.Vessels.Count; j++)
             {
-                Vessel item = FlightGlobals.Vessels[j];
-                if (!item.rails)
+                Vessel vessel = FlightGlobals.Vessels[j];
+                Vector3d velocity = vessel.orbitDriver.orbit.GetVel() - Krakensbane.GetFrameVelocity();
+
+                if (!vessel.rails)
                 {
-                    if (item.GetComponent<Rigidbody>() != null)
+                    if (vessel.GetComponent<Rigidbody>() != null)
                     {
-                        item.GetComponent<Rigidbody>().velocity = item.orbitDriver.orbit.GetVel() - Krakensbane.GetFrameVelocity();
+                        vessel.GetComponent<Rigidbody>().velocity = vessel.orbitDriver.orbit.GetVel() - Krakensbane.GetFrameVelocity();
                     }
 
-                    string[] str = new string[] { "Vessel ", item.name, " velocity resumed. Reference body: ", item.orbitDriver.orbit.referenceBody.name, " vel: ", null };
-                    Vector3d vector3d = item.orbitDriver.orbit.GetVel() - Krakensbane.GetFrameVelocity();
-                    str[5] = vector3d.ToString();
-                    Debug.Log(string.Concat(str), item.gameObject);
+                    Debug.Log(string.Format("Vessel {0} velocity resumed. Reference body: {1}; Velocity: {2}", vessel.name,
+                                                                                                               vessel.orbitDriver.orbit.referenceBody.name,
+                                                                                                               velocity));
                 }
             }
 
@@ -219,7 +223,7 @@
         {
             dominantBody.inverseRotation = rotatingFrameState;
 
-            Debug.Log(string.Concat("Reference Frame: ", (!rotatingFrameState ? "Inertial" : "Rotating")));
+            Debug.Log(string.Format("Reference Frame: {0}", (!rotatingFrameState ? "Inertial" : "Rotating")));
 
             for (int i = 0; i < FlightGlobals.Vessels.Count; i++)
             {
@@ -240,8 +244,6 @@
                     }
                 }
             }
-
-            //onRotatingFrameTransition
         }
 
         private void Start()
