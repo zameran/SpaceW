@@ -11,7 +11,6 @@ namespace Experimental
     [Serializable]
     public class Orbit
     {
-        /*
         public enum EncounterSolutionLevel
         {
             NONE,
@@ -20,7 +19,6 @@ namespace Experimental
             SOI_INTERSECT_2,
             SOI_INTERSECT_1
         }
-        */
 
         public enum PatchTransitionType
         {
@@ -32,8 +30,16 @@ namespace Experimental
             IMPACT
         }
 
+        public bool activePatch;
+        public Orbit closestEncounterPatch;
+        public CelestialBody closestEncounterBody;
+        public EncounterSolutionLevel closestEncounterLevel;
+
         public PatchTransitionType patchStartTransition;
         public PatchTransitionType patchEndTransition;
+
+        public Orbit nextPatch;
+        public Orbit previousPatch;
 
         public CelestialBody referenceBody;
 
@@ -97,29 +103,6 @@ namespace Experimental
         public double closestTgtApprUT;
         public double StartUT;
         public double EndUT;
-
-        /*
-        public bool activePatch;
-
-        public Orbit closestEncounterPatch;
-
-        public CelestialBody closestEncounterBody;
-
-        public EncounterSolutionLevel closestEncounterLevel;
-        public PatchTransitionType patchStartTransition;
-        public PatchTransitionType patchEndTransition;
-
-        public Orbit nextPatch;
-        public Orbit previousPatch;
-
-        public double fromE;
-        public double toE;
-        public double sampleInterval;
-        public double E;
-        public double V;
-        public double fromV;
-        public double toV;
-        */
 
         public double semiMinorAxis
         {
@@ -807,38 +790,38 @@ namespace Experimental
 
         public Vector3d getRelativePositionFromEccAnomaly(double E)
         {
-            E *= -1.0;
+            //TODO: Inversed by one axis rotation problem here...
+
+            E = E * -1;
 
             double x;
             double y;
 
-            if (eccentricity < 1.0)
+            if (eccentricity < 1)
             {
                 x = semiMajorAxis * (Math.Cos(E) - eccentricity);
-                y = semiMajorAxis * Math.Sqrt(1.0 - eccentricity * eccentricity) * -Math.Sin(E);
+                y = semiMajorAxis * Math.Sqrt(1 - eccentricity * eccentricity) * -Math.Sin(E);
             }
-            else if (eccentricity > 1.0)
+            else if (eccentricity <= 1)
             {
-                x = -semiMajorAxis * (eccentricity - Math.Cosh(E));
-                y = -semiMajorAxis * Math.Sqrt(eccentricity * eccentricity - 1.0) * -Math.Sinh(E);
+                x = 0;
+                y = 0;
             }
             else
             {
-                x = 0.0;
-                y = 0.0;
+                x = -semiMajorAxis * (eccentricity - Math.Cosh(E));
+                y = -semiMajorAxis * Math.Sqrt(eccentricity * eccentricity - 1) * -Math.Sinh(E);
             }
 
-            Vector3d pos = new Vector3d(x, y, 0.0);
+            Vector3d pos = new Vector3d(x, y, 0);
             Vector3d normal = Quat.AngleAxis(LAN, Planetarium.Zup.Z) * Planetarium.Zup.X;
             Vector3d axis = Quat.AngleAxis(inclination, normal) * Planetarium.Zup.Z;
 
-            Quat rotation = Quat.AngleAxis(argumentOfPeriapsis, axis) *
-                                   Quat.AngleAxis(inclination, normal) *
-                                   Quat.AngleAxis(LAN - Planetarium.InverseRotAngle, Planetarium.Zup.Z);
+            Quat rotation = (Quat.AngleAxis(argumentOfPeriapsis, axis) *
+                            Quat.AngleAxis(inclination, normal)) *
+                            Quat.AngleAxis(LAN - Planetarium.InverseRotAngle, Planetarium.Zup.Z);
 
-            pos = rotation * pos;
-
-            return pos;
+            return rotation * pos;
         }
 
         public Vector3d getPositionFromTrueAnomaly(double tA)
@@ -1111,10 +1094,99 @@ namespace Experimental
         private double sampleInterval;
         private double E;
         private double V;
-        private double fromV;
-        private double toV;
+        public double fromV;
+        public double toV;
 
         private bool returnFullEllipseTrajectory = false;
+
+        public Trajectory GetPatchTrajectoryEcc(int sampleCount)
+        {
+            Vector3d[] positions = new Vector3d[sampleCount];
+
+            double[] trueAnomalies = new double[sampleCount];
+            float[] times = new float[sampleCount];
+
+            if (eccentricity < 1.0)
+            {
+                if (patchEndTransition == PatchTransitionType.FINAL || returnFullEllipseTrajectory)
+                {
+                    sampleInterval = MathUtils.TwoPI / (double)sampleCount;
+
+                    for (int i = 0; i < sampleCount; i++)
+                    {
+                        E = i * sampleInterval;
+                        V = getTrueAnomaly(E);
+
+                        times[i] = (float)(StartUT + GetDTforTrueAnomaly(V, 1.7976931348623157E+308));
+                        positions[i] = getPositionFromTrueAnomaly(E);
+                    }
+                }
+                else
+                {
+                    fromV = TrueAnomalyAtUT(StartUT);
+                    toV = TrueAnomalyAtUT(EndUT);
+                    fromE = GetEccentricAnomaly(fromV);
+                    toE = GetEccentricAnomaly(toV);
+
+                    if (fromV > toV) fromE = -(MathUtils.TwoPI - fromE);
+
+                    sampleInterval = (toE - fromE) / (sampleCount - 5);
+                    fromE -= sampleInterval * 2.0;
+
+                    double dTforTrueAnomaly = GetDTforTrueAnomaly(fromV, 0.0);
+
+                    for (int j = 0; j < sampleCount; j++)
+                    {
+                        E = fromE + sampleInterval * j;
+                        V = getTrueAnomaly(E);
+
+                        trueAnomalies[j] = V;
+                        times[j] = (float)(StartUT + GetDTforTrueAnomaly(V, dTforTrueAnomaly));
+
+                        positions[j] = getPositionFromTrueAnomaly(E);
+                    }
+                }
+            }
+            else
+            {
+                fromV = TrueAnomalyAtUT(StartUT);
+                toV = TrueAnomalyAtUT(EndUT);
+                fromE = GetEccentricAnomaly(fromV);
+                toE = GetEccentricAnomaly(toV);
+
+                if (fromV > MathUtils.PI) fromE = -fromE;
+
+                sampleInterval = (toE - fromE) / (sampleCount - 1);
+
+                for (int k = 0; k < sampleCount; k++)
+                {
+                    E = fromE + sampleInterval * k;
+                    V = getTrueAnomaly(E);
+
+                    times[k] = (float)(StartUT + GetDTforTrueAnomaly(V, 1.7976931348623157E+308));
+                    positions[k] = getPositionFromTrueAnomaly(E);
+                }
+            }
+
+            Vector3d periapsis;
+            Vector3d apoapsis;
+
+            if (eccentricity < 1.0)
+            {
+                periapsis = getRelativePositionAtT(0.0).xzy;
+                apoapsis = getRelativePositionAtT(period * 0.5).xzy;
+            }
+            else
+            {
+                periapsis = GetEccVector().xzy.normalized * (-semiMajorAxis * (eccentricity - 1.0));
+                apoapsis = Vector3d.zero;
+            }
+
+            Vector3d patchStartPoint = getRelativePositionAtUT(StartUT).xzy;
+            Vector3d patchEndPoint = getRelativePositionAtUT(EndUT).xzy;
+
+            return new Trajectory(positions, times, trueAnomalies, periapsis, apoapsis, patchStartPoint, patchEndPoint, Vector3d.zero, this);
+        }
 
         public Trajectory GetPatchTrajectory(int sampleCount)
         {

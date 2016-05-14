@@ -178,7 +178,7 @@
             l.continuousTexture = true;
             l.color = GetOrbitColour();
             l.rectTransform.gameObject.layer = 31;
-            l.rectTransform.gameObject.hideFlags = HideFlags.HideInHierarchy;
+            //l.rectTransform.gameObject.hideFlags = HideFlags.HideInHierarchy;
             l.joins = Joins.Weld;
         }
 

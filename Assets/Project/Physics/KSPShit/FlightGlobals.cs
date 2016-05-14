@@ -118,6 +118,21 @@
             return GetMainBody(Vector3.zero);
         }
 
+        public static CelestialBody GetHomeBody()
+        {
+            return Bodies[0];
+        }
+
+        public static double getAltitudeAtPos(Vector3d position)
+        {
+            return Vector3d.Distance(position, GetMainBody(position).Position) - GetMainBody(position).Radius;
+        }
+
+        public static float getAltitudeAtPos(Vector3 position)
+        {
+            return Vector3.Distance(position, GetMainBody(position).Position) - (float)GetMainBody(position).Radius;
+        }
+
         public CelestialBody currentMainBody;
 
         public bool RefFrameIsRotating

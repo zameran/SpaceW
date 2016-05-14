@@ -4,6 +4,8 @@ namespace Experimental
 {
     public class Vessel : MonoBehaviour
     {
+        private bool drawDebugUI = false;
+
         private class CenterVectorHelper
         {
             public Vector3 center;
@@ -29,12 +31,16 @@ namespace Experimental
 
         private CenterVectorHelper centerHelper = new CenterVectorHelper();
 
+        public float D1 = 500f;
+        public float D2 = 1000f;
+
         public Rigidbody rb;
 
         public Transform centerOfMass;
 
         public Vector3 velocityLast;
         public Vector3 velocity;
+        public Vector3 velocityStart;
 
         public Vector3 CoM;
         public Vector3 geeForce;
@@ -82,7 +88,7 @@ namespace Experimental
         private void Start()
         {
             if (rb != null)
-                rb.velocity = new Vector3(0, 0, 100);
+                rb.velocity = velocityStart;
         }
 
         private void Update()
@@ -123,7 +129,7 @@ namespace Experimental
 
         private void OnGUI()
         {
-            if (rb != null)
+            if (rb != null && drawDebugUI)
             {
                 GUILayout.BeginVertical();
 
@@ -138,13 +144,17 @@ namespace Experimental
             }
         }
 
+        private void VesselPrecalculate()
+        {
+        }
+
         public void Integrate()
         {
             if (rails) return;
 
             if (rb != null)
             {
-                CelestialBody rB = orbitDriver.orbit.referenceBody;
+                CelestialBody rB = FlightGlobals.GetMainBody(CoM);
 
                 geeForce = FlightGlobals.GetGeeForceAtPosition(CoM, rB);
                 centrifugalForce = FlightGlobals.GetCentrifugalAcc(CoM, rB);
@@ -153,14 +163,14 @@ namespace Experimental
                 rb.centerOfMass = CoM;
 
                 rb.AddForce(geeForce, ForceMode.Acceleration);
-                rb.AddForce(centrifugalForce, ForceMode.Acceleration);
-                rb.AddForce(coriolisForce, ForceMode.Acceleration);
+                //rb.AddForce(centrifugalForce, ForceMode.Acceleration);
+                //rb.AddForce(coriolisForce, ForceMode.Acceleration);
 
                 Debug.DrawLine(CoM, coriolisForce, XKCDColors.Yellowish);
-                Debug.DrawLine(CoM, centrifugalForce, XKCDColors.Bluegreen);
-                Debug.DrawLine(CoM, geeForce, XKCDColors.Moss);
+                //Debug.DrawLine(CoM, centrifugalForce, XKCDColors.Bluegreen);
+                //Debug.DrawLine(CoM, geeForce, XKCDColors.Moss);
 
-                Debug.DrawLine(rB.Position, geeForce, XKCDColors.Red);
+                //Debug.DrawLine(rB.Position, geeForce, XKCDColors.Red);
             }
         }
 

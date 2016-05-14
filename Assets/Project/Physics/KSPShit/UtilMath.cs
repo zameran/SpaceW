@@ -51,9 +51,9 @@ namespace Experimental
 
         public static int BSPSolver(ref double v0, double dv, Func<double, double> solveFor, double vMin, double vMax, double epsilon, int maxIterations)
         {
-            int num;
+            int bsp;
 
-            if (v0 < vMin) num = 0;
+            if (v0 < vMin) bsp = 0;
             else if (v0 <= vMax)
             {
                 int num1 = 0;
@@ -80,20 +80,22 @@ namespace Experimental
                     dv = dv / 2;
                     num1++;
                 }
-                num = num1;
+
+                bsp = num1;
             }
             else
             {
-                num = 0;
+                bsp = 0;
             }
-            return num;
+
+            return bsp;
         }
 
         public static int BSPSolver(ref float v0, float dv, Func<float, float> solveFor, float vMin, float vMax, float epsilon, int maxIterations)
         {
-            int num;
+            int bsp;
 
-            if (v0 < vMin) num = 0;
+            if (v0 < vMin) bsp = 0;
             else if (v0 <= vMax)
             {
                 int num1 = 0;
@@ -120,13 +122,36 @@ namespace Experimental
                     dv = dv / 2f;
                     num1++;
                 }
-                num = num1;
+
+                bsp = num1;
             }
             else
             {
-                num = 0;
+                bsp = 0;
             }
-            return num;
+
+            return bsp;
+        }
+
+        public static float WrapAround(float value, float min, float max)
+        {
+            if (value < min) value = value + max;
+
+            return value % max;
+        }
+
+        public static double WrapAround(double value, double min, double max)
+        {
+            if (value < min) value = value + max;
+
+            return value % max;
+        }
+
+        public static int WrapAround(int value, int min, int max)
+        {
+            if (value < min) value = value + max;
+
+            return value % max;
         }
 
         public static bool isDivisible(int n, int byN)

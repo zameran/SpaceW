@@ -51,8 +51,8 @@ public class MouseOrbitImproved : GameCamera
             Vector3 negDistance = new Vector3(0.0f, 0.0f, -distance);
             Vector3 position = rotation * negDistance + target.position;
 
-            transform.rotation = rotation;
-            transform.position = position;
+            transform.rotation = Quaternion.Slerp(transform.rotation, rotation, 1.0f * Time.deltaTime);
+            transform.position = position; //Vector3.Slerp(transform.position, position, 1.0f * Time.deltaTime);
         }
     }
 

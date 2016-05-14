@@ -57,6 +57,8 @@ public class SpaceshipController : MonoBehaviour
     public bool vInput = false;
     public bool mInput = false;
 
+    public bool AddForces = true;
+
     private void Start()
     {
         if (_cacheRigidbody == null)
@@ -65,14 +67,17 @@ public class SpaceshipController : MonoBehaviour
 
     private void Update()
     {
-        CheckInput();
+            CheckInput();
     }
 
     private void FixedUpdate()
     {
-        _cacheRigidbody.AddTorque(new Vector3(0, 0, rollInput));
-        _cacheRigidbody.AddTorque(new Vector3(0, yawInput, 0));
-        _cacheRigidbody.AddTorque(new Vector3(pitchInput, 0, 0));
+        if (AddForces)
+        {
+            _cacheRigidbody.AddTorque(new Vector3(0, 0, rollInput));
+            _cacheRigidbody.AddTorque(new Vector3(0, yawInput, 0));
+            _cacheRigidbody.AddTorque(new Vector3(pitchInput, 0, 0));
+        }
     }
 
     private void CheckInput()
@@ -81,69 +86,72 @@ public class SpaceshipController : MonoBehaviour
         yawInput = Input.GetAxis("Horizontal") * yawRate;
         pitchInput = Input.GetAxis("Vertical") * pitchRate;
 
-        if (Input.GetButtonDown("Fire3"))
+        if (AddForces)
         {
-            foreach (SpaceshipThruster _thruster in fowrwardThrusters)
+            if (Input.GetButtonDown("Fire3"))
             {
-                _thruster.StartThruster();
-                _thruster.thurstCoeff = forceModifier;
+                foreach (SpaceshipThruster _thruster in fowrwardThrusters)
+                {
+                    _thruster.StartThruster();
+                    _thruster.thurstCoeff = forceModifier;
+                }
+
+                foreach (SpaceshipThruster _thruster in backwardThrusters)
+                {
+                    _thruster.StartThruster();
+                    _thruster.thurstCoeff = forceModifier;
+                }
             }
 
-            foreach (SpaceshipThruster _thruster in backwardThrusters)
+            if (Input.GetButtonUp("Fire3"))
             {
-                _thruster.StartThruster();
-                _thruster.thurstCoeff = forceModifier;
-            }
-        }
+                foreach (SpaceshipThruster _thruster in fowrwardThrusters)
+                {
+                    _thruster.StopThruster();
+                    _thruster.thurstCoeff = forceModifier;
+                }
 
-        if (Input.GetButtonUp("Fire3"))
-        {
-            foreach (SpaceshipThruster _thruster in fowrwardThrusters)
-            {
-                _thruster.StopThruster();
-                _thruster.thurstCoeff = forceModifier;
+                foreach (SpaceshipThruster _thruster in backwardThrusters)
+                {
+                    _thruster.StopThruster();
+                    _thruster.thurstCoeff = forceModifier;
+                }
             }
 
-            foreach (SpaceshipThruster _thruster in backwardThrusters)
+            if (Input.GetButtonDown("Fire1"))
             {
-                _thruster.StopThruster();
-                _thruster.thurstCoeff = forceModifier;
+                foreach (SpaceshipThruster _thruster in fowrwardThrusters)
+                {
+                    _thruster.StartThruster();
+                    _thruster.thurstCoeff = forceModifier;
+                }
             }
-        }
 
-        if (Input.GetButtonDown("Fire1"))
-        {
-            foreach (SpaceshipThruster _thruster in fowrwardThrusters)
+            if (Input.GetButtonUp("Fire1"))
             {
-                _thruster.StartThruster();
-                _thruster.thurstCoeff = forceModifier;
+                foreach (SpaceshipThruster _thruster in fowrwardThrusters)
+                {
+                    _thruster.StopThruster();
+                    _thruster.thurstCoeff = forceModifier;
+                }
             }
-        }
 
-        if (Input.GetButtonUp("Fire1"))
-        {
-            foreach (SpaceshipThruster _thruster in fowrwardThrusters)
+            if (Input.GetButtonDown("Fire2"))
             {
-                _thruster.StopThruster();
-                _thruster.thurstCoeff = forceModifier;
+                foreach (SpaceshipThruster _thruster in backwardThrusters)
+                {
+                    _thruster.StartThruster();
+                    _thruster.thurstCoeff = forceModifier;
+                }
             }
-        }
 
-        if (Input.GetButtonDown("Fire2"))
-        {
-            foreach (SpaceshipThruster _thruster in backwardThrusters)
+            if (Input.GetButtonUp("Fire2"))
             {
-                _thruster.StartThruster();
-                _thruster.thurstCoeff = forceModifier;
-            }
-        }
-
-        if (Input.GetButtonUp("Fire2"))
-        {
-            foreach (SpaceshipThruster _thruster in backwardThrusters)
-            {
-                _thruster.StopThruster();
-                _thruster.thurstCoeff = forceModifier;
+                foreach (SpaceshipThruster _thruster in backwardThrusters)
+                {
+                    _thruster.StopThruster();
+                    _thruster.thurstCoeff = forceModifier;
+                }
             }
         }
 
