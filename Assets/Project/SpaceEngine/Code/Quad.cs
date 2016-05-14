@@ -51,6 +51,12 @@ public struct QuadGenerationConstants
     public float LODOctaveModifier;
     public float orientation;
 
+    //x - nVerticesPerSide
+    //y - nVerticesPerSideWithBorder
+    //z - nVerticesPerSideSub
+    //w - nVerticesPerSideWithBorderSub
+    public Vector4 meshSettings;
+
     public Vector3 cubeFaceEastDirection; //12
     public Vector3 cubeFaceNorthDirection; //12
     public Vector3 patchCubeCenter; //12
@@ -60,6 +66,8 @@ public struct QuadGenerationConstants
     public static QuadGenerationConstants Init()
     {
         QuadGenerationConstants temp = new QuadGenerationConstants();
+
+        temp.meshSettings = new Vector4(QS.nVertsPerEdge, QS.nVertsPerEdgeReal, QS.nVertsPerEdgeSub, QS.nVertsPerEdgeSubReal);
 
         temp.spacing = QS.nSpacing;
         temp.spacingreal = QS.nSpacingReal;
@@ -72,6 +80,8 @@ public struct QuadGenerationConstants
     public static QuadGenerationConstants Init(float terrainMaxHeight)
     {
         QuadGenerationConstants temp = new QuadGenerationConstants();
+
+        temp.meshSettings = new Vector4(QS.nVertsPerEdge, QS.nVertsPerEdgeReal, QS.nVertsPerEdgeSub, QS.nVertsPerEdgeSubReal);
 
         temp.spacing = QS.nSpacing;
         temp.spacingreal = QS.nSpacingReal;
@@ -249,9 +259,9 @@ public sealed class Quad : MonoBehaviour
 
     private void Awake()
     {
-        QuadGenerationConstantsBuffer = new ComputeBuffer(1, 68);
+        QuadGenerationConstantsBuffer = new ComputeBuffer(1, 84);
         PreOutDataBuffer = new ComputeBuffer(QS.nVertsReal, 64);
-        PreOutDataSubBuffer = new ComputeBuffer(QS.nRealVertsSub, 64);
+        PreOutDataSubBuffer = new ComputeBuffer(QS.nVertsSubReal, 64);
         OutDataBuffer = new ComputeBuffer(QS.nVerts, 64);
         QuadCornersBuffer = new ComputeBuffer(1, 64);
 
@@ -730,7 +740,7 @@ public sealed class Quad : MonoBehaviour
 
         QuadGenerationConstants[] quadGenerationConstantsData = new QuadGenerationConstants[] { generationConstants };
         OutputStruct[] preOutputStructData = new OutputStruct[QS.nVertsReal];
-        OutputStruct[] preOutputSubStructData = new OutputStruct[QS.nRealVertsSub];
+        OutputStruct[] preOutputSubStructData = new OutputStruct[QS.nVertsSubReal];
         OutputStruct[] outputStructData = new OutputStruct[QS.nVerts];
         QuadCorners[] quadCorners = new QuadCorners[] { new QuadCorners() };
 

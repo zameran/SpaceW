@@ -40,6 +40,8 @@ struct QuadGenerationConstants
 	float lodOctaveModifier;
 	float orientation;
 
+	float4 meshSettings;
+
 	float3 cubeFaceEastDirection;
 	float3 cubeFaceNorthDirection;
 	float3 patchCubeCenter;

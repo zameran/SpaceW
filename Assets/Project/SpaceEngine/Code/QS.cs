@@ -42,7 +42,7 @@ public static class QS
 
     public static int nVertsReal { get { return nVertsPerEdgeReal * nVertsPerEdgeReal; } }
     public static int nVerts { get { return nVertsPerEdge * nVertsPerEdge; } }
-    public static int nRealVertsSub { get { return nVertsPerEdgeSubReal * nVertsPerEdgeSubReal; } }
+    public static int nVertsSubReal { get { return nVertsPerEdgeSubReal * nVertsPerEdgeSubReal; } }
     public static int nVertsSub { get { return nVertsPerEdgeSub * nVertsPerEdgeSub; } }
 
     public static float nSpacingReal { get { return 2.0f / (nVertsPerEdgeReal - 1.0f); } }

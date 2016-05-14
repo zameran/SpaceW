@@ -31,8 +31,39 @@
 #endregion
 
 using UnityEngine;
+using UnityEngine.UI;
 
 public class MainMenuUI : UserInterface, IUserInterface
 {
+    public AssemblyLoader loader = null;
 
+    public CanvasRenderer addonsCanvasRenderer;
+    public Toggle addonsShowToggle;
+    public ScrollRect addonsScrollView;
+    public GameObject addonsItemPrefab;
+
+    private void Awake()
+    {
+        if (loader == null) loader = Loader.Instance as AssemblyLoader;
+
+        InitUI();
+    }
+
+    public void InitUI()
+    {
+        ShowAddonsToggle_OnValueChanged(addonsShowToggle);
+    }
+
+    public void AddToScrollView(GameObject item, ScrollRect scrollRect)
+    {
+        GameObject createdItem = GameObject.Instantiate(item);
+    }
+
+    public void ShowAddonsToggle_OnValueChanged(Toggle t)
+    {
+        if (addonsScrollView != null && t != null)
+        {
+            addonsScrollView.gameObject.SetActive(!t.isOn);
+        }
+    }
 }
