@@ -44,7 +44,7 @@ public struct PlanetoidGenerationConstants
 
 }
 
-public sealed class Planetoid : MonoBehaviour
+public sealed class Planetoid : MonoBehaviour, IPlanet
 {
     public Atmosphere Atmosphere;
 

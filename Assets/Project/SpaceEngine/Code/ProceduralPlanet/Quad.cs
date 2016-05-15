@@ -40,59 +40,6 @@ using System.Collections.Generic;
 using ZFramework.Unity.Common.PerfomanceMonitor;
 
 [Serializable]
-public struct QuadGenerationConstants
-{
-    public float planetRadius; //4
-    public float spacing; //4
-    public float spacingreal;
-    public float spacingsub;
-    public float terrainMaxHeight; //4
-    public float LODLevel; //4
-    public float LODOctaveModifier;
-    public float orientation;
-
-    //x - nVerticesPerSide
-    //y - nVerticesPerSideWithBorder
-    //z - nVerticesPerSideSub
-    //w - nVerticesPerSideWithBorderSub
-    public Vector4 meshSettings;
-
-    public Vector3 cubeFaceEastDirection; //12
-    public Vector3 cubeFaceNorthDirection; //12
-    public Vector3 patchCubeCenter; //12
-
-    //12 * 3 + 4 * 3 = 36 + 12 = 48
-
-    public static QuadGenerationConstants Init()
-    {
-        QuadGenerationConstants temp = new QuadGenerationConstants();
-
-        temp.meshSettings = new Vector4(QS.nVertsPerEdge, QS.nVertsPerEdgeReal, QS.nVertsPerEdgeSub, QS.nVertsPerEdgeSubReal);
-
-        temp.spacing = QS.nSpacing;
-        temp.spacingreal = QS.nSpacingReal;
-        temp.spacingsub = QS.nSpacingSub;
-        temp.terrainMaxHeight = 64.0f;
-
-        return temp;
-    }
-
-    public static QuadGenerationConstants Init(float terrainMaxHeight)
-    {
-        QuadGenerationConstants temp = new QuadGenerationConstants();
-
-        temp.meshSettings = new Vector4(QS.nVertsPerEdge, QS.nVertsPerEdgeReal, QS.nVertsPerEdgeSub, QS.nVertsPerEdgeSubReal);
-
-        temp.spacing = QS.nSpacing;
-        temp.spacingreal = QS.nSpacingReal;
-        temp.spacingsub = QS.nSpacingSub;
-        temp.terrainMaxHeight = terrainMaxHeight;
-
-        return temp;
-    }
-}
-
-[Serializable]
 public struct OutputStruct
 {
     public float noise;
@@ -104,16 +51,7 @@ public struct OutputStruct
     public Vector4 cpos;
 }
 
-[Serializable]
-public struct QuadCorners
-{
-    public Vector4 topLeftCorner;
-    public Vector4 topRightCorner;
-    public Vector4 bottomLeftCorner;
-    public Vector4 bottomRightCorner;
-}
-
-public sealed class Quad : MonoBehaviour
+public sealed class Quad : MonoBehaviour, IQuad
 {
     [Serializable]
     public class Id
