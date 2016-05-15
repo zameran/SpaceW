@@ -49,8 +49,8 @@ public sealed class QuadTextureCache : QuadCache
 
     public override void Init()
     {
-        this.HeightTexture = RTExtensions.CreateRTexture(QS.nVertsPerEdgeSub, 0);
-        this.NormalTexture = RTExtensions.CreateRTexture(QS.nVertsPerEdgeSub, 0);
+        this.HeightTexture = RTExtensions.CreateRTexture(QuadSettings.nVertsPerEdgeSub, 0);
+        this.NormalTexture = RTExtensions.CreateRTexture(QuadSettings.nVertsPerEdgeSub, 0);
 
         RTUtility.ClearColor(new RenderTexture[] { this.HeightTexture, this.NormalTexture });
 

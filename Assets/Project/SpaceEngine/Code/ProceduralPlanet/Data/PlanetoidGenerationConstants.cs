@@ -29,62 +29,14 @@
 // THE POSSIBILITY OF SUCH DAMAGE.
 // 
 // Creation Date: 2016.05.15
-// Creation Time: 21:12
+// Creation Time: 22:27
 // Creator: zameran
 #endregion
 
 using System;
-using UnityEngine;
 
 [Serializable]
-public struct QuadGenerationConstants
+public struct PlanetoidGenerationConstants
 {
-    public float planetRadius; //4
-    public float spacing; //4
-    public float spacingreal;
-    public float spacingsub;
-    public float terrainMaxHeight; //4
-    public float LODLevel; //4
-    public float LODOctaveModifier;
-    public float orientation;
-
-    //x - nVerticesPerSide
-    //y - nVerticesPerSideWithBorder
-    //z - nVerticesPerSideSub
-    //w - nVerticesPerSideWithBorderSub
-    public Vector4 meshSettings;
-
-    public Vector3 cubeFaceEastDirection; //12
-    public Vector3 cubeFaceNorthDirection; //12
-    public Vector3 patchCubeCenter; //12
-
-    //12 * 3 + 4 * 3 = 36 + 12 = 48
-
-    public static QuadGenerationConstants Init()
-    {
-        QuadGenerationConstants temp = new QuadGenerationConstants();
-
-        temp.meshSettings = new Vector4(QuadSettings.nVertsPerEdge, QuadSettings.nVertsPerEdgeReal, QuadSettings.nVertsPerEdgeSub, QuadSettings.nVertsPerEdgeSubReal);
-
-        temp.spacing = QuadSettings.nSpacing;
-        temp.spacingreal = QuadSettings.nSpacingReal;
-        temp.spacingsub = QuadSettings.nSpacingSub;
-        temp.terrainMaxHeight = 64.0f;
-
-        return temp;
-    }
-
-    public static QuadGenerationConstants Init(float terrainMaxHeight)
-    {
-        QuadGenerationConstants temp = new QuadGenerationConstants();
-
-        temp.meshSettings = new Vector4(QuadSettings.nVertsPerEdge, QuadSettings.nVertsPerEdgeReal, QuadSettings.nVertsPerEdgeSub, QuadSettings.nVertsPerEdgeSubReal);
-
-        temp.spacing = QuadSettings.nSpacing;
-        temp.spacingreal = QuadSettings.nSpacingReal;
-        temp.spacingsub = QuadSettings.nSpacingSub;
-        temp.terrainMaxHeight = terrainMaxHeight;
-
-        return temp;
-    }
+     
 }

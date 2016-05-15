@@ -1,4 +1,4 @@
-#region License
+﻿#region License
 // Procedural planet generator.
 // 
 // Copyright (C) 2015-2016 Denis Ovchinnikov [zameran] 
@@ -29,18 +29,26 @@
 // THE POSSIBILITY OF SUCH DAMAGE.
 // 
 // Creation Date: 2016.05.15
-// Creation Time: 21:15
+// Creation Time: 21:25
 // Creator: zameran
 #endregion
 
-using System;
 using UnityEngine;
 
-[Serializable]
-public struct QuadCorners
+using ZFramework.Unity.Common.Types;
+
+public static class CPUSpaceUtils
 {
-    public Vector3 topLeftCorner;
-    public Vector3 topRightCorner;
-    public Vector3 bottomLeftCorner;
-    public Vector3 bottomRightCorner;
+	public static Vector3d CubeCoord(QuadGenerationConstants constants, int VerticesPerSide, Vector3i id, int mod, float spacing)
+	{
+		double eastValue = (id.X - ((VerticesPerSide - mod) * 0.5)) * spacing;
+		double northValue = (id.Y - ((VerticesPerSide - mod) * 0.5)) * spacing;
+
+		Vector3d cubeCoordEast = constants.cubeFaceEastDirection * (float)eastValue;
+		Vector3d cubeCoordNorth = constants.cubeFaceNorthDirection * (float) northValue;
+
+		Vector3d cubeCoord = cubeCoordEast + cubeCoordNorth + (Vector3d)constants.patchCubeCenter;
+
+		return cubeCoord;
+	}
 }

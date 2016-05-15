@@ -198,13 +198,13 @@ public sealed class Quad : MonoBehaviour, IQuad
     private void Awake()
     {
         QuadGenerationConstantsBuffer = new ComputeBuffer(1, 84);
-        PreOutDataBuffer = new ComputeBuffer(QS.nVertsReal, 64);
-        PreOutDataSubBuffer = new ComputeBuffer(QS.nVertsSubReal, 64);
-        OutDataBuffer = new ComputeBuffer(QS.nVerts, 64);
+        PreOutDataBuffer = new ComputeBuffer(QuadSettings.nVertsReal, 64);
+        PreOutDataSubBuffer = new ComputeBuffer(QuadSettings.nVertsSubReal, 64);
+        OutDataBuffer = new ComputeBuffer(QuadSettings.nVerts, 64);
         QuadCornersBuffer = new ComputeBuffer(1, 64);
 
-        HeightTexture = RTExtensions.CreateRTexture(QS.nVertsPerEdgeSub, 0, RenderTextureFormat.ARGB32);
-        NormalTexture = RTExtensions.CreateRTexture(QS.nVertsPerEdgeSub, 0, RenderTextureFormat.ARGB32);
+        HeightTexture = RTExtensions.CreateRTexture(QuadSettings.nVertsPerEdgeSub, 0, RenderTextureFormat.ARGB32);
+        NormalTexture = RTExtensions.CreateRTexture(QuadSettings.nVertsPerEdgeSub, 0, RenderTextureFormat.ARGB32);
 
         RTUtility.ClearColor(new RenderTexture[] { HeightTexture, NormalTexture });
     }
@@ -677,9 +677,9 @@ public sealed class Quad : MonoBehaviour, IQuad
         if (Cached) Log("Textures founded in cache!"); else Log("Textures not found in cache!");
 
         QuadGenerationConstants[] quadGenerationConstantsData = new QuadGenerationConstants[] { generationConstants };
-        OutputStruct[] preOutputStructData = new OutputStruct[QS.nVertsReal];
-        OutputStruct[] preOutputSubStructData = new OutputStruct[QS.nVertsSubReal];
-        OutputStruct[] outputStructData = new OutputStruct[QS.nVerts];
+        OutputStruct[] preOutputStructData = new OutputStruct[QuadSettings.nVertsReal];
+        OutputStruct[] preOutputSubStructData = new OutputStruct[QuadSettings.nVertsSubReal];
+        OutputStruct[] outputStructData = new OutputStruct[QuadSettings.nVerts];
         QuadCorners[] quadCorners = new QuadCorners[] { new QuadCorners() };
 
         QuadGenerationConstantsBuffer.SetData(quadGenerationConstantsData);
@@ -701,29 +701,29 @@ public sealed class Quad : MonoBehaviour, IQuad
         SetupComputeShaderKernelUniforfms(kernel5, QuadGenerationConstantsBuffer, PreOutDataBuffer, PreOutDataSubBuffer, OutDataBuffer, QuadCornersBuffer);
 
         CoreShader.Dispatch(kernel1,
-        QS.THREADGROUP_SIZE_X_REAL,
-        QS.THREADGROUP_SIZE_Y_REAL,
-        QS.THREADGROUP_SIZE_Z_REAL);
+        QuadSettings.THREADGROUP_SIZE_X_REAL,
+        QuadSettings.THREADGROUP_SIZE_Y_REAL,
+        QuadSettings.THREADGROUP_SIZE_Z_REAL);
 
         CoreShader.Dispatch(kernel2,
-        QS.THREADGROUP_SIZE_X,
-        QS.THREADGROUP_SIZE_Y,
-        QS.THREADGROUP_SIZE_Z);
+        QuadSettings.THREADGROUP_SIZE_X,
+        QuadSettings.THREADGROUP_SIZE_Y,
+        QuadSettings.THREADGROUP_SIZE_Z);
 
         CoreShader.Dispatch(kernel3,
-        QS.THREADGROUP_SIZE_X_SUB_REAL,
-        QS.THREADGROUP_SIZE_Y_SUB_REAL,
-        QS.THREADGROUP_SIZE_Z_SUB_REAL);
+        QuadSettings.THREADGROUP_SIZE_X_SUB_REAL,
+        QuadSettings.THREADGROUP_SIZE_Y_SUB_REAL,
+        QuadSettings.THREADGROUP_SIZE_Z_SUB_REAL);
 
         CoreShader.Dispatch(kernel4,
-        QS.THREADGROUP_SIZE_X_SUB,
-        QS.THREADGROUP_SIZE_Y_SUB,
-        QS.THREADGROUP_SIZE_Z_SUB);
+        QuadSettings.THREADGROUP_SIZE_X_SUB,
+        QuadSettings.THREADGROUP_SIZE_Y_SUB,
+        QuadSettings.THREADGROUP_SIZE_Z_SUB);
 
         CoreShader.Dispatch(kernel5,
-        QS.THREADGROUP_SIZE_X_UNIT,
-        QS.THREADGROUP_SIZE_Y_UNIT,
-        QS.THREADGROUP_SIZE_Z_UNIT);
+        QuadSettings.THREADGROUP_SIZE_X_UNIT,
+        QuadSettings.THREADGROUP_SIZE_Y_UNIT,
+        QuadSettings.THREADGROUP_SIZE_Z_UNIT);
 
         Generated = true;
 

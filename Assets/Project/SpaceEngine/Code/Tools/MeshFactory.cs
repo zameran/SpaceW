@@ -38,8 +38,8 @@ public static class MeshFactory
 
     public static Mesh SetupQuadColliderMesh(OutputStruct[] outputStructData)
     {
-        int nVerts = QS.nVerts;
-        int nVertsPerEdge = QS.nVertsPerEdge;
+        int nVerts = QuadSettings.nVerts;
+        int nVertsPerEdge = QuadSettings.nVertsPerEdge;
 
         Vector3[] dummyVerts = new Vector3[nVerts];
 
@@ -89,8 +89,8 @@ public static class MeshFactory
 
     public static Mesh SetupQuadMesh()
     {
-        int nVerts = QS.nVerts;
-        int nVertsPerEdge = QS.nVertsPerEdge;
+        int nVerts = QuadSettings.nVerts;
+        int nVertsPerEdge = QuadSettings.nVertsPerEdge;
 
         Vector3[] dummyVerts = new Vector3[nVerts];
         Vector2[] uv0 = new Vector2[nVerts];

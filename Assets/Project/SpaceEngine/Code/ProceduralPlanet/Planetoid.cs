@@ -38,12 +38,6 @@ using System.Collections.Generic;
 using Amib;
 using Amib.Threading;
 
-[Serializable]
-public struct PlanetoidGenerationConstants
-{
-
-}
-
 public sealed class Planetoid : MonoBehaviour, IPlanet
 {
     public Atmosphere Atmosphere;

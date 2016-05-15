@@ -33,7 +33,7 @@
 using System;
 
 [Serializable]
-public static class QS
+public static class QuadSettings
 {
     public static int nVertsPerEdgeReal { get { return 128; } }
     public static int nVertsPerEdge { get { return 120; } }

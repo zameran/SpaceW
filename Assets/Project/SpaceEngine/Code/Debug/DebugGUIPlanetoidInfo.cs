@@ -55,7 +55,7 @@ public sealed class DebugGUIPlanetoidInfo : DebugGUI
 
     public double CalculateTexturesVMU(int quadsCount)
     {
-        int size = QS.nVertsPerEdgeSub * QS.nVertsPerEdgeSub;
+        int size = QuadSettings.nVertsPerEdgeSub * QuadSettings.nVertsPerEdgeSub;
 
         double sizeInBytes = size * 8; //8 bit per channel.
         double sizeInMegabytes = (sizeInBytes / 1024.0) / 1024.0;
@@ -69,7 +69,7 @@ public sealed class DebugGUIPlanetoidInfo : DebugGUI
         {
             int quadsCount = Planetoid.Quads.Count;
             int quadsCulledCount = Planetoid.GetCulledQuadsCount();
-            int vertsRendered = (quadsCount - quadsCulledCount) * QS.nVerts;
+            int vertsRendered = (quadsCount - quadsCulledCount) * QuadSettings.nVerts;
 
             double quadsTexturesVideoMemoryUsage = CalculateTexturesVMU(quadsCount);
 
