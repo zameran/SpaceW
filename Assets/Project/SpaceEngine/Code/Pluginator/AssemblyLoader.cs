@@ -117,6 +117,8 @@ public sealed class AssemblyLoader : Loader
         {
             Delay((TotalDetected + 1) * 2, () => { SceneManager.LoadScene(1); });
         }
+
+        base.Pass();
     }
 
     #region AssemblyLoader Logic

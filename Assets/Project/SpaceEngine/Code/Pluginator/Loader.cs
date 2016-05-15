@@ -51,6 +51,13 @@ public abstract class Loader : MonoBehaviour
         private set { if (value != null) instance = value; else Logger.Log("Loader Instance set fail!"); }
     }
 
+    private static int step;
+    public static int Step
+    {
+        get { return step; }
+        private set { step = value; }
+    }
+
     protected virtual void Start()
     {
 
@@ -59,6 +66,9 @@ public abstract class Loader : MonoBehaviour
     protected virtual void Awake()
     {
         Instance = this;
+
+        Step = 0;
+
         if(ShouldDontDestroyOnLoad) DontDestroyOnLoad(this);
     }
 
@@ -77,7 +87,10 @@ public abstract class Loader : MonoBehaviour
 
     }
 
-    protected abstract void Pass();
+    protected virtual void Pass()
+    {
+        Step++;
+    }
 
     public void Delay(float waitTime, Action action)
     {
