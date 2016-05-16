@@ -43,8 +43,6 @@
 // NOISE_ENGINE_SE - space engine texture lookup
 // NOISE_ENGINE_ZNE - zameran noise engine
 // NOISE_ENGINE_I - space engine
-//#define NOISE_ENGINE_SE
-//#define NOISE_ENGINE_ZNE
 #define NOISE_ENGINE_I
 //-----------------------------------------------------------------------------
 
@@ -745,39 +743,39 @@ Surface GetSurfaceColorAtlas(float height, float slope, float vary)
 
 Surface GetSurfaceColorAtlas(float height, float slope, float vary)
 {
-    float4 PackFactors = float4(1.0 / ATLAS_RES_X, 1.0 / ATLAS_RES_Y, ATLAS_TILE_RES, ATLAS_TILE_RES_LOG2);
-    slope = saturate(slope * 0.5);
+	float4 PackFactors = float4(1.0 / ATLAS_RES_X, 1.0 / ATLAS_RES_Y, ATLAS_TILE_RES, ATLAS_TILE_RES_LOG2);
+	slope = saturate(slope * 0.5);
 
-    float4 IdScale = tex2Dlod(MaterialTable, float4(height, slope + 0.5, 0, 0));
-    int materialID = min(int(IdScale.x) + int(vary), int(ATLAS_RES_X * ATLAS_RES_Y - 1));
-    float2 tileOffs = float2(materialID % (uint)ATLAS_RES_X, materialID / (uint)ATLAS_RES_X) * PackFactors.xy;
+	float4 IdScale = tex2Dlod(MaterialTable, float4(height, slope + 0.5, 0, 0));
+	int materialID = min(int(IdScale.x) + int(vary), int(ATLAS_RES_X * ATLAS_RES_Y - 1));
+	float2 tileOffs = float2(materialID % (uint)ATLAS_RES_X, materialID / (uint)ATLAS_RES_X) * PackFactors.xy;
 
-    Surface res;
-    float2 tileUV = (TexCoord.xy * faceParams.z + faceParams.xy) * texScale * IdScale.y;
-    float2 dx = dFdx(tileUV * PackFactors.z);
-    float2 dy = dFdy(tileUV * PackFactors.z);
-    float lod = 0;//clamp(0.5 * log2(max(dot(dx, dx), dot(dy, dy))), 0.0, PackFactors.w);
-    float2 invSize = float2(pow(2.0, lod - PackFactors.w), pow(2.0, lod - PackFactors.w)) * PackFactors.xy; //,
-    float2 uv = tileOffs + frac(tileUV) * (PackFactors.xy - invSize) + 0.5 * invSize;
+	Surface res;
+	float2 tileUV = (TexCoord.xy * faceParams.z + faceParams.xy) * texScale * IdScale.y;
+	float2 dx = dFdx(tileUV * PackFactors.z);
+	float2 dy = dFdy(tileUV * PackFactors.z);
+	float lod = 0;//clamp(0.5 * log2(max(dot(dx, dx), dot(dy, dy))), 0.0, PackFactors.w);
+	float2 invSize = float2(pow(2.0, lod - PackFactors.w), pow(2.0, lod - PackFactors.w)) * PackFactors.xy; //,
+	float2 uv = tileOffs + frac(tileUV) * (PackFactors.xy - invSize) + 0.5 * invSize;
 
 	#if (TILING_FIX_MODE == 0)
-    res.color = tex2Dlod(AtlasDiffSampler, float4(uv, 0, 0));
+	res.color = tex2Dlod(AtlasDiffSampler, float4(uv, 0, 0));
 	#elif (TILING_FIX_MODE == 1)
-    float2 uv2 = tileOffs + frac(-0.173 * tileUV) * (PackFactors.xy - invSize) + 0.5 * invSize;
-    res.color = lerp(tex2Dlod(AtlasDiffSampler, float4(uv, 0, 0)), tex2Dlod(AtlasDiffSampler, float4(uv2, 0, 0)), 0.5);
+	float2 uv2 = tileOffs + frac(-0.173 * tileUV) * (PackFactors.xy - invSize) + 0.5 * invSize;
+	res.color = lerp(tex2Dlod(AtlasDiffSampler, float4(uv, 0, 0)), tex2Dlod(AtlasDiffSampler, float4(uv2, 0, 0)), 0.5);
 	#endif
 
-    res.height = res.color.a;
+	res.height = res.color.a;
 
-    float4 adjust = tex2Dlod(MaterialTable, float4(height, slope, 0, 0));
-    adjust.xyz *= texColorConv;
-    float3 hsl = rgb2hsl(res.color.rgb);
-    hsl.x  = frac(hsl.x  + adjust.x);
-    hsl.yz = clamp(hsl.yz + adjust.yz, 0.0, 1.0);
-    res.color.rgb = hsl2rgb(hsl);
+	float4 adjust = tex2Dlod(MaterialTable, float4(height, slope, 0, 0));
+	adjust.xyz *= texColorConv;
+	float3 hsl = rgb2hsl(res.color.rgb);
+	hsl.x  = frac(hsl.x  + adjust.x);
+	hsl.yz = clamp(hsl.yz + adjust.yz, 0.0, 1.0);
+	res.color.rgb = hsl2rgb(hsl);
 
-    res.color.a = adjust.a;
-    return  res;
+	res.color.a = adjust.a;
+	return  res;
 }
 
 #endif
@@ -1431,15 +1429,68 @@ float4 NoiseDeriv(float3 p)
 //-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
-inline float4 permute(float4 x) { return fmod((x * 34.0 + 1.0) * x, 289.0); }
-inline float3 permute3(float3 x) { return fmod((x * 34.0 + 1.0) * x, 289.0); }
-inline float4 taylorInvSqrt(float4 r) { return 1.79284291400159 - 0.85373472095314 * r; }
+inline float4 modi(float4 x, float y) { return x - y * floor(x / y); }
+inline float3 modi(float3 x, float y) { return x - y * floor(x / y); }
+inline float4 Permutation(float4 x) { return modi((34.0 * x + 1.0) * x, 289.0); }
+inline float3 Permutation(float3 x) { return modi((34.0 * x + 1.0) * x, 289.0); }
+inline float4 TaylorInvSqrt(float4 r) { return 1.79284291400159 - 0.85373472095314 * r; }
+
+#define K 0.142857142857
+#define Ko 0.428571428571
+
+float2 iNoise(float3 P, float jitter)
+{			
+	float3 Pi = modi(floor(P), 289.0);
+	float3 Pf = frac(P);
+	float3 oi = float3(-1.0, 0.0, 1.0);
+	float3 of = float3(-0.5, 0.5, 1.5);
+	float3 px = Permutation(Pi.x + oi);
+	float3 py = Permutation(Pi.y + oi);
+
+	float3 p, ox, oy, oz, dx, dy, dz;
+	float2 F = 1e6;
+
+	for(int i = 0; i < 3; i++)
+	{
+		for(int j = 0; j < 3; j++)
+		{
+			p = Permutation(px[i] + py[j] + Pi.z + oi); // pij1, pij2, pij3
+
+			ox = frac(p * K) - Ko;
+			oy = modi(floor(p * K),7.0) * K - Ko;
+			
+			p = Permutation(p);
+			
+			oz = frac(p*K) - Ko;
+		
+			dx = Pf.x - of[i] + jitter * ox;
+			dy = Pf.y - of[j] + jitter * oy;
+			dz = Pf.z - of + jitter * oz;
+			
+			float3 d = dx * dx + dy * dy + dz * dz; // dij1, dij2 and dij3, squared
+			
+			//Find lowest and second lowest distances
+			for(int n = 0; n < 3; n++)
+			{
+				if(d[n] < F[0])
+				{
+					F[1] = F[0];
+					F[0] = d[n];
+				}
+				else if(d[n] < F[1])
+				{
+					F[1] = d[n];
+				}
+			}
+		}
+	}
+	
+	return F;
+}
 
 // 3D simplex noise
 float sNoise(float3 v)
 {
-	v *= 0.25;
-
 	float2 C = float2(1.0 / 6.0, 1.0 / 3.0);
 	float4 D = float4(0.0, 0.5, 1.0, 2.0);
 
@@ -1462,8 +1513,8 @@ float sNoise(float3 v)
 	float3 x3 = x0 - D.yyy;      // -1.0+3.0*C.x = -0.5 = -D.y
 
 	// Permutations
-	i = fmod(i, 289.0); 
-	float4 p = permute(permute(permute(
+	i = modi(i, 289.0); 
+	float4 p = Permutation(Permutation(Permutation(
 		  i.z + float4(0.0, i1.z, i2.z, 1.0))
 		+ i.y + float4(0.0, i1.y, i2.y, 1.0))
 		+ i.x + float4(0.0, i1.x, i2.x, 1.0));
@@ -1500,7 +1551,7 @@ float sNoise(float3 v)
 	float3 p3 = float3(a1.zw, h.w);
 
 	//Normalise gradients
-	float4 norm = taylorInvSqrt(float4(dot(p0, p0), dot(p1, p1), dot(p2, p2), dot(p3, p3)));
+	float4 norm = TaylorInvSqrt(float4(dot(p0, p0), dot(p1, p1), dot(p2, p2), dot(p3, p3)));
 	p0 *= norm.x;
 	p1 *= norm.y;
 	p2 *= norm.z;

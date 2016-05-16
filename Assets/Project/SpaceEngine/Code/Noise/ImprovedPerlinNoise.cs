@@ -24,8 +24,11 @@
  */
 #endregion
 
+using System;
 using UnityEngine;
+using Random = UnityEngine.Random;
 
+[Serializable]
 public sealed class ImprovedPerlinNoise
 {
     const int SIZE = 256;
