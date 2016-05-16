@@ -182,63 +182,49 @@
 
         private void OnGUI()
         {
-            OrbitCastHit orbitCastHit;
-            OrbitDriver hitDriver = TargetCastSplines(out orbitCastHit, lineWidth);
+            if (orbitDriver == null) return;
 
-            if(hitDriver != null && orbitLine != null)
+            OrbitCastHit orbitCastHit = TargetCastSpline(lineWidth);
+
+            if (orbitCastHit != null)
             {
-                Vector2 position = orbitCastHit.orbitScreenPoint;
-                Vector2 dimension = new Vector2(200, 50);
+                OrbitDriver hitDriver = orbitCastHit.driver;
 
-                GUILayout.BeginArea(new Rect(position, dimension));
-
-                GUILayout.Window(0, new Rect(position, dimension), (x) => 
+                if (hitDriver != null && orbitLine != null)
                 {
-                    GUILayout.Label("Velocity: " + hitDriver.orbit.vel.magnitude.ToString("0.0") + " m/s");
-                    GUILayout.Label("Altitude: " + hitDriver.orbit.altitude.ToString("N0") + " m");
-                }, orbitLine.name + " Info");
+                    Vector2 position = orbitCastHit.orbitScreenPoint;
+                    Vector2 dimension = new Vector2(200, 50);
 
-                GUILayout.EndArea();
-            }
-        }
+                    GUILayout.BeginArea(new Rect(position, dimension));
 
-        public OrbitDriver TargetCastSplines(out OrbitCastHit orbitHit, float orbitPixelWidth = 18f)
-        {
-            orbitHit = new OrbitCastHit();
-            OrbitCastHit tempOrbitHit = new OrbitCastHit();
-
-            foreach (OrbitDriver orbit in Planetarium.Orbits)
-            {
-                if (orbit.Renderer != null)
-                {
-                    if (!orbit.Renderer.OrbitCast(Input.mousePosition, out tempOrbitHit, orbitPixelWidth))
+                    GUILayout.Window(0, new Rect(position, dimension), (x) =>
                     {
-                        continue;
-                    }
+                        GUILayout.Label("Velocity: " + hitDriver.orbit.vel.magnitude.ToString("0.0") + " m/s");
+                        GUILayout.Label("Altitude: " + hitDriver.orbit.altitude.ToString("N0") + " m");
+                    }, hitDriver.name + "s Orbit Info");
 
-                    orbitHit = tempOrbitHit;
-
-                    break;
+                    GUILayout.EndArea();
                 }
             }
-
-            return orbitHit.driver;
         }
 
-        public bool OrbitCast(Vector3 screenPos, out OrbitCastHit hitInfo, float orbitPixelWidth = 10f)
+        private OrbitCastHit TargetCastSpline(float orbitPixelWidth = 18f)
+        {
+            return OrbitCast(Input.mousePosition, orbitPixelWidth);
+        }
+
+        private OrbitCastHit OrbitCast(Vector3 screenPos, float orbitPixelWidth = 10f)
         {
             float enter;
 
             Vector3 pos;
 
-            hitInfo = new OrbitCastHit()
-            {
-                or = this,
-                driver = orbitDriver
-            };
+            OrbitCastHit hitInfo = new OrbitCastHit();
+            hitInfo.or = this;
+            hitInfo.driver = orbitDriver;
 
             if(EventSystem.current != null && orbitLine != null)
-                if (EventSystem.current.IsPointerOverGameObject() || !orbitLine.active) return false;
+                if (EventSystem.current.IsPointerOverGameObject() || !orbitLine.active) return null;
 
             hitInfo.orbitOrigin = orbit.referenceBody.Position.LocalToScaledSpace();
 
@@ -283,12 +269,12 @@
 
                 hitInfo.orbitScreenPoint = new Vector3(hitInfo.orbitScreenPoint.x, Screen.height - hitInfo.orbitScreenPoint.y, 0f);
 
-                return true;
+                return hitInfo;
             }
 
             Debug.DrawRay(hitInfo.orbitOrigin, hitInfo.hitPoint, Color.yellow);
 
-            return false;
+            return null;
         }
 
         private void UpdateSpline()
@@ -356,24 +342,18 @@
             REDRAW_AND_RECALCULATE
         }
 
-        public struct OrbitCastHit
+        public class OrbitCastHit
         {
             public Vector3 orbitOrigin;
-
             public Vector3 hitPoint;
-
             public Vector3 orbitPoint;
-
             public Vector3 orbitScreenPoint;
 
             public double mouseTA;
-
             public double radiusAtTA;
-
             public double UTatTA;
 
             public OrbitRenderer or;
-
             public OrbitDriver driver;
 
             public Vector3 GetUpdatedOrbitPoint()

@@ -74,6 +74,9 @@ public class SpaceshipController : MonoBehaviour
     {
         if (AddForces)
         {
+            //Quaternion targetRotation = transform.rotation * Quaternion.Euler(pitchInput * 10, yawInput * 10, rollInput * 10);
+            //transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, Time.fixedDeltaTime);
+
             _cacheRigidbody.AddTorque(new Vector3(0, 0, rollInput));
             _cacheRigidbody.AddTorque(new Vector3(0, yawInput, 0));
             _cacheRigidbody.AddTorque(new Vector3(pitchInput, 0, 0));
