@@ -276,16 +276,16 @@ public sealed class Atmosphere : MonoBehaviour
 
     public void InitTextures()
     {
-        Transmittance = RTExtensions.CreateRTexture(new Vector2(atmosphereParameters.TRANSMITTANCE_W, atmosphereParameters.TRANSMITTANCE_H), 0, RenderTextureFormat.ARGBHalf, FilterMode.Bilinear, TextureWrapMode.Clamp);
-        Irradiance = RTExtensions.CreateRTexture(new Vector2(atmosphereParameters.SKY_W, atmosphereParameters.SKY_H), 0, RenderTextureFormat.ARGBHalf, FilterMode.Bilinear, TextureWrapMode.Clamp);
-        Inscatter = RTExtensions.CreateRTexture(new Vector2(atmosphereParameters.RES_MU_S * atmosphereParameters.RES_NU, atmosphereParameters.RES_MU), 0, RenderTextureFormat.ARGBHalf, FilterMode.Bilinear, TextureWrapMode.Clamp, atmosphereParameters.RES_R);
-
         if (RunTimeBaking && artb != null)
         {
 
         }
         else
         {
+            Transmittance = RTExtensions.CreateRTexture(new Vector2(atmosphereParameters.TRANSMITTANCE_W, atmosphereParameters.TRANSMITTANCE_H), 0, RenderTextureFormat.ARGBHalf, FilterMode.Bilinear, TextureWrapMode.Clamp);
+            Irradiance = RTExtensions.CreateRTexture(new Vector2(atmosphereParameters.SKY_W, atmosphereParameters.SKY_H), 0, RenderTextureFormat.ARGBHalf, FilterMode.Bilinear, TextureWrapMode.Clamp);
+            Inscatter = RTExtensions.CreateRTexture(new Vector2(atmosphereParameters.RES_MU_S * atmosphereParameters.RES_NU, atmosphereParameters.RES_MU), 0, RenderTextureFormat.ARGBHalf, FilterMode.Bilinear, TextureWrapMode.Clamp, atmosphereParameters.RES_R);
+
             string texturesPath = "/Resources/Textures/Atmosphere/";
 
             ComputeBuffer buffer;
