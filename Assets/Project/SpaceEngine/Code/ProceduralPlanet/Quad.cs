@@ -751,7 +751,7 @@ public sealed class Quad : MonoBehaviour, IQuad
         }
 
         //Release and dispose unnecessary buffers. Video memory, you are free!
-        BufferHelper.ReleaseAndDisposeBuffers(PreOutDataBuffer, PreOutDataSubBuffer, QuadCornersBuffer);
+        BufferHelper.ReleaseAndDisposeBuffers(PreOutDataBuffer, PreOutDataSubBuffer);
 
         if (DispatchReady != null)
             DispatchReady(this);
