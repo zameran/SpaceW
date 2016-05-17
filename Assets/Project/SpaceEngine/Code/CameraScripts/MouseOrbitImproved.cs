@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 
-public class MouseOrbitImproved : GameCamera
+public sealed class MouseOrbitImproved : GameCamera
 {
     public Transform target;
 
@@ -54,15 +54,6 @@ public class MouseOrbitImproved : GameCamera
             transform.rotation = Quaternion.Slerp(transform.rotation, rotation, 1.0f * Time.deltaTime);
             transform.position = position; //Vector3.Slerp(transform.position, position, 1.0f * Time.deltaTime);
         }
-    }
-
-    public static float ClampAngle(float angle, float min, float max)
-    {
-        if (angle < -360F)
-            angle += 360F;
-        if (angle > 360F)
-            angle -= 360F;
-        return Mathf.Clamp(angle, min, max);
     }
 
     protected override void Init()

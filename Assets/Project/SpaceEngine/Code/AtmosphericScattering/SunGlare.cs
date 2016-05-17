@@ -109,7 +109,7 @@ public sealed class SunGlare : MonoBehaviour
 
         sunGlareMaterial.SetVector("sunViewPortPos", sunViewPortPosition);
 
-        sunGlareMaterial.SetFloat("aspectRatio", Camera.main.aspect);
+        sunGlareMaterial.SetFloat("aspectRatio", CameraHelper.Main().aspect);
         sunGlareMaterial.SetFloat("sunGlareScale", sunGlareScale);
         sunGlareMaterial.SetFloat("sunGlareFade", sunGlareFade);
         sunGlareMaterial.SetFloat("useTransmittance", 1.0f);
@@ -122,19 +122,19 @@ public sealed class SunGlare : MonoBehaviour
     {
         if (Atmosphere == null || Sun == null) return;
 
-        float dist = (Camera.main.transform.position - Sun.transform.position).magnitude;
+        float dist = (CameraHelper.Main().transform.position - Sun.transform.position).magnitude;
 
         RaycastHit hit;
 
-        sunViewPortPosition = Camera.main.WorldToViewportPoint(Sun.transform.position);
+        sunViewPortPosition = CameraHelper.Main().WorldToViewportPoint(Sun.transform.position);
         sunGlareScale = dist / 2266660f;
         sunGlareFade = sunGlareFadeCurve.Evaluate(sunGlareScale);
 
         eclipse = false;
-        eclipse = Physics.Raycast(Camera.main.transform.position, (Sun.transform.position - Camera.main.transform.position).normalized, out hit, Mathf.Infinity);
+        eclipse = Physics.Raycast(CameraHelper.Main().transform.position, (Sun.transform.position - CameraHelper.Main().transform.position).normalized, out hit, Mathf.Infinity);
 
         if (!eclipse)
-            eclipse = Physics.Raycast(Camera.main.transform.position, (Sun.transform.position - Camera.main.transform.position).normalized, out hit, Mathf.Infinity);
+            eclipse = Physics.Raycast(CameraHelper.Main().transform.position, (Sun.transform.position - CameraHelper.Main().transform.position).normalized, out hit, Mathf.Infinity);
 
         SetUniforms(sunGlareMaterial);
     }
@@ -145,7 +145,7 @@ public sealed class SunGlare : MonoBehaviour
 
         if (sunViewPortPosition.z > 0)
         {
-            Graphics.DrawMesh(screenMesh, Vector3.zero, Quaternion.identity, sunGlareMaterial, 10, Camera.main, 0, null, false, false);
+            Graphics.DrawMesh(screenMesh, Vector3.zero, Quaternion.identity, sunGlareMaterial, 10, CameraHelper.Main(), 0, null, false, false);
         }
     }
 }

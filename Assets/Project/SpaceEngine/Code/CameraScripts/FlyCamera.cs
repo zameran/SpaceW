@@ -84,7 +84,7 @@ public sealed class FlyCamera : GameCamera
             {
                 zRotation = 0;
 
-                Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+                Ray ray = GetComponent<Camera>().ScreenPointToRay(Input.mousePosition);
 
                 targetRotation = Quaternion.LookRotation((ray.origin + ray.direction * 10f) - transform.position, transform.up);
 
@@ -211,16 +211,6 @@ public sealed class FlyCamera : GameCamera
             cameraComponent.nearClipPlane = nearClipPlaneCache;
             cameraComponent.farClipPlane = farClipPlaneCache;
         }
-    }
-
-    private float ClampAngle(float angle, float min, float max)
-    {
-        if (angle < -360)
-            angle += 360;
-        if (angle > 360)
-            angle -= 360;
-
-        return Mathf.Clamp(angle, min, max);
     }
 
     private void RotateAround(float x, float y, float z, Vector3 distanceVector)

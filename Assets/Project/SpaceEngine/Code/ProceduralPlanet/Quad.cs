@@ -401,7 +401,7 @@ public sealed class Quad : MonoBehaviour, IQuad
                 if (Planetoid.RenderPerUpdate)
                 {
                     if (Visible)
-                        Graphics.DrawMesh(QuadMesh, PlanetoidTRS, QuadMaterial, Planetoid.DrawLayer, Camera.main, 0, null, true, true);
+                        Graphics.DrawMesh(QuadMesh, PlanetoidTRS, QuadMaterial, Planetoid.DrawLayer, CameraHelper.Main(), 0, null, true, true);
                 }
                 else
                 {
@@ -418,7 +418,7 @@ public sealed class Quad : MonoBehaviour, IQuad
     public void TryCull()
     {
         if (!Planetoid.UseUnityCulling)
-            Visible = PlaneFrustumCheck(Camera.main);
+            Visible = PlaneFrustumCheck(CameraHelper.Main());
         else
             Visible = true;
     }

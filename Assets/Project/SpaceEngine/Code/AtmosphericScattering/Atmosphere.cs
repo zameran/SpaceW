@@ -477,11 +477,11 @@ public sealed class Atmosphere : MonoBehaviour
 
         mat.SetTexture("_Sky_Map", null);
 
-        mat.SetMatrix("_Globals_WorldToCamera", Camera.main.GetWorldToCamera());
-        mat.SetMatrix("_Globals_CameraToWorld", Camera.main.GetCameraToWorld());
-        mat.SetMatrix("_Globals_CameraToScreen", Camera.main.GetCameraToScreen());
-        mat.SetMatrix("_Globals_ScreenToCamera", Camera.main.GetScreenToCamera());
-        mat.SetVector("_Globals_WorldCameraPos", Camera.main.transform.position);
+        mat.SetMatrix("_Globals_WorldToCamera", CameraHelper.Main().GetWorldToCamera());
+        mat.SetMatrix("_Globals_CameraToWorld", CameraHelper.Main().GetCameraToWorld());
+        mat.SetMatrix("_Globals_CameraToScreen", CameraHelper.Main().GetCameraToScreen());
+        mat.SetMatrix("_Globals_ScreenToCamera", CameraHelper.Main().GetScreenToCamera());
+        mat.SetVector("_Globals_WorldCameraPos", CameraHelper.Main().transform.position);
 
         mat.SetVector("_Globals_Origin", -Origin);
         mat.SetFloat("_Exposure", HDRExposure);
@@ -524,11 +524,11 @@ public sealed class Atmosphere : MonoBehaviour
 
         mat.SetTexture("_Sky_Map", null);
 
-        mat.SetMatrix("_Globals_WorldToCamera", Camera.main.GetWorldToCamera());
-        mat.SetMatrix("_Globals_CameraToWorld", Camera.main.GetCameraToWorld());
-        mat.SetMatrix("_Globals_CameraToScreen", Camera.main.GetCameraToScreen());
-        mat.SetMatrix("_Globals_ScreenToCamera", Camera.main.GetScreenToCamera());
-        mat.SetVector("_Globals_WorldCameraPos", Camera.main.transform.position - Origin); // Apply origin to vector on planetoid quads. 
+        mat.SetMatrix("_Globals_WorldToCamera", CameraHelper.Main().GetWorldToCamera());
+        mat.SetMatrix("_Globals_CameraToWorld", CameraHelper.Main().GetCameraToWorld());
+        mat.SetMatrix("_Globals_CameraToScreen", CameraHelper.Main().GetCameraToScreen());
+        mat.SetMatrix("_Globals_ScreenToCamera", CameraHelper.Main().GetScreenToCamera());
+        mat.SetVector("_Globals_WorldCameraPos", CameraHelper.Main().transform.position - Origin); // Apply origin to vector on planetoid quads. 
 
         mat.SetVector("_Globals_Origin", -Origin);
         mat.SetFloat("_Exposure", HDRExposure);
