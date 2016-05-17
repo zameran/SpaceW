@@ -100,7 +100,7 @@
 
 			float GroundFinalColorWithoutAtmosphere(appdata_full_compute v, float4 terrainColor, float3 p, float n)
 			{
-				float4 finaColor = terrainColor;
+				float4 finaColor = float4(terrainColor.xyz, 1);
 
 				return finaColor;
 			}
@@ -186,7 +186,8 @@
 										   GroundFinalColorWithAtmosphere(v, terrainColor, v.vertex.xyz, v.normal.xyz, _Sun_WorldSunDir_1) : 
 										   GroundFinalColorWithoutAtmosphere(v, terrainColor, v.vertex.xyz, v.normal.xyz);
 
-				scatteringColor = hdr(groundFinalColor1);
+				scatteringColor = _Atmosphere > 0.0 ? hdr(groundFinalColor1) : 
+													  	  groundFinalColor1;
 				#endif
 
 				#ifdef LIGHT_2
@@ -198,7 +199,8 @@
 										   GroundFinalColorWithAtmosphere(v, terrainColor, v.vertex.xyz, v.normal.xyz, _Sun_WorldSunDir_2) : 
 										   GroundFinalColorWithoutAtmosphere(v, terrainColor, v.vertex.xyz, v.normal.xyz);
 
-				scatteringColor = hdr(groundFinalColor1 + groundFinalColor2);
+				scatteringColor = _Atmosphere > 0.0 ? hdr(groundFinalColor1 + groundFinalColor2) : 
+														  groundFinalColor1 + groundFinalColor2;
 				#endif
 
 				#ifdef LIGHT_3
@@ -214,7 +216,8 @@
 										   GroundFinalColorWithAtmosphere(v, terrainColor, v.vertex.xyz, v.normal.xyz, _Sun_WorldSunDir_3) : 
 										   GroundFinalColorWithoutAtmosphere(v, terrainColor, v.vertex.xyz, v.normal.xyz);
 
-				scatteringColor = hdr(groundFinalColor1 + groundFinalColor2 + groundFinalColor3);
+				scatteringColor = _Atmosphere > 0.0 ? hdr(groundFinalColor1 + groundFinalColor2 + groundFinalColor3) : 
+														  groundFinalColor1 + groundFinalColor2 + groundFinalColor3;
 				#endif
 
 				#ifdef LIGHT_4
@@ -234,7 +237,8 @@
 										   GroundFinalColorWithAtmosphere(v, terrainColor, v.vertex.xyz, v.normal.xyz, _Sun_WorldSunDir_4) : 
 										   GroundFinalColorWithoutAtmosphere(v, terrainColor, v.vertex.xyz, v.normal.xyz);
 
-				scatteringColor = hdr(groundFinalColor1 + groundFinalColor2 + groundFinalColor3 + groundFinalColor4);
+				scatteringColor = _Atmosphere > 0.0 ? hdr(groundFinalColor1 + groundFinalColor2 + groundFinalColor3 + groundFinalColor4) : 
+														  groundFinalColor1 + groundFinalColor2 + groundFinalColor3 + groundFinalColor4;
 				#endif
 
 				v2fg o;
