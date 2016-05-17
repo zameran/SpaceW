@@ -42,6 +42,8 @@ public sealed class Planetoid : MonoBehaviour, IPlanet
 {
     public Atmosphere Atmosphere;
 
+    public int DrawLayer = 8;
+
     public bool DrawWireframe = false;
     public bool DrawNormals = false;
     public bool DrawGizmos = false;
@@ -204,7 +206,7 @@ public sealed class Planetoid : MonoBehaviour, IPlanet
 
             Atmosphere.Origin = Origin;
             Atmosphere.UpdateNode();
-            Atmosphere.Render(false);
+            Atmosphere.Render(false, DrawLayer);
         }
 
         if (ExternalRendering && RenderPerUpdate)

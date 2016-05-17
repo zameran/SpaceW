@@ -45,11 +45,6 @@ public sealed class MainRenderer : MonoBehaviour
 
     private void OnRenderObject()
     {
-        if(atmosphere != null)
-        {
-            atmosphere.Sun_1.UpdateNode();
-            atmosphere.UpdateNode();
-            atmosphere.Render(true);
-        }
+
     }
 }

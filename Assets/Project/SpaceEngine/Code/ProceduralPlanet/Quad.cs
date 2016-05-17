@@ -401,7 +401,7 @@ public sealed class Quad : MonoBehaviour, IQuad
                 if (Planetoid.RenderPerUpdate)
                 {
                     if (Visible)
-                        Graphics.DrawMesh(QuadMesh, PlanetoidTRS, QuadMaterial, 0, Camera.main, 0, null, true, true);
+                        Graphics.DrawMesh(QuadMesh, PlanetoidTRS, QuadMaterial, Planetoid.DrawLayer, Camera.main, 0, null, true, true);
                 }
                 else
                 {
