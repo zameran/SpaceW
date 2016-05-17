@@ -750,6 +750,9 @@ public sealed class Quad : MonoBehaviour, IQuad
             this.GPUDataRecieved = true;
         }
 
+        //Release and dispose unnecessary buffers. Video memory, you are free!
+        BufferHelper.ReleaseAndDisposeBuffers(PreOutDataBuffer, PreOutDataSubBuffer, QuadCornersBuffer);
+
         if (DispatchReady != null)
             DispatchReady(this);
     }
