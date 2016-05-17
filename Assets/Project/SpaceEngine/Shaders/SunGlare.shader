@@ -24,6 +24,7 @@
 			uniform float4x4 _Globals_CameraToWorld;
 			uniform float4x4 _Globals_ScreenToCamera;
 			uniform float4x4 _Sun_WorldToLocal_1;
+			uniform float3 _Sun_Position;
 
 			uniform float sunGlareScale;
 			uniform float sunGlareFade;
@@ -45,7 +46,6 @@
 			uniform float eclipse;
 		
 			uniform float3 sunViewPortPos;
-			uniform float3 sunPos;
 
 			uniform float aspectRatio;
 			
@@ -139,7 +139,7 @@
 							  float2(aspectRatio * ghost3Settings[k].y, 1.0) * ghost3Settings[k].z + 0.5).rgb);
 				}		
 
-				float3 extinction = Extinction(WCP, WSD);
+				float3 extinction = Extinction(WCP, WCP - _Sun_Position);
 
 				ghosts = ghosts * smoothstep(0.0, 1.0, 1.0 - length(toScreenCenter));		
 				
