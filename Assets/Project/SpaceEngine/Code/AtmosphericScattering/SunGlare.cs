@@ -22,6 +22,7 @@ public sealed class SunGlare : MonoBehaviour
     private bool eclipse = false;
 
     private Vector3 sunViewPortPosition = Vector3.zero;
+    private Vector3 sunPosition = Vector3.zero;
 
     private float sunGlareScale = 1;
     private float sunGlareFade = 1;
@@ -108,6 +109,7 @@ public sealed class SunGlare : MonoBehaviour
         if (mat == null) return;
 
         sunGlareMaterial.SetVector("sunViewPortPos", sunViewPortPosition);
+        sunGlareMaterial.SetVector("sunPos", sunPosition);
 
         sunGlareMaterial.SetFloat("aspectRatio", Camera.main.aspect);
         sunGlareMaterial.SetFloat("sunGlareScale", sunGlareScale);
@@ -127,6 +129,7 @@ public sealed class SunGlare : MonoBehaviour
         RaycastHit hit;
 
         sunViewPortPosition = Camera.main.WorldToViewportPoint(Sun.transform.position);
+        sunPosition = Sun.transform.position;
         sunGlareScale = dist / 2266660f;
         sunGlareFade = sunGlareFadeCurve.Evaluate(sunGlareScale);
 

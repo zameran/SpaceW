@@ -44,6 +44,8 @@
 			uniform float eclipse;
 		
 			uniform float3 sunViewPortPos;
+			uniform float3 sunPos;
+
 			uniform float aspectRatio;
 			
 			struct v2f 
