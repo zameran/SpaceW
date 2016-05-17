@@ -12,7 +12,7 @@
 	}
 	SubShader
 	{
-		Tags { "Queue" = "Geometry" "RenderType"="Opaque" }
+		Tags { "Queue" = "Geometry" "RenderType" = "Opaque" }
 
 		Pass
 		{
@@ -32,7 +32,7 @@
 			#pragma enable_d3d11_debug_symbols //RenderDoc debugging
 
 			#pragma fragmentoption ARB_precision_hint_fastest
-			
+
 			#include "UnityCG.cginc"
 			#include "UnityLightingCommon.cginc"
 			#include "Assets/Project/SpaceEngine/Shaders/Compute/Utils.cginc"

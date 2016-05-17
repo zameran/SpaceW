@@ -2426,6 +2426,41 @@ float4 Cell3NoiseVec(float3 p)
 	return float4(ppoint, sqrt(distMin));
 }
 
+float4 Cell3NoiseNormalizedVec(float3 p)
+{
+	float3 cell = floor(p);
+	float3 offs = p - cell;
+	float3 pos;
+	float3 ppoint = float3(0.0, 0.0, 0.0);
+	float3 rnd;
+	float3 d;
+	float dist;
+	float distMin = 1.0e38;
+
+	for (d.z = -1.0; d.z <= 2.0; d.z += 1.0)
+	{
+		for (d.y = -1.0; d.y <= 2.0; d.y += 1.0)
+		{
+			for (d.x = -1.0; d.x <= 2.0; d.x += 1.0)
+			{
+				rnd = NoiseRandomUVec3((cell + d)).xyz + d;
+				pos = rnd - offs;
+				dist = dot(pos, pos);
+
+				if (distMin > dist)
+				{
+					distMin = dist;
+					ppoint = rnd;
+				}
+			}
+		}
+	}
+
+	ppoint = normalize(normalize(ppoint) + cell + OFFSETOUT);
+
+	return float4(ppoint, sqrt(distMin));
+}
+
 float Cell3NoiseColor(float3 p, out float4 color)
 {
 	float3 cell = floor(p);
@@ -3257,7 +3292,7 @@ float RidgedMultifractalTerraced(float3 ppoint, float n, float power)
 float4 CycloneNoise(float3 ppoint, float o)
 {
 	float3 twistedPoint = ppoint;
-	float3 p = ppoint;
+	float3 p = normalize(ppoint);
 	float3 v;
 	float4 cell;
 	float radius, dist, dist2, fi;
@@ -3268,8 +3303,8 @@ float4 CycloneNoise(float3 ppoint, float o)
 
 	for (int i = 0; i < o; i++)
 	{
-		cell = Cell3NoiseVec(p * freq);
-		v = cell.xyz - p;
+		cell = Cell3NoiseVec(p * freq);//Cell3NoiseNormalizedVec //Cell3NoiseVec
+		v = p - cell.xyz;
 		v.y *= 1.6;
 		radius = length(v) * dens;
 
@@ -3287,6 +3322,35 @@ float4 CycloneNoise(float3 ppoint, float o)
 		offs *= 0.2;
 		ppoint = twistedPoint;
 	}
+
+	return float4(twistedPoint, offset);
+}
+
+float4 CycloneNoise(float3 ppoint)
+{
+	float3 twistedPoint = ppoint;
+	float3 p = normalize(ppoint);
+	float3 v;
+	float4 cell;
+	float radius, dist, dist2, fi;
+	float dens   = 1.0 / cycloneSqrtDensity;
+	float offset = 0.0;
+
+	cell = Cell3NoiseVec(p * 0.1);//Cell3NoiseNormalizedVec //Cell3NoiseVec
+	v = p - cell.xyz;
+	v.y *= 1.6;
+	radius = length(v) * dens;
+
+	if (radius < 1.0)
+	{
+		dist  = 1.0 - radius;
+		dist2 = 0.5 - radius;
+		fi    = SavePow(dist, 2.5) * (exp(-60.0 * dist2 * dist2) + 0.5);
+		twistedPoint = Rotate(cycloneMagn * sign(cell.y) * fi, cell.xyz, ppoint);
+		offset += fi;
+	}
+
+	ppoint = twistedPoint;
 
 	return float4(twistedPoint, offset);
 }
@@ -3820,28 +3884,27 @@ float HeightMapCloudsGasGiant(float3 ppoint)
 {
 	float3 twistedPoint = ppoint;
 
-	if (cloudsStyle < 1.0 && cloudsStyle > -1.0) //if (cloudsStyle == 0.0)
+	if (cloudsStyle == 0.0)
 	{
-		twistedPoint *= float3(1.0, 1.0, 1.0) + 0.337 * Fbm3D(ppoint * 0.193, 10);
+		twistedPoint *= float3(1.0, 1.0, 1.0) + 0.337 * Fbm3D(ppoint * 0.0193, 8);
 	}
 
 	float offset = 0.0;
-	float zone = Noise(float3(0.0, twistedPoint.y * twistZones * 0.5, 0.0)) * 2.0;
-	//float zone = Fbm(float3(0.0, twistedPoint.y * twistZones * 0.5, 0.0), 2) * 2.0;
+	float zone = Noise(float3(0, (1.0 - normalize(twistedPoint).y) * twistZones * 0.5, 0)) * 2.0;
 
 	noiseOctaves = 10.0;
 
 	// Compute cyclons
 	if (cycloneOctaves > 0.0)
 	{
-		float4 cyclone = CycloneNoise(twistedPoint, cycloneOctaves);
+		float4 cyclone = CycloneNoise(twistedPoint);
 		twistedPoint = cyclone.xyz;
 		offset = cyclone.w;
 	}
 
 	// Compute stripes
 	float turbulence, height;
-	if (cloudsStyle < 1.0 && cloudsStyle > -1.0) //if (cloudsStyle == 0.0)
+	if (cloudsStyle == 0.0)
 	{
 		float ang = zone * twistMagn;
 		float sina = sin(ang);
@@ -3849,14 +3912,14 @@ float HeightMapCloudsGasGiant(float3 ppoint)
 		twistedPoint = float3(cosa * twistedPoint.x - sina * twistedPoint.z, twistedPoint.y, sina * twistedPoint.x + cosa * twistedPoint.z);
 		twistedPoint = twistedPoint * mainFreq + Randomize;
 		turbulence = Fbm(colorDistFreq * twistedPoint);
-		twistedPoint *= 10.0 + 5.0 * turbulence;
+		twistedPoint *= 500.0 + 5.0 * turbulence;
 		height = (Fbm(twistedPoint) + 0.7) * 0.7;
 	}
 	else
 	{
 		turbulence = Fbm(twistedPoint * 0.2);
 		twistedPoint = twistedPoint * mainFreq + Randomize;
-		twistedPoint.y *= 2.0 + turbulence * twistMagn;
+		twistedPoint.y *= 100.0 + turbulence * twistMagn;
 		height = (Fbm(twistedPoint) + 0.7) * 0.7;
 	}
 
