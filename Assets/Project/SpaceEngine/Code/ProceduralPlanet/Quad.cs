@@ -353,7 +353,16 @@ public sealed class Quad : MonoBehaviour, IQuad
     public Matrix4x4 GetFrame()
     {
         //TODO: Rotate normals towards sun.
-        return Matrix4x4d.Identity().ToMatrix4x4();
+
+        if (Planetoid.Atmosphere != null)
+        {
+            if (Planetoid.Atmosphere.Sun_1 != null)
+            {
+                return Matrix4x4.Transpose(Matrix4x4.Inverse(Planetoid.Atmosphere.Sun_1.LocalToWorldRotation));
+            }
+        }
+
+        return Matrix4x4.identity;
     }
 
     public void Render()

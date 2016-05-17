@@ -121,7 +121,7 @@
 				float3 rotatedNormal = Rotate(_Rotation.x, float3(1, 0, 0), 
 									   Rotate(_Rotation.y, float3(0, 1, 0), 
 									   Rotate(_Rotation.z, float3(0, 0, 1), originalNormal)));	
-			
+
 				n = rotatedNormal;
 
 				//n = normalize(rotatedPoint + rotatedNormal); //So. Good variant, but without normal bumping.
