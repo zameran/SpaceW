@@ -48,7 +48,7 @@ public static class CPUSpaceUtils
 		Vector3 cubeCoordNorth = constants.cubeFaceNorthDirection * (float) northValue;
 
 		Vector3 cubeCoord = cubeCoordEast + cubeCoordNorth + constants.patchCubeCenter;
-		//test blablabla
+
 		return cubeCoord;
 	}
 }
