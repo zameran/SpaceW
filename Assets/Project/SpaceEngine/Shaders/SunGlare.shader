@@ -23,6 +23,7 @@
 			uniform float3 _Globals_Origin;
 			uniform float4x4 _Globals_CameraToWorld;
 			uniform float4x4 _Globals_ScreenToCamera;
+			uniform float4x4 _Sun_WorldToLocal_1;
 
 			uniform float sunGlareScale;
 			uniform float sunGlareFade;
@@ -51,17 +52,28 @@
 			struct v2f 
 			{
 				float4 pos : SV_POSITION;
-				float2 uv : TEXCOORD0;
+				float3 dir : TEXCOORD0;
+				float3 relativeDir : TEXCOORD1;
+				float2 uv : TEXCOORD2;
 			};
 
 			v2f vert(appdata_base v)
 			{
 				v2f OUT;
 
-				OUT.pos = float4(v.vertex.xy, 1.0, 1.0);
+				OUT.pos = float4(v.vertex.xyz, 1.0);
+				OUT.dir = (mul(_Globals_CameraToWorld, float4((mul(_Globals_ScreenToCamera, v.vertex)).xyz, 0.0))).xyz;
+				OUT.relativeDir = mul(_Sun_WorldToLocal_1, OUT.dir); 
 				OUT.uv = v.texcoord.xy;
 
 				return OUT;
+			}
+
+			float3 OuterSunGlareRadiance(float3 viewdir, float3 sunColor)
+			{
+				float3 data = viewdir.z > 0.0 ? sunColor : float3(0, 0, 0);
+
+				return pow(max(0, data), 2.2) * 2;
 			}
 
  			float3 Extinction(float3 camera, float3 p)
@@ -72,8 +84,7 @@
  				float rMu = dot(camera, viewdir);
  				float mu = rMu / r;
 				float d = length(viewdir - camera);
-     			float deltaSq = SQRT(rMu * rMu - r * r + Rt * Rt, 0.000001);
- 
+     			float deltaSq = SQRT(rMu * rMu - r * r + Rt * Rt, 1e30);
      			float din = max(-rMu - deltaSq, 0.0);
 
 				//viewdir = viewdir / d;
@@ -94,7 +105,8 @@
 			{
 				float3 WSD = _Sun_WorldSunDir_1;
 				float3 WCP = _Globals_WorldCameraPos;
-				
+				float3 d = normalize(IN.dir);
+
 				float2 toScreenCenter = sunViewPortPos.xy - 0.5;
 
 				float3 outputColor = 0;
@@ -135,6 +147,7 @@
 				outputColor += ghosts;
 				outputColor *= sunGlareFade;
 				outputColor = (useTransmittance > 0.0) ? outputColor * extinction : outputColor;
+				//outputColor = OuterSunGlareRadiance(IN.relativeDir, outputColor);
 				//outputColor = (eclipse > 0.0) ? sunColor : outputColor;
 
 				return float4(outputColor, 1.0);				
