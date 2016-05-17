@@ -42,6 +42,8 @@ struct QuadGenerationConstants
 
 	float4 meshSettings;
 
+	float2 borderMod;
+
 	float3 cubeFaceEastDirection;
 	float3 cubeFaceNorthDirection;
 	float3 patchCubeCenter;

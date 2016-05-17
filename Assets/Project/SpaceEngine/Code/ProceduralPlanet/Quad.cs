@@ -197,7 +197,7 @@ public sealed class Quad : MonoBehaviour, IQuad
 
     private void Awake()
     {
-        QuadGenerationConstantsBuffer = new ComputeBuffer(1, 84);
+        QuadGenerationConstantsBuffer = new ComputeBuffer(1, 92);
         PreOutDataBuffer = new ComputeBuffer(QuadSettings.nVertsReal, 64);
         PreOutDataSubBuffer = new ComputeBuffer(QuadSettings.nVertsSubReal, 64);
         OutDataBuffer = new ComputeBuffer(QuadSettings.nVerts, 64);

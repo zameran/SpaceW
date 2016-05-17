@@ -54,6 +54,10 @@ public struct QuadGenerationConstants
     //w - nVerticesPerSideWithBorderSub
     public Vector4 meshSettings;
 
+    //x - mesh
+    //y - texture
+    public Vector2 borderMod;
+
     public Vector3 cubeFaceEastDirection; //12
     public Vector3 cubeFaceNorthDirection; //12
     public Vector3 patchCubeCenter; //12
@@ -65,6 +69,7 @@ public struct QuadGenerationConstants
         QuadGenerationConstants temp = new QuadGenerationConstants();
 
         temp.meshSettings = new Vector4(QuadSettings.nVertsPerEdge, QuadSettings.nVertsPerEdgeReal, QuadSettings.nVertsPerEdgeSub, QuadSettings.nVertsPerEdgeSubReal);
+        temp.borderMod = new Vector2(QuadSettings.borderModMesh, QuadSettings.borderModTexture);
 
         temp.spacing = QuadSettings.nSpacing;
         temp.spacingreal = QuadSettings.nSpacingReal;
@@ -79,6 +84,7 @@ public struct QuadGenerationConstants
         QuadGenerationConstants temp = new QuadGenerationConstants();
 
         temp.meshSettings = new Vector4(QuadSettings.nVertsPerEdge, QuadSettings.nVertsPerEdgeReal, QuadSettings.nVertsPerEdgeSub, QuadSettings.nVertsPerEdgeSubReal);
+        temp.borderMod = new Vector2(QuadSettings.borderModMesh, QuadSettings.borderModTexture);
 
         temp.spacing = QuadSettings.nSpacing;
         temp.spacingreal = QuadSettings.nSpacingReal;

@@ -32,6 +32,8 @@
 #define nVerticesPerSideWithBorder 		quadGenerationConstants[0].meshSettings.y
 #define nVerticesPerSideSub 			quadGenerationConstants[0].meshSettings.z
 #define nVerticesPerSideWithBorderSub 	quadGenerationConstants[0].meshSettings.w
+#define borderModMesh					quadGenerationConstants[0].borderMod.x
+#define borderModTexture				quadGenerationConstants[0].borderMod.y
 
 //#define defaultNoise
 
@@ -174,7 +176,7 @@ void HeightMain (uint3 id : SV_DispatchThreadID)
 
 	int outBuffOffset = id.x + id.y * nVerticesPerSideWithBorder;
 
-	float3 cubeCoord = CubeCoord(constants, nVerticesPerSideWithBorder, id, 7, constants.spacing);
+	float3 cubeCoord = CubeCoord(constants, nVerticesPerSideWithBorder, id, borderModMesh, constants.spacing);
 
 	float3 patchCenter = normalize(constants.patchCubeCenter) * constants.planetRadius;
 	float3 patchNormalizedCoord = normalize(cubeCoord);
@@ -210,7 +212,7 @@ void HeightSub(uint3 id : SV_DispatchThreadID)
 
 	int outBuffOffset = id.x + id.y * nVerticesPerSideWithBorderSub;
 
-	float3 cubeCoord = CubeCoord(constants, nVerticesPerSideWithBorderSub, id, 17, constants.spacingsub);
+	float3 cubeCoord = CubeCoord(constants, nVerticesPerSideWithBorderSub, id, borderModTexture, constants.spacingsub);
 
 	float3 patchCenter = normalize(constants.patchCubeCenter) * constants.planetRadius;
 	float3 patchNormalizedCoord = normalize(cubeCoord);

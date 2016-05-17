@@ -35,6 +35,9 @@ using System;
 [Serializable]
 public static class QuadSettings
 {
+    public static int borderModMesh { get { return 7; } }
+    public static int borderModTexture { get { return 17; } }
+
     public static int nVertsPerEdgeReal { get { return 128; } }
     public static int nVertsPerEdge { get { return 120; } }
     public static int nVertsPerEdgeSubReal { get { return nVertsPerEdgeReal * 2; } }
