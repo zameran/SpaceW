@@ -39,15 +39,15 @@ using ZFramework.Unity.Common.Types;
 
 public static class CPUSpaceUtils
 {
-	public static Vector3d CubeCoord(QuadGenerationConstants constants, int VerticesPerSide, Vector3i id, int mod, float spacing)
+	public static Vector3 CubeCoord(QuadGenerationConstants constants, int VerticesPerSide, Vector3i id, int mod, float spacing)
 	{
 		double eastValue = (id.X - ((VerticesPerSide - mod) * 0.5)) * spacing;
 		double northValue = (id.Y - ((VerticesPerSide - mod) * 0.5)) * spacing;
 
-		Vector3d cubeCoordEast = constants.cubeFaceEastDirection * (float)eastValue;
-		Vector3d cubeCoordNorth = constants.cubeFaceNorthDirection * (float) northValue;
+		Vector3 cubeCoordEast = constants.cubeFaceEastDirection * (float)eastValue;
+		Vector3 cubeCoordNorth = constants.cubeFaceNorthDirection * (float) northValue;
 
-		Vector3d cubeCoord = cubeCoordEast + cubeCoordNorth + (Vector3d)constants.patchCubeCenter;
+		Vector3 cubeCoord = cubeCoordEast + cubeCoordNorth + constants.patchCubeCenter;
 
 		return cubeCoord;
 	}
