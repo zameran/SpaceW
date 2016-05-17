@@ -193,7 +193,7 @@ float GetEclipseShadow(float3 worldPos, float3 worldLightPos,float3 occluderSphe
 }
 
 
-float3 ApplyEclipse(float3 WCP, float3 d, float3 _Globals_Origin)
+float ApplyEclipse(float3 WCP, float3 d, float3 _Globals_Origin)
 {
 	float eclipseShadow = 1;
 
@@ -255,22 +255,52 @@ float EclipseValue(float lightRadius, float casterRadius, float Dist)
     return maxPhase * smoothstep(0.0, 1.0, 1.0 - clamp((Dist-Diff) / (sumRadius-Diff), 0.0, 1.0));
 }
 
-float EclipseShadow(float4x4 LightCasters, float3 FragPosS, float3 lightVec, float lightAngularRadius)
+float EclipseShadow(float3 FragPosS, float3 lightVec, float lightAngularRadius)
 {
     float Shadow = 1.0;
 
     for (int i = 0; i < 4; ++i)
     {
-        if (LightCasters[i].w <= 0.0) break;
+        if (_Sky_LightOccluders_1[i].w <= 0.0) break;
 
-        float3 lightCasterPos = LightCasters[i].xyz - FragPosS;
+        float3 lightCasterPos = _Sky_LightOccluders_1[i].xyz - FragPosS;
 
         float lightCasterInvDist  = rsqrt(dot(lightCasterPos, lightCasterPos));
-        float casterAngularRadius = asin(clamp(LightCasters[i].w * lightCasterInvDist, 0.0, 1.0));
+        float casterAngularRadius = asin(clamp(_Sky_LightOccluders_1[i].w * lightCasterInvDist, 0.0, 1.0));
         float lightToCasterAngle  = acos(clamp(dot(lightVec, lightCasterPos * lightCasterInvDist), 0.0, 1.0));
 
         Shadow *= clamp(1.0 - EclipseValue(lightAngularRadius, casterAngularRadius, lightToCasterAngle), 0.0, 1.0);
     }
+
+    for (int j = 0; j < 4; ++j)
+    {
+        if (_Sky_LightOccluders_2[j].w <= 0.0) break;
+
+        float3 lightCasterPos = _Sky_LightOccluders_2[j].xyz - FragPosS;
+
+        float lightCasterInvDist  = rsqrt(dot(lightCasterPos, lightCasterPos));
+        float casterAngularRadius = asin(clamp(_Sky_LightOccluders_2[j].w * lightCasterInvDist, 0.0, 1.0));
+        float lightToCasterAngle  = acos(clamp(dot(lightVec, lightCasterPos * lightCasterInvDist), 0.0, 1.0));
+
+        Shadow *= clamp(1.0 - EclipseValue(lightAngularRadius, casterAngularRadius, lightToCasterAngle), 0.0, 1.0);
+    }
+
+    return Shadow;
+}
+
+float EclipseOuterShadow(float3 lightVec, float lightAngularRadius, float3 d, float3 WCP, float3 _Globals_Origin)
+{
+    float Shadow = 1.0;
+
+    //TODO : Swkitch in sphere - out sphere.
+    float interSectPt = IntersectOuterSphere(WCP, d, _Globals_Origin, Rt);
+
+    if (interSectPt != -1)
+    {
+		float3 worldPos = WCP + d * interSectPt;
+
+		Shadow = EclipseShadow(worldPos, lightVec, lightAngularRadius);
+	}
 
     return Shadow;
 }

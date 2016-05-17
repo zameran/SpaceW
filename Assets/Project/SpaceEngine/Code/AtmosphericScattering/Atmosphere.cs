@@ -153,8 +153,12 @@ public sealed class Atmosphere : MonoBehaviour
         Vector4 OccluderPlanetPos = Vector4.zero;
         Vector4 SunPosition = Vector4.zero;
 
+        float D = Vector3.Distance(Sun_1.transform.position, Origin);
+        float actualRadius = 25000;
+        float angularRadius = 2.0f * Mathf.Asin(actualRadius / (2 * D));
+
         SunPosition = Sun_1.transform.position;
-        SunPosition.w = 250000;
+        SunPosition.w = angularRadius;
 
         for (int i = 0; i < Mathf.Min(4, eclipseCasters.Count); i++)
         {
