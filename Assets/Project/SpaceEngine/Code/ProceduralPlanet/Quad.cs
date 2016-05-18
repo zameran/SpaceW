@@ -390,7 +390,7 @@ public sealed class Quad : MonoBehaviour, IQuad
         QuadMaterial.SetVector("_Rotation", new Vector3(Planetoid.QuadsRoot.transform.rotation.eulerAngles.x, Planetoid.QuadsRoot.transform.rotation.eulerAngles.y, Planetoid.QuadsRoot.transform.rotation.eulerAngles.z) * Mathf.Deg2Rad);
         QuadMaterial.SetVector("_Origin", Planetoid.Origin);
         QuadMaterial.SetMatrix("_TTW", GetFrame());
-        QuadMaterial.renderQueue = Planetoid.RenderQueue;
+        QuadMaterial.renderQueue = (int)Planetoid.RenderQueue + Planetoid.RenderQueueOffset;
         QuadMaterial.SetPass(0);
 
         if (!Uniformed)

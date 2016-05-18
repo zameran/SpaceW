@@ -44,7 +44,8 @@ public sealed class Atmosphere : MonoBehaviour
     public Texture SunGlareTexture;
     public float SunGlareScale = 1;
 
-    public int RenderQueue = 1999;
+    public EngineRenderQueue RenderQueue = EngineRenderQueue.Transparent;
+    public int RenderQueueOffset = 0;
 
     public RenderTexture Transmittance;
     public RenderTexture Inscatter;
@@ -249,7 +250,7 @@ public sealed class Atmosphere : MonoBehaviour
     public void Render(bool now, int drawLayer = 8)
     {
         SetUniforms(SkyMaterial);
-        SkyMaterial.renderQueue = RenderQueue;
+        SkyMaterial.renderQueue = (int)RenderQueue + RenderQueueOffset;
         SkyMaterial.SetPass(0);
 
         if (!now)

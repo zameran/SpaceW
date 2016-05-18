@@ -69,7 +69,8 @@ public sealed class Planetoid : MonoBehaviour, IPlanet
 
     public PlanetoidGenerationConstants GenerationConstants;
 
-    public int RenderQueue = 2000;
+    public EngineRenderQueue RenderQueue = EngineRenderQueue.Geometry;
+    public int RenderQueueOffset = 0;
 
     public int DispatchSkipFramesCount = 8;
 
@@ -95,20 +96,38 @@ public sealed class Planetoid : MonoBehaviour, IPlanet
 
     public float TerrainMaxHeight = 64.0f;
 
+    public float DistanceToLODTarget = 0;
+
     public Vector3 Origin = Vector3.zero;
     public Quaternion OriginRotation = Quaternion.identity;
+    public Vector3 OriginScale = Vector3.one;
 
     public QuadDistanceToClosestCornerComparer qdtccc;
+    public PlanetoidDistanceToLODTargetComparer pdtltc;
+
     public TCCommonParametersSetter tccps;
     public SmartThreadPool stp = new SmartThreadPool();
 
-    public class QuadDistanceToClosestCornerComparer : IComparer<Quad>
+    public sealed class QuadDistanceToClosestCornerComparer : IComparer<Quad>
     {
         public int Compare(Quad x, Quad y)
         {
             if (x.DistanceToClosestCorner > y.DistanceToClosestCorner)
                 return 1;
-            if (x.DistanceToClosestCorner < y.DistanceToClosestCorner)
+            else if (x.DistanceToClosestCorner < y.DistanceToClosestCorner)
+                return -1;
+            else
+                return 0;
+        }
+    }
+
+    public sealed class PlanetoidDistanceToLODTargetComparer : IComparer<Planetoid>
+    {
+        public int Compare(Planetoid x, Planetoid y)
+        {
+            if (x.DistanceToLODTarget > y.DistanceToLODTarget)
+                return 1;
+            else if (x.DistanceToLODTarget < y.DistanceToLODTarget)
                 return -1;
             else
                 return 0;
@@ -134,6 +153,7 @@ public sealed class Planetoid : MonoBehaviour, IPlanet
     {
         Origin = transform.position;
         OriginRotation = QuadsRoot.transform.rotation;
+        OriginScale = transform.lossyScale;
 
         if (Atmosphere != null) Atmosphere.Origin = Origin;
     }
@@ -149,6 +169,12 @@ public sealed class Planetoid : MonoBehaviour, IPlanet
         if (tccps == null)
             if (gameObject.GetComponentInChildren<TCCommonParametersSetter>() != null)
                 tccps = gameObject.GetComponentInChildren<TCCommonParametersSetter>();
+
+        if (qdtccc == null)
+            qdtccc = new QuadDistanceToClosestCornerComparer();
+
+        if(pdtltc == null)
+            pdtltc = new PlanetoidDistanceToLODTargetComparer();
 
         if (NPS != null)
             NPS.LoadAndInit();
@@ -198,6 +224,12 @@ public sealed class Planetoid : MonoBehaviour, IPlanet
 
         Origin = transform.position;
         OriginRotation = QuadsRoot.transform.rotation;
+        OriginScale = transform.lossyScale;
+
+        if (LODTarget != null)
+            DistanceToLODTarget = Vector3.Distance(transform.position, LODTarget.position);
+        else
+            DistanceToLODTarget = -1.0f;
 
         if (Atmosphere != null)
         {

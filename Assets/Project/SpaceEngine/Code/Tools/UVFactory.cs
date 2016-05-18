@@ -34,7 +34,7 @@ using UnityEngine;
 
 public static class UVFactory
 {
-    public static Vector2 GetSgtSphericalUv(Vector3 vertex)
+    public static Vector2 GetSgtSphericalUV(Vector3 vertex)
     {
         return VectorHelper.CartesianToPolarUV(vertex);
     }
@@ -50,7 +50,7 @@ public static class UVFactory
                           (uvStartY + ((float)col / (detail - 1)) * uvResolution));
     }
 
-    public static Vector2 GetSphericalUv(int detail, int col, int row, Vector3 vertex, bool staticX, bool staticY)
+    public static Vector2 GetSphericalUV(int detail, int col, int row, Vector3 vertex, bool staticX, bool staticY)
     {
         Vector2 uv = new Vector2();
 
