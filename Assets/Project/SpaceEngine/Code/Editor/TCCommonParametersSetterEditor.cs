@@ -40,7 +40,10 @@ public sealed class TCCommonParametersSetterEditor : Editor
     {
         Main, Noise, Texturing, Clouds, Nature, Montes, Dunes, Hills, Canyons, Rivers, Cracks, Craters, Radials, Volcanoes, Mare, Venus
     }
+
     private Tab currentTab = Tab.Main;
+    private Tab prevTab = Tab.Main;
+
     private string[] tabTexts = new string[16] { "Main", "Noise", "Texturing", "Clouds", "Nature", "Montes", "Dunes", "Hills",
                                                  "Canyons", "Rivers", "Cracks", "Craters", "Radials", "Volcanoes",
                                                  "Mare", "Venus" };
@@ -258,14 +261,46 @@ public sealed class TCCommonParametersSetterEditor : Editor
         setter.textureParams.w = EditorGUILayout.Slider("venusFreq ", setter.textureParams.w, 0.0f, 2.0f);
     }
 
+    private void ResetupPlanetoid(TCCommonParametersSetter setter)
+    {
+        if (Application.isPlaying)
+        {
+            if (setter.Planet != null)
+            {
+                setter.Planet.ReSetupQuads();
+
+                if (setter.Planet.Atmosphere != null)
+                {
+                    setter.Planet.Atmosphere.ReanimateAtmosphereUniforms(setter.Planet.Atmosphere, setter.Planet);
+                }
+            }
+        }
+    }
+
     public override void OnInspectorGUI()
     {
         TCCommonParametersSetter setter = (TCCommonParametersSetter)target;
 
         EditorGUILayout.Space();
+
+        if (GUILayout.Button("Update"))
+        {
+            ResetupPlanetoid(setter);
+        }
+
+        EditorGUILayout.Space();
         EditorGUILayout.BeginVertical();
         EditorGUILayout.BeginHorizontal();
+
         currentTab = (Tab)GUILayout.SelectionGrid((int)currentTab, tabTexts, 4, EditorStyles.toolbarButton);
+
+        if(currentTab != prevTab && setter.AutoUpdate)
+        {
+            ResetupPlanetoid(setter);
+        }
+
+        prevTab = currentTab;
+
         EditorGUILayout.EndHorizontal();
         EditorGUILayout.EndVertical();
         EditorGUILayout.Space();
@@ -320,12 +355,6 @@ public sealed class TCCommonParametersSetterEditor : Editor
             case Tab.Venus:
                 DrawGUIForVenus(setter);
                 break;
-        }
-
-        if (setter.AutoUpdate)
-        {
-            if (GUI.changed)
-                setter.UpdateUniforms();
         }
     }
 }

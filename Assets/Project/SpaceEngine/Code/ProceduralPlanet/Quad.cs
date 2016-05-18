@@ -149,6 +149,7 @@ public sealed class Quad : MonoBehaviour, IQuad
     public bool Cached = false;
     public bool Uniformed = false;
     public bool GPUDataRecieved = false;
+    public bool BuffersCreated = false;
 
     public float LODUpdateInterval = 0.25f;
     public float LastLODUpdateTime = 0.00f;
@@ -197,11 +198,7 @@ public sealed class Quad : MonoBehaviour, IQuad
 
     private void Awake()
     {
-        QuadGenerationConstantsBuffer = new ComputeBuffer(1, 92);
-        PreOutDataBuffer = new ComputeBuffer(QuadSettings.nVertsReal, 64);
-        PreOutDataSubBuffer = new ComputeBuffer(QuadSettings.nVertsSubReal, 64);
-        OutDataBuffer = new ComputeBuffer(QuadSettings.nVerts, 64);
-        QuadCornersBuffer = new ComputeBuffer(1, 64);
+        CreateBuffers();
 
         HeightTexture = RTExtensions.CreateRTexture(QuadSettings.nVertsPerEdgeSub, 0, RenderTextureFormat.ARGB32);
         NormalTexture = RTExtensions.CreateRTexture(QuadSettings.nVertsPerEdgeSub, 0, RenderTextureFormat.ARGB32);
@@ -293,6 +290,20 @@ public sealed class Quad : MonoBehaviour, IQuad
             Gizmos.DrawWireSphere(Planetoid.transform.TransformPoint(quadCorners.topRightCorner), 150);
             Gizmos.DrawWireSphere(Planetoid.transform.TransformPoint(quadCorners.bottomLeftCorner), 150);
             Gizmos.DrawWireSphere(Planetoid.transform.TransformPoint(quadCorners.bottomRightCorner), 150);
+        }
+    }
+
+    public void CreateBuffers()
+    {
+        if (!BuffersCreated)
+        {
+            QuadGenerationConstantsBuffer = new ComputeBuffer(1, 92);
+            PreOutDataBuffer = new ComputeBuffer(QuadSettings.nVertsReal, 64);
+            PreOutDataSubBuffer = new ComputeBuffer(QuadSettings.nVertsSubReal, 64);
+            OutDataBuffer = new ComputeBuffer(QuadSettings.nVerts, 64);
+            QuadCornersBuffer = new ComputeBuffer(1, 64);
+
+            BuffersCreated = true;
         }
     }
 
@@ -666,7 +677,12 @@ public sealed class Quad : MonoBehaviour, IQuad
 
     public void Dispatch()
     {
-        StartCoroutine(DispatchCoroutine());
+        StartCoroutine(DispatcheCoroutineWait());
+    }
+
+    public IEnumerator DispatcheCoroutineWait()
+    {
+        yield return StartCoroutine(DispatchCoroutine());
     }
 
     public IEnumerator DispatchCoroutine()
@@ -689,6 +705,8 @@ public sealed class Quad : MonoBehaviour, IQuad
         OutputStruct[] preOutputSubStructData = new OutputStruct[QuadSettings.nVertsSubReal];
         OutputStruct[] outputStructData = new OutputStruct[QuadSettings.nVerts];
         QuadCorners[] quadCorners = new QuadCorners[] { new QuadCorners() };
+
+        CreateBuffers();
 
         QuadGenerationConstantsBuffer.SetData(quadGenerationConstantsData);
         PreOutDataBuffer.SetData(preOutputStructData);
@@ -760,6 +778,7 @@ public sealed class Quad : MonoBehaviour, IQuad
 
         //Release and dispose unnecessary buffers. Video memory, you are free!
         BufferHelper.ReleaseAndDisposeBuffers(PreOutDataBuffer, PreOutDataSubBuffer, QuadCornersBuffer);
+        BuffersCreated = false;
 
         if (DispatchReady != null)
             DispatchReady(this);

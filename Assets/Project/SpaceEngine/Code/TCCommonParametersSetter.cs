@@ -99,7 +99,9 @@ public sealed class TCCommonParametersSetter : MonoBehaviour
             UpdateUniforms(Planet.Quads[i].CoreShader);
 
             if (Application.isPlaying)
+            {
                 Planet.Quads[i].Dispatch();
+            }
         }
     }
 
