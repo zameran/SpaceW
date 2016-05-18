@@ -50,6 +50,7 @@ public class PlanetoidCPU : MonoBehaviour, IPlanet
 
     public PlanetoidGenerationConstants GenerationConstants;
 
+   
     public int RenderQueue = 2000;
 
     public float LODDistanceMultiplier = 1;
