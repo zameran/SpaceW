@@ -405,7 +405,7 @@ public sealed class Quad : MonoBehaviour, IQuad
 
             if (QuadMesh != null)
             {
-                Matrix4x4 PlanetoidTRS = Matrix4x4.TRS(Planetoid.Origin, Planetoid.OriginRotation, Planetoid.transform.localScale);
+                Matrix4x4 PlanetoidTRS = Matrix4x4.TRS(Planetoid.Origin, Quaternion.Euler(Planetoid.OriginRotation), Planetoid.transform.localScale);
 
                 if (Planetoid.RenderPerUpdate)
                 {

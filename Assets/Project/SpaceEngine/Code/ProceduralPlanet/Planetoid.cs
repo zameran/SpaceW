@@ -38,28 +38,9 @@ using System.Collections.Generic;
 using Amib;
 using Amib.Threading;
 
-public sealed class Planetoid : MonoBehaviour, IPlanet
+public sealed class Planetoid : Planet, IPlanet
 {
-    public Atmosphere Atmosphere;
-
-    public int DrawLayer = 8;
-
-    public bool DrawWireframe = false;
-    public bool DrawNormals = false;
-    public bool DrawGizmos = false;
-
-    public bool GenerateColliders = false;
-
-    public bool OctaveFade = false;
     public bool GetData = false;
-
-    public bool Working = false;
-
-    public Transform LODTarget = null;
-
-    public float PlanetRadius = 1024;
-
-    public bool DebugEnabled = false;
 
     public List<Quad> MainQuads = new List<Quad>();
     public List<Quad> Quads = new List<Quad>();
@@ -67,72 +48,18 @@ public sealed class Planetoid : MonoBehaviour, IPlanet
     public Shader ColorShader;
     public ComputeShader CoreShader;
 
-    public PlanetoidGenerationConstants GenerationConstants;
-
-    public EngineRenderQueue RenderQueue = EngineRenderQueue.Geometry;
-    public int RenderQueueOffset = 0;
-
     public int DispatchSkipFramesCount = 8;
-
-    public float LODDistanceMultiplier = 1;
-
-    public int LODMaxLevel = 12;
-    public int[] LODDistances = new int[13] { 2048, 1024, 512, 256, 128, 64, 32, 16, 8, 4, 2, 1, 0 };
-    public float[] LODOctaves = new float[6] { 0.5f, 0.5f, 0.5f, 0.75f, 0.75f, 1.0f };
 
     public Mesh PrototypeMesh;
 
-    public GameObject QuadsRoot = null;
     public QuadStorage Cache = null;
     public NoiseParametersSetter NPS = null;
 
     public QuadDrawAndCull DrawAndCull = QuadDrawAndCull.CullBeforeDraw;
 
     public bool UseUnityCulling = true;
-    public bool UseLOD = true;
-    public bool RenderPerUpdate = false;
-    public bool OneSplittingQuad = true;
-    public bool ExternalRendering = false;
-
-    public float TerrainMaxHeight = 64.0f;
-
-    public float DistanceToLODTarget = 0;
-
-    public Vector3 Origin = Vector3.zero;
-    public Quaternion OriginRotation = Quaternion.identity;
-    public Vector3 OriginScale = Vector3.one;
-
-    public QuadDistanceToClosestCornerComparer qdtccc;
-    public PlanetoidDistanceToLODTargetComparer pdtltc;
 
     public TCCommonParametersSetter tccps;
-    public SmartThreadPool stp = new SmartThreadPool();
-
-    public sealed class QuadDistanceToClosestCornerComparer : IComparer<Quad>
-    {
-        public int Compare(Quad x, Quad y)
-        {
-            if (x.DistanceToClosestCorner > y.DistanceToClosestCorner)
-                return 1;
-            else if (x.DistanceToClosestCorner < y.DistanceToClosestCorner)
-                return -1;
-            else
-                return 0;
-        }
-    }
-
-    public sealed class PlanetoidDistanceToLODTargetComparer : IComparer<Planetoid>
-    {
-        public int Compare(Planetoid x, Planetoid y)
-        {
-            if (x.DistanceToLODTarget > y.DistanceToLODTarget)
-                return 1;
-            else if (x.DistanceToLODTarget < y.DistanceToLODTarget)
-                return -1;
-            else
-                return 0;
-        }
-    }
 
     public void QuadDispatchStarted(Quad q)
     {
@@ -149,18 +76,16 @@ public sealed class Planetoid : MonoBehaviour, IPlanet
 
     }
 
-    private void Awake()
+    protected override void Awake()
     {
-        Origin = transform.position;
-        OriginRotation = QuadsRoot.transform.rotation;
-        OriginScale = transform.lossyScale;
+        base.Awake();
 
         if (Atmosphere != null) Atmosphere.Origin = Origin;
     }
 
-    private void Start()
+    protected override void Start()
     {
-        stp.Start();
+        base.Start();
 
         if (Cache == null)
             if (gameObject.GetComponentInChildren<QuadStorage>() != null)
@@ -169,12 +94,6 @@ public sealed class Planetoid : MonoBehaviour, IPlanet
         if (tccps == null)
             if (gameObject.GetComponentInChildren<TCCommonParametersSetter>() != null)
                 tccps = gameObject.GetComponentInChildren<TCCommonParametersSetter>();
-
-        if (qdtccc == null)
-            qdtccc = new QuadDistanceToClosestCornerComparer();
-
-        if(pdtltc == null)
-            pdtltc = new PlanetoidDistanceToLODTargetComparer();
 
         if (NPS != null)
             NPS.LoadAndInit();
@@ -189,14 +108,31 @@ public sealed class Planetoid : MonoBehaviour, IPlanet
         }
     }
 
-    private void OnDestroy()
+    protected override void Update()
     {
-        if (Atmosphere != null)
-            Atmosphere.OnBaked -= OnAtmosphereBaked;
-    }
+        base.Update();
 
-    private void Update()
-    {
+        CheckCutoff();
+
+        Origin = transform.position;
+        OriginRotation = QuadsRoot.transform.rotation.eulerAngles;
+        OriginScale = transform.lossyScale;
+
+        if (LODTarget != null)
+            DistanceToLODTarget = Vector3.Distance(transform.position, LODTarget.position);
+        else
+            DistanceToLODTarget = -1.0f;
+
+        if (Atmosphere != null)
+        {
+            if (Atmosphere.Sun_1 != null) Atmosphere.Sun_1.UpdateNode();
+            if (Atmosphere.Sun_2 != null) Atmosphere.Sun_2.UpdateNode();
+
+            Atmosphere.Origin = Origin;
+            Atmosphere.UpdateNode();
+            Atmosphere.Render(false, DrawLayer);
+        }
+
         if (Input.GetKeyDown(KeyCode.F1))
         {
             DrawWireframe = !DrawWireframe;
@@ -220,48 +156,39 @@ public sealed class Planetoid : MonoBehaviour, IPlanet
             }
         }
 
-        CheckCutoff();
-
-        Origin = transform.position;
-        OriginRotation = QuadsRoot.transform.rotation;
-        OriginScale = transform.lossyScale;
-
-        if (LODTarget != null)
-            DistanceToLODTarget = Vector3.Distance(transform.position, LODTarget.position);
-        else
-            DistanceToLODTarget = -1.0f;
-
-        if (Atmosphere != null)
-        {
-            if (Atmosphere.Sun_1 != null) Atmosphere.Sun_1.UpdateNode();
-            if (Atmosphere.Sun_2 != null) Atmosphere.Sun_2.UpdateNode();
-
-            Atmosphere.Origin = Origin;
-            Atmosphere.UpdateNode();
-            Atmosphere.Render(false, DrawLayer);
-        }
-
         if (ExternalRendering && RenderPerUpdate)
         {
             Render();
         }
     }
 
-    private void LateUpdate()
+    protected override void LateUpdate()
     {
-
+        base.LateUpdate();
     }
 
-    private void OnRenderObject()
+    protected override void OnDestroy()
     {
+        base.OnDestroy();
+
+        if (Atmosphere != null)
+            Atmosphere.OnBaked -= OnAtmosphereBaked;
+    }
+
+    protected override void OnRenderObject()
+    {
+        base.OnRenderObject();
+
         if (ExternalRendering && !RenderPerUpdate)
         {
             Render();
         }
     }
 
-    private void OnApplicationFocus(bool focusStatus)
+    protected override void OnApplicationFocus(bool focusStatus)
     {
+        base.OnApplicationFocus(focusStatus);
+
         if (focusStatus == true)
         {
             if (Atmosphere != null)
@@ -284,6 +211,20 @@ public sealed class Planetoid : MonoBehaviour, IPlanet
         for (int i = 0; i < Quads.Count; i++)
         {
             Quads[i].Render();
+        }
+    }
+
+    public void CheckCutoff()
+    {
+        //Prevent fast jumping of lod distances check and working state.
+        if (Vector3.Distance(LODTarget.transform.position, transform.position) > PlanetRadius * 2 + LODDistances[0])
+        {
+            for (int i = 0; i < Quads.Count; i++)
+            {
+                Quads[i].StopAllCoroutines();
+            }
+
+            Working = false;
         }
     }
 
@@ -498,19 +439,5 @@ public sealed class Planetoid : MonoBehaviour, IPlanet
         Quads.Sort(qdtccc);
 
         return quadComponent;
-    }
-
-    public void CheckCutoff()
-    {
-        //Prevent fast jumping of lod distances check and working state.
-        if (Vector3.Distance(LODTarget.transform.position, this.transform.position) > this.PlanetRadius * 2 + LODDistances[0])
-        {
-            for (int i = 0; i < Quads.Count; i++)
-            {
-                Quads[i].StopAllCoroutines();
-            }
-
-            this.Working = false;
-        }
     }
 }
