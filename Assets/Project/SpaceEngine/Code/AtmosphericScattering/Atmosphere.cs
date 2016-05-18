@@ -29,6 +29,7 @@ public sealed class Atmosphere : MonoBehaviour
 
     public float Radius = 2048f;
     public float Height = 100.0f;
+    public float Scale = 1.0f;
 
     public int AtmosphereMeshResolution = 2;
 
@@ -97,7 +98,7 @@ public sealed class Atmosphere : MonoBehaviour
         atmosphereParameters.Rg = Radius;
         atmosphereParameters.Rt = Radius + Height;
         atmosphereParameters.Rl = Radius + Height * 1.05f;
-        atmosphereParameters.SCALE = Radius;
+        atmosphereParameters.SCALE = Scale;
     }
 
     public void TryBake()
@@ -226,7 +227,7 @@ public sealed class Atmosphere : MonoBehaviour
         atmosphereParameters.Rg = Radius;
         atmosphereParameters.Rt = Radius + Height;
         atmosphereParameters.Rl = Radius + Height * 1.05f;
-        atmosphereParameters.SCALE = Radius;
+        atmosphereParameters.SCALE = Scale;
 
         if (Sun_1 != null) Sun_1.Origin = Origin;
         if (Sun_2 != null) Sun_2.Origin = Origin;
@@ -473,7 +474,7 @@ public sealed class Atmosphere : MonoBehaviour
         SetEclipses(mat);
 
         mat.SetFloat("density", Density);
-        mat.SetFloat("scale", atmosphereParameters.Rg / atmosphereParameters.SCALE);
+        mat.SetFloat("scale", atmosphereParameters.SCALE);
         mat.SetFloat("Rg", atmosphereParameters.Rg);
         mat.SetFloat("Rt", atmosphereParameters.Rt);
         mat.SetFloat("RL", atmosphereParameters.Rl);
@@ -521,7 +522,7 @@ public sealed class Atmosphere : MonoBehaviour
         SetEclipses(mat);
 
         mat.SetFloat("density", Density);
-        mat.SetFloat("scale", atmosphereParameters.Rg / atmosphereParameters.SCALE);
+        mat.SetFloat("scale", atmosphereParameters.SCALE);
         mat.SetFloat("Rg", atmosphereParameters.Rg);
         mat.SetFloat("Rt", atmosphereParameters.Rt);
         mat.SetFloat("RL", atmosphereParameters.Rl);

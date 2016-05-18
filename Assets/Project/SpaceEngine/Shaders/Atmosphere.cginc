@@ -594,7 +594,7 @@ float3 SkyRadiance(float3 camera, float3 viewdir, float3 sundir, out float3 exti
 		float3 result = float3(0, 0, 0);
 		extinction = float3(1, 1, 1);
 	
-		camera *= scale;
+		camera /= scale;
 		camera += viewdir * max(shaftWidth, 0.0);
 
 		float r = length(camera);
@@ -651,7 +651,7 @@ float3 SkyRadiance(float3 camera, float3 viewdir, float3 sundir, out float3 exti
 
 void SunRadianceAndSkyIrradiance(float3 worldP, float3 worldN, float3 worldS, out float3 sunL, out float3 skyE)
 {
-	worldP *= scale;
+	worldP /= scale;
 
 	float r = length(worldP);
 
@@ -682,8 +682,8 @@ void SunRadianceAndSkyIrradiance(float3 worldP, float3 worldN, float3 worldS, ou
 float4 InScattering(float3 camera, float3 _point, float3 sundir, out float3 extinction, float shaftWidth) 
 {
 	#if defined(ATMO_INSCATTER_ONLY) || defined(ATMO_FULL)
-		camera *= scale;
-		_point *= scale;
+		camera /= scale;
+		_point /= scale;
 
 		float4 result;
 		float3 viewdir = _point - camera;
