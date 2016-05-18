@@ -130,7 +130,9 @@ public sealed class Planetoid : Planet, IPlanet
 
             Atmosphere.Origin = Origin;
             Atmosphere.UpdateNode();
-            Atmosphere.Render(false, DrawLayer);
+
+            if(RenderPerUpdate)
+                Atmosphere.Render(false, DrawLayer);
         }
 
         if (Input.GetKeyDown(KeyCode.F1))
@@ -182,6 +184,12 @@ public sealed class Planetoid : Planet, IPlanet
         if (ExternalRendering && !RenderPerUpdate)
         {
             Render();
+        }
+
+        if (Atmosphere != null)
+        {
+            if(!RenderPerUpdate)
+                Atmosphere.Render(false, DrawLayer);
         }
     }
 
