@@ -32,7 +32,7 @@
 	 
 			float4 frag(v2f i) : COLOR
 			{
-			    return (i.depth.x /i.depth.y);
+			    return (i.depth.x / i.depth.y);
 			}
 			ENDCG
 	    }
