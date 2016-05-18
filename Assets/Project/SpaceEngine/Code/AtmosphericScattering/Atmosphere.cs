@@ -172,7 +172,7 @@ public sealed class Atmosphere : MonoBehaviour
             OccludersMatrix2.SetRow(i - 4, new Vector4(OccluderPlanetPos.x, OccluderPlanetPos.y, OccluderPlanetPos.z, 250000));
         }
 
-        mat.SetVector("_Sun_WorldSunPosRadius", SunPosition);
+        mat.SetVector("_Sun_WorldSunPosRadius_1", SunPosition);
         mat.SetMatrix("_Sky_LightOccluders_1", OccludersMatrix1);
         mat.SetMatrix("_Sky_LightOccluders_2", OccludersMatrix2);
     }

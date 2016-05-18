@@ -219,7 +219,7 @@ Shader "Proland/Atmo/Sky"
 					float3 extinction = extinction1;
 					float3 inscatter = inscatter1;
 					//float eclipse = ApplyEclipse(WCP, d, _Globals_Origin);
-					float eclipse = EclipseOuterShadow(WSD_1, _Sun_WorldSunPosRadius.w, d, WCP, _Globals_Origin);
+					float eclipse = EclipseOuterShadow(WSD_1, _Sun_WorldSunPosRadius_1.w, d, WCP, _Globals_Origin);
 
 					float3 finalColor = sunColor * extinction + inscatter * eclipse;
 
@@ -244,7 +244,7 @@ Shader "Proland/Atmo/Sky"
 					float3 inscatter = inscatter1 + inscatter2;
 
 					//float eclipse = ApplyEclipse(WCP, d, _Globals_Origin);
-					float eclipse = EclipseOuterShadow(WSD_1, _Sun_WorldSunPosRadius.w, d, WCP, _Globals_Origin);
+					float eclipse = EclipseOuterShadow(WSD_1, _Sun_WorldSunPosRadius_1.w, d, WCP, _Globals_Origin);
 
 					float3 finalColor = sunColor * extinction + inscatter * eclipse;
 
@@ -273,7 +273,7 @@ Shader "Proland/Atmo/Sky"
 					float3 inscatter = inscatter1 + inscatter2 + inscatter3;
 
 					//float eclipse = ApplyEclipse(WCP, d, _Globals_Origin);
-					float eclipse = EclipseOuterShadow(WSD_1, _Sun_WorldSunPosRadius.w, d, WCP, _Globals_Origin);
+					float eclipse = EclipseOuterShadow(WSD_1, _Sun_WorldSunPosRadius_1.w, d, WCP, _Globals_Origin);
 
 					float3 finalColor = sunColor * extinction + inscatter * eclipse;
 
@@ -306,7 +306,7 @@ Shader "Proland/Atmo/Sky"
 					float3 inscatter = inscatter1 + inscatter2 + inscatter3 + inscatter4;
 
 					//float eclipse = ApplyEclipse(WCP, d, _Globals_Origin);
-					float eclipse = EclipseOuterShadow(WSD_1, _Sun_WorldSunPosRadius.w, d, WCP, _Globals_Origin);
+					float eclipse = EclipseOuterShadow(WSD_1, _Sun_WorldSunPosRadius_1.w, d, WCP, _Globals_Origin);
 
 					float3 finalColor = sunColor * extinction + inscatter * eclipse;
 

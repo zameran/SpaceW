@@ -78,7 +78,7 @@ uniform float3 _Sun_WorldSunDir_1;
 uniform float3 _Sun_WorldSunDir_2;
 uniform float3 _Sun_WorldSunDir_3;
 uniform float3 _Sun_WorldSunDir_4;
-uniform float4 _Sun_WorldSunPosRadius;
+uniform float4 _Sun_WorldSunPosRadius_1;
 
 uniform float3 _Globals_WorldCameraPos;
 
@@ -207,14 +207,14 @@ float ApplyEclipse(float3 WCP, float3 d, float3 _Globals_Origin)
 		{
     		if (_Sky_LightOccluders_1[i].w <= 0) break;
 
-			eclipseShadow *= GetEclipseShadow(worldPos, _Sun_WorldSunPosRadius.xyz, _Sky_LightOccluders_1[i].xyz, _Sky_LightOccluders_1[i].w, _Sun_WorldSunPosRadius.w);
+			eclipseShadow *= GetEclipseShadow(worldPos, _Sun_WorldSunPosRadius_1.xyz, _Sky_LightOccluders_1[i].xyz, _Sky_LightOccluders_1[i].w, _Sun_WorldSunPosRadius_1.w);
 		}
 						
 		for (int j = 0; j < 4; ++j)
     	{
 			if (_Sky_LightOccluders_2[j].w <= 0) break;
 
-			eclipseShadow *= GetEclipseShadow(worldPos, _Sun_WorldSunPosRadius.xyz, _Sky_LightOccluders_2[j].xyz, _Sky_LightOccluders_2[j].w, _Sun_WorldSunPosRadius.w);
+			eclipseShadow *= GetEclipseShadow(worldPos, _Sun_WorldSunPosRadius_1.xyz, _Sky_LightOccluders_2[j].xyz, _Sky_LightOccluders_2[j].w, _Sun_WorldSunPosRadius_1.w);
 		}
 	}
 

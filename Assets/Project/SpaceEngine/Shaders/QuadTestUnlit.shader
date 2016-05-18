@@ -149,7 +149,7 @@
 				SunRadianceAndSkyIrradiance(rotatedPoint, n, WSD, sunL, skyE);
 
 				//float eclipse = ApplyEclipse(WCP, WCP - rotatedPoint, _Globals_Origin);
-				float eclipse = EclipseShadow(rotatedPoint, WSD, _Sun_WorldSunPosRadius.w);
+				float eclipse = EclipseShadow(rotatedPoint, WSD, _Sun_WorldSunPosRadius_1.w);
 				float4 inscatter = InScattering(WCP, rotatedPoint, WSD, extinction, 1.0);
 
 				float3 groundColor = 1.5 * reflectance.rgb * (sunL * max(cTheta, 0) + skyE) / M_PI;
