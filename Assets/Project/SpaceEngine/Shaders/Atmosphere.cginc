@@ -79,6 +79,9 @@ uniform float3 _Sun_WorldSunDir_2;
 uniform float3 _Sun_WorldSunDir_3;
 uniform float3 _Sun_WorldSunDir_4;
 uniform float4 _Sun_WorldSunPosRadius_1;
+uniform float4 _Sun_WorldSunPosRadius_2;
+uniform float4 _Sun_WorldSunPosRadius_3;
+uniform float4 _Sun_WorldSunPosRadius_4;
 
 uniform float3 _Globals_WorldCameraPos;
 
@@ -133,6 +136,7 @@ uniform sampler3D _Sky_Inscatter;
 
 uniform float4x4 _Sky_LightOccluders_1;
 uniform float4x4 _Sky_LightOccluders_2;
+uniform float4x4 _Sun_Positions_1;
 
 float IntersectInnerSphere(float3 p1, float3 d, float3 p3, float r)
 {

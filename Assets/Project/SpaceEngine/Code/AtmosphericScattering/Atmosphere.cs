@@ -149,16 +149,34 @@ public sealed class Atmosphere : MonoBehaviour
     {
         Matrix4x4 OccludersMatrix1 = Matrix4x4.zero;
         Matrix4x4 OccludersMatrix2 = Matrix4x4.zero;
+        Matrix4x4 SunMatrix1 = Matrix4x4.zero;
 
         Vector4 OccluderPlanetPos = Vector4.zero;
         Vector4 SunPosition = Vector4.zero;
+        Vector4 SunPosition_1 = Vector4.zero;
 
         float D = Vector3.Distance(Sun_1.transform.position, Origin);
         float actualRadius = 25000;
         float angularRadius = 2.0f * Mathf.Asin(actualRadius / (2 * D));
 
-        SunPosition = Sun_1.transform.position;
-        SunPosition.w = angularRadius;
+        if (Sun_1 != null)
+        {
+            SunPosition_1 = Sun_1.transform.position;
+            SunPosition_1.w = angularRadius;
+        }
+
+        List<AtmosphereSun> Suns = new List<AtmosphereSun>();
+
+        if (Sun_1 != null) Suns.Add(Sun_1);
+        if (Sun_2 != null) Suns.Add(Sun_2);
+        if (Sun_3 != null) Suns.Add(Sun_3);
+        if (Sun_4 != null) Suns.Add(Sun_4);
+
+        for (int i = 0; i < Mathf.Min(4, Suns.Count); i++)
+        {
+            SunPosition = Suns[i].transform.position;
+            SunMatrix1.SetRow(i, new Vector4(SunPosition.x, SunPosition.y, SunPosition.z, actualRadius));
+        }
 
         for (int i = 0; i < Mathf.Min(4, eclipseCasters.Count); i++)
         {
@@ -172,9 +190,11 @@ public sealed class Atmosphere : MonoBehaviour
             OccludersMatrix2.SetRow(i - 4, new Vector4(OccluderPlanetPos.x, OccluderPlanetPos.y, OccluderPlanetPos.z, 250000));
         }
 
-        mat.SetVector("_Sun_WorldSunPosRadius_1", SunPosition);
+        mat.SetVector("_Sun_WorldSunPosRadius_1", SunPosition_1);
+
         mat.SetMatrix("_Sky_LightOccluders_1", OccludersMatrix1);
         mat.SetMatrix("_Sky_LightOccluders_2", OccludersMatrix2);
+        mat.SetMatrix("_Sun_Positions_1", SunMatrix1);
     }
 
     public bool ArraysEqual<T>(T[] a, List<T> b)
