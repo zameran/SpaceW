@@ -48,7 +48,6 @@ public abstract class Planet : MonoBehaviour
 
     public bool DebugEnabled = false;
 
-    public bool DrawWireframe = false;
     public bool DrawNormals = false;
     public bool DrawGizmos = false;
 

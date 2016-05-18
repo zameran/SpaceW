@@ -24,7 +24,6 @@
 			#pragma target 5.0
 			#pragma only_renderers d3d11
 			#pragma vertex vert
-			//#pragma geometry geom //FPS drop down on geometry shader program.
 			#pragma fragment frag
 
 			#pragma multi_compile LIGHT_1 LIGHT_2 LIGHT_3 LIGHT_4
@@ -71,7 +70,6 @@
 			uniform half4 _WireframeColor;
 
 			uniform float _Atmosphere;
-			uniform float _Wireframe;
 			uniform float _Normale;
 			uniform float _Side;
 
@@ -263,83 +261,11 @@
 				return o;
 			}
 
-			inline v2fg PutData(v2fg FROM)
-			{	
-				v2fg OUT;
-
-				OUT.terrainColor = FROM.terrainColor;
-				OUT.scatterColor = FROM.scatterColor;
-				OUT.uv0 = FROM.uv0;
-				OUT.uv1 = FROM.uv1;
-				OUT.uv2 = FROM.uv2;
-				OUT.uv3 = FROM.uv3;
-				OUT.normal0 = FROM.normal0;
-				OUT.normal1 = FROM.normal1;
-				OUT.vertex0 = FROM.vertex0;
-				OUT.vertex1 = FROM.vertex1;
-				OUT.depth = FROM.depth;
-
-				return OUT;
-			}
-
-			inline v2fg PutData(v2fg FROM, float3 customUV1)
-			{	
-				v2fg OUT;
-
-				OUT.terrainColor = FROM.terrainColor;
-				OUT.scatterColor = FROM.scatterColor;
-				OUT.uv0 = FROM.uv0;
-				OUT.uv1 = customUV1;
-				OUT.uv2 = FROM.uv2;
-				OUT.uv3 = FROM.uv3;
-				OUT.normal0 = FROM.normal0;
-				OUT.normal1 = FROM.normal1;
-				OUT.vertex0 = FROM.vertex0;
-				OUT.vertex1 = FROM.vertex1;
-				OUT.depth = FROM.depth;
-
-				return OUT;
-			}
-
-			[maxvertexcount(16)]
-			void geom(triangle v2fg IN[3], inout TriangleStream<v2fg> triStream)
-			{	
-				if (_Wireframe > 0)
-				{
-					float2 SCREEN_SCALE = float2(_ScreenParams.x / 2.0, _ScreenParams.y / 2.0);
-				
-					float2 p0 = SCREEN_SCALE * IN[0].vertex0.xy / IN[0].vertex0.w;
-					float2 p1 = SCREEN_SCALE * IN[1].vertex0.xy / IN[1].vertex0.w;
-					float2 p2 = SCREEN_SCALE * IN[2].vertex0.xy / IN[2].vertex0.w;
-				
-					float2 v0 = p2 - p1;
-					float2 v1 = p2 - p0;
-					float2 v2 = p1 - p0;
-
-					float area = abs(v1.x * v2.y - v1.y * v2.x);
-			
-					triStream.Append(PutData(IN[0], float3(area / length(v0), 0, 0)));
-					triStream.Append(PutData(IN[1], float3(0, area / length(v1), 0)));
-					triStream.Append(PutData(IN[2], float3(0, 0, area / length(v2))));
-				}
-				else
-				{
-					triStream.Append(IN[0]);
-					triStream.Append(IN[1]);
-					triStream.Append(IN[2]);
-				}
-			}
-
 			void frag(v2fg IN, out float4 outDiffuse : COLOR0)
 			{		
 				QuadGenerationConstants constants = quadGenerationConstants[0];
 
-				float d = min(IN.uv1.x, min(IN.uv1.y, IN.uv1.z));
-				float I = exp2(-4.0 * d * d);
-
-				float4 terrainColor = IN.scatterColor;
-				fixed4 wireframeColor = lerp(terrainColor, _WireframeColor, I);
-				fixed4 outputColor = lerp(terrainColor, wireframeColor, _Wireframe);
+				fixed4 terrainColor = IN.scatterColor;
 
 				IN.normal0 = mul(_TTW, IN.normal0);
 
@@ -347,7 +273,7 @@
 				fixed3 terrainLocalNormal = CalculateSurfaceNormal_HeightMap(IN.vertex1, IN.normal0, IN.terrainColor.a);
 				fixed4 outputNormal = fixed4(terrainWorldNormal, 1); //fixed4(terrainWorldNormal * terrainLocalNormal, 1);
 
-				outDiffuse = lerp(outputColor, outputNormal, _Normale);
+				outDiffuse = lerp(terrainColor, outputNormal, _Normale);
 			}
 			ENDCG
 		}

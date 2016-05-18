@@ -137,20 +137,15 @@ public sealed class Planetoid : Planet, IPlanet
 
         if (Input.GetKeyDown(KeyCode.F1))
         {
-            DrawWireframe = !DrawWireframe;
+            DrawNormals = !DrawNormals;
         }
 
         if (Input.GetKeyDown(KeyCode.F2))
         {
-            DrawNormals = !DrawNormals;
-        }
-
-        if (Input.GetKeyDown(KeyCode.F3))
-        {
             if (Atmosphere != null) Atmosphere.TryBake();
         }
 
-        if (Input.GetKeyDown(KeyCode.F4))
+        if (Input.GetKeyDown(KeyCode.F3))
         {
             if (Atmosphere != null)
             {

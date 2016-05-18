@@ -384,7 +384,6 @@ public sealed class Quad : MonoBehaviour, IQuad
         QuadMaterial.SetTexture("_HeightTexture", HeightTexture);
         QuadMaterial.SetTexture("_NormalTexture", NormalTexture);
         QuadMaterial.SetFloat("_Atmosphere", (Planetoid.Atmosphere != null) ? 1.0f : 0.0f);
-        QuadMaterial.SetFloat("_Wireframe", Planetoid.DrawWireframe ? 1.0f : 0.0f);
         QuadMaterial.SetFloat("_Normale", Planetoid.DrawNormals ? 1.0f : 0.0f);
         QuadMaterial.SetFloat("_Side", (float)Position);
         QuadMaterial.SetVector("_Rotation", new Vector3(Planetoid.QuadsRoot.transform.rotation.eulerAngles.x, Planetoid.QuadsRoot.transform.rotation.eulerAngles.y, Planetoid.QuadsRoot.transform.rotation.eulerAngles.z) * Mathf.Deg2Rad);
