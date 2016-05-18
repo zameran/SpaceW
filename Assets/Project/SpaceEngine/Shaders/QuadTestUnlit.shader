@@ -96,44 +96,18 @@
 				return float4(tan(1.37 * inColor.rgb) / tan(1.37), inColor.a);
 			}
 
-			float GroundFinalColorWithoutAtmosphere(appdata_full_compute v, float4 terrainColor, float3 p, float n)
+			float GroundFinalColorWithoutAtmosphere(float4 terrainColor, float3 p, float n)
 			{
 				float4 finaColor = float4(terrainColor.xyz, 1);
 
 				return finaColor;
 			}
 
-			float4 GroundFinalColorWithAtmosphere(appdata_full_compute v, float4 terrainColor, float3 p, float3 n, float3 WSD)
+			float4 GroundFinalColorWithAtmosphere(float4 terrainColor, float3 p, float3 n, float3 WSD)
 			{	
 				QuadGenerationConstants constants = quadGenerationConstants[0];
 	
 				float3 WCP = _Globals_WorldCameraPos;
-				
-				float3 originalPoint = p;
-				float3 originalNormal = n;
-
-				float3 rotatedPoint = Rotate(_Rotation.x, float3(1, 0, 0), 
-									  Rotate(_Rotation.y, float3(0, 1, 0), 
-									  Rotate(_Rotation.z, float3(0, 0, 1), originalPoint)));	
-
-				float3 rotatedNormal = Rotate(_Rotation.x, float3(1, 0, 0), 
-									   Rotate(_Rotation.y, float3(0, 1, 0), 
-									   Rotate(_Rotation.z, float3(0, 0, 1), originalNormal)));	
-
-				n = rotatedNormal;
-
-				//n = normalize(rotatedPoint + rotatedNormal); //So. Good variant, but without normal bumping.
-				//n = normalize(n + WSD); //use this for normal light intens. but disabled normals.
-
-				//n.xy = n.xy; // - default.
-				//n.xy = -n.xy; // - inverted.
-
-				//n.z = sqrt(max(0.0, 1.0 - dot(n.xy, n.xy))); // - default.
-				//n.z = sqrt(max(0.0, -1.0 + dot(n.xy, n.xy))); // - inverted.
-
-				//n = float3(0, 0, 0); //disable normal mapping... bruuuutaal!
-
-				//n = mul(_TTW, n);
 
 				float4 reflectance = RGB2Reflectance(terrainColor);
 
@@ -144,11 +118,11 @@
 				float extinctionGroundFade = 0.000025;
 				float cTheta = dot(n, -WSD);
 
-				SunRadianceAndSkyIrradiance(rotatedPoint, n, WSD, sunL, skyE);
+				SunRadianceAndSkyIrradiance(p, n, WSD, sunL, skyE);
 
-				//float eclipse = ApplyEclipse(WCP, WCP - rotatedPoint, _Globals_Origin);
-				float eclipse = EclipseShadow(rotatedPoint, WSD, _Sun_WorldSunPosRadius_1.w);
-				float4 inscatter = InScattering(WCP, rotatedPoint, WSD, extinction, 1.0);
+				//float eclipse = ApplyEclipse(WCP, WCP - p, _Globals_Origin);
+				float eclipse = EclipseShadow(p, WSD, _Sun_WorldSunPosRadius_1.w);
+				float4 inscatter = InScattering(WCP, p, WSD, extinction, 1.0);
 
 				float3 groundColor = 1.5 * reflectance.rgb * (sunL * max(cTheta, 0) + skyE) / M_PI;
 
@@ -179,66 +153,6 @@
 				float4 terrainColor = tex2Dlod(_HeightTexture, v.texcoord);
 				float4 scatteringColor = float4(0, 0, 0, 0);
 
-				#ifdef LIGHT_1
-				float4 groundFinalColor1 = _Atmosphere > 0.0 ? 
-										   GroundFinalColorWithAtmosphere(v, terrainColor, v.vertex.xyz, v.normal.xyz, _Sun_WorldSunDir_1) : 
-										   GroundFinalColorWithoutAtmosphere(v, terrainColor, v.vertex.xyz, v.normal.xyz);
-
-				scatteringColor = _Atmosphere > 0.0 ? hdr(groundFinalColor1) : 
-													  	  groundFinalColor1;
-				#endif
-
-				#ifdef LIGHT_2
-				float4 groundFinalColor1 = _Atmosphere > 0.0 ? 
-										   GroundFinalColorWithAtmosphere(v, terrainColor, v.vertex.xyz, v.normal.xyz, _Sun_WorldSunDir_1) : 
-										   GroundFinalColorWithoutAtmosphere(v, terrainColor, v.vertex.xyz, v.normal.xyz);
-
-				float4 groundFinalColor2 = _Atmosphere > 0.0 ? 
-										   GroundFinalColorWithAtmosphere(v, terrainColor, v.vertex.xyz, v.normal.xyz, _Sun_WorldSunDir_2) : 
-										   GroundFinalColorWithoutAtmosphere(v, terrainColor, v.vertex.xyz, v.normal.xyz);
-
-				scatteringColor = _Atmosphere > 0.0 ? hdr(groundFinalColor1 + groundFinalColor2) : 
-														  groundFinalColor1 + groundFinalColor2;
-				#endif
-
-				#ifdef LIGHT_3
-				float4 groundFinalColor1 = _Atmosphere > 0.0 ? 
-										   GroundFinalColorWithAtmosphere(v, terrainColor, v.vertex.xyz, v.normal.xyz, _Sun_WorldSunDir_1) : 
-										   GroundFinalColorWithoutAtmosphere(v, terrainColor, v.vertex.xyz, v.normal.xyz);
-
-				float4 groundFinalColor2 = _Atmosphere > 0.0 ? 
-										   GroundFinalColorWithAtmosphere(v, terrainColor, v.vertex.xyz, v.normal.xyz, _Sun_WorldSunDir_2) : 
-										   GroundFinalColorWithoutAtmosphere(v, terrainColor, v.vertex.xyz, v.normal.xyz);
-
-				float4 groundFinalColor3 = _Atmosphere > 0.0 ? 
-										   GroundFinalColorWithAtmosphere(v, terrainColor, v.vertex.xyz, v.normal.xyz, _Sun_WorldSunDir_3) : 
-										   GroundFinalColorWithoutAtmosphere(v, terrainColor, v.vertex.xyz, v.normal.xyz);
-
-				scatteringColor = _Atmosphere > 0.0 ? hdr(groundFinalColor1 + groundFinalColor2 + groundFinalColor3) : 
-														  groundFinalColor1 + groundFinalColor2 + groundFinalColor3;
-				#endif
-
-				#ifdef LIGHT_4
-				float4 groundFinalColor1 = _Atmosphere > 0.0 ? 
-										   GroundFinalColorWithAtmosphere(v, terrainColor, v.vertex.xyz, v.normal.xyz, _Sun_WorldSunDir_1) : 
-										   GroundFinalColorWithoutAtmosphere(v, terrainColor, v.vertex.xyz, v.normal.xyz);
-
-				float4 groundFinalColor2 = _Atmosphere > 0.0 ? 
-										   GroundFinalColorWithAtmosphere(v, terrainColor, v.vertex.xyz, v.normal.xyz, _Sun_WorldSunDir_2) : 
-										   GroundFinalColorWithoutAtmosphere(v, terrainColor, v.vertex.xyz, v.normal.xyz);
-
-				float4 groundFinalColor3 = _Atmosphere > 0.0 ? 
-										   GroundFinalColorWithAtmosphere(v, terrainColor, v.vertex.xyz, v.normal.xyz, _Sun_WorldSunDir_3) : 
-										   GroundFinalColorWithoutAtmosphere(v, terrainColor, v.vertex.xyz, v.normal.xyz);
-
-				float4 groundFinalColor4 = _Atmosphere > 0.0 ? 
-										   GroundFinalColorWithAtmosphere(v, terrainColor, v.vertex.xyz, v.normal.xyz, _Sun_WorldSunDir_4) : 
-										   GroundFinalColorWithoutAtmosphere(v, terrainColor, v.vertex.xyz, v.normal.xyz);
-
-				scatteringColor = _Atmosphere > 0.0 ? hdr(groundFinalColor1 + groundFinalColor2 + groundFinalColor3 + groundFinalColor4) : 
-														  groundFinalColor1 + groundFinalColor2 + groundFinalColor3 + groundFinalColor4;
-				#endif
-
 				v2fg o;
 
 				o.terrainColor = terrainColor;	
@@ -265,7 +179,68 @@
 			{		
 				QuadGenerationConstants constants = quadGenerationConstants[0];
 
-				fixed4 terrainColor = IN.scatterColor;
+				float4 scatteringColor = IN.scatterColor;
+				fixed4 terrainColor = IN.terrainColor;
+
+				#ifdef LIGHT_1
+				float4 groundFinalColor1 = _Atmosphere > 0.0 ? 
+										   GroundFinalColorWithAtmosphere(terrainColor, IN.vertex1.xyz, IN.normal0.xyz, _Sun_WorldSunDir_1) : 
+										   GroundFinalColorWithoutAtmosphere(terrainColor, IN.vertex1.xyz, IN.normal0.xyz);
+
+				scatteringColor = _Atmosphere > 0.0 ? hdr(groundFinalColor1) : 
+													  	  groundFinalColor1;
+				#endif
+
+				#ifdef LIGHT_2
+				float4 groundFinalColor1 = _Atmosphere > 0.0 ? 
+										   GroundFinalColorWithAtmosphere(terrainColor, IN.vertex1.xyz, IN.normal0.xyz, _Sun_WorldSunDir_1) : 
+										   GroundFinalColorWithoutAtmosphere(terrainColor, IN.vertex1.xyz, IN.normal0.xyz);
+
+				float4 groundFinalColor2 = _Atmosphere > 0.0 ? 
+										   GroundFinalColorWithAtmosphere(terrainColor, IN.vertex1.xyz, IN.normal0.xyz, _Sun_WorldSunDir_2) : 
+										   GroundFinalColorWithoutAtmosphere(terrainColor, IN.vertex1.xyz, IN.normal0.xyz);
+
+				scatteringColor = _Atmosphere > 0.0 ? hdr(groundFinalColor1 + groundFinalColor2) : 
+														  groundFinalColor1 + groundFinalColor2;
+				#endif
+
+				#ifdef LIGHT_3
+				float4 groundFinalColor1 = _Atmosphere > 0.0 ? 
+										   GroundFinalColorWithAtmosphere(terrainColor, IN.vertex1.xyz, IN.normal0.xyz, _Sun_WorldSunDir_1) : 
+										   GroundFinalColorWithoutAtmosphere(terrainColor, IN.vertex1.xyz, IN.normal0.xyz);
+
+				float4 groundFinalColor2 = _Atmosphere > 0.0 ? 
+										   GroundFinalColorWithAtmosphere(terrainColor, IN.vertex1.xyz, IN.normal0.xyz, _Sun_WorldSunDir_2) : 
+										   GroundFinalColorWithoutAtmosphere(terrainColor, IN.vertex1.xyz, IN.normal0.xyz);
+
+				float4 groundFinalColor3 = _Atmosphere > 0.0 ? 
+										   GroundFinalColorWithAtmosphere(terrainColor, IN.vertex1.xyz, IN.normal0.xyz, _Sun_WorldSunDir_3) : 
+										   GroundFinalColorWithoutAtmosphere(terrainColor, IN.vertex1.xyz, IN.normal0.xyz);
+
+				scatteringColor = _Atmosphere > 0.0 ? hdr(groundFinalColor1 + groundFinalColor2 + groundFinalColor3) : 
+														  groundFinalColor1 + groundFinalColor2 + groundFinalColor3;
+				#endif
+
+				#ifdef LIGHT_4
+				float4 groundFinalColor1 = _Atmosphere > 0.0 ? 
+										   GroundFinalColorWithAtmosphere(terrainColor, IN.vertex1.xyz, IN.normal0.xyz, _Sun_WorldSunDir_1) : 
+										   GroundFinalColorWithoutAtmosphere(terrainColor, IN.vertex1.xyz, IN.normal0.xyz);
+
+				float4 groundFinalColor2 = _Atmosphere > 0.0 ? 
+										   GroundFinalColorWithAtmosphere(terrainColor, IN.vertex1.xyz, IN.normal0.xyz, _Sun_WorldSunDir_2) : 
+										   GroundFinalColorWithoutAtmosphere(terrainColor, IN.vertex1.xyz, IN.normal0.xyz);
+
+				float4 groundFinalColor3 = _Atmosphere > 0.0 ? 
+										   GroundFinalColorWithAtmosphere(terrainColor, IN.vertex1.xyz, IN.normal0.xyz, _Sun_WorldSunDir_3) : 
+										   GroundFinalColorWithoutAtmosphere(terrainColor, IN.vertex1.xyz, IN.normal0.xyz);
+
+				float4 groundFinalColor4 = _Atmosphere > 0.0 ? 
+										   GroundFinalColorWithAtmosphere(terrainColor, IN.vertex1.xyz, IN.normal0.xyz, _Sun_WorldSunDir_4) : 
+										   GroundFinalColorWithoutAtmosphere(terrainColor, IN.vertex1.xyz, IN.normal0.xyz);
+
+				scatteringColor = _Atmosphere > 0.0 ? hdr(groundFinalColor1 + groundFinalColor2 + groundFinalColor3 + groundFinalColor4) : 
+														  groundFinalColor1 + groundFinalColor2 + groundFinalColor3 + groundFinalColor4;
+				#endif
 
 				IN.normal0 = mul(_TTW, IN.normal0);
 
@@ -273,7 +248,7 @@
 				fixed3 terrainLocalNormal = CalculateSurfaceNormal_HeightMap(IN.vertex1, IN.normal0, IN.terrainColor.a);
 				fixed4 outputNormal = fixed4(terrainWorldNormal, 1); //fixed4(terrainWorldNormal * terrainLocalNormal, 1);
 
-				outDiffuse = lerp(terrainColor, outputNormal, _Normale);
+				outDiffuse = lerp(scatteringColor, outputNormal, _Normale);
 			}
 			ENDCG
 		}
