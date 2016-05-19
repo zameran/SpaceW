@@ -834,7 +834,7 @@ Surface GetSurfaceColorAtlas(float height, float slope, float vary)
 
 			// color conversion must be done before summarize, because hls color space is not additive
 			float4 rgb = tex2Dlod(AtlasDiffSampler, float4(ruvy(uv * uvs + uvo * texturingUVAtlasOffset), 0, 0));
-
+			
 			#if (COLOR_SPACE == 0)
 				float3 hsl = rgb2hsl(rgb.rgb);
 				hsl.x = frac(hsl.x + adjust.x);

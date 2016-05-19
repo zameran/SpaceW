@@ -40,15 +40,44 @@
 
 				o.uv = mul(_Object2World, v.uv).xyz;
 				o.uv *= _Freq;
-		
+				
 				return o;
+			}
+
+			float NoiseFunction(float3 pos)
+			{
+				return sNoise(pos);
+			}
+
+			float3 FindNormal(float3 pos, float u)
+			{
+				float3 offsets[4];
+				float hts[4];
+
+				offsets[0] = pos + float3(-u, 0, 0);
+				offsets[1] = pos + float3(u, 0, 0);
+				offsets[2] = pos + float3(0, -u, 0);
+				offsets[3] = pos + float3(0, u, 0);
+
+				for(int i = 0; i < 4; i++)
+				{
+					hts[i] = NoiseFunction(offsets[i]);
+				}
+
+				float3 _step = float3(1, 0, 1);
+			   
+				float3 va = normalize(float3(_step.xy, hts[1] - hts[0]));
+				float3 vb = normalize(float3(_step.yx, hts[3] - hts[2]));
+			   
+				return cross(va, vb); //you may not need to swizzle the normal
 			}
 
 			float4 frag(v2f i) : COLOR
 			{
-				float v = sNoise(i.uv);
+				float v = NoiseFunction(i.uv);
 
 				return float4(v, v, v, 1);
+				//return float4(FindNormal(i.uv, 1), 1);
 			}
 			ENDCG
 		}
