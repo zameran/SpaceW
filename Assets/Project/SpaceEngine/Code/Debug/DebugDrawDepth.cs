@@ -68,7 +68,7 @@ public class DebugDrawDepth : MonoBehaviour
             RenderTexture rt = RenderTexture.active;
             RenderTexture.active = DepthTexture;
 
-            GL.Clear(false, true, Color.white);
+            GL.Clear(false, true, Color.black);
 
             depthCameraComponent.targetTexture = DepthTexture;
             depthCameraComponent.RenderWithShader(depthShader, "RenderType");

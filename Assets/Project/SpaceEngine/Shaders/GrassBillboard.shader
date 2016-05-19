@@ -21,7 +21,7 @@ Shader "Custom/GrassBillboard"
 
 		Pass
 		{
-			Tags { "LightMode" = "ForwardBase"}
+			Tags { "LightMode" = "ForwardBase" }
 
 			CGPROGRAM
 				#pragma vertex vertexShader
