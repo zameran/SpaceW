@@ -14,6 +14,149 @@
 	{
 		Tags { "Queue" = "Geometry" "RenderType" = "Opaque" }
 
+		/*
+		Pass 
+	    {
+	        Fog { Mode Off }
+			//Cull Front
+			//ZTest Off
+			        
+			CGPROGRAM
+			 
+			#pragma vertex vert
+			#pragma fragment frag
+			#pragma target 3.0
+			#pragma glsl
+
+			#include "UnityCG.cginc"
+			#include "Assets/Project/SpaceEngine/Shaders/Compute/Utils.cginc"
+
+			float3 _Godray_WorldSunDir;
+
+			struct appdata 
+			{
+			    float4 vertex : POSITION;
+			    float3 normal : NORMAL;
+			    float4 texcoord : TEXCOORD0;
+
+			    uint id : SV_VertexID;
+			};
+
+			uniform sampler2D _HeightTexture;
+			uniform sampler2D _NormalTexture;
+			uniform StructuredBuffer<OutputStruct> data;
+			uniform StructuredBuffer<QuadGenerationConstants> quadGenerationConstants;
+
+			struct v2f 
+			{
+			    float4 pos : SV_POSITION;
+			    float2 depth : TEXCOORD0;
+			};
+
+			float3 LinePlaneIntersection(float3 linePoint, float3 lineVec, float3 planeNormal, float3 planePoint)
+			{	
+				float lineLength;
+				float dotNumerator;
+				float dotDenominator;
+					
+				float3 intersectVector;
+				float3 intersection = 0;
+
+				//calculate the distance between the linePoint and the line-plane intersection point
+				dotNumerator = dot((planePoint - linePoint), planeNormal);
+				dotDenominator = dot(lineVec, planeNormal);
+			 
+				//line and plane are not parallel
+				//if(dotDenominator != 0.0f)
+				//{
+					lineLength =  dotNumerator / dotDenominator;
+			  		intersection= (lineLength > 600.0) ? linePoint + normalize(lineVec) * (lineLength - 600) : linePoint;
+
+					return intersection;	
+				//}
+				//else //output not valid
+				//{
+					//return false;
+				//}
+			}
+					  
+			v2f vert (appdata v) 
+			{
+				//v2f o;
+
+				//float4 _LightDirWorldSpace = float4(_Godray_WorldSunDirX,_Godray_WorldSunDirY,_Godray_WorldSunDirZ,0.0);
+				//float4 _LightDirWorldSpace = float4(_Godray_WorldSunDir,0.0);
+				//float3 _LightDirObjectSpace = mul(_World2Object,_LightDirWorldSpace);
+
+				//float3 toLight=normalize(_LightDirObjectSpace);
+
+				//float backFactor = dot( toLight, v.normal );
+
+				//float extrude = (backFactor < 0.0) ? 1.0 : 0.0;
+				//v.vertex.xyz -= toLight * (extrude * 1000000);
+				//    
+				//o.pos = mul (UNITY_MATRIX_MVP, v.vertex);
+				//o.depth = o.pos.zw;
+				//return o;
+
+			    v2f o;
+
+			    float noise = data[v.id].noise;
+				float3 patchCenter = data[v.id].patchCenter;
+				float4 vcolor = data[v.id].vcolor;
+				float4 position = data[v.id].pos;
+
+				float3 normal = tex2Dlod(_NormalTexture, v.texcoord);
+
+				position.w = 1.0;
+				position.xyz += patchCenter;
+
+				float4 pos = position;
+				float3 nor = normal;
+
+				nor = float3(0, 0, nor.z);
+
+				float4 _LightDirWorldSpace = float4(_Godray_WorldSunDir, 0.0);
+				float3 _LightDirObjectSpace = mul(_World2Object, _LightDirWorldSpace);
+			
+				float3 _LightDirViewSpace = mul(UNITY_MATRIX_V, float4(_LightDirObjectSpace, 0.0)); 
+				pos = mul(UNITY_MATRIX_MV, pos);  //both in view space
+
+			    float3 toLight = normalize(_LightDirViewSpace);
+			    
+			    float backFactor = dot(toLight, mul(UNITY_MATRIX_MV, float4(nor, 0.0)));
+			   	float backfaceFactor = dot(float3(0, 0, 1), mul(UNITY_MATRIX_MV, float4(nor, 0.0)));
+			   	backfaceFactor = (backfaceFactor < 0.0) ? 1.0 : 0.0;
+			   
+			    float extrude = (backFactor < 0.0) ? 1.0 : 0.0;
+			    
+			    float towardsSunFactor = dot(toLight, float3(0, 0, 1));
+			   	float projectOnNearPlane = (towardsSunFactor < 0.0) ? 1.0 : 0.0;
+			   	
+				//v.vertex.xyz -= toLight * (extrude * 1000000);
+				//v.vertex.xyz -= toLight * (extrude  *  1000000);
+				
+				pos.xyz = (projectOnNearPlane * extrude > 0.0) ? LinePlaneIntersection(pos.xyz, -toLight,float3(0, 0, 1), 0) : (pos.xyz = pos.xyz - toLight * (extrude  *  1000000));
+				//v.vertex.xyz = (projectOnNearPlane * extrude > 0.0) ? LinePlaneIntersection(v.vertex.xyz, -toLight,float3(0, 0, 1), float3(0, 0, 600)) : (v.vertex.xyz = v.vertex.xyz - toLight * (extrude * 1000000));
+
+			    o.pos = mul(UNITY_MATRIX_P, pos);
+			    o.depth = o.pos.zw;
+
+			    o.pos.z = log2(max(1e-6, 10000.0 + o.pos.w)) * (2.0 / log2(_ProjectionParams.z + 1.0)) - 1.0;
+				o.pos.z *= v.vertex.w;
+
+			    return o;
+			}
+			 
+			float4 frag(v2f i) : COLOR 
+			{
+			    return i.depth.x / i.depth.y;
+			}
+
+			ENDCG
+	    }
+	    */
+
 		Pass
 		{
 			ZWrite On
@@ -66,6 +209,8 @@
 				float4 vertex1 : POSITION1;
 				float depth : DEPTH;
 			};
+
+			float3 _Godray_WorldSunDir;
 		
 			uniform half4 _WireframeColor;
 
@@ -132,6 +277,33 @@
 				float4 finalColor = float4(groundColor, 1) * float4(extinction, 1) + inscatter * eclipse;
 				
 				return finalColor;
+			}
+
+			float3 LinePlaneIntersection(float3 linePoint, float3 lineVec, float3 planeNormal, float3 planePoint)
+			{	
+				float lineLength;
+				float dotNumerator;
+				float dotDenominator;
+					
+				float3 intersectVector;
+				float3 intersection = 0;
+
+				//calculate the distance between the linePoint and the line-plane intersection point
+				dotNumerator = dot((planePoint - linePoint), planeNormal);
+				dotDenominator = dot(lineVec, planeNormal);
+			 
+				//line and plane are not parallel
+				//if(dotDenominator != 0.0f)
+				//{
+					lineLength =  dotNumerator / dotDenominator;
+			  		intersection= (lineLength > 600.0) ? linePoint + normalize(lineVec) * (lineLength - 600) : linePoint;
+
+					return intersection;	
+				//}
+				//else //output not valid
+				//{
+					//return false;
+				//}
 			}
 
 			v2fg vert (in appdata_full_compute v)
@@ -242,7 +414,7 @@
 														  groundFinalColor1 + groundFinalColor2 + groundFinalColor3 + groundFinalColor4;
 				#endif
 
-				IN.normal0 = mul(_TTW, IN.normal0);
+				//IN.normal0 = mul(_TTW, IN.normal0);
 
 				fixed3 terrainWorldNormal = IN.normal0;
 				fixed3 terrainLocalNormal = CalculateSurfaceNormal_HeightMap(IN.vertex1, IN.normal0, IN.terrainColor.a);

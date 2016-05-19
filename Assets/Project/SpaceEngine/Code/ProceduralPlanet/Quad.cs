@@ -402,6 +402,8 @@ public sealed class Quad : MonoBehaviour, IQuad
         QuadMaterial.SetMatrix("_TTW", GetFrame()); 
         QuadMaterial.renderQueue = (int)Planetoid.RenderQueue + Planetoid.RenderQueueOffset;
 
+        //Shader.SetGlobalVector("_Godray_WorldSunDir", Planetoid.Atmosphere.Sun_1.transform.position - Planetoid.transform.position);
+
         if (!Planetoid.RenderPerUpdate) QuadMaterial.SetPass(0);
 
         if (!Uniformed)
