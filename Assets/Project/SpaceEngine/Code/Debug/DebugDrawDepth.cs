@@ -26,7 +26,7 @@ public class DebugDrawDepth : MonoBehaviour
 
     private void Update()
     {
-        Shader.SetGlobalVector("_Godray_WorldSunDir", sunTransform - transform.position);
+        Shader.SetGlobalVector("_Godray_WorldSunDir", sunTransform.position - transform.position);
     }
 
     private void OnGUI()
