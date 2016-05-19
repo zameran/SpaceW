@@ -133,7 +133,7 @@
 				
 				return finalColor;
 			}
-	
+
 			v2fg vert (in appdata_full_compute v)
 			{
 				float noise = data[v.id].noise;
@@ -253,5 +253,4 @@
 			ENDCG
 		}
 	}
-	Fallback Off
 }

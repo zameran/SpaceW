@@ -39,6 +39,15 @@ public static class CameraHelper
         return Camera.main;
     }
 
+    public static Camera DepthCamera()
+    {
+        if (Camera.main.gameObject.transform.FindChild("CustomDepthCamera") != null)
+            if (Camera.main.gameObject.transform.FindChild("CustomDepthCamera").GetComponent<Camera>() != null)
+                return Camera.main.gameObject.transform.FindChild("CustomDepthCamera").GetComponent<Camera>();
+
+        return null;
+    }
+
     public static Matrix4x4 GetWorldToCamera(this Camera camera)
     {
         return camera.worldToCameraMatrix;
