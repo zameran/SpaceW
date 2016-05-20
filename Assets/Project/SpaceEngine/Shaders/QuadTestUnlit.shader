@@ -240,11 +240,9 @@
 				return float4(tan(1.37 * inColor.rgb) / tan(1.37), inColor.a);
 			}
 
-			float GroundFinalColorWithoutAtmosphere(float4 terrainColor, float3 p, float n)
+			float4 GroundFinalColorWithoutAtmosphere(float4 terrainColor, float3 p, float n, float3 WSD)
 			{
-				float4 finaColor = float4(terrainColor.xyz, 1);
-
-				return finaColor;
+				return terrainColor;
 			}
 
 			float4 GroundFinalColorWithAtmosphere(float4 terrainColor, float3 p, float3 n, float3 WSD, float4 WSPR)
@@ -328,20 +326,20 @@
 				#ifdef LIGHT_1
 				float4 groundFinalColor1 = _Atmosphere > 0.0 ? 
 										   GroundFinalColorWithAtmosphere(terrainColor, IN.vertex1.xyz, IN.normal0.xyz, _Sun_WorldSunDir_1, _Sun_Positions_1[0]) : 
-										   GroundFinalColorWithoutAtmosphere(terrainColor, IN.vertex1.xyz, IN.normal0.xyz);
+										   GroundFinalColorWithoutAtmosphere(terrainColor, IN.vertex1.xyz, IN.normal0.xyz, _Sun_WorldSunDir_1);
 
 				scatteringColor = _Atmosphere > 0.0 ? hdr(groundFinalColor1) : 
-													  	  groundFinalColor1;
+														  groundFinalColor1;
 				#endif
 
 				#ifdef LIGHT_2
 				float4 groundFinalColor1 = _Atmosphere > 0.0 ? 
 										   GroundFinalColorWithAtmosphere(terrainColor, IN.vertex1.xyz, IN.normal0.xyz, _Sun_WorldSunDir_1, _Sun_Positions_1[0]) : 
-										   GroundFinalColorWithoutAtmosphere(terrainColor, IN.vertex1.xyz, IN.normal0.xyz);
+										   GroundFinalColorWithoutAtmosphere(terrainColor, IN.vertex1.xyz, IN.normal0.xyz, _Sun_WorldSunDir_1);
 
 				float4 groundFinalColor2 = _Atmosphere > 0.0 ? 
 										   GroundFinalColorWithAtmosphere(terrainColor, IN.vertex1.xyz, IN.normal0.xyz, _Sun_WorldSunDir_2, _Sun_Positions_1[1]) : 
-										   GroundFinalColorWithoutAtmosphere(terrainColor, IN.vertex1.xyz, IN.normal0.xyz);
+										   GroundFinalColorWithoutAtmosphere(terrainColor, IN.vertex1.xyz, IN.normal0.xyz, _Sun_WorldSunDir_1);
 
 				scatteringColor = _Atmosphere > 0.0 ? hdr(groundFinalColor1 + groundFinalColor2) : 
 														  groundFinalColor1 + groundFinalColor2;
@@ -350,15 +348,15 @@
 				#ifdef LIGHT_3
 				float4 groundFinalColor1 = _Atmosphere > 0.0 ? 
 										   GroundFinalColorWithAtmosphere(terrainColor, IN.vertex1.xyz, IN.normal0.xyz, _Sun_WorldSunDir_1, _Sun_Positions_1[0]) : 
-										   GroundFinalColorWithoutAtmosphere(terrainColor, IN.vertex1.xyz, IN.normal0.xyz);
+										   GroundFinalColorWithoutAtmosphere(terrainColor, IN.vertex1.xyz, IN.normal0.xyz, _Sun_WorldSunDir_1);
 
 				float4 groundFinalColor2 = _Atmosphere > 0.0 ? 
 										   GroundFinalColorWithAtmosphere(terrainColor, IN.vertex1.xyz, IN.normal0.xyz, _Sun_WorldSunDir_2, _Sun_Positions_1[1]) : 
-										   GroundFinalColorWithoutAtmosphere(terrainColor, IN.vertex1.xyz, IN.normal0.xyz);
+										   GroundFinalColorWithoutAtmosphere(terrainColor, IN.vertex1.xyz, IN.normal0.xyz, _Sun_WorldSunDir_1);
 
 				float4 groundFinalColor3 = _Atmosphere > 0.0 ? 
 										   GroundFinalColorWithAtmosphere(terrainColor, IN.vertex1.xyz, IN.normal0.xyz, _Sun_WorldSunDir_3, _Sun_Positions_1[2]) : 
-										   GroundFinalColorWithoutAtmosphere(terrainColor, IN.vertex1.xyz, IN.normal0.xyz);
+										   GroundFinalColorWithoutAtmosphere(terrainColor, IN.vertex1.xyz, IN.normal0.xyz, _Sun_WorldSunDir_1);
 
 				scatteringColor = _Atmosphere > 0.0 ? hdr(groundFinalColor1 + groundFinalColor2 + groundFinalColor3) : 
 														  groundFinalColor1 + groundFinalColor2 + groundFinalColor3;
@@ -367,19 +365,19 @@
 				#ifdef LIGHT_4
 				float4 groundFinalColor1 = _Atmosphere > 0.0 ? 
 										   GroundFinalColorWithAtmosphere(terrainColor, IN.vertex1.xyz, IN.normal0.xyz, _Sun_WorldSunDir_1, _Sun_Positions_1[0]) : 
-										   GroundFinalColorWithoutAtmosphere(terrainColor, IN.vertex1.xyz, IN.normal0.xyz);
+										   GroundFinalColorWithoutAtmosphere(terrainColor, IN.vertex1.xyz, IN.normal0.xyz, _Sun_WorldSunDir_1);
 
 				float4 groundFinalColor2 = _Atmosphere > 0.0 ? 
 										   GroundFinalColorWithAtmosphere(terrainColor, IN.vertex1.xyz, IN.normal0.xyz, _Sun_WorldSunDir_2, _Sun_Positions_1[1]) : 
-										   GroundFinalColorWithoutAtmosphere(terrainColor, IN.vertex1.xyz, IN.normal0.xyz);
+										   GroundFinalColorWithoutAtmosphere(terrainColor, IN.vertex1.xyz, IN.normal0.xyz, _Sun_WorldSunDir_1);
 
 				float4 groundFinalColor3 = _Atmosphere > 0.0 ? 
 										   GroundFinalColorWithAtmosphere(terrainColor, IN.vertex1.xyz, IN.normal0.xyz, _Sun_WorldSunDir_3, _Sun_Positions_1[2]) : 
-										   GroundFinalColorWithoutAtmosphere(terrainColor, IN.vertex1.xyz, IN.normal0.xyz);
+										   GroundFinalColorWithoutAtmosphere(terrainColor, IN.vertex1.xyz, IN.normal0.xyz, _Sun_WorldSunDir_1);
 
 				float4 groundFinalColor4 = _Atmosphere > 0.0 ? 
 										   GroundFinalColorWithAtmosphere(terrainColor, IN.vertex1.xyz, IN.normal0.xyz, _Sun_WorldSunDir_4, _Sun_Positions_1[3]) : 
-										   GroundFinalColorWithoutAtmosphere(terrainColor, IN.vertex1.xyz, IN.normal0.xyz);
+										   GroundFinalColorWithoutAtmosphere(terrainColor, IN.vertex1.xyz, IN.normal0.xyz, _Sun_WorldSunDir_1);
 
 				scatteringColor = _Atmosphere > 0.0 ? hdr(groundFinalColor1 + groundFinalColor2 + groundFinalColor3 + groundFinalColor4) : 
 														  groundFinalColor1 + groundFinalColor2 + groundFinalColor3 + groundFinalColor4;

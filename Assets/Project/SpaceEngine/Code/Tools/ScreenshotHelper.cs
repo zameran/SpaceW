@@ -49,13 +49,15 @@ public class ScreenshotHelper : MonoBehaviour
                 }
             }
 
-            rt.ReleaseAndDestroy();
-
             File.WriteAllBytes(Application.dataPath + "/ScreenShot_" + System.DateTime.Now.ToString("yy.MM.dd-hh.mm.ss") + ".png", screenShot.EncodeToPNG());
+
+            //Just make sure that we don't eating memory...
+            rt.ReleaseAndDestroy();
+            Destroy(screenShot);
 
             keyPressed = false;
         }
 
-        Graphics.Blit(src, dest);
+        //Graphics.Blit(src, dest);
     }
 }
