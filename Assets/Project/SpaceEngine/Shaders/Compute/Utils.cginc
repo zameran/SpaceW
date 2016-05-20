@@ -29,7 +29,15 @@
  */
 
 //-----------------------------------------------------------------------------
-struct QuadGenerationConstants
+struct PlanetGenerationConstants //For planet only //wip
+{
+	float planetRadius;
+	float terrainMaxHeight;
+
+	float4 meshSettings;
+};
+
+struct QuadGenerationConstants //For every quad
 {
 	float planetRadius;
 	float spacing;
@@ -141,5 +149,81 @@ float3 CalculateSurfaceNormal_HeightMap(float3 position, float3 normal, float he
 	float dhdy = ddy_fine(height);
   
 	return PerturbNormal(normal, dpdx, dpdy, dhdx, dhdy);
+}
+//-----------------------------------------------------------------------------
+
+//-----------------------------------------------------------------------------
+float3 GetSobelNormal(QuadGenerationConstants constants, RWStructuredBuffer<OutputStruct> buffer, int size, uint3 id)
+{
+	float normalStrength = 0.5 / ((constants.lodLevel / 20.0 + 1.0) * (constants.lodLevel / 20.0 + 1.0));
+	
+	float tl = buffer[(id.x + 0) + (id.y + 0) * size].noise;// * constants.lodLevel;
+	float  l = buffer[(id.x + 0) + (id.y + 1) * size].noise;// * constants.lodLevel;
+	float bl = buffer[(id.x + 0) + (id.y + 2) * size].noise;// * constants.lodLevel;
+	float  t = buffer[(id.x + 1) + (id.y + 0) * size].noise;// * constants.lodLevel;
+	float  b = buffer[(id.x + 1) + (id.y + 2) * size].noise;// * constants.lodLevel;
+	float tr = buffer[(id.x + 2) + (id.y + 0) * size].noise;// * constants.lodLevel;
+	float  r = buffer[(id.x + 2) + (id.y + 1) * size].noise;// * constants.lodLevel;
+	float br = buffer[(id.x + 2) + (id.y + 2) * size].noise;// * constants.lodLevel;
+
+	float xdelta = tr + 2.0 * r + br - tl - 2.0 * l - bl;
+	float ydelta = bl + 2.0 * b + br - tl - 2.0 * t - tr;
+
+	float3 normal = normalize(float3(xdelta, ydelta, 2.0 * 1));
+
+	return normal;
+}
+
+float3 GetHeightNormal(QuadGenerationConstants constants, RWStructuredBuffer<OutputStruct> buffer, int size, uint3 id, out float slope)
+{
+	float left  = buffer[(id.x + 0) + (id.y + 1) * size].noise * constants.lodLevel;
+	float right = buffer[(id.x + 2) + (id.y + 1) * size].noise * constants.lodLevel;
+	float up    = buffer[(id.x + 1) + (id.y + 0) * size].noise * constants.lodLevel;
+	float down  = buffer[(id.x + 1) + (id.y + 2) * size].noise * constants.lodLevel;
+
+	float xdelta = ((left - right) + 1.0) * 0.5;
+	float ydelta = ((up - down) + 1.0) * 0.5;
+	float zdelta = ((right - left) + 1.0) * 0.5;
+	float wdelta = ((up - down) + 1.0) * 0.5;
+
+	float3 xnormal = float3(xdelta, ydelta, 1.0);
+	float3 ynormal = float3(ydelta, xdelta, 1.0);
+	float3 znormal = float3(zdelta, wdelta, 1.0);
+	float3 wnormal = float3(wdelta, zdelta, 1.0);
+
+	float xslope = 0.5 / max(dot(xnormal, float3(0.0, 1.0, 0.0)), 0.001);
+	float yslope = 0.5 / max(dot(ynormal, float3(0.0, 1.0, 0.0)), 0.001);
+	float zslope = 0.5 / max(dot(znormal, float3(0.0, 1.0, 0.0)), 0.001);
+	float wslope = 0.5 / max(dot(wnormal, float3(0.0, 1.0, 0.0)), 0.001);
+
+	float finalSlope = min(min(xslope, yslope), min(zslope, wslope));
+	
+	slope = finalSlope;
+
+	return xnormal;
+}
+
+float3 GetHeightNormalFromPosition(QuadGenerationConstants constants, RWStructuredBuffer<OutputStruct> buffer, int size, uint3 id)
+{
+	float r = constants.planetRadius;
+
+	float3 left	 = (buffer[(id.x + 0) + (id.y + 1) * size].pos.xyz) / r;// * constants.lodLevel;
+	float3 right = (buffer[(id.x + 2) + (id.y + 1) * size].pos.xyz) / r;// * constants.lodLevel;
+	float3 up	 = (buffer[(id.x + 1) + (id.y + 0) * size].pos.xyz) / r;// * constants.lodLevel;
+	float3 down  = (buffer[(id.x + 1) + (id.y + 2) * size].pos.xyz) / r;// * constants.lodLevel;
+	float3 curr	 = (buffer[(id.x + 1) + (id.y + 1) * size].pos.xyz) / r;// * constants.lodLevel;
+	
+	float3 e0 = curr - left;
+	float3 e1 = curr - right;
+	float3 e2 = curr - up;
+	float3 e3 = curr - down;
+
+	float3 n0 = cross(e0, e2);
+	float3 n1 = cross(e1, e3);
+
+	float3 n = n0 + n1;
+	float3 normal = normalize(float3(-n.x, -n.y, n.z));
+
+	return normal;
 }
 //-----------------------------------------------------------------------------

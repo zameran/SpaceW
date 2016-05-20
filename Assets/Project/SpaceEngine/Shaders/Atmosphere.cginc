@@ -665,7 +665,7 @@ void SunRadianceAndSkyIrradiance(float3 worldP, float3 worldN, float3 worldS, ou
 
 	// ambient occlusion due only to slope, does not take self shadowing into account
 	float skyOcclusion = (1.0 + dot(worldV, worldN)) * 0.5;
-	// factor 2.0 : hack to increase sky contribution (numerical simulation of
+	// factor 2.0 - hack to increase sky contribution (numerical simulation of
 	// "precompued atmospheric scattering" gives less luminance than in reality)
 	skyE = 2.0 * SkyIrradiance(r, muS) * skyOcclusion;
 }

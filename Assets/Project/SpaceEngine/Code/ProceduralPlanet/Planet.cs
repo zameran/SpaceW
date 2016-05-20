@@ -60,7 +60,7 @@ public abstract class Planet : MonoBehaviour
     public Vector3 OriginRotation = Vector3.zero;
     public Vector3 OriginScale = Vector3.one;
 
-    public PlanetoidGenerationConstants GenerationConstants;
+    public PlanetGenerationConstants GenerationConstants;
 
     public EngineRenderQueue RenderQueue = EngineRenderQueue.Geometry;
     public int RenderQueueOffset = 0;
@@ -114,7 +114,7 @@ public abstract class Planet : MonoBehaviour
 
     protected virtual void LateUpdate()
     {
-        
+
     }
 
     protected virtual void OnDestroy()
@@ -124,7 +124,7 @@ public abstract class Planet : MonoBehaviour
 
     protected virtual void OnRenderObject()
     {
-        
+
     }
 
     protected virtual void OnApplicationFocus(bool focusStatus)

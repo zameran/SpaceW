@@ -58,6 +58,7 @@ public class ScreenshotHelper : MonoBehaviour
             keyPressed = false;
         }
 
-        //Graphics.Blit(src, dest);
+        //May cause driver crash lol. I don't know why...
+        Graphics.Blit(src, dest);
     }
 }

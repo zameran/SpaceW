@@ -220,11 +220,22 @@ public sealed class Quad : MonoBehaviour, IQuad
                 Render();
     }
 
+    private void FixedUpdate()
+    {
+        //Some strange thing happends if i manualy switch Planetoid.RenderPerUpdate - FPS going up!.
+        //But no effect if CPU is under side load... Eg. when streaming :)
+    }
+
     private void OnDestroy()
     {
         BufferHelper.ReleaseAndDisposeBuffers(QuadGenerationConstantsBuffer, PreOutDataBuffer, PreOutDataSubBuffer, OutDataBuffer, QuadCornersBuffer);
 
-        RenderTexture.active = null; //Fixing RenderTexture.active on OnDestroy. Maybe custom GC for RenderTexture.active?
+        //RenderTexture.active = null; 
+
+        //Fixing RenderTexture.active on OnDestroy. Maybe custom GC for RenderTexture.active?
+        if (RenderTexture.active == HeightTexture | NormalTexture) RenderTexture.active = null; //Best idea anyway.
+        //if (RenderTexture.active != null) RenderTexture.active = null;
+        //RenderTexture.active = null;
 
         if (HeightTexture != null)
             HeightTexture.ReleaseAndDestroy();
@@ -438,10 +449,13 @@ public sealed class Quad : MonoBehaviour, IQuad
 
     public void TryCull()
     {
-        if (!Planetoid.UseUnityCulling)
-            Visible = PlaneFrustumCheck(CameraHelper.Main());
-        else
-            Visible = true;
+        using (new Timer("Quad.TryCull"))
+        {
+            if (!Planetoid.UseUnityCulling)
+                Visible = PlaneFrustumCheck(CameraHelper.Main());
+            else
+                Visible = true;
+        }
     }
 
     public Vector3[] GetFlatBox(float offset = 0)

@@ -3879,7 +3879,6 @@ float4 ColorMapPlanet(float3 pos, float3 ppoint, float height, float slope)
 //-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
-//TODO: Fix dat.
 float HeightMapCloudsGasGiant(float3 ppoint)
 {
 	float3 twistedPoint = ppoint;

@@ -35,8 +35,37 @@
 
 using System;
 
+using UnityEngine;
+
 [Serializable]
-public struct PlanetoidGenerationConstants
+public struct PlanetGenerationConstants
 {
-     
+    public float planetRadius; //4
+    public float terrainMaxHeight; //4
+
+    public Vector4 meshSettings; //16
+
+    public static PlanetGenerationConstants Init()
+    {
+        PlanetGenerationConstants temp = new PlanetGenerationConstants();
+
+        temp.planetRadius = 2048.0f;
+        temp.terrainMaxHeight = 64.0f;
+
+        temp.meshSettings = new Vector4(QuadSettings.nVertsPerEdge, QuadSettings.nVertsPerEdgeReal, QuadSettings.nVertsPerEdgeSub, QuadSettings.nVertsPerEdgeSubReal);
+
+        return temp;
+    }
+
+    public static PlanetGenerationConstants Init(float planetRadius, float terrainMaxHeight)
+    {
+        PlanetGenerationConstants temp = new PlanetGenerationConstants();
+
+        temp.planetRadius = planetRadius;
+        temp.terrainMaxHeight = terrainMaxHeight;
+
+        temp.meshSettings = new Vector4(QuadSettings.nVertsPerEdge, QuadSettings.nVertsPerEdgeReal, QuadSettings.nVertsPerEdgeSub, QuadSettings.nVertsPerEdgeSubReal);
+
+        return temp;
+    }
 }

@@ -1,0 +1,15 @@
+SpaceW Checklist.
+- Priory ordered.
+
+1 : Remake planet dispatching/rendering system. 
+	Eg find more info about Graphics.DrawProcedural/MeshTopology and Buffer types.
+	Anyway need more info about strange Unity's rendering pipeine.
+
+2 : More abstract Planetoid/Quad main classes.
+3 : If second item from dat list completed - make ability to render "Pre Computed" planetes.
+	Under "Pre Computed" i mean render planet from pack of Diffuse/Normal/Height textures.
+
+...
+
+9 : Finish all todo's :D
+10 : Depth. I need depth. Depth texture.
