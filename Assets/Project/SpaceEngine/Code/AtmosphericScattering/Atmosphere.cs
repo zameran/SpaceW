@@ -155,17 +155,10 @@ public sealed class Atmosphere : MonoBehaviour
 
         Vector4 OccluderPlanetPos = Vector4.zero;
         Vector4 SunPosition = Vector4.zero;
-        Vector4 SunPosition_1 = Vector4.zero;
 
         float D = Vector3.Distance(Sun_1.transform.position, Origin);
-        float actualRadius = 25000;
+        float actualRadius = 250000;
         float angularRadius = 2.0f * Mathf.Asin(actualRadius / (2 * D));
-
-        if (Sun_1 != null)
-        {
-            SunPosition_1 = Sun_1.transform.position;
-            SunPosition_1.w = angularRadius;
-        }
 
         List<AtmosphereSun> Suns = new List<AtmosphereSun>();
 
@@ -177,22 +170,20 @@ public sealed class Atmosphere : MonoBehaviour
         for (int i = 0; i < Mathf.Min(4, Suns.Count); i++)
         {
             SunPosition = Suns[i].transform.position;
-            SunMatrix1.SetRow(i, new Vector4(SunPosition.x, SunPosition.y, SunPosition.z, actualRadius));
+            SunMatrix1.SetRow(i, new Vector4(SunPosition.x, SunPosition.y, SunPosition.z, angularRadius));
         }
 
         for (int i = 0; i < Mathf.Min(4, eclipseCasters.Count); i++)
         {
             OccluderPlanetPos = eclipseCasters[i].transform.position;
-            OccludersMatrix1.SetRow(i, new Vector4(OccluderPlanetPos.x, OccluderPlanetPos.y, OccluderPlanetPos.z, 250000));
+            OccludersMatrix1.SetRow(i, new Vector4(OccluderPlanetPos.x, OccluderPlanetPos.y, OccluderPlanetPos.z, actualRadius));
         }
 
         for (int i = 4; i < Mathf.Min(8, eclipseCasters.Count); i++)
         {
             OccluderPlanetPos = eclipseCasters[i].transform.position;
-            OccludersMatrix2.SetRow(i - 4, new Vector4(OccluderPlanetPos.x, OccluderPlanetPos.y, OccluderPlanetPos.z, 250000));
+            OccludersMatrix2.SetRow(i - 4, new Vector4(OccluderPlanetPos.x, OccluderPlanetPos.y, OccluderPlanetPos.z, actualRadius));
         }
-
-        mat.SetVector("_Sun_WorldSunPosRadius_1", SunPosition_1);
 
         mat.SetMatrix("_Sky_LightOccluders_1", OccludersMatrix1);
         mat.SetMatrix("_Sky_LightOccluders_2", OccludersMatrix2);
