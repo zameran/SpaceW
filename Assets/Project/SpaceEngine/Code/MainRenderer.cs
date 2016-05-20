@@ -43,6 +43,12 @@ public sealed class MainRenderer : MonoBehaviour
 
     }
 
+    private void Update()
+    {
+        if (atmosphere != null) atmosphere.Render(false);
+        if (planet != null) planet.Render();
+    }
+
     private void OnRenderObject()
     {
 
