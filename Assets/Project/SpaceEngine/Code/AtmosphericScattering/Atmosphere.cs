@@ -272,7 +272,14 @@ public sealed class Atmosphere : MonoBehaviour
 
     private void AtmosphereOnBaked(Atmosphere a)
     {
+        //Just make sure that all Origin variables set.
+        if (a.transform.parent != null)
+        {
+            Planetoid owner = a.GetComponentInParent<Planetoid>();
 
+            if (owner != null)
+                owner.ReSetupQuads();
+        }
     }
 
     public void CollectGarbage(bool all = true)
@@ -376,10 +383,12 @@ public sealed class Atmosphere : MonoBehaviour
     {
         if (planetoid.Atmosphere != null)
         {
-            foreach (Quad q in planetoid.MainQuads)
+            for (int i = 0; i < planetoid.Quads.Count; i++)
             {
-                if (q != null)
-                    planetoid.Atmosphere.InitUniforms(q.QuadMaterial);
+                if (planetoid.Quads[i] != null)
+                {
+                    planetoid.Atmosphere.InitUniforms(planetoid.Quads[i].QuadMaterial);
+                }
             }
         }
     }
@@ -388,10 +397,12 @@ public sealed class Atmosphere : MonoBehaviour
     {
         if (planetoid.Atmosphere != null)
         {
-            foreach (Quad q in planetoid.MainQuads)
+            for (int i = 0; i < planetoid.Quads.Count; i++)
             {
-                if (q != null)
-                    planetoid.Atmosphere.SetUniformsForPlanetQuad(q.QuadMaterial);
+                if (planetoid.Quads[i] != null)
+                {
+                    planetoid.Atmosphere.SetUniformsForPlanetQuad(planetoid.Quads[i].QuadMaterial);
+                }
             }
         }
     }

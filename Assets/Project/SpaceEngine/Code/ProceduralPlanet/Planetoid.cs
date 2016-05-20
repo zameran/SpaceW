@@ -131,7 +131,7 @@ public sealed class Planetoid : Planet, IPlanet
             Atmosphere.Origin = Origin;
             Atmosphere.UpdateNode();
 
-            if(RenderPerUpdate)
+            if (RenderPerUpdate)
                 Atmosphere.Render(false, DrawLayer);
         }
 
@@ -183,7 +183,7 @@ public sealed class Planetoid : Planet, IPlanet
 
         if (Atmosphere != null)
         {
-            if(!RenderPerUpdate)
+            if (!RenderPerUpdate)
                 Atmosphere.Render(false, DrawLayer);
         }
     }
@@ -387,6 +387,8 @@ public sealed class Planetoid : Planet, IPlanet
         quadComponent.QuadMesh = mesh;
         quadComponent.QuadMaterial = material;
         quadComponent.SetupEvents(quadComponent);
+
+        if (Atmosphere != null) Atmosphere.InitUniforms(quadComponent.QuadMaterial);
 
         QuadGenerationConstants gc = QuadGenerationConstants.Init(TerrainMaxHeight);
         gc.planetRadius = PlanetRadius;

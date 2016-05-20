@@ -84,4 +84,12 @@ public static class UniformTools
             mat.SetVector(name, value);
         }
     }
+
+    public static void SetProperty(this Material mat, string name, Texture value)
+    {
+        if (mat.HasProperty(name))
+        {
+            mat.SetTexture(name, value);
+        }
+    }
 }

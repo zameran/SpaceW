@@ -161,7 +161,7 @@
 		Pass
 		{
 			ZWrite On
-			ZTest LEqual  
+			ZTest LEqual
 			Fog { Mode Off }
 
 			CGPROGRAM
@@ -225,11 +225,8 @@
 
 			uniform float3 _Rotation;
 
-			uniform float3 _Origin;
-
 			uniform float4x4 _Globals_CameraToWorld;
 			uniform float4x4 _Globals_ScreenToCamera;
-			uniform float3 _Globals_Origin;
 
 			uniform float4x4 _TTW;
 

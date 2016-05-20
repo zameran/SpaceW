@@ -398,8 +398,7 @@ public sealed class Quad : MonoBehaviour, IQuad
         QuadMaterial.SetFloat("_Normale", Planetoid.DrawNormals ? 1.0f : 0.0f);
         QuadMaterial.SetFloat("_Side", (float)Position);
         QuadMaterial.SetVector("_Rotation", new Vector3(Planetoid.QuadsRoot.transform.rotation.eulerAngles.x, Planetoid.QuadsRoot.transform.rotation.eulerAngles.y, Planetoid.QuadsRoot.transform.rotation.eulerAngles.z) * Mathf.Deg2Rad);
-        QuadMaterial.SetVector("_Origin", Planetoid.Origin);
-        QuadMaterial.SetMatrix("_TTW", GetFrame()); 
+        QuadMaterial.SetMatrix("_TTW", GetFrame());
         QuadMaterial.renderQueue = (int)Planetoid.RenderQueue + Planetoid.RenderQueueOffset;
 
         //Shader.SetGlobalVector("_Godray_WorldSunDir", Planetoid.Atmosphere.Sun_1.transform.position - Planetoid.transform.position);
