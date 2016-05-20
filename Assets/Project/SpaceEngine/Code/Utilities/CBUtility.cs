@@ -32,7 +32,7 @@ static public class CBUtility
 {
     static public ComputeBuffer CreateArgBuffer(int vertexCountPerInstance, int instanceCount, int startVertex, int startInstance)
     {
-        ComputeBuffer buffer = new ComputeBuffer(4, sizeof(int), ComputeBufferType.DrawIndirect);
+        ComputeBuffer buffer = new ComputeBuffer(4, sizeof(int), ComputeBufferType.IndirectArguments);
         int[] args = new int[] { vertexCountPerInstance, instanceCount, startVertex, startInstance };
         buffer.SetData(args);
 
@@ -83,7 +83,7 @@ static public class CBUtility
         string D = "2D";
         string C = "C" + channels.ToString();
 
-        if (tex.isVolume)
+        if (tex.dimension == UnityEngine.Rendering.TextureDimension.Tex3D)
         {
             depth = tex.volumeDepth;
             D = "3D";
@@ -147,7 +147,7 @@ static public class CBUtility
         string D = "2D";
         string B = (useBilinear) ? "Bilinear" : "";
 
-        if (tex.isVolume)
+        if (tex.dimension == UnityEngine.Rendering.TextureDimension.Tex3D)
         {
             depth = tex.volumeDepth;
             D = "3D";
@@ -221,7 +221,7 @@ static public class CBUtility
         string D = "2D";
         string C = "C" + channels.ToString();
 
-        if (tex.isVolume)
+        if (tex.dimension == UnityEngine.Rendering.TextureDimension.Tex3D)
         {
             depth = tex.volumeDepth;
             D = "3D";
@@ -329,7 +329,7 @@ static public class CBUtility
         string D = "2D";
         string C = "C" + channels.ToString();
 
-        if (tex.isVolume)
+        if (tex.dimension == UnityEngine.Rendering.TextureDimension.Tex3D)
         {
             depth = tex.volumeDepth;
             D = "3D";

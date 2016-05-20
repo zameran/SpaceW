@@ -94,7 +94,7 @@
 			    v2f o;
 
 				float4 _LightDirWorldSpace = float4(_Godray_WorldSunDir, 0.0);
-				float3 _LightDirObjectSpace = mul(_World2Object, _LightDirWorldSpace);
+				float3 _LightDirObjectSpace = mul(unity_WorldToObject, _LightDirWorldSpace);
 				
 				float3 _LightDirViewSpace = mul(UNITY_MATRIX_MV, float4(_LightDirObjectSpace, 0.0)); 
 				v.vertex = mul(UNITY_MATRIX_MV, v.vertex);  //both in view space

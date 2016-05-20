@@ -94,9 +94,9 @@ public sealed class AssemblyLoader : Loader
         }
     }
 
-    protected override void OnLevelWasLoaded(int level)
+    protected override void OnActiveSceneChanged(Scene arg0, Scene arg1)
     {
-        base.OnLevelWasLoaded(level);
+        base.OnActiveSceneChanged(arg0, arg1);
 
         ShowGUI = false;
 

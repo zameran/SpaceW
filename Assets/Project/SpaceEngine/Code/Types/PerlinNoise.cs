@@ -33,7 +33,7 @@ namespace UnityEngine
 
         public PerlinNoise(int seed)
         {
-            Random.seed = seed;
+            Random.InitState(seed);
 
             int i, j, k;
             for (i = 0; i < B; i++)
@@ -188,5 +188,5 @@ namespace UnityEngine
 
             return 0.936f * LERP(s, n0, n1);
         }
-    } 
+    }
 }

@@ -37,7 +37,6 @@
 
 //#define defaultNoise
 
-#include "UnityCG.cginc"
 #include "Assets/Project/SpaceEngine/Shaders/Compute/Utils.cginc"
 #include "Assets/Project/SpaceEngine/Shaders/TCCommon.cginc"
 

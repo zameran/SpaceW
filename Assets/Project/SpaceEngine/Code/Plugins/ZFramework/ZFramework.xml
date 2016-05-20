@@ -2408,11 +2408,12 @@
             This manager will ensure that the messenger's eventTable will be cleaned up upon loading of a new level.
             </summary>
         </member>
-        <member name="M:ZFramework.Unity.Common.Messenger.MessengerHelper.OnLevelWasLoaded(System.Int32)">
+        <member name="M:ZFramework.Unity.Common.Messenger.MessengerHelper.OnActiveSceneChanged(UnityEngine.SceneManagement.Scene,UnityEngine.SceneManagement.Scene)">
             <summary>
             Clean up eventTable every time a new level loads.
             </summary>
-            <param name="level"></param>
+            <param name="arg0"></param>
+            <param name="arg1"></param>
         </member>
         <member name="T:ZFramework.Unity.Common.Threading.Dispatcher">
             <summary>
