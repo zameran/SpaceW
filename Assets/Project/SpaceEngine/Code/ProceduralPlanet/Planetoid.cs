@@ -52,8 +52,6 @@ public sealed class Planetoid : Planet, IPlanet
 
     public Mesh PrototypeMesh;
 
-    public ComputeBuffer GenerationConstantsBuffer;
-
     public QuadStorage Cache = null;
     public NoiseParametersSetter NPS = null;
 
@@ -172,8 +170,6 @@ public sealed class Planetoid : Planet, IPlanet
     {
         base.OnDestroy();
 
-        BufferHelper.ReleaseAndDisposeBuffer(GenerationConstantsBuffer);
-
         if (Atmosphere != null)
             Atmosphere.OnBaked -= OnAtmosphereBaked;
     }
@@ -217,11 +213,7 @@ public sealed class Planetoid : Planet, IPlanet
 
     private void SetupGenerationConstants()
     {
-        BufferHelper.ReleaseAndDisposeBuffer(GenerationConstantsBuffer);
-
         GenerationConstants = PlanetGenerationConstants.Init(PlanetRadius, TerrainMaxHeight);
-        GenerationConstantsBuffer = new ComputeBuffer(1, 24);
-        GenerationConstantsBuffer.SetData(new PlanetGenerationConstants[] { GenerationConstants });
     }
 
     public void Render()
@@ -249,8 +241,6 @@ public sealed class Planetoid : Planet, IPlanet
     [ContextMenu("DestroyQuads")]
     public void DestroyQuads()
     {
-        BufferHelper.ReleaseAndDisposeBuffer(GenerationConstantsBuffer);
-
         for (int i = 0; i < Quads.Count; i++)
         {
             if (Quads[i] != null)
