@@ -722,7 +722,11 @@ public sealed class Quad : MonoBehaviour, IQuad
         OutputStruct[] outputStructData = new OutputStruct[QuadSettings.nVerts];
         QuadCorners[] quadCorners = new QuadCorners[] { new QuadCorners() };
 
+        Log("Data created!");
+
         CreateBuffers();
+
+        Log("Buffers created!");
 
         QuadGenerationConstantsBuffer.SetData(quadGenerationConstantsData);
         PreOutDataBuffer.SetData(preOutputStructData);
@@ -730,17 +734,23 @@ public sealed class Quad : MonoBehaviour, IQuad
         OutDataBuffer.SetData(outputStructData);
         QuadCornersBuffer.SetData(quadCorners);
 
+        Log("Buffers data setted!");
+
         int kernel1 = CoreShader.FindKernel("HeightMain");
         int kernel2 = CoreShader.FindKernel("Transfer");
         int kernel3 = CoreShader.FindKernel("HeightSub");
         int kernel4 = CoreShader.FindKernel("TexturesSub");
         int kernel5 = CoreShader.FindKernel("GetCorners");
 
+        Log("Kernels detection end!");
+
         SetupComputeShaderKernelUniforfms(kernel1, QuadGenerationConstantsBuffer, PreOutDataBuffer, PreOutDataSubBuffer, OutDataBuffer, QuadCornersBuffer);
         SetupComputeShaderKernelUniforfms(kernel2, QuadGenerationConstantsBuffer, PreOutDataBuffer, PreOutDataSubBuffer, OutDataBuffer, QuadCornersBuffer);
         SetupComputeShaderKernelUniforfms(kernel3, QuadGenerationConstantsBuffer, PreOutDataBuffer, PreOutDataSubBuffer, OutDataBuffer, QuadCornersBuffer);
         SetupComputeShaderKernelUniforfms(kernel4, QuadGenerationConstantsBuffer, PreOutDataBuffer, PreOutDataSubBuffer, OutDataBuffer, QuadCornersBuffer);
         SetupComputeShaderKernelUniforfms(kernel5, QuadGenerationConstantsBuffer, PreOutDataBuffer, PreOutDataSubBuffer, OutDataBuffer, QuadCornersBuffer);
+
+        Log("Buffers and data setted to kernels!");
 
         CoreShader.Dispatch(kernel1,
         QuadSettings.THREADGROUP_SIZE_X_REAL,
@@ -767,7 +777,7 @@ public sealed class Quad : MonoBehaviour, IQuad
         QuadSettings.THREADGROUP_SIZE_Y_UNIT,
         QuadSettings.THREADGROUP_SIZE_Z_UNIT);
 
-        Generated = true;
+        Log("Kernels dispatched!");
 
         if (LODLevel == -1)
         {
@@ -798,6 +808,8 @@ public sealed class Quad : MonoBehaviour, IQuad
 
         if (DispatchReady != null)
             DispatchReady(this);
+
+        Generated = true;
     }
 
     private bool AllSubquadsGenerated()

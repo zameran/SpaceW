@@ -7,7 +7,7 @@
 // adds deltaS into S (line 11 in algorithm 4.1)
 #pragma kernel CSMain
 
-#include "Assets/Project/SpaceEngine/Shaders/PreprocessCommon.cginc"
+#include "PreprocessCommon.cginc"
 
 int layer;
 
