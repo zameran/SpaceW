@@ -30,7 +30,7 @@
 			#pragma glsl
 
 			#include "UnityCG.cginc"
-			#include "Assets/Project/SpaceEngine/Shaders/Utils.cginc"
+			#include "Assets/Project/SpaceEngine/Shaders/Compute/Utils.cginc"
 
 			float3 _Godray_WorldSunDir;
 
@@ -178,7 +178,7 @@
 
 			#include "UnityCG.cginc"
 			#include "UnityLightingCommon.cginc"
-			#include "Assets/Project/SpaceEngine/Shaders/Utils.cginc"
+			#include "Assets/Project/SpaceEngine/Shaders/Compute/Utils.cginc"
 			#include "Assets/Project/SpaceEngine/Shaders/TCCommon.cginc"
 			#include "Assets/Project/SpaceEngine/Shaders/Utility.cginc"
 			#include "Assets/Project/SpaceEngine/Shaders/Atmosphere.cginc"

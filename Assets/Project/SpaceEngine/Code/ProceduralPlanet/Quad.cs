@@ -332,7 +332,7 @@ public sealed class Quad : MonoBehaviour, IQuad
 
                 if (!Planetoid.OneSplittingQuad)
                 {
-                    if (Generated && !HaveSubQuads && !Planetoid.Working)
+                    if (Generated && !HaveSubQuads)
                     {
                         if (DistanceToClosestCorner < LODDistance && !Splitting)
                         {
