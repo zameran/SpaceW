@@ -88,7 +88,7 @@ public class CubemapCapturer : MonoBehaviour
         {
             cubeRenderTexture = new RenderTexture(cubemapSize, cubemapSize, 16);
             cubeRenderTexture.isPowerOfTwo = true;
-            cubeRenderTexture.dimension = UnityEngine.Rendering.TextureDimension.Cube;
+            cubeRenderTexture.isCubemap = true;
             cubeRenderTexture.hideFlags = HideFlags.HideAndDontSave;
 
             foreach (Renderer r in GetComponentsInChildren<Renderer>())

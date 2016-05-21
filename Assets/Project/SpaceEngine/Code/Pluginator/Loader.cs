@@ -32,9 +32,7 @@
 
 using System;
 using System.Collections;
-
 using UnityEngine;
-using UnityEngine.SceneManagement;
 
 using ZFramework.Unity.Common;
 
@@ -71,9 +69,7 @@ public abstract class Loader : MonoBehaviour
 
         Step = 0;
 
-        SceneManager.activeSceneChanged += OnActiveSceneChanged;
-
-        if (ShouldDontDestroyOnLoad) DontDestroyOnLoad(this);
+        if(ShouldDontDestroyOnLoad) DontDestroyOnLoad(this);
     }
 
     protected virtual void Update()
@@ -86,7 +82,7 @@ public abstract class Loader : MonoBehaviour
 
     }
 
-    protected virtual void OnActiveSceneChanged(Scene arg0, Scene arg1)
+    protected virtual void OnLevelWasLoaded(int level)
     {
 
     }

@@ -66,21 +66,16 @@ public class UserInterface : MonoBehaviour
 
     public void Quit()
     {
-#if UNITY_EDITOR
+        #if UNITY_EDITOR
         Debug.Break();
-#else
+        #else
         Application.Quit();
-#endif
+        #endif
     }
 
     #endregion
 
-    private void Awake()
-    {
-        SceneManager.activeSceneChanged += OnActiveSceneChanged;
-    }
-
-    private void OnActiveSceneChanged(Scene arg0, Scene arg1)
+    private void OnLevelWasLoaded(int level)
     {
         UnFreezeTime();
     }

@@ -122,7 +122,7 @@ public static class RTExtensions
         rt.filterMode = fm;
         rt.wrapMode = twm;
         rt.useMipMap = false;
-        rt.dimension = UnityEngine.Rendering.TextureDimension.Tex3D;
+        rt.isVolume = true;
         rt.volumeDepth = volumeDepth;
         rt.Create();
 

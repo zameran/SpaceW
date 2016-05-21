@@ -1,4 +1,4 @@
-﻿﻿Shader "SpaceEngine/NoiseEngineTest"
+﻿﻿Shader "SpaceEngine/NoiseEngineTest" 
 {
 	Properties 
 	{
@@ -38,7 +38,7 @@
 
 				o.vertex = mul(UNITY_MATRIX_MVP, v.vertex);
 
-				o.uv = mul(unity_ObjectToWorld, v.uv).xyz;
+				o.uv = mul(_Object2World, v.uv).xyz;
 				o.uv *= _Freq;
 				
 				return o;
