@@ -153,7 +153,7 @@ float3 CalculateSurfaceNormal_HeightMap(float3 position, float3 normal, float he
 //-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
-float3 GetSobelNormal(QuadGenerationConstants constants, RWStructuredBuffer<OutputStruct> buffer, int size, uint3 id)
+inline float3 GetSobelNormal(QuadGenerationConstants constants, RWStructuredBuffer<OutputStruct> buffer, int size, uint3 id)
 {
 	float normalStrength = 0.5 / ((constants.lodLevel / 20.0 + 1.0) * (constants.lodLevel / 20.0 + 1.0));
 	
@@ -174,7 +174,7 @@ float3 GetSobelNormal(QuadGenerationConstants constants, RWStructuredBuffer<Outp
 	return normal;
 }
 
-float3 GetHeightNormal(QuadGenerationConstants constants, RWStructuredBuffer<OutputStruct> buffer, int size, uint3 id, out float slope)
+inline float3 GetHeightNormal(QuadGenerationConstants constants, RWStructuredBuffer<OutputStruct> buffer, int size, uint3 id, out float slope)
 {
 	float left  = buffer[(id.x + 0) + (id.y + 1) * size].noise * constants.lodLevel;
 	float right = buffer[(id.x + 2) + (id.y + 1) * size].noise * constants.lodLevel;
@@ -203,7 +203,7 @@ float3 GetHeightNormal(QuadGenerationConstants constants, RWStructuredBuffer<Out
 	return xnormal;
 }
 
-float3 GetHeightNormalFromPosition(QuadGenerationConstants constants, RWStructuredBuffer<OutputStruct> buffer, int size, uint3 id)
+inline float3 GetHeightNormalFromPosition(QuadGenerationConstants constants, RWStructuredBuffer<OutputStruct> buffer, int size, uint3 id)
 {
 	float r = constants.planetRadius;
 

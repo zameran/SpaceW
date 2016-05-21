@@ -41,28 +41,28 @@ public struct QuadGenerationConstants
 {
     public float planetRadius; //4
     public float spacing; //4
-    public float spacingreal;
-    public float spacingsub;
+    public float spacingreal; //4
+    public float spacingsub; //4
     public float terrainMaxHeight; //4
     public float LODLevel; //4
-    public float LODOctaveModifier;
-    public float orientation;
+    public float LODOctaveModifier; //4
+    public float orientation; //4
 
     //x - nVerticesPerSide
     //y - nVerticesPerSideWithBorder
     //z - nVerticesPerSideSub
     //w - nVerticesPerSideWithBorderSub
-    public Vector4 meshSettings;
+    public Vector4 meshSettings; //16
 
     //x - mesh
     //y - texture
-    public Vector2 borderMod;
+    public Vector2 borderMod; //8
 
     public Vector3 cubeFaceEastDirection; //12
     public Vector3 cubeFaceNorthDirection; //12
     public Vector3 patchCubeCenter; //12
 
-    //12 * 3 + 4 * 3 = 36 + 12 = 48
+    //32 + 16 + 8 + 36 = 92
 
     public static QuadGenerationConstants Init()
     {
