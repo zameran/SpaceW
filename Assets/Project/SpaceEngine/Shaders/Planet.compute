@@ -37,7 +37,7 @@
 
 //#define defaultNoise
 
-#include "Assets/Project/SpaceEngine/Shaders/Compute/Utils.cginc"
+#include "Assets/Project/SpaceEngine/Shaders/Utils.cginc"
 #include "Assets/Project/SpaceEngine/Shaders/TCCommon.cginc"
 
 RWTexture2D<float4> Height;
