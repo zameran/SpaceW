@@ -66,7 +66,7 @@
 
 uniform float _Exposure;
 
-float mod(float x, float y) { return x - y * floor(x/y); }
+float mod(float x, float y) { return x - y * floor(x / y); }
 
 float3 hdr(float3 L) 
 {

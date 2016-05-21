@@ -1,4 +1,4 @@
-﻿Shader "Proland/Atmo/SunFlare" 
+﻿Shader "SpaceEngine/Atmosphere/Sunglare"
 {
 	SubShader 
 	{

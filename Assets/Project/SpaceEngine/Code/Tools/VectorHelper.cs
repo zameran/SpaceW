@@ -63,12 +63,20 @@ public static class VectorHelper
 
     public static Vector3 NormalizeToRadius(this Vector3 v, float radius)
     {
-        return v.normalized * radius;
+        Vector3 normalized = new Vector3();
+
+        normalized = v.normalized * radius;
+
+        return normalized;
     }
 
     public static Vector3 NormalizeToRadiusUnNormalized(this Vector3 v, float radius)
     {
-        return v * radius;
+        Vector3 vector = new Vector3();
+
+        vector = v * radius;
+
+        return vector;
     }
 
     public static Vector2 CartesianToPolar(Vector3 xyz)
@@ -111,7 +119,7 @@ public static class VectorHelper
     {
         return ((-p1.distance * Vector3.Cross(p2.normal, p3.normal)) +
                 (-p2.distance * Vector3.Cross(p3.normal, p1.normal)) +
-                (-p3.distance * Vector3.Cross(p1.normal, p2.normal))) / 
+                (-p3.distance * Vector3.Cross(p1.normal, p2.normal))) /
                                (Vector3.Dot(p1.normal, Vector3.Cross(p2.normal, p3.normal)));
     }
 

@@ -1,4 +1,4 @@
-﻿Shader "SpaceEngine/DepthTexture" 
+﻿Shader "SpaceEngine/Depth/DepthTexture" 
 {
 	SubShader 
 	{

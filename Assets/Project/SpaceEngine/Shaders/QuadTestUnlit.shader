@@ -1,4 +1,4 @@
-﻿Shader "Unlit/QuadTestUnlit"
+﻿Shader "SpaceEngine/QuadTestUnlit"
 {
 	Properties
 	{

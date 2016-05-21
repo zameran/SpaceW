@@ -1,4 +1,4 @@
-﻿Shader "SpaceEngine/DepthGrayscale"
+﻿Shader "SpaceEngine/Depth/DepthGrayscale"
 {
 	SubShader 
 	{

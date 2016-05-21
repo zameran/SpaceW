@@ -64,7 +64,7 @@
  * Modified by Denis Ovchinnikov 2015-2016
  */
 
-Shader "Proland/Atmo/Sky" 
+Shader "SpaceEngine/Atmosphere/Atmosphere" 
 {
 	Properties
 	{

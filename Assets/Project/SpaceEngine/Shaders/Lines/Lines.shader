@@ -1,4 +1,4 @@
-﻿Shader "Lines/Colored Blended" 
+﻿Shader "SpaceEngine/Lines/Colored Blended" 
 {
 	Properties 
 	{

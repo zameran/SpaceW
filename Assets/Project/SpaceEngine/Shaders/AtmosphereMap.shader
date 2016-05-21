@@ -64,7 +64,7 @@
  * Modified by Denis Ovchinnikov 2015-2016
  */
 
-Shader "Proland/Atmo/SkyMap" 
+Shader "SpaceEngine/Atmosphere/AtmosphereMap" 
 {
 	SubShader 
 	{

@@ -1,4 +1,4 @@
-﻿Shader "SpaceEngine/DepthVolume"
+﻿Shader "SpaceEngine/Depth/DepthVolume"
 {
 	SubShader 
 	{

@@ -7,7 +7,7 @@
 // computes single scattering (line 3 in algorithm 4.1)
 #pragma kernel CSMain
 
-#include "Assets/Project/SpaceEngine/Shaders/PreprocessCommon.cginc"
+#include "Assets/Project/SpaceEngine/Shaders/AtmospherePreprocess.cginc"
 
 int layer;
 

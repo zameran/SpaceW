@@ -1,14 +1,13 @@
 ﻿/*
- * Author: Justin Hawkins
+ * Author: Eric Bruneton
+ * Modified and ported to Unity by Justin Hawkins 2014
  * Modified by Denis Ovchinnikov 2015-2016
  */
 
 // computes transmittance table T using Eq (5)
-
 #pragma kernel CSMain
 
-//watch out, include files for compute shader dont automatically update when changed
-#include "Assets/Project/SpaceEngine/Shaders/PreprocessCommon.cginc"
+#include "Assets/Project/SpaceEngine/Shaders/AtmospherePreprocess.cginc"
 
 RWTexture2D<float4> transmittanceWrite;
 
@@ -23,7 +22,9 @@ float OpticalDepth(float H, float r, float mu)
 	{ 
 		float xj = float(i) * dx; 
 		float yj = exp(-(sqrt(r * r + xj * xj + 2.0 * xj * r * mu) - Rg) / H); 
+
 		result += (yi + yj) / 2.0 * dx; 
+
 		xi = xj; 
 		yi = yj; 
 	}
@@ -31,33 +32,14 @@ float OpticalDepth(float H, float r, float mu)
 	return mu < -sqrt(1.0 - (Rg / r) * (Rg / r)) ? 1e9 : result; 
 } 
 
-[numthreads(NUM_THREADS,NUM_THREADS,1)]
+[numthreads(NUM_THREADS, NUM_THREADS,1)]
 void CSMain (uint3 id : SV_DispatchThreadID)
 {
-
 	float r, muS; 
+
 	GetTransmittanceRMu(float2(id.xy), r, muS); 
 	
 	float4 depth = betaR * OpticalDepth(HR, r, muS) + betaMEx * OpticalDepth(HM, r, muS); 
 
 	transmittanceWrite[id.xy] = exp(-depth); // Eq (5);
-	
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
