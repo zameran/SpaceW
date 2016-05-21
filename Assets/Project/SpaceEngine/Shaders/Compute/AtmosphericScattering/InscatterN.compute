@@ -8,7 +8,7 @@
  
 #pragma kernel CSMain
 
-#include "Assets/Project/SpaceEngine/Shaders/PreprocessCommon.cginc"
+#include "PreprocessCommon.cginc"
 
 int layer;
 
