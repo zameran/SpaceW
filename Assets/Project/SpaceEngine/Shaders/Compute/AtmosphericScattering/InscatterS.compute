@@ -7,7 +7,7 @@
 // computes deltaJ (line 7 in algorithm 4.1)
 #pragma kernel CSMain
 
-#include "PreprocessCommon.cginc"
+#include "Assets/Project/SpaceEngine/Shaders/PreprocessCommon.cginc"
 
 int layer;
 
