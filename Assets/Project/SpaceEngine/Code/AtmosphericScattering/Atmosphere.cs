@@ -27,6 +27,7 @@ public sealed class Atmosphere : MonoBehaviour
     [Range(0.0f, 1.0f)]
     public float Density = 1.0f;
 
+    public float TerrainRadiusHold = 0.0f;
     public float Radius = 2048f;
     public float Height = 100.0f;
     public float Scale = 1.0f;
@@ -95,9 +96,9 @@ public sealed class Atmosphere : MonoBehaviour
     {
         atmosphereParameters = new AtmosphereParameters(p);
 
-        atmosphereParameters.Rg = Radius;
-        atmosphereParameters.Rt = Radius + Height;
-        atmosphereParameters.Rl = Radius + Height * 1.05f;
+        atmosphereParameters.Rg = Radius - TerrainRadiusHold;
+        atmosphereParameters.Rt = (Radius + Height) - TerrainRadiusHold;
+        atmosphereParameters.Rl = (Radius + Height * 1.05f) - TerrainRadiusHold;
         atmosphereParameters.SCALE = Scale;
     }
 
@@ -215,9 +216,9 @@ public sealed class Atmosphere : MonoBehaviour
 
     public void UpdateNode()
     {
-        atmosphereParameters.Rg = Radius;
-        atmosphereParameters.Rt = Radius + Height;
-        atmosphereParameters.Rl = Radius + Height * 1.05f;
+        atmosphereParameters.Rg = Radius - TerrainRadiusHold;
+        atmosphereParameters.Rt = (Radius + Height) - TerrainRadiusHold;
+        atmosphereParameters.Rl = (Radius + Height * 1.05f) - TerrainRadiusHold;
         atmosphereParameters.SCALE = Scale;
 
         if (Sun_1 != null) Sun_1.Origin = Origin;

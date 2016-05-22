@@ -741,41 +741,44 @@ Surface GetSurfaceColorAtlas(float height, float slope, float vary)
 
 #else
 
+//WIP
 Surface GetSurfaceColorAtlas(float height, float slope, float vary)
 {
 	float4 PackFactors = float4(1.0 / ATLAS_RES_X, 1.0 / ATLAS_RES_Y, ATLAS_TILE_RES, ATLAS_TILE_RES_LOG2);
 	slope = saturate(slope * 0.5);
 
-	float4 IdScale = tex2Dlod(MaterialTable, float4(height, slope + 0.5, 0, 0));
-	int materialID = min(int(IdScale.x) + int(vary), int(ATLAS_RES_X * ATLAS_RES_Y - 1));
+	float4 IdScale = tex2D(MaterialTable, float2(height, slope + 0.5));
+	int materialID = min(int(IdScale.x) + int(vary) * 100, int(ATLAS_RES_X * ATLAS_RES_Y - 1));
 	float2 tileOffs = float2(materialID % (uint)ATLAS_RES_X, materialID / (uint)ATLAS_RES_X) * PackFactors.xy;
 
 	Surface res;
-	float2 tileUV = (TexCoord.xy * faceParams.z + faceParams.xy) * texScale * IdScale.y;
-	float2 dx = dFdx(tileUV * PackFactors.z);
-	float2 dy = dFdy(tileUV * PackFactors.z);
-	float lod = 0;//clamp(0.5 * log2(max(dot(dx, dx), dot(dy, dy))), 0.0, PackFactors.w);
-	float2 invSize = float2(pow(2.0, lod - PackFactors.w), pow(2.0, lod - PackFactors.w)) * PackFactors.xy; //,
+	//float2 tileUV = (TexCoord.xy * faceParams.z + faceParams.xy) * texScale * IdScale.y;
+	//float2 tileUV = (TexCoord.xy * faceParams.z + 1 / 240) * texScale * IdScale.y;
+	float2 tileUV = (TexCoord.xy * 1) * texScale * IdScale.y;
+	float2 dx = Fwidth(tileUV * PackFactors.z, PackFactors.xy);
+	float2 dy = Fwidth(tileUV * PackFactors.z, PackFactors.xy);
+	float lod = 9;//clamp(0.5 * log2(max(dot(dx, dx), dot(dy, dy))), 0.0, PackFactors.w);
+	float2 invSize = pow(2.0, lod - PackFactors.w) * PackFactors.xy;
 	float2 uv = tileOffs + frac(tileUV) * (PackFactors.xy - invSize) + 0.5 * invSize;
 
 	#if (TILING_FIX_MODE == 0)
-	res.color = tex2Dlod(AtlasDiffSampler, float4(uv, 0, 0));
+	res.color = tex2D(AtlasDiffSampler, uv);
 	#elif (TILING_FIX_MODE == 1)
 	float2 uv2 = tileOffs + frac(-0.173 * tileUV) * (PackFactors.xy - invSize) + 0.5 * invSize;
-	res.color = lerp(tex2Dlod(AtlasDiffSampler, float4(uv, 0, 0)), tex2Dlod(AtlasDiffSampler, float4(uv2, 0, 0)), 0.5);
+	res.color = lerp(tex2D(AtlasDiffSampler, uv), tex2D(AtlasDiffSampler, uv2)), 0.5);
 	#endif
 
 	res.height = res.color.a;
 
-	float4 adjust = tex2Dlod(MaterialTable, float4(height, slope, 0, 0));
-	adjust.xyz *= texColorConv;
-	float3 hsl = rgb2hsl(res.color.rgb);
-	hsl.x  = frac(hsl.x  + adjust.x);
-	hsl.yz = clamp(hsl.yz + adjust.yz, 0.0, 1.0);
-	res.color.rgb = hsl2rgb(hsl);
+	//float4 adjust = tex2D(MaterialTable, float2(height, slope));
+	//adjust.xyz *= texColorConv;
+	//float3 hsl = rgb2hsl(res.color.rgb);
+	//hsl.x  = frac(hsl.x  + adjust.x);
+	//hsl.yz = clamp(hsl.yz + adjust.yz, 0.0, 1.0);
+	//res.color.rgb = hsl2rgb(hsl);
 
-	res.color.a = adjust.a;
-	return  res;
+	//res.color.a = adjust.a;
+	return res;
 }
 
 #endif
@@ -3852,11 +3855,9 @@ float HeightMapPlanet(float3 ppoint, float lodom)
 //-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
-float4 ColorMapPlanet(float3 pos, float3 ppoint, float height, float slope)
+float4 ColorMapPlanet(float3 ppoint, float height, float slope)
 {
 	Surface surf;
-
-	float4 lookupColor = tex2Dlod(MaterialTable, float4(height, slope, 0, 0));
 
 	float3 p = ppoint * mainFreq + Randomize;
 	float3 pp = (ppoint + Randomize) * (0.0005 * hillsFreq / (hillsMagn * hillsMagn));
@@ -3870,7 +3871,7 @@ float4 ColorMapPlanet(float3 pos, float3 ppoint, float height, float slope)
 	p += Fbm3D(p * 0.38, 4) * 1.2;
 	p = ppoint * colorDistFreq * 0.371;
 	p += Fbm3D(p * 0.5, 5) * 1.2;
-	vary = saturate((Fbm(p, 5) + 0.7) * 0.7);
+	vary = (Fbm(p, 5) + 0.7) * 0.7;
 
 	surf = GetSurfaceColor(height, slope, vary);
 
@@ -3929,7 +3930,7 @@ float HeightMapCloudsGasGiant(float3 ppoint)
 //-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
-float4 ColorMapCloudsGasGiant(float3 pos, float3 ppoint, float height, float slope)
+float4 ColorMapCloudsGasGiant(float3 ppoint, float height, float slope)
 {
 	return height * GetGasGiantCloudsColor(height);
 }

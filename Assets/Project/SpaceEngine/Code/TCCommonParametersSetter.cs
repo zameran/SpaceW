@@ -105,6 +105,54 @@ public sealed class TCCommonParametersSetter : MonoBehaviour
         }
     }
 
+    public void UpdateUniforms(Material mat)
+    {
+        if (mat == null) return;
+
+        mat.SetFloat("noiseLacunarity", Lacunarity);
+        mat.SetFloat("noiseH", H);
+        mat.SetFloat("noiseOffset", Offset);
+        mat.SetFloat("noiseRidgeSmooth", RidgeSmooth);
+
+        mat.SetFloat("texturingHeightOffset", texturingHeightOffset);
+        mat.SetFloat("texturingSlopeOffset", texturingSlopeOffset);
+
+        if (UseCustomTexCoord)
+            mat.SetVector("TexCoord", TexCoord);
+
+        mat.SetVector("Randomize", Randomize);
+        mat.SetVector("faceParams", faceParams); //(WIP) For SE Coloring in fragment shader work...
+        mat.SetVector("scaleParams", scaleParams);
+        mat.SetVector("mainParams", mainParams);
+        mat.SetVector("colorParams", colorParams);
+        mat.SetVector("climateParams", climateParams);
+        mat.SetVector("mareParams", mareParams);
+        mat.SetVector("montesParams", montesParams);
+        mat.SetVector("dunesParams", dunesParams);
+        mat.SetVector("hillsParams", hillsParams);
+        mat.SetVector("canyonsParams", canyonsParams);
+        mat.SetVector("riversParams", riversParams);
+        mat.SetVector("cracksParams", cracksParams);
+        mat.SetVector("craterParams", craterParams);
+        mat.SetVector("volcanoParams1", volcanoParams1);
+        mat.SetVector("volcanoParams2", volcanoParams2);
+        mat.SetVector("lavaParams", lavaParams);
+        mat.SetVector("textureParams", textureParams);
+        mat.SetVector("cloudsParams1", cloudsParams1);
+        mat.SetVector("cloudsParams2", cloudsParams2);
+        mat.SetVector("cycloneParams", cycloneParams);
+
+        mat.SetVector("radParams", radParams);
+        mat.SetVector("crHeightParams", crHeightParams);
+        mat.SetVector("craterParams1", craterParams1);
+        mat.SetVector("craterParams2", craterParams2);
+
+        mat.SetVector("texturingUVAtlasOffset", texturingUVAtlasOffset);
+        mat.SetVector("InvSize", InvSize);
+
+        mat.SetVector("planetGlobalColor", new Vector4(PlanetGlobalColor.r, PlanetGlobalColor.g, PlanetGlobalColor.b, PlanetGlobalColor.a));
+    }
+
     public void UpdateUniforms(ComputeShader shader)
     {
         if (shader == null) return;
@@ -121,7 +169,7 @@ public sealed class TCCommonParametersSetter : MonoBehaviour
             shader.SetVector("TexCoord", TexCoord);
 
         shader.SetVector("Randomize", Randomize);
-        shader.SetVector("faceParams", faceParams);
+        shader.SetVector("faceParams", faceParams); //(WIP) For SE Coloring in fragment shader work...
         shader.SetVector("scaleParams", scaleParams);
         shader.SetVector("mainParams", mainParams);
         shader.SetVector("colorParams", colorParams);

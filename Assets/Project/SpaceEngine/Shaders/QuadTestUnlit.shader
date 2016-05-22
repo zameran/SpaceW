@@ -4,7 +4,10 @@
 	{
 		_HeightTexture("Height (RGBA)", 2D) = "white" {}
 		_NormalTexture("Normal (RGBA)", 2D) = "white" {}
-		_GrassTexture("GrassTexture (RGB)", 2D) = "white" {}
+		_QuadTexture1("QuadTexture 1 (RGB)", 2D) = "white" {}
+		_QuadTexture2("QuadTexture 2 (RGB)", 2D) = "white" {}
+		_QuadTexture3("QuadTexture 3 (RGB)", 2D) = "white" {}
+		_QuadTexture4("QuadTexture 4 (RGB)", 2D) = "white" {}
 		_WireframeColor("Wireframe Background Color", Color) = (0, 0, 0, 1)
 		_Atmosphere("Atmosphere", Range(0, 1)) = 0.0
 		_Wireframe("Wireframe", Range(0, 1)) = 0.0
@@ -208,6 +211,7 @@
 				float3 normal1 : NORMAL1;
 				float4 vertex0 : POSITION0;
 				float4 vertex1 : POSITION1;
+				float4 vertex2 : POSITION2;
 				float depth : DEPTH;
 			};
 
@@ -221,7 +225,11 @@
 
 			uniform sampler2D _HeightTexture;
 			uniform sampler2D _NormalTexture;
-			uniform sampler2D _GrassTexture;
+
+			uniform sampler2D _QuadTexture1;
+			uniform sampler2D _QuadTexture2;
+			uniform sampler2D _QuadTexture3;
+			uniform sampler2D _QuadTexture4;
 
 			uniform float3 _Rotation;
 
@@ -245,11 +253,9 @@
 				return terrainColor;
 			}
 
-			float4 GroundFinalColorWithAtmosphere(float4 terrainColor, float3 p, float3 n, float3 WSD, float4 WSPR, float2 uv)
+			float4 GroundFinalColorWithAtmosphere(float4 terrainColor, float3 p, float3 n, float3 WSD, float4 WSPR)
 			{	
 				QuadGenerationConstants constants = quadGenerationConstants[0];
-	
-				float4 grass = tex2D(_GrassTexture, p.xyz / (constants.splitLevel));
 
 				float3 WCP = _Globals_WorldCameraPos;
 
@@ -283,11 +289,15 @@
 				float3 patchCenter = data[v.id].patchCenter;
 				float4 vcolor = data[v.id].vcolor;
 				float4 position = data[v.id].pos;
+				float4 cubePosition = data[v.id].cpos;
 
 				float3 normal = tex2Dlod(_NormalTexture, v.texcoord);
 
 				position.w = 1.0;
 				position.xyz += patchCenter;
+
+				cubePosition.w = 1.0;
+				cubePosition.xyz += patchCenter;
 
 				v.vertex = position;
 				v.tangent = float4(FindTangent(normal, 0.01, float3(0, 1, 0)), 1);
@@ -308,6 +318,7 @@
 				o.normal1 = v.normal;
 				o.vertex0 = mul(UNITY_MATRIX_MVP, v.vertex);
 				o.vertex1 = v.vertex;
+				o.vertex2 = cubePosition;
 				o.depth = 1;
 
 				//Log. depth
@@ -327,7 +338,7 @@
 
 				#ifdef LIGHT_1
 				float4 groundFinalColor1 = _Atmosphere > 0.0 ? 
-										   GroundFinalColorWithAtmosphere(terrainColor, IN.vertex1.xyz, IN.normal0.xyz, _Sun_WorldSunDir_1, _Sun_Positions_1[0], IN.uv0) : 
+										   GroundFinalColorWithAtmosphere(terrainColor, IN.vertex1.xyz, IN.normal0.xyz, _Sun_WorldSunDir_1, _Sun_Positions_1[0]) : 
 										   GroundFinalColorWithoutAtmosphere(terrainColor, IN.vertex1.xyz, IN.normal0.xyz, _Sun_WorldSunDir_1);
 
 				scatteringColor = _Atmosphere > 0.0 ? hdr(groundFinalColor1) : 
@@ -391,7 +402,10 @@
 				fixed3 terrainLocalNormal = CalculateSurfaceNormal_HeightMap(IN.vertex1, IN.normal0, IN.terrainColor.a);
 				fixed4 outputNormal = fixed4(terrainWorldNormal, 1); //fixed4(terrainWorldNormal * terrainLocalNormal, 1);
 
-				outDiffuse = lerp(scatteringColor, outputNormal, _Normale);
+				float height = tex2D(_HeightTexture, IN.uv0).a;
+				float slope = tex2D(_NormalTexture, IN.uv0).a;
+
+				outDiffuse = scatteringColor;//lerp(scatteringColor, outputNormal, _Normale);
 			}
 			ENDCG
 		}

@@ -28,7 +28,8 @@ public class Cloudsphere : MonoBehaviour
 
     private void Update()
     {
-        Render(false);
+        if (Planetoid != null)
+            Render(false, Planetoid.DrawLayer);
     }
 
     public void Render(bool now, int drawLayer = 8)
@@ -37,7 +38,7 @@ public class Cloudsphere : MonoBehaviour
         CloudMaterial.renderQueue = (int)RenderQueue + RenderQueueOffset;
         CloudMaterial.SetPass(0);
 
-        if (Planetoid == null || CloudsphereMesh == null) return;
+        if (CloudsphereMesh == null) return;
 
         Matrix4x4 CloudsTRS = Matrix4x4.TRS(Planetoid.transform.position, transform.rotation, Vector3.one * (Radius + Height));
 

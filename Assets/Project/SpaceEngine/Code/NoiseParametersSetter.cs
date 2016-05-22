@@ -40,7 +40,10 @@ public sealed class NoiseParametersSetter : MonoBehaviour
     public Texture2D PlanetColor = null;
     public Texture2D PlanetColorMap = null;
 
-    public Texture2D GrassTexture = null;
+    public Texture2D QuadTexture1 = null;
+    public Texture2D QuadTexture2 = null;
+    public Texture2D QuadTexture3 = null;
+    public Texture2D QuadTexture4 = null;
 
     public ImprovedPerlinNoise Perlin = null;
 
@@ -112,7 +115,10 @@ public sealed class NoiseParametersSetter : MonoBehaviour
         mat.SetTexture("MaterialTable", PlanetColor);
         mat.SetTexture("ColorMap", PlanetColorMap);
 
-        mat.SetTexture("_GrassTexture", GrassTexture);
+        mat.SetTexture("_QuadTexture1", QuadTexture1);
+        mat.SetTexture("_QuadTexture2", QuadTexture1);
+        mat.SetTexture("_QuadTexture3", QuadTexture1);
+        mat.SetTexture("_QuadTexture4", QuadTexture1);
     }
 
     public void SetUniforms(ComputeShader shader)
