@@ -164,6 +164,8 @@ public sealed class Quad : MonoBehaviour, IQuad
     public QuadCorners quadCorners;
     public OutputStruct[] outputStructData;
 
+    public Vector3[] AABB;
+
     public delegate void QuadDelegate(Quad q);
     public event QuadDelegate DispatchStarted, DispatchReady, GPUGetDataReady;
 
@@ -281,6 +283,12 @@ public sealed class Quad : MonoBehaviour, IQuad
     {
         if (Planetoid.DrawGizmos)
         {
+            Bounds bounds = GetBounds(this);
+
+            Gizmos.color = Color.blue;
+
+            Gizmos.DrawWireCube(bounds.center, bounds.size);
+
             Gizmos.color = Color.red;
 
             Gizmos.DrawWireSphere(Planetoid.transform.TransformPoint(topLeftCorner), 100);
@@ -308,7 +316,7 @@ public sealed class Quad : MonoBehaviour, IQuad
     {
         if (!BuffersCreated)
         {
-            QuadGenerationConstantsBuffer = new ComputeBuffer(1, 92);
+            QuadGenerationConstantsBuffer = new ComputeBuffer(1, 96);
             PreOutDataBuffer = new ComputeBuffer(QuadSettings.nVertsReal, 64);
             PreOutDataSubBuffer = new ComputeBuffer(QuadSettings.nVertsSubReal, 64);
             OutDataBuffer = new ComputeBuffer(QuadSettings.nVerts, 64);
@@ -397,6 +405,8 @@ public sealed class Quad : MonoBehaviour, IQuad
             }
         }
 
+        if (AABB == null) AABB = GetVolumeBox(Planetoid.TerrainMaxHeight, 0, true);
+
         SetupBounds(this, QuadMesh);
 
         if (Planetoid.Atmosphere != null) Planetoid.Atmosphere.SetUniformsForPlanetQuad(QuadMaterial);
@@ -452,7 +462,7 @@ public sealed class Quad : MonoBehaviour, IQuad
         using (new Timer("Quad.TryCull"))
         {
             if (!Planetoid.UseUnityCulling)
-                Visible = PlaneFrustumCheck(CameraHelper.Main());
+                Visible = PlaneFrustumCheck(CameraHelper.Main(), AABB);
             else
                 Visible = true;
         }
@@ -528,20 +538,19 @@ public sealed class Quad : MonoBehaviour, IQuad
         return verts;
     }
 
-    public bool PlaneFrustumCheck(Camera camera)
+    public bool PlaneFrustumCheck(Camera camera, Vector3[] aabb)
     {
+        if (aabb == null || aabb.Length == 0) { Log("AABB array problem!"); return true; }
         if (Parent == null || !Generated || Splitting || Planetoid.UseUnityCulling)
             return true;
 
-        Vector3[] verts0 = GetVolumeBox(Planetoid.TerrainMaxHeight * 2, 0, true);
-
         Plane[] planes = GeometryUtility.CalculateFrustumPlanes(camera);
 
-        bool[] states = new bool[verts0.Length];
+        bool[] states = new bool[aabb.Length];
 
         for (int i = 0; i < states.Length; i++)
         {
-            states[i] = BorderFrustumCheck(planes, verts0[i]);
+            states[i] = BorderFrustumCheck(planes, aabb[i]);
         }
 
         return states.Contains(true);
@@ -719,6 +728,7 @@ public sealed class Quad : MonoBehaviour, IQuad
         if (DispatchStarted != null)
             DispatchStarted(this);
 
+        generationConstants.SplitLevel = LODLevel + 2;
         generationConstants.LODLevel = (((1 << LODLevel + 2) * (Planetoid.PlanetRadius / (LODLevel + 2)) - ((Planetoid.PlanetRadius / (LODLevel + 2)) / 2)) / Planetoid.PlanetRadius);
         generationConstants.LODOctaveModifier = Planetoid.GetLODOctaveModifier(LODLevel + 1);
         generationConstants.orientation = (float)Position;
@@ -949,9 +959,7 @@ public sealed class Quad : MonoBehaviour, IQuad
 
     public void SetupBounds(Quad quad, Mesh mesh)
     {
-        Vector3 middle = quad.middleNormalized;
-
-        mesh.bounds = new Bounds(middle, GetBoundsSize(quad));
+        mesh.bounds = GetBounds(quad);//new Bounds(generationConstants.patchCubeCenter, GetBoundsSize(quad));
     }
 
     public float GetDistanceToClosestCorner()
@@ -1080,17 +1088,21 @@ public sealed class Quad : MonoBehaviour, IQuad
         return closestDistance;
     }
 
-    public Vector3 GetBoundsSize(Quad quad)
+    public Bounds GetBounds(Quad quad)
     {
         if (Planetoid.UseUnityCulling)
         {
-            Vector3 size = bottomRightCorner - topLeftCorner;
+            Bounds bounds = new Bounds();
 
-            return VectorHelper.Abs(size * 2.0f - VectorHelper.Abs(middleNormalized));
+            Vector3 v = (quad.generationConstants.cubeFaceEastDirection + quad.generationConstants.cubeFaceNorthDirection) + quad.generationConstants.patchCubeCenter;
+
+            bounds.SetMinMax(v, -v);
+
+            return bounds;
         }
         else
         {
-            return new Vector3(9e37f, 9e37f, 9e37f);
+            return new Bounds(quad.generationConstants.patchCubeCenter, new Vector3(9e37f, 9e37f, 9e37f));
         }
     }
 

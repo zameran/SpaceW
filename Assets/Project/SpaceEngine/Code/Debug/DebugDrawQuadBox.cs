@@ -95,7 +95,7 @@ public sealed class DebugDrawQuadBox : DebugDraw
                     lineColor = Color.blue;
                 else
                 {
-                    colorsForQuad.ForEach(delegate(ColorForQuad c) { if (q.Position == c.quadPosition) lineColor = c.color; });
+                    colorsForQuad.ForEach(delegate (ColorForQuad c) { if (q.Position == c.quadPosition) lineColor = c.color; });
                 }
 
                 if (useLODCriticalColoring)

@@ -54,7 +54,7 @@ RWStructuredBuffer<QuadCorners> quadCorners;
 
 float3 ScaledCoordinate(float3 coord)
 {
-	return 0.00005 * coord;
+	return normalize(coord);
 }
 
 float NoiseFunction(float3 coord, float lodom)

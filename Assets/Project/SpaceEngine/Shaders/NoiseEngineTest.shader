@@ -75,7 +75,7 @@
 			float4 frag(v2f i) : COLOR
 			{
 				float v = NoiseFunction(i.uv);
-
+				
 				return float4(v, v, v, 1);
 				//return float4(FindNormal(i.uv, 1), 1);
 			}

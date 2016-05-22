@@ -47,6 +47,9 @@ public sealed class NoiseEngineParametersTest : MonoBehaviour
 
     public Texture2D PermSampler = null;
     public Texture2D PermGradSampler = null;
+    public Texture2D PlanetAtlas = null;
+    public Texture2D PlanetColor = null;
+    public Texture2D PlanetColorMap = null;
 
     public Material material;
 
@@ -66,6 +69,9 @@ public sealed class NoiseEngineParametersTest : MonoBehaviour
 
         mat.SetTexture("PermSampler", PermSampler);
         mat.SetTexture("PermGradSampler", PermGradSampler);
+        mat.SetTexture("AtlasDiffSampler", PlanetAtlas);
+        mat.SetTexture("MaterialTable", PlanetColor);
+        mat.SetTexture("ColorMap", PlanetColorMap);
 
         mat.SetFloat("noiseLacunarity", Lacunarity);
         mat.SetFloat("noiseH", H);

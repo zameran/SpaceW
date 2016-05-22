@@ -80,7 +80,7 @@ public sealed class TCCommonParametersSetterEditor : Editor
         setter.Randomize.y = EditorGUILayout.Slider("Randomize.y ", setter.Randomize.y, -2.0f, 2.0f);
         setter.Randomize.z = EditorGUILayout.Slider("Randomize.z ", setter.Randomize.z, -2.0f, 2.0f);
 
-        setter.mainParams.x = EditorGUILayout.Slider("mainFreq ", setter.mainParams.x, 0.0f, 5.0f);
+        setter.mainParams.x = EditorGUILayout.Slider("mainFreq ", setter.mainParams.x, 0.0f, 500.0f);
 
         setter.canyonsParams.w = EditorGUILayout.Slider("erosion", setter.canyonsParams.w, 0.0f, 1.0f);
 

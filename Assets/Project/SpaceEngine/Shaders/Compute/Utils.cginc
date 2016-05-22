@@ -45,6 +45,7 @@ struct QuadGenerationConstants //For every quad
 	float spacingsub;
 	float terrainMaxHeight;
 	float lodLevel;
+	float splitLevel;
 	float lodOctaveModifier;
 	float orientation;
 

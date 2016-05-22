@@ -45,6 +45,7 @@ public struct QuadGenerationConstants
     public float spacingsub; //4
     public float terrainMaxHeight; //4
     public float LODLevel; //4
+    public float SplitLevel; //4
     public float LODOctaveModifier; //4
     public float orientation; //4
 
@@ -62,7 +63,7 @@ public struct QuadGenerationConstants
     public Vector3 cubeFaceNorthDirection; //12
     public Vector3 patchCubeCenter; //12
 
-    //32 + 16 + 8 + 36 = 92
+    //32 + 16 + 8 + 36 + 4 = 96
 
     public static QuadGenerationConstants Init()
     {

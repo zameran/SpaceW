@@ -245,10 +245,12 @@
 				return terrainColor;
 			}
 
-			float4 GroundFinalColorWithAtmosphere(float4 terrainColor, float3 p, float3 n, float3 WSD, float4 WSPR)
+			float4 GroundFinalColorWithAtmosphere(float4 terrainColor, float3 p, float3 n, float3 WSD, float4 WSPR, float2 uv)
 			{	
 				QuadGenerationConstants constants = quadGenerationConstants[0];
 	
+				float4 grass = tex2D(_GrassTexture, uv * constants.planetRadius / 10000);
+
 				float3 WCP = _Globals_WorldCameraPos;
 
 				float4 reflectance = RGB2Reflectance(terrainColor);
@@ -325,7 +327,7 @@
 
 				#ifdef LIGHT_1
 				float4 groundFinalColor1 = _Atmosphere > 0.0 ? 
-										   GroundFinalColorWithAtmosphere(terrainColor, IN.vertex1.xyz, IN.normal0.xyz, _Sun_WorldSunDir_1, _Sun_Positions_1[0]) : 
+										   GroundFinalColorWithAtmosphere(terrainColor, IN.vertex1.xyz, IN.normal0.xyz, _Sun_WorldSunDir_1, _Sun_Positions_1[0], IN.uv0) : 
 										   GroundFinalColorWithoutAtmosphere(terrainColor, IN.vertex1.xyz, IN.normal0.xyz, _Sun_WorldSunDir_1);
 
 				scatteringColor = _Atmosphere > 0.0 ? hdr(groundFinalColor1) : 
