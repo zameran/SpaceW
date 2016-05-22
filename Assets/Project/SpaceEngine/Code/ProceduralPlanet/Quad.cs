@@ -496,12 +496,13 @@ public sealed class Quad : MonoBehaviour, IQuad
 
     public Vector3[] GetVolumeBox(float height, float offset = 0, bool forCulling = false)
     {
-        Vector3[] verts = new Vector3[forCulling ? 12 : 8];
+        Vector3[] verts = new Vector3[forCulling ? 14 : 8];
 
         Vector3 tl = topLeftCorner;
         Vector3 tr = topRightCorner;
         Vector3 bl = bottomLeftCorner;
         Vector3 br = bottomRightCorner;
+        Vector3 mi = middleNormalized;
 
         verts[0] = tl.NormalizeToRadius(Planetoid.PlanetRadius + height + offset);
         verts[1] = tr.NormalizeToRadius(Planetoid.PlanetRadius + height + offset);
@@ -519,6 +520,9 @@ public sealed class Quad : MonoBehaviour, IQuad
             verts[9] = verts[1] - verts[5];
             verts[10] = verts[2] - verts[6];
             verts[11] = verts[3] - verts[7];
+
+            verts[12] = mi.NormalizeToRadius(Planetoid.PlanetRadius + height + offset);
+            verts[13] = mi.NormalizeToRadius(Planetoid.PlanetRadius - height - offset);
         }
 
         return verts;
@@ -529,7 +533,7 @@ public sealed class Quad : MonoBehaviour, IQuad
         if (Parent == null || !Generated || Splitting || Planetoid.UseUnityCulling)
             return true;
 
-        Vector3[] verts0 = GetVolumeBox(Planetoid.TerrainMaxHeight * 1, 0, true);
+        Vector3[] verts0 = GetVolumeBox(Planetoid.TerrainMaxHeight * 2, 0, true);
 
         Plane[] planes = GeometryUtility.CalculateFrustumPlanes(camera);
 
@@ -637,14 +641,23 @@ public sealed class Quad : MonoBehaviour, IQuad
 
                 quad.gameObject.name += "_ID" + id + "_LOD" + quad.LODLevel;
 
-                quad.ReadyForDispatch = true;
-
                 Subquads.Add(quad);
 
                 for (int wait = 0; wait < Planetoid.DispatchSkipFramesCount; wait++)
                 {
                     yield return new WaitForEndOfFrame();
                 }
+            }
+        }
+
+        //Dispatch one by one with intervals.
+        foreach (Quad q in Subquads)
+        {
+            q.ReadyForDispatch = true;
+
+            for (int wait = 0; wait < Planetoid.DispatchSkipFramesCount; wait++)
+            {
+                yield return new WaitForEndOfFrame();
             }
         }
 
