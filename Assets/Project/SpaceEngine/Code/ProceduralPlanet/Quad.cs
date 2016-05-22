@@ -965,11 +965,26 @@ public sealed class Quad : MonoBehaviour, IQuad
 
         Vector3 closestCorner = new Vector3(Mathf.Infinity, Mathf.Infinity, Mathf.Infinity);
 
-        Vector3 tl = Planetoid.transform.TransformPoint(topLeftCorner.NormalizeToRadius(Planetoid.PlanetRadius));
-        Vector3 tr = Planetoid.transform.TransformPoint(topRightCorner.NormalizeToRadius(Planetoid.PlanetRadius));
+        Vector3 tl = Vector3.zero;
+        Vector3 tr = Vector3.zero;
         Vector3 middlePoint = Planetoid.transform.TransformPoint(middleNormalized);
-        Vector3 bl = Planetoid.transform.TransformPoint(bottomLeftCorner.NormalizeToRadius(Planetoid.PlanetRadius));
-        Vector3 br = Planetoid.transform.TransformPoint(bottomRightCorner.NormalizeToRadius(Planetoid.PlanetRadius));
+        Vector3 bl = Vector3.zero;
+        Vector3 br = Vector3.zero;
+
+        if (Planetoid.GetData && GPUDataRecieved)
+        {
+            tl = quadCorners.topLeftCorner;
+            tr = quadCorners.topRightCorner;
+            bl = quadCorners.bottomLeftCorner;
+            br = quadCorners.bottomRightCorner;
+        }
+        else
+        {
+            tl = Planetoid.transform.TransformPoint(topLeftCorner.NormalizeToRadius(Planetoid.PlanetRadius));
+            tr = Planetoid.transform.TransformPoint(topRightCorner.NormalizeToRadius(Planetoid.PlanetRadius));
+            bl = Planetoid.transform.TransformPoint(bottomLeftCorner.NormalizeToRadius(Planetoid.PlanetRadius));
+            br = Planetoid.transform.TransformPoint(bottomRightCorner.NormalizeToRadius(Planetoid.PlanetRadius));
+        }
 
         float d = Vector3.Distance(Planetoid.LODTarget.position, tl);
 
