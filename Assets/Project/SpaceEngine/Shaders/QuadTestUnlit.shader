@@ -249,7 +249,7 @@
 			{	
 				QuadGenerationConstants constants = quadGenerationConstants[0];
 	
-				float4 grass = tex2D(_GrassTexture, uv * constants.planetRadius / 10000);
+				float4 grass = tex2D(_GrassTexture, p.xyz / (constants.splitLevel));
 
 				float3 WCP = _Globals_WorldCameraPos;
 
