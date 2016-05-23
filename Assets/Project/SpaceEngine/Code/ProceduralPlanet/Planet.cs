@@ -89,6 +89,9 @@ public abstract class Planet : MonoBehaviour
     public QuadDistanceToClosestCornerComparer qdtccc;
     public PlanetoidDistanceToLODTargetComparer pdtltc;
 
+    [HideInInspector]
+    public Wireframe wireframeSwitcher;
+
     protected virtual void Awake()
     {
         Origin = transform.position;
@@ -105,6 +108,9 @@ public abstract class Planet : MonoBehaviour
 
         if (pdtltc == null)
             pdtltc = new PlanetoidDistanceToLODTargetComparer();
+
+        if (wireframeSwitcher == null)
+            wireframeSwitcher = FindObjectOfType<Wireframe>();
     }
 
     protected virtual void Update()

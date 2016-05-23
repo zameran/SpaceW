@@ -278,8 +278,8 @@ public sealed class Quad : MonoBehaviour, IQuad
             if (!Planetoid.RenderPerUpdate)
                 Render();
 
-        if (FindObjectOfType<Wireframe>() != null)
-            if (FindObjectOfType<Wireframe>().Enabled)
+        if (Planetoid.wireframeSwitcher != null)
+            if (Planetoid.wireframeSwitcher.Enabled)
                 GL.wireframe = true;
     }
 

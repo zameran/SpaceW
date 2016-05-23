@@ -188,7 +188,11 @@ public sealed class Planetoid : Planet, IPlanet
         if (Atmosphere != null)
         {
             if (!RenderPerUpdate)
-                Atmosphere.Render(false, DrawLayer);
+                Atmosphere.Render(true, DrawLayer);
+
+            if (wireframeSwitcher != null)
+                if (wireframeSwitcher.Enabled)
+                    GL.wireframe = true;
         }
     }
 
