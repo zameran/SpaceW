@@ -1047,54 +1047,6 @@ public sealed class Quad : MonoBehaviour, IQuad
             return new Vector3(Mathf.Infinity, Mathf.Infinity, Mathf.Infinity);
     }
 
-    public float GetClosestDistance(float offset)
-    {
-        float closestDistance = Mathf.Infinity;
-
-        Vector3 tl = Planetoid.transform.TransformPoint(topLeftCorner.NormalizeToRadius(Planetoid.PlanetRadius));
-        Vector3 tr = Planetoid.transform.TransformPoint(topRightCorner.NormalizeToRadius(Planetoid.PlanetRadius));
-        Vector3 middlePoint = Planetoid.transform.TransformPoint(middleNormalized);
-        Vector3 bl = Planetoid.transform.TransformPoint(bottomLeftCorner.NormalizeToRadius(Planetoid.PlanetRadius));
-        Vector3 br = Planetoid.transform.TransformPoint(bottomRightCorner.NormalizeToRadius(Planetoid.PlanetRadius));
-
-        float d = Vector3.Distance(Planetoid.LODTarget.position, tl);
-
-        if (d < closestDistance)
-        {
-            closestDistance = d + offset;
-        }
-
-        d = Vector3.Distance(Planetoid.LODTarget.position, tr);
-
-        if (d < closestDistance)
-        {
-            closestDistance = d + offset;
-        }
-
-        d = Vector3.Distance(Planetoid.LODTarget.position, middlePoint);
-
-        if (d < closestDistance)
-        {
-            closestDistance = d + offset;
-        }
-
-        d = Vector3.Distance(Planetoid.LODTarget.position, bl);
-
-        if (d < closestDistance)
-        {
-            closestDistance = d + offset;
-        }
-
-        d = Vector3.Distance(Planetoid.LODTarget.position, br);
-
-        if (d < closestDistance)
-        {
-            closestDistance = d + offset;
-        }
-
-        return closestDistance;
-    }
-
     public Bounds GetBounds(Quad quad)
     {
         if (Planetoid.UseUnityCulling)
