@@ -176,12 +176,16 @@ public sealed class Atmosphere : MonoBehaviour
 
         for (int i = 0; i < Mathf.Min(4, eclipseCasters.Count); i++)
         {
+            if (eclipseCasters[i] == null) { Debug.Log("Atmosphere: Eclipses problem!"); break; }
+
             OccluderPlanetPos = eclipseCasters[i].transform.position;
             OccludersMatrix1.SetRow(i, new Vector4(OccluderPlanetPos.x, OccluderPlanetPos.y, OccluderPlanetPos.z, actualRadius));
         }
 
         for (int i = 4; i < Mathf.Min(8, eclipseCasters.Count); i++)
         {
+            if (eclipseCasters[i] == null) { Debug.Log("Atmosphere: Eclipses problem!"); break; }
+
             OccluderPlanetPos = eclipseCasters[i].transform.position;
             OccludersMatrix2.SetRow(i - 4, new Vector4(OccluderPlanetPos.x, OccluderPlanetPos.y, OccluderPlanetPos.z, actualRadius));
         }

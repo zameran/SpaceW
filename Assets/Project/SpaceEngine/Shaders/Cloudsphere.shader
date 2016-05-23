@@ -32,8 +32,7 @@ Shader "SpaceEngine/Atmosphere/Cloudsphere"
 {
 	Properties
 	{
-		_Color("Color", Color) = (1, 1, 1, 1)
-		_TransmittanceColor("Transmittance Color", Color) = (1, 1, 1, 1)
+		_Color("Color", Color) = (0, 0, 0, 1)
 
 		_Cloud("Cloud (RGBA)", CUBE) = "white" {}
 		_Normal("Normal (RGBA)", 2D) = "white" {}
@@ -65,7 +64,6 @@ Shader "SpaceEngine/Atmosphere/Cloudsphere"
 			uniform float _TransmittanceOffset;
 
 			uniform float4 _Color;
-			uniform float4 _TransmittanceColor;
 
 			uniform samplerCUBE _Cloud;
 			uniform sampler2D _Normal;
@@ -91,8 +89,12 @@ Shader "SpaceEngine/Atmosphere/Cloudsphere"
 				float3 normal : NORMAL;
 				float3 uv : TEXCOORD0;
 				float3 direction : TEXCOORD1;
-				
 			};
+
+			inline float vectorSum(float4 v) 
+			{
+				return (v.x + v.y + v.z + v.w);
+			}
 
 			v2f vert(appdata_full_compute v)
 			{
@@ -112,14 +114,14 @@ Shader "SpaceEngine/Atmosphere/Cloudsphere"
 				float4 clouds = texCUBE(_Cloud, IN.uv).aaaa;
 				float4 transmittance = tex2D(_Sky_Transmittance, IN.direction + _TransmittanceOffset);
 
-				clouds = saturate(clouds);
-
-				transmittance /= _TransmittanceColor;
+				float cloudsAlpha = clouds.w;
 
 				clouds *= _Color;
-				clouds *= transmittance;
+				clouds += float4(transmittance.rgb, 1);
 
-				return clouds;
+				float4 output = float4(clouds.xyz, cloudsAlpha);
+
+				return output;
 			}	
 			ENDCG
 		}
