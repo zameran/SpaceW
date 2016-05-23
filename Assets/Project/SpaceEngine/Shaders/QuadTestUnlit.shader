@@ -405,7 +405,7 @@
 				float height = tex2D(_HeightTexture, IN.uv0).a;
 				float slope = tex2D(_NormalTexture, IN.uv0).a;
 
-				outDiffuse = scatteringColor;//lerp(scatteringColor, outputNormal, _Normale);
+				outDiffuse = lerp(scatteringColor, outputNormal, _Normale);
 			}
 			ENDCG
 		}

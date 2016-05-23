@@ -129,6 +129,8 @@ public sealed class Planetoid : Planet, IPlanet
         {
             if (Atmosphere.Sun_1 != null) Atmosphere.Sun_1.UpdateNode();
             if (Atmosphere.Sun_2 != null) Atmosphere.Sun_2.UpdateNode();
+            if (Atmosphere.Sun_3 != null) Atmosphere.Sun_3.UpdateNode();
+            if (Atmosphere.Sun_4 != null) Atmosphere.Sun_4.UpdateNode();
 
             Atmosphere.Origin = Origin;
             Atmosphere.UpdateNode();
