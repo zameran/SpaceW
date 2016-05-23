@@ -277,6 +277,10 @@ public sealed class Quad : MonoBehaviour, IQuad
         if (!Planetoid.ExternalRendering)
             if (!Planetoid.RenderPerUpdate)
                 Render();
+
+        if (FindObjectOfType<Wireframe>() != null)
+            if (FindObjectOfType<Wireframe>().Enabled)
+                GL.wireframe = true;
     }
 
     private void OnDrawGizmos()
