@@ -60,12 +60,17 @@ public abstract class Planet : MonoBehaviour
     public Vector3 OriginRotation = Vector3.zero;
     public Vector3 OriginScale = Vector3.one;
 
+    public Matrix4x4 PlanetoidTRS = Matrix4x4.identity;
+
     public PlanetGenerationConstants GenerationConstants;
 
     public EngineRenderQueue RenderQueue = EngineRenderQueue.Geometry;
     public int RenderQueueOffset = 0;
 
     public Transform LODTarget = null;
+
+    public float LODUpdateInterval = 0.25f;
+    public float LastLODUpdateTime = 0.00f;
 
     public GameObject QuadsRoot = null;
 
@@ -96,7 +101,9 @@ public abstract class Planet : MonoBehaviour
     {
         Origin = transform.position;
         OriginRotation = QuadsRoot.transform.rotation.eulerAngles;
-        OriginScale = transform.lossyScale;
+        OriginScale = transform.localScale;
+
+        PlanetoidTRS = Matrix4x4.TRS(Origin, Quaternion.Euler(OriginRotation), OriginScale);
     }
 
     protected virtual void Start()
@@ -115,7 +122,11 @@ public abstract class Planet : MonoBehaviour
 
     protected virtual void Update()
     {
+        Origin = transform.position;
+        OriginRotation = QuadsRoot.transform.rotation.eulerAngles;
+        OriginScale = transform.localScale;
 
+        PlanetoidTRS = Matrix4x4.TRS(Origin, Quaternion.Euler(OriginRotation), OriginScale);
     }
 
     protected virtual void LateUpdate()

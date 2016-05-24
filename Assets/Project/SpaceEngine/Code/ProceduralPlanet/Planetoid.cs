@@ -116,10 +116,6 @@ public sealed class Planetoid : Planet, IPlanet
 
         CheckCutoff();
 
-        Origin = transform.position;
-        OriginRotation = QuadsRoot.transform.rotation.eulerAngles;
-        OriginScale = transform.lossyScale;
-
         if (LODTarget != null)
             DistanceToLODTarget = Vector3.Distance(transform.position, LODTarget.position);
         else
@@ -161,6 +157,8 @@ public sealed class Planetoid : Planet, IPlanet
         {
             Render();
         }
+
+        CheckLOD();
     }
 
     protected override void LateUpdate()
@@ -220,6 +218,19 @@ public sealed class Planetoid : Planet, IPlanet
     private void SetupGenerationConstants()
     {
         GenerationConstants = PlanetGenerationConstants.Init(PlanetRadius, TerrainMaxHeight);
+    }
+
+    public void CheckLOD()
+    {
+        if (Time.time > LastLODUpdateTime + LODUpdateInterval && UseLOD)
+        {
+            LastLODUpdateTime = Time.time;
+
+            for (int i = 0; i < Quads.Count; i++)
+            {
+                Quads[i].CheckLOD();
+            }
+        }
     }
 
     public void Render()

@@ -151,8 +151,6 @@ public sealed class Quad : MonoBehaviour, IQuad
     public bool GPUDataRecieved = false;
     public bool BuffersCreated = false;
 
-    public float LODUpdateInterval = 0.25f;
-    public float LastLODUpdateTime = 0.00f;
     public float DistanceToClosestCorner = Mathf.Infinity;
 
     public Vector3 topLeftCorner;
@@ -215,8 +213,6 @@ public sealed class Quad : MonoBehaviour, IQuad
 
     private void Update()
     {
-        CheckLOD();
-
         if (!Planetoid.ExternalRendering)
             if (Planetoid.RenderPerUpdate)
                 Render();
@@ -332,71 +328,51 @@ public sealed class Quad : MonoBehaviour, IQuad
 
     public void CheckLOD()
     {
-        if (Time.time > LastLODUpdateTime + LODUpdateInterval && Planetoid.UseLOD)
+        DistanceToClosestCorner = GetDistanceToClosestCorner();
+
+        if (LODLevel < Planetoid.LODMaxLevel)
         {
-            LastLODUpdateTime = Time.time;
+            float LODDistance = Planetoid.LODDistances[LODLevel + 1] * Planetoid.LODDistanceMultiplier;
 
-            DistanceToClosestCorner = GetDistanceToClosestCorner();
-
-            if (LODLevel < Planetoid.LODMaxLevel)
+            if (!Planetoid.OneSplittingQuad)
             {
-                float LODDistance = Planetoid.LODDistances[LODLevel + 1] * Planetoid.LODDistanceMultiplier;
-
-                if (!Planetoid.OneSplittingQuad)
+                if (Generated && !HaveSubQuads)
                 {
-                    if (Generated && !HaveSubQuads)
+                    if (DistanceToClosestCorner < LODDistance && !Splitting)
                     {
-                        if (DistanceToClosestCorner < LODDistance && !Splitting)
-                        {
-                            StartCoroutine(Split());
-                            Log("Split Call");
-                        }
-                    }
-                    else
-                    {
-                        if (DistanceToClosestCorner > LODDistance && !Splitting)
-                        {
-                            Unsplit();
-                            Log("Unsplit Call");
-                        }
+                        StartCoroutine(Split());
+                        Log("Split Call");
                     }
                 }
                 else
                 {
-                    if (Generated && !HaveSubQuads && !Planetoid.Working)
+                    if (DistanceToClosestCorner > LODDistance && !Splitting)
                     {
-                        if (DistanceToClosestCorner < LODDistance && !Splitting)
-                        {
-                            StartCoroutine(Split());
-                            Log("Split Call");
-                        }
+                        Unsplit();
+                        Log("Unsplit Call");
                     }
-                    else
+                }
+            }
+            else
+            {
+                if (Generated && !HaveSubQuads && !Planetoid.Working)
+                {
+                    if (DistanceToClosestCorner < LODDistance && !Splitting)
                     {
-                        if (DistanceToClosestCorner > LODDistance && !Splitting)
-                        {
-                            Unsplit();
-                            Log("Unsplit Call");
-                        }
+                        StartCoroutine(Split());
+                        Log("Split Call");
+                    }
+                }
+                else
+                {
+                    if (DistanceToClosestCorner > LODDistance && !Splitting)
+                    {
+                        Unsplit();
+                        Log("Unsplit Call");
                     }
                 }
             }
         }
-    }
-
-    public Matrix4x4 GetFrame()
-    {
-        //TODO: Rotate normals towards sun.
-
-        if (Planetoid.Atmosphere != null)
-        {
-            if (Planetoid.Atmosphere.Sun_1 != null)
-            {
-                return Matrix4x4.Transpose(Matrix4x4.Inverse(Planetoid.Atmosphere.Sun_1.LocalToWorldRotation));
-            }
-        }
-
-        return Matrix4x4.identity;
     }
 
     public void Render()
@@ -426,17 +402,13 @@ public sealed class Quad : MonoBehaviour, IQuad
         QuadMaterial.SetFloat("_Normale", Planetoid.DrawNormals ? 1.0f : 0.0f);
         QuadMaterial.SetFloat("_Side", (float)Position);
         QuadMaterial.SetVector("_Rotation", new Vector3(Planetoid.QuadsRoot.transform.rotation.eulerAngles.x, Planetoid.QuadsRoot.transform.rotation.eulerAngles.y, Planetoid.QuadsRoot.transform.rotation.eulerAngles.z) * Mathf.Deg2Rad);
-        QuadMaterial.SetMatrix("_TTW", GetFrame());
         QuadMaterial.renderQueue = (int)Planetoid.RenderQueue + Planetoid.RenderQueueOffset;
 
         //Shader.SetGlobalVector("_Godray_WorldSunDir", Planetoid.Atmosphere.Sun_1.transform.position - Planetoid.transform.position);
 
         if (!Planetoid.RenderPerUpdate) QuadMaterial.SetPass(0);
 
-        if (!Uniformed)
-        {
-            Uniformed = true;
-        }
+        if (!Uniformed) Uniformed = true;
 
         if (Generated && ShouldDraw)
         {
@@ -445,17 +417,15 @@ public sealed class Quad : MonoBehaviour, IQuad
 
             if (QuadMesh != null)
             {
-                Matrix4x4 PlanetoidTRS = Matrix4x4.TRS(Planetoid.Origin, Quaternion.Euler(Planetoid.OriginRotation), Planetoid.transform.localScale);
-
                 if (Planetoid.RenderPerUpdate)
                 {
                     if (Visible)
-                        Graphics.DrawMesh(QuadMesh, PlanetoidTRS, QuadMaterial, Planetoid.DrawLayer, CameraHelper.Main(), 0, null, true, true);
+                        Graphics.DrawMesh(QuadMesh, Planetoid.PlanetoidTRS, QuadMaterial, Planetoid.DrawLayer, CameraHelper.Main(), 0, null, true, true);
                 }
                 else
                 {
                     if (Visible)
-                        Graphics.DrawMeshNow(QuadMesh, PlanetoidTRS);
+                        Graphics.DrawMeshNow(QuadMesh, Planetoid.PlanetoidTRS);
                 }
             }
 

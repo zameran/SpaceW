@@ -212,6 +212,7 @@
 				float4 vertex0 : POSITION0;
 				float4 vertex1 : POSITION1;
 				float4 vertex2 : POSITION2;
+				float4 tangent0 : TANGENT0;
 				float depth : DEPTH;
 			};
 
@@ -235,8 +236,6 @@
 
 			uniform float4x4 _Globals_CameraToWorld;
 			uniform float4x4 _Globals_ScreenToCamera;
-
-			uniform float4x4 _TTW;
 
 			uniform float3 _Sun_Position;
 
@@ -319,6 +318,7 @@
 				o.vertex0 = mul(UNITY_MATRIX_MVP, v.vertex);
 				o.vertex1 = v.vertex;
 				o.vertex2 = cubePosition;
+				o.tangent0 = v.tangent;
 				o.depth = 1;
 
 				//Log. depth
@@ -395,8 +395,6 @@
 				scatteringColor = _Atmosphere > 0.0 ? hdr(groundFinalColor1 + groundFinalColor2 + groundFinalColor3 + groundFinalColor4) : 
 														  groundFinalColor1 + groundFinalColor2 + groundFinalColor3 + groundFinalColor4;
 				#endif
-
-				//IN.normal0 = mul(_TTW, IN.normal0);
 
 				fixed3 terrainWorldNormal = IN.normal0;
 				fixed3 terrainLocalNormal = CalculateSurfaceNormal_HeightMap(IN.vertex1, IN.normal0, IN.terrainColor.a);
