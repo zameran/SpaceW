@@ -28,8 +28,7 @@ public class Cloudsphere : MonoBehaviour
 
     private void Update()
     {
-        if (Planetoid != null)
-            Render(false, Planetoid.DrawLayer);
+
     }
 
     public void Render(bool now, int drawLayer = 8)
@@ -57,6 +56,11 @@ public class Cloudsphere : MonoBehaviour
         }
     }
 
+    public void InitUniforms()
+    {
+        InitUniforms(CloudMaterial);
+    }
+
     public void InitUniforms(Material mat)
     {
         if (mat == null) return;
@@ -72,6 +76,11 @@ public class Cloudsphere : MonoBehaviour
         if (CloudTexture != null) mat.SetTexture("_Cloud", CloudTexture);
 
         mat.SetFloat("_TransmittanceOffset", TransmittanceOffset);
+    }
+
+    public void SetUniforms()
+    {
+        SetUniforms(CloudMaterial);
     }
 
     public void SetUniforms(Material mat)

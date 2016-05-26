@@ -81,6 +81,7 @@ public sealed class Planetoid : Planet, IPlanet
         base.Awake();
 
         if (Atmosphere != null) Atmosphere.Origin = Origin;
+        if (Cloudsphere != null) if (Cloudsphere.Planetoid == null) Cloudsphere.Planetoid = this;
 
         SetupGenerationConstants();
     }
@@ -108,6 +109,11 @@ public sealed class Planetoid : Planet, IPlanet
             Atmosphere.OnBaked += OnAtmosphereBaked;
             Atmosphere.InitPlanetoidUniforms(this);
         }
+
+        if (Cloudsphere != null)
+        {
+            Cloudsphere.InitUniforms();
+        }
     }
 
     protected override void Update()
@@ -133,6 +139,12 @@ public sealed class Planetoid : Planet, IPlanet
 
             if (RenderPerUpdate)
                 Atmosphere.Render(false, DrawLayer);
+        }
+
+        if (Cloudsphere != null)
+        {
+            if (RenderPerUpdate)
+                Cloudsphere.Render(false, DrawLayer);
         }
 
         if (Input.GetKeyDown(KeyCode.F1))
@@ -187,11 +199,17 @@ public sealed class Planetoid : Planet, IPlanet
         {
             if (!RenderPerUpdate)
                 Atmosphere.Render(true, DrawLayer);
-
-            if (wireframeSwitcher != null)
-                if (wireframeSwitcher.Enabled)
-                    GL.wireframe = true;
         }
+
+        if (Cloudsphere != null)
+        {
+            if (!RenderPerUpdate)
+                Cloudsphere.Render(true, DrawLayer);
+        }
+
+        if (wireframeSwitcher != null)
+            if (wireframeSwitcher.Enabled)
+                GL.wireframe = true;
     }
 
     protected override void OnApplicationFocus(bool focusStatus)

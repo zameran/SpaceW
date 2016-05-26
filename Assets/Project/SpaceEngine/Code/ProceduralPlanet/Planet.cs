@@ -43,6 +43,7 @@ using UnityEngine;
 public abstract class Planet : MonoBehaviour
 {
     public Atmosphere Atmosphere;
+    public Cloudsphere Cloudsphere;
 
     public int DrawLayer = 8;
 
