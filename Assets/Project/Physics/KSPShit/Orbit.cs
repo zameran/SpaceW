@@ -158,12 +158,12 @@ namespace Experimental
 
         public void Init()
         {
-            period = 2.0 * Math.PI * Math.Sqrt(Math.Pow(Math.Abs(semiMajorAxis), 3.0) / referenceBody.gravParameter);
+            period = MathUtils.TwoPI * Math.Sqrt(Math.Pow(Math.Abs(semiMajorAxis), 3.0) / referenceBody.gravParameter);
 
             if (eccentricity < 1.0)
             {
                 meanAnomaly = meanAnomalyAtEpoch;
-                orbitPercent = meanAnomaly / (2.0 * Math.PI);
+                orbitPercent = meanAnomaly / MathUtils.TwoPI;
                 ObTAtEpoch = orbitPercent * period;
             }
             else
@@ -189,7 +189,7 @@ namespace Experimental
 
             if (h.sqrMagnitude == 0.0)
             {
-                inclination = Math.Acos(pos.z / pos.magnitude) * (180.0 / Math.PI);
+                inclination = Math.Acos(pos.z / pos.magnitude) * MathUtils.Rad2Deg;
                 an = Vector3d.Cross(pos, Vector3d.forward);
 
                 if (an.sqrMagnitude == 0.0)
@@ -197,7 +197,7 @@ namespace Experimental
             }
             else
             {
-                inclination = Math.Acos(h.z / h.magnitude) * (180.0 / Math.PI);
+                inclination = Math.Acos(h.z / h.magnitude) * MathUtils.Rad2Deg;
                 an = Vector3d.Cross(Vector3d.forward, h);
             }
 
@@ -205,17 +205,17 @@ namespace Experimental
             eccentricity = eccVec.magnitude;
             orbitalEnergy = vel.sqrMagnitude / 2.0 - refBody.gravParameter / pos.magnitude;
             semiMajorAxis = eccentricity >= 1.0 ? -semiLatusRectum / (eccVec.sqrMagnitude - 1.0) : -refBody.gravParameter / (2.0 * orbitalEnergy);
-            LAN = (an.y < 0.0 ? 2.0 * Math.PI - Math.Acos(an.x / an.magnitude) : Math.Acos(an.x / an.magnitude)) * (180.0 / Math.PI);
+            LAN = (an.y < 0.0 ? MathUtils.TwoPI - Math.Acos(an.x / an.magnitude) : Math.Acos(an.x / an.magnitude)) * MathUtils.Rad2Deg;
             argumentOfPeriapsis = Math.Acos(Vector3d.Dot(an, eccVec) / (an.magnitude * eccentricity));
 
-            if (eccVec.z < 0.0) argumentOfPeriapsis = 2.0 * Math.PI - argumentOfPeriapsis;
+            if (eccVec.z < 0.0) argumentOfPeriapsis = MathUtils.TwoPI - argumentOfPeriapsis;
 
             LAN = (LAN + Planetarium.InverseRotAngle) % 360.0;
-            argumentOfPeriapsis *= 180.0 / Math.PI;
-            period = 2.0 * Math.PI * Math.Sqrt(Math.Pow(Math.Abs(semiMajorAxis), 3.0) / refBody.gravParameter);
+            argumentOfPeriapsis *= MathUtils.Rad2Deg;
+            period = MathUtils.TwoPI * Math.Sqrt(Math.Pow(Math.Abs(semiMajorAxis), 3.0) / refBody.gravParameter);
             trueAnomaly = Math.Acos(Vector3d.Dot(eccVec, pos) / (eccentricity * pos.magnitude));
 
-            if (Vector3d.Dot(pos, vel) < 0.0) trueAnomaly = 2.0 * Math.PI - trueAnomaly;
+            if (Vector3d.Dot(pos, vel) < 0.0) trueAnomaly = MathUtils.TwoPI - trueAnomaly;
             if (double.IsNaN(trueAnomaly)) trueAnomaly = Math.PI;
 
             eccentricAnomaly = GetEccentricAnomaly(trueAnomaly);
@@ -224,7 +224,7 @@ namespace Experimental
 
             if (eccentricity < 1.0)
             {
-                orbitPercent = meanAnomaly / (2.0 * Math.PI);
+                orbitPercent = meanAnomaly / (MathUtils.TwoPI);
                 ObT = orbitPercent * period;
                 timeToPe = period - ObT;
                 timeToAp = timeToPe - period / 2.0;
@@ -269,11 +269,11 @@ namespace Experimental
 
             if (eccentricity < 1.0)
             {
-                meanAnomaly = ObT / period * 2.0 * Math.PI;
+                meanAnomaly = ObT / period * MathUtils.TwoPI;
                 eccentricAnomaly = eccentricity >= 0.9 ? solveEccentricAnomalyExtremeEcc(meanAnomaly, eccentricity, 8) : solveEccentricAnomalyStd(meanAnomaly, eccentricity, 1E-07);
                 trueAnomaly = Math.Acos((Math.Cos(eccentricAnomaly) - eccentricity) / (1.0 - eccentricity * Math.Cos(eccentricAnomaly)));
 
-                if (ObT > period / 2.0) trueAnomaly = 2.0 * Math.PI - trueAnomaly;
+                if (ObT > period / 2.0) trueAnomaly = MathUtils.TwoPI - trueAnomaly;
 
                 radius = semiMajorAxis * (1.0 - eccentricity * eccentricity) / (1.0 + eccentricity * Math.Cos(trueAnomaly));
             }
@@ -281,21 +281,21 @@ namespace Experimental
             {
                 if (eccentricity == 1.0) eccentricity += 1E-10;
 
-                meanAnomaly = 2.0 * Math.PI * Math.Abs(ObT) / period;
+                meanAnomaly = MathUtils.TwoPI * Math.Abs(ObT) / period;
 
                 if (ObT < 0.0) meanAnomaly *= -1.0;
 
                 eccentricAnomaly = solveEccentricAnomalyHyp(Math.Abs(meanAnomaly), eccentricity, 1E-07);
                 trueAnomaly = Math.Atan2(Math.Sqrt(eccentricity * eccentricity - 1.0) * Math.Sinh(eccentricAnomaly), eccentricity - Math.Cosh(eccentricAnomaly));
 
-                if (ObT < 0.0) trueAnomaly = 2.0 * Math.PI - trueAnomaly;
+                if (ObT < 0.0) trueAnomaly = MathUtils.TwoPI - trueAnomaly;
 
                 radius = -semiMajorAxis * (eccentricity * eccentricity - 1.0) / (1.0 + eccentricity * Math.Cos(trueAnomaly));
             }
 
-            orbitPercent = meanAnomaly / (2.0 * Math.PI);
+            orbitPercent = meanAnomaly / MathUtils.TwoPI;
 
-            pos = Quat.AngleAxis(argumentOfPeriapsis + trueAnomaly * (180.0 / Math.PI), h) * an * radius;
+            pos = Quat.AngleAxis(argumentOfPeriapsis + trueAnomaly * MathUtils.Rad2Deg, h) * an * radius;
             vel = getOrbitalVelocityAtObT(ObT + Time.deltaTime);
 
             orbitalSpeed = vel.magnitude;
@@ -326,7 +326,7 @@ namespace Experimental
         {
             double eccentricAnomaly = GetEccentricAnomaly(tA);
             double meanAnomaly = GetMeanAnomaly(eccentricAnomaly, tA);
-            double num = eccentricity >= 1.0 ? Math.Pow(Math.Pow(-semiMajorAxis, 3.0) / referenceBody.gravParameter, 0.5) * meanAnomaly : meanAnomaly / (2.0 * Math.PI) * period;
+            double num = eccentricity >= 1.0 ? Math.Pow(Math.Pow(-semiMajorAxis, 3.0) / referenceBody.gravParameter, 0.5) * meanAnomaly : meanAnomaly / MathUtils.TwoPI * period;
             double d;
 
             if (eccentricity < 1.0)
@@ -399,7 +399,7 @@ namespace Experimental
 
         public double getObTAtMeanAnomaly(double M)
         {
-            if (eccentricity < 1.0) return meanAnomaly / (2.0 * Math.PI) * period;
+            if (eccentricity < 1.0) return meanAnomaly / MathUtils.TwoPI * period;
 
             return Math.Pow(Math.Pow(-semiMajorAxis, 3.0) / referenceBody.gravParameter, 0.5) * M;
         }
@@ -480,7 +480,7 @@ namespace Experimental
                 d = Math.Acos((eccentricity + Math.Cos(tA)) / (1.0 + eccentricity * Math.Cos(tA)));
 
                 if (tA > Math.PI)
-                    d = 2.0 * Math.PI - d;
+                    d = MathUtils.TwoPI - d;
             }
             else
             {
@@ -547,17 +547,17 @@ namespace Experimental
 
             if (eccentricity < 1.0)
             {
-                double M = T / period * 2.0 * Math.PI;
+                double M = T / period * MathUtils.TwoPI;
                 double d = eccentricity >= 0.9 ? solveEccentricAnomalyExtremeEcc(M, eccentricity, 8) : solveEccentricAnomalyStd(M, eccentricity, 1E-07);
 
                 trueAnomaly = Math.Acos((Math.Cos(d) - eccentricity) / (1.0 - eccentricity * Math.Cos(d)));
 
                 if (T > period / 2.0)
-                    trueAnomaly = 2.0 * Math.PI - trueAnomaly;
+                    trueAnomaly = MathUtils.TwoPI - trueAnomaly;
             }
             else
             {
-                double M = 2.0 * Math.PI * Math.Abs(T) / period;
+                double M = MathUtils.TwoPI * Math.Abs(T) / period;
 
                 if (T < 0.0)
                     M *= -1.0;
@@ -570,14 +570,14 @@ namespace Experimental
                 }
                 else if (double.IsNegativeInfinity(d))
                 {
-                    trueAnomaly = 2.0 * Math.PI - Math.Acos(-1.0 / eccentricity);
+                    trueAnomaly = MathUtils.TwoPI - Math.Acos(-1.0 / eccentricity);
                 }
                 else
                 {
                     trueAnomaly = Math.Atan2(Math.Sqrt(eccentricity * eccentricity - 1.0) * Math.Sinh(d), eccentricity - Math.Cosh(d));
 
                     if (T < 0.0)
-                        trueAnomaly = 2.0 * Math.PI - trueAnomaly;
+                        trueAnomaly = MathUtils.TwoPI - trueAnomaly;
                 }
             }
 
@@ -654,7 +654,7 @@ namespace Experimental
             {
                 trueAnomaly = Math.Acos((Math.Cos(E) - eccentricity) / (1.0 - eccentricity * Math.Cos(E)));
 
-                if (E > Math.PI) trueAnomaly = 2.0 * Math.PI - trueAnomaly;
+                if (E > Math.PI) trueAnomaly = MathUtils.TwoPI - trueAnomaly;
                 if (E < 0.0) trueAnomaly *= -1.0;
             }
             else
@@ -669,7 +669,7 @@ namespace Experimental
 
             double trueAnomaly = Math.PI - Math.Atan2(zUpVector.x, zUpVector.z);
 
-            if (trueAnomaly < 0.0) trueAnomaly = 2.0 * Math.PI - trueAnomaly;
+            if (trueAnomaly < 0.0) trueAnomaly = MathUtils.TwoPI - trueAnomaly;
 
             return trueAnomaly;
         }
@@ -686,18 +686,18 @@ namespace Experimental
 
             if (eccentricity < 1.0)
             {
-                double M = T / period * 2.0 * Math.PI;
+                double M = T / period * MathUtils.TwoPI;
                 double d2 = eccentricity >= 0.9 ? solveEccentricAnomalyExtremeEcc(M, eccentricity, 8) : solveEccentricAnomalyStd(M, eccentricity, 1E-07);
 
                 d1 = Math.Acos((Math.Cos(d2) - eccentricity) / (1.0 - eccentricity * Math.Cos(d2)));
 
-                if (T > period / 2.0) d1 = 2.0 * Math.PI - d1;
+                if (T > period / 2.0) d1 = MathUtils.TwoPI - d1;
 
                 H = semiMajorAxis * (1.0 - eccentricity * eccentricity) / (1.0 + eccentricity * Math.Cos(d1));
             }
             else
             {
-                double M = 2.0 * Math.PI * Math.Abs(T) / period;
+                double M = MathUtils.TwoPI * Math.Abs(T) / period;
 
                 if (T < 0.0)
                     M *= -1.0;
@@ -706,7 +706,7 @@ namespace Experimental
 
                 d1 = Math.Atan2(Math.Sqrt(eccentricity * eccentricity - 1.0) * Math.Sinh(num3), eccentricity - Math.Cosh(num3));
 
-                if (T < 0.0) d1 = 2.0 * Math.PI - d1;
+                if (T < 0.0) d1 = MathUtils.TwoPI - d1;
 
                 H = -semiMajorAxis * (eccentricity * eccentricity - 1.0) / (1.0 + eccentricity * Math.Cos(d1));
             }
@@ -714,7 +714,7 @@ namespace Experimental
             Vector3d axis = Quat.AngleAxis(LAN, Planetarium.Zup.Z) * Planetarium.Zup.X;
             Vector3d normal = Quat.AngleAxis(inclination, axis) * Planetarium.Zup.Z;
 
-            return Quat.AngleAxis(argumentOfPeriapsis + d1 * (180.0 / Math.PI), normal) * axis * H;
+            return Quat.AngleAxis(argumentOfPeriapsis + d1 * MathUtils.Rad2Deg, normal) * axis * H;
         }
 
         public Vector3d getPositionFromMeanAnomaly(double M)
@@ -773,7 +773,7 @@ namespace Experimental
             Vector3d axis = Quat.AngleAxis(LAN, Planetarium.Zup.Z) * Planetarium.Zup.X;
             Vector3d normal = Quat.AngleAxis(inclination, axis) * Planetarium.Zup.Z;
 
-            return Quat.AngleAxis(argumentOfPeriapsis + tA * (180.0 / Math.PI), normal) * axis * H;
+            return Quat.AngleAxis(argumentOfPeriapsis + tA * MathUtils.Rad2Deg, normal) * axis * H;
         }
 
         public double getOrbitalSpeedAt(double time)
@@ -821,25 +821,25 @@ namespace Experimental
             {
                 double tA = 0.0;
 
-                while (tA < 2.0 * Math.PI)
+                while (tA < MathUtils.TwoPI)
                 {
-                    Vector3 vector3_1 = getPositionFromTrueAnomaly(tA % (2.0 * Math.PI));
-                    Vector3 vector3_2 = getPositionFromTrueAnomaly((tA + drawResolution * Math.PI / 180.0) % (2.0 * Math.PI));
+                    Vector3 vector3_1 = getPositionFromTrueAnomaly(tA % MathUtils.TwoPI);
+                    Vector3 vector3_2 = getPositionFromTrueAnomaly((tA + drawResolution * MathUtils.Deg2Rad) % MathUtils.TwoPI);
 
                     Debug.DrawLine(ScaledSpace.LocalToScaledSpace(vector3_1), ScaledSpace.LocalToScaledSpace(vector3_2), Color.Lerp(Color.yellow, Color.green, Mathf.InverseLerp((float)getOrbitalSpeedAtDistance(PeR), (float)getOrbitalSpeedAtDistance(ApR), (float)getOrbitalSpeedAtPos(vector3_1))));
 
-                    tA += drawResolution * Math.PI / 180.0;
+                    tA += drawResolution * MathUtils.Deg2Rad;
                 }
             }
             else
             {
-                double tA = -Math.Acos(-(1.0 / eccentricity)) + drawResolution * (Math.PI / 180.0);
+                double tA = -Math.Acos(-(1.0 / eccentricity)) + drawResolution * MathUtils.Deg2Rad;
 
-                while (tA < Math.Acos(-(1.0 / eccentricity)) - drawResolution * (Math.PI / 180.0))
+                while (tA < Math.Acos(-(1.0 / eccentricity)) - drawResolution * MathUtils.Deg2Rad)
                 {
-                    Debug.DrawLine(ScaledSpace.LocalToScaledSpace(getPositionFromTrueAnomaly(tA)), ScaledSpace.LocalToScaledSpace(getPositionFromTrueAnomaly(Math.Min(Math.Acos(-(1.0 / eccentricity)), tA + drawResolution * (Math.PI / 180.0)))), Color.green);
+                    Debug.DrawLine(ScaledSpace.LocalToScaledSpace(getPositionFromTrueAnomaly(tA)), ScaledSpace.LocalToScaledSpace(getPositionFromTrueAnomaly(Math.Min(Math.Acos(-(1.0 / eccentricity)), tA + drawResolution * MathUtils.Deg2Rad))), Color.green);
 
-                    tA += drawResolution * (Math.PI / 180.0);
+                    tA += drawResolution * MathUtils.Deg2Rad;
                 }
             }
 
@@ -1016,7 +1016,7 @@ namespace Experimental
             {
                 if (patchEndTransition == PatchTransitionType.FINAL || debug_returnFullEllipseTrajectory)
                 {
-                    sampleInterval = 2.0 * Math.PI / sampleCount;
+                    sampleInterval = MathUtils.TwoPI / sampleCount;
 
                     for (int index = 0; index < sampleCount; ++index)
                     {
@@ -1037,8 +1037,8 @@ namespace Experimental
 
                     if (fromV > toV)
                     {
-                        fromE = -(2.0 * Math.PI - fromE);
-                        fromV = -(2.0 * Math.PI - fromV);
+                        fromE = -(MathUtils.TwoPI - fromE);
+                        fromV = -(MathUtils.TwoPI - fromV);
                     }
 
                     sampleInterval = (toE - fromE) / (sampleCount - 5);
@@ -1069,7 +1069,7 @@ namespace Experimental
                 if (double.IsInfinity(fromE))
                 {
                     if (fromE > 0.0) fromV *= 0.95;
-                    else fromV = 0.95 * (fromV - 2.0 * Math.PI);
+                    else fromV = 0.95 * (fromV - MathUtils.TwoPI);
 
                     fromE = GetEccentricAnomaly(fromV);
                 }
@@ -1077,7 +1077,7 @@ namespace Experimental
                 if (double.IsInfinity(toE))
                 {
                     if (toE > 0.0) toV *= 0.95;
-                    else toV = 0.95 * (toV - 2.0 * Math.PI);
+                    else toV = 0.95 * (toV - MathUtils.TwoPI);
 
                     toE = GetEccentricAnomaly(toV);
                 }
