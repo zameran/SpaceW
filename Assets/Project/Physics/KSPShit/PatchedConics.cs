@@ -66,7 +66,7 @@
 
                                     if (double.IsNaN(p.nearestTT))
                                     {
-                                        Debug.Log(string.Format("nearestTT is NaN! t1: {0}, t2: {1}, FEVp: {2}, SEVp: {3}",
+                                        Debug.Log(string.Format("[PatchedConics] : NearestTT is NaN! t1: {0}, t2: {1}, FEVp: {2}, SEVp: {3}",
                                                                 p.timeToTransition1, 
                                                                 p.timeToTransition2, 
                                                                 p.FEVp, 
@@ -210,6 +210,12 @@
 
                     Debug.DrawLine(ScaledSpace.LocalToScaledSpace(p.referenceBody.transform.position), ScaledSpace.LocalToScaledSpace(p.getPositionFromTrueAnomaly(p.FEVp)), XKCDColors.Purple);
                     Debug.DrawLine(ScaledSpace.LocalToScaledSpace(p.referenceBody.transform.position), ScaledSpace.LocalToScaledSpace(p.getPositionFromTrueAnomaly(p.SEVp)), XKCDColors.LightPeriwinkle);
+
+                    Debug.Log("[PatchedConics] : End - Final Transition; RefBody: " + 
+                              p.referenceBody.name + 
+                              "; SOI: " + 
+                              p.referenceBody.sphereOfInfluence + 
+                              "; UTSOI: " + p.UTsoi);
 
                     nextPatch.UpdateFromOrbitAtUT(p, p.UTsoi, p.referenceBody.ReferenceBody);
 

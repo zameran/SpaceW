@@ -259,6 +259,8 @@
                 hitInfo.mouseTA = MathUtils.TwoPI - hitInfo.mouseTA;
             }
 
+            if (double.IsNaN(hitInfo.mouseTA)) hitInfo.mouseTA = 0;
+
             hitInfo.radiusAtTA = orbit.RadiusAtTrueAnomaly(hitInfo.mouseTA) * ScaledSpace.InverseScaleFactor;
             hitInfo.orbitPoint = (hitInfo.hitPoint.normalized * (float)hitInfo.radiusAtTA) + hitInfo.orbitOrigin;
             hitInfo.UTatTA = orbit.GetUTforTrueAnomaly(hitInfo.mouseTA, 0);

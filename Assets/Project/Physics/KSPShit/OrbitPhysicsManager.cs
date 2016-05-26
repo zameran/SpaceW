@@ -142,7 +142,7 @@
 
             Vector3[] component = new Vector3[FlightGlobals.physicalObjects.Count];
 
-            Debug.Log(string.Format("Setting new dominant body: {0} \nFlightGlobals.mainBody: {1}", dominantBody.name, 
+            Debug.Log(string.Format("[OrbitPhysicsManager] : Setting new dominant body: {0} \nFlightGlobals.mainBody: {1}", dominantBody.name, 
                                                                                                     Planetarium.fetch.CurrentMainBody.name));
 
             foreach (OrbitDriver orbit in Planetarium.Orbits)
@@ -181,7 +181,7 @@
                         vessel.GetComponent<Rigidbody>().velocity = vessel.orbitDriver.orbit.GetVel() - Krakensbane.GetFrameVelocity();
                     }
 
-                    Debug.Log(string.Format("Vessel {0} velocity resumed. Reference body: {1}; Velocity: {2}", vessel.name,
+                    Debug.Log(string.Format("[OrbitPhysicsManager] : Vessel {0} velocity resumed. Reference body: {1}; Velocity: {2}", vessel.name,
                                                                                                                vessel.orbitDriver.orbit.referenceBody.name,
                                                                                                                velocity));
                 }
@@ -223,7 +223,7 @@
         {
             dominantBody.inverseRotation = rotatingFrameState;
 
-            Debug.Log(string.Format("Reference Frame: {0}", (!rotatingFrameState ? "Inertial" : "Rotating")));
+            Debug.Log(string.Format("[OrbitPhysicsManager] : Reference Frame: {0}", (!rotatingFrameState ? "Inertial" : "Rotating")));
 
             for (int i = 0; i < FlightGlobals.Vessels.Count; i++)
             {

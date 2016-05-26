@@ -186,13 +186,13 @@ namespace Experimental
 
             if (double.IsNaN(pos.x))
             {
-                Debug.Log(string.Format("[OrbitDriver]: ObT : {0} nM : {1} nE : {2} nV : {3} nRadius : {4} nVel {5} nAN : {6} nPeriod : {7}",
+                Debug.Log(string.Format("[OrbitDriver] : ObT : {0} nM : {1} nE : {2} nV : {3} nRadius : {4} nVel {5} nAN : {6} nPeriod : {7}",
                                         orbit.ObT, orbit.meanAnomaly, orbit.eccentricAnomaly,
                                         orbit.trueAnomaly, orbit.radius, vel, orbit.an, orbit.period));
 
                 if (vessel)
                 {
-                    Debug.LogWarning("[OrbitDriver : Warning!]: " + vessel.name + " had a NaN Orbit and was removed.");
+                    Debug.LogWarning("[OrbitDriver : Warning!] : " + vessel.name + " had a NaN Orbit and was removed.");
 
                     Destroy(vessel.gameObject);
                 }
@@ -233,12 +233,12 @@ namespace Experimental
             }
             else
             {
-                Debug.Log(string.Format("[OrbitDriver]: Recalculating orbit for {0}: rPos: {1}; rVel: {2} | {3}",
+                Debug.Log(string.Format("[OrbitDriver] : Recalculating orbit for {0}: rPos: {1}; rVel: {2} | {3}",
                                         name, referenceBody.name, pos, vel, vel.magnitude));
 
                 TrackRigidbody(newReferenceBody);
 
-                Debug.Log(string.Format("[OrbitDriver]: Recalculated orbit for {0}: rPos: {1}; rVel: {2} | {3}",
+                Debug.Log(string.Format("[OrbitDriver] : Recalculated orbit for {0}: rPos: {1}; rVel: {2} | {3}",
                                         name, newReferenceBody.name, pos, orbit.GetVel(), vel.magnitude));
 
                 orbit.epoch = Planetarium.GetUniversalTime() - Time.fixedDeltaTime;
@@ -276,7 +276,7 @@ namespace Experimental
                 bsp = UtilMath.BSPSolver(ref UT, 1.0 * TimeWarpCurrentRate, (double t) => Math.Abs(ownOrbit.getRelativePositionAtUT(t).sqrMagnitude - SOIsqr), vMin, time, 0.01, 64);
             }   
 
-            Debug.Log(string.Format("[OrbitDriver]: On-Rails SOI Transition from {0} to {1}. Transition UT Range: {2} - {3}. Transition UT: {4}. Iterations: {5}.",
+            Debug.Log(string.Format("[OrbitDriver] : On-Rails SOI Transition from {0} to {1}. Transition UT Range: {2} - {3}. Transition UT: {4}. Iterations: {5}.",
                                     ReferenceBody.name, to.name,
                                     vMin.ToString("0.###"),
                                     time.ToString("0.###"),

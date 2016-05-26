@@ -179,7 +179,7 @@
 
             if (trajectory == null)
             {
-                Debug.Log("PatchRendering Trajectory is Null");
+                Debug.Log("[PatchRendering] : Trajectory is Null");
 
                 return Vector3.zero;
             }

@@ -339,7 +339,7 @@ namespace Experimental
                 d = tA >= 0.0 ? num - ObT : -ObT - num;
 
             if (double.IsNaN(d))
-                Debug.Log(("dT is NaN! tA: " + tA + ", E: " + eccentricAnomaly + ", M: " + meanAnomaly + ", T: " + num));
+                Debug.Log(("[Orbit] : dT is NaN! tA: " + tA + ", E: " + eccentricAnomaly + ", M: " + meanAnomaly + ", T: " + num));
 
             return d;
         }
@@ -377,7 +377,7 @@ namespace Experimental
             {
                 if (double.IsInfinity(UT))
                 {
-                    Debug.Log(("getObtAtUT infinite UT on elliptical orbit UT: " + UT.ToString() + ", returning NaN"));
+                    Debug.Log(("[Orbit] : getObtAtUT infinite UT on elliptical orbit UT: " + UT.ToString() + ", returning NaN"));
                     return double.NaN;
                 }
 
@@ -487,7 +487,7 @@ namespace Experimental
                 d = Math.Abs(eccentricity * Math.Cos(tA) + 1.0) >= 1E-05 ? (eccentricity * Math.Cos(tA) >= -1.0 ? UtilMath.ACosh((eccentricity + Math.Cos(tA)) / (1.0 + eccentricity * Math.Cos(tA))) : double.NaN) : (tA >= Math.PI ? double.NegativeInfinity : double.PositiveInfinity);
 
                 if (double.IsNaN(d))
-                    Debug.Log(("E is NaN! tA: " + tA + ", e = " + eccentricity));
+                    Debug.Log(("[Orbit] : E is NaN! tA: " + tA + ", e = " + eccentricity));
             }
 
             return d;
