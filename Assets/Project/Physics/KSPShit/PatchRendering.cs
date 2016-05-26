@@ -283,7 +283,7 @@
 
             if (!patch.activePatch) return;
 
-            trajectory = patch.GetPatchTrajectoryEcc(samples);
+            trajectory = patch.GetPatchTrajectory(samples);
             relativeTo = patch.referenceBody.ReferenceBody;
 
             if (relativityMode == RelativityMode.RELATIVE && patch.patchEndTransition == Orbit.PatchTransitionType.FINAL)

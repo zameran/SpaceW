@@ -4,42 +4,12 @@ using UnityEngine;
 
 using ZFramework.Math;
 
-using Random = UnityEngine.Random;
-
 namespace Experimental
 {
     [Serializable]
     public class Orbit
     {
-        public enum EncounterSolutionLevel
-        {
-            NONE,
-            ESCAPE,
-            ORBIT_INTERSECT,
-            SOI_INTERSECT_2,
-            SOI_INTERSECT_1
-        }
-
-        public enum PatchTransitionType
-        {
-            INITIAL,
-            FINAL,
-            ENCOUNTER,
-            ESCAPE,
-            MANEUVER,
-            IMPACT
-        }
-
-        public bool activePatch;
-        public Orbit closestEncounterPatch;
-        public CelestialBody closestEncounterBody;
-        public EncounterSolutionLevel closestEncounterLevel;
-
-        public PatchTransitionType patchStartTransition;
-        public PatchTransitionType patchEndTransition;
-
-        public Orbit nextPatch;
-        public Orbit previousPatch;
+        private double drawResolution = 15.0;
 
         public CelestialBody referenceBody;
 
@@ -73,27 +43,25 @@ namespace Experimental
         public double meanAnomalyAtEpoch;
         public double period;
 
+        public Vector3 debugPos;
+        public Vector3 debugVel;
+        public Vector3 debugH;
+        public Vector3 debugAN;
+        public Vector3 debugEccVec;
+
         public double mag;
-
-        private double drawResolution = 4.0;
-
         public double FEVp;
         public double FEVs;
         public double SEVp;
         public double SEVs;
-
         public double UTappr;
         public double UTsoi;
-
         public double ClAppr;
         public double CrAppr;
-
         public double ClEctr1;
         public double ClEctr2;
-
         public double timeToTransition1;
         public double timeToTransition2;
-
         public double nearestTT;
         public double nextTT;
 
@@ -104,52 +72,63 @@ namespace Experimental
         public double StartUT;
         public double EndUT;
 
+        public bool activePatch;
+
+        public Orbit closestEncounterPatch;
+
+        public CelestialBody closestEncounterBody;
+
+        public EncounterSolutionLevel closestEncounterLevel;
+        public PatchTransitionType patchStartTransition;
+        public PatchTransitionType patchEndTransition;
+
+        public Orbit nextPatch;
+        public Orbit previousPatch;
+
+        public double fromE;
+        public double toE;
+        public double sampleInterval;
+        public double E;
+        public double V;
+        public double fromV;
+        public double toV;
+
+        public bool debug_returnFullEllipseTrajectory;
+
         public double semiMinorAxis
         {
             get
             {
-                return (eccentricity >= 1.0) ? (semiMajorAxis * Math.Sqrt(eccentricity * eccentricity - 1.0)) : (semiMajorAxis * Math.Sqrt(1.0 - eccentricity * eccentricity));
+                if (eccentricity < 1.0)
+                    return semiMajorAxis * Math.Sqrt(1.0 - eccentricity * eccentricity);
+
+                return semiMajorAxis * Math.Sqrt(eccentricity * eccentricity - 1.0);
             }
         }
 
         public double semiLatusRectum
         {
-            get
-            {
-                return h.sqrMagnitude / referenceBody.gravParameter;
-            }
+            get { return h.sqrMagnitude / referenceBody.gravParameter; }
         }
 
         public double PeR
         {
-            get
-            {
-                return (1.0 - eccentricity) * semiMajorAxis;
-            }
+            get { return (1.0 - eccentricity) * semiMajorAxis; }
         }
 
         public double ApR
         {
-            get
-            {
-                return (1.0 + eccentricity) * semiMajorAxis;
-            }
+            get { return (1.0 + eccentricity) * semiMajorAxis; }
         }
 
         public double PeA
         {
-            get
-            {
-                return PeR - referenceBody.Radius;
-            }
+            get { return PeR - referenceBody.Radius; }
         }
 
         public double ApA
         {
-            get
-            {
-                return ApR - referenceBody.Radius;
-            }
+            get { return ApR - referenceBody.Radius; }
         }
 
         public Orbit()
@@ -157,12 +136,14 @@ namespace Experimental
 
         }
 
-        public Orbit(double inclination, double eccentricity, double semiMajorAxis,
-                     double LAN, double argumentOfPeriapsis, double meanAnomalyAtEpoch,
+        public Orbit(double inclination,
+                     double eccentricity,
+                     double semiMajorAxis,
+                     double LAN,
+                     double argumentOfPeriapsis,
+                     double meanAnomalyAtEpoch,
                      double epoch, CelestialBody referenceBody)
         {
-            this.referenceBody = referenceBody;
-
             this.inclination = inclination;
             this.eccentricity = eccentricity;
             this.semiMajorAxis = semiMajorAxis;
@@ -170,33 +151,19 @@ namespace Experimental
             this.argumentOfPeriapsis = argumentOfPeriapsis;
             this.meanAnomalyAtEpoch = meanAnomalyAtEpoch;
             this.epoch = epoch;
-
-            Init();
-        }
-
-        public Orbit(Orbit reference)
-        {
-            this.referenceBody = reference.referenceBody;
-
-            this.inclination = reference.inclination;
-            this.eccentricity = reference.eccentricity;
-            this.semiMajorAxis = reference.semiMajorAxis;
-            this.LAN = reference.LAN;
-            this.argumentOfPeriapsis = reference.argumentOfPeriapsis;
-            this.meanAnomalyAtEpoch = reference.meanAnomalyAtEpoch;
-            this.epoch = reference.epoch;
+            this.referenceBody = referenceBody;
 
             Init();
         }
 
         public void Init()
         {
-            period = MathUtils.TwoPI * Math.Sqrt(Math.Pow(Math.Abs(semiMajorAxis), 3.0) / referenceBody.gravParameter);
+            period = 2.0 * Math.PI * Math.Sqrt(Math.Pow(Math.Abs(semiMajorAxis), 3.0) / referenceBody.gravParameter);
 
             if (eccentricity < 1.0)
             {
                 meanAnomaly = meanAnomalyAtEpoch;
-                orbitPercent = meanAnomaly / MathUtils.TwoPI;
+                orbitPercent = meanAnomaly / (2.0 * Math.PI);
                 ObTAtEpoch = orbitPercent * period;
             }
             else
@@ -218,57 +185,47 @@ namespace Experimental
         public void UpdateFromStateVectors(Vector3d pos, Vector3d vel, CelestialBody refBody, double UT)
         {
             referenceBody = refBody;
-
             h = Vector3d.Cross(pos, vel);
-            inclination = Math.Acos(h.z / h.magnitude) * MathUtils.Rad2Deg;
 
-            if (inclination == 0.0)
+            if (h.sqrMagnitude == 0.0)
             {
-                vel += Vector3d.forward * 1e-10;
+                inclination = Math.Acos(pos.z / pos.magnitude) * (180.0 / Math.PI);
+                an = Vector3d.Cross(pos, Vector3d.forward);
 
-                h = Vector3d.Cross(pos, vel);
-                inclination = Math.Acos(h.z / h.magnitude) * MathUtils.Rad2Deg;
+                if (an.sqrMagnitude == 0.0)
+                    an = Vector3d.right;
+            }
+            else
+            {
+                inclination = Math.Acos(h.z / h.magnitude) * (180.0 / Math.PI);
+                an = Vector3d.Cross(Vector3d.forward, h);
             }
 
             eccVec = Vector3d.Cross(vel, h) / refBody.gravParameter - pos / pos.magnitude;
             eccentricity = eccVec.magnitude;
-
             orbitalEnergy = vel.sqrMagnitude / 2.0 - refBody.gravParameter / pos.magnitude;
-            semiMajorAxis = ((eccentricity >= 1.0) ?
-                            (-semiLatusRectum / (eccVec.sqrMagnitude - 1.0)) :
-                            (-refBody.gravParameter / (2.0 * orbitalEnergy)));
-
-            an = Vector3d.Cross(Vector3d.forward, h);
-
-            LAN = ((an.y < 0.0) ? (MathUtils.TwoPI - Math.Acos(an.x / an.magnitude)) :
-                                  Math.Acos(an.x / an.magnitude)) * MathUtils.Rad2Deg;
-
+            semiMajorAxis = eccentricity >= 1.0 ? -semiLatusRectum / (eccVec.sqrMagnitude - 1.0) : -refBody.gravParameter / (2.0 * orbitalEnergy);
+            LAN = (an.y < 0.0 ? 2.0 * Math.PI - Math.Acos(an.x / an.magnitude) : Math.Acos(an.x / an.magnitude)) * (180.0 / Math.PI);
             argumentOfPeriapsis = Math.Acos(Vector3d.Dot(an, eccVec) / (an.magnitude * eccentricity));
 
-            if (eccVec.z < 0.0) argumentOfPeriapsis = MathUtils.TwoPI - argumentOfPeriapsis;
-            if (an == Vector3d.zero) { LAN = 0.0; argumentOfPeriapsis = Math.Acos(eccVec.x / eccentricity); }
+            if (eccVec.z < 0.0) argumentOfPeriapsis = 2.0 * Math.PI - argumentOfPeriapsis;
 
             LAN = (LAN + Planetarium.InverseRotAngle) % 360.0;
-
-            argumentOfPeriapsis *= MathUtils.Rad2Deg;
-
-            period = MathUtils.TwoPI * Math.Sqrt(Math.Pow(Math.Abs(semiMajorAxis), 3.0) / refBody.gravParameter);
+            argumentOfPeriapsis *= 180.0 / Math.PI;
+            period = 2.0 * Math.PI * Math.Sqrt(Math.Pow(Math.Abs(semiMajorAxis), 3.0) / refBody.gravParameter);
             trueAnomaly = Math.Acos(Vector3d.Dot(eccVec, pos) / (eccentricity * pos.magnitude));
 
-            if (Vector3d.Dot(pos, vel) < 0.0) trueAnomaly = MathUtils.TwoPI - trueAnomaly;
-
-            if (double.IsNaN(trueAnomaly)) trueAnomaly = MathUtils.PI;
+            if (Vector3d.Dot(pos, vel) < 0.0) trueAnomaly = 2.0 * Math.PI - trueAnomaly;
+            if (double.IsNaN(trueAnomaly)) trueAnomaly = Math.PI;
 
             eccentricAnomaly = GetEccentricAnomaly(trueAnomaly);
             meanAnomaly = GetMeanAnomaly(eccentricAnomaly, trueAnomaly);
-
             meanAnomalyAtEpoch = meanAnomaly;
 
             if (eccentricity < 1.0)
             {
-                orbitPercent = meanAnomaly / MathUtils.TwoPI;
+                orbitPercent = meanAnomaly / (2.0 * Math.PI);
                 ObT = orbitPercent * period;
-
                 timeToPe = period - ObT;
                 timeToAp = timeToPe - period / 2.0;
 
@@ -279,7 +236,6 @@ namespace Experimental
             else
             {
                 ObT = Math.Pow(Math.Pow(-semiMajorAxis, 3.0) / refBody.gravParameter, 0.5) * meanAnomaly;
-
                 timeToPe = -ObT;
                 ObTAtEpoch = ObT;
             }
@@ -290,6 +246,12 @@ namespace Experimental
 
             this.pos = pos;
             this.vel = vel;
+
+            debugPos = pos;
+            debugVel = vel;
+            debugH = h;
+            debugAN = an;
+            debugEccVec = eccVec;
         }
 
         public void UpdateFromUT(double UT)
@@ -300,66 +262,43 @@ namespace Experimental
             if (!Planetarium.Pause)
             {
                 mag = Vector3d.Cross(pos, vel).magnitude;
-                h = Quat.AngleAxis(inclination, an) * Planetarium.Zup.Z * ((!double.IsNaN(mag)) ? Math.Max(mag, 1.0) : 1.0);
+                h = Quat.AngleAxis(inclination, an) * Planetarium.Zup.Z * (!double.IsNaN(mag) ? Math.Max(mag, 1.0) : 1.0);
             }
 
             eccVec = Quat.AngleAxis(argumentOfPeriapsis, h) * an * eccentricity;
 
             if (eccentricity < 1.0)
             {
-                meanAnomaly = ObT / period * 2.0 * MathUtils.PI;
-                eccentricAnomaly = ((eccentricity >= 0.9) ?
-                                   solveEccentricAnomalyExtremeEcc(meanAnomaly, eccentricity, 8) :
-                                   solveEccentricAnomalyStd(meanAnomaly, eccentricity, 1e-07));
-
+                meanAnomaly = ObT / period * 2.0 * Math.PI;
+                eccentricAnomaly = eccentricity >= 0.9 ? solveEccentricAnomalyExtremeEcc(meanAnomaly, eccentricity, 8) : solveEccentricAnomalyStd(meanAnomaly, eccentricity, 1E-07);
                 trueAnomaly = Math.Acos((Math.Cos(eccentricAnomaly) - eccentricity) / (1.0 - eccentricity * Math.Cos(eccentricAnomaly)));
 
-                if (ObT > period / 2.0) trueAnomaly = MathUtils.TwoPI - trueAnomaly;
+                if (ObT > period / 2.0) trueAnomaly = 2.0 * Math.PI - trueAnomaly;
 
                 radius = semiMajorAxis * (1.0 - eccentricity * eccentricity) / (1.0 + eccentricity * Math.Cos(trueAnomaly));
             }
             else
             {
-                if (eccentricity == 1.0) eccentricity += 1e-10;
+                if (eccentricity == 1.0) eccentricity += 1E-10;
 
-                meanAnomaly = MathUtils.TwoPI * Math.Abs(ObT) / period;
+                meanAnomaly = 2.0 * Math.PI * Math.Abs(ObT) / period;
 
                 if (ObT < 0.0) meanAnomaly *= -1.0;
 
                 eccentricAnomaly = solveEccentricAnomalyHyp(Math.Abs(meanAnomaly), eccentricity, 1E-07);
                 trueAnomaly = Math.Atan2(Math.Sqrt(eccentricity * eccentricity - 1.0) * Math.Sinh(eccentricAnomaly), eccentricity - Math.Cosh(eccentricAnomaly));
 
-                if (ObT < 0.0) trueAnomaly = MathUtils.TwoPI - trueAnomaly;
+                if (ObT < 0.0) trueAnomaly = 2.0 * Math.PI - trueAnomaly;
 
                 radius = -semiMajorAxis * (eccentricity * eccentricity - 1.0) / (1.0 + eccentricity * Math.Cos(trueAnomaly));
             }
 
-            orbitPercent = meanAnomaly / MathUtils.TwoPI;
-            pos = Quat.AngleAxis(argumentOfPeriapsis + trueAnomaly * MathUtils.Rad2Deg, h) * an * radius;
+            orbitPercent = meanAnomaly / (2.0 * Math.PI);
 
-            if (eccentricity > 1e-05 && eccentricity < 1.0)
-            {
-                Vector3d relativePositionAtT = getRelativePositionAtT(ObT + Time.deltaTime); //TimeWarp.deltaTime
+            pos = Quat.AngleAxis(argumentOfPeriapsis + trueAnomaly * (180.0 / Math.PI), h) * an * radius;
+            vel = getOrbitalVelocityAtObT(ObT + Time.deltaTime);
 
-                double magnitude = relativePositionAtT.magnitude;
-                double axisMagn = magnitude / semiMajorAxis;
-                double angle = Math.Acos((2.0 - 2.0 * (eccentricity * eccentricity)) / (axisMagn * (2.0 - axisMagn)) - 1.0);
-                double T = (MathUtils.PI - angle) / 2.0;
-
-                orbitalSpeed = Math.Sqrt(referenceBody.gravParameter * (2.0 / magnitude - 1.0 / semiMajorAxis));
-
-                if (ObT > period / 2.0) T = angle + T;
-
-                vel = Quat.AngleAxis(T * MathUtils.Rad2Deg, h) * relativePositionAtT.normalized * orbitalSpeed;
-            }
-            else
-            {
-                Vector3d relativePositionAtT2 = getRelativePositionAtT(ObT + Time.deltaTime); //TimeWarp.deltaTime
-
-                orbitalSpeed = Math.Sqrt(referenceBody.gravParameter * (2.0 / pos.magnitude - 1.0 / semiMajorAxis));
-                vel = (relativePositionAtT2 - pos).normalized * orbitalSpeed;
-            }
-
+            orbitalSpeed = vel.magnitude;
             orbitalEnergy = orbitalSpeed * orbitalSpeed / 2.0 - referenceBody.gravParameter / pos.magnitude;
             altitude = radius - referenceBody.Radius;
 
@@ -375,32 +314,34 @@ namespace Experimental
                 timeToPe = -ObT;
                 timeToAp = 0.0;
             }
+
+            debugPos = pos;
+            debugVel = vel;
+            debugH = h;
+            debugAN = an;
+            debugEccVec = eccVec;
         }
 
         public double GetDTforTrueAnomaly(double tA, double wrapAfterSeconds)
         {
             double eccentricAnomaly = GetEccentricAnomaly(tA);
             double meanAnomaly = GetMeanAnomaly(eccentricAnomaly, tA);
-            double t = (eccentricity >= 1.0) ?
-                       (Math.Pow(Math.Pow(-semiMajorAxis, 3.0) / referenceBody.gravParameter, 0.5) * meanAnomaly) :
-                       (meanAnomaly / MathUtils.TwoPI * period);
-
-            double dt;
+            double num = eccentricity >= 1.0 ? Math.Pow(Math.Pow(-semiMajorAxis, 3.0) / referenceBody.gravParameter, 0.5) * meanAnomaly : meanAnomaly / (2.0 * Math.PI) * period;
+            double d;
 
             if (eccentricity < 1.0)
             {
-                if (tA < 0.0) dt = -ObT - t;
-                else dt = t - ObT;
+                d = tA >= 0.0 ? num - ObT : -ObT - num;
 
-                if (dt < -Math.Abs(wrapAfterSeconds)) dt += period;
+                if (d < -Math.Abs(wrapAfterSeconds)) d += period;
             }
-            else if (tA < 0.0) dt = -ObT - t;
-            else dt = t - ObT;
+            else
+                d = tA >= 0.0 ? num - ObT : -ObT - num;
 
-            if (double.IsNaN(dt))
-                Debug.Log(string.Format("dt is NaN! tA: {0}, E: {1}, M: {2}, T: {3}", tA, eccentricAnomaly, meanAnomaly, t));
+            if (double.IsNaN(d))
+                Debug.Log(("dT is NaN! tA: " + tA + ", E: " + eccentricAnomaly + ", M: " + meanAnomaly + ", T: " + num));
 
-            return dt;
+            return d;
         }
 
         public double GetUTforTrueAnomaly(double tA, double wrapAfterSeconds)
@@ -432,19 +373,33 @@ namespace Experimental
         {
             double Obt;
 
-            if (eccentricity < 1.0) Obt = (UT - epoch + ObTAtEpoch) % period;
-            else Obt = ObTAtEpoch + (UT - epoch);
+            if (eccentricity < 1.0)
+            {
+                if (double.IsInfinity(UT))
+                {
+                    Debug.Log(("getObtAtUT infinite UT on elliptical orbit UT: " + UT.ToString() + ", returning NaN"));
+                    return double.NaN;
+                }
 
-            if (Obt < 0.0 && eccentricity < 1.0) Obt += period;
+                Obt = (UT - epoch + ObTAtEpoch) % period;
 
-            if (double.IsNaN(Obt)) Debug.Log("getObtAtUT() result is NaN! UT: " + UT.ToString());
+                if (Obt < 0.0)
+                    Obt += period;
+            }
+            else
+            {
+                if (double.IsInfinity(UT))
+                    return UT;
+
+                Obt = ObTAtEpoch + (UT - epoch);
+            }
 
             return Obt;
         }
 
         public double getObTAtMeanAnomaly(double M)
         {
-            if (eccentricity < 1.0) return meanAnomaly / MathUtils.TwoPI * period;
+            if (eccentricity < 1.0) return meanAnomaly / (2.0 * Math.PI) * period;
 
             return Math.Pow(Math.Pow(-semiMajorAxis, 3.0) / referenceBody.gravParameter, 0.5) * M;
         }
@@ -452,50 +407,32 @@ namespace Experimental
         public Vector3d GetOrbitNormal()
         {
             if (Planetarium.FrameIsRotating())
-            {
-                Vector3d axis = Quat.AngleAxis(LAN, Planetarium.Zup.Z) * Planetarium.Zup.X;
-
-                return Quat.AngleAxis(inclination, axis) * Planetarium.Zup.Z;
-            }
+                return Quat.AngleAxis(inclination, Quat.AngleAxis(LAN, Planetarium.Zup.Z) * Planetarium.Zup.X) * Planetarium.Zup.Z;
 
             return h;
         }
 
-        public void GetOrbitNormal(ref Vector3 axis, ref Vector3d normal)
-        {
-            if (Planetarium.FrameIsRotating())
-            {
-                axis = Quat.AngleAxis(LAN, Planetarium.Zup.Z) * Planetarium.Zup.X;
-                normal = Quat.AngleAxis(inclination, axis) * Planetarium.Zup.Z;
-            }
-        }
-
         public Vector3d GetEccVector()
         {
-            if (Planetarium.FrameIsRotating())
-            {
-                Vector3d axis = Quat.AngleAxis(LAN, Planetarium.Zup.Z) * Planetarium.Zup.X;
-                Vector3d normal = Quat.AngleAxis(inclination, axis) * Planetarium.Zup.Z;
+            if (!Planetarium.FrameIsRotating()) return eccVec;
 
-                return Quat.AngleAxis(argumentOfPeriapsis, normal) * axis;
-            }
+            Vector3d axis = Quat.AngleAxis(LAN, Planetarium.Zup.Z) * Planetarium.Zup.X;
 
-            return eccVec;
+            return Quat.AngleAxis(argumentOfPeriapsis, Quat.AngleAxis(inclination, axis) * Planetarium.Zup.Z) * axis;
         }
 
         public Vector3d GetANVector()
         {
-            if (Planetarium.FrameIsRotating())
-                return Quat.AngleAxis(LAN, Planetarium.Zup.Z) * Planetarium.Zup.X;
+            if (Planetarium.FrameIsRotating()) return Quat.AngleAxis(LAN, Planetarium.Zup.Z) * Planetarium.Zup.X;
 
             return an;
         }
 
         public Vector3d GetVel()
         {
-            Vector3d vel = GetFrameVel() - ((!FlightGlobals.ActiveVessel) ? Vector3d.zero : FlightGlobals.ActiveVessel.orbitDriver.ReferenceBody.GetFrameVel());
+            Vector3d vector3d = GetFrameVel() - (!(FlightGlobals.ActiveVessel) ? Vector3d.zero : FlightGlobals.ActiveVessel.orbitDriver.ReferenceBody.GetFrameVel());
 
-            return vel.xzy;
+            return new Vector3d(vector3d.x, vector3d.z, vector3d.y);
         }
 
         public Vector3d GetRelativeVel()
@@ -523,60 +460,56 @@ namespace Experimental
 
         public Vector3d GetWorldSpaceVel()
         {
-            return GetVel() - ((!referenceBody.inverseRotation) ? Vector3d.zero : referenceBody.GetRFrmVel(pos + referenceBody.Position));
+            return GetVel() - (!referenceBody.inverseRotation ? Vector3d.zero : referenceBody.GetRFrmVel(pos + referenceBody.Position));
         }
 
         public double GetTimeToPeriapsis()
         {
-            //if (eccentricity < 1.0 && patchEndTransition != PatchTransitionType.FINAL && StartUT + timeToPe > EndUT)
-            if (eccentricity < 1.0 && StartUT + timeToPe > EndUT)
+            if (eccentricity < 1.0 && patchEndTransition != PatchTransitionType.FINAL && StartUT + timeToPe > EndUT)
                 return timeToPe - period;
 
             return timeToPe;
         }
 
-        public static double ACosh(double x)
-        {
-            return Math.Log(x + Math.Sqrt(x * x - 1.0));
-        }
-
         public double GetEccentricAnomaly(double tA)
         {
-            double eccentricAnomaly;
+            double d;
 
             if (eccentricity < 1.0)
             {
-                eccentricAnomaly = Math.Acos((eccentricity + Math.Cos(tA)) / (1.0 + eccentricity * Math.Cos(tA)));
+                d = Math.Acos((eccentricity + Math.Cos(tA)) / (1.0 + eccentricity * Math.Cos(tA)));
 
-                if (tA > MathUtils.PI) eccentricAnomaly = MathUtils.TwoPI - eccentricAnomaly;
+                if (tA > Math.PI)
+                    d = 2.0 * Math.PI - d;
             }
             else
             {
-                eccentricAnomaly = ACosh((eccentricity + Math.Cos(tA)) / (1.0 + eccentricity * Math.Cos(tA)));
+                d = Math.Abs(eccentricity * Math.Cos(tA) + 1.0) >= 1E-05 ? (eccentricity * Math.Cos(tA) >= -1.0 ? UtilMath.ACosh((eccentricity + Math.Cos(tA)) / (1.0 + eccentricity * Math.Cos(tA))) : double.NaN) : (tA >= Math.PI ? double.NegativeInfinity : double.PositiveInfinity);
 
-                if (double.IsNaN(eccentricAnomaly)) eccentricAnomaly = MathUtils.PI;
-
-                if (double.IsInfinity(eccentricAnomaly))
-                {
-                    Debug.Log(string.Format("E is Infinity! tA: {0}, e: {1}", tA, eccentricAnomaly));
-                }
+                if (double.IsNaN(d))
+                    Debug.Log(("E is NaN! tA: " + tA + ", e = " + eccentricity));
             }
 
-            return eccentricAnomaly;
+            return d;
         }
 
         public double GetMeanAnomaly(double E, double tA)
         {
-            if (eccentricity < 1.0) return E - eccentricity * Math.Sin(E);
+            if (eccentricity < 1.0)
+                return E - eccentricity * Math.Sin(E);
 
-            return (eccentricity * Math.Sinh(E) - E) * ((tA >= 3.1415926535897931) ? -1.0 : 1.0);
+            if (double.IsInfinity(E))
+                return E;
+
+            return (eccentricity * Math.Sinh(E) - E) * (tA >= Math.PI ? -1.0 : 1.0);
         }
 
         public double RadiusAtTrueAnomaly(double tA)
         {
-            return (eccentricity >= 1.0) ?
-                   (-semiMajorAxis * (eccentricity * eccentricity - 1.0) / (1.0 + eccentricity * Math.Cos(tA))) :
-                   (semiLatusRectum * (1.0 / (1.0 + eccentricity * Math.Cos(tA))));
+            if (eccentricity < 1.0)
+                return semiLatusRectum * (1.0 / (1.0 + eccentricity * Math.Cos(tA)));
+
+            return -semiMajorAxis * (eccentricity * eccentricity - 1.0) / (1.0 + eccentricity * Math.Cos(tA));
         }
 
         public double TrueAnomalyAtRadius(double R)
@@ -586,20 +519,21 @@ namespace Experimental
 
         private double trueAnomalyAtRadiusExtreme(double R)
         {
-            double result;
+            double extreme = Vector3d.Cross(getRelativePositionFromEccAnomaly(eccentricAnomaly), getOrbitalVelocityAtObT(ObT)).sqrMagnitude / referenceBody.gravParameter;
+            double trueAnomaly;
 
             if (eccentricity < 1.0)
             {
                 R = Math.Min(Math.Max(PeR, R), ApR);
-                result = Math.Acos((Vector3d.Cross(getRelativePositionFromEccAnomaly(eccentricAnomaly), getOrbitalVelocityAtObT(ObT)).sqrMagnitude / referenceBody.gravParameter) / (this.eccentricity * R) - 1.0 / this.eccentricity);
+                trueAnomaly = Math.Acos(extreme / (eccentricity * R) - 1.0 / eccentricity);
             }
             else
             {
                 R = Math.Max(PeR, R);
-                result = MathUtils.PI - Math.Acos(semiMajorAxis * eccentricity / R - semiMajorAxis / (eccentricity * R) + 1.0 / eccentricity);
+                trueAnomaly = Math.PI - Math.Acos(semiMajorAxis * eccentricity / R - semiMajorAxis / (eccentricity * R) + 1.0 / eccentricity);
             }
 
-            return result;
+            return trueAnomaly;
         }
 
         public double TrueAnomalyAtUT(double UT)
@@ -613,25 +547,38 @@ namespace Experimental
 
             if (eccentricity < 1.0)
             {
-                double meanAnomaly = T / period * 2.0 * MathUtils.PI;
-                double eccentricAnomaly = (eccentricity >= 0.9) ? solveEccentricAnomalyExtremeEcc(meanAnomaly, eccentricity, 8) :
-                                                                  solveEccentricAnomalyStd(meanAnomaly, eccentricity, 1e-07);
+                double M = T / period * 2.0 * Math.PI;
+                double d = eccentricity >= 0.9 ? solveEccentricAnomalyExtremeEcc(M, eccentricity, 8) : solveEccentricAnomalyStd(M, eccentricity, 1E-07);
 
-                trueAnomaly = Math.Acos((Math.Cos(eccentricAnomaly) - eccentricity) / (1.0 - eccentricity * Math.Cos(eccentricAnomaly)));
+                trueAnomaly = Math.Acos((Math.Cos(d) - eccentricity) / (1.0 - eccentricity * Math.Cos(d)));
 
-                if (T > period / 2.0) trueAnomaly = MathUtils.TwoPI - trueAnomaly;
+                if (T > period / 2.0)
+                    trueAnomaly = 2.0 * Math.PI - trueAnomaly;
             }
             else
             {
-                double meanAnomaly = MathUtils.TwoPI * Math.Abs(T) / period;
+                double M = 2.0 * Math.PI * Math.Abs(T) / period;
 
-                if (T < 0.0) meanAnomaly *= -1.0;
+                if (T < 0.0)
+                    M *= -1.0;
 
-                double eccentricAnomaly = solveEccentricAnomalyHyp(Math.Abs(meanAnomaly), eccentricity, 1e-07);
+                double d = solveEccentricAnomalyHyp(Math.Abs(M), eccentricity, 1E-07);
 
-                trueAnomaly = Math.Atan2(Math.Sqrt(eccentricity * eccentricity - 1.0) * Math.Sinh(eccentricAnomaly), eccentricity - Math.Cosh(eccentricAnomaly));
+                if (double.IsPositiveInfinity(d))
+                {
+                    trueAnomaly = Math.Acos(-1.0 / eccentricity);
+                }
+                else if (double.IsNegativeInfinity(d))
+                {
+                    trueAnomaly = 2.0 * Math.PI - Math.Acos(-1.0 / eccentricity);
+                }
+                else
+                {
+                    trueAnomaly = Math.Atan2(Math.Sqrt(eccentricity * eccentricity - 1.0) * Math.Sinh(d), eccentricity - Math.Cosh(d));
 
-                if (T < 0.0) trueAnomaly = MathUtils.TwoPI - trueAnomaly;
+                    if (T < 0.0)
+                        trueAnomaly = 2.0 * Math.PI - trueAnomaly;
+                }
             }
 
             return trueAnomaly;
@@ -639,56 +586,64 @@ namespace Experimental
 
         public double solveEccentricAnomaly(double M, double ecc, double maxError, int maxIterations)
         {
-            return (eccentricity >= 1.0) ? solveEccentricAnomalyHyp(M, eccentricity, maxError) :
-                   ((eccentricity >= 0.8) ? solveEccentricAnomalyExtremeEcc(M, eccentricity, maxIterations) :
-                                            solveEccentricAnomalyStd(M, eccentricity, maxError));
+            if (eccentricity >= 1.0)
+                return solveEccentricAnomalyHyp(M, eccentricity, maxError);
+
+            if (eccentricity < 0.8)
+                return solveEccentricAnomalyStd(M, eccentricity, maxError);
+
+            return solveEccentricAnomalyExtremeEcc(M, eccentricity, maxIterations);
         }
 
         private double solveEccentricAnomalyStd(double M, double ecc, double maxError = 1E-07)
         {
-            double s = 1.0;
-            double std = M + ecc * Math.Sin(M) + 0.5 * ecc * ecc * Math.Sin(2.0 * M);
+            double i = 1.0;
+            double eccentricAnomaly = M + ecc * Math.Sin(M) + 0.5 * ecc * ecc * Math.Sin(2.0 * M);
 
-            while (Math.Abs(s) > maxError)
+            while (Math.Abs(i) > maxError)
             {
-                double num3 = std - ecc * Math.Sin(std);
+                double num3 = eccentricAnomaly - ecc * Math.Sin(eccentricAnomaly);
 
-                s = (M - num3) / (1.0 - ecc * Math.Cos(std));
-                std += s;
+                i = (M - num3) / (1.0 - ecc * Math.Cos(eccentricAnomaly));
+
+                eccentricAnomaly += i;
             }
 
-            return std;
+            return eccentricAnomaly;
         }
 
         private double solveEccentricAnomalyExtremeEcc(double M, double ecc, int iterations = 8)
         {
-            double s = M + 0.85 * eccentricity * Math.Sign(Math.Sin(M));
+            double eccentricAnomaly = M + 0.85 * eccentricity * Math.Sign(Math.Sin(M));
 
-            for (int i = 0; i < iterations; i++)
+            for (int index = 0; index < iterations; ++index)
             {
-                double sins = ecc * Math.Sin(s);
-                double coss = ecc * Math.Cos(s);
-                double aC = s - sins - M;
-                double aB = 1.0 - coss;
+                double sina = ecc * Math.Sin(eccentricAnomaly);
+                double cosa = ecc * Math.Cos(eccentricAnomaly);
+                double x = eccentricAnomaly - sina - M;
+                double y = 1.0 - cosa;
+                double z = sina;
 
-                s += -5.0 * aC / (aB + Math.Sign(aB) * Math.Sqrt(Math.Abs(16.0 * aB * aB - 20.0 * aC * sins)));
+                eccentricAnomaly += -5.0 * x / (y + Math.Sign(y) * Math.Sqrt(Math.Abs(16.0 * y * y - 20.0 * x * z)));
             }
 
-            return s;
+            return eccentricAnomaly;
         }
 
         private double solveEccentricAnomalyHyp(double M, double ecc, double maxError = 1E-07)
         {
-            double anomaly = 1.0;
-            double hyp = Math.Log(2.0 * M / ecc + 1.8);
+            if (double.IsInfinity(M)) return M;
 
-            while (Math.Abs(anomaly) > maxError)
+            double index = 1.0;
+            double eccentricAnomaly = Math.Log(2.0 * M / ecc + 1.8);
+
+            while (Math.Abs(index) > maxError)
             {
-                anomaly = (eccentricity * Math.Sinh(hyp) - hyp - M) / (eccentricity * Math.Cosh(hyp) - 1.0);
-                hyp -= anomaly;
+                index = (eccentricity * Math.Sinh(eccentricAnomaly) - eccentricAnomaly - M) / (eccentricity * Math.Cosh(eccentricAnomaly) - 1.0);
+                eccentricAnomaly -= index;
             }
 
-            return hyp;
+            return eccentricAnomaly;
         }
 
         public double getTrueAnomaly(double E)
@@ -699,33 +654,22 @@ namespace Experimental
             {
                 trueAnomaly = Math.Acos((Math.Cos(E) - eccentricity) / (1.0 - eccentricity * Math.Cos(E)));
 
-                if (E > MathUtils.PI) trueAnomaly = MathUtils.TwoPI - trueAnomaly;
+                if (E > Math.PI) trueAnomaly = 2.0 * Math.PI - trueAnomaly;
                 if (E < 0.0) trueAnomaly *= -1.0;
             }
             else
-            {
                 trueAnomaly = Math.Atan2(Math.Sqrt(eccentricity * eccentricity - 1.0) * Math.Sinh(E), eccentricity - Math.Cosh(E));
-            }
 
             return trueAnomaly;
         }
 
         public double GetTrueAnomalyOfZupVector(Vector3d vector)
         {
-            Vector3 axis;
+            Vector3d zUpVector = !(eccVec != Vector3d.zero) ? (Vector3d)(Quaternion.Inverse(Quaternion.LookRotation(-getPositionFromTrueAnomaly(0.0).normalized, GetOrbitNormal().xzy)) * vector.xzy) : (Vector3d)(Quaternion.Inverse(Quaternion.LookRotation(-GetEccVector().xzy, GetOrbitNormal().xzy)) * vector.xzy);
 
-            if (eccVec != Vector3d.zero)
-            {
-                axis = Quaternion.Inverse(Quaternion.LookRotation(-GetEccVector().xzy.ToVector3(), GetOrbitNormal().xzy.ToVector3())) * vector.xzy.ToVector3();
-            }
-            else
-            {
-                axis = Quaternion.Inverse(Quaternion.LookRotation(-getPositionFromTrueAnomaly(0.0).normalized.ToVector3(), GetOrbitNormal().xzy.ToVector3())) * vector.xzy.ToVector3();
-            }
+            double trueAnomaly = Math.PI - Math.Atan2(zUpVector.x, zUpVector.z);
 
-            double trueAnomaly = MathUtils.PI - Math.Atan2(axis.x, axis.z);
-
-            if (trueAnomaly < 0.0) trueAnomaly = MathUtils.TwoPI - trueAnomaly;
+            if (trueAnomaly < 0.0) trueAnomaly = 2.0 * Math.PI - trueAnomaly;
 
             return trueAnomaly;
         }
@@ -737,40 +681,40 @@ namespace Experimental
 
         public Vector3d getRelativePositionAtT(double T)
         {
-            double trueAnomaly;
-            double d;
+            double d1;
+            double H;
 
             if (eccentricity < 1.0)
             {
-                double meanAnomaly = T / period * 2.0 * MathUtils.PI;
-                double eccentricAnomaly = (eccentricity >= 0.9) ? solveEccentricAnomalyExtremeEcc(meanAnomaly, eccentricity, 8) :
-                                                                  solveEccentricAnomalyStd(meanAnomaly, eccentricity, 1e-07);
+                double M = T / period * 2.0 * Math.PI;
+                double d2 = eccentricity >= 0.9 ? solveEccentricAnomalyExtremeEcc(M, eccentricity, 8) : solveEccentricAnomalyStd(M, eccentricity, 1E-07);
 
-                trueAnomaly = Math.Acos((Math.Cos(eccentricAnomaly) - eccentricity) / (1.0 - eccentricity * Math.Cos(eccentricAnomaly)));
+                d1 = Math.Acos((Math.Cos(d2) - eccentricity) / (1.0 - eccentricity * Math.Cos(d2)));
 
-                if (T > period / 2.0) trueAnomaly = MathUtils.TwoPI - trueAnomaly;
+                if (T > period / 2.0) d1 = 2.0 * Math.PI - d1;
 
-                d = semiMajorAxis * (1.0 - eccentricity * eccentricity) / (1.0 + eccentricity * Math.Cos(trueAnomaly));
+                H = semiMajorAxis * (1.0 - eccentricity * eccentricity) / (1.0 + eccentricity * Math.Cos(d1));
             }
             else
             {
-                double meanAnomaly = MathUtils.TwoPI * Math.Abs(T) / period;
+                double M = 2.0 * Math.PI * Math.Abs(T) / period;
 
-                if (T < 0.0) meanAnomaly *= -1.0;
+                if (T < 0.0)
+                    M *= -1.0;
 
-                double eccentricAnomaly = solveEccentricAnomalyHyp(Math.Abs(meanAnomaly), eccentricity, 1E-07);
+                double num3 = solveEccentricAnomalyHyp(Math.Abs(M), eccentricity, 1E-07);
 
-                trueAnomaly = Math.Atan2(Math.Sqrt(eccentricity * eccentricity - 1.0) * Math.Sinh(eccentricAnomaly), eccentricity - Math.Cosh(eccentricAnomaly));
+                d1 = Math.Atan2(Math.Sqrt(eccentricity * eccentricity - 1.0) * Math.Sinh(num3), eccentricity - Math.Cosh(num3));
 
-                if (T < 0.0) trueAnomaly = MathUtils.TwoPI - trueAnomaly;
+                if (T < 0.0) d1 = 2.0 * Math.PI - d1;
 
-                d = -semiMajorAxis * (eccentricity * eccentricity - 1.0) / (1.0 + eccentricity * Math.Cos(trueAnomaly));
+                H = -semiMajorAxis * (eccentricity * eccentricity - 1.0) / (1.0 + eccentricity * Math.Cos(d1));
             }
 
-            Vector3d normal = Quat.AngleAxis(LAN, Planetarium.Zup.Z) * Planetarium.Zup.X;
-            Vector3d axis = Quat.AngleAxis(inclination, normal) * Planetarium.Zup.Z;
+            Vector3d axis = Quat.AngleAxis(LAN, Planetarium.Zup.Z) * Planetarium.Zup.X;
+            Vector3d normal = Quat.AngleAxis(inclination, axis) * Planetarium.Zup.Z;
 
-            return Quat.AngleAxis(argumentOfPeriapsis + trueAnomaly * MathUtils.Rad2Deg, axis) * normal * d;
+            return Quat.AngleAxis(argumentOfPeriapsis + d1 * (180.0 / Math.PI), normal) * axis * H;
         }
 
         public Vector3d getPositionFromMeanAnomaly(double M)
@@ -780,7 +724,7 @@ namespace Experimental
 
         public Vector3d getRelativePositionFromMeanAnomaly(double M)
         {
-            return getRelativePositionFromEccAnomaly(solveEccentricAnomaly(M, eccentricity, 1e-05, 8));
+            return getRelativePositionFromEccAnomaly(solveEccentricAnomaly(M, eccentricity, 1E-05, 8));
         }
 
         public Vector3d getPositionFromEccAnomaly(double E)
@@ -790,38 +734,31 @@ namespace Experimental
 
         public Vector3d getRelativePositionFromEccAnomaly(double E)
         {
-            //TODO: Inversed by one axis rotation problem here...
-
-            E = E * -1;
+            E *= -1.0;
 
             double x;
             double y;
 
-            if (eccentricity < 1)
+            if (eccentricity < 1.0)
             {
                 x = semiMajorAxis * (Math.Cos(E) - eccentricity);
-                y = semiMajorAxis * Math.Sqrt(1 - eccentricity * eccentricity) * -Math.Sin(E);
+                y = semiMajorAxis * Math.Sqrt(1.0 - eccentricity * eccentricity) * -Math.Sin(E);
             }
-            else if (eccentricity <= 1)
+            else if (eccentricity > 1.0)
             {
-                x = 0;
-                y = 0;
+                x = -semiMajorAxis * (eccentricity - Math.Cosh(E));
+                y = -semiMajorAxis * Math.Sqrt(eccentricity * eccentricity - 1.0) * -Math.Sinh(E);
             }
             else
             {
-                x = -semiMajorAxis * (eccentricity - Math.Cosh(E));
-                y = -semiMajorAxis * Math.Sqrt(eccentricity * eccentricity - 1) * -Math.Sinh(E);
+                x = 0.0;
+                y = 0.0;
             }
 
-            Vector3d pos = new Vector3d(x, y, 0);
-            Vector3d normal = Quat.AngleAxis(LAN, Planetarium.Zup.Z) * Planetarium.Zup.X;
-            Vector3d axis = Quat.AngleAxis(inclination, normal) * Planetarium.Zup.Z;
+            Vector3d position = new Vector3d(x, y, 0.0);
+            Vector3d axis = Quat.AngleAxis(LAN, Planetarium.Zup.Z) * Planetarium.Zup.X;
 
-            Quat rotation = (Quat.AngleAxis(argumentOfPeriapsis, axis) *
-                            Quat.AngleAxis(inclination, normal)) *
-                            Quat.AngleAxis(LAN - Planetarium.InverseRotAngle, Planetarium.Zup.Z);
-
-            return rotation * pos;
+            return Quat.AngleAxis(argumentOfPeriapsis, Quat.AngleAxis(inclination, axis) * Planetarium.Zup.Z) * Quat.AngleAxis(inclination, axis) * Quat.AngleAxis(LAN - Planetarium.InverseRotAngle, Planetarium.Zup.Z) * position;
         }
 
         public Vector3d getPositionFromTrueAnomaly(double tA)
@@ -831,14 +768,12 @@ namespace Experimental
 
         public Vector3d getRelativePositionFromTrueAnomaly(double tA)
         {
-            double d = (eccentricity >= 1.0) ?
-                       (-semiMajorAxis * (eccentricity * eccentricity - 1.0) / (1.0 + eccentricity * Math.Cos(tA))) :
-                       (semiLatusRectum * (1.0 / (1.0 + eccentricity * Math.Cos(tA))));
+            double H = eccentricity >= 1.0 ? -semiMajorAxis * (eccentricity * eccentricity - 1.0) / (1.0 + this.eccentricity * Math.Cos(tA)) : semiLatusRectum * (1.0 / (1.0 + eccentricity * Math.Cos(tA)));
 
-            Vector3d normal = Quat.AngleAxis(LAN, Planetarium.Zup.Z) * Planetarium.Zup.X;
-            Vector3d axis = Quat.AngleAxis(inclination, normal) * Planetarium.Zup.Z;
+            Vector3d axis = Quat.AngleAxis(LAN, Planetarium.Zup.Z) * Planetarium.Zup.X;
+            Vector3d normal = Quat.AngleAxis(inclination, axis) * Planetarium.Zup.Z;
 
-            return Quat.AngleAxis(argumentOfPeriapsis + tA * MathUtils.Rad2Deg, axis) * normal * d;
+            return Quat.AngleAxis(argumentOfPeriapsis + tA * (180.0 / Math.PI), normal) * axis * H;
         }
 
         public double getOrbitalSpeedAt(double time)
@@ -863,69 +798,56 @@ namespace Experimental
 
         public Vector3d getOrbitalVelocityAtObT(double ObT)
         {
-            if (eccentricity > 1e-05 && eccentricity < 1.0)
-            {
-                Vector3d relativePositionAtT = getRelativePositionAtT(ObT + Time.fixedDeltaTime);
+            return getOrbitalVelocityAtTrueAnomaly(TrueAnomalyAtT(ObT));
+        }
 
-                double magnitude = relativePositionAtT.magnitude;
-                double d = Math.Sqrt(referenceBody.gravParameter * (2.0 / magnitude - 1.0 / semiMajorAxis));
-                double axisMagn = magnitude / semiMajorAxis;
-                double angle = Math.Acos((2.0 - 2.0 * (eccentricity * eccentricity)) / (axisMagn * (2.0 - axisMagn)) - 1.0);
-                double T = (MathUtils.PI - angle) / 2.0;
+        public Vector3d getOrbitalVelocityAtTrueAnomaly(double tA)
+        {
+            double cosa = Math.Cos(tA);
+            double sina = Math.Sin(tA);
+            double x = Math.Sqrt(referenceBody.gravParameter / (semiMajorAxis * (1.0 - eccentricity * eccentricity)));
+            double y = -sina * x;
+            double z = (cosa + eccentricity) * x;
 
-                if (ObT > period / 2.0) T = angle + T;
+            Vector3d axis = Quat.AngleAxis(LAN, Planetarium.Zup.Z) * Planetarium.Zup.X;
+            Vector3d normal = Quat.AngleAxis(inclination, axis) * Planetarium.Zup.Z;
 
-                Vector3d normal = Quat.AngleAxis(LAN, Planetarium.Zup.Z) * Planetarium.Zup.X;
-                Vector3d axis = Quat.AngleAxis(inclination, normal) * Planetarium.Zup.Z;
-
-                return Quat.AngleAxis(T * MathUtils.Rad2Deg, axis) * relativePositionAtT.normalized * d;
-            }
-
-            Vector3d relativePositionAtT2 = getRelativePositionAtT(ObT);
-            Vector3d relativePositionAtT3 = getRelativePositionAtT(ObT - Time.fixedDeltaTime);
-
-            double d2 = Math.Sqrt(referenceBody.gravParameter * (2.0 / relativePositionAtT2.magnitude - 1.0 / semiMajorAxis));
-
-            Vector3d result = (relativePositionAtT2 - relativePositionAtT3).normalized * d2;
-
-            if (double.IsNaN(result.x))
-            {
-                Debug.Log(string.Format("Problem! \n {0} - {1} - {2} - {3} - {4}", relativePositionAtT2.ToString(),
-                                                                                   relativePositionAtT3.ToString(),
-                                                                                   d2,
-                                                                                   result.ToString(),
-                                                                                   ObT));
-            }
-
-            return result;
+            return Quat.AngleAxis(argumentOfPeriapsis, normal) * axis * y + Quat.AngleAxis(argumentOfPeriapsis + 90.0, normal) * axis * z;
         }
 
         public void DrawOrbit()
         {
             if (eccentricity < 1.0)
             {
-                for (double i = 0.0; i < MathUtils.TwoPI; i += drawResolution * MathUtils.Deg2Rad)
-                {
-                    Vector3d v = getPositionFromTrueAnomaly(i % MathUtils.TwoPI).ToVector3();
-                    Vector3d v2 = getPositionFromTrueAnomaly((i + drawResolution * MathUtils.Deg2Rad) % MathUtils.TwoPI).ToVector3();
+                double tA = 0.0;
 
-                    Debug.DrawLine(v.LocalToScaledSpace(), v2.LocalToScaledSpace(), Color.Lerp(Color.yellow, Color.green, Mathf.InverseLerp((float)getOrbitalSpeedAtDistance(PeR), (float)getOrbitalSpeedAtDistance(ApR), (float)getOrbitalSpeedAtPos(v))));
+                while (tA < 2.0 * Math.PI)
+                {
+                    Vector3 vector3_1 = getPositionFromTrueAnomaly(tA % (2.0 * Math.PI));
+                    Vector3 vector3_2 = getPositionFromTrueAnomaly((tA + drawResolution * Math.PI / 180.0) % (2.0 * Math.PI));
+
+                    Debug.DrawLine(ScaledSpace.LocalToScaledSpace(vector3_1), ScaledSpace.LocalToScaledSpace(vector3_2), Color.Lerp(Color.yellow, Color.green, Mathf.InverseLerp((float)getOrbitalSpeedAtDistance(PeR), (float)getOrbitalSpeedAtDistance(ApR), (float)getOrbitalSpeedAtPos(vector3_1))));
+
+                    tA += drawResolution * Math.PI / 180.0;
                 }
             }
             else
             {
-                for (double i = -Math.Acos(-(1.0 / eccentricity)) + drawResolution * MathUtils.Deg2Rad; i < Math.Acos(-(1.0 / eccentricity)) - drawResolution * MathUtils.Deg2Rad; i += drawResolution * MathUtils.Deg2Rad)
+                double tA = -Math.Acos(-(1.0 / eccentricity)) + drawResolution * (Math.PI / 180.0);
+
+                while (tA < Math.Acos(-(1.0 / eccentricity)) - drawResolution * (Math.PI / 180.0))
                 {
-                    Debug.DrawLine(getPositionFromTrueAnomaly(i).LocalToScaledSpace(), getPositionFromTrueAnomaly(Math.Min(Math.Acos(-(1.0 / eccentricity)), i + drawResolution * MathUtils.Deg2Rad)).LocalToScaledSpace(), Color.green);
+                    Debug.DrawLine(ScaledSpace.LocalToScaledSpace(getPositionFromTrueAnomaly(tA)), ScaledSpace.LocalToScaledSpace(getPositionFromTrueAnomaly(Math.Min(Math.Acos(-(1.0 / eccentricity)), tA + drawResolution * (Math.PI / 180.0)))), Color.green);
+
+                    tA += drawResolution * (Math.PI / 180.0);
                 }
             }
 
-            Debug.DrawLine(getPositionAtT(ObT).LocalToScaledSpace(), referenceBody.Position.LocalToScaledSpace(), Color.white);
-            Debug.DrawLine(referenceBody.Position.LocalToScaledSpace(), referenceBody.Position.LocalToScaledSpace() + (an.xzy * radius), Color.cyan);
-            Debug.DrawLine(referenceBody.Position.LocalToScaledSpace(), getPositionAtT(0.0).LocalToScaledSpace(), Color.magenta);
-
-            Debug.DrawRay(getPositionAtT(ObT).LocalToScaledSpace(), vel.xzy * 0.0099999997764825821, Color.white);
-            Debug.DrawRay(referenceBody.Position.LocalToScaledSpace(), h.xzy.LocalToScaledSpace(), Color.blue);
+            Debug.DrawLine(ScaledSpace.LocalToScaledSpace(getPositionAtT(ObT)), ScaledSpace.LocalToScaledSpace(referenceBody.Position), Color.green);
+            Debug.DrawRay(ScaledSpace.LocalToScaledSpace(getPositionAtT(ObT)), (vel.xzy * 0.00999999977648258), Color.white);
+            Debug.DrawLine(ScaledSpace.LocalToScaledSpace(referenceBody.Position), ScaledSpace.LocalToScaledSpace(referenceBody.Position.ToVector3() + (Vector3)(an.xzy * radius)), Color.cyan);
+            Debug.DrawLine(ScaledSpace.LocalToScaledSpace(referenceBody.Position), ScaledSpace.LocalToScaledSpace(getPositionAtT(0.0)), Color.magenta);
+            Debug.DrawRay(ScaledSpace.LocalToScaledSpace(referenceBody.Position), ScaledSpace.LocalToScaledSpace(h.xzy), Color.blue);
         }
 
         public static bool PeApIntersects(Orbit primary, Orbit secondary, double threshold)
@@ -938,26 +860,21 @@ namespace Experimental
 
         public static void FindClosestPoints(Orbit p, Orbit s, ref double CD, ref double CCD, ref double FFp, ref double FFs, ref double SFp, ref double SFs, double epsilon, int maxIterations, ref int iterationCount)
         {
-            double pInc = p.inclination * MathUtils.Deg2Rad;
-            double sInc = s.inclination * MathUtils.Deg2Rad;
-            double dInc = pInc - sInc;
+            double num1 = p.inclination * MathUtils.Deg2Rad;
+            double num2 = s.inclination * MathUtils.Deg2Rad;
+            double num3 = num1 - num2;
 
             Vector3d vector3d = Vector3d.Cross(s.h, p.h);
 
-            Debug.DrawRay(p.referenceBody.Position.LocalToScaledSpace(), vector3d.xzy * 1000.0, Color.white);
+            Debug.DrawRay(ScaledSpace.LocalToScaledSpace(p.referenceBody.Position), (Vector3)(vector3d.xzy * 1000.0), Color.white);
 
-            double num4 = 1.0 / Math.Sin(dInc) * (Math.Sin(pInc) * Math.Cos(sInc) - Math.Sin(sInc) * Math.Cos(pInc) * Math.Cos(p.LAN * MathUtils.Deg2Rad - s.LAN * MathUtils.Deg2Rad));
-            double num5 = 1.0 / Math.Sin(dInc) * (Math.Sin(sInc) * Math.Sin(p.LAN * MathUtils.Deg2Rad - s.LAN * MathUtils.Deg2Rad));
+            double x1 = 1.0 / Math.Sin(num3) * (Math.Sin(num1) * Math.Cos(num2) - Math.Sin(num2) * Math.Cos(num1) * Math.Cos(p.LAN * MathUtils.Deg2Rad - s.LAN * MathUtils.Deg2Rad));
+            double num4 = Math.Atan2(1.0 / Math.Sin(num3) * (Math.Sin(num2) * Math.Sin(p.LAN * MathUtils.Deg2Rad - s.LAN * MathUtils.Deg2Rad)), x1);
+            double x2 = 1.0 / Math.Sin(num3) * (Math.Sin(num1) * Math.Cos(num2) * Math.Cos(p.LAN * MathUtils.Deg2Rad - s.LAN * MathUtils.Deg2Rad) - Math.Sin(num2) * Math.Cos(num1));
+            double num5 = Math.Atan2(1.0 / Math.Sin(num3) * (Math.Sin(num1) * Math.Sin(p.LAN * MathUtils.Deg2Rad - s.LAN * MathUtils.Deg2Rad)), x2);
 
-            double num6 = Math.Atan2(num5, num4);
-
-            double num7 = 1.0 / Math.Sin(dInc) * (Math.Sin(pInc) * Math.Cos(sInc) * Math.Cos(p.LAN * MathUtils.Deg2Rad - s.LAN * MathUtils.Deg2Rad) - Math.Sin(sInc) * Math.Cos(pInc));
-            double num8 = 1.0 / Math.Sin(dInc) * (Math.Sin(pInc) * Math.Sin(p.LAN * MathUtils.Deg2Rad - s.LAN * MathUtils.Deg2Rad));
-
-            double num9 = Math.Atan2(num8, num7);
-
-            FFp = num6 - p.argumentOfPeriapsis * MathUtils.Deg2Rad;
-            FFs = num9 - s.argumentOfPeriapsis * MathUtils.Deg2Rad;
+            FFp = num4 - p.argumentOfPeriapsis * MathUtils.Deg2Rad;
+            FFs = num5 - s.argumentOfPeriapsis * MathUtils.Deg2Rad;
 
             if (p.eccentricity == 0.0 && s.eccentricity == 0.0)
             {
@@ -965,18 +882,18 @@ namespace Experimental
                 CCD = CD;
             }
 
-            CD = SolveClosestBSP(ref FFp, ref FFs, dInc, MathUtils.PI, p, s, 0.0001, maxIterations, ref iterationCount);
+            CD = SolveClosestBSP(ref FFp, ref FFs, num3, Math.PI, p, s, 0.0001, maxIterations, ref iterationCount);
 
-            Debug.DrawLine(p.referenceBody.Position.LocalToScaledSpace(), p.getPositionFromTrueAnomaly(FFp).LocalToScaledSpace(), Color.green);
-            Debug.DrawLine(s.referenceBody.Position.LocalToScaledSpace(), s.getPositionFromTrueAnomaly(FFs).LocalToScaledSpace(), Color.grey);
+            Debug.DrawLine(ScaledSpace.LocalToScaledSpace(p.referenceBody.Position), ScaledSpace.LocalToScaledSpace(p.getPositionFromTrueAnomaly(FFp)), Color.green);
+            Debug.DrawLine(ScaledSpace.LocalToScaledSpace(s.referenceBody.Position), ScaledSpace.LocalToScaledSpace(s.getPositionFromTrueAnomaly(FFs)), Color.grey);
 
-            SFp = FFp + MathUtils.PI;
-            SFs = FFs + MathUtils.PI;
+            SFp = FFp + Math.PI;
+            SFs = FFs + Math.PI;
 
-            CCD = SolveClosestBSP(ref SFp, ref SFs, dInc, MathUtils.PIOver2, p, s, 0.0001, maxIterations, ref iterationCount);
+            CCD = SolveClosestBSP(ref SFp, ref SFs, num3, Math.PI / 2.0, p, s, 0.0001, maxIterations, ref iterationCount);
 
-            Debug.DrawLine(p.referenceBody.Position.LocalToScaledSpace(), p.getPositionFromTrueAnomaly(SFp).LocalToScaledSpace(), Color.cyan);
-            Debug.DrawLine(s.referenceBody.Position.LocalToScaledSpace(), s.getPositionFromTrueAnomaly(SFs).LocalToScaledSpace(), Color.magenta);
+            Debug.DrawLine(ScaledSpace.LocalToScaledSpace(p.referenceBody.Position), ScaledSpace.LocalToScaledSpace(p.getPositionFromTrueAnomaly(SFp)), Color.cyan);
+            Debug.DrawLine(ScaledSpace.LocalToScaledSpace(s.referenceBody.Position), ScaledSpace.LocalToScaledSpace(s.getPositionFromTrueAnomaly(SFs)), Color.magenta);
 
             CD = Math.Sqrt(CD);
             CCD = Math.Sqrt(CCD);
@@ -984,230 +901,131 @@ namespace Experimental
 
         private static double SolveClosestBSP(ref double Fp, ref double Fs, double Ir, double dF, Orbit p, Orbit s, double epsilon, int maxIterations, ref int iterationCount)
         {
-            double DF = dF;
+            double dFp = dF;
+            double dFs = dF;
 
-            if (Math.Abs(Ir) % MathUtils.PI * 2.0 > MathUtils.PIOver2) DF *= -1.0;
+            if (Math.Abs(Ir) % Math.PI * 2.0 > Math.PI / 2.0) dFs *= -1.0;
 
             iterationCount = 0;
 
-            double pM = (p.getRelativePositionFromTrueAnomaly(Fp) - s.getRelativePositionFromTrueAnomaly(Fs)).sqrMagnitude;
+            double bsp = (p.getRelativePositionFromTrueAnomaly(Fp) - s.getRelativePositionFromTrueAnomaly(Fs)).sqrMagnitude;
 
-            while (DF > 0.0001 && iterationCount < maxIterations)
+            while (dFp > 0.0001 && iterationCount < maxIterations)
             {
-                double sqrMagnitude1 = (p.getRelativePositionFromTrueAnomaly(Fp + DF) - s.getRelativePositionFromTrueAnomaly(Fs + DF)).sqrMagnitude;
-                double sqrMagnitude2 = (p.getRelativePositionFromTrueAnomaly(Fp - DF) - s.getRelativePositionFromTrueAnomaly(Fs - DF)).sqrMagnitude;
+                double sqrMagnitude1 = (p.getRelativePositionFromTrueAnomaly(Fp + dFp) - s.getRelativePositionFromTrueAnomaly(Fs + dFs)).sqrMagnitude;
+                double sqrMagnitude2 = (p.getRelativePositionFromTrueAnomaly(Fp - dFp) - s.getRelativePositionFromTrueAnomaly(Fs - dFs)).sqrMagnitude;
 
-                pM = Math.Min(pM, Math.Min(sqrMagnitude1, sqrMagnitude2));
+                bsp = Math.Min(bsp, Math.Min(sqrMagnitude1, sqrMagnitude2));
 
-                if (pM == sqrMagnitude1)
+                if (bsp == sqrMagnitude1)
                 {
-                    Fp += DF;
-                    Fs += DF;
+                    Fp = Fp + dFp;
+                    Fs = Fs + dFs;
                 }
-                else if (pM == sqrMagnitude2)
+                else if (bsp == sqrMagnitude2)
                 {
-                    Fp -= DF;
-                    Fs -= DF;
+                    Fp = Fp - dFp;
+                    Fs = Fs - dFs;
                 }
 
-                DF *= 0.5;
+                dFp *= 0.5;
+                dFs *= 0.5;
 
-                iterationCount++;
+                iterationCount = iterationCount + 1;
             }
 
-            return pM;
+            return bsp;
         }
 
         public static double SolveClosestApproach(Orbit p, Orbit s, ref double UT, double dT, double threshold, double MinUT, double MaxUT, double epsilon, int maxIterations, ref int iterationCount)
         {
-            if (UT < MinUT) return -1.0;
-            if (UT > MaxUT) return -1.0;
+            if (UT < MinUT || UT > MaxUT) return -1.0;
 
             iterationCount = 0;
 
-            double pM = Math.Abs((p.getPositionAtUT(UT) - s.getPositionAtUT(UT)).sqrMagnitude);
+            double closestAproach = Math.Abs((p.getPositionAtUT(UT) - s.getPositionAtUT(UT)).sqrMagnitude);
 
             while (dT > epsilon && iterationCount < maxIterations)
             {
-                double sqrMagnitude1 = (p.getPositionAtUT(UT + dT) - s.getPositionAtUT(UT + dT)).sqrMagnitude;
-                double sqrMagnitude2 = (p.getPositionAtUT(UT - dT) - s.getPositionAtUT(UT - dT)).sqrMagnitude;
+                double val1 = (p.getPositionAtUT(UT + dT) - s.getPositionAtUT(UT + dT)).sqrMagnitude;
+                double val2 = (p.getPositionAtUT(UT - dT) - s.getPositionAtUT(UT - dT)).sqrMagnitude;
 
-                if (UT - dT < MinUT) sqrMagnitude2 = 1.7976931348623157E+308;
-                if (UT + dT > MaxUT) sqrMagnitude1 = 1.7976931348623157E+308;
+                if (UT - dT < MinUT) val2 = double.MaxValue;
+                if (UT + dT > MaxUT) val1 = double.MaxValue;
 
-                pM = Math.Min(pM, Math.Min(sqrMagnitude1, sqrMagnitude2));
+                closestAproach = Math.Min(closestAproach, Math.Min(val1, val2));
 
-                if (pM == sqrMagnitude2) UT -= dT;
-                else if (pM == sqrMagnitude1) UT += dT;
+                if (closestAproach == val2) UT = UT - dT;
+                else if (closestAproach == val1) UT = UT + dT;
 
                 dT /= 2.0;
 
-                iterationCount++;
+                iterationCount = iterationCount + 1;
 
-                Debug.DrawLine(p.referenceBody.Position.LocalToScaledSpace(), p.getPositionAtUT(UT).LocalToScaledSpace(), Color.yellow * 0.5f);
+                Debug.DrawLine(ScaledSpace.LocalToScaledSpace(p.referenceBody.Position), ScaledSpace.LocalToScaledSpace(p.getPositionAtUT(UT)), XKCDColors.Lime * 0.5f);
             }
 
-            return Math.Sqrt(pM);
+            return Math.Sqrt(closestAproach);
         }
 
         public static bool SolveSOI_BSP(Orbit p, Orbit s, ref double UT, double dT, double Rsoi, double MinUT, double MaxUT, double epsilon, int maxIterations, ref int iterationCount)
         {
-            if (UT < MinUT) return false;
-            if (UT > MaxUT) return false;
+            if (UT < MinUT || UT > MaxUT) return false;
 
             iterationCount = 0;
 
-            bool result = false;
-
-            double r = Rsoi * Rsoi;
-            double pM = Math.Abs((p.getPositionAtUT(UT) - s.getPositionAtUT(UT)).sqrMagnitude - r);
+            double SOI = Rsoi * Rsoi;
+            double BSP = Math.Abs((p.getPositionAtUT(UT) - s.getPositionAtUT(UT)).sqrMagnitude - SOI);
 
             while (dT > epsilon && iterationCount < maxIterations)
             {
-                double sqrMagnitude1 = (p.getPositionAtUT(UT + dT) - s.getPositionAtUT(UT + dT)).sqrMagnitude - r;
-                double sqrMagnitude2 = (p.getPositionAtUT(UT - dT) - s.getPositionAtUT(UT - dT)).sqrMagnitude - r;
+                double num2 = (p.getPositionAtUT(UT + dT) - s.getPositionAtUT(UT + dT)).sqrMagnitude - SOI;
+                double num3 = (p.getPositionAtUT(UT - dT) - s.getPositionAtUT(UT - dT)).sqrMagnitude - SOI;
 
-                if (UT - dT < MinUT) sqrMagnitude2 = 1.7976931348623157E+308;
-                if (UT + dT > MaxUT) sqrMagnitude1 = 1.7976931348623157E+308;
+                if (UT - dT < MinUT) num3 = double.MaxValue;
+                if (UT + dT > MaxUT) num2 = double.MaxValue;
+                if (BSP < 0.0 || num2 < 0.0 || num3 < 0.0) return true;
 
-                if (pM < 0.0 || sqrMagnitude1 < 0.0 || sqrMagnitude2 < 0.0) result = true;
+                double val1_2 = Math.Abs(num2);
+                double val2 = Math.Abs(num3);
 
-                sqrMagnitude1 = Math.Abs(sqrMagnitude1);
-                sqrMagnitude2 = Math.Abs(sqrMagnitude2);
+                BSP = Math.Min(BSP, Math.Min(val1_2, val2));
 
-                pM = Math.Min(pM, Math.Min(sqrMagnitude1, sqrMagnitude2));
-
-                if (pM == sqrMagnitude2) UT -= dT;
-                else if (pM == sqrMagnitude1) UT += dT;
+                if (BSP == val2) UT = UT - dT;
+                else if (BSP == val1_2) UT = UT + dT;
 
                 dT /= 2.0;
-                iterationCount++;
 
-                Debug.DrawLine(p.referenceBody.Position.LocalToScaledSpace(), p.getPositionAtUT(UT).LocalToScaledSpace(), XKCDColors.LightMagenta * 0.5f);
+                iterationCount = iterationCount + 1;
+
+                Debug.DrawLine(ScaledSpace.LocalToScaledSpace(p.referenceBody.Position), ScaledSpace.LocalToScaledSpace(p.getPositionAtUT(UT)), XKCDColors.LightMagenta * 0.5f);
             }
 
-            return result;
-        }
-
-        private double fromE;
-        private double toE;
-        private double sampleInterval;
-        private double E;
-        private double V;
-        public double fromV;
-        public double toV;
-
-        private bool returnFullEllipseTrajectory = false;
-
-        public Trajectory GetPatchTrajectoryEcc(int sampleCount)
-        {
-            Vector3d[] positions = new Vector3d[sampleCount];
-
-            double[] trueAnomalies = new double[sampleCount];
-            float[] times = new float[sampleCount];
-
-            if (eccentricity < 1.0)
-            {
-                if (patchEndTransition == PatchTransitionType.FINAL || returnFullEllipseTrajectory)
-                {
-                    sampleInterval = MathUtils.TwoPI / (double)sampleCount;
-
-                    for (int i = 0; i < sampleCount; i++)
-                    {
-                        E = i * sampleInterval;
-                        V = getTrueAnomaly(E);
-
-                        times[i] = (float)(StartUT + GetDTforTrueAnomaly(V, 1.7976931348623157E+308));
-                        positions[i] = getPositionFromTrueAnomaly(E);
-                    }
-                }
-                else
-                {
-                    fromV = TrueAnomalyAtUT(StartUT);
-                    toV = TrueAnomalyAtUT(EndUT);
-                    fromE = GetEccentricAnomaly(fromV);
-                    toE = GetEccentricAnomaly(toV);
-
-                    if (fromV > toV) fromE = -(MathUtils.TwoPI - fromE);
-
-                    sampleInterval = (toE - fromE) / (sampleCount - 5);
-                    fromE -= sampleInterval * 2.0;
-
-                    double dTforTrueAnomaly = GetDTforTrueAnomaly(fromV, 0.0);
-
-                    for (int j = 0; j < sampleCount; j++)
-                    {
-                        E = fromE + sampleInterval * j;
-                        V = getTrueAnomaly(E);
-
-                        trueAnomalies[j] = V;
-                        times[j] = (float)(StartUT + GetDTforTrueAnomaly(V, dTforTrueAnomaly));
-
-                        positions[j] = getPositionFromTrueAnomaly(E);
-                    }
-                }
-            }
-            else
-            {
-                fromV = TrueAnomalyAtUT(StartUT);
-                toV = TrueAnomalyAtUT(EndUT);
-                fromE = GetEccentricAnomaly(fromV);
-                toE = GetEccentricAnomaly(toV);
-
-                if (fromV > MathUtils.PI) fromE = -fromE;
-
-                sampleInterval = (toE - fromE) / (sampleCount - 1);
-
-                for (int k = 0; k < sampleCount; k++)
-                {
-                    E = fromE + sampleInterval * k;
-                    V = getTrueAnomaly(E);
-
-                    times[k] = (float)(StartUT + GetDTforTrueAnomaly(V, 1.7976931348623157E+308));
-                    positions[k] = getPositionFromTrueAnomaly(E);
-                }
-            }
-
-            Vector3d periapsis;
-            Vector3d apoapsis;
-
-            if (eccentricity < 1.0)
-            {
-                periapsis = getRelativePositionAtT(0.0).xzy;
-                apoapsis = getRelativePositionAtT(period * 0.5).xzy;
-            }
-            else
-            {
-                periapsis = GetEccVector().xzy.normalized * (-semiMajorAxis * (eccentricity - 1.0));
-                apoapsis = Vector3d.zero;
-            }
-
-            Vector3d patchStartPoint = getRelativePositionAtUT(StartUT).xzy;
-            Vector3d patchEndPoint = getRelativePositionAtUT(EndUT).xzy;
-
-            return new Trajectory(positions, times, trueAnomalies, periapsis, apoapsis, patchStartPoint, patchEndPoint, Vector3d.zero, this);
+            return false;
         }
 
         public Trajectory GetPatchTrajectory(int sampleCount)
         {
-            Vector3d[] positions = new Vector3d[sampleCount];
+            Vector3d[] points = new Vector3d[sampleCount];
 
             double[] trueAnomalies = new double[sampleCount];
+
             float[] times = new float[sampleCount];
 
             if (eccentricity < 1.0)
             {
-                if (patchEndTransition == PatchTransitionType.FINAL || returnFullEllipseTrajectory)
+                if (patchEndTransition == PatchTransitionType.FINAL || debug_returnFullEllipseTrajectory)
                 {
-                    sampleInterval = MathUtils.TwoPI / (double)sampleCount;
+                    sampleInterval = 2.0 * Math.PI / sampleCount;
 
-                    for (int i = 0; i < sampleCount; i++)
+                    for (int index = 0; index < sampleCount; ++index)
                     {
-                        E = i * sampleInterval;
+                        E = index * sampleInterval;
                         V = getTrueAnomaly(E);
 
-                        times[i] = (float)(StartUT + GetDTforTrueAnomaly(V, 1.7976931348623157E+308));
-                        positions[i] = getRelativePositionFromEccAnomaly(E).xzy;
+                        times[index] = (float)(StartUT + GetDTforTrueAnomaly(V, double.MaxValue));
+
+                        points[index] = getRelativePositionFromEccAnomaly(E).xzy;
                     }
                 }
                 else
@@ -1217,22 +1035,27 @@ namespace Experimental
                     fromE = GetEccentricAnomaly(fromV);
                     toE = GetEccentricAnomaly(toV);
 
-                    if (fromV > toV) fromE = -(MathUtils.TwoPI - fromE);
+                    if (fromV > toV)
+                    {
+                        fromE = -(2.0 * Math.PI - fromE);
+                        fromV = -(2.0 * Math.PI - fromV);
+                    }
 
                     sampleInterval = (toE - fromE) / (sampleCount - 5);
                     fromE -= sampleInterval * 2.0;
 
-                    double dTforTrueAnomaly = GetDTforTrueAnomaly(fromV, 0.0);
+                    double dTForTrueAnomaly = GetDTforTrueAnomaly(fromV, 0.0);
 
-                    for (int j = 0; j < sampleCount; j++)
+                    for (int index = 0; index < sampleCount; ++index)
                     {
-                        E = fromE + sampleInterval * j;
+                        E = fromE + sampleInterval * index;
                         V = getTrueAnomaly(E);
 
-                        trueAnomalies[j] = V;
-                        times[j] = (float)(StartUT + GetDTforTrueAnomaly(V, dTforTrueAnomaly));
+                        trueAnomalies[index] = V;
 
-                        positions[j] = getRelativePositionFromEccAnomaly(E).xzy;
+                        times[index] = (float)(StartUT + GetDTforTrueAnomaly(V, dTForTrueAnomaly));
+
+                        points[index] = getRelativePositionFromEccAnomaly(E).xzy;
                     }
                 }
             }
@@ -1243,51 +1066,69 @@ namespace Experimental
                 fromE = GetEccentricAnomaly(fromV);
                 toE = GetEccentricAnomaly(toV);
 
-                if (fromV > MathUtils.PI) fromE = -fromE;
+                if (double.IsInfinity(fromE))
+                {
+                    if (fromE > 0.0) fromV *= 0.95;
+                    else fromV = 0.95 * (fromV - 2.0 * Math.PI);
+
+                    fromE = GetEccentricAnomaly(fromV);
+                }
+
+                if (double.IsInfinity(toE))
+                {
+                    if (toE > 0.0) toV *= 0.95;
+                    else toV = 0.95 * (toV - 2.0 * Math.PI);
+
+                    toE = GetEccentricAnomaly(toV);
+                }
+
+                if (fromV > Math.PI) fromE = -fromE;
 
                 sampleInterval = (toE - fromE) / (sampleCount - 1);
 
-                for (int k = 0; k < sampleCount; k++)
+                for (int index = 0; index < sampleCount; ++index)
                 {
-                    E = fromE + sampleInterval * k;
+                    E = fromE + sampleInterval * index;
                     V = getTrueAnomaly(E);
 
-                    times[k] = (float)(StartUT + GetDTforTrueAnomaly(V, 1.7976931348623157E+308));
-                    positions[k] = getRelativePositionFromEccAnomaly(E).xzy;
+                    times[index] = (float)(StartUT + GetDTforTrueAnomaly(V, double.MaxValue));
+
+                    points[index] = getRelativePositionFromEccAnomaly(E).xzy;
                 }
             }
 
-            Vector3d periapsis;
-            Vector3d apoapsis;
+            Vector3d pe;
+            Vector3d ap;
 
             if (eccentricity < 1.0)
             {
-                periapsis = getRelativePositionAtT(0.0).xzy;
-                apoapsis = getRelativePositionAtT(period * 0.5).xzy;
+                pe = getRelativePositionAtT(0.0).xzy;
+                ap = getRelativePositionAtT(period * 0.5).xzy;
             }
             else
             {
-                periapsis = GetEccVector().xzy.normalized * (-semiMajorAxis * (eccentricity - 1.0));
-                apoapsis = Vector3d.zero;
+                pe = GetEccVector().xzy.normalized * (-semiMajorAxis * (eccentricity - 1.0));
+                ap = Vector3d.zero;
             }
 
             Vector3d patchStartPoint = getRelativePositionAtUT(StartUT).xzy;
             Vector3d patchEndPoint = getRelativePositionAtUT(EndUT).xzy;
 
-            return new Trajectory(positions, times, trueAnomalies, periapsis, apoapsis, patchStartPoint, patchEndPoint, Vector3d.zero, this);
+            return new Trajectory(points, times, trueAnomalies, pe, ap, patchStartPoint, patchEndPoint, Vector3d.zero, this);
         }
 
         public static Orbit CreateRandomOrbitAround(CelestialBody body)
         {
             Orbit orbit = new Orbit();
+
             orbit.referenceBody = body;
-            orbit.eccentricity = Random.Range(0.0001f, 0.01f);
-            orbit.semiMajorAxis = Random.Range((float)body.Radius, (float)body.sphereOfInfluence);
-            orbit.inclination = Random.Range(-0.001f, 0.001f);
-            orbit.LAN = Random.Range(0.999f, 1.001f);
-            orbit.argumentOfPeriapsis = Random.Range(0.999f, 1.001f);
-            orbit.meanAnomalyAtEpoch = Random.Range(0.999f, 1.001f);
-            orbit.epoch = Random.Range(0.999f, 1.001f);
+            orbit.eccentricity = UnityEngine.Random.Range(0.0001f, 0.01f);
+            orbit.semiMajorAxis = UnityEngine.Random.Range((float)body.Radius, (float)body.sphereOfInfluence);
+            orbit.inclination = UnityEngine.Random.Range(-1f / 1000f, 1f / 1000f);
+            orbit.LAN = UnityEngine.Random.Range(0.999f, 1.001f);
+            orbit.argumentOfPeriapsis = UnityEngine.Random.Range(0.999f, 1.001f);
+            orbit.meanAnomalyAtEpoch = UnityEngine.Random.Range(0.999f, 1.001f);
+            orbit.epoch = UnityEngine.Random.Range(0.999f, 1.001f);
 
             orbit.Init();
 
@@ -1297,14 +1138,15 @@ namespace Experimental
         public static Orbit CreateRandomOrbitAround(CelestialBody body, double minAltitude, double maxAltitude)
         {
             Orbit orbit = new Orbit();
+
             orbit.referenceBody = body;
-            orbit.eccentricity = Random.Range(0.0001f, 0.01f);
-            orbit.semiMajorAxis = Random.Range((float)minAltitude, (float)maxAltitude);
-            orbit.inclination = Random.Range(-0.001f, 0.001f);
-            orbit.LAN = Random.Range(0.999f, 1.001f);
-            orbit.argumentOfPeriapsis = Random.Range(0.999f, 1.001f);
-            orbit.meanAnomalyAtEpoch = Random.Range(0.999f, 1.001f);
-            orbit.epoch = Random.Range(0.999f, 1.001f);
+            orbit.eccentricity = UnityEngine.Random.Range(0.0001f, 0.01f);
+            orbit.semiMajorAxis = UnityEngine.Random.Range((float)minAltitude, (float)maxAltitude);
+            orbit.inclination = UnityEngine.Random.Range(-1f / 1000f, 1f / 1000f);
+            orbit.LAN = UnityEngine.Random.Range(0.999f, 1.001f);
+            orbit.argumentOfPeriapsis = UnityEngine.Random.Range(0.999f, 1.001f);
+            orbit.meanAnomalyAtEpoch = UnityEngine.Random.Range(0.999f, 1.001f);
+            orbit.epoch = UnityEngine.Random.Range(0.999f, 1.001f);
 
             orbit.Init();
 
@@ -1314,12 +1156,13 @@ namespace Experimental
         public static Orbit CreateRandomOrbitNearby(Orbit baseOrbit)
         {
             Orbit orbit = new Orbit();
-            orbit.eccentricity = baseOrbit.eccentricity + Random.Range(0.0001f, 0.01f);
-            orbit.semiMajorAxis = baseOrbit.semiMajorAxis * Random.Range(0.999f, 1.001f);
-            orbit.inclination = baseOrbit.inclination + Random.Range(-0.001f, 0.001f);
-            orbit.LAN = baseOrbit.LAN * Random.Range(0.999f, 1.001f);
-            orbit.argumentOfPeriapsis = baseOrbit.argumentOfPeriapsis * Random.Range(0.999f, 1.001f);
-            orbit.meanAnomalyAtEpoch = baseOrbit.meanAnomalyAtEpoch * Random.Range(0.999f, 1.001f);
+
+            orbit.eccentricity = baseOrbit.eccentricity + UnityEngine.Random.Range(0.0001f, 0.01f);
+            orbit.semiMajorAxis = baseOrbit.semiMajorAxis * UnityEngine.Random.Range(0.999f, 1.001f);
+            orbit.inclination = baseOrbit.inclination + UnityEngine.Random.Range(-1f / 1000f, 1f / 1000f);
+            orbit.LAN = baseOrbit.LAN * UnityEngine.Random.Range(0.999f, 1.001f);
+            orbit.argumentOfPeriapsis = baseOrbit.argumentOfPeriapsis * UnityEngine.Random.Range(0.999f, 1.001f);
+            orbit.meanAnomalyAtEpoch = baseOrbit.meanAnomalyAtEpoch * UnityEngine.Random.Range(0.999f, 1.001f);
             orbit.epoch = baseOrbit.epoch;
             orbit.referenceBody = baseOrbit.referenceBody;
 
@@ -1330,8 +1173,8 @@ namespace Experimental
 
         public static Orbit CreateRandomOrbitFlyBy(CelestialBody tgtBody, double daysToClosestApproach)
         {
-            double periapsis = Math.Max(tgtBody.Radius * 3.0, tgtBody.sphereOfInfluence * Random.Range(0f, 1.1f));
-            double deltaVatPeriapsis = Random.Range(100f, 500f);
+            double periapsis = Math.Max(tgtBody.Radius * 3.0, tgtBody.sphereOfInfluence * UnityEngine.Random.Range(0.0f, 1.1f));
+            double deltaVatPeriapsis = UnityEngine.Random.Range(100f, 500f);
 
             return CreateRandomOrbitFlyBy(tgtBody.Orbit, daysToClosestApproach * 24.0 * 60.0 * 60.0, periapsis, deltaVatPeriapsis);
         }
@@ -1340,17 +1183,45 @@ namespace Experimental
         {
             double universalTime = Planetarium.GetUniversalTime();
 
-            Vector3d relativePositionAtUT = targetOrbit.getRelativePositionAtUT(universalTime + timeToPeriapsis);
-            Vector3d orbitalVelocityAtUT = targetOrbit.getOrbitalVelocityAtUT(universalTime + timeToPeriapsis);
+            Vector3d relativePositionAtUt = targetOrbit.getRelativePositionAtUT(universalTime + timeToPeriapsis);
+            Vector3d orbitalVelocityAtUt = targetOrbit.getOrbitalVelocityAtUT(universalTime + timeToPeriapsis);
 
             Orbit orbit = new Orbit();
 
-            Vector3d pos = relativePositionAtUT.ToVector3() + Random.onUnitSphere * (float)periapsis;
-            Vector3d vel = orbitalVelocityAtUT.ToVector3() + (orbitalVelocityAtUT.normalized.ToVector3() + Random.onUnitSphere) * (float)deltaVatPeriapsis;
+            Vector3d pos = relativePositionAtUt + (Vector3d)UnityEngine.Random.onUnitSphere * periapsis;
+            Vector3d vel = orbitalVelocityAtUt + (orbitalVelocityAtUt.normalized + (Vector3d)UnityEngine.Random.onUnitSphere) * deltaVatPeriapsis;
 
             orbit.UpdateFromStateVectors(pos, vel, targetOrbit.referenceBody, universalTime + timeToPeriapsis);
 
             return orbit;
+        }
+
+        public enum ObjectType
+        {
+            VESSEL,
+            SPACE_DEBRIS,
+            CELESTIAL_BODIES,
+            UNKNOWN_MISC,
+            KERBAL,
+        }
+
+        public enum EncounterSolutionLevel
+        {
+            NONE,
+            ESCAPE,
+            ORBIT_INTERSECT,
+            SOI_INTERSECT_2,
+            SOI_INTERSECT_1,
+        }
+
+        public enum PatchTransitionType
+        {
+            INITIAL,
+            FINAL,
+            ENCOUNTER,
+            ESCAPE,
+            MANEUVER,
+            IMPACT,
         }
     }
 }

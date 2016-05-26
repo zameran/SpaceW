@@ -159,23 +159,19 @@ namespace Experimental
         private void TrackRigidbody(CelestialBody refBody)
         {
             CoMLocal = vessel.findLocalCenterOfMass();
-            pos = (driverTransform.position + driverTransform.rotation * CoMLocal - (Vector3)refBody.Position);
-            pos = pos.xzy;
+            pos = ((Vector3d)vessel.CoM - refBody.Position).xzy;
 
-            if (updateMode == UpdateMode.IDLE)
+            if (vessel != null && vessel.rb != null && !vessel.rb.isKinematic)
+            {
+                vel = vessel.rb.GetPointVelocity(vessel.CoM);
+                vel = vel.xzy + orbit.GetRotFrameVel(ReferenceBody);
+            }
+            else if (updateMode == UpdateMode.IDLE)
             {
                 vel = orbit.GetRotFrameVel(ReferenceBody);
             }
 
-            if (vessel != null && vessel.rb != null && !vessel.rb.isKinematic)
-            {
-                Vector3d vesselVel = vessel.rb.GetPointVelocity(vessel.CoM);
-
-                vel = vesselVel;
-                vel = vel.xzy + orbit.GetRotFrameVel(ReferenceBody);
-            }
-
-            vel += ReferenceBody.GetFrameVel() - refBody.GetFrameVel();
+            vel = vel + ReferenceBody.GetFrameVel() - refBody.GetFrameVel();
             pos += vel * Time.fixedDeltaTime;
 
             orbit.UpdateFromStateVectors(pos, vel, refBody, Planetarium.GetUniversalTime());
