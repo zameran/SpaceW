@@ -14,6 +14,17 @@ namespace Experimental
             celestialBody = GetComponent<CelestialBody>();
             vessel = GetComponent<Vessel>();
         }
+
+        public CelestialBody GetReferenceBody()
+        {
+            if (celestialBody)
+                return celestialBody;
+
+            if (vessel)
+                return vessel.orbitDriver.orbit.referenceBody;
+
+            return null;
+        }
     }
 
     public static class TargetExtensions

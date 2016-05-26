@@ -27,6 +27,8 @@
 
         public CelestialBody targetBody;
 
+        public bool updateFlightPlan = false;
+
         public Orbit orbit
         {
             get
@@ -171,7 +173,7 @@
 
         private void OnReferenceBodyChange(CelestialBody body)
         {
-            
+            updateFlightPlan = true;
         }
 
         public void RemoveManeuverNode(ManeuverNode node)
@@ -187,6 +189,7 @@
 
             if (maneuverNodes.Count != 0)
             {
+                Update();
                 UpdateFlightPlan();
             }
             else
@@ -217,7 +220,6 @@
             }
 
             //if (obtDriver.updateMode == OrbitDriver.UpdateMode.IDLE) return;
-
             if (obtDriver.vessel == null) return;
 
             patches[0] = orbit;
@@ -238,11 +240,17 @@
             }
             while (i < patchLimit || maneuverNodes.Count > 0 && FindFirstPatch(maneuverNodes[0].UT) == null);
 
+            if (!updateFlightPlan) return;
+
             UpdateFlightPlan();
+
+            updateFlightPlan = false;
         }
 
         public void UpdateFlightPlan()
         {
+            Debug.Log("[PatchedConicsSolver] : UpdateFlightPlan!");
+
             if (maneuverNodes.Count > 0)
             {
                 maneuverNodes.Sort(new Comparison<ManeuverNode>(SortNodesByDate));

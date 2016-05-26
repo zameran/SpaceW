@@ -201,7 +201,9 @@
                     {
                         GUILayout.Label("Velocity: " + hitDriver.orbit.vel.magnitude.ToString("0.0") + " m/s");
                         GUILayout.Label("Altitude: " + hitDriver.orbit.altitude.ToString("N0") + " m");
-                    }, hitDriver.name + "s Orbit Info");
+                        GUILayout.Label("Apoapsis: " + hitDriver.orbit.ApA.ToString("N0") + " m");
+                        GUILayout.Label("Periapsis: " + hitDriver.orbit.PeA.ToString("N0") + " m");
+                    }, hitDriver.name + "'s Orbit Info");
 
                     GUILayout.EndArea();
                 }

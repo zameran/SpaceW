@@ -301,10 +301,10 @@
                 relativityMode = RelativityMode.LOCAL_TO_BODIES;
             }
 
-            //if (patch.referenceBody == PlanetariumCamera.fetch.target.GetReferenceBody() || patch.referenceBody.HasChild(PlanetariumCamera.fetch.target.GetReferenceBody()))
-            //{
-            //    relativityMode = RelativityMode.LOCAL_TO_BODIES;
-            //}
+            if (patch.referenceBody == PlanetariumCamera.fetch.target.GetReferenceBody() || patch.referenceBody.HasChild(PlanetariumCamera.fetch.target.GetReferenceBody()))
+            {
+                relativityMode = RelativityMode.LOCAL_TO_BODIES;
+            }
 
             double UT = Planetarium.GetUniversalTime();
 
