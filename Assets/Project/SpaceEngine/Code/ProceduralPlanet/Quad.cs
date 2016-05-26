@@ -861,6 +861,7 @@ public sealed class Quad : MonoBehaviour, IQuad
         quad.generationConstants.cubeFaceEastDirection = cfed;
         quad.generationConstants.cubeFaceNorthDirection = cfnd;
         quad.generationConstants.patchCubeCenter = quad.GetPatchCubeCenterSplitted(quad.Position, id, staticX, staticY, staticZ);
+        //quad.generationConstants.patchCubeCenter = quad.GetPatchCubeCenterSplittedAlternative(quad.Position, id, staticX, staticY, staticZ);
     }
 
     public void SetupCorners(QuadPosition pos)
@@ -1124,6 +1125,109 @@ public sealed class Quad : MonoBehaviour, IQuad
                 temp = new Vector3(0.0f, 0.0f, -r);
                 break;
         }
+
+        return temp;
+    }
+
+    public Vector3 GetPatchCubeCenterSplittedAlternative(QuadPosition quadPosition, int id, bool staticX, bool staticY, bool staticZ)
+    {
+        Vector3 temp = Vector3.zero;
+
+        float mod = 0.5f;
+        float v = Planetoid.PlanetRadius;
+        float tempStatic = 0;
+
+        switch (quadPosition)
+        {
+            case QuadPosition.Top:
+                if (id == 0)
+                    temp += new Vector3(-v * mod, v, v * mod);
+                else if (id == 1)
+                    temp += new Vector3(v * mod, v, v * mod);
+                else if (id == 2)
+                    temp += new Vector3(-v * mod, v, -v * mod);
+                else if (id == 3)
+                    temp += new Vector3(v * mod, v, -v * mod);
+                break;
+            case QuadPosition.Bottom:
+                if (id == 0)
+                    temp += new Vector3(-v * mod, -v, -v * mod);
+                else if (id == 1)
+                    temp += new Vector3(v * mod, -v, -v * mod);
+                else if (id == 2)
+                    temp += new Vector3(-v * mod, -v, v * mod);
+                else if (id == 3)
+                    temp += new Vector3(v * mod, -v, v * mod);
+                break;
+            case QuadPosition.Left:
+                if (id == 0)
+                    temp += new Vector3(-v, v * mod, v * mod);
+                else if (id == 1)
+                    temp += new Vector3(-v, v * mod, -v * mod);
+                else if (id == 2)
+                    temp += new Vector3(-v, -v * mod, v * mod);
+                else if (id == 3)
+                    temp += new Vector3(-v, -v * mod, -v * mod);
+                break;
+            case QuadPosition.Right:
+                if (id == 0)
+                    temp += new Vector3(v, v * mod, -v * mod);
+                else if (id == 1)
+                    temp += new Vector3(v, v * mod, v * mod);
+                else if (id == 2)
+                    temp += new Vector3(v, -v * mod, -v * mod);
+                else if (id == 3)
+                    temp += new Vector3(v, -v * mod, v * mod);
+                break;
+            case QuadPosition.Front:
+                if (id == 0)
+                    temp += new Vector3(v * mod, v * mod, v);
+                else if (id == 1)
+                    temp += new Vector3(-v * mod, v * mod, v);
+                else if (id == 2)
+                    temp += new Vector3(v * mod, -v * mod, v);
+                else if (id == 3)
+                    temp += new Vector3(-v * mod, -v * mod, v);
+                break;
+            case QuadPosition.Back:
+                if (id == 0)
+                    temp += new Vector3(-v * mod, v * mod, -v);
+                else if (id == 1)
+                    temp += new Vector3(v * mod, v * mod, -v);
+                else if (id == 2)
+                    temp += new Vector3(-v * mod, -v * mod, -v);
+                else if (id == 3)
+                    temp += new Vector3(v * mod, -v * mod, -v);
+                break;
+        }
+
+        Vector3 topLeft = Parent.topLeftCorner;
+        Vector3 topRight = Parent.topRightCorner;
+        Vector3 bottomLeft = Parent.bottomLeftCorner;
+        Vector3 bottomRight = Parent.bottomRightCorner;
+
+        Vector3 parentPcc = Parent.generationConstants.patchCubeCenter;
+
+        BrainFuckMath.LockAxis(ref tempStatic, ref temp, staticX, staticY, staticZ);
+
+        if (id == 0)
+        {
+            temp = topLeft - parentPcc;
+        }
+        else if (id == 1)
+        {
+            temp = topRight - parentPcc;
+        }
+        else if (id == 2)
+        {
+            temp = bottomLeft - parentPcc;
+        }
+        else if (id == 3)
+        {
+            temp = bottomRight - parentPcc;
+        }
+
+        BrainFuckMath.UnlockAxis(ref temp, ref tempStatic, staticX, staticY, staticZ);
 
         return temp;
     }
