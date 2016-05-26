@@ -59,6 +59,8 @@ public sealed class QuadTextureCache : QuadCache
 
     public override void TransferTo(Quad q)
     {
+        RenderTexture.active = null;
+
         if (Owner.Multithreaded)
         {
             Dispatcher.InvokeAsync(() =>
@@ -81,6 +83,8 @@ public sealed class QuadTextureCache : QuadCache
 
     public override void TransferFrom(Quad q)
     {
+        RenderTexture.active = null;
+
         if (Owner.Multithreaded)
         {
             Dispatcher.InvokeAsync(() =>

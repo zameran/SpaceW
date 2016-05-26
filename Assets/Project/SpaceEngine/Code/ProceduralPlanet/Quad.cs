@@ -67,18 +67,8 @@ public sealed class Quad : MonoBehaviour, IQuad
             this.Position = Position;
         }
 
-        public int Compare(Id id)
-        {
-            return LODLevel.CompareTo(id.LODLevel);
-        }
-
         public bool Equals(Id id)
         {
-            if (ReferenceEquals(this, id))
-            {
-                return true;
-            }
-
             if ((this == null) || (id == null))
             {
                 return false;
