@@ -71,7 +71,8 @@ public abstract class Planet : MonoBehaviour
     public Transform LODTarget = null;
 
     public float LODUpdateInterval = 0.25f;
-    [HideInInspector] public float LastLODUpdateTime = 0.00f;
+    [HideInInspector]
+    public float LastLODUpdateTime = 0.00f;
 
     public GameObject QuadsRoot = null;
 
@@ -86,9 +87,9 @@ public abstract class Planet : MonoBehaviour
     public int[] LODDistances = new int[13] { 2048, 1024, 512, 256, 128, 64, 32, 16, 8, 4, 2, 1, 0 };
     public float[] LODOctaves = new float[6] { 0.5f, 0.5f, 0.5f, 0.75f, 0.75f, 1.0f };
 
-    public bool RenderPerUpdate = false;
     public bool OneSplittingQuad = true;
     public bool ExternalRendering = false;
+    public bool RenderQuadsFromPlanetoid = false;
 
     public SmartThreadPool stp = new SmartThreadPool();
 

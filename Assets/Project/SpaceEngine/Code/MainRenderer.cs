@@ -45,7 +45,7 @@ public sealed class MainRenderer : MonoBehaviour
 
     private void Update()
     {
-        if (atmosphere != null) atmosphere.Render(false);
+        if (atmosphere != null) atmosphere.Render();
         if (planet != null) planet.Render();
     }
 

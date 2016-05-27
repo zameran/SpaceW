@@ -244,16 +244,14 @@ public sealed class Atmosphere : MonoBehaviour
         }
     }
 
-    public void Render(bool now, int drawLayer = 8)
+    public void Render(int drawLayer = 8)
     {
         SetUniforms(SkyMaterial);
+
         SkyMaterial.renderQueue = (int)RenderQueue + RenderQueueOffset;
         SkyMaterial.SetPass(0);
 
-        if (!now)
-            Graphics.DrawMesh(AtmosphereMesh, transform.localToWorldMatrix, SkyMaterial, drawLayer);
-        else
-            Graphics.DrawMeshNow(AtmosphereMesh, transform.localToWorldMatrix);
+        Graphics.DrawMesh(AtmosphereMesh, transform.localToWorldMatrix, SkyMaterial, drawLayer);
     }
 
     private void OnDestroy()

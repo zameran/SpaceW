@@ -127,26 +127,6 @@ public sealed class Planetoid : Planet, IPlanet
         else
             DistanceToLODTarget = -1.0f;
 
-        if (Atmosphere != null)
-        {
-            if (Atmosphere.Sun_1 != null) Atmosphere.Sun_1.UpdateNode();
-            if (Atmosphere.Sun_2 != null) Atmosphere.Sun_2.UpdateNode();
-            if (Atmosphere.Sun_3 != null) Atmosphere.Sun_3.UpdateNode();
-            if (Atmosphere.Sun_4 != null) Atmosphere.Sun_4.UpdateNode();
-
-            Atmosphere.Origin = Origin;
-            Atmosphere.UpdateNode();
-
-            if (RenderPerUpdate)
-                Atmosphere.Render(false, DrawLayer);
-        }
-
-        if (Cloudsphere != null)
-        {
-            if (RenderPerUpdate)
-                Cloudsphere.Render(false, DrawLayer);
-        }
-
         if (Input.GetKeyDown(KeyCode.F1))
         {
             DrawNormals = !DrawNormals;
@@ -165,7 +145,7 @@ public sealed class Planetoid : Planet, IPlanet
             }
         }
 
-        if (ExternalRendering && RenderPerUpdate)
+        if (!ExternalRendering)
         {
             Render();
         }
@@ -189,23 +169,6 @@ public sealed class Planetoid : Planet, IPlanet
     protected override void OnRenderObject()
     {
         base.OnRenderObject();
-
-        if (ExternalRendering && !RenderPerUpdate)
-        {
-            Render();
-        }
-
-        if (Atmosphere != null)
-        {
-            if (!RenderPerUpdate)
-                Atmosphere.Render(true, DrawLayer);
-        }
-
-        if (Cloudsphere != null)
-        {
-            if (!RenderPerUpdate)
-                Cloudsphere.Render(true, DrawLayer);
-        }
 
         if (wireframeSwitcher != null)
             if (wireframeSwitcher.Enabled)
@@ -253,9 +216,31 @@ public sealed class Planetoid : Planet, IPlanet
 
     public void Render()
     {
-        for (int i = 0; i < Quads.Count; i++)
+        if (RenderQuadsFromPlanetoid)
         {
-            Quads[i].Render();
+            for (int i = 0; i < Quads.Count; i++)
+            {
+                if (Quads[i] != null)
+                    Quads[i].Render();
+            }
+        }
+
+        if (Atmosphere != null)
+        {
+            if (Atmosphere.Sun_1 != null) Atmosphere.Sun_1.UpdateNode();
+            if (Atmosphere.Sun_2 != null) Atmosphere.Sun_2.UpdateNode();
+            if (Atmosphere.Sun_3 != null) Atmosphere.Sun_3.UpdateNode();
+            if (Atmosphere.Sun_4 != null) Atmosphere.Sun_4.UpdateNode();
+
+            Atmosphere.Origin = Origin;
+            Atmosphere.UpdateNode();
+
+            Atmosphere.Render(DrawLayer);
+        }
+
+        if (Cloudsphere != null)
+        {
+            Cloudsphere.Render(DrawLayer);
         }
     }
 

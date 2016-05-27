@@ -31,9 +31,10 @@ public class Cloudsphere : MonoBehaviour
 
     }
 
-    public void Render(bool now, int drawLayer = 8)
+    public void Render(int drawLayer = 8)
     {
         SetUniforms(CloudMaterial);
+
         CloudMaterial.renderQueue = (int)RenderQueue + RenderQueueOffset;
         CloudMaterial.SetPass(0);
 
@@ -41,10 +42,7 @@ public class Cloudsphere : MonoBehaviour
 
         Matrix4x4 CloudsTRS = Matrix4x4.TRS(Planetoid.transform.position, transform.rotation, Vector3.one * (Radius + Height));
 
-        if (!now)
-            Graphics.DrawMesh(CloudsphereMesh, CloudsTRS, CloudMaterial, drawLayer);
-        else
-            Graphics.DrawMeshNow(CloudsphereMesh, CloudsTRS);
+        Graphics.DrawMesh(CloudsphereMesh, CloudsTRS, CloudMaterial, drawLayer);
     }
 
     public void InitMaterials()

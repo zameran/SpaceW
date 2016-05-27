@@ -203,27 +203,20 @@ public sealed class Quad : MonoBehaviour, IQuad
 
     private void Update()
     {
-        if (!Planetoid.ExternalRendering)
-            if (Planetoid.RenderPerUpdate)
-                Render();
+        if (!Planetoid.ExternalRendering && !Planetoid.RenderQuadsFromPlanetoid)
+            Render();
     }
 
     private void FixedUpdate()
     {
-        //Some strange thing happends if i manualy switch Planetoid.RenderPerUpdate - FPS going up!.
-        //But no effect if CPU is under side load... Eg. when streaming :)
+
     }
 
     private void OnDestroy()
     {
         BufferHelper.ReleaseAndDisposeBuffers(QuadGenerationConstantsBuffer, PreOutDataBuffer, PreOutDataSubBuffer, OutDataBuffer, QuadCornersBuffer);
 
-        //RenderTexture.active = null; 
-
-        //Fixing RenderTexture.active on OnDestroy. Maybe custom GC for RenderTexture.active?
-        if (RenderTexture.active == HeightTexture | NormalTexture) RenderTexture.active = null; //Best idea anyway.
-        //if (RenderTexture.active != null) RenderTexture.active = null;
-        //RenderTexture.active = null;
+        if (RenderTexture.active == HeightTexture | NormalTexture) RenderTexture.active = null;
 
         if (HeightTexture != null)
             HeightTexture.ReleaseAndDestroy();
@@ -260,10 +253,6 @@ public sealed class Quad : MonoBehaviour, IQuad
 
     private void OnRenderObject()
     {
-        if (!Planetoid.ExternalRendering)
-            if (!Planetoid.RenderPerUpdate)
-                Render();
-
         if (Planetoid.wireframeSwitcher != null)
             if (Planetoid.wireframeSwitcher.Enabled)
                 GL.wireframe = true;
@@ -281,24 +270,24 @@ public sealed class Quad : MonoBehaviour, IQuad
 
             Gizmos.color = Color.red;
 
-            Gizmos.DrawWireSphere(Planetoid.transform.TransformPoint(topLeftCorner), 100);
-            Gizmos.DrawWireSphere(Planetoid.transform.TransformPoint(topRightCorner), 100);
-            Gizmos.DrawWireSphere(Planetoid.transform.TransformPoint(bottomLeftCorner), 100);
-            Gizmos.DrawWireSphere(Planetoid.transform.TransformPoint(bottomRightCorner), 100);
+            Gizmos.DrawWireSphere(Planetoid.transform.TransformPoint(topLeftCorner), 1000);
+            Gizmos.DrawWireSphere(Planetoid.transform.TransformPoint(topRightCorner), 1000);
+            Gizmos.DrawWireSphere(Planetoid.transform.TransformPoint(bottomLeftCorner), 1000);
+            Gizmos.DrawWireSphere(Planetoid.transform.TransformPoint(bottomRightCorner), 1000);
 
             Gizmos.color = Color.green;
 
-            Gizmos.DrawWireSphere(Planetoid.transform.TransformPoint(topLeftCorner.NormalizeToRadius(Planetoid.PlanetRadius)), 175);
-            Gizmos.DrawWireSphere(Planetoid.transform.TransformPoint(topRightCorner.NormalizeToRadius(Planetoid.PlanetRadius)), 175);
-            Gizmos.DrawWireSphere(Planetoid.transform.TransformPoint(bottomLeftCorner.NormalizeToRadius(Planetoid.PlanetRadius)), 175);
-            Gizmos.DrawWireSphere(Planetoid.transform.TransformPoint(bottomRightCorner.NormalizeToRadius(Planetoid.PlanetRadius)), 175);
+            Gizmos.DrawWireSphere(Planetoid.transform.TransformPoint(topLeftCorner.NormalizeToRadius(Planetoid.PlanetRadius)), 1750);
+            Gizmos.DrawWireSphere(Planetoid.transform.TransformPoint(topRightCorner.NormalizeToRadius(Planetoid.PlanetRadius)), 1750);
+            Gizmos.DrawWireSphere(Planetoid.transform.TransformPoint(bottomLeftCorner.NormalizeToRadius(Planetoid.PlanetRadius)), 1750);
+            Gizmos.DrawWireSphere(Planetoid.transform.TransformPoint(bottomRightCorner.NormalizeToRadius(Planetoid.PlanetRadius)), 1750);
 
             Gizmos.color = Color.blue;
 
-            Gizmos.DrawWireSphere(Planetoid.transform.TransformPoint(quadCorners.topLeftCorner), 150);
-            Gizmos.DrawWireSphere(Planetoid.transform.TransformPoint(quadCorners.topRightCorner), 150);
-            Gizmos.DrawWireSphere(Planetoid.transform.TransformPoint(quadCorners.bottomLeftCorner), 150);
-            Gizmos.DrawWireSphere(Planetoid.transform.TransformPoint(quadCorners.bottomRightCorner), 150);
+            Gizmos.DrawWireSphere(Planetoid.transform.TransformPoint(quadCorners.topLeftCorner), 1500);
+            Gizmos.DrawWireSphere(Planetoid.transform.TransformPoint(quadCorners.topRightCorner), 1500);
+            Gizmos.DrawWireSphere(Planetoid.transform.TransformPoint(quadCorners.bottomLeftCorner), 1500);
+            Gizmos.DrawWireSphere(Planetoid.transform.TransformPoint(quadCorners.bottomRightCorner), 1500);
         }
     }
 
@@ -396,28 +385,17 @@ public sealed class Quad : MonoBehaviour, IQuad
 
         //Shader.SetGlobalVector("_Godray_WorldSunDir", Planetoid.Atmosphere.Sun_1.transform.position - Planetoid.transform.position);
 
-        if (!Planetoid.RenderPerUpdate) QuadMaterial.SetPass(0);
+        QuadMaterial.SetPass(0);
 
         if (!Uniformed) Uniformed = true;
 
-        if (Generated && ShouldDraw)
+        if (Generated && ShouldDraw && QuadMesh != null)
         {
             if (Planetoid.DrawAndCull == QuadDrawAndCull.CullBeforeDraw || Planetoid.DrawAndCull == QuadDrawAndCull.Both)
                 TryCull();
 
-            if (QuadMesh != null)
-            {
-                if (Planetoid.RenderPerUpdate)
-                {
-                    if (Visible)
-                        Graphics.DrawMesh(QuadMesh, Planetoid.PlanetoidTRS, QuadMaterial, Planetoid.DrawLayer, CameraHelper.Main(), 0, null, true, true);
-                }
-                else
-                {
-                    if (Visible)
-                        Graphics.DrawMeshNow(QuadMesh, Planetoid.PlanetoidTRS);
-                }
-            }
+            if (Visible)
+                Graphics.DrawMesh(QuadMesh, Planetoid.PlanetoidTRS, QuadMaterial, Planetoid.DrawLayer, CameraHelper.Main(), 0, null, true, true);
 
             if (Planetoid.DrawAndCull == QuadDrawAndCull.CullAfterDraw || Planetoid.DrawAndCull == QuadDrawAndCull.Both)
                 TryCull();
@@ -851,7 +829,6 @@ public sealed class Quad : MonoBehaviour, IQuad
         quad.generationConstants.cubeFaceEastDirection = cfed;
         quad.generationConstants.cubeFaceNorthDirection = cfnd;
         quad.generationConstants.patchCubeCenter = quad.GetPatchCubeCenterSplitted(quad.Position, id, staticX, staticY, staticZ);
-        //quad.generationConstants.patchCubeCenter = quad.GetPatchCubeCenterSplittedAlternative(quad.Position, id, staticX, staticY, staticZ);
     }
 
     public void SetupCorners(QuadPosition pos)
@@ -1115,109 +1092,6 @@ public sealed class Quad : MonoBehaviour, IQuad
                 temp = new Vector3(0.0f, 0.0f, -r);
                 break;
         }
-
-        return temp;
-    }
-
-    public Vector3 GetPatchCubeCenterSplittedAlternative(QuadPosition quadPosition, int id, bool staticX, bool staticY, bool staticZ)
-    {
-        Vector3 temp = Vector3.zero;
-
-        float mod = 0.5f;
-        float v = Planetoid.PlanetRadius;
-        float tempStatic = 0;
-
-        switch (quadPosition)
-        {
-            case QuadPosition.Top:
-                if (id == 0)
-                    temp += new Vector3(-v * mod, v, v * mod);
-                else if (id == 1)
-                    temp += new Vector3(v * mod, v, v * mod);
-                else if (id == 2)
-                    temp += new Vector3(-v * mod, v, -v * mod);
-                else if (id == 3)
-                    temp += new Vector3(v * mod, v, -v * mod);
-                break;
-            case QuadPosition.Bottom:
-                if (id == 0)
-                    temp += new Vector3(-v * mod, -v, -v * mod);
-                else if (id == 1)
-                    temp += new Vector3(v * mod, -v, -v * mod);
-                else if (id == 2)
-                    temp += new Vector3(-v * mod, -v, v * mod);
-                else if (id == 3)
-                    temp += new Vector3(v * mod, -v, v * mod);
-                break;
-            case QuadPosition.Left:
-                if (id == 0)
-                    temp += new Vector3(-v, v * mod, v * mod);
-                else if (id == 1)
-                    temp += new Vector3(-v, v * mod, -v * mod);
-                else if (id == 2)
-                    temp += new Vector3(-v, -v * mod, v * mod);
-                else if (id == 3)
-                    temp += new Vector3(-v, -v * mod, -v * mod);
-                break;
-            case QuadPosition.Right:
-                if (id == 0)
-                    temp += new Vector3(v, v * mod, -v * mod);
-                else if (id == 1)
-                    temp += new Vector3(v, v * mod, v * mod);
-                else if (id == 2)
-                    temp += new Vector3(v, -v * mod, -v * mod);
-                else if (id == 3)
-                    temp += new Vector3(v, -v * mod, v * mod);
-                break;
-            case QuadPosition.Front:
-                if (id == 0)
-                    temp += new Vector3(v * mod, v * mod, v);
-                else if (id == 1)
-                    temp += new Vector3(-v * mod, v * mod, v);
-                else if (id == 2)
-                    temp += new Vector3(v * mod, -v * mod, v);
-                else if (id == 3)
-                    temp += new Vector3(-v * mod, -v * mod, v);
-                break;
-            case QuadPosition.Back:
-                if (id == 0)
-                    temp += new Vector3(-v * mod, v * mod, -v);
-                else if (id == 1)
-                    temp += new Vector3(v * mod, v * mod, -v);
-                else if (id == 2)
-                    temp += new Vector3(-v * mod, -v * mod, -v);
-                else if (id == 3)
-                    temp += new Vector3(v * mod, -v * mod, -v);
-                break;
-        }
-
-        Vector3 topLeft = Parent.topLeftCorner;
-        Vector3 topRight = Parent.topRightCorner;
-        Vector3 bottomLeft = Parent.bottomLeftCorner;
-        Vector3 bottomRight = Parent.bottomRightCorner;
-
-        Vector3 parentPcc = Parent.generationConstants.patchCubeCenter;
-
-        BrainFuckMath.LockAxis(ref tempStatic, ref temp, staticX, staticY, staticZ);
-
-        if (id == 0)
-        {
-            temp = topLeft - parentPcc;
-        }
-        else if (id == 1)
-        {
-            temp = topRight - parentPcc;
-        }
-        else if (id == 2)
-        {
-            temp = bottomLeft - parentPcc;
-        }
-        else if (id == 3)
-        {
-            temp = bottomRight - parentPcc;
-        }
-
-        BrainFuckMath.UnlockAxis(ref temp, ref tempStatic, staticX, staticY, staticZ);
 
         return temp;
     }
