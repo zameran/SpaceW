@@ -99,6 +99,9 @@ public abstract class Planet : MonoBehaviour
     [HideInInspector]
     public Wireframe wireframeSwitcher;
 
+    [HideInInspector]
+    public Bounds PlanetBouds;
+
     protected virtual void Awake()
     {
         Origin = transform.position;
@@ -106,6 +109,8 @@ public abstract class Planet : MonoBehaviour
         OriginScale = transform.localScale;
 
         PlanetoidTRS = Matrix4x4.TRS(Origin, Quaternion.Euler(OriginRotation), OriginScale);
+
+        PlanetBouds = new Bounds(Origin, Vector3.one * (PlanetRadius + TerrainMaxHeight) * 2);
     }
 
     protected virtual void Start()
@@ -149,6 +154,16 @@ public abstract class Planet : MonoBehaviour
     protected virtual void OnApplicationFocus(bool focusStatus)
     {
 
+    }
+
+    protected virtual void OnDrawGizmos()
+    {
+        if (DrawGizmos)
+        {
+            Gizmos.color = Color.blue;
+
+            Gizmos.DrawWireCube(PlanetBouds.center, PlanetBouds.size);
+        }
     }
 
     public sealed class QuadDistanceToClosestCornerComparer : IComparer<Quad>

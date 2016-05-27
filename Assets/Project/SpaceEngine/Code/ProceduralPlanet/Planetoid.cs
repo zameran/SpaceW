@@ -188,6 +188,11 @@ public sealed class Planetoid : Planet, IPlanet
         }
     }
 
+    protected override void OnDrawGizmos()
+    {
+        base.OnDrawGizmos();
+    }
+
     private void OnAtmosphereBaked(Atmosphere a)
     {
         if (a != null)
