@@ -253,9 +253,7 @@ public sealed class Quad : MonoBehaviour, IQuad
 
     private void OnRenderObject()
     {
-        if (Planetoid.wireframeSwitcher != null)
-            if (Planetoid.wireframeSwitcher.Enabled)
-                GL.wireframe = true;
+
     }
 
     private void OnDrawGizmos()

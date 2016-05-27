@@ -169,10 +169,6 @@ public sealed class Planetoid : Planet, IPlanet
     protected override void OnRenderObject()
     {
         base.OnRenderObject();
-
-        if (wireframeSwitcher != null)
-            if (wireframeSwitcher.Enabled)
-                GL.wireframe = true;
     }
 
     protected override void OnApplicationFocus(bool focusStatus)
