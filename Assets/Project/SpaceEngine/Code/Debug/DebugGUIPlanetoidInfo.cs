@@ -84,6 +84,18 @@ public sealed class DebugGUIPlanetoidInfo : DebugGUI
             GUILayoutExtensions.LabelWithSpace("Quads textures VMU (MB): " + quadsTexturesVideoMemoryUsage.ToString("0.00"), -8);
             GUILayoutExtensions.LabelWithSpace("Verts rendered per frame (Only Quads): " + vertsRendered, -8);
 
+            GUILayout.Space(10);
+
+            GUILayout.Label("Planetoid parameters: ", boldLabel);
+ 
+            GUILayout.Label("LOD Distance Multiplier: " + Planetoid.LODDistanceMultiplier);
+            GUILayout.BeginHorizontal();
+            Planetoid.LODDistanceMultiplier = GUILayout.HorizontalSlider(Planetoid.LODDistanceMultiplier, 0.8f, 1.2f);
+            if (GUILayout.Button("Reset")) Planetoid.LODDistanceMultiplier = 1.0f;
+            GUILayout.EndHorizontal();
+
+            if (GUILayout.Button("Resetup")) Planetoid.ReSetupQuads();
+
             GUILayout.EndVertical();
 
             if (Planetoid.Atmosphere != null)
