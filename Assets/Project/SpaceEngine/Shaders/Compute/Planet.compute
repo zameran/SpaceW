@@ -70,9 +70,9 @@ float NoiseFunction(float3 coord, float lodom)
 	//float noise = HeightMapCloudsGasGiant(scaledCoord);
 	#endif
 
-	//float normalized = (noise + 1.0) / 2;
+	float normalized = (noise + 1.0) * 0.5;
 
-	return noise;
+	return normalized;
 }
 
 float4 ColorFunction(float3 coord, float height, float slope)

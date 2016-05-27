@@ -27,6 +27,7 @@ public sealed class Atmosphere : MonoBehaviour
     [Range(0.0f, 1.0f)]
     public float Density = 1.0f;
 
+    [Tooltip("1/3 or 1/2 from Planet.TerrainMaxHeight")]
     public float TerrainRadiusHold = 0.0f;
     public float Radius = 2048f;
     public float Height = 100.0f;
