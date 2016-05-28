@@ -217,7 +217,7 @@ public sealed class Planetoid : Planet, IPlanet
 
     public void Render()
     {
-        if (RenderQuadsFromPlanetoid)
+        if (Quads != null)
         {
             for (int i = 0; i < Quads.Count; i++)
             {

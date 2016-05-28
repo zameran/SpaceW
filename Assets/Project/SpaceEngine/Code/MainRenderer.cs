@@ -35,11 +35,15 @@ using UnityEngine;
 [RequireComponent(typeof(Camera))]
 public sealed class MainRenderer : MonoBehaviour
 {
+    public bool OverrideExternalRendering = true;
+
     public Planetoid planet;
 
     private void Start()
     {
-
+        if (planet != null)
+            if (!planet.ExternalRendering && OverrideExternalRendering)
+                planet.ExternalRendering = true;
     }
 
     private void Update()
@@ -50,5 +54,19 @@ public sealed class MainRenderer : MonoBehaviour
     private void OnRenderObject()
     {
 
+    }
+
+    private void OnEnable()
+    {
+        if (planet != null)
+            if (!planet.ExternalRendering && OverrideExternalRendering)
+                planet.ExternalRendering = true;
+    }
+
+    private void OnDisable()
+    {
+        if (planet != null)
+            if (planet.ExternalRendering && OverrideExternalRendering)
+                planet.ExternalRendering = false;
     }
 }

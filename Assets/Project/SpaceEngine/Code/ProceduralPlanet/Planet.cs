@@ -89,7 +89,6 @@ public abstract class Planet : MonoBehaviour
 
     public bool OneSplittingQuad = true;
     public bool ExternalRendering = false;
-    public bool RenderQuadsFromPlanetoid = false;
 
     public SmartThreadPool stp = new SmartThreadPool();
 

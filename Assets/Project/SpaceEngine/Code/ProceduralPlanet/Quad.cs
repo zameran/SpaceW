@@ -203,8 +203,7 @@ public sealed class Quad : MonoBehaviour, IQuad
 
     private void Update()
     {
-        if (!Planetoid.ExternalRendering && !Planetoid.RenderQuadsFromPlanetoid)
-            Render();
+
     }
 
     private void FixedUpdate()
