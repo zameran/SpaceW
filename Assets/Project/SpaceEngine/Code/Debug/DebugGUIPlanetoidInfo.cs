@@ -90,7 +90,7 @@ public sealed class DebugGUIPlanetoidInfo : DebugGUI
  
             GUILayout.Label("LOD Distance Multiplier: " + Planetoid.LODDistanceMultiplier);
             GUILayout.BeginHorizontal();
-            Planetoid.LODDistanceMultiplier = GUILayout.HorizontalSlider(Planetoid.LODDistanceMultiplier, 0.8f, 1.2f);
+            Planetoid.LODDistanceMultiplier = GUILayout.HorizontalSlider(Planetoid.LODDistanceMultiplier, 0.8f, 2.2f);
             if (GUILayout.Button("Reset")) Planetoid.LODDistanceMultiplier = 1.0f;
             GUILayout.EndHorizontal();
 
