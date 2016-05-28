@@ -382,8 +382,6 @@ public sealed class Quad : MonoBehaviour, IQuad
 
         //Shader.SetGlobalVector("_Godray_WorldSunDir", Planetoid.Atmosphere.Sun_1.transform.position - Planetoid.transform.position);
 
-        QuadMaterial.SetPass(0);
-
         if (!Uniformed) Uniformed = true;
 
         if (Generated && ShouldDraw && QuadMesh != null)

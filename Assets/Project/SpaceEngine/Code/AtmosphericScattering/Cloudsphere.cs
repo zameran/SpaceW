@@ -36,7 +36,6 @@ public class Cloudsphere : MonoBehaviour
         SetUniforms(CloudMaterial);
 
         CloudMaterial.renderQueue = (int)RenderQueue + RenderQueueOffset;
-        CloudMaterial.SetPass(0);
 
         if (CloudsphereMesh == null) return;
 

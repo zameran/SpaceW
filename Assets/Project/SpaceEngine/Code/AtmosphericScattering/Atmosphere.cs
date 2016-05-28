@@ -219,6 +219,16 @@ public sealed class Atmosphere : MonoBehaviour
         return true;
     }
 
+    private void Update()
+    {
+        if (Sun_1 != null) Sun_1.UpdateNode();
+        if (Sun_2 != null) Sun_2.UpdateNode();
+        if (Sun_3 != null) Sun_3.UpdateNode();
+        if (Sun_4 != null) Sun_4.UpdateNode();
+
+        UpdateNode();
+    }
+
     public void UpdateNode()
     {
         atmosphereParameters.Rg = Radius - TerrainRadiusHold;
@@ -245,12 +255,13 @@ public sealed class Atmosphere : MonoBehaviour
         }
     }
 
-    public void Render(int drawLayer = 8)
+    public void Render(Vector3 Origin, int drawLayer = 8)
     {
+        this.Origin = Origin;
+
         SetUniforms(SkyMaterial);
 
         SkyMaterial.renderQueue = (int)RenderQueue + RenderQueueOffset;
-        SkyMaterial.SetPass(0);
 
         Graphics.DrawMesh(AtmosphereMesh, transform.localToWorldMatrix, SkyMaterial, drawLayer);
     }
