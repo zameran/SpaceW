@@ -39,6 +39,7 @@ public sealed class NoiseParametersSetter : MonoBehaviour
     public Texture2D PlanetAtlas = null;
     public Texture2D PlanetColor = null;
     public Texture2D PlanetColorMap = null;
+    public Texture2D PlanetUVSampler = null;
 
     public Texture2D QuadTexture1 = null;
     public Texture2D QuadTexture2 = null;
@@ -114,6 +115,8 @@ public sealed class NoiseParametersSetter : MonoBehaviour
         mat.SetTexture("AtlasDiffSampler", PlanetAtlas);
         mat.SetTexture("MaterialTable", PlanetColor);
         mat.SetTexture("ColorMap", PlanetColorMap);
+
+        mat.SetTexture("_PlanetUVSampler", PlanetUVSampler);
 
         mat.SetTexture("_QuadTexture1", QuadTexture1);
         mat.SetTexture("_QuadTexture2", QuadTexture1);

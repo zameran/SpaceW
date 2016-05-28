@@ -71,7 +71,11 @@
 #define ANALYTIC_TRANSMITTANCE
 
 #if !defined (M_PI)
-#define M_PI 3.141592657
+#define M_PI 3.14159265358
+#endif
+
+#if !defined (M_PI2)
+#define M_PI2 6.28318531
 #endif
 
 uniform float3 _Sun_WorldSunDir_1;

@@ -226,6 +226,7 @@
 
 			uniform sampler2D _HeightTexture;
 			uniform sampler2D _NormalTexture;
+			uniform sampler2D _PlanetUVSampler;
 
 			uniform sampler2D _QuadTexture1;
 			uniform sampler2D _QuadTexture2;

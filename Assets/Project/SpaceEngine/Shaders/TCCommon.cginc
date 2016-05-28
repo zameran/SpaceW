@@ -171,6 +171,16 @@ const float pi2 = 6.28318531;
 //-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
+#if !defined (M_PI)
+#define M_PI 3.14159265358
+#endif
+
+#if !defined (M_PI2)
+#define M_PI2 6.28318531
+#endif
+//-----------------------------------------------------------------------------
+
+//-----------------------------------------------------------------------------
 #define     tidalLock           scaleParams.w
 #define		mainFreq			mainParams.x
 #define     terraceProb         mainParams.y
@@ -301,6 +311,11 @@ inline float AngleBetween(float3 a, float3 b)
 	return acos(dot(a, b) / (length(a) * length(b)));
 }
 
+inline float Repeat(float t, float l)
+{
+	return t - floor(t / l) * l;
+}
+
 float3 Rotate(float Angle, float3 Axis, float3 Vector)
 {
 	float cosa = cos(Angle);
@@ -326,22 +341,47 @@ float3 Rotate(float Angle, float3 Axis, float3 Vector)
 //-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
+float2 CartesianToPolar(float3 xyz)
+{
+	float longitude = atan2(xyz.x, xyz.z);
+	float latitude = asin(xyz.y / length(xyz));
+
+	return float2(longitude, latitude);
+}
+
+float2 CartesianToPolarUV(float3 xyz)
+{
+	float2 uv = CartesianToPolar(xyz);
+
+	uv.x = Repeat(0.5 - uv.x / pi2, 1.0);
+	uv.y = 0.5 + uv.y / pi;
+
+	return uv;
+}
+
+float2 SinACosAUV_Z(float3 v)
+{
+	float2 uv = 1;
+
+	uv.x = ((-normalize(v).x) + cos(normalize(v).y * 1.35f) * sin(normalize(v).x * 0.4));
+	uv.y = ((normalize(v).y) - cos(normalize(v).x * 1.35f) * sin(normalize(v).y * 0.4));
+
+	return uv;
+}
+
 float3 SphericalToCartesian(float2 spherical)
 {
 	float2 Alpha = float2(sin(spherical.x), cos(spherical.x));
 	float2 Delta = float2(sin(spherical.y), cos(spherical.y));
+
 	return float3(Delta.y * Alpha.x, Delta.x, Delta.y * Alpha.y);
 }
 
 float3 Cartesian2Spherical(float3 cartesian)
 {
-	float X = cartesian.x;
-	float Y = cartesian.y;
-	float Z = cartesian.z;
-
 	float radius = length(cartesian);
-	float theta = atan2(Y, X);
-	float phi = acos(Z / radius);
+	float theta = atan2(cartesian.y, cartesian.x);
+	float phi = acos(cartesian.z / radius);
 
 	return float3(radius, theta, phi);
 }
@@ -383,9 +423,49 @@ float3 GetSurfacePoint(float2 texcoord)
 	}
 }
 
+float3 GetSurfacePoint(float2 texcoord, float face)
+{
+	float2 spherical = float2(0.0, 0.0);
+
+	if (face == 6.0) //global
+	{
+		spherical.x = (texcoord.x * 2 - 0.5) * pi;
+		spherical.y = (0.5 - texcoord.y) * pi;
+
+		float2 Alpha = float2(sin(spherical.x), cos(spherical.x));
+		float2 Delta = float2(sin(spherical.y), cos(spherical.y));
+
+		return float3(Delta.y * Alpha.x, Delta.x, Delta.y * Alpha.y);
+	}
+	else //cubemap
+	{
+		spherical = texcoord.xy * faceParams.z + faceParams.xy;
+
+		float3 p = normalize(float3(spherical, 1.0));
+
+		if (face == 0.0)
+			return float3(p.z, -p.y, -p.x); //neg_x
+		else if (face == 1.0)
+			return float3(-p.z, -p.y, p.x); //pos_x
+		else if (face == 2.0)
+			return float3(p.x, -p.z, -p.y); //neg_y
+		else if (face == 3.0)
+			return float3(p.x, p.z, p.y); //pos_y
+		else if (face == 4.0)
+			return float3(-p.x, -p.y, -p.z); //neg_z
+		else
+			return float3(p.x, -p.y, p.z); //pos_z
+	}
+}
+
 float3 GetSurfacePoint()
 {
 	return GetSurfacePoint(TexCoord);
+}
+
+float3 GetSurfacePoint(float face)
+{
+	return GetSurfacePoint(TexCoord, face);
 }
 //-----------------------------------------------------------------------------
 
