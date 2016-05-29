@@ -11,6 +11,8 @@ public sealed class AtmosphereSun : MonoBehaviour
 
     private bool HasMoved = false;
 
+    public float Radius = 250000;
+
     public Matrix4x4 WorldToLocalRotation
     {
         get

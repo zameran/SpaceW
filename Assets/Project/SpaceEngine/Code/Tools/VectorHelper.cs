@@ -127,4 +127,9 @@ public static class VectorHelper
     {
         return new Vector3(Mathf.RoundToInt(v.x), Mathf.RoundToInt(v.y), Mathf.RoundToInt(v.z));
     }
+
+    public static float AngularRadius(Vector3 from, Vector3 to, float actualRadius)
+    {
+        return 2.0f * Mathf.Asin(actualRadius / (2 * Vector3.Distance(from, to)));
+    }
 }

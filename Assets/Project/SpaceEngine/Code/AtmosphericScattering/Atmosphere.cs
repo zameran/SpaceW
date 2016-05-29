@@ -158,9 +158,7 @@ public sealed class Atmosphere : MonoBehaviour
         Vector4 OccluderPlanetPos = Vector4.zero;
         Vector4 SunPosition = Vector4.zero;
 
-        float D = Vector3.Distance(Sun_1.transform.position, Origin);
         float actualRadius = 250000;
-        float angularRadius = 2.0f * Mathf.Asin(actualRadius / (2 * D));
 
         List<AtmosphereSun> Suns = new List<AtmosphereSun>();
 
@@ -172,7 +170,7 @@ public sealed class Atmosphere : MonoBehaviour
         for (int i = 0; i < Mathf.Min(4, Suns.Count); i++)
         {
             SunPosition = Suns[i].transform.position;
-            SunMatrix1.SetRow(i, new Vector4(SunPosition.x, SunPosition.y, SunPosition.z, angularRadius));
+            SunMatrix1.SetRow(i, new Vector4(SunPosition.x, SunPosition.y, SunPosition.z, VectorHelper.AngularRadius(SunPosition, Origin, Suns[i].Radius)));
         }
 
         for (int i = 0; i < Mathf.Min(4, eclipseCasters.Count); i++)
