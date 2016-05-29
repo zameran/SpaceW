@@ -311,7 +311,7 @@
 				o.terrainColor = terrainColor;	
 				o.scatterColor = scatteringColor;
 				o.uv0 = v.texcoord;
-				o.uv1 = v.texcoord1;
+				o.uv1 = noise;
 				o.uv2 = v.texcoord2;
 				o.uv3 = v.texcoord3;
 				o.normal0 = v.normal;
@@ -406,6 +406,8 @@
 
 				float2 testUV = CartesianToPolarUV(IN.vertex1.xyz);
 				float4 testUVColor = tex2D(_PlanetUVSampler, testUV);
+
+				float4 noiseColor = float4(IN.uv1.xxx, 1);
 
 				outDiffuse = lerp(scatteringColor, outputNormal, _Normale);
 			}
