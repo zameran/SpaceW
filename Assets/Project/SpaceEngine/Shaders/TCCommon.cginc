@@ -166,11 +166,6 @@ uniform float noiseRidgeSmooth;// = 0.0001;
 //-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
-const float pi = 3.14159265358;
-const float pi2 = 6.28318531;
-//-----------------------------------------------------------------------------
-
-//-----------------------------------------------------------------------------
 #if !defined (M_PI)
 #define M_PI 3.14159265358
 #endif
@@ -353,8 +348,8 @@ float2 CartesianToPolarUV(float3 xyz)
 {
 	float2 uv = CartesianToPolar(xyz);
 
-	uv.x = Repeat(0.5 - uv.x / pi2, 1.0);
-	uv.y = 0.5 + uv.y / pi;
+	uv.x = Repeat(0.5 - uv.x / M_PI2, 1.0);
+	uv.y = 0.5 + uv.y / M_PI;
 
 	return uv;
 }
@@ -394,8 +389,8 @@ float3 GetSurfacePoint(float2 texcoord)
 
 	if (faceParams.w == 6.0) //global
 	{
-		spherical.x = (texcoord.x * 2 - 0.5) * pi;
-		spherical.y = (0.5 - texcoord.y) * pi;
+		spherical.x = (texcoord.x * 2 - 0.5) * M_PI;
+		spherical.y = (0.5 - texcoord.y) * M_PI;
 
 		float2 Alpha = float2(sin(spherical.x), cos(spherical.x));
 		float2 Delta = float2(sin(spherical.y), cos(spherical.y));
@@ -429,8 +424,8 @@ float3 GetSurfacePoint(float2 texcoord, float face)
 
 	if (face == 6.0) //global
 	{
-		spherical.x = (texcoord.x * 2 - 0.5) * pi;
-		spherical.y = (0.5 - texcoord.y) * pi;
+		spherical.x = (texcoord.x * 2 - 0.5) * M_PI;
+		spherical.y = (0.5 - texcoord.y) * M_PI;
 
 		float2 Alpha = float2(sin(spherical.x), cos(spherical.x));
 		float2 Delta = float2(sin(spherical.y), cos(spherical.y));
@@ -2867,7 +2862,7 @@ float RayedCraterColorNoise(float3 ppoint, float cratFreq, float cratSqrtDensity
 	for (int i = 0; i < cratOctaves; i++)
 	{
 		cell = Cell2NoiseVec(ppoint * craterSphereRadius);
-		//fi = acos(dot(binormal, normalize(cell.xyz - ppoint))) / (pi * 2.0); //10 * Y = 10 / (3.14159265359 * 2.0) //Y = 0.159155
+		//fi = acos(dot(binormal, normalize(cell.xyz - ppoint))) / (M_PI * 2.0); //10 * Y = 10 / (3.14159265359 * 2.0) //Y = 0.159155
 		fi = acos(dot(binormal, normalize(cell.xyz - ppoint))) * 0.159155;
 		color += RayedCraterColorFunc(cell.w * radFactor, fi, 48.3 * dot(cell.xyz, Randomize));
 		craterSphereRadius *= 1.81818182;
@@ -2933,7 +2928,7 @@ float VolcanoNoise(float3 ppoint, float globalLand, float localLand)
 		cell = Cell2NoiseVecSphere(ppoint, craterSphereRadius);
 		//cell = Cell3NoiseVec(ppoint + craterSphereRadius);
 
-		fi = acos(dot(binormal, normalize(cell.xyz - ppoint))) / (pi * 2.0);
+		fi = acos(dot(binormal, normalize(cell.xyz - ppoint))) / (M_PI * 2.0);
 		r = SavePow(cell.w * radFactor, shape);
 		volcano = globalLand - 1.0 + 2.0 * amplitude * VolcanoHeightFunc(r, fi, 48.3 * dot(cell.xyz, Randomize), dist, 0.1 * shape);
 		newLand = softExpMaxMin(newLand, volcano, 32);
@@ -2976,7 +2971,7 @@ float VolcanoNoise(float3 ppoint, float globalLand, float localLand, float volcf
 		cell = Cell2NoiseVecSphere(ppoint, craterSphereRadius);
 		//cell = Cell3NoiseVec(ppoint + craterSphereRadius);
 
-		fi = acos(dot(binormal, normalize(cell.xyz - ppoint))) / (pi * 2.0);
+		fi = acos(dot(binormal, normalize(cell.xyz - ppoint))) / (M_PI * 2.0);
 		r = SavePow(cell.w * radFactor, shape);
 		volcano = globalLand - 1.0 + 2.0 * amplitude * VolcanoHeightFunc(r, fi, 48.3 * dot(cell.xyz, Randomize), dist, 0.1 * shape);
 		newLand = softExpMaxMin(newLand, volcano, 32);
@@ -3014,7 +3009,7 @@ float VolcanoGlowNoise(float3 ppoint)
 		cell = Cell2NoiseVecSphere(ppoint, craterSphereRadius);
 		//cell = Cell3NoiseVec(ppoint + craterSphereRadius);
 
-		fi = acos(dot(binormal, normalize(cell.xyz - ppoint))) / (pi * 2.0);
+		fi = acos(dot(binormal, normalize(cell.xyz - ppoint))) / (M_PI * 2.0);
 		r = SavePow(cell.w * radFactor, shape);
 		lavaTemp = max(lavaTemp, VolcanoGlowFunc(r, fi, 48.3 * dot(cell.xyz, Randomize)));
 
@@ -3284,7 +3279,7 @@ void SolarSpotsHeightNoise(float3 ppoint, out float botMask, out float filMask, 
 	{
 		cell = Cell2NoiseSphere(ppoint, craterSphereRadius);
 		//cell = Cell2NoiseVec(ppoint * craterSphereRadius);
-		fi = acos(dot(binormal, normalize(cell.xyz - ppoint))) / (pi * 2.0);
+		fi = acos(dot(binormal, normalize(cell.xyz - ppoint))) / (M_PI * 2.0);
 		rnd = 48.3 * dot(cell.xyz, Randomize);
 
 		t = saturate((cell.w * radFactor - radInner) / (radOuter - radInner));
@@ -3326,7 +3321,7 @@ void SolarSpotsTempNoise(float3 ppoint, out float botMask, out float filMask, ou
 	//{
 		cell = Cell2NoiseSphere(ppoint, craterSphereRadius);
 		//cell = Cell2NoiseVec(ppoint * craterSphereRadius);
-		fi = acos(dot(binormal, normalize(cell.xyz - ppoint))) / (pi * 2.0);
+		fi = acos(dot(binormal, normalize(cell.xyz - ppoint))) / (M_PI * 2.0);
 		rnd = 48.3 * dot(cell.xyz, Randomize);
 
 		t = saturate((cell.w * radFactor - radInner) / (radOuter - radInner));

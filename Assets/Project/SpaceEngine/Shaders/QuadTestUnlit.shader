@@ -4,13 +4,13 @@
 	{
 		_HeightTexture("Height (RGBA)", 2D) = "white" {}
 		_NormalTexture("Normal (RGBA)", 2D) = "white" {}
+		_PlanetUVSampler("Planet UV Sampler (RGBA)", 2D) = "white" {}
 		_QuadTexture1("QuadTexture 1 (RGB)", 2D) = "white" {}
 		_QuadTexture2("QuadTexture 2 (RGB)", 2D) = "white" {}
 		_QuadTexture3("QuadTexture 3 (RGB)", 2D) = "white" {}
 		_QuadTexture4("QuadTexture 4 (RGB)", 2D) = "white" {}
 		_WireframeColor("Wireframe Background Color", Color) = (0, 0, 0, 1)
 		_Atmosphere("Atmosphere", Range(0, 1)) = 0.0
-		_Wireframe("Wireframe", Range(0, 1)) = 0.0
 		_Normale("Normale", Range(0, 1)) = 0.0
 		_Side("Side", Range(0, 5)) = 0.0
 	}
@@ -403,6 +403,9 @@
 
 				float height = tex2D(_HeightTexture, IN.uv0).a;
 				float slope = tex2D(_NormalTexture, IN.uv0).a;
+
+				float2 testUV = CartesianToPolarUV(IN.vertex1.xyz);
+				float4 testUVColor = tex2D(_PlanetUVSampler, testUV);
 
 				outDiffuse = lerp(scatteringColor, outputNormal, _Normale);
 			}
