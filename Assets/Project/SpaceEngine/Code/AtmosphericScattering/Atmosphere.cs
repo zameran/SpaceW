@@ -138,6 +138,9 @@ public sealed class Atmosphere : MonoBehaviour
         if (Sun_3 != null && Sun_4 != null)
             Keywords.Remove("LIGHT_3");
 
+        Keywords.Add("ATMOSPHERE");
+        Keywords.Add("ECLIPSES_ON");
+
         return Keywords;
     }
 

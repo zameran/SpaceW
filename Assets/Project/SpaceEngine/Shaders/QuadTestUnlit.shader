@@ -174,6 +174,7 @@
 			#pragma fragment frag
 
 			#pragma multi_compile LIGHT_1 LIGHT_2 LIGHT_3 LIGHT_4
+			#pragma multi_compile ECLIPSES_ON ECLIPSES_OFF
 
 			#pragma enable_d3d11_debug_symbols //RenderDoc debugging
 
@@ -201,8 +202,6 @@
 
 			struct v2fg
 			{
-				float4 terrainColor : COLOR0;
-				float4 scatterColor : COLOR1;
 				float2 uv0 : TEXCOORD0;
 				float3 uv1 : TEXCOORD1;
 				float3 uv2 : TEXCOORD2;
@@ -303,13 +302,8 @@
 				v.tangent = float4(FindTangent(normal, 0.01, float3(0, 1, 0)), 1);
 				v.normal = normal;
 
-				float4 terrainColor = tex2Dlod(_HeightTexture, v.texcoord);
-				float4 scatteringColor = float4(0, 0, 0, 0);
-
 				v2fg o;
 
-				o.terrainColor = terrainColor;	
-				o.scatterColor = scatteringColor;
 				o.uv0 = v.texcoord;
 				o.uv1 = noise;
 				o.uv2 = v.texcoord2;
@@ -334,8 +328,8 @@
 			{		
 				QuadGenerationConstants constants = quadGenerationConstants[0];
 
-				float4 scatteringColor = IN.scatterColor;
-				fixed4 terrainColor = IN.terrainColor;
+				float4 scatteringColor = 1;
+				fixed4 terrainColor = tex2D(_HeightTexture, IN.uv0);
 
 				#ifdef LIGHT_1
 				float4 groundFinalColor1 = _Atmosphere > 0.0 ? 
@@ -397,9 +391,7 @@
 														  groundFinalColor1 + groundFinalColor2 + groundFinalColor3 + groundFinalColor4;
 				#endif
 
-				fixed3 terrainWorldNormal = IN.normal0;
-				fixed3 terrainLocalNormal = CalculateSurfaceNormal_HeightMap(IN.vertex1, IN.normal0, IN.terrainColor.a);
-				fixed4 outputNormal = fixed4(terrainWorldNormal, 1); //fixed4(terrainWorldNormal * terrainLocalNormal, 1);
+				fixed4 outputNormal = fixed4(IN.normal0, 1);
 
 				float height = tex2D(_HeightTexture, IN.uv0).a;
 				float slope = tex2D(_NormalTexture, IN.uv0).a;
