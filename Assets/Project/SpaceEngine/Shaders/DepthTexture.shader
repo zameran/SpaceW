@@ -32,7 +32,7 @@
 			    v2f o;
 
 			    o.pos = mul(UNITY_MATRIX_MVP, v.vertex);
-			    o.depth = o.pos.wz;
+			    o.depth = o.pos.zw;
 
 				//UNITY_TRANSFER_DEPTH(o.depth);
 
