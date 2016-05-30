@@ -30,6 +30,8 @@
  */
 #endregion
 
+using System.Collections.Generic;
+
 using UnityEngine;
 
 [RequireComponent(typeof(Camera))]
@@ -37,36 +39,66 @@ public sealed class MainRenderer : MonoBehaviour
 {
     public bool OverrideExternalRendering = true;
 
-    public Planetoid planet;
+    public List<Planetoid> planets = new List<Planetoid>();
+
+    public Planetoid.PlanetoidDistanceToLODTargetComparer pdtltc;
 
     private void Start()
     {
-        if (planet != null)
-            if (!planet.ExternalRendering && OverrideExternalRendering)
-                planet.ExternalRendering = true;
+        if (pdtltc == null)
+            pdtltc = new Planetoid.PlanetoidDistanceToLODTargetComparer();
+
+        Planetoid[] p = FindObjectsOfType<Planetoid>();
+
+        for (int i = 0; i < p.Length; i++)
+        {
+            planets.Add(p[i]);
+        }
+
+        for (int i = 0; i < planets.Count; i++)
+        {
+            Planetoid planet = planets[i];
+
+            if (planet != null)
+                if (!planet.ExternalRendering && OverrideExternalRendering)
+                    planet.ExternalRendering = true;
+        }
     }
 
     private void Update()
     {
-        if (planet != null) planet.Render();
-    }
+        planets.Sort(pdtltc);
 
-    private void OnRenderObject()
-    {
+        for (int i = 0; i < planets.Count; i++)
+        {
+            Planetoid planet = planets[i];
 
+            if (planet != null)
+                planet.Render();
+        }
     }
 
     private void OnEnable()
     {
-        if (planet != null)
-            if (!planet.ExternalRendering && OverrideExternalRendering)
-                planet.ExternalRendering = true;
+        for (int i = 0; i < planets.Count; i++)
+        {
+            Planetoid planet = planets[i];
+
+            if (planet != null)
+                if (!planet.ExternalRendering && OverrideExternalRendering)
+                    planet.ExternalRendering = true;
+        }
     }
 
     private void OnDisable()
     {
-        if (planet != null)
-            if (planet.ExternalRendering && OverrideExternalRendering)
-                planet.ExternalRendering = false;
+        for (int i = 0; i < planets.Count; i++)
+        {
+            Planetoid planet = planets[i];
+
+            if (planet != null)
+                if (!planet.ExternalRendering && OverrideExternalRendering)
+                    planet.ExternalRendering = false;
+        }
     }
 }

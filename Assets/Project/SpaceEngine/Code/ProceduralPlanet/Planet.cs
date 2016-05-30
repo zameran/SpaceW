@@ -93,7 +93,6 @@ public abstract class Planet : MonoBehaviour
     public SmartThreadPool stp = new SmartThreadPool();
 
     public QuadDistanceToClosestCornerComparer qdtccc;
-    public PlanetoidDistanceToLODTargetComparer pdtltc;
 
     [HideInInspector]
     public Wireframe wireframeSwitcher;
@@ -118,9 +117,6 @@ public abstract class Planet : MonoBehaviour
 
         if (qdtccc == null)
             qdtccc = new QuadDistanceToClosestCornerComparer();
-
-        if (pdtltc == null)
-            pdtltc = new PlanetoidDistanceToLODTargetComparer();
 
         if (wireframeSwitcher == null)
             wireframeSwitcher = FindObjectOfType<Wireframe>();
