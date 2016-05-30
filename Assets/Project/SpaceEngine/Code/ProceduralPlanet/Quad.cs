@@ -402,7 +402,7 @@ public sealed class Quad : MonoBehaviour, IQuad
         using (new Timer("Quad.TryCull"))
         {
             if (!Planetoid.UseUnityCulling)
-                Visible = PlaneFrustumCheck(CameraHelper.Main(), AABB);
+                Visible = PlaneFrustumCheck(AABB);
             else
                 Visible = true;
         }
@@ -478,19 +478,18 @@ public sealed class Quad : MonoBehaviour, IQuad
         return verts;
     }
 
-    public bool PlaneFrustumCheck(Camera camera, Vector3[] aabb)
+    public bool PlaneFrustumCheck(Vector3[] aabb)
     {
+        if (Planetoid == null) { Log("Planetoid is null!"); return true; }
         if (aabb == null || aabb.Length == 0) { Log("AABB array problem!"); return true; }
-        if (Parent == null || !Generated || Splitting || Planetoid.UseUnityCulling)
-            return true;
-
-        Plane[] planes = GeometryUtility.CalculateFrustumPlanes(camera);
+        if (Planetoid.FrustumPlanes == null || Planetoid.FrustumPlanes.Length == 0) { Log("Frustum Planes Problem!"); return true; }
+        if (Parent == null || !Generated || Splitting || Planetoid.UseUnityCulling) { return true; }
 
         bool[] states = new bool[aabb.Length];
 
         for (int i = 0; i < states.Length; i++)
         {
-            states[i] = BorderFrustumCheck(planes, aabb[i]);
+            states[i] = BorderFrustumCheck(Planetoid.FrustumPlanes, aabb[i]);
         }
 
         return states.Contains(true);

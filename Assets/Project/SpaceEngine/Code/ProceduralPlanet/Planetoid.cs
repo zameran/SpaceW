@@ -61,6 +61,8 @@ public sealed class Planetoid : Planet, IPlanet
 
     public TCCommonParametersSetter tccps;
 
+    public Plane[] FrustumPlanes;
+
     public void QuadDispatchStarted(Quad q)
     {
 
@@ -82,6 +84,8 @@ public sealed class Planetoid : Planet, IPlanet
 
         if (Atmosphere != null) Atmosphere.Origin = Origin;
         if (Cloudsphere != null) if (Cloudsphere.Planetoid == null) Cloudsphere.Planetoid = this;
+
+        FrustumPlanes = GeometryUtility.CalculateFrustumPlanes(CameraHelper.Main());
 
         SetupGenerationConstants();
     }
@@ -144,6 +148,8 @@ public sealed class Planetoid : Planet, IPlanet
                 Atmosphere.ReanimateAtmosphereUniforms(Atmosphere, this);
             }
         }
+
+        FrustumPlanes = GeometryUtility.CalculateFrustumPlanes(CameraHelper.Main());
 
         if (!ExternalRendering)
         {
