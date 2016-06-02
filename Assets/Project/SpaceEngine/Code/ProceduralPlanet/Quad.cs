@@ -368,7 +368,8 @@ public sealed class Quad : MonoBehaviour, IQuad
 
         SetupBounds(this, QuadMesh);
 
-        if (Planetoid.Atmosphere != null) Planetoid.Atmosphere.SetUniformsForPlanetQuad(QuadMaterial);
+        //if (Planetoid.Atmosphere != null) Planetoid.Atmosphere.SetUniformsForPlanetQuad(QuadMaterial); //Old shit...
+        if (Planetoid.Atmosphere != null) Planetoid.Atmosphere.SetUniformsForPlanetQuad(null, QuadMaterial, false);
 
         //if (Planetoid.NPS != null) Planetoid.NPS.UpdateUniforms(QuadMaterial, null); //(WIP) For SE Coloring in fragment shader work...
         //if (Planetoid.tccps != null) Planetoid.tccps.UpdateUniforms(QuadMaterial); //(WIP) For SE Coloring in fragment shader work...
@@ -393,7 +394,7 @@ public sealed class Quad : MonoBehaviour, IQuad
                 TryCull();
 
             if (Visible)
-                Graphics.DrawMesh(QuadMesh, Planetoid.PlanetoidTRS, QuadMaterial, Planetoid.DrawLayer, CameraHelper.Main(), 0, null, true, true);
+                Graphics.DrawMesh(QuadMesh, Planetoid.PlanetoidTRS, QuadMaterial, Planetoid.DrawLayer, CameraHelper.Main(), 0, Planetoid.QuadAtmosphereMPB, true, true);
 
             if (Planetoid.DrawAndCull == QuadDrawAndCull.CullAfterDraw || Planetoid.DrawAndCull == QuadDrawAndCull.Both)
                 TryCull();

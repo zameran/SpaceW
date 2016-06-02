@@ -70,6 +70,39 @@ public sealed class AtmosphereSun : MonoBehaviour
         }
     }
 
+    public void SetUniforms(MaterialPropertyBlock block)
+    {
+        if (block == null) return;
+
+        block.SetFloat("_Sun_Intensity", SunIntensity);
+
+        switch (sunID)
+        {
+            case 1:
+                block.SetVector("_Sun_WorldSunDir_1", GetDirection());
+                block.SetMatrix("_Sun_WorldToLocal_1", WorldToLocalRotation);
+                break;
+            case 2:
+                block.SetVector("_Sun_WorldSunDir_2", GetDirection());
+                block.SetMatrix("_Sun_WorldToLocal_2", WorldToLocalRotation);
+                break;
+            case 3:
+                block.SetVector("_Sun_WorldSunDir_3", GetDirection());
+                block.SetMatrix("_Sun_WorldToLocal_3", WorldToLocalRotation);
+                break;
+            case 4:
+                block.SetVector("_Sun_WorldSunDir_4", GetDirection());
+                block.SetMatrix("_Sun_WorldToLocal_4", WorldToLocalRotation);
+                break;
+            default:
+                block.SetVector("_Sun_WorldSunDir", GetDirection());
+                block.SetMatrix("_Sun_WorldToLocal", WorldToLocalRotation);
+                break;
+        }
+
+        block.SetVector("_Sun_Position", transform.position);
+    }
+
     public void SetUniforms(Material mat)
     {
         if (mat == null) return;

@@ -63,6 +63,8 @@ public sealed class Planetoid : Planet, IPlanet
 
     public Plane[] FrustumPlanes;
 
+    public MaterialPropertyBlock QuadAtmosphereMPB;
+
     public void QuadDispatchStarted(Quad q)
     {
 
@@ -86,6 +88,8 @@ public sealed class Planetoid : Planet, IPlanet
         if (Cloudsphere != null) if (Cloudsphere.Planetoid == null) Cloudsphere.Planetoid = this;
 
         FrustumPlanes = GeometryUtility.CalculateFrustumPlanes(CameraHelper.Main());
+
+        QuadAtmosphereMPB = new MaterialPropertyBlock();
 
         SetupGenerationConstants();
     }
@@ -150,6 +154,8 @@ public sealed class Planetoid : Planet, IPlanet
         }
 
         FrustumPlanes = GeometryUtility.CalculateFrustumPlanes(CameraHelper.Main());
+
+        if (Atmosphere != null) Atmosphere.SetUniformsForPlanetQuad(QuadAtmosphereMPB, null, true);
 
         if (!ExternalRendering)
         {

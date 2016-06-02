@@ -1,4 +1,6 @@
-﻿using UnityEngine;
+﻿using System;
+
+using UnityEngine;
 
 using System.Collections.Generic;
 
@@ -209,11 +211,11 @@ public sealed class Atmosphere : MonoBehaviour
         }
     }
 
-    public void SetEclipses(Material mat)
+    public void CalculateEclipses(out Matrix4x4 oc1, out Matrix4x4 oc2, out Matrix4x4 suns)
     {
-        occludersMatrix1 = Matrix4x4.zero;
-        occludersMatrix2 = Matrix4x4.zero;
-        sunMatrix1 = Matrix4x4.zero;
+        oc1 = Matrix4x4.zero;
+        oc2 = Matrix4x4.zero;
+        suns = Matrix4x4.zero;
 
         Vector4 OccluderPlanetPos = Vector4.zero;
         Vector4 SunPosition = Vector4.zero;
@@ -230,7 +232,7 @@ public sealed class Atmosphere : MonoBehaviour
         for (int i = 0; i < Mathf.Min(4, Suns.Count); i++)
         {
             SunPosition = Suns[i].transform.position;
-            sunMatrix1.SetRow(i, new Vector4(SunPosition.x, SunPosition.y, SunPosition.z, VectorHelper.AngularRadius(SunPosition, Origin, Suns[i].Radius)));
+            suns.SetRow(i, new Vector4(SunPosition.x, SunPosition.y, SunPosition.z, VectorHelper.AngularRadius(SunPosition, Origin, Suns[i].Radius)));
         }
 
         for (int i = 0; i < Mathf.Min(4, eclipseCasters.Count); i++)
@@ -238,7 +240,7 @@ public sealed class Atmosphere : MonoBehaviour
             if (eclipseCasters[i] == null) { Debug.Log("Atmosphere: Eclipses problem!"); break; }
 
             OccluderPlanetPos = eclipseCasters[i].transform.position;
-            occludersMatrix1.SetRow(i, new Vector4(OccluderPlanetPos.x, OccluderPlanetPos.y, OccluderPlanetPos.z, actualRadius));
+            oc1.SetRow(i, new Vector4(OccluderPlanetPos.x, OccluderPlanetPos.y, OccluderPlanetPos.z, actualRadius));
         }
 
         for (int i = 4; i < Mathf.Min(8, eclipseCasters.Count); i++)
@@ -246,12 +248,26 @@ public sealed class Atmosphere : MonoBehaviour
             if (eclipseCasters[i] == null) { Debug.Log("Atmosphere: Eclipses problem!"); break; }
 
             OccluderPlanetPos = eclipseCasters[i].transform.position;
-            occludersMatrix2.SetRow(i - 4, new Vector4(OccluderPlanetPos.x, OccluderPlanetPos.y, OccluderPlanetPos.z, actualRadius));
+            oc2.SetRow(i - 4, new Vector4(OccluderPlanetPos.x, OccluderPlanetPos.y, OccluderPlanetPos.z, actualRadius));
         }
+    }
+
+    public void SetEclipses(Material mat)
+    {
+        CalculateEclipses(out occludersMatrix1, out occludersMatrix2, out sunMatrix1);
 
         mat.SetMatrix("_Sky_LightOccluders_1", occludersMatrix1);
         mat.SetMatrix("_Sky_LightOccluders_2", occludersMatrix2);
         mat.SetMatrix("_Sun_Positions_1", sunMatrix1);
+    }
+
+    public void SetEclipses(MaterialPropertyBlock block)
+    {
+        CalculateEclipses(out occludersMatrix1, out occludersMatrix2, out sunMatrix1);
+
+        block.SetMatrix("_Sky_LightOccluders_1", occludersMatrix1);
+        block.SetMatrix("_Sky_LightOccluders_2", occludersMatrix2);
+        block.SetMatrix("_Sun_Positions_1", sunMatrix1);
     }
 
     public bool ArraysEqual<T>(T[] a, List<T> b)
@@ -373,7 +389,7 @@ public sealed class Atmosphere : MonoBehaviour
         if (SkyMaterial == null)
         {
             SkyMaterial = new Material(SkyShader);
-            SkyMaterial.name = "Sky" + "(Instance)" + Random.Range(float.MinValue, float.MaxValue);
+            SkyMaterial.name = "Sky" + "(Instance)" + UnityEngine.Random.Range(float.MinValue, float.MaxValue);
         }
     }
 
@@ -462,6 +478,40 @@ public sealed class Atmosphere : MonoBehaviour
         mat.SetFloat("HM", atmosphereParameters.HM * 1000.0f);
     }
 
+    [Obsolete]
+    public void InitUniformsForPlanetQuad(MaterialPropertyBlock block, Material mat, bool full)
+    {
+        if (mat != null)
+        {
+            SetKeywords(mat, GetKeywords());
+        }
+
+        if (full)
+        {
+            if (block == null) return;
+
+            SetEclipses(mat);
+
+            block.SetTexture("_Sun_Glare", SunGlareTexture);
+
+            block.SetFloat("Rg", atmosphereParameters.Rg);
+            block.SetFloat("Rt", atmosphereParameters.Rt);
+            block.SetFloat("RL", atmosphereParameters.Rl);
+
+            block.SetFloat("TRANSMITTANCE_W", atmosphereParameters.TRANSMITTANCE_W);
+            block.SetFloat("TRANSMITTANCE_H", atmosphereParameters.TRANSMITTANCE_H);
+            block.SetFloat("SKY_W", atmosphereParameters.SKY_W);
+            block.SetFloat("SKY_H", atmosphereParameters.SKY_H);
+            block.SetFloat("RES_R", atmosphereParameters.RES_R);
+            block.SetFloat("RES_MU", atmosphereParameters.RES_MU);
+            block.SetFloat("RES_MU_S", atmosphereParameters.RES_MU_S);
+            block.SetFloat("RES_NU", atmosphereParameters.RES_NU);
+            block.SetFloat("AVERAGE_GROUND_REFLECTANCE", atmosphereParameters.AVERAGE_GROUND_REFLECTANCE);
+            block.SetFloat("HR", atmosphereParameters.HR * 1000.0f);
+            block.SetFloat("HM", atmosphereParameters.HM * 1000.0f);
+        }
+    }
+
     public void InitPlanetoidUniforms(Planetoid planetoid)
     {
         if (planetoid.Atmosphere != null)
@@ -484,7 +534,7 @@ public sealed class Atmosphere : MonoBehaviour
             {
                 if (planetoid.Quads[i] != null)
                 {
-                    planetoid.Atmosphere.SetUniformsForPlanetQuad(planetoid.Quads[i].QuadMaterial);
+                    planetoid.Atmosphere.SetUniformsForPlanetQuad(null, planetoid.Quads[i].QuadMaterial, false);
                 }
             }
         }
@@ -582,8 +632,6 @@ public sealed class Atmosphere : MonoBehaviour
             if (Irradiance != null) mat.SetTexture("_Sky_Irradiance", Irradiance);
         }
 
-        mat.SetTexture("_Sky_Map", null);
-
         mat.SetMatrix("_Globals_WorldToCamera", worldToCamera);
         mat.SetMatrix("_Globals_CameraToWorld", cameraToWorld);
         mat.SetMatrix("_Globals_CameraToScreen", cameraToScreen);
@@ -599,6 +647,7 @@ public sealed class Atmosphere : MonoBehaviour
         if (Sun_4 != null) Sun_4.SetUniforms(mat);
     }
 
+    [Obsolete]
     public void SetUniformsForPlanetQuad(Material mat)
     {
         if (mat == null) return;
@@ -629,8 +678,6 @@ public sealed class Atmosphere : MonoBehaviour
             if (Irradiance != null) mat.SetTexture("_Sky_Irradiance", Irradiance);
         }
 
-        mat.SetTexture("_Sky_Map", null);
-
         mat.SetMatrix("_Globals_WorldToCamera", worldToCamera);
         mat.SetMatrix("_Globals_CameraToWorld", cameraToWorld);
         mat.SetMatrix("_Globals_CameraToScreen", cameraToScreen);
@@ -644,5 +691,57 @@ public sealed class Atmosphere : MonoBehaviour
         if (Sun_2 != null) Sun_2.SetUniforms(mat);
         if (Sun_3 != null) Sun_3.SetUniforms(mat);
         if (Sun_4 != null) Sun_4.SetUniforms(mat);
+    }
+
+    public void SetUniformsForPlanetQuad(MaterialPropertyBlock block, Material mat, bool full = true)
+    {
+        if (mat != null)
+        {
+            SetKeywords(mat, GetKeywords());
+        }
+
+        if (full)
+        {
+            if (block == null) return;
+
+            SetEclipses(block);
+
+            block.SetFloat("density", Density);
+            block.SetFloat("scale", atmosphereParameters.SCALE);
+            block.SetFloat("Rg", atmosphereParameters.Rg);
+            block.SetFloat("Rt", atmosphereParameters.Rt);
+            block.SetFloat("RL", atmosphereParameters.Rl);
+            block.SetVector("betaR", atmosphereParameters.BETA_R / 1000);
+            block.SetVector("betaMSca", atmosphereParameters.BETA_MSca / 1000);
+            block.SetVector("betaMEx", atmosphereParameters.BETA_MEx / 1000);
+            block.SetFloat("mieG", Mathf.Clamp(atmosphereParameters.MIE_G, 0.0f, 0.99f));
+
+            if (RunTimeBaking && artb != null)
+            {
+                if (artb.transmittanceT != null) block.SetTexture("_Sky_Transmittance", artb.transmittanceT);
+                if (artb.inscatterT_Read != null) block.SetTexture("_Sky_Inscatter", artb.inscatterT_Read);
+                if (artb.irradianceT_Read != null) block.SetTexture("_Sky_Irradiance", artb.irradianceT_Read);
+            }
+            else
+            {
+                if (Transmittance != null) block.SetTexture("_Sky_Transmittance", Transmittance);
+                if (Inscatter != null) block.SetTexture("_Sky_Inscatter", Inscatter);
+                if (Irradiance != null) block.SetTexture("_Sky_Irradiance", Irradiance);
+            }
+
+            block.SetMatrix("_Globals_WorldToCamera", worldToCamera);
+            block.SetMatrix("_Globals_CameraToWorld", cameraToWorld);
+            block.SetMatrix("_Globals_CameraToScreen", cameraToScreen);
+            block.SetMatrix("_Globals_ScreenToCamera", screenToCamera);
+            block.SetVector("_Globals_WorldCameraPos", worldCameraPos - Origin); // Apply origin to vector on planetoid quads. 
+
+            block.SetVector("_Globals_Origin", -Origin);
+            block.SetFloat("_Exposure", HDRExposure);
+
+            if (Sun_1 != null) Sun_1.SetUniforms(block);
+            if (Sun_2 != null) Sun_2.SetUniforms(block);
+            if (Sun_3 != null) Sun_3.SetUniforms(block);
+            if (Sun_4 != null) Sun_4.SetUniforms(block);
+        }
     }
 }
