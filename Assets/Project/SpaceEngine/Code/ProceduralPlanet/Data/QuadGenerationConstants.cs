@@ -37,7 +37,7 @@ using System;
 using UnityEngine;
 
 [Serializable]
-public struct QuadGenerationConstants
+public struct QuadGenerationConstants : IData
 {
     public float planetRadius; //4
     public float spacing; //4
@@ -93,5 +93,10 @@ public struct QuadGenerationConstants
         temp.terrainMaxHeight = terrainMaxHeight;
 
         return temp;
+    }
+
+    public int GetStride()
+    {
+        return 96;
     }
 }

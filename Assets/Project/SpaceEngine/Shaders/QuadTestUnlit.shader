@@ -107,8 +107,7 @@
 
 			    float noise = data[v.id].noise;
 				float3 patchCenter = data[v.id].patchCenter;
-				float4 vcolor = data[v.id].vcolor;
-				float4 position = data[v.id].pos;
+				float4 position = data[v.id].position;
 
 				float3 normal = tex2Dlod(_NormalTexture, v.texcoord);
 
@@ -286,9 +285,8 @@
 			{
 				float noise = data[v.id].noise;
 				float3 patchCenter = data[v.id].patchCenter;
-				float4 vcolor = data[v.id].vcolor;
-				float4 position = data[v.id].pos;
-				float4 cubePosition = data[v.id].cpos;
+				float4 position = data[v.id].position;
+				float4 cubePosition = data[v.id].cubePosition;
 
 				float3 normal = tex2Dlod(_NormalTexture, v.texcoord);
 

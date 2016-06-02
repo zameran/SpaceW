@@ -40,15 +40,19 @@ using System.Collections.Generic;
 using ZFramework.Unity.Common.PerfomanceMonitor;
 
 [Serializable]
-public struct OutputStruct
+public struct OutputStruct : IData
 {
-    public float noise;
+    public float noise; //4
 
-    public Vector3 patchCenter;
+    public Vector3 patchCenter; //12
 
-    public Vector4 vcolor;
-    public Vector4 pos;
-    public Vector4 cpos;
+    public Vector4 position; //16
+    public Vector4 cubePosition; //16
+
+    public int GetStride()
+    {
+        return 48;
+    }
 }
 
 public sealed class Quad : MonoBehaviour, IQuad
@@ -74,13 +78,12 @@ public sealed class Quad : MonoBehaviour, IQuad
                 return false;
             }
 
-            return (this.LODLevel == id.LODLevel && this.ID == id.ID && this.Position == id.Position);
+            return (LODLevel == id.LODLevel && ID == id.ID && Position == id.Position);
         }
 
         public override int GetHashCode()
         {
-            int code = LODLevel ^ ID ^ Position;
-            return code.GetHashCode();
+            return (LODLevel ^ ID ^ Position).GetHashCode();
         }
 
         public override string ToString()
@@ -293,10 +296,10 @@ public sealed class Quad : MonoBehaviour, IQuad
         if (!BuffersCreated)
         {
             QuadGenerationConstantsBuffer = new ComputeBuffer(1, 96);
-            PreOutDataBuffer = new ComputeBuffer(QuadSettings.nVertsReal, 64);
-            PreOutDataSubBuffer = new ComputeBuffer(QuadSettings.nVertsSubReal, 64);
-            OutDataBuffer = new ComputeBuffer(QuadSettings.nVerts, 64);
-            QuadCornersBuffer = new ComputeBuffer(1, 64);
+            PreOutDataBuffer = new ComputeBuffer(QuadSettings.nVertsReal, 48);
+            PreOutDataSubBuffer = new ComputeBuffer(QuadSettings.nVertsSubReal, 48);
+            OutDataBuffer = new ComputeBuffer(QuadSettings.nVerts, 48);
+            QuadCornersBuffer = new ComputeBuffer(1, 48);
 
             BuffersCreated = true;
         }
@@ -616,9 +619,9 @@ public sealed class Quad : MonoBehaviour, IQuad
         }
 
         ShouldDraw = false;
+        Splitting = false;
 
         Planetoid.Working = false;
-        Splitting = false;
     }
 
     public void Unsplit()

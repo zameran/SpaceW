@@ -74,9 +74,8 @@ public static class CPUSpaceUtils
 
 				patchPreOutput[outBuffOffset].noise = noise;
 				patchPreOutput[outBuffOffset].patchCenter = patchCenter;
-				patchPreOutput[outBuffOffset].vcolor = new Vector4(noise, noise, noise, noise);
-				patchPreOutput[outBuffOffset].pos = output;
-				patchPreOutput[outBuffOffset].cpos = cubeOutput;
+				patchPreOutput[outBuffOffset].position = output;
+				patchPreOutput[outBuffOffset].cubePosition = cubeOutput;
 			}
 		}
 	}

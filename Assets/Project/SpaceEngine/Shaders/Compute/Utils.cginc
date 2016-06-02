@@ -73,10 +73,9 @@ struct OutputStruct
 	float noise;
 
 	float3 patchCenter;
-	
-	float4 vcolor;
-	float4 pos;
-	float4 cpos;
+
+	float4 position;
+	float4 cubePosition;
 };
 
 struct QuadCorners
@@ -218,11 +217,11 @@ inline float3 GetHeightNormalFromPosition(QuadGenerationConstants constants, RWS
 {
 	float r = constants.planetRadius;
 
-	float3 left	 = (buffer[(id.x + 0) + (id.y + 1) * size].pos.xyz) / r;// * constants.lodLevel;
-	float3 right = (buffer[(id.x + 2) + (id.y + 1) * size].pos.xyz) / r;// * constants.lodLevel;
-	float3 up	 = (buffer[(id.x + 1) + (id.y + 0) * size].pos.xyz) / r;// * constants.lodLevel;
-	float3 down  = (buffer[(id.x + 1) + (id.y + 2) * size].pos.xyz) / r;// * constants.lodLevel;
-	float3 curr	 = (buffer[(id.x + 1) + (id.y + 1) * size].pos.xyz) / r;// * constants.lodLevel;
+	float3 left	 = (buffer[(id.x + 0) + (id.y + 1) * size].position.xyz) / r;// * constants.lodLevel;
+	float3 right = (buffer[(id.x + 2) + (id.y + 1) * size].position.xyz) / r;// * constants.lodLevel;
+	float3 up	 = (buffer[(id.x + 1) + (id.y + 0) * size].position.xyz) / r;// * constants.lodLevel;
+	float3 down  = (buffer[(id.x + 1) + (id.y + 2) * size].position.xyz) / r;// * constants.lodLevel;
+	float3 curr	 = (buffer[(id.x + 1) + (id.y + 1) * size].position.xyz) / r;// * constants.lodLevel;
 	
 	float3 e0 = curr - left;
 	float3 e1 = curr - right;

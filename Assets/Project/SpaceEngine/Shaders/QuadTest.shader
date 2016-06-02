@@ -29,9 +29,8 @@
 
 			float3 patchCenter;
 
-			float4 vcolor;
-			float4 pos;
-			float4 cpos;
+			float4 position;
+			float4 cubePosition;
 		};
 
 		struct appdata_full_compute 
@@ -102,8 +101,7 @@
 		{
 			float noise = data[v.id].noise;
 			float3 patchCenter = data[v.id].patchCenter;
-			float4 vcolor = data[v.id].vcolor;
-			float4 position = data[v.id].pos;
+			float4 position = data[v.id].position;
 
 			position.w = 1.0;
 			position.xyz += patchCenter;
@@ -120,7 +118,7 @@
 			o.noise = noise;
 			o.uv_HeightTexture = v.texcoord.xy;
 			o.uv_NormalTexture = v.texcoord.xy;
-			o.color = vcolor;
+			o.color = float4(noise, noise, noise, 1);
 		}
 		
 		half _Mixing;

@@ -38,7 +38,7 @@ using System;
 using UnityEngine;
 
 [Serializable]
-public struct PlanetGenerationConstants
+public struct PlanetGenerationConstants : IData
 {
     public float planetRadius; //4
     public float terrainMaxHeight; //4
@@ -67,5 +67,10 @@ public struct PlanetGenerationConstants
         temp.meshSettings = new Vector4(QuadSettings.nVertsPerEdge, QuadSettings.nVertsPerEdgeReal, QuadSettings.nVertsPerEdgeSub, QuadSettings.nVertsPerEdgeSubReal);
 
         return temp;
+    }
+
+    public int GetStride()
+    {
+        return 24;
     }
 }

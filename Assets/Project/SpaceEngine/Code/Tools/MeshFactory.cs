@@ -53,8 +53,8 @@ public static class MeshFactory
             {
                 int vertID = rowStartID + c;
 
-                outputStructData[vertID].pos.w = 1.0f;
-                dummyVerts[vertID] = outputStructData[vertID].pos + (Vector4)outputStructData[vertID].patchCenter;
+                outputStructData[vertID].position.w = 1.0f;
+                dummyVerts[vertID] = outputStructData[vertID].position + (Vector4)outputStructData[vertID].patchCenter;
             }
         }
 

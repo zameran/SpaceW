@@ -37,10 +37,15 @@ using System;
 using UnityEngine;
 
 [Serializable]
-public struct QuadCorners
+public struct QuadCorners : IData
 {
     public Vector3 topLeftCorner;
     public Vector3 topRightCorner;
     public Vector3 bottomLeftCorner;
     public Vector3 bottomRightCorner;
+
+    public int GetStride()
+    {
+        return 48;
+    }
 }
