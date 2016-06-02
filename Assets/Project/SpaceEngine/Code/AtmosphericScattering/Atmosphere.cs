@@ -72,11 +72,32 @@ public sealed class Atmosphere : MonoBehaviour
 
     public Vector3 Origin;
 
+    private Matrix4x4 occludersMatrix1;
+    private Matrix4x4 occludersMatrix2;
+    private Matrix4x4 sunMatrix1;
     private Matrix4x4 worldToCamera;
     private Matrix4x4 cameraToWorld;
     private Matrix4x4 cameraToScreen;
     private Matrix4x4 screenToCamera;
     private Vector3 worldCameraPos;
+
+    public Matrix4x4 OccludersMatrix1
+    {
+        get { return occludersMatrix1; }
+        set { occludersMatrix1 = value; }
+    }
+
+    public Matrix4x4 OccludersMatrix2
+    {
+        get { return occludersMatrix2; }
+        set { occludersMatrix2 = value; }
+    }
+
+    public Matrix4x4 SunMatrix1
+    {
+        get { return sunMatrix1; }
+        set { sunMatrix1 = value; }
+    }
 
     public Matrix4x4 WorldToCamera
     {
@@ -190,9 +211,9 @@ public sealed class Atmosphere : MonoBehaviour
 
     public void SetEclipses(Material mat)
     {
-        Matrix4x4 OccludersMatrix1 = Matrix4x4.zero;
-        Matrix4x4 OccludersMatrix2 = Matrix4x4.zero;
-        Matrix4x4 SunMatrix1 = Matrix4x4.zero;
+        occludersMatrix1 = Matrix4x4.zero;
+        occludersMatrix2 = Matrix4x4.zero;
+        sunMatrix1 = Matrix4x4.zero;
 
         Vector4 OccluderPlanetPos = Vector4.zero;
         Vector4 SunPosition = Vector4.zero;
@@ -209,7 +230,7 @@ public sealed class Atmosphere : MonoBehaviour
         for (int i = 0; i < Mathf.Min(4, Suns.Count); i++)
         {
             SunPosition = Suns[i].transform.position;
-            SunMatrix1.SetRow(i, new Vector4(SunPosition.x, SunPosition.y, SunPosition.z, VectorHelper.AngularRadius(SunPosition, Origin, Suns[i].Radius)));
+            sunMatrix1.SetRow(i, new Vector4(SunPosition.x, SunPosition.y, SunPosition.z, VectorHelper.AngularRadius(SunPosition, Origin, Suns[i].Radius)));
         }
 
         for (int i = 0; i < Mathf.Min(4, eclipseCasters.Count); i++)
@@ -217,7 +238,7 @@ public sealed class Atmosphere : MonoBehaviour
             if (eclipseCasters[i] == null) { Debug.Log("Atmosphere: Eclipses problem!"); break; }
 
             OccluderPlanetPos = eclipseCasters[i].transform.position;
-            OccludersMatrix1.SetRow(i, new Vector4(OccluderPlanetPos.x, OccluderPlanetPos.y, OccluderPlanetPos.z, actualRadius));
+            occludersMatrix1.SetRow(i, new Vector4(OccluderPlanetPos.x, OccluderPlanetPos.y, OccluderPlanetPos.z, actualRadius));
         }
 
         for (int i = 4; i < Mathf.Min(8, eclipseCasters.Count); i++)
@@ -225,12 +246,12 @@ public sealed class Atmosphere : MonoBehaviour
             if (eclipseCasters[i] == null) { Debug.Log("Atmosphere: Eclipses problem!"); break; }
 
             OccluderPlanetPos = eclipseCasters[i].transform.position;
-            OccludersMatrix2.SetRow(i - 4, new Vector4(OccluderPlanetPos.x, OccluderPlanetPos.y, OccluderPlanetPos.z, actualRadius));
+            occludersMatrix2.SetRow(i - 4, new Vector4(OccluderPlanetPos.x, OccluderPlanetPos.y, OccluderPlanetPos.z, actualRadius));
         }
 
-        mat.SetMatrix("_Sky_LightOccluders_1", OccludersMatrix1);
-        mat.SetMatrix("_Sky_LightOccluders_2", OccludersMatrix2);
-        mat.SetMatrix("_Sun_Positions_1", SunMatrix1);
+        mat.SetMatrix("_Sky_LightOccluders_1", occludersMatrix1);
+        mat.SetMatrix("_Sky_LightOccluders_2", occludersMatrix2);
+        mat.SetMatrix("_Sun_Positions_1", sunMatrix1);
     }
 
     public bool ArraysEqual<T>(T[] a, List<T> b)
