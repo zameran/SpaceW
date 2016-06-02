@@ -68,7 +68,8 @@ public static class CameraHelper
 
             if (d3d)
             {
-                if (camera.actualRenderingPath == RenderingPath.DeferredLighting)
+                if (camera.actualRenderingPath == RenderingPath.DeferredLighting || 
+                    camera.actualRenderingPath == RenderingPath.DeferredShading)
                 {
                     // Invert Y for rendering to a render texture
                     for (int i = 0; i < 4; i++)
