@@ -12,11 +12,13 @@ public class ScreenshotHelper : MonoBehaviour
 
     public bool IncludeAlpha = true;
 
+    public KeyCode Key = KeyCode.F12;
+
     private bool keyPressed = false;
 
     private void LateUpdate()
     {
-        keyPressed |= Input.GetKeyDown(KeyCode.F12);
+        keyPressed |= Input.GetKeyDown(Key);
     }
 
     private void OnRenderImage(RenderTexture src, RenderTexture dest)

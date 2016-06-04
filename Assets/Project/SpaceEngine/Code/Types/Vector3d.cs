@@ -310,6 +310,11 @@ namespace UnityEngine
             return new Vector3d(from.x + (to.x - from.x) * t, from.y + (to.y - from.y) * t, from.z + (to.z - from.z) * t);
         }
 
+        public static Vector3d Lerp01t(Vector3d from, Vector3d to, float t)
+        {
+            return Lerp(from, to, Mathf.Clamp01(t));
+        }
+
         public Vector2d XY()
         {
             return new Vector2d(x, y);
