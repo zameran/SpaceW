@@ -61,7 +61,7 @@ public abstract class DebugDraw : MonoBehaviour, IDebug
             lineMaterial = new Material(lineShader);
 
             lineMaterial.hideFlags = HideFlags.HideAndDontSave;
-            lineMaterial.shader.hideFlags = HideFlags.HideAndDontSave;
+            lineMaterial.shader.hideFlags = HideFlags.None;
         }
     }
 

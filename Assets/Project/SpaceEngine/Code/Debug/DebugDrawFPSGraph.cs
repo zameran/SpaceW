@@ -1,29 +1,12 @@
- using UnityEngine;
+using System;
+using System.Diagnostics;
 
-// FPS Graph - Performance Analyzer Tool - Version 0.91
-//
-// To use FPS Graph simply add this script to your main camera. 
-//    detailed explanation: Select the camera used in your scene then go to the inspector window click on the component menu and down to scripts you should find FPSGraph 
-// Options:
-//    Audio Feedback: This allows you to audibly "visualize" the perforamnce of the scene
-//    Audio Feedback Volume: This specifies how loud the audio feedback is, from 0.0-1.0
-//    Graph Multiply: This specifies how zoomed in the graph is, the default is the graph is multiplyed by 2x, meaning every pixel is doubled.
-//    Graph Position: This specifies where the graph sits on the screen examples: x:0.0, y:0.0 (top-left) x:1.0, y:0.0 (top-right) x:0.0, y:1.0 (bottom-left) x:1.0 y:1.0 (bottom-right)
-//    Frame History Length: This is the length of FPS that is displayed (Set this to a low amount if you are targeting older mobile devices)
-public class FPSGraph : MonoBehaviour
+using UnityEngine;
+
+using Debug = UnityEngine.Debug;
+
+public class DebugDrawFPSGraph : DebugDraw
 {
-    Material mat;
-
-    public void CreateLineMaterial()
-    {
-        if (!mat)
-        {
-            mat = new Material(Shader.Find("SpaceEngine/Lines/Colored Blended Simple"));
-            mat.hideFlags = HideFlags.HideAndDontSave;
-            mat.shader.hideFlags = HideFlags.HideAndDontSave;
-        }
-    }
-
     public bool audioFeedback = false;
     public float audioFeedbackVolume = 0.5f;
     public int graphMultiply = 2;
@@ -70,10 +53,31 @@ public class FPSGraph : MonoBehaviour
 
     Rect graphSizeGUI;
 
-    System.Diagnostics.Stopwatch stopWatch;
+    Stopwatch stopWatch;
     float lastElapsed;
     float fps;
     int graphSizeMin;
+
+
+    float beforeRender;
+
+    float[] fpsVals = new float[3];
+
+    float x1;
+    float x2;
+    float y1;
+    float y2;
+    float xOff;
+    float yOff;
+
+    int[] lineY = new[] { 25, 50, 99 };
+    int[] lineY2 = new[] { 21, 46, 91 };
+    int[] keyOffX = new[] { 61, 34, 1 };
+
+    string[] splitMb;
+
+    int first;
+    int second;
 
     void Awake()
     {
@@ -86,15 +90,17 @@ public class FPSGraph : MonoBehaviour
         fpsColorsTo = new[] { fpsColors[0] * 0.7f, fpsColors[1] * 0.7f, fpsColors[2] * 0.7f };
     }
 
-    void Start()
+    protected override void Start()
     {
+        base.Start();
+
         graphSizeMin = frameHistoryLength > 95 ? frameHistoryLength : 95;
 
         textOverlayMask = new int[graphHeight, graphSizeMin];
 
         dtHistory = new float[3, frameHistoryLength];
 
-        stopWatch = new System.Diagnostics.Stopwatch();
+        stopWatch = new Stopwatch();
         stopWatch.Start();
 
         graphTexture = new Texture2D(graphSizeMin, 7, TextureFormat.ARGB32, false, false);
@@ -103,9 +109,9 @@ public class FPSGraph : MonoBehaviour
         graphTexture.filterMode = FilterMode.Point;
         graphSizeGUI = new Rect(0f, 0f, graphTexture.width * graphMultiply, graphTexture.height * graphMultiply);
 
-        addFPSAt(14, 23);
-        addFPSAt(14, 48);
-        addFPSAt(14, 93);
+        AddFPSAt(14, 23);
+        AddFPSAt(14, 48);
+        AddFPSAt(14, 93);
 
         for (int x = 0; x < graphTexture.width; ++x)
         {
@@ -128,10 +134,10 @@ public class FPSGraph : MonoBehaviour
         graphTexture.Apply();
 
         if (audioFeedback)
-            initAudio();
+            InitAudio();
     }
 
-    public void initAudio()
+    public void InitAudio()
     {
         audioClip = AudioClip.Create("FPS-BNote", bNote.Length, 1, 44100, false, null);
         audioClip.SetData(bNote, 0);
@@ -147,7 +153,7 @@ public class FPSGraph : MonoBehaviour
     int yOffset;
     int xLength;
 
-    void addFPSAt(int startX, int startY)
+    void AddFPSAt(int startX, int startY)
     {
         yExtern = startY;
 
@@ -166,7 +172,7 @@ public class FPSGraph : MonoBehaviour
         }
     }
 
-    void addNumberAt(int startX, int startY, int num, bool isLeading)
+    void AddNumberAt(int startX, int startY, int num, bool isLeading)
     {
         if (isLeading && num == 0) num = -1;
 
@@ -234,7 +240,7 @@ public class FPSGraph : MonoBehaviour
             if (audioFeedback)
             {
                 if (audioClip == null)
-                    initAudio();
+                    InitAudio();
 
                 if (audioSource.isPlaying == false)
                     audioSource.Play();
@@ -267,30 +273,21 @@ public class FPSGraph : MonoBehaviour
         beforeRender = eTotalSeconds;
     }
 
-    float beforeRender;
+    protected override void OnPostRender()
+    {
+        base.OnPostRender();
+    }
 
-    float[] fpsVals = new float[3];
+    void OnGUI()
+    {
+        if (Time.frameCount > 4)
+            GUI.DrawTexture(new Rect(graphPosition.x * (Screen.width - graphMultiply * frameHistoryLength), graphPosition.y * (Screen.height - graphMultiply * 107) + 100 * graphMultiply, graphSizeGUI.width, graphSizeGUI.height), graphTexture);
+    }
 
-    float x1;
-    float x2;
-    float y1;
-    float y2;
-    float xOff;
-    float yOff;
-
-    int[] lineY = new[] { 25, 50, 99 };
-    int[] lineY2 = new[] { 21, 46, 91 };
-    int[] keyOffX = new[] { 61, 34, 1 };
-
-    string[] splitMb;
-
-    int first;
-    int second;
-
-    void OnPostRender()
+    protected override void Draw()
     {
         GL.PushMatrix();
-        mat.SetPass(0);
+        lineMaterial.SetPass(0);
         GL.LoadPixelMatrix();
         GL.Begin(GL.QUADS);
 
@@ -478,23 +475,23 @@ public class FPSGraph : MonoBehaviour
         {
             fps = Mathf.Round(1.0f / maxFrame);
 
-            addNumberAt(1, 93, (int)((fps / 100) % 10), true);
-            addNumberAt(5, 93, (int)((fps / 10.0) % 10), true);
-            addNumberAt(9, 93, (int)(fps % 10), false);
+            AddNumberAt(1, 93, (int)((fps / 100) % 10), true);
+            AddNumberAt(5, 93, (int)((fps / 10.0) % 10), true);
+            AddNumberAt(9, 93, (int)(fps % 10), false);
 
             fps *= 2;
 
-            addNumberAt(1, 48, (int)((fps / 100) % 10), true);
-            addNumberAt(5, 48, (int)((fps / 10) % 10), true);
-            addNumberAt(9, 48, (int)(fps % 10), false);
+            AddNumberAt(1, 48, (int)((fps / 100) % 10), true);
+            AddNumberAt(5, 48, (int)((fps / 10) % 10), true);
+            AddNumberAt(9, 48, (int)(fps % 10), false);
 
             fps *= 1.5f;
 
-            addNumberAt(1, 23, (int)((fps / 100) % 10), true);
-            addNumberAt(5, 23, (int)((fps / 10) % 10), true);
-            addNumberAt(9, 23, (int)(fps % 10), false);
+            AddNumberAt(1, 23, (int)((fps / 100) % 10), true);
+            AddNumberAt(5, 23, (int)((fps / 10) % 10), true);
+            AddNumberAt(9, 23, (int)(fps % 10), false);
 
-            float mem = (System.GC.GetTotalMemory(true)) / 1000000.0f;
+            float mem = (GC.GetTotalMemory(true)) / 1000000.0f;
 
             if (mem < 1.0)
             {
@@ -513,29 +510,28 @@ public class FPSGraph : MonoBehaviour
                 }
 
                 addPeriodAt(100, -6);
-                addNumberAt(102, -7, first, false);
-                addNumberAt(106, -7, second, false);
+                AddNumberAt(102, -7, first, false);
+                AddNumberAt(106, -7, second, false);
             }
             else
             {
                 splitMb = mem.ToString("F1").Split("."[0]);
                 first = int.Parse(splitMb[0]);
 
-                if (first >= 10) addNumberAt(96, -7, first / 10, false);
+                if (first >= 10) AddNumberAt(96, -7, first / 10, false);
 
                 second = first % 10;
 
                 if (second < 0) second = 0;
 
-                addNumberAt(100, -7, second, false);
+                AddNumberAt(100, -7, second, false);
                 addPeriodAt(104, -6);
-                addNumberAt(106, -7, int.Parse(splitMb[1]), false);
+                AddNumberAt(106, -7, int.Parse(splitMb[1]), false);
             }
         }
 
         GL.End();
         GL.PopMatrix();
-
 
         dt = ((float)stopWatch.Elapsed.TotalSeconds - beforeRender);
 
@@ -544,11 +540,5 @@ public class FPSGraph : MonoBehaviour
         eTotalSeconds = (float)stopWatch.Elapsed.TotalSeconds;
 
         dt = (eTotalSeconds - lastElapsed);
-    }
-
-    void OnGUI()
-    {
-        if (Time.frameCount > 4)
-            GUI.DrawTexture(new Rect(graphPosition.x * (Screen.width - graphMultiply * frameHistoryLength), graphPosition.y * (Screen.height - graphMultiply * 107) + 100 * graphMultiply, graphSizeGUI.width, graphSizeGUI.height), graphTexture);
     }
 }
