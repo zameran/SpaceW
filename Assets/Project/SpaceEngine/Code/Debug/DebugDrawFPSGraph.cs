@@ -27,18 +27,23 @@ public class DebugDrawFPSGraph : DebugDraw
     AudioSource audioSource;
 
     Texture2D graphTexture;
+
     int graphHeight = 100;
 
     int[,] textOverlayMask;
 
     float[,] dtHistory;
+
     int i;
     int j;
     int x;
     int y;
+
     float val;
+
     Color color;
     Color32 color32;
+
     float maxFrame = 0.0f;
     float yMulti;
 
@@ -54,8 +59,10 @@ public class DebugDrawFPSGraph : DebugDraw
     Rect graphSizeGUI;
 
     Stopwatch stopWatch;
+
     float lastElapsed;
     float fps;
+
     int graphSizeMin;
 
 
@@ -69,6 +76,14 @@ public class DebugDrawFPSGraph : DebugDraw
     float y2;
     float xOff;
     float yOff;
+
+    float totalSeconds;
+    float renderSeconds;
+    float lateSeconds;
+    float dt;
+    float eTotalSeconds;
+
+    int frameIter = 0;
 
     int[] lineY = new[] { 25, 50, 99 };
     int[] lineY2 = new[] { 21, 46, 91 };
@@ -205,7 +220,7 @@ public class DebugDrawFPSGraph : DebugDraw
         }
     }
 
-    void addPeriodAt(int startX, int startY)
+    void AddPeriodAt(int startX, int startY)
     {
         x1 = startX * graphMultiply + xOff;
         x2 = (startX + 1) * graphMultiply + xOff;
@@ -217,13 +232,6 @@ public class DebugDrawFPSGraph : DebugDraw
         GL.Vertex3(x2, y2, 0);
         GL.Vertex3(x2, y1, 0);
     }
-
-    float totalSeconds;
-    float renderSeconds;
-    float lateSeconds;
-    float dt;
-    int frameIter = 0;
-    float eTotalSeconds;
 
     void Update()
     {
@@ -341,7 +349,11 @@ public class DebugDrawFPSGraph : DebugDraw
             }
         }
 
-        if (maxFrame < 1.0f / 120.0f)
+        if (maxFrame < 1.0f / 240.0f)
+        {
+            maxFrame = 1.0f / 240.0f;
+        }
+        else if (maxFrame < 1.0f / 120.0f)
         {
             maxFrame = 1.0f / 120.0f;
         }
@@ -509,7 +521,7 @@ public class DebugDrawFPSGraph : DebugDraw
                     first = (first / 10) % 10;
                 }
 
-                addPeriodAt(100, -6);
+                AddPeriodAt(100, -6);
                 AddNumberAt(102, -7, first, false);
                 AddNumberAt(106, -7, second, false);
             }
@@ -525,7 +537,7 @@ public class DebugDrawFPSGraph : DebugDraw
                 if (second < 0) second = 0;
 
                 AddNumberAt(100, -7, second, false);
-                addPeriodAt(104, -6);
+                AddPeriodAt(104, -6);
                 AddNumberAt(106, -7, int.Parse(splitMb[1]), false);
             }
         }
