@@ -195,10 +195,10 @@ public sealed class FlyCamera : GameCamera
         {
             if (planetoid != null)
             {
-                float h = (distanceToPlanetCore - planetoid.PlanetRadius);
+                float h = (distanceToPlanetCore - planetoid.PlanetRadius - planetoid.TerrainMaxHeight);
 
-                cameraComponent.nearClipPlane = Mathf.Clamp(0.1f * Mathf.Abs(h), 0.01f, 1000.0f);
-                cameraComponent.farClipPlane = Mathf.Clamp(1e6f * Mathf.Abs(h), 1000.0f, 1e8f);
+                cameraComponent.nearClipPlane = Mathf.Clamp(0.01f * Mathf.Abs(h), 0.01f, 1000.0f);
+                cameraComponent.farClipPlane = Mathf.Clamp(1e8f * Mathf.Abs(h), 1000.0f, 1e8f);
             }
             else
             {
