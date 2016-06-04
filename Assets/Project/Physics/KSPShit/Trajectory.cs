@@ -44,7 +44,7 @@
             Vector3d from = point + (Vector3d)relativeFrom.transform.position;
             Vector3d to = ((point + relativeFrom.GetTruePositionAtUT(time)) - relativeTo.GetTruePositionAtUT(time)) + (Vector3d)relativeTo.transform.position;
 
-            return Vector3d.Lerp(from, to, Mathf.Pow(Mathf.InverseLerp((float)Math.Max(minUT, Planetarium.GetUniversalTime()), (float)escapeUT, (float)time), linearity));
+            return Vector3d.Lerp(from, to, Mathf.Pow(Mathf.InverseLerp((float)Math.Max(minUT, Planetarium.GetUniversalTime()), (float)escapeUT, (float)time), Mathf.Clamp01(linearity)));
         }
 
         public Vector3d ConvertPointToLocal(Vector3d point)

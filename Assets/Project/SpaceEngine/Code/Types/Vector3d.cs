@@ -298,10 +298,15 @@ namespace UnityEngine
             return new Vector3d(lhs.y * rhs.z - lhs.z * rhs.y, lhs.z * rhs.x - lhs.x * rhs.z, lhs.x * rhs.y - lhs.y * rhs.x);
         }
 
-        public static Vector3d Lerp(Vector3d from, Vector3d to, float t)
+        /// <summary>
+        /// Linear interpolation between two vectors.
+        /// </summary>
+        /// <param name="from">From.</param>
+        /// <param name="to">To.</param>
+        /// <param name="t">T. WARNING : Only 0 - 1 range!</param>
+        /// <returns>Interpolated vector.</returns>
+        public static Vector3d Lerp(Vector3d from, Vector3d to, double t)
         {
-            t = Mathf.Clamp01(t);
-
             return new Vector3d(from.x + (to.x - from.x) * t, from.y + (to.y - from.y) * t, from.z + (to.z - from.z) * t);
         }
 

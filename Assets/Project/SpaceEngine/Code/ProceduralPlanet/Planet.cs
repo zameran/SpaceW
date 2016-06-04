@@ -82,9 +82,9 @@ public abstract class Planet : MonoBehaviour
     public float DistanceToLODTarget = 0;
 
     public float LODDistanceMultiplier = 1;
-
-    public int LODMaxLevel = 12;
-    public int[] LODDistances = new int[13] { 2048, 1024, 512, 256, 128, 64, 32, 16, 8, 4, 2, 1, 0 };
+    public float LODDistanceMultiplierPerLevel = 2;
+    public int LODMaxLevel = 15;
+    public float[] LODDistances = new float[16];
     public float[] LODOctaves = new float[6] { 0.5f, 0.5f, 0.5f, 0.75f, 0.75f, 1.0f };
 
     public bool OneSplittingQuad = true;

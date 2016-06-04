@@ -291,15 +291,15 @@ public sealed class Planetoid : Planet, IPlanet
     [ContextMenu("UpdateLODDistances")]
     public void UpdateLODDistances()
     {
-        LODDistances = new int[LODMaxLevel + 1];
+        LODDistances = new float[LODMaxLevel + 1];
 
         for (int i = 0; i < LODDistances.Length; i++)
         {
             if (i == 0)
-                LODDistances[i] = Mathf.RoundToInt(PlanetRadius);
+                LODDistances[i] = PlanetRadius;
             else
             {
-                LODDistances[i] = LODDistances[i - 1] / 2;
+                LODDistances[i] = LODDistances[i - 1] / LODDistanceMultiplierPerLevel;
             }
         }
     }
