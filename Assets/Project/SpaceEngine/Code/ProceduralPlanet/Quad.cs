@@ -374,17 +374,15 @@ public sealed class Quad : MonoBehaviour, IQuad
         //if (Planetoid.NPS != null) Planetoid.NPS.UpdateUniforms(QuadMaterial, null); //(WIP) For SE Coloring in fragment shader work...
         //if (Planetoid.tccps != null) Planetoid.tccps.UpdateUniforms(QuadMaterial); //(WIP) For SE Coloring in fragment shader work...
 
+        if (QuadMaterial == null) { return; }
+
         QuadMaterial.SetBuffer("data", OutDataBuffer);
         QuadMaterial.SetBuffer("quadGenerationConstants", QuadGenerationConstantsBuffer);
         QuadMaterial.SetTexture("_HeightTexture", HeightTexture);
         QuadMaterial.SetTexture("_NormalTexture", NormalTexture);
         QuadMaterial.SetFloat("_Atmosphere", (Planetoid.Atmosphere != null) ? 1.0f : 0.0f);
         QuadMaterial.SetFloat("_Normale", Planetoid.DrawNormals ? 1.0f : 0.0f);
-        QuadMaterial.SetFloat("_Side", (float)Position);
-        QuadMaterial.SetVector("_Rotation", Planetoid.QuadsRoot.transform.rotation.eulerAngles * Mathf.Deg2Rad);
         QuadMaterial.renderQueue = (int)Planetoid.RenderQueue + Planetoid.RenderQueueOffset;
-
-        //Shader.SetGlobalVector("_Godray_WorldSunDir", Planetoid.Atmosphere.Sun_1.transform.position - Planetoid.transform.position);
 
         if (!Uniformed) Uniformed = true;
 
@@ -594,11 +592,6 @@ public sealed class Quad : MonoBehaviour, IQuad
                 quad.gameObject.name += "_ID" + id + "_LOD" + quad.LODLevel;
 
                 Subquads.Add(quad);
-
-                for (int wait = 0; wait < Planetoid.DispatchSkipFramesCount; wait++)
-                {
-                    yield return new WaitForEndOfFrame();
-                }
             }
         }
 

@@ -9,156 +9,11 @@
 		_QuadTexture2("QuadTexture 2 (RGB)", 2D) = "white" {}
 		_QuadTexture3("QuadTexture 3 (RGB)", 2D) = "white" {}
 		_QuadTexture4("QuadTexture 4 (RGB)", 2D) = "white" {}
-		_WireframeColor("Wireframe Background Color", Color) = (0, 0, 0, 1)
-		_Atmosphere("Atmosphere", Range(0, 1)) = 0.0
 		_Normale("Normale", Range(0, 1)) = 0.0
-		_Side("Side", Range(0, 5)) = 0.0
 	}
 	SubShader
 	{
 		Tags { "Queue" = "Geometry" "RenderType" = "Opaque" }
-
-		/*
-		Pass 
-	    {
-	        Fog { Mode Off }
-			//Cull Front
-			//ZTest Off
-			        
-			CGPROGRAM
-			 
-			#pragma vertex vert
-			#pragma fragment frag
-			#pragma target 3.0
-			#pragma glsl
-
-			#include "UnityCG.cginc"
-			#include "Assets/Project/SpaceEngine/Shaders/Compute/Utils.cginc"
-
-			float3 _Godray_WorldSunDir;
-
-			struct appdata 
-			{
-			    float4 vertex : POSITION;
-			    float3 normal : NORMAL;
-			    float4 texcoord : TEXCOORD0;
-
-			    uint id : SV_VertexID;
-			};
-
-			uniform sampler2D _HeightTexture;
-			uniform sampler2D _NormalTexture;
-			uniform StructuredBuffer<OutputStruct> data;
-			uniform StructuredBuffer<QuadGenerationConstants> quadGenerationConstants;
-
-			struct v2f 
-			{
-			    float4 pos : SV_POSITION;
-			    float2 depth : TEXCOORD0;
-			};
-
-			float3 LinePlaneIntersection(float3 linePoint, float3 lineVec, float3 planeNormal, float3 planePoint)
-			{	
-				float lineLength;
-				float dotNumerator;
-				float dotDenominator;
-					
-				float3 intersectVector;
-				float3 intersection = 0;
-
-				//calculate the distance between the linePoint and the line-plane intersection point
-				dotNumerator = dot((planePoint - linePoint), planeNormal);
-				dotDenominator = dot(lineVec, planeNormal);
-			 
-				//line and plane are not parallel
-				//if(dotDenominator != 0.0f)
-				//{
-					lineLength =  dotNumerator / dotDenominator;
-			  		intersection= (lineLength > 600.0) ? linePoint + normalize(lineVec) * (lineLength - 600) : linePoint;
-
-					return intersection;	
-				//}
-				//else //output not valid
-				//{
-					//return false;
-				//}
-			}
-					  
-			v2f vert (appdata v) 
-			{
-				//v2f o;
-
-				//float4 _LightDirWorldSpace = float4(_Godray_WorldSunDirX,_Godray_WorldSunDirY,_Godray_WorldSunDirZ,0.0);
-				//float4 _LightDirWorldSpace = float4(_Godray_WorldSunDir,0.0);
-				//float3 _LightDirObjectSpace = mul(_World2Object,_LightDirWorldSpace);
-
-				//float3 toLight=normalize(_LightDirObjectSpace);
-
-				//float backFactor = dot( toLight, v.normal );
-
-				//float extrude = (backFactor < 0.0) ? 1.0 : 0.0;
-				//v.vertex.xyz -= toLight * (extrude * 1000000);
-				//    
-				//o.pos = mul (UNITY_MATRIX_MVP, v.vertex);
-				//o.depth = o.pos.zw;
-				//return o;
-
-			    v2f o;
-
-			    float noise = data[v.id].noise;
-				float3 patchCenter = data[v.id].patchCenter;
-				float4 position = data[v.id].position;
-
-				float3 normal = tex2Dlod(_NormalTexture, v.texcoord);
-
-				position.w = 1.0;
-				position.xyz += patchCenter;
-
-				float4 pos = position;
-				float3 nor = normal;
-
-				nor = float3(0, 0, nor.z);
-
-				float4 _LightDirWorldSpace = float4(_Godray_WorldSunDir, 0.0);
-				float3 _LightDirObjectSpace = mul(_World2Object, _LightDirWorldSpace);
-			
-				float3 _LightDirViewSpace = mul(UNITY_MATRIX_V, float4(_LightDirObjectSpace, 0.0)); 
-				pos = mul(UNITY_MATRIX_MV, pos);  //both in view space
-
-			    float3 toLight = normalize(_LightDirViewSpace);
-			    
-			    float backFactor = dot(toLight, mul(UNITY_MATRIX_MV, float4(nor, 0.0)));
-			   	float backfaceFactor = dot(float3(0, 0, 1), mul(UNITY_MATRIX_MV, float4(nor, 0.0)));
-			   	backfaceFactor = (backfaceFactor < 0.0) ? 1.0 : 0.0;
-			   
-			    float extrude = (backFactor < 0.0) ? 1.0 : 0.0;
-			    
-			    float towardsSunFactor = dot(toLight, float3(0, 0, 1));
-			   	float projectOnNearPlane = (towardsSunFactor < 0.0) ? 1.0 : 0.0;
-			   	
-				//v.vertex.xyz -= toLight * (extrude * 1000000);
-				//v.vertex.xyz -= toLight * (extrude  *  1000000);
-				
-				pos.xyz = (projectOnNearPlane * extrude > 0.0) ? LinePlaneIntersection(pos.xyz, -toLight,float3(0, 0, 1), 0) : (pos.xyz = pos.xyz - toLight * (extrude  *  1000000));
-				//v.vertex.xyz = (projectOnNearPlane * extrude > 0.0) ? LinePlaneIntersection(v.vertex.xyz, -toLight,float3(0, 0, 1), float3(0, 0, 600)) : (v.vertex.xyz = v.vertex.xyz - toLight * (extrude * 1000000));
-
-			    o.pos = mul(UNITY_MATRIX_P, pos);
-			    o.depth = o.pos.zw;
-
-			    o.pos.z = log2(max(1e-6, 10000.0 + o.pos.w)) * (2.0 / log2(_ProjectionParams.z + 1.0)) - 1.0;
-				o.pos.z *= v.vertex.w;
-
-			    return o;
-			}
-			 
-			float4 frag(v2f i) : COLOR 
-			{
-			    return i.depth.x / i.depth.y;
-			}
-
-			ENDCG
-	    }
-	    */
 
 		Pass
 		{
@@ -176,7 +31,7 @@
 			#pragma multi_compile ECLIPSES_ON ECLIPSES_OFF
 			#pragma multi_compile ATMOSPHERE_ON ATMOSPHERE_OFF
 
-			#pragma enable_d3d11_debug_symbols //RenderDoc debugging
+			#pragma enable_d3d11_debug_symbols
 
 			#pragma fragmentoption ARB_precision_hint_fastest
 
@@ -215,13 +70,7 @@
 				float depth : DEPTH;
 			};
 
-			float3 _Godray_WorldSunDir;
-		
-			uniform half4 _WireframeColor;
-
-			uniform float _Atmosphere;
 			uniform float _Normale;
-			uniform float _Side;
 
 			uniform sampler2D _HeightTexture;
 			uniform sampler2D _NormalTexture;
@@ -232,13 +81,6 @@
 			uniform sampler2D _QuadTexture3;
 			uniform sampler2D _QuadTexture4;
 
-			uniform float3 _Rotation;
-
-			uniform float4x4 _Globals_CameraToWorld;
-			uniform float4x4 _Globals_ScreenToCamera;
-
-			uniform float3 _Sun_Position;
-
 			uniform StructuredBuffer<OutputStruct> data;
 			uniform StructuredBuffer<QuadGenerationConstants> quadGenerationConstants;
 
@@ -247,14 +89,13 @@
 				return float4(tan(1.37 * inColor.rgb) / tan(1.37), inColor.a);
 			}
 
-			float4 GroundFinalColorWithoutAtmosphere(float4 terrainColor, float3 p, float n, float3 WSD)
+			inline float4 GroundFinalColorWithoutAtmosphere(float4 terrainColor, float3 p, float n, float3 WSD)
 			{
 				return terrainColor;
 			}
 
-			float4 GroundFinalColorWithAtmosphere(float4 terrainColor, float3 p, float3 n, float3 WSD, float4 WSPR)
+			inline float4 GroundFinalColorWithAtmosphere(float4 terrainColor, float3 p, float3 n, float3 WSD, float4 WSPR)
 			{	
-				float3 WCP = _Globals_WorldCameraPos;
 				float3 sunL = 0;
 				float3 skyE = 0;
 				float3 extinction = 0;
@@ -270,19 +111,18 @@
 					eclipse *= EclipseShadow(p, WSD, WSPR.w);
 				#endif
 
-				float4 inscatter = InScattering(WCP, p, WSD, extinction, 1.0) * eclipse;
+				float4 inscatter = InScattering(_Globals_WorldCameraPos, p, WSD, extinction, 1.0) * eclipse;
 
 				float3 groundColor = 1.5 * RGB2Reflectance(terrainColor).rgb * (sunL * max(cTheta, 0) + skyE) / M_PI;
 
-				extinction *= eclipse;
-				extinction = float3(1.0, 1.0, 1.0) * extinctionGroundFade + (1 - extinctionGroundFade) * extinction;
+				extinction = float3(1.0, 1.0, 1.0) * extinctionGroundFade + (1 - extinctionGroundFade) * extinction * eclipse;
 
 				float4 finalColor = float4(groundColor, 1) * float4(extinction, 1) + inscatter;
 				
 				return finalColor;
 			}
 
-			v2fg vert (in appdata_full_compute v)
+			void vert(in appdata_full_compute v, out v2fg o)
 			{
 				float noise = data[v.id].noise;
 				float3 patchCenter = data[v.id].patchCenter;
@@ -301,16 +141,14 @@
 				v.tangent = float4(FindTangent(normal, 0.01, float3(0, 1, 0)), 1);
 				v.normal = normal;
 
-				v2fg o;
-
 				o.uv0 = v.texcoord;
 				o.uv1 = noise;
 				o.uv2 = v.texcoord2;
 				o.uv3 = v.texcoord3;
 				o.normal0 = v.normal;
-				o.normal1 = v.normal;
+				o.normal1 = mul(_Object2World, v.normal);
 				o.vertex0 = mul(UNITY_MATRIX_MVP, v.vertex);
-				o.vertex1 = v.vertex;
+				o.vertex1 = mul(_Object2World, v.vertex);
 				o.vertex2 = cubePosition;
 				o.tangent0 = v.tangent;
 				o.depth = 1;
@@ -319,16 +157,15 @@
 				//o.vertex0.z = log2(max(1e-6, 1.0 + o.vertex0.w)) * (2.0 / log2(_ProjectionParams.z + 1.0)) - 1.0;
 				//o.vertex0.z *= o.vertex0.w;
 				//o.depth = log2(1.0 + o.vertex0.w) * (0.5 * (2.0 / log2(_ProjectionParams.z + 1.0)));
-
-				return o;
 			}
 
-			void frag(v2fg IN, out float4 outDiffuse : COLOR0)
+			void frag(in v2fg IN, out float4 outDiffuse : COLOR)
 			{		
 				QuadGenerationConstants constants = quadGenerationConstants[0];
 
 				float4 scatteringColor = 0;
 				fixed4 terrainColor = tex2D(_HeightTexture, IN.uv0);
+				fixed4 outputNormal = fixed4(IN.normal0, 1);
 
 				float height = tex2D(_HeightTexture, IN.uv0).a;
 				float slope = tex2D(_NormalTexture, IN.uv0).a;
@@ -370,7 +207,6 @@
 				#endif
 
 				#ifdef LIGHT_4
-
 					#ifdef ATMOSPHERE_ON
 						scatteringColor += hdr(GroundFinalColorWithAtmosphere(terrainColor, IN.vertex1.xyz, IN.normal0.xyz, _Sun_WorldSunDir_1, _Sun_Positions_1[0]));
 						scatteringColor += hdr(GroundFinalColorWithAtmosphere(terrainColor, IN.vertex1.xyz, IN.normal0.xyz, _Sun_WorldSunDir_2, _Sun_Positions_1[1]));
@@ -385,8 +221,6 @@
 						scatteringColor += GroundFinalColorWithoutAtmosphere(terrainColor, IN.vertex1.xyz, IN.normal0.xyz, _Sun_WorldSunDir_4);
 					#endif
 				#endif
-
-				fixed4 outputNormal = fixed4(IN.normal0, 1);
 
 				outDiffuse = lerp(scatteringColor, outputNormal, _Normale);
 			}

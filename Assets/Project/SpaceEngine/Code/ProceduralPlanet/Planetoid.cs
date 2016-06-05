@@ -72,8 +72,16 @@ public static class PlanetoidExtensions
                     if (planet.Atmosphere.Sun_3 != null && planet.Atmosphere.Sun_4 != null)
                         Keywords.Remove("LIGHT_3");
 
+                    if (planet.Atmosphere.eclipseCasters.Count == 0)
+                    {
+                        Keywords.Add("ECLIPSES_OFF");
+                    }
+                    else
+                    {
+                        Keywords.Add("ECLIPSES_ON");
+                    }
+
                     Keywords.Add("ATMOSPHERE_ON");
-                    Keywords.Add("ECLIPSES_ON");
                 }
                 else
                 {
