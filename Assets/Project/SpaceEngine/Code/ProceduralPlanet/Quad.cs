@@ -592,6 +592,11 @@ public sealed class Quad : MonoBehaviour, IQuad
                 quad.gameObject.name += "_ID" + id + "_LOD" + quad.LODLevel;
 
                 Subquads.Add(quad);
+
+                for (int wait = 0; wait < Planetoid.DispatchSkipFramesCount; wait++)
+                {
+                    yield return new WaitForEndOfFrame();
+                }
             }
         }
 
