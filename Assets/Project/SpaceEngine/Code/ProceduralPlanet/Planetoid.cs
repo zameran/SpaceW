@@ -296,7 +296,7 @@ public sealed class Planetoid : Planet, IPlanet
             for (int i = 0; i < Quads.Count; i++)
             {
                 if (Quads[i] != null)
-                    Quads[i].Render();
+                    Quads[i].Render(DrawLayer);
             }
         }
 
