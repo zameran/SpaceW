@@ -354,7 +354,7 @@ public sealed class Quad : MonoBehaviour, IQuad
         }
     }
 
-    public void Render()
+    public void Render(int drawLayer = 8)
     {
         if (ReadyForDispatch)
         {
@@ -394,7 +394,7 @@ public sealed class Quad : MonoBehaviour, IQuad
                 TryCull();
 
             if (Visible)
-                Graphics.DrawMesh(QuadMesh, Planetoid.PlanetoidTRS, QuadMaterial, Planetoid.DrawLayer, CameraHelper.Main(), 0, Planetoid.QuadAtmosphereMPB, true, true);
+                Graphics.DrawMesh(QuadMesh, Planetoid.PlanetoidTRS, QuadMaterial, drawLayer, CameraHelper.Main(), 0, Planetoid.QuadAtmosphereMPB, true, true);
 
             if (Planetoid.DrawAndCull == QuadDrawAndCull.CullAfterDraw || Planetoid.DrawAndCull == QuadDrawAndCull.Both)
                 TryCull();
