@@ -139,7 +139,9 @@
 							  float2(aspectRatio * ghost3Settings[k].y, 1.0) * ghost3Settings[k].z + 0.5).rgb);
 				}		
 
-				float3 extinction = Extinction(WCP, WCP - _Sun_Position);
+				float3 extinction = 1;//Extinction(WCP, WCP - _Sun_Position);
+
+				InScattering(WCP, _Sun_Position, WSD, extinction, 1.0);
 
 				ghosts = ghosts * smoothstep(0.0, 1.0, 1.0 - length(toScreenCenter));		
 				
