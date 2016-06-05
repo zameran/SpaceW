@@ -38,6 +38,58 @@ using System.Collections.Generic;
 using Amib;
 using Amib.Threading;
 
+public static class PlanetoidExtensions
+{
+    public static List<string> GetKeywords(this Planet planet)
+    {
+        List<string> Keywords = new List<string>();
+
+        if (planet != null)
+        {
+            if (planet.Atmosphere != null)
+            {
+                if (planet.AtmosphereEnabled)
+                {
+                    if (planet.Atmosphere.Sun_1 != null)
+                        Keywords.Add("LIGHT_1");
+
+                    if (planet.Atmosphere.Sun_2 != null)
+                        Keywords.Add("LIGHT_2");
+
+                    if (planet.Atmosphere.Sun_1 != null && planet.Atmosphere.Sun_2 != null)
+                        Keywords.Remove("LIGHT_1");
+
+                    if (planet.Atmosphere.Sun_3 != null)
+                        Keywords.Add("LIGHT_3");
+
+                    if (planet.Atmosphere.Sun_4 != null)
+                        Keywords.Add("LIGHT_4");
+
+                    if (planet.Atmosphere.Sun_1 != null && planet.Atmosphere.Sun_2 != null)
+                        if (planet.Atmosphere.Sun_3 != null && planet.Atmosphere.Sun_4 != null)
+                            Keywords.Remove("LIGHT_2");
+
+                    if (planet.Atmosphere.Sun_3 != null && planet.Atmosphere.Sun_4 != null)
+                        Keywords.Remove("LIGHT_3");
+
+                    Keywords.Add("ATMOSPHERE_ON");
+                    Keywords.Add("ECLIPSES_ON");
+                }
+                else
+                {
+                    Keywords.Add("ATMOSPHERE_OFF");
+                }
+            }
+            else
+            {
+                Debug.Log("Planet: GetKeywords problem!");
+            }
+        }
+
+        return Keywords;
+    }
+}
+
 public sealed class Planetoid : Planet, IPlanet
 {
     public bool GetData = false;
@@ -201,6 +253,16 @@ public sealed class Planetoid : Planet, IPlanet
         base.OnDrawGizmos();
     }
 
+    private void PlanetOnAtmosphereChanged(Planet p)
+    {
+        for (int i = 0; i < Quads.Count; i++)
+        {
+            Quads[i].QuadMaterial.shaderKeywords = p.GetKeywords().ToArray();
+        }
+
+        Debug.Log("Planetoid: PlanetOnAtmosphereChanged");
+    }
+
     private void OnAtmosphereBaked(Atmosphere a)
     {
         if (a != null)
@@ -240,12 +302,14 @@ public sealed class Planetoid : Planet, IPlanet
 
         if (Atmosphere != null)
         {
-            Atmosphere.Render(Origin, DrawLayer);
+            if (AtmosphereEnabled)
+                Atmosphere.Render(Origin, DrawLayer);
         }
 
         if (Cloudsphere != null)
         {
-            Cloudsphere.Render(DrawLayer);
+            if (CloudsphereEnabled)
+                Cloudsphere.Render(DrawLayer);
         }
     }
 

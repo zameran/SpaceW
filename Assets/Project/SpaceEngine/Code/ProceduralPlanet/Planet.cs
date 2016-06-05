@@ -45,6 +45,9 @@ public abstract class Planet : MonoBehaviour
     public Atmosphere Atmosphere;
     public Cloudsphere Cloudsphere;
 
+    public bool AtmosphereEnabled = true;
+    public bool CloudsphereEnabled = true;
+
     public int DrawLayer = 8;
 
     public bool DebugEnabled = false;

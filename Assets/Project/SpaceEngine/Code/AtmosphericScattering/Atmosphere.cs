@@ -171,36 +171,18 @@ public sealed class Atmosphere : MonoBehaviour
 
     public List<string> GetKeywords()
     {
-        //TODO: Remake this keyword shit.
+        Planetoid planet = transform.parent.GetComponent<Planet>() as Planetoid;
 
-        List<string> Keywords = new List<string>();
+        if(planet != null)
+        {
+            return planet.GetKeywords();
+        }
+        else
+        {
+            Debug.Log("Atmosphere: GetKeywords problem!");
 
-        if (Sun_1 != null)
-            Keywords.Add("LIGHT_1");
-
-        if (Sun_2 != null)
-            Keywords.Add("LIGHT_2");
-
-        if (Sun_1 != null && Sun_2 != null)
-            Keywords.Remove("LIGHT_1");
-
-        if (Sun_3 != null)
-            Keywords.Add("LIGHT_3");
-
-        if (Sun_4 != null)
-            Keywords.Add("LIGHT_4");
-
-        if (Sun_1 != null && Sun_2 != null)
-            if (Sun_3 != null && Sun_4 != null)
-                Keywords.Remove("LIGHT_2");
-
-        if (Sun_3 != null && Sun_4 != null)
-            Keywords.Remove("LIGHT_3");
-
-        Keywords.Add("ATMOSPHERE");
-        Keywords.Add("ECLIPSES_ON");
-
-        return Keywords;
+            return null;
+        }
     }
 
     public void SetKeywords(Material m, List<string> keywords)
