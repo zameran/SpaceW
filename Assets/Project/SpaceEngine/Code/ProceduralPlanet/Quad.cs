@@ -1169,7 +1169,7 @@ public sealed class Quad : MonoBehaviour, IQuad
         BrainFuckMath.UnlockAxis(ref temp, ref tempStatic, staticX, staticY, staticZ);
 
         //Just make sure that our vector values is rounded...
-        temp = temp.RoundToInt();
+        if(Planetoid.PlanetRadius % 2 == 0) temp = temp.RoundToInt();
 
         return temp;
     }

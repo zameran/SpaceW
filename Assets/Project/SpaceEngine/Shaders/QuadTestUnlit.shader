@@ -165,6 +165,7 @@
 
 				float4 scatteringColor = 0;
 				fixed4 terrainColor = tex2D(_HeightTexture, IN.uv0);
+				fixed4 uvSamplerColor = tex2D(_PlanetUVSampler, IN.uv0);
 				fixed4 outputNormal = fixed4(IN.normal0, 1);
 
 				float height = tex2D(_HeightTexture, IN.uv0).a;
