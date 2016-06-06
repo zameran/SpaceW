@@ -15,6 +15,7 @@
 			CGPROGRAM
 			#include "UnityCG.cginc"
 			#include "Atmosphere.cginc"
+			#include "Utility.cginc"
 
 			#pragma target 3.0
 			#pragma vertex vert
@@ -42,7 +43,7 @@
 			uniform float4x4 ghost2Settings;
 			uniform float4x4 ghost3Settings;
 			
-			uniform float useTransmittance;
+			uniform float useAtmosphereColors;
 			uniform float eclipse;
 		
 			uniform float3 sunViewPortPos;
@@ -109,6 +110,8 @@
 
 				float2 toScreenCenter = sunViewPortPos.xy - 0.5;
 
+				float r = length(WCP);
+
 				float3 outputColor = 0;
 				float3 sunColor = 0;
 				float3 ghosts = 0;
@@ -140,15 +143,19 @@
 				}		
 
 				float3 extinction = 1;//Extinction(WCP, WCP - _Sun_Position);
+				float3 inscatter = 1;
 
-				InScattering(WCP, _Sun_Position, WSD, extinction, 1.0);
+				inscatter = InScattering(WCP, _Sun_Position, WSD, extinction, 1.0);
+				//inscatter = (length(inscatter) > 0) ? inscatter : 1;
 
-				ghosts = ghosts * smoothstep(0.0, 1.0, 1.0 - length(toScreenCenter));		
+				ghosts = ghosts * smoothstep(0.0, 1.0, 1.0 - length(toScreenCenter));	
+
+				if (r <= Rt) {  }
 				
 				outputColor += sunColor;
 				outputColor += ghosts;
 				outputColor *= sunGlareFade;
-				outputColor = (useTransmittance > 0.0) ? outputColor * extinction : outputColor;
+				outputColor = (useAtmosphereColors > 0.0) ? outputColor * extinction : outputColor;
 				//outputColor = OuterSunGlareRadiance(IN.relativeDir, outputColor);
 				//outputColor = (eclipse > 0.0) ? sunColor : outputColor;
 

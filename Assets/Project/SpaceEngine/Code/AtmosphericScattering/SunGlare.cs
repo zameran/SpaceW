@@ -53,7 +53,7 @@ public sealed class SunGlare : MonoBehaviour
         sunGlareMaterial = new Material(sunGlareShader);
         sunGlareMaterial.renderQueue = RenderQueue;
 
-        screenMesh = MeshFactory.MakePlane(2, 2, MeshFactory.PLANE.XY, false, false, false);
+        screenMesh = MeshFactory.MakePlane(8, 8, MeshFactory.PLANE.XY, false, false, false);
         screenMesh.bounds = new Bounds(Vector4.zero, new Vector3(9e37f, 9e37f, 9e37f));
 
         for (int i = 0; i < ghost1SettingsList.Count; i++)
@@ -112,7 +112,7 @@ public sealed class SunGlare : MonoBehaviour
         sunGlareMaterial.SetFloat("aspectRatio", CameraHelper.Main().aspect);
         sunGlareMaterial.SetFloat("sunGlareScale", sunGlareScale);
         sunGlareMaterial.SetFloat("sunGlareFade", sunGlareFade);
-        sunGlareMaterial.SetFloat("useTransmittance", 1.0f);
+        sunGlareMaterial.SetFloat("useAtmosphereColors", 1.0f);
         sunGlareMaterial.SetFloat("eclipse", eclipse ? 1.0f : 0.0f);
 
         Atmosphere.SetUniforms(sunGlareMaterial);
