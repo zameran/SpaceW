@@ -1,6 +1,7 @@
 SpaceW Checklist.
 - Priory ordered.
 
+-1 : Forget about dat fucking project and kill yourself...
 0 : Save the GPU-CPU tick-tack order. Shit happends...
 1 : Remake planet dispatching/rendering system. 
 	Eg find more info about Graphics.DrawProcedural/MeshTopology and Buffer types.
