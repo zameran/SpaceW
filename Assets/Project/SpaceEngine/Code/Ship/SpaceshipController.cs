@@ -29,7 +29,7 @@
  * THE POSSIBILITY OF SUCH DAMAGE.
  */
 #endregion
-
+#if KSP_SHIT
 using UnityEngine;
 
 using Experimental;
@@ -166,3 +166,4 @@ public class SpaceshipController : MonoBehaviour
         if (vessel != null) { vessel.rails = !input; vessel.UpdateRails(); }
     }
 }
+#endif

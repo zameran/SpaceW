@@ -1,4 +1,5 @@
-﻿using System;
+﻿#if NODE_EDITOR_FRAMEWORK
+using System;
 using System.Text;
 
 using UnityEngine;
@@ -96,3 +97,4 @@ namespace NodeEditorFramework.NoiseEngine
         }
     }
 }
+#endif

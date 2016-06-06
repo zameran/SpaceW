@@ -1174,7 +1174,7 @@ public sealed class Quad : MonoBehaviour, IQuad
         return temp;
     }
 
-    public Vector3 CalculateMiddlePoint(Vector3 topLeft, Vector3 bottmoRight, Vector3 topRight, Vector3 bottomLeft)
+    public Vector3 CalculateMiddlePoint(Vector3 topLeft, Vector3 bottomRight, Vector3 topRight, Vector3 bottomLeft)
     {
         Vector3 size = bottomLeft - topLeft;
         Vector3 middle = Vector3.zero;
@@ -1185,7 +1185,7 @@ public sealed class Quad : MonoBehaviour, IQuad
 
         BrainFuckMath.DefineAxis(ref staticX, ref staticY, ref staticZ, size);
 
-        middle = (topLeft + bottmoRight) * (1 / Mathf.Abs(LODLevel));
+        middle = (topLeft + bottomRight) * (1 / Mathf.Abs(LODLevel));
         middle = middle.NormalizeToRadius(Planetoid.PlanetRadius);
 
         BrainFuckMath.LockAxis(ref tempStatic, ref middle, staticX, staticY, staticZ);

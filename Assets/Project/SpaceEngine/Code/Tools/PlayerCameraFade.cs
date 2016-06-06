@@ -60,7 +60,7 @@ public class PlayerCameraFade : MonoBehaviour
     {
         if (mInstance == null)
         {
-            mInstance = this as PlayerCameraFade;
+            mInstance = this;
             instance.init();
         }
     }

@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿#if NODE_EDITOR_FRAMEWORK
+using UnityEngine;
 
 namespace NodeEditorFramework.NoiseEngine
 {
@@ -9,3 +10,4 @@ namespace NodeEditorFramework.NoiseEngine
         Texture2D CalculatePreview(int size = 128);
     }
 }
+#endif

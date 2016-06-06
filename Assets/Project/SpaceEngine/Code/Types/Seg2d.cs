@@ -113,21 +113,6 @@ namespace UnityEngine
             return false;
         }
 
-        public bool Intersects(Seg2d s, double t0)
-        {
-            Vector2d aa = s.a - a;
-            double det = Vector2d.Cross(ab, s.ab);
-            t0 = Vector2d.Cross(aa, s.ab) / det;
-
-            if (t0 > 0 && t0 < 1)
-            {
-                double t1 = Vector2d.Cross(aa, ab) / det;
-                return t1 > 0 && t1 < 1;
-            }
-
-            return false;
-        }
-
         /*
          * Returns true if this segment intersects the given segment. If there
          * is an intersection it is returned in the vector.

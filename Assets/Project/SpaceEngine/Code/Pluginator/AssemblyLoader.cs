@@ -160,13 +160,13 @@ public sealed class AssemblyLoader : Loader
 
             SpaceAddonAssembly[] attrbutes = assembly.GetCustomAttributes(typeof(SpaceAddonAssembly), false) as SpaceAddonAssembly[];
 
-            if (attrbutes.Length == 0 || attrbutes == null)
+            if (attrbutes == null || attrbutes.Length == 0)
             {
                 Logger.Log(string.Format("This is not an adddon assembly! {0}", path));
             }
             else
             {
-                SpaceAddonAssembly ea = attrbutes[0] as SpaceAddonAssembly;
+                SpaceAddonAssembly ea = attrbutes[0];
                 List<Type> mb = GetAllSubclassesOf<Type, SpaceAddonMonoBehaviour, MonoBehaviour>(assembly);
                 AssemblyExternalTypes aet = new AssemblyExternalTypes(typeof(MonoBehaviour), mb);
                 AssemblyExternal ae = new AssemblyExternal(path, ea.Name, ea.Version, assembly, aet);

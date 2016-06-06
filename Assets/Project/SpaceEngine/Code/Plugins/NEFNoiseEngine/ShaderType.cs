@@ -1,4 +1,5 @@
-﻿using System;
+﻿#if NODE_EDITOR_FRAMEWORK
+using System;
 
 using UnityEngine;
 
@@ -13,3 +14,4 @@ namespace NodeEditorFramework.NoiseEngine
         public string OutKnobTex { get { return "Textures/Out_Knob.png"; } }
     }
 }
+#endif
