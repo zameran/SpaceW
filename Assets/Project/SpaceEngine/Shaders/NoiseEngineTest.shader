@@ -16,7 +16,7 @@
 			#pragma fragment frag
 
 			#include "UnityCG.cginc"
-			#include "TCCommon.cginc"
+			#include "NoiseEngine.cginc"
 			
 			struct data
 			{
@@ -26,27 +26,25 @@
 
 			struct v2f
 			{
-				float4 vertex : POSITION;
+				float4 vertex : SV_POSITION;
 				float3 uv : TEXCOORD0;
 			};
 
 			uniform float _Freq;
 
-			v2f vert(data v)
+			v2f vert (data v)
 			{
-				v2f o;
+			    v2f o;
 
-				o.vertex = mul(UNITY_MATRIX_MVP, v.vertex);
+			    o.vertex = mul(UNITY_MATRIX_MVP, v.vertex);
+			    o.uv = v.uv * _Freq;
 
-				o.uv = mul(_Object2World, v.uv).xyz;
-				o.uv *= _Freq;
-				
-				return o;
+			    return o;
 			}
 
 			float NoiseFunction(float3 pos)
 			{
-				return sNoise(pos);
+				return Noise3D(pos.xyz);
 			}
 
 			float3 FindNormal(float3 pos, float u)
