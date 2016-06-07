@@ -1,0 +1,41 @@
+﻿//07.06.2016
+
+Noise(float3 p) : NOISE_ENGINE_I : NOISE_ENGINE_TECHNIQUE 2
+ // Stats for Vertex shader:
+ //       d3d11 : 5 math
+ //        d3d9 : 5 math
+ // Stats for Fragment shader:
+ //       d3d11 : 63 math
+ //        d3d9 : 69 math
+
+Noise(float3 p) : NOISE_ENGINE_I : NOISE_ENGINE_TECHNIQUE 1
+ // Stats for Vertex shader:
+ //       d3d11 : 5 math
+ //        d3d9 : 5 math
+ // Stats for Fragment shader:
+ //       d3d11 : 68 math
+ //        d3d9 : 71 math
+
+Noise(float3 p) : NOISE_ENGINE_I : NOISE_ENGINE_TECHNIQUE 0
+ // Stats for Vertex shader:
+ //       d3d11 : 5 math
+ //        d3d9 : 5 math
+ // Stats for Fragment shader:
+ //       d3d11 : 64 math
+ //        d3d9 : 79 math
+
+Noise(float3 p) : NOISE_ENGINE_ZNE : NOISE_ENGINE_TECHNIQUE ANY
+ // Stats for Vertex shader:
+ //       d3d11 : 5 math
+ //        d3d9 : 5 math
+ // Stats for Fragment shader:
+ //       d3d11 : 64 math
+ //        d3d9 : 79 math
+
+Noise(float3 p) : NOISE_ENGINE_SE : NOISE_ENGINE_TECHNIQUE ANY
+ // Stats for Vertex shader:
+ //       d3d11 : 5 math
+ //        d3d9 : 5 math
+ // Stats for Fragment shader:
+ //       d3d11 : 53 math
+ //        d3d9 : 57 math, 18 texture

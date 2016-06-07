@@ -16,7 +16,7 @@
 			#pragma fragment frag
 
 			#include "UnityCG.cginc"
-			#include "NoiseEngine.cginc"
+			#include "TCCommon.cginc"
 			
 			struct data
 			{
@@ -44,7 +44,7 @@
 
 			float NoiseFunction(float3 pos)
 			{
-				return Noise3D(pos.xyz);
+				return Noise(pos);
 			}
 
 			float3 FindNormal(float3 pos, float u)

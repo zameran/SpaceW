@@ -39,6 +39,13 @@
 // Not all features already ported! (Early - WIP)
 
 //-----------------------------------------------------------------------------
+// include 2d noise engine features? NOTE : This shit will use UAV data... so...
+// 0 - why i need this?!
+// 1 - include.
+#define INCLUDE_NOISE_ENGINE_2D 0
+//-----------------------------------------------------------------------------
+
+//-----------------------------------------------------------------------------
 // noise engine:
 // NOISE_ENGINE_SE - space engine texture lookup
 // NOISE_ENGINE_ZNE - zameran noise engine
@@ -62,7 +69,7 @@
 //-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
-// coloring engine tweak
+// coloring engine tweak:
 // 0 - disable wip.
 // 1 - enable wip.
 #define TEST 0
@@ -145,8 +152,10 @@ uniform float2 TexCoord;
 //-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
-uniform sampler2D	PermSampler;
-uniform sampler2D	PermGradSampler;
+uniform sampler2D	PermSampler;		// 3d
+uniform sampler2D	PermGradSampler;	// 3d
+uniform sampler2D	PermSamplerGL;		// 2d
+uniform sampler2D	PermGradSamplerGL;	// 2d
 uniform sampler2D   NormalMap;          // normals map to calculate slope
 uniform sampler1D   CloudsColorTable;   // clouds color table
 
@@ -1070,6 +1079,7 @@ void FAST32_hash_3D(float3 gridcell, out float4 lowz_hash_0, out float4 lowz_has
 
 	//truncate the domain
 	gridcell.xyz = gridcell.xyz - floor(gridcell.xyz * (1.0 / DOMAIN)) * DOMAIN;
+
 	float3 gridcell_inc1 = step(gridcell, float3(DOMAIN - 1.5, DOMAIN - 1.5, DOMAIN - 1.5)) * (gridcell + 1.0);
 
 	//calculate the noise
@@ -1099,12 +1109,15 @@ void FAST32_hash_3D(float3 gridcell, out float4 lowz_hash, out float4 highz_hash
 
 	//	truncate the domain
 	gridcell.xyz = gridcell.xyz - floor(gridcell.xyz * (1.0 / DOMAIN)) * DOMAIN;
+
 	float3 gridcell_inc1 = step(gridcell, float3(DOMAIN - 1.5, DOMAIN - 1.5, DOMAIN - 1.5)) * (gridcell + 1.0);
 
 	//	calculate the noise
 	float4 P = float4(gridcell.xy, gridcell_inc1.xy) + OFFSET.xyxy;
+
 	P *= P;
 	P = P.xzxz * P.yyww;
+
 	highz_hash.xy = float2(1.0 / (SOMELARGEFLOAT + float2(gridcell.z, gridcell_inc1.z) * ZINC));
 	lowz_hash  = frac(P * highz_hash.xxxx );
 	highz_hash = frac(P * highz_hash.yyyy );
@@ -1281,13 +1294,6 @@ float4 NoiseDeriv(float3 p)
 	grad_y1 *= norm_1;
 	grad_z1 *= norm_1;
 
-	//grad_x0 = mul(grad_x0, norm_0);
-	//grad_y0 = mul(grad_y0, norm_0);
-	//grad_z0 = mul(grad_z0, norm_0);
-	//grad_x1 = mul(grad_x1, norm_1);
-	//grad_y1 = mul(grad_y1, norm_1);
-	//grad_z1 = mul(grad_z1, norm_1);
-
 	//calculate the dot products
 	float4 dotval_0 = float2(Pf.x, Pf_min1.x).xyxy * grad_x0 + float2(Pf.y, Pf_min1.y).xxyy * grad_y0 + Pf.zzzz * grad_z0;
 	float4 dotval_1 = float2(Pf.x, Pf_min1.x).xyxy * grad_x1 + float2(Pf.y, Pf_min1.y).xxyy * grad_y1 + Pf_min1.zzzz * grad_z1;
@@ -1331,9 +1337,9 @@ float4 NoiseDeriv(float3 p)
 
 	float4 result = float4(0.0, 0.0, 0.0, noiseresult.x); //ONLY noiseresult.x!!!!!!!!
 
-	result.x += dot(float4(k0_gk0.x, k3_gk3.x * v, float2(k4_gk4.x, k6_gk6.x * v) * w), float4(blendDeriv.x, blendDeriv.x, blendDeriv.x, blendDeriv.x));
-	result.y += dot(float4(k1_gk1.x, k3_gk3.x * u, float2(k5_gk5.x, k6_gk6.x * u) * w), float4(blendDeriv.y, blendDeriv.y, blendDeriv.y, blendDeriv.y));
-	result.z += dot(float4(k2_gk2.x, k4_gk4.x * u, float2(k5_gk5.x, k6_gk6.x * u) * v), float4(blendDeriv.z, blendDeriv.z, blendDeriv.z, blendDeriv.z));
+	result.x = dot(float4(k0_gk0.x, k3_gk3.x * v, float2(k4_gk4.x, k6_gk6.x * v) * w), float4(blendDeriv.x, blendDeriv.x, blendDeriv.x, blendDeriv.x));
+	result.y = dot(float4(k1_gk1.x, k3_gk3.x * u, float2(k5_gk5.x, k6_gk6.x * u) * w), float4(blendDeriv.y, blendDeriv.y, blendDeriv.y, blendDeriv.y));
+	result.z = dot(float4(k2_gk2.x, k4_gk4.x * u, float2(k5_gk5.x, k6_gk6.x * u) * v), float4(blendDeriv.z, blendDeriv.z, blendDeriv.z, blendDeriv.z));
 
 	//normalize and return
 	return result *= 1.1547005383792515290182975610039;
@@ -1370,11 +1376,14 @@ float Noise(float3 p)
 
 		// Classic Perlin Interpolation
 		float3 blend = Interpolation_C2(Pf);
+
 		float4 res0 = lerp(grad_results_0, grad_results_1, blend.z);
+
 		float2 res1 = lerp(res0.xy, res0.zw, blend.y);
+
 		float finalValue = lerp(res1.x, res1.y, blend.x);
-		finalValue *= 1.1547005383792515290182975610039; // (optionally) scale things to a strict -1.0->1.0 rang *= 1.0/sqrt(0.75)
-		return finalValue;
+
+		return finalValue * 1.1547005383792515290182975610039; // (optionally) scale things to a strict -1.0->1.0 rang *= 1.0/sqrt(0.75);
 	#else
 		// Improved noise. Requires 1 random value per point.
 		// Will run faster than classic noise if a slow hashing function is used.
@@ -1390,15 +1399,21 @@ float Noise(float3 p)
 			// [1,0,1] [-1,0,1] [1,0,-1] [-1,0,-1]
 			// [0,1,1] [0,-1,1] [0,1,-1] [0,-1,-1]
 			hash_lowz *= 3.0;
+
 			float4 grad_results_0_0 = lerp(float2(Pf.y, Pf_min1.y).xxyy, float2(Pf.x, Pf_min1.x).xyxy, LessThan(hash_lowz, float4(2.0, 2.0, 2.0, 2.0)));
 			float4 grad_results_0_1 = lerp(Pf.zzzz, float2(Pf.y, Pf_min1.y).xxyy, LessThan(hash_lowz, float4(1.0, 1.0, 1.0, 1.0)));
+
 			hash_lowz = frac(hash_lowz) - 0.5;
+
 			float4 grad_results_0 = grad_results_0_0 * sign(hash_lowz) + grad_results_0_1 * sign(abs(hash_lowz) - float4(0.25, 0.25, 0.25, 0.25));
 
 			hash_highz *= 3.0;
+
 			float4 grad_results_1_0 = lerp(float2(Pf.y, Pf_min1.y).xxyy, float2(Pf.x, Pf_min1.x).xyxy, LessThan(hash_highz, float4(2.0, 2.0, 2.0, 2.0)));
 			float4 grad_results_1_1 = lerp(Pf_min1.zzzz, float2(Pf.y, Pf_min1.y).xxyy, LessThan(hash_highz, float4(1.0, 1.0, 1.0, 1.0)));
+
 			hash_highz = frac(hash_highz) - 0.5;
+
 			float4 grad_results_1 = grad_results_1_0 * sign(hash_highz) + grad_results_1_1 * sign(abs(hash_highz) - float4(0.25, 0.25, 0.25, 0.25));
 
 			// Blend the gradients and return
@@ -1412,15 +1427,21 @@ float Noise(float3 p)
 			// [1,1,1]  [-1,1,1]  [1,-1,1]  [-1,-1,1]
 			// [1,1,-1] [-1,1,-1] [1,-1,-1] [-1,-1,-1]
 			hash_lowz -= float4(0.5, 0.5, 0.5, 0.5);
+
 			float4 grad_results_0_0 = float2(Pf.x, Pf_min1.x).xyxy * sign(hash_lowz);
+
 			hash_lowz = abs(hash_lowz) - float4(0.25, 0.25, 0.25, 0.25);
+
 			float4 grad_results_0_1 = float2(Pf.y, Pf_min1.y).xxyy * sign(hash_lowz);
 			float4 grad_results_0_2 = Pf.zzzz * sign(abs(hash_lowz) - float4(0.125, 0.125, 0.125, 0.125));
 			float4 grad_results_0 = grad_results_0_0 + grad_results_0_1 + grad_results_0_2;
 
 			hash_highz -= float4(0.5, 0.5, 0.5, 0.5);
+
 			float4 grad_results_1_0 = float2(Pf.x, Pf_min1.x).xyxy * sign(hash_highz);
+
 			hash_highz = abs(hash_highz) - float4(0.25, 0.25, 0.25, 0.25);
+
 			float4 grad_results_1_1 = float2(Pf.y, Pf_min1.y).xxyy * sign(hash_highz);
 			float4 grad_results_1_2 = Pf_min1.zzzz * sign(abs(hash_highz) - float4(0.125, 0.125, 0.125, 0.125));
 			float4 grad_results_1 = grad_results_1_0 + grad_results_1_1 + grad_results_1_2;
@@ -1453,22 +1474,20 @@ float4 NoiseDeriv(float3 p)
 	float4 grad_y0 = hashy0 - 0.49999;
 	float4 grad_z0 = hashz0 - 0.49999;
 	float4 norm_0 = rsqrt(grad_x0 * grad_x0 + grad_y0 * grad_y0 + grad_z0 * grad_z0);
+
 	grad_x0 *= norm_0;
 	grad_y0 *= norm_0;
 	grad_z0 *= norm_0;
-	//grad_x0 = mul(grad_x0, norm_0);
-	//grad_y0 = mul(grad_y0, norm_0);
-	//grad_z0 = mul(grad_z0, norm_0);
+
 	float4 grad_x1 = hashx1 - 0.49999;
 	float4 grad_y1 = hashy1 - 0.49999;
 	float4 grad_z1 = hashz1 - 0.49999;
 	float4 norm_1 = rsqrt(grad_x1 * grad_x1 + grad_y1 * grad_y1 + grad_z1 * grad_z1);
+
 	grad_x1 *= norm_1;
 	grad_y1 *= norm_1;
 	grad_z1 *= norm_1;
-	//grad_x1 = mul(grad_x1, norm_1);
-	//grad_y1 = mul(grad_y1, norm_1);
-	//grad_z1 = mul(grad_z1, norm_1);
+
 	float4 grad_results_0 = float2(Pf.x, Pf_min1.x).xyxy * grad_x0 + float2(Pf.y, Pf_min1.y).xxyy * grad_y0 + Pf.zzzz * grad_z0;
 	float4 grad_results_1 = float2(Pf.x, Pf_min1.x).xyxy * grad_x1 + float2(Pf.y, Pf_min1.y).xxyy * grad_y1 + Pf_min1.zzzz * grad_z1;
 
@@ -1502,6 +1521,132 @@ float4 NoiseDeriv(float3 p)
 	const float FINAL_NORMALIZATION = 2.3703703703703703703703703703704;	// scales the final result to a strict (-1.0, 1.0) range
 	return float4(float3(xderiv_0, yderiv_0, zderiv_0) + float3(xderiv_1, yderiv_1, zderiv_1),
 				 dot(m3_0, grad_results_0) + dot(m3_1, grad_results_1)) * FINAL_NORMALIZATION;
+}
+#endif
+//-----------------------------------------------------------------------------
+
+//-----------------------------------------------------------------------------
+#if (INCLUDE_NOISE_ENGINE_2D == 1)
+float Noise2D(float2 p, float seed = 0)
+{
+	const float one = 1.0 / 256;
+
+	float2 P = fmod(floor(p), 256) * one;
+	p -= floor(p);
+
+	// Get weights from the coordinate fraction
+	float2 w = p * p * p * (p * (p * 6 - 15) + 10);
+	float4 w4 = float4(1, w.x, w.y, w.x * w.y);
+
+	// Get the four randomly permutated indices from the noise lattice nearest to
+	// p and offset these numbers with the seed number.
+	float4 perm = tex2D(PermSamplerGL, P) + seed;
+
+	// Permutate the four offseted indices again and get the 2D gradient for each
+	// of the four permutated coordinates-seed pairs.
+	float4 g1 = tex2D(PermGradSamplerGL, perm.xy) * 2 - 1;
+	float4 g2 = tex2D(PermGradSamplerGL, perm.zw) * 2 - 1;
+
+	// Evaluate the four lattice gradients at p
+	float a = dot(g1.xy, p);
+	float b = dot(g2.xy, p + float2(-1,  0));
+	float c = dot(g1.zw, p + float2( 0, -1));
+	float d = dot(g2.zw, p + float2(-1, -1));
+
+	// Bi-linearly blend between the gradients, using w4 as blend factors.
+	float4 grads = float4(a, b - a, c - a, a - b - c + d);
+	float n = dot(grads, w4);
+
+	// Return the noise value, roughly normalized in the range [-1, 1]
+	return n * 1.5;
+}
+
+float3 Noise2DPseudoDeriv(float2 p, float seed = 0)
+{
+	const float one = 1.0 / 256;
+
+	float2 P = fmod(floor(p), 256) * one;
+	p -= floor(p);
+
+	float2 f = p * p * p * (p * (p * 6 - 15) + 10);
+	float2 df = p * p * (p * (30 * p - 60) + 30);
+
+	float4 AA = tex2D(PermSamplerGL, P) + seed / 256;
+	float4 G1 = tex2D(PermGradSamplerGL, AA.xy) * 2 - 1;
+	float4 G2 = tex2D(PermGradSamplerGL, AA.zw) * 2 - 1;
+
+	float a = dot(G1.xy, p);
+	float b = dot(G2.xy, p + float2(-1,  0));
+	float c = dot(G1.zw, p + float2( 0, -1));
+	float d = dot(G2.zw, p + float2(-1, -1));
+
+	float k0 = a;
+	float k1 = b - a;
+	float k2 = c - a;
+	float k3 = a - b - c + d;
+
+	float n = k0 + k1 * f.x + k2 * f.y + k3 * f.x * f.y;
+
+	float dx = df.x * (k1 + k3 * f.y);
+	float dy = df.y * (k2 + k3 * f.x);
+
+	return float3(n, dx, dy) * 1.5;
+}
+
+float3 Noise2DDeriv(float2 p, float seed = 0)
+{
+	const float one = 1.0 / 256;
+
+	float2 P = fmod(floor(p), 256) * one;
+	p -= floor(p);
+
+	float2 w = p * p * p * (p * (p * 6 - 15) + 10);
+	float2 dw = p * p * (p * (p * 30 - 60) + 30);
+	float2 dwp = p * p * p * (p * (p * 36 - 75) + 40);
+
+	float4 AA = tex2D(PermSamplerGL, P) + seed / 256;
+	float4 G1 = tex2D(PermGradSamplerGL, AA.xy) * 2 - 1;
+	float4 G2 = tex2D(PermGradSamplerGL, AA.zw) * 2 - 1;
+
+	float k0 = G1.x * p.x + G1.y * p.y;
+	float k1 = (G2.x - G1.x) * p.x + (G2.y - G1.y) * p.y - G2.x;
+	float k2 = (G1.z - G1.x) * p.x + (G1.w - G1.y) * p.y - G1.w;
+	float k3 = (G1.x - G2.x - G1.z + G2.z) * p.x + (G1.y - G2.y - G1.w + G2.w) * p.y + G2.x + G1.w - G2.z - G2.w; // a - b - c + d
+
+	float n = k0 + k1 * w.x + k2 * w.y + k3 * w.x * w.y;
+
+	float dx = (G1.x + (G1.z - G1.x) * w.y) + ((G2.y - G1.y) * p.y - G2.x + ((G1.y - G2.y - G1.w + G2.w) * p.y + G2.x + G1.w - G2.z - G2.w) * w.y) * dw.x + ((G2.x - G1.x) + (G1.x - G2.x - G1.z + G2.z) * w.y) * dwp.x;
+	float dy = (G1.y + (G2.y - G1.y) * w.x) + ((G1.z - G1.x) * p.x - G1.w + ((G1.x - G2.x - G1.z + G2.z) * p.x + G2.x + G1.w - G2.z - G2.w) * w.x) * dw.y + ((G1.w - G1.y) + (G1.y - G2.y - G1.w + G2.w) * w.x) * dwp.y;
+
+	return float3(n, dx, dy) * 1.5;
+}
+
+float3 Noise2DAlternativeDeriv(float2 p, float seed = 0)
+{
+	const float one = 1.0 / 256;
+
+	float2 P = fmod(floor(p), 256) * one;
+	p -= floor(p);
+
+	float2 f = p * p * p * (p * (p * 6 - 15) + 10);
+	float2 ddf = p * (p * (p * 120 - 180) + 60);
+	float2 ddfp = p * p * (p * (p * 180 - 300) + 120);
+
+	float4 AA = tex2D(PermSamplerGL, P) + seed / 256;
+	float4 G1 = tex2D(PermGradSamplerGL, AA.xy) * 2 - 1;
+	float4 G2 = tex2D(PermGradSamplerGL, AA.zw) * 2 - 1;
+
+	float k0 = G1.x * p.x + G1.y * p.y;
+	float k1 = (G2.x - G1.x) * p.x + (G2.y - G1.y) * p.y - G2.x;
+	float k2 = (G1.z - G1.x) * p.x + (G1.w - G1.y) * p.y - G1.w;
+	float k3 = (G1.x - G2.x - G1.z + G2.z) * p.x + (G1.y - G2.y - G1.w + G2.w) * p.y + G2.x + G1.w - G2.z - G2.w; // a - b - c + d
+
+	float n = k0 + k1 * f.x + k2 * f.y + k3 * f.x * f.y;
+
+	float ddx = ((G2.y - G1.y) * p.y - G2.x + ((G1.y - G2.y - G1.w + G2.w) * p.y + G2.x + G1.w - G2.z - G2.w) * f.y) * ddf.x + ((G2.x-G1.x) + (G1.x - G2.x - G1.z + G2.z) * f.y) * ddfp.x;
+	float ddy = ((G1.z - G1.x) * p.x - G1.w + ((G1.x - G2.x - G1.z + G2.z) * p.x + G2.x + G1.w - G2.z - G2.w) * f.x) * ddf.y + ((G1.w-G1.y) + (G1.y - G2.y - G1.w + G2.w) * f.x) * ddfp.y;
+
+	return float3(n, ddx, ddy) * 1.5;
 }
 #endif
 //-----------------------------------------------------------------------------
