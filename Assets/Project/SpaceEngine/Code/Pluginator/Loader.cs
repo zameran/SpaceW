@@ -101,7 +101,7 @@ public abstract class Loader : MonoBehaviour
 
     private IEnumerator DelayImpl(float waitTime, Action action)
     {
-        yield return new WaitForSeconds(waitTime);
+        yield return Yielders.Get(waitTime);
 
         if (action != null) action();
     }

@@ -86,7 +86,7 @@ public sealed class AtmosphereRunTimeBaker : MonoBehaviour
 
             for (int i = 0; i < 8; i++)
             {
-                yield return new WaitForEndOfFrame();
+                yield return Yielders.EndOfFrame;
             }
         }
 

@@ -595,7 +595,7 @@ public sealed class Quad : MonoBehaviour, IQuad
 
                 for (int wait = 0; wait < Planetoid.DispatchSkipFramesCount; wait++)
                 {
-                    yield return new WaitForEndOfFrame();
+                    yield return Yielders.EndOfFrame;
                 }
             }
         }
@@ -607,7 +607,7 @@ public sealed class Quad : MonoBehaviour, IQuad
 
             for (int wait = 0; wait < Planetoid.DispatchSkipFramesCount; wait++)
             {
-                yield return new WaitForEndOfFrame();
+                yield return Yielders.EndOfFrame;
             }
         }
 
@@ -741,7 +741,7 @@ public sealed class Quad : MonoBehaviour, IQuad
         {
             for (int i = 0; i < (Planetoid.DispatchSkipFramesCount / 2); i++)
             {
-                yield return new WaitForEndOfFrame();
+                yield return Yielders.EndOfFrame;
             }
         }
 
