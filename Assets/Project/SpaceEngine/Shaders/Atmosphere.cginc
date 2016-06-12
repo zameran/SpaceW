@@ -134,6 +134,9 @@ uniform sampler2D _Sky_Transmittance;
 uniform sampler2D _Sky_Irradiance;
 uniform sampler3D _Sky_Inscatter;
 
+uniform float4x4 _Sky_ShineOccluders_1;
+uniform float4x4 _Sky_ShineColors_1;
+
 uniform float4x4 _Sky_LightOccluders_1;
 uniform float4x4 _Sky_LightOccluders_2;
 uniform float4x4 _Sun_Positions_1;
@@ -647,6 +650,22 @@ float3 SkyRadiance(float3 camera, float3 viewdir, float3 sundir, out float3 exti
 
 		return float3(0, 0, 0);
 	#endif
+}
+
+float3 SkyShineRadiance(float3 camera, float3 viewdir, float4x4 _Sky_ShineOccluders_1, float4x4 _Sky_ShineColors_1)
+{
+	float3 inscatter = 0;
+	float3 extinction = 0;
+
+	for (int i = 0; i < 4; ++i)
+	{
+		if (_Sky_ShineColors_1[i].w <= 0) break;
+
+		inscatter += SkyRadiance(camera, viewdir, _Sky_ShineOccluders_1[i].xyz, extinction, 0.0);
+		inscatter *= _Sky_ShineColors_1[i].xyz * _Sky_ShineColors_1[i].w;
+	}
+
+	return inscatter;
 }
 
 void SunRadianceAndSkyIrradiance(float3 worldP, float3 worldN, float3 worldS, out float3 sunL, out float3 skyE)

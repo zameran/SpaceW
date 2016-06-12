@@ -122,6 +122,63 @@
 				return finalColor;
 			}
 
+			void Account(in float4 terrainColor, out float4 scatteringColor, float3 p, float3 n) //AtmosphereInToTheAccount
+			{
+				scatteringColor = 0;
+
+				#ifdef LIGHT_1
+					#ifdef ATMOSPHERE_ON
+						scatteringColor += hdr(GroundFinalColorWithAtmosphere(terrainColor, p, n, _Sun_WorldSunDir_1, _Sun_Positions_1[0]));
+					#endif
+
+					#ifdef ATMOSPHERE_OFF
+						scatteringColor += GroundFinalColorWithoutAtmosphere(terrainColor, p, n, _Sun_WorldSunDir_1);
+					#endif
+				#endif
+
+				#ifdef LIGHT_2	
+					#ifdef ATMOSPHERE_ON
+						scatteringColor += hdr(GroundFinalColorWithAtmosphere(terrainColor, p, n, _Sun_WorldSunDir_1, _Sun_Positions_1[0]));
+						scatteringColor += hdr(GroundFinalColorWithAtmosphere(terrainColor, p, n, _Sun_WorldSunDir_2, _Sun_Positions_1[1]));
+					#endif
+
+					#ifdef ATMOSPHERE_OFF
+						scatteringColor += GroundFinalColorWithoutAtmosphere(terrainColor, p, n, _Sun_WorldSunDir_1);
+						scatteringColor += GroundFinalColorWithoutAtmosphere(terrainColor, p, n, _Sun_WorldSunDir_2);
+					#endif
+				#endif
+
+				#ifdef LIGHT_3
+					#ifdef ATMOSPHERE_ON
+						scatteringColor += hdr(GroundFinalColorWithAtmosphere(terrainColor, p, n, _Sun_WorldSunDir_1, _Sun_Positions_1[0]));
+						scatteringColor += hdr(GroundFinalColorWithAtmosphere(terrainColor, p, n, _Sun_WorldSunDir_2, _Sun_Positions_1[1]));
+						scatteringColor += hdr(GroundFinalColorWithAtmosphere(terrainColor, p, n, _Sun_WorldSunDir_3, _Sun_Positions_1[2]));
+					#endif
+
+					#ifdef ATMOSPHERE_OFF
+						scatteringColor += GroundFinalColorWithoutAtmosphere(terrainColor, p, n, _Sun_WorldSunDir_1);
+						scatteringColor += GroundFinalColorWithoutAtmosphere(terrainColor, p, n, _Sun_WorldSunDir_2);
+						scatteringColor += GroundFinalColorWithoutAtmosphere(terrainColor, p, n, _Sun_WorldSunDir_3);
+					#endif
+				#endif
+
+				#ifdef LIGHT_4
+					#ifdef ATMOSPHERE_ON
+						scatteringColor += hdr(GroundFinalColorWithAtmosphere(terrainColor, p, n, _Sun_WorldSunDir_1, _Sun_Positions_1[0]));
+						scatteringColor += hdr(GroundFinalColorWithAtmosphere(terrainColor, p, n, _Sun_WorldSunDir_2, _Sun_Positions_1[1]));
+						scatteringColor += hdr(GroundFinalColorWithAtmosphere(terrainColor, p, n, _Sun_WorldSunDir_3, _Sun_Positions_1[2]));
+						scatteringColor += hdr(GroundFinalColorWithAtmosphere(terrainColor, p, n, _Sun_WorldSunDir_4, _Sun_Positions_1[3]));
+					#endif
+
+					#ifdef ATMOSPHERE_OFF
+						scatteringColor += GroundFinalColorWithoutAtmosphere(terrainColor, p, n, _Sun_WorldSunDir_1);
+						scatteringColor += GroundFinalColorWithoutAtmosphere(terrainColor, p, n, _Sun_WorldSunDir_2);
+						scatteringColor += GroundFinalColorWithoutAtmosphere(terrainColor, p, n, _Sun_WorldSunDir_3);
+						scatteringColor += GroundFinalColorWithoutAtmosphere(terrainColor, p, n, _Sun_WorldSunDir_4);
+					#endif
+				#endif
+			}
+
 			void vert(in appdata_full_compute v, out v2fg o)
 			{
 				float noise = data[v.id].noise;
@@ -171,57 +228,7 @@
 				float height = tex2D(_HeightTexture, IN.uv0).a;
 				float slope = tex2D(_NormalTexture, IN.uv0).a;
 
-				#ifdef LIGHT_1
-					#ifdef ATMOSPHERE_ON
-						scatteringColor += hdr(GroundFinalColorWithAtmosphere(terrainColor, IN.vertex1.xyz, IN.normal0.xyz, _Sun_WorldSunDir_1, _Sun_Positions_1[0]));
-					#endif
-
-					#ifdef ATMOSPHERE_OFF
-						scatteringColor += GroundFinalColorWithoutAtmosphere(terrainColor, IN.vertex1.xyz, IN.normal0.xyz, _Sun_WorldSunDir_1);
-					#endif
-				#endif
-
-				#ifdef LIGHT_2	
-					#ifdef ATMOSPHERE_ON
-						scatteringColor += hdr(GroundFinalColorWithAtmosphere(terrainColor, IN.vertex1.xyz, IN.normal0.xyz, _Sun_WorldSunDir_1, _Sun_Positions_1[0]));
-						scatteringColor += hdr(GroundFinalColorWithAtmosphere(terrainColor, IN.vertex1.xyz, IN.normal0.xyz, _Sun_WorldSunDir_2, _Sun_Positions_1[1]));
-					#endif
-
-					#ifdef ATMOSPHERE_OFF
-						scatteringColor += GroundFinalColorWithoutAtmosphere(terrainColor, IN.vertex1.xyz, IN.normal0.xyz, _Sun_WorldSunDir_1);
-						scatteringColor += GroundFinalColorWithoutAtmosphere(terrainColor, IN.vertex1.xyz, IN.normal0.xyz, _Sun_WorldSunDir_2);
-					#endif
-				#endif
-
-				#ifdef LIGHT_3
-					#ifdef ATMOSPHERE_ON
-						scatteringColor += hdr(GroundFinalColorWithAtmosphere(terrainColor, IN.vertex1.xyz, IN.normal0.xyz, _Sun_WorldSunDir_1, _Sun_Positions_1[0]));
-						scatteringColor += hdr(GroundFinalColorWithAtmosphere(terrainColor, IN.vertex1.xyz, IN.normal0.xyz, _Sun_WorldSunDir_2, _Sun_Positions_1[1]));
-						scatteringColor += hdr(GroundFinalColorWithAtmosphere(terrainColor, IN.vertex1.xyz, IN.normal0.xyz, _Sun_WorldSunDir_3, _Sun_Positions_1[2]));
-					#endif
-
-					#ifdef ATMOSPHERE_OFF
-						scatteringColor += GroundFinalColorWithoutAtmosphere(terrainColor, IN.vertex1.xyz, IN.normal0.xyz, _Sun_WorldSunDir_1);
-						scatteringColor += GroundFinalColorWithoutAtmosphere(terrainColor, IN.vertex1.xyz, IN.normal0.xyz, _Sun_WorldSunDir_2);
-						scatteringColor += GroundFinalColorWithoutAtmosphere(terrainColor, IN.vertex1.xyz, IN.normal0.xyz, _Sun_WorldSunDir_3);
-					#endif
-				#endif
-
-				#ifdef LIGHT_4
-					#ifdef ATMOSPHERE_ON
-						scatteringColor += hdr(GroundFinalColorWithAtmosphere(terrainColor, IN.vertex1.xyz, IN.normal0.xyz, _Sun_WorldSunDir_1, _Sun_Positions_1[0]));
-						scatteringColor += hdr(GroundFinalColorWithAtmosphere(terrainColor, IN.vertex1.xyz, IN.normal0.xyz, _Sun_WorldSunDir_2, _Sun_Positions_1[1]));
-						scatteringColor += hdr(GroundFinalColorWithAtmosphere(terrainColor, IN.vertex1.xyz, IN.normal0.xyz, _Sun_WorldSunDir_3, _Sun_Positions_1[2]));
-						scatteringColor += hdr(GroundFinalColorWithAtmosphere(terrainColor, IN.vertex1.xyz, IN.normal0.xyz, _Sun_WorldSunDir_4, _Sun_Positions_1[3]));
-					#endif
-
-					#ifdef ATMOSPHERE_OFF
-						scatteringColor += GroundFinalColorWithoutAtmosphere(terrainColor, IN.vertex1.xyz, IN.normal0.xyz, _Sun_WorldSunDir_1);
-						scatteringColor += GroundFinalColorWithoutAtmosphere(terrainColor, IN.vertex1.xyz, IN.normal0.xyz, _Sun_WorldSunDir_2);
-						scatteringColor += GroundFinalColorWithoutAtmosphere(terrainColor, IN.vertex1.xyz, IN.normal0.xyz, _Sun_WorldSunDir_3);
-						scatteringColor += GroundFinalColorWithoutAtmosphere(terrainColor, IN.vertex1.xyz, IN.normal0.xyz, _Sun_WorldSunDir_4);
-					#endif
-				#endif
+				Account(terrainColor, scatteringColor, IN.vertex1.xyz, IN.normal0.xyz);
 
 				outDiffuse = lerp(scatteringColor, outputNormal, _Normale);
 			}

@@ -225,6 +225,7 @@ Shader "SpaceEngine/Atmosphere/Atmosphere"
 					#endif
 
 					inscatter += SkyRadiance(WCP + _Globals_Origin, d, WSD_1, extinction1, 0.0) * eclipse1;
+					//inscatter += SkyShineRadiance(WCP + _Globals_Origin, d, _Sky_ShineOccluders_1, _Sky_ShineColors_1);
 
 					extinction += extinction1;
 

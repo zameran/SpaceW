@@ -66,9 +66,8 @@ public sealed class Atmosphere : MonoBehaviour
     public AtmosphereSun Sun_3;
     public AtmosphereSun Sun_4;
 
-    public List<GameObject> eclipseCasters;
-    public List<GameObject> shineAdditionalSuns;
-    public List<GameObject> shineSuns;
+    public List<GameObject> eclipseCasters = new List<GameObject>();
+    public List<GameObject> shineCasters = new List<GameObject>();
 
     private AtmosphereParameters atmosphereParameters;
 
@@ -226,21 +225,13 @@ public sealed class Atmosphere : MonoBehaviour
 
         int index = 0;
 
-        for (int i = 0; i < Mathf.Min(4, shineAdditionalSuns.Count); i++)
+        for (int i = 0; i < Mathf.Min(4, shineCasters.Count); i++)
         {
-            //...
+            if (shineCasters[i] == null) { Debug.Log("Atmosphere: Shine problem!"); break; }
+
+            soc1.SetRow(i, VectorHelper.MakeFrom((shineCasters[i].transform.position - Origin).normalized, 1.0f));
 
             sc1.SetRow(index, Vector4.one);
-
-            index++;
-        }
-
-        for (int i = 0; i < Mathf.Min(4, shineSuns.Count); i++)
-        {
-            if (index > 3)
-                break;
-
-            //...
 
             index++;
         }
@@ -285,14 +276,16 @@ public sealed class Atmosphere : MonoBehaviour
     {
         CalculateShine(out shineOccludersMatrix1, out shineColorsMatrix1);
 
-        //...
+        mat.SetMatrix("_Sky_ShineOccluders_1", shineOccludersMatrix1);
+        mat.SetMatrix("_Sky_ShineColors_1", shineColorsMatrix1);
     }
 
     public void SetShine(MaterialPropertyBlock block)
     {
         CalculateShine(out shineOccludersMatrix1, out shineColorsMatrix1);
 
-        //...
+        block.SetMatrix("_Sky_ShineOccluders_1", shineOccludersMatrix1);
+        block.SetMatrix("_Sky_ShineColors_1", shineColorsMatrix1);
     }
 
     public void SetEclipses(Material mat)
@@ -505,6 +498,7 @@ public sealed class Atmosphere : MonoBehaviour
 
         SetKeywords(mat, Keywords);
         SetEclipses(mat);
+        SetShine(mat);
 
         mat.SetTexture("_Sun_Glare", SunGlareTexture);
 
@@ -538,6 +532,7 @@ public sealed class Atmosphere : MonoBehaviour
             if (block == null) return;
 
             SetEclipses(mat);
+            SetShine(mat);
 
             block.SetTexture("_Sun_Glare", SunGlareTexture);
 
@@ -654,6 +649,7 @@ public sealed class Atmosphere : MonoBehaviour
 
         SetKeywords(mat, Keywords);
         SetEclipses(mat);
+        SetShine(mat);
 
         mat.SetFloat("density", Density);
         mat.SetFloat("scale", atmosphereParameters.SCALE);
@@ -701,6 +697,7 @@ public sealed class Atmosphere : MonoBehaviour
 
         SetKeywords(mat, Keywords);
         SetEclipses(mat);
+        SetShine(mat);
 
         mat.SetFloat("density", Density);
         mat.SetFloat("scale", atmosphereParameters.SCALE);
@@ -752,6 +749,7 @@ public sealed class Atmosphere : MonoBehaviour
             if (block == null) return;
 
             SetEclipses(block);
+            SetShine(block);
 
             block.SetFloat("density", Density);
             block.SetFloat("scale", atmosphereParameters.SCALE);
