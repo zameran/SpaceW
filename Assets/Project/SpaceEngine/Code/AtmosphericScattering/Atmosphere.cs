@@ -370,7 +370,7 @@ public sealed class Atmosphere : MonoBehaviour
         }
     }
 
-    public void CollectGarbage(bool all = true)
+    public void CollectGarbage()
     {
         if (Transmittance != null) Transmittance.ReleaseAndDestroy();
         if (Inscatter != null) Inscatter.ReleaseAndDestroy();
