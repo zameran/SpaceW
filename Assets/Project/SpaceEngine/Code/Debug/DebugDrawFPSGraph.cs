@@ -35,14 +35,8 @@ public class DebugDrawFPSGraph : DebugDraw
     float[,] dtHistory;
 
     int i;
-    int j;
-    int x;
-    int y;
-
-    float val;
 
     Color color;
-    Color32 color32;
 
     float maxFrame = 0.0f;
     float yMulti;
