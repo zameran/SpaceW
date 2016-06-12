@@ -433,6 +433,8 @@ public sealed class Atmosphere : MonoBehaviour
         cameraToScreen = CameraHelper.Main().GetCameraToScreen();
         screenToCamera = CameraHelper.Main().GetScreenToCamera();
         worldCameraPos = CameraHelper.Main().transform.position;
+
+        Keywords = GetKeywords();
     }
 
     public void InitSuns()
