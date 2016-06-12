@@ -45,6 +45,7 @@ public abstract class Planet : MonoBehaviour
     public Atmosphere Atmosphere;
     public Cloudsphere Cloudsphere;
 
+    public bool ShineEnabled = false;
     public bool AtmosphereEnabled = true;
     public bool CloudsphereEnabled = true;
 

@@ -81,6 +81,15 @@ public static class PlanetoidExtensions
                         Keywords.Add("ECLIPSES_ON");
                     }
 
+                    if (planet.Atmosphere.shineSuns.Count == 0 || planet.Atmosphere.shineAdditionalSuns.Count == 0)
+                    {
+                        Keywords.Add("SHINE_OFF");
+                    }
+                    else
+                    {
+                        Keywords.Add("SHINE_ON");
+                    }
+
                     Keywords.Add("ATMOSPHERE_ON");
                 }
                 else

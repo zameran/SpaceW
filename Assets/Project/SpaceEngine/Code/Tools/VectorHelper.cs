@@ -132,4 +132,9 @@ public static class VectorHelper
     {
         return 2.0f * Mathf.Asin(actualRadius / (2 * Vector3.Distance(from, to)));
     }
+
+    public static Vector4 MakeFrom(Vector3 xyz, float w)
+    {
+        return new Vector4(xyz.x, xyz.y, xyz.z, w);
+    }
 }
