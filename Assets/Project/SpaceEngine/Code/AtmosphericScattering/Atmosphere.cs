@@ -83,6 +83,8 @@ public sealed class Atmosphere : MonoBehaviour
     private Matrix4x4 screenToCamera;
     private Vector3 worldCameraPos;
 
+    public List<string> Keywords = new List<string>();
+
     public Matrix4x4 OccludersMatrix1
     {
         get { return occludersMatrix1; }
@@ -185,9 +187,16 @@ public sealed class Atmosphere : MonoBehaviour
         }
     }
 
-    public void SetKeywords(Material m, List<string> keywords)
+    public void SetKeywords(Material m, List<string> keywords, bool checkShaderKeywords = false)
     {
-        if (m != null && ArraysEqual(m.shaderKeywords, keywords) == false)
+        if (checkShaderKeywords)
+        {
+            if (m != null && ArraysEqual(m.shaderKeywords, keywords) == false)
+            {
+                m.shaderKeywords = keywords.ToArray();
+            }
+        }
+        else
         {
             m.shaderKeywords = keywords.ToArray();
         }
@@ -302,6 +311,8 @@ public sealed class Atmosphere : MonoBehaviour
         cameraToScreen = CameraHelper.Main().GetCameraToScreen();
         screenToCamera = CameraHelper.Main().GetScreenToCamera();
         worldCameraPos = CameraHelper.Main().transform.position;
+
+        Keywords = GetKeywords();
     }
 
     public void OnApplicationFocus(bool focusStatus)
@@ -438,7 +449,7 @@ public sealed class Atmosphere : MonoBehaviour
     {
         if (mat == null) return;
 
-        SetKeywords(mat, GetKeywords());
+        SetKeywords(mat, Keywords);
         SetEclipses(mat);
 
         mat.SetTexture("_Sun_Glare", SunGlareTexture);
@@ -465,7 +476,7 @@ public sealed class Atmosphere : MonoBehaviour
     {
         if (mat != null)
         {
-            SetKeywords(mat, GetKeywords());
+            SetKeywords(mat, Keywords);
         }
 
         if (full)
@@ -587,7 +598,7 @@ public sealed class Atmosphere : MonoBehaviour
     {
         if (mat == null) return;
 
-        SetKeywords(mat, GetKeywords());
+        SetKeywords(mat, Keywords);
         SetEclipses(mat);
 
         mat.SetFloat("density", Density);
@@ -634,7 +645,7 @@ public sealed class Atmosphere : MonoBehaviour
     {
         if (mat == null) return;
 
-        SetKeywords(mat, GetKeywords());
+        SetKeywords(mat, Keywords);
         SetEclipses(mat);
 
         mat.SetFloat("density", Density);
@@ -679,7 +690,7 @@ public sealed class Atmosphere : MonoBehaviour
     {
         if (mat != null)
         {
-            SetKeywords(mat, GetKeywords());
+            SetKeywords(mat, Keywords);
         }
 
         if (full)
