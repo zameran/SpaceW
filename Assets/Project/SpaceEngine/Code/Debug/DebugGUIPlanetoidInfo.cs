@@ -80,7 +80,7 @@ public sealed class DebugGUIPlanetoidInfo : DebugGUI
             GUILayoutExtensions.LabelWithSpace((Planetoid.gameObject.name + ": " + (Planetoid.Working ? "Generating..." : "Idle...")), -8);
             GUILayoutExtensions.LabelWithSpace("Quads count: " + quadsCount, -8);
             GUILayoutExtensions.LabelWithSpace("Quads culled count: " + quadsCulledCount, -8);
-            GUILayoutExtensions.LabelWithSpace("Quads culling machine: " + (Planetoid.UseUnityCulling ? "Unity Culling" : "Custom Culling"), -8);
+            GUILayoutExtensions.LabelWithSpace("Quads culling machine: " + Planetoid.CullingMethod.ToString(), -8);
             GUILayoutExtensions.LabelWithSpace("Quads textures VMU (MB): " + quadsTexturesVideoMemoryUsage.ToString("0.00"), -8);
             GUILayoutExtensions.LabelWithSpace("Verts rendered per frame (Only Quads): " + vertsRendered, -8);
 

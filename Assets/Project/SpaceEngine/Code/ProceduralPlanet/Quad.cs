@@ -403,7 +403,7 @@ public sealed class Quad : MonoBehaviour, IQuad
     {
         using (new Timer("Quad.TryCull"))
         {
-            if (!Planetoid.UseUnityCulling)
+            if (Planetoid.CullingMethod == QuadCullingMethod.Custom)
                 Visible = PlaneFrustumCheck(AABB);
             else
                 Visible = true;
@@ -485,7 +485,7 @@ public sealed class Quad : MonoBehaviour, IQuad
         if (Planetoid == null) { Log("Planetoid is null!"); return true; }
         if (aabb == null || aabb.Length == 0) { Log("AABB array problem!"); return true; }
         if (Planetoid.FrustumPlanes == null || Planetoid.FrustumPlanes.Length == 0) { Log("Frustum Planes Problem!"); return true; }
-        if (Parent == null || !Generated || Splitting || Planetoid.UseUnityCulling) { return true; }
+        if (Parent == null || !Generated || Splitting || Planetoid.CullingMethod == (QuadCullingMethod.Unity | QuadCullingMethod.None)) { return true; }
 
         bool[] states = new bool[aabb.Length];
 
@@ -983,7 +983,7 @@ public sealed class Quad : MonoBehaviour, IQuad
 
     public Bounds GetBounds(Quad quad)
     {
-        if (Planetoid.UseUnityCulling)
+        if (Planetoid.CullingMethod == QuadCullingMethod.Unity)
         {
             Bounds bounds = new Bounds();
 

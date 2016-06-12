@@ -116,8 +116,7 @@ public sealed class Planetoid : Planet, IPlanet
     public NoiseParametersSetter NPS = null;
 
     public QuadDrawAndCull DrawAndCull = QuadDrawAndCull.CullBeforeDraw;
-
-    public bool UseUnityCulling = true;
+    public QuadCullingMethod CullingMethod = QuadCullingMethod.Custom;
 
     public TCCommonParametersSetter tccps;
 
