@@ -137,4 +137,32 @@ public static class VectorHelper
     {
         return new Vector4(xyz.x, xyz.y, xyz.z, w);
     }
+
+    public static Vector3 Max(params Vector3[] vectors)
+    {
+        if (vectors == null || vectors.Length == 0) { Debug.Log("VectorHelper.Max Problem!"); return Vector3.zero; }
+
+        Vector3 max = new Vector3(-9e37f, -9e37f, -9e37f);
+
+        for (int i = 0; i < vectors.Length; i++)
+        {
+            max = Vector3.Max(max, vectors[i]);
+        }
+
+        return max;
+    }
+
+    public static Vector3 Min(params Vector3[] vectors)
+    {
+        if (vectors == null || vectors.Length == 0) { Debug.Log("VectorHelper.Min Problem!"); return Vector3.zero; }
+
+        Vector3 min = new Vector3(9e37f, 9e37f, 9e37f);
+
+        for (int i = 0; i < vectors.Length; i++)
+        {
+            min = Vector3.Min(min, vectors[i]);
+        }
+
+        return min;
+    }
 }

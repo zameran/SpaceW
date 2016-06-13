@@ -155,7 +155,7 @@ public sealed class Quad : MonoBehaviour, IQuad
     public QuadCorners quadCorners;
     public OutputStruct[] outputStructData;
 
-    public Vector3[] AABB;
+    public QuadAABB QuadAABB = null;
 
     public delegate void QuadDelegate(Quad q);
     public event QuadDelegate DispatchStarted, DispatchReady, GPUGetDataReady;
@@ -307,7 +307,7 @@ public sealed class Quad : MonoBehaviour, IQuad
 
     public void CheckLOD()
     {
-        DistanceToClosestCorner = GetDistanceToClosestCorner();
+        DistanceToClosestCorner = GetDistanceToClosestCorner() + Planetoid.TerrainMaxHeight;
 
         if (LODLevel < Planetoid.LODMaxLevel)
         {
@@ -364,7 +364,7 @@ public sealed class Quad : MonoBehaviour, IQuad
             }
         }
 
-        if (AABB == null) AABB = GetVolumeBox(Planetoid.TerrainMaxHeight, 0, true);
+        if (QuadAABB == null) QuadAABB = new QuadAABB(GetVolumeBox(Planetoid.TerrainMaxHeight, 0, true), false);
 
         SetupBounds(this, QuadMesh);
 
@@ -408,7 +408,7 @@ public sealed class Quad : MonoBehaviour, IQuad
         using (new Timer("Quad.TryCull"))
         {
             if (Planetoid.CullingMethod == QuadCullingMethod.Custom)
-                Visible = PlaneFrustumCheck(AABB);
+                Visible = PlaneFrustumCheck(QuadAABB);
             else
                 Visible = true;
         }
@@ -482,6 +482,13 @@ public sealed class Quad : MonoBehaviour, IQuad
         }
 
         return verts;
+    }
+
+    public bool PlaneFrustumCheck(QuadAABB qaabb)
+    {
+        if (qaabb == null) { Log("QuadAABB problem!"); return true; }
+
+        return PlaneFrustumCheck(qaabb.AABB);
     }
 
     public bool PlaneFrustumCheck(Vector3[] aabb)

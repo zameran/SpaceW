@@ -60,6 +60,16 @@ namespace UnityEngine
             zmax = System.Math.Max(p.z, q.z);
         }
 
+        public Box3d(Vector3 min, Vector3 max)
+        {
+            xmin = min.x;
+            xmax = max.x;
+            ymin = min.y;
+            ymax = max.y;
+            zmin = min.z;
+            zmax = max.z;
+        }
+
         public Vector3d Center()
         {
             return new Vector3d((xmin + xmax) / 2.0, (ymin + ymax) / 2.0, (zmin + zmax) / 2.0);
