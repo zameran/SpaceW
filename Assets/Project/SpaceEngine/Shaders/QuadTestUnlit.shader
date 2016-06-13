@@ -115,7 +115,7 @@
 
 				float3 groundColor = 1.5 * RGB2Reflectance(terrainColor).rgb * (sunL * max(cTheta, 0) + skyE) / M_PI;
 
-				extinction = float3(1.0, 1.0, 1.0) * extinctionGroundFade + (1 - extinctionGroundFade) * extinction * eclipse;
+				extinction = 1 * extinctionGroundFade + (1 - extinctionGroundFade) * extinction * eclipse;
 
 				float4 finalColor = float4(groundColor, 1) * float4(extinction, 1) + inscatter;
 				
