@@ -557,6 +557,20 @@ float3 SunRadiance(float r, float muS)
 	#endif
 }
 
+// incident sun light at given position (radiance)
+// r=length(x)
+// muS=dot(x,s) / r
+float3 SunRadiance(float r, float muS, Sun sun) 
+{
+	#if defined(ATMO_SUN_ONLY) || defined(ATMO_FULL)
+		return TransmittanceWithShadow(r, muS) * sun.Intensity;
+	#elif defined(ATMO_NONE)
+		return sun.Intensity.xxx;
+	#else
+		return float3(0, 0, 0);
+	#endif
+}
+
 // incident sky light at given position, integrated over the hemisphere (irradiance)
 // r=length(x)
 // muS=dot(x,s) / r
@@ -564,6 +578,18 @@ float3 SkyIrradiance(float r, float muS)
 {
 	#if defined(ATMO_SKY_ONLY) || defined(ATMO_FULL)
 		return Irradiance(_Sky_Irradiance, r, muS) * _Sun_Intensity;
+	#else
+		return float3(0, 0, 0);
+	#endif
+}
+
+// incident sky light at given position, integrated over the hemisphere (irradiance)
+// r=length(x)
+// muS=dot(x,s) / r
+float3 SkyIrradiance(float r, float muS, Sun sun) 
+{
+	#if defined(ATMO_SKY_ONLY) || defined(ATMO_FULL)
+		return Irradiance(_Sky_Irradiance, r, muS) * sun.Intensity;
 	#else
 		return float3(0, 0, 0);
 	#endif
@@ -635,6 +661,72 @@ float3 SkyRadiance(float3 camera, float3 viewdir, float3 sundir, out float3 exti
 	#endif
 }
 
+// single scattered sunlight between two points
+// camera=observer
+// viewdir=unit vector towards observed point
+// sundir=unit vector towards the sun
+// return scattered light and extinction coefficient
+float3 SkyRadiance(float3 camera, float3 viewdir, float3 sundir, out float3 extinction, float shaftWidth, Sun sun)
+{
+	#if defined(ATMO_INSCATTER_ONLY) || defined(ATMO_FULL)
+		float3 result = float3(0, 0, 0);
+		extinction = float3(1, 1, 1);
+	
+		camera /= scale;
+		camera += viewdir * max(shaftWidth, 0.0);
+
+		float r = length(camera);
+		float rMu = dot(camera, viewdir);
+		float mu = rMu / r;
+		float r0 = r;
+		float mu0 = mu;
+
+		float deltaSq = SQRT(rMu * rMu - r * r + Rt * Rt, 1e30);
+		float din = max(-rMu - deltaSq, 0.0);
+
+		if (din > 0.0) 
+		{
+			camera += din * viewdir;
+			rMu += din;
+			mu = rMu / Rt;
+			r = Rt;
+		}
+
+		if (r <= Rt) 
+		{
+			float nu = dot(viewdir, sundir);
+			float muS = dot(camera, sundir) / r;
+
+			float4 inScatter = Texture4D(_Sky_Inscatter, r, rMu / r, muS, nu);
+
+			if (shaftWidth > 0.0) 
+			{
+				if (mu > 0.0) 
+				{
+					inScatter *= min(Transmittance(r0, mu0) / Transmittance(r, mu), 1.0).rgbr;
+				} 
+				else 
+				{
+					inScatter *= min(Transmittance(r, -mu) / Transmittance(r0, -mu0), 1.0).rgbr;
+				}
+			}
+			extinction = Transmittance(r, mu);
+
+			float3 inScatterM = GetMie(inScatter);
+			float phase = PhaseFunctionR(nu);
+			float phaseM = PhaseFunctionM(nu);
+
+			result = inScatter.rgb * phase + inScatterM * phaseM;
+		} 
+
+		return result * sun.Intensity;
+	#else
+		extinction = float3(1, 1, 1);
+
+		return float3(0, 0, 0);
+	#endif
+}
+
 float3 SkyShineRadiance(float3 camera, float3 viewdir, float4x4 _Sky_ShineOccluders_1, float4x4 _Sky_ShineColors_1)
 {
 	float3 inscatter = 0;
@@ -645,6 +737,22 @@ float3 SkyShineRadiance(float3 camera, float3 viewdir, float4x4 _Sky_ShineOcclud
 		if (_Sky_ShineColors_1[i].w <= 0) break;
 
 		inscatter += SkyRadiance(camera, viewdir, _Sky_ShineOccluders_1[i].xyz, extinction, 0.0);
+		inscatter *= _Sky_ShineColors_1[i].xyz * _Sky_ShineColors_1[i].w;
+	}
+
+	return inscatter;
+}
+
+float3 SkyShineRadiance(float3 camera, float3 viewdir, float4x4 _Sky_ShineOccluders_1, float4x4 _Sky_ShineColors_1, Sun sun)
+{
+	float3 inscatter = 0;
+	float3 extinction = 0;
+
+	for (int i = 0; i < 4; ++i)
+	{
+		if (_Sky_ShineColors_1[i].w <= 0) break;
+
+		inscatter += SkyRadiance(camera, viewdir, _Sky_ShineOccluders_1[i].xyz, extinction, 0.0, sun);
 		inscatter *= _Sky_ShineColors_1[i].xyz * _Sky_ShineColors_1[i].w;
 	}
 
@@ -674,6 +782,31 @@ void SunRadianceAndSkyIrradiance(float3 worldP, float3 worldN, float3 worldS, ou
 	// factor 2.0 - hack to increase sky contribution (numerical simulation of
 	// "precompued atmospheric scattering" gives less luminance than in reality)
 	skyE = 2.0 * SkyIrradiance(r, muS) * skyOcclusion;
+}
+
+void SunRadianceAndSkyIrradiance(float3 worldP, float3 worldN, float3 worldS, Sun sun, out float3 sunL, out float3 skyE)
+{
+	worldP /= scale;
+
+	float r = length(worldP);
+
+	if (r < 0.9 * Rg) 
+	{
+		worldP.z += Rg;
+		r = length(worldP);
+	}
+
+	float3 worldV = worldP / r; // vertical vector
+	float muS = dot(worldV, worldS);
+
+	float sunOcclusion = 1.0;// - sunShadow;
+	sunL = SunRadiance(r, muS) * sunOcclusion;
+
+	// ambient occlusion due only to slope, does not take self shadowing into account
+	float skyOcclusion = (1.0 + dot(worldV, worldN)) * 0.5;
+	// factor 2.0 - hack to increase sky contribution (numerical simulation of
+	// "precompued atmospheric scattering" gives less luminance than in reality)
+	skyE = 2.0 * SkyIrradiance(r, muS, sun) * skyOcclusion;
 }
 
 // single scattered sunlight between two points
@@ -812,6 +945,148 @@ float4 InScattering(float3 camera, float3 _point, float3 sundir, out float3 exti
 		}
 
 		return result * _Sun_Intensity;
+	#else
+		extinction = float4(1, 1, 1);
+		return float4(0, 0, 0, 0);
+	#endif
+}
+
+// single scattered sunlight between two points
+// camera=observer
+// point=point on the ground
+// sundir=unit vector towards the sun
+// return scattered light and extinction coefficient
+float4 InScattering(float3 camera, float3 _point, float3 sundir, out float3 extinction, float shaftWidth, Sun sun) 
+{
+	#if defined(ATMO_INSCATTER_ONLY) || defined(ATMO_FULL)
+		camera /= scale;
+		_point /= scale;
+
+		float4 result;
+		float3 viewdir = _point - camera;
+		float d = length(viewdir);
+		viewdir = viewdir / d;
+	
+		float r = length(camera);
+
+		if (r < 0.9 * Rg) 
+		{
+			camera.z += Rg;
+			_point.z += Rg;
+			r = length(camera);
+		}
+	
+		float rMu = dot(camera, viewdir);
+		float mu = rMu / r;
+		float r0 = r;
+		float mu0 = mu;
+		_point -= viewdir * clamp(shaftWidth, 0.0, d);
+
+		float deltaSq = SQRT(rMu * rMu - r * r + Rt * Rt, 1e30);
+		float din = max(-rMu - deltaSq, 0.0);
+		if (din > 0.0 && din < d) 
+		{
+			camera += din * viewdir;
+			rMu += din;
+			mu = rMu / Rt;
+			r = Rt;
+			d -= din;
+		}
+
+		if (r <= Rt) 
+		{
+			float nu = dot(viewdir, sundir);
+			float muS = dot(camera, sundir) / r;
+			float muR = 1 - abs(dot(normalize(cross(camera, sundir)), viewdir)); 
+			float4 inScatter;
+
+			if (r < Rg + 2000.0) 
+			{
+				// avoids imprecision problems in aerial perspective near ground
+				float f = (Rg + 2000.0) / r;
+				r = r * f;
+				rMu = rMu * f;
+				_point = _point * f;
+			}
+
+			float r1 = length(_point);
+			float rMu1 = dot(_point, viewdir);
+			float mu1 = rMu1 / r1;
+			float muS1 = dot(_point, sundir) / r1;
+
+			#ifdef ANALYTIC_TRANSMITTANCE
+				extinction = min(AnalyticTransmittance(r, mu, d), 1.0);
+			#else
+				if (mu > 0.0) 
+				{
+					extinction = min(Transmittance(r, mu) / Transmittance(r1, mu1), 1.0);
+				} 
+				else 
+				{
+					extinction = min(Transmittance(r1, -mu1) / Transmittance(r, -mu), 1.0);
+				}
+			#endif
+
+			#ifdef HORIZON_HACK
+				#ifdef HORIZON_HACK_BIG_EPSILON
+					const float EPS = 0.4;
+				#else
+					const float EPS = 0.004; //0.004 - default. 0.4 - maybe normal?
+				#endif
+
+				float lim = -sqrt(1.0 - (Rg / r) * (Rg / r));
+
+				if (abs(mu - lim) < EPS) 
+				{
+					float a = ((mu - lim) + EPS) / (2.0 * EPS);
+
+					mu = lim - EPS;
+					r1 = sqrt(r * r + d * d + 2.0 * r * d * mu);
+					mu1 = (r * mu + d) / r1;
+					float4 inScatter0 = Texture4D(_Sky_Inscatter, r, mu, muS, nu);
+					float4 inScatter1 = Texture4D(_Sky_Inscatter, r1, mu1, muS1, nu);
+					float4 inScatterA = max(inScatter0 - inScatter1 * extinction.rgbr, 0.0);
+
+					mu = lim + EPS;
+					r1 = sqrt(r * r + d * d + 2.0 * r * d * mu);
+					mu1 = (r * mu + d) / r1;
+					inScatter0 = Texture4D(_Sky_Inscatter, r, mu, muS, nu);
+					inScatter1 = Texture4D(_Sky_Inscatter, r1, mu1, muS1, nu);
+					float4 inScatterB = max(inScatter0 - inScatter1 * extinction.rgbr, 0.0);
+
+					inScatter = lerp(inScatterA, inScatterB, a);
+				} 
+				else 
+				{
+					float4 inScatter0 = Texture4D(_Sky_Inscatter, r, mu, muS, nu);
+					float4 inScatter1 = Texture4D(_Sky_Inscatter, r1, mu1, muS1, nu);
+					inScatter = max(inScatter0 - inScatter1 * extinction.rgbr, 0.0);
+				}
+			#else
+				float4 inScatter0 = Texture4D(_Sky_Inscatter, r, mu, muS, nu);
+				float4 inScatter1 = Texture4D(_Sky_Inscatter, r1, mu1, muS1, nu);
+				inScatter = max(inScatter0 - inScatter1 * extinction.rgbr, 0.0);
+			#endif
+
+			//cancels inscatter when sun hidden by mountains
+			//TODO: smoothstep values depend on horizon angle in sun direction
+			//inScatter.w *= smoothstep(0.035, 0.07, muS);
+
+			// avoids imprecision problems in Mie scattering when sun is below horizon
+			inScatter.w *= smoothstep(0.00, 0.02, muS);
+			
+			float4 inScatterM = float4(GetMie(inScatter), 1);
+			float phase = PhaseFunctionR(nu);
+			float phaseM = PhaseFunctionM(nu);
+			result = inScatter * phase + inScatterM * phaseM;
+		}
+		else 
+		{
+			result = float4(0, 0, 0, 0);
+			extinction = float3(1, 1, 1);
+		}
+
+		return result * sun.Intensity;
 	#else
 		extinction = float4(1, 1, 1);
 		return float4(0, 0, 0, 0);
