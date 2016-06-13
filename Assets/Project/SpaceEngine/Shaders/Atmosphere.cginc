@@ -433,31 +433,6 @@ float OpticalDepth(float H, float r, float mu, float d)
 	return sqrt((6.2831 * H) * r) * exp((Rg - r) / H) * (x + dot(y, float2(1.0, -1.0)));
 }
 
-// optical depth for ray (r,mu), using analytic formula
-// (mu=cos(view zenith angle)), intersections with ground ignored
-// H=height scale of exponential density function
-// Eric's original eq.
-float OpticalDepth(float H, float r, float mu) 
-{
-	int TRANSMITTANCE_INTEGRAL_SAMPLES = 16;
-
-	float result = 0.0;
-	float dx = Limit(r, mu) / float(TRANSMITTANCE_INTEGRAL_SAMPLES);
-	float xi = 0.0;
-	float yi = exp(-(r - Rg) / H);
-
-	for (int i = 1; i <= TRANSMITTANCE_INTEGRAL_SAMPLES; ++i) 
-	{
-		float xj = float(i) * dx;
-		float yj = exp(-(sqrt(r * r + xj * xj + 2.0 * xj * r * mu) - Rg) / H);
-		result += (yi + yj) / 2.0 * dx;
-		xi = xj;
-		yi = yj;
-	}
-
-	return mu < -sqrt(1.0 - (Rg / r) * (Rg / r)) ? 1e9 : result;
-}
-
 // transmittance(=transparency) of atmosphere for infinite ray (r,mu)
 // (mu=cos(view zenith angle)), intersections with ground ignored
 float3 Transmittance(float r, float mu) 
