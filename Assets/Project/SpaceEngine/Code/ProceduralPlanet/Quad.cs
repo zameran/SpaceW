@@ -376,15 +376,19 @@ public sealed class Quad : MonoBehaviour, IQuad
 
         if (QuadMaterial == null) { return; }
 
-        QuadMaterial.SetBuffer("data", OutDataBuffer);
-        QuadMaterial.SetBuffer("quadGenerationConstants", QuadGenerationConstantsBuffer);
+        if (!Uniformed)
+        {
+            QuadMaterial.SetBuffer("data", OutDataBuffer);
+            QuadMaterial.SetBuffer("quadGenerationConstants", QuadGenerationConstantsBuffer);
+
+            Uniformed = true;
+        }
+
         QuadMaterial.SetTexture("_HeightTexture", HeightTexture);
         QuadMaterial.SetTexture("_NormalTexture", NormalTexture);
         QuadMaterial.SetFloat("_Atmosphere", (Planetoid.Atmosphere != null) ? 1.0f : 0.0f);
         QuadMaterial.SetFloat("_Normale", Planetoid.DrawNormals ? 1.0f : 0.0f);
         QuadMaterial.renderQueue = (int)Planetoid.RenderQueue + Planetoid.RenderQueueOffset;
-
-        if (!Uniformed) Uniformed = true;
 
         if (Generated && ShouldDraw && QuadMesh != null)
         {
@@ -700,11 +704,11 @@ public sealed class Quad : MonoBehaviour, IQuad
         int kernel4 = CoreShader.FindKernel("TexturesSub");
         int kernel5 = CoreShader.FindKernel("GetCorners");
 
-        SetupComputeShaderKernelUniforfms(kernel1, QuadGenerationConstantsBuffer, PreOutDataBuffer, PreOutDataSubBuffer, OutDataBuffer, QuadCornersBuffer);
-        SetupComputeShaderKernelUniforfms(kernel2, QuadGenerationConstantsBuffer, PreOutDataBuffer, PreOutDataSubBuffer, OutDataBuffer, QuadCornersBuffer);
-        SetupComputeShaderKernelUniforfms(kernel3, QuadGenerationConstantsBuffer, PreOutDataBuffer, PreOutDataSubBuffer, OutDataBuffer, QuadCornersBuffer);
-        SetupComputeShaderKernelUniforfms(kernel4, QuadGenerationConstantsBuffer, PreOutDataBuffer, PreOutDataSubBuffer, OutDataBuffer, QuadCornersBuffer);
-        SetupComputeShaderKernelUniforfms(kernel5, QuadGenerationConstantsBuffer, PreOutDataBuffer, PreOutDataSubBuffer, OutDataBuffer, QuadCornersBuffer);
+        SetupComputeShaderKernelsUniforfms(QuadGenerationConstantsBuffer, 
+                                           PreOutDataBuffer, 
+                                           PreOutDataSubBuffer, 
+                                           OutDataBuffer, 
+                                           QuadCornersBuffer, new int[] { kernel1, kernel2, kernel3, kernel4, kernel5 });
 
         CoreShader.Dispatch(kernel1,
         QuadSettings.THREADGROUP_SIZE_X_REAL,
@@ -768,8 +772,7 @@ public sealed class Quad : MonoBehaviour, IQuad
     {
         if (Subquads.Count != 0)
         {
-            var state = true;
-            return Subquads.All(s => s.Generated == state);
+            return Subquads.All(s => s.Generated == true);
         }
         else
             return false;
@@ -796,6 +799,16 @@ public sealed class Quad : MonoBehaviour, IQuad
 
         if (Planetoid.NPS != null)
             Planetoid.NPS.UpdateUniforms(QuadMaterial, CoreShader, kernel);
+    }
+
+    private void SetupComputeShaderKernelsUniforfms(ComputeBuffer QuadGenerationConstantsBuffer, ComputeBuffer PreOutDataBuffer, ComputeBuffer PreOutDataSubBuffer, ComputeBuffer OutDataBuffer, ComputeBuffer QuadCornersBuffer, params int[] kernels)
+    {
+        if (kernels == null || kernels.Length == 0) { Debug.Log("Quad.SetupComputeShaderKernelsUniforfms(...) problem!"); return; }
+
+        for (int i = 0; i < kernels.Length; i++)
+        {
+            SetupComputeShaderKernelUniforfms(i, QuadGenerationConstantsBuffer, PreOutDataBuffer, PreOutDataSubBuffer, OutDataBuffer, QuadCornersBuffer);
+        }
     }
 
     public void SetupEvents(Quad q)
