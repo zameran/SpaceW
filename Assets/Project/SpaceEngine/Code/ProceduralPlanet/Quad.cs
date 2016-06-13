@@ -144,7 +144,7 @@ public sealed class Quad : MonoBehaviour, IQuad
     public bool GPUDataRecieved = false;
     public bool BuffersCreated = false;
 
-    public float DistanceToClosestCorner = Mathf.Infinity;
+    public float DistanceToLODSplit = Mathf.Infinity;
 
     public Vector3 topLeftCorner;
     public Vector3 bottomRightCorner;
@@ -307,7 +307,9 @@ public sealed class Quad : MonoBehaviour, IQuad
 
     public void CheckLOD()
     {
-        DistanceToClosestCorner = GetDistanceToClosestCorner() + Planetoid.TerrainMaxHeight;
+        if (QuadAABB == null) return;
+
+        DistanceToLODSplit = GetDistanceToLODSplit() + Planetoid.TerrainMaxHeight;
 
         if (LODLevel < Planetoid.LODMaxLevel)
         {
@@ -317,7 +319,7 @@ public sealed class Quad : MonoBehaviour, IQuad
             {
                 if (Generated && !HaveSubQuads)
                 {
-                    if (DistanceToClosestCorner < LODDistance && !Splitting)
+                    if (DistanceToLODSplit < LODDistance && !Splitting)
                     {
                         StartCoroutine(Split());
                         Log("Split Call");
@@ -325,7 +327,7 @@ public sealed class Quad : MonoBehaviour, IQuad
                 }
                 else
                 {
-                    if (DistanceToClosestCorner > LODDistance && !Splitting)
+                    if (DistanceToLODSplit > LODDistance && !Splitting)
                     {
                         Unsplit();
                         Log("Unsplit Call");
@@ -336,7 +338,7 @@ public sealed class Quad : MonoBehaviour, IQuad
             {
                 if (Generated && !HaveSubQuads && !Planetoid.Working)
                 {
-                    if (DistanceToClosestCorner < LODDistance && !Splitting)
+                    if (DistanceToLODSplit < LODDistance && !Splitting)
                     {
                         StartCoroutine(Split());
                         Log("Split Call");
@@ -344,7 +346,7 @@ public sealed class Quad : MonoBehaviour, IQuad
                 }
                 else
                 {
-                    if (DistanceToClosestCorner > LODDistance && !Splitting)
+                    if (DistanceToLODSplit > LODDistance && !Splitting)
                     {
                         Unsplit();
                         Log("Unsplit Call");
@@ -923,12 +925,59 @@ public sealed class Quad : MonoBehaviour, IQuad
         mesh.bounds = GetBounds(quad);//new Bounds(generationConstants.patchCubeCenter, GetBoundsSize(quad));
     }
 
-    public float GetDistanceToClosestCorner()
+    public float GetDistanceToLODSplit()
+    {
+        float distance = Mathf.Infinity;
+
+        switch(Planetoid.LODDistanceMethod)
+        {
+            case QuadLODDistanceMethod.ClosestCorner:
+                distance = GetDistanceToClosestCorner();
+                break;
+            case QuadLODDistanceMethod.ClosestAABBCorner:
+                distance = GetDistanceToClosestAABBCorner();
+                break;
+            default:
+                distance = GetDistanceToClosestCorner();
+                break;
+        }
+
+        return distance;
+    }
+
+    private float GetDistanceToClosestCorner()
     {
         return Vector3.Distance(Planetoid.LODTarget.position, GetClosestCorner());
     }
 
-    public Vector3 GetClosestCorner()
+    private float GetDistanceToClosestAABBCorner()
+    {
+        if (QuadAABB.AABB == null || QuadAABB.AABB.Length == 0 || QuadAABB.AABB.Length <= 4) { Debug.Log("Quad.GetClosestAABBCorner(...) QuadAABB.AABB problem!"); return Mathf.Infinity; }
+
+        return Vector3.Distance(Planetoid.LODTarget.position, GetClosestAABBCorner());
+    }
+
+    private Vector3 GetClosestAABBCorner()
+    {
+        float closestDistance = Mathf.Infinity;
+
+        Vector3 closestCorner = Vector3.zero;
+
+        for (int i = 0; i < 4; i++)
+        {
+            float d = Vector3.Distance(Planetoid.LODTarget.position, QuadAABB.AABB[i]);
+
+            if(d < closestDistance)
+            {
+                closestCorner = QuadAABB.AABB[i];
+                closestDistance = d;
+            }
+        }
+
+        return closestCorner;
+    }
+
+    private Vector3 GetClosestCorner()
     {
         float closestDistance = Mathf.Infinity;
 

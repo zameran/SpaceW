@@ -126,6 +126,7 @@ public sealed class Planetoid : Planet, IPlanet
 
     public QuadDrawAndCull DrawAndCull = QuadDrawAndCull.CullBeforeDraw;
     public QuadCullingMethod CullingMethod = QuadCullingMethod.Custom;
+    public QuadLODDistanceMethod LODDistanceMethod = QuadLODDistanceMethod.ClosestCorner;
 
     public TCCommonParametersSetter tccps;
 

@@ -168,9 +168,9 @@ public abstract class Planet : MonoBehaviour
     {
         public int Compare(Quad x, Quad y)
         {
-            if (x.DistanceToClosestCorner > y.DistanceToClosestCorner)
+            if (x.DistanceToLODSplit > y.DistanceToLODSplit)
                 return 1;
-            else if (x.DistanceToClosestCorner < y.DistanceToClosestCorner)
+            else if (x.DistanceToLODSplit < y.DistanceToLODSplit)
                 return -1;
             else
                 return 0;
