@@ -10,6 +10,7 @@
 		_QuadTexture3("QuadTexture 3 (RGB)", 2D) = "white" {}
 		_QuadTexture4("QuadTexture 4 (RGB)", 2D) = "white" {}
 		_Normale("Normale", Range(0, 1)) = 0.0
+		_ExtinctionGroundFade("Extinction Ground Fade", Range(0.000025, 0.000100)) = 0.000025
 	}
 	SubShader
 	{
@@ -71,6 +72,7 @@
 			};
 
 			uniform float _Normale;
+			uniform float _ExtinctionGroundFade;
 
 			uniform sampler2D _HeightTexture;
 			uniform sampler2D _NormalTexture;
@@ -100,7 +102,6 @@
 				float3 skyE = 0;
 				float3 extinction = 0;
 
-				float extinctionGroundFade = 0.000025;
 				float cTheta = dot(n, -WSD);
 
 				SunRadianceAndSkyIrradiance(p, n, WSD, sunL, skyE);
@@ -115,7 +116,7 @@
 
 				float3 groundColor = 1.5 * RGB2Reflectance(terrainColor).rgb * (sunL * max(cTheta, 0) + skyE) / M_PI;
 
-				extinction = 1 * extinctionGroundFade + (1 - extinctionGroundFade) * extinction * eclipse;
+				extinction = 1 * _ExtinctionGroundFade + (1 - _ExtinctionGroundFade) * extinction * eclipse;
 
 				float4 finalColor = float4(groundColor, 1) * float4(extinction, 1) + inscatter;
 				

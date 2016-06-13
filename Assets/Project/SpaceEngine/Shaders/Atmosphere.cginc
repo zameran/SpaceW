@@ -64,7 +64,7 @@
  * Modified by Denis Ovchinnikov 2015-2016
  */
 
-//#define OPTIMIZE
+#define OPTIMIZE
 #define ATMO_FULL
 #define HORIZON_HACK
 //#define HORIZON_HACK_BIG_EPSILON
@@ -464,11 +464,9 @@ float3 AnalyticTransmittance(float r, float mu, float d)
 {
 	float3 tr = exp(- betaR * OpticalDepth(HR, r, mu, d) - betaMEx * OpticalDepth(HM, r, mu, d)); //using default eq.
 
-	if(isnan(tr.x)) tr = float3(1.0, 1.0, 1.0);
+	if (isnan(tr.x)) tr = float3(1.0, 1.0, 1.0);
 
 	return lerp(float3(1.0, 1.0, 1.0), tr, density);
-
-	//return exp(- betaR * OpticalDepth(HR, r, mu) - betaMEx * OpticalDepth(HM, r, mu)); //using Eric's eq.
 }
 
 // transmittance(=transparency) of atmosphere for infinite ray (r,mu)
@@ -547,7 +545,7 @@ float3 GetMie(float4 rayMie)
 	return rayMie.rgb * rayMie.w / max(rayMie.r, 1e-4) * (betaR.r / betaR);
 }
 
-float SQRT(float f, float err) 
+inline float SQRT(float f, float err) 
 {
 	#ifdef OPTIMIZE
 		return sqrt(f);
