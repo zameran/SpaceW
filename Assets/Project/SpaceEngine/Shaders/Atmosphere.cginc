@@ -78,6 +78,16 @@
 #define M_PI2 6.28318531
 #endif
 
+struct Sun
+{
+	float Intensity;
+	float3 WorldDirection;
+	float3 WorldPosition;
+	float3x3 WorldToLocalRotation;
+};
+
+uniform StructuredBuffer<Sun> Suns;
+
 uniform float3 _Sun_WorldSunDir_1;
 uniform float3 _Sun_WorldSunDir_2;
 uniform float3 _Sun_WorldSunDir_3;
