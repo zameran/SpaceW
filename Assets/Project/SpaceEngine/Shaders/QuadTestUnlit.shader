@@ -86,6 +86,8 @@
 			uniform StructuredBuffer<OutputStruct> data;
 			uniform StructuredBuffer<QuadGenerationConstants> quadGenerationConstants;
 
+			uniform float4x4 TRS;
+
 			inline float4 RGB2Reflectance(float4 inColor)
 			{
 				return float4(tan(1.37 * inColor.rgb) / tan(1.37), inColor.a);
@@ -207,7 +209,7 @@
 				o.normal1 = mul(_Object2World, v.normal);
 				o.vertex0 = mul(UNITY_MATRIX_MVP, v.vertex);
 				o.vertex1 = mul(_Object2World, v.vertex);
-				o.vertex2 = cubePosition;
+				o.vertex2 = mul(_Object2World, v.vertex); //TODO : Apply Origin vector. //NOTE : Bug here!!!!!111
 				o.tangent0 = v.tangent;
 				o.depth = 1;
 
@@ -229,7 +231,7 @@
 				float height = tex2D(_HeightTexture, IN.uv0).a;
 				float slope = tex2D(_NormalTexture, IN.uv0).a;
 
-				Account(terrainColor, scatteringColor, IN.vertex1.xyz, IN.normal0.xyz);
+				Account(terrainColor, scatteringColor, IN.vertex2.xyz, IN.normal0.xyz);
 
 				outDiffuse = lerp(scatteringColor, outputNormal, _Normale);
 			}

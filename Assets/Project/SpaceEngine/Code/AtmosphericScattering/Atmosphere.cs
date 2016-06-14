@@ -26,6 +26,8 @@ public sealed class Atmosphere : MonoBehaviour
     public delegate void AtmosphereDelegate(Atmosphere a);
     public event AtmosphereDelegate OnPresetChanged, OnBaked;
 
+    public Planetoid planetoid;
+
     [Range(0.0f, 1.0f)]
     public float Density = 1.0f;
 
@@ -377,18 +379,7 @@ public sealed class Atmosphere : MonoBehaviour
     {
         this.Origin = Origin;
 
-        SetUniforms(SkyMaterial);
-
-        SkyMaterial.renderQueue = (int)RenderQueue + RenderQueueOffset;
-
-        Graphics.DrawMesh(AtmosphereMesh, transform.localToWorldMatrix, SkyMaterial, drawLayer);
-    }
-
-    public void RenderFrom(Planetoid planetoid, Vector3 Origin, int drawLayer = 8)
-    {
-        this.Origin = Origin;
-
-        SetUniforms(SkyMaterial);
+        SetUniforms(planetoid.QuadAtmosphereMPB, SkyMaterial, true);
 
         SkyMaterial.renderQueue = (int)RenderQueue + RenderQueueOffset;
 
@@ -503,34 +494,7 @@ public sealed class Atmosphere : MonoBehaviour
         if (suns.Length > 3) if (Sun_4 == null && suns[3] != null) Sun_4 = suns[3];
     }
 
-    public void InitUniforms(Material mat)
-    {
-        if (mat == null) return;
-
-        SetKeywords(mat, Keywords);
-        SetEclipses(mat);
-        SetShine(mat);
-
-        mat.SetTexture("_Sun_Glare", SunGlareTexture);
-
-        mat.SetFloat("Rg", atmosphereParameters.Rg);
-        mat.SetFloat("Rt", atmosphereParameters.Rt);
-        mat.SetFloat("RL", atmosphereParameters.Rl);
-
-        mat.SetFloat("TRANSMITTANCE_W", atmosphereParameters.TRANSMITTANCE_W);
-        mat.SetFloat("TRANSMITTANCE_H", atmosphereParameters.TRANSMITTANCE_H);
-        mat.SetFloat("SKY_W", atmosphereParameters.SKY_W);
-        mat.SetFloat("SKY_H", atmosphereParameters.SKY_H);
-        mat.SetFloat("RES_R", atmosphereParameters.RES_R);
-        mat.SetFloat("RES_MU", atmosphereParameters.RES_MU);
-        mat.SetFloat("RES_MU_S", atmosphereParameters.RES_MU_S);
-        mat.SetFloat("RES_NU", atmosphereParameters.RES_NU);
-        mat.SetFloat("AVERAGE_GROUND_REFLECTANCE", atmosphereParameters.AVERAGE_GROUND_REFLECTANCE);
-        mat.SetFloat("HR", atmosphereParameters.HR * 1000.0f);
-        mat.SetFloat("HM", atmosphereParameters.HM * 1000.0f);
-    }
-
-    public void InitUniformsForPlanetQuad(MaterialPropertyBlock block, Material mat, bool full)
+    public void InitUniforms(MaterialPropertyBlock block, Material mat, bool full = true)
     {
         if (mat != null)
         {
@@ -572,12 +536,12 @@ public sealed class Atmosphere : MonoBehaviour
             {
                 if (planetoid.Quads[i] != null)
                 {
-                    planetoid.Atmosphere.InitUniforms(planetoid.Quads[i].QuadMaterial);
+                    planetoid.Atmosphere.InitUniforms(null, planetoid.Quads[i].QuadMaterial, false);
                 }
             }
 
             //Just make sure that all mpb parameters are set.
-            planetoid.Atmosphere.InitUniformsForPlanetQuad(planetoid.QuadAtmosphereMPB, null, true);
+            planetoid.Atmosphere.InitUniforms(planetoid.QuadAtmosphereMPB, null, true);
         }
     }
 
@@ -589,12 +553,12 @@ public sealed class Atmosphere : MonoBehaviour
             {
                 if (planetoid.Quads[i] != null)
                 {
-                    planetoid.Atmosphere.SetUniformsForPlanetQuad(null, planetoid.Quads[i].QuadMaterial, false);
+                    planetoid.Atmosphere.SetUniforms(null, planetoid.Quads[i].QuadMaterial, false, true);
                 }
             }
 
             //Just make sure that all mpb parameters are set.
-            planetoid.Atmosphere.SetUniformsForPlanetQuad(planetoid.QuadAtmosphereMPB, null, true);
+            planetoid.Atmosphere.SetUniforms(planetoid.QuadAtmosphereMPB, null, true, true);
         }
     }
 
@@ -606,14 +570,14 @@ public sealed class Atmosphere : MonoBehaviour
 
     public void InitSetAtmosphereUniforms()
     {
-        InitUniforms(SkyMaterial);
-        SetUniforms(SkyMaterial);
+        InitUniforms(planetoid.QuadAtmosphereMPB, SkyMaterial, true);
+        SetUniforms(planetoid.QuadAtmosphereMPB, SkyMaterial, true);
     }
 
     public void InitSetAtmosphereUniforms(Atmosphere atmosphere)
     {
-        InitUniforms(atmosphere.SkyMaterial);
-        SetUniforms(atmosphere.SkyMaterial);
+        InitUniforms(planetoid.QuadAtmosphereMPB, SkyMaterial, true);
+        SetUniforms(planetoid.QuadAtmosphereMPB, SkyMaterial, true);
     }
 
     public void ReanimateAtmosphereUniforms(Atmosphere atmosphere, Planetoid planetoid)
@@ -659,101 +623,7 @@ public sealed class Atmosphere : MonoBehaviour
             Debug.Log("Atmosphere: Reanimation fail!");
     }
 
-    public void SetUniforms(Material mat)
-    {
-        if (mat == null) return;
-
-        SetKeywords(mat, Keywords);
-        SetEclipses(mat);
-        SetShine(mat);
-
-        mat.SetFloat("density", Density);
-        mat.SetFloat("scale", atmosphereParameters.SCALE);
-        mat.SetFloat("Rg", atmosphereParameters.Rg);
-        mat.SetFloat("Rt", atmosphereParameters.Rt);
-        mat.SetFloat("RL", atmosphereParameters.Rl);
-        mat.SetVector("betaR", atmosphereParameters.BETA_R / 1000);
-        mat.SetVector("betaMSca", atmosphereParameters.BETA_MSca / 1000);
-        mat.SetVector("betaMEx", atmosphereParameters.BETA_MEx / 1000);
-        mat.SetFloat("mieG", Mathf.Clamp(atmosphereParameters.MIE_G, 0.0f, 0.99f));
-        mat.SetFloat("_Sun_Glare_Scale", SunGlareScale);
-
-        if (RunTimeBaking && artb != null)
-        {
-            if (artb.transmittanceT != null) mat.SetTexture("_Sky_Transmittance", artb.transmittanceT);
-            if (artb.inscatterT_Read != null) mat.SetTexture("_Sky_Inscatter", artb.inscatterT_Read);
-            if (artb.irradianceT_Read != null) mat.SetTexture("_Sky_Irradiance", artb.irradianceT_Read);
-        }
-        else
-        {
-            if (Transmittance != null) mat.SetTexture("_Sky_Transmittance", Transmittance);
-            if (Inscatter != null) mat.SetTexture("_Sky_Inscatter", Inscatter);
-            if (Irradiance != null) mat.SetTexture("_Sky_Irradiance", Irradiance);
-        }
-
-        mat.SetMatrix("_Globals_WorldToCamera", worldToCamera);
-        mat.SetMatrix("_Globals_CameraToWorld", cameraToWorld);
-        mat.SetMatrix("_Globals_CameraToScreen", cameraToScreen);
-        mat.SetMatrix("_Globals_ScreenToCamera", screenToCamera);
-        mat.SetVector("_Globals_WorldCameraPos", worldCameraPos);
-
-        mat.SetVector("_Globals_Origin", -Origin);
-        mat.SetFloat("_Exposure", HDRExposure);
-
-        if (Sun_1 != null) Sun_1.SetUniforms(mat);
-        if (Sun_2 != null) Sun_2.SetUniforms(mat);
-        if (Sun_3 != null) Sun_3.SetUniforms(mat);
-        if (Sun_4 != null) Sun_4.SetUniforms(mat);
-    }
-
-    [Obsolete]
-    public void SetUniformsForPlanetQuad(Material mat)
-    {
-        if (mat == null) return;
-
-        SetKeywords(mat, Keywords);
-        SetEclipses(mat);
-        SetShine(mat);
-
-        mat.SetFloat("density", Density);
-        mat.SetFloat("scale", atmosphereParameters.SCALE);
-        mat.SetFloat("Rg", atmosphereParameters.Rg);
-        mat.SetFloat("Rt", atmosphereParameters.Rt);
-        mat.SetFloat("RL", atmosphereParameters.Rl);
-        mat.SetVector("betaR", atmosphereParameters.BETA_R / 1000);
-        mat.SetVector("betaMSca", atmosphereParameters.BETA_MSca / 1000);
-        mat.SetVector("betaMEx", atmosphereParameters.BETA_MEx / 1000);
-        mat.SetFloat("mieG", Mathf.Clamp(atmosphereParameters.MIE_G, 0.0f, 0.99f));
-
-        if (RunTimeBaking && artb != null)
-        {
-            if (artb.transmittanceT != null) mat.SetTexture("_Sky_Transmittance", artb.transmittanceT);
-            if (artb.inscatterT_Read != null) mat.SetTexture("_Sky_Inscatter", artb.inscatterT_Read);
-            if (artb.irradianceT_Read != null) mat.SetTexture("_Sky_Irradiance", artb.irradianceT_Read);
-        }
-        else
-        {
-            if (Transmittance != null) mat.SetTexture("_Sky_Transmittance", Transmittance);
-            if (Inscatter != null) mat.SetTexture("_Sky_Inscatter", Inscatter);
-            if (Irradiance != null) mat.SetTexture("_Sky_Irradiance", Irradiance);
-        }
-
-        mat.SetMatrix("_Globals_WorldToCamera", worldToCamera);
-        mat.SetMatrix("_Globals_CameraToWorld", cameraToWorld);
-        mat.SetMatrix("_Globals_CameraToScreen", cameraToScreen);
-        mat.SetMatrix("_Globals_ScreenToCamera", screenToCamera);
-        mat.SetVector("_Globals_WorldCameraPos", worldCameraPos - Origin); // Apply origin to vector on planetoid quads. 
-
-        mat.SetVector("_Globals_Origin", -Origin);
-        mat.SetFloat("_Exposure", HDRExposure);
-
-        if (Sun_1 != null) Sun_1.SetUniforms(mat);
-        if (Sun_2 != null) Sun_2.SetUniforms(mat);
-        if (Sun_3 != null) Sun_3.SetUniforms(mat);
-        if (Sun_4 != null) Sun_4.SetUniforms(mat);
-    }
-
-    public void SetUniformsForPlanetQuad(MaterialPropertyBlock block, Material mat, bool full = true)
+    public void SetUniforms(MaterialPropertyBlock block, Material mat, bool full = true, bool forQuad = false)
     {
         if (mat != null)
         {
@@ -776,6 +646,7 @@ public sealed class Atmosphere : MonoBehaviour
             block.SetVector("betaMSca", atmosphereParameters.BETA_MSca / 1000);
             block.SetVector("betaMEx", atmosphereParameters.BETA_MEx / 1000);
             block.SetFloat("mieG", Mathf.Clamp(atmosphereParameters.MIE_G, 0.0f, 0.99f));
+            block.SetFloat("_Sun_Glare_Scale", SunGlareScale);
 
             if (RunTimeBaking && artb != null)
             {
@@ -794,7 +665,7 @@ public sealed class Atmosphere : MonoBehaviour
             block.SetMatrix("_Globals_CameraToWorld", cameraToWorld);
             block.SetMatrix("_Globals_CameraToScreen", cameraToScreen);
             block.SetMatrix("_Globals_ScreenToCamera", screenToCamera);
-            block.SetVector("_Globals_WorldCameraPos", worldCameraPos - Origin); // Apply origin to vector on planetoid quads. 
+            block.SetVector("_Globals_WorldCameraPos", forQuad == true ? worldCameraPos - Origin : worldCameraPos);
 
             block.SetVector("_Globals_Origin", -Origin);
             block.SetFloat("_Exposure", HDRExposure);

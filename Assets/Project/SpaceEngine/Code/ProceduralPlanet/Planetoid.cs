@@ -153,8 +153,19 @@ public sealed class Planetoid : Planet, IPlanet
     {
         base.Awake();
 
-        if (Atmosphere != null) Atmosphere.Origin = Origin;
-        if (Cloudsphere != null) if (Cloudsphere.Planetoid == null) Cloudsphere.Planetoid = this;
+        if (Atmosphere != null)
+        {
+            if (Atmosphere.planetoid == null)
+                Atmosphere.planetoid = this;
+
+            Atmosphere.Origin = Origin;
+        }
+
+        if (Cloudsphere != null)
+        {
+            if (Cloudsphere.planetoid == null)
+                Cloudsphere.planetoid = this;
+        }
 
         FrustumPlanes = GeometryUtility.CalculateFrustumPlanes(CameraHelper.Main());
 
@@ -224,7 +235,7 @@ public sealed class Planetoid : Planet, IPlanet
 
         FrustumPlanes = GeometryUtility.CalculateFrustumPlanes(CameraHelper.Main());
 
-        if (Atmosphere != null) Atmosphere.SetUniformsForPlanetQuad(QuadAtmosphereMPB, null, true);
+        if (Atmosphere != null) Atmosphere.SetUniforms(QuadAtmosphereMPB, null, false, true);
 
         if (!ExternalRendering)
         {
@@ -331,7 +342,7 @@ public sealed class Planetoid : Planet, IPlanet
         if (Atmosphere != null)
         {
             if (AtmosphereEnabled)
-                Atmosphere.RenderFrom(this, Origin, DrawLayer);
+                Atmosphere.Render(Origin, DrawLayer);
         }
 
         if (Cloudsphere != null)
@@ -518,7 +529,7 @@ public sealed class Planetoid : Planet, IPlanet
         quadComponent.QuadMaterial = material;
         quadComponent.SetupEvents(quadComponent);
 
-        if (Atmosphere != null) Atmosphere.InitUniforms(quadComponent.QuadMaterial);
+        if (Atmosphere != null) Atmosphere.InitUniforms(null, quadComponent.QuadMaterial, false);
 
         QuadGenerationConstants gc = QuadGenerationConstants.Init(TerrainMaxHeight);
         gc.planetRadius = PlanetRadius;
@@ -558,7 +569,7 @@ public sealed class Planetoid : Planet, IPlanet
         quadComponent.SetupEvents(quadComponent);
         quadComponent.SetupCorners(quadPosition);
 
-        if (Atmosphere != null) Atmosphere.InitUniforms(quadComponent.QuadMaterial);
+        if (Atmosphere != null) Atmosphere.InitUniforms(null, quadComponent.QuadMaterial, false);
 
         QuadGenerationConstants gc = QuadGenerationConstants.Init(TerrainMaxHeight);
         gc.planetRadius = PlanetRadius;

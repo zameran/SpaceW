@@ -21,7 +21,6 @@
 			#pragma vertex vert
 			#pragma fragment frag
 
-			uniform float3 _Globals_Origin;
 			uniform float4x4 _Globals_CameraToWorld;
 			uniform float4x4 _Globals_ScreenToCamera;
 			uniform float4x4 _Sun_WorldToLocal_1;

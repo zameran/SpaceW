@@ -94,6 +94,7 @@ uniform float3 _Sun_WorldSunDir_3;
 uniform float3 _Sun_WorldSunDir_4;
 
 uniform float3 _Globals_WorldCameraPos;
+uniform float3 _Globals_Origin;
 
 // ----------------------------------------------------------------------------
 // PHYSICAL MODEL PARAMETERS

@@ -100,7 +100,6 @@ Shader "SpaceEngine/Atmosphere/Atmosphere"
 			
 			uniform float4x4 _Globals_CameraToWorld;
 			uniform float4x4 _Globals_ScreenToCamera;
-			uniform float3 _Globals_Origin;
 			
 			uniform sampler2D _Sun_Glare;
 			uniform float _Sun_Glare_Scale;

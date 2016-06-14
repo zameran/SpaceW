@@ -97,7 +97,7 @@ public sealed class SunGlare : MonoBehaviour
         sunGlareMaterial.SetMatrix("ghost2Settings", ghost2Settings);
         sunGlareMaterial.SetMatrix("ghost3Settings", ghost2Settings);
 
-        if (Atmosphere != null) Atmosphere.InitUniforms(sunGlareMaterial);
+        //if (Atmosphere != null) Atmosphere.InitUniforms(sunGlareMaterial); //TODO : Repeair sunglare atmosphere uniforms.
     }
 
     public void SetUniforms()
@@ -117,7 +117,7 @@ public sealed class SunGlare : MonoBehaviour
         sunGlareMaterial.SetFloat("useAtmosphereColors", 1.0f);
         sunGlareMaterial.SetFloat("eclipse", eclipse ? 1.0f : 0.0f);
 
-        Atmosphere.SetUniforms(sunGlareMaterial);
+        //Atmosphere.SetUniforms(sunGlareMaterial);
     }
 
     public void UpdateNode()
