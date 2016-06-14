@@ -258,6 +258,17 @@ public sealed class Planetoid : Planet, IPlanet
 
         if (focusStatus == true)
         {
+            //NOTE : So, when unity recompiles shaders or scripts from editor 
+            //while playing - quads not draws properly. 
+            //1) Reanimation of uniforms/mpb can't help.
+            //2) MaterialPropertyBlock.Clear() in Reanimation can't help.
+            //3) mpb = null; in Reanimation can't help.
+            //4) All parameters are ok in mpb.
+            //5) Problem not in MainRenderer.
+            //I think i've lost something...
+            //This ussue take effect only with mpb, so dirty fix is:
+            ReSetupQuads();
+
             if (Atmosphere != null)
             {
                 Atmosphere.ReanimateAtmosphereUniforms(Atmosphere, this);
@@ -320,7 +331,7 @@ public sealed class Planetoid : Planet, IPlanet
         if (Atmosphere != null)
         {
             if (AtmosphereEnabled)
-                Atmosphere.Render(Origin, DrawLayer);
+                Atmosphere.RenderFrom(this, Origin, DrawLayer);
         }
 
         if (Cloudsphere != null)

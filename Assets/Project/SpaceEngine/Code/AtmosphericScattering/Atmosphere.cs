@@ -384,6 +384,17 @@ public sealed class Atmosphere : MonoBehaviour
         Graphics.DrawMesh(AtmosphereMesh, transform.localToWorldMatrix, SkyMaterial, drawLayer);
     }
 
+    public void RenderFrom(Planetoid planetoid, Vector3 Origin, int drawLayer = 8)
+    {
+        this.Origin = Origin;
+
+        SetUniforms(SkyMaterial);
+
+        SkyMaterial.renderQueue = (int)RenderQueue + RenderQueueOffset;
+
+        Graphics.DrawMesh(AtmosphereMesh, transform.localToWorldMatrix, SkyMaterial, drawLayer, CameraHelper.Main(), 0, planetoid.QuadAtmosphereMPB);
+    }
+
     private void OnDestroy()
     {
         CollectGarbage();
@@ -519,7 +530,6 @@ public sealed class Atmosphere : MonoBehaviour
         mat.SetFloat("HM", atmosphereParameters.HM * 1000.0f);
     }
 
-    [Obsolete]
     public void InitUniformsForPlanetQuad(MaterialPropertyBlock block, Material mat, bool full)
     {
         if (mat != null)
@@ -531,8 +541,8 @@ public sealed class Atmosphere : MonoBehaviour
         {
             if (block == null) return;
 
-            SetEclipses(mat);
-            SetShine(mat);
+            SetEclipses(block);
+            SetShine(block);
 
             block.SetTexture("_Sun_Glare", SunGlareTexture);
 
@@ -565,6 +575,9 @@ public sealed class Atmosphere : MonoBehaviour
                     planetoid.Atmosphere.InitUniforms(planetoid.Quads[i].QuadMaterial);
                 }
             }
+
+            //Just make sure that all mpb parameters are set.
+            planetoid.Atmosphere.InitUniformsForPlanetQuad(planetoid.QuadAtmosphereMPB, null, true);
         }
     }
 
@@ -579,6 +592,9 @@ public sealed class Atmosphere : MonoBehaviour
                     planetoid.Atmosphere.SetUniformsForPlanetQuad(null, planetoid.Quads[i].QuadMaterial, false);
                 }
             }
+
+            //Just make sure that all mpb parameters are set.
+            planetoid.Atmosphere.SetUniformsForPlanetQuad(planetoid.QuadAtmosphereMPB, null, true);
         }
     }
 

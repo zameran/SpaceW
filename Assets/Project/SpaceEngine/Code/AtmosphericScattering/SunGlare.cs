@@ -19,6 +19,8 @@ public sealed class SunGlare : MonoBehaviour
 
     public int RenderQueue = 3000;
 
+    public bool InitUniformsInUpdate = true;
+
     private bool eclipse = false;
 
     private Vector3 sunViewPortPosition = Vector3.zero;
@@ -136,6 +138,7 @@ public sealed class SunGlare : MonoBehaviour
         if (!eclipse)
             eclipse = Physics.Raycast(CameraHelper.Main().transform.position, (Sun.transform.position - CameraHelper.Main().transform.position).normalized, out hit, Mathf.Infinity);
 
+        if (InitUniformsInUpdate) InitUniforms(sunGlareMaterial);
         SetUniforms(sunGlareMaterial);
     }
 
