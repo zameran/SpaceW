@@ -401,11 +401,15 @@ public sealed class Planetoid : Planet, IPlanet
         if (OctaveFade)
         {
             int id = invert ?
-                (LODDistances.Length / (LODLevel + 1 + ((LODDistances.Length - LODOctaves.Length) / LODOctaves.Length))) :
-                LODOctaves.Length - (LODDistances.Length / (LODLevel + 1 + ((LODDistances.Length - LODOctaves.Length) / LODOctaves.Length)));
+                (LODDistances.Length / (LODLevel + 2 + ((LODDistances.Length - LODOctaves.Length) / LODOctaves.Length))) :
+                LODOctaves.Length - (LODDistances.Length / (LODLevel + 2 + ((LODDistances.Length - LODOctaves.Length) / LODOctaves.Length)));
+
+            id -= 1;
 
             if (LODOctaves != null && LODOctaves.Length > 1 && !(id > LODOctaves.Length))
+            {
                 return LODOctaves[id];
+            }
             else
                 return 1.0f;
         }
