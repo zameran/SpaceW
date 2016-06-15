@@ -1,6 +1,4 @@
-﻿//TODO: Fix this
-
-using System;
+﻿using System;
 using System.Collections.Generic;
 
 #if UNITY_EDITOR
@@ -11,7 +9,7 @@ using UnityEditor;
 using UnityEngine;
 
 [AttributeUsage(AttributeTargets.Class, Inherited = false, AllowMultiple = false)]
-sealed class ExecutionOrderAttribute : Attribute
+internal sealed class ExecutionOrderAttribute : Attribute
 {
     public readonly int ExecutionOrder = 0;
 
@@ -33,13 +31,15 @@ sealed class ExecutionOrderAttribute : Attribute
         var types = assembly.GetTypes();
         var scripts = new Dictionary<MonoScript, ExecutionOrderAttribute>();
 
-        var progress = 0f;
-        var step = 1f / types.Length;
+        var progress = 0.0f;
+        var step = 1.0f / types.Length;
 
         foreach (var item in types)
         {
             var attributes = item.GetCustomAttributes(type, false);
+
             if (attributes.Length != 1) continue;
+
             var attribute = attributes[0] as ExecutionOrderAttribute;
 
             var asset = "";
@@ -51,32 +51,26 @@ sealed class ExecutionOrderAttribute : Attribute
                 {
                     var assetPath = AssetDatabase.GUIDToAssetPath(guid);
                     var filename = Path.GetFileNameWithoutExtension(assetPath);
-                    if (filename == item.Name)
-                    {
-                        asset = guid;
-                        break;
-                    }
+
+                    if (filename == item.Name) { asset = guid; break; }
                 }
             }
-            else if (guids.Length == 1)
-            {
-                asset = guids[0];
-            }
-            else {
-                Debug.LogErrorFormat(ERR_MESSAGE, item.Name);
-                return;
-            }
+            else if (guids.Length == 1) { asset = guids[0]; }
+            else { Debug.LogErrorFormat(ERR_MESSAGE, item.Name); return; }
 
             var script = AssetDatabase.LoadAssetAtPath<MonoScript>(AssetDatabase.GUIDToAssetPath(asset));
+
             scripts.Add(script, attribute);
         }
 
         var changed = false;
+
         foreach (var item in scripts)
         {
             if (MonoImporter.GetExecutionOrder(item.Key) != item.Value.ExecutionOrder)
             {
                 changed = true;
+
                 break;
             }
         }
@@ -86,6 +80,7 @@ sealed class ExecutionOrderAttribute : Attribute
             foreach (var item in scripts)
             {
                 var cancelled = EditorUtility.DisplayCancelableProgressBar(PB_TITLE, PB_MESSAGE, progress);
+
                 progress += step;
 
                 if (MonoImporter.GetExecutionOrder(item.Key) != item.Value.ExecutionOrder)
