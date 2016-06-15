@@ -46,7 +46,8 @@ public class CubemapCapturer : MonoBehaviour
     public LayerMask layerMask;
 
     private Camera renderCamera;
-    private RenderTexture cubeRenderTexture;
+
+    public RenderTexture cubeRenderTexture;
 
     void Start()
     {

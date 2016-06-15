@@ -65,13 +65,7 @@ public sealed class MainRenderer : MonoBehaviour
 
     private void Update()
     {
-        planets.Sort(pdtltc);
-
-        for (int i = 0; i < planets.Count; i++)
-        {
-            if (planets[i] != null)
-                planets[i].Render();
-        }
+        Render();
     }
 
     private void OnEnable()
@@ -91,6 +85,17 @@ public sealed class MainRenderer : MonoBehaviour
             if (planets[i] != null)
                 if (!planets[i].ExternalRendering && OverrideExternalRendering)
                     planets[i].ExternalRendering = false;
+        }
+    }
+
+    public void Render()
+    {
+        planets.Sort(pdtltc);
+
+        for (int i = 0; i < planets.Count; i++)
+        {
+            if (planets[i] != null)
+                planets[i].Render();
         }
     }
 }
