@@ -457,7 +457,7 @@ public class DebugDrawFPSGraph : DebugDraw
             }
         }
 
-        // Draw Mb
+        /*// Draw Mb
         for (int x = 0; x < 9; ++x)
         {
             for (int y = 0; y < 4; ++y)
@@ -476,6 +476,7 @@ public class DebugDrawFPSGraph : DebugDraw
                 }
             }
         }
+        */
 
         if (maxFrame > 0)
         {
