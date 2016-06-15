@@ -7,6 +7,7 @@ using Debug = UnityEngine.Debug;
 
 public class DebugDrawFPSGraph : DebugDraw
 {
+    public float elapsedTotalSecondsOffset = 0.0f;
     public bool audioFeedback = false;
     public float audioFeedbackVolume = 0.5f;
     public int graphMultiply = 2;
@@ -229,7 +230,7 @@ public class DebugDrawFPSGraph : DebugDraw
 
     void Update()
     {
-        eTotalSeconds = (float)stopWatch.Elapsed.TotalSeconds;
+        eTotalSeconds = (float)stopWatch.Elapsed.TotalSeconds + elapsedTotalSecondsOffset;
         dt = eTotalSeconds - lastElapsed;
         lastElapsed = eTotalSeconds;
 
@@ -261,13 +262,13 @@ public class DebugDrawFPSGraph : DebugDraw
             if (frameIter >= frameHistoryLength)
                 frameIter = 0;
 
-            beforeRender = (float)stopWatch.Elapsed.TotalSeconds;
+            beforeRender = (float)stopWatch.Elapsed.TotalSeconds + elapsedTotalSecondsOffset;
         }
     }
 
     void LateUpdate()
     {
-        eTotalSeconds = (float)stopWatch.Elapsed.TotalSeconds;
+        eTotalSeconds = (float)stopWatch.Elapsed.TotalSeconds + elapsedTotalSecondsOffset;
         dt = (eTotalSeconds - beforeRender);
 
         dtHistory[2, frameIter] = dt;
@@ -538,11 +539,11 @@ public class DebugDrawFPSGraph : DebugDraw
         GL.End();
         GL.PopMatrix();
 
-        dt = ((float)stopWatch.Elapsed.TotalSeconds - beforeRender);
+        dt = ((float)stopWatch.Elapsed.TotalSeconds + elapsedTotalSecondsOffset) - beforeRender;
 
         dtHistory[1, frameIter] = dt;
 
-        eTotalSeconds = (float)stopWatch.Elapsed.TotalSeconds;
+        eTotalSeconds = (float)stopWatch.Elapsed.TotalSeconds + elapsedTotalSecondsOffset;
 
         dt = (eTotalSeconds - lastElapsed);
     }
