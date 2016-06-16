@@ -167,7 +167,8 @@ public sealed class Planetoid : Planet, IPlanet
                 Cloudsphere.planetoid = this;
         }
 
-        FrustumPlanes = GeometryUtility.CalculateFrustumPlanes(CameraHelper.Main());
+        if (CameraHelper.Main() != null)
+            FrustumPlanes = GeometryUtility.CalculateFrustumPlanes(CameraHelper.Main());
 
         QuadAtmosphereMPB = new MaterialPropertyBlock();
 
@@ -233,7 +234,8 @@ public sealed class Planetoid : Planet, IPlanet
             }
         }
 
-        FrustumPlanes = GeometryUtility.CalculateFrustumPlanes(CameraHelper.Main());
+        if (CameraHelper.Main() != null)
+            FrustumPlanes = GeometryUtility.CalculateFrustumPlanes(CameraHelper.Main());
 
         if (Atmosphere != null) Atmosphere.SetUniforms(QuadAtmosphereMPB, null, false, true);
 
@@ -278,7 +280,10 @@ public sealed class Planetoid : Planet, IPlanet
             //5) Problem not in MainRenderer.
             //I think i've lost something...
             //This ussue take effect only with mpb, so dirty fix is:
-            ReSetupQuads();
+            //ReSetupQuads();
+            //NOTE : Fixed. Buffers setted 1 time. Need to update when focus losted.
+
+            ReanimateQuadsBuffers(false);
 
             if (Atmosphere != null)
             {
@@ -307,6 +312,22 @@ public sealed class Planetoid : Planet, IPlanet
         if (a != null)
         {
             a.ReanimateAtmosphereUniforms(a, this);
+        }
+    }
+
+    public void ReanimateQuadsBuffers(bool resetup = false)
+    {
+        if (resetup) { ReSetupQuads(); return; }
+
+        if (Quads != null)
+        {
+            if (Quads.Count != 0)
+            {
+                for (int i = 0; i < Quads.Count; i++)
+                {
+                    Quads[i].Uniformed = false;
+                }
+            }
         }
     }
 
