@@ -243,4 +243,24 @@ inline float3 GetHeightNormalFromPosition(QuadGenerationConstants constants, RWS
 
 	return normal;
 }
+
+inline float3 GetHeightNormalFromBump(QuadGenerationConstants constants, RWStructuredBuffer<OutputStruct> buffer, int size, uint3 id)
+{
+	float left	 = buffer[(id.x + 0) + (id.y + 1) * size].noise * constants.lodLevel;
+	float right  = buffer[(id.x + 2) + (id.y + 1) * size].noise * constants.lodLevel;
+	float up	 = buffer[(id.x + 1) + (id.y + 0) * size].noise * constants.lodLevel;
+	float down   = buffer[(id.x + 1) + (id.y + 2) * size].noise * constants.lodLevel;
+	float curr	 = buffer[(id.x + 1) + (id.y + 1) * size].noise * constants.lodLevel;
+	
+	float3 s;
+
+	s  = normalize(float3(up - curr, curr - left, 1.0));
+	s += normalize(float3(curr - down, curr - left, 1.0));
+	s += normalize(float3(curr - down, right - curr, 1.0));
+	s += normalize(float3(up - curr, right - curr, 1.0));
+
+	s = normalize(s);
+
+	return s;
+}
 //-----------------------------------------------------------------------------
