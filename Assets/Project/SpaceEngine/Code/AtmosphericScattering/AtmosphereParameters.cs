@@ -43,8 +43,6 @@ public struct AtmosphereParameters
 
     public AtmosphereParameters(AtmosphereParameters from)
     {
-        //TODO: copy via reflection.
-
         this.MIE_G = from.MIE_G;
 
         this.HR = from.HR;
@@ -120,7 +118,7 @@ public struct AtmosphereParameters
     {
         switch (preset)
         {
-            case AtmosphereBase.Default: return Earth;
+            case AtmosphereBase.Default: return Default;
             case AtmosphereBase.Earth: return Earth;
             case AtmosphereBase.Venus: return Venus;
             case AtmosphereBase.Mars: return Mars;
@@ -128,11 +126,11 @@ public struct AtmosphereParameters
             case AtmosphereBase.Titan: return Titan;
             case AtmosphereBase.Neptune: return Neptune;
             case AtmosphereBase.Sun: return Sun;
-            default: { Debug.Log("Atmosphere: AtmosphereParameters.Get(...) fail!"); return Earth; }
+            default: { Debug.Log("Atmosphere: AtmosphereParameters.Get(...) fail!"); return Default; }
         }
     }
-    //TODO: Maybe methods? Propertyed pressets... fuuuucking shit.
-    public static AtmosphereParameters Earth
+
+    public static AtmosphereParameters Default
     {
         get
         {
@@ -142,6 +140,25 @@ public struct AtmosphereParameters
                                                                new Vector4(0.0040f, 0.0040f, 0.0040f, 0.0f),
                                                                6360.0f, 6420.0f, 6421.0f,
                                                                6360.0f, 6420.0f, 6421.0f,
+                                                               6360.0f,
+                                                               256, 64, 64, 16, 32, 128, 32, 8);
+
+            return ap;
+        }
+
+        private set { }
+    }
+
+    public static AtmosphereParameters Earth
+    {
+        get
+        {
+            AtmosphereParameters ap = new AtmosphereParameters(0.85f, 8.0f, 1.0f, 0.1f,
+                                                               new Vector4(0.0128f, 0.0305f, 0.0731f, 0.0f),
+                                                               new Vector4(0.0040f, 0.0040f, 0.0040f, 0.0f),
+                                                               new Vector4(0.0040f, 0.0040f, 0.0040f, 0.0f),
+                                                               6000.0f, 6056.6f, 6057.5f,
+                                                               6000.0f, 6056.6f, 6057.5f,
                                                                6360.0f,
                                                                256, 64, 64, 16, 32, 128, 32, 8);
 

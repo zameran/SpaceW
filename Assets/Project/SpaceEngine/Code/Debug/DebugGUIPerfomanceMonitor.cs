@@ -30,6 +30,8 @@
  */
 #endregion
 
+using System.Collections.Generic;
+
 using UnityEngine;
 
 using ZFramework.Unity.Common.PerfomanceMonitor;
@@ -50,7 +52,7 @@ public sealed class DebugGUIPerfomanceMonitor : DebugGUI
     {
         base.OnGUI();
 
-        using (new Timer("DebugGUIPerfomanceMonitor.OnGUI"))
+        using (new Timer("Repfomance Monitor OnGUI"))
         {
             GUI.Window(0, debugInfoBounds, UI, "Perfomance Monitor (in milliseconds)");
         }
@@ -58,42 +60,45 @@ public sealed class DebugGUIPerfomanceMonitor : DebugGUI
 
     private void UI(int id)
     {
-        const int ColumnZero = 10;
-        const int ColumnOne = ColumnZero + 230;
-        const int ColumnTwo = ColumnOne + 100;
-        const int ColumnThree = ColumnTwo + 80;
-        const int ColumnFour = ColumnThree + 60;
-        const int ColumnFive = ColumnFour + 60;
-        const int ColumnSix = ColumnFive + 80;
-
-        //Collect our counters...
         var counters = PerformanceMonitor.Counters;
 
         debugInfoBounds.width = Screen.width - 20;
-        debugInfoBounds.height = Mathf.Max(counters.Count * 20 + 5 + 60, 205);
 
-        //Draw ui..
-        //GUI.Box(new Rect(0, 0, Screen.width - 0, Mathf.Max(counters.Count * 20 + 5 + 60, 205)), "");
-        //GUI.Label(new Rect(Screen.width / 2 - 125, 0, 500, 30), string.Format("<b>Performance Monitor</b> (in milliseconds)"));
-        GUI.Label(new Rect(ColumnZero, 30, ColumnOne - ColumnZero, 30), string.Format("Name"), boldLabel);
-        GUI.Label(new Rect(ColumnOne, 30, ColumnTwo - ColumnOne, 30), string.Format("Total"), boldLabel);
-        GUI.Label(new Rect(ColumnTwo, 30, ColumnThree - ColumnTwo, 30), string.Format("Average"), boldLabel);
-        GUI.Label(new Rect(ColumnThree, 30, ColumnFour - ColumnThree, 30), string.Format("Last"), boldLabel);
-        GUI.Label(new Rect(ColumnFour, 30, ColumnFive - ColumnFour, 30), string.Format("Max"), boldLabel);
-        GUI.Label(new Rect(ColumnFive, 30, ColumnSix - ColumnFive, 30), string.Format("Count"), boldLabel);
-
-        var y = 60;
-
-        foreach (var counter in counters)
+        scrollPosition = GUILayout.BeginScrollView(scrollPosition, false, true);
         {
-            GUI.Label(new Rect(ColumnZero, y, ColumnOne - ColumnZero, 30), counter.Name);
-            GUI.Label(new Rect(ColumnOne, y, ColumnTwo - ColumnOne, 30), string.Format("{0}", counter.Time / 1000.0f));
-            GUI.Label(new Rect(ColumnTwo, y, ColumnThree - ColumnTwo, 30), string.Format("{0:0.00}", counter.Average / 1000.0f));
-            GUI.Label(new Rect(ColumnThree, y, ColumnFour - ColumnThree, 30), string.Format("{0:0.0}", counter.Last / 1000.0f));
-            GUI.Label(new Rect(ColumnFour, y, ColumnFive - ColumnFour, 30), string.Format("{0:0.0}", counter.Max / 1000.0f));
-            GUI.Label(new Rect(ColumnFive, y, ColumnSix - ColumnFive, 30), string.Format("{0}", counter.Count));
+            GUILayout.BeginVertical();
 
-            y += 20;
+            for (int i = 0; i < counters.Count; i++)
+            {
+                var counter = counters[i];
+
+                GUILayout.BeginVertical(string.Format("{0}", counter.Name), skin.box, GUILayout.Width(debugInfoBounds.width - 40));
+                {
+                    GUILayout.Space(20);
+
+                    if (true)
+                    {
+                        GUILayout.BeginVertical("", skin.box, GUILayout.Width(debugInfoBounds.width - 45));
+                        {
+                            GUILayout.BeginHorizontal();
+                            GUILayoutExtensions.LabelWithSpace(string.Format("Total: {0}", counter.Time / 1000.0f), -8);
+                            GUILayoutExtensions.LabelWithSpace(string.Format("Average: {0}", counter.Average / 1000.0f), -8);
+                            GUILayoutExtensions.LabelWithSpace(string.Format("Last: {0}", counter.Last / 1000.0f), -8);
+                            GUILayoutExtensions.LabelWithSpace(string.Format("Max: {0}", counter.Max / 1000.0f), -8);
+                            GUILayoutExtensions.LabelWithSpace(string.Format("Count: {0}", counter.Count), -8);
+                            GUILayout.EndHorizontal();
+                        }
+                        GUILayout.EndVertical();
+                    }
+                }
+                GUILayout.EndVertical();
+            }
+
+            GUILayout.Space(10);
+
+            GUILayout.EndVertical();
         }
+
+        GUILayout.EndScrollView();
     }
 }

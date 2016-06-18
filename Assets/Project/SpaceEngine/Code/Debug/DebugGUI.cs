@@ -42,6 +42,24 @@ public abstract class DebugGUI : MonoBehaviour, IDebug
     [HideInInspector]
     public GUIStyle boldLabel;
 
+    [HideInInspector]
+    public Vector2 scrollPosition = Vector2.zero;
+
+    public GUISkin skin
+    {
+        get
+        {
+            var switcher = GetComponent<DebugGUISwitcher>();
+
+            if (switcher != null)
+                if (switcher.skin != null)
+                    return switcher.skin;
+
+            return GUI.skin;
+        }
+        private set { }
+    }
+
     protected virtual void Awake()
     {
         if (switcher == null)
@@ -55,10 +73,7 @@ public abstract class DebugGUI : MonoBehaviour, IDebug
 
     protected virtual void OnGUI()
     {
-        if (switcher != null)
-            if (switcher.skin != null)
-                GUI.skin = switcher.skin;
-
+        GUI.skin = skin;
         GUI.depth = -100;
 
         if (switcher != null)

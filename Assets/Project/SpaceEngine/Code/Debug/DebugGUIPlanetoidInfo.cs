@@ -65,8 +65,10 @@ public sealed class DebugGUIPlanetoidInfo : DebugGUI
 
     private void UI(int id)
     {
+        scrollPosition = GUILayout.BeginScrollView(scrollPosition, false, true);
+
         if (Planetoid != null)
-        {
+        {           
             int quadsCount = Planetoid.Quads.Count;
             int quadsCulledCount = Planetoid.GetCulledQuadsCount();
             int vertsRendered = (quadsCount - quadsCulledCount) * QuadSettings.nVerts;
@@ -139,5 +141,7 @@ public sealed class DebugGUIPlanetoidInfo : DebugGUI
 
             GUILayout.EndVertical();
         }
+
+        GUILayout.EndScrollView();
     }
 }

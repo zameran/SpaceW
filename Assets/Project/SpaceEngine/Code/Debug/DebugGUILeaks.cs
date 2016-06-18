@@ -36,8 +36,6 @@ using UnityEngine;
 
 public sealed class DebugGUILeaks : DebugGUI
 {
-    private Vector2 ScrollPosition;
-
     protected override void Awake()
     {
         base.Awake();
@@ -57,7 +55,7 @@ public sealed class DebugGUILeaks : DebugGUI
 
     private void UI(int id)
     {
-        ScrollPosition = GUILayout.BeginScrollView(ScrollPosition, false, true, GUILayout.Width(debugInfoBounds.width), GUILayout.Height(debugInfoBounds.height));
+        scrollPosition = GUILayout.BeginScrollView(scrollPosition, false, true, GUILayout.Width(debugInfoBounds.width), GUILayout.Height(debugInfoBounds.height));
         {
             Object[] objects = FindObjectsOfType(typeof(Object));
 
