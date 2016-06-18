@@ -441,9 +441,9 @@ public sealed class Atmosphere : MonoBehaviour
         }
         else
         {
-            Transmittance = RTExtensions.CreateRTexture(new Vector2(atmosphereParameters.TRANSMITTANCE_W, atmosphereParameters.TRANSMITTANCE_H), 0, RenderTextureFormat.ARGBHalf, FilterMode.Bilinear, TextureWrapMode.Clamp);
-            Irradiance = RTExtensions.CreateRTexture(new Vector2(atmosphereParameters.SKY_W, atmosphereParameters.SKY_H), 0, RenderTextureFormat.ARGBHalf, FilterMode.Bilinear, TextureWrapMode.Clamp);
-            Inscatter = RTExtensions.CreateRTexture(new Vector2(atmosphereParameters.RES_MU_S * atmosphereParameters.RES_NU, atmosphereParameters.RES_MU), 0, RenderTextureFormat.ARGBHalf, FilterMode.Bilinear, TextureWrapMode.Clamp, atmosphereParameters.RES_R);
+            Transmittance = RTExtensions.CreateRTexture(new Vector2(AtmosphereConstants.TRANSMITTANCE_W, AtmosphereConstants.TRANSMITTANCE_H), 0, RenderTextureFormat.ARGBHalf, FilterMode.Bilinear, TextureWrapMode.Clamp);
+            Irradiance = RTExtensions.CreateRTexture(new Vector2(AtmosphereConstants.SKY_W, AtmosphereConstants.SKY_H), 0, RenderTextureFormat.ARGBHalf, FilterMode.Bilinear, TextureWrapMode.Clamp);
+            Inscatter = RTExtensions.CreateRTexture(new Vector2(AtmosphereConstants.RES_MU_S * AtmosphereConstants.RES_NU, AtmosphereConstants.RES_MU), 0, RenderTextureFormat.ARGBHalf, FilterMode.Bilinear, TextureWrapMode.Clamp, AtmosphereConstants.RES_R);
 
             string texturesPath = "/Resources/Textures/Atmosphere/";
 
@@ -453,15 +453,15 @@ public sealed class Atmosphere : MonoBehaviour
             string IrradiancePath = Application.dataPath + texturesPath + "/irradiance.raw";
             string InscatterPath = Application.dataPath + texturesPath + "/inscatter.raw";
 
-            buffer = new ComputeBuffer(atmosphereParameters.TRANSMITTANCE_W * atmosphereParameters.TRANSMITTANCE_H, sizeof(float) * 3);
+            buffer = new ComputeBuffer(AtmosphereConstants.TRANSMITTANCE_W * AtmosphereConstants.TRANSMITTANCE_H, sizeof(float) * 3);
             CBUtility.WriteIntoRenderTexture(Transmittance, 3, TransmittancePath, buffer, WriteDataCore);
             buffer.Release();
 
-            buffer = new ComputeBuffer(atmosphereParameters.SKY_W * atmosphereParameters.SKY_H, sizeof(float) * 3);
+            buffer = new ComputeBuffer(AtmosphereConstants.SKY_W * AtmosphereConstants.SKY_H, sizeof(float) * 3);
             CBUtility.WriteIntoRenderTexture(Irradiance, 3, IrradiancePath, buffer, WriteDataCore);
             buffer.Release();
 
-            buffer = new ComputeBuffer(atmosphereParameters.RES_MU_S * atmosphereParameters.RES_NU * atmosphereParameters.RES_MU * atmosphereParameters.RES_R, sizeof(float) * 4);
+            buffer = new ComputeBuffer(AtmosphereConstants.RES_MU_S * AtmosphereConstants.RES_NU * AtmosphereConstants.RES_MU * AtmosphereConstants.RES_R, sizeof(float) * 4);
             CBUtility.WriteIntoRenderTexture(Inscatter, 4, InscatterPath, buffer, WriteDataCore);
             buffer.Release();
         }
@@ -514,14 +514,14 @@ public sealed class Atmosphere : MonoBehaviour
             block.SetFloat("Rt", atmosphereParameters.Rt);
             block.SetFloat("RL", atmosphereParameters.Rl);
 
-            block.SetFloat("TRANSMITTANCE_W", atmosphereParameters.TRANSMITTANCE_W);
-            block.SetFloat("TRANSMITTANCE_H", atmosphereParameters.TRANSMITTANCE_H);
-            block.SetFloat("SKY_W", atmosphereParameters.SKY_W);
-            block.SetFloat("SKY_H", atmosphereParameters.SKY_H);
-            block.SetFloat("RES_R", atmosphereParameters.RES_R);
-            block.SetFloat("RES_MU", atmosphereParameters.RES_MU);
-            block.SetFloat("RES_MU_S", atmosphereParameters.RES_MU_S);
-            block.SetFloat("RES_NU", atmosphereParameters.RES_NU);
+            block.SetFloat("TRANSMITTANCE_W", AtmosphereConstants.TRANSMITTANCE_W);
+            block.SetFloat("TRANSMITTANCE_H", AtmosphereConstants.TRANSMITTANCE_H);
+            block.SetFloat("SKY_W", AtmosphereConstants.SKY_W);
+            block.SetFloat("SKY_H", AtmosphereConstants.SKY_H);
+            block.SetFloat("RES_R", AtmosphereConstants.RES_R);
+            block.SetFloat("RES_MU", AtmosphereConstants.RES_MU);
+            block.SetFloat("RES_MU_S", AtmosphereConstants.RES_MU_S);
+            block.SetFloat("RES_NU", AtmosphereConstants.RES_NU);
             block.SetFloat("AVERAGE_GROUND_REFLECTANCE", atmosphereParameters.AVERAGE_GROUND_REFLECTANCE);
             block.SetFloat("HR", atmosphereParameters.HR * 1000.0f);
             block.SetFloat("HM", atmosphereParameters.HM * 1000.0f);

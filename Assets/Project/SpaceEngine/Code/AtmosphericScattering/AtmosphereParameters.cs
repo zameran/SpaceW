@@ -31,16 +31,6 @@ public struct AtmosphereParameters
 
     public float SCALE;
 
-    //Dimensions of the tables
-    public int TRANSMITTANCE_W;
-    public int TRANSMITTANCE_H;
-    public int SKY_W;
-    public int SKY_H;
-    public int RES_R;
-    public int RES_MU;
-    public int RES_MU_S;
-    public int RES_NU;
-
     public AtmosphereParameters(AtmosphereParameters from)
     {
         this.MIE_G = from.MIE_G;
@@ -63,15 +53,6 @@ public struct AtmosphereParameters
         this.bRl = from.bRl;
 
         this.SCALE = from.SCALE;
-
-        this.TRANSMITTANCE_W = from.TRANSMITTANCE_W;
-        this.TRANSMITTANCE_H = from.TRANSMITTANCE_H;
-        this.SKY_W = from.SKY_W;
-        this.SKY_H = from.SKY_H;
-        this.RES_R = from.RES_R;
-        this.RES_MU = from.RES_MU;
-        this.RES_MU_S = from.RES_MU_S;
-        this.RES_NU = from.RES_NU;
     }
 
     public AtmosphereParameters(float MIE_G, float HR, float HM, float AVERAGE_GROUND_REFLECTANCE,
@@ -80,8 +61,7 @@ public struct AtmosphereParameters
                                 Vector4 BETA_MEx,
                                 float Rg, float Rt, float Rl,
                                 float bRg, float bRt, float bRl,
-                                float SCALE,
-                                int TRANSMITTANCE_W, int TRANSMITTANCE_H, int SKY_W, int SKY_H, int RES_R, int RES_MU, int RES_MU_S, int RES_NU)
+                                float SCALE)
     {
         this.MIE_G = MIE_G;
 
@@ -103,15 +83,6 @@ public struct AtmosphereParameters
         this.bRl = bRl;
 
         this.SCALE = SCALE;
-
-        this.TRANSMITTANCE_W = TRANSMITTANCE_W;
-        this.TRANSMITTANCE_H = TRANSMITTANCE_H;
-        this.SKY_W = SKY_W;
-        this.SKY_H = SKY_H;
-        this.RES_R = RES_R;
-        this.RES_MU = RES_MU;
-        this.RES_MU_S = RES_MU_S;
-        this.RES_NU = RES_NU;
     }
 
     public static AtmosphereParameters Get(AtmosphereBase preset)
@@ -140,8 +111,7 @@ public struct AtmosphereParameters
                                                                new Vector4(0.0040f, 0.0040f, 0.0040f, 0.0f),
                                                                6360.0f, 6420.0f, 6421.0f,
                                                                6360.0f, 6420.0f, 6421.0f,
-                                                               6360.0f,
-                                                               256, 64, 64, 16, 32, 128, 32, 8);
+                                                               6360.0f);
 
             return ap;
         }
@@ -159,8 +129,7 @@ public struct AtmosphereParameters
                                                                new Vector4(0.0040f, 0.0040f, 0.0040f, 0.0f),
                                                                6000.0f, 6056.6f, 6057.5f,
                                                                6000.0f, 6056.6f, 6057.5f,
-                                                               6360.0f,
-                                                               256, 64, 64, 16, 32, 128, 32, 8);
+                                                               6360.0f);
 
             return ap;
         }
@@ -178,8 +147,7 @@ public struct AtmosphereParameters
                                                                new Vector4(0.005f, 0.004f, 0.002f, 0.0f),
                                                                6052.0f, 6132.0f, 6133.0f,
                                                                6052.0f, 6132.0f, 6133.0f,
-                                                               6052.0f,
-                                                               256, 64, 64, 16, 32, 128, 32, 8);
+                                                               6052.0f);
 
             return ap;
         }
@@ -197,8 +165,7 @@ public struct AtmosphereParameters
                                                                new Vector4(0.0040f, 0.0040f, 0.0040f, 0.0f),
                                                                3387.792f, 3487.792f, 3488.792f,
                                                                3387.792f, 3487.792f, 3488.792f,
-                                                               3387.792f,
-                                                               256, 64, 64, 16, 32, 128, 32, 8);
+                                                               3387.792f);
 
             return ap;
         }
@@ -216,8 +183,7 @@ public struct AtmosphereParameters
                                                                new Vector4(0.0040f, 0.0040f, 0.0040f, 0.0f),
                                                                7149.2f, 7209.2f, 7210.2f,
                                                                7149.2f, 7209.2f, 7210.2f,
-                                                               7149.2f,
-                                                               256, 64, 64, 16, 32, 128, 32, 8);
+                                                               7149.2f);
 
             return ap;
         }
@@ -235,8 +201,7 @@ public struct AtmosphereParameters
                                                                new Vector4(0.0010f, 0.0100f, 0.0600f, 0.0f),
                                                                2574.91f, 2634.91f, 2635.91f,
                                                                2574.91f, 2634.91f, 2635.91f,
-                                                               2574.91f,
-                                                               256, 64, 64, 16, 32, 128, 32, 8);
+                                                               2574.91f);
 
             return ap;
         }
@@ -254,8 +219,7 @@ public struct AtmosphereParameters
                                                                new Vector4(0.00058f, 0.00027f, 0.005f, 0.0f),
                                                                6371.0f, 6431.0f, 6432.0f,
                                                                6371.0f, 6431.0f, 6432.0f,
-                                                               6371.0f,
-                                                               256, 64, 64, 16, 32, 128, 32, 8);
+                                                               6371.0f);
 
             return ap;
         }
@@ -273,8 +237,7 @@ public struct AtmosphereParameters
                                                                new Vector4(0.004f, 0.004f, 0.004f, 0.0f),
                                                                3387.792f, 3487.792f, 3488.792f,
                                                                3387.792f, 3487.792f, 3488.792f,
-                                                               3387.792f,
-                                                               256, 64, 64, 16, 32, 128, 32, 8);
+                                                               3387.792f);
 
             return ap;
         }
