@@ -436,8 +436,7 @@ public sealed class Atmosphere : MonoBehaviour
     {
         if (SkyMaterial == null)
         {
-            SkyMaterial = new Material(SkyShader);
-            SkyMaterial.name = "Sky" + "(Instance)" + UnityEngine.Random.Range(float.MinValue, float.MaxValue);
+            SkyMaterial = MaterialHelper.CreateTemp(SkyShader, "Sky");
         }
     }
 
