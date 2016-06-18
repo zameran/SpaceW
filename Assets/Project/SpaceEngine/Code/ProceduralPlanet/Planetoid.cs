@@ -540,8 +540,7 @@ public sealed class Planetoid : Planet, IPlanet
         Mesh mesh = GetMesh(quadPosition);
         mesh.bounds = new Bounds(Vector3.zero, new Vector3(PlanetRadius * 2, PlanetRadius * 2, PlanetRadius * 2));
 
-        Material material = new Material(ColorShader);
-        material.name += "_" + quadPosition.ToString() + "(Instance)" + "_" + UnityEngine.Random.Range(float.MinValue, float.MaxValue);
+        Material material = MaterialHelper.CreateTemp(ColorShader, "Quad");
 
         Quad quadComponent = go.AddComponent<Quad>();
         quadComponent.CoreShader = CoreShader;
@@ -579,8 +578,7 @@ public sealed class Planetoid : Planet, IPlanet
         Mesh mesh = GetMesh(quadPosition);
         mesh.bounds = new Bounds(Vector3.zero, new Vector3(PlanetRadius * 2, PlanetRadius * 2, PlanetRadius * 2));
 
-        Material material = new Material(ColorShader);
-        material.name += "_" + quadPosition.ToString() + "(Instance)" + "_" + UnityEngine.Random.Range(float.MinValue, float.MaxValue);
+        Material material = MaterialHelper.CreateTemp(ColorShader, "Quad");
 
         Quad quadComponent = go.AddComponent<Quad>();
         quadComponent.CoreShader = CoreShader;

@@ -52,8 +52,7 @@ public sealed class SunGlare : MonoBehaviour
             if (GetComponent<AtmosphereSun>() != null)
                 Sun = GetComponent<AtmosphereSun>();
 
-        sunGlareMaterial = new Material(sunGlareShader);
-        sunGlareMaterial.renderQueue = RenderQueue;
+        sunGlareMaterial = MaterialHelper.CreateTemp(sunGlareShader, "Sunglare", RenderQueue);
 
         screenMesh = MeshFactory.MakePlane(8, 8, MeshFactory.PLANE.XY, false, false, false);
         screenMesh.bounds = new Bounds(Vector4.zero, new Vector3(9e37f, 9e37f, 9e37f));
