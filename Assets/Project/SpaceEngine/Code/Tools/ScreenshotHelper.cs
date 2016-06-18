@@ -8,12 +8,6 @@ using System.Collections;
 [RequireComponent(typeof(Camera))]
 public class ScreenshotHelper : MonoBehaviour
 {
-    public enum ScreenshotFormat
-    {
-        PNG,
-        JPG
-    }
-
     [Range(1, 8)]
     public int SuperSize = 3;
 
