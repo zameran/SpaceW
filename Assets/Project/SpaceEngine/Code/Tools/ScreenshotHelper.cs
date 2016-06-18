@@ -8,14 +8,26 @@ using System.Collections;
 [RequireComponent(typeof(Camera))]
 public class ScreenshotHelper : MonoBehaviour
 {
+    public enum ScreenshotFormat
+    {
+        PNG,
+        JPG
+    }
+
     [Range(1, 8)]
     public int SuperSize = 3;
 
     public bool IncludeAlpha = true;
 
     public KeyCode Key = KeyCode.F12;
+    public ScreenshotFormat Format = ScreenshotFormat.PNG;
 
     private bool keyPressed = false;
+
+    private void Start()
+    {
+
+    }
 
     private void Update()
     {
@@ -77,6 +89,26 @@ public class ScreenshotHelper : MonoBehaviour
         return screenShot;
     }
 
+    private void SaveScreenshot(Texture2D ScreenShotTexture, string name = "Screenshot")
+    {
+        if (ScreenShotTexture != null)
+        {
+            string file = string.Format("{0}/{1}_{2}", Application.dataPath, name, DateTime.Now.ToString("yy.MM.dd-hh.mm.ss"));
+
+            switch (Format)
+            {
+                case ScreenshotFormat.JPG:
+                    File.WriteAllBytes(file + ".jpg", ScreenShotTexture.EncodeToJPG(100));
+                    break;
+                case ScreenshotFormat.PNG:
+                    File.WriteAllBytes(file + ".png", ScreenShotTexture.EncodeToPNG());
+                    break;
+            }
+        }
+        else
+            Debug.Log("ScreenshotHelper.WaitOneScreenShot : ScreenShotTexture is null!");
+    }
+
     private void OnRenderImage(RenderTexture src, RenderTexture dest)
     {
         if (keyPressed)
@@ -85,10 +117,7 @@ public class ScreenshotHelper : MonoBehaviour
             {
                 Texture2D ScreenShotTexture = TakeScreenShot(src, SuperSize, IncludeAlpha);
 
-                if (ScreenShotTexture != null)
-                    File.WriteAllBytes(Application.dataPath + "/ScreenShot_" + DateTime.Now.ToString("yy.MM.dd-hh.mm.ss") + ".png", ScreenShotTexture.EncodeToPNG());
-                else
-                    Debug.Log("ScreenshotHelper.WaitOneScreenShot : ScreenShotTexture is null!");
+                SaveScreenshot(ScreenShotTexture);
 
                 Destroy(ScreenShotTexture);
 
