@@ -99,6 +99,7 @@ uniform float3 _Globals_Origin;
 // ----------------------------------------------------------------------------
 // PHYSICAL MODEL PARAMETERS
 // ----------------------------------------------------------------------------
+uniform float fade;
 uniform float density;
 uniform float scale;
 uniform float Rg;

@@ -230,7 +230,7 @@ Shader "SpaceEngine/Atmosphere/Atmosphere"
 
 					float3 finalColor = sunColor * extinction + inscatter;
 
-					return float4(hdr(finalColor), 1);
+					return float4(hdr(finalColor) * fade, 1);
 				#endif
 
 				#ifdef LIGHT_2
@@ -263,7 +263,7 @@ Shader "SpaceEngine/Atmosphere/Atmosphere"
 
 					float3 finalColor = sunColor * extinction + inscatter;
 
-					return float4(hdr(finalColor), 1);
+					return float4(hdr(finalColor) * fade, 1);
 				#endif
 
 				#ifdef LIGHT_3
@@ -303,7 +303,7 @@ Shader "SpaceEngine/Atmosphere/Atmosphere"
 
 					float3 finalColor = sunColor * extinction + inscatter;
 
-					return float4(hdr(finalColor), 1);
+					return float4(hdr(finalColor) * fade, 1);
 				#endif
 
 				#ifdef LIGHT_4
@@ -350,7 +350,7 @@ Shader "SpaceEngine/Atmosphere/Atmosphere"
 
 					float3 finalColor = sunColor * extinction + inscatter;
 
-					return float4(hdr(finalColor), 1);
+					return float4(hdr(finalColor) * fade, 1);
 				#endif
 
 				return float4(0, 0, 0, 0);

@@ -23,6 +23,10 @@ public sealed class Atmosphere : MonoBehaviour
         }
     }
 
+    public AnimationCurve FadeCurve = new AnimationCurve(new Keyframe[] { new Keyframe(0.0f, 0.0f),
+                                                                          new Keyframe(0.25f, 1.0f),
+                                                                          new Keyframe(1.0f, 1.0f) });
+
     public delegate void AtmosphereDelegate(Atmosphere a);
     public event AtmosphereDelegate OnPresetChanged, OnBaked;
 
@@ -36,6 +40,7 @@ public sealed class Atmosphere : MonoBehaviour
     public float Radius = 2048f;
     public float Height = 100.0f;
     public float Scale = 1.0f;
+    public float Fade = 1.0f;
 
     public int AtmosphereMeshResolution = 2;
 
@@ -359,6 +364,9 @@ public sealed class Atmosphere : MonoBehaviour
         screenToCamera = CameraHelper.Main().GetScreenToCamera();
         worldCameraPos = CameraHelper.Main().transform.position;
 
+        //NOTE : Wip
+        Fade = FadeCurve.Evaluate(Mathf.Clamp01(VectorHelper.AngularRadius(Origin, planetoid.LODTarget.position, planetoid.PlanetRadius)));
+
         Keywords = GetKeywords();
     }
 
@@ -637,6 +645,7 @@ public sealed class Atmosphere : MonoBehaviour
             SetEclipses(block);
             SetShine(block);
 
+            block.SetFloat("fade", Fade);
             block.SetFloat("density", Density);
             block.SetFloat("scale", atmosphereParameters.SCALE);
             block.SetFloat("Rg", atmosphereParameters.Rg);
