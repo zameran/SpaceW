@@ -60,9 +60,11 @@ public abstract class Planet : MonoBehaviour
     public bool Working = false;
     public bool UseLOD = true;
 
-    public Vector3 Origin = Vector3.zero;
-    public Vector3 OriginRotation = Vector3.zero;
-    public Vector3 OriginScale = Vector3.one;
+    public Transform OriginTransform { get { return transform; } private set { } }
+
+    public Vector3 Origin { get { return OriginTransform.position; } private set { } }
+    public Vector3 OriginRotation { get { if (QuadsRoot != null) return QuadsRoot.transform.rotation.eulerAngles; else return OriginTransform.rotation.eulerAngles; } private set { } }
+    public Vector3 OriginScale { get { return OriginTransform.localScale; } private set { } }
 
     public Matrix4x4 PlanetoidTRS = Matrix4x4.identity;
 
@@ -105,10 +107,6 @@ public abstract class Planet : MonoBehaviour
 
     protected virtual void Awake()
     {
-        Origin = transform.position;
-        OriginRotation = QuadsRoot.transform.rotation.eulerAngles;
-        OriginScale = transform.localScale;
-
         PlanetoidTRS = Matrix4x4.TRS(Origin, Quaternion.Euler(OriginRotation), OriginScale);
 
         PlanetBouds = new Bounds(Origin, Vector3.one * (PlanetRadius + TerrainMaxHeight) * 2);
@@ -127,10 +125,6 @@ public abstract class Planet : MonoBehaviour
 
     protected virtual void Update()
     {
-        Origin = transform.position;
-        OriginRotation = QuadsRoot.transform.rotation.eulerAngles;
-        OriginScale = transform.localScale;
-
         PlanetoidTRS = Matrix4x4.TRS(Origin, Quaternion.Euler(OriginRotation), OriginScale);
     }
 
