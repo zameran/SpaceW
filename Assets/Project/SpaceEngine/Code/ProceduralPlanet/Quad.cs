@@ -288,6 +288,13 @@ public sealed class Quad : MonoBehaviour, IQuad
             Gizmos.DrawWireSphere(Planetoid.transform.TransformPoint(quadCorners.topRightCorner), 1500);
             Gizmos.DrawWireSphere(Planetoid.transform.TransformPoint(quadCorners.bottomLeftCorner), 1500);
             Gizmos.DrawWireSphere(Planetoid.transform.TransformPoint(quadCorners.bottomRightCorner), 1500);
+
+            if (QuadAABB != null)
+            {
+                Gizmos.color = XKCDColors.Adobe;
+
+                Gizmos.DrawWireCube(QuadAABB.Bounds.center, QuadAABB.Bounds.size);
+            }
         }
     }
 
@@ -356,6 +363,29 @@ public sealed class Quad : MonoBehaviour, IQuad
         }
     }
 
+    private Bounds GetBoundFromPoints(Vector3[] points)
+    {
+        var center = points.Aggregate(Vector3.zero, (current, t) => current + t) / 8;
+
+        var min = new Vector3(float.MaxValue, float.MaxValue, float.MaxValue);
+        var max = new Vector3(float.MinValue, float.MinValue, float.MinValue);
+
+        foreach (var p in points)
+        {
+            if (p.x < min.x) min.x = p.x;
+            if (p.y < min.y) min.y = p.y;
+            if (p.z < min.z) min.z = p.z;
+
+            if (p.x > max.x) max.x = p.x;
+            if (p.y > max.y) max.y = p.y;
+            if (p.z > max.z) max.z = p.z;
+        }
+
+        var size = max - min;
+
+        return new Bounds(center, size);
+    }
+
     public void Render(int drawLayer = 8)
     {
         if (ReadyForDispatch)
@@ -366,7 +396,11 @@ public sealed class Quad : MonoBehaviour, IQuad
             }
         }
 
-        if (QuadAABB == null) QuadAABB = new QuadAABB(GetVolumeBox(Planetoid.TerrainMaxHeight, 0, true), false);
+        if (QuadAABB == null)
+        {
+            QuadAABB = new QuadAABB(GetVolumeBox(Planetoid.TerrainMaxHeight, 0, true), false);
+            QuadAABB.Bounds = GetBoundFromPoints(GetVolumeBox(Planetoid.TerrainMaxHeight));
+        }
 
         SetupBounds(this, QuadMesh);
 
@@ -1055,13 +1089,11 @@ public sealed class Quad : MonoBehaviour, IQuad
     {
         if (Planetoid.CullingMethod == QuadCullingMethod.Unity)
         {
-            Bounds bounds = new Bounds();
+            //TODO : Well calculated, but not axis aligned.
+            if (QuadAABB != null)
+                return QuadAABB.Bounds;
 
-            Vector3 v = (quad.generationConstants.cubeFaceEastDirection + quad.generationConstants.cubeFaceNorthDirection) + quad.generationConstants.patchCubeCenter;
-
-            bounds.SetMinMax(v, -v);
-
-            return bounds;
+            return new Bounds(quad.generationConstants.patchCubeCenter, new Vector3(9e37f, 9e37f, 9e37f));
         }
         else
         {

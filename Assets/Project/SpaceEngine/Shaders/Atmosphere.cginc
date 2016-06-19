@@ -432,7 +432,7 @@ float OpticalDepth(float H, float r, float mu, float d)
 	float x = a01s.y > a01s.x ? exp(a01sq.x) : 0.0;
 	float2 y = a01s / (2.3193 * abs(a01) + sqrt(1.52 * a01sq + 4.0)) * float2(1.0, exp(-d / H * (d / (2.0 * r) + mu)));
 
-	return sqrt((6.2831 * H) * r) * exp((Rg - r) / H) * (x + dot(y, float2(1.0, -1.0)));
+	return sqrt((M_PI2 * H) * r) * exp((Rg - r) / H) * (x + dot(y, float2(1.0, -1.0)));
 }
 
 // transmittance(=transparency) of atmosphere for infinite ray (r,mu)
