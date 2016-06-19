@@ -61,6 +61,16 @@ public static class VectorHelper
         return new Vector3(Mathf.Abs(v.x), Mathf.Abs(v.y), Mathf.Abs(v.z));
     }
 
+    public static Vector3 RotatePointAroundPivot(this Vector3 point, Vector3 pivot, Vector3 angles)
+    {
+        Vector3 dir = point - pivot;
+
+        dir = Quaternion.Euler(angles) * dir;
+        point = dir + pivot;
+
+        return new Vector3(point.x, point.y, point.z);
+    }
+
     public static Vector3 NormalizeToRadius(this Vector3 v, float radius)
     {
         Vector3 normalized = new Vector3();
@@ -136,6 +146,11 @@ public static class VectorHelper
     public static Vector4 MakeFrom(Vector3 xyz, float w)
     {
         return new Vector4(xyz.x, xyz.y, xyz.z, w);
+    }
+
+    public static Vector3 MakeFrom(Vector3 xyz)
+    {
+        return new Vector3(xyz.x, xyz.y, xyz.z);
     }
 
     public static Vector3 Max(params Vector3[] vectors)
