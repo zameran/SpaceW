@@ -370,8 +370,10 @@ public sealed class Quad : MonoBehaviour, IQuad
         var min = new Vector3(float.MaxValue, float.MaxValue, float.MaxValue);
         var max = new Vector3(float.MinValue, float.MinValue, float.MinValue);
 
-        foreach (var p in points)
+        for (int i = 0; i < points.Length; i++)
         {
+            Vector3 p = points[i];
+
             if (p.x < min.x) min.x = p.x;
             if (p.y < min.y) min.y = p.y;
             if (p.z < min.z) min.z = p.z;
@@ -399,7 +401,7 @@ public sealed class Quad : MonoBehaviour, IQuad
         if (QuadAABB == null)
         {
             QuadAABB = new QuadAABB(GetVolumeBox(Planetoid.TerrainMaxHeight, 0, true), false);
-            QuadAABB.Bounds = GetBoundFromPoints(GetVolumeBox(Planetoid.TerrainMaxHeight));
+            QuadAABB.Bounds = GetBoundFromPoints(GetVolumeBox(0));
         }
 
         SetupBounds(this, QuadMesh);
@@ -1090,6 +1092,8 @@ public sealed class Quad : MonoBehaviour, IQuad
         if (Planetoid.CullingMethod == QuadCullingMethod.Unity)
         {
             //TODO : Well calculated, but not axis aligned.
+            //https://inovaestudios.blob.core.windows.net/forumsavatars/3255860d4f86c8c8a67cdb0b79e7e8889951cc54a65a.png
+
             if (QuadAABB != null)
                 return QuadAABB.Bounds;
 
