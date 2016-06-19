@@ -295,6 +295,10 @@ public sealed class Quad : MonoBehaviour, IQuad
 
                 Gizmos.DrawWireCube(QuadAABB.Bounds.center, QuadAABB.Bounds.size);
             }
+
+            Gizmos.color = XKCDColors.BabyBlue;
+
+            Gizmos.DrawRay(middleNormalized, middleNormalized);
         }
     }
 
