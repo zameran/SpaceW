@@ -26,8 +26,8 @@
 			uniform float4x4 _Sun_WorldToLocal_1;
 			uniform float3 _Sun_Position;
 
-			uniform float sunGlareScale;
-			uniform float sunGlareFade;
+			uniform float Scale;
+			uniform float Fade;
 			
 			uniform sampler2D sunSpikes;
 			uniform sampler2D sunFlare;
@@ -43,11 +43,11 @@
 			uniform float4x4 ghost3Settings;
 			
 			uniform float useAtmosphereColors;
-			uniform float eclipse;
+			uniform float Eclipse;
 		
 			uniform float3 sunViewPortPos;
 
-			uniform float aspectRatio;
+			uniform float AspectRatio;
 			
 			struct v2f 
 			{
@@ -116,36 +116,36 @@
 				float3 ghosts = 0;
 
 				sunColor += flareSettings.x * (tex2D(sunFlare, (IN.uv.xy - sunViewPortPos.xy) * 
-							float2(aspectRatio * flareSettings.y, 1.0) * flareSettings.z * sunGlareScale + 0.5).rgb);
+							float2(AspectRatio * flareSettings.y, 1.0) * flareSettings.z * Scale + 0.5).rgb);
 				sunColor += spikesSettings.x * (tex2D(sunSpikes, (IN.uv.xy - sunViewPortPos.xy) * 
-							float2(aspectRatio * spikesSettings.y, 1.0) * spikesSettings.z * sunGlareScale + 0.5).rgb); 
+							float2(AspectRatio * spikesSettings.y, 1.0) * spikesSettings.z * Scale + 0.5).rgb); 
 				
 				for (int i = 0; i < 4; ++i)
 				{			
 					ghosts += ghost1Settings[i].x * 
 							  (tex2D(sunGhost1, (IN.uv.xy - sunViewPortPos.xy + (toScreenCenter * ghost1Settings[i].w)) * 
-							  float2(aspectRatio * ghost1Settings[i].y, 1.0) * ghost1Settings[i].z + 0.5).rgb);
+							  float2(AspectRatio * ghost1Settings[i].y, 1.0) * ghost1Settings[i].z + 0.5).rgb);
 				}
 				
 				for (int j = 0; j < 4; ++j)
 				{
 					ghosts += ghost2Settings[j].x * 
 							  (tex2D(sunGhost2, (IN.uv.xy - sunViewPortPos.xy + (toScreenCenter * ghost2Settings[j].w)) * 
-							  float2(aspectRatio * ghost2Settings[j].y, 1.0) * ghost2Settings[j].z + 0.5).rgb);
+							  float2(AspectRatio * ghost2Settings[j].y, 1.0) * ghost2Settings[j].z + 0.5).rgb);
 				}
 
 				for (int k = 0; k < 4; ++k)
 				{
 					ghosts += ghost3Settings[k].x *
 							  (tex2D(sunGhost3, (IN.uv.xy - sunViewPortPos.xy + (toScreenCenter * ghost3Settings[k].w)) * 
-							  float2(aspectRatio * ghost3Settings[k].y, 1.0) * ghost3Settings[k].z + 0.5).rgb);
+							  float2(AspectRatio * ghost3Settings[k].y, 1.0) * ghost3Settings[k].z + 0.5).rgb);
 				}		
 
-				float3 extinction = 1;//Extinction(WCP, WCP - _Sun_Position);
+				float3 extinction = 1;//Extinction(WCP, WCP - _Sun_Positions_1[0]);
 				float3 inscatter = 1;
 
-				inscatter = InScattering(WCP, _Sun_Position, WSD, extinction, 1.0);
-				//inscatter = (length(inscatter) > 0) ? inscatter : 1;
+				(useAtmosphereColors > 0.0) ? inscatter = InScattering(WCP, _Sun_Positions_1[0], WSD, extinction, 0.0) : 1;
+				//inscatter = (length(inscatter) > 0) ? inscatter : 0;
 
 				ghosts = ghosts * smoothstep(0.0, 1.0, 1.0 - length(toScreenCenter));	
 
@@ -153,10 +153,10 @@
 				
 				outputColor += sunColor;
 				outputColor += ghosts;
-				outputColor *= sunGlareFade;
-				outputColor = (useAtmosphereColors > 0.0) ? outputColor * extinction : outputColor;
+				outputColor *= Fade;
+				outputColor = (useAtmosphereColors > 0.0) ? (outputColor * extinction) : outputColor;
 				//outputColor = OuterSunGlareRadiance(IN.relativeDir, outputColor);
-				//outputColor = (eclipse > 0.0) ? sunColor : outputColor;
+				//outputColor = (Eclipse > 0.0) ? sunColor : outputColor;
 
 				return float4(outputColor, 1.0);				
 			}			
