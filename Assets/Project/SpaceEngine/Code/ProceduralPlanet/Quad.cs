@@ -156,6 +156,7 @@ public sealed class Quad : MonoBehaviour, IQuad
     public OutputStruct[] outputStructData;
 
     public QuadAABB QuadAABB = null;
+    public Box3d QuadBox = null;
 
     public delegate void QuadDelegate(Quad q);
     public event QuadDelegate DispatchStarted, DispatchReady, GPUGetDataReady;
@@ -366,16 +367,18 @@ public sealed class Quad : MonoBehaviour, IQuad
         }
     }
 
-    private Bounds GetBoundFromPoints(Vector3[] points)
+    private Bounds GetBoundFromPoints(Vector3[] points, out Vector3 max, out Vector3 min)
     {
         var center = points.Aggregate(Vector3.zero, (current, t) => current + t) / 8;
 
-        var min = new Vector3(float.MaxValue, float.MaxValue, float.MaxValue);
-        var max = new Vector3(float.MinValue, float.MinValue, float.MinValue);
+        min = new Vector3(float.MaxValue, float.MaxValue, float.MaxValue);
+        max = new Vector3(float.MinValue, float.MinValue, float.MinValue);
 
         for (int i = 0; i < points.Length; i++)
         {
             Vector3 p = points[i];
+
+            p = RotationMatrix.MultiplyVector(p);
 
             if (p.x < min.x) min.x = p.x;
             if (p.y < min.y) min.y = p.y;
@@ -391,6 +394,38 @@ public sealed class Quad : MonoBehaviour, IQuad
         return new Bounds(center, size);
     }
 
+    private Box3d GetBoundFromPoints(Vector3[] points)
+    {
+        var min = new Vector3(float.MaxValue, float.MaxValue, float.MaxValue);
+        var max = new Vector3(float.MinValue, float.MinValue, float.MinValue);
+
+        Box3d box = new Box3d();
+
+        for (int i = 0; i < points.Length; i++)
+        {
+            Vector3 p = points[i];
+
+            p = RotationMatrix.MultiplyPoint(p);
+
+            if (p.x < min.x) min.x = p.x;
+            if (p.y < min.y) min.y = p.y;
+            if (p.z < min.z) min.z = p.z;
+
+            if (p.x > max.x) max.x = p.x;
+            if (p.y > max.y) max.y = p.y;
+            if (p.z > max.z) max.z = p.z;
+        }
+
+        box.xmax = max.x;
+        box.ymax = max.y;
+        box.zmax = max.z;
+        box.xmin = min.x;
+        box.ymin = min.y;
+        box.zmin = min.z;
+
+        return box;
+    }
+
     public void Render(int drawLayer = 8)
     {
         if (ReadyForDispatch)
@@ -403,8 +438,18 @@ public sealed class Quad : MonoBehaviour, IQuad
 
         if (QuadAABB == null)
         {
+            Vector3 min = Vector3.zero;
+            Vector3 max = Vector3.zero;
+
             QuadAABB = new QuadAABB(GetVolumeBox(Planetoid.TerrainMaxHeight, 0, true), false);
-            QuadAABB.Bounds = GetBoundFromPoints(GetVolumeBox(0));
+            QuadAABB.Bounds = GetBoundFromPoints(GetVolumeBox(Planetoid.TerrainMaxHeight, 0, false), out max, out min);
+            QuadAABB.Max = max;
+            QuadAABB.Min = min;
+        }
+
+        if(QuadBox == null)
+        {
+            QuadBox = GetBoundFromPoints(GetVolumeBox(0));
         }
 
         SetupBounds(this, QuadMesh);

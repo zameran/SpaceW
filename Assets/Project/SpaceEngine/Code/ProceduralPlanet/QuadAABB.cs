@@ -8,6 +8,9 @@ public class QuadAABB
 
     public Bounds Bounds { get; set; }
 
+    public Vector3 Min { get; set; }
+    public Vector3 Max { get; set; }
+
     public QuadAABB(Vector3[] AABB, bool forCulling)
     {
         this.AABB = new Vector3[AABB.Length];
