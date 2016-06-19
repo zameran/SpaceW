@@ -49,7 +49,7 @@ public sealed class QuadStorage : MonoBehaviour
 
         if (!ExistInTexturesCache(q))
         {
-            QuadTextureCache qtc = new QuadTextureCache(q.GetId(), this);
+            QuadTextureCache qtc = new QuadTextureCache(q.RegistryID, this);
             qtc.Init();
             qtc.TransferFrom(q);
 
@@ -63,7 +63,7 @@ public sealed class QuadStorage : MonoBehaviour
     {
         Working = true;
 
-        QuadTextureCache qtc = TexturesCache.Find(s => s.ID.Equals(q.GetId()));
+        QuadTextureCache qtc = TexturesCache.Find(s => s.ID.Equals(q.RegistryID));
         qtc.TransferTo(q);
 
         Working = false;
@@ -101,7 +101,7 @@ public sealed class QuadStorage : MonoBehaviour
 
     public bool ExistInTexturesCache(Quad q)
     {
-        return TexturesCache.Any(s => s.ID.Equals(q.GetId()));
+        return TexturesCache.Any(s => s.ID.Equals(q.RegistryID));
     }
 
     private void OnDestroy()

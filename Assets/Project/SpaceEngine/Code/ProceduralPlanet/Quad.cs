@@ -160,10 +160,9 @@ public sealed class Quad : MonoBehaviour, IQuad
     public delegate void QuadDelegate(Quad q);
     public event QuadDelegate DispatchStarted, DispatchReady, GPUGetDataReady;
 
-    public Id GetId()
-    {
-        return new Id(LODLevel, (int)ID, (int)Position);
-    }
+    public Id RegistryID { get { return new Id(LODLevel, (int)ID, (int)Position); } }
+
+    public Matrix4x4 RotationMatrix { get { return Matrix4x4.TRS(Vector3.zero, Quaternion.Euler((middleNormalized).normalized * Mathf.Deg2Rad), Vector3.one); } }
 
     private void QuadDispatchStarted(Quad q)
     {
