@@ -15,7 +15,7 @@
 			CGPROGRAM
 			#include "UnityCG.cginc"
 			#include "Atmosphere.cginc"
-			#include "Utility.cginc"
+			#include "HDR.cginc"
 
 			#pragma target 3.0
 			#pragma vertex vert

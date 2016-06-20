@@ -40,7 +40,7 @@
 			#include "UnityLightingCommon.cginc"
 			#include "Assets/Project/SpaceEngine/Shaders/Compute/Utils.cginc"
 			#include "Assets/Project/SpaceEngine/Shaders/TCCommon.cginc"
-			#include "Assets/Project/SpaceEngine/Shaders/Utility.cginc"
+			#include "Assets/Project/SpaceEngine/Shaders/HDR.cginc"
 			#include "Assets/Project/SpaceEngine/Shaders/Atmosphere.cginc"
 
 			struct appdata_full_compute 
@@ -95,7 +95,9 @@
 
 			inline float4 GroundFinalColorWithoutAtmosphere(float4 terrainColor, float3 p, float n, float3 WSD)
 			{
-				return terrainColor;
+				float cTheta = dot(n, -WSD);
+
+				return terrainColor * max(cTheta, 0);
 			}
 
 			inline float4 GroundFinalColorWithAtmosphere(float4 terrainColor, float3 p, float3 n, float3 WSD, float4 WSPR)
@@ -105,6 +107,8 @@
 				float3 extinction = 0;
 
 				float cTheta = dot(n, -WSD);
+				
+				p += _Globals_Origin;
 
 				SunRadianceAndSkyIrradiance(p, n, WSD, sunL, skyE);
 
@@ -114,7 +118,7 @@
 					eclipse *= EclipseShadow(p, WSD, WSPR.w);
 				#endif
 
-				float4 inscatter = InScattering(_Globals_WorldCameraPos, p, WSD, extinction, 1.0) * eclipse;
+				float4 inscatter = InScattering(_Globals_WorldCameraPos + _Globals_Origin, p, WSD, extinction, 1.0) * eclipse;
 
 				float3 groundColor = 1.5 * RGB2Reflectance(terrainColor).rgb * (sunL * max(cTheta, 0) + skyE) / M_PI;
 

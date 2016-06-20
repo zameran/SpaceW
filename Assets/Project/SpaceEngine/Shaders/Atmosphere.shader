@@ -87,7 +87,7 @@ Shader "SpaceEngine/Atmosphere/Atmosphere"
 
 			CGPROGRAM
 			#include "UnityCG.cginc"		
-			#include "Utility.cginc"
+			#include "HDR.cginc"
 			#include "Atmosphere.cginc"
 
 			#pragma multi_compile LIGHT_1 LIGHT_2 LIGHT_3 LIGHT_4
@@ -144,53 +144,32 @@ Shader "SpaceEngine/Atmosphere/Atmosphere"
 				v2f OUT;
 				OUT.dir = (mul(_Globals_CameraToWorld, float4((mul(_Globals_ScreenToCamera, v.vertex)).xyz, 0.0))).xyz;
 
-				#ifdef LIGHT_1 
-					float3x3 wtl_1 = _Sun_WorldToLocal_1; 
-				#endif
-
-				#ifdef LIGHT_2 
-					float3x3 wtl_1 = _Sun_WorldToLocal_1;
-					float3x3 wtl_2 = _Sun_WorldToLocal_2; 
-				#endif
-				
-				#ifdef LIGHT_3
-					float3x3 wtl_1 = _Sun_WorldToLocal_1;
-					float3x3 wtl_2 = _Sun_WorldToLocal_2; 
-					float3x3 wtl_3 = _Sun_WorldToLocal_3;
-				#endif
-
-				#ifdef LIGHT_4
-					float3x3 wtl_1 = _Sun_WorldToLocal_1;
-					float3x3 wtl_2 = _Sun_WorldToLocal_2; 
-					float3x3 wtl_3 = _Sun_WorldToLocal_3;
-					float3x3 wtl_4 = _Sun_WorldToLocal_4;
-				#endif
-
 				// apply this rotation to view dir to get relative viewdir
 				#ifdef LIGHT_1 
-					OUT.relativeDir_1 = mul(wtl_1, OUT.dir); 
+					OUT.relativeDir_1 = mul(_Sun_WorldToLocal_1, OUT.dir); 
 				#endif
 
 				#ifdef LIGHT_2 
-					OUT.relativeDir_1 = mul(wtl_1, OUT.dir); 
-					OUT.relativeDir_2 = mul(wtl_2, OUT.dir); 
+					OUT.relativeDir_1 = mul(_Sun_WorldToLocal_1, OUT.dir); 
+					OUT.relativeDir_2 = mul(_Sun_WorldToLocal_2, OUT.dir); 
 				#endif
 
 				#ifdef LIGHT_3
-					OUT.relativeDir_1 = mul(wtl_1, OUT.dir); 
-					OUT.relativeDir_2 = mul(wtl_2, OUT.dir); 
-					OUT.relativeDir_3 = mul(wtl_3, OUT.dir); 
+					OUT.relativeDir_1 = mul(_Sun_WorldToLocal_1, OUT.dir); 
+					OUT.relativeDir_2 = mul(_Sun_WorldToLocal_2, OUT.dir); 
+					OUT.relativeDir_3 = mul(_Sun_WorldToLocal_3, OUT.dir); 
 				#endif
 
 				#ifdef LIGHT_4
-					OUT.relativeDir_1 = mul(wtl_1, OUT.dir); 
-					OUT.relativeDir_2 = mul(wtl_2, OUT.dir); 
-					OUT.relativeDir_3 = mul(wtl_3, OUT.dir); 
-					OUT.relativeDir_4 = mul(wtl_4, OUT.dir); 
+					OUT.relativeDir_1 = mul(_Sun_WorldToLocal_1, OUT.dir); 
+					OUT.relativeDir_2 = mul(_Sun_WorldToLocal_2, OUT.dir); 
+					OUT.relativeDir_3 = mul(_Sun_WorldToLocal_3, OUT.dir); 
+					OUT.relativeDir_4 = mul(_Sun_WorldToLocal_4, OUT.dir); 
 				#endif
 	
 				OUT.pos = float4(v.vertex.xy, 1.0, 1.0);
 				OUT.uv = v.texcoord.xy;
+
 				return OUT;
 			}
 			
@@ -204,15 +183,15 @@ Shader "SpaceEngine/Atmosphere/Atmosphere"
 			float4 frag(v2f IN) : COLOR
 			{			
 				float3 WCP = _Globals_WorldCameraPos;
+				float3 WCPG = WCP + _Globals_Origin;
+
 				float3 d = normalize(IN.dir);
 
+				float sunColor = 0;
+				float3 extinction = 0;
+				float3 inscatter = 0;
+
 				#ifdef LIGHT_1
-					float sunColor = 0;
-					float3 extinction = 0;
-					float3 inscatter = 0;
-
-					float3 WSD_1 = _Sun_WorldSunDir_1;
-
 					sunColor += OuterSunRadiance(IN.relativeDir_1);
 
 					float3 extinction1 = 0;
@@ -220,27 +199,20 @@ Shader "SpaceEngine/Atmosphere/Atmosphere"
 					float eclipse1 = 1;
 
 					#ifdef ECLIPSES_ON
-						eclipse1 = EclipseOuterShadow(WSD_1, _Sun_Positions_1[0].w, d, WCP, _Globals_Origin);
+						eclipse1 = EclipseOuterShadow(_Sun_WorldSunDir_1, _Sun_Positions_1[0].w, d, WCP, _Globals_Origin);
 					#endif
 
-					inscatter += SkyRadiance(WCP + _Globals_Origin, d, WSD_1, extinction1, 0.0) * eclipse1;
-					//inscatter += SkyShineRadiance(WCP + _Globals_Origin, d, _Sky_ShineOccluders_1, _Sky_ShineColors_1);
+					inscatter += SkyRadiance(WCPG, d, _Sun_WorldSunDir_1, extinction1, 0.0) * eclipse1;
+					//inscatter += SkyShineRadiance(WCPG, d, _Sky_ShineOccluders_1, _Sky_ShineColors_1);
 
 					extinction += extinction1;
 
 					float3 finalColor = sunColor * extinction + inscatter;
 
-					return float4(hdr(finalColor) * fade, 1);
+					return float4(hdr(finalColor), 1) * fade;
 				#endif
 
 				#ifdef LIGHT_2
-					float sunColor = 0;
-					float3 extinction = 0;
-					float3 inscatter = 0;
-
-					float3 WSD_1 = _Sun_WorldSunDir_1;
-					float3 WSD_2 = _Sun_WorldSunDir_2;
-
 					sunColor += OuterSunRadiance(IN.relativeDir_1);
 					sunColor += OuterSunRadiance(IN.relativeDir_2);
 
@@ -251,30 +223,22 @@ Shader "SpaceEngine/Atmosphere/Atmosphere"
 					float eclipse2 = 1;
 
 					#ifdef ECLIPSES_ON
-						eclipse1 *= EclipseOuterShadow(WSD_1, _Sun_Positions_1[0].w, d, WCP, _Globals_Origin);
-						eclipse2 *= EclipseOuterShadow(WSD_1, _Sun_Positions_1[1].w, d, WCP, _Globals_Origin);
+						eclipse1 *= EclipseOuterShadow(_Sun_WorldSunDir_1, _Sun_Positions_1[0].w, d, WCP, _Globals_Origin);
+						eclipse2 *= EclipseOuterShadow(_Sun_WorldSunDir_2, _Sun_Positions_1[1].w, d, WCP, _Globals_Origin);
 					#endif
 
-					inscatter += SkyRadiance(WCP + _Globals_Origin, d, WSD_1, extinction1, 0.0) * eclipse1;
-					inscatter += SkyRadiance(WCP + _Globals_Origin, d, WSD_2, extinction2, 0.0) * eclipse2;
+					inscatter += SkyRadiance(WCPG, d, _Sun_WorldSunDir_1, extinction1, 0.0) * eclipse1;
+					inscatter += SkyRadiance(WCPG, d, _Sun_WorldSunDir_2, extinction2, 0.0) * eclipse2;
 
 					extinction += extinction1;
 					extinction += extinction2;
 
 					float3 finalColor = sunColor * extinction + inscatter;
 
-					return float4(hdr(finalColor) * fade, 1);
+					return float4(hdr(finalColor), 1) * fade;
 				#endif
 
 				#ifdef LIGHT_3
-					float sunColor = 0;
-					float3 extinction = 0;
-					float3 inscatter = 0;
-
-					float3 WSD_1 = _Sun_WorldSunDir_1;
-					float3 WSD_2 = _Sun_WorldSunDir_2;
-					float3 WSD_3 = _Sun_WorldSunDir_3;
-
 					sunColor += OuterSunRadiance(IN.relativeDir_1);
 					sunColor += OuterSunRadiance(IN.relativeDir_2);
 					sunColor += OuterSunRadiance(IN.relativeDir_3);
@@ -288,14 +252,14 @@ Shader "SpaceEngine/Atmosphere/Atmosphere"
 					float eclipse3 = 1;
 
 					#ifdef ECLIPSES_ON
-						eclipse1 *= EclipseOuterShadow(WSD_1, _Sun_Positions_1[0].w, d, WCP, _Globals_Origin);
-						eclipse2 *= EclipseOuterShadow(WSD_1, _Sun_Positions_1[1].w, d, WCP, _Globals_Origin);
-						eclipse3 *= EclipseOuterShadow(WSD_1, _Sun_Positions_1[2].w, d, WCP, _Globals_Origin);
+						eclipse1 *= EclipseOuterShadow(_Sun_WorldSunDir_1, _Sun_Positions_1[0].w, d, WCP, _Globals_Origin);
+						eclipse2 *= EclipseOuterShadow(_Sun_WorldSunDir_2, _Sun_Positions_1[1].w, d, WCP, _Globals_Origin);
+						eclipse3 *= EclipseOuterShadow(_Sun_WorldSunDir_3, _Sun_Positions_1[2].w, d, WCP, _Globals_Origin);
 					#endif
 
-					inscatter += SkyRadiance(WCP + _Globals_Origin, d, WSD_1, extinction1, 0.0) * eclipse1;
-					inscatter += SkyRadiance(WCP + _Globals_Origin, d, WSD_2, extinction2, 0.0) * eclipse2;
-					inscatter += SkyRadiance(WCP + _Globals_Origin, d, WSD_3, extinction3, 0.0) * eclipse3;
+					inscatter += SkyRadiance(WCPG, d, _Sun_WorldSunDir_1, extinction1, 0.0) * eclipse1;
+					inscatter += SkyRadiance(WCPG, d, _Sun_WorldSunDir_2, extinction2, 0.0) * eclipse2;
+					inscatter += SkyRadiance(WCPG, d, _Sun_WorldSunDir_3, extinction3, 0.0) * eclipse3;
 
 					extinction += extinction1;
 					extinction += extinction2;
@@ -303,19 +267,10 @@ Shader "SpaceEngine/Atmosphere/Atmosphere"
 
 					float3 finalColor = sunColor * extinction + inscatter;
 
-					return float4(hdr(finalColor) * fade, 1);
+					return float4(hdr(finalColor), 1) * fade;
 				#endif
 
 				#ifdef LIGHT_4
-					float sunColor = 0;
-					float3 extinction = 0;
-					float3 inscatter = 0;
-
-					float3 WSD_1 = _Sun_WorldSunDir_1;
-					float3 WSD_2 = _Sun_WorldSunDir_2;
-					float3 WSD_3 = _Sun_WorldSunDir_3;
-					float3 WSD_4 = _Sun_WorldSunDir_4;
-
 					sunColor += OuterSunRadiance(IN.relativeDir_1);
 					sunColor += OuterSunRadiance(IN.relativeDir_2);
 					sunColor += OuterSunRadiance(IN.relativeDir_3);
@@ -332,16 +287,16 @@ Shader "SpaceEngine/Atmosphere/Atmosphere"
 					float eclipse4 = 1;
 
 					#ifdef ECLIPSES_ON
-						eclipse1 *= EclipseOuterShadow(WSD_1, _Sun_Positions_1[0].w, d, WCP, _Globals_Origin);
-						eclipse2 *= EclipseOuterShadow(WSD_1, _Sun_Positions_1[1].w, d, WCP, _Globals_Origin);
-						eclipse3 *= EclipseOuterShadow(WSD_1, _Sun_Positions_1[2].w, d, WCP, _Globals_Origin);
-						eclipse4 *= EclipseOuterShadow(WSD_1, _Sun_Positions_1[3].w, d, WCP, _Globals_Origin);
+						eclipse1 *= EclipseOuterShadow(_Sun_WorldSunDir_1, _Sun_Positions_1[0].w, d, WCP, _Globals_Origin);
+						eclipse2 *= EclipseOuterShadow(_Sun_WorldSunDir_2, _Sun_Positions_1[1].w, d, WCP, _Globals_Origin);
+						eclipse3 *= EclipseOuterShadow(_Sun_WorldSunDir_3, _Sun_Positions_1[2].w, d, WCP, _Globals_Origin);
+						eclipse4 *= EclipseOuterShadow(_Sun_WorldSunDir_4, _Sun_Positions_1[3].w, d, WCP, _Globals_Origin);
 					#endif
 
-					inscatter += SkyRadiance(WCP + _Globals_Origin, d, WSD_1, extinction1, 0.0) * eclipse1;
-					inscatter += SkyRadiance(WCP + _Globals_Origin, d, WSD_2, extinction2, 0.0) * eclipse2;
-					inscatter += SkyRadiance(WCP + _Globals_Origin, d, WSD_3, extinction3, 0.0) * eclipse3;
-					inscatter += SkyRadiance(WCP + _Globals_Origin, d, WSD_4, extinction4, 0.0) * eclipse4;
+					inscatter += SkyRadiance(WCPG, d, _Sun_WorldSunDir_1, extinction1, 0.0) * eclipse1;
+					inscatter += SkyRadiance(WCPG, d, _Sun_WorldSunDir_2, extinction2, 0.0) * eclipse2;
+					inscatter += SkyRadiance(WCPG, d, _Sun_WorldSunDir_3, extinction3, 0.0) * eclipse3;
+					inscatter += SkyRadiance(WCPG, d, _Sun_WorldSunDir_4, extinction4, 0.0) * eclipse4;
 
 					extinction += extinction1;
 					extinction += extinction2;
@@ -350,7 +305,7 @@ Shader "SpaceEngine/Atmosphere/Atmosphere"
 
 					float3 finalColor = sunColor * extinction + inscatter;
 
-					return float4(hdr(finalColor) * fade, 1);
+					return float4(hdr(finalColor), 1) * fade;
 				#endif
 
 				return float4(0, 0, 0, 0);

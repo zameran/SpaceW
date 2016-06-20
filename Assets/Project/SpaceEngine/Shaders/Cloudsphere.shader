@@ -52,7 +52,7 @@ Shader "SpaceEngine/Atmosphere/Cloudsphere"
 
 			CGPROGRAM
 			#include "UnityCG.cginc"		
-			#include "Utility.cginc"
+			#include "HDR.cginc"
 			#include "Atmosphere.cginc"
 			#include "Assets/Project/SpaceEngine/Shaders/Compute/Utils.cginc"
 

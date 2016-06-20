@@ -66,23 +66,34 @@
 
 uniform float _Exposure;
 
-float mod(float x, float y) { return x - y * floor(x / y); }
+inline float3 hdrF(float c)
+{
+	//return 1.0 - exp(-c);
+	//return c < 0.75662 ? pow(c, 2.2) / 0.38317 : -log(1.0 - c); //HDRI
+	//return c < 1.0 ? pow(c * 0.47, 0.6073) : 1.0 - exp(-c);
+	//return c < 1.413 ? pow(c * 0.38317, 1.0 / 2.2) : 1.0 - exp(-c);
+	return c < 1.413 ? pow(c * 0.38317, 0.454545455) : 1.0 - exp(-c); //1.0 / 2.2 = 0.454545455
+}
 
 float3 hdr(float3 L) 
 {
-    L = L * _Exposure;
-    L.r = L.r < 1.413 ? pow(L.r * 0.38317, 1.0 / 2.2) : 1.0 - exp(-L.r);
-    L.g = L.g < 1.413 ? pow(L.g * 0.38317, 1.0 / 2.2) : 1.0 - exp(-L.g);
-    L.b = L.b < 1.413 ? pow(L.b * 0.38317, 1.0 / 2.2) : 1.0 - exp(-L.b);
+    L *= _Exposure;
+
+    L.r = hdrF(L.r);
+    L.g = hdrF(L.g);
+    L.b = hdrF(L.b);
+
     return L;
 }
 
 float4 hdr(float4 L) 
 {
-    L = L * _Exposure;
-    L.r = L.r < 1.413 ? pow(L.r * 0.38317, 1.0 / 2.2) : 1.0 - exp(-L.r);
-    L.g = L.g < 1.413 ? pow(L.g * 0.38317, 1.0 / 2.2) : 1.0 - exp(-L.g);
-    L.b = L.b < 1.413 ? pow(L.b * 0.38317, 1.0 / 2.2) : 1.0 - exp(-L.b);
-	L.a = L.a < 1.413 ? pow(L.a * 0.38317, 1.0 / 2.2) : 1.0 - exp(-L.a);
+    L *= _Exposure;
+
+    L.r = hdrF(L.r);
+    L.g = hdrF(L.g);
+    L.b = hdrF(L.b);
+	L.a = L.a;
+
     return L;
 }
