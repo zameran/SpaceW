@@ -69,6 +69,8 @@
 #define HORIZON_HACK
 //#define HORIZON_HACK_BIG_EPSILON
 #define ANALYTIC_TRANSMITTANCE
+#define TRANSMITTANCE_NON_LINEAR
+#define INSCATTER_NON_LINEAR
 
 #if !defined (M_PI)
 #define M_PI 3.14159265358
@@ -132,9 +134,6 @@ uniform float RES_R;
 uniform float RES_MU;
 uniform float RES_MU_S;
 uniform float RES_NU;
-
-#define TRANSMITTANCE_NON_LINEAR
-#define INSCATTER_NON_LINEAR
 
 // ----------------------------------------------------------------------------
 // PARAMETERIZATION FUNCTIONS
