@@ -33,6 +33,7 @@
 using UnityEngine;
 
 using System;
+using System.Linq;
 using System.Collections.Generic;
 
 using Amib;
@@ -453,15 +454,7 @@ public sealed class Planetoid : Planet, IPlanet
 
     public int GetCulledQuadsCount()
     {
-        int count = 0;
-
-        for (int i = 0; i < Quads.Count; i++)
-        {
-            if (!Quads[i].Visible)
-                count++;
-        }
-
-        return count;
+        return Quads.Count(x => !x.Visible);
     }
 
     public Quad GetMainQuad(QuadPosition position)

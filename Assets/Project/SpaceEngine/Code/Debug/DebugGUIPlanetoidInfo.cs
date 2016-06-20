@@ -30,6 +30,8 @@
  */
 #endregion
 
+using System.Linq;
+
 using UnityEngine;
 
 public sealed class DebugGUIPlanetoidInfo : DebugGUI
@@ -68,23 +70,33 @@ public sealed class DebugGUIPlanetoidInfo : DebugGUI
         scrollPosition = GUILayout.BeginScrollView(scrollPosition, false, true);
 
         if (Planetoid != null)
-        {           
-            int quadsCount = Planetoid.Quads.Count;
-            int quadsCulledCount = Planetoid.GetCulledQuadsCount();
-            int vertsRendered = (quadsCount - quadsCulledCount) * QuadSettings.nVerts;
-
-            double quadsTexturesVideoMemoryUsage = CalculateTexturesVMU(quadsCount);
-
+        {
             GUILayout.BeginVertical();
 
             GUILayout.Label("Planetoid stats: ", boldLabel);
 
             GUILayoutExtensions.LabelWithSpace((Planetoid.gameObject.name + ": " + (Planetoid.Working ? "Generating..." : "Idle...")), -8);
-            GUILayoutExtensions.LabelWithSpace("Quads count: " + quadsCount, -8);
-            GUILayoutExtensions.LabelWithSpace("Quads culled count: " + quadsCulledCount, -8);
-            GUILayoutExtensions.LabelWithSpace("Quads culling machine: " + Planetoid.CullingMethod.ToString(), -8);
-            GUILayoutExtensions.LabelWithSpace("Quads textures VMU (MB): " + quadsTexturesVideoMemoryUsage.ToString("0.00"), -8);
-            GUILayoutExtensions.LabelWithSpace("Verts rendered per frame (Only Quads): " + vertsRendered, -8);
+
+            if (Planetoid.CullingMethod == QuadCullingMethod.Custom)
+            {
+                int quadsCount = Planetoid.Quads.Count;
+                int quadsCulledCount = Planetoid.GetCulledQuadsCount();
+                int vertsRendered = (quadsCount - quadsCulledCount) * QuadSettings.nVerts;
+
+                double quadsTexturesVideoMemoryUsage = CalculateTexturesVMU(quadsCount);
+
+                GUILayoutExtensions.LabelWithSpace("Quads count: " + quadsCount, -8);
+                GUILayoutExtensions.LabelWithSpace("Quads culled count: " + quadsCulledCount, -8);
+                GUILayoutExtensions.LabelWithSpace("Quads textures VMU (MB): " + quadsTexturesVideoMemoryUsage.ToString("0.00"), -8);
+                GUILayoutExtensions.LabelWithSpace("Verts rendered per frame (Only Quads): " + vertsRendered, -8);
+            }
+
+            GUILayoutExtensions.LabelWithSpace("Quads culling method: " + Planetoid.CullingMethod.ToString(), 0);
+            Planetoid.CullingMethod = (QuadCullingMethod)GUILayout.SelectionGrid((int)Planetoid.CullingMethod, System.Enum.GetNames(typeof(QuadCullingMethod)), 3);
+
+            GUILayout.EndVertical();
+
+            GUILayout.BeginVertical();
 
             GUILayout.Space(10);
 
