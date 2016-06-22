@@ -354,23 +354,30 @@ public sealed class Planetoid : Planet, IPlanet
     {
         if (Quads != null)
         {
-            for (int i = 0; i < Quads.Count; i++)
+            if (PlanetQuadsEnabled)
             {
-                if (Quads[i] != null)
-                    Quads[i].Render(DrawLayer);
+                for (int i = 0; i < Quads.Count; i++)
+                {
+                    if (Quads[i] != null)
+                        Quads[i].Render(DrawLayer);
+                }
             }
         }
 
         if (Atmosphere != null)
         {
             if (AtmosphereEnabled)
+            {
                 Atmosphere.Render(Origin, DrawLayer);
+            }
         }
 
         if (Cloudsphere != null)
         {
             if (CloudsphereEnabled)
+            {
                 Cloudsphere.Render(DrawLayer);
+            }
         }
     }
 

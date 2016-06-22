@@ -44,7 +44,7 @@
 
 			float NoiseFunction(float3 pos)
 			{
-				return Noise(pos);
+				return iNoise(pos, 1);
 			}
 
 			float3 FindNormal(float3 pos, float u)

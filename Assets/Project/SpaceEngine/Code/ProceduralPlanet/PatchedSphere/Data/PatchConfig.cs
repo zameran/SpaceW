@@ -1,3 +1,5 @@
+using UnityEngine;
+
 public enum PatchQuality { Minimum, Low, Standard, High, Maximum };
 
 public enum PatchResolution { Minimum, Low, Standard, High, Maximum };

@@ -6,6 +6,11 @@ public class PatchSphere : MonoBehaviour
 {
     public Transform LODTarget;
 
+    public Shader CoreShader;
+    public Material CoreMaterial;
+
+    public Planet planet;
+
     public PatchQuality PatchQuality = PatchQuality.Standard;
     public PatchResolution PatchResoulution = PatchResolution.Standard;
 
@@ -14,6 +19,7 @@ public class PatchSphere : MonoBehaviour
     public int MaxSplitLevel = 8;
     public float SizeSplit = 3;
     public float SizeRejoin = 6;
+    public float TerrainMaxHeight = 8;
 
     public List<PatchTree> PatchTrees = new List<PatchTree>();
 
@@ -56,16 +62,19 @@ public class PatchSphere : MonoBehaviour
         PatchConfig = new PatchConfig(PatchQuality, PatchResoulution);
         PatchManager = new PatchManager(PatchConfig, this);
 
+        CoreMaterial = MaterialHelper.CreateTemp(CoreShader, "PatchCore");
+        CoreMaterial.hideFlags = HideFlags.DontSave;
+
         DestroyPlanet();
 
-        PatchTrees.Add(new PatchTree(new Vector3(0, 1, 0), new Vector3(0, 0, -1), this));      //0: top
-        PatchTrees.Add(new PatchTree(new Vector3(0, -1, 0), new Vector3(0, 0, 1), this));      //1: bottom
+        PatchTrees.Add(new PatchTree(new Vector3(0, 1, 0), new Vector3(0, 0, -1), this));      //0 : top
+        PatchTrees.Add(new PatchTree(new Vector3(0, -1, 0), new Vector3(0, 0, 1), this));      //1 : bottom
 
-        PatchTrees.Add(new PatchTree(new Vector3(-1, 0, 0), new Vector3(0, 1, 0), this));      //2: left
-        PatchTrees.Add(new PatchTree(new Vector3(1, 0, 0), new Vector3(0, 1, 0), this));       //3: right
+        PatchTrees.Add(new PatchTree(new Vector3(-1, 0, 0), new Vector3(0, 1, 0), this));      //2 : left
+        PatchTrees.Add(new PatchTree(new Vector3(1, 0, 0), new Vector3(0, 1, 0), this));       //3 : right
 
-        PatchTrees.Add(new PatchTree(new Vector3(0, 0, 1), new Vector3(0, 1, 0), this));       //4: front
-        PatchTrees.Add(new PatchTree(new Vector3(0, 0, -1), new Vector3(0, 1, 0), this));      //5: back
+        PatchTrees.Add(new PatchTree(new Vector3(0, 0, 1), new Vector3(0, 1, 0), this));       //4 : front
+        PatchTrees.Add(new PatchTree(new Vector3(0, 0, -1), new Vector3(0, 1, 0), this));      //5 : back
 
         //link neighbors of TOP quadtree
         PatchTrees[0].SetNeighbor(NeighborDirection.Top, PatchTrees[5], NeighborDirection.Top);         //back
@@ -115,17 +124,17 @@ public class PatchSphere : MonoBehaviour
         MinCamDist = 9999999.0f;
         CloserNode = null;
 
-        for (byte i = 0; i < PatchTrees.Count; i++)
+        for (int i = 0; i < PatchTrees.Count; i++)
         {
             PatchTrees[i].Update(InversedCameraPosition);
         }
 
-        for (byte i = 0; i < PatchTrees.Count; i++)
+        for (int i = 0; i < PatchTrees.Count; i++)
         {
             PatchTrees[i].RefreshTerrain(InversedCameraPosition, InversedCameraPosition);
         }
 
-        for (byte i = 0; i < PatchTrees.Count; i++)
+        for (int i = 0; i < PatchTrees.Count; i++)
         {
             PatchTrees[i].RefreshGaps();
         }

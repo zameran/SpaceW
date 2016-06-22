@@ -63,6 +63,11 @@ public sealed class NoiseParametersSetter : MonoBehaviour
 
     }
 
+    public void UpdateUniforms(Material mat)
+    {
+        SetUniforms(mat);
+    }
+
     public void UpdateUniforms(Material mat, ComputeShader cs)
     {
         SetUniforms(mat);
@@ -105,7 +110,7 @@ public sealed class NoiseParametersSetter : MonoBehaviour
         return temp;
     }
 
-    public void SetUniforms(Material mat)
+    private void SetUniforms(Material mat)
     {
         if (mat == null) return;
 
@@ -124,7 +129,7 @@ public sealed class NoiseParametersSetter : MonoBehaviour
         mat.SetTexture("_QuadTexture4", QuadTexture1);
     }
 
-    public void SetUniforms(ComputeShader shader)
+    private void SetUniforms(ComputeShader shader)
     {
         if (shader == null) return;
 
@@ -136,7 +141,7 @@ public sealed class NoiseParametersSetter : MonoBehaviour
         shader.SetTexture(0, "ColorMap", PlanetColorMap);
     }
 
-    public void SetUniforms(ComputeShader shader, int kernel)
+    private void SetUniforms(ComputeShader shader, int kernel)
     {
         if (shader == null) return;
 
