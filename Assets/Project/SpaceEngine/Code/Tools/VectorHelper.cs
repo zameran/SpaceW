@@ -143,6 +143,13 @@ public static class VectorHelper
         return 2.0f * Mathf.Asin(actualRadius / (2 * Vector3.Distance(from, to)));
     }
 
+    public static float QuickDistance(Vector3 v1, Vector3 v2)
+    {
+        Vector3 diff = v2 - v1;
+
+        return diff.x * diff.x + diff.y * diff.y + diff.z * diff.z;
+    }
+
     public static Vector4 MakeFrom(Vector3 xyz, float w)
     {
         return new Vector4(xyz.x, xyz.y, xyz.z, w);

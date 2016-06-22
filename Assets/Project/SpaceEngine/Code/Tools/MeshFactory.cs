@@ -366,4 +366,248 @@ public static class MeshFactory
 
         return mesh;
     }
+
+    public static Mesh MakeSphere(float radius, int divr, int divh)
+    {
+        float a, da, yp, ya, yda, yf;
+        float U, V, dU, dV;
+
+        if (divr < 3) divr = 3;
+        if (divh < 3) divh = 3;
+
+        int numVerts = (divh - 2) * divr + 2 + (divh - 2);
+        int numInds = (divr * 2 + divr * 2 * (divh - 3)) * 3;
+
+        Mesh mesh = new Mesh();
+        Vector3[] vertices = new Vector3[numVerts];
+        Vector2[] uvs = new Vector2[numVerts];
+        int[] inds = new int[numInds];
+
+        int vidx = 0;       //current vertex
+        int fidx = 0;       //current index
+
+        //top and bottom vertices
+        vertices[vidx++] = new Vector3(0, radius, 0);
+        vertices[vidx++] = new Vector3(0, -radius, 0);
+
+        ya = 0;
+        yda = Mathf.PI / (divh - 1);
+        da = (2 * Mathf.PI) / divr;
+
+        //all other vertices
+        for (int y = 0; y < divh - 2; y++)
+        {
+            ya += yda;
+            yp = Mathf.Cos(ya) * radius;
+            yf = Mathf.Sin(ya) * radius;
+            a = 0;
+
+            for (int x = 0; x < divr; x++)
+            {
+                vertices[vidx++] = new Vector3(Mathf.Cos(a) * yf, yp, Mathf.Sin(a) * yf);
+
+                if (x == divr - 1)
+                {
+                    //add an extra vertex in the end of each longitudinal circunference
+                    Vector3 tmp = vertices[y * (divr + 1) + 2];
+                    vertices[vidx++] = new Vector3(tmp.x, tmp.y, tmp.z);
+                }
+
+                a += da;
+            }
+        }
+
+        a = 0;
+        U = 0;
+        dU = 1.0f / divr;
+        dV = V = 1.0f / divh;
+
+        //top indices
+        for (int x = 0; x < divr; x++)
+        {
+            int[] v = { 0, 2 + x + 1, 2 + x };
+
+            inds[fidx++] = v[0];
+            inds[fidx++] = v[1];
+            inds[fidx++] = v[2];
+
+            uvs[v[0]].x = U;
+            uvs[v[0]].y = 0;
+
+            uvs[v[1]].x = U + dU;
+            uvs[v[1]].y = V;
+
+            uvs[v[2]].x = U;
+            uvs[v[2]].y = V;
+
+            U += dU;
+        }
+
+        da = 1.0f / (divr + 1);
+        int offv = 2;
+
+        //create main body faces
+        for (int x = 0; x < divh - 3; x++)
+        {
+            U = 0;
+            for (int y = 0; y < divr; y++)
+            {
+                int[] v = { offv + y, offv + (divr + 1) + y + 1, offv + (divr + 1) + y };
+
+                inds[fidx++] = v[0];
+                inds[fidx++] = v[1];
+                inds[fidx++] = v[2];
+
+                uvs[v[0]].x = U;
+                uvs[v[0]].y = V;
+
+                uvs[v[1]].x = U + dU;
+                uvs[v[1]].y = V + dV;
+
+                uvs[v[2]].x = U;
+                uvs[v[2]].y = V + dV;
+
+                int[] vv = { offv + y, offv + y + 1, offv + y + 1 + (divr + 1) };
+
+                inds[fidx++] = vv[0];
+                inds[fidx++] = vv[1];
+                inds[fidx++] = vv[2];
+
+                uvs[vv[0]].x = U;
+                uvs[vv[0]].y = V;
+
+                uvs[vv[1]].x = U + dU;
+                uvs[vv[1]].y = V;
+
+                uvs[vv[2]].x = U + dU;
+                uvs[vv[2]].y = V + dV;
+
+                U += dU;
+            }
+
+            V += dV;
+            offv += divr + 1;
+        }
+
+        int s = numVerts - divr - 1;
+        U = 0;
+
+        //bottom faces
+        for (int x = 0; x < divr; x++)
+        {
+            int[] v = { 1, s + x, s + x + 1 };
+
+            inds[fidx++] = v[0];
+            inds[fidx++] = v[1];
+            inds[fidx++] = v[2];
+
+            uvs[v[0]].x = U;
+            uvs[v[0]].y = 1.0f;
+
+            uvs[v[1]].x = U;
+            uvs[v[1]].y = V;
+
+            uvs[v[2]].x = U + dU;
+            uvs[v[2]].y = V;
+
+            U += dU;
+        }
+
+        mesh.vertices = vertices;
+        mesh.uv = uvs;
+        mesh.triangles = inds;
+
+        mesh.Optimize();
+        mesh.RecalculateBounds();
+        mesh.RecalculateNormals();
+
+        SolveTangents(mesh);
+
+        return mesh;
+    }
+
+    public static Vector3 SolveNormal(Vector3 v1, Vector3 v2, Vector3 v3)
+    {
+        Vector3 vt1 = new Vector3(v2.x - v1.x, v2.y - v1.y, v2.z - v1.z);
+        Vector3 vt2 = new Vector3(v3.x - v2.x, v3.y - v2.y, v3.z - v2.z);
+
+        return Vector3.Cross(vt1, vt2).normalized;
+    }
+
+    public static void SolveTangents(Mesh theMesh)
+    {
+        int vertexCount = theMesh.vertexCount;
+
+        Vector3[] vertices = theMesh.vertices;
+        Vector3[] normals = theMesh.normals;
+        Vector2[] texcoords = theMesh.uv;
+
+        int[] triangles = theMesh.triangles;
+        int triangleCount = triangles.Length / 3;
+
+        Vector4[] tangents = new Vector4[vertexCount];
+        Vector3[] tan1 = new Vector3[vertexCount];
+        Vector3[] tan2 = new Vector3[vertexCount];
+
+        int tri = 0;
+
+        for (int i = 0; i < (triangleCount); i++)
+        {
+            int i1 = triangles[tri];
+            int i2 = triangles[tri + 1];
+            int i3 = triangles[tri + 2];
+
+            Vector3 v1 = vertices[i1];
+            Vector3 v2 = vertices[i2];
+            Vector3 v3 = vertices[i3];
+            Vector2 w1 = texcoords[i1];
+            Vector2 w2 = texcoords[i2];
+            Vector2 w3 = texcoords[i3];
+
+            float x1 = v2.x - v1.x;
+            float x2 = v3.x - v1.x;
+            float y1 = v2.y - v1.y;
+            float y2 = v3.y - v1.y;
+            float z1 = v2.z - v1.z;
+            float z2 = v3.z - v1.z;
+
+            float s1 = w2.x - w1.x;
+            float s2 = w3.x - w1.x;
+            float t1 = w2.y - w1.y;
+            float t2 = w3.y - w1.y;
+
+            float r = 1.0f / (s1 * t2 - s2 * t1);
+
+            Vector3 sdir = new Vector3((t2 * x1 - t1 * x2) * r, (t2 * y1 - t1 * y2) * r, (t2 * z1 - t1 * z2) * r);
+            Vector3 tdir = new Vector3((s1 * x2 - s2 * x1) * r, (s1 * y2 - s2 * y1) * r, (s1 * z2 - s2 * z1) * r);
+
+            tan1[i1] += sdir;
+            tan1[i2] += sdir;
+            tan1[i3] += sdir;
+
+            tan2[i1] += tdir;
+            tan2[i2] += tdir;
+            tan2[i3] += tdir;
+
+            tri += 3;
+        }
+
+        for (int i = 0; i < (vertexCount); i++)
+        {
+            Vector3 n = normals[i];
+            Vector3 t = tan1[i];
+
+            //Gram-Schmidt orthogonalize
+            Vector3.OrthoNormalize(ref n, ref t);
+
+            tangents[i].x = t.x;
+            tangents[i].y = t.y;
+            tangents[i].z = t.z;
+
+            //Calculate handedness
+            tangents[i].w = (Vector3.Dot(Vector3.Cross(n, t), tan2[i]) < 0.0f) ? -1.0f : 1.0f;
+        }
+
+        theMesh.tangents = tangents;
+    }
 }
