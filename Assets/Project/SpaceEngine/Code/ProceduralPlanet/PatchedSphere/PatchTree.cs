@@ -329,10 +329,10 @@ public class PatchTree
             }
         }
 
-        Texture2D Heightmap;
-        Texture2D HeightmapLowRes;
+        //Texture2D Heightmap;
+        //Texture2D HeightmapLowRes;
 
-        RenderTextures(out Heightmap, out HeightmapLowRes);
+        //RenderTextures(out Heightmap, out HeightmapLowRes);
 
         GameObject = new GameObject();
         GameObject.name = "Patch_LOD_ " + SplitLevel + " : [" + Up + "]";
@@ -341,8 +341,8 @@ public class PatchTree
         GameObject.AddComponent<MeshRenderer>();
         GameObject.GetComponent<MeshRenderer>().sharedMaterial = new Material(Sphere.Shader);
 
-        if(GameObject.GetComponent<MeshRenderer>().sharedMaterial.HasProperty("_MainTex"))
-            GameObject.GetComponent<MeshRenderer>().sharedMaterial.SetTexture("_MainTex", Heightmap);
+        //if(GameObject.GetComponent<MeshRenderer>().sharedMaterial.HasProperty("_MainTex"))
+        //    GameObject.GetComponent<MeshRenderer>().sharedMaterial.SetTexture("_MainTex", Heightmap);
 
         Mesh = new Mesh();
 
@@ -352,7 +352,7 @@ public class PatchTree
         uvvols = new Vector2[Sphere.PatchConfig.GridSize];
         normals = new Vector3[Sphere.PatchConfig.GridSize];
 
-        Color[] heights = HeightmapLowRes.GetPixels();
+        //Color[] heights = HeightmapLowRes.GetPixels();
 
         Vector3 origin = Volume.vertices[0];
 
@@ -380,7 +380,7 @@ public class PatchTree
             for (ushort x = 0; x < Sphere.PatchConfig.PatchSize; x++)
             {
                 //get sampled height from the low res packed heightmap
-                float height = heights[idx].a;
+                float height = 1; //heights[idx].a;
 
                 height = height * Sphere.TerrainMaxHeight;
                 if (height > maxHeight) maxHeight = height;
@@ -467,7 +467,7 @@ public class PatchTree
 
         Patch patch = GameObject.AddComponent<Patch>();
         patch.PatchTree = this;
-        patch.Texture = Heightmap;
+        //patch.Texture = Heightmap;
     }
 
     private void GapFix(byte directionsMask)
