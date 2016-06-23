@@ -42,6 +42,7 @@
 			#include "Assets/Project/SpaceEngine/Shaders/TCCommon.cginc"
 			#include "Assets/Project/SpaceEngine/Shaders/HDR.cginc"
 			#include "Assets/Project/SpaceEngine/Shaders/Atmosphere.cginc"
+			#include "Assets/Project/SpaceEngine/Shaders/LogarithmicDepthBuffer.cginc"
 
 			struct appdata_full_compute 
 			{
@@ -221,9 +222,14 @@
 				//o.vertex0.z = log2(max(1e-6, 1.0 + o.vertex0.w)) * (2.0 / log2(_ProjectionParams.z + 1.0)) - 1.0;
 				//o.vertex0.z *= o.vertex0.w;
 				//o.depth = log2(1.0 + o.vertex0.w) * (0.5 * (2.0 / log2(_ProjectionParams.z + 1.0)));
+
+				//Log. depth new; FarPlane = _ProjectionParams.z | _ProjectionParams.w;
+				//FarPlane = UNITY_MATRIX_P[2].w / (UNITY_MATRIX_P[2].z + 1.0);
+				//o.vertex0.z = log2(max(1e-6, 1.0 + o.vertex0.w)) * FCoef(1e+2) - 1.0;
+				//o.depth = 1.0 + o.vertex0.w;
 			}
 
-			void frag(in v2fg IN, out float4 outDiffuse : COLOR)
+			void frag(in v2fg IN, out float4 outDiffuse : COLOR)//, out float depth : DEPTH)
 			{		
 				QuadGenerationConstants constants = quadGenerationConstants[0];
 
@@ -238,6 +244,7 @@
 				Account(terrainColor, scatteringColor, IN.vertex2.xyz, IN.normal0.xyz);
 
 				outDiffuse = lerp(scatteringColor, outputNormal, _Normale);
+				//depth = log2(IN.depth) * (0.5 * FCoef(1e+2));
 			}
 			ENDCG
 		}
