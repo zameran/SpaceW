@@ -457,7 +457,6 @@ public sealed class Quad : MonoBehaviour, IQuad
 
         SetupBounds(this, QuadMesh);
 
-        //if (Planetoid.Atmosphere != null) Planetoid.Atmosphere.SetUniformsForPlanetQuad(QuadMaterial); //Old shit...
         if (Planetoid.Atmosphere != null) Planetoid.Atmosphere.SetUniforms(null, QuadMaterial, false, true);
 
         //if (Planetoid.NPS != null) Planetoid.NPS.UpdateUniforms(QuadMaterial, null); //(WIP) For SE Coloring in fragment shader work...
