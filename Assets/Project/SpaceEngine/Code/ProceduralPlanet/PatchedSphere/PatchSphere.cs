@@ -5,6 +5,7 @@ using System.Collections.Generic;
 public class PatchSphere : MonoBehaviour
 {
     public Shader CoreShader;
+    public Shader Shader;
     [HideInInspector]
     public Material CoreMaterial;
 

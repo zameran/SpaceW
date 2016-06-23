@@ -42,7 +42,7 @@
 			{
 				float3 p = normalize(i.vol);
 
-				float h = Fbm(p * 4, 8);
+				float h = HeightMapClouds(p);
 
 				// return the heightmap
 				// r = normalmap dx (not filled yet -- will be filled by the normal generator)

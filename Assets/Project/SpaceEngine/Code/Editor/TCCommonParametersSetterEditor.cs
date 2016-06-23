@@ -63,6 +63,9 @@ public sealed class TCCommonParametersSetterEditor : Editor
         EditorGUILayout.LabelField("Planetoid to setup: ", EditorStyles.boldLabel);
         setter.Planet = EditorGUILayout.ObjectField(setter.Planet, typeof(Planetoid), true) as Planetoid;
 
+        EditorGUILayout.LabelField("Patche Sphere to setup: ", EditorStyles.boldLabel);
+        setter.PatchSphere = EditorGUILayout.ObjectField(setter.PatchSphere, typeof(PatchSphere), true) as PatchSphere;
+
         EditorGUILayout.Space();
     }
 
@@ -129,15 +132,21 @@ public sealed class TCCommonParametersSetterEditor : Editor
 
     private void DrawGUIForClouds(TCCommonParametersSetter setter)
     {
-        setter.cloudsParams2.z = EditorGUILayout.Slider("cloudsStyle ", setter.cloudsParams2.z, -1.0f, 1.0f);
+        setter.cloudsParams2.x = EditorGUILayout.Slider("cloudsLayer ", setter.cloudsParams2.x, 0.0f, 1.0f);
+        setter.cloudsParams2.y = EditorGUILayout.Slider("cloudsNLayers ", setter.cloudsParams2.y, 0.0f, 4.0f);
+        setter.cloudsParams2.z = EditorGUILayout.Slider("cloudsCoverage ", setter.cloudsParams2.z, 0.0f, 1.0f);
+        setter.cloudsParams2.w = EditorGUILayout.Slider("cloudsStyle ", setter.cloudsParams2.w, -1.0f, 1.0f);
 
+
+        setter.cloudsParams1.x = EditorGUILayout.Slider("cloudsFreq ", setter.cloudsParams1.x, 0.0f, 1000.0f);
+        setter.cloudsParams1.y = (float)Mathf.RoundToInt(EditorGUILayout.Slider("cloudsOctaves ", setter.cloudsParams1.y, 0.0f, 6.0f));
         setter.cloudsParams1.z = EditorGUILayout.Slider("twistZones ", setter.cloudsParams1.z, 0.0f, 10.0f);
         setter.cloudsParams1.w = EditorGUILayout.Slider("twistMagn ", setter.cloudsParams1.w, 0.0f, 5.0f);
 
         setter.cycloneParams.x = EditorGUILayout.Slider("cycloneMagn ", setter.cycloneParams.x, 0.0f, 20.0f);
         setter.cycloneParams.y = EditorGUILayout.Slider("cycloneFreq ", setter.cycloneParams.y, 0.0f, 10000.0f);
         setter.cycloneParams.z = EditorGUILayout.Slider("cycloneSqrtDensity ", setter.cycloneParams.z, 0.0f, 1.0f);
-        setter.cycloneParams.w = (float)Mathf.RoundToInt(EditorGUILayout.Slider("cycloneOctaves ", setter.cycloneParams.w, 0.0f, 5.0f));
+        setter.cycloneParams.w = (float)Mathf.RoundToInt(EditorGUILayout.Slider("cycloneOctaves ", setter.cycloneParams.w, 0.0f, 6.0f));
     }
 
     private void DrawGUIForNature(TCCommonParametersSetter setter)
@@ -261,6 +270,15 @@ public sealed class TCCommonParametersSetterEditor : Editor
         setter.textureParams.w = EditorGUILayout.Slider("venusFreq ", setter.textureParams.w, 0.0f, 2.0f);
     }
 
+    private void ResetupSphere(TCCommonParametersSetter setter)
+    {
+        if (setter.PatchSphere != null)
+        {
+            setter.PatchSphere.Rebuild();
+            setter.PatchSphere.CallLateUpdate();
+        }
+    }
+
     private void ResetupPlanetoid(TCCommonParametersSetter setter)
     {
         if (Application.isPlaying)
@@ -286,6 +304,12 @@ public sealed class TCCommonParametersSetterEditor : Editor
         if (GUILayout.Button("Update"))
         {
             ResetupPlanetoid(setter);
+            ResetupSphere(setter);
+        }
+
+        if(GUI.changed)
+        {
+            ResetupSphere(setter);
         }
 
         EditorGUILayout.Space();
@@ -297,6 +321,7 @@ public sealed class TCCommonParametersSetterEditor : Editor
         if(currentTab != prevTab && setter.AutoUpdate)
         {
             ResetupPlanetoid(setter);
+            ResetupSphere(setter);
         }
 
         prevTab = currentTab;

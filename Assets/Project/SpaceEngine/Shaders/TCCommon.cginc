@@ -3583,6 +3583,8 @@ float4 CycloneNoise(float3 ppoint)
 //TODO: Fix dat.
 float HeightMapClouds(float3 ppoint)
 {
+	ppoint = normalize(ppoint);
+
 	float zone = cos(ppoint.y * twistZones);
 	float ang = zone * twistMagn;
 	float3 twistedPoint = ppoint;

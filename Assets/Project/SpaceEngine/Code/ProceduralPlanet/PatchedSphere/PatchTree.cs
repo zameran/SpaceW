@@ -268,27 +268,34 @@ public class PatchTree
 
     private void RenderTextures(out Texture2D Heightmap, out Texture2D HeightmapLowRes)
     {
+        //TODO : Fix texture sliding.
+        //NOTE : Maybe UV float precision...
+
         int PackedTextureResolution = Sphere.PatchConfig.LevelHeightMapRes(SplitLevel);
         int LowResTextureResolution = Sphere.PatchConfig.PatchSize;
+
+        var WrapMode = TextureWrapMode.Clamp;
+        var Mipmaps = false;
+        var POT = true;
 
         RenderTexture heightmapRT = RTExtensions.CreateRTexture(new Vector2(PackedTextureResolution, PackedTextureResolution), 0,
                                                         RenderTextureFormat.ARGB32,
                                                         FilterMode.Bilinear,
-                                                        TextureWrapMode.Clamp, true, 0, false);
+                                                        WrapMode, Mipmaps, 0, POT);
 
         RenderTexture heightmapRTLowRes = RTExtensions.CreateRTexture(new Vector2(LowResTextureResolution, LowResTextureResolution), 0,
                                                                       RenderTextureFormat.ARGB32,
                                                                       FilterMode.Bilinear,
-                                                                      TextureWrapMode.Clamp, true, 0, false);
+                                                                      WrapMode, Mipmaps, 0, POT);
 
-        Heightmap = new Texture2D(PackedTextureResolution, PackedTextureResolution, TextureFormat.ARGB32, true);
-        Heightmap.wrapMode = TextureWrapMode.Clamp;
+        Heightmap = new Texture2D(PackedTextureResolution, PackedTextureResolution, TextureFormat.ARGB32, Mipmaps);
+        Heightmap.wrapMode = WrapMode;
         Heightmap.filterMode = FilterMode.Bilinear;
         Heightmap.anisoLevel = 0;
         Heightmap.Apply();
 
-        HeightmapLowRes = new Texture2D(LowResTextureResolution, LowResTextureResolution, TextureFormat.ARGB32, true);
-        HeightmapLowRes.wrapMode = TextureWrapMode.Clamp;
+        HeightmapLowRes = new Texture2D(LowResTextureResolution, LowResTextureResolution, TextureFormat.ARGB32, Mipmaps);
+        HeightmapLowRes.wrapMode = WrapMode;
         HeightmapLowRes.filterMode = FilterMode.Bilinear;
         HeightmapLowRes.anisoLevel = 0;
         HeightmapLowRes.Apply();
@@ -332,8 +339,11 @@ public class PatchTree
         GameObject.layer = Sphere.gameObject.layer;
         GameObject.AddComponent<MeshFilter>();
         GameObject.AddComponent<MeshRenderer>();
-        GameObject.GetComponent<MeshRenderer>().sharedMaterial = new Material(Shader.Find("Diffuse"));
-        GameObject.GetComponent<MeshRenderer>().sharedMaterial.SetTexture("_MainTex", Heightmap);
+        GameObject.GetComponent<MeshRenderer>().sharedMaterial = new Material(Sphere.Shader);
+
+        if(GameObject.GetComponent<MeshRenderer>().sharedMaterial.HasProperty("_MainTex"))
+            GameObject.GetComponent<MeshRenderer>().sharedMaterial.SetTexture("_MainTex", Heightmap);
+
         Mesh = new Mesh();
 
         vertices = new Vector3[Sphere.PatchConfig.GridSize];
