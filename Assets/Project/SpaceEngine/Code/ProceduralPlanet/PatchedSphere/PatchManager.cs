@@ -1,5 +1,7 @@
+using System;
 using System.Collections.Generic;
 
+[Serializable]
 public class PatchManager
 {
     private List<int[]> patches = new List<int[]>();

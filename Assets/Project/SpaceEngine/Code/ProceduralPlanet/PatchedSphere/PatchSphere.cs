@@ -4,12 +4,11 @@ using System.Collections.Generic;
 [ExecuteInEditMode]
 public class PatchSphere : MonoBehaviour
 {
-    public Transform LODTarget;
-
     public Shader CoreShader;
+    [HideInInspector]
     public Material CoreMaterial;
 
-    public Planet planet;
+    public Planet ParentPlanet;
 
     public PatchQuality PatchQuality = PatchQuality.Standard;
     public PatchResolution PatchResoulution = PatchResolution.Standard;
@@ -115,9 +114,10 @@ public class PatchSphere : MonoBehaviour
 
     private void LateUpdate()
     {
-        if (LODTarget == null) return;
+        if (ParentPlanet == null) return;
+        if (ParentPlanet.LODTarget == null) return;
 
-        Vector3 InversedCameraPosition = transform.InverseTransformPoint(LODTarget.position);
+        Vector3 InversedCameraPosition = transform.InverseTransformPoint(ParentPlanet.LODTarget.position);
 
         Splitted = Rejoined = false;
         HighestSplitLevel = 0;

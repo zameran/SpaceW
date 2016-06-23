@@ -1,11 +1,8 @@
-using UnityEngine;
-
 public enum PatchQuality { Minimum, Low, Standard, High, Maximum };
 
 public enum PatchResolution { Minimum, Low, Standard, High, Maximum };
 
 public enum NeighborDirection { Top = 0, Right = 1, Bottom = 2, Left = 3 };
-
 
 public class PatchConfig
 {

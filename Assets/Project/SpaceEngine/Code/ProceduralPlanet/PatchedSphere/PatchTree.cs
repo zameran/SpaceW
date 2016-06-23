@@ -1,10 +1,13 @@
 using UnityEngine;
 
+using System;
 using System.Collections.Generic;
+
+using Object = UnityEngine.Object;
 
 public class PatchTree
 {
-    PatchSphere Sphere;
+    public PatchSphere Sphere;
 
     Vector3[] vertices;
     Vector2[] uv;
@@ -13,13 +16,13 @@ public class PatchTree
     Vector3[] vols;
     Vector2[] uvvols;
 
-    ushort SplitLevel;
+    public ushort SplitLevel;
 
-    bool HasChildren;
-    bool NeedsTerrain;
-    bool NeedsReedge;
+    public bool HasChildren;
+    public bool NeedsTerrain;
+    public bool NeedsReedge;
 
-    float Size;
+    public float Size;
 
     Vector3 Up, Front, Right;
     Vector3 FrontProjected, UpProjected;
@@ -29,20 +32,20 @@ public class PatchTree
 
     Plane Plane;
 
-    Vector3 Middle;
+    public Vector3 Middle;
     Vector3 MiddleProjected;
 
-    Vector3 PatchNormal;
+    public Vector3 PatchNormal;
 
-    GameObject GameObject;
-    Mesh Mesh;
-    MeshCollider Collider = null;
+    public GameObject GameObject;
+    public Mesh Mesh;
+    public MeshCollider Collider = null;
 
     public static List<PatchColliderQueue> ColliderQueueList = new List<PatchColliderQueue>(32);
 
-    PatchTree Parent;
-    PatchTree[] Children = new PatchTree[4];
-    PatchNeighbor[] Neighbors = new PatchNeighbor[4];
+    public PatchTree Parent;
+    public PatchTree[] Children = new PatchTree[4];
+    public PatchNeighbor[] Neighbors = new PatchNeighbor[4];
 
     byte NeedsRejoinCount;
     byte Edges;
@@ -263,40 +266,66 @@ public class PatchTree
         MiddleProjected = MiddleProjected.NormalizeToRadius(Sphere.Radius);
     }
 
-    private void GenerateTerrain()
+    private void RenderTextures(out Texture2D Heightmap, out Texture2D HeightmapLowRes)
     {
         int PackedTextureResolution = Sphere.PatchConfig.LevelHeightMapRes(SplitLevel);
+        int LowResTextureResolution = Sphere.PatchConfig.PatchSize;
 
+        RenderTexture heightmapRT = RTExtensions.CreateRTexture(new Vector2(PackedTextureResolution, PackedTextureResolution), 0,
+                                                        RenderTextureFormat.ARGB32,
+                                                        FilterMode.Bilinear,
+                                                        TextureWrapMode.Clamp, true, 0, false);
+
+        RenderTexture heightmapRTLowRes = RTExtensions.CreateRTexture(new Vector2(LowResTextureResolution, LowResTextureResolution), 0,
+                                                                      RenderTextureFormat.ARGB32,
+                                                                      FilterMode.Bilinear,
+                                                                      TextureWrapMode.Clamp, true, 0, false);
+
+        Heightmap = new Texture2D(PackedTextureResolution, PackedTextureResolution, TextureFormat.ARGB32, true);
+        Heightmap.wrapMode = TextureWrapMode.Clamp;
+        Heightmap.filterMode = FilterMode.Bilinear;
+        Heightmap.anisoLevel = 0;
+        Heightmap.Apply();
+
+        HeightmapLowRes = new Texture2D(LowResTextureResolution, LowResTextureResolution, TextureFormat.ARGB32, true);
+        HeightmapLowRes.wrapMode = TextureWrapMode.Clamp;
+        HeightmapLowRes.filterMode = FilterMode.Bilinear;
+        HeightmapLowRes.anisoLevel = 0;
+        HeightmapLowRes.Apply();
+
+        RenderTexture.active = heightmapRT;
+        RenderQuadVolume(PackedTextureResolution, PackedTextureResolution, CoreMaterial, Volume);
+        Heightmap.ReadPixels(new Rect(0, 0, PackedTextureResolution, PackedTextureResolution), 0, 0, false);
+        Heightmap.Apply();
+        RenderTexture.active = null;
+
+        RenderTexture.active = heightmapRTLowRes;
+        RenderQuadVolume(LowResTextureResolution, LowResTextureResolution, CoreMaterial, Volume);
+        HeightmapLowRes.ReadPixels(new Rect(0, 0, LowResTextureResolution, LowResTextureResolution), 0, 0, false);
+        HeightmapLowRes.Apply();
+        RenderTexture.active = null;
+    }
+
+    private void GenerateTerrain()
+    {
         CoreShader = Sphere.CoreShader;
         CoreMaterial = Sphere.CoreMaterial;
 
-        if (Sphere.planet != null)
+        if (Sphere.ParentPlanet != null)
         {
-            if (Sphere.planet is Planetoid)
+            if (Sphere.ParentPlanet is Planetoid)
             {
-                Planetoid planetoid = Sphere.planet as Planetoid;
+                Planetoid planetoid = Sphere.ParentPlanet as Planetoid;
 
                 planetoid.tccps.UpdateUniforms(CoreMaterial);
                 planetoid.NPS.UpdateUniforms(CoreMaterial);
             }
         }
 
-        RenderTexture heightmapRT = RTExtensions.CreateRTexture(new Vector2(PackedTextureResolution, PackedTextureResolution), 0, 
-                                                                RenderTextureFormat.ARGB32, 
-                                                                FilterMode.Bilinear, 
-                                                                TextureWrapMode.Clamp, true, 0, false);
+        Texture2D Heightmap;
+        Texture2D HeightmapLowRes;
 
-        Texture2D heightmap = new Texture2D(PackedTextureResolution, PackedTextureResolution, TextureFormat.ARGB32, true);
-        heightmap.wrapMode = TextureWrapMode.Clamp;
-        heightmap.filterMode = FilterMode.Bilinear;
-        heightmap.anisoLevel = 0;
-        heightmap.Apply();
-
-        RenderTexture.active = heightmapRT;
-        RenderQuadVolume(PackedTextureResolution, PackedTextureResolution, CoreMaterial, Volume);
-        heightmap.ReadPixels(new Rect(0, 0, PackedTextureResolution, PackedTextureResolution), 0, 0, false);
-        heightmap.Apply();
-        RenderTexture.active = null;
+        RenderTextures(out Heightmap, out HeightmapLowRes);
 
         GameObject = new GameObject();
         GameObject.name = "Patch_LOD_ " + SplitLevel + " : [" + Up + "]";
@@ -304,7 +333,7 @@ public class PatchTree
         GameObject.AddComponent<MeshFilter>();
         GameObject.AddComponent<MeshRenderer>();
         GameObject.GetComponent<MeshRenderer>().sharedMaterial = new Material(Shader.Find("Diffuse"));
-        GameObject.GetComponent<MeshRenderer>().sharedMaterial.SetTexture("_MainTex", heightmap);
+        GameObject.GetComponent<MeshRenderer>().sharedMaterial.SetTexture("_MainTex", Heightmap);
         Mesh = new Mesh();
 
         vertices = new Vector3[Sphere.PatchConfig.GridSize];
@@ -313,13 +342,13 @@ public class PatchTree
         uvvols = new Vector2[Sphere.PatchConfig.GridSize];
         normals = new Vector3[Sphere.PatchConfig.GridSize];
 
-        Color[] heights = heightmap.GetPixels();
+        Color[] heights = HeightmapLowRes.GetPixels();
 
         Vector3 origin = Volume.vertices[0];
 
         float vertStep = Size / (Sphere.PatchConfig.PatchSize - 1);                                         //vertex spacing
 
-        float startHMap = 1.0f / PackedTextureResolution;
+        float startHMap = 1.0f / Sphere.PatchConfig.LevelHeightMapRes(SplitLevel);
         float endHMap = 1.0f - startHMap;
         float uCoord = startHMap, vCoord = startHMap;                                                       //uv coordinates for the heightmap
         float uvStep = (endHMap - startHMap) / (Sphere.PatchConfig.PatchSize - 1);                          //hmap uv step size inside the loop
@@ -427,8 +456,8 @@ public class PatchTree
         }
 
         Patch patch = GameObject.AddComponent<Patch>();
-        patch.Mesh = Mesh;
-        patch.Texture = heightmap;
+        patch.PatchTree = this;
+        patch.Texture = Heightmap;
     }
 
     private void GapFix(byte directionsMask)
