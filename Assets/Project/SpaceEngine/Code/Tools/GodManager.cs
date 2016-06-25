@@ -40,8 +40,10 @@ using ZFramework.Unity.Common.Messenger;
 
 public sealed class GodManager : MonoBehaviour
 {
+    public bool Debug = true;
+
     private void Awake()
     {
-        Messenger.Setup(true);
+        Messenger.Setup(Debug);
     }
 }

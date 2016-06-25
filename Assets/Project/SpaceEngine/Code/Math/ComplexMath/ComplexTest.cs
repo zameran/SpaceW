@@ -1,17 +1,49 @@
 ﻿using UnityEngine;
 
+using ZFramework.Unity.Common.Messenger;
+
 public class ComplexTest : MonoBehaviour
 {
-    public Complex a = new Complex(0, 100);
-    public Complex b = new Complex(1, 50);
-    public ComplexVector v = ComplexVector.Zero;
+    public ComplexTranform[] Transforms;
+    public ComplexVector Offset;
+
+    public Vector3d offset = Vector3d.zero;
+
+    public float Rim = 20000.0f;
 
     private void Start()
     {
-        Debug.Log("A: " + a.ToString());
-        Debug.Log("B: " + b.ToString());
-        Debug.Log("A + B: " + (a + b).ToString());
 
-        Debug.Log("V: " + v.ToString());
+    }
+
+    private void OnDrawGizmos()
+    {
+        Gizmos.color = Color.red;
+
+        for (int i = 0; i < Transforms.Length; i++)
+        {
+            Gizmos.DrawWireSphere(Transforms[i].RelativePosition, Rim);
+        }
+    }
+
+    private void LateUpdate()
+    {
+        Shift();
+    }
+
+    private void Shift()
+    {
+        Vector3d currentOffset = this.transform.position;
+
+        for (int i = 0; i < Transforms.Length; i++)
+        {
+            Transforms[i].RelativePosition -= currentOffset.ToVector3();
+            Transforms[i].SetComplexPostion(Transforms[i].RelativePosition);
+            Transforms[i].IncrementComplexPosition(200);
+        }
+
+        this.transform.position -= currentOffset.ToVector3();
+
+        offset += currentOffset;
     }
 }

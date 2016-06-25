@@ -200,4 +200,9 @@ public static class VectorHelper
     {
         return new Vector4(color.r, color.g, color.b, customAlpha);
     }
+
+    public static bool OneOfIsBiggerThan(this Vector3 v, float value)
+    {
+        return (v.x >= value || v.y >= value || v.z >= value);
+    }
 }

@@ -34,13 +34,16 @@
 #endregion
 
 using System;
+
 using UnityEngine;
+
+using ZFramework.Unity.Common.Messenger;
 
 public sealed class FlyCamera : GameCamera
 {
     public Camera cameraComponent = null;
 
-    public float speed = 0.1f;
+    public float speed = 1.0f;
     public float rotationSpeed = 3.0f;
     public float alignDistance = 1024.0f;
 
