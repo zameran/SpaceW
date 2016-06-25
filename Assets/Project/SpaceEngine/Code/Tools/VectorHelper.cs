@@ -190,4 +190,14 @@ public static class VectorHelper
 
         return min;
     }
+
+    public static Vector4 FromColor(this Color color)
+    {
+        return new Vector4(color.r, color.g, color.b, color.a);
+    }
+
+    public static Vector4 FromColor(this Color color, float customAlpha)
+    {
+        return new Vector4(color.r, color.g, color.b, customAlpha);
+    }
 }

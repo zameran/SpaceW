@@ -117,6 +117,8 @@ public sealed class Atmosphere : MonoBehaviour
 
     public Vector3 Origin;
 
+    public Color[] shineColors = new Color[4] { XKCDColors.Bluish, XKCDColors.Bluish, XKCDColors.Bluish, XKCDColors.Bluish };
+
     private Matrix4x4 shineColorsMatrix1;
     private Matrix4x4 shineOccludersMatrix1;
     private Matrix4x4 occludersMatrix1;
@@ -271,9 +273,11 @@ public sealed class Atmosphere : MonoBehaviour
         {
             if (shineCasters[i] == null) { Debug.Log("Atmosphere: Shine problem!"); break; }
 
+            float distance = shineColors[i].a; //TODO : Distance based shine power.
+
             soc1.SetRow(i, VectorHelper.MakeFrom((shineCasters[i].transform.position - Origin).normalized, 1.0f));
 
-            sc1.SetRow(index, Vector4.one);
+            sc1.SetRow(index, VectorHelper.FromColor(shineColors[i], distance));
 
             index++;
         }

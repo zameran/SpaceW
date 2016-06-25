@@ -103,12 +103,16 @@
 
 			inline float4 GroundFinalColorWithAtmosphere(float4 terrainColor, float3 p, float3 n, float3 WSD, float4 WSPR)
 			{	
+				float3 WCPG = _Globals_WorldCameraPos + _Globals_Origin;
 				float3 sunL = 0;
 				float3 skyE = 0;
 				float3 extinction = 0;
 
+				//float3 d = normalize((mul(_Globals_CameraToWorld, float4((mul(_Globals_ScreenToCamera, p)).xyz, 0.0))).xyz);
+				float3 d = normalize((_Globals_WorldCameraPos - mul(_Globals_CameraToWorld, p)).xyz);
+
 				float cTheta = dot(n, -WSD);
-				
+	
 				p += _Globals_Origin;
 
 				SunRadianceAndSkyIrradiance(p, n, WSD, sunL, skyE);
@@ -119,7 +123,9 @@
 					eclipse *= EclipseShadow(p, WSD, WSPR.w);
 				#endif
 
-				float4 inscatter = InScattering(_Globals_WorldCameraPos + _Globals_Origin, p, WSD, extinction, 1.0) * eclipse;
+				float4 inscatter = InScattering(WCPG, p, WSD, extinction, 1.0) * eclipse;
+
+				//inscatter += float4(SkyShineRadiance(p, d, _Sky_ShineOccluders_1, _Sky_ShineColors_1), 0.0);
 
 				float3 groundColor = 1.5 * RGB2Reflectance(terrainColor).rgb * (sunL * max(cTheta, 0) + skyE) / M_PI;
 

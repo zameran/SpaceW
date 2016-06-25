@@ -50,8 +50,8 @@ RWTexture2D<float4> Normal;
 StructuredBuffer<QuadGenerationConstants> quadGenerationConstants;
 
 RWStructuredBuffer<OutputStruct> patchPreOutput;
-RWStructuredBuffer<OutputStruct> patchOutput;
 RWStructuredBuffer<OutputStruct> patchPreOutputSub;
+RWStructuredBuffer<OutputStruct> patchOutput;
 
 RWStructuredBuffer<QuadCorners> quadCorners;
 

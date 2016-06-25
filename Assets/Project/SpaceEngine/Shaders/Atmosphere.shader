@@ -97,10 +97,7 @@ Shader "SpaceEngine/Atmosphere/Atmosphere"
 			#pragma only_renderers d3d11
 			#pragma vertex vert
 			#pragma fragment frag
-			
-			uniform float4x4 _Globals_CameraToWorld;
-			uniform float4x4 _Globals_ScreenToCamera;
-			
+					
 			uniform sampler2D _Sun_Glare;
 			uniform float _Sun_Glare_Scale;
 			uniform float4 _Sun_Glare_Color;

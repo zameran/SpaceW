@@ -95,6 +95,8 @@ uniform float3 _Sun_WorldSunDir_2;
 uniform float3 _Sun_WorldSunDir_3;
 uniform float3 _Sun_WorldSunDir_4;
 
+uniform float4x4 _Globals_CameraToWorld;
+uniform float4x4 _Globals_ScreenToCamera;
 uniform float3 _Globals_WorldCameraPos;
 uniform float3 _Globals_Origin;
 
@@ -652,7 +654,7 @@ float3 SkyShineRadiance(float3 camera, float3 viewdir, float4x4 _Sky_ShineOcclud
 	{
 		if (_Sky_ShineColors_1[i].w <= 0) break;
 
-		inscatter += SkyRadiance(camera, viewdir, _Sky_ShineOccluders_1[i].xyz, extinction, 0.0);
+		inscatter += SkyRadiance(camera, viewdir, _Sky_ShineOccluders_1[i].xyz, extinction, 1.0);
 		inscatter *= _Sky_ShineColors_1[i].xyz * _Sky_ShineColors_1[i].w;
 	}
 
