@@ -24,6 +24,10 @@ namespace UnityEngine
             {
                 return real;
             }
+            set
+            {
+                real = value;
+            }
         }
 
         public double Imaginary
@@ -31,6 +35,10 @@ namespace UnityEngine
             get
             {
                 return imaginary;
+            }
+            set
+            {
+                imaginary = value;
             }
         }
 
@@ -53,6 +61,12 @@ namespace UnityEngine
         public static readonly Complex Zero = new Complex(0.0, 0.0);
         public static readonly Complex One = new Complex(1.0, 0.0);
         public static readonly Complex ImaginaryOne = new Complex(0.0, 1.0);
+
+        public Complex(Complex from)
+        {
+            this.real = from.real;
+            this.imaginary = from.imaginary;
+        }
 
         public Complex(double real, double imaginary)
         {
@@ -90,7 +104,7 @@ namespace UnityEngine
             return dividend / divisor;
         }
 
-        public static Complex operator -(Complex value)  /* Unary negation of a complex number */
+        public static Complex operator -(Complex value)
         {
             return new Complex((-value.real), (-value.imaginary));
         }
@@ -107,7 +121,7 @@ namespace UnityEngine
 
         public static Complex operator *(Complex left, Complex right)
         {
-            // Multiplication:  (a + bi)(c + di) = (ac -bd) + (bc + ad)i
+            // Multiplication : (a + bi)(c + di) = (ac -bd) + (bc + ad)i
             double result_Realpart = (left.real * right.real) - (left.imaginary * right.imaginary);
             double result_Imaginarypart = (left.imaginary * right.real) + (left.real * right.imaginary);
 
@@ -169,7 +183,7 @@ namespace UnityEngine
         }
         public static Complex Conjugate(Complex value)
         {
-            // Conjugate of a Complex number: the conjugate of x+i*y is x-i*y 
+            // Conjugate of a Complex number : the conjugate of x+i*y is x-i*y 
             return new Complex(value.real, (-value.imaginary));
 
         }
@@ -299,7 +313,7 @@ namespace UnityEngine
             return new Complex(Math.Sin(a) * Math.Cosh(b), Math.Cos(a) * Math.Sinh(b));
         }
 
-        public static Complex Sinh(Complex value) /* Hyperbolic sin */
+        public static Complex Sinh(Complex value)
         {
             double a = value.real;
             double b = value.imaginary;
@@ -308,7 +322,7 @@ namespace UnityEngine
 
         }
 
-        public static Complex Asin(Complex value) /* Arcsin */
+        public static Complex Asin(Complex value)
         {
             return (-ImaginaryOne) * Log(ImaginaryOne * value + Sqrt(One - value * value));
         }
@@ -321,7 +335,7 @@ namespace UnityEngine
             return new Complex(Math.Cos(a) * Math.Cosh(b), -(Math.Sin(a) * Math.Sinh(b)));
         }
 
-        public static Complex Cosh(Complex value) /* Hyperbolic cos */
+        public static Complex Cosh(Complex value)
         {
             double a = value.real;
             double b = value.imaginary;
@@ -329,7 +343,7 @@ namespace UnityEngine
             return new Complex(Math.Cosh(a) * Math.Cos(b), Math.Sinh(a) * Math.Sin(b));
         }
 
-        public static Complex Acos(Complex value) /* Arccos */
+        public static Complex Acos(Complex value)
         {
             return (-ImaginaryOne) * Log(value + ImaginaryOne * Sqrt(One - (value * value)));
 
@@ -340,37 +354,37 @@ namespace UnityEngine
             return Sin(value) / Cos(value);
         }
 
-        public static Complex Tanh(Complex value) /* Hyperbolic tan */
+        public static Complex Tanh(Complex value)
         {
             return Sinh(value) / Cosh(value);
         }
 
-        public static Complex Atan(Complex value) /* Arctan */
+        public static Complex Atan(Complex value)
         {
             Complex Two = new Complex(2.0, 0.0);
 
             return (ImaginaryOne / Two) * (Log(One - ImaginaryOne * value) - Log(One + ImaginaryOne * value));
         }
 
-        public static Complex Log(Complex value) /* Log of the complex number value to the base of 'e' */
+        public static Complex Log(Complex value)
         {
             return new Complex((Math.Log(Abs(value))), (Math.Atan2(value.imaginary, value.real)));
 
         }
 
-        public static Complex Log(Complex value, double baseValue) /* Log of the complex number to a the base of a double */
+        public static Complex Log(Complex value, double baseValue)
         {
             return Log(value) / Log(baseValue);
         }
 
-        public static Complex Log10(Complex value) /* Log to the base of 10 of the complex number */
+        public static Complex Log10(Complex value)
         {
             Complex temp_log = Log(value);
 
             return Scale(temp_log, LOG_10_INV);
         }
 
-        public static Complex Exp(Complex value) /* The complex number raised to e */
+        public static Complex Exp(Complex value)
         {
             double temp_factor = Math.Exp(value.real);
             double result_re = temp_factor * Math.Cos(value.imaginary);
@@ -379,12 +393,12 @@ namespace UnityEngine
             return new Complex(result_re, result_im);
         }
 
-        public static Complex Sqrt(Complex value) /* Square root ot the complex number */
+        public static Complex Sqrt(Complex value)
         {
             return Complex.FromPolarCoordinates(Math.Sqrt(value.Magnitude), value.Phase / 2.0);
         }
 
-        public static Complex Pow(Complex value, Complex power) /* A complex number raised to another complex number */
+        public static Complex Pow(Complex value, Complex power)
         {
             if (power == Complex.Zero)
             {
@@ -410,7 +424,7 @@ namespace UnityEngine
             return new Complex(t * Math.Cos(newRho), t * Math.Sin(newRho));
         }
 
-        public static Complex Pow(Complex value, double power) // A complex number raised to a real number 
+        public static Complex Pow(Complex value, double power)
         {
             return Pow(value, new Complex(power, 0));
         }
