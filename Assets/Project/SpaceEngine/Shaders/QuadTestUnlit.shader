@@ -29,6 +29,7 @@
 			#pragma fragment frag
 
 			#pragma multi_compile LIGHT_1 LIGHT_2 LIGHT_3 LIGHT_4
+			#pragma multi_compile SHINE_ON SHINE_OFF
 			#pragma multi_compile ECLIPSES_ON ECLIPSES_OFF
 			#pragma multi_compile ATMOSPHERE_ON ATMOSPHERE_OFF
 
@@ -117,19 +118,27 @@
 
 				SunRadianceAndSkyIrradiance(p, n, WSD, sunL, skyE);
 
-				float eclipse = 1;
-
 				#ifdef ECLIPSES_ON
+					float eclipse = 1;
+
 					eclipse *= EclipseShadow(p, WSD, WSPR.w);
 				#endif
 
-				float4 inscatter = InScattering(WCPG, p, WSD, extinction, 1.0) * eclipse;
+				float4 inscatter = InScattering(WCPG, p, WSD, extinction, 1.0);
 
-				//inscatter += float4(SkyShineRadiance(p, d, _Sky_ShineOccluders_1, _Sky_ShineColors_1), 0.0);
+				#ifdef ECLIPSES_ON
+					inscatter *= eclipse;
+				#endif
+
+				#ifdef SHINE_ON
+					inscatter += float4(SkyShineRadiance(p, d, _Sky_ShineOccluders_1, _Sky_ShineColors_1), 0.0);
+				#endif
 
 				float3 groundColor = 1.5 * RGB2Reflectance(terrainColor).rgb * (sunL * max(cTheta, 0) + skyE) / M_PI;
 
-				extinction = 1 * _ExtinctionGroundFade + (1 - _ExtinctionGroundFade) * extinction * eclipse;
+				#ifdef ECLIPSES_ON
+					extinction = 1 * _ExtinctionGroundFade + (1 - _ExtinctionGroundFade) * extinction * eclipse;
+				#endif
 
 				float4 finalColor = float4(groundColor, 1) * float4(extinction, 1) + inscatter;
 				
