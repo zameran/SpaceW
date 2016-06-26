@@ -39,7 +39,7 @@ public class ComplexTest : MonoBehaviour
         {
             Transforms[i].RelativePosition -= currentOffset.ToVector3();
             Transforms[i].SetComplexPostion(Transforms[i].RelativePosition);
-            Transforms[i].IncrementComplexPosition(Rim);
+            Transforms[i].IncrementComplexPosition(200);
         }
 
         this.transform.position -= currentOffset.ToVector3();
