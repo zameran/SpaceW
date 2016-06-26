@@ -33,6 +33,8 @@
 // Creator: zameran
 #endregion
 
+//#define KSP_SHIT
+
 #if KSP_SHIT
 using UnityEngine;
 
