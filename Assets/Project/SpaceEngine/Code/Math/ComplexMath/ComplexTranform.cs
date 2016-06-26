@@ -7,8 +7,8 @@ public class ComplexTranform : MonoBehaviour
 {
     public Transform Transform { get { return this.transform; } }
 
-    public Vector3 RelativePosition { get { return this.transform.position; } set { this.transform.position = value; } }
-    public Vector3 AbsolutePosition = Vector3.zero;
+    public Vector3d RelativePosition { get { return this.transform.position; } set { this.transform.position = value; } }
+    public Vector3d AbsolutePosition = Vector3d.zero;
 
     public ComplexVector Position;
 
@@ -24,7 +24,7 @@ public class ComplexTranform : MonoBehaviour
                                      new Complex(offset.z, Position.z.Imaginary));
     }
 
-    public void IncrementComplexPosition(float rim)
+    public void CalculateComplexPosition(float rim)
     {
 
     }
