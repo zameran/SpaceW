@@ -759,7 +759,8 @@ float4 InScattering(float3 camera, float3 _point, float3 sundir, out float3 exti
 			#ifdef ANALYTIC_TRANSMITTANCE
 				extinction = min(AnalyticTransmittance(r, mu, d), 1.0);
 			#else
-				mu > 0 ? extinction = min(Transmittance(r, mu) / Transmittance(r1, mu1), 1.0) : extinction = min(Transmittance(r1, -mu1) / Transmittance(r, -mu), 1.0);
+				extinction = (mu > 0) ? min(Transmittance(r, mu) / Transmittance(r1, mu1), 1.0) : 
+										min(Transmittance(r1, -mu1) / Transmittance(r, -mu), 1.0);
 			#endif
 
 			#ifdef HORIZON_HACK
