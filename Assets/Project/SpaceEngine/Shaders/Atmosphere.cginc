@@ -88,6 +88,8 @@ struct Sun
 	float3x3 WorldToLocalRotation;
 };
 
+uniform float _Aerial_Perspective_Offset;
+
 uniform StructuredBuffer<Sun> Suns;
 
 uniform float3 _Sun_WorldSunDir_1;
@@ -740,10 +742,10 @@ float4 InScattering(float3 camera, float3 _point, float3 sundir, out float3 exti
 			float muR = 1 - abs(dot(normalize(cross(camera, sundir)), viewdir)); 
 			float4 inScatter;
 
-			if (r < Rg + 2000.0) 
+			if (r < Rg + _Aerial_Perspective_Offset) 
 			{
 				// avoids imprecision problems in aerial perspective near ground
-				float f = (Rg + 2000.0) / r;
+				float f = (Rg + _Aerial_Perspective_Offset) / r;
 				r = r * f;
 				rMu = rMu * f;
 				_point = _point * f;

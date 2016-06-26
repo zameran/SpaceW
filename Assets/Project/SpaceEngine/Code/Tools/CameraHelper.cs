@@ -96,4 +96,22 @@ public static class CameraHelper
     {
         return camera.GetCameraToScreen().inverse;
     }
+
+    public static Matrix4x4 GetScreenToCamera(this Camera camera, bool useRTFix)
+    {
+        return camera.GetCameraToScreen(useRTFix).inverse;
+    }
+
+    public static Vector3 GetProjectedDirection(this Vector3 v)
+    {
+        Matrix4x4 cameraToWorld = CameraHelper.Main().GetCameraToWorld();
+        Matrix4x4 screenToCamera = CameraHelper.Main().GetScreenToCamera();
+
+        return cameraToWorld.MultiplyPoint(screenToCamera.MultiplyPoint(v));
+    }
+
+    public static Vector3 GetRelativeProjectedDirection(this Vector3 v, Matrix4x4 worldToLocal)
+    {
+        return worldToLocal.MultiplyPoint(v.GetProjectedDirection());
+    }
 }

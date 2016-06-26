@@ -76,6 +76,7 @@ public sealed class Atmosphere : MonoBehaviour
     public float Height = 100.0f;
     public float Scale = 1.0f;
     public float Fade = 1.0f;
+    public float AerialPerspectiveOffset = 2000.0f;
 
     public int AtmosphereMeshResolution = 2;
 
@@ -596,6 +597,8 @@ public sealed class Atmosphere : MonoBehaviour
 
             block.SetTexture("_Sun_Glare", SunGlareTexture);
 
+            block.SetFloat("_Aerial_Perspective_Offset", AerialPerspectiveOffset);
+
             block.SetFloat("Rg", atmosphereParameters.Rg);
             block.SetFloat("Rt", atmosphereParameters.Rt);
             block.SetFloat("RL", atmosphereParameters.Rl);
@@ -733,6 +736,9 @@ public sealed class Atmosphere : MonoBehaviour
             block.SetVector("betaMSca", atmosphereParameters.BETA_MSca / 1000);
             block.SetVector("betaMEx", atmosphereParameters.BETA_MEx / 1000);
             block.SetFloat("mieG", Mathf.Clamp(atmosphereParameters.MIE_G, 0.0f, 0.99f));
+
+            block.SetFloat("_Aerial_Perspective_Offset", AerialPerspectiveOffset);
+
             block.SetFloat("_Sun_Glare_Scale", SunGlareScale);
 
             if (RunTimeBaking && artb != null)
