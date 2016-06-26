@@ -289,7 +289,7 @@ public sealed class Atmosphere : MonoBehaviour
         oc2 = Matrix4x4.zero;
         suns = Matrix4x4.zero;
 
-        float actualRadius = 250000;
+        float actualRadius = 250000.0f;
 
         List<AtmosphereSun> Suns = new List<AtmosphereSun>();
 
@@ -442,6 +442,46 @@ public sealed class Atmosphere : MonoBehaviour
 
         if (OnBaked != null)
             OnBaked -= AtmosphereOnBaked;
+    }
+
+    private void OnDrawGizmos()
+    {
+        if (planetoid != null)
+        {
+            if (planetoid.DrawGizmos == false) return;
+
+            //NOTE : Sun Direction is sun's tranform.forward with sun rotation applyied...
+
+            List<AtmosphereSun> Suns = new List<AtmosphereSun>();
+
+            if (Sun_1 != null) Suns.Add(Sun_1);
+            if (Sun_2 != null) Suns.Add(Sun_2);
+            if (Sun_3 != null) Suns.Add(Sun_3);
+            if (Sun_4 != null) Suns.Add(Sun_4);
+
+            for (int i = 0; i < Mathf.Min(4, Suns.Count); i++)
+            {
+                float sunRadius = Suns[i].Radius;
+                float sunToPlanetDistance = Vector3.Distance(planetoid.Origin, Suns[i].transform.position);
+                float umbraLegth = CalculateUmbraLength(planetoid.PlanetRadius * 2, sunRadius, sunToPlanetDistance);
+                float umbraAngle = CalculateUmbraSubtendedAngle(planetoid.PlanetRadius * 2, umbraLegth);
+
+                Vector3 direction = (Suns[i].GetDirection() * umbraLegth);
+
+                Gizmos.color = Color.yellow;
+                Gizmos.DrawWireSphere(Suns[i].transform.position, sunRadius);
+                Gizmos.DrawRay(Suns[i].transform.position, (direction / umbraLegth) * -sunToPlanetDistance);
+
+                Gizmos.color = Color.red;
+                Gizmos.DrawRay(planetoid.Origin, direction);
+
+                Gizmos.color = Color.blue;
+                Gizmos.DrawRay(planetoid.Origin + direction, -(Quaternion.Euler(umbraAngle, 0, 0) * direction));
+                Gizmos.DrawRay(planetoid.Origin + direction, -(Quaternion.Euler(-umbraAngle, 0, 0) * direction));
+                Gizmos.DrawRay(planetoid.Origin + direction, -(Quaternion.Euler(0, umbraAngle, 0) * direction));
+                Gizmos.DrawRay(planetoid.Origin + direction, -(Quaternion.Euler(0, -umbraAngle, 0) * direction));
+            }
+        }
     }
 
     private void AtmosphereOnPresetChanged(Atmosphere a)
@@ -723,4 +763,18 @@ public sealed class Atmosphere : MonoBehaviour
             if (Sun_4 != null) Sun_4.SetUniforms(block);
         }
     }
+
+    #region ExtraAPI
+
+    public float CalculateUmbraLength(float planetDiameter, float sunDiameter, float distance)
+    {
+        return (planetDiameter * distance) / (sunDiameter - planetDiameter);
+    }
+
+    public float CalculateUmbraSubtendedAngle(float planetDiameter, float umbraLength)
+    {
+        return Mathf.Asin(planetDiameter / (umbraLength * 2.0f)) * Mathf.Rad2Deg;
+    }
+
+    #endregion
 }
