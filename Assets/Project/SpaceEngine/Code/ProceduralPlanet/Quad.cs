@@ -110,7 +110,7 @@ public sealed class Quad : MonoBehaviour, IQuad
 
     public QuadPosition Position;
     public QuadID ID;
-
+    
     public Planetoid Planetoid;
 
     public ComputeShader CoreShader;
@@ -759,6 +759,11 @@ public sealed class Quad : MonoBehaviour, IQuad
         StartCoroutine(DispatcheCoroutineWait());
     }
 
+    public void DispatchNow()
+    {
+        StartCoroutine(DispatchCoroutine());
+    }
+
     public IEnumerator DispatcheCoroutineWait()
     {
         yield return StartCoroutine(DispatchCoroutine());
@@ -1047,19 +1052,18 @@ public sealed class Quad : MonoBehaviour, IQuad
     private Vector3 GetClosestAABBCorner()
     {
         float closestDistance = Mathf.Infinity;
+        float d;
 
         Vector3 closestCorner = Vector3.zero;
 
         for (int i = 0; i < 4; i++)
         {
-            float d = Vector3.Distance(Planetoid.LODTarget.position, QuadAABB.AABB[i]);
-
-            if(d < closestDistance)
-            {
-                closestCorner = QuadAABB.AABB[i];
-                closestDistance = d;
-            }
+            d = Vector3.Distance(Planetoid.LODTarget.position, QuadAABB.AABB[i]);   
+            if (d < closestDistance) { closestCorner = QuadAABB.AABB[i]; closestDistance = d; }
         }
+
+        d = Vector3.Distance(Planetoid.LODTarget.position, middleNormalized);
+        if (d < closestDistance) { closestCorner = middleNormalized; closestDistance = d; }
 
         return closestCorner;
     }
@@ -1067,6 +1071,7 @@ public sealed class Quad : MonoBehaviour, IQuad
     private Vector3 GetClosestCorner()
     {
         float closestDistance = Mathf.Infinity;
+        float d;
 
         Vector3 closestCorner = new Vector3(Mathf.Infinity, Mathf.Infinity, Mathf.Infinity);
 
@@ -1091,7 +1096,7 @@ public sealed class Quad : MonoBehaviour, IQuad
             br = Planetoid.transform.TransformPoint(bottomRightCorner.NormalizeToRadius(Planetoid.PlanetRadius));
         }
 
-        float d = Vector3.Distance(Planetoid.LODTarget.position, tl);
+        d = Vector3.Distance(Planetoid.LODTarget.position, tl);
 
         if (d < closestDistance)
         {
@@ -1325,7 +1330,8 @@ public sealed class Quad : MonoBehaviour, IQuad
         BrainFuckMath.UnlockAxis(ref temp, ref tempStatic, staticX, staticY, staticZ);
 
         //Just make sure that our vector values is rounded...
-        if(Planetoid.PlanetRadius % 2 == 0) temp = temp.RoundToInt();
+        //if(Planetoid.PlanetRadius % 2 == 0) temp = temp.RoundToInt();
+        //NOTE : FLOATING POINT PRECISION ANYWAY!
 
         return temp;
     }

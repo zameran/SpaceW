@@ -207,6 +207,8 @@ public sealed class Planetoid : Planet, IPlanet
         {
             Cloudsphere.InitUniforms();
         }
+
+        ReSetupQuads(); //NOTE : Force resetup on start.
     }
 
     protected override void Update()
