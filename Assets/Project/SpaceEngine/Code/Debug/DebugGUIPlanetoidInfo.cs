@@ -128,6 +128,11 @@ public sealed class DebugGUIPlanetoidInfo : DebugGUI
 
                 GUILayout.Space(10);
 
+                GUILayout.Label("HDR: ");
+                Planetoid.Atmosphere.HDRMode = (AtmosphereHDR)GUILayout.SelectionGrid((int)Planetoid.Atmosphere.HDRMode, System.Enum.GetNames(typeof(AtmosphereHDR)), 2);
+
+                GUILayout.Space(10);
+
                 GUILayout.Label("Density: ");
                 float.TryParse(GUILayout.TextField(Planetoid.Atmosphere.Density.ToString("0.0")), out Planetoid.Atmosphere.Density);
 

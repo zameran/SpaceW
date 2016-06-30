@@ -92,6 +92,8 @@ public sealed class Atmosphere : MonoBehaviour
     public Texture SunGlareTexture;
     public float SunGlareScale = 1;
 
+    public AtmosphereHDR HDRMode = AtmosphereHDR.Proland;
+
     public EngineRenderQueue RenderQueue = EngineRenderQueue.Transparent;
     public int RenderQueueOffset = 0;
 
@@ -767,6 +769,7 @@ public sealed class Atmosphere : MonoBehaviour
 
             block.SetVector("_Globals_Origin", -Origin);
             block.SetFloat("_Exposure", HDRExposure);
+            block.SetFloat("_HDRMode", (int)HDRMode);
 
             if (Sun_1 != null) Sun_1.SetUniforms(block);
             if (Sun_2 != null) Sun_2.SetUniforms(block);

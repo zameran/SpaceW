@@ -85,9 +85,9 @@ public class ScreenshotHelper : MonoBehaviour
     {
         Vector2 size = new Vector2(Screen.width * SuperSize, Screen.height * SuperSize);
 
-        RenderTexture rt = RTExtensions.CreateRTexture(size, 0, RenderTextureFormat.ARGBFloat, FilterMode.Trilinear, TextureWrapMode.Clamp, false, 6);
+        RenderTexture rt = RTExtensions.CreateRTexture(size, 0, RenderTextureFormat.ARGB32, FilterMode.Trilinear, TextureWrapMode.Clamp, false, 6);
 
-        Texture2D screenShot = new Texture2D((int)size.x, (int)size.y, TextureFormat.RGBAFloat, false);
+        Texture2D screenShot = new Texture2D((int)size.x, (int)size.y, TextureFormat.ARGB32, false);
 
         Graphics.Blit(src, rt);
 
