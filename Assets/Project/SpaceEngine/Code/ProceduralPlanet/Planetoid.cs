@@ -355,7 +355,7 @@ public sealed class Planetoid : Planet, IPlanet
         }
     }
 
-    public void Render()
+    public void Render(Camera camera)
     {
         if (Quads != null)
         {
@@ -364,7 +364,7 @@ public sealed class Planetoid : Planet, IPlanet
                 for (int i = 0; i < Quads.Count; i++)
                 {
                     if (Quads[i] != null)
-                        Quads[i].Render(DrawLayer);
+                        Quads[i].Render(camera, DrawLayer);
                 }
             }
         }
@@ -373,7 +373,7 @@ public sealed class Planetoid : Planet, IPlanet
         {
             if (AtmosphereEnabled)
             {
-                Atmosphere.Render(Origin, DrawLayer);
+                Atmosphere.Render(camera, Origin, DrawLayer);
             }
         }
 
@@ -381,9 +381,14 @@ public sealed class Planetoid : Planet, IPlanet
         {
             if (CloudsphereEnabled)
             {
-                Cloudsphere.Render(DrawLayer);
+                Cloudsphere.Render(camera, DrawLayer);
             }
         }
+    }
+
+    public void Render()
+    {
+        Render(CameraHelper.Main());
     }
 
     public void CheckCutoff()

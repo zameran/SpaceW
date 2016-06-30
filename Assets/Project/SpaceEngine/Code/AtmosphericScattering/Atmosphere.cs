@@ -425,13 +425,18 @@ public sealed class Atmosphere : MonoBehaviour
 
     public void Render(Vector3 Origin, int drawLayer = 8)
     {
+        Render(CameraHelper.Main(), Origin, drawLayer);
+    }
+
+    public void Render(Camera camera, Vector3 Origin, int drawLayer = 8)
+    {
         this.Origin = Origin;
 
         SetUniforms(planetoid.QuadAtmosphereMPB, SkyMaterial, true);
 
         SkyMaterial.renderQueue = (int)RenderQueue + RenderQueueOffset;
 
-        Graphics.DrawMesh(AtmosphereMesh, transform.localToWorldMatrix, SkyMaterial, drawLayer, CameraHelper.Main(), 0, planetoid.QuadAtmosphereMPB);
+        Graphics.DrawMesh(AtmosphereMesh, transform.localToWorldMatrix, SkyMaterial, drawLayer, camera, 0, planetoid.QuadAtmosphereMPB);
     }
 
     private void OnDestroy()

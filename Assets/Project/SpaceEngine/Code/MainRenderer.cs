@@ -98,7 +98,7 @@ public sealed class MainRenderer : MonoBehaviour
         for (int i = 0; i < planets.Count; i++)
         {
             if (planets[i] != null)
-                planets[i].Render();
+                planets[i].Render(CameraHelper.Main());
         }
     }
 }

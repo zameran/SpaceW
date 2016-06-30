@@ -266,50 +266,72 @@ public class PatchTree
         MiddleProjected = MiddleProjected.NormalizeToRadius(Sphere.Radius);
     }
 
-    private void RenderTextures(out Texture2D Heightmap, out Texture2D HeightmapLowRes)
+    private void RenderTextures(out Texture2D Heightmap, out Texture2D HeightmapLowRes, out Texture2D Normalmap)
     {
         //TODO : Fix texture sliding.
-        //NOTE : Maybe UV float precision...
 
         int PackedTextureResolution = Sphere.PatchConfig.LevelHeightMapRes(SplitLevel);
         int LowResTextureResolution = Sphere.PatchConfig.PatchSize;
 
-        var WrapMode = TextureWrapMode.Clamp;
-        var Mipmaps = false;
-        var POT = true;
+        var WrapMode = Sphere.WrapMode;
+        var TextureFilterMode = Sphere.TextureFilterMode;
+        var Mipmaps = Sphere.Mipmaps;
+        var POT = Sphere.POT;
+        var AnisoLevel = Sphere.AnisoLevel;
 
         RenderTexture heightmapRT = RTExtensions.CreateRTexture(new Vector2(PackedTextureResolution, PackedTextureResolution), 0,
-                                                        RenderTextureFormat.ARGB32,
-                                                        FilterMode.Bilinear,
-                                                        WrapMode, Mipmaps, 0, POT);
+                                                                            RenderTextureFormat.ARGB32,
+                                                                            TextureFilterMode,
+                                                                            WrapMode, Mipmaps, AnisoLevel, POT);
+
+        RenderTexture normalmapRT = RTExtensions.CreateRTexture(new Vector2(PackedTextureResolution, PackedTextureResolution), 0,
+                                                                            RenderTextureFormat.ARGB32,
+                                                                            TextureFilterMode,
+                                                                            WrapMode, Mipmaps, AnisoLevel, POT);
 
         RenderTexture heightmapRTLowRes = RTExtensions.CreateRTexture(new Vector2(LowResTextureResolution, LowResTextureResolution), 0,
                                                                       RenderTextureFormat.ARGB32,
-                                                                      FilterMode.Bilinear,
-                                                                      WrapMode, Mipmaps, 0, POT);
+                                                                      TextureFilterMode,
+                                                                      WrapMode, Mipmaps, AnisoLevel, POT);
 
         Heightmap = new Texture2D(PackedTextureResolution, PackedTextureResolution, TextureFormat.ARGB32, Mipmaps);
         Heightmap.wrapMode = WrapMode;
-        Heightmap.filterMode = FilterMode.Bilinear;
-        Heightmap.anisoLevel = 0;
+        Heightmap.filterMode = TextureFilterMode;
+        Heightmap.anisoLevel = AnisoLevel;
         Heightmap.Apply();
 
         HeightmapLowRes = new Texture2D(LowResTextureResolution, LowResTextureResolution, TextureFormat.ARGB32, Mipmaps);
         HeightmapLowRes.wrapMode = WrapMode;
-        HeightmapLowRes.filterMode = FilterMode.Bilinear;
-        HeightmapLowRes.anisoLevel = 0;
+        HeightmapLowRes.filterMode = TextureFilterMode;
+        HeightmapLowRes.anisoLevel = AnisoLevel;
         HeightmapLowRes.Apply();
 
+        Normalmap = new Texture2D(PackedTextureResolution, PackedTextureResolution, TextureFormat.ARGB32, Mipmaps);
+        Normalmap.wrapMode = WrapMode;
+        Normalmap.filterMode = TextureFilterMode;
+        Normalmap.anisoLevel = AnisoLevel;
+        Normalmap.Apply();
+
         RenderTexture.active = heightmapRT;
-        RenderQuadVolume(PackedTextureResolution, PackedTextureResolution, CoreMaterial, Volume);
+        Sphere.RenderQuadVolume(PackedTextureResolution, PackedTextureResolution, CoreMaterial, Volume, 0);
         Heightmap.ReadPixels(new Rect(0, 0, PackedTextureResolution, PackedTextureResolution), 0, 0, false);
         Heightmap.Apply();
         RenderTexture.active = null;
 
         RenderTexture.active = heightmapRTLowRes;
-        RenderQuadVolume(LowResTextureResolution, LowResTextureResolution, CoreMaterial, Volume);
+        Sphere.RenderQuadVolume(LowResTextureResolution, LowResTextureResolution, CoreMaterial, Volume, 0);
         HeightmapLowRes.ReadPixels(new Rect(0, 0, LowResTextureResolution, LowResTextureResolution), 0, 0, false);
         HeightmapLowRes.Apply();
+        RenderTexture.active = null;
+
+        CoreMaterial.SetFloat("_UVStep", 1.0f / PackedTextureResolution);
+        CoreMaterial.SetTexture("_Heightmap", Heightmap);
+        CoreMaterial.SetFloat("_HeightScale", Sphere.TerrainMaxHeight);
+
+        RenderTexture.active = normalmapRT;
+        Sphere.RenderQuadVolume(PackedTextureResolution, PackedTextureResolution, CoreMaterial, Volume, 1);
+        Normalmap.ReadPixels(new Rect(0, 0, PackedTextureResolution, PackedTextureResolution), 0, 0, false);
+        Normalmap.Apply();
         RenderTexture.active = null;
     }
 
@@ -329,20 +351,22 @@ public class PatchTree
             }
         }
 
-        //Texture2D Heightmap;
-        //Texture2D HeightmapLowRes;
+        Texture2D Heightmap;
+        Texture2D HeightmapLowRes;
+        Texture2D Normalmap;
 
-        //RenderTextures(out Heightmap, out HeightmapLowRes);
+        RenderTextures(out Heightmap, out HeightmapLowRes, out Normalmap);
 
         GameObject = new GameObject();
         GameObject.name = "Patch_LOD_ " + SplitLevel + " : [" + Up + "]";
         GameObject.layer = Sphere.gameObject.layer;
+        //GameObject.hideFlags = HideFlags.HideInHierarchy | HideFlags.HideInInspector;
         GameObject.AddComponent<MeshFilter>();
         GameObject.AddComponent<MeshRenderer>();
         GameObject.GetComponent<MeshRenderer>().sharedMaterial = new Material(Sphere.Shader);
 
-        //if(GameObject.GetComponent<MeshRenderer>().sharedMaterial.HasProperty("_MainTex"))
-        //    GameObject.GetComponent<MeshRenderer>().sharedMaterial.SetTexture("_MainTex", Heightmap);
+        if(GameObject.GetComponent<MeshRenderer>().sharedMaterial.HasProperty("_MainTex"))
+            GameObject.GetComponent<MeshRenderer>().sharedMaterial.SetTexture("_MainTex", Normalmap);
 
         Mesh = new Mesh();
 
@@ -352,7 +376,7 @@ public class PatchTree
         uvvols = new Vector2[Sphere.PatchConfig.GridSize];
         normals = new Vector3[Sphere.PatchConfig.GridSize];
 
-        //Color[] heights = HeightmapLowRes.GetPixels();
+        Color[] heights = HeightmapLowRes.GetPixels();
 
         Vector3 origin = Volume.vertices[0];
 
@@ -380,7 +404,7 @@ public class PatchTree
             for (ushort x = 0; x < Sphere.PatchConfig.PatchSize; x++)
             {
                 //get sampled height from the low res packed heightmap
-                float height = 1; //heights[idx].a;
+                float height = heights[idx].a;
 
                 height = height * Sphere.TerrainMaxHeight;
                 if (height > maxHeight) maxHeight = height;
@@ -448,8 +472,6 @@ public class PatchTree
         //restore parent transformations
         Sphere.gameObject.transform.position = parentPos;
         Sphere.gameObject.transform.rotation = parentQua;
-
-        GameObject.hideFlags = HideFlags.HideInHierarchy | HideFlags.HideInInspector;
 
         if (SplitLevel >= Sphere.MaxSplitLevel)
         {
@@ -1328,76 +1350,5 @@ public class PatchTree
         collisionPoint = Vector3.zero;
 
         return minDist;
-    }
-
-    public static void RenderQuadVolume(int width, int height, Material material, PatchAABB volume)
-    {
-        GL.PushMatrix();
-        GL.LoadOrtho();
-        GL.Viewport(new Rect(0, 0, width, height));
-
-        material.SetPass(0);
-
-        Vector3 v1 = volume.vertices[0];
-        Vector3 uv1 = volume.uvs[0];
-
-        Vector3 v2 = volume.vertices[3];
-        Vector3 uv2 = volume.uvs[3];
-
-        Vector3 v3 = volume.vertices[2];
-        Vector3 uv3 = volume.uvs[2];
-
-        Vector3 v4 = volume.vertices[1];
-        Vector3 uv4 = volume.uvs[1];
-
-        GL.Begin(GL.QUADS);
-
-        if (Application.platform == RuntimePlatform.OSXPlayer || Application.platform == RuntimePlatform.OSXWebPlayer || Application.platform == RuntimePlatform.OSXEditor)
-        {
-            GL.MultiTexCoord(0, new Vector3(0, 0, 0));
-            GL.MultiTexCoord(1, v1);
-            GL.MultiTexCoord(2, uv1);
-            GL.Vertex3(-1, -1, 0);
-
-            GL.MultiTexCoord(0, new Vector3(0, 1, 0));
-            GL.MultiTexCoord(1, v2);
-            GL.MultiTexCoord(2, uv2);
-            GL.Vertex3(-1, 1, 0);
-
-            GL.MultiTexCoord(0, new Vector3(1, 1, 0));
-            GL.MultiTexCoord(1, v3);
-            GL.MultiTexCoord(2, uv3);
-            GL.Vertex3(1, 1, 0);
-
-            GL.MultiTexCoord(0, new Vector3(1, 0, 0));
-            GL.MultiTexCoord(1, v4);
-            GL.MultiTexCoord(2, uv4);
-            GL.Vertex3(1, -1, 0);
-        }
-        else
-        {
-            GL.MultiTexCoord(0, new Vector3(0, 0, 0));
-            GL.MultiTexCoord(1, v1);
-            GL.MultiTexCoord(2, uv1);
-            GL.Vertex3(-1, 1, 0);
-
-            GL.MultiTexCoord(0, new Vector3(0, 1, 0));
-            GL.MultiTexCoord(1, v2);
-            GL.MultiTexCoord(2, uv2);
-            GL.Vertex3(-1, -1, 0);
-
-            GL.MultiTexCoord(0, new Vector3(1, 1, 0));
-            GL.MultiTexCoord(1, v3);
-            GL.MultiTexCoord(2, uv3);
-            GL.Vertex3(1, -1, 0);
-
-            GL.MultiTexCoord(0, new Vector3(1, 0, 0));
-            GL.MultiTexCoord(1, v4);
-            GL.MultiTexCoord(2, uv4);
-            GL.Vertex3(1, 1, 0);
-        }
-
-        GL.End();
-        GL.PopMatrix();
     }
 }

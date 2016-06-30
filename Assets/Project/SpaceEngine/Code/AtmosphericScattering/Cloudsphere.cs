@@ -67,6 +67,11 @@ public class Cloudsphere : MonoBehaviour
 
     public void Render(int drawLayer = 8)
     {
+        Render(CameraHelper.Main(), drawLayer);
+    }
+
+    public void Render(Camera camera, int drawLayer = 8)
+    {
         SetUniforms(CloudMaterial);
 
         CloudMaterial.renderQueue = (int)RenderQueue + RenderQueueOffset;
@@ -75,7 +80,7 @@ public class Cloudsphere : MonoBehaviour
 
         Matrix4x4 CloudsTRS = Matrix4x4.TRS(planetoid.transform.position, transform.rotation, Vector3.one * (Radius + Height));
 
-        Graphics.DrawMesh(CloudsphereMesh, CloudsTRS, CloudMaterial, drawLayer, CameraHelper.Main(), 0, planetoid.QuadAtmosphereMPB);
+        Graphics.DrawMesh(CloudsphereMesh, CloudsTRS, CloudMaterial, drawLayer, camera, 0, planetoid.QuadAtmosphereMPB);
     }
 
     public void InitMaterials()

@@ -39,6 +39,8 @@ using UnityEngine;
 
 public class CubemapCapturer : MonoBehaviour
 {
+    public Planetoid planet = null;
+
     public int cubemapSize = 128;
 
     public bool oneFacePerFrame = false;
@@ -71,17 +73,23 @@ public class CubemapCapturer : MonoBehaviour
 
     void UpdateCubemap(int faceMask)
     {
+        Camera mainCamera = CameraHelper.Main();
+
+        if (mainCamera == null || planet == null) return;
+
         if (!renderCamera)
         {
             GameObject go = new GameObject("CubemapCamera", typeof(Camera));
             go.hideFlags = HideFlags.HideAndDontSave;
             go.transform.position = transform.position;
             go.transform.rotation = Quaternion.identity;
+            go.transform.parent = mainCamera.transform;
 
             renderCamera = go.GetComponent<Camera>();
             renderCamera.cullingMask = layerMask;
-            renderCamera.nearClipPlane = 0.001f;
-            renderCamera.farClipPlane = 1000.0f;
+            renderCamera.nearClipPlane = mainCamera.nearClipPlane;
+            renderCamera.farClipPlane = mainCamera.farClipPlane;
+            renderCamera.backgroundColor = mainCamera.backgroundColor;
             renderCamera.enabled = false;
         }
 
@@ -104,6 +112,8 @@ public class CubemapCapturer : MonoBehaviour
             }
         }
 
+        planet.Render(renderCamera);
+
         renderCamera.transform.position = transform.position;
 
         renderCamera.RenderToCubemap(cubeRenderTexture, faceMask);
@@ -112,6 +122,7 @@ public class CubemapCapturer : MonoBehaviour
     void OnDisable()
     {
         DestroyImmediate(renderCamera);
-        DestroyImmediate(cubeRenderTexture);
+
+        if (cubeRenderTexture != null) cubeRenderTexture.ReleaseAndDestroy();
     }
 }

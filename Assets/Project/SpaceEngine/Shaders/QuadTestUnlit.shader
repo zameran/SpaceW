@@ -256,8 +256,13 @@
 				float height = tex2D(_HeightTexture, IN.uv0).a;
 				float slope = tex2D(_NormalTexture, IN.uv0).a;
 
+				float2 uvTest = SinACosAUV_Z(IN.vertex2.xyz);
+				float4 uvTestSampler = tex2D(_PlanetUVSampler, uvTest);
+
 				Account(terrainColor, scatteringColor, IN.vertex2.xyz, IN.normal0.xyz);
 
+				//outDiffuse = FindNormal(_HeightTexture, IN.uv0); 
+				//outDiffuse = uvTestSampler;
 				outDiffuse = lerp(scatteringColor, outputNormal, _Normale);
 				//depth = log2(IN.depth) * (0.5 * FCoef(1e+2));
 			}

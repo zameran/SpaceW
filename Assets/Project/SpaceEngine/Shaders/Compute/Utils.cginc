@@ -266,4 +266,19 @@ inline float3 GetHeightNormalFromBump(QuadGenerationConstants constants, RWStruc
 
 	return s;
 }
+
+inline float3 GetPackedNormal(QuadGenerationConstants constants, RWStructuredBuffer<OutputStruct> buffer, int size, uint3 id)
+{
+	float left	 = (buffer[(id.x + 0) + (id.y + 1) * size].noise) * constants.lodLevel;
+	float right  = (buffer[(id.x + 2) + (id.y + 1) * size].noise) * constants.lodLevel;
+	float up	 = (buffer[(id.x + 1) + (id.y + 0) * size].noise) * constants.lodLevel;
+	float down   = (buffer[(id.x + 1) + (id.y + 2) * size].noise) * constants.lodLevel;
+               
+    float2 dir = float2(1.0, 0.0);
+               
+    float3 va = normalize(float3(dir.xy, right - left));
+    float3 vb = normalize(float3(dir.yx, down - up));
+               
+    return cross(va, vb).rbg; 
+}
 //-----------------------------------------------------------------------------
