@@ -543,9 +543,11 @@ public sealed class Planetoid : Planet, IPlanet
     public void SetupMainQuad(QuadPosition quadPosition)
     {
         GameObject go = new GameObject("Quad" + "_" + quadPosition.ToString());
+        go.transform.parent = QuadsRoot.transform;
         go.transform.position = Vector3.zero;
         go.transform.rotation = Quaternion.identity;
-        go.transform.parent = QuadsRoot.transform;
+        go.transform.localPosition = Vector3.zero;
+        go.transform.localRotation = Quaternion.identity;
 
         Mesh mesh = GetMesh(quadPosition);
         mesh.bounds = new Bounds(Vector3.zero, new Vector3(PlanetRadius * 2, PlanetRadius * 2, PlanetRadius * 2));
@@ -582,8 +584,6 @@ public sealed class Planetoid : Planet, IPlanet
     public Quad SetupSubQuad(QuadPosition quadPosition)
     {
         GameObject go = new GameObject("Quad" + "_" + quadPosition.ToString());
-        go.transform.position = Vector3.zero;
-        go.transform.rotation = Quaternion.identity;
 
         Mesh mesh = GetMesh(quadPosition);
         mesh.bounds = new Bounds(Vector3.zero, new Vector3(PlanetRadius * 2, PlanetRadius * 2, PlanetRadius * 2));

@@ -60,6 +60,8 @@ public struct OutputStruct : IData
 
 public sealed class Quad : MonoBehaviour, IQuad
 {
+    //NOTE : Do not TransformPoint the points on wich bounds will depend on.
+
     [Serializable]
     public class Id
     {
@@ -296,12 +298,12 @@ public sealed class Quad : MonoBehaviour, IQuad
             {
                 Gizmos.color = XKCDColors.Adobe;
 
-                Gizmos.DrawWireCube(QuadAABB.Bounds.center, QuadAABB.Bounds.size);
+                Gizmos.DrawWireCube(Planetoid.transform.TransformPoint(QuadAABB.Bounds.center), QuadAABB.Bounds.size);
             }
 
             Gizmos.color = XKCDColors.BabyBlue;
 
-            Gizmos.DrawRay(middleNormalized, middleNormalized);
+            Gizmos.DrawRay(Planetoid.transform.TransformPoint(middleNormalized), middleNormalized);
         }
     }
 
@@ -509,42 +511,6 @@ public sealed class Quad : MonoBehaviour, IQuad
         }
     }
 
-    public Vector3[] GetFlatBox(float offset = 0)
-    {
-        Vector3[] verts = new Vector3[4];
-
-        Vector3 tl = topLeftCorner;
-        Vector3 tr = topRightCorner;
-        Vector3 bl = bottomLeftCorner;
-        Vector3 br = bottomRightCorner;
-
-        verts[0] = tl.NormalizeToRadius(Planetoid.PlanetRadius + offset);
-        verts[1] = tr.NormalizeToRadius(Planetoid.PlanetRadius + offset);
-        verts[2] = bl.NormalizeToRadius(Planetoid.PlanetRadius + offset);
-        verts[3] = br.NormalizeToRadius(Planetoid.PlanetRadius + offset);
-
-        return verts;
-    }
-
-    public Vector3[] GetFlatBoxWithMiddle(float offset = 0)
-    {
-        Vector3[] verts = new Vector3[5];
-
-        Vector3 tl = topLeftCorner;
-        Vector3 tr = topRightCorner;
-        Vector3 bl = bottomLeftCorner;
-        Vector3 br = bottomRightCorner;
-        Vector3 mi = middleNormalized;
-
-        verts[0] = tl.NormalizeToRadius(Planetoid.PlanetRadius + offset);
-        verts[1] = tr.NormalizeToRadius(Planetoid.PlanetRadius + offset);
-        verts[2] = mi;
-        verts[3] = bl.NormalizeToRadius(Planetoid.PlanetRadius + offset);
-        verts[4] = br.NormalizeToRadius(Planetoid.PlanetRadius + offset);
-
-        return verts;
-    }
-
     public Vector3[] GetVolumeBox(float height, float offset = 0, bool forCulling = false)
     {
         Vector3[] verts = new Vector3[forCulling ? 14 : 8];
@@ -694,6 +660,11 @@ public sealed class Quad : MonoBehaviour, IQuad
 
                 if (quad.Parent.transform != null)
                     quad.transform.parent = quad.Parent.transform;
+
+                quad.transform.position = Vector3.zero;
+                quad.transform.rotation = Quaternion.identity;
+                quad.transform.localPosition = Vector3.zero;
+                quad.transform.localRotation = Quaternion.identity;
 
                 quad.gameObject.name += "_ID" + id + "_LOD" + quad.LODLevel;
 
@@ -1064,14 +1035,14 @@ public sealed class Quad : MonoBehaviour, IQuad
 
         for (int i = 0; i < 4; i++)
         {
-            d = Vector3.Distance(Planetoid.LODTarget.position, QuadAABB.AABB[i]);   
+            d = Vector3.Distance(Planetoid.LODTarget.position, Planetoid.transform.TransformPoint(QuadAABB.AABB[i]));   
             if (d < closestDistance) { closestCorner = QuadAABB.AABB[i]; closestDistance = d; }
         }
 
-        d = Vector3.Distance(Planetoid.LODTarget.position, middleNormalized);
+        d = Vector3.Distance(Planetoid.LODTarget.position, Planetoid.transform.TransformPoint(middleNormalized));
         if (d < closestDistance) { closestCorner = middleNormalized; closestDistance = d; }
 
-        return closestCorner;
+        return Planetoid.transform.TransformPoint(closestCorner);
     }
 
     private Vector3 GetClosestCorner()
@@ -1089,10 +1060,10 @@ public sealed class Quad : MonoBehaviour, IQuad
 
         if (Planetoid.GetData && GPUDataRecieved)
         {
-            tl = quadCorners.topLeftCorner;
-            tr = quadCorners.topRightCorner;
-            bl = quadCorners.bottomLeftCorner;
-            br = quadCorners.bottomRightCorner;
+            tl = Planetoid.transform.TransformPoint(quadCorners.topLeftCorner);
+            tr = Planetoid.transform.TransformPoint(quadCorners.topRightCorner);
+            bl = Planetoid.transform.TransformPoint(quadCorners.bottomLeftCorner);
+            br = Planetoid.transform.TransformPoint(quadCorners.bottomRightCorner);
         }
         else
         {

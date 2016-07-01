@@ -10,7 +10,6 @@
 		_QuadTexture3("QuadTexture 3 (RGB)", 2D) = "white" {}
 		_QuadTexture4("QuadTexture 4 (RGB)", 2D) = "white" {}
 		_Normale("Normale", Range(0, 1)) = 0.0
-		_ExtinctionGroundFade("Extinction Ground Fade", Range(0.000025, 0.000100)) = 0.000025
 	}
 	SubShader
 	{
@@ -32,13 +31,14 @@
 			#pragma multi_compile SHINE_ON SHINE_OFF
 			#pragma multi_compile ECLIPSES_ON ECLIPSES_OFF
 			#pragma multi_compile ATMOSPHERE_ON ATMOSPHERE_OFF
+			#pragma multi_compile_fwdbase
 
 			#pragma enable_d3d11_debug_symbols
 
 			#pragma fragmentoption ARB_precision_hint_fastest
 
-			#include "UnityCG.cginc"
-			#include "UnityLightingCommon.cginc"
+            #include "UnityCG.cginc"
+            #include "AutoLight.cginc"
 			#include "Assets/Project/SpaceEngine/Shaders/Compute/Utils.cginc"
 			#include "Assets/Project/SpaceEngine/Shaders/TCCommon.cginc"
 			#include "Assets/Project/SpaceEngine/Shaders/HDR.cginc"
@@ -74,7 +74,6 @@
 			};
 
 			uniform float _Normale;
-			uniform float _ExtinctionGroundFade;
 
 			uniform sampler2D _HeightTexture;
 			uniform sampler2D _NormalTexture;
@@ -109,13 +108,13 @@
 				float3 skyE = 0;
 				float3 extinction = 0;
 
+				p += _Globals_Origin;
+
 				//float3 d = normalize((mul(_Globals_CameraToWorld, float4((mul(_Globals_ScreenToCamera, p)).xyz, 0.0))).xyz);
-				float3 d = normalize((_Globals_WorldCameraPos - mul(_Globals_CameraToWorld, p)).xyz);
+				float3 d = normalize((WCPG - mul(_Globals_CameraToWorld, p)).xyz);
 
 				float cTheta = dot(n, -WSD);
 	
-				p += _Globals_Origin;
-
 				SunRadianceAndSkyIrradiance(p, n, WSD, sunL, skyE);
 
 				#ifdef ECLIPSES_ON
@@ -268,5 +267,30 @@
 			}
 			ENDCG
 		}
+
+        /*Pass
+        {
+            Name "ShadowCaster"
+            Tags
+            { 
+                "LightMode" = "ShadowCaster" 
+                "IgnoreProjector" = "True"
+            }
+
+            ZWrite On
+
+            CGPROGRAM
+            #pragma target 5.0
+
+            #pragma shader_feature _ALPHAPREMULTIPLY_ON
+            #pragma multi_compile_shadowcaster
+
+            #pragma vertex vertShadowCaster
+            #pragma fragment fragShadowCaster
+
+            #include "UnityStandardShadow.cginc"
+
+            ENDCG
+        }*/
 	}
 }

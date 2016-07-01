@@ -77,6 +77,7 @@ public sealed class Atmosphere : MonoBehaviour
     public float Scale = 1.0f;
     public float Fade = 1.0f;
     public float AerialPerspectiveOffset = 2000.0f;
+    public float ExtinctionGroundFade = 0.000025f;
 
     public int AtmosphereMeshResolution = 2;
 
@@ -471,23 +472,23 @@ public sealed class Atmosphere : MonoBehaviour
             {
                 float sunRadius = Suns[i].Radius;
                 float sunToPlanetDistance = Vector3.Distance(planetoid.Origin, Suns[i].transform.position);
-                float umbraLegth = CalculateUmbraLength(planetoid.PlanetRadius * 2, sunRadius, sunToPlanetDistance);
-                float umbraAngle = CalculateUmbraSubtendedAngle(planetoid.PlanetRadius * 2, umbraLegth);
+                float umbraLength = CalculateUmbraLength(planetoid.PlanetRadius * 2, sunRadius, sunToPlanetDistance);
+                float umbraAngle = CalculateUmbraSubtendedAngle(planetoid.PlanetRadius * 2, umbraLength);
 
-                Vector3 direction = (Suns[i].GetDirection() * umbraLegth);
+                Vector3 direction = (Suns[i].GetDirection() * umbraLength);
 
                 Gizmos.color = Color.yellow;
                 Gizmos.DrawWireSphere(Suns[i].transform.position, sunRadius);
-                Gizmos.DrawRay(Suns[i].transform.position, (direction / umbraLegth) * -sunToPlanetDistance);
+                Gizmos.DrawRay(Suns[i].transform.position, (direction / umbraLength) * -sunToPlanetDistance);
 
                 Gizmos.color = Color.red;
                 Gizmos.DrawRay(planetoid.Origin, direction);
 
                 Gizmos.color = Color.blue;
-                Gizmos.DrawRay(planetoid.Origin + direction, -(Quaternion.Euler(umbraAngle, 0, 0) * direction));
-                Gizmos.DrawRay(planetoid.Origin + direction, -(Quaternion.Euler(-umbraAngle, 0, 0) * direction));
-                Gizmos.DrawRay(planetoid.Origin + direction, -(Quaternion.Euler(0, umbraAngle, 0) * direction));
-                Gizmos.DrawRay(planetoid.Origin + direction, -(Quaternion.Euler(0, -umbraAngle, 0) * direction));
+                Gizmos.DrawRay(planetoid.transform.InverseTransformVector(planetoid.Origin + direction), -(Quaternion.Euler(umbraAngle, 0, 0) * direction));
+                Gizmos.DrawRay(planetoid.transform.InverseTransformVector(planetoid.Origin + direction), -(Quaternion.Euler(-umbraAngle, 0, 0) * direction));
+                Gizmos.DrawRay(planetoid.transform.InverseTransformVector(planetoid.Origin + direction), -(Quaternion.Euler(0, umbraAngle, 0) * direction));
+                Gizmos.DrawRay(planetoid.transform.InverseTransformVector(planetoid.Origin + direction), -(Quaternion.Euler(0, -umbraAngle, 0) * direction));
             }
         }
     }
@@ -745,6 +746,7 @@ public sealed class Atmosphere : MonoBehaviour
             block.SetFloat("mieG", Mathf.Clamp(atmosphereParameters.MIE_G, 0.0f, 0.99f));
 
             block.SetFloat("_Aerial_Perspective_Offset", AerialPerspectiveOffset);
+            block.SetFloat("_ExtinctionGroundFade", ExtinctionGroundFade);
 
             block.SetFloat("_Sun_Glare_Scale", SunGlareScale);
 

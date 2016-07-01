@@ -156,6 +156,8 @@ uniform float4x4 _Sky_LightOccluders_1;
 uniform float4x4 _Sky_LightOccluders_2;
 uniform float4x4 _Sun_Positions_1;
 
+uniform float _ExtinctionGroundFade;
+
 float IntersectInnerSphere(float3 p1, float3 d, float3 p3, float r)
 {
 	float a = dot(d, d);
