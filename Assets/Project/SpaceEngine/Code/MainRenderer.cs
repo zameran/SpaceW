@@ -100,5 +100,15 @@ public sealed class MainRenderer : MonoBehaviour
             if (planets[i] != null)
                 planets[i].Render(CameraHelper.Main());
         }
+
+        //-----------------------------------------------------------------------------
+        planets[0].RenderQueueOffset = 10000;
+        if (planets[0].Atmosphere != null) { planets[0].Atmosphere.RenderQueueOffset = 10001; }
+        for (int i = 1; i < planets.Count; i++)
+        {
+            planets[i].RenderQueueOffset = 0;
+            if (planets[i].Atmosphere != null) planets[i].Atmosphere.RenderQueueOffset = 1;
+        }
+        //-----------------------------------------------------------------------------
     }
 }

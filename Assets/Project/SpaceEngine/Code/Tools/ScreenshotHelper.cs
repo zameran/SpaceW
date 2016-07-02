@@ -140,6 +140,7 @@ public class ScreenshotHelper : MonoBehaviour
 
     private void OnRenderImage(RenderTexture src, RenderTexture dest)
     {
+        //May cause driver crash on big SuperSize values lol.
         if (keyPressed)
         {
             StartCoroutine(WaitOneFrame(() => 
@@ -154,7 +155,6 @@ public class ScreenshotHelper : MonoBehaviour
             }));
         }
 
-        //May cause driver crash on big SuperSize values lol.
         Graphics.Blit(src, dest);
     }
 }

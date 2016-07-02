@@ -93,7 +93,7 @@ public sealed class Atmosphere : MonoBehaviour
     public Texture SunGlareTexture;
     public float SunGlareScale = 1;
 
-    public AtmosphereHDR HDRMode = AtmosphereHDR.Proland;
+    [HideInInspector] public AtmosphereHDR HDRMode = AtmosphereHDR.Proland;
 
     public EngineRenderQueue RenderQueue = EngineRenderQueue.Transparent;
     public int RenderQueueOffset = 0;
