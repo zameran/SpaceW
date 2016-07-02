@@ -94,9 +94,6 @@ public sealed class DebugGUIPlanetoidInfo : DebugGUI
                 GUILayoutExtensions.LabelWithSpace("Verts rendered per frame (Only Quads): " + vertsRendered, -8);
             }
 
-            GUILayoutExtensions.LabelWithSpace("Quads culling method: " + Planetoid.CullingMethod.ToString(), 0);
-            Planetoid.CullingMethod = (QuadCullingMethod)GUILayout.SelectionGrid((int)Planetoid.CullingMethod, System.Enum.GetNames(typeof(QuadCullingMethod)), 3);
-
             GUILayout.EndVertical();
 
             GUILayout.BeginVertical();
@@ -105,12 +102,6 @@ public sealed class DebugGUIPlanetoidInfo : DebugGUI
 
             GUILayout.Label("Planetoid parameters: ", boldLabel);
  
-            GUILayout.Label("LOD Distance Multiplier: " + Planetoid.LODDistanceMultiplier);
-            GUILayout.BeginHorizontal();
-            Planetoid.LODDistanceMultiplier = GUILayout.HorizontalSlider(Planetoid.LODDistanceMultiplier, 0.8f, 2.2f);
-            if (GUILayout.Button("Reset")) Planetoid.LODDistanceMultiplier = 1.0f;
-            GUILayout.EndHorizontal();
-
             if (GUILayout.Button("Resetup")) Planetoid.ReSetupQuads();
 
             GUILayout.EndVertical();
@@ -125,11 +116,6 @@ public sealed class DebugGUIPlanetoidInfo : DebugGUI
 
                 GUILayout.Label("Preset: ");
                 Planetoid.Atmosphere.AtmosphereBase = (AtmosphereBase)GUILayout.SelectionGrid((int)Planetoid.Atmosphere.AtmosphereBase, System.Enum.GetNames(typeof(AtmosphereBase)), 2);
-
-                GUILayout.Space(10);
-
-                GUILayout.Label("HDR: ");
-                Planetoid.Atmosphere.HDRMode = (AtmosphereHDR)GUILayout.SelectionGrid((int)Planetoid.Atmosphere.HDRMode, System.Enum.GetNames(typeof(AtmosphereHDR)), 2);
 
                 GUILayout.Space(10);
 
