@@ -103,8 +103,8 @@ public sealed class FlyCamera : GameCamera
             {
                 zRotation = 0;
 
-                x += (Input.GetAxis("Mouse X") * 60.0f * 0.02f);
-                y -= (Input.GetAxis("Mouse Y") * 30.0f * 0.02f);
+                x += (Input.GetAxis("Mouse X") * 240.0f) / cameraComponent.pixelHeight;
+                y -= (Input.GetAxis("Mouse Y") * 220.0f) / cameraComponent.pixelHeight;
 
                 if (planetoidGameObject != null && !aligned)
                     RotateAround(x, y, zRotation, new Vector3(0, 0, -distanceToPlanetCore));
