@@ -28,43 +28,55 @@
         </member>
         <member name="P:ZFramework.Math.MathUtils.NanoToSec">
             <summary>
-            Readonly. NanoToSec = 1 / 1000000000f
+            NanoToSec = 1 / 1000000000f
             </summary>
         </member>
         <member name="P:ZFramework.Math.MathUtils.PI">
             <summary>
-            Readonly. PI = 3.1415927f
+            PI = 3.141592653589f
             </summary>
         </member>
         <member name="P:ZFramework.Math.MathUtils.TwoPI">
             <summary>
-            Readonly. TwoPI = PI * 2
+            TwoPI = PI * 2
             </summary>
         </member>
         <member name="P:ZFramework.Math.MathUtils.PIOver2">
             <summary>
-            Readonly. PIOver2 = PI / 2
+            PIOver2 = PI / 2
             </summary>
         </member>
         <member name="P:ZFramework.Math.MathUtils.PIOver4">
             <summary>
-            Readonly. PIOver2 = PI / 4
+            PIOver2 = PI / 4
             </summary>
         </member>
         <member name="P:ZFramework.Math.MathUtils.E">
             <summary>
-            Readonly. E = 2.7182818f
+            E = 2.7182818f
             </summary>
         </member>
         <member name="P:ZFramework.Math.MathUtils.Rad2Deg">
             <summary>
-            Readonly.
+            Rad2Deg = 180.0f / PI
             </summary>
         </member>
         <member name="P:ZFramework.Math.MathUtils.Deg2Rad">
             <summary>
-            Readonly.
+            Deg2Rad = PI / 180.0f
             </summary>
+        </member>
+        <member name="P:ZFramework.Math.MathUtils.C">
+            <summary>
+            Speed of light in m/s.
+            </summary>
+        </member>
+        <member name="M:ZFramework.Math.MathUtils.Setup(System.Int32,System.Int32)">
+            <summary>
+            Override math tri-function's accuracy.
+            </summary>
+            <param name="sinuseBits">Sinuse function accuracy.</param>
+            <param name="ata2Bits">Atan2 function accuracy.</param>
         </member>
         <member name="M:ZFramework.Math.MathUtils.Sin(System.Single)">
             <summary>
@@ -831,13 +843,28 @@
             Maybe monade class.
             </summary>
         </member>
-        <member name="M:ZFramework.Monads.Maybe.ExceptionIfNull``1(``0,System.String)">
+        <member name="M:ZFramework.Monads.Maybe.IfNull``1(``0,System.Action)">
             <summary>
             Check if null.
             </summary>
-            <typeparam name="T">Class type.</typeparam>
+            <typeparam name="T">Type.</typeparam>
             <param name="value">Value.</param>
-            <param name="name">Value name. Added to exception info.</param>
+            <param name="OnNull">Action will be executed if passed value is null.</param>
+        </member>
+        <member name="M:ZFramework.Monads.Maybe.IfNull``1(``0,System.String)">
+            <summary>
+            Check if null.
+            </summary>
+            <typeparam name="T">Type.</typeparam>
+            <param name="value">Value.</param>
+            <param name="name">Value name. Will be added to exception info.</param>
+        </member>
+        <member name="M:ZFramework.Monads.Maybe.IfNull``1(``0)">
+            <summary>
+            Check if null.
+            </summary>
+            <typeparam name="T">Type.</typeparam>
+            <param name="value">Value.</param>
         </member>
         <member name="T:ZFramework.NamespaceDocumentationContainer">
             <summary>
@@ -2408,11 +2435,12 @@
             This manager will ensure that the messenger's eventTable will be cleaned up upon loading of a new level.
             </summary>
         </member>
-        <member name="M:ZFramework.Unity.Common.Messenger.MessengerHelper.OnLevelWasLoaded(System.Int32)">
+        <member name="M:ZFramework.Unity.Common.Messenger.MessengerHelper.OnActiveSceneChanged(UnityEngine.SceneManagement.Scene,UnityEngine.SceneManagement.Scene)">
             <summary>
             Clean up eventTable every time a new level loads.
             </summary>
-            <param name="level"></param>
+            <param name="arg0"></param>
+            <param name="arg1"></param>
         </member>
         <member name="T:ZFramework.Unity.Common.Threading.Dispatcher">
             <summary>

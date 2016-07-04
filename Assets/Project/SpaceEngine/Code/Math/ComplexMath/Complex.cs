@@ -18,45 +18,13 @@ namespace UnityEngine
 
         private const double LOG_10_INV = 0.43429448190325;
 
-        public double Real
-        {
-            get
-            {
-                return real;
-            }
-            set
-            {
-                real = value;
-            }
-        }
+        public double Real { get { return real; } set { real = value; } }
 
-        public double Imaginary
-        {
-            get
-            {
-                return imaginary;
-            }
-            set
-            {
-                imaginary = value;
-            }
-        }
+        public double Imaginary { get { return imaginary; } set { imaginary = value; } }
 
-        public double Magnitude
-        {
-            get
-            {
-                return Abs(this);
-            }
-        }
+        public double Magnitude { get { return Abs(this); } }
 
-        public double Phase
-        {
-            get
-            {
-                return Math.Atan2(imaginary, real);
-            }
-        }
+        public double Phase { get { return Math.Atan2(imaginary, real); } }
 
         public static readonly Complex Zero = new Complex(0.0, 0.0);
         public static readonly Complex One = new Complex(1.0, 0.0);
