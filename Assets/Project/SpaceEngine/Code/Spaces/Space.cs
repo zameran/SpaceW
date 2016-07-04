@@ -35,7 +35,7 @@
 
 using UnityEngine;
 
-public class GalaxyClusterSpace : MonoBehaviour
+public class Space : MonoBehaviour
 {
 
 }

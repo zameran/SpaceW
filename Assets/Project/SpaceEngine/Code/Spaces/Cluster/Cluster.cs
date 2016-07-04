@@ -38,5 +38,5 @@ using System;
 [Serializable]
 public class Cluster
 {
-
+    public Cluster[,] Clusters;
 }

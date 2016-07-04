@@ -99,7 +99,7 @@ public sealed class AtmosphereSun : MonoBehaviour
             float h = Input.GetAxis("HorizontalArrows") * 0.75f;
             float v = Input.GetAxis("VerticalArrows") * 0.75f;
 
-            transform.Rotate(new Vector3(v, h, 0), Space.World);
+            transform.Rotate(new Vector3(v, h, 0), UnityEngine.Space.World);
 
             HasMoved = true;
         }

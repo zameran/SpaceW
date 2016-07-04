@@ -35,7 +35,7 @@
 
 using UnityEngine;
 
-public class UnlimitedSpace : MonoBehaviour
+public class ClusterSpace : MonoBehaviour
 {
 
 }
