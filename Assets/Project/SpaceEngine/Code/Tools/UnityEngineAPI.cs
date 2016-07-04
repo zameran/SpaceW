@@ -47,7 +47,7 @@ public class UnityEngineAPI
             Type type = typeof(T);
             MethodInfo method = type.GetMethod(MethodName, BillingAtr);
 
-            method.Invoke(null, MethodParams);
+            method.Invoke(obj, MethodParams);
         }
         catch (Exception ex) { Debug.LogError("InvokeAPI Exception!" + "\n" + ex.Message + "\n" + ex.StackTrace); }
         finally { }
