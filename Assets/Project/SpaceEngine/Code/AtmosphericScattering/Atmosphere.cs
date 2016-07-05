@@ -407,8 +407,9 @@ public sealed class Atmosphere : MonoBehaviour
         screenToCamera = CameraHelper.Main().GetScreenToCamera();
         worldCameraPos = CameraHelper.Main().transform.position;
 
-        //NOTE : Wip
-        Fade = FadeCurve.Evaluate(Mathf.Clamp01(VectorHelper.AngularRadius(Origin, planetoid.LODTarget.position, planetoid.PlanetRadius)));
+        var fadeValue = Mathf.Clamp01(VectorHelper.AngularRadius(Origin, planetoid.LODTarget.position, planetoid.PlanetRadius));
+
+        Fade = FadeCurve.Evaluate(float.IsNaN(fadeValue) || float.IsInfinity(fadeValue) ? 1.0f : fadeValue);
 
         Keywords = GetKeywords();
     }
