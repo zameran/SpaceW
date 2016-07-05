@@ -140,17 +140,17 @@ public sealed class Planetoid : Planet, IPlanet
 
     public void QuadDispatchStarted(Quad q)
     {
-
+        //Debug.Log("Planetoid: QuadDispatchStarted() - " + q.gameObject.name);
     }
 
     public void QuadDispatchReady(Quad q)
     {
-
+        //Debug.Log("Planetoid: QuadDispatchReady() - " + q.gameObject.name);
     }
 
     public void QuadGPUGetDataReady(Quad q)
     {
-
+        //Debug.Log("Planetoid: QuadGPUGetDataReady() - " + q.gameObject.name);
     }
 
     protected override void Awake()
@@ -559,7 +559,7 @@ public sealed class Planetoid : Planet, IPlanet
         quadComponent.Planetoid = this;
         quadComponent.QuadMesh = mesh;
         quadComponent.QuadMaterial = material;
-        quadComponent.SetupEvents(quadComponent);
+        quadComponent.Eventit(quadComponent);
 
         if (Atmosphere != null) Atmosphere.InitUniforms(null, quadComponent.QuadMaterial, false);
 
@@ -595,7 +595,7 @@ public sealed class Planetoid : Planet, IPlanet
         quadComponent.Planetoid = this;
         quadComponent.QuadMesh = mesh;
         quadComponent.QuadMaterial = material;
-        quadComponent.SetupEvents(quadComponent);
+        quadComponent.Eventit(quadComponent);
         quadComponent.SetupCorners(quadPosition);
 
         if (Atmosphere != null) Atmosphere.InitUniforms(null, quadComponent.QuadMaterial, false);

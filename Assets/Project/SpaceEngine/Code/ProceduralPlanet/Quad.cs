@@ -58,7 +58,7 @@ public struct OutputStruct : IData
     }
 }
 
-public sealed class Quad : MonoBehaviour, IQuad
+public sealed class Quad : MonoBehaviour, IQuad, IEventit<Quad>
 {
     //NOTE : Do not TransformPoint the points on wich bounds will depend on.
 
@@ -170,13 +170,55 @@ public sealed class Quad : MonoBehaviour, IQuad
 
     public Matrix4x4 RotationMatrix { get { return Matrix4x4.TRS(Vector3.zero, Quaternion.Euler((middleNormalized).normalized * Mathf.Deg2Rad), Vector3.one); } }
 
+    #region Eventit
+    public bool isEventit { get; set; }
+
+    public void Eventit(Quad quad)
+    {
+        if (isEventit) return;
+
+        quad.DispatchStarted += quad.QuadDispatchStarted;
+        quad.DispatchReady += quad.QuadDispatchReady;
+        quad.GPUGetDataReady += quad.QuadGPUGetDataReady;
+
+        if (quad.Planetoid != null)
+        {
+            quad.DispatchStarted += quad.Planetoid.QuadDispatchStarted;
+            quad.DispatchReady += quad.Planetoid.QuadDispatchReady;
+            quad.GPUGetDataReady += quad.Planetoid.QuadGPUGetDataReady;
+        }
+
+        isEventit = true;
+    }
+
+    public void UnEventit(Quad quad)
+    {
+        if (!isEventit) return;
+
+        DispatchStarted -= QuadDispatchStarted;
+        DispatchReady -= QuadDispatchReady;
+        GPUGetDataReady -= QuadGPUGetDataReady;
+
+        if (quad.Planetoid != null)
+        {
+            DispatchStarted -= Planetoid.QuadDispatchStarted;
+            DispatchReady -= Planetoid.QuadDispatchReady;
+            GPUGetDataReady -= Planetoid.QuadGPUGetDataReady;
+        }
+
+        isEventit = false;
+    }
+    #endregion
+
     private void QuadDispatchStarted(Quad q)
     {
-
+        //Debug.Log("Quad: QuadDispatchStarted() - " + q.gameObject.name);
     }
 
     private void QuadDispatchReady(Quad q)
     {
+        //Debug.Log("Quad: QuadDispatchReady() - " + q.gameObject.name);
+
         if (LODLevel == 6 && Planetoid.GenerateColliders && GPUDataRecieved)
         {
             MeshCollider mc = gameObject.AddComponent<MeshCollider>();
@@ -186,7 +228,7 @@ public sealed class Quad : MonoBehaviour, IQuad
 
     private void QuadGPUGetDataReady(Quad q)
     {
-
+        //Debug.Log("Quad: QuadGPUGetDataReady() - " + q.gameObject.name);
     }
 
     public Quad()
@@ -234,23 +276,7 @@ public sealed class Quad : MonoBehaviour, IQuad
         if (QuadMaterial != null)
             DestroyImmediate(QuadMaterial);
 
-        if (DispatchStarted != null)
-        {
-            DispatchStarted -= QuadDispatchStarted;
-            DispatchStarted -= Planetoid.QuadDispatchStarted;
-        }
-
-        if (DispatchReady != null)
-        {
-            DispatchReady -= QuadDispatchReady;
-            DispatchReady -= Planetoid.QuadDispatchReady;
-        }
-
-        if (GPUGetDataReady != null)
-        {
-            GPUGetDataReady -= QuadGPUGetDataReady;
-            GPUGetDataReady -= Planetoid.QuadGPUGetDataReady;
-        }
+        UnEventit(this);
     }
 
     private void OnWillRenderObject()
@@ -887,25 +913,6 @@ public sealed class Quad : MonoBehaviour, IQuad
         {
             SetupComputeShaderKernelUniforfms(i, QuadGenerationConstantsBuffer, PreOutDataBuffer, PreOutDataSubBuffer, OutDataBuffer, QuadCornersBuffer);
         }
-    }
-
-    public void SetupEvents(Quad q)
-    {
-        SetupQuadEvents(q);
-
-        if (q.Planetoid != null)
-        {
-            q.DispatchStarted += q.Planetoid.QuadDispatchStarted;
-            q.DispatchReady += q.Planetoid.QuadDispatchReady;
-            q.GPUGetDataReady += q.Planetoid.QuadGPUGetDataReady;
-        }
-    }
-
-    private void SetupQuadEvents(Quad q)
-    {
-        q.DispatchStarted += q.QuadDispatchStarted;
-        q.DispatchReady += q.QuadDispatchReady;
-        q.GPUGetDataReady += q.QuadGPUGetDataReady;
     }
 
     public void SetupVectors(Quad quad, int id, bool staticX, bool staticY, bool staticZ)

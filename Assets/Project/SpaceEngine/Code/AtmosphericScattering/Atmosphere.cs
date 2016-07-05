@@ -39,7 +39,7 @@ using UnityEngine;
 
 using System.Collections.Generic;
 
-public sealed class Atmosphere : MonoBehaviour
+public sealed class Atmosphere : MonoBehaviour, IEventit
 {
     private AtmosphereBase atmosphereBase = AtmosphereBase.Earth;
     private AtmosphereBase atmosphereBasePrev = AtmosphereBase.Earth;
@@ -84,27 +84,15 @@ public sealed class Atmosphere : MonoBehaviour
     public float HDRExposure = 0.2f;
 
     public Shader SkyShader;
-
-    public ComputeShader ReadDataCore;
-    public ComputeShader WriteDataCore;
-
     public Material SkyMaterial;
-
-    public Texture SunGlareTexture;
-    public float SunGlareScale = 1;
 
     [HideInInspector] public AtmosphereHDR HDRMode = AtmosphereHDR.Proland;
 
     public EngineRenderQueue RenderQueue = EngineRenderQueue.Transparent;
     public int RenderQueueOffset = 0;
 
-    public RenderTexture Transmittance;
-    public RenderTexture Inscatter;
-    public RenderTexture Irradiance;
-
     public Mesh AtmosphereMesh;
 
-    public bool RunTimeBaking = false;
     public bool LostFocusForceRebake = false;
 
     public AtmosphereSun Sun_1;
@@ -197,25 +185,44 @@ public sealed class Atmosphere : MonoBehaviour
         set { worldCameraPos = value; }
     }
 
+    #region Eventit
+    public bool isEventit { get; set; }
+
+    public void Eventit()
+    {
+        if (isEventit) return;
+
+        OnPresetChanged += AtmosphereOnPresetChanged;
+        OnBaked += AtmosphereOnBaked;
+
+        isEventit = true;
+    }
+
+    public void UnEventit()
+    {
+        if (!isEventit) return;
+
+        OnPresetChanged -= AtmosphereOnPresetChanged;
+        OnBaked -= AtmosphereOnBaked;
+
+        isEventit = false;
+    }
+    #endregion
+
     private void Start()
     {
+        Eventit();
+
         ApplyTestPresset(AtmosphereParameters.Get(atmosphereBase));
 
         TryBake();
 
         InitMisc();
         InitMaterials();
-        InitTextures();
         InitMesh();
         InitSuns();
 
         InitSetAtmosphereUniforms();
-
-        if (OnPresetChanged == null) //TODO: Need make some sort of Planetoid scale event manager.
-            OnPresetChanged += AtmosphereOnPresetChanged;
-
-        if (OnBaked == null)
-            OnBaked += AtmosphereOnBaked;
     }
 
     private void ApplyTestPresset(AtmosphereParameters p)
@@ -230,7 +237,7 @@ public sealed class Atmosphere : MonoBehaviour
 
     public void TryBake()
     {
-        if (RunTimeBaking && artb != null) artb.Bake(atmosphereParameters);
+        if (artb != null) artb.Bake(atmosphereParameters);
 
         if (OnBaked != null) OnBaked(this);
     }
@@ -418,12 +425,7 @@ public sealed class Atmosphere : MonoBehaviour
     {
         if (focusStatus == true && LostFocusForceRebake == true)
         {
-            if (Transmittance == null || Inscatter == null || Irradiance == null) return;
-
-            if (!Transmittance.IsCreated() || !Inscatter.IsCreated() || !Irradiance.IsCreated())
-            {
-                Debug.Log("Atmosphere: fail with textures!");
-            }
+            TryBake();
         }
     }
 
@@ -445,13 +447,7 @@ public sealed class Atmosphere : MonoBehaviour
 
     private void OnDestroy()
     {
-        CollectGarbage();
-
-        if (OnPresetChanged != null)
-            OnPresetChanged -= AtmosphereOnPresetChanged;
-
-        if (OnBaked != null)
-            OnBaked -= AtmosphereOnBaked;
+        UnEventit();
     }
 
     private void OnDrawGizmos()
@@ -504,6 +500,8 @@ public sealed class Atmosphere : MonoBehaviour
 
     private void AtmosphereOnBaked(Atmosphere a)
     {
+        //Debug.Log("Atmosphere: AtmosphereOnBaked() - " + a.gameObject.name);
+
         //Just make sure that all Origin variables set.
         if (a.transform.parent != null)
         {
@@ -514,52 +512,11 @@ public sealed class Atmosphere : MonoBehaviour
         }
     }
 
-    public void CollectGarbage()
-    {
-        if (Transmittance != null) Transmittance.ReleaseAndDestroy();
-        if (Inscatter != null) Inscatter.ReleaseAndDestroy();
-        if (Irradiance != null) Irradiance.ReleaseAndDestroy();
-    }
-
     public void InitMaterials()
     {
         if (SkyMaterial == null)
         {
             SkyMaterial = MaterialHelper.CreateTemp(SkyShader, "Sky");
-        }
-    }
-
-    public void InitTextures()
-    {
-        if (RunTimeBaking && artb != null)
-        {
-
-        }
-        else
-        {
-            Transmittance = RTExtensions.CreateRTexture(new Vector2(AtmosphereConstants.TRANSMITTANCE_W, AtmosphereConstants.TRANSMITTANCE_H), 0, RenderTextureFormat.ARGBHalf, FilterMode.Bilinear, TextureWrapMode.Clamp);
-            Irradiance = RTExtensions.CreateRTexture(new Vector2(AtmosphereConstants.SKY_W, AtmosphereConstants.SKY_H), 0, RenderTextureFormat.ARGBHalf, FilterMode.Bilinear, TextureWrapMode.Clamp);
-            Inscatter = RTExtensions.CreateRTexture(new Vector2(AtmosphereConstants.RES_MU_S * AtmosphereConstants.RES_NU, AtmosphereConstants.RES_MU), 0, RenderTextureFormat.ARGBHalf, FilterMode.Bilinear, TextureWrapMode.Clamp, AtmosphereConstants.RES_R);
-
-            string texturesPath = "/Resources/Textures/Atmosphere/";
-
-            ComputeBuffer buffer;
-
-            string TransmittancePath = Application.dataPath + texturesPath + "/transmittance.raw";
-            string IrradiancePath = Application.dataPath + texturesPath + "/irradiance.raw";
-            string InscatterPath = Application.dataPath + texturesPath + "/inscatter.raw";
-
-            buffer = new ComputeBuffer(AtmosphereConstants.TRANSMITTANCE_W * AtmosphereConstants.TRANSMITTANCE_H, sizeof(float) * 3);
-            CBUtility.WriteIntoRenderTexture(Transmittance, 3, TransmittancePath, buffer, WriteDataCore);
-            buffer.Release();
-
-            buffer = new ComputeBuffer(AtmosphereConstants.SKY_W * AtmosphereConstants.SKY_H, sizeof(float) * 3);
-            CBUtility.WriteIntoRenderTexture(Irradiance, 3, IrradiancePath, buffer, WriteDataCore);
-            buffer.Release();
-
-            buffer = new ComputeBuffer(AtmosphereConstants.RES_MU_S * AtmosphereConstants.RES_NU * AtmosphereConstants.RES_MU * AtmosphereConstants.RES_R, sizeof(float) * 4);
-            CBUtility.WriteIntoRenderTexture(Inscatter, 4, InscatterPath, buffer, WriteDataCore);
-            buffer.Release();
         }
     }
 
@@ -604,7 +561,7 @@ public sealed class Atmosphere : MonoBehaviour
             SetEclipses(block);
             SetShine(block);
 
-            block.SetTexture("_Sun_Glare", SunGlareTexture);
+            //block.SetTexture("_Sun_Glare", SunGlareTexture);
 
             block.SetFloat("_Aerial_Perspective_Offset", AerialPerspectiveOffset);
 
@@ -723,6 +680,8 @@ public sealed class Atmosphere : MonoBehaviour
 
     public void SetUniforms(MaterialPropertyBlock block, Material mat, bool full = true, bool forQuad = false)
     {
+        if (artb == null) { Debug.Log("Atmosphere: ARTB is null!"); return; }
+
         if (mat != null)
         {
             SetKeywords(mat, Keywords);
@@ -749,20 +708,11 @@ public sealed class Atmosphere : MonoBehaviour
             block.SetFloat("_Aerial_Perspective_Offset", AerialPerspectiveOffset);
             block.SetFloat("_ExtinctionGroundFade", ExtinctionGroundFade);
 
-            block.SetFloat("_Sun_Glare_Scale", SunGlareScale);
+            block.SetFloat("_Sun_Glare_Scale", 0.1f);
 
-            if (RunTimeBaking && artb != null)
-            {
-                if (artb.transmittanceT != null) block.SetTexture("_Sky_Transmittance", artb.transmittanceT);
-                if (artb.inscatterT_Read != null) block.SetTexture("_Sky_Inscatter", artb.inscatterT_Read);
-                if (artb.irradianceT_Read != null) block.SetTexture("_Sky_Irradiance", artb.irradianceT_Read);
-            }
-            else
-            {
-                if (Transmittance != null) block.SetTexture("_Sky_Transmittance", Transmittance);
-                if (Inscatter != null) block.SetTexture("_Sky_Inscatter", Inscatter);
-                if (Irradiance != null) block.SetTexture("_Sky_Irradiance", Irradiance);
-            }
+            if (artb.transmittanceT != null) block.SetTexture("_Sky_Transmittance", artb.transmittanceT);
+            if (artb.inscatterT_Read != null) block.SetTexture("_Sky_Inscatter", artb.inscatterT_Read);
+            if (artb.irradianceT_Read != null) block.SetTexture("_Sky_Irradiance", artb.irradianceT_Read);
 
             block.SetMatrix("_Globals_WorldToCamera", worldToCamera);
             block.SetMatrix("_Globals_CameraToWorld", cameraToWorld);
