@@ -31,11 +31,6 @@
 			#pragma multi_compile SHINE_ON SHINE_OFF
 			#pragma multi_compile ECLIPSES_ON ECLIPSES_OFF
 			#pragma multi_compile ATMOSPHERE_ON ATMOSPHERE_OFF
-			#pragma multi_compile_fwdbase
-
-			#pragma enable_d3d11_debug_symbols
-
-			#pragma fragmentoption ARB_precision_hint_fastest
 
             #include "UnityCG.cginc"
             #include "AutoLight.cginc"
@@ -51,9 +46,6 @@
 				float4 tangent : TANGENT;
 				float3 normal : NORMAL;
 				float4 texcoord : TEXCOORD0;
-				float4 texcoord1 : TEXCOORD1;
-				float4 texcoord2 : TEXCOORD2;
-				float4 texcoord3 : TEXCOORD3;
 
 				uint id : SV_VertexID;
 			};
@@ -61,16 +53,13 @@
 			struct v2fg
 			{
 				float2 uv0 : TEXCOORD0;
-				float3 uv1 : TEXCOORD1;
-				float3 uv2 : TEXCOORD2;
-				float3 uv3 : TEXCOORD3;
 				float3 normal0 : NORMAL0;
-				float3 normal1 : NORMAL1;
 				float4 vertex0 : POSITION0;
 				float4 vertex1 : POSITION1;
-				float4 vertex2 : POSITION2;
 				float4 tangent0 : TANGENT0;
 				float depth : DEPTH;
+
+				float3 direction : TEXCOORD1;
 			};
 
 			uniform float _Normale;
@@ -103,17 +92,13 @@
 				return terrainColor * max(cTheta, 0);
 			}
 
-			inline float4 GroundFinalColorWithAtmosphere(float4 terrainColor, float3 p, float3 n, float3 WSD, float4 WSPR)
+			inline float4 GroundFinalColorWithAtmosphere(float4 terrainColor, float3 p, float3 n, float3 d, float3 WSD, float4 WSPR)
 			{	
-				float3 WCPG = _Globals_WorldCameraPos + _Globals_Origin;
 				float3 sunL = 0;
 				float3 skyE = 0;
 				float3 extinction = 0;
 
 				p += _Globals_Origin;
-
-				//float3 d = normalize((mul(_Globals_CameraToWorld, float4((mul(_Globals_ScreenToCamera, p)).xyz, 0.0))).xyz);
-				float3 d = normalize((WCPG - mul(_Globals_CameraToWorld, p)).xyz);
 
 				float cTheta = dot(n, -WSD);
 	
@@ -146,13 +131,13 @@
 				return finalColor;
 			}
 
-			void Account(in float4 terrainColor, out float4 scatteringColor, float3 p, float3 n) //AtmosphereInToTheAccount
+			void Account(in float4 terrainColor, out float4 scatteringColor, float3 p, float3 n, float3 d) //AtmosphereInToTheAccount
 			{
 				scatteringColor = 0;
 
 				#ifdef LIGHT_1
 					#ifdef ATMOSPHERE_ON
-						scatteringColor += hdr(GroundFinalColorWithAtmosphere(terrainColor, p, n, _Sun_WorldSunDir_1, _Sun_Positions_1[0]));
+						scatteringColor += hdr(GroundFinalColorWithAtmosphere(terrainColor, p, n, d, _Sun_WorldSunDir_1, _Sun_Positions_1[0]));
 					#endif
 
 					#ifdef ATMOSPHERE_OFF
@@ -162,8 +147,8 @@
 
 				#ifdef LIGHT_2	
 					#ifdef ATMOSPHERE_ON
-						scatteringColor += hdr(GroundFinalColorWithAtmosphere(terrainColor, p, n, _Sun_WorldSunDir_1, _Sun_Positions_1[0]));
-						scatteringColor += hdr(GroundFinalColorWithAtmosphere(terrainColor, p, n, _Sun_WorldSunDir_2, _Sun_Positions_1[1]));
+						scatteringColor += hdr(GroundFinalColorWithAtmosphere(terrainColor, p, n, d, _Sun_WorldSunDir_1, _Sun_Positions_1[0]));
+						scatteringColor += hdr(GroundFinalColorWithAtmosphere(terrainColor, p, n, d, _Sun_WorldSunDir_2, _Sun_Positions_1[1]));
 					#endif
 
 					#ifdef ATMOSPHERE_OFF
@@ -174,9 +159,9 @@
 
 				#ifdef LIGHT_3
 					#ifdef ATMOSPHERE_ON
-						scatteringColor += hdr(GroundFinalColorWithAtmosphere(terrainColor, p, n, _Sun_WorldSunDir_1, _Sun_Positions_1[0]));
-						scatteringColor += hdr(GroundFinalColorWithAtmosphere(terrainColor, p, n, _Sun_WorldSunDir_2, _Sun_Positions_1[1]));
-						scatteringColor += hdr(GroundFinalColorWithAtmosphere(terrainColor, p, n, _Sun_WorldSunDir_3, _Sun_Positions_1[2]));
+						scatteringColor += hdr(GroundFinalColorWithAtmosphere(terrainColor, p, n, d, _Sun_WorldSunDir_1, _Sun_Positions_1[0]));
+						scatteringColor += hdr(GroundFinalColorWithAtmosphere(terrainColor, p, n, d, _Sun_WorldSunDir_2, _Sun_Positions_1[1]));
+						scatteringColor += hdr(GroundFinalColorWithAtmosphere(terrainColor, p, n, d, _Sun_WorldSunDir_3, _Sun_Positions_1[2]));
 					#endif
 
 					#ifdef ATMOSPHERE_OFF
@@ -188,10 +173,10 @@
 
 				#ifdef LIGHT_4
 					#ifdef ATMOSPHERE_ON
-						scatteringColor += hdr(GroundFinalColorWithAtmosphere(terrainColor, p, n, _Sun_WorldSunDir_1, _Sun_Positions_1[0]));
-						scatteringColor += hdr(GroundFinalColorWithAtmosphere(terrainColor, p, n, _Sun_WorldSunDir_2, _Sun_Positions_1[1]));
-						scatteringColor += hdr(GroundFinalColorWithAtmosphere(terrainColor, p, n, _Sun_WorldSunDir_3, _Sun_Positions_1[2]));
-						scatteringColor += hdr(GroundFinalColorWithAtmosphere(terrainColor, p, n, _Sun_WorldSunDir_4, _Sun_Positions_1[3]));
+						scatteringColor += hdr(GroundFinalColorWithAtmosphere(terrainColor, p, n, d, _Sun_WorldSunDir_1, _Sun_Positions_1[0]));
+						scatteringColor += hdr(GroundFinalColorWithAtmosphere(terrainColor, p, n, d, _Sun_WorldSunDir_2, _Sun_Positions_1[1]));
+						scatteringColor += hdr(GroundFinalColorWithAtmosphere(terrainColor, p, n, d, _Sun_WorldSunDir_3, _Sun_Positions_1[2]));
+						scatteringColor += hdr(GroundFinalColorWithAtmosphere(terrainColor, p, n, d, _Sun_WorldSunDir_4, _Sun_Positions_1[3]));
 					#endif
 
 					#ifdef ATMOSPHERE_OFF
@@ -223,16 +208,13 @@
 				v.normal = normal;
 
 				o.uv0 = v.texcoord;
-				o.uv1 = noise;
-				o.uv2 = v.texcoord2;
-				o.uv3 = v.texcoord3;
 				o.normal0 = v.normal;
-				o.normal1 = mul(_Object2World, v.normal);
 				o.vertex0 = mul(UNITY_MATRIX_MVP, v.vertex);
-				o.vertex1 = mul(_Object2World, v.vertex);
-				o.vertex2 = mul(_Object2World, v.vertex); //TODO : Apply Origin vector. //NOTE : Bug here!!!!!111
+				o.vertex1 = mul(_Object2World, v.vertex); //TODO : Apply Origin vector. //NOTE : Bug here!!!!!111
 				o.tangent0 = v.tangent;
 				o.depth = 1;
+
+				o.direction = normalize(((_Globals_WorldCameraPos + _Globals_Origin) - mul(_Globals_CameraToWorld, o.vertex1)).xyz);
 
 				//Log. depth
 				//o.vertex0.z = log2(max(1e-6, 1.0 + o.vertex0.w)) * (2.0 / log2(_ProjectionParams.z + 1.0)) - 1.0;
@@ -257,10 +239,10 @@
 				float height = tex2D(_HeightTexture, IN.uv0).a;
 				float slope = tex2D(_NormalTexture, IN.uv0).a;
 
-				float2 uvTest = SinACosAUV_Z(IN.vertex2.xyz);
+				float2 uvTest = SinACosAUV_Z(IN.vertex1.xyz);
 				float4 uvTestSampler = tex2D(_PlanetUVSampler, uvTest);
 
-				Account(terrainColor, scatteringColor, IN.vertex2.xyz, IN.normal0.xyz);
+				Account(terrainColor, scatteringColor, IN.vertex1.xyz, IN.normal0.xyz, IN.direction);
 
 				//outDiffuse = FindNormal(_HeightTexture, IN.uv0); 
 				//outDiffuse = uvSamplerColor;

@@ -724,6 +724,8 @@ public sealed class Atmosphere : MonoBehaviour, IEventit
             if (artb.inscatterT_Read != null) block.SetTexture("_Sky_Inscatter", artb.inscatterT_Read);
             if (artb.irradianceT_Read != null) block.SetTexture("_Sky_Irradiance", artb.irradianceT_Read);
 
+            var WCP = forQuad == true ? worldCameraPos - Origin : worldCameraPos;
+
             block.SetMatrix("_Globals_WorldToCamera", worldToCamera);
             block.SetMatrix("_Globals_CameraToWorld", cameraToWorld);
             block.SetMatrix("_Globals_CameraToScreen", cameraToScreen);
@@ -731,6 +733,9 @@ public sealed class Atmosphere : MonoBehaviour, IEventit
             block.SetVector("_Globals_WorldCameraPos", forQuad == true ? worldCameraPos - Origin : worldCameraPos);
 
             block.SetVector("_Globals_Origin", -Origin);
+
+            block.SetVector("WCPG", WCP + (-Origin));
+
             block.SetFloat("_Exposure", HDRExposure);
             block.SetFloat("_HDRMode", (int)HDRMode);
 
