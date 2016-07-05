@@ -89,6 +89,8 @@
 
 			uniform float4x4 TRS;
 
+			uniform float _LODLevel;
+
 			inline float4 RGB2Reflectance(float4 inColor)
 			{
 				return float4(tan(1.37 * inColor.rgb) / tan(1.37), inColor.a);
@@ -261,7 +263,7 @@
 				Account(terrainColor, scatteringColor, IN.vertex2.xyz, IN.normal0.xyz);
 
 				//outDiffuse = FindNormal(_HeightTexture, IN.uv0); 
-				//outDiffuse = uvTestSampler;
+				//outDiffuse = uvSamplerColor;
 				outDiffuse = lerp(scatteringColor, outputNormal, _Normale);
 				//depth = log2(IN.depth) * (0.5 * FCoef(1e+2));
 			}

@@ -48,6 +48,9 @@ public sealed class DebugGUISettings : DebugGUI
 
     public float LODDistanceMultiplier = 2.0f;
 
+    public bool Eclipses = true;
+    public bool Planetshine = true;
+
     protected override void Awake()
     {
         base.Awake();
@@ -96,6 +99,11 @@ public sealed class DebugGUISettings : DebugGUI
         GUILayout.Label("HDR: ");
         AtmosphereHDRMode = (AtmosphereHDR)GUILayout.SelectionGrid((int)AtmosphereHDRMode, System.Enum.GetNames(typeof(AtmosphereHDR)), 2);
 
+        GUILayout.Space(10);
+
+        Eclipses = GUILayout.Toggle(Eclipses, " - Eclipses?");
+        Planetshine = GUILayout.Toggle(Planetshine, " - Planetshine?");
+
         GUILayout.EndVertical();
 
         if (Planetoids != null)
@@ -114,6 +122,8 @@ public sealed class DebugGUISettings : DebugGUI
                         if (Planetoids[i].Atmosphere != null)
                         {
                             Planetoids[i].Atmosphere.HDRMode = AtmosphereHDRMode;
+                            Planetoids[i].Atmosphere.Eclipses = Eclipses;
+                            Planetoids[i].Atmosphere.Planetshine = Planetshine;
                         }
                     }
                 }

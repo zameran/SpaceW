@@ -510,6 +510,7 @@ public sealed class Quad : MonoBehaviour, IQuad, IEventit<Quad>
         QuadMaterial.SetFloat("_Atmosphere", (Planetoid.Atmosphere != null) ? 1.0f : 0.0f);
         QuadMaterial.SetFloat("_Normale", Planetoid.DrawNormals ? 1.0f : 0.0f);
         QuadMaterial.SetMatrix("TRS", Planetoid.PlanetoidTRS);
+        QuadMaterial.SetFloat("_LODLevel", LODLevel + 2);
 
         QuadMaterial.renderQueue = (int)Planetoid.RenderQueue + Planetoid.RenderQueueOffset;
 

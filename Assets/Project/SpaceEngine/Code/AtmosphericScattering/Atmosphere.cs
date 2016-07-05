@@ -94,6 +94,8 @@ public sealed class Atmosphere : MonoBehaviour, IEventit
     public Mesh AtmosphereMesh;
 
     public bool LostFocusForceRebake = false;
+    [HideInInspector] public bool Eclipses = true;
+    [HideInInspector] public bool Planetshine = true;
 
     public AtmosphereSun Sun_1;
     public AtmosphereSun Sun_2;
@@ -331,6 +333,8 @@ public sealed class Atmosphere : MonoBehaviour, IEventit
 
     public void SetShine(Material mat)
     {
+        if (!Planetshine) return;
+
         CalculateShine(out shineOccludersMatrix1, out shineColorsMatrix1);
 
         mat.SetMatrix("_Sky_ShineOccluders_1", shineOccludersMatrix1);
@@ -339,6 +343,8 @@ public sealed class Atmosphere : MonoBehaviour, IEventit
 
     public void SetShine(MaterialPropertyBlock block)
     {
+        if (!Planetshine) return;
+
         CalculateShine(out shineOccludersMatrix1, out shineColorsMatrix1);
 
         block.SetMatrix("_Sky_ShineOccluders_1", shineOccludersMatrix1);
@@ -347,6 +353,8 @@ public sealed class Atmosphere : MonoBehaviour, IEventit
 
     public void SetEclipses(Material mat)
     {
+        if (!Eclipses) return;
+
         CalculateEclipses(out occludersMatrix1, out occludersMatrix2, out sunMatrix1);
 
         mat.SetMatrix("_Sky_LightOccluders_1", occludersMatrix1);
@@ -356,6 +364,8 @@ public sealed class Atmosphere : MonoBehaviour, IEventit
 
     public void SetEclipses(MaterialPropertyBlock block)
     {
+        if (!Eclipses) return;
+
         CalculateEclipses(out occludersMatrix1, out occludersMatrix2, out sunMatrix1);
 
         block.SetMatrix("_Sky_LightOccluders_1", occludersMatrix1);
