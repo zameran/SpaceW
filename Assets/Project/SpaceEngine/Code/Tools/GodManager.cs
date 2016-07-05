@@ -38,12 +38,21 @@ using UnityEngine;
 using ZFramework.Unity.Common;
 using ZFramework.Unity.Common.Messenger;
 
-public sealed class GodManager : MonoBehaviour
+[ExecutionOrder(-9999)]
+public class GodManager : MonoSingleton<GodManager>
 {
+    public Plane[] FrustumPlanes;
     public bool Debug = true;
+
+    protected GodManager() { }
 
     private void Awake()
     {
+        Instance = this;
+
         Messenger.Setup(Debug);
+
+        if (CameraHelper.Main() != null)
+            FrustumPlanes = GeometryUtility.CalculateFrustumPlanes(CameraHelper.Main());
     }
 }

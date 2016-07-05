@@ -171,8 +171,7 @@ public sealed class Planetoid : Planet, IPlanet
                 Cloudsphere.planetoid = this;
         }
 
-        if (CameraHelper.Main() != null)
-            FrustumPlanes = GeometryUtility.CalculateFrustumPlanes(CameraHelper.Main());
+        FrustumPlanes = GodManager.Instance.FrustumPlanes;
 
         QuadAtmosphereMPB = new MaterialPropertyBlock();
 
