@@ -147,6 +147,7 @@ public static class MeshFactory
         dummyMesh.vertices = dummyVerts;
         dummyMesh.uv = uv0;
         dummyMesh.SetTriangles(triangles, 0);
+        dummyMesh.name = string.Format("PrototypeMesh_({0})", Random.Range(float.MinValue, float.MaxValue));
 
         return dummyMesh;
     }

@@ -554,7 +554,6 @@ public sealed class Planetoid : Planet, IPlanet
         Material material = MaterialHelper.CreateTemp(ColorShader, "Quad");
 
         Quad quadComponent = go.AddComponent<Quad>();
-        quadComponent.CoreShader = CoreShader;
         quadComponent.Planetoid = this;
         quadComponent.QuadMesh = mesh;
         quadComponent.QuadMaterial = material;
@@ -590,7 +589,6 @@ public sealed class Planetoid : Planet, IPlanet
         Material material = MaterialHelper.CreateTemp(ColorShader, "Quad");
 
         Quad quadComponent = go.AddComponent<Quad>();
-        quadComponent.CoreShader = CoreShader;
         quadComponent.Planetoid = this;
         quadComponent.QuadMesh = mesh;
         quadComponent.QuadMaterial = material;

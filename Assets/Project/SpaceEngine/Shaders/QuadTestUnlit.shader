@@ -13,7 +13,7 @@
 	}
 	SubShader
 	{
-		Tags { "Queue" = "Geometry" "RenderType" = "Opaque" }
+		Tags { "Queue" = "Geometry" "RenderType" = "Opaque" "IgnoreProjector" = "True" }
 
 		Pass
 		{
@@ -77,7 +77,7 @@
 			uniform StructuredBuffer<OutputStruct> data;
 			uniform StructuredBuffer<QuadGenerationConstants> quadGenerationConstants;
 
-			uniform float4x4 TRS;
+			uniform float4x4 _TRS;
 
 			uniform float _LODLevel;
 
@@ -100,6 +100,9 @@
 				float3 extinction = 0;
 
 				p += _Globals_Origin;
+
+				//n.z = sqrt(max(0.0, 1.0 - dot(n.xy, n.xy)));
+				//n = mul(_TRS, n);
 
 				float cTheta = dot(n, -WSD);
 	
@@ -232,10 +235,15 @@
 			{		
 				QuadGenerationConstants constants = quadGenerationConstants[0];
 
+				float3 normal = IN.normal0;
+
+				//normal.z = sqrt(max(0.0, 1.0 - dot(normal.xy, normal.xy)));
+				//normal = mul(_TRS, normal);
+
 				float4 scatteringColor = 0;
 				fixed4 terrainColor = tex2D(_HeightTexture, IN.uv0);
 				fixed4 uvSamplerColor = tex2D(_PlanetUVSampler, IN.uv0);
-				fixed4 outputNormal = fixed4(IN.normal0, 1);
+				fixed4 outputNormal = fixed4(normal.xyz, 1);
 
 				float height = tex2D(_HeightTexture, IN.uv0).a;
 				float slope = tex2D(_NormalTexture, IN.uv0).a;
@@ -243,7 +251,7 @@
 				float2 uvTest = SinACosAUV_Z(IN.vertex1.xyz);
 				float4 uvTestSampler = tex2D(_PlanetUVSampler, uvTest);
 
-				Account(terrainColor, scatteringColor, IN.vertex1.xyz, IN.normal0.xyz, IN.direction);
+				Account(terrainColor, scatteringColor, IN.vertex1.xyz, normal, IN.direction);
 
 				//outDiffuse = FindNormal(_HeightTexture, IN.uv0); 
 				//outDiffuse = uvSamplerColor;

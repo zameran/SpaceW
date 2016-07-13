@@ -115,7 +115,7 @@ public sealed class Quad : MonoBehaviour, IQuad, IEventit<Quad>
     
     public Planetoid Planetoid;
 
-    public ComputeShader CoreShader;
+    public ComputeShader CoreShader { get { return Planetoid.CoreShader; } }
 
     public Mesh QuadMesh;
     public Material QuadMaterial;
@@ -168,7 +168,7 @@ public sealed class Quad : MonoBehaviour, IQuad, IEventit<Quad>
 
     public Id RegistryID { get { return new Id(LODLevel, (int)ID, (int)Position); } }
 
-    public Matrix4x4 RotationMatrix { get { return Matrix4x4.TRS(Vector3.zero, Quaternion.Euler((middleNormalized).normalized * Mathf.Deg2Rad), Vector3.one); } }
+    public Matrix4x4 RotationMatrix { get { return Matrix4x4.TRS(middleNormalized, Quaternion.Euler((middleNormalized).normalized * Mathf.Deg2Rad), Vector3.one); } }
 
     #region Eventit
     public bool isEventit { get; set; }
@@ -509,7 +509,7 @@ public sealed class Quad : MonoBehaviour, IQuad, IEventit<Quad>
         QuadMaterial.SetTexture("_NormalTexture", NormalTexture);
         QuadMaterial.SetFloat("_Atmosphere", (Planetoid.Atmosphere != null) ? 1.0f : 0.0f);
         QuadMaterial.SetFloat("_Normale", Planetoid.DrawNormals ? 1.0f : 0.0f);
-        QuadMaterial.SetMatrix("TRS", Planetoid.PlanetoidTRS);
+        QuadMaterial.SetMatrix("_TRS", RotationMatrix);
         QuadMaterial.SetFloat("_LODLevel", LODLevel + 2);
 
         QuadMaterial.renderQueue = (int)Planetoid.RenderQueue + Planetoid.RenderQueueOffset;
@@ -775,6 +775,8 @@ public sealed class Quad : MonoBehaviour, IQuad, IEventit<Quad>
 
     public IEnumerator DispatchCoroutine()
     {
+        if (CoreShader == null) StopCoroutine(DispatchCoroutine());
+
         if (DispatchStarted != null)
             DispatchStarted(this);
 

@@ -33,7 +33,7 @@ public class PatchTree
     Plane Plane;
 
     public Vector3 Middle;
-    Vector3 MiddleProjected;
+    public Vector3 MiddleProjected;
 
     public Vector3 PatchNormal;
 
