@@ -18,7 +18,8 @@
 		Pass
 		{
 			ZWrite On
-			ZTest LEqual
+			ZTest LEqual 
+			Cull Back
 			Fog { Mode Off }
 
 			CGPROGRAM

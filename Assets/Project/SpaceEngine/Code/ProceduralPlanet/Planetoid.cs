@@ -362,7 +362,7 @@ public sealed class Planetoid : Planet, IPlanet
             {
                 for (int i = 0; i < Quads.Count; i++)
                 {
-                    if (Quads[i] != null)
+                    if (Quads[i] != null && Quads[i].gameObject.activeInHierarchy)
                         Quads[i].Render(camera, DrawLayer);
                 }
             }
