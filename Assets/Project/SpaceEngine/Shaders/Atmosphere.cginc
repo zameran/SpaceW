@@ -316,19 +316,10 @@ float EclipseShadow(float3 FragPosS, float3 lightVec, float lightAngularRadius)
 
 float EclipseOuterShadow(float3 lightVec, float lightAngularRadius, float3 d, float3 WCP, float3 _Globals_Origin)
 {
-    float Shadow = 1.0;
-
-    //TODO : Swkitch in sphere - out sphere.
+    //TODO : Switch in sphere - out sphere.
     float interSectPt = IntersectOuterSphere(WCP, d, _Globals_Origin, Rt);
 
-    if (interSectPt != -1)
-    {
-		float3 worldPos = WCP + d * interSectPt;
-
-		Shadow = EclipseShadow(worldPos, lightVec, lightAngularRadius);
-	}
-
-    return Shadow;
+    return interSectPt != -1 ? EclipseShadow(WCP + d * interSectPt, lightVec, lightAngularRadius) : 1.0;;
 }
 
 float2 GetTransmittanceUV(float r, float mu) 

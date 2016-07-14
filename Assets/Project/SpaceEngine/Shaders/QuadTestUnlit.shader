@@ -28,6 +28,8 @@
 			#pragma vertex vert
 			#pragma fragment frag
 
+			#pragma fragmentoption ARB_precision_hint_fastest
+
 			#pragma multi_compile LIGHT_1 LIGHT_2 LIGHT_3 LIGHT_4
 			#pragma multi_compile SHINE_ON SHINE_OFF
 			#pragma multi_compile ECLIPSES_ON ECLIPSES_OFF
@@ -261,7 +263,8 @@
 			ENDCG
 		}
 
-        /*Pass
+        /*
+		Pass
         {
             Name "ShadowCaster"
             Tags
@@ -284,6 +287,7 @@
             #include "UnityStandardShadow.cginc"
 
             ENDCG
-        }*/
+        }
+		*/
 	}
 }
