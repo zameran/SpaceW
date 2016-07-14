@@ -173,9 +173,16 @@ float3 CalculateSurfaceNormal_HeightMap(float3 position, float3 normal, float he
 //-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
+inline float GetSlope(float3 normal)
+{
+	return 0.5 * max(dot(normal, float3(0.0, 1.0, 0.0)), 0.001);
+}
+//-----------------------------------------------------------------------------
+
+//-----------------------------------------------------------------------------
 inline float3 GetSobelNormal(QuadGenerationConstants constants, RWStructuredBuffer<OutputStruct> buffer, int size, uint3 id)
 {
-	float normalStrength = 0.5 / ((constants.lodLevel / 20.0 + 1.0) * (constants.lodLevel / 20.0 + 1.0));
+	//float normalStrength = 0.5 / ((constants.lodLevel / 20.0 + 1.0) * (constants.lodLevel / 20.0 + 1.0));
 	
 	float tl = buffer[(id.x + 0) + (id.y + 0) * size].noise;// * constants.lodLevel;
 	float  l = buffer[(id.x + 0) + (id.y + 1) * size].noise;// * constants.lodLevel;
@@ -206,17 +213,15 @@ inline float3 GetHeightNormal(QuadGenerationConstants constants, RWStructuredBuf
 	float zdelta = ((right - left) + 1.0) * 0.5;
 	float wdelta = ((up - down) + 1.0) * 0.5;
 
-	float3 xnormal = float3(xdelta, ydelta, 1.0);
-	float3 ynormal = float3(ydelta, xdelta, 1.0);
-	float3 znormal = float3(zdelta, wdelta, 1.0);
-	float3 wnormal = float3(wdelta, zdelta, 1.0);
+	float3 xnormal = normalize(float3(xdelta, ydelta, 1.0));
+	float3 ynormal = normalize(float3(ydelta, xdelta, 1.0));
+	float3 znormal = normalize(float3(zdelta, wdelta, 1.0));
+	float3 wnormal = normalize(float3(wdelta, zdelta, 1.0));
 
-	float xslope = 0.5 / max(dot(xnormal, float3(0.0, 1.0, 0.0)), 0.001);
-	float yslope = 0.5 / max(dot(ynormal, float3(0.0, 1.0, 0.0)), 0.001);
-	float zslope = 0.5 / max(dot(znormal, float3(0.0, 1.0, 0.0)), 0.001);
-	float wslope = 0.5 / max(dot(wnormal, float3(0.0, 1.0, 0.0)), 0.001);
-
-	float finalSlope = min(min(xslope, yslope), min(zslope, wslope));
+	float finalSlope = min(min(GetSlope(xnormal), 
+							   GetSlope(ynormal)), 
+						   min(GetSlope(znormal), 
+							   GetSlope(wnormal)));
 	
 	slope = finalSlope;
 
@@ -225,26 +230,15 @@ inline float3 GetHeightNormal(QuadGenerationConstants constants, RWStructuredBuf
 
 inline float3 GetHeightNormalFromPosition(QuadGenerationConstants constants, RWStructuredBuffer<OutputStruct> buffer, int size, uint3 id)
 {
-	float r = constants.planetRadius;
+	float3 left	 = (buffer[(id.x + 0) + (id.y + 1) * size].position.xyz);
+	float3 right = (buffer[(id.x + 2) + (id.y + 1) * size].position.xyz);
+	float3 up	 = (buffer[(id.x + 1) + (id.y + 0) * size].position.xyz);
+	float3 down  = (buffer[(id.x + 1) + (id.y + 2) * size].position.xyz);
+	float3 curr	 = (buffer[(id.x + 1) + (id.y + 1) * size].position.xyz);
 
-	float3 left	 = (buffer[(id.x + 0) + (id.y + 1) * size].position.xyz) / r;// * constants.lodLevel;
-	float3 right = (buffer[(id.x + 2) + (id.y + 1) * size].position.xyz) / r;// * constants.lodLevel;
-	float3 up	 = (buffer[(id.x + 1) + (id.y + 0) * size].position.xyz) / r;// * constants.lodLevel;
-	float3 down  = (buffer[(id.x + 1) + (id.y + 2) * size].position.xyz) / r;// * constants.lodLevel;
-	float3 curr	 = (buffer[(id.x + 1) + (id.y + 1) * size].position.xyz) / r;// * constants.lodLevel;
-	
-	float3 e0 = curr - left;
-	float3 e1 = curr - right;
-	float3 e2 = curr - up;
-	float3 e3 = curr - down;
+	float3 n = cross(curr - left, curr - up) + cross(curr - right, curr - down);
 
-	float3 n0 = cross(e0, e2);
-	float3 n1 = cross(e1, e3);
-
-	float3 n = n0 + n1;
-	float3 normal = normalize(float3(-n.x, -n.y, n.z));
-
-	return normal;
+	return normalize(float3(-n.x, -n.y, n.z));
 }
 
 inline float3 GetHeightNormalFromBump(QuadGenerationConstants constants, RWStructuredBuffer<OutputStruct> buffer, int size, uint3 id)
@@ -262,9 +256,7 @@ inline float3 GetHeightNormalFromBump(QuadGenerationConstants constants, RWStruc
 	s += normalize(float3(curr - down, right - curr, 1.0));
 	s += normalize(float3(up - curr, right - curr, 1.0));
 
-	s = normalize(s);
-
-	return s;
+	return normalize(s);
 }
 
 inline float3 GetPackedNormal(QuadGenerationConstants constants, RWStructuredBuffer<OutputStruct> buffer, int size, uint3 id)
@@ -276,9 +268,6 @@ inline float3 GetPackedNormal(QuadGenerationConstants constants, RWStructuredBuf
                
     float2 dir = float2(1.0, 0.0);
                
-    float3 va = normalize(float3(dir.xy, right - left));
-    float3 vb = normalize(float3(dir.yx, down - up));
-               
-    return cross(va, vb).rbg; 
+    return cross(normalize(float3(dir.xy, right - left)), normalize(float3(dir.yx, down - up))).xyz; 
 }
 //-----------------------------------------------------------------------------

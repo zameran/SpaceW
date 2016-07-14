@@ -101,8 +101,8 @@
 
 				p += _Globals_Origin;
 
-				//n.z = sqrt(max(0.0, 1.0 - dot(n.xy, n.xy)));
-				//n = mul(_TRS, n);
+				n.z = sqrt(max(0.0, 1.0 - dot(n.xy, n.xy)));
+				n = mul(_TRS, n);
 
 				float cTheta = dot(n, -WSD);
 	
@@ -237,8 +237,8 @@
 
 				float3 normal = IN.normal0;
 
-				//normal.z = sqrt(max(0.0, 1.0 - dot(normal.xy, normal.xy)));
-				//normal = mul(_TRS, normal);
+				normal.z = sqrt(max(0.0, 1.0 - dot(normal.xy, normal.xy)));
+				normal = mul(_TRS, normal);
 
 				float4 scatteringColor = 0;
 				fixed4 terrainColor = tex2D(_HeightTexture, IN.uv0);
