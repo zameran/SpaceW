@@ -35,8 +35,26 @@
 
 using System;
 
+using UnityEngine;
+
 [Serializable]
 public class Cluster
 {
-    public Cluster[,] Clusters;
+    public int Size;
+
+    public Vector3d Position;
+
+    public Cluster[,,] Clusters;
+
+    private Cluster()
+    {
+
+    }
+
+    public Cluster(int Size, Vector3d Position)
+    {
+        this.Size = Size;
+
+        this.Position = Position;
+    }
 }

@@ -33,58 +33,13 @@
 // Creator: zameran
 #endregion
 
-using UnityEngine;
-
-public sealed class ClusterSpace : Space
+public enum NoiseEnginePreset : uint
 {
-    public int ClusterSize = 128;
-    public int ClusterCapacitySize = 4;
-
-    public int Deep = 4;
-
-    public Cluster[,,] TopClusters = new Cluster[8, 8, 8];
-
-    protected override void Init()
-    {
-        base.Init();
-
-        for (int i = 0; i < 8; i++)
-        {
-            for (int j = 0; j < 8; j++)
-            {
-                for (int k = 0; k < 8; k++)
-                {
-                    TopClusters[i, j, k] = new Cluster(128, new Vector3d(i * ClusterSize, 
-                                                                         j * ClusterSize, 
-                                                                         k * ClusterSize));
-                }
-            }
-        }
-    }
-
-    private void Awake()
-    {
-        Init();
-    }
-
-    private void OnDrawGizmos()
-    {
-        Gizmos.color = XKCDColors.Berry;
-
-        for (int i = 0; i < 8; i++)
-        {
-            for (int j = 0; j < 8; j++)
-            {
-                for (int k = 0; k < 8; k++)
-                {
-                    var cluster = TopClusters[i, j, k];
-
-                    if (cluster != null)
-                    {
-                        Gizmos.DrawWireCube(cluster.Position, new Vector3(ClusterSize, ClusterSize, ClusterSize));
-                    }
-                }
-            }
-        }
-    }
+    Asteroid = 0,
+    Terra = 1,
+    Gasgiant = 2,
+    Sun = 3,
+    Clouds = 4,
+    CloudsGasGiant = 5,
+    Moon = 6
 }

@@ -35,7 +35,10 @@
 
 using UnityEngine;
 
-public class Space : MonoBehaviour
+public abstract class Space : MonoBehaviour
 {
+    protected virtual void Init()
+    {
 
+    }
 }
