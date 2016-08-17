@@ -79,7 +79,7 @@ Shader "SpaceEngine/Atmosphere/AtmosphereMap"
 			#include "Atmosphere.cginc"
 
 			#pragma target 5.0
-			#pragma only_renderers d3d11
+			#pragma only_renderers d3d11 glcore
 			#pragma vertex vert
 			#pragma fragment frag
 

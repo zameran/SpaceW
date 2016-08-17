@@ -57,7 +57,7 @@ Shader "SpaceEngine/Atmosphere/Cloudsphere"
 			#include "Assets/Project/SpaceEngine/Shaders/Compute/Utils.cginc"
 
 			#pragma target 5.0
-			#pragma only_renderers d3d11
+			#pragma only_renderers d3d11 glcore
 			#pragma vertex vert
 			#pragma fragment frag
 					

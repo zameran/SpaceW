@@ -24,7 +24,7 @@
 
 			CGPROGRAM
 			#pragma target 5.0
-			#pragma only_renderers d3d11
+			#pragma only_renderers d3d11 glcore
 			#pragma vertex vert
 			#pragma fragment frag
 
@@ -35,8 +35,8 @@
 			#pragma multi_compile ECLIPSES_ON ECLIPSES_OFF
 			#pragma multi_compile ATMOSPHERE_ON ATMOSPHERE_OFF
 
-            #include "UnityCG.cginc"
-            #include "AutoLight.cginc"
+			#include "UnityCG.cginc"
+			#include "AutoLight.cginc"
 			#include "Assets/Project/SpaceEngine/Shaders/Compute/Utils.cginc"
 			#include "Assets/Project/SpaceEngine/Shaders/TCCommon.cginc"
 			#include "Assets/Project/SpaceEngine/Shaders/HDR.cginc"
@@ -260,31 +260,31 @@
 			ENDCG
 		}
 
-        /*
+		/*
 		Pass
-        {
-            Name "ShadowCaster"
-            Tags
-            { 
-                "LightMode" = "ShadowCaster" 
-                "IgnoreProjector" = "True"
-            }
+		{
+			Name "ShadowCaster"
+			Tags
+			{ 
+				"LightMode" = "ShadowCaster" 
+				"IgnoreProjector" = "True"
+			}
 
-            ZWrite On
+			ZWrite On
 
-            CGPROGRAM
-            #pragma target 5.0
+			CGPROGRAM
+			#pragma target 5.0
 
-            #pragma shader_feature _ALPHAPREMULTIPLY_ON
-            #pragma multi_compile_shadowcaster
+			#pragma shader_feature _ALPHAPREMULTIPLY_ON
+			#pragma multi_compile_shadowcaster
 
-            #pragma vertex vertShadowCaster
-            #pragma fragment fragShadowCaster
+			#pragma vertex vertShadowCaster
+			#pragma fragment fragShadowCaster
 
-            #include "UnityStandardShadow.cginc"
+			#include "UnityStandardShadow.cginc"
 
-            ENDCG
-        }
+			ENDCG
+		}
 		*/
 	}
 }

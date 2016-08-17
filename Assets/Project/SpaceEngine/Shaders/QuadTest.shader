@@ -21,7 +21,7 @@
 		#pragma vertex vert
 
 		#pragma target 5.0
-		#pragma only_renderers d3d11
+		#pragma only_renderers d3d11 glcore
 
 		struct OutputStruct
 		{
@@ -50,9 +50,7 @@
 		uniform sampler2D _NormalTexture;
 		uniform float LODLevel;
 
-		#ifdef SHADER_API_D3D11
 		uniform StructuredBuffer<OutputStruct> data;
-		#endif
 
 		float3 FindNormal(float2 uv, float2 u)
 		{

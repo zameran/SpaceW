@@ -74,16 +74,16 @@
 				return pow(max(0, data), 2.2) * 2;
 			}
 
- 			float3 Extinction(float3 camera, float3 p)
- 			{
+			float3 Extinction(float3 camera, float3 p)
+			{
 				float3 viewdir = p;
 
- 				float r = length(camera);
- 				float rMu = dot(camera, viewdir);
- 				float mu = rMu / r;
+				float r = length(camera);
+				float rMu = dot(camera, viewdir);
+				float mu = rMu / r;
 				float d = length(viewdir - camera);
-     			float deltaSq = SQRT(rMu * rMu - r * r + Rt * Rt, 1e30);
-     			float din = max(-rMu - deltaSq, 0.0);
+				float deltaSq = SQRT(rMu * rMu - r * r + Rt * Rt, 1e30);
+				float din = max(-rMu - deltaSq, 0.0);
 
 				//viewdir = viewdir / d;
 
@@ -96,8 +96,8 @@
 					d -= din;
 				}
  
-     			return (r > Rt) ? float3(1.0, 1.0, 1.0) : Transmittance(r, mu);
-     		}
+				return (r > Rt) ? float3(1.0, 1.0, 1.0) : Transmittance(r, mu);
+			}
 
 			float4 frag(v2f IN) : COLOR
 			{

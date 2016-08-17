@@ -95,7 +95,7 @@ Shader "SpaceEngine/Atmosphere/Atmosphere"
 			#pragma multi_compile ECLIPSES_ON ECLIPSES_OFF
 
 			#pragma target 5.0
-			#pragma only_renderers d3d11
+			#pragma only_renderers d3d11 glcore
 			#pragma vertex vert
 			#pragma fragment frag
 					
