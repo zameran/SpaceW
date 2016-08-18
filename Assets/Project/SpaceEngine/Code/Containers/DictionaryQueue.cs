@@ -92,24 +92,30 @@ public class DictionaryQueue<KEY, VALUE>
     public VALUE RemoveFirst()
     {
         LinkedListNode<KeyValuePair<KEY, VALUE>> node = m_list.First;
+
         m_list.RemoveFirst();
         m_dictionary.Remove(node.Value.Key);
+
         return node.Value.Value;
     }
 
     public VALUE RemoveLast()
     {
         LinkedListNode<KeyValuePair<KEY, VALUE>> node = m_list.Last;
+
         m_list.RemoveLast();
         m_dictionary.Remove(node.Value.Key);
+
         return node.Value.Value;
     }
 
     public VALUE Remove(KEY key)
     {
         LinkedListNode<KeyValuePair<KEY, VALUE>> node = m_dictionary[key];
+
         m_dictionary.Remove(key);
         m_list.Remove(node);
+
         return node.Value.Value;
     }
 

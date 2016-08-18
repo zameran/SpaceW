@@ -33,6 +33,9 @@
 // Creator: zameran
 #endregion
 
+/// <summary>
+/// Quad LOD Splitting behaviour.
+/// </summary>
 public enum QuadLODDistanceMethod
 {
     ClosestCorner,

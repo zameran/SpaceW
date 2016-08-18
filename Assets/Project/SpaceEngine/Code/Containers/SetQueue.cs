@@ -80,22 +80,27 @@ public class SetQueue<VALUE>
     public VALUE RemoveFirst()
     {
         LinkedListNode<KeyValuePair<VALUE, VALUE>> node = m_list.First;
+
         m_list.RemoveFirst();
         m_dictionary.Remove(node.Value.Key);
+
         return node.Value.Value;
     }
 
     public VALUE RemoveLast()
     {
         LinkedListNode<KeyValuePair<VALUE, VALUE>> node = m_list.Last;
+
         m_list.RemoveLast();
         m_dictionary.Remove(node.Value.Key);
+
         return node.Value.Value;
     }
 
     public void Remove(VALUE val)
     {
         LinkedListNode<KeyValuePair<VALUE, VALUE>> node = m_dictionary[val];
+
         m_dictionary.Remove(val);
         m_list.Remove(node);
     }

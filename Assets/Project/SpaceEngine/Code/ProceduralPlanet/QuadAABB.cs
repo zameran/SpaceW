@@ -48,7 +48,7 @@ public class QuadAABB
 
     public QuadAABB(Vector3[] AABB, bool forCulling)
     {
-        this.AABB = new Vector3[AABB.Length];
+        this.AABB = new Vector3[forCulling ? 8 : 14];
 
         this.Bounds = new Bounds(Vector3.zero, new Vector3(9e37f, 9e37f, 9e37f));
 

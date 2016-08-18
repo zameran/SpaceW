@@ -33,6 +33,9 @@
 // Creator: zameran
 #endregion
 
+/// <summary>
+/// Quad ID [Number] in hierarchy.
+/// </summary>
 public enum QuadID
 {
     One,

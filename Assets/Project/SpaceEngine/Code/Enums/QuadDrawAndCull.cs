@@ -33,6 +33,9 @@
 // Creator: zameran
 #endregion
 
+/// <summary>
+/// Quad culling behaviour.
+/// </summary>
 public enum QuadDrawAndCull
 {
     CullBeforeDraw,

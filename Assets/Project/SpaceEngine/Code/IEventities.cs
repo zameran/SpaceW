@@ -45,6 +45,6 @@ public interface IEventit<T> where T : class
 {
     bool isEventit { get; set; }
 
-    void Eventit(T quad);
-    void UnEventit(T quad);
+    void Eventit(T obj);
+    void UnEventit(T obj);
 }

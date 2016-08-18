@@ -33,6 +33,9 @@
 // Creator: zameran
 #endregion
 
+/// <summary>
+/// Quad position [Orientation] relative to planet center.
+/// </summary>
 public enum QuadPosition
 {
     Top,        //0

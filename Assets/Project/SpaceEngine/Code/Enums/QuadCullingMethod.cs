@@ -33,6 +33,9 @@
 // Creator: zameran
 #endregion
 
+/// <summary>
+/// Quad culling method.
+/// </summary>
 public enum QuadCullingMethod
 {
     None,
