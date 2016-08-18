@@ -79,10 +79,6 @@ public abstract class Planet : MonoBehaviour
 
     public Transform LODTarget = null;
 
-    public float LODUpdateInterval = 0.25f;
-    [HideInInspector]
-    public float LastLODUpdateTime = 0.00f;
-
     public GameObject QuadsRoot = null;
 
     public float PlanetRadius = 1024;

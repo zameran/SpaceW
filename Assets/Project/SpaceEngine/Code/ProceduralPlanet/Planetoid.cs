@@ -249,7 +249,7 @@ public sealed class Planetoid : Planet, IPlanet
             Render();
         }
 
-        CheckLOD();
+        UpdateLOD();
     }
 
     protected override void LateUpdate()
@@ -341,16 +341,11 @@ public sealed class Planetoid : Planet, IPlanet
         GenerationConstants = PlanetGenerationConstants.Init(PlanetRadius, TerrainMaxHeight);
     }
 
-    public void CheckLOD()
+    public void UpdateLOD()
     {
-        if (Time.time > LastLODUpdateTime + LODUpdateInterval && UseLOD)
+        for (int i = 0; i < Quads.Count; i++)
         {
-            LastLODUpdateTime = Time.time;
-
-            for (int i = 0; i < Quads.Count; i++)
-            {
-                Quads[i].CheckLOD();
-            }
+            Quads[i].CheckLOD();
         }
     }
 
