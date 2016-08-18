@@ -216,7 +216,7 @@
 				o.uv0 = v.texcoord;
 				o.normal0 = v.normal;
 				o.vertex0 = mul(UNITY_MATRIX_MVP, v.vertex);
-				o.vertex1 = mul(_Object2World, v.vertex); //TODO : Apply Origin vector. //NOTE : Bug here!!!!!111
+				o.vertex1 = mul(unity_ObjectToWorld, v.vertex); //TODO : Apply Origin vector. //NOTE : Bug here!!!!!111
 				o.tangent0 = v.tangent;
 				o.depth = 1;
 

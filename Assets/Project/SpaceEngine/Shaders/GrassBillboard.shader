@@ -77,7 +77,7 @@ Shader "Custom/GrassBillboard"
 					GS_INPUT vOut;
 					
 					// set output values
-					vOut.worldPosition =  mul(_Object2World, vIn.position);
+					vOut.worldPosition =  mul(unity_ObjectToWorld, vIn.position);
 					vOut.parameters.x = tex2Dlod(_NoiseTexture, vIn.uv_Noise * _Freq).a;
 					vOut.parameters.y = vIn.sizeFactor;
 
@@ -123,7 +123,7 @@ Shader "Custom/GrassBillboard"
 					v[3] = float4(p[0].worldPosition - halfSize * right + size * up, 1.0f);
 
 					// matrix to transfer vertices from world to screen space
-					float4x4 vpMatrix = mul(UNITY_MATRIX_MVP, _World2Object);
+					float4x4 vpMatrix = mul(UNITY_MATRIX_MVP, unity_WorldToObject);
 					
 					FS_INPUT fIn;
 					
@@ -245,7 +245,7 @@ Shader "Custom/GrassBillboard"
 				GS_INPUT vOut;
 
 				// set output values
-				vOut.worldPosition =  mul(_Object2World, v.position);
+				vOut.worldPosition =  mul(unity_ObjectToWorld, v.position);
 				vOut.parameters.x = tex2Dlod(_NoiseTexture, v.uv_Noise * _Freq).a;
 				vOut.parameters.y = v.sizeFactor;
 
@@ -290,25 +290,25 @@ Shader "Custom/GrassBillboard"
 				FS_INPUT fIn;
 
 				SHADOW_VERTEX v;
-				v.vertex = mul (_World2Object, vertices[0]);
+				v.vertex = mul (unity_WorldToObject, vertices[0]);
 				fIn.uv_MainTexture = float2(1.0f, 0.0f);
 				TRANSFER_SHADOW_CASTER(fIn)		// uses "v.vertex" for vertex position
 					
 				triStream.Append(fIn);
 				
-				v.vertex = mul (_World2Object, vertices[1]);
+				v.vertex = mul (unity_WorldToObject, vertices[1]);
 				fIn.uv_MainTexture = float2(1.0f, 1.0f);
 				TRANSFER_SHADOW_CASTER(fIn)          
 
 				triStream.Append(fIn);
 
-				v.vertex = mul (_World2Object, vertices[2]);
+				v.vertex = mul (unity_WorldToObject, vertices[2]);
 				fIn.uv_MainTexture = float2(0.0f, 0.0f);
 				TRANSFER_SHADOW_CASTER(fIn)          
 
 				triStream.Append(fIn);
 
-				v.vertex = mul (_World2Object, vertices[3]);
+				v.vertex = mul (unity_WorldToObject, vertices[3]);
 				fIn.uv_MainTexture = float2(0.0f, 1.0f);
 				TRANSFER_SHADOW_CASTER(fIn)          
 

@@ -31,7 +31,7 @@ static public class CBUtility
 {
     static public ComputeBuffer CreateArgBuffer(int vertexCountPerInstance, int instanceCount, int startVertex, int startInstance)
     {
-        ComputeBuffer buffer = new ComputeBuffer(4, sizeof(int), ComputeBufferType.DrawIndirect);
+        ComputeBuffer buffer = new ComputeBuffer(4, sizeof(int), ComputeBufferType.IndirectArguments);
         int[] args = new int[] { vertexCountPerInstance, instanceCount, startVertex, startInstance };
         buffer.SetData(args);
 
