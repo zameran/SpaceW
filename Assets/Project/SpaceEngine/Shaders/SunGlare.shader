@@ -2,7 +2,7 @@
 {
 	SubShader 
 	{
-		Tags { "Queue" = "Transparent" "IgnoreProjector"="True" "RenderType"="Transparent" }
+		Tags { "Queue" = "Transparent" "IgnoreProjector" = "True" "RenderType" = "Transparent" }
 	
 		Pass 
 		{
@@ -147,12 +147,12 @@
 
 				ghosts = ghosts * smoothstep(0.0, 1.0, 1.0 - length(toScreenCenter));	
 
-				if (r <= Rt) {  }
+				//if (r <= Rt) {  }
 				
 				outputColor += sunColor;
 				outputColor += ghosts;
-				outputColor *= Fade;
-				//outputColor = (useAtmosphereColors > 0.0) ? (outputColor * extinction) : outputColor;
+				//outputColor *= Fade;
+				outputColor = (useAtmosphereColors > 0.0) ? (outputColor * extinction) : outputColor;
 				//outputColor = OuterSunGlareRadiance(IN.relativeDir, outputColor);
 				//outputColor = (Eclipse > 0.0) ? sunColor : outputColor;
 
