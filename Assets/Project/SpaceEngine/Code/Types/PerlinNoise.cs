@@ -32,7 +32,7 @@ namespace UnityEngine
 
         public PerlinNoise(int seed)
         {
-            Random.seed = seed;
+            Random.InitState(seed);
 
             int i, j, k;
             for (i = 0; i < B; i++)

@@ -86,7 +86,7 @@ public class PatchSphere : MonoBehaviour
 
         GL.Begin(GL.QUADS);
 
-        if (Application.platform == RuntimePlatform.OSXPlayer || Application.platform == RuntimePlatform.OSXWebPlayer || Application.platform == RuntimePlatform.OSXEditor)
+        if (Application.platform == RuntimePlatform.OSXPlayer || Application.platform == RuntimePlatform.OSXEditor)
         {
             GL.MultiTexCoord(0, new Vector3(0, 0, 0));
             GL.MultiTexCoord(1, v1);

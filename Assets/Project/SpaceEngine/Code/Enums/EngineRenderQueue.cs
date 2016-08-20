@@ -33,7 +33,7 @@
 // Creator: zameran
 #endregion
 
-public enum EngineRenderQueue
+public enum EngineRenderQueue : int
 {
 	Background = 1000,
 	Geometry = 2000,
