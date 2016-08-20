@@ -54,7 +54,8 @@ namespace SpaceEngine.AtmosphericScattering.Sun
         public Texture2D SunGhost2;
         public Texture2D SunGhost3;
 
-        public int RenderQueue = 3000;
+        public EngineRenderQueue RenderQueue = EngineRenderQueue.Transparent;
+        public int RenderQueueOffset = 1000;
 
         public bool InitUniformsInUpdate = true;
 
@@ -89,7 +90,7 @@ namespace SpaceEngine.AtmosphericScattering.Sun
                 if (GetComponent<AtmosphereSun>() != null)
                     Sun = GetComponent<AtmosphereSun>();
 
-            SunGlareMaterial = MaterialHelper.CreateTemp(SunGlareShader, "Sunglare", RenderQueue);
+            SunGlareMaterial = MaterialHelper.CreateTemp(SunGlareShader, "Sunglare", (int)RenderQueue);
 
             mesh = MeshFactory.MakePlane(8, 8, MeshFactory.PLANE.XY, false, false, false);
             mesh.bounds = new Bounds(Vector4.zero, new Vector3(9e37f, 9e37f, 9e37f));
@@ -153,7 +154,10 @@ namespace SpaceEngine.AtmosphericScattering.Sun
             SunGlareMaterial.SetFloat("useAtmosphereColors", 1.0f);
             SunGlareMaterial.SetFloat("Eclipse", Eclipse ? 1.0f : 0.0f);
 
+            SunGlareMaterial.renderQueue = (int)RenderQueue + RenderQueueOffset;
+
             if (Atmosphere != null) Atmosphere.SetUniforms(null, SunGlareMaterial, false, false);
+            if (Sun != null) Sun.SetUniforms(SunGlareMaterial);
         }
 
         public void UpdateNode()
