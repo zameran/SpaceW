@@ -54,7 +54,7 @@ public sealed class ImprovedPerlinNoise
 
     public ImprovedPerlinNoise(int seed)
     {
-        Random.seed = seed;
+        Random.InitState(seed);
 
         int i, j, k;
 
