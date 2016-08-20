@@ -152,7 +152,7 @@
 				outputColor += sunColor;
 				outputColor += ghosts;
 				outputColor *= Fade;
-				outputColor = (useAtmosphereColors > 0.0) ? (outputColor * extinction) : outputColor;
+				//outputColor = (useAtmosphereColors > 0.0) ? (outputColor * extinction) : outputColor;
 				//outputColor = OuterSunGlareRadiance(IN.relativeDir, outputColor);
 				//outputColor = (Eclipse > 0.0) ? sunColor : outputColor;
 

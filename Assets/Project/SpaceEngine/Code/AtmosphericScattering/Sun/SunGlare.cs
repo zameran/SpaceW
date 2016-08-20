@@ -154,6 +154,7 @@ namespace SpaceEngine.AtmosphericScattering.Sun
             SunGlareMaterial.SetFloat("Eclipse", Eclipse ? 1.0f : 0.0f);
 
             if (Atmosphere != null) Atmosphere.SetUniforms(null, SunGlareMaterial, false, false);
+            if (Sun != null) Sun.SetUniforms(SunGlareMaterial);
         }
 
         public void UpdateNode()
