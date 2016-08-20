@@ -52,24 +52,11 @@ public class Ring : MonoBehaviour
 	protected static List<string> keywords = new List<string>();
 
 	public Shader RingShader;
-
-	public float Width
-	{
-		get
-		{
-			return OuterRadius - InnerRadius;
-		}
-	}
 	
 	public void UpdateState()
 	{
 		UpdateMaterial();
 		UpdateSegments();
-	}
-	
-	public static Ring CreateRing(Transform parent = null)
-	{
-		return CreateRing(parent, Vector3.zero, Quaternion.identity, Vector3.one);
 	}
 	
 	public static Ring CreateRing(Transform parent, Vector3 localPosition, Quaternion localRotation, Vector3 localScale)
@@ -112,7 +99,7 @@ public class Ring : MonoBehaviour
 		
 		for (var i = segments.Count - 1; i >= 0; i--)
 		{
-			RingSegment.MarkForDestruction(segments[i]);
+			DestroyImmediate(segments[i]);
 		}
 		
 		segments.Clear();
@@ -184,8 +171,10 @@ public class Ring : MonoBehaviour
 	[ContextMenu("RegenerateMesh")]
 	protected virtual void RegenerateMesh()
 	{
+		DestroyImmediate(mesh);
+
 		mesh = ObjectPool<Mesh>.Add(mesh, m => m.Clear());
-		
+
 		ProceduralMesh.Clear();
 		{
 			if (SegmentDetail >= 3)

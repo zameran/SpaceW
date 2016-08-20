@@ -158,7 +158,6 @@ public static class ObjectPool<T> where T : Object
 				{
 					var element = QuickPop(pool.Count - 1);
 					
-					// If the top is null then clean the whole pool
 					if (element == null)
 					{
 						Debug.LogWarning("Popped a null element");
@@ -267,7 +266,7 @@ public static class ObjectPool<T> where T : Object
 	{
 		if (component == null)
 		{
-			var name = "SgtObjectPool<" + typeof(T).Name + ">";
+			var name = "ObjectPool<" + typeof(T).Name + ">";
 			var root = GameObject.Find(name);
 			
 			if (root == null && allowCreation == true)
