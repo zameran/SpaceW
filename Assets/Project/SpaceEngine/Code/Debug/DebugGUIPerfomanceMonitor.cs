@@ -39,69 +39,72 @@ using UnityEngine;
 
 using ZFramework.Unity.Common.PerfomanceMonitor;
 
-public sealed class DebugGUIPerfomanceMonitor : DebugGUI
+namespace SpaceEngine.Debugging
 {
-    protected override void Awake()
+    public sealed class DebugGUIPerfomanceMonitor : DebugGUI
     {
-        base.Awake();
-    }
-
-    protected override void Start()
-    {
-        base.Start();
-    }
-
-    protected override void OnGUI()
-    {
-        base.OnGUI();
-
-        using (new Timer("Repfomance Monitor OnGUI"))
+        protected override void Awake()
         {
-            GUI.Window(0, debugInfoBounds, UI, "Perfomance Monitor (in milliseconds)");
+            base.Awake();
         }
-    }
 
-    private void UI(int id)
-    {
-        var counters = PerformanceMonitor.Counters;
-
-        debugInfoBounds.width = Screen.width - 20;
-
-        scrollPosition = GUILayout.BeginScrollView(scrollPosition, false, true);
+        protected override void Start()
         {
-            GUILayout.BeginVertical();
+            base.Start();
+        }
 
-            for (int i = 0; i < counters.Count; i++)
+        protected override void OnGUI()
+        {
+            base.OnGUI();
+
+            using (new Timer("Repfomance Monitor OnGUI"))
             {
-                var counter = counters[i];
+                GUI.Window(0, debugInfoBounds, UI, "Perfomance Monitor (in milliseconds)");
+            }
+        }
 
-                GUILayout.BeginVertical(string.Format("{0}", counter.Name), skin.box, GUILayout.Width(debugInfoBounds.width - 40));
+        private void UI(int id)
+        {
+            var counters = PerformanceMonitor.Counters;
+
+            debugInfoBounds.width = Screen.width - 20;
+
+            scrollPosition = GUILayout.BeginScrollView(scrollPosition, false, true);
+            {
+                GUILayout.BeginVertical();
+
+                for (int i = 0; i < counters.Count; i++)
                 {
-                    GUILayout.Space(20);
+                    var counter = counters[i];
 
-                    if (true)
+                    GUILayout.BeginVertical(string.Format("{0}", counter.Name), skin.box, GUILayout.Width(debugInfoBounds.width - 40));
                     {
-                        GUILayout.BeginVertical("", skin.box, GUILayout.Width(debugInfoBounds.width - 45));
+                        GUILayout.Space(20);
+
+                        if (true)
                         {
-                            GUILayout.BeginHorizontal();
-                            GUILayoutExtensions.LabelWithSpace(string.Format("Total: {0}", counter.Time / 1000.0f), -8);
-                            GUILayoutExtensions.LabelWithSpace(string.Format("Average: {0}", counter.Average / 1000.0f), -8);
-                            GUILayoutExtensions.LabelWithSpace(string.Format("Last: {0}", counter.Last / 1000.0f), -8);
-                            GUILayoutExtensions.LabelWithSpace(string.Format("Max: {0}", counter.Max / 1000.0f), -8);
-                            GUILayoutExtensions.LabelWithSpace(string.Format("Count: {0}", counter.Count), -8);
-                            GUILayout.EndHorizontal();
+                            GUILayout.BeginVertical("", skin.box, GUILayout.Width(debugInfoBounds.width - 45));
+                            {
+                                GUILayout.BeginHorizontal();
+                                GUILayoutExtensions.LabelWithSpace(string.Format("Total: {0}", counter.Time / 1000.0f), -8);
+                                GUILayoutExtensions.LabelWithSpace(string.Format("Average: {0}", counter.Average / 1000.0f), -8);
+                                GUILayoutExtensions.LabelWithSpace(string.Format("Last: {0}", counter.Last / 1000.0f), -8);
+                                GUILayoutExtensions.LabelWithSpace(string.Format("Max: {0}", counter.Max / 1000.0f), -8);
+                                GUILayoutExtensions.LabelWithSpace(string.Format("Count: {0}", counter.Count), -8);
+                                GUILayout.EndHorizontal();
+                            }
+                            GUILayout.EndVertical();
                         }
-                        GUILayout.EndVertical();
                     }
+                    GUILayout.EndVertical();
                 }
+
+                GUILayout.Space(10);
+
                 GUILayout.EndVertical();
             }
 
-            GUILayout.Space(10);
-
-            GUILayout.EndVertical();
+            GUILayout.EndScrollView();
         }
-
-        GUILayout.EndScrollView();
     }
 }

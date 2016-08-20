@@ -35,17 +35,22 @@
 
 using System;
 
-[AttributeUsage(AttributeTargets.Class, AllowMultiple = false, Inherited = true)]
-public sealed class SpaceAddonMonoBehaviour : Attribute
+using SpaceEngine.Pluginator.Enums;
+
+namespace SpaceEngine.Pluginator.Attributes
 {
-    public EntryPoint @EntryPoint;
-
-    public bool StartupOnce;
-
-    public SpaceAddonMonoBehaviour(EntryPoint @EntryPoint, bool StartupOnce)
+    [AttributeUsage(AttributeTargets.Class, AllowMultiple = false, Inherited = true)]
+    public sealed class SpaceAddonMonoBehaviour : Attribute
     {
-        this.EntryPoint = EntryPoint;
+        public EntryPoint @EntryPoint;
 
-        this.StartupOnce = StartupOnce;
+        public bool StartupOnce;
+
+        public SpaceAddonMonoBehaviour(EntryPoint @EntryPoint, bool StartupOnce)
+        {
+            this.EntryPoint = EntryPoint;
+
+            this.StartupOnce = StartupOnce;
+        }
     }
 }

@@ -35,15 +35,18 @@
 
 using UnityEngine;
 
-public static class QuadCacheUtility
+namespace SpaceEngine.PorecduralPlanet.Cache
 {
-    public static void BeginTransfer()
+    public static class QuadCacheUtility
     {
+        public static void BeginTransfer()
+        {
 
-    }
+        }
 
-    public static void EndTransfer()
-    {
+        public static void EndTransfer()
+        {
 
+        }
     }
 }

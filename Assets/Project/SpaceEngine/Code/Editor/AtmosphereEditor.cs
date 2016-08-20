@@ -1,6 +1,8 @@
 ﻿using UnityEngine;
 using UnityEditor;
 
+using SpaceEngine.AtmosphericScattering;
+
 [CustomEditor(typeof(Atmosphere))]
 public class AtmosphereEditor : Editor
 {

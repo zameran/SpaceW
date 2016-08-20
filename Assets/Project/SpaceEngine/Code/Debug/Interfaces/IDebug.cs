@@ -33,7 +33,10 @@
 // Creator: zameran
 #endregion
 
-internal interface IDebug
+namespace SpaceEngine.Debugging
 {
+    internal interface IDebug
+    {
 
+    }
 }

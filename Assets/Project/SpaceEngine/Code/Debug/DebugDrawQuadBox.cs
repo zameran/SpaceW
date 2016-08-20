@@ -34,25 +34,28 @@
 #endregion
 
 using System.Collections.Generic;
+
 using UnityEngine;
 
-public sealed class DebugDrawQuadBox : DebugDraw
+namespace SpaceEngine.Debugging
 {
-    private struct ColorForQuad
+    public sealed class DebugDrawQuadBox : DebugDraw
     {
-        public Color color;
-
-        public QuadPosition quadPosition;
-
-        public ColorForQuad(Color color, QuadPosition quadPosition)
+        private struct ColorForQuad
         {
-            this.color = color;
+            public Color color;
 
-            this.quadPosition = quadPosition;
+            public QuadPosition quadPosition;
+
+            public ColorForQuad(Color color, QuadPosition quadPosition)
+            {
+                this.color = color;
+
+                this.quadPosition = quadPosition;
+            }
         }
-    }
 
-    private List<ColorForQuad> colorsForQuad = new List<ColorForQuad>(6)
+        private List<ColorForQuad> colorsForQuad = new List<ColorForQuad>(6)
     {
         new ColorForQuad(Color.blue, QuadPosition.Top),
         new ColorForQuad(Color.red, QuadPosition.Bottom),
@@ -62,81 +65,82 @@ public sealed class DebugDrawQuadBox : DebugDraw
         new ColorForQuad(Color.cyan, QuadPosition.Right)
     };
 
-    public bool useColorPerMainQuad = true;
-    public bool useLODCriticalColoring = true;
+        public bool useColorPerMainQuad = true;
+        public bool useLODCriticalColoring = true;
 
-    protected override void Start()
-    {
-        base.Start();
-    }
-
-    protected override void OnPostRender()
-    {
-        base.OnPostRender();
-    }
-
-    protected override void CreateLineMaterial()
-    {
-        base.CreateLineMaterial();
-    }
-
-    protected override void Draw()
-    {
-        #if UNITY_EDITOR
-        if (UnityEditor.SceneView.currentDrawingSceneView != null) return; //Do not draw at Scene tab in editor.
-        #endif
-
-        for (int i = 0; i < Planet.Quads.Count; i++)
+        protected override void Start()
         {
-            Quad q = Planet.Quads[i];
+            base.Start();
+        }
 
-            if (q.Generated && q.ShouldDraw)
+        protected override void OnPostRender()
+        {
+            base.OnPostRender();
+        }
+
+        protected override void CreateLineMaterial()
+        {
+            base.CreateLineMaterial();
+        }
+
+        protected override void Draw()
+        {
+#if UNITY_EDITOR
+            if (UnityEditor.SceneView.currentDrawingSceneView != null) return; //Do not draw at Scene tab in editor.
+#endif
+
+            for (int i = 0; i < Planet.Quads.Count; i++)
             {
-                Color lineColor = Color.blue;
+                Quad q = Planet.Quads[i];
 
-                if (!useColorPerMainQuad)
-                    lineColor = Color.blue;
-                else
+                if (q.Generated && q.ShouldDraw)
                 {
-                    colorsForQuad.ForEach(delegate (ColorForQuad c) { if (q.Position == c.quadPosition) lineColor = c.color; });
+                    Color lineColor = Color.blue;
+
+                    if (!useColorPerMainQuad)
+                        lineColor = Color.blue;
+                    else
+                    {
+                        colorsForQuad.ForEach(delegate (ColorForQuad c) { if (q.Position == c.quadPosition) lineColor = c.color; });
+                    }
+
+                    if (useLODCriticalColoring)
+                        if (q.LODLevel == q.Planetoid.LODMaxLevel)
+                            lineColor = Color.white;
+
+                    int[,] ORDER = new int[,] { { 1, 0 }, { 2, 3 }, { 0, 2 }, { 3, 1 } };
+
+                    Vector3[] verts = q.GetVolumeBox(q.Planetoid.TerrainMaxHeight * 3);
+
+                    GL.PushMatrix();
+                    GL.LoadIdentity();
+                    GL.MultMatrix(CameraHelper.Main().worldToCameraMatrix * q.Planetoid.transform.localToWorldMatrix);
+                    GL.LoadProjectionMatrix(CameraHelper.Main().projectionMatrix);
+
+                    lineMaterial.renderQueue = 5000;
+                    lineMaterial.SetPass(0);
+
+                    GL.Begin(GL.LINES);
+                    GL.Color(lineColor);
+
+                    for (int j = 0; j < 4; j++)
+                    {
+                        //Draw bottom quad
+                        GL.Vertex3(verts[ORDER[j, 0]].x, verts[ORDER[j, 0]].y, verts[ORDER[j, 0]].z);
+                        GL.Vertex3(verts[ORDER[j, 1]].x, verts[ORDER[j, 1]].y, verts[ORDER[j, 1]].z);
+
+                        //Draw top quad
+                        GL.Vertex3(verts[ORDER[j, 0] + 4].x, verts[ORDER[j, 0] + 4].y, verts[ORDER[j, 0] + 4].z);
+                        GL.Vertex3(verts[ORDER[j, 1] + 4].x, verts[ORDER[j, 1] + 4].y, verts[ORDER[j, 1] + 4].z);
+
+                        //Draw verticals
+                        GL.Vertex3(verts[ORDER[j, 0]].x, verts[ORDER[j, 0]].y, verts[ORDER[j, 0]].z);
+                        GL.Vertex3(verts[ORDER[j, 0] + 4].x, verts[ORDER[j, 0] + 4].y, verts[ORDER[j, 0] + 4].z);
+                    }
+
+                    GL.End();
+                    GL.PopMatrix();
                 }
-
-                if (useLODCriticalColoring)
-                    if (q.LODLevel == q.Planetoid.LODMaxLevel)
-                        lineColor = Color.white;
-
-                int[,] ORDER = new int[,] { { 1, 0 }, { 2, 3 }, { 0, 2 }, { 3, 1 } };
-
-                Vector3[] verts = q.GetVolumeBox(q.Planetoid.TerrainMaxHeight * 3);
-
-                GL.PushMatrix();
-                GL.LoadIdentity();
-                GL.MultMatrix(CameraHelper.Main().worldToCameraMatrix * q.Planetoid.transform.localToWorldMatrix);
-                GL.LoadProjectionMatrix(CameraHelper.Main().projectionMatrix);
-
-                lineMaterial.renderQueue = 5000;
-                lineMaterial.SetPass(0);
-
-                GL.Begin(GL.LINES);
-                GL.Color(lineColor);
-
-                for (int j = 0; j < 4; j++)
-                {
-                    //Draw bottom quad
-                    GL.Vertex3(verts[ORDER[j, 0]].x, verts[ORDER[j, 0]].y, verts[ORDER[j, 0]].z);
-                    GL.Vertex3(verts[ORDER[j, 1]].x, verts[ORDER[j, 1]].y, verts[ORDER[j, 1]].z);
-
-                    //Draw top quad
-                    GL.Vertex3(verts[ORDER[j, 0] + 4].x, verts[ORDER[j, 0] + 4].y, verts[ORDER[j, 0] + 4].z);
-                    GL.Vertex3(verts[ORDER[j, 1] + 4].x, verts[ORDER[j, 1] + 4].y, verts[ORDER[j, 1] + 4].z);
-
-                    //Draw verticals
-                    GL.Vertex3(verts[ORDER[j, 0]].x, verts[ORDER[j, 0]].y, verts[ORDER[j, 0]].z);
-                    GL.Vertex3(verts[ORDER[j, 0] + 4].x, verts[ORDER[j, 0] + 4].y, verts[ORDER[j, 0] + 4].z);
-                }
-
-                GL.End();
-                GL.PopMatrix();
             }
         }
     }

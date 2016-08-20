@@ -33,11 +33,14 @@
 // Creator: zameran
 #endregion
 
-/// <summary>
-/// Note: Order here = build order.
-/// </summary>
-public enum EntryPoint : int
+namespace SpaceEngine.Pluginator.Enums
 {
-    Init = 0,
-    MainMenu = 1,
+    /// <summary>
+    /// Note: Order here = build order.
+    /// </summary>
+    public enum EntryPoint : int
+    {
+        Init = 0,
+        MainMenu = 1,
+    }
 }

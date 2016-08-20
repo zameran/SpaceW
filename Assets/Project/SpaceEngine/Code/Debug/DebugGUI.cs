@@ -35,55 +35,58 @@
 
 using UnityEngine;
 
-public abstract class DebugGUI : MonoBehaviour, IDebug
+namespace SpaceEngine.Debugging
 {
-    public Rect debugInfoBounds = new Rect(10, 10, 500, 500);
-
-    [HideInInspector]
-    public DebugGUISwitcher switcher;
-
-    [HideInInspector]
-    public GUIStyle boldLabel;
-
-    [HideInInspector]
-    public Vector2 scrollPosition = Vector2.zero;
-
-    public GUISkin skin
+    public abstract class DebugGUI : MonoBehaviour, IDebug
     {
-        get
+        public Rect debugInfoBounds = new Rect(10, 10, 500, 500);
+
+        [HideInInspector]
+        public DebugGUISwitcher switcher;
+
+        [HideInInspector]
+        public GUIStyle boldLabel;
+
+        [HideInInspector]
+        public Vector2 scrollPosition = Vector2.zero;
+
+        public GUISkin skin
         {
-            var switcher = GetComponent<DebugGUISwitcher>();
+            get
+            {
+                var switcher = GetComponent<DebugGUISwitcher>();
+
+                if (switcher != null)
+                    if (switcher.skin != null)
+                        return switcher.skin;
+
+                return GUI.skin;
+            }
+            private set { }
+        }
+
+        protected virtual void Awake()
+        {
+            if (switcher == null)
+                switcher = GetComponent<DebugGUISwitcher>();
+        }
+
+        protected virtual void Start()
+        {
+
+        }
+
+        protected virtual void OnGUI()
+        {
+            GUI.skin = skin;
+            GUI.depth = -100;
 
             if (switcher != null)
                 if (switcher.skin != null)
-                    return switcher.skin;
-
-            return GUI.skin;
+                    if (GUI.skin.FindStyle("label_Bold") != null)
+                        boldLabel = GUI.skin.FindStyle("label_Bold");
+                    else if (GUI.skin.FindStyle("label") != null)
+                        boldLabel = GUI.skin.FindStyle("label");
         }
-        private set { }
-    }
-
-    protected virtual void Awake()
-    {
-        if (switcher == null)
-            switcher = GetComponent<DebugGUISwitcher>();
-    }
-
-    protected virtual void Start()
-    {
-
-    }
-
-    protected virtual void OnGUI()
-    {
-        GUI.skin = skin;
-        GUI.depth = -100;
-
-        if (switcher != null)
-            if (switcher.skin != null)
-                if (GUI.skin.FindStyle("label_Bold") != null)
-                    boldLabel = GUI.skin.FindStyle("label_Bold");
-                else if (GUI.skin.FindStyle("label") != null)
-                    boldLabel = GUI.skin.FindStyle("label");
     }
 }

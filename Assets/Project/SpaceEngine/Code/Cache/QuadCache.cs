@@ -37,36 +37,39 @@ using System;
 
 using UnityEngine;
 
-[Serializable]
-public abstract class QuadCache
+namespace SpaceEngine.PorecduralPlanet.Cache
 {
-    public QuadStorage Owner;
-    public Quad.Id ID;
-
-    public QuadCache(Quad.Id ID, QuadStorage Owner)
+    [Serializable]
+    public abstract class QuadCache
     {
-        this.ID = ID;
+        public QuadStorage Owner;
+        public Quad.Id ID;
 
-        this.Owner = Owner;
-    }
+        public QuadCache(Quad.Id ID, QuadStorage Owner)
+        {
+            this.ID = ID;
 
-    public virtual void Init()
-    {
+            this.Owner = Owner;
+        }
 
-    }
+        public virtual void Init()
+        {
 
-    public virtual void TransferTo(Quad q)
-    {
+        }
 
-    }
+        public virtual void TransferTo(Quad q)
+        {
 
-    public virtual void TransferFrom(Quad q)
-    {
+        }
 
-    }
+        public virtual void TransferFrom(Quad q)
+        {
 
-    public virtual void OnDestroy()
-    {
+        }
 
+        public virtual void OnDestroy()
+        {
+
+        }
     }
 }

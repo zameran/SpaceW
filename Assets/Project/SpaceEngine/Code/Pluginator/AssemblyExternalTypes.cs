@@ -37,10 +37,13 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 
-public sealed class AssemblyExternalTypes : Dictionary<Type, List<Type>>
+namespace SpaceEngine.Pluginator
 {
-    public AssemblyExternalTypes(Type type, List<Type> value)
+    public sealed class AssemblyExternalTypes : Dictionary<Type, List<Type>>
     {
-        this.Add(type, value);
+        public AssemblyExternalTypes(Type type, List<Type> value)
+        {
+            this.Add(type, value);
+        }
     }
 }

@@ -42,6 +42,11 @@ using System.Collections.Generic;
 using Amib;
 using Amib.Threading;
 
+using SpaceEngine.AtmosphericScattering;
+using SpaceEngine.AtmosphericScattering.Clouds;
+using SpaceEngine.AtmosphericScattering.Sun;
+using SpaceEngine.PorecduralPlanet.Cache;
+
 public static class PlanetoidExtensions
 {
     public static List<string> GetKeywords(this Planet planet)

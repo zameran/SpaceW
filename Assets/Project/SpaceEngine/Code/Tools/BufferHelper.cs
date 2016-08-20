@@ -81,16 +81,6 @@ public static class BufferHelper
         }
     }
 
-    public static void ReleaseAndDisposeCacheBuffers(QuadCBCache cache)
-    {
-
-    }
-
-    public static void ReleaseAndDisposeCacheBuffers(QuadFullCache cache)
-    {
-
-    }
-
     public static void ReleaseAndDisposeQuadBuffers(Quad quad)
     {
         ReleaseAndDisposeBuffers(quad.QuadGenerationConstantsBuffer, quad.PreOutDataBuffer, quad.PreOutDataSubBuffer, quad.OutDataBuffer);

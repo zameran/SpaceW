@@ -39,61 +39,64 @@ using UnityEngine;
 
 using ZFramework.Unity.Common.Threading;
 
-[Serializable]
-public sealed class QuadCBCache : QuadCache
+namespace SpaceEngine.PorecduralPlanet.Cache
 {
-    public QuadCBCache(Quad.Id id, QuadStorage owner) : base(id, owner)
+    [Serializable]
+    public sealed class QuadCBCache : QuadCache
     {
-
-    }
-
-    public override void Init()
-    {
-        base.Init();
-    }
-
-    public override void TransferTo(Quad q)
-    {
-        if (Owner.Multithreaded)
+        public QuadCBCache(Quad.Id id, QuadStorage owner) : base(id, owner)
         {
-            Dispatcher.InvokeAsync(() =>
-            {
 
-            });
-        }
-        else
-        {
-            Dispatcher.Invoke(() =>
-            {
-
-            });
         }
 
-        base.TransferTo(q);
-    }
-
-    public override void TransferFrom(Quad q)
-    {
-        if (Owner.Multithreaded)
+        public override void Init()
         {
-            Dispatcher.InvokeAsync(() =>
-            {
-
-            });
-        }
-        else
-        {
-            Dispatcher.Invoke(() =>
-            {
-
-            });
+            base.Init();
         }
 
-        base.TransferTo(q);
-    }
+        public override void TransferTo(Quad q)
+        {
+            if (Owner.Multithreaded)
+            {
+                Dispatcher.InvokeAsync(() =>
+                {
 
-    public override void OnDestroy()
-    {
-        base.OnDestroy();
+                });
+            }
+            else
+            {
+                Dispatcher.Invoke(() =>
+                {
+
+                });
+            }
+
+            base.TransferTo(q);
+        }
+
+        public override void TransferFrom(Quad q)
+        {
+            if (Owner.Multithreaded)
+            {
+                Dispatcher.InvokeAsync(() =>
+                {
+
+                });
+            }
+            else
+            {
+                Dispatcher.Invoke(() =>
+                {
+
+                });
+            }
+
+            base.TransferTo(q);
+        }
+
+        public override void OnDestroy()
+        {
+            base.OnDestroy();
+        }
     }
 }

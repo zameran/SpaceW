@@ -37,47 +37,50 @@ using UnityEngine;
 
 using System;
 
-[Serializable]
-public sealed class QuadFullCache : QuadCache
+namespace SpaceEngine.PorecduralPlanet.Cache
 {
-    public QuadCBCache QuadComputeBuffers;
-    public QuadTextureCache QuadTextures;
-
-    public QuadFullCache(Quad.Id id, QuadStorage owner) : base(id, owner)
+    [Serializable]
+    public sealed class QuadFullCache : QuadCache
     {
-        QuadComputeBuffers = new QuadCBCache(id, owner);
-        QuadTextures = new QuadTextureCache(id, owner);
-    }
+        public QuadCBCache QuadComputeBuffers;
+        public QuadTextureCache QuadTextures;
 
-    public override void Init()
-    {
-        QuadComputeBuffers.Init();
-        QuadTextures.Init();
+        public QuadFullCache(Quad.Id id, QuadStorage owner) : base(id, owner)
+        {
+            QuadComputeBuffers = new QuadCBCache(id, owner);
+            QuadTextures = new QuadTextureCache(id, owner);
+        }
 
-        base.Init();
-    }
+        public override void Init()
+        {
+            QuadComputeBuffers.Init();
+            QuadTextures.Init();
 
-    public override void TransferTo(Quad q)
-    {
-        QuadComputeBuffers.TransferTo(q);
-        QuadTextures.TransferTo(q);
+            base.Init();
+        }
 
-        base.TransferTo(q);
-    }
+        public override void TransferTo(Quad q)
+        {
+            QuadComputeBuffers.TransferTo(q);
+            QuadTextures.TransferTo(q);
 
-    public override void TransferFrom(Quad q)
-    {
-        QuadComputeBuffers.TransferFrom(q);
-        QuadTextures.TransferFrom(q);
+            base.TransferTo(q);
+        }
 
-        base.TransferTo(q);
-    }
+        public override void TransferFrom(Quad q)
+        {
+            QuadComputeBuffers.TransferFrom(q);
+            QuadTextures.TransferFrom(q);
 
-    public override void OnDestroy()
-    {
-        QuadComputeBuffers.OnDestroy();
-        QuadTextures.OnDestroy();
+            base.TransferTo(q);
+        }
 
-        base.OnDestroy();
+        public override void OnDestroy()
+        {
+            QuadComputeBuffers.OnDestroy();
+            QuadTextures.OnDestroy();
+
+            base.OnDestroy();
+        }
     }
 }

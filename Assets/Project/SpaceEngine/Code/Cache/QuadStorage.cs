@@ -39,80 +39,83 @@ using System.Linq;
 using System.Collections;
 using System.Collections.Generic;
 
-public sealed class QuadStorage : MonoBehaviour
+namespace SpaceEngine.PorecduralPlanet.Cache
 {
-    public bool Multithreaded = false;
-    public bool Working = false;
-
-    public List<QuadTextureCache> TexturesCache = new List<QuadTextureCache>();
-
-    public void AddToTexturesCache(Quad q)
+    public sealed class QuadStorage : MonoBehaviour
     {
-        Working = true;
+        public bool Multithreaded = false;
+        public bool Working = false;
 
-        if (!ExistInTexturesCache(q))
+        public List<QuadTextureCache> TexturesCache = new List<QuadTextureCache>();
+
+        public void AddToTexturesCache(Quad q)
         {
-            QuadTextureCache qtc = new QuadTextureCache(q.RegistryID, this);
-            qtc.Init();
-            qtc.TransferFrom(q);
+            Working = true;
 
-            TexturesCache.Add(qtc);
+            if (!ExistInTexturesCache(q))
+            {
+                QuadTextureCache qtc = new QuadTextureCache(q.RegistryID, this);
+                qtc.Init();
+                qtc.TransferFrom(q);
+
+                TexturesCache.Add(qtc);
+            }
+
+            Working = false;
         }
 
-        Working = false;
-    }
-
-    public void GetFromTexturesCache(Quad q)
-    {
-        Working = true;
-
-        QuadTextureCache qtc = TexturesCache.Find(s => s.ID.Equals(q.RegistryID));
-        qtc.TransferTo(q);
-
-        Working = false;
-    }
-
-    public void LinkQuadToCache(QuadCBCache qcbc, Quad q)
-    {
-
-    }
-
-    public void LinkQuadToCache(QuadTextureCache qtc, Quad q)
-    {
-
-    }
-
-    public void LinkQuadToCache(QuadFullCache qfc, Quad q)
-    {
-
-    }
-
-    public void LinkCacheToQuad(Quad q, QuadCBCache qcbc)
-    {
-
-    }
-
-    public void LinkCacheToQuad(Quad q, QuadTextureCache qtc)
-    {
-
-    }
-
-    public void LinkCacheToQuad(Quad q, QuadFullCache qfc)
-    {
-
-    }
-
-    public bool ExistInTexturesCache(Quad q)
-    {
-        return TexturesCache.Any(s => s.ID.Equals(q.RegistryID));
-    }
-
-    private void OnDestroy()
-    {
-        foreach (QuadTextureCache q in TexturesCache)
+        public void GetFromTexturesCache(Quad q)
         {
-            if (q != null)
-                q.OnDestroy();
+            Working = true;
+
+            QuadTextureCache qtc = TexturesCache.Find(s => s.ID.Equals(q.RegistryID));
+            qtc.TransferTo(q);
+
+            Working = false;
+        }
+
+        public void LinkQuadToCache(QuadCBCache qcbc, Quad q)
+        {
+
+        }
+
+        public void LinkQuadToCache(QuadTextureCache qtc, Quad q)
+        {
+
+        }
+
+        public void LinkQuadToCache(QuadFullCache qfc, Quad q)
+        {
+
+        }
+
+        public void LinkCacheToQuad(Quad q, QuadCBCache qcbc)
+        {
+
+        }
+
+        public void LinkCacheToQuad(Quad q, QuadTextureCache qtc)
+        {
+
+        }
+
+        public void LinkCacheToQuad(Quad q, QuadFullCache qfc)
+        {
+
+        }
+
+        public bool ExistInTexturesCache(Quad q)
+        {
+            return TexturesCache.Any(s => s.ID.Equals(q.RegistryID));
+        }
+
+        private void OnDestroy()
+        {
+            foreach (QuadTextureCache q in TexturesCache)
+            {
+                if (q != null)
+                    q.OnDestroy();
+            }
         }
     }
 }

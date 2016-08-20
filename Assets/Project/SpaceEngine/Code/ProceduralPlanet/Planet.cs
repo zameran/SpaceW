@@ -40,6 +40,10 @@ using Amib.Threading;
 
 using UnityEngine;
 
+using SpaceEngine.AtmosphericScattering;
+using SpaceEngine.AtmosphericScattering.Clouds;
+using SpaceEngine.AtmosphericScattering.Sun;
+
 public abstract class Planet : MonoBehaviour
 {
     public Atmosphere Atmosphere;

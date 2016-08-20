@@ -35,49 +35,52 @@
 
 using UnityEngine;
 
-public sealed class DebugDrawSwitcher : MonoBehaviour, IDebugSwitcher
+namespace SpaceEngine.Debugging
 {
-    public DebugDraw[] GUIs;
-
-    public int state = 0;
-
-    private void Start()
+    public sealed class DebugDrawSwitcher : MonoBehaviour, IDebugSwitcher
     {
-        ToogleAll(GUIs, false);
-    }
+        public DebugDraw[] GUIs;
 
-    private void Update()
-    {
-        if (Input.GetKeyDown(KeyCode.F6))
+        public int state = 0;
+
+        private void Start()
         {
-            if (state == GUIs.Length)
-            {
-                state = 0;
-                ToogleAll(GUIs, false);
-                return;
-            }
-
             ToogleAll(GUIs, false);
-            state++;
-            ToogleAt(GUIs, true, state);
         }
-    }
 
-    public void Toogle(DebugDraw GUI, bool state)
-    {
-        GUI.enabled = state;
-    }
-
-    public void ToogleAt(DebugDraw[] GUIs, bool state, int index)
-    {
-        GUIs[index - 1].enabled = state;
-    }
-
-    public void ToogleAll(DebugDraw[] GUIs, bool state)
-    {
-        for (int i = 0; i < GUIs.Length; i++)
+        private void Update()
         {
-            GUIs[i].enabled = false;
+            if (Input.GetKeyDown(KeyCode.F6))
+            {
+                if (state == GUIs.Length)
+                {
+                    state = 0;
+                    ToogleAll(GUIs, false);
+                    return;
+                }
+
+                ToogleAll(GUIs, false);
+                state++;
+                ToogleAt(GUIs, true, state);
+            }
+        }
+
+        public void Toogle(DebugDraw GUI, bool state)
+        {
+            GUI.enabled = state;
+        }
+
+        public void ToogleAt(DebugDraw[] GUIs, bool state, int index)
+        {
+            GUIs[index - 1].enabled = state;
+        }
+
+        public void ToogleAll(DebugDraw[] GUIs, bool state)
+        {
+            for (int i = 0; i < GUIs.Length; i++)
+            {
+                GUIs[i].enabled = false;
+            }
         }
     }
 }

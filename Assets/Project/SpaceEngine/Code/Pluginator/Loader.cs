@@ -41,71 +41,77 @@ using ZFramework.Unity.Common;
 
 using Logger = ZFramework.Unity.Common.Logger;
 
-[UseLogger(Category.Data)]
-[UseLoggerFile(false, "Log")]
-public abstract class Loader : MonoBehaviour
+using SpaceEngine.Pluginator.Attributes;
+using SpaceEngine.Pluginator.Enums;
+
+namespace SpaceEngine.Pluginator
 {
-    public bool ShouldDontDestroyOnLoad = true;
-
-    private static Loader instance;
-    public static Loader Instance
+    [UseLogger(Category.Data)]
+    [UseLoggerFile(false, "Log")]
+    public abstract class Loader : MonoBehaviour
     {
-        get { if (instance == null) { Logger.Log("Loader Instance get fail!"); } return instance; }
-        private set { if (value != null) instance = value; else Logger.Log("Loader Instance set fail!"); }
-    }
+        public bool ShouldDontDestroyOnLoad = true;
 
-    private static int step;
-    public static int Step
-    {
-        get { return step; }
-        private set { step = value; }
-    }
+        private static Loader instance;
+        public static Loader Instance
+        {
+            get { if (instance == null) { Logger.Log("Loader Instance get fail!"); } return instance; }
+            private set { if (value != null) instance = value; else Logger.Log("Loader Instance set fail!"); }
+        }
 
-    protected virtual void Start()
-    {
+        private static int step;
+        public static int Step
+        {
+            get { return step; }
+            private set { step = value; }
+        }
 
-    }
+        protected virtual void Start()
+        {
 
-    protected virtual void Awake()
-    {
-        Instance = this;
+        }
 
-        Step = 0;
+        protected virtual void Awake()
+        {
+            Instance = this;
 
-        if(ShouldDontDestroyOnLoad) DontDestroyOnLoad(this);
-    }
+            Step = 0;
 
-    protected virtual void Update()
-    {
+            if (ShouldDontDestroyOnLoad) DontDestroyOnLoad(this);
+        }
 
-    }
+        protected virtual void Update()
+        {
 
-    protected virtual void OnGUI()
-    {
+        }
 
-    }
+        protected virtual void OnGUI()
+        {
 
-    protected virtual void OnLevelWasLoaded(int level)
-    {
+        }
 
-    }
+        protected virtual void OnLevelWasLoaded(int level)
+        {
 
-    protected virtual void Pass()
-    {
-        Step++;
-    }
+        }
 
-    public void Delay(float waitTime, Action action)
-    {
-        Logger.Log(string.Format("Delay method invoked! Will wait for {0} seconds...", waitTime));
+        protected virtual void Pass()
+        {
+            Step++;
+        }
 
-        StartCoroutine(DelayImpl(waitTime, action));
-    }
+        public void Delay(float waitTime, Action action)
+        {
+            Logger.Log(string.Format("Delay method invoked! Will wait for {0} seconds...", waitTime));
 
-    private IEnumerator DelayImpl(float waitTime, Action action)
-    {
-        yield return Yielders.Get(waitTime);
+            StartCoroutine(DelayImpl(waitTime, action));
+        }
 
-        if (action != null) action();
+        private IEnumerator DelayImpl(float waitTime, Action action)
+        {
+            yield return Yielders.Get(waitTime);
+
+            if (action != null) action();
+        }
     }
 }

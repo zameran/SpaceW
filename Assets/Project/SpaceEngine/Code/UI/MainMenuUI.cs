@@ -36,6 +36,8 @@
 using UnityEngine;
 using UnityEngine.UI;
 
+using SpaceEngine.Pluginator;
+
 public sealed class MainMenuUI : UserInterface, IUserInterface
 {
     public AssemblyLoader loader = null;

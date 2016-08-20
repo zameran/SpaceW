@@ -33,25 +33,28 @@
 // Creator: zameran
 #endregion
 
-public sealed class DebugDrawPlanetoidBox : DebugDraw
+namespace SpaceEngine.Debugging
 {
-    protected override void Start()
+    public sealed class DebugDrawPlanetoidBox : DebugDraw
     {
-        base.Start();
-    }
+        protected override void Start()
+        {
+            base.Start();
+        }
 
-    protected override void OnPostRender()
-    {
-        base.OnPostRender();
-    }
+        protected override void OnPostRender()
+        {
+            base.OnPostRender();
+        }
 
-    protected override void CreateLineMaterial()
-    {
-        base.CreateLineMaterial();
-    }
+        protected override void CreateLineMaterial()
+        {
+            base.CreateLineMaterial();
+        }
 
-    protected override void Draw()
-    {
+        protected override void Draw()
+        {
 
+        }
     }
 }

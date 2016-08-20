@@ -33,7 +33,10 @@
 // Creator: zameran
 #endregion
 
-internal interface IDebugSwitcher
+namespace SpaceEngine.Debugging
 {
+    internal interface IDebugSwitcher
+    {
 
+    }
 }

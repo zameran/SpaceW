@@ -37,99 +37,102 @@ using System.Linq;
 
 using UnityEngine;
 
-public sealed class DebugGUISettings : DebugGUI
+namespace SpaceEngine.Debugging
 {
-    public Planetoid[] Planetoids;
-
-    public QuadLODDistanceMethod LODDistanceMethod = QuadLODDistanceMethod.ClosestAABBCorner;
-    public QuadCullingMethod CullingMethod = QuadCullingMethod.Unity;
-    public AtmosphereHDR AtmosphereHDRMode = AtmosphereHDR.ProlandOptimized;
-    public QuadDrawAndCull DrawAndCull = QuadDrawAndCull.CullAfterDraw;
-
-    public float LODDistanceMultiplier = 2.0f;
-
-    public bool Eclipses = true;
-    public bool Planetshine = true;
-
-    protected override void Awake()
+    public sealed class DebugGUISettings : DebugGUI
     {
-        base.Awake();
-    }
+        public Planetoid[] Planetoids;
 
-    protected override void Start()
-    {
-        base.Start();
-    }
+        public QuadLODDistanceMethod LODDistanceMethod = QuadLODDistanceMethod.ClosestAABBCorner;
+        public QuadCullingMethod CullingMethod = QuadCullingMethod.Unity;
+        public AtmosphereHDR AtmosphereHDRMode = AtmosphereHDR.ProlandOptimized;
+        public QuadDrawAndCull DrawAndCull = QuadDrawAndCull.CullAfterDraw;
 
-    protected override void OnGUI()
-    {
-        base.OnGUI();
+        public float LODDistanceMultiplier = 2.0f;
 
-        GUILayout.Window(0, debugInfoBounds, UI, "Settings");
-    }
+        public bool Eclipses = true;
+        public bool Planetshine = true;
 
-    private void UI(int id)
-    {
-        scrollPosition = GUILayout.BeginScrollView(scrollPosition, false, true);
-        Planetoids = FindObjectsOfType<Planetoid>();
-
-        GUILayout.BeginVertical();
-
-        GUILayout.Label("Misc: ", boldLabel);
-
-        GUILayoutExtensions.LabelWithSpace("Quads culling method: " + CullingMethod.ToString(), 0);
-        CullingMethod = (QuadCullingMethod)GUILayout.SelectionGrid((int)CullingMethod, System.Enum.GetNames(typeof(QuadCullingMethod)), 3);
-
-        GUILayoutExtensions.LabelWithSpace("Quads culling/draw method: " + DrawAndCull.ToString(), 0);
-        DrawAndCull = (QuadDrawAndCull)GUILayout.SelectionGrid((int)DrawAndCull, System.Enum.GetNames(typeof(QuadDrawAndCull)), 3);
-
-        GUILayoutExtensions.LabelWithSpace("Quads culling/draw method: " + LODDistanceMethod.ToString(), 0);
-        LODDistanceMethod = (QuadLODDistanceMethod)GUILayout.SelectionGrid((int)LODDistanceMethod, System.Enum.GetNames(typeof(QuadLODDistanceMethod)), 3);
-
-        GUILayout.Space(10);
-
-        GUILayout.Label("LOD Distance Multiplier: " + LODDistanceMultiplier);
-        GUILayout.BeginHorizontal();
-        LODDistanceMultiplier = GUILayout.HorizontalSlider(LODDistanceMultiplier, 0.8f, 2.2f);
-        if (GUILayout.Button("Reset")) LODDistanceMultiplier = 1.0f;
-        GUILayout.EndHorizontal();
-
-        GUILayout.Space(10);
-
-        GUILayout.Label("HDR: ");
-        AtmosphereHDRMode = (AtmosphereHDR)GUILayout.SelectionGrid((int)AtmosphereHDRMode, System.Enum.GetNames(typeof(AtmosphereHDR)), 2);
-
-        GUILayout.Space(10);
-
-        Eclipses = GUILayout.Toggle(Eclipses, " - Eclipses?");
-        Planetshine = GUILayout.Toggle(Planetshine, " - Planetshine?");
-
-        GUILayout.EndVertical();
-
-        if (Planetoids != null)
+        protected override void Awake()
         {
-            if (Planetoids.Length != 0)
-            {
-                for (int i = 0; i < Planetoids.Length; i++)
-                {
-                    if(Planetoids[i] != null)
-                    {
-                        Planetoids[i].CullingMethod = CullingMethod;
-                        Planetoids[i].DrawAndCull = DrawAndCull;
-                        Planetoids[i].LODDistanceMultiplier = LODDistanceMultiplier;
-                        Planetoids[i].LODDistanceMethod = LODDistanceMethod;
+            base.Awake();
+        }
 
-                        if (Planetoids[i].Atmosphere != null)
+        protected override void Start()
+        {
+            base.Start();
+        }
+
+        protected override void OnGUI()
+        {
+            base.OnGUI();
+
+            GUILayout.Window(0, debugInfoBounds, UI, "Settings");
+        }
+
+        private void UI(int id)
+        {
+            scrollPosition = GUILayout.BeginScrollView(scrollPosition, false, true);
+            Planetoids = FindObjectsOfType<Planetoid>();
+
+            GUILayout.BeginVertical();
+
+            GUILayout.Label("Misc: ", boldLabel);
+
+            GUILayoutExtensions.LabelWithSpace("Quads culling method: " + CullingMethod.ToString(), 0);
+            CullingMethod = (QuadCullingMethod)GUILayout.SelectionGrid((int)CullingMethod, System.Enum.GetNames(typeof(QuadCullingMethod)), 3);
+
+            GUILayoutExtensions.LabelWithSpace("Quads culling/draw method: " + DrawAndCull.ToString(), 0);
+            DrawAndCull = (QuadDrawAndCull)GUILayout.SelectionGrid((int)DrawAndCull, System.Enum.GetNames(typeof(QuadDrawAndCull)), 3);
+
+            GUILayoutExtensions.LabelWithSpace("Quads culling/draw method: " + LODDistanceMethod.ToString(), 0);
+            LODDistanceMethod = (QuadLODDistanceMethod)GUILayout.SelectionGrid((int)LODDistanceMethod, System.Enum.GetNames(typeof(QuadLODDistanceMethod)), 3);
+
+            GUILayout.Space(10);
+
+            GUILayout.Label("LOD Distance Multiplier: " + LODDistanceMultiplier);
+            GUILayout.BeginHorizontal();
+            LODDistanceMultiplier = GUILayout.HorizontalSlider(LODDistanceMultiplier, 0.8f, 2.2f);
+            if (GUILayout.Button("Reset")) LODDistanceMultiplier = 1.0f;
+            GUILayout.EndHorizontal();
+
+            GUILayout.Space(10);
+
+            GUILayout.Label("HDR: ");
+            AtmosphereHDRMode = (AtmosphereHDR)GUILayout.SelectionGrid((int)AtmosphereHDRMode, System.Enum.GetNames(typeof(AtmosphereHDR)), 2);
+
+            GUILayout.Space(10);
+
+            Eclipses = GUILayout.Toggle(Eclipses, " - Eclipses?");
+            Planetshine = GUILayout.Toggle(Planetshine, " - Planetshine?");
+
+            GUILayout.EndVertical();
+
+            if (Planetoids != null)
+            {
+                if (Planetoids.Length != 0)
+                {
+                    for (int i = 0; i < Planetoids.Length; i++)
+                    {
+                        if (Planetoids[i] != null)
                         {
-                            Planetoids[i].Atmosphere.HDRMode = AtmosphereHDRMode;
-                            Planetoids[i].Atmosphere.Eclipses = Eclipses;
-                            Planetoids[i].Atmosphere.Planetshine = Planetshine;
+                            Planetoids[i].CullingMethod = CullingMethod;
+                            Planetoids[i].DrawAndCull = DrawAndCull;
+                            Planetoids[i].LODDistanceMultiplier = LODDistanceMultiplier;
+                            Planetoids[i].LODDistanceMethod = LODDistanceMethod;
+
+                            if (Planetoids[i].Atmosphere != null)
+                            {
+                                Planetoids[i].Atmosphere.HDRMode = AtmosphereHDRMode;
+                                Planetoids[i].Atmosphere.Eclipses = Eclipses;
+                                Planetoids[i].Atmosphere.Planetshine = Planetshine;
+                            }
                         }
                     }
                 }
             }
-        }
 
-        GUILayout.EndScrollView();
+            GUILayout.EndScrollView();
+        }
     }
 }

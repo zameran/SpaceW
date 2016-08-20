@@ -37,117 +37,120 @@ using System.Linq;
 
 using UnityEngine;
 
-public sealed class DebugGUIPlanetoidInfo : DebugGUI
+namespace SpaceEngine.Debugging
 {
-    public Planetoid Planetoid;
-
-    protected override void Awake()
+    public sealed class DebugGUIPlanetoidInfo : DebugGUI
     {
-        base.Awake();
-    }
+        public Planetoid Planetoid;
 
-    protected override void Start()
-    {
-        base.Start();
-    }
-
-    protected override void OnGUI()
-    {
-        base.OnGUI();
-
-        GUILayout.Window(0, debugInfoBounds, UI, "Planetoid Info");
-    }
-
-    public double CalculateTexturesVMU(int quadsCount)
-    {
-        int size = QuadSettings.nVertsPerEdgeSub * QuadSettings.nVertsPerEdgeSub;
-
-        double sizeInBytes = size * 8; //8 bit per channel.
-        double sizeInMegabytes = (sizeInBytes / 1024.0) / 1024.0;
-
-        return sizeInMegabytes * quadsCount;
-    }
-
-    private void UI(int id)
-    {
-        scrollPosition = GUILayout.BeginScrollView(scrollPosition, false, true);
-
-        if (Planetoid != null)
+        protected override void Awake()
         {
-            GUILayout.BeginVertical();
+            base.Awake();
+        }
 
-            GUILayout.Label("Planetoid stats: ", boldLabel);
+        protected override void Start()
+        {
+            base.Start();
+        }
 
-            GUILayoutExtensions.LabelWithSpace((Planetoid.gameObject.name + ": " + (Planetoid.Working ? "Generating..." : "Idle...")), -8);
+        protected override void OnGUI()
+        {
+            base.OnGUI();
 
-            if (Planetoid.CullingMethod == QuadCullingMethod.Custom)
+            GUILayout.Window(0, debugInfoBounds, UI, "Planetoid Info");
+        }
+
+        public double CalculateTexturesVMU(int quadsCount)
+        {
+            int size = QuadSettings.nVertsPerEdgeSub * QuadSettings.nVertsPerEdgeSub;
+
+            double sizeInBytes = size * 8; //8 bit per channel.
+            double sizeInMegabytes = (sizeInBytes / 1024.0) / 1024.0;
+
+            return sizeInMegabytes * quadsCount;
+        }
+
+        private void UI(int id)
+        {
+            scrollPosition = GUILayout.BeginScrollView(scrollPosition, false, true);
+
+            if (Planetoid != null)
             {
-                int quadsCount = Planetoid.Quads.Count;
-                int quadsCulledCount = Planetoid.GetCulledQuadsCount();
-                int vertsRendered = (quadsCount - quadsCulledCount) * QuadSettings.nVerts;
+                GUILayout.BeginVertical();
 
-                double quadsTexturesVideoMemoryUsage = CalculateTexturesVMU(quadsCount);
+                GUILayout.Label("Planetoid stats: ", boldLabel);
 
-                GUILayoutExtensions.LabelWithSpace("Quads count: " + quadsCount, -8);
-                GUILayoutExtensions.LabelWithSpace("Quads culled count: " + quadsCulledCount, -8);
-                GUILayoutExtensions.LabelWithSpace("Quads textures VMU (MB): " + quadsTexturesVideoMemoryUsage.ToString("0.00"), -8);
-                GUILayoutExtensions.LabelWithSpace("Verts rendered per frame (Only Quads): " + vertsRendered, -8);
-            }
+                GUILayoutExtensions.LabelWithSpace((Planetoid.gameObject.name + ": " + (Planetoid.Working ? "Generating..." : "Idle...")), -8);
 
-            GUILayout.EndVertical();
+                if (Planetoid.CullingMethod == QuadCullingMethod.Custom)
+                {
+                    int quadsCount = Planetoid.Quads.Count;
+                    int quadsCulledCount = Planetoid.GetCulledQuadsCount();
+                    int vertsRendered = (quadsCount - quadsCulledCount) * QuadSettings.nVerts;
 
-            GUILayout.BeginVertical();
+                    double quadsTexturesVideoMemoryUsage = CalculateTexturesVMU(quadsCount);
 
-            GUILayout.Space(10);
+                    GUILayoutExtensions.LabelWithSpace("Quads count: " + quadsCount, -8);
+                    GUILayoutExtensions.LabelWithSpace("Quads culled count: " + quadsCulledCount, -8);
+                    GUILayoutExtensions.LabelWithSpace("Quads textures VMU (MB): " + quadsTexturesVideoMemoryUsage.ToString("0.00"), -8);
+                    GUILayoutExtensions.LabelWithSpace("Verts rendered per frame (Only Quads): " + vertsRendered, -8);
+                }
 
-            GUILayout.Label("Planetoid parameters: ", boldLabel);
- 
-            if (GUILayout.Button("Resetup")) Planetoid.ReSetupQuads();
-
-            GUILayout.EndVertical();
-
-            if (Planetoid.Atmosphere != null)
-            {
-                GUILayout.Space(10);
+                GUILayout.EndVertical();
 
                 GUILayout.BeginVertical();
 
-                GUILayout.Label("Atmosphere parameters: ", boldLabel);
-
-                GUILayout.Label("Preset: ");
-                Planetoid.Atmosphere.AtmosphereBase = (AtmosphereBase)GUILayout.SelectionGrid((int)Planetoid.Atmosphere.AtmosphereBase, System.Enum.GetNames(typeof(AtmosphereBase)), 2);
-
                 GUILayout.Space(10);
 
-                GUILayout.Label("Density: ");
-                float.TryParse(GUILayout.TextField(Planetoid.Atmosphere.Density.ToString("0.0")), out Planetoid.Atmosphere.Density);
+                GUILayout.Label("Planetoid parameters: ", boldLabel);
 
-                GUILayout.Label("Radius: ");
-                float.TryParse(GUILayout.TextField(Planetoid.Atmosphere.Radius.ToString("0.0")), out Planetoid.Atmosphere.Radius);
-
-                GUILayout.Label("Height: ");
-                float.TryParse(GUILayout.TextField(Planetoid.Atmosphere.Height.ToString("0.0")), out Planetoid.Atmosphere.Height);
+                if (GUILayout.Button("Resetup")) Planetoid.ReSetupQuads();
 
                 GUILayout.EndVertical();
+
+                if (Planetoid.Atmosphere != null)
+                {
+                    GUILayout.Space(10);
+
+                    GUILayout.BeginVertical();
+
+                    GUILayout.Label("Atmosphere parameters: ", boldLabel);
+
+                    GUILayout.Label("Preset: ");
+                    Planetoid.Atmosphere.AtmosphereBase = (AtmosphereBase)GUILayout.SelectionGrid((int)Planetoid.Atmosphere.AtmosphereBase, System.Enum.GetNames(typeof(AtmosphereBase)), 2);
+
+                    GUILayout.Space(10);
+
+                    GUILayout.Label("Density: ");
+                    float.TryParse(GUILayout.TextField(Planetoid.Atmosphere.Density.ToString("0.0")), out Planetoid.Atmosphere.Density);
+
+                    GUILayout.Label("Radius: ");
+                    float.TryParse(GUILayout.TextField(Planetoid.Atmosphere.Radius.ToString("0.0")), out Planetoid.Atmosphere.Radius);
+
+                    GUILayout.Label("Height: ");
+                    float.TryParse(GUILayout.TextField(Planetoid.Atmosphere.Height.ToString("0.0")), out Planetoid.Atmosphere.Height);
+
+                    GUILayout.EndVertical();
+                }
+                else
+                {
+                    GUILayout.BeginVertical();
+
+                    GUILayoutExtensions.LabelWithSpace("No Atmosphere!?", -8);
+
+                    GUILayout.EndVertical();
+                }
             }
             else
             {
                 GUILayout.BeginVertical();
 
-                GUILayoutExtensions.LabelWithSpace("No Atmosphere!?", -8);
+                GUILayoutExtensions.LabelWithSpace("No Planetoid!?", -8);
 
                 GUILayout.EndVertical();
             }
+
+            GUILayout.EndScrollView();
         }
-        else
-        {
-            GUILayout.BeginVertical();
-
-            GUILayoutExtensions.LabelWithSpace("No Planetoid!?", -8);
-
-            GUILayout.EndVertical();
-        }
-
-        GUILayout.EndScrollView();
     }
 }
