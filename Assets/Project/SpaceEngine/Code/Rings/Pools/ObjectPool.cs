@@ -278,7 +278,7 @@ public static class ObjectPool<T> where T : Object
 			{
 				root.hideFlags = HideFlags.DontSave;
 				
-				Object.DontDestroyOnLoad(root);
+				//Object.DontDestroyOnLoad(root);
 				
 				component = root.GetComponent<ObjectPool>();
 				

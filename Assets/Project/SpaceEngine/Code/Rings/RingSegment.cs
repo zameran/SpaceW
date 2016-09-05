@@ -5,36 +5,21 @@ public class RingSegment : MonoBehaviour
 {
     public Ring Ring;
 
-    public MeshFilter MeshFilter;
+    public void Render(Camera camera, int drawLayer = 8)
+    {
+        if (Ring == null) return;
+        if (Ring.RingSegmentMesh == null) return;
+        if (Ring.RingMaterial == null) return;
 
-    public MeshRenderer MeshRenderer;
+        Matrix4x4 SegmentTRS = Matrix4x4.TRS(Ring.transform.position, transform.rotation, Vector3.one);
 
-    public void ManualUpdate(Mesh mesh, Material material, Quaternion rotation)
+        Graphics.DrawMesh(Ring.RingSegmentMesh, SegmentTRS, Ring.RingMaterial, drawLayer, camera, 0);
+    }
+
+    public void UpdateNode(Mesh mesh, Material material, Quaternion rotation)
     {
         if (Ring != null)
         {
-            if (MeshFilter == null) MeshFilter = gameObject.AddComponent<MeshFilter>();
-
-            if (MeshRenderer == null) MeshRenderer = gameObject.AddComponent<MeshRenderer>();
-
-            if (MeshFilter.sharedMesh != mesh)
-            {
-                Helper.BeginStealthSet(MeshFilter);
-                {
-                    MeshFilter.sharedMesh = mesh;
-                }
-                Helper.EndStealthSet();
-            }
-
-            if (MeshRenderer.sharedMaterial != material)
-            {
-                Helper.BeginStealthSet(MeshRenderer);
-                {
-                    MeshRenderer.sharedMaterial = material;
-                }
-                Helper.EndStealthSet();
-            }
-
             Helper.SetLocalRotation(transform, rotation);
         }
     }
@@ -46,33 +31,5 @@ public class RingSegment : MonoBehaviour
         segment.Ring = ring;
 
         return segment;
-    }
-
-    public static void Pool(RingSegment segment)
-    {
-        if (segment != null)
-        {
-            segment.Ring = null;
-
-            ComponentPool<RingSegment>.Add(segment);
-        }
-    }
-
-    public static void MarkForDestruction(RingSegment segment)
-    {
-        if (segment != null)
-        {
-            segment.Ring = null;
-
-            segment.gameObject.SetActive(true);
-        }
-    }
-
-    protected virtual void Update()
-    {
-        if (Ring == null)
-        {
-            Pool(this);
-        }
     }
 }
