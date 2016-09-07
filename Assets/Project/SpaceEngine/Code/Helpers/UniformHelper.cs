@@ -35,7 +35,7 @@
 
 using UnityEngine;
 
-public static class UniformTools
+public static class UniformHelper
 {
     public static void SetProperty(this Material mat, string name, ComputeBuffer buffer)
     {
