@@ -11,43 +11,6 @@ public static class Helper
 		return b != null && b.enabled == true && b.gameObject.activeInHierarchy == true;
 	}
 
-	public static T GetOrAddComponent<T>(GameObject gameObject)
-		where T : Component
-	{
-		if (gameObject != null)
-		{
-			var component = gameObject.GetComponent<T>();
-
-			if (component == null) component = AddComponent<T>(gameObject);
-
-			return component;
-		}
-
-		return null;
-	}
-
-	public static T AddComponent<T>(GameObject gameObject)
-		where T : Component
-	{
-		if (gameObject != null)
-		{
-#if UNITY_EDITOR
-			if (Application.isPlaying == true)
-			{
-				return gameObject.AddComponent<T>();
-			}
-			else
-			{
-				return gameObject.AddComponent<T>();
-			}
-#else
-			return gameObject.AddComponent<T>();
-#endif
-		}
-
-		return null;
-	}
-
 	public static T Destroy<T>(T o)
 		where T : Object
 	{
@@ -57,50 +20,6 @@ public static class Helper
 		}
 
 		return null;
-	}
-
-	private static Object stealthSetObject;
-
-	private static HideFlags stealthSetFlags;
-
-	public static void BeginStealthSet(Object o)
-	{
-		if (o != null)
-		{
-			stealthSetObject = o;
-			stealthSetFlags = o.hideFlags;
-
-			o.hideFlags = HideFlags.DontSave;
-		}
-	}
-
-	public static void EndStealthSet()
-	{
-		if (stealthSetObject != null)
-		{
-			stealthSetObject.hideFlags = stealthSetFlags;
-		}
-	}
-
-	public static Vector2 Rotate2(Vector2 v, float a)
-	{
-		var sin = Mathf.Sin(a);
-		var cos = Mathf.Cos(a);
-
-		Vector2 o;
-
-		o.x = cos * v.x - sin * v.y;
-		o.y = sin * v.x + cos * v.y;
-
-		return o;
-	}
-
-	public static Vector2 Divide2(float x, float y, float x2, float y2)
-	{
-		x = Divide(x, x2);
-		y = Divide(y, y2);
-
-		return new Vector2(x, y);
 	}
 
 	public static bool Zero(float v)
@@ -384,7 +303,7 @@ public static class Helper
 		{
 			if (a.Length != b.Count) return false;
 
-			var comparer = System.Collections.Generic.EqualityComparer<T>.Default;
+			var comparer = EqualityComparer<T>.Default;
 
 			for (var i = 0; i < a.Length; i++)
 			{
@@ -453,11 +372,12 @@ public static class Helper
 
 		if (lights != null)
 		{
-			for (var i = lights.Count - 1; i >= 0; i--)
+			for (var i = 1; i <= lights.Count; i++)
 			{
-				var light = lights[i];
+				var index = i - 1;
+				var light = lights[index];
 
-				if (Helper.Enabled(light) == true && light.intensity > 0.0f && lightCount < maxLights)
+				if (Enabled(light) == true && light.intensity > 0.0f && lightCount < maxLights)
 				{
 					var prefix = "_Light" + (++lightCount);
 					var direction = default(Vector3);
@@ -475,6 +395,8 @@ public static class Helper
 							material.SetVector(prefix + "Direction", direction);
 							material.SetVector(prefix + "Position", Helper.NewVector4(position, 1.0f));
 							material.SetColor(prefix + "Color", color);
+
+							//Debug.Log(string.Format("{0} | {1} | {2}", prefix + "Direction", prefix + "Position", prefix + "Color"));
 						}
 					}
 				}
@@ -490,11 +412,12 @@ public static class Helper
 
 		if (shadows != null)
 		{
-			for (var i = shadows.Count - 1; i >= 0; i--)
+			for (var i = 1; i <= shadows.Count; i++)
 			{
-				var shadow = shadows[i];
+				var index = i - 1;
+				var shadow = shadows[index];
 
-				if (Helper.Enabled(shadow) == true && shadow.CalculateShadow() == true && shadowCount < maxShadows)
+				if (Enabled(shadow) == true && shadow.CalculateShadow() == true && shadowCount < maxShadows)
 				{
 					var prefix = "_Shadow" + (++shadowCount);
 
@@ -507,6 +430,8 @@ public static class Helper
 							material.SetTexture(prefix + "Texture", shadow.GetTexture());
 							material.SetMatrix(prefix + "Matrix", shadow.Matrix);
 							material.SetFloat(prefix + "Ratio", shadow.Ratio);
+
+							//Debug.Log(string.Format("{0} | {1} | {2}", prefix + "Texture", prefix + "Matrix", prefix + "Ratio"));
 						}
 					}
 				}

@@ -125,8 +125,8 @@ public class Ring : MonoBehaviour
     {
         if (mat == null) return;
 
-        var lightCount = Helper.WriteLights(Lights, 2, transform.position, null, null, mat);
-        var shadowCount = Helper.WriteShadows(Shadows, 2, mat);
+        var lightCount = Helper.WriteLights(Lights, 4, transform.position, null, null, mat);
+        var shadowCount = Helper.WriteShadows(Shadows, 4, mat);
 
         mat.renderQueue = (int)RenderQueue + RenderQueueOffset;
         mat.SetTexture("_MainTex", MainTex);
@@ -134,7 +134,7 @@ public class Ring : MonoBehaviour
         mat.SetFloat("_LightingBias", LightingBias);
         mat.SetFloat("_LightingSharpness", LightingSharpness);
 
-        keywords.Add("SGT_A");
+        keywords.Add("SCATTERING");
 
         Helper.WriteMie(MieSharpness, MieStrength, mat);
         Helper.WriteLightKeywords(Lights.Count > 0, lightCount, keywords);

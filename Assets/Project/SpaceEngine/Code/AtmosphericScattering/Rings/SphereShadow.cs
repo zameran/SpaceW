@@ -10,9 +10,6 @@ public class SphereShadow : Shadow
 
     private Texture2D penumbraLut;
 
-    private static GradientColorKey[] defaultLightingBrightness = new GradientColorKey[] {new GradientColorKey(Color.black, 0.0f), new GradientColorKey(Color.white, 1.0f)};
-    private static GradientColorKey[] defaultLightingColor = new GradientColorKey[] {new GradientColorKey(Color.red, 0.0f), new GradientColorKey(Color.white, 1.0f)};
-
     private static Vector3[] vectors = new Vector3[3];
 
     private static float[] magnitudes = new float[3];
@@ -60,9 +57,6 @@ public class SphereShadow : Shadow
 
     protected virtual void Awake()
     {
-        PenumbraBrightness.colorKeys = defaultLightingBrightness;
-        PenumbraColor.colorKeys = defaultLightingColor;
-
         RegenerateLightingLut();
     }
 
