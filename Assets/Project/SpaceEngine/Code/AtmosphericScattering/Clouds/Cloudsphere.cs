@@ -94,8 +94,10 @@ namespace SpaceEngine.AtmosphericScattering.Clouds
             }
         }
 
-        public void InitUniforms()
+        public void InitUniforms(Planet planet)
         {
+            if (planet == null) return;
+
             InitUniforms(CloudMaterial);
         }
 

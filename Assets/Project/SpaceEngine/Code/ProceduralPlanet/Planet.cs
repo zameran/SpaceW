@@ -48,6 +48,7 @@ public abstract class Planet : MonoBehaviour
 {
     public Atmosphere Atmosphere;
     public Cloudsphere Cloudsphere;
+    public Ring Ring;
 
     [Tooltip("Render planet's quads?")]
     public bool PlanetQuadsEnabled = true;
@@ -55,6 +56,8 @@ public abstract class Planet : MonoBehaviour
     public bool AtmosphereEnabled = true;
     [Tooltip("Render planet's cloudsphere?")]
     public bool CloudsphereEnabled = true;
+    [Tooltip("Render planet's ring?")]
+    public bool RingEnabled = true;
 
     public int DrawLayer = 8;
 

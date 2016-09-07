@@ -116,6 +116,13 @@ public class Ring : MonoBehaviour
         }
     }
 
+    public void InitUniforms(Planet planet)
+    {
+        if (planet == null) return;
+
+        SetUniforms(RingMaterial);
+    }
+
     public void SetUniforms(Material mat)
     {
         if (mat == null) return;

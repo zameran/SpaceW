@@ -55,6 +55,15 @@ public static class PlanetoidExtensions
 
         if (planet != null)
         {
+            if (planet.Ring != null)
+            {
+                Keywords.Add(planet.RingEnabled ? "RING_ON" : "RING_OFF");
+            }
+            else
+            {
+                Keywords.Add("RING_OFF");
+            }
+
             if (planet.Atmosphere != null)
             {
                 if (planet.AtmosphereEnabled)
@@ -108,7 +117,7 @@ public static class PlanetoidExtensions
             }
             else
             {
-                Debug.Log("Planet: GetKeywords problem!");
+                Keywords.Add("ATMOSPHERE_OFF");
             }
         }
 
@@ -176,6 +185,11 @@ public sealed class Planetoid : Planet, IPlanet
                 Cloudsphere.planetoid = this;
         }
 
+        if (Ring != null)
+        {
+            //TODO : RINGS
+        }
+
         FrustumPlanes = GodManager.Instance.FrustumPlanes;
 
         QuadAtmosphereMPB = new MaterialPropertyBlock();
@@ -209,7 +223,12 @@ public sealed class Planetoid : Planet, IPlanet
 
         if (Cloudsphere != null)
         {
-            Cloudsphere.InitUniforms();
+            Cloudsphere.InitUniforms(this);
+        }
+
+        if (Ring != null)
+        {
+            Ring.InitUniforms(this);
         }
 
         ReSetupQuads(); //NOTE : Force resetup on start.
@@ -381,6 +400,14 @@ public sealed class Planetoid : Planet, IPlanet
             if (CloudsphereEnabled)
             {
                 Cloudsphere.Render(camera, DrawLayer);
+            }
+        }
+
+        if (Ring != null)
+        {
+            if (RingEnabled)
+            {
+                Ring.Render(camera, DrawLayer);
             }
         }
     }
