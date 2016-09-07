@@ -28,7 +28,7 @@ float4 ShadowColor(float4 worldPoint)
 	float4 color = ShadowColor(_Shadow1Matrix, _Shadow1Texture, _Shadow1Ratio, worldPoint);
 	
 	#if SHADOW_2
-	color *= ShadowColor(_Shadow2Matrix, _Shadow2Texture, _Shadow2Ratio, worldPoint);
+		color *= ShadowColor(_Shadow2Matrix, _Shadow2Texture, _Shadow2Ratio, worldPoint);
 	#endif
 	
 	return color;

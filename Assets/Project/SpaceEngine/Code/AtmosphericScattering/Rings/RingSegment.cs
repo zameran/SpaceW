@@ -1,6 +1,5 @@
 ﻿using UnityEngine;
 
-[ExecuteInEditMode]
 public class RingSegment : MonoBehaviour
 {
     public Ring Ring;
@@ -26,7 +25,8 @@ public class RingSegment : MonoBehaviour
 
     public static RingSegment Create(Ring ring)
     {
-        var segment = ComponentPool<RingSegment>.Pop("Segment", ring.transform);
+        var segmentGameObject = Helper.CreateGameObject("Segment", ring.transform);
+        var segment = segmentGameObject.AddComponent<RingSegment>();
 
         segment.Ring = ring;
 

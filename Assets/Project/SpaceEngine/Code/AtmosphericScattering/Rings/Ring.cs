@@ -120,14 +120,12 @@ public class Ring : MonoBehaviour
     {
         if (mat == null) return;
 
-        var color = Helper.Brighten(Color, Brightness);
-        var renderQueue = (int)RenderQueue + RenderQueueOffset;
         var lightCount = Helper.WriteLights(Lights, 2, transform.position, null, null, mat);
         var shadowCount = Helper.WriteShadows(Shadows, 2, mat);
 
-        mat.renderQueue = renderQueue;
+        mat.renderQueue = (int)RenderQueue + RenderQueueOffset;
         mat.SetTexture("_MainTex", MainTex);
-        mat.SetColor("_Color", color);
+        mat.SetColor("_Color", Helper.Brighten(Color, Brightness));
         mat.SetFloat("_LightingBias", LightingBias);
         mat.SetFloat("_LightingSharpness", LightingSharpness);
 
