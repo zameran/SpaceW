@@ -55,21 +55,6 @@ public static class Helper
 		return b != 0.0f ? a / b : 0.0f;
 	}
 
-	public static Vector3 NewVector3(float xyz)
-	{
-		return new Vector3(xyz, xyz, xyz);
-	}
-
-	public static Vector3 NewVector3(Vector2 xy, float z)
-	{
-		return new Vector3(xy.x, xy.y, z);
-	}
-
-	public static Vector4 NewVector4(Vector3 xyz, float w)
-	{
-		return new Vector4(xyz.x, xyz.y, xyz.z, w);
-	}
-
 	public static float DampenFactor(float dampening, float elapsed)
 	{
 		return 1.0f - Mathf.Pow((float)System.Math.E, -dampening * elapsed);
@@ -277,10 +262,10 @@ public static class Helper
 			var r = s.textureRect;
 			var t = s.texture;
 
-			uv.x = Helper.Divide(r.xMin, t.width);
-			uv.y = Helper.Divide(r.yMin, t.height);
-			uv.z = Helper.Divide(r.xMax, t.width);
-			uv.w = Helper.Divide(r.yMax, t.height);
+			uv.x = Divide(r.xMin, t.width);
+			uv.y = Divide(r.yMin, t.height);
+			uv.z = Divide(r.xMax, t.width);
+			uv.w = Divide(r.yMax, t.height);
 		}
 
 		return uv;
@@ -339,16 +324,13 @@ public static class Helper
 	{
 		if (light != null)
 		{
-			direction = -light.transform.forward;
+			direction = Vector3.Normalize(position - center);
 			position = light.transform.position;
-			color = Helper.Brighten(light.color, light.intensity * 2.0f);
+			color = Brighten(light.color, light.intensity * 2.0f);
 
 			switch (light.type)
 			{
 				case LightType.Point: direction = Vector3.Normalize(position - center); break;
-
-				//case LightType.Directional: position = center + direction * 10000.0f; break;
-
 				//distances fix.
 				case LightType.Directional: position = center + direction * (position - center).magnitude; break;
 			}
@@ -393,7 +375,7 @@ public static class Helper
 						if (material != null)
 						{
 							material.SetVector(prefix + "Direction", direction);
-							material.SetVector(prefix + "Position", Helper.NewVector4(position, 1.0f));
+							material.SetVector(prefix + "Position", VectorHelper.MakeFrom(position, 1.0f));
 							material.SetColor(prefix + "Color", color);
 
 							//Debug.Log(string.Format("{0} | {1} | {2}", prefix + "Direction", prefix + "Position", prefix + "Color"));

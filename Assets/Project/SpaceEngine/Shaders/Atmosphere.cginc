@@ -77,7 +77,7 @@
 #endif
 
 #if !defined (M_PI2)
-#define M_PI2 6.28318531
+#define M_PI2 6.28318530716
 #endif
 
 struct Sun

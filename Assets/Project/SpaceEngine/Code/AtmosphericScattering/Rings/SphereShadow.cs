@@ -31,7 +31,7 @@ public class SphereShadow : Shadow
 
             Helper.CalculateLight(Light, transform.position, null, null, ref position, ref direction, ref color);
 
-            var rotation = Quaternion.FromToRotation(direction, Vector3.back);
+            var rotation = Quaternion.FromToRotation(-direction, Vector3.back);
 
             SetVector(0, rotation * transform.right * transform.lossyScale.x * OuterRadius);
             SetVector(1, rotation * transform.up * transform.lossyScale.y * OuterRadius);
