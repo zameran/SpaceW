@@ -279,23 +279,34 @@ public static class Helper
 		}
 	}
 
+	public static void SetKeywords(Material m, List<string> keywords, bool checkShaderKeywords)
+	{
+		if (checkShaderKeywords)
+		{
+			if (m != null && ArraysEqual(m.shaderKeywords, keywords) == false)
+			{
+				m.shaderKeywords = keywords.ToArray();
+			}
+		}
+		else
+		{
+			m.shaderKeywords = keywords.ToArray();
+		}
+	}
+
 	public static bool ArraysEqual<T>(T[] a, List<T> b)
 	{
-		if (a != null && b == null) return false;
-		if (a == null && b != null) return false;
+		if (a == null || b == null) return false;
 
-		if (a != null && b != null)
+		if (a.Length != b.Count) return false;
+
+		var comparer = EqualityComparer<T>.Default;
+
+		for (var i = 0; i < a.Length; i++)
 		{
-			if (a.Length != b.Count) return false;
-
-			var comparer = EqualityComparer<T>.Default;
-
-			for (var i = 0; i < a.Length; i++)
+			if (comparer.Equals(a[i], b[i]) == false)
 			{
-				if (comparer.Equals(a[i], b[i]) == false)
-				{
-					return false;
-				}
+				return false;
 			}
 		}
 

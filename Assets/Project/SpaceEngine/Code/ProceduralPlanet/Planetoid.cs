@@ -68,27 +68,9 @@ public static class PlanetoidExtensions
             {
                 if (planet.AtmosphereEnabled)
                 {
-                    if (planet.Atmosphere.Sun_1 != null)
-                        Keywords.Add("LIGHT_1");
+                    var lightCount = planet.Atmosphere.Suns.Count((sun) => sun != null);
 
-                    if (planet.Atmosphere.Sun_2 != null)
-                        Keywords.Add("LIGHT_2");
-
-                    if (planet.Atmosphere.Sun_1 != null && planet.Atmosphere.Sun_2 != null)
-                        Keywords.Remove("LIGHT_1");
-
-                    if (planet.Atmosphere.Sun_3 != null)
-                        Keywords.Add("LIGHT_3");
-
-                    if (planet.Atmosphere.Sun_4 != null)
-                        Keywords.Add("LIGHT_4");
-
-                    if (planet.Atmosphere.Sun_1 != null && planet.Atmosphere.Sun_2 != null)
-                        if (planet.Atmosphere.Sun_3 != null && planet.Atmosphere.Sun_4 != null)
-                            Keywords.Remove("LIGHT_2");
-
-                    if (planet.Atmosphere.Sun_3 != null && planet.Atmosphere.Sun_4 != null)
-                        Keywords.Remove("LIGHT_3");
+                    Keywords.Add("LIGHT_" + lightCount);
 
                     if (planet.Atmosphere.eclipseCasters.Count == 0)
                     {
