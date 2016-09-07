@@ -48,8 +48,6 @@ public class Ring : MonoBehaviour
         SetUniforms(RingMaterial);
 
         UpdateNode();
-
-        Render(CameraHelper.Main());
     }
 
     private void OnEnable()

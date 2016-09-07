@@ -2,7 +2,7 @@ using UnityEngine;
 
 using System.Collections.Generic;
 
-public static partial class Helper
+public static class Helper
 {
 	public static readonly float InscribedBox = 1.0f / Mathf.Sqrt(2.0f);
 
@@ -516,6 +516,36 @@ public static partial class Helper
 		return shadowCount;
 	}
 
+	public static Matrix4x4 Scaling(Vector3 xyz)
+	{
+		var matrix = Matrix4x4.identity;
+
+		matrix.m00 = xyz.x;
+		matrix.m11 = xyz.y;
+		matrix.m22 = xyz.z;
+
+		return matrix;
+	}
+
+	public static Matrix4x4 Rotation(Quaternion q)
+	{
+		var matrix = Matrix4x4.TRS(Vector3.zero, q, Vector3.one);
+
+		return matrix;
+	}
+
+	public static Matrix4x4 Translation(Vector3 xyz)
+	{
+		var matrix = Matrix4x4.identity;
+
+		matrix.m03 = xyz.x;
+		matrix.m13 = xyz.y;
+		matrix.m23 = xyz.z;
+
+		return matrix;
+	}
+
+
 	public static void WriteLightKeywords(bool lit, int lightCount, params List<string>[] keywordLists)
 	{
 		if (lit == true)
@@ -585,6 +615,15 @@ public static partial class Helper
 				material.SetFloat("_Rayleigh", strength);
 			}
 		}
+	}
+
+	public static Texture2D CreateTempTeture2D(int width, int height, TextureFormat format = TextureFormat.ARGB32, bool mips = false, bool linear = false, bool recordUndo = true)
+	{
+		var texture2D = new Texture2D(width, height, format, mips, linear);
+
+		texture2D.hideFlags = HideFlags.DontSave;
+
+		return texture2D;
 	}
 
 #if UNITY_EDITOR

@@ -28,7 +28,7 @@
 		}
 		Pass
 		{
-			Blend SrcAlpha OneMinusSrcAlpha
+			Blend SrcAlpha OneMinusSrcColor
 			Cull Off
 			Lighting Off
 			ZWrite Off
@@ -116,9 +116,9 @@
 			void Frag(v2f i, out f2g o)
 			{
 				float4 mainTex    = tex2D(_MainTex, i.texcoord0);
-				float4 atmosphere = mainTex * _Color;
+				float4 mainColor = mainTex * _Color;
 					
-				o.color = i.texcoord1 * atmosphere;
+				o.color = i.texcoord1 * mainColor;
 
 				#if LIGHT_1 || LIGHT_2
 					i.texcoord2 = normalize(i.texcoord2);
@@ -150,7 +150,7 @@
 						lighting *= ShadowColor(i.texcoord5);
 					#endif
 
-					o.color += lighting * atmosphere;
+					o.color += lighting * mainColor;
 				#endif
 
 				#if !LIGHT_0 && !LIGHT_1 && !LIGHT_2
