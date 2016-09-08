@@ -187,11 +187,11 @@ void TexturesSub(uint3 id : SV_DispatchThreadID)
 	//float slope = 0;
 	//float3 sobelNormal = GetSobelNormal(constants, patchPreOutputSub, nVerticesPerSideWithBorderSub, id);
 	//float3 heightNormal = GetHeightNormal(constants, patchPreOutputSub, nVerticesPerSideWithBorderSub, id, slope);
-	//float3 positionNormal = GetHeightNormalFromPosition(constants, patchPreOutputSub, nVerticesPerSideWithBorderSub, id);
+	float3 positionNormal = GetHeightNormalFromPosition(constants, patchPreOutputSub, nVerticesPerSideWithBorderSub, id);
 	//float3 bumpNormal = GetHeightNormalFromBump(constants, patchPreOutputSub, nVerticesPerSideWithBorderSub, id);
 	//float3 packedNormal = GetPackedNormal(constants, patchPreOutputSub, nVerticesPerSideWithBorderSub, id);
 
-	float3 normal = heightNormal;
+	float3 normal = positionNormal;
 
 	float4 color = ColorFunction(cubePosition.xyz, noise, slope);
 	float4 normalColor = float4(normal, slope);
