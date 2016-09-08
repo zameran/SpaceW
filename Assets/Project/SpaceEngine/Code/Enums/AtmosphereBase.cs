@@ -42,5 +42,6 @@ public enum AtmosphereBase
     Jupiter,
     Titan,
     Neptune,
-    Sun
+    Sun,
+    Pluto
 }

@@ -134,6 +134,7 @@ namespace SpaceEngine.AtmosphericScattering
                 case AtmosphereBase.Titan: return Titan;
                 case AtmosphereBase.Neptune: return Neptune;
                 case AtmosphereBase.Sun: return Sun;
+                case AtmosphereBase.Pluto: return Pluto;
                 default: { Debug.Log("Atmosphere: AtmosphereParameters.Get(...) fail!"); return Default; }
             }
         }
@@ -152,8 +153,6 @@ namespace SpaceEngine.AtmosphericScattering
 
                 return ap;
             }
-
-            private set { }
         }
 
         public static AtmosphereParameters Earth
@@ -170,8 +169,6 @@ namespace SpaceEngine.AtmosphericScattering
 
                 return ap;
             }
-
-            private set { }
         }
 
         public static AtmosphereParameters Venus
@@ -188,8 +185,6 @@ namespace SpaceEngine.AtmosphericScattering
 
                 return ap;
             }
-
-            private set { }
         }
 
         public static AtmosphereParameters Mars
@@ -206,8 +201,6 @@ namespace SpaceEngine.AtmosphericScattering
 
                 return ap;
             }
-
-            private set { }
         }
 
         public static AtmosphereParameters Jupiter
@@ -242,8 +235,6 @@ namespace SpaceEngine.AtmosphericScattering
 
                 return ap;
             }
-
-            private set { }
         }
 
         public static AtmosphereParameters Neptune
@@ -260,8 +251,6 @@ namespace SpaceEngine.AtmosphericScattering
 
                 return ap;
             }
-
-            private set { }
         }
 
         public static AtmosphereParameters Sun
@@ -278,8 +267,21 @@ namespace SpaceEngine.AtmosphericScattering
 
                 return ap;
             }
+        }
 
-            private set { }
+        public static AtmosphereParameters Pluto
+        {
+            get
+            {
+                AtmosphereParameters ap = new AtmosphereParameters(0.6f, 12.0f, 8.0f, 0.1f,
+                                                                   new Vector4(0.001f, 0.001f, 0.001f),
+                                                                   new Vector4(0.004f, 0.0045f, 0.006f),
+                                                                   new Vector4(0.001f, 0.001f, 0.001f),
+                                                                   2400.0f, 2460.0f, 2470.0f,
+                                                                   2400.0f, 2460.0f, 2470.0f,
+                                                                   2400.0f);
+                return ap;
+            }
         }
     }
 }
