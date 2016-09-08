@@ -190,7 +190,10 @@ float IntersectOuterSphere(float3 p1, float3 d, float3 p3, float r)
 
 	float u = (-b - sqrt(test)) / (2.0 * a);
 
-	u = (u < 0) ? (-b + sqrt(test)) / (2.0 * a) : u;
+	// (u < 0) - steped transition.
+	// (u < 0 || u > 0) - draw always. Looks like fix.
+
+	u = (u < 0 || u > 0) ? (-b + sqrt(test)) / (2.0 * a) : u;
 			
 	return u;
 }
