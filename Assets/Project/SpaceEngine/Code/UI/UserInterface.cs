@@ -36,7 +36,7 @@
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
-public class UserInterface : MonoBehaviour
+public class UserInterface : MonoBehaviour, IEventit
 {
     public GameObject Controllable;
 
@@ -69,17 +69,64 @@ public class UserInterface : MonoBehaviour
 
     public void Quit()
     {
-        #if UNITY_EDITOR
+#if UNITY_EDITOR
         Debug.Break();
-        #else
+#else
         Application.Quit();
         #endif
     }
 
     #endregion
 
-    private void OnLevelWasLoaded(int level)
+    #region Subscribtion/Unsubscription
+
+    protected void OnEnable()
+    {
+        Eventit();
+    }
+
+    protected void OnDisable()
+    {
+        UnEventit();
+    }
+
+    protected void OnDestroy()
+    {
+        UnEventit();
+    }
+
+    #endregion
+
+    #region Eventit
+
+    public bool isEventit { get; set; }
+
+    public void Eventit()
+    {
+        if (isEventit) return;
+
+        SceneManager.activeSceneChanged += OnActiveSceneChanged;
+
+        isEventit = true;
+    }
+
+    public void UnEventit()
+    {
+        if (!isEventit) return;
+
+        SceneManager.activeSceneChanged -= OnActiveSceneChanged;
+
+        isEventit = false;
+    }
+
+    #endregion
+
+    #region Events
+
+    private void OnActiveSceneChanged(Scene arg0, Scene arg1)
     {
         UnFreezeTime();
     }
+
+    #endregion
 }
