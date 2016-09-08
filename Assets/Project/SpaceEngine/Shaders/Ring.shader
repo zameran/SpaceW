@@ -26,6 +26,7 @@
 			"RenderType"      = "Transparent"
 			"IgnoreProjector" = "True"
 		}
+
 		Pass
 		{
 			Blend SrcAlpha OneMinusSrcColor
@@ -67,10 +68,10 @@
 						float3 sunRelativeDirection2 : TEXCOORD4; // world vertex/pixel to light 2
 					#endif
 					#if LIGHT_3
-						float3 sunRelativeDirection3 : TEXCOORD5; // world vertex/pixel to light 2
+						float3 sunRelativeDirection3 : TEXCOORD5; // world vertex/pixel to light 3
 					#endif
 					#if LIGHT_4
-						float3 sunRelativeDirection4 : TEXCOORD6; // world vertex/pixel to light 2
+						float3 sunRelativeDirection4 : TEXCOORD6; // world vertex/pixel to light 4
 					#endif
 				#endif
 
