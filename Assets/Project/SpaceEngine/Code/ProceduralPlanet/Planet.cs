@@ -118,7 +118,7 @@ public abstract class Planet : MonoBehaviour
     {
         PlanetoidTRS = Matrix4x4.TRS(Origin, Quaternion.Euler(OriginRotation), OriginScale);
 
-        PlanetBouds = new Bounds(Origin, Vector3.one * (PlanetRadius + TerrainMaxHeight) * 2);
+        PlanetBouds = new Bounds(Origin, Ring == null ? (Vector3.one * (PlanetRadius + TerrainMaxHeight) * 2) : (Vector3.one * Ring.OuterRadius * 2));
     }
 
     protected virtual void Start()

@@ -231,7 +231,7 @@ public sealed class Planetoid : Planet, IPlanet
         CheckCutoff();
 
         if (LODTarget != null)
-            DistanceToLODTarget = Vector3.Distance(transform.position, LODTarget.position);
+            DistanceToLODTarget = PlanetBouds.SqrDistance(LODTarget.position);
         else
             DistanceToLODTarget = -1.0f;
 

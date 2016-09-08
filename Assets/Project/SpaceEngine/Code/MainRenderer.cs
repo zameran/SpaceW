@@ -110,7 +110,7 @@ public sealed class MainRenderer : MonoBehaviour
         {
             planets[i].RenderQueueOffset = 1;
             if (planets[i].Atmosphere != null) planets[i].Atmosphere.RenderQueueOffset = 2;
-            if (planets[i].Atmosphere != null) planets[i].Atmosphere.RenderQueueOffset = 0;
+            if (planets[i].Ring != null) planets[i].Ring.RenderQueueOffset = 0;
         }
         //-----------------------------------------------------------------------------
     }
