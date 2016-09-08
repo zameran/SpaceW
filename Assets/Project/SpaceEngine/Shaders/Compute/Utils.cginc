@@ -32,16 +32,6 @@
 // Creator: zameran
 
 //-----------------------------------------------------------------------------
-#if !defined (M_PI)
-#define M_PI 3.14159265358
-#endif
-
-#if !defined (M_PI2)
-#define M_PI2 6.28318531
-#endif
-//-----------------------------------------------------------------------------
-
-//-----------------------------------------------------------------------------
 struct PlanetGenerationConstants //For planet only //wip
 {
 	float planetRadius;
@@ -265,9 +255,9 @@ inline float3 GetPackedNormal(QuadGenerationConstants constants, RWStructuredBuf
 	float right  = (buffer[(id.x + 2) + (id.y + 1) * size].noise) * constants.lodLevel;
 	float up	 = (buffer[(id.x + 1) + (id.y + 0) * size].noise) * constants.lodLevel;
 	float down   = (buffer[(id.x + 1) + (id.y + 2) * size].noise) * constants.lodLevel;
-               
-    float2 dir = float2(1.0, 0.0);
-               
-    return cross(normalize(float3(dir.xy, right - left)), normalize(float3(dir.yx, down - up))).xyz; 
+			   
+	float2 dir = float2(1.0, 0.0);
+			   
+	return cross(normalize(float3(dir.xy, right - left)), normalize(float3(dir.yx, down - up))).xyz; 
 }
 //-----------------------------------------------------------------------------
