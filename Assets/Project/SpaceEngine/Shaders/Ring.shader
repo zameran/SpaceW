@@ -29,7 +29,7 @@
 
 		Pass
 		{
-			Blend SrcAlpha OneMinusSrcAlpha
+			Blend SrcAlpha OneMinusSrcColor
 			Cull Off
 			Lighting Off
 			ZWrite On
@@ -94,11 +94,12 @@
 				float4 worldPosition = mul(unity_ObjectToWorld, i.vertex);
 				
 				o.vertex = mul(UNITY_MATRIX_MVP, i.vertex);
-				o.uv = i.uv;
+				o.uv = float2(clamp(i.uv.x, 0.0032, 0.9968), i.uv.y);
+				//o.uv = i.uv;
 				o.color = 1.0f;
 
 				#if LIGHT_1 || LIGHT_2 || LIGHT_3 || LIGHT_4
-					o.color *= 0.1f * 2.0f; //UNITY_LIGHTMODEL_AMBIENT * 2.0f;
+					o.color *= UNITY_LIGHTMODEL_AMBIENT * 2.0f; //UNITY_LIGHTMODEL_AMBIENT * 2.0f;
 				#endif
 
 				#if LIGHT_1 || LIGHT_2 || LIGHT_3 || LIGHT_4

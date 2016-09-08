@@ -3,29 +3,34 @@
 [ExecuteInEditMode]
 public class RingShadow : Shadow
 {
+    public Ring RingComponent { get { return GetComponent<Ring>(); } }
+
+    [HideInInspector]
     public Texture Texture;
 
-    public Ring Ring;
-
+    [HideInInspector]
     public float InnerRadius = 1.0f;
 
+    [HideInInspector]
     public float OuterRadius = 2.0f;
 
     public override Texture GetTexture()
     {
-        return Texture;
+        return RingComponent.MainTex ?? Texture;
     }
 
     public override bool CalculateShadow()
     {
         if (base.CalculateShadow() == true)
         {
+            if (RingComponent == null) return false;
+
             if (Texture != null)
             {
-                if (Helper.Enabled(Ring) == true)
+                if (Helper.Enabled(RingComponent) == true)
                 {
-                    InnerRadius = Ring.InnerRadius;
-                    OuterRadius = Ring.OuterRadius;
+                    InnerRadius = RingComponent.InnerRadius;
+                    OuterRadius = RingComponent.OuterRadius;
                 }
 
                 var direction = default(Vector3);
