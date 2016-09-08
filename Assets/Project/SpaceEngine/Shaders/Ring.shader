@@ -29,14 +29,18 @@
 
 		Pass
 		{
-			Blend SrcAlpha OneMinusSrcColor
+			Blend SrcAlpha OneMinusSrcAlpha
 			Cull Off
 			Lighting Off
-			ZWrite Off
+			ZWrite On
+			ZTest LEqual 
 			
 			CGPROGRAM
 
 			#include "SpaceStuff.cginc"
+
+			#pragma target 5.0
+			#pragma only_renderers d3d11 glcore
 			#pragma vertex Vert
 			#pragma fragment Frag
 			#pragma multi_compile DUMMY LIGHT_1 LIGHT_2 LIGHT_3 LIGHT_3
@@ -94,7 +98,7 @@
 				o.color = 1.0f;
 
 				#if LIGHT_1 || LIGHT_2 || LIGHT_3 || LIGHT_4
-					o.color *= 0.25f * 2.0f; //UNITY_LIGHTMODEL_AMBIENT * 2.0f;
+					o.color *= 0.1f * 2.0f; //UNITY_LIGHTMODEL_AMBIENT * 2.0f;
 				#endif
 
 				#if LIGHT_1 || LIGHT_2 || LIGHT_3 || LIGHT_4
