@@ -105,9 +105,6 @@
 
 				p += _Globals_Origin;
 
-				n.z = sqrt(max(0.0, 1.0 - dot(n.xy, n.xy)));
-				n = mul(_TRS, n);
-
 				float cTheta = dot(n, -WSD);
 	
 				SunRadianceAndSkyIrradiance(p, n, WSD, sunL, skyE);
@@ -224,7 +221,8 @@
 
 				v.vertex = position;
 				v.tangent = float4(FindTangent(normal, 0.01, float3(0, 1, 0)), 1);
-				v.normal = mul(_TRS, float3(normal.xy, sqrt(max(0.0, 1.0 - dot(normal.xy, normal.xy)))));
+				//v.normal = mul(_TRS, float3(normal.xy, sqrt(max(0.0, 1.0 - dot(normal.xy, normal.xy)))));
+				v.normal = mul(_TRS, normal);
 
 				o.uv0 = v.texcoord;
 				o.normal0 = v.normal;
@@ -250,12 +248,12 @@
 			{		
 				QuadGenerationConstants constants = quadGenerationConstants[0];
 
-				float3 normal = IN.normal0;
+				float3 normal = IN.normal0.xyz;
 
 				float4 scatteringColor = 0;
 				fixed4 terrainColor = tex2D(_HeightTexture, IN.uv0);
 				fixed4 uvSamplerColor = tex2D(_PlanetUVSampler, IN.uv0);
-				fixed4 outputNormal = fixed4(normal.xyz, 1);
+				fixed4 outputNormal = fixed4(normal, 1);
 
 				float height = tex2D(_HeightTexture, IN.uv0).a;
 				float slope = tex2D(_NormalTexture, IN.uv0).a;
@@ -265,7 +263,6 @@
 
 				Account(terrainColor, scatteringColor, IN.vertex1.xyz, normal, IN.direction);
 
-				//outDiffuse = FindNormal(_HeightTexture, IN.uv0); 
 				//outDiffuse = uvSamplerColor;
 				outDiffuse = lerp(scatteringColor, outputNormal, _Normale);
 				//depth = log2(IN.depth) * (0.5 * FCoef(1e+2));
