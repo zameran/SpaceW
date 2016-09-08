@@ -50,6 +50,8 @@ public abstract class Planet : MonoBehaviour
     public Cloudsphere Cloudsphere;
     public Ring Ring;
 
+    public List<Shadow> Shadows = new List<Shadow>();
+
     [Tooltip("Render planet's quads?")]
     public bool PlanetQuadsEnabled = true;
     [Tooltip("Render planet's atmosphere?")]

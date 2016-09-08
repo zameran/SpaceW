@@ -335,15 +335,15 @@ public static class Helper
 	{
 		if (light != null)
 		{
-			direction = Vector3.Normalize(position - center);
 			position = light.transform.position;
+			direction = Vector3.Normalize(position - center);
 			color = Brighten(light.color, light.intensity * 2.0f);
 
 			switch (light.type)
 			{
 				case LightType.Point: direction = Vector3.Normalize(position - center); break;
 				//distances fix.
-				case LightType.Directional: position = center + direction * (position - center).magnitude; break;
+				//case LightType.Directional: position = center + direction * (position - center).magnitude; break;
 			}
 
 			// Transform into local space?
@@ -464,9 +464,9 @@ public static class Helper
 	}
 
 
-	public static void WriteLightKeywords(bool lit, int lightCount, params List<string>[] keywordLists)
+	public static void WriteLightKeywords(int lightCount, params List<string>[] keywordLists)
 	{
-		if (lit == true)
+		if (lightCount > 0)
 		{
 			var keyword = "LIGHT_" + lightCount;
 

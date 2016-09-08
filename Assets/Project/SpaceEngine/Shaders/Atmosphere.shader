@@ -89,10 +89,12 @@ Shader "SpaceEngine/Atmosphere/Atmosphere"
 			#include "UnityCG.cginc"		
 			#include "HDR.cginc"
 			#include "Atmosphere.cginc"
+			#include "SpaceStuff.cginc"
 
 			#pragma multi_compile LIGHT_1 LIGHT_2 LIGHT_3 LIGHT_4
 			#pragma multi_compile SHINE_ON SHINE_OFF
 			#pragma multi_compile ECLIPSES_ON ECLIPSES_OFF
+			#pragma multi_compile SHADOW_1 SHADOW_2 SHADOW_3 SHADOW_4
 
 			#pragma target 5.0
 			#pragma only_renderers d3d11 glcore
@@ -177,6 +179,13 @@ Shader "SpaceEngine/Atmosphere/Atmosphere"
 
 				return pow(max(0, data), 2.2) * _Sun_Intensity;
 			}
+
+			float4 ShadowOuterColor(float3 d, float3 WCP, float3 _Globals_Origin)
+			{
+				float interSectPt = IntersectOuterSphere(WCP, d, _Globals_Origin, Rt);
+
+				return interSectPt != -1 ? ShadowColor(float4(WCP + d * interSectPt, 1)) : 1.0;
+			}
 			
 			float4 frag(v2f IN) : COLOR
 			{			
@@ -188,6 +197,12 @@ Shader "SpaceEngine/Atmosphere/Atmosphere"
 				float sunColor = 0;
 				float3 extinction = 0;
 				float3 inscatter = 0;
+
+				#ifdef ECLIPSES_ON
+					#if SHADOW_1 || SHADOW_2 || SHADOW_3 || SHADOW_4
+						float shadow = ShadowOuterColor(d, WCP, _Globals_Origin);
+					#endif
+				#endif
 
 				#ifdef LIGHT_1
 					sunColor += OuterSunRadiance(IN.relativeDir_1);
@@ -204,6 +219,10 @@ Shader "SpaceEngine/Atmosphere/Atmosphere"
 
 					#ifdef ECLIPSES_ON
 						inscatter *= eclipse1;
+
+						#if SHADOW_1 || SHADOW_2 || SHADOW_3 || SHADOW_4
+							inscatter *= shadow;
+						#endif
 					#endif
 
 					#ifdef SHINE_ON
@@ -238,6 +257,10 @@ Shader "SpaceEngine/Atmosphere/Atmosphere"
 					#ifdef ECLIPSES_ON
 						inscatter *= eclipse1;
 						inscatter *= eclipse2;
+
+						#if SHADOW_1 || SHADOW_2 || SHADOW_3 || SHADOW_4
+							inscatter *= shadow;
+						#endif
 					#endif
 
 					#ifdef SHINE_ON
@@ -279,6 +302,10 @@ Shader "SpaceEngine/Atmosphere/Atmosphere"
 						inscatter *= eclipse1;
 						inscatter *= eclipse2;
 						inscatter *= eclipse3;
+
+						#if SHADOW_1 || SHADOW_2 || SHADOW_3 || SHADOW_4
+							inscatter *= shadow;
+						#endif
 					#endif
 
 					#ifdef SHINE_ON
@@ -327,6 +354,10 @@ Shader "SpaceEngine/Atmosphere/Atmosphere"
 						inscatter *= eclipse2;
 						inscatter *= eclipse3;
 						inscatter *= eclipse4;
+
+						#if SHADOW_1 || SHADOW_2 || SHADOW_3 || SHADOW_4
+							inscatter *= shadow;
+						#endif
 					#endif
 
 					#ifdef SHINE_ON

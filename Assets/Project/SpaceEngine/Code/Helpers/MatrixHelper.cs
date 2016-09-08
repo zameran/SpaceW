@@ -54,17 +54,6 @@ public static class MatrixHelper
         return matrix;
     }
 
-    public static Matrix4x4 Scaling(float xyz)
-    {
-        var matrix = Matrix4x4.identity;
-
-        matrix.m00 = xyz;
-        matrix.m11 = xyz;
-        matrix.m22 = xyz;
-
-        return matrix;
-    }
-
     public static Matrix4x4 Scaling(Vector3 xyz)
     {
         var matrix = Matrix4x4.identity;

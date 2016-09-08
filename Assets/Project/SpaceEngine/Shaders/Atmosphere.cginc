@@ -319,7 +319,7 @@ float EclipseOuterShadow(float3 lightVec, float lightAngularRadius, float3 d, fl
 	//TODO : Switch in sphere - out sphere.
 	float interSectPt = IntersectOuterSphere(WCP, d, _Globals_Origin, Rt);
 
-	return interSectPt != -1 ? EclipseShadow(WCP + d * interSectPt, lightVec, lightAngularRadius) : 1.0;;
+	return interSectPt != -1 ? EclipseShadow(WCP + d * interSectPt, lightVec, lightAngularRadius) : 1.0;
 }
 
 float2 GetTransmittanceUV(float r, float mu) 

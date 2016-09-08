@@ -613,6 +613,14 @@ namespace SpaceEngine.AtmosphericScattering
             if (mat != null)
             {
                 Helper.SetKeywords(mat, Keywords, false);
+
+                if (planetoid != null)
+                {
+                    if (planetoid.Ring != null)
+                    {
+                        planetoid.Ring.SetShadows(mat, planetoid.Shadows);
+                    }
+                }
             }
 
             if (full)

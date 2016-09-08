@@ -33,10 +33,12 @@
 			#pragma multi_compile LIGHT_1 LIGHT_2 LIGHT_3 LIGHT_4
 			#pragma multi_compile SHINE_ON SHINE_OFF
 			#pragma multi_compile ECLIPSES_ON ECLIPSES_OFF
+			#pragma multi_compile SHADOW_1 SHADOW_2 SHADOW_3 SHADOW_4
 			#pragma multi_compile ATMOSPHERE_ON ATMOSPHERE_OFF
 
 			#include "UnityCG.cginc"
 			#include "AutoLight.cginc"
+			#include "SpaceStuff.cginc"
 			#include "Assets/Project/SpaceEngine/Shaders/Compute/Utils.cginc"
 			#include "Assets/Project/SpaceEngine/Shaders/TCCommon.cginc"
 			#include "Assets/Project/SpaceEngine/Shaders/HDR.cginc"
@@ -112,14 +114,21 @@
 
 				#ifdef ECLIPSES_ON
 					float eclipse = 1;
-
 					eclipse *= EclipseShadow(p, WSD, WSPR.w);
+
+					#if SHADOW_1 || SHADOW_2 || SHADOW_3 || SHADOW_4
+						float shadow = ShadowColor(float4(p, 1));
+					#endif
 				#endif
 
 				float4 inscatter = InScattering(WCPG, p, WSD, extinction, 1.0);
 
 				#ifdef ECLIPSES_ON
 					inscatter *= eclipse;
+
+					#if SHADOW_1 || SHADOW_2 || SHADOW_3 || SHADOW_4
+						inscatter *= shadow;
+					#endif
 				#endif
 
 				#ifdef SHINE_ON
@@ -129,7 +138,11 @@
 				float3 groundColor = 1.5 * RGB2Reflectance(terrainColor).rgb * (sunL * max(cTheta, 0) + skyE) / M_PI;
 
 				#ifdef ECLIPSES_ON
-					extinction = 1 * _ExtinctionGroundFade + (1 - _ExtinctionGroundFade) * extinction * eclipse;
+					#if SHADOW_1 || SHADOW_2 || SHADOW_3 || SHADOW_4
+						extinction = 1 * _ExtinctionGroundFade + (1 - _ExtinctionGroundFade) * extinction * eclipse * shadow;
+					#else
+						extinction = 1 * _ExtinctionGroundFade + (1 - _ExtinctionGroundFade) * extinction * eclipse;
+					#endif
 				#endif
 
 				float4 finalColor = float4(groundColor, 1) * float4(extinction, 1) + inscatter;

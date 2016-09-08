@@ -10,9 +10,9 @@ public class SphereShadow : Shadow
 
     private Texture2D penumbraLut;
 
-    private static Vector3[] vectors = new Vector3[3];
+    readonly Vector3[] vectors = new Vector3[3];
 
-    private static float[] magnitudes = new float[3];
+    readonly float[] magnitudes = new float[3];
 
     public override Texture GetTexture()
     {
@@ -31,7 +31,7 @@ public class SphereShadow : Shadow
 
             Helper.CalculateLight(Light, transform.position, null, null, ref position, ref direction, ref color);
 
-            var rotation = Quaternion.FromToRotation(-direction, Vector3.back);
+            var rotation = Quaternion.FromToRotation(direction, Vector3.back);
 
             SetVector(0, rotation * transform.right * transform.lossyScale.x * OuterRadius);
             SetVector(1, rotation * transform.up * transform.lossyScale.y * OuterRadius);
@@ -70,6 +70,12 @@ public class SphereShadow : Shadow
     {
         if (Helper.Enabled(this) == true)
         {
+            Gizmos.color = Color.red;
+            Gizmos.DrawRay(transform.position, transform.right * OuterRadius * 1.5f);
+            Gizmos.DrawRay(transform.position, transform.up * OuterRadius * 1.5f);
+            Gizmos.DrawRay(transform.position, transform.forward * OuterRadius * 1.5f);
+            Gizmos.color = Color.white;
+
             Gizmos.matrix = transform.localToWorldMatrix;
 
             Gizmos.DrawWireSphere(Vector3.zero, InnerRadius);
