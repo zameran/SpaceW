@@ -37,6 +37,7 @@ using System;
 using System.IO;
 using System.Reflection;
 using System.Collections.Generic;
+using System.Linq;
 
 using ZFramework.Extensions;
 using ZFramework.Unity.Common;
@@ -53,7 +54,7 @@ namespace SpaceEngine.Pluginator
 {
     [UseLogger(Category.Data)]
     [UseLoggerFile(false, "Log")]
-    public sealed class AssemblyLoader : Loader
+    public sealed class AssemblyLoader : Loader, IEventit
     {
         public GUISkin UISkin = null;
 
@@ -90,26 +91,66 @@ namespace SpaceEngine.Pluginator
             {
                 if (UISkin != null) GUI.skin = UISkin;
 
-                GUI.Box(new Rect(Screen.width / 2 - (Screen.width / 1.25f) / 2,
-                                 Screen.height / 1.25f,
-                                 Screen.width / 1.25f,
-                                 15), "");
+                GUI.Box(new Rect(Screen.width / 2 - (Screen.width / 1.25f) / 2, Screen.height / 1.25f, Screen.width / 1.25f, 15), "");
 
-                GUI.Label(new Rect(Screen.width / 2 - 50,
-                                   Screen.height / 1.25f,
-                                   Screen.width / 1.25f,
-                                   25), string.Format("Loading {0}/{1} dll's...", TotalLoaded, TotalDetected));
+                GUI.Label(new Rect(Screen.width / 2 - 50, Screen.height / 1.25f, Screen.width / 1.25f, 25),
+                    string.Format("Loading {0}/{1} dll's...", TotalLoaded, TotalDetected));
             }
         }
 
-        protected override void OnLevelWasLoaded(int level)
-        {
-            base.OnLevelWasLoaded(level);
+        #region Subscribtion/Unsubscription
 
+        private void OnEnable()
+        {
+            Eventit();
+        }
+
+        private void OnDisable()
+        {
+            UnEventit();
+        }
+
+        private void OnDestroy()
+        {
+            UnEventit();
+        }
+
+        #endregion
+
+        #region Eventit
+
+        public bool isEventit { get; set; }
+
+        public void Eventit()
+        {
+            if (isEventit) return;
+
+            SceneManager.activeSceneChanged += OnActiveSceneChanged;
+
+            isEventit = true;
+        }
+
+        public void UnEventit()
+        {
+            if (!isEventit) return;
+
+            SceneManager.activeSceneChanged -= OnActiveSceneChanged;
+
+            isEventit = false;
+        }
+
+        #endregion
+
+        #region Events
+
+        private void OnActiveSceneChanged(Scene arg0, Scene arg1)
+        {
             ShowGUI = false;
 
             if (SceneManager.GetActiveScene().buildIndex != 0 && Loaded) FirePlugins(ExternalAssemblies);
         }
+
+        #endregion
 
         protected override void Pass()
         {
@@ -130,6 +171,7 @@ namespace SpaceEngine.Pluginator
         }
 
         #region AssemblyLoader Logic
+
         private void DetectAssembies(out List<string> allPaths)
         {
             string path = PathGlobals.GlobalModFolderPath;
@@ -138,10 +180,7 @@ namespace SpaceEngine.Pluginator
 
             try
             {
-                foreach (string dll in Directory.GetFiles(path, "*.dll", SearchOption.AllDirectories))
-                {
-                    allPaths.Add(dll);
-                }
+                allPaths.AddRange(Directory.GetFiles(path, "*.dll", SearchOption.AllDirectories));
             }
             catch (Exception ex)
             {
@@ -155,7 +194,8 @@ namespace SpaceEngine.Pluginator
 
         private void DetectAndLoadAssemblies()
         {
-            List<string> allPaths; DetectAssembies(out allPaths);
+            List<string> allPaths;
+            DetectAssembies(out allPaths);
 
             LoadDetectedAssemblies(allPaths);
         }
@@ -166,7 +206,7 @@ namespace SpaceEngine.Pluginator
             {
                 Assembly assembly = Assembly.LoadFile(path);
 
-                SpaceAddonAssembly[] attrbutes = assembly.GetCustomAttributes(typeof(SpaceAddonAssembly), false) as SpaceAddonAssembly[];
+                SpaceAddonAssembly[] attrbutes = assembly.GetCustomAttributes(typeof (SpaceAddonAssembly), false) as SpaceAddonAssembly[];
 
                 if (attrbutes == null || attrbutes.Length == 0)
                 {
@@ -176,7 +216,7 @@ namespace SpaceEngine.Pluginator
                 {
                     SpaceAddonAssembly ea = attrbutes[0];
                     List<Type> mb = GetAllSubclassesOf<Type, SpaceAddonMonoBehaviour, MonoBehaviour>(assembly);
-                    AssemblyExternalTypes aet = new AssemblyExternalTypes(typeof(MonoBehaviour), mb);
+                    AssemblyExternalTypes aet = new AssemblyExternalTypes(typeof (MonoBehaviour), mb);
                     AssemblyExternal ae = new AssemblyExternal(path, ea.Name, ea.Version, assembly, aet);
 
                     ExternalAssemblies.Add(ae);
@@ -190,15 +230,15 @@ namespace SpaceEngine.Pluginator
             {
                 Logger.Log(string.Format("LoadAssembly Exception: {0}", ex.Message));
             }
-            finally
-            {
-
-            }
         }
 
         private void LoadDetectedAssemblies(List<string> allPaths)
         {
-            if (allPaths == null) { DetectAssembies(out allPaths); Logger.Log("Something wrong with path's array! Detecting assemblies again!"); }
+            if (allPaths == null)
+            {
+                DetectAssembies(out allPaths);
+                Logger.Log("Something wrong with path's array! Detecting assemblies again!");
+            }
 
             for (int i = 0; i < allPaths.Count; i++)
             {
@@ -214,14 +254,7 @@ namespace SpaceEngine.Pluginator
 
             foreach (AssemblyExternal assembly in ExternalAssemblies)
             {
-                foreach (KeyValuePair<Type, List<Type>> kvp in assembly.Types)
-                {
-                    foreach (Type v in kvp.Value)
-                    {
-                        if (FirePlugin(v, level))
-                            counter++;
-                    }
-                }
+                counter += assembly.Types.SelectMany(kvp => kvp.Value).Count(v => FirePlugin(v, level));
             }
 
             Logger.Log(string.Format("{0} plugins fired at scene №: {1}", counter, level));
@@ -233,14 +266,7 @@ namespace SpaceEngine.Pluginator
 
             foreach (AssemblyExternal assembly in ExternalAssemblies)
             {
-                foreach (KeyValuePair<Type, List<Type>> kvp in assembly.Types)
-                {
-                    foreach (Type v in kvp.Value)
-                    {
-                        if (FirePlugin(v))
-                            counter++;
-                    }
-                }
+                counter += assembly.Types.SelectMany(kvp => kvp.Value).Count(v => FirePlugin(v));
             }
 
             Logger.Log(string.Format("{0} plugins fired at scene №: {1}", counter, SceneManager.GetActiveScene().buildIndex));
@@ -248,51 +274,18 @@ namespace SpaceEngine.Pluginator
 
         private void FireHotPlugin(AssemblyExternal Addon)
         {
-            int counter = 0;
-
-            foreach (KeyValuePair<Type, List<Type>> kvp in Addon.Types)
-            {
-                foreach (Type v in kvp.Value)
-                {
-                    if (FirePlugin(v, 0))
-                        counter++;
-                }
-            }
+            int counter = Addon.Types.SelectMany(kvp => kvp.Value).Count(v => FirePlugin(v, 0));
 
             Logger.Log(string.Format("{0} plugins fired at scene №: {1}", counter, SceneManager.GetActiveScene().buildIndex));
-        }
-
-        private bool FirePlugin(Type type, int level, string msg)
-        {
-            SpaceAddonMonoBehaviour atr = AttributeUtils.GetTypeAttribute<SpaceAddonMonoBehaviour>(type);
-
-            if ((int)atr.EntryPoint == level)
-            {
-                if (atr != null)
-                {
-                    GameObject go = new GameObject(type.Name);
-                    go.transform.position = Vector3.zero;
-                    go.transform.rotation = Quaternion.identity;
-                    go.AddComponent(type);
-
-                    return true;
-                }
-            }
-            else
-            {
-                if (!msg.IsNullOrWhiteSpace()) Logger.Log(msg);
-            }
-
-            return false;
         }
 
         private bool FirePlugin(Type type, int level)
         {
             SpaceAddonMonoBehaviour atr = AttributeUtils.GetTypeAttribute<SpaceAddonMonoBehaviour>(type);
 
-            if ((int)atr.EntryPoint == level)
+            if (atr != null)
             {
-                if (atr != null)
+                if ((int)atr.EntryPoint == level)
                 {
                     GameObject go = new GameObject(type.Name);
                     go.transform.position = Vector3.zero;
@@ -336,7 +329,7 @@ namespace SpaceEngine.Pluginator
 
             foreach (Type type in types)
             {
-                if (type.IsSubclassOf(typeof(Y)))
+                if (type.IsSubclassOf(typeof (Y)))
                 {
                     U atr = AttributeUtils.GetTypeAttribute<U>(type);
 
@@ -347,6 +340,7 @@ namespace SpaceEngine.Pluginator
 
             return output;
         }
+
         #endregion
     }
 }

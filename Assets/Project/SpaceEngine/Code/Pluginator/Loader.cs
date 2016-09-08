@@ -59,12 +59,7 @@ namespace SpaceEngine.Pluginator
             private set { if (value != null) instance = value; else Logger.Log("Loader Instance set fail!"); }
         }
 
-        private static int step;
-        public static int Step
-        {
-            get { return step; }
-            private set { step = value; }
-        }
+        public static int Step { get; private set; }
 
         protected virtual void Start()
         {
@@ -86,11 +81,6 @@ namespace SpaceEngine.Pluginator
         }
 
         protected virtual void OnGUI()
-        {
-
-        }
-
-        protected virtual void OnLevelWasLoaded(int level)
         {
 
         }
