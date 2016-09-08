@@ -35,7 +35,7 @@
 
 using UnityEngine;
 
-public class HideFlagSetter : MonoBehaviour
+public class HideFlagSetterHelper : MonoBehaviour
 {
     public HideFlags flag;
 
@@ -44,6 +44,8 @@ public class HideFlagSetter : MonoBehaviour
     [ContextMenu("Set Flag")]
     public void SetFlag()
     {
+        if (obj == null) { Debug.LogError("Obj is null!"); return; }
+
         obj.hideFlags = flag;
     }
 }

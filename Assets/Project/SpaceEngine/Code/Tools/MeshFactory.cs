@@ -33,6 +33,8 @@
 // Creator: zameran
 #endregion
 
+using System.Collections.Generic;
+
 using UnityEngine;
 
 public static class MeshFactory
@@ -526,6 +528,76 @@ public static class MeshFactory
         mesh.RecalculateNormals();
 
         SolveTangents(mesh);
+
+        return mesh;
+    }
+
+    public static Mesh SetupRingSegmentMesh(int SegmentCount, int SegmentDetail, float InnerRadius, float OuterRadius, float BoundsShift)
+    {
+        var mesh = new Mesh();
+
+        var positions = new List<Vector3>();
+        var normals = new List<Vector3>();
+        var uvs = new List<Vector2>();
+        var indices = new List<int>();
+
+        var angleTotal = Helper.Divide(Mathf.PI * 2.0f, SegmentCount);
+        var angleStep = Helper.Divide(angleTotal, SegmentDetail);
+        var coordStep = Helper.Reciprocal(SegmentDetail);
+
+        for (var i = 0; i <= SegmentDetail; i++)
+        {
+            var coord = coordStep * i;
+            var angle = angleStep * i;
+            var sin = Mathf.Sin(angle);
+            var cos = Mathf.Cos(angle);
+
+            positions.Add(new Vector3(sin * InnerRadius, 0.0f, cos * InnerRadius));
+            positions.Add(new Vector3(sin * OuterRadius, 0.0f, cos * OuterRadius));
+
+            normals.Add(Vector3.up);
+            normals.Add(Vector3.up);
+
+            uvs.Add(new Vector2(0.0f, coord));
+            uvs.Add(new Vector2(1.0f, coord));
+        }
+
+        mesh.vertices = positions.ToArray();
+        mesh.uv = uvs.ToArray();
+        mesh.normals = normals.ToArray();
+
+        #region Indices
+
+        var steps = mesh.vertexCount / 2 - 1;
+
+        for (var j = 0; j < steps; j++)
+        {
+            var vertexOff = j * 2;
+
+            indices.Add(vertexOff + 0);
+            indices.Add(vertexOff + 1);
+            indices.Add(vertexOff + 2);
+            indices.Add(vertexOff + 3);
+            indices.Add(vertexOff + 2);
+            indices.Add(vertexOff + 1);
+        }
+
+        mesh.triangles = indices.ToArray();
+
+        #endregion
+
+        #region Bounds
+
+        var bounds = mesh.bounds;
+
+        mesh.bounds = Helper.NewBoundsCenter(bounds, bounds.center + bounds.center.normalized * BoundsShift);
+
+        #endregion
+
+        positions.Clear();
+        normals.Clear();
+        uvs.Clear();
+        indices.Clear();
 
         return mesh;
     }

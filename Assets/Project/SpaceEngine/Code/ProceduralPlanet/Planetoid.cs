@@ -55,31 +55,30 @@ public static class PlanetoidExtensions
 
         if (planet != null)
         {
+            if (planet.Ring != null)
+            {
+                Keywords.Add(planet.RingEnabled ? "RING_ON" : "RING_OFF");
+                if (planet.RingEnabled) Keywords.Add("SCATTERING");
+
+                var shadowsCount = planet.Shadows.Count((shadow) => shadow != null);
+
+                for (int i = 1; i < shadowsCount + 1; i++)
+                {
+                    Keywords.Add("SHADOW_" + i);
+                }
+            }
+            else
+            {
+                Keywords.Add("RING_OFF");
+            }
+
             if (planet.Atmosphere != null)
             {
                 if (planet.AtmosphereEnabled)
                 {
-                    if (planet.Atmosphere.Sun_1 != null)
-                        Keywords.Add("LIGHT_1");
+                    var lightCount = planet.Atmosphere.Suns.Count((sun) => sun != null);
 
-                    if (planet.Atmosphere.Sun_2 != null)
-                        Keywords.Add("LIGHT_2");
-
-                    if (planet.Atmosphere.Sun_1 != null && planet.Atmosphere.Sun_2 != null)
-                        Keywords.Remove("LIGHT_1");
-
-                    if (planet.Atmosphere.Sun_3 != null)
-                        Keywords.Add("LIGHT_3");
-
-                    if (planet.Atmosphere.Sun_4 != null)
-                        Keywords.Add("LIGHT_4");
-
-                    if (planet.Atmosphere.Sun_1 != null && planet.Atmosphere.Sun_2 != null)
-                        if (planet.Atmosphere.Sun_3 != null && planet.Atmosphere.Sun_4 != null)
-                            Keywords.Remove("LIGHT_2");
-
-                    if (planet.Atmosphere.Sun_3 != null && planet.Atmosphere.Sun_4 != null)
-                        Keywords.Remove("LIGHT_3");
+                    Keywords.Add("LIGHT_" + lightCount);
 
                     if (planet.Atmosphere.eclipseCasters.Count == 0)
                     {
@@ -108,7 +107,7 @@ public static class PlanetoidExtensions
             }
             else
             {
-                Debug.Log("Planet: GetKeywords problem!");
+                Keywords.Add("ATMOSPHERE_OFF");
             }
         }
 
@@ -176,6 +175,11 @@ public sealed class Planetoid : Planet, IPlanet
                 Cloudsphere.planetoid = this;
         }
 
+        if (Ring != null)
+        {
+            //TODO : RINGS
+        }
+
         FrustumPlanes = GodManager.Instance.FrustumPlanes;
 
         QuadAtmosphereMPB = new MaterialPropertyBlock();
@@ -209,7 +213,12 @@ public sealed class Planetoid : Planet, IPlanet
 
         if (Cloudsphere != null)
         {
-            Cloudsphere.InitUniforms();
+            Cloudsphere.InitUniforms(this);
+        }
+
+        if (Ring != null)
+        {
+            Ring.InitUniforms(this);
         }
 
         ReSetupQuads(); //NOTE : Force resetup on start.
@@ -381,6 +390,14 @@ public sealed class Planetoid : Planet, IPlanet
             if (CloudsphereEnabled)
             {
                 Cloudsphere.Render(camera, DrawLayer);
+            }
+        }
+
+        if (Ring != null)
+        {
+            if (RingEnabled)
+            {
+                Ring.Render(camera, DrawLayer);
             }
         }
     }

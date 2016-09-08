@@ -55,7 +55,7 @@ public struct QuadGenerationConstants : IData
     //w - nVerticesPerSideWithBorderSub
     public Vector4 meshSettings; //16
 
-    //x - mesh
+    //x - RingSegmentMesh
     //y - texture
     public Vector2 borderMod; //8
 

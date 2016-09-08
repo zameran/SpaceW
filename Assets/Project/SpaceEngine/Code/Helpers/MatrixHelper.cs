@@ -28,68 +28,70 @@
 // ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF
 // THE POSSIBILITY OF SUCH DAMAGE.
 // 
-// Creation Date: 2016.05.18
-// Creation Time: 16:45
+// Creation Date: Undefined
+// Creation Time: Undefined
 // Creator: zameran
 #endregion
 
+using System;
 using UnityEngine;
 
-public static class UniformTools
+public static class MatrixHelper
 {
-    public static void SetProperty(this Material mat, string name, ComputeBuffer buffer)
+    public static Matrix4x4 Rotation(Quaternion q)
     {
-        if (mat.HasProperty(name))
-        {
-            mat.SetBuffer(name, buffer);
-        }
+        return Matrix4x4.TRS(Vector3.zero, q, Vector3.one);
     }
 
-    public static void SetProperty(this Material mat, string name, Color color)
+    public static Matrix4x4 Translation(Vector3 xyz)
     {
-        if (mat.HasProperty(name))
-        {
-            mat.SetColor(name, color);
-        }
+        var matrix = Matrix4x4.identity;
+
+        matrix.m03 = xyz.x;
+        matrix.m13 = xyz.y;
+        matrix.m23 = xyz.z;
+
+        return matrix;
     }
 
-    public static void SetProperty(this Material mat, string name, float value)
+    public static Matrix4x4 Scaling(Vector3 xyz)
     {
-        if (mat.HasProperty(name))
-        {
-            mat.SetFloat(name, value);
-        }
+        var matrix = Matrix4x4.identity;
+
+        matrix.m00 = xyz.x;
+        matrix.m11 = xyz.y;
+        matrix.m22 = xyz.z;
+
+        return matrix;
     }
 
-    public static void SetProperty(this Material mat, string name, int value)
+    public static Matrix4x4 ShearingX(Vector2 yz)
     {
-        if (mat.HasProperty(name))
-        {
-            mat.SetInt(name, value);
-        }
+        var matrix = Matrix4x4.identity;
+
+        matrix.m01 = yz.x;
+        matrix.m02 = yz.y;
+
+        return matrix;
     }
 
-    public static void SetProperty(this Material mat, string name, Matrix4x4 value)
+    public static Matrix4x4 ShearingY(Vector2 xz)
     {
-        if (mat.HasProperty(name))
-        {
-            mat.SetMatrix(name, value);
-        }
+        var matrix = Matrix4x4.identity;
+
+        matrix.m10 = xz.x;
+        matrix.m12 = xz.y;
+
+        return matrix;
     }
 
-    public static void SetProperty(this Material mat, string name, Vector4 value)
+    public static Matrix4x4 ShearingZ(Vector2 xy)
     {
-        if (mat.HasProperty(name))
-        {
-            mat.SetVector(name, value);
-        }
-    }
+        var matrix = Matrix4x4.identity;
 
-    public static void SetProperty(this Material mat, string name, Texture value)
-    {
-        if (mat.HasProperty(name))
-        {
-            mat.SetTexture(name, value);
-        }
+        matrix.m20 = xy.x;
+        matrix.m21 = xy.y;
+
+        return matrix;
     }
 }

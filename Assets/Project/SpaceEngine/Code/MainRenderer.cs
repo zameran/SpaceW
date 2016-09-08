@@ -102,12 +102,15 @@ public sealed class MainRenderer : MonoBehaviour
         }
 
         //-----------------------------------------------------------------------------
-        planets[0].RenderQueueOffset = 10000;
-        if (planets[0].Atmosphere != null) { planets[0].Atmosphere.RenderQueueOffset = 10001; }
+        planets[0].RenderQueueOffset = 10001;
+        if (planets[0].Atmosphere != null) { planets[0].Atmosphere.RenderQueueOffset = 10002; }
+        if (planets[0].Ring != null) { planets[0].Ring.RenderQueueOffset = 10000; }
+
         for (int i = 1; i < planets.Count; i++)
         {
-            planets[i].RenderQueueOffset = 0;
-            if (planets[i].Atmosphere != null) planets[i].Atmosphere.RenderQueueOffset = 1;
+            planets[i].RenderQueueOffset = 1;
+            if (planets[i].Atmosphere != null) planets[i].Atmosphere.RenderQueueOffset = 2;
+            if (planets[i].Atmosphere != null) planets[i].Atmosphere.RenderQueueOffset = 0;
         }
         //-----------------------------------------------------------------------------
     }

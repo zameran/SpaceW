@@ -156,7 +156,7 @@
 				//outputColor = OuterSunGlareRadiance(IN.relativeDir, outputColor);
 				//outputColor = (Eclipse > 0.0) ? sunColor : outputColor;
 
-				return float4(outputColor, 1.0);				
+				return float4(outputColor, 0.0);				
 			}			
 			ENDCG
 		}

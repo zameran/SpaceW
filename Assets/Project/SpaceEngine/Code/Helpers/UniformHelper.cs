@@ -28,105 +28,68 @@
 // ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF
 // THE POSSIBILITY OF SUCH DAMAGE.
 // 
-// Creation Date: Undefined
-// Creation Time: Undefined
+// Creation Date: 2016.05.18
+// Creation Time: 16:45
 // Creator: zameran
 #endregion
 
 using UnityEngine;
-using UnityEngine.SceneManagement;
 
-public class UserInterface : MonoBehaviour, IEventit
+public static class UniformHelper
 {
-    public GameObject Controllable;
-
-    #region API
-
-    public void FreezeTime()
+    public static void SetProperty(this Material mat, string name, ComputeBuffer buffer)
     {
-        Time.timeScale = 0.0000001f;
+        if (mat.HasProperty(name))
+        {
+            mat.SetBuffer(name, buffer);
+        }
     }
 
-    public void UnFreezeTime()
+    public static void SetProperty(this Material mat, string name, Color color)
     {
-        Time.timeScale = 1.0f;
+        if (mat.HasProperty(name))
+        {
+            mat.SetColor(name, color);
+        }
     }
 
-    public void LoadGameScene()
+    public static void SetProperty(this Material mat, string name, float value)
     {
-        LoadScene(2);
+        if (mat.HasProperty(name))
+        {
+            mat.SetFloat(name, value);
+        }
     }
 
-    public void LoadMenuScene()
+    public static void SetProperty(this Material mat, string name, int value)
     {
-        LoadScene(1);
+        if (mat.HasProperty(name))
+        {
+            mat.SetInt(name, value);
+        }
     }
 
-    public void LoadScene(int id)
+    public static void SetProperty(this Material mat, string name, Matrix4x4 value)
     {
-        SceneManager.LoadScene(id);
+        if (mat.HasProperty(name))
+        {
+            mat.SetMatrix(name, value);
+        }
     }
 
-    public void Quit()
+    public static void SetProperty(this Material mat, string name, Vector4 value)
     {
-#if UNITY_EDITOR
-        Debug.Break();
-#else
-        Application.Quit();
-        #endif
+        if (mat.HasProperty(name))
+        {
+            mat.SetVector(name, value);
+        }
     }
 
-    #endregion
-
-    #region Subscribtion/Unsubscription
-
-    protected void OnEnable()
+    public static void SetProperty(this Material mat, string name, Texture value)
     {
-        Eventit();
+        if (mat.HasProperty(name))
+        {
+            mat.SetTexture(name, value);
+        }
     }
-
-    protected void OnDisable()
-    {
-        UnEventit();
-    }
-
-    protected void OnDestroy()
-    {
-        UnEventit();
-    }
-
-    #endregion
-
-    #region Eventit
-
-    public bool isEventit { get; set; }
-
-    public void Eventit()
-    {
-        if (isEventit) return;
-
-        SceneManager.activeSceneChanged += OnActiveSceneChanged;
-
-        isEventit = true;
-    }
-
-    public void UnEventit()
-    {
-        if (!isEventit) return;
-
-        SceneManager.activeSceneChanged -= OnActiveSceneChanged;
-
-        isEventit = false;
-    }
-
-    #endregion
-
-    #region Events
-
-    private void OnActiveSceneChanged(Scene arg0, Scene arg1)
-    {
-        UnFreezeTime();
-    }
-
-    #endregion
 }

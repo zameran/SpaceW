@@ -104,10 +104,7 @@ namespace SpaceEngine.AtmosphericScattering
         [HideInInspector]
         public bool Planetshine = true;
 
-        public AtmosphereSun Sun_1;
-        public AtmosphereSun Sun_2;
-        public AtmosphereSun Sun_3;
-        public AtmosphereSun Sun_4;
+        public List<AtmosphereSun> Suns = new List<AtmosphereSun>(); 
 
         public List<GameObject> eclipseCasters = new List<GameObject>();
         public List<GameObject> shineCasters = new List<GameObject>();
@@ -229,7 +226,6 @@ namespace SpaceEngine.AtmosphericScattering
             InitMisc();
             InitMaterials();
             InitMesh();
-            InitSuns();
 
             InitSetAtmosphereUniforms();
         }
@@ -267,21 +263,6 @@ namespace SpaceEngine.AtmosphericScattering
             }
         }
 
-        public void SetKeywords(Material m, List<string> keywords, bool checkShaderKeywords = false)
-        {
-            if (checkShaderKeywords)
-            {
-                if (m != null && ArraysEqual(m.shaderKeywords, keywords) == false)
-                {
-                    m.shaderKeywords = keywords.ToArray();
-                }
-            }
-            else
-            {
-                m.shaderKeywords = keywords.ToArray();
-            }
-        }
-
         public void CalculateShine(out Matrix4x4 soc1, out Matrix4x4 sc1)
         {
             soc1 = Matrix4x4.zero;
@@ -310,13 +291,6 @@ namespace SpaceEngine.AtmosphericScattering
             suns = Matrix4x4.zero;
 
             float actualRadius = 250000.0f;
-
-            List<AtmosphereSun> Suns = new List<AtmosphereSun>();
-
-            if (Sun_1 != null) Suns.Add(Sun_1);
-            if (Sun_2 != null) Suns.Add(Sun_2);
-            if (Sun_3 != null) Suns.Add(Sun_3);
-            if (Sun_4 != null) Suns.Add(Sun_4);
 
             for (int i = 0; i < Mathf.Min(4, Suns.Count); i++)
             {
@@ -380,36 +354,8 @@ namespace SpaceEngine.AtmosphericScattering
             block.SetMatrix("_Sun_Positions_1", sunMatrix1);
         }
 
-        public bool ArraysEqual<T>(T[] a, List<T> b)
-        {
-            if (a != null && b == null) return false;
-            if (a == null && b != null) return false;
-
-            if (a != null && b != null)
-            {
-                if (a.Length != b.Count) return false;
-
-                var comparer = EqualityComparer<T>.Default;
-
-                for (var i = 0; i < a.Length; i++)
-                {
-                    if (comparer.Equals(a[i], b[i]) == false)
-                    {
-                        return false;
-                    }
-                }
-            }
-
-            return true;
-        }
-
         private void Update()
         {
-            if (Sun_1 != null) Sun_1.UpdateNode();
-            if (Sun_2 != null) Sun_2.UpdateNode();
-            if (Sun_3 != null) Sun_3.UpdateNode();
-            if (Sun_4 != null) Sun_4.UpdateNode();
-
             UpdateNode();
         }
 
@@ -420,10 +366,14 @@ namespace SpaceEngine.AtmosphericScattering
             atmosphereParameters.Rl = (Radius + Height * 1.05f) - TerrainRadiusHold;
             atmosphereParameters.SCALE = Scale;
 
-            if (Sun_1 != null) Sun_1.Origin = Origin;
-            if (Sun_2 != null) Sun_2.Origin = Origin;
-            if (Sun_3 != null) Sun_3.Origin = Origin;
-            if (Sun_4 != null) Sun_4.Origin = Origin;
+            for (int i = 0; i < Suns.Count; i++)
+            {
+                if (Suns[i] != null)
+                {
+                    Suns[i].Origin = Origin;
+                    Suns[i].UpdateNode();
+                }
+            }
 
             worldToCamera = CameraHelper.Main().GetWorldToCamera();
             cameraToWorld = CameraHelper.Main().GetCameraToWorld();
@@ -474,13 +424,6 @@ namespace SpaceEngine.AtmosphericScattering
                 if (planetoid.DrawGizmos == false) return;
 
                 //NOTE : Sun Direction is sun's tranform.forward with sun rotation applyied...
-
-                List<AtmosphereSun> Suns = new List<AtmosphereSun>();
-
-                if (Sun_1 != null) Suns.Add(Sun_1);
-                if (Sun_2 != null) Suns.Add(Sun_2);
-                if (Sun_3 != null) Suns.Add(Sun_3);
-                if (Sun_4 != null) Suns.Add(Sun_4);
 
                 for (int i = 0; i < Mathf.Min(4, Suns.Count); i++)
                 {
@@ -554,21 +497,11 @@ namespace SpaceEngine.AtmosphericScattering
             Keywords = GetKeywords();
         }
 
-        public void InitSuns()
-        {
-            AtmosphereSun[] suns = FindObjectsOfType<AtmosphereSun>();
-
-            if (suns.Length > 0) if (Sun_1 == null && suns[0] != null) Sun_1 = suns[0];
-            if (suns.Length > 1) if (Sun_2 == null && suns[1] != null) Sun_2 = suns[1];
-            if (suns.Length > 2) if (Sun_3 == null && suns[2] != null) Sun_3 = suns[2];
-            if (suns.Length > 3) if (Sun_4 == null && suns[3] != null) Sun_4 = suns[3];
-        }
-
         public void InitUniforms(MaterialPropertyBlock block, Material mat, bool full = true)
         {
             if (mat != null)
             {
-                SetKeywords(mat, Keywords);
+                Helper.SetKeywords(mat, Keywords, false);
             }
 
             if (full)
@@ -659,36 +592,14 @@ namespace SpaceEngine.AtmosphericScattering
                 atmosphere.InitSetPlanetoidUniforms(planetoid);
                 atmosphere.InitSetAtmosphereUniforms();
 
-                if (Sun_1 != null)
+                for (int i = 0; i < Suns.Count; i++)
                 {
-                    SunGlare sg_1 = Sun_1.GetComponent<SunGlare>();
+                    if (Suns[i] != null)
+                    {
+                        var sunGlareComponent = Suns[i].GetComponent<SunGlare>();
 
-                    if (sg_1 != null)
-                        sg_1.InitSetAtmosphereUniforms();
-                }
-
-                if (Sun_2 != null)
-                {
-                    SunGlare sg_2 = Sun_2.GetComponent<SunGlare>();
-
-                    if (sg_2 != null)
-                        sg_2.InitSetAtmosphereUniforms();
-                }
-
-                if (Sun_3 != null)
-                {
-                    SunGlare sg_3 = Sun_3.GetComponent<SunGlare>();
-
-                    if (sg_3 != null)
-                        sg_3.InitSetAtmosphereUniforms();
-                }
-
-                if (Sun_4 != null)
-                {
-                    SunGlare sg_4 = Sun_4.GetComponent<SunGlare>();
-
-                    if (sg_4 != null)
-                        sg_4.InitSetAtmosphereUniforms();
+                        if(sunGlareComponent != null) sunGlareComponent.InitSetAtmosphereUniforms();
+                    }
                 }
             }
             else
@@ -701,7 +612,15 @@ namespace SpaceEngine.AtmosphericScattering
 
             if (mat != null)
             {
-                SetKeywords(mat, Keywords);
+                Helper.SetKeywords(mat, Keywords, false);
+
+                if (planetoid != null)
+                {
+                    if (planetoid.Ring != null)
+                    {
+                        planetoid.Ring.SetShadows(mat, planetoid.Shadows);
+                    }
+                }
             }
 
             if (full)
@@ -746,10 +665,13 @@ namespace SpaceEngine.AtmosphericScattering
                 block.SetFloat("_Exposure", HDRExposure);
                 block.SetFloat("_HDRMode", (int)HDRMode);
 
-                if (Sun_1 != null) Sun_1.SetUniforms(block);
-                if (Sun_2 != null) Sun_2.SetUniforms(block);
-                if (Sun_3 != null) Sun_3.SetUniforms(block);
-                if (Sun_4 != null) Sun_4.SetUniforms(block);
+                for (int i = 0; i < Suns.Count; i++)
+                {
+                    if (Suns[i] != null)
+                    {
+                        Suns[i].SetUniforms(block);
+                    }
+                }
             }
         }
 

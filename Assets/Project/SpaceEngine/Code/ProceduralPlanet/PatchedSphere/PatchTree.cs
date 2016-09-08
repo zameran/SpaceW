@@ -77,7 +77,7 @@ public class PatchTree
             {
                 if (ColliderQueueList[i].Tree.Collider != null)
                 {
-                    // update mesh collider
+                    // update RingSegmentMesh collider
                     ColliderQueueList[i].Tree.Collider.sharedMesh = null;
                     ColliderQueueList[i].Tree.Collider.sharedMesh = ColliderQueueList[i].Tree.Mesh;
                 }
@@ -86,7 +86,7 @@ public class PatchTree
             {
                 if (ColliderQueueList[i].Tree.GameObject != null)
                 {
-                    // add mesh collider to the patch
+                    // add RingSegmentMesh collider to the patch
                     ColliderQueueList[i].Tree.Collider = (MeshCollider)ColliderQueueList[i].Tree.GameObject.AddComponent<MeshCollider>();
                 }
             }
@@ -449,14 +449,14 @@ public class PatchTree
         Vector3 parentPos = Sphere.gameObject.transform.position;
         Quaternion parentQua = Sphere.gameObject.transform.rotation;
 
-        //reset parent transformations before assigning mesh data (so our vertices will be centered on the parent transform)
+        //reset parent transformations before assigning RingSegmentMesh data (so our vertices will be centered on the parent transform)
         Sphere.gameObject.transform.position = Vector3.zero;
         Sphere.gameObject.transform.rotation = Quaternion.identity;
 
         //put this node as a child of parent
         GameObject.transform.parent = Sphere.gameObject.transform;
 
-        //assign data to this node's mesh
+        //assign data to this node's RingSegmentMesh
         Mesh.vertices = vertices;
         Mesh.uv = uv;                   //vertex uv coordinates
         Mesh.uv2 = uvvols;              //passing flat patch volume uv coordinates as second texcoords
@@ -475,7 +475,7 @@ public class PatchTree
 
         if (SplitLevel >= Sphere.MaxSplitLevel)
         {
-            //add mesh collider to the patch through the lazy creator
+            //add RingSegmentMesh collider to the patch through the lazy creator
             ColliderQueueList.Add(new PatchColliderQueue() { Tree = this, Update = false });
         }
 
@@ -750,7 +750,7 @@ public class PatchTree
                         Neighbors[direction].Node.vertices[posThere] = vertices[posHere];
                     }
 
-                    //reupload vertices to the mesh in this node and update its physics mesh
+                    //reupload vertices to the RingSegmentMesh in this node and update its physics RingSegmentMesh
                     if (fixedHere)
                     {
                         Mesh.vertices = vertices;
@@ -762,7 +762,7 @@ public class PatchTree
                         }
                     }
 
-                    //reupload vertices to the neighbor mesh in the other node and update its physics mesh
+                    //reupload vertices to the neighbor RingSegmentMesh in the other node and update its physics RingSegmentMesh
                     Neighbors[direction].Node.Mesh.vertices = Neighbors[direction].Node.vertices;
                     Neighbors[direction].Node.Mesh.RecalculateBounds();
 
@@ -1166,7 +1166,7 @@ public class PatchTree
                 //the other node was discarding resolution
                 //because this node was at coarse level
                 //now that both are at same level,
-                //lets force the other node to use full mesh at the edge that links to this node
+                //lets force the other node to use full RingSegmentMesh at the edge that links to this node
                 pCorrectNode.GapFixMask |= (byte)(1 << neighDirection);
                 pCorrectNode.Neighbors[neighDirection].isFixed = false;
             }
