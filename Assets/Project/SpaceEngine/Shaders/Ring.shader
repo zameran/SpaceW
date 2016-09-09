@@ -1,4 +1,4 @@
-﻿Shader "Hidden/Ring"
+﻿Shader "SpaceEngine/Ring"
 {
 	Properties
 	{

@@ -40,11 +40,11 @@
 			#include "AutoLight.cginc"
 			#include "SpaceStuff.cginc"
 			#include "Eclipses.cginc"
-			#include "Assets/Project/SpaceEngine/Shaders/Compute/Utils.cginc"
-			#include "Assets/Project/SpaceEngine/Shaders/TCCommon.cginc"
-			#include "Assets/Project/SpaceEngine/Shaders/HDR.cginc"
-			#include "Assets/Project/SpaceEngine/Shaders/Atmosphere.cginc"
-			#include "Assets/Project/SpaceEngine/Shaders/LogarithmicDepthBuffer.cginc"
+			#include "Utils.cginc"
+			#include "TCCommon.cginc"
+			#include "HDR.cginc"
+			#include "Atmosphere.cginc"
+			#include "LogarithmicDepthBuffer.cginc"
 
 			struct appdata_full_compute 
 			{

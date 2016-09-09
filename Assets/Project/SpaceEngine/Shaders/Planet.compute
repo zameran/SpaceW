@@ -41,8 +41,8 @@
 //#define defaultNoise
 
 #include "UnityCG.cginc"
-#include "Assets/Project/SpaceEngine/Shaders/Compute/Utils.cginc"
-#include "Assets/Project/SpaceEngine/Shaders/TCCommon.cginc"
+#include "Utils.cginc"
+#include "TCCommon.cginc"
 
 RWTexture2D<float4> Height;
 RWTexture2D<float4> Normal;
@@ -69,10 +69,10 @@ float NoiseFunction(float3 coord, float lodom)
 	#else
 	//float noise = HeightMapAsteroid(scaledCoord);
 	//float noise = HeightMapTerra(scaledCoord);
-	float noise = HeightMapPlanet(scaledCoord, lodom);
+	float noise = HeightMapPlanet(scaledCoord);
 	//float noise = HeightMapCloudsGasGiant(scaledCoord);
 	#endif
-
+	
 	float normalized = (noise + 1.0) * 0.5;
 
 	return normalized;

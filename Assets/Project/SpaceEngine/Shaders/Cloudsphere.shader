@@ -54,7 +54,7 @@ Shader "SpaceEngine/Atmosphere/Cloudsphere"
 			#include "UnityCG.cginc"		
 			#include "HDR.cginc"
 			#include "Atmosphere.cginc"
-			#include "Assets/Project/SpaceEngine/Shaders/Compute/Utils.cginc"
+			#include "Utils.cginc"
 
 			#pragma target 5.0
 			#pragma only_renderers d3d11 glcore

@@ -36,11 +36,30 @@ float IntersectOuterSphere(float3 p1, float3 d, float3 p3, float r)
 	if (test < 0) return -1.0;
 
 	float u = (-b - sqrt(test)) / (2.0 * a);
+	float pu = (-b + sqrt(test)) / (2.0 * a);
 
-	// (u < 0) - steped transition.
-	// (u < 0 || u > 0) - draw always. Looks like fix.
+	u = (u < 0) ? pu : u;
+			
+	return u;
+}
 
-	u = (u != 1.0) ? (-b + sqrt(test)) / (2.0 * a) : u;
+float IntersectOuterSphereInverted(float3 p1, float3 d, float3 p3, float r)
+{
+	// p1 starting point
+	// d look direction
+	// p3 is the sphere center
+
+	float a = dot(d, d);
+	float b = 2.0 * dot(d, p1 - p3);
+	float c = dot(p3, p3) + dot(p1, p1) - 2.0 * dot(p3, p1) - r * r;
+	float test = b * b - 4.0 * a * c;
+
+	if (test < 0) return -1.0;
+
+	float u = (-b - sqrt(test)) / (2.0 * a);
+	float pu = (-b + sqrt(test)) / (2.0 * a);
+
+	u = (u > 0) ? pu : u;
 			
 	return u;
 }

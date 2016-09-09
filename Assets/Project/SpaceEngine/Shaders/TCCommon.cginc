@@ -1787,6 +1787,23 @@ float sNoise(float3 v)
 	m = m * m;
 	return 42.0 * dot(m * m, float4(dot(p0, x0), dot(p1, x1), dot(p2, x2), dot(p3, x3)));
 }
+
+float SimplexRidgedMultifractal(float3 position, int octaves, float frequency, float persistence) 
+{
+  float total = 0.0;
+  float maxAmplitude = 0.0;
+  float amplitude = 1.0;
+
+  for (int i = 0; i < octaves; i++) 
+  {
+	total += ((1.0 - abs(sNoise(position * frequency))) * 2.0 - 1.0) * amplitude;
+	frequency *= 2.0;
+	maxAmplitude += amplitude;
+	amplitude *= persistence;
+  }
+
+  return total / maxAmplitude;
+}
 //-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
@@ -4046,7 +4063,7 @@ float4 ColorMapTerra(float3 ppoint, float height, float slope)
 //-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
-float HeightMapPlanet(float3 ppoint, float lodom)
+float HeightMapPlanet(float3 ppoint)
 {
 	float3 p = ppoint * mainFreq + Randomize;
 
@@ -4066,8 +4083,8 @@ float HeightMapPlanet(float3 ppoint, float lodom)
 		latitude = saturate(latitude);
 	}
 
-	float t0 = Fbm(p * 0.75, 4 * lodom);
-	float v0 = t0 + pow(2.0, RidgedMultifractalExtra(p, 18 * lodom, 1, 1.75, 0.6));
+	float t0 = Fbm(p * 0.75, 4);
+	float v0 = t0 + pow(2.0, RidgedMultifractalExtra(p, 18, 1, 1.75, 0.6));
 
 	total = GetTerraced(v0, 4, 2);
 
