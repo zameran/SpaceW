@@ -388,8 +388,6 @@ public static class Helper
 							material.SetVector(prefix + "Direction", direction);
 							material.SetVector(prefix + "Position", VectorHelper.MakeFrom(position, 1.0f));
 							material.SetColor(prefix + "Color", color);
-
-							//Debug.Log(string.Format("{0} | {1} | {2}", prefix + "Direction", prefix + "Position", prefix + "Color"));
 						}
 					}
 				}
@@ -423,8 +421,39 @@ public static class Helper
 							material.SetTexture(prefix + "Texture", shadow.GetTexture());
 							material.SetMatrix(prefix + "Matrix", shadow.Matrix);
 							material.SetFloat(prefix + "Ratio", shadow.Ratio);
+						}
+					}
+				}
+			}
+		}
 
-							//Debug.Log(string.Format("{0} | {1} | {2}", prefix + "Texture", prefix + "Matrix", prefix + "Ratio"));
+		return shadowCount;
+	}
+
+	public static int WriteShadows(List<Shadow> shadows, int maxShadows, params MaterialPropertyBlock[] blocks)
+	{
+		var shadowCount = 0;
+
+		if (shadows != null)
+		{
+			for (var i = 1; i <= shadows.Count; i++)
+			{
+				var index = i - 1;
+				var shadow = shadows[index];
+
+				if (Enabled(shadow) == true && shadow.CalculateShadow() == true && shadowCount < maxShadows)
+				{
+					var prefix = "_Shadow" + (++shadowCount);
+
+					for (var j = blocks.Length - 1; j >= 0; j--)
+					{
+						var block = blocks[j];
+
+						if (block != null)
+						{
+							block.SetTexture(prefix + "Texture", shadow.GetTexture());
+							block.SetMatrix(prefix + "Matrix", shadow.Matrix);
+							block.SetFloat(prefix + "Ratio", shadow.Ratio);
 						}
 					}
 				}

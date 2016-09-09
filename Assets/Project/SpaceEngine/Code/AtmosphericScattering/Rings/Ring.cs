@@ -2,6 +2,8 @@ using UnityEngine;
 
 using System.Collections.Generic;
 
+using ZFramework.Unity.Common.PerfomanceMonitor;
+
 public class Ring : MonoBehaviour
 {
     public List<Light> Lights = new List<Light>();
@@ -143,6 +145,13 @@ public class Ring : MonoBehaviour
         Helper.WriteShadows(shadows, 4, mat);
     }
 
+    public void SetShadows(MaterialPropertyBlock block, List<Shadow> shadows)
+    {
+        if (block == null) return;
+
+        Helper.WriteShadows(shadows, 4, block);
+    }
+
     public void SetUniforms(Material mat)
     {
         if (mat == null) return;
@@ -162,21 +171,24 @@ public class Ring : MonoBehaviour
 
     private void UpdateNode()
     {
-        Segments.RemoveAll(m => m == null);
-
-        if (SegmentCount != Segments.Count)
+        using (new Timer("Ring.UpdateNode()"))
         {
-            Helper.ResizeArrayTo(ref Segments, SegmentCount, i => RingSegment.Create(this), null);
-        }
+            Segments.RemoveAll(m => m == null);
 
-        var angleStep = Helper.Divide(360.0f, SegmentCount);
+            if (SegmentCount != Segments.Count)
+            {
+                Helper.ResizeArrayTo(ref Segments, SegmentCount, i => RingSegment.Create(this), null);
+            }
 
-        for (var i = SegmentCount - 1; i >= 0; i--)
-        {
-            var angle = angleStep * i;
-            var rotation = Quaternion.Euler(0.0f, angle, 0.0f);
+            var angleStep = Helper.Divide(360.0f, SegmentCount);
 
-            Segments[i].UpdateNode(RingSegmentMesh, RingMaterial, rotation);
+            for (var i = SegmentCount - 1; i >= 0; i--)
+            {
+                var angle = angleStep * i;
+                var rotation = Quaternion.Euler(0.0f, angle, 0.0f);
+
+                Segments[i].UpdateNode(RingSegmentMesh, RingMaterial, rotation);
+            }
         }
     }
 

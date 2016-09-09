@@ -39,6 +39,7 @@
 			#include "UnityCG.cginc"
 			#include "AutoLight.cginc"
 			#include "SpaceStuff.cginc"
+			#include "Eclipses.cginc"
 			#include "Assets/Project/SpaceEngine/Shaders/Compute/Utils.cginc"
 			#include "Assets/Project/SpaceEngine/Shaders/TCCommon.cginc"
 			#include "Assets/Project/SpaceEngine/Shaders/HDR.cginc"

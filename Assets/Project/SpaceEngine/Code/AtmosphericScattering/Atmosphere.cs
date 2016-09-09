@@ -613,14 +613,6 @@ namespace SpaceEngine.AtmosphericScattering
             if (mat != null)
             {
                 Helper.SetKeywords(mat, Keywords, false);
-
-                if (planetoid != null)
-                {
-                    if (planetoid.Ring != null)
-                    {
-                        planetoid.Ring.SetShadows(mat, planetoid.Shadows);
-                    }
-                }
             }
 
             if (full)
@@ -629,6 +621,17 @@ namespace SpaceEngine.AtmosphericScattering
 
                 SetEclipses(block);
                 SetShine(block);
+
+                if (!forQuad)
+                {
+                    if (planetoid != null)
+                    {
+                        if (planetoid.Ring != null)
+                        {
+                            planetoid.Ring.SetShadows(block, planetoid.Shadows);
+                        }
+                    }
+                }
 
                 block.SetFloat("fade", Fade);
                 block.SetFloat("density", Density);

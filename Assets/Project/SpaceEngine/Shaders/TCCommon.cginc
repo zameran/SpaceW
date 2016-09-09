@@ -38,6 +38,8 @@
 // NOTE:
 // Not all features already ported! (Early - WIP)
 
+#define TCCOMMON
+
 //-----------------------------------------------------------------------------
 // include 2d noise engine features? NOTE : This shit will use UAV data... so...
 // 0 - why i need this?!

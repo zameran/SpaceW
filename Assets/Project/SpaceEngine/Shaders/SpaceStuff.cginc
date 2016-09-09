@@ -8,6 +8,10 @@
 #define M_PI2 6.28318530716
 #endif
 
+#if !defined (MATH)
+#include "Math.cginc"
+#endif
+
 #if LIGHT_1 || LIGHT_2 || LIGHT_3 || LIGHT_4
 float4 _Light1Color;
 float4 _Light1Position;
@@ -148,5 +152,12 @@ float4 ShadowColor(float4 worldPoint)
 	#endif
 	
 	return color;
+}
+
+float4 ShadowOuterColor(float3 d, float3 WCP, float3 _Globals_Origin, float Rt)
+{
+	float interSectPt = IntersectOuterSphere(WCP, d, _Globals_Origin, Rt);
+
+	return interSectPt != -1 ? ShadowColor(float4(WCP + d * interSectPt, 1)) : 1.0;
 }
 #endif

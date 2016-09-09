@@ -90,6 +90,7 @@ Shader "SpaceEngine/Atmosphere/Atmosphere"
 			#include "HDR.cginc"
 			#include "Atmosphere.cginc"
 			#include "SpaceStuff.cginc"
+			#include "Eclipses.cginc"
 
 			#pragma multi_compile LIGHT_1 LIGHT_2 LIGHT_3 LIGHT_4
 			#pragma multi_compile SHINE_ON SHINE_OFF
@@ -179,13 +180,6 @@ Shader "SpaceEngine/Atmosphere/Atmosphere"
 
 				return pow(max(0, data), 2.2) * _Sun_Intensity;
 			}
-
-			float4 ShadowOuterColor(float3 d, float3 WCP, float3 _Globals_Origin)
-			{
-				float interSectPt = IntersectOuterSphere(WCP, d, _Globals_Origin, Rt);
-
-				return interSectPt != -1 ? ShadowColor(float4(WCP + d * interSectPt, 1)) : 1.0;
-			}
 			
 			float4 frag(v2f IN) : COLOR
 			{			
@@ -200,7 +194,7 @@ Shader "SpaceEngine/Atmosphere/Atmosphere"
 
 				#ifdef ECLIPSES_ON
 					#if SHADOW_1 || SHADOW_2 || SHADOW_3 || SHADOW_4
-						float shadow = ShadowOuterColor(d, WCP, _Globals_Origin);
+						float shadow = ShadowOuterColor(d, WCP, _Globals_Origin, Rt);
 					#endif
 				#endif
 
@@ -212,7 +206,7 @@ Shader "SpaceEngine/Atmosphere/Atmosphere"
 					#ifdef ECLIPSES_ON
 						float eclipse1 = 1;
 
-						eclipse1 = EclipseOuterShadow(_Sun_WorldSunDir_1, _Sun_Positions_1[0].w, d, WCP, _Globals_Origin);
+						eclipse1 = EclipseOuterShadow(_Sun_WorldSunDir_1, _Sun_Positions_1[0].w, d, WCP, _Globals_Origin, Rt);
 					#endif
 
 					inscatter += SkyRadiance(WCPG, d, _Sun_WorldSunDir_1, extinction1, 0.0);

@@ -28,6 +28,8 @@
  * THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+#define LDB
+
 float FCoef(float farPlane)
 {
 	return 2.0 / log2(farPlane + 1.0);
