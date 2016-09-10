@@ -10,6 +10,7 @@ public class Ring : MonoBehaviour
     public List<Shadow> Shadows = new List<Shadow>();
 
     public Texture MainTex;
+    public Texture NoiseTex;
 
     public Color Color = Color.white;
 
@@ -160,6 +161,7 @@ public class Ring : MonoBehaviour
 
         mat.renderQueue = (int)RenderQueue + RenderQueueOffset;
         mat.SetTexture("_MainTex", MainTex);
+        mat.SetTexture("_NoiseTex", NoiseTex);
         mat.SetColor("_Color", Helper.Brighten(Color, Brightness));
         mat.SetFloat("_LightingBias", LightingBias);
         mat.SetFloat("_LightingSharpness", LightingSharpness);
