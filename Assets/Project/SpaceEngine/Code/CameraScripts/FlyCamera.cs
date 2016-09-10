@@ -41,8 +41,6 @@ using ZFramework.Unity.Common.Messenger;
 
 public sealed class FlyCamera : GameCamera
 {
-    public Camera cameraComponent = null;
-
     public float speed = 1.0f;
     public float rotationSpeed = 3.0f;
     public float alignDistance = 1024.0f;
@@ -90,9 +88,9 @@ public sealed class FlyCamera : GameCamera
             {
                 zRotation = 0;
 
-                Ray ray = GetComponent<Camera>().ScreenPointToRay(Input.mousePosition);
+                Ray ray = CameraComponent.ScreenPointToRay(Input.mousePosition);
 
-                targetRotation = Quaternion.LookRotation((ray.origin + ray.direction * 10f) - transform.position, transform.up);
+                targetRotation = Quaternion.LookRotation((ray.origin + ray.direction * 10.0f) - transform.position, transform.up);
 
                 transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, Time.fixedDeltaTime * rotationSpeed);
 
@@ -103,8 +101,8 @@ public sealed class FlyCamera : GameCamera
             {
                 zRotation = 0;
 
-                x += (Input.GetAxis("Mouse X") * 240.0f) / cameraComponent.pixelHeight;
-                y -= (Input.GetAxis("Mouse Y") * 220.0f) / cameraComponent.pixelHeight;
+                x += (Input.GetAxis("Mouse X") * 480.0f) / CameraComponent.pixelWidth;
+                y -= (Input.GetAxis("Mouse Y") * 440.0f) / CameraComponent.pixelHeight;
 
                 if (planetoidGameObject != null && !aligned)
                     RotateAround(x, y, zRotation, new Vector3(0, 0, -distanceToPlanetCore));
@@ -173,9 +171,6 @@ public sealed class FlyCamera : GameCamera
 
     protected override void Init()
     {
-        if (cameraComponent == null)
-            cameraComponent = GetComponent<Camera>();
-
         if (planetoid == null)
             if (planetoidGameObject != null)
                 planetoid = planetoidGameObject.GetComponent<Planetoid>();
@@ -185,8 +180,8 @@ public sealed class FlyCamera : GameCamera
             distanceToPlanetCore = Vector3.Distance(transform.position, planetoidGameObject.transform.position);
         }
 
-        nearClipPlaneCache = cameraComponent.nearClipPlane;
-        farClipPlaneCache = cameraComponent.farClipPlane;
+        nearClipPlaneCache = CameraComponent.nearClipPlane;
+        farClipPlaneCache = CameraComponent.farClipPlane;
 
         Vector3 angles = transform.eulerAngles;
         x = angles.y;
@@ -207,19 +202,19 @@ public sealed class FlyCamera : GameCamera
 
                 //NOTE : 0.01 is too small value for near clip plane...
 
-                cameraComponent.nearClipPlane = Mathf.Clamp(0.3f * Mathf.Abs(h), 0.3f, 1000.0f);
-                cameraComponent.farClipPlane = Mathf.Clamp(1e8f * Mathf.Abs(h), 1000.0f, 1e8f);
+                CameraComponent.nearClipPlane = Mathf.Clamp(0.3f * Mathf.Abs(h), 0.3f, 1000.0f);
+                CameraComponent.farClipPlane = Mathf.Clamp(1e8f * Mathf.Abs(h), 1000.0f, 1e8f);
             }
             else
             {
-                cameraComponent.nearClipPlane = nearClipPlaneCache;
-                cameraComponent.farClipPlane = farClipPlaneCache;
+                CameraComponent.nearClipPlane = nearClipPlaneCache;
+                CameraComponent.farClipPlane = farClipPlaneCache;
             }
         }
         else
         {
-            cameraComponent.nearClipPlane = nearClipPlaneCache;
-            cameraComponent.farClipPlane = farClipPlaneCache;
+            CameraComponent.nearClipPlane = nearClipPlaneCache;
+            CameraComponent.farClipPlane = farClipPlaneCache;
         }
     }
 
