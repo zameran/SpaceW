@@ -36,9 +36,8 @@ float IntersectOuterSphere(float3 p1, float3 d, float3 p3, float r)
 	if (test < 0) return -1.0;
 
 	float u = (-b - sqrt(test)) / (2.0 * a);
-	float pu = (-b + sqrt(test)) / (2.0 * a);
 
-	u = (u < 0) ? pu : u;
+	u = (u < 0) ? (-b + sqrt(test)) / (2.0 * a) : u;
 			
 	return u;
 }
@@ -55,11 +54,6 @@ float IntersectOuterSphereInverted(float3 p1, float3 d, float3 p3, float r)
 	float test = b * b - 4.0 * a * c;
 
 	if (test < 0) return -1.0;
-
-	float u = (-b - sqrt(test)) / (2.0 * a);
-	float pu = (-b + sqrt(test)) / (2.0 * a);
-
-	u = (u > 0) ? pu : u;
 			
-	return u;
+	return (-b + sqrt(test)) / (2.0 * a);
 }
