@@ -92,7 +92,7 @@ namespace SpaceEngine.Debugging
 
             GUILayout.Label("LOD Distance Multiplier: " + LODDistanceMultiplier);
             GUILayout.BeginHorizontal();
-            LODDistanceMultiplier = GUILayout.HorizontalSlider(LODDistanceMultiplier, 0.8f, 2.2f);
+            LODDistanceMultiplier = GUILayout.HorizontalSlider(LODDistanceMultiplier, 0.75f, 3.25f);
             if (GUILayout.Button("Reset")) LODDistanceMultiplier = 1.0f;
             GUILayout.EndHorizontal();
 
