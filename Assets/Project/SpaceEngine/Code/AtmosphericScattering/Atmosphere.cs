@@ -432,7 +432,7 @@ namespace SpaceEngine.AtmosphericScattering
                     float umbraLength = CalculateUmbraLength(planetoid.PlanetRadius * 2, sunRadius, sunToPlanetDistance);
                     float umbraAngle = CalculateUmbraSubtendedAngle(planetoid.PlanetRadius * 2, umbraLength);
 
-                    Vector3 direction = (Suns[i].GetDirection() * umbraLength);
+                    Vector3 direction = GetSunDirection(Suns[i]) * umbraLength;
 
                     Gizmos.color = Color.yellow;
                     Gizmos.DrawWireSphere(Suns[i].transform.position, sunRadius);
@@ -470,6 +470,16 @@ namespace SpaceEngine.AtmosphericScattering
                 if (owner != null)
                     owner.ReSetupQuads();
             }
+        }
+
+        private Vector3 GetSunDirection(AtmosphereSun sun)
+        {
+            return (sun.transform.position - Origin).normalized;
+        }
+
+        private Matrix4x4 GetSunWorldToLocalRotation(AtmosphereSun sun, Vector3 direction)
+        {
+            return Matrix4x4.TRS(Vector3.zero + sun.Origin, Quaternion.FromToRotation(direction, sun.Z_AXIS), Vector3.one);
         }
 
         public void InitMaterials()
@@ -510,8 +520,6 @@ namespace SpaceEngine.AtmosphericScattering
 
                 SetEclipses(block);
                 SetShine(block);
-
-                //block.SetTexture("_Sun_Glare", SunGlareTexture);
 
                 block.SetFloat("_Aerial_Perspective_Offset", AerialPerspectiveOffset);
 
@@ -606,6 +614,25 @@ namespace SpaceEngine.AtmosphericScattering
                 Debug.Log("Atmosphere: Reanimation fail!");
         }
 
+        public void SetSunUniforms(MaterialPropertyBlock block)
+        {
+            if (block == null) return;
+
+            foreach (var sun in Suns)
+            {
+                if (sun != null)
+                {
+                    var direction = GetSunDirection(sun);
+                    var rotationMatrix = GetSunWorldToLocalRotation(sun, direction);
+
+                    block.SetFloat("_Sun_Intensity", sun.SunIntensity);
+                    block.SetVector("_Sun_WorldSunDir_" + sun.sunID, direction);
+                    block.SetMatrix("_Sun_WorldToLocal_" + sun.sunID, rotationMatrix);
+                    block.SetVector("_Sun_Position", sun.transform.position);
+                }
+            }
+        }
+
         public void SetUniforms(MaterialPropertyBlock block, Material mat, bool full = true, bool forQuad = false)
         {
             if (artb == null) { Debug.Log("Atmosphere: ARTB is null!"); return; }
@@ -668,13 +695,7 @@ namespace SpaceEngine.AtmosphericScattering
                 block.SetFloat("_Exposure", HDRExposure);
                 block.SetFloat("_HDRMode", (int)HDRMode);
 
-                for (int i = 0; i < Suns.Count; i++)
-                {
-                    if (Suns[i] != null)
-                    {
-                        Suns[i].SetUniforms(block);
-                    }
-                }
+                SetSunUniforms(block);
             }
         }
 
