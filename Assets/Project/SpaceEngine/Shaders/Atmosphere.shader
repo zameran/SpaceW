@@ -195,6 +195,7 @@ Shader "SpaceEngine/Atmosphere/Atmosphere"
 				#ifdef ECLIPSES_ON
 					#if SHADOW_1 || SHADOW_2 || SHADOW_3 || SHADOW_4
 						float shadow = ShadowOuterColor(d, WCP, _Globals_Origin, Rt);
+						shadow = GroundFade(_ExtinctionGroundFade, shadow);
 					#endif
 				#endif
 
@@ -204,9 +205,9 @@ Shader "SpaceEngine/Atmosphere/Atmosphere"
 					float3 extinction1 = 0;
 
 					#ifdef ECLIPSES_ON
-						float eclipse1 = 1;
+						float eclipse1 = EclipseOuterShadow(_Sun_WorldSunDir_1, _Sun_Positions_1[0].w, d, WCP, _Globals_Origin, Rt);
 
-						eclipse1 = EclipseOuterShadow(_Sun_WorldSunDir_1, _Sun_Positions_1[0].w, d, WCP, _Globals_Origin, Rt);
+						eclipse1 = GroundFade(_ExtinctionGroundFade, eclipse1);
 					#endif
 
 					inscatter += SkyRadiance(WCPG, d, _Sun_WorldSunDir_1, extinction1, 0.0);
@@ -238,11 +239,11 @@ Shader "SpaceEngine/Atmosphere/Atmosphere"
 					float3 extinction2 = 0;
 
 					#ifdef ECLIPSES_ON
-						float eclipse1 = 1;
-						float eclipse2 = 1;
+						float eclipse1 = EclipseOuterShadow(_Sun_WorldSunDir_1, _Sun_Positions_1[0].w, d, WCP, _Globals_Origin, Rt);
+						float eclipse2 = EclipseOuterShadow(_Sun_WorldSunDir_2, _Sun_Positions_1[1].w, d, WCP, _Globals_Origin, Rt);
 
-						eclipse1 *= EclipseOuterShadow(_Sun_WorldSunDir_1, _Sun_Positions_1[0].w, d, WCP, _Globals_Origin, Rt);
-						eclipse2 *= EclipseOuterShadow(_Sun_WorldSunDir_2, _Sun_Positions_1[1].w, d, WCP, _Globals_Origin, Rt);
+						eclipse1 = GroundFade(_ExtinctionGroundFade, eclipse1);
+						eclipse2 = GroundFade(_ExtinctionGroundFade, eclipse2);
 					#endif
 
 					inscatter += SkyRadiance(WCPG, d, _Sun_WorldSunDir_1, extinction1, 0.0);
@@ -264,6 +265,12 @@ Shader "SpaceEngine/Atmosphere/Atmosphere"
 					extinction += extinction1;
 					extinction += extinction2;
 
+					#ifdef ECLIPSES_ON
+						#if SHADOW_1 || SHADOW_2 || SHADOW_3 || SHADOW_4
+							extinction = 1 * _ExtinctionGroundFade + (1 - _ExtinctionGroundFade) * extinction;
+						#endif
+					#endif
+
 					float3 finalColor = sunColor * extinction + inscatter;
 
 					return float4(hdr(finalColor), 1) * fade;
@@ -279,13 +286,13 @@ Shader "SpaceEngine/Atmosphere/Atmosphere"
 					float3 extinction3 = 0;
 
 					#ifdef ECLIPSES_ON
-						float eclipse1 = 1;
-						float eclipse2 = 1;
-						float eclipse3 = 1;
+						float eclipse1 = EclipseOuterShadow(_Sun_WorldSunDir_1, _Sun_Positions_1[0].w, d, WCP, _Globals_Origin, Rt);
+						float eclipse2 = EclipseOuterShadow(_Sun_WorldSunDir_2, _Sun_Positions_1[1].w, d, WCP, _Globals_Origin, Rt);
+						float eclipse3 = EclipseOuterShadow(_Sun_WorldSunDir_3, _Sun_Positions_1[2].w, d, WCP, _Globals_Origin, Rt);
 
-						eclipse1 *= EclipseOuterShadow(_Sun_WorldSunDir_1, _Sun_Positions_1[0].w, d, WCP, _Globals_Origin, Rt);
-						eclipse2 *= EclipseOuterShadow(_Sun_WorldSunDir_2, _Sun_Positions_1[1].w, d, WCP, _Globals_Origin, Rt);
-						eclipse3 *= EclipseOuterShadow(_Sun_WorldSunDir_3, _Sun_Positions_1[2].w, d, WCP, _Globals_Origin, Rt);
+						eclipse1 = GroundFade(_ExtinctionGroundFade, eclipse1);
+						eclipse2 = GroundFade(_ExtinctionGroundFade, eclipse2);
+						eclipse3 = GroundFade(_ExtinctionGroundFade, eclipse3);
 					#endif
 
 					inscatter += SkyRadiance(WCPG, d, _Sun_WorldSunDir_1, extinction1, 0.0);
@@ -327,15 +334,15 @@ Shader "SpaceEngine/Atmosphere/Atmosphere"
 					float3 extinction4 = 0;
 
 					#ifdef ECLIPSES_ON
-						float eclipse1 = 1;
-						float eclipse2 = 1;
-						float eclipse3 = 1;
-						float eclipse4 = 1;
+						float eclipse1 = EclipseOuterShadow(_Sun_WorldSunDir_1, _Sun_Positions_1[0].w, d, WCP, _Globals_Origin, Rt);
+						float eclipse2 = EclipseOuterShadow(_Sun_WorldSunDir_2, _Sun_Positions_1[1].w, d, WCP, _Globals_Origin, Rt);
+						float eclipse3 = EclipseOuterShadow(_Sun_WorldSunDir_3, _Sun_Positions_1[2].w, d, WCP, _Globals_Origin, Rt);
+						float eclipse4 = EclipseOuterShadow(_Sun_WorldSunDir_4, _Sun_Positions_1[3].w, d, WCP, _Globals_Origin, Rt);
 
-						eclipse1 *= EclipseOuterShadow(_Sun_WorldSunDir_1, _Sun_Positions_1[0].w, d, WCP, _Globals_Origin, Rt);
-						eclipse2 *= EclipseOuterShadow(_Sun_WorldSunDir_2, _Sun_Positions_1[1].w, d, WCP, _Globals_Origin, Rt);
-						eclipse3 *= EclipseOuterShadow(_Sun_WorldSunDir_3, _Sun_Positions_1[2].w, d, WCP, _Globals_Origin, Rt);
-						eclipse4 *= EclipseOuterShadow(_Sun_WorldSunDir_4, _Sun_Positions_1[3].w, d, WCP, _Globals_Origin, Rt);
+						eclipse1 = GroundFade(_ExtinctionGroundFade, eclipse1);
+						eclipse2 = GroundFade(_ExtinctionGroundFade, eclipse2);
+						eclipse3 = GroundFade(_ExtinctionGroundFade, eclipse3);
+						eclipse4 = GroundFade(_ExtinctionGroundFade, eclipse4);
 					#endif
 
 					inscatter += SkyRadiance(WCPG, d, _Sun_WorldSunDir_1, extinction1, 0.0);

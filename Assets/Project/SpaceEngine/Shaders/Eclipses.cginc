@@ -91,3 +91,8 @@ float EclipseOuterShadow(float3 lightVec, float lightAngularRadius, float3 d, fl
 
 	return interSectPt != -1 ? EclipseShadow(WCP + d * interSectPt, lightVec, lightAngularRadius) : 1.0;
 }
+
+float GroundFade(float fade, float value)
+{
+	return 1.0f * fade + (1.0f - fade) * value;
+}

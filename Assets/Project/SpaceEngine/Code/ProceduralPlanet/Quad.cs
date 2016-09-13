@@ -485,7 +485,7 @@ public sealed class Quad : MonoBehaviour, IQuad, IEventit<Quad>
 
         if(QuadBox == null)
         {
-            QuadBox = GetBoundFromPoints(GetVolumeBox(0));
+            QuadBox = GetBoundFromPoints(QuadAABB != null ? QuadAABB.AABB : GetVolumeBox(0));
         }
 
         SetupBounds(this, QuadMesh);
@@ -501,12 +501,12 @@ public sealed class Quad : MonoBehaviour, IQuad, IEventit<Quad>
         {
             QuadMaterial.SetBuffer("data", OutDataBuffer);
             QuadMaterial.SetBuffer("quadGenerationConstants", QuadGenerationConstantsBuffer);
+            QuadMaterial.SetTexture("_HeightTexture", HeightTexture);
+            QuadMaterial.SetTexture("_NormalTexture", NormalTexture);
 
             Uniformed = true;
         }
 
-        QuadMaterial.SetTexture("_HeightTexture", HeightTexture);
-        QuadMaterial.SetTexture("_NormalTexture", NormalTexture);
         QuadMaterial.SetFloat("_Atmosphere", (Planetoid.Atmosphere != null) ? 1.0f : 0.0f);
         QuadMaterial.SetFloat("_Normale", Planetoid.DrawNormals ? 1.0f : 0.0f);
         QuadMaterial.SetMatrix("_TRS", RotationMatrix);
