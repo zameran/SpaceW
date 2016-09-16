@@ -602,6 +602,37 @@ public static class MeshFactory
         return mesh;
     }
 
+    public static Mesh MakeBillboardQuad(float size)
+    {
+        Vector3[] Vertices =
+        {
+            new Vector3(1, 1, 0) * size, new Vector3(-1, 1, 0) * size, new Vector3(1, -1, 0) * size, new Vector3(-1, -1, 0) * size
+        };
+
+        Vector2[] uv =
+        {
+            new Vector2(0, 1), new Vector2(1, 1), new Vector2(0, 0), new Vector2(1, 0)
+        };
+
+        var triangles = new int[6]
+        {
+            0, 2, 1, 2, 3, 1
+        };
+
+        var m = new Mesh
+        {
+            vertices = Vertices,
+            uv = uv,
+            triangles = triangles,
+            name = string.Format("BillboardMesh_({0})", Random.Range(float.MinValue, float.MaxValue))
+        };
+
+        m.RecalculateNormals();
+        m.hideFlags = HideFlags.DontSave;
+
+        return m;
+    }
+
     public static Vector3 SolveNormal(Vector3 v1, Vector3 v2, Vector3 v3)
     {
         Vector3 vt1 = new Vector3(v2.x - v1.x, v2.y - v1.y, v2.z - v1.z);
