@@ -35,6 +35,8 @@
 
 using System.Collections.Generic;
 
+using SpaceEngine.Startfield;
+
 using UnityEngine;
 
 [RequireComponent(typeof(Camera))]
@@ -43,6 +45,7 @@ public sealed class MainRenderer : MonoBehaviour
     public bool OverrideExternalRendering = true;
 
     public List<Planetoid> planets = new List<Planetoid>();
+    public List<Starfield> starfields = new List<Starfield>();
 
     public Planet.PlanetoidDistanceToLODTargetComparer pdtltc;
 
@@ -94,6 +97,12 @@ public sealed class MainRenderer : MonoBehaviour
     public void Render()
     {
         planets.Sort(pdtltc);
+
+        for (int i = 0; i < starfields.Count; i++)
+        {
+            if(starfields[i] != null)
+                starfields[i].Render(CameraHelper.Main());
+        }
 
         for (int i = 0; i < planets.Count; i++)
         {
