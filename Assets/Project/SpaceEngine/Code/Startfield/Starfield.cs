@@ -76,16 +76,24 @@ namespace SpaceEngine.Startfield
 
         private Mesh CreateStarfieldMesh(float starDistance)
         {
-            const int numberOfStars = 9110;       
+            const int numberOfStars = 9110;
 
-            var dataFile = Resources.Load("Json/Stars", typeof(TextAsset)) as TextAsset;
-            var stars = new List<StarfieldStar>(numberOfStars);
+            var dataFile = Resources.Load("Json/Stars", typeof (TextAsset)) as TextAsset;
+
+            if (dataFile == null)
+            {
+                Debug.Log("Starfield: Data file reading error!");
+
+                return null;
+            }
+
             var starsData = JsonConvert.DeserializeObject<StarfieldStarJson[]>(dataFile.text).ToList();
             var starsCIs = new List<CombineInstance>();
 
-            starsData.ForEach((sd) => stars.Add(new StarfieldStar(sd)));
-            stars.ForEach((star) =>
+            for (int i = 0; i < numberOfStars - 1; i++)
             {
+                var star = new StarfieldStar(starsData[i]);
+
                 float magnitude = Vector3.Dot(new Vector3(star.Color.r, star.Color.g, star.Color.b), new Vector3(0.22f, 0.707f, 0.071f));
 
                 star.Color.a = magnitude;
@@ -98,13 +106,14 @@ namespace SpaceEngine.Startfield
                 ci.transform = MatrixHelper.BillboardMatrix(star.Position * starDistance);
 
                 starsCIs.Add(ci);
-            });
+            }
 
             var mesh = new Mesh();
             mesh.name = string.Format("StarfieldMesh_({0})", Random.Range(float.MinValue, float.MaxValue));
             mesh.CombineMeshes(starsCIs.ToArray());
             mesh.Optimize();
             mesh.bounds = new Bounds(Vector3.zero, new Vector3(1e8f, 1e8f, 1e8f));
+            mesh.hideFlags = HideFlags.DontSave;
 
             return mesh;
         }

@@ -88,6 +88,7 @@ public static class MeshFactory
         Mesh dummyMesh = new Mesh();
         dummyMesh.vertices = dummyVerts;
         dummyMesh.triangles = triangles;
+        dummyMesh.hideFlags = HideFlags.DontSave;
 
         return dummyMesh;
     }
@@ -150,6 +151,7 @@ public static class MeshFactory
         dummyMesh.uv = uv0;
         dummyMesh.SetTriangles(triangles, 0);
         dummyMesh.name = string.Format("PrototypeMesh_({0})", Random.Range(float.MinValue, float.MaxValue));
+        dummyMesh.hideFlags = HideFlags.DontSave;
 
         return dummyMesh;
     }
@@ -260,6 +262,7 @@ public static class MeshFactory
         dummyMesh.vertices = dummyVerts;
         dummyMesh.uv = uv0;
         dummyMesh.SetTriangles(triangles, 0);
+        dummyMesh.hideFlags = HideFlags.DontSave;
 
         return dummyMesh;
     }
@@ -369,6 +372,7 @@ public static class MeshFactory
         mesh.uv = texcoords;
         mesh.triangles = indices;
         mesh.normals = normals;
+        mesh.hideFlags = HideFlags.DontSave;
 
         return mesh;
     }
@@ -527,6 +531,8 @@ public static class MeshFactory
         mesh.RecalculateBounds();
         mesh.RecalculateNormals();
 
+        mesh.hideFlags = HideFlags.DontSave;
+
         SolveTangents(mesh);
 
         return mesh;
@@ -599,6 +605,8 @@ public static class MeshFactory
         uvs.Clear();
         indices.Clear();
 
+        mesh.hideFlags = HideFlags.DontSave;
+
         return mesh;
     }
 
@@ -624,11 +632,11 @@ public static class MeshFactory
             vertices = Vertices,
             uv = uv,
             triangles = triangles,
-            name = string.Format("BillboardMesh_({0})", Random.Range(float.MinValue, float.MaxValue))
-        };
+            name = string.Format("BillboardMesh_({0})", Random.Range(float.MinValue, float.MaxValue)),
+            hideFlags = HideFlags.DontSave
+    };
 
         m.RecalculateNormals();
-        m.hideFlags = HideFlags.DontSave;
 
         return m;
     }
