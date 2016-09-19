@@ -41,6 +41,8 @@ Shader "SpaceEngine/Stars/Starfield"
 		Pass
 		{	
 			CGPROGRAM
+			#include "HDR.cginc"
+
 			#pragma vertex vert
 			#pragma fragment frag
 			#pragma fragmentoption ARB_precision_hint_fastest	
@@ -106,7 +108,7 @@ Shader "SpaceEngine/Stars/Starfield"
 				half scale = exp(-dot(distCenter, distCenter));
 				half3 colFinal = IN.color.xyz * scale + 5 * IN.color.w * pow(scale, 10);
 
-				return half4( colFinal,0);
+				return half4(hdr(colFinal), 0);
 			}
 			ENDCG
 		}

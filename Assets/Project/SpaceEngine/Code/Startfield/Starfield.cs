@@ -14,11 +14,16 @@ namespace SpaceEngine.Startfield
         public float StarsScale = 1.0f;
         public float StarsDistance = 1000.0f;
 
+        public float HDRExposure = 0.2f;
+
         public Shader StarfieldShader;
         public Material StarfieldMaterial;
 
         public Mesh BillboardMesh;
         public Mesh StarfieldMesh;
+
+        [HideInInspector]
+        public AtmosphereHDR HDRMode = AtmosphereHDR.Proland;
 
         public EngineRenderQueue RenderQueue = EngineRenderQueue.Background;
         public int RenderQueueOffset = 0;
@@ -41,9 +46,6 @@ namespace SpaceEngine.Startfield
                 SetUniforms(StarfieldMaterial);
 
                 StarfieldMaterial.renderQueue = (int)RenderQueue + RenderQueueOffset;
-
-                //GetComponent<MeshFilter>().sharedMesh = StarfieldMesh;
-                //GetComponent<MeshRenderer>().sharedMaterial = StarfieldMaterial;
 
                 Graphics.DrawMesh(StarfieldMesh, transform.localToWorldMatrix, StarfieldMaterial, drawLayer, CameraHelper.Main(), 0, null, false, false);
             }
@@ -72,6 +74,9 @@ namespace SpaceEngine.Startfield
 
             mat.SetFloat("_StarIntensity", StarIntensity);
             mat.SetMatrix("_RotationMatrix", Matrix4x4.identity);
+
+            mat.SetFloat("_Exposure", HDRExposure);
+            mat.SetFloat("_HDRMode", (int)HDRMode);
         }
 
         private Mesh CreateStarfieldMesh(float starDistance)
