@@ -13,7 +13,6 @@
 #endif
 
 uniform float4x4 _Sky_LightOccluders_1;
-uniform float4x4 _Sky_LightOccluders_2;
 
 uniform float _ExtinctionGroundFade;
 
@@ -48,10 +47,10 @@ float EclipseValue(float lightRadius, float casterRadius, float Dist)
 	float Diff = abs(lightRadius - casterRadius);
 
 	// Partial intersection
-	return maxPhase * smoothstep(0.0, 1.0, 1.0 - clamp((Dist-Diff) / (sumRadius-Diff), 0.0, 1.0));
+	return maxPhase * smoothstep(0.0, 1.0, 1.0 - clamp((Dist - Diff) / (sumRadius - Diff), 0.0, 1.0));
 }
 
-float EclipseShadow(float3 FragPosS, float3 lightVec, float lightAngularRadius)
+float EclipseShadow(float3 position, float3 lightVec, float lightAngularRadius)
 {
 	float Shadow = 1.0;
 
@@ -59,23 +58,10 @@ float EclipseShadow(float3 FragPosS, float3 lightVec, float lightAngularRadius)
 	{
 		if (_Sky_LightOccluders_1[i].w <= 0.0) break;
 
-		float3 lightCasterPos = _Sky_LightOccluders_1[i].xyz - FragPosS;
+		float3 lightCasterPos = _Sky_LightOccluders_1[i].xyz - position;
 
 		float lightCasterInvDist  = rsqrt(dot(lightCasterPos, lightCasterPos));
 		float casterAngularRadius = asin(clamp(_Sky_LightOccluders_1[i].w * lightCasterInvDist, 0.0, 1.0));
-		float lightToCasterAngle  = acos(clamp(dot(lightVec, lightCasterPos * lightCasterInvDist), 0.0, 1.0));
-
-		Shadow *= clamp(1.0 - EclipseValue(lightAngularRadius, casterAngularRadius, lightToCasterAngle), 0.0, 1.0);
-	}
-
-	for (int j = 0; j < 4; ++j)
-	{
-		if (_Sky_LightOccluders_2[j].w <= 0.0) break;
-
-		float3 lightCasterPos = _Sky_LightOccluders_2[j].xyz - FragPosS;
-
-		float lightCasterInvDist  = rsqrt(dot(lightCasterPos, lightCasterPos));
-		float casterAngularRadius = asin(clamp(_Sky_LightOccluders_2[j].w * lightCasterInvDist, 0.0, 1.0));
 		float lightToCasterAngle  = acos(clamp(dot(lightVec, lightCasterPos * lightCasterInvDist), 0.0, 1.0));
 
 		Shadow *= clamp(1.0 - EclipseValue(lightAngularRadius, casterAngularRadius, lightToCasterAngle), 0.0, 1.0);

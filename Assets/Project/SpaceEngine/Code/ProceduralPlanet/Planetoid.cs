@@ -165,8 +165,6 @@ public sealed class Planetoid : Planet, IPlanet
         {
             if (Atmosphere.planetoid == null)
                 Atmosphere.planetoid = this;
-
-            Atmosphere.Origin = Origin;
         }
 
         if (Cloudsphere != null)

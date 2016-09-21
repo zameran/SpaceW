@@ -42,7 +42,6 @@ using UnityEngine;
 
 using SpaceEngine.AtmosphericScattering;
 using SpaceEngine.AtmosphericScattering.Clouds;
-using SpaceEngine.AtmosphericScattering.Sun;
 
 public abstract class Planet : MonoBehaviour
 {
@@ -73,11 +72,11 @@ public abstract class Planet : MonoBehaviour
     public bool Working = false;
     public bool UseLOD = true;
 
-    public Transform OriginTransform { get { return transform; } private set { } }
+    public Transform OriginTransform { get { return transform; } }
 
-    public Vector3 Origin { get { return OriginTransform.position; } private set { } }
-    public Vector3 OriginRotation { get { if (QuadsRoot != null) return QuadsRoot.transform.rotation.eulerAngles; else return OriginTransform.rotation.eulerAngles; } private set { } }
-    public Vector3 OriginScale { get { return OriginTransform.localScale; } private set { } }
+    public Vector3 Origin { get { return OriginTransform.position; } }
+    public Vector3 OriginRotation { get { if (QuadsRoot != null) return QuadsRoot.transform.rotation.eulerAngles; else return OriginTransform.rotation.eulerAngles; } }
+    public Vector3 OriginScale { get { return OriginTransform.localScale; } }
 
     public Matrix4x4 PlanetoidTRS = Matrix4x4.identity;
 
@@ -135,6 +134,8 @@ public abstract class Planet : MonoBehaviour
     protected virtual void Update()
     {
         PlanetoidTRS = Matrix4x4.TRS(Origin, Quaternion.Euler(OriginRotation), OriginScale);
+
+        PlanetBouds = new Bounds(Origin, Ring == null ? (Vector3.one * (PlanetRadius + TerrainMaxHeight) * 2) : (Vector3.one * Ring.OuterRadius * 2));
     }
 
     protected virtual void LateUpdate()

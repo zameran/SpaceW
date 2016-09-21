@@ -106,21 +106,20 @@ namespace SpaceEngine.AtmosphericScattering
 
         public List<AtmosphereSun> Suns = new List<AtmosphereSun>(); 
 
-        public List<GameObject> eclipseCasters = new List<GameObject>();
+        public List<Planet> eclipseCasters = new List<Planet>();
         public List<GameObject> shineCasters = new List<GameObject>();
 
         private AtmosphereParameters atmosphereParameters;
 
         public AtmosphereRunTimeBaker artb = null;
 
-        public Vector3 Origin;
+        public Vector3 Origin { get { return planetoid != null ? planetoid.Origin : Vector3.zero; } }
 
         public Color[] shineColors = new Color[4] { XKCDColors.Bluish, XKCDColors.Bluish, XKCDColors.Bluish, XKCDColors.Bluish };
 
         private Matrix4x4 shineColorsMatrix1;
         private Matrix4x4 shineOccludersMatrix1;
         private Matrix4x4 occludersMatrix1;
-        private Matrix4x4 occludersMatrix2;
         private Matrix4x4 sunMatrix1;
         private Matrix4x4 worldToCamera;
         private Matrix4x4 cameraToWorld;
@@ -147,12 +146,6 @@ namespace SpaceEngine.AtmosphericScattering
         {
             get { return occludersMatrix1; }
             set { occludersMatrix1 = value; }
-        }
-
-        public Matrix4x4 OccludersMatrix2
-        {
-            get { return occludersMatrix2; }
-            set { occludersMatrix2 = value; }
         }
 
         public Matrix4x4 SunMatrix1
@@ -284,10 +277,9 @@ namespace SpaceEngine.AtmosphericScattering
             }
         }
 
-        public void CalculateEclipses(out Matrix4x4 oc1, out Matrix4x4 oc2, out Matrix4x4 suns)
+        public void CalculateEclipses(out Matrix4x4 oc1, out Matrix4x4 suns)
         {
             oc1 = Matrix4x4.zero;
-            oc2 = Matrix4x4.zero;
             suns = Matrix4x4.zero;
 
             float actualRadius = 250000.0f;
@@ -301,14 +293,7 @@ namespace SpaceEngine.AtmosphericScattering
             {
                 if (eclipseCasters[i] == null) { Debug.Log("Atmosphere: Eclipses problem!"); break; }
 
-                oc1.SetRow(i, VectorHelper.MakeFrom(eclipseCasters[i].transform.position, actualRadius));
-            }
-
-            for (int i = 4; i < Mathf.Min(8, eclipseCasters.Count); i++)
-            {
-                if (eclipseCasters[i] == null) { Debug.Log("Atmosphere: Eclipses problem!"); break; }
-
-                oc2.SetRow(i - 4, VectorHelper.MakeFrom(eclipseCasters[i].transform.position, actualRadius));
+                oc1.SetRow(i, VectorHelper.MakeFrom(eclipseCasters[i].Origin - Origin, actualRadius));
             }
         }
 
@@ -336,10 +321,9 @@ namespace SpaceEngine.AtmosphericScattering
         {
             if (!Eclipses) return;
 
-            CalculateEclipses(out occludersMatrix1, out occludersMatrix2, out sunMatrix1);
+            CalculateEclipses(out occludersMatrix1, out sunMatrix1);
 
             mat.SetMatrix("_Sky_LightOccluders_1", occludersMatrix1);
-            mat.SetMatrix("_Sky_LightOccluders_2", occludersMatrix2);
             mat.SetMatrix("_Sun_Positions_1", sunMatrix1);
         }
 
@@ -347,10 +331,9 @@ namespace SpaceEngine.AtmosphericScattering
         {
             if (!Eclipses) return;
 
-            CalculateEclipses(out occludersMatrix1, out occludersMatrix2, out sunMatrix1);
+            CalculateEclipses(out occludersMatrix1, out sunMatrix1);
 
             block.SetMatrix("_Sky_LightOccluders_1", occludersMatrix1);
-            block.SetMatrix("_Sky_LightOccluders_2", occludersMatrix2);
             block.SetMatrix("_Sun_Positions_1", sunMatrix1);
         }
 
@@ -403,8 +386,6 @@ namespace SpaceEngine.AtmosphericScattering
 
         public void Render(Camera camera, Vector3 Origin, int drawLayer = 8)
         {
-            this.Origin = Origin;
-
             SetUniforms(planetoid.QuadAtmosphereMPB, SkyMaterial, true);
 
             SkyMaterial.renderQueue = (int)RenderQueue + RenderQueueOffset;
@@ -423,12 +404,10 @@ namespace SpaceEngine.AtmosphericScattering
             {
                 if (planetoid.DrawGizmos == false) return;
 
-                //NOTE : Sun Direction is sun's tranform.forward with sun rotation applyied...
-
                 for (int i = 0; i < Mathf.Min(4, Suns.Count); i++)
                 {
                     float sunRadius = Suns[i].Radius;
-                    float sunToPlanetDistance = Vector3.Distance(planetoid.Origin, Suns[i].transform.position);
+                    float sunToPlanetDistance = Vector3.Distance(Origin, Suns[i].transform.position);
                     float umbraLength = CalculateUmbraLength(planetoid.PlanetRadius * 2, sunRadius, sunToPlanetDistance);
                     float umbraAngle = CalculateUmbraSubtendedAngle(planetoid.PlanetRadius * 2, umbraLength);
 
@@ -439,13 +418,13 @@ namespace SpaceEngine.AtmosphericScattering
                     Gizmos.DrawRay(Suns[i].transform.position, (direction / umbraLength) * -sunToPlanetDistance);
 
                     Gizmos.color = Color.red;
-                    Gizmos.DrawRay(planetoid.Origin, direction);
+                    Gizmos.DrawRay(Origin, direction);
 
                     Gizmos.color = Color.blue;
-                    Gizmos.DrawRay(planetoid.transform.InverseTransformVector(planetoid.Origin + direction), -(Quaternion.Euler(umbraAngle, 0, 0) * direction));
-                    Gizmos.DrawRay(planetoid.transform.InverseTransformVector(planetoid.Origin + direction), -(Quaternion.Euler(-umbraAngle, 0, 0) * direction));
-                    Gizmos.DrawRay(planetoid.transform.InverseTransformVector(planetoid.Origin + direction), -(Quaternion.Euler(0, umbraAngle, 0) * direction));
-                    Gizmos.DrawRay(planetoid.transform.InverseTransformVector(planetoid.Origin + direction), -(Quaternion.Euler(0, -umbraAngle, 0) * direction));
+                    Gizmos.DrawRay(planetoid.transform.InverseTransformVector(Origin + direction), -(Quaternion.Euler(umbraAngle, 0, 0) * direction));
+                    Gizmos.DrawRay(planetoid.transform.InverseTransformVector(Origin + direction), -(Quaternion.Euler(-umbraAngle, 0, 0) * direction));
+                    Gizmos.DrawRay(planetoid.transform.InverseTransformVector(Origin + direction), -(Quaternion.Euler(0, umbraAngle, 0) * direction));
+                    Gizmos.DrawRay(planetoid.transform.InverseTransformVector(Origin + direction), -(Quaternion.Euler(0, -umbraAngle, 0) * direction));
                 }
             }
         }
@@ -703,7 +682,7 @@ namespace SpaceEngine.AtmosphericScattering
 
         public float CalculateUmbraLength(float planetDiameter, float sunDiameter, float distance)
         {
-            return (planetDiameter * distance) / (sunDiameter - planetDiameter);
+            return -Mathf.Abs((planetDiameter * distance) / (sunDiameter - planetDiameter));
         }
 
         public float CalculateUmbraSubtendedAngle(float planetDiameter, float umbraLength)

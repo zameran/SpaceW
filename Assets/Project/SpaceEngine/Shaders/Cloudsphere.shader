@@ -104,7 +104,8 @@ Shader "SpaceEngine/Atmosphere/Cloudsphere"
 				OUT.vertex1 = v.vertex;
 				OUT.normal = v.normal;
 				OUT.uv = v.normal;
-				OUT.direction = dot(normalize(v.normal), normalize(_Sun_Positions_1[0] - v.vertex));
+				OUT.direction = float3(0, 0, 1); //TODO : Rewoke...
+				//OUT.direction = dot(normalize(v.normal), normalize(_Sun_Positions_1[0] - v.vertex));
 
 				return OUT;
 			}
