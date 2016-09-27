@@ -62,13 +62,14 @@ namespace SpaceEngine.Debugging
         {
             scrollPosition = GUILayout.BeginScrollView(scrollPosition, false, true, GUILayout.Width(debugInfoBounds.width), GUILayout.Height(debugInfoBounds.height));
             {
-                Object[] objects = FindObjectsOfType(typeof(Object));
+                #region Do Magic
 
-                Dictionary<string, int> dictionary = new Dictionary<string, int>();
+                var objects = FindObjectsOfType(typeof (Object));
+                var dictionary = new Dictionary<string, int>();
 
-                foreach (Object obj in objects)
+                foreach (var obj in objects)
                 {
-                    string key = obj.GetType().ToString();
+                    string key = obj.GetType().FullName;
 
                     if (dictionary.ContainsKey(key))
                     {
@@ -80,20 +81,21 @@ namespace SpaceEngine.Debugging
                     }
                 }
 
-                List<KeyValuePair<string, int>> myList = new List<KeyValuePair<string, int>>(dictionary);
+                #endregion
 
-                myList.Sort(delegate (KeyValuePair<string, int> firstPair, KeyValuePair<string, int> nextPair)
-                {
-                    return nextPair.Value.CompareTo((firstPair.Value));
-                });
+                var entryies = new List<KeyValuePair<string, int>>(dictionary);
+
+                entryies.Sort((firstPair, nextPair) => nextPair.Value.CompareTo((firstPair.Value)));
 
                 GUILayout.BeginVertical();
 
-                for (int i = 0; i < myList.Count; i++)
+                for (int i = 0; i < entryies.Count; i++)
                 {
-                    KeyValuePair<string, int> entry = myList[i];
+                    var entry = entryies[i];
 
-                    GUILayoutExtensions.LabelWithSpace(entry.Key + " : " + entry.Value, -8);
+                    GUILayout.BeginHorizontal("box");
+                    GUILayoutExtensions.LabelWithFlexibleSpace(entry.Key, entry.Value.ToString());
+                    GUILayout.EndHorizontal();
                 }
 
                 GUILayout.Space(10);

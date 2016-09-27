@@ -32,7 +32,7 @@ Shader "SpaceEngine/Stars/Starfield"
 {
 	SubShader 
 	{
-		Tags { "Queue" = "Geometry+1000000000" "IgnoreProjector" = "True" "RenderType" = "Background" }
+		Tags { "Queue" = "Geometry" "IgnoreProjector" = "True" "RenderType" = "Background" }
 		Blend OneMinusDstColor OneMinusSrcAlpha
 		//Blend OneMinusDstAlpha SrcAlpha
 		ZWrite Off 
@@ -78,7 +78,7 @@ Shader "SpaceEngine/Stars/Starfield"
 
 				index *= 8;
 
-				float f = frac(index)* 2.5;
+				float f = frac(index) * 2.5;
 				int i = (int)index;
 
 				return tab[i].x + f * tab[i].y;
@@ -90,7 +90,8 @@ Shader "SpaceEngine/Stars/Starfield"
 
 				float3 t = mul((float3x3)_RotationMatrix, v.vertex.xyz) + _WorldSpaceCameraPos.xyz; 
 
-				float appMag = 6.5 + (-1.44 - 2.5);
+				//float appMag = 6.5 + v.color.w * (-1.44 - 2.5);
+				float appMag = 6.5 + v.color.w * 255 * (-1.44 - 2.5);
 				float brightness = GetFlickerAmount(v.vertex.xy) * pow(5.0, (-appMag - 1.44) / 2.5);
 						
 				half4 starColor = _StarIntensity * float4(brightness * v.color.xyz, brightness);
@@ -106,7 +107,9 @@ Shader "SpaceEngine/Stars/Starfield"
 			{
 				half2 distCenter = IN.uv.xy;
 				half scale = exp(-dot(distCenter, distCenter));
-				half3 colFinal = IN.color.xyz * scale + 5 * IN.color.w * pow(scale, 10);
+				half3 colFinal = IN.color.xyz * scale + 5 * IN.color.w * pow(scale, 16);
+
+				colFinal = (colFinal * colFinal) * 2;
 
 				return half4(hdr(colFinal), 0);
 			}

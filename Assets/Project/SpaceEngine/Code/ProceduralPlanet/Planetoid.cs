@@ -132,9 +132,9 @@ public sealed class Planetoid : Planet, IPlanet
     public QuadStorage Cache = null;
     public NoiseParametersSetter NPS = null;
 
-    [HideInInspector] public QuadDrawAndCull DrawAndCull = QuadDrawAndCull.CullBeforeDraw;
-    [HideInInspector] public QuadCullingMethod CullingMethod = QuadCullingMethod.Custom;
-    [HideInInspector] public QuadLODDistanceMethod LODDistanceMethod = QuadLODDistanceMethod.ClosestCorner;
+    public QuadDrawAndCull DrawAndCull = QuadDrawAndCull.CullBeforeDraw;
+    public QuadCullingMethod CullingMethod = QuadCullingMethod.Custom;
+    public QuadLODDistanceMethod LODDistanceMethod = QuadLODDistanceMethod.ClosestCorner;
 
     public TCCommonParametersSetter tccps;
 
