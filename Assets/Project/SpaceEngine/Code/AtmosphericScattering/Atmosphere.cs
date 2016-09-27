@@ -277,23 +277,21 @@ namespace SpaceEngine.AtmosphericScattering
             }
         }
 
-        public void CalculateEclipses(out Matrix4x4 oc1, out Matrix4x4 suns)
+        public void CalculateEclipses(out Matrix4x4 occludersMatrix, out Matrix4x4 sunsMatrix)
         {
-            oc1 = Matrix4x4.zero;
-            suns = Matrix4x4.zero;
-
-            float actualRadius = 250000.0f;
+            occludersMatrix = Matrix4x4.zero;
+            sunsMatrix = Matrix4x4.zero;
 
             for (int i = 0; i < Mathf.Min(4, Suns.Count); i++)
             {
-                suns.SetRow(i, VectorHelper.MakeFrom(Suns[i].transform.position, VectorHelper.AngularRadius(Suns[i].transform.position, Origin, Suns[i].Radius)));
+                sunsMatrix.SetRow(i, VectorHelper.MakeFrom(Suns[i].transform.position, VectorHelper.AngularRadius(Suns[i].transform.position, Origin, Suns[i].Radius)));
             }
 
             for (int i = 0; i < Mathf.Min(4, eclipseCasters.Count); i++)
             {
                 if (eclipseCasters[i] == null) { Debug.Log("Atmosphere: Eclipses problem!"); break; }
 
-                oc1.SetRow(i, VectorHelper.MakeFrom(eclipseCasters[i].Origin - Origin, actualRadius));
+                occludersMatrix.SetRow(i, VectorHelper.MakeFrom(eclipseCasters[i].Origin - Origin, eclipseCasters[i].PlanetRadius));
             }
         }
 
@@ -425,6 +423,12 @@ namespace SpaceEngine.AtmosphericScattering
                     Gizmos.DrawRay(planetoid.transform.InverseTransformVector(Origin + direction), -(Quaternion.Euler(-umbraAngle, 0, 0) * direction));
                     Gizmos.DrawRay(planetoid.transform.InverseTransformVector(Origin + direction), -(Quaternion.Euler(0, umbraAngle, 0) * direction));
                     Gizmos.DrawRay(planetoid.transform.InverseTransformVector(Origin + direction), -(Quaternion.Euler(0, -umbraAngle, 0) * direction));
+
+                    Gizmos.color = Color.cyan;
+                    Gizmos.DrawLine(planetoid.transform.position + Vector3.up * planetoid.PlanetRadius, planetoid.transform.InverseTransformVector(Origin + direction) + Vector3.up * planetoid.PlanetRadius);
+                    Gizmos.DrawLine(planetoid.transform.position + Vector3.down * planetoid.PlanetRadius, planetoid.transform.InverseTransformVector(Origin + direction) + Vector3.down * planetoid.PlanetRadius);
+                    Gizmos.DrawLine(planetoid.transform.position + Vector3.left * planetoid.PlanetRadius, planetoid.transform.InverseTransformVector(Origin + direction) + Vector3.left * planetoid.PlanetRadius);
+                    Gizmos.DrawLine(planetoid.transform.position + Vector3.right * planetoid.PlanetRadius, planetoid.transform.InverseTransformVector(Origin + direction) + Vector3.right * planetoid.PlanetRadius);
                 }
             }
         }
