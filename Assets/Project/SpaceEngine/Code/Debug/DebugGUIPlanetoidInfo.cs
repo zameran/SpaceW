@@ -80,7 +80,10 @@ namespace SpaceEngine.Debugging
 
                 GUILayout.Label("Planetoid stats: ", boldLabel);
 
+                var highestLODLevel = Planetoid.Quads.Max((quad => quad.LODLevel)) + 1;
+
                 GUILayoutExtensions.LabelWithSpace((Planetoid.gameObject.name + ": " + (Planetoid.Working ? "Generating..." : "Idle...")), -8);
+                GUILayoutExtensions.LabelWithSpace("Highest LOD level: " + highestLODLevel, -8);
 
                 if (Planetoid.CullingMethod == QuadCullingMethod.Custom)
                 {

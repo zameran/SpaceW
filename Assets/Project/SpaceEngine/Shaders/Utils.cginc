@@ -103,7 +103,7 @@ float3 FindTangent(float3 normal, float epsilon, float3 dir)
 //-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
-float3 CubeCoord(QuadGenerationConstants constants, float VerticesPerSide, uint3 id, int mod, float spacing)
+float3 CubeCoord(QuadGenerationConstants constants, float verticesPerSide, uint3 id, int mod, float spacing)
 {
 	//32 : 1;     x = 32; y = 32;   z0 = y / x + 0 + 0;
 	//64 : 3;     x = 32; y = 64;   z1 = y / x + z0 + 0;
@@ -121,8 +121,8 @@ float3 CubeCoord(QuadGenerationConstants constants, float VerticesPerSide, uint3
 
 	//TODO: modifier calculation.
 
-	float eastValue = (id.x - ((VerticesPerSide - mod) * 0.5)) * spacing;
-	float northValue = (id.y - ((VerticesPerSide - mod) * 0.5)) * spacing;
+	float eastValue = (id.x - ((verticesPerSide - mod) * 0.5)) * spacing;
+	float northValue = (id.y - ((verticesPerSide - mod) * 0.5)) * spacing;
 
 	float3 cubeCoordEast = constants.cubeFaceEastDirection * eastValue;
 	float3 cubeCoordNorth = constants.cubeFaceNorthDirection * northValue;

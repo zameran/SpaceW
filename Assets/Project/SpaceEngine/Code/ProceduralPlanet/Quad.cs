@@ -33,13 +33,11 @@
 // Creator: zameran
 #endregion
 
-using UnityEngine;
-
 using System;
-using System.Linq;
 using System.Collections;
 using System.Collections.Generic;
-
+using System.Linq;
+using UnityEngine;
 using ZFramework.Unity.Common.PerfomanceMonitor;
 
 [Serializable]
@@ -78,7 +76,7 @@ public sealed class Quad : MonoBehaviour, IQuad, IEventit<Quad>
 
         public bool Equals(Id id)
         {
-            if ((this == null) || (id == null))
+            if (id == null)
             {
                 return false;
             }
@@ -93,7 +91,7 @@ public sealed class Quad : MonoBehaviour, IQuad, IEventit<Quad>
 
         public override string ToString()
         {
-            return LODLevel.ToString() + "," + ID.ToString() + "," + Position.ToString();
+            return LODLevel + "," + ID + "," + Position;
         }
     }
 
@@ -112,7 +110,7 @@ public sealed class Quad : MonoBehaviour, IQuad, IEventit<Quad>
 
     public QuadPosition Position;
     public QuadID ID;
-    
+
     public Planetoid Planetoid;
 
     public ComputeShader CoreShader { get { return Planetoid.CoreShader; } }
@@ -144,7 +142,6 @@ public sealed class Quad : MonoBehaviour, IQuad, IEventit<Quad>
     public bool Splitting = false;
     public bool Unsplitted = false;
     public bool Visible = false;
-    public bool Cached = false;
     public bool Uniformed = false;
     public bool GPUDataRecieved = false;
     public bool BuffersCreated = false;
@@ -161,7 +158,6 @@ public sealed class Quad : MonoBehaviour, IQuad, IEventit<Quad>
     public OutputStruct[] outputStructData;
 
     public QuadAABB QuadAABB = null;
-    public Box3d QuadBox = null;
 
     public delegate void QuadDelegate(Quad q);
     public event QuadDelegate DispatchStarted, DispatchReady, GPUGetDataReady;
@@ -219,21 +215,15 @@ public sealed class Quad : MonoBehaviour, IQuad, IEventit<Quad>
     {
         //Debug.Log("Quad: QuadDispatchReady() - " + q.gameObject.name);
 
-        if (LODLevel == 6 && Planetoid.GenerateColliders && GPUDataRecieved)
-        {
-            MeshCollider mc = gameObject.AddComponent<MeshCollider>();
-            mc.sharedMesh = MeshFactory.SetupQuadColliderMesh(outputStructData);
-        }
+        if (LODLevel != 6 || !Planetoid.GenerateColliders || !GPUDataRecieved) return;
+
+        var mc = gameObject.AddComponent<MeshCollider>();
+        mc.sharedMesh = MeshFactory.SetupQuadColliderMesh(outputStructData);
     }
 
     private void QuadGPUGetDataReady(Quad q)
     {
         //Debug.Log("Quad: QuadGPUGetDataReady() - " + q.gameObject.name);
-    }
-
-    public Quad()
-    {
-
     }
 
     private void Awake()
@@ -244,21 +234,6 @@ public sealed class Quad : MonoBehaviour, IQuad, IEventit<Quad>
         NormalTexture = RTExtensions.CreateRTexture(QuadSettings.nVertsPerEdgeSub, 0, RenderTextureFormat.ARGB32);
 
         RTUtility.ClearColor(new RenderTexture[] { HeightTexture, NormalTexture });
-    }
-
-    private void Start()
-    {
-
-    }
-
-    private void Update()
-    {
-
-    }
-
-    private void FixedUpdate()
-    {
-
     }
 
     private void OnDestroy()
@@ -277,16 +252,6 @@ public sealed class Quad : MonoBehaviour, IQuad, IEventit<Quad>
             DestroyImmediate(QuadMaterial);
 
         UnEventit(this);
-    }
-
-    private void OnWillRenderObject()
-    {
-
-    }
-
-    private void OnRenderObject()
-    {
-
     }
 
     private void OnDrawGizmos()
@@ -425,38 +390,6 @@ public sealed class Quad : MonoBehaviour, IQuad, IEventit<Quad>
         return new Bounds(center, size);
     }
 
-    private Box3d GetBoundFromPoints(Vector3[] points)
-    {
-        var min = new Vector3(float.MaxValue, float.MaxValue, float.MaxValue);
-        var max = new Vector3(float.MinValue, float.MinValue, float.MinValue);
-
-        Box3d box = new Box3d();
-
-        for (int i = 0; i < points.Length; i++)
-        {
-            Vector3 p = points[i];
-
-            p = RotationMatrix.MultiplyPoint(p);
-
-            if (p.x < min.x) min.x = p.x;
-            if (p.y < min.y) min.y = p.y;
-            if (p.z < min.z) min.z = p.z;
-
-            if (p.x > max.x) max.x = p.x;
-            if (p.y > max.y) max.y = p.y;
-            if (p.z > max.z) max.z = p.z;
-        }
-
-        box.xmax = max.x;
-        box.ymax = max.y;
-        box.zmax = max.z;
-        box.xmin = min.x;
-        box.ymin = min.y;
-        box.zmin = min.z;
-
-        return box;
-    }
-
     public void Render(int drawLayer = 8)
     {
         Render(CameraHelper.Main(), drawLayer);
@@ -466,7 +399,7 @@ public sealed class Quad : MonoBehaviour, IQuad, IEventit<Quad>
     {
         if (ReadyForDispatch)
         {
-            if (!Generated && !Planetoid.Cache.Working)
+            if (!Generated)
             {
                 Dispatch();
             }
@@ -474,18 +407,7 @@ public sealed class Quad : MonoBehaviour, IQuad, IEventit<Quad>
 
         if (QuadAABB == null)
         {
-            Vector3 min = Vector3.zero;
-            Vector3 max = Vector3.zero;
-
-            QuadAABB = new QuadAABB(GetVolumeBox(Planetoid.TerrainMaxHeight, 0, true), false);
-            QuadAABB.Bounds = GetBoundFromPoints(GetVolumeBox(Planetoid.TerrainMaxHeight, 0, false), out max, out min);
-            QuadAABB.Max = max;
-            QuadAABB.Min = min;
-        }
-
-        if(QuadBox == null)
-        {
-            QuadBox = GetBoundFromPoints(QuadAABB != null ? QuadAABB.AABB : GetVolumeBox(0));
+            QuadAABB = GetQuadAABB(this);
         }
 
         SetupBounds(this, QuadMesh);
@@ -581,36 +503,14 @@ public sealed class Quad : MonoBehaviour, IQuad, IEventit<Quad>
 
     public bool PlaneFrustumCheck(Vector3[] aabb)
     {
-        if (Planetoid == null) { Log("Planetoid is null!"); return true; }
-        if (aabb == null || aabb.Length == 0) { Log("AABB array problem!"); return true; }
-        if (Planetoid.FrustumPlanes == null || Planetoid.FrustumPlanes.Length == 0) { Log("Frustum Planes Problem!"); return true; }
         if (Parent == null || !Generated || Splitting || Planetoid.CullingMethod == (QuadCullingMethod.Unity | QuadCullingMethod.None)) { return true; }
 
-        bool[] states = new bool[aabb.Length];
-
-        for (int i = 0; i < states.Length; i++)
-        {
-            states[i] = BorderFrustumCheck(Planetoid.FrustumPlanes, aabb[i]);
-        }
-
-        return states.Contains(true);
+        return aabb.Any(pos => BorderFrustumCheck(Planetoid.FrustumPlanes, pos) == true);
     }
 
     public bool BorderFrustumCheck(Plane[] planes, Vector3 border)
     {
-        float offset = 1024.0f;
-
-        bool useOffset = true;
-
-        for (int i = 0; i < planes.Length; i++)
-        {
-            if (planes[i].GetDistanceToPoint(Planetoid.transform.TransformPoint(border)) < (useOffset ? 0 - offset : 0))
-            {
-                return false;
-            }
-        }
-
-        return true;
+        return planes.All(plane => (plane.GetDistanceToPoint(Planetoid.transform.TransformPoint(border)) < 0 - 1024.0f) == false);
     }
 
     public void InitCorners(Vector3 topLeft, Vector3 bottmoRight, Vector3 topRight, Vector3 bottomLeft)
@@ -680,7 +580,7 @@ public sealed class Quad : MonoBehaviour, IQuad, IEventit<Quad>
                 quad.Splitting = true;
                 quad.ShouldDraw = false;
                 quad.InitCorners(subTopLeft, subBottomRight, subTopRight, subBottomLeft);
-                quad.SetupParent(this);
+                quad.SetupParent(quad, this);
                 quad.SetupLODLevel(quad);
                 quad.SetupID(quad, id);
                 quad.SetupVectors(quad, id, staticX, staticY, staticZ);
@@ -705,7 +605,7 @@ public sealed class Quad : MonoBehaviour, IQuad, IEventit<Quad>
         }
 
         //Dispatch one by one with intervals.
-        foreach (Quad q in Subquads)
+        foreach (var q in Subquads)
         {
             q.ReadyForDispatch = true;
 
@@ -715,7 +615,7 @@ public sealed class Quad : MonoBehaviour, IQuad, IEventit<Quad>
             }
         }
 
-        foreach (Quad q in Subquads)
+        foreach (var q in Subquads)
         {
             q.Splitting = false;
             q.ShouldDraw = true;
@@ -733,25 +633,22 @@ public sealed class Quad : MonoBehaviour, IQuad, IEventit<Quad>
 
         StopAllCoroutines();
 
-        for (int i = 0; i < Subquads.Count; i++)
+        foreach (var subQuad in Subquads)
         {
-            if (Subquads[i].HaveSubQuads)
+            if (subQuad.HaveSubQuads)
             {
-                Subquads[i].Unsplit();
+                subQuad.Unsplit();
             }
 
-            if (Planetoid.Quads.Contains(Subquads[i]))
+            if (Planetoid.Quads.Contains(subQuad))
             {
-                Planetoid.Quads.Remove(Subquads[i]);
+                Planetoid.Quads.Remove(subQuad);
             }
 
-            if (Subquads[i] != null)
-            {
-                DestroyImmediate(Subquads[i].gameObject);
-            }
+            DestroyImmediate(subQuad.gameObject);
         }
 
-        if (HaveSubQuads == true) ShouldDraw = true;
+        if (HaveSubQuads) ShouldDraw = true;
 
         HaveSubQuads = false;
         Unsplitted = true;
@@ -761,11 +658,6 @@ public sealed class Quad : MonoBehaviour, IQuad, IEventit<Quad>
     public void Dispatch()
     {
         StartCoroutine(DispatcheCoroutineWait());
-    }
-
-    public void DispatchNow()
-    {
-        StartCoroutine(DispatchCoroutine());
     }
 
     public IEnumerator DispatcheCoroutineWait()
@@ -787,10 +679,6 @@ public sealed class Quad : MonoBehaviour, IQuad, IEventit<Quad>
 
         SetupComputeShaderUniforms();
 
-        Cached = Planetoid.Cache.ExistInTexturesCache(this);
-
-        if (Cached) Log("Textures founded in cache!"); else Log("Textures not found in cache!");
-
         QuadGenerationConstants[] quadGenerationConstantsData = new QuadGenerationConstants[] { generationConstants };
         OutputStruct[] preOutputStructData = new OutputStruct[QuadSettings.nVertsReal];
         OutputStruct[] preOutputSubStructData = new OutputStruct[QuadSettings.nVertsSubReal];
@@ -811,10 +699,10 @@ public sealed class Quad : MonoBehaviour, IQuad, IEventit<Quad>
         int kernel4 = CoreShader.FindKernel("TexturesSub");
         int kernel5 = CoreShader.FindKernel("GetCorners");
 
-        SetupComputeShaderKernelsUniforfms(QuadGenerationConstantsBuffer, 
-                                           PreOutDataBuffer, 
-                                           PreOutDataSubBuffer, 
-                                           OutDataBuffer, 
+        SetupComputeShaderKernelsUniforfms(QuadGenerationConstantsBuffer,
+                                           PreOutDataBuffer,
+                                           PreOutDataSubBuffer,
+                                           OutDataBuffer,
                                            QuadCornersBuffer, new int[] { kernel1, kernel2, kernel3, kernel4, kernel5 });
 
         CoreShader.Dispatch(kernel1,
@@ -865,24 +753,18 @@ public sealed class Quad : MonoBehaviour, IQuad, IEventit<Quad>
             this.outputStructData = outputStructData;
 
             this.GPUDataRecieved = true;
+
+            if (GPUGetDataReady != null)
+                GPUGetDataReady(this);
         }
 
         //Release and dispose unnecessary buffers. Video memory, you are free!
         BufferHelper.ReleaseAndDisposeBuffers(PreOutDataBuffer, PreOutDataSubBuffer, QuadCornersBuffer);
+
         BuffersCreated = false;
 
         if (DispatchReady != null)
             DispatchReady(this);
-    }
-
-    private bool AllSubquadsGenerated()
-    {
-        if (Subquads.Count != 0)
-        {
-            return Subquads.All(s => s.Generated == true);
-        }
-        else
-            return false;
     }
 
     private void SetupComputeShaderUniforms()
@@ -891,15 +773,15 @@ public sealed class Quad : MonoBehaviour, IQuad, IEventit<Quad>
             Planetoid.tccps.UpdateUniforms(CoreShader);
     }
 
-    private void SetupComputeShaderKernelUniforfms(int kernel, ComputeBuffer QuadGenerationConstantsBuffer, ComputeBuffer PreOutDataBuffer, ComputeBuffer PreOutDataSubBuffer, ComputeBuffer OutDataBuffer, ComputeBuffer QuadCornersBuffer)
+    private void SetupComputeShaderKernelUniforfms(int kernel, ComputeBuffer quadGenerationConstantsBuffer, ComputeBuffer preOutDataBuffer, ComputeBuffer preOutDataSubBuffer, ComputeBuffer outDataBuffer, ComputeBuffer quadCornersBuffer)
     {
         if (CoreShader == null) return;
 
-        CoreShader.SetBuffer(kernel, "quadGenerationConstants", QuadGenerationConstantsBuffer);
-        CoreShader.SetBuffer(kernel, "patchPreOutput", PreOutDataBuffer);
-        CoreShader.SetBuffer(kernel, "patchPreOutputSub", PreOutDataSubBuffer);
-        CoreShader.SetBuffer(kernel, "patchOutput", OutDataBuffer);
-        CoreShader.SetBuffer(kernel, "quadCorners", QuadCornersBuffer);
+        CoreShader.SetBuffer(kernel, "quadGenerationConstants", quadGenerationConstantsBuffer);
+        CoreShader.SetBuffer(kernel, "patchPreOutput", preOutDataBuffer);
+        CoreShader.SetBuffer(kernel, "patchPreOutputSub", preOutDataSubBuffer);
+        CoreShader.SetBuffer(kernel, "patchOutput", outDataBuffer);
+        CoreShader.SetBuffer(kernel, "quadCorners", quadCornersBuffer);
 
         CoreShader.SetTexture(kernel, "Height", HeightTexture);
         CoreShader.SetTexture(kernel, "Normal", NormalTexture);
@@ -908,31 +790,31 @@ public sealed class Quad : MonoBehaviour, IQuad, IEventit<Quad>
             Planetoid.NPS.UpdateUniforms(QuadMaterial, CoreShader, kernel);
     }
 
-    private void SetupComputeShaderKernelsUniforfms(ComputeBuffer QuadGenerationConstantsBuffer, ComputeBuffer PreOutDataBuffer, ComputeBuffer PreOutDataSubBuffer, ComputeBuffer OutDataBuffer, ComputeBuffer QuadCornersBuffer, params int[] kernels)
+    private void SetupComputeShaderKernelsUniforfms(ComputeBuffer quadGenerationConstantsBuffer, ComputeBuffer preOutDataBuffer, ComputeBuffer preOutDataSubBuffer, ComputeBuffer outDataBuffer, ComputeBuffer quadCornersBuffer, params int[] kernels)
     {
         if (kernels == null || kernels.Length == 0) { Debug.Log("Quad.SetupComputeShaderKernelsUniforfms(...) problem!"); return; }
 
         for (int i = 0; i < kernels.Length; i++)
         {
-            SetupComputeShaderKernelUniforfms(i, QuadGenerationConstantsBuffer, PreOutDataBuffer, PreOutDataSubBuffer, OutDataBuffer, QuadCornersBuffer);
+            SetupComputeShaderKernelUniforfms(i, quadGenerationConstantsBuffer, preOutDataBuffer, preOutDataSubBuffer, outDataBuffer, quadCornersBuffer);
         }
     }
 
     public void SetupVectors(Quad quad, int id, bool staticX, bool staticY, bool staticZ)
     {
-        Vector3 cfed = Parent.generationConstants.cubeFaceEastDirection / 2;
-        Vector3 cfnd = Parent.generationConstants.cubeFaceNorthDirection / 2;
+        var cfed = Parent.generationConstants.cubeFaceEastDirection / 2.0f;
+        var cfnd = Parent.generationConstants.cubeFaceNorthDirection / 2.0f;
 
         quad.generationConstants.cubeFaceEastDirection = cfed;
         quad.generationConstants.cubeFaceNorthDirection = cfnd;
         quad.generationConstants.patchCubeCenter = quad.GetPatchCubeCenterSplitted(quad.Position, id, staticX, staticY, staticZ);
     }
 
-    public void SetupCorners(QuadPosition pos)
+    public void SetupCorners(QuadPosition quadPosition)
     {
-        float v = Planetoid.PlanetRadius / 2;
+        var v = Planetoid.PlanetRadius / 2;
 
-        switch (pos)
+        switch (quadPosition)
         {
             case QuadPosition.Top:
                 topLeftCorner = new Vector3(-v, v, v);
@@ -976,17 +858,16 @@ public sealed class Quad : MonoBehaviour, IQuad, IEventit<Quad>
                 topRightCorner = new Vector3(v, v, -v);
                 bottomLeftCorner = new Vector3(-v, -v, -v);
                 break;
+            default:
+                throw new ArgumentOutOfRangeException("quadPosition", quadPosition, null);
         }
 
-        middleNormalized = CalculateMiddlePoint(topLeftCorner,
-                                                bottomRightCorner,
-                                                topRightCorner,
-                                                bottomLeftCorner);
+        middleNormalized = CalculateMiddlePoint(topLeftCorner, bottomRightCorner, topRightCorner, bottomLeftCorner);
     }
 
-    public void SetupParent(Quad parent)
+    public void SetupParent(Quad quad, Quad parent)
     {
-        Parent = parent;
+        quad.Parent = parent;
     }
 
     public void SetupLODLevel(Quad quad)
@@ -1001,14 +882,14 @@ public sealed class Quad : MonoBehaviour, IQuad, IEventit<Quad>
 
     public void SetupBounds(Quad quad, Mesh mesh)
     {
-        mesh.bounds = GetBounds(quad);//new Bounds(generationConstants.patchCubeCenter, GetBoundsSize(quad));
+        mesh.bounds = GetBounds(quad); //new Bounds(generationConstants.patchCubeCenter, GetBoundsSize(quad));
     }
 
     public float GetDistanceToLODSplit()
     {
         float distance = Mathf.Infinity;
 
-        switch(Planetoid.LODDistanceMethod)
+        switch (Planetoid.LODDistanceMethod)
         {
             case QuadLODDistanceMethod.ClosestCorner:
                 distance = GetDistanceToClosestCorner();
@@ -1031,7 +912,11 @@ public sealed class Quad : MonoBehaviour, IQuad, IEventit<Quad>
 
     private float GetDistanceToClosestAABBCorner()
     {
-        if (QuadAABB.AABB == null || QuadAABB.AABB.Length == 0 || QuadAABB.AABB.Length <= 4) { Debug.Log("Quad.GetClosestAABBCorner(...) QuadAABB.AABB problem!"); return Mathf.Infinity; }
+        if (QuadAABB.AABB == null || QuadAABB.AABB.Length == 0 || QuadAABB.AABB.Length <= 4)
+        {
+            Debug.Log("Quad.GetClosestAABBCorner(...) QuadAABB.AABB problem!");
+            return Mathf.Infinity;
+        }
 
         return Vector3.Distance(Planetoid.LODTarget.position, GetClosestAABBCorner());
     }
@@ -1045,12 +930,20 @@ public sealed class Quad : MonoBehaviour, IQuad, IEventit<Quad>
 
         for (int i = 0; i < 4; i++)
         {
-            d = Vector3.Distance(Planetoid.LODTarget.position, Planetoid.transform.TransformPoint(QuadAABB.AABB[i]));   
-            if (d < closestDistance) { closestCorner = QuadAABB.AABB[i]; closestDistance = d; }
+            d = Vector3.Distance(Planetoid.LODTarget.position, Planetoid.transform.TransformPoint(QuadAABB.AABB[i]));
+            if (d < closestDistance)
+            {
+                closestCorner = QuadAABB.AABB[i];
+                closestDistance = d;
+            }
         }
 
         d = Vector3.Distance(Planetoid.LODTarget.position, Planetoid.transform.TransformPoint(middleNormalized));
-        if (d < closestDistance) { closestCorner = middleNormalized; closestDistance = d; }
+        if (d < closestDistance)
+        {
+            closestCorner = middleNormalized;
+            closestDistance = d;
+        }
 
         return Planetoid.transform.TransformPoint(closestCorner);
     }
@@ -1123,35 +1016,46 @@ public sealed class Quad : MonoBehaviour, IQuad, IEventit<Quad>
             closestDistance = d;
         }
 
-        if (Generated)
-            return closestCorner;
-        else
-            return new Vector3(Mathf.Infinity, Mathf.Infinity, Mathf.Infinity);
+        return Generated ? closestCorner : new Vector3(Mathf.Infinity, Mathf.Infinity, Mathf.Infinity);
+    }
+
+    public QuadAABB GetQuadAABB(Quad quad)
+    {
+        if (quad.QuadAABB == null)
+        {
+            var min = Vector3.zero;
+            var max = Vector3.zero;
+
+            quad.QuadAABB = new QuadAABB(quad.GetVolumeBox(quad.Planetoid.TerrainMaxHeight, 0, true), false)
+            {
+                Bounds = quad.GetBoundFromPoints(quad.GetVolumeBox(quad.Planetoid.TerrainMaxHeight, 0, false), out max, out min),
+                Max = max,
+                Min = min
+            };
+        }
+
+        return quad.QuadAABB;
     }
 
     public Bounds GetBounds(Quad quad)
     {
         if (Planetoid.CullingMethod == QuadCullingMethod.Unity)
         {
-            //TODO : Well calculated, but not axis aligned.
-            //https://inovaestudios.blob.core.windows.net/forumsavatars/3255860d4f86c8c8a67cdb0b79e7e8889951cc54a65a.png
+            //NOTE : https://inovaestudios.blob.core.windows.net/forumsavatars/3255860d4f86c8c8a67cdb0b79e7e8889951cc54a65a.png
 
             if (QuadAABB != null)
                 return QuadAABB.Bounds;
-
-            return new Bounds(quad.generationConstants.patchCubeCenter, new Vector3(9e37f, 9e37f, 9e37f));
+            else
+                return new Bounds(quad.generationConstants.patchCubeCenter, new Vector3(9e37f, 9e37f, 9e37f));
         }
         else
-        {
             return new Bounds(quad.generationConstants.patchCubeCenter, new Vector3(9e37f, 9e37f, 9e37f));
-        }
     }
 
     public Vector3 GetCubeFaceEastDirection(QuadPosition quadPosition)
     {
-        Vector3 temp = Vector3.zero;
-
-        float r = Planetoid.PlanetRadius;
+        var temp = Vector3.zero;
+        var r = Planetoid.PlanetRadius;
 
         switch (quadPosition)
         {
@@ -1173,6 +1077,8 @@ public sealed class Quad : MonoBehaviour, IQuad, IEventit<Quad>
             case QuadPosition.Back:
                 temp = new Vector3(-r, 0.0f, 0.0f);
                 break;
+            default:
+                throw new ArgumentOutOfRangeException("quadPosition", quadPosition, null);
         }
 
         return temp;
@@ -1180,9 +1086,8 @@ public sealed class Quad : MonoBehaviour, IQuad, IEventit<Quad>
 
     public Vector3 GetCubeFaceNorthDirection(QuadPosition quadPosition)
     {
-        Vector3 temp = Vector3.zero;
-
-        float r = Planetoid.PlanetRadius;
+        var temp = Vector3.zero;
+        var r = Planetoid.PlanetRadius;
 
         switch (quadPosition)
         {
@@ -1204,6 +1109,8 @@ public sealed class Quad : MonoBehaviour, IQuad, IEventit<Quad>
             case QuadPosition.Back:
                 temp = new Vector3(0.0f, -r, 0.0f);
                 break;
+            default:
+                throw new ArgumentOutOfRangeException("quadPosition", quadPosition, null);
         }
 
         return temp;
@@ -1211,9 +1118,8 @@ public sealed class Quad : MonoBehaviour, IQuad, IEventit<Quad>
 
     public Vector3 GetPatchCubeCenter(QuadPosition quadPosition)
     {
-        Vector3 temp = Vector3.zero;
-
-        float r = Planetoid.PlanetRadius;
+        var temp = Vector3.zero;
+        var r = Planetoid.PlanetRadius;
 
         switch (quadPosition)
         {
@@ -1235,6 +1141,8 @@ public sealed class Quad : MonoBehaviour, IQuad, IEventit<Quad>
             case QuadPosition.Back:
                 temp = new Vector3(0.0f, 0.0f, -r);
                 break;
+            default:
+                throw new ArgumentOutOfRangeException("quadPosition", quadPosition, null);
         }
 
         return temp;
@@ -1242,10 +1150,10 @@ public sealed class Quad : MonoBehaviour, IQuad, IEventit<Quad>
 
     public Vector3 GetPatchCubeCenterSplitted(QuadPosition quadPosition, int id, bool staticX, bool staticY, bool staticZ)
     {
-        Vector3 temp = Vector3.zero;
+        var temp = Vector3.zero;
+        var mod = 0.5f;
+        var v = Planetoid.PlanetRadius;
 
-        float mod = 0.5f;
-        float v = Planetoid.PlanetRadius;
         float tempStatic = 0;
 
         switch (quadPosition)
@@ -1310,6 +1218,8 @@ public sealed class Quad : MonoBehaviour, IQuad, IEventit<Quad>
                 else if (id == 3)
                     temp += new Vector3(v * mod, -v * mod, -v);
                 break;
+            default:
+                throw new ArgumentOutOfRangeException("quadPosition", quadPosition, null);
         }
 
         BrainFuckMath.LockAxis(ref tempStatic, ref temp, staticX, staticY, staticZ);
@@ -1334,7 +1244,7 @@ public sealed class Quad : MonoBehaviour, IQuad, IEventit<Quad>
 
         BrainFuckMath.DefineAxis(ref staticX, ref staticY, ref staticZ, size);
 
-        middle = (topLeft + bottomRight) * (1 / Mathf.Abs(LODLevel));
+        middle = (topLeft + bottomRight) * (1.0f / Mathf.Abs(LODLevel));
         middle = middle.NormalizeToRadius(Planetoid.PlanetRadius);
 
         BrainFuckMath.LockAxis(ref tempStatic, ref middle, staticX, staticY, staticZ);
@@ -1346,12 +1256,6 @@ public sealed class Quad : MonoBehaviour, IQuad, IEventit<Quad>
     private void Log(string msg)
     {
         if (Planetoid.DebugEnabled)
-            Debug.Log(msg);
-    }
-
-    private void Log(string msg, bool state)
-    {
-        if (state)
             Debug.Log(msg);
     }
 }

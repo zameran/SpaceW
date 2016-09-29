@@ -65,15 +65,15 @@ float NoiseFunction(float3 coord, float lodom)
 	float3 scaledCoord = ScaledCoordinate(coord);
 	
 	#ifdef defaultNoise
-	float noise = RidgedMultifractalEroded(scaledCoord * 2 + Randomize, 1, 1, 4) * 2;	
+	float noiseValue = RidgedMultifractalEroded(scaledCoord * 2 + Randomize, 1, 1, 4) * 2;	
 	#else
-	//float noise = HeightMapAsteroid(scaledCoord);
-	//float noise = HeightMapTerra(scaledCoord);
-	float noise = HeightMapPlanet(scaledCoord);
-	//float noise = HeightMapCloudsGasGiant(scaledCoord);
+	//float noiseValue = HeightMapAsteroid(scaledCoord);
+	//float noiseValue = HeightMapTerra(scaledCoord);
+	float noiseValue = HeightMapPlanet(scaledCoord);
+	//float noiseValue = HeightMapCloudsGasGiant(scaledCoord);
 	#endif
 	
-	float normalized = (noise + 1.0) * 0.5;
+	float normalized = (noiseValue + 1.0) * 0.5;
 
 	return normalized;
 }
@@ -115,9 +115,9 @@ void HeightMain (uint3 id : SV_DispatchThreadID)
 	float3 patchCubeCoordCentered = patchNormalizedCoord;
 	float3 patchCubeCoordCenteredFlat = patchNormalizedCoord;
 
-	float noise = NoiseFunction(patchCoord, constants.lodOctaveModifier);
+	float noiseValue = NoiseFunction(patchCoord, constants.lodOctaveModifier);
 
-	float height = noise * constants.terrainMaxHeight;
+	float height = noiseValue * constants.terrainMaxHeight;
 
 	patchCoordCentered += patchNormalizedCoord * height;
 	patchCubeCoordCentered += patchNormalizedCoord * height;
@@ -126,7 +126,7 @@ void HeightMain (uint3 id : SV_DispatchThreadID)
 	float4 output = float4(patchCoordCentered.xyz, 0.0);
 	float4 cubeOutput = float4(patchCubeCoordCentered.xyz, 0.0);
 
-	patchPreOutput[outBuffOffset].noise = noise;
+	patchPreOutput[outBuffOffset].noise = noiseValue;
 	patchPreOutput[outBuffOffset].patchCenter = patchCenter;
 	patchPreOutput[outBuffOffset].position = output;
 	patchPreOutput[outBuffOffset].cubePosition = cubeOutput;
@@ -150,9 +150,9 @@ void HeightSub(uint3 id : SV_DispatchThreadID)
 	float3 patchCubeCoordCentered = patchNormalizedCoord;
 	float3 patchCubeCoordCenteredFlat = patchNormalizedCoord;
 	
-	float noise = NoiseFunction(patchCoord, constants.lodOctaveModifier);
+	float noiseValue = NoiseFunction(patchCoord, constants.lodOctaveModifier);
 
-	float height = noise * constants.terrainMaxHeight;
+	float height = noiseValue * constants.terrainMaxHeight;
 
 	patchCoordCentered += patchNormalizedCoord * height;
 	patchCubeCoordCentered += patchNormalizedCoord * height;
@@ -161,7 +161,7 @@ void HeightSub(uint3 id : SV_DispatchThreadID)
 	float4 output = float4(patchCoordCentered.xyz, 0.0);
 	float4 cubeOutput = float4(patchCubeCoordCentered.xyz, 0.0);
 
-	patchPreOutputSub[outBuffOffset].noise = noise;
+	patchPreOutputSub[outBuffOffset].noise = noiseValue;
 	patchPreOutputSub[outBuffOffset].patchCenter = patchCenter;
 	patchPreOutputSub[outBuffOffset].position = output;
 	patchPreOutputSub[outBuffOffset].cubePosition = cubeOutput;
@@ -174,9 +174,8 @@ void TexturesSub(uint3 id : SV_DispatchThreadID)
 	QuadGenerationConstants constants = quadGenerationConstants[0];
 
 	int inBuffOffset = (id.x + 1) + (id.y + 1) * nVerticesPerSideWithBorderSub;
-	int outBuffOffset = id.x + id.y * nVerticesPerSideSub;
 	
-	float noise = patchPreOutputSub[inBuffOffset].noise;
+	float noiseValue = patchPreOutputSub[inBuffOffset].noise;
 	float3 patchCenter = patchPreOutputSub[inBuffOffset].patchCenter;
 	float4 position = patchPreOutputSub[inBuffOffset].position;
 	float4 cubePosition = patchPreOutputSub[inBuffOffset].cubePosition;
@@ -193,9 +192,9 @@ void TexturesSub(uint3 id : SV_DispatchThreadID)
 
 	float3 normal = positionNormal;
 
-	float4 color = ColorFunction(cubePosition.xyz, noise, slope);
+	float4 color = ColorFunction(cubePosition.xyz, noiseValue, slope);
 	float4 normalColor = float4(normal, slope);
-	float4 heightColor = float4(color.xyz, noise);
+	float4 heightColor = float4(color.xyz, noiseValue);
 
 	Normal[id.yx] = normalColor;
 	Height[id.yx] = heightColor;
@@ -215,14 +214,15 @@ void Transfer(uint3 id : SV_DispatchThreadID)
 [numthreads(1, 1, 1)]
 void GetCorners(uint3 id : SV_DispatchThreadID)
 {
-	float4 center = float4(patchOutput[0 + 0 * nVerticesPerSide].patchCenter, 0);
+	float4 center = float4(patchOutput[0].patchCenter, 0);
 
 	float size = nVerticesPerSide - 1;
+	float sideSize = size * nVerticesPerSide;
 
-	float4 topLeftCorner = patchOutput[size + 0 * nVerticesPerSide].position + center;
-	float4 topRightCorner = patchOutput[0 + 0 * nVerticesPerSide].position + center;
-	float4 bottomLeftCorner = patchOutput[size + size * nVerticesPerSide].position + center;
-	float4 bottomRightCorner = patchOutput[0 + size * nVerticesPerSide].position + center;
+	float4 topLeftCorner = patchOutput[size].position + center;
+	float4 topRightCorner = patchOutput[0].position + center;
+	float4 bottomLeftCorner = patchOutput[size + sideSize].position + center;
+	float4 bottomRightCorner = patchOutput[sideSize].position + center;
 
 	quadCorners[id.x + id.y].topLeftCorner = topLeftCorner;
 	quadCorners[id.x + id.y].topRightCorner = topRightCorner;

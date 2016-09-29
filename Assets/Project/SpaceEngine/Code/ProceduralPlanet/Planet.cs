@@ -33,15 +33,11 @@
 // Creator: zameran
 #endregion
 
-using System;
-using System.Collections.Generic;
-
 using Amib.Threading;
-
-using UnityEngine;
-
 using SpaceEngine.AtmosphericScattering;
 using SpaceEngine.AtmosphericScattering.Clouds;
+using System.Collections.Generic;
+using UnityEngine;
 
 public abstract class Planet : MonoBehaviour
 {
@@ -101,6 +97,8 @@ public abstract class Planet : MonoBehaviour
     public float[] LODOctaves = new float[6] { 0.5f, 0.5f, 0.5f, 0.75f, 0.75f, 1.0f };
 
     public bool OneSplittingQuad = true;
+
+    [HideInInspector]
     public bool ExternalRendering = false;
 
     public SmartThreadPool stp = new SmartThreadPool();

@@ -161,7 +161,6 @@ public static class BrainFuckMath
         32 : 15.0 / 14,999999996507540345191955564 | 0,9999999997671693563461303710
         */
 
-        //TODO: Make a formula! - Formula is done!
         //So. We have exponential modifier... WTF!?
         //Fuck dat shit. 7 LOD level more than i need. fuck. dat.
         //Too small numbers... So. Solution is planet radius scaling. 1 unit = 1 milion unity units,

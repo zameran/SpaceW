@@ -33,19 +33,11 @@
 // Creator: zameran
 #endregion
 
-using UnityEngine;
-
-using System;
-using System.Linq;
-using System.Collections.Generic;
-
-using Amib;
-using Amib.Threading;
-
 using SpaceEngine.AtmosphericScattering;
 using SpaceEngine.AtmosphericScattering.Clouds;
-using SpaceEngine.AtmosphericScattering.Sun;
-using SpaceEngine.PorecduralPlanet.Cache;
+using System.Collections.Generic;
+using System.Linq;
+using UnityEngine;
 
 public static class PlanetoidExtensions
 {
@@ -129,7 +121,6 @@ public sealed class Planetoid : Planet, IPlanet
 
     public Mesh PrototypeMesh;
 
-    public QuadStorage Cache = null;
     public NoiseParametersSetter NPS = null;
 
     public QuadDrawAndCull DrawAndCull = QuadDrawAndCull.CullBeforeDraw;
@@ -188,10 +179,6 @@ public sealed class Planetoid : Planet, IPlanet
     protected override void Start()
     {
         base.Start();
-
-        if (Cache == null)
-            if (gameObject.GetComponentInChildren<QuadStorage>() != null)
-                Cache = gameObject.GetComponentInChildren<QuadStorage>();
 
         if (tccps == null)
             if (gameObject.GetComponentInChildren<TCCommonParametersSetter>() != null)
@@ -286,42 +273,31 @@ public sealed class Planetoid : Planet, IPlanet
     {
         base.OnApplicationFocus(focusStatus);
 
-        if (focusStatus == true)
+        if (focusStatus != true) return;
+
+        //NOTE : So, when unity recompiles shaders or scripts from editor 
+        //while playing - quads not draws properly. 
+        //1) Reanimation of uniforms/mpb can't help.
+        //2) MaterialPropertyBlock.Clear() in Reanimation can't help.
+        //3) mpb = null; in Reanimation can't help.
+        //4) All parameters are ok in mpb.
+        //5) Problem not in MainRenderer.
+        //I think i've lost something...
+        //This ussue take effect only with mpb, so dirty fix is:
+        //ReSetupQuads();
+        //NOTE : Fixed. Buffers setted 1 time. Need to update when focus losted.
+
+        ReanimateQuadsBuffers(false);
+
+        if (Atmosphere != null)
         {
-            //NOTE : So, when unity recompiles shaders or scripts from editor 
-            //while playing - quads not draws properly. 
-            //1) Reanimation of uniforms/mpb can't help.
-            //2) MaterialPropertyBlock.Clear() in Reanimation can't help.
-            //3) mpb = null; in Reanimation can't help.
-            //4) All parameters are ok in mpb.
-            //5) Problem not in MainRenderer.
-            //I think i've lost something...
-            //This ussue take effect only with mpb, so dirty fix is:
-            //ReSetupQuads();
-            //NOTE : Fixed. Buffers setted 1 time. Need to update when focus losted.
-
-            ReanimateQuadsBuffers(false);
-
-            if (Atmosphere != null)
-            {
-                Atmosphere.ReanimateAtmosphereUniforms(Atmosphere, this);
-            }
+            Atmosphere.ReanimateAtmosphereUniforms(Atmosphere, this);
         }
     }
 
     protected override void OnDrawGizmos()
     {
         base.OnDrawGizmos();
-    }
-
-    private void PlanetOnAtmosphereChanged(Planet p)
-    {
-        for (int i = 0; i < Quads.Count; i++)
-        {
-            Quads[i].QuadMaterial.shaderKeywords = p.GetKeywords().ToArray();
-        }
-
-        Debug.Log("Planetoid: PlanetOnAtmosphereChanged");
     }
 
     private void OnAtmosphereBaked(Atmosphere a)
@@ -490,13 +466,7 @@ public sealed class Planetoid : Planet, IPlanet
 
     public Quad GetMainQuad(QuadPosition position)
     {
-        foreach (Quad q in MainQuads)
-        {
-            if (q.Position == position)
-                return q;
-        }
-
-        return null;
+        return MainQuads.FirstOrDefault(q => q.Position == position);
     }
 
     public Mesh GetMesh(QuadPosition position)
@@ -547,10 +517,6 @@ public sealed class Planetoid : Planet, IPlanet
             QuadsRoot.transform.position = transform.position;
             QuadsRoot.transform.rotation = transform.rotation;
             QuadsRoot.transform.parent = transform;
-        }
-        else
-        {
-            return;
         }
     }
 
