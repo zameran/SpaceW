@@ -106,16 +106,13 @@ public abstract class Planet : MonoBehaviour
     public QuadDistanceToClosestCornerComparer qdtccc;
 
     [HideInInspector]
-    public Wireframe wireframeSwitcher;
-
-    [HideInInspector]
-    public Bounds PlanetBouds;
+    public Bounds PlanetBounds;
 
     protected virtual void Awake()
     {
         PlanetoidTRS = Matrix4x4.TRS(Origin, Quaternion.Euler(OriginRotation), OriginScale);
 
-        PlanetBouds = new Bounds(Origin, Ring == null ? (Vector3.one * (PlanetRadius + TerrainMaxHeight) * 2) : (Vector3.one * Ring.OuterRadius * 2));
+        PlanetBounds = new Bounds(Origin, Ring == null ? (Vector3.one * (PlanetRadius + TerrainMaxHeight) * 2) : (Vector3.one * Ring.OuterRadius * 2));
     }
 
     protected virtual void Start()
@@ -124,16 +121,13 @@ public abstract class Planet : MonoBehaviour
 
         if (qdtccc == null)
             qdtccc = new QuadDistanceToClosestCornerComparer();
-
-        if (wireframeSwitcher == null)
-            wireframeSwitcher = FindObjectOfType<Wireframe>();
     }
 
     protected virtual void Update()
     {
         PlanetoidTRS = Matrix4x4.TRS(Origin, Quaternion.Euler(OriginRotation), OriginScale);
 
-        PlanetBouds = new Bounds(Origin, Ring == null ? (Vector3.one * (PlanetRadius + TerrainMaxHeight) * 2) : (Vector3.one * Ring.OuterRadius * 2));
+        PlanetBounds = new Bounds(Origin, Ring == null ? (Vector3.one * (PlanetRadius + TerrainMaxHeight) * 2) : (Vector3.one * Ring.OuterRadius * 2));
     }
 
     protected virtual void LateUpdate()
@@ -162,7 +156,7 @@ public abstract class Planet : MonoBehaviour
         {
             Gizmos.color = Color.blue;
 
-            Gizmos.DrawWireCube(PlanetBouds.center, PlanetBouds.size);
+            Gizmos.DrawWireCube(PlanetBounds.center, PlanetBounds.size);
         }
     }
 

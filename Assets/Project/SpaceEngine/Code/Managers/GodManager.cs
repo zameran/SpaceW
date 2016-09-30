@@ -34,8 +34,6 @@
 #endregion
 
 using UnityEngine;
-
-using ZFramework.Unity.Common;
 using ZFramework.Unity.Common.Messenger;
 
 [ExecutionOrder(-9999)]
@@ -52,6 +50,12 @@ public class GodManager : MonoSingleton<GodManager>
 
         Messenger.Setup(Debug);
 
+        if (CameraHelper.Main() != null)
+            FrustumPlanes = GeometryUtility.CalculateFrustumPlanes(CameraHelper.Main());
+    }
+
+    private void Update()
+    {
         if (CameraHelper.Main() != null)
             FrustumPlanes = GeometryUtility.CalculateFrustumPlanes(CameraHelper.Main());
     }

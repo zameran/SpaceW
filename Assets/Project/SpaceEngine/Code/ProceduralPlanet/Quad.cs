@@ -363,7 +363,7 @@ public sealed class Quad : MonoBehaviour, IQuad, IEventit<Quad>
         }
     }
 
-    private Bounds GetBoundFromPoints(Vector3[] points, out Vector3 max, out Vector3 min)
+    public Bounds GetBoundFromPoints(Vector3[] points, out Vector3 max, out Vector3 min)
     {
         var center = points.Aggregate(Vector3.zero, (current, t) => current + t) / 8;
 
@@ -407,7 +407,7 @@ public sealed class Quad : MonoBehaviour, IQuad, IEventit<Quad>
 
         if (QuadAABB == null)
         {
-            QuadAABB = GetQuadAABB(this);
+            QuadAABB = GetQuadAABB();
         }
 
         SetupBounds(this, QuadMesh);
@@ -460,9 +460,10 @@ public sealed class Quad : MonoBehaviour, IQuad, IEventit<Quad>
         }
     }
 
-    public Vector3[] GetVolumeBox(float height, float offset = 0, bool forCulling = false)
+    public QuadAABB GetVolumeBox(float height, float offset = 0)
     {
-        Vector3[] verts = new Vector3[forCulling ? 14 : 8];
+        Vector3[] points = new Vector3[8];
+        Vector3[] cullingPoints = new Vector3[14];
 
         Vector3 tl = topLeftCorner;
         Vector3 tr = topRightCorner;
@@ -470,42 +471,41 @@ public sealed class Quad : MonoBehaviour, IQuad, IEventit<Quad>
         Vector3 br = bottomRightCorner;
         Vector3 mi = middleNormalized;
 
-        verts[0] = tl.NormalizeToRadius(Planetoid.PlanetRadius + height + offset);
-        verts[1] = tr.NormalizeToRadius(Planetoid.PlanetRadius + height + offset);
-        verts[2] = bl.NormalizeToRadius(Planetoid.PlanetRadius + height + offset);
-        verts[3] = br.NormalizeToRadius(Planetoid.PlanetRadius + height + offset);
+        points[0] = tl.NormalizeToRadius(Planetoid.PlanetRadius + height + offset);
+        points[1] = tr.NormalizeToRadius(Planetoid.PlanetRadius + height + offset);
+        points[2] = bl.NormalizeToRadius(Planetoid.PlanetRadius + height + offset);
+        points[3] = br.NormalizeToRadius(Planetoid.PlanetRadius + height + offset);
 
-        verts[4] = tl.NormalizeToRadius(Planetoid.PlanetRadius - height - offset);
-        verts[5] = tr.NormalizeToRadius(Planetoid.PlanetRadius - height - offset);
-        verts[6] = bl.NormalizeToRadius(Planetoid.PlanetRadius - height - offset);
-        verts[7] = br.NormalizeToRadius(Planetoid.PlanetRadius - height - offset);
+        points[4] = tl.NormalizeToRadius(Planetoid.PlanetRadius - height - offset);
+        points[5] = tr.NormalizeToRadius(Planetoid.PlanetRadius - height - offset);
+        points[6] = bl.NormalizeToRadius(Planetoid.PlanetRadius - height - offset);
+        points[7] = br.NormalizeToRadius(Planetoid.PlanetRadius - height - offset);
 
-        if (forCulling)
-        {
-            verts[8] = verts[0] - verts[4];
-            verts[9] = verts[1] - verts[5];
-            verts[10] = verts[2] - verts[6];
-            verts[11] = verts[3] - verts[7];
+        Array.Copy(points, cullingPoints, 8);
 
-            verts[12] = mi.NormalizeToRadius(Planetoid.PlanetRadius + height + offset);
-            verts[13] = mi.NormalizeToRadius(Planetoid.PlanetRadius - height - offset);
-        }
+        cullingPoints[8] = points[0] - points[4];
+        cullingPoints[9] = points[1] - points[5];
+        cullingPoints[10] = points[2] - points[6];
+        cullingPoints[11] = points[3] - points[7];
 
-        return verts;
+        cullingPoints[12] = mi.NormalizeToRadius(Planetoid.PlanetRadius + height + offset);
+        cullingPoints[13] = mi.NormalizeToRadius(Planetoid.PlanetRadius - height - offset);
+
+        return new QuadAABB(points, cullingPoints, this);
     }
 
     public bool PlaneFrustumCheck(QuadAABB qaabb)
     {
         if (qaabb == null) { Log("QuadAABB problem!"); return true; }
 
-        return PlaneFrustumCheck(qaabb.AABB);
+        return PlaneFrustumCheck(qaabb.CullingAABB);
     }
 
-    public bool PlaneFrustumCheck(Vector3[] aabb)
+    public bool PlaneFrustumCheck(Vector3[] points)
     {
-        if (Parent == null || !Generated || Splitting || Planetoid.CullingMethod == (QuadCullingMethod.Unity | QuadCullingMethod.None)) { return true; }
+        if (Parent == null || !Generated || Splitting || (Planetoid.CullingMethod == QuadCullingMethod.Unity || Planetoid.CullingMethod == QuadCullingMethod.None)) { return true; }
 
-        return aabb.Any(pos => BorderFrustumCheck(Planetoid.FrustumPlanes, pos) == true);
+        return points.Any(pos => BorderFrustumCheck(GodManager.Instance.FrustumPlanes, pos) == true);
     }
 
     public bool BorderFrustumCheck(Plane[] planes, Vector3 border)
@@ -1019,22 +1019,9 @@ public sealed class Quad : MonoBehaviour, IQuad, IEventit<Quad>
         return Generated ? closestCorner : new Vector3(Mathf.Infinity, Mathf.Infinity, Mathf.Infinity);
     }
 
-    public QuadAABB GetQuadAABB(Quad quad)
+    public QuadAABB GetQuadAABB()
     {
-        if (quad.QuadAABB == null)
-        {
-            var min = Vector3.zero;
-            var max = Vector3.zero;
-
-            quad.QuadAABB = new QuadAABB(quad.GetVolumeBox(quad.Planetoid.TerrainMaxHeight, 0, true), false)
-            {
-                Bounds = quad.GetBoundFromPoints(quad.GetVolumeBox(quad.Planetoid.TerrainMaxHeight, 0, false), out max, out min),
-                Max = max,
-                Min = min
-            };
-        }
-
-        return quad.QuadAABB;
+        return GetVolumeBox(Planetoid.TerrainMaxHeight, 0);
     }
 
     public Bounds GetBounds(Quad quad)

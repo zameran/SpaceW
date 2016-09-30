@@ -129,8 +129,6 @@ public sealed class Planetoid : Planet, IPlanet
 
     public TCCommonParametersSetter tccps;
 
-    public Plane[] FrustumPlanes;
-
     public MaterialPropertyBlock QuadAtmosphereMPB;
 
     public void QuadDispatchStarted(Quad q)
@@ -168,8 +166,6 @@ public sealed class Planetoid : Planet, IPlanet
         {
             //TODO : RINGS
         }
-
-        FrustumPlanes = GodManager.Instance.FrustumPlanes;
 
         QuadAtmosphereMPB = new MaterialPropertyBlock();
 
@@ -216,7 +212,7 @@ public sealed class Planetoid : Planet, IPlanet
         CheckCutoff();
 
         if (LODTarget != null)
-            DistanceToLODTarget = PlanetBouds.SqrDistance(LODTarget.position);
+            DistanceToLODTarget = PlanetBounds.SqrDistance(LODTarget.position);
         else
             DistanceToLODTarget = -1.0f;
 
@@ -237,9 +233,6 @@ public sealed class Planetoid : Planet, IPlanet
                 Atmosphere.ReanimateAtmosphereUniforms(Atmosphere, this);
             }
         }
-
-        if (CameraHelper.Main() != null)
-            FrustumPlanes = GeometryUtility.CalculateFrustumPlanes(CameraHelper.Main());
 
         if (Atmosphere != null) Atmosphere.SetUniforms(QuadAtmosphereMPB, null, false, true);
 
