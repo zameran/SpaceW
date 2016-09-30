@@ -40,7 +40,9 @@ using ZFramework.Unity.Common.Messenger;
 public class GodManager : MonoSingleton<GodManager>
 {
     public Plane[] FrustumPlanes;
+
     public bool Debug = true;
+    public bool UpdateFrustumPlanes = true;
 
     protected GodManager() { }
 
@@ -56,7 +58,10 @@ public class GodManager : MonoSingleton<GodManager>
 
     private void Update()
     {
-        if (CameraHelper.Main() != null)
-            FrustumPlanes = GeometryUtility.CalculateFrustumPlanes(CameraHelper.Main());
+        if (UpdateFrustumPlanes)
+        {
+            if (CameraHelper.Main() != null)
+                FrustumPlanes = GeometryUtility.CalculateFrustumPlanes(CameraHelper.Main());
+        }
     }
 }

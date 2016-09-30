@@ -33,11 +33,8 @@
 // Creator: zameran
 #endregion
 
-using System;
 
 using UnityEngine;
-
-using ZFramework.Unity.Common.Messenger;
 
 public sealed class FlyCamera : GameCamera
 {

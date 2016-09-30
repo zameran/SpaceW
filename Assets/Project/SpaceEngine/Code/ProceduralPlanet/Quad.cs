@@ -453,6 +453,8 @@ public sealed class Quad : MonoBehaviour, IQuad, IEventit<Quad>
     {
         using (new Timer("Quad.TryCull"))
         {
+            if (GodManager.Instance.UpdateFrustumPlanes == false) return;
+
             if (Planetoid.CullingMethod == QuadCullingMethod.Custom)
                 Visible = PlaneFrustumCheck(QuadAABB);
             else
@@ -498,12 +500,13 @@ public sealed class Quad : MonoBehaviour, IQuad, IEventit<Quad>
     {
         if (qaabb == null) { Log("QuadAABB problem!"); return true; }
 
+        //return GeometryUtility.TestPlanesAABB(GodManager.Instance.FrustumPlanes, QuadAABB.Bounds);
         return PlaneFrustumCheck(qaabb.CullingAABB);
     }
 
     public bool PlaneFrustumCheck(Vector3[] points)
     {
-        if (Parent == null || !Generated || Splitting || (Planetoid.CullingMethod == QuadCullingMethod.Unity || Planetoid.CullingMethod == QuadCullingMethod.None)) { return true; }
+        if (Parent == null || Splitting || (Planetoid.CullingMethod == QuadCullingMethod.Unity || Planetoid.CullingMethod == QuadCullingMethod.None)) { return true; }
 
         return points.Any(pos => BorderFrustumCheck(GodManager.Instance.FrustumPlanes, pos) == true);
     }

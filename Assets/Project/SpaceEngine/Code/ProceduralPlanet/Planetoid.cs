@@ -324,6 +324,8 @@ public sealed class Planetoid : Planet, IPlanet
 
     public void UpdateLOD()
     {
+        if (UseLOD == false) return;
+
         for (int i = 0; i < Quads.Count; i++)
         {
             Quads[i].CheckLOD();
