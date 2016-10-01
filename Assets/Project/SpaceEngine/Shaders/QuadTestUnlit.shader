@@ -40,7 +40,6 @@
 			#include "AutoLight.cginc"
 			#include "SpaceStuff.cginc"
 			#include "Eclipses.cginc"
-			#include "Utils.cginc"
 			#include "TCCommon.cginc"
 			#include "HDR.cginc"
 			#include "Atmosphere.cginc"

@@ -41,7 +41,7 @@
 //#define defaultNoise
 
 #include "UnityCG.cginc"
-#include "Utils.cginc"
+#include "SpaceStuff.cginc"
 #include "TCCommon.cginc"
 
 RWTexture2D<float4> Height;

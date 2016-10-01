@@ -164,7 +164,7 @@ public sealed class Quad : MonoBehaviour, IQuad, IEventit<Quad>
 
     public Id RegistryID { get { return new Id(LODLevel, (int)ID, (int)Position); } }
 
-    public Matrix4x4 RotationMatrix { get { return Matrix4x4.TRS(middleNormalized, Quaternion.Euler((middleNormalized).normalized * Mathf.Deg2Rad), Vector3.one); } }
+    public Matrix4x4 RotationMatrix { get { return Matrix4x4.TRS(middleNormalized, Quaternion.Euler(middleNormalized.normalized * Mathf.Deg2Rad), Vector3.one); } }
 
     #region Eventit
     public bool isEventit { get; set; }
