@@ -131,21 +131,6 @@ public sealed class Planetoid : Planet, IPlanet
 
     public MaterialPropertyBlock QuadAtmosphereMPB;
 
-    public void QuadDispatchStarted(Quad q)
-    {
-        //Debug.Log("Planetoid: QuadDispatchStarted() - " + q.gameObject.name);
-    }
-
-    public void QuadDispatchReady(Quad q)
-    {
-        //Debug.Log("Planetoid: QuadDispatchReady() - " + q.gameObject.name);
-    }
-
-    public void QuadGPUGetDataReady(Quad q)
-    {
-        //Debug.Log("Planetoid: QuadGPUGetDataReady() - " + q.gameObject.name);
-    }
-
     protected override void Awake()
     {
         base.Awake();
@@ -188,7 +173,6 @@ public sealed class Planetoid : Planet, IPlanet
 
         if (Atmosphere != null)
         {
-            Atmosphere.OnBaked += OnAtmosphereBaked;
             Atmosphere.InitPlanetoidUniforms(this);
         }
 
@@ -252,9 +236,6 @@ public sealed class Planetoid : Planet, IPlanet
     protected override void OnDestroy()
     {
         base.OnDestroy();
-
-        if (Atmosphere != null)
-            Atmosphere.OnBaked -= OnAtmosphereBaked;
     }
 
     protected override void OnRenderObject()
@@ -291,14 +272,6 @@ public sealed class Planetoid : Planet, IPlanet
     protected override void OnDrawGizmos()
     {
         base.OnDrawGizmos();
-    }
-
-    private void OnAtmosphereBaked(Atmosphere a)
-    {
-        if (a != null)
-        {
-            a.ReanimateAtmosphereUniforms(a, this);
-        }
     }
 
     public void ReanimateQuadsBuffers(bool resetup = false)
@@ -533,7 +506,6 @@ public sealed class Planetoid : Planet, IPlanet
         quadComponent.Planetoid = this;
         quadComponent.QuadMesh = mesh;
         quadComponent.QuadMaterial = material;
-        quadComponent.Eventit(quadComponent);
 
         if (Atmosphere != null) Atmosphere.InitUniforms(null, quadComponent.QuadMaterial, false);
 
@@ -568,7 +540,6 @@ public sealed class Planetoid : Planet, IPlanet
         quadComponent.Planetoid = this;
         quadComponent.QuadMesh = mesh;
         quadComponent.QuadMaterial = material;
-        quadComponent.Eventit(quadComponent);
         quadComponent.SetupCorners(quadPosition);
 
         if (Atmosphere != null) Atmosphere.InitUniforms(null, quadComponent.QuadMaterial, false);

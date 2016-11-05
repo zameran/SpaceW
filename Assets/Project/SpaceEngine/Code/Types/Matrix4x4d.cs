@@ -25,7 +25,7 @@
 
 namespace UnityEngine
 {
-    #pragma warning disable 660, 661
+#pragma warning disable 660, 661
 
     public class Matrix4x4d
     {
@@ -292,7 +292,7 @@ namespace UnityEngine
             return mat;
         }
 
-        static public Matrix4x4d ToMatrix4x4d(Matrix4x4 matf)
+        public static Matrix4x4d ToMatrix4x4d(Matrix4x4 matf)
         {
             Matrix4x4d mat = new Matrix4x4d();
 
@@ -304,7 +304,7 @@ namespace UnityEngine
             return mat;
         }
 
-        static public Matrix4x4d Translate(Vector3d v)
+        public static Matrix4x4d Translate(Vector3d v)
         {
             return new Matrix4x4d(1, 0, 0, v.x,
                                   0, 1, 0, v.y,
@@ -312,7 +312,7 @@ namespace UnityEngine
                                   0, 0, 0, 1);
         }
 
-        static public Matrix4x4d Translate(Vector3 v)
+        public static Matrix4x4d Translate(Vector3 v)
         {
             return new Matrix4x4d(1, 0, 0, v.x,
                                   0, 1, 0, v.y,
@@ -320,7 +320,7 @@ namespace UnityEngine
                                   0, 0, 0, 1);
         }
 
-        static public Matrix4x4d Scale(Vector3d v)
+        public static Matrix4x4d Scale(Vector3d v)
         {
             return new Matrix4x4d(v.x, 0, 0, 0,
                                   0, v.y, 0, 0,
@@ -328,7 +328,7 @@ namespace UnityEngine
                                   0, 0, 0, 1);
         }
 
-        static public Matrix4x4d Scale(Vector3 v)
+        public static Matrix4x4d Scale(Vector3 v)
         {
             return new Matrix4x4d(v.x, 0, 0, 0,
                                   0, v.y, 0, 0,
@@ -336,7 +336,7 @@ namespace UnityEngine
                                   0, 0, 0, 1);
         }
 
-        static public Matrix4x4d RotateX(double angle)
+        public static Matrix4x4d RotateX(double angle)
         {
             double ca = System.Math.Cos(angle * System.Math.PI / 180.0);
             double sa = System.Math.Sin(angle * System.Math.PI / 180.0);
@@ -347,7 +347,7 @@ namespace UnityEngine
                                   0, 0, 0, 1);
         }
 
-        static public Matrix4x4d RotateY(double angle)
+        public static Matrix4x4d RotateY(double angle)
         {
             double ca = System.Math.Cos(angle * System.Math.PI / 180.0);
             double sa = System.Math.Sin(angle * System.Math.PI / 180.0);
@@ -358,7 +358,7 @@ namespace UnityEngine
                                   0, 0, 0, 1);
         }
 
-        static public Matrix4x4d RotateZ(double angle)
+        public static Matrix4x4d RotateZ(double angle)
         {
             double ca = System.Math.Cos(angle * System.Math.PI / 180.0);
             double sa = System.Math.Sin(angle * System.Math.PI / 180.0);
@@ -369,7 +369,7 @@ namespace UnityEngine
                                   0, 0, 0, 1);
         }
 
-        static public Matrix4x4d Rotate(Vector3 rotation)
+        public static Matrix4x4d Rotate(Vector3 rotation)
         {
             Quat x = new Quat(new Vector3d(1, 0, 0), rotation.x * MathUtility.Deg2Rad);
             Quat y = new Quat(new Vector3d(0, 1, 0), rotation.y * MathUtility.Deg2Rad);
@@ -378,7 +378,7 @@ namespace UnityEngine
             return (z * y * x).ToMatrix4x4d();
         }
 
-        static public Matrix4x4d Rotate(Vector3d rotation)
+        public static Matrix4x4d Rotate(Vector3d rotation)
         {
             Quat x = new Quat(new Vector3d(1, 0, 0), rotation.x * MathUtility.Deg2Rad);
             Quat y = new Quat(new Vector3d(0, 1, 0), rotation.y * MathUtility.Deg2Rad);
@@ -387,7 +387,7 @@ namespace UnityEngine
             return (z * y * x).ToMatrix4x4d();
         }
 
-        static public Matrix4x4d Perspective(double fovy, double aspect, double zNear, double zFar)
+        public static Matrix4x4d Perspective(double fovy, double aspect, double zNear, double zFar)
         {
             double f = 1.0 / System.Math.Tan((fovy * System.Math.PI / 180.0) / 2.0);
 
@@ -397,7 +397,7 @@ namespace UnityEngine
                                   0, 0, -1, 0);
         }
 
-        static public Matrix4x4d Ortho(double xRight, double xLeft, double yTop, double yBottom, double zNear, double zFar)
+        public static Matrix4x4d Ortho(double xRight, double xLeft, double yTop, double yBottom, double zNear, double zFar)
         {
             double tx, ty, tz;
 
@@ -411,12 +411,12 @@ namespace UnityEngine
                                   0, 0, 0, 1);
         }
 
-        static public Matrix4x4d Identity()
+        public static Matrix4x4d Identity()
         {
             return new Matrix4x4d(1, 0, 0, 0,
                                   0, 1, 0, 0,
                                   0, 0, 1, 0,
                                   0, 0, 0, 1);
         }
-    } 
+    }
 }

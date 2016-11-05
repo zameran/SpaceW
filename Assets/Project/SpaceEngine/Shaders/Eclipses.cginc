@@ -21,7 +21,7 @@ float EclipseValue(float lightRadius, float casterRadius, float Dist)
 	float sumRadius = lightRadius + casterRadius;
 
 	// No intersection
-	if (Dist >= sumRadius) return 0.0;
+	if (Dist >= sumRadius || lightRadius < 0.0) return 0.0;
 
 	float minRadius;
 	float maxPhase;
@@ -56,7 +56,7 @@ float EclipseShadow(float3 position, float3 lightVec, float lightAngularRadius)
 
 	for (int i = 0; i < 4; ++i)
 	{
-		if (_Sky_LightOccluders_1[i].w <= 0.0) break;
+		if (_Sky_LightOccluders_1[i].w <= 0.0) { break; }
 
 		float3 lightCasterPos = _Sky_LightOccluders_1[i].xyz - position;
 

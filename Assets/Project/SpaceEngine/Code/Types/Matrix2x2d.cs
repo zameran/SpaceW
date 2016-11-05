@@ -169,9 +169,9 @@ namespace UnityEngine
             return kInverse;
         }
 
-        static public Matrix2x2d Identity()
+        public static Matrix2x2d Identity()
         {
             return new Matrix2x2d(1, 0, 0, 1);
         }
-    } 
+    }
 }

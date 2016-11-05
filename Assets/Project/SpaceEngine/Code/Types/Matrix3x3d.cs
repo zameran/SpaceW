@@ -244,9 +244,9 @@ namespace UnityEngine
             return mat;
         }
 
-        static public Matrix3x3d Identity()
+        public static Matrix3x3d Identity()
         {
             return new Matrix3x3d(1, 0, 0, 0, 1, 0, 0, 0, 1);
         }
-    } 
+    }
 }

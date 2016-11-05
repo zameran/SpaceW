@@ -29,7 +29,7 @@ namespace UnityEngine
     {
         public enum VISIBILITY { FULLY = 0, PARTIALLY = 1, INVISIBLE = 3 };
 
-        static public Vector4d[] GetFrustumPlanes(Matrix4x4d mat)
+        public static Vector4d[] GetFrustumPlanes(Matrix4x4d mat)
         {
             //extract frustum planes from a projection matrix
             Vector4d[] frustumPlanes = new Vector4d[6];
@@ -74,7 +74,7 @@ namespace UnityEngine
             return frustumPlanes;
         }
 
-        static public Vector4d[] GetFrustumPlanes(Matrix4x4 mat)
+        public static Vector4d[] GetFrustumPlanes(Matrix4x4 mat)
         {
             //extract frustum planes from a projection matrix
             Vector4d[] frustumPlanes = new Vector4d[6];
@@ -119,7 +119,7 @@ namespace UnityEngine
             return frustumPlanes;
         }
 
-        static public VISIBILITY GetVisibility(Vector4d[] frustumPlanes, Box3d box)
+        public static VISIBILITY GetVisibility(Vector4d[] frustumPlanes, Box3d box)
         {
             VISIBILITY v0 = GetVisibility(frustumPlanes[0], box);
             if (v0 == VISIBILITY.INVISIBLE)
@@ -190,5 +190,5 @@ namespace UnityEngine
 
             return VISIBILITY.PARTIALLY;
         }
-    } 
+    }
 }

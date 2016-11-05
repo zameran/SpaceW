@@ -63,7 +63,6 @@ public abstract class Planet : MonoBehaviour
     public bool DrawNormals = false;
     public bool DrawGizmos = false;
 
-    public bool GenerateColliders = false;
     public bool OctaveFade = false;
     public bool Working = false;
     public bool UseLOD = true;

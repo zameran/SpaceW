@@ -33,13 +33,9 @@
 // Creator: zameran
 #endregion
 
-using System;
-
-using UnityEngine;
-
-using System.Collections.Generic;
-
 using SpaceEngine.AtmosphericScattering.Sun;
+using System.Collections.Generic;
+using UnityEngine;
 
 namespace SpaceEngine.AtmosphericScattering
 {
@@ -57,17 +53,13 @@ namespace SpaceEngine.AtmosphericScattering
                 atmosphereBase = value;
 
                 if (atmosphereBasePrev != value)
-                    if (OnPresetChanged != null)
-                        OnPresetChanged(this);
+                    EventManager.PlanetoidEvents.OnAtmospherePresetChanged.Invoke(planetoid, this);
             }
         }
 
         public AnimationCurve FadeCurve = new AnimationCurve(new Keyframe[] { new Keyframe(0.0f, 0.0f),
                                                                           new Keyframe(0.25f, 1.0f),
                                                                           new Keyframe(1.0f, 1.0f) });
-
-        public delegate void AtmosphereDelegate(Atmosphere a);
-        public event AtmosphereDelegate OnPresetChanged, OnBaked;
 
         public Planetoid planetoid;
 
@@ -104,7 +96,7 @@ namespace SpaceEngine.AtmosphericScattering
         [HideInInspector]
         public bool Planetshine = true;
 
-        public List<AtmosphereSun> Suns = new List<AtmosphereSun>(); 
+        public List<AtmosphereSun> Suns = new List<AtmosphereSun>();
 
         public List<Planet> eclipseCasters = new List<Planet>();
         public List<GameObject> shineCasters = new List<GameObject>();
@@ -130,60 +122,6 @@ namespace SpaceEngine.AtmosphericScattering
 
         public List<string> Keywords = new List<string>();
 
-        public Matrix4x4 ShineColorsMatrix1
-        {
-            get { return shineColorsMatrix1; }
-            set { shineColorsMatrix1 = value; }
-        }
-
-        public Matrix4x4 ShineOccludersMatrix1
-        {
-            get { return shineColorsMatrix1; }
-            set { shineColorsMatrix1 = value; }
-        }
-
-        public Matrix4x4 OccludersMatrix1
-        {
-            get { return occludersMatrix1; }
-            set { occludersMatrix1 = value; }
-        }
-
-        public Matrix4x4 SunMatrix1
-        {
-            get { return sunMatrix1; }
-            set { sunMatrix1 = value; }
-        }
-
-        public Matrix4x4 WorldToCamera
-        {
-            get { return worldToCamera; }
-            set { worldToCamera = value; }
-        }
-
-        public Matrix4x4 CameraToWorld
-        {
-            get { return cameraToWorld; }
-            set { cameraToWorld = value; }
-        }
-
-        public Matrix4x4 CameraToScreen
-        {
-            get { return cameraToScreen; }
-            set { cameraToScreen = value; }
-        }
-
-        public Matrix4x4 ScreenToCamera
-        {
-            get { return screenToCamera; }
-            set { screenToCamera = value; }
-        }
-
-        public Vector3 WorldCameraPos
-        {
-            get { return worldCameraPos; }
-            set { worldCameraPos = value; }
-        }
-
         #region Eventit
         public bool isEventit { get; set; }
 
@@ -191,8 +129,8 @@ namespace SpaceEngine.AtmosphericScattering
         {
             if (isEventit) return;
 
-            OnPresetChanged += AtmosphereOnPresetChanged;
-            OnBaked += AtmosphereOnBaked;
+            EventManager.PlanetoidEvents.OnAtmosphereBaked.OnEvent += OnAtmosphereBaked;
+            EventManager.PlanetoidEvents.OnAtmospherePresetChanged.OnEvent += OnAtmospherePresetChanged;
 
             isEventit = true;
         }
@@ -201,10 +139,48 @@ namespace SpaceEngine.AtmosphericScattering
         {
             if (!isEventit) return;
 
-            OnPresetChanged -= AtmosphereOnPresetChanged;
-            OnBaked -= AtmosphereOnBaked;
+            EventManager.PlanetoidEvents.OnAtmosphereBaked.OnEvent -= OnAtmosphereBaked;
+            EventManager.PlanetoidEvents.OnAtmospherePresetChanged.OnEvent -= OnAtmospherePresetChanged;
 
             isEventit = false;
+        }
+        #endregion
+
+        #region Events
+        private void OnAtmosphereBaked(Planetoid planetoid, Atmosphere atmosphere)
+        {
+            if (planetoid == null)
+            {
+                Debug.Log("Atmosphere: OnAtmosphereBaked planetoid is null!");
+                return;
+            }
+
+            if (atmosphere == null)
+            {
+                Debug.Log("Atmosphere: OnAtmosphereBaked atmosphere is null!");
+                return;
+            }
+
+            atmosphere.ApplyTestPresset(AtmosphereParameters.Get(atmosphere.AtmosphereBase));
+            atmosphere.ReanimateAtmosphereUniforms(atmosphere, planetoid);
+        }
+
+        private void OnAtmospherePresetChanged(Planetoid planetoid, Atmosphere atmosphere)
+        {
+            if (planetoid == null)
+            {
+                Debug.Log("Atmosphere: OnAtmospherePresetChanged planetoid is null!");
+                return;
+            }
+
+            if (atmosphere == null)
+            {
+                Debug.Log("Atmosphere: OnAtmospherePresetChanged atmosphere is null!");
+                return;
+            }
+
+            atmosphere.TryBake();
+            planetoid.ReSetupQuads();
         }
         #endregion
 
@@ -237,7 +213,7 @@ namespace SpaceEngine.AtmosphericScattering
         {
             if (artb != null) artb.Bake(atmosphereParameters);
 
-            if (OnBaked != null) OnBaked(this);
+            EventManager.PlanetoidEvents.OnAtmosphereBaked.Invoke(planetoid, this);
         }
 
         public List<string> GetKeywords()
@@ -284,12 +260,22 @@ namespace SpaceEngine.AtmosphericScattering
 
             for (int i = 0; i < Mathf.Min(4, Suns.Count); i++)
             {
+                if (Suns[i] == null)
+                {
+                    Debug.Log("Atmosphere: Eclipse sun problem!");
+                    break;
+                }
+
                 sunsMatrix.SetRow(i, VectorHelper.MakeFrom(Suns[i].transform.position, VectorHelper.AngularRadius(Suns[i].transform.position, Origin, Suns[i].Radius)));
             }
 
             for (int i = 0; i < Mathf.Min(4, eclipseCasters.Count); i++)
             {
-                if (eclipseCasters[i] == null) { Debug.Log("Atmosphere: Eclipses problem!"); break; }
+                if (eclipseCasters[i] == null)
+                {
+                    Debug.Log("Atmosphere: Eclipse caster problem!");
+                    break;
+                }
 
                 occludersMatrix.SetRow(i, VectorHelper.MakeFrom(eclipseCasters[i].Origin - Origin, eclipseCasters[i].PlanetRadius));
             }
@@ -433,28 +419,6 @@ namespace SpaceEngine.AtmosphericScattering
             }
         }
 
-        private void AtmosphereOnPresetChanged(Atmosphere a)
-        {
-            //Debug.Log("Atmosphere: AtmosphereOnPresetChanged() - " + a.gameObject.name);
-
-            ApplyTestPresset(AtmosphereParameters.Get(AtmosphereBase));
-            TryBake();
-        }
-
-        private void AtmosphereOnBaked(Atmosphere a)
-        {
-            //Debug.Log("Atmosphere: AtmosphereOnBaked() - " + a.gameObject.name);
-
-            //Just make sure that all Origin variables set.
-            if (a.transform.parent != null)
-            {
-                Planetoid owner = a.GetComponentInParent<Planetoid>();
-
-                if (owner != null)
-                    owner.ReSetupQuads();
-            }
-        }
-
         private Vector3 GetSunDirection(AtmosphereSun sun)
         {
             return (sun.transform.position - Origin).normalized;
@@ -589,7 +553,7 @@ namespace SpaceEngine.AtmosphericScattering
                     {
                         var sunGlareComponent = Suns[i].GetComponent<SunGlare>();
 
-                        if(sunGlareComponent != null) sunGlareComponent.InitSetAtmosphereUniforms();
+                        if (sunGlareComponent != null) sunGlareComponent.InitSetAtmosphereUniforms();
                     }
                 }
             }
@@ -695,5 +659,5 @@ namespace SpaceEngine.AtmosphericScattering
         }
 
         #endregion
-    } 
+    }
 }

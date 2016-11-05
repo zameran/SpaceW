@@ -56,7 +56,7 @@ public struct OutputStruct : IData
     }
 }
 
-public sealed class Quad : MonoBehaviour, IQuad, IEventit<Quad>
+public sealed class Quad : MonoBehaviour, IQuad
 {
     //NOTE : Do not TransformPoint the points on wich bounds will depend on.
 
@@ -159,72 +159,9 @@ public sealed class Quad : MonoBehaviour, IQuad, IEventit<Quad>
 
     public QuadAABB QuadAABB = null;
 
-    public delegate void QuadDelegate(Quad q);
-    public event QuadDelegate DispatchStarted, DispatchReady, GPUGetDataReady;
-
     public Id RegistryID { get { return new Id(LODLevel, (int)ID, (int)Position); } }
 
     public Matrix4x4 RotationMatrix { get { return Matrix4x4.TRS(middleNormalized, Quaternion.Euler(middleNormalized.normalized * Mathf.Deg2Rad), Vector3.one); } }
-
-    #region Eventit
-    public bool isEventit { get; set; }
-
-    public void Eventit(Quad quad)
-    {
-        if (isEventit) return;
-
-        quad.DispatchStarted += quad.QuadDispatchStarted;
-        quad.DispatchReady += quad.QuadDispatchReady;
-        quad.GPUGetDataReady += quad.QuadGPUGetDataReady;
-
-        if (quad.Planetoid != null)
-        {
-            quad.DispatchStarted += quad.Planetoid.QuadDispatchStarted;
-            quad.DispatchReady += quad.Planetoid.QuadDispatchReady;
-            quad.GPUGetDataReady += quad.Planetoid.QuadGPUGetDataReady;
-        }
-
-        isEventit = true;
-    }
-
-    public void UnEventit(Quad quad)
-    {
-        if (!isEventit) return;
-
-        DispatchStarted -= QuadDispatchStarted;
-        DispatchReady -= QuadDispatchReady;
-        GPUGetDataReady -= QuadGPUGetDataReady;
-
-        if (quad.Planetoid != null)
-        {
-            DispatchStarted -= Planetoid.QuadDispatchStarted;
-            DispatchReady -= Planetoid.QuadDispatchReady;
-            GPUGetDataReady -= Planetoid.QuadGPUGetDataReady;
-        }
-
-        isEventit = false;
-    }
-    #endregion
-
-    private void QuadDispatchStarted(Quad q)
-    {
-        //Debug.Log("Quad: QuadDispatchStarted() - " + q.gameObject.name);
-    }
-
-    private void QuadDispatchReady(Quad q)
-    {
-        //Debug.Log("Quad: QuadDispatchReady() - " + q.gameObject.name);
-
-        if (LODLevel != 6 || !Planetoid.GenerateColliders || !GPUDataRecieved) return;
-
-        var mc = gameObject.AddComponent<MeshCollider>();
-        mc.sharedMesh = MeshFactory.SetupQuadColliderMesh(outputStructData);
-    }
-
-    private void QuadGPUGetDataReady(Quad q)
-    {
-        //Debug.Log("Quad: QuadGPUGetDataReady() - " + q.gameObject.name);
-    }
 
     private void Awake()
     {
@@ -250,8 +187,6 @@ public sealed class Quad : MonoBehaviour, IQuad, IEventit<Quad>
 
         if (QuadMaterial != null)
             DestroyImmediate(QuadMaterial);
-
-        UnEventit(this);
     }
 
     private void OnDrawGizmos()
@@ -672,8 +607,7 @@ public sealed class Quad : MonoBehaviour, IQuad, IEventit<Quad>
     {
         if (CoreShader == null) StopCoroutine(DispatchCoroutine());
 
-        if (DispatchStarted != null)
-            DispatchStarted(this);
+        EventManager.PlanetoidEvents.OnDispatchStarted.Invoke(Planetoid, this);
 
         generationConstants.SplitLevel = LODLevel + 2;
         generationConstants.LODLevel = (((1 << LODLevel + 2) * (Planetoid.PlanetRadius / (LODLevel + 2)) - ((Planetoid.PlanetRadius / (LODLevel + 2)) / 2)) / Planetoid.PlanetRadius);
@@ -757,8 +691,7 @@ public sealed class Quad : MonoBehaviour, IQuad, IEventit<Quad>
 
             this.GPUDataRecieved = true;
 
-            if (GPUGetDataReady != null)
-                GPUGetDataReady(this);
+            EventManager.PlanetoidEvents.OnDispatchFinished.Invoke(Planetoid, this);
         }
 
         //Release and dispose unnecessary buffers. Video memory, you are free!
@@ -766,8 +699,7 @@ public sealed class Quad : MonoBehaviour, IQuad, IEventit<Quad>
 
         BuffersCreated = false;
 
-        if (DispatchReady != null)
-            DispatchReady(this);
+        EventManager.PlanetoidEvents.OnDispatchEnd.Invoke(Planetoid, this);
     }
 
     private void SetupComputeShaderUniforms()

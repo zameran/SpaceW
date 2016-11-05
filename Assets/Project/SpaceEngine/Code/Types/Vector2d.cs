@@ -139,7 +139,7 @@ namespace UnityEngine
             return x * v.y - y * v.x;
         }
 
-        static public double Cross(Vector2d u, Vector2d v)
+        public static double Cross(Vector2d u, Vector2d v)
         {
             return u.x * v.y - u.y * v.x;
         }
@@ -148,5 +148,5 @@ namespace UnityEngine
         {
             return new Vector2((float)x, (float)y);
         }
-    } 
+    }
 }

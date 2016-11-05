@@ -235,7 +235,7 @@ namespace UnityEngine
             return mat;
         }
 
-        static public Matrix3x3 Rotate(Vector3 rotation)
+        public static Matrix3x3 Rotate(Vector3 rotation)
         {
             Quat x = new Quat(new Vector3d(1, 0, 0), rotation.x * MathUtility.Deg2Rad);
             Quat y = new Quat(new Vector3d(0, 1, 0), rotation.y * MathUtility.Deg2Rad);
@@ -244,9 +244,9 @@ namespace UnityEngine
             return (z * y * x).ToMatrix3x3();
         }
 
-        static public Matrix3x3 Identity()
+        public static Matrix3x3 Identity()
         {
             return new Matrix3x3(1, 0, 0, 0, 1, 0, 0, 0, 1);
         }
-    } 
+    }
 }
