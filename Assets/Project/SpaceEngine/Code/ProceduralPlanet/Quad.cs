@@ -167,8 +167,8 @@ public sealed class Quad : MonoBehaviour, IQuad
     {
         CreateBuffers();
 
-        HeightTexture = RTExtensions.CreateRTexture(QuadSettings.nVertsPerEdgeSub, 0, RenderTextureFormat.ARGB32);
-        NormalTexture = RTExtensions.CreateRTexture(QuadSettings.nVertsPerEdgeSub, 0, RenderTextureFormat.ARGB32);
+        HeightTexture = RTExtensions.CreateRTexture(QuadSettings.VerticesPerSideFull, 0, RenderTextureFormat.ARGB32);
+        NormalTexture = RTExtensions.CreateRTexture(QuadSettings.VerticesPerSideFull, 0, RenderTextureFormat.ARGB32);
 
         RTUtility.ClearColor(new RenderTexture[] { HeightTexture, NormalTexture });
     }
@@ -237,10 +237,10 @@ public sealed class Quad : MonoBehaviour, IQuad
     {
         if (!BuffersCreated)
         {
-            QuadGenerationConstantsBuffer = new ComputeBuffer(1, 96);
-            PreOutDataBuffer = new ComputeBuffer(QuadSettings.nVertsReal, 48);
-            PreOutDataSubBuffer = new ComputeBuffer(QuadSettings.nVertsSubReal, 48);
-            OutDataBuffer = new ComputeBuffer(QuadSettings.nVerts, 48);
+            QuadGenerationConstantsBuffer = new ComputeBuffer(1, 84);
+            PreOutDataBuffer = new ComputeBuffer(QuadSettings.VerticesWithBorder, 48);
+            PreOutDataSubBuffer = new ComputeBuffer(QuadSettings.VerticesWithBorderFull, 48);
+            OutDataBuffer = new ComputeBuffer(QuadSettings.Vertices, 48);
             QuadCornersBuffer = new ComputeBuffer(1, 48);
 
             BuffersCreated = true;
@@ -609,18 +609,16 @@ public sealed class Quad : MonoBehaviour, IQuad
 
         EventManager.PlanetoidEvents.OnDispatchStarted.Invoke(Planetoid, this);
 
-        generationConstants.SplitLevel = LODLevel + 2;
-        generationConstants.LODLevel = (((1 << LODLevel + 2) * (Planetoid.PlanetRadius / (LODLevel + 2)) - ((Planetoid.PlanetRadius / (LODLevel + 2)) / 2)) / Planetoid.PlanetRadius);
-        generationConstants.LODOctaveModifier = Planetoid.GetLODOctaveModifier(LODLevel + 1);
-        generationConstants.orientation = (float)Position;
+        generationConstants.lodLevel = (((1 << LODLevel + 2) * (Planetoid.PlanetRadius / (LODLevel + 2)) - ((Planetoid.PlanetRadius / (LODLevel + 2)) / 2)) / Planetoid.PlanetRadius);
+        generationConstants.lodOctaveModifier = Planetoid.GetLODOctaveModifier(LODLevel + 1);
 
         SetupComputeShaderUniforms();
 
-        QuadGenerationConstants[] quadGenerationConstantsData = new QuadGenerationConstants[] { generationConstants };
-        OutputStruct[] preOutputStructData = new OutputStruct[QuadSettings.nVertsReal];
-        OutputStruct[] preOutputSubStructData = new OutputStruct[QuadSettings.nVertsSubReal];
-        OutputStruct[] outputStructData = new OutputStruct[QuadSettings.nVerts];
-        QuadCorners[] quadCorners = new QuadCorners[] { new QuadCorners() };
+        QuadGenerationConstants[] quadGenerationConstantsData = { generationConstants };
+        OutputStruct[] preOutputStructData = new OutputStruct[QuadSettings.VerticesWithBorder];
+        OutputStruct[] preOutputSubStructData = new OutputStruct[QuadSettings.VerticesWithBorderFull];
+        OutputStruct[] outputStructData = new OutputStruct[QuadSettings.Vertices];
+        QuadCorners[] quadCorners = { new QuadCorners() };
 
         CreateBuffers();
 
@@ -642,30 +640,11 @@ public sealed class Quad : MonoBehaviour, IQuad
                                            OutDataBuffer,
                                            QuadCornersBuffer, new int[] { kernel1, kernel2, kernel3, kernel4, kernel5 });
 
-        CoreShader.Dispatch(kernel1,
-        QuadSettings.THREADGROUP_SIZE_X_REAL,
-        QuadSettings.THREADGROUP_SIZE_Y_REAL,
-        QuadSettings.THREADGROUP_SIZE_Z_REAL);
-
-        CoreShader.Dispatch(kernel2,
-        QuadSettings.THREADGROUP_SIZE_X,
-        QuadSettings.THREADGROUP_SIZE_Y,
-        QuadSettings.THREADGROUP_SIZE_Z);
-
-        CoreShader.Dispatch(kernel3,
-        QuadSettings.THREADGROUP_SIZE_X_SUB_REAL,
-        QuadSettings.THREADGROUP_SIZE_Y_SUB_REAL,
-        QuadSettings.THREADGROUP_SIZE_Z_SUB_REAL);
-
-        CoreShader.Dispatch(kernel4,
-        QuadSettings.THREADGROUP_SIZE_X_SUB,
-        QuadSettings.THREADGROUP_SIZE_Y_SUB,
-        QuadSettings.THREADGROUP_SIZE_Z_SUB);
-
-        CoreShader.Dispatch(kernel5,
-        QuadSettings.THREADGROUP_SIZE_X_UNIT,
-        QuadSettings.THREADGROUP_SIZE_Y_UNIT,
-        QuadSettings.THREADGROUP_SIZE_Z_UNIT);
+        CoreShader.Dispatch(kernel1, QuadSettings.THREADGROUP_SIZE_BORDER, QuadSettings.THREADGROUP_SIZE_BORDER, 1);
+        CoreShader.Dispatch(kernel2, QuadSettings.THREADGROUP_SIZE, QuadSettings.THREADGROUP_SIZE, 1);
+        CoreShader.Dispatch(kernel3, QuadSettings.THREADGROUP_SIZE_BORDER_FULL, QuadSettings.THREADGROUP_SIZE_BORDER_FULL, 1);
+        CoreShader.Dispatch(kernel4, QuadSettings.THREADGROUP_SIZE_FULL, QuadSettings.THREADGROUP_SIZE_FULL, 1);
+        CoreShader.Dispatch(kernel5, 1, 1, 1);
 
         Generated = true;
 

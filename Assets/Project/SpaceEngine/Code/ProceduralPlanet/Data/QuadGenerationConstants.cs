@@ -41,40 +41,34 @@ public struct QuadGenerationConstants : IData
 {
     public float planetRadius; //4
     public float spacing; //4
-    public float spacingreal; //4
-    public float spacingsub; //4
+    public float spacingFull; //4
     public float terrainMaxHeight; //4
-    public float LODLevel; //4
-    public float SplitLevel; //4
-    public float LODOctaveModifier; //4
-    public float orientation; //4
+    public float lodLevel; //4
+    public float lodOctaveModifier; //4
 
-    //x - nVerticesPerSide
-    //y - nVerticesPerSideWithBorder
-    //z - nVerticesPerSideSub
-    //w - nVerticesPerSideWithBorderSub
+    //x - VerticesPerSide
+    //y - VerticesPerSideWithBorder
+    //z - VerticesPerSideFull
+    //w - VerticesPerSideWithBorderFull
     public Vector4 meshSettings; //16
 
-    //x - RingSegmentMesh
-    //y - texture
+    //x - BorderModMesh
+    //y - BorderModTexture
     public Vector2 borderMod; //8
 
     public Vector3 cubeFaceEastDirection; //12
     public Vector3 cubeFaceNorthDirection; //12
     public Vector3 patchCubeCenter; //12
 
-    //32 + 16 + 8 + 36 + 4 = 96
-
     public static QuadGenerationConstants Init()
     {
         QuadGenerationConstants temp = new QuadGenerationConstants();
 
-        temp.meshSettings = new Vector4(QuadSettings.nVertsPerEdge, QuadSettings.nVertsPerEdgeReal, QuadSettings.nVertsPerEdgeSub, QuadSettings.nVertsPerEdgeSubReal);
-        temp.borderMod = new Vector2(QuadSettings.borderModMesh, QuadSettings.borderModTexture);
+        temp.meshSettings = new Vector4(QuadSettings.VerticesPerSide, QuadSettings.VerticesPerSideWithBorder, QuadSettings.VerticesPerSideFull, QuadSettings.VerticesPerSideWithBorderFull);
+        temp.borderMod = new Vector2(QuadSettings.BorderModMesh, QuadSettings.BorderModTexture);
 
-        temp.spacing = QuadSettings.nSpacing;
-        temp.spacingreal = QuadSettings.nSpacingReal;
-        temp.spacingsub = QuadSettings.nSpacingSub;
+        temp.spacing = QuadSettings.Spacing;
+        temp.spacingFull = QuadSettings.SpacingFull;
         temp.terrainMaxHeight = 64.0f;
 
         return temp;
@@ -84,12 +78,11 @@ public struct QuadGenerationConstants : IData
     {
         QuadGenerationConstants temp = new QuadGenerationConstants();
 
-        temp.meshSettings = new Vector4(QuadSettings.nVertsPerEdge, QuadSettings.nVertsPerEdgeReal, QuadSettings.nVertsPerEdgeSub, QuadSettings.nVertsPerEdgeSubReal);
-        temp.borderMod = new Vector2(QuadSettings.borderModMesh, QuadSettings.borderModTexture);
+        temp.meshSettings = new Vector4(QuadSettings.VerticesPerSide, QuadSettings.VerticesPerSideWithBorder, QuadSettings.VerticesPerSideFull, QuadSettings.VerticesPerSideWithBorderFull);
+        temp.borderMod = new Vector2(QuadSettings.BorderModMesh, QuadSettings.BorderModTexture);
 
-        temp.spacing = QuadSettings.nSpacing;
-        temp.spacingreal = QuadSettings.nSpacingReal;
-        temp.spacingsub = QuadSettings.nSpacingSub;
+        temp.spacing = QuadSettings.Spacing;
+        temp.spacingFull = QuadSettings.SpacingFull;
         temp.terrainMaxHeight = terrainMaxHeight;
 
         return temp;
@@ -97,6 +90,6 @@ public struct QuadGenerationConstants : IData
 
     public int GetStride()
     {
-        return 96;
+        return 84;
     }
 }

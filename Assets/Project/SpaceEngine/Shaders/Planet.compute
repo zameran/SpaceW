@@ -31,12 +31,12 @@
 // Creation Time: Undefined
 // Creator: zameran
 
-#define nVerticesPerSide 				quadGenerationConstants[0].meshSettings.x
-#define nVerticesPerSideWithBorder 		quadGenerationConstants[0].meshSettings.y
-#define nVerticesPerSideSub 			quadGenerationConstants[0].meshSettings.z
-#define nVerticesPerSideWithBorderSub 	quadGenerationConstants[0].meshSettings.w
-#define borderModMesh					quadGenerationConstants[0].borderMod.x
-#define borderModTexture				quadGenerationConstants[0].borderMod.y
+#define VerticesPerSide 				quadGenerationConstants[0].meshSettings.x
+#define VerticesPerSideWithBorder 		quadGenerationConstants[0].meshSettings.y
+#define VerticesPerSideFull 			quadGenerationConstants[0].meshSettings.z
+#define VerticesPerSideWithBorderFull 	quadGenerationConstants[0].meshSettings.w
+#define BorderModMesh					quadGenerationConstants[0].borderMod.x
+#define BorderModTexture				quadGenerationConstants[0].borderMod.y
 
 //#define defaultNoise
 
@@ -103,9 +103,9 @@ void HeightMain (uint3 id : SV_DispatchThreadID)
 {
 	QuadGenerationConstants constants = quadGenerationConstants[0];
 
-	int outBuffOffset = id.x + id.y * nVerticesPerSideWithBorder;
+	int outBuffOffset = id.x + id.y * VerticesPerSideWithBorder;
 
-	float3 cubeCoord = CubeCoord(constants, nVerticesPerSideWithBorder, id, borderModMesh, constants.spacing);
+	float3 cubeCoord = CubeCoord(constants, VerticesPerSideWithBorder, id, BorderModMesh, constants.spacing);
 
 	float3 patchCenter = normalize(constants.patchCubeCenter) * constants.planetRadius;
 	float3 patchNormalizedCoord = normalize(cubeCoord);
@@ -138,9 +138,9 @@ void HeightSub(uint3 id : SV_DispatchThreadID)
 {
 	QuadGenerationConstants constants = quadGenerationConstants[0];
 
-	int outBuffOffset = id.x + id.y * nVerticesPerSideWithBorderSub;
+	int outBuffOffset = id.x + id.y * VerticesPerSideWithBorderFull;
 
-	float3 cubeCoord = CubeCoord(constants, nVerticesPerSideWithBorderSub, id, borderModTexture, constants.spacingsub);
+	float3 cubeCoord = CubeCoord(constants, VerticesPerSideWithBorderFull, id, BorderModTexture, constants.spacingFull);
 
 	float3 patchCenter = normalize(constants.patchCubeCenter) * constants.planetRadius;
 	float3 patchNormalizedCoord = normalize(cubeCoord);
@@ -173,7 +173,7 @@ void TexturesSub(uint3 id : SV_DispatchThreadID)
 {
 	QuadGenerationConstants constants = quadGenerationConstants[0];
 
-	int inBuffOffset = (id.x + 1) + (id.y + 1) * nVerticesPerSideWithBorderSub;
+	int inBuffOffset = (id.x + 1) + (id.y + 1) * VerticesPerSideWithBorderFull;
 	
 	float noiseValue = patchPreOutputSub[inBuffOffset].noise;
 	float3 patchCenter = patchPreOutputSub[inBuffOffset].patchCenter;
@@ -181,14 +181,14 @@ void TexturesSub(uint3 id : SV_DispatchThreadID)
 	float4 cubePosition = patchPreOutputSub[inBuffOffset].cubePosition;
 
 	float slope = 0;
-	float3 heightNormal = GetHeightNormal(constants, patchPreOutputSub, nVerticesPerSideWithBorderSub, id, slope);
+	float3 heightNormal = GetHeightNormal(constants, patchPreOutputSub, VerticesPerSideWithBorderFull, id, slope);
 
 	//float slope = 0;
-	//float3 sobelNormal = GetSobelNormal(constants, patchPreOutputSub, nVerticesPerSideWithBorderSub, id);
-	//float3 heightNormal = GetHeightNormal(constants, patchPreOutputSub, nVerticesPerSideWithBorderSub, id, slope);
-	float3 positionNormal = GetHeightNormalFromPosition(constants, patchPreOutputSub, nVerticesPerSideWithBorderSub, id);
-	//float3 bumpNormal = GetHeightNormalFromBump(constants, patchPreOutputSub, nVerticesPerSideWithBorderSub, id);
-	//float3 packedNormal = GetPackedNormal(constants, patchPreOutputSub, nVerticesPerSideWithBorderSub, id);
+	//float3 sobelNormal = GetSobelNormal(constants, patchPreOutputSub, VerticesPerSideWithBorderFull, id);
+	//float3 heightNormal = GetHeightNormal(constants, patchPreOutputSub, VerticesPerSideWithBorderFull, id, slope);
+	float3 positionNormal = GetHeightNormalFromPosition(constants, patchPreOutputSub, VerticesPerSideWithBorderFull, id);
+	//float3 bumpNormal = GetHeightNormalFromBump(constants, patchPreOutputSub, VerticesPerSideWithBorderFull, id);
+	//float3 packedNormal = GetPackedNormal(constants, patchPreOutputSub, VerticesPerSideWithBorderFull, id);
 
 	float3 normal = positionNormal;
 
@@ -204,8 +204,8 @@ void TexturesSub(uint3 id : SV_DispatchThreadID)
 [numthreads(30, 30, 1)]
 void Transfer(uint3 id : SV_DispatchThreadID)
 {
-	int inBuffOffset = (id.x + 1) + (id.y + 1) * nVerticesPerSideWithBorder;
-	int outBuffOffset = id.x + id.y * nVerticesPerSide;
+	int inBuffOffset = (id.x + 1) + (id.y + 1) * VerticesPerSideWithBorder;
+	int outBuffOffset = id.x + id.y * VerticesPerSide;
 
 	patchOutput[outBuffOffset] = patchPreOutput[inBuffOffset];
 }
@@ -216,8 +216,8 @@ void GetCorners(uint3 id : SV_DispatchThreadID)
 {
 	float4 center = float4(patchOutput[0].patchCenter, 0);
 
-	float size = nVerticesPerSide - 1;
-	float sideSize = size * nVerticesPerSide;
+	float size = VerticesPerSide - 1;
+	float sideSize = size * VerticesPerSide;
 
 	float4 topLeftCorner = patchOutput[size].position + center;
 	float4 topRightCorner = patchOutput[0].position + center;
