@@ -68,13 +68,13 @@ public class GUIDrawQuadTexture : MonoBehaviour
                 {
                     if (q.HeightTexture == null || q.NormalTexture == null) return;
 
-                    Vector2 size = new Vector2(QuadSettings.nVertsPerEdgeSub, QuadSettings.nVertsPerEdgeSub);
+                    Vector2 size = new Vector2(QuadSettings.VerticesPerSideFull, QuadSettings.VerticesPerSideFull);
 
                     if (q.Position == quadPosition)
                     {
                         GUI.BeginGroup(new Rect(0, 0, Screen.width * 10, Screen.height * 10));
-                        GUIUtility.RotateAroundPivot(angle, new Vector2(x + QuadSettings.nVertsPerEdge * scale,
-                                                                        y + QuadSettings.nVertsPerEdge * scale));
+                        GUIUtility.RotateAroundPivot(angle, new Vector2(x + QuadSettings.VerticesPerSide * scale,
+                                                                        y + QuadSettings.VerticesPerSide * scale));
                         GUI.DrawTexture(new Rect(x, y, size.x * scale, size.y * scale),
                                                  GetTexture(q, textureType), ScaleMode.ScaleAndCrop, alphaBelnded);
                         GUI.EndGroup();
@@ -86,7 +86,7 @@ public class GUIDrawQuadTexture : MonoBehaviour
 
     private void DrawBox()
     {
-        Vector2 size = new Vector2(QuadSettings.nVertsPerEdgeSub * scale, QuadSettings.nVertsPerEdgeSub * scale);
+        Vector2 size = new Vector2(QuadSettings.VerticesPerSideFull * scale, QuadSettings.VerticesPerSideFull * scale);
 
         if (planetoid != null)
         {
@@ -108,8 +108,8 @@ public class GUIDrawQuadTexture : MonoBehaviour
                     else if (q.Position == QuadPosition.Bottom)
                     {
                         GUI.BeginGroup(new Rect(0, 0, Screen.width * 10, Screen.height * 10));
-                        GUIUtility.RotateAroundPivot(180, new Vector2(x + QuadSettings.nVertsPerEdge * scale,
-                                                                      y + QuadSettings.nVertsPerEdge * scale));
+                        GUIUtility.RotateAroundPivot(180, new Vector2(x + QuadSettings.VerticesPerSide * scale,
+                                                                      y + QuadSettings.VerticesPerSide * scale));
 
                         GUI.DrawTexture(bottomRect, GetTexture(q, textureType), ScaleMode.ScaleAndCrop, alphaBelnded);
                         GUI.EndGroup();
@@ -117,8 +117,8 @@ public class GUIDrawQuadTexture : MonoBehaviour
                     else if (q.Position == QuadPosition.Left)
                     {
                         GUI.BeginGroup(new Rect(0, 0, Screen.width * 10, Screen.height * 10));
-                        GUIUtility.RotateAroundPivot(-90, new Vector2(x + QuadSettings.nVertsPerEdge * scale,
-                                                                      y + QuadSettings.nVertsPerEdge * scale));
+                        GUIUtility.RotateAroundPivot(-90, new Vector2(x + QuadSettings.VerticesPerSide * scale,
+                                                                      y + QuadSettings.VerticesPerSide * scale));
 
                         GUI.DrawTexture(leftRect, GetTexture(q, textureType), ScaleMode.ScaleAndCrop, alphaBelnded);
                         GUI.EndGroup();
@@ -126,8 +126,8 @@ public class GUIDrawQuadTexture : MonoBehaviour
                     else if (q.Position == QuadPosition.Right)
                     {
                         GUI.BeginGroup(new Rect(0, 0, Screen.width * 10, Screen.height * 10));
-                        GUIUtility.RotateAroundPivot(90, new Vector2(x + QuadSettings.nVertsPerEdge * scale,
-                                                                     y + QuadSettings.nVertsPerEdge * scale));
+                        GUIUtility.RotateAroundPivot(90, new Vector2(x + QuadSettings.VerticesPerSide * scale,
+                                                                     y + QuadSettings.VerticesPerSide * scale));
 
                         GUI.DrawTexture(rightRect, GetTexture(q, textureType), ScaleMode.ScaleAndCrop, alphaBelnded);
                         GUI.EndGroup();
@@ -135,8 +135,8 @@ public class GUIDrawQuadTexture : MonoBehaviour
                     else if (q.Position == QuadPosition.Front)
                     {
                         GUI.BeginGroup(new Rect(0, 0, Screen.width * 10, Screen.height * 10));
-                        GUIUtility.RotateAroundPivot(90, new Vector2(x + QuadSettings.nVertsPerEdge * scale,
-                                                                     y + QuadSettings.nVertsPerEdge * scale));
+                        GUIUtility.RotateAroundPivot(90, new Vector2(x + QuadSettings.VerticesPerSide * scale,
+                                                                     y + QuadSettings.VerticesPerSide * scale));
 
                         GUI.DrawTexture(frontRect, GetTexture(q, textureType), ScaleMode.ScaleAndCrop, alphaBelnded);
                         GUI.EndGroup();
@@ -144,8 +144,8 @@ public class GUIDrawQuadTexture : MonoBehaviour
                     else if (q.Position == QuadPosition.Back)
                     {
                         GUI.BeginGroup(new Rect(0, 0, Screen.width * 10, Screen.height * 10));
-                        GUIUtility.RotateAroundPivot(-90, new Vector2(x + QuadSettings.nVertsPerEdge * scale,
-                                                                      y + QuadSettings.nVertsPerEdge * scale));
+                        GUIUtility.RotateAroundPivot(-90, new Vector2(x + QuadSettings.VerticesPerSide * scale,
+                                                                      y + QuadSettings.VerticesPerSide * scale));
 
                         GUI.DrawTexture(backRect, GetTexture(q, textureType), ScaleMode.ScaleAndCrop, alphaBelnded);
                         GUI.EndGroup();

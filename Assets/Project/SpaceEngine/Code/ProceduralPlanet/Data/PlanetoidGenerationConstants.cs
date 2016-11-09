@@ -52,7 +52,7 @@ public struct PlanetGenerationConstants : IData
         temp.planetRadius = 2048.0f;
         temp.terrainMaxHeight = 64.0f;
 
-        temp.meshSettings = new Vector4(QuadSettings.nVertsPerEdge, QuadSettings.nVertsPerEdgeReal, QuadSettings.nVertsPerEdgeSub, QuadSettings.nVertsPerEdgeSubReal);
+        temp.meshSettings = new Vector4(QuadSettings.VerticesPerSide, QuadSettings.VerticesPerSideWithBorder, QuadSettings.VerticesPerSideFull, QuadSettings.VerticesPerSideWithBorderFull);
 
         return temp;
     }
@@ -64,7 +64,7 @@ public struct PlanetGenerationConstants : IData
         temp.planetRadius = planetRadius;
         temp.terrainMaxHeight = terrainMaxHeight;
 
-        temp.meshSettings = new Vector4(QuadSettings.nVertsPerEdge, QuadSettings.nVertsPerEdgeReal, QuadSettings.nVertsPerEdgeSub, QuadSettings.nVertsPerEdgeSubReal);
+        temp.meshSettings = new Vector4(QuadSettings.VerticesPerSide, QuadSettings.VerticesPerSideWithBorder, QuadSettings.VerticesPerSideFull, QuadSettings.VerticesPerSideWithBorderFull);
 
         return temp;
     }

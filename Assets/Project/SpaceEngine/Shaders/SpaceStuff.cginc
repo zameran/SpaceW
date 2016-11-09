@@ -202,25 +202,14 @@ float4 ShadowOuterColor(float3 d, float3 WCP, float3 _Globals_Origin, float Rt)
 //----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
-struct PlanetGenerationConstants //For planet only
-{
-	float planetRadius;
-	float terrainMaxHeight;
-
-	float4 meshSettings;
-};
-
 struct QuadGenerationConstants //For every quad
 {
 	float planetRadius;
 	float spacing;
-	float spacingreal;
-	float spacingsub;
+	float spacingFull;
 	float terrainMaxHeight;
 	float lodLevel;
-	float splitLevel;
 	float lodOctaveModifier;
-	float orientation;
 
 	float4 meshSettings;
 

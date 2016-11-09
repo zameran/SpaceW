@@ -38,48 +38,32 @@ using System;
 [Serializable]
 public static class QuadSettings
 {
-    public static int textureScaleModifier { get { return 2; } }
+    private static int TextureScaleModifier { get { return 2; } }
 
-    public static int borderModMesh { get { return 3; } }
-    public static int borderModTexture { get { return 7; } }
+    public static int BorderModMesh { get { return 3; } }
+    public static int BorderModTexture { get { return 7; } }
 
-    public static int nVertsPerEdgeReal { get { return 64; } }
-    public static int nVertsPerEdge { get { return 60; } }
-    public static int nVertsPerEdgeSubReal { get { return nVertsPerEdgeReal * textureScaleModifier; } }
-    public static int nVertsPerEdgeSub { get { return nVertsPerEdge * textureScaleModifier; } }
+    public static int VerticesPerSideWithBorder { get { return 64; } }
+    public static int VerticesPerSide { get { return 60; } }
+    public static int VerticesPerSideWithBorderFull { get { return VerticesPerSideWithBorder * TextureScaleModifier; } }
+    public static int VerticesPerSideFull { get { return VerticesPerSide * TextureScaleModifier; } }
 
-    public static int nVertsReal { get { return nVertsPerEdgeReal * nVertsPerEdgeReal; } }
-    public static int nVerts { get { return nVertsPerEdge * nVertsPerEdge; } }
-    public static int nVertsSubReal { get { return nVertsPerEdgeSubReal * nVertsPerEdgeSubReal; } }
-    public static int nVertsSub { get { return nVertsPerEdgeSub * nVertsPerEdgeSub; } }
+    public static int VerticesWithBorder { get { return VerticesPerSideWithBorder * VerticesPerSideWithBorder; } }
+    public static int Vertices { get { return VerticesPerSide * VerticesPerSide; } }
+    public static int VerticesWithBorderFull { get { return VerticesPerSideWithBorderFull * VerticesPerSideWithBorderFull; } }
+    public static int VerticesFull { get { return VerticesPerSideFull * VerticesPerSideFull; } }
 
-    public static float nSpacingReal { get { return 2.0f / (nVertsPerEdgeReal - 1.0f); } }
-    public static float nSpacing { get { return 2.0f / (nVertsPerEdge - 1.0f); } }
-    public static float nSpacingSub { get { return 2.0f / (nVertsPerEdgeSub - 1.0f); } }
+    public static float Spacing { get { return 2.0f / (VerticesPerSide - 1.0f); } }
+    public static float SpacingFull { get { return 2.0f / (VerticesPerSideFull - 1.0f); } }
 
-    public static int THREADS_PER_GROUP_X { get { return 30; } }
-    public static int THREADS_PER_GROUP_Y { get { return 30; } }
+    private static int THREADS_PER_GROUP { get { return 30; } }
+    private static int THREADS_PER_GROUP_FULL { get { return 32; } }
 
-    public static int THREADS_PER_GROUP_X_REAL { get { return 32; } }
-    public static int THREADS_PER_GROUP_Y_REAL { get { return 32; } }
+    public static int THREADGROUP_SIZE { get { return VerticesPerSide / THREADS_PER_GROUP; } }
 
-    public static int THREADGROUP_SIZE_X_UNIT { get { return 1; } }
-    public static int THREADGROUP_SIZE_Y_UNIT { get { return 1; } }
-    public static int THREADGROUP_SIZE_Z_UNIT { get { return 1; } }
+    public static int THREADGROUP_SIZE_BORDER { get { return VerticesPerSideWithBorder / THREADS_PER_GROUP_FULL; } }
 
-    public static int THREADGROUP_SIZE_X { get { return nVertsPerEdge / THREADS_PER_GROUP_X; } }
-    public static int THREADGROUP_SIZE_Y { get { return nVertsPerEdge / THREADS_PER_GROUP_Y; } }
-    public static int THREADGROUP_SIZE_Z { get { return 1; } }
+    public static int THREADGROUP_SIZE_FULL { get { return VerticesPerSideFull / THREADS_PER_GROUP; } }
 
-    public static int THREADGROUP_SIZE_X_REAL { get { return nVertsPerEdgeReal / THREADS_PER_GROUP_X_REAL; } }
-    public static int THREADGROUP_SIZE_Y_REAL { get { return nVertsPerEdgeReal / THREADS_PER_GROUP_Y_REAL; } }
-    public static int THREADGROUP_SIZE_Z_REAL { get { return 1; } }
-
-    public static int THREADGROUP_SIZE_X_SUB { get { return nVertsPerEdgeSub / THREADS_PER_GROUP_X; } }
-    public static int THREADGROUP_SIZE_Y_SUB { get { return nVertsPerEdgeSub / THREADS_PER_GROUP_Y; } }
-    public static int THREADGROUP_SIZE_Z_SUB { get { return 1; } }
-
-    public static int THREADGROUP_SIZE_X_SUB_REAL { get { return nVertsPerEdgeSubReal / THREADS_PER_GROUP_X_REAL; } }
-    public static int THREADGROUP_SIZE_Y_SUB_REAL { get { return nVertsPerEdgeSubReal / THREADS_PER_GROUP_Y_REAL; } }
-    public static int THREADGROUP_SIZE_Z_SUB_REAL { get { return 1; } }
+    public static int THREADGROUP_SIZE_BORDER_FULL { get { return VerticesPerSideWithBorderFull / THREADS_PER_GROUP_FULL; } }
 }

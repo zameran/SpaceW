@@ -140,7 +140,7 @@ void HeightSub(uint3 id : SV_DispatchThreadID)
 
 	int outBuffOffset = id.x + id.y * nVerticesPerSideWithBorderSub;
 
-	float3 cubeCoord = CubeCoord(constants, nVerticesPerSideWithBorderSub, id, borderModTexture, constants.spacingsub);
+	float3 cubeCoord = CubeCoord(constants, nVerticesPerSideWithBorderSub, id, borderModTexture, constants.spacingFull);
 
 	float3 patchCenter = normalize(constants.patchCubeCenter) * constants.planetRadius;
 	float3 patchNormalizedCoord = normalize(cubeCoord);

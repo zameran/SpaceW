@@ -62,7 +62,7 @@ namespace SpaceEngine.Debugging
 
         public double CalculateTexturesVMU(int quadsCount)
         {
-            int size = QuadSettings.nVertsPerEdgeSub * QuadSettings.nVertsPerEdgeSub;
+            int size = QuadSettings.VerticesPerSideFull * QuadSettings.VerticesPerSideFull;
 
             double sizeInBytes = size * 8; //8 bit per channel.
             double sizeInMegabytes = (sizeInBytes / 1024.0) / 1024.0;
@@ -89,7 +89,7 @@ namespace SpaceEngine.Debugging
                 {
                     int quadsCount = Planetoid.Quads.Count;
                     int quadsCulledCount = Planetoid.GetCulledQuadsCount();
-                    int vertsRendered = (quadsCount - quadsCulledCount) * QuadSettings.nVerts;
+                    int vertsRendered = (quadsCount - quadsCulledCount) * QuadSettings.Vertices;
 
                     double quadsTexturesVideoMemoryUsage = CalculateTexturesVMU(quadsCount);
 
