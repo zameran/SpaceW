@@ -98,8 +98,8 @@ namespace SpaceEngine.AtmosphericScattering
 
         public List<AtmosphereSun> Suns = new List<AtmosphereSun>();
 
-        public List<Planet> eclipseCasters = new List<Planet>();
-        public List<GameObject> shineCasters = new List<GameObject>();
+        public List<Planet> EclipseCasters = new List<Planet>();
+        public List<GameObject> ShineCasters = new List<GameObject>();
 
         private AtmosphereParameters atmosphereParameters;
 
@@ -239,13 +239,13 @@ namespace SpaceEngine.AtmosphericScattering
 
             int index = 0;
 
-            for (int i = 0; i < Mathf.Min(4, shineCasters.Count); i++)
+            for (int i = 0; i < Mathf.Min(4, ShineCasters.Count); i++)
             {
-                if (shineCasters[i] == null) { Debug.Log("Atmosphere: Shine problem!"); break; }
+                if (ShineCasters[i] == null) { Debug.Log("Atmosphere: Shine problem!"); break; }
 
                 float distance = shineColors[i].a; //TODO : Distance based shine power.
 
-                soc1.SetRow(i, VectorHelper.MakeFrom((shineCasters[i].transform.position - Origin).normalized, 1.0f));
+                soc1.SetRow(i, VectorHelper.MakeFrom((ShineCasters[i].transform.position - Origin).normalized, 1.0f));
 
                 sc1.SetRow(index, VectorHelper.FromColor(shineColors[i], distance));
 
@@ -269,15 +269,15 @@ namespace SpaceEngine.AtmosphericScattering
                 sunsMatrix.SetRow(i, VectorHelper.MakeFrom(Suns[i].transform.position, VectorHelper.AngularRadius(Suns[i].transform.position, Origin, Suns[i].Radius)));
             }
 
-            for (int i = 0; i < Mathf.Min(4, eclipseCasters.Count); i++)
+            for (int i = 0; i < Mathf.Min(4, EclipseCasters.Count); i++)
             {
-                if (eclipseCasters[i] == null)
+                if (EclipseCasters[i] == null)
                 {
                     Debug.Log("Atmosphere: Eclipse caster problem!");
                     break;
                 }
 
-                occludersMatrix.SetRow(i, VectorHelper.MakeFrom(eclipseCasters[i].Origin - Origin, eclipseCasters[i].PlanetRadius));
+                occludersMatrix.SetRow(i, VectorHelper.MakeFrom(EclipseCasters[i].Origin - Origin, EclipseCasters[i].PlanetRadius));
             }
         }
 
@@ -380,6 +380,32 @@ namespace SpaceEngine.AtmosphericScattering
         private void OnDestroy()
         {
             UnEventit();
+        }
+
+        private void OnDrawGizmosSelected()
+        {
+            if (planetoid != null)
+            {
+                if (planetoid.DrawGizmos == false) return;
+
+                for (int i = 0; i < Mathf.Min(4, Suns.Count); i++)
+                {
+                    var distanceToSun = Vector3.Distance(Suns[i].transform.position, Origin);
+                    var sunDirection = (Suns[i].transform.position - Origin) * distanceToSun;
+
+                    Gizmos.color = XKCDColors.Red;
+                    Gizmos.DrawRay(Origin, sunDirection);
+
+                    for (int j = 0; j < Mathf.Min(4, EclipseCasters.Count); j++)
+                    {
+                        var distanceToEclipseCaster = Vector3.Distance(EclipseCasters[i].Origin, Origin); ;
+                        var eclipseCasterDirection = (EclipseCasters[j].Origin - Origin) * distanceToEclipseCaster;
+
+                        Gizmos.color = XKCDColors.Green;
+                        Gizmos.DrawRay(Origin, eclipseCasterDirection);
+                    }
+                }
+            }
         }
 
         private void OnDrawGizmos()

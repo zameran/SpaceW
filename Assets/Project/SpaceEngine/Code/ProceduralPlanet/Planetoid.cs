@@ -72,7 +72,7 @@ public static class PlanetoidExtensions
 
                     Keywords.Add("LIGHT_" + lightCount);
 
-                    if (planet.Atmosphere.eclipseCasters.Count == 0)
+                    if (planet.Atmosphere.EclipseCasters.Count == 0)
                     {
                         Keywords.Add("ECLIPSES_OFF");
                     }
@@ -81,7 +81,7 @@ public static class PlanetoidExtensions
                         Keywords.Add(planet.Atmosphere.Eclipses ? "ECLIPSES_ON" : "ECLIPSES_OFF");
                     }
 
-                    if (planet.Atmosphere.shineCasters.Count == 0)
+                    if (planet.Atmosphere.ShineCasters.Count == 0)
                     {
                         Keywords.Add("SHINE_OFF");
                     }
