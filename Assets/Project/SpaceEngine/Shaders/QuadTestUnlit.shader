@@ -27,6 +27,7 @@
 			#pragma only_renderers d3d11 glcore
 			#pragma vertex vert
 			#pragma fragment frag
+			//#pragma geometry geom //TODO : Move to another shader, vert - move vertices, geom - debug lines, frag - debug lines coloring.
 
 			#pragma fragmentoption ARB_precision_hint_fastest
 
@@ -61,6 +62,7 @@
 				float3 normal0 : NORMAL0;
 				float4 vertex0 : POSITION0;
 				float4 vertex1 : POSITION1;
+				float4 vertex2 : POSITION2;
 				float4 tangent0 : TANGENT0;
 				float depth : DEPTH;
 
@@ -228,6 +230,7 @@
 				o.normal0 = v.normal;
 				o.vertex0 = mul(UNITY_MATRIX_MVP, v.vertex);
 				o.vertex1 = mul(unity_ObjectToWorld, v.vertex); //TODO : Apply Origin vector. //NOTE : Bug here!!!!!111
+				o.vertex2 = v.vertex;
 				o.tangent0 = v.tangent;
 				o.depth = 1;
 
@@ -242,6 +245,28 @@
 				//FarPlane = UNITY_MATRIX_P[2].w / (UNITY_MATRIX_P[2].z + 1.0);
 				//o.vertex0.z = log2(max(1e-6, 1.0 + o.vertex0.w)) * FCoef(1e+2) - 1.0;
 				//o.depth = 1.0 + o.vertex0.w;
+			}
+
+			[maxvertexcount(4)]
+			void geom(line v2fg Input[2], inout LineStream<v2fg> OutputStream)
+			{
+				float3 P = Input[0].vertex2.xyz;
+				float3 N = Input[0].normal0.xyz;
+
+				float4 PositionA = mul(UNITY_MATRIX_MVP, float4(P, 1.0));
+				float4 PositionB = mul(UNITY_MATRIX_MVP, float4(P + N * 10000, 1.0));
+
+				v2fg a = Input[0];
+				v2fg b = Input[0];
+
+				a.vertex0 = PositionA;
+				b.vertex0 = PositionB;
+
+				OutputStream.Append(Input[0]);
+				OutputStream.Append(Input[1]);
+
+				OutputStream.Append(a);
+				OutputStream.Append(b);
 			}
 
 			void frag(in v2fg IN, out float4 outDiffuse : COLOR)//, out float depth : DEPTH)

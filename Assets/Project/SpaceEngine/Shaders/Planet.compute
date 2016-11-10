@@ -185,7 +185,6 @@ void TexturesSub(uint3 id : SV_DispatchThreadID)
 
 	//float slope = 0;
 	//float3 sobelNormal = GetSobelNormal(constants, patchPreOutputSub, VerticesPerSideWithBorderFull, id);
-	//float3 heightNormal = GetHeightNormal(constants, patchPreOutputSub, VerticesPerSideWithBorderFull, id, slope);
 	float3 positionNormal = GetHeightNormalFromPosition(constants, patchPreOutputSub, VerticesPerSideWithBorderFull, id);
 	//float3 bumpNormal = GetHeightNormalFromBump(constants, patchPreOutputSub, VerticesPerSideWithBorderFull, id);
 	//float3 packedNormal = GetPackedNormal(constants, patchPreOutputSub, VerticesPerSideWithBorderFull, id);
