@@ -33,9 +33,9 @@
 // Creator: zameran
 #endregion
 
-using System.Collections.Generic;
-
 using SpaceEngine.Startfield;
+
+using System.Collections.Generic;
 
 using UnityEngine;
 
@@ -100,7 +100,7 @@ public sealed class MainRenderer : MonoBehaviour
 
         for (int i = 0; i < starfields.Count; i++)
         {
-            if(starfields[i] != null)
+            if (starfields[i] != null)
                 starfields[i].Render(CameraHelper.Main());
         }
 

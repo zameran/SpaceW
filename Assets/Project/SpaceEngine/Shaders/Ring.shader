@@ -29,7 +29,7 @@
 
 		Pass
 		{
-			Blend SrcAlpha OneMinusSrcColor
+			Blend One OneMinusSrcColor
 			Cull Off
 			Lighting Off
 			ZWrite On

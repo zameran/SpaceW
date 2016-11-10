@@ -254,7 +254,7 @@
 				float3 N = Input[0].normal0.xyz;
 
 				float4 PositionA = mul(UNITY_MATRIX_MVP, float4(P, 1.0));
-				float4 PositionB = mul(UNITY_MATRIX_MVP, float4(P + N * 10000, 1.0));
+				float4 PositionB = mul(UNITY_MATRIX_MVP, float4(P + N * 1000, 1.0));
 
 				v2fg a = Input[0];
 				v2fg b = Input[0];
