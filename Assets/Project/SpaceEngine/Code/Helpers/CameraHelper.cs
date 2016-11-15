@@ -71,8 +71,9 @@ public static class CameraHelper
 
             if (d3d)
             {
-                if (camera.actualRenderingPath == RenderingPath.DeferredLighting || 
-                    camera.actualRenderingPath == RenderingPath.DeferredShading)
+                if (camera.actualRenderingPath == RenderingPath.DeferredLighting ||
+                    camera.actualRenderingPath == RenderingPath.DeferredShading ||
+                    QualitySettings.antiAliasing == 0) // NOTE : Default unity antialiasing breaks matrices?
                 {
                     // Invert Y for rendering to a render texture
                     for (int i = 0; i < 4; i++)
