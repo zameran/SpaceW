@@ -33,7 +33,6 @@
 // Creator: zameran
 #endregion
 
-using System.Linq;
 
 using SpaceEngine.Startfield;
 
@@ -49,7 +48,6 @@ namespace SpaceEngine.Debugging
         public QuadLODDistanceMethod LODDistanceMethod = QuadLODDistanceMethod.ClosestAABBCorner;
         public QuadCullingMethod CullingMethod = QuadCullingMethod.Unity;
         public AtmosphereHDR HDRMode = AtmosphereHDR.ProlandOptimized;
-        public QuadDrawAndCull DrawAndCull = QuadDrawAndCull.CullAfterDraw;
 
         public float LODDistanceMultiplier = 2.0f;
 
@@ -86,10 +84,7 @@ namespace SpaceEngine.Debugging
             GUILayoutExtensions.LabelWithSpace("Quads culling method: " + CullingMethod.ToString(), 0);
             CullingMethod = (QuadCullingMethod)GUILayout.SelectionGrid((int)CullingMethod, System.Enum.GetNames(typeof(QuadCullingMethod)), 3);
 
-            GUILayoutExtensions.LabelWithSpace("Quads culling/draw method: " + DrawAndCull.ToString(), 0);
-            DrawAndCull = (QuadDrawAndCull)GUILayout.SelectionGrid((int)DrawAndCull, System.Enum.GetNames(typeof(QuadDrawAndCull)), 3);
-
-            GUILayoutExtensions.LabelWithSpace("Quads culling/draw method: " + LODDistanceMethod.ToString(), 0);
+            GUILayoutExtensions.LabelWithSpace("Quads LOD distance method: " + LODDistanceMethod.ToString(), 0);
             LODDistanceMethod = (QuadLODDistanceMethod)GUILayout.SelectionGrid((int)LODDistanceMethod, System.Enum.GetNames(typeof(QuadLODDistanceMethod)), 3);
 
             GUILayout.Space(10);
@@ -121,7 +116,6 @@ namespace SpaceEngine.Debugging
                         if (Planetoids[i] != null)
                         {
                             Planetoids[i].CullingMethod = CullingMethod;
-                            Planetoids[i].DrawAndCull = DrawAndCull;
                             Planetoids[i].LODDistanceMultiplier = LODDistanceMultiplier;
                             Planetoids[i].LODDistanceMethod = LODDistanceMethod;
 

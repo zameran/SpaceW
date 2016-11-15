@@ -37,13 +37,18 @@ using UnityEngine;
 
 public static class BrainFuckMath
 {
+    public static bool AlmostEquals(this float a, float b, float precision)
+    {
+        return Mathf.Abs(a - b) <= precision;
+    }
+
     public static void DefineAxis(ref bool staticX, ref bool staticY, ref bool staticZ, Vector3 size)
     {
-        if (size.x == 0)
+        if (AlmostEquals(size.x, 0.0f, 0.01f))
             staticX = true;
-        else if (size.y == 0)
+        else if (AlmostEquals(size.y, 0.0f, 0.01f))
             staticY = true;
-        else if (size.z == 0)
+        else if (AlmostEquals(size.z, 0.0f, 0.01f))
             staticZ = true;
     }
 
@@ -51,9 +56,9 @@ public static class BrainFuckMath
     {
         if (staticX)
             tempAxisValue = temp.x;
-        if (staticY)
+        else if (staticY)
             tempAxisValue = temp.y;
-        if (staticZ)
+        else if (staticZ)
             tempAxisValue = temp.z;
     }
 
@@ -61,9 +66,9 @@ public static class BrainFuckMath
     {
         if (staticX)
             temp.x = tempAxisValue;
-        if (staticY)
+        else if (staticY)
             temp.y = tempAxisValue;
-        if (staticZ)
+        else if (staticZ)
             temp.z = tempAxisValue;
     }
 
@@ -109,7 +114,7 @@ public static class BrainFuckMath
     {
         Vector3d vd = v; //Cast vector to double typed.
 
-        Vector3d result = vd * d; //Multiply in doubles.
+        var result = vd * d; //Multiply in doubles.
 
         return result.ToVector3(); //Cast it back to float typed.
     }
@@ -119,7 +124,7 @@ public static class BrainFuckMath
         Vector3d ad = a; //Cast first vector to double typed.
         Vector3d bd = b; //Cast second vector to double typed.
 
-        Vector3d result = Vector3d.Lerp(ad, bd, t); //Lerp it.
+        var result = Vector3d.Lerp(ad, bd, t); //Lerp it.
 
         return result.ToVector3(); //Cast it back to float typed.
     }

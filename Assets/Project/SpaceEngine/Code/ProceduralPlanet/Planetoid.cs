@@ -123,7 +123,6 @@ public sealed class Planetoid : Planet, IPlanet
 
     public NoiseParametersSetter NPS = null;
 
-    public QuadDrawAndCull DrawAndCull = QuadDrawAndCull.CullBeforeDraw;
     public QuadCullingMethod CullingMethod = QuadCullingMethod.Custom;
     public QuadLODDistanceMethod LODDistanceMethod = QuadLODDistanceMethod.ClosestCorner;
 

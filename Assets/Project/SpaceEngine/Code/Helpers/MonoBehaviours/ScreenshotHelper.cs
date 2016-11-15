@@ -33,12 +33,10 @@
 // Creator: zameran
 #endregion
 
-using System.IO;
-
-using UnityEngine;
-
 using System;
 using System.Collections;
+using System.IO;
+using UnityEngine;
 
 [RequireComponent(typeof(Camera))]
 public class ScreenshotHelper : MonoBehaviour
@@ -143,7 +141,7 @@ public class ScreenshotHelper : MonoBehaviour
         //May cause driver crash on big SuperSize values lol.
         if (keyPressed)
         {
-            StartCoroutine(WaitOneFrame(() => 
+            StartCoroutine(WaitOneFrame(() =>
             {
                 Texture2D ScreenShotTexture = TakeScreenShot(src, SuperSize, IncludeAlpha);
 

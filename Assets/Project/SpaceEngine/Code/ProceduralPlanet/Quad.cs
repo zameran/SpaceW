@@ -91,20 +91,7 @@ public sealed class Quad : MonoBehaviour, IQuad
 
         public override string ToString()
         {
-            return LODLevel + "," + ID + "," + Position;
-        }
-    }
-
-    public class EqualityComparerID : IEqualityComparer<Id>
-    {
-        public bool Equals(Id t1, Id t2)
-        {
-            return t1.Equals(t2);
-        }
-
-        public int GetHashCode(Id t)
-        {
-            return t.GetHashCode();
+            return string.Format("({0}, {1}, {2})", LODLevel, ID, Position);
         }
     }
 
@@ -307,7 +294,7 @@ public sealed class Quad : MonoBehaviour, IQuad
 
         for (int i = 0; i < points.Length; i++)
         {
-            Vector3 p = points[i];
+            var p = points[i];
 
             p = RotationMatrix.MultiplyVector(p);
 
@@ -360,27 +347,23 @@ public sealed class Quad : MonoBehaviour, IQuad
             QuadMaterial.SetBuffer("quadGenerationConstants", QuadGenerationConstantsBuffer);
             QuadMaterial.SetTexture("_HeightTexture", HeightTexture);
             QuadMaterial.SetTexture("_NormalTexture", NormalTexture);
+            QuadMaterial.SetMatrix("_TRS", RotationMatrix);
+            QuadMaterial.SetFloat("_LODLevel", LODLevel + 2);
 
             Uniformed = true;
         }
 
         QuadMaterial.SetFloat("_Atmosphere", (Planetoid.Atmosphere != null) ? 1.0f : 0.0f);
         QuadMaterial.SetFloat("_Normale", Planetoid.DrawNormals ? 1.0f : 0.0f);
-        QuadMaterial.SetMatrix("_TRS", RotationMatrix);
-        QuadMaterial.SetFloat("_LODLevel", LODLevel + 2);
 
         QuadMaterial.renderQueue = (int)Planetoid.RenderQueue + Planetoid.RenderQueueOffset;
 
         if (Generated && ShouldDraw && QuadMesh != null)
         {
-            if (Planetoid.DrawAndCull == QuadDrawAndCull.CullBeforeDraw || Planetoid.DrawAndCull == QuadDrawAndCull.Both)
-                TryCull();
+            TryCull();
 
             if (Visible)
                 Graphics.DrawMesh(QuadMesh, Planetoid.PlanetoidTRS, QuadMaterial, drawLayer, camera, 0, Planetoid.QuadAtmosphereMPB, true, true);
-
-            if (Planetoid.DrawAndCull == QuadDrawAndCull.CullAfterDraw || Planetoid.DrawAndCull == QuadDrawAndCull.Both)
-                TryCull();
         }
     }
 
@@ -402,21 +385,15 @@ public sealed class Quad : MonoBehaviour, IQuad
         Vector3[] points = new Vector3[8];
         Vector3[] cullingPoints = new Vector3[14];
 
-        Vector3 tl = topLeftCorner;
-        Vector3 tr = topRightCorner;
-        Vector3 bl = bottomLeftCorner;
-        Vector3 br = bottomRightCorner;
-        Vector3 mi = middleNormalized;
+        points[0] = topLeftCorner.NormalizeToRadius(Planetoid.PlanetRadius + height + offset);
+        points[1] = topRightCorner.NormalizeToRadius(Planetoid.PlanetRadius + height + offset);
+        points[2] = bottomLeftCorner.NormalizeToRadius(Planetoid.PlanetRadius + height + offset);
+        points[3] = bottomRightCorner.NormalizeToRadius(Planetoid.PlanetRadius + height + offset);
 
-        points[0] = tl.NormalizeToRadius(Planetoid.PlanetRadius + height + offset);
-        points[1] = tr.NormalizeToRadius(Planetoid.PlanetRadius + height + offset);
-        points[2] = bl.NormalizeToRadius(Planetoid.PlanetRadius + height + offset);
-        points[3] = br.NormalizeToRadius(Planetoid.PlanetRadius + height + offset);
-
-        points[4] = tl.NormalizeToRadius(Planetoid.PlanetRadius - height - offset);
-        points[5] = tr.NormalizeToRadius(Planetoid.PlanetRadius - height - offset);
-        points[6] = bl.NormalizeToRadius(Planetoid.PlanetRadius - height - offset);
-        points[7] = br.NormalizeToRadius(Planetoid.PlanetRadius - height - offset);
+        points[4] = topLeftCorner.NormalizeToRadius(Planetoid.PlanetRadius - height - offset);
+        points[5] = topRightCorner.NormalizeToRadius(Planetoid.PlanetRadius - height - offset);
+        points[6] = bottomLeftCorner.NormalizeToRadius(Planetoid.PlanetRadius - height - offset);
+        points[7] = bottomRightCorner.NormalizeToRadius(Planetoid.PlanetRadius - height - offset);
 
         Array.Copy(points, cullingPoints, 8);
 
@@ -425,8 +402,8 @@ public sealed class Quad : MonoBehaviour, IQuad
         cullingPoints[10] = points[2] - points[6];
         cullingPoints[11] = points[3] - points[7];
 
-        cullingPoints[12] = mi.NormalizeToRadius(Planetoid.PlanetRadius + height + offset);
-        cullingPoints[13] = mi.NormalizeToRadius(Planetoid.PlanetRadius - height - offset);
+        cullingPoints[12] = middleNormalized.NormalizeToRadius(Planetoid.PlanetRadius + height + offset);
+        cullingPoints[13] = middleNormalized.NormalizeToRadius(Planetoid.PlanetRadius - height - offset);
 
         return new QuadAABB(points, cullingPoints, this);
     }
@@ -441,7 +418,7 @@ public sealed class Quad : MonoBehaviour, IQuad
 
     public bool PlaneFrustumCheck(Vector3[] points)
     {
-        if (Parent == null || Splitting || (Planetoid.CullingMethod == QuadCullingMethod.Unity || Planetoid.CullingMethod == QuadCullingMethod.None)) { return true; }
+        if (Parent == null || Splitting) { return true; }
 
         return points.Any(pos => BorderFrustumCheck(GodManager.Instance.FrustumPlanes, pos) == true);
     }
@@ -470,12 +447,7 @@ public sealed class Quad : MonoBehaviour, IQuad
 
         bool staticX = false, staticY = false, staticZ = false;
 
-        if (step.x == 0)
-            staticX = true;
-        if (step.y == 0)
-            staticY = true;
-        if (step.z == 0)
-            staticZ = true;
+        BrainFuckMath.DefineAxis(ref staticX, ref staticY, ref staticZ, size);
 
         Planetoid.Working = true;
         HaveSubQuads = true;
@@ -1052,72 +1024,73 @@ public sealed class Quad : MonoBehaviour, IQuad
     public Vector3 GetPatchCubeCenterSplitted(QuadPosition quadPosition, int id, bool staticX, bool staticY, bool staticZ)
     {
         var temp = Vector3.zero;
-        var mod = 0.5f;
-        var v = Planetoid.PlanetRadius;
 
-        float tempStatic = 0;
+        var r = Planetoid.PlanetRadius;
+        var v = Planetoid.PlanetRadius / 2;
+
+        var tempStatic = 0.0f;
 
         switch (quadPosition)
         {
             case QuadPosition.Top:
                 if (id == 0)
-                    temp += new Vector3(-v * mod, v, v * mod);
+                    temp += new Vector3(-v, r, v);
                 else if (id == 1)
-                    temp += new Vector3(v * mod, v, v * mod);
+                    temp += new Vector3(v, r, v);
                 else if (id == 2)
-                    temp += new Vector3(-v * mod, v, -v * mod);
+                    temp += new Vector3(-v, r, -v);
                 else if (id == 3)
-                    temp += new Vector3(v * mod, v, -v * mod);
+                    temp += new Vector3(v, r, -v);
                 break;
             case QuadPosition.Bottom:
                 if (id == 0)
-                    temp += new Vector3(-v * mod, -v, -v * mod);
+                    temp += new Vector3(-v, -r, -v);
                 else if (id == 1)
-                    temp += new Vector3(v * mod, -v, -v * mod);
+                    temp += new Vector3(v, -r, -v);
                 else if (id == 2)
-                    temp += new Vector3(-v * mod, -v, v * mod);
+                    temp += new Vector3(-v, -r, v);
                 else if (id == 3)
-                    temp += new Vector3(v * mod, -v, v * mod);
+                    temp += new Vector3(v, -r, v);
                 break;
             case QuadPosition.Left:
                 if (id == 0)
-                    temp += new Vector3(-v, v * mod, v * mod);
+                    temp += new Vector3(-r, v, v);
                 else if (id == 1)
-                    temp += new Vector3(-v, v * mod, -v * mod);
+                    temp += new Vector3(-r, v, -v);
                 else if (id == 2)
-                    temp += new Vector3(-v, -v * mod, v * mod);
+                    temp += new Vector3(-r, -v, v);
                 else if (id == 3)
-                    temp += new Vector3(-v, -v * mod, -v * mod);
+                    temp += new Vector3(-r, -v, -v);
                 break;
             case QuadPosition.Right:
                 if (id == 0)
-                    temp += new Vector3(v, v * mod, -v * mod);
+                    temp += new Vector3(r, v, -v);
                 else if (id == 1)
-                    temp += new Vector3(v, v * mod, v * mod);
+                    temp += new Vector3(r, v, v);
                 else if (id == 2)
-                    temp += new Vector3(v, -v * mod, -v * mod);
+                    temp += new Vector3(r, -v, -v);
                 else if (id == 3)
-                    temp += new Vector3(v, -v * mod, v * mod);
+                    temp += new Vector3(r, -v, v);
                 break;
             case QuadPosition.Front:
                 if (id == 0)
-                    temp += new Vector3(v * mod, v * mod, v);
+                    temp += new Vector3(v, v, r);
                 else if (id == 1)
-                    temp += new Vector3(-v * mod, v * mod, v);
+                    temp += new Vector3(-v, v, r);
                 else if (id == 2)
-                    temp += new Vector3(v * mod, -v * mod, v);
+                    temp += new Vector3(v, -v, r);
                 else if (id == 3)
-                    temp += new Vector3(-v * mod, -v * mod, v);
+                    temp += new Vector3(-v, -v, r);
                 break;
             case QuadPosition.Back:
                 if (id == 0)
-                    temp += new Vector3(-v * mod, v * mod, -v);
+                    temp += new Vector3(-v, v, -r);
                 else if (id == 1)
-                    temp += new Vector3(v * mod, v * mod, -v);
+                    temp += new Vector3(v, v, -r);
                 else if (id == 2)
-                    temp += new Vector3(-v * mod, -v * mod, -v);
+                    temp += new Vector3(-v, -v, -r);
                 else if (id == 3)
-                    temp += new Vector3(v * mod, -v * mod, -v);
+                    temp += new Vector3(v, -v, -r);
                 break;
             default:
                 throw new ArgumentOutOfRangeException("quadPosition", quadPosition, null);

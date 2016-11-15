@@ -53,7 +53,6 @@ public class Wireframe : MonoBehaviour
 
     private void OnPostRender()
     {
-        if (Enabled)
-            GL.wireframe = false;
+        GL.wireframe = false;
     }
 }
