@@ -498,11 +498,6 @@ public sealed class Quad : MonoBehaviour, IQuad
                 if (quad.Parent.transform != null)
                     quad.transform.parent = quad.Parent.transform;
 
-                quad.transform.position = Vector3.zero;
-                quad.transform.rotation = Quaternion.identity;
-                quad.transform.localPosition = Vector3.zero;
-                quad.transform.localRotation = Quaternion.identity;
-
                 quad.gameObject.name += "_ID" + id + "_LOD" + quad.LODLevel;
 
                 Subquads.Add(quad);
