@@ -78,16 +78,16 @@ namespace UnityEngine
         public Box3d Enlarge(Vector3d p)
         {
             return new Box3d(System.Math.Min(xmin, p.x), System.Math.Max(xmax, p.x),
-                                System.Math.Min(ymin, p.y), System.Math.Max(ymax, p.y),
-                                System.Math.Min(zmin, p.z), System.Math.Max(zmax, p.z));
+                             System.Math.Min(ymin, p.y), System.Math.Max(ymax, p.y),
+                             System.Math.Min(zmin, p.z), System.Math.Max(zmax, p.z));
         }
 
         //Returns the bounding box containing this box and the given box.
         public Box3d Enlarge(Box3d r)
         {
             return new Box3d(System.Math.Min(xmin, r.xmin), System.Math.Max(xmax, r.xmax),
-                                System.Math.Min(ymin, r.ymin), System.Math.Max(ymax, r.ymax),
-                                System.Math.Min(zmin, r.zmin), System.Math.Max(zmax, r.zmax));
+                             System.Math.Min(ymin, r.ymin), System.Math.Max(ymax, r.ymax),
+                             System.Math.Min(zmin, r.zmin), System.Math.Max(zmax, r.zmax));
         }
 
         //Returns true if this bounding box contains the given point.
@@ -95,5 +95,5 @@ namespace UnityEngine
         {
             return (p.x >= xmin && p.x <= xmax && p.y >= ymin && p.y <= ymax && p.z >= zmin && p.z <= zmax);
         }
-    } 
+    }
 }

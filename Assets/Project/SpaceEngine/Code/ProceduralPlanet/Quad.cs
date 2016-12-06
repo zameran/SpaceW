@@ -64,10 +64,10 @@ public sealed class Quad : MonoBehaviour, IQuad
     public class Id
     {
         public int LODLevel;
-        public int ID;
+        public byte ID;
         public int Position;
 
-        public Id(int LODLevel, int ID, int Position)
+        public Id(int LODLevel, byte ID, int Position)
         {
             this.LODLevel = LODLevel;
             this.ID = ID;
@@ -146,7 +146,7 @@ public sealed class Quad : MonoBehaviour, IQuad
 
     public QuadAABB QuadAABB = null;
 
-    public Id RegistryID { get { return new Id(LODLevel, (int)ID, (int)Position); } }
+    public Id RegistryID { get { return new Id(LODLevel, (byte)ID, (int)Position); } }
 
     public Matrix4x4 RotationMatrix { get { return Matrix4x4.TRS(middleNormalized, Quaternion.Euler(middleNormalized.normalized * Mathf.Deg2Rad), Vector3.one); } }
 

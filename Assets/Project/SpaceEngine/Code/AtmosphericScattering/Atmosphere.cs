@@ -85,7 +85,7 @@ namespace SpaceEngine.AtmosphericScattering
         [HideInInspector]
         public AtmosphereHDR HDRMode = AtmosphereHDR.Proland;
 
-        public EngineRenderQueue RenderQueue = EngineRenderQueue.Transparent;
+        public EngineRenderQueue RenderQueue = EngineRenderQueue.Background;
         public int RenderQueueOffset = 0;
 
         public Mesh AtmosphereMesh;

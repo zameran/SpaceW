@@ -29,15 +29,21 @@ namespace UnityEngine
     {
         public float[,] m = new float[3, 3];
 
-        public Matrix3x3() { }
-
-        public Matrix3x3(float m00, float m01, float m02,
-                         float m10, float m11, float m12,
-                         float m20, float m21, float m22)
+        public Matrix3x3()
         {
-            m[0, 0] = m00; m[0, 1] = m01; m[0, 2] = m02;
-            m[1, 0] = m10; m[1, 1] = m11; m[1, 2] = m12;
-            m[2, 0] = m20; m[2, 1] = m21; m[2, 2] = m22;
+        }
+
+        public Matrix3x3(float m00, float m01, float m02, float m10, float m11, float m12, float m20, float m21, float m22)
+        {
+            m[0, 0] = m00;
+            m[0, 1] = m01;
+            m[0, 2] = m02;
+            m[1, 0] = m10;
+            m[1, 1] = m11;
+            m[1, 2] = m12;
+            m[2, 0] = m20;
+            m[2, 1] = m21;
+            m[2, 2] = m22;
 
         }
 
@@ -53,7 +59,7 @@ namespace UnityEngine
 
         public static Matrix3x3 operator +(Matrix3x3 m1, Matrix3x3 m2)
         {
-            Matrix3x3 kSum = new Matrix3x3();
+            var kSum = new Matrix3x3();
 
             for (int iRow = 0; iRow < 3; iRow++)
             {
@@ -68,7 +74,7 @@ namespace UnityEngine
 
         public static Matrix3x3 operator -(Matrix3x3 m1, Matrix3x3 m2)
         {
-            Matrix3x3 kSum = new Matrix3x3();
+            var kSum = new Matrix3x3();
 
             for (int iRow = 0; iRow < 3; iRow++)
             {
@@ -83,15 +89,13 @@ namespace UnityEngine
 
         public static Matrix3x3 operator *(Matrix3x3 m1, Matrix3x3 m2)
         {
-            Matrix3x3 kProd = new Matrix3x3();
+            var kProd = new Matrix3x3();
 
             for (int iRow = 0; iRow < 3; iRow++)
             {
                 for (int iCol = 0; iCol < 3; iCol++)
                 {
-                    kProd.m[iRow, iCol] = m1.m[iRow, 0] * m2.m[0, iCol] +
-                        m1.m[iRow, 1] * m2.m[1, iCol] +
-                            m1.m[iRow, 2] * m2.m[2, iCol];
+                    kProd.m[iRow, iCol] = m1.m[iRow, 0] * m2.m[0, iCol] + m1.m[iRow, 1] * m2.m[1, iCol] + m1.m[iRow, 2] * m2.m[2, iCol];
                 }
             }
 
@@ -100,18 +104,19 @@ namespace UnityEngine
 
         public static Vector3 operator *(Matrix3x3 m, Vector3 v)
         {
-            Vector3 kProd = new Vector3();
-
-            kProd.x = m.m[0, 0] * v.x + m.m[0, 1] * v.y + m.m[0, 2] * v.z;
-            kProd.y = m.m[1, 0] * v.x + m.m[1, 1] * v.y + m.m[1, 2] * v.z;
-            kProd.z = m.m[2, 0] * v.x + m.m[2, 1] * v.y + m.m[2, 2] * v.z;
+            var kProd = new Vector3
+            {
+                x = m.m[0, 0] * v.x + m.m[0, 1] * v.y + m.m[0, 2] * v.z,
+                y = m.m[1, 0] * v.x + m.m[1, 1] * v.y + m.m[1, 2] * v.z,
+                z = m.m[2, 0] * v.x + m.m[2, 1] * v.y + m.m[2, 2] * v.z
+            };
 
             return kProd;
         }
 
         public static Matrix3x3 operator *(Matrix3x3 m, float s)
         {
-            Matrix3x3 kProd = new Matrix3x3();
+            var kProd = new Matrix3x3();
 
             for (int iRow = 0; iRow < 3; iRow++)
             {
@@ -126,14 +131,12 @@ namespace UnityEngine
 
         public override string ToString()
         {
-            return m[0, 0] + "," + m[0, 1] + "," + m[0, 2] + "\n" +
-                    m[1, 0] + "," + m[1, 1] + "," + m[1, 2] + "\n" +
-                    m[2, 0] + "," + m[2, 1] + "," + m[2, 2];
+            return m[0, 0] + "," + m[0, 1] + "," + m[0, 2] + "\n" + m[1, 0] + "," + m[1, 1] + "," + m[1, 2] + "\n" + m[2, 0] + "," + m[2, 1] + "," + m[2, 2];
         }
 
         public Matrix3x3 Transpose()
         {
-            Matrix3x3 kTranspose = new Matrix3x3();
+            var kTranspose = new Matrix3x3();
 
             for (int iRow = 0; iRow < 3; iRow++)
             {
@@ -148,13 +151,11 @@ namespace UnityEngine
 
         private float Determinant()
         {
-            float fCofactor00 = m[1, 1] * m[2, 2] - m[1, 2] * m[2, 1];
-            float fCofactor10 = m[1, 2] * m[2, 0] - m[1, 0] * m[2, 2];
-            float fCofactor20 = m[1, 0] * m[2, 1] - m[1, 1] * m[2, 0];
+            var fCofactor00 = m[1, 1] * m[2, 2] - m[1, 2] * m[2, 1];
+            var fCofactor10 = m[1, 2] * m[2, 0] - m[1, 0] * m[2, 2];
+            var fCofactor20 = m[1, 0] * m[2, 1] - m[1, 1] * m[2, 0];
 
-            float fDet = m[0, 0] * fCofactor00 + m[0, 1] * fCofactor10 + m[0, 2] * fCofactor20;
-
-            return fDet;
+            return m[0, 0] * fCofactor00 + m[0, 1] * fCofactor10 + m[0, 2] * fCofactor20;
         }
 
         //public bool Inverse(ref Matrix3x3 mInv, float tolerance = 1e-06f)
@@ -172,7 +173,7 @@ namespace UnityEngine
             mInv.m[2, 1] = m[0, 1] * m[2, 0] - m[0, 0] * m[2, 1];
             mInv.m[2, 2] = m[0, 0] * m[1, 1] - m[0, 1] * m[1, 0];
 
-            float fDet = m[0, 0] * mInv.m[0, 0] + m[0, 1] * mInv.m[1, 0] + m[0, 2] * mInv.m[2, 0];
+            var fDet = m[0, 0] * mInv.m[0, 0] + m[0, 1] * mInv.m[1, 0] + m[0, 2] * mInv.m[2, 0];
 
             if (System.Math.Abs(fDet) <= tolerance)
             {
@@ -193,7 +194,7 @@ namespace UnityEngine
         //public Matrix3x3 Inverse(float tolerance = 1e-06f)
         public Matrix3x3 Inverse(float tolerance)
         {
-            Matrix3x3 kInverse = new Matrix3x3();
+            var kInverse = new Matrix3x3();
 
             Inverse(ref kInverse, tolerance);
 
@@ -226,20 +227,28 @@ namespace UnityEngine
 
         public Matrix4x4 ToMatrix4x4()
         {
-            Matrix4x4 mat = new Matrix4x4();
+            var mat = new Matrix4x4
+            {
+                m00 = m[0, 0],
+                m01 = m[0, 1],
+                m02 = m[0, 2],
+                m10 = m[1, 0],
+                m11 = m[1, 1],
+                m12 = m[1, 2],
+                m20 = m[2, 0],
+                m21 = m[2, 1],
+                m22 = m[2, 2]
+            };
 
-            mat.m00 = m[0, 0]; mat.m01 = m[0, 1]; mat.m02 = m[0, 2];
-            mat.m10 = m[1, 0]; mat.m11 = m[1, 1]; mat.m12 = m[1, 2];
-            mat.m20 = m[2, 0]; mat.m21 = m[2, 1]; mat.m22 = m[2, 2];
 
             return mat;
         }
 
         public static Matrix3x3 Rotate(Vector3 rotation)
         {
-            Quat x = new Quat(new Vector3d(1, 0, 0), rotation.x * MathUtility.Deg2Rad);
-            Quat y = new Quat(new Vector3d(0, 1, 0), rotation.y * MathUtility.Deg2Rad);
-            Quat z = new Quat(new Vector3d(0, 0, 1), rotation.z * MathUtility.Deg2Rad);
+            var x = new Quat(new Vector3d(1, 0, 0), rotation.x * MathUtility.Deg2Rad);
+            var y = new Quat(new Vector3d(0, 1, 0), rotation.y * MathUtility.Deg2Rad);
+            var z = new Quat(new Vector3d(0, 0, 1), rotation.z * MathUtility.Deg2Rad);
 
             return (z * y * x).ToMatrix3x3();
         }

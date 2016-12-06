@@ -36,7 +36,7 @@
 /// <summary>
 /// Quad position [Orientation] relative to planet center.
 /// </summary>
-public enum QuadPosition
+public enum QuadPosition : byte
 {
     Top,        //0
     Bottom,     //1

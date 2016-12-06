@@ -112,7 +112,8 @@ namespace UnityEngine
         //Returns the nearest point to a contained in the box.
         public Vector2d NearestInnerPoint(Vector2d a)
         {
-            Vector2d nearest = new Vector2d(a);
+            var nearest = new Vector2d(a);
+
             if (a.x < xmin)
             {
                 nearest.x = xmin;
@@ -133,5 +134,5 @@ namespace UnityEngine
 
             return nearest;
         }
-    } 
+    }
 }

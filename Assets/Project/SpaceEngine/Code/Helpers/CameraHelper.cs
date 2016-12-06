@@ -63,7 +63,7 @@ public static class CameraHelper
 
     public static Matrix4x4 GetCameraToScreen(this Camera camera, bool useRTFix = true)
     {
-        Matrix4x4 p = camera.projectionMatrix;
+        var p = camera.projectionMatrix;
 
         if (useRTFix)
         {
@@ -71,8 +71,7 @@ public static class CameraHelper
 
             if (d3d)
             {
-                if (camera.actualRenderingPath == RenderingPath.DeferredLighting ||
-                    camera.actualRenderingPath == RenderingPath.DeferredShading ||
+                if (camera.actualRenderingPath == RenderingPath.DeferredLighting || camera.actualRenderingPath == RenderingPath.DeferredShading ||
                     QualitySettings.antiAliasing == 0) // NOTE : Default unity antialiasing breaks matrices?
                 {
                     // Invert Y for rendering to a render texture
@@ -105,8 +104,8 @@ public static class CameraHelper
 
     public static Vector3 GetProjectedDirection(this Vector3 v)
     {
-        Matrix4x4 cameraToWorld = CameraHelper.Main().GetCameraToWorld();
-        Matrix4x4 screenToCamera = CameraHelper.Main().GetScreenToCamera();
+        var cameraToWorld = Main().GetCameraToWorld();
+        var screenToCamera = Main().GetScreenToCamera();
 
         return cameraToWorld.MultiplyPoint(screenToCamera.MultiplyPoint(v));
     }

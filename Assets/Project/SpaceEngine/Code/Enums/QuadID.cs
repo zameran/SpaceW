@@ -36,7 +36,7 @@
 /// <summary>
 /// Quad ID [Number] in hierarchy.
 /// </summary>
-public enum QuadID
+public enum QuadID : byte
 {
     One,
     Two,

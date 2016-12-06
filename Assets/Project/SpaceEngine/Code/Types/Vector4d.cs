@@ -215,5 +215,5 @@ namespace UnityEngine
         {
             return new Vector4d(0, 0, 0, 0);
         }
-    } 
+    }
 }

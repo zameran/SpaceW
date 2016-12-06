@@ -93,8 +93,8 @@ namespace UnityEngine
             {
                 do
                 {
-                    x1 = 2.0f * UnityEngine.Random.value - 1.0f;
-                    x2 = 2.0f * UnityEngine.Random.value - 1.0f;
+                    x1 = 2.0f * Random.value - 1.0f;
+                    x2 = 2.0f * Random.value - 1.0f;
                     w = x1 * x1 + x2 * x2;
                 }
                 while (w >= 1.0f);
@@ -107,5 +107,5 @@ namespace UnityEngine
 
             return mean + y1 * stdDeviation;
         }
-    } 
+    }
 }

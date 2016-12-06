@@ -33,11 +33,11 @@
 // Creator: zameran
 #endregion
 
-public enum AtmosphereHDR : int
+public enum AtmosphereHDR : byte
 {
-    None = -1,
-    Simple = 0,
-    SpaceEngine = 1,
-    Proland = 2,
-    ProlandOptimized = 3
+    None = 0,
+    Simple = 1,
+    SpaceEngine = 2,
+    Proland = 3,
+    ProlandOptimized = 4
 }
