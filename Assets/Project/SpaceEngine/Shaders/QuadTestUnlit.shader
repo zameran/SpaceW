@@ -104,6 +104,7 @@
 				float3 sunL = 0;
 				float3 skyE = 0;
 				float3 extinction = 0;
+				float3 position = p; // NOTE : We need unshifted position for shadows stuff...
 
 				p += _Globals_Origin;
 
@@ -113,10 +114,16 @@
 
 				#ifdef ECLIPSES_ON
 					float eclipse = 1;
-					eclipse *= EclipseShadow(p, WSD, WSPR.w);
+
+					float3 invertedLightDistance = rsqrt(dot(WSPR.xyz, WSPR.xyz));
+					float3 lightPosition = WSPR.xyz * invertedLightDistance;
+
+					float lightAngularRadius = asin(WSPR.w * invertedLightDistance);
+
+					eclipse *= EclipseShadow(p, lightPosition, lightAngularRadius);
 
 					#if SHADOW_1 || SHADOW_2 || SHADOW_3 || SHADOW_4
-						float shadow = ShadowColor(float4(p, 1));
+						float shadow = ShadowColor(float4(position, 1));
 					#endif
 				#endif
 

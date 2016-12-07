@@ -184,7 +184,16 @@ Shader "SpaceEngine/Atmosphere/Atmosphere"
 			float4 frag(v2f IN) : COLOR
 			{			
 				float3 WCP = _Globals_WorldCameraPos;
-				float3 WCPG = WCP + _Globals_Origin;
+				float3 WCPG = WCP + _Globals_Origin; // Current camera position with offset applied...
+				float3 WCPGG = WCPG + _Globals_Origin; // I HAVE NO IDEA HOW, BUT IT WORKS!
+
+				// ORIGIN = Planet center, but inverted, aka -Planet.transform.position...
+				// CAMERA + ORIGIN = Current true position for atmosphere and shadows stuff...
+				// CAMERA + ORIGIN + ORIGIN = Current true position for eclipses stuff...
+				// FUCK DAT SHIT I'AM OUT! ¯\_(ツ)_/¯
+
+				// NOTE : Please don't hurt me, baby...
+				// NOTE : _Globals_Origin Should be inverted for shadows stuff, aka Planet.transform.position...
 
 				float3 d = normalize(IN.dir);
 
@@ -194,7 +203,7 @@ Shader "SpaceEngine/Atmosphere/Atmosphere"
 
 				#ifdef ECLIPSES_ON
 					#if SHADOW_1 || SHADOW_2 || SHADOW_3 || SHADOW_4
-						float shadow = ShadowOuterColor(d, WCP, _Globals_Origin, Rt);
+						float shadow = ShadowOuterColor(d, WCP, -_Globals_Origin, Rt);
 						shadow = GroundFade(_ExtinctionGroundFade, shadow);
 					#endif
 				#endif
@@ -205,7 +214,15 @@ Shader "SpaceEngine/Atmosphere/Atmosphere"
 					float3 extinction1 = 0;
 
 					#ifdef ECLIPSES_ON
-						float eclipse1 = EclipseOuterShadow(_Sun_WorldSunDir_1, _Sun_Positions_1[0].w, d, WCP, _Globals_Origin, Rt);
+						float4 WSPR0 = _Sun_Positions_1[0];
+
+						float3 invertedLightDistance0 = rsqrt(dot(WSPR0.xyz, WSPR0.xyz));
+						float3 lightPosition0 = WSPR0.xyz * invertedLightDistance0;
+
+						float lightAngularRadius = 0;
+
+						lightAngularRadius = asin(WSPR0.w * invertedLightDistance0);
+						float eclipse1 = EclipseOuterShadow(lightPosition0, lightAngularRadius, d, WCPGG, _Globals_Origin, Rt);
 
 						eclipse1 = GroundFade(_ExtinctionGroundFade, eclipse1);
 					#endif
@@ -239,8 +256,20 @@ Shader "SpaceEngine/Atmosphere/Atmosphere"
 					float3 extinction2 = 0;
 
 					#ifdef ECLIPSES_ON
-						float eclipse1 = EclipseOuterShadow(_Sun_WorldSunDir_1, _Sun_Positions_1[0].w, d, WCP, _Globals_Origin, Rt);
-						float eclipse2 = EclipseOuterShadow(_Sun_WorldSunDir_2, _Sun_Positions_1[1].w, d, WCP, _Globals_Origin, Rt);
+						float4 WSPR0 = _Sun_Positions_1[0];
+						float4 WSPR1 = _Sun_Positions_1[1];
+
+						float3 invertedLightDistance0 = rsqrt(dot(WSPR0.xyz, WSPR0.xyz));
+						float3 invertedLightDistance1 = rsqrt(dot(WSPR1.xyz, WSPR1.xyz));
+						float3 lightPosition0 = WSPR0.xyz * invertedLightDistance0;
+						float3 lightPosition1 = WSPR1.xyz * invertedLightDistance1;
+
+						float lightAngularRadius = 0;
+
+						lightAngularRadius = asin(WSPR0.w * invertedLightDistance0);
+						float eclipse1 = EclipseOuterShadow(lightPosition0, lightAngularRadius, d, WCPGG, _Globals_Origin, Rt);
+						lightAngularRadius = asin(WSPR1.w * invertedLightDistance1);
+						float eclipse2 = EclipseOuterShadow(lightPosition1, lightAngularRadius, d, WCPGG, _Globals_Origin, Rt);
 
 						eclipse1 = GroundFade(_ExtinctionGroundFade, eclipse1);
 						eclipse2 = GroundFade(_ExtinctionGroundFade, eclipse2);
@@ -286,9 +315,25 @@ Shader "SpaceEngine/Atmosphere/Atmosphere"
 					float3 extinction3 = 0;
 
 					#ifdef ECLIPSES_ON
-						float eclipse1 = EclipseOuterShadow(_Sun_WorldSunDir_1, _Sun_Positions_1[0].w, d, WCP, _Globals_Origin, Rt);
-						float eclipse2 = EclipseOuterShadow(_Sun_WorldSunDir_2, _Sun_Positions_1[1].w, d, WCP, _Globals_Origin, Rt);
-						float eclipse3 = EclipseOuterShadow(_Sun_WorldSunDir_3, _Sun_Positions_1[2].w, d, WCP, _Globals_Origin, Rt);
+						float4 WSPR0 = _Sun_Positions_1[0];
+						float4 WSPR1 = _Sun_Positions_1[1];
+						float4 WSPR2 = _Sun_Positions_1[2];
+
+						float3 invertedLightDistance0 = rsqrt(dot(WSPR0.xyz, WSPR0.xyz));
+						float3 invertedLightDistance1 = rsqrt(dot(WSPR1.xyz, WSPR1.xyz));
+						float3 invertedLightDistance2 = rsqrt(dot(WSPR2.xyz, WSPR2.xyz));
+						float3 lightPosition0 = WSPR0.xyz * invertedLightDistance0;
+						float3 lightPosition1 = WSPR1.xyz * invertedLightDistance1;
+						float3 lightPosition2 = WSPR2.xyz * invertedLightDistance2;
+
+						float lightAngularRadius = 0;
+
+						lightAngularRadius = asin(WSPR0.w * invertedLightDistance0);
+						float eclipse1 = EclipseOuterShadow(lightPosition0, lightAngularRadius, d, WCPGG, _Globals_Origin, Rt);
+						lightAngularRadius = asin(WSPR1.w * invertedLightDistance1);
+						float eclipse2 = EclipseOuterShadow(lightPosition1, lightAngularRadius, d, WCPGG, _Globals_Origin, Rt);
+						lightAngularRadius = asin(WSPR2.w * invertedLightDistance2);
+						float eclipse3 = EclipseOuterShadow(lightPosition2, lightAngularRadius, d, WCPGG, _Globals_Origin, Rt);
 
 						eclipse1 = GroundFade(_ExtinctionGroundFade, eclipse1);
 						eclipse2 = GroundFade(_ExtinctionGroundFade, eclipse2);
@@ -334,10 +379,30 @@ Shader "SpaceEngine/Atmosphere/Atmosphere"
 					float3 extinction4 = 0;
 
 					#ifdef ECLIPSES_ON
-						float eclipse1 = EclipseOuterShadow(_Sun_WorldSunDir_1, _Sun_Positions_1[0].w, d, WCP, _Globals_Origin, Rt);
-						float eclipse2 = EclipseOuterShadow(_Sun_WorldSunDir_2, _Sun_Positions_1[1].w, d, WCP, _Globals_Origin, Rt);
-						float eclipse3 = EclipseOuterShadow(_Sun_WorldSunDir_3, _Sun_Positions_1[2].w, d, WCP, _Globals_Origin, Rt);
-						float eclipse4 = EclipseOuterShadow(_Sun_WorldSunDir_4, _Sun_Positions_1[3].w, d, WCP, _Globals_Origin, Rt);
+						float4 WSPR0 = _Sun_Positions_1[0];
+						float4 WSPR1 = _Sun_Positions_1[1];
+						float4 WSPR2 = _Sun_Positions_1[2];
+						float4 WSPR3 = _Sun_Positions_1[3];
+
+						float3 invertedLightDistance0 = rsqrt(dot(WSPR0.xyz, WSPR0.xyz));
+						float3 invertedLightDistance1 = rsqrt(dot(WSPR1.xyz, WSPR1.xyz));
+						float3 invertedLightDistance2 = rsqrt(dot(WSPR2.xyz, WSPR2.xyz));
+						float3 invertedLightDistance3 = rsqrt(dot(WSPR3.xyz, WSPR3.xyz));
+						float3 lightPosition0 = WSPR0.xyz * invertedLightDistance0;
+						float3 lightPosition1 = WSPR1.xyz * invertedLightDistance1;
+						float3 lightPosition2 = WSPR2.xyz * invertedLightDistance2;
+						float3 lightPosition3 = WSPR3.xyz * invertedLightDistance3;
+
+						float lightAngularRadius = 0;
+
+						lightAngularRadius = asin(WSPR0.w * invertedLightDistance0);
+						float eclipse1 = EclipseOuterShadow(lightPosition0, lightAngularRadius, d, WCPGG, _Globals_Origin, Rt);
+						lightAngularRadius = asin(WSPR1.w * invertedLightDistance1);
+						float eclipse2 = EclipseOuterShadow(lightPosition1, lightAngularRadius, d, WCPGG, _Globals_Origin, Rt);
+						lightAngularRadius = asin(WSPR2.w * invertedLightDistance2);
+						float eclipse3 = EclipseOuterShadow(lightPosition2, lightAngularRadius, d, WCPGG, _Globals_Origin, Rt);
+						lightAngularRadius = asin(WSPR3.w * invertedLightDistance3);
+						float eclipse4 = EclipseOuterShadow(lightPosition3, lightAngularRadius, d, WCPGG, _Globals_Origin, Rt);
 
 						eclipse1 = GroundFade(_ExtinctionGroundFade, eclipse1);
 						eclipse2 = GroundFade(_ExtinctionGroundFade, eclipse2);

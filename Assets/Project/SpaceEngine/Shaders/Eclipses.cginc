@@ -16,12 +16,13 @@ uniform float4x4 _Sky_LightOccluders_1;
 
 uniform float _ExtinctionGroundFade;
 
+//-----------------------------------------------------------------------------
 float EclipseValue(float lightRadius, float casterRadius, float Dist)
 {
 	float sumRadius = lightRadius + casterRadius;
 
 	// No intersection
-	if (Dist >= sumRadius || lightRadius < 0.0) return 0.0;
+	if (Dist >= sumRadius) return 0.0;
 
 	float minRadius;
 	float maxPhase;
@@ -47,9 +48,11 @@ float EclipseValue(float lightRadius, float casterRadius, float Dist)
 	float Diff = abs(lightRadius - casterRadius);
 
 	// Partial intersection
-	return maxPhase * smoothstep(0.0, 1.0, 1.0 - clamp((Dist - Diff) / (sumRadius - Diff), 0.0, 1.0));
+	return maxPhase * smoothstep(0.0, 1.0, 1.0 - clamp((Dist-Diff)/(sumRadius-Diff), 0.0, 1.0));
 }
+//-----------------------------------------------------------------------------
 
+//-----------------------------------------------------------------------------
 float EclipseShadow(float3 position, float3 lightVec, float lightAngularRadius)
 {
 	float Shadow = 1.0;
@@ -70,15 +73,18 @@ float EclipseShadow(float3 position, float3 lightVec, float lightAngularRadius)
 	return Shadow;
 }
 
-float EclipseOuterShadow(float3 lightVec, float lightAngularRadius, float3 d, float3 WCP, float3 _Globals_Origin, float Rt)
+float EclipseOuterShadow(float3 lightVec, float lightAngularRadius, float3 d, float3 camera, float3 _Globals_Origin, float Rt)
 {
 	//TODO : Switch in sphere - out sphere.
-	float interSectPt = IntersectOuterSphere(WCP, d, _Globals_Origin, Rt);
+	float interSectPt = IntersectOuterSphere(camera, d, _Globals_Origin, Rt);
 
-	return interSectPt != -1 ? EclipseShadow(WCP + d * interSectPt, lightVec, lightAngularRadius) : 1.0;
+	return interSectPt != -1 ? EclipseShadow(camera + d * interSectPt, lightVec, lightAngularRadius) : 1.0;
 }
+//-----------------------------------------------------------------------------
 
+//-----------------------------------------------------------------------------
 float GroundFade(float fade, float value)
 {
 	return 1.0f * fade + (1.0f - fade) * value;
 }
+//-----------------------------------------------------------------------------

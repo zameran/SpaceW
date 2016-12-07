@@ -266,7 +266,8 @@ namespace SpaceEngine.AtmosphericScattering
                     break;
                 }
 
-                sunsMatrix.SetRow(i, VectorHelper.MakeFrom(Suns[i].transform.position, VectorHelper.AngularRadius(Suns[i].transform.position, Origin, Suns[i].Radius)));
+                //sunsMatrix.SetRow(i, VectorHelper.MakeFrom(Suns[i].transform.position, VectorHelper.AngularRadius(Suns[i].transform.position, Origin, Suns[i].Radius)));
+                sunsMatrix.SetRow(i, VectorHelper.MakeFrom(Suns[i].transform.position, Suns[i].Radius));
             }
 
             for (int i = 0; i < Mathf.Min(4, EclipseCasters.Count); i++)
