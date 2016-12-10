@@ -169,6 +169,8 @@ float4 ShadowColor(float4 worldPoint)
 		color *= ShadowColor(_Shadow4Matrix, _Shadow4Texture, _Shadow4Ratio, worldPoint);
 	#endif
 	
+	color.a = 1.0;
+
 	return color;
 }
 

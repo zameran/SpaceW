@@ -202,8 +202,12 @@ Shader "SpaceEngine/Atmosphere/Atmosphere"
 				float3 inscatter = 0;
 
 				#ifdef ECLIPSES_ON
+					float4 WSPR0 = _Sun_Positions_1[0];
+
 					#if SHADOW_1 || SHADOW_2 || SHADOW_3 || SHADOW_4
-						float shadow = ShadowOuterColor(d, WCP, -_Globals_Origin, Rt);
+						float shadow = 1.0;
+
+						shadow = ShadowOuterColor(d, WCP, -_Globals_Origin, Rt);
 						shadow = GroundFade(_ExtinctionGroundFade, shadow);
 					#endif
 				#endif
@@ -214,8 +218,6 @@ Shader "SpaceEngine/Atmosphere/Atmosphere"
 					float3 extinction1 = 0;
 
 					#ifdef ECLIPSES_ON
-						float4 WSPR0 = _Sun_Positions_1[0];
-
 						float3 invertedLightDistance0 = rsqrt(dot(WSPR0.xyz, WSPR0.xyz));
 						float3 lightPosition0 = WSPR0.xyz * invertedLightDistance0;
 
