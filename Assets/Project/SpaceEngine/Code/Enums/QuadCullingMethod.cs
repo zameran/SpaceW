@@ -36,9 +36,9 @@
 /// <summary>
 /// Quad culling method.
 /// </summary>
-public enum QuadCullingMethod
+public enum QuadCullingMethod : byte
 {
-    None,
-    Custom,
-    Unity
+    None = 0,
+    Custom = 1,
+    Unity = 2
 }

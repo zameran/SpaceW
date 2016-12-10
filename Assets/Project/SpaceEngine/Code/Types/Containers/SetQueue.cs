@@ -29,88 +29,88 @@ namespace SpaceEngine.Types.Containers
 {
     public class SetQueue<VALUE>
     {
-        Dictionary<VALUE, LinkedListNode<KeyValuePair<VALUE, VALUE>>> m_dictionary;
-        LinkedList<KeyValuePair<VALUE, VALUE>> m_list;
+        private readonly Dictionary<VALUE, LinkedListNode<KeyValuePair<VALUE, VALUE>>> dictionary;
+        private readonly LinkedList<KeyValuePair<VALUE, VALUE>> list;
 
         public SetQueue()
         {
-            m_dictionary = new Dictionary<VALUE, LinkedListNode<KeyValuePair<VALUE, VALUE>>>();
-            m_list = new LinkedList<KeyValuePair<VALUE, VALUE>>();
+            dictionary = new Dictionary<VALUE, LinkedListNode<KeyValuePair<VALUE, VALUE>>>();
+            list = new LinkedList<KeyValuePair<VALUE, VALUE>>();
         }
 
         public SetQueue(IEqualityComparer<VALUE> comparer)
         {
-            m_dictionary = new Dictionary<VALUE, LinkedListNode<KeyValuePair<VALUE, VALUE>>>(comparer);
-            m_list = new LinkedList<KeyValuePair<VALUE, VALUE>>();
+            dictionary = new Dictionary<VALUE, LinkedListNode<KeyValuePair<VALUE, VALUE>>>(comparer);
+            list = new LinkedList<KeyValuePair<VALUE, VALUE>>();
         }
 
         public bool Contains(VALUE val)
         {
-            return m_dictionary.ContainsKey(val);
+            return dictionary.ContainsKey(val);
         }
 
         public void AddFirst(VALUE val)
         {
-            m_dictionary.Add(val, m_list.AddFirst(new KeyValuePair<VALUE, VALUE>(val, val)));
+            dictionary.Add(val, list.AddFirst(new KeyValuePair<VALUE, VALUE>(val, val)));
         }
 
         public void AddLast(VALUE val)
         {
-            m_dictionary.Add(val, m_list.AddLast(new KeyValuePair<VALUE, VALUE>(val, val)));
+            dictionary.Add(val, list.AddLast(new KeyValuePair<VALUE, VALUE>(val, val)));
         }
 
         public int Count()
         {
-            return m_dictionary.Count;
+            return dictionary.Count;
         }
 
         public bool Empty()
         {
-            return (m_dictionary.Count == 0);
+            return (dictionary.Count == 0);
         }
 
         public VALUE First()
         {
-            return m_list.First.Value.Value;
+            return list.First.Value.Value;
         }
 
         public VALUE Last()
         {
-            return m_list.Last.Value.Value;
+            return list.Last.Value.Value;
         }
 
         public VALUE RemoveFirst()
         {
-            LinkedListNode<KeyValuePair<VALUE, VALUE>> node = m_list.First;
+            var node = list.First;
 
-            m_list.RemoveFirst();
-            m_dictionary.Remove(node.Value.Key);
+            list.RemoveFirst();
+            dictionary.Remove(node.Value.Key);
 
             return node.Value.Value;
         }
 
         public VALUE RemoveLast()
         {
-            LinkedListNode<KeyValuePair<VALUE, VALUE>> node = m_list.Last;
+            var node = list.Last;
 
-            m_list.RemoveLast();
-            m_dictionary.Remove(node.Value.Key);
+            list.RemoveLast();
+            dictionary.Remove(node.Value.Key);
 
             return node.Value.Value;
         }
 
         public void Remove(VALUE val)
         {
-            LinkedListNode<KeyValuePair<VALUE, VALUE>> node = m_dictionary[val];
+            var node = dictionary[val];
 
-            m_dictionary.Remove(val);
-            m_list.Remove(node);
+            dictionary.Remove(val);
+            list.Remove(node);
         }
 
         public void Clear()
         {
-            m_dictionary.Clear();
-            m_list.Clear();
+            dictionary.Clear();
+            list.Clear();
         }
     }
 }

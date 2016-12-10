@@ -42,135 +42,24 @@ namespace SpaceEngine.AtmosphericScattering.Sun
         [Range(1, 4)]
         public int sunID = 1;
 
-        static readonly Vector3 Z_AXIS = new Vector3(0, 0, 1);
-
-        Vector3 m_startSunDirection = Z_AXIS;
-
-        private bool HasMoved = false;
+        public Vector3 Z_AXIS { get { return new Vector3(0, 0, 1); } }
 
         public float Radius = 250000;
-
-        public Matrix4x4 WorldToLocalRotation
-        {
-            get
-            {
-                Quaternion q = Quaternion.FromToRotation(GetDirection(), Z_AXIS);
-
-                return Matrix4x4.TRS(Vector3.zero + Origin, q, Vector3.one);
-            }
-            private set { WorldToLocalRotation = value; }
-        }
-
-        public Matrix4x4 LocalToWorldRotation
-        {
-            get
-            {
-                return WorldToLocalRotation.inverse;
-            }
-            private set { LocalToWorldRotation = value; }
-        }
-
         public float SunIntensity = 100.0f;
 
         public Vector3 Origin;
 
-        public Vector3 GetDirection()
-        {
-            return -transform.forward;
-        }
-
-        public bool GetHasMoved()
-        {
-            return HasMoved;
-        }
-
-        private void Start()
-        {
-            if (m_startSunDirection.magnitude < Mathf.Epsilon)
-                m_startSunDirection = Z_AXIS;
-
-            transform.forward = m_startSunDirection.normalized;
-        }
-
         public void UpdateNode()
         {
-            if ((sunID == 1 && Input.GetKey(KeyCode.RightControl)) || (sunID == 2 && Input.GetKey(KeyCode.RightShift)))
+            if ((sunID == 1 && Input.GetKey(KeyCode.RightControl)) || 
+                (sunID == 2 && Input.GetKey(KeyCode.RightShift)) ||
+                (sunID == 3 && Input.GetKey(KeyCode.LeftControl)) ||
+                (sunID == 4 && Input.GetKey(KeyCode.LeftShift)))
             {
-                HasMoved = false;
-
                 float h = Input.GetAxis("HorizontalArrows") * 0.75f;
-                float v = Input.GetAxis("VerticalArrows") * 0.75f;
 
-                transform.Rotate(new Vector3(v, h, 0), UnityEngine.Space.World);
-
-                HasMoved = true;
+                transform.RotateAround(new Vector3(0, 0, 0), new Vector3(0, 1, 0), h);
             }
-        }
-
-        public void SetUniforms(MaterialPropertyBlock block)
-        {
-            if (block == null) return;
-
-            block.SetFloat("_Sun_Intensity", SunIntensity);
-
-            switch (sunID)
-            {
-                case 1:
-                    block.SetVector("_Sun_WorldSunDir_1", GetDirection());
-                    block.SetMatrix("_Sun_WorldToLocal_1", WorldToLocalRotation);
-                    break;
-                case 2:
-                    block.SetVector("_Sun_WorldSunDir_2", GetDirection());
-                    block.SetMatrix("_Sun_WorldToLocal_2", WorldToLocalRotation);
-                    break;
-                case 3:
-                    block.SetVector("_Sun_WorldSunDir_3", GetDirection());
-                    block.SetMatrix("_Sun_WorldToLocal_3", WorldToLocalRotation);
-                    break;
-                case 4:
-                    block.SetVector("_Sun_WorldSunDir_4", GetDirection());
-                    block.SetMatrix("_Sun_WorldToLocal_4", WorldToLocalRotation);
-                    break;
-                default:
-                    block.SetVector("_Sun_WorldSunDir", GetDirection());
-                    block.SetMatrix("_Sun_WorldToLocal", WorldToLocalRotation);
-                    break;
-            }
-
-            block.SetVector("_Sun_Position", transform.position);
-        }
-
-        public void SetUniforms(Material mat)
-        {
-            if (mat == null) return;
-
-            mat.SetFloat("_Sun_Intensity", SunIntensity);
-
-            switch (sunID)
-            {
-                case 1:
-                    mat.SetVector("_Sun_WorldSunDir_1", GetDirection());
-                    mat.SetMatrix("_Sun_WorldToLocal_1", WorldToLocalRotation);
-                    break;
-                case 2:
-                    mat.SetVector("_Sun_WorldSunDir_2", GetDirection());
-                    mat.SetMatrix("_Sun_WorldToLocal_2", WorldToLocalRotation);
-                    break;
-                case 3:
-                    mat.SetVector("_Sun_WorldSunDir_3", GetDirection());
-                    mat.SetMatrix("_Sun_WorldToLocal_3", WorldToLocalRotation);
-                    break;
-                case 4:
-                    mat.SetVector("_Sun_WorldSunDir_4", GetDirection());
-                    mat.SetMatrix("_Sun_WorldToLocal_4", WorldToLocalRotation);
-                    break;
-                default:
-                    mat.SetVector("_Sun_WorldSunDir", GetDirection());
-                    mat.SetMatrix("_Sun_WorldToLocal", WorldToLocalRotation);
-                    break;
-            }
-
-            mat.SetVector("_Sun_Position", transform.position);
         }
     }
 }

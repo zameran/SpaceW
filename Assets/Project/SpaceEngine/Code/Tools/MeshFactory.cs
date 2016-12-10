@@ -43,8 +43,8 @@ public static class MeshFactory
 
     public static Mesh SetupQuadColliderMesh(OutputStruct[] outputStructData)
     {
-        int nVerts = QuadSettings.nVerts;
-        int nVertsPerEdge = QuadSettings.nVertsPerEdge;
+        int nVerts = QuadSettings.Vertices;
+        int nVertsPerEdge = QuadSettings.VerticesPerSide;
 
         Vector3[] dummyVerts = new Vector3[nVerts];
 
@@ -88,14 +88,15 @@ public static class MeshFactory
         Mesh dummyMesh = new Mesh();
         dummyMesh.vertices = dummyVerts;
         dummyMesh.triangles = triangles;
+        dummyMesh.hideFlags = HideFlags.DontSave;
 
         return dummyMesh;
     }
 
     public static Mesh SetupQuadMesh()
     {
-        int nVerts = QuadSettings.nVerts;
-        int nVertsPerEdge = QuadSettings.nVertsPerEdge;
+        int nVerts = QuadSettings.Vertices;
+        int nVertsPerEdge = QuadSettings.VerticesPerSide;
 
         Vector3[] dummyVerts = new Vector3[nVerts];
         Vector2[] uv0 = new Vector2[nVerts];
@@ -150,6 +151,7 @@ public static class MeshFactory
         dummyMesh.uv = uv0;
         dummyMesh.SetTriangles(triangles, 0);
         dummyMesh.name = string.Format("PrototypeMesh_({0})", Random.Range(float.MinValue, float.MaxValue));
+        dummyMesh.hideFlags = HideFlags.DontSave;
 
         return dummyMesh;
     }
@@ -178,8 +180,8 @@ public static class MeshFactory
 
                 Vector2 uv = new Vector2();
 
-                //uv.x = r / (float)((float)nVertsPerEdge - 0.5f);
-                //uv.y = c / (float)((float)nVertsPerEdge - 0.5f);
+                //uv.x = r / (float)((float)VerticesPerSide - 0.5f);
+                //uv.y = c / (float)((float)VerticesPerSide - 0.5f);
 
                 uv.x = r / (float)(nVertsPerEdge - 1);
                 uv.y = c / (float)(nVertsPerEdge - 1);
@@ -260,6 +262,7 @@ public static class MeshFactory
         dummyMesh.vertices = dummyVerts;
         dummyMesh.uv = uv0;
         dummyMesh.SetTriangles(triangles, 0);
+        dummyMesh.hideFlags = HideFlags.DontSave;
 
         return dummyMesh;
     }
@@ -369,6 +372,7 @@ public static class MeshFactory
         mesh.uv = texcoords;
         mesh.triangles = indices;
         mesh.normals = normals;
+        mesh.hideFlags = HideFlags.DontSave;
 
         return mesh;
     }
@@ -527,6 +531,8 @@ public static class MeshFactory
         mesh.RecalculateBounds();
         mesh.RecalculateNormals();
 
+        mesh.hideFlags = HideFlags.DontSave;
+
         SolveTangents(mesh);
 
         return mesh;
@@ -599,7 +605,40 @@ public static class MeshFactory
         uvs.Clear();
         indices.Clear();
 
+        mesh.hideFlags = HideFlags.DontSave;
+
         return mesh;
+    }
+
+    public static Mesh MakeBillboardQuad(float size)
+    {
+        Vector3[] Vertices =
+        {
+            new Vector3(1, 1, 0) * size, new Vector3(-1, 1, 0) * size, new Vector3(1, -1, 0) * size, new Vector3(-1, -1, 0) * size
+        };
+
+        Vector2[] uv =
+        {
+            new Vector2(0, 1), new Vector2(1, 1), new Vector2(0, 0), new Vector2(1, 0)
+        };
+
+        var triangles = new int[6]
+        {
+            0, 2, 1, 2, 3, 1
+        };
+
+        var m = new Mesh
+        {
+            vertices = Vertices,
+            uv = uv,
+            triangles = triangles,
+            name = string.Format("BillboardMesh_({0})", Random.Range(float.MinValue, float.MaxValue)),
+            hideFlags = HideFlags.DontSave
+    };
+
+        m.RecalculateNormals();
+
+        return m;
     }
 
     public static Vector3 SolveNormal(Vector3 v1, Vector3 v2, Vector3 v3)

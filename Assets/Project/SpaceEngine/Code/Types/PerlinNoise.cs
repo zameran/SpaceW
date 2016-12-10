@@ -28,7 +28,7 @@ namespace UnityEngine
     public class PerlinNoise
     {
         const int B = 256;
-        int[] m_perm = new int[B + B];
+        private readonly int[] m_perm = new int[B + B];
 
         public PerlinNoise(int seed)
         {
@@ -55,9 +55,15 @@ namespace UnityEngine
 
         }
 
-        float FADE(float t) { return t * t * t * (t * (t * 6.0f - 15.0f) + 10.0f); }
+        float FADE(float t)
+        {
+            return t * t * t * (t * (t * 6.0f - 15.0f) + 10.0f);
+        }
 
-        float LERP(float t, float a, float b) { return (a) + (t) * ((b) - (a)); }
+        float LERP(float t, float a, float b)
+        {
+            return (a) + (t) * ((b) - (a));
+        }
 
         float GRAD1(int hash, float x)
         {
@@ -91,11 +97,11 @@ namespace UnityEngine
             float fx0, fx1;
             float s, n0, n1;
 
-            ix0 = (int)Mathf.Floor(x);  // Integer part of x
-            fx0 = x - ix0;              // Fractional part of x
+            ix0 = (int)Mathf.Floor(x); // Integer part of x
+            fx0 = x - ix0; // Fractional part of x
             fx1 = fx0 - 1.0f;
             ix1 = (ix0 + 1) & 0xff;
-            ix0 = ix0 & 0xff;           // Wrap to 0..255
+            ix0 = ix0 & 0xff; // Wrap to 0..255
 
             s = FADE(fx0);
 
@@ -110,13 +116,13 @@ namespace UnityEngine
             int ix0, iy0, ix1, iy1;
             float fx0, fy0, fx1, fy1, s, t, nx0, nx1, n0, n1;
 
-            ix0 = (int)Mathf.Floor(x);  // Integer part of x
-            iy0 = (int)Mathf.Floor(y);  // Integer part of y
-            fx0 = x - ix0;              // Fractional part of x
-            fy0 = y - iy0;              // Fractional part of y
+            ix0 = (int)Mathf.Floor(x); // Integer part of x
+            iy0 = (int)Mathf.Floor(y); // Integer part of y
+            fx0 = x - ix0; // Fractional part of x
+            fy0 = y - iy0; // Fractional part of y
             fx1 = fx0 - 1.0f;
             fy1 = fy0 - 1.0f;
-            ix1 = (ix0 + 1) & 0xff;     // Wrap to 0..255
+            ix1 = (ix0 + 1) & 0xff; // Wrap to 0..255
             iy1 = (iy0 + 1) & 0xff;
             ix0 = ix0 & 0xff;
             iy0 = iy0 & 0xff;
@@ -148,9 +154,9 @@ namespace UnityEngine
             ix0 = (int)Mathf.Floor(x); // Integer part of x
             iy0 = (int)Mathf.Floor(y); // Integer part of y
             iz0 = (int)Mathf.Floor(z); // Integer part of z
-            fx0 = x - ix0;        // Fractional part of x
-            fy0 = y - iy0;        // Fractional part of y
-            fz0 = z - iz0;        // Fractional part of z
+            fx0 = x - ix0; // Fractional part of x
+            fy0 = y - iy0; // Fractional part of y
+            fz0 = z - iz0; // Fractional part of z
             fx1 = fx0 - 1.0f;
             fy1 = fy0 - 1.0f;
             fz1 = fz0 - 1.0f;
@@ -187,5 +193,5 @@ namespace UnityEngine
 
             return 0.936f * LERP(s, n0, n1);
         }
-    } 
+    }
 }

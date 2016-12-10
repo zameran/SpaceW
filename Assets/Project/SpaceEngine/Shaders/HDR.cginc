@@ -64,6 +64,8 @@
  * Modified by Denis Ovchinnikov 2015-2016
  */
 
+#define HDR
+
 uniform float _Exposure;
 uniform float _HDRMode;
 
@@ -79,23 +81,23 @@ inline float3 hdrF(float c)
 
 float3 hdr(float3 L) 
 {
-    L *= _Exposure;
+	L *= _Exposure;
 
-    L.r = hdrF(L.r);
-    L.g = hdrF(L.g);
-    L.b = hdrF(L.b);
+	L.r = hdrF(L.r);
+	L.g = hdrF(L.g);
+	L.b = hdrF(L.b);
 
-    return L;
+	return L;
 }
 
 float4 hdr(float4 L) 
 {
-    L *= _Exposure;
+	L *= _Exposure;
 
-    L.r = hdrF(L.r);
-    L.g = hdrF(L.g);
-    L.b = hdrF(L.b);
+	L.r = hdrF(L.r);
+	L.g = hdrF(L.g);
+	L.b = hdrF(L.b);
 	L.a = L.a;
 
-    return L;
+	return L;
 }

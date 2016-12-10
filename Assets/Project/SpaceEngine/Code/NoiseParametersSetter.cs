@@ -39,6 +39,8 @@ public sealed class NoiseParametersSetter : MonoBehaviour
 {
     public Texture2D PermSampler = null;
     public Texture2D PermGradSampler = null;
+    public Texture2D PermSamplerGL = null;
+    public Texture2D PermGradSamplerGL = null;
     public Texture2D PlanetAtlas = null;
     public Texture2D PlanetColor = null;
     public Texture2D PlanetColorMap = null;
@@ -48,8 +50,6 @@ public sealed class NoiseParametersSetter : MonoBehaviour
     public Texture2D QuadTexture2 = null;
     public Texture2D QuadTexture3 = null;
     public Texture2D QuadTexture4 = null;
-
-    public ImprovedPerlinNoise Perlin = null;
 
     private void Awake()
     {
@@ -83,24 +83,12 @@ public sealed class NoiseParametersSetter : MonoBehaviour
         SetUniforms(cs, kernel);
     }
 
-    public void Init()
-    {
-        if (Perlin == null)
-        {
-            Perlin = new ImprovedPerlinNoise(0);
-            Perlin.LoadResourcesFor2DNoise();
-            Perlin.LoadResourcesFor3DNoise();
-            Perlin.LoadResourcesFor4DNoise();
-        }
-    }
-
     public void LoadAndInit()
     {
-        Init();
-
-        if (PermSampler == null) PermSampler = Perlin.GetPermutationTable2D();
-        if (PermGradSampler == null) PermGradSampler = Perlin.GetGradient3D();
-
+        if (PermSampler == null) PermSampler = LoadTextureFromResources("Noise/PerlinPerm2D");
+        if (PermGradSampler == null) PermGradSampler = LoadTextureFromResources("Noise/PerlinGrad2D");
+        if (PermSamplerGL == null) PermSamplerGL = LoadTextureFromResources("Noise/PerlinPerm2D_GL");
+        if (PermGradSamplerGL == null) PermGradSamplerGL = LoadTextureFromResources("Noise/PerlinGrad2D_GL");
         if (PlanetAtlas == null) PlanetAtlas = LoadTextureFromResources("PlanetAtlas");
         if (PlanetColor == null) PlanetColor = LoadTextureFromResources("PlanetColorHeightGradient");
         if (PlanetColorMap == null) PlanetColorMap = LoadTextureFromResources("PlanetColorHumanityToTemp");
@@ -119,6 +107,8 @@ public sealed class NoiseParametersSetter : MonoBehaviour
 
         mat.SetTexture("PermSampler", PermSampler);
         mat.SetTexture("PermGradSampler", PermGradSampler);
+        mat.SetTexture("PermSamplerGL", PermSamplerGL);
+        mat.SetTexture("PermGradSamplerGL", PermSamplerGL);
 
         mat.SetTexture("AtlasDiffSampler", PlanetAtlas);
         mat.SetTexture("MaterialTable", PlanetColor);
@@ -138,6 +128,8 @@ public sealed class NoiseParametersSetter : MonoBehaviour
 
         shader.SetTexture(0, "PermSampler", PermSampler);
         shader.SetTexture(0, "PermGradSampler", PermGradSampler);
+        shader.SetTexture(0, "PermSamplerGL", PermSamplerGL);
+        shader.SetTexture(0, "PermGradSamplerGL", PermSamplerGL);
 
         shader.SetTexture(0, "AtlasDiffSampler", PlanetAtlas);
         shader.SetTexture(0, "MaterialTable", PlanetColor);
@@ -150,6 +142,8 @@ public sealed class NoiseParametersSetter : MonoBehaviour
 
         shader.SetTexture(kernel, "PermSampler", PermSampler);
         shader.SetTexture(kernel, "PermGradSampler", PermGradSampler);
+        shader.SetTexture(kernel, "PermSamplerGL", PermSamplerGL);
+        shader.SetTexture(kernel, "PermGradSamplerGL", PermSamplerGL);
 
         shader.SetTexture(kernel, "AtlasDiffSampler", PlanetAtlas);
         shader.SetTexture(kernel, "MaterialTable", PlanetColor);

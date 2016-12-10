@@ -39,17 +39,18 @@ public static class MaterialHelper
 {
     public static Material CreateTemp(Shader shader, string name)
     {
-        Material material = new Material(shader);
-
-        material.name = string.Format("{0}(Instance){1}", name, Random.Range(float.MinValue, float.MaxValue));
-        material.hideFlags = HideFlags.HideAndDontSave;
+        var material = new Material(shader)
+        {
+            name = string.Format("{0}(Instance){1}", name, Random.Range(float.MinValue, float.MaxValue)),
+            hideFlags = HideFlags.HideAndDontSave
+        };
 
         return material;
     }
 
     public static Material CreateTemp(Shader shader, string name, int renderingQueue)
     {
-        Material material = CreateTemp(shader, name);
+        var material = CreateTemp(shader, name);
 
         material.renderQueue = renderingQueue;
 

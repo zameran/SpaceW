@@ -33,16 +33,11 @@
 // Creator: zameran
 #endregion
 
-using System;
-using System.Collections.Generic;
-
 using Amib.Threading;
-
-using UnityEngine;
-
 using SpaceEngine.AtmosphericScattering;
 using SpaceEngine.AtmosphericScattering.Clouds;
-using SpaceEngine.AtmosphericScattering.Sun;
+using System.Collections.Generic;
+using UnityEngine;
 
 public abstract class Planet : MonoBehaviour
 {
@@ -68,16 +63,15 @@ public abstract class Planet : MonoBehaviour
     public bool DrawNormals = false;
     public bool DrawGizmos = false;
 
-    public bool GenerateColliders = false;
     public bool OctaveFade = false;
     public bool Working = false;
     public bool UseLOD = true;
 
-    public Transform OriginTransform { get { return transform; } private set { } }
+    public Transform OriginTransform { get { return transform; } }
 
-    public Vector3 Origin { get { return OriginTransform.position; } private set { } }
-    public Vector3 OriginRotation { get { if (QuadsRoot != null) return QuadsRoot.transform.rotation.eulerAngles; else return OriginTransform.rotation.eulerAngles; } private set { } }
-    public Vector3 OriginScale { get { return OriginTransform.localScale; } private set { } }
+    public Vector3 Origin { get { return OriginTransform.position; } }
+    public Vector3 OriginRotation { get { if (QuadsRoot != null) return QuadsRoot.transform.rotation.eulerAngles; else return OriginTransform.rotation.eulerAngles; } }
+    public Vector3 OriginScale { get { return OriginTransform.localScale; } }
 
     public Matrix4x4 PlanetoidTRS = Matrix4x4.identity;
 
@@ -102,6 +96,8 @@ public abstract class Planet : MonoBehaviour
     public float[] LODOctaves = new float[6] { 0.5f, 0.5f, 0.5f, 0.75f, 0.75f, 1.0f };
 
     public bool OneSplittingQuad = true;
+
+    [HideInInspector]
     public bool ExternalRendering = false;
 
     public SmartThreadPool stp = new SmartThreadPool();
@@ -109,16 +105,13 @@ public abstract class Planet : MonoBehaviour
     public QuadDistanceToClosestCornerComparer qdtccc;
 
     [HideInInspector]
-    public Wireframe wireframeSwitcher;
-
-    [HideInInspector]
-    public Bounds PlanetBouds;
+    public Bounds PlanetBounds;
 
     protected virtual void Awake()
     {
         PlanetoidTRS = Matrix4x4.TRS(Origin, Quaternion.Euler(OriginRotation), OriginScale);
 
-        PlanetBouds = new Bounds(Origin, Vector3.one * (PlanetRadius + TerrainMaxHeight) * 2);
+        PlanetBounds = new Bounds(Origin, Ring == null ? (Vector3.one * (PlanetRadius + TerrainMaxHeight) * 2) : (Vector3.one * Ring.OuterRadius * 2));
     }
 
     protected virtual void Start()
@@ -127,14 +120,13 @@ public abstract class Planet : MonoBehaviour
 
         if (qdtccc == null)
             qdtccc = new QuadDistanceToClosestCornerComparer();
-
-        if (wireframeSwitcher == null)
-            wireframeSwitcher = FindObjectOfType<Wireframe>();
     }
 
     protected virtual void Update()
     {
         PlanetoidTRS = Matrix4x4.TRS(Origin, Quaternion.Euler(OriginRotation), OriginScale);
+
+        PlanetBounds = new Bounds(Origin, Ring == null ? (Vector3.one * (PlanetRadius + TerrainMaxHeight) * 2) : (Vector3.one * Ring.OuterRadius * 2));
     }
 
     protected virtual void LateUpdate()
@@ -163,7 +155,7 @@ public abstract class Planet : MonoBehaviour
         {
             Gizmos.color = Color.blue;
 
-            Gizmos.DrawWireCube(PlanetBouds.center, PlanetBouds.size);
+            Gizmos.DrawWireCube(PlanetBounds.center, PlanetBounds.size);
         }
     }
 

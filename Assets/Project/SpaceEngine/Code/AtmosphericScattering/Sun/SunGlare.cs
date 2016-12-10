@@ -156,8 +156,7 @@ namespace SpaceEngine.AtmosphericScattering.Sun
 
             SunGlareMaterial.renderQueue = (int)RenderQueue + RenderQueueOffset;
 
-            if (Atmosphere != null) Atmosphere.SetUniforms(null, SunGlareMaterial, false, false);
-            if (Sun != null) Sun.SetUniforms(SunGlareMaterial);
+            if (Atmosphere != null) { Atmosphere.SetUniforms(null, SunGlareMaterial, false, false); }
         }
 
         public void UpdateNode()

@@ -1,6 +1,6 @@
-using UnityEngine;
-
 using System.Collections.Generic;
+using UnityEngine;
+using ZFramework.Unity.Common.PerfomanceMonitor;
 
 public class Ring : MonoBehaviour
 {
@@ -8,6 +8,7 @@ public class Ring : MonoBehaviour
     public List<Shadow> Shadows = new List<Shadow>();
 
     public Texture MainTex;
+    public Texture NoiseTex;
 
     public Color Color = Color.white;
 
@@ -23,10 +24,17 @@ public class Ring : MonoBehaviour
 
     public float BoundsShift;
 
-    [Range(-1.0f, 1.0f)] public float LightingBias = 0.5f;
-    [Range(0.0f, 1.0f)] public float LightingSharpness = 0.5f;
-    [Range(0.0f, 5.0f)] public float MieSharpness = 2.0f;
-    [Range(0.0f, 10.0f)] public float MieStrength = 1.0f;
+    [Range(-1.0f, 1.0f)]
+    public float LightingBias = 0.5f;
+
+    [Range(0.0f, 1.0f)]
+    public float LightingSharpness = 0.5f;
+
+    [Range(0.0f, 5.0f)]
+    public float MieSharpness = 2.0f;
+
+    [Range(0.0f, 10.0f)]
+    public float MieStrength = 1.0f;
 
     public List<RingSegment> Segments = new List<RingSegment>();
 
@@ -128,8 +136,8 @@ public class Ring : MonoBehaviour
         var lightCount = Helper.WriteLights(Lights, 4, transform.position, null, null, mat);
         var shadowCount = Helper.WriteShadows(Shadows, 4, mat);
 
-        Helper.WriteLightKeywords(lightCount, keywords);
-        Helper.WriteShadowKeywords(shadowCount, keywords);
+        WriteLightKeywords(lightCount, keywords);
+        WriteShadowKeywords(shadowCount, keywords);
 
         keywords.Add("SCATTERING");
 
@@ -143,6 +151,13 @@ public class Ring : MonoBehaviour
         Helper.WriteShadows(shadows, 4, mat);
     }
 
+    public void SetShadows(MaterialPropertyBlock block, List<Shadow> shadows)
+    {
+        if (block == null) return;
+
+        Helper.WriteShadows(shadows, 4, block);
+    }
+
     public void SetUniforms(Material mat)
     {
         if (mat == null) return;
@@ -151,32 +166,36 @@ public class Ring : MonoBehaviour
 
         mat.renderQueue = (int)RenderQueue + RenderQueueOffset;
         mat.SetTexture("_MainTex", MainTex);
+        mat.SetTexture("_NoiseTex", NoiseTex);
         mat.SetColor("_Color", Helper.Brighten(Color, Brightness));
         mat.SetFloat("_LightingBias", LightingBias);
         mat.SetFloat("_LightingSharpness", LightingSharpness);
 
-        Helper.WriteMie(MieSharpness, MieStrength, mat);
+        WriteMie(MieSharpness, MieStrength, mat);
 
         keywords.Clear();
     }
 
     private void UpdateNode()
     {
-        Segments.RemoveAll(m => m == null);
-
-        if (SegmentCount != Segments.Count)
+        using (new Timer("Ring.UpdateNode()"))
         {
-            Helper.ResizeArrayTo(ref Segments, SegmentCount, i => RingSegment.Create(this), null);
-        }
+            Segments.RemoveAll(m => m == null);
 
-        var angleStep = Helper.Divide(360.0f, SegmentCount);
+            if (SegmentCount != Segments.Count)
+            {
+                Helper.ResizeArrayTo(ref Segments, SegmentCount, i => RingSegment.Create(this), null);
+            }
 
-        for (var i = SegmentCount - 1; i >= 0; i--)
-        {
-            var angle = angleStep * i;
-            var rotation = Quaternion.Euler(0.0f, angle, 0.0f);
+            var angleStep = Helper.Divide(360.0f, SegmentCount);
 
-            Segments[i].UpdateNode(RingSegmentMesh, RingMaterial, rotation);
+            for (var i = SegmentCount - 1; i >= 0; i--)
+            {
+                var angle = angleStep * i;
+                var rotation = Quaternion.Euler(0.0f, angle, 0.0f);
+
+                Segments[i].UpdateNode(RingSegmentMesh, RingMaterial, rotation);
+            }
         }
     }
 
@@ -189,4 +208,66 @@ public class Ring : MonoBehaviour
     {
         RingSegmentMesh = MeshFactory.SetupRingSegmentMesh(SegmentCount, SegmentDetail, InnerRadius, OuterRadius, BoundsShift);
     }
+
+    #region Special Stuff
+
+    public static void WriteLightKeywords(int lightCount, params List<string>[] keywordLists)
+    {
+        if (lightCount > 0)
+        {
+            var keyword = "LIGHT_" + lightCount;
+
+            for (var i = keywordLists.Length - 1; i >= 0; i--)
+            {
+                var keywordList = keywordLists[i];
+
+                if (keywordList != null)
+                {
+                    keywordList.Add(keyword);
+                }
+            }
+        }
+    }
+
+    public static void WriteShadowKeywords(int shadowCount, params List<string>[] keywordLists)
+    {
+        if (shadowCount > 0)
+        {
+            var keyword = "SHADOW_" + shadowCount;
+
+            for (var i = keywordLists.Length - 1; i >= 0; i--)
+            {
+                var keywordList = keywordLists[i];
+
+                if (keywordList != null)
+                {
+                    keywordList.Add(keyword);
+                }
+            }
+        }
+    }
+
+    public static void WriteMie(float sharpness, float strength, params Material[] materials)
+    {
+        sharpness = Mathf.Pow(10.0f, sharpness);
+        strength *= (Mathf.Log10(sharpness) + 1) * 0.75f;
+
+        //var mie  = -(1.0f - 1.0f / Mathf.Pow(10.0f, sharpness));
+        //var mie4 = new Vector4(mie * 2.0f, 1.0f - mie * mie, 1.0f + mie * mie, mie / strength);
+
+        var mie = -(1.0f - 1.0f / sharpness);
+        var mie4 = new Vector4(mie * 2.0f, 1.0f - mie * mie, 1.0f + mie * mie, strength);
+
+        for (var j = materials.Length - 1; j >= 0; j--)
+        {
+            var material = materials[j];
+
+            if (material != null)
+            {
+                material.SetVector("_Mie", mie4);
+            }
+        }
+    }
+
+    #endregion
 }

@@ -35,6 +35,8 @@
 
 using UnityEngine;
 
+// NOTE : Wireframe mode will not work in build with 'Grapphics Jobs' option enabled. [Unity 5.4.1f1 Windows x86/x64]
+
 public class Wireframe : MonoBehaviour
 {
     public bool Enabled = false;
@@ -53,7 +55,6 @@ public class Wireframe : MonoBehaviour
 
     private void OnPostRender()
     {
-        if (Enabled)
-            GL.wireframe = false;
+        GL.wireframe = false;
     }
 }

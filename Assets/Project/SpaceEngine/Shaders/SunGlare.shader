@@ -142,7 +142,7 @@
 				float3 extinction = 1;//Extinction(WCP, WCP - _Sun_Positions_1[0]);
 				float3 inscatter = 1;
 
-				(useAtmosphereColors > 0.0) ? inscatter = InScattering(WCP, _Sun_Positions_1[0], WSD, extinction, 0.0) : 1;
+				//(useAtmosphereColors > 0.0) ? inscatter = InScattering(WCP, _Sun_Positions_1[0], WSD, extinction, 0.0) : 1;
 				//inscatter = (length(inscatter) > 0) ? inscatter : 0;
 
 				ghosts = ghosts * smoothstep(0.0, 1.0, 1.0 - length(toScreenCenter));	
@@ -152,7 +152,7 @@
 				outputColor += sunColor;
 				outputColor += ghosts;
 				//outputColor *= Fade;
-				outputColor = (useAtmosphereColors > 0.0) ? (outputColor * extinction) : outputColor;
+				//outputColor = (useAtmosphereColors > 0.0) ? (outputColor * extinction) : outputColor;
 				//outputColor = OuterSunGlareRadiance(IN.relativeDir, outputColor);
 				//outputColor = (Eclipse > 0.0) ? sunColor : outputColor;
 

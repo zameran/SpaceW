@@ -33,14 +33,15 @@
 // Creator: zameran
 #endregion
 
-public enum AtmosphereBase
+public enum AtmosphereBase : byte
 {
-    Default,
-    Earth,
-    Venus,
-    Mars,
-    Jupiter,
-    Titan,
-    Neptune,
-    Sun
+    Default = 0,
+    Earth = 1,
+    Venus = 2,
+    Mars = 3,
+    Jupiter = 4,
+    Titan = 5,
+    Neptune = 6,
+    Sun = 7,
+    Pluto = 8
 }

@@ -48,3 +48,11 @@ public interface IEventit<T> where T : class
     void Eventit(T obj);
     void UnEventit(T obj);
 }
+
+public interface IEventit<T, U> where T : class where U : class
+{
+    bool isEventit { get; set; }
+
+    void Eventit(T obj1, U obj2);
+    void UnEventit(T obj1, U obj2);
+}

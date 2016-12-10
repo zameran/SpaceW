@@ -33,19 +33,11 @@
 // Creator: zameran
 #endregion
 
-using UnityEngine;
-
-using System;
-using System.Linq;
-using System.Collections.Generic;
-
-using Amib;
-using Amib.Threading;
-
 using SpaceEngine.AtmosphericScattering;
 using SpaceEngine.AtmosphericScattering.Clouds;
-using SpaceEngine.AtmosphericScattering.Sun;
-using SpaceEngine.PorecduralPlanet.Cache;
+using System.Collections.Generic;
+using System.Linq;
+using UnityEngine;
 
 public static class PlanetoidExtensions
 {
@@ -80,7 +72,7 @@ public static class PlanetoidExtensions
 
                     Keywords.Add("LIGHT_" + lightCount);
 
-                    if (planet.Atmosphere.eclipseCasters.Count == 0)
+                    if (planet.Atmosphere.EclipseCasters.Count == 0)
                     {
                         Keywords.Add("ECLIPSES_OFF");
                     }
@@ -89,7 +81,7 @@ public static class PlanetoidExtensions
                         Keywords.Add(planet.Atmosphere.Eclipses ? "ECLIPSES_ON" : "ECLIPSES_OFF");
                     }
 
-                    if (planet.Atmosphere.shineCasters.Count == 0)
+                    if (planet.Atmosphere.ShineCasters.Count == 0)
                     {
                         Keywords.Add("SHINE_OFF");
                     }
@@ -129,33 +121,14 @@ public sealed class Planetoid : Planet, IPlanet
 
     public Mesh PrototypeMesh;
 
-    public QuadStorage Cache = null;
     public NoiseParametersSetter NPS = null;
 
-    [HideInInspector] public QuadDrawAndCull DrawAndCull = QuadDrawAndCull.CullBeforeDraw;
-    [HideInInspector] public QuadCullingMethod CullingMethod = QuadCullingMethod.Custom;
-    [HideInInspector] public QuadLODDistanceMethod LODDistanceMethod = QuadLODDistanceMethod.ClosestCorner;
+    public QuadCullingMethod CullingMethod = QuadCullingMethod.Custom;
+    public QuadLODDistanceMethod LODDistanceMethod = QuadLODDistanceMethod.ClosestCorner;
 
     public TCCommonParametersSetter tccps;
 
-    public Plane[] FrustumPlanes;
-
     public MaterialPropertyBlock QuadAtmosphereMPB;
-
-    public void QuadDispatchStarted(Quad q)
-    {
-        //Debug.Log("Planetoid: QuadDispatchStarted() - " + q.gameObject.name);
-    }
-
-    public void QuadDispatchReady(Quad q)
-    {
-        //Debug.Log("Planetoid: QuadDispatchReady() - " + q.gameObject.name);
-    }
-
-    public void QuadGPUGetDataReady(Quad q)
-    {
-        //Debug.Log("Planetoid: QuadGPUGetDataReady() - " + q.gameObject.name);
-    }
 
     protected override void Awake()
     {
@@ -165,8 +138,6 @@ public sealed class Planetoid : Planet, IPlanet
         {
             if (Atmosphere.planetoid == null)
                 Atmosphere.planetoid = this;
-
-            Atmosphere.Origin = Origin;
         }
 
         if (Cloudsphere != null)
@@ -180,8 +151,6 @@ public sealed class Planetoid : Planet, IPlanet
             //TODO : RINGS
         }
 
-        FrustumPlanes = GodManager.Instance.FrustumPlanes;
-
         QuadAtmosphereMPB = new MaterialPropertyBlock();
 
         SetupGenerationConstants();
@@ -190,10 +159,6 @@ public sealed class Planetoid : Planet, IPlanet
     protected override void Start()
     {
         base.Start();
-
-        if (Cache == null)
-            if (gameObject.GetComponentInChildren<QuadStorage>() != null)
-                Cache = gameObject.GetComponentInChildren<QuadStorage>();
 
         if (tccps == null)
             if (gameObject.GetComponentInChildren<TCCommonParametersSetter>() != null)
@@ -207,7 +172,6 @@ public sealed class Planetoid : Planet, IPlanet
 
         if (Atmosphere != null)
         {
-            Atmosphere.OnBaked += OnAtmosphereBaked;
             Atmosphere.InitPlanetoidUniforms(this);
         }
 
@@ -231,7 +195,7 @@ public sealed class Planetoid : Planet, IPlanet
         CheckCutoff();
 
         if (LODTarget != null)
-            DistanceToLODTarget = Vector3.Distance(transform.position, LODTarget.position);
+            DistanceToLODTarget = PlanetBounds.SqrDistance(LODTarget.position);
         else
             DistanceToLODTarget = -1.0f;
 
@@ -253,9 +217,6 @@ public sealed class Planetoid : Planet, IPlanet
             }
         }
 
-        if (CameraHelper.Main() != null)
-            FrustumPlanes = GeometryUtility.CalculateFrustumPlanes(CameraHelper.Main());
-
         if (Atmosphere != null) Atmosphere.SetUniforms(QuadAtmosphereMPB, null, false, true);
 
         if (!ExternalRendering)
@@ -274,9 +235,6 @@ public sealed class Planetoid : Planet, IPlanet
     protected override void OnDestroy()
     {
         base.OnDestroy();
-
-        if (Atmosphere != null)
-            Atmosphere.OnBaked -= OnAtmosphereBaked;
     }
 
     protected override void OnRenderObject()
@@ -288,50 +246,31 @@ public sealed class Planetoid : Planet, IPlanet
     {
         base.OnApplicationFocus(focusStatus);
 
-        if (focusStatus == true)
+        if (focusStatus != true) return;
+
+        //NOTE : So, when unity recompiles shaders or scripts from editor 
+        //while playing - quads not draws properly. 
+        //1) Reanimation of uniforms/mpb can't help.
+        //2) MaterialPropertyBlock.Clear() in Reanimation can't help.
+        //3) mpb = null; in Reanimation can't help.
+        //4) All parameters are ok in mpb.
+        //5) Problem not in MainRenderer.
+        //I think i've lost something...
+        //This ussue take effect only with mpb, so dirty fix is:
+        //ReSetupQuads();
+        //NOTE : Fixed. Buffers setted 1 time. Need to update when focus losted.
+
+        ReanimateQuadsBuffers(false);
+
+        if (Atmosphere != null)
         {
-            //NOTE : So, when unity recompiles shaders or scripts from editor 
-            //while playing - quads not draws properly. 
-            //1) Reanimation of uniforms/mpb can't help.
-            //2) MaterialPropertyBlock.Clear() in Reanimation can't help.
-            //3) mpb = null; in Reanimation can't help.
-            //4) All parameters are ok in mpb.
-            //5) Problem not in MainRenderer.
-            //I think i've lost something...
-            //This ussue take effect only with mpb, so dirty fix is:
-            //ReSetupQuads();
-            //NOTE : Fixed. Buffers setted 1 time. Need to update when focus losted.
-
-            ReanimateQuadsBuffers(false);
-
-            if (Atmosphere != null)
-            {
-                Atmosphere.ReanimateAtmosphereUniforms(Atmosphere, this);
-            }
+            Atmosphere.ReanimateAtmosphereUniforms(Atmosphere, this);
         }
     }
 
     protected override void OnDrawGizmos()
     {
         base.OnDrawGizmos();
-    }
-
-    private void PlanetOnAtmosphereChanged(Planet p)
-    {
-        for (int i = 0; i < Quads.Count; i++)
-        {
-            Quads[i].QuadMaterial.shaderKeywords = p.GetKeywords().ToArray();
-        }
-
-        Debug.Log("Planetoid: PlanetOnAtmosphereChanged");
-    }
-
-    private void OnAtmosphereBaked(Atmosphere a)
-    {
-        if (a != null)
-        {
-            a.ReanimateAtmosphereUniforms(a, this);
-        }
     }
 
     public void ReanimateQuadsBuffers(bool resetup = false)
@@ -357,6 +296,8 @@ public sealed class Planetoid : Planet, IPlanet
 
     public void UpdateLOD()
     {
+        if (UseLOD == false) return;
+
         for (int i = 0; i < Quads.Count; i++)
         {
             Quads[i].CheckLOD();
@@ -492,13 +433,7 @@ public sealed class Planetoid : Planet, IPlanet
 
     public Quad GetMainQuad(QuadPosition position)
     {
-        foreach (Quad q in MainQuads)
-        {
-            if (q.Position == position)
-                return q;
-        }
-
-        return null;
+        return MainQuads.FirstOrDefault(q => q.Position == position);
     }
 
     public Mesh GetMesh(QuadPosition position)
@@ -550,10 +485,6 @@ public sealed class Planetoid : Planet, IPlanet
             QuadsRoot.transform.rotation = transform.rotation;
             QuadsRoot.transform.parent = transform;
         }
-        else
-        {
-            return;
-        }
     }
 
     public void SetupMainQuad(QuadPosition quadPosition)
@@ -574,7 +505,6 @@ public sealed class Planetoid : Planet, IPlanet
         quadComponent.Planetoid = this;
         quadComponent.QuadMesh = mesh;
         quadComponent.QuadMaterial = material;
-        quadComponent.Eventit(quadComponent);
 
         if (Atmosphere != null) Atmosphere.InitUniforms(null, quadComponent.QuadMaterial, false);
 
@@ -609,7 +539,6 @@ public sealed class Planetoid : Planet, IPlanet
         quadComponent.Planetoid = this;
         quadComponent.QuadMesh = mesh;
         quadComponent.QuadMaterial = material;
-        quadComponent.Eventit(quadComponent);
         quadComponent.SetupCorners(quadPosition);
 
         if (Atmosphere != null) Atmosphere.InitUniforms(null, quadComponent.QuadMaterial, false);

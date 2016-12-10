@@ -38,6 +38,8 @@ using UnityEngine;
 [RequireComponent(typeof(Camera))]
 public abstract class GameCamera : MonoBehaviour, ICamera
 {
+    public Camera CameraComponent { get { return GetComponent<Camera>(); } }
+
     protected virtual void Start()
     {
         Init();

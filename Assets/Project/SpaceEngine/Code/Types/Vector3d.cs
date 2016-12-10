@@ -151,7 +151,7 @@ namespace UnityEngine
             if (!(obj is Vector3d))
                 return false;
 
-            Vector3d Vector = (Vector3d)obj;
+            var Vector = (Vector3d)obj;
 
             return x == Vector.x && y == Vector.y && z == Vector.z;
         }
@@ -161,15 +161,9 @@ namespace UnityEngine
             return "(" + x + "," + y + "," + z + ")";
         }
 
-        public double magnitude
-        {
-            get { return Magnitude(); }
-        }
+        public double magnitude { get { return Magnitude(); } }
 
-        public double sqrMagnitude
-        {
-            get { return SqrMagnitude(); }
-        }
+        public double sqrMagnitude { get { return SqrMagnitude(); } }
 
         public double Magnitude()
         {
@@ -191,13 +185,7 @@ namespace UnityEngine
             return lhs.x * rhs.x + lhs.y * rhs.y + lhs.z * rhs.z;
         }
 
-        public Vector3d normalized
-        {
-            get
-            {
-                return Normalize(this);
-            }
-        }
+        public Vector3d normalized { get { return Normalize(this); } }
 
         public void Normalize()
         {
@@ -216,14 +204,16 @@ namespace UnityEngine
         {
             double dot = Dot(onNormal, onNormal);
 
-            return (dot >= 1.40129846432482E-45 ? (onNormal * Dot(vector, onNormal)) / dot : zero); ;
+            return (dot >= 1.40129846432482E-45 ? (onNormal * Dot(vector, onNormal)) / dot : zero);
+            ;
         }
 
         public static Vector3d Normalize(Vector3d value)
         {
             double magnitude = value.Magnitude();
 
-            if (magnitude > 9.9999997473787516E-06) return value / magnitude; else return zero;
+            if (magnitude > 9.9999997473787516E-06) return value / magnitude;
+            else return zero;
         }
 
         public static Vector3d Projection(Vector3d a, Vector3d b)
@@ -248,10 +238,17 @@ namespace UnityEngine
             double cosa = Math.Cos(angle);
             double sina = Math.Sin(angle);
 
-            double x = ((((pointX * ((directionY * directionY) + (directionZ * directionZ))) - (directionX * (((((pointY * directionY) + (pointZ * directionZ)) - (directionX * this.x)) - (directionY * this.y)) - (directionZ * this.z)))) * (1.0 - cosa)) + (this.x * cosa)) + (((((-pointZ * directionY) + (pointY * directionZ)) - (directionZ * this.y)) + (directionY * this.z)) * sina);
-            double y = ((((pointY * ((directionX * directionX) + (directionZ * directionZ))) - (directionY * (((((pointX * directionX) + (pointZ * directionZ)) - (directionX * this.x)) - (directionY * this.y)) - (directionZ * this.z)))) * (1.0 - cosa)) + (this.y * cosa)) + (((((pointZ * directionX) - (pointX * directionZ)) + (directionZ * this.x)) - (directionX * this.z)) * sina);
+            double x = ((((pointX * ((directionY * directionY) + (directionZ * directionZ))) -
+                          (directionX * (((((pointY * directionY) + (pointZ * directionZ)) - (directionX * this.x)) - (directionY * this.y)) - (directionZ * this.z)))) *
+                         (1.0 - cosa)) + (this.x * cosa)) + (((((-pointZ * directionY) + (pointY * directionZ)) - (directionZ * this.y)) + (directionY * this.z)) * sina);
+            double y = ((((pointY * ((directionX * directionX) + (directionZ * directionZ))) -
+                          (directionY * (((((pointX * directionX) + (pointZ * directionZ)) - (directionX * this.x)) - (directionY * this.y)) - (directionZ * this.z)))) *
+                         (1.0 - cosa)) + (this.y * cosa)) + (((((pointZ * directionX) - (pointX * directionZ)) + (directionZ * this.x)) - (directionX * this.z)) * sina);
 
-            return new Vector3d(x, y, ((((pointZ * ((directionX * directionX) + (directionY * directionY))) - (directionZ * (((((pointX * directionX) + (pointY * directionY)) - (directionX * this.x)) - (directionY * this.y)) - (directionZ * this.z)))) * (1.0 - cosa)) + (this.z * cosa)) + (((((-pointY * directionX) + (pointX * directionY)) - (directionY * this.x)) + (directionX * this.y)) * sina));
+            return new Vector3d(x, y,
+                ((((pointZ * ((directionX * directionX) + (directionY * directionY))) -
+                   (directionZ * (((((pointX * directionX) + (pointY * directionY)) - (directionX * this.x)) - (directionY * this.y)) - (directionZ * this.z)))) * (1.0 - cosa)) +
+                 (this.z * cosa)) + (((((-pointY * directionX) + (pointX * directionY)) - (directionY * this.x)) + (directionX * this.y)) * sina));
         }
 
         public Vector3d Rotate(Vector3d point, Vector3d direction, double angle)
@@ -273,17 +270,8 @@ namespace UnityEngine
 
         public Vector3d Normalized(double l)
         {
-            double invLength = l / Math.Sqrt(x * x + y * y + z * z); ;
-
-            return new Vector3d(x * invLength, y * invLength, z * invLength);
-        }
-
-        public Vector3d Normalized(ref double previousLength)
-        {
-            previousLength = Math.Sqrt(x * x + y * y + z * z);
-
-            double invLength = 1.0 / previousLength;
-
+            double invLength = l / Math.Sqrt(x * x + y * y + z * z);
+            ;
             return new Vector3d(x * invLength, y * invLength, z * invLength);
         }
 
@@ -354,76 +342,22 @@ namespace UnityEngine
             return new Vector3d(0, 0, 1);
         }
 
-        public static Vector3d zero
-        {
-            get
-            {
-                return new Vector3d(0.0, 0.0, 0.0);
-            }
-        }
+        public static Vector3d zero { get { return new Vector3d(0.0, 0.0, 0.0); } }
 
-        public static Vector3d one
-        {
-            get
-            {
-                return new Vector3d(1.0, 1.0, 1.0);
-            }
-        }
+        public static Vector3d one { get { return new Vector3d(1.0, 1.0, 1.0); } }
 
-        public static Vector3d forward
-        {
-            get
-            {
-                return new Vector3d(0.0, 0.0, 1.0);
-            }
-        }
+        public static Vector3d forward { get { return new Vector3d(0.0, 0.0, 1.0); } }
 
-        public static Vector3d back
-        {
-            get
-            {
-                return new Vector3d(0.0, 0.0, -1.0);
-            }
-        }
+        public static Vector3d back { get { return new Vector3d(0.0, 0.0, -1.0); } }
 
-        public static Vector3d up
-        {
-            get
-            {
-                return new Vector3d(0.0, 1.0, 0.0);
-            }
-        }
+        public static Vector3d up { get { return new Vector3d(0.0, 1.0, 0.0); } }
 
-        public static Vector3d down
-        {
-            get
-            {
-                return new Vector3d(0.0, -1.0, 0.0);
-            }
-        }
+        public static Vector3d down { get { return new Vector3d(0.0, -1.0, 0.0); } }
 
-        public static Vector3d left
-        {
-            get
-            {
-                return new Vector3d(-1.0, 0.0, 0.0);
-            }
-        }
+        public static Vector3d left { get { return new Vector3d(-1.0, 0.0, 0.0); } }
 
-        public static Vector3d right
-        {
-            get
-            {
-                return new Vector3d(1.0, 0.0, 0.0);
-            }
-        }
+        public static Vector3d right { get { return new Vector3d(1.0, 0.0, 0.0); } }
 
-        public Vector3d xzy
-        {
-            get
-            {
-                return new Vector3d(this.x, this.z, this.y);
-            }
-        }
-    } 
+        public Vector3d xzy { get { return new Vector3d(this.x, this.z, this.y); } }
+    }
 }

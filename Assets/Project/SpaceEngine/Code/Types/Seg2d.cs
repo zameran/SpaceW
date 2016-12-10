@@ -39,6 +39,7 @@ namespace UnityEngine
          * @param a a segment extremity.
          * @param b the other segment extremity.
          */
+
         public Seg2d(Vector2d a, Vector2d b)
         {
             this.a = new Vector2d(a);
@@ -51,11 +52,13 @@ namespace UnityEngine
          *
          * @param p a point.
          */
+
         public double LineDistSq(Vector2d p)
         {
-            Vector2d ap = p - a;
-            double dotprod = ab.Dot(ap);
-            double projLenSq = dotprod * dotprod / ab.SqrMagnitude();
+            var ap = p - a;
+            var dotprod = ab.Dot(ap);
+            var projLenSq = dotprod * dotprod / ab.SqrMagnitude();
+
             return ap.SqrMagnitude() - projLenSq;
         }
 
@@ -64,10 +67,12 @@ namespace UnityEngine
          *
          * @param p a point.
          */
+
         public double SegmentDistSq(Vector2d p)
         {
-            Vector2d ap = p - a;
-            double dotprod = ab.Dot(ap);
+            var ap = p - a;
+            var dotprod = ab.Dot(ap);
+
             double projlenSq;
 
             if (dotprod <= 0.0)
@@ -97,15 +102,16 @@ namespace UnityEngine
          *
          * @param s a segment.
          */
+
         public bool Intersects(Seg2d s)
         {
-            Vector2d aa = s.a - a;
-            double det = Vector2d.Cross(ab, s.ab);
-            double t0 = Vector2d.Cross(aa, s.ab) / det;
+            var aa = s.a - a;
+            var det = Vector2d.Cross(ab, s.ab);
+            var t0 = Vector2d.Cross(aa, s.ab) / det;
 
             if (t0 > 0 && t0 < 1)
             {
-                double t1 = Vector2d.Cross(aa, ab) / det;
+                var t1 = Vector2d.Cross(aa, ab) / det;
                 return t1 > 0 && t1 < 1;
             }
 
@@ -119,16 +125,17 @@ namespace UnityEngine
          * @param s a segment.
          * @param i where to store the intersection point, if any.
          */
+
         public bool Intersects(Seg2d s, ref Vector2d i)
         {
-            Vector2d aa = s.a - a;
-            double det = Vector2d.Cross(ab, s.ab);
-            double t0 = Vector2d.Cross(aa, s.ab) / det;
+            var aa = s.a - a;
+            var det = Vector2d.Cross(ab, s.ab);
+            var t0 = Vector2d.Cross(aa, s.ab) / det;
 
             if (t0 > 0 && t0 < 1)
             {
                 i = a + ab * t0;
-                double t1 = Vector2d.Cross(aa, ab) / det;
+                var t1 = Vector2d.Cross(aa, ab) / det;
                 return t1 > 0 && t1 < 1;
             }
 
@@ -141,34 +148,35 @@ namespace UnityEngine
          *
          * @param r a bounding box.
          */
+
         public bool Intersects(Box2d r)
         {
-            Vector2d b = a + ab;
+            var b = a + ab;
             if (r.Contains(a) || r.Contains(b))
             {
                 return true;
             }
 
-            Box2d t = new Box2d(a, b);
+            var t = new Box2d(a, b);
             if (t.xmin > r.xmax || t.xmax < r.xmin || t.ymin > r.ymax || t.ymax < r.ymin)
             {
                 return false;
             }
 
-            double p0 = Vector2d.Cross(ab, new Vector2d(r.xmin, r.ymin) - a);
-            double p1 = Vector2d.Cross(ab, new Vector2d(r.xmax, r.ymin) - a);
+            var p0 = Vector2d.Cross(ab, new Vector2d(r.xmin, r.ymin) - a);
+            var p1 = Vector2d.Cross(ab, new Vector2d(r.xmax, r.ymin) - a);
             if (p1 * p0 <= 0)
             {
                 return true;
             }
 
-            double p2 = Vector2d.Cross(ab, new Vector2d(r.xmin, r.ymax) - a);
+            var p2 = Vector2d.Cross(ab, new Vector2d(r.xmin, r.ymax) - a);
             if (p2 * p0 <= 0)
             {
                 return true;
             }
 
-            double p3 = Vector2d.Cross(ab, new Vector2d(r.xmax, r.ymax) - a);
+            var p3 = Vector2d.Cross(ab, new Vector2d(r.xmax, r.ymax) - a);
             if (p3 * p0 <= 0)
             {
                 return true;
@@ -186,12 +194,11 @@ namespace UnityEngine
          * @param p a point.
          * @param w width of this segment.
          */
+
         public bool Contains(Vector2d p, double w)
         {
-            Vector2d ap = p - a;
-
-            double dotprod = ab.Dot(ap);
-            double projlenSq;
+            var ap = p - a;
+            var dotprod = ab.Dot(ap);
 
             if (dotprod <= 0.0)
             {
@@ -208,10 +215,9 @@ namespace UnityEngine
                 }
                 else
                 {
-                    projlenSq = dotprod * dotprod / ab.SqrMagnitude();
-                    return ap.SqrMagnitude() - projlenSq < w * w;
+                    return ap.SqrMagnitude() - (dotprod * dotprod / ab.SqrMagnitude()) < w * w;
                 }
             }
         }
-    } 
+    }
 }

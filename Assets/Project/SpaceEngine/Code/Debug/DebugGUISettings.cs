@@ -33,7 +33,8 @@
 // Creator: zameran
 #endregion
 
-using System.Linq;
+
+using SpaceEngine.Startfield;
 
 using UnityEngine;
 
@@ -42,11 +43,11 @@ namespace SpaceEngine.Debugging
     public sealed class DebugGUISettings : DebugGUI
     {
         public Planetoid[] Planetoids;
+        public Starfield[] Starfields;
 
         public QuadLODDistanceMethod LODDistanceMethod = QuadLODDistanceMethod.ClosestAABBCorner;
         public QuadCullingMethod CullingMethod = QuadCullingMethod.Unity;
-        public AtmosphereHDR AtmosphereHDRMode = AtmosphereHDR.ProlandOptimized;
-        public QuadDrawAndCull DrawAndCull = QuadDrawAndCull.CullAfterDraw;
+        public AtmosphereHDR HDRMode = AtmosphereHDR.ProlandOptimized;
 
         public float LODDistanceMultiplier = 2.0f;
 
@@ -74,6 +75,7 @@ namespace SpaceEngine.Debugging
         {
             scrollPosition = GUILayout.BeginScrollView(scrollPosition, false, true);
             Planetoids = FindObjectsOfType<Planetoid>();
+            Starfields = FindObjectsOfType<Starfield>();
 
             GUILayout.BeginVertical();
 
@@ -82,24 +84,21 @@ namespace SpaceEngine.Debugging
             GUILayoutExtensions.LabelWithSpace("Quads culling method: " + CullingMethod.ToString(), 0);
             CullingMethod = (QuadCullingMethod)GUILayout.SelectionGrid((int)CullingMethod, System.Enum.GetNames(typeof(QuadCullingMethod)), 3);
 
-            GUILayoutExtensions.LabelWithSpace("Quads culling/draw method: " + DrawAndCull.ToString(), 0);
-            DrawAndCull = (QuadDrawAndCull)GUILayout.SelectionGrid((int)DrawAndCull, System.Enum.GetNames(typeof(QuadDrawAndCull)), 3);
-
-            GUILayoutExtensions.LabelWithSpace("Quads culling/draw method: " + LODDistanceMethod.ToString(), 0);
+            GUILayoutExtensions.LabelWithSpace("Quads LOD distance method: " + LODDistanceMethod.ToString(), 0);
             LODDistanceMethod = (QuadLODDistanceMethod)GUILayout.SelectionGrid((int)LODDistanceMethod, System.Enum.GetNames(typeof(QuadLODDistanceMethod)), 3);
 
             GUILayout.Space(10);
 
             GUILayout.Label("LOD Distance Multiplier: " + LODDistanceMultiplier);
             GUILayout.BeginHorizontal();
-            LODDistanceMultiplier = GUILayout.HorizontalSlider(LODDistanceMultiplier, 0.8f, 2.2f);
+            LODDistanceMultiplier = GUILayout.HorizontalSlider(LODDistanceMultiplier, 0.75f, 3.25f);
             if (GUILayout.Button("Reset")) LODDistanceMultiplier = 1.0f;
             GUILayout.EndHorizontal();
 
             GUILayout.Space(10);
 
             GUILayout.Label("HDR: ");
-            AtmosphereHDRMode = (AtmosphereHDR)GUILayout.SelectionGrid((int)AtmosphereHDRMode, System.Enum.GetNames(typeof(AtmosphereHDR)), 2);
+            HDRMode = (AtmosphereHDR)GUILayout.SelectionGrid((int)HDRMode, System.Enum.GetNames(typeof(AtmosphereHDR)), 2);
 
             GUILayout.Space(10);
 
@@ -117,16 +116,29 @@ namespace SpaceEngine.Debugging
                         if (Planetoids[i] != null)
                         {
                             Planetoids[i].CullingMethod = CullingMethod;
-                            Planetoids[i].DrawAndCull = DrawAndCull;
                             Planetoids[i].LODDistanceMultiplier = LODDistanceMultiplier;
                             Planetoids[i].LODDistanceMethod = LODDistanceMethod;
 
                             if (Planetoids[i].Atmosphere != null)
                             {
-                                Planetoids[i].Atmosphere.HDRMode = AtmosphereHDRMode;
+                                Planetoids[i].Atmosphere.HDRMode = HDRMode;
                                 Planetoids[i].Atmosphere.Eclipses = Eclipses;
                                 Planetoids[i].Atmosphere.Planetshine = Planetshine;
                             }
+                        }
+                    }
+                }
+            }
+
+            if (Starfields != null)
+            {
+                if (Starfields.Length != 0)
+                {
+                    for (int i = 0; i < Starfields.Length; i++)
+                    {
+                        if (Starfields[i] != null)
+                        {
+                            Starfields[i].HDRMode = HDRMode;
                         }
                     }
                 }

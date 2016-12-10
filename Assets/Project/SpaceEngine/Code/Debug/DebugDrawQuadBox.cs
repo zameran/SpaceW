@@ -110,7 +110,9 @@ namespace SpaceEngine.Debugging
 
                     int[,] ORDER = new int[,] { { 1, 0 }, { 2, 3 }, { 0, 2 }, { 3, 1 } };
 
-                    Vector3[] verts = q.GetVolumeBox(q.Planetoid.TerrainMaxHeight * 3);
+                    Vector3[] verts = q.QuadAABB.AABB;//q.GetVolumeBox(q.Planetoid.TerrainMaxHeight * 3);
+
+                    if (verts == null) return;
 
                     GL.PushMatrix();
                     GL.LoadIdentity();

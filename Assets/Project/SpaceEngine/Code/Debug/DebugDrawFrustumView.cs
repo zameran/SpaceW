@@ -34,7 +34,6 @@
 #endregion
 
 using UnityEngine;
-using System.Collections;
 
 namespace SpaceEngine.Debugging
 {
@@ -63,7 +62,7 @@ namespace SpaceEngine.Debugging
 
             Vector3[] nearCorners = new Vector3[4]; //Approx'd nearplane corners
             Vector3[] farCorners = new Vector3[4]; //Approx'd farplane corners
-            Plane[] camPlanes = GeometryUtility.CalculateFrustumPlanes(CameraHelper.Main()); //get planes from matrix
+            Plane[] camPlanes = GodManager.Instance.FrustumPlanes;
 
             Plane temp = camPlanes[1]; camPlanes[1] = camPlanes[2]; camPlanes[2] = temp; //swap [1] and [2] so the order is better for the loop
 

@@ -33,7 +33,6 @@
 // Creator: zameran
 #endregion
 
-using System;
 using UnityEngine;
 
 public static class MatrixHelper
@@ -91,6 +90,22 @@ public static class MatrixHelper
 
         matrix.m20 = xy.x;
         matrix.m21 = xy.y;
+
+        return matrix;
+    }
+
+    public static Matrix4x4 BillboardMatrix(Vector3 position)
+    {
+        var direction = (position - Vector3.zero).normalized;
+        var particleRight = Vector3.Cross(direction, Vector3.up).normalized;
+        var particleUp = Vector3.Cross(particleRight, direction).normalized;
+
+        var matrix = new Matrix4x4();
+
+        matrix.SetColumn(0, particleRight); // right
+        matrix.SetColumn(1, particleUp); // up
+        matrix.SetColumn(2, direction); // forward
+        matrix.SetColumn(3, position); // position
 
         return matrix;
     }

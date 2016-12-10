@@ -80,6 +80,10 @@
 #define M_PI2 6.28318530716
 #endif
 
+#if !defined (MATH)
+#include "Math.cginc"
+#endif
+
 struct Sun
 {
 	float Intensity;
@@ -154,174 +158,7 @@ uniform sampler3D _Sky_Inscatter;
 
 uniform float4x4 _Sky_ShineOccluders_1;
 uniform float4x4 _Sky_ShineColors_1;
-
-uniform float4x4 _Sky_LightOccluders_1;
-uniform float4x4 _Sky_LightOccluders_2;
 uniform float4x4 _Sun_Positions_1;
-
-uniform float _ExtinctionGroundFade;
-
-float IntersectInnerSphere(float3 p1, float3 d, float3 p3, float r)
-{
-	float a = dot(d, d);
-	float b = 2.0 * dot(d, p1 - p3);
-	float c = dot(p3, p3) + dot(p1, p1) - 2.0 * dot(p3, p1) - r * r;
-	float test = b * b - 4.0 * a * c;
-
-	if (test < 0) return -1.0;
-
-	float u = (-b - sqrt(test)) / (2.0 * a);	
-								
-	return u;
-}
-
-float IntersectOuterSphere(float3 p1, float3 d, float3 p3, float r)
-{
-	// p1 starting point
-	// d look direction
-	// p3 is the sphere center
-
-	float a = dot(d, d);
-	float b = 2.0 * dot(d, p1 - p3);
-	float c = dot(p3, p3) + dot(p1, p1) - 2.0 * dot(p3, p1) - r * r;
-	float test = b * b - 4.0 * a * c;
-
-	if (test < 0) return -1.0;
-
-	float u = (-b - sqrt(test)) / (2.0 * a);
-
-	u = (u < 0) ? (-b + sqrt(test)) / (2.0 * a) : u;
-			
-	return u;
-}
-
-float GetEclipseShadow(float3 worldPos, float3 worldLightPos,float3 occluderSpherePosition,
-					   float3 occluderSphereRadius, float3 lightSourceRadius)		
-{											
-	float3 lightDirection = float3(worldLightPos - worldPos);
-	float3 lightDistance = length(lightDirection);
-
-	lightDirection = lightDirection / lightDistance;
-			   
-	// computation of level of shadowing w  
-	float3 sphereDirection = float3(occluderSpherePosition - worldPos);  //occluder planet
-	float sphereDistance = length(sphereDirection);
-
-	sphereDirection = sphereDirection / sphereDistance;
-					
-	float dd = lightDistance * (asin(min(1.0, length(cross(lightDirection, sphereDirection)))) 
-			   - asin(min(1.0, occluderSphereRadius / sphereDistance)));
-			
-	float w = smoothstep(-1.0, 1.0, -dd / lightSourceRadius);
-
-	w = w * smoothstep(0.0, 0.2, dot(lightDirection, sphereDirection));
-					
-	return (1 - w);
-}
-
-
-float ApplyEclipse(float3 WCP, float4 WSPR, float3 d, float3 _Globals_Origin)
-{
-	float eclipseShadow = 1;
-
-	float interSectPt = IntersectOuterSphere(WCP, d, _Globals_Origin, Rt);
-
-	if (interSectPt != -1)
-	{
-		float3 worldPos = WCP + d * interSectPt;  //worldPos, actually relative to planet origin
-		
-		for (int i = 0; i < 4; ++i)
-		{
-			if (_Sky_LightOccluders_1[i].w <= 0) break;
-
-			eclipseShadow *= GetEclipseShadow(worldPos, WSPR.xyz, _Sky_LightOccluders_1[i].xyz, _Sky_LightOccluders_1[i].w, WSPR.w);
-		}
-						
-		for (int j = 0; j < 4; ++j)
-		{
-			if (_Sky_LightOccluders_2[j].w <= 0) break;
-
-			eclipseShadow *= GetEclipseShadow(worldPos, WSPR.xyz, _Sky_LightOccluders_2[j].xyz, _Sky_LightOccluders_2[j].w, WSPR.w);
-		}
-	}
-
-	return eclipseShadow;
-}
-
-float EclipseValue(float lightRadius, float casterRadius, float Dist)
-{
-	float sumRadius = lightRadius + casterRadius;
-
-	// No intersection
-	if (Dist >= sumRadius) return 0.0;
-
-	float minRadius;
-	float maxPhase;
-
-	if (lightRadius < casterRadius)
-	{
-		minRadius = lightRadius;
-		maxPhase = 1.0;
-	}
-	else
-	{
-		minRadius = casterRadius;
-
-		if (lightRadius < 0.001)
-			maxPhase = (casterRadius * casterRadius) / (lightRadius * lightRadius);
-		else
-			maxPhase = (1.0 - cos(casterRadius)) / (1.0 - cos(lightRadius));
-	}
-
-	// Full intersection
-	if (Dist <= max(lightRadius, casterRadius) - minRadius) return maxPhase;
-
-	float Diff = abs(lightRadius - casterRadius);
-
-	// Partial intersection
-	return maxPhase * smoothstep(0.0, 1.0, 1.0 - clamp((Dist-Diff) / (sumRadius-Diff), 0.0, 1.0));
-}
-
-float EclipseShadow(float3 FragPosS, float3 lightVec, float lightAngularRadius)
-{
-	float Shadow = 1.0;
-
-	for (int i = 0; i < 4; ++i)
-	{
-		if (_Sky_LightOccluders_1[i].w <= 0.0) break;
-
-		float3 lightCasterPos = _Sky_LightOccluders_1[i].xyz - FragPosS;
-
-		float lightCasterInvDist  = rsqrt(dot(lightCasterPos, lightCasterPos));
-		float casterAngularRadius = asin(clamp(_Sky_LightOccluders_1[i].w * lightCasterInvDist, 0.0, 1.0));
-		float lightToCasterAngle  = acos(clamp(dot(lightVec, lightCasterPos * lightCasterInvDist), 0.0, 1.0));
-
-		Shadow *= clamp(1.0 - EclipseValue(lightAngularRadius, casterAngularRadius, lightToCasterAngle), 0.0, 1.0);
-	}
-
-	for (int j = 0; j < 4; ++j)
-	{
-		if (_Sky_LightOccluders_2[j].w <= 0.0) break;
-
-		float3 lightCasterPos = _Sky_LightOccluders_2[j].xyz - FragPosS;
-
-		float lightCasterInvDist  = rsqrt(dot(lightCasterPos, lightCasterPos));
-		float casterAngularRadius = asin(clamp(_Sky_LightOccluders_2[j].w * lightCasterInvDist, 0.0, 1.0));
-		float lightToCasterAngle  = acos(clamp(dot(lightVec, lightCasterPos * lightCasterInvDist), 0.0, 1.0));
-
-		Shadow *= clamp(1.0 - EclipseValue(lightAngularRadius, casterAngularRadius, lightToCasterAngle), 0.0, 1.0);
-	}
-
-	return Shadow;
-}
-
-float EclipseOuterShadow(float3 lightVec, float lightAngularRadius, float3 d, float3 WCP, float3 _Globals_Origin)
-{
-	//TODO : Switch in sphere - out sphere.
-	float interSectPt = IntersectOuterSphere(WCP, d, _Globals_Origin, Rt);
-
-	return interSectPt != -1 ? EclipseShadow(WCP + d * interSectPt, lightVec, lightAngularRadius) : 1.0;
-}
 
 float2 GetTransmittanceUV(float r, float mu) 
 {
@@ -524,7 +361,7 @@ float PhaseFunctionR(float mu)
 // Mie phase function
 float PhaseFunctionM(float mu) 
 {
-	return 1.5 * 1.0 / (4.0 * M_PI) * (1.0 - mieG * mieG) * pow(1.0 + (mieG * mieG) - 2.0 * mieG * mu, -3.0/2.0) * (1.0 + mu * mu) / (2.0 + mieG * mieG);
+	return 1.5 * 1.0 / (4.0 * M_PI) * (1.0 - mieG * mieG) * pow(1.0 + (mieG * mieG) - 2.0 * mieG * mu, -3.0 / 2.0) * (1.0 + mu * mu) / (2.0 + mieG * mieG);
 }
 
 // approximated single Mie scattering (cf. approximate Cm in paragraph "Angular precision")
@@ -567,6 +404,68 @@ float3 SkyIrradiance(float r, float muS)
 {
 	#if defined(ATMO_SKY_ONLY) || defined(ATMO_FULL)
 		return Irradiance(_Sky_Irradiance, r, muS) * _Sun_Intensity;
+	#else
+		return float3(0, 0, 0);
+	#endif
+}
+
+// single scattered sunlight between two points
+// camera=observer
+// viewdir=unit vector towards observed point
+// sundir=unit vector towards the sun
+// return scattered light
+float3 SkyRadiance(float3 camera, float3 viewdir, float3 sundir, float shaftWidth)
+{
+	#if defined(ATMO_INSCATTER_ONLY) || defined(ATMO_FULL)
+		float3 result = float3(0, 0, 0);
+	
+		camera /= scale;
+		camera += viewdir * max(shaftWidth, 0.0);
+
+		float r = length(camera);
+		float rMu = dot(camera, viewdir);
+		float mu = rMu / r;
+		float r0 = r;
+		float mu0 = mu;
+
+		float deltaSq = SQRT(rMu * rMu - r * r + Rt * Rt, 1e30);
+		float din = max(-rMu - deltaSq, 0.0);
+
+		if (din > 0.0) 
+		{
+			camera += din * viewdir;
+			rMu += din;
+			mu = rMu / Rt;
+			r = Rt;
+		}
+
+		if (r <= Rt) 
+		{
+			float nu = dot(viewdir, sundir);
+			float muS = dot(camera, sundir) / r;
+
+			float4 inScatter = Texture4D(_Sky_Inscatter, r, rMu / r, muS, nu);
+
+			if (shaftWidth > 0.0) 
+			{
+				if (mu > 0.0) 
+				{
+					inScatter *= min(Transmittance(r0, mu0) / Transmittance(r, mu), 1.0).rgbr;
+				} 
+				else 
+				{
+					inScatter *= min(Transmittance(r, -mu) / Transmittance(r0, -mu0), 1.0).rgbr;
+				}
+			}
+
+			float3 inScatterM = GetMie(inScatter);
+			float phase = PhaseFunctionR(nu);
+			float phaseM = PhaseFunctionM(nu);
+
+			result = inScatter.rgb * phase + inScatterM * phaseM;
+		} 
+
+		return result * _Sun_Intensity;
 	#else
 		return float3(0, 0, 0);
 	#endif
@@ -646,13 +545,12 @@ float3 SkyRadiance(float3 camera, float3 viewdir, float3 sundir, out float3 exti
 float3 SkyShineRadiance(float3 camera, float3 viewdir, float4x4 _Sky_ShineOccluders_1, float4x4 _Sky_ShineColors_1)
 {
 	float3 inscatter = 0;
-	float3 extinction = 0;
 
 	for (int i = 0; i < 4; ++i)
 	{
 		if (_Sky_ShineColors_1[i].w <= 0) break;
 
-		inscatter += SkyRadiance(camera, viewdir, _Sky_ShineOccluders_1[i].xyz, extinction, 1.0);
+		inscatter += SkyRadiance(camera, viewdir, _Sky_ShineOccluders_1[i].xyz, 0.0);
 		inscatter *= _Sky_ShineColors_1[i].xyz * _Sky_ShineColors_1[i].w;
 	}
 

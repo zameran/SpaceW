@@ -38,9 +38,11 @@
 // NOTE:
 // Not all features already ported! (Early - WIP)
 
+#define TCCOMMON
+
 //-----------------------------------------------------------------------------
-// include 2d noise engine features? NOTE : This shit will use UAV data... so...
-// 0 - why i need this?!
+// include 2d noise engine features?
+// 0 - do not include
 // 1 - include.
 #define INCLUDE_NOISE_ENGINE_2D 0
 //-----------------------------------------------------------------------------
@@ -1199,15 +1201,15 @@ float4 NoiseDeriv(float3 p)
 
 	// Hash coordinates of the 8 cube corners
 	float4 AA = tex2Dlod(PermSampler, float4(P.xyz, 0));
-
-	float a = dot(tex2Dlod(PermGradSampler, AA.x).rgb, p);
-	float b = dot(tex2Dlod(PermGradSampler, AA.z).rgb, p + float3(-1, 0, 0));
-	float c = dot(tex2Dlod(PermGradSampler, AA.y).rgb, p + float3(0, -1, 0));
-	float d = dot(tex2Dlod(PermGradSampler, AA.w).rgb, p + float3(-1, -1, 0));
-	float e = dot(tex2Dlod(PermGradSampler, AA.x + one).rgb, p + float3(0, 0, -1));
-	float f = dot(tex2Dlod(PermGradSampler, AA.z + one).rgb, p + float3(-1, 0, -1));
-	float g = dot(tex2Dlod(PermGradSampler, AA.y + one).rgb, p + float3(0, -1, -1));
-	float h = dot(tex2Dlod(PermGradSampler, AA.w + one).rgb, p + float3(-1, -1, -1));
+	
+	float a = dot(tex2Dlod(PermGradSampler, float4(AA.x, 0, 0, 0)).rgb, p);
+	float b = dot(tex2Dlod(PermGradSampler, float4(AA.z, 0, 0, 0)).rgb, p + float3(-1, 0, 0));
+	float c = dot(tex2Dlod(PermGradSampler, float4(AA.y, 0, 0, 0)).rgb, p + float3(0, -1, 0));
+	float d = dot(tex2Dlod(PermGradSampler, float4(AA.w, 0, 0, 0)).rgb, p + float3(-1, -1, 0));
+	float e = dot(tex2Dlod(PermGradSampler, float4(AA.x, 0, 0, 0) + one).rgb, p + float3(0, 0, -1));
+	float f = dot(tex2Dlod(PermGradSampler, float4(AA.z, 0, 0, 0) + one).rgb, p + float3(-1, 0, -1));
+	float g = dot(tex2Dlod(PermGradSampler, float4(AA.y, 0, 0, 0) + one).rgb, p + float3(0, -1, -1));
+	float h = dot(tex2Dlod(PermGradSampler, float4(AA.w, 0, 0, 0) + one).rgb, p + float3(-1, -1, -1));
 
 	float k0 = a;
 	float k1 = b - a;
@@ -1540,12 +1542,12 @@ float Noise2D(float2 p, float seed = 0)
 
 	// Get the four randomly permutated indices from the noise lattice nearest to
 	// p and offset these numbers with the seed number.
-	float4 perm = tex2D(PermSamplerGL, P) + seed;
+	float4 perm = tex2Dlod(PermSamplerGL, float4(P, 0, 0)) + seed;
 
 	// Permutate the four offseted indices again and get the 2D gradient for each
 	// of the four permutated coordinates-seed pairs.
-	float4 g1 = tex2D(PermGradSamplerGL, perm.xy) * 2 - 1;
-	float4 g2 = tex2D(PermGradSamplerGL, perm.zw) * 2 - 1;
+	float4 g1 = tex2Dlod(PermGradSamplerGL, float4(perm.xy, 0, 0)) * 2 - 1;
+	float4 g2 = tex2Dlod(PermGradSamplerGL, float4(perm.zw, 0, 0)) * 2 - 1;
 
 	// Evaluate the four lattice gradients at p
 	float a = dot(g1.xy, p);
@@ -1571,9 +1573,9 @@ float3 Noise2DPseudoDeriv(float2 p, float seed = 0)
 	float2 f = p * p * p * (p * (p * 6 - 15) + 10);
 	float2 df = p * p * (p * (30 * p - 60) + 30);
 
-	float4 AA = tex2D(PermSamplerGL, P) + seed / 256;
-	float4 G1 = tex2D(PermGradSamplerGL, AA.xy) * 2 - 1;
-	float4 G2 = tex2D(PermGradSamplerGL, AA.zw) * 2 - 1;
+	float4 AA = tex2Dlod(PermSamplerGL, float4(P, 0, 0)) + seed / 256;
+	float4 G1 = tex2Dlod(PermGradSamplerGL, float4(AA.xy, 0, 0)) * 2 - 1;
+	float4 G2 = tex2Dlod(PermGradSamplerGL, float4(AA.zw, 0, 0)) * 2 - 1;
 
 	float a = dot(G1.xy, p);
 	float b = dot(G2.xy, p + float2(-1,  0));
@@ -1604,9 +1606,9 @@ float3 Noise2DDeriv(float2 p, float seed = 0)
 	float2 dw = p * p * (p * (p * 30 - 60) + 30);
 	float2 dwp = p * p * p * (p * (p * 36 - 75) + 40);
 
-	float4 AA = tex2D(PermSamplerGL, P) + seed / 256;
-	float4 G1 = tex2D(PermGradSamplerGL, AA.xy) * 2 - 1;
-	float4 G2 = tex2D(PermGradSamplerGL, AA.zw) * 2 - 1;
+	float4 AA = tex2Dlod(PermSamplerGL, float4(P, 0, 0)) + seed / 256;
+	float4 G1 = tex2Dlod(PermGradSamplerGL, float4(AA.xy, 0, 0)) * 2 - 1;
+	float4 G2 = tex2Dlod(PermGradSamplerGL, float4(AA.zw, 0, 0)) * 2 - 1;
 
 	float k0 = G1.x * p.x + G1.y * p.y;
 	float k1 = (G2.x - G1.x) * p.x + (G2.y - G1.y) * p.y - G2.x;
@@ -1632,9 +1634,9 @@ float3 Noise2DAlternativeDeriv(float2 p, float seed = 0)
 	float2 ddf = p * (p * (p * 120 - 180) + 60);
 	float2 ddfp = p * p * (p * (p * 180 - 300) + 120);
 
-	float4 AA = tex2D(PermSamplerGL, P) + seed / 256;
-	float4 G1 = tex2D(PermGradSamplerGL, AA.xy) * 2 - 1;
-	float4 G2 = tex2D(PermGradSamplerGL, AA.zw) * 2 - 1;
+	float4 AA = tex2Dlod(PermSamplerGL, float4(P, 0, 0)) + seed / 256;
+	float4 G1 = tex2Dlod(PermGradSamplerGL, float4(AA.xy, 0, 0)) * 2 - 1;
+	float4 G2 = tex2Dlod(PermGradSamplerGL, float4(AA.zw, 0, 0)) * 2 - 1;
 
 	float k0 = G1.x * p.x + G1.y * p.y;
 	float k1 = (G2.x - G1.x) * p.x + (G2.y - G1.y) * p.y - G2.x;
@@ -1784,6 +1786,23 @@ float sNoise(float3 v)
 	float4 m = max(0.6 - float4(dot(x0, x0), dot(x1, x1), dot(x2, x2), dot(x3, x3)), 0.0);
 	m = m * m;
 	return 42.0 * dot(m * m, float4(dot(p0, x0), dot(p1, x1), dot(p2, x2), dot(p3, x3)));
+}
+
+float SimplexRidgedMultifractal(float3 position, int octaves, float frequency, float persistence) 
+{
+  float total = 0.0;
+  float maxAmplitude = 0.0;
+  float amplitude = 1.0;
+
+  for (int i = 0; i < octaves; i++) 
+  {
+	total += ((1.0 - abs(sNoise(position * frequency))) * 2.0 - 1.0) * amplitude;
+	frequency *= 2.0;
+	maxAmplitude += amplitude;
+	amplitude *= persistence;
+  }
+
+  return total / maxAmplitude;
 }
 //-----------------------------------------------------------------------------
 
@@ -4044,7 +4063,7 @@ float4 ColorMapTerra(float3 ppoint, float height, float slope)
 //-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
-float HeightMapPlanet(float3 ppoint, float lodom)
+float HeightMapPlanet(float3 ppoint)
 {
 	float3 p = ppoint * mainFreq + Randomize;
 
@@ -4064,8 +4083,9 @@ float HeightMapPlanet(float3 ppoint, float lodom)
 		latitude = saturate(latitude);
 	}
 
-	float t0 = Fbm(p * 0.75, 4 * lodom);
-	float v0 = t0 + pow(2.0, RidgedMultifractalExtra(p, 18 * lodom, 1, 1.75, 0.6));
+	float t0 = Fbm(p * 0.75, 4);
+	//float v0 = t0 + pow(2.0, RidgedMultifractalExtra(p, 18, 1, 1.75, 0.6));
+	float v0 = t0 + pow(2.0, SimplexRidgedMultifractal(p, 18, 2, 0.5));
 
 	total = GetTerraced(v0, 4, 2);
 

@@ -33,6 +33,8 @@
 // Creator: zameran
 #endregion
 
+using System.Linq;
+
 using UnityEngine;
 
 public static class VectorHelper
@@ -42,16 +44,9 @@ public static class VectorHelper
         return new Vector3(v.x, v.z, v.y);
     }
 
-    public static Vector3 CombineVectors(params Vector3[] vectors)
+    public static Vector3 Summ(params Vector3[] vectors)
     {
-        Vector3 summ = Vector3.zero;
-
-        for (int i = 0; i < vectors.Length; i++)
-        {
-            summ += vectors[i];
-        }
-
-        return summ;
+        return vectors.Aggregate(Vector3.zero, (current, t) => current + t);
     }
 
     public static Vector3 Middle(this Vector3 v1, Vector3 v2)
@@ -66,7 +61,7 @@ public static class VectorHelper
 
     public static Vector3 RotatePointAroundPivot(this Vector3 point, Vector3 pivot, Vector3 angles)
     {
-        Vector3 dir = point - pivot;
+        var dir = point - pivot;
 
         dir = Quaternion.Euler(angles) * dir;
         point = dir + pivot;
@@ -76,20 +71,12 @@ public static class VectorHelper
 
     public static Vector3 NormalizeToRadius(this Vector3 v, float radius)
     {
-        Vector3 normalized = new Vector3();
-
-        normalized = v.normalized * radius;
-
-        return normalized;
+        return v.normalized * radius;
     }
 
     public static Vector3 NormalizeToRadiusUnNormalized(this Vector3 v, float radius)
     {
-        Vector3 vector = new Vector3();
-
-        vector = v * radius;
-
-        return vector;
+        return v * radius;
     }
 
     public static Vector2 CartesianToPolar(Vector3 xyz)
@@ -112,13 +99,13 @@ public static class VectorHelper
 
     public static Vector3 SpherifyPoint(Vector3 point)
     {
-        float dX2 = point.x * point.x;
-        float dY2 = point.y * point.y;
-        float dZ2 = point.z * point.z;
+        var dX2 = point.x * point.x;
+        var dY2 = point.y * point.y;
+        var dZ2 = point.z * point.z;
 
-        float dX2Half = dX2 * 0.5f;
-        float dY2Half = dY2 * 0.5f;
-        float dZ2Half = dZ2 * 0.5f;
+        var dX2Half = dX2 * 0.5f;
+        var dY2Half = dY2 * 0.5f;
+        var dZ2Half = dZ2 * 0.5f;
 
         point.x = point.x * Mathf.Sqrt(1f - dY2Half - dZ2Half + (dY2 * dZ2) * (1f / 3f));
         point.y = point.y * Mathf.Sqrt(1f - dZ2Half - dX2Half + (dZ2 * dX2) * (1f / 3f));
@@ -132,8 +119,7 @@ public static class VectorHelper
     {
         return ((-p1.distance * Vector3.Cross(p2.normal, p3.normal)) +
                 (-p2.distance * Vector3.Cross(p3.normal, p1.normal)) +
-                (-p3.distance * Vector3.Cross(p1.normal, p2.normal))) /
-                               (Vector3.Dot(p1.normal, Vector3.Cross(p2.normal, p3.normal)));
+                (-p3.distance * Vector3.Cross(p1.normal, p2.normal))) / (Vector3.Dot(p1.normal, Vector3.Cross(p2.normal, p3.normal)));
     }
 
     public static Vector3 RoundToInt(this Vector3 v)
@@ -148,7 +134,7 @@ public static class VectorHelper
 
     public static float QuickDistance(Vector3 v1, Vector3 v2)
     {
-        Vector3 diff = v2 - v1;
+        var diff = v2 - v1;
 
         return diff.x * diff.x + diff.y * diff.y + diff.z * diff.z;
     }
@@ -167,28 +153,18 @@ public static class VectorHelper
     {
         if (vectors == null || vectors.Length == 0) { Debug.Log("VectorHelper.Max Problem!"); return Vector3.zero; }
 
-        Vector3 max = new Vector3(-9e37f, -9e37f, -9e37f);
+        var max = new Vector3(-9e37f, -9e37f, -9e37f);
 
-        for (int i = 0; i < vectors.Length; i++)
-        {
-            max = Vector3.Max(max, vectors[i]);
-        }
-
-        return max;
+        return vectors.Aggregate(max, (current, t) => Vector3.Max(current, t));
     }
 
     public static Vector3 Min(params Vector3[] vectors)
     {
         if (vectors == null || vectors.Length == 0) { Debug.Log("VectorHelper.Min Problem!"); return Vector3.zero; }
 
-        Vector3 min = new Vector3(9e37f, 9e37f, 9e37f);
+        var min = new Vector3(9e37f, 9e37f, 9e37f);
 
-        for (int i = 0; i < vectors.Length; i++)
-        {
-            min = Vector3.Min(min, vectors[i]);
-        }
-
-        return min;
+        return vectors.Aggregate(min, (current, t) => Vector3.Min(current, t));
     }
 
     public static Vector4 FromColor(this Color color)

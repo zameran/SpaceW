@@ -40,18 +40,27 @@ using UnityEngine;
 public class QuadAABB
 {
     public Vector3[] AABB { get; set; }
+    public Vector3[] CullingAABB { get; set; }
 
     public Bounds Bounds { get; set; }
 
     public Vector3 Min { get; set; }
     public Vector3 Max { get; set; }
 
-    public QuadAABB(Vector3[] AABB, bool forCulling)
+    public QuadAABB(Vector3[] AABB, Vector3[] CullingAABB, Quad Quad)
     {
-        this.AABB = new Vector3[forCulling ? 8 : 14];
+        this.AABB = new Vector3[8];
+        this.CullingAABB = new Vector3[14];
 
-        this.Bounds = new Bounds(Vector3.zero, new Vector3(9e37f, 9e37f, 9e37f));
+        var Max = default(Vector3);
+        var Min = default(Vector3);
 
-        Array.Copy(AABB, this.AABB, forCulling ? 8 : 14);
+        this.Bounds = Quad.GetBoundFromPoints(AABB, out Max, out Min);
+
+        this.Min = Min;
+        this.Max = Max;
+
+        Array.Copy(AABB, this.AABB, 8);
+        Array.Copy(CullingAABB, this.CullingAABB, 14);
     }
 }

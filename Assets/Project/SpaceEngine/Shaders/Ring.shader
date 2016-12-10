@@ -1,4 +1,4 @@
-﻿Shader "Hidden/Ring"
+﻿Shader "SpaceEngine/Ring"
 {
 	Properties
 	{
@@ -29,7 +29,7 @@
 
 		Pass
 		{
-			Blend SrcAlpha OneMinusSrcColor
+			Blend One OneMinusSrcColor
 			Cull Off
 			Lighting Off
 			ZWrite On
@@ -48,6 +48,7 @@
 			#pragma multi_compile DUMMY SCATTERING
 				
 			sampler2D _MainTex;
+			sampler2D _NoiseTex;
 			float4    _Color;
 			float4    _Mie;
 			float     _LightingBias;
@@ -63,25 +64,23 @@
 			{
 				float4 vertex : SV_POSITION;
 				float2 uv : TEXCOORD0; // uv
-				float4 color : TEXCOORD1; // color
+				float4 color : COLOR0; // color
 
 				#if LIGHT_1 || LIGHT_2 || LIGHT_3 || LIGHT_4
-					float3 relativeDirection : TEXCOORD2; // world vertex/pixel to camera
-					float3 sunRelativeDirection1 : TEXCOORD3; // world vertex/pixel to light 1
+					float3 relativeDirection : TEXCOORD1; // world vertex/pixel to camera
+					float3 sunRelativeDirection1 : TEXCOORD2; // world vertex/pixel to light 1
 					#if LIGHT_2
-						float3 sunRelativeDirection2 : TEXCOORD4; // world vertex/pixel to light 2
+						float3 sunRelativeDirection2 : TEXCOORD3; // world vertex/pixel to light 2
 					#endif
 					#if LIGHT_3
-						float3 sunRelativeDirection3 : TEXCOORD5; // world vertex/pixel to light 3
+						float3 sunRelativeDirection3 : TEXCOORD4; // world vertex/pixel to light 3
 					#endif
 					#if LIGHT_4
-						float3 sunRelativeDirection4 : TEXCOORD6; // world vertex/pixel to light 4
+						float3 sunRelativeDirection4 : TEXCOORD5; // world vertex/pixel to light 4
 					#endif
 				#endif
 
-				#if SHADOW_1 || SHADOW_2 || SHADOW_3 || SHADOW_4
-					float4 worldPosition : TEXCOORD7; // world vertex/pixel
-				#endif
+				float4 worldPosition : TEXCOORD6; // world vertex/pixel
 			};
 				
 			struct f2g
@@ -116,9 +115,7 @@
 					#endif
 				#endif
 
-				#if SHADOW_1 || SHADOW_2 || SHADOW_3 || SHADOW_4
-					o.worldPosition = worldPosition;
-				#endif
+				o.worldPosition = worldPosition;
 			}
 				
 			void Frag(v2f i, out f2g o)
@@ -129,9 +126,28 @@
 				o.color = i.color * mainColor;
 
 				#if LIGHT_1 || LIGHT_2 || LIGHT_3 || LIGHT_4
+					float cameraDistance = length(i.relativeDirection);
+
 					i.relativeDirection = normalize(i.relativeDirection);
 					i.sunRelativeDirection1 = normalize(i.sunRelativeDirection1);
+
+					float2 Pos = i.worldPosition.xz * 0.1;
+					float Rad = i.uv * 512;
+					float Noise = 1;
+					float detFade = 1.0 - cameraDistance * 0.00002;
 					
+					if(detFade > 0.0)
+					{
+						Noise = tex2D(_NoiseTex, Pos).r *
+								tex2D(_NoiseTex, Pos * 0.3).g *
+								tex2D(_NoiseTex, float2(Rad, 0.5)).b *
+								tex2D(_NoiseTex, float2(Rad * 0.3, 0.5)).a * 16.0;
+						Noise = saturate(Noise);
+						Noise = lerp(1.0, Noise, clamp(detFade, 0.0, 1.0));
+					}
+
+					mainColor *= Noise;
+
 					float3 shapened = i.relativeDirection * _LightingSharpness;
 					float4 light1 = saturate(dot(i.sunRelativeDirection1, shapened) + _LightingBias) * _Light1Color;
 					float4 lighting = float4(light1.xyz, 0.0f);

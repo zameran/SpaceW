@@ -64,11 +64,11 @@ namespace UnityEngine
 
         public Quat(Vector3d axis, double angle)
         {
-            Vector3d axisN = axis.Normalized();
+            var axisN = axis.Normalized();
 
-            double a = angle * 0.5;
-            double sina = System.Math.Sin(a);
-            double cosa = System.Math.Cos(a);
+            var a = angle * 0.5;
+            var sina = System.Math.Sin(a);
+            var cosa = System.Math.Cos(a);
 
             x = axisN.x * sina;
             y = axisN.y * sina;
@@ -78,11 +78,11 @@ namespace UnityEngine
 
         public Quat(Vector3 axis, float angle)
         {
-            Vector3 axisN = axis.normalized;
+            var axisN = axis.normalized;
 
-            float a = angle * 0.5f;
-            float sina = Mathf.Sin(a);
-            float cosa = Mathf.Cos(a);
+            var a = angle * 0.5f;
+            var sina = Mathf.Sin(a);
+            var cosa = Mathf.Cos(a);
 
             x = (double)(axisN.x * sina);
             y = (double)(axisN.y * sina);
@@ -92,31 +92,32 @@ namespace UnityEngine
 
         public Quat(Vector3d to, Vector3d from)
         {
-            Vector3d f = from.Normalized();
-            Vector3d t = to.Normalized();
+            var f = from.Normalized();
+            var t = to.Normalized();
 
-            double dotProdPlus1 = 1.0 + f.Dot(t);
+            var dotProdPlus1 = 1.0 + f.Dot(t);
 
             if (dotProdPlus1 < 1e-7)
             {
                 w = 0;
+
                 if (System.Math.Abs(f.x) < 0.6)
                 {
-                    double norm = System.Math.Sqrt(1 - f.x * f.x);
+                    var norm = System.Math.Sqrt(1 - f.x * f.x);
                     x = 0;
                     y = f.z / norm;
                     z = -f.y / norm;
                 }
                 else if (System.Math.Abs(f.y) < 0.6)
                 {
-                    double norm = System.Math.Sqrt(1 - f.y * f.y);
+                    var norm = System.Math.Sqrt(1 - f.y * f.y);
                     x = -f.z / norm;
                     y = 0;
                     z = f.x / norm;
                 }
                 else
                 {
-                    double norm = System.Math.Sqrt(1 - f.z * f.z);
+                    var norm = System.Math.Sqrt(1 - f.z * f.z);
                     x = f.y / norm;
                     y = -f.x / norm;
                     z = 0;
@@ -124,8 +125,9 @@ namespace UnityEngine
             }
             else
             {
-                double s = System.Math.Sqrt(0.5 * dotProdPlus1);
-                Vector3d tmp = (f.Cross(t)) / (2.0 * s);
+                var s = System.Math.Sqrt(0.5 * dotProdPlus1);
+                var tmp = (f.Cross(t)) / (2.0 * s);
+
                 x = tmp.x;
                 y = tmp.y;
                 z = tmp.z;
@@ -140,7 +142,7 @@ namespace UnityEngine
             double z;
             double w;
 
-            double magnitude = axis.magnitude;
+            var magnitude = axis.magnitude;
 
             if (magnitude <= 0.0001)
             {
@@ -151,8 +153,8 @@ namespace UnityEngine
             }
             else
             {
-                double cosa = System.Math.Cos(angle * 0.0174532925199433 / 2);
-                double sina = System.Math.Sin(angle * 0.0174532925199433 / 2);
+                var cosa = System.Math.Cos(angle * MathUtility.Deg2Rad / 2);
+                var sina = System.Math.Sin(angle * MathUtility.Deg2Rad / 2);
 
                 x = axis.x / magnitude * sina;
                 y = axis.y / magnitude * sina;
@@ -164,10 +166,8 @@ namespace UnityEngine
 
         public static Quat operator *(Quat q1, Quat q2)
         {
-            return new Quat(q2.w * q1.x + q2.x * q1.w + q2.y * q1.z - q2.z * q1.y,
-                            q2.w * q1.y - q2.x * q1.z + q2.y * q1.w + q2.z * q1.x,
-                            q2.w * q1.z + q2.x * q1.y - q2.y * q1.x + q2.z * q1.w,
-                            q2.w * q1.w - q2.x * q1.x - q2.y * q1.y - q2.z * q1.z);
+            return new Quat(q2.w * q1.x + q2.x * q1.w + q2.y * q1.z - q2.z * q1.y, q2.w * q1.y - q2.x * q1.z + q2.y * q1.w + q2.z * q1.x,
+                q2.w * q1.z + q2.x * q1.y - q2.y * q1.x + q2.z * q1.w, q2.w * q1.w - q2.x * q1.x - q2.y * q1.y - q2.z * q1.z);
         }
 
         public static Vector3d operator *(Quat q, Vector3d v)
@@ -188,62 +188,33 @@ namespace UnityEngine
         public Matrix3x3 ToMatrix3x3()
         {
             float xx = (float)(x * x),
-                  xy = (float)(x * y),
-                  xz = (float)(x * z),
-                  xw = (float)(x * w),
-                  yy = (float)(y * y),
-                  yz = (float)(y * z),
-                  yw = (float)(y * w),
-                  zz = (float)(z * z),
-                  zw = (float)(z * w);
+                xy = (float)(x * y),
+                xz = (float)(x * z),
+                xw = (float)(x * w),
+                yy = (float)(y * y),
+                yz = (float)(y * z),
+                yw = (float)(y * w),
+                zz = (float)(z * z),
+                zw = (float)(z * w);
 
-            return new Matrix3x3
-            (
-                1.0f - 2.0f * (yy + zz), 2.0f * (xy - zw), 2.0f * (xz + yw),
-                2.0f * (xy + zw), 1.0f - 2.0f * (xx + zz), 2.0f * (yz - xw),
-                2.0f * (xz - yw), 2.0f * (yz + xw), 1.0f - 2.0f * (xx + yy)
-            );
+            return new Matrix3x3(1.0f - 2.0f * (yy + zz), 2.0f * (xy - zw), 2.0f * (xz + yw), 2.0f * (xy + zw), 1.0f - 2.0f * (xx + zz), 2.0f * (yz - xw), 2.0f * (xz - yw),
+                2.0f * (yz + xw), 1.0f - 2.0f * (xx + yy));
         }
 
         public Matrix3x3d ToMatrix3x3d()
         {
-            double xx = x * x,
-                   xy = x * y,
-                   xz = x * z,
-                   xw = x * w,
-                   yy = y * y,
-                   yz = y * z,
-                   yw = y * w,
-                   zz = z * z,
-                   zw = z * w;
+            double xx = x * x, xy = x * y, xz = x * z, xw = x * w, yy = y * y, yz = y * z, yw = y * w, zz = z * z, zw = z * w;
 
-            return new Matrix3x3d
-            (
-                 1.0 - 2.0 * (yy + zz), 2.0 * (xy - zw), 2.0 * (xz + yw),
-                 2.0 * (xy + zw), 1.0 - 2.0 * (xx + zz), 2.0 * (yz - xw),
-                 2.0 * (xz - yw), 2.0 * (yz + xw), 1.0 - 2.0 * (xx + yy)
-            );
+            return new Matrix3x3d(1.0 - 2.0 * (yy + zz), 2.0 * (xy - zw), 2.0 * (xz + yw), 2.0 * (xy + zw), 1.0 - 2.0 * (xx + zz), 2.0 * (yz - xw), 2.0 * (xz - yw),
+                2.0 * (yz + xw), 1.0 - 2.0 * (xx + yy));
         }
 
         public Matrix4x4d ToMatrix4x4d()
         {
-            double xx = x * x,
-                    xy = x * y,
-                    xz = x * z,
-                    xw = x * w,
-                    yy = y * y,
-                    yz = y * z,
-                    yw = y * w,
-                    zz = z * z,
-                    zw = z * w;
+            double xx = x * x, xy = x * y, xz = x * z, xw = x * w, yy = y * y, yz = y * z, yw = y * w, zz = z * z, zw = z * w;
 
-            return new Matrix4x4d
-            (
-                1.0 - 2.0 * (yy + zz), 2.0 * (xy - zw), 2.0 * (xz + yw), 0.0,
-                2.0 * (xy + zw), 1.0 - 2.0 * (xx + zz), 2.0 * (yz - xw), 0.0,
-                2.0 * (xz - yw), 2.0 * (yz + xw), 1.0 - 2.0 * (xx + yy), 0.0,
-                0.0, 0.0, 0.0, 1.0
-            );
+            return new Matrix4x4d(1.0 - 2.0 * (yy + zz), 2.0 * (xy - zw), 2.0 * (xz + yw), 0.0, 2.0 * (xy + zw), 1.0 - 2.0 * (xx + zz), 2.0 * (yz - xw), 0.0, 2.0 * (xz - yw),
+                2.0 * (yz + xw), 1.0 - 2.0 * (xx + yy), 0.0, 0.0, 0.0, 0.0, 1.0);
         }
 
         public Quat Inverse()
@@ -251,15 +222,14 @@ namespace UnityEngine
             return new Quat(-x, -y, -z, w);
         }
 
-        double Length()
+        private double Length()
         {
-            double len = x * x + y * y + z * z + w * w;
-            return System.Math.Sqrt(len);
+            return System.Math.Sqrt(x * x + y * y + z * z + w * w);
         }
 
         public void Normalize()
         {
-            double invLength = 1.0 / Length();
+            var invLength = 1.0 / Length();
 
             x *= invLength;
             y *= invLength;
@@ -269,7 +239,7 @@ namespace UnityEngine
 
         public Quat Normalized()
         {
-            double invLength = 1.0 / Length();
+            var invLength = 1.0 / Length();
 
             return new Quat(x * invLength, y * invLength, z * invLength, w * invLength);
         }
@@ -286,16 +256,17 @@ namespace UnityEngine
             }
             else
             {
-                double cosom = _from.x * to.x + _from.y * to.y + _from.z * to.z + _from.w * to.w;
-                double absCosom = System.Math.Abs(cosom);
+                var cosom = _from.x * to.x + _from.y * to.y + _from.z * to.z + _from.w * to.w;
+                var absCosom = System.Math.Abs(cosom);
 
                 double scale0;
                 double scale1;
 
                 if ((1 - absCosom) > 1e-6)
                 {
-                    double omega = MathUtility.Safe_Acos(absCosom);
-                    double sinom = 1.0 / System.Math.Sin(omega);
+                    var omega = MathUtility.Safe_Acos(absCosom);
+                    var sinom = 1.0 / System.Math.Sin(omega);
+
                     scale0 = System.Math.Sin((1.0 - t) * omega) * sinom;
                     scale1 = System.Math.Sin(t * omega) * sinom;
                 }
@@ -305,13 +276,8 @@ namespace UnityEngine
                     scale1 = t;
                 }
 
-                Quat res = new Quat(scale0 * _from.x + scale1 * to.x,
-                                    scale0 * _from.y + scale1 * to.y,
-                                    scale0 * _from.z + scale1 * to.z,
-                                    scale0 * _from.w + scale1 * to.w);
-
-                return res.Normalized();
+                return new Quat(scale0 * _from.x + scale1 * to.x, scale0 * _from.y + scale1 * to.y, scale0 * _from.z + scale1 * to.z, scale0 * _from.w + scale1 * to.w).Normalized();
             }
         }
-    } 
+    }
 }

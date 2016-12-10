@@ -116,21 +116,24 @@ namespace UnityEngine
 
         public void Normalize()
         {
-            double invLength = 1.0 / System.Math.Sqrt(x * x + y * y);
+            var invLength = 1.0 / System.Math.Sqrt(x * x + y * y);
+
             x *= invLength;
             y *= invLength;
         }
 
         public Vector2d Normalized()
         {
-            double invLength = 1.0 / System.Math.Sqrt(x * x + y * y);
+            var invLength = 1.0 / System.Math.Sqrt(x * x + y * y);
+
             return new Vector2d(x * invLength, y * invLength);
         }
 
         public Vector2d Normalized(double l)
         {
-            double length = System.Math.Sqrt(x * x + y * y);
-            double invLength = l / length;
+            var length = System.Math.Sqrt(x * x + y * y);
+            var invLength = l / length;
+
             return new Vector2d(x * invLength, y * invLength);
         }
 
@@ -139,7 +142,7 @@ namespace UnityEngine
             return x * v.y - y * v.x;
         }
 
-        static public double Cross(Vector2d u, Vector2d v)
+        public static double Cross(Vector2d u, Vector2d v)
         {
             return u.x * v.y - u.y * v.x;
         }
@@ -148,5 +151,5 @@ namespace UnityEngine
         {
             return new Vector2((float)x, (float)y);
         }
-    } 
+    }
 }
