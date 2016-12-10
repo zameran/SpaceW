@@ -361,7 +361,7 @@ float PhaseFunctionR(float mu)
 // Mie phase function
 float PhaseFunctionM(float mu) 
 {
-	return 1.5 * 1.0 / (4.0 * M_PI) * (1.0 - mieG * mieG) * pow(1.0 + (mieG * mieG) - 2.0 * mieG * mu, -3.0/2.0) * (1.0 + mu * mu) / (2.0 + mieG * mieG);
+	return 1.5 * 1.0 / (4.0 * M_PI) * (1.0 - mieG * mieG) * pow(1.0 + (mieG * mieG) - 2.0 * mieG * mu, -3.0 / 2.0) * (1.0 + mu * mu) / (2.0 + mieG * mieG);
 }
 
 // approximated single Mie scattering (cf. approximate Cm in paragraph "Angular precision")
@@ -404,6 +404,68 @@ float3 SkyIrradiance(float r, float muS)
 {
 	#if defined(ATMO_SKY_ONLY) || defined(ATMO_FULL)
 		return Irradiance(_Sky_Irradiance, r, muS) * _Sun_Intensity;
+	#else
+		return float3(0, 0, 0);
+	#endif
+}
+
+// single scattered sunlight between two points
+// camera=observer
+// viewdir=unit vector towards observed point
+// sundir=unit vector towards the sun
+// return scattered light
+float3 SkyRadiance(float3 camera, float3 viewdir, float3 sundir, float shaftWidth)
+{
+	#if defined(ATMO_INSCATTER_ONLY) || defined(ATMO_FULL)
+		float3 result = float3(0, 0, 0);
+	
+		camera /= scale;
+		camera += viewdir * max(shaftWidth, 0.0);
+
+		float r = length(camera);
+		float rMu = dot(camera, viewdir);
+		float mu = rMu / r;
+		float r0 = r;
+		float mu0 = mu;
+
+		float deltaSq = SQRT(rMu * rMu - r * r + Rt * Rt, 1e30);
+		float din = max(-rMu - deltaSq, 0.0);
+
+		if (din > 0.0) 
+		{
+			camera += din * viewdir;
+			rMu += din;
+			mu = rMu / Rt;
+			r = Rt;
+		}
+
+		if (r <= Rt) 
+		{
+			float nu = dot(viewdir, sundir);
+			float muS = dot(camera, sundir) / r;
+
+			float4 inScatter = Texture4D(_Sky_Inscatter, r, rMu / r, muS, nu);
+
+			if (shaftWidth > 0.0) 
+			{
+				if (mu > 0.0) 
+				{
+					inScatter *= min(Transmittance(r0, mu0) / Transmittance(r, mu), 1.0).rgbr;
+				} 
+				else 
+				{
+					inScatter *= min(Transmittance(r, -mu) / Transmittance(r0, -mu0), 1.0).rgbr;
+				}
+			}
+
+			float3 inScatterM = GetMie(inScatter);
+			float phase = PhaseFunctionR(nu);
+			float phaseM = PhaseFunctionM(nu);
+
+			result = inScatter.rgb * phase + inScatterM * phaseM;
+		} 
+
+		return result * _Sun_Intensity;
 	#else
 		return float3(0, 0, 0);
 	#endif
@@ -483,13 +545,12 @@ float3 SkyRadiance(float3 camera, float3 viewdir, float3 sundir, out float3 exti
 float3 SkyShineRadiance(float3 camera, float3 viewdir, float4x4 _Sky_ShineOccluders_1, float4x4 _Sky_ShineColors_1)
 {
 	float3 inscatter = 0;
-	float3 extinction = 0;
 
 	for (int i = 0; i < 4; ++i)
 	{
 		if (_Sky_ShineColors_1[i].w <= 0) break;
 
-		inscatter += SkyRadiance(camera, viewdir, _Sky_ShineOccluders_1[i].xyz, extinction, 1.0);
+		inscatter += SkyRadiance(camera, viewdir, _Sky_ShineOccluders_1[i].xyz, 0.0);
 		inscatter *= _Sky_ShineColors_1[i].xyz * _Sky_ShineColors_1[i].w;
 	}
 

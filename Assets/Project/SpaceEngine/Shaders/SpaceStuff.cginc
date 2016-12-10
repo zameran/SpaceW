@@ -85,26 +85,6 @@ float MiePhase(float angle, float4 mie)
 {
 	return ComputeMiePhase(mie.y, mie.y) / pow(mie.z - mie.x * angle, mie.w);
 }
-
-float RayleighPhase(float angle, float rayleigh)
-{
-	return rayleigh * angle * angle;
-}
-
-float RayleighPhaseFunction(float mu, float rayleigh) 
-{
-	return rayleigh * (3.0 / (16.0 * M_PI)) * (1.0 + mu * mu);
-}
-
-float MieRayleighPhase(float angle, float4 mie, float rayleigh)
-{
-	return MiePhase(angle, mie) + RayleighPhase(angle, rayleigh);
-}
-
-float MieRayleighPhaseFunction(float angle, float4 mie, float rayleigh) 
-{
-	 return MiePhase(angle, mie) + RayleighPhaseFunction(angle, rayleigh);
-}
 #endif
 //----------------------------------------------------------------------------
 
