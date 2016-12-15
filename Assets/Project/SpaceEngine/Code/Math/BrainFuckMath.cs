@@ -33,10 +33,24 @@
 // Creator: zameran
 #endregion
 
+using System;
+
 using UnityEngine;
 
 public static class BrainFuckMath
 {
+    public static Vector3 FromQuadPositionMask(float r, byte[] sign, byte[] axis, QuadPosition quadPosition)
+    {
+        var indexOf = Array.IndexOf(Enum.GetValues(typeof(QuadPosition)), quadPosition);
+
+        var s = (sign[indexOf] == 1) ? -r : r;
+        var v = axis[indexOf];
+
+        var output = new Vector3(v == 0 ? s : 0.0f, v == 1 ? s : 0.0f, v == 2 ? s : 0.0f);
+
+        return output;
+    }
+
     public static bool AlmostEquals(this float a, float b, float precision)
     {
         return Mathf.Abs(a - b) <= precision;

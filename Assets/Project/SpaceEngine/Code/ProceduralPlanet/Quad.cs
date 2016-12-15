@@ -38,6 +38,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
+
 using ZFramework.Unity.Common.PerfomanceMonitor;
 
 [Serializable]
@@ -934,98 +935,59 @@ public sealed class Quad : MonoBehaviour, IQuad
 
     public Vector3 GetCubeFaceEastDirection(QuadPosition quadPosition)
     {
-        var temp = Vector3.zero;
-        var r = Planetoid.PlanetRadius;
+        // NOTE : So, here i will construct vector with specific parameters.
+        // I need unit axis vector, depending on Quad Orientation [QuadPosition] with positive or negative value [Planet Radius].
+        // "Sign" will represent 'Is value negative or positive?'
+        // "Axis" will represent one component of vector, which should be 'valued' [X or Y or Z]. Other vector components will be zero...
+        // TOP      (0.0, 0.0, -r)      SIGN     1      AXIS    2   Z
+        // BUTTOM   (0.0, 0.0, -r)      SIGN     1      AXIS    2   Z
+        // LEFT     (0.0, -r, 0.0)      SIGN     1      AXIS    1   Y
+        // RIGHT    (0.0, -r, 0.0)      SIGN     1      AXIS    1   Y
+        // FRONT    (r, 0.0, 0.0)       SIGN     0      AXIS    0   X
+        // BACK     (r, 0.0, 0.0)       SIGN     0      AXIS    0   X
 
-        switch (quadPosition)
-        {
-            case QuadPosition.Top:
-                temp = new Vector3(0.0f, 0.0f, -r);
-                break;
-            case QuadPosition.Bottom:
-                temp = new Vector3(0.0f, 0.0f, -r);
-                break;
-            case QuadPosition.Left:
-                temp = new Vector3(0.0f, -r, 0.0f);
-                break;
-            case QuadPosition.Right:
-                temp = new Vector3(0.0f, -r, 0.0f);
-                break;
-            case QuadPosition.Front:
-                temp = new Vector3(r, 0.0f, 0.0f);
-                break;
-            case QuadPosition.Back:
-                temp = new Vector3(r, 0.0f, 0.0f);
-                break;
-            default:
-                throw new ArgumentOutOfRangeException("quadPosition", quadPosition, null);
-        }
+        var sign = new byte[] { 1, 1, 1, 1, 0, 0 };
+        var axis = new byte[] { 2, 2, 1, 1, 0, 0 };
 
-        return temp;
+        return BrainFuckMath.FromQuadPositionMask(Planetoid.PlanetRadius, sign, axis, quadPosition);
     }
 
     public Vector3 GetCubeFaceNorthDirection(QuadPosition quadPosition)
     {
-        var temp = Vector3.zero;
-        var r = Planetoid.PlanetRadius;
+        // NOTE : So, here i will construct vector with specific parameters.
+        // I need unit axis vector, depending on Quad Orientation [QuadPosition] with positive or negative value [Planet Radius].
+        // "Sign" will represent 'Is value negative or positive?'
+        // "Axis" will represent one component of vector, which should be 'valued' [X or Y or Z]. Other vector components will be zero...
+        // TOP      (r, 0.0, 0.0)       SIGN     0      AXIS    0   X
+        // BUTTOM   (-r, 0.0, 0.0)      SIGN     1      AXIS    0   X
+        // LEFT     (0.0, 0.0, -r)      SIGN     1      AXIS    2   Z
+        // RIGHT    (0.0, 0.0, r)       SIGN     0      AXIS    2   Z
+        // FRONT    (0.0, -r, 0.0)      SIGN     1      AXIS    1   Y
+        // BACK     (0.0, r, 0.0)       SIGN     0      AXIS    1   Y
 
-        switch (quadPosition)
-        {
-            case QuadPosition.Top:
-                temp = new Vector3(r, 0.0f, 0.0f);
-                break;
-            case QuadPosition.Bottom:
-                temp = new Vector3(-r, 0.0f, 0.0f);
-                break;
-            case QuadPosition.Left:
-                temp = new Vector3(0.0f, 0.0f, -r);
-                break;
-            case QuadPosition.Right:
-                temp = new Vector3(0.0f, 0.0f, r);
-                break;
-            case QuadPosition.Front:
-                temp = new Vector3(0.0f, -r, 0.0f);
-                break;
-            case QuadPosition.Back:
-                temp = new Vector3(0.0f, r, 0.0f);
-                break;
-            default:
-                throw new ArgumentOutOfRangeException("quadPosition", quadPosition, null);
-        }
+        var sign = new byte[] { 0, 1, 1, 0, 1, 0 };
+        var axis = new byte[] { 0, 0, 2, 2, 1, 1 };
 
-        return temp;
+        return BrainFuckMath.FromQuadPositionMask(Planetoid.PlanetRadius, sign, axis, quadPosition);
     }
 
     public Vector3 GetPatchCubeCenter(QuadPosition quadPosition)
     {
-        var temp = Vector3.zero;
-        var r = Planetoid.PlanetRadius;
+        // NOTE : So, here i will construct vector with specific parameters.
+        // I need unit axis vector, depending on Quad Orientation [QuadPosition] with positive or negative value [Planet Radius].
+        // "Sign" will represent 'Is value negative or positive?'
+        // "Axis" will represent one component of vector, which should be 'valued' [X or Y or Z]. Other vector components will be zero...
+        // TOP      (0.0, r, 0.0)       SIGN     0      AXIS    0   Y
+        // BUTTOM   (0.0, -r, 0.0)      SIGN     1      AXIS    0   Y
+        // LEFT     (-r, 0.0, 0.0)      SIGN     1      AXIS    2   X
+        // RIGHT    (r, 0.0, 0.0)       SIGN     0      AXIS    2   X
+        // FRONT    (0.0, 0.0, r)       SIGN     0      AXIS    1   Z
+        // BACK     (0.0, 0,0, -r)      SIGN     1      AXIS    1   Z
 
-        switch (quadPosition)
-        {
-            case QuadPosition.Top:
-                temp = new Vector3(0.0f, r, 0.0f);
-                break;
-            case QuadPosition.Bottom:
-                temp = new Vector3(0.0f, -r, 0.0f);
-                break;
-            case QuadPosition.Left:
-                temp = new Vector3(-r, 0.0f, 0.0f);
-                break;
-            case QuadPosition.Right:
-                temp = new Vector3(r, 0.0f, 0.0f);
-                break;
-            case QuadPosition.Front:
-                temp = new Vector3(0.0f, 0.0f, r);
-                break;
-            case QuadPosition.Back:
-                temp = new Vector3(0.0f, 0.0f, -r);
-                break;
-            default:
-                throw new ArgumentOutOfRangeException("quadPosition", quadPosition, null);
-        }
+        var sign = new byte[] { 0, 1, 1, 0, 0, 1 };
+        var axis = new byte[] { 1, 1, 0, 0, 2, 2 };
 
-        return temp;
+        return BrainFuckMath.FromQuadPositionMask(Planetoid.PlanetRadius, sign, axis, quadPosition);
     }
 
     public Vector3 GetPatchCubeCenterSplitted(QuadPosition quadPosition, int id, bool staticX, bool staticY, bool staticZ)
@@ -1116,8 +1078,7 @@ public sealed class Quad : MonoBehaviour, IQuad
 
     public Vector3 CalculateMiddlePoint(Vector3 topLeft, Vector3 bottomRight, Vector3 topRight, Vector3 bottomLeft)
     {
-        Vector3 size = bottomLeft - topLeft;
-        Vector3 middle = Vector3.zero;
+        var size = bottomLeft - topLeft;
 
         bool staticX = false, staticY = false, staticZ = false;
 
@@ -1125,8 +1086,7 @@ public sealed class Quad : MonoBehaviour, IQuad
 
         BrainFuckMath.DefineAxis(ref staticX, ref staticY, ref staticZ, size);
 
-        middle = (topLeft + bottomRight) * (1.0f / Mathf.Abs(LODLevel));
-        middle = middle.NormalizeToRadius(Planetoid.PlanetRadius);
+        var middle = ((topLeft + bottomRight) * (1.0f / Mathf.Abs(LODLevel))).NormalizeToRadius(Planetoid.PlanetRadius);
 
         BrainFuckMath.LockAxis(ref tempStatic, ref middle, staticX, staticY, staticZ);
         BrainFuckMath.UnlockAxis(ref middle, ref tempStatic, staticX, staticY, staticZ);
