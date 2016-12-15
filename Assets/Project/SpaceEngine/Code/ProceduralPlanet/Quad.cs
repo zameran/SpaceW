@@ -180,7 +180,8 @@ public sealed class Quad : MonoBehaviour, IQuad
     {
         if (Planetoid.DrawGizmos)
         {
-            Bounds bounds = GetBounds(this);
+            var r = Planetoid.PlanetRadius / 1000.0f;
+            var bounds = GetBounds(this);
 
             Gizmos.color = Color.blue;
 
@@ -188,35 +189,49 @@ public sealed class Quad : MonoBehaviour, IQuad
 
             Gizmos.color = Color.red;
 
-            Gizmos.DrawWireSphere(Planetoid.transform.TransformPoint(topLeftCorner), 1000);
-            Gizmos.DrawWireSphere(Planetoid.transform.TransformPoint(topRightCorner), 1000);
-            Gizmos.DrawWireSphere(Planetoid.transform.TransformPoint(bottomLeftCorner), 1000);
-            Gizmos.DrawWireSphere(Planetoid.transform.TransformPoint(bottomRightCorner), 1000);
+            Gizmos.DrawWireSphere(Planetoid.OriginTransform.TransformPoint(topLeftCorner), r);
+            Gizmos.DrawWireSphere(Planetoid.OriginTransform.TransformPoint(topRightCorner), r);
+            Gizmos.DrawWireSphere(Planetoid.OriginTransform.TransformPoint(bottomLeftCorner), r);
+            Gizmos.DrawWireSphere(Planetoid.OriginTransform.TransformPoint(bottomRightCorner), r);
 
             Gizmos.color = Color.green;
 
-            Gizmos.DrawWireSphere(Planetoid.transform.TransformPoint(topLeftCorner.NormalizeToRadius(Planetoid.PlanetRadius)), 1750);
-            Gizmos.DrawWireSphere(Planetoid.transform.TransformPoint(topRightCorner.NormalizeToRadius(Planetoid.PlanetRadius)), 1750);
-            Gizmos.DrawWireSphere(Planetoid.transform.TransformPoint(bottomLeftCorner.NormalizeToRadius(Planetoid.PlanetRadius)), 1750);
-            Gizmos.DrawWireSphere(Planetoid.transform.TransformPoint(bottomRightCorner.NormalizeToRadius(Planetoid.PlanetRadius)), 1750);
+            Gizmos.DrawWireSphere(Planetoid.OriginTransform.TransformPoint(topLeftCorner.NormalizeToRadius(Planetoid.PlanetRadius)), r);
+            Gizmos.DrawWireSphere(Planetoid.OriginTransform.TransformPoint(topRightCorner.NormalizeToRadius(Planetoid.PlanetRadius)), r);
+            Gizmos.DrawWireSphere(Planetoid.OriginTransform.TransformPoint(bottomLeftCorner.NormalizeToRadius(Planetoid.PlanetRadius)), r);
+            Gizmos.DrawWireSphere(Planetoid.OriginTransform.TransformPoint(bottomRightCorner.NormalizeToRadius(Planetoid.PlanetRadius)), r);
 
             Gizmos.color = Color.blue;
 
-            Gizmos.DrawWireSphere(Planetoid.transform.TransformPoint(quadCorners.topLeftCorner), 1500);
-            Gizmos.DrawWireSphere(Planetoid.transform.TransformPoint(quadCorners.topRightCorner), 1500);
-            Gizmos.DrawWireSphere(Planetoid.transform.TransformPoint(quadCorners.bottomLeftCorner), 1500);
-            Gizmos.DrawWireSphere(Planetoid.transform.TransformPoint(quadCorners.bottomRightCorner), 1500);
+            Gizmos.DrawWireSphere(Planetoid.OriginTransform.TransformPoint(quadCorners.topLeftCorner), r);
+            Gizmos.DrawWireSphere(Planetoid.OriginTransform.TransformPoint(quadCorners.topRightCorner), r);
+            Gizmos.DrawWireSphere(Planetoid.OriginTransform.TransformPoint(quadCorners.bottomLeftCorner), r);
+            Gizmos.DrawWireSphere(Planetoid.OriginTransform.TransformPoint(quadCorners.bottomRightCorner), r);
 
             if (QuadAABB != null)
             {
                 Gizmos.color = XKCDColors.Adobe;
 
-                Gizmos.DrawWireCube(Planetoid.transform.TransformPoint(QuadAABB.Bounds.center), QuadAABB.Bounds.size);
+                Gizmos.DrawWireCube(Planetoid.OriginTransform.TransformPoint(QuadAABB.Bounds.center), QuadAABB.Bounds.size);
             }
 
             Gizmos.color = XKCDColors.BabyBlue;
 
-            Gizmos.DrawRay(Planetoid.transform.TransformPoint(middleNormalized), middleNormalized);
+            Gizmos.DrawRay(Planetoid.OriginTransform.TransformPoint(middleNormalized), middleNormalized);
+        }
+        else
+        {
+            Gizmos.color = XKCDColors.Red;
+
+            Gizmos.DrawRay(Planetoid.OriginTransform.TransformPoint(middleNormalized), generationConstants.cubeFaceEastDirection);
+
+            Gizmos.color = XKCDColors.Green;
+
+            Gizmos.DrawRay(Planetoid.OriginTransform.TransformPoint(middleNormalized), generationConstants.patchCubeCenter);
+
+            Gizmos.color = XKCDColors.Blue;
+
+            Gizmos.DrawRay(Planetoid.OriginTransform.TransformPoint(middleNormalized), generationConstants.cubeFaceNorthDirection);
         }
     }
 
@@ -425,7 +440,7 @@ public sealed class Quad : MonoBehaviour, IQuad
 
     public bool BorderFrustumCheck(Plane[] planes, Vector3 border)
     {
-        return planes.All(plane => (plane.GetDistanceToPoint(Planetoid.transform.TransformPoint(border)) < 0 - 1024.0f) == false);
+        return planes.All(plane => (plane.GetDistanceToPoint(Planetoid.OriginTransform.TransformPoint(border)) < 0 - 1024.0f) == false);
     }
 
     public void InitCorners(Vector3 topLeft, Vector3 bottmoRight, Vector3 topRight, Vector3 bottomLeft)
@@ -811,7 +826,7 @@ public sealed class Quad : MonoBehaviour, IQuad
 
         for (int i = 0; i < 4; i++)
         {
-            d = Vector3.Distance(Planetoid.LODTarget.position, Planetoid.transform.TransformPoint(QuadAABB.AABB[i]));
+            d = Vector3.Distance(Planetoid.LODTarget.position, Planetoid.OriginTransform.TransformPoint(QuadAABB.AABB[i]));
             if (d < closestDistance)
             {
                 closestCorner = QuadAABB.AABB[i];
@@ -819,14 +834,14 @@ public sealed class Quad : MonoBehaviour, IQuad
             }
         }
 
-        d = Vector3.Distance(Planetoid.LODTarget.position, Planetoid.transform.TransformPoint(middleNormalized));
+        d = Vector3.Distance(Planetoid.LODTarget.position, Planetoid.OriginTransform.TransformPoint(middleNormalized));
         if (d < closestDistance)
         {
             closestCorner = middleNormalized;
             closestDistance = d;
         }
 
-        return Planetoid.transform.TransformPoint(closestCorner);
+        return Planetoid.OriginTransform.TransformPoint(closestCorner);
     }
 
     private Vector3 GetClosestCorner()
@@ -838,23 +853,23 @@ public sealed class Quad : MonoBehaviour, IQuad
 
         Vector3 tl = Vector3.zero;
         Vector3 tr = Vector3.zero;
-        Vector3 middlePoint = Planetoid.transform.TransformPoint(middleNormalized);
+        Vector3 middlePoint = Planetoid.OriginTransform.TransformPoint(middleNormalized);
         Vector3 bl = Vector3.zero;
         Vector3 br = Vector3.zero;
 
         if (Planetoid.GetData && GPUDataRecieved)
         {
-            tl = Planetoid.transform.TransformPoint(quadCorners.topLeftCorner);
-            tr = Planetoid.transform.TransformPoint(quadCorners.topRightCorner);
-            bl = Planetoid.transform.TransformPoint(quadCorners.bottomLeftCorner);
-            br = Planetoid.transform.TransformPoint(quadCorners.bottomRightCorner);
+            tl = Planetoid.OriginTransform.TransformPoint(quadCorners.topLeftCorner);
+            tr = Planetoid.OriginTransform.TransformPoint(quadCorners.topRightCorner);
+            bl = Planetoid.OriginTransform.TransformPoint(quadCorners.bottomLeftCorner);
+            br = Planetoid.OriginTransform.TransformPoint(quadCorners.bottomRightCorner);
         }
         else
         {
-            tl = Planetoid.transform.TransformPoint(topLeftCorner.NormalizeToRadius(Planetoid.PlanetRadius));
-            tr = Planetoid.transform.TransformPoint(topRightCorner.NormalizeToRadius(Planetoid.PlanetRadius));
-            bl = Planetoid.transform.TransformPoint(bottomLeftCorner.NormalizeToRadius(Planetoid.PlanetRadius));
-            br = Planetoid.transform.TransformPoint(bottomRightCorner.NormalizeToRadius(Planetoid.PlanetRadius));
+            tl = Planetoid.OriginTransform.TransformPoint(topLeftCorner.NormalizeToRadius(Planetoid.PlanetRadius));
+            tr = Planetoid.OriginTransform.TransformPoint(topRightCorner.NormalizeToRadius(Planetoid.PlanetRadius));
+            bl = Planetoid.OriginTransform.TransformPoint(bottomLeftCorner.NormalizeToRadius(Planetoid.PlanetRadius));
+            br = Planetoid.OriginTransform.TransformPoint(bottomRightCorner.NormalizeToRadius(Planetoid.PlanetRadius));
         }
 
         d = Vector3.Distance(Planetoid.LODTarget.position, tl);

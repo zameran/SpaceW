@@ -432,16 +432,16 @@ namespace SpaceEngine.AtmosphericScattering
                     Gizmos.DrawRay(Origin, direction);
 
                     Gizmos.color = Color.blue;
-                    Gizmos.DrawRay(planetoid.transform.InverseTransformVector(Origin + direction), -(Quaternion.Euler(umbraAngle, 0, 0) * direction));
-                    Gizmos.DrawRay(planetoid.transform.InverseTransformVector(Origin + direction), -(Quaternion.Euler(-umbraAngle, 0, 0) * direction));
-                    Gizmos.DrawRay(planetoid.transform.InverseTransformVector(Origin + direction), -(Quaternion.Euler(0, umbraAngle, 0) * direction));
-                    Gizmos.DrawRay(planetoid.transform.InverseTransformVector(Origin + direction), -(Quaternion.Euler(0, -umbraAngle, 0) * direction));
+                    Gizmos.DrawRay(planetoid.OriginTransform.InverseTransformVector(Origin + direction), -(Quaternion.Euler(umbraAngle, 0, 0) * direction));
+                    Gizmos.DrawRay(planetoid.OriginTransform.InverseTransformVector(Origin + direction), -(Quaternion.Euler(-umbraAngle, 0, 0) * direction));
+                    Gizmos.DrawRay(planetoid.OriginTransform.InverseTransformVector(Origin + direction), -(Quaternion.Euler(0, umbraAngle, 0) * direction));
+                    Gizmos.DrawRay(planetoid.OriginTransform.InverseTransformVector(Origin + direction), -(Quaternion.Euler(0, -umbraAngle, 0) * direction));
 
                     Gizmos.color = Color.cyan;
-                    Gizmos.DrawLine(planetoid.transform.position + Vector3.up * planetoid.PlanetRadius, planetoid.transform.InverseTransformVector(Origin + direction) + Vector3.up * planetoid.PlanetRadius);
-                    Gizmos.DrawLine(planetoid.transform.position + Vector3.down * planetoid.PlanetRadius, planetoid.transform.InverseTransformVector(Origin + direction) + Vector3.down * planetoid.PlanetRadius);
-                    Gizmos.DrawLine(planetoid.transform.position + Vector3.left * planetoid.PlanetRadius, planetoid.transform.InverseTransformVector(Origin + direction) + Vector3.left * planetoid.PlanetRadius);
-                    Gizmos.DrawLine(planetoid.transform.position + Vector3.right * planetoid.PlanetRadius, planetoid.transform.InverseTransformVector(Origin + direction) + Vector3.right * planetoid.PlanetRadius);
+                    Gizmos.DrawLine(planetoid.OriginTransform.position + Vector3.up * planetoid.PlanetRadius, planetoid.OriginTransform.InverseTransformVector(Origin + direction) + Vector3.up * planetoid.PlanetRadius);
+                    Gizmos.DrawLine(planetoid.OriginTransform.position + Vector3.down * planetoid.PlanetRadius, planetoid.OriginTransform.InverseTransformVector(Origin + direction) + Vector3.down * planetoid.PlanetRadius);
+                    Gizmos.DrawLine(planetoid.OriginTransform.position + Vector3.left * planetoid.PlanetRadius, planetoid.OriginTransform.InverseTransformVector(Origin + direction) + Vector3.left * planetoid.PlanetRadius);
+                    Gizmos.DrawLine(planetoid.OriginTransform.position + Vector3.right * planetoid.PlanetRadius, planetoid.OriginTransform.InverseTransformVector(Origin + direction) + Vector3.right * planetoid.PlanetRadius);
                 }
             }
         }

@@ -116,7 +116,7 @@ namespace SpaceEngine.Debugging
 
                     GL.PushMatrix();
                     GL.LoadIdentity();
-                    GL.MultMatrix(CameraHelper.Main().worldToCameraMatrix * q.Planetoid.transform.localToWorldMatrix);
+                    GL.MultMatrix(CameraHelper.Main().worldToCameraMatrix * q.Planetoid.OriginTransform.localToWorldMatrix);
                     GL.LoadProjectionMatrix(CameraHelper.Main().projectionMatrix);
 
                     lineMaterial.renderQueue = 5000;
