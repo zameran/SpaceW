@@ -114,7 +114,7 @@ public static class BrainFuckMath
         decimal prev1 = CalculateJ(lodLevel - 1);
         decimal prev2 = CalculateJ(lodLevel - 2);
 
-        decimal summ = System.Math.Abs(prev1 - prev2) / 2.0M;
+        decimal summ = Math.Abs(prev1 - prev2) / 2.0M;
 
         return prev1 + summ;
     }
