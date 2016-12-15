@@ -955,7 +955,7 @@ public sealed class Quad : MonoBehaviour, IQuad
                 temp = new Vector3(r, 0.0f, 0.0f);
                 break;
             case QuadPosition.Back:
-                temp = new Vector3(-r, 0.0f, 0.0f);
+                temp = new Vector3(r, 0.0f, 0.0f);
                 break;
             default:
                 throw new ArgumentOutOfRangeException("quadPosition", quadPosition, null);
@@ -987,7 +987,7 @@ public sealed class Quad : MonoBehaviour, IQuad
                 temp = new Vector3(0.0f, -r, 0.0f);
                 break;
             case QuadPosition.Back:
-                temp = new Vector3(0.0f, -r, 0.0f);
+                temp = new Vector3(0.0f, r, 0.0f);
                 break;
             default:
                 throw new ArgumentOutOfRangeException("quadPosition", quadPosition, null);
