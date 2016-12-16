@@ -23,6 +23,7 @@
 // Modified by Denis Ovchinnikov 2015-2016
 #endregion
 
+
 namespace UnityEngine
 {
     public class Frustum

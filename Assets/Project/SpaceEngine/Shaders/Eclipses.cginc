@@ -83,8 +83,13 @@ float EclipseOuterShadow(float3 lightVec, float lightAngularRadius, float3 d, fl
 //-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
-float GroundFade(float fade, float value)
+float4 GroundFade(float fade, float4 value)
 {
 	return 1.0f * fade + (1.0f - fade) * value;
+}
+
+float4 BrightnessContrast(float brightness, float contrast, float4 value)
+{
+	return (value - 1.0) * contrast + 1.0 + brightness;
 }
 //-----------------------------------------------------------------------------

@@ -110,7 +110,6 @@ public sealed class Quad : MonoBehaviour, IQuad
     public ComputeBuffer PreOutDataBuffer;
     public ComputeBuffer PreOutDataSubBuffer;
     public ComputeBuffer OutDataBuffer;
-    public ComputeBuffer QuadCornersBuffer;
 
     public RenderTexture HeightTexture;
     public RenderTexture NormalTexture;
@@ -139,8 +138,6 @@ public sealed class Quad : MonoBehaviour, IQuad
     public Vector3 middleNormalized;
 
     public QuadCorners quadCorners;
-    public QuadCorners quadCornersDisplaced;
-    public OutputStruct[] outputStructData;
 
     public QuadAABB QuadAABB = null;
 
@@ -160,7 +157,7 @@ public sealed class Quad : MonoBehaviour, IQuad
 
     private void OnDestroy()
     {
-        BufferHelper.ReleaseAndDisposeBuffers(QuadGenerationConstantsBuffer, PreOutDataBuffer, PreOutDataSubBuffer, OutDataBuffer, QuadCornersBuffer);
+        BufferHelper.ReleaseAndDisposeBuffers(QuadGenerationConstantsBuffer, PreOutDataBuffer, PreOutDataSubBuffer, OutDataBuffer);
 
         if (RenderTexture.active == HeightTexture | NormalTexture) RenderTexture.active = null;
 
@@ -199,13 +196,6 @@ public sealed class Quad : MonoBehaviour, IQuad
             Gizmos.DrawWireSphere(Planetoid.OriginTransform.TransformPoint(quadCorners.bottomLeftCorner.NormalizeToRadius(Planetoid.PlanetRadius)), r);
             Gizmos.DrawWireSphere(Planetoid.OriginTransform.TransformPoint(quadCorners.bottomRightCorner.NormalizeToRadius(Planetoid.PlanetRadius)), r);
 
-            Gizmos.color = Color.blue;
-
-            Gizmos.DrawWireSphere(Planetoid.OriginTransform.TransformPoint(quadCornersDisplaced.topLeftCorner), r);
-            Gizmos.DrawWireSphere(Planetoid.OriginTransform.TransformPoint(quadCornersDisplaced.topRightCorner), r);
-            Gizmos.DrawWireSphere(Planetoid.OriginTransform.TransformPoint(quadCornersDisplaced.bottomLeftCorner), r);
-            Gizmos.DrawWireSphere(Planetoid.OriginTransform.TransformPoint(quadCornersDisplaced.bottomRightCorner), r);
-
             if (QuadAABB != null)
             {
                 Gizmos.color = XKCDColors.Adobe;
@@ -241,7 +231,6 @@ public sealed class Quad : MonoBehaviour, IQuad
             PreOutDataBuffer = new ComputeBuffer(QuadSettings.VerticesWithBorder, 48);
             PreOutDataSubBuffer = new ComputeBuffer(QuadSettings.VerticesWithBorderFull, 48);
             OutDataBuffer = new ComputeBuffer(QuadSettings.Vertices, 48);
-            QuadCornersBuffer = new ComputeBuffer(1, 48);
 
             BuffersCreated = true;
         }
@@ -348,6 +337,7 @@ public sealed class Quad : MonoBehaviour, IQuad
         SetupBounds(this, QuadMesh);
 
         if (Planetoid.Atmosphere != null) Planetoid.Atmosphere.SetUniforms(null, QuadMaterial, false, true);
+
         //if (Planetoid.Ring != null) Planetoid.Ring.SetShadows(QuadMaterial, Planetoid.Shadows);
         //if (Planetoid.NPS != null) Planetoid.NPS.UpdateUniforms(QuadMaterial, null); //(WIP) For SE Coloring in fragment shader work...
         //if (Planetoid.tccps != null) Planetoid.tccps.UpdateUniforms(QuadMaterial); //(WIP) For SE Coloring in fragment shader work...
@@ -575,30 +565,15 @@ public sealed class Quad : MonoBehaviour, IQuad
 
     public void Dispatch()
     {
-        StartCoroutine(DispatcheCoroutineWait());
-    }
-
-    public IEnumerator DispatcheCoroutineWait()
-    {
-        yield return StartCoroutine(DispatchCoroutine());
-    }
-
-    public IEnumerator DispatchCoroutine()
-    {
-        if (CoreShader == null) StopCoroutine(DispatchCoroutine());
-
-        EventManager.PlanetoidEvents.OnDispatchStarted.Invoke(Planetoid, this);
-
         generationConstants.lodLevel = (((1 << LODLevel + 2) * (Planetoid.PlanetRadius / (LODLevel + 2)) - ((Planetoid.PlanetRadius / (LODLevel + 2)) / 2)) / Planetoid.PlanetRadius);
         generationConstants.lodOctaveModifier = Planetoid.GetLODOctaveModifier(LODLevel + 1);
 
         SetupComputeShaderUniforms();
 
-        QuadGenerationConstants[] quadGenerationConstantsData = { generationConstants };
-        OutputStruct[] preOutputStructData = new OutputStruct[QuadSettings.VerticesWithBorder];
-        OutputStruct[] preOutputSubStructData = new OutputStruct[QuadSettings.VerticesWithBorderFull];
-        OutputStruct[] outputStructData = new OutputStruct[QuadSettings.Vertices];
-        QuadCorners[] quadCorners = { new QuadCorners() };
+        var quadGenerationConstantsData = new[] { generationConstants };
+        var preOutputStructData = new OutputStruct[QuadSettings.VerticesWithBorder];
+        var preOutputSubStructData = new OutputStruct[QuadSettings.VerticesWithBorderFull];
+        var outputStructData = new OutputStruct[QuadSettings.Vertices];
 
         CreateBuffers();
 
@@ -606,59 +581,49 @@ public sealed class Quad : MonoBehaviour, IQuad
         PreOutDataBuffer.SetData(preOutputStructData);
         PreOutDataSubBuffer.SetData(preOutputSubStructData);
         OutDataBuffer.SetData(outputStructData);
-        QuadCornersBuffer.SetData(quadCorners);
+
+        StartCoroutine(DispatcheCoroutineWait());
+    }
+
+    private IEnumerator DispatcheCoroutineWait()
+    {
+        yield return StartCoroutine(DispatchCoroutine());
+    }
+
+    private IEnumerator DispatchCoroutine()
+    {
+        if (CoreShader == null) StopCoroutine(DispatchCoroutine());
+
+        EventManager.PlanetoidEvents.OnDispatchStarted.Invoke(Planetoid, this);
 
         int kernel1 = CoreShader.FindKernel("HeightMain");
         int kernel2 = CoreShader.FindKernel("Transfer");
         int kernel3 = CoreShader.FindKernel("HeightSub");
         int kernel4 = CoreShader.FindKernel("TexturesSub");
-        int kernel5 = CoreShader.FindKernel("GetCorners");
 
         SetupComputeShaderKernelsUniforfms(QuadGenerationConstantsBuffer,
                                            PreOutDataBuffer,
                                            PreOutDataSubBuffer,
-                                           OutDataBuffer,
-                                           QuadCornersBuffer, new int[] { kernel1, kernel2, kernel3, kernel4, kernel5 });
+                                           OutDataBuffer, new int[] { kernel1, kernel2, kernel3, kernel4 });
 
         CoreShader.Dispatch(kernel1, QuadSettings.THREADGROUP_SIZE_BORDER, QuadSettings.THREADGROUP_SIZE_BORDER, 1);
         CoreShader.Dispatch(kernel2, QuadSettings.THREADGROUP_SIZE, QuadSettings.THREADGROUP_SIZE, 1);
         CoreShader.Dispatch(kernel3, QuadSettings.THREADGROUP_SIZE_BORDER_FULL, QuadSettings.THREADGROUP_SIZE_BORDER_FULL, 1);
         CoreShader.Dispatch(kernel4, QuadSettings.THREADGROUP_SIZE_FULL, QuadSettings.THREADGROUP_SIZE_FULL, 1);
-        CoreShader.Dispatch(kernel5, 1, 1, 1);
 
         Generated = true;
 
-        if (LODLevel == -1)
-        {
-            yield return null;
-        }
-        else
-        {
-            for (int i = 0; i < (Planetoid.DispatchSkipFramesCount / 2); i++)
-            {
-                yield return Yielders.EndOfFrame;
-            }
-        }
-
-        if (Planetoid.GetData)
-        {
-            QuadCornersBuffer.GetData(quadCorners);
-            OutDataBuffer.GetData(outputStructData);
-
-            this.quadCornersDisplaced = quadCorners[0];
-            this.outputStructData = outputStructData;
-
-            this.GPUDataRecieved = true;
-
-            EventManager.PlanetoidEvents.OnDispatchFinished.Invoke(Planetoid, this);
-        }
+        // NOTE : NO DATA WILL BE RECIEVED UNTIL ASYNC GET DATA!
 
         //Release and dispose unnecessary buffers. Video memory, you are free!
-        BufferHelper.ReleaseAndDisposeBuffers(PreOutDataBuffer, PreOutDataSubBuffer, QuadCornersBuffer);
+        BufferHelper.ReleaseAndDisposeBuffers(PreOutDataBuffer, PreOutDataSubBuffer);
 
         BuffersCreated = false;
 
         EventManager.PlanetoidEvents.OnDispatchEnd.Invoke(Planetoid, this);
+        EventManager.PlanetoidEvents.OnDispatchFinished.Invoke(Planetoid, this);
+
+        yield return null;
     }
 
     private void SetupComputeShaderUniforms()
@@ -667,7 +632,7 @@ public sealed class Quad : MonoBehaviour, IQuad
             Planetoid.tccps.UpdateUniforms(CoreShader);
     }
 
-    private void SetupComputeShaderKernelUniforfms(int kernel, ComputeBuffer quadGenerationConstantsBuffer, ComputeBuffer preOutDataBuffer, ComputeBuffer preOutDataSubBuffer, ComputeBuffer outDataBuffer, ComputeBuffer quadCornersBuffer)
+    private void SetupComputeShaderKernelUniforfms(int kernel, ComputeBuffer quadGenerationConstantsBuffer, ComputeBuffer preOutDataBuffer, ComputeBuffer preOutDataSubBuffer, ComputeBuffer outDataBuffer)
     {
         if (CoreShader == null) return;
 
@@ -675,7 +640,6 @@ public sealed class Quad : MonoBehaviour, IQuad
         CoreShader.SetBuffer(kernel, "patchPreOutput", preOutDataBuffer);
         CoreShader.SetBuffer(kernel, "patchPreOutputSub", preOutDataSubBuffer);
         CoreShader.SetBuffer(kernel, "patchOutput", outDataBuffer);
-        CoreShader.SetBuffer(kernel, "quadCorners", quadCornersBuffer);
 
         CoreShader.SetTexture(kernel, "Height", HeightTexture);
         CoreShader.SetTexture(kernel, "Normal", NormalTexture);
@@ -684,13 +648,13 @@ public sealed class Quad : MonoBehaviour, IQuad
             Planetoid.NPS.UpdateUniforms(QuadMaterial, CoreShader, kernel);
     }
 
-    private void SetupComputeShaderKernelsUniforfms(ComputeBuffer quadGenerationConstantsBuffer, ComputeBuffer preOutDataBuffer, ComputeBuffer preOutDataSubBuffer, ComputeBuffer outDataBuffer, ComputeBuffer quadCornersBuffer, params int[] kernels)
+    private void SetupComputeShaderKernelsUniforfms(ComputeBuffer quadGenerationConstantsBuffer, ComputeBuffer preOutDataBuffer, ComputeBuffer preOutDataSubBuffer, ComputeBuffer outDataBuffer, params int[] kernels)
     {
         if (kernels == null || kernels.Length == 0) { Debug.Log("Quad.SetupComputeShaderKernelsUniforfms(...) problem!"); return; }
 
         for (int i = 0; i < kernels.Length; i++)
         {
-            SetupComputeShaderKernelUniforfms(i, quadGenerationConstantsBuffer, preOutDataBuffer, preOutDataSubBuffer, outDataBuffer, quadCornersBuffer);
+            SetupComputeShaderKernelUniforfms(i, quadGenerationConstantsBuffer, preOutDataBuffer, preOutDataSubBuffer, outDataBuffer);
         }
     }
 
@@ -855,20 +819,10 @@ public sealed class Quad : MonoBehaviour, IQuad
         Vector3 bl = Vector3.zero;
         Vector3 br = Vector3.zero;
 
-        if (Planetoid.GetData && GPUDataRecieved)
-        {
-            tl = Planetoid.OriginTransform.TransformPoint(quadCornersDisplaced.topLeftCorner);
-            tr = Planetoid.OriginTransform.TransformPoint(quadCornersDisplaced.topRightCorner);
-            bl = Planetoid.OriginTransform.TransformPoint(quadCornersDisplaced.bottomLeftCorner);
-            br = Planetoid.OriginTransform.TransformPoint(quadCornersDisplaced.bottomRightCorner);
-        }
-        else
-        {
-            tl = Planetoid.OriginTransform.TransformPoint(quadCorners.topLeftCorner.NormalizeToRadius(Planetoid.PlanetRadius));
-            tr = Planetoid.OriginTransform.TransformPoint(quadCorners.topRightCorner.NormalizeToRadius(Planetoid.PlanetRadius));
-            bl = Planetoid.OriginTransform.TransformPoint(quadCorners.bottomLeftCorner.NormalizeToRadius(Planetoid.PlanetRadius));
-            br = Planetoid.OriginTransform.TransformPoint(quadCorners.bottomRightCorner.NormalizeToRadius(Planetoid.PlanetRadius));
-        }
+        tl = Planetoid.OriginTransform.TransformPoint(quadCorners.topLeftCorner.NormalizeToRadius(Planetoid.PlanetRadius));
+        tr = Planetoid.OriginTransform.TransformPoint(quadCorners.topRightCorner.NormalizeToRadius(Planetoid.PlanetRadius));
+        bl = Planetoid.OriginTransform.TransformPoint(quadCorners.bottomLeftCorner.NormalizeToRadius(Planetoid.PlanetRadius));
+        br = Planetoid.OriginTransform.TransformPoint(quadCorners.bottomRightCorner.NormalizeToRadius(Planetoid.PlanetRadius));
 
         d = Vector3.Distance(Planetoid.LODTarget.position, tl);
 

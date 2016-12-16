@@ -53,8 +53,6 @@ RWStructuredBuffer<OutputStruct> patchPreOutput;
 RWStructuredBuffer<OutputStruct> patchPreOutputSub;
 RWStructuredBuffer<OutputStruct> patchOutput;
 
-RWStructuredBuffer<QuadCorners> quadCorners;
-
 float3 ScaledCoordinate(float3 coord)
 {
 	return normalize(coord);
@@ -207,24 +205,4 @@ void Transfer(uint3 id : SV_DispatchThreadID)
 	int outBuffOffset = id.x + id.y * VerticesPerSide;
 
 	patchOutput[outBuffOffset] = patchPreOutput[inBuffOffset];
-}
-
-#pragma kernel GetCorners
-[numthreads(1, 1, 1)]
-void GetCorners(uint3 id : SV_DispatchThreadID)
-{
-	float4 center = float4(patchOutput[0].patchCenter, 0);
-
-	float size = VerticesPerSide - 1;
-	float sideSize = size * VerticesPerSide;
-
-	float4 topLeftCorner = patchOutput[size].position + center;
-	float4 topRightCorner = patchOutput[0].position + center;
-	float4 bottomLeftCorner = patchOutput[size + sideSize].position + center;
-	float4 bottomRightCorner = patchOutput[sideSize].position + center;
-
-	quadCorners[id.x + id.y].topLeftCorner = topLeftCorner;
-	quadCorners[id.x + id.y].topRightCorner = topRightCorner;
-	quadCorners[id.x + id.y].bottomLeftCorner = bottomLeftCorner;
-	quadCorners[id.x + id.y].bottomRightCorner = bottomRightCorner;
 }

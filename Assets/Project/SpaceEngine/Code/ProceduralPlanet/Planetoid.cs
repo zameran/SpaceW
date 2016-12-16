@@ -109,8 +109,6 @@ public static class PlanetoidExtensions
 
 public sealed class Planetoid : Planet, IPlanet
 {
-    public bool GetData = false;
-
     public List<Quad> MainQuads = new List<Quad>();
     public List<Quad> Quads = new List<Quad>();
 

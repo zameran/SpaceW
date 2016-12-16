@@ -112,7 +112,7 @@ sampler2D _Shadow4Texture;
 float     _Shadow4Ratio;
 #endif
 
-float4 BlurShadow(sampler2D inputTexture, float2 inputUV, float inputStep = 0.0001f)
+float4 BlurShadow(sampler2D inputTexture, float2 inputUV, float inputStep = 0.00015f)
 {
 	float2 blurCoordinates[5];
 
