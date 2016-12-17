@@ -38,7 +38,6 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
-
 using ZFramework.Unity.Common.PerfomanceMonitor;
 
 [Serializable]
@@ -385,8 +384,8 @@ public sealed class Quad : MonoBehaviour, IQuad
 
     public QuadAABB GetVolumeBox(float height, float offset = 0)
     {
-        Vector3[] points = new Vector3[8];
-        Vector3[] cullingPoints = new Vector3[14];
+        var points = new Vector3[8];
+        var cullingPoints = new Vector3[14];
 
         points[0] = quadCorners.topLeftCorner.NormalizeToRadius(Planetoid.PlanetRadius + height + offset);
         points[1] = quadCorners.topRightCorner.NormalizeToRadius(Planetoid.PlanetRadius + height + offset);
@@ -408,7 +407,7 @@ public sealed class Quad : MonoBehaviour, IQuad
         cullingPoints[12] = middleNormalized.NormalizeToRadius(Planetoid.PlanetRadius + height + offset);
         cullingPoints[13] = middleNormalized.NormalizeToRadius(Planetoid.PlanetRadius - height - offset);
 
-        return new QuadAABB(points, cullingPoints, this);
+        return new QuadAABB(points, cullingPoints, this, Planetoid.OriginTransform);
     }
 
     public bool PlaneFrustumCheck(QuadAABB qaabb)
@@ -428,7 +427,7 @@ public sealed class Quad : MonoBehaviour, IQuad
 
     public bool BorderFrustumCheck(Plane[] planes, Vector3 border)
     {
-        return planes.All(plane => (plane.GetDistanceToPoint(Planetoid.OriginTransform.TransformPoint(border)) < 0 - 1024.0f) == false);
+        return planes.All(plane => (plane.GetDistanceToPoint(border) < 0 - 1024.0f) == false);
     }
 
     public void InitCorners(Vector3 topLeft, Vector3 bottmoRight, Vector3 topRight, Vector3 bottomLeft)
