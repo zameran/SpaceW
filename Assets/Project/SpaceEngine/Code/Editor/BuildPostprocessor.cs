@@ -30,25 +30,24 @@
  */
 #endregion
 
-using UnityEngine;
+using System.IO;
+
 using UnityEditor;
 using UnityEditor.Callbacks;
-
-using System.IO;
 
 public sealed class BuildPostprocessor
 {
     [PostProcessBuild(1)]
     public static void OnPostprocessBuild(BuildTarget target, string pathToBuiltProject)
     {
-        string exeName = Path.GetFileName(pathToBuiltProject);
-        string exeNameWE = Path.GetFileNameWithoutExtension(pathToBuiltProject);
+        var exeName = Path.GetFileName(pathToBuiltProject);
+        var exeNameWE = Path.GetFileNameWithoutExtension(pathToBuiltProject);
 
-        string dataPath = pathToBuiltProject.Remove(pathToBuiltProject.Length - exeName.Length, exeName.Length) + exeNameWE + "_Data";
+        var dataPath = pathToBuiltProject.Remove(pathToBuiltProject.Length - exeName.Length, exeName.Length) + exeNameWE + "_Data";
 
         if (target == BuildTarget.StandaloneWindows || target == BuildTarget.StandaloneWindows64)
         {
-            string pureBuildPath = Path.GetDirectoryName(pathToBuiltProject);
+            var pureBuildPath = Path.GetDirectoryName(pathToBuiltProject);
 
             foreach (string file in Directory.GetFiles(pureBuildPath, "*.pdb"))
             {

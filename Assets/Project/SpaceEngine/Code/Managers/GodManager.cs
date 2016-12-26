@@ -53,7 +53,9 @@ public class GodManager : MonoSingleton<GodManager>
         Messenger.Setup(Debug);
 
         if (CameraHelper.Main() != null)
+        {
             FrustumPlanes = GeometryUtility.CalculateFrustumPlanes(CameraHelper.Main());
+        }
     }
 
     private void Update()
@@ -61,7 +63,9 @@ public class GodManager : MonoSingleton<GodManager>
         if (UpdateFrustumPlanes)
         {
             if (CameraHelper.Main() != null)
+            {
                 FrustumPlanes = GeometryUtility.CalculateFrustumPlanes(CameraHelper.Main());
+            }
         }
     }
 }
