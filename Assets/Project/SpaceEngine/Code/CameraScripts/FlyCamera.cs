@@ -178,6 +178,7 @@ public sealed class FlyCamera : GameCamera
         farClipPlaneCache = CameraComponent.farClipPlane;
 
         rotation = transform.eulerAngles;
+        rotation.z = 0; // NOTE : Prevent crazy rotation on start...
 
         UpdateClipPlanes();
     }
