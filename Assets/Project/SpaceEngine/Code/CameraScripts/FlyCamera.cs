@@ -94,8 +94,8 @@ public sealed class FlyCamera : GameCamera
             }
             else if (Input.GetMouseButton(1))
             {
-                rotation.x += (Input.GetAxis("Mouse X") * 480.0f) / CameraComponent.pixelWidth;
-                rotation.y -= (Input.GetAxis("Mouse Y") * 440.0f) / CameraComponent.pixelHeight;
+                rotation.x += (Input.GetAxis("Mouse Y") * 480.0f) / CameraComponent.pixelWidth;
+                rotation.y -= (Input.GetAxis("Mouse X") * 440.0f) / CameraComponent.pixelHeight;
                 rotation.z = 0;
 
                 if (planetoidGameObject != null && !aligned)
