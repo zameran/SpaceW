@@ -41,6 +41,7 @@ using ZFramework.Unity.Common.Messenger;
 public class GodManager : MonoSingleton<GodManager>
 {
     public Plane[] FrustumPlanes;
+    public Mesh PrototypeMesh;
 
     public bool Debug = true;
     public bool UpdateFrustumPlanes = true;
@@ -56,6 +57,11 @@ public class GodManager : MonoSingleton<GodManager>
         if (CameraHelper.Main() != null)
         {
             FrustumPlanes = GeometryUtility.CalculateFrustumPlanes(CameraHelper.Main());
+        }
+
+        if (PrototypeMesh == null)
+        {
+            PrototypeMesh = MeshFactory.SetupQuadMesh();
         }
     }
 

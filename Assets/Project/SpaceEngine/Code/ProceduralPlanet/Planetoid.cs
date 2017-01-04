@@ -33,10 +33,9 @@
 // Creator: zameran
 #endregion
 
-using SpaceEngine.AtmosphericScattering;
-using SpaceEngine.AtmosphericScattering.Clouds;
 using System.Collections.Generic;
 using System.Linq;
+
 using UnityEngine;
 
 public static class PlanetoidExtensions
@@ -117,8 +116,6 @@ public sealed class Planetoid : Planet, IPlanet
 
     public int DispatchSkipFramesCount = 8;
 
-    public Mesh PrototypeMesh;
-
     public NoiseParametersSetter NPS = null;
 
     public QuadCullingMethod CullingMethod = QuadCullingMethod.Custom;
@@ -164,9 +161,6 @@ public sealed class Planetoid : Planet, IPlanet
 
         if (NPS != null)
             NPS.LoadAndInit();
-
-        if (PrototypeMesh == null)
-            SetupMesh();
 
         if (Atmosphere != null)
         {
@@ -373,16 +367,6 @@ public sealed class Planetoid : Planet, IPlanet
         MainQuads.Clear();
 
         if (QuadsRoot != null) DestroyImmediate(QuadsRoot);
-
-        if (PrototypeMesh != null) DestroyImmediate(PrototypeMesh);
-    }
-
-    [ContextMenu("SetupMesh")]
-    public void SetupMesh()
-    {
-        if (PrototypeMesh != null) DestroyImmediate(PrototypeMesh);
-
-        PrototypeMesh = MeshFactory.SetupQuadMesh();
     }
 
     [ContextMenu("UpdateLODDistances")]
@@ -436,7 +420,7 @@ public sealed class Planetoid : Planet, IPlanet
 
     public Mesh GetMesh(QuadPosition position)
     {
-        return PrototypeMesh;
+        return GodManager.Instance.PrototypeMesh;
     }
 
     [ContextMenu("SetupQuads")]
@@ -451,7 +435,6 @@ public sealed class Planetoid : Planet, IPlanet
             if (gameObject.GetComponentInChildren<TCCommonParametersSetter>() != null)
                 tccps = gameObject.GetComponentInChildren<TCCommonParametersSetter>();
 
-        SetupMesh();
         SetupRoot();
 
         SetupMainQuad(QuadPosition.Top);
