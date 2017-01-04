@@ -230,7 +230,6 @@
 
 				v.vertex = position;
 				v.tangent = float4(FindTangent(normal, 0.01, float3(0, 1, 0)), 1);
-				//v.normal = mul(_TRS, float3(normal.xy, sqrt(max(0.0, 1.0 - dot(normal.xy, normal.xy)))));
 				v.normal = mul(_TRS, normal);
 
 				o.uv0 = v.texcoord;
@@ -280,7 +279,8 @@
 			{		
 				QuadGenerationConstants constants = quadGenerationConstants[0];
 
-				float3 normal = IN.normal0.xyz;
+				float3 normal = tex2D(_NormalTexture, IN.uv0).rgb;
+				float3 vertexNormal = IN.normal0.xyz;
 
 				float4 scatteringColor = 0;
 				fixed4 terrainColor = tex2D(_HeightTexture, IN.uv0);
