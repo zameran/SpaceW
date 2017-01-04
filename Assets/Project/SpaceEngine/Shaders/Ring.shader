@@ -135,6 +135,7 @@
 					float Rad = i.uv * 512;
 					float Noise = 1;
 					float detFade = 1.0 - cameraDistance * 0.00002;
+					float fade = smoothstep(0.0, 1.0, cameraDistance * 0.02 - 0.25);
 					
 					if(detFade > 0.0)
 					{
@@ -192,6 +193,7 @@
 					#endif
 
 					o.color += lighting * mainColor;
+					o.color *= fade;
 				#endif
 
 				#if !LIGHT_1 && !LIGHT_2 && !LIGHT_3 && !LIGHT_4
