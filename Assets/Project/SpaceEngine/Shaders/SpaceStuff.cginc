@@ -260,7 +260,8 @@ float3 CubeCoord(QuadGenerationConstants constants, float verticesPerSide, uint3
 	//256 : 15
 	//512 : 31
 
-	//TODO: modifier calculation.
+	//NOTE: The mod formula is:
+	//(SIZE / 16) - 1; Where SIZE is PoT [Power Of Two]
 
 	float eastValue = (id.x - ((verticesPerSide - mod) * 0.5)) * spacing;
 	float northValue = (id.y - ((verticesPerSide - mod) * 0.5)) * spacing;

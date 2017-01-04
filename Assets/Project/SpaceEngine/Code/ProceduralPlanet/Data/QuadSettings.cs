@@ -40,8 +40,8 @@ public static class QuadSettings
 {
     private static int TextureScaleModifier { get { return 2; } }
 
-    public static int BorderModMesh { get { return 3; } }
-    public static int BorderModTexture { get { return 7; } }
+    public static int BorderModMesh { get { return (VerticesPerSideWithBorder / 16) - 1; } }
+    public static int BorderModTexture { get { return (VerticesPerSideWithBorderFull / 16) - 1; } }
 
     public static int VerticesPerSideWithBorder { get { return 64; } }
     public static int VerticesPerSide { get { return 60; } }
