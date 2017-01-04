@@ -33,7 +33,6 @@
 // Creator: zameran
 #endregion
 
-
 using UnityEngine;
 
 public sealed class FlyCamera : GameCamera
@@ -46,9 +45,9 @@ public sealed class FlyCamera : GameCamera
     public GameObject planetoidGameObject;
 
     private float currentSpeed;
-    private float zRotation = 0;
 
     private Vector3 velocity = Vector3.zero;
+    private Vector3 rotation = Vector3.zero;
     private Quaternion targetRotation = Quaternion.identity;
 
     public float distanceToPlanetCore;
@@ -60,8 +59,7 @@ public sealed class FlyCamera : GameCamera
     public bool aligned = false;
     public bool controllable = true;
 
-    private float x;
-    private float y;
+    private Ray ray;
 
     protected override void Start()
     {
@@ -83,46 +81,45 @@ public sealed class FlyCamera : GameCamera
         {
             if (Input.GetMouseButton(0))
             {
-                zRotation = 0;
+                rotation.z = 0;
 
-                Ray ray = CameraComponent.ScreenPointToRay(Input.mousePosition);
+                ray = CameraComponent.ScreenPointToRay(Input.mousePosition);
 
                 targetRotation = Quaternion.LookRotation((ray.origin + ray.direction * 10.0f) - transform.position, transform.up);
 
                 transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, Time.fixedDeltaTime * rotationSpeed);
 
                 if (!aligned)
-                    transform.Rotate(new Vector3(0, 0, zRotation));
+                    transform.Rotate(new Vector3(0.0f, 0.0f, rotation.z));
             }
             else if (Input.GetMouseButton(1))
             {
-                zRotation = 0;
-
-                x += (Input.GetAxis("Mouse X") * 480.0f) / CameraComponent.pixelWidth;
-                y -= (Input.GetAxis("Mouse Y") * 440.0f) / CameraComponent.pixelHeight;
+                rotation.x += (Input.GetAxis("Mouse Y") * 480.0f) / CameraComponent.pixelWidth;
+                rotation.y -= (Input.GetAxis("Mouse X") * 440.0f) / CameraComponent.pixelHeight;
+                rotation.z = 0;
 
                 if (planetoidGameObject != null && !aligned)
-                    RotateAround(x, y, zRotation, new Vector3(0, 0, -distanceToPlanetCore));
+                    RotateAround(rotation, new Vector3(0, 0, -distanceToPlanetCore));
             }
             else
             {
                 if (Input.GetKey(KeyCode.E))
                 {
-                    zRotation -= 1 * Time.deltaTime;
+                    rotation.z -= 1.0f * Time.deltaTime;
                 }
                 else if (Input.GetKey(KeyCode.Q))
                 {
-                    zRotation += 1 * Time.deltaTime;
+                    rotation.z += 1.0f * Time.deltaTime;
                 }
                 else
                 {
-                    zRotation = Mathf.Lerp(zRotation, 0, Time.deltaTime * 2);
+                    rotation.z = Mathf.Lerp(rotation.z, 0, Time.deltaTime * 2.0f);
                 }
 
-                zRotation = Mathf.Clamp(zRotation, -100, 100);
+                rotation.z = Mathf.Clamp(rotation.z, -100.0f, 100.0f);
 
                 if (!aligned)
-                    transform.Rotate(new Vector3(0, 0, zRotation));
+                    transform.Rotate(new Vector3(0, 0, rotation.z));
             }
 
             if (planetoidGameObject != null)
@@ -133,7 +130,7 @@ public sealed class FlyCamera : GameCamera
                 {
                     aligned = true;
 
-                    Vector3 gravityVector = planetoidGameObject.transform.position - transform.position;
+                    var gravityVector = planetoidGameObject.transform.position - transform.position;
 
                     targetRotation = Quaternion.LookRotation(transform.forward, -gravityVector);
 
@@ -152,15 +149,15 @@ public sealed class FlyCamera : GameCamera
 
             if (Input.GetKey(KeyCode.LeftShift))
                 currentSpeed = speed * 10f;
-            if (Input.GetKey(KeyCode.LeftAlt))
+            if (Input.GetKey(KeyCode.Space))
                 currentSpeed = speed * 100f;
-            if (Input.GetKey(KeyCode.LeftShift) && Input.GetKey(KeyCode.LeftAlt))
+            if (Input.GetKey(KeyCode.LeftShift) && Input.GetKey(KeyCode.Space))
                 currentSpeed = speed * 1000f;
             if (Input.GetKey(KeyCode.LeftControl))
                 currentSpeed = speed / 10f;
 
-            speed += Mathf.RoundToInt(Input.GetAxis("Mouse ScrollWheel") * 10.0f);
-            speed = Mathf.Clamp(speed, 1, 100);
+            speed += Mathf.RoundToInt(Input.GetAxis("Mouse ScrollWheel") * 100.0f);
+            speed = Mathf.Clamp(speed, 1.0f, 100.0f);
 
             transform.Translate(velocity * currentSpeed);
         }
@@ -180,9 +177,8 @@ public sealed class FlyCamera : GameCamera
         nearClipPlaneCache = CameraComponent.nearClipPlane;
         farClipPlaneCache = CameraComponent.farClipPlane;
 
-        Vector3 angles = transform.eulerAngles;
-        x = angles.y;
-        y = angles.x;
+        rotation = transform.eulerAngles;
+        rotation.z = 0; // NOTE : Prevent crazy rotation on start...
 
         UpdateClipPlanes();
     }
@@ -193,7 +189,7 @@ public sealed class FlyCamera : GameCamera
         {
             if (planetoid != null)
             {
-                float h = (distanceToPlanetCore - planetoid.PlanetRadius - planetoid.TerrainMaxHeight);
+                var h = (distanceToPlanetCore - planetoid.PlanetRadius - planetoid.TerrainMaxHeight);
 
                 if (h < 1.0f) { h = 1.0f; }
 
@@ -215,13 +211,12 @@ public sealed class FlyCamera : GameCamera
         }
     }
 
-    private void RotateAround(float x, float y, float z, Vector3 distanceVector)
+    private void RotateAround(Vector3 rotationVector, Vector3 distanceVector)
     {
-        Quaternion rotation = Quaternion.Euler(y + targetRotation.x, x + targetRotation.y, z + targetRotation.z);
+        var rotation = Quaternion.Euler(rotationVector + targetRotation.eulerAngles);
+        var position = rotation * distanceVector + planetoidGameObject.transform.position;
 
-        Vector3 position = rotation * distanceVector + planetoidGameObject.transform.position;
-
-        transform.rotation = Quaternion.Slerp(transform.rotation, rotation, (Time.fixedDeltaTime * rotationSpeed) * 10);
-        transform.position = Vector3.Slerp(transform.position, position, (Time.deltaTime * rotationSpeed) * 5);
+        transform.rotation = Quaternion.Slerp(transform.rotation, rotation, (Time.fixedDeltaTime * rotationSpeed) * 10.0f);
+        transform.position = Vector3.Slerp(transform.position, position, (Time.deltaTime * rotationSpeed) * 5.0f);
     }
 }

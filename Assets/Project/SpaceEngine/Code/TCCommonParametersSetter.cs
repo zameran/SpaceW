@@ -89,11 +89,16 @@ public sealed class TCCommonParametersSetter : MonoBehaviour
     private void Start()
     {
         if ((Planet != null))
-            UpdateUniforms();
+            UpdateUniforms(false); //NOTE : Update uniforms, but do not dispatch, cuz it will be called automatically...
     }
 
     [ContextMenu("UpdateUniforms")]
     public void UpdateUniforms()
+    {
+        UpdateUniforms(true);
+    }
+
+    public void UpdateUniforms(bool dispatch)
     {
         if (Planet.Quads.Count == 0) return;
         if (Planet.Quads == null) return;
