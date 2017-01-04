@@ -422,7 +422,15 @@ public sealed class Quad : MonoBehaviour, IQuad
     {
         if (Parent == null || Splitting) { return true; }
 
-        return points.Any(pos => BorderFrustumCheck(GodManager.Instance.FrustumPlanes, pos) == true);
+        for (var i = 0; i < points.Length; i++)
+        {
+            if (BorderFrustumCheck(GodManager.Instance.FrustumPlanes, points[i]))
+            {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     public bool BorderFrustumCheck(Plane[] planes, Vector3 border)
@@ -442,7 +450,12 @@ public sealed class Quad : MonoBehaviour, IQuad
 
     public IEnumerator Split()
     {
-        int id = 0;
+        var id = 0;
+
+        var subTopLeft = Vector3.zero;
+        var subBottomRight = Vector3.zero;
+        var subTopRight = Vector3.zero;
+        var subBottomLeft = Vector3.zero;
 
         var size = quadCorners.bottomRightCorner - quadCorners.topLeftCorner;
         var step = size / 2.0f;
@@ -460,9 +473,6 @@ public sealed class Quad : MonoBehaviour, IQuad
         {
             for (int sX = 0; sX < 2; sX++, id++)
             {
-                Vector3 subTopLeft = Vector3.zero, subBottomRight = Vector3.zero;
-                Vector3 subTopRight = Vector3.zero, subBottomLeft = Vector3.zero;
-
                 if (staticX)
                 {
                     subTopLeft = new Vector3(quadCorners.topLeftCorner.x, quadCorners.topLeftCorner.y + step.y * sY, quadCorners.topLeftCorner.z + step.z * sX);
@@ -500,7 +510,7 @@ public sealed class Quad : MonoBehaviour, IQuad
                 if (quad.Parent.transform != null)
                     quad.transform.parent = quad.Parent.transform;
 
-                quad.gameObject.name += "_ID" + id + "_LOD" + quad.LODLevel;
+                quad.gameObject.name = string.Format("{0}_ID{1}_LOD{2}", quad.gameObject.name, id, quad.LODLevel);
 
                 Subquads.Add(quad);
 
@@ -512,20 +522,20 @@ public sealed class Quad : MonoBehaviour, IQuad
         }
 
         //Dispatch one by one with intervals.
-        foreach (var q in Subquads)
+        for (var i = 0; i < Subquads.Count; i++)
         {
-            q.ReadyForDispatch = true;
+            Subquads[i].ReadyForDispatch = true;
 
-            for (int wait = 0; wait < Planetoid.DispatchSkipFramesCount; wait++)
+            for (var wait = 0; wait < Planetoid.DispatchSkipFramesCount; wait++)
             {
                 yield return Yielders.EndOfFrame;
             }
         }
 
-        foreach (var q in Subquads)
+        for (var i = 0; i < Subquads.Count; i++)
         {
-            q.Splitting = false;
-            q.ShouldDraw = true;
+            Subquads[i].Splitting = false;
+            Subquads[i].ShouldDraw = true;
         }
 
         ShouldDraw = false;
@@ -540,8 +550,10 @@ public sealed class Quad : MonoBehaviour, IQuad
 
         StopAllCoroutines();
 
-        foreach (var subQuad in Subquads)
+        for (var i = 0; i < Subquads.Count; i++)
         {
+            var subQuad = Subquads[i];
+
             if (subQuad.HaveSubQuads)
             {
                 subQuad.Unsplit();
@@ -581,17 +593,7 @@ public sealed class Quad : MonoBehaviour, IQuad
         PreOutDataSubBuffer.SetData(preOutputSubStructData);
         OutDataBuffer.SetData(outputStructData);
 
-        StartCoroutine(DispatcheCoroutineWait());
-    }
-
-    private IEnumerator DispatcheCoroutineWait()
-    {
-        yield return StartCoroutine(DispatchCoroutine());
-    }
-
-    private IEnumerator DispatchCoroutine()
-    {
-        if (CoreShader == null) StopCoroutine(DispatchCoroutine());
+        if (CoreShader == null) return;
 
         EventManager.PlanetoidEvents.OnDispatchStarted.Invoke(Planetoid, this);
 
@@ -621,8 +623,6 @@ public sealed class Quad : MonoBehaviour, IQuad
 
         EventManager.PlanetoidEvents.OnDispatchEnd.Invoke(Planetoid, this);
         EventManager.PlanetoidEvents.OnDispatchFinished.Invoke(Planetoid, this);
-
-        yield return null;
     }
 
     private void SetupComputeShaderUniforms()

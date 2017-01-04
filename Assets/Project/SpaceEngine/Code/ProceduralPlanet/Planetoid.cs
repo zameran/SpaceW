@@ -33,6 +33,7 @@
 // Creator: zameran
 #endregion
 
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -389,9 +390,9 @@ public sealed class Planetoid : Planet, IPlanet
     {
         if (OctaveFade)
         {
-            int id = invert ?
-                (LODDistances.Length / (LODLevel + 2 + ((LODDistances.Length - LODOctaves.Length) / LODOctaves.Length))) :
-                LODOctaves.Length - (LODDistances.Length / (LODLevel + 2 + ((LODDistances.Length - LODOctaves.Length) / LODOctaves.Length)));
+            var id = invert
+                ? (LODDistances.Length / (LODLevel + 2 + ((LODDistances.Length - LODOctaves.Length) / LODOctaves.Length)))
+                : LODOctaves.Length - (LODDistances.Length / (LODLevel + 2 + ((LODDistances.Length - LODOctaves.Length) / LODOctaves.Length)));
 
             id -= 1;
 
@@ -399,13 +400,9 @@ public sealed class Planetoid : Planet, IPlanet
             {
                 return LODOctaves[id];
             }
-            else
-                return 1.0f;
         }
-        else
-        {
-            return 1.0f;
-        }
+
+        return 1.0f;
     }
 
     public int GetCulledQuadsCount()
@@ -437,12 +434,12 @@ public sealed class Planetoid : Planet, IPlanet
 
         SetupRoot();
 
-        SetupMainQuad(QuadPosition.Top);
-        SetupMainQuad(QuadPosition.Bottom);
-        SetupMainQuad(QuadPosition.Left);
-        SetupMainQuad(QuadPosition.Right);
-        SetupMainQuad(QuadPosition.Front);
-        SetupMainQuad(QuadPosition.Back);
+        var sides = Enum.GetValues(typeof(QuadPosition));
+
+        foreach (QuadPosition side in sides)
+        {
+            SetupMainQuad(side);
+        }
 
         UpdateLODDistances();
 
@@ -470,7 +467,7 @@ public sealed class Planetoid : Planet, IPlanet
 
     public void SetupMainQuad(QuadPosition quadPosition)
     {
-        GameObject go = new GameObject("Quad" + "_" + quadPosition.ToString());
+        GameObject go = new GameObject(string.Format("Quad_{0}", quadPosition));
         go.transform.parent = QuadsRoot.transform;
         go.transform.position = Vector3.zero;
         go.transform.rotation = Quaternion.identity;
@@ -509,7 +506,7 @@ public sealed class Planetoid : Planet, IPlanet
 
     public Quad SetupSubQuad(QuadPosition quadPosition)
     {
-        GameObject go = new GameObject("Quad" + "_" + quadPosition.ToString());
+        GameObject go = new GameObject(string.Format("Quad_{0}", quadPosition));
 
         Mesh mesh = GetMesh(quadPosition);
         mesh.bounds = new Bounds(Vector3.zero, new Vector3(PlanetRadius * 2, PlanetRadius * 2, PlanetRadius * 2));
