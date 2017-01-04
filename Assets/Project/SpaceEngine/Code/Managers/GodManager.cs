@@ -43,6 +43,10 @@ public class GodManager : MonoSingleton<GodManager>
     public Plane[] FrustumPlanes;
     public Mesh PrototypeMesh;
 
+    public OutputStruct[] PreOutputDataBuffer;
+    public OutputStruct[] PreOutputSubDataBuffer;
+    public OutputStruct[] OutputDataBuffer;
+
     public bool Debug = true;
     public bool UpdateFrustumPlanes = true;
 
@@ -63,6 +67,10 @@ public class GodManager : MonoSingleton<GodManager>
         {
             PrototypeMesh = MeshFactory.SetupQuadMesh();
         }
+
+        PreOutputDataBuffer = new OutputStruct[QuadSettings.VerticesWithBorder];
+        PreOutputSubDataBuffer = new OutputStruct[QuadSettings.VerticesWithBorderFull];
+        OutputDataBuffer = new OutputStruct[QuadSettings.Vertices];
     }
 
     private void Update()

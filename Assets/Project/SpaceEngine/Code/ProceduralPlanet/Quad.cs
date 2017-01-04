@@ -435,7 +435,15 @@ public sealed class Quad : MonoBehaviour, IQuad
 
     public bool BorderFrustumCheck(Plane[] planes, Vector3 border)
     {
-        return planes.All(plane => (plane.GetDistanceToPoint(border) < 0 - 1024.0f) == false);
+        for (var i = 0; i < planes.Length; i++)
+        {
+            if (planes[i].GetDistanceToPoint(border) < 0 - 1024.0f)
+            {
+                return false;
+            }
+        }
+
+        return true;
     }
 
     public void InitCorners(Vector3 topLeft, Vector3 bottmoRight, Vector3 topRight, Vector3 bottomLeft)
@@ -581,17 +589,12 @@ public sealed class Quad : MonoBehaviour, IQuad
 
         SetupComputeShaderUniforms();
 
-        var quadGenerationConstantsData = new[] { generationConstants };
-        var preOutputStructData = new OutputStruct[QuadSettings.VerticesWithBorder];
-        var preOutputSubStructData = new OutputStruct[QuadSettings.VerticesWithBorderFull];
-        var outputStructData = new OutputStruct[QuadSettings.Vertices];
-
         CreateBuffers();
 
-        QuadGenerationConstantsBuffer.SetData(quadGenerationConstantsData);
-        PreOutDataBuffer.SetData(preOutputStructData);
-        PreOutDataSubBuffer.SetData(preOutputSubStructData);
-        OutDataBuffer.SetData(outputStructData);
+        QuadGenerationConstantsBuffer.SetData(new[] { generationConstants });
+        PreOutDataBuffer.SetData(GodManager.Instance.PreOutputDataBuffer);
+        PreOutDataSubBuffer.SetData(GodManager.Instance.PreOutputSubDataBuffer);
+        OutDataBuffer.SetData(GodManager.Instance.OutputDataBuffer);
 
         if (CoreShader == null) return;
 
