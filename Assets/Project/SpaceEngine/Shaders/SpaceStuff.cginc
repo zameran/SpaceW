@@ -149,8 +149,9 @@ float4 ShadowColor(float4x4 shadowMatrix, sampler2D shadowSampler, float shadowR
 	#endif
 	
 	shadow += shadowPoint.z < 0.0f ? 1.0f : 0.0f;
-	
-	return saturate(shadow);
+	shadow = saturate(shadow);
+
+	return shadow;
 }
 
 float4 ShadowColor(float4 worldPoint)
