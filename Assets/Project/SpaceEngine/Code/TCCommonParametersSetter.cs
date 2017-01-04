@@ -48,8 +48,6 @@ public sealed class TCCommonParametersSetter : MonoBehaviour
     public float texturingHeightOffset;
     public float texturingSlopeOffset;
 
-    public Vector2 TexCoord;
-
     public Vector3 Randomize;
 
     public Vector4 faceParams;
@@ -84,7 +82,6 @@ public sealed class TCCommonParametersSetter : MonoBehaviour
     public Color PlanetGlobalColor = Color.white;
 
     public bool AutoUpdate = false;
-    public bool UseCustomTexCoord = false;
 
     private void Start()
     {
@@ -125,9 +122,6 @@ public sealed class TCCommonParametersSetter : MonoBehaviour
 
         mat.SetFloat("texturingHeightOffset", texturingHeightOffset);
         mat.SetFloat("texturingSlopeOffset", texturingSlopeOffset);
-
-        if (UseCustomTexCoord)
-            mat.SetVector("TexCoord", TexCoord);
 
         mat.SetVector("Randomize", Randomize);
         mat.SetVector("faceParams", faceParams); //(WIP) For SE Coloring in fragment shader work...
@@ -173,9 +167,6 @@ public sealed class TCCommonParametersSetter : MonoBehaviour
 
         shader.SetFloat("texturingHeightOffset", texturingHeightOffset);
         shader.SetFloat("texturingSlopeOffset", texturingSlopeOffset);
-
-        if (UseCustomTexCoord)
-            shader.SetVector("TexCoord", TexCoord);
 
         shader.SetVector("Randomize", Randomize);
         shader.SetVector("faceParams", faceParams); //(WIP) For SE Coloring in fragment shader work...

@@ -30,8 +30,8 @@
  */
 #endregion
 
-using UnityEngine;
 using UnityEditor;
+using UnityEngine;
 
 [CustomEditor(typeof(TCCommonParametersSetter))]
 public sealed class TCCommonParametersSetterEditor : Editor
@@ -52,11 +52,6 @@ public sealed class TCCommonParametersSetterEditor : Editor
     {
         EditorGUILayout.LabelField("Auto update: ", EditorStyles.boldLabel);
         setter.AutoUpdate = EditorGUILayout.Toggle(setter.AutoUpdate);
-
-        EditorGUILayout.Space();
-
-        EditorGUILayout.LabelField("Use Custom TexCoord: ", EditorStyles.boldLabel);
-        setter.UseCustomTexCoord = EditorGUILayout.Toggle(setter.UseCustomTexCoord);
 
         EditorGUILayout.Space();
 
@@ -112,9 +107,6 @@ public sealed class TCCommonParametersSetterEditor : Editor
 
         setter.textureParams.x = EditorGUILayout.Slider("texScale ", setter.textureParams.x, 0.0f, 4096.0f);
         setter.textureParams.y = EditorGUILayout.Slider("texColorConv ", setter.textureParams.y, -1.0f, 1.0f);
-
-        setter.TexCoord.x = EditorGUILayout.Slider("TexCoord.x ", setter.TexCoord.x, -10.0f, 10.0f);
-        setter.TexCoord.y = EditorGUILayout.Slider("TexCoord.y ", setter.TexCoord.y, -10.0f, 10.0f);
 
         setter.texturingHeightOffset = EditorGUILayout.Slider("texturingHeightOffset ", setter.texturingHeightOffset, -1.0f, 1.0f);
         setter.texturingSlopeOffset = EditorGUILayout.Slider("texturingSlopeOffset ", setter.texturingSlopeOffset, -1.0f, 1.0f);
@@ -307,7 +299,7 @@ public sealed class TCCommonParametersSetterEditor : Editor
             ResetupSphere(setter);
         }
 
-        if(GUI.changed)
+        if (GUI.changed)
         {
             ResetupSphere(setter);
         }
@@ -318,7 +310,7 @@ public sealed class TCCommonParametersSetterEditor : Editor
 
         currentTab = (Tab)GUILayout.SelectionGrid((int)currentTab, tabTexts, 4, EditorStyles.toolbarButton);
 
-        if(currentTab != prevTab && setter.AutoUpdate)
+        if (currentTab != prevTab && setter.AutoUpdate)
         {
             ResetupPlanetoid(setter);
             ResetupSphere(setter);
