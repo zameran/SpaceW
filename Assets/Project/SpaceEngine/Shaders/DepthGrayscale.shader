@@ -1,53 +1,29 @@
-﻿Shader "SpaceEngine/Depth/DepthGrayscale"
-{
-	SubShader 
-	{
-		Tags { "RenderType" = "Opaque" }
+﻿Shader "Render Depth" {
+    SubShader {
+        Tags { "RenderType"="Opaque" }
+        Pass {
+            CGPROGRAM
 
-		Pass
-		{
-			Fog { Mode Off }
+            #pragma vertex vert
+            #pragma fragment frag
+            #include "UnityCG.cginc"
 
-			CGPROGRAM
-			#pragma vertex vert
-			#pragma fragment frag
+            struct v2f {
+                float4 pos : SV_POSITION;
+                float2 depth : TEXCOORD0;
+            };
 
-			#include "UnityCG.cginc"
+            v2f vert (appdata_base v) {
+                v2f o;
+                o.pos = UnityObjectToClipPos(v.vertex);
+                UNITY_TRANSFER_DEPTH(o.depth);
+                return o;
+            }
 
-			sampler2D _CameraDepthTexture;
-
-			struct v2f 
-			{
-			   float4 pos : SV_POSITION;
-			   float4 scrPos : TEXCOORD0;
-			};
-
-			v2f vert (appdata_base v)
-			{
-			   v2f o;
-
-			   o.pos = mul(UNITY_MATRIX_MVP, v.vertex);
-			   o.scrPos = ComputeScreenPos(o.pos);
-			   //for some reason, the y position of the depth texture comes out inverted
-			   //o.scrPos.y = 1.0 - o.scrPos.y;
-
-			   return o;
-			}
-
-			half4 frag (v2f i) : COLOR
-			{
-			   float depthValue = Linear01Depth(tex2Dproj(_CameraDepthTexture, UNITY_PROJ_COORD(i.scrPos)).r);
-
-			   half4 depth;
-
-			   depth.r = depthValue;
-			   depth.g = depthValue;
-			   depth.b = depthValue;
-			   depth.a = 1;
-
-			   return depth;
-			}
-			ENDCG
-		}
-	}
+            half4 frag(v2f i) : SV_Target {
+                UNITY_OUTPUT_DEPTH(i.depth);
+            }
+            ENDCG
+        }
+    }
 }

@@ -10,9 +10,9 @@ public class RingSegment : MonoBehaviour
         if (Ring.RingSegmentMesh == null) return;
         if (Ring.RingMaterial == null) return;
 
-        Matrix4x4 SegmentTRS = Matrix4x4.TRS(Ring.transform.position, transform.rotation, Vector3.one);
+        var SegmentTRS = Matrix4x4.TRS(Ring.transform.position, transform.rotation, Vector3.one);
 
-        Graphics.DrawMesh(Ring.RingSegmentMesh, SegmentTRS, Ring.RingMaterial, drawLayer, camera, 0);
+        Graphics.DrawMesh(Ring.RingSegmentMesh, SegmentTRS, Ring.RingMaterial, drawLayer, camera);
     }
 
     public void UpdateNode(Mesh mesh, Material material, Quaternion rotation)
