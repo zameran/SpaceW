@@ -527,7 +527,7 @@ public static class MeshFactory
         mesh.uv = uvs;
         mesh.triangles = inds;
 
-        mesh.Optimize();
+        ;
         mesh.RecalculateBounds();
         mesh.RecalculateNormals();
 

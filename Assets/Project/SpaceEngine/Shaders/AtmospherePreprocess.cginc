@@ -132,8 +132,8 @@ int INSCATTER_SPHERICAL_INTEGRAL_SAMPLES;
 
 Texture2D<float4> transmittanceRead;
 
-SamplerState _PointClamp;
-SamplerState _LinearClamp;
+SamplerState PointClamp;
+SamplerState LinearClamp;
 
 float4 SamplePoint(Texture3D<float4> tex, float3 uv, float3 size)
 {
@@ -294,7 +294,7 @@ float Limit(float r, float mu)
 float3 Transmittance(float r, float mu) 
 { 
 	float2 uv = GetTransmittanceUV(r, mu);
-	return transmittanceRead.SampleLevel(_LinearClamp, uv, 0).rgb; 
+	return transmittanceRead.SampleLevel(LinearClamp, uv, 0).rgb; 
 } 
 
 // transmittance(=transparency) of atmosphere between x and x0 
@@ -322,7 +322,7 @@ float3 Irradiance(Texture2D<float4> tex, float r, float muS)
 { 
 	float2 uv = GetIrradianceUV(r, muS); 
 
-	return tex.SampleLevel(_LinearClamp, uv, 0).rgb;
+	return tex.SampleLevel(LinearClamp, uv, 0).rgb;
 }  
 
 // Rayleigh phase function 

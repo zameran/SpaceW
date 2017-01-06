@@ -36,7 +36,7 @@ float4 _UV;
 Texture2D _Tex2D;
 Texture3D _Tex3D;
 
-SamplerState _LinearClamp;
+SamplerState LinearClamp;
 
 //-----------------------------------------------------------------------//
 
@@ -130,7 +130,7 @@ void readSingle2D(uint3 id : SV_DispatchThreadID)
 void readSingleBilinear2D(uint3 id : SV_DispatchThreadID)
 {
 
-	_BufferSingle2D[0] = _Tex2D.SampleLevel(_LinearClamp, _UV.xy, 0);
+	_BufferSingle2D[0] = _Tex2D.SampleLevel(LinearClamp, _UV.xy, 0);
 
 }
 
@@ -224,7 +224,7 @@ void readSingle3D(uint3 id : SV_DispatchThreadID)
 [numthreads(1,1,1)]
 void readSingleBilinear3D(uint3 id : SV_DispatchThreadID)
 {
-	_BufferSingle3D[0] = _Tex3D.SampleLevel(_LinearClamp, _UV.xyz, 0);
+	_BufferSingle3D[0] = _Tex3D.SampleLevel(LinearClamp, _UV.xyz, 0);
 
 }
 
