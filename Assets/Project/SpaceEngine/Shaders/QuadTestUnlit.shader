@@ -282,7 +282,7 @@
 				float3 normal = tex2D(_NormalTexture, IN.uv0).rgb;
 
 				normal = mul(_TRS, normal);
-				normal = normalize(normal);
+				//normal = normalize(normal);
 
 				float3 vertexNormal = IN.normal0.xyz;
 
