@@ -131,7 +131,6 @@ public sealed class Quad : MonoBehaviour, IQuad
     public bool Unsplitted = false;
     public bool Visible = false;
     public bool Uniformed = false;
-    public bool GPUDataRecieved = false;
     public bool BuffersCreated = false;
 
     public float DistanceToLODSplit = Mathf.Infinity;

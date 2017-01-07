@@ -182,7 +182,7 @@ Shader "SpaceEngine/Atmosphere/Atmosphere"
 			}
 			
 			float4 frag(v2f IN) : COLOR
-			{			
+			{
 				float3 WCP = _Globals_WorldCameraPos;
 				float3 WCPG = WCP + _Globals_Origin; // Current camera position with offset applied...
 				float3 WCPGG = WCPG + _Globals_Origin; // I HAVE NO IDEA HOW, BUT IT WORKS!

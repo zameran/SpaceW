@@ -263,10 +263,10 @@ Shader "SpaceEngine/QuadTestUnlit"
 
 				v.vertex = position;
 				v.tangent = float4(FindTangent(normal, 0.01, float3(0, 1, 0)), 1);
-				v.normal = mul(_TRS, normal);
+				v.normal = normal;
 
 				o.uv0 = v.texcoord;
-				o.normal0 = v.normal;
+				o.normal0 =  mul(_TRS, v.normal);
 				o.vertex0 = mul(UNITY_MATRIX_MVP, v.vertex);
 				o.vertex1 = mul(unity_ObjectToWorld, v.vertex); //TODO : Apply Origin vector. //NOTE : Bug here!!!!!111
 				o.vertex2 = v.vertex;
