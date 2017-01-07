@@ -1,7 +1,7 @@
 ﻿#region License
 // Procedural planet generator.
 // 
-// Copyright (C) 2015-2016 Denis Ovchinnikov [zameran] 
+// Copyright (C) 2015-2017 Denis Ovchinnikov [zameran] 
 // All rights reserved.
 // 
 // Redistribution and use in source and binary forms, with or without
@@ -68,9 +68,10 @@ public static class PlanetoidExtensions
             {
                 if (planet.AtmosphereEnabled)
                 {
-                    var lightCount = planet.Atmosphere.Suns.Count((sun) => sun != null);
+                    var lightCount = planet.Atmosphere.Suns.Count((sun) => sun != null && sun.gameObject.activeInHierarchy);
 
-                    Keywords.Add("LIGHT_" + lightCount);
+                    if (lightCount != 0)
+                        Keywords.Add("LIGHT_" + lightCount);
 
                     if (planet.Atmosphere.EclipseCasters.Count == 0)
                     {
@@ -148,8 +149,6 @@ public sealed class Planetoid : Planet, IPlanet
         }
 
         QuadAtmosphereMPB = new MaterialPropertyBlock();
-
-        SetupGenerationConstants();
     }
 
     protected override void Start()
@@ -280,11 +279,6 @@ public sealed class Planetoid : Planet, IPlanet
                 }
             }
         }
-    }
-
-    private void SetupGenerationConstants()
-    {
-        GenerationConstants = PlanetGenerationConstants.Init(PlanetRadius, TerrainMaxHeight);
     }
 
     public void UpdateLOD()
@@ -423,8 +417,6 @@ public sealed class Planetoid : Planet, IPlanet
     [ContextMenu("SetupQuads")]
     public void SetupQuads()
     {
-        SetupGenerationConstants();
-
         if (Quads.Count > 0)
             return;
 

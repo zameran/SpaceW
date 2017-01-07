@@ -1,6 +1,6 @@
 ﻿// Procedural planet generator.
 // 
-// Copyright (C) 2015-2016 Denis Ovchinnikov [zameran] 
+// Copyright (C) 2015-2017 Denis Ovchinnikov [zameran] 
 // All rights reserved.
 // 
 // Redistribution and use in source and binary forms, with or without
@@ -111,7 +111,6 @@ void HeightMain (uint3 id : SV_DispatchThreadID)
 	float3 patchCoord =  constants.planetRadius * patchNormalizedCoord;
 	float3 patchCoordCentered = patchCoord - patchCenter;
 	float3 patchCubeCoordCentered = patchNormalizedCoord;
-	float3 patchCubeCoordCenteredFlat = patchNormalizedCoord;
 
 	float noiseValue = NoiseFunction(patchCoord, constants.lodOctaveModifier);
 
@@ -119,7 +118,6 @@ void HeightMain (uint3 id : SV_DispatchThreadID)
 
 	patchCoordCentered += patchNormalizedCoord * height;
 	patchCubeCoordCentered += patchNormalizedCoord * height;
-	patchCubeCoordCenteredFlat += patchNormalizedCoord;
 	
 	float4 output = float4(patchCoordCentered.xyz, 0.0);
 	float4 cubeOutput = float4(patchCubeCoordCentered.xyz, 0.0);
@@ -146,7 +144,6 @@ void HeightSub(uint3 id : SV_DispatchThreadID)
 	float3 patchCoord =  constants.planetRadius * patchNormalizedCoord;
 	float3 patchCoordCentered = patchCoord - patchCenter;
 	float3 patchCubeCoordCentered = patchNormalizedCoord;
-	float3 patchCubeCoordCenteredFlat = patchNormalizedCoord;
 	
 	float noiseValue = NoiseFunction(patchCoord, constants.lodOctaveModifier);
 
@@ -154,7 +151,6 @@ void HeightSub(uint3 id : SV_DispatchThreadID)
 
 	patchCoordCentered += patchNormalizedCoord * height;
 	patchCubeCoordCentered += patchNormalizedCoord * height;
-	patchCubeCoordCenteredFlat += patchNormalizedCoord;
 	
 	float4 output = float4(patchCoordCentered.xyz, 0.0);
 	float4 cubeOutput = float4(patchCubeCoordCentered.xyz, 0.0);

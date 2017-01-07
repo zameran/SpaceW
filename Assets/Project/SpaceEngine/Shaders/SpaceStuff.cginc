@@ -1,6 +1,6 @@
 // Procedural planet generator.
 // 
-// Copyright (C) 2015-2016 Denis Ovchinnikov [zameran] 
+// Copyright (C) 2015-2017 Denis Ovchinnikov [zameran] 
 // All rights reserved.
 // 
 // Redistribution and use in source and binary forms, with or without
@@ -372,6 +372,7 @@ inline float3 GetHeightNormalFromPosition(QuadGenerationConstants constants, RWS
 	float3 n = cross(curr - left, curr - up) + cross(curr - right, curr - down);
 
 	return normalize(float3(-n.x, -n.y, n.z));
+	//return normalize(cross(right - curr, up - curr));
 }
 
 inline float3 GetHeightNormalFromBump(QuadGenerationConstants constants, RWStructuredBuffer<OutputStruct> buffer, int size, uint3 id)

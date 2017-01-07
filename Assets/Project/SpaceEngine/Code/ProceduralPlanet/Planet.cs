@@ -1,7 +1,7 @@
 ﻿#region License
 // Procedural planet generator.
 // 
-// Copyright (C) 2015-2016 Denis Ovchinnikov [zameran] 
+// Copyright (C) 2015-2017 Denis Ovchinnikov [zameran] 
 // All rights reserved.
 // 
 // Redistribution and use in source and binary forms, with or without
@@ -33,10 +33,12 @@
 // Creator: zameran
 #endregion
 
-using Amib.Threading;
+
 using SpaceEngine.AtmosphericScattering;
 using SpaceEngine.AtmosphericScattering.Clouds;
+
 using System.Collections.Generic;
+
 using UnityEngine;
 
 public abstract class Planet : MonoBehaviour
@@ -75,8 +77,6 @@ public abstract class Planet : MonoBehaviour
 
     public Matrix4x4 PlanetoidTRS = Matrix4x4.identity;
 
-    public PlanetGenerationConstants GenerationConstants;
-
     public EngineRenderQueue RenderQueue = EngineRenderQueue.Geometry;
     public int RenderQueueOffset = 0;
 
@@ -100,8 +100,6 @@ public abstract class Planet : MonoBehaviour
     [HideInInspector]
     public bool ExternalRendering = false;
 
-    public SmartThreadPool stp = new SmartThreadPool();
-
     public QuadDistanceToClosestCornerComparer qdtccc;
 
     [HideInInspector]
@@ -116,8 +114,6 @@ public abstract class Planet : MonoBehaviour
 
     protected virtual void Start()
     {
-        stp.Start();
-
         if (qdtccc == null)
             qdtccc = new QuadDistanceToClosestCornerComparer();
     }
