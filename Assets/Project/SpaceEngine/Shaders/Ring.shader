@@ -40,11 +40,6 @@ Shader "SpaceEngine/Ring"
 		_Mie("Mie", Vector) = (0,0,0)
 		_LightingBias("Lighting Bias", Float) = 0
 		_LightingSharpness("Lighting Sharpness", Float) = 0
-		
-		_Shadow1Texture("Shadow 1 Texture", 2D) = "white" {}
-		_Shadow1Ratio("Shadow 1 Ratio", Float) = 1
-		_Shadow2Texture("Shadow 2 Texture", 2D) = "white" {}
-		_Shadow2Ratio("Shadow 2 Ratio", Float) = 1
 	}
 	SubShader
 	{
