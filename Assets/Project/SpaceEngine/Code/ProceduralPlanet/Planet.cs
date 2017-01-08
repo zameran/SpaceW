@@ -72,7 +72,7 @@ public abstract class Planet : MonoBehaviour
     public Transform OriginTransform { get { return transform; } }
 
     public Vector3 Origin { get { return OriginTransform.position; } }
-    public Vector3 OriginRotation { get { if (QuadsRoot != null) return QuadsRoot.transform.rotation.eulerAngles; else return OriginTransform.rotation.eulerAngles; } }
+    public Vector3 OriginRotation { get { if (QuadsRoot != null) return QuadsRoot.transform.rotation.eulerAngles; return OriginTransform.rotation.eulerAngles; } }
     public Vector3 OriginScale { get { return OriginTransform.localScale; } }
 
     public Matrix4x4 PlanetoidTRS = Matrix4x4.identity;
