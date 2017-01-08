@@ -164,6 +164,7 @@ Shader "SpaceEngine/Ring"
 				float cameraDistance = length(i.relativeDirection);
 
 				float2 position = i.worldPosition.xz * 0.1;
+				float2 deltaPosition = float2(position.x, position.y + _Time.y);
 				float radial = i.uv * 512;
 				float noiseValue = 1;
 				float fadeIn = 1.0 - cameraDistance * 0.00002;
@@ -171,8 +172,8 @@ Shader "SpaceEngine/Ring"
 					
 				if(fadeIn > 0.0)
 				{
-					noiseValue = tex2D(_NoiseTex, position).r *
-								 tex2D(_NoiseTex, position * 0.3).g *
+					noiseValue = tex2D(_NoiseTex, deltaPosition).r *
+								 tex2D(_NoiseTex, deltaPosition * 0.3).g *
 								 tex2D(_NoiseTex, float2(radial, 0.5)).b *
 								 tex2D(_NoiseTex, float2(radial * 0.3, 0.5)).a * 16.0;
 
