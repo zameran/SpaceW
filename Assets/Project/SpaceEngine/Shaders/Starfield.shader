@@ -76,8 +76,7 @@ Shader "SpaceEngine/Stars/Starfield"
 				};
 		
 				float2 hash = frac(pos.xy * 512);
-				//float index = frac(hash.x + (hash.y + 1) * (_Time.x * 2 + unity_DeltaTime.z)); // flickering speed
-				float index = frac(hash.x + (hash.y + 1) * (_Time.w * 5 * unity_DeltaTime.z)); // flickering speed
+				float index = frac(hash.x + (hash.y + 1) * (_Time.x * 2 + unity_DeltaTime.z)); // flickering speed
 
 				index *= 8;
 
@@ -93,8 +92,7 @@ Shader "SpaceEngine/Stars/Starfield"
 
 				float3 t = mul((float3x3)_RotationMatrix, v.vertex.xyz) + _WorldSpaceCameraPos.xyz; 
 
-				//float appMag = 6.5 + v.color.w * (-1.44 - 2.5);
-				float appMag = 6.5 + v.color.w * 255 * (-1.44 - 2.5);
+				float appMag = 6.5 + v.color.w * (-1.44 - 2.5);
 				float brightness = GetFlickerAmount(v.vertex.xy) * pow(5.0, (-appMag - 1.44) / 2.5);
 						
 				half4 starColor = _StarIntensity * float4(brightness * v.color.xyz, brightness);
@@ -110,7 +108,7 @@ Shader "SpaceEngine/Stars/Starfield"
 			{
 				half2 distCenter = IN.uv.xy;
 				half scale = exp(-dot(distCenter, distCenter));
-				half3 colFinal = IN.color.xyz * scale + 5 * IN.color.w * pow(scale, 16);
+				half3 colFinal = IN.color.xyz * scale + 5 * IN.color.w * pow(scale, 32);
 
 				colFinal = (colFinal * colFinal) * 2;
 

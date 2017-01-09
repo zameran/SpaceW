@@ -88,7 +88,7 @@ namespace SpaceEngine.Startfield
         [ContextMenu("InitMesh")]
         public void InitMesh()
         {
-            float starSize = StarsDistance / 100 * StarsScale;
+            var starSize = StarsDistance / 100 * StarsScale;
 
             BillboardMesh = MeshFactory.MakeBillboardQuad(starSize);
             StarfieldMesh = CreateStarfieldMesh(StarsDistance);
@@ -132,17 +132,18 @@ namespace SpaceEngine.Startfield
             for (int i = 0; i < numberOfStars - 1; i++)
             {
                 var star = new StarfieldStar(starsData[i]);
-
-                float magnitude = Vector3.Dot(new Vector3(star.Color.r, star.Color.g, star.Color.b), new Vector3(0.22f, 0.707f, 0.071f));
+                var magnitude = Vector3.Dot(new Vector3(star.Color.r, star.Color.g, star.Color.b), new Vector3(0.22f, 0.707f, 0.071f));
 
                 star.Color.a = magnitude;
                 star.Position = Vector3.Scale(star.Position, new Vector3(-1.0f, 1.0f, -1.0f));
 
-                CombineInstance ci = new CombineInstance();
+                var ci = new CombineInstance
+                {
+                    mesh = BillboardMesh,
+                    transform = MatrixHelper.BillboardMatrix(star.Position * starDistance)
+                };
 
-                ci.mesh = BillboardMesh;
                 ci.mesh.colors = new[] { star.Color, star.Color, star.Color, star.Color };
-                ci.transform = MatrixHelper.BillboardMatrix(star.Position * starDistance);
 
                 starsCIs.Add(ci);
             }
@@ -150,7 +151,6 @@ namespace SpaceEngine.Startfield
             var mesh = new Mesh();
             mesh.name = string.Format("StarfieldMesh_({0})", Random.Range(float.MinValue, float.MaxValue));
             mesh.CombineMeshes(starsCIs.ToArray());
-            ;
             mesh.bounds = new Bounds(Vector3.zero, new Vector3(1e8f, 1e8f, 1e8f));
             mesh.hideFlags = HideFlags.DontSave;
 
