@@ -40,29 +40,15 @@ using UnityEngine;
 [ExecuteInEditMode]
 public class PatchSphere : MonoBehaviour
 {
-    public Shader CoreShader;
     public Shader Shader;
 
-    [HideInInspector]
-    public Material CoreMaterial;
-
-    public Planet ParentPlanet;
-
     public PatchQuality PatchQuality = PatchQuality.Standard;
-    public PatchResolution PatchResoulution = PatchResolution.Standard;
-
-    public TextureWrapMode WrapMode = TextureWrapMode.Clamp;
-    public FilterMode TextureFilterMode = FilterMode.Bilinear;
-    public bool Mipmaps = false;
-    public bool POT = true;
-    public int AnisoLevel = 0;
 
     public float Radius = 64;
 
     public int MaxSplitLevel = 8;
     public float SizeSplit = 3;
     public float SizeRejoin = 6;
-    public float TerrainMaxHeight = 8;
 
     public List<PatchTree> PatchTrees = new List<PatchTree>();
 
@@ -100,84 +86,10 @@ public class PatchSphere : MonoBehaviour
         }
     }
 
-    public void RenderQuadVolume(float width, float height, Material material, PatchAABB volume, int pass)
-    {
-        GL.PushMatrix();
-        GL.LoadOrtho();
-        GL.Viewport(new Rect(0, 0, width, height));
-
-        material.SetPass(pass);
-
-        Vector3 v1 = volume.vertices[0];
-        Vector3 uv1 = volume.uvs[0];
-
-        Vector3 v2 = volume.vertices[3];
-        Vector3 uv2 = volume.uvs[3];
-
-        Vector3 v3 = volume.vertices[2];
-        Vector3 uv3 = volume.uvs[2];
-
-        Vector3 v4 = volume.vertices[1];
-        Vector3 uv4 = volume.uvs[1];
-
-        GL.Begin(GL.QUADS);
-
-        if (Application.platform == RuntimePlatform.OSXPlayer || Application.platform == RuntimePlatform.OSXEditor)
-        {
-            GL.MultiTexCoord(0, new Vector3(0, 0, 0));
-            GL.MultiTexCoord(1, v1);
-            GL.MultiTexCoord(2, uv1);
-            GL.Vertex3(-1, -1, 0);
-
-            GL.MultiTexCoord(0, new Vector3(0, 1, 0));
-            GL.MultiTexCoord(1, v2);
-            GL.MultiTexCoord(2, uv2);
-            GL.Vertex3(-1, 1, 0);
-
-            GL.MultiTexCoord(0, new Vector3(1, 1, 0));
-            GL.MultiTexCoord(1, v3);
-            GL.MultiTexCoord(2, uv3);
-            GL.Vertex3(1, 1, 0);
-
-            GL.MultiTexCoord(0, new Vector3(1, 0, 0));
-            GL.MultiTexCoord(1, v4);
-            GL.MultiTexCoord(2, uv4);
-            GL.Vertex3(1, -1, 0);
-        }
-        else
-        {
-            GL.MultiTexCoord(0, new Vector3(0, 0, 0));
-            GL.MultiTexCoord(1, v1);
-            GL.MultiTexCoord(2, uv1);
-            GL.Vertex3(-1, 1, 0);
-
-            GL.MultiTexCoord(0, new Vector3(0, 1, 0));
-            GL.MultiTexCoord(1, v2);
-            GL.MultiTexCoord(2, uv2);
-            GL.Vertex3(-1, -1, 0);
-
-            GL.MultiTexCoord(0, new Vector3(1, 1, 0));
-            GL.MultiTexCoord(1, v3);
-            GL.MultiTexCoord(2, uv3);
-            GL.Vertex3(1, -1, 0);
-
-            GL.MultiTexCoord(0, new Vector3(1, 0, 0));
-            GL.MultiTexCoord(1, v4);
-            GL.MultiTexCoord(2, uv4);
-            GL.Vertex3(1, 1, 0);
-        }
-
-        GL.End();
-        GL.PopMatrix();
-    }
-
     public void Rebuild()
     {
-        PatchConfig = new PatchConfig(PatchQuality, PatchResoulution);
-        PatchManager = new PatchManager(PatchConfig, this);
-
-        CoreMaterial = MaterialHelper.CreateTemp(CoreShader, "PatchCore");
-        CoreMaterial.hideFlags = HideFlags.DontSave;
+        PatchConfig = new PatchConfig(PatchQuality);
+        PatchManager = new PatchManager(PatchConfig);
 
         DestroyPlanet();
 
@@ -229,10 +141,7 @@ public class PatchSphere : MonoBehaviour
 
     private void LateUpdate()
     {
-        if (ParentPlanet == null) return;
-        if (ParentPlanet.LODTarget == null) return;
-
-        Vector3 InversedCameraPosition = transform.InverseTransformPoint(ParentPlanet.LODTarget.position);
+        var InversedCameraPosition = CameraHelper.Main().transform.position;
 
         Splitted = Rejoined = false;
         HighestSplitLevel = 0;

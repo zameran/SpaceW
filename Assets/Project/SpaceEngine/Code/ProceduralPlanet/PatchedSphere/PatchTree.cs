@@ -33,12 +33,13 @@
 // Creator: zameran
 #endregion
 
-using System.Collections.Generic;
+using System;
 
 using UnityEngine;
 
 using Object = UnityEngine.Object;
 
+[Serializable]
 public class PatchTree
 {
     public PatchSphere Sphere;
@@ -73,11 +74,10 @@ public class PatchTree
 
     public GameObject GameObject;
     public Mesh Mesh;
-    public MeshCollider Collider = null;
-
-    public static List<PatchColliderQueue> ColliderQueueList = new List<PatchColliderQueue>(32);
 
     public PatchTree Parent;
+
+    [NonSerialized]
     public PatchTree[] Children = new PatchTree[4];
     public PatchNeighbor[] Neighbors = new PatchNeighbor[4];
 
@@ -85,49 +85,8 @@ public class PatchTree
     byte Edges;
     byte GapFixMask;
 
-    public Shader CoreShader;
-    public Material CoreMaterial;
-
-    static float lastCollider = Time.time;
-
     public byte NEXT_EDGE(byte e) { return (byte)(e == 3 ? 0 : e + 1); }
     public byte PREV_EDGE(byte e) { return (byte)(e == 0 ? 3 : e - 1); }
-
-    public static void NewColliderStart()
-    {
-        const int MaxProcess = 1;
-        int c = (MaxProcess > ColliderQueueList.Count ? ColliderQueueList.Count : MaxProcess);
-
-        if (c > 0)
-        {
-            float t = Time.time;
-            if (t - lastCollider < 0.01f) return;
-            lastCollider = t;
-        }
-
-        for (int i = 0; i < c; i++)
-        {
-            if (ColliderQueueList[i].Update)
-            {
-                if (ColliderQueueList[i].Tree.Collider != null)
-                {
-                    // update RingSegmentMesh collider
-                    ColliderQueueList[i].Tree.Collider.sharedMesh = null;
-                    ColliderQueueList[i].Tree.Collider.sharedMesh = ColliderQueueList[i].Tree.Mesh;
-                }
-            }
-            else
-            {
-                if (ColliderQueueList[i].Tree.GameObject != null)
-                {
-                    // add RingSegmentMesh collider to the patch
-                    ColliderQueueList[i].Tree.Collider = (MeshCollider)ColliderQueueList[i].Tree.GameObject.AddComponent<MeshCollider>();
-                }
-            }
-        }
-
-        ColliderQueueList.RemoveRange(0, c);
-    }
 
     public PatchTree(Vector3 Up, Vector3 Front, PatchSphere Sphere)
     {
@@ -300,97 +259,8 @@ public class PatchTree
         MiddleProjected = MiddleProjected.NormalizeToRadius(Sphere.Radius);
     }
 
-    private void RenderTextures(out Texture2D Heightmap, out Texture2D HeightmapLowRes, out Texture2D Normalmap)
-    {
-        //TODO : Fix texture sliding.
-
-        int PackedTextureResolution = Sphere.PatchConfig.LevelHeightMapRes(SplitLevel);
-        int LowResTextureResolution = Sphere.PatchConfig.PatchSize;
-
-        var WrapMode = Sphere.WrapMode;
-        var TextureFilterMode = Sphere.TextureFilterMode;
-        var Mipmaps = Sphere.Mipmaps;
-        var POT = Sphere.POT;
-        var AnisoLevel = Sphere.AnisoLevel;
-
-        RenderTexture heightmapRT = RTExtensions.CreateRTexture(new Vector2(PackedTextureResolution, PackedTextureResolution), 0,
-                                                                            RenderTextureFormat.ARGB32,
-                                                                            TextureFilterMode,
-                                                                            WrapMode, Mipmaps, AnisoLevel, POT);
-
-        RenderTexture normalmapRT = RTExtensions.CreateRTexture(new Vector2(PackedTextureResolution, PackedTextureResolution), 0,
-                                                                            RenderTextureFormat.ARGB32,
-                                                                            TextureFilterMode,
-                                                                            WrapMode, Mipmaps, AnisoLevel, POT);
-
-        RenderTexture heightmapRTLowRes = RTExtensions.CreateRTexture(new Vector2(LowResTextureResolution, LowResTextureResolution), 0,
-                                                                      RenderTextureFormat.ARGB32,
-                                                                      TextureFilterMode,
-                                                                      WrapMode, Mipmaps, AnisoLevel, POT);
-
-        Heightmap = new Texture2D(PackedTextureResolution, PackedTextureResolution, TextureFormat.ARGB32, Mipmaps);
-        Heightmap.wrapMode = WrapMode;
-        Heightmap.filterMode = TextureFilterMode;
-        Heightmap.anisoLevel = AnisoLevel;
-        Heightmap.Apply();
-
-        HeightmapLowRes = new Texture2D(LowResTextureResolution, LowResTextureResolution, TextureFormat.ARGB32, Mipmaps);
-        HeightmapLowRes.wrapMode = WrapMode;
-        HeightmapLowRes.filterMode = TextureFilterMode;
-        HeightmapLowRes.anisoLevel = AnisoLevel;
-        HeightmapLowRes.Apply();
-
-        Normalmap = new Texture2D(PackedTextureResolution, PackedTextureResolution, TextureFormat.ARGB32, Mipmaps);
-        Normalmap.wrapMode = WrapMode;
-        Normalmap.filterMode = TextureFilterMode;
-        Normalmap.anisoLevel = AnisoLevel;
-        Normalmap.Apply();
-
-        RenderTexture.active = heightmapRT;
-        Sphere.RenderQuadVolume(PackedTextureResolution, PackedTextureResolution, CoreMaterial, Volume, 0);
-        Heightmap.ReadPixels(new Rect(0, 0, PackedTextureResolution, PackedTextureResolution), 0, 0, false);
-        Heightmap.Apply();
-        RenderTexture.active = null;
-
-        RenderTexture.active = heightmapRTLowRes;
-        Sphere.RenderQuadVolume(LowResTextureResolution, LowResTextureResolution, CoreMaterial, Volume, 0);
-        HeightmapLowRes.ReadPixels(new Rect(0, 0, LowResTextureResolution, LowResTextureResolution), 0, 0, false);
-        HeightmapLowRes.Apply();
-        RenderTexture.active = null;
-
-        CoreMaterial.SetFloat("_UVStep", 1.0f / PackedTextureResolution);
-        CoreMaterial.SetTexture("_Heightmap", Heightmap);
-        CoreMaterial.SetFloat("_HeightScale", Sphere.TerrainMaxHeight);
-
-        RenderTexture.active = normalmapRT;
-        Sphere.RenderQuadVolume(PackedTextureResolution, PackedTextureResolution, CoreMaterial, Volume, 1);
-        Normalmap.ReadPixels(new Rect(0, 0, PackedTextureResolution, PackedTextureResolution), 0, 0, false);
-        Normalmap.Apply();
-        RenderTexture.active = null;
-    }
-
     private void GenerateTerrain()
     {
-        CoreShader = Sphere.CoreShader;
-        CoreMaterial = Sphere.CoreMaterial;
-
-        if (Sphere.ParentPlanet != null)
-        {
-            if (Sphere.ParentPlanet is Planetoid)
-            {
-                Planetoid planetoid = Sphere.ParentPlanet as Planetoid;
-
-                planetoid.tccps.UpdateUniforms(CoreMaterial);
-                planetoid.NPS.UpdateUniforms(CoreMaterial);
-            }
-        }
-
-        Texture2D Heightmap;
-        Texture2D HeightmapLowRes;
-        Texture2D Normalmap;
-
-        RenderTextures(out Heightmap, out HeightmapLowRes, out Normalmap);
-
         GameObject = new GameObject();
         GameObject.name = "Patch_LOD_ " + SplitLevel + " : [" + Up + "]";
         GameObject.layer = Sphere.gameObject.layer;
@@ -398,9 +268,6 @@ public class PatchTree
         GameObject.AddComponent<MeshFilter>();
         GameObject.AddComponent<MeshRenderer>();
         GameObject.GetComponent<MeshRenderer>().sharedMaterial = new Material(Sphere.Shader);
-
-        if (GameObject.GetComponent<MeshRenderer>().sharedMaterial.HasProperty("_MainTex"))
-            GameObject.GetComponent<MeshRenderer>().sharedMaterial.SetTexture("_MainTex", Normalmap);
 
         Mesh = new Mesh();
 
@@ -410,39 +277,30 @@ public class PatchTree
         uvvols = new Vector2[Sphere.PatchConfig.GridSize];
         normals = new Vector3[Sphere.PatchConfig.GridSize];
 
-        Color[] heights = HeightmapLowRes.GetPixels();
+        var origin = Volume.vertices[0];
 
-        Vector3 origin = Volume.vertices[0];
+        var vertStep = Size / (Sphere.PatchConfig.PatchSize - 1);                                         //vertex spacing
+        var startHMap = 1.0f;
+        var endHMap = 1.0f - startHMap;
 
-        float vertStep = Size / (Sphere.PatchConfig.PatchSize - 1);                                         //vertex spacing
-
-        float startHMap = 1.0f / Sphere.PatchConfig.LevelHeightMapRes(SplitLevel);
-        float endHMap = 1.0f - startHMap;
         float uCoord = startHMap, vCoord = startHMap;                                                       //uv coordinates for the heightmap
-        float uvStep = (endHMap - startHMap) / (Sphere.PatchConfig.PatchSize - 1);                          //hmap uv step size inside the loop
+
+        var uvStep = (endHMap - startHMap) / (Sphere.PatchConfig.PatchSize - 1);                          //hmap uv step size inside the loop
 
         float uVolCoord, vVolCoord = Volume.uvs[0].y;                                                       //flat uv coordinates for the cube face
-        float volCoordStep = (Volume.uvs[1].x - Volume.uvs[0].x) / (Sphere.PatchConfig.PatchSize - 1);      //step size of flat uv inside the loop
 
-        float maxHeight = -999999999.0f;
-
-        int idx = 0;
+        var volCoordStep = (Volume.uvs[1].x - Volume.uvs[0].x) / (Sphere.PatchConfig.PatchSize - 1);      //step size of flat uv inside the loop
+        var idx = 0;
 
         for (ushort y = 0; y < Sphere.PatchConfig.PatchSize; y++)
         {
-            Vector3 offset = origin;
+            var offset = origin;
 
             uCoord = startHMap;
             uVolCoord = Volume.uvs[0].x;
 
             for (ushort x = 0; x < Sphere.PatchConfig.PatchSize; x++)
             {
-                //get sampled height from the low res packed heightmap
-                float height = heights[idx].a;
-
-                height = height * Sphere.TerrainMaxHeight;
-                if (height > maxHeight) maxHeight = height;
-
                 //heightmap texture coordinates
                 uv[idx] = new Vector2(uCoord, vCoord);
                 uCoord += uvStep;
@@ -454,14 +312,14 @@ public class PatchTree
                 uVolCoord += volCoordStep;
 
                 //calculate vertex position
-                Vector3 vtx = offset;
+                var vtx = offset;
 
                 //use normalized vertex position as vertex normal
                 vtx.Normalize();
                 normals[idx] = vtx;
 
                 //scale to sphere
-                vtx = vtx * (Sphere.Radius + height);
+                vtx = vtx * Sphere.Radius;
 
                 //store
                 vertices[idx] = vtx;
@@ -477,7 +335,7 @@ public class PatchTree
         }
 
         //update projected center
-        MiddleProjected = MiddleProjected.NormalizeToRadius(Sphere.Radius + maxHeight);
+        MiddleProjected = MiddleProjected.NormalizeToRadius(Sphere.Radius);
 
         //save original parent transformations
         Vector3 parentPos = Sphere.gameObject.transform.position;
@@ -509,8 +367,7 @@ public class PatchTree
 
         if (SplitLevel >= Sphere.MaxSplitLevel)
         {
-            //add RingSegmentMesh collider to the patch through the lazy creator
-            ColliderQueueList.Add(new PatchColliderQueue() { Tree = this, Update = false });
+            //
         }
 
         NeedsTerrain = false;
@@ -789,21 +646,11 @@ public class PatchTree
                     {
                         Mesh.vertices = vertices;
                         Mesh.RecalculateBounds();
-
-                        if (Collider != null)
-                        {
-                            ColliderQueueList.Add(new PatchColliderQueue() { Tree = this, Update = true });
-                        }
                     }
 
                     //reupload vertices to the neighbor RingSegmentMesh in the other node and update its physics RingSegmentMesh
                     Neighbors[direction].Node.Mesh.vertices = Neighbors[direction].Node.vertices;
                     Neighbors[direction].Node.Mesh.RecalculateBounds();
-
-                    if (Neighbors[direction].Node.Collider != null)
-                    {
-                        ColliderQueueList.Add(new PatchColliderQueue() { Tree = Neighbors[direction].Node, Update = true });
-                    }
 
                     //fixed
                     Neighbors[direction].isFixed = true;
@@ -823,8 +670,6 @@ public class PatchTree
             {
                 GenerateTerrain();
             }
-
-            NewColliderStart();
         }
         else
         {
@@ -1295,94 +1140,5 @@ public class PatchTree
 
         Sphere.Rejoined = true;
         NeedsTerrain = true;
-    }
-
-    public float Collided(Vector3 entityWorldPos, float collisionRadius, ref Vector3 collisionPoint)
-    {
-        int indexCount = Sphere.PatchManager.Patches[Edges].Length;
-
-        int[] indexList = Sphere.PatchManager.Patches[Edges];
-        int[] idx = new int[3];
-
-        Plane triplane = new Plane();
-        Plane p1 = new Plane();
-        Plane p2 = new Plane();
-        Plane p3 = new Plane();
-
-        //inverse transform entity
-        Vector3 pos = Sphere.transform.InverseTransformPoint(entityWorldPos);
-
-        float minDist = float.MaxValue;
-
-        for (int f = 0; f < indexCount; f += 3)
-        {
-            //face indexes
-            idx[0] = indexList[f + 0];
-            idx[1] = indexList[f + 1];
-            idx[2] = indexList[f + 2];
-
-            //determine triangle plane
-            triplane.Set3Points(vertices[idx[0]], vertices[idx[1]], vertices[idx[2]]);
-
-            //make three planes, one for each edge of this triangle
-
-            //edge 1
-            Vector3 e1 = Vector3.Cross(triplane.normal, vertices[idx[1]] - vertices[idx[0]]);
-            e1.Normalize();
-
-            //calculate edge center
-            Vector3 me1 = Vector3.Lerp(vertices[idx[0]], vertices[idx[1]], 0.5f);
-            p1.SetNormalAndPosition(e1, me1);
-
-            //edge 2
-            Vector3 e2 = Vector3.Cross(triplane.normal, vertices[idx[2]] - vertices[idx[1]]);
-            e2.Normalize();
-
-            //calculate edge center
-            Vector3 me2 = Vector3.Lerp(vertices[idx[1]], vertices[idx[2]], 0.5f);
-            p2.SetNormalAndPosition(e2, me2);
-
-            //edge 3
-            Vector3 e3 = Vector3.Cross(triplane.normal, vertices[idx[0]] - vertices[idx[2]]);
-            e3.Normalize();
-
-            //calculate edge center
-            Vector3 me3 = Vector3.Lerp(vertices[idx[2]], vertices[idx[0]], 0.5f);
-            p3.SetNormalAndPosition(e3, me3);
-
-            //check if entity is inside the three planes
-            float d1 = p1.GetDistanceToPoint(pos);
-            float d2 = p2.GetDistanceToPoint(pos);
-            float d3 = p3.GetDistanceToPoint(pos);
-
-            if (d1 < 0 || d2 < 0 || d3 < 0)
-            {
-                //not inside, skip further testing
-                continue;
-            }
-
-            //finally, check collision against the selected triangle
-            //and do collision response
-            float dst = triplane.GetDistanceToPoint(pos);
-
-            if (dst < minDist) minDist = dst;
-
-            if (dst < collisionRadius)
-            {
-                float adj = (collisionRadius - dst);
-
-                //rotate normal contrary to the planet's orientation,
-                //because entity position was inverse transformed here.
-                Vector3 vadj = Sphere.transform.InverseTransformDirection(triplane.normal);
-
-                collisionPoint = vadj * adj;
-
-                return dst;
-            }
-        }
-
-        collisionPoint = Vector3.zero;
-
-        return minDist;
     }
 }
