@@ -33,42 +33,10 @@
 // Creator: zameran
 #endregion
 
-using System;
-
-public enum PatchQuality { Minimum, Low, Standard };
-
 public enum NeighborDirection { Top = 0, Right = 1, Bottom = 2, Left = 3 };
 
-public class PatchConfig
+public static class PatchSettings
 {
-    public ushort PatchSize { get; private set; }
-    public ushort GridSize { get; private set; }
-
-    public PatchConfig(PatchQuality patchQuality)
-    {
-        switch (patchQuality)
-        {
-            case PatchQuality.Standard:
-                {
-                    PatchSize = 33;
-                    break;
-                }
-
-            case PatchQuality.Low:
-                {
-                    PatchSize = 17;
-                    break;
-                }
-
-            case PatchQuality.Minimum:
-                {
-                    PatchSize = 9;
-                    break;
-                }
-            default:
-                throw new ArgumentOutOfRangeException("patchQuality", patchQuality, null);
-        }
-
-        GridSize = (ushort)(PatchSize * PatchSize);
-    }
+    public static ushort VerticesPerSide { get { return 33; } }
+    public static ushort Vertices { get { return (ushort)(VerticesPerSide * VerticesPerSide); } }
 }

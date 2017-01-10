@@ -42,8 +42,6 @@ public class PatchSphere : MonoBehaviour
 {
     public Shader Shader;
 
-    public PatchQuality PatchQuality = PatchQuality.Standard;
-
     public float Radius = 64;
 
     public int MaxSplitLevel = 8;
@@ -63,8 +61,6 @@ public class PatchSphere : MonoBehaviour
     public PatchTree CloserNode { get; set; }
 
     public PatchManager PatchManager { get; private set; }
-
-    public PatchConfig PatchConfig { get; private set; }
 
     private void Start()
     {
@@ -113,8 +109,7 @@ public class PatchSphere : MonoBehaviour
 
     public void Rebuild()
     {
-        PatchConfig = new PatchConfig(PatchQuality);
-        PatchManager = new PatchManager(PatchConfig);
+        PatchManager = new PatchManager();
 
         DestroyPlanet();
 
