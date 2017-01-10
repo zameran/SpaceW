@@ -267,7 +267,7 @@ public sealed class TCCommonParametersSetterEditor : Editor
         if (setter.PatchSphere != null)
         {
             setter.PatchSphere.Rebuild();
-            setter.PatchSphere.CallLateUpdate();
+            setter.PatchSphere.CallUpdate();
         }
     }
 

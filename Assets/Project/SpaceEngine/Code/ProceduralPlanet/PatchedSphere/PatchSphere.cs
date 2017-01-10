@@ -71,6 +71,31 @@ public class PatchSphere : MonoBehaviour
         Rebuild();
     }
 
+    private void Update()
+    {
+        var InversedCameraPosition = CameraHelper.Main().transform.position;
+
+        Splitted = Rejoined = false;
+        HighestSplitLevel = 0;
+        MinCamDist = 9999999.0f;
+        CloserNode = null;
+
+        for (int i = 0; i < PatchTrees.Count; i++)
+        {
+            PatchTrees[i].Update(InversedCameraPosition);
+        }
+
+        for (int i = 0; i < PatchTrees.Count; i++)
+        {
+            PatchTrees[i].RefreshLOD();
+        }
+
+        for (int i = 0; i < PatchTrees.Count; i++)
+        {
+            PatchTrees[i].RefreshGaps();
+        }
+    }
+
     public void DestroyPlanet()
     {
         for (int i = 0; i < PatchTrees.Count; i++)
@@ -139,33 +164,8 @@ public class PatchSphere : MonoBehaviour
         PatchTrees[5].SetNeighbor(NeighborDirection.Right, PatchTrees[2], NeighborDirection.Left);      //left
     }
 
-    private void LateUpdate()
+    public void CallUpdate()
     {
-        var InversedCameraPosition = CameraHelper.Main().transform.position;
-
-        Splitted = Rejoined = false;
-        HighestSplitLevel = 0;
-        MinCamDist = 9999999.0f;
-        CloserNode = null;
-
-        for (int i = 0; i < PatchTrees.Count; i++)
-        {
-            PatchTrees[i].Update(InversedCameraPosition);
-        }
-
-        for (int i = 0; i < PatchTrees.Count; i++)
-        {
-            PatchTrees[i].RefreshTerrain(InversedCameraPosition, InversedCameraPosition);
-        }
-
-        for (int i = 0; i < PatchTrees.Count; i++)
-        {
-            PatchTrees[i].RefreshGaps();
-        }
-    }
-
-    public void CallLateUpdate()
-    {
-        LateUpdate();
+        Update();
     }
 }
