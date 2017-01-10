@@ -8,7 +8,7 @@ class PatchSphereEditor : Editor
     {
         PatchSphere p = (PatchSphere)target;
 
-        p.CallLateUpdate();
+        p.CallUpdate();
     }
 
     public override void OnInspectorGUI()

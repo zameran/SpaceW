@@ -43,33 +43,33 @@ public class PatchManager
 
     public List<int[]> Patches { get { return patches; } }
 
-    public PatchManager(PatchConfig config, PatchSphere planet)
+    public PatchManager(PatchConfig config)
     {
         for (byte i = 0; i < 16; i++)
         {
-            GenerateGrid(i, config, planet);
+            GenerateGrid(i, config);
         }
     }
 
-    private void GenerateGrid(byte edges, PatchConfig config, PatchSphere sphere)
+    private void GenerateGrid(byte edges, PatchConfig config)
     {
         /*
-		+++ +O+ +++ +O+
-		+++ +++ O+O O+O
-		+++ +O+ +++ +O+
+        +++ +O+ +++ +O+
+        +++ +++ O+O O+O
+        +++ +O+ +++ +O+
 
-		+O+ +++ +++ +++
-		+++ ++O +++ O++
-		+++ +++ +O+ +++
-			   
-		+O+ +++ +++ +O+
-		++O ++O O++ O++
-		+++ +O+ +O+ +++
+        +O+ +++ +++ +++
+        +++ ++O +++ O++
+        +++ +++ +O+ +++
+               
+        +O+ +++ +++ +O+
+        ++O ++O O++ O++
+        +++ +O+ +O+ +++
 
-		+O+ +O+ +++ +O+
-		O+O ++O O+O O++
-		+++ +O+ +O+ +O+
-		*/
+        +O+ +O+ +++ +O+
+        O+O ++O O+O O++
+        +++ +O+ +O+ +O+
+        */
 
         //number of triangles in one full-res line
         //discounting the two extremities triangles that aren't included on this edge
