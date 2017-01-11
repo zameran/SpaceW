@@ -34,6 +34,7 @@
 #endregion
 
 using System;
+using System.Linq;
 
 using UnityEngine;
 
@@ -255,13 +256,16 @@ public class PatchTree
         var uv4 = new Vector3(0, 1, 0);
 
         Volume = new PatchAABB();
+
         Volume.Vertices.Add(v1);
-        Volume.UVs.Add(uv1);
         Volume.Vertices.Add(v2);
-        Volume.UVs.Add(uv2);
         Volume.Vertices.Add(v3);
-        Volume.UVs.Add(uv3);
         Volume.Vertices.Add(v4);
+
+
+        Volume.UVs.Add(uv1);
+        Volume.UVs.Add(uv2);
+        Volume.UVs.Add(uv3);
         Volume.UVs.Add(uv4);
 
         var v5 = v1;
@@ -275,6 +279,7 @@ public class PatchTree
         v8 = v8.NormalizeToRadius(Sphere.Radius);
 
         VolumeProjected = new PatchAABB();
+
         VolumeProjected.Vertices.Add(v5);
         VolumeProjected.Vertices.Add(v6);
         VolumeProjected.Vertices.Add(v7);
@@ -304,11 +309,13 @@ public class PatchTree
         var startHMap = 1.0f;
         var endHMap = 1.0f - startHMap;
 
-        float uCoord = startHMap, vCoord = startHMap; //uv coordinates for the heightmap
+        var uCoord = startHMap;
+        var vCoord = startHMap; //uv coordinates for the heightmap
 
         var uvStep = (endHMap - startHMap) / (PatchSettings.VerticesPerSide - 1); //hmap uv step size inside the loop
 
-        float uVolCoord, vVolCoord = Volume.UVs[0].y; //flat uv coordinates for the cube face
+        var uVolCoord = Volume.UVs[0].x;
+        var vVolCoord = Volume.UVs[0].y; //flat uv coordinates for the cube face
 
         var volCoordStep = (Volume.UVs[1].x - Volume.UVs[0].x) / (PatchSettings.VerticesPerSide - 1); //step size of flat uv inside the loop
         var idx = 0;
@@ -370,11 +377,11 @@ public class PatchTree
         GameObject.transform.parent = Sphere.gameObject.transform;
 
         //assign data to this node's mesh
-        Mesh.vertices = Data.Vertices;
-        Mesh.uv = Data.UV1; //vertex uv coordinates
-        Mesh.uv2 = Data.UV2; //passing flat patch volume uv coordinates as second texcoords
-        Mesh.normals = Data.Normals;
-        Mesh.triangles = Sphere.PatchManager.Patches[Edges];
+        Mesh.SetVertices(Data.Vertices.ToList());
+        Mesh.SetUVs(0, Data.UV1.ToList());
+        Mesh.SetUVs(1, Data.UV2.ToList());
+        Mesh.SetNormals(Data.Normals.ToList());
+        Mesh.SetTriangles(Sphere.PatchManager.Patches[Edges], 0);
         Mesh.hideFlags = HideFlags.DontSave;
 
         MeshFactory.SolveTangents(Mesh);
@@ -418,14 +425,15 @@ public class PatchTree
         //0100 == bottom edge at half-res
         //1000 == left edge at half-res
 
-        short idxTopLeft = 0;
-        short idxTopRight = (short)(PatchSettings.VerticesPerSide - 1);
-        short idxBottomLeft = (short)((PatchSettings.VerticesPerSide - 1) * PatchSettings.VerticesPerSide);
-        short idxBottomRight = (short)(idxBottomLeft + idxTopRight);
+        var idxTopLeft = (short)0;
+        var idxTopRight = (short)(PatchSettings.VerticesPerSide - 1);
+        var idxBottomLeft = (short)((PatchSettings.VerticesPerSide - 1) * PatchSettings.VerticesPerSide);
+        var idxBottomRight = (short)(idxBottomLeft + idxTopRight);
 
         for (byte direction = 0; direction < 4; direction++)
         {
-            byte bit = (byte)(1 << direction);
+            var bit = (byte)(1 << direction);
+
             if ((bit & directionsMask) > 0)
             {
                 short add = 0;
@@ -962,19 +970,24 @@ public class PatchTree
         ReLink();
     }
 
+    private void ReLinkChild(byte childIndex, NeighborDirection direction)
+    {
+        Children[childIndex].SetNeighbor(direction, Neighbors[(int)direction].Node, Neighbors[(int)direction].Direction);
+    }
+
     private void ReLink()
     {
-        Children[0].SetNeighbor(NeighborDirection.Top, Neighbors[(int)NeighborDirection.Top].Node, Neighbors[(int)NeighborDirection.Top].Direction);
-        Children[0].SetNeighbor(NeighborDirection.Left, Neighbors[(int)NeighborDirection.Left].Node, Neighbors[(int)NeighborDirection.Left].Direction);
+        ReLinkChild(0, NeighborDirection.Top);
+        ReLinkChild(0, NeighborDirection.Left);
 
-        Children[1].SetNeighbor(NeighborDirection.Top, Neighbors[(int)NeighborDirection.Top].Node, Neighbors[(int)NeighborDirection.Top].Direction);
-        Children[1].SetNeighbor(NeighborDirection.Right, Neighbors[(int)NeighborDirection.Right].Node, Neighbors[(int)NeighborDirection.Right].Direction);
+        ReLinkChild(1, NeighborDirection.Top);
+        ReLinkChild(1, NeighborDirection.Right);
 
-        Children[2].SetNeighbor(NeighborDirection.Bottom, Neighbors[(int)NeighborDirection.Bottom].Node, Neighbors[(int)NeighborDirection.Bottom].Direction);
-        Children[2].SetNeighbor(NeighborDirection.Right, Neighbors[(int)NeighborDirection.Right].Node, Neighbors[(int)NeighborDirection.Right].Direction);
+        ReLinkChild(2, NeighborDirection.Bottom);
+        ReLinkChild(2, NeighborDirection.Right);
 
-        Children[3].SetNeighbor(NeighborDirection.Bottom, Neighbors[(int)NeighborDirection.Bottom].Node, Neighbors[(int)NeighborDirection.Bottom].Direction);
-        Children[3].SetNeighbor(NeighborDirection.Left, Neighbors[(int)NeighborDirection.Left].Node, Neighbors[(int)NeighborDirection.Left].Direction);
+        ReLinkChild(3, NeighborDirection.Bottom);
+        ReLinkChild(3, NeighborDirection.Left);
     }
 
     private void ReEdge()
@@ -1000,7 +1013,7 @@ public class PatchTree
         if (Edges != EdgesTemp)
         {
             //reassign the index buffer
-            Mesh.triangles = Sphere.PatchManager.Patches[Edges];
+            Mesh.SetTriangles(Sphere.PatchManager.Patches[Edges], 0);
         }
 
         NeedsReedge = false;
@@ -1122,6 +1135,14 @@ public class PatchTree
         }
     }
 
+    private void ReJoinChild(byte childIndex, NeighborDirection direction)
+    {
+        Children[childIndex].Neighbors[(int)direction].Node.Neighbors[(int)Children[childIndex].Neighbors[(int)direction].Direction].Node = this;
+        Children[childIndex].Neighbors[(int)direction].Node.Neighbors[(int)Children[childIndex].Neighbors[(int)direction].Direction].isFixed = false;
+        Children[childIndex].Neighbors[(int)direction].Node.GapFixMask |= (byte)(1 << (int)Children[childIndex].Neighbors[(int)direction].Direction);
+        Children[childIndex].Neighbors[(int)direction].Node.NeedsReedge = true;
+    }
+
     private void ReJoin()
     {
         HasChildren = false;
@@ -1130,51 +1151,17 @@ public class PatchTree
         //relinks all children neighbors to point to this level
         //then delete children
 
-        Children[0].Neighbors[(int)NeighborDirection.Top].Node.Neighbors[(int)Children[0].Neighbors[(int)NeighborDirection.Top].Direction].Node = this;
-        Children[0].Neighbors[(int)NeighborDirection.Top].Node.Neighbors[(int)Children[0].Neighbors[(int)NeighborDirection.Top].Direction].isFixed = false;
-        Children[0].Neighbors[(int)NeighborDirection.Top].Node.GapFixMask |= (byte)(1 << (int)Children[0].Neighbors[(int)NeighborDirection.Top].Direction);
-        Children[0].Neighbors[(int)NeighborDirection.Top].Node.NeedsReedge = true;
+        ReJoinChild(0, NeighborDirection.Top);
+        ReJoinChild(0, NeighborDirection.Left);
 
-        Children[0].Neighbors[(int)NeighborDirection.Left].Node.Neighbors[(int)Children[0].Neighbors[(int)NeighborDirection.Left].Direction].Node = this;
-        Children[0].Neighbors[(int)NeighborDirection.Left].Node.Neighbors[(int)Children[0].Neighbors[(int)NeighborDirection.Left].Direction].isFixed = false;
-        Children[0].Neighbors[(int)NeighborDirection.Left].Node.GapFixMask |= (byte)(1 << (int)Children[0].Neighbors[(int)NeighborDirection.Left].Direction);
-        Children[0].Neighbors[(int)NeighborDirection.Left].Node.NeedsReedge = true;
+        ReJoinChild(1, NeighborDirection.Top);
+        ReJoinChild(1, NeighborDirection.Right);
 
-        //
+        ReJoinChild(2, NeighborDirection.Bottom);
+        ReJoinChild(2, NeighborDirection.Right);
 
-        Children[1].Neighbors[(int)NeighborDirection.Top].Node.Neighbors[(int)Children[1].Neighbors[(int)NeighborDirection.Top].Direction].Node = this;
-        Children[1].Neighbors[(int)NeighborDirection.Top].Node.Neighbors[(int)Children[1].Neighbors[(int)NeighborDirection.Top].Direction].isFixed = false;
-        Children[1].Neighbors[(int)NeighborDirection.Top].Node.GapFixMask |= (byte)(1 << (int)Children[1].Neighbors[(int)NeighborDirection.Top].Direction);
-        Children[1].Neighbors[(int)NeighborDirection.Top].Node.NeedsReedge = true;
-
-        Children[1].Neighbors[(int)NeighborDirection.Right].Node.Neighbors[(int)Children[1].Neighbors[(int)NeighborDirection.Right].Direction].Node = this;
-        Children[1].Neighbors[(int)NeighborDirection.Right].Node.Neighbors[(int)Children[1].Neighbors[(int)NeighborDirection.Right].Direction].isFixed = false;
-        Children[1].Neighbors[(int)NeighborDirection.Right].Node.GapFixMask |= (byte)(1 << (int)Children[1].Neighbors[(int)NeighborDirection.Right].Direction);
-        Children[1].Neighbors[(int)NeighborDirection.Right].Node.NeedsReedge = true;
-
-        //
-
-        Children[2].Neighbors[(int)NeighborDirection.Bottom].Node.Neighbors[(int)Children[2].Neighbors[(int)NeighborDirection.Bottom].Direction].Node = this;
-        Children[2].Neighbors[(int)NeighborDirection.Bottom].Node.Neighbors[(int)Children[2].Neighbors[(int)NeighborDirection.Bottom].Direction].isFixed = false;
-        Children[2].Neighbors[(int)NeighborDirection.Bottom].Node.GapFixMask |= (byte)(1 << (int)Children[2].Neighbors[(int)NeighborDirection.Bottom].Direction);
-        Children[2].Neighbors[(int)NeighborDirection.Bottom].Node.NeedsReedge = true;
-
-        Children[2].Neighbors[(int)NeighborDirection.Right].Node.Neighbors[(int)Children[2].Neighbors[(int)NeighborDirection.Right].Direction].Node = this;
-        Children[2].Neighbors[(int)NeighborDirection.Right].Node.Neighbors[(int)Children[2].Neighbors[(int)NeighborDirection.Right].Direction].isFixed = false;
-        Children[2].Neighbors[(int)NeighborDirection.Right].Node.GapFixMask |= (byte)(1 << (int)Children[2].Neighbors[(int)NeighborDirection.Right].Direction);
-        Children[2].Neighbors[(int)NeighborDirection.Right].Node.NeedsReedge = true;
-
-        //
-
-        Children[3].Neighbors[(int)NeighborDirection.Bottom].Node.Neighbors[(int)Children[3].Neighbors[(int)NeighborDirection.Bottom].Direction].Node = this;
-        Children[3].Neighbors[(int)NeighborDirection.Bottom].Node.Neighbors[(int)Children[3].Neighbors[(int)NeighborDirection.Bottom].Direction].isFixed = false;
-        Children[3].Neighbors[(int)NeighborDirection.Bottom].Node.GapFixMask |= (byte)(1 << (int)Children[3].Neighbors[(int)NeighborDirection.Bottom].Direction);
-        Children[3].Neighbors[(int)NeighborDirection.Bottom].Node.NeedsReedge = true;
-
-        Children[3].Neighbors[(int)NeighborDirection.Left].Node.Neighbors[(int)Children[3].Neighbors[(int)NeighborDirection.Left].Direction].Node = this;
-        Children[3].Neighbors[(int)NeighborDirection.Left].Node.Neighbors[(int)Children[3].Neighbors[(int)NeighborDirection.Left].Direction].isFixed = false;
-        Children[3].Neighbors[(int)NeighborDirection.Left].Node.GapFixMask |= (byte)(1 << (int)Children[3].Neighbors[(int)NeighborDirection.Left].Direction);
-        Children[3].Neighbors[(int)NeighborDirection.Left].Node.NeedsReedge = true;
+        ReJoinChild(3, NeighborDirection.Bottom);
+        ReJoinChild(3, NeighborDirection.Left);
 
         for (byte i = 0; i < 4; i++)
         {

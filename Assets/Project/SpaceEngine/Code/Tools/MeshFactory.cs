@@ -34,6 +34,7 @@
 #endregion
 
 using System.Collections.Generic;
+using System.Linq;
 
 using UnityEngine;
 
@@ -560,6 +561,6 @@ public static class MeshFactory
             tangents[i].w = (Vector3.Dot(Vector3.Cross(n, t), tan2[i]) < 0.0f) ? -1.0f : 1.0f;
         }
 
-        theMesh.tangents = tangents;
+        theMesh.SetTangents(tangents.ToList());
     }
 }

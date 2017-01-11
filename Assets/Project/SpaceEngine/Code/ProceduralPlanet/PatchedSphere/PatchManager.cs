@@ -45,6 +45,11 @@ public class PatchManager
     {
         Patches = new List<int[]>();
 
+        Generate();
+    }
+
+    private void Generate()
+    {
         for (byte i = 0; i < 16; i++)
         {
             GenerateGrid(i);
