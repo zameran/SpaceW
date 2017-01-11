@@ -33,6 +33,8 @@
 // Creator: zameran
 #endregion
 
+using System;
+
 using UnityEngine;
 
 public sealed class FlyCamera : GameCamera
@@ -160,6 +162,15 @@ public sealed class FlyCamera : GameCamera
             speed = Mathf.Clamp(speed, 1.0f, 10000.0f);
 
             transform.Translate(velocity * currentSpeed);
+        }
+
+        var cameraPosition = transform.position;
+        var universe = FindObjectOfType<Universe>();
+
+        if (Math.Abs(cameraPosition.magnitude) > 5000.000f)
+        {
+            universe.transform.position -= cameraPosition;
+            transform.position = Vector3.zero;
         }
     }
 
