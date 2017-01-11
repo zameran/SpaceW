@@ -33,10 +33,9 @@
 // Creator: zameran
 #endregion
 
-using Newtonsoft.Json;
 
 using System.Collections.Generic;
-using System.Linq;
+using System.IO;
 
 using UnityEngine;
 
@@ -48,12 +47,9 @@ namespace SpaceEngine.Startfield
         public float StarsScale = 1.0f;
         public float StarsDistance = 1000.0f;
 
-        public float HDRExposure = 0.2f;
-
         public Shader StarfieldShader;
         public Material StarfieldMaterial;
 
-        public Mesh BillboardMesh;
         public Mesh StarfieldMesh;
 
         [HideInInspector]
@@ -61,6 +57,13 @@ namespace SpaceEngine.Startfield
 
         public EngineRenderQueue RenderQueue = EngineRenderQueue.Background;
         public int RenderQueueOffset = 0;
+
+        private readonly Vector4[] Tab =
+        {
+            new Vector2(0.897907815f, -0.347608525f), new Vector2(0.550299290f, 0.273586675f), new Vector2(0.823885965f, 0.098853070f),
+            new Vector2(0.922739035f, -0.122108860f), new Vector2(0.800630175f, -0.088956800f), new Vector2(0.711673375f, 0.158864420f), new Vector2(0.870537795f, 0.085484560f),
+            new Vector2(0.956022355f, -0.058114540f)
+        };
 
         private void Start()
         {
@@ -88,9 +91,6 @@ namespace SpaceEngine.Startfield
         [ContextMenu("InitMesh")]
         public void InitMesh()
         {
-            var starSize = StarsDistance / 100 * StarsScale;
-
-            BillboardMesh = MeshFactory.MakeBillboardQuad(starSize);
             StarfieldMesh = CreateStarfieldMesh(StarsDistance);
         }
 
@@ -109,43 +109,50 @@ namespace SpaceEngine.Startfield
             mat.SetFloat("_StarIntensity", StarIntensity);
             mat.SetMatrix("_RotationMatrix", Matrix4x4.identity);
 
-            mat.SetFloat("_Exposure", HDRExposure);
-            mat.SetFloat("_HDRMode", (int)HDRMode);
+            mat.SetVectorArray("_Tab", Tab);
         }
 
         private Mesh CreateStarfieldMesh(float starDistance)
         {
             const int numberOfStars = 9110;
 
-            var dataFile = Resources.Load("Json/Stars", typeof(TextAsset)) as TextAsset;
+            var binaryDataFile = Resources.Load("Binary/Stars", typeof(TextAsset)) as TextAsset;
 
-            if (dataFile == null)
+            if (binaryDataFile == null)
             {
-                Debug.Log("Starfield: Data file reading error!");
-
+                Debug.Log("Starfield: Binary data file reading error!");
                 return null;
             }
 
-            var starsData = JsonConvert.DeserializeObject<StarfieldStarJson[]>(dataFile.text).ToList();
             var starsCIs = new List<CombineInstance>();
 
-            for (int i = 0; i < numberOfStars - 1; i++)
+            using (var reader = new BinaryReader(new MemoryStream(binaryDataFile.bytes)))
             {
-                var star = new StarfieldStar(starsData[i]);
-                var magnitude = Vector3.Dot(new Vector3(star.Color.r, star.Color.g, star.Color.b), new Vector3(0.22f, 0.707f, 0.071f));
-
-                star.Color.a = magnitude;
-                star.Position = Vector3.Scale(star.Position, new Vector3(-1.0f, 1.0f, -1.0f));
-
-                var ci = new CombineInstance
+                for (int i = 0; i < numberOfStars - 1; i++)
                 {
-                    mesh = BillboardMesh,
-                    transform = MatrixHelper.BillboardMatrix(star.Position * starDistance)
-                };
+                    var star = new StarfieldStar();
+                    var starSize = StarsDistance / 100 * StarsScale;
 
-                ci.mesh.colors = new[] { star.Color, star.Color, star.Color, star.Color };
+                    // NOTE : Swap Z and Y...
+                    star.Position = new Vector3(reader.ReadSingle(), reader.ReadSingle(), reader.ReadSingle());
+                    star.Color = new Vector4(reader.ReadSingle(), reader.ReadSingle(), reader.ReadSingle(), 0);
 
-                starsCIs.Add(ci);
+                    star.Position = Vector3.Scale(star.Position, new Vector3(-1.0f, 1.0f, -1.0f));
+                    star.Color.w = new Vector3(star.Color.x, star.Color.y, star.Color.z).magnitude;
+
+                    if (star.Color.w > 5.7f)
+                        star.Color = Vector4.Normalize(star.Color) * 0.5f;
+
+                    var ci = new CombineInstance
+                    {
+                        mesh = MeshFactory.MakeBillboardQuad(starSize),
+                        transform = MatrixHelper.BillboardMatrix(star.Position * starDistance)
+                    };
+
+                    ci.mesh.colors = new Color[] { star.Color, star.Color, star.Color, star.Color };
+
+                    starsCIs.Add(ci);
+                }
             }
 
             var mesh = new Mesh();

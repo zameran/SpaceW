@@ -41,20 +41,13 @@ namespace SpaceEngine.Startfield
     {
         public Vector3 Position;
 
-        public Color Color;
+        public Vector4 Color;
 
-        public StarfieldStar(Vector3 Position, Color Color)
+        public StarfieldStar(Vector3 Position, Vector4 Color)
         {
             this.Position = Position;
 
             this.Color = Color;
-        }
-
-        public StarfieldStar(StarfieldStarJson starJson)
-        {
-            this.Position = new Vector3(starJson.X, starJson.Y, starJson.Z);
-
-            this.Color = new Color(starJson.R, starJson.G, starJson.B, starJson.A);
         }
     }
 }

@@ -36,24 +36,23 @@ Shader "SpaceEngine/Stars/Starfield"
 	SubShader 
 	{
 		Tags { "Queue" = "Geometry" "IgnoreProjector" = "True" "RenderType" = "Background" }
-		Blend OneMinusDstColor OneMinusSrcAlpha
+		//Blend OneMinusDstColor OneMinusSrcAlpha
 		//Blend OneMinusDstAlpha SrcAlpha
+		Blend OneMinusDstAlpha OneMinusSrcAlpha
 		ZWrite Off 
 		Fog { Mode Off }
 
 		Pass
 		{	
 			CGPROGRAM
-			#include "HDR.cginc"
-
 			#pragma vertex vert
 			#pragma fragment frag
-			#pragma fragmentoption ARB_precision_hint_fastest	
 
 			uniform float _StarIntensity;
 			uniform float4x4 _RotationMatrix;
+			uniform float4 _Tab[8];
 		
-			struct appdata_t
+			struct appdata
 			{
 				float4 vertex : POSITION;
 				float4 color : COLOR;
@@ -68,51 +67,43 @@ Shader "SpaceEngine/Stars/Starfield"
 			};	
 			
 			float GetFlickerAmount(in float2 pos)
-			{
-				const float2 tab[8] = 
-				{
-					float2(0.897907815,-0.347608525), float2(0.550299290, 0.273586675), float2(0.823885965, 0.098853070), float2(0.922739035,-0.122108860),
-					float2(0.800630175,-0.088956800), float2(0.711673375, 0.158864420), float2(0.870537795, 0.085484560), float2(0.956022355,-0.058114540)
-				};
-		
-				float2 hash = frac(pos.xy * 512);
-				float index = frac(hash.x + (hash.y + 1) * (_Time.x * 2 + unity_DeltaTime.z)); // flickering speed
+			{	
+				float2 hash = frac(pos.xy * 256);
+				float index = frac(hash.x + (hash.y + 1) * (_Time.x * 2 + unity_DeltaTime.z));
 
 				index *= 8;
 
 				float f = frac(index) * 2.5;
 				int i = (int)index;
 
-				return tab[i].x + f * tab[i].y;
+				return _Tab[i].x + f * _Tab[i].y;
 			}	
 		
-			v2f vert(appdata_t v)
+			v2f vert(appdata v)
 			{
 				v2f OUT;
 
-				float3 t = mul((float3x3)_RotationMatrix, v.vertex.xyz) + _WorldSpaceCameraPos.xyz; 
+				float3 worldPosition = mul((float3x3)_RotationMatrix, v.vertex.xyz) + _WorldSpaceCameraPos.xyz; 
 
-				float appMag = 6.5 + v.color.w * (-1.44 - 2.5);
-				float brightness = GetFlickerAmount(v.vertex.xy) * pow(5.0, (-appMag - 1.44) / 2.5);
+				float magnitude = 6.5 + v.color.w * (-1.44 - 1.5);
+				float brightness = GetFlickerAmount(v.vertex.xy) * pow(5.0, (-magnitude - 1.44) / 2.5);
 						
-				half4 starColor = _StarIntensity * float4(brightness * v.color.xyz, brightness);
+				half4 color = _StarIntensity * half4(brightness * v.color.xyz * 3, brightness);
 			
-				OUT.pos = mul(UNITY_MATRIX_MVP, float4 (t, 1));
-				OUT.color = starColor;// * saturate(t.y);	
-				OUT.uv = 5 * (v.texcoord.xy - float2(0.5, 0.5));
+				OUT.pos = mul(UNITY_MATRIX_MVP, float4(worldPosition, 1));
+				OUT.color = color;
+				OUT.uv = 6.5 * v.texcoord.xy - 6.5 * float2(0.5, 0.5);
 			
 				return OUT;
 			}
 
 			half4 frag(v2f IN) : SV_Target
 			{
-				half2 distCenter = IN.uv.xy;
-				half scale = exp(-dot(distCenter, distCenter));
-				half3 colFinal = IN.color.xyz * scale + 5 * IN.color.w * pow(scale, 32);
+				half scale = exp(-dot(IN.uv.xy, IN.uv.xy));
 
-				colFinal = (colFinal * colFinal) * 2;
+				half3 color = IN.color.xyz * scale + 5 * IN.color.w * pow(scale, 10);
 
-				return half4(hdr(colFinal), 0);
+				return half4(color, 0);
 			}
 			ENDCG
 		}
