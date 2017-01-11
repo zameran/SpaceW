@@ -157,7 +157,7 @@ public sealed class FlyCamera : GameCamera
                 currentSpeed = speed / 10f;
 
             speed += Mathf.RoundToInt(Input.GetAxis("Mouse ScrollWheel") * 100.0f);
-            speed = Mathf.Clamp(speed, 1.0f, 100.0f);
+            speed = Mathf.Clamp(speed, 1.0f, 10000.0f);
 
             transform.Translate(velocity * currentSpeed);
         }

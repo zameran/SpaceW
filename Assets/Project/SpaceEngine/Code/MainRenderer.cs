@@ -33,9 +33,7 @@
 // Creator: zameran
 #endregion
 
-using SpaceEngine.Startfield;
-
-using System.Collections.Generic;
+using System;
 
 using UnityEngine;
 
@@ -44,9 +42,6 @@ public sealed class MainRenderer : MonoBehaviour
 {
     public bool OverrideExternalRendering = true;
 
-    public List<Planetoid> planets = new List<Planetoid>();
-    public List<Starfield> starfields = new List<Starfield>();
-
     public Planet.PlanetoidDistanceToLODTargetComparer pdtltc;
 
     private void Start()
@@ -54,19 +49,7 @@ public sealed class MainRenderer : MonoBehaviour
         if (pdtltc == null)
             pdtltc = new Planet.PlanetoidDistanceToLODTargetComparer();
 
-        Planetoid[] p = FindObjectsOfType<Planetoid>();
-
-        for (int i = 0; i < p.Length; i++)
-        {
-            planets.Add(p[i]);
-        }
-
-        for (int i = 0; i < planets.Count; i++)
-        {
-            if (planets[i] != null)
-                if (!planets[i].ExternalRendering && OverrideExternalRendering)
-                    planets[i].ExternalRendering = true;
-        }
+        UpdateSettings();
     }
 
     private void Update()
@@ -76,51 +59,63 @@ public sealed class MainRenderer : MonoBehaviour
 
     private void OnEnable()
     {
-        for (int i = 0; i < planets.Count; i++)
-        {
-            if (planets[i] != null)
-                if (!planets[i].ExternalRendering && OverrideExternalRendering)
-                    planets[i].ExternalRendering = true;
-        }
+        UpdateSettings();
     }
 
     private void OnDisable()
     {
-        for (int i = 0; i < planets.Count; i++)
+        UpdateSettings();
+    }
+
+    private void UpdateSettings()
+    {
+        if (GodManager.ApplicationIsQuitting) return; // BRUTAL!
+        if (GodManager.Instance == null) return;
+
+        for (int i = 0; i < GodManager.Instance.Planetoids.Length; i++)
         {
-            if (planets[i] != null)
-                if (!planets[i].ExternalRendering && OverrideExternalRendering)
-                    planets[i].ExternalRendering = false;
+            var planetoid = GodManager.Instance.Planetoids[i];
+
+            if (planetoid != null)
+                if (!planetoid.ExternalRendering && OverrideExternalRendering)
+                    planetoid.ExternalRendering = true;
         }
     }
 
     public void Render()
     {
-        planets.Sort(pdtltc);
+        if (GodManager.Instance == null) return;
 
-        for (int i = 0; i < starfields.Count; i++)
+        Array.Sort(GodManager.Instance.Planetoids, pdtltc);
+
+        for (int i = 0; i < GodManager.Instance.Starfields.Length; i++)
         {
-            if (starfields[i] != null)
-                starfields[i].Render(CameraHelper.Main());
+            if (GodManager.Instance.Starfields[i] != null)
+                GodManager.Instance.Starfields[i].Render(CameraHelper.Main());
         }
 
-        for (int i = 0; i < planets.Count; i++)
+        for (int i = 0; i < GodManager.Instance.Planetoids.Length; i++)
         {
-            if (planets[i] != null)
-                planets[i].Render(CameraHelper.Main());
+            if (GodManager.Instance.Planetoids[i] != null)
+                GodManager.Instance.Planetoids[i].Render(CameraHelper.Main());
         }
 
         //-----------------------------------------------------------------------------
-        planets[0].RenderQueueOffset = 10001;
-        if (planets[0].Atmosphere != null) { planets[0].Atmosphere.RenderQueueOffset = 10002; }
-        if (planets[0].Ring != null) { planets[0].Ring.RenderQueueOffset = 10000; }
+        GodManager.Instance.Planetoids[0].RenderQueueOffset = 10001;
+        if (GodManager.Instance.Planetoids[0].Atmosphere != null)
+            GodManager.Instance.Planetoids[0].Atmosphere.RenderQueueOffset = 10002;
+        if (GodManager.Instance.Planetoids[0].Ring != null)
+            GodManager.Instance.Planetoids[0].Ring.RenderQueueOffset = 10000;
 
-        for (int i = 1; i < planets.Count; i++)
+        for (int i = 1; i < GodManager.Instance.Planetoids.Length; i++)
         {
-            planets[i].RenderQueueOffset = 1;
-            if (planets[i].Atmosphere != null) planets[i].Atmosphere.RenderQueueOffset = 2;
-            if (planets[i].Ring != null) planets[i].Ring.RenderQueueOffset = 0;
+            GodManager.Instance.Planetoids[i].RenderQueueOffset = 1;
+            if (GodManager.Instance.Planetoids[i].Atmosphere != null)
+                GodManager.Instance.Planetoids[i].Atmosphere.RenderQueueOffset = 2;
+            if (GodManager.Instance.Planetoids[i].Ring != null)
+                GodManager.Instance.Planetoids[i].Ring.RenderQueueOffset = 0;
         }
+
         //-----------------------------------------------------------------------------
     }
 }

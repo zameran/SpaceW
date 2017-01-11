@@ -15,7 +15,7 @@ public class MonoSingleton<T> : MonoBehaviour where T : MonoBehaviour
     {
         get
         {
-            if (applicationIsQuitting)
+            if (ApplicationIsQuitting)
             {
                 Debug.LogWarning("[Singleton] Instance '" + typeof(T) + "' already destroyed on application quit." + " Won't create again - returning null.");
 
@@ -57,7 +57,7 @@ public class MonoSingleton<T> : MonoBehaviour where T : MonoBehaviour
         protected set { instance = value; }
     }
 
-    private static bool applicationIsQuitting = false;
+    public static bool ApplicationIsQuitting { get; private set; }
 
     /// <summary>
     /// When Unity quits, it destroys objects in a random order.
@@ -69,6 +69,6 @@ public class MonoSingleton<T> : MonoBehaviour where T : MonoBehaviour
     /// </summary>
     public void OnDestroy()
     {
-        applicationIsQuitting = true;
+        ApplicationIsQuitting = true;
     }
 }
