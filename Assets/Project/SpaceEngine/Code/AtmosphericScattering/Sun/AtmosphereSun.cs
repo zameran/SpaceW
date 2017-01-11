@@ -37,7 +37,7 @@ using UnityEngine;
 
 namespace SpaceEngine.AtmosphericScattering.Sun
 {
-    public sealed class AtmosphereSun : MonoBehaviour
+    public sealed class AtmosphereSun : Node
     {
         [Range(1, 4)]
         public int sunID = 1;
@@ -49,9 +49,16 @@ namespace SpaceEngine.AtmosphericScattering.Sun
 
         public Vector3 Origin;
 
-        public void UpdateNode()
+        #region Node
+
+        protected override void InitNode()
         {
-            if ((sunID == 1 && Input.GetKey(KeyCode.RightControl)) || 
+
+        }
+
+        protected override void UpdateNode()
+        {
+            if ((sunID == 1 && Input.GetKey(KeyCode.RightControl)) ||
                 (sunID == 2 && Input.GetKey(KeyCode.RightShift)) ||
                 (sunID == 3 && Input.GetKey(KeyCode.LeftControl)) ||
                 (sunID == 4 && Input.GetKey(KeyCode.LeftShift)))
@@ -61,5 +68,7 @@ namespace SpaceEngine.AtmosphericScattering.Sun
                 transform.RotateAround(new Vector3(0, 0, 0), new Vector3(0, 1, 0), h);
             }
         }
+
+        #endregion
     }
 }

@@ -35,11 +35,12 @@
 
 using SpaceEngine.AtmosphericScattering.Sun;
 using System.Collections.Generic;
+
 using UnityEngine;
 
 namespace SpaceEngine.AtmosphericScattering
 {
-    public sealed class Atmosphere : MonoBehaviour, IEventit
+    public sealed class Atmosphere : Node, IEventit
     {
         private AtmosphereBase atmosphereBase = AtmosphereBase.Earth;
         private AtmosphereBase atmosphereBasePrev = AtmosphereBase.Earth;
@@ -184,10 +185,10 @@ namespace SpaceEngine.AtmosphericScattering
         }
         #endregion
 
-        private void Start()
-        {
-            Eventit();
+        #region Node
 
+        protected override void InitNode()
+        {
             ApplyTestPresset(AtmosphereParameters.Get(atmosphereBase));
 
             TryBake();
@@ -198,6 +199,48 @@ namespace SpaceEngine.AtmosphericScattering
 
             InitSetAtmosphereUniforms();
         }
+
+        protected override void UpdateNode()
+        {
+            atmosphereParameters.Rg = Radius - TerrainRadiusHold;
+            atmosphereParameters.Rt = (Radius + Height) - TerrainRadiusHold;
+            atmosphereParameters.Rl = (Radius + Height * 1.05f) - TerrainRadiusHold;
+            atmosphereParameters.SCALE = Scale;
+
+            for (int i = 0; i < Suns.Count; i++)
+            {
+                if (Suns[i] != null)
+                {
+                    Suns[i].Origin = Origin;
+                }
+            }
+
+            worldToCamera = CameraHelper.Main().GetWorldToCamera();
+            cameraToWorld = CameraHelper.Main().GetCameraToWorld();
+            cameraToScreen = CameraHelper.Main().GetCameraToScreen();
+            screenToCamera = CameraHelper.Main().GetScreenToCamera();
+            worldCameraPos = CameraHelper.Main().transform.position;
+
+            var fadeValue = Mathf.Clamp01(VectorHelper.AngularRadius(Origin, planetoid.LODTarget.position, planetoid.PlanetRadius));
+
+            Fade = FadeCurve.Evaluate(float.IsNaN(fadeValue) || float.IsInfinity(fadeValue) ? 1.0f : fadeValue);
+
+            Keywords = GetKeywords();
+        }
+
+        protected override void Start()
+        {
+            Eventit();
+
+            base.Start();
+        }
+
+        protected override void Update()
+        {
+            base.Update();
+        }
+
+        #endregion
 
         private void ApplyTestPresset(AtmosphereParameters p)
         {
@@ -218,7 +261,7 @@ namespace SpaceEngine.AtmosphericScattering
 
         public List<string> GetKeywords()
         {
-            Planetoid planet = transform.parent.GetComponent<Planet>() as Planetoid;
+            var planet = transform.parent.GetComponent<Planet>() as Planetoid;
 
             if (planet != null)
             {
@@ -237,13 +280,13 @@ namespace SpaceEngine.AtmosphericScattering
             soc1 = Matrix4x4.zero;
             sc1 = Matrix4x4.zero;
 
-            int index = 0;
+            byte index = 0;
 
-            for (int i = 0; i < Mathf.Min(4, ShineCasters.Count); i++)
+            for (byte i = 0; i < Mathf.Min(4, ShineCasters.Count); i++)
             {
                 if (ShineCasters[i] == null) { Debug.Log("Atmosphere: Shine problem!"); break; }
 
-                float distance = shineColors[i].a; //TODO : Distance based shine power.
+                var distance = shineColors[i].a; //TODO : Distance based shine power.
 
                 soc1.SetRow(i, VectorHelper.MakeFrom((ShineCasters[i].transform.position - Origin).normalized, 1.0f));
 
@@ -258,7 +301,7 @@ namespace SpaceEngine.AtmosphericScattering
             occludersMatrix = Matrix4x4.zero;
             sunsMatrix = Matrix4x4.zero;
 
-            for (int i = 0; i < Mathf.Min(4, Suns.Count); i++)
+            for (byte i = 0; i < Mathf.Min(4, Suns.Count); i++)
             {
                 if (Suns[i] == null)
                 {
@@ -270,7 +313,7 @@ namespace SpaceEngine.AtmosphericScattering
                 sunsMatrix.SetRow(i, VectorHelper.MakeFrom(Suns[i].transform.position, Suns[i].Radius));
             }
 
-            for (int i = 0; i < Mathf.Min(4, EclipseCasters.Count); i++)
+            for (byte i = 0; i < Mathf.Min(4, EclipseCasters.Count); i++)
             {
                 if (EclipseCasters[i] == null)
                 {
@@ -322,48 +365,6 @@ namespace SpaceEngine.AtmosphericScattering
             block.SetMatrix("_Sun_Positions_1", sunMatrix1);
         }
 
-        private void Update()
-        {
-            UpdateNode();
-        }
-
-        public void UpdateNode()
-        {
-            atmosphereParameters.Rg = Radius - TerrainRadiusHold;
-            atmosphereParameters.Rt = (Radius + Height) - TerrainRadiusHold;
-            atmosphereParameters.Rl = (Radius + Height * 1.05f) - TerrainRadiusHold;
-            atmosphereParameters.SCALE = Scale;
-
-            for (int i = 0; i < Suns.Count; i++)
-            {
-                if (Suns[i] != null)
-                {
-                    Suns[i].Origin = Origin;
-                    Suns[i].UpdateNode();
-                }
-            }
-
-            worldToCamera = CameraHelper.Main().GetWorldToCamera();
-            cameraToWorld = CameraHelper.Main().GetCameraToWorld();
-            cameraToScreen = CameraHelper.Main().GetCameraToScreen();
-            screenToCamera = CameraHelper.Main().GetScreenToCamera();
-            worldCameraPos = CameraHelper.Main().transform.position;
-
-            var fadeValue = Mathf.Clamp01(VectorHelper.AngularRadius(Origin, planetoid.LODTarget.position, planetoid.PlanetRadius));
-
-            Fade = FadeCurve.Evaluate(float.IsNaN(fadeValue) || float.IsInfinity(fadeValue) ? 1.0f : fadeValue);
-
-            Keywords = GetKeywords();
-        }
-
-        public void OnApplicationFocus(bool focusStatus)
-        {
-            if (focusStatus == true && LostFocusForceRebake == true)
-            {
-                TryBake();
-            }
-        }
-
         public void Render(Vector3 Origin, int drawLayer = 8)
         {
             Render(CameraHelper.Main(), Origin, drawLayer);
@@ -378,6 +379,14 @@ namespace SpaceEngine.AtmosphericScattering
             Graphics.DrawMesh(AtmosphereMesh, transform.localToWorldMatrix, SkyMaterial, drawLayer, camera, 0, planetoid.QuadAtmosphereMPB);
         }
 
+        public void OnApplicationFocus(bool focusStatus)
+        {
+            if (focusStatus == true && LostFocusForceRebake == true)
+            {
+                TryBake();
+            }
+        }
+
         private void OnDestroy()
         {
             UnEventit();
@@ -389,7 +398,7 @@ namespace SpaceEngine.AtmosphericScattering
             {
                 if (planetoid.DrawGizmos == false) return;
 
-                for (int i = 0; i < Mathf.Min(4, Suns.Count); i++)
+                for (byte i = 0; i < Mathf.Min(4, Suns.Count); i++)
                 {
                     var distanceToSun = Vector3.Distance(Suns[i].transform.position, Origin);
                     var sunDirection = (Suns[i].transform.position - Origin) * distanceToSun;
@@ -415,7 +424,7 @@ namespace SpaceEngine.AtmosphericScattering
             {
                 if (planetoid.DrawGizmos == false) return;
 
-                for (int i = 0; i < Mathf.Min(4, Suns.Count); i++)
+                for (byte i = 0; i < Mathf.Min(4, Suns.Count); i++)
                 {
                     float sunRadius = Suns[i].Radius;
                     float sunToPlanetDistance = Vector3.Distance(Origin, Suns[i].transform.position);
@@ -574,7 +583,7 @@ namespace SpaceEngine.AtmosphericScattering
                 atmosphere.InitSetPlanetoidUniforms(planetoid);
                 atmosphere.InitSetAtmosphereUniforms();
 
-                for (int i = 0; i < Suns.Count; i++)
+                for (byte i = 0; i < Suns.Count; i++)
                 {
                     if (Suns[i] != null)
                     {
