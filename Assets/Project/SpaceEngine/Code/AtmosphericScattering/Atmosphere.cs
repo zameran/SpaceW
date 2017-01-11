@@ -43,17 +43,19 @@ namespace SpaceEngine.AtmosphericScattering
     public sealed class Atmosphere : Node, IEventit
     {
         private AtmosphereBase atmosphereBase = AtmosphereBase.Earth;
-        private AtmosphereBase atmosphereBasePrev = AtmosphereBase.Earth;
 
         public AtmosphereBase AtmosphereBase
         {
             get { return atmosphereBase; }
             set
             {
-                atmosphereBasePrev = atmosphereBase;
+                var changed = false;
+
+                changed = (atmosphereBase != value);
+
                 atmosphereBase = value;
 
-                if (atmosphereBasePrev != value)
+                if (changed)
                     EventManager.PlanetoidEvents.OnAtmospherePresetChanged.Invoke(planetoid, this);
             }
         }
