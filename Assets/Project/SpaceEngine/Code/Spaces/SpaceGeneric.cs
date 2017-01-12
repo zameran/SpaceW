@@ -1,6 +1,6 @@
 ﻿#region License
 // Procedural planet generator.
-// 
+//  
 // Copyright (C) 2015-2017 Denis Ovchinnikov [zameran] 
 // All rights reserved.
 // 
@@ -8,7 +8,7 @@
 // modification, are permitted provided that the following conditions
 // are met:
 // 1. Redistributions of source code must retain the above copyright
-//    notice, this list of conditions and the following disclaimer.
+//     notice, this list of conditions and the following disclaimer.
 // 2. Redistributions in binary form must reproduce the above copyright
 //    notice, this list of conditions and the following disclaimer in the
 //    documentation and/or other materials provided with the distribution.
@@ -28,33 +28,24 @@
 // ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF
 // THE POSSIBILITY OF SUCH DAMAGE.
 // 
-// Creation Date: Undefined
-// Creation Time: Undefined
+// Creation Date: 2017.01.11
+// Creation Time: 22:38
 // Creator: zameran
 #endregion
 
-using System;
-
 using UnityEngine;
 
-[Serializable]
-public class Cluster
+public class SpaceGeneric<TChildType> : Space where TChildType : Space
 {
-    public int Size;
+    public TChildType[,,] LeafNodes;
 
-    public Vector3d Position;
-
-    public Cluster[,,] Clusters;
-
-    private Cluster()
+    public override void Init()
     {
 
     }
 
-    public Cluster(int Size, Vector3d Position)
+    public override void Update(Vector3d Position)
     {
-        this.Size = Size;
 
-        this.Position = Position;
     }
 }

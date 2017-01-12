@@ -33,58 +33,28 @@
 // Creator: zameran
 #endregion
 
+using System;
+
 using UnityEngine;
 
-public sealed class ClusterSpace : Space
+[Serializable]
+public class Cluster : Space
 {
-    public int ClusterSize = 128;
-    public int ClusterCapacitySize = 4;
-
-    public int Deep = 4;
-
-    public Cluster[,,] TopClusters = new Cluster[8, 8, 8];
-
-    protected override void Init()
+    public Cluster() : base()
     {
-        base.Init();
-
-        for (int i = 0; i < 8; i++)
-        {
-            for (int j = 0; j < 8; j++)
-            {
-                for (int k = 0; k < 8; k++)
-                {
-                    TopClusters[i, j, k] = new Cluster(128, new Vector3d(i * ClusterSize,
-                                                                         j * ClusterSize,
-                                                                         k * ClusterSize));
-                }
-            }
-        }
     }
 
-    private void Awake()
+    public Cluster(Vector3d Position) : base(Position)
     {
-        Init();
     }
 
-    private void OnDrawGizmos()
+    public override void Init()
     {
-        Gizmos.color = XKCDColors.Berry;
 
-        for (int i = 0; i < 8; i++)
-        {
-            for (int j = 0; j < 8; j++)
-            {
-                for (int k = 0; k < 8; k++)
-                {
-                    var cluster = TopClusters[i, j, k];
+    }
 
-                    if (cluster != null)
-                    {
-                        Gizmos.DrawWireCube(cluster.Position, new Vector3(ClusterSize, ClusterSize, ClusterSize));
-                    }
-                }
-            }
-        }
+    public override void Update(Vector3d Position)
+    {
+        this.Position = Position;
     }
 }
