@@ -1,6 +1,6 @@
 ﻿#region License
 // Procedural planet generator.
-// 
+//  
 // Copyright (C) 2015-2017 Denis Ovchinnikov [zameran] 
 // All rights reserved.
 // 
@@ -8,7 +8,7 @@
 // modification, are permitted provided that the following conditions
 // are met:
 // 1. Redistributions of source code must retain the above copyright
-//    notice, this list of conditions and the following disclaimer.
+//     notice, this list of conditions and the following disclaimer.
 // 2. Redistributions in binary form must reproduce the above copyright
 //    notice, this list of conditions and the following disclaimer in the
 //    documentation and/or other materials provided with the distribution.
@@ -28,47 +28,37 @@
 // ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF
 // THE POSSIBILITY OF SUCH DAMAGE.
 // 
-// Creation Date: Undefined
-// Creation Time: Undefined
+// Creation Date: 2017.01.12
+// Creation Time: 17:49
 // Creator: zameran
 #endregion
 
-using System;
-
 using UnityEngine;
 
-public static class GUILayoutExtensions
+public class Universe : MonoBehaviour
 {
-    public static void LabelWithFlexibleSpace(string text1, string text2)
+    public Chunk chunk;
+
+    private void Start()
     {
-        GUILayout.Label(text1);
-        GUILayout.FlexibleSpace();
-        GUILayout.Label(text2);
+        chunk = chunk.InitNodeAtOrigin<Chunk>();
+        chunk.Init();
     }
 
-    public static void LabelWithSpace(string text, int space = -8)
+    private void OnDrawGizmos()
     {
-        GUILayout.Label(text);
-        GUILayout.Space(space);
+        if (chunk == null) return;
+
+        chunk.DrawDebug();
     }
 
-    public static void LabelWithSpace(GUIContent content, int space = -8)
+    private void OnGUI()
     {
-        GUILayout.Label(content);
-        GUILayout.Space(space);
-    }
+        if (chunk == null) return;
 
-    public static void Horizontal(Action body)
-    {
-        GUILayout.BeginHorizontal();
-        if (body != null) body();
-        GUILayout.EndHorizontal();
-    }
-
-    public static void Vertical(Action body)
-    {
-        GUILayout.BeginVertical();
-        if (body != null) body();
-        GUILayout.EndVertical();
+        GUILayoutExtensions.Vertical(() =>
+        {
+            GUILayoutExtensions.LabelWithSpace(string.Format("Blocks count: {0}", 0));
+        });
     }
 }

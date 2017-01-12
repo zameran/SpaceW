@@ -37,56 +37,156 @@ using System;
 
 using UnityEngine;
 
-public abstract class SpaceGeneric
+[Serializable]
+public class SpaceGeneric
 {
     public Guid GUID { get; private set; }
 
     public Vector3d Position { get; protected set; }
 
     public SpaceGeneric Parent;
-    public SpaceGeneric Current;
 
-    public abstract byte Size { get; }
-    public abstract long SpaceSize { get; }
+    public GameObject GameObject;
+
+    public virtual byte Size { get { return 1; } }
+    public virtual long SpaceSize { get { return 1; } }
     public byte HalfSize { get { return (byte)(Size / 2); } }
     public long SideSize { get { return Size * SpaceSize; } }
-    public long HalfSpaceSize { get { return SpaceSize / 2; } }
+    public long HalfSpaceSize { get { return SpaceSize / (Size * 2); } } // NOTE : Hack, but it works...
+
     public Vector3d Shift { get { return new Vector3d(HalfSpaceSize, HalfSpaceSize, HalfSpaceSize); } }
 
-    protected SpaceGeneric()
+    public SpaceGeneric()
     {
-        this.GUID = Guid.NewGuid();
+        GUID = Guid.NewGuid();
 
-        this.Position = Vector3d.zero;
+        Position = Vector3d.zero;
+
+        Parent = null;
+
+        GameObject = null;
     }
 
-    protected SpaceGeneric(Vector3d Position)
+    public SpaceGeneric(Vector3d position)
     {
-        this.GUID = Guid.NewGuid();
+        GUID = Guid.NewGuid();
 
-        this.Position = Position;
+        Position = position;
+
+        Parent = null;
+
+        GameObject = null;
     }
 
-    protected void UpdateFromParent(Vector3d Position)
+    public void UpdateHierarchy()
     {
         if (Parent == null) return;
+        if (Parent.GameObject == null) return;
 
-        Update(Position);
+        GameObject.transform.parent = Parent.GameObject.transform;
+        GameObject.transform.position = Position;
+        GameObject.transform.rotation = Quaternion.identity;
     }
 
-    public abstract void Init();
+    public virtual void Init()
+    {
+    }
 
-    public abstract void Update(Vector3d Position);
+    public virtual void UpdateFromNode(Vector3d position)
+    {
+        Position = position;
+    }
 
-    public abstract void DrawDebug();
+    public virtual void DrawDebug()
+    {
+        Gizmos.color = Color.black;
+        Gizmos.DrawWireCube(Position, Vector3.one * SpaceSize);
+    }
 }
 
+[Serializable]
+public class Block : SpaceGeneric<SpaceGeneric>
+{
+    public override byte Size { get { return 1; } }
+
+    public override long SpaceSize { get { return 2048; } }
+
+    public override void DrawDebug()
+    {
+        base.DrawDebug();
+
+        Gizmos.color = Color.white;
+        Gizmos.DrawWireCube(Position, Vector3.one * SpaceSize);
+    }
+}
+
+[Serializable]
+public class Chunk : SpaceGeneric<Block>
+{
+    public override byte Size { get { return 4; } }
+    public override long SpaceSize { get { return Size * 2048; } }
+
+    public override void DrawDebug()
+    {
+        base.DrawDebug();
+
+        Gizmos.color = Color.red;
+        Gizmos.DrawWireCube(Position, Vector3.one * SpaceSize);
+    }
+}
+
+[Serializable]
+public class ChunkKilo : SpaceGeneric<Chunk>
+{
+    public override byte Size { get { return 4; } }
+    public override long SpaceSize { get { return Size * (4 * 2048); } }
+
+    public override void DrawDebug()
+    {
+        base.DrawDebug();
+
+        Gizmos.color = Color.green;
+        Gizmos.DrawWireCube(Position, Vector3.one * SpaceSize);
+    }
+}
+
+[Serializable]
+public class ChunkMega : SpaceGeneric<ChunkKilo>
+{
+    public override byte Size { get { return 4; } }
+    public override long SpaceSize { get { return Size * (4 * (4 * 2048)); } }
+
+    public override void DrawDebug()
+    {
+        base.DrawDebug();
+
+        Gizmos.color = Color.blue;
+        Gizmos.DrawWireCube(Position, Vector3.one * SpaceSize);
+    }
+}
+
+[Serializable]
+public class ChunkGiga : SpaceGeneric<ChunkMega>
+{
+    public override byte Size { get { return 4; } }
+    public override long SpaceSize { get { return Size * (4 * (4 * (4 * 2048))); } }
+
+    public override void DrawDebug()
+    {
+        base.DrawDebug();
+
+        Gizmos.color = Color.magenta;
+        Gizmos.DrawWireCube(Position, Vector3.one * SpaceSize);
+    }
+}
+
+[Serializable]
 public class SpaceGeneric<TChildType> : SpaceGeneric where TChildType : SpaceGeneric, new()
 {
     public TChildType[,,] LeafNodes;
 
-    public override byte Size { get { return 8; } }
-    public override long SpaceSize { get { return 65536; } }
+    public override byte Size { get { return 1; } }
+    public override long SpaceSize { get { return 1; } }
 
     public override void Init()
     {
@@ -102,22 +202,52 @@ public class SpaceGeneric<TChildType> : SpaceGeneric where TChildType : SpaceGen
                     var idy = y + HalfSize;
                     var idz = z + HalfSize;
 
-                    var position = new Vector3d(x * SpaceSize, y * SpaceSize, z * SpaceSize) + Shift;
-                    var node = new TChildType();
-
-                    node.Parent = this;
-                    node.Init();
-                    node.Update(Position + position);
+                    var node = InitNode<TChildType>(x, y, z);
 
                     LeafNodes[idx, idy, idz] = node;
                 }
             }
         }
+
+        base.Init();
     }
 
-    public override void Update(Vector3d Position)
+    public TNodeType InitNodeAtOrigin<TNodeType>() where TNodeType : SpaceGeneric, new()
     {
-        if (LeafNodes != null)
+        return InitNode<TNodeType>(0, 0, 0);
+    }
+
+    private TNodeType InitNode<TNodeType>(int x, int y, int z) where TNodeType : SpaceGeneric, new()
+    {
+        var mod = SpaceSize / Size;
+        var position = new Vector3d(x * mod, y * mod, z * mod) + Shift;
+
+        return InitNode<TNodeType>(position + Position);
+    }
+
+    private TNodeType InitNode<TNodeType>(Vector3d center) where TNodeType : SpaceGeneric, new()
+    {
+        var node = new TNodeType();
+        var gameObject = new GameObject(string.Format("{0} : {1}", typeof(TNodeType).Name, center));
+
+        node.GameObject = gameObject;
+        node.Parent = this;
+
+        if (typeof(TNodeType) == GetType())
+        {
+            return node;
+        }
+
+        node.Init();
+        node.UpdateFromNode(center);
+        node.UpdateHierarchy();
+
+        return node;
+    }
+
+    public override void UpdateFromNode(Vector3d position)
+    {
+        if (LeafNodes != null && LeafNodes.Length != 0)
         {
             for (var x = 0; x < Size; x++)
             {
@@ -129,22 +259,20 @@ public class SpaceGeneric<TChildType> : SpaceGeneric where TChildType : SpaceGen
 
                         if (node != null)
                         {
-                            node.Update(Position + (node.Position - this.Position));
+                            node.UpdateFromNode(position + (node.Position - Position));
                         }
                     }
                 }
             }
         }
 
-        this.Position = Position;
+        base.UpdateFromNode(position);
     }
 
     public override void DrawDebug()
     {
-        if (LeafNodes != null)
+        if (LeafNodes != null && LeafNodes.Length != 0)
         {
-            var size = Vector3.one * SpaceSize;
-
             for (var x = 0; x < Size; x++)
             {
                 for (var y = 0; y < Size; y++)
@@ -155,11 +283,13 @@ public class SpaceGeneric<TChildType> : SpaceGeneric where TChildType : SpaceGen
 
                         if (node != null)
                         {
-                            Gizmos.DrawWireCube(node.Position, size);
+                            node.DrawDebug();
                         }
                     }
                 }
             }
         }
+
+        base.DrawDebug();
     }
 }
