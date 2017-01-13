@@ -40,21 +40,23 @@ using UnityEngine;
 [Serializable]
 public class SpaceGeneric
 {
-    public Guid GUID { get; private set; }
+    protected const byte SizeDeep = 4;
+    protected const short SpaceUnitSize = 2048;
 
-    public Vector3d Position { get; protected set; }
+    public SerializableGuid GUID { get; private set; }
+
+    public Vector3d Position { get; private set; }
 
     public SpaceGeneric Parent;
+    public SpaceEntry Entry;
 
-    public GameObject GameObject;
+    protected virtual byte Size { get { return 1; } }
+    protected virtual long SpaceSize { get { return 1; } }
+    protected byte HalfSize { get { return (byte)(Size / 2); } }
+    protected long SideSize { get { return Size * SpaceSize; } }
+    private long HalfSpaceSize { get { return SpaceSize / (Size * 2); } } // NOTE : Hack, but it works...
 
-    public virtual byte Size { get { return 1; } }
-    public virtual long SpaceSize { get { return 1; } }
-    public byte HalfSize { get { return (byte)(Size / 2); } }
-    public long SideSize { get { return Size * SpaceSize; } }
-    public long HalfSpaceSize { get { return SpaceSize / (Size * 2); } } // NOTE : Hack, but it works...
-
-    public Vector3d Shift { get { return new Vector3d(HalfSpaceSize, HalfSpaceSize, HalfSpaceSize); } }
+    protected Vector3d Shift { get { return new Vector3d(HalfSpaceSize, HalfSpaceSize, HalfSpaceSize); } }
 
     public SpaceGeneric()
     {
@@ -64,7 +66,7 @@ public class SpaceGeneric
 
         Parent = null;
 
-        GameObject = null;
+        Entry = null;
     }
 
     public SpaceGeneric(Vector3d position)
@@ -75,17 +77,17 @@ public class SpaceGeneric
 
         Parent = null;
 
-        GameObject = null;
+        Entry = null;
     }
 
     public void UpdateHierarchy()
     {
         if (Parent == null) return;
-        if (Parent.GameObject == null) return;
+        if (Parent.Entry == null) return;
 
-        GameObject.transform.parent = Parent.GameObject.transform;
-        GameObject.transform.position = Position;
-        GameObject.transform.rotation = Quaternion.identity;
+        Entry.transform.parent = Parent.Entry.transform;
+        Entry.transform.position = Position;
+        Entry.transform.rotation = Quaternion.identity;
     }
 
     public virtual void Init()
@@ -107,9 +109,9 @@ public class SpaceGeneric
 [Serializable]
 public class Block : SpaceGeneric<SpaceGeneric>
 {
-    public override byte Size { get { return 1; } }
+    protected override byte Size { get { return 1; } }
 
-    public override long SpaceSize { get { return 2048; } }
+    protected override long SpaceSize { get { return SpaceUnitSize; } }
 
     public override void DrawDebug()
     {
@@ -123,8 +125,8 @@ public class Block : SpaceGeneric<SpaceGeneric>
 [Serializable]
 public class Chunk : SpaceGeneric<Block>
 {
-    public override byte Size { get { return 4; } }
-    public override long SpaceSize { get { return Size * 2048; } }
+    protected override byte Size { get { return SizeDeep; } }
+    protected override long SpaceSize { get { return Size * SpaceUnitSize; } }
 
     public override void DrawDebug()
     {
@@ -138,8 +140,8 @@ public class Chunk : SpaceGeneric<Block>
 [Serializable]
 public class ChunkKilo : SpaceGeneric<Chunk>
 {
-    public override byte Size { get { return 4; } }
-    public override long SpaceSize { get { return Size * (4 * 2048); } }
+    protected override byte Size { get { return SizeDeep; } }
+    protected override long SpaceSize { get { return Size * (SizeDeep * SpaceUnitSize); } }
 
     public override void DrawDebug()
     {
@@ -153,8 +155,8 @@ public class ChunkKilo : SpaceGeneric<Chunk>
 [Serializable]
 public class ChunkMega : SpaceGeneric<ChunkKilo>
 {
-    public override byte Size { get { return 4; } }
-    public override long SpaceSize { get { return Size * (4 * (4 * 2048)); } }
+    protected override byte Size { get { return SizeDeep; } }
+    protected override long SpaceSize { get { return Size * (SizeDeep * (SizeDeep * SpaceUnitSize)); } }
 
     public override void DrawDebug()
     {
@@ -168,8 +170,8 @@ public class ChunkMega : SpaceGeneric<ChunkKilo>
 [Serializable]
 public class ChunkGiga : SpaceGeneric<ChunkMega>
 {
-    public override byte Size { get { return 4; } }
-    public override long SpaceSize { get { return Size * (4 * (4 * (4 * 2048))); } }
+    protected override byte Size { get { return 4; } }
+    protected override long SpaceSize { get { return Size * (SizeDeep * (SizeDeep * (SizeDeep * SpaceUnitSize))); } }
 
     public override void DrawDebug()
     {
@@ -185,8 +187,8 @@ public class SpaceGeneric<TChildType> : SpaceGeneric where TChildType : SpaceGen
 {
     public TChildType[,,] LeafNodes;
 
-    public override byte Size { get { return 1; } }
-    public override long SpaceSize { get { return 1; } }
+    protected override byte Size { get { return 1; } }
+    protected override long SpaceSize { get { return 1; } }
 
     public override void Init()
     {
@@ -229,8 +231,9 @@ public class SpaceGeneric<TChildType> : SpaceGeneric where TChildType : SpaceGen
     {
         var node = new TNodeType();
         var gameObject = new GameObject(string.Format("{0} : {1}", typeof(TNodeType).Name, center));
+        var spaceEntry = gameObject.AddComponent<SpaceEntry>();
 
-        node.GameObject = gameObject;
+        node.Entry = spaceEntry;
         node.Parent = this;
 
         if (typeof(TNodeType) == GetType())
