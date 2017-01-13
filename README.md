@@ -1,8 +1,9 @@
 # SpaceW - Procedural Universe [Planetarium] #
 
-SpaceW is procedural universe generator and renderer.
+SpaceW is procedural universe generator simulator.
 
 [gitter channel placeholder] : [discord channel placeholder] : [telegram channel placeholder]
+[other paceholder] : [other placeholder]
 
 ## Current Engine version support ##
 Unity 5.4.1f1 (Windows)
@@ -18,17 +19,21 @@ Unity 5.6.0b3 (Linux)
 * Project can be sold. Contact me.
 
 ### Install ###
-
 * Clone the repository.
 * Open project in Unity.
 * Open 'Scene' scene.
 * Profit!
 
 ### Contribution guidelines ###
-
 * Fork the repository.
 * Make your changes in separate branch [Git Flow].
 * Create pull request.
+
+### TODO ###
+* Infinite coordinate system.
+* Replace LOD system.
+* Replace atmosphere with volumetric stuff.
+* Other stuff will be in trello.
 
 ### License ###
 * The 3-Clause BSD License
@@ -44,7 +49,8 @@ Unity 5.6.0b3 (Linux)
 * [Space Engine](http://spaceengine.org/)
 * [Proland](http://proland.imag.fr/)
 * [Eric Bruneton](http://www-evasion.imag.fr/Membres/Eric.Bruneton/)
+* [Google](https://www.google.com)
 
 ### Contact me ###
-* zameran9@gmail.com
+* [zameran9@gmail.com](zameran9@gmail.com)
 * [Telegram](https://t.me/zameran)
