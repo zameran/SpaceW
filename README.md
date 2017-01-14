@@ -2,8 +2,7 @@
 
 SpaceW is procedural universe generator simulator.
 
-[gitter channel placeholder] : [discord channel placeholder] : [telegram channel placeholder]
-[other paceholder] : [other placeholder]
+[gitter channel placeholder] : [discord channel placeholder] : [telegram channel placeholder] : [other paceholder] : [other placeholder]
 
 ## Current Engine version support ##
 Unity 5.4.1f1 (Windows)
