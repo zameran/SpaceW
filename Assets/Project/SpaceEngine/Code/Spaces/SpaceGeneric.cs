@@ -301,6 +301,8 @@ public class SpaceGeneric<TChildType> : SpaceGeneric where TChildType : SpaceGen
         var gameObject = new GameObject(string.Format("{0} : {1}", typeof(TNodeType).Name, center));
         var spaceEntry = gameObject.AddComponent<SpaceEntry>();
 
+        //spaceEntry.Universe = Universe.Instance;
+
         node.Entry = spaceEntry;
         node.Parent = this;
 

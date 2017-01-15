@@ -33,9 +33,7 @@
 // Creator: zameran
 #endregion
 
-using UnityEngine;
-
-public class Universe : MonoBehaviour
+public class Universe : MonoSingleton<Universe>
 {
     public Chunk chunk;
 
