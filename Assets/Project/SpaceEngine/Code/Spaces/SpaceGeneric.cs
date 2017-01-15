@@ -34,13 +34,21 @@
 #endregion
 
 using System;
+using System.Collections;
 
 using UnityEngine;
 
 [Serializable]
-public class SpaceGeneric
+public class SpaceGeneric : IEqualityComparer
 {
+    /// <summary>
+    /// Splitting count in one dimension. Only power of two.
+    /// </summary>
     protected const byte SizeDeep = 4;
+
+    /// <summary>
+    /// Size of smallest entry of system in one dimension.
+    /// </summary>
     protected const short SpaceUnitSize = 2048;
 
     public SerializableGuid GUID { get; private set; }
@@ -48,15 +56,19 @@ public class SpaceGeneric
     public Vector3d Position { get; private set; }
 
     public SpaceGeneric Parent;
+
+    /// <summary>
+    /// Reference to scene representation of this entry.
+    /// </summary>
     public SpaceEntry Entry;
 
     protected virtual byte Size { get { return 1; } }
     protected virtual long SpaceSize { get { return 1; } }
     protected byte HalfSize { get { return (byte)(Size / 2); } }
     protected long SideSize { get { return Size * SpaceSize; } }
-    private long HalfSpaceSize { get { return SpaceSize / (Size * 2); } } // NOTE : Hack, but it works...
+    private long DeepSpaceSize { get { return SpaceSize / (Size * 2); } } // NOTE : Hack, but it works...
 
-    protected Vector3d Shift { get { return new Vector3d(HalfSpaceSize, HalfSpaceSize, HalfSpaceSize); } }
+    protected Vector3d Shift { get { return new Vector3d(DeepSpaceSize, DeepSpaceSize, DeepSpaceSize); } }
 
     public SpaceGeneric()
     {
@@ -104,6 +116,64 @@ public class SpaceGeneric
         Gizmos.color = Color.black;
         Gizmos.DrawWireCube(Position, Vector3.one * SpaceSize);
     }
+
+    #region Operators
+
+    public static bool operator ==(SpaceGeneric x, SpaceGeneric y)
+    {
+        if ((object)x == null && (object)y == null)
+        {
+            return true;
+        }
+
+        return ReferenceEquals(x, y);
+    }
+
+    public static bool operator !=(SpaceGeneric x, SpaceGeneric y)
+    {
+        return !(x == y);
+    }
+
+    #endregion
+
+    #region Equals/GetHashCode
+
+    public override bool Equals(object obj)
+    {
+        return (SpaceGeneric)obj != null && Equals((SpaceGeneric)obj);
+    }
+
+    public bool Equals(SpaceGeneric value)
+    {
+        return this == value;
+    }
+
+    public bool Equals(SpaceGeneric x, SpaceGeneric y)
+    {
+        return x == y;
+    }
+
+    bool IEqualityComparer.Equals(object x, object y)
+    {
+        return Equals(x as SpaceGeneric, y as SpaceGeneric);
+    }
+
+    public override int GetHashCode()
+    {
+        return GetHashCode(this);
+    }
+
+    public int GetHashCode(object obj)
+    {
+        return GetHashCode(obj as SpaceGeneric);
+    }
+
+    public int GetHashCode(SpaceGeneric value)
+    {
+        return base.GetHashCode();
+    }
+
+    #endregion
 }
 
 [Serializable]
@@ -125,7 +195,6 @@ public class Block : SpaceGeneric<SpaceGeneric>
 [Serializable]
 public class Chunk : SpaceGeneric<Block>
 {
-    protected override byte Size { get { return SizeDeep; } }
     protected override long SpaceSize { get { return Size * SpaceUnitSize; } }
 
     public override void DrawDebug()
@@ -140,7 +209,6 @@ public class Chunk : SpaceGeneric<Block>
 [Serializable]
 public class ChunkKilo : SpaceGeneric<Chunk>
 {
-    protected override byte Size { get { return SizeDeep; } }
     protected override long SpaceSize { get { return Size * (SizeDeep * SpaceUnitSize); } }
 
     public override void DrawDebug()
@@ -155,7 +223,6 @@ public class ChunkKilo : SpaceGeneric<Chunk>
 [Serializable]
 public class ChunkMega : SpaceGeneric<ChunkKilo>
 {
-    protected override byte Size { get { return SizeDeep; } }
     protected override long SpaceSize { get { return Size * (SizeDeep * (SizeDeep * SpaceUnitSize)); } }
 
     public override void DrawDebug()
@@ -170,7 +237,6 @@ public class ChunkMega : SpaceGeneric<ChunkKilo>
 [Serializable]
 public class ChunkGiga : SpaceGeneric<ChunkMega>
 {
-    protected override byte Size { get { return 4; } }
     protected override long SpaceSize { get { return Size * (SizeDeep * (SizeDeep * (SizeDeep * SpaceUnitSize))); } }
 
     public override void DrawDebug()
@@ -187,8 +253,8 @@ public class SpaceGeneric<TChildType> : SpaceGeneric where TChildType : SpaceGen
 {
     public TChildType[,,] LeafNodes;
 
-    protected override byte Size { get { return 1; } }
-    protected override long SpaceSize { get { return 1; } }
+    protected override byte Size { get { return SizeDeep; } }
+    protected override long SpaceSize { get { return Size * SpaceUnitSize; } }
 
     public override void Init()
     {
@@ -221,13 +287,15 @@ public class SpaceGeneric<TChildType> : SpaceGeneric where TChildType : SpaceGen
 
     private TNodeType InitNode<TNodeType>(int x, int y, int z) where TNodeType : SpaceGeneric, new()
     {
+        var isZeroRoot = (x == 0) && (y == 0) && (z == 0);
+        var isRoot = typeof(TNodeType) == GetType();
         var mod = SpaceSize / Size;
-        var position = new Vector3d(x * mod, y * mod, z * mod) + Shift;
+        var position = new Vector3d(x * mod, y * mod, z * mod) + (isZeroRoot && isRoot ? Vector3d.zero : Shift);
 
-        return InitNode<TNodeType>(position + Position);
+        return InitNode<TNodeType>(position + Position, isRoot);
     }
 
-    private TNodeType InitNode<TNodeType>(Vector3d center) where TNodeType : SpaceGeneric, new()
+    private TNodeType InitNode<TNodeType>(Vector3d center, bool isRoot) where TNodeType : SpaceGeneric, new()
     {
         var node = new TNodeType();
         var gameObject = new GameObject(string.Format("{0} : {1}", typeof(TNodeType).Name, center));
@@ -236,12 +304,8 @@ public class SpaceGeneric<TChildType> : SpaceGeneric where TChildType : SpaceGen
         node.Entry = spaceEntry;
         node.Parent = this;
 
-        if (typeof(TNodeType) == GetType())
-        {
-            return node;
-        }
+        if (!isRoot) node.Init();
 
-        node.Init();
         node.UpdateFromNode(center);
         node.UpdateHierarchy();
 
