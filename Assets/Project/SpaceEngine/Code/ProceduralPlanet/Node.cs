@@ -33,15 +33,21 @@
 // Creator: zameran
 #endregion
 
-public abstract class Node
+using UnityEngine;
+
+public abstract class Node : MonoBehaviour
 {
-    protected virtual void InitNode()
+    protected virtual void Start()
     {
-
+        InitNode();
     }
 
-    protected virtual void UpdateNode()
+    protected virtual void Update()
     {
-
+        UpdateNode();
     }
+
+    protected abstract void InitNode();
+
+    protected abstract void UpdateNode();
 }

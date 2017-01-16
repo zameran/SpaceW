@@ -1,6 +1,6 @@
 ﻿#region License
 // Procedural planet generator.
-// 
+//  
 // Copyright (C) 2015-2017 Denis Ovchinnikov [zameran] 
 // All rights reserved.
 // 
@@ -8,7 +8,7 @@
 // modification, are permitted provided that the following conditions
 // are met:
 // 1. Redistributions of source code must retain the above copyright
-//    notice, this list of conditions and the following disclaimer.
+//     notice, this list of conditions and the following disclaimer.
 // 2. Redistributions in binary form must reproduce the above copyright
 //    notice, this list of conditions and the following disclaimer in the
 //    documentation and/or other materials provided with the distribution.
@@ -28,33 +28,53 @@
 // ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF
 // THE POSSIBILITY OF SUCH DAMAGE.
 // 
-// Creation Date: Undefined
-// Creation Time: Undefined
+// Creation Date: 2017.01.11
+// Creation Time: 19:13
 // Creator: zameran
 #endregion
 
-using System;
-
 using UnityEngine;
 
-[Serializable]
-public class Cluster
+public class Universe : MonoBehaviour
 {
-    public int Size;
+    public FlyCamera FlyCamera;
 
-    public Vector3d Position;
+    public Segment Entry;
 
-    public Cluster[,,] Clusters;
+    public int ClustersCount { get { return Entry.Chunks.Length * Chunk.Size; } }
+    public int ChunksCount { get { return Entry.Chunks.Length; } }
+    public int SegmentsCount { get { return 1; } }
 
-    private Cluster()
+    private void Start()
     {
-
+        Entry = new Segment(Vector3d.zero);
+        Entry.Init();
     }
 
-    public Cluster(int Size, Vector3d Position)
+    private void Update()
     {
-        this.Size = Size;
+        if (Entry == null) return;
 
-        this.Position = Position;
+        Entry.Update(transform.position);
+    }
+
+    private void OnDrawGizmos()
+    {
+        if (Entry == null) return;
+
+        Entry.OnDrawGizmos();
+    }
+
+    private void OnGUI()
+    {
+        GUILayoutExtensions.Vertical(() =>
+        {
+            GUILayoutExtensions.LabelWithSpace(string.Format("Segment Position: {0}", Entry.Position), -8);
+            GUILayoutExtensions.LabelWithSpace(string.Format("Camera Position: {0}", FlyCamera.transform.position), -8);
+            GUILayoutExtensions.LabelWithSpace(string.Format("Clusters Count: {0}", ClustersCount), -8);
+            GUILayoutExtensions.LabelWithSpace(string.Format("Chunks Count: {0}", ChunksCount), -8);
+            GUILayoutExtensions.LabelWithSpace(string.Format("Segments Count: {0}", SegmentsCount), -8);
+            GUILayoutExtensions.LabelWithSpace(string.Format("Current Chunk Position: {0}", Entry.Current != null ? Entry.Current.GUID.ToString() : "Null"), -8);
+        });
     }
 }

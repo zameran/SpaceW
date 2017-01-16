@@ -71,11 +71,11 @@ uniform float _HDRMode;
 
 inline float3 hdrF(float c)
 {
-	if (_HDRMode == -1) { return c; }
-	else if (_HDRMode == 0) { return 1.0 - exp(-c); }
-	else if (_HDRMode == 1) { return c < 1.0 ? pow(c * 0.47, 0.6073) : 1.0 - exp(-c); }
-	else if (_HDRMode == 2) { return c < 1.413 ? pow(c * 0.38317, 1.0 / 2.2) : 1.0 - exp(-c); }
-	else if (_HDRMode == 3) { return c < 1.413 ? pow(c * 0.38317, 0.454545455) : 1.0 - exp(-c); }
+	if (_HDRMode == 0) { return c; }
+	else if (_HDRMode == 1) { return 1.0 - exp(-c); }
+	else if (_HDRMode == 2) { return c < 1.0 ? pow(c * 0.47, 0.6073) : 1.0 - exp(-c); }
+	else if (_HDRMode == 3) { return c < 1.413 ? pow(c * 0.38317, 1.0 / 2.2) : 1.0 - exp(-c); }
+	else if (_HDRMode == 4) { return c < 1.413 ? pow(c * 0.38317, 0.454545455) : 1.0 - exp(-c); }
 	else return c;
 }
 

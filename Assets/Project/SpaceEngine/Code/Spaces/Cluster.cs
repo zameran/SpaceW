@@ -33,32 +33,28 @@
 // Creator: zameran
 #endregion
 
-using System.Runtime.InteropServices;
+using System;
 
-namespace SpaceEngine.Startfield
+using UnityEngine;
+
+[Serializable]
+public class Cluster : Space
 {
-    [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Auto)]
-    public struct StarfieldStarJson
+    public Cluster() : base()
     {
-        public float X;
-        public float Y;
-        public float Z;
+    }
 
-        public float R;
-        public float G;
-        public float B;
-        public float A;
+    public Cluster(Vector3d Position) : base(Position)
+    {
+    }
 
-        public StarfieldStarJson(float X, float Y, float Z, float R, float G, float B, float A)
-        {
-            this.X = X;
-            this.Y = Y;
-            this.Z = Z;
+    public override void Init()
+    {
 
-            this.R = R;
-            this.G = G;
-            this.B = B;
-            this.A = A;
-        }
+    }
+
+    public override void Update(Vector3d Position)
+    {
+        this.Position = Position;
     }
 }

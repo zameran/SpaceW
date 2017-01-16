@@ -70,4 +70,11 @@ public static class GUILayoutExtensions
         if (body != null) body();
         GUILayout.EndHorizontal();
     }
+
+    public static void Vertical(Action body)
+    {
+        GUILayout.BeginVertical();
+        if (body != null) body();
+        GUILayout.EndVertical();
+    }
 }

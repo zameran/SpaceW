@@ -1,6 +1,6 @@
 ﻿#region License
 // Procedural planet generator.
-// 
+//  
 // Copyright (C) 2015-2017 Denis Ovchinnikov [zameran] 
 // All rights reserved.
 // 
@@ -8,7 +8,7 @@
 // modification, are permitted provided that the following conditions
 // are met:
 // 1. Redistributions of source code must retain the above copyright
-//    notice, this list of conditions and the following disclaimer.
+//     notice, this list of conditions and the following disclaimer.
 // 2. Redistributions in binary form must reproduce the above copyright
 //    notice, this list of conditions and the following disclaimer in the
 //    documentation and/or other materials provided with the distribution.
@@ -28,63 +28,24 @@
 // ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF
 // THE POSSIBILITY OF SUCH DAMAGE.
 // 
-// Creation Date: Undefined
-// Creation Time: Undefined
+// Creation Date: 2017.01.11
+// Creation Time: 22:38
 // Creator: zameran
 #endregion
 
 using UnityEngine;
 
-public sealed class ClusterSpace : Space
+public class SpaceGeneric<TChildType> : Space where TChildType : Space
 {
-    public int ClusterSize = 128;
-    public int ClusterCapacitySize = 4;
+    public TChildType[,,] LeafNodes;
 
-    public int Deep = 4;
-
-    public Cluster[,,] TopClusters = new Cluster[8, 8, 8];
-
-    protected override void Init()
+    public override void Init()
     {
-        base.Init();
 
-        for (int i = 0; i < 8; i++)
-        {
-            for (int j = 0; j < 8; j++)
-            {
-                for (int k = 0; k < 8; k++)
-                {
-                    TopClusters[i, j, k] = new Cluster(128, new Vector3d(i * ClusterSize,
-                                                                         j * ClusterSize,
-                                                                         k * ClusterSize));
-                }
-            }
-        }
     }
 
-    private void Awake()
+    public override void Update(Vector3d Position)
     {
-        Init();
-    }
 
-    private void OnDrawGizmos()
-    {
-        Gizmos.color = XKCDColors.Berry;
-
-        for (int i = 0; i < 8; i++)
-        {
-            for (int j = 0; j < 8; j++)
-            {
-                for (int k = 0; k < 8; k++)
-                {
-                    var cluster = TopClusters[i, j, k];
-
-                    if (cluster != null)
-                    {
-                        Gizmos.DrawWireCube(cluster.Position, new Vector3(ClusterSize, ClusterSize, ClusterSize));
-                    }
-                }
-            }
-        }
     }
 }

@@ -33,6 +33,8 @@
 // Creator: zameran
 #endregion
 
+using System;
+
 using UnityEngine;
 
 public sealed class FlyCamera : GameCamera
@@ -157,9 +159,18 @@ public sealed class FlyCamera : GameCamera
                 currentSpeed = speed / 10f;
 
             speed += Mathf.RoundToInt(Input.GetAxis("Mouse ScrollWheel") * 100.0f);
-            speed = Mathf.Clamp(speed, 1.0f, 100.0f);
+            speed = Mathf.Clamp(speed, 1.0f, 10000.0f);
 
             transform.Translate(velocity * currentSpeed);
+        }
+
+        var cameraPosition = transform.position;
+        var universe = FindObjectOfType<Universe>();
+
+        if (Math.Abs(cameraPosition.magnitude) > 5000.000f)
+        {
+            universe.transform.position -= cameraPosition;
+            transform.position = Vector3.zero;
         }
     }
 
