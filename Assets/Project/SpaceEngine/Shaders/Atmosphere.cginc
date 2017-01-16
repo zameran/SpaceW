@@ -1,6 +1,6 @@
 /* Procedural planet generator.
  *
- * Copyright (C) 2015-2016 Denis Ovchinnikov
+ * Copyright (C) 2015-2017 Denis Ovchinnikov
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -61,7 +61,7 @@
 /*
  * Author: Eric Bruneton
  * Modified and ported to Unity by Justin Hawkins 2014
- * Modified by Denis Ovchinnikov 2015-2016
+ * Modified by Denis Ovchinnikov 2015-2017
  */
 
 #define OPTIMIZE
@@ -572,7 +572,7 @@ void SunRadianceAndSkyIrradiance(float3 worldP, float3 worldN, float3 worldS, ou
 	float3 worldV = worldP / r; // vertical vector
 	float muS = dot(worldV, worldS);
 
-	//loat sunOcclusion = 1.0;// - sunShadow;
+	//float sunOcclusion = 1.0;// - sunShadow;
 	sunL = SunRadiance(r, muS) * 1.0;// * sunOcclusion;
 
 	// ambient occlusion due only to slope, does not take self shadowing into account

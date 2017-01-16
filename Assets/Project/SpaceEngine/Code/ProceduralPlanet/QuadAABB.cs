@@ -1,7 +1,7 @@
 ﻿#region License
 // Procedural planet generator.
 // 
-// Copyright (C) 2015-2016 Denis Ovchinnikov [zameran] 
+// Copyright (C) 2015-2017 Denis Ovchinnikov [zameran] 
 // All rights reserved.
 // 
 // Redistribution and use in source and binary forms, with or without
@@ -37,6 +37,8 @@ using System;
 
 using UnityEngine;
 
+using ZFramework.Extensions;
+
 public class QuadAABB
 {
     public Vector3[] AABB { get; set; }
@@ -47,10 +49,10 @@ public class QuadAABB
     public Vector3 Min { get; set; }
     public Vector3 Max { get; set; }
 
-    public QuadAABB(Vector3[] AABB, Vector3[] CullingAABB, Quad Quad)
+    public QuadAABB(Vector3[] AABB, Vector3[] CullingAABB, Quad Quad, Transform OriginTransform = null)
     {
-        this.AABB = new Vector3[8];
-        this.CullingAABB = new Vector3[14];
+        this.AABB = new Vector3[AABB.Length];
+        this.CullingAABB = new Vector3[CullingAABB.Length];
 
         var Max = default(Vector3);
         var Min = default(Vector3);
@@ -62,5 +64,11 @@ public class QuadAABB
 
         Array.Copy(AABB, this.AABB, 8);
         Array.Copy(CullingAABB, this.CullingAABB, 14);
+
+        if (OriginTransform != null)
+        {
+            AABB.ForEach((point) => OriginTransform.TransformPoint(point));
+            CullingAABB.ForEach((point) => OriginTransform.TransformPoint(point));
+        }
     }
 }

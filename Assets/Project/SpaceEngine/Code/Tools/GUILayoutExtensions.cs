@@ -1,7 +1,7 @@
 ﻿#region License
 // Procedural planet generator.
 // 
-// Copyright (C) 2015-2016 Denis Ovchinnikov [zameran] 
+// Copyright (C) 2015-2017 Denis Ovchinnikov [zameran] 
 // All rights reserved.
 // 
 // Redistribution and use in source and binary forms, with or without
@@ -69,5 +69,12 @@ public static class GUILayoutExtensions
         GUILayout.BeginHorizontal();
         if (body != null) body();
         GUILayout.EndHorizontal();
+    }
+
+    public static void Vertical(Action body)
+    {
+        GUILayout.BeginVertical();
+        if (body != null) body();
+        GUILayout.EndVertical();
     }
 }

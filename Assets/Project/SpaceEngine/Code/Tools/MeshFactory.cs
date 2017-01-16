@@ -1,7 +1,7 @@
 ﻿#region License
 // Procedural planet generator.
 // 
-// Copyright (C) 2015-2016 Denis Ovchinnikov [zameran] 
+// Copyright (C) 2015-2017 Denis Ovchinnikov [zameran] 
 // All rights reserved.
 // 
 // Redistribution and use in source and binary forms, with or without
@@ -34,64 +34,13 @@
 #endregion
 
 using System.Collections.Generic;
+using System.Linq;
 
 using UnityEngine;
 
 public static class MeshFactory
 {
     public enum PLANE { XY, XZ, YZ };
-
-    public static Mesh SetupQuadColliderMesh(OutputStruct[] outputStructData)
-    {
-        int nVerts = QuadSettings.Vertices;
-        int nVertsPerEdge = QuadSettings.VerticesPerSide;
-
-        Vector3[] dummyVerts = new Vector3[nVerts];
-
-        int[] triangles = new int[(nVertsPerEdge - 1) * (nVertsPerEdge - 1) * 2 * 3];
-
-        for (int r = 0; r < nVertsPerEdge; r++)
-        {
-            int rowStartID = r * nVertsPerEdge;
-
-            for (int c = 0; c < nVertsPerEdge; c++)
-            {
-                int vertID = rowStartID + c;
-
-                outputStructData[vertID].position.w = 1.0f;
-                dummyVerts[vertID] = outputStructData[vertID].position + (Vector4)outputStructData[vertID].patchCenter;
-            }
-        }
-
-        int triangleIndex = 0;
-
-        for (int r = 0; r < nVertsPerEdge - 1; r++)
-        {
-            int rowStartID = r * nVertsPerEdge;
-            int rowAboveStartID = (r + 1) * nVertsPerEdge;
-
-            for (int c = 0; c < nVertsPerEdge - 1; c++)
-            {
-                int vertID = rowStartID + c;
-                int vertAboveID = rowAboveStartID + c;
-
-                triangles[triangleIndex++] = vertID;
-                triangles[triangleIndex++] = vertAboveID;
-                triangles[triangleIndex++] = vertAboveID + 1;
-
-                triangles[triangleIndex++] = vertID;
-                triangles[triangleIndex++] = vertAboveID + 1;
-                triangles[triangleIndex++] = vertID + 1;
-            }
-        }
-
-        Mesh dummyMesh = new Mesh();
-        dummyMesh.vertices = dummyVerts;
-        dummyMesh.triangles = triangles;
-        dummyMesh.hideFlags = HideFlags.DontSave;
-
-        return dummyMesh;
-    }
 
     public static Mesh SetupQuadMesh()
     {
@@ -151,117 +100,6 @@ public static class MeshFactory
         dummyMesh.uv = uv0;
         dummyMesh.SetTriangles(triangles, 0);
         dummyMesh.name = string.Format("PrototypeMesh_({0})", Random.Range(float.MinValue, float.MaxValue));
-        dummyMesh.hideFlags = HideFlags.DontSave;
-
-        return dummyMesh;
-    }
-
-    public static Mesh SetupQuadMesh(int nVertsPerEdge, PLANE plane, bool invert)
-    {
-        int nVerts = nVertsPerEdge * nVertsPerEdge;
-
-        Vector3[] dummyVerts = new Vector3[nVerts];
-        Vector3[] dummyNormals = new Vector3[nVerts];
-        Vector2[] uv0 = new Vector2[nVerts];
-
-        int[] triangles = new int[(nVertsPerEdge - 1) * (nVertsPerEdge - 1) * 2 * 3];
-
-        for (int r = 0; r < nVertsPerEdge; r++)
-        {
-            int rowStartID = r * nVertsPerEdge;
-
-            for (int c = 0; c < nVertsPerEdge; c++)
-            {
-                int vertID = rowStartID + c;
-
-                Vector3 pos = new Vector3(), norm = new Vector3();
-
-                Vector2 p = new Vector2();
-
-                Vector2 uv = new Vector2();
-
-                //uv.x = r / (float)((float)VerticesPerSide - 0.5f);
-                //uv.y = c / (float)((float)VerticesPerSide - 0.5f);
-
-                uv.x = r / (float)(nVertsPerEdge - 1);
-                uv.y = c / (float)(nVertsPerEdge - 1);
-
-                p.x = (uv.x - 0.5f) * 2.0f;
-                p.y = (uv.y - 0.5f) * 2.0f;
-
-                switch ((int)plane)
-                {
-                    case (int)PLANE.XY:
-                        if (!invert)
-                        {
-                            pos = new Vector3(p.x, p.y, 0.0f);
-                            norm = new Vector3(0.0f, 0.0f, 1.0f);
-                        }
-                        else
-                        {
-                            pos = new Vector3(-p.x, -p.y, 0.0f);
-                            norm = new Vector3(0.0f, 0.0f, -1.0f);
-                        }
-                        break;
-                    case (int)PLANE.XZ:
-                        if (!invert)
-                        {
-                            pos = new Vector3(p.x, 0.0f, p.y);
-                            norm = new Vector3(0.0f, 1.0f, 0.0f);
-                            break;
-                        }
-                        else
-                        {
-                            pos = new Vector3(-p.x, 0.0f, -p.y);
-                            norm = new Vector3(0.0f, -1.0f, 0.0f);
-                        }
-                        break;
-                    case (int)PLANE.YZ:
-                        if (!invert)
-                        {
-                            pos = new Vector3(0.0f, p.x, p.y);
-                            norm = new Vector3(1.0f, 0.0f, 0.0f);
-                        }
-                        else
-                        {
-                            pos = new Vector3(0.0f, -p.x, -p.y);
-                            norm = new Vector3(-1.0f, 0.0f, 0.0f);
-                        }
-                        break;
-                }
-
-                dummyVerts[vertID] = pos;
-                dummyNormals[vertID] = norm;
-                uv0[vertID] = uv;
-            }
-        }
-
-        int triangleIndex = 0;
-
-        for (int r = 0; r < nVertsPerEdge - 1; r++)
-        {
-            int rowStartID = r * nVertsPerEdge;
-            int rowAboveStartID = (r + 1) * nVertsPerEdge;
-
-            for (int c = 0; c < nVertsPerEdge - 1; c++)
-            {
-                int vertID = rowStartID + c;
-                int vertAboveID = rowAboveStartID + c;
-
-                triangles[triangleIndex++] = vertID;
-                triangles[triangleIndex++] = vertAboveID;
-                triangles[triangleIndex++] = vertAboveID + 1;
-
-                triangles[triangleIndex++] = vertID;
-                triangles[triangleIndex++] = vertAboveID + 1;
-                triangles[triangleIndex++] = vertID + 1;
-            }
-        }
-
-        Mesh dummyMesh = new Mesh();
-        dummyMesh.vertices = dummyVerts;
-        dummyMesh.uv = uv0;
-        dummyMesh.SetTriangles(triangles, 0);
         dummyMesh.hideFlags = HideFlags.DontSave;
 
         return dummyMesh;
@@ -527,7 +365,7 @@ public static class MeshFactory
         mesh.uv = uvs;
         mesh.triangles = inds;
 
-        mesh.Optimize();
+        ;
         mesh.RecalculateBounds();
         mesh.RecalculateNormals();
 
@@ -634,7 +472,7 @@ public static class MeshFactory
             triangles = triangles,
             name = string.Format("BillboardMesh_({0})", Random.Range(float.MinValue, float.MaxValue)),
             hideFlags = HideFlags.DontSave
-    };
+        };
 
         m.RecalculateNormals();
 
@@ -723,6 +561,6 @@ public static class MeshFactory
             tangents[i].w = (Vector3.Dot(Vector3.Cross(n, t), tan2[i]) < 0.0f) ? -1.0f : 1.0f;
         }
 
-        theMesh.tangents = tangents;
+        theMesh.SetTangents(tangents.ToList());
     }
 }

@@ -1,7 +1,7 @@
 ﻿#region License
 // Procedural planet generator.
 // 
-// Copyright (C) 2015-2016 Denis Ovchinnikov [zameran] 
+// Copyright (C) 2015-2017 Denis Ovchinnikov [zameran] 
 // All rights reserved.
 // 
 // Redistribution and use in source and binary forms, with or without
@@ -33,16 +33,36 @@
 // Creator: zameran
 #endregion
 
+using SpaceEngine.Startfield;
+
 using UnityEngine;
+
 using ZFramework.Unity.Common.Messenger;
 
 [ExecutionOrder(-9999)]
 public class GodManager : MonoSingleton<GodManager>
 {
     public Plane[] FrustumPlanes;
+    public Mesh PrototypeMesh;
+
+    public OutputStruct[] PreOutputDataBuffer;
+    public OutputStruct[] PreOutputSubDataBuffer;
+    public OutputStruct[] OutputDataBuffer;
 
     public bool Debug = true;
     public bool UpdateFrustumPlanes = true;
+
+    public Planetoid[] Planetoids;
+    public Starfield[] Starfields;
+
+    public QuadLODDistanceMethod LODDistanceMethod = QuadLODDistanceMethod.ClosestAABBCorner;
+    public QuadCullingMethod CullingMethod = QuadCullingMethod.Unity;
+    public AtmosphereHDR HDRMode = AtmosphereHDR.ProlandOptimized;
+
+    public float LODDistanceMultiplier = 2.0f;
+
+    public bool Eclipses = true;
+    public bool Planetshine = true;
 
     protected GodManager() { }
 
@@ -52,16 +72,79 @@ public class GodManager : MonoSingleton<GodManager>
 
         Messenger.Setup(Debug);
 
+        Planetoids = FindObjectsOfType<Planetoid>();
+        Starfields = FindObjectsOfType<Starfield>();
+
         if (CameraHelper.Main() != null)
+        {
             FrustumPlanes = GeometryUtility.CalculateFrustumPlanes(CameraHelper.Main());
+        }
+
+        if (PrototypeMesh == null)
+        {
+            PrototypeMesh = MeshFactory.SetupQuadMesh();
+        }
+
+        PreOutputDataBuffer = new OutputStruct[QuadSettings.VerticesWithBorder];
+        PreOutputSubDataBuffer = new OutputStruct[QuadSettings.VerticesWithBorderFull];
+        OutputDataBuffer = new OutputStruct[QuadSettings.Vertices];
+
+        UpdateSettings();
     }
 
     private void Update()
     {
+        Planetoids = FindObjectsOfType<Planetoid>();
+        Starfields = FindObjectsOfType<Starfield>();
+
         if (UpdateFrustumPlanes)
         {
             if (CameraHelper.Main() != null)
+            {
                 FrustumPlanes = GeometryUtility.CalculateFrustumPlanes(CameraHelper.Main());
+            }
+        }
+
+        UpdateSettings();
+    }
+
+    private void UpdateSettings()
+    {
+        if (Planetoids != null)
+        {
+            if (Planetoids.Length != 0)
+            {
+                for (int i = 0; i < Planetoids.Length; i++)
+                {
+                    if (Planetoids[i] != null)
+                    {
+                        Planetoids[i].CullingMethod = CullingMethod;
+                        Planetoids[i].LODDistanceMultiplier = LODDistanceMultiplier;
+                        Planetoids[i].LODDistanceMethod = LODDistanceMethod;
+
+                        if (Planetoids[i].Atmosphere != null)
+                        {
+                            Planetoids[i].Atmosphere.HDRMode = HDRMode;
+                            Planetoids[i].Atmosphere.Eclipses = Eclipses;
+                            Planetoids[i].Atmosphere.Planetshine = Planetshine;
+                        }
+                    }
+                }
+            }
+        }
+
+        if (Starfields != null)
+        {
+            if (Starfields.Length != 0)
+            {
+                for (int i = 0; i < Starfields.Length; i++)
+                {
+                    if (Starfields[i] != null)
+                    {
+                        Starfields[i].HDRMode = HDRMode;
+                    }
+                }
+            }
         }
     }
 }

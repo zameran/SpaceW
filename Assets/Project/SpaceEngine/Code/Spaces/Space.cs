@@ -1,7 +1,7 @@
 ﻿#region License
 // Procedural planet generator.
 // 
-// Copyright (C) 2015-2016 Denis Ovchinnikov [zameran] 
+// Copyright (C) 2015-2017 Denis Ovchinnikov [zameran] 
 // All rights reserved.
 // 
 // Redistribution and use in source and binary forms, with or without
@@ -33,12 +33,41 @@
 // Creator: zameran
 #endregion
 
+using System;
+
 using UnityEngine;
 
-public abstract class Space : MonoBehaviour
+public abstract class Space
 {
-    protected virtual void Init()
-    {
+    public Guid GUID { get; private set; }
 
+    public Vector3d Position { get; protected set; }
+
+    public Space Parent;
+    public Space Current;
+
+    protected Space()
+    {
+        this.GUID = Guid.NewGuid();
+
+        this.Position = Vector3d.zero;
     }
+
+    protected Space(Vector3d Position)
+    {
+        this.GUID = Guid.NewGuid();
+
+        this.Position = Position;
+    }
+
+    protected void UpdateFromParent(Vector3d Position)
+    {
+        if (Parent == null) return;
+
+        Update(Position);
+    }
+
+    public abstract void Init();
+
+    public abstract void Update(Vector3d Position);
 }

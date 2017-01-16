@@ -1,7 +1,7 @@
 ﻿#region License
 // Procedural planet generator.
 // 
-// Copyright (C) 2015-2016 Denis Ovchinnikov [zameran] 
+// Copyright (C) 2015-2017 Denis Ovchinnikov [zameran] 
 // All rights reserved.
 // 
 // Redistribution and use in source and binary forms, with or without
@@ -37,7 +37,9 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+
 using UnityEngine;
+
 using ZFramework.Unity.Common.PerfomanceMonitor;
 
 [Serializable]
@@ -109,7 +111,6 @@ public sealed class Quad : MonoBehaviour, IQuad
     public ComputeBuffer PreOutDataBuffer;
     public ComputeBuffer PreOutDataSubBuffer;
     public ComputeBuffer OutDataBuffer;
-    public ComputeBuffer QuadCornersBuffer;
 
     public RenderTexture HeightTexture;
     public RenderTexture NormalTexture;
@@ -130,19 +131,13 @@ public sealed class Quad : MonoBehaviour, IQuad
     public bool Unsplitted = false;
     public bool Visible = false;
     public bool Uniformed = false;
-    public bool GPUDataRecieved = false;
     public bool BuffersCreated = false;
 
     public float DistanceToLODSplit = Mathf.Infinity;
 
-    public Vector3 topLeftCorner;
-    public Vector3 bottomRightCorner;
-    public Vector3 topRightCorner;
-    public Vector3 bottomLeftCorner;
     public Vector3 middleNormalized;
 
     public QuadCorners quadCorners;
-    public OutputStruct[] outputStructData;
 
     public QuadAABB QuadAABB = null;
 
@@ -162,7 +157,7 @@ public sealed class Quad : MonoBehaviour, IQuad
 
     private void OnDestroy()
     {
-        BufferHelper.ReleaseAndDisposeBuffers(QuadGenerationConstantsBuffer, PreOutDataBuffer, PreOutDataSubBuffer, OutDataBuffer, QuadCornersBuffer);
+        BufferHelper.ReleaseAndDisposeBuffers(QuadGenerationConstantsBuffer, PreOutDataBuffer, PreOutDataSubBuffer, OutDataBuffer);
 
         if (RenderTexture.active == HeightTexture | NormalTexture) RenderTexture.active = null;
 
@@ -180,7 +175,8 @@ public sealed class Quad : MonoBehaviour, IQuad
     {
         if (Planetoid.DrawGizmos)
         {
-            Bounds bounds = GetBounds(this);
+            var r = Planetoid.PlanetRadius / 1000.0f;
+            var bounds = GetBounds(this);
 
             Gizmos.color = Color.blue;
 
@@ -188,35 +184,42 @@ public sealed class Quad : MonoBehaviour, IQuad
 
             Gizmos.color = Color.red;
 
-            Gizmos.DrawWireSphere(Planetoid.transform.TransformPoint(topLeftCorner), 1000);
-            Gizmos.DrawWireSphere(Planetoid.transform.TransformPoint(topRightCorner), 1000);
-            Gizmos.DrawWireSphere(Planetoid.transform.TransformPoint(bottomLeftCorner), 1000);
-            Gizmos.DrawWireSphere(Planetoid.transform.TransformPoint(bottomRightCorner), 1000);
+            Gizmos.DrawWireSphere(Planetoid.OriginTransform.TransformPoint(quadCorners.topLeftCorner), r);
+            Gizmos.DrawWireSphere(Planetoid.OriginTransform.TransformPoint(quadCorners.topRightCorner), r);
+            Gizmos.DrawWireSphere(Planetoid.OriginTransform.TransformPoint(quadCorners.bottomLeftCorner), r);
+            Gizmos.DrawWireSphere(Planetoid.OriginTransform.TransformPoint(quadCorners.bottomRightCorner), r);
 
             Gizmos.color = Color.green;
 
-            Gizmos.DrawWireSphere(Planetoid.transform.TransformPoint(topLeftCorner.NormalizeToRadius(Planetoid.PlanetRadius)), 1750);
-            Gizmos.DrawWireSphere(Planetoid.transform.TransformPoint(topRightCorner.NormalizeToRadius(Planetoid.PlanetRadius)), 1750);
-            Gizmos.DrawWireSphere(Planetoid.transform.TransformPoint(bottomLeftCorner.NormalizeToRadius(Planetoid.PlanetRadius)), 1750);
-            Gizmos.DrawWireSphere(Planetoid.transform.TransformPoint(bottomRightCorner.NormalizeToRadius(Planetoid.PlanetRadius)), 1750);
-
-            Gizmos.color = Color.blue;
-
-            Gizmos.DrawWireSphere(Planetoid.transform.TransformPoint(quadCorners.topLeftCorner), 1500);
-            Gizmos.DrawWireSphere(Planetoid.transform.TransformPoint(quadCorners.topRightCorner), 1500);
-            Gizmos.DrawWireSphere(Planetoid.transform.TransformPoint(quadCorners.bottomLeftCorner), 1500);
-            Gizmos.DrawWireSphere(Planetoid.transform.TransformPoint(quadCorners.bottomRightCorner), 1500);
+            Gizmos.DrawWireSphere(Planetoid.OriginTransform.TransformPoint(quadCorners.topLeftCorner.NormalizeToRadius(Planetoid.PlanetRadius)), r);
+            Gizmos.DrawWireSphere(Planetoid.OriginTransform.TransformPoint(quadCorners.topRightCorner.NormalizeToRadius(Planetoid.PlanetRadius)), r);
+            Gizmos.DrawWireSphere(Planetoid.OriginTransform.TransformPoint(quadCorners.bottomLeftCorner.NormalizeToRadius(Planetoid.PlanetRadius)), r);
+            Gizmos.DrawWireSphere(Planetoid.OriginTransform.TransformPoint(quadCorners.bottomRightCorner.NormalizeToRadius(Planetoid.PlanetRadius)), r);
 
             if (QuadAABB != null)
             {
                 Gizmos.color = XKCDColors.Adobe;
 
-                Gizmos.DrawWireCube(Planetoid.transform.TransformPoint(QuadAABB.Bounds.center), QuadAABB.Bounds.size);
+                Gizmos.DrawWireCube(Planetoid.OriginTransform.TransformPoint(QuadAABB.Bounds.center), QuadAABB.Bounds.size);
             }
 
             Gizmos.color = XKCDColors.BabyBlue;
 
-            Gizmos.DrawRay(Planetoid.transform.TransformPoint(middleNormalized), middleNormalized);
+            Gizmos.DrawRay(Planetoid.OriginTransform.TransformPoint(middleNormalized), middleNormalized);
+        }
+        else
+        {
+            Gizmos.color = XKCDColors.Red;
+
+            Gizmos.DrawRay(Planetoid.OriginTransform.TransformPoint(middleNormalized), generationConstants.cubeFaceEastDirection);
+
+            Gizmos.color = XKCDColors.Green;
+
+            Gizmos.DrawRay(Planetoid.OriginTransform.TransformPoint(middleNormalized), generationConstants.patchCubeCenter);
+
+            Gizmos.color = XKCDColors.Blue;
+
+            Gizmos.DrawRay(Planetoid.OriginTransform.TransformPoint(middleNormalized), generationConstants.cubeFaceNorthDirection);
         }
     }
 
@@ -228,7 +231,6 @@ public sealed class Quad : MonoBehaviour, IQuad
             PreOutDataBuffer = new ComputeBuffer(QuadSettings.VerticesWithBorder, 48);
             PreOutDataSubBuffer = new ComputeBuffer(QuadSettings.VerticesWithBorderFull, 48);
             OutDataBuffer = new ComputeBuffer(QuadSettings.Vertices, 48);
-            QuadCornersBuffer = new ComputeBuffer(1, 48);
 
             BuffersCreated = true;
         }
@@ -335,6 +337,7 @@ public sealed class Quad : MonoBehaviour, IQuad
         SetupBounds(this, QuadMesh);
 
         if (Planetoid.Atmosphere != null) Planetoid.Atmosphere.SetUniforms(null, QuadMaterial, false, true);
+
         //if (Planetoid.Ring != null) Planetoid.Ring.SetShadows(QuadMaterial, Planetoid.Shadows);
         //if (Planetoid.NPS != null) Planetoid.NPS.UpdateUniforms(QuadMaterial, null); //(WIP) For SE Coloring in fragment shader work...
         //if (Planetoid.tccps != null) Planetoid.tccps.UpdateUniforms(QuadMaterial); //(WIP) For SE Coloring in fragment shader work...
@@ -382,18 +385,18 @@ public sealed class Quad : MonoBehaviour, IQuad
 
     public QuadAABB GetVolumeBox(float height, float offset = 0)
     {
-        Vector3[] points = new Vector3[8];
-        Vector3[] cullingPoints = new Vector3[14];
+        var points = new Vector3[8];
+        var cullingPoints = new Vector3[14];
 
-        points[0] = topLeftCorner.NormalizeToRadius(Planetoid.PlanetRadius + height + offset);
-        points[1] = topRightCorner.NormalizeToRadius(Planetoid.PlanetRadius + height + offset);
-        points[2] = bottomLeftCorner.NormalizeToRadius(Planetoid.PlanetRadius + height + offset);
-        points[3] = bottomRightCorner.NormalizeToRadius(Planetoid.PlanetRadius + height + offset);
+        points[0] = quadCorners.topLeftCorner.NormalizeToRadius(Planetoid.PlanetRadius + height + offset);
+        points[1] = quadCorners.topRightCorner.NormalizeToRadius(Planetoid.PlanetRadius + height + offset);
+        points[2] = quadCorners.bottomLeftCorner.NormalizeToRadius(Planetoid.PlanetRadius + height + offset);
+        points[3] = quadCorners.bottomRightCorner.NormalizeToRadius(Planetoid.PlanetRadius + height + offset);
 
-        points[4] = topLeftCorner.NormalizeToRadius(Planetoid.PlanetRadius - height - offset);
-        points[5] = topRightCorner.NormalizeToRadius(Planetoid.PlanetRadius - height - offset);
-        points[6] = bottomLeftCorner.NormalizeToRadius(Planetoid.PlanetRadius - height - offset);
-        points[7] = bottomRightCorner.NormalizeToRadius(Planetoid.PlanetRadius - height - offset);
+        points[4] = quadCorners.topLeftCorner.NormalizeToRadius(Planetoid.PlanetRadius - height - offset);
+        points[5] = quadCorners.topRightCorner.NormalizeToRadius(Planetoid.PlanetRadius - height - offset);
+        points[6] = quadCorners.bottomLeftCorner.NormalizeToRadius(Planetoid.PlanetRadius - height - offset);
+        points[7] = quadCorners.bottomRightCorner.NormalizeToRadius(Planetoid.PlanetRadius - height - offset);
 
         Array.Copy(points, cullingPoints, 8);
 
@@ -405,7 +408,7 @@ public sealed class Quad : MonoBehaviour, IQuad
         cullingPoints[12] = middleNormalized.NormalizeToRadius(Planetoid.PlanetRadius + height + offset);
         cullingPoints[13] = middleNormalized.NormalizeToRadius(Planetoid.PlanetRadius - height - offset);
 
-        return new QuadAABB(points, cullingPoints, this);
+        return new QuadAABB(points, cullingPoints, this, Planetoid.OriginTransform);
     }
 
     public bool PlaneFrustumCheck(QuadAABB qaabb)
@@ -420,30 +423,51 @@ public sealed class Quad : MonoBehaviour, IQuad
     {
         if (Parent == null || Splitting) { return true; }
 
-        return points.Any(pos => BorderFrustumCheck(GodManager.Instance.FrustumPlanes, pos) == true);
+        for (var i = 0; i < points.Length; i++)
+        {
+            if (BorderFrustumCheck(GodManager.Instance.FrustumPlanes, points[i]))
+            {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     public bool BorderFrustumCheck(Plane[] planes, Vector3 border)
     {
-        return planes.All(plane => (plane.GetDistanceToPoint(Planetoid.transform.TransformPoint(border)) < 0 - 1024.0f) == false);
+        for (var i = 0; i < planes.Length; i++)
+        {
+            if (planes[i].GetDistanceToPoint(border) < 0 - 1024.0f)
+            {
+                return false;
+            }
+        }
+
+        return true;
     }
 
     public void InitCorners(Vector3 topLeft, Vector3 bottmoRight, Vector3 topRight, Vector3 bottomLeft)
     {
-        topLeftCorner = topLeft;
-        bottomRightCorner = bottmoRight;
-        topRightCorner = topRight;
-        bottomLeftCorner = bottomLeft;
+        quadCorners.topLeftCorner = topLeft;
+        quadCorners.bottomRightCorner = bottmoRight;
+        quadCorners.topRightCorner = topRight;
+        quadCorners.bottomLeftCorner = bottomLeft;
 
         middleNormalized = CalculateMiddlePoint(topLeft, bottmoRight, topRight, bottmoRight);
     }
 
     public IEnumerator Split()
     {
-        int id = 0;
+        var id = 0;
 
-        Vector3 size = bottomRightCorner - topLeftCorner;
-        Vector3 step = size / 2;
+        var subTopLeft = Vector3.zero;
+        var subBottomRight = Vector3.zero;
+        var subTopRight = Vector3.zero;
+        var subBottomLeft = Vector3.zero;
+
+        var size = quadCorners.bottomRightCorner - quadCorners.topLeftCorner;
+        var step = size / 2.0f;
 
         bool staticX = false, staticY = false, staticZ = false;
 
@@ -458,32 +482,29 @@ public sealed class Quad : MonoBehaviour, IQuad
         {
             for (int sX = 0; sX < 2; sX++, id++)
             {
-                Vector3 subTopLeft = Vector3.zero, subBottomRight = Vector3.zero;
-                Vector3 subTopRight = Vector3.zero, subBottomLeft = Vector3.zero;
-
                 if (staticX)
                 {
-                    subTopLeft = new Vector3(topLeftCorner.x, topLeftCorner.y + step.y * sY, topLeftCorner.z + step.z * sX);
-                    subBottomRight = new Vector3(topLeftCorner.x, topLeftCorner.y + step.y * (sY + 1), topLeftCorner.z + step.z * (sX + 1));
+                    subTopLeft = new Vector3(quadCorners.topLeftCorner.x, quadCorners.topLeftCorner.y + step.y * sY, quadCorners.topLeftCorner.z + step.z * sX);
+                    subBottomRight = new Vector3(quadCorners.topLeftCorner.x, quadCorners.topLeftCorner.y + step.y * (sY + 1), quadCorners.topLeftCorner.z + step.z * (sX + 1));
 
-                    subTopRight = new Vector3(topLeftCorner.x, topLeftCorner.y + step.y * sY, topLeftCorner.z + step.z * (sX + 1));
-                    subBottomLeft = new Vector3(topLeftCorner.x, topLeftCorner.y + step.y * (sY + 1), topLeftCorner.z + step.z * sX);
+                    subTopRight = new Vector3(quadCorners.topLeftCorner.x, quadCorners.topLeftCorner.y + step.y * sY, quadCorners.topLeftCorner.z + step.z * (sX + 1));
+                    subBottomLeft = new Vector3(quadCorners.topLeftCorner.x, quadCorners.topLeftCorner.y + step.y * (sY + 1), quadCorners.topLeftCorner.z + step.z * sX);
                 }
                 else if (staticY)
                 {
-                    subTopLeft = new Vector3(topLeftCorner.x + step.x * sX, topLeftCorner.y, topLeftCorner.z + step.z * sY);
-                    subBottomRight = new Vector3(topLeftCorner.x + step.x * (sX + 1), topLeftCorner.y, topLeftCorner.z + step.z * (sY + 1));
+                    subTopLeft = new Vector3(quadCorners.topLeftCorner.x + step.x * sX, quadCorners.topLeftCorner.y, quadCorners.topLeftCorner.z + step.z * sY);
+                    subBottomRight = new Vector3(quadCorners.topLeftCorner.x + step.x * (sX + 1), quadCorners.topLeftCorner.y, quadCorners.topLeftCorner.z + step.z * (sY + 1));
 
-                    subTopRight = new Vector3(topLeftCorner.x + step.x * (sX + 1), topLeftCorner.y, topLeftCorner.z + step.z * sY);
-                    subBottomLeft = new Vector3(topLeftCorner.x + step.x * sX, topLeftCorner.y, topLeftCorner.z + step.z * (sY + 1));
+                    subTopRight = new Vector3(quadCorners.topLeftCorner.x + step.x * (sX + 1), quadCorners.topLeftCorner.y, quadCorners.topLeftCorner.z + step.z * sY);
+                    subBottomLeft = new Vector3(quadCorners.topLeftCorner.x + step.x * sX, quadCorners.topLeftCorner.y, quadCorners.topLeftCorner.z + step.z * (sY + 1));
                 }
                 else if (staticZ)
                 {
-                    subTopLeft = new Vector3(topLeftCorner.x + step.x * sX, topLeftCorner.y + step.y * sY, topLeftCorner.z);
-                    subBottomRight = new Vector3(topLeftCorner.x + step.x * (sX + 1), topLeftCorner.y + step.y * (sY + 1), topLeftCorner.z);
+                    subTopLeft = new Vector3(quadCorners.topLeftCorner.x + step.x * sX, quadCorners.topLeftCorner.y + step.y * sY, quadCorners.topLeftCorner.z);
+                    subBottomRight = new Vector3(quadCorners.topLeftCorner.x + step.x * (sX + 1), quadCorners.topLeftCorner.y + step.y * (sY + 1), quadCorners.topLeftCorner.z);
 
-                    subTopRight = new Vector3(topLeftCorner.x + step.x * (sX + 1), topLeftCorner.y + step.y * sY, topLeftCorner.z);
-                    subBottomLeft = new Vector3(topLeftCorner.x + step.x * sX, topLeftCorner.y + step.y * (sY + 1), topLeftCorner.z);
+                    subTopRight = new Vector3(quadCorners.topLeftCorner.x + step.x * (sX + 1), quadCorners.topLeftCorner.y + step.y * sY, quadCorners.topLeftCorner.z);
+                    subBottomLeft = new Vector3(quadCorners.topLeftCorner.x + step.x * sX, quadCorners.topLeftCorner.y + step.y * (sY + 1), quadCorners.topLeftCorner.z);
                 }
 
                 Quad quad = Planetoid.SetupSubQuad(Position);
@@ -498,7 +519,7 @@ public sealed class Quad : MonoBehaviour, IQuad
                 if (quad.Parent.transform != null)
                     quad.transform.parent = quad.Parent.transform;
 
-                quad.gameObject.name += "_ID" + id + "_LOD" + quad.LODLevel;
+                quad.gameObject.name = string.Format("{0}_ID{1}_LOD{2}", quad.gameObject.name, id, quad.LODLevel);
 
                 Subquads.Add(quad);
 
@@ -510,20 +531,20 @@ public sealed class Quad : MonoBehaviour, IQuad
         }
 
         //Dispatch one by one with intervals.
-        foreach (var q in Subquads)
+        for (var i = 0; i < Subquads.Count; i++)
         {
-            q.ReadyForDispatch = true;
+            Subquads[i].ReadyForDispatch = true;
 
-            for (int wait = 0; wait < Planetoid.DispatchSkipFramesCount; wait++)
+            for (var wait = 0; wait < Planetoid.DispatchSkipFramesCount; wait++)
             {
                 yield return Yielders.EndOfFrame;
             }
         }
 
-        foreach (var q in Subquads)
+        for (var i = 0; i < Subquads.Count; i++)
         {
-            q.Splitting = false;
-            q.ShouldDraw = true;
+            Subquads[i].Splitting = false;
+            Subquads[i].ShouldDraw = true;
         }
 
         ShouldDraw = false;
@@ -538,8 +559,10 @@ public sealed class Quad : MonoBehaviour, IQuad
 
         StopAllCoroutines();
 
-        foreach (var subQuad in Subquads)
+        for (var i = 0; i < Subquads.Count; i++)
         {
+            var subQuad = Subquads[i];
+
             if (subQuad.HaveSubQuads)
             {
                 subQuad.Unsplit();
@@ -562,90 +585,48 @@ public sealed class Quad : MonoBehaviour, IQuad
 
     public void Dispatch()
     {
-        StartCoroutine(DispatcheCoroutineWait());
-    }
-
-    public IEnumerator DispatcheCoroutineWait()
-    {
-        yield return StartCoroutine(DispatchCoroutine());
-    }
-
-    public IEnumerator DispatchCoroutine()
-    {
-        if (CoreShader == null) StopCoroutine(DispatchCoroutine());
-
-        EventManager.PlanetoidEvents.OnDispatchStarted.Invoke(Planetoid, this);
-
         generationConstants.lodLevel = (((1 << LODLevel + 2) * (Planetoid.PlanetRadius / (LODLevel + 2)) - ((Planetoid.PlanetRadius / (LODLevel + 2)) / 2)) / Planetoid.PlanetRadius);
         generationConstants.lodOctaveModifier = Planetoid.GetLODOctaveModifier(LODLevel + 1);
 
         SetupComputeShaderUniforms();
 
-        QuadGenerationConstants[] quadGenerationConstantsData = { generationConstants };
-        OutputStruct[] preOutputStructData = new OutputStruct[QuadSettings.VerticesWithBorder];
-        OutputStruct[] preOutputSubStructData = new OutputStruct[QuadSettings.VerticesWithBorderFull];
-        OutputStruct[] outputStructData = new OutputStruct[QuadSettings.Vertices];
-        QuadCorners[] quadCorners = { new QuadCorners() };
-
         CreateBuffers();
 
-        QuadGenerationConstantsBuffer.SetData(quadGenerationConstantsData);
-        PreOutDataBuffer.SetData(preOutputStructData);
-        PreOutDataSubBuffer.SetData(preOutputSubStructData);
-        OutDataBuffer.SetData(outputStructData);
-        QuadCornersBuffer.SetData(quadCorners);
+        QuadGenerationConstantsBuffer.SetData(new[] { generationConstants });
+        PreOutDataBuffer.SetData(GodManager.Instance.PreOutputDataBuffer);
+        PreOutDataSubBuffer.SetData(GodManager.Instance.PreOutputSubDataBuffer);
+        OutDataBuffer.SetData(GodManager.Instance.OutputDataBuffer);
+
+        if (CoreShader == null) return;
+
+        EventManager.PlanetoidEvents.OnDispatchStarted.Invoke(Planetoid, this);
 
         int kernel1 = CoreShader.FindKernel("HeightMain");
         int kernel2 = CoreShader.FindKernel("Transfer");
         int kernel3 = CoreShader.FindKernel("HeightSub");
         int kernel4 = CoreShader.FindKernel("TexturesSub");
-        int kernel5 = CoreShader.FindKernel("GetCorners");
 
         SetupComputeShaderKernelsUniforfms(QuadGenerationConstantsBuffer,
                                            PreOutDataBuffer,
                                            PreOutDataSubBuffer,
-                                           OutDataBuffer,
-                                           QuadCornersBuffer, new int[] { kernel1, kernel2, kernel3, kernel4, kernel5 });
+                                           OutDataBuffer, new int[] { kernel1, kernel2, kernel3, kernel4 });
 
         CoreShader.Dispatch(kernel1, QuadSettings.THREADGROUP_SIZE_BORDER, QuadSettings.THREADGROUP_SIZE_BORDER, 1);
         CoreShader.Dispatch(kernel2, QuadSettings.THREADGROUP_SIZE, QuadSettings.THREADGROUP_SIZE, 1);
         CoreShader.Dispatch(kernel3, QuadSettings.THREADGROUP_SIZE_BORDER_FULL, QuadSettings.THREADGROUP_SIZE_BORDER_FULL, 1);
         CoreShader.Dispatch(kernel4, QuadSettings.THREADGROUP_SIZE_FULL, QuadSettings.THREADGROUP_SIZE_FULL, 1);
-        CoreShader.Dispatch(kernel5, 1, 1, 1);
 
         Generated = true;
 
-        if (LODLevel == -1)
-        {
-            yield return null;
-        }
-        else
-        {
-            for (int i = 0; i < (Planetoid.DispatchSkipFramesCount / 2); i++)
-            {
-                yield return Yielders.EndOfFrame;
-            }
-        }
-
-        if (Planetoid.GetData)
-        {
-            QuadCornersBuffer.GetData(quadCorners);
-            OutDataBuffer.GetData(outputStructData);
-
-            this.quadCorners = quadCorners[0];
-            this.outputStructData = outputStructData;
-
-            this.GPUDataRecieved = true;
-
-            EventManager.PlanetoidEvents.OnDispatchFinished.Invoke(Planetoid, this);
-        }
+        // NOTE : NO DATA WILL BE RECIEVED UNTIL ASYNC GET DATA!
 
         //Release and dispose unnecessary buffers. Video memory, you are free!
-        BufferHelper.ReleaseAndDisposeBuffers(PreOutDataBuffer, PreOutDataSubBuffer, QuadCornersBuffer);
+        BufferHelper.ReleaseAndDisposeBuffers(PreOutDataBuffer, PreOutDataSubBuffer);
 
         BuffersCreated = false;
 
         EventManager.PlanetoidEvents.OnDispatchEnd.Invoke(Planetoid, this);
+        EventManager.PlanetoidEvents.OnDispatchFinished.Invoke(Planetoid, this);
     }
 
     private void SetupComputeShaderUniforms()
@@ -654,7 +635,7 @@ public sealed class Quad : MonoBehaviour, IQuad
             Planetoid.tccps.UpdateUniforms(CoreShader);
     }
 
-    private void SetupComputeShaderKernelUniforfms(int kernel, ComputeBuffer quadGenerationConstantsBuffer, ComputeBuffer preOutDataBuffer, ComputeBuffer preOutDataSubBuffer, ComputeBuffer outDataBuffer, ComputeBuffer quadCornersBuffer)
+    private void SetupComputeShaderKernelUniforfms(int kernel, ComputeBuffer quadGenerationConstantsBuffer, ComputeBuffer preOutDataBuffer, ComputeBuffer preOutDataSubBuffer, ComputeBuffer outDataBuffer)
     {
         if (CoreShader == null) return;
 
@@ -662,7 +643,6 @@ public sealed class Quad : MonoBehaviour, IQuad
         CoreShader.SetBuffer(kernel, "patchPreOutput", preOutDataBuffer);
         CoreShader.SetBuffer(kernel, "patchPreOutputSub", preOutDataSubBuffer);
         CoreShader.SetBuffer(kernel, "patchOutput", outDataBuffer);
-        CoreShader.SetBuffer(kernel, "quadCorners", quadCornersBuffer);
 
         CoreShader.SetTexture(kernel, "Height", HeightTexture);
         CoreShader.SetTexture(kernel, "Normal", NormalTexture);
@@ -671,13 +651,13 @@ public sealed class Quad : MonoBehaviour, IQuad
             Planetoid.NPS.UpdateUniforms(QuadMaterial, CoreShader, kernel);
     }
 
-    private void SetupComputeShaderKernelsUniforfms(ComputeBuffer quadGenerationConstantsBuffer, ComputeBuffer preOutDataBuffer, ComputeBuffer preOutDataSubBuffer, ComputeBuffer outDataBuffer, ComputeBuffer quadCornersBuffer, params int[] kernels)
+    private void SetupComputeShaderKernelsUniforfms(ComputeBuffer quadGenerationConstantsBuffer, ComputeBuffer preOutDataBuffer, ComputeBuffer preOutDataSubBuffer, ComputeBuffer outDataBuffer, params int[] kernels)
     {
         if (kernels == null || kernels.Length == 0) { Debug.Log("Quad.SetupComputeShaderKernelsUniforfms(...) problem!"); return; }
 
         for (int i = 0; i < kernels.Length; i++)
         {
-            SetupComputeShaderKernelUniforfms(i, quadGenerationConstantsBuffer, preOutDataBuffer, preOutDataSubBuffer, outDataBuffer, quadCornersBuffer);
+            SetupComputeShaderKernelUniforfms(i, quadGenerationConstantsBuffer, preOutDataBuffer, preOutDataSubBuffer, outDataBuffer);
         }
     }
 
@@ -698,52 +678,52 @@ public sealed class Quad : MonoBehaviour, IQuad
         switch (quadPosition)
         {
             case QuadPosition.Top:
-                topLeftCorner = new Vector3(-v, v, v);
-                bottomRightCorner = new Vector3(v, v, -v);
+                quadCorners.topLeftCorner = new Vector3(-v, v, v);
+                quadCorners.bottomRightCorner = new Vector3(v, v, -v);
 
-                topRightCorner = new Vector3(v, v, v);
-                bottomLeftCorner = new Vector3(-v, v, -v);
+                quadCorners.topRightCorner = new Vector3(v, v, v);
+                quadCorners.bottomLeftCorner = new Vector3(-v, v, -v);
                 break;
             case QuadPosition.Bottom:
-                topLeftCorner = new Vector3(-v, -v, -v);
-                bottomRightCorner = new Vector3(v, -v, v);
+                quadCorners.topLeftCorner = new Vector3(-v, -v, -v);
+                quadCorners.bottomRightCorner = new Vector3(v, -v, v);
 
-                topRightCorner = new Vector3(v, -v, -v);
-                bottomLeftCorner = new Vector3(-v, -v, v);
+                quadCorners.topRightCorner = new Vector3(v, -v, -v);
+                quadCorners.bottomLeftCorner = new Vector3(-v, -v, v);
                 break;
             case QuadPosition.Left:
-                topLeftCorner = new Vector3(-v, v, v);
-                bottomRightCorner = new Vector3(-v, -v, -v);
+                quadCorners.topLeftCorner = new Vector3(-v, v, v);
+                quadCorners.bottomRightCorner = new Vector3(-v, -v, -v);
 
-                topRightCorner = new Vector3(-v, v, -v);
-                bottomLeftCorner = new Vector3(-v, -v, v);
+                quadCorners.topRightCorner = new Vector3(-v, v, -v);
+                quadCorners.bottomLeftCorner = new Vector3(-v, -v, v);
                 break;
             case QuadPosition.Right:
-                topLeftCorner = new Vector3(v, v, -v);
-                bottomRightCorner = new Vector3(v, -v, v);
+                quadCorners.topLeftCorner = new Vector3(v, v, -v);
+                quadCorners.bottomRightCorner = new Vector3(v, -v, v);
 
-                topRightCorner = new Vector3(v, v, v);
-                bottomLeftCorner = new Vector3(v, -v, -v);
+                quadCorners.topRightCorner = new Vector3(v, v, v);
+                quadCorners.bottomLeftCorner = new Vector3(v, -v, -v);
                 break;
             case QuadPosition.Front:
-                topLeftCorner = new Vector3(v, v, v);
-                bottomRightCorner = new Vector3(-v, -v, v);
+                quadCorners.topLeftCorner = new Vector3(v, v, v);
+                quadCorners.bottomRightCorner = new Vector3(-v, -v, v);
 
-                topRightCorner = new Vector3(-v, v, v);
-                bottomLeftCorner = new Vector3(v, -v, v);
+                quadCorners.topRightCorner = new Vector3(-v, v, v);
+                quadCorners.bottomLeftCorner = new Vector3(v, -v, v);
                 break;
             case QuadPosition.Back:
-                topLeftCorner = new Vector3(-v, v, -v);
-                bottomRightCorner = new Vector3(v, -v, -v);
+                quadCorners.topLeftCorner = new Vector3(-v, v, -v);
+                quadCorners.bottomRightCorner = new Vector3(v, -v, -v);
 
-                topRightCorner = new Vector3(v, v, -v);
-                bottomLeftCorner = new Vector3(-v, -v, -v);
+                quadCorners.topRightCorner = new Vector3(v, v, -v);
+                quadCorners.bottomLeftCorner = new Vector3(-v, -v, -v);
                 break;
             default:
                 throw new ArgumentOutOfRangeException("quadPosition", quadPosition, null);
         }
 
-        middleNormalized = CalculateMiddlePoint(topLeftCorner, bottomRightCorner, topRightCorner, bottomLeftCorner);
+        middleNormalized = CalculateMiddlePoint(quadCorners.topLeftCorner, quadCorners.bottomRightCorner, quadCorners.topRightCorner, quadCorners.bottomLeftCorner);
     }
 
     public void SetupParent(Quad quad, Quad parent)
@@ -811,7 +791,7 @@ public sealed class Quad : MonoBehaviour, IQuad
 
         for (int i = 0; i < 4; i++)
         {
-            d = Vector3.Distance(Planetoid.LODTarget.position, Planetoid.transform.TransformPoint(QuadAABB.AABB[i]));
+            d = Vector3.Distance(Planetoid.LODTarget.position, Planetoid.OriginTransform.TransformPoint(QuadAABB.AABB[i]));
             if (d < closestDistance)
             {
                 closestCorner = QuadAABB.AABB[i];
@@ -819,14 +799,14 @@ public sealed class Quad : MonoBehaviour, IQuad
             }
         }
 
-        d = Vector3.Distance(Planetoid.LODTarget.position, Planetoid.transform.TransformPoint(middleNormalized));
+        d = Vector3.Distance(Planetoid.LODTarget.position, Planetoid.OriginTransform.TransformPoint(middleNormalized));
         if (d < closestDistance)
         {
             closestCorner = middleNormalized;
             closestDistance = d;
         }
 
-        return Planetoid.transform.TransformPoint(closestCorner);
+        return Planetoid.OriginTransform.TransformPoint(closestCorner);
     }
 
     private Vector3 GetClosestCorner()
@@ -838,24 +818,14 @@ public sealed class Quad : MonoBehaviour, IQuad
 
         Vector3 tl = Vector3.zero;
         Vector3 tr = Vector3.zero;
-        Vector3 middlePoint = Planetoid.transform.TransformPoint(middleNormalized);
+        Vector3 middlePoint = Planetoid.OriginTransform.TransformPoint(middleNormalized);
         Vector3 bl = Vector3.zero;
         Vector3 br = Vector3.zero;
 
-        if (Planetoid.GetData && GPUDataRecieved)
-        {
-            tl = Planetoid.transform.TransformPoint(quadCorners.topLeftCorner);
-            tr = Planetoid.transform.TransformPoint(quadCorners.topRightCorner);
-            bl = Planetoid.transform.TransformPoint(quadCorners.bottomLeftCorner);
-            br = Planetoid.transform.TransformPoint(quadCorners.bottomRightCorner);
-        }
-        else
-        {
-            tl = Planetoid.transform.TransformPoint(topLeftCorner.NormalizeToRadius(Planetoid.PlanetRadius));
-            tr = Planetoid.transform.TransformPoint(topRightCorner.NormalizeToRadius(Planetoid.PlanetRadius));
-            bl = Planetoid.transform.TransformPoint(bottomLeftCorner.NormalizeToRadius(Planetoid.PlanetRadius));
-            br = Planetoid.transform.TransformPoint(bottomRightCorner.NormalizeToRadius(Planetoid.PlanetRadius));
-        }
+        tl = Planetoid.OriginTransform.TransformPoint(quadCorners.topLeftCorner.NormalizeToRadius(Planetoid.PlanetRadius));
+        tr = Planetoid.OriginTransform.TransformPoint(quadCorners.topRightCorner.NormalizeToRadius(Planetoid.PlanetRadius));
+        bl = Planetoid.OriginTransform.TransformPoint(quadCorners.bottomLeftCorner.NormalizeToRadius(Planetoid.PlanetRadius));
+        br = Planetoid.OriginTransform.TransformPoint(quadCorners.bottomRightCorner.NormalizeToRadius(Planetoid.PlanetRadius));
 
         d = Vector3.Distance(Planetoid.LODTarget.position, tl);
 
@@ -922,98 +892,59 @@ public sealed class Quad : MonoBehaviour, IQuad
 
     public Vector3 GetCubeFaceEastDirection(QuadPosition quadPosition)
     {
-        var temp = Vector3.zero;
-        var r = Planetoid.PlanetRadius;
+        // NOTE : So, here i will construct vector with specific parameters.
+        // I need unit axis vector, depending on Quad Orientation [QuadPosition] with positive or negative value [Planet Radius].
+        // "Sign" will represent 'Is value negative or positive?'
+        // "Axis" will represent one component of vector, which should be 'valued' [X or Y or Z]. Other vector components will be zero...
+        // TOP      (0.0, 0.0, -r)      SIGN     1      AXIS    2   Z
+        // BUTTOM   (0.0, 0.0, -r)      SIGN     1      AXIS    2   Z
+        // LEFT     (0.0, -r, 0.0)      SIGN     1      AXIS    1   Y
+        // RIGHT    (0.0, -r, 0.0)      SIGN     1      AXIS    1   Y
+        // FRONT    (r, 0.0, 0.0)       SIGN     0      AXIS    0   X
+        // BACK     (r, 0.0, 0.0)       SIGN     0      AXIS    0   X
 
-        switch (quadPosition)
-        {
-            case QuadPosition.Top:
-                temp = new Vector3(0.0f, 0.0f, -r);
-                break;
-            case QuadPosition.Bottom:
-                temp = new Vector3(0.0f, 0.0f, -r);
-                break;
-            case QuadPosition.Left:
-                temp = new Vector3(0.0f, -r, 0.0f);
-                break;
-            case QuadPosition.Right:
-                temp = new Vector3(0.0f, -r, 0.0f);
-                break;
-            case QuadPosition.Front:
-                temp = new Vector3(r, 0.0f, 0.0f);
-                break;
-            case QuadPosition.Back:
-                temp = new Vector3(-r, 0.0f, 0.0f);
-                break;
-            default:
-                throw new ArgumentOutOfRangeException("quadPosition", quadPosition, null);
-        }
+        var sign = new byte[] { 1, 1, 1, 1, 0, 0 };
+        var axis = new byte[] { 2, 2, 1, 1, 0, 0 };
 
-        return temp;
+        return BrainFuckMath.FromQuadPositionMask(Planetoid.PlanetRadius, sign, axis, quadPosition);
     }
 
     public Vector3 GetCubeFaceNorthDirection(QuadPosition quadPosition)
     {
-        var temp = Vector3.zero;
-        var r = Planetoid.PlanetRadius;
+        // NOTE : So, here i will construct vector with specific parameters.
+        // I need unit axis vector, depending on Quad Orientation [QuadPosition] with positive or negative value [Planet Radius].
+        // "Sign" will represent 'Is value negative or positive?'
+        // "Axis" will represent one component of vector, which should be 'valued' [X or Y or Z]. Other vector components will be zero...
+        // TOP      (r, 0.0, 0.0)       SIGN     0      AXIS    0   X
+        // BUTTOM   (-r, 0.0, 0.0)      SIGN     1      AXIS    0   X
+        // LEFT     (0.0, 0.0, -r)      SIGN     1      AXIS    2   Z
+        // RIGHT    (0.0, 0.0, r)       SIGN     0      AXIS    2   Z
+        // FRONT    (0.0, -r, 0.0)      SIGN     1      AXIS    1   Y
+        // BACK     (0.0, r, 0.0)       SIGN     0      AXIS    1   Y
 
-        switch (quadPosition)
-        {
-            case QuadPosition.Top:
-                temp = new Vector3(r, 0.0f, 0.0f);
-                break;
-            case QuadPosition.Bottom:
-                temp = new Vector3(-r, 0.0f, 0.0f);
-                break;
-            case QuadPosition.Left:
-                temp = new Vector3(0.0f, 0.0f, -r);
-                break;
-            case QuadPosition.Right:
-                temp = new Vector3(0.0f, 0.0f, r);
-                break;
-            case QuadPosition.Front:
-                temp = new Vector3(0.0f, -r, 0.0f);
-                break;
-            case QuadPosition.Back:
-                temp = new Vector3(0.0f, -r, 0.0f);
-                break;
-            default:
-                throw new ArgumentOutOfRangeException("quadPosition", quadPosition, null);
-        }
+        var sign = new byte[] { 0, 1, 1, 0, 1, 0 };
+        var axis = new byte[] { 0, 0, 2, 2, 1, 1 };
 
-        return temp;
+        return BrainFuckMath.FromQuadPositionMask(Planetoid.PlanetRadius, sign, axis, quadPosition);
     }
 
     public Vector3 GetPatchCubeCenter(QuadPosition quadPosition)
     {
-        var temp = Vector3.zero;
-        var r = Planetoid.PlanetRadius;
+        // NOTE : So, here i will construct vector with specific parameters.
+        // I need unit axis vector, depending on Quad Orientation [QuadPosition] with positive or negative value [Planet Radius].
+        // "Sign" will represent 'Is value negative or positive?'
+        // "Axis" will represent one component of vector, which should be 'valued' [X or Y or Z]. Other vector components will be zero...
+        // TOP      (0.0, r, 0.0)       SIGN     0      AXIS    0   Y
+        // BUTTOM   (0.0, -r, 0.0)      SIGN     1      AXIS    0   Y
+        // LEFT     (-r, 0.0, 0.0)      SIGN     1      AXIS    2   X
+        // RIGHT    (r, 0.0, 0.0)       SIGN     0      AXIS    2   X
+        // FRONT    (0.0, 0.0, r)       SIGN     0      AXIS    1   Z
+        // BACK     (0.0, 0,0, -r)      SIGN     1      AXIS    1   Z
 
-        switch (quadPosition)
-        {
-            case QuadPosition.Top:
-                temp = new Vector3(0.0f, r, 0.0f);
-                break;
-            case QuadPosition.Bottom:
-                temp = new Vector3(0.0f, -r, 0.0f);
-                break;
-            case QuadPosition.Left:
-                temp = new Vector3(-r, 0.0f, 0.0f);
-                break;
-            case QuadPosition.Right:
-                temp = new Vector3(r, 0.0f, 0.0f);
-                break;
-            case QuadPosition.Front:
-                temp = new Vector3(0.0f, 0.0f, r);
-                break;
-            case QuadPosition.Back:
-                temp = new Vector3(0.0f, 0.0f, -r);
-                break;
-            default:
-                throw new ArgumentOutOfRangeException("quadPosition", quadPosition, null);
-        }
+        var sign = new byte[] { 0, 1, 1, 0, 0, 1 };
+        var axis = new byte[] { 1, 1, 0, 0, 2, 2 };
 
-        return temp;
+        return BrainFuckMath.FromQuadPositionMask(Planetoid.PlanetRadius, sign, axis, quadPosition);
     }
 
     public Vector3 GetPatchCubeCenterSplitted(QuadPosition quadPosition, int id, bool staticX, bool staticY, bool staticZ)
@@ -1104,8 +1035,7 @@ public sealed class Quad : MonoBehaviour, IQuad
 
     public Vector3 CalculateMiddlePoint(Vector3 topLeft, Vector3 bottomRight, Vector3 topRight, Vector3 bottomLeft)
     {
-        Vector3 size = bottomLeft - topLeft;
-        Vector3 middle = Vector3.zero;
+        var size = bottomLeft - topLeft;
 
         bool staticX = false, staticY = false, staticZ = false;
 
@@ -1113,8 +1043,7 @@ public sealed class Quad : MonoBehaviour, IQuad
 
         BrainFuckMath.DefineAxis(ref staticX, ref staticY, ref staticZ, size);
 
-        middle = (topLeft + bottomRight) * (1.0f / Mathf.Abs(LODLevel));
-        middle = middle.NormalizeToRadius(Planetoid.PlanetRadius);
+        var middle = ((topLeft + bottomRight) * (1.0f / Mathf.Abs(LODLevel))).NormalizeToRadius(Planetoid.PlanetRadius);
 
         BrainFuckMath.LockAxis(ref tempStatic, ref middle, staticX, staticY, staticZ);
         BrainFuckMath.UnlockAxis(ref middle, ref tempStatic, staticX, staticY, staticZ);

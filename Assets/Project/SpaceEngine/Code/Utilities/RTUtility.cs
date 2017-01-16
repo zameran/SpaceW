@@ -20,11 +20,10 @@
 // You can obtain a specific license from Inria: proland-licensing@inria.fr.
 //
 // Authors: Justin Hawkins 2014.
-// Modified by Denis Ovchinnikov 2015-2016
+// Modified by Denis Ovchinnikov 2015-2017
 #endregion
 
 using UnityEngine;
-using System.Collections;
 
 static public class RTUtility
 {

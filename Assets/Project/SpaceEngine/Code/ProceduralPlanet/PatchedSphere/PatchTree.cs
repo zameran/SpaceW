@@ -1,20 +1,72 @@
-using UnityEngine;
+#region License
+// Procedural planet generator.
+// 
+// Copyright (C) 2015-2017 Denis Ovchinnikov [zameran] 
+// All rights reserved.
+// 
+// Redistribution and use in source and binary forms, with or without
+// modification, are permitted provided that the following conditions
+// are met:
+// 1. Redistributions of source code must retain the above copyright
+//    notice, this list of conditions and the following disclaimer.
+// 2. Redistributions in binary form must reproduce the above copyright
+//    notice, this list of conditions and the following disclaimer in the
+//    documentation and/or other materials provided with the distribution.
+// 3. Neither the name of the copyright holders nor the names of its
+//    contributors may be used to endorse or promote products derived from
+//    this software without specific prior written permission.
+// 
+// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+// AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+// IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+// ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE
+// LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+// CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+// SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+// INTERRUPTION)HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+// CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+// ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF
+// THE POSSIBILITY OF SUCH DAMAGE.
+// 
+// Creation Date: Undefined
+// Creation Time: Undefined
+// Creator: zameran
+#endregion
 
 using System;
-using System.Collections.Generic;
+using System.Linq;
+
+using UnityEngine;
 
 using Object = UnityEngine.Object;
 
+[Serializable]
+public struct PatchData
+{
+    public Vector3[] Vertices;
+    public Vector3[] Normals;
+    public Vector3[] Volume;
+
+    public Vector2[] UV1;
+    public Vector2[] UV2;
+
+    public PatchData(int gridSize)
+    {
+        Vertices = new Vector3[gridSize];
+        Normals = new Vector3[gridSize];
+        Volume = new Vector3[gridSize];
+
+        UV2 = new Vector2[gridSize];
+        UV1 = new Vector2[gridSize];
+    }
+}
+
+[Serializable]
 public class PatchTree
 {
     public PatchSphere Sphere;
 
-    Vector3[] vertices;
-    Vector2[] uv;
-    Vector3[] normals;
-
-    Vector3[] vols;
-    Vector2[] uvvols;
+    public PatchData Data;
 
     public ushort SplitLevel;
 
@@ -35,64 +87,30 @@ public class PatchTree
     public Vector3 Middle;
     public Vector3 MiddleProjected;
 
-    public Vector3 PatchNormal;
+    public Vector3 Normal;
 
     public GameObject GameObject;
     public Mesh Mesh;
-    public MeshCollider Collider = null;
-
-    public static List<PatchColliderQueue> ColliderQueueList = new List<PatchColliderQueue>(32);
 
     public PatchTree Parent;
+
+    [NonSerialized]
     public PatchTree[] Children = new PatchTree[4];
+
     public PatchNeighbor[] Neighbors = new PatchNeighbor[4];
 
     byte NeedsRejoinCount;
     byte Edges;
     byte GapFixMask;
 
-    public Shader CoreShader;
-    public Material CoreMaterial;
-
-    static float lastCollider = Time.time;
-
-    public byte NEXT_EDGE(byte e) { return (byte)(e == 3 ? 0 : e + 1); }
-    public byte PREV_EDGE(byte e) { return (byte)(e == 0 ? 3 : e - 1); }
-
-    public static void NewColliderStart()
+    public byte NEXT_EDGE(byte e)
     {
-        const int MaxProcess = 1;
-        int c = (MaxProcess > ColliderQueueList.Count ? ColliderQueueList.Count : MaxProcess);
+        return (byte)(e == 3 ? 0 : e + 1);
+    }
 
-        if (c > 0)
-        {
-            float t = Time.time;
-            if (t - lastCollider < 0.01f) return;
-            lastCollider = t;
-        }
-
-        for (int i = 0; i < c; i++)
-        {
-            if (ColliderQueueList[i].Update)
-            {
-                if (ColliderQueueList[i].Tree.Collider != null)
-                {
-                    // update RingSegmentMesh collider
-                    ColliderQueueList[i].Tree.Collider.sharedMesh = null;
-                    ColliderQueueList[i].Tree.Collider.sharedMesh = ColliderQueueList[i].Tree.Mesh;
-                }
-            }
-            else
-            {
-                if (ColliderQueueList[i].Tree.GameObject != null)
-                {
-                    // add RingSegmentMesh collider to the patch
-                    ColliderQueueList[i].Tree.Collider = (MeshCollider)ColliderQueueList[i].Tree.GameObject.AddComponent<MeshCollider>();
-                }
-            }
-        }
-
-        ColliderQueueList.RemoveRange(0, c);
+    public byte PREV_EDGE(byte e)
+    {
+        return (byte)(e == 0 ? 3 : e - 1);
     }
 
     public PatchTree(Vector3 Up, Vector3 Front, PatchSphere Sphere)
@@ -119,7 +137,7 @@ public class PatchTree
 
         GenerateVolume();
 
-        Plane = new Plane(Volume.vertices[0], Volume.vertices[2], Volume.vertices[1]);
+        Plane = new Plane(Volume.Vertices[0], Volume.Vertices[2], Volume.Vertices[1]);
     }
 
     public PatchTree(PatchTree Parent, PatchAABB Volume)
@@ -134,27 +152,27 @@ public class PatchTree
 
         Size = this.Parent.Size / 2;
 
-        Vector3 v1 = this.Volume.vertices[0];
-        Vector3 v2 = this.Volume.vertices[1];
-        Vector3 v3 = this.Volume.vertices[2];
-        Vector3 v4 = this.Volume.vertices[3];
+        var v1 = this.Volume.Vertices[0];
+        var v2 = this.Volume.Vertices[1];
+        var v3 = this.Volume.Vertices[2];
+        var v4 = this.Volume.Vertices[3];
 
-        Vector2 uv1 = this.Volume.uvs[0];
-        Vector2 uv2 = this.Volume.uvs[1];
-        Vector2 uv3 = this.Volume.uvs[2];
-        Vector2 uv4 = this.Volume.uvs[3];
+        var uv1 = this.Volume.UVs[0];
+        var uv2 = this.Volume.UVs[1];
+        var uv3 = this.Volume.UVs[2];
+        var uv4 = this.Volume.UVs[3];
 
         VolumeProjected = new PatchAABB();
 
-        VolumeProjected.vertices.Add(v1.NormalizeToRadius(Sphere.Radius));
-        VolumeProjected.vertices.Add(v2.NormalizeToRadius(Sphere.Radius));
-        VolumeProjected.vertices.Add(v3.NormalizeToRadius(Sphere.Radius));
-        VolumeProjected.vertices.Add(v4.NormalizeToRadius(Sphere.Radius));
+        VolumeProjected.Vertices.Add(v1.NormalizeToRadius(Sphere.Radius));
+        VolumeProjected.Vertices.Add(v2.NormalizeToRadius(Sphere.Radius));
+        VolumeProjected.Vertices.Add(v3.NormalizeToRadius(Sphere.Radius));
+        VolumeProjected.Vertices.Add(v4.NormalizeToRadius(Sphere.Radius));
 
-        VolumeProjected.uvs.Add(uv1);
-        VolumeProjected.uvs.Add(uv2);
-        VolumeProjected.uvs.Add(uv3);
-        VolumeProjected.uvs.Add(uv4);
+        VolumeProjected.UVs.Add(uv1);
+        VolumeProjected.UVs.Add(uv2);
+        VolumeProjected.UVs.Add(uv3);
+        VolumeProjected.UVs.Add(uv4);
 
         Neighbors[0].Node = Neighbors[1].Node = Neighbors[2].Node = Neighbors[3].Node = null;
         Neighbors[0].isFixed = Neighbors[1].isFixed = Neighbors[2].isFixed = Neighbors[3].isFixed = false;
@@ -166,16 +184,16 @@ public class PatchTree
         NeedsTerrain = true;
         GapFixMask = 15;
 
-        PatchNormal = this.Parent.PatchNormal;
+        Normal = this.Parent.Normal;
 
-        Middle = (Volume.vertices[0] + Volume.vertices[1] + Volume.vertices[2] + Volume.vertices[3]) / 4;
+        Middle = (Volume.Vertices[0] + Volume.Vertices[1] + Volume.Vertices[2] + Volume.Vertices[3]) / 4;
         MiddleProjected = Middle;
         MiddleProjected = MiddleProjected.NormalizeToRadius(Sphere.Radius);
 
         UpProjected = MiddleProjected;
         UpProjected.Normalize();
 
-        FrontProjected = Vector3.Lerp(VolumeProjected.vertices[0], VolumeProjected.vertices[1], 0.5f) - MiddleProjected;
+        FrontProjected = Vector3.Lerp(VolumeProjected.Vertices[0], VolumeProjected.Vertices[1], 0.5f) - MiddleProjected;
         FrontProjected.Normalize();
 
         Plane = this.Parent.Plane;
@@ -216,7 +234,7 @@ public class PatchTree
             {
                 Object.Destroy(Mesh);
                 Object.Destroy(GameObject);
-            }          
+            }
 
             Mesh = null;
             GameObject = null;
@@ -225,28 +243,35 @@ public class PatchTree
 
     private void GenerateVolume()
     {
-        Vector3 left = -Right;
+        var left = -Right;
 
-        Vector3 v1 = (left * Sphere.Radius) + (Front * Sphere.Radius) + (Up * Sphere.Radius);       //left far
-        Vector3 v2 = (left * -Sphere.Radius) + (Front * Sphere.Radius) + (Up * Sphere.Radius);      //right far
-        Vector3 v3 = (left * -Sphere.Radius) + (Front * -Sphere.Radius) + (Up * Sphere.Radius);     //right near
-        Vector3 v4 = (left * Sphere.Radius) + (Front * -Sphere.Radius) + (Up * Sphere.Radius);      //left near
+        var v1 = (left * Sphere.Radius) + (Front * Sphere.Radius) + (Up * Sphere.Radius); //left far
+        var v2 = (left * -Sphere.Radius) + (Front * Sphere.Radius) + (Up * Sphere.Radius); //right far
+        var v3 = (left * -Sphere.Radius) + (Front * -Sphere.Radius) + (Up * Sphere.Radius); //right near
+        var v4 = (left * Sphere.Radius) + (Front * -Sphere.Radius) + (Up * Sphere.Radius); //left near
 
-        Vector3 uv1 = new Vector3(0, 0, 0);
-        Vector3 uv2 = new Vector3(1, 0, 0);
-        Vector3 uv3 = new Vector3(1, 1, 0);
-        Vector3 uv4 = new Vector3(0, 1, 0);
+        var uv1 = new Vector3(0, 0, 0);
+        var uv2 = new Vector3(1, 0, 0);
+        var uv3 = new Vector3(1, 1, 0);
+        var uv4 = new Vector3(0, 1, 0);
 
         Volume = new PatchAABB();
-        Volume.vertices.Add(v1); Volume.uvs.Add(uv1);
-        Volume.vertices.Add(v2); Volume.uvs.Add(uv2);
-        Volume.vertices.Add(v3); Volume.uvs.Add(uv3);
-        Volume.vertices.Add(v4); Volume.uvs.Add(uv4);
 
-        Vector3 v5 = v1;
-        Vector3 v6 = v2;
-        Vector3 v7 = v3;
-        Vector3 v8 = v4;
+        Volume.Vertices.Add(v1);
+        Volume.Vertices.Add(v2);
+        Volume.Vertices.Add(v3);
+        Volume.Vertices.Add(v4);
+
+
+        Volume.UVs.Add(uv1);
+        Volume.UVs.Add(uv2);
+        Volume.UVs.Add(uv3);
+        Volume.UVs.Add(uv4);
+
+        var v5 = v1;
+        var v6 = v2;
+        var v7 = v3;
+        var v8 = v4;
 
         v5 = v5.NormalizeToRadius(Sphere.Radius);
         v6 = v6.NormalizeToRadius(Sphere.Radius);
@@ -254,184 +279,79 @@ public class PatchTree
         v8 = v8.NormalizeToRadius(Sphere.Radius);
 
         VolumeProjected = new PatchAABB();
-        VolumeProjected.vertices.Add(v5);
-        VolumeProjected.vertices.Add(v6);
-        VolumeProjected.vertices.Add(v7);
-        VolumeProjected.vertices.Add(v8);
 
-        PatchNormal = Up;
+        VolumeProjected.Vertices.Add(v5);
+        VolumeProjected.Vertices.Add(v6);
+        VolumeProjected.Vertices.Add(v7);
+        VolumeProjected.Vertices.Add(v8);
+
+        Normal = Up;
 
         Middle = (v1 + v2 + v3 + v4) / 4;
         MiddleProjected = Middle;
         MiddleProjected = MiddleProjected.NormalizeToRadius(Sphere.Radius);
     }
 
-    private void RenderTextures(out Texture2D Heightmap, out Texture2D HeightmapLowRes, out Texture2D Normalmap)
-    {
-        //TODO : Fix texture sliding.
-
-        int PackedTextureResolution = Sphere.PatchConfig.LevelHeightMapRes(SplitLevel);
-        int LowResTextureResolution = Sphere.PatchConfig.PatchSize;
-
-        var WrapMode = Sphere.WrapMode;
-        var TextureFilterMode = Sphere.TextureFilterMode;
-        var Mipmaps = Sphere.Mipmaps;
-        var POT = Sphere.POT;
-        var AnisoLevel = Sphere.AnisoLevel;
-
-        RenderTexture heightmapRT = RTExtensions.CreateRTexture(new Vector2(PackedTextureResolution, PackedTextureResolution), 0,
-                                                                            RenderTextureFormat.ARGB32,
-                                                                            TextureFilterMode,
-                                                                            WrapMode, Mipmaps, AnisoLevel, POT);
-
-        RenderTexture normalmapRT = RTExtensions.CreateRTexture(new Vector2(PackedTextureResolution, PackedTextureResolution), 0,
-                                                                            RenderTextureFormat.ARGB32,
-                                                                            TextureFilterMode,
-                                                                            WrapMode, Mipmaps, AnisoLevel, POT);
-
-        RenderTexture heightmapRTLowRes = RTExtensions.CreateRTexture(new Vector2(LowResTextureResolution, LowResTextureResolution), 0,
-                                                                      RenderTextureFormat.ARGB32,
-                                                                      TextureFilterMode,
-                                                                      WrapMode, Mipmaps, AnisoLevel, POT);
-
-        Heightmap = new Texture2D(PackedTextureResolution, PackedTextureResolution, TextureFormat.ARGB32, Mipmaps);
-        Heightmap.wrapMode = WrapMode;
-        Heightmap.filterMode = TextureFilterMode;
-        Heightmap.anisoLevel = AnisoLevel;
-        Heightmap.Apply();
-
-        HeightmapLowRes = new Texture2D(LowResTextureResolution, LowResTextureResolution, TextureFormat.ARGB32, Mipmaps);
-        HeightmapLowRes.wrapMode = WrapMode;
-        HeightmapLowRes.filterMode = TextureFilterMode;
-        HeightmapLowRes.anisoLevel = AnisoLevel;
-        HeightmapLowRes.Apply();
-
-        Normalmap = new Texture2D(PackedTextureResolution, PackedTextureResolution, TextureFormat.ARGB32, Mipmaps);
-        Normalmap.wrapMode = WrapMode;
-        Normalmap.filterMode = TextureFilterMode;
-        Normalmap.anisoLevel = AnisoLevel;
-        Normalmap.Apply();
-
-        RenderTexture.active = heightmapRT;
-        Sphere.RenderQuadVolume(PackedTextureResolution, PackedTextureResolution, CoreMaterial, Volume, 0);
-        Heightmap.ReadPixels(new Rect(0, 0, PackedTextureResolution, PackedTextureResolution), 0, 0, false);
-        Heightmap.Apply();
-        RenderTexture.active = null;
-
-        RenderTexture.active = heightmapRTLowRes;
-        Sphere.RenderQuadVolume(LowResTextureResolution, LowResTextureResolution, CoreMaterial, Volume, 0);
-        HeightmapLowRes.ReadPixels(new Rect(0, 0, LowResTextureResolution, LowResTextureResolution), 0, 0, false);
-        HeightmapLowRes.Apply();
-        RenderTexture.active = null;
-
-        CoreMaterial.SetFloat("_UVStep", 1.0f / PackedTextureResolution);
-        CoreMaterial.SetTexture("_Heightmap", Heightmap);
-        CoreMaterial.SetFloat("_HeightScale", Sphere.TerrainMaxHeight);
-
-        RenderTexture.active = normalmapRT;
-        Sphere.RenderQuadVolume(PackedTextureResolution, PackedTextureResolution, CoreMaterial, Volume, 1);
-        Normalmap.ReadPixels(new Rect(0, 0, PackedTextureResolution, PackedTextureResolution), 0, 0, false);
-        Normalmap.Apply();
-        RenderTexture.active = null;
-    }
-
     private void GenerateTerrain()
     {
-        CoreShader = Sphere.CoreShader;
-        CoreMaterial = Sphere.CoreMaterial;
-
-        if (Sphere.ParentPlanet != null)
+        GameObject = new GameObject
         {
-            if (Sphere.ParentPlanet is Planetoid)
-            {
-                Planetoid planetoid = Sphere.ParentPlanet as Planetoid;
-
-                planetoid.tccps.UpdateUniforms(CoreMaterial);
-                planetoid.NPS.UpdateUniforms(CoreMaterial);
-            }
-        }
-
-        Texture2D Heightmap;
-        Texture2D HeightmapLowRes;
-        Texture2D Normalmap;
-
-        RenderTextures(out Heightmap, out HeightmapLowRes, out Normalmap);
-
-        GameObject = new GameObject();
-        GameObject.name = "Patch_LOD_ " + SplitLevel + " : [" + Up + "]";
-        GameObject.layer = Sphere.gameObject.layer;
-        //GameObject.hideFlags = HideFlags.HideInHierarchy | HideFlags.HideInInspector;
-        GameObject.AddComponent<MeshFilter>();
-        GameObject.AddComponent<MeshRenderer>();
-        GameObject.GetComponent<MeshRenderer>().sharedMaterial = new Material(Sphere.Shader);
-
-        if(GameObject.GetComponent<MeshRenderer>().sharedMaterial.HasProperty("_MainTex"))
-            GameObject.GetComponent<MeshRenderer>().sharedMaterial.SetTexture("_MainTex", Normalmap);
+            name = "Patch_LOD_ " + SplitLevel + " : [" + Up + "]",
+            layer = Sphere.gameObject.layer
+        };
 
         Mesh = new Mesh();
+        Data = new PatchData(PatchSettings.Vertices);
 
-        vertices = new Vector3[Sphere.PatchConfig.GridSize];
-        uv = new Vector2[Sphere.PatchConfig.GridSize];
-        vols = new Vector3[Sphere.PatchConfig.GridSize];
-        uvvols = new Vector2[Sphere.PatchConfig.GridSize];
-        normals = new Vector3[Sphere.PatchConfig.GridSize];
+        var origin = Volume.Vertices[0];
 
-        Color[] heights = HeightmapLowRes.GetPixels();
+        var vertStep = Size / (PatchSettings.VerticesPerSide - 1); //vertex spacing
+        var startHMap = 1.0f;
+        var endHMap = 1.0f - startHMap;
 
-        Vector3 origin = Volume.vertices[0];
+        var uCoord = startHMap;
+        var vCoord = startHMap; //uv coordinates for the heightmap
 
-        float vertStep = Size / (Sphere.PatchConfig.PatchSize - 1);                                         //vertex spacing
+        var uvStep = (endHMap - startHMap) / (PatchSettings.VerticesPerSide - 1); //hmap uv step size inside the loop
 
-        float startHMap = 1.0f / Sphere.PatchConfig.LevelHeightMapRes(SplitLevel);
-        float endHMap = 1.0f - startHMap;
-        float uCoord = startHMap, vCoord = startHMap;                                                       //uv coordinates for the heightmap
-        float uvStep = (endHMap - startHMap) / (Sphere.PatchConfig.PatchSize - 1);                          //hmap uv step size inside the loop
+        var uVolCoord = Volume.UVs[0].x;
+        var vVolCoord = Volume.UVs[0].y; //flat uv coordinates for the cube face
 
-        float uVolCoord, vVolCoord = Volume.uvs[0].y;                                                       //flat uv coordinates for the cube face
-        float volCoordStep = (Volume.uvs[1].x - Volume.uvs[0].x) / (Sphere.PatchConfig.PatchSize - 1);      //step size of flat uv inside the loop
+        var volCoordStep = (Volume.UVs[1].x - Volume.UVs[0].x) / (PatchSettings.VerticesPerSide - 1); //step size of flat uv inside the loop
+        var idx = 0;
 
-        float maxHeight = -999999999.0f;
-
-        int idx = 0;
-
-        for (ushort y = 0; y < Sphere.PatchConfig.PatchSize; y++)
+        for (ushort y = 0; y < PatchSettings.VerticesPerSide; y++)
         {
-            Vector3 offset = origin;
+            var offset = origin;
 
             uCoord = startHMap;
-            uVolCoord = Volume.uvs[0].x;
+            uVolCoord = Volume.UVs[0].x;
 
-            for (ushort x = 0; x < Sphere.PatchConfig.PatchSize; x++)
+            for (ushort x = 0; x < PatchSettings.VerticesPerSide; x++)
             {
-                //get sampled height from the low res packed heightmap
-                float height = heights[idx].a;
-
-                height = height * Sphere.TerrainMaxHeight;
-                if (height > maxHeight) maxHeight = height;
-
                 //heightmap texture coordinates
-                uv[idx] = new Vector2(uCoord, vCoord);
+                Data.UV1[idx] = new Vector2(uCoord, vCoord);
                 uCoord += uvStep;
 
                 //volume texture coordinates
                 //x,y = flat volume uv coordinates
                 //z = vertex slope
-                uvvols[idx] = new Vector2(uVolCoord, vVolCoord);
+                Data.UV2[idx] = new Vector2(uVolCoord, vVolCoord);
                 uVolCoord += volCoordStep;
 
                 //calculate vertex position
-                Vector3 vtx = offset;
+                var vtx = offset;
 
                 //use normalized vertex position as vertex normal
                 vtx.Normalize();
-                normals[idx] = vtx;
+                Data.Normals[idx] = vtx;
 
                 //scale to sphere
-                vtx = vtx * (Sphere.Radius + height);
+                vtx = vtx * Sphere.Radius;
 
                 //store
-                vertices[idx] = vtx;
-                vols[idx] = offset;
+                Data.Vertices[idx] = vtx;
+                Data.Volume[idx] = offset;
 
                 idx++;
                 offset += Right * vertStep;
@@ -443,41 +363,34 @@ public class PatchTree
         }
 
         //update projected center
-        MiddleProjected = MiddleProjected.NormalizeToRadius(Sphere.Radius + maxHeight);
+        MiddleProjected = MiddleProjected.NormalizeToRadius(Sphere.Radius);
 
         //save original parent transformations
-        Vector3 parentPos = Sphere.gameObject.transform.position;
-        Quaternion parentQua = Sphere.gameObject.transform.rotation;
+        var parentPosition = Sphere.gameObject.transform.position;
+        var parentRotation = Sphere.gameObject.transform.rotation;
 
-        //reset parent transformations before assigning RingSegmentMesh data (so our vertices will be centered on the parent transform)
+        //reset parent transformations before assigning data (so our vertices will be centered on the parent transform)
         Sphere.gameObject.transform.position = Vector3.zero;
         Sphere.gameObject.transform.rotation = Quaternion.identity;
 
         //put this node as a child of parent
         GameObject.transform.parent = Sphere.gameObject.transform;
 
-        //assign data to this node's RingSegmentMesh
-        Mesh.vertices = vertices;
-        Mesh.uv = uv;                   //vertex uv coordinates
-        Mesh.uv2 = uvvols;              //passing flat patch volume uv coordinates as second texcoords
-        Mesh.normals = normals;
-        Mesh.triangles = Sphere.PatchManager.Patches[Edges];
+        //assign data to this node's mesh
+        Mesh.SetVertices(Data.Vertices.ToList());
+        Mesh.SetUVs(0, Data.UV1.ToList());
+        Mesh.SetUVs(1, Data.UV2.ToList());
+        Mesh.SetNormals(Data.Normals.ToList());
+        Mesh.SetTriangles(Sphere.PatchManager.Patches[Edges], 0);
         Mesh.hideFlags = HideFlags.DontSave;
 
         MeshFactory.SolveTangents(Mesh);
 
         Mesh.RecalculateBounds();
-        GameObject.GetComponent<MeshFilter>().mesh = Mesh;
 
         //restore parent transformations
-        Sphere.gameObject.transform.position = parentPos;
-        Sphere.gameObject.transform.rotation = parentQua;
-
-        if (SplitLevel >= Sphere.MaxSplitLevel)
-        {
-            //add RingSegmentMesh collider to the patch through the lazy creator
-            ColliderQueueList.Add(new PatchColliderQueue() { Tree = this, Update = false });
-        }
+        Sphere.gameObject.transform.position = parentPosition;
+        Sphere.gameObject.transform.rotation = parentRotation;
 
         NeedsTerrain = false;
 
@@ -487,9 +400,14 @@ public class PatchTree
             Parent.DestroyNode();
         }
 
-        Patch patch = GameObject.AddComponent<Patch>();
+        var patch = GameObject.AddComponent<Patch>();
+        var meshFilter = GameObject.AddComponent<MeshFilter>();
+
+        GameObject.AddComponent<MeshRenderer>();
+        GameObject.GetComponent<MeshRenderer>().sharedMaterial = MaterialHelper.CreateTemp(Sphere.Shader, "Patch");
+
+        meshFilter.mesh = Mesh;
         patch.PatchTree = this;
-        //patch.Texture = Heightmap;
     }
 
     private void GapFix(byte directionsMask)
@@ -507,19 +425,22 @@ public class PatchTree
         //0100 == bottom edge at half-res
         //1000 == left edge at half-res
 
-        short idxTopLeft = 0;
-        short idxTopRight = (short)(Sphere.PatchConfig.PatchSize - 1);
-        short idxBottomLeft = (short)((Sphere.PatchConfig.PatchSize - 1) * Sphere.PatchConfig.PatchSize);
-        short idxBottomRight = (short)(idxBottomLeft + idxTopRight);
+        var idxTopLeft = (short)0;
+        var idxTopRight = (short)(PatchSettings.VerticesPerSide - 1);
+        var idxBottomLeft = (short)((PatchSettings.VerticesPerSide - 1) * PatchSettings.VerticesPerSide);
+        var idxBottomRight = (short)(idxBottomLeft + idxTopRight);
 
         for (byte direction = 0; direction < 4; direction++)
         {
-            byte bit = (byte)(1 << direction);
+            var bit = (byte)(1 << direction);
+
             if ((bit & directionsMask) > 0)
             {
                 short add = 0;
 
-                if (Neighbors[direction].Node.HasChildren) { }
+                if (Neighbors[direction].Node.HasChildren)
+                {
+                }
                 else
                 {
                     switch ((NeighborDirection)direction)
@@ -529,9 +450,14 @@ public class PatchTree
                                 posHere = 0;
                                 incHere = 1;
 
-                                PatchTree np = Neighbors[(int)NeighborDirection.Right].Node.Parent;
+                                var parent = Neighbors[(int)NeighborDirection.Right].Node.Parent;
 
-                                add = (short)(np != null && Parent != null && np.Equals(Parent) && Neighbors[(int)NeighborDirection.Right].Node.Neighbors[(int)NeighborDirection.Top].Node.Equals(Neighbors[direction].Node) ? 0 : (Sphere.PatchConfig.PatchSize >> 1));
+                                add =
+                                    (short)
+                                        (parent != null && Parent != null && parent.Equals(Parent) &&
+                                         Neighbors[(int)NeighborDirection.Right].Node.Neighbors[(int)NeighborDirection.Top].Node.Equals(Neighbors[direction].Node)
+                                            ? 0
+                                            : (PatchSettings.VerticesPerSide >> 1));
 
                                 switch (Neighbors[direction].Direction)
                                 {
@@ -552,14 +478,14 @@ public class PatchTree
                                     case NeighborDirection.Left:
                                         {
                                             posThere = idxTopLeft;
-                                            incThere = (short)(Sphere.PatchConfig.PatchSize);
+                                            incThere = (short)(PatchSettings.VerticesPerSide);
                                             break;
                                         }
 
                                     case NeighborDirection.Right:
                                         {
                                             posThere = idxBottomRight;
-                                            incThere = (short)(-Sphere.PatchConfig.PatchSize);
+                                            incThere = (short)(-PatchSettings.VerticesPerSide);
                                             break;
                                         }
                                 }
@@ -569,11 +495,16 @@ public class PatchTree
                         case NeighborDirection.Right:
                             {
                                 posHere = idxTopRight;
-                                incHere = (short)(Sphere.PatchConfig.PatchSize);
+                                incHere = (short)(PatchSettings.VerticesPerSide);
 
-                                PatchTree np = Neighbors[(int)NeighborDirection.Bottom].Node.Parent;
+                                var parent = Neighbors[(int)NeighborDirection.Bottom].Node.Parent;
 
-                                add = (short)(np != null && Parent != null && np.Equals(Parent) && Neighbors[(int)NeighborDirection.Bottom].Node.Neighbors[(int)NeighborDirection.Right].Node.Equals(Neighbors[direction].Node) ? 0 : (Sphere.PatchConfig.PatchSize >> 1));
+                                add =
+                                    (short)
+                                        (parent != null && Parent != null && parent.Equals(Parent) &&
+                                         Neighbors[(int)NeighborDirection.Bottom].Node.Neighbors[(int)NeighborDirection.Right].Node.Equals(Neighbors[direction].Node)
+                                            ? 0
+                                            : (PatchSettings.VerticesPerSide >> 1));
 
                                 switch (Neighbors[direction].Direction)
                                 {
@@ -594,14 +525,14 @@ public class PatchTree
                                     case NeighborDirection.Left:
                                         {
                                             posThere = idxTopLeft;
-                                            incThere = (short)(Sphere.PatchConfig.PatchSize);
+                                            incThere = (short)(PatchSettings.VerticesPerSide);
                                             break;
                                         }
 
                                     case NeighborDirection.Right:
                                         {
                                             posThere = idxBottomRight;
-                                            incThere = (short)(-Sphere.PatchConfig.PatchSize);
+                                            incThere = (short)(-PatchSettings.VerticesPerSide);
                                             break;
                                         }
                                 }
@@ -613,9 +544,14 @@ public class PatchTree
                                 posHere = idxBottomRight;
                                 incHere = -1;
 
-                                PatchTree np = Neighbors[(int)NeighborDirection.Left].Node.Parent;
+                                var parent = Neighbors[(int)NeighborDirection.Left].Node.Parent;
 
-                                add = (short)(np != null && Parent != null && np.Equals(Parent) && Neighbors[(int)NeighborDirection.Left].Node.Neighbors[(int)NeighborDirection.Bottom].Node.Equals(Neighbors[direction].Node) ? 0 : (Sphere.PatchConfig.PatchSize >> 1));
+                                add =
+                                    (short)
+                                        (parent != null && Parent != null && parent.Equals(Parent) &&
+                                         Neighbors[(int)NeighborDirection.Left].Node.Neighbors[(int)NeighborDirection.Bottom].Node.Equals(Neighbors[direction].Node)
+                                            ? 0
+                                            : (PatchSettings.VerticesPerSide >> 1));
 
                                 switch (Neighbors[direction].Direction)
                                 {
@@ -636,14 +572,14 @@ public class PatchTree
                                     case NeighborDirection.Left:
                                         {
                                             posThere = idxTopLeft;
-                                            incThere = (short)(Sphere.PatchConfig.PatchSize);
+                                            incThere = (short)(PatchSettings.VerticesPerSide);
                                             break;
                                         }
 
                                     case NeighborDirection.Right:
                                         {
                                             posThere = idxBottomRight;
-                                            incThere = (short)(-Sphere.PatchConfig.PatchSize);
+                                            incThere = (short)(-PatchSettings.VerticesPerSide);
                                             break;
                                         }
                                 }
@@ -653,11 +589,16 @@ public class PatchTree
                         case NeighborDirection.Left:
                             {
                                 posHere = idxBottomLeft;
-                                incHere = (short)(-Sphere.PatchConfig.PatchSize);
+                                incHere = (short)(-PatchSettings.VerticesPerSide);
 
-                                PatchTree np = Neighbors[(int)NeighborDirection.Top].Node.Parent;
+                                var parent = Neighbors[(int)NeighborDirection.Top].Node.Parent;
 
-                                add = (short)(np != null && Parent != null && np.Equals(Parent) && Neighbors[(int)NeighborDirection.Top].Node.Neighbors[(int)NeighborDirection.Left].Node.Equals(Neighbors[direction].Node) ? 0 : (Sphere.PatchConfig.PatchSize >> 1));
+                                add =
+                                    (short)
+                                        (parent != null && Parent != null && parent.Equals(Parent) &&
+                                         Neighbors[(int)NeighborDirection.Top].Node.Neighbors[(int)NeighborDirection.Left].Node.Equals(Neighbors[direction].Node)
+                                            ? 0
+                                            : (PatchSettings.VerticesPerSide >> 1));
 
                                 switch (Neighbors[direction].Direction)
                                 {
@@ -678,14 +619,14 @@ public class PatchTree
                                     case NeighborDirection.Left:
                                         {
                                             posThere = idxTopLeft;
-                                            incThere = (short)(Sphere.PatchConfig.PatchSize);
+                                            incThere = (short)(PatchSettings.VerticesPerSide);
                                             break;
                                         }
 
                                     case NeighborDirection.Right:
                                         {
                                             posThere = idxBottomRight;
-                                            incThere = (short)(-Sphere.PatchConfig.PatchSize);
+                                            incThere = (short)(-PatchSettings.VerticesPerSide);
                                             break;
                                         }
                                 }
@@ -693,7 +634,7 @@ public class PatchTree
                             }
                     }
 
-                    ushort loopLen = Sphere.PatchConfig.PatchSize;
+                    var loopLen = PatchSettings.VerticesPerSide;
 
                     //check for half-resolution neighbor
                     if ((Edges & bit) > 0)
@@ -707,19 +648,19 @@ public class PatchTree
                         posThere += (short)(add * incThere);
                     }
 
-                    bool fixedHere = false;
+                    var fixedHere = false;
 
                     //fix the first edge vertex only
                     //if it's not already fixed by the edge at left (counter-clockwise) of current edge
                     if (!Neighbors[PREV_EDGE(direction)].isFixed)
                     {
-                        vertices[posHere] = Neighbors[direction].Node.vertices[posThere];
+                        Data.Vertices[posHere] = Neighbors[direction].Node.Data.Vertices[posThere];
                         fixedHere = true;
                     }
                     else
                     {
                         //instead, fix the vertex of the other node
-                        Neighbors[direction].Node.vertices[posThere] = vertices[posHere];
+                        Neighbors[direction].Node.Data.Vertices[posThere] = Data.Vertices[posHere];
                     }
 
                     posHere += incHere;
@@ -729,7 +670,7 @@ public class PatchTree
 
                     while (x < loopLen - 2)
                     {
-                        Neighbors[direction].Node.vertices[posThere] = vertices[posHere];
+                        Neighbors[direction].Node.Data.Vertices[posThere] = Data.Vertices[posHere];
 
                         x++;
 
@@ -741,35 +682,25 @@ public class PatchTree
                     //if it's not already fixed by the edge at right (clockwise) of current edge
                     if (!Neighbors[NEXT_EDGE(direction)].isFixed)
                     {
-                        vertices[posHere] = Neighbors[direction].Node.vertices[posThere];
+                        Data.Vertices[posHere] = Neighbors[direction].Node.Data.Vertices[posThere];
                         fixedHere = true;
                     }
                     else
                     {
                         //instead, fix the vertex of the other node
-                        Neighbors[direction].Node.vertices[posThere] = vertices[posHere];
+                        Neighbors[direction].Node.Data.Vertices[posThere] = Data.Vertices[posHere];
                     }
 
-                    //reupload vertices to the RingSegmentMesh in this node and update its physics RingSegmentMesh
+                    //reupload vertices to the mesh in this node and update its physics mesh
                     if (fixedHere)
                     {
-                        Mesh.vertices = vertices;
+                        Mesh.vertices = Data.Vertices;
                         Mesh.RecalculateBounds();
-
-                        if (Collider != null)
-                        {
-                            ColliderQueueList.Add(new PatchColliderQueue() { Tree = this, Update = true });
-                        }
                     }
 
-                    //reupload vertices to the neighbor RingSegmentMesh in the other node and update its physics RingSegmentMesh
-                    Neighbors[direction].Node.Mesh.vertices = Neighbors[direction].Node.vertices;
+                    //reupload vertices to the neighbor mesh in the other node and update its physics mesh
+                    Neighbors[direction].Node.Mesh.vertices = Neighbors[direction].Node.Data.Vertices;
                     Neighbors[direction].Node.Mesh.RecalculateBounds();
-
-                    if (Neighbors[direction].Node.Collider != null)
-                    {
-                        ColliderQueueList.Add(new PatchColliderQueue() { Tree = Neighbors[direction].Node, Update = true });
-                    }
 
                     //fixed
                     Neighbors[direction].isFixed = true;
@@ -781,7 +712,7 @@ public class PatchTree
         }
     }
 
-    public void RefreshTerrain(Vector3 entityPos, Vector3 invCamPos)
+    public void RefreshLOD()
     {
         if (!HasChildren)
         {
@@ -789,14 +720,12 @@ public class PatchTree
             {
                 GenerateTerrain();
             }
-
-            NewColliderStart();
         }
         else
         {
             for (byte i = 0; i < 4; i++)
             {
-                Children[i].RefreshTerrain(entityPos, invCamPos);
+                Children[i].RefreshLOD();
             }
         }
     }
@@ -830,26 +759,20 @@ public class PatchTree
         if (!HasChildren)
         {
             //project entityPos to the flat plane
-            Vector3 pos = entityPos;
+            var position = entityPos;
 
-            float t;
-            float d1 = Plane.GetDistanceToPoint(pos);
-            float d2 = Plane.distance;
-            float dd = d2 - d1;
+            var distanceToPlane = Plane.GetDistanceToPoint(position);
+            var distanceToOrigin = Plane.distance;
+            var distanceDelta = distanceToOrigin - distanceToPlane;
 
-            if (dd != 0)
-                t = -d1 / dd;
-            else
-                t = 0;
-
-            pos = pos * (1.0f - t);
+            position = position * (1.0f - (Math.Abs(distanceDelta) > 0.01f ? (-distanceToPlane / distanceDelta) : 0));
 
             //check distance to the center of the patch
-            float patchDist = VectorHelper.QuickDistance(Middle, pos);
+            var patchDistance = VectorHelper.QuickDistance(Middle, position);
 
-            if (SplitLevel > 1 && patchDist < Sphere.MinCamDist)
+            if (SplitLevel > 1 && patchDistance < Sphere.MinCamDist)
             {
-                Sphere.MinCamDist = patchDist;
+                Sphere.MinCamDist = patchDistance;
                 Sphere.CloserNode = this;
             }
 
@@ -864,9 +787,9 @@ public class PatchTree
                 {
                     //check distance of this node's center to the camera
                     //coordinates are local, as if the planet were in origin
-                    float LastCamDist = VectorHelper.QuickDistance(MiddleProjected, entityPos);
+                    var cameraDistance = VectorHelper.QuickDistance(MiddleProjected, entityPos);
 
-                    if (LastCamDist < Size * Size * Sphere.SizeSplit)
+                    if (cameraDistance < Size * Size * Sphere.SizeSplit)
                     {
                         if (SplitLevel < Sphere.MaxSplitLevel)
                         {
@@ -877,14 +800,18 @@ public class PatchTree
                     {
                         if (Parent != null)
                         {
-                            float lastParentDist = VectorHelper.QuickDistance(Parent.MiddleProjected, entityPos);
+                            var parentDistance = VectorHelper.QuickDistance(Parent.MiddleProjected, entityPos);
 
-                            if (lastParentDist > Parent.Size * Parent.Size * Sphere.SizeRejoin)
+                            if (parentDistance > Parent.Size * Parent.Size * Sphere.SizeRejoin)
                             {
-                                if ((SplitLevel > Neighbors[(int)NeighborDirection.Top].Node.SplitLevel || !Neighbors[(int)NeighborDirection.Top].Node.HasChildren && SplitLevel == Neighbors[(int)NeighborDirection.Top].Node.SplitLevel) &&
-                                    (SplitLevel > Neighbors[(int)NeighborDirection.Right].Node.SplitLevel || !Neighbors[(int)NeighborDirection.Right].Node.HasChildren && SplitLevel == Neighbors[(int)NeighborDirection.Right].Node.SplitLevel) &&
-                                    (SplitLevel > Neighbors[(int)NeighborDirection.Bottom].Node.SplitLevel || !Neighbors[(int)NeighborDirection.Bottom].Node.HasChildren && SplitLevel == Neighbors[(int)NeighborDirection.Bottom].Node.SplitLevel) &&
-                                    (SplitLevel > Neighbors[(int)NeighborDirection.Left].Node.SplitLevel || !Neighbors[(int)NeighborDirection.Left].Node.HasChildren && SplitLevel == Neighbors[(int)NeighborDirection.Left].Node.SplitLevel))
+                                if ((SplitLevel > Neighbors[(int)NeighborDirection.Top].Node.SplitLevel ||
+                                     !Neighbors[(int)NeighborDirection.Top].Node.HasChildren && SplitLevel == Neighbors[(int)NeighborDirection.Top].Node.SplitLevel) &&
+                                    (SplitLevel > Neighbors[(int)NeighborDirection.Right].Node.SplitLevel ||
+                                     !Neighbors[(int)NeighborDirection.Right].Node.HasChildren && SplitLevel == Neighbors[(int)NeighborDirection.Right].Node.SplitLevel) &&
+                                    (SplitLevel > Neighbors[(int)NeighborDirection.Bottom].Node.SplitLevel ||
+                                     !Neighbors[(int)NeighborDirection.Bottom].Node.HasChildren && SplitLevel == Neighbors[(int)NeighborDirection.Bottom].Node.SplitLevel) &&
+                                    (SplitLevel > Neighbors[(int)NeighborDirection.Left].Node.SplitLevel ||
+                                     !Neighbors[(int)NeighborDirection.Left].Node.HasChildren && SplitLevel == Neighbors[(int)NeighborDirection.Left].Node.SplitLevel))
                                 {
                                     Parent.NeedsRejoinCount++;
                                 }
@@ -918,89 +845,102 @@ public class PatchTree
         {
             if (SplitLevel > Neighbors[i].Node.SplitLevel && !Neighbors[i].Node.HasChildren)
             {
-                Neighbors[i].Node.Split(); return;
+                Neighbors[i].Node.Split();
+
+                return;
             }
         }
 
-        //first child - top left
-        PatchAABB vol1 = new PatchAABB();
-        Vector3 v1a = Volume.vertices[0];
-        Vector3 v1b = Vector3.Lerp(Volume.vertices[0], Volume.vertices[1], 0.5f);
-        Vector3 v1c = Middle;
-        Vector3 v1d = Vector3.Lerp(Volume.vertices[3], Volume.vertices[0], 0.5f);
-        vol1.vertices.Add(v1a);
-        vol1.vertices.Add(v1b);
-        vol1.vertices.Add(v1c);
-        vol1.vertices.Add(v1d);
-        Vector3 uv1a = Volume.uvs[0];
-        Vector3 uv1b = Vector3.Lerp(Volume.uvs[0], Volume.uvs[1], 0.5f);
-        Vector3 uv1d = Vector3.Lerp(Volume.uvs[3], Volume.uvs[0], 0.5f);
-        Vector3 uv1c = new Vector3(uv1b.x, uv1d.y, 0);
-        vol1.uvs.Add(uv1a);
-        vol1.uvs.Add(uv1b);
-        vol1.uvs.Add(uv1c);
-        vol1.uvs.Add(uv1d);
-        PatchTree q1 = new PatchTree(this, vol1);
+        #region TOP LEFT
+
+        var volume1 = new PatchAABB();
+
+        volume1.Vertices.Add(Volume.Vertices[0]);
+        volume1.Vertices.Add(Vector3.Lerp(Volume.Vertices[0], Volume.Vertices[1], 0.5f));
+        volume1.Vertices.Add(Middle);
+        volume1.Vertices.Add(Vector3.Lerp(Volume.Vertices[3], Volume.Vertices[0], 0.5f));
+
+        var uv1a = Volume.UVs[0];
+        var uv1b = Vector3.Lerp(Volume.UVs[0], Volume.UVs[1], 0.5f);
+        var uv1d = Vector3.Lerp(Volume.UVs[3], Volume.UVs[0], 0.5f);
+        var uv1c = new Vector3(uv1b.x, uv1d.y, 0);
+
+        volume1.UVs.Add(uv1a);
+        volume1.UVs.Add(uv1b);
+        volume1.UVs.Add(uv1c);
+        volume1.UVs.Add(uv1d);
+
+        #endregion
+
+        #region TOP RIGHT
 
         //second child - top right
-        PatchAABB vol2 = new PatchAABB();
-        Vector3 v2a = Vector3.Lerp(Volume.vertices[0], Volume.vertices[1], 0.5f);
-        Vector3 v2b = Volume.vertices[1];
-        Vector3 v2c = Vector3.Lerp(Volume.vertices[1], Volume.vertices[2], 0.5f);
-        Vector3 v2d = Middle;
-        vol2.vertices.Add(v2a);
-        vol2.vertices.Add(v2b);
-        vol2.vertices.Add(v2c);
-        vol2.vertices.Add(v2d);
-        Vector3 uv2a = Vector3.Lerp(Volume.uvs[0], Volume.uvs[1], 0.5f);
-        Vector3 uv2b = Volume.uvs[1];
-        Vector3 uv2c = Vector3.Lerp(Volume.uvs[1], Volume.uvs[2], 0.5f);
-        Vector3 uv2d = new Vector3(uv2a.x, uv2c.y, 0);
-        vol2.uvs.Add(uv2a);
-        vol2.uvs.Add(uv2b);
-        vol2.uvs.Add(uv2c);
-        vol2.uvs.Add(uv2d);
-        PatchTree q2 = new PatchTree(this, vol2);
+        var volume2 = new PatchAABB();
+        volume2.Vertices.Add(Vector3.Lerp(Volume.Vertices[0], Volume.Vertices[1], 0.5f));
+        volume2.Vertices.Add(Volume.Vertices[1]);
+        volume2.Vertices.Add(Vector3.Lerp(Volume.Vertices[1], Volume.Vertices[2], 0.5f));
+        volume2.Vertices.Add(Middle);
+
+        var uv2a = Vector3.Lerp(Volume.UVs[0], Volume.UVs[1], 0.5f);
+        var uv2b = Volume.UVs[1];
+        var uv2c = Vector3.Lerp(Volume.UVs[1], Volume.UVs[2], 0.5f);
+        var uv2d = new Vector3(uv2a.x, uv2c.y, 0);
+
+        volume2.UVs.Add(uv2a);
+        volume2.UVs.Add(uv2b);
+        volume2.UVs.Add(uv2c);
+        volume2.UVs.Add(uv2d);
+
+        #endregion
+
+        #region BOTTOM RIGHT
 
         //third child - bottom right
-        PatchAABB vol3 = new PatchAABB();
-        Vector3 v3a = Middle;
-        Vector3 v3b = Vector3.Lerp(Volume.vertices[1], Volume.vertices[2], 0.5f);
-        Vector3 v3c = Volume.vertices[2];
-        Vector3 v3d = Vector3.Lerp(Volume.vertices[3], Volume.vertices[2], 0.5f);
-        vol3.vertices.Add(v3a);
-        vol3.vertices.Add(v3b);
-        vol3.vertices.Add(v3c);
-        vol3.vertices.Add(v3d);
-        Vector3 uv3b = Vector3.Lerp(Volume.uvs[1], Volume.uvs[2], 0.5f);
-        Vector3 uv3c = Volume.uvs[2];
-        Vector3 uv3d = Vector3.Lerp(Volume.uvs[3], Volume.uvs[2], 0.5f);
-        Vector3 uv3a = new Vector3(uv3d.x, uv3b.y, 0);
-        vol3.uvs.Add(uv3a);
-        vol3.uvs.Add(uv3b);
-        vol3.uvs.Add(uv3c);
-        vol3.uvs.Add(uv3d);
-        PatchTree q3 = new PatchTree(this, vol3);
+        var volume3 = new PatchAABB();
+
+        volume3.Vertices.Add(Middle);
+        volume3.Vertices.Add(Vector3.Lerp(Volume.Vertices[1], Volume.Vertices[2], 0.5f));
+        volume3.Vertices.Add(Volume.Vertices[2]);
+        volume3.Vertices.Add(Vector3.Lerp(Volume.Vertices[3], Volume.Vertices[2], 0.5f));
+
+        var uv3b = Vector3.Lerp(Volume.UVs[1], Volume.UVs[2], 0.5f);
+        var uv3c = Volume.UVs[2];
+        var uv3d = Vector3.Lerp(Volume.UVs[3], Volume.UVs[2], 0.5f);
+        var uv3a = new Vector3(uv3d.x, uv3b.y, 0);
+
+        volume3.UVs.Add(uv3a);
+        volume3.UVs.Add(uv3b);
+        volume3.UVs.Add(uv3c);
+        volume3.UVs.Add(uv3d);
+
+        #endregion
+
+        #region BOTTOM LEFT
 
         //fourth child - bottom left
-        PatchAABB vol4 = new PatchAABB();
-        Vector3 v4a = Vector3.Lerp(Volume.vertices[3], Volume.vertices[0], 0.5f);
-        Vector3 v4b = Middle;
-        Vector3 v4c = Vector3.Lerp(Volume.vertices[3], Volume.vertices[2], 0.5f);
-        Vector3 v4d = Volume.vertices[3];
-        vol4.vertices.Add(v4a);
-        vol4.vertices.Add(v4b);
-        vol4.vertices.Add(v4c);
-        vol4.vertices.Add(v4d);
-        Vector3 uv4a = Vector3.Lerp(Volume.uvs[3], Volume.uvs[0], 0.5f);
-        Vector3 uv4c = Vector3.Lerp(Volume.uvs[3], Volume.uvs[2], 0.5f);
-        Vector3 uv4d = Volume.uvs[3];
-        Vector3 uv4b = new Vector3(uv4c.x, uv4a.y, 0);
-        vol4.uvs.Add(uv4a);
-        vol4.uvs.Add(uv4b);
-        vol4.uvs.Add(uv4c);
-        vol4.uvs.Add(uv4d);
-        PatchTree q4 = new PatchTree(this, vol4);
+        var volume4 = new PatchAABB();
+
+        volume4.Vertices.Add(Vector3.Lerp(Volume.Vertices[3], Volume.Vertices[0], 0.5f));
+        volume4.Vertices.Add(Middle);
+        volume4.Vertices.Add(Vector3.Lerp(Volume.Vertices[3], Volume.Vertices[2], 0.5f));
+        volume4.Vertices.Add(Volume.Vertices[3]);
+
+        var uv4a = Vector3.Lerp(Volume.UVs[3], Volume.UVs[0], 0.5f);
+        var uv4c = Vector3.Lerp(Volume.UVs[3], Volume.UVs[2], 0.5f);
+        var uv4d = Volume.UVs[3];
+        var uv4b = new Vector3(uv4c.x, uv4a.y, 0);
+
+        volume4.UVs.Add(uv4a);
+        volume4.UVs.Add(uv4b);
+        volume4.UVs.Add(uv4c);
+        volume4.UVs.Add(uv4d);
+
+        #endregion
+
+        var q1 = new PatchTree(this, volume1);
+        var q2 = new PatchTree(this, volume2);
+        var q3 = new PatchTree(this, volume3);
+        var q4 = new PatchTree(this, volume4);
 
         //set internal neighbors
         q1.SetNeighbor(NeighborDirection.Bottom, q4, NeighborDirection.Top);
@@ -1030,19 +970,24 @@ public class PatchTree
         ReLink();
     }
 
+    private void ReLinkChild(byte childIndex, NeighborDirection direction)
+    {
+        Children[childIndex].SetNeighbor(direction, Neighbors[(int)direction].Node, Neighbors[(int)direction].Direction);
+    }
+
     private void ReLink()
     {
-        Children[0].SetNeighbor(NeighborDirection.Top, Neighbors[(int)NeighborDirection.Top].Node, Neighbors[(int)NeighborDirection.Top].Direction);
-        Children[0].SetNeighbor(NeighborDirection.Left, Neighbors[(int)NeighborDirection.Left].Node, Neighbors[(int)NeighborDirection.Left].Direction);
+        ReLinkChild(0, NeighborDirection.Top);
+        ReLinkChild(0, NeighborDirection.Left);
 
-        Children[1].SetNeighbor(NeighborDirection.Top, Neighbors[(int)NeighborDirection.Top].Node, Neighbors[(int)NeighborDirection.Top].Direction);
-        Children[1].SetNeighbor(NeighborDirection.Right, Neighbors[(int)NeighborDirection.Right].Node, Neighbors[(int)NeighborDirection.Right].Direction);
+        ReLinkChild(1, NeighborDirection.Top);
+        ReLinkChild(1, NeighborDirection.Right);
 
-        Children[2].SetNeighbor(NeighborDirection.Bottom, Neighbors[(int)NeighborDirection.Bottom].Node, Neighbors[(int)NeighborDirection.Bottom].Direction);
-        Children[2].SetNeighbor(NeighborDirection.Right, Neighbors[(int)NeighborDirection.Right].Node, Neighbors[(int)NeighborDirection.Right].Direction);
+        ReLinkChild(2, NeighborDirection.Bottom);
+        ReLinkChild(2, NeighborDirection.Right);
 
-        Children[3].SetNeighbor(NeighborDirection.Bottom, Neighbors[(int)NeighborDirection.Bottom].Node, Neighbors[(int)NeighborDirection.Bottom].Direction);
-        Children[3].SetNeighbor(NeighborDirection.Left, Neighbors[(int)NeighborDirection.Left].Node, Neighbors[(int)NeighborDirection.Left].Direction);
+        ReLinkChild(3, NeighborDirection.Bottom);
+        ReLinkChild(3, NeighborDirection.Left);
     }
 
     private void ReEdge()
@@ -1056,7 +1001,7 @@ public class PatchTree
         //0100 == bottom edge at half-res
         //1000 == left edge at half-res
 
-        byte EdgesTemp = Edges;
+        var EdgesTemp = Edges;
 
         Edges = 0;
 
@@ -1068,7 +1013,7 @@ public class PatchTree
         if (Edges != EdgesTemp)
         {
             //reassign the index buffer
-            Mesh.triangles = Sphere.PatchManager.Patches[Edges];
+            Mesh.SetTriangles(Sphere.PatchManager.Patches[Edges], 0);
         }
 
         NeedsReedge = false;
@@ -1085,7 +1030,7 @@ public class PatchTree
             //then, decide which of the two children is closer to this node
             //and update the correct (nearest) child to link to this node
 
-            PatchTree pCorrectNode = null;
+            PatchTree correctNode = null;
 
             float dist = 0;
 
@@ -1094,30 +1039,30 @@ public class PatchTree
             //for each child of that node...
             for (byte i = 0; i < 4; i++)
             {
-                PatchTree pChild = tree.Children[i];
+                var child = tree.Children[i];
 
                 //for each direction of that child of that node...
                 for (byte j = 0; j < 4; j++)
                 {
                     //check if that child links from that direction to our parent
-                    if (pChild.Neighbors[j].Node.Equals(Parent))
+                    if (child.Neighbors[j].Node.Equals(Parent))
                     {
-                        if (pCorrectNode == null)
+                        if (correctNode == null)
                         {
                             //as there is no best correct child yet,
                             //temporarily selects that child as the correct
-                            pCorrectNode = pChild;
+                            correctNode = child;
                             neighDirection = j;
-                            dist = VectorHelper.QuickDistance(pChild.Middle, Middle);
+                            dist = VectorHelper.QuickDistance(child.Middle, Middle);
                             break;
                         }
                         else
                         {
                             //check if this child is closer than
                             //the currently selected as the closer child
-                            if (VectorHelper.QuickDistance(pChild.Middle, Middle) < dist)
+                            if (VectorHelper.QuickDistance(child.Middle, Middle) < dist)
                             {
-                                pCorrectNode = pChild;
+                                correctNode = child;
                                 neighDirection = j;
 
                                 //as we can have only two childs
@@ -1128,16 +1073,16 @@ public class PatchTree
                             }
                         }
                     }
-                    else if (pChild.Neighbors[j].Node == this)
+                    else if (child.Neighbors[j].Node == this)
                     {
                         //that child relinked to this node first
                         //which means both nodes are at same level
                         //so just get it and bail out
-                        pCorrectNode = pChild;
+                        correctNode = child;
                         neighDirection = j;
 
                         //link back to that node
-                        Neighbors[(int)direction].Node = pCorrectNode;
+                        Neighbors[(int)direction].Node = correctNode;
                         Neighbors[(int)direction].Direction = (NeighborDirection)neighDirection;
 
                         //update edges of this node
@@ -1149,26 +1094,26 @@ public class PatchTree
                 }
             }
 
-            if (pCorrectNode != null)
+            if (correctNode != null)
             {
                 //link to that node
-                Neighbors[(int)direction].Node = pCorrectNode;
+                Neighbors[(int)direction].Node = correctNode;
                 Neighbors[(int)direction].Direction = (NeighborDirection)neighDirection;
 
                 //link that node back to this node
-                pCorrectNode.Neighbors[neighDirection].Node = this;
-                pCorrectNode.Neighbors[neighDirection].Direction = direction;
+                correctNode.Neighbors[neighDirection].Node = this;
+                correctNode.Neighbors[neighDirection].Direction = direction;
 
                 //update edges and gaps
                 NeedsReedge = true;
-                pCorrectNode.NeedsReedge = true;
+                correctNode.NeedsReedge = true;
 
                 //the other node was discarding resolution
                 //because this node was at coarse level
                 //now that both are at same level,
-                //lets force the other node to use full RingSegmentMesh at the edge that links to this node
-                pCorrectNode.GapFixMask |= (byte)(1 << neighDirection);
-                pCorrectNode.Neighbors[neighDirection].isFixed = false;
+                //lets force the other node to use full mesh at the edge that links to this node
+                correctNode.GapFixMask |= (byte)(1 << neighDirection);
+                correctNode.Neighbors[neighDirection].isFixed = false;
             }
         }
         else
@@ -1190,9 +1135,12 @@ public class PatchTree
         }
     }
 
-    public PatchNeighbor GetNeighbor(NeighborDirection direction)
+    private void ReJoinChild(byte childIndex, NeighborDirection direction)
     {
-        return Neighbors[(int)direction];
+        Children[childIndex].Neighbors[(int)direction].Node.Neighbors[(int)Children[childIndex].Neighbors[(int)direction].Direction].Node = this;
+        Children[childIndex].Neighbors[(int)direction].Node.Neighbors[(int)Children[childIndex].Neighbors[(int)direction].Direction].isFixed = false;
+        Children[childIndex].Neighbors[(int)direction].Node.GapFixMask |= (byte)(1 << (int)Children[childIndex].Neighbors[(int)direction].Direction);
+        Children[childIndex].Neighbors[(int)direction].Node.NeedsReedge = true;
     }
 
     private void ReJoin()
@@ -1203,51 +1151,17 @@ public class PatchTree
         //relinks all children neighbors to point to this level
         //then delete children
 
-        Children[0].Neighbors[(int)NeighborDirection.Top].Node.Neighbors[(int)Children[0].Neighbors[(int)NeighborDirection.Top].Direction].Node = this;
-        Children[0].Neighbors[(int)NeighborDirection.Top].Node.Neighbors[(int)Children[0].Neighbors[(int)NeighborDirection.Top].Direction].isFixed = false;
-        Children[0].Neighbors[(int)NeighborDirection.Top].Node.GapFixMask |= (byte)(1 << (int)Children[0].Neighbors[(int)NeighborDirection.Top].Direction);
-        Children[0].Neighbors[(int)NeighborDirection.Top].Node.NeedsReedge = true;
+        ReJoinChild(0, NeighborDirection.Top);
+        ReJoinChild(0, NeighborDirection.Left);
 
-        Children[0].Neighbors[(int)NeighborDirection.Left].Node.Neighbors[(int)Children[0].Neighbors[(int)NeighborDirection.Left].Direction].Node = this;
-        Children[0].Neighbors[(int)NeighborDirection.Left].Node.Neighbors[(int)Children[0].Neighbors[(int)NeighborDirection.Left].Direction].isFixed = false;
-        Children[0].Neighbors[(int)NeighborDirection.Left].Node.GapFixMask |= (byte)(1 << (int)Children[0].Neighbors[(int)NeighborDirection.Left].Direction);
-        Children[0].Neighbors[(int)NeighborDirection.Left].Node.NeedsReedge = true;
+        ReJoinChild(1, NeighborDirection.Top);
+        ReJoinChild(1, NeighborDirection.Right);
 
-        //
+        ReJoinChild(2, NeighborDirection.Bottom);
+        ReJoinChild(2, NeighborDirection.Right);
 
-        Children[1].Neighbors[(int)NeighborDirection.Top].Node.Neighbors[(int)Children[1].Neighbors[(int)NeighborDirection.Top].Direction].Node = this;
-        Children[1].Neighbors[(int)NeighborDirection.Top].Node.Neighbors[(int)Children[1].Neighbors[(int)NeighborDirection.Top].Direction].isFixed = false;
-        Children[1].Neighbors[(int)NeighborDirection.Top].Node.GapFixMask |= (byte)(1 << (int)Children[1].Neighbors[(int)NeighborDirection.Top].Direction);
-        Children[1].Neighbors[(int)NeighborDirection.Top].Node.NeedsReedge = true;
-
-        Children[1].Neighbors[(int)NeighborDirection.Right].Node.Neighbors[(int)Children[1].Neighbors[(int)NeighborDirection.Right].Direction].Node = this;
-        Children[1].Neighbors[(int)NeighborDirection.Right].Node.Neighbors[(int)Children[1].Neighbors[(int)NeighborDirection.Right].Direction].isFixed = false;
-        Children[1].Neighbors[(int)NeighborDirection.Right].Node.GapFixMask |= (byte)(1 << (int)Children[1].Neighbors[(int)NeighborDirection.Right].Direction);
-        Children[1].Neighbors[(int)NeighborDirection.Right].Node.NeedsReedge = true;
-
-        //
-
-        Children[2].Neighbors[(int)NeighborDirection.Bottom].Node.Neighbors[(int)Children[2].Neighbors[(int)NeighborDirection.Bottom].Direction].Node = this;
-        Children[2].Neighbors[(int)NeighborDirection.Bottom].Node.Neighbors[(int)Children[2].Neighbors[(int)NeighborDirection.Bottom].Direction].isFixed = false;
-        Children[2].Neighbors[(int)NeighborDirection.Bottom].Node.GapFixMask |= (byte)(1 << (int)Children[2].Neighbors[(int)NeighborDirection.Bottom].Direction);
-        Children[2].Neighbors[(int)NeighborDirection.Bottom].Node.NeedsReedge = true;
-
-        Children[2].Neighbors[(int)NeighborDirection.Right].Node.Neighbors[(int)Children[2].Neighbors[(int)NeighborDirection.Right].Direction].Node = this;
-        Children[2].Neighbors[(int)NeighborDirection.Right].Node.Neighbors[(int)Children[2].Neighbors[(int)NeighborDirection.Right].Direction].isFixed = false;
-        Children[2].Neighbors[(int)NeighborDirection.Right].Node.GapFixMask |= (byte)(1 << (int)Children[2].Neighbors[(int)NeighborDirection.Right].Direction);
-        Children[2].Neighbors[(int)NeighborDirection.Right].Node.NeedsReedge = true;
-
-        //
-
-        Children[3].Neighbors[(int)NeighborDirection.Bottom].Node.Neighbors[(int)Children[3].Neighbors[(int)NeighborDirection.Bottom].Direction].Node = this;
-        Children[3].Neighbors[(int)NeighborDirection.Bottom].Node.Neighbors[(int)Children[3].Neighbors[(int)NeighborDirection.Bottom].Direction].isFixed = false;
-        Children[3].Neighbors[(int)NeighborDirection.Bottom].Node.GapFixMask |= (byte)(1 << (int)Children[3].Neighbors[(int)NeighborDirection.Bottom].Direction);
-        Children[3].Neighbors[(int)NeighborDirection.Bottom].Node.NeedsReedge = true;
-
-        Children[3].Neighbors[(int)NeighborDirection.Left].Node.Neighbors[(int)Children[3].Neighbors[(int)NeighborDirection.Left].Direction].Node = this;
-        Children[3].Neighbors[(int)NeighborDirection.Left].Node.Neighbors[(int)Children[3].Neighbors[(int)NeighborDirection.Left].Direction].isFixed = false;
-        Children[3].Neighbors[(int)NeighborDirection.Left].Node.GapFixMask |= (byte)(1 << (int)Children[3].Neighbors[(int)NeighborDirection.Left].Direction);
-        Children[3].Neighbors[(int)NeighborDirection.Left].Node.NeedsReedge = true;
+        ReJoinChild(3, NeighborDirection.Bottom);
+        ReJoinChild(3, NeighborDirection.Left);
 
         for (byte i = 0; i < 4; i++)
         {
@@ -1261,94 +1175,5 @@ public class PatchTree
 
         Sphere.Rejoined = true;
         NeedsTerrain = true;
-    }
-
-    public float Collided(Vector3 entityWorldPos, float collisionRadius, ref Vector3 collisionPoint)
-    {
-        int indexCount = Sphere.PatchManager.Patches[Edges].Length;
-
-        int[] indexList = Sphere.PatchManager.Patches[Edges];
-        int[] idx = new int[3];
-
-        Plane triplane = new Plane();
-        Plane p1 = new Plane();
-        Plane p2 = new Plane();
-        Plane p3 = new Plane();
-
-        //inverse transform entity
-        Vector3 pos = Sphere.transform.InverseTransformPoint(entityWorldPos);
-
-        float minDist = float.MaxValue;
-
-        for (int f = 0; f < indexCount; f += 3)
-        {
-            //face indexes
-            idx[0] = indexList[f + 0];
-            idx[1] = indexList[f + 1];
-            idx[2] = indexList[f + 2];
-
-            //determine triangle plane
-            triplane.Set3Points(vertices[idx[0]], vertices[idx[1]], vertices[idx[2]]);
-
-            //make three planes, one for each edge of this triangle
-
-            //edge 1
-            Vector3 e1 = Vector3.Cross(triplane.normal, vertices[idx[1]] - vertices[idx[0]]);
-            e1.Normalize();
-
-            //calculate edge center
-            Vector3 me1 = Vector3.Lerp(vertices[idx[0]], vertices[idx[1]], 0.5f);
-            p1.SetNormalAndPosition(e1, me1);
-
-            //edge 2
-            Vector3 e2 = Vector3.Cross(triplane.normal, vertices[idx[2]] - vertices[idx[1]]);
-            e2.Normalize();
-
-            //calculate edge center
-            Vector3 me2 = Vector3.Lerp(vertices[idx[1]], vertices[idx[2]], 0.5f);
-            p2.SetNormalAndPosition(e2, me2);
-
-            //edge 3
-            Vector3 e3 = Vector3.Cross(triplane.normal, vertices[idx[0]] - vertices[idx[2]]);
-            e3.Normalize();
-
-            //calculate edge center
-            Vector3 me3 = Vector3.Lerp(vertices[idx[2]], vertices[idx[0]], 0.5f);
-            p3.SetNormalAndPosition(e3, me3);
-
-            //check if entity is inside the three planes
-            float d1 = p1.GetDistanceToPoint(pos);
-            float d2 = p2.GetDistanceToPoint(pos);
-            float d3 = p3.GetDistanceToPoint(pos);
-
-            if (d1 < 0 || d2 < 0 || d3 < 0)
-            {
-                //not inside, skip further testing
-                continue;
-            }
-
-            //finally, check collision against the selected triangle
-            //and do collision response
-            float dst = triplane.GetDistanceToPoint(pos);
-
-            if (dst < minDist) minDist = dst;
-
-            if (dst < collisionRadius)
-            {
-                float adj = (collisionRadius - dst);
-
-                //rotate normal contrary to the planet's orientation,
-                //because entity position was inverse transformed here.
-                Vector3 vadj = Sphere.transform.InverseTransformDirection(triplane.normal);
-
-                collisionPoint = vadj * adj;
-
-                return dst;
-            }
-        }
-
-        collisionPoint = Vector3.zero;
-
-        return minDist;
     }
 }

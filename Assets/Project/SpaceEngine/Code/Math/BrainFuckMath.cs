@@ -1,7 +1,7 @@
 ﻿#region License
 // Procedural planet generator.
 // 
-// Copyright (C) 2015-2016 Denis Ovchinnikov [zameran] 
+// Copyright (C) 2015-2017 Denis Ovchinnikov [zameran] 
 // All rights reserved.
 // 
 // Redistribution and use in source and binary forms, with or without
@@ -33,10 +33,24 @@
 // Creator: zameran
 #endregion
 
+using System;
+
 using UnityEngine;
 
 public static class BrainFuckMath
 {
+    public static Vector3 FromQuadPositionMask(float r, byte[] sign, byte[] axis, QuadPosition quadPosition)
+    {
+        var indexOf = Array.IndexOf(Enum.GetValues(typeof(QuadPosition)), quadPosition);
+
+        var s = (sign[indexOf] == 1) ? -r : r;
+        var v = axis[indexOf];
+
+        var output = new Vector3(v == 0 ? s : 0.0f, v == 1 ? s : 0.0f, v == 2 ? s : 0.0f);
+
+        return output;
+    }
+
     public static bool AlmostEquals(this float a, float b, float precision)
     {
         return Mathf.Abs(a - b) <= precision;
@@ -100,7 +114,7 @@ public static class BrainFuckMath
         decimal prev1 = CalculateJ(lodLevel - 1);
         decimal prev2 = CalculateJ(lodLevel - 2);
 
-        decimal summ = System.Math.Abs(prev1 - prev2) / 2.0M;
+        decimal summ = Math.Abs(prev1 - prev2) / 2.0M;
 
         return prev1 + summ;
     }

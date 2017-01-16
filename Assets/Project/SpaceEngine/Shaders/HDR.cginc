@@ -1,6 +1,6 @@
 /* Procedural planet generator.
  *
- * Copyright (C) 2015-2016 Denis Ovchinnikov
+ * Copyright (C) 2015-2017 Denis Ovchinnikov
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -61,7 +61,7 @@
 /*
  * Author: Eric Bruneton
  * Modified and ported to Unity by Justin Hawkins 2014
- * Modified by Denis Ovchinnikov 2015-2016
+ * Modified by Denis Ovchinnikov 2015-2017
  */
 
 #define HDR
@@ -71,11 +71,11 @@ uniform float _HDRMode;
 
 inline float3 hdrF(float c)
 {
-	if (_HDRMode == -1) { return c; }
-	else if (_HDRMode == 0) { return 1.0 - exp(-c); }
-	else if (_HDRMode == 1) { return c < 1.0 ? pow(c * 0.47, 0.6073) : 1.0 - exp(-c); }
-	else if (_HDRMode == 2) { return c < 1.413 ? pow(c * 0.38317, 1.0 / 2.2) : 1.0 - exp(-c); }
-	else if (_HDRMode == 3) { return c < 1.413 ? pow(c * 0.38317, 0.454545455) : 1.0 - exp(-c); }
+	if (_HDRMode == 0) { return c; }
+	else if (_HDRMode == 1) { return 1.0 - exp(-c); }
+	else if (_HDRMode == 2) { return c < 1.0 ? pow(c * 0.47, 0.6073) : 1.0 - exp(-c); }
+	else if (_HDRMode == 3) { return c < 1.413 ? pow(c * 0.38317, 1.0 / 2.2) : 1.0 - exp(-c); }
+	else if (_HDRMode == 4) { return c < 1.413 ? pow(c * 0.38317, 0.454545455) : 1.0 - exp(-c); }
 	else return c;
 }
 

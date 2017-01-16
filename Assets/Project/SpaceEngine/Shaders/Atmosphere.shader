@@ -1,6 +1,6 @@
 ﻿/* Procedural planet generator.
  *
- * Copyright (C) 2015-2016 Denis Ovchinnikov
+ * Copyright (C) 2015-2017 Denis Ovchinnikov
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -61,7 +61,7 @@
 /*
  * Author: Eric Bruneton
  * Modified and ported to Unity by Justin Hawkins 2014
- * Modified by Denis Ovchinnikov 2015-2016
+ * Modified by Denis Ovchinnikov 2015-2017
  */
 
 Shader "SpaceEngine/Atmosphere/Atmosphere" 
@@ -118,25 +118,25 @@ Shader "SpaceEngine/Atmosphere/Atmosphere"
 				float3 dir : TEXCOORD1;
 
 				#ifdef LIGHT_1 
-					float3 relativeDir_1 : TEXCOORD2;
+					float3 sunRelDirection_1 : TEXCOORD2;
 				#endif
 
 				#ifdef LIGHT_2
-					float3 relativeDir_1 : TEXCOORD2;
-					float3 relativeDir_2 : TEXCOORD3;
+					float3 sunRelDirection_1 : TEXCOORD2;
+					float3 sunRelDirection_2 : TEXCOORD3;
 				#endif
 
 				#ifdef LIGHT_3
-					float3 relativeDir_1 : TEXCOORD2;
-					float3 relativeDir_2 : TEXCOORD3;
-					float3 relativeDir_3 : TEXCOORD4;
+					float3 sunRelDirection_1 : TEXCOORD2;
+					float3 sunRelDirection_2 : TEXCOORD3;
+					float3 sunRelDirection_3 : TEXCOORD4;
 				#endif
 
 				#ifdef LIGHT_4
-					float3 relativeDir_1 : TEXCOORD2;
-					float3 relativeDir_2 : TEXCOORD3;
-					float3 relativeDir_3 : TEXCOORD4;
-					float3 relativeDir_4 : TEXCOORD5;
+					float3 sunRelDirection_1 : TEXCOORD2;
+					float3 sunRelDirection_2 : TEXCOORD3;
+					float3 sunRelDirection_3 : TEXCOORD4;
+					float3 sunRelDirection_4 : TEXCOORD5;
 				#endif
 			};
 
@@ -147,25 +147,25 @@ Shader "SpaceEngine/Atmosphere/Atmosphere"
 
 				// apply this rotation to view dir to get relative viewdir
 				#ifdef LIGHT_1 
-					OUT.relativeDir_1 = mul(_Sun_WorldToLocal_1, OUT.dir); 
+					OUT.sunRelDirection_1 = mul(_Sun_WorldToLocal_1, OUT.dir); 
 				#endif
 
 				#ifdef LIGHT_2 
-					OUT.relativeDir_1 = mul(_Sun_WorldToLocal_1, OUT.dir); 
-					OUT.relativeDir_2 = mul(_Sun_WorldToLocal_2, OUT.dir); 
+					OUT.sunRelDirection_1 = mul(_Sun_WorldToLocal_1, OUT.dir); 
+					OUT.sunRelDirection_2 = mul(_Sun_WorldToLocal_2, OUT.dir); 
 				#endif
 
 				#ifdef LIGHT_3
-					OUT.relativeDir_1 = mul(_Sun_WorldToLocal_1, OUT.dir); 
-					OUT.relativeDir_2 = mul(_Sun_WorldToLocal_2, OUT.dir); 
-					OUT.relativeDir_3 = mul(_Sun_WorldToLocal_3, OUT.dir); 
+					OUT.sunRelDirection_1 = mul(_Sun_WorldToLocal_1, OUT.dir); 
+					OUT.sunRelDirection_2 = mul(_Sun_WorldToLocal_2, OUT.dir); 
+					OUT.sunRelDirection_3 = mul(_Sun_WorldToLocal_3, OUT.dir); 
 				#endif
 
 				#ifdef LIGHT_4
-					OUT.relativeDir_1 = mul(_Sun_WorldToLocal_1, OUT.dir); 
-					OUT.relativeDir_2 = mul(_Sun_WorldToLocal_2, OUT.dir); 
-					OUT.relativeDir_3 = mul(_Sun_WorldToLocal_3, OUT.dir); 
-					OUT.relativeDir_4 = mul(_Sun_WorldToLocal_4, OUT.dir); 
+					OUT.sunRelDirection_1 = mul(_Sun_WorldToLocal_1, OUT.dir); 
+					OUT.sunRelDirection_2 = mul(_Sun_WorldToLocal_2, OUT.dir); 
+					OUT.sunRelDirection_3 = mul(_Sun_WorldToLocal_3, OUT.dir); 
+					OUT.sunRelDirection_4 = mul(_Sun_WorldToLocal_4, OUT.dir); 
 				#endif
 	
 				OUT.pos = float4(v.vertex.xy, 1.0, 1.0);
@@ -182,7 +182,7 @@ Shader "SpaceEngine/Atmosphere/Atmosphere"
 			}
 			
 			float4 frag(v2f IN) : COLOR
-			{			
+			{
 				float3 WCP = _Globals_WorldCameraPos;
 				float3 WCPG = WCP + _Globals_Origin; // Current camera position with offset applied...
 				float3 WCPGG = WCPG + _Globals_Origin; // I HAVE NO IDEA HOW, BUT IT WORKS!
@@ -202,10 +202,8 @@ Shader "SpaceEngine/Atmosphere/Atmosphere"
 				float3 inscatter = 0;
 
 				#ifdef ECLIPSES_ON
-					float4 WSPR0 = _Sun_Positions_1[0];
-
 					#if SHADOW_1 || SHADOW_2 || SHADOW_3 || SHADOW_4
-						float shadow = 1.0;
+						float4 shadow = 1.0;
 
 						shadow = ShadowOuterColor(d, WCP, -_Globals_Origin, Rt);
 						shadow = GroundFade(_ExtinctionGroundFade, shadow);
@@ -213,11 +211,13 @@ Shader "SpaceEngine/Atmosphere/Atmosphere"
 				#endif
 
 				#ifdef LIGHT_1
-					sunColor += OuterSunRadiance(IN.relativeDir_1);
+					sunColor += OuterSunRadiance(IN.sunRelDirection_1);
 
 					float3 extinction1 = 0;
 
 					#ifdef ECLIPSES_ON
+						float4 WSPR0 = _Sun_Positions_1[0];
+
 						float3 invertedLightDistance0 = rsqrt(dot(WSPR0.xyz, WSPR0.xyz));
 						float3 lightPosition0 = WSPR0.xyz * invertedLightDistance0;
 
@@ -251,8 +251,8 @@ Shader "SpaceEngine/Atmosphere/Atmosphere"
 				#endif
 
 				#ifdef LIGHT_2
-					sunColor += OuterSunRadiance(IN.relativeDir_1);
-					sunColor += OuterSunRadiance(IN.relativeDir_2);
+					sunColor += OuterSunRadiance(IN.sunRelDirection_1);
+					sunColor += OuterSunRadiance(IN.sunRelDirection_2);
 
 					float3 extinction1 = 0;
 					float3 extinction2 = 0;
@@ -308,9 +308,9 @@ Shader "SpaceEngine/Atmosphere/Atmosphere"
 				#endif
 
 				#ifdef LIGHT_3
-					sunColor += OuterSunRadiance(IN.relativeDir_1);
-					sunColor += OuterSunRadiance(IN.relativeDir_2);
-					sunColor += OuterSunRadiance(IN.relativeDir_3);
+					sunColor += OuterSunRadiance(IN.sunRelDirection_1);
+					sunColor += OuterSunRadiance(IN.sunRelDirection_2);
+					sunColor += OuterSunRadiance(IN.sunRelDirection_3);
 
 					float3 extinction1 = 0;
 					float3 extinction2 = 0;
@@ -370,10 +370,10 @@ Shader "SpaceEngine/Atmosphere/Atmosphere"
 				#endif
 
 				#ifdef LIGHT_4
-					sunColor += OuterSunRadiance(IN.relativeDir_1);
-					sunColor += OuterSunRadiance(IN.relativeDir_2);
-					sunColor += OuterSunRadiance(IN.relativeDir_3);
-					sunColor += OuterSunRadiance(IN.relativeDir_4);
+					sunColor += OuterSunRadiance(IN.sunRelDirection_1);
+					sunColor += OuterSunRadiance(IN.sunRelDirection_2);
+					sunColor += OuterSunRadiance(IN.sunRelDirection_3);
+					sunColor += OuterSunRadiance(IN.sunRelDirection_4);
 
 					float3 extinction1 = 0;
 					float3 extinction2 = 0;

@@ -1,7 +1,7 @@
 ﻿#region License
 // Procedural planet generator.
 // 
-// Copyright (C) 2015-2016 Denis Ovchinnikov [zameran] 
+// Copyright (C) 2015-2017 Denis Ovchinnikov [zameran] 
 // All rights reserved.
 // 
 // Redistribution and use in source and binary forms, with or without
@@ -33,15 +33,12 @@
 // Creator: zameran
 #endregion
 
+using System;
 using System.Collections.Generic;
 using System.Reflection;
 using System.Text;
-using System;
 
 using UnityEngine;
-
-using SpaceEngine.Pluginator.Attributes;
-using SpaceEngine.Pluginator.Enums;
 
 namespace SpaceEngine.Pluginator
 {
@@ -50,16 +47,16 @@ namespace SpaceEngine.Pluginator
     {
         public static void DumpStringList(List<string> items)
         {
-            StringBuilder sb = new StringBuilder();
+            var sb = new StringBuilder();
 
             if (items == null)
                 return;
 
-            foreach (string item in items)
+            foreach (var item in items)
             {
                 if (item != null)
                 {
-                    string message = string.Format("Path: {0};", item);
+                    var message = string.Format("Path: {0};", item);
 
                     sb.AppendLine(message);
                 }
@@ -73,9 +70,9 @@ namespace SpaceEngine.Pluginator
             if (assemblies == null)
                 return;
 
-            foreach (AssemblyExternal assembly in assemblies)
+            foreach (var assembly in assemblies)
             {
-                StringBuilder sb = new StringBuilder();
+                var sb = new StringBuilder();
 
                 if (assembly != null)
                 {
@@ -87,11 +84,11 @@ namespace SpaceEngine.Pluginator
 
                         sb.AppendLine(string.Format("Assembly Types List ({0}) Start.", assembly.Types.Count));
 
-                        foreach (KeyValuePair<Type, List<Type>> kvp in assembly.Types)
+                        foreach (var kvp in assembly.Types)
                         {
-                            StringBuilder values_sb = new StringBuilder();
+                            var values_sb = new StringBuilder();
 
-                            foreach (Type v in kvp.Value)
+                            foreach (var v in kvp.Value)
                             {
                                 values_sb.Append(string.Format("{0} ", v));
                             }
@@ -109,16 +106,16 @@ namespace SpaceEngine.Pluginator
 
         public static void DumpAssembliesInfo(List<Assembly> assemblies)
         {
-            StringBuilder sb = new StringBuilder();
+            var sb = new StringBuilder();
 
             if (assemblies == null)
                 return;
 
-            foreach (Assembly assembly in assemblies)
+            foreach (var assembly in assemblies)
             {
                 if (assembly != null)
                 {
-                    string message = string.Format("Full Name: {0};", assembly.FullName);
+                    var message = string.Format("Full Name: {0};", assembly.FullName);
 
                     sb.AppendLine(message);
                 }
@@ -129,16 +126,16 @@ namespace SpaceEngine.Pluginator
 
         public static void DumpTypesNames(List<Type> types)
         {
-            StringBuilder sb = new StringBuilder();
+            var sb = new StringBuilder();
 
             if (types == null)
                 return;
 
-            foreach (Type type in types)
+            foreach (var type in types)
             {
                 if (type != null)
                 {
-                    string message = string.Format("Type: {0}; Name: {1}", type.ToString(), type.Name);
+                    var message = string.Format("Type: {0}; Name: {1}", type, type.Name);
 
                     sb.AppendLine(message);
                 }

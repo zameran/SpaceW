@@ -1,7 +1,7 @@
 ﻿#region License
 // Procedural planet generator.
 // 
-// Copyright (C) 2015-2016 Denis Ovchinnikov [zameran] 
+// Copyright (C) 2015-2017 Denis Ovchinnikov [zameran] 
 // All rights reserved.
 // 
 // Redistribution and use in source and binary forms, with or without
@@ -80,7 +80,7 @@ namespace SpaceEngine.AtmosphericScattering.Clouds
 
             if (CloudsphereMesh == null) return;
 
-            Matrix4x4 CloudsTRS = Matrix4x4.TRS(planetoid.transform.position, transform.rotation, Vector3.one * (Radius + Height));
+            Matrix4x4 CloudsTRS = Matrix4x4.TRS(planetoid.OriginTransform.position, transform.rotation, Vector3.one * (Radius + Height));
 
             Graphics.DrawMesh(CloudsphereMesh, CloudsTRS, CloudMaterial, drawLayer, camera, 0, planetoid.QuadAtmosphereMPB);
         }

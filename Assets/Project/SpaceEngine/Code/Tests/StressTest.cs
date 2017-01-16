@@ -1,7 +1,7 @@
 ﻿#region License
 // Procedural planet generator.
 // 
-// Copyright (C) 2015-2016 Denis Ovchinnikov [zameran] 
+// Copyright (C) 2015-2017 Denis Ovchinnikov [zameran] 
 // All rights reserved.
 // 
 // Redistribution and use in source and binary forms, with or without
@@ -48,7 +48,7 @@ public class StressTest : MonoBehaviour
             for (int i = 0; i < 1000000; i++)
             {
                 BrainFuckMath.CalculatePatchCubeCenter(0, Vector3.zero, ref temp);
-            }          
+            }
         }
     }
 }

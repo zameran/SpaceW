@@ -1,7 +1,7 @@
 ﻿#region License
 // Procedural planet generator.
 // 
-// Copyright (C) 2015-2016 Denis Ovchinnikov [zameran] 
+// Copyright (C) 2015-2017 Denis Ovchinnikov [zameran] 
 // All rights reserved.
 // 
 // Redistribution and use in source and binary forms, with or without
@@ -40,8 +40,8 @@ public static class QuadSettings
 {
     private static int TextureScaleModifier { get { return 2; } }
 
-    public static int BorderModMesh { get { return 3; } }
-    public static int BorderModTexture { get { return 7; } }
+    public static int BorderModMesh { get { return (VerticesPerSideWithBorder / 16) - 1; } }
+    public static int BorderModTexture { get { return (VerticesPerSideWithBorderFull / 16) - 1; } }
 
     public static int VerticesPerSideWithBorder { get { return 64; } }
     public static int VerticesPerSide { get { return 60; } }

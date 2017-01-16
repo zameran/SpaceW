@@ -1,6 +1,6 @@
 // Procedural planet generator.
 // 
-// Copyright (C) 2015-2016 Denis Ovchinnikov [zameran] 
+// Copyright (C) 2015-2017 Denis Ovchinnikov [zameran] 
 // All rights reserved.
 // 
 // Redistribution and use in source and binary forms, with or without
@@ -112,7 +112,7 @@ sampler2D _Shadow4Texture;
 float     _Shadow4Ratio;
 #endif
 
-float4 BlurShadow(sampler2D inputTexture, float2 inputUV, float inputStep = 0.0001f)
+float4 BlurShadow(sampler2D inputTexture, float2 inputUV, float inputStep = 0.00015f)
 {
 	float2 blurCoordinates[5];
 
@@ -149,8 +149,9 @@ float4 ShadowColor(float4x4 shadowMatrix, sampler2D shadowSampler, float shadowR
 	#endif
 	
 	shadow += shadowPoint.z < 0.0f ? 1.0f : 0.0f;
-	
-	return saturate(shadow);
+	shadow = saturate(shadow);
+
+	return shadow;
 }
 
 float4 ShadowColor(float4 worldPoint)
@@ -260,7 +261,8 @@ float3 CubeCoord(QuadGenerationConstants constants, float verticesPerSide, uint3
 	//256 : 15
 	//512 : 31
 
-	//TODO: modifier calculation.
+	//NOTE: The mod formula is:
+	//(SIZE / 16) - 1; Where SIZE is PoT [Power Of Two]
 
 	float eastValue = (id.x - ((verticesPerSide - mod) * 0.5)) * spacing;
 	float northValue = (id.y - ((verticesPerSide - mod) * 0.5)) * spacing;
@@ -370,6 +372,7 @@ inline float3 GetHeightNormalFromPosition(QuadGenerationConstants constants, RWS
 	float3 n = cross(curr - left, curr - up) + cross(curr - right, curr - down);
 
 	return normalize(float3(-n.x, -n.y, n.z));
+	//return normalize(cross(right - curr, up - curr));
 }
 
 inline float3 GetHeightNormalFromBump(QuadGenerationConstants constants, RWStructuredBuffer<OutputStruct> buffer, int size, uint3 id)

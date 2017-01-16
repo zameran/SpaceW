@@ -1,6 +1,6 @@
 ﻿// Procedural planet generator.
 // 
-// Copyright (C) 2015-2016 Denis Ovchinnikov [zameran] 
+// Copyright (C) 2015-2017 Denis Ovchinnikov [zameran] 
 // All rights reserved.
 // 
 // Redistribution and use in source and binary forms, with or without
@@ -52,8 +52,6 @@ StructuredBuffer<QuadGenerationConstants> quadGenerationConstants;
 RWStructuredBuffer<OutputStruct> patchPreOutput;
 RWStructuredBuffer<OutputStruct> patchPreOutputSub;
 RWStructuredBuffer<OutputStruct> patchOutput;
-
-RWStructuredBuffer<QuadCorners> quadCorners;
 
 float3 ScaledCoordinate(float3 coord)
 {
@@ -113,7 +111,6 @@ void HeightMain (uint3 id : SV_DispatchThreadID)
 	float3 patchCoord =  constants.planetRadius * patchNormalizedCoord;
 	float3 patchCoordCentered = patchCoord - patchCenter;
 	float3 patchCubeCoordCentered = patchNormalizedCoord;
-	float3 patchCubeCoordCenteredFlat = patchNormalizedCoord;
 
 	float noiseValue = NoiseFunction(patchCoord, constants.lodOctaveModifier);
 
@@ -121,7 +118,6 @@ void HeightMain (uint3 id : SV_DispatchThreadID)
 
 	patchCoordCentered += patchNormalizedCoord * height;
 	patchCubeCoordCentered += patchNormalizedCoord * height;
-	patchCubeCoordCenteredFlat += patchNormalizedCoord;
 	
 	float4 output = float4(patchCoordCentered.xyz, 0.0);
 	float4 cubeOutput = float4(patchCubeCoordCentered.xyz, 0.0);
@@ -148,7 +144,6 @@ void HeightSub(uint3 id : SV_DispatchThreadID)
 	float3 patchCoord =  constants.planetRadius * patchNormalizedCoord;
 	float3 patchCoordCentered = patchCoord - patchCenter;
 	float3 patchCubeCoordCentered = patchNormalizedCoord;
-	float3 patchCubeCoordCenteredFlat = patchNormalizedCoord;
 	
 	float noiseValue = NoiseFunction(patchCoord, constants.lodOctaveModifier);
 
@@ -156,7 +151,6 @@ void HeightSub(uint3 id : SV_DispatchThreadID)
 
 	patchCoordCentered += patchNormalizedCoord * height;
 	patchCubeCoordCentered += patchNormalizedCoord * height;
-	patchCubeCoordCenteredFlat += patchNormalizedCoord;
 	
 	float4 output = float4(patchCoordCentered.xyz, 0.0);
 	float4 cubeOutput = float4(patchCubeCoordCentered.xyz, 0.0);
@@ -207,24 +201,4 @@ void Transfer(uint3 id : SV_DispatchThreadID)
 	int outBuffOffset = id.x + id.y * VerticesPerSide;
 
 	patchOutput[outBuffOffset] = patchPreOutput[inBuffOffset];
-}
-
-#pragma kernel GetCorners
-[numthreads(1, 1, 1)]
-void GetCorners(uint3 id : SV_DispatchThreadID)
-{
-	float4 center = float4(patchOutput[0].patchCenter, 0);
-
-	float size = VerticesPerSide - 1;
-	float sideSize = size * VerticesPerSide;
-
-	float4 topLeftCorner = patchOutput[size].position + center;
-	float4 topRightCorner = patchOutput[0].position + center;
-	float4 bottomLeftCorner = patchOutput[size + sideSize].position + center;
-	float4 bottomRightCorner = patchOutput[sideSize].position + center;
-
-	quadCorners[id.x + id.y].topLeftCorner = topLeftCorner;
-	quadCorners[id.x + id.y].topRightCorner = topRightCorner;
-	quadCorners[id.x + id.y].bottomLeftCorner = bottomLeftCorner;
-	quadCorners[id.x + id.y].bottomRightCorner = bottomRightCorner;
 }
