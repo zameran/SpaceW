@@ -37,6 +37,11 @@ public class Universe : MonoSingleton<Universe>
 {
     public Chunk chunk;
 
+    private void Awake()
+    {
+        Instance = this;
+    }
+
     private void Start()
     {
         chunk = chunk.InitNodeAtOrigin<Chunk>();
