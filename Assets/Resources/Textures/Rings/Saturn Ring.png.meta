@@ -9,9 +9,9 @@ TextureImporter:
     mipMapMode: 1
     enableMipMap: 0
     linearTexture: 0
-    correctGamma: 1
-    fadeOut: 0
-    borderMipMap: 1
+    correctGamma: 0
+    fadeOut: 1
+    borderMipMap: 0
     mipMapFadeDistanceStart: 1
     mipMapFadeDistanceEnd: 3
   bumpmap:
@@ -26,10 +26,10 @@ TextureImporter:
   cubemapConvolutionSteps: 7
   cubemapConvolutionExponent: 1.5
   seamlessCubemap: 0
-  textureFormat: -1
+  textureFormat: -3
   maxTextureSize: 1024
   textureSettings:
-    filterMode: 1
+    filterMode: 2
     aniso: 16
     mipBias: -1
     wrapMode: 1

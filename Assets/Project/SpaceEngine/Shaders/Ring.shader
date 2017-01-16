@@ -128,8 +128,8 @@ Shader "SpaceEngine/Ring"
 				float4 worldPosition = mul(unity_ObjectToWorld, i.vertex);
 				
 				o.vertex = mul(UNITY_MATRIX_MVP, i.vertex);
-				//o.uv = float2(clamp(i.uv.x, 0.0032, 0.9968), i.uv.y);
-				o.uv = i.uv;
+				o.uv = float2(clamp(i.uv.x, 0.0064, 0.9936), i.uv.y); //NOTE : Oh shit...
+				//o.uv = i.uv;
 				o.color = 1.0f;
 
 				#if LIGHT_1 || LIGHT_2 || LIGHT_3 || LIGHT_4
