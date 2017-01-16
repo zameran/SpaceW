@@ -1,6 +1,6 @@
 ﻿#region License
 // Procedural planet generator.
-// 
+//  
 // Copyright (C) 2015-2017 Denis Ovchinnikov [zameran] 
 // All rights reserved.
 // 
@@ -8,7 +8,7 @@
 // modification, are permitted provided that the following conditions
 // are met:
 // 1. Redistributions of source code must retain the above copyright
-//    notice, this list of conditions and the following disclaimer.
+//     notice, this list of conditions and the following disclaimer.
 // 2. Redistributions in binary form must reproduce the above copyright
 //    notice, this list of conditions and the following disclaimer in the
 //    documentation and/or other materials provided with the distribution.
@@ -28,33 +28,40 @@
 // ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF
 // THE POSSIBILITY OF SUCH DAMAGE.
 // 
-// Creation Date: Undefined
-// Creation Time: Undefined
+// Creation Date: 2017.01.12
+// Creation Time: 17:49
 // Creator: zameran
 #endregion
 
-using System;
-
-using UnityEngine;
-
-[Serializable]
-public class Cluster : Space
+public class Universe : MonoSingleton<Universe>
 {
-    public Cluster() : base()
+    public Chunk chunk;
+
+    private void Awake()
     {
+        Instance = this;
     }
 
-    public Cluster(Vector3d Position) : base(Position)
+    private void Start()
     {
+        chunk = chunk.InitNodeAtOrigin<Chunk>();
+        chunk.Init();
     }
 
-    public override void Init()
+    private void OnDrawGizmos()
     {
+        if (chunk == null) return;
 
+        chunk.DrawDebug();
     }
 
-    public override void Update(Vector3d Position)
+    private void OnGUI()
     {
-        this.Position = Position;
+        if (chunk == null) return;
+
+        GUILayoutExtensions.Vertical(() =>
+        {
+            GUILayoutExtensions.LabelWithSpace(string.Format("Blocks count: {0}", 0));
+        });
     }
 }

@@ -46,21 +46,15 @@ public static class GUILayoutExtensions
         GUILayout.Label(text2);
     }
 
-    public static void LabelWithSpace(string text, int space)
+    public static void LabelWithSpace(string text, int space = -8)
     {
         GUILayout.Label(text);
         GUILayout.Space(space);
     }
 
-    public static void LabelWithSpace(GUIContent content, int space)
+    public static void LabelWithSpace(GUIContent content, int space = -8)
     {
         GUILayout.Label(content);
-        GUILayout.Space(space);
-    }
-
-    public static void LabelWithSpace(Texture image, int space)
-    {
-        GUILayout.Label(image);
         GUILayout.Space(space);
     }
 
