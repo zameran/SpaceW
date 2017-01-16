@@ -1,7 +1,7 @@
 ﻿#region License
 // Procedural planet generator.
 // 
-// Copyright (C) 2015-2016 Denis Ovchinnikov [zameran] 
+// Copyright (C) 2015-2017 Denis Ovchinnikov [zameran] 
 // All rights reserved.
 // 
 // Redistribution and use in source and binary forms, with or without
@@ -91,11 +91,11 @@ namespace SpaceEngine.Debugging
 
             for (int i = 0; i < Planet.Quads.Count; i++)
             {
-                Quad q = Planet.Quads[i];
+                var q = Planet.Quads[i];
 
                 if (q.Generated && q.ShouldDraw)
                 {
-                    Color lineColor = Color.blue;
+                    var lineColor = Color.blue;
 
                     if (!useColorPerMainQuad)
                         lineColor = Color.blue;
@@ -108,15 +108,15 @@ namespace SpaceEngine.Debugging
                         if (q.LODLevel == q.Planetoid.LODMaxLevel)
                             lineColor = Color.white;
 
-                    int[,] ORDER = new int[,] { { 1, 0 }, { 2, 3 }, { 0, 2 }, { 3, 1 } };
+                    var ORDER = new[,] { { 1, 0 }, { 2, 3 }, { 0, 2 }, { 3, 1 } };
 
-                    Vector3[] verts = q.QuadAABB.AABB;//q.GetVolumeBox(q.Planetoid.TerrainMaxHeight * 3);
+                    var verts = q.QuadAABB.AABB;//q.GetVolumeBox(q.Planetoid.TerrainMaxHeight * 3);
 
                     if (verts == null) return;
 
                     GL.PushMatrix();
                     GL.LoadIdentity();
-                    GL.MultMatrix(CameraHelper.Main().worldToCameraMatrix * q.Planetoid.transform.localToWorldMatrix);
+                    GL.MultMatrix(CameraHelper.Main().worldToCameraMatrix * q.Planetoid.OriginTransform.localToWorldMatrix);
                     GL.LoadProjectionMatrix(CameraHelper.Main().projectionMatrix);
 
                     lineMaterial.renderQueue = 5000;

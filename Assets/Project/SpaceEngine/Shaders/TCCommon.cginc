@@ -3,7 +3,7 @@
  * Copyright (C) 2012-2015 Vladimir Romanyuk
  * All rights reserved.
  *
- * Modified and ported to Unity by Denis Ovchinnikov 2015-2016
+ * Modified and ported to Unity by Denis Ovchinnikov 2015-2017
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -32,7 +32,7 @@
 
 /*
  * Author: Vladimir Romanyuk
- * Modified and ported to Unity by Denis Ovchinnikov 2015-2016
+ * Modified and ported to Unity by Denis Ovchinnikov 2015-2017
  */
 
 // NOTE:
@@ -112,8 +112,6 @@
 
 //-----------------------------------------------------------------------------
 #define USESAVEPOW
-#define USETEXLOD
-#define PACKED_NORMALS
 //-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
@@ -150,22 +148,15 @@ uniform float2	  InvSize;				 // ()
 //-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
-uniform float2 TexCoord;
-//-----------------------------------------------------------------------------
-
-//-----------------------------------------------------------------------------
 uniform sampler2D	PermSampler;		// 3d
 uniform sampler2D	PermGradSampler;	// 3d
 uniform sampler2D	PermSamplerGL;		// 2d
 uniform sampler2D	PermGradSamplerGL;	// 2d
-uniform sampler2D   NormalMap;          // normals map to calculate slope
 uniform sampler1D   CloudsColorTable;   // clouds color table
 
 uniform sampler2D   MaterialTable;      // material parameters table
 
 uniform sampler2D   AtlasDiffSampler;   // detail texture diffuse atlas
-
-uniform sampler2D	ColorMap;
 //-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
@@ -287,8 +278,6 @@ uniform float noiseRidgeSmooth;// = 0.0001;
 #define     GetGasGiantCloudsColor(height)   tex2Dlod(MaterialTable, float4(height, 0.0, 0.0, 0.0))
 //-----------------------------------------------------------------------------
 
-//TODO: LODOM for all planettypes/planet height functions.
-
 //-----------------------------------------------------------------------------
 inline float SavePow(float f, float p) 
 { 
@@ -394,88 +383,6 @@ float3 Cartesian2Spherical(float3 cartesian)
 //-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
-float3 GetSurfacePoint(float2 texcoord)
-{
-	float2 spherical = float2(0.0, 0.0);
-
-	if (faceParams.w == 6.0) //global
-	{
-		spherical.x = (texcoord.x * 2 - 0.5) * M_PI;
-		spherical.y = (0.5 - texcoord.y) * M_PI;
-
-		float2 Alpha = float2(sin(spherical.x), cos(spherical.x));
-		float2 Delta = float2(sin(spherical.y), cos(spherical.y));
-
-		return float3(Delta.y * Alpha.x, Delta.x, Delta.y * Alpha.y);
-	}
-	else //cubemap
-	{
-		spherical = texcoord.xy * faceParams.z + faceParams.xy;
-
-		float3 p = normalize(float3(spherical, 1.0));
-
-		if (faceParams.w == 0.0)
-			return float3(p.z, -p.y, -p.x); //neg_x
-		else if (faceParams.w == 1.0)
-			return float3(-p.z, -p.y, p.x); //pos_x
-		else if (faceParams.w == 2.0)
-			return float3(p.x, -p.z, -p.y); //neg_y
-		else if (faceParams.w == 3.0)
-			return float3(p.x, p.z, p.y); //pos_y
-		else if (faceParams.w == 4.0)
-			return float3(-p.x, -p.y, -p.z); //neg_z
-		else
-			return float3(p.x, -p.y, p.z); //pos_z
-	}
-}
-
-float3 GetSurfacePoint(float2 texcoord, float face)
-{
-	float2 spherical = float2(0.0, 0.0);
-
-	if (face == 6.0) //global
-	{
-		spherical.x = (texcoord.x * 2 - 0.5) * M_PI;
-		spherical.y = (0.5 - texcoord.y) * M_PI;
-
-		float2 Alpha = float2(sin(spherical.x), cos(spherical.x));
-		float2 Delta = float2(sin(spherical.y), cos(spherical.y));
-
-		return float3(Delta.y * Alpha.x, Delta.x, Delta.y * Alpha.y);
-	}
-	else //cubemap
-	{
-		spherical = texcoord.xy * faceParams.z + faceParams.xy;
-
-		float3 p = normalize(float3(spherical, 1.0));
-
-		if (face == 0.0)
-			return float3(p.z, -p.y, -p.x); //neg_x
-		else if (face == 1.0)
-			return float3(-p.z, -p.y, p.x); //pos_x
-		else if (face == 2.0)
-			return float3(p.x, -p.z, -p.y); //neg_y
-		else if (face == 3.0)
-			return float3(p.x, p.z, p.y); //pos_y
-		else if (face == 4.0)
-			return float3(-p.x, -p.y, -p.z); //neg_z
-		else
-			return float3(p.x, -p.y, p.z); //pos_z
-	}
-}
-
-float3 GetSurfacePoint()
-{
-	return GetSurfacePoint(TexCoord);
-}
-
-float3 GetSurfacePoint(float face)
-{
-	return GetSurfacePoint(TexCoord, face);
-}
-//-----------------------------------------------------------------------------
-
-//-----------------------------------------------------------------------------
 float3 UnitToColor24(in float unit)
 {
 	float mask = 1.0 / 256.0;
@@ -501,120 +408,6 @@ struct  Surface
 	float4 color;
 	float  height;
 };
-
-#ifndef PACKED_NORMALS
-float GetSurfaceHeight(float2 texcoord)
-{
-	float2  texCoord = texcoord.xy * scaleParams.z + scaleParams.xy;
-
-	#ifdef USETEXLOD
-	return tex2Dlod(NormalMap, float4(texCoord, 0.0, 0.0)).a;
-	#else
-	return tex2D(NormalMap, texCoord).a;
-	#endif
-}
-
-float GetSurfaceHeight()
-{
-	return GetSurfaceHeight(TexCoord);
-}
-
-void GetSurfaceHeightAndSlope(inout float height, inout float slope, float2 texcoord, sampler2D normalMap)
-{
-	float2 texCoord = texcoord.xy * scaleParams.z + scaleParams.xy;
-
-	#ifdef USETEXLOD
-	float4 bumpData = tex2Dlod(normalMap, float4(texCoord, 0.0, 0.0));
-	#else
-	float4 bumpData = tex2D(normalMap, texCoord);
-	#endif
-
-	float3 norm = 2.0 * bumpData.xyz - 1.0;
-
-	slope = clamp(1.0 - pow(norm.z, 6.0), 0.0, 1.0);
-	height = bumpData.a;
-}
-
-void GetSurfaceHeightAndSlope(inout float height, inout float slope, float2 texcoord)
-{
-	float2 texCoord = texcoord.xy * scaleParams.z + scaleParams.xy;
-
-	#ifdef USETEXLOD
-	float4 bumpData = tex2Dlod(NormalMap, float4(texCoord, 0.0, 0.0));
-	#else
-	float4 bumpData = tex2D(NormalMap, texCoord);
-	#endif
-
-	float3 norm = 2.0 * bumpData.xyz - 1.0;
-
-	slope = clamp(1.0 - pow(norm.z, 6.0), 0.0, 1.0);
-	height = bumpData.a;
-}
-
-void GetSurfaceHeightAndSlope(inout float height, inout float slope)
-{
-	GetSurfaceHeightAndSlope(height, slope, TexCoord);
-}
-
-#else
-
-float GetSurfaceHeight(float2 texcoord)
-{
-	float2 texCoord = texCoord.xy * scaleParams.z + scaleParams.xy;
-
-	#ifdef USETEXLOD
-	float4 bumpData = tex2Dlod(NormalMap, float4(texCoord, 0.0, 0.0));
-	#else
-	float4 bumpData = tex2D(NormalMap, texCoord);
-	#endif
-
-	return dot(bumpData.zw, float2(0.00390625, 1.0));
-}
-
-float GetSurfaceHeight()
-{
-	return GetSurfaceHeight(TexCoord);
-}
-
-void GetSurfaceHeightAndSlope(inout float height, inout float slope, float2 texcoord, sampler2D normalMap)
-{
-	float2 texCoord = texcoord.xy * scaleParams.z + scaleParams.xy;
-
-	#ifdef USETEXLOD
-	float4 bumpData = tex2Dlod(normalMap, float4(texCoord, 0.0, 0.0));
-	#else
-	float4 bumpData = tex2D(normalMap, texCoord);
-	#endif
-
-	float2 norm = 2.0 * bumpData.xy - 1.0;
-
-	slope = 1.0 - dot(norm.xy, norm.xy);
-	slope = clamp(1.0 - pow(slope, 3.0), 0.0, 1.0);
-	height = dot(bumpData.zw, float2(0.00390625, 1.0));
-}
-
-void GetSurfaceHeightAndSlope(inout float height, inout float slope, float2 texcoord)
-{
-	float2 texCoord = texcoord.xy * scaleParams.z + scaleParams.xy;
-
-	#ifdef USETEXLOD
-	float4 bumpData = tex2Dlod(NormalMap, float4(texCoord, 0.0, 0.0));
-	#else
-	float4 bumpData = tex2D(NormalMap, texCoord);
-	#endif
-
-	float2 norm = 2.0 * bumpData.xy - 1.0;
-
-	slope = 1.0 - dot(norm.xy, norm.xy);
-	slope = clamp(1.0 - pow(slope, 3.0), 0.0, 1.0);
-	height = dot(bumpData.zw, float2(0.00390625, 1.0));
-}
-
-void GetSurfaceHeightAndSlope(inout float height, inout float slope)
-{
-	GetSurfaceHeightAndSlope(height, slope, TexCoord);
-}
-#endif
 //-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
@@ -1422,6 +1215,7 @@ float Noise(float3 p)
 			float3 blend = Interpolation_C2(Pf);
 			float4 res0 = lerp(grad_results_0, grad_results_1, blend.z);
 			float2 res1 = lerp(res0.xy, res0.zw, blend.y);
+
 			return lerp(res1.x, res1.y, blend.x) * 0.66666666666; //0.66666666666 = (2.0 / 3.0) //(2.0 / 3.0);   // (optionally) mult by (2.0/3.0)to scale to a strict -1.0->1.0 range
 		#else
 			// "Improved" noise using 8 corner gradients. Faster than the 12 mid-edge point method.
@@ -1452,6 +1246,7 @@ float Noise(float3 p)
 			float3 blend = Interpolation_C2(Pf);
 			float4 res0 = lerp(grad_results_0, grad_results_1, blend.z);
 			float2 res1 = lerp(res0.xy, res0.zw, blend.y);
+
 			return lerp(res1.x, res1.y, blend.x) * 0.66666666666; //0.66666666666 = (2.0 / 3.0) //(2.0 / 3.0);   // (optionally) mult by (2.0/3.0)to scale to a strict -1.0->1.0 range
 		#endif
 	#endif
@@ -1520,9 +1315,8 @@ float4 NoiseDeriv(float3 p)
 	float yderiv_1 = dot(temp_1, float2(Pf.y, Pf_min1.y).xxyy) + dot(m3_1, grad_y1);
 	float zderiv_1 = dot(temp_1, Pf_min1.zzzz) + dot(m3_1, grad_z1);
 
-	const float FINAL_NORMALIZATION = 2.3703703703703703703703703703704;	// scales the final result to a strict (-1.0, 1.0) range
 	return float4(float3(xderiv_0, yderiv_0, zderiv_0) + float3(xderiv_1, yderiv_1, zderiv_1),
-				 dot(m3_0, grad_results_0) + dot(m3_1, grad_results_1)) * FINAL_NORMALIZATION;
+				 dot(m3_0, grad_results_0) + dot(m3_1, grad_results_1)) * 2.3703703703703703703703703703704;// scales the final result to a strict (-1.0, 1.0) range
 }
 #endif
 //-----------------------------------------------------------------------------

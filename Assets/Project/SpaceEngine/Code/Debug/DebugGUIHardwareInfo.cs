@@ -1,7 +1,7 @@
 #region License
 // Procedural planet generator.
 // 
-// Copyright (C) 2015-2016 Denis Ovchinnikov [zameran] 
+// Copyright (C) 2015-2017 Denis Ovchinnikov [zameran] 
 // All rights reserved.
 // 
 // Redistribution and use in source and binary forms, with or without
@@ -82,7 +82,7 @@ namespace SpaceEngine.Debugging
             GUILayoutExtensions.LabelWithSpace("Non-Power-Of-Two Texture Support: " + SI.npotSupport, -8);
 
             GUILayoutExtensions.LabelWithSpace("ComputeShaders: " + SI.supportsComputeShaders, -8);
-            GUILayoutExtensions.LabelWithSpace("RenderTextures: " + SI.supportsRenderTextures, -8);
+            GUILayoutExtensions.LabelWithSpace("RenderTextures: " + true, -8);
             GUILayoutExtensions.LabelWithSpace("3DTextures: " + SI.supports3DTextures, -8);
             GUILayoutExtensions.LabelWithSpace("Graphics Multithreading: " + SI.graphicsMultiThreaded, -8);
             GUILayoutExtensions.LabelWithSpace("ARGB4444: " + SI.supportsARGB4444TextureFormat, -8);
@@ -115,7 +115,6 @@ namespace SpaceEngine.Debugging
         public static string npotSupport;
 
         public static string supportsComputeShaders;
-        public static string supportsRenderTextures;
         public static string supports3DTextures;
         public static string graphicsMultiThreaded;
         public static string supportsARGB4444TextureFormat;
@@ -143,7 +142,6 @@ namespace SpaceEngine.Debugging
             npotSupport = SystemInfo.npotSupport.ToString();
 
             supportsComputeShaders = Supports(SystemInfo.supportsComputeShaders);
-            supportsRenderTextures = Supports(SystemInfo.supportsRenderTextures);
             supports3DTextures = Supports(SystemInfo.supports3DTextures);
             graphicsMultiThreaded = Supports(SystemInfo.graphicsMultiThreaded);
             supportsARGB4444TextureFormat = Supports(SystemInfo.SupportsRenderTextureFormat(RenderTextureFormat.ARGB4444));

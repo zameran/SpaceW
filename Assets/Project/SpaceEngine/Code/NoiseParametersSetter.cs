@@ -1,7 +1,7 @@
 ﻿#region License
 // Procedural planet generator.
 // 
-// Copyright (C) 2015-2016 Denis Ovchinnikov [zameran] 
+// Copyright (C) 2015-2017 Denis Ovchinnikov [zameran] 
 // All rights reserved.
 // 
 // Redistribution and use in source and binary forms, with or without
@@ -117,9 +117,9 @@ public sealed class NoiseParametersSetter : MonoBehaviour
         mat.SetTexture("_PlanetUVSampler", PlanetUVSampler);
 
         mat.SetTexture("_QuadTexture1", QuadTexture1);
-        mat.SetTexture("_QuadTexture2", QuadTexture1);
-        mat.SetTexture("_QuadTexture3", QuadTexture1);
-        mat.SetTexture("_QuadTexture4", QuadTexture1);
+        mat.SetTexture("_QuadTexture2", QuadTexture2);
+        mat.SetTexture("_QuadTexture3", QuadTexture3);
+        mat.SetTexture("_QuadTexture4", QuadTexture4);
     }
 
     private void SetUniforms(ComputeShader shader)

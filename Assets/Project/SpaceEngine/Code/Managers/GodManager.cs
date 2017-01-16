@@ -1,7 +1,7 @@
 ﻿#region License
 // Procedural planet generator.
 // 
-// Copyright (C) 2015-2016 Denis Ovchinnikov [zameran] 
+// Copyright (C) 2015-2017 Denis Ovchinnikov [zameran] 
 // All rights reserved.
 // 
 // Redistribution and use in source and binary forms, with or without
@@ -34,12 +34,18 @@
 #endregion
 
 using UnityEngine;
+
 using ZFramework.Unity.Common.Messenger;
 
 [ExecutionOrder(-9999)]
 public class GodManager : MonoSingleton<GodManager>
 {
     public Plane[] FrustumPlanes;
+    public Mesh PrototypeMesh;
+
+    public OutputStruct[] PreOutputDataBuffer;
+    public OutputStruct[] PreOutputSubDataBuffer;
+    public OutputStruct[] OutputDataBuffer;
 
     public bool Debug = true;
     public bool UpdateFrustumPlanes = true;
@@ -53,7 +59,18 @@ public class GodManager : MonoSingleton<GodManager>
         Messenger.Setup(Debug);
 
         if (CameraHelper.Main() != null)
+        {
             FrustumPlanes = GeometryUtility.CalculateFrustumPlanes(CameraHelper.Main());
+        }
+
+        if (PrototypeMesh == null)
+        {
+            PrototypeMesh = MeshFactory.SetupQuadMesh();
+        }
+
+        PreOutputDataBuffer = new OutputStruct[QuadSettings.VerticesWithBorder];
+        PreOutputSubDataBuffer = new OutputStruct[QuadSettings.VerticesWithBorderFull];
+        OutputDataBuffer = new OutputStruct[QuadSettings.Vertices];
     }
 
     private void Update()
@@ -61,7 +78,9 @@ public class GodManager : MonoSingleton<GodManager>
         if (UpdateFrustumPlanes)
         {
             if (CameraHelper.Main() != null)
+            {
                 FrustumPlanes = GeometryUtility.CalculateFrustumPlanes(CameraHelper.Main());
+            }
         }
     }
 }

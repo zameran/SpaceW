@@ -1,7 +1,7 @@
 ﻿#region License
 // Procedural planet generator.
 // 
-// Copyright (C) 2015-2016 Denis Ovchinnikov [zameran] 
+// Copyright (C) 2015-2017 Denis Ovchinnikov [zameran] 
 // All rights reserved.
 // 
 // Redistribution and use in source and binary forms, with or without
@@ -33,8 +33,6 @@
 // Creator: zameran
 #endregion
 
-using System;
-using System.Collections.Generic;
 using UnityEngine;
 
 [RequireComponent(typeof(Transform))]
@@ -54,8 +52,8 @@ public class ComplexTranform : MonoBehaviour
 
     public void SetComplexPostion(Vector3d offset)
     {
-        Position = new ComplexVector(new Complex(offset.x, Position.x.Imaginary), 
-                                     new Complex(offset.y, Position.y.Imaginary), 
+        Position = new ComplexVector(new Complex(offset.x, Position.x.Imaginary),
+                                     new Complex(offset.y, Position.y.Imaginary),
                                      new Complex(offset.z, Position.z.Imaginary));
     }
 

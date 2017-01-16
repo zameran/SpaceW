@@ -1,7 +1,7 @@
 ﻿#region License
 // Procedural planet generator.
 // 
-// Copyright (C) 2015-2016 Denis Ovchinnikov [zameran] 
+// Copyright (C) 2015-2017 Denis Ovchinnikov [zameran] 
 // All rights reserved.
 // 
 // Redistribution and use in source and binary forms, with or without
@@ -35,9 +35,9 @@
 
 using System.IO;
 
-using ZFramework.Unity.Common;
-
 using UnityEngine;
+
+using ZFramework.Unity.Common;
 
 [UseLogger(Category.Important)]
 [UseLoggerFile(false, "Log")]

@@ -1,7 +1,7 @@
 ﻿#region License
 // Procedural planet generator.
 // 
-// Copyright (C) 2015-2016 Denis Ovchinnikov [zameran] 
+// Copyright (C) 2015-2017 Denis Ovchinnikov [zameran] 
 // All rights reserved.
 // 
 // Redistribution and use in source and binary forms, with or without
@@ -33,10 +33,10 @@
 // Creator: zameran
 #endregion
 
-using SpaceEngine.AtmosphericScattering;
-using SpaceEngine.AtmosphericScattering.Clouds;
+using System;
 using System.Collections.Generic;
 using System.Linq;
+
 using UnityEngine;
 
 public static class PlanetoidExtensions
@@ -68,9 +68,10 @@ public static class PlanetoidExtensions
             {
                 if (planet.AtmosphereEnabled)
                 {
-                    var lightCount = planet.Atmosphere.Suns.Count((sun) => sun != null);
+                    var lightCount = planet.Atmosphere.Suns.Count((sun) => sun != null && sun.gameObject.activeInHierarchy);
 
-                    Keywords.Add("LIGHT_" + lightCount);
+                    if (lightCount != 0)
+                        Keywords.Add("LIGHT_" + lightCount);
 
                     if (planet.Atmosphere.EclipseCasters.Count == 0)
                     {
@@ -109,8 +110,6 @@ public static class PlanetoidExtensions
 
 public sealed class Planetoid : Planet, IPlanet
 {
-    public bool GetData = false;
-
     public List<Quad> MainQuads = new List<Quad>();
     public List<Quad> Quads = new List<Quad>();
 
@@ -118,8 +117,6 @@ public sealed class Planetoid : Planet, IPlanet
     public ComputeShader CoreShader;
 
     public int DispatchSkipFramesCount = 8;
-
-    public Mesh PrototypeMesh;
 
     public NoiseParametersSetter NPS = null;
 
@@ -152,8 +149,6 @@ public sealed class Planetoid : Planet, IPlanet
         }
 
         QuadAtmosphereMPB = new MaterialPropertyBlock();
-
-        SetupGenerationConstants();
     }
 
     protected override void Start()
@@ -166,9 +161,6 @@ public sealed class Planetoid : Planet, IPlanet
 
         if (NPS != null)
             NPS.LoadAndInit();
-
-        if (PrototypeMesh == null)
-            SetupMesh();
 
         if (Atmosphere != null)
         {
@@ -289,11 +281,6 @@ public sealed class Planetoid : Planet, IPlanet
         }
     }
 
-    private void SetupGenerationConstants()
-    {
-        GenerationConstants = PlanetGenerationConstants.Init(PlanetRadius, TerrainMaxHeight);
-    }
-
     public void UpdateLOD()
     {
         if (UseLOD == false) return;
@@ -375,16 +362,6 @@ public sealed class Planetoid : Planet, IPlanet
         MainQuads.Clear();
 
         if (QuadsRoot != null) DestroyImmediate(QuadsRoot);
-
-        if (PrototypeMesh != null) DestroyImmediate(PrototypeMesh);
-    }
-
-    [ContextMenu("SetupMesh")]
-    public void SetupMesh()
-    {
-        if (PrototypeMesh != null) DestroyImmediate(PrototypeMesh);
-
-        PrototypeMesh = MeshFactory.SetupQuadMesh();
     }
 
     [ContextMenu("UpdateLODDistances")]
@@ -407,9 +384,9 @@ public sealed class Planetoid : Planet, IPlanet
     {
         if (OctaveFade)
         {
-            int id = invert ?
-                (LODDistances.Length / (LODLevel + 2 + ((LODDistances.Length - LODOctaves.Length) / LODOctaves.Length))) :
-                LODOctaves.Length - (LODDistances.Length / (LODLevel + 2 + ((LODDistances.Length - LODOctaves.Length) / LODOctaves.Length)));
+            var id = invert
+                ? (LODDistances.Length / (LODLevel + 2 + ((LODDistances.Length - LODOctaves.Length) / LODOctaves.Length)))
+                : LODOctaves.Length - (LODDistances.Length / (LODLevel + 2 + ((LODDistances.Length - LODOctaves.Length) / LODOctaves.Length)));
 
             id -= 1;
 
@@ -417,13 +394,9 @@ public sealed class Planetoid : Planet, IPlanet
             {
                 return LODOctaves[id];
             }
-            else
-                return 1.0f;
         }
-        else
-        {
-            return 1.0f;
-        }
+
+        return 1.0f;
     }
 
     public int GetCulledQuadsCount()
@@ -438,14 +411,12 @@ public sealed class Planetoid : Planet, IPlanet
 
     public Mesh GetMesh(QuadPosition position)
     {
-        return PrototypeMesh;
+        return GodManager.Instance.PrototypeMesh;
     }
 
     [ContextMenu("SetupQuads")]
     public void SetupQuads()
     {
-        SetupGenerationConstants();
-
         if (Quads.Count > 0)
             return;
 
@@ -453,15 +424,14 @@ public sealed class Planetoid : Planet, IPlanet
             if (gameObject.GetComponentInChildren<TCCommonParametersSetter>() != null)
                 tccps = gameObject.GetComponentInChildren<TCCommonParametersSetter>();
 
-        SetupMesh();
         SetupRoot();
 
-        SetupMainQuad(QuadPosition.Top);
-        SetupMainQuad(QuadPosition.Bottom);
-        SetupMainQuad(QuadPosition.Left);
-        SetupMainQuad(QuadPosition.Right);
-        SetupMainQuad(QuadPosition.Front);
-        SetupMainQuad(QuadPosition.Back);
+        var sides = Enum.GetValues(typeof(QuadPosition));
+
+        foreach (QuadPosition side in sides)
+        {
+            SetupMainQuad(side);
+        }
 
         UpdateLODDistances();
 
@@ -489,7 +459,7 @@ public sealed class Planetoid : Planet, IPlanet
 
     public void SetupMainQuad(QuadPosition quadPosition)
     {
-        GameObject go = new GameObject("Quad" + "_" + quadPosition.ToString());
+        GameObject go = new GameObject(string.Format("Quad_{0}", quadPosition));
         go.transform.parent = QuadsRoot.transform;
         go.transform.position = Vector3.zero;
         go.transform.rotation = Quaternion.identity;
@@ -528,7 +498,7 @@ public sealed class Planetoid : Planet, IPlanet
 
     public Quad SetupSubQuad(QuadPosition quadPosition)
     {
-        GameObject go = new GameObject("Quad" + "_" + quadPosition.ToString());
+        GameObject go = new GameObject(string.Format("Quad_{0}", quadPosition));
 
         Mesh mesh = GetMesh(quadPosition);
         mesh.bounds = new Bounds(Vector3.zero, new Vector3(PlanetRadius * 2, PlanetRadius * 2, PlanetRadius * 2));

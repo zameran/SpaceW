@@ -1,7 +1,7 @@
 ﻿#region License
 // Procedural planet generator.
 // 
-// Copyright (C) 2015-2016 Denis Ovchinnikov [zameran] 
+// Copyright (C) 2015-2017 Denis Ovchinnikov [zameran] 
 // All rights reserved.
 // 
 // Redistribution and use in source and binary forms, with or without
@@ -54,8 +54,8 @@ public sealed class ClusterSpace : Space
             {
                 for (int k = 0; k < 8; k++)
                 {
-                    TopClusters[i, j, k] = new Cluster(128, new Vector3d(i * ClusterSize, 
-                                                                         j * ClusterSize, 
+                    TopClusters[i, j, k] = new Cluster(128, new Vector3d(i * ClusterSize,
+                                                                         j * ClusterSize,
                                                                          k * ClusterSize));
                 }
             }

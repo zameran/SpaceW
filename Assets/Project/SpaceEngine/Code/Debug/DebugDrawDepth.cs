@@ -1,7 +1,7 @@
 ﻿#region License
 // Procedural planet generator.
 // 
-// Copyright (C) 2015-2016 Denis Ovchinnikov [zameran] 
+// Copyright (C) 2015-2017 Denis Ovchinnikov [zameran] 
 // All rights reserved.
 // 
 // Redistribution and use in source and binary forms, with or without
@@ -34,21 +34,16 @@
 #endregion
 
 using UnityEngine;
-using System.Collections;
 
 namespace SpaceEngine.Debugging
 {
     [RequireComponent(typeof(Camera))]
     public class DebugDrawDepth : MonoBehaviour
     {
-        public Shader depthShader;
-
-        public Transform sunTransform;
+        public Shader DepthShader;
+        public Material DepthMaterial;
 
         public RenderTexture DepthTexture;
-
-        private GameObject depthCamera;
-        private Camera depthCameraComponent;
 
         private void Start()
         {
@@ -59,11 +54,13 @@ namespace SpaceEngine.Debugging
             DepthTexture.filterMode = FilterMode.Bilinear;
             DepthTexture.useMipMap = false;
             DepthTexture.Create();
+
+            DepthMaterial = MaterialHelper.CreateTemp(DepthShader, "DepthTest");
         }
 
         private void Update()
         {
-            Shader.SetGlobalVector("_Godray_WorldSunDir", sunTransform.position - transform.position);
+
         }
 
         private void OnGUI()
@@ -79,41 +76,7 @@ namespace SpaceEngine.Debugging
 
         private void OnRenderImage(RenderTexture source, RenderTexture destination)
         {
-            if (!depthCamera)
-            {
-                depthCamera = new GameObject("CustomDepthCamera");
-                depthCameraComponent = depthCamera.AddComponent<Camera>();
-
-                depthCameraComponent.CopyFrom(CameraHelper.Main());
-
-                depthCameraComponent.farClipPlane = CameraHelper.Main().farClipPlane;
-                depthCameraComponent.nearClipPlane = CameraHelper.Main().nearClipPlane;
-                depthCameraComponent.depthTextureMode = DepthTextureMode.None;
-
-                depthCameraComponent.transform.parent = CameraHelper.Main().transform;
-
-                depthCameraComponent.enabled = false;
-            }
-
-            depthCameraComponent.CopyFrom(CameraHelper.Main());
-            depthCameraComponent.enabled = false;
-
-            bool renderDepthBuffer = true;
-
-            if (renderDepthBuffer)
-            {
-                RenderTexture rt = RenderTexture.active;
-                RenderTexture.active = DepthTexture;
-
-                GL.Clear(false, true, Color.black);
-
-                depthCameraComponent.targetTexture = DepthTexture;
-                depthCameraComponent.RenderWithShader(depthShader, "RenderType");
-
-                RenderTexture.active = rt;
-            }
-
-            Graphics.Blit(source, destination);
+            Graphics.Blit(source, destination, DepthMaterial);
         }
     }
 }
