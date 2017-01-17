@@ -41,21 +41,24 @@ namespace SpaceEngine.Debugging
     public class DebugDrawDepth : MonoBehaviour
     {
         public Shader DepthShader;
-        public Material DepthMaterial;
 
         public RenderTexture DepthTexture;
 
         private void Start()
         {
-            GetComponent<Camera>().depthTextureMode = DepthTextureMode.Depth;
+            var customDepthCameraGameObject = new GameObject("CustomDepthCamera");
+            var customDepthCamera = customDepthCameraGameObject.AddComponent<Camera>();
 
-            DepthTexture = new RenderTexture((int)(Screen.width * 1), (int)(Screen.height * 1), 16, RenderTextureFormat.RFloat);
+            customDepthCamera.CopyFrom(Camera.main);
+            customDepthCamera.transform.parent = Camera.main.transform;
+            customDepthCamera.depthTextureMode = DepthTextureMode.Depth;
+            customDepthCamera.enabled = false;
 
-            DepthTexture.filterMode = FilterMode.Bilinear;
+            DepthTexture = new RenderTexture(Screen.width, Screen.height, 16, RenderTextureFormat.ARGB32);
+
+            DepthTexture.filterMode = FilterMode.Point;
             DepthTexture.useMipMap = false;
             DepthTexture.Create();
-
-            DepthMaterial = MaterialHelper.CreateTemp(DepthShader, "DepthTest");
         }
 
         private void Update()
@@ -71,12 +74,18 @@ namespace SpaceEngine.Debugging
 
         private void OnPreRender()
         {
+            var customDepthCamera = CameraHelper.DepthCamera();
 
+            customDepthCamera.CopyFrom(Camera.main);
+            customDepthCamera.targetTexture = DepthTexture;
+            customDepthCamera.depthTextureMode = DepthTextureMode.Depth;
+            customDepthCamera.RenderWithShader(DepthShader, "RenderType");
+            customDepthCamera.enabled = false;
         }
 
         private void OnRenderImage(RenderTexture source, RenderTexture destination)
         {
-            Graphics.Blit(source, destination, DepthMaterial);
+
         }
     }
 }
