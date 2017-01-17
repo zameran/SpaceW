@@ -33,7 +33,6 @@
 // Creator: zameran
 #endregion
 
-using System;
 
 using UnityEngine;
 
@@ -164,6 +163,7 @@ public sealed class FlyCamera : GameCamera
             transform.Translate(velocity * currentSpeed);
         }
 
+        /*
         var cameraPosition = transform.position;
         var universe = FindObjectOfType<Universe>();
 
@@ -172,6 +172,7 @@ public sealed class FlyCamera : GameCamera
             universe.transform.position -= cameraPosition;
             transform.position = Vector3.zero;
         }
+        */
     }
 
     protected override void Init()

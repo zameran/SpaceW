@@ -136,12 +136,11 @@ float4 BlurShadow(sampler2D inputTexture, float2 inputUV, float inputStep = 0.00
 float4 ShadowColor(float4x4 shadowMatrix, sampler2D shadowSampler, float shadowRatio,  float4 worldPoint)
 {
 	float4 shadowPoint = mul(shadowMatrix, worldPoint);
-	float2 shadowMag   = length(shadowPoint.xy);
+	float4 shadow = 0;
+	float2 shadowMag = length(shadowPoint.xy);
 	
 	shadowMag = 1.0f - (1.0f - shadowMag) * shadowRatio;
-	
-	float4 shadow = 0;
-	
+
 	#ifdef SHADOW_BLUR
 		shadow = BlurShadow(shadowSampler, shadowMag);
 	#else

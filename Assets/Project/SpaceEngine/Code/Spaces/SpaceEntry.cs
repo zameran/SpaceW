@@ -28,53 +28,14 @@
 // ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF
 // THE POSSIBILITY OF SUCH DAMAGE.
 // 
-// Creation Date: 2017.01.11
-// Creation Time: 19:13
+// Creation Date: 2017.01.13
+// Creation Time: 8:30 PM
 // Creator: zameran
 #endregion
 
 using UnityEngine;
 
-public class Universe : MonoBehaviour
+public class SpaceEntry : MonoBehaviour
 {
-    public FlyCamera FlyCamera;
-
-    public Segment Entry;
-
-    public int ClustersCount { get { return Entry.Chunks.Length * Chunk.Size; } }
-    public int ChunksCount { get { return Entry.Chunks.Length; } }
-    public int SegmentsCount { get { return 1; } }
-
-    private void Start()
-    {
-        Entry = new Segment(Vector3d.zero);
-        Entry.Init();
-    }
-
-    private void Update()
-    {
-        if (Entry == null) return;
-
-        Entry.Update(transform.position);
-    }
-
-    private void OnDrawGizmos()
-    {
-        if (Entry == null) return;
-
-        Entry.OnDrawGizmos();
-    }
-
-    private void OnGUI()
-    {
-        GUILayoutExtensions.Vertical(() =>
-        {
-            GUILayoutExtensions.LabelWithSpace(string.Format("Segment Position: {0}", Entry.Position), -8);
-            GUILayoutExtensions.LabelWithSpace(string.Format("Camera Position: {0}", FlyCamera.transform.position), -8);
-            GUILayoutExtensions.LabelWithSpace(string.Format("Clusters Count: {0}", ClustersCount), -8);
-            GUILayoutExtensions.LabelWithSpace(string.Format("Chunks Count: {0}", ChunksCount), -8);
-            GUILayoutExtensions.LabelWithSpace(string.Format("Segments Count: {0}", SegmentsCount), -8);
-            GUILayoutExtensions.LabelWithSpace(string.Format("Current Chunk Position: {0}", Entry.Current != null ? Entry.Current.GUID.ToString() : "Null"), -8);
-        });
-    }
+    public Universe Universe;
 }
