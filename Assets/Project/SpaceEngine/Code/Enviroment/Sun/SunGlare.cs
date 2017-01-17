@@ -33,13 +33,12 @@
 // Creator: zameran
 #endregion
 
-using UnityEngine;
-
 using System.Collections.Generic;
+using UnityEngine;
 
 namespace SpaceEngine.AtmosphericScattering.Sun
 {
-    public sealed class SunGlare : MonoBehaviour
+    public sealed class SunGlare : Node<SunGlare>
     {
         public Atmosphere Atmosphere;
         public AtmosphereSun Sun;
@@ -66,24 +65,44 @@ namespace SpaceEngine.AtmosphericScattering.Sun
         private float Fade = 1;
 
         public AnimationCurve FadeCurve = new AnimationCurve(new Keyframe[] { new Keyframe(0.0f, 0.0f),
-                                                                          new Keyframe(10.0f, 1.0f),
-                                                                          new Keyframe(90.0f, 1.0f),
-                                                                          new Keyframe(100.0f, 0.0f) });
+                                                                              new Keyframe(10.0f, 1.0f),
+                                                                              new Keyframe(90.0f, 1.0f),
+                                                                              new Keyframe(100.0f, 0.0f) });
 
         private Mesh mesh;
 
         public Vector3 FlareSettings = new Vector3(0.45f, 1.0f, 0.85f);
         public Vector3 SpikesSettings = new Vector3(0.6f, 1.0f, 1.0f);
 
-        public List<Vector4> Ghost1SettingsList = new List<Vector4> { new Vector4(0.54f, 0.65f, 2.3f, 0.5f), new Vector4(0.54f, 1.0f, 6.0f, 0.7f) };
-        public List<Vector4> Ghost2SettingsList = new List<Vector4> { new Vector4(0.135f, 1.0f, 3.0f, 0.9f), new Vector4(0.054f, 1.0f, 8.0f, 1.1f), new Vector4(0.054f, 1.0f, 4.0f, 1.3f), new Vector4(0.054f, 1.0f, 5.0f, 1.5f) };
-        public List<Vector4> Ghost3SettingsList = new List<Vector4> { new Vector4(0.135f, 1.0f, 3.0f, 0.9f), new Vector4(0.054f, 1.0f, 8.0f, 1.1f), new Vector4(0.054f, 1.0f, 4.0f, 1.3f), new Vector4(0.054f, 1.0f, 5.0f, 1.5f) };
+        public List<Vector4> Ghost1SettingsList = new List<Vector4>
+        {
+            new Vector4(0.54f, 0.65f, 2.3f, 0.5f),
+            new Vector4(0.54f, 1.0f, 6.0f, 0.7f)
+        };
+
+        public List<Vector4> Ghost2SettingsList = new List<Vector4>
+        {
+            new Vector4(0.135f, 1.0f, 3.0f, 0.9f),
+            new Vector4(0.054f, 1.0f, 8.0f, 1.1f),
+            new Vector4(0.054f, 1.0f, 4.0f, 1.3f),
+            new Vector4(0.054f, 1.0f, 5.0f, 1.5f)
+        };
+
+        public List<Vector4> Ghost3SettingsList = new List<Vector4>
+        {
+            new Vector4(0.135f, 1.0f, 3.0f, 0.9f),
+            new Vector4(0.054f, 1.0f, 8.0f, 1.1f),
+            new Vector4(0.054f, 1.0f, 4.0f, 1.3f),
+            new Vector4(0.054f, 1.0f, 5.0f, 1.5f)
+        };
 
         private Matrix4x4 Ghost1Settings = Matrix4x4.zero;
         private Matrix4x4 Ghost2Settings = Matrix4x4.zero;
         private Matrix4x4 Ghost3Settings = Matrix4x4.zero;
 
-        public void Start()
+        #region Node
+
+        protected override void InitNode()
         {
             if (Sun == null)
                 if (GetComponent<AtmosphereSun>() != null)
@@ -106,15 +125,59 @@ namespace SpaceEngine.AtmosphericScattering.Sun
             InitUniforms(SunGlareMaterial);
         }
 
-        public void InitSetAtmosphereUniforms()
+        protected override void UpdateNode()
         {
-            InitUniforms();
-            SetUniforms();
+            if (Sun == null) return;
+
+            SunGlareMaterial.renderQueue = (int)RenderQueue + RenderQueueOffset;
+
+            var distance = (CameraHelper.Main().transform.position - Sun.transform.position).magnitude;
+
+            CameraHelper.WithReplacedProjection(() =>
+            {
+                ViewPortPosition = CameraHelper.Main().WorldToViewportPoint(Sun.transform.position);
+            });
+
+            Scale = distance / 2266660f;
+            Fade = FadeCurve.Evaluate(Mathf.Clamp(Scale, 0.0f, 100.0f));
+            //Fade = FadeCurve.Evaluate(Mathf.Clamp01(VectorHelper.AngularRadius(Sun.transform.position, CameraHelper.Main().transform.position, 250000.0f)));
+
+            //RaycastHit hit;
+
+            Eclipse = false;
+
+            //Eclipse = Physics.Raycast(CameraHelper.Main().transform.position, (Sun.transform.position - CameraHelper.Main().transform.position).normalized, out hit, Mathf.Infinity);
+            //if (!Eclipse)
+            //    Eclipse = Physics.Raycast(CameraHelper.Main().transform.position, (Sun.transform.position - CameraHelper.Main().transform.position).normalized, out hit, Mathf.Infinity);
+
+            if (InitUniformsInUpdate) InitUniforms(SunGlareMaterial);
+
+            SetUniforms(SunGlareMaterial);
         }
 
-        public void InitUniforms()
+        protected override void Start()
+        {
+            base.Start();
+        }
+
+        protected override void Update()
+        {
+            if (ViewPortPosition.z > 0)
+            {
+                if (Atmosphere == null) return;
+
+                Graphics.DrawMesh(mesh, Vector3.zero, Quaternion.identity, SunGlareMaterial, 10, CameraHelper.Main(), 0, Atmosphere.planetoid.QuadAtmosphereMPB, false, false);
+            }
+
+            base.Update();
+        }
+
+        #endregion
+
+        public void InitSetAtmosphereUniforms()
         {
             InitUniforms(SunGlareMaterial);
+            SetUniforms(SunGlareMaterial);
         }
 
         public void InitUniforms(Material mat)
@@ -136,11 +199,6 @@ namespace SpaceEngine.AtmosphericScattering.Sun
             if (Atmosphere != null) Atmosphere.InitUniforms(null, SunGlareMaterial, false);
         }
 
-        public void SetUniforms()
-        {
-            SetUniforms(SunGlareMaterial);
-        }
-
         public void SetUniforms(Material mat)
         {
             if (mat == null) return;
@@ -150,47 +208,12 @@ namespace SpaceEngine.AtmosphericScattering.Sun
             SunGlareMaterial.SetFloat("AspectRatio", CameraHelper.Main().aspect);
             SunGlareMaterial.SetFloat("Scale", Scale);
             SunGlareMaterial.SetFloat("Fade", Fade);
-            SunGlareMaterial.SetFloat("useAtmosphereColors", 1.0f);
+            SunGlareMaterial.SetFloat("UseAtmosphereColors", 1.0f);
             SunGlareMaterial.SetFloat("Eclipse", Eclipse ? 1.0f : 0.0f);
 
             SunGlareMaterial.renderQueue = (int)RenderQueue + RenderQueueOffset;
 
             if (Atmosphere != null) { Atmosphere.SetUniforms(null, SunGlareMaterial, false, false); }
-        }
-
-        public void UpdateNode()
-        {
-            if (Atmosphere == null || Sun == null) return;
-
-            float distance = (CameraHelper.Main().transform.position - Sun.transform.position).magnitude;
-
-            RaycastHit hit;
-
-            ViewPortPosition = CameraHelper.Main().WorldToViewportPoint(Sun.transform.position);
-            Scale = distance / 2266660f;
-            Fade = FadeCurve.Evaluate(Mathf.Clamp(Scale, 0.0f, 100.0f));
-            //Fade = FadeCurve.Evaluate(Mathf.Clamp01(VectorHelper.AngularRadius(Sun.transform.position, CameraHelper.Main().transform.position, 250000.0f)));
-
-            Eclipse = false;
-            Eclipse = Physics.Raycast(CameraHelper.Main().transform.position, (Sun.transform.position - CameraHelper.Main().transform.position).normalized, out hit, Mathf.Infinity);
-
-            if (!Eclipse)
-                Eclipse = Physics.Raycast(CameraHelper.Main().transform.position, (Sun.transform.position - CameraHelper.Main().transform.position).normalized, out hit, Mathf.Infinity);
-
-            if (InitUniformsInUpdate) InitUniforms(SunGlareMaterial);
-            SetUniforms(SunGlareMaterial);
-        }
-
-        public void Update()
-        {
-            UpdateNode();
-
-            if (ViewPortPosition.z > 0)
-            {
-                if (Atmosphere == null) return;
-
-                Graphics.DrawMesh(mesh, Vector3.zero, Quaternion.identity, SunGlareMaterial, 10, CameraHelper.Main(), 0, Atmosphere.planetoid.QuadAtmosphereMPB, false, false);
-            }
         }
     }
 }

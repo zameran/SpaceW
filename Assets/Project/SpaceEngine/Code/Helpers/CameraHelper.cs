@@ -33,6 +33,8 @@
 // Creator: zameran
 #endregion
 
+using System;
+
 using UnityEngine;
 
 public static class CameraHelper
@@ -113,5 +115,15 @@ public static class CameraHelper
     public static Vector3 GetRelativeProjectedDirection(this Vector3 v, Matrix4x4 worldToLocal)
     {
         return worldToLocal.MultiplyPoint(v.GetProjectedDirection());
+    }
+
+    public static void WithReplacedProjection(Action ToDo)
+    {
+        var camera = Main();
+        var projectionMatrix = camera.projectionMatrix;
+
+        camera.projectionMatrix = camera.GetCameraToScreen();
+        if (ToDo != null) ToDo();
+        camera.projectionMatrix = projectionMatrix;
     }
 }

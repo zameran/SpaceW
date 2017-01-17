@@ -37,7 +37,7 @@ using UnityEngine;
 
 namespace SpaceEngine.AtmosphericScattering.Clouds
 {
-    public class Cloudsphere : MonoBehaviour
+    public class Cloudsphere : Node<Cloudsphere>
     {
         public Planetoid planetoid;
 
@@ -57,15 +57,31 @@ namespace SpaceEngine.AtmosphericScattering.Clouds
 
         public Cubemap CloudTexture;
 
-        private void Start()
+        #region Node
+
+        protected override void InitNode()
         {
             InitMaterials();
         }
 
-        private void Update()
+        protected override void UpdateNode()
         {
+            CloudMaterial.renderQueue = (int)RenderQueue + RenderQueueOffset;
 
+            SetUniforms();
         }
+
+        protected override void Start()
+        {
+            base.Start();
+        }
+
+        protected override void Update()
+        {
+            base.Update();
+        }
+
+        #endregion
 
         public void Render(int drawLayer = 8)
         {
@@ -74,24 +90,16 @@ namespace SpaceEngine.AtmosphericScattering.Clouds
 
         public void Render(Camera camera, int drawLayer = 8)
         {
-            SetUniforms(CloudMaterial);
-
-            CloudMaterial.renderQueue = (int)RenderQueue + RenderQueueOffset;
-
             if (CloudsphereMesh == null) return;
 
-            Matrix4x4 CloudsTRS = Matrix4x4.TRS(planetoid.OriginTransform.position, transform.rotation, Vector3.one * (Radius + Height));
+            var CloudsTRS = Matrix4x4.TRS(planetoid.OriginTransform.position, transform.rotation, Vector3.one * (Radius + Height));
 
             Graphics.DrawMesh(CloudsphereMesh, CloudsTRS, CloudMaterial, drawLayer, camera, 0, planetoid.QuadAtmosphereMPB);
         }
 
         public void InitMaterials()
         {
-            if (CloudMaterial == null)
-            {
-                CloudMaterial = new Material(CloudShader);
-                CloudMaterial.name = "Clouds" + "(Instance)" + Random.Range(float.MinValue, float.MaxValue);
-            }
+            CloudMaterial = MaterialHelper.CreateTemp(CloudShader, "Cloudsphere", (int)RenderQueue);
         }
 
         public void InitUniforms(Planet planet)

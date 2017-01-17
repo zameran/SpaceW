@@ -41,7 +41,7 @@ using UnityEngine;
 
 namespace SpaceEngine.AtmosphericScattering
 {
-    public sealed class Atmosphere : Node, IEventit
+    public sealed class Atmosphere : Node<Atmosphere>, IEventit
     {
         private AtmosphereBase atmosphereBase = AtmosphereBase.Earth;
 
@@ -165,7 +165,7 @@ namespace SpaceEngine.AtmosphericScattering
                 return;
             }
 
-            atmosphere.ApplyTestPresset(AtmosphereParameters.Get(atmosphere.AtmosphereBase));
+            atmosphere.ApplyPresset(AtmosphereParameters.Get(atmosphere.AtmosphereBase));
             atmosphere.ReanimateAtmosphereUniforms(atmosphere, planetoid);
         }
 
@@ -192,7 +192,7 @@ namespace SpaceEngine.AtmosphericScattering
 
         protected override void InitNode()
         {
-            ApplyTestPresset(AtmosphereParameters.Get(atmosphereBase));
+            ApplyPresset(AtmosphereParameters.Get(AtmosphereBase));
 
             TryBake();
 
@@ -205,6 +205,8 @@ namespace SpaceEngine.AtmosphericScattering
 
         protected override void UpdateNode()
         {
+            SkyMaterial.renderQueue = (int)RenderQueue + RenderQueueOffset;
+
             atmosphereParameters.Rg = Radius - TerrainRadiusHold;
             atmosphereParameters.Rt = (Radius + Height) - TerrainRadiusHold;
             atmosphereParameters.Rl = (Radius + Height * 1.05f) - TerrainRadiusHold;
@@ -228,7 +230,7 @@ namespace SpaceEngine.AtmosphericScattering
 
             Fade = FadeCurve.Evaluate(float.IsNaN(fadeValue) || float.IsInfinity(fadeValue) ? 1.0f : fadeValue);
 
-            Keywords = GetKeywords();
+            Keywords = planetoid.GetKeywords();
         }
 
         protected override void Start()
@@ -245,7 +247,7 @@ namespace SpaceEngine.AtmosphericScattering
 
         #endregion
 
-        private void ApplyTestPresset(AtmosphereParameters p)
+        private void ApplyPresset(AtmosphereParameters p)
         {
             atmosphereParameters = new AtmosphereParameters(p);
 
@@ -260,22 +262,6 @@ namespace SpaceEngine.AtmosphericScattering
             if (artb != null) artb.Bake(atmosphereParameters);
 
             EventManager.PlanetoidEvents.OnAtmosphereBaked.Invoke(planetoid, this);
-        }
-
-        public List<string> GetKeywords()
-        {
-            var planet = transform.parent.GetComponent<Planet>() as Planetoid;
-
-            if (planet != null)
-            {
-                return planet.GetKeywords();
-            }
-            else
-            {
-                Debug.Log("Atmosphere: GetKeywords problem!");
-
-                return null;
-            }
         }
 
         public void CalculateShine(out Matrix4x4 soc1, out Matrix4x4 sc1)
@@ -377,8 +363,6 @@ namespace SpaceEngine.AtmosphericScattering
         {
             SetUniforms(planetoid.QuadAtmosphereMPB, SkyMaterial, true);
 
-            SkyMaterial.renderQueue = (int)RenderQueue + RenderQueueOffset;
-
             Graphics.DrawMesh(AtmosphereMesh, transform.localToWorldMatrix, SkyMaterial, drawLayer, camera, 0, planetoid.QuadAtmosphereMPB);
         }
 
@@ -470,10 +454,7 @@ namespace SpaceEngine.AtmosphericScattering
 
         public void InitMaterials()
         {
-            if (SkyMaterial == null)
-            {
-                SkyMaterial = MaterialHelper.CreateTemp(SkyShader, "Sky");
-            }
+            SkyMaterial = MaterialHelper.CreateTemp(SkyShader, "Sky");
         }
 
         public void InitMesh()
@@ -490,7 +471,7 @@ namespace SpaceEngine.AtmosphericScattering
             screenToCamera = CameraHelper.Main().GetScreenToCamera();
             worldCameraPos = CameraHelper.Main().transform.position;
 
-            Keywords = GetKeywords();
+            Keywords = planetoid.GetKeywords();
         }
 
         public void InitUniforms(MaterialPropertyBlock block, Material mat, bool full = true)
@@ -592,7 +573,10 @@ namespace SpaceEngine.AtmosphericScattering
                     {
                         var sunGlareComponent = Suns[i].GetComponent<SunGlare>();
 
-                        if (sunGlareComponent != null) sunGlareComponent.InitSetAtmosphereUniforms();
+                        if (sunGlareComponent != null)
+                        {
+                            sunGlareComponent.InitSetAtmosphereUniforms();
+                        }
                     }
                 }
             }

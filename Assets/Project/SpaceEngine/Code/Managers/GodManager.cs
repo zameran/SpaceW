@@ -94,9 +94,6 @@ public class GodManager : MonoSingleton<GodManager>
 
     private void Update()
     {
-        Planetoids = FindObjectsOfType<Planetoid>();
-        Starfields = FindObjectsOfType<Starfield>();
-
         if (UpdateFrustumPlanes)
         {
             if (CameraHelper.Main() != null)

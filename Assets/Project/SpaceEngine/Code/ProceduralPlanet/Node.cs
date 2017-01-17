@@ -35,7 +35,7 @@
 
 using UnityEngine;
 
-public abstract class Node : MonoBehaviour
+public abstract class Node<T> : MonoBehaviour where T : class
 {
     protected virtual void Start()
     {
