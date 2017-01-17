@@ -33,8 +33,6 @@
 // Creator: zameran
 #endregion
 
-using System.Collections.Generic;
-
 using UnityEngine;
 
 using ZFramework.Unity.Common.PerfomanceMonitor;

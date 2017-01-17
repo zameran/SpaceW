@@ -35,35 +35,38 @@
 
 using UnityEngine;
 
-[RequireComponent(typeof(Camera))]
-public abstract class GameCamera : MonoBehaviour, ICamera
+namespace SpaceEngine.Cameras
 {
-    public Camera CameraComponent { get { return GetComponent<Camera>(); } }
-
-    protected virtual void Start()
+    [RequireComponent(typeof(Camera))]
+    public abstract class GameCamera : MonoBehaviour, ICamera
     {
-        Init();
-    }
+        public Camera CameraComponent { get { return GetComponent<Camera>(); } }
 
-    protected virtual void Update()
-    {
+        protected virtual void Start()
+        {
+            Init();
+        }
 
-    }
+        protected virtual void Update()
+        {
 
-    protected virtual void FixedUpdate()
-    {
+        }
 
-    }
+        protected virtual void FixedUpdate()
+        {
 
-    protected abstract void Init();
+        }
 
-    protected float ClampAngle(float angle, float min, float max)
-    {
-        if (angle < -360)
-            angle += 360;
-        if (angle > 360)
-            angle -= 360;
+        protected abstract void Init();
 
-        return Mathf.Clamp(angle, min, max);
+        protected float ClampAngle(float angle, float min, float max)
+        {
+            if (angle < -360)
+                angle += 360;
+            if (angle > 360)
+                angle -= 360;
+
+            return Mathf.Clamp(angle, min, max);
+        }
     }
 }

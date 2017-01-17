@@ -34,6 +34,7 @@
 #endregion
 
 using SpaceEngine.AtmosphericScattering.Sun;
+
 using System.Collections.Generic;
 
 using UnityEngine;
@@ -61,8 +62,8 @@ namespace SpaceEngine.AtmosphericScattering
         }
 
         public AnimationCurve FadeCurve = new AnimationCurve(new Keyframe[] { new Keyframe(0.0f, 0.0f),
-                                                                          new Keyframe(0.25f, 1.0f),
-                                                                          new Keyframe(1.0f, 1.0f) });
+                                                                              new Keyframe(0.25f, 1.0f),
+                                                                              new Keyframe(1.0f, 1.0f) });
 
         public Planetoid planetoid;
 
