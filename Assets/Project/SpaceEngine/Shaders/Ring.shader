@@ -247,5 +247,27 @@ Shader "SpaceEngine/Ring"
 			}
 			ENDCG
 		}
+
+		//TODO : Shadow pass...
+		Pass 
+		{
+			Name "ShadowCaster"
+			Tags { "LightMode" = "ShadowCaster" }
+
+			ZWrite On ZTest LEqual
+
+			CGPROGRAM
+			#pragma target 3.0
+
+			#pragma shader_feature _ _ALPHATEST_ON _ALPHABLEND_ON _ALPHAPREMULTIPLY_ON
+			#pragma multi_compile_shadowcaster
+
+			#pragma vertex vertShadowCaster
+			#pragma fragment fragShadowCaster
+
+			#include "UnityStandardShadow.cginc"
+
+			ENDCG
+		}
 	}
 }

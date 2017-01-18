@@ -55,6 +55,8 @@ namespace SpaceEngine.AtmosphericScattering.Sun
         public EngineRenderQueue RenderQueue = EngineRenderQueue.Transparent;
         public int RenderQueueOffset = 1000;
 
+        public float Magnitude = 1;
+
         public bool InitUniformsInUpdate = true;
 
         private bool Eclipse = false;
@@ -65,11 +67,10 @@ namespace SpaceEngine.AtmosphericScattering.Sun
         private float Fade = 1;
 
         public AnimationCurve FadeCurve = new AnimationCurve(new Keyframe[] { new Keyframe(0.0f, 0.0f),
-                                                                              new Keyframe(10.0f, 1.0f),
-                                                                              new Keyframe(90.0f, 1.0f),
-                                                                              new Keyframe(100.0f, 0.0f) });
+                                                                              new Keyframe(1.0f, 1.0f),
+                                                                              new Keyframe(10.0f, 0.0f) });
 
-        private Mesh mesh;
+        private Mesh SunGlareMesh;
 
         public Vector3 FlareSettings = new Vector3(0.45f, 1.0f, 0.85f);
         public Vector3 SpikesSettings = new Vector3(0.6f, 1.0f, 1.0f);
@@ -110,8 +111,8 @@ namespace SpaceEngine.AtmosphericScattering.Sun
 
             SunGlareMaterial = MaterialHelper.CreateTemp(SunGlareShader, "Sunglare", (int)RenderQueue);
 
-            mesh = MeshFactory.MakePlane(8, 8, MeshFactory.PLANE.XY, false, false, false);
-            mesh.bounds = new Bounds(Vector4.zero, new Vector3(9e37f, 9e37f, 9e37f));
+            SunGlareMesh = MeshFactory.MakePlane(8, 8, MeshFactory.PLANE.XY, false, false, false);
+            SunGlareMesh.bounds = new Bounds(Vector4.zero, new Vector3(9e37f, 9e37f, 9e37f));
 
             for (int i = 0; i < Ghost1SettingsList.Count; i++)
                 Ghost1Settings.SetRow(i, Ghost1SettingsList[i]);
@@ -131,14 +132,14 @@ namespace SpaceEngine.AtmosphericScattering.Sun
 
             SunGlareMaterial.renderQueue = (int)RenderQueue + RenderQueueOffset;
 
-            var distance = (CameraHelper.Main().transform.position - Sun.transform.position).magnitude;
+            var distance = (CameraHelper.Main().transform.position.normalized - Sun.transform.position.normalized).magnitude;
 
             CameraHelper.WithReplacedProjection(() =>
             {
                 ViewPortPosition = CameraHelper.Main().WorldToViewportPoint(Sun.transform.position);
             });
 
-            Scale = distance / 2266660f;
+            Scale = distance / Magnitude;
             Fade = FadeCurve.Evaluate(Mathf.Clamp(Scale, 0.0f, 100.0f));
             //Fade = FadeCurve.Evaluate(Mathf.Clamp01(VectorHelper.AngularRadius(Sun.transform.position, CameraHelper.Main().transform.position, 250000.0f)));
 
@@ -166,7 +167,7 @@ namespace SpaceEngine.AtmosphericScattering.Sun
             {
                 if (Atmosphere == null) return;
 
-                Graphics.DrawMesh(mesh, Vector3.zero, Quaternion.identity, SunGlareMaterial, 10, CameraHelper.Main(), 0, Atmosphere.planetoid.QuadAtmosphereMPB, false, false);
+                Graphics.DrawMesh(SunGlareMesh, Vector3.zero, Quaternion.identity, SunGlareMaterial, 10, CameraHelper.Main(), 0, Atmosphere.planetoid.QuadAtmosphereMPB, false, false);
             }
 
             base.Update();

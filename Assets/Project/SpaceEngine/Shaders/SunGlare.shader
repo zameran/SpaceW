@@ -102,9 +102,7 @@ Shader "SpaceEngine/Atmosphere/Sunglare"
 
 			float3 OuterSunGlareRadiance(float3 viewdir, float3 sunColor)
 			{
-				float3 data = viewdir.z > 0.0 ? sunColor : float3(0, 0, 0);
-
-				return pow(max(0, data), 2.2) * 2;
+				return pow(max(0, viewdir.z > 0.0 ? sunColor : float3(0, 0, 0)), 2.2) * 2;
 			}
 
 			float3 Extinction(float3 camera, float3 p)
@@ -172,21 +170,19 @@ Shader "SpaceEngine/Atmosphere/Sunglare"
 							  float2(AspectRatio * ghost3Settings[k].y, 1.0) * ghost3Settings[k].z + 0.5).rgb);
 				}		
 
-				float3 extinction = 1;//Extinction(WCP, WCP - _Sun_Positions_1[0]);
-				float3 inscatter = 1;
+				//float3 extinction = 1;
+				//float3 inscatter = 1;
 
 				//(UseAtmosphereColors > 0.0) ? inscatter = InScattering(WCP, _Sun_Positions_1[0], WSD, extinction, 0.0) : 1;
 				//inscatter = (length(inscatter) > 0) ? inscatter : 0;
 
 				ghosts = ghosts * smoothstep(0.0, 1.0, 1.0 - length(toScreenCenter));	
-
-				//if (r <= Rt) {  }
 				
 				outputColor += sunColor;
 				outputColor += ghosts;
-				//outputColor *= Fade;
+				outputColor *= Fade;
 				//outputColor = (UseAtmosphereColors > 0.0) ? (outputColor * extinction) : outputColor;
-				//outputColor = OuterSunGlareRadiance(IN.relativeDir, outputColor);
+				outputColor = OuterSunGlareRadiance(IN.relativeDir, outputColor);
 				//outputColor = (Eclipse > 0.0) ? sunColor : outputColor;
 
 				return float4(outputColor, 0.0);				
