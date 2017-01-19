@@ -61,7 +61,7 @@ namespace SpaceEngine.Debugging
             }
         }
 
-        private void UI(int id)
+        protected override void UI(int id)
         {
             var counters = PerformanceMonitor.Counters;
 
