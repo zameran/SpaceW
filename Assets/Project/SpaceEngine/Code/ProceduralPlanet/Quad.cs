@@ -119,7 +119,7 @@ public sealed class Quad : Node<Quad>, IQuad
 
     public Quad Parent;
 
-    public List<Quad> Subquads = new List<Quad>();
+    public List<Quad> Subquads = new List<Quad>(4);
 
     public int LODLevel = -1;
 
@@ -503,9 +503,9 @@ public sealed class Quad : Node<Quad>, IQuad
         Splitting = true;
         Unsplitted = false;
 
-        for (int sY = 0; sY < 2; sY++)
+        for (byte sY = 0; sY < 2; sY++)
         {
-            for (int sX = 0; sX < 2; sX++, id++)
+            for (byte sX = 0; sX < 2; sX++, id++)
             {
                 if (staticX)
                 {
@@ -548,7 +548,7 @@ public sealed class Quad : Node<Quad>, IQuad
 
                 Subquads.Add(quad);
 
-                for (int wait = 0; wait < Planetoid.DispatchSkipFramesCount; wait++)
+                for (var wait = 0; wait < Planetoid.DispatchSkipFramesCount; wait++)
                 {
                     yield return Yielders.EndOfFrame;
                 }
@@ -556,7 +556,7 @@ public sealed class Quad : Node<Quad>, IQuad
         }
 
         //Dispatch one by one with intervals.
-        for (var i = 0; i < Subquads.Count; i++)
+        for (byte i = 0; i < Subquads.Count; i++)
         {
             Subquads[i].ReadyForDispatch = true;
 
@@ -566,7 +566,7 @@ public sealed class Quad : Node<Quad>, IQuad
             }
         }
 
-        for (var i = 0; i < Subquads.Count; i++)
+        for (byte i = 0; i < Subquads.Count; i++)
         {
             Subquads[i].Splitting = false;
             Subquads[i].ShouldDraw = true;
