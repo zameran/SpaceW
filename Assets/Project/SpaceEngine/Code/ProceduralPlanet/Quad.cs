@@ -268,7 +268,7 @@ public sealed class Quad : Node<Quad>, IQuad
 
         if (LODLevel < Planetoid.LODMaxLevel)
         {
-            float LODDistance = Planetoid.LODDistances[LODLevel + 1] * Planetoid.LODDistanceMultiplier;
+            var LODDistance = Planetoid.LODDistances[LODLevel + 1] * Planetoid.LODDistanceMultiplier;
 
             if (!Planetoid.OneSplittingQuad)
             {
@@ -794,7 +794,7 @@ public sealed class Quad : Node<Quad>, IQuad
 
         for (byte i = 0; i < 4; i++)
         {
-            distance = Vector3.Distance(Planetoid.LODTarget.position, Planetoid.OriginTransform.TransformPoint(QuadAABB.AABB[i]));
+            distance = VectorHelper.QuickDistance(Planetoid.LODTarget.position, Planetoid.OriginTransform.TransformPoint(QuadAABB.AABB[i]));
 
             if (distance < closestDistance)
             {
@@ -803,7 +803,7 @@ public sealed class Quad : Node<Quad>, IQuad
             }
         }
 
-        distance = Vector3.Distance(Planetoid.LODTarget.position, Planetoid.OriginTransform.TransformPoint(middleNormalized));
+        distance = VectorHelper.QuickDistance(Planetoid.LODTarget.position, Planetoid.OriginTransform.TransformPoint(middleNormalized));
 
         if (distance < closestDistance)
         {
@@ -827,7 +827,7 @@ public sealed class Quad : Node<Quad>, IQuad
         var br = Planetoid.OriginTransform.TransformPoint(quadCorners.bottomRightCorner.NormalizeToRadius(Planetoid.PlanetRadius));
         var middlePoint = Planetoid.OriginTransform.TransformPoint(middleNormalized);
 
-        distance = Vector3.Distance(Planetoid.LODTarget.position, tl);
+        distance = VectorHelper.QuickDistance(Planetoid.LODTarget.position, tl);
 
         if (distance < closestDistance)
         {
@@ -835,7 +835,7 @@ public sealed class Quad : Node<Quad>, IQuad
             closestDistance = distance;
         }
 
-        distance = Vector3.Distance(Planetoid.LODTarget.position, tr);
+        distance = VectorHelper.QuickDistance(Planetoid.LODTarget.position, tr);
 
         if (distance < closestDistance)
         {
@@ -843,7 +843,7 @@ public sealed class Quad : Node<Quad>, IQuad
             closestDistance = distance;
         }
 
-        distance = Vector3.Distance(Planetoid.LODTarget.position, middlePoint);
+        distance = VectorHelper.QuickDistance(Planetoid.LODTarget.position, middlePoint);
 
         if (distance < closestDistance)
         {
@@ -851,7 +851,7 @@ public sealed class Quad : Node<Quad>, IQuad
             closestDistance = distance;
         }
 
-        distance = Vector3.Distance(Planetoid.LODTarget.position, bl);
+        distance = VectorHelper.QuickDistance(Planetoid.LODTarget.position, bl);
 
         if (distance < closestDistance)
         {
@@ -859,7 +859,7 @@ public sealed class Quad : Node<Quad>, IQuad
             closestDistance = distance;
         }
 
-        distance = Vector3.Distance(Planetoid.LODTarget.position, br);
+        distance = VectorHelper.QuickDistance(Planetoid.LODTarget.position, br);
 
         if (distance < closestDistance)
         {
