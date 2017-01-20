@@ -105,8 +105,24 @@ public class GodManager : MonoSingleton<GodManager>
         UpdateSettings();
     }
 
+    private void UpdateCameraCulling(QuadCullingMethod currentMethod)
+    {
+        var mainCamera = CameraHelper.Main();
+
+        if (currentMethod == QuadCullingMethod.Unity)
+        {
+            mainCamera.useOcclusionCulling = true;
+        }
+        else
+        {
+            mainCamera.useOcclusionCulling = false;
+        }
+    }
+
     private void UpdateSettings()
     {
+        UpdateCameraCulling(CullingMethod);
+
         if (Planetoids != null)
         {
             if (Planetoids.Length != 0)
