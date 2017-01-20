@@ -364,12 +364,11 @@ public sealed class Planetoid : Planet, IPlanet
         if (QuadsRoot != null) DestroyImmediate(QuadsRoot);
     }
 
-    [ContextMenu("UpdateLODDistances")]
     public void UpdateLODDistances()
     {
         LODDistances = new float[LODMaxLevel + 1];
 
-        for (int i = 0; i < LODDistances.Length; i++)
+        for (byte i = 0; i < LODDistances.Length; i++)
         {
             if (i == 0)
                 LODDistances[i] = PlanetRadius;
@@ -409,12 +408,6 @@ public sealed class Planetoid : Planet, IPlanet
         return MainQuads.FirstOrDefault(q => q.Position == position);
     }
 
-    public Mesh GetMesh(QuadPosition position)
-    {
-        return GodManager.Instance.PrototypeMesh;
-    }
-
-    [ContextMenu("SetupQuads")]
     public void SetupQuads()
     {
         if (Quads.Count > 0)
@@ -457,28 +450,28 @@ public sealed class Planetoid : Planet, IPlanet
         }
     }
 
-    public void SetupMainQuad(QuadPosition quadPosition)
+    private void SetupMainQuad(QuadPosition quadPosition)
     {
-        GameObject go = new GameObject(string.Format("Quad_{0}", quadPosition));
+        var go = new GameObject(string.Format("Quad_{0}", quadPosition));
         go.transform.parent = QuadsRoot.transform;
         go.transform.position = Vector3.zero;
         go.transform.rotation = Quaternion.identity;
         go.transform.localPosition = Vector3.zero;
         go.transform.localRotation = Quaternion.identity;
 
-        Mesh mesh = GetMesh(quadPosition);
+        var mesh = GodManager.Instance.PrototypeMesh;
         mesh.bounds = new Bounds(Vector3.zero, new Vector3(PlanetRadius * 2, PlanetRadius * 2, PlanetRadius * 2));
 
-        Material material = MaterialHelper.CreateTemp(ColorShader, "Quad");
+        var material = MaterialHelper.CreateTemp(ColorShader, "Quad");
 
-        Quad quadComponent = go.AddComponent<Quad>();
+        var quadComponent = go.AddComponent<Quad>();
         quadComponent.Planetoid = this;
         quadComponent.QuadMesh = mesh;
         quadComponent.QuadMaterial = material;
 
         if (Atmosphere != null) Atmosphere.InitUniforms(null, quadComponent.QuadMaterial, false);
 
-        QuadGenerationConstants gc = QuadGenerationConstants.Init(TerrainMaxHeight);
+        var gc = QuadGenerationConstants.Init(TerrainMaxHeight);
         gc.planetRadius = PlanetRadius;
 
         gc.cubeFaceEastDirection = quadComponent.GetCubeFaceEastDirection(quadPosition);
@@ -498,14 +491,14 @@ public sealed class Planetoid : Planet, IPlanet
 
     public Quad SetupSubQuad(QuadPosition quadPosition)
     {
-        GameObject go = new GameObject(string.Format("Quad_{0}", quadPosition));
+        var go = new GameObject(string.Format("Quad_{0}", quadPosition));
 
-        Mesh mesh = GetMesh(quadPosition);
+        var mesh = GodManager.Instance.PrototypeMesh;
         mesh.bounds = new Bounds(Vector3.zero, new Vector3(PlanetRadius * 2, PlanetRadius * 2, PlanetRadius * 2));
 
-        Material material = MaterialHelper.CreateTemp(ColorShader, "Quad");
+        var material = MaterialHelper.CreateTemp(ColorShader, "Quad");
 
-        Quad quadComponent = go.AddComponent<Quad>();
+        var quadComponent = go.AddComponent<Quad>();
         quadComponent.Planetoid = this;
         quadComponent.QuadMesh = mesh;
         quadComponent.QuadMaterial = material;
@@ -513,7 +506,7 @@ public sealed class Planetoid : Planet, IPlanet
 
         if (Atmosphere != null) Atmosphere.InitUniforms(null, quadComponent.QuadMaterial, false);
 
-        QuadGenerationConstants gc = QuadGenerationConstants.Init(TerrainMaxHeight);
+        var gc = QuadGenerationConstants.Init(TerrainMaxHeight);
         gc.planetRadius = PlanetRadius;
 
         quadComponent.Position = quadPosition;
