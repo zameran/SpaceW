@@ -42,7 +42,7 @@ Shader "SpaceEngine/QuadTestUnlit"
 		_QuadTexture2("QuadTexture 2 (RGB)", 2D) = "white" {}
 		_QuadTexture3("QuadTexture 3 (RGB)", 2D) = "white" {}
 		_QuadTexture4("QuadTexture 4 (RGB)", 2D) = "white" {}
-		_Normale("Normale", Range(0, 1)) = 0.0
+		_DrawNormals("Draw Normals?", Range(0, 1)) = 0.0
 	}
 	SubShader
 	{
@@ -101,7 +101,7 @@ Shader "SpaceEngine/QuadTestUnlit"
 				float3 direction : TEXCOORD1;
 			};
 
-			uniform float _Normale;
+			uniform float _DrawNormals;
 
 			uniform sampler2D _HeightTexture;
 			uniform sampler2D _NormalTexture;
@@ -331,7 +331,7 @@ Shader "SpaceEngine/QuadTestUnlit"
 				Account(terrainColor, scatteringColor, IN.vertex1.xyz, normal, IN.direction);
 
 				//outDiffuse = uvSamplerColor;
-				outDiffuse = lerp(scatteringColor, outputNormal, _Normale);
+				outDiffuse = lerp(scatteringColor, outputNormal, _DrawNormals);
 				//depth = log2(IN.depth) * (0.5 * FCoef(1e+2));
 			}
 			ENDCG

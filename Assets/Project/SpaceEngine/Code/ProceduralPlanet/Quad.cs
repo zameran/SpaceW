@@ -381,9 +381,6 @@ public sealed class Quad : Node<Quad>, IQuad
             Uniformed = true;
         }
 
-        QuadMaterial.SetFloat("_Atmosphere", (Planetoid.Atmosphere != null) ? 1.0f : 0.0f);
-        QuadMaterial.SetFloat("_Normale", Planetoid.DrawNormals ? 1.0f : 0.0f);
-
         QuadMaterial.renderQueue = (int)Planetoid.RenderQueue + Planetoid.RenderQueueOffset;
 
         if (Generated && ShouldDraw && QuadMesh != null)
@@ -391,7 +388,7 @@ public sealed class Quad : Node<Quad>, IQuad
             TryCull();
 
             if (Visible)
-                Graphics.DrawMesh(QuadMesh, Planetoid.PlanetoidTRS, QuadMaterial, drawLayer, camera, 0, Planetoid.QuadAtmosphereMPB, true, true);
+                Graphics.DrawMesh(QuadMesh, Planetoid.PlanetoidTRS, QuadMaterial, drawLayer, camera, 0, Planetoid.QuadMPB, true, true);
         }
     }
 

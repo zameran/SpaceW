@@ -361,9 +361,9 @@ namespace SpaceEngine.AtmosphericScattering
 
         public void Render(Camera camera, Vector3 Origin, int drawLayer = 8)
         {
-            SetUniforms(planetoid.QuadAtmosphereMPB, SkyMaterial, true);
+            SetUniforms(planetoid.QuadMPB, SkyMaterial, true);
 
-            Graphics.DrawMesh(AtmosphereMesh, transform.localToWorldMatrix, SkyMaterial, drawLayer, camera, 0, planetoid.QuadAtmosphereMPB);
+            Graphics.DrawMesh(AtmosphereMesh, transform.localToWorldMatrix, SkyMaterial, drawLayer, camera, 0, planetoid.QuadMPB);
         }
 
         public void OnApplicationFocus(bool focusStatus)
@@ -521,7 +521,7 @@ namespace SpaceEngine.AtmosphericScattering
                 }
 
                 //Just make sure that all mpb parameters are set.
-                planetoid.Atmosphere.InitUniforms(planetoid.QuadAtmosphereMPB, null, true);
+                planetoid.Atmosphere.InitUniforms(planetoid.QuadMPB, null, true);
             }
         }
 
@@ -538,7 +538,7 @@ namespace SpaceEngine.AtmosphericScattering
                 }
 
                 //Just make sure that all mpb parameters are set.
-                planetoid.Atmosphere.SetUniforms(planetoid.QuadAtmosphereMPB, null, true, true);
+                planetoid.Atmosphere.SetUniforms(planetoid.QuadMPB, null, true, true);
             }
         }
 
@@ -550,14 +550,14 @@ namespace SpaceEngine.AtmosphericScattering
 
         public void InitSetAtmosphereUniforms()
         {
-            InitUniforms(planetoid.QuadAtmosphereMPB, SkyMaterial, true);
-            SetUniforms(planetoid.QuadAtmosphereMPB, SkyMaterial, true);
+            InitUniforms(planetoid.QuadMPB, SkyMaterial, true);
+            SetUniforms(planetoid.QuadMPB, SkyMaterial, true);
         }
 
         public void InitSetAtmosphereUniforms(Atmosphere atmosphere)
         {
-            InitUniforms(planetoid.QuadAtmosphereMPB, SkyMaterial, true);
-            SetUniforms(planetoid.QuadAtmosphereMPB, SkyMaterial, true);
+            InitUniforms(planetoid.QuadMPB, SkyMaterial, true);
+            SetUniforms(planetoid.QuadMPB, SkyMaterial, true);
         }
 
         public void ReanimateAtmosphereUniforms(Atmosphere atmosphere, Planetoid planetoid)

@@ -125,7 +125,7 @@ public sealed class Planetoid : Planet, IPlanet
 
     public TCCommonParametersSetter tccps;
 
-    public MaterialPropertyBlock QuadAtmosphereMPB;
+    public MaterialPropertyBlock QuadMPB;
 
     protected override void Awake()
     {
@@ -148,7 +148,7 @@ public sealed class Planetoid : Planet, IPlanet
             //TODO : RINGS
         }
 
-        QuadAtmosphereMPB = new MaterialPropertyBlock();
+        QuadMPB = new MaterialPropertyBlock();
     }
 
     protected override void Start()
@@ -194,6 +194,9 @@ public sealed class Planetoid : Planet, IPlanet
         if (Input.GetKeyDown(KeyCode.F1))
         {
             DrawNormals = !DrawNormals;
+
+            //NOTE : Update shader variable...
+            QuadMPB.SetFloat("_DrawNormals", DrawNormals ? 1.0f : 0.0f);
         }
 
         if (Input.GetKeyDown(KeyCode.F2))
@@ -209,7 +212,7 @@ public sealed class Planetoid : Planet, IPlanet
             }
         }
 
-        if (Atmosphere != null) Atmosphere.SetUniforms(QuadAtmosphereMPB, null, false, true);
+        if (Atmosphere != null) Atmosphere.SetUniforms(QuadMPB, null, false, true);
 
         if (!ExternalRendering)
         {

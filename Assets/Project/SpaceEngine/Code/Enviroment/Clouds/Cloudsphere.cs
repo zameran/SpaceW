@@ -94,7 +94,7 @@ namespace SpaceEngine.AtmosphericScattering.Clouds
 
             var CloudsTRS = Matrix4x4.TRS(planetoid.OriginTransform.position, transform.rotation, Vector3.one * (Radius + Height));
 
-            Graphics.DrawMesh(CloudsphereMesh, CloudsTRS, CloudMaterial, drawLayer, camera, 0, planetoid.QuadAtmosphereMPB);
+            Graphics.DrawMesh(CloudsphereMesh, CloudsTRS, CloudMaterial, drawLayer, camera, 0, planetoid.QuadMPB);
         }
 
         public void InitMaterials()
@@ -117,7 +117,7 @@ namespace SpaceEngine.AtmosphericScattering.Clouds
             {
                 if (planetoid.Atmosphere != null)
                 {
-                    planetoid.Atmosphere.InitUniforms(planetoid.QuadAtmosphereMPB, mat, true);
+                    planetoid.Atmosphere.InitUniforms(planetoid.QuadMPB, mat, true);
                 }
             }
 
@@ -139,7 +139,7 @@ namespace SpaceEngine.AtmosphericScattering.Clouds
             {
                 if (planetoid.Atmosphere != null)
                 {
-                    planetoid.Atmosphere.SetUniforms(planetoid.QuadAtmosphereMPB, mat, true);
+                    planetoid.Atmosphere.SetUniforms(planetoid.QuadMPB, mat, true);
                 }
             }
 
