@@ -33,8 +33,6 @@
 // Creator: zameran
 #endregion
 
-using System.Collections.Generic;
-
 using UnityEngine;
 
 using ZFramework.Unity.Common.PerfomanceMonitor;
@@ -63,7 +61,7 @@ namespace SpaceEngine.Debugging
             }
         }
 
-        private void UI(int id)
+        protected override void UI(int id)
         {
             var counters = PerformanceMonitor.Counters;
 

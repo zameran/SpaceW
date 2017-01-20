@@ -63,10 +63,7 @@ namespace SpaceEngine.Debugging
 
             if (!lineMaterial)
             {
-                lineMaterial = new Material(lineShader);
-
-                lineMaterial.hideFlags = HideFlags.HideAndDontSave;
-                lineMaterial.shader.hideFlags = HideFlags.None;
+                lineMaterial = MaterialHelper.CreateTemp(lineShader, "Line");
             }
         }
 

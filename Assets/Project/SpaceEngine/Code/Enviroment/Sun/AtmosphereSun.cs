@@ -37,7 +37,7 @@ using UnityEngine;
 
 namespace SpaceEngine.AtmosphericScattering.Sun
 {
-    public sealed class AtmosphereSun : Node
+    public sealed class AtmosphereSun : Node<AtmosphereSun>
     {
         [Range(1, 4)]
         public int sunID = 1;
@@ -63,7 +63,7 @@ namespace SpaceEngine.AtmosphericScattering.Sun
                 (sunID == 3 && Input.GetKey(KeyCode.LeftControl)) ||
                 (sunID == 4 && Input.GetKey(KeyCode.LeftShift)))
             {
-                float h = Input.GetAxis("HorizontalArrows") * 0.75f;
+                var h = Input.GetAxis("HorizontalArrows") * 0.75f;
 
                 transform.RotateAround(new Vector3(0, 0, 0), new Vector3(0, 1, 0), h);
             }

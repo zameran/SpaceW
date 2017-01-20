@@ -54,11 +54,11 @@ namespace SpaceEngine.Debugging
         {
             get
             {
-                var switcher = GetComponent<DebugGUISwitcher>();
+                var sceneSwitcher = GetComponent<DebugGUISwitcher>();
 
-                if (switcher != null)
-                    if (switcher.skin != null)
-                        return switcher.skin;
+                if (sceneSwitcher != null)
+                    if (sceneSwitcher.skin != null)
+                        return sceneSwitcher.skin;
 
                 return GUI.skin;
             }
@@ -88,5 +88,7 @@ namespace SpaceEngine.Debugging
                     else if (GUI.skin.FindStyle("label") != null)
                         boldLabel = GUI.skin.FindStyle("label");
         }
+
+        protected abstract void UI(int id);
     }
 }

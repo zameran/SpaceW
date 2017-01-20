@@ -60,17 +60,17 @@ namespace SpaceEngine.Debugging
             GUILayout.Window(0, debugInfoBounds, UI, "Planetoid Info");
         }
 
-        public double CalculateTexturesVMU(int quadsCount)
+        private double CalculateTexturesVMU(int quadsCount)
         {
-            int size = QuadSettings.VerticesPerSideFull * QuadSettings.VerticesPerSideFull;
+            var size = QuadSettings.VerticesPerSideFull * QuadSettings.VerticesPerSideFull;
 
-            double sizeInBytes = size * 8; //8 bit per channel.
-            double sizeInMegabytes = (sizeInBytes / 1024.0) / 1024.0;
+            var sizeInBytes = size * 8; //8 bit per channel.
+            var sizeInMegabytes = (sizeInBytes / 1024.0) / 1024.0;
 
             return sizeInMegabytes * quadsCount;
         }
 
-        private void UI(int id)
+        protected override void UI(int id)
         {
             scrollPosition = GUILayout.BeginScrollView(scrollPosition, false, true);
 
@@ -87,11 +87,11 @@ namespace SpaceEngine.Debugging
 
                 if (Planetoid.CullingMethod == QuadCullingMethod.Custom)
                 {
-                    int quadsCount = Planetoid.Quads.Count;
-                    int quadsCulledCount = Planetoid.GetCulledQuadsCount();
-                    int vertsRendered = (quadsCount - quadsCulledCount) * QuadSettings.Vertices;
+                    var quadsCount = Planetoid.Quads.Count;
+                    var quadsCulledCount = Planetoid.GetCulledQuadsCount();
+                    var vertsRendered = (quadsCount - quadsCulledCount) * QuadSettings.Vertices;
 
-                    double quadsTexturesVideoMemoryUsage = CalculateTexturesVMU(quadsCount);
+                    var quadsTexturesVideoMemoryUsage = CalculateTexturesVMU(quadsCount);
 
                     GUILayoutExtensions.LabelWithSpace("Quads count: " + quadsCount, -8);
                     GUILayoutExtensions.LabelWithSpace("Quads culled count: " + quadsCulledCount, -8);

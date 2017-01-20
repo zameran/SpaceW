@@ -64,7 +64,9 @@ namespace SpaceEngine.Debugging
             Vector3[] farCorners = new Vector3[4]; //Approx'd farplane corners
             Plane[] camPlanes = GodManager.Instance.FrustumPlanes;
 
-            Plane temp = camPlanes[1]; camPlanes[1] = camPlanes[2]; camPlanes[2] = temp; //swap [1] and [2] so the order is better for the loop
+            Plane temp = camPlanes[1];
+            camPlanes[1] = camPlanes[2];
+            camPlanes[2] = temp; //swap [1] and [2] so the order is better for the loop
 
             GL.PushMatrix();
             GL.LoadIdentity();
@@ -76,13 +78,13 @@ namespace SpaceEngine.Debugging
 
             GL.Begin(GL.LINES);
 
-            for (int i = 0; i < 4; i++)
+            for (byte i = 0; i < 4; i++)
             {
                 nearCorners[i] = VectorHelper.Plane3Intersect(camPlanes[4], camPlanes[i], camPlanes[(i + 1) % 4]); //near corners on the created projection matrix
                 farCorners[i] = VectorHelper.Plane3Intersect(camPlanes[5], camPlanes[i], camPlanes[(i + 1) % 4]); //far corners on the created projection matrix
             }
 
-            for (int i = 0; i < 4; i++)
+            for (byte i = 0; i < 4; i++)
             {
                 GL.Color(Color.red);
                 GL.Vertex3(nearCorners[i].x, nearCorners[i].y, nearCorners[i].z);

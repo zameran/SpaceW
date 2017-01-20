@@ -56,14 +56,14 @@ namespace SpaceEngine.Debugging
         }
 
         private List<ColorForQuad> colorsForQuad = new List<ColorForQuad>(6)
-    {
-        new ColorForQuad(Color.blue, QuadPosition.Top),
-        new ColorForQuad(Color.red, QuadPosition.Bottom),
-        new ColorForQuad(Color.yellow, QuadPosition.Front),
-        new ColorForQuad(Color.green, QuadPosition.Back),
-        new ColorForQuad(Color.magenta, QuadPosition.Left),
-        new ColorForQuad(Color.cyan, QuadPosition.Right)
-    };
+        {
+            new ColorForQuad(Color.blue, QuadPosition.Top),
+            new ColorForQuad(Color.red, QuadPosition.Bottom),
+            new ColorForQuad(Color.yellow, QuadPosition.Front),
+            new ColorForQuad(Color.green, QuadPosition.Back),
+            new ColorForQuad(Color.magenta, QuadPosition.Left),
+            new ColorForQuad(Color.cyan, QuadPosition.Right)
+        };
 
         public bool useColorPerMainQuad = true;
         public bool useLODCriticalColoring = true;
@@ -110,7 +110,7 @@ namespace SpaceEngine.Debugging
 
                     var ORDER = new[,] { { 1, 0 }, { 2, 3 }, { 0, 2 }, { 3, 1 } };
 
-                    var verts = q.QuadAABB.AABB;//q.GetVolumeBox(q.Planetoid.TerrainMaxHeight * 3);
+                    var verts = q.QuadAABB.AABB; //q.GetVolumeBox(q.Planetoid.TerrainMaxHeight * 3);
 
                     if (verts == null) return;
 
@@ -125,7 +125,7 @@ namespace SpaceEngine.Debugging
                     GL.Begin(GL.LINES);
                     GL.Color(lineColor);
 
-                    for (int j = 0; j < 4; j++)
+                    for (byte j = 0; j < 4; j++)
                     {
                         //Draw bottom quad
                         GL.Vertex3(verts[ORDER[j, 0]].x, verts[ORDER[j, 0]].y, verts[ORDER[j, 0]].z);

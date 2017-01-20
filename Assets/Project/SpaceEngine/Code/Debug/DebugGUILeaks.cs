@@ -58,18 +58,18 @@ namespace SpaceEngine.Debugging
             GUILayout.Window(0, debugInfoBounds, UI, "Leaks Info");
         }
 
-        private void UI(int id)
+        protected override void UI(int id)
         {
             scrollPosition = GUILayout.BeginScrollView(scrollPosition, false, true, GUILayout.Width(debugInfoBounds.width), GUILayout.Height(debugInfoBounds.height));
             {
                 #region Do Magic
 
-                var objects = FindObjectsOfType(typeof (Object));
+                var objects = FindObjectsOfType(typeof(Object));
                 var dictionary = new Dictionary<string, int>();
 
                 foreach (var obj in objects)
                 {
-                    string key = obj.GetType().FullName;
+                    var key = obj.GetType().FullName;
 
                     if (dictionary.ContainsKey(key))
                     {

@@ -39,7 +39,7 @@ using UnityEngine;
 
 using ZFramework.Unity.Common.PerfomanceMonitor;
 
-public class Ring : MonoBehaviour
+public class Ring : Node<Ring>
 {
     public List<Light> Lights = new List<Light>();
     public List<Shadow> Shadows = new List<Shadow>();
@@ -82,18 +82,52 @@ public class Ring : MonoBehaviour
 
     public Mesh RingSegmentMesh;
 
-    private void Start()
+    #region Node
+
+    protected override void InitNode()
     {
         InitMesh();
         InitMaterial();
     }
 
-    private void Update()
+    protected override void UpdateNode()
     {
-        SetUniforms(RingMaterial);
+        RingMaterial.renderQueue = (int)RenderQueue + RenderQueueOffset;
 
-        UpdateNode();
+        using (new Timer("Ring.UpdateNode()"))
+        {
+            Segments.RemoveAll(m => m == null);
+
+            if (SegmentCount != Segments.Count)
+            {
+                Helper.ResizeArrayTo(ref Segments, SegmentCount, i => RingSegment.Create(this), null);
+            }
+
+            var angleStep = Helper.Divide(360.0f, SegmentCount);
+
+            for (var i = SegmentCount - 1; i >= 0; i--)
+            {
+                var angle = angleStep * i;
+                var rotation = Quaternion.Euler(0.0f, angle, 0.0f);
+
+                Segments[i].UpdateNode(RingSegmentMesh, RingMaterial, rotation);
+            }
+        }
+
+        SetUniforms(RingMaterial);
     }
+
+    protected override void Start()
+    {
+        base.Start();
+    }
+
+    protected override void Update()
+    {
+        base.Update();
+    }
+
+    #endregion
 
     private void OnEnable()
     {
@@ -201,7 +235,6 @@ public class Ring : MonoBehaviour
 
         SetLightsAndShadows(mat);
 
-        mat.renderQueue = (int)RenderQueue + RenderQueueOffset;
         mat.SetTexture("_MainTex", MainTex);
         mat.SetTexture("_NoiseTex", NoiseTex);
         mat.SetColor("_Color", Helper.Brighten(Color, Brightness));
@@ -213,32 +246,9 @@ public class Ring : MonoBehaviour
         keywords.Clear();
     }
 
-    private void UpdateNode()
-    {
-        using (new Timer("Ring.UpdateNode()"))
-        {
-            Segments.RemoveAll(m => m == null);
-
-            if (SegmentCount != Segments.Count)
-            {
-                Helper.ResizeArrayTo(ref Segments, SegmentCount, i => RingSegment.Create(this), null);
-            }
-
-            var angleStep = Helper.Divide(360.0f, SegmentCount);
-
-            for (var i = SegmentCount - 1; i >= 0; i--)
-            {
-                var angle = angleStep * i;
-                var rotation = Quaternion.Euler(0.0f, angle, 0.0f);
-
-                Segments[i].UpdateNode(RingSegmentMesh, RingMaterial, rotation);
-            }
-        }
-    }
-
     private void InitMaterial()
     {
-        RingMaterial = MaterialHelper.CreateTemp(RingShader, "Ring");
+        RingMaterial = MaterialHelper.CreateTemp(RingShader, "Ring", (int)RenderQueue);
     }
 
     private void InitMesh()

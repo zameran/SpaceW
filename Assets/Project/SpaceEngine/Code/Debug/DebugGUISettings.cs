@@ -57,7 +57,7 @@ namespace SpaceEngine.Debugging
             GUILayout.Window(0, debugInfoBounds, UI, "Settings");
         }
 
-        private void UI(int id)
+        protected override void UI(int id)
         {
             scrollPosition = GUILayout.BeginScrollView(scrollPosition, false, true);
 

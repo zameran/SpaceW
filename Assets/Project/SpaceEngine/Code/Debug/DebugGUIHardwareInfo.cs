@@ -59,7 +59,7 @@ namespace SpaceEngine.Debugging
             GUILayout.Window(0, debugInfoBounds, UI, "Hardware Info");
         }
 
-        private void UI(int id)
+        protected override void UI(int id)
         {
             GUILayout.BeginVertical();
 

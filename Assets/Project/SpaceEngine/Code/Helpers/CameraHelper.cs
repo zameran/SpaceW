@@ -33,6 +33,8 @@
 // Creator: zameran
 #endregion
 
+using System;
+
 using UnityEngine;
 
 public static class CameraHelper
@@ -61,35 +63,32 @@ public static class CameraHelper
         return camera.cameraToWorldMatrix;
     }
 
-    public static Matrix4x4 GetCameraToScreen(this Camera camera, bool useRTFix = true)
+    public static Matrix4x4 GetCameraToScreen(this Camera camera, bool useFix = true)
     {
-        var p = camera.projectionMatrix;
+        var projectionMatrix = camera.projectionMatrix;
 
-        if (useRTFix)
+        if (!useFix) return projectionMatrix;
+
+        if (SystemInfo.graphicsDeviceVersion.IndexOf("Direct3D") > -1)
         {
-            bool d3d = SystemInfo.graphicsDeviceVersion.IndexOf("Direct3D") > -1;
-
-            if (d3d)
+            // NOTE : Default unity antialiasing breaks matrices?
+            if (camera.actualRenderingPath == RenderingPath.DeferredLighting || camera.actualRenderingPath == RenderingPath.DeferredShading || QualitySettings.antiAliasing == 0)
             {
-                if (camera.actualRenderingPath == RenderingPath.DeferredLighting || camera.actualRenderingPath == RenderingPath.DeferredShading ||
-                    QualitySettings.antiAliasing == 0) // NOTE : Default unity antialiasing breaks matrices?
+                // Invert Y for rendering to a render texture
+                for (byte i = 0; i < 4; i++)
                 {
-                    // Invert Y for rendering to a render texture
-                    for (int i = 0; i < 4; i++)
-                    {
-                        p[1, i] = -p[1, i];
-                    }
+                    projectionMatrix[1, i] = -projectionMatrix[1, i];
                 }
+            }
 
-                // Scale and bias depth range
-                for (int i = 0; i < 4; i++)
-                {
-                    p[2, i] = p[2, i] * 0.5f + p[3, i] * 0.5f;
-                }
+            // Scale and bias depth range
+            for (byte i = 0; i < 4; i++)
+            {
+                projectionMatrix[2, i] = projectionMatrix[2, i] * 0.5f + projectionMatrix[3, i] * 0.5f;
             }
         }
 
-        return p;
+        return projectionMatrix;
     }
 
     public static Matrix4x4 GetScreenToCamera(this Camera camera)
@@ -97,9 +96,9 @@ public static class CameraHelper
         return camera.GetCameraToScreen().inverse;
     }
 
-    public static Matrix4x4 GetScreenToCamera(this Camera camera, bool useRTFix)
+    public static Matrix4x4 GetScreenToCamera(this Camera camera, bool useFix)
     {
-        return camera.GetCameraToScreen(useRTFix).inverse;
+        return camera.GetCameraToScreen(useFix).inverse;
     }
 
     public static Vector3 GetProjectedDirection(this Vector3 v)
@@ -113,5 +112,15 @@ public static class CameraHelper
     public static Vector3 GetRelativeProjectedDirection(this Vector3 v, Matrix4x4 worldToLocal)
     {
         return worldToLocal.MultiplyPoint(v.GetProjectedDirection());
+    }
+
+    public static void WithReplacedProjection(Action ToDo)
+    {
+        var camera = Main();
+        var projectionMatrix = camera.projectionMatrix;
+
+        camera.projectionMatrix = camera.GetCameraToScreen();
+        if (ToDo != null) ToDo();
+        camera.projectionMatrix = projectionMatrix;
     }
 }

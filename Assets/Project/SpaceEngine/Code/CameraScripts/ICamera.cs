@@ -33,7 +33,10 @@
 // Creator: zameran
 #endregion
 
-internal interface ICamera
+namespace SpaceEngine.Cameras
 {
+    internal interface ICamera
+    {
 
+    }
 }
