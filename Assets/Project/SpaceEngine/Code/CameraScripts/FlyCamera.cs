@@ -81,7 +81,7 @@ namespace SpaceEngine.Cameras
 
             if (controllable)
             {
-                if (Input.GetMouseButton(0))
+                if (Input.GetMouseButton(0) && !MouseOverUI)
                 {
                     rotation.z = 0;
 
@@ -94,7 +94,7 @@ namespace SpaceEngine.Cameras
                     if (!aligned)
                         transform.Rotate(new Vector3(0.0f, 0.0f, rotation.z));
                 }
-                else if (Input.GetMouseButton(1))
+                else if (Input.GetMouseButton(1) && !MouseOverUI)
                 {
                     rotation.x += (Input.GetAxis("Mouse Y") * 480.0f) / CameraComponent.pixelWidth;
                     rotation.y -= (Input.GetAxis("Mouse X") * 440.0f) / CameraComponent.pixelHeight;
@@ -165,15 +165,15 @@ namespace SpaceEngine.Cameras
             }
 
             /*
-        var cameraPosition = transform.position;
-        var universe = FindObjectOfType<Universe>();
+            var cameraPosition = transform.position;
+            var universe = FindObjectOfType<Universe>();
 
-        if (Math.Abs(cameraPosition.magnitude) > 5000.000f)
-        {
-            universe.transform.position -= cameraPosition;
-            transform.position = Vector3.zero;
-        }
-        */
+            if (Math.Abs(cameraPosition.magnitude) > 5000.000f)
+            {
+                universe.transform.position -= cameraPosition;
+                transform.position = Vector3.zero;
+            }
+            */
         }
 
         protected override void Init()

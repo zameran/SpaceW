@@ -1,6 +1,6 @@
 ﻿#region License
 // Procedural planet generator.
-// 
+//  
 // Copyright (C) 2015-2017 Denis Ovchinnikov [zameran] 
 // All rights reserved.
 // 
@@ -8,7 +8,7 @@
 // modification, are permitted provided that the following conditions
 // are met:
 // 1. Redistributions of source code must retain the above copyright
-//    notice, this list of conditions and the following disclaimer.
+//     notice, this list of conditions and the following disclaimer.
 // 2. Redistributions in binary form must reproduce the above copyright
 //    notice, this list of conditions and the following disclaimer in the
 //    documentation and/or other materials provided with the distribution.
@@ -28,51 +28,34 @@
 // ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF
 // THE POSSIBILITY OF SUCH DAMAGE.
 // 
-// Creation Date: Undefined
-// Creation Time: Undefined
+// Creation Date: 2017.01.21
+// Creation Time: 5:36 PM
 // Creator: zameran
 #endregion
 
+using System;
+
 using UnityEngine;
 
-namespace SpaceEngine.Cameras
+[Serializable]
+public class CachedComponent<T> where T : Component
 {
-    [RequireComponent(typeof(Camera))]
-    public abstract class GameCamera : MonoBehaviour, ICamera
+    public CachedComponent()
     {
-        private CachedComponent<Camera> CachedCameraComponent = new CachedComponent<Camera>();
+        Component = null;
+    }
 
-        public Camera CameraComponent { get { return CachedCameraComponent.Component; } }
+    public T Component { get; set; }
 
-        public bool MouseOverUI { get { return GUIUtility.hotControl != 0; } }
+    public void TryInit(MonoBehaviour mb)
+    {
+        Component = mb.GetComponent<T>();
+    }
 
-        protected virtual void Start()
-        {
-            CachedCameraComponent.TryInit(this);
+    public void TryInitFromParent(MonoBehaviour mb)
+    {
+        if (mb.transform.parent == null) return;
 
-            Init();
-        }
-
-        protected virtual void Update()
-        {
-
-        }
-
-        protected virtual void FixedUpdate()
-        {
-
-        }
-
-        protected abstract void Init();
-
-        protected float ClampAngle(float angle, float min, float max)
-        {
-            if (angle < -360)
-                angle += 360;
-            if (angle > 360)
-                angle -= 360;
-
-            return Mathf.Clamp(angle, min, max);
-        }
+        Component = mb.transform.parent.GetComponent<T>();
     }
 }
