@@ -96,12 +96,7 @@ namespace SpaceEngine.Cameras
                 }
                 else if (Input.GetMouseButton(1) && !MouseOverUI)
                 {
-                    rotation.x += (Input.GetAxis("Mouse Y") * 480.0f) / CameraComponent.pixelWidth;
-                    rotation.y -= (Input.GetAxis("Mouse X") * 440.0f) / CameraComponent.pixelHeight;
-                    rotation.z = 0;
-
-                    if (planetoidGameObject != null && !aligned)
-                        RotateAround(rotation, new Vector3(0, 0, -distanceToPlanetCore));
+                    RotateAround(true); // NOTE : Force this rotation mode...
                 }
                 else
                 {
@@ -224,13 +219,48 @@ namespace SpaceEngine.Cameras
             }
         }
 
+        private void RotateAround(bool staticRotation = false)
+        {
+            var mouseX = (Input.GetAxis("Mouse Y") * 480.0f) / CameraComponent.pixelWidth;
+            var mouseY = (Input.GetAxis("Mouse X") * 440.0f) / CameraComponent.pixelHeight;
+
+            if (staticRotation) rotation = Vector3.zero;
+
+            rotation.x += mouseX;
+            rotation.y -= mouseY;
+            rotation.z = 0;
+
+            if (planetoidGameObject != null && !aligned)
+            {
+                if (staticRotation)
+                {
+                    rotation.x *= 10.0f;
+                    rotation.y *= 10.0f;
+
+                    RotateAround(rotation);
+
+                    rotation = Vector3.zero;
+                }
+                else
+                {
+                    RotateAround(rotation, new Vector3(0, 0, -distanceToPlanetCore));
+                }
+            }
+        }
+
+        private void RotateAround(Vector3 rotationVector)
+        {
+            transform.RotateAround(planetoid.Origin, Vector3.up, rotationVector.x * (Time.fixedDeltaTime * rotationSpeed) * 10.0f);
+            transform.RotateAround(planetoid.Origin, Vector3.up, rotationVector.y * (Time.fixedDeltaTime * rotationSpeed) * 10.0f);
+        }
+
         private void RotateAround(Vector3 rotationVector, Vector3 distanceVector)
         {
-            var rotation = Quaternion.Euler(rotationVector + targetRotation.eulerAngles);
-            var position = rotation * distanceVector + planetoidGameObject.transform.position;
+            var currentRotation = Quaternion.Euler(rotationVector + targetRotation.eulerAngles);
+            var currentPosition = currentRotation * distanceVector + planetoidGameObject.transform.position;
 
-            transform.rotation = Quaternion.Slerp(transform.rotation, rotation, (Time.fixedDeltaTime * rotationSpeed) * 10.0f);
-            transform.position = Vector3.Slerp(transform.position, position, (Time.deltaTime * rotationSpeed) * 5.0f);
+            transform.rotation = Quaternion.Slerp(transform.rotation, currentRotation, (Time.fixedDeltaTime * rotationSpeed) * 10.0f);
+            transform.position = Vector3.Slerp(transform.position, currentPosition, (Time.deltaTime * rotationSpeed) * 5.0f);
         }
     }
 }
