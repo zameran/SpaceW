@@ -41,6 +41,8 @@ namespace SpaceEngine.Debugging
 {
     public sealed class DebugGUILeaks : DebugGUI
     {
+        public Object[] Objects;
+
         protected override void Awake()
         {
             base.Awake();
@@ -49,6 +51,14 @@ namespace SpaceEngine.Debugging
         protected override void Start()
         {
             base.Start();
+
+            Objects = FindObjectsOfType(typeof(Object));
+        }
+
+        private void FixedUpdate()
+        {
+            if (Time.frameCount % 64 == 0)
+                Objects = FindObjectsOfType(typeof(Object));
         }
 
         protected override void OnGUI()
@@ -64,11 +74,14 @@ namespace SpaceEngine.Debugging
             {
                 #region Do Magic
 
-                var objects = FindObjectsOfType(typeof(Object));
+                if (Objects == null) return;
+
                 var dictionary = new Dictionary<string, int>();
 
-                foreach (var obj in objects)
+                for (var i = 0; i < Objects.Length; i++)
                 {
+                    var obj = Objects[i];
+
                     var key = obj.GetType().FullName;
 
                     if (dictionary.ContainsKey(key))

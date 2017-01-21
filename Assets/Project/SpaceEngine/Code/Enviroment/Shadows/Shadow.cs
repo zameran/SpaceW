@@ -45,7 +45,7 @@ public abstract class Shadow : MonoBehaviour
 
     public abstract Texture GetTexture();
 
-    public virtual void Start()
+    protected virtual void Start()
     {
 
     }

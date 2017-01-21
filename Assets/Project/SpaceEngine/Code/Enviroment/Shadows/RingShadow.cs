@@ -38,7 +38,9 @@ using UnityEngine;
 [ExecuteInEditMode]
 public class RingShadow : Shadow
 {
-    public Ring RingComponent { get { return GetComponent<Ring>(); } }
+    private CachedComponent<Ring> RingCachedComponent = new CachedComponent<Ring>();
+
+    public Ring RingComponent { get { return RingCachedComponent.Component; } }
 
     [HideInInspector]
     public Texture Texture;
@@ -56,6 +58,11 @@ public class RingShadow : Shadow
 
     public override bool CalculateShadow()
     {
+        if (RingComponent == null)
+        {
+            RingCachedComponent.TryInit(this);
+        }
+
         if (base.CalculateShadow() == true)
         {
             if (RingComponent == null) return false;
@@ -96,6 +103,13 @@ public class RingShadow : Shadow
         }
 
         return false;
+    }
+
+    protected override void Start()
+    {
+        RingCachedComponent.TryInit(this);
+
+        base.Start();
     }
 
 #if UNITY_EDITOR
