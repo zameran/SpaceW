@@ -2,6 +2,8 @@
 
 using System;
 
+using UnityEngine;
+
 public static class EventManager
 {
     public static PlanetoidEvents PlanetoidEvents = new PlanetoidEvents();
@@ -35,8 +37,9 @@ public class EventHolder
         {
             Invoke();
         }
-        catch
+        catch (Exception ex)
         {
+            Debug.LogError(string.Format("EventManager: {0}:{1}", ex.GetType().Name, ex.Message));
         }
     }
 }
@@ -57,8 +60,9 @@ public class EventHolder<T>
         {
             Invoke(arg1);
         }
-        catch
+        catch (Exception ex)
         {
+            Debug.LogError(string.Format("EventManager: {0}:{1}", ex.GetType().Name, ex.Message));
         }
     }
 }
@@ -79,8 +83,9 @@ public class EventHolder<T1, T2>
         {
             Invoke(arg1, arg2);
         }
-        catch
+        catch (Exception ex)
         {
+            Debug.LogError(string.Format("EventManager: {0}:{1}", ex.GetType().Name, ex.Message));
         }
     }
 }
@@ -101,8 +106,9 @@ public class EventHolder<T1, T2, T3>
         {
             Invoke(arg1, arg2, arg3);
         }
-        catch
+        catch (Exception ex)
         {
+            Debug.LogError(string.Format("EventManager: {0}:{1}", ex.GetType().Name, ex.Message));
         }
     }
 }
@@ -123,8 +129,9 @@ public class EventHolder<T1, T2, T3, T4>
         {
             Invoke(arg1, arg2, arg3, arg4);
         }
-        catch
+        catch (Exception ex)
         {
+            Debug.LogError(string.Format("EventManager: {0}:{1}", ex.GetType().Name, ex.Message));
         }
     }
 }

@@ -1,13 +1,15 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+
 using UnityEngine;
 
 public static class Yielders
 {
-    class FloatComparer : IEqualityComparer<float>
+    private class FloatComparer : IEqualityComparer<float>
     {
         bool IEqualityComparer<float>.Equals(float x, float y)
         {
-            return x == y;
+            return Math.Abs(x - y) < 0.001f;
         }
 
         int IEqualityComparer<float>.GetHashCode(float obj)
@@ -16,28 +18,22 @@ public static class Yielders
         }
     }
 
-    static Dictionary<float, WaitForSeconds> _timeInterval = new Dictionary<float, WaitForSeconds>(100, new FloatComparer());
+    private static readonly Dictionary<float, WaitForSeconds> TimeIntervals = new Dictionary<float, WaitForSeconds>(100, new FloatComparer());
 
-    static WaitForEndOfFrame _endOfFrame = new WaitForEndOfFrame();
+    private static readonly WaitForEndOfFrame endOfFrame = new WaitForEndOfFrame();
 
-    public static WaitForEndOfFrame EndOfFrame
-    {
-        get { return _endOfFrame; }
-    }
+    public static WaitForEndOfFrame EndOfFrame { get { return endOfFrame; } }
 
-    static WaitForFixedUpdate _fixedUpdate = new WaitForFixedUpdate();
+    private static readonly WaitForFixedUpdate fixedUpdate = new WaitForFixedUpdate();
 
-    public static WaitForFixedUpdate FixedUpdate
-    {
-        get { return _fixedUpdate; }
-    }
+    public static WaitForFixedUpdate FixedUpdate { get { return fixedUpdate; } }
 
     public static WaitForSeconds Get(float seconds)
     {
         WaitForSeconds wfs;
 
-        if (!_timeInterval.TryGetValue(seconds, out wfs))
-            _timeInterval.Add(seconds, wfs = new WaitForSeconds(seconds));
+        if (!TimeIntervals.TryGetValue(seconds, out wfs))
+            TimeIntervals.Add(seconds, wfs = new WaitForSeconds(seconds));
 
         return wfs;
     }

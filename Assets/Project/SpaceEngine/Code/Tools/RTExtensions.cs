@@ -39,10 +39,11 @@ public static class RTExtensions
 {
     public static RenderTexture CreateRTexture(int size)
     {
-        RenderTexture rt;
+        var rt = new RenderTexture(size, size, 24, RenderTextureFormat.ARGB32)
+        {
+            enableRandomWrite = true
+        };
 
-        rt = new RenderTexture(size, size, 24, RenderTextureFormat.ARGB32);
-        rt.enableRandomWrite = true;
         rt.Create();
 
         return rt;
@@ -50,10 +51,11 @@ public static class RTExtensions
 
     public static RenderTexture CreateRTexture(int size, int depth)
     {
-        RenderTexture rt;
+        var rt = new RenderTexture(size, size, depth, RenderTextureFormat.ARGB32)
+        {
+            enableRandomWrite = true
+        };
 
-        rt = new RenderTexture(size, size, depth, RenderTextureFormat.ARGB32);
-        rt.enableRandomWrite = true;
         rt.Create();
 
         return rt;
@@ -61,10 +63,11 @@ public static class RTExtensions
 
     public static RenderTexture CreateRTexture(int size, int depth, RenderTextureFormat format)
     {
-        RenderTexture rt;
+        var rt = new RenderTexture(size, size, depth, format)
+        {
+            enableRandomWrite = true
+        };
 
-        rt = new RenderTexture(size, size, depth, format);
-        rt.enableRandomWrite = true;
         rt.Create();
 
         return rt;
@@ -72,10 +75,11 @@ public static class RTExtensions
 
     public static RenderTexture CreateRTexture(Vector2 size)
     {
-        RenderTexture rt;
+        var rt = new RenderTexture((int)size.x, (int)size.y, 24, RenderTextureFormat.ARGB32)
+        {
+            enableRandomWrite = true
+        };
 
-        rt = new RenderTexture((int)size.x, (int)size.y, 24, RenderTextureFormat.ARGB32);
-        rt.enableRandomWrite = true;
         rt.Create();
 
         return rt;
@@ -83,10 +87,11 @@ public static class RTExtensions
 
     public static RenderTexture CreateRTexture(Vector2 size, int depth)
     {
-        RenderTexture rt;
+        var rt = new RenderTexture((int)size.x, (int)size.y, depth, RenderTextureFormat.ARGB32)
+        {
+            enableRandomWrite = true
+        };
 
-        rt = new RenderTexture((int)size.x, (int)size.y, depth, RenderTextureFormat.ARGB32);
-        rt.enableRandomWrite = true;
         rt.Create();
 
         return rt;
@@ -94,10 +99,11 @@ public static class RTExtensions
 
     public static RenderTexture CreateRTexture(Vector2 size, int depth, RenderTextureFormat format)
     {
-        RenderTexture rt;
+        var rt = new RenderTexture((int)size.x, (int)size.y, depth, format)
+        {
+            enableRandomWrite = true
+        };
 
-        rt = new RenderTexture((int)size.x, (int)size.y, depth, format);
-        rt.enableRandomWrite = true;
         rt.Create();
 
         return rt;
@@ -105,12 +111,13 @@ public static class RTExtensions
 
     public static RenderTexture CreateRTexture(Vector2 size, int depth, RenderTextureFormat format, FilterMode fm, TextureWrapMode twm)
     {
-        RenderTexture rt;
+        var rt = new RenderTexture((int)size.x, (int)size.y, depth, format)
+        {
+            enableRandomWrite = true,
+            filterMode = fm,
+            wrapMode = twm
+        };
 
-        rt = new RenderTexture((int)size.x, (int)size.y, depth, format);
-        rt.enableRandomWrite = true;
-        rt.filterMode = fm;
-        rt.wrapMode = twm;
         rt.Create();
 
         return rt;
@@ -118,15 +125,16 @@ public static class RTExtensions
 
     public static RenderTexture CreateRTexture(Vector2 size, int depth, RenderTextureFormat format, FilterMode fm, TextureWrapMode twm, int volumeDepth)
     {
-        RenderTexture rt;
+        var rt = new RenderTexture((int)size.x, (int)size.y, depth, format)
+        {
+            enableRandomWrite = true,
+            filterMode = fm,
+            wrapMode = twm,
+            useMipMap = false,
+            dimension = UnityEngine.Rendering.TextureDimension.Tex3D,
+            volumeDepth = volumeDepth
+        };
 
-        rt = new RenderTexture((int)size.x, (int)size.y, depth, format);
-        rt.enableRandomWrite = true;
-        rt.filterMode = fm;
-        rt.wrapMode = twm;
-        rt.useMipMap = false;
-        rt.dimension = UnityEngine.Rendering.TextureDimension.Tex3D;
-        rt.volumeDepth = volumeDepth;
         rt.Create();
 
         return rt;
@@ -134,14 +142,15 @@ public static class RTExtensions
 
     public static RenderTexture CreateRTexture(Vector2 size, int depth, RenderTextureFormat format, FilterMode fm, TextureWrapMode twm, bool usemm, int al)
     {
-        RenderTexture rt;
+        var rt = new RenderTexture((int)size.x, (int)size.y, depth, format)
+        {
+            enableRandomWrite = true,
+            filterMode = fm,
+            wrapMode = twm,
+            useMipMap = usemm,
+            anisoLevel = al
+        };
 
-        rt = new RenderTexture((int)size.x, (int)size.y, depth, format);
-        rt.enableRandomWrite = true;
-        rt.filterMode = fm;
-        rt.wrapMode = twm;
-        rt.useMipMap = usemm;
-        rt.anisoLevel = al;
         rt.Create();
 
         return rt;
@@ -149,15 +158,16 @@ public static class RTExtensions
 
     public static RenderTexture CreateRTexture(Vector2 size, int depth, RenderTextureFormat format, FilterMode fm, TextureWrapMode twm, bool usemm, int al, bool pot)
     {
-        RenderTexture rt;
+        var rt = new RenderTexture((int)size.x, (int)size.y, depth, format)
+        {
+            enableRandomWrite = true,
+            filterMode = fm,
+            wrapMode = twm,
+            useMipMap = usemm,
+            anisoLevel = al,
+            isPowerOfTwo = pot
+        };
 
-        rt = new RenderTexture((int)size.x, (int)size.y, depth, format);
-        rt.enableRandomWrite = true;
-        rt.filterMode = fm;
-        rt.wrapMode = twm;
-        rt.useMipMap = usemm;
-        rt.anisoLevel = al;
-        rt.isPowerOfTwo = pot;
         rt.Create();
 
         return rt;
@@ -166,6 +176,7 @@ public static class RTExtensions
     public static void ReleaseAndDestroy(this RenderTexture rt)
     {
         rt.Release();
-        GameObject.DestroyImmediate(rt);
+
+        Object.DestroyImmediate(rt);
     }
 }
