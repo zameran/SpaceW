@@ -55,7 +55,6 @@ Shader "SpaceEngine/Atmosphere/Sunglare"
 			#pragma fragment frag
 
 			uniform float4x4 _Sun_WorldToLocal_1;
-			uniform float3 _Sun_Position;
 
 			uniform float Scale;
 			uniform float Fade;
