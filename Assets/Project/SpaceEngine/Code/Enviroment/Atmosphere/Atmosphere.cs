@@ -311,7 +311,7 @@ namespace SpaceEngine.AtmosphericScattering
             {
                 if (Suns[i] == null)
                 {
-                    Debug.Log("Atmosphere: Suns direction calculation problem!");
+                    Debug.Log("Atmosphere: Sun calculation problem!");
                     break;
                 }
 
