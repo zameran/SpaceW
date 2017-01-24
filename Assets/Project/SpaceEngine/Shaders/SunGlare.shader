@@ -54,8 +54,6 @@ Shader "SpaceEngine/Atmosphere/Sunglare"
 			#pragma vertex vert
 			#pragma fragment frag
 
-			uniform float4x4 _Sun_WorldToLocal_1;
-
 			uniform float Scale;
 			uniform float Fade;
 			
@@ -83,7 +81,6 @@ Shader "SpaceEngine/Atmosphere/Sunglare"
 			{
 				float4 pos : SV_POSITION;
 				float3 dir : TEXCOORD0;
-				float3 relativeDir : TEXCOORD1;
 				float2 uv : TEXCOORD2;
 			};
 
@@ -93,15 +90,14 @@ Shader "SpaceEngine/Atmosphere/Sunglare"
 
 				OUT.pos = float4(v.vertex.xyz, 1.0);
 				OUT.dir = (mul(_Globals_CameraToWorld, float4((mul(_Globals_ScreenToCamera, v.vertex)).xyz, 0.0))).xyz;
-				OUT.relativeDir = mul(_Sun_WorldToLocal_1, OUT.dir); 
 				OUT.uv = v.texcoord.xy;
 
 				return OUT;
 			}
 
-			float3 OuterSunGlareRadiance(float3 viewdir, float3 sunColor)
+			float3 OuterSunGlareRadiance(float3 sunColor)
 			{
-				return pow(max(0, viewdir.z > 0.0 ? sunColor : float3(0, 0, 0)), 2.2) * 2;
+				return pow(max(0, sunColor), 2.2) * 2;
 			}
 
 			float4 frag(v2f IN) : COLOR
@@ -145,7 +141,7 @@ Shader "SpaceEngine/Atmosphere/Sunglare"
 				outputColor += ghosts;
 				outputColor *= Fade;
 				outputColor *= Eclipse;
-				outputColor = OuterSunGlareRadiance(IN.relativeDir, outputColor);
+				outputColor = OuterSunGlareRadiance(outputColor);
 
 				if (UseAtmosphereColors > 0.0)
 				{
