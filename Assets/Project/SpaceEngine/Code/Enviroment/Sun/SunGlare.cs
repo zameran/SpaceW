@@ -34,11 +34,12 @@
 #endregion
 
 using System.Collections.Generic;
+
 using UnityEngine;
 
 namespace SpaceEngine.AtmosphericScattering.Sun
 {
-    public sealed class Sunglare : Node<Sunglare>
+    public sealed class SunGlare : Node<SunGlare>
     {
         public Atmosphere Atmosphere;
         public AtmosphereSun Sun;

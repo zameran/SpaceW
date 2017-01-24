@@ -603,7 +603,7 @@ namespace SpaceEngine.AtmosphericScattering
                 {
                     if (Suns[i] != null)
                     {
-                        var sunGlareComponent = Suns[i].GetComponent<Sunglare>();
+                        var sunGlareComponent = Suns[i].GetComponent<SunGlare>();
 
                         if (sunGlareComponent != null)
                         {
