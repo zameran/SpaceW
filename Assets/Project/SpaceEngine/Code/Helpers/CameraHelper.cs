@@ -33,8 +33,6 @@
 // Creator: zameran
 #endregion
 
-using System;
-
 using UnityEngine;
 
 public static class CameraHelper
@@ -46,9 +44,11 @@ public static class CameraHelper
 
     public static Camera DepthCamera()
     {
-        if (Camera.main.gameObject.transform.FindChild("CustomDepthCamera") != null)
-            if (Camera.main.gameObject.transform.FindChild("CustomDepthCamera").GetComponent<Camera>() != null)
-                return Camera.main.gameObject.transform.FindChild("CustomDepthCamera").GetComponent<Camera>();
+        var mainCamera = Main();
+
+        if (mainCamera.gameObject.transform.FindChild("CustomDepthCamera") != null)
+            if (mainCamera.gameObject.transform.FindChild("CustomDepthCamera").GetComponent<Camera>() != null)
+                return mainCamera.gameObject.transform.FindChild("CustomDepthCamera").GetComponent<Camera>();
 
         return null;
     }
@@ -72,7 +72,7 @@ public static class CameraHelper
         if (SystemInfo.graphicsDeviceVersion.IndexOf("Direct3D") > -1)
         {
             // NOTE : Default unity antialiasing breaks matrices?
-            if (camera.actualRenderingPath == RenderingPath.DeferredLighting || camera.actualRenderingPath == RenderingPath.DeferredShading || QualitySettings.antiAliasing == 0)
+            if (IsDeferred(camera) || QualitySettings.antiAliasing == 0)
             {
                 // Invert Y for rendering to a render texture
                 for (byte i = 0; i < 4; i++)
@@ -114,13 +114,8 @@ public static class CameraHelper
         return worldToLocal.MultiplyPoint(v.GetProjectedDirection());
     }
 
-    public static void WithReplacedProjection(Action ToDo)
+    public static bool IsDeferred(this Camera camera)
     {
-        var camera = Main();
-        var projectionMatrix = camera.projectionMatrix;
-
-        camera.projectionMatrix = camera.GetCameraToScreen();
-        if (ToDo != null) ToDo();
-        camera.projectionMatrix = projectionMatrix;
+        return camera.actualRenderingPath == (RenderingPath.DeferredLighting | RenderingPath.DeferredShading);
     }
 }

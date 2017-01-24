@@ -49,8 +49,8 @@ namespace SpaceEngine.Debugging
             var customDepthCameraGameObject = new GameObject("CustomDepthCamera");
             var customDepthCamera = customDepthCameraGameObject.AddComponent<Camera>();
 
-            customDepthCamera.CopyFrom(Camera.main);
-            customDepthCamera.transform.parent = Camera.main.transform;
+            customDepthCamera.CopyFrom(CameraHelper.Main());
+            customDepthCamera.transform.parent = CameraHelper.Main().transform;
             customDepthCamera.depthTextureMode = DepthTextureMode.Depth;
             customDepthCamera.enabled = false;
 
@@ -76,7 +76,7 @@ namespace SpaceEngine.Debugging
         {
             var customDepthCamera = CameraHelper.DepthCamera();
 
-            customDepthCamera.CopyFrom(Camera.main);
+            customDepthCamera.CopyFrom(CameraHelper.Main());
             customDepthCamera.targetTexture = DepthTexture;
             customDepthCamera.depthTextureMode = DepthTextureMode.Depth;
             customDepthCamera.RenderWithShader(DepthShader, "RenderType");

@@ -135,10 +135,15 @@ namespace SpaceEngine.AtmosphericScattering.Sun
 
             var distance = (CameraHelper.Main().transform.position.normalized - Sun.transform.position.normalized).magnitude;
 
-            CameraHelper.WithReplacedProjection(() =>
+            ViewPortPosition = CameraHelper.Main().WorldToViewportPoint(Sun.transform.position);
+
+            // NOTE : So, camera's projection matrix replacement is bad idea in fact of strange clip planes behaviour.
+            // Instead i will invert the y component of resulting vector of WorldToViewportPoint.
+            // Looks like better idea...
+            if (CameraHelper.Main().IsDeferred())
             {
-                ViewPortPosition = CameraHelper.Main().WorldToViewportPoint(Sun.transform.position);
-            });
+                ViewPortPosition.y = 1.0f - ViewPortPosition.y;
+            }
 
             Scale = distance / Magnitude;
             Fade = FadeCurve.Evaluate(Mathf.Clamp(Scale, 0.0f, 100.0f));
