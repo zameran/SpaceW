@@ -127,9 +127,6 @@ namespace SpaceEngine.Debugging
                     GUILayout.Label("Density: ");
                     float.TryParse(GUILayout.TextField(Planetoid.Atmosphere.Density.ToString("0.0")), out Planetoid.Atmosphere.Density);
 
-                    GUILayout.Label("Radius: ");
-                    float.TryParse(GUILayout.TextField(Planetoid.Atmosphere.Radius.ToString("0.0")), out Planetoid.Atmosphere.Radius);
-
                     GUILayout.Label("Height: ");
                     float.TryParse(GUILayout.TextField(Planetoid.Atmosphere.Height.ToString("0.0")), out Planetoid.Atmosphere.Height);
 

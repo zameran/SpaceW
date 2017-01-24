@@ -72,7 +72,6 @@ namespace SpaceEngine.AtmosphericScattering
 
         [Tooltip("1/3 or 1/2 from Planet.TerrainMaxHeight")]
         public float TerrainRadiusHold = 0.0f;
-        public float Radius = 2048f;
         public float Height = 100.0f;
         public float Scale = 1.0f;
         public float Fade = 1.0f;
@@ -116,7 +115,8 @@ namespace SpaceEngine.AtmosphericScattering
         private Matrix4x4 shineColorsMatrix1;
         private Matrix4x4 shineOccludersMatrix1;
         private Matrix4x4 occludersMatrix1;
-        private Matrix4x4 sunMatrix1;
+        private Matrix4x4 sunPositionsMatrix;
+        private Matrix4x4 sunDirectionsMatrix;
         private Matrix4x4 worldToCamera;
         private Matrix4x4 cameraToWorld;
         private Matrix4x4 cameraToScreen;
@@ -125,6 +125,8 @@ namespace SpaceEngine.AtmosphericScattering
         private Vector3 worldCameraPos;
 
         public List<string> Keywords = new List<string>();
+
+        public float Radius { get { return planetoid != null ? planetoid.PlanetRadius : 0.0f; } }
 
         #region Eventit
         public bool isEventit { get; set; }
@@ -285,22 +287,9 @@ namespace SpaceEngine.AtmosphericScattering
             }
         }
 
-        public void CalculateEclipses(out Matrix4x4 occludersMatrix, out Matrix4x4 sunsMatrix)
+        public void CalculateEclipses(out Matrix4x4 occludersMatrix)
         {
             occludersMatrix = Matrix4x4.zero;
-            sunsMatrix = Matrix4x4.zero;
-
-            for (byte i = 0; i < Mathf.Min(4, Suns.Count); i++)
-            {
-                if (Suns[i] == null)
-                {
-                    Debug.Log("Atmosphere: Eclipse sun problem!");
-                    break;
-                }
-
-                //sunsMatrix.SetRow(i, VectorHelper.MakeFrom(Suns[i].transform.position, VectorHelper.AngularRadius(Suns[i].transform.position, Origin, Suns[i].Radius)));
-                sunsMatrix.SetRow(i, VectorHelper.MakeFrom(Suns[i].transform.position, Suns[i].Radius));
-            }
 
             for (byte i = 0; i < Mathf.Min(4, EclipseCasters.Count); i++)
             {
@@ -311,6 +300,30 @@ namespace SpaceEngine.AtmosphericScattering
                 }
 
                 occludersMatrix.SetRow(i, VectorHelper.MakeFrom(EclipseCasters[i].Origin - Origin, EclipseCasters[i].PlanetRadius));
+            }
+        }
+
+        public void CalculateSuns(out Matrix4x4 sunDirectionsMatrix, out Matrix4x4 sunPositionsMatrix)
+        {
+            sunDirectionsMatrix = Matrix4x4.zero;
+            sunPositionsMatrix = Matrix4x4.zero;
+
+            for (byte i = 0; i < Mathf.Min(4, Suns.Count); i++)
+            {
+                if (Suns[i] == null)
+                {
+                    Debug.Log("Atmosphere: Sun calculation problem!");
+                    break;
+                }
+
+                var sun = Suns[i];
+                var direction = GetSunDirection(sun);
+                var position = sun.transform.position;
+                var radius = sun.Radius;
+
+                sunDirectionsMatrix.SetRow(i, VectorHelper.MakeFrom(direction));
+                sunPositionsMatrix.SetRow(i, VectorHelper.MakeFrom(position, radius));
+                //sunPositions.SetRow(i, VectorHelper.MakeFrom(position, VectorHelper.AngularRadius(position, Origin, radius)));
             }
         }
 
@@ -338,20 +351,39 @@ namespace SpaceEngine.AtmosphericScattering
         {
             if (!Eclipses) return;
 
-            CalculateEclipses(out occludersMatrix1, out sunMatrix1);
+            CalculateEclipses(out occludersMatrix1);
 
             mat.SetMatrix("_Sky_LightOccluders_1", occludersMatrix1);
-            mat.SetMatrix("_Sun_Positions_1", sunMatrix1);
         }
 
         public void SetEclipses(MaterialPropertyBlock block)
         {
             if (!Eclipses) return;
 
-            CalculateEclipses(out occludersMatrix1, out sunMatrix1);
+            CalculateEclipses(out occludersMatrix1);
 
             block.SetMatrix("_Sky_LightOccluders_1", occludersMatrix1);
-            block.SetMatrix("_Sun_Positions_1", sunMatrix1);
+        }
+
+        public void SetSuns(MaterialPropertyBlock block)
+        {
+            if (block == null) return;
+
+            foreach (var sun in Suns)
+            {
+                if (sun != null)
+                {
+                    var rotationMatrix = GetSunWorldToLocalRotation(sun, GetSunDirection(sun));
+
+                    block.SetFloat("_Sun_Intensity", sun.SunIntensity);
+                    block.SetMatrix("_Sun_WorldToLocal_" + sun.sunID, rotationMatrix);
+                }
+            }
+
+            CalculateSuns(out sunDirectionsMatrix, out sunPositionsMatrix);
+
+            block.SetMatrix("_Sun_WorldDirections_1", sunDirectionsMatrix);
+            block.SetMatrix("_Sun_Positions_1", sunPositionsMatrix);
         }
 
         public void Render(Vector3 Origin, int drawLayer = 8)
@@ -584,25 +616,6 @@ namespace SpaceEngine.AtmosphericScattering
                 Debug.Log("Atmosphere: Reanimation fail!");
         }
 
-        public void SetSunUniforms(MaterialPropertyBlock block)
-        {
-            if (block == null) return;
-
-            foreach (var sun in Suns)
-            {
-                if (sun != null)
-                {
-                    var direction = GetSunDirection(sun);
-                    var rotationMatrix = GetSunWorldToLocalRotation(sun, direction);
-
-                    block.SetFloat("_Sun_Intensity", sun.SunIntensity);
-                    block.SetVector("_Sun_WorldSunDir_" + sun.sunID, direction);
-                    block.SetMatrix("_Sun_WorldToLocal_" + sun.sunID, rotationMatrix);
-                    block.SetVector("_Sun_Position", sun.transform.position);
-                }
-            }
-        }
-
         public void SetUniforms(MaterialPropertyBlock block, Material mat, bool full = true, bool forQuad = false)
         {
             if (artb == null) { Debug.Log("Atmosphere: ARTB is null!"); return; }
@@ -618,6 +631,7 @@ namespace SpaceEngine.AtmosphericScattering
 
                 SetEclipses(block);
                 SetShine(block);
+                SetSuns(block);
 
                 if (!forQuad)
                 {
@@ -664,8 +678,6 @@ namespace SpaceEngine.AtmosphericScattering
 
                 block.SetFloat("_Exposure", HDRExposure);
                 block.SetFloat("_HDRMode", (int)HDRMode);
-
-                SetSunUniforms(block);
             }
         }
 

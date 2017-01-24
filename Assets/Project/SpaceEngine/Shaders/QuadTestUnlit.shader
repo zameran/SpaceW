@@ -194,53 +194,53 @@ Shader "SpaceEngine/QuadTestUnlit"
 
 				#ifdef LIGHT_1
 					#ifdef ATMOSPHERE_ON
-						scatteringColor += hdr(GroundFinalColorWithAtmosphere(terrainColor, p, n, d, _Sun_WorldSunDir_1, _Sun_Positions_1[0]));
+						scatteringColor += hdr(GroundFinalColorWithAtmosphere(terrainColor, p, n, d, _Sun_WorldDirections_1[0], _Sun_Positions_1[0]));
 					#endif
 
 					#ifdef ATMOSPHERE_OFF
-						scatteringColor += GroundFinalColorWithoutAtmosphere(terrainColor, p, n, _Sun_WorldSunDir_1);
+						scatteringColor += GroundFinalColorWithoutAtmosphere(terrainColor, p, n, _Sun_WorldDirections_1[0]);
 					#endif
 				#endif
 
 				#ifdef LIGHT_2	
 					#ifdef ATMOSPHERE_ON
-						scatteringColor += hdr(GroundFinalColorWithAtmosphere(terrainColor, p, n, d, _Sun_WorldSunDir_1, _Sun_Positions_1[0]));
-						scatteringColor += hdr(GroundFinalColorWithAtmosphere(terrainColor, p, n, d, _Sun_WorldSunDir_2, _Sun_Positions_1[1]));
+						scatteringColor += hdr(GroundFinalColorWithAtmosphere(terrainColor, p, n, d, _Sun_WorldDirections_1[0], _Sun_Positions_1[0]));
+						scatteringColor += hdr(GroundFinalColorWithAtmosphere(terrainColor, p, n, d, _Sun_WorldDirections_1[1], _Sun_Positions_1[1]));
 					#endif
 
 					#ifdef ATMOSPHERE_OFF
-						scatteringColor += GroundFinalColorWithoutAtmosphere(terrainColor, p, n, _Sun_WorldSunDir_1);
-						scatteringColor += GroundFinalColorWithoutAtmosphere(terrainColor, p, n, _Sun_WorldSunDir_2);
+						scatteringColor += GroundFinalColorWithoutAtmosphere(terrainColor, p, n, _Sun_WorldDirections_1[0]);
+						scatteringColor += GroundFinalColorWithoutAtmosphere(terrainColor, p, n, _Sun_WorldDirections_1[1]);
 					#endif
 				#endif
 
 				#ifdef LIGHT_3
 					#ifdef ATMOSPHERE_ON
-						scatteringColor += hdr(GroundFinalColorWithAtmosphere(terrainColor, p, n, d, _Sun_WorldSunDir_1, _Sun_Positions_1[0]));
-						scatteringColor += hdr(GroundFinalColorWithAtmosphere(terrainColor, p, n, d, _Sun_WorldSunDir_2, _Sun_Positions_1[1]));
-						scatteringColor += hdr(GroundFinalColorWithAtmosphere(terrainColor, p, n, d, _Sun_WorldSunDir_3, _Sun_Positions_1[2]));
+						scatteringColor += hdr(GroundFinalColorWithAtmosphere(terrainColor, p, n, d, _Sun_WorldDirections_1[0], _Sun_Positions_1[0]));
+						scatteringColor += hdr(GroundFinalColorWithAtmosphere(terrainColor, p, n, d, _Sun_WorldDirections_1[1], _Sun_Positions_1[1]));
+						scatteringColor += hdr(GroundFinalColorWithAtmosphere(terrainColor, p, n, d, _Sun_WorldDirections_1[2], _Sun_Positions_1[2]));
 					#endif
 
 					#ifdef ATMOSPHERE_OFF
-						scatteringColor += GroundFinalColorWithoutAtmosphere(terrainColor, p, n, _Sun_WorldSunDir_1);
-						scatteringColor += GroundFinalColorWithoutAtmosphere(terrainColor, p, n, _Sun_WorldSunDir_2);
-						scatteringColor += GroundFinalColorWithoutAtmosphere(terrainColor, p, n, _Sun_WorldSunDir_3);
+						scatteringColor += GroundFinalColorWithoutAtmosphere(terrainColor, p, n, _Sun_WorldDirections_1[0]);
+						scatteringColor += GroundFinalColorWithoutAtmosphere(terrainColor, p, n, _Sun_WorldDirections_1[1]);
+						scatteringColor += GroundFinalColorWithoutAtmosphere(terrainColor, p, n, _Sun_WorldDirections_1[2]);
 					#endif
 				#endif
 
 				#ifdef LIGHT_4
 					#ifdef ATMOSPHERE_ON
-						scatteringColor += hdr(GroundFinalColorWithAtmosphere(terrainColor, p, n, d, _Sun_WorldSunDir_1, _Sun_Positions_1[0]));
-						scatteringColor += hdr(GroundFinalColorWithAtmosphere(terrainColor, p, n, d, _Sun_WorldSunDir_2, _Sun_Positions_1[1]));
-						scatteringColor += hdr(GroundFinalColorWithAtmosphere(terrainColor, p, n, d, _Sun_WorldSunDir_3, _Sun_Positions_1[2]));
-						scatteringColor += hdr(GroundFinalColorWithAtmosphere(terrainColor, p, n, d, _Sun_WorldSunDir_4, _Sun_Positions_1[3]));
+						scatteringColor += hdr(GroundFinalColorWithAtmosphere(terrainColor, p, n, d, _Sun_WorldDirections_1[0], _Sun_Positions_1[0]));
+						scatteringColor += hdr(GroundFinalColorWithAtmosphere(terrainColor, p, n, d, _Sun_WorldDirections_1[1], _Sun_Positions_1[1]));
+						scatteringColor += hdr(GroundFinalColorWithAtmosphere(terrainColor, p, n, d, _Sun_WorldDirections_1[2], _Sun_Positions_1[2]));
+						scatteringColor += hdr(GroundFinalColorWithAtmosphere(terrainColor, p, n, d, _Sun_WorldDirections_1[3], _Sun_Positions_1[3]));
 					#endif
 
 					#ifdef ATMOSPHERE_OFF
-						scatteringColor += GroundFinalColorWithoutAtmosphere(terrainColor, p, n, _Sun_WorldSunDir_1);
-						scatteringColor += GroundFinalColorWithoutAtmosphere(terrainColor, p, n, _Sun_WorldSunDir_2);
-						scatteringColor += GroundFinalColorWithoutAtmosphere(terrainColor, p, n, _Sun_WorldSunDir_3);
-						scatteringColor += GroundFinalColorWithoutAtmosphere(terrainColor, p, n, _Sun_WorldSunDir_4);
+						scatteringColor += GroundFinalColorWithoutAtmosphere(terrainColor, p, n, _Sun_WorldDirections_1[0]);
+						scatteringColor += GroundFinalColorWithoutAtmosphere(terrainColor, p, n, _Sun_WorldDirections_1[1]);
+						scatteringColor += GroundFinalColorWithoutAtmosphere(terrainColor, p, n, _Sun_WorldDirections_1[2]);
+						scatteringColor += GroundFinalColorWithoutAtmosphere(terrainColor, p, n, _Sun_WorldDirections_1[3]);
 					#endif
 				#endif
 			}

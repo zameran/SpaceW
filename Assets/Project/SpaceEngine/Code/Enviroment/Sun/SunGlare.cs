@@ -34,6 +34,7 @@
 #endregion
 
 using System.Collections.Generic;
+
 using UnityEngine;
 
 namespace SpaceEngine.AtmosphericScattering.Sun
@@ -210,7 +211,7 @@ namespace SpaceEngine.AtmosphericScattering.Sun
             SunGlareMaterial.SetFloat("Scale", Scale);
             SunGlareMaterial.SetFloat("Fade", Fade);
             SunGlareMaterial.SetFloat("UseAtmosphereColors", 1.0f);
-            SunGlareMaterial.SetFloat("Eclipse", Eclipse ? 1.0f : 0.0f);
+            SunGlareMaterial.SetFloat("Eclipse", Eclipse ? 0.0f : 1.0f);
 
             SunGlareMaterial.renderQueue = (int)RenderQueue + RenderQueueOffset;
 
