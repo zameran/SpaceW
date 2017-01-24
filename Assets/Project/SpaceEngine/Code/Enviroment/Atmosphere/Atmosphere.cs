@@ -72,7 +72,6 @@ namespace SpaceEngine.AtmosphericScattering
 
         [Tooltip("1/3 or 1/2 from Planet.TerrainMaxHeight")]
         public float TerrainRadiusHold = 0.0f;
-        public float Radius = 2048f;
         public float Height = 100.0f;
         public float Scale = 1.0f;
         public float Fade = 1.0f;
@@ -126,6 +125,8 @@ namespace SpaceEngine.AtmosphericScattering
         private Vector3 worldCameraPos;
 
         public List<string> Keywords = new List<string>();
+
+        public float Radius { get { return planetoid != null ? planetoid.PlanetRadius : 0.0f; } }
 
         #region Eventit
         public bool isEventit { get; set; }
