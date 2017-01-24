@@ -229,7 +229,7 @@ Shader "SpaceEngine/Atmosphere/Atmosphere"
 						eclipse1 = GroundFade(_ExtinctionGroundFade, eclipse1);
 					#endif
 
-					inscatter += SkyRadiance(WCPG, d, _Sun_WorldSunDir_1, extinction1, 0.0);
+					inscatter += SkyRadiance(WCPG, d, _Sun_WorldDirections_1[0], extinction1, 0.0);
 
 					#ifdef ECLIPSES_ON
 						inscatter *= eclipse1;
@@ -277,8 +277,8 @@ Shader "SpaceEngine/Atmosphere/Atmosphere"
 						eclipse2 = GroundFade(_ExtinctionGroundFade, eclipse2);
 					#endif
 
-					inscatter += SkyRadiance(WCPG, d, _Sun_WorldSunDir_1, extinction1, 0.0);
-					inscatter += SkyRadiance(WCPG, d, _Sun_WorldSunDir_2, extinction2, 0.0);
+					inscatter += SkyRadiance(WCPG, d, _Sun_WorldDirections_1[0], extinction1, 0.0);
+					inscatter += SkyRadiance(WCPG, d, _Sun_WorldDirections_1[1], extinction2, 0.0);
 
 					#ifdef ECLIPSES_ON
 						inscatter *= eclipse1;
@@ -342,9 +342,9 @@ Shader "SpaceEngine/Atmosphere/Atmosphere"
 						eclipse3 = GroundFade(_ExtinctionGroundFade, eclipse3);
 					#endif
 
-					inscatter += SkyRadiance(WCPG, d, _Sun_WorldSunDir_1, extinction1, 0.0);
-					inscatter += SkyRadiance(WCPG, d, _Sun_WorldSunDir_2, extinction2, 0.0);
-					inscatter += SkyRadiance(WCPG, d, _Sun_WorldSunDir_3, extinction3, 0.0);
+					inscatter += SkyRadiance(WCPG, d, _Sun_WorldDirections_1[0], extinction1, 0.0);
+					inscatter += SkyRadiance(WCPG, d, _Sun_WorldDirections_1[1], extinction2, 0.0);
+					inscatter += SkyRadiance(WCPG, d, _Sun_WorldDirections_1[2], extinction3, 0.0);
 
 					#ifdef ECLIPSES_ON
 						inscatter *= eclipse1;
@@ -412,10 +412,10 @@ Shader "SpaceEngine/Atmosphere/Atmosphere"
 						eclipse4 = GroundFade(_ExtinctionGroundFade, eclipse4);
 					#endif
 
-					inscatter += SkyRadiance(WCPG, d, _Sun_WorldSunDir_1, extinction1, 0.0);
-					inscatter += SkyRadiance(WCPG, d, _Sun_WorldSunDir_2, extinction2, 0.0);
-					inscatter += SkyRadiance(WCPG, d, _Sun_WorldSunDir_3, extinction3, 0.0);
-					inscatter += SkyRadiance(WCPG, d, _Sun_WorldSunDir_4, extinction4, 0.0);
+					inscatter += SkyRadiance(WCPG, d, _Sun_WorldDirections_1[0], extinction1, 0.0);
+					inscatter += SkyRadiance(WCPG, d, _Sun_WorldDirections_1[1], extinction2, 0.0);
+					inscatter += SkyRadiance(WCPG, d, _Sun_WorldDirections_1[2], extinction3, 0.0);
+					inscatter += SkyRadiance(WCPG, d, _Sun_WorldDirections_1[3], extinction4, 0.0);
 
 					#ifdef ECLIPSES_ON
 						inscatter *= eclipse1;

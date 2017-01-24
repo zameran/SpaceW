@@ -96,11 +96,6 @@ uniform float _Aerial_Perspective_Offset;
 
 uniform StructuredBuffer<Sun> Suns;
 
-uniform float3 _Sun_WorldSunDir_1;
-uniform float3 _Sun_WorldSunDir_2;
-uniform float3 _Sun_WorldSunDir_3;
-uniform float3 _Sun_WorldSunDir_4;
-
 uniform float4x4 _Globals_CameraToWorld;
 uniform float4x4 _Globals_ScreenToCamera;
 uniform float3 _Globals_WorldCameraPos;
@@ -159,6 +154,7 @@ uniform sampler3D _Sky_Inscatter;
 uniform float4x4 _Sky_ShineOccluders_1;
 uniform float4x4 _Sky_ShineColors_1;
 uniform float4x4 _Sun_Positions_1;
+uniform float4x4 _Sun_WorldDirections_1;
 
 float2 GetTransmittanceUV(float r, float mu) 
 {
