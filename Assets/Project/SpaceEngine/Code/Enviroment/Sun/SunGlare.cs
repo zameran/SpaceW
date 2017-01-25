@@ -57,7 +57,7 @@ namespace SpaceEngine.AtmosphericScattering.Sun
         public Texture2D SunGhost3;
 
         public EngineRenderQueue RenderQueue = EngineRenderQueue.Transparent;
-        public int RenderQueueOffset = 1000;
+        public int RenderQueueOffset = 1000000; //NOTE : Render over all.
 
         public float Magnitude = 1;
 

@@ -408,7 +408,7 @@ namespace SpaceEngine.AtmosphericScattering
                     Gizmos.color = XKCDColors.Red;
                     Gizmos.DrawRay(Origin, sunDirection);
 
-                    for (int j = 0; j < Mathf.Min(4, EclipseCasters.Count); j++)
+                    for (byte j = 0; j < Mathf.Min(4, EclipseCasters.Count); j++)
                     {
                         var distanceToEclipseCaster = Vector3.Distance(EclipseCasters[i].Origin, Origin); ;
                         var eclipseCasterDirection = (EclipseCasters[j].Origin - Origin) * distanceToEclipseCaster;
