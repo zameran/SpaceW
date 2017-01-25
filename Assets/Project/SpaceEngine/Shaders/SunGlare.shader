@@ -71,6 +71,7 @@ Shader "SpaceEngine/Atmosphere/SunGlare"
 			uniform float4x4 ghost3Settings;
 			
 			uniform float UseAtmosphereColors;
+			uniform float UseRadiance;
 			uniform float Eclipse;
 		
 			uniform float3 sunViewPortPos;
@@ -141,7 +142,11 @@ Shader "SpaceEngine/Atmosphere/SunGlare"
 				outputColor += ghosts;
 				outputColor *= Fade;
 				outputColor *= Eclipse;
-				outputColor = OuterSunGlareRadiance(outputColor);
+
+				if (UseRadiance > 0.0)
+				{
+					outputColor = OuterSunGlareRadiance(outputColor);
+				}
 
 				if (UseAtmosphereColors > 0.0)
 				{
