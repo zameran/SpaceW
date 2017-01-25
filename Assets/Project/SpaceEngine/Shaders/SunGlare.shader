@@ -71,6 +71,7 @@ Shader "SpaceEngine/Atmosphere/SunGlare"
 			uniform float4x4 ghost3Settings;
 			
 			uniform float UseAtmosphereColors;
+			uniform float UseRadiance;
 			uniform float Eclipse;
 		
 			uniform float3 sunViewPortPos;
@@ -141,18 +142,23 @@ Shader "SpaceEngine/Atmosphere/SunGlare"
 				outputColor += ghosts;
 				outputColor *= Fade;
 				outputColor *= Eclipse;
-				outputColor = OuterSunGlareRadiance(outputColor);
+						
+				if (UseRadiance > 0.0)
+				{
+					outputColor = OuterSunGlareRadiance(outputColor);
+				}
 
 				if (UseAtmosphereColors > 0.0)
 				{
-					float3 extinction = 0; 
+					float3 extinction = 0;
 					float3 inscatter = 0;
 
 					inscatter = InScattering(WCPG, _Sun_Positions_1[0], WSD, extinction, 1.0).rgb;
 
-					extinction = trunc(extinction);
+					// NOTE : Atmosphere color limitation...
+					inscatter = saturate(inscatter);
 
-					outputColor *= extinction;
+					outputColor *= outputColor + inscatter * extinction;
 				}
 
 				return float4(outputColor, 1.0);				
