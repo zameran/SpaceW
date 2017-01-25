@@ -152,13 +152,19 @@ Shader "SpaceEngine/Atmosphere/SunGlare"
 				{
 					float3 extinction = 0;
 					float3 inscatter = 0;
+					float l = 0;
 
 					inscatter = InScattering(WCPG, _Sun_Positions_1[0], WSD, extinction, 1.0).rgb;
+					inscatter = saturate(inscatter); // NOTE : Atmosphere color limitation...
 
-					// NOTE : Atmosphere color limitation...
-					inscatter = saturate(inscatter);
+					l = length(extinction);
 
 					outputColor *= outputColor + inscatter * extinction;
+
+					if (l >= 0 && l <= 0.08)
+					{
+						outputColor = 0;
+					}
 				}
 
 				return float4(outputColor, 1.0);				

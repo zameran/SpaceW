@@ -55,8 +55,6 @@ namespace SpaceEngine.AtmosphericScattering.Clouds
         [Range(0.0f, 1.0f)]
         public float TransmittanceOffset = 0.625f;
 
-        public Cubemap CloudTexture;
-
         #region Node
 
         protected override void InitNode()
@@ -121,8 +119,6 @@ namespace SpaceEngine.AtmosphericScattering.Clouds
                 }
             }
 
-            if (CloudTexture != null) mat.SetTexture("_Cloud", CloudTexture);
-
             mat.SetFloat("_TransmittanceOffset", TransmittanceOffset);
         }
 
@@ -142,8 +138,6 @@ namespace SpaceEngine.AtmosphericScattering.Clouds
                     planetoid.Atmosphere.SetUniforms(planetoid.QuadMPB, mat, true);
                 }
             }
-
-            if (CloudTexture != null) mat.SetTexture("_Cloud", CloudTexture);
 
             mat.SetFloat("_TransmittanceOffset", TransmittanceOffset);
         }

@@ -212,7 +212,7 @@ public class Ring : Node<Ring>
 
         keywords.Add("SCATTERING");
 
-        Helper.SetKeywords(mat, keywords);
+        Helper.SetKeywords(mat, keywords, false);
     }
 
     public void SetShadows(Material mat, List<Shadow> shadows)
@@ -235,9 +235,9 @@ public class Ring : Node<Ring>
 
         SetLightsAndShadows(mat);
 
-        mat.SetTexture("_MainTex", MainTex);
+        mat.SetTexture("_DiffuseTexture", MainTex);
         mat.SetTexture("_NoiseTex", NoiseTex);
-        mat.SetColor("_Color", Helper.Brighten(Color, Brightness));
+        mat.SetColor("_DiffuseColor", Helper.Brighten(Color, Brightness));
         mat.SetFloat("_LightingBias", LightingBias);
         mat.SetFloat("_LightingSharpness", LightingSharpness);
 

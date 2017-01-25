@@ -97,8 +97,14 @@ Shader "SpaceEngine/Atmosphere/Atmosphere"
 
 			#pragma target 5.0
 			#pragma only_renderers d3d11 glcore
-			#pragma vertex vert
+			#pragma vertex main_Vertex
 			#pragma fragment frag
+
+			struct a2v
+			{
+				float4 vertex : POSITION;
+				float2 uv : TEXCOORD0;
+			};
 
 			struct v2f 
 			{
@@ -107,17 +113,23 @@ Shader "SpaceEngine/Atmosphere/Atmosphere"
 				float3 dir : TEXCOORD1;
 			};
 
-			v2f vert(appdata_base v)
+			struct f2g
 			{
-				v2f OUT;
+				float4 color : COLOR;
+			};
 
-				OUT.pos = float4(v.vertex.xy, 1.0, 1.0);
-				OUT.dir = (mul(_Globals_CameraToWorld, float4((mul(_Globals_ScreenToCamera, v.vertex)).xyz, 0.0))).xyz;
-				OUT.uv = v.texcoord.xy;
-
-				return OUT;
+			void main_Vertex(a2v i, out v2f o)
+			{
+				o.pos = float4(i.vertex.xy, 1.0, 1.0);
+				o.uv = i.uv.xy;
+				o.dir = (mul(_Globals_CameraToWorld, float4((mul(_Globals_ScreenToCamera, i.vertex)).xyz, 0.0))).xyz;
 			}
 			
+			void main_Fragment(v2f i, out f2g o)
+			{
+				
+			}
+
 			float4 frag(v2f IN) : COLOR
 			{
 				float3 WCP = _Globals_WorldCameraPos;

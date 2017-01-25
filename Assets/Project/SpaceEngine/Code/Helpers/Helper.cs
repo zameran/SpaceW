@@ -306,14 +306,6 @@ public static class Helper
         return uv;
     }
 
-    public static void SetKeywords(Material m, List<string> keywords)
-    {
-        if (m != null && ArraysEqual(m.shaderKeywords, keywords) == false)
-        {
-            m.shaderKeywords = keywords.ToArray();
-        }
-    }
-
     public static void SetKeywords(Material m, List<string> keywords, bool checkShaderKeywords)
     {
         if (checkShaderKeywords)
