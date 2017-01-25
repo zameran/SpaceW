@@ -120,21 +120,15 @@ Shader "SpaceEngine/Atmosphere/SunGlare"
 					ghosts += ghost1Settings[i].x * 
 							  (tex2D(sunGhost1, (IN.uv.xy - sunViewPortPos.xy + (toScreenCenter * ghost1Settings[i].w)) * 
 							  float2(AspectRatio * ghost1Settings[i].y, 1.0) * ghost1Settings[i].z + 0.5).rgb);
-				}
-				
-				for (int j = 0; j < 4; ++j)
-				{
-					ghosts += ghost2Settings[j].x * 
-							  (tex2D(sunGhost2, (IN.uv.xy - sunViewPortPos.xy + (toScreenCenter * ghost2Settings[j].w)) * 
-							  float2(AspectRatio * ghost2Settings[j].y, 1.0) * ghost2Settings[j].z + 0.5).rgb);
-				}
 
-				for (int k = 0; k < 4; ++k)
-				{
-					ghosts += ghost3Settings[k].x *
-							  (tex2D(sunGhost3, (IN.uv.xy - sunViewPortPos.xy + (toScreenCenter * ghost3Settings[k].w)) * 
-							  float2(AspectRatio * ghost3Settings[k].y, 1.0) * ghost3Settings[k].z + 0.5).rgb);
-				}		
+					ghosts += ghost2Settings[i].x * 
+							  (tex2D(sunGhost2, (IN.uv.xy - sunViewPortPos.xy + (toScreenCenter * ghost2Settings[i].w)) * 
+							  float2(AspectRatio * ghost2Settings[i].y, 1.0) * ghost2Settings[i].z + 0.5).rgb);
+
+					ghosts += ghost3Settings[i].x *
+							  (tex2D(sunGhost3, (IN.uv.xy - sunViewPortPos.xy + (toScreenCenter * ghost3Settings[i].w)) * 
+							  float2(AspectRatio * ghost3Settings[i].y, 1.0) * ghost3Settings[i].z + 0.5).rgb);
+				}	
 
 				ghosts = ghosts * smoothstep(0.0, 1.0, 1.0 - length(toScreenCenter));	
 
