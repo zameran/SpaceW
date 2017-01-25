@@ -68,9 +68,7 @@ Shader "SpaceEngine/Atmosphere/Atmosphere"
 {
 	Properties
 	{
-		_Sun_Glare("Sun Glare", 2D) = "black" {}
-		_Sun_Glare_Scale("Sun Glare Scale", Float) = 1.0
-		_Sun_Glare_Color("Sun Glare Color", Color) = (1, 1, 1, 1)
+
 	}
 	SubShader 
 	{
@@ -101,84 +99,23 @@ Shader "SpaceEngine/Atmosphere/Atmosphere"
 			#pragma only_renderers d3d11 glcore
 			#pragma vertex vert
 			#pragma fragment frag
-					
-			uniform sampler2D _Sun_Glare;
-			uniform float _Sun_Glare_Scale;
-			uniform float4 _Sun_Glare_Color;
-
-			uniform float4x4 _Sun_WorldToLocal_1;
-			uniform float4x4 _Sun_WorldToLocal_2;
-			uniform float4x4 _Sun_WorldToLocal_3;
-			uniform float4x4 _Sun_WorldToLocal_4;
 
 			struct v2f 
 			{
 				float4 pos : SV_POSITION;
 				float2 uv : TEXCOORD0;
 				float3 dir : TEXCOORD1;
-
-				#ifdef LIGHT_1 
-					float3 sunRelDirection_1 : TEXCOORD2;
-				#endif
-
-				#ifdef LIGHT_2
-					float3 sunRelDirection_1 : TEXCOORD2;
-					float3 sunRelDirection_2 : TEXCOORD3;
-				#endif
-
-				#ifdef LIGHT_3
-					float3 sunRelDirection_1 : TEXCOORD2;
-					float3 sunRelDirection_2 : TEXCOORD3;
-					float3 sunRelDirection_3 : TEXCOORD4;
-				#endif
-
-				#ifdef LIGHT_4
-					float3 sunRelDirection_1 : TEXCOORD2;
-					float3 sunRelDirection_2 : TEXCOORD3;
-					float3 sunRelDirection_3 : TEXCOORD4;
-					float3 sunRelDirection_4 : TEXCOORD5;
-				#endif
 			};
 
 			v2f vert(appdata_base v)
 			{
 				v2f OUT;
-				OUT.dir = (mul(_Globals_CameraToWorld, float4((mul(_Globals_ScreenToCamera, v.vertex)).xyz, 0.0))).xyz;
 
-				// apply this rotation to view dir to get relative viewdir
-				#ifdef LIGHT_1 
-					OUT.sunRelDirection_1 = mul(_Sun_WorldToLocal_1, OUT.dir); 
-				#endif
-
-				#ifdef LIGHT_2 
-					OUT.sunRelDirection_1 = mul(_Sun_WorldToLocal_1, OUT.dir); 
-					OUT.sunRelDirection_2 = mul(_Sun_WorldToLocal_2, OUT.dir); 
-				#endif
-
-				#ifdef LIGHT_3
-					OUT.sunRelDirection_1 = mul(_Sun_WorldToLocal_1, OUT.dir); 
-					OUT.sunRelDirection_2 = mul(_Sun_WorldToLocal_2, OUT.dir); 
-					OUT.sunRelDirection_3 = mul(_Sun_WorldToLocal_3, OUT.dir); 
-				#endif
-
-				#ifdef LIGHT_4
-					OUT.sunRelDirection_1 = mul(_Sun_WorldToLocal_1, OUT.dir); 
-					OUT.sunRelDirection_2 = mul(_Sun_WorldToLocal_2, OUT.dir); 
-					OUT.sunRelDirection_3 = mul(_Sun_WorldToLocal_3, OUT.dir); 
-					OUT.sunRelDirection_4 = mul(_Sun_WorldToLocal_4, OUT.dir); 
-				#endif
-	
 				OUT.pos = float4(v.vertex.xy, 1.0, 1.0);
+				OUT.dir = (mul(_Globals_CameraToWorld, float4((mul(_Globals_ScreenToCamera, v.vertex)).xyz, 0.0))).xyz;
 				OUT.uv = v.texcoord.xy;
 
 				return OUT;
-			}
-			
-			float3 OuterSunRadiance(float3 viewdir)
-			{
-				float3 data = viewdir.z > 0.0 ? (tex2D(_Sun_Glare, float2(0.5, 0.5) + viewdir.xy / _Sun_Glare_Scale).rgb * _Sun_Glare_Color) : float3(0, 0, 0);
-
-				return pow(max(0, data), 2.2) * _Sun_Intensity;
 			}
 			
 			float4 frag(v2f IN) : COLOR
@@ -211,8 +148,6 @@ Shader "SpaceEngine/Atmosphere/Atmosphere"
 				#endif
 
 				#ifdef LIGHT_1
-					sunColor += OuterSunRadiance(IN.sunRelDirection_1);
-
 					float3 extinction1 = 0;
 
 					#ifdef ECLIPSES_ON
@@ -251,9 +186,6 @@ Shader "SpaceEngine/Atmosphere/Atmosphere"
 				#endif
 
 				#ifdef LIGHT_2
-					sunColor += OuterSunRadiance(IN.sunRelDirection_1);
-					sunColor += OuterSunRadiance(IN.sunRelDirection_2);
-
 					float3 extinction1 = 0;
 					float3 extinction2 = 0;
 
@@ -308,10 +240,6 @@ Shader "SpaceEngine/Atmosphere/Atmosphere"
 				#endif
 
 				#ifdef LIGHT_3
-					sunColor += OuterSunRadiance(IN.sunRelDirection_1);
-					sunColor += OuterSunRadiance(IN.sunRelDirection_2);
-					sunColor += OuterSunRadiance(IN.sunRelDirection_3);
-
 					float3 extinction1 = 0;
 					float3 extinction2 = 0;
 					float3 extinction3 = 0;
@@ -370,11 +298,6 @@ Shader "SpaceEngine/Atmosphere/Atmosphere"
 				#endif
 
 				#ifdef LIGHT_4
-					sunColor += OuterSunRadiance(IN.sunRelDirection_1);
-					sunColor += OuterSunRadiance(IN.sunRelDirection_2);
-					sunColor += OuterSunRadiance(IN.sunRelDirection_3);
-					sunColor += OuterSunRadiance(IN.sunRelDirection_4);
-
 					float3 extinction1 = 0;
 					float3 extinction2 = 0;
 					float3 extinction3 = 0;

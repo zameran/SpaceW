@@ -41,8 +41,11 @@ namespace SpaceEngine.AtmosphericScattering.Sun
 {
     public sealed class SunGlare : Node<SunGlare>
     {
+        private CachedComponent<AtmosphereSun> SunCachedComponent = new CachedComponent<AtmosphereSun>();
+
+        public AtmosphereSun SunComponent { get { return SunCachedComponent.Component; } }
+
         public Atmosphere Atmosphere;
-        public AtmosphereSun Sun;
 
         public Shader SunGlareShader;
         private Material SunGlareMaterial;
@@ -106,10 +109,6 @@ namespace SpaceEngine.AtmosphericScattering.Sun
 
         protected override void InitNode()
         {
-            if (Sun == null)
-                if (GetComponent<AtmosphereSun>() != null)
-                    Sun = GetComponent<AtmosphereSun>();
-
             SunGlareMaterial = MaterialHelper.CreateTemp(SunGlareShader, "Sunglare", (int)RenderQueue);
 
             SunGlareMesh = MeshFactory.MakePlane(8, 8, MeshFactory.PLANE.XY, false, false, false);
@@ -129,13 +128,11 @@ namespace SpaceEngine.AtmosphericScattering.Sun
 
         protected override void UpdateNode()
         {
-            if (Sun == null) return;
-
             SunGlareMaterial.renderQueue = (int)RenderQueue + RenderQueueOffset;
 
-            var distance = (CameraHelper.Main().transform.position.normalized - Sun.transform.position.normalized).magnitude;
+            var distance = (CameraHelper.Main().transform.position.normalized - SunComponent.transform.position.normalized).magnitude;
 
-            ViewPortPosition = CameraHelper.Main().WorldToViewportPoint(Sun.transform.position);
+            ViewPortPosition = CameraHelper.Main().WorldToViewportPoint(SunComponent.transform.position);
 
             // NOTE : So, camera's projection matrix replacement is bad idea in fact of strange clip planes behaviour.
             // Instead i will invert the y component of resulting vector of WorldToViewportPoint.
@@ -147,15 +144,15 @@ namespace SpaceEngine.AtmosphericScattering.Sun
 
             Scale = distance / Magnitude;
             Fade = FadeCurve.Evaluate(Mathf.Clamp(Scale, 0.0f, 100.0f));
-            //Fade = FadeCurve.Evaluate(Mathf.Clamp01(VectorHelper.AngularRadius(Sun.transform.position, CameraHelper.Main().transform.position, 250000.0f)));
+            //Fade = FadeCurve.Evaluate(Mathf.Clamp01(VectorHelper.AngularRadius(SunComponent.transform.position, CameraHelper.Main().transform.position, 250000.0f)));
 
             //RaycastHit hit;
 
             Eclipse = false;
 
-            //Eclipse = Physics.Raycast(CameraHelper.Main().transform.position, (Sun.transform.position - CameraHelper.Main().transform.position).normalized, out hit, Mathf.Infinity);
+            //Eclipse = Physics.Raycast(CameraHelper.Main().transform.position, (SunComponent.transform.position - CameraHelper.Main().transform.position).normalized, out hit, Mathf.Infinity);
             //if (!Eclipse)
-            //    Eclipse = Physics.Raycast(CameraHelper.Main().transform.position, (Sun.transform.position - CameraHelper.Main().transform.position).normalized, out hit, Mathf.Infinity);
+            //    Eclipse = Physics.Raycast(CameraHelper.Main().transform.position, (SunComponent.transform.position - CameraHelper.Main().transform.position).normalized, out hit, Mathf.Infinity);
 
             if (InitUniformsInUpdate) InitUniforms(SunGlareMaterial);
 
@@ -164,6 +161,8 @@ namespace SpaceEngine.AtmosphericScattering.Sun
 
         protected override void Start()
         {
+            SunCachedComponent.TryInit(this);
+
             base.Start();
         }
 

@@ -214,14 +214,6 @@ namespace SpaceEngine.AtmosphericScattering
             atmosphereParameters.Rl = (Radius + Height * 1.05f) - TerrainRadiusHold;
             atmosphereParameters.SCALE = Scale;
 
-            for (int i = 0; i < Suns.Count; i++)
-            {
-                if (Suns[i] != null)
-                {
-                    Suns[i].Origin = Origin;
-                }
-            }
-
             worldToCamera = CameraHelper.Main().GetWorldToCamera();
             cameraToWorld = CameraHelper.Main().GetCameraToWorld();
             cameraToScreen = CameraHelper.Main().GetCameraToScreen();
@@ -369,16 +361,7 @@ namespace SpaceEngine.AtmosphericScattering
         {
             if (block == null) return;
 
-            foreach (var sun in Suns)
-            {
-                if (sun != null)
-                {
-                    var rotationMatrix = GetSunWorldToLocalRotation(sun, GetSunDirection(sun));
-
-                    block.SetFloat("_Sun_Intensity", sun.SunIntensity);
-                    block.SetMatrix("_Sun_WorldToLocal_" + sun.sunID, rotationMatrix);
-                }
-            }
+            block.SetFloat("_Sun_Intensity", 100.0f);
 
             CalculateSuns(out sunDirectionsMatrix, out sunPositionsMatrix);
 
@@ -477,11 +460,6 @@ namespace SpaceEngine.AtmosphericScattering
         private Vector3 GetSunDirection(AtmosphereSun sun)
         {
             return (sun.transform.position - Origin).normalized;
-        }
-
-        private Matrix4x4 GetSunWorldToLocalRotation(AtmosphereSun sun, Vector3 direction)
-        {
-            return Matrix4x4.TRS(Vector3.zero + sun.Origin, Quaternion.FromToRotation(direction, sun.Z_AXIS), Vector3.one);
         }
 
         public void InitMaterials()
@@ -657,8 +635,6 @@ namespace SpaceEngine.AtmosphericScattering
 
                 block.SetFloat("_Aerial_Perspective_Offset", AerialPerspectiveOffset);
                 block.SetFloat("_ExtinctionGroundFade", ExtinctionGroundFade);
-
-                block.SetFloat("_Sun_Glare_Scale", 0.1f);
 
                 if (artb.transmittanceT != null) block.SetTexture("_Sky_Transmittance", artb.transmittanceT);
                 if (artb.inscatterT_Read != null) block.SetTexture("_Sky_Inscatter", artb.inscatterT_Read);
