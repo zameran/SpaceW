@@ -162,7 +162,11 @@ float2 GetTransmittanceUV(float r, float mu)
 
 	#ifdef TRANSMITTANCE_NON_LINEAR
 		uR = sqrt((r - Rg) / (Rt - Rg));
-		uMu = atan((mu + 0.15) / (1.0 + 0.15) * tan(1.5)) / 1.5;
+		#ifdef OPTIMIZE
+			uMu = atan(mu * 11.950355887 + 2.1510640597) * 0.6666666667;
+		#else
+			uMu = atan((mu + 0.15) / (1.0 + 0.15) * tan(1.5)) / 1.5;
+		#endif
 	#else
 		uR = (r - Rg) / (Rt - Rg);
 		uMu = (mu + 0.15) / (1.0 + 0.15);
