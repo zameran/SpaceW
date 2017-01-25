@@ -189,7 +189,7 @@ namespace SpaceEngine.AtmosphericScattering.Sun
             SunGlareMaterial.SetFloat("Scale", Scale);
             SunGlareMaterial.SetFloat("Fade", Fade);
             SunGlareMaterial.SetFloat("UseAtmosphereColors", 1.0f);
-            SunGlareMaterial.SetFloat("UseRadiance", 1.0f);
+            SunGlareMaterial.SetFloat("UseRadiance", 0.0f);
             SunGlareMaterial.SetFloat("Eclipse", Eclipse ? 0.0f : 1.0f);
 
             SunGlareMaterial.renderQueue = (int)RenderQueue + RenderQueueOffset;
