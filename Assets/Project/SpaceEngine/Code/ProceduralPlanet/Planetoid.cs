@@ -43,7 +43,7 @@ public static class PlanetoidExtensions
 {
     public static List<string> GetKeywords(this Planet planet)
     {
-        List<string> Keywords = new List<string>();
+        var Keywords = new List<string>();
 
         if (planet != null)
         {
@@ -54,7 +54,7 @@ public static class PlanetoidExtensions
 
                 var shadowsCount = planet.Shadows.Count((shadow) => shadow != null);
 
-                for (int i = 1; i < shadowsCount + 1; i++)
+                for (byte i = 1; i < shadowsCount + 1; i++)
                 {
                     Keywords.Add("SHADOW_" + i);
                 }

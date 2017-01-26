@@ -212,7 +212,7 @@ public class Ring : Node<Ring>
 
         keywords.Add("SCATTERING");
 
-        Helper.SetKeywords(mat, keywords, false);
+        Helper.SetKeywords(mat, keywords);
     }
 
     public void SetShadows(Material mat, List<Shadow> shadows)

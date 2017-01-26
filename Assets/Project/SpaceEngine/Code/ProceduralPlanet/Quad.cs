@@ -40,8 +40,6 @@ using System.Linq;
 
 using UnityEngine;
 
-using ZFramework.Unity.Common.PerfomanceMonitor;
-
 [Serializable]
 public struct OutputStruct : IData
 {
@@ -311,12 +309,12 @@ public sealed class Quad : Node<Quad>, IQuad
         }
     }
 
-    public Bounds GetBoundFromPoints(Vector3[] points, out Vector3 max, out Vector3 min)
+    public Bounds GetBoundFromPoints(Vector3d[] points, out Vector3d max, out Vector3d min)
     {
-        var center = points.Aggregate(Vector3.zero, (current, t) => current + t) / 8;
+        var center = points.Aggregate(Vector3d.zero, (current, t) => current + t) / 8;
 
-        min = new Vector3(float.MaxValue, float.MaxValue, float.MaxValue);
-        max = new Vector3(float.MinValue, float.MinValue, float.MinValue);
+        min = new Vector3d(double.MaxValue, double.MaxValue, double.MaxValue);
+        max = new Vector3d(double.MinValue, double.MinValue, double.MinValue);
 
         for (int i = 0; i < points.Length; i++)
         {
@@ -392,23 +390,10 @@ public sealed class Quad : Node<Quad>, IQuad
         }
     }
 
-    private void TryCull()
-    {
-        using (new Timer("Quad.TryCull"))
-        {
-            if (GodManager.Instance.UpdateFrustumPlanes == false) return;
-
-            if (Planetoid.CullingMethod == QuadCullingMethod.Custom)
-                Visible = PlaneFrustumCheck(QuadAABB);
-            else
-                Visible = true;
-        }
-    }
-
     private QuadAABB GetVolumeBox(float height, float offset = 0)
     {
-        var points = new Vector3[8];
-        var cullingPoints = new Vector3[14];
+        var points = new Vector3d[8];
+        var cullingPoints = new Vector3d[14];
 
         points[0] = quadCorners.topLeftCorner.NormalizeToRadius(Planetoid.PlanetRadius + height + offset);
         points[1] = quadCorners.topRightCorner.NormalizeToRadius(Planetoid.PlanetRadius + height + offset);
@@ -433,21 +418,21 @@ public sealed class Quad : Node<Quad>, IQuad
         return new QuadAABB(points, cullingPoints, this, Planetoid.OriginTransform);
     }
 
-    private bool PlaneFrustumCheck(QuadAABB qaabb)
+    private void TryCull()
     {
-        if (qaabb == null) { Log("QuadAABB problem!"); return true; }
+        if (GodManager.Instance.UpdateFrustumPlanesNow == false) return;
 
-        //return GeometryUtility.TestPlanesAABB(GodManager.Instance.FrustumPlanes, QuadAABB.Bounds);
-        return PlaneFrustumCheck(qaabb.CullingAABB);
+        if (Planetoid.CullingMethod == QuadCullingMethod.Custom)
+            Visible = PlaneFrustumCheck(QuadAABB);
+        else
+            Visible = true;
     }
 
-    private bool PlaneFrustumCheck(Vector3[] points)
+    private bool PlaneFrustumCheck(QuadAABB qaabb)
     {
-        if (Parent == null || Splitting) { return true; }
-
-        for (var i = 0; i < points.Length; i++)
+        for (byte i = 0; i < qaabb.CullingAABB.Length; i++)
         {
-            if (BorderFrustumCheck(GodManager.Instance.FrustumPlanes, points[i]))
+            if (BorderFrustumCheck(GodManager.Instance.FrustumPlanesTS, qaabb.CullingAABB[i]))
             {
                 return true;
             }
@@ -456,9 +441,9 @@ public sealed class Quad : Node<Quad>, IQuad
         return false;
     }
 
-    private bool BorderFrustumCheck(Plane[] planes, Vector3 border)
+    private bool BorderFrustumCheck(FrustumPlane[] planes, Vector3 border)
     {
-        for (var i = 0; i < planes.Length; i++)
+        for (byte i = 0; i < planes.Length; i++)
         {
             if (planes[i].GetDistanceToPoint(border) < 0 - 1024.0f)
             {

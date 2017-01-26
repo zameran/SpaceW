@@ -1,6 +1,6 @@
 ﻿#region License
 // Procedural planet generator.
-// 
+//  
 // Copyright (C) 2015-2017 Denis Ovchinnikov [zameran] 
 // All rights reserved.
 // 
@@ -8,7 +8,7 @@
 // modification, are permitted provided that the following conditions
 // are met:
 // 1. Redistributions of source code must retain the above copyright
-//    notice, this list of conditions and the following disclaimer.
+//     notice, this list of conditions and the following disclaimer.
 // 2. Redistributions in binary form must reproduce the above copyright
 //    notice, this list of conditions and the following disclaimer in the
 //    documentation and/or other materials provided with the distribution.
@@ -28,47 +28,37 @@
 // ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF
 // THE POSSIBILITY OF SUCH DAMAGE.
 // 
-// Creation Date: Undefined
-// Creation Time: Undefined
+// Creation Date: 2017.01.26
+// Creation Time: 11:19 PM
 // Creator: zameran
 #endregion
 
 using System;
 
-using UnityEngine;
-
-using ZFramework.Extensions;
-
-public class QuadAABB
+namespace UnityEngine
 {
-    public Vector3d[] AABB { get; set; }
-    public Vector3d[] CullingAABB { get; set; }
-
-    public Bounds Bounds { get; set; }
-
-    public Vector3d Min { get; set; }
-    public Vector3d Max { get; set; }
-
-    public QuadAABB(Vector3d[] AABB, Vector3d[] CullingAABB, Quad Quad, Transform OriginTransform = null)
+    [Serializable]
+    public struct FrustumPlane
     {
-        this.AABB = new Vector3d[AABB.Length];
-        this.CullingAABB = new Vector3d[CullingAABB.Length];
+        public Vector3d Normal;
 
-        var Max = default(Vector3d);
-        var Min = default(Vector3d);
+        public float Distance;
 
-        this.Bounds = Quad.GetBoundFromPoints(AABB, out Max, out Min);
-
-        this.Min = Min;
-        this.Max = Max;
-
-        Array.Copy(AABB, this.AABB, 8);
-        Array.Copy(CullingAABB, this.CullingAABB, 14);
-
-        if (OriginTransform != null)
+        public FrustumPlane(Vector3d Normal, float Distance)
         {
-            AABB.ForEach((point) => OriginTransform.TransformPoint(point));
-            CullingAABB.ForEach((point) => OriginTransform.TransformPoint(point));
+            this.Normal = Normal;
+
+            this.Distance = Distance;
+        }
+
+        public static implicit operator FrustumPlane(Plane p)
+        {
+            return new FrustumPlane(p.normal, p.distance);
+        }
+
+        public float GetDistanceToPoint(Vector3d point)
+        {
+            return Vector3.Dot(Normal, point) + Distance;
         }
     }
 }

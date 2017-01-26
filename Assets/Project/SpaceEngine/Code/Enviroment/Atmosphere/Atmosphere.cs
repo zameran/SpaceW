@@ -488,7 +488,7 @@ namespace SpaceEngine.AtmosphericScattering
         {
             if (mat != null)
             {
-                Helper.SetKeywords(mat, Keywords, false);
+                Helper.SetKeywords(mat, Keywords);
             }
 
             if (full)
@@ -600,7 +600,7 @@ namespace SpaceEngine.AtmosphericScattering
 
             if (mat != null)
             {
-                Helper.SetKeywords(mat, Keywords, false);
+                Helper.SetKeywords(mat, Keywords);
             }
 
             if (full)

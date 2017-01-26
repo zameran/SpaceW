@@ -306,7 +306,7 @@ public static class Helper
         return uv;
     }
 
-    public static void SetKeywords(Material m, List<string> keywords, bool checkShaderKeywords)
+    public static void SetKeywords(Material m, List<string> keywords, bool checkShaderKeywords = false)
     {
         if (checkShaderKeywords)
         {
