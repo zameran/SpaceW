@@ -250,14 +250,38 @@ namespace SpaceEngine.Cameras
 
         private void RotateAround(Vector3 rotationVector)
         {
-            transform.RotateAround(planetoid.Origin, Vector3.up, rotationVector.x * (Time.fixedDeltaTime * rotationSpeed) * 10.0f);
-            transform.RotateAround(planetoid.Origin, Vector3.up, rotationVector.y * (Time.fixedDeltaTime * rotationSpeed) * 10.0f);
+            if (planetoid != null)
+            {
+                RotateAroundOrigin(rotationVector, planetoid.Origin);
+            }
+            else if (planetoidGameObject != null)
+            {
+                RotateAroundOrigin(rotationVector, planetoidGameObject.transform.position);
+            }
         }
 
         private void RotateAround(Vector3 rotationVector, Vector3 distanceVector)
         {
+            if (planetoid != null)
+            {
+                RotateAroundOrigin(rotationVector, distanceVector, planetoid.Origin);
+            }
+            else if (planetoidGameObject != null)
+            {
+                RotateAroundOrigin(rotationVector, distanceVector, planetoidGameObject.transform.position);
+            }
+        }
+
+        private void RotateAroundOrigin(Vector3 rotationVector, Vector3 origin)
+        {
+            transform.RotateAround(origin, Vector3.up, rotationVector.x * (Time.fixedDeltaTime * rotationSpeed) * 10.0f);
+            transform.RotateAround(origin, Vector3.up, rotationVector.y * (Time.fixedDeltaTime * rotationSpeed) * 10.0f);
+        }
+
+        private void RotateAroundOrigin(Vector3 rotationVector, Vector3 distanceVector, Vector3 origin)
+        {
             var currentRotation = Quaternion.Euler(rotationVector + targetRotation.eulerAngles);
-            var currentPosition = currentRotation * distanceVector + planetoidGameObject.transform.position;
+            var currentPosition = currentRotation * distanceVector + origin;
 
             transform.rotation = Quaternion.Slerp(transform.rotation, currentRotation, (Time.fixedDeltaTime * rotationSpeed) * 10.0f);
             transform.position = Vector3.Slerp(transform.position, currentPosition, (Time.deltaTime * rotationSpeed) * 5.0f);

@@ -345,7 +345,10 @@ public sealed class Planetoid : Planet, IPlanet
         {
             for (int i = 0; i < Quads.Count; i++)
             {
-                Quads[i].StopAllCoroutines();
+                if (Quads[i] != null)
+                {
+                    Quads[i].StopAllCoroutines();
+                }
             }
 
             Working = false;
