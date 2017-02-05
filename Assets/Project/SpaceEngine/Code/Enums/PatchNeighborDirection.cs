@@ -33,11 +33,10 @@
 // Creator: zameran
 #endregion
 
-public struct PatchNeighbor
+public enum PatchNeighborDirection
 {
-    public PatchTree Node;
-
-    public PatchNeighborDirection Direction;
-
-    public bool isFixed;
-}
+    Top = 0,
+    Right = 1,
+    Bottom = 2,
+    Left = 3
+};

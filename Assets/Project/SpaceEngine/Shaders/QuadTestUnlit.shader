@@ -333,6 +333,7 @@ Shader "SpaceEngine/QuadTestUnlit"
 				//outDiffuse = uvSamplerColor;
 				outDiffuse = lerp(scatteringColor, outputNormal, _DrawNormals);
 				//depth = log2(IN.depth) * (0.5 * FCoef(1e+2));
+				//depth = 0;
 			}
 			ENDCG
 		}

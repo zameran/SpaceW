@@ -82,11 +82,9 @@ public class ScreenshotHelper : MonoBehaviour
 
     private Texture2D TakeScreenShot(RenderTexture src, int SuperSize = 1, bool IncludeAlpha = true, Action OnDone = null)
     {
-        Vector2 size = new Vector2(Screen.width * SuperSize, Screen.height * SuperSize);
-
-        RenderTexture rt = RTExtensions.CreateRTexture(size, 0, RenderTextureFormat.ARGB32, FilterMode.Trilinear, TextureWrapMode.Clamp, false, 6);
-
-        Texture2D screenShot = new Texture2D((int)size.x, (int)size.y, TextureFormat.ARGB32, false);
+        var size = new Vector2(Screen.width * SuperSize, Screen.height * SuperSize);
+        var rt = RTExtensions.CreateRTexture(size, 0, RenderTextureFormat.ARGB32, FilterMode.Trilinear, TextureWrapMode.Clamp, false, 6);
+        var screenShot = new Texture2D((int)size.x, (int)size.y, TextureFormat.ARGB32, false);
 
         Graphics.Blit(src, rt);
 
@@ -137,14 +135,14 @@ public class ScreenshotHelper : MonoBehaviour
             Debug.Log("ScreenshotHelper.WaitOneScreenShot : ScreenShotTexture is null!");
     }
 
-    private void OnRenderImage(RenderTexture src, RenderTexture dest)
+    private void OnRenderImage(RenderTexture source, RenderTexture destination)
     {
-        //May cause driver crash on big SuperSize values lol.
+        //May cause driver crash on big SuperSize values, lol.
         if (keyPressed)
         {
             StartCoroutine(WaitOneFrame(() =>
             {
-                Texture2D ScreenShotTexture = TakeScreenShot(src, SuperSize, IncludeAlpha);
+                var ScreenShotTexture = TakeScreenShot(source, SuperSize, IncludeAlpha);
 
                 SaveScreenshot(ScreenShotTexture);
 
@@ -154,6 +152,6 @@ public class ScreenshotHelper : MonoBehaviour
             }));
         }
 
-        Graphics.Blit(src, dest);
+        Graphics.Blit(source, destination);
     }
 }

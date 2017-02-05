@@ -33,8 +33,6 @@
 // Creator: zameran
 #endregion
 
-public enum NeighborDirection { Top = 0, Right = 1, Bottom = 2, Left = 3 };
-
 public static class PatchSettings
 {
     public static ushort VerticesPerSide { get { return 33; } }

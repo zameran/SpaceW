@@ -124,7 +124,6 @@ public class PatchManager
         ushort idx = 0;
         ushort position = 0;
 
-
         for (ushort row = 1; row < PatchSettings.VerticesPerSide - 2; row++)
         {
             var pos = (ushort)(row * PatchSettings.VerticesPerSide);
@@ -150,7 +149,7 @@ public class PatchManager
         //1000 (8) == left edge at half-res
 
         //top edge
-        if ((edges & (1 << (int)NeighborDirection.Top)) > 0)
+        if ((edges & (1 << (int)PatchNeighborDirection.Top)) > 0)
         {
             //top edge at half-resolution
 
@@ -225,7 +224,7 @@ public class PatchManager
         }
 
         //right edge
-        if ((edges & (1 << (int)NeighborDirection.Right)) > 0)
+        if ((edges & (1 << (int)PatchNeighborDirection.Right)) > 0)
         {
             //right edge at half-resolution
             ushort y = 0;
@@ -299,7 +298,7 @@ public class PatchManager
         }
 
         //bottom edge
-        if ((edges & (1 << (int)NeighborDirection.Bottom)) > 0)
+        if ((edges & (1 << (int)PatchNeighborDirection.Bottom)) > 0)
         {
             //bottom edge at half-resolution
             ushort x = 0;
@@ -373,7 +372,7 @@ public class PatchManager
         }
 
         //left edge
-        if ((edges & (1 << (int)NeighborDirection.Left)) > 0)
+        if ((edges & (1 << (int)PatchNeighborDirection.Left)) > 0)
         {
             //left edge at half-resolution
             ushort y = 0;

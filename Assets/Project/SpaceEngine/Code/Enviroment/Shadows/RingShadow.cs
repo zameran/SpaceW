@@ -117,9 +117,7 @@ public class RingShadow : Shadow
     {
         if (Helper.Enabled(this) == true)
         {
-            Gizmos.color = Color.yellow;
             Gizmos.DrawRay(transform.position, transform.up * OuterRadius);
-            Gizmos.color = Color.white;
 
             Gizmos.matrix = transform.localToWorldMatrix;
 
