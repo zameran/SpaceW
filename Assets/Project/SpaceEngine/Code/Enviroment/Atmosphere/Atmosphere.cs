@@ -391,6 +391,9 @@ namespace SpaceEngine.AtmosphericScattering
 
         private void OnDestroy()
         {
+            Helper.Destroy(SkyMaterial);
+            Helper.Destroy(AtmosphereMesh);
+
             UnEventit();
         }
 

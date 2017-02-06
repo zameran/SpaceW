@@ -162,7 +162,7 @@ public class Ring : Node<Ring>
 
         for (var i = Segments.Count - 1; i >= 0; i--)
         {
-            DestroyImmediate(Segments[i]);
+            Helper.Destroy(Segments[i]);
         }
 
         Segments.Clear();

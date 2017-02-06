@@ -100,6 +100,13 @@ public class GodManager : MonoSingleton<GodManager>
         UpdateSettings();
     }
 
+    protected override void OnDestroy()
+    {
+        base.OnDestroy();
+
+        Helper.Destroy(PrototypeMesh);
+    }
+
     private void UpdateFrustumPlanes()
     {
         if (CameraHelper.Main() != null)

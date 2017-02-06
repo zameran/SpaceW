@@ -81,6 +81,12 @@ namespace SpaceEngine.AtmosphericScattering.Clouds
 
         #endregion
 
+        private void OnDestroy()
+        {
+            //Helper.Destroy(CloudsphereMesh);
+            Helper.Destroy(CloudMaterial);
+        }
+
         public void Render(int drawLayer = 8)
         {
             Render(CameraHelper.Main(), drawLayer);

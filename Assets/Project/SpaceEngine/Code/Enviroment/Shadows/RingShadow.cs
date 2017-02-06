@@ -112,6 +112,11 @@ public class RingShadow : Shadow
         base.Start();
     }
 
+    private void OnDestroy()
+    {
+
+    }
+
 #if UNITY_EDITOR
     protected virtual void OnDrawGizmosSelected()
     {

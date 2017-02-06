@@ -154,6 +154,12 @@ namespace SpaceEngine.AtmosphericScattering.Sun
 
         #endregion
 
+        private void OnDestroy()
+        {
+            Helper.Destroy(SunGlareMaterial);
+            Helper.Destroy(SunGlareMesh);
+        }
+
         public void InitSetAtmosphereUniforms()
         {
             InitUniforms(SunGlareMaterial);

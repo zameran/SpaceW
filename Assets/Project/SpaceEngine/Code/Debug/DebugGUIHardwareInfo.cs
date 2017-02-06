@@ -37,7 +37,6 @@ using UnityEngine;
 
 namespace SpaceEngine.Debugging
 {
-    [ExecuteInEditMode]
     public sealed class DebugGUIHardwareInfo : DebugGUI
     {
         protected override void Awake()

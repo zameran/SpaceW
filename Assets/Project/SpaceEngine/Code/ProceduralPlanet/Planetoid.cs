@@ -230,6 +230,9 @@ public sealed class Planetoid : Planet, IPlanet
     protected override void OnDestroy()
     {
         base.OnDestroy();
+
+        MainQuads.Clear();
+        Quads.Clear();
     }
 
     protected override void OnRenderObject()
@@ -424,6 +427,9 @@ public sealed class Planetoid : Planet, IPlanet
                 tccps = gameObject.GetComponentInChildren<TCCommonParametersSetter>();
 
         SetupRoot();
+        UpdateLODDistances();
+
+        if (GodManager.Instance.PrototypeMesh == null) return;
 
         var sides = Enum.GetValues(typeof(QuadPosition));
 
@@ -431,8 +437,6 @@ public sealed class Planetoid : Planet, IPlanet
         {
             SetupMainQuad(side);
         }
-
-        UpdateLODDistances();
 
         if (NPS != null)
             NPS.LoadAndInit();

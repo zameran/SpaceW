@@ -33,11 +33,12 @@
 // Creator: zameran
 #endregion
 
-
+using System;
 using System.Collections.Generic;
 using System.IO;
 
 using UnityEngine;
+using Random = UnityEngine.Random;
 
 namespace SpaceEngine.Startfield
 {
@@ -61,14 +62,20 @@ namespace SpaceEngine.Startfield
         private readonly Vector4[] Tab =
         {
             new Vector2(0.897907815f, -0.347608525f), new Vector2(0.550299290f, 0.273586675f), new Vector2(0.823885965f, 0.098853070f),
-            new Vector2(0.922739035f, -0.122108860f), new Vector2(0.800630175f, -0.088956800f), new Vector2(0.711673375f, 0.158864420f), new Vector2(0.870537795f, 0.085484560f),
-            new Vector2(0.956022355f, -0.058114540f)
+            new Vector2(0.922739035f, -0.122108860f), new Vector2(0.800630175f, -0.088956800f), new Vector2(0.711673375f, 0.158864420f),
+            new Vector2(0.870537795f, 0.085484560f), new Vector2(0.956022355f, -0.058114540f)
         };
 
         private void Start()
         {
             InitMaterials();
             InitMesh();
+        }
+
+        private void OnDestroy()
+        {
+            Helper.Destroy(StarfieldMaterial);
+            Helper.Destroy(StarfieldMesh);
         }
 
         public void Render(int drawLayer = 8)
@@ -160,6 +167,19 @@ namespace SpaceEngine.Startfield
             mesh.CombineMeshes(starsCIs.ToArray());
             mesh.bounds = new Bounds(Vector3.zero, new Vector3(1e8f, 1e8f, 1e8f));
             mesh.hideFlags = HideFlags.DontSave;
+
+            #region Cleanup
+
+            foreach (var ci in starsCIs)
+            {
+                Helper.Destroy(ci.mesh);
+            }
+
+            starsCIs.Clear();
+
+            GC.Collect();
+
+            #endregion
 
             return mesh;
         }
