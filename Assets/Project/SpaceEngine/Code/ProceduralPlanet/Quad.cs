@@ -936,101 +936,64 @@ public sealed class Quad : Node<Quad>, IQuad
 
         var tempStatic = 0.0f;
 
-        // TOP      (-v, r, v)  :0    SIGN    100     AXIS 010
-        // TOP      (v, r, v)   :1    SIGN    000     AXIS 010
-        // TOP      (-v, r, -v) :2    SIGN    101     AXIS 010
-        // TOP      (v, r, -v)  :3    SIGN    001     AXIS 010
-        // ---------------------------------------------------
-        // BUTTOM   (-v, -r, -v):0    SIGN    111     AXIS 010
-        // BUTTOM   (v, -r, -v) :1    SIGN    011     AXIS 010
-        // BUTTOM   (-v, -r, v) :2    SIGN    110     AXIS 010
-        // BUTTOM   (v, -r, v)  :3    SIGN    010     AXIS 010
-        // ---------------------------------------------------
-        // LEFT     (-r, v, v)  :0    SIGN    100     AXIS 100
-        // LEFT     (-r, v, -v) :1    SIGN    101     AXIS 100
-        // LEFT     (-r, -v, v) :2    SIGN    110     AXIS 100
-        // LEFT     (-r, -v, -v):3    SIGN    111     AXIS 100
-        // ---------------------------------------------------
-        // RIGHT    (r, v, -v)  :0    SIGN    001     AXIS 100
-        // RIGHT    (r, v, v)   :1    SIGN    000     AXIS 100
-        // RIGHT    (r, -v, -v) :2    SIGN    011     AXIS 100
-        // RIGHT    (r, -v, v)  :3    SIGN    010     AXIS 100
-        // ---------------------------------------------------
-        // FRONT    (v, v, r)   :0    SIGN    000     AXIS 001
-        // FRONT    (-v, v, r)  :1    SIGN    100     AXIS 001
-        // FRONT    (v, -v, r)  :2    SIGN    010     AXIS 001
-        // FRONT    (-v, -v, r) :3    SIGN    110     AXIS 001
-        // ---------------------------------------------------
-        // BACK     (-v, v, -r) :0    SIGN    101     AXIS 001
-        // BACK     (v, v, -r)  :1    SIGN    001     AXIS 001
-        // BACK     (-v, -v, -r):2    SIGN    111     AXIS 001
-        // BACK     (v, -v, -r) :3    SIGN    011     AXIS 001
+        var sign = new byte[][] { new byte[] { 4, 0, 5, 1 },
+                                  new byte[] { 7, 3, 6, 2 },
+                                  new byte[] { 4, 5, 6, 7 },
+                                  new byte[] { 1, 0, 3, 2 },
+                                  new byte[] { 0, 4, 2, 6 },
+                                  new byte[] { 5, 1, 7, 3 } };
 
-        switch (quadPosition)
-        {
-            case QuadPosition.Top:
-                if (id == 0)
-                    temp += new Vector3(-v, r, v);
-                else if (id == 1)
-                    temp += new Vector3(v, r, v);
-                else if (id == 2)
-                    temp += new Vector3(-v, r, -v);
-                else if (id == 3)
-                    temp += new Vector3(v, r, -v);
-                break;
-            case QuadPosition.Bottom:
-                if (id == 0)
-                    temp += new Vector3(-v, -r, -v);
-                else if (id == 1)
-                    temp += new Vector3(v, -r, -v);
-                else if (id == 2)
-                    temp += new Vector3(-v, -r, v);
-                else if (id == 3)
-                    temp += new Vector3(v, -r, v);
-                break;
-            case QuadPosition.Left:
-                if (id == 0)
-                    temp += new Vector3(-r, v, v);
-                else if (id == 1)
-                    temp += new Vector3(-r, v, -v);
-                else if (id == 2)
-                    temp += new Vector3(-r, -v, v);
-                else if (id == 3)
-                    temp += new Vector3(-r, -v, -v);
-                break;
-            case QuadPosition.Right:
-                if (id == 0)
-                    temp += new Vector3(r, v, -v);
-                else if (id == 1)
-                    temp += new Vector3(r, v, v);
-                else if (id == 2)
-                    temp += new Vector3(r, -v, -v);
-                else if (id == 3)
-                    temp += new Vector3(r, -v, v);
-                break;
-            case QuadPosition.Front:
-                if (id == 0)
-                    temp += new Vector3(v, v, r);
-                else if (id == 1)
-                    temp += new Vector3(-v, v, r);
-                else if (id == 2)
-                    temp += new Vector3(v, -v, r);
-                else if (id == 3)
-                    temp += new Vector3(-v, -v, r);
-                break;
-            case QuadPosition.Back:
-                if (id == 0)
-                    temp += new Vector3(-v, v, -r);
-                else if (id == 1)
-                    temp += new Vector3(v, v, -r);
-                else if (id == 2)
-                    temp += new Vector3(-v, -v, -r);
-                else if (id == 3)
-                    temp += new Vector3(v, -v, -r);
-                break;
-            default:
-                throw new ArgumentOutOfRangeException("quadPosition", quadPosition, null);
-        }
+        var axis = new byte[] { 2, 2, 4, 4, 1, 1 };
+
+        var sideSign = sign[(int)quadPosition][id];
+        var sideAxis = axis[(int)quadPosition];
+
+        var maskVector = BrainFuckMath.MakeBitMask(sideSign);
+        var maskAxisVector = BrainFuckMath.MakeBitMask(sideAxis);
+
+        var vector = BrainFuckMath.ApplyBitMask(maskAxisVector, r, v);
+        var output = BrainFuckMath.ApplyBitMask(vector, maskVector);
+
+        temp = output;
+
+        // NOTE : So, here i will construct vector with specific parameters. Much slower than switch { ... }, but FUCK OFF! I wanna brainfucking stuff, cuz i can!
+        // "Sign" will represent 'Wich component of vector what sign have?'
+        // "Axis" will represent 'What value shoud i use for vector component? Left or right? 1.0 or 0.0?'
+        // Example [Sign] - 110 - [-X, -Y, Z]
+        // Example [Axis] - 010 - [0.0, 1.0, 0.0]
+        // Example [Together] - - [-0.0, -0.0, 0.0]
+
+        // AXIS     [2, 2, 4, 4, 1, 1]
+
+        // TOP      (-v, r, v)  :0    SIGN    100-4     AXIS 010-2  [4, 0, 5, 1]
+        // TOP      (v, r, v)   :1    SIGN    000-0     AXIS 010-2
+        // TOP      (-v, r, -v) :2    SIGN    101-5     AXIS 010-2
+        // TOP      (v, r, -v)  :3    SIGN    001-1     AXIS 010-2
+        // ---------------------------------------------------
+        // BUTTOM   (-v, -r, -v):0    SIGN    111-7     AXIS 010-2  [7, 3, 6, 2]
+        // BUTTOM   (v, -r, -v) :1    SIGN    011-3     AXIS 010-2
+        // BUTTOM   (-v, -r, v) :2    SIGN    110-6     AXIS 010-2
+        // BUTTOM   (v, -r, v)  :3    SIGN    010-2     AXIS 010-2
+        // ---------------------------------------------------
+        // LEFT     (-r, v, v)  :0    SIGN    100-4     AXIS 100-4  [4, 5, 6, 7]
+        // LEFT     (-r, v, -v) :1    SIGN    101-5     AXIS 100-4
+        // LEFT     (-r, -v, v) :2    SIGN    110-6     AXIS 100-4
+        // LEFT     (-r, -v, -v):3    SIGN    111-7     AXIS 100-4
+        // ---------------------------------------------------
+        // RIGHT    (r, v, -v)  :0    SIGN    001-1     AXIS 100-4  [1, 0, 3, 2]
+        // RIGHT    (r, v, v)   :1    SIGN    000-0     AXIS 100-4
+        // RIGHT    (r, -v, -v) :2    SIGN    011-3     AXIS 100-4
+        // RIGHT    (r, -v, v)  :3    SIGN    010-2     AXIS 100-4
+        // ---------------------------------------------------
+        // FRONT    (v, v, r)   :0    SIGN    000-0     AXIS 001-1  [0, 4, 2, 6]
+        // FRONT    (-v, v, r)  :1    SIGN    100-4     AXIS 001-1
+        // FRONT    (v, -v, r)  :2    SIGN    010-2     AXIS 001-1
+        // FRONT    (-v, -v, r) :3    SIGN    110-6     AXIS 001-1
+        // ---------------------------------------------------
+        // BACK     (-v, v, -r) :0    SIGN    101-5     AXIS 001-1  [5, 1, 7, 3]
+        // BACK     (v, v, -r)  :1    SIGN    001-1     AXIS 001-1
+        // BACK     (-v, -v, -r):2    SIGN    111-7     AXIS 001-1
+        // BACK     (v, -v, -r) :3    SIGN    011-3     AXIS 001-1
 
         BrainFuckMath.LockAxis(ref tempStatic, ref temp, staticX, staticY, staticZ);
         BrainFuckMath.CalculatePatchCubeCenter(LODLevel, Parent.generationConstants.patchCubeCenter, ref temp);
