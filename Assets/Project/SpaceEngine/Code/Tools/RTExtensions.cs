@@ -175,6 +175,9 @@ public static class RTExtensions
 
     public static void ReleaseAndDestroy(this RenderTexture rt)
     {
+        // NOTE : Can be a problem here...
+        if (RenderTexture.active == rt) RenderTexture.active = null;
+
         rt.Release();
 
         Object.DestroyImmediate(rt);
