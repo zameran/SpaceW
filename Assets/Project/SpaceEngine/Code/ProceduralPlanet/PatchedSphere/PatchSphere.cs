@@ -123,40 +123,40 @@ public class PatchSphere : MonoBehaviour
         PatchTrees.Add(new PatchTree(new Vector3(0, 0, -1), new Vector3(0, 1, 0), this));      //5 : back
 
         //link neighbors of TOP quadtree
-        PatchTrees[0].SetNeighbor(NeighborDirection.Top, PatchTrees[5], NeighborDirection.Top);         //back
-        PatchTrees[0].SetNeighbor(NeighborDirection.Bottom, PatchTrees[4], NeighborDirection.Top);      //front
-        PatchTrees[0].SetNeighbor(NeighborDirection.Left, PatchTrees[2], NeighborDirection.Top);        //left
-        PatchTrees[0].SetNeighbor(NeighborDirection.Right, PatchTrees[3], NeighborDirection.Top);       //right
+        PatchTrees[0].SetNeighbor(PatchNeighborDirection.Top, PatchTrees[5], PatchNeighborDirection.Top);         //back
+        PatchTrees[0].SetNeighbor(PatchNeighborDirection.Bottom, PatchTrees[4], PatchNeighborDirection.Top);      //front
+        PatchTrees[0].SetNeighbor(PatchNeighborDirection.Left, PatchTrees[2], PatchNeighborDirection.Top);        //left
+        PatchTrees[0].SetNeighbor(PatchNeighborDirection.Right, PatchTrees[3], PatchNeighborDirection.Top);       //right
 
         //link neighbors of BOTTOM quadtree
-        PatchTrees[1].SetNeighbor(NeighborDirection.Top, PatchTrees[4], NeighborDirection.Bottom);      //front
-        PatchTrees[1].SetNeighbor(NeighborDirection.Bottom, PatchTrees[5], NeighborDirection.Bottom);   //back
-        PatchTrees[1].SetNeighbor(NeighborDirection.Left, PatchTrees[2], NeighborDirection.Bottom);     //left
-        PatchTrees[1].SetNeighbor(NeighborDirection.Right, PatchTrees[3], NeighborDirection.Bottom);    //right
+        PatchTrees[1].SetNeighbor(PatchNeighborDirection.Top, PatchTrees[4], PatchNeighborDirection.Bottom);      //front
+        PatchTrees[1].SetNeighbor(PatchNeighborDirection.Bottom, PatchTrees[5], PatchNeighborDirection.Bottom);   //back
+        PatchTrees[1].SetNeighbor(PatchNeighborDirection.Left, PatchTrees[2], PatchNeighborDirection.Bottom);     //left
+        PatchTrees[1].SetNeighbor(PatchNeighborDirection.Right, PatchTrees[3], PatchNeighborDirection.Bottom);    //right
 
         //link neighbors of LEFT quadtree
-        PatchTrees[2].SetNeighbor(NeighborDirection.Top, PatchTrees[0], NeighborDirection.Left);        //top
-        PatchTrees[2].SetNeighbor(NeighborDirection.Bottom, PatchTrees[1], NeighborDirection.Left);     //bottom
-        PatchTrees[2].SetNeighbor(NeighborDirection.Left, PatchTrees[5], NeighborDirection.Right);      //back
-        PatchTrees[2].SetNeighbor(NeighborDirection.Right, PatchTrees[4], NeighborDirection.Left);      //front
+        PatchTrees[2].SetNeighbor(PatchNeighborDirection.Top, PatchTrees[0], PatchNeighborDirection.Left);        //top
+        PatchTrees[2].SetNeighbor(PatchNeighborDirection.Bottom, PatchTrees[1], PatchNeighborDirection.Left);     //bottom
+        PatchTrees[2].SetNeighbor(PatchNeighborDirection.Left, PatchTrees[5], PatchNeighborDirection.Right);      //back
+        PatchTrees[2].SetNeighbor(PatchNeighborDirection.Right, PatchTrees[4], PatchNeighborDirection.Left);      //front
 
         //link neighbors of RIGHT quadtree
-        PatchTrees[3].SetNeighbor(NeighborDirection.Top, PatchTrees[0], NeighborDirection.Right);       //top
-        PatchTrees[3].SetNeighbor(NeighborDirection.Bottom, PatchTrees[1], NeighborDirection.Right);    //bottom
-        PatchTrees[3].SetNeighbor(NeighborDirection.Left, PatchTrees[4], NeighborDirection.Right);      //front
-        PatchTrees[3].SetNeighbor(NeighborDirection.Right, PatchTrees[5], NeighborDirection.Left);      //back
+        PatchTrees[3].SetNeighbor(PatchNeighborDirection.Top, PatchTrees[0], PatchNeighborDirection.Right);       //top
+        PatchTrees[3].SetNeighbor(PatchNeighborDirection.Bottom, PatchTrees[1], PatchNeighborDirection.Right);    //bottom
+        PatchTrees[3].SetNeighbor(PatchNeighborDirection.Left, PatchTrees[4], PatchNeighborDirection.Right);      //front
+        PatchTrees[3].SetNeighbor(PatchNeighborDirection.Right, PatchTrees[5], PatchNeighborDirection.Left);      //back
 
         //link neighbors of FRONT quadtree
-        PatchTrees[4].SetNeighbor(NeighborDirection.Top, PatchTrees[0], NeighborDirection.Bottom);      //top
-        PatchTrees[4].SetNeighbor(NeighborDirection.Bottom, PatchTrees[1], NeighborDirection.Top);      //bottom
-        PatchTrees[4].SetNeighbor(NeighborDirection.Left, PatchTrees[2], NeighborDirection.Right);      //left
-        PatchTrees[4].SetNeighbor(NeighborDirection.Right, PatchTrees[3], NeighborDirection.Left);      //right
+        PatchTrees[4].SetNeighbor(PatchNeighborDirection.Top, PatchTrees[0], PatchNeighborDirection.Bottom);      //top
+        PatchTrees[4].SetNeighbor(PatchNeighborDirection.Bottom, PatchTrees[1], PatchNeighborDirection.Top);      //bottom
+        PatchTrees[4].SetNeighbor(PatchNeighborDirection.Left, PatchTrees[2], PatchNeighborDirection.Right);      //left
+        PatchTrees[4].SetNeighbor(PatchNeighborDirection.Right, PatchTrees[3], PatchNeighborDirection.Left);      //right
 
         //link neighbors of BACK quadtree
-        PatchTrees[5].SetNeighbor(NeighborDirection.Top, PatchTrees[0], NeighborDirection.Top);         //top
-        PatchTrees[5].SetNeighbor(NeighborDirection.Bottom, PatchTrees[1], NeighborDirection.Bottom);   //bottom
-        PatchTrees[5].SetNeighbor(NeighborDirection.Left, PatchTrees[3], NeighborDirection.Right);      //right
-        PatchTrees[5].SetNeighbor(NeighborDirection.Right, PatchTrees[2], NeighborDirection.Left);      //left
+        PatchTrees[5].SetNeighbor(PatchNeighborDirection.Top, PatchTrees[0], PatchNeighborDirection.Top);         //top
+        PatchTrees[5].SetNeighbor(PatchNeighborDirection.Bottom, PatchTrees[1], PatchNeighborDirection.Bottom);   //bottom
+        PatchTrees[5].SetNeighbor(PatchNeighborDirection.Left, PatchTrees[3], PatchNeighborDirection.Right);      //right
+        PatchTrees[5].SetNeighbor(PatchNeighborDirection.Right, PatchTrees[2], PatchNeighborDirection.Left);      //left
     }
 
     public void CallUpdate()

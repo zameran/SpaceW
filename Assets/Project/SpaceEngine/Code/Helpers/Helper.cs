@@ -33,15 +33,43 @@
 // Creator: zameran
 #endregion
 
+using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 
 using UnityEngine;
+
+using Debug = UnityEngine.Debug;
+using Object = UnityEngine.Object;
 
 public static class Helper
 {
     public static readonly float InscribedBox = 1.0f / Mathf.Sqrt(2.0f);
 
-    public static bool Enabled(Behaviour b)
+    public static void Measure(string label = "Method", Action ToMeasure = null)
+    {
+        var time = Time.realtimeSinceStartup;
+
+        if (ToMeasure != null) ToMeasure();
+
+        var executionTime = Time.realtimeSinceStartup - time;
+
+        Debug.Log(string.Format("[Benchmark.{0}] : Execution time: {1}ms", label, executionTime.ToString("f6")));
+    }
+
+    public static void MeasureNative(string label = "Method", Action ToMeasure = null)
+    {
+        var watch = new Stopwatch();
+        watch.Start();
+
+        if (ToMeasure != null) ToMeasure();
+
+        watch.Stop();
+
+        Debug.Log(string.Format("[Benchmark.{0}] : Execution time: {1}ms", label, watch.Elapsed.TotalMilliseconds.ToString("f6")));
+    }
+
+    public static bool Enabled<T>(T b) where T : Behaviour
     {
         return b != null && b.enabled == true && b.gameObject.activeInHierarchy == true;
     }
@@ -306,15 +334,7 @@ public static class Helper
         return uv;
     }
 
-    public static void SetKeywords(Material m, List<string> keywords)
-    {
-        if (m != null && ArraysEqual(m.shaderKeywords, keywords) == false)
-        {
-            m.shaderKeywords = keywords.ToArray();
-        }
-    }
-
-    public static void SetKeywords(Material m, List<string> keywords, bool checkShaderKeywords)
+    public static void SetKeywords(Material m, List<string> keywords, bool checkShaderKeywords = false)
     {
         if (checkShaderKeywords)
         {

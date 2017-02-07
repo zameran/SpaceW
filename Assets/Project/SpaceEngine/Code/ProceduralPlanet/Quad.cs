@@ -40,8 +40,6 @@ using System.Linq;
 
 using UnityEngine;
 
-using ZFramework.Unity.Common.PerfomanceMonitor;
-
 [Serializable]
 public struct OutputStruct : IData
 {
@@ -268,7 +266,7 @@ public sealed class Quad : Node<Quad>, IQuad
 
         if (LODLevel < Planetoid.LODMaxLevel)
         {
-            float LODDistance = Planetoid.LODDistances[LODLevel + 1] * Planetoid.LODDistanceMultiplier;
+            var LODDistance = Planetoid.LODDistances[LODLevel + 1] * Planetoid.LODDistanceMultiplier;
 
             if (!Planetoid.OneSplittingQuad)
             {
@@ -311,12 +309,12 @@ public sealed class Quad : Node<Quad>, IQuad
         }
     }
 
-    public Bounds GetBoundFromPoints(Vector3[] points, out Vector3 max, out Vector3 min)
+    public Bounds GetBoundFromPoints(Vector3d[] points, out Vector3d max, out Vector3d min)
     {
-        var center = points.Aggregate(Vector3.zero, (current, t) => current + t) / 8;
+        var center = points.Aggregate(Vector3d.zero, (current, t) => current + t) / 8;
 
-        min = new Vector3(float.MaxValue, float.MaxValue, float.MaxValue);
-        max = new Vector3(float.MinValue, float.MinValue, float.MinValue);
+        min = new Vector3d(double.MaxValue, double.MaxValue, double.MaxValue);
+        max = new Vector3d(double.MinValue, double.MinValue, double.MinValue);
 
         for (int i = 0; i < points.Length; i++)
         {
@@ -381,9 +379,6 @@ public sealed class Quad : Node<Quad>, IQuad
             Uniformed = true;
         }
 
-        QuadMaterial.SetFloat("_Atmosphere", (Planetoid.Atmosphere != null) ? 1.0f : 0.0f);
-        QuadMaterial.SetFloat("_Normale", Planetoid.DrawNormals ? 1.0f : 0.0f);
-
         QuadMaterial.renderQueue = (int)Planetoid.RenderQueue + Planetoid.RenderQueueOffset;
 
         if (Generated && ShouldDraw && QuadMesh != null)
@@ -391,27 +386,14 @@ public sealed class Quad : Node<Quad>, IQuad
             TryCull();
 
             if (Visible)
-                Graphics.DrawMesh(QuadMesh, Planetoid.PlanetoidTRS, QuadMaterial, drawLayer, camera, 0, Planetoid.QuadAtmosphereMPB, true, true);
-        }
-    }
-
-    private void TryCull()
-    {
-        using (new Timer("Quad.TryCull"))
-        {
-            if (GodManager.Instance.UpdateFrustumPlanes == false) return;
-
-            if (Planetoid.CullingMethod == QuadCullingMethod.Custom)
-                Visible = PlaneFrustumCheck(QuadAABB);
-            else
-                Visible = true;
+                Graphics.DrawMesh(QuadMesh, Planetoid.PlanetoidTRS, QuadMaterial, drawLayer, camera, 0, Planetoid.QuadMPB, true, true);
         }
     }
 
     private QuadAABB GetVolumeBox(float height, float offset = 0)
     {
-        var points = new Vector3[8];
-        var cullingPoints = new Vector3[14];
+        var points = new Vector3d[8];
+        var cullingPoints = new Vector3d[14];
 
         points[0] = quadCorners.topLeftCorner.NormalizeToRadius(Planetoid.PlanetRadius + height + offset);
         points[1] = quadCorners.topRightCorner.NormalizeToRadius(Planetoid.PlanetRadius + height + offset);
@@ -436,21 +418,21 @@ public sealed class Quad : Node<Quad>, IQuad
         return new QuadAABB(points, cullingPoints, this, Planetoid.OriginTransform);
     }
 
-    private bool PlaneFrustumCheck(QuadAABB qaabb)
+    private void TryCull()
     {
-        if (qaabb == null) { Log("QuadAABB problem!"); return true; }
+        if (GodManager.Instance.UpdateFrustumPlanesNow == false) return;
 
-        //return GeometryUtility.TestPlanesAABB(GodManager.Instance.FrustumPlanes, QuadAABB.Bounds);
-        return PlaneFrustumCheck(qaabb.CullingAABB);
+        if (Planetoid.CullingMethod == QuadCullingMethod.Custom)
+            Visible = PlaneFrustumCheck(QuadAABB);
+        else
+            Visible = true;
     }
 
-    private bool PlaneFrustumCheck(Vector3[] points)
+    private bool PlaneFrustumCheck(QuadAABB qaabb)
     {
-        if (Parent == null || Splitting) { return true; }
-
-        for (var i = 0; i < points.Length; i++)
+        for (byte i = 0; i < qaabb.CullingAABB.Length; i++)
         {
-            if (BorderFrustumCheck(GodManager.Instance.FrustumPlanes, points[i]))
+            if (BorderFrustumCheck(GodManager.Instance.FrustumPlanesTS, qaabb.CullingAABB[i]))
             {
                 return true;
             }
@@ -459,9 +441,9 @@ public sealed class Quad : Node<Quad>, IQuad
         return false;
     }
 
-    private bool BorderFrustumCheck(Plane[] planes, Vector3 border)
+    private bool BorderFrustumCheck(FrustumPlane[] planes, Vector3 border)
     {
-        for (var i = 0; i < planes.Length; i++)
+        for (byte i = 0; i < planes.Length; i++)
         {
             if (planes[i].GetDistanceToPoint(border) < 0 - 1024.0f)
             {
@@ -797,7 +779,7 @@ public sealed class Quad : Node<Quad>, IQuad
 
         for (byte i = 0; i < 4; i++)
         {
-            distance = Vector3.Distance(Planetoid.LODTarget.position, Planetoid.OriginTransform.TransformPoint(QuadAABB.AABB[i]));
+            distance = VectorHelper.QuickDistance(Planetoid.LODTarget.position, Planetoid.OriginTransform.TransformPoint(QuadAABB.AABB[i]));
 
             if (distance < closestDistance)
             {
@@ -806,7 +788,7 @@ public sealed class Quad : Node<Quad>, IQuad
             }
         }
 
-        distance = Vector3.Distance(Planetoid.LODTarget.position, Planetoid.OriginTransform.TransformPoint(middleNormalized));
+        distance = VectorHelper.QuickDistance(Planetoid.LODTarget.position, Planetoid.OriginTransform.TransformPoint(middleNormalized));
 
         if (distance < closestDistance)
         {
@@ -830,7 +812,7 @@ public sealed class Quad : Node<Quad>, IQuad
         var br = Planetoid.OriginTransform.TransformPoint(quadCorners.bottomRightCorner.NormalizeToRadius(Planetoid.PlanetRadius));
         var middlePoint = Planetoid.OriginTransform.TransformPoint(middleNormalized);
 
-        distance = Vector3.Distance(Planetoid.LODTarget.position, tl);
+        distance = VectorHelper.QuickDistance(Planetoid.LODTarget.position, tl);
 
         if (distance < closestDistance)
         {
@@ -838,7 +820,7 @@ public sealed class Quad : Node<Quad>, IQuad
             closestDistance = distance;
         }
 
-        distance = Vector3.Distance(Planetoid.LODTarget.position, tr);
+        distance = VectorHelper.QuickDistance(Planetoid.LODTarget.position, tr);
 
         if (distance < closestDistance)
         {
@@ -846,7 +828,7 @@ public sealed class Quad : Node<Quad>, IQuad
             closestDistance = distance;
         }
 
-        distance = Vector3.Distance(Planetoid.LODTarget.position, middlePoint);
+        distance = VectorHelper.QuickDistance(Planetoid.LODTarget.position, middlePoint);
 
         if (distance < closestDistance)
         {
@@ -854,7 +836,7 @@ public sealed class Quad : Node<Quad>, IQuad
             closestDistance = distance;
         }
 
-        distance = Vector3.Distance(Planetoid.LODTarget.position, bl);
+        distance = VectorHelper.QuickDistance(Planetoid.LODTarget.position, bl);
 
         if (distance < closestDistance)
         {
@@ -862,7 +844,7 @@ public sealed class Quad : Node<Quad>, IQuad
             closestDistance = distance;
         }
 
-        distance = Vector3.Distance(Planetoid.LODTarget.position, br);
+        distance = VectorHelper.QuickDistance(Planetoid.LODTarget.position, br);
 
         if (distance < closestDistance)
         {
@@ -954,101 +936,64 @@ public sealed class Quad : Node<Quad>, IQuad
 
         var tempStatic = 0.0f;
 
-        // TOP      (-v, r, v)  :0    SIGN    100     AXIS 010
-        // TOP      (v, r, v)   :1    SIGN    000     AXIS 010
-        // TOP      (-v, r, -v) :2    SIGN    101     AXIS 010
-        // TOP      (v, r, -v)  :3    SIGN    001     AXIS 010
-        // ---------------------------------------------------
-        // BUTTOM   (-v, -r, -v):0    SIGN    111     AXIS 010
-        // BUTTOM   (v, -r, -v) :1    SIGN    011     AXIS 010
-        // BUTTOM   (-v, -r, v) :2    SIGN    110     AXIS 010
-        // BUTTOM   (v, -r, v)  :3    SIGN    010     AXIS 010
-        // ---------------------------------------------------
-        // LEFT     (-r, v, v)  :0    SIGN    100     AXIS 100
-        // LEFT     (-r, v, -v) :1    SIGN    101     AXIS 100
-        // LEFT     (-r, -v, v) :2    SIGN    110     AXIS 100
-        // LEFT     (-r, -v, -v):3    SIGN    111     AXIS 100
-        // ---------------------------------------------------
-        // RIGHT    (r, v, -v)  :0    SIGN    001     AXIS 100
-        // RIGHT    (r, v, v)   :1    SIGN    000     AXIS 100
-        // RIGHT    (r, -v, -v) :2    SIGN    011     AXIS 100
-        // RIGHT    (r, -v, v)  :3    SIGN    010     AXIS 100
-        // ---------------------------------------------------
-        // FRONT    (v, v, r)   :0    SIGN    000     AXIS 001
-        // FRONT    (-v, v, r)  :1    SIGN    100     AXIS 001
-        // FRONT    (v, -v, r)  :2    SIGN    010     AXIS 001
-        // FRONT    (-v, -v, r) :3    SIGN    110     AXIS 001
-        // ---------------------------------------------------
-        // BACK     (-v, v, -r) :0    SIGN    101     AXIS 001
-        // BACK     (v, v, -r)  :1    SIGN    001     AXIS 001
-        // BACK     (-v, -v, -r):2    SIGN    111     AXIS 001
-        // BACK     (v, -v, -r) :3    SIGN    011     AXIS 001
+        var sign = new byte[][] { new byte[] { 4, 0, 5, 1 },
+                                  new byte[] { 7, 3, 6, 2 },
+                                  new byte[] { 4, 5, 6, 7 },
+                                  new byte[] { 1, 0, 3, 2 },
+                                  new byte[] { 0, 4, 2, 6 },
+                                  new byte[] { 5, 1, 7, 3 } };
 
-        switch (quadPosition)
-        {
-            case QuadPosition.Top:
-                if (id == 0)
-                    temp += new Vector3(-v, r, v);
-                else if (id == 1)
-                    temp += new Vector3(v, r, v);
-                else if (id == 2)
-                    temp += new Vector3(-v, r, -v);
-                else if (id == 3)
-                    temp += new Vector3(v, r, -v);
-                break;
-            case QuadPosition.Bottom:
-                if (id == 0)
-                    temp += new Vector3(-v, -r, -v);
-                else if (id == 1)
-                    temp += new Vector3(v, -r, -v);
-                else if (id == 2)
-                    temp += new Vector3(-v, -r, v);
-                else if (id == 3)
-                    temp += new Vector3(v, -r, v);
-                break;
-            case QuadPosition.Left:
-                if (id == 0)
-                    temp += new Vector3(-r, v, v);
-                else if (id == 1)
-                    temp += new Vector3(-r, v, -v);
-                else if (id == 2)
-                    temp += new Vector3(-r, -v, v);
-                else if (id == 3)
-                    temp += new Vector3(-r, -v, -v);
-                break;
-            case QuadPosition.Right:
-                if (id == 0)
-                    temp += new Vector3(r, v, -v);
-                else if (id == 1)
-                    temp += new Vector3(r, v, v);
-                else if (id == 2)
-                    temp += new Vector3(r, -v, -v);
-                else if (id == 3)
-                    temp += new Vector3(r, -v, v);
-                break;
-            case QuadPosition.Front:
-                if (id == 0)
-                    temp += new Vector3(v, v, r);
-                else if (id == 1)
-                    temp += new Vector3(-v, v, r);
-                else if (id == 2)
-                    temp += new Vector3(v, -v, r);
-                else if (id == 3)
-                    temp += new Vector3(-v, -v, r);
-                break;
-            case QuadPosition.Back:
-                if (id == 0)
-                    temp += new Vector3(-v, v, -r);
-                else if (id == 1)
-                    temp += new Vector3(v, v, -r);
-                else if (id == 2)
-                    temp += new Vector3(-v, -v, -r);
-                else if (id == 3)
-                    temp += new Vector3(v, -v, -r);
-                break;
-            default:
-                throw new ArgumentOutOfRangeException("quadPosition", quadPosition, null);
-        }
+        var axis = new byte[] { 2, 2, 4, 4, 1, 1 };
+
+        var sideSign = sign[(int)quadPosition][id];
+        var sideAxis = axis[(int)quadPosition];
+
+        var maskVector = BrainFuckMath.MakeBitMask(sideSign);
+        var maskAxisVector = BrainFuckMath.MakeBitMask(sideAxis);
+
+        var vector = BrainFuckMath.ApplyBitMask(maskAxisVector, r, v);
+        var output = BrainFuckMath.ApplyBitMask(vector, maskVector);
+
+        temp = output;
+
+        // NOTE : So, here i will construct vector with specific parameters. Much slower than switch { ... }, but FUCK OFF! I wanna brainfucking stuff, cuz i can!
+        // "Sign" will represent 'Wich component of vector what sign have?'
+        // "Axis" will represent 'What value shoud i use for vector component? Left or right? 1.0 or 0.0?'
+        // Example [Sign] - 110 - [-X, -Y, Z]
+        // Example [Axis] - 010 - [0.0, 1.0, 0.0]
+        // Example [Together] - - [-0.0, -0.0, 0.0]
+
+        // AXIS     [2, 2, 4, 4, 1, 1]
+
+        // TOP      (-v, r, v)  :0    SIGN    100-4     AXIS 010-2  [4, 0, 5, 1]
+        // TOP      (v, r, v)   :1    SIGN    000-0     AXIS 010-2
+        // TOP      (-v, r, -v) :2    SIGN    101-5     AXIS 010-2
+        // TOP      (v, r, -v)  :3    SIGN    001-1     AXIS 010-2
+        // ---------------------------------------------------
+        // BUTTOM   (-v, -r, -v):0    SIGN    111-7     AXIS 010-2  [7, 3, 6, 2]
+        // BUTTOM   (v, -r, -v) :1    SIGN    011-3     AXIS 010-2
+        // BUTTOM   (-v, -r, v) :2    SIGN    110-6     AXIS 010-2
+        // BUTTOM   (v, -r, v)  :3    SIGN    010-2     AXIS 010-2
+        // ---------------------------------------------------
+        // LEFT     (-r, v, v)  :0    SIGN    100-4     AXIS 100-4  [4, 5, 6, 7]
+        // LEFT     (-r, v, -v) :1    SIGN    101-5     AXIS 100-4
+        // LEFT     (-r, -v, v) :2    SIGN    110-6     AXIS 100-4
+        // LEFT     (-r, -v, -v):3    SIGN    111-7     AXIS 100-4
+        // ---------------------------------------------------
+        // RIGHT    (r, v, -v)  :0    SIGN    001-1     AXIS 100-4  [1, 0, 3, 2]
+        // RIGHT    (r, v, v)   :1    SIGN    000-0     AXIS 100-4
+        // RIGHT    (r, -v, -v) :2    SIGN    011-3     AXIS 100-4
+        // RIGHT    (r, -v, v)  :3    SIGN    010-2     AXIS 100-4
+        // ---------------------------------------------------
+        // FRONT    (v, v, r)   :0    SIGN    000-0     AXIS 001-1  [0, 4, 2, 6]
+        // FRONT    (-v, v, r)  :1    SIGN    100-4     AXIS 001-1
+        // FRONT    (v, -v, r)  :2    SIGN    010-2     AXIS 001-1
+        // FRONT    (-v, -v, r) :3    SIGN    110-6     AXIS 001-1
+        // ---------------------------------------------------
+        // BACK     (-v, v, -r) :0    SIGN    101-5     AXIS 001-1  [5, 1, 7, 3]
+        // BACK     (v, v, -r)  :1    SIGN    001-1     AXIS 001-1
+        // BACK     (-v, -v, -r):2    SIGN    111-7     AXIS 001-1
+        // BACK     (v, -v, -r) :3    SIGN    011-3     AXIS 001-1
 
         BrainFuckMath.LockAxis(ref tempStatic, ref temp, staticX, staticY, staticZ);
         BrainFuckMath.CalculatePatchCubeCenter(LODLevel, Parent.generationConstants.patchCubeCenter, ref temp);

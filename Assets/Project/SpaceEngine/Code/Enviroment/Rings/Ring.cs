@@ -162,7 +162,7 @@ public class Ring : Node<Ring>
 
         for (var i = Segments.Count - 1; i >= 0; i--)
         {
-            DestroyImmediate(Segments[i]);
+            Helper.Destroy(Segments[i]);
         }
 
         Segments.Clear();
@@ -235,9 +235,9 @@ public class Ring : Node<Ring>
 
         SetLightsAndShadows(mat);
 
-        mat.SetTexture("_MainTex", MainTex);
+        mat.SetTexture("_DiffuseTexture", MainTex);
         mat.SetTexture("_NoiseTex", NoiseTex);
-        mat.SetColor("_Color", Helper.Brighten(Color, Brightness));
+        mat.SetColor("_DiffuseColor", Helper.Brighten(Color, Brightness));
         mat.SetFloat("_LightingBias", LightingBias);
         mat.SetFloat("_LightingSharpness", LightingSharpness);
 

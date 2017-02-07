@@ -61,6 +61,11 @@ public sealed class NoiseEngineParametersTest : MonoBehaviour
         UpdateUniforms(material);
     }
 
+    private void OnDestroy()
+    {
+        //Helper.Destroy(material);
+    }
+
     public void UpdateUniforms(Material mat)
     {
         if (mat == null) return;

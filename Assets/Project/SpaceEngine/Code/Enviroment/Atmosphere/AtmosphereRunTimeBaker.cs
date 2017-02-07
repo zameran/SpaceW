@@ -42,6 +42,7 @@ namespace SpaceEngine.AtmosphericScattering
     public sealed class AtmosphereRunTimeBaker : MonoBehaviour
     {
         public RenderTextureFormat Format = RenderTextureFormat.ARGBFloat;
+        public TextureWrapMode WrapMode = TextureWrapMode.Clamp;
 
         public bool ClearAfterBake = true;
         public bool UseCoroutine = true;
@@ -146,8 +147,7 @@ namespace SpaceEngine.AtmosphericScattering
             if (irradianceT_Write != null) irradianceT_Write.ReleaseAndDestroy();
             if (inscatterT_Write != null) inscatterT_Write.ReleaseAndDestroy();
 
-            if (all) if (deltaET != null) deltaET.ReleaseAndDestroy();
-
+            if (deltaET != null) deltaET.ReleaseAndDestroy();
             if (deltaSRT != null) deltaSRT.ReleaseAndDestroy();
             if (deltaSMT != null) deltaSMT.ReleaseAndDestroy();
             if (deltaJT != null) deltaJT.ReleaseAndDestroy();
@@ -170,14 +170,14 @@ namespace SpaceEngine.AtmosphericScattering
             irradianceT_Read = RTExtensions.CreateRTexture(new Vector2(AtmosphereConstants.SKY_W, AtmosphereConstants.SKY_H), 0, Format);
             irradianceT_Write = RTExtensions.CreateRTexture(new Vector2(AtmosphereConstants.SKY_W, AtmosphereConstants.SKY_H), 0, Format);
 
-            inscatterT_Read = RTExtensions.CreateRTexture(new Vector2(AtmosphereConstants.RES_MU_S * AtmosphereConstants.RES_NU, AtmosphereConstants.RES_MU), 0, Format, FilterMode.Bilinear, TextureWrapMode.Clamp, AtmosphereConstants.RES_R);
-            inscatterT_Write = RTExtensions.CreateRTexture(new Vector2(AtmosphereConstants.RES_MU_S * AtmosphereConstants.RES_NU, AtmosphereConstants.RES_MU), 0, Format, FilterMode.Bilinear, TextureWrapMode.Clamp, AtmosphereConstants.RES_R);
+            inscatterT_Read = RTExtensions.CreateRTexture(new Vector2(AtmosphereConstants.RES_MU_S * AtmosphereConstants.RES_NU, AtmosphereConstants.RES_MU), 0, Format, FilterMode.Bilinear, WrapMode, AtmosphereConstants.RES_R);
+            inscatterT_Write = RTExtensions.CreateRTexture(new Vector2(AtmosphereConstants.RES_MU_S * AtmosphereConstants.RES_NU, AtmosphereConstants.RES_MU), 0, Format, FilterMode.Bilinear, WrapMode, AtmosphereConstants.RES_R);
 
             deltaET = RTExtensions.CreateRTexture(new Vector2(AtmosphereConstants.SKY_W, AtmosphereConstants.SKY_H), 0, Format);
 
-            deltaSRT = RTExtensions.CreateRTexture(new Vector2(AtmosphereConstants.RES_MU_S * AtmosphereConstants.RES_NU, AtmosphereConstants.RES_MU), 0, Format, FilterMode.Bilinear, TextureWrapMode.Clamp, AtmosphereConstants.RES_R);
-            deltaSMT = RTExtensions.CreateRTexture(new Vector2(AtmosphereConstants.RES_MU_S * AtmosphereConstants.RES_NU, AtmosphereConstants.RES_MU), 0, Format, FilterMode.Bilinear, TextureWrapMode.Clamp, AtmosphereConstants.RES_R);
-            deltaJT = RTExtensions.CreateRTexture(new Vector2(AtmosphereConstants.RES_MU_S * AtmosphereConstants.RES_NU, AtmosphereConstants.RES_MU), 0, Format, FilterMode.Bilinear, TextureWrapMode.Clamp, AtmosphereConstants.RES_R);
+            deltaSRT = RTExtensions.CreateRTexture(new Vector2(AtmosphereConstants.RES_MU_S * AtmosphereConstants.RES_NU, AtmosphereConstants.RES_MU), 0, Format, FilterMode.Bilinear, WrapMode, AtmosphereConstants.RES_R);
+            deltaSMT = RTExtensions.CreateRTexture(new Vector2(AtmosphereConstants.RES_MU_S * AtmosphereConstants.RES_NU, AtmosphereConstants.RES_MU), 0, Format, FilterMode.Bilinear, WrapMode, AtmosphereConstants.RES_R);
+            deltaJT = RTExtensions.CreateRTexture(new Vector2(AtmosphereConstants.RES_MU_S * AtmosphereConstants.RES_NU, AtmosphereConstants.RES_MU), 0, Format, FilterMode.Bilinear, WrapMode, AtmosphereConstants.RES_R);
         }
 
         public void SetParametersForAll(AtmosphereParameters AP)
@@ -199,8 +199,6 @@ namespace SpaceEngine.AtmosphericScattering
 
             RTUtility.ClearColor(irradianceT_Read);
             RTUtility.ClearColor(irradianceT_Write);
-
-            RTUtility.ClearColor(deltaET);
         }
 
         public void Calculate(AtmosphereParameters AP)

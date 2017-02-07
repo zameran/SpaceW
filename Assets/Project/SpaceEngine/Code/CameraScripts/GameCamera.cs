@@ -40,10 +40,16 @@ namespace SpaceEngine.Cameras
     [RequireComponent(typeof(Camera))]
     public abstract class GameCamera : MonoBehaviour, ICamera
     {
-        public Camera CameraComponent { get { return GetComponent<Camera>(); } }
+        private CachedComponent<Camera> CameraCachedComponent = new CachedComponent<Camera>();
+
+        public Camera CameraComponent { get { return CameraCachedComponent.Component; } }
+
+        public bool MouseOverUI { get { return GUIUtility.hotControl != 0; } }
 
         protected virtual void Start()
         {
+            CameraCachedComponent.TryInit(this);
+
             Init();
         }
 

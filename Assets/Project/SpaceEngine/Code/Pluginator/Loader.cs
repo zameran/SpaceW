@@ -35,6 +35,7 @@
 
 using System;
 using System.Collections;
+
 using UnityEngine;
 
 using ZFramework.Unity.Common;
@@ -50,10 +51,19 @@ namespace SpaceEngine.Pluginator
         public bool ShouldDontDestroyOnLoad = true;
 
         private static Loader instance;
+
         public static Loader Instance
         {
-            get { if (instance == null) { Logger.Log("Loader Instance get fail!"); } return instance; }
-            private set { if (value != null) instance = value; else Logger.Log("Loader Instance set fail!"); }
+            get
+            {
+                if (instance == null) { Logger.Log("Loader Instance get fail!"); }
+                return instance;
+            }
+            private set
+            {
+                if (value != null) instance = value;
+                else Logger.Log("Loader Instance set fail!");
+            }
         }
 
         public static int Step { get; private set; }

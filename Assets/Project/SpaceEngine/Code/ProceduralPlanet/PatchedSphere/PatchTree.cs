@@ -34,7 +34,7 @@
 #endregion
 
 using System;
-using System.Linq;
+using System.Collections.Generic;
 
 using UnityEngine;
 
@@ -43,21 +43,21 @@ using Object = UnityEngine.Object;
 [Serializable]
 public struct PatchData
 {
-    public Vector3[] Vertices;
-    public Vector3[] Normals;
-    public Vector3[] Volume;
+    public List<Vector3> Vertices;
+    public List<Vector3> Normals;
+    public List<Vector3> Volume;
 
-    public Vector2[] UV1;
-    public Vector2[] UV2;
+    public List<Vector2> UV1;
+    public List<Vector2> UV2;
 
     public PatchData(int gridSize)
     {
-        Vertices = new Vector3[gridSize];
-        Normals = new Vector3[gridSize];
-        Volume = new Vector3[gridSize];
+        Vertices = new List<Vector3>(gridSize);
+        Normals = new List<Vector3>(gridSize);
+        Volume = new List<Vector3>(gridSize);
 
-        UV2 = new Vector2[gridSize];
-        UV1 = new Vector2[gridSize];
+        UV2 = new List<Vector2>(gridSize);
+        UV1 = new List<Vector2>(gridSize);
     }
 }
 
@@ -99,9 +99,9 @@ public class PatchTree
 
     public PatchNeighbor[] Neighbors = new PatchNeighbor[4];
 
-    byte NeedsRejoinCount;
-    byte Edges;
-    byte GapFixMask;
+    private byte NeedsRejoinCount;
+    public byte Edges;
+    private byte GapFixMask;
 
     public byte NEXT_EDGE(byte e)
     {
@@ -304,62 +304,27 @@ public class PatchTree
         Data = new PatchData(PatchSettings.Vertices);
 
         var origin = Volume.Vertices[0];
-
-        var vertStep = Size / (PatchSettings.VerticesPerSide - 1); //vertex spacing
-        var startHMap = 1.0f;
-        var endHMap = 1.0f - startHMap;
-
-        var uCoord = startHMap;
-        var vCoord = startHMap; //uv coordinates for the heightmap
-
-        var uvStep = (endHMap - startHMap) / (PatchSettings.VerticesPerSide - 1); //hmap uv step size inside the loop
-
-        var uVolCoord = Volume.UVs[0].x;
-        var vVolCoord = Volume.UVs[0].y; //flat uv coordinates for the cube face
-
-        var volCoordStep = (Volume.UVs[1].x - Volume.UVs[0].x) / (PatchSettings.VerticesPerSide - 1); //step size of flat uv inside the loop
-        var idx = 0;
+        var spacing = Size / (PatchSettings.VerticesPerSide - 1);
 
         for (ushort y = 0; y < PatchSettings.VerticesPerSide; y++)
         {
             var offset = origin;
 
-            uCoord = startHMap;
-            uVolCoord = Volume.UVs[0].x;
-
             for (ushort x = 0; x < PatchSettings.VerticesPerSide; x++)
             {
-                //heightmap texture coordinates
-                Data.UV1[idx] = new Vector2(uCoord, vCoord);
-                uCoord += uvStep;
+                var vertex = offset;
 
-                //volume texture coordinates
-                //x,y = flat volume uv coordinates
-                //z = vertex slope
-                Data.UV2[idx] = new Vector2(uVolCoord, vVolCoord);
-                uVolCoord += volCoordStep;
+                Data.Vertices.Add(vertex.NormalizeToRadius(Sphere.Radius));
+                Data.Normals.Add(vertex.normalized);
+                Data.Volume.Add(offset);
 
-                //calculate vertex position
-                var vtx = offset;
+                Data.UV1.Add(VectorHelper.CartesianToPolarUV(vertex));
+                Data.UV2.Add(new Vector2(0, 0));
 
-                //use normalized vertex position as vertex normal
-                vtx.Normalize();
-                Data.Normals[idx] = vtx;
-
-                //scale to sphere
-                vtx = vtx * Sphere.Radius;
-
-                //store
-                Data.Vertices[idx] = vtx;
-                Data.Volume[idx] = offset;
-
-                idx++;
-                offset += Right * vertStep;
+                offset += Right * spacing;
             }
 
-            origin -= Front * vertStep;
-            vCoord += uvStep;
-            vVolCoord += volCoordStep;
+            origin -= Front * spacing;
         }
 
         //update projected center
@@ -376,16 +341,18 @@ public class PatchTree
         //put this node as a child of parent
         GameObject.transform.parent = Sphere.gameObject.transform;
 
+        var indices = Sphere.PatchManager.Patches[Edges];
+
         //assign data to this node's mesh
-        Mesh.SetVertices(Data.Vertices.ToList());
-        Mesh.SetUVs(0, Data.UV1.ToList());
-        Mesh.SetUVs(1, Data.UV2.ToList());
-        Mesh.SetNormals(Data.Normals.ToList());
-        Mesh.SetTriangles(Sphere.PatchManager.Patches[Edges], 0);
-        Mesh.hideFlags = HideFlags.DontSave;
+        Mesh.SetVertices(Data.Vertices);
+        Mesh.SetNormals(Data.Normals);
+        Mesh.SetTriangles(indices, 0);
+        Mesh.SetUVs(0, Data.UV1);
+        Mesh.SetUVs(1, Data.UV2);
 
-        MeshFactory.SolveTangents(Mesh);
+        Mesh.hideFlags = HideFlags.HideAndDontSave;
 
+        Mesh.SolveTangents(ref indices, ref Data.Vertices, ref Data.Normals, ref Data.UV1);
         Mesh.RecalculateBounds();
 
         //restore parent transformations
@@ -414,7 +381,6 @@ public class PatchTree
     {
         short posHere = 0;
         short posThere = 0;
-
         short incHere = 1;
         short incThere = 1;
 
@@ -433,56 +399,57 @@ public class PatchTree
         for (byte direction = 0; direction < 4; direction++)
         {
             var bit = (byte)(1 << direction);
+            var neighborAtDirection = Neighbors[direction].Node;
 
             if ((bit & directionsMask) > 0)
             {
                 short add = 0;
 
-                if (Neighbors[direction].Node.HasChildren)
+                if (neighborAtDirection.HasChildren)
                 {
                 }
                 else
                 {
-                    switch ((NeighborDirection)direction)
+                    switch ((PatchNeighborDirection)direction)
                     {
-                        case NeighborDirection.Top:
+                        case PatchNeighborDirection.Top:
                             {
                                 posHere = 0;
                                 incHere = 1;
 
-                                var parent = Neighbors[(int)NeighborDirection.Right].Node.Parent;
+                                var parent = Neighbors[(int)PatchNeighborDirection.Right].Node.Parent;
 
                                 add =
                                     (short)
                                         (parent != null && Parent != null && parent.Equals(Parent) &&
-                                         Neighbors[(int)NeighborDirection.Right].Node.Neighbors[(int)NeighborDirection.Top].Node.Equals(Neighbors[direction].Node)
+                                         Neighbors[(int)PatchNeighborDirection.Right].Node.Neighbors[(int)PatchNeighborDirection.Top].Node.Equals(neighborAtDirection)
                                             ? 0
                                             : (PatchSettings.VerticesPerSide >> 1));
 
                                 switch (Neighbors[direction].Direction)
                                 {
-                                    case NeighborDirection.Top:
+                                    case PatchNeighborDirection.Top:
                                         {
                                             posThere = idxTopRight;
                                             incThere = -1;
                                             break;
                                         }
 
-                                    case NeighborDirection.Bottom:
+                                    case PatchNeighborDirection.Bottom:
                                         {
                                             posThere = idxBottomLeft;
                                             incThere = 1;
                                             break;
                                         }
 
-                                    case NeighborDirection.Left:
+                                    case PatchNeighborDirection.Left:
                                         {
                                             posThere = idxTopLeft;
                                             incThere = (short)(PatchSettings.VerticesPerSide);
                                             break;
                                         }
 
-                                    case NeighborDirection.Right:
+                                    case PatchNeighborDirection.Right:
                                         {
                                             posThere = idxBottomRight;
                                             incThere = (short)(-PatchSettings.VerticesPerSide);
@@ -492,44 +459,44 @@ public class PatchTree
                                 break;
                             }
 
-                        case NeighborDirection.Right:
+                        case PatchNeighborDirection.Right:
                             {
                                 posHere = idxTopRight;
                                 incHere = (short)(PatchSettings.VerticesPerSide);
 
-                                var parent = Neighbors[(int)NeighborDirection.Bottom].Node.Parent;
+                                var parent = Neighbors[(int)PatchNeighborDirection.Bottom].Node.Parent;
 
                                 add =
                                     (short)
                                         (parent != null && Parent != null && parent.Equals(Parent) &&
-                                         Neighbors[(int)NeighborDirection.Bottom].Node.Neighbors[(int)NeighborDirection.Right].Node.Equals(Neighbors[direction].Node)
+                                         Neighbors[(int)PatchNeighborDirection.Bottom].Node.Neighbors[(int)PatchNeighborDirection.Right].Node.Equals(neighborAtDirection)
                                             ? 0
                                             : (PatchSettings.VerticesPerSide >> 1));
 
                                 switch (Neighbors[direction].Direction)
                                 {
-                                    case NeighborDirection.Top:
+                                    case PatchNeighborDirection.Top:
                                         {
                                             posThere = idxTopRight;
                                             incThere = -1;
                                             break;
                                         }
 
-                                    case NeighborDirection.Bottom:
+                                    case PatchNeighborDirection.Bottom:
                                         {
                                             posThere = idxBottomLeft;
                                             incThere = 1;
                                             break;
                                         }
 
-                                    case NeighborDirection.Left:
+                                    case PatchNeighborDirection.Left:
                                         {
                                             posThere = idxTopLeft;
                                             incThere = (short)(PatchSettings.VerticesPerSide);
                                             break;
                                         }
 
-                                    case NeighborDirection.Right:
+                                    case PatchNeighborDirection.Right:
                                         {
                                             posThere = idxBottomRight;
                                             incThere = (short)(-PatchSettings.VerticesPerSide);
@@ -539,44 +506,44 @@ public class PatchTree
                                 break;
                             }
 
-                        case NeighborDirection.Bottom:
+                        case PatchNeighborDirection.Bottom:
                             {
                                 posHere = idxBottomRight;
                                 incHere = -1;
 
-                                var parent = Neighbors[(int)NeighborDirection.Left].Node.Parent;
+                                var parent = Neighbors[(int)PatchNeighborDirection.Left].Node.Parent;
 
                                 add =
                                     (short)
                                         (parent != null && Parent != null && parent.Equals(Parent) &&
-                                         Neighbors[(int)NeighborDirection.Left].Node.Neighbors[(int)NeighborDirection.Bottom].Node.Equals(Neighbors[direction].Node)
+                                         Neighbors[(int)PatchNeighborDirection.Left].Node.Neighbors[(int)PatchNeighborDirection.Bottom].Node.Equals(neighborAtDirection)
                                             ? 0
                                             : (PatchSettings.VerticesPerSide >> 1));
 
                                 switch (Neighbors[direction].Direction)
                                 {
-                                    case NeighborDirection.Top:
+                                    case PatchNeighborDirection.Top:
                                         {
                                             posThere = idxTopRight;
                                             incThere = -1;
                                             break;
                                         }
 
-                                    case NeighborDirection.Bottom:
+                                    case PatchNeighborDirection.Bottom:
                                         {
                                             posThere = idxBottomLeft;
                                             incThere = 1;
                                             break;
                                         }
 
-                                    case NeighborDirection.Left:
+                                    case PatchNeighborDirection.Left:
                                         {
                                             posThere = idxTopLeft;
                                             incThere = (short)(PatchSettings.VerticesPerSide);
                                             break;
                                         }
 
-                                    case NeighborDirection.Right:
+                                    case PatchNeighborDirection.Right:
                                         {
                                             posThere = idxBottomRight;
                                             incThere = (short)(-PatchSettings.VerticesPerSide);
@@ -586,44 +553,44 @@ public class PatchTree
                                 break;
                             }
 
-                        case NeighborDirection.Left:
+                        case PatchNeighborDirection.Left:
                             {
                                 posHere = idxBottomLeft;
                                 incHere = (short)(-PatchSettings.VerticesPerSide);
 
-                                var parent = Neighbors[(int)NeighborDirection.Top].Node.Parent;
+                                var parent = Neighbors[(int)PatchNeighborDirection.Top].Node.Parent;
 
                                 add =
                                     (short)
                                         (parent != null && Parent != null && parent.Equals(Parent) &&
-                                         Neighbors[(int)NeighborDirection.Top].Node.Neighbors[(int)NeighborDirection.Left].Node.Equals(Neighbors[direction].Node)
+                                         Neighbors[(int)PatchNeighborDirection.Top].Node.Neighbors[(int)PatchNeighborDirection.Left].Node.Equals(neighborAtDirection)
                                             ? 0
                                             : (PatchSettings.VerticesPerSide >> 1));
 
                                 switch (Neighbors[direction].Direction)
                                 {
-                                    case NeighborDirection.Top:
+                                    case PatchNeighborDirection.Top:
                                         {
                                             posThere = idxTopRight;
                                             incThere = -1;
                                             break;
                                         }
 
-                                    case NeighborDirection.Bottom:
+                                    case PatchNeighborDirection.Bottom:
                                         {
                                             posThere = idxBottomLeft;
                                             incThere = 1;
                                             break;
                                         }
 
-                                    case NeighborDirection.Left:
+                                    case PatchNeighborDirection.Left:
                                         {
                                             posThere = idxTopLeft;
                                             incThere = (short)(PatchSettings.VerticesPerSide);
                                             break;
                                         }
 
-                                    case NeighborDirection.Right:
+                                    case PatchNeighborDirection.Right:
                                         {
                                             posThere = idxBottomRight;
                                             incThere = (short)(-PatchSettings.VerticesPerSide);
@@ -654,13 +621,13 @@ public class PatchTree
                     //if it's not already fixed by the edge at left (counter-clockwise) of current edge
                     if (!Neighbors[PREV_EDGE(direction)].isFixed)
                     {
-                        Data.Vertices[posHere] = Neighbors[direction].Node.Data.Vertices[posThere];
+                        Data.Vertices[posHere] = neighborAtDirection.Data.Vertices[posThere];
                         fixedHere = true;
                     }
                     else
                     {
                         //instead, fix the vertex of the other node
-                        Neighbors[direction].Node.Data.Vertices[posThere] = Data.Vertices[posHere];
+                        neighborAtDirection.Data.Vertices[posThere] = Data.Vertices[posHere];
                     }
 
                     posHere += incHere;
@@ -670,7 +637,7 @@ public class PatchTree
 
                     while (x < loopLen - 2)
                     {
-                        Neighbors[direction].Node.Data.Vertices[posThere] = Data.Vertices[posHere];
+                        neighborAtDirection.Data.Vertices[posThere] = Data.Vertices[posHere];
 
                         x++;
 
@@ -682,33 +649,83 @@ public class PatchTree
                     //if it's not already fixed by the edge at right (clockwise) of current edge
                     if (!Neighbors[NEXT_EDGE(direction)].isFixed)
                     {
-                        Data.Vertices[posHere] = Neighbors[direction].Node.Data.Vertices[posThere];
+                        Data.Vertices[posHere] = neighborAtDirection.Data.Vertices[posThere];
                         fixedHere = true;
                     }
                     else
                     {
                         //instead, fix the vertex of the other node
-                        Neighbors[direction].Node.Data.Vertices[posThere] = Data.Vertices[posHere];
+                        neighborAtDirection.Data.Vertices[posThere] = Data.Vertices[posHere];
                     }
 
                     //reupload vertices to the mesh in this node and update its physics mesh
                     if (fixedHere)
                     {
-                        Mesh.vertices = Data.Vertices;
+                        Mesh.SetVertices(Data.Vertices);
                         Mesh.RecalculateBounds();
                     }
 
                     //reupload vertices to the neighbor mesh in the other node and update its physics mesh
-                    Neighbors[direction].Node.Mesh.vertices = Neighbors[direction].Node.Data.Vertices;
-                    Neighbors[direction].Node.Mesh.RecalculateBounds();
+                    neighborAtDirection.Mesh.SetVertices(neighborAtDirection.Data.Vertices);
+                    neighborAtDirection.Mesh.RecalculateBounds();
 
                     //fixed
                     Neighbors[direction].isFixed = true;
 
                     //the other node's edge is fixed as well.
-                    Neighbors[direction].Node.Neighbors[(byte)Neighbors[direction].Direction].isFixed = true;
+                    neighborAtDirection.Neighbors[(byte)Neighbors[direction].Direction].isFixed = true;
                 }
             }
+        }
+    }
+
+    void CalculateGapError(PatchNeighborDirection direction, PatchNeighborDirection neighborDirection, ref PatchTree neighborNode, out short add)
+    {
+        var node = Neighbors[(int)neighborDirection].Node;
+        var parent = node.Parent;
+
+        bool trueParent = (parent != null && Parent != null && parent == Parent);
+
+        add = (short)(trueParent && node.Neighbors[(int)direction].Node == neighborNode ? 0 : PatchSettings.VerticesPerSide >> 1);
+    }
+
+    void PositionThereIncrement(ref short idxTR, ref short idxBL, ref short idxTL, ref short idxBR, out short positionThere, out short incrementThere, PatchNeighborDirection direction)
+    {
+        positionThere = 0;
+        incrementThere = 0;
+
+        switch (Neighbors[(int)direction].Direction)
+        {
+            case PatchNeighborDirection.Top:
+                {
+                    positionThere = idxTR;
+                    incrementThere = -1;
+                    break;
+                }
+
+            case PatchNeighborDirection.Bottom:
+                {
+                    positionThere = idxBL;
+                    incrementThere = 1;
+                    break;
+                }
+
+            case PatchNeighborDirection.Left:
+                {
+                    positionThere = idxTL;
+                    incrementThere = (short)PatchSettings.VerticesPerSide;
+                    break;
+                }
+
+            case PatchNeighborDirection.Right:
+                {
+                    positionThere = idxBR;
+                    incrementThere = (short)-PatchSettings.VerticesPerSide;
+                    break;
+                }
+
+            default:
+                break;
         }
     }
 
@@ -804,14 +821,14 @@ public class PatchTree
 
                             if (parentDistance > Parent.Size * Parent.Size * Sphere.SizeRejoin)
                             {
-                                if ((SplitLevel > Neighbors[(int)NeighborDirection.Top].Node.SplitLevel ||
-                                     !Neighbors[(int)NeighborDirection.Top].Node.HasChildren && SplitLevel == Neighbors[(int)NeighborDirection.Top].Node.SplitLevel) &&
-                                    (SplitLevel > Neighbors[(int)NeighborDirection.Right].Node.SplitLevel ||
-                                     !Neighbors[(int)NeighborDirection.Right].Node.HasChildren && SplitLevel == Neighbors[(int)NeighborDirection.Right].Node.SplitLevel) &&
-                                    (SplitLevel > Neighbors[(int)NeighborDirection.Bottom].Node.SplitLevel ||
-                                     !Neighbors[(int)NeighborDirection.Bottom].Node.HasChildren && SplitLevel == Neighbors[(int)NeighborDirection.Bottom].Node.SplitLevel) &&
-                                    (SplitLevel > Neighbors[(int)NeighborDirection.Left].Node.SplitLevel ||
-                                     !Neighbors[(int)NeighborDirection.Left].Node.HasChildren && SplitLevel == Neighbors[(int)NeighborDirection.Left].Node.SplitLevel))
+                                if ((SplitLevel > Neighbors[(int)PatchNeighborDirection.Top].Node.SplitLevel ||
+                                     !Neighbors[(int)PatchNeighborDirection.Top].Node.HasChildren && SplitLevel == Neighbors[(int)PatchNeighborDirection.Top].Node.SplitLevel) &&
+                                    (SplitLevel > Neighbors[(int)PatchNeighborDirection.Right].Node.SplitLevel ||
+                                     !Neighbors[(int)PatchNeighborDirection.Right].Node.HasChildren && SplitLevel == Neighbors[(int)PatchNeighborDirection.Right].Node.SplitLevel) &&
+                                    (SplitLevel > Neighbors[(int)PatchNeighborDirection.Bottom].Node.SplitLevel ||
+                                     !Neighbors[(int)PatchNeighborDirection.Bottom].Node.HasChildren && SplitLevel == Neighbors[(int)PatchNeighborDirection.Bottom].Node.SplitLevel) &&
+                                    (SplitLevel > Neighbors[(int)PatchNeighborDirection.Left].Node.SplitLevel ||
+                                     !Neighbors[(int)PatchNeighborDirection.Left].Node.HasChildren && SplitLevel == Neighbors[(int)PatchNeighborDirection.Left].Node.SplitLevel))
                                 {
                                     Parent.NeedsRejoinCount++;
                                 }
@@ -840,6 +857,12 @@ public class PatchTree
 
     private void Split()
     {
+        //discard parent's resources
+        if (Parent != null)
+        {
+            Parent.DestroyNode();
+        }
+
         //force too coarse neighbors to split as well
         for (byte i = 0; i < 4; i++)
         {
@@ -943,20 +966,20 @@ public class PatchTree
         var q4 = new PatchTree(this, volume4);
 
         //set internal neighbors
-        q1.SetNeighbor(NeighborDirection.Bottom, q4, NeighborDirection.Top);
-        q1.SetNeighbor(NeighborDirection.Right, q2, NeighborDirection.Left);
+        q1.SetNeighbor(PatchNeighborDirection.Bottom, q4, PatchNeighborDirection.Top);
+        q1.SetNeighbor(PatchNeighborDirection.Right, q2, PatchNeighborDirection.Left);
 
         //set internal neighbors
-        q2.SetNeighbor(NeighborDirection.Bottom, q3, NeighborDirection.Top);
-        q2.SetNeighbor(NeighborDirection.Left, q1, NeighborDirection.Right);
+        q2.SetNeighbor(PatchNeighborDirection.Bottom, q3, PatchNeighborDirection.Top);
+        q2.SetNeighbor(PatchNeighborDirection.Left, q1, PatchNeighborDirection.Right);
 
         //set internal neighbors
-        q3.SetNeighbor(NeighborDirection.Top, q2, NeighborDirection.Bottom);
-        q3.SetNeighbor(NeighborDirection.Left, q4, NeighborDirection.Right);
+        q3.SetNeighbor(PatchNeighborDirection.Top, q2, PatchNeighborDirection.Bottom);
+        q3.SetNeighbor(PatchNeighborDirection.Left, q4, PatchNeighborDirection.Right);
 
         //set internal neighbors
-        q4.SetNeighbor(NeighborDirection.Top, q1, NeighborDirection.Bottom);
-        q4.SetNeighbor(NeighborDirection.Right, q3, NeighborDirection.Left);
+        q4.SetNeighbor(PatchNeighborDirection.Top, q1, PatchNeighborDirection.Bottom);
+        q4.SetNeighbor(PatchNeighborDirection.Right, q3, PatchNeighborDirection.Left);
 
         //store as children of the current node
         Children[0] = q1;
@@ -965,29 +988,30 @@ public class PatchTree
         Children[3] = q4;
 
         Sphere.Splitted = true;
+
         HasChildren = true;
 
         ReLink();
     }
 
-    private void ReLinkChild(byte childIndex, NeighborDirection direction)
+    private void ReLinkChild(byte childIndex, PatchNeighborDirection direction)
     {
         Children[childIndex].SetNeighbor(direction, Neighbors[(int)direction].Node, Neighbors[(int)direction].Direction);
     }
 
     private void ReLink()
     {
-        ReLinkChild(0, NeighborDirection.Top);
-        ReLinkChild(0, NeighborDirection.Left);
+        ReLinkChild(0, PatchNeighborDirection.Top);
+        ReLinkChild(0, PatchNeighborDirection.Left);
 
-        ReLinkChild(1, NeighborDirection.Top);
-        ReLinkChild(1, NeighborDirection.Right);
+        ReLinkChild(1, PatchNeighborDirection.Top);
+        ReLinkChild(1, PatchNeighborDirection.Right);
 
-        ReLinkChild(2, NeighborDirection.Bottom);
-        ReLinkChild(2, NeighborDirection.Right);
+        ReLinkChild(2, PatchNeighborDirection.Bottom);
+        ReLinkChild(2, PatchNeighborDirection.Right);
 
-        ReLinkChild(3, NeighborDirection.Bottom);
-        ReLinkChild(3, NeighborDirection.Left);
+        ReLinkChild(3, PatchNeighborDirection.Bottom);
+        ReLinkChild(3, PatchNeighborDirection.Left);
     }
 
     private void ReEdge()
@@ -1019,7 +1043,7 @@ public class PatchTree
         NeedsReedge = false;
     }
 
-    public void SetNeighbor(NeighborDirection direction, PatchTree tree, NeighborDirection directionFromThere)
+    public void SetNeighbor(PatchNeighborDirection direction, PatchTree tree, PatchNeighborDirection directionFromThere)
     {
         if (tree.HasChildren)
         {
@@ -1083,7 +1107,7 @@ public class PatchTree
 
                         //link back to that node
                         Neighbors[(int)direction].Node = correctNode;
-                        Neighbors[(int)direction].Direction = (NeighborDirection)neighDirection;
+                        Neighbors[(int)direction].Direction = (PatchNeighborDirection)neighDirection;
 
                         //update edges of this node
                         NeedsReedge = true;
@@ -1098,7 +1122,7 @@ public class PatchTree
             {
                 //link to that node
                 Neighbors[(int)direction].Node = correctNode;
-                Neighbors[(int)direction].Direction = (NeighborDirection)neighDirection;
+                Neighbors[(int)direction].Direction = (PatchNeighborDirection)neighDirection;
 
                 //link that node back to this node
                 correctNode.Neighbors[neighDirection].Node = this;
@@ -1135,7 +1159,7 @@ public class PatchTree
         }
     }
 
-    private void ReJoinChild(byte childIndex, NeighborDirection direction)
+    private void ReJoinChild(byte childIndex, PatchNeighborDirection direction)
     {
         Children[childIndex].Neighbors[(int)direction].Node.Neighbors[(int)Children[childIndex].Neighbors[(int)direction].Direction].Node = this;
         Children[childIndex].Neighbors[(int)direction].Node.Neighbors[(int)Children[childIndex].Neighbors[(int)direction].Direction].isFixed = false;
@@ -1151,17 +1175,17 @@ public class PatchTree
         //relinks all children neighbors to point to this level
         //then delete children
 
-        ReJoinChild(0, NeighborDirection.Top);
-        ReJoinChild(0, NeighborDirection.Left);
+        ReJoinChild(0, PatchNeighborDirection.Top);
+        ReJoinChild(0, PatchNeighborDirection.Left);
 
-        ReJoinChild(1, NeighborDirection.Top);
-        ReJoinChild(1, NeighborDirection.Right);
+        ReJoinChild(1, PatchNeighborDirection.Top);
+        ReJoinChild(1, PatchNeighborDirection.Right);
 
-        ReJoinChild(2, NeighborDirection.Bottom);
-        ReJoinChild(2, NeighborDirection.Right);
+        ReJoinChild(2, PatchNeighborDirection.Bottom);
+        ReJoinChild(2, PatchNeighborDirection.Right);
 
-        ReJoinChild(3, NeighborDirection.Bottom);
-        ReJoinChild(3, NeighborDirection.Left);
+        ReJoinChild(3, PatchNeighborDirection.Bottom);
+        ReJoinChild(3, PatchNeighborDirection.Left);
 
         for (byte i = 0; i < 4; i++)
         {

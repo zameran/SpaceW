@@ -42,12 +42,7 @@ namespace SpaceEngine.AtmosphericScattering.Sun
         [Range(1, 4)]
         public int sunID = 1;
 
-        public Vector3 Z_AXIS { get { return new Vector3(0, 0, 1); } }
-
         public float Radius = 250000;
-        public float SunIntensity = 100.0f;
-
-        public Vector3 Origin;
 
         #region Node
 

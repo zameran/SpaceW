@@ -55,8 +55,6 @@ namespace SpaceEngine.AtmosphericScattering.Clouds
         [Range(0.0f, 1.0f)]
         public float TransmittanceOffset = 0.625f;
 
-        public Cubemap CloudTexture;
-
         #region Node
 
         protected override void InitNode()
@@ -83,6 +81,12 @@ namespace SpaceEngine.AtmosphericScattering.Clouds
 
         #endregion
 
+        private void OnDestroy()
+        {
+            //Helper.Destroy(CloudsphereMesh);
+            Helper.Destroy(CloudMaterial);
+        }
+
         public void Render(int drawLayer = 8)
         {
             Render(CameraHelper.Main(), drawLayer);
@@ -94,7 +98,7 @@ namespace SpaceEngine.AtmosphericScattering.Clouds
 
             var CloudsTRS = Matrix4x4.TRS(planetoid.OriginTransform.position, transform.rotation, Vector3.one * (Radius + Height));
 
-            Graphics.DrawMesh(CloudsphereMesh, CloudsTRS, CloudMaterial, drawLayer, camera, 0, planetoid.QuadAtmosphereMPB);
+            Graphics.DrawMesh(CloudsphereMesh, CloudsTRS, CloudMaterial, drawLayer, camera, 0, planetoid.QuadMPB);
         }
 
         public void InitMaterials()
@@ -117,11 +121,9 @@ namespace SpaceEngine.AtmosphericScattering.Clouds
             {
                 if (planetoid.Atmosphere != null)
                 {
-                    planetoid.Atmosphere.InitUniforms(planetoid.QuadAtmosphereMPB, mat, true);
+                    planetoid.Atmosphere.InitUniforms(planetoid.QuadMPB, mat, true);
                 }
             }
-
-            if (CloudTexture != null) mat.SetTexture("_Cloud", CloudTexture);
 
             mat.SetFloat("_TransmittanceOffset", TransmittanceOffset);
         }
@@ -139,11 +141,9 @@ namespace SpaceEngine.AtmosphericScattering.Clouds
             {
                 if (planetoid.Atmosphere != null)
                 {
-                    planetoid.Atmosphere.SetUniforms(planetoid.QuadAtmosphereMPB, mat, true);
+                    planetoid.Atmosphere.SetUniforms(planetoid.QuadMPB, mat, true);
                 }
             }
-
-            if (CloudTexture != null) mat.SetTexture("_Cloud", CloudTexture);
 
             mat.SetFloat("_TransmittanceOffset", TransmittanceOffset);
         }

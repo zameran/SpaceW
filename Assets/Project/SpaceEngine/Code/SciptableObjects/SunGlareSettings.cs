@@ -1,6 +1,6 @@
 ﻿#region License
 // Procedural planet generator.
-// 
+//  
 // Copyright (C) 2015-2017 Denis Ovchinnikov [zameran] 
 // All rights reserved.
 // 
@@ -8,7 +8,7 @@
 // modification, are permitted provided that the following conditions
 // are met:
 // 1. Redistributions of source code must retain the above copyright
-//    notice, this list of conditions and the following disclaimer.
+//     notice, this list of conditions and the following disclaimer.
 // 2. Redistributions in binary form must reproduce the above copyright
 //    notice, this list of conditions and the following disclaimer in the
 //    documentation and/or other materials provided with the distribution.
@@ -28,26 +28,50 @@
 // ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF
 // THE POSSIBILITY OF SUCH DAMAGE.
 // 
-// Creation Date: Undefined
-// Creation Time: Undefined
+// Creation Date: 2017.01.25
+// Creation Time: 10:46 AM
 // Creator: zameran
 #endregion
 
 using System;
+using System.Collections.Generic;
 
-namespace SpaceEngine.Pluginator.Attributes
+using UnityEngine;
+
+[Serializable]
+[CreateAssetMenuAttribute(fileName = "SunGlareSettings", menuName = "Create SunGlare Settings")]
+public class SunGlareSettings : ScriptableObject
 {
-    [AttributeUsage(AttributeTargets.Assembly, AllowMultiple = false, Inherited = false)]
-    public sealed class SpaceAddonAssembly : Attribute
+    [Header("Textures")]
+    public Texture2D SunSpikes;
+    public Texture2D SunFlare;
+    public Texture2D SunGhost1;
+    public Texture2D SunGhost2;
+    public Texture2D SunGhost3;
+
+    [Header("Settings")]
+    public Vector3 FlareSettings = new Vector3(0.45f, 1.0f, 0.85f);
+    public Vector3 SpikesSettings = new Vector3(0.6f, 1.0f, 1.0f);
+
+    public List<Vector4> Ghost1SettingsList = new List<Vector4>
     {
-        public readonly string Name;
-        public readonly string Version;
+        new Vector4(0.54f, 0.65f, 2.3f, 0.5f),
+        new Vector4(0.54f, 1.0f, 6.0f, 0.7f)
+    };
 
-        public SpaceAddonAssembly(string Name, string Version)
-        {
-            this.Name = Name;
+    public List<Vector4> Ghost2SettingsList = new List<Vector4>
+    {
+        new Vector4(0.135f, 1.0f, 3.0f, 0.9f),
+        new Vector4(0.054f, 1.0f, 8.0f, 1.1f),
+        new Vector4(0.054f, 1.0f, 4.0f, 1.3f),
+        new Vector4(0.054f, 1.0f, 5.0f, 1.5f)
+    };
 
-            this.Version = Version;
-        }
-    }
+    public List<Vector4> Ghost3SettingsList = new List<Vector4>
+    {
+        new Vector4(0.135f, 1.0f, 3.0f, 0.9f),
+        new Vector4(0.054f, 1.0f, 8.0f, 1.1f),
+        new Vector4(0.054f, 1.0f, 4.0f, 1.3f),
+        new Vector4(0.054f, 1.0f, 5.0f, 1.5f)
+    };
 }

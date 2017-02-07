@@ -128,16 +128,16 @@ namespace SpaceEngine.Debugging
                     for (byte j = 0; j < 4; j++)
                     {
                         //Draw bottom quad
-                        GL.Vertex3(verts[ORDER[j, 0]].x, verts[ORDER[j, 0]].y, verts[ORDER[j, 0]].z);
-                        GL.Vertex3(verts[ORDER[j, 1]].x, verts[ORDER[j, 1]].y, verts[ORDER[j, 1]].z);
+                        GL.Vertex3((float)verts[ORDER[j, 0]].x, (float)verts[ORDER[j, 0]].y, (float)verts[ORDER[j, 0]].z);
+                        GL.Vertex3((float)verts[ORDER[j, 1]].x, (float)verts[ORDER[j, 1]].y, (float)verts[ORDER[j, 1]].z);
 
                         //Draw top quad
-                        GL.Vertex3(verts[ORDER[j, 0] + 4].x, verts[ORDER[j, 0] + 4].y, verts[ORDER[j, 0] + 4].z);
-                        GL.Vertex3(verts[ORDER[j, 1] + 4].x, verts[ORDER[j, 1] + 4].y, verts[ORDER[j, 1] + 4].z);
+                        GL.Vertex3((float)verts[ORDER[j, 0] + 4].x, (float)verts[ORDER[j, 0] + 4].y, (float)verts[ORDER[j, 0] + 4].z);
+                        GL.Vertex3((float)verts[ORDER[j, 1] + 4].x, (float)verts[ORDER[j, 1] + 4].y, (float)verts[ORDER[j, 1] + 4].z);
 
                         //Draw verticals
-                        GL.Vertex3(verts[ORDER[j, 0]].x, verts[ORDER[j, 0]].y, verts[ORDER[j, 0]].z);
-                        GL.Vertex3(verts[ORDER[j, 0] + 4].x, verts[ORDER[j, 0] + 4].y, verts[ORDER[j, 0] + 4].z);
+                        GL.Vertex3((float)verts[ORDER[j, 0]].x, (float)verts[ORDER[j, 0]].y, (float)verts[ORDER[j, 0]].z);
+                        GL.Vertex3((float)verts[ORDER[j, 0] + 4].x, (float)verts[ORDER[j, 0] + 4].y, (float)verts[ORDER[j, 0] + 4].z);
                     }
 
                     GL.End();

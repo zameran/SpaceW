@@ -43,7 +43,7 @@ public static class PlanetoidExtensions
 {
     public static List<string> GetKeywords(this Planet planet)
     {
-        List<string> Keywords = new List<string>();
+        var Keywords = new List<string>();
 
         if (planet != null)
         {
@@ -54,7 +54,7 @@ public static class PlanetoidExtensions
 
                 var shadowsCount = planet.Shadows.Count((shadow) => shadow != null);
 
-                for (int i = 1; i < shadowsCount + 1; i++)
+                for (byte i = 1; i < shadowsCount + 1; i++)
                 {
                     Keywords.Add("SHADOW_" + i);
                 }
@@ -125,7 +125,7 @@ public sealed class Planetoid : Planet, IPlanet
 
     public TCCommonParametersSetter tccps;
 
-    public MaterialPropertyBlock QuadAtmosphereMPB;
+    public MaterialPropertyBlock QuadMPB;
 
     protected override void Awake()
     {
@@ -148,7 +148,7 @@ public sealed class Planetoid : Planet, IPlanet
             //TODO : RINGS
         }
 
-        QuadAtmosphereMPB = new MaterialPropertyBlock();
+        QuadMPB = new MaterialPropertyBlock();
     }
 
     protected override void Start()
@@ -194,6 +194,9 @@ public sealed class Planetoid : Planet, IPlanet
         if (Input.GetKeyDown(KeyCode.F1))
         {
             DrawNormals = !DrawNormals;
+
+            //NOTE : Update shader variable...
+            QuadMPB.SetFloat("_DrawNormals", DrawNormals ? 1.0f : 0.0f);
         }
 
         if (Input.GetKeyDown(KeyCode.F2))
@@ -209,7 +212,7 @@ public sealed class Planetoid : Planet, IPlanet
             }
         }
 
-        if (Atmosphere != null) Atmosphere.SetUniforms(QuadAtmosphereMPB, null, false, true);
+        if (Atmosphere != null) Atmosphere.SetUniforms(QuadMPB, null, false, true);
 
         if (!ExternalRendering)
         {
@@ -227,6 +230,9 @@ public sealed class Planetoid : Planet, IPlanet
     protected override void OnDestroy()
     {
         base.OnDestroy();
+
+        MainQuads.Clear();
+        Quads.Clear();
     }
 
     protected override void OnRenderObject()
@@ -342,7 +348,10 @@ public sealed class Planetoid : Planet, IPlanet
         {
             for (int i = 0; i < Quads.Count; i++)
             {
-                Quads[i].StopAllCoroutines();
+                if (Quads[i] != null)
+                {
+                    Quads[i].StopAllCoroutines();
+                }
             }
 
             Working = false;
@@ -418,6 +427,9 @@ public sealed class Planetoid : Planet, IPlanet
                 tccps = gameObject.GetComponentInChildren<TCCommonParametersSetter>();
 
         SetupRoot();
+        UpdateLODDistances();
+
+        if (GodManager.Instance.PrototypeMesh == null) return;
 
         var sides = Enum.GetValues(typeof(QuadPosition));
 
@@ -425,8 +437,6 @@ public sealed class Planetoid : Planet, IPlanet
         {
             SetupMainQuad(side);
         }
-
-        UpdateLODDistances();
 
         if (NPS != null)
             NPS.LoadAndInit();

@@ -42,7 +42,7 @@ Shader "SpaceEngine/QuadTestUnlit"
 		_QuadTexture2("QuadTexture 2 (RGB)", 2D) = "white" {}
 		_QuadTexture3("QuadTexture 3 (RGB)", 2D) = "white" {}
 		_QuadTexture4("QuadTexture 4 (RGB)", 2D) = "white" {}
-		_Normale("Normale", Range(0, 1)) = 0.0
+		_DrawNormals("Draw Normals?", Range(0, 1)) = 0.0
 	}
 	SubShader
 	{
@@ -101,7 +101,7 @@ Shader "SpaceEngine/QuadTestUnlit"
 				float3 direction : TEXCOORD1;
 			};
 
-			uniform float _Normale;
+			uniform float _DrawNormals;
 
 			uniform sampler2D _HeightTexture;
 			uniform sampler2D _NormalTexture;
@@ -194,53 +194,53 @@ Shader "SpaceEngine/QuadTestUnlit"
 
 				#ifdef LIGHT_1
 					#ifdef ATMOSPHERE_ON
-						scatteringColor += hdr(GroundFinalColorWithAtmosphere(terrainColor, p, n, d, _Sun_WorldSunDir_1, _Sun_Positions_1[0]));
+						scatteringColor += hdr(GroundFinalColorWithAtmosphere(terrainColor, p, n, d, _Sun_WorldDirections_1[0], _Sun_Positions_1[0]));
 					#endif
 
 					#ifdef ATMOSPHERE_OFF
-						scatteringColor += GroundFinalColorWithoutAtmosphere(terrainColor, p, n, _Sun_WorldSunDir_1);
+						scatteringColor += GroundFinalColorWithoutAtmosphere(terrainColor, p, n, _Sun_WorldDirections_1[0]);
 					#endif
 				#endif
 
 				#ifdef LIGHT_2	
 					#ifdef ATMOSPHERE_ON
-						scatteringColor += hdr(GroundFinalColorWithAtmosphere(terrainColor, p, n, d, _Sun_WorldSunDir_1, _Sun_Positions_1[0]));
-						scatteringColor += hdr(GroundFinalColorWithAtmosphere(terrainColor, p, n, d, _Sun_WorldSunDir_2, _Sun_Positions_1[1]));
+						scatteringColor += hdr(GroundFinalColorWithAtmosphere(terrainColor, p, n, d, _Sun_WorldDirections_1[0], _Sun_Positions_1[0]));
+						scatteringColor += hdr(GroundFinalColorWithAtmosphere(terrainColor, p, n, d, _Sun_WorldDirections_1[1], _Sun_Positions_1[1]));
 					#endif
 
 					#ifdef ATMOSPHERE_OFF
-						scatteringColor += GroundFinalColorWithoutAtmosphere(terrainColor, p, n, _Sun_WorldSunDir_1);
-						scatteringColor += GroundFinalColorWithoutAtmosphere(terrainColor, p, n, _Sun_WorldSunDir_2);
+						scatteringColor += GroundFinalColorWithoutAtmosphere(terrainColor, p, n, _Sun_WorldDirections_1[0]);
+						scatteringColor += GroundFinalColorWithoutAtmosphere(terrainColor, p, n, _Sun_WorldDirections_1[1]);
 					#endif
 				#endif
 
 				#ifdef LIGHT_3
 					#ifdef ATMOSPHERE_ON
-						scatteringColor += hdr(GroundFinalColorWithAtmosphere(terrainColor, p, n, d, _Sun_WorldSunDir_1, _Sun_Positions_1[0]));
-						scatteringColor += hdr(GroundFinalColorWithAtmosphere(terrainColor, p, n, d, _Sun_WorldSunDir_2, _Sun_Positions_1[1]));
-						scatteringColor += hdr(GroundFinalColorWithAtmosphere(terrainColor, p, n, d, _Sun_WorldSunDir_3, _Sun_Positions_1[2]));
+						scatteringColor += hdr(GroundFinalColorWithAtmosphere(terrainColor, p, n, d, _Sun_WorldDirections_1[0], _Sun_Positions_1[0]));
+						scatteringColor += hdr(GroundFinalColorWithAtmosphere(terrainColor, p, n, d, _Sun_WorldDirections_1[1], _Sun_Positions_1[1]));
+						scatteringColor += hdr(GroundFinalColorWithAtmosphere(terrainColor, p, n, d, _Sun_WorldDirections_1[2], _Sun_Positions_1[2]));
 					#endif
 
 					#ifdef ATMOSPHERE_OFF
-						scatteringColor += GroundFinalColorWithoutAtmosphere(terrainColor, p, n, _Sun_WorldSunDir_1);
-						scatteringColor += GroundFinalColorWithoutAtmosphere(terrainColor, p, n, _Sun_WorldSunDir_2);
-						scatteringColor += GroundFinalColorWithoutAtmosphere(terrainColor, p, n, _Sun_WorldSunDir_3);
+						scatteringColor += GroundFinalColorWithoutAtmosphere(terrainColor, p, n, _Sun_WorldDirections_1[0]);
+						scatteringColor += GroundFinalColorWithoutAtmosphere(terrainColor, p, n, _Sun_WorldDirections_1[1]);
+						scatteringColor += GroundFinalColorWithoutAtmosphere(terrainColor, p, n, _Sun_WorldDirections_1[2]);
 					#endif
 				#endif
 
 				#ifdef LIGHT_4
 					#ifdef ATMOSPHERE_ON
-						scatteringColor += hdr(GroundFinalColorWithAtmosphere(terrainColor, p, n, d, _Sun_WorldSunDir_1, _Sun_Positions_1[0]));
-						scatteringColor += hdr(GroundFinalColorWithAtmosphere(terrainColor, p, n, d, _Sun_WorldSunDir_2, _Sun_Positions_1[1]));
-						scatteringColor += hdr(GroundFinalColorWithAtmosphere(terrainColor, p, n, d, _Sun_WorldSunDir_3, _Sun_Positions_1[2]));
-						scatteringColor += hdr(GroundFinalColorWithAtmosphere(terrainColor, p, n, d, _Sun_WorldSunDir_4, _Sun_Positions_1[3]));
+						scatteringColor += hdr(GroundFinalColorWithAtmosphere(terrainColor, p, n, d, _Sun_WorldDirections_1[0], _Sun_Positions_1[0]));
+						scatteringColor += hdr(GroundFinalColorWithAtmosphere(terrainColor, p, n, d, _Sun_WorldDirections_1[1], _Sun_Positions_1[1]));
+						scatteringColor += hdr(GroundFinalColorWithAtmosphere(terrainColor, p, n, d, _Sun_WorldDirections_1[2], _Sun_Positions_1[2]));
+						scatteringColor += hdr(GroundFinalColorWithAtmosphere(terrainColor, p, n, d, _Sun_WorldDirections_1[3], _Sun_Positions_1[3]));
 					#endif
 
 					#ifdef ATMOSPHERE_OFF
-						scatteringColor += GroundFinalColorWithoutAtmosphere(terrainColor, p, n, _Sun_WorldSunDir_1);
-						scatteringColor += GroundFinalColorWithoutAtmosphere(terrainColor, p, n, _Sun_WorldSunDir_2);
-						scatteringColor += GroundFinalColorWithoutAtmosphere(terrainColor, p, n, _Sun_WorldSunDir_3);
-						scatteringColor += GroundFinalColorWithoutAtmosphere(terrainColor, p, n, _Sun_WorldSunDir_4);
+						scatteringColor += GroundFinalColorWithoutAtmosphere(terrainColor, p, n, _Sun_WorldDirections_1[0]);
+						scatteringColor += GroundFinalColorWithoutAtmosphere(terrainColor, p, n, _Sun_WorldDirections_1[1]);
+						scatteringColor += GroundFinalColorWithoutAtmosphere(terrainColor, p, n, _Sun_WorldDirections_1[2]);
+						scatteringColor += GroundFinalColorWithoutAtmosphere(terrainColor, p, n, _Sun_WorldDirections_1[3]);
 					#endif
 				#endif
 			}
@@ -331,8 +331,9 @@ Shader "SpaceEngine/QuadTestUnlit"
 				Account(terrainColor, scatteringColor, IN.vertex1.xyz, normal, IN.direction);
 
 				//outDiffuse = uvSamplerColor;
-				outDiffuse = lerp(scatteringColor, outputNormal, _Normale);
+				outDiffuse = lerp(scatteringColor, outputNormal, _DrawNormals);
 				//depth = log2(IN.depth) * (0.5 * FCoef(1e+2));
+				//depth = 0;
 			}
 			ENDCG
 		}

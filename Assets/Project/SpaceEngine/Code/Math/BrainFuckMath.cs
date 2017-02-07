@@ -51,6 +51,24 @@ public static class BrainFuckMath
         return output;
     }
 
+    public static Vector3 MakeBitMask(byte x)
+    {
+        // NOTE : So, here i have a bit magic!
+        return new Vector3((x & (1 << 2)) > 0 ? -1 : 1, (x & (1 << 1)) > 0 ? -1 : 1, (x & (1 << 0)) > 0 ? -1 : 1);
+    }
+
+    public static Vector3 ApplyBitMask(Vector3 vector, Vector3 mask)
+    {
+        // NOTE : So, i have mask vector with only [1.0 or -1.0] values and i will change sign of components via multiplication.
+        return new Vector3(vector.x * mask.x, vector.y * mask.y, vector.z * mask.z);
+    }
+
+    public static Vector3 ApplyBitMask(Vector3 mask, float leftValue, float rightvalue)
+    {
+        // NOTE : So, i have mask vector with only [1.0 or -1.0] values and i will set 'left' or 'right' stuff to components.
+        return new Vector3(mask.x < 0 ? leftValue : rightvalue, mask.y < 0 ? leftValue : rightvalue, mask.z < 0 ? leftValue : rightvalue);
+    }
+
     public static bool AlmostEquals(this float a, float b, float precision)
     {
         return Mathf.Abs(a - b) <= precision;

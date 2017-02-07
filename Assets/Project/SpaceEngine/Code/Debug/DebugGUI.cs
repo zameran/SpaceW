@@ -39,10 +39,11 @@ namespace SpaceEngine.Debugging
 {
     public abstract class DebugGUI : MonoBehaviour, IDebug
     {
-        public Rect debugInfoBounds = new Rect(10, 10, 500, 500);
+        private CachedComponent<DebugGUISwitcher> SwitcherCachedComponent = new CachedComponent<DebugGUISwitcher>();
 
-        [HideInInspector]
-        public DebugGUISwitcher switcher;
+        public DebugGUISwitcher SwitcherComponent { get { return SwitcherCachedComponent.Component; } }
+
+        public Rect debugInfoBounds = new Rect(10, 10, 500, 500);
 
         [HideInInspector]
         public GUIStyle boldLabel;
@@ -54,11 +55,9 @@ namespace SpaceEngine.Debugging
         {
             get
             {
-                var sceneSwitcher = GetComponent<DebugGUISwitcher>();
-
-                if (sceneSwitcher != null)
-                    if (sceneSwitcher.skin != null)
-                        return sceneSwitcher.skin;
+                if (SwitcherComponent != null)
+                    if (SwitcherComponent.skin != null)
+                        return SwitcherComponent.skin;
 
                 return GUI.skin;
             }
@@ -67,13 +66,12 @@ namespace SpaceEngine.Debugging
 
         protected virtual void Awake()
         {
-            if (switcher == null)
-                switcher = GetComponent<DebugGUISwitcher>();
+
         }
 
         protected virtual void Start()
         {
-
+            SwitcherCachedComponent.TryInit(this);
         }
 
         protected virtual void OnGUI()
@@ -81,8 +79,8 @@ namespace SpaceEngine.Debugging
             GUI.skin = skin;
             GUI.depth = -100;
 
-            if (switcher != null)
-                if (switcher.skin != null)
+            if (SwitcherComponent != null)
+                if (SwitcherComponent.skin != null)
                     if (GUI.skin.FindStyle("label_Bold") != null)
                         boldLabel = GUI.skin.FindStyle("label_Bold");
                     else if (GUI.skin.FindStyle("label") != null)

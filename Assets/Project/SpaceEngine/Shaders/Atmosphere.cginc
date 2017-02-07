@@ -96,11 +96,6 @@ uniform float _Aerial_Perspective_Offset;
 
 uniform StructuredBuffer<Sun> Suns;
 
-uniform float3 _Sun_WorldSunDir_1;
-uniform float3 _Sun_WorldSunDir_2;
-uniform float3 _Sun_WorldSunDir_3;
-uniform float3 _Sun_WorldSunDir_4;
-
 uniform float4x4 _Globals_CameraToWorld;
 uniform float4x4 _Globals_ScreenToCamera;
 uniform float3 _Globals_WorldCameraPos;
@@ -159,6 +154,7 @@ uniform sampler3D _Sky_Inscatter;
 uniform float4x4 _Sky_ShineOccluders_1;
 uniform float4x4 _Sky_ShineColors_1;
 uniform float4x4 _Sun_Positions_1;
+uniform float4x4 _Sun_WorldDirections_1;
 
 float2 GetTransmittanceUV(float r, float mu) 
 {
@@ -166,7 +162,11 @@ float2 GetTransmittanceUV(float r, float mu)
 
 	#ifdef TRANSMITTANCE_NON_LINEAR
 		uR = sqrt((r - Rg) / (Rt - Rg));
-		uMu = atan((mu + 0.15) / (1.0 + 0.15) * tan(1.5)) / 1.5;
+		#ifdef OPTIMIZE
+			uMu = atan(mu * 11.950355887 + 2.1510640597) * 0.6666666667;
+		#else
+			uMu = atan((mu + 0.15) / (1.0 + 0.15) * tan(1.5)) / 1.5;
+		#endif
 	#else
 		uR = (r - Rg) / (Rt - Rg);
 		uMu = (mu + 0.15) / (1.0 + 0.15);

@@ -33,16 +33,15 @@
 // Creator: zameran
 #endregion
 
-using System;
-
 using SpaceEngine.Pluginator.Enums;
+using System;
 
 namespace SpaceEngine.Pluginator.Attributes
 {
     [AttributeUsage(AttributeTargets.Class, AllowMultiple = false, Inherited = true)]
     public sealed class SpaceAddonMonoBehaviour : Attribute
     {
-        public EntryPoint @EntryPoint;
+        public readonly EntryPoint @EntryPoint;
 
         public bool StartupOnce;
 

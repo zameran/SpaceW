@@ -35,98 +35,90 @@ Shader "SpaceEngine/Atmosphere/Cloudsphere"
 {
 	Properties
 	{
-		_Color("Color", Color) = (0, 0, 0, 1)
-
-		_Cloud("Cloud (RGBA)", CUBE) = "white" {}
-		_Normal("Normal (RGBA)", 2D) = "white" {}
+		_DiffuseColor("Diffuse Color", Color) = (0, 0, 0, 1)
 	}
 	SubShader 
 	{
-		Tags { "Queue" = "Transparent" "RenderType" = "Transparent" "IgnoreProjector" = "True" }
+		CGINCLUDE
+
+		#include "UnityCG.cginc"
+		#include "Atmosphere.cginc"
+		#include "TCCommon.cginc"
+					
+		uniform float _TransmittanceOffset;
+		uniform float4 _DiffuseColor;
+
+		struct a2v
+		{
+			float4 vertex : POSITION;
+			float3 normal : NORMAL0;
+			float2 uv : TEXCOORD0;
+		};
+
+		struct v2f
+		{
+			float4 vertex0 : POSITION0;
+			float4 vertex1 : POSITION1;
+			float3 normal : NORMAL;
+			float3 uv : TEXCOORD0;
+			float3 direction : TEXCOORD1;
+		};
+
+		void main_Vertex(a2v i, out v2f o)
+		{
+			o.vertex0 = mul(UNITY_MATRIX_MVP, i.vertex);
+			o.vertex1 = i.vertex;
+			o.normal = i.normal;
+			o.uv = i.normal;
+			o.direction = dot(normalize(i.normal), normalize(_Sun_Positions_1[0] - i.vertex));
+		}
+			
+		float4 main_Fragment(v2f IN) : COLOR
+		{			
+			float noise = Noise(IN.vertex1.xyz * 16) + Noise(IN.vertex1.xyz * 32) + Noise(IN.vertex1.xyz * 64);
+			float4 clouds = float4(noise, noise, noise, noise);
+			float4 transmittance = tex2D(_Sky_Transmittance, IN.direction + _TransmittanceOffset);
+
+			float cloudsAlpha = clouds.w;
+
+			clouds *= _DiffuseColor;
+			clouds += float4(transmittance.rgb, 1);
+
+			float4 output = float4(clouds.xyz, cloudsAlpha);
+
+			return output;
+		}	
+
+		ENDCG
 	
 		Pass 
 		{
+			Name "Cloudsphere"
+			Tags
+			{ 
+				"Queue" = "Transparent" 
+				"RenderType" = "Transparent" 
+				"IgnoreProjector" = "True" 
+			}
+
 			Blend SrcAlpha OneMinusSrcAlpha
 			Cull Off
 			Lighting Off
 			ZWrite Off
 			ZTest LEqual
 			Offset -1, -1
+			Fog 
+			{ 
+				Mode Off 
+			}
 
 			CGPROGRAM
-			#include "UnityCG.cginc"		
-			#include "HDR.cginc"
-			#include "Atmosphere.cginc"
-			#include "SpaceStuff.cginc"
 
 			#pragma target 5.0
 			#pragma only_renderers d3d11 glcore
-			#pragma vertex vert
-			#pragma fragment frag
-					
-			uniform float _TransmittanceOffset;
+			#pragma vertex main_Vertex
+			#pragma fragment main_Fragment
 
-			uniform float4 _Color;
-
-			uniform samplerCUBE _Cloud;
-			uniform sampler2D _Normal;
-
-
-			struct appdata_full_compute 
-			{
-				float4 vertex : POSITION;
-				float4 tangent : TANGENT;
-				float3 normal : NORMAL;
-				float4 texcoord : TEXCOORD0;
-				float4 texcoord1 : TEXCOORD1;
-				float4 texcoord2 : TEXCOORD2;
-				float4 texcoord3 : TEXCOORD3;
-
-				uint id : SV_VertexID;
-			};
-
-			struct v2f 
-			{
-				float4 vertex0 : POSITION0;
-				float4 vertex1 : POSITION1;
-				float3 normal : NORMAL;
-				float3 uv : TEXCOORD0;
-				float3 direction : TEXCOORD1;
-			};
-
-			inline float vectorSum(float4 v) 
-			{
-				return (v.x + v.y + v.z + v.w);
-			}
-
-			v2f vert(appdata_full_compute v)
-			{
-				v2f OUT;
-				
-				OUT.vertex0 = mul(UNITY_MATRIX_MVP, v.vertex);
-				OUT.vertex1 = v.vertex;
-				OUT.normal = v.normal;
-				OUT.uv = v.normal;
-				OUT.direction = float3(0, 0, 1); //TODO : Rewoke...
-				//OUT.direction = dot(normalize(v.normal), normalize(_Sun_Positions_1[0] - v.vertex));
-
-				return OUT;
-			}
-			
-			float4 frag(v2f IN) : COLOR
-			{			
-				float4 clouds = texCUBE(_Cloud, IN.uv).aaaa;
-				float4 transmittance = tex2D(_Sky_Transmittance, IN.direction + _TransmittanceOffset);
-
-				float cloudsAlpha = clouds.w;
-
-				clouds *= _Color;
-				clouds += float4(transmittance.rgb, 1);
-
-				float4 output = float4(clouds.xyz, cloudsAlpha);
-
-				return output;
-			}	
 			ENDCG
 		}
 	}

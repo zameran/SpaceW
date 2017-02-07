@@ -33,21 +33,10 @@
 // Creator: zameran
 #endregion
 
-using System;
-
-namespace SpaceEngine.Pluginator.Attributes
+public enum PatchNeighborDirection
 {
-    [AttributeUsage(AttributeTargets.Assembly, AllowMultiple = false, Inherited = false)]
-    public sealed class SpaceAddonAssembly : Attribute
-    {
-        public readonly string Name;
-        public readonly string Version;
-
-        public SpaceAddonAssembly(string Name, string Version)
-        {
-            this.Name = Name;
-
-            this.Version = Version;
-        }
-    }
-}
+    Top = 0,
+    Right = 1,
+    Bottom = 2,
+    Left = 3
+};

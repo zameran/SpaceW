@@ -41,21 +41,21 @@ using ZFramework.Extensions;
 
 public class QuadAABB
 {
-    public Vector3[] AABB { get; set; }
-    public Vector3[] CullingAABB { get; set; }
+    public Vector3d[] AABB { get; set; }
+    public Vector3d[] CullingAABB { get; set; }
 
     public Bounds Bounds { get; set; }
 
-    public Vector3 Min { get; set; }
-    public Vector3 Max { get; set; }
+    public Vector3d Min { get; set; }
+    public Vector3d Max { get; set; }
 
-    public QuadAABB(Vector3[] AABB, Vector3[] CullingAABB, Quad Quad, Transform OriginTransform = null)
+    public QuadAABB(Vector3d[] AABB, Vector3d[] CullingAABB, Quad Quad, Transform OriginTransform = null)
     {
-        this.AABB = new Vector3[AABB.Length];
-        this.CullingAABB = new Vector3[CullingAABB.Length];
+        this.AABB = new Vector3d[AABB.Length];
+        this.CullingAABB = new Vector3d[CullingAABB.Length];
 
-        var Max = default(Vector3);
-        var Min = default(Vector3);
+        var Max = default(Vector3d);
+        var Min = default(Vector3d);
 
         this.Bounds = Quad.GetBoundFromPoints(AABB, out Max, out Min);
 

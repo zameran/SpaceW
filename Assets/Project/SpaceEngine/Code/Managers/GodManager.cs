@@ -43,6 +43,7 @@ using ZFramework.Unity.Common.Messenger;
 public class GodManager : MonoSingleton<GodManager>
 {
     public Plane[] FrustumPlanes;
+    public FrustumPlane[] FrustumPlanesTS;
     public Mesh PrototypeMesh;
 
     public OutputStruct[] PreOutputDataBuffer;
@@ -50,7 +51,7 @@ public class GodManager : MonoSingleton<GodManager>
     public OutputStruct[] OutputDataBuffer;
 
     public bool Debug = true;
-    public bool UpdateFrustumPlanes = true;
+    public bool UpdateFrustumPlanesNow = true;
 
     public Planetoid[] Planetoids;
     public Starfield[] Starfields;
@@ -75,10 +76,7 @@ public class GodManager : MonoSingleton<GodManager>
         Planetoids = FindObjectsOfType<Planetoid>();
         Starfields = FindObjectsOfType<Starfield>();
 
-        if (CameraHelper.Main() != null)
-        {
-            FrustumPlanes = GeometryUtility.CalculateFrustumPlanes(CameraHelper.Main());
-        }
+        UpdateFrustumPlanes();
 
         if (PrototypeMesh == null)
         {
@@ -94,15 +92,33 @@ public class GodManager : MonoSingleton<GodManager>
 
     private void Update()
     {
-        if (UpdateFrustumPlanes)
+        if (UpdateFrustumPlanesNow)
         {
-            if (CameraHelper.Main() != null)
-            {
-                FrustumPlanes = GeometryUtility.CalculateFrustumPlanes(CameraHelper.Main());
-            }
+            UpdateFrustumPlanes();
         }
 
         UpdateSettings();
+    }
+
+    protected override void OnDestroy()
+    {
+        base.OnDestroy();
+
+        Helper.Destroy(PrototypeMesh);
+    }
+
+    private void UpdateFrustumPlanes()
+    {
+        if (CameraHelper.Main() != null)
+        {
+            FrustumPlanes = GeometryUtility.CalculateFrustumPlanes(CameraHelper.Main());
+            FrustumPlanesTS = new FrustumPlane[FrustumPlanes.Length];
+
+            for (byte i = 0; i < FrustumPlanes.Length; i++)
+            {
+                FrustumPlanesTS[i] = FrustumPlanes[i];
+            }
+        }
     }
 
     private void UpdateCameraCulling(QuadCullingMethod currentMethod)
