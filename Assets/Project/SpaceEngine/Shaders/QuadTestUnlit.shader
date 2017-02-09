@@ -312,8 +312,12 @@ Shader "SpaceEngine/QuadTestUnlit"
 				QuadGenerationConstants constants = quadGenerationConstants[0];
 
 				float3 normal = tex2D(_NormalTexture, IN.uv0).rgb;
+				//normal.z = sqrt(1.0 - dot(normal.xy, normal.xy));
+
+				float3x3 _TBN = CotangentFrame(normal, IN.vertex2.xyz, IN.uv0);
 
 				normal = mul(_TRS, normal);
+				//normal = mul(_TBN, normal);
 
 				float3 vertexNormal = IN.normal0.xyz;
 

@@ -125,18 +125,14 @@ inline void Core(uint3 id, int size, int mod, QuadGenerationConstants constants,
 [numthreads(32, 32, 1)]
 void HeightMain(uint3 id : SV_DispatchThreadID)
 {
-	QuadGenerationConstants constants = quadGenerationConstants[0];
-
-	Core(id, VerticesPerSideWithBorder, BorderModMesh, constants, constants.spacing, patchPreOutput);
+	Core(id, VerticesPerSideWithBorder, BorderModMesh, quadGenerationConstants[0], quadGenerationConstants[0].spacing, patchPreOutput);
 }
 
 #pragma kernel HeightSub
 [numthreads(32, 32, 1)]
 void HeightSub(uint3 id : SV_DispatchThreadID)
 {
-	QuadGenerationConstants constants = quadGenerationConstants[0];
-
-	Core(id, VerticesPerSideWithBorderFull, BorderModTexture, constants, constants.spacingFull, patchPreOutputSub);
+	Core(id, VerticesPerSideWithBorderFull, BorderModTexture, quadGenerationConstants[0], quadGenerationConstants[0].spacingFull, patchPreOutputSub);
 }
 
 #pragma kernel TexturesSub
@@ -154,7 +150,7 @@ void TexturesSub(uint3 id : SV_DispatchThreadID)
 
 	float slope = 0;
 	float3 heightNormal = GetHeightNormal(constants, patchPreOutputSub, VerticesPerSideWithBorderFull, id, slope);
-
+	
 	//float slope = 0;
 	//float3 sobelNormal = GetSobelNormal(constants, patchPreOutputSub, VerticesPerSideWithBorderFull, id);
 	float3 positionNormal = GetHeightNormalFromPosition(constants, patchPreOutputSub, VerticesPerSideWithBorderFull, id);
