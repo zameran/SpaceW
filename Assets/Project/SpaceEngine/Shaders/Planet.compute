@@ -95,25 +95,18 @@ float4 ColorFunction(float3 coord, float height, float slope)
 	return color;
 }
 
-#pragma kernel HeightMain
-[numthreads(32, 32, 1)]
-void HeightMain (uint3 id : SV_DispatchThreadID)
+inline void Core(uint3 id, int size, int mod, QuadGenerationConstants constants, float spacing, RWStructuredBuffer<OutputStruct> buffer)
 {
-	QuadGenerationConstants constants = quadGenerationConstants[0];
+	int outBuffOffset = id.x + id.y * size;
 
-	int outBuffOffset = id.x + id.y * VerticesPerSideWithBorder;
-
-	float3 cubeCoord = CubeCoord(constants, VerticesPerSideWithBorder, id, BorderModMesh, constants.spacing);
-
+	float3 cubeCoord = CubeCoord(constants, size, id, mod, spacing);
 	float3 patchCenter = normalize(constants.patchCubeCenter) * constants.planetRadius;
 	float3 patchNormalizedCoord = normalize(cubeCoord);
-
 	float3 patchCoord =  constants.planetRadius * patchNormalizedCoord;
 	float3 patchCoordCentered = patchCoord - patchCenter;
 	float3 patchCubeCoordCentered = patchNormalizedCoord;
 
 	float noiseValue = NoiseFunction(patchCoord, constants.lodOctaveModifier);
-
 	float height = noiseValue * constants.terrainMaxHeight;
 
 	patchCoordCentered += patchNormalizedCoord * height;
@@ -122,10 +115,19 @@ void HeightMain (uint3 id : SV_DispatchThreadID)
 	float4 output = float4(patchCoordCentered.xyz, 0.0);
 	float4 cubeOutput = float4(patchCubeCoordCentered.xyz, 0.0);
 
-	patchPreOutput[outBuffOffset].noise = noiseValue;
-	patchPreOutput[outBuffOffset].patchCenter = patchCenter;
-	patchPreOutput[outBuffOffset].position = output;
-	patchPreOutput[outBuffOffset].cubePosition = cubeOutput;
+	buffer[outBuffOffset].noise = noiseValue;
+	buffer[outBuffOffset].patchCenter = patchCenter;
+	buffer[outBuffOffset].position = output;
+	buffer[outBuffOffset].cubePosition = cubeOutput;
+}
+
+#pragma kernel HeightMain
+[numthreads(32, 32, 1)]
+void HeightMain(uint3 id : SV_DispatchThreadID)
+{
+	QuadGenerationConstants constants = quadGenerationConstants[0];
+
+	Core(id, VerticesPerSideWithBorder, BorderModMesh, constants, constants.spacing, patchPreOutput);
 }
 
 #pragma kernel HeightSub
@@ -134,31 +136,7 @@ void HeightSub(uint3 id : SV_DispatchThreadID)
 {
 	QuadGenerationConstants constants = quadGenerationConstants[0];
 
-	int outBuffOffset = id.x + id.y * VerticesPerSideWithBorderFull;
-
-	float3 cubeCoord = CubeCoord(constants, VerticesPerSideWithBorderFull, id, BorderModTexture, constants.spacingFull);
-
-	float3 patchCenter = normalize(constants.patchCubeCenter) * constants.planetRadius;
-	float3 patchNormalizedCoord = normalize(cubeCoord);
-
-	float3 patchCoord =  constants.planetRadius * patchNormalizedCoord;
-	float3 patchCoordCentered = patchCoord - patchCenter;
-	float3 patchCubeCoordCentered = patchNormalizedCoord;
-	
-	float noiseValue = NoiseFunction(patchCoord, constants.lodOctaveModifier);
-
-	float height = noiseValue * constants.terrainMaxHeight;
-
-	patchCoordCentered += patchNormalizedCoord * height;
-	patchCubeCoordCentered += patchNormalizedCoord * height;
-	
-	float4 output = float4(patchCoordCentered.xyz, 0.0);
-	float4 cubeOutput = float4(patchCubeCoordCentered.xyz, 0.0);
-
-	patchPreOutputSub[outBuffOffset].noise = noiseValue;
-	patchPreOutputSub[outBuffOffset].patchCenter = patchCenter;
-	patchPreOutputSub[outBuffOffset].position = output;
-	patchPreOutputSub[outBuffOffset].cubePosition = cubeOutput;
+	Core(id, VerticesPerSideWithBorderFull, BorderModTexture, constants, constants.spacingFull, patchPreOutputSub);
 }
 
 #pragma kernel TexturesSub
