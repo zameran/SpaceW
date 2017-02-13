@@ -35,6 +35,12 @@
 
 using UnityEngine;
 
+public interface IUniformed<T> where T : class
+{
+    void InitUniforms(T target);
+    void SetUniforms(T target);
+}
+
 public abstract class Node<T> : MonoBehaviour where T : class
 {
     protected virtual void Start()

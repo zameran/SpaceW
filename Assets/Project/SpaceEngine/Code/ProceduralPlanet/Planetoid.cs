@@ -442,7 +442,6 @@ public sealed class Planetoid : Planet, IPlanet
             NPS.LoadAndInit();
     }
 
-    [ContextMenu("ReSetupQuads")]
     public void ReSetupQuads()
     {
         DestroyQuads();
