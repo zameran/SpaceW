@@ -77,7 +77,7 @@ float ComputeMiePhase(float _CosTheta, float _MiePhaseAnisotropy)
 
 	float Num = 1.5 * (1.0 + _CosTheta * _CosTheta) * (1.0 - squareAniso);
 	float Den = (8.0 + squareAniso) * pow( abs(1.0 + squareAniso - 2.0 * _MiePhaseAnisotropy * _CosTheta), 1.5 );
-
+	
 	return Num / Den;
 }
 
