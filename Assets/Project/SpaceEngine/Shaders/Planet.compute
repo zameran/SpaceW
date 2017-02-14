@@ -111,14 +111,11 @@ inline void Core(uint3 id, int size, int mod, QuadGenerationConstants constants,
 
 	patchCoordCentered += patchNormalizedCoord * height;
 	patchCubeCoordCentered += patchNormalizedCoord * height;
-	
-	float4 output = float4(patchCoordCentered.xyz, 0.0);
-	float4 cubeOutput = float4(patchCubeCoordCentered.xyz, 0.0);
 
 	buffer[outBuffOffset].noise = noiseValue;
 	buffer[outBuffOffset].patchCenter = patchCenter;
-	buffer[outBuffOffset].position = output;
-	buffer[outBuffOffset].cubePosition = cubeOutput;
+	buffer[outBuffOffset].position = float4(patchCoordCentered.xyz, 0.0);
+	buffer[outBuffOffset].cubePosition = float4(patchCubeCoordCentered.xyz, 0.0);
 }
 
 #pragma kernel HeightMain

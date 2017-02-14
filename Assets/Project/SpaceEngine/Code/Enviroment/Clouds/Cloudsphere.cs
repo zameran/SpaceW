@@ -37,7 +37,7 @@ using UnityEngine;
 
 namespace SpaceEngine.AtmosphericScattering.Clouds
 {
-    public class Cloudsphere : Node<Cloudsphere>
+    public class Cloudsphere : Node<Cloudsphere>, IUniformed<Material>
     {
         public Planetoid planetoid;
 
@@ -60,13 +60,15 @@ namespace SpaceEngine.AtmosphericScattering.Clouds
         protected override void InitNode()
         {
             InitMaterials();
+
+            InitUniforms(CloudMaterial);
         }
 
         protected override void UpdateNode()
         {
             CloudMaterial.renderQueue = (int)RenderQueue + RenderQueueOffset;
 
-            SetUniforms();
+            SetUniforms(CloudMaterial);
         }
 
         protected override void Start()
@@ -77,6 +79,46 @@ namespace SpaceEngine.AtmosphericScattering.Clouds
         protected override void Update()
         {
             base.Update();
+        }
+
+        #endregion
+
+        #region IUniformed
+
+        public void InitUniforms(Material target)
+        {
+            if (target == null) return;
+
+            if (planetoid != null)
+            {
+                if (planetoid.Atmosphere != null)
+                {
+                    planetoid.Atmosphere.InitUniforms(planetoid.QuadMPB, target, true);
+                }
+            }
+
+            target.SetFloat("_TransmittanceOffset", TransmittanceOffset);
+        }
+
+        public void SetUniforms(Material target)
+        {
+            if (target == null) return;
+
+            if (planetoid != null)
+            {
+                if (planetoid.Atmosphere != null)
+                {
+                    planetoid.Atmosphere.SetUniforms(planetoid.QuadMPB, target, true);
+                }
+            }
+
+            target.SetFloat("_TransmittanceOffset", TransmittanceOffset);
+        }
+
+        public void InitSetUniforms()
+        {
+            InitUniforms(CloudMaterial);
+            SetUniforms(CloudMaterial);
         }
 
         #endregion
@@ -104,48 +146,6 @@ namespace SpaceEngine.AtmosphericScattering.Clouds
         public void InitMaterials()
         {
             CloudMaterial = MaterialHelper.CreateTemp(CloudShader, "Cloudsphere", (int)RenderQueue);
-        }
-
-        public void InitUniforms(Planet planet)
-        {
-            if (planet == null) return;
-
-            InitUniforms(CloudMaterial);
-        }
-
-        public void InitUniforms(Material mat)
-        {
-            if (mat == null) return;
-
-            if (planetoid != null)
-            {
-                if (planetoid.Atmosphere != null)
-                {
-                    planetoid.Atmosphere.InitUniforms(planetoid.QuadMPB, mat, true);
-                }
-            }
-
-            mat.SetFloat("_TransmittanceOffset", TransmittanceOffset);
-        }
-
-        public void SetUniforms()
-        {
-            SetUniforms(CloudMaterial);
-        }
-
-        public void SetUniforms(Material mat)
-        {
-            if (mat == null) return;
-
-            if (planetoid != null)
-            {
-                if (planetoid.Atmosphere != null)
-                {
-                    planetoid.Atmosphere.SetUniforms(planetoid.QuadMPB, mat, true);
-                }
-            }
-
-            mat.SetFloat("_TransmittanceOffset", TransmittanceOffset);
         }
     }
 }

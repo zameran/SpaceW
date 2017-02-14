@@ -38,7 +38,7 @@ using UnityEngine;
 
 namespace SpaceEngine.AtmosphericScattering.Sun
 {
-    public sealed class SunGlare : Node<SunGlare>
+    public sealed class SunGlare : Node<SunGlare>, IUniformed<Material>
     {
         private CachedComponent<AtmosphereSun> SunCachedComponent = new CachedComponent<AtmosphereSun>();
 
@@ -154,40 +154,30 @@ namespace SpaceEngine.AtmosphericScattering.Sun
 
         #endregion
 
-        private void OnDestroy()
+        #region IUniformed
+
+        public void InitUniforms(Material target)
         {
-            Helper.Destroy(SunGlareMaterial);
-            Helper.Destroy(SunGlareMesh);
+            if (target == null) return;
+
+            target.SetTexture("sunSpikes", Settings.SunSpikes);
+            target.SetTexture("sunFlare", Settings.SunFlare);
+            target.SetTexture("sunGhost1", Settings.SunGhost1);
+            target.SetTexture("sunGhost2", Settings.SunGhost2);
+            target.SetTexture("sunGhost3", Settings.SunGhost3);
+
+            target.SetVector("flareSettings", Settings.FlareSettings);
+            target.SetVector("spikesSettings", Settings.SpikesSettings);
+            target.SetMatrix("ghost1Settings", Ghost1Settings);
+            target.SetMatrix("ghost2Settings", Ghost2Settings);
+            target.SetMatrix("ghost3Settings", Ghost2Settings);
+
+            if (Atmosphere != null) Atmosphere.InitUniforms(null, target, false);
         }
 
-        public void InitSetAtmosphereUniforms()
+        public void SetUniforms(Material target)
         {
-            InitUniforms(SunGlareMaterial);
-            SetUniforms(SunGlareMaterial);
-        }
-
-        public void InitUniforms(Material mat)
-        {
-            if (mat == null) return;
-
-            SunGlareMaterial.SetTexture("sunSpikes", Settings.SunSpikes);
-            SunGlareMaterial.SetTexture("sunFlare", Settings.SunFlare);
-            SunGlareMaterial.SetTexture("sunGhost1", Settings.SunGhost1);
-            SunGlareMaterial.SetTexture("sunGhost2", Settings.SunGhost2);
-            SunGlareMaterial.SetTexture("sunGhost3", Settings.SunGhost3);
-
-            SunGlareMaterial.SetVector("flareSettings", Settings.FlareSettings);
-            SunGlareMaterial.SetVector("spikesSettings", Settings.SpikesSettings);
-            SunGlareMaterial.SetMatrix("ghost1Settings", Ghost1Settings);
-            SunGlareMaterial.SetMatrix("ghost2Settings", Ghost2Settings);
-            SunGlareMaterial.SetMatrix("ghost3Settings", Ghost2Settings);
-
-            if (Atmosphere != null) Atmosphere.InitUniforms(null, SunGlareMaterial, false);
-        }
-
-        public void SetUniforms(Material mat)
-        {
-            if (mat == null) return;
+            if (target == null) return;
 
             SunGlareMaterial.SetVector("sunViewPortPos", ViewPortPosition);
 
@@ -201,6 +191,20 @@ namespace SpaceEngine.AtmosphericScattering.Sun
             SunGlareMaterial.renderQueue = (int)RenderQueue + RenderQueueOffset;
 
             if (Atmosphere != null) { Atmosphere.SetUniforms(null, SunGlareMaterial, false, false); }
+        }
+
+        public void InitSetUniforms()
+        {
+            InitUniforms(SunGlareMaterial);
+            SetUniforms(SunGlareMaterial);
+        }
+
+        #endregion
+
+        private void OnDestroy()
+        {
+            Helper.Destroy(SunGlareMaterial);
+            Helper.Destroy(SunGlareMesh);
         }
     }
 }

@@ -588,7 +588,7 @@ namespace SpaceEngine.AtmosphericScattering
 
                         if (sunGlareComponent != null)
                         {
-                            sunGlareComponent.InitSetAtmosphereUniforms();
+                            sunGlareComponent.InitSetUniforms();
                         }
                     }
                 }

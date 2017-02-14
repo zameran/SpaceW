@@ -39,7 +39,7 @@ using UnityEngine;
 
 using ZFramework.Unity.Common.PerfomanceMonitor;
 
-public class Ring : Node<Ring>
+public class Ring : Node<Ring>, IUniformed<Material>
 {
     public List<Light> Lights = new List<Light>();
     public List<Shadow> Shadows = new List<Shadow>();
@@ -88,6 +88,8 @@ public class Ring : Node<Ring>
     {
         InitMesh();
         InitMaterial();
+
+        InitUniforms(RingMaterial);
     }
 
     protected override void UpdateNode()
@@ -125,6 +127,38 @@ public class Ring : Node<Ring>
     protected override void Update()
     {
         base.Update();
+    }
+
+    #endregion
+
+    #region IUniformed
+
+    public void InitUniforms(Material target)
+    {
+        if (target == null) return;
+    }
+
+    public void SetUniforms(Material target)
+    {
+        if (target == null) return;
+
+        SetLightsAndShadows(target);
+
+        target.SetTexture("_DiffuseTexture", MainTex);
+        target.SetTexture("_NoiseTex", NoiseTex);
+        target.SetColor("_DiffuseColor", Helper.Brighten(Color, Brightness));
+        target.SetFloat("_LightingBias", LightingBias);
+        target.SetFloat("_LightingSharpness", LightingSharpness);
+
+        WriteMie(MieSharpness, MieStrength, target);
+
+        keywords.Clear();
+    }
+
+    public void InitSetUniforms()
+    {
+        InitUniforms(RingMaterial);
+        SetUniforms(RingMaterial);
     }
 
     #endregion
@@ -193,13 +227,6 @@ public class Ring : Node<Ring>
         }
     }
 
-    public void InitUniforms(Planet planet)
-    {
-        if (planet == null) return;
-
-        SetUniforms(RingMaterial);
-    }
-
     public void SetLightsAndShadows(Material mat)
     {
         if (mat == null) return;
@@ -227,23 +254,6 @@ public class Ring : Node<Ring>
         if (block == null) return;
 
         Helper.WriteShadows(shadows, 4, block);
-    }
-
-    public void SetUniforms(Material mat)
-    {
-        if (mat == null) return;
-
-        SetLightsAndShadows(mat);
-
-        mat.SetTexture("_DiffuseTexture", MainTex);
-        mat.SetTexture("_NoiseTex", NoiseTex);
-        mat.SetColor("_DiffuseColor", Helper.Brighten(Color, Brightness));
-        mat.SetFloat("_LightingBias", LightingBias);
-        mat.SetFloat("_LightingSharpness", LightingSharpness);
-
-        WriteMie(MieSharpness, MieStrength, mat);
-
-        keywords.Clear();
     }
 
     private void InitMaterial()
