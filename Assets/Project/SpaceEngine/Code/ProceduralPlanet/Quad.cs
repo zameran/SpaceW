@@ -56,7 +56,7 @@ public struct OutputStruct : IData
     }
 }
 
-public sealed class Quad : Node<Quad>, IQuad
+public sealed class Quad : Node<Quad>, IQuad, IUniformed<Material>
 {
     //NOTE : Do not TransformPoint the points on wich bounds will depend on.
 
@@ -121,7 +121,6 @@ public sealed class Quad : Node<Quad>, IQuad
 
     public int LODLevel = -1;
 
-    public bool HaveSubQuads = false;
     public bool Generated = false;
     public bool ShouldDraw = false;
     public bool ReadyForDispatch = false;
@@ -143,16 +142,34 @@ public sealed class Quad : Node<Quad>, IQuad
 
     public Matrix4x4 RotationMatrix { get { return Matrix4x4.TRS(middleNormalized, Quaternion.Euler(middleNormalized.normalized * Mathf.Deg2Rad), Vector3.one); } }
 
+    public bool HaveSubQuads { get { return Subquads.Count == 4; } }
+
     #region Node
 
     protected override void InitNode()
     {
+        CreateBuffers();
 
+        HeightTexture = RTExtensions.CreateRTexture(QuadSettings.VerticesPerSideFull, 0, RenderTextureFormat.ARGB32);
+        NormalTexture = RTExtensions.CreateRTexture(QuadSettings.VerticesPerSideFull, 0, RenderTextureFormat.ARGB32);
+
+        RTUtility.ClearColor(new RenderTexture[] { HeightTexture, NormalTexture });
+
+        InitMaterial();
+
+        InitUniforms(QuadMaterial);
     }
 
     protected override void UpdateNode()
     {
+        if (!Uniformed)
+        {
+            SetUniforms(QuadMaterial);
 
+            Uniformed = true;
+        }
+
+        if (Planetoid.Atmosphere != null) Planetoid.Atmosphere.SetUniforms(QuadMaterial);
     }
 
     protected override void Start()
@@ -167,14 +184,41 @@ public sealed class Quad : Node<Quad>, IQuad
 
     #endregion
 
+    #region IUniformed
+
+    public void InitUniforms(Material target)
+    {
+        if (target == null) return;
+    }
+
+    public void SetUniforms(Material target)
+    {
+        if (target == null) return;
+
+        target.SetBuffer("data", OutDataBuffer);
+        target.SetBuffer("quadGenerationConstants", QuadGenerationConstantsBuffer);
+        target.SetTexture("_HeightTexture", HeightTexture);
+        target.SetTexture("_NormalTexture", NormalTexture);
+        target.SetMatrix("_TRS", RotationMatrix);
+        target.SetFloat("_LODLevel", LODLevel + 2);
+    }
+
+    public void InitSetUniforms()
+    {
+        InitUniforms(QuadMaterial);
+        SetUniforms(QuadMaterial);
+    }
+
+    #endregion
+
+    private void InitMaterial()
+    {
+        QuadMaterial = MaterialHelper.CreateTemp(Planetoid.ColorShader, "Quad", (int)Planetoid.RenderQueue);
+    }
+
     private void Awake()
     {
-        CreateBuffers();
 
-        HeightTexture = RTExtensions.CreateRTexture(QuadSettings.VerticesPerSideFull, 0, RenderTextureFormat.ARGB32);
-        NormalTexture = RTExtensions.CreateRTexture(QuadSettings.VerticesPerSideFull, 0, RenderTextureFormat.ARGB32);
-
-        RTUtility.ClearColor(new RenderTexture[] { HeightTexture, NormalTexture });
     }
 
     private void OnDestroy()
@@ -193,6 +237,9 @@ public sealed class Quad : Node<Quad>, IQuad
             DestroyImmediate(QuadMaterial);
     }
 
+    #region Gizmos
+
+#if UNITY_EDITOR
     private void OnDrawGizmos()
     {
         if (Planetoid.DrawGizmos)
@@ -244,6 +291,9 @@ public sealed class Quad : Node<Quad>, IQuad
             Gizmos.DrawRay(Planetoid.OriginTransform.TransformPoint(middleNormalized), generationConstants.cubeFaceNorthDirection);
         }
     }
+#endif
+
+    #endregion
 
     private void CreateBuffers()
     {
@@ -359,25 +409,11 @@ public sealed class Quad : Node<Quad>, IQuad
         // TODO : Setup bounds only once...
         QuadMesh.bounds = GetBounds(this);
 
-        if (Planetoid.Atmosphere != null) Planetoid.Atmosphere.SetUniforms(null, QuadMaterial, false, true);
-
         //if (Planetoid.Ring != null) Planetoid.Ring.SetShadows(QuadMaterial, Planetoid.Shadows);
         //if (Planetoid.NPS != null) Planetoid.NPS.UpdateUniforms(QuadMaterial, null); //(WIP) For SE Coloring in fragment shader work...
         //if (Planetoid.tccps != null) Planetoid.tccps.UpdateUniforms(QuadMaterial); //(WIP) For SE Coloring in fragment shader work...
 
-        if (QuadMaterial == null) { return; }
-
-        if (!Uniformed)
-        {
-            QuadMaterial.SetBuffer("data", OutDataBuffer);
-            QuadMaterial.SetBuffer("quadGenerationConstants", QuadGenerationConstantsBuffer);
-            QuadMaterial.SetTexture("_HeightTexture", HeightTexture);
-            QuadMaterial.SetTexture("_NormalTexture", NormalTexture);
-            QuadMaterial.SetMatrix("_TRS", RotationMatrix);
-            QuadMaterial.SetFloat("_LODLevel", LODLevel + 2);
-
-            Uniformed = true;
-        }
+        if (QuadMaterial == null) return;
 
         QuadMaterial.renderQueue = (int)Planetoid.RenderQueue + Planetoid.RenderQueueOffset;
 
@@ -481,7 +517,6 @@ public sealed class Quad : Node<Quad>, IQuad
         BrainFuckMath.DefineAxis(ref staticX, ref staticY, ref staticZ, size);
 
         Planetoid.Working = true;
-        HaveSubQuads = true;
         Splitting = true;
         Unsplitted = false;
 
@@ -530,9 +565,12 @@ public sealed class Quad : Node<Quad>, IQuad
 
                 Subquads.Add(quad);
 
-                for (var wait = 0; wait < Planetoid.DispatchSkipFramesCount; wait++)
+                if (Planetoid.WaitOnSplit)
                 {
-                    yield return Yielders.EndOfFrame;
+                    for (var wait = 0; wait < Planetoid.DispatchSkipFramesCount; wait++)
+                    {
+                        yield return Yielders.EndOfFrame;
+                    }
                 }
             }
         }
@@ -583,15 +621,16 @@ public sealed class Quad : Node<Quad>, IQuad
             DestroyImmediate(subQuad.gameObject);
         }
 
-        if (HaveSubQuads) ShouldDraw = true;
-
-        HaveSubQuads = false;
+        ShouldDraw = true;
         Unsplitted = true;
+
         Subquads.Clear();
     }
 
     public void Dispatch()
     {
+        if (HeightTexture == null || NormalTexture == null) return;
+
         generationConstants.lodLevel = (((1 << LODLevel + 2) * (Planetoid.PlanetRadius / (LODLevel + 2)) - ((Planetoid.PlanetRadius / (LODLevel + 2)) / 2)) / Planetoid.PlanetRadius);
         generationConstants.lodOctaveModifier = Planetoid.GetLODOctaveModifier(LODLevel + 1);
 

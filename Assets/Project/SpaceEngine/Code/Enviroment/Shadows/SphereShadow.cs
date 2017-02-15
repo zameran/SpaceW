@@ -100,6 +100,8 @@ public class SphereShadow : Shadow
         Helper.Destroy(penumbraLut);
     }
 
+    #region Gizmos
+
 #if UNITY_EDITOR
     protected virtual void OnDrawGizmosSelected()
     {
@@ -125,6 +127,8 @@ public class SphereShadow : Shadow
         }
     }
 #endif
+
+    #endregion
 
     private void RegenerateLightingLut()
     {

@@ -117,6 +117,9 @@ public class RingShadow : Shadow
 
     }
 
+
+    #region Gizmos
+
 #if UNITY_EDITOR
     protected virtual void OnDrawGizmosSelected()
     {
@@ -138,4 +141,6 @@ public class RingShadow : Shadow
         }
     }
 #endif
+
+    #endregion
 }

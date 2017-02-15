@@ -41,7 +41,7 @@ using UnityEngine;
 
 namespace SpaceEngine.AtmosphericScattering
 {
-    public sealed class Atmosphere : Node<Atmosphere>, IEventit
+    public sealed class Atmosphere : Node<Atmosphere>, IEventit, IUniformed<Material>, IUniformed<MaterialPropertyBlock>
     {
         private AtmosphereBase atmosphereBase = AtmosphereBase.Earth;
 
@@ -202,7 +202,11 @@ namespace SpaceEngine.AtmosphericScattering
             InitMaterials();
             InitMesh();
 
-            InitSetAtmosphereUniforms();
+            InitUniforms(SkyMaterial);
+            InitUniforms(planetoid.QuadMPB);
+
+            SetUniforms(SkyMaterial);
+            SetUniforms(planetoid.QuadMPB);
         }
 
         protected override void UpdateNode()
@@ -237,6 +241,104 @@ namespace SpaceEngine.AtmosphericScattering
         protected override void Update()
         {
             base.Update();
+        }
+
+        #endregion
+
+        #region IUniformed<Material>
+
+        public void InitUniforms(Material target)
+        {
+            if (target == null) return;
+
+            Helper.SetKeywords(target, Keywords);
+        }
+
+        public void SetUniforms(Material target)
+        {
+            if (target == null) return;
+
+            Helper.SetKeywords(target, Keywords);
+        }
+
+        #endregion
+
+        #region IUniformed<MaterialPropertyBlock>
+
+        public void InitUniforms(MaterialPropertyBlock target)
+        {
+            if (target == null) return;
+
+            SetEclipses(target);
+            SetShine(target);
+
+            target.SetFloat("_Aerial_Perspective_Offset", AerialPerspectiveOffset);
+
+            target.SetFloat("Rg", atmosphereParameters.Rg);
+            target.SetFloat("Rt", atmosphereParameters.Rt);
+            target.SetFloat("RL", atmosphereParameters.Rl);
+
+            target.SetFloat("TRANSMITTANCE_W", AtmosphereConstants.TRANSMITTANCE_W);
+            target.SetFloat("TRANSMITTANCE_H", AtmosphereConstants.TRANSMITTANCE_H);
+            target.SetFloat("SKY_W", AtmosphereConstants.SKY_W);
+            target.SetFloat("SKY_H", AtmosphereConstants.SKY_H);
+            target.SetFloat("RES_R", AtmosphereConstants.RES_R);
+            target.SetFloat("RES_MU", AtmosphereConstants.RES_MU);
+            target.SetFloat("RES_MU_S", AtmosphereConstants.RES_MU_S);
+            target.SetFloat("RES_NU", AtmosphereConstants.RES_NU);
+            target.SetFloat("AVERAGE_GROUND_REFLECTANCE", atmosphereParameters.AVERAGE_GROUND_REFLECTANCE);
+            target.SetFloat("HR", atmosphereParameters.HR * 1000.0f);
+            target.SetFloat("HM", atmosphereParameters.HM * 1000.0f);
+        }
+
+        public void SetUniforms(MaterialPropertyBlock target)
+        {
+            if (target == null) return;
+
+            SetEclipses(target);
+            SetShine(target);
+            SetSuns(target);
+
+            target.SetFloat("fade", Fade);
+            target.SetFloat("density", Density);
+            target.SetFloat("scale", atmosphereParameters.SCALE);
+            target.SetFloat("Rg", atmosphereParameters.Rg);
+            target.SetFloat("Rt", atmosphereParameters.Rt);
+            target.SetFloat("RL", atmosphereParameters.Rl);
+            target.SetVector("betaR", atmosphereParameters.BETA_R / 1000);
+            target.SetVector("betaMSca", atmosphereParameters.BETA_MSca / 1000);
+            target.SetVector("betaMEx", atmosphereParameters.BETA_MEx / 1000);
+            target.SetFloat("mieG", Mathf.Clamp(atmosphereParameters.MIE_G, 0.0f, 0.99f));
+
+            target.SetFloat("_Aerial_Perspective_Offset", AerialPerspectiveOffset);
+            target.SetFloat("_ExtinctionGroundFade", ExtinctionGroundFade);
+
+            if (artb.transmittanceT != null) target.SetTexture("_Sky_Transmittance", artb.transmittanceT);
+            if (artb.inscatterT_Read != null) target.SetTexture("_Sky_Inscatter", artb.inscatterT_Read);
+            if (artb.irradianceT_Read != null) target.SetTexture("_Sky_Irradiance", artb.irradianceT_Read);
+
+            target.SetMatrix("_Globals_WorldToCamera", worldToCamera);
+            target.SetMatrix("_Globals_CameraToWorld", cameraToWorld);
+            target.SetMatrix("_Globals_CameraToScreen", cameraToScreen);
+            target.SetMatrix("_Globals_ScreenToCamera", screenToCamera);
+            target.SetVector("_Globals_WorldCameraPos", worldCameraPos);
+            target.SetVector("_Globals_WorldCameraPos_Offsetted", worldCameraPos - Origin);
+            target.SetVector("_Globals_Origin", -Origin);
+
+            target.SetVector("_Globals_WorldCameraPos_Offsetted_Origin", (worldCameraPos - Origin) + (-Origin)); // NOTE : Lol.
+
+            target.SetFloat("_Exposure", HDRExposure);
+            target.SetFloat("_HDRMode", (int)HDRMode);
+        }
+
+        #endregion
+
+        #region IUniformed
+
+        public void InitSetUniforms()
+        {
+            InitUniforms(SkyMaterial);
+            SetUniforms(SkyMaterial);
         }
 
         #endregion
@@ -376,7 +478,8 @@ namespace SpaceEngine.AtmosphericScattering
 
         public void Render(Camera camera, Vector3 Origin, int drawLayer = 8)
         {
-            SetUniforms(planetoid.QuadMPB, SkyMaterial, true);
+            SetUniforms(SkyMaterial);
+            SetUniforms(planetoid.QuadMPB);
 
             Graphics.DrawMesh(AtmosphereMesh, transform.localToWorldMatrix, SkyMaterial, drawLayer, camera, 0, planetoid.QuadMPB);
         }
@@ -397,6 +500,9 @@ namespace SpaceEngine.AtmosphericScattering
             UnEventit();
         }
 
+        #region Gizmos
+
+#if UNITY_EDITOR
         private void OnDrawGizmosSelected()
         {
             if (planetoid != null)
@@ -459,6 +565,9 @@ namespace SpaceEngine.AtmosphericScattering
                 }
             }
         }
+#endif
+
+        #endregion
 
         private Vector3 GetSunDirection(AtmosphereSun sun)
         {
@@ -487,40 +596,6 @@ namespace SpaceEngine.AtmosphericScattering
             Keywords = planetoid.GetKeywords();
         }
 
-        public void InitUniforms(MaterialPropertyBlock block, Material mat, bool full = true)
-        {
-            if (mat != null)
-            {
-                Helper.SetKeywords(mat, Keywords);
-            }
-
-            if (full)
-            {
-                if (block == null) return;
-
-                SetEclipses(block);
-                SetShine(block);
-
-                block.SetFloat("_Aerial_Perspective_Offset", AerialPerspectiveOffset);
-
-                block.SetFloat("Rg", atmosphereParameters.Rg);
-                block.SetFloat("Rt", atmosphereParameters.Rt);
-                block.SetFloat("RL", atmosphereParameters.Rl);
-
-                block.SetFloat("TRANSMITTANCE_W", AtmosphereConstants.TRANSMITTANCE_W);
-                block.SetFloat("TRANSMITTANCE_H", AtmosphereConstants.TRANSMITTANCE_H);
-                block.SetFloat("SKY_W", AtmosphereConstants.SKY_W);
-                block.SetFloat("SKY_H", AtmosphereConstants.SKY_H);
-                block.SetFloat("RES_R", AtmosphereConstants.RES_R);
-                block.SetFloat("RES_MU", AtmosphereConstants.RES_MU);
-                block.SetFloat("RES_MU_S", AtmosphereConstants.RES_MU_S);
-                block.SetFloat("RES_NU", AtmosphereConstants.RES_NU);
-                block.SetFloat("AVERAGE_GROUND_REFLECTANCE", atmosphereParameters.AVERAGE_GROUND_REFLECTANCE);
-                block.SetFloat("HR", atmosphereParameters.HR * 1000.0f);
-                block.SetFloat("HM", atmosphereParameters.HM * 1000.0f);
-            }
-        }
-
         public void InitPlanetoidUniforms(Planetoid planetoid)
         {
             if (planetoid.Atmosphere != null)
@@ -529,12 +604,12 @@ namespace SpaceEngine.AtmosphericScattering
                 {
                     if (planetoid.Quads[i] != null)
                     {
-                        planetoid.Atmosphere.InitUniforms(null, planetoid.Quads[i].QuadMaterial, false);
+                        planetoid.Atmosphere.InitUniforms(planetoid.Quads[i].QuadMaterial);
                     }
                 }
 
                 //Just make sure that all mpb parameters are set.
-                planetoid.Atmosphere.InitUniforms(planetoid.QuadMPB, null, true);
+                planetoid.Atmosphere.InitUniforms(planetoid.QuadMPB);
             }
         }
 
@@ -546,39 +621,27 @@ namespace SpaceEngine.AtmosphericScattering
                 {
                     if (planetoid.Quads[i] != null)
                     {
-                        planetoid.Atmosphere.SetUniforms(null, planetoid.Quads[i].QuadMaterial, false, true);
+                        planetoid.Atmosphere.SetUniforms(planetoid.Quads[i].QuadMaterial);
                     }
                 }
 
                 //Just make sure that all mpb parameters are set.
-                planetoid.Atmosphere.SetUniforms(planetoid.QuadMPB, null, true, true);
+                planetoid.Atmosphere.SetUniforms(planetoid.QuadMPB);
             }
-        }
-
-        public void InitSetPlanetoidUniforms(Planetoid planetoid)
-        {
-            InitPlanetoidUniforms(planetoid);
-            SetPlanetoidUniforms(planetoid);
-        }
-
-        public void InitSetAtmosphereUniforms()
-        {
-            InitUniforms(planetoid.QuadMPB, SkyMaterial, true);
-            SetUniforms(planetoid.QuadMPB, SkyMaterial, true);
-        }
-
-        public void InitSetAtmosphereUniforms(Atmosphere atmosphere)
-        {
-            InitUniforms(planetoid.QuadMPB, SkyMaterial, true);
-            SetUniforms(planetoid.QuadMPB, SkyMaterial, true);
         }
 
         public void ReanimateAtmosphereUniforms(Atmosphere atmosphere, Planetoid planetoid)
         {
             if (atmosphere != null && planetoid != null)
             {
-                atmosphere.InitSetPlanetoidUniforms(planetoid);
-                atmosphere.InitSetAtmosphereUniforms();
+                atmosphere.InitPlanetoidUniforms(planetoid);
+                atmosphere.SetPlanetoidUniforms(planetoid);
+
+                atmosphere.InitUniforms(atmosphere.SkyMaterial);
+                atmosphere.InitUniforms(atmosphere.planetoid.QuadMPB);
+
+                atmosphere.SetUniforms(atmosphere.SkyMaterial);
+                atmosphere.SetUniforms(atmosphere.planetoid.QuadMPB);
 
                 for (byte i = 0; i < Suns.Count; i++)
                 {
@@ -588,76 +651,13 @@ namespace SpaceEngine.AtmosphericScattering
 
                         if (sunGlareComponent != null)
                         {
-                            sunGlareComponent.InitSetAtmosphereUniforms();
+                            sunGlareComponent.InitSetUniforms();
                         }
                     }
                 }
             }
             else
                 Debug.Log("Atmosphere: Reanimation fail!");
-        }
-
-        public void SetUniforms(MaterialPropertyBlock block, Material mat, bool full = true, bool forQuad = false)
-        {
-            if (artb == null) { Debug.Log("Atmosphere: ARTB is null!"); return; }
-
-            if (mat != null)
-            {
-                Helper.SetKeywords(mat, Keywords);
-            }
-
-            if (full)
-            {
-                if (block == null) return;
-
-                SetEclipses(block);
-                SetShine(block);
-                SetSuns(block);
-
-                if (!forQuad)
-                {
-                    if (planetoid != null)
-                    {
-                        if (planetoid.Ring != null)
-                        {
-                            planetoid.Ring.SetShadows(block, planetoid.Shadows);
-                        }
-                    }
-                }
-
-                block.SetFloat("fade", Fade);
-                block.SetFloat("density", Density);
-                block.SetFloat("scale", atmosphereParameters.SCALE);
-                block.SetFloat("Rg", atmosphereParameters.Rg);
-                block.SetFloat("Rt", atmosphereParameters.Rt);
-                block.SetFloat("RL", atmosphereParameters.Rl);
-                block.SetVector("betaR", atmosphereParameters.BETA_R / 1000);
-                block.SetVector("betaMSca", atmosphereParameters.BETA_MSca / 1000);
-                block.SetVector("betaMEx", atmosphereParameters.BETA_MEx / 1000);
-                block.SetFloat("mieG", Mathf.Clamp(atmosphereParameters.MIE_G, 0.0f, 0.99f));
-
-                block.SetFloat("_Aerial_Perspective_Offset", AerialPerspectiveOffset);
-                block.SetFloat("_ExtinctionGroundFade", ExtinctionGroundFade);
-
-                if (artb.transmittanceT != null) block.SetTexture("_Sky_Transmittance", artb.transmittanceT);
-                if (artb.inscatterT_Read != null) block.SetTexture("_Sky_Inscatter", artb.inscatterT_Read);
-                if (artb.irradianceT_Read != null) block.SetTexture("_Sky_Irradiance", artb.irradianceT_Read);
-
-                var WCP = forQuad == true ? worldCameraPos - Origin : worldCameraPos;
-
-                block.SetMatrix("_Globals_WorldToCamera", worldToCamera);
-                block.SetMatrix("_Globals_CameraToWorld", cameraToWorld);
-                block.SetMatrix("_Globals_CameraToScreen", cameraToScreen);
-                block.SetMatrix("_Globals_ScreenToCamera", screenToCamera);
-                block.SetVector("_Globals_WorldCameraPos", forQuad == true ? worldCameraPos - Origin : worldCameraPos);
-
-                block.SetVector("_Globals_Origin", -Origin);
-
-                block.SetVector("WCPG", WCP + (-Origin));
-
-                block.SetFloat("_Exposure", HDRExposure);
-                block.SetFloat("_HDRMode", (int)HDRMode);
-            }
         }
 
         #region ExtraAPI

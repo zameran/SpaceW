@@ -127,6 +127,8 @@ public sealed class Planetoid : Planet, IPlanet
 
     public MaterialPropertyBlock QuadMPB;
 
+    public bool WaitOnSplit = false;
+
     protected override void Awake()
     {
         base.Awake();
@@ -145,7 +147,8 @@ public sealed class Planetoid : Planet, IPlanet
 
         if (Ring != null)
         {
-            //TODO : RINGS
+            if (Ring.planetoid == null)
+                Ring.planetoid = this;
         }
 
         QuadMPB = new MaterialPropertyBlock();
@@ -165,16 +168,6 @@ public sealed class Planetoid : Planet, IPlanet
         if (Atmosphere != null)
         {
             Atmosphere.InitPlanetoidUniforms(this);
-        }
-
-        if (Cloudsphere != null)
-        {
-            Cloudsphere.InitUniforms(this);
-        }
-
-        if (Ring != null)
-        {
-            Ring.InitUniforms(this);
         }
 
         ReSetupQuads(); //NOTE : Force resetup on start.
@@ -212,7 +205,7 @@ public sealed class Planetoid : Planet, IPlanet
             }
         }
 
-        if (Atmosphere != null) Atmosphere.SetUniforms(QuadMPB, null, false, true);
+        if (Atmosphere != null) Atmosphere.SetUniforms(QuadMPB); // TODO : Full? Really?
 
         if (!ExternalRendering)
         {
@@ -266,10 +259,16 @@ public sealed class Planetoid : Planet, IPlanet
         }
     }
 
+    #region Gizmos
+
+#if UNITY_EDITOR
     protected override void OnDrawGizmos()
     {
         base.OnDrawGizmos();
     }
+#endif
+
+    #endregion
 
     public void ReanimateQuadsBuffers(bool resetup = false)
     {
@@ -471,14 +470,9 @@ public sealed class Planetoid : Planet, IPlanet
         var mesh = GodManager.Instance.PrototypeMesh;
         mesh.bounds = new Bounds(Vector3.zero, new Vector3(PlanetRadius * 2, PlanetRadius * 2, PlanetRadius * 2));
 
-        var material = MaterialHelper.CreateTemp(ColorShader, "Quad");
-
         var quadComponent = go.AddComponent<Quad>();
         quadComponent.Planetoid = this;
         quadComponent.QuadMesh = mesh;
-        quadComponent.QuadMaterial = material;
-
-        if (Atmosphere != null) Atmosphere.InitUniforms(null, quadComponent.QuadMaterial, false);
 
         var gc = QuadGenerationConstants.Init(TerrainMaxHeight);
         gc.planetRadius = PlanetRadius;
@@ -505,15 +499,10 @@ public sealed class Planetoid : Planet, IPlanet
         var mesh = GodManager.Instance.PrototypeMesh;
         mesh.bounds = new Bounds(Vector3.zero, new Vector3(PlanetRadius * 2, PlanetRadius * 2, PlanetRadius * 2));
 
-        var material = MaterialHelper.CreateTemp(ColorShader, "Quad");
-
         var quadComponent = go.AddComponent<Quad>();
         quadComponent.Planetoid = this;
         quadComponent.QuadMesh = mesh;
-        quadComponent.QuadMaterial = material;
         quadComponent.SetupCorners(quadPosition);
-
-        if (Atmosphere != null) Atmosphere.InitUniforms(null, quadComponent.QuadMaterial, false);
 
         var gc = QuadGenerationConstants.Init(TerrainMaxHeight);
         gc.planetRadius = PlanetRadius;

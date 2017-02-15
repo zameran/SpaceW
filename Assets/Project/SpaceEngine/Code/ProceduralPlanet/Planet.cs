@@ -35,7 +35,7 @@
 
 
 using SpaceEngine.AtmosphericScattering;
-using SpaceEngine.AtmosphericScattering.Clouds;
+using SpaceEngine.AtmosphericScattering.Cloudsphere;
 
 using System.Collections.Generic;
 
@@ -145,6 +145,9 @@ public abstract class Planet : MonoBehaviour
 
     }
 
+    #region Gizmos
+
+#if UNITY_EDITOR
     protected virtual void OnDrawGizmos()
     {
         if (DrawGizmos)
@@ -154,6 +157,9 @@ public abstract class Planet : MonoBehaviour
             Gizmos.DrawWireCube(PlanetBounds.center, PlanetBounds.size);
         }
     }
+#endif
+
+    #endregion
 
     public sealed class QuadDistanceToClosestCornerComparer : IComparer<Quad>
     {

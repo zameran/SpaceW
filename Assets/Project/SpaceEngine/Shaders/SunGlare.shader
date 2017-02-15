@@ -77,6 +77,8 @@ Shader "SpaceEngine/Atmosphere/SunGlare"
 			uniform float3 sunViewPortPos;
 
 			uniform float AspectRatio;
+		
+			uniform float3 WCPG;
 			
 			struct v2f 
 			{

@@ -119,6 +119,8 @@ Shader "SpaceEngine/QuadTestUnlit"
 
 			uniform float _LODLevel;
 
+			uniform float3 _Globals_WorldCameraPos_Offsetted_Origin;
+
 			inline float4 RGB2Reflectance(float4 inColor)
 			{
 				return float4(tan(1.37 * inColor.rgb) / tan(1.37), inColor.a);
@@ -159,7 +161,7 @@ Shader "SpaceEngine/QuadTestUnlit"
 					#endif
 				#endif
 
-				float4 inscatter = InScattering(WCPG, p, WSD, extinction, 1.0);
+				float4 inscatter = InScattering(_Globals_WorldCameraPos_Offsetted, p, WSD, extinction, 1.0);
 
 				#ifdef ECLIPSES_ON
 					inscatter *= eclipse;
@@ -272,7 +274,7 @@ Shader "SpaceEngine/QuadTestUnlit"
 				o.tangent0 = v.tangent;
 				o.depth = 1;
 
-				o.direction = normalize(((_Globals_WorldCameraPos + _Globals_Origin) - mul(_Globals_CameraToWorld, o.vertex1)).xyz);
+				o.direction = normalize(((_Globals_WorldCameraPos_Offsetted + _Globals_Origin) - mul(_Globals_CameraToWorld, o.vertex1)).xyz);
 
 				//Log. depth
 				//o.vertex0.z = log2(max(1e-6, 1.0 + o.vertex0.w)) * (2.0 / log2(_ProjectionParams.z + 1.0)) - 1.0;
