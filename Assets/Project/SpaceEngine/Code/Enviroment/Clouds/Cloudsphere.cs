@@ -93,7 +93,9 @@ namespace SpaceEngine.AtmosphericScattering.Clouds
             {
                 if (planetoid.Atmosphere != null)
                 {
-                    planetoid.Atmosphere.InitUniforms(planetoid.QuadMPB, target, true);
+                    planetoid.Atmosphere.InitUniforms(target);
+                    planetoid.Atmosphere.InitUniforms(planetoid.QuadMPB);
+                    // TODO : Full? Really?
                 }
             }
 
@@ -108,7 +110,9 @@ namespace SpaceEngine.AtmosphericScattering.Clouds
             {
                 if (planetoid.Atmosphere != null)
                 {
-                    planetoid.Atmosphere.SetUniforms(planetoid.QuadMPB, target, true);
+                    planetoid.Atmosphere.SetUniforms(target);
+                    planetoid.Atmosphere.SetUniforms(planetoid.QuadMPB);
+                    // TODO : Full? Really?
                 }
             }
 

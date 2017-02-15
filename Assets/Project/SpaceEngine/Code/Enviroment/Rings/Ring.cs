@@ -41,6 +41,8 @@ using ZFramework.Unity.Common.PerfomanceMonitor;
 
 public class Ring : Node<Ring>, IUniformed<Material>
 {
+    public Planetoid planetoid;
+
     public List<Light> Lights = new List<Light>();
     public List<Shadow> Shadows = new List<Shadow>();
 
@@ -86,6 +88,8 @@ public class Ring : Node<Ring>, IUniformed<Material>
 
     protected override void InitNode()
     {
+        if (planetoid == null) planetoid = GetComponentInParent<Planetoid>();
+
         InitMesh();
         InitMaterial();
 
@@ -117,6 +121,8 @@ public class Ring : Node<Ring>, IUniformed<Material>
         }
 
         SetUniforms(RingMaterial);
+
+        if (planetoid != null) SetShadows(planetoid.QuadMPB, planetoid.Shadows);
     }
 
     protected override void Start()

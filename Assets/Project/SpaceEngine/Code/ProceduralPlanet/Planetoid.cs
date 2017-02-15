@@ -204,7 +204,7 @@ public sealed class Planetoid : Planet, IPlanet
             }
         }
 
-        if (Atmosphere != null) Atmosphere.SetUniforms(QuadMPB, null, false, true);
+        if (Atmosphere != null) Atmosphere.SetUniforms(QuadMPB); // TODO : Full? Really?
 
         if (!ExternalRendering)
         {
@@ -473,7 +473,8 @@ public sealed class Planetoid : Planet, IPlanet
         quadComponent.Planetoid = this;
         quadComponent.QuadMesh = mesh;
 
-        if (Atmosphere != null) Atmosphere.InitUniforms(null, quadComponent.QuadMaterial, false);
+        // TODO : Move to quad.
+        if (Atmosphere != null) Atmosphere.InitUniforms(quadComponent.QuadMaterial);
 
         var gc = QuadGenerationConstants.Init(TerrainMaxHeight);
         gc.planetRadius = PlanetRadius;
@@ -505,7 +506,8 @@ public sealed class Planetoid : Planet, IPlanet
         quadComponent.QuadMesh = mesh;
         quadComponent.SetupCorners(quadPosition);
 
-        if (Atmosphere != null) Atmosphere.InitUniforms(null, quadComponent.QuadMaterial, false);
+        // TODO : Move to quad.
+        if (Atmosphere != null) Atmosphere.InitUniforms(quadComponent.QuadMaterial);
 
         var gc = QuadGenerationConstants.Init(TerrainMaxHeight);
         gc.planetRadius = PlanetRadius;

@@ -168,6 +168,8 @@ public sealed class Quad : Node<Quad>, IQuad, IUniformed<Material>
 
             Uniformed = true;
         }
+
+        if (Planetoid.Atmosphere != null) Planetoid.Atmosphere.SetUniforms(QuadMaterial);
     }
 
     protected override void Start()
@@ -406,8 +408,6 @@ public sealed class Quad : Node<Quad>, IQuad, IUniformed<Material>
 
         // TODO : Setup bounds only once...
         QuadMesh.bounds = GetBounds(this);
-
-        if (Planetoid.Atmosphere != null) Planetoid.Atmosphere.SetUniforms(null, QuadMaterial, false, true);
 
         //if (Planetoid.Ring != null) Planetoid.Ring.SetShadows(QuadMaterial, Planetoid.Shadows);
         //if (Planetoid.NPS != null) Planetoid.NPS.UpdateUniforms(QuadMaterial, null); //(WIP) For SE Coloring in fragment shader work...

@@ -172,25 +172,25 @@ namespace SpaceEngine.AtmosphericScattering.Sun
             target.SetMatrix("ghost2Settings", Ghost2Settings);
             target.SetMatrix("ghost3Settings", Ghost2Settings);
 
-            if (Atmosphere != null) Atmosphere.InitUniforms(null, target, false);
+            if (Atmosphere != null) Atmosphere.InitUniforms(target);
         }
 
         public void SetUniforms(Material target)
         {
             if (target == null) return;
 
-            SunGlareMaterial.SetVector("sunViewPortPos", ViewPortPosition);
+            target.SetVector("sunViewPortPos", ViewPortPosition);
 
-            SunGlareMaterial.SetFloat("AspectRatio", CameraHelper.Main().aspect);
-            SunGlareMaterial.SetFloat("Scale", Scale);
-            SunGlareMaterial.SetFloat("Fade", Fade);
-            SunGlareMaterial.SetFloat("UseAtmosphereColors", 1.0f);
-            SunGlareMaterial.SetFloat("UseRadiance", 0.0f);
-            SunGlareMaterial.SetFloat("Eclipse", Eclipse ? 0.0f : 1.0f);
+            target.SetFloat("AspectRatio", CameraHelper.Main().aspect);
+            target.SetFloat("Scale", Scale);
+            target.SetFloat("Fade", Fade);
+            target.SetFloat("UseAtmosphereColors", 1.0f);
+            target.SetFloat("UseRadiance", 0.0f);
+            target.SetFloat("Eclipse", Eclipse ? 0.0f : 1.0f);
 
-            SunGlareMaterial.renderQueue = (int)RenderQueue + RenderQueueOffset;
+            target.renderQueue = (int)RenderQueue + RenderQueueOffset;
 
-            if (Atmosphere != null) { Atmosphere.SetUniforms(null, SunGlareMaterial, false, false); }
+            if (Atmosphere != null) { Atmosphere.SetUniforms(target); }
         }
 
         public void InitSetUniforms()
