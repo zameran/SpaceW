@@ -88,8 +88,6 @@ public class Ring : Node<Ring>, IUniformed<Material>
 
     protected override void InitNode()
     {
-        if (planetoid == null) planetoid = GetComponentInParent<Planetoid>();
-
         InitMesh();
         InitMaterial();
 

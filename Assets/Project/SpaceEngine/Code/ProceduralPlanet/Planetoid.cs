@@ -147,7 +147,8 @@ public sealed class Planetoid : Planet, IPlanet
 
         if (Ring != null)
         {
-            //TODO : RINGS
+            if (Ring.planetoid == null)
+                Ring.planetoid = this;
         }
 
         QuadMPB = new MaterialPropertyBlock();
@@ -473,9 +474,6 @@ public sealed class Planetoid : Planet, IPlanet
         quadComponent.Planetoid = this;
         quadComponent.QuadMesh = mesh;
 
-        // TODO : Move to quad.
-        if (Atmosphere != null) Atmosphere.InitUniforms(quadComponent.QuadMaterial);
-
         var gc = QuadGenerationConstants.Init(TerrainMaxHeight);
         gc.planetRadius = PlanetRadius;
 
@@ -505,9 +503,6 @@ public sealed class Planetoid : Planet, IPlanet
         quadComponent.Planetoid = this;
         quadComponent.QuadMesh = mesh;
         quadComponent.SetupCorners(quadPosition);
-
-        // TODO : Move to quad.
-        if (Atmosphere != null) Atmosphere.InitUniforms(quadComponent.QuadMaterial);
 
         var gc = QuadGenerationConstants.Init(TerrainMaxHeight);
         gc.planetRadius = PlanetRadius;
