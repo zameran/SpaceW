@@ -35,7 +35,7 @@
 
 using UnityEngine;
 
-namespace SpaceEngine.AtmosphericScattering.Clouds
+namespace SpaceEngine.AtmosphericScattering.Cloudsphere
 {
     public class Cloudsphere : Node<Cloudsphere>, IUniformed<Material>
     {

@@ -35,7 +35,7 @@
 
 
 using SpaceEngine.AtmosphericScattering;
-using SpaceEngine.AtmosphericScattering.Clouds;
+using SpaceEngine.AtmosphericScattering.Cloudsphere;
 
 using System.Collections.Generic;
 
