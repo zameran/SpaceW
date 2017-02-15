@@ -234,6 +234,9 @@ public sealed class Quad : Node<Quad>, IQuad, IUniformed<Material>
             DestroyImmediate(QuadMaterial);
     }
 
+    #region Gizmos
+
+#if UNITY_EDITOR
     private void OnDrawGizmos()
     {
         if (Planetoid.DrawGizmos)
@@ -285,6 +288,9 @@ public sealed class Quad : Node<Quad>, IQuad, IUniformed<Material>
             Gizmos.DrawRay(Planetoid.OriginTransform.TransformPoint(middleNormalized), generationConstants.cubeFaceNorthDirection);
         }
     }
+#endif
+
+    #endregion
 
     private void CreateBuffers()
     {

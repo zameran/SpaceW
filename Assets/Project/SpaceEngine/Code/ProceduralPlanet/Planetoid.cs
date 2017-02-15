@@ -258,10 +258,16 @@ public sealed class Planetoid : Planet, IPlanet
         }
     }
 
+    #region Gizmos
+
+#if UNITY_EDITOR
     protected override void OnDrawGizmos()
     {
         base.OnDrawGizmos();
     }
+#endif
+
+    #endregion
 
     public void ReanimateQuadsBuffers(bool resetup = false)
     {

@@ -397,6 +397,9 @@ namespace SpaceEngine.AtmosphericScattering
             UnEventit();
         }
 
+        #region Gizmos
+
+#if UNITY_EDITOR
         private void OnDrawGizmosSelected()
         {
             if (planetoid != null)
@@ -459,6 +462,10 @@ namespace SpaceEngine.AtmosphericScattering
                 }
             }
         }
+#endif
+
+        #endregion
+
 
         private Vector3 GetSunDirection(AtmosphereSun sun)
         {
