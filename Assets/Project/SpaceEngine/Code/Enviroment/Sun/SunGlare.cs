@@ -190,7 +190,7 @@ namespace SpaceEngine.AtmosphericScattering.Sun
 
             target.renderQueue = (int)RenderQueue + RenderQueueOffset;
 
-            if (Atmosphere != null) { Atmosphere.SetUniforms(target); }
+            if (Atmosphere != null) Atmosphere.SetUniforms(target);
         }
 
         public void InitSetUniforms()

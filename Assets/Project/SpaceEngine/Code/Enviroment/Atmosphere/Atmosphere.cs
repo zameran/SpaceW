@@ -202,7 +202,11 @@ namespace SpaceEngine.AtmosphericScattering
             InitMaterials();
             InitMesh();
 
-            InitSetAtmosphereUniforms();
+            InitUniforms(SkyMaterial);
+            InitUniforms(planetoid.QuadMPB);
+
+            SetUniforms(SkyMaterial);
+            SetUniforms(planetoid.QuadMPB);
         }
 
         protected override void UpdateNode()
@@ -626,22 +630,18 @@ namespace SpaceEngine.AtmosphericScattering
             }
         }
 
-        public void InitSetAtmosphereUniforms()
-        {
-            InitUniforms(SkyMaterial);
-            InitUniforms(planetoid.QuadMPB);
-
-            SetUniforms(SkyMaterial);
-            SetUniforms(planetoid.QuadMPB);
-        }
-
         public void ReanimateAtmosphereUniforms(Atmosphere atmosphere, Planetoid planetoid)
         {
             if (atmosphere != null && planetoid != null)
             {
                 atmosphere.InitPlanetoidUniforms(planetoid);
                 atmosphere.SetPlanetoidUniforms(planetoid);
-                atmosphere.InitSetAtmosphereUniforms();
+
+                atmosphere.InitUniforms(atmosphere.SkyMaterial);
+                atmosphere.InitUniforms(atmosphere.planetoid.QuadMPB);
+
+                atmosphere.SetUniforms(atmosphere.SkyMaterial);
+                atmosphere.SetUniforms(atmosphere.planetoid.QuadMPB);
 
                 for (byte i = 0; i < Suns.Count; i++)
                 {
