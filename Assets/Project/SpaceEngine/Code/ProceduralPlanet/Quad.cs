@@ -121,7 +121,6 @@ public sealed class Quad : Node<Quad>, IQuad, IUniformed<Material>
 
     public int LODLevel = -1;
 
-    public bool HaveSubQuads = false;
     public bool Generated = false;
     public bool ShouldDraw = false;
     public bool ReadyForDispatch = false;
@@ -142,6 +141,8 @@ public sealed class Quad : Node<Quad>, IQuad, IUniformed<Material>
     public Id RegistryID { get { return new Id(LODLevel, (byte)ID, (int)Position); } }
 
     public Matrix4x4 RotationMatrix { get { return Matrix4x4.TRS(middleNormalized, Quaternion.Euler(middleNormalized.normalized * Mathf.Deg2Rad), Vector3.one); } }
+
+    public bool HaveSubQuads { get { return Subquads.Count == 4; } }
 
     #region Node
 
@@ -516,7 +517,6 @@ public sealed class Quad : Node<Quad>, IQuad, IUniformed<Material>
         BrainFuckMath.DefineAxis(ref staticX, ref staticY, ref staticZ, size);
 
         Planetoid.Working = true;
-        HaveSubQuads = true;
         Splitting = true;
         Unsplitted = false;
 
@@ -621,10 +621,9 @@ public sealed class Quad : Node<Quad>, IQuad, IUniformed<Material>
             DestroyImmediate(subQuad.gameObject);
         }
 
-        if (HaveSubQuads) ShouldDraw = true;
-
-        HaveSubQuads = false;
+        ShouldDraw = true;
         Unsplitted = true;
+
         Subquads.Clear();
     }
 
