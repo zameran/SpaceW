@@ -42,7 +42,7 @@ using Random = UnityEngine.Random;
 
 namespace SpaceEngine.Startfield
 {
-    public class Starfield : MonoBehaviour
+    public class Starfield : Node<Starfield>, IUniformed<Material>
     {
         public float StarIntensity = 1.0f;
         public float StarsScale = 1.0f;
@@ -66,11 +66,59 @@ namespace SpaceEngine.Startfield
             new Vector2(0.870537795f, 0.085484560f), new Vector2(0.956022355f, -0.058114540f)
         };
 
-        private void Start()
+        #region Node
+
+        protected override void InitNode()
         {
             InitMaterials();
             InitMesh();
+
+            InitUniforms(StarfieldMaterial);
         }
+
+        protected override void UpdateNode()
+        {
+            StarfieldMaterial.renderQueue = (int)RenderQueue + RenderQueueOffset;
+
+            SetUniforms(StarfieldMaterial);
+        }
+
+        protected override void Start()
+        {
+            base.Start();
+        }
+
+        protected override void Update()
+        {
+            base.Update();
+        }
+
+        #endregion
+
+        #region IUniformed
+
+        public void InitUniforms(Material target)
+        {
+            if (target == null) return;
+        }
+
+        public void SetUniforms(Material target)
+        {
+            if (target == null) return;
+
+            target.SetFloat("_StarIntensity", StarIntensity);
+            target.SetMatrix("_RotationMatrix", Matrix4x4.identity);
+
+            target.SetVectorArray("_Tab", Tab);
+        }
+
+        public void InitSetUniforms()
+        {
+            InitUniforms(StarfieldMaterial);
+            SetUniforms(StarfieldMaterial);
+        }
+
+        #endregion
 
         private void OnDestroy()
         {
@@ -85,14 +133,7 @@ namespace SpaceEngine.Startfield
 
         public void Render(Camera camera, int drawLayer = 8)
         {
-            if (StarfieldMesh != null && StarfieldMaterial != null)
-            {
-                SetUniforms(StarfieldMaterial);
-
-                StarfieldMaterial.renderQueue = (int)RenderQueue + RenderQueueOffset;
-
-                Graphics.DrawMesh(StarfieldMesh, transform.localToWorldMatrix, StarfieldMaterial, drawLayer, CameraHelper.Main(), 0, null, false, false);
-            }
+            Graphics.DrawMesh(StarfieldMesh, transform.localToWorldMatrix, StarfieldMaterial, drawLayer, CameraHelper.Main(), 0, null, false, false);
         }
 
         [ContextMenu("InitMesh")]
@@ -107,16 +148,6 @@ namespace SpaceEngine.Startfield
             {
                 StarfieldMaterial = MaterialHelper.CreateTemp(StarfieldShader, "Starfield");
             }
-        }
-
-        public void SetUniforms(Material mat)
-        {
-            if (mat == null) return;
-
-            mat.SetFloat("_StarIntensity", StarIntensity);
-            mat.SetMatrix("_RotationMatrix", Matrix4x4.identity);
-
-            mat.SetVectorArray("_Tab", Tab);
         }
 
         private Mesh CreateStarfieldMesh(float starDistance)
