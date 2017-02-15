@@ -119,7 +119,7 @@ Shader "SpaceEngine/QuadTestUnlit"
 
 			uniform float _LODLevel;
 
-			uniform float3 WCPG;
+			uniform float3 _Globals_WorldCameraPos_Offsetted_Origin;
 
 			inline float4 RGB2Reflectance(float4 inColor)
 			{
@@ -161,7 +161,7 @@ Shader "SpaceEngine/QuadTestUnlit"
 					#endif
 				#endif
 
-				float4 inscatter = InScattering(WCPG, p, WSD, extinction, 1.0);
+				float4 inscatter = InScattering(_Globals_WorldCameraPos_Offsetted, p, WSD, extinction, 1.0);
 
 				#ifdef ECLIPSES_ON
 					inscatter *= eclipse;

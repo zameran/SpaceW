@@ -321,7 +321,7 @@ namespace SpaceEngine.AtmosphericScattering
             target.SetVector("_Globals_WorldCameraPos_Offsetted", worldCameraPos - Origin);
             target.SetVector("_Globals_Origin", -Origin);
 
-            target.SetVector("WCPG", (worldCameraPos - Origin) + (-Origin)); // NOTE : Lol.
+            target.SetVector("_Globals_WorldCameraPos_Offsetted_Origin", (worldCameraPos - Origin) + (-Origin)); // NOTE : Lol.
 
             target.SetFloat("_Exposure", HDRExposure);
             target.SetFloat("_HDRMode", (int)HDRMode);
