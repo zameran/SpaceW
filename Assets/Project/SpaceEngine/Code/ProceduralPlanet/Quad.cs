@@ -56,7 +56,7 @@ public struct OutputStruct : IData
     }
 }
 
-public sealed class Quad : Node<Quad>, IQuad, IUniformed<Material>
+public sealed class Quad : Node<Quad>, IQuad, IUniformed<Material>, IUniformed<ComputeShader>
 {
     //NOTE : Do not TransformPoint the points on wich bounds will depend on.
 
@@ -184,11 +184,14 @@ public sealed class Quad : Node<Quad>, IQuad, IUniformed<Material>
 
     #endregion
 
-    #region IUniformed
+    #region IUniformed<Material>
 
     public void InitUniforms(Material target)
     {
         if (target == null) return;
+
+        if (Planetoid.NPS != null)
+            Planetoid.NPS.UpdateUniforms(target);
     }
 
     public void SetUniforms(Material target)
@@ -202,6 +205,57 @@ public sealed class Quad : Node<Quad>, IQuad, IUniformed<Material>
         target.SetMatrix("_TRS", RotationMatrix);
         target.SetFloat("_LODLevel", LODLevel + 2);
     }
+
+    #endregion
+
+    #region IUniformed<ComputeShader>
+
+    public void InitUniforms(ComputeShader target)
+    {
+        if (target == null) return;
+    }
+
+    public void SetUniforms(ComputeShader target)
+    {
+        if (target == null) return;
+
+        // NOTE : So, hardcoded kernel numbers...
+        // Target ComputeShader have 4 kernels, and original indexes are [0, 3, 1, 2]
+        // But engine don't care in wich kernel order uniforms will set...
+
+        SetUniforms(CoreShader, 0, 1, 2, 3);
+    }
+
+    public void SetUniforms(ComputeShader target, params int[] kernels)
+    {
+        if (target == null) return;
+        if (kernels == null || kernels.Length == 0) { Debug.Log("Quad.SetupComputeShaderKernelsUniforfms(...) problem!"); return; }
+
+        for (int i = 0; i < kernels.Length; i++)
+        {
+            SetUniforms(target, i);
+        }
+    }
+
+    public void SetUniforms(ComputeShader target, int kernel)
+    {
+        if (target == null) return;
+
+        target.SetBuffer(kernel, "quadGenerationConstants", QuadGenerationConstantsBuffer);
+        target.SetBuffer(kernel, "patchPreOutput", PreOutDataBuffer);
+        target.SetBuffer(kernel, "patchPreOutputSub", PreOutDataSubBuffer);
+        target.SetBuffer(kernel, "patchOutput", OutDataBuffer);
+
+        target.SetTexture(kernel, "Height", HeightTexture);
+        target.SetTexture(kernel, "Normal", NormalTexture);
+
+        if (Planetoid.NPS != null)
+            Planetoid.NPS.UpdateUniforms(target, kernel);
+    }
+
+    #endregion
+
+    #region IUniformed
 
     public void InitSetUniforms()
     {
@@ -634,7 +688,9 @@ public sealed class Quad : Node<Quad>, IQuad, IUniformed<Material>
         generationConstants.lodLevel = (((1 << LODLevel + 2) * (Planetoid.PlanetRadius / (LODLevel + 2)) - ((Planetoid.PlanetRadius / (LODLevel + 2)) / 2)) / Planetoid.PlanetRadius);
         generationConstants.lodOctaveModifier = Planetoid.GetLODOctaveModifier(LODLevel + 1);
 
-        SetupComputeShaderUniforms();
+        // NOTE : Just setup all our generator parameters...
+        if (Planetoid.tccps != null)
+            Planetoid.tccps.UpdateUniforms(CoreShader);
 
         CreateBuffers();
 
@@ -647,15 +703,13 @@ public sealed class Quad : Node<Quad>, IQuad, IUniformed<Material>
 
         EventManager.PlanetoidEvents.OnDispatchStarted.Invoke(Planetoid, this);
 
+        // NOTE : I still need this stuff...
         int kernel1 = CoreShader.FindKernel("HeightMain");
         int kernel2 = CoreShader.FindKernel("Transfer");
         int kernel3 = CoreShader.FindKernel("HeightSub");
         int kernel4 = CoreShader.FindKernel("TexturesSub");
 
-        SetupComputeShaderKernelsUniforfms(QuadGenerationConstantsBuffer,
-                                           PreOutDataBuffer,
-                                           PreOutDataSubBuffer,
-                                           OutDataBuffer, new int[] { kernel1, kernel2, kernel3, kernel4 });
+        SetUniforms(CoreShader);
 
         CoreShader.Dispatch(kernel1, QuadSettings.THREADGROUP_SIZE_BORDER, QuadSettings.THREADGROUP_SIZE_BORDER, 1);
         CoreShader.Dispatch(kernel2, QuadSettings.THREADGROUP_SIZE, QuadSettings.THREADGROUP_SIZE, 1);
@@ -673,38 +727,6 @@ public sealed class Quad : Node<Quad>, IQuad, IUniformed<Material>
 
         EventManager.PlanetoidEvents.OnDispatchEnd.Invoke(Planetoid, this);
         EventManager.PlanetoidEvents.OnDispatchFinished.Invoke(Planetoid, this);
-    }
-
-    private void SetupComputeShaderUniforms()
-    {
-        if (Planetoid.tccps != null)
-            Planetoid.tccps.UpdateUniforms(CoreShader);
-    }
-
-    private void SetupComputeShaderKernelUniforfms(int kernel, ComputeBuffer quadGenerationConstantsBuffer, ComputeBuffer preOutDataBuffer, ComputeBuffer preOutDataSubBuffer, ComputeBuffer outDataBuffer)
-    {
-        if (CoreShader == null) return;
-
-        CoreShader.SetBuffer(kernel, "quadGenerationConstants", quadGenerationConstantsBuffer);
-        CoreShader.SetBuffer(kernel, "patchPreOutput", preOutDataBuffer);
-        CoreShader.SetBuffer(kernel, "patchPreOutputSub", preOutDataSubBuffer);
-        CoreShader.SetBuffer(kernel, "patchOutput", outDataBuffer);
-
-        CoreShader.SetTexture(kernel, "Height", HeightTexture);
-        CoreShader.SetTexture(kernel, "Normal", NormalTexture);
-
-        if (Planetoid.NPS != null)
-            Planetoid.NPS.UpdateUniforms(QuadMaterial, CoreShader, kernel);
-    }
-
-    private void SetupComputeShaderKernelsUniforfms(ComputeBuffer quadGenerationConstantsBuffer, ComputeBuffer preOutDataBuffer, ComputeBuffer preOutDataSubBuffer, ComputeBuffer outDataBuffer, params int[] kernels)
-    {
-        if (kernels == null || kernels.Length == 0) { Debug.Log("Quad.SetupComputeShaderKernelsUniforfms(...) problem!"); return; }
-
-        for (int i = 0; i < kernels.Length; i++)
-        {
-            SetupComputeShaderKernelUniforfms(i, quadGenerationConstantsBuffer, preOutDataBuffer, preOutDataSubBuffer, outDataBuffer);
-        }
     }
 
     private void SetupVectors(Quad quad, int id, bool staticX, bool staticY, bool staticZ)

@@ -77,9 +77,19 @@ public sealed class NoiseParametersSetter : MonoBehaviour
         SetUniforms(cs);
     }
 
+    public void UpdateUniforms(ComputeShader cs)
+    {
+        SetUniforms(cs);
+    }
+
     public void UpdateUniforms(Material mat, ComputeShader cs, int kernel)
     {
         SetUniforms(mat);
+        SetUniforms(cs, kernel);
+    }
+
+    public void UpdateUniforms(ComputeShader cs, int kernel)
+    {
         SetUniforms(cs, kernel);
     }
 
@@ -96,9 +106,7 @@ public sealed class NoiseParametersSetter : MonoBehaviour
 
     public Texture2D LoadTextureFromResources(string name)
     {
-        Texture2D temp = Resources.Load("Textures/" + name, typeof(Texture2D)) as Texture2D;
-
-        return temp;
+        return Resources.Load("Textures/" + name, typeof(Texture2D)) as Texture2D;
     }
 
     private void SetUniforms(Material mat)

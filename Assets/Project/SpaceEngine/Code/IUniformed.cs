@@ -39,3 +39,9 @@ public interface IUniformed<T> where T : class
     void SetUniforms(T target);
     void InitSetUniforms();
 }
+
+public interface IUniformed<T, U> where T : class where U : class
+{
+    void InitUniforms(T target0, U target1);
+    void SetUniforms(T target0, U target1);
+}
