@@ -52,7 +52,7 @@
 // NOISE_ENGINE_SE - space engine texture lookup
 // NOISE_ENGINE_ZNE - zameran noise engine
 // NOISE_ENGINE_I - space engine
-#define NOISE_ENGINE_I
+#define NOISE_ENGINE_SE
 //-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
@@ -953,7 +953,9 @@ float Noise(float3 p)
 	float3 ff = p * p * p * (p * (p * 6.0 - 15.0) + 10.0);
 
 	// Hash coordinates of the 8 cube corners
-	float4 AA = tex2Dlod(PermSampler, float4(P.xyz, 0));
+	// NOTE : I FUCKING DID IT! I FIX DAT FORMULA FOR 3D!
+	// Solution is "+ P.z"
+	float4 AA = tex2Dlod(PermSampler, float4(P.xyz, 0)) + P.z;
 
 	float a = dot(tex2Dlod(PermGradSampler, AA.x).rgb, p);
 	float b = dot(tex2Dlod(PermGradSampler, AA.z).rgb, p + float3(-1, 0, 0));
@@ -981,7 +983,7 @@ float Noise(float3 p)
 // 3D Perlin noise with derivatives, returns vec4(xderiv, yderiv, zderiv, noise)
 float4 NoiseDeriv(float3 p)
 {
-	const float one = 1.0 / 256;
+	const float one = 1.0 / 256.0;
 
 	// Find unit cube that contains point
 	// Find relative x,y,z of point in cube
@@ -993,16 +995,18 @@ float4 NoiseDeriv(float3 p)
 	float3 ff = p * p * p * (p * (p * 6.0 - 15.0) + 10.0);
 
 	// Hash coordinates of the 8 cube corners
-	float4 AA = tex2Dlod(PermSampler, float4(P.xyz, 0));
+	// NOTE : I FUCKING DID IT! I FIX DAT FORMULA FOR 3D!
+	// Solution is "+ P.z"
+	float4 AA = tex2Dlod(PermSampler, float4(P.xyz, 0)) + P.z;
 	
-	float a = dot(tex2Dlod(PermGradSampler, float4(AA.x, 0, 0, 0)).rgb, p);
-	float b = dot(tex2Dlod(PermGradSampler, float4(AA.z, 0, 0, 0)).rgb, p + float3(-1, 0, 0));
-	float c = dot(tex2Dlod(PermGradSampler, float4(AA.y, 0, 0, 0)).rgb, p + float3(0, -1, 0));
-	float d = dot(tex2Dlod(PermGradSampler, float4(AA.w, 0, 0, 0)).rgb, p + float3(-1, -1, 0));
-	float e = dot(tex2Dlod(PermGradSampler, float4(AA.x, 0, 0, 0) + one).rgb, p + float3(0, 0, -1));
-	float f = dot(tex2Dlod(PermGradSampler, float4(AA.z, 0, 0, 0) + one).rgb, p + float3(-1, 0, -1));
-	float g = dot(tex2Dlod(PermGradSampler, float4(AA.y, 0, 0, 0) + one).rgb, p + float3(0, -1, -1));
-	float h = dot(tex2Dlod(PermGradSampler, float4(AA.w, 0, 0, 0) + one).rgb, p + float3(-1, -1, -1));
+	float a = dot(tex2Dlod(PermGradSampler, AA.x).rgb, p);
+	float b = dot(tex2Dlod(PermGradSampler, AA.z).rgb, p + float3(-1, 0, 0));
+	float c = dot(tex2Dlod(PermGradSampler, AA.y).rgb, p + float3(0, -1, 0));
+	float d = dot(tex2Dlod(PermGradSampler, AA.w).rgb, p + float3(-1, -1, 0));
+	float e = dot(tex2Dlod(PermGradSampler, AA.x + one).rgb, p + float3(0, 0, -1));
+	float f = dot(tex2Dlod(PermGradSampler, AA.z + one).rgb, p + float3(-1, 0, -1));
+	float g = dot(tex2Dlod(PermGradSampler, AA.y + one).rgb, p + float3(0, -1, -1));
+	float h = dot(tex2Dlod(PermGradSampler, AA.w + one).rgb, p + float3(-1, -1, -1));
 
 	float k0 = a;
 	float k1 = b - a;

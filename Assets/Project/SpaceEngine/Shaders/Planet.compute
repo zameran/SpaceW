@@ -38,7 +38,7 @@
 #define BorderModMesh					quadGenerationConstants[0].borderMod.x
 #define BorderModTexture				quadGenerationConstants[0].borderMod.y
 
-//#define defaultNoise
+//#define NOISE_USE_DEFAULT
 
 #include "UnityCG.cginc"
 #include "SpaceStuff.cginc"
@@ -62,8 +62,8 @@ float NoiseFunction(float3 coord, float lodom)
 {
 	float3 scaledCoord = ScaledCoordinate(coord);
 	
-	#ifdef defaultNoise
-	float noiseValue = RidgedMultifractalEroded(scaledCoord * 2 + Randomize, 1, 1, 4) * 2;	
+	#ifdef NOISE_USE_DEFAULT
+	float noiseValue = Noise(scaledCoord * 16 + Randomize);
 	#else
 	//float noiseValue = HeightMapAsteroid(scaledCoord);
 	//float noiseValue = HeightMapTerra(scaledCoord);
@@ -80,7 +80,7 @@ float4 ColorFunction(float3 coord, float height, float slope)
 {
 	float3 scaledCoord = ScaledCoordinate(coord);
 
-	#ifdef defaultNoise
+	#ifdef NOISE_USE_DEFAULT
 	float4 color = float4(height, height, height, slope);
 	#else
 	//float4 colorMapColor = ColorMapAsteroid(scaledCoord, height, slope);
