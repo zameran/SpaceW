@@ -925,9 +925,9 @@ inline float3 Interpolation_C2_Deriv(float3 x) { return x * x * (x * (x * 30.0 -
 //-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
-float4 RND_M = float4(1.0, 1.0, 1.0, 1.0);
-float3 OFFSET = float3(0.5, 0.5, 0.5);
-float3 OFFSETOUT = float3(1.5, 1.5, 1.5);
+const float4 NOISE_RND_M = float4(1.0, 1.0, 1.0, 1.0);
+const float3 NOISE_OFFSET = float3(0.5, 0.5, 0.5);
+const float3 NOISE_OFFSETOUT = float3(1.5, 1.5, 1.5);
 //-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
@@ -2089,7 +2089,7 @@ float4 NoiseRandomUVec4(float3 c)
 float Cell2Noise(float3 p)
 {
 	float3 cell = floor(p);
-	float3 offs = p - cell - OFFSET;
+	float3 offs = p - cell - NOISE_OFFSET;
 	float3 pos;
 	float3 rnd;
 	float3 d;
@@ -2117,7 +2117,7 @@ float Cell2Noise(float3 p)
 float2 Cell2Noise2(float3 p)
 {
 	float3 cell = floor(p);
-	float3 offs = p - cell - OFFSET;
+	float3 offs = p - cell - NOISE_OFFSET;
 	float3 pos;
 	float3 rnd;
 	float3 d;
@@ -2152,7 +2152,7 @@ float2 Cell2Noise2(float3 p)
 float4 Cell2NoiseVec(float3 p)
 {
 	float3 cell = floor(p);
-	float3 offs = p - cell - OFFSET;
+	float3 offs = p - cell - NOISE_OFFSET;
 	float3 pos;
 	float3 ppoint = float3(0.0, 0.0, 0.0);
 	float3 rnd;
@@ -2179,7 +2179,7 @@ float4 Cell2NoiseVec(float3 p)
 		}
 	}
 
-	ppoint = normalize(ppoint + cell + OFFSETOUT);
+	ppoint = normalize(ppoint + cell + NOISE_OFFSETOUT);
 
 	return float4(ppoint, sqrt(distMin));
 }
@@ -2187,9 +2187,9 @@ float4 Cell2NoiseVec(float3 p)
 float Cell2NoiseColor(float3 p, out float4 color)
 {
 	float3 cell = floor(p);
-	float3 offs = p - cell - OFFSET;
+	float3 offs = p - cell - NOISE_OFFSET;
 	float3 pos;
-	float4 rndM = RND_M;
+	float4 rndM = NOISE_RND_M;
 	float4 rnd;
 	float3 d;
 	float distMin = 1.0e38;
@@ -2224,7 +2224,7 @@ float4 Cell2NoiseSphere(float3 p, float Radius)
 	p *= Radius;
 
 	float3 cell = floor(p);
-	float3 offs = p - cell - OFFSET;
+	float3 offs = p - cell - NOISE_OFFSET;
 	float3 pos;
 	float3 ppoint = float3(0.0, 0.0, 0.0);
 	float3 rnd;
@@ -2251,7 +2251,7 @@ float4 Cell2NoiseSphere(float3 p, float Radius)
 		}
 	}
 
-	ppoint = normalize(ppoint + cell + OFFSETOUT);
+	ppoint = normalize(ppoint + cell + NOISE_OFFSETOUT);
 
 	return float4(ppoint, length(ppoint * Radius - p));
 }
@@ -2261,7 +2261,7 @@ void Cell2Noise2Sphere(float3 p, float Radius, out float4 point1, out float4 poi
 	p *= Radius;
 
 	float3 cell = floor(p);
-	float3 offs = p - cell - OFFSET;
+	float3 offs = p - cell - NOISE_OFFSET;
 	float3 pos;
 	float3 rnd;
 	float3 d;
@@ -2294,10 +2294,10 @@ void Cell2Noise2Sphere(float3 p, float Radius, out float4 point1, out float4 poi
 		}
 	}
 
-	point1.xyz = normalize(point1.xyz + cell + OFFSETOUT);
+	point1.xyz = normalize(point1.xyz + cell + NOISE_OFFSETOUT);
 	point1.w = distMin1;
 
-	point2.xyz = normalize(point2.xyz + cell + OFFSETOUT);
+	point2.xyz = normalize(point2.xyz + cell + NOISE_OFFSETOUT);
 	point2.w = distMin2;
 }
 
@@ -2306,7 +2306,7 @@ float4 Cell2NoiseVecSphere(float3 p, float Radius)
 	p *= Radius;
 
 	float3 cell = floor(p);
-	float3 offs = p - cell - OFFSET;
+	float3 offs = p - cell - NOISE_OFFSET;
 	float3 pos;
 	float3 ppoint = float3(0.0, 0.0, 0.0);
 	float3 rnd;
@@ -2333,7 +2333,7 @@ float4 Cell2NoiseVecSphere(float3 p, float Radius)
 		}
 	}
 
-	ppoint = normalize(ppoint + cell + OFFSETOUT);
+	ppoint = normalize(ppoint + cell + NOISE_OFFSETOUT);
 
 	return float4(ppoint, length(ppoint * Radius - p));
 }
@@ -2457,7 +2457,7 @@ float4 Cell3NoiseVec(float3 p)
 		}
 	}
 
-	ppoint = normalize(ppoint + cell + OFFSETOUT);
+	ppoint = normalize(ppoint + cell + NOISE_OFFSETOUT);
 
 	return float4(ppoint, sqrt(distMin));
 }
@@ -2492,7 +2492,7 @@ float4 Cell3NoiseNormalizedVec(float3 p)
 		}
 	}
 
-	ppoint = normalize(normalize(ppoint) + cell + OFFSETOUT);
+	ppoint = normalize(normalize(ppoint) + cell + NOISE_OFFSETOUT);
 
 	return float4(ppoint, sqrt(distMin));
 }
@@ -2503,7 +2503,7 @@ float Cell3NoiseColor(float3 p, out float4 color)
 	float3 offs = p - cell;
 	float3 pos;
 	float4 rnd;
-	float4 rndM = RND_M;
+	float4 rndM = NOISE_RND_M;
 	float3 d;
 	float dist;
 	float distMin = 1.0e38;
@@ -2538,7 +2538,7 @@ float2 Cell3Noise2Color(float3 p, out float4 color)
 	float3 offs = p - cell;
 	float3 pos;
 	float4 rnd;
-	float4 rndM = RND_M;
+	float4 rndM = NOISE_RND_M;
 	float3 d;
 	float dist;
 	float distMin1 = 1.0e38;
@@ -2577,7 +2577,7 @@ float Cell3NoiseSmoothColor(float3 p, float falloff, out float4 color)
 	float3 offs = p - cell;
 	float3 pos;
 	float4 rnd;
-	float4 rndM = RND_M;
+	float4 rndM = NOISE_RND_M;
 	float3 d;
 	float dist;
 	float distMin = 1.0e38;
@@ -2648,7 +2648,7 @@ float4 Cell3NoiseF0Vec(float3 p, int octaves, float amp)
 		amp *= gain;
 	}
 
-	p = normalize(p + cell + OFFSETOUT);
+	p = normalize(p + cell + NOISE_OFFSETOUT);
 
 	return float4(p, sum / 2.0);
 }
