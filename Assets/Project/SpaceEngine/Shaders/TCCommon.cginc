@@ -955,7 +955,7 @@ float Noise(float3 p)
 	// Hash coordinates of the 8 cube corners
 	// NOTE : I FUCKING DID IT! I FIX DAT FORMULA FOR 3D!
 	// Solution is "+ P.z"
-	float4 AA = tex2Dlod(PermSampler, float4(P.xyz, 0)) + P.z;
+	float4 AA = tex2Dlod(PermSampler, float4(P.xy, 0, 0)) + P.z;
 
 	float a = dot(tex2Dlod(PermGradSampler, AA.x).rgb, p);
 	float b = dot(tex2Dlod(PermGradSampler, AA.z).rgb, p + float3(-1, 0, 0));
@@ -997,7 +997,7 @@ float4 NoiseDeriv(float3 p)
 	// Hash coordinates of the 8 cube corners
 	// NOTE : I FUCKING DID IT! I FIX DAT FORMULA FOR 3D!
 	// Solution is "+ P.z"
-	float4 AA = tex2Dlod(PermSampler, float4(P.xyz, 0)) + P.z;
+	float4 AA = tex2Dlod(PermSampler, float4(P.xy, 0, 0)) + P.z;
 	
 	float a = dot(tex2Dlod(PermGradSampler, AA.x).rgb, p);
 	float b = dot(tex2Dlod(PermGradSampler, AA.z).rgb, p + float3(-1, 0, 0));
