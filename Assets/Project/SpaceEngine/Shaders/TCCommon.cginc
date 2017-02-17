@@ -52,7 +52,7 @@
 // NOISE_ENGINE_SE - space engine texture lookup
 // NOISE_ENGINE_ZNE - zameran noise engine
 // NOISE_ENGINE_I - space engine
-#define NOISE_ENGINE_SE
+#define NOISE_ENGINE_I
 //-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
@@ -61,13 +61,6 @@
 // 1 - Ken Perlin's "improved" - OK.
 // 2 - fast "improved" - OK.
 #define NOISE_ENGINE_TECHNIQUE 2
-//-----------------------------------------------------------------------------
-
-//-----------------------------------------------------------------------------
-// noise engine technique:
-// 0 - space engine.
-// 1 - own.
-#define COLORING_TECHNIQUE 0
 //-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
@@ -136,10 +129,6 @@ uniform float4    textureParams;  // (texScale,       texColorConv,   venusMagn,
 uniform float4    cloudsParams1;  // (cloudsFreq,     cloudsOctaves,  twistZones,             twistMagn)
 uniform float4    cloudsParams2;  // (cloudsLayer,    cloudsNLayers,  cloudsStyle,            cloudsCoverage)
 uniform float4    cycloneParams;  // (cycloneMagn,    cycloneFreq,    sqrt(cycloneDensity),   cycloneOctaves)
-uniform float4	  radParams;	  // ()
-uniform float4	  crHeightParams; // ()
-uniform float4	  craterParams1;  // ()
-uniform float4	  craterParams2;  // ()
 uniform float4	  planetGlobalColor;	 // ()
 uniform float	  texturingHeightOffset; // ()
 uniform float	  texturingSlopeOffset;  // ()
@@ -251,7 +240,6 @@ uniform float noiseRidgeSmooth;// = 0.0001;
 #define     cycloneFreq         cycloneParams.y
 #define     cycloneSqrtDensity  cycloneParams.z
 #define     cycloneOctaves      cycloneParams.w
-#define		heightCrew			crHeightParams.w
 //-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
@@ -373,9 +361,9 @@ float3 Cartesian2Spherical(float3 cartesian)
 //-----------------------------------------------------------------------------
 float3 UnitToColor24(in float unit)
 {
-	float mask = 1.0 / 256.0;
+	const float3 factor = float3(1.0, 255.0, 65025.0);
+	const float mask = 1.0 / 256.0;
 
-	float3 factor = float3(1.0, 255.0, 65025.0);
 	float3 color = unit * factor.rgb;
 
 	color.gb = frac(color.gb);
@@ -425,6 +413,7 @@ float2 Fwidth(float2 texCoord, float2 size)
 
 float3 rgb2hsl(float3 rgb)
 {
+	/*
 	float Max = max(rgb.r, max(rgb.g, rgb.b));
 	float Min = min(rgb.r, min(rgb.g, rgb.b));
 
@@ -456,10 +445,22 @@ float3 rgb2hsl(float3 rgb)
 	}
 
 	return hsl;
+	*/
+	
+	const float4 K = float4(0.0, -1.0 / 3.0, 2.0 / 3.0, -1.0);
+	float4 p = lerp(float4(rgb.bg, K.wz), float4(rgb.gb, K.xy), step(rgb.b, rgb.g));
+	float4 q = lerp(float4(p.xyw, rgb.r), float4(rgb.r, p.yzx), step(p.x, rgb.r));
+
+	float d = q.x - min(q.w, q.y);
+
+	const float e = 1.0e-10;
+
+	return float3(abs(q.z + (q.w - q.y) / (6.0 * d + e)), d / (q.x + e), q.x);
 }
 
 float3 hsl2rgb(float3 hsl)
 {
+	/*
 	float3  rgb;
 	float q = (hsl.z <= 0.5) ? (hsl.z * (1.0 + hsl.y)) : (hsl.z + hsl.y - hsl.z * hsl.y);
 
@@ -491,6 +492,13 @@ float3 hsl2rgb(float3 hsl)
 	}
 
 	return rgb;
+	*/
+
+	const float4 K = float4(1.0, 2.0 / 3.0, 1.0 / 3.0, 3.0);
+
+	float3 p = abs(frac(hsl.xxx + K.xyz) * 6.0 - K.www);
+
+	return hsl.z * lerp(K.xxx, clamp(p - K.xxx, 0.0, 1.0), hsl.y);
 }
 
 inline float hash1(float p) { return frac(sin(p) * 158.5453123); }
@@ -514,15 +522,17 @@ inline Surface BlendSmart(Surface s0, Surface s1, float t)
 	float a0 = s0.height + 1.0 - t;
 	float a1 = s1.height + t;
 	float ma = max(a0, a1) - 0.5;
-	float b0 = max(a0 - ma, 0.0);
-	float b1 = max(a1 - ma, 0.0);
+	float b0 = max(a0 - ma, 0);
+	float b1 = max(a1 - ma, 0);
 
-	ma = b0 + b1;
+	ma = 1.0 / (b0 + b1);
+	b0 *= ma;
+	b1 *= ma;
 
 	Surface res;
 
-	res.color = (s0.color  * b0 + s1.color  * b1) / ma;
-	res.height = (s0.height * b0 + s1.height * b1) / ma;
+	res.color  = s0.color  * b0 + s1.color  * b1;
+	res.height = s0.height * b0 + s1.height * b1;
 
 	return res;
 }
@@ -542,8 +552,6 @@ inline float4 ruvy(float4 uv)
 	return float4(uv.x, 1.0 - uv.y, uv.z, uv.w);
 }
 //-----------------------------------------------------------------------------
-
-#if (COLORING_TECHNIQUE == 0)
 
 //-----------------------------------------------------------------------------
 #if (TILING_FIX_MODE <= 1)
@@ -752,8 +760,8 @@ Surface GetSurfaceColor(float height, float slope, float vary)
 
 Surface GetSurfaceColor(float height, float slope, float vary)
 {
-	height = clamp(height - 0.000625, 0.0, 1.0);
-	slope  = clamp(slope  + 0.001250, 0.0, 1.0);
+	height = clamp(height - 0.0625, 0.0, 1.0);
+	slope  = clamp(slope  + 0.1250, 0.0, 1.0);
 
 	float h0 = floor(height * 8.0) * 0.125;
 	float h1 = h0 + 0.125;
@@ -789,15 +797,15 @@ Surface GetSurfaceColor(float height, float slope, float vary)
 
 	surfV1 = Blend(surfS0, surfS1, ds);
 
-	return Blend(surfV0, surfV1, dv);
+	return   Blend(surfV0, surfV1, dv);
 }
 
 #elif (TILE_BLEND_MODE == 2)
 
 Surface GetSurfaceColor(float height, float slope, float vary)
 {
-	height = clamp(height - 0.000625, 0.0, 1.0);
-	slope  = clamp(slope  + 0.001250, 0.0, 1.0);
+	height = clamp(height - 0.0625, 0.0, 1.0);
+	slope  = clamp(slope  + 0.1250, 0.0, 1.0);
 
 	float h0 = floor(height * 8.0) * 0.125;
 	float h1 = h0 + 0.125;
@@ -837,18 +845,6 @@ Surface GetSurfaceColor(float height, float slope, float vary)
 }
 #endif
 //-----------------------------------------------------------------------------
-
-#elif (COLORING_TECHNIQUE == 1)
-
-Surface GetSurfaceColor(float height, float slope, float vary)
-{
-	Surface surf;
-	surf.height = height;
-	surf.color = float4(height, height, height, 1);
-	return surf;
-}
-
-#endif
 
 //-----------------------------------------------------------------------------
 void FAST32_hash_3D(float3 gridcell, out float4 lowz_hash_0, out float4 lowz_hash_1, out float4 lowz_hash_2, out float4 highz_hash_0, out float4 highz_hash_1, out float4 highz_hash_2)
@@ -1155,12 +1151,13 @@ float Noise(float3 p)
 		FAST32_hash_3D(Pi, hashx0, hashy0, hashz0, hashx1, hashy1, hashz1);
 
 		// Calculate the gradients
-		float4 grad_x0 = hashx0 - 0.49999;
-		float4 grad_y0 = hashy0 - 0.49999;
-		float4 grad_z0 = hashz0 - 0.49999;
-		float4 grad_x1 = hashx1 - 0.49999;
-		float4 grad_y1 = hashy1 - 0.49999;
-		float4 grad_z1 = hashz1 - 0.49999;
+		const float4 C = float4(0.49999, 0.49999, 0.49999, 0.49999);
+		float4 grad_x0 = hashx0 - C;
+		float4 grad_y0 = hashy0 - C;
+		float4 grad_z0 = hashz0 - C;
+		float4 grad_x1 = hashx1 - C;
+		float4 grad_y1 = hashy1 - C;
+		float4 grad_z1 = hashz1 - C;
 		float4 grad_results_0 = rsqrt(grad_x0 * grad_x0 + grad_y0 * grad_y0 + grad_z0 * grad_z0) * (float2(Pf.x, Pf_min1.x).xyxy * grad_x0 + float2(Pf.y, Pf_min1.y).xxyy * grad_y0 + Pf.zzzz * grad_z0);
 		float4 grad_results_1 = rsqrt(grad_x1 * grad_x1 + grad_y1 * grad_y1 + grad_z1 * grad_z1) * (float2(Pf.x, Pf_min1.x).xyxy * grad_x1 + float2(Pf.y, Pf_min1.y).xxyy * grad_y1 + Pf_min1.zzzz * grad_z1);
 
@@ -1261,19 +1258,20 @@ float4 NoiseDeriv(float3 p)
 	float4 hashx0, hashy0, hashz0, hashx1, hashy1, hashz1;
 	FAST32_hash_3D(Pi, hashx0, hashy0, hashz0, hashx1, hashy1, hashz1);
 
-	// calculate the gradients
-	float4 grad_x0 = hashx0 - 0.49999;
-	float4 grad_y0 = hashy0 - 0.49999;
-	float4 grad_z0 = hashz0 - 0.49999;
+	//	calculate the gradients
+	const float4 C = float4(0.49999, 0.49999, 0.49999, 0.49999);
+	float4 grad_x0 = hashx0 - C;
+	float4 grad_y0 = hashy0 - C;
+	float4 grad_z0 = hashz0 - C;
 	float4 norm_0 = rsqrt(grad_x0 * grad_x0 + grad_y0 * grad_y0 + grad_z0 * grad_z0);
 
 	grad_x0 *= norm_0;
 	grad_y0 *= norm_0;
 	grad_z0 *= norm_0;
 
-	float4 grad_x1 = hashx1 - 0.49999;
-	float4 grad_y1 = hashy1 - 0.49999;
-	float4 grad_z1 = hashz1 - 0.49999;
+	float4 grad_x1 = hashx1 - C;
+	float4 grad_y1 = hashy1 - C;
+	float4 grad_z1 = hashz1 - C;
 	float4 norm_1 = rsqrt(grad_x1 * grad_x1 + grad_y1 * grad_y1 + grad_z1 * grad_z1);
 
 	grad_x1 *= norm_1;
@@ -1310,8 +1308,9 @@ float4 NoiseDeriv(float3 p)
 	float yderiv_1 = dot(temp_1, float2(Pf.y, Pf_min1.y).xxyy) + dot(m3_1, grad_y1);
 	float zderiv_1 = dot(temp_1, Pf_min1.zzzz) + dot(m3_1, grad_z1);
 
+	const float FINAL_NORMALIZATION = 2.3703703703703703703703703703704;	//	scales the final result to a strict (-1.0, 1.0) range
 	return float4(float3(xderiv_0, yderiv_0, zderiv_0) + float3(xderiv_1, yderiv_1, zderiv_1),
-				 dot(m3_0, grad_results_0) + dot(m3_1, grad_results_1)) * 2.3703703703703703703703703703704;// scales the final result to a strict (-1.0, 1.0) range
+				 dot(m3_0, grad_results_0) + dot(m3_1, grad_results_1)) * FINAL_NORMALIZATION;
 }
 #endif
 //-----------------------------------------------------------------------------
@@ -1620,26 +1619,6 @@ float4 FiltNoise4D(float3 p, float w) { return NoiseVec4(p) * (1.0 - smoothstep(
 float FiltDistNoise(float3 p, float w, float d) { return DistNoise(p, d) * (1.0 - smoothstep(0.2, 0.6, w)); }
 float3 FiltDistNoise3D(float3 p, float w, float d) { return DistNoise3D(p, d) * (1.0 - smoothstep(0.2, 0.6, w)); }
 float4 FiltDistNoise4D(float3 p, float w, float d) { return DistNoise4D(p, d) * (1.0 - smoothstep(0.2, 0.6, w)); }
-//-----------------------------------------------------------------------------
-
-//-----------------------------------------------------------------------------
-inline float Lacunarity() 
-{ 
-	#ifdef USESAVEPOW 
-	return pow(abs(noiseLacunarity), -noiseH); 
-	#else
-	return pow(noiseLacunarity, -noiseH);
-	#endif
-}
-
-inline float Frequency(float frequency)
-{
-	#ifdef USESAVEPOW 
-	return pow(abs(frequency), -noiseH);
-	#else
-	return pow(frequency, -noiseH);
-	#endif
-}
 //-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
@@ -2659,7 +2638,7 @@ float Cell3NoiseF0(float3 p, int octaves, float amp)
 {
 	float freq = 1.0;
 	float sum = 0.0;
-	float gain = SavePow(Lacunarity(), -noiseH);
+	float gain = pow(noiseLacunarity, -noiseH);
 
 	for (int i = 0; i < octaves; i++)
 	{
@@ -2667,7 +2646,7 @@ float Cell3NoiseF0(float3 p, int octaves, float amp)
 
 		sum += 0.1 + sqrt(F[0]);
 
-		freq *= Lacunarity();
+		freq *= pow(noiseLacunarity, -noiseH);
 		amp *= gain;
 	}
 
@@ -2679,7 +2658,7 @@ float4 Cell3NoiseF0Vec(float3 p, int octaves, float amp)
 	float3 cell = floor(p);
 	float freq = 1.0;
 	float sum = 0.0;
-	float gain = SavePow(Lacunarity(), -noiseH);
+	float gain = pow(noiseLacunarity, -noiseH);
 
 	for (int i = 0; i < octaves; i++)
 	{
@@ -2687,7 +2666,7 @@ float4 Cell3NoiseF0Vec(float3 p, int octaves, float amp)
 
 		sum += 0.1 + sqrt(F[0]);
 
-		freq *= Lacunarity();
+		freq *= pow(noiseLacunarity, -noiseH);
 		amp *= gain;
 	}
 
@@ -2700,7 +2679,7 @@ float Cell3NoiseF1F0(float3 p, int octaves, float amp)
 {
 	float freq = 1.0;
 	float sum = 0.0;
-	float gain = SavePow(Lacunarity(), -noiseH);
+	float gain = pow(noiseLacunarity, -noiseH);
 
 	for (int i = 0; i < octaves; i++)
 	{
@@ -2708,7 +2687,7 @@ float Cell3NoiseF1F0(float3 p, int octaves, float amp)
 
 		sum += 0.1 + sqrt(F[0]) - sqrt(F[1]);
 
-		freq *= Lacunarity();
+		freq *= pow(noiseLacunarity, -noiseH);
 		amp *= gain;
 	}
 
@@ -3274,24 +3253,6 @@ float CrackHeightFunc(float lastLand, float lastlastLand, float height, float r,
 	return lerp(cracks, land, outer);
 }
 
-float CrackColorFunc(float r)
-{
-	float t;
-
-	if (r < 0.5) // inner rim
-	{  
-		t = 2.0 * r;
-
-		return smoothstep(0.0, 1.0, 1.0 - t);
-	}
-	else // outer rim
-	{  
-		t = 2.0 * (r - 0.5);
-
-		return smoothstep(0.0, 1.0, t);
-	}
-}
-
 float CrackNoise(float3 ppoint, out float mask)
 {
 	ppoint = (ppoint + Randomize) * cracksFreq;
@@ -3359,7 +3320,7 @@ float CrackColorNoise(float3 ppoint, out float mask)
 
 float DunesNoise(float3 ppoint, float octaves)
 {
-	float dir = Noise(ppoint * 3.86) * 197.3 * dunesFreq;
+	float dir = sNoise(ppoint * 3.86) * 197.3 * dunesFreq;
 	float3 p = ppoint;
 
 	float glob = saturate(Fbm(p * 7.21) + 0.3);
@@ -3373,11 +3334,13 @@ float DunesNoise(float3 ppoint, float octaves)
 
 	for (int i = 0; i < octaves; i++)
 	{
-		dist = dir + Noise(p * dunesFreq * 100.0) * 1.7;
-		wave = frac(dist / 3.1415926);
-		wave = cos(3.1415926 * wave * wave);
+		//dist = dir + Noise(p * dunesFreq * 100.0) * 1.7;
+		dist = dir + sNoise(p * dunesFreq * 25.0) * 12.7 + sNoise(p * dunesFreq * 300.0) * 1.2;
+		wave = frac(dist / M_PI);
+		wave = cos(M_PI * wave * wave);
 		fade = smoothstep(win - 0.5 * dwin, win, glob) * (1.0 - smoothstep(win + dwin, win + 1.5 * dwin, glob));
-		dunes += (1.0 - sqrt(wave * wave + 0.005)) * ampl * fade;
+		//dunes += (1.0 - sqrt(wave * wave + 0.005)) * ampl * fade;
+		dunes += (1.0 - sqrt(wave * wave + 0.005)) * (ampl + Fbm(p * dunesFreq * 150.0) * 0.05 - 0.03) * fade;
 		p = p * lac + float3(3.17, 5.38, 8.79);
 		dir *= lac;
 		ampl /= lac;
@@ -3389,7 +3352,7 @@ float DunesNoise(float3 ppoint, float octaves)
 
 void SolarSpotsHeightNoise(float3 ppoint, out float botMask, out float filMask, out float filaments)
 {
-	float3 binormal = normalize(cross(ppoint, float3(0.0, 1.0, 0.0)));
+	float3 binormal = normalize(float3(-ppoint.z, 0.0, ppoint.x));
 
 	craterSphereRadius = mareFreq * mareSqrtDensity;
 
@@ -3418,7 +3381,7 @@ void SolarSpotsHeightNoise(float3 ppoint, out float botMask, out float filMask, 
 		t = saturate((cell.w * radFactor - radInner) / (radOuter - radInner));
 		botmask = smoothstep(0.0, 1.0, t);
 		filmask = smoothstep(0.0, 0.1, t) * (1.0 - botmask);
-		filam = NoiseU(float3(530.7 * fi, rnd, rnd));
+		filam = NoiseU(float3(montesFreq * fi, rnd, rnd));
 
 		filaments += filam;
 		filMask *= filmask;
@@ -3432,7 +3395,7 @@ void SolarSpotsHeightNoise(float3 ppoint, out float botMask, out float filMask, 
 
 void SolarSpotsTempNoise(float3 ppoint, out float botMask, out float filMask, out float filaments)
 {
-	float3 binormal = normalize(cross(ppoint, float3(0.0, 1.0, 0.0)));
+	float3 binormal =  normalize(float3(-ppoint.z, 0.0, ppoint.x));
 	craterSphereRadius = mareFreq * mareSqrtDensity;
 
 	botMask = 1.0;
@@ -3458,9 +3421,9 @@ void SolarSpotsTempNoise(float3 ppoint, out float botMask, out float filMask, ou
 		rnd = 48.3 * dot(cell.xyz, Randomize);
 
 		t = saturate((cell.w * radFactor - radInner) / (radOuter - radInner));
-		botmask = smoothstep(0.9, 1.0, t);
-		filmask = smoothstep(0.0, 0.1, t) * (1.0 - botmask);
-		filam = NoiseU(float3(530.7 * fi, rnd, rnd)) * (1.0 - 0.5 * t);
+		botmask = smoothstep(0.0, 0.2, t);
+		filmask = (1.0 - smoothstep(0.7, 1.0, t)) * smoothstep(0.0, 0.1, t) * 0.85;
+		filam   = NoiseU(float3(montesFreq * fi, rnd, rnd)) * t * 0.75;
 
 		filaments += filam;
 		filMask *= filmask;
@@ -3496,6 +3459,69 @@ float RidgedMultifractalTerraced(float3 ppoint, float n, float power)
 	total = GetTerraced(total, n, power);
 
 	return total;
+}
+//-----------------------------------------------------------------------------
+
+//-----------------------------------------------------------------------------
+// Can be used to create lava planets or icebergs
+// climate-dependent: gapWidth = climate, flood = 1.5
+// random:            gapWidth = 0.7,     flood = 1.0
+float LithoCellsNoise(float3 ppoint, float gapWidth, float flood)
+{
+	float gap = saturate(1.0 - 1.0 * gapWidth);
+	float2 cell;
+	float3 p;
+	float4 col;
+
+	noiseOctaves = 4;
+	p = ppoint * 14.2 + Randomize;
+	p += 0.1 * Fbm3D(p * 0.7);
+
+	cell = Cell3Noise2Color(p * (0.5 * gap - 0.5), col);
+
+	float lithoCells = (1.0 - gap) * sqrt(abs(cell.y - cell.x));
+	lithoCells = smoothstep(0.1 * gap, 0.6 * gap, lithoCells);
+	lithoCells *= step(col.r, flood - gap);
+
+	return lithoCells;
+}
+
+float3 TurbulenceTerra(float3 ppoint)
+{
+	const float scale = 0.7;
+
+	float3 twistedPoint = ppoint;
+	float3 cellCenter = float3(0.0, 0.0, 0.0);
+	float2 cell;
+	float r, fi, rnd, dist, dist2, dir;
+	float strength = 5.5;
+	float freq = 20.0 * scale;
+	float size = 4.0 * scale;
+	float dens = 0.3;
+
+	for (int i = 0; i < 2; i++)
+	{
+		float2  cell = inverseSF(ppoint, freq, cellCenter);
+
+		rnd = hash1(cell.x);
+		r = size * cell.y;
+
+		if ((rnd < dens) && (r < 1.0))
+		{
+			dir = sign(0.5 * dens - rnd);
+			dist = saturate(1.0 - r);
+			dist2 = saturate(0.5 - r);
+			fi = pow(dist, strength) * (exp(-6.0 * dist2) + 0.25);
+			twistedPoint = Rotate(dir * 15.0 * sign(cellCenter.y + 0.001) * fi, cellCenter.xyz, ppoint);
+		}
+
+		freq = min(freq * 2.0, 1600.0);
+		size = min(size * 1.2, 30.0);
+		strength = strength * 1.5;
+		ppoint = twistedPoint;
+	}
+
+	return twistedPoint;
 }
 //-----------------------------------------------------------------------------
 
@@ -3855,8 +3881,8 @@ float HeightMapTerra(float3 ppoint)
 		crater = CraterNoise(ppoint, 0.5 * craterMagn, craterFreq, craterSqrtDensity, craterOctaves);
 		noiseOctaves    = 10.0;
 		noiseLacunarity = 2.0;
-		//crater = 0.25 * crater + 0.05 * crater * iqTurbulence(ppoint * montesFreq + Randomize, 0.55);
-		 crater = RidgedMultifractalErodedDetail(ppoint * 0.3 * montesFreq + Randomize, 2.0, erosion, 0.25 * crater);
+		crater = 0.25 * crater + 0.05 * crater * iqTurbulence(ppoint * montesFreq + Randomize, 0.55);
+		//crater = RidgedMultifractalErodedDetail(ppoint * 0.3 * montesFreq + Randomize, 2.0, erosion, 0.25 * crater);
 	}
 
 	height += mare + crater;

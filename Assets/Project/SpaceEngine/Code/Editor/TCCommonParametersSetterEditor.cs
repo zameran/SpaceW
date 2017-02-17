@@ -30,6 +30,8 @@
  */
 #endregion
 
+using System;
+
 using UnityEditor;
 using UnityEngine;
 
@@ -38,15 +40,11 @@ public sealed class TCCommonParametersSetterEditor : Editor
 {
     private enum Tab
     {
-        Main, Noise, Texturing, Clouds, Nature, Montes, Dunes, Hills, Canyons, Rivers, Cracks, Craters, Radials, Volcanoes, Mare, Venus
+        Main, Noise, Texturing, Clouds, Nature, Montes, Dunes, Hills, Canyons, Rivers, Cracks, Craters, Volcanoes, Mare, Venus
     }
 
     private Tab currentTab = Tab.Main;
     private Tab prevTab = Tab.Main;
-
-    private string[] tabTexts = new string[16] { "Main", "Noise", "Texturing", "Clouds", "Nature", "Montes", "Dunes", "Hills",
-                                                 "Canyons", "Rivers", "Cracks", "Craters", "Radials", "Volcanoes",
-                                                 "Mare", "Venus" };
 
     private void DrawGUIForMain(TCCommonParametersSetter setter)
     {
@@ -83,11 +81,6 @@ public sealed class TCCommonParametersSetterEditor : Editor
         setter.canyonsParams.w = EditorGUILayout.Slider("erosion", setter.canyonsParams.w, 0.0f, 1.0f);
 
         setter.mainParams.y = EditorGUILayout.Slider("terraceProb ", setter.mainParams.y, 0.0f, 1.0f);
-
-        setter.crHeightParams.x = EditorGUILayout.Slider("heightFloor ", setter.crHeightParams.x, -1.0f, 1.0f);
-        setter.crHeightParams.y = EditorGUILayout.Slider("heightPeak ", setter.crHeightParams.y, 0.0f, 1.0f);
-        setter.crHeightParams.z = EditorGUILayout.Slider("heightRim ", setter.crHeightParams.z, 0.0f, 1.0f);
-        setter.crHeightParams.w = EditorGUILayout.Slider("heightCrew ", setter.crHeightParams.w, 0.0f, 1.0f);
     }
 
     private void DrawGUIForTexturing(TCCommonParametersSetter setter)
@@ -212,29 +205,6 @@ public sealed class TCCommonParametersSetterEditor : Editor
         setter.craterParams.z = EditorGUILayout.Slider("craterDensity ", setter.craterParams.z, 0.0f, 2.0f);
         setter.craterParams.w = (float)Mathf.RoundToInt(EditorGUILayout.Slider("craterOctaves ", setter.craterParams.w, 0.0f, 20.0f));
         setter.cracksParams.w = EditorGUILayout.Slider("craterRayedFactor ", setter.cracksParams.w, 0.0f, 1.0f);
-
-        setter.craterParams1.x = EditorGUILayout.Slider("craterSphereRadius ", setter.craterParams1.x, 0.0f, 1.0f);
-        setter.craterParams1.y = EditorGUILayout.Slider("craterRoundDist ", setter.craterParams1.y, 0.0f, 1.0f);
-        setter.craterParams1.z = EditorGUILayout.Slider("craterDistortion ", setter.craterParams1.z, 0.0f, 1.0f);
-        setter.craterParams1.w = EditorGUILayout.Slider("craterRaysColor ", setter.craterParams1.w, 0.0f, 1.0f);
-
-        setter.craterParams2.x = EditorGUILayout.Slider("craterAmplitudePerOctave ", setter.craterParams2.x, 0.0f, 1.0f);
-        setter.craterParams2.y = EditorGUILayout.Slider("craterHeightPeakPerOctave ", setter.craterParams2.y, 0.0f, 1.0f);
-        setter.craterParams2.z = EditorGUILayout.Slider("craterHeightFloorPerOctave ", setter.craterParams2.z, 0.0f, 2.0f);
-        setter.craterParams2.w = EditorGUILayout.Slider("craterRadInnerPerOctave ", setter.craterParams2.w, 0.0f, 1.0f);
-
-        //amplitude *= 0.55;
-        //heightPeak *= 0.25;
-        //heightFloor *= 1.2;
-        //radInner *= 0.60;
-    }
-
-    private void DrawGUIForRadials(TCCommonParametersSetter setter)
-    {
-        setter.radParams.x = EditorGUILayout.Slider("radPeak ", setter.radParams.x, 0.0f, 0.5f);
-        setter.radParams.y = EditorGUILayout.Slider("radInner ", setter.radParams.y, 0.0f, 0.5f);
-        setter.radParams.z = EditorGUILayout.Slider("radRim ", setter.radParams.z, 0.0f, 0.5f);
-        setter.radParams.w = EditorGUILayout.Slider("radOuter ", setter.radParams.w, 0.0f, 0.5f);
     }
 
     private void DrawGUIForVolcanoes(TCCommonParametersSetter setter)
@@ -309,7 +279,7 @@ public sealed class TCCommonParametersSetterEditor : Editor
         EditorGUILayout.BeginVertical();
         EditorGUILayout.BeginHorizontal();
 
-        currentTab = (Tab)GUILayout.SelectionGrid((int)currentTab, tabTexts, 4, EditorStyles.toolbarButton);
+        currentTab = (Tab)GUILayout.SelectionGrid((int)currentTab, Enum.GetNames(typeof(Tab)), 4, EditorStyles.toolbarButton);
 
         if (currentTab != prevTab && setter.AutoUpdate)
         {
@@ -360,9 +330,6 @@ public sealed class TCCommonParametersSetterEditor : Editor
                 break;
             case Tab.Craters:
                 DrawGUIForCraters(setter);
-                break;
-            case Tab.Radials:
-                DrawGUIForRadials(setter);
                 break;
             case Tab.Volcanoes:
                 DrawGUIForVolcanoes(setter);
