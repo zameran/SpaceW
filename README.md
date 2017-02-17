@@ -2,6 +2,8 @@
 
 SpaceW is procedural universe generator simulator.
 
+![alt tag](https://github.com/zameran/SpaceW/blob/develop/Logo.png?raw=true)
+
 [gitter channel placeholder] : [discord channel placeholder] : [telegram channel placeholder] : [other paceholder] : [other placeholder]
 
 ## Current Engine version support ##
