@@ -66,8 +66,8 @@ float NoiseFunction(float3 coord, float lodom)
 	float noiseValue = Noise(scaledCoord * 16 + Randomize);
 	#else
 	//float noiseValue = HeightMapAsteroid(scaledCoord);
-	//float noiseValue = HeightMapTerra(scaledCoord);
-	float noiseValue = HeightMapPlanet(scaledCoord);
+	float noiseValue = HeightMapTerra(scaledCoord);
+	//float noiseValue = HeightMapPlanet(scaledCoord);
 	//float noiseValue = HeightMapCloudsGasGiant(scaledCoord);
 	#endif
 	
@@ -86,8 +86,8 @@ float4 ColorFunction(float3 coord, float height, float slope)
 	//float4 colorMapColor = ColorMapAsteroid(scaledCoord, height, slope);
 	//float4 glowMapColor = GlowMapAsteroid(scaledCoord, height, slope);
 	//float4 color = colorMapColor + glowMapColor;
-	//float4 color = ColorMapTerra(scaledCoord, height, slope);
-	float4 color = ColorMapPlanet(scaledCoord, height, slope);
+	float4 color = ColorMapTerra(scaledCoord, height, slope);
+	//float4 color = ColorMapPlanet(scaledCoord, height, slope);
 	//float4 color = ColorMapCloudsGasGiant(scaledCoord, height, slope);
 	//float4 color = float4(height, height, height, 1);
 	#endif
