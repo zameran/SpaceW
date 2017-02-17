@@ -144,7 +144,7 @@ public sealed class TCCommonParametersSetterEditor : Editor
     private void DrawGUIForNature(TCCommonParametersSetter setter)
     {
         setter.mareParams.x = EditorGUILayout.Slider("seaLevel ", setter.mareParams.x, -1.0f, 1.0f);
-        setter.mainParams.w = EditorGUILayout.Slider("snowLevel ", setter.mainParams.w, 0.0f, 1.0f);
+        setter.mainParams.w = EditorGUILayout.Slider("snowLevel ", setter.mainParams.w, 0.0f, 10.0f);
 
         setter.mainParams.z = EditorGUILayout.Slider("surfType ", setter.mainParams.z, 0.0f, 6.0f);
 
@@ -207,7 +207,7 @@ public sealed class TCCommonParametersSetterEditor : Editor
 
     private void DrawGUIForCraters(TCCommonParametersSetter setter)
     {
-        setter.craterParams.x = EditorGUILayout.Slider("craterMagn ", setter.craterParams.x, 0.0f, 100.0f);
+        setter.craterParams.x = EditorGUILayout.Slider("craterMagn ", setter.craterParams.x, 0.0f, 10000.0f);
         setter.craterParams.y = EditorGUILayout.Slider("craterFreq ", setter.craterParams.y, 0.0f, 1000.0f);
         setter.craterParams.z = EditorGUILayout.Slider("craterDensity ", setter.craterParams.z, 0.0f, 2.0f);
         setter.craterParams.w = (float)Mathf.RoundToInt(EditorGUILayout.Slider("craterOctaves ", setter.craterParams.w, 0.0f, 20.0f));
@@ -258,7 +258,7 @@ public sealed class TCCommonParametersSetterEditor : Editor
 
     private void DrawGUIForVenus(TCCommonParametersSetter setter)
     {
-        setter.textureParams.z = EditorGUILayout.Slider("venusMagn ", setter.textureParams.z, 0.0f, 100.0f);
+        setter.textureParams.z = EditorGUILayout.Slider("venusMagn ", setter.textureParams.z, -1.0f, 1.0f);
         setter.textureParams.w = EditorGUILayout.Slider("venusFreq ", setter.textureParams.w, 0.0f, 1000.0f);
     }
 

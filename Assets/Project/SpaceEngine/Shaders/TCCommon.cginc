@@ -251,22 +251,7 @@ uniform float noiseRidgeSmooth;// = 0.0001;
 #define     cycloneFreq         cycloneParams.y
 #define     cycloneSqrtDensity  cycloneParams.z
 #define     cycloneOctaves      cycloneParams.w
-#define		radPeak				radParams.x
-#define		radInner			radParams.y
-#define		radRim				radParams.z
-#define		radOuter			radParams.w
-#define		heightFloor			crHeightParams.x
-#define		heightPeak			crHeightParams.y
-#define		heightRim			crHeightParams.z
 #define		heightCrew			crHeightParams.w
-#define		craterSphereRadius	craterParams1.x
-#define		craterRoundDist		craterParams1.y
-#define		craterDistortion	craterParams1.z
-#define		craterRaysColor		craterParams1.w
-#define		craterAmplitudePerOctave	craterParams2.x;
-#define		craterHeightPeakPerOctave	craterParams2.y;
-#define		craterHeightFloorPerOctave	craterParams2.z;
-#define		craterRadInnerPerOctave		craterParams2.w;
 //-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
@@ -568,18 +553,20 @@ inline float4 ruvy(float4 uv)
 // vary sets one of 4 different tiles of the same material
 Surface GetSurfaceColorAtlas(float height, float slope, float vary)
 {
-	float4 PackFactors = float4(1.0 / ATLAS_RES_X, 1.0 / ATLAS_RES_Y, ATLAS_TILE_RES, ATLAS_TILE_RES_LOG2);
+	const float4 PackFactors = float4(1.0 / ATLAS_RES_X, 1.0 / ATLAS_RES_Y, ATLAS_TILE_RES, ATLAS_TILE_RES_LOG2);
 	slope = saturate(slope * 0.5);
 
-	float4 IdScale = tex2Dlod(MaterialTable, float4(ruvy(float2(height + texturingHeightOffset, (slope + 0.5) + texturingSlopeOffset)), 0, 0));
-
+	//float4 IdScale = tex2Dlod(MaterialTable, float4(ruvy(float2(height + texturingHeightOffset, (slope + 0.5) + texturingSlopeOffset)), 0, 0));
+	float4 IdScale = tex2Dlod(MaterialTable, float4(float2(height + texturingHeightOffset, (slope + 0.5) + texturingSlopeOffset), 0, 0));
 	uint materialID = min(int(IdScale.x) + int(vary), int(ATLAS_RES_X * ATLAS_RES_Y - 1));
 	float2 tileOffs = float2(materialID % ATLAS_RES_X, materialID / ATLAS_RES_X) * PackFactors.xy;
 
 	Surface res;
 	float2 tileUV = (float2(1, 1) * faceParams.z + faceParams.xy) * texScale * IdScale.y;//(TexCoord.xy * faceParams.z + faceParams.xy) * texScale * IdScale.y;
-	float2 dx = Fwidth(tileUV * PackFactors.z, PackFactors.xy); //dFdx(tileUV * PackFactors.z);
-	float2 dy = Fwidth(tileUV * PackFactors.z, PackFactors.xy); //dFdy(tileUV * PackFactors.z);
+	//float2 dx = Fwidth(tileUV * PackFactors.z, PackFactors.xy); //dFdx(tileUV * PackFactors.z);
+	//float2 dy = Fwidth(tileUV * PackFactors.z, PackFactors.xy); //dFdy(tileUV * PackFactors.z);
+	float2 dx = dFdx(tileUV * PackFactors.z);
+	float2 dy = dFdy(tileUV * PackFactors.z);
 
 	float lod = 4;//clamp(0.5 * log2(max(dot(dx, dx), dot(dy, dy))), 0.0, PackFactors.w);
 
@@ -1012,19 +999,19 @@ float4 NoiseDeriv(float3 p)
 	float g = dot(tex2Dlod(PermGradSampler, AA.y + one).rgb, p + float3(0, -1, -1));
 	float h = dot(tex2Dlod(PermGradSampler, AA.w + one).rgb, p + float3(-1, -1, -1));
 
-	float k0 = a;
-	float k1 = b - a;
-	float k2 = c - a;
-	float k3 = e - a;
-	float k4 = a - b - c + d;
-	float k5 = a - c - e + g;
-	float k6 = a - b - e + f;
+	float k0 =  a;
+	float k1 =  b - a;
+	float k2 =  c - a;
+	float k3 =  e - a;
+	float k4 =  a - b - c + d;
+	float k5 =  a - c - e + g;
+	float k6 =  a - b - e + f;
 	float k7 = -a + b + c - d + e - f - g + h;
 
-	return float4(df.x * (k1 + k4 * ff.y + k6 * ff.z + k7 * ff.y * ff.z),
-						  df.y * (k2 + k5 * ff.z + k4 * ff.x + k7 * ff.z * ff.x),
-						  df.z * (k3 + k6 * ff.x + k5 * ff.y + k7 * ff.x * ff.y),
-						  k0 + k1 * ff.x + k2 * ff.y + k3 * ff.z + k4 * ff.x * ff.y + k5 * ff.y * ff.z + k6 * ff.z * ff.x + k7 * ff.x * ff.y * ff.z);
+	return float4(df.x * (k1 + k4*ff.y + k6*ff.z + k7*ff.y*ff.z),
+				  df.y * (k2 + k5*ff.z + k4*ff.x + k7*ff.z*ff.x),
+				  df.z * (k3 + k6*ff.x + k5*ff.y + k7*ff.x*ff.y),
+				  k0 + k1*ff.x + k2*ff.y + k3*ff.z + k4*ff.x*ff.y + k5*ff.y*ff.z + k6*ff.z*ff.x + k7*ff.x*ff.y*ff.z);
 }
 //-----------------------------------------------------------------------------
 
@@ -2833,160 +2820,224 @@ float2 inverseSF(float3 p, float n, out float3 NearestPoint)
 //-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
+float radPeak;
+float radInner;
+float radRim;
+float radOuter;
+float heightFloor;
+float heightPeak;
+float heightRim;
+float craterSphereRadius;
+float craterRoundDist;
+float craterDistortion;
+float4 craterRaysColor;
+
 float CraterHeightFunc(float lastlastLand, float lastLand, float height, float r)
 {
-	float t;
+	float distHeight = craterDistortion * height;
 
-	if (r < radPeak) // central peak
-	{   
-		t = 1.0 - r / radPeak;
+	float t = 1.0 - r / radPeak;
+	float peak = heightPeak * craterDistortion * smoothstep(0.0, 1.0, t);
 
-		return lastlastLand + height * heightFloor + heightPeak * craterDistortion * smoothstep(0.0, 1.0, t);
-	}
-	else if (r < radInner) // crater bottom
-	{   
-		return lastlastLand + height * heightFloor;
-	}
-	else if (r < radRim) // inner rim
-	{  
-		t = (r - radInner) / (radRim - radInner);
+	t = smoothstep(0.0, 1.0, (r - radInner) / (radRim - radInner));
+	float inoutMask = t * t * t;
+	float innerRim = heightRim * distHeight * smoothstep(0.0, 1.0, inoutMask);
 
-		return lerp(lastlastLand + height * heightFloor, lastLand + height * heightRim * craterDistortion, t * t * t);
-	}
-	else if (r < radOuter) // outer rim
-	{  
-		t = 1.0 - (r - radRim) / (radOuter - radRim);
+	t = smoothstep(0.0, 1.0, (radOuter - r) / (radOuter - radRim));
+	float outerRim = distHeight * lerp(0.05, heightRim, t * t);
 
-		return lastLand + height * craterDistortion * lerp(0.1, heightRim, t * t);
-	}
-	else if (r < 1.0) // outer area
-	{  
-		t = 1.0 - (r - radOuter) / (1.0 - radOuter);
+	t = saturate((1.0 - r) / (1.0 - radOuter));
+	float halo = 0.05 * distHeight * t;
 
-		return lastLand + 0.1 * height * craterDistortion * t;
-	}
-	else
-		return lastLand;
+	return lerp(lastlastLand + height * heightFloor + peak + innerRim, lastLand + outerRim + halo, inoutMask);
 }
 
-float CraterNoise(float3 ppoint, float cratMagn, float cratFreq, float cratSqrtDensity, float cratOctaves)
+float   CraterNoise(float3 ppoint, float cratMagn, float cratFreq, float cratSqrtDensity, float cratOctaves)
 {
+	//craterSphereRadius = cratFreq * cratSqrtDensity;
+	//ppoint *= craterSphereRadius;
 	ppoint = (ppoint * cratFreq + Randomize) * cratSqrtDensity;
 
-	float newLand = 0.0;
-	float lastLand = 0.0;
-	float lastlastLand = 0.0;
-	float lastlastlastLand = 0.0;
-	float amplitude = 1.0;
-	float cell;
-	float radFactor = 1.0 / cratSqrtDensity;
+	float  newLand = 0.0;
+	float  lastLand = 0.0;
+	float  lastlastLand = 0.0;
+	float  lastlastlastLand = 0.0;
+	float  amplitude = 1.0;
+	float  cell;
+	float  radFactor = 1.0 / cratSqrtDensity;
 
-	radPeak = 0.02;
+	// Craters roundness distortion
+	noiseH           = 0.5;
+	noiseLacunarity  = 2.218281828459;
+	noiseOffset      = 0.8;
+	noiseOctaves     = 3;
+	craterDistortion = 1.0;
+	craterRoundDist  = 0.03;
+
+	radPeak  = 0.03;
 	radInner = 0.15;
-	radRim = 0.20;
-	radOuter = 0.40;
+	radRim   = 0.2;
+	radOuter = 0.8;
 
-	for (int i = 0; i < cratOctaves; i++)
+	for (int i=0; i<cratOctaves; i++)
 	{
-		float id = (i + 1) * 0.25;
-
-		cell = Cell3Noise(ppoint + craterRoundDist * Fbm3D(ppoint * 2.56));
-
 		lastlastlastLand = lastlastLand;
 		lastlastLand = lastLand;
 		lastLand = newLand;
-		newLand = CraterHeightFunc(lastlastlastLand, lastLand, amplitude, cell * radFactor);
-		ppoint *= 1.81818182;
-		amplitude *= craterAmplitudePerOctave;
-		heightPeak *= craterHeightPeakPerOctave;
-		heightFloor *= craterHeightFloorPerOctave;
-		radInner *= craterRadInnerPerOctave;
-	}
 
-	return cratMagn * newLand;
-}
-
-float RayedCraterColorFunc(float r, float fi, float rnd)
-{
-	if (r < radOuter)
-	{
-		float t = 1.0 - (r - radRim) / (radOuter - radRim);
-
-		float d = SavePow(NoiseU(float3(70.3 * fi, rnd, rnd)), 4);
-
-		return sqrt(t) * saturate(SavePow(d, 4) + 1.0 - smoothstep(d, d + 0.75, r));
-	}
-	else
-		return 0.0;
-}
-
-float RayedCraterNoise(float3 ppoint, float cratMagn, float cratFreq, float cratSqrtDensity, float cratOctaves)
-{
-	craterSphereRadius = cratFreq * cratSqrtDensity;
-
-	float newLand = 0.0;
-	float lastLand = 0.0;
-	float lastlastLand = 0.0;
-	float lastlastlastLand = 0.0;
-	float amplitude = 1.0;
-	float cell;
-	float radFactor = 1.0 / cratSqrtDensity;
-
-	radPeak = 0.002;
-	radInner = 0.015;
-	radRim = 0.020;
-	radOuter = 0.040;
-
-	for (int i = 0; i < cratOctaves; i++)
-	{
-		cell = Cell2NoiseSphere(ppoint, craterSphereRadius).w;
-
-		lastlastlastLand = lastlastLand;
-		lastlastLand = lastLand;
-		lastLand = newLand;
+		//float3 dist = craterRoundDist * Fbm3D(ppoint*2.56);
+		//cell = Cell2NoiseSphere(ppoint + dist, craterSphereRadius, dist).w;
+		//craterSphereRadius *= 1.83;
+		cell = Cell3Noise(ppoint + craterRoundDist * Fbm3D(ppoint*2.56));
 		newLand = CraterHeightFunc(lastlastlastLand, lastLand, amplitude, cell * radFactor);
 
-		craterSphereRadius *= 1.81818182;
-		//amplitude *= 0.55;
-		//heightPeak *= 0.25;
-		//heightFloor *= 1.2;
-		//radInner *= 0.60;
-		amplitude *= craterAmplitudePerOctave;
-		heightPeak *= craterHeightPeakPerOctave;
-		heightFloor *= craterHeightFloorPerOctave;
-		radInner *= craterRadInnerPerOctave;
+		//cell = inverseSF(ppoint + 0.2 * craterRoundDist * Fbm3D(ppoint*2.56), fibFreq);
+		//rad = hash1(cell.x * 743.1) * 0.9 + 0.1;
+		//newLand = CraterHeightFunc(lastlastlastLand, lastLand, amplitude, cell.y * radFactor / rad);
+		//fibFreq   *= 1.81818182;
+		//radFactor *= 1.3483997256; // = sqrt(1.81818182)
+
+		if (cratOctaves > 1)
+		{
+			ppoint       *= 1.81818182;
+			amplitude    *= 0.55;
+			heightPeak   *= 0.25;
+			heightFloor  *= 1.2;
+			radInner     *= 0.60;
+		}
 	}
 
 	return  cratMagn * newLand;
 }
 
+float RayedCraterColorFunc(float r, float fi, float rnd)
+{
+	float t = saturate((radOuter - r) / (radOuter - radRim));
+	float d4 = NoiseU(float3(70.3 * fi, rnd, rnd));
+
+	d4 *= d4;
+	d4 *= d4;
+
+	float d16 = d4 * d4;
+
+	d16 *= d16;
+
+	return sqrt(t) * pow(saturate(/*0.001 * t * t +*/ d16 + 1.0 - smoothstep(d4, d4 + 0.75, r)), 2.5);
+}
+
+float   RayedCraterNoise(float3 ppoint, float cratMagn, float cratFreq, float cratSqrtDensity, float cratOctaves)
+{
+	float3 rotVec = normalize(Randomize);
+
+	// Craters roundness distortion
+	noiseH           = 0.5;
+	noiseLacunarity  = 2.218281828459;
+	noiseOffset      = 0.8;
+	noiseOctaves     = 3;
+	craterDistortion = 1.0;
+	craterRoundDist  = 0.03;
+	float shapeDist = 1.0 + 0.5 * craterRoundDist * Fbm(ppoint * 419.54);
+
+	radPeak  = 0.002;
+	radInner = 0.015;
+	radRim   = 0.03;
+	radOuter = 0.8;
+
+	float newLand = 0.0;
+	float lastLand = 0.0;
+	float lastlastLand = 0.0;
+	float lastlastlastLand = 0.0;
+	float amplitude = 1.0;
+	float2 cell;
+	float rad;
+	float radFactor = shapeDist / cratSqrtDensity;
+	float fibFreq = 2.0 * cratFreq;
+
+	for (int i=0; i<cratOctaves; i++)
+	{
+		lastlastlastLand = lastlastLand;
+		lastlastLand = lastLand;
+		lastLand = newLand;
+
+		//cell = Cell2NoiseSphere(ppoint, craterSphereRadius).w;
+		////cell = Cell2NoiseVec(ppoint * craterSphereRadius, 1.0).w;
+		//newLand = CraterHeightFunc(0.0, lastLand, amplitude, cell * radFactor);
+
+		cell    = inverseSF(ppoint, fibFreq);
+		rad     = hash1(cell.x * 743.1) * 0.9 + 0.1;
+		newLand = CraterHeightFunc(lastlastlastLand, lastLand, amplitude, cell.y * radFactor / rad);
+
+		if (cratOctaves > 1)
+		{
+			ppoint = Rotate(M_PI2 * hash1(float(i)), rotVec, ppoint);
+			fibFreq     *= 1.81818182;
+			radFactor   *= 1.3483997256; // = sqrt(1.81818182)
+			amplitude   *= 0.55;
+			heightPeak  *= 0.25;
+			heightFloor *= 1.2;
+			radInner    *= 0.6;
+		}
+	}
+
+	return  cratMagn * newLand;
+}
+
+//-----------------------------------------------------------------------------
+
 float RayedCraterColorNoise(float3 ppoint, float cratFreq, float cratSqrtDensity, float cratOctaves)
 {
-	float3 binormal = normalize(cross(ppoint, float3(0.0, 1.0, 0.0)));
+	float3 binormal = normalize(float3(-ppoint.z, 0.0, ppoint.x)); // = normalize(cross(ppoint, float3(0, 1, 0)));
+	float3 rotVec = normalize(Randomize);
 
-	craterSphereRadius = cratFreq * cratSqrtDensity;
+	// Craters roundness distortion
+	noiseH           = 0.5;
+	noiseLacunarity  = 2.218281828459;
+	noiseOffset      = 0.8;
+	noiseOctaves     = 3;
+	craterDistortion = 1.0;
+	craterRoundDist  = 0.03;
+	float shapeDist = 1.0 + 0.5 * craterRoundDist * Fbm(ppoint * 419.54);
+	float colorDist = 1.0 - 0.2 * Fbm(ppoint * 4315.16);
 
 	float color = 0.0;
 	float fi;
-	float4 cell;
-	float radFactor = 1.0 / cratSqrtDensity;
+	float2  cell;
+	float3  cellCenter = float3(0.0, 0.0, 0.0);
+	float rad;
+	float radFactor = shapeDist / cratSqrtDensity;
+	float fibFreq = 2.0 * cratFreq;
 
-	radPeak = 0.002;
-	radInner = 0.015;
-	radRim = 0.030;
-	radOuter = 0.800;
+	heightFloor = -0.5;
+	heightPeak  = 0.6;
+	heightRim   = 1.0;
+	radPeak     = 0.002;
+	radInner    = 0.015;
+	radRim      = 0.03;
+	radOuter    = 0.8;
 
 	for (int i = 0; i < cratOctaves; i++)
 	{
-		cell = Cell2NoiseVec(ppoint * craterSphereRadius);
-		//fi = acos(dot(binormal, normalize(cell.xyz - ppoint))) / (M_PI * 2.0); //10 * Y = 10 / (3.14159265359 * 2.0) //Y = 0.159155
-		fi = acos(dot(binormal, normalize(cell.xyz - ppoint))) * 0.159155;
-		color += RayedCraterColorFunc(cell.w * radFactor, fi, 48.3 * dot(cell.xyz, Randomize));
-		craterSphereRadius *= 1.81818182;
-		radInner *= 0.60;
+		//cell = Cell2NoiseSphere(ppoint, craterSphereRadius);
+		////cell = Cell2NoiseVec(ppoint * craterSphereRadius, 1.0);
+		//fi = acos(dot(binormal, normalize(cell.xyz - ppoint))) / (pi*2.0);
+		//color += vary * RayedCraterColorFunc(cell.w * radFactor, fi, 48.3 * dot(cell.xyz, Randomize));
+		//radInner  *= 0.6;
+
+		cell = inverseSF(ppoint, fibFreq, cellCenter);
+		rad  = hash1(cell.x * 743.1) * 0.9 + 0.1;
+		fi   = acos(dot(binormal, normalize(cellCenter - ppoint))) / (M_PI2 * 2.0);
+		color += RayedCraterColorFunc(cell.y * radFactor / rad, fi, 48.3 * dot(cellCenter, Randomize));
+
+		if (cratOctaves > 1)
+		{
+			ppoint = Rotate(M_PI2 * hash1(float(i)), rotVec, ppoint);
+			fibFreq   *= 1.81818182;
+			radFactor *= 1.3483997256; // = sqrt(1.81818182)
+			radInner  *= 0.6;
+		}
 	}
 
-	return color;
+	return color * colorDist;
 }
 
 float VolcanoRidges(float r, float fi1, float fi2, float rnd)
@@ -3804,7 +3855,8 @@ float HeightMapTerra(float3 ppoint)
 		crater = CraterNoise(ppoint, 0.5 * craterMagn, craterFreq, craterSqrtDensity, craterOctaves);
 		noiseOctaves    = 10.0;
 		noiseLacunarity = 2.0;
-		crater = 0.25 * crater + 0.05 * crater * iqTurbulence(ppoint * montesFreq + Randomize, 0.55);
+		//crater = 0.25 * crater + 0.05 * crater * iqTurbulence(ppoint * montesFreq + Randomize, 0.55);
+		 crater = RidgedMultifractalErodedDetail(ppoint * 0.3 * montesFreq + Randomize, 2.0, erosion, 0.25 * crater);
 	}
 
 	height += mare + crater;
