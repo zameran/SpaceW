@@ -52,11 +52,18 @@ public static class PlanetoidExtensions
                 Keywords.Add(planet.RingEnabled ? "RING_ON" : "RING_OFF");
                 if (planet.RingEnabled) Keywords.Add("SCATTERING");
 
-                var shadowsCount = planet.Shadows.Count((shadow) => shadow != null);
+                var shadowsCount = planet.Shadows.Count((shadow) => shadow != null && Helper.Enabled(shadow));
 
-                for (byte i = 1; i < shadowsCount + 1; i++)
+                if (shadowsCount > 0)
                 {
-                    Keywords.Add("SHADOW_" + i);
+                    for (byte i = 0; i < shadowsCount; i++)
+                    {
+                        Keywords.Add("SHADOW_" + (i + 1));
+                    }
+                }
+                else
+                {
+                    Keywords.Add("SHADOW_0");
                 }
             }
             else

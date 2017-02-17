@@ -67,7 +67,7 @@ Shader "SpaceEngine/QuadTestUnlit"
 			#pragma multi_compile LIGHT_1 LIGHT_2 LIGHT_3 LIGHT_4
 			#pragma multi_compile SHINE_ON SHINE_OFF
 			#pragma multi_compile ECLIPSES_ON ECLIPSES_OFF
-			#pragma multi_compile SHADOW_1 SHADOW_2 SHADOW_3 SHADOW_4
+			#pragma multi_compile SHADOW_0 SHADOW_1 SHADOW_2 SHADOW_3 SHADOW_4
 			#pragma multi_compile ATMOSPHERE_ON ATMOSPHERE_OFF
 
 			#include "UnityCG.cginc"
@@ -325,14 +325,11 @@ Shader "SpaceEngine/QuadTestUnlit"
 
 				float4 scatteringColor = 0;
 				fixed4 terrainColor = tex2D(_HeightTexture, IN.uv0);
-				fixed4 uvSamplerColor = tex2D(_PlanetUVSampler, IN.uv0);
+				fixed4 uvSamplerColor = tex2D(_PlanetUVSampler, CartesianToPolarUV(normalize(IN.vertex2.xyz))); // Calculating UV's in fragment to prevent artifacts... CHEATER!
 				fixed4 outputNormal = fixed4(normal, 1);
 
 				float height = tex2D(_HeightTexture, IN.uv0).a;
 				float slope = tex2D(_NormalTexture, IN.uv0).a;
-
-				float2 uvTest = SinACosAUV_Z(IN.vertex1.xyz);
-				float4 uvTestSampler = tex2D(_PlanetUVSampler, uvTest);
 
 				Account(terrainColor, scatteringColor, IN.vertex1.xyz, normal, IN.direction);
 

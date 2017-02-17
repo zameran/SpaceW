@@ -93,7 +93,7 @@ Shader "SpaceEngine/Atmosphere/Atmosphere"
 			#pragma multi_compile LIGHT_1 LIGHT_2 LIGHT_3 LIGHT_4
 			#pragma multi_compile SHINE_ON SHINE_OFF
 			#pragma multi_compile ECLIPSES_ON ECLIPSES_OFF
-			#pragma multi_compile SHADOW_1 SHADOW_2 SHADOW_3 SHADOW_4
+			#pragma multi_compile SHADOW_0 SHADOW_1 SHADOW_2 SHADOW_3 SHADOW_4
 
 			#pragma target 5.0
 			#pragma only_renderers d3d11 glcore

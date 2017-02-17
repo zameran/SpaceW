@@ -35,7 +35,7 @@
 
 using UnityEngine;
 
-public sealed class NoiseParametersSetter : MonoBehaviour
+public sealed class NoiseParametersSetter : MonoBehaviour, IUniformed<Material>, IUniformed<ComputeShader>
 {
     public Texture2D PermSampler = null;
     public Texture2D PermGradSampler = null;
@@ -50,6 +50,84 @@ public sealed class NoiseParametersSetter : MonoBehaviour
     public Texture2D QuadTexture2 = null;
     public Texture2D QuadTexture3 = null;
     public Texture2D QuadTexture4 = null;
+
+    #region IUniformed<Material>
+
+    public void InitUniforms(Material target)
+    {
+        if (target == null) return;
+    }
+
+    public void SetUniforms(Material target)
+    {
+        if (target == null) return;
+
+        target.SetTexture("PermSampler", PermSampler);
+        target.SetTexture("PermGradSampler", PermGradSampler);
+        target.SetTexture("PermSamplerGL", PermSamplerGL);
+        target.SetTexture("PermGradSamplerGL", PermSamplerGL);
+
+        target.SetTexture("AtlasDiffSampler", PlanetAtlas);
+        target.SetTexture("MaterialTable", PlanetColor);
+        target.SetTexture("ColorMap", PlanetColorMap);
+
+        target.SetTexture("_PlanetUVSampler", PlanetUVSampler);
+
+        target.SetTexture("_QuadTexture1", QuadTexture1);
+        target.SetTexture("_QuadTexture2", QuadTexture2);
+        target.SetTexture("_QuadTexture3", QuadTexture3);
+        target.SetTexture("_QuadTexture4", QuadTexture4);
+    }
+
+    #endregion
+
+    #region IUniformed<ComputeShader>
+
+    public void InitUniforms(ComputeShader target)
+    {
+        if (target == null) return;
+    }
+
+    public void SetUniforms(ComputeShader target)
+    {
+        if (target == null) return;
+    }
+
+    public void SetUniforms(ComputeShader target, params int[] kernels)
+    {
+        if (target == null) return;
+        if (kernels == null || kernels.Length == 0) { Debug.Log("Quad.SetupComputeShaderKernelsUniforfms(...) problem!"); return; }
+
+        for (int i = 0; i < kernels.Length; i++)
+        {
+            SetUniforms(target, i);
+        }
+    }
+
+    public void SetUniforms(ComputeShader target, int kernel)
+    {
+        if (target == null) return;
+
+        target.SetTexture(kernel, "PermSampler", PermSampler);
+        target.SetTexture(kernel, "PermGradSampler", PermGradSampler);
+        target.SetTexture(kernel, "PermSamplerGL", PermSamplerGL);
+        target.SetTexture(kernel, "PermGradSamplerGL", PermSamplerGL);
+
+        target.SetTexture(kernel, "AtlasDiffSampler", PlanetAtlas);
+        target.SetTexture(kernel, "MaterialTable", PlanetColor);
+        target.SetTexture(kernel, "ColorMap", PlanetColorMap);
+    }
+
+    #endregion
+
+    #region IUniformed
+
+    public void InitSetUniforms()
+    {
+
+    }
+
+    #endregion
 
     private void Awake()
     {
@@ -71,15 +149,8 @@ public sealed class NoiseParametersSetter : MonoBehaviour
         SetUniforms(mat);
     }
 
-    public void UpdateUniforms(Material mat, ComputeShader cs)
+    public void UpdateUniforms(ComputeShader cs, int kernel)
     {
-        SetUniforms(mat);
-        SetUniforms(cs);
-    }
-
-    public void UpdateUniforms(Material mat, ComputeShader cs, int kernel)
-    {
-        SetUniforms(mat);
         SetUniforms(cs, kernel);
     }
 
@@ -96,57 +167,6 @@ public sealed class NoiseParametersSetter : MonoBehaviour
 
     public Texture2D LoadTextureFromResources(string name)
     {
-        Texture2D temp = Resources.Load("Textures/" + name, typeof(Texture2D)) as Texture2D;
-
-        return temp;
-    }
-
-    private void SetUniforms(Material mat)
-    {
-        if (mat == null) return;
-
-        mat.SetTexture("PermSampler", PermSampler);
-        mat.SetTexture("PermGradSampler", PermGradSampler);
-        mat.SetTexture("PermSamplerGL", PermSamplerGL);
-        mat.SetTexture("PermGradSamplerGL", PermSamplerGL);
-
-        mat.SetTexture("AtlasDiffSampler", PlanetAtlas);
-        mat.SetTexture("MaterialTable", PlanetColor);
-        mat.SetTexture("ColorMap", PlanetColorMap);
-
-        mat.SetTexture("_PlanetUVSampler", PlanetUVSampler);
-
-        mat.SetTexture("_QuadTexture1", QuadTexture1);
-        mat.SetTexture("_QuadTexture2", QuadTexture2);
-        mat.SetTexture("_QuadTexture3", QuadTexture3);
-        mat.SetTexture("_QuadTexture4", QuadTexture4);
-    }
-
-    private void SetUniforms(ComputeShader shader)
-    {
-        if (shader == null) return;
-
-        shader.SetTexture(0, "PermSampler", PermSampler);
-        shader.SetTexture(0, "PermGradSampler", PermGradSampler);
-        shader.SetTexture(0, "PermSamplerGL", PermSamplerGL);
-        shader.SetTexture(0, "PermGradSamplerGL", PermSamplerGL);
-
-        shader.SetTexture(0, "AtlasDiffSampler", PlanetAtlas);
-        shader.SetTexture(0, "MaterialTable", PlanetColor);
-        shader.SetTexture(0, "ColorMap", PlanetColorMap);
-    }
-
-    private void SetUniforms(ComputeShader shader, int kernel)
-    {
-        if (shader == null) return;
-
-        shader.SetTexture(kernel, "PermSampler", PermSampler);
-        shader.SetTexture(kernel, "PermGradSampler", PermGradSampler);
-        shader.SetTexture(kernel, "PermSamplerGL", PermSamplerGL);
-        shader.SetTexture(kernel, "PermGradSamplerGL", PermSamplerGL);
-
-        shader.SetTexture(kernel, "AtlasDiffSampler", PlanetAtlas);
-        shader.SetTexture(kernel, "MaterialTable", PlanetColor);
-        shader.SetTexture(kernel, "ColorMap", PlanetColorMap);
+        return Resources.Load("Textures/" + name, typeof(Texture2D)) as Texture2D;
     }
 }
