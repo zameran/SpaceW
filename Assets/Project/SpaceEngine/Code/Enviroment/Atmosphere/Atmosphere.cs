@@ -76,6 +76,8 @@ namespace SpaceEngine.AtmosphericScattering
         public float Scale = 1.0f;
         public float Fade = 1.0f;
         public float AerialPerspectiveOffset = 2000.0f;
+
+        [Range(0.000025f, 0.1f)]
         public float ExtinctionGroundFade = 0.000025f;
 
         public int AtmosphereMeshResolution = 2;

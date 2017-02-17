@@ -152,7 +152,7 @@ Shader "SpaceEngine/Atmosphere/Atmosphere"
 
 				#ifdef ECLIPSES_ON
 					#if SHADOW_1 || SHADOW_2 || SHADOW_3 || SHADOW_4
-						float shadow = 1.0;
+						float4 shadow = 1.0;
 
 						shadow = ShadowOuterColor(d, WCP, -_Globals_Origin, Rt);
 						shadow = GroundFade(_ExtinctionGroundFade, shadow);
