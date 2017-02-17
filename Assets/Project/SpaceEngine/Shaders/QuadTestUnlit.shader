@@ -95,6 +95,7 @@ Shader "SpaceEngine/QuadTestUnlit"
 				float4 vertex0 : POSITION0;
 				float4 vertex1 : POSITION1;
 				float4 vertex2 : POSITION2;
+				float4 vertex3 : POSITION3;
 				float4 tangent0 : TANGENT0;
 				float depth : DEPTH;
 
@@ -271,6 +272,7 @@ Shader "SpaceEngine/QuadTestUnlit"
 				o.vertex0 = mul(UNITY_MATRIX_MVP, v.vertex);
 				o.vertex1 = mul(unity_ObjectToWorld, v.vertex); //TODO : Apply Origin vector. //NOTE : Bug here!!!!!111
 				o.vertex2 = v.vertex;
+				o.vertex3 = cubePosition;
 				o.tangent0 = v.tangent;
 				o.depth = 1;
 
@@ -325,14 +327,15 @@ Shader "SpaceEngine/QuadTestUnlit"
 
 				float4 scatteringColor = 0;
 				fixed4 terrainColor = tex2D(_HeightTexture, IN.uv0);
-				fixed4 uvSamplerColor = tex2D(_PlanetUVSampler, CartesianToPolarUV(normalize(IN.vertex2.xyz))); // Calculating UV's in fragment to prevent artifacts... CHEATER!
+				fixed4 uvSamplerColor = tex2D(_PlanetUVSampler, IN.uv0); // Calculating UV's in fragment to prevent artifacts... CHEATER!
 				fixed4 outputNormal = fixed4(normal, 1);
 
 				float height = tex2D(_HeightTexture, IN.uv0).a;
 				float slope = tex2D(_NormalTexture, IN.uv0).a;
-
+				
 				Account(terrainColor, scatteringColor, IN.vertex1.xyz, normal, IN.direction);
 
+				//outDiffuse = triplanar;
 				//outDiffuse = uvSamplerColor;
 				outDiffuse = lerp(scatteringColor, outputNormal, _DrawNormals);
 				//depth = log2(IN.depth) * (0.5 * FCoef(1e+2));
@@ -340,6 +343,25 @@ Shader "SpaceEngine/QuadTestUnlit"
 			}
 			ENDCG
 		}
+
+		/*
+		float3 triplanarVector = abs(IN.vertex2.xyz);
+		float3 triplanarUV = triplanarVector;
+		triplanarVector = normalize(max(triplanarVector, 0.00001));
+		float totalTriplanarVector = (triplanarVector.x + triplanarVector.y + triplanarVector.z);
+
+		triplanarVector /= totalTriplanarVector;
+
+		float4 triplanar = 0;
+		float4 qt1 = tex2D(_QuadTexture1, triplanarUV.xy * 0.1);
+		triplanar += (triplanarVector.x * qt1);
+
+		float4 qt2 = tex2D(_QuadTexture2, triplanarUV.yz * 0.1);
+		triplanar += (triplanarVector.y * qt2);
+
+		float4 qt3 = tex2D(_QuadTexture3, triplanarUV.zx * 0.1);
+		triplanar += (triplanarVector.z * qt3);
+		*/
 
 		//TODO : Shadow pass...
 		Pass

@@ -64,13 +64,6 @@
 //-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
-// coloring engine tweak:
-// 0 - disable wip.
-// 1 - enable wip.
-#define TEST 0
-//-----------------------------------------------------------------------------
-
-//-----------------------------------------------------------------------------
 // tile blending method:
 // 0 - hard mix (no blending)
 // 1 - soft blending
@@ -555,188 +548,110 @@ inline float4 ruvy(float4 uv)
 
 //-----------------------------------------------------------------------------
 #if (TILING_FIX_MODE <= 1)
-#if (TEST == 0)
-// Texture atlas sampling function
-// height, slope defines the tile based on MaterialTable texture
-// vary sets one of 4 different tiles of the same material
+
 Surface GetSurfaceColorAtlas(float height, float slope, float vary)
 {
-	const float4 PackFactors = float4(1.0 / ATLAS_RES_X, 1.0 / ATLAS_RES_Y, ATLAS_TILE_RES, ATLAS_TILE_RES_LOG2);
+	const float4  PackFactors = float4(1.0 / ATLAS_RES_X, 1.0 / ATLAS_RES_Y, ATLAS_TILE_RES, ATLAS_TILE_RES_LOG2);
 	slope = saturate(slope * 0.5);
 
-	//float4 IdScale = tex2Dlod(MaterialTable, float4(ruvy(float2(height + texturingHeightOffset, (slope + 0.5) + texturingSlopeOffset)), 0, 0));
-	float4 IdScale = tex2Dlod(MaterialTable, float4(float2(height + texturingHeightOffset, (slope + 0.5) + texturingSlopeOffset), 0, 0));
-	uint materialID = min(int(IdScale.x) + int(vary), int(ATLAS_RES_X * ATLAS_RES_Y - 1));
+	float4 IdScale = tex2Dlod(MaterialTable, float4(height + texturingHeightOffset, (slope + 0.5) + texturingSlopeOffset, 0, 0));
+	uint materialID = min(uint(IdScale.x) + uint(vary), uint(ATLAS_RES_X * ATLAS_RES_Y - 1));
 	float2 tileOffs = float2(materialID % ATLAS_RES_X, materialID / ATLAS_RES_X) * PackFactors.xy;
 
 	Surface res;
-	float2 tileUV = (float2(1, 1) * faceParams.z + faceParams.xy) * texScale * IdScale.y;//(TexCoord.xy * faceParams.z + faceParams.xy) * texScale * IdScale.y;
-	//float2 dx = Fwidth(tileUV * PackFactors.z, PackFactors.xy); //dFdx(tileUV * PackFactors.z);
-	//float2 dy = Fwidth(tileUV * PackFactors.z, PackFactors.xy); //dFdy(tileUV * PackFactors.z);
-	float2 dx = dFdx(tileUV * PackFactors.z);
-	float2 dy = dFdy(tileUV * PackFactors.z);
-
-	float lod = 4;//clamp(0.5 * log2(max(dot(dx, dx), dot(dy, dy))), 0.0, PackFactors.w);
-
-	float2 invSize = InvSize * PackFactors.xy; //float2(pow(2.0, lod - PackFactors.w), 0.0) * PackFactors.xy;
-	float4 uv = float4(tileOffs + frac(tileUV) * (PackFactors.xy - invSize) + 0.5 * invSize, 0, 0);
-	
-	#if (TILING_FIX_MODE == 0)
-		res.color = tex2Dlod(AtlasDiffSampler, float4(ruvy(float2(uv.xy * texturingUVAtlasOffset.xy)).xy, 0, 0));
-	#elif (TILING_FIX_MODE == 1)
-		float4 uv2 = (tileOffs + frac(-0.173 * tileUV) * (PackFactors.xy - invSize) + 0.5 * invSize, 0, 0);
-		res.color = lerp(tex2Dlod(AtlasDiffSampler, ruvy(uv * texturingUVAtlasOffset)), tex2Dlod(AtlasDiffSampler, ruvy(uv2 * texturingUVAtlasOffset)), 0.5);
-	#endif
-	
-	float4 adjust = tex2Dlod(MaterialTable, float4(ruvy(float2(height + texturingHeightOffset, slope + texturingSlopeOffset)), 0, 0));
-
-	adjust.xyz *= texColorConv;
-	
-	#if (COLOR_SPACE == 0)
-		float3 hsl = rgb2hsl(res.color.rgb);
-		hsl.x = frac(hsl.x + adjust.x);
-		hsl.yz = clamp(hsl.yz + adjust.yz, 0.0, 1.0);
-		res.color.rgb = hsl2rgb(hsl);
-	#elif (COLOR_SPACE == 1)
-		float3 rgb = res.color.rgb;
-		rgb.x = frac(rgb.x + adjust.x);
-		rgb.yz = clamp(rgb.yz + adjust.yz, 0.0, 1.0);
-		res.color.rgb = rgb;
-	#elif (COLOR_SPACE == 2)
-		float3 rgb = res.color.rgb;
-		rgb.xyz += adjust.xyz;
-		res.color.rgb = rgb;
-	#else
-		
-	#endif
-	
-	res.color = res.color * planetGlobalColor;
-	res.height = res.color.a;
-	res.color.a = adjust.a;
-
-	return  res;
-}
-
-#else
-
-//WIP
-Surface GetSurfaceColorAtlas(float height, float slope, float vary)
-{
-	float4 PackFactors = float4(1.0 / ATLAS_RES_X, 1.0 / ATLAS_RES_Y, ATLAS_TILE_RES, ATLAS_TILE_RES_LOG2);
-	slope = saturate(slope * 0.5);
-
-	float4 IdScale = tex2D(MaterialTable, float2(height, slope + 0.5));
-	int materialID = min(int(IdScale.x) + int(vary) * 100, int(ATLAS_RES_X * ATLAS_RES_Y - 1));
-	float2 tileOffs = float2(materialID % (uint)ATLAS_RES_X, materialID / (uint)ATLAS_RES_X) * PackFactors.xy;
-
-	Surface res;
-	//float2 tileUV = (TexCoord.xy * faceParams.z + faceParams.xy) * texScale * IdScale.y;
-	//float2 tileUV = (TexCoord.xy * faceParams.z + 1 / 240) * texScale * IdScale.y;
-	float2 tileUV = (TexCoord.xy * 1) * texScale * IdScale.y;
-	float2 dx = Fwidth(tileUV * PackFactors.z, PackFactors.xy);
-	float2 dy = Fwidth(tileUV * PackFactors.z, PackFactors.xy);
-	float lod = 9;//clamp(0.5 * log2(max(dot(dx, dx), dot(dy, dy))), 0.0, PackFactors.w);
-	float2 invSize = pow(2.0, lod - PackFactors.w) * PackFactors.xy;
+	float2 tileUV = (float2(1.0, 1.0) * faceParams.z + faceParams.xy) * texScale * IdScale.y;
+	float lod = 0;
+	//float2 invSize = pow(2.0, 4 - PackFactors.w) * PackFactors.xy;
+	float2 invSize = InvSize * PackFactors.xy;
 	float2 uv = tileOffs + frac(tileUV) * (PackFactors.xy - invSize) + 0.5 * invSize;
 
-	#if (TILING_FIX_MODE == 0)
-	res.color = tex2D(AtlasDiffSampler, uv);
-	#elif (TILING_FIX_MODE == 1)
+#if   (TILING_FIX_MODE == 0)
+	res.color = tex2Dlod(AtlasDiffSampler, ruvy(float4(uv, 0, lod)));
+#elif (TILING_FIX_MODE == 1)
 	float2 uv2 = tileOffs + frac(-0.173 * tileUV) * (PackFactors.xy - invSize) + 0.5 * invSize;
-	res.color = lerp(tex2D(AtlasDiffSampler, uv), tex2D(AtlasDiffSampler, uv2)), 0.5);
-	#endif
+	res.color = lerp(tex2Dlod(AtlasDiffSampler, ruvy(float4(uv, 0, lod))), tex2Dlod(AtlasDiffSampler, ruvy(float4(uv2, 0, lod))), 0.5);
+#endif
 
 	res.height = res.color.a;
 
-	//float4 adjust = tex2D(MaterialTable, float2(height, slope));
-	//adjust.xyz *= texColorConv;
-	//float3 hsl = rgb2hsl(res.color.rgb);
-	//hsl.x  = frac(hsl.x  + adjust.x);
-	//hsl.yz = clamp(hsl.yz + adjust.yz, 0.0, 1.0);
-	//res.color.rgb = hsl2rgb(hsl);
+	float4 adjust = tex2Dlod(MaterialTable, float4(height + texturingHeightOffset, slope + texturingSlopeOffset, 0, 0));
+	adjust.xyz *= texColorConv;
 
-	//res.color.a = adjust.a;
+	float3 hsl = rgb2hsl(res.color.rgb);
+	hsl.x  = frac(hsl.x  + adjust.x);
+	hsl.yz = clamp(hsl.yz + adjust.yz, 0.0, 1.0);
+
+	res.color.rgb = hsl2rgb(hsl);
+	res.color.a = adjust.a;
+
 	return res;
 }
 
-#endif
-
 #else
 
 Surface GetSurfaceColorAtlas(float height, float slope, float vary)
 {
-	float4 PackFactors = float4(1.0 / ATLAS_RES_X, 1.0 / ATLAS_RES_Y, ATLAS_TILE_RES, ATLAS_TILE_RES_LOG2);
+	const float4  PackFactors = float4(1.0 / ATLAS_RES_X, 1.0 / ATLAS_RES_Y, ATLAS_TILE_RES, ATLAS_TILE_RES_LOG2);
 	slope = saturate(slope * 0.5);
 
-	float4 IdScale = tex2Dlod(MaterialTable, float4(ruvy(float2(height + texturingHeightOffset, (slope + 0.5) + texturingSlopeOffset)), 0, 0));
-
-	uint materialID = min(int(IdScale.x) + int(vary), int(ATLAS_RES_X * ATLAS_RES_Y - 1));
+	float4 IdScale = tex2Dlod(MaterialTable, ruvy(float4(height + texturingHeightOffset, (slope + 0.5) + texturingSlopeOffset, 0, 0)));
+	uint materialID = min(uint(IdScale.x) + uint(vary), uint(ATLAS_RES_X * ATLAS_RES_Y - 1));
 	float2 tileOffs = float2(materialID % ATLAS_RES_X, materialID / ATLAS_RES_X) * PackFactors.xy;
 
-	float2 tileUV = (float2(1, 1) * faceParams.z + faceParams.xy) * texScale * IdScale.y;//(TexCoord.xy * faceParams.z + faceParams.xy) * texScale * IdScale.y;
-	float2 dx = Fwidth(tileUV * PackFactors.z, PackFactors.xy); //dFdx(tileUV * PackFactors.z);
-	float2 dy = Fwidth(tileUV * PackFactors.z, PackFactors.xy); //dFdy(tileUV * PackFactors.z);
+	float2 tileUV = (float2(1.0, 1.0) * faceParams.z + faceParams.xy) * texScale * IdScale.y;
+	float lod = 0; 
+	//float2 invSize = pow(2.0, 4 - PackFactors.w) * PackFactors.xy;
+	float2 invSize = InvSize * PackFactors.xy;
 
-	float lod = 4;//clamp(0.5 * log2(max(dot(dx, dx), dot(dy, dy))), 0.0, PackFactors.w);
-
-	float2 invSize = InvSize * PackFactors.xy; //float2(pow(2.0, lod - PackFactors.w), 0.0) * PackFactors.xy;
-
-	// Voronoi-based random offset for tile texture coordinates and rotation
-	float magOffs = 1.0; // magnitude of the texture coordinates offset
+	// Voronoi-based random offset and rotation for tile texture coordinates
+	const float magOffs = 1.0; // magnitude of the texture coordinates offset
 	float2 uvo = tileOffs + 0.5 * invSize;
 	float2 uvs = PackFactors.xy - invSize;
-	float2 p = floor(tileUV);
-	float2 f = frac(tileUV);
-	float4 color = float4(0, 0, 0, 0);
+	float2 p   = floor(tileUV);
+	float2 f   = frac(tileUV) - 0.5;
+	float4  color = float4(0.0, 0.0, 0.0, 0.0);
 	float weight = 0.0;
 
-	float4 adjust = tex2Dlod(MaterialTable, float4(ruvy(float2(height + texturingHeightOffset, slope + texturingSlopeOffset)), 0, 0));
-
+	float4 adjust = tex2Dlod(MaterialTable, ruvy(float4(height + texturingHeightOffset, slope + texturingSlopeOffset, 0, 0)));
 	adjust.xyz *= texColorConv;
 
-	for(int j = -1; j <= 1; j++)
+	for(int j = -1; j < 1; j++)
 	{
-		for(int i = -1; i <= 1; i++)
+		for(int i = -1; i < 1; i++)
 		{
 			float2 g = float2(float(i), float(j));
 			float4 o = hash4(p + g);
-			float2 r = g - f + o.xy;
-			float d = dot(r, r);
-			float w = SavePow(1.0 - smoothstep(0.0, 2.0, d * d), 1.0 + 16.0 * magOffs);
+			float2 r = g - f + o.xy * 0.66666667; // reduce a jitter to fix artefacts
+			float  d = dot(r, r);
+			float  w = pow(1.0 - smoothstep(0.0, 2.0, d * d), 1.0 + 16.0 * magOffs);
 
-			#if (TILING_FIX_MODE == 2)
-				float2 uv = frac(tileUV + magOffs * o.zy);
-			#elif (TILING_FIX_MODE == 3)
-				float a = o.w * IdScale.z; // magnitude of the texture coordinates rotation (zero for sand tiles)
-				float2 sc  = float2(sin(a), cos(a));
-				float2x2 rot = float2x2(sc.y, sc.x, -sc.x, sc.y);
-				float2 uv = frac(mul((tileUV + magOffs * o.zy), rot));
-			#endif
+#if   (TILING_FIX_MODE == 2)
+			float2 uv = frac(tileUV + magOffs * o.zy);
+#elif (TILING_FIX_MODE == 3)
+			float a   = o.w * IdScale.z; // magnitude of the texture coordinates rotation (zero for sand tiles)
+			float2 sc  = float2(sin(a), cos(a));
+			float2x2 rot = float2(sc.y, sc.x, -sc.x, sc.y);
+			float2 uv  = frac(mul(rot, (tileUV + magOffs * o.zy)));
+#endif
 
 			// color conversion must be done before summarize, because hls color space is not additive
-			float4 rgb = tex2Dlod(AtlasDiffSampler, float4(ruvy(uv * uvs + uvo * texturingUVAtlasOffset), 0, 0));
-			
-			#if (COLOR_SPACE == 0)
-				float3 hsl = rgb2hsl(rgb.rgb);
-				hsl.x = frac(hsl.x + adjust.x);
-				hsl.yz = clamp(hsl.yz + adjust.yz, 0.0, 1.0);
-				rgb.rgb = hsl2rgb(hsl);
-			#elif (COLOR_SPACE == 1)
-				rgb.x = frac(rgb.x + adjust.x);
-				rgb.yz = clamp(rgb.yz + adjust.yz, 0.0, 1.0);
-			#elif (COLOR_SPACE == 2)
-				rgb.xyz += adjust.xyz;
-			#else
-				
-			#endif
+			float4 rgb = tex2Dlod(AtlasDiffSampler, ruvy(float4(uv * uvs + uvo, 0, lod)));
+			float3 hsl = rgb2hsl(rgb.rgb);
+			hsl.x    = frac(hsl.x  + adjust.x);
+			hsl.yz   = clamp(hsl.yz + adjust.yz, 0.0, 1.0);
 
-			color += w * rgb;
+			rgb.rgb  = hsl2rgb(hsl);
+			//rgb.r = d;
+			//rgb.b = o.w;
+
+			color  += w * rgb;
 			weight += w;
 		}
 	}
 	
 	Surface res;
-	res.color = color / weight * planetGlobalColor;
+
+	res.color = color / weight;
 	res.height = res.color.a;
 	res.color.a = adjust.a;
 
