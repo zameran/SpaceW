@@ -1,6 +1,6 @@
 # SpaceW - Procedural Universe [Planetarium] #
 
-SpaceW is procedural universe generator simulator.
+SpaceW is procedural universe generator - simulator.
 
 ![alt tag](https://github.com/zameran/SpaceW/blob/develop/Logo.png?raw=true)
 
