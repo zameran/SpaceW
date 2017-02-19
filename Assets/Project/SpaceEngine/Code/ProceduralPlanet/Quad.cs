@@ -204,6 +204,7 @@ public sealed class Quad : Node<Quad>, IQuad, IUniformed<Material>, IUniformed<C
         target.SetTexture("_NormalTexture", NormalTexture);
         target.SetMatrix("_TRS", RotationMatrix);
         target.SetFloat("_LODLevel", LODLevel + 2);
+        target.SetFloat("_ID", (float)ID);
     }
 
     #endregion
@@ -988,7 +989,83 @@ public sealed class Quad : Node<Quad>, IQuad, IUniformed<Material>, IUniformed<C
         return BrainFuckMath.FromQuadPositionMask(Planetoid.PlanetRadius, sign, axis, quadPosition);
     }
 
-    private Vector3 GetPatchCubeCenterSplitted(QuadPosition quadPosition, int id, bool staticX, bool staticY, bool staticZ)
+    private Vector3 GetPatchCubeCenterSplitted(QuadPosition quadPosition, int id, bool staticX, bool staticY, bool staticZ, bool sexWithBrain = false)
+    {
+        return sexWithBrain ? GetPatchCubeCenterSplitted_Old(quadPosition, id, staticX, staticY, staticZ) :
+                              GetPatchCubeCenterSplitted_New(quadPosition, id, staticX, staticY, staticZ);
+    }
+
+    private Vector3 GetPatchCubeCenterSplitted_New(QuadPosition quadPosition, int id, bool staticX, bool staticY, bool staticZ)
+    {
+        // NOTE : Yaaahuuu!
+
+        var temp = Vector3.zero;
+        var tempStatic = 0.0f;
+
+        var pcc = Parent.generationConstants.patchCubeCenter;
+        var fed = Parent.generationConstants.cubeFaceEastDirection / 2.0f;
+        var fnd = Parent.generationConstants.cubeFaceNorthDirection / 2.0f;
+
+        switch (quadPosition)
+        {
+            case QuadPosition.Top:
+                {
+                    if (id == 0) temp = new Vector3(-fnd.x, pcc.y, -fed.z);
+                    else if (id == 1) temp = new Vector3(fnd.x, pcc.y, -fed.z);
+                    else if (id == 2) temp = new Vector3(-fnd.x, pcc.y, fed.z);
+                    else if (id == 3) temp = new Vector3(fnd.x, pcc.y, fed.z);
+                }
+                break;
+            case QuadPosition.Bottom:
+                {
+                    if (id == 0) temp = new Vector3(fnd.x, pcc.y, fed.z);
+                    else if (id == 1) temp = new Vector3(-fnd.x, pcc.y, fed.z);
+                    else if (id == 2) temp = new Vector3(fnd.x, pcc.y, -fed.z);
+                    else if (id == 3) temp = new Vector3(-fnd.x, pcc.y, -fed.z);
+                }
+                break;
+            case QuadPosition.Left:
+                {
+                    if (id == 0) temp = new Vector3(pcc.x, -fed.y, -fnd.z);
+                    else if (id == 1) temp = new Vector3(pcc.x, -fed.y, fnd.z);
+                    else if (id == 2) temp = new Vector3(pcc.x, fed.y, -fnd.z);
+                    else if (id == 3) temp = new Vector3(pcc.x, fed.y, fnd.z);
+                }
+                break;
+            case QuadPosition.Right:
+                {
+                    if (id == 0) temp = new Vector3(pcc.x, -fed.y, -fnd.z);
+                    else if (id == 1) temp = new Vector3(pcc.x, -fed.y, fnd.z);
+                    else if (id == 2) temp = new Vector3(pcc.x, fed.y, -fnd.z);
+                    else if (id == 3) temp = new Vector3(pcc.x, fed.y, fnd.z);
+                }
+                break;
+            case QuadPosition.Front:
+                {
+                    if (id == 0) temp = new Vector3(fed.x, -fnd.y, pcc.z);
+                    else if (id == 1) temp = new Vector3(-fed.x, -fnd.y, pcc.z);
+                    else if (id == 2) temp = new Vector3(fed.x, fnd.y, pcc.z);
+                    else if (id == 3) temp = new Vector3(-fed.x, fnd.y, pcc.z);
+                }
+                break;
+            case QuadPosition.Back:
+                {
+                    if (id == 0) temp = new Vector3(-fed.x, fnd.y, pcc.z);
+                    else if (id == 1) temp = new Vector3(fed.x, fnd.y, pcc.z);
+                    else if (id == 2) temp = new Vector3(-fed.x, -fnd.y, pcc.z);
+                    else if (id == 3) temp = new Vector3(fed.x, -fnd.y, pcc.z);
+                }
+                break;
+        }
+
+        BrainFuckMath.LockAxis(ref tempStatic, ref temp, staticX, staticY, staticZ);
+        temp += Parent.generationConstants.patchCubeCenter;
+        BrainFuckMath.UnlockAxis(ref temp, ref tempStatic, staticX, staticY, staticZ);
+
+        return temp;
+    }
+
+    private Vector3 GetPatchCubeCenterSplitted_Old(QuadPosition quadPosition, int id, bool staticX, bool staticY, bool staticZ)
     {
         var temp = Vector3.zero;
 

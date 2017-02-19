@@ -63,6 +63,7 @@ public abstract class Planet : MonoBehaviour
     public bool DebugEnabled = false;
 
     public bool DrawNormals = false;
+    public bool DrawQuadTree = false;
     public bool DrawGizmos = false;
 
     public bool OctaveFade = false;
