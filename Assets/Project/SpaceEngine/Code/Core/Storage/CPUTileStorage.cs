@@ -36,7 +36,7 @@ namespace SpaceEngine.Core.Storage
             INT,
             SHORT,
             BYTE
-        };
+        }
 
         [SerializeField]
         public DATA_TYPE DataType = DATA_TYPE.FLOAT;

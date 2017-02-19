@@ -31,14 +31,14 @@ namespace SpaceEngine.Core.Storage
             {
                 Buffer = buffer;
             }
-        };
+        }
 
         public enum DATA_TYPE : byte
         {
             FLOAT,
             INT,
             BYTE
-        };
+        }
 
         [SerializeField]
         public DATA_TYPE DataType = DATA_TYPE.FLOAT;

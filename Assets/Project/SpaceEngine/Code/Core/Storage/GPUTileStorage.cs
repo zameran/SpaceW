@@ -25,7 +25,7 @@ namespace SpaceEngine.Core.Storage
             {
                 Texture = texture;
             }
-        };
+        }
 
         [SerializeField]
         public RenderTextureFormat Format = RenderTextureFormat.ARGB32;
