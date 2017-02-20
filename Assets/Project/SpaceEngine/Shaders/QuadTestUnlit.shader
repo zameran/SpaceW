@@ -101,6 +101,7 @@ Shader "SpaceEngine/QuadTestUnlit"
 				float depth : DEPTH;
 
 				float3 direction : TEXCOORD1;
+				float3 relativeDirection : TEXCOORD2;
 			};
 
 			uniform float _DrawNormals;
@@ -292,7 +293,7 @@ Shader "SpaceEngine/QuadTestUnlit"
 				o.depth = 1;
 
 				o.direction = normalize(((_Globals_WorldCameraPos_Offsetted + _Globals_Origin) - mul(_Globals_CameraToWorld, o.vertex1)).xyz);
-
+				o.relativeDirection = (_Globals_WorldCameraPos_Offsetted - o.vertex1.xyz);
 				//Log. depth
 				//o.vertex0.z = log2(max(1e-6, 1.0 + o.vertex0.w)) * (2.0 / log2(_ProjectionParams.z + 1.0)) - 1.0;
 				//o.vertex0.z *= o.vertex0.w;
@@ -347,7 +348,7 @@ Shader "SpaceEngine/QuadTestUnlit"
 
 				float height = tex2D(_HeightTexture, IN.uv0).a;
 				float slope = tex2D(_NormalTexture, IN.uv0).a;
-				
+
 				Account(terrainColor, scatteringColor, IN.vertex1.xyz, normal, IN.direction);
 
 				//outDiffuse = triplanar;
@@ -357,6 +358,7 @@ Shader "SpaceEngine/QuadTestUnlit"
 				//depth = log2(IN.depth) * (0.5 * FCoef(1e+2));
 				//depth = 0;
 			}
+
 			ENDCG
 		}
 

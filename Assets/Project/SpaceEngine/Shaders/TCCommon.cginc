@@ -64,23 +64,6 @@
 //-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
-// tile blending method:
-// 0 - hard mix (no blending)
-// 1 - soft blending
-// 2 - "smart" blening (tile heightmap based)
-#define TILE_BLEND_MODE 0
-//-----------------------------------------------------------------------------
-
-//-----------------------------------------------------------------------------
-// tiling fix method:
-// 0 - no tiling fix
-// 1 - sampling texture 2 times at different scales
-// 2 - voronoi random offset
-// 3 - voronoi random offset and rotation
-#define TILING_FIX_MODE 0
-//-----------------------------------------------------------------------------
-
-//-----------------------------------------------------------------------------
 // color space to use:
 // 0 - hsl with adjusting.
 // 1 - rgb with adjusting.
@@ -547,8 +530,6 @@ inline float4 ruvy(float4 uv)
 //-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
-#if (TILING_FIX_MODE <= 1)
-
 Surface GetSurfaceColorAtlas(float height, float slope, float vary)
 {
 	const float4  PackFactors = float4(1.0 / ATLAS_RES_X, 1.0 / ATLAS_RES_Y, ATLAS_TILE_RES, ATLAS_TILE_RES_LOG2);
@@ -559,19 +540,13 @@ Surface GetSurfaceColorAtlas(float height, float slope, float vary)
 	float2 tileOffs = float2(materialID % ATLAS_RES_X, materialID / ATLAS_RES_X) * PackFactors.xy;
 
 	Surface res;
+
 	float2 tileUV = (float2(1.0, 1.0) * faceParams.z + faceParams.xy) * texScale * IdScale.y;
 	float lod = 0;
-	//float2 invSize = pow(2.0, 4 - PackFactors.w) * PackFactors.xy;
 	float2 invSize = InvSize * PackFactors.xy;
 	float2 uv = tileOffs + frac(tileUV) * (PackFactors.xy - invSize) + 0.5 * invSize;
 
-#if   (TILING_FIX_MODE == 0)
 	res.color = tex2Dlod(AtlasDiffSampler, ruvy(float4(uv, 0, lod)));
-#elif (TILING_FIX_MODE == 1)
-	float2 uv2 = tileOffs + frac(-0.173 * tileUV) * (PackFactors.xy - invSize) + 0.5 * invSize;
-	res.color = lerp(tex2Dlod(AtlasDiffSampler, ruvy(float4(uv, 0, lod))), tex2Dlod(AtlasDiffSampler, ruvy(float4(uv2, 0, lod))), 0.5);
-#endif
-
 	res.height = res.color.a;
 
 	float4 adjust = tex2Dlod(MaterialTable, float4(height + texturingHeightOffset, slope + texturingSlopeOffset, 0, 0));
@@ -586,83 +561,9 @@ Surface GetSurfaceColorAtlas(float height, float slope, float vary)
 
 	return res;
 }
-
-#else
-
-Surface GetSurfaceColorAtlas(float height, float slope, float vary)
-{
-	const float4  PackFactors = float4(1.0 / ATLAS_RES_X, 1.0 / ATLAS_RES_Y, ATLAS_TILE_RES, ATLAS_TILE_RES_LOG2);
-	slope = saturate(slope * 0.5);
-
-	float4 IdScale = tex2Dlod(MaterialTable, ruvy(float4(height + texturingHeightOffset, (slope + 0.5) + texturingSlopeOffset, 0, 0)));
-	uint materialID = min(uint(IdScale.x) + uint(vary), uint(ATLAS_RES_X * ATLAS_RES_Y - 1));
-	float2 tileOffs = float2(materialID % ATLAS_RES_X, materialID / ATLAS_RES_X) * PackFactors.xy;
-
-	float2 tileUV = (float2(1.0, 1.0) * faceParams.z + faceParams.xy) * texScale * IdScale.y;
-	float lod = 0; 
-	//float2 invSize = pow(2.0, 4 - PackFactors.w) * PackFactors.xy;
-	float2 invSize = InvSize * PackFactors.xy;
-
-	// Voronoi-based random offset and rotation for tile texture coordinates
-	const float magOffs = 1.0; // magnitude of the texture coordinates offset
-	float2 uvo = tileOffs + 0.5 * invSize;
-	float2 uvs = PackFactors.xy - invSize;
-	float2 p   = floor(tileUV);
-	float2 f   = frac(tileUV) - 0.5;
-	float4  color = float4(0.0, 0.0, 0.0, 0.0);
-	float weight = 0.0;
-
-	float4 adjust = tex2Dlod(MaterialTable, ruvy(float4(height + texturingHeightOffset, slope + texturingSlopeOffset, 0, 0)));
-	adjust.xyz *= texColorConv;
-
-	for(int j = -1; j < 1; j++)
-	{
-		for(int i = -1; i < 1; i++)
-		{
-			float2 g = float2(float(i), float(j));
-			float4 o = hash4(p + g);
-			float2 r = g - f + o.xy * 0.66666667; // reduce a jitter to fix artefacts
-			float  d = dot(r, r);
-			float  w = pow(1.0 - smoothstep(0.0, 2.0, d * d), 1.0 + 16.0 * magOffs);
-
-#if   (TILING_FIX_MODE == 2)
-			float2 uv = frac(tileUV + magOffs * o.zy);
-#elif (TILING_FIX_MODE == 3)
-			float a   = o.w * IdScale.z; // magnitude of the texture coordinates rotation (zero for sand tiles)
-			float2 sc  = float2(sin(a), cos(a));
-			float2x2 rot = float2(sc.y, sc.x, -sc.x, sc.y);
-			float2 uv  = frac(mul(rot, (tileUV + magOffs * o.zy)));
-#endif
-
-			// color conversion must be done before summarize, because hls color space is not additive
-			float4 rgb = tex2Dlod(AtlasDiffSampler, ruvy(float4(uv * uvs + uvo, 0, lod)));
-			float3 hsl = rgb2hsl(rgb.rgb);
-			hsl.x    = frac(hsl.x  + adjust.x);
-			hsl.yz   = clamp(hsl.yz + adjust.yz, 0.0, 1.0);
-
-			rgb.rgb  = hsl2rgb(hsl);
-			//rgb.r = d;
-			//rgb.b = o.w;
-
-			color  += w * rgb;
-			weight += w;
-		}
-	}
-	
-	Surface res;
-
-	res.color = color / weight;
-	res.height = res.color.a;
-	res.color.a = adjust.a;
-
-	return  res;
-}
-
-#endif
 //-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
-#if (TILE_BLEND_MODE == 0)
 // Planet surface color function (uses the texture atlas sampling function)
 // height, slope defines the tile based on MaterialTable texture
 // vary sets one of 4 different tiles of the same material
@@ -670,95 +571,6 @@ Surface GetSurfaceColor(float height, float slope, float vary)
 {
 	return GetSurfaceColorAtlas(height, slope, vary * 4.0);
 }
-
-#elif (TILE_BLEND_MODE == 1)
-
-Surface GetSurfaceColor(float height, float slope, float vary)
-{
-	height = clamp(height - 0.0625, 0.0, 1.0);
-	slope  = clamp(slope  + 0.1250, 0.0, 1.0);
-
-	float h0 = floor(height * 8.0) * 0.125;
-	float h1 = h0 + 0.125;
-	float dh = (height - h0) * 8.0;
-	float s0 = floor(slope  * 4.0) * 0.25;
-	float s1 = s0 - 0.25;
-	float ds = 1.0 - (slope - s0) * 4.0;
-	float v0 = floor(vary * 16.0) * 0.25;
-	float v1 = v0 - 0.25;
-	float dv = 1.0 - (vary * 4.0 - v0) * 4.0;
-
-	Surface surfH0, surfH1;
-	Surface surfS0, surfS1;
-	Surface surfV0, surfV1;
-
-	surfH0 = GetSurfaceColorAtlas(h0, s0, v0);
-	surfH1 = GetSurfaceColorAtlas(h1, s0, v0);
-	surfS0 = Blend(surfH0, surfH1, dh);
-
-	surfH0 = GetSurfaceColorAtlas(h0, s1, v0);
-	surfH1 = GetSurfaceColorAtlas(h1, s1, v0);
-	surfS1 = Blend(surfH0, surfH1, dh);
-
-	surfV0 = Blend(surfS0, surfS1, ds);
-
-	surfH0 = GetSurfaceColorAtlas(h0, s0, v1);
-	surfH1 = GetSurfaceColorAtlas(h1, s0, v1);
-	surfS0 = Blend(surfH0, surfH1, dh);
-
-	surfH0 = GetSurfaceColorAtlas(h0, s1, v1);
-	surfH1 = GetSurfaceColorAtlas(h1, s1, v1);
-	surfS1 = Blend(surfH0, surfH1, dh);
-
-	surfV1 = Blend(surfS0, surfS1, ds);
-
-	return   Blend(surfV0, surfV1, dv);
-}
-
-#elif (TILE_BLEND_MODE == 2)
-
-Surface GetSurfaceColor(float height, float slope, float vary)
-{
-	height = clamp(height - 0.0625, 0.0, 1.0);
-	slope  = clamp(slope  + 0.1250, 0.0, 1.0);
-
-	float h0 = floor(height * 8.0) * 0.125;
-	float h1 = h0 + 0.125;
-	float dh = (height - h0) * 8.0;
-	float s0 = floor(slope  * 4.0) * 0.25;
-	float s1 = s0 - 0.25;
-	float ds = 1.0 - (slope - s0) * 4.0;
-	float v0 = floor(vary * 16.0) * 0.25;
-	float v1 = v0 - 0.25;
-	float dv = 1.0 - (vary * 4.0 - v0) * 4.0;
-
-	Surface surfH0, surfH1;
-	Surface surfS0, surfS1;
-	Surface surfV0, surfV1;
-
-	surfH0 = GetSurfaceColorAtlas(h0, s0, v0);
-	surfH1 = GetSurfaceColorAtlas(h1, s0, v0);
-	surfS0 = BlendSmart(surfH0, surfH1, dh);
-
-	surfH0 = GetSurfaceColorAtlas(h0, s1, v0);
-	surfH1 = GetSurfaceColorAtlas(h1, s1, v0);
-	surfS1 = BlendSmart(surfH0, surfH1, dh);
-
-	surfV0 = BlendSmart(surfS0, surfS1, ds);
-
-	surfH0 = GetSurfaceColorAtlas(h0, s0, v1);
-	surfH1 = GetSurfaceColorAtlas(h1, s0, v1);
-	surfS0 = BlendSmart(surfH0, surfH1, dh);
-
-	surfH0 = GetSurfaceColorAtlas(h0, s1, v1);
-	surfH1 = GetSurfaceColorAtlas(h1, s1, v1);
-	surfS1 = BlendSmart(surfH0, surfH1, dh);
-
-	surfV1 = BlendSmart(surfS0, surfS1, ds);
-
-	return BlendSmart(surfV0, surfV1, dv);
-}
-#endif
 //-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
