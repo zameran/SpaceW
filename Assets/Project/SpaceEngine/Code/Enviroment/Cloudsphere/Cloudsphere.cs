@@ -71,6 +71,11 @@ namespace SpaceEngine.AtmosphericScattering.Cloudsphere
             SetUniforms(CloudMaterial);
         }
 
+        protected override void Awake()
+        {
+            base.Awake();
+        }
+
         protected override void Start()
         {
             base.Start();
@@ -79,6 +84,14 @@ namespace SpaceEngine.AtmosphericScattering.Cloudsphere
         protected override void Update()
         {
             base.Update();
+        }
+
+        protected override void OnDestroy()
+        {
+            //Helper.Destroy(CloudsphereMesh);
+            Helper.Destroy(CloudMaterial);
+
+            base.OnDestroy();
         }
 
         #endregion
@@ -122,12 +135,6 @@ namespace SpaceEngine.AtmosphericScattering.Cloudsphere
         }
 
         #endregion
-
-        private void OnDestroy()
-        {
-            //Helper.Destroy(CloudsphereMesh);
-            Helper.Destroy(CloudMaterial);
-        }
 
         public void Render(int drawLayer = 8)
         {

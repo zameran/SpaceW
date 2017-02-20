@@ -172,6 +172,11 @@ public sealed class Quad : Node<Quad>, IQuad, IUniformed<Material>, IUniformed<C
         if (Planetoid.Atmosphere != null) Planetoid.Atmosphere.SetUniforms(QuadMaterial);
     }
 
+    protected override void Awake()
+    {
+        base.Awake();
+    }
+
     protected override void Start()
     {
         base.Start();
@@ -180,6 +185,24 @@ public sealed class Quad : Node<Quad>, IQuad, IUniformed<Material>, IUniformed<C
     protected override void Update()
     {
         base.Update();
+    }
+
+    protected override void OnDestroy()
+    {
+        BufferHelper.ReleaseAndDisposeBuffers(QuadGenerationConstantsBuffer, PreOutDataBuffer, PreOutDataSubBuffer, OutDataBuffer);
+
+        if (RenderTexture.active == HeightTexture | NormalTexture) RenderTexture.active = null;
+
+        if (HeightTexture != null)
+            HeightTexture.ReleaseAndDestroy();
+
+        if (NormalTexture != null)
+            NormalTexture.ReleaseAndDestroy();
+
+        if (QuadMaterial != null)
+            DestroyImmediate(QuadMaterial);
+
+        base.OnDestroy();
     }
 
     #endregion
@@ -269,27 +292,6 @@ public sealed class Quad : Node<Quad>, IQuad, IUniformed<Material>, IUniformed<C
     private void InitMaterial()
     {
         QuadMaterial = MaterialHelper.CreateTemp(Planetoid.ColorShader, "Quad", (int)Planetoid.RenderQueue);
-    }
-
-    private void Awake()
-    {
-
-    }
-
-    private void OnDestroy()
-    {
-        BufferHelper.ReleaseAndDisposeBuffers(QuadGenerationConstantsBuffer, PreOutDataBuffer, PreOutDataSubBuffer, OutDataBuffer);
-
-        if (RenderTexture.active == HeightTexture | NormalTexture) RenderTexture.active = null;
-
-        if (HeightTexture != null)
-            HeightTexture.ReleaseAndDestroy();
-
-        if (NormalTexture != null)
-            NormalTexture.ReleaseAndDestroy();
-
-        if (QuadMaterial != null)
-            DestroyImmediate(QuadMaterial);
     }
 
     #region Gizmos

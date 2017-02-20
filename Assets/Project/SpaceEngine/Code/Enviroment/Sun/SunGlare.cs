@@ -133,6 +133,11 @@ namespace SpaceEngine.AtmosphericScattering.Sun
             SetUniforms(SunGlareMaterial);
         }
 
+        protected override void Awake()
+        {
+            base.Awake();
+        }
+
         protected override void Start()
         {
             SunCachedComponent.TryInit(this);
@@ -150,6 +155,14 @@ namespace SpaceEngine.AtmosphericScattering.Sun
             }
 
             base.Update();
+        }
+
+        protected override void OnDestroy()
+        {
+            Helper.Destroy(SunGlareMaterial);
+            Helper.Destroy(SunGlareMesh);
+
+            base.OnDestroy();
         }
 
         #endregion
@@ -200,11 +213,5 @@ namespace SpaceEngine.AtmosphericScattering.Sun
         }
 
         #endregion
-
-        private void OnDestroy()
-        {
-            Helper.Destroy(SunGlareMaterial);
-            Helper.Destroy(SunGlareMesh);
-        }
     }
 }

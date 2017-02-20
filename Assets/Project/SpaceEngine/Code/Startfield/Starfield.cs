@@ -83,6 +83,11 @@ namespace SpaceEngine.Startfield
             SetUniforms(StarfieldMaterial);
         }
 
+        protected override void Awake()
+        {
+            base.Awake();
+        }
+
         protected override void Start()
         {
             base.Start();
@@ -91,6 +96,14 @@ namespace SpaceEngine.Startfield
         protected override void Update()
         {
             base.Update();
+        }
+
+        protected override void OnDestroy()
+        {
+            Helper.Destroy(StarfieldMaterial);
+            Helper.Destroy(StarfieldMesh);
+
+            base.OnDestroy();
         }
 
         #endregion
@@ -119,12 +132,6 @@ namespace SpaceEngine.Startfield
         }
 
         #endregion
-
-        private void OnDestroy()
-        {
-            Helper.Destroy(StarfieldMaterial);
-            Helper.Destroy(StarfieldMesh);
-        }
 
         public void Render(int drawLayer = 8)
         {

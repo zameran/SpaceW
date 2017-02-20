@@ -233,6 +233,11 @@ namespace SpaceEngine.AtmosphericScattering
             Keywords = planetoid.GetKeywords();
         }
 
+        protected override void Awake()
+        {
+            base.Awake();
+        }
+
         protected override void Start()
         {
             Eventit();
@@ -243,6 +248,16 @@ namespace SpaceEngine.AtmosphericScattering
         protected override void Update()
         {
             base.Update();
+        }
+
+        protected override void OnDestroy()
+        {
+            Helper.Destroy(SkyMaterial);
+            Helper.Destroy(AtmosphereMesh);
+
+            UnEventit();
+
+            base.OnDestroy();
         }
 
         #endregion
@@ -492,14 +507,6 @@ namespace SpaceEngine.AtmosphericScattering
             {
                 TryBake();
             }
-        }
-
-        private void OnDestroy()
-        {
-            Helper.Destroy(SkyMaterial);
-            Helper.Destroy(AtmosphereMesh);
-
-            UnEventit();
         }
 
         #region Gizmos

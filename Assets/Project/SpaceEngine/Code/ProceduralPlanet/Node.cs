@@ -37,6 +37,11 @@ using UnityEngine;
 
 public abstract class Node<T> : MonoBehaviour where T : class
 {
+    protected virtual void Awake()
+    {
+
+    }
+
     protected virtual void Start()
     {
         InitNode();
@@ -45,6 +50,11 @@ public abstract class Node<T> : MonoBehaviour where T : class
     protected virtual void Update()
     {
         UpdateNode();
+    }
+
+    protected virtual void OnDestroy()
+    {
+
     }
 
     protected abstract void InitNode();
