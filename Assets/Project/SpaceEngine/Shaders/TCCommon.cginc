@@ -119,9 +119,9 @@ uniform float4    volcanoParams1; // (volcanoMagn,    volcanoFreq,    sqrt(volca
 uniform float4    volcanoParams2; // (volcanoActivity,volcanoFlows,   volcanoRadius,          volcanoTemp)
 uniform float4    lavaParams;	  // (lavaCoverage,   lavaTemperature,surfTemperature,        heightTempGrad)
 uniform float4    textureParams;  // (texScale,       texColorConv,   venusMagn,              venusFreq)
-uniform float4    cloudsParams1;  // (cloudsFreq,     cloudsOctaves,  twistZones,             twistMagn)
-uniform float4    cloudsParams2;  // (cloudsLayer,    cloudsNLayers,  cloudsStyle,            cloudsCoverage)
-uniform float4    cycloneParams;  // (cycloneMagn,    cycloneFreq,    sqrt(cycloneDensity),   cycloneOctaves)
+uniform float4    cloudsParams1;  // (cloudsFreq,     cloudsOctaves,  stripeZones,		      stripeTwist)
+uniform float4    cloudsParams2;  // (cloudsLayer,    cloudsNLayers,  stripeFluct,            cloudsCoverage)
+uniform float4    cycloneParams;  // (cycloneMagn,    cycloneFreq,    cycloneDensity,		  cycloneOctaves)
 uniform float4	  planetGlobalColor;	 // ()
 uniform float	  texturingHeightOffset; // ()
 uniform float	  texturingSlopeOffset;  // ()
@@ -223,15 +223,15 @@ uniform float noiseRidgeSmooth;// = 0.0001;
 #define     venusFreq           textureParams.w
 #define     cloudsFreq          cloudsParams1.x
 #define     cloudsOctaves       cloudsParams1.y
-#define     twistZones          cloudsParams1.z
-#define     twistMagn           cloudsParams1.w
+#define     stripeZones         cloudsParams1.z
+#define     stripeTwist         cloudsParams1.w
 #define     cloudsLayer         cloudsParams2.x
 #define     cloudsNLayers       cloudsParams2.y
-#define     cloudsStyle         cloudsParams2.z
+#define     stripeFluct         cloudsParams2.z
 #define     cloudsCoverage      cloudsParams2.w
 #define     cycloneMagn         cycloneParams.x
 #define     cycloneFreq         cycloneParams.y
-#define     cycloneSqrtDensity  cycloneParams.z
+#define     cycloneDensity		cycloneParams.z
 #define     cycloneOctaves      cycloneParams.w
 //-----------------------------------------------------------------------------
 
@@ -1599,9 +1599,24 @@ float FbmClouds(float3 ppoint, int o)
 	return summ;
 }
 
+float3 FbmClouds3D(float3 ppoint)
+{
+	float3 summ = float3(0.0, 0.0, 0.0);
+	float ampl = 1.0;
+
+	for (int i = 0; i < cloudsOctaves; ++i)
+	{
+		summ += NoiseVec3(ppoint) * ampl;
+		ampl  *= 0.333;
+		ppoint *= 3.1416;
+	}
+
+	return summ;
+}
+
 float3 Fbm3D(float3 ppoint)
 {
-	float3  summ = float3(0.0, 0.0, 0.0);
+	float3 summ = float3(0.0, 0.0, 0.0);
 	float ampl = 1.0;
 	float gain = SavePow(noiseLacunarity, -noiseH);
 
@@ -1617,7 +1632,7 @@ float3 Fbm3D(float3 ppoint)
 
 float3 Fbm3D(float3 ppoint, int o)
 {
-	float3  summ = float3(0.0, 0.0, 0.0);
+	float3 summ = float3(0.0, 0.0, 0.0);
 	float ampl = 1.0;
 	float gain = SavePow(noiseLacunarity, -noiseH);
 
@@ -1633,7 +1648,7 @@ float3 Fbm3D(float3 ppoint, int o)
 
 float3 Fbm3DClouds(float3 ppoint)
 {
-	float3  summ = float3(0.0, 0.0, 0.0);
+	float3 summ = float3(0.0, 0.0, 0.0);
 	float ampl = 1.0;
 
 	for (int i = 0; i < cloudsOctaves; ++i)
@@ -2291,7 +2306,7 @@ float Cell3Noise(float3 p)
 		{
 			for (d.x = -1.0; d.x <= 2.0; d.x += 1.0)
 			{
-				rnd = NoiseRandomUVec3((cell + d)).xyz + d;
+				rnd = NoiseRandomUVec4((cell + d)).xyz + d;
 				pos = rnd - offs;
 				dist = dot(pos, pos);
 				distMin = min(distMin, dist);
@@ -2318,7 +2333,7 @@ float Cell3NoiseSmooth(float3 p, float falloff)
 		{
 			for (d.x = -1.0; d.x <= 2.0; d.x += 1.0)
 			{
-				rnd = float4(NoiseRandomUVec3((cell + d)), 0.0);
+				rnd = NoiseRandomUVec4((cell + d));
 				pos = rnd.xyz + d - offs;
 				dist = dot(pos, pos);
 				res += SavePow(dist, -falloff);
@@ -2746,7 +2761,7 @@ float CraterHeightFunc(float lastlastLand, float lastLand, float height, float r
 	return lerp(lastlastLand + height * heightFloor + peak + innerRim, lastLand + outerRim + halo, inoutMask);
 }
 
-float   CraterNoise(float3 ppoint, float cratMagn, float cratFreq, float cratSqrtDensity, float cratOctaves)
+float CraterNoise(float3 ppoint, float cratMagn, float cratFreq, float cratSqrtDensity, float cratOctaves)
 {
 	//craterSphereRadius = cratFreq * cratSqrtDensity;
 	//ppoint *= craterSphereRadius;
@@ -2773,7 +2788,7 @@ float   CraterNoise(float3 ppoint, float cratMagn, float cratFreq, float cratSqr
 	radRim   = 0.2;
 	radOuter = 0.8;
 
-	for (int i=0; i<cratOctaves; i++)
+	for (int i = 0; i < cratOctaves; i++)
 	{
 		lastlastlastLand = lastlastLand;
 		lastlastLand = lastLand;
@@ -2782,7 +2797,7 @@ float   CraterNoise(float3 ppoint, float cratMagn, float cratFreq, float cratSqr
 		//float3 dist = craterRoundDist * Fbm3D(ppoint*2.56);
 		//cell = Cell2NoiseSphere(ppoint + dist, craterSphereRadius, dist).w;
 		//craterSphereRadius *= 1.83;
-		cell = Cell3Noise(ppoint + craterRoundDist * Fbm3D(ppoint*2.56));
+		cell = Cell3Noise(ppoint + craterRoundDist * Fbm3D(ppoint * 2.56));
 		newLand = CraterHeightFunc(lastlastlastLand, lastLand, amplitude, cell * radFactor);
 
 		//cell = inverseSF(ppoint + 0.2 * craterRoundDist * Fbm3D(ppoint*2.56), fibFreq);
@@ -3441,99 +3456,78 @@ float3 TurbulenceTerra(float3 ppoint)
 //-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
-float4 CycloneNoise(float3 ppoint, float o)
+float3 CycloneNoiseTerra(float3 ppoint, inout float weight, inout float coverage)
 {
+	float3 rotVec = normalize(Randomize);
 	float3 twistedPoint = ppoint;
-	float3 p = normalize(ppoint);
-	float3 v;
-	float4 cell;
-	float radius, dist, dist2, fi;
-	float freq   = cycloneFreq;
-	float dens   = 1.0 / cycloneSqrtDensity;
-	float offset = 0.0;
-	float offs   = 1.0;
+	float3 cellCenter = float3(0.0, 0.0, 0.0);
+	float2 cell;
+	float r, fi, rnd, dist, w;
+	float mag = -tidalLock * cycloneMagn;
+	float freq = cycloneFreq * 50.0;
+	float dens = cycloneDensity * 0.02;
+	float size = 8.0;
 
-	for (int i = 0; i < o; i++)
+	for (int i = 0; i < cycloneOctaves; i++)
 	{
-		cell = Cell3NoiseVec(p * freq);//Cell3NoiseNormalizedVec //Cell3NoiseVec
-		v = p - cell.xyz;
-		v.y *= 1.6;
-		radius = length(v) * dens;
+		cell = inverseSF(ppoint, freq, cellCenter);
+		rnd = hash1(cell.x);
+		r = size * cell.y;
 
-		if (radius < 1.0)
+		if ((rnd < dens) && (r < 1.0))
 		{
-			dist  = 1.0 - radius;
-			dist2 = 0.5 - radius;
-			fi    = SavePow(dist, 2.5) * (exp(-60.0 * dist2 * dist2) + 0.5);
-			twistedPoint = Rotate(cycloneMagn * sign(cell.y) * fi, cell.xyz, ppoint);
-			offset += offs * fi;
+			dist = 1.0 - r;
+			fi = lerp(log(r), dist * dist * dist, r);
+			twistedPoint = Rotate(mag * sign(cellCenter.y + 0.001) * fi, cellCenter.xyz, ppoint);
+			w = saturate(1.0 - r * 10.0);
+			weight = min(weight, 1.0 - w * w);
+			coverage = lerp(coverage, 1.0, dist);
 		}
 
-		freq *= 4.3;
-		dens *= 2.9;
-		offs *= 0.2;
+		freq *= 2.0;
+		dens *= 2.0;
+		size *= 2.0;
 		ppoint = twistedPoint;
 	}
 
-	return float4(twistedPoint, offset);
+	weight = saturate(weight);
+
+	return twistedPoint;
 }
 
-float4 CycloneNoise(float3 ppoint)
+float HeightMapCloudsTerra(float3 ppoint)
 {
-	float3 twistedPoint = ppoint;
-	float3 p = normalize(ppoint);
-	float3 v;
-	float4 cell;
-	float radius, dist, dist2, fi;
-	float dens   = 1.0 / cycloneSqrtDensity;
-	float offset = 0.0;
-
-	cell = Cell3NoiseVec(p * 0.1);//Cell3NoiseNormalizedVec //Cell3NoiseVec
-	v = p - cell.xyz;
-	v.y *= 1.6;
-	radius = length(v) * dens;
-
-	if (radius < 1.0)
-	{
-		dist  = 1.0 - radius;
-		dist2 = 0.5 - radius;
-		fi    = SavePow(dist, 2.5) * (exp(-60.0 * dist2 * dist2) + 0.5);
-		twistedPoint = Rotate(cycloneMagn * sign(cell.y) * fi, cell.xyz, ppoint);
-		offset += fi;
-	}
-
-	ppoint = twistedPoint;
-
-	return float4(twistedPoint, offset);
-}
-//-----------------------------------------------------------------------------
-
-//-----------------------------------------------------------------------------
-//TODO: Fix dat.
-float HeightMapClouds(float3 ppoint)
-{
-	ppoint = normalize(ppoint);
-
-	float zone = cos(ppoint.y * twistZones);
-	float ang = zone * twistMagn;
+	float zones = cos(ppoint.y * stripeZones);
+	float ang = zones * stripeTwist;
 	float3 twistedPoint = ppoint;
 	float coverage = cloudsCoverage;
 	float weight = 1.0;
+	float offset = 0.0;
 
 	// Compute the cyclons
-	float3 cycloneCenter = (tidalLock > 0.0) ? float3(0.0, 1.0, 0.0) : Cell3NoiseVec((ppoint + Randomize) * cycloneFreq).xyz;
-	float cycloneRadius = length(cycloneCenter - ppoint) / cycloneSqrtDensity;
-	float cycloneAmpl = -tidalLock * cycloneMagn * sign(cycloneCenter.y);
-
-	if (cycloneRadius < 1.0)
+	if (tidalLock > 0.0)
 	{
-		float dist = 1.0 - cycloneRadius;
-		float fi = lerp(log(cycloneRadius), SavePow(dist, 3.0), cycloneRadius);
-		twistedPoint = Rotate(cycloneAmpl * fi, cycloneCenter, ppoint);
-		weight = saturate(1.0 - cycloneRadius / 0.05);
-		weight = (1.0 - weight * weight) * (1.0 + dist);
-		coverage = lerp(coverage, 1.0, dist);
+		float3 cycloneCenter = float3(0.0, 1.0, 0.0);
+		float r = length(cycloneCenter - ppoint);
+		float mag = -tidalLock * cycloneMagn;
+
+		if (r < 1.0)
+		{
+			float dist = 1.0 - r;
+			float fi = lerp(log(r), dist * dist * dist, r);
+			twistedPoint = Rotate(mag * fi, cycloneCenter, ppoint);
+			weight = saturate(r * 40.0 - 0.05);
+			weight = weight * weight;
+			coverage = lerp(coverage, 1.0, dist);
+		}
+
+		weight *= smoothstep(-0.2, 0.0, ppoint.y);   // surpress clouds on a night side
 	}
+	else
+		twistedPoint = CycloneNoiseTerra(ppoint, weight, coverage);
+
+	// Compute turbulence
+	twistedPoint = TurbulenceTerra(twistedPoint);
 
 	// Compute the Coriolis effect
 	float sina = sin(ang);
@@ -3544,16 +3538,184 @@ float HeightMapClouds(float3 ppoint)
 
 	// Compute the flow-like distortion
 	float3 p = twistedPoint * cloudsFreq * 6.37;
-	float3 q = p + Fbm3DClouds(p);
-	float3 r = p + Fbm3DClouds(q);
+	float3 q = p + FbmClouds3D(p);
+	float3 r = p + FbmClouds3D(q);
 	float f = FbmClouds(r) * 0.7 + coverage - 0.3;
 	float global = saturate(f) * weight;
 
-	// Compute turbilence features
-	//noiseOctaves = cloudsOctaves;
-	//float turbulence = (Fbm(ppoint * 100.0 * cloudsFreq + Randomize) + 1.5);// * smoothstep(0.0, 0.05, global);
-
 	return global;
+}
+
+float3 TurbulenceGasGiant(float3 ppoint)
+{
+	const float scale = 0.7;
+
+	float3 twistedPoint = ppoint;
+	float3 cellCenter = float3(0.0, 0.0, 0.0);
+	float2 cell;
+	float r, fi, rnd, dist, dist2, dir;
+	float strength = 5.5;
+	float freq = 800 * scale;
+	float size = 15.0 * scale;
+	float dens = 0.8;
+
+	for (int i = 0; i < 5; i++)
+	{
+		cell = inverseSF(ppoint, freq, cellCenter);
+		rnd = hash1(cell.x);
+		r = size * cell.y;
+
+		if ((rnd < dens) && (r < 1.0))
+		{
+			dir = sign(0.5 * dens - rnd);
+			dist = saturate(1.0 - r);
+			dist2 = saturate(0.5 - r);
+			fi = pow(dist, strength) * (exp(-6.0 * dist2) + 0.25);
+			twistedPoint = Rotate(dir * stripeTwist * sign(cellCenter.y) * fi, cellCenter.xyz, ppoint);
+		}
+
+		freq = min(freq * 2.0, 1600.0);
+		size = min(size * 1.2, 30.0);
+		strength = strength * 1.5;
+		ppoint = twistedPoint;
+	}
+
+	return twistedPoint;
+}
+
+float3 CycloneNoiseGasGiant(float3 ppoint, inout float offset)
+{
+	float3 rotVec = normalize(Randomize);
+	float3 twistedPoint = ppoint;
+	float3 cellCenter = float3(0.0, 0.0, 0.0);
+	float2 cell;
+	float r, fi, rnd, dist, dist2, dir;
+	float offs = 0.6;
+	float squeeze = 1.7;
+	float strength = 2.5;
+	float freq = cycloneFreq * 50.0;
+	float dens = cycloneDensity * 0.02;
+	float size = 6.0;
+
+	for (int i = 0; i < cycloneOctaves; i++)
+	{
+		cell = inverseSF(float3(ppoint.x, ppoint.y * squeeze, ppoint.z), freq, cellCenter);
+		rnd = hash1(cell.x);
+		r = size * cell.y;
+
+		if ((rnd < dens) && (r < 1.0))
+		{
+			dir = sign(0.7 * dens - rnd);
+			dist = saturate(1.0 - r);
+			dist2 = saturate(0.5 - r);
+			fi = pow(dist, strength) * (exp(-6.0 * dist2) + 0.5);
+			twistedPoint = Rotate(cycloneMagn * dir * sign(cellCenter.y + 0.001) * fi, cellCenter.xyz, ppoint);
+			offset += offs * fi * dir;
+		}
+
+		freq = min(freq * 2.0, 6400.0);
+		dens = min(dens * 3.5, 0.3);
+		size = min(size * 1.5, 15.0);
+		offs = offs * 0.85;
+		squeeze = max(squeeze - 0.3, 1.0);
+		strength = max(strength * 1.3, 0.5);
+		ppoint = twistedPoint;
+	}
+
+	return twistedPoint;
+}
+
+float HeightMapCloudsGasGiant(float3 ppoint)
+{
+	float3 twistedPoint = ppoint;
+
+	// Compute zones
+	float zones = Noise(float3(0.0, twistedPoint.y * stripeZones * 0.5, 0.0)) * 0.6 + 0.25;
+	float offset = 0.0;
+
+	// Compute cyclons
+	if (cycloneOctaves > 0.0)
+		twistedPoint = CycloneNoiseGasGiant(twistedPoint, offset);
+
+	// Compute turbulence
+	twistedPoint = TurbulenceGasGiant(twistedPoint);
+
+	// Compute stripes
+	noiseOctaves = cloudsOctaves;
+	float turbulence = Fbm(twistedPoint * 0.2);
+	twistedPoint = twistedPoint * (0.05 * cloudsFreq) + Randomize;
+	twistedPoint.y *= 100.0 + turbulence;
+	float height = stripeFluct * (Fbm(twistedPoint) * 0.7 + 0.5);
+
+	return zones + height + offset;
+}
+
+float HeightMapSun(float3 ppoint)
+{
+	// Flows
+	float3 p = ppoint * colorDistFreq + Randomize;
+	float3 dist = 2.5 * Fbm3D(p * 0.5, 5);
+	float flows = Fbm(p * 7.5 + dist, 3);
+
+	// Granularity
+	noiseOctaves = 5;
+	p = ppoint * hillsFreq + Randomize;
+	dist = dunesMagn * Fbm3D(p * 0.2);
+	float2 cell = Cell3Noise2(p + dist);
+	float gran = smoothstep(0.1, 1.0, sqrt(abs(cell.y - cell.x))) - 0.5;
+
+	// Solar spots
+	float botMask = 1.0;
+	float filMask = 0.0;
+	float filaments = 0.0;
+
+	if (mareSqrtDensity > 0.01)
+	{
+		noiseOctaves = 5;
+		SolarSpotsHeightNoise(ppoint, botMask, filMask, filaments);
+	}
+
+	const float surfHeight = 1.0;
+	const float filHeight  = 0.6;
+	const float spotHeight = 0.5;
+
+	//return (flows * 0.1 + gran * (1.0 - filMask)) * lerp(spotHeight, surfHeight, botMask) + filMask * lerp(spotHeight, filHeight, filaments);
+	//return (0.8 + flows * 0.1) * botMask + gran * 0.03 * (1.0 - filMask) + saturate(filaments) * 0.1 * filMask;
+	return (0.8 + flows * 0.1) * colorDistMagn * botMask + gran * hillsMagn * (1.0 - filMask) + saturate(filaments) * 0.1 * hillsMagn * filMask;
+}
+
+float GlowMapSun(float3 ppoint)
+{
+	// Flows
+	float3 p = ppoint * colorDistFreq + Randomize;
+	float3 dist = 2.5 * Fbm3D(p * 0.5, 5);
+	float flows = Fbm(p * 7.5 + dist, 3);
+
+	// Granularity
+	noiseOctaves = 5;
+	p = ppoint * hillsFreq + Randomize;
+	dist = dunesMagn * Fbm3D(p * 0.2);
+	float2 cell = Cell3Noise2(p + dist);
+	float gran = smoothstep(0.1, 1.0, sqrt(abs(cell.y - cell.x)));
+
+	// Solar spots
+	float botMask   = 1.0;
+	float filMask   = 0.0;
+	float filaments = 0.0;
+
+	if (mareSqrtDensity > 0.01)
+	{
+		noiseOctaves = 5;
+		SolarSpotsTempNoise(ppoint, botMask, filMask, filaments);
+	}
+
+	float granTopTemp = colorParams.z;
+	float granBotTemp = colorParams.w;
+	float surfTemp = 1.0;
+	float filTemp  = granTopTemp;
+	float spotTemp = granBotTemp;
+
+	return (flows * 0.1 + lerp(granBotTemp, granTopTemp, gran) * (1.0 - filMask)) * lerp(spotTemp, surfTemp, botMask) + filMask * lerp(spotTemp, filTemp, filaments);
 }
 //-----------------------------------------------------------------------------
 
@@ -3561,27 +3723,31 @@ float HeightMapClouds(float3 ppoint)
 float HeightMapAsteroid(float3 ppoint)
 {
 	// Global landscape
-	float3  p = ppoint * mainFreq + Randomize;
-	float height = (Fbm(p, 2) + 0.7) * 0.7;
+	float3 p = ppoint * 0.6 + Randomize;
+	float height = 0.5 - Noise(p) * 2.0;
 
-	float distort = 0.01 * Fbm(ppoint * montesFreq + Randomize, 8);
-	height += distort;
+	noiseOctaves = 10;
+	noiseLacunarity = 2.0;
+	height += 0.05 * iqTurbulence(ppoint * 2.0 * mainFreq + Randomize, 0.35);
 
 	// Hills
-	float hills = (0.5 + 1.5 * Fbm(p * 0.0721, 5)) * hillsFreq;
-	hills = Fbm(p * hills, 5) * 0.15;
-
-	float hillsMod = smoothstep(0, 1, Fbm(p * hillsFraction, 2) * 3.0);
+	noiseOctaves = 5;
+	noiseLacunarity  = 2.218281828459;
+	float hills = (0.5 + 1.5 * Fbm(p * 0.0721)) * hillsFreq;
+	hills = Fbm(p * hills) * 0.15;
+	noiseOctaves = 2;
+	float hillsMod = smoothstep(0, 1, Fbm(p * hillsFraction) * 3.0);
 	height *= 1.0 + hillsMagn * hills * hillsMod;
 
 	// Craters
-	noiseOctaves = 3;
-	craterDistortion = 1.0;
-	craterRoundDist  = 0.03;
 	heightFloor = -0.1;
-	heightPeak  = 0.6;
-	heightRim   = 1.0;
-	float crater = CraterNoise(ppoint, craterMagn, craterFreq, craterSqrtDensity, craterOctaves);
+	heightPeak  =  0.6;
+	heightRim   =  0.4;
+	float crater = 0.4 * CraterNoise(ppoint, craterMagn, craterFreq, craterSqrtDensity, craterOctaves);
+
+	noiseOctaves = 10;
+	noiseLacunarity = 2.0;
+	crater += montesMagn * crater * iqTurbulence(ppoint * montesFreq, 0.52);	
 
 	return height + crater;
 }
@@ -3590,15 +3756,12 @@ float HeightMapAsteroid(float3 ppoint)
 //-----------------------------------------------------------------------------
 float4 ColorMapAsteroid(float3 ppoint, float height, float slope)
 {
-	//height = DistFbm((ppoint + Randomize) * 3.7, 1.5, 2) * 0.7 + 0.5;
+	height = DistFbm(ppoint * 3.7 + Randomize, 1.5, 5);
 
+	noiseOctaves = 5.0;
 	float3 p = ppoint * colorDistFreq * 2.3;
-	p += Fbm3D(p * 0.5, 5) * 1.2;
-
+	p += Fbm3D(p * 0.5) * 1.2;
 	float vary = saturate((Fbm(p) + 0.7) * 0.7);
-
-	//float4 c = float4(0.41, 0.41, 0.41, 1) * (0.5 + slope) + (0.0125 * height) + (0.05 * vary);
-	//return c;
 
 	Surface surf = GetSurfaceColor(height, slope, vary);
 	surf.color.rgb *= 0.5 + slope;
@@ -3610,7 +3773,8 @@ float4 ColorMapAsteroid(float3 ppoint, float height, float slope)
 float4 GlowMapAsteroid(float3 ppoint, float height, float slope)
 {
 	// Thermal emission temperature (in thousand Kelvins)
-	float3  p = ppoint * 600.0 + Randomize;
+	float3 p = ppoint * 600.0 + Randomize;
+
 	float dist = 10.0 * colorDistMagn * Fbm(p * 0.2, 5);
 	float globTemp = 0.95 - abs(Fbm((p + dist) * 0.01, 3)) * 0.08;
 	float varyTemp = abs(Fbm(p + dist, 8));
@@ -3618,10 +3782,7 @@ float4 GlowMapAsteroid(float3 ppoint, float height, float slope)
 	// Global surface melting
 	float surfTemp = surfTemperature * (globTemp + varyTemp * 0.08) * saturate(2.0 * (lavaCoverage * 0.4 + 0.4 - 0.8 * height));
 
-	float4 outColor;
-	outColor.rgb = UnitToColor24(log(surfTemp) * 0.188 + 0.1316);
-	outColor.a = 1.0;
-	return outColor;
+	return float4(UnitToColor24(log(surfTemp) * 0.188 + 0.1316), 1.0);
 }
 //-----------------------------------------------------------------------------
 
@@ -4047,56 +4208,6 @@ float4 ColorMapPlanet(float3 ppoint, float height, float slope)
 	surf = GetSurfaceColor(height, slope, vary);
 
 	return surf.color;
-}
-//-----------------------------------------------------------------------------
-
-//-----------------------------------------------------------------------------
-float HeightMapCloudsGasGiant(float3 ppoint)
-{
-	float3 twistedPoint = ppoint;
-
-	if (cloudsStyle == 0.0)
-	{
-		twistedPoint *= float3(1.0, 1.0, 1.0) + 0.337 * Fbm3D(ppoint * 0.0193, 8);
-	}
-
-	float offset = 0.0;
-	float zone = Noise(float3(0, (1.0 - normalize(twistedPoint).y) * twistZones * 0.5, 0)) * 2.0;
-
-	noiseOctaves = 10.0;
-
-	// Compute cyclons
-	if (cycloneOctaves > 0.0)
-	{
-		float4 cyclone = CycloneNoise(twistedPoint);
-		twistedPoint = cyclone.xyz;
-		offset = cyclone.w;
-	}
-
-	// Compute stripes
-	float turbulence, height;
-	if (cloudsStyle == 0.0)
-	{
-		float ang = zone * twistMagn;
-		float sina = sin(ang);
-		float cosa = cos(ang);
-		twistedPoint = float3(cosa * twistedPoint.x - sina * twistedPoint.z, twistedPoint.y, sina * twistedPoint.x + cosa * twistedPoint.z);
-		twistedPoint = twistedPoint * mainFreq + Randomize;
-		turbulence = Fbm(colorDistFreq * twistedPoint);
-		twistedPoint *= 500.0 + 5.0 * turbulence;
-		height = (Fbm(twistedPoint) + 0.7) * 0.7;
-	}
-	else
-	{
-		turbulence = Fbm(twistedPoint * 0.2);
-		twistedPoint = twistedPoint * mainFreq + Randomize;
-		twistedPoint.y *= 100.0 + turbulence * twistMagn;
-		height = (Fbm(twistedPoint) + 0.7) * 0.7;
-	}
-
-	height = 0.5 * (0.5 + 0.6 * zone) + colorDistMagn * height + offset;
-
-	return height;
 }
 //-----------------------------------------------------------------------------
 
