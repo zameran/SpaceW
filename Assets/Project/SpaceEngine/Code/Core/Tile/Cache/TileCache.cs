@@ -33,9 +33,6 @@ namespace SpaceEngine.Core.Tile.Cache
     /// </summary>
     public class TileCache : MonoBehaviour
     {
-        /// <summary>
-        /// Next local identifier to be used for a TileProducer using this cache.
-        /// </summary>
         private static int nextProducerId = 0;
 
         /// <summary>

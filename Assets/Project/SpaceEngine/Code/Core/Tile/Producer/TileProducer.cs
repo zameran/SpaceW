@@ -24,7 +24,7 @@ namespace SpaceEngine.Core.Tile.Producer
         /// The tile cache game object that stores the tiles produced by this producer.
         /// </summary>
         [SerializeField]
-        GameObject m_cacheGO;
+        GameObject CacheGameObject;
 
         public TileCache Cache { get; private set; }
 
@@ -32,7 +32,7 @@ namespace SpaceEngine.Core.Tile.Producer
         /// The name of the uniforms this producers data will be bound if used in a shader.
         /// </summary>
         [SerializeField]
-        string m_name;
+        string Name;
 
         //Does this producer use the gpu 
         [SerializeField]
@@ -83,7 +83,7 @@ namespace SpaceEngine.Core.Tile.Producer
         {
             if (Cache == null)
             {
-                Cache = m_cacheGO.GetComponent<TileCache>();
+                Cache = CacheGameObject.GetComponent<TileCache>();
                 ID = Cache.NextProducerId;
                 Cache.InsertProducer(ID, this);
             }
@@ -91,7 +91,7 @@ namespace SpaceEngine.Core.Tile.Producer
 
         public string GetName()
         {
-            return m_name;
+            return Name;
         }
 
         public int GetTileSize(int i)

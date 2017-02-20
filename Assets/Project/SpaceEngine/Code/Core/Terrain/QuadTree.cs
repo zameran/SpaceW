@@ -62,7 +62,7 @@ namespace SpaceEngine.Core.Terrain
         {
             if (Tile != null && owner != null)
             {
-                owner.GetProducer().PutTile(Tile);
+                owner.Producer.PutTile(Tile);
 
                 Tile = null;
             }

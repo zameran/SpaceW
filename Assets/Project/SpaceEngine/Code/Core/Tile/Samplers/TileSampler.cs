@@ -44,7 +44,9 @@ namespace SpaceEngine.Core.Tile.Samplers
             }
         }
 
-        //The terrain node associated with this sampler
+        /// <summary>
+        /// The terrain node associated with this sampler.
+        /// </summary>
         [SerializeField]
         GameObject m_terrainNodeGO;
 
@@ -78,35 +80,31 @@ namespace SpaceEngine.Core.Tile.Samplers
         /// </summary>
         QuadTree QuadTreeRoot = null;
 
-        Uniforms m_uniforms;
+        Uniforms uniforms;
 
         /// <summary>
         /// The producer to be used to create texture tiles for newly created quads.
         /// </summary>
-        TileProducer m_producer;
+        public TileProducer Producer { get; private set; }
 
-        TileFilter[] m_tileFilters;
+        /// <summary>
+        /// The <see cref="TileFilter"/>'s array to be used.
+        /// </summary>
+        public TileFilter[] Filters { get; private set; }
 
         protected override void Start()
         {
             base.Start();
 
-            m_producer = GetComponent<TileProducer>();
+            Producer = GetComponent<TileProducer>();
             TerrainNode = m_terrainNodeGO.GetComponent<TerrainNode>();
-            m_uniforms = new Uniforms(m_producer.GetName());
-            m_tileFilters = GetComponents<TileFilter>();
+            uniforms = new Uniforms(Producer.GetName());
+            Filters = GetComponents<TileFilter>();
         }
 
         protected override void OnDestroy()
         {
             base.OnDestroy();
-
-            //Debug.Log("Max used tiles for producer " + m_producer.GetName() + " = " + m_producer.GetCache().GetMaxUsedTiles());
-        }
-
-        public TileProducer GetProducer()
-        {
-            return m_producer;
         }
 
         public bool GetStoreLeaf()
@@ -120,8 +118,6 @@ namespace SpaceEngine.Core.Tile.Samplers
 
             PutTiles(QuadTreeRoot, TerrainNode.TerrainQuadRoot);
             GetTiles(null, ref QuadTreeRoot, TerrainNode.TerrainQuadRoot);
-
-            //Debug.Log("used = " + GetProducer().GetCache().GetUsedTilesCount() + " unused = " + GetProducer().GetCache().GetUnusedTilesCount());
         }
 
         /// <summary>
@@ -134,13 +130,13 @@ namespace SpaceEngine.Core.Tile.Samplers
             var needTile = StoreLeaf;
 
             // If the quad is not a leaf and producer has children and if have been asked not to store parent then dont need tile
-            if (!StoreParent && !quad.IsLeaf() && m_producer.HasChildren(quad.GetLevel(), quad.GetTX(), quad.GetTY()))
+            if (!StoreParent && !quad.IsLeaf() && Producer.HasChildren(quad.GetLevel(), quad.GetTX(), quad.GetTY()))
             {
                 needTile = false;
             }
 
             // Check if any of the filters have determined that this tile is not needed
-            foreach (var filter in m_tileFilters)
+            foreach (var filter in Filters)
             {
                 if (filter.DiscardTile(quad))
                 {
@@ -174,7 +170,7 @@ namespace SpaceEngine.Core.Tile.Samplers
 
             if (!tree.IsNeedTile && tree.Tile != null)
             {
-                m_producer.PutTile(tree.Tile);
+                Producer.PutTile(tree.Tile);
 
                 tree.Tile = null;
             }
@@ -187,7 +183,7 @@ namespace SpaceEngine.Core.Tile.Samplers
                     tree.RecursiveDeleteChildren(this);
                 }
             }
-            else if (m_producer.HasChildren(quad.GetLevel(), quad.GetTX(), quad.GetTY()))
+            else if (Producer.HasChildren(quad.GetLevel(), quad.GetTX(), quad.GetTY()))
             {
                 for (byte i = 0; i < 4; ++i)
                 {
@@ -215,7 +211,7 @@ namespace SpaceEngine.Core.Tile.Samplers
             // If this trees tile is needed get a tile and add its task to the schedular if the task is not already done
             if (tree.IsNeedTile && tree.Tile == null)
             {
-                tree.Tile = m_producer.GetTile(quad.GetLevel(), quad.GetTX(), quad.GetTY());
+                tree.Tile = Producer.GetTile(quad.GetLevel(), quad.GetTX(), quad.GetTY());
 
                 if (!tree.Tile.Task.IsDone)
                 {
@@ -225,7 +221,7 @@ namespace SpaceEngine.Core.Tile.Samplers
                 }
             }
 
-            if (!quad.IsLeaf() && m_producer.HasChildren(quad.GetLevel(), quad.GetTX(), quad.GetTY()))
+            if (!quad.IsLeaf() && Producer.HasChildren(quad.GetLevel(), quad.GetTX(), quad.GetTY()))
             {
                 for (byte i = 0; i < 4; ++i)
                 {
@@ -236,30 +232,30 @@ namespace SpaceEngine.Core.Tile.Samplers
 
         public void SetTile(MaterialPropertyBlock matPropertyBlock, int level, int tx, int ty)
         {
-            if (!m_producer.IsGPUProducer) return;
+            if (!Producer.IsGPUProducer) return;
 
             RenderTexture tex = null;
             Vector3 coords = Vector3.zero, size = Vector3.zero;
 
             SetTile(ref tex, ref coords, ref size, level, tx, ty);
 
-            matPropertyBlock.SetTexture(m_uniforms.tile, tex);
-            matPropertyBlock.SetVector(m_uniforms.tileCoords, coords);
-            matPropertyBlock.SetVector(m_uniforms.tileSize, size);
+            matPropertyBlock.SetTexture(uniforms.tile, tex);
+            matPropertyBlock.SetVector(uniforms.tileCoords, coords);
+            matPropertyBlock.SetVector(uniforms.tileSize, size);
         }
 
         public void SetTile(Material mat, int level, int tx, int ty)
         {
-            if (!m_producer.IsGPUProducer) return;
+            if (!Producer.IsGPUProducer) return;
 
             RenderTexture tex = null;
             Vector3 coords = Vector3.zero, size = Vector3.zero;
 
             SetTile(ref tex, ref coords, ref size, level, tx, ty);
 
-            mat.SetTexture(m_uniforms.tile, tex);
-            mat.SetVector(m_uniforms.tileCoords, coords);
-            mat.SetVector(m_uniforms.tileSize, size);
+            mat.SetTexture(uniforms.tile, tex);
+            mat.SetVector(uniforms.tileCoords, coords);
+            mat.SetVector(uniforms.tileSize, size);
         }
 
         /// <summary>
@@ -274,12 +270,12 @@ namespace SpaceEngine.Core.Tile.Samplers
         /// <param name="ty"></param>
         void SetTile(ref RenderTexture tex, ref Vector3 coord, ref Vector3 size, int level, int tx, int ty)
         {
-            if (!m_producer.IsGPUProducer) return;
+            if (!Producer.IsGPUProducer) return;
 
             Tile t = null;
 
-            var b = m_producer.GetBorder();
-            var s = m_producer.Cache.GetStorage(0).TileSize;
+            var b = Producer.GetBorder();
+            var s = Producer.Cache.GetStorage(0).TileSize;
             var sDivTwo = s / 2;
 
             var dx = 0.0f;
@@ -288,7 +284,7 @@ namespace SpaceEngine.Core.Tile.Samplers
             var ds0 = sDivTwo * 2.0f - 2.0f * b;
             var ds = ds0;
 
-            while (!m_producer.HasTile(level, tx, ty))
+            while (!Producer.HasTile(level, tx, ty))
             {
                 dx += (tx % 2) * dd;
                 dy += (ty % 2) * dd;

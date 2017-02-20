@@ -23,8 +23,7 @@ namespace SpaceEngine.Core.Storage
 
             public override void Release()
             {
-                if (Buffer != null)
-                    Buffer.Release();
+                BufferHelper.ReleaseAndDisposeBuffers(Buffer);
             }
 
             public CBSlot(TileStorage owner, ComputeBuffer buffer) : base(owner)

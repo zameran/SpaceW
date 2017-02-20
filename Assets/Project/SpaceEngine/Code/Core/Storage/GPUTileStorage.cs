@@ -18,7 +18,7 @@ namespace SpaceEngine.Core.Storage
 
             public override void Release()
             {
-                if (Texture != null) Texture.Release();
+                Texture.ReleaseAndDestroy();
             }
 
             public GPUSlot(TileStorage owner, RenderTexture texture) : base(owner)
@@ -54,13 +54,7 @@ namespace SpaceEngine.Core.Storage
 
             for (var i = 0; i < Capacity; i++)
             {
-                var texture = new RenderTexture(TileSize, TileSize, 0, Format, ReadWrite);
-                texture.filterMode = FilterMode;
-                texture.wrapMode = WrapMode;
-                texture.useMipMap = Mipmaps;
-                texture.anisoLevel = AnisoLevel;
-                texture.enableRandomWrite = EnableRandomWrite;
-
+                var texture = RTExtensions.CreateRTexture(new Vector2(TileSize, TileSize), 0, Format, FilterMode, WrapMode, Mipmaps, AnisoLevel, EnableRandomWrite);
                 var slot = new GPUSlot(this, texture);
 
                 AddSlot(i, slot);

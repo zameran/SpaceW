@@ -90,7 +90,7 @@ namespace SpaceEngine.Core.Tile.Samplers
             NeedsReadBackDictionary = new Dictionary<Tile.Id, QuadTreeZ>(new Tile.EqualityComparerID());
             ElevationsDicionary = new DictionaryQueue<Tile.Id, ElevationInfo>(new Tile.EqualityComparerID());
 
-            var size = GetProducer().GetTileSize(0);
+            var size = Producer.GetTileSize(0);
 
             ElevationsBuffer = new ComputeBuffer(size * size, sizeof(float));
             GroundBuffer = new ComputeBuffer(1, sizeof(float));

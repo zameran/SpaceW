@@ -61,6 +61,11 @@ namespace SpaceEngine.Core.Tile.Storage
         Slot[] Slots;
 
         /// <summary>
+        /// The used slots counts;
+        /// </summary>
+        public int SlotsCount { get { return Slots.Length; } }
+
+        /// <summary>
         /// The currently free slots.
         /// </summary>
         LinkedList<Slot> SlotsFree;

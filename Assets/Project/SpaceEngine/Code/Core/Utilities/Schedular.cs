@@ -2,22 +2,20 @@
 
 using UnityEngine;
 
-using TASK = SpaceEngine.Core.Utilities.Task;
-
 namespace SpaceEngine.Core.Utilities
 {
     public class Schedular : MonoBehaviour
     {
-        SetQueue<TASK> TaskQueue;
-        TASK.EqualityComparer Comparer;
+        SetQueue<Task> TaskQueue;
+        Task.EqualityComparer Comparer;
 
         public Schedular()
         {
-            Comparer = new TASK.EqualityComparer();
-            TaskQueue = new SetQueue<TASK>(Comparer);
+            Comparer = new Task.EqualityComparer();
+            TaskQueue = new SetQueue<Task>(Comparer);
         }
 
-        public void Add(TASK task)
+        public void Add(Task task)
         {
             if (task.IsDone) return;
 
@@ -25,7 +23,7 @@ namespace SpaceEngine.Core.Utilities
                 TaskQueue.AddLast(task);
         }
 
-        public bool HasTask(TASK task)
+        public bool HasTask(Task task)
         {
             return TaskQueue.Contains(task);
         }

@@ -1,18 +1,17 @@
 ﻿using SpaceEngine.Core.Tile.Producer;
 using SpaceEngine.Core.Tile.Storage;
+using SpaceEngine.Core.Utilities;
 
 using System.Collections.Generic;
 
 using UnityEngine;
-
-using TASK = SpaceEngine.Core.Utilities.Task;
 
 namespace SpaceEngine.Core.Tile.Tasks
 {
     /// <summary>
     /// The task that creates the tiles. The task calles the producers DoCreateTile function and the data created is stored in the slot.
     /// </summary>
-    public class CreateTileTask : TASK
+    public class CreateTileTask : Task
     {
         /// <summary>
         /// The TileProducer that created this task.
