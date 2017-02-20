@@ -119,12 +119,6 @@ namespace SpaceEngine.AtmosphericScattering
         private Matrix4x4 occludersMatrix1;
         private Matrix4x4 sunPositionsMatrix;
         private Matrix4x4 sunDirectionsMatrix;
-        private Matrix4x4 worldToCamera;
-        private Matrix4x4 cameraToWorld;
-        private Matrix4x4 cameraToScreen;
-        private Matrix4x4 screenToCamera;
-
-        private Vector3 worldCameraPos;
 
         public List<string> Keywords = new List<string>();
 
@@ -219,12 +213,6 @@ namespace SpaceEngine.AtmosphericScattering
             atmosphereParameters.Rt = (Radius + Height) - TerrainRadiusHold;
             atmosphereParameters.Rl = (Radius + Height * 1.05f) - TerrainRadiusHold;
             atmosphereParameters.SCALE = Scale;
-
-            worldToCamera = CameraHelper.Main().GetWorldToCamera();
-            cameraToWorld = CameraHelper.Main().GetCameraToWorld();
-            cameraToScreen = CameraHelper.Main().GetCameraToScreen();
-            screenToCamera = CameraHelper.Main().GetScreenToCamera();
-            worldCameraPos = CameraHelper.Main().transform.position;
 
             var fadeValue = Mathf.Clamp01(VectorHelper.AngularRadius(Origin, planetoid.LODTarget.position, planetoid.PlanetRadius));
 
@@ -334,15 +322,15 @@ namespace SpaceEngine.AtmosphericScattering
             if (artb.inscatterT_Read != null) target.SetTexture("_Sky_Inscatter", artb.inscatterT_Read);
             if (artb.irradianceT_Read != null) target.SetTexture("_Sky_Irradiance", artb.irradianceT_Read);
 
-            target.SetMatrix("_Globals_WorldToCamera", worldToCamera);
-            target.SetMatrix("_Globals_CameraToWorld", cameraToWorld);
-            target.SetMatrix("_Globals_CameraToScreen", cameraToScreen);
-            target.SetMatrix("_Globals_ScreenToCamera", screenToCamera);
-            target.SetVector("_Globals_WorldCameraPos", worldCameraPos);
-            target.SetVector("_Globals_WorldCameraPos_Offsetted", worldCameraPos - Origin);
+            target.SetMatrix("_Globals_WorldToCamera", GodManager.Instance.WorldToCamera);
+            target.SetMatrix("_Globals_CameraToWorld", GodManager.Instance.CameraToWorld);
+            target.SetMatrix("_Globals_CameraToScreen", GodManager.Instance.CameraToScreen);
+            target.SetMatrix("_Globals_ScreenToCamera", GodManager.Instance.ScreenToCamera);
+            target.SetVector("_Globals_WorldCameraPos", GodManager.Instance.WorldCameraPos);
+            target.SetVector("_Globals_WorldCameraPos_Offsetted", GodManager.Instance.WorldCameraPos - Origin);
             target.SetVector("_Globals_Origin", -Origin);
 
-            target.SetVector("_Globals_WorldCameraPos_Offsetted_Origin", (worldCameraPos - Origin) + (-Origin)); // NOTE : Lol.
+            target.SetVector("_Globals_WorldCameraPos_Offsetted_Origin", (GodManager.Instance.WorldCameraPos - Origin) + (-Origin)); // NOTE : Lol.
 
             target.SetFloat("_Exposure", HDRExposure);
             target.SetFloat("_HDRMode", (int)HDRMode);
@@ -596,12 +584,6 @@ namespace SpaceEngine.AtmosphericScattering
 
         public void InitMisc()
         {
-            worldToCamera = CameraHelper.Main().GetWorldToCamera();
-            cameraToWorld = CameraHelper.Main().GetCameraToWorld();
-            cameraToScreen = CameraHelper.Main().GetCameraToScreen();
-            screenToCamera = CameraHelper.Main().GetScreenToCamera();
-            worldCameraPos = CameraHelper.Main().transform.position;
-
             Keywords = planetoid.GetKeywords();
         }
 

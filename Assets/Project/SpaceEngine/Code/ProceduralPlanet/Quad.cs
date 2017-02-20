@@ -189,9 +189,11 @@ public sealed class Quad : Node<Quad>, IQuad, IUniformed<Material>, IUniformed<C
 
     protected override void OnDestroy()
     {
+        base.OnDestroy();
+
         BufferHelper.ReleaseAndDisposeBuffers(QuadGenerationConstantsBuffer, PreOutDataBuffer, PreOutDataSubBuffer, OutDataBuffer);
 
-        if (RenderTexture.active == HeightTexture | NormalTexture) RenderTexture.active = null;
+        if (RenderTexture.active == HeightTexture || RenderTexture.active == NormalTexture) RenderTexture.active = null;
 
         if (HeightTexture != null)
             HeightTexture.ReleaseAndDestroy();
@@ -199,10 +201,8 @@ public sealed class Quad : Node<Quad>, IQuad, IUniformed<Material>, IUniformed<C
         if (NormalTexture != null)
             NormalTexture.ReleaseAndDestroy();
 
-        if (QuadMaterial != null)
-            DestroyImmediate(QuadMaterial);
+        Helper.Destroy(QuadMaterial);
 
-        base.OnDestroy();
     }
 
     #endregion

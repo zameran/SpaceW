@@ -44,12 +44,6 @@ namespace SpaceEngine.Core.Tile.Samplers
             }
         }
 
-        /// <summary>
-        /// The terrain node associated with this sampler.
-        /// </summary>
-        [SerializeField]
-        GameObject m_terrainNodeGO;
-
         public TerrainNode TerrainNode { get; private set; }
 
         /// <summary>
@@ -97,7 +91,7 @@ namespace SpaceEngine.Core.Tile.Samplers
             base.Start();
 
             Producer = GetComponent<TileProducer>();
-            TerrainNode = m_terrainNodeGO.GetComponent<TerrainNode>();
+            TerrainNode = GetComponentInParent<TerrainNode>();
             uniforms = new Uniforms(Producer.GetName());
             Filters = GetComponents<TileFilter>();
         }
@@ -105,11 +99,6 @@ namespace SpaceEngine.Core.Tile.Samplers
         protected override void OnDestroy()
         {
             base.OnDestroy();
-        }
-
-        public bool GetStoreLeaf()
-        {
-            return StoreLeaf;
         }
 
         public virtual void UpdateSampler()

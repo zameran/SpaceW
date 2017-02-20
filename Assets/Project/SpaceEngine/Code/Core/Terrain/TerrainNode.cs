@@ -1,8 +1,6 @@
-﻿using SpaceEngine.Core.Terrain.Deformation;
-using SpaceEngine.Core.Utilities;
-
+﻿using SpaceEngine.Code.Core.Bodies;
+using SpaceEngine.Core.Terrain.Deformation;
 using System;
-
 using UnityEngine;
 
 namespace SpaceEngine.Core.Terrain
@@ -19,8 +17,10 @@ namespace SpaceEngine.Core.Terrain
     /// The terrain data must be managed by <see cref="SpaceEngine.Core.Tile.Producer.TileProducer"/>, and stored in TileStorage. 
     /// The link between with the terrain quadtree is provided by the TileSampler class.
     /// </summary>
-    public class TerrainNode : Node
+    public class TerrainNode : Node<TerrainNode>
     {
+        public CelestialBody Body { get; set; }
+
         readonly static int HORIZON_SIZE = 256;
 
         /// <summary>
@@ -42,11 +42,6 @@ namespace SpaceEngine.Core.Terrain
         /// The terrain quadtree will never be subdivided beyond this level, even if the viewer comes very close to the terrain.
         /// </summary>
         public int MaxLevel = 16;
-
-        /// <summary>
-        /// The terrain quad half size (only use on start up).
-        /// </summary>
-        public float Size = 50000.0f;
 
         /// <summary>
         /// The terrain quad zmin (only use on start up).
@@ -77,7 +72,7 @@ namespace SpaceEngine.Core.Terrain
         /// The deformation of this terrain. In the terrain local space the terrain sea level surface is flat. 
         /// In the terrain deformed space the sea level surface can be spherical (or flat if the identity deformation is used).
         /// </summary>
-        public DeformationBase Deformation { get; private set; }
+        public DeformationBase Deformation { get { return Body.Deformation; } }
 
         /// <summary>
         /// The root of the terrain quadtree. This quadtree is subdivided based on the current viewer position by the update method.
@@ -129,48 +124,22 @@ namespace SpaceEngine.Core.Terrain
         /// </summary>
         float[] Horizon = new float[HORIZON_SIZE];
 
-        public void SetPerQuadUniforms(TerrainQuad quad, MaterialPropertyBlock matPropertyBlock)
+        #region Node
+
+        protected override void InitNode()
         {
-            Deformation.SetUniforms(this, quad, matPropertyBlock);
+            Body = GetComponentInParent<CelestialBody>();
+            Body.TerrainNodes.Add(this);
+
+            TerrainMaterial = MaterialHelper.CreateTemp(Body.ColorShader, "TerrainNode");
         }
 
-        protected override void Start()
+        protected override void UpdateNode()
         {
-            base.Start();
+            LocalToWorld = FaceToLocal;
 
-            //Manager.GetSkyNode().InitUniforms(TerrainMaterial);
-
-            Vector3d[] faces = new Vector3d[] { new Vector3d(0, 0, 0), new Vector3d(90, 0, 0), new Vector3d(90, 90, 0), new Vector3d(90, 180, 0), new Vector3d(90, 270, 0), new Vector3d(0, 180, 180) };
-
-            FaceToLocal = Matrix4x4d.Identity();
-
-            // If this terrain is deformed into a sphere the face matrix is the rotation of the 
-            // terrain needed to make up the spherical planet. In this case there should be 6 terrains, each with a unique face number
-            if (Face - 1 >= 0 && Face - 1 < 6)
-                FaceToLocal = Matrix4x4d.Rotate(faces[Face - 1]);
-
-            LocalToWorld = /*Matrix4x4d.ToMatrix4x4d(transform.localToWorldMatrix) * */ FaceToLocal;
-
-            float size = Size;
-
-            //if (Manager.IsDeformed())
-            //{
-            //    size = Manager.GetRadius();
-            //    Deformation = new DeformationSpherical(size);
-            //}
-            //else
-            //    Deformation = new DeformationBase();
-
-            TerrainQuadRoot = new TerrainQuad(this, null, 0, 0, -size, -size, 2.0 * size, ZMin, ZMax);
-
-        }
-
-        public void UpdateNode()
-        {
-            LocalToWorld = /*Matrix4x4d.ToMatrix4x4d(transform.localToWorldMatrix) * */ FaceToLocal;
-
-            Matrix4x4d localToCamera = Matrix4x4d.Identity();//GetView().GetWorldToCamera() * LocalToWorld;
-            Matrix4x4d localToScreen = Matrix4x4d.Identity();//GetView().GetCameraToScreen() * localToCamera;
+            Matrix4x4d localToCamera = (Matrix4x4d)GodManager.Instance.WorldToCamera * LocalToWorld;
+            Matrix4x4d localToScreen = (Matrix4x4d)GodManager.Instance.CameraToScreen * localToCamera;
             Matrix4x4d invLocalToCamera = localToCamera.Inverse();
 
             DeformedCameraPosition = invLocalToCamera * (new Vector3d(0));
@@ -221,7 +190,52 @@ namespace SpaceEngine.Core.Terrain
 
             //if (Manager.GetPlantsNode() != null)
             //    Manager.GetPlantsNode().SetUniforms(TerrainMaterial);
+        }
 
+        protected override void Awake()
+        {
+            base.Awake();
+        }
+
+        protected override void Start()
+        {
+            base.Start();
+
+            //Manager.GetSkyNode().InitUniforms(TerrainMaterial);
+
+            var faces = new Vector3d[] { new Vector3d(0, 0, 0), new Vector3d(90, 0, 0), new Vector3d(90, 90, 0), new Vector3d(90, 180, 0), new Vector3d(90, 270, 0), new Vector3d(0, 180, 180) };
+
+            FaceToLocal = Matrix4x4d.Identity();
+
+            // If this terrain is deformed into a sphere the face matrix is the rotation of the 
+            // terrain needed to make up the spherical planet. In this case there should be 6 terrains, each with a unique face number
+            if (Face - 1 >= 0 && Face - 1 < 6)
+            {
+                FaceToLocal = Matrix4x4d.Rotate(faces[Face - 1]);
+            }
+
+            LocalToWorld = /*Matrix4x4d.ToMatrix4x4d(transform.localToWorldMatrix) * */ FaceToLocal;
+
+            TerrainQuadRoot = new TerrainQuad(this, null, 0, 0, -Body.Radius, -Body.Radius, 2.0 * Body.Radius, ZMin, ZMax);
+        }
+
+        protected override void Update()
+        {
+            base.Update();
+        }
+
+        protected override void OnDestroy()
+        {
+            Helper.Destroy(TerrainMaterial);
+
+            base.OnDestroy();
+        }
+
+        #endregion
+
+        public void SetPerQuadUniforms(TerrainQuad quad, MaterialPropertyBlock matPropertyBlock)
+        {
+            Deformation.SetUniforms(this, quad, matPropertyBlock);
         }
 
         public Frustum.VISIBILITY GetVisibility(Box3d localBox)

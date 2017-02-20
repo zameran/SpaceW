@@ -147,12 +147,11 @@ namespace SpaceEngine.Core.Terrain.Deformation
             var d1 = node.SplitDistance + 1.0f;
             var d2 = 2.0f * node.SplitDistance;
 
-            // TODO : CORE
-            //localToCamera = node.GetView().GetWorldToCamera() * node.LocalToWorld;
-            //localToScreen = node.GetView().GetCameraToScreen() * localToCamera;
+            localToCamera = (Matrix4x4d)GodManager.Instance.WorldToCamera * node.LocalToWorld;
+            localToScreen = (Matrix4x4d)GodManager.Instance.CameraToScreen * localToCamera;
 
             Vector3d localCameraPos = node.LocalCameraPosition;
-            Vector3d worldCamera = Vector3d.zero;//node.GetView().GetWorldCameraPos();
+            Vector3d worldCamera = (Vector3d)GodManager.Instance.WorldCameraPos;
 
             Matrix4x4d A = LocalToDeformedDifferential(localCameraPos);
             Matrix4x4d B = DeformedToTangentFrame(worldCamera);
@@ -174,17 +173,17 @@ namespace SpaceEngine.Core.Terrain.Deformation
             var ox = quad.GetOX();
             var oy = quad.GetOY();
             var l = quad.GetLength();
-            //var distFactor = (double)node.DistanceFactor;
+            var distFactor = (double)node.DistanceFactor;
             var level = quad.GetLevel();
 
-            //Vector3d camera = node.LocalCameraPosition;
+            Vector3d camera = node.LocalCameraPosition;
             Vector3d c = node.LocalCameraPosition;
 
             Matrix3x3d m = localToTangent * (new Matrix3x3d(l, 0.0, ox - c.x, 0.0, l, oy - c.y, 0.0, 0.0, 1.0));
 
-            // TODO : CORE
+            // TODO : Camera ground collision [(float)((camera.z - 0.0f)]
             matPropertyBlock.SetVector(uniforms.offset, new Vector4((float)ox, (float)oy, (float)l, (float)level));
-            //matPropertyBlock.SetVector(uniforms.camera, new Vector4((float)((camera.x - ox) / l), (float)((camera.y - oy) / l), (float)((camera.z - node.GetView().GetGroundHeight()) / (l * distFactor)), (float)camera.z));
+            matPropertyBlock.SetVector(uniforms.camera, new Vector4((float)((camera.x - ox) / l), (float)((camera.y - oy) / l), (float)((camera.z - 0.0f) / (l * distFactor)), (float)camera.z));
             matPropertyBlock.SetMatrix(uniforms.tileToTangent, m.ToMatrix4x4());
 
             SetScreenUniforms(node, quad, matPropertyBlock);
