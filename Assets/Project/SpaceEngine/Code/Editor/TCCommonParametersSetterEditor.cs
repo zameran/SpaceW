@@ -120,17 +120,17 @@ public sealed class TCCommonParametersSetterEditor : Editor
         setter.cloudsParams2.x = EditorGUILayout.Slider("cloudsLayer ", setter.cloudsParams2.x, 0.0f, 1.0f);
         setter.cloudsParams2.y = EditorGUILayout.Slider("cloudsNLayers ", setter.cloudsParams2.y, 0.0f, 4.0f);
         setter.cloudsParams2.z = EditorGUILayout.Slider("cloudsCoverage ", setter.cloudsParams2.z, 0.0f, 1.0f);
-        setter.cloudsParams2.w = EditorGUILayout.Slider("cloudsStyle ", setter.cloudsParams2.w, -1.0f, 1.0f);
+        setter.cloudsParams2.w = EditorGUILayout.Slider("stripeFluct ", setter.cloudsParams2.w, -1.0f, 1.0f);
 
 
         setter.cloudsParams1.x = EditorGUILayout.Slider("cloudsFreq ", setter.cloudsParams1.x, 0.0f, 1000.0f);
         setter.cloudsParams1.y = (float)Mathf.RoundToInt(EditorGUILayout.Slider("cloudsOctaves ", setter.cloudsParams1.y, 0.0f, 6.0f));
-        setter.cloudsParams1.z = EditorGUILayout.Slider("twistZones ", setter.cloudsParams1.z, 0.0f, 10.0f);
-        setter.cloudsParams1.w = EditorGUILayout.Slider("twistMagn ", setter.cloudsParams1.w, 0.0f, 100.0f);
+        setter.cloudsParams1.z = EditorGUILayout.Slider("stripeZones ", setter.cloudsParams1.z, 0.0f, 10.0f);
+        setter.cloudsParams1.w = EditorGUILayout.Slider("stripeMagn ", setter.cloudsParams1.w, 0.0f, 100.0f);
 
         setter.cycloneParams.x = EditorGUILayout.Slider("cycloneMagn ", setter.cycloneParams.x, 0.0f, 100.0f);
         setter.cycloneParams.y = EditorGUILayout.Slider("cycloneFreq ", setter.cycloneParams.y, 0.0f, 1000.0f);
-        setter.cycloneParams.z = EditorGUILayout.Slider("cycloneSqrtDensity ", setter.cycloneParams.z, 0.0f, 1.0f);
+        setter.cycloneParams.z = EditorGUILayout.Slider("cycloneDensity ", setter.cycloneParams.z, 0.0f, 1.0f);
         setter.cycloneParams.w = (float)Mathf.RoundToInt(EditorGUILayout.Slider("cycloneOctaves ", setter.cycloneParams.w, 0.0f, 6.0f));
     }
 
@@ -215,7 +215,7 @@ public sealed class TCCommonParametersSetterEditor : Editor
         setter.volcanoParams1.w = (float)Mathf.RoundToInt(EditorGUILayout.Slider("volcanoOctaves ", setter.volcanoParams1.w, 0.0f, 5.0f));
 
         setter.volcanoParams2.z = EditorGUILayout.Slider("volcanoRadius ", setter.volcanoParams2.z, 0.0f, 5.0f);
-        setter.volcanoParams2.y = EditorGUILayout.Slider("volcanoFlows ", setter.volcanoParams2.y, 0.0f, 1.0f);
+        setter.volcanoParams2.y = EditorGUILayout.Slider("volcanoFlows ", setter.volcanoParams2.y, -1.0f, 1.0f);
         setter.volcanoParams2.w = EditorGUILayout.Slider("volcanoTemp ", setter.volcanoParams2.w, 0.0f, 3000.0f);
         setter.volcanoParams2.x = EditorGUILayout.Slider("volcanoActivity ", setter.volcanoParams2.x, 0.0f, 2.0f);
     }

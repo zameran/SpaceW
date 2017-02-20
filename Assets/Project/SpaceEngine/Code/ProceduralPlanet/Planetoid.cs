@@ -201,10 +201,18 @@ public sealed class Planetoid : Planet, IPlanet
 
         if (Input.GetKeyDown(KeyCode.F2))
         {
-            if (Atmosphere != null) Atmosphere.TryBake();
+            DrawQuadTree = !DrawQuadTree;
+
+            //NOTE : Update shader variable...
+            QuadMPB.SetFloat("_DrawQuadTree", DrawQuadTree ? 1.0f : 0.0f);
         }
 
         if (Input.GetKeyDown(KeyCode.F3))
+        {
+            if (Atmosphere != null) Atmosphere.TryBake();
+        }
+
+        if (Input.GetKeyDown(KeyCode.F4))
         {
             if (Atmosphere != null)
             {

@@ -43,6 +43,7 @@ Shader "SpaceEngine/QuadTestUnlit"
 		_QuadTexture3("QuadTexture 3 (RGB)", 2D) = "white" {}
 		_QuadTexture4("QuadTexture 4 (RGB)", 2D) = "white" {}
 		_DrawNormals("Draw Normals?", Range(0, 1)) = 0.0
+		_DrawQuadTree("Draw Quad Tree?", Range(0, 1)) = 0.0
 	}
 	SubShader
 	{
@@ -100,9 +101,11 @@ Shader "SpaceEngine/QuadTestUnlit"
 				float depth : DEPTH;
 
 				float3 direction : TEXCOORD1;
+				float3 relativeDirection : TEXCOORD2;
 			};
 
 			uniform float _DrawNormals;
+			uniform float _DrawQuadTree;
 
 			uniform sampler2D _HeightTexture;
 			uniform sampler2D _NormalTexture;
@@ -119,6 +122,7 @@ Shader "SpaceEngine/QuadTestUnlit"
 			uniform float4x4 _TRS;
 
 			uniform float _LODLevel;
+			uniform float _ID;
 
 			uniform float3 _Globals_WorldCameraPos_Offsetted_Origin;
 
@@ -248,6 +252,18 @@ Shader "SpaceEngine/QuadTestUnlit"
 				#endif
 			}
 
+			float4 GetOverlayColorForID(float id)
+			{
+				if (_DrawQuadTree < 1.0) return float4(0.0, 0.0, 0.0, 0.0);
+
+				if (id == 0) return float4(1.0, 0.0, 0.0, 0.0);
+				else if (id == 1) return float4(0.0, 1.0, 0.0, 0.0);
+				else if (id == 2) return float4(0.0, 0.0, 1.0, 0.0);
+				else if (id == 3) return float4(0.0, 0.5, 0.5, 0.0);
+
+				return float4(0.0, 0.0, 0.0, 0.0);
+			}
+
 			void vert(in appdata_full_compute v, out v2fg o)
 			{
 				float noise = data[v.id].noise;
@@ -277,7 +293,7 @@ Shader "SpaceEngine/QuadTestUnlit"
 				o.depth = 1;
 
 				o.direction = normalize(((_Globals_WorldCameraPos_Offsetted + _Globals_Origin) - mul(_Globals_CameraToWorld, o.vertex1)).xyz);
-
+				o.relativeDirection = (_Globals_WorldCameraPos_Offsetted - o.vertex1.xyz);
 				//Log. depth
 				//o.vertex0.z = log2(max(1e-6, 1.0 + o.vertex0.w)) * (2.0 / log2(_ProjectionParams.z + 1.0)) - 1.0;
 				//o.vertex0.z *= o.vertex0.w;
@@ -332,15 +348,17 @@ Shader "SpaceEngine/QuadTestUnlit"
 
 				float height = tex2D(_HeightTexture, IN.uv0).a;
 				float slope = tex2D(_NormalTexture, IN.uv0).a;
-				
+
 				Account(terrainColor, scatteringColor, IN.vertex1.xyz, normal, IN.direction);
 
 				//outDiffuse = triplanar;
 				//outDiffuse = uvSamplerColor;
-				outDiffuse = lerp(scatteringColor, outputNormal, _DrawNormals);
+				//outDiffuse = lerp(scatteringColor, outputNormal, _DrawNormals);
+				outDiffuse = lerp(lerp(scatteringColor, outputNormal, _DrawNormals), GetOverlayColorForID(_ID), _DrawQuadTree);
 				//depth = log2(IN.depth) * (0.5 * FCoef(1e+2));
 				//depth = 0;
 			}
+
 			ENDCG
 		}
 
