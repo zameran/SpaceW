@@ -537,16 +537,14 @@ Surface GetSurfaceColorAtlas(float height, float slope, float vary)
 
 	float4 IdScale = tex2Dlod(MaterialTable, float4(height + texturingHeightOffset, (slope + 0.5) + texturingSlopeOffset, 0, 0));
 	uint materialID = min(uint(IdScale.x) + uint(vary), uint(ATLAS_RES_X * ATLAS_RES_Y - 1));
-	float2 tileOffs = float2(materialID % ATLAS_RES_X, materialID / ATLAS_RES_X) * PackFactors.xy;
 
 	Surface res;
 
 	float2 tileUV = (float2(1.0, 1.0) * faceParams.z + faceParams.xy) * texScale * IdScale.y;
-	float lod = 0;
 	float2 invSize = InvSize * PackFactors.xy;
-	float2 uv = tileOffs + frac(tileUV) * (PackFactors.xy - invSize) + 0.5 * invSize;
+	float2 uv = float2(materialID % ATLAS_RES_X, materialID / ATLAS_RES_X) * PackFactors.xy + frac(tileUV) * (PackFactors.xy - invSize) + 0.5 * invSize;
 
-	res.color = tex2Dlod(AtlasDiffSampler, ruvy(float4(uv, 0, lod)));
+	res.color = tex2Dlod(AtlasDiffSampler, ruvy(float4(uv, 0, 0)));
 	res.height = res.color.a;
 
 	float4 adjust = tex2Dlod(MaterialTable, float4(height + texturingHeightOffset, slope + texturingSlopeOffset, 0, 0));
