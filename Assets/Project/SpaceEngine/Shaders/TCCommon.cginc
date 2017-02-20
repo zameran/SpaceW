@@ -2637,7 +2637,7 @@ float2 inverseSF(float3 p, float n)
 {
 	const float phi = 1.61803398875;
 
-	float m = 1.0 - 1.0/n;
+	float m = 1.0 - 1.0 / n;
 	
 	float fi = min(atan2(p.y, p.x), M_PI);
 	float cosTheta = p.z;
@@ -2647,7 +2647,7 @@ float2 inverseSF(float3 p, float n)
 	float2 F = float2(round(Fk), round(Fk * phi)); // k, k+1
 
 	float2 ka = 2.0 * F / n;
-	float2 kb = 2.0 * M_PI * (frac((F+1.0) * phi) - (phi-1.0));
+	float2 kb = 2.0 * M_PI * (frac((F + 1.0) * phi) - (phi - 1.0));
 	
 	float2x2 iB = float2x2(ka.y, -ka.x, kb.y, -kb.x) / (ka.y * kb.x - ka.x * kb.y);
 	
@@ -2657,7 +2657,7 @@ float2 inverseSF(float3 p, float n)
 
 	for (int s = 0; s < 4; s++)
 	{
-		float2 uv = float2(float(s - 2 * (s / 2)), float(s / 2));
+		float2 uv = float2(float(s - 2 * (s / 2.0)), float(s / 2.0));
 		
 		float i = dot(F, uv + c);
 		
@@ -3625,7 +3625,7 @@ float3 CycloneNoiseGasGiant(float3 ppoint, inout float offset)
 	return twistedPoint;
 }
 
-float HeightMapCloudsGasGiant(float3 ppoint)
+float HeightMapCloudsGasGiantCore(float3 ppoint)
 {
 	float3 twistedPoint = ppoint;
 
@@ -3783,6 +3783,49 @@ float4 GlowMapAsteroid(float3 ppoint, float height, float slope)
 	float surfTemp = surfTemperature * (globTemp + varyTemp * 0.08) * saturate(2.0 * (lavaCoverage * 0.4 + 0.4 - 0.8 * height));
 
 	return float4(UnitToColor24(log(surfTemp) * 0.188 + 0.1316), 1.0);
+}
+//-----------------------------------------------------------------------------
+
+//-----------------------------------------------------------------------------
+// TODO : Fix gas giants! Looks like some shit with points...
+float HeightMapCloudsGasGiant(float3 ppoint)
+{
+	if (cloudsLayer == 0.0)
+	{
+		return HeightMapCloudsGasGiantCore(ppoint);
+	}
+	else
+	{
+		return 0.0;
+	}
+}
+//-----------------------------------------------------------------------------
+
+//-----------------------------------------------------------------------------
+float HeightMapFogGasGiant(float3 ppoint)
+{
+	return 0.75 + 0.3 * Noise(ppoint * float3(0.2, 6.0, 0.2));
+}
+
+float4 ColorMapCloudsGasGiant(float3 ppoint, float height, float slope)
+{
+	if (cloudsLayer == 0.0)
+	{
+		float3 color = height * GetGasGiantCloudsColor(height).rgb;
+
+		return float4(color, 5.0 * dot(color.rgb, float3(0.299, 0.587, 0.114)));
+	}
+	else
+	{
+		return float4(HeightMapFogGasGiant(ppoint) * GetGasGiantCloudsColor(1.0).rgb, 1.0);
+	}
+}
+//-----------------------------------------------------------------------------
+
+//-----------------------------------------------------------------------------
+float4 GlowMapCloudsGasGiant(float3 ppoint, float height, float slope)
+{
+	return float4(UnitToColor24(log((1.0 - 0.2 * height) * surfTemperature) * 0.188 + 0.1316), 1.0);
 }
 //-----------------------------------------------------------------------------
 
@@ -4153,6 +4196,80 @@ float4 ColorMapTerra(float3 ppoint, float height, float slope)
 //-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
+float4 GlowMapTerra(float3 ppoint, float height, float slope)
+{
+	// Assign a climate type
+	noiseOctaves	= (surfClass == 1.0) ? 5.0 : 12.0;
+	noiseH          = 0.5;
+	noiseLacunarity = 2.218281828459;
+	noiseOffset     = 0.8;
+
+	float climate, latitude, dist;
+
+	if (tidalLock <= 0.0)
+	{
+		latitude = abs(normalize(ppoint).y);
+		latitude += 0.15 * (Fbm(ppoint * 0.7 + Randomize) - 1.0);
+		latitude = saturate(latitude);
+
+		if (latitude < latTropic - tropicWidth)
+			climate = lerp(climateTropic, climateEquator, (latTropic - tropicWidth - latitude) / latTropic);
+		else if (latitude > latTropic + tropicWidth)
+			climate = lerp(climateTropic, climatePole, (latitude - latTropic - tropicWidth) / (1.0 - latTropic));
+		else
+			climate = climateTropic;
+	}
+	else
+	{
+		latitude = 1.0 - normalize(ppoint).x;
+		latitude += 0.15 * (Fbm(ppoint * 0.7 + Randomize) - 1.0);
+		climate = lerp(climateTropic, climatePole, saturate(latitude));
+	}
+
+	// Litosphere cells
+	//float lithoCells = LithoCellsNoise(ppoint, climate, 1.5);
+
+	// Change climate with elevation
+	float montHeight = saturate((height - seaLevel) / (snowLevel - seaLevel));
+	climate = min(climate + heightTempGrad * montHeight, climatePole);
+
+	// Ice caps
+	float iceCap = saturate((latitude / latIceCaps - 1.0) * 50.0);
+	climate = lerp(climate, climatePole, iceCap);
+
+	// Thermal emission temperature (in thousand Kelvins)
+	float3 p = ppoint * 600.0 + Randomize;
+
+	dist = 10.0 * colorDistMagn * Fbm(p * 0.2, 5);
+
+	float globTemp = 0.95 - abs(Fbm((p + dist) * 0.01, 3)) * 0.08;
+	float varyTemp = abs(Fbm(p + dist, 8));
+
+	//globTemp *= 1.0 - lithoCells;
+
+	float surfTemp = surfTemperature *
+		(globTemp + varyTemp * 0.08) *
+		saturate(2.0 * (lavaCoverage * 0.4 + 0.4 - 0.8 * height)) *
+		saturate((lavaCoverage - 0.01) * 25.0) *
+		saturate((0.875 - climate) * 50.0);
+
+	// Shield volcano lava
+	if (volcanoOctaves > 0)
+	{
+		// Global volcano activity mask
+		float volcActivity = saturate((Fbm(ppoint * 1.37 + Randomize, 3) - 1.0 + volcanoActivity) * 5.0);
+
+		// Lava in the volcano caldera and lava flows
+		float2 volcMask = VolcanoGlowNoise(ppoint);
+		volcMask.x *= (0.75 + 0.25 * varyTemp) * volcActivity * volcanoTemp;
+		surfTemp = max(surfTemp, volcMask.x);
+	}
+
+	return float4(UnitToColor24(log(surfTemp) * 0.188 + 0.1316), 1.0);
+}
+//-----------------------------------------------------------------------------
+
+//-----------------------------------------------------------------------------
 float HeightMapPlanet(float3 ppoint)
 {
 	float3 p = ppoint * mainFreq + Randomize;
@@ -4208,12 +4325,5 @@ float4 ColorMapPlanet(float3 ppoint, float height, float slope)
 	surf = GetSurfaceColor(height, slope, vary);
 
 	return surf.color;
-}
-//-----------------------------------------------------------------------------
-
-//-----------------------------------------------------------------------------
-float4 ColorMapCloudsGasGiant(float3 ppoint, float height, float slope)
-{
-	return height * GetGasGiantCloudsColor(height);
 }
 //-----------------------------------------------------------------------------
