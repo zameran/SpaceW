@@ -215,7 +215,7 @@ public sealed class TCCommonParametersSetterEditor : Editor
         setter.volcanoParams1.w = (float)Mathf.RoundToInt(EditorGUILayout.Slider("volcanoOctaves ", setter.volcanoParams1.w, 0.0f, 5.0f));
 
         setter.volcanoParams2.z = EditorGUILayout.Slider("volcanoRadius ", setter.volcanoParams2.z, 0.0f, 5.0f);
-        setter.volcanoParams2.y = EditorGUILayout.Slider("volcanoFlows ", setter.volcanoParams2.y, 0.0f, 1.0f);
+        setter.volcanoParams2.y = EditorGUILayout.Slider("volcanoFlows ", setter.volcanoParams2.y, -1.0f, 1.0f);
         setter.volcanoParams2.w = EditorGUILayout.Slider("volcanoTemp ", setter.volcanoParams2.w, 0.0f, 3000.0f);
         setter.volcanoParams2.x = EditorGUILayout.Slider("volcanoActivity ", setter.volcanoParams2.x, 0.0f, 2.0f);
     }
