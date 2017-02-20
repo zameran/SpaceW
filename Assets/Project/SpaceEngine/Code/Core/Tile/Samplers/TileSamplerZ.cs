@@ -112,10 +112,10 @@ namespace SpaceEngine.Core.Tile.Samplers
         /// <returns>Return 'True' if needs tile.</returns>
         protected override bool NeedTile(TerrainQuad quad)
         {
-            var localCameraPosition = quad.GetOwner().LocalCameraPosition;
-            var l = quad.GetLevel();
-            var ox = quad.GetOX();
-            var oy = quad.GetOY();
+            var localCameraPosition = quad.Owner.LocalCameraPosition;
+            var l = quad.Level;
+            var ox = quad.Ox;
+            var oy = quad.Oy;
 
             if (localCameraPosition.x >= ox && localCameraPosition.x < ox + l && localCameraPosition.y >= oy && localCameraPosition.y < oy + l)
             {
@@ -207,8 +207,8 @@ namespace SpaceEngine.Core.Tile.Samplers
                 {
                     ElevationInfo info = ElevationsDicionary.Get(id);
 
-                    treeZ.TerrainQuad.SetZMin(info.Min);
-                    treeZ.TerrainQuad.SetZMax(info.Max);
+                    treeZ.TerrainQuad.ZMin = info.Min;
+                    treeZ.TerrainQuad.ZMax = info.Max;
 
                     NeedsReadBackDictionary.Remove(id);
                 }
@@ -252,8 +252,8 @@ namespace SpaceEngine.Core.Tile.Samplers
                     }
 
                     // Update TerrainQuad
-                    treeZ.TerrainQuad.SetZMin(elevationInfo.Min);
-                    treeZ.TerrainQuad.SetZMax(elevationInfo.Max);
+                    treeZ.TerrainQuad.ZMin = elevationInfo.Min;
+                    treeZ.TerrainQuad.ZMax = elevationInfo.Max;
 
                     // Store elevations to prevent having to read back again soon
                     // Add to end of container
@@ -300,11 +300,11 @@ namespace SpaceEngine.Core.Tile.Samplers
             // Check if this TerrainQuad is below the camera. If so store a reference to it.
             if (CameraQuad == null && treeZ.Tile != null && treeZ.Tile.Task.IsDone)
             {
-                var cameraPosition = quad.GetOwner().LocalCameraPosition;
+                var cameraPosition = quad.Owner.LocalCameraPosition;
 
-                var l = quad.GetLength();
-                var ox = quad.GetOX();
-                var oy = quad.GetOY();
+                var l = quad.Length;
+                var ox = quad.Ox;
+                var oy = quad.Oy;
 
                 if (cameraPosition.x >= ox && cameraPosition.x < ox + l && cameraPosition.y >= oy && cameraPosition.y < oy + l)
                 {

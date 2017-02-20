@@ -1,9 +1,9 @@
 ﻿using SpaceEngine.Core.Exceptions;
 using SpaceEngine.Core.Storage;
 using SpaceEngine.Core.Terrain.Deformation;
-using SpaceEngine.Core.Tile;
 using SpaceEngine.Core.Tile.Producer;
 using SpaceEngine.Core.Tile.Storage;
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -36,23 +36,22 @@ namespace Proland
         TileProducer ElevationProducer;
 
         [SerializeField]
-        Material m_normalsMat;
+        Material NormalsMaterial;
 
-        Uniforms m_uniforms;
+        Uniforms uniforms;
 
-        // Use this for initialization
         protected override void Start()
         {
             base.Start();
 
-            m_uniforms = new Uniforms();
+            uniforms = new Uniforms();
 
             ElevationProducer = ElevationProducerGameObject.GetComponent<TileProducer>();
 
             if (ElevationProducer.Cache == null) ElevationProducer.InitCache(); // NOTE : Brutal fix - force initialization.
 
-            int tileSize = Cache.GetStorage(0).TileSize;
-            int elevationTileSize = ElevationProducer.Cache.GetStorage(0).TileSize;
+            var tileSize = Cache.GetStorage(0).TileSize;
+            var elevationTileSize = ElevationProducer.Cache.GetStorage(0).TileSize;
 
             if (tileSize != elevationTileSize)
             {
@@ -64,9 +63,7 @@ namespace Proland
                 throw new InvalidParameterException("Border size must be equal to elevation border size");
             }
 
-            GPUTileStorage storage = Cache.GetStorage(0) as GPUTileStorage;
-
-            if (storage == null)
+            if (!(Cache.GetStorage(0) is GPUTileStorage))
             {
                 throw new InvalidStorageException("Storage must be a GPUTileStorage");
             }
@@ -85,9 +82,9 @@ namespace Proland
 
         public override void DoCreateTile(int level, int tx, int ty, List<TileStorage.Slot> slot)
         {
-            GPUTileStorage.GPUSlot gpuSlot = slot[0] as GPUTileStorage.GPUSlot;
+            var gpuSlot = slot[0] as GPUTileStorage.GPUSlot;
+            var elevationTile = ElevationProducer.FindTile(level, tx, ty, false, true);
 
-            Tile elevationTile = ElevationProducer.FindTile(level, tx, ty, false, true);
             GPUTileStorage.GPUSlot elevationGpuSlot = null;
 
             if (elevationTile != null)
@@ -99,72 +96,87 @@ namespace Proland
                 throw new MissingTileException("Find elevation tile failed");
             }
 
-            int tileWidth = gpuSlot.Owner.TileSize;
+            if (gpuSlot == null)
+            {
+                throw new NullReferenceException("gpuSlot");
+            }
 
-            m_normalsMat.SetVector(m_uniforms.tileSD, new Vector2((float)tileWidth, (float)(tileWidth - 1) / (float)(TerrainNode.Body.GridResolution - 1)));
+            if (elevationGpuSlot == null)
+            {
+                throw new NullReferenceException("elevationGpuSlot");
+            }
 
-            RenderTexture elevationTex = elevationGpuSlot.Texture;
+            var tileWidth = gpuSlot.Owner.TileSize;
+            var elevationTex = elevationGpuSlot.Texture;
+            var elevationOSL = new Vector4(0.25f / (float)elevationTex.width, 0.25f / (float)elevationTex.height, 1.0f / (float)elevationTex.width, 0.0f);
 
-            m_normalsMat.SetTexture(m_uniforms.elevationSampler, elevationTex);
-
-            Vector4 elevationOSL = new Vector4(0.25f / (float)elevationTex.width, 0.25f / (float)elevationTex.height, 1.0f / (float)elevationTex.width, 0.0f);
-
-            m_normalsMat.SetVector(m_uniforms.elevationOSL, elevationOSL);
+            NormalsMaterial.SetVector(uniforms.tileSD, new Vector2((float)tileWidth, (float)(tileWidth - 1) / (float)(TerrainNode.Body.GridResolution - 1)));
+            NormalsMaterial.SetTexture(uniforms.elevationSampler, elevationTex);
+            NormalsMaterial.SetVector(uniforms.elevationOSL, elevationOSL);
 
             if (TerrainNode.Deformation.GetType() == typeof(DeformationSpherical))
             {
-                double D = TerrainNode.TerrainQuadRoot.GetLength();
-                double R = D / 2.0;
+                var D = TerrainNode.TerrainQuadRoot.Length;
+                var R = D / 2.0;
 
-                double x0 = (double)(tx) / (double)(1 << level) * D - R;
-                double x1 = (double)(tx + 1) / (double)(1 << level) * D - R;
-                double y0 = (double)(ty) / (double)(1 << level) * D - R;
-                double y1 = (double)(ty + 1) / (double)(1 << level) * D - R;
+                var x0 = (double)(tx) / (double)(1 << level) * D - R;
+                var x1 = (double)(tx + 1) / (double)(1 << level) * D - R;
+                var y0 = (double)(ty) / (double)(1 << level) * D - R;
+                var y1 = (double)(ty + 1) / (double)(1 << level) * D - R;
 
-                Vector3d p0 = new Vector3d(x0, y0, R);
-                Vector3d p1 = new Vector3d(x1, y0, R);
-                Vector3d p2 = new Vector3d(x0, y1, R);
-                Vector3d p3 = new Vector3d(x1, y1, R);
-                Vector3d pc = new Vector3d((x0 + x1) * 0.5, (y0 + y1) * 0.5, R);
+                var p0 = new Vector3d(x0, y0, R);
+                var p1 = new Vector3d(x1, y0, R);
+                var p2 = new Vector3d(x0, y1, R);
+                var p3 = new Vector3d(x1, y1, R);
+                var pc = new Vector3d((x0 + x1) * 0.5, (y0 + y1) * 0.5, R);
 
                 double l0 = 0, l1 = 0, l2 = 0, l3 = 0;
 
-                Vector3d v0 = p0.Normalized(ref l0);
-                Vector3d v1 = p1.Normalized(ref l1);
-                Vector3d v2 = p2.Normalized(ref l2);
-                Vector3d v3 = p3.Normalized(ref l3);
-                Vector3d vc = (v0 + v1 + v2 + v3) * 0.25;
+                var v0 = p0.Normalized(ref l0);
+                var v1 = p1.Normalized(ref l1);
+                var v2 = p2.Normalized(ref l2);
+                var v3 = p3.Normalized(ref l3);
+                var vc = (v0 + v1 + v2 + v3) * 0.25;
 
-                Matrix4x4d deformedCorners = new Matrix4x4d(v0.x * R - vc.x * R, v1.x * R - vc.x * R, v2.x * R - vc.x * R, v3.x * R - vc.x * R, v0.y * R - vc.y * R, v1.y * R - vc.y * R,
-                    v2.y * R - vc.y * R, v3.y * R - vc.y * R, v0.z * R - vc.z * R, v1.z * R - vc.z * R, v2.z * R - vc.z * R, v3.z * R - vc.z * R, 1.0, 1.0, 1.0, 1.0);
+                var deformedCorners = new Matrix4x4d(v0.x * R - vc.x * R,
+                                                     v1.x * R - vc.x * R,
+                                                     v2.x * R - vc.x * R,
+                                                     v3.x * R - vc.x * R,
+                                                     v0.y * R - vc.y * R,
+                                                     v1.y * R - vc.y * R,
+                                                     v2.y * R - vc.y * R,
+                                                     v3.y * R - vc.y * R,
+                                                     v0.z * R - vc.z * R,
+                                                     v1.z * R - vc.z * R,
+                                                     v2.z * R - vc.z * R,
+                                                     v3.z * R - vc.z * R, 1.0, 1.0, 1.0, 1.0);
 
-                Matrix4x4d deformedVerticals = new Matrix4x4d(v0.x, v1.x, v2.x, v3.x, v0.y, v1.y, v2.y, v3.y, v0.z, v1.z, v2.z, v3.z, 0.0, 0.0, 0.0, 0.0);
+                var deformedVerticals = new Matrix4x4d(v0.x, v1.x, v2.x, v3.x, v0.y, v1.y, v2.y, v3.y, v0.z, v1.z, v2.z, v3.z, 0.0, 0.0, 0.0, 0.0);
 
-                Vector3d uz = pc.Normalized();
-                Vector3d ux = (new Vector3d(0, 1, 0)).Cross(uz).Normalized();
-                Vector3d uy = uz.Cross(ux);
+                var uz = pc.Normalized();
+                var ux = new Vector3d(0.0, 1.0, 0.0).Cross(uz).Normalized();
+                var uy = uz.Cross(ux);
 
-                Matrix4x4d worldToTangentFrame = new Matrix4x4d(ux.x, ux.y, ux.z, 0.0, uy.x, uy.y, uy.z, 0.0, uz.x, uz.y, uz.z, 0.0, 0.0, 0.0, 0.0, 0.0);
+                var worldToTangentFrame = new Matrix4x4d(ux.x, ux.y, ux.z, 0.0, uy.x, uy.y, uy.z, 0.0, uz.x, uz.y, uz.z, 0.0, 0.0, 0.0, 0.0, 0.0);
 
-                m_normalsMat.SetMatrix(m_uniforms.patchCorners, deformedCorners.ToMatrix4x4());
-                m_normalsMat.SetMatrix(m_uniforms.patchVerticals, deformedVerticals.ToMatrix4x4());
-                m_normalsMat.SetVector(m_uniforms.patchCornerNorms, new Vector4((float)l0, (float)l1, (float)l2, (float)l3));
-                m_normalsMat.SetVector(m_uniforms.deform, new Vector4((float)x0, (float)y0, (float)D / (float)(1 << level), (float)R));
-                m_normalsMat.SetMatrix(m_uniforms.worldToTangentFrame, worldToTangentFrame.ToMatrix4x4());
+                NormalsMaterial.SetMatrix(uniforms.patchCorners, deformedCorners.ToMatrix4x4());
+                NormalsMaterial.SetMatrix(uniforms.patchVerticals, deformedVerticals.ToMatrix4x4());
+                NormalsMaterial.SetVector(uniforms.patchCornerNorms, new Vector4((float)l0, (float)l1, (float)l2, (float)l3));
+                NormalsMaterial.SetVector(uniforms.deform, new Vector4((float)x0, (float)y0, (float)D / (float)(1 << level), (float)R));
+                NormalsMaterial.SetMatrix(uniforms.worldToTangentFrame, worldToTangentFrame.ToMatrix4x4());
             }
             else
             {
-                double D = TerrainNode.TerrainQuadRoot.GetLength();
-                double R = D / 2.0;
-                double x0 = (double)tx / (double)(1 << level) * D - R;
-                double y0 = (double)ty / (double)(1 << level) * D - R;
+                var D = TerrainNode.TerrainQuadRoot.Length;
+                var R = D / 2.0;
+                var x0 = (double)tx / (double)(1 << level) * D - R;
+                var y0 = (double)ty / (double)(1 << level) * D - R;
 
-                m_normalsMat.SetMatrix(m_uniforms.worldToTangentFrame, Matrix4x4.identity);
-                m_normalsMat.SetVector(m_uniforms.deform, new Vector4((float)x0, (float)y0, (float)D / (float)(1 << level), 0.0f));
-
+                NormalsMaterial.SetMatrix(uniforms.worldToTangentFrame, Matrix4x4.identity);
+                NormalsMaterial.SetVector(uniforms.deform, new Vector4((float)x0, (float)y0, (float)D / (float)(1 << level), 0.0f));
             }
 
-            Graphics.Blit(null, gpuSlot.Texture, m_normalsMat);
+            Graphics.Blit(null, gpuSlot.Texture, NormalsMaterial);
 
             base.DoCreateTile(level, tx, ty, slot);
         }

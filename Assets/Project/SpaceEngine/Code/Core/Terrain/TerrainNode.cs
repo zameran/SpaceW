@@ -183,7 +183,7 @@ namespace SpaceEngine.Core.Terrain
             }
 
             // initializes data structures for horizon occlusion culling
-            if (UseHorizonCulling && LocalCameraPosition.z <= TerrainQuadRoot.GetZMax())
+            if (UseHorizonCulling && LocalCameraPosition.z <= TerrainQuadRoot.ZMax)
             {
                 var deformedDirection = invLocalToCamera * (new Vector3d(0, 0, 1));
                 var localDirection = (Deformation.DeformedToLocal(deformedDirection) - LocalCameraPosition).XY().Normalized();
@@ -196,7 +196,7 @@ namespace SpaceEngine.Core.Terrain
                 }
             }
 
-            TerrainQuadRoot.Update();
+            TerrainQuadRoot.UpdateLOD();
 
             //Manager.GetSkyNode().SetUniforms(TerrainMaterial);
             //Manager.GetSunNode().SetUniforms(TerrainMaterial);
@@ -253,7 +253,7 @@ namespace SpaceEngine.Core.Terrain
         /// <returns>Returns 'True' if the given bounding box is occluded by the bounding boxes previously added as occluders by <see cref="AddOccluder"/></returns>
         public bool IsOccluded(Box3d box)
         {
-            if (!UseHorizonCulling || LocalCameraPosition.z > TerrainQuadRoot.GetZMax())
+            if (!UseHorizonCulling || LocalCameraPosition.z > TerrainQuadRoot.ZMax)
             {
                 return false;
             }
@@ -303,7 +303,7 @@ namespace SpaceEngine.Core.Terrain
         /// <returns>Returns 'True' if the given bounding box is occluded by the bounding boxes previously added as occluders by this method.</returns>
         public bool AddOccluder(Box3d occluder)
         {
-            if (!UseHorizonCulling || LocalCameraPosition.z > TerrainQuadRoot.GetZMax())
+            if (!UseHorizonCulling || LocalCameraPosition.z > TerrainQuadRoot.ZMax)
             {
                 return false;
             }

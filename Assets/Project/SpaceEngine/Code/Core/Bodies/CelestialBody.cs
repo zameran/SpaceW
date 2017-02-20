@@ -159,22 +159,22 @@ namespace SpaceEngine.Code.Core.Bodies
         {
             quad.Drawable = false;
 
-            if (!quad.IsVisible())
+            if (!quad.IsVisible)
             {
                 quad.Drawable = true;
 
                 return;
             }
 
-            if (quad.IsLeaf())
+            if (quad.IsLeaf)
             {
                 for (int i = 0; i < samplers.Count; ++i)
                 {
                     TileProducer p = samplers[i].Producer;
 
-                    int l = quad.GetLevel();
-                    int tx = quad.GetTX();
-                    int ty = quad.GetTY();
+                    int l = quad.Level;
+                    int tx = quad.Tx;
+                    int ty = quad.Ty;
 
                     if (p.HasTile(l, tx, ty) && p.FindTile(l, tx, ty, false, true) == null)
                     {
@@ -202,9 +202,9 @@ namespace SpaceEngine.Code.Core.Bodies
                     {
                         TileProducer p = samplers[i].Producer;
 
-                        int l = quad.GetLevel();
-                        int tx = quad.GetTX();
-                        int ty = quad.GetTY();
+                        int l = quad.Level;
+                        int tx = quad.Tx;
+                        int ty = quad.Ty;
 
                         if (p.HasTile(l, tx, ty) && p.FindTile(l, tx, ty, false, true) == null)
                         {
@@ -219,7 +219,7 @@ namespace SpaceEngine.Code.Core.Bodies
 
         private void DrawQuad(TerrainNode node, TerrainQuad quad, List<TileSampler> samplers)
         {
-            if (!quad.IsVisible())
+            if (!quad.IsVisible)
             {
                 return;
             }
@@ -229,14 +229,14 @@ namespace SpaceEngine.Code.Core.Bodies
                 return;
             }
 
-            if (quad.IsLeaf())
+            if (quad.IsLeaf)
             {
                 MPB.Clear();
 
                 for (int i = 0; i < samplers.Count; ++i)
                 {
                     // Set the unifroms needed to draw the texture for this sampler
-                    samplers[i].SetTile(MPB, quad.GetLevel(), quad.GetTX(), quad.GetTY());
+                    samplers[i].SetTile(MPB, quad.Level, quad.Tx, quad.Ty);
                 }
 
                 // Set the uniforms unique to each quad
@@ -252,8 +252,8 @@ namespace SpaceEngine.Code.Core.Bodies
                 double ox = node.LocalCameraPosition.x;
                 double oy = node.LocalCameraPosition.y;
 
-                double cx = quad.GetOX() + quad.GetLength() / 2.0;
-                double cy = quad.GetOY() + quad.GetLength() / 2.0;
+                double cx = quad.Oy + quad.Length / 2.0;
+                double cy = quad.Oy + quad.Length / 2.0;
 
                 if (oy < cy)
                 {
@@ -294,7 +294,7 @@ namespace SpaceEngine.Code.Core.Bodies
 
                 for (int i = 0; i < 4; ++i)
                 {
-                    if (quad.GetChild(order[i]).GetVisible() == Frustum.VISIBILITY.INVISIBLE)
+                    if (quad.GetChild(order[i]).Visibility == Frustum.VISIBILITY.INVISIBLE)
                     {
                         done |= (1 << order[i]);
                     }
@@ -316,7 +316,7 @@ namespace SpaceEngine.Code.Core.Bodies
                     for (int i = 0; i < samplers.Count; ++i)
                     {
                         // Set the unifroms needed to draw the texture for this sampler
-                        samplers[i].SetTile(MPB, quad.GetLevel(), quad.GetTX(), quad.GetTY());
+                        samplers[i].SetTile(MPB, quad.Level, quad.Tx, quad.Ty);
                     }
 
                     // Set the uniforms unique to each quad

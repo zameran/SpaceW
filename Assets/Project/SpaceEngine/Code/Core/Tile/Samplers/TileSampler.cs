@@ -116,7 +116,7 @@ namespace SpaceEngine.Core.Tile.Samplers
             var needTile = StoreLeaf;
 
             // If the quad is not a leaf and producer has children and if have been asked not to store parent then dont need tile
-            if (!StoreParent && !quad.IsLeaf() && Producer.HasChildren(quad.GetLevel(), quad.GetTX(), quad.GetTY()))
+            if (!StoreParent && !quad.IsLeaf && Producer.HasChildren(quad.Level, quad.Tx, quad.Ty))
             {
                 needTile = false;
             }
@@ -133,7 +133,7 @@ namespace SpaceEngine.Core.Tile.Samplers
             }
 
             // If this quad is not visilbe and have not been asked to store invisilbe quads dont need tile
-            if (!StoreInvisible && !quad.IsVisible())
+            if (!StoreInvisible && !quad.IsVisible)
             {
                 needTile = false;
             }
@@ -162,14 +162,14 @@ namespace SpaceEngine.Core.Tile.Samplers
             }
 
             // If this qiad is a leaf then all children of the tree are not needed
-            if (quad.IsLeaf())
+            if (quad.IsLeaf)
             {
                 if (!tree.IsLeaf)
                 {
                     tree.RecursiveDeleteChildren(this);
                 }
             }
-            else if (Producer.HasChildren(quad.GetLevel(), quad.GetTX(), quad.GetTY()))
+            else if (Producer.HasChildren(quad.Level, quad.Tx, quad.Ty))
             {
                 for (byte i = 0; i < 4; ++i)
                 {
@@ -197,7 +197,7 @@ namespace SpaceEngine.Core.Tile.Samplers
             // If this trees tile is needed get a tile and add its task to the schedular if the task is not already done
             if (tree.IsNeedTile && tree.Tile == null)
             {
-                tree.Tile = Producer.GetTile(quad.GetLevel(), quad.GetTX(), quad.GetTY());
+                tree.Tile = Producer.GetTile(quad.Level, quad.Tx, quad.Ty);
 
                 if (!tree.Tile.Task.IsDone)
                 {
@@ -206,7 +206,7 @@ namespace SpaceEngine.Core.Tile.Samplers
                 }
             }
 
-            if (!quad.IsLeaf() && Producer.HasChildren(quad.GetLevel(), quad.GetTX(), quad.GetTY()))
+            if (!quad.IsLeaf && Producer.HasChildren(quad.Level, quad.Tx, quad.Ty))
             {
                 for (byte i = 0; i < 4; ++i)
                 {

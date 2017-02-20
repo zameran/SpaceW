@@ -247,9 +247,9 @@ namespace SpaceEngine.Core.Terrain.Deformation
 
         protected override void SetScreenUniforms(TerrainNode node, TerrainQuad quad, MaterialPropertyBlock matPropertyBlock)
         {
-            var ox = quad.GetOX();
-            var oy = quad.GetOY();
-            var l = quad.GetLength();
+            var ox = quad.Ox;
+            var oy = quad.Oy;
+            var l = quad.Length;
 
             Vector3d p0 = new Vector3d(ox, oy, R);
             Vector3d p1 = new Vector3d(ox + l, oy, R);

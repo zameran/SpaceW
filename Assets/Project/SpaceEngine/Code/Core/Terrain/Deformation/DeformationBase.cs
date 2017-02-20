@@ -170,11 +170,11 @@ namespace SpaceEngine.Core.Terrain.Deformation
         {
             if (matPropertyBlock == null || node == null || quad == null) return;
 
-            var ox = quad.GetOX();
-            var oy = quad.GetOY();
-            var l = quad.GetLength();
+            var ox = quad.Ox;
+            var oy = quad.Oy;
+            var l = quad.Length;
             var distFactor = (double)node.DistanceFactor;
-            var level = quad.GetLevel();
+            var level = quad.Level;
 
             Vector3d camera = node.LocalCameraPosition;
             Vector3d c = node.LocalCameraPosition;
@@ -191,9 +191,9 @@ namespace SpaceEngine.Core.Terrain.Deformation
 
         protected virtual void SetScreenUniforms(TerrainNode node, TerrainQuad quad, MaterialPropertyBlock matPropertyBlock)
         {
-            var ox = quad.GetOX();
-            var oy = quad.GetOY();
-            var l = quad.GetLength();
+            var ox = quad.Ox;
+            var oy = quad.Oy;
+            var l = quad.Length;
 
             var p0 = new Vector3d(ox, oy, 0.0);
             var p1 = new Vector3d(ox + l, oy, 0.0);
