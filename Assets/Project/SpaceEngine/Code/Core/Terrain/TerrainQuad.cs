@@ -39,7 +39,7 @@ namespace SpaceEngine.Core.Terrain
         Box3d m_localBox;
 
         //Should the quad be drawn
-        bool m_drawable;
+        public bool Drawable { get; set; }
 
         /**
         * The minimum/maximum terrain elevation inside this quad. This field must
@@ -155,16 +155,6 @@ namespace SpaceEngine.Core.Terrain
             return m_children[i];
         }
 
-        public bool GetDrawable()
-        {
-            return m_drawable;
-        }
-
-        public void SetDrawable(bool drawable)
-        {
-            m_drawable = drawable;
-        }
-
         public void SetZMin(float zmin)
         {
             m_zmin = zmin;
@@ -269,7 +259,7 @@ namespace SpaceEngine.Core.Terrain
                 }
             }
 
-            // TODO : CORE
+            // TODO : CORE FIX
             double ground = 0.0;//m_owner.GetView().GetGroundHeight();
             double dist = m_owner.GetCameraDist(new Box3d(m_ox, m_ox + m_length, m_oy, m_oy + m_length, Math.Min(0.0, ground), Math.Max(0.0, ground)));
 

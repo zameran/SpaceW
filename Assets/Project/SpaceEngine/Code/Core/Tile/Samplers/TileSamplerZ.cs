@@ -147,27 +147,25 @@ namespace SpaceEngine.Core.Tile.Samplers
 
                 if (slot != null)
                 {
-                    //var border = GetProducer().GetBorder();
-                    //var tileSize = GetProducer().GetTileSizeMinBorder(0);
+                    var border = Producer.GetBorder();
+                    var tileSize = Producer.GetTileSizeMinBorder(0);
 
-                    //float dx = CameraQuadCoordinates.x * tileSize;
-                    //float dy = CameraQuadCoordinates.y * tileSize;
+                    float dx = CameraQuadCoordinates.x * tileSize;
+                    float dy = CameraQuadCoordinates.y * tileSize;
 
-                    // TODO : CORE
                     // x,y are the non-normalized position in the elevations texture where the ground height below the camera is.
-                    //float x = dx + (float)border;
-                    //float y = dy + (float)border;
+                    float x = dx + (float)border;
+                    float y = dy + (float)border;
 
-                    // TODO : CORE
                     // Read the single value from the render texture
-                    //CBUtility.ReadSingleFromRenderTexture(slot.Texture, x, y, 0, GroundBuffer, Manager.GetReadData(), true);
+                    CBUtility.ReadSingleFromRenderTexture(slot.Texture, x, y, 0, GroundBuffer, GodManager.Instance.ReadData, true);
 
                     // Get single height value from buffer
                     float[] height = new float[1];
 
                     GroundBuffer.GetData(height);
 
-                    // TODO : CORE
+                    // TODO : CORE FIX
                     // Update the ground height. Stored as a static value in the TerrainNode script
                     //GetView().SetGroundHeight(Math.Max(0.0, height[0]));
 
@@ -240,9 +238,8 @@ namespace SpaceEngine.Core.Tile.Samplers
                     var elevationInfo = new ElevationInfo();
                     elevationInfo.Elevations = new float[size];
 
-                    // TODO : CORE
                     // Read back heights data from texture
-                    //CBUtility.ReadFromRenderTexture(texture, 1, ElevationsBuffer, Manager.GetReadData());
+                    CBUtility.ReadFromRenderTexture(texture, 1, ElevationsBuffer, GodManager.Instance.ReadData);
 
                     // Copy into elevations info
                     ElevationsBuffer.GetData(elevationInfo.Elevations);
@@ -286,10 +283,8 @@ namespace SpaceEngine.Core.Tile.Samplers
                 tree.IsNeedTile = NeedTile(quad);
             }
 
-            //var treeZ = tree as QuadTreeZ;
+            var treeZ = tree as QuadTreeZ;
 
-            // TODO : CORE
-            /*
             // If tile needs elevation data read back add to container
             if (treeZ.Tile != null && treeZ.Tile.Task.IsDone && !treeZ.ReadBack && MaxReadBacksPerFrame > 0)
             {
@@ -299,12 +294,9 @@ namespace SpaceEngine.Core.Tile.Samplers
                     NeedsReadBackDictionary.Add(treeZ.Tile.GetId(), treeZ);
                 }
             }
-            */
 
             base.GetTiles(parent, ref tree, quad);
 
-            // TODO : CORE
-            /*
             // Check if this TerrainQuad is below the camera. If so store a reference to it.
             if (CameraQuad == null && treeZ.Tile != null && treeZ.Tile.Task.IsDone)
             {
@@ -320,7 +312,6 @@ namespace SpaceEngine.Core.Tile.Samplers
                     CameraQuad = treeZ;
                 }
             }
-            */
         }
     }
 }

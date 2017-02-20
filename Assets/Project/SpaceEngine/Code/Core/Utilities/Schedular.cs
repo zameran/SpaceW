@@ -1,16 +1,16 @@
 ﻿using SpaceEngine.Types.Containers;
 
-using UnityEngine;
-
 namespace SpaceEngine.Core.Utilities
 {
-    public class Schedular : MonoBehaviour
+    public class Schedular : MonoSingleton<Schedular>
     {
-        SetQueue<Task> TaskQueue;
         Task.EqualityComparer Comparer;
+        SetQueue<Task> TaskQueue;
 
-        public Schedular()
+        private void Awake()
         {
+            Instance = this;
+
             Comparer = new Task.EqualityComparer();
             TaskQueue = new SetQueue<Task>(Comparer);
         }

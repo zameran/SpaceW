@@ -1,6 +1,7 @@
 ﻿using SpaceEngine.Code.Core.Bodies;
 using SpaceEngine.Core.Terrain.Deformation;
 using System;
+
 using UnityEngine;
 
 namespace SpaceEngine.Core.Terrain
@@ -72,7 +73,7 @@ namespace SpaceEngine.Core.Terrain
         /// The deformation of this terrain. In the terrain local space the terrain sea level surface is flat. 
         /// In the terrain deformed space the sea level surface can be spherical (or flat if the identity deformation is used).
         /// </summary>
-        public DeformationBase Deformation { get { return Body.Deformation; } }
+        public DeformationBase Deformation { get; protected set; }
 
         /// <summary>
         /// The root of the terrain quadtree. This quadtree is subdivided based on the current viewer position by the update method.
@@ -132,6 +133,25 @@ namespace SpaceEngine.Core.Terrain
             Body.TerrainNodes.Add(this);
 
             TerrainMaterial = MaterialHelper.CreateTemp(Body.ColorShader, "TerrainNode");
+
+            //Manager.GetSkyNode().InitUniforms(TerrainMaterial);
+
+            var faces = new Vector3d[] { new Vector3d(0, 0, 0), new Vector3d(90, 0, 0), new Vector3d(90, 90, 0), new Vector3d(90, 180, 0), new Vector3d(90, 270, 0), new Vector3d(0, 180, 180) };
+
+            FaceToLocal = Matrix4x4d.Identity();
+
+            // If this terrain is deformed into a sphere the face matrix is the rotation of the 
+            // terrain needed to make up the spherical planet. In this case there should be 6 terrains, each with a unique face number
+            if (Face - 1 >= 0 && Face - 1 < 6)
+            {
+                FaceToLocal = Matrix4x4d.Rotate(faces[Face - 1]);
+            }
+
+            LocalToWorld = /*Matrix4x4d.ToMatrix4x4d(transform.localToWorldMatrix) * */ FaceToLocal;
+
+            Deformation = new DeformationSpherical(Body.Radius);
+
+            TerrainQuadRoot = new TerrainQuad(this, null, 0, 0, -Body.Radius, -Body.Radius, 2.0 * Body.Radius, ZMin, ZMax);
         }
 
         protected override void UpdateNode()
@@ -180,7 +200,7 @@ namespace SpaceEngine.Core.Terrain
 
             //Manager.GetSkyNode().SetUniforms(TerrainMaterial);
             //Manager.GetSunNode().SetUniforms(TerrainMaterial);
-            //Manager.SetUniforms(TerrainMaterial);
+            Body.SetUniforms(TerrainMaterial);
             Deformation.SetUniforms(this, TerrainMaterial);
 
             //if (Manager.GetOceanNode() != null)
@@ -200,23 +220,6 @@ namespace SpaceEngine.Core.Terrain
         protected override void Start()
         {
             base.Start();
-
-            //Manager.GetSkyNode().InitUniforms(TerrainMaterial);
-
-            var faces = new Vector3d[] { new Vector3d(0, 0, 0), new Vector3d(90, 0, 0), new Vector3d(90, 90, 0), new Vector3d(90, 180, 0), new Vector3d(90, 270, 0), new Vector3d(0, 180, 180) };
-
-            FaceToLocal = Matrix4x4d.Identity();
-
-            // If this terrain is deformed into a sphere the face matrix is the rotation of the 
-            // terrain needed to make up the spherical planet. In this case there should be 6 terrains, each with a unique face number
-            if (Face - 1 >= 0 && Face - 1 < 6)
-            {
-                FaceToLocal = Matrix4x4d.Rotate(faces[Face - 1]);
-            }
-
-            LocalToWorld = /*Matrix4x4d.ToMatrix4x4d(transform.localToWorldMatrix) * */ FaceToLocal;
-
-            TerrainQuadRoot = new TerrainQuad(this, null, 0, 0, -Body.Radius, -Body.Radius, 2.0 * Body.Radius, ZMin, ZMax);
         }
 
         protected override void Update()

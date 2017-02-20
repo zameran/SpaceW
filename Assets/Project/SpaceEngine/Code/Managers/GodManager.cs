@@ -33,6 +33,7 @@
 // Creator: zameran
 #endregion
 
+using SpaceEngine.Core.Utilities;
 using SpaceEngine.Startfield;
 
 using UnityEngine;
@@ -101,6 +102,7 @@ public class GodManager : MonoSingleton<GodManager>
 
     private void Update()
     {
+        UpdateSchedular();
         UpdateViewer();
 
         if (UpdateFrustumPlanesNow)
@@ -116,6 +118,11 @@ public class GodManager : MonoSingleton<GodManager>
         base.OnDestroy();
 
         Helper.Destroy(PrototypeMesh);
+    }
+
+    private void UpdateSchedular()
+    {
+        Schedular.Instance.Run();
     }
 
     private void UpdateViewer()

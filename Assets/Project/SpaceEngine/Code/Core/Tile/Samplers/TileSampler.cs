@@ -49,20 +49,17 @@ namespace SpaceEngine.Core.Tile.Samplers
         /// <summary>
         /// Store texture tiles for leaf quads?
         /// </summary>
-        [SerializeField]
-        bool StoreLeaf = true;
+        public bool StoreLeaf = true;
 
         /// <summary>
         /// Store texture tiles for non leaf quads?
         /// </summary>
-        [SerializeField]
-        bool StoreParent = true;
+        public bool StoreParent = true;
 
         /// <summary>
         /// store texture tiles for invisible quads?
         /// </summary>
-        [SerializeField]
-        bool StoreInvisible = false;
+        public bool StoreInvisible = false;
 
         /// <summary>
         /// The order in which to update samplers.
@@ -204,9 +201,8 @@ namespace SpaceEngine.Core.Tile.Samplers
 
                 if (!tree.Tile.Task.IsDone)
                 {
-                    // TODO : CORE
                     // If task not done schedule task
-                    //Manager.GetSchedular().Add(tree.Tile.Task);
+                    Schedular.Instance.Add(tree.Tile.Task);
                 }
             }
 

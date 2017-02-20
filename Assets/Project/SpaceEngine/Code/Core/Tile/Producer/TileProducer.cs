@@ -96,6 +96,9 @@ namespace SpaceEngine.Core.Tile.Producer
 
         public int GetTileSize(int i)
         {
+            // TODO : CORE FIX.
+            InitCache();
+
             return Cache.GetStorage(i).TileSize;
         }
 

@@ -33,73 +33,44 @@
 // Creator: zameran
 #endregion
 
+using SpaceEngine.Code.Core.Bodies;
+
 using UnityEngine;
 
 namespace SpaceEngine.Debugging
 {
-    public abstract class DebugDraw : MonoBehaviour, IDebug
+    public sealed class DebugDrawTerrainNode : DebugDraw<CelestialBody>
     {
-        public Planetoid Planet = null;
-        public Shader lineShader = null;
-        public Material lineMaterial = null;
-
-        protected virtual void Start()
+        protected override void Start()
         {
-            if (lineMaterial == null)
-                CreateLineMaterial();
+            base.Start();
         }
 
-        protected virtual void OnPostRender()
+        protected override void OnPostRender()
         {
-            if (Planet == null) return;
-            if (lineMaterial == null) CreateLineMaterial();
-
-            Draw();
+            base.OnPostRender();
         }
 
-        protected virtual void CreateLineMaterial()
+        protected override void CreateLineMaterial()
         {
-            if (lineShader == null) throw new System.NullReferenceException("Line Shader is null!");
+            base.CreateLineMaterial();
+        }
 
-            if (!lineMaterial)
+        protected override void Draw()
+        {
+#if UNITY_EDITOR
+            if (UnityEditor.SceneView.currentDrawingSceneView != null) return; //Do not draw at Scene tab in editor.
+#endif
+
+            for (int i = 0; i < Planet.TerrainNodes.Count; i++)
             {
-                lineMaterial = MaterialHelper.CreateTemp(lineShader, "Line");
+                var q = Planet.TerrainNodes[i];
+                var root = q.TerrainQuadRoot;
+
+                if (root == null) continue;
+
+                root.DrawQuadOutline(CameraHelper.Main(), lineMaterial, Color.blue);
             }
         }
-
-        protected abstract void Draw();
-    }
-
-    public abstract class DebugDraw<T> : MonoBehaviour, IDebug where T : class
-    {
-        public T Planet = null;
-        public Shader lineShader = null;
-        public Material lineMaterial = null;
-
-        protected virtual void Start()
-        {
-            if (lineMaterial == null)
-                CreateLineMaterial();
-        }
-
-        protected virtual void OnPostRender()
-        {
-            if (Planet == null) return;
-            if (lineMaterial == null) CreateLineMaterial();
-
-            Draw();
-        }
-
-        protected virtual void CreateLineMaterial()
-        {
-            if (lineShader == null) throw new System.NullReferenceException("Line Shader is null!");
-
-            if (!lineMaterial)
-            {
-                lineMaterial = MaterialHelper.CreateTemp(lineShader, "Line");
-            }
-        }
-
-        protected abstract void Draw();
     }
 }

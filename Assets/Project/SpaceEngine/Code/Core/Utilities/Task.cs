@@ -1,9 +1,11 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 
-using UnityEngine;
+using Object = UnityEngine.Object;
 
 namespace SpaceEngine.Core.Utilities
 {
+    [Serializable]
     public abstract class Task
     {
         public class EqualityComparer : IEqualityComparer<Task>
