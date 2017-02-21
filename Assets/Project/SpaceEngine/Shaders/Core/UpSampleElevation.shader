@@ -184,7 +184,7 @@
 				{
 					zf += noiseAmp * _Amp * noise;
 				}
-				
+
 				float zc = zf;
 
 				if (_CoarseLevelOSL.x != -1.0) 

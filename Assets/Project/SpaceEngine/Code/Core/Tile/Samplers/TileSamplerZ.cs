@@ -101,8 +101,8 @@ namespace SpaceEngine.Core.Tile.Samplers
         {
             base.OnDestroy();
 
-            ElevationsBuffer.Release();
-            GroundBuffer.Release();
+            ElevationsBuffer.ReleaseAndDisposeBuffer();
+            GroundBuffer.ReleaseAndDisposeBuffer();
         }
 
         /// <summary>
@@ -150,29 +150,26 @@ namespace SpaceEngine.Core.Tile.Samplers
                     var border = Producer.GetBorder();
                     var tileSize = Producer.GetTileSizeMinBorder(0);
 
-                    float dx = CameraQuadCoordinates.x * tileSize;
-                    float dy = CameraQuadCoordinates.y * tileSize;
+                    var dx = CameraQuadCoordinates.x * tileSize;
+                    var dy = CameraQuadCoordinates.y * tileSize;
 
                     // x,y are the non-normalized position in the elevations texture where the ground height below the camera is.
-                    float x = dx + (float)border;
-                    float y = dy + (float)border;
+                    var x = dx + (float)border;
+                    var y = dy + (float)border;
 
                     // Read the single value from the render texture
                     CBUtility.ReadSingleFromRenderTexture(slot.Texture, x, y, 0, GroundBuffer, GodManager.Instance.ReadData, true);
 
                     // Get single height value from buffer
-                    float[] height = new float[1];
+                    var height = new float[1];
 
                     GroundBuffer.GetData(height);
 
-                    // TODO : CORE FIX
-                    // Update the ground height. Stored as a static value in the TerrainNode script
-                    //GetView().SetGroundHeight(Math.Max(0.0, height[0]));
+                    TerrainNode.Body.HeightZ = Math.Max(0.0, height[0]);
 
                     OldLocalCamera.x = localCameraPosition.x;
                     OldLocalCamera.y = localCameraPosition.y;
                     OldLocalCamera.z = localCameraPosition.z;
-
                 }
             }
 

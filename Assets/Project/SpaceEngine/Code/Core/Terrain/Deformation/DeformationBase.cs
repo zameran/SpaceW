@@ -181,9 +181,8 @@ namespace SpaceEngine.Core.Terrain.Deformation
 
             Matrix3x3d m = localToTangent * (new Matrix3x3d(l, 0.0, ox - c.x, 0.0, l, oy - c.y, 0.0, 0.0, 1.0));
 
-            // TODO : Camera ground collision [(float)((camera.z - 0.0f)]
             matPropertyBlock.SetVector(uniforms.offset, new Vector4((float)ox, (float)oy, (float)l, (float)level));
-            matPropertyBlock.SetVector(uniforms.camera, new Vector4((float)((camera.x - ox) / l), (float)((camera.y - oy) / l), (float)((camera.z - 0.0f) / (l * distFactor)), (float)camera.z));
+            matPropertyBlock.SetVector(uniforms.camera, new Vector4((float)((camera.x - ox) / l), (float)((camera.y - oy) / l), (float)((camera.z - node.Body.HeightZ) / (l * distFactor)), (float)camera.z));
             matPropertyBlock.SetMatrix(uniforms.tileToTangent, m.ToMatrix4x4());
 
             SetScreenUniforms(node, quad, matPropertyBlock);

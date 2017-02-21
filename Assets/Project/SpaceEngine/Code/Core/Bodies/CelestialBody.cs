@@ -57,6 +57,8 @@ namespace SpaceEngine.Code.Core.Bodies
 
         public MaterialPropertyBlock MPB;
 
+        public double HeightZ = 0;
+
         public Vector3 Origin { get; set; }
 
         #region Node

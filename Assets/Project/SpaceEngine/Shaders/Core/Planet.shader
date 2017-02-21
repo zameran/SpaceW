@@ -127,7 +127,8 @@
 			float4 frag(v2f IN) : COLOR
 			{		
 				float3 WCP = _Globals_WorldCameraPos;
-				float3 WSD = _Sun_WorldSunDir;
+				//float3 WSD = _Sun_WorldSunDir;
+				float3 WSD = float3(0.0, -1.0, 0.0);
 				float ht = texTile(_Elevation_Tile, IN.uv, _Elevation_TileCoords, _Elevation_TileSize).x;
 				
 				float3 V = normalize(IN.p);
@@ -148,7 +149,7 @@
 				float vSun = dot(V, WSD);
 				
 				float4 reflectance = texTile(_Ortho_Tile, IN.uv, _Ortho_TileCoords, _Ortho_TileSize);
-				//reflectance.rgb = tan(1.37 * reflectance.rgb) / tan(1.37); //RGB to reflectance
+				reflectance.rgb = tan(1.37 * reflectance.rgb) / tan(1.37); //RGB to reflectance
 				
 				//float3 sunL;
 				//float3 skyE;
@@ -156,7 +157,7 @@
 				
 				// diffuse ground color
 				//float3 groundColor = 1.5 * reflectance.rgb * (sunL * max(cTheta, 0.0) + skyE) / 3.14159265;
-				float3 groundColor = 1.5 * reflectance.rgb * (max(cTheta, 0.0)) / 3.14159265;
+				float3 groundColor = 1.5 * reflectance.rgb * (10 * max(cTheta, 0.0)) / 3.14159265;
 				
 				//if(ht <= _Ocean_Level && _Ocean_DrawBRDF == 1.0)
 				//	groundColor = OceanRadiance(WSD, -v, V, _Ocean_Sigma, sunL, skyE, _Ocean_Color);
@@ -168,7 +169,7 @@
 
 				//return float4(finalColor, 1.0);
 
-				return float4(fn, 1.0);
+				return float4(groundColor, 1.0);
 			}
 			
 			ENDCG
