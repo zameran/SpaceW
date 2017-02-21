@@ -136,6 +136,16 @@ namespace UnityEngine
             return new Vector4d(v1.x / v2.x, v1.y / v2.y, v1.z / v2.z, v1.w / v2.w);
         }
 
+        public static implicit operator Vector4(Vector4d v)
+        {
+            return new Vector4((float)v.x, (float)v.y, (float)v.z);
+        }
+
+        public static implicit operator Vector4d(Vector4 v)
+        {
+            return new Vector4d((double)v.x, (double)v.y, (double)v.z, (double)v.w);
+        }
+
         public override string ToString()
         {
             return "(" + x + "," + y + "," + z + "," + w + ")";

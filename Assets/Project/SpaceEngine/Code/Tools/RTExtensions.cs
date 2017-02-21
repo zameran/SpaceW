@@ -156,6 +156,22 @@ public static class RTExtensions
         return rt;
     }
 
+    public static RenderTexture CreateRTexture(Vector2 size, int depth, RenderTextureFormat format, FilterMode fm, TextureWrapMode twm, bool usemm, bool erw, int al)
+    {
+        var rt = new RenderTexture((int)size.x, (int)size.y, depth, format)
+        {
+            enableRandomWrite = erw,
+            filterMode = fm,
+            wrapMode = twm,
+            useMipMap = usemm,
+            anisoLevel = al
+        };
+
+        rt.Create();
+
+        return rt;
+    }
+
     public static RenderTexture CreateRTexture(Vector2 size, int depth, RenderTextureFormat format, FilterMode fm, TextureWrapMode twm, bool usemm, int al, bool pot)
     {
         var rt = new RenderTexture((int)size.x, (int)size.y, depth, format)

@@ -34,32 +34,42 @@
 #endregion
 
 using SpaceEngine.AtmosphericScattering.Sun;
+using SpaceEngine.Core.PropertyNotification;
 
 using System.Collections.Generic;
+using System.ComponentModel;
 
 using UnityEngine;
 
 namespace SpaceEngine.AtmosphericScattering
 {
-    public sealed class Atmosphere : Node<Atmosphere>, IEventit, IUniformed<Material>, IUniformed<MaterialPropertyBlock>
+    public sealed class AtmosphereBaseProperty : PropertyNotificationObject
     {
-        private AtmosphereBase atmosphereBase = AtmosphereBase.Earth;
+        private AtmosphereBase _value = AtmosphereBase.Earth;
 
-        public AtmosphereBase AtmosphereBase
+        public AtmosphereBase Value
         {
-            get { return atmosphereBase; }
+            get
+            {
+                return _value;
+            }
             set
             {
-                var changed = false;
+                if (!Equals(value, _value))
+                {
+                    _value = value;
 
-                changed = (atmosphereBase != value);
-
-                atmosphereBase = value;
-
-                if (changed)
-                    EventManager.PlanetoidEvents.OnAtmospherePresetChanged.Invoke(planetoid, this);
+                    OnPropertyChanged("Name");
+                }
             }
         }
+    }
+
+    public sealed class Atmosphere : Node<Atmosphere>, IEventit, IUniformed<Material>, IUniformed<MaterialPropertyBlock>
+    {
+        public AtmosphereBaseProperty AtmosphereBaseProperty = new AtmosphereBaseProperty();
+
+        public AtmosphereBase AtmosphereBase { get { return AtmosphereBaseProperty.Value; } set { AtmosphereBaseProperty.Value = value; } }
 
         public AnimationCurve FadeCurve = new AnimationCurve(new Keyframe[] { new Keyframe(0.0f, 0.0f),
                                                                               new Keyframe(0.25f, 1.0f),
@@ -76,6 +86,8 @@ namespace SpaceEngine.AtmosphericScattering
         public float Scale = 1.0f;
         public float Fade = 1.0f;
         public float AerialPerspectiveOffset = 2000.0f;
+
+        [Range(0.000025f, 0.1f)]
         public float ExtinctionGroundFade = 0.000025f;
 
         public int AtmosphereMeshResolution = 2;
@@ -117,12 +129,6 @@ namespace SpaceEngine.AtmosphericScattering
         private Matrix4x4 occludersMatrix1;
         private Matrix4x4 sunPositionsMatrix;
         private Matrix4x4 sunDirectionsMatrix;
-        private Matrix4x4 worldToCamera;
-        private Matrix4x4 cameraToWorld;
-        private Matrix4x4 cameraToScreen;
-        private Matrix4x4 screenToCamera;
-
-        private Vector3 worldCameraPos;
 
         public List<string> Keywords = new List<string>();
 
@@ -135,6 +141,8 @@ namespace SpaceEngine.AtmosphericScattering
         {
             if (isEventit) return;
 
+            AtmosphereBaseProperty.PropertyChanged += AtmosphereBasePropertyOnPropertyChanged;
+
             EventManager.PlanetoidEvents.OnAtmosphereBaked.OnEvent += OnAtmosphereBaked;
             EventManager.PlanetoidEvents.OnAtmospherePresetChanged.OnEvent += OnAtmospherePresetChanged;
 
@@ -145,6 +153,8 @@ namespace SpaceEngine.AtmosphericScattering
         {
             if (!isEventit) return;
 
+            AtmosphereBaseProperty.PropertyChanged -= AtmosphereBasePropertyOnPropertyChanged;
+
             EventManager.PlanetoidEvents.OnAtmosphereBaked.OnEvent -= OnAtmosphereBaked;
             EventManager.PlanetoidEvents.OnAtmospherePresetChanged.OnEvent -= OnAtmospherePresetChanged;
 
@@ -153,6 +163,11 @@ namespace SpaceEngine.AtmosphericScattering
         #endregion
 
         #region Events
+        private void AtmosphereBasePropertyOnPropertyChanged(object sender, PropertyChangedEventArgs e)
+        {
+            EventManager.PlanetoidEvents.OnAtmospherePresetChanged.Invoke(planetoid, this);
+        }
+
         private void OnAtmosphereBaked(Planetoid planetoid, Atmosphere atmosphere)
         {
             if (planetoid == null)
@@ -218,17 +233,16 @@ namespace SpaceEngine.AtmosphericScattering
             atmosphereParameters.Rl = (Radius + Height * 1.05f) - TerrainRadiusHold;
             atmosphereParameters.SCALE = Scale;
 
-            worldToCamera = CameraHelper.Main().GetWorldToCamera();
-            cameraToWorld = CameraHelper.Main().GetCameraToWorld();
-            cameraToScreen = CameraHelper.Main().GetCameraToScreen();
-            screenToCamera = CameraHelper.Main().GetScreenToCamera();
-            worldCameraPos = CameraHelper.Main().transform.position;
-
             var fadeValue = Mathf.Clamp01(VectorHelper.AngularRadius(Origin, planetoid.LODTarget.position, planetoid.PlanetRadius));
 
             Fade = FadeCurve.Evaluate(float.IsNaN(fadeValue) || float.IsInfinity(fadeValue) ? 1.0f : fadeValue);
 
             Keywords = planetoid.GetKeywords();
+        }
+
+        protected override void Awake()
+        {
+            base.Awake();
         }
 
         protected override void Start()
@@ -241,6 +255,16 @@ namespace SpaceEngine.AtmosphericScattering
         protected override void Update()
         {
             base.Update();
+        }
+
+        protected override void OnDestroy()
+        {
+            Helper.Destroy(SkyMaterial);
+            Helper.Destroy(AtmosphereMesh);
+
+            UnEventit();
+
+            base.OnDestroy();
         }
 
         #endregion
@@ -317,15 +341,15 @@ namespace SpaceEngine.AtmosphericScattering
             if (artb.inscatterT_Read != null) target.SetTexture("_Sky_Inscatter", artb.inscatterT_Read);
             if (artb.irradianceT_Read != null) target.SetTexture("_Sky_Irradiance", artb.irradianceT_Read);
 
-            target.SetMatrix("_Globals_WorldToCamera", worldToCamera);
-            target.SetMatrix("_Globals_CameraToWorld", cameraToWorld);
-            target.SetMatrix("_Globals_CameraToScreen", cameraToScreen);
-            target.SetMatrix("_Globals_ScreenToCamera", screenToCamera);
-            target.SetVector("_Globals_WorldCameraPos", worldCameraPos);
-            target.SetVector("_Globals_WorldCameraPos_Offsetted", worldCameraPos - Origin);
+            target.SetMatrix("_Globals_WorldToCamera", GodManager.Instance.WorldToCamera);
+            target.SetMatrix("_Globals_CameraToWorld", GodManager.Instance.CameraToWorld);
+            target.SetMatrix("_Globals_CameraToScreen", GodManager.Instance.CameraToScreen);
+            target.SetMatrix("_Globals_ScreenToCamera", GodManager.Instance.ScreenToCamera);
+            target.SetVector("_Globals_WorldCameraPos", GodManager.Instance.WorldCameraPos);
+            target.SetVector("_Globals_WorldCameraPos_Offsetted", GodManager.Instance.WorldCameraPos - Origin);
             target.SetVector("_Globals_Origin", -Origin);
 
-            target.SetVector("_Globals_WorldCameraPos_Offsetted_Origin", (worldCameraPos - Origin) + (-Origin)); // NOTE : Lol.
+            target.SetVector("_Globals_WorldCameraPos_Offsetted_Origin", (GodManager.Instance.WorldCameraPos - Origin) + (-Origin)); // NOTE : Lol.
 
             target.SetFloat("_Exposure", HDRExposure);
             target.SetFloat("_HDRMode", (int)HDRMode);
@@ -492,14 +516,6 @@ namespace SpaceEngine.AtmosphericScattering
             }
         }
 
-        private void OnDestroy()
-        {
-            Helper.Destroy(SkyMaterial);
-            Helper.Destroy(AtmosphereMesh);
-
-            UnEventit();
-        }
-
         #region Gizmos
 
 #if UNITY_EDITOR
@@ -569,7 +585,7 @@ namespace SpaceEngine.AtmosphericScattering
 
         #endregion
 
-        private Vector3 GetSunDirection(AtmosphereSun sun)
+        public Vector3 GetSunDirection(AtmosphereSun sun)
         {
             return (sun.transform.position - Origin).normalized;
         }
@@ -587,12 +603,6 @@ namespace SpaceEngine.AtmosphericScattering
 
         public void InitMisc()
         {
-            worldToCamera = CameraHelper.Main().GetWorldToCamera();
-            cameraToWorld = CameraHelper.Main().GetCameraToWorld();
-            cameraToScreen = CameraHelper.Main().GetCameraToScreen();
-            screenToCamera = CameraHelper.Main().GetScreenToCamera();
-            worldCameraPos = CameraHelper.Main().transform.position;
-
             Keywords = planetoid.GetKeywords();
         }
 
@@ -642,6 +652,8 @@ namespace SpaceEngine.AtmosphericScattering
 
                 atmosphere.SetUniforms(atmosphere.SkyMaterial);
                 atmosphere.SetUniforms(atmosphere.planetoid.QuadMPB);
+
+                if (planetoid.Ocean != null) planetoid.Ocean.Reanimate();
 
                 for (byte i = 0; i < Suns.Count; i++)
                 {

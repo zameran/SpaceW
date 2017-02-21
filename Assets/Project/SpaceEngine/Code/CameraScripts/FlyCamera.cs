@@ -199,6 +199,8 @@ namespace SpaceEngine.Cameras
                 {
                     var h = (distanceToPlanetCore - planetoid.PlanetRadius - planetoid.TerrainMaxHeight);
 
+                    if (planetoid.Ocean != null) h = h - planetoid.Ocean.OceanLevel;
+
                     if (h < 1.0f) { h = 1.0f; }
 
                     //NOTE : 0.01 is too small value for near clip plane...
@@ -214,8 +216,8 @@ namespace SpaceEngine.Cameras
             }
             else
             {
-                CameraComponent.nearClipPlane = nearClipPlaneCache;
-                CameraComponent.farClipPlane = farClipPlaneCache;
+                //CameraComponent.nearClipPlane = nearClipPlaneCache;
+                //CameraComponent.farClipPlane = farClipPlaneCache;
             }
         }
 

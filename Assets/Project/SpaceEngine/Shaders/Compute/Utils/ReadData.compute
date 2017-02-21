@@ -1,27 +1,4 @@
-﻿//
-// Procedural planet renderer.
-// Copyright (c) 2008-2011 INRIA
-//
-// This program is free software: you can redistribute it and/or modify
-// it under the terms of the GNU General Public License as published by
-// the Free Software Foundation, either version 3 of the License, or
-// (at your option) any later version.
-//
-// This program is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU General Public License for more details.
-//
-// You should have received a copy of the GNU General Public License
-// along with this program.  If not, see <http://www.gnu.org/licenses/>.
-//
-// Proland is distributed under a dual-license scheme.
-// You can obtain a specific license from Inria: proland-licensing@inria.fr.
-//
-// Authors: Justin Hawkins 2014.
-// Modified by Denis Ovchinnikov 2015-2017
-
-//NOTE - Not every kernel has been tested
+﻿//NOTE - Not every kernel has been tested
 
 uint _Width;
 uint _Height;
@@ -36,12 +13,9 @@ float4 _UV;
 Texture2D _Tex2D;
 Texture3D _Tex3D;
 
-SamplerState LinearClamp;
-
-//-----------------------------------------------------------------------//
+SamplerState _LinearClamp;
 
 //-- read from 1 channel 2D render texture --//
-
 #pragma kernel read2DC1
 
 RWStructuredBuffer<float> _Buffer2DC1;
@@ -49,16 +23,16 @@ RWStructuredBuffer<float> _Buffer2DC1;
 [numthreads(8,8,1)]
 void read2DC1(uint3 id : SV_DispatchThreadID)
 {
-
 	int idx = id.x + id.y * _Width;
 
 	if(id.x < _Width && id.y < _Height)
+	{
 		_Buffer2DC1[idx] = _Tex2D[id.xy].x;
+	}
 
 }
 
 //-- read from 2 channel 2D render texture --//
-
 #pragma kernel read2DC2
 
 RWStructuredBuffer<float2> _Buffer2DC2;
@@ -66,16 +40,16 @@ RWStructuredBuffer<float2> _Buffer2DC2;
 [numthreads(8,8,1)]
 void read2DC2(uint3 id : SV_DispatchThreadID)
 {
-
 	int idx = id.x + id.y * _Width;
 	
 	if(id.x < _Width && id.y < _Height)
+	{
 		_Buffer2DC2[idx] = _Tex2D[id.xy].xy;
+	}
 
 }
 
 //-- read from 3 channel 2D render texture --//
-
 #pragma kernel read2DC3
 
 RWStructuredBuffer<float3> _Buffer2DC3;
@@ -83,16 +57,16 @@ RWStructuredBuffer<float3> _Buffer2DC3;
 [numthreads(8,8,1)]
 void read2DC3(uint3 id : SV_DispatchThreadID)
 {
-
 	int idx = id.x + id.y * _Width;
 
 	if(id.x < _Width && id.y < _Height)
+	{
 		_Buffer2DC3[idx] = _Tex2D[id.xy].xyz;
+	}
 
 }
 
 //-- read from 4 channel 2D render texture --//
-
 #pragma kernel read2DC4
 
 RWStructuredBuffer<float4> _Buffer2DC4;
@@ -100,16 +74,16 @@ RWStructuredBuffer<float4> _Buffer2DC4;
 [numthreads(8,8,1)]
 void read2DC4(uint3 id : SV_DispatchThreadID)
 {
-
 	int idx = id.x + id.y * _Width;
 
 	if(id.x < _Width && id.y < _Height)
+	{
 		_Buffer2DC4[idx] = _Tex2D[id.xy];
+	}
 
 }
 
 //-- read single pixel from 2D render texure. Always reads all 4 channes --//
-
 #pragma kernel readSingle2D
 
 RWStructuredBuffer<float4> _BufferSingle2D;
@@ -117,27 +91,19 @@ RWStructuredBuffer<float4> _BufferSingle2D;
 [numthreads(1,1,1)]
 void readSingle2D(uint3 id : SV_DispatchThreadID)
 {
-
 	_BufferSingle2D[0] = _Tex2D[uint2(_IdxX,_IdxY)];
-
 }
 
 //-- read single pixel from 2D render texure using bilinear filtering. Always reads all 4 channes --//
-
 #pragma kernel readSingleBilinear2D
 
 [numthreads(1,1,1)]
 void readSingleBilinear2D(uint3 id : SV_DispatchThreadID)
 {
-
-	_BufferSingle2D[0] = _Tex2D.SampleLevel(LinearClamp, _UV.xy, 0);
-
+	_BufferSingle2D[0] = _Tex2D.SampleLevel(_LinearClamp, _UV.xy, 0);
 }
 
-//-----------------------------------------------------------------------//
-
 //-- read from 1 channel 3D render texture --//
-
 #pragma kernel read3DC1
 
 RWStructuredBuffer<float> _Buffer3DC1;
@@ -145,16 +111,15 @@ RWStructuredBuffer<float> _Buffer3DC1;
 [numthreads(8,8,8)]
 void read3DC1(uint3 id : SV_DispatchThreadID)
 {
-
 	int idx = id.x + id.y * _Width + id.z * _Width * _Height;
 
 	if(id.x < _Width && id.y < _Height && id.z < _Depth)
+	{
 		_Buffer3DC1[idx] = _Tex3D[id].x;
-
+	}
 }
 
 //-- read from 2 channel 3D render texture --//
-
 #pragma kernel read3DC2
 
 RWStructuredBuffer<float2> _Buffer3DC2;
@@ -162,16 +127,15 @@ RWStructuredBuffer<float2> _Buffer3DC2;
 [numthreads(8,8,8)]
 void read3DC2(uint3 id : SV_DispatchThreadID)
 {
-
 	int idx = id.x + id.y * _Width + id.z * _Width * _Height;
 
 	if(id.x < _Width && id.y < _Height && id.z < _Depth)
+	{
 		_Buffer3DC2[idx] = _Tex3D[id].xy;
-
+	}
 }
 
 //-- read from 3 channel 3D render texture --//
-
 #pragma kernel read3DC3
 
 RWStructuredBuffer<float3> _Buffer3DC3;
@@ -179,16 +143,15 @@ RWStructuredBuffer<float3> _Buffer3DC3;
 [numthreads(8,8,8)]
 void read3DC3(uint3 id : SV_DispatchThreadID)
 {
-
 	int idx = id.x + id.y * _Width + id.z * _Width * _Height;
 
 	if(id.x < _Width && id.y < _Height && id.z < _Depth)
+	{
 		_Buffer3DC3[idx] = _Tex3D[id].xyz;
-
+	}
 }
 
 //-- read from 4 channel 3D render texture --//
-
 #pragma kernel read3DC4
 
 RWStructuredBuffer<float4> _Buffer3DC4;
@@ -196,16 +159,15 @@ RWStructuredBuffer<float4> _Buffer3DC4;
 [numthreads(8,8,8)]
 void read3DC4(uint3 id : SV_DispatchThreadID)
 {
-
 	int idx = id.x + id.y * _Width + id.z * _Width * _Height;
 
 	if(id.x < _Width && id.y < _Height && id.z < _Depth)
+	{
 		_Buffer3DC4[idx] = _Tex3D[id];
-
+	}
 }
 
 //-- read single pixel from 3D render texure. Always reads all 4 channes --//
-
 #pragma kernel readSingle3D
 
 RWStructuredBuffer<float4> _BufferSingle3D;
@@ -214,41 +176,13 @@ RWStructuredBuffer<float4> _BufferSingle3D;
 void readSingle3D(uint3 id : SV_DispatchThreadID)
 {
 	_BufferSingle3D[0] = _Tex3D[uint3(_IdxX,_IdxY,_IdxZ)];
-
 }
 
 //-- read single pixel from 3D render texure using bilinear filtering. Always reads all 4 channes --//
-
 #pragma kernel readSingleBilinear3D
 
 [numthreads(1,1,1)]
 void readSingleBilinear3D(uint3 id : SV_DispatchThreadID)
 {
-	_BufferSingle3D[0] = _Tex3D.SampleLevel(LinearClamp, _UV.xyz, 0);
-
+	_BufferSingle3D[0] = _Tex3D.SampleLevel(_LinearClamp, _UV.xyz, 0);
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

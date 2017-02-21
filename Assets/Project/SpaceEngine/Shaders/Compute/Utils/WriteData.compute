@@ -1,40 +1,15 @@
-﻿//
-// Procedural planet renderer.
-// Copyright (c) 2008-2011 INRIA
-//
-// This program is free software: you can redistribute it and/or modify
-// it under the terms of the GNU General Public License as published by
-// the Free Software Foundation, either version 3 of the License, or
-// (at your option) any later version.
-//
-// This program is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU General Public License for more details.
-//
-// You should have received a copy of the GNU General Public License
-// along with this program.  If not, see <http://www.gnu.org/licenses/>.
-//
-// Proland is distributed under a dual-license scheme.
-// You can obtain a specific license from Inria: proland-licensing@inria.fr.
-//
-// Authors: Justin Hawkins 2014.
-// Modified by Denis Ovchinnikov 2015-2017
-
-//NOTE - Not every kernel has been tested
+﻿//NOTE - Not every kernel has been tested
 
 uint _Width;
 uint _Height;
 uint _Depth;
 
-//-----------------------------------------------------------------------//
-
 //-- write into 1 channel 2D render texture --//
-
 #pragma kernel write2DC1
 
 RWTexture2D<float> _Des2DC1;
 RWStructuredBuffer<float> _Buffer2DC1;
+
 int _Size;
 
 [numthreads(8,8,1)]
@@ -43,11 +18,12 @@ void write2DC1(uint3 id : SV_DispatchThreadID)
 	int idx = id.x + id.y * _Width;
 	
 	if(id.x < _Width && id.y < _Height)
+	{
 		_Des2DC1[id.xy] = _Buffer2DC1[idx];
+	}
 }
 
 //-- write into 2 channel 2D render texture --//
-
 #pragma kernel write2DC2
 
 RWTexture2D<float2> _Des2DC2;
@@ -59,11 +35,12 @@ void write2DC2(uint3 id : SV_DispatchThreadID)
 	int idx = id.x + id.y * _Width;
 	
 	if(id.x < _Width && id.y < _Height)
+	{
 		_Des2DC2[id.xy] = _Buffer2DC2[idx];
+	}
 }
 
 //-- write into 3 channel 2D render texture --//
-
 #pragma kernel write2DC3
 
 RWTexture2D<float4> _Des2DC3; //There is no RGBFloat format in Unity atm so must use ARGBFloat
@@ -75,11 +52,12 @@ void write2DC3(uint3 id : SV_DispatchThreadID)
 	int idx = id.x + id.y * _Width;
 	
 	if(id.x < _Width && id.y < _Height)
+	{
 		_Des2DC3[id.xy] = float4(_Buffer2DC3[idx].xyz, 1);
+	}
 }
 
 //-- write into 4 channel 2D render texture --//
-
 #pragma kernel write2DC4
 
 RWTexture2D<float4> _Des2DC4;
@@ -91,13 +69,12 @@ void write2DC4(uint3 id : SV_DispatchThreadID)
 	int idx = id.x + id.y * _Width;
 	
 	if(id.x < _Width && id.y < _Height)
+	{
 		_Des2DC4[id.xy] = _Buffer2DC4[idx];
+	}
 }
 
-//-----------------------------------------------------------------------//
-
 //-- write into 1 channel 3D render texture --//
-
 #pragma kernel write3DC1
 
 RWTexture3D<float> _Des3DC1;
@@ -109,11 +86,12 @@ void write3DC1(uint3 id : SV_DispatchThreadID)
 	int idx = id.x + id.y * _Width + id.z * _Width * _Height;
 	
 	if(id.x < _Width && id.y < _Height && id.z < _Depth)
+	{
 		_Des3DC1[id] = _Buffer3DC1[idx];
+	}
 }
 
 //-- write into 2 channel 3D render texture --//
-
 #pragma kernel write3DC2
 
 RWTexture3D<float2> _Des3DC2;
@@ -125,11 +103,12 @@ void write3DC2(uint3 id : SV_DispatchThreadID)
 	int idx = id.x + id.y * _Width + id.z * _Width * _Height;
 	
 	if(id.x < _Width && id.y < _Height && id.z < _Depth)
+	{
 		_Des3DC2[id] = _Buffer3DC2[idx];
+	}
 }
 
 //-- write into 3 channel 3D render texture --//
-
 #pragma kernel write3DC3
 
 RWTexture3D<float4> _Des3DC3; //There is no RGBFloat format in Unity atm so must use ARGBFloat
@@ -141,11 +120,12 @@ void write3DC3(uint3 id : SV_DispatchThreadID)
 	int idx = id.x + id.y * _Width + id.z * _Width * _Height;
 	
 	if(id.x < _Width && id.y < _Height && id.z < _Depth)
+	{
 		_Des3DC3[id] = float4(_Buffer3DC3[idx].xyz, 1);
+	}
 }
 
 //-- write into 4 channel 3D render texture --//
-
 #pragma kernel write3DC4
 
 RWTexture3D<float4> _Des3DC4;
@@ -157,8 +137,7 @@ void write3DC4(uint3 id : SV_DispatchThreadID)
 	int idx = id.x + id.y * _Width + id.z * _Width * _Height;
 	
 	if(id.x < _Width && id.y < _Height && id.z < _Depth)
+	{
 		_Des3DC4[id] = _Buffer3DC4[idx];
+	}
 }
-
-
-

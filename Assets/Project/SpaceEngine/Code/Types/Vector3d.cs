@@ -263,15 +263,24 @@ namespace UnityEngine
 
         public Vector3d Normalized()
         {
-            double invLength = 1.0 / Math.Sqrt(x * x + y * y + z * z);
+            var invLength = 1.0 / Math.Sqrt(x * x + y * y + z * z);
 
             return new Vector3d(x * invLength, y * invLength, z * invLength);
         }
 
         public Vector3d Normalized(double l)
         {
-            double invLength = l / Math.Sqrt(x * x + y * y + z * z);
-            ;
+            var invLength = l / Math.Sqrt(x * x + y * y + z * z);
+
+            return new Vector3d(x * invLength, y * invLength, z * invLength);
+        }
+
+        public Vector3d Normalized(ref double previousLength)
+        {
+            previousLength = System.Math.Sqrt(x * x + y * y + z * z);
+
+            var invLength = 1.0 / previousLength;
+
             return new Vector3d(x * invLength, y * invLength, z * invLength);
         }
 

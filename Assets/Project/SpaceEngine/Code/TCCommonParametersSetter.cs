@@ -71,11 +71,6 @@ public sealed class TCCommonParametersSetter : MonoBehaviour
     public Vector4 cloudsParams2;
     public Vector4 cycloneParams;
 
-    public Vector4 radParams;
-    public Vector4 crHeightParams;
-    public Vector4 craterParams1;
-    public Vector4 craterParams2;
-
     public Vector2 texturingUVAtlasOffset;
     public Vector2 InvSize;
 
@@ -145,11 +140,6 @@ public sealed class TCCommonParametersSetter : MonoBehaviour
         mat.SetVector("cloudsParams2", cloudsParams2);
         mat.SetVector("cycloneParams", cycloneParams);
 
-        mat.SetVector("radParams", radParams);
-        mat.SetVector("crHeightParams", crHeightParams);
-        mat.SetVector("craterParams1", craterParams1);
-        mat.SetVector("craterParams2", craterParams2);
-
         mat.SetVector("texturingUVAtlasOffset", texturingUVAtlasOffset);
         mat.SetVector("InvSize", InvSize);
 
@@ -189,11 +179,6 @@ public sealed class TCCommonParametersSetter : MonoBehaviour
         shader.SetVector("cloudsParams1", cloudsParams1);
         shader.SetVector("cloudsParams2", cloudsParams2);
         shader.SetVector("cycloneParams", cycloneParams);
-
-        shader.SetVector("radParams", radParams);
-        shader.SetVector("crHeightParams", crHeightParams);
-        shader.SetVector("craterParams1", craterParams1);
-        shader.SetVector("craterParams2", craterParams2);
 
         shader.SetVector("texturingUVAtlasOffset", texturingUVAtlasOffset);
         shader.SetVector("InvSize", InvSize);

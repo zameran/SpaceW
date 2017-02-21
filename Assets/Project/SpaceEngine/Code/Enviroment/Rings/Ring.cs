@@ -123,6 +123,11 @@ public class Ring : Node<Ring>, IUniformed<Material>
         if (planetoid != null) SetShadows(planetoid.QuadMPB, planetoid.Shadows);
     }
 
+    protected override void Awake()
+    {
+        base.Awake();
+    }
+
     protected override void Start()
     {
         base.Start();
@@ -131,6 +136,21 @@ public class Ring : Node<Ring>, IUniformed<Material>
     protected override void Update()
     {
         base.Update();
+    }
+
+    protected override void OnDestroy()
+    {
+        Helper.Destroy(RingMaterial);
+        Helper.Destroy(RingSegmentMesh);
+
+        for (var i = Segments.Count - 1; i >= 0; i--)
+        {
+            Helper.Destroy(Segments[i]);
+        }
+
+        Segments.Clear();
+
+        base.OnDestroy();
     }
 
     #endregion
@@ -191,19 +211,6 @@ public class Ring : Node<Ring>, IUniformed<Material>
                 segment.gameObject.SetActive(false);
             }
         }
-    }
-
-    private void OnDestroy()
-    {
-        Helper.Destroy(RingMaterial);
-        Helper.Destroy(RingSegmentMesh);
-
-        for (var i = Segments.Count - 1; i >= 0; i--)
-        {
-            Helper.Destroy(Segments[i]);
-        }
-
-        Segments.Clear();
     }
 
     #region Gizmos
