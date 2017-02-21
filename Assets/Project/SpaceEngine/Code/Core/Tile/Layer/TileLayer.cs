@@ -23,7 +23,6 @@ namespace SpaceEngine.Core.Tile.Layer
 
         }
 
-
         protected override void Awake()
         {
             base.Awake();
