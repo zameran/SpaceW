@@ -31,8 +31,6 @@ namespace SpaceEngine.Ocean
         [SerializeField]
         protected float ZMin = 20000.0f;
 
-        public float ZOffset = 0.0f;
-
         /// <summary>
         /// Size of each grid in the projected grid. (number of pixels on screen).
         /// </summary>
@@ -64,14 +62,17 @@ namespace SpaceEngine.Ocean
 
         #endregion
 
+        public void Reanimate()
+        {
+            InitNode();
+        }
+
         #region Node
 
         protected override void InitNode()
         {
             OceanMaterial = MaterialHelper.CreateTemp(OceanShader, "Ocean");
 
-            // TODO : OCEAN
-            //Manager.GetSkyNode().InitUniforms(OceanMaterial);
             planetoid.Atmosphere.InitUniforms(OceanMaterial);
 
             OldLocalToOcean = Matrix4x4d.Identity();
@@ -114,7 +115,7 @@ namespace SpaceEngine.Ocean
             // Calculates the required data for the projected grid
 
             var c2w = (Matrix4x4d)GodManager.Instance.CameraToWorld;
-            var cl = c2w * Vector3d.zero; // Camera in local space
+            var cl = c2w * Vector3d.zero; // Camera in local space // TODO : Really? Zero?!
 
             var radius = planetoid.PlanetRadius;//Manager.IsDeformed() ? Manager.GetRadius() : 0.0f;
 
@@ -164,7 +165,7 @@ namespace SpaceEngine.Ocean
 
             if (OldLocalToOcean != Matrix4x4d.Identity())
             {
-                var delta = l2o * (OldLocalToOcean.Inverse() * Vector3d.zero);
+                var delta = l2o * (OldLocalToOcean.Inverse() * Vector3d.zero); // TODO : Really? Zero?!
 
                 Offset += new Vector4((float)delta.x, (float)delta.y, (float)delta.z, 0.0f);
             }
@@ -172,7 +173,7 @@ namespace SpaceEngine.Ocean
             OldLocalToOcean = l2o;
 
             var stoc = (Matrix4x4d)GodManager.Instance.ScreenToCamera;
-            var oc = c2o * Vector3d.zero;
+            var oc = c2o * Vector3d.zero; // TODO : Really? Zero?!
 
             var h = oc.z;
 
@@ -210,11 +211,10 @@ namespace SpaceEngine.Ocean
                 horizon2 = new Vector3d(beta0 * beta0 - gamma0, 2.0 * (beta0 * beta1 - gamma1), beta1 * beta1 - gamma2);
             }
 
-            // TODO : OCEAN
-            Vector3d sunDir = planetoid.Atmosphere.GetSunDirection(planetoid.Atmosphere.Suns[0]);//new Vector3d(Manager.GetSunNode().GetDirection());
-            Vector3d oceanSunDir = l2o.ToMatrix3x3d() * sunDir;
+            var sunDirection = planetoid.Atmosphere.GetSunDirection(planetoid.Atmosphere.Suns[0]);
+            var oceanSunDirection = l2o.ToMatrix3x3d() * sunDirection;
 
-            OceanMaterial.SetVector("_Ocean_SunDir", oceanSunDir.ToVector3());
+            OceanMaterial.SetVector("_Ocean_SunDir", oceanSunDirection.ToVector3());
             OceanMaterial.SetVector("_Ocean_Horizon1", horizon1.ToVector3());
             OceanMaterial.SetVector("_Ocean_Horizon2", horizon2.ToVector3());
             OceanMaterial.SetMatrix("_Ocean_CameraToOcean", c2o.ToMatrix4x4());
@@ -265,7 +265,6 @@ namespace SpaceEngine.Ocean
 
             foreach (var mesh in ScreenMeshGrids)
             {
-                // TODO : OCEAN
                 Graphics.DrawMesh(mesh, Matrix4x4.identity, OceanMaterial, drawLayer, camera, 0, planetoid.QuadMPB);
             }
         }
@@ -278,6 +277,16 @@ namespace SpaceEngine.Ocean
             mat.SetVector("_Ocean_Color", UpwellingColor * 0.1f);
             mat.SetFloat("_Ocean_DrawBRDF", (DrawOcean) ? 0.0f : 1.0f);
             mat.SetFloat("_Ocean_Level", OceanLevel);
+        }
+
+        public void SetUniforms(MaterialPropertyBlock block)
+        {
+            if (block == null) return;
+
+            block.SetFloat("_Ocean_Sigma", GetMaxSlopeVariance());
+            block.SetVector("_Ocean_Color", UpwellingColor * 0.1f);
+            block.SetFloat("_Ocean_DrawBRDF", (DrawOcean) ? 0.0f : 1.0f);
+            block.SetFloat("_Ocean_Level", OceanLevel);
         }
     }
 }

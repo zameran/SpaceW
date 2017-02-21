@@ -170,6 +170,7 @@ public sealed class Quad : Node<Quad>, IQuad, IUniformed<Material>, IUniformed<C
         }
 
         if (Planetoid.Atmosphere != null) Planetoid.Atmosphere.SetUniforms(QuadMaterial);
+        if (Planetoid.Ocean != null) Planetoid.Ocean.SetUniforms(QuadMaterial);
     }
 
     protected override void Awake()
@@ -228,6 +229,7 @@ public sealed class Quad : Node<Quad>, IQuad, IUniformed<Material>, IUniformed<C
         target.SetMatrix("_TRS", RotationMatrix);
         target.SetFloat("_LODLevel", LODLevel + 2);
         target.SetFloat("_ID", (float)ID);
+        target.SetFloat("_TerrainMaxHeight", generationConstants.terrainMaxHeight);
     }
 
     #endregion

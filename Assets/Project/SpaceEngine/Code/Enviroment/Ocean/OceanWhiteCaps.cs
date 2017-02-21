@@ -51,6 +51,8 @@ namespace SpaceEngine.Ocean
 
         protected override void InitNode()
         {
+            base.InitNode();
+
             InitJacobiansMaterial.SetTexture("_Spectrum01", Spectrum01);
             InitJacobiansMaterial.SetTexture("_Spectrum23", Spectrum23);
             InitJacobiansMaterial.SetTexture("_WTable", WTable);
@@ -60,6 +62,8 @@ namespace SpaceEngine.Ocean
 
         protected override void UpdateNode()
         {
+            base.UpdateNode();
+
             Fourier.PeformFFT(FourierBuffer5, FourierBuffer6, FourierBuffer7);
 
             WhiteCapsPrecomputeMat.SetTexture("_Map5", FourierBuffer5[IDX]);

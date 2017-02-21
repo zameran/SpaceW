@@ -104,10 +104,20 @@ public static class PlanetoidExtensions
                 {
                     Keywords.Add("ATMOSPHERE_OFF");
                 }
+
+                if (planet.Ocean != null)
+                {
+                    Keywords.Add("OCEAN_ON");
+                }
+                else
+                {
+                    Keywords.Add("OCEAN_OFF");
+                }
             }
             else
             {
                 Keywords.Add("ATMOSPHERE_OFF");
+                Keywords.Add("OCEAN_OFF");
             }
         }
 
