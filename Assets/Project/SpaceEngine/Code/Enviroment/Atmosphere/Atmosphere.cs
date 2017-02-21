@@ -34,32 +34,42 @@
 #endregion
 
 using SpaceEngine.AtmosphericScattering.Sun;
+using SpaceEngine.Core.PropertyNotification;
 
 using System.Collections.Generic;
+using System.ComponentModel;
 
 using UnityEngine;
 
 namespace SpaceEngine.AtmosphericScattering
 {
-    public sealed class Atmosphere : Node<Atmosphere>, IEventit, IUniformed<Material>, IUniformed<MaterialPropertyBlock>
+    public sealed class AtmosphereBaseProperty : PropertyNotificationObject
     {
-        private AtmosphereBase atmosphereBase = AtmosphereBase.Earth;
+        private AtmosphereBase _value = AtmosphereBase.Earth;
 
-        public AtmosphereBase AtmosphereBase
+        public AtmosphereBase Value
         {
-            get { return atmosphereBase; }
+            get
+            {
+                return _value;
+            }
             set
             {
-                var changed = false;
+                if (!Equals(value, _value))
+                {
+                    _value = value;
 
-                changed = (atmosphereBase != value);
-
-                atmosphereBase = value;
-
-                if (changed)
-                    EventManager.PlanetoidEvents.OnAtmospherePresetChanged.Invoke(planetoid, this);
+                    OnPropertyChanged("Name");
+                }
             }
         }
+    }
+
+    public sealed class Atmosphere : Node<Atmosphere>, IEventit, IUniformed<Material>, IUniformed<MaterialPropertyBlock>
+    {
+        public AtmosphereBaseProperty AtmosphereBaseProperty = new AtmosphereBaseProperty();
+
+        public AtmosphereBase AtmosphereBase { get { return AtmosphereBaseProperty.Value; } set { AtmosphereBaseProperty.Value = value; } }
 
         public AnimationCurve FadeCurve = new AnimationCurve(new Keyframe[] { new Keyframe(0.0f, 0.0f),
                                                                               new Keyframe(0.25f, 1.0f),
@@ -131,6 +141,8 @@ namespace SpaceEngine.AtmosphericScattering
         {
             if (isEventit) return;
 
+            AtmosphereBaseProperty.PropertyChanged += AtmosphereBasePropertyOnPropertyChanged;
+
             EventManager.PlanetoidEvents.OnAtmosphereBaked.OnEvent += OnAtmosphereBaked;
             EventManager.PlanetoidEvents.OnAtmospherePresetChanged.OnEvent += OnAtmospherePresetChanged;
 
@@ -141,6 +153,8 @@ namespace SpaceEngine.AtmosphericScattering
         {
             if (!isEventit) return;
 
+            AtmosphereBaseProperty.PropertyChanged -= AtmosphereBasePropertyOnPropertyChanged;
+
             EventManager.PlanetoidEvents.OnAtmosphereBaked.OnEvent -= OnAtmosphereBaked;
             EventManager.PlanetoidEvents.OnAtmospherePresetChanged.OnEvent -= OnAtmospherePresetChanged;
 
@@ -149,6 +163,11 @@ namespace SpaceEngine.AtmosphericScattering
         #endregion
 
         #region Events
+        private void AtmosphereBasePropertyOnPropertyChanged(object sender, PropertyChangedEventArgs e)
+        {
+            EventManager.PlanetoidEvents.OnAtmospherePresetChanged.Invoke(planetoid, this);
+        }
+
         private void OnAtmosphereBaked(Planetoid planetoid, Atmosphere atmosphere)
         {
             if (planetoid == null)
