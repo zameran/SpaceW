@@ -1,18 +1,15 @@
-﻿using SpaceEngine.Core.Exceptions;
+﻿using SpaceEngine.Code.Core.Bodies;
+using SpaceEngine.Core.Exceptions;
 using SpaceEngine.Core.Storage;
 using SpaceEngine.Core.Tile.Producer;
 using SpaceEngine.Core.Tile.Storage;
-
 using System;
 using System.Collections.Generic;
-
 using UnityEngine;
-
 using Random = UnityEngine.Random;
 
 namespace SpaceEngine.Core
 {
-    [ExecutionOrder(1000)]
     public class OriginalElevationProducer : TileProducer
     {
         public class Uniforms
@@ -60,6 +57,8 @@ namespace SpaceEngine.Core
         protected override void Start()
         {
             base.Start();
+
+            if (TerrainNode.Body == null) { TerrainNode.Body = transform.parent.GetComponentInParent<CelestialBody>(); }
 
             var tileSize = Cache.GetStorage(0).TileSize;
 

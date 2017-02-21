@@ -148,7 +148,7 @@
 				float vSun = dot(V, WSD);
 				
 				float4 reflectance = texTile(_Ortho_Tile, IN.uv, _Ortho_TileCoords, _Ortho_TileSize);
-				reflectance.rgb = tan(1.37 * reflectance.rgb) / tan(1.37); //RGB to reflectance
+				//reflectance.rgb = tan(1.37 * reflectance.rgb) / tan(1.37); //RGB to reflectance
 				
 				//float3 sunL;
 				//float3 skyE;
