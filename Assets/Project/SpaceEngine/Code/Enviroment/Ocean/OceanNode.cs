@@ -9,6 +9,11 @@ namespace SpaceEngine.Ocean
     {
         public Planetoid planetoid;
 
+        public Shader OceanShader;
+
+        public EngineRenderQueue RenderQueue = EngineRenderQueue.Background;
+        public int RenderQueueOffset = 0;
+
         [SerializeField]
         protected Material OceanMaterial;
 
@@ -18,14 +23,15 @@ namespace SpaceEngine.Ocean
         /// <summary>
         /// Sea level in meters.
         /// </summary>
-        [SerializeField]
-        protected float OceanLevel = 5.0f;
+        public float OceanLevel = 5.0f;
 
         /// <summary>
         /// The maximum altitude at which the ocean must be displayed.
         /// </summary>
         [SerializeField]
         protected float ZMin = 20000.0f;
+
+        public float ZOffset = 0.0f;
 
         /// <summary>
         /// Size of each grid in the projected grid. (number of pixels on screen).
@@ -50,11 +56,6 @@ namespace SpaceEngine.Ocean
         /// <returns></returns>
         public abstract float GetMaxSlopeVariance();
 
-        public bool GetDrawOcean()
-        {
-            return DrawOcean;
-        }
-
         #region OceanNode
 
         protected abstract void InitOceanNode();
@@ -67,8 +68,11 @@ namespace SpaceEngine.Ocean
 
         protected override void InitNode()
         {
+            OceanMaterial = MaterialHelper.CreateTemp(OceanShader, "Ocean");
+
             // TODO : OCEAN
             //Manager.GetSkyNode().InitUniforms(OceanMaterial);
+            planetoid.Atmosphere.InitUniforms(OceanMaterial);
 
             OldLocalToOcean = Matrix4x4d.Identity();
             Offset = Vector4.zero;
@@ -105,6 +109,8 @@ namespace SpaceEngine.Ocean
 
         protected override void UpdateNode()
         {
+            OceanMaterial.renderQueue = (int)RenderQueue + RenderQueueOffset;
+
             // Calculates the required data for the projected grid
 
             var c2w = (Matrix4x4d)GodManager.Instance.CameraToWorld;
@@ -205,10 +211,10 @@ namespace SpaceEngine.Ocean
             }
 
             // TODO : OCEAN
-            //Vector3d sunDir = new Vector3d(Manager.GetSunNode().GetDirection());
-            //Vector3d oceanSunDir = ltoo.ToMatrix3x3d() * sunDir;
+            Vector3d sunDir = planetoid.Atmosphere.GetSunDirection(planetoid.Atmosphere.Suns[0]);//new Vector3d(Manager.GetSunNode().GetDirection());
+            Vector3d oceanSunDir = l2o.ToMatrix3x3d() * sunDir;
 
-            //OceanMaterial.SetVector("_Ocean_SunDir", oceanSunDir.ToVector3());
+            OceanMaterial.SetVector("_Ocean_SunDir", oceanSunDir.ToVector3());
             OceanMaterial.SetVector("_Ocean_Horizon1", horizon1.ToVector3());
             OceanMaterial.SetVector("_Ocean_Horizon2", horizon2.ToVector3());
             OceanMaterial.SetMatrix("_Ocean_CameraToOcean", c2o.ToMatrix4x4());
@@ -222,13 +228,6 @@ namespace SpaceEngine.Ocean
             //Manager.GetSkyNode().SetUniforms(OceanMaterial);
             //Manager.GetSunNode().SetUniforms(OceanMaterial);
             //Manager.SetUniforms(OceanMaterial);
-
-            //Draw each mesh that makes up the projected grid
-            foreach (var mesh in ScreenMeshGrids)
-            {
-                // TODO : OCEAN
-                Graphics.DrawMesh(mesh, Matrix4x4.identity, OceanMaterial, 0, Camera.main);
-            }
         }
 
         protected override void Awake()
@@ -249,9 +248,27 @@ namespace SpaceEngine.Ocean
         protected override void OnDestroy()
         {
             base.OnDestroy();
+
+            Helper.Destroy(OceanMaterial);
         }
 
         #endregion
+
+        public void Render(Vector3 Origin, int drawLayer = 8)
+        {
+            Render(CameraHelper.Main(), Origin, drawLayer);
+        }
+
+        public void Render(Camera camera, Vector3 Origin, int drawLayer = 8)
+        {
+            if (DrawOcean == false) return;
+
+            foreach (var mesh in ScreenMeshGrids)
+            {
+                // TODO : OCEAN
+                Graphics.DrawMesh(mesh, Matrix4x4.identity, OceanMaterial, drawLayer, camera, 0, planetoid.QuadMPB);
+            }
+        }
 
         public void SetUniforms(Material mat)
         {

@@ -104,6 +104,8 @@ public sealed class MainRenderer : MonoBehaviour
         GodManager.Instance.Planetoids[0].RenderQueueOffset = 10001;
         if (GodManager.Instance.Planetoids[0].Atmosphere != null)
             GodManager.Instance.Planetoids[0].Atmosphere.RenderQueueOffset = 10002;
+        if (GodManager.Instance.Planetoids[0].Ocean != null)
+            GodManager.Instance.Planetoids[0].Ocean.RenderQueueOffset = 10003;
         if (GodManager.Instance.Planetoids[0].Ring != null)
             GodManager.Instance.Planetoids[0].Ring.RenderQueueOffset = 10000;
 
@@ -112,10 +114,11 @@ public sealed class MainRenderer : MonoBehaviour
             GodManager.Instance.Planetoids[i].RenderQueueOffset = 1;
             if (GodManager.Instance.Planetoids[i].Atmosphere != null)
                 GodManager.Instance.Planetoids[i].Atmosphere.RenderQueueOffset = 2;
+            if (GodManager.Instance.Planetoids[i].Ocean != null)
+                GodManager.Instance.Planetoids[i].Ocean.RenderQueueOffset = 3;
             if (GodManager.Instance.Planetoids[i].Ring != null)
                 GodManager.Instance.Planetoids[i].Ring.RenderQueueOffset = 0;
         }
-
         //-----------------------------------------------------------------------------
     }
 }

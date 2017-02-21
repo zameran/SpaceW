@@ -164,6 +164,12 @@ public sealed class Planetoid : Planet, IPlanet
                 Atmosphere.planetoid = this;
         }
 
+        if (Ocean != null)
+        {
+            if (Ocean.planetoid == null)
+                Ocean.planetoid = this;
+        }
+
         if (Cloudsphere != null)
         {
             if (Cloudsphere.planetoid == null)
@@ -352,6 +358,11 @@ public sealed class Planetoid : Planet, IPlanet
             {
                 Atmosphere.Render(camera, Origin, DrawLayer);
             }
+        }
+
+        if (Ocean != null)
+        {
+            Ocean.Render(camera, Origin, DrawLayer);
         }
 
         if (Cloudsphere != null)

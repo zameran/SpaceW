@@ -35,6 +35,7 @@
 
 using SpaceEngine.AtmosphericScattering;
 using SpaceEngine.AtmosphericScattering.Cloudsphere;
+using SpaceEngine.Ocean;
 
 using System.Collections.Generic;
 
@@ -43,6 +44,7 @@ using UnityEngine;
 public abstract class Planet : MonoBehaviour
 {
     public Atmosphere Atmosphere;
+    public OceanNode Ocean;
     public Cloudsphere Cloudsphere;
     public Ring Ring;
 

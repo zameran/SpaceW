@@ -585,7 +585,7 @@ namespace SpaceEngine.AtmosphericScattering
 
         #endregion
 
-        private Vector3 GetSunDirection(AtmosphereSun sun)
+        public Vector3 GetSunDirection(AtmosphereSun sun)
         {
             return (sun.transform.position - Origin).normalized;
         }
