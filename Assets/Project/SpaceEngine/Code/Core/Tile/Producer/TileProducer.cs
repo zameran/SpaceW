@@ -53,7 +53,7 @@ namespace SpaceEngine.Core.Tile.Producer
         /// </summary>
         public int ID { get; protected set; }
 
-        public TerrainNode TerrainNode { get { return Sampler.TerrainNode; } }
+        public TerrainNode TerrainNode { get { return Sampler.TerrainNode; } set { Sampler.TerrainNode = value; } }
 
         #region Node
 

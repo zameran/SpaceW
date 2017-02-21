@@ -95,7 +95,7 @@ namespace SpaceEngine.Core
 
         Texture2D[] NoiseTextures;
 
-        Texture2D ResudentalTexture;
+        Texture2D ResidualTexture;
 
         protected override void Start()
         {
@@ -122,9 +122,9 @@ namespace SpaceEngine.Core
 
             Noise = new PerlinNoise(Seed);
 
-            ResudentalTexture = new Texture2D(tileSize, tileSize, TextureFormat.ARGB32, false);
-            ResudentalTexture.wrapMode = TextureWrapMode.Clamp;
-            ResudentalTexture.filterMode = FilterMode.Point;
+            ResidualTexture = new Texture2D(tileSize, tileSize, TextureFormat.ARGB32, false);
+            ResidualTexture.wrapMode = TextureWrapMode.Clamp;
+            ResidualTexture.filterMode = FilterMode.Point;
 
             CreateOrthoNoise();
         }
@@ -224,13 +224,13 @@ namespace SpaceEngine.Core
                         if (channels > 2) color.b = data[(x + y * tileWidth) * channels + 2];
                         if (channels > 3) color.a = data[(x + y * tileWidth) * channels + 3];
 
-                        ResudentalTexture.SetPixel(x, y, color);
+                        ResidualTexture.SetPixel(x, y, color);
                     }
                 }
 
-                ResudentalTexture.Apply();
+                ResidualTexture.Apply();
 
-                UpSampleMaterial.SetTexture(uniforms.residualSampler, ResudentalTexture);
+                UpSampleMaterial.SetTexture(uniforms.residualSampler, ResidualTexture);
                 UpSampleMaterial.SetVector(uniforms.residualOSH, new Vector4(0.5f / (float)tileWidth, 0.5f / (float)tileWidth, 1.0f / (float)tileWidth, 0.0f));
             }
             else

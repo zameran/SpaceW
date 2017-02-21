@@ -44,7 +44,7 @@ namespace SpaceEngine.Core.Tile.Samplers
             }
         }
 
-        public TerrainNode TerrainNode { get; private set; }
+        public TerrainNode TerrainNode { get; set; }
 
         /// <summary>
         /// Store texture tiles for leaf quads?
