@@ -57,8 +57,11 @@ namespace SpaceEngine.AtmosphericScattering.Sun
         public float Magnitude = 1;
 
         public bool InitUniformsInUpdate = true;
+        public bool UseAtmosphereColors = false;
+        public bool UseRadiance = true;
 
         private bool Eclipse = false;
+        private bool UseTransmittanceOffset = false;
 
         private Vector3 ViewPortPosition = Vector3.zero;
 
@@ -151,7 +154,7 @@ namespace SpaceEngine.AtmosphericScattering.Sun
             {
                 if (Atmosphere == null) return;
 
-                Graphics.DrawMesh(SunGlareMesh, Vector3.zero, Quaternion.identity, SunGlareMaterial, 10, CameraHelper.Main(), 0, Atmosphere.planetoid.QuadMPB, false, false);
+                Graphics.DrawMesh(SunGlareMesh, Vector3.zero, Quaternion.identity, SunGlareMaterial, 8, CameraHelper.Main(), 0, Atmosphere.planetoid.QuadMPB, false, false);
             }
 
             base.Update();
@@ -197,9 +200,20 @@ namespace SpaceEngine.AtmosphericScattering.Sun
             target.SetFloat("AspectRatio", CameraHelper.Main().aspect);
             target.SetFloat("Scale", Scale);
             target.SetFloat("Fade", Fade);
-            target.SetFloat("UseAtmosphereColors", 1.0f);
-            target.SetFloat("UseRadiance", 0.0f);
+            target.SetFloat("UseAtmosphereColors", UseAtmosphereColors ? 1.0f : 0.0f);
+            target.SetFloat("UseRadiance", UseRadiance ? 1.0f : 0.0f);
             target.SetFloat("Eclipse", Eclipse ? 0.0f : 1.0f);
+
+            if (Atmosphere != null)
+            {
+                // NOTE : Only on these atmospheres we don't gonna use special transmittance uv offset... Magic!
+                UseTransmittanceOffset = Atmosphere.AtmosphereBase != AtmosphereBase.Earth &&
+                                         Atmosphere.AtmosphereBase != AtmosphereBase.Default &&
+                                         Atmosphere.AtmosphereBase != AtmosphereBase.Neptune &&
+                                         Atmosphere.AtmosphereBase != AtmosphereBase.Jupiter;
+
+                target.SetFloat("UseTransmittanceOffset", UseTransmittanceOffset ? 1.0f : 0.0f);
+            }
 
             target.renderQueue = (int)RenderQueue + RenderQueueOffset;
 

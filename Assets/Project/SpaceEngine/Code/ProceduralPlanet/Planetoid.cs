@@ -302,8 +302,11 @@ public sealed class Planetoid : Planet, IPlanet
         //This ussue take effect only with mpb, so dirty fix is:
         //ReSetupQuads();
         //NOTE : Fixed. Buffers setted 1 time. Need to update when focus losted.
+        //NOTE : Reinit [Reanimate] ocean stuff only after focus lost...
 
         ReanimateQuadsBuffers(false);
+
+        if (Ocean != null) Ocean.Reanimate();
 
         if (Atmosphere != null)
         {

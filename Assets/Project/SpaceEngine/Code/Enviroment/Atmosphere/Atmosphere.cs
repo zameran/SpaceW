@@ -495,6 +495,18 @@ namespace SpaceEngine.AtmosphericScattering
             block.SetMatrix("_Sun_Positions_1", sunPositionsMatrix);
         }
 
+        public void SetSuns(Material mat)
+        {
+            if (mat == null) return;
+
+            mat.SetFloat("_Sun_Intensity", 100.0f);
+
+            CalculateSuns(out sunDirectionsMatrix, out sunPositionsMatrix);
+
+            mat.SetMatrix("_Sun_WorldDirections_1", sunDirectionsMatrix);
+            mat.SetMatrix("_Sun_Positions_1", sunPositionsMatrix);
+        }
+
         public void Render(Vector3 Origin, int drawLayer = 8)
         {
             Render(CameraHelper.Main(), Origin, drawLayer);
@@ -652,8 +664,6 @@ namespace SpaceEngine.AtmosphericScattering
 
                 atmosphere.SetUniforms(atmosphere.SkyMaterial);
                 atmosphere.SetUniforms(atmosphere.planetoid.QuadMPB);
-
-                if (planetoid.Ocean != null) planetoid.Ocean.Reanimate();
 
                 for (byte i = 0; i < Suns.Count; i++)
                 {
