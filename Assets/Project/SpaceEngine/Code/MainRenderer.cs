@@ -42,12 +42,12 @@ public sealed class MainRenderer : MonoBehaviour
 {
     public bool OverrideExternalRendering = true;
 
-    public Planet.PlanetoidDistanceToLODTargetComparer pdtltc;
+    public Planetoid.PlanetoidDistanceToLODTargetComparer pdtltc;
 
     private void Start()
     {
         if (pdtltc == null)
-            pdtltc = new Planet.PlanetoidDistanceToLODTargetComparer();
+            pdtltc = new Planetoid.PlanetoidDistanceToLODTargetComparer();
 
         UpdateSettings();
     }

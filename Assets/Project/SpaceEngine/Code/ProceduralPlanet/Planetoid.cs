@@ -135,6 +135,24 @@ public sealed class Planetoid : Planet, IPlanet
     public MaterialPropertyBlock QuadMPB;
 
     public bool WaitOnSplit = false;
+    [HideInInspector]
+    public bool ExternalRendering = false;
+    public bool Working = false;
+    public bool OctaveFade = false;
+    public bool UseLOD = true;
+
+    public QuadDistanceToClosestCornerComparer qdtccc;
+
+    public Transform LODTarget = null;
+
+    [HideInInspector]
+    public float DistanceToLODTarget = 0;
+
+    public float LODDistanceMultiplier = 1;
+    public float LODDistanceMultiplierPerLevel = 2;
+    public int LODMaxLevel = 15;
+    public float[] LODDistances = new float[16];
+    public float[] LODOctaves = new float[6] { 0.5f, 0.5f, 0.5f, 0.75f, 0.75f, 1.0f };
 
     protected override void Awake()
     {
@@ -164,6 +182,9 @@ public sealed class Planetoid : Planet, IPlanet
     protected override void Start()
     {
         base.Start();
+
+        if (qdtccc == null)
+            qdtccc = new QuadDistanceToClosestCornerComparer();
 
         if (tccps == null)
             if (gameObject.GetComponentInChildren<TCCommonParametersSetter>() != null)
@@ -533,5 +554,31 @@ public sealed class Planetoid : Planet, IPlanet
         Quads.Sort(qdtccc);
 
         return quadComponent;
+    }
+
+    public sealed class QuadDistanceToClosestCornerComparer : IComparer<Quad>
+    {
+        public int Compare(Quad x, Quad y)
+        {
+            if (x.DistanceToLODSplit > y.DistanceToLODSplit)
+                return 1;
+            else if (x.DistanceToLODSplit < y.DistanceToLODSplit)
+                return -1;
+            else
+                return 0;
+        }
+    }
+
+    public sealed class PlanetoidDistanceToLODTargetComparer : IComparer<Planetoid>
+    {
+        public int Compare(Planetoid x, Planetoid y)
+        {
+            if (x.DistanceToLODTarget > y.DistanceToLODTarget)
+                return 1;
+            else if (x.DistanceToLODTarget < y.DistanceToLODTarget)
+                return -1;
+            else
+                return 0;
+        }
     }
 }
