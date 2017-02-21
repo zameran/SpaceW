@@ -104,10 +104,20 @@ public static class PlanetoidExtensions
                 {
                     Keywords.Add("ATMOSPHERE_OFF");
                 }
+
+                if (planet.Ocean != null)
+                {
+                    Keywords.Add("OCEAN_ON");
+                }
+                else
+                {
+                    Keywords.Add("OCEAN_OFF");
+                }
             }
             else
             {
                 Keywords.Add("ATMOSPHERE_OFF");
+                Keywords.Add("OCEAN_OFF");
             }
         }
 
@@ -162,6 +172,12 @@ public sealed class Planetoid : Planet, IPlanet
         {
             if (Atmosphere.planetoid == null)
                 Atmosphere.planetoid = this;
+        }
+
+        if (Ocean != null)
+        {
+            if (Ocean.planetoid == null)
+                Ocean.planetoid = this;
         }
 
         if (Cloudsphere != null)
@@ -352,6 +368,11 @@ public sealed class Planetoid : Planet, IPlanet
             {
                 Atmosphere.Render(camera, Origin, DrawLayer);
             }
+        }
+
+        if (Ocean != null)
+        {
+            Ocean.Render(camera, Origin, DrawLayer);
         }
 
         if (Cloudsphere != null)

@@ -222,6 +222,13 @@ struct QuadCorners
 //-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
+float DenormalizeMaximumHeight(float noiseValue, float terrainMaxHeight)
+{
+	return (noiseValue * terrainMaxHeight + terrainMaxHeight) - (terrainMaxHeight * 1.35f);
+}
+//-----------------------------------------------------------------------------
+
+//-----------------------------------------------------------------------------
 float3 FindBiTangent(float3 normal, float epsilon, float3 dir)
 {
 	float refVectorSign = sign(1.0 - abs(normal.x) - epsilon);

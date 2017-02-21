@@ -585,7 +585,7 @@ namespace SpaceEngine.AtmosphericScattering
 
         #endregion
 
-        private Vector3 GetSunDirection(AtmosphereSun sun)
+        public Vector3 GetSunDirection(AtmosphereSun sun)
         {
             return (sun.transform.position - Origin).normalized;
         }
@@ -652,6 +652,8 @@ namespace SpaceEngine.AtmosphericScattering
 
                 atmosphere.SetUniforms(atmosphere.SkyMaterial);
                 atmosphere.SetUniforms(atmosphere.planetoid.QuadMPB);
+
+                if (planetoid.Ocean != null) planetoid.Ocean.Reanimate();
 
                 for (byte i = 0; i < Suns.Count; i++)
                 {
