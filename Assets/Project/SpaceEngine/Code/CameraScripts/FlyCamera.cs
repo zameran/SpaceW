@@ -214,8 +214,8 @@ namespace SpaceEngine.Cameras
             }
             else
             {
-                CameraComponent.nearClipPlane = nearClipPlaneCache;
-                CameraComponent.farClipPlane = farClipPlaneCache;
+                //CameraComponent.nearClipPlane = nearClipPlaneCache;
+                //CameraComponent.farClipPlane = farClipPlaneCache;
             }
         }
 

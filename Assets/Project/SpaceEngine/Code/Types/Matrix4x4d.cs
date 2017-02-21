@@ -212,6 +212,31 @@ namespace UnityEngine
             return false;
         }
 
+        public static implicit operator Matrix4x4(Matrix4x4d m)
+        {
+            var matrix = Matrix4x4.identity;
+
+            for (int iRow = 0; iRow < 4; iRow++)
+            {
+                matrix.SetRow(iRow, m.GetRow(iRow));
+            }
+
+            return matrix;
+        }
+
+        public static implicit operator Matrix4x4d(Matrix4x4 m)
+        {
+            var matrix = Identity();
+
+            for (int iRow = 0; iRow < 4; iRow++)
+            {
+                matrix.SetRow(iRow, m.GetRow(iRow));
+            }
+
+            return matrix;
+        }
+
+
         public override string ToString()
         {
             return m[0, 0] + "," + m[0, 1] + "," + m[0, 2] + "," + m[0, 3] + "\n" + m[1, 0] + "," + m[1, 1] + "," + m[1, 2] + "," + m[1, 3] + "\n" + m[2, 0] + "," + m[2, 1] +
