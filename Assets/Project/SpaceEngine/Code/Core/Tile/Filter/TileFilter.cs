@@ -12,7 +12,7 @@ namespace SpaceEngine.Core.Tile.Filter
         /// <summary>
         /// A texture tile must be produced for the given quad?
         /// </summary>
-        /// <param name="quad"></param>
+        /// <param name="quad">Quad.</param>
         /// <returns>Returns 'True' if a texture tile must be produced for the given quad.</returns>
         public abstract bool DiscardTile(TerrainQuad quad);
     }

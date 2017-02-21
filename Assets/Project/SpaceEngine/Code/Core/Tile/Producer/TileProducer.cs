@@ -4,7 +4,6 @@ using SpaceEngine.Core.Tile.Layer;
 using SpaceEngine.Core.Tile.Samplers;
 using SpaceEngine.Core.Tile.Storage;
 using SpaceEngine.Core.Tile.Tasks;
-using SpaceEngine.Core.Utilities;
 
 using System;
 using System.Collections.Generic;
@@ -18,7 +17,7 @@ namespace SpaceEngine.Core.Tile.Producer
     /// Note that several TileProducer can share the same TileCache, and hence the same TileStorage.
     /// </summary>
     [RequireComponent(typeof(TileSampler))]
-    public abstract class TileProducer : Node
+    public abstract class TileProducer : Node<TileProducer>
     {
         /// <summary>
         /// The tile cache game object that stores the tiles produced by this producer.
@@ -56,10 +55,10 @@ namespace SpaceEngine.Core.Tile.Producer
 
         public TerrainNode TerrainNode { get { return Sampler.TerrainNode; } }
 
-        protected override void Start()
-        {
-            base.Start();
+        #region Node
 
+        protected override void InitNode()
+        {
             InitCache();
 
             // Get any layers attached to same GameObject. May have 0 to many attached.
@@ -67,13 +66,35 @@ namespace SpaceEngine.Core.Tile.Producer
 
             // Get the samplers attached to GameObject. Must have one sampler attahed.
             Sampler = GetComponent<TileSampler>();
+        }
 
+        protected override void UpdateNode()
+        {
+
+        }
+
+
+        protected override void Awake()
+        {
+            base.Awake();
+        }
+
+        protected override void Start()
+        {
+            base.Start();
+        }
+
+        protected override void Update()
+        {
+            base.Update();
         }
 
         protected override void OnDestroy()
         {
             base.OnDestroy();
         }
+
+        #endregion
 
         /// <summary>
         /// It's posible that a producer will have a call to get it's cache before it's start fuction has been called. 

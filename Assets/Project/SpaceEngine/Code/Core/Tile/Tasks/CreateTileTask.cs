@@ -11,7 +11,7 @@ namespace SpaceEngine.Core.Tile.Tasks
     /// <summary>
     /// The task that creates the tiles. The task calles the producers DoCreateTile function and the data created is stored in the slot.
     /// </summary>
-    public class CreateTileTask : Task
+    public class CreateTileTask : Schedular.Task
     {
         /// <summary>
         /// The TileProducer that created this task.

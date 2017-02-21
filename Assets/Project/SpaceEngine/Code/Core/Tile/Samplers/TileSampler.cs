@@ -14,7 +14,7 @@ namespace SpaceEngine.Core.Tile.Samplers
     /// This class can set the uniforms necessary to access a given texture tile on GPU, stored in a GPUTileStorage. 
     /// This class also manages the creation of new texture tiles when a terrain quadtree is updated, via a TileProducer.
     /// </summary>
-    public class TileSampler : Node
+    public class TileSampler : Node<TileSampler>
     {
         /// <summary>
         /// Class used to sort a <see cref="TileSampler"/> based on its priority.
@@ -83,20 +83,43 @@ namespace SpaceEngine.Core.Tile.Samplers
         /// </summary>
         public TileFilter[] Filters { get; private set; }
 
-        protected override void Start()
-        {
-            base.Start();
+        #region Node
 
+        protected override void InitNode()
+        {
             Producer = GetComponent<TileProducer>();
             TerrainNode = GetComponentInParent<TerrainNode>();
             uniforms = new Uniforms(Producer.GetName());
             Filters = GetComponents<TileFilter>();
         }
 
+        protected override void UpdateNode()
+        {
+
+        }
+
+
+        protected override void Awake()
+        {
+            base.Awake();
+        }
+
+        protected override void Start()
+        {
+            base.Start();
+        }
+
+        protected override void Update()
+        {
+            base.Update();
+        }
+
         protected override void OnDestroy()
         {
             base.OnDestroy();
         }
+
+        #endregion
 
         public virtual void UpdateSampler()
         {
@@ -307,6 +330,7 @@ namespace SpaceEngine.Core.Tile.Samplers
                 tx /= 2;
                 ty /= 2;
             }
+
             t = tt.Tile;
 
             while (t == null)
@@ -331,12 +355,6 @@ namespace SpaceEngine.Core.Tile.Samplers
 
             dx = dx * (sDivTwo * 2 - 2 * b) / dd;
             dy = dy * (sDivTwo * 2 - 2 * b) / dd;
-
-            if (t == null)
-            {
-                Debug.Log("Proland::TileSampler::SetTile - tile is null");
-                return;
-            }
 
             var gpuSlot = t.GetSlot(0) as GPUTileStorage.GPUSlot;
 
