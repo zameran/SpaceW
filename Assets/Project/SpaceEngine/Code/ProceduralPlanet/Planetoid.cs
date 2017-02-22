@@ -33,6 +33,8 @@
 // Creator: zameran
 #endregion
 
+using SpaceEngine.Core.Reanimator;
+
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -125,7 +127,7 @@ public static class PlanetoidExtensions
     }
 }
 
-public sealed class Planetoid : Planet, IPlanet
+public sealed class Planetoid : Planet, IPlanet, IReanimateable
 {
     public List<Quad> MainQuads = new List<Quad>();
     public List<Quad> Quads = new List<Quad>();
@@ -253,7 +255,7 @@ public sealed class Planetoid : Planet, IPlanet
         {
             if (Atmosphere != null)
             {
-                Atmosphere.ReanimateAtmosphereUniforms(Atmosphere, this);
+                Atmosphere.Reanimate();
             }
         }
 
@@ -291,43 +293,16 @@ public sealed class Planetoid : Planet, IPlanet
 
         if (focusStatus != true) return;
 
-        //NOTE : So, when unity recompiles shaders or scripts from editor 
-        //while playing - quads not draws properly. 
-        //1) Reanimation of uniforms/mpb can't help.
-        //2) MaterialPropertyBlock.Clear() in Reanimation can't help.
-        //3) mpb = null; in Reanimation can't help.
-        //4) All parameters are ok in mpb.
-        //5) Problem not in MainRenderer.
-        //I think i've lost something...
-        //This ussue take effect only with mpb, so dirty fix is:
-        //ReSetupQuads();
+        Reanimate();
+    }
+
+    #region IReanimateable
+
+    public void Reanimate()
+    {
+        //NOTE : So, when unity recompiles shaders or scripts from editor while playing - quads not draws properly. 
         //NOTE : Fixed. Buffers setted 1 time. Need to update when focus losted.
         //NOTE : Reinit [Reanimate] ocean stuff only after focus lost...
-
-        ReanimateQuadsBuffers(false);
-
-        if (Ocean != null) Ocean.Reanimate();
-
-        if (Atmosphere != null)
-        {
-            Atmosphere.ReanimateAtmosphereUniforms(Atmosphere, this);
-        }
-    }
-
-    #region Gizmos
-
-#if UNITY_EDITOR
-    protected override void OnDrawGizmos()
-    {
-        base.OnDrawGizmos();
-    }
-#endif
-
-    #endregion
-
-    public void ReanimateQuadsBuffers(bool resetup = false)
-    {
-        if (resetup) { ReSetupQuads(); return; }
 
         if (Quads != null)
         {
@@ -339,7 +314,23 @@ public sealed class Planetoid : Planet, IPlanet
                 }
             }
         }
+
+        if (Ocean != null) Ocean.Reanimate();
+        if (Atmosphere != null) Atmosphere.Reanimate();
     }
+
+    #endregion
+
+    #region Gizmos
+
+#if UNITY_EDITOR
+    protected override void OnDrawGizmos()
+    {
+        base.OnDrawGizmos();
+    }
+#endif
+
+    #endregion
 
     public void UpdateLOD()
     {

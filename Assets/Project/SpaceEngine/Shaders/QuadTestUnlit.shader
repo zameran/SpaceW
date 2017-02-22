@@ -299,7 +299,7 @@ Shader "SpaceEngine/QuadTestUnlit"
 				float4 position = data[v.id].position;
 				float4 cubePosition = data[v.id].cubePosition;
 
-				float3 normal = tex2Dlod(_NormalTexture, v.texcoord);
+				float3 normal = tex2Dlod(_NormalTexture, v.texcoord) * 10;
 
 				position.w = 1.0;
 				position.xyz += patchCenter;

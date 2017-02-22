@@ -1,11 +1,13 @@
-﻿using UnityEngine;
+﻿using SpaceEngine.Core.Reanimator;
+
+using UnityEngine;
 
 namespace SpaceEngine.Ocean
 {
     /// <summary>
     /// An AbstractTask to draw a flat or spherical ocean. This class provides the functions and data to draw a flat projected grid but nothing else.
     /// </summary>
-    public abstract class OceanNode : Node<OceanNode>
+    public abstract class OceanNode : Node<OceanNode>, IReanimateable
     {
         public Planetoid planetoid;
 
@@ -61,11 +63,6 @@ namespace SpaceEngine.Ocean
         protected abstract void UpdateOceanNode();
 
         #endregion
-
-        public void Reanimate()
-        {
-            InitNode();
-        }
 
         #region Node
 
@@ -250,6 +247,15 @@ namespace SpaceEngine.Ocean
             base.OnDestroy();
 
             Helper.Destroy(OceanMaterial);
+        }
+
+        #endregion
+
+        #region IReanimateable
+
+        public void Reanimate()
+        {
+            InitNode();
         }
 
         #endregion
