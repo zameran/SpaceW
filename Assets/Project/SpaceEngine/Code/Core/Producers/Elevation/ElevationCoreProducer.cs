@@ -108,7 +108,7 @@ namespace SpaceEngine.Core
             offset.w = TerrainNode.Body.Radius;
 
             ElevationMaterial.SetFloat("_TileSize", tileSize);
-            ElevationMaterial.SetFloat("_Amplitude", 128.0f);
+            ElevationMaterial.SetFloat("_Amplitude", 32.0f);
             ElevationMaterial.SetFloat("_Frequency", 128.0f);
             ElevationMaterial.SetVector("_Offset", offset.ToVector4());
             ElevationMaterial.SetMatrix("_LocalToWorld", TerrainNode.FaceToLocal.ToMatrix4x4());
