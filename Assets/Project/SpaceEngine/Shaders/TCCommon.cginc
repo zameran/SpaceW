@@ -288,7 +288,7 @@ float3 Rotate(float Angle, float3 Axis, float3 Vector)
 //-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
-float2 CartesianToPolar(float3 xyz)
+float2 CartesianToSpherical(float3 xyz)
 {
 	float longitude = atan2(xyz.x, xyz.z);
 	float latitude = asin(xyz.y / length(xyz));
@@ -296,22 +296,12 @@ float2 CartesianToPolar(float3 xyz)
 	return float2(longitude, latitude);
 }
 
-float2 CartesianToPolarUV(float3 xyz)
+float2 CartesianToSphericalUV(float3 xyz)
 {
-	float2 uv = CartesianToPolar(xyz);
+	float2 uv = CartesianToSpherical(xyz);
 
 	uv.x = Repeat(0.5 - uv.x / M_PI2, 1.0);
 	uv.y = 0.5 + uv.y / M_PI;
-
-	return uv;
-}
-
-float2 SinACosAUV_Z(float3 v)
-{
-	float2 uv = 1;
-
-	uv.x = ((-normalize(v).x) + cos(normalize(v).y * 1.35f) * sin(normalize(v).x * 0.4));
-	uv.y = ((normalize(v).y) - cos(normalize(v).x * 1.35f) * sin(normalize(v).y * 0.4));
 
 	return uv;
 }
@@ -324,13 +314,36 @@ float3 SphericalToCartesian(float2 spherical)
 	return float3(Delta.y * Alpha.x, Delta.x, Delta.y * Alpha.y);
 }
 
-float3 Cartesian2Spherical(float3 cartesian)
+float3 GetPlanetPoint(float3 pos, float face)
 {
-	float radius = length(cartesian);
-	float theta = atan2(cartesian.y, cartesian.x);
-	float phi = acos(cartesian.z / radius);
+	if (face == 6.0)	// global
+	{
+		float2 spherical;
 
-	return float3(radius, theta, phi);
+		spherical.x = (pos.x * 2.0 - 0.5) * M_PI;
+		spherical.y = (0.5 - pos.y) * M_PI;
+
+		return SphericalToCartesian(spherical);
+	}
+	else				// cubemap
+	{
+		float3 p = normalize(pos);
+
+		if (face == 0.0)
+			return float3( p.z, -p.y, -p.x);  // neg_x
+		else if (face == 1.0)
+			return float3(-p.z, -p.y,  p.x);  // pos_x
+		else if (face == 2.0)
+			return float3( p.x, -p.z, -p.y);  // neg_y
+		else if (face == 3.0)
+			return float3( p.x,  p.z,  p.y);  // pos_y
+		else if (face == 4.0)
+			return float3(-p.x, -p.y, -p.z);  // neg_z
+		else if (face == 5.0)
+			return float3( p.x, -p.y,  p.z);  // pos_z
+		else
+			return float3(0.0, 0.0, 0.0);
+	}
 }
 //-----------------------------------------------------------------------------
 
