@@ -291,8 +291,8 @@ namespace SpaceEngine.Core.Tile.Producer
                 t = tile == null ? FindTile(level, tx, ty, true, true) : null;
             }
 
-            dx = dx * ((s / 2) * 2 - 2 * b) / dd;
-            dy = dy * ((s / 2) * 2 - 2 * b) / dd;
+            dx = dx * ((s / 2.0f) * 2 - 2 * b) / dd;
+            dy = dy * ((s / 2.0f) * 2 - 2 * b) / dd;
 
             if (tile == null)
             {

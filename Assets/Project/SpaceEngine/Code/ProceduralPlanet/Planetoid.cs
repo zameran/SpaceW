@@ -448,7 +448,7 @@ public sealed class Planetoid : Planet, IPlanet, IReanimateable
 
             id -= 1;
 
-            if (LODOctaves != null && LODOctaves.Length > 1 && !(id > LODOctaves.Length))
+            if (LODOctaves.Length > 1 && !(id > LODOctaves.Length))
             {
                 return LODOctaves[id];
             }

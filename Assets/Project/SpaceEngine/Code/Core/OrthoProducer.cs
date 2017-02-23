@@ -118,13 +118,13 @@ namespace SpaceEngine.Core
         {
             var gpuSlot = slot[0] as GPUTileStorage.GPUSlot;
 
-            var tileWidth = gpuSlot.Owner.TileSize;
-            var tileSize = tileWidth - 4;
-
             if (gpuSlot == null)
             {
                 throw new NullReferenceException("gpuSlot");
             }
+
+            var tileWidth = gpuSlot.Owner.TileSize;
+            var tileSize = tileWidth - 4;
 
             GPUTileStorage.GPUSlot parentGpuSlot = null;
 

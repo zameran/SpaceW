@@ -461,9 +461,6 @@ public sealed class Quad : Node<Quad>, IQuad, IUniformed<Material>, IUniformed<C
             QuadAABB = GetVolumeBox(Planetoid.TerrainMaxHeight, 0);
         }
 
-        // TODO : Setup bounds only once...
-        QuadMesh.bounds = GetBounds(this);
-
         //if (Planetoid.Ring != null) Planetoid.Ring.SetShadows(QuadMaterial, Planetoid.Shadows);
         //if (Planetoid.NPS != null) Planetoid.NPS.UpdateUniforms(QuadMaterial); //(WIP) For SE Coloring in fragment shader work...
         //if (Planetoid.tccps != null) Planetoid.tccps.UpdateUniforms(QuadMaterial); //(WIP) For SE Coloring in fragment shader work...
@@ -474,6 +471,9 @@ public sealed class Quad : Node<Quad>, IQuad, IUniformed<Material>, IUniformed<C
 
         if (Generated && ShouldDraw && QuadMesh != null)
         {
+            // TODO : Setup bounds only once...
+            QuadMesh.bounds = GetBounds(this);
+
             TryCull();
 
             if (Visible)

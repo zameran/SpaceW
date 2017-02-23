@@ -34,6 +34,7 @@
 #endregion
 
 using SpaceEngine.Pluginator.Enums;
+
 using System;
 
 namespace SpaceEngine.Pluginator.Attributes

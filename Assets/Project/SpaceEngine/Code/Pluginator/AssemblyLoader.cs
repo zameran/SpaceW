@@ -33,22 +33,21 @@
 // Creator: zameran
 #endregion
 
-using System;
-using System.IO;
-using System.Reflection;
-using System.Collections.Generic;
-using System.Linq;
+using SpaceEngine.Pluginator.Attributes;
 
-using ZFramework.Extensions;
-using ZFramework.Unity.Common;
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Reflection;
 
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
-using Logger = ZFramework.Unity.Common.Logger;
+using ZFramework.Extensions;
+using ZFramework.Unity.Common;
 
-using SpaceEngine.Pluginator.Attributes;
-using SpaceEngine.Pluginator.Enums;
+using Logger = ZFramework.Unity.Common.Logger;
 
 namespace SpaceEngine.Pluginator
 {
@@ -91,9 +90,9 @@ namespace SpaceEngine.Pluginator
             {
                 if (UISkin != null) GUI.skin = UISkin;
 
-                GUI.Box(new Rect(Screen.width / 2 - (Screen.width / 1.25f) / 2, Screen.height / 1.25f, Screen.width / 1.25f, 15), "");
+                GUI.Box(new Rect(Screen.width / 2.0f - (Screen.width / 1.25f) / 2.0f, Screen.height / 1.25f, Screen.width / 1.25f, 15.0f), "");
 
-                GUI.Label(new Rect(Screen.width / 2 - 50, Screen.height / 1.25f, Screen.width / 1.25f, 25),
+                GUI.Label(new Rect(Screen.width / 2.0f - 50.0f, Screen.height / 1.25f, Screen.width / 1.25f, 25.0f),
                     string.Format("Loading {0}/{1} dll's...", TotalLoaded, TotalDetected));
             }
         }
@@ -206,7 +205,7 @@ namespace SpaceEngine.Pluginator
             {
                 Assembly assembly = Assembly.LoadFile(path);
 
-                SpaceAddonAssembly[] attrbutes = assembly.GetCustomAttributes(typeof (SpaceAddonAssembly), false) as SpaceAddonAssembly[];
+                SpaceAddonAssembly[] attrbutes = assembly.GetCustomAttributes(typeof(SpaceAddonAssembly), false) as SpaceAddonAssembly[];
 
                 if (attrbutes == null || attrbutes.Length == 0)
                 {
@@ -216,7 +215,7 @@ namespace SpaceEngine.Pluginator
                 {
                     SpaceAddonAssembly ea = attrbutes[0];
                     List<Type> mb = GetAllSubclassesOf<Type, SpaceAddonMonoBehaviour, MonoBehaviour>(assembly);
-                    AssemblyExternalTypes aet = new AssemblyExternalTypes(typeof (MonoBehaviour), mb);
+                    AssemblyExternalTypes aet = new AssemblyExternalTypes(typeof(MonoBehaviour), mb);
                     AssemblyExternal ae = new AssemblyExternal(path, ea.Name, ea.Version, assembly, aet);
 
                     ExternalAssemblies.Add(ae);
@@ -329,7 +328,7 @@ namespace SpaceEngine.Pluginator
 
             foreach (Type type in types)
             {
-                if (type.IsSubclassOf(typeof (Y)))
+                if (type.IsSubclassOf(typeof(Y)))
                 {
                     U atr = AttributeUtils.GetTypeAttribute<U>(type);
 
