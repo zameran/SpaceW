@@ -15,6 +15,7 @@
 			#pragma vertex vert
 			#pragma fragment frag
 			
+			#include "../TCCommon.cginc"
 			#include "ImprovedPerlinNoise3D.cginc"
 			
 			// tile border size
@@ -174,7 +175,9 @@
 				float3x3 LTW = _LocalToWorld;
 				float3 p = normalize(mul(LTW, P)).xyz;
 				
-				float noise = inoise(p * _Frequency);
+				noiseH          = 0.5;
+				noiseLacunarity = 2.218281828459;
+				float noise = Fbm(p * _Frequency, 6);
 				
 				if (_Amp < 0.0) 
 				{

@@ -1379,6 +1379,22 @@ float Fbm(float3 ppoint, int o)
 	return summ;
 }
 
+float Fbm(float3 ppoint, float lacunarity, float h, int o)
+{
+	float summ = 0.0;
+	float ampl = 1.0;
+	float gain = SavePow(lacunarity, -h);
+
+	for (int i = 0; i < o; ++i)
+	{
+		summ += Noise(ppoint) * ampl;
+		ampl *= gain;
+		ppoint *= lacunarity;
+	}
+
+	return summ;
+}
+
 float FbmClouds(float3 ppoint)
 {
 	float summ = 0.0;
