@@ -265,7 +265,7 @@ namespace SpaceEngine.Core.Tile.Producer
 
                 if (level < 0)
                 {
-                    Debug.Log("Proland::TileProducer::GetGpuTileCoords - invalid level (A)");
+                    Debug.LogError("Invalid level (A)!");
                     Debug.Break();
                 }
             }
@@ -284,7 +284,7 @@ namespace SpaceEngine.Core.Tile.Producer
 
                 if (level < 0)
                 {
-                    Debug.Log("Proland::TileProducer::GetGpuTileCoords - invalid level (B)");
+                    Debug.LogError("Invalid level (B)!");
                     Debug.Break();
                 }
 

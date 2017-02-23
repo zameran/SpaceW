@@ -51,7 +51,7 @@ namespace SpaceEngine.Core.Tile.Tasks
         {
             if (IsDone)
             {
-                Debug.Log("Proland::CreateTileTask::Run - task has already been run, task will not run");
+                Debug.Log("Task has already been run, task will not run");
 
                 return;
             }

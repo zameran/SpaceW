@@ -255,7 +255,7 @@ public sealed class Quad : Node<Quad>, IQuad, IUniformed<Material>, IUniformed<C
     public void SetUniforms(ComputeShader target, params int[] kernels)
     {
         if (target == null) return;
-        if (kernels == null || kernels.Length == 0) { Debug.Log("Quad.SetupComputeShaderKernelsUniforfms(...) problem!"); return; }
+        if (kernels == null || kernels.Length == 0) { Debug.Log("Quad: SetupComputeShaderKernelsUniforfms(...) problem!"); return; }
 
         for (int i = 0; i < kernels.Length; i++)
         {
@@ -384,7 +384,6 @@ public sealed class Quad : Node<Quad>, IQuad, IUniformed<Material>, IUniformed<C
                     if (DistanceToLODSplit < LODDistance && !Splitting)
                     {
                         StartCoroutine(Split());
-                        Log("Split Call");
                     }
                 }
                 else
@@ -392,7 +391,6 @@ public sealed class Quad : Node<Quad>, IQuad, IUniformed<Material>, IUniformed<C
                     if (DistanceToLODSplit > LODDistance && !Splitting)
                     {
                         Unsplit();
-                        Log("Unsplit Call");
                     }
                 }
             }
@@ -403,7 +401,6 @@ public sealed class Quad : Node<Quad>, IQuad, IUniformed<Material>, IUniformed<C
                     if (DistanceToLODSplit < LODDistance && !Splitting)
                     {
                         StartCoroutine(Split());
-                        Log("Split Call");
                     }
                 }
                 else
@@ -411,7 +408,6 @@ public sealed class Quad : Node<Quad>, IQuad, IUniformed<Material>, IUniformed<C
                     if (DistanceToLODSplit > LODDistance && !Splitting)
                     {
                         Unsplit();
-                        Log("Unsplit Call");
                     }
                 }
             }
@@ -828,7 +824,7 @@ public sealed class Quad : Node<Quad>, IQuad, IUniformed<Material>, IUniformed<C
     {
         if (QuadAABB.AABB == null || QuadAABB.AABB.Length == 0 || QuadAABB.AABB.Length <= 4)
         {
-            Debug.Log("Quad.GetClosestAABBCorner(...) QuadAABB.AABB problem!");
+            Debug.Log("Quad: GetClosestAABBCorner(...) QuadAABB.AABB problem!");
 
             return Mathf.Infinity;
         }
@@ -1151,11 +1147,5 @@ public sealed class Quad : Node<Quad>, IQuad, IUniformed<Material>, IUniformed<C
     private Vector3 CalculateMiddlePoint()
     {
         return ((quadCorners.topLeftCorner + quadCorners.bottomRightCorner) * (1.0f / Mathf.Abs(LODLevel))).NormalizeToRadius(Planetoid.PlanetRadius);
-    }
-
-    private void Log(string msg)
-    {
-        if (Planetoid.DebugEnabled)
-            Debug.Log(msg);
     }
 }
