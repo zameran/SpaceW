@@ -94,7 +94,7 @@ namespace SpaceEngine.Core.Tile.Cache
         {
             if (Producers.ContainsKey(id))
             {
-                Debug.Log("Proland::TileCache::InsertProducer - Producer id already inserted");
+                Debug.LogFormat("Producer with {0} already inserted!", id);
             }
             else
             {
@@ -111,7 +111,7 @@ namespace SpaceEngine.Core.Tile.Cache
         {
             if (i >= TileStorage.Length)
             {
-                Debug.Log("Proland::TileCache::GetStorage - tile storage at location " + i + " does not exist");
+                Debug.LogFormat("Tile storage at location {0} does not exist!", i);
             }
 
             return TileStorage[i];
@@ -182,7 +182,7 @@ namespace SpaceEngine.Core.Tile.Cache
             // If this producer id does not exist can not create tile.
             if (!Producers.ContainsKey(producerId))
             {
-                Debug.Log("Proland::TileCache::GetTile - Producer id not been inserted into cache");
+                Debug.LogFormat("GetTile Producer {0} not been inserted into cache!", producerId);
                 return null;
             }
 

@@ -132,7 +132,7 @@ public class ScreenshotHelper : MonoBehaviour
             }
         }
         else
-            Debug.Log("ScreenshotHelper.WaitOneScreenShot : ScreenShotTexture is null!");
+            Debug.Log("ScreenshotHelper: ScreenShotTexture is null!");
     }
 
     private void OnRenderImage(RenderTexture source, RenderTexture destination)

@@ -16,19 +16,19 @@ namespace UnityEngine
         {
             if (size > 256)
             {
-                Debug.Log("FourierGPU::FourierGPU - fourier grid size must not be greater than 256, changing to 256");
+                Debug.Log("FourierGPU: Fourier grid size must not be greater than 256, changing to 256...");
                 size = 256;
             }
 
             if (!Mathf.IsPowerOfTwo(size))
             {
-                Debug.Log("FourierGPU::FourierGPU - fourier grid size must be pow2 number, changing to nearest pow2 number");
+                Debug.Log("FourierGPU: fourier grid size must be pow2 number, changing to nearest pow2 number...");
                 size = Mathf.NextPowerOfTwo(size);
             }
 
             var shader = Shader.Find("Math/Fourier");
 
-            if (shader == null) Debug.Log("FourierGPU::FourierGPU - Could not find shader Math/Fourier");
+            if (shader == null) Debug.Log("FourierGPU: Could not find shader Math/Fourier!");
 
             FourierMaterial = new Material(shader);
 

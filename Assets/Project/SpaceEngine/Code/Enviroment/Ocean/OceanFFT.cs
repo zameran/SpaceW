@@ -112,13 +112,13 @@ namespace SpaceEngine.Ocean
 
             if (FourierGridSize > 256)
             {
-                Debug.Log("Proland::OceanFFT::Start	- fourier grid size must not be greater than 256, changing to 256");
+                Debug.Log("OceanFFT: fourier grid size must not be greater than 256, changing to 256...");
                 FourierGridSize = 256;
             }
 
             if (!Mathf.IsPowerOfTwo(FourierGridSize))
             {
-                Debug.Log("Proland::OceanFFT::Start	- fourier grid size must be pow2 number, changing to nearest pow2 number");
+                Debug.Log("OceanFFT: fourier grid size must be pow2 number, changing to nearest pow2 number...");
                 FourierGridSize = Mathf.NextPowerOfTwo(FourierGridSize);
             }
 

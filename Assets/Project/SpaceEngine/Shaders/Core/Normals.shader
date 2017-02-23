@@ -82,8 +82,8 @@
 			{
 				float2 p_uv = floor(IN.st);
 
-				float4 uv0 = floor(p_uv.xyxy + float4(-1.0,0.0,1.0,0.0)) * _ElevationOSL.z + _ElevationOSL.xyxy;
-				float4 uv1 = floor(p_uv.xyxy + float4(0.0,-1.0,0.0,1.0)) * _ElevationOSL.z + _ElevationOSL.xyxy;
+				float4 uv0 = floor(p_uv.xyxy + float4(-1.0, 0.0, 1.0, 0.0)) * _ElevationOSL.z + _ElevationOSL.xyxy;
+				float4 uv1 = floor(p_uv.xyxy + float4(0.0, -1.0, 0.0, 1.0)) * _ElevationOSL.z + _ElevationOSL.xyxy;
 				
 				float z0 = tex2Dlod(_ElevationSampler, float4(uv0.xy, 0.0, 0.0)).x;
 				float z1 = tex2Dlod(_ElevationSampler, float4(uv0.zw, 0.0, 0.0)).x;
@@ -99,7 +99,7 @@
 				
 				float3 nf = (mul(worldToTangentFrame, normalize(cross(p1 - p0, p3 - p2)))).xyz;
 				
-				return float4(nf,0);
+				return float4(nf, 0);
 			}
 			
 			ENDCG

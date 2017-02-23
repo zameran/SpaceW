@@ -248,11 +248,7 @@ public sealed class TCCommonParametersSetterEditor : Editor
             if (setter.Planet != null)
             {
                 setter.Planet.ReSetupQuads();
-
-                if (setter.Planet.Atmosphere != null)
-                {
-                    setter.Planet.Atmosphere.ReanimateAtmosphereUniforms(setter.Planet.Atmosphere, setter.Planet);
-                }
+                setter.Planet.Reanimate();
             }
         }
     }

@@ -1,18 +1,28 @@
-﻿using UnityEngine;
+﻿using SpaceEngine.Core.Reanimator;
+
+using UnityEngine;
 
 namespace SpaceEngine.Ocean
 {
     /// <summary>
     /// An AbstractTask to draw a flat or spherical ocean. This class provides the functions and data to draw a flat projected grid but nothing else.
     /// </summary>
-    public abstract class OceanNode : Node<OceanNode>
+    public abstract class OceanNode : Node<OceanNode>, IReanimateable
     {
+        public enum OceanSurfaceType : byte
+        {
+            Flat,
+            Spherized
+        }
+
         public Planetoid planetoid;
 
         public Shader OceanShader;
 
         public EngineRenderQueue RenderQueue = EngineRenderQueue.Background;
         public int RenderQueueOffset = 0;
+
+        public OceanSurfaceType OceanType = OceanSurfaceType.Spherized;
 
         [SerializeField]
         protected Material OceanMaterial;
@@ -48,6 +58,8 @@ namespace SpaceEngine.Ocean
         /// </summary>
         bool DrawOcean;
 
+        public Vector3 Origin { get { return planetoid != null ? planetoid.Origin : transform.position; } }
+
         /// <summary>
         /// Concrete classes must provide a function that returns the variance of the waves need for the BRDF rendering of waves.
         /// </summary>
@@ -61,11 +73,6 @@ namespace SpaceEngine.Ocean
         protected abstract void UpdateOceanNode();
 
         #endregion
-
-        public void Reanimate()
-        {
-            InitNode();
-        }
 
         #region Node
 
@@ -115,11 +122,11 @@ namespace SpaceEngine.Ocean
             // Calculates the required data for the projected grid
 
             var c2w = (Matrix4x4d)GodManager.Instance.CameraToWorld;
-            var cl = c2w * Vector3d.zero; // Camera in local space // TODO : Really? Zero?!
+            var cl = c2w * -Origin; // Camera in local space // TODO : Ocean origin
 
             var radius = planetoid.PlanetRadius;//Manager.IsDeformed() ? Manager.GetRadius() : 0.0f;
 
-            if ((radius == 0.0 && cl.z > ZMin) || (radius > 0.0 && cl.Magnitude() > radius + ZMin) || (radius < 0.0 && (new Vector2d(cl.y, cl.z)).Magnitude() < -radius - ZMin))
+            if ((OceanType == OceanSurfaceType.Flat && cl.z > ZMin) || (radius > 0.0 && cl.Magnitude() > radius + ZMin) || (radius < 0.0 && (new Vector2d(cl.y, cl.z)).Magnitude() < -radius - ZMin))
             {
                 OldLocalToOcean = Matrix4x4d.Identity();
                 Offset = Vector4.zero;
@@ -131,7 +138,7 @@ namespace SpaceEngine.Ocean
             DrawOcean = true;
             Vector3d ux, uy, uz, oo;
 
-            if (radius == 0.0f)
+            if (OceanType == OceanSurfaceType.Flat)
             {
                 // Terrain ocean
                 ux = Vector3d.UnitX();
@@ -165,7 +172,7 @@ namespace SpaceEngine.Ocean
 
             if (OldLocalToOcean != Matrix4x4d.Identity())
             {
-                var delta = l2o * (OldLocalToOcean.Inverse() * Vector3d.zero); // TODO : Really? Zero?!
+                var delta = l2o * (OldLocalToOcean.Inverse() * -Origin); // TODO : Ocean origin
 
                 Offset += new Vector4((float)delta.x, (float)delta.y, (float)delta.z, 0.0f);
             }
@@ -173,7 +180,7 @@ namespace SpaceEngine.Ocean
             OldLocalToOcean = l2o;
 
             var stoc = (Matrix4x4d)GodManager.Instance.ScreenToCamera;
-            var oc = c2o * Vector3d.zero; // TODO : Really? Zero?!
+            var oc = c2o * Vector3d.zero; // TODO : Ocean origin
 
             var h = oc.z;
 
@@ -189,7 +196,7 @@ namespace SpaceEngine.Ocean
             var horizon2 = Vector3d.zero;
             var offset = new Vector3d(-Offset.x, -Offset.y, oc.z);
 
-            if (radius == 0.0)
+            if (OceanType == OceanSurfaceType.Flat)
             {
                 // Terrain ocean
                 horizon1 = new Vector3d(-(h * 1e-6 + A0.z) / B.z, -dA.z / B.z, 0.0);
@@ -250,6 +257,15 @@ namespace SpaceEngine.Ocean
             base.OnDestroy();
 
             Helper.Destroy(OceanMaterial);
+        }
+
+        #endregion
+
+        #region IReanimateable
+
+        public void Reanimate()
+        {
+            InitNode();
         }
 
         #endregion

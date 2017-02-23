@@ -304,7 +304,7 @@ namespace SpaceEngine.Core.Tile.Samplers
 
                 if (level < 0)
                 {
-                    Debug.Log("Proland::TileSampler::SetTile - invalid level");
+                    Debug.Log("Invalid level!");
                     return;
                 }
             }
@@ -346,7 +346,7 @@ namespace SpaceEngine.Core.Tile.Samplers
 
                 if (tt == null)
                 {
-                    Debug.Log("Proland::TileSampler::SetTile - null tile");
+                    Debug.Log("Null tile!");
                     return;
                 }
 
@@ -360,7 +360,7 @@ namespace SpaceEngine.Core.Tile.Samplers
 
             if (gpuSlot == null)
             {
-                Debug.Log("Proland::TileSampler::SetTile - gpuSlot is null");
+                Debug.Log("Null gpuSlot!");
                 return;
             }
 

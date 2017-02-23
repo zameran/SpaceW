@@ -10,7 +10,7 @@
 		
 		Pass 
 		{
-			//cull front
+			Cull Back
 
 			CGPROGRAM
 			#include "UnityCG.cginc"
@@ -169,7 +169,7 @@
 
 				//return float4(finalColor, 1.0);
 
-				return float4(groundColor, 1.0);
+				return float4(fn, 1.0);
 			}
 			
 			ENDCG

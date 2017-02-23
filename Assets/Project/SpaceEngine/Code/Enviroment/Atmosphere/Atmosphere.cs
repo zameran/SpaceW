@@ -35,6 +35,7 @@
 
 using SpaceEngine.AtmosphericScattering.Sun;
 using SpaceEngine.Core.PropertyNotification;
+using SpaceEngine.Core.Reanimator;
 
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -65,7 +66,7 @@ namespace SpaceEngine.AtmosphericScattering
         }
     }
 
-    public sealed class Atmosphere : Node<Atmosphere>, IEventit, IUniformed<Material>, IUniformed<MaterialPropertyBlock>
+    public sealed class Atmosphere : Node<Atmosphere>, IEventit, IUniformed<Material>, IUniformed<MaterialPropertyBlock>, IReanimateable
     {
         public AtmosphereBaseProperty AtmosphereBaseProperty = new AtmosphereBaseProperty();
 
@@ -183,7 +184,7 @@ namespace SpaceEngine.AtmosphericScattering
             }
 
             atmosphere.ApplyPresset(AtmosphereParameters.Get(atmosphere.AtmosphereBase));
-            atmosphere.ReanimateAtmosphereUniforms(atmosphere, planetoid);
+            atmosphere.Reanimate();
         }
 
         private void OnAtmospherePresetChanged(Planetoid planetoid, Atmosphere atmosphere)
@@ -367,6 +368,40 @@ namespace SpaceEngine.AtmosphericScattering
 
         #endregion
 
+        #region IReanimateable
+
+        public void Reanimate()
+        {
+            if (planetoid != null)
+            {
+                InitPlanetoidUniforms(planetoid);
+                SetPlanetoidUniforms(planetoid);
+
+                InitUniforms(SkyMaterial);
+                InitUniforms(planetoid.QuadMPB);
+
+                SetUniforms(SkyMaterial);
+                SetUniforms(planetoid.QuadMPB);
+
+                for (byte i = 0; i < Suns.Count; i++)
+                {
+                    if (Suns[i] != null)
+                    {
+                        var sunGlareComponent = Suns[i].GetComponent<SunGlare>();
+
+                        if (sunGlareComponent != null)
+                        {
+                            sunGlareComponent.InitSetUniforms();
+                        }
+                    }
+                }
+            }
+            else
+                Debug.Log("Atmosphere: Reanimation fail!");
+        }
+
+        #endregion
+
         private void ApplyPresset(AtmosphereParameters p)
         {
             atmosphereParameters = new AtmosphereParameters(p);
@@ -493,6 +528,18 @@ namespace SpaceEngine.AtmosphericScattering
 
             block.SetMatrix("_Sun_WorldDirections_1", sunDirectionsMatrix);
             block.SetMatrix("_Sun_Positions_1", sunPositionsMatrix);
+        }
+
+        public void SetSuns(Material mat)
+        {
+            if (mat == null) return;
+
+            mat.SetFloat("_Sun_Intensity", 100.0f);
+
+            CalculateSuns(out sunDirectionsMatrix, out sunPositionsMatrix);
+
+            mat.SetMatrix("_Sun_WorldDirections_1", sunDirectionsMatrix);
+            mat.SetMatrix("_Sun_Positions_1", sunPositionsMatrix);
         }
 
         public void Render(Vector3 Origin, int drawLayer = 8)
@@ -638,38 +685,6 @@ namespace SpaceEngine.AtmosphericScattering
                 //Just make sure that all mpb parameters are set.
                 planetoid.Atmosphere.SetUniforms(planetoid.QuadMPB);
             }
-        }
-
-        public void ReanimateAtmosphereUniforms(Atmosphere atmosphere, Planetoid planetoid)
-        {
-            if (atmosphere != null && planetoid != null)
-            {
-                atmosphere.InitPlanetoidUniforms(planetoid);
-                atmosphere.SetPlanetoidUniforms(planetoid);
-
-                atmosphere.InitUniforms(atmosphere.SkyMaterial);
-                atmosphere.InitUniforms(atmosphere.planetoid.QuadMPB);
-
-                atmosphere.SetUniforms(atmosphere.SkyMaterial);
-                atmosphere.SetUniforms(atmosphere.planetoid.QuadMPB);
-
-                if (planetoid.Ocean != null) planetoid.Ocean.Reanimate();
-
-                for (byte i = 0; i < Suns.Count; i++)
-                {
-                    if (Suns[i] != null)
-                    {
-                        var sunGlareComponent = Suns[i].GetComponent<SunGlare>();
-
-                        if (sunGlareComponent != null)
-                        {
-                            sunGlareComponent.InitSetUniforms();
-                        }
-                    }
-                }
-            }
-            else
-                Debug.Log("Atmosphere: Reanimation fail!");
         }
 
         #region ExtraAPI

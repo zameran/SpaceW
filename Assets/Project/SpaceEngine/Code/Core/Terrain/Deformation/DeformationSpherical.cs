@@ -87,7 +87,7 @@ namespace SpaceEngine.Core.Terrain.Deformation
                 return new Vector3d((-2.0 - deformedPoint.z / deformedPoint.x) * R, -deformedPoint.y / deformedPoint.x * R, l - R);
             }
 
-            Debug.Log("Proland::SpericalDeformation::DeformToLocal - fail");
+            Debug.Log("DeformationSpherical: DeformToLocal fail!");
 
             return Vector3d.zero;
         }

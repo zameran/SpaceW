@@ -9,7 +9,8 @@
 			CGPROGRAM
 			#include "UnityCG.cginc"
 
-			#pragma target 4.0
+			#pragma target 5.0
+			#pragma only_renderers d3d11 glcore
 			#pragma vertex vert
 			#pragma fragment frag
 			

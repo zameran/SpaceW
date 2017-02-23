@@ -1,6 +1,6 @@
 ﻿#region License
 // Procedural planet generator.
-// 
+//  
 // Copyright (C) 2015-2017 Denis Ovchinnikov [zameran] 
 // All rights reserved.
 // 
@@ -8,7 +8,7 @@
 // modification, are permitted provided that the following conditions
 // are met:
 // 1. Redistributions of source code must retain the above copyright
-//    notice, this list of conditions and the following disclaimer.
+//     notice, this list of conditions and the following disclaimer.
 // 2. Redistributions in binary form must reproduce the above copyright
 //    notice, this list of conditions and the following disclaimer in the
 //    documentation and/or other materials provided with the distribution.
@@ -28,28 +28,20 @@
 // ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF
 // THE POSSIBILITY OF SUCH DAMAGE.
 // 
-// Creation Date: Undefined
-// Creation Time: Undefined
+// Creation Date: 2017.02.22
+// Creation Time: 6:27 PM
 // Creator: zameran
 #endregion
 
-using System;
-using System.Reflection;
-
-using UnityEngine;
-
-public class UnityEngineAPI
+namespace SpaceEngine.Core.Reanimator
 {
-    public static void InvokeAPI<T>(string MethodName, BindingFlags BillingAtr, object obj = null, params object[] MethodParams) where T : class
+    public interface IReanimateable
     {
-        try
-        {
-            Type type = typeof(T);
-            MethodInfo method = type.GetMethod(MethodName, BillingAtr);
+        void Reanimate();
+    }
 
-            method.Invoke(obj, MethodParams);
-        }
-        catch (Exception ex) { Debug.LogError("[InvokeAPI] Exception!" + "\n" + ex.Message + "\n" + ex.StackTrace); }
-        finally { }
+    public interface IReanimateable<T> : IReanimateable
+    {
+        void Reanimate(T state);
     }
 }
