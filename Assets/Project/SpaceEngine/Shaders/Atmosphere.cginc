@@ -98,6 +98,7 @@ uniform StructuredBuffer<Sun> Suns;
 
 uniform float4x4 _Globals_CameraToWorld;
 uniform float4x4 _Globals_ScreenToCamera;
+uniform float4x4 _Globals_CameraToScreen;
 uniform float3 _Globals_WorldCameraPos;
 uniform float3 _Globals_WorldCameraPos_Offsetted;
 uniform float3 _Globals_Origin;

@@ -70,6 +70,7 @@ Shader "SpaceEngine/Atmosphere/SunGlare"
 			uniform float4x4 ghost2Settings;
 			uniform float4x4 ghost3Settings;
 			
+			uniform float UseTransmittanceOffset;
 			uniform float UseAtmosphereColors;
 			uniform float UseRadiance;
 			uniform float Eclipse;
@@ -103,10 +104,43 @@ Shader "SpaceEngine/Atmosphere/SunGlare"
 				return pow(max(0, sunColor), 2.2) * 2;
 			}
 
+			float2 GetTransmittanceUV_SunGlare(float r, float mu) 
+			{
+				float uR = sqrt((r - Rg) / (Rt - Rg));
+				float uMu = atan(mu * 11.950355887 + 2.1510640597) * 0.6666666667;
+
+				return UseTransmittanceOffset > 0.0 ? float2(uMu, 1.5 - uR) : float2(uMu, uR);
+			}
+
+			float3 Extinction(float3 camera, float3 viewdir)
+			{
+				float3 extinction = float3(1.0, 1.0, 1.0);
+
+				float r = length(camera);
+				float rMu = dot(camera, viewdir);
+				float mu = rMu / r;
+
+				float deltaSq = SQRT(rMu * rMu - r * r + Rt * Rt, 0.000001);
+
+				float din = max(-rMu - deltaSq, 0.0);
+
+				if (din > 0.0)
+				{
+					camera += din * viewdir;
+					rMu += din;
+					mu = rMu / Rt;
+					r = Rt;
+				}
+
+				float3 transmittance = tex2D(_Sky_Transmittance, GetTransmittanceUV_SunGlare(r, mu)).rgb;
+
+				return (r > Rt) ? float3(1.0, 1.0, 1.0) : transmittance;
+			}
+
 			float4 frag(v2f IN) : COLOR
 			{
 				float3 WCP = _Globals_WorldCameraPos;
-				float3 WSD = normalize(WCP - _Sun_Positions_1[0]);
+				float3 WSD2C = normalize(WCP - _Sun_Positions_1[0]); //World sun direction to camera.
 
 				float2 toScreenCenter = sunViewPortPos.xy - 0.5;
 
@@ -146,21 +180,7 @@ Shader "SpaceEngine/Atmosphere/SunGlare"
 
 				if (UseAtmosphereColors > 0.0)
 				{
-					float3 extinction = 0;
-					float3 inscatter = 0;
-					float l = 0;
-
-					inscatter = InScattering(WCPG, _Sun_Positions_1[0], WSD, extinction, 1.0).rgb;
-					inscatter = saturate(inscatter); // NOTE : Atmosphere color limitation...
-
-					l = length(extinction);
-
-					outputColor *= outputColor + inscatter * extinction;
-
-					if (l >= 0 && l <= 0.08)
-					{
-						outputColor = 0;
-					}
+					outputColor *= Extinction(WCP, _Globals_Origin - WSD2C);
 				}
 
 				return float4(outputColor, 1.0);				

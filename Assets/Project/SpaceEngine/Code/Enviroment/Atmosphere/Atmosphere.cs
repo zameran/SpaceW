@@ -34,32 +34,43 @@
 #endregion
 
 using SpaceEngine.AtmosphericScattering.Sun;
+using SpaceEngine.Core.PropertyNotification;
+using SpaceEngine.Core.Reanimator;
 
 using System.Collections.Generic;
+using System.ComponentModel;
 
 using UnityEngine;
 
 namespace SpaceEngine.AtmosphericScattering
 {
-    public sealed class Atmosphere : Node<Atmosphere>, IEventit, IUniformed<Material>, IUniformed<MaterialPropertyBlock>
+    public sealed class AtmosphereBaseProperty : PropertyNotificationObject
     {
-        private AtmosphereBase atmosphereBase = AtmosphereBase.Earth;
+        private AtmosphereBase _value = AtmosphereBase.Earth;
 
-        public AtmosphereBase AtmosphereBase
+        public AtmosphereBase Value
         {
-            get { return atmosphereBase; }
+            get
+            {
+                return _value;
+            }
             set
             {
-                var changed = false;
+                if (!Equals(value, _value))
+                {
+                    _value = value;
 
-                changed = (atmosphereBase != value);
-
-                atmosphereBase = value;
-
-                if (changed)
-                    EventManager.PlanetoidEvents.OnAtmospherePresetChanged.Invoke(planetoid, this);
+                    OnPropertyChanged("Name");
+                }
             }
         }
+    }
+
+    public sealed class Atmosphere : Node<Atmosphere>, IEventit, IUniformed<Material>, IUniformed<MaterialPropertyBlock>, IReanimateable
+    {
+        public AtmosphereBaseProperty AtmosphereBaseProperty = new AtmosphereBaseProperty();
+
+        public AtmosphereBase AtmosphereBase { get { return AtmosphereBaseProperty.Value; } set { AtmosphereBaseProperty.Value = value; } }
 
         public AnimationCurve FadeCurve = new AnimationCurve(new Keyframe[] { new Keyframe(0.0f, 0.0f),
                                                                               new Keyframe(0.25f, 1.0f),
@@ -131,6 +142,8 @@ namespace SpaceEngine.AtmosphericScattering
         {
             if (isEventit) return;
 
+            AtmosphereBaseProperty.PropertyChanged += AtmosphereBasePropertyOnPropertyChanged;
+
             EventManager.PlanetoidEvents.OnAtmosphereBaked.OnEvent += OnAtmosphereBaked;
             EventManager.PlanetoidEvents.OnAtmospherePresetChanged.OnEvent += OnAtmospherePresetChanged;
 
@@ -141,6 +154,8 @@ namespace SpaceEngine.AtmosphericScattering
         {
             if (!isEventit) return;
 
+            AtmosphereBaseProperty.PropertyChanged -= AtmosphereBasePropertyOnPropertyChanged;
+
             EventManager.PlanetoidEvents.OnAtmosphereBaked.OnEvent -= OnAtmosphereBaked;
             EventManager.PlanetoidEvents.OnAtmospherePresetChanged.OnEvent -= OnAtmospherePresetChanged;
 
@@ -149,6 +164,11 @@ namespace SpaceEngine.AtmosphericScattering
         #endregion
 
         #region Events
+        private void AtmosphereBasePropertyOnPropertyChanged(object sender, PropertyChangedEventArgs e)
+        {
+            EventManager.PlanetoidEvents.OnAtmospherePresetChanged.Invoke(planetoid, this);
+        }
+
         private void OnAtmosphereBaked(Planetoid planetoid, Atmosphere atmosphere)
         {
             if (planetoid == null)
@@ -164,7 +184,7 @@ namespace SpaceEngine.AtmosphericScattering
             }
 
             atmosphere.ApplyPresset(AtmosphereParameters.Get(atmosphere.AtmosphereBase));
-            atmosphere.ReanimateAtmosphereUniforms(atmosphere, planetoid);
+            atmosphere.Reanimate();
         }
 
         private void OnAtmospherePresetChanged(Planetoid planetoid, Atmosphere atmosphere)
@@ -348,6 +368,40 @@ namespace SpaceEngine.AtmosphericScattering
 
         #endregion
 
+        #region IReanimateable
+
+        public void Reanimate()
+        {
+            if (planetoid != null)
+            {
+                InitPlanetoidUniforms(planetoid);
+                SetPlanetoidUniforms(planetoid);
+
+                InitUniforms(SkyMaterial);
+                InitUniforms(planetoid.QuadMPB);
+
+                SetUniforms(SkyMaterial);
+                SetUniforms(planetoid.QuadMPB);
+
+                for (byte i = 0; i < Suns.Count; i++)
+                {
+                    if (Suns[i] != null)
+                    {
+                        var sunGlareComponent = Suns[i].GetComponent<SunGlare>();
+
+                        if (sunGlareComponent != null)
+                        {
+                            sunGlareComponent.InitSetUniforms();
+                        }
+                    }
+                }
+            }
+            else
+                Debug.Log("Atmosphere: Reanimation fail!");
+        }
+
+        #endregion
+
         private void ApplyPresset(AtmosphereParameters p)
         {
             atmosphereParameters = new AtmosphereParameters(p);
@@ -476,6 +530,18 @@ namespace SpaceEngine.AtmosphericScattering
             block.SetMatrix("_Sun_Positions_1", sunPositionsMatrix);
         }
 
+        public void SetSuns(Material mat)
+        {
+            if (mat == null) return;
+
+            mat.SetFloat("_Sun_Intensity", 100.0f);
+
+            CalculateSuns(out sunDirectionsMatrix, out sunPositionsMatrix);
+
+            mat.SetMatrix("_Sun_WorldDirections_1", sunDirectionsMatrix);
+            mat.SetMatrix("_Sun_Positions_1", sunPositionsMatrix);
+        }
+
         public void Render(Vector3 Origin, int drawLayer = 8)
         {
             Render(CameraHelper.Main(), Origin, drawLayer);
@@ -566,7 +632,7 @@ namespace SpaceEngine.AtmosphericScattering
 
         #endregion
 
-        private Vector3 GetSunDirection(AtmosphereSun sun)
+        public Vector3 GetSunDirection(AtmosphereSun sun)
         {
             return (sun.transform.position - Origin).normalized;
         }
@@ -619,36 +685,6 @@ namespace SpaceEngine.AtmosphericScattering
                 //Just make sure that all mpb parameters are set.
                 planetoid.Atmosphere.SetUniforms(planetoid.QuadMPB);
             }
-        }
-
-        public void ReanimateAtmosphereUniforms(Atmosphere atmosphere, Planetoid planetoid)
-        {
-            if (atmosphere != null && planetoid != null)
-            {
-                atmosphere.InitPlanetoidUniforms(planetoid);
-                atmosphere.SetPlanetoidUniforms(planetoid);
-
-                atmosphere.InitUniforms(atmosphere.SkyMaterial);
-                atmosphere.InitUniforms(atmosphere.planetoid.QuadMPB);
-
-                atmosphere.SetUniforms(atmosphere.SkyMaterial);
-                atmosphere.SetUniforms(atmosphere.planetoid.QuadMPB);
-
-                for (byte i = 0; i < Suns.Count; i++)
-                {
-                    if (Suns[i] != null)
-                    {
-                        var sunGlareComponent = Suns[i].GetComponent<SunGlare>();
-
-                        if (sunGlareComponent != null)
-                        {
-                            sunGlareComponent.InitSetUniforms();
-                        }
-                    }
-                }
-            }
-            else
-                Debug.Log("Atmosphere: Reanimation fail!");
         }
 
         #region ExtraAPI

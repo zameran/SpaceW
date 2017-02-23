@@ -93,7 +93,6 @@ public sealed class TCCommonParametersSetter : MonoBehaviour
     public void UpdateUniforms(bool dispatch)
     {
         if (Planet.Quads.Count == 0) return;
-        if (Planet.Quads == null) return;
 
         for (int i = 0; i < Planet.Quads.Count; i++)
         {

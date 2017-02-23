@@ -96,7 +96,7 @@ public sealed class NoiseParametersSetter : MonoBehaviour, IUniformed<Material>,
     public void SetUniforms(ComputeShader target, params int[] kernels)
     {
         if (target == null) return;
-        if (kernels == null || kernels.Length == 0) { Debug.Log("Quad.SetupComputeShaderKernelsUniforfms(...) problem!"); return; }
+        if (kernels == null || kernels.Length == 0) { Debug.Log("Quad: SetupComputeShaderKernelsUniforfms(...) problem!"); return; }
 
         for (int i = 0; i < kernels.Length; i++)
         {

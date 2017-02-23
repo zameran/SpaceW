@@ -52,31 +52,31 @@ public static class CBUtility
     {
         if (tex == null)
         {
-            Debug.Log("CBUtility::ReadFromRenderTexture - RenderTexture is null");
+            Debug.Log("CBUtility: ReadFromRenderTexture - RenderTexture is null!");
             return;
         }
 
         if (buffer == null)
         {
-            Debug.Log("CBUtility::ReadFromRenderTexture - buffer is null");
+            Debug.Log("CBUtility: ReadFromRenderTexture - buffer is null!");
             return;
         }
 
         if (readData == null)
         {
-            Debug.Log("CBUtility::ReadFromRenderTexture - Computer shader is null");
+            Debug.Log("CBUtility: ReadFromRenderTexture - Computer shader is null!");
             return;
         }
 
         if (channels < 1 || channels > 4)
         {
-            Debug.Log("CBUtility::ReadFromRenderTexture - Channels must be 1, 2, 3, or 4");
+            Debug.Log("CBUtility: ReadFromRenderTexture - Channels must be 1, 2, 3, or 4!");
             return;
         }
 
         if (!tex.IsCreated())
         {
-            Debug.Log("CBUtility::ReadFromRenderTexture - tex has not been created (Call Create() on tex)");
+            Debug.Log("CBUtility: ReadFromRenderTexture - tex has not been created (Call Create() on tex)!");
             return;
         }
 
@@ -95,7 +95,7 @@ public static class CBUtility
 
         if (kernel == -1)
         {
-            Debug.Log("CBUtility::ReadFromRenderTexture - could not find kernel " + "read" + D + C);
+            Debug.LogFormat("CBUtility: ReadFromRenderTexture - could not find kernel read{0}", D + C);
             return;
         }
 
@@ -123,25 +123,25 @@ public static class CBUtility
     {
         if (tex == null)
         {
-            Debug.Log("CBUtility::ReadSingleFromRenderTexture - RenderTexture is null");
+            Debug.Log("CBUtility: ReadSingleFromRenderTexture - RenderTexture is null!");
             return;
         }
 
         if (buffer == null)
         {
-            Debug.Log("CBUtility::ReadSingleFromRenderTexture - buffer is null");
+            Debug.Log("CBUtility: ReadSingleFromRenderTexture - buffer is null!");
             return;
         }
 
         if (readData == null)
         {
-            Debug.Log("CBUtility::ReadSingleFromRenderTexture - Computer shader is null");
+            Debug.Log("CBUtility: ReadSingleFromRenderTexture - Computer shader is null!");
             return;
         }
 
         if (!tex.IsCreated())
         {
-            Debug.Log("CBUtility::ReadSingleFromRenderTexture - tex has not been created (Call Create() on tex)");
+            Debug.Log("CBUtility: ReadSingleFromRenderTexture - tex has not been created (Call Create() on tex)!");
             return;
         }
 
@@ -160,7 +160,7 @@ public static class CBUtility
 
         if (kernel == -1)
         {
-            Debug.Log("CBUtility::ReadSingleFromRenderTexture - could not find kernel " + "readSingle" + B + D);
+            Debug.LogFormat("CBUtility::ReadSingleFromRenderTexture - could not find kernel readSingle{0}", B + D);
             return;
         }
 
@@ -187,37 +187,37 @@ public static class CBUtility
     {
         if (tex == null)
         {
-            Debug.Log("CBUtility::WriteIntoRenderTexture - RenderTexture is null");
+            Debug.Log("CBUtility: WriteIntoRenderTexture - RenderTexture is null");
             return;
         }
 
         if (buffer == null)
         {
-            Debug.Log("CBUtility::WriteIntoRenderTexture - buffer is null");
+            Debug.Log("CBUtility: WriteIntoRenderTexture - buffer is null");
             return;
         }
 
         if (writeData == null)
         {
-            Debug.Log("CBUtility::WriteIntoRenderTexture - Computer shader is null");
+            Debug.Log("CBUtility: WriteIntoRenderTexture - Computer shader is null");
             return;
         }
 
         if (channels < 1 || channels > 4)
         {
-            Debug.Log("CBUtility::WriteIntoRenderTexture - Channels must be 1, 2, 3, or 4");
+            Debug.Log("CBUtility: WriteIntoRenderTexture - Channels must be 1, 2, 3, or 4");
             return;
         }
 
         if (!tex.enableRandomWrite)
         {
-            Debug.Log("CBUtility::WriteIntoRenderTexture - you must enable random write on render texture");
+            Debug.Log("CBUtility: WriteIntoRenderTexture - you must enable random write on render texture");
             return;
         }
 
         if (!tex.IsCreated())
         {
-            Debug.Log("CBUtility::WriteIntoRenderTexture - tex has not been created (Call Create() on tex)");
+            Debug.Log("CBUtility: WriteIntoRenderTexture - tex has not been created (Call Create() on tex)");
             return;
         }
 
@@ -236,7 +236,7 @@ public static class CBUtility
 
         if (kernel == -1)
         {
-            Debug.Log("CBUtility::WriteIntoRenderTexture - could not find kernel " + "write" + D + C);
+            Debug.LogFormat("CBUtility::WriteIntoRenderTexture - could not find kernel write{0}", D + C);
             return;
         }
 
@@ -264,15 +264,9 @@ public static class CBUtility
         int kernel = transfer.FindKernel("Three2Three");
         int depth = from.volumeDepth;
 
-        if (transfer == null)
-        {
-            Debug.Log("CBUtility::Three2Three - Computer shader is null");
-            return;
-        }
-
         if (kernel == -1)
         {
-            Debug.Log("CBUtility::Three2Three - could not find kernel " + "Three2Three");
+            Debug.Log("CBUtility: Three2Three - could not find kernel " + "Three2Three");
             return;
         }
 
@@ -296,37 +290,37 @@ public static class CBUtility
     {
         if (tex == null)
         {
-            Debug.Log("CBUtility::WriteIntoRenderTexture - RenderTexture is null");
+            Debug.Log("CBUtility: WriteIntoRenderTexture - RenderTexture is null!");
             return;
         }
 
         if (buffer == null)
         {
-            Debug.Log("CBUtility::WriteIntoRenderTexture - buffer is null");
+            Debug.Log("CBUtility: WriteIntoRenderTexture - buffer is null!");
             return;
         }
 
         if (writeData == null)
         {
-            Debug.Log("CBUtility::WriteIntoRenderTexture - Computer shader is null");
+            Debug.Log("CBUtility: WriteIntoRenderTexture - Computer shader is null!");
             return;
         }
 
         if (channels < 1 || channels > 4)
         {
-            Debug.Log("CBUtility::WriteIntoRenderTexture - Channels must be 1, 2, 3, or 4");
+            Debug.Log("CBUtility: WriteIntoRenderTexture - Channels must be 1, 2, 3, or 4!");
             return;
         }
 
         if (!tex.enableRandomWrite)
         {
-            Debug.Log("CBUtility::WriteIntoRenderTexture - you must enable random write on render texture");
+            Debug.Log("CBUtility: WriteIntoRenderTexture - you must enable random write on render texture!");
             return;
         }
 
         if (!tex.IsCreated())
         {
-            Debug.Log("CBUtility::WriteIntoRenderTexture - tex has not been created (Call Create() on tex)");
+            Debug.Log("CBUtility: WriteIntoRenderTexture - tex has not been created (Call Create() on tex)!");
             return;
         }
 
@@ -345,7 +339,8 @@ public static class CBUtility
 
         if (kernel == -1)
         {
-            Debug.Log("CBUtility::WriteIntoRenderTexture - could not find kernel " + "write" + D + C);
+            Debug.LogFormat("CBUtility::WriteIntoRenderTexture - could not find kernel write{0}", D + C);
+
             return;
         }
 
@@ -378,13 +373,6 @@ public static class CBUtility
     static bool LoadRawFile(string path, float[] map, int size)
     {
         FileInfo fi = new FileInfo(path);
-
-        if (fi == null)
-        {
-            Debug.Log("CBUtility::LoadRawFile - Raw file not found (" + path + ")");
-            return false;
-        }
-
         FileStream fs = fi.OpenRead();
 
         byte[] data = new byte[fi.Length];
@@ -394,7 +382,7 @@ public static class CBUtility
         //divide by 4 as there are 4 bytes in a 32 bit float
         if (size > fi.Length / 4)
         {
-            Debug.Log("CBUtility::LoadRawFile - Raw file is not the required size (" + path + ")");
+            Debug.LogFormat("CBUtility: LoadRawFile - Raw file is not the required size! {0}", path);
             return false;
         }
 

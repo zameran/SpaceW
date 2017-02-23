@@ -68,6 +68,7 @@ Shader "SpaceEngine/QuadTestUnlit"
 			#pragma multi_compile LIGHT_1 LIGHT_2 LIGHT_3 LIGHT_4
 			#pragma multi_compile SHINE_ON SHINE_OFF
 			#pragma multi_compile ECLIPSES_ON ECLIPSES_OFF
+			#pragma multi_compile OCEAN_ON OCEAN_OFF
 			#pragma multi_compile SHADOW_0 SHADOW_1 SHADOW_2 SHADOW_3 SHADOW_4
 			#pragma multi_compile ATMOSPHERE_ON ATMOSPHERE_OFF
 
@@ -78,6 +79,7 @@ Shader "SpaceEngine/QuadTestUnlit"
 			#include "HDR.cginc"
 			#include "Atmosphere.cginc"
 			#include "LogarithmicDepthBuffer.cginc"
+			#include "Ocean/OceanBRDF.cginc"
 
 			struct appdata_full_compute 
 			{
@@ -123,8 +125,14 @@ Shader "SpaceEngine/QuadTestUnlit"
 
 			uniform float _LODLevel;
 			uniform float _ID;
+			uniform float _TerrainMaxHeight;
 
 			uniform float3 _Globals_WorldCameraPos_Offsetted_Origin;
+
+			uniform float _Ocean_Sigma;
+			uniform float3 _Ocean_Color;
+			uniform float _Ocean_DrawBRDF;
+			uniform float _Ocean_Level;
 
 			inline float4 RGB2Reflectance(float4 inColor)
 			{
@@ -145,9 +153,22 @@ Shader "SpaceEngine/QuadTestUnlit"
 				float3 extinction = 0;
 				float3 position = p; // NOTE : We need unshifted position for shadows stuff...
 
+				// Unpack height from noise value...
+				float height = DenormalizeMaximumHeight(terrainColor.a, _TerrainMaxHeight);
+				float3 V = normalize(p);
+				float3 P = V * max(length(p), Rg + 10.0);
+				float3 v = normalize(P - _Globals_WorldCameraPos);
+
 				p += _Globals_Origin;
 
 				float cTheta = dot(n, -WSD);
+
+				#ifdef OCEAN_ON
+					if(height <= _Ocean_Level && _Ocean_DrawBRDF == 1.0)
+					{
+						n = float3(0, 0, 1);
+					}
+				#endif
 	
 				SunRadianceAndSkyIrradiance(p, n, WSD, sunL, skyE);
 
@@ -181,6 +202,13 @@ Shader "SpaceEngine/QuadTestUnlit"
 				#endif
 
 				float3 groundColor = 1.5 * RGB2Reflectance(terrainColor).rgb * (sunL * max(cTheta, 0) + skyE) / M_PI;
+
+				#ifdef OCEAN_ON
+					if(height <= _Ocean_Level && _Ocean_DrawBRDF == 1.0)
+					{
+						groundColor = OceanRadiance(WSD, -v, V, _Ocean_Sigma, sunL, skyE, _Ocean_Color);
+					}
+				#endif
 
 				#ifdef ECLIPSES_ON
 					#if SHADOW_1 || SHADOW_2 || SHADOW_3 || SHADOW_4
@@ -271,7 +299,7 @@ Shader "SpaceEngine/QuadTestUnlit"
 				float4 position = data[v.id].position;
 				float4 cubePosition = data[v.id].cubePosition;
 
-				float3 normal = tex2Dlod(_NormalTexture, v.texcoord);
+				float3 normal = tex2Dlod(_NormalTexture, v.texcoord) * 10;
 
 				position.w = 1.0;
 				position.xyz += patchCenter;

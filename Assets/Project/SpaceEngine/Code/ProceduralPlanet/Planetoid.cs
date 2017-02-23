@@ -33,6 +33,8 @@
 // Creator: zameran
 #endregion
 
+using SpaceEngine.Core.Reanimator;
+
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -104,10 +106,20 @@ public static class PlanetoidExtensions
                 {
                     Keywords.Add("ATMOSPHERE_OFF");
                 }
+
+                if (planet.Ocean != null)
+                {
+                    Keywords.Add("OCEAN_ON");
+                }
+                else
+                {
+                    Keywords.Add("OCEAN_OFF");
+                }
             }
             else
             {
                 Keywords.Add("ATMOSPHERE_OFF");
+                Keywords.Add("OCEAN_OFF");
             }
         }
 
@@ -115,7 +127,7 @@ public static class PlanetoidExtensions
     }
 }
 
-public sealed class Planetoid : Planet, IPlanet
+public sealed class Planetoid : Planet, IPlanet, IReanimateable
 {
     public List<Quad> MainQuads = new List<Quad>();
     public List<Quad> Quads = new List<Quad>();
@@ -135,6 +147,24 @@ public sealed class Planetoid : Planet, IPlanet
     public MaterialPropertyBlock QuadMPB;
 
     public bool WaitOnSplit = false;
+    [HideInInspector]
+    public bool ExternalRendering = false;
+    public bool Working = false;
+    public bool OctaveFade = false;
+    public bool UseLOD = true;
+
+    public QuadDistanceToClosestCornerComparer qdtccc;
+
+    public Transform LODTarget = null;
+
+    [HideInInspector]
+    public float DistanceToLODTarget = 0;
+
+    public float LODDistanceMultiplier = 1;
+    public float LODDistanceMultiplierPerLevel = 2;
+    public int LODMaxLevel = 15;
+    public float[] LODDistances = new float[16];
+    public float[] LODOctaves = new float[6] { 0.5f, 0.5f, 0.5f, 0.75f, 0.75f, 1.0f };
 
     protected override void Awake()
     {
@@ -144,6 +174,12 @@ public sealed class Planetoid : Planet, IPlanet
         {
             if (Atmosphere.planetoid == null)
                 Atmosphere.planetoid = this;
+        }
+
+        if (Ocean != null)
+        {
+            if (Ocean.planetoid == null)
+                Ocean.planetoid = this;
         }
 
         if (Cloudsphere != null)
@@ -164,6 +200,9 @@ public sealed class Planetoid : Planet, IPlanet
     protected override void Start()
     {
         base.Start();
+
+        if (qdtccc == null)
+            qdtccc = new QuadDistanceToClosestCornerComparer();
 
         if (tccps == null)
             if (gameObject.GetComponentInChildren<TCCommonParametersSetter>() != null)
@@ -216,7 +255,7 @@ public sealed class Planetoid : Planet, IPlanet
         {
             if (Atmosphere != null)
             {
-                Atmosphere.ReanimateAtmosphereUniforms(Atmosphere, this);
+                Atmosphere.Reanimate();
             }
         }
 
@@ -254,40 +293,16 @@ public sealed class Planetoid : Planet, IPlanet
 
         if (focusStatus != true) return;
 
-        //NOTE : So, when unity recompiles shaders or scripts from editor 
-        //while playing - quads not draws properly. 
-        //1) Reanimation of uniforms/mpb can't help.
-        //2) MaterialPropertyBlock.Clear() in Reanimation can't help.
-        //3) mpb = null; in Reanimation can't help.
-        //4) All parameters are ok in mpb.
-        //5) Problem not in MainRenderer.
-        //I think i've lost something...
-        //This ussue take effect only with mpb, so dirty fix is:
-        //ReSetupQuads();
+        Reanimate();
+    }
+
+    #region IReanimateable
+
+    public void Reanimate()
+    {
+        //NOTE : So, when unity recompiles shaders or scripts from editor while playing - quads not draws properly. 
         //NOTE : Fixed. Buffers setted 1 time. Need to update when focus losted.
-
-        ReanimateQuadsBuffers(false);
-
-        if (Atmosphere != null)
-        {
-            Atmosphere.ReanimateAtmosphereUniforms(Atmosphere, this);
-        }
-    }
-
-    #region Gizmos
-
-#if UNITY_EDITOR
-    protected override void OnDrawGizmos()
-    {
-        base.OnDrawGizmos();
-    }
-#endif
-
-    #endregion
-
-    public void ReanimateQuadsBuffers(bool resetup = false)
-    {
-        if (resetup) { ReSetupQuads(); return; }
+        //NOTE : Reinit [Reanimate] ocean stuff only after focus lost...
 
         if (Quads != null)
         {
@@ -299,7 +314,23 @@ public sealed class Planetoid : Planet, IPlanet
                 }
             }
         }
+
+        if (Ocean != null) Ocean.Reanimate();
+        if (Atmosphere != null) Atmosphere.Reanimate();
     }
+
+    #endregion
+
+    #region Gizmos
+
+#if UNITY_EDITOR
+    protected override void OnDrawGizmos()
+    {
+        base.OnDrawGizmos();
+    }
+#endif
+
+    #endregion
 
     public void UpdateLOD()
     {
@@ -331,6 +362,11 @@ public sealed class Planetoid : Planet, IPlanet
             {
                 Atmosphere.Render(camera, Origin, DrawLayer);
             }
+        }
+
+        if (Ocean != null)
+        {
+            Ocean.Render(camera, Origin, DrawLayer);
         }
 
         if (Cloudsphere != null)
@@ -412,7 +448,7 @@ public sealed class Planetoid : Planet, IPlanet
 
             id -= 1;
 
-            if (LODOctaves != null && LODOctaves.Length > 1 && !(id > LODOctaves.Length))
+            if (LODOctaves.Length > 1 && !(id > LODOctaves.Length))
             {
                 return LODOctaves[id];
             }
@@ -533,5 +569,31 @@ public sealed class Planetoid : Planet, IPlanet
         Quads.Sort(qdtccc);
 
         return quadComponent;
+    }
+
+    public sealed class QuadDistanceToClosestCornerComparer : IComparer<Quad>
+    {
+        public int Compare(Quad x, Quad y)
+        {
+            if (x.DistanceToLODSplit > y.DistanceToLODSplit)
+                return 1;
+            else if (x.DistanceToLODSplit < y.DistanceToLODSplit)
+                return -1;
+            else
+                return 0;
+        }
+    }
+
+    public sealed class PlanetoidDistanceToLODTargetComparer : IComparer<Planetoid>
+    {
+        public int Compare(Planetoid x, Planetoid y)
+        {
+            if (x.DistanceToLODTarget > y.DistanceToLODTarget)
+                return 1;
+            else if (x.DistanceToLODTarget < y.DistanceToLODTarget)
+                return -1;
+            else
+                return 0;
+        }
     }
 }

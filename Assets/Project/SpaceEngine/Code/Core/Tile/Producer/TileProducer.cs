@@ -265,7 +265,7 @@ namespace SpaceEngine.Core.Tile.Producer
 
                 if (level < 0)
                 {
-                    Debug.Log("Proland::TileProducer::GetGpuTileCoords - invalid level (A)");
+                    Debug.LogError("Invalid level (A)!");
                     Debug.Break();
                 }
             }
@@ -284,15 +284,15 @@ namespace SpaceEngine.Core.Tile.Producer
 
                 if (level < 0)
                 {
-                    Debug.Log("Proland::TileProducer::GetGpuTileCoords - invalid level (B)");
+                    Debug.LogError("Invalid level (B)!");
                     Debug.Break();
                 }
 
                 t = tile == null ? FindTile(level, tx, ty, true, true) : null;
             }
 
-            dx = dx * ((s / 2) * 2 - 2 * b) / dd;
-            dy = dy * ((s / 2) * 2 - 2 * b) / dd;
+            dx = dx * ((s / 2.0f) * 2 - 2 * b) / dd;
+            dy = dy * ((s / 2.0f) * 2 - 2 * b) / dd;
 
             if (tile == null)
             {

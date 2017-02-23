@@ -170,6 +170,7 @@ public sealed class Quad : Node<Quad>, IQuad, IUniformed<Material>, IUniformed<C
         }
 
         if (Planetoid.Atmosphere != null) Planetoid.Atmosphere.SetUniforms(QuadMaterial);
+        if (Planetoid.Ocean != null) Planetoid.Ocean.SetUniforms(QuadMaterial);
     }
 
     protected override void Awake()
@@ -228,6 +229,7 @@ public sealed class Quad : Node<Quad>, IQuad, IUniformed<Material>, IUniformed<C
         target.SetMatrix("_TRS", RotationMatrix);
         target.SetFloat("_LODLevel", LODLevel + 2);
         target.SetFloat("_ID", (float)ID);
+        target.SetFloat("_TerrainMaxHeight", generationConstants.terrainMaxHeight);
     }
 
     #endregion
@@ -253,7 +255,7 @@ public sealed class Quad : Node<Quad>, IQuad, IUniformed<Material>, IUniformed<C
     public void SetUniforms(ComputeShader target, params int[] kernels)
     {
         if (target == null) return;
-        if (kernels == null || kernels.Length == 0) { Debug.Log("Quad.SetupComputeShaderKernelsUniforfms(...) problem!"); return; }
+        if (kernels == null || kernels.Length == 0) { Debug.Log("Quad: SetupComputeShaderKernelsUniforfms(...) problem!"); return; }
 
         for (int i = 0; i < kernels.Length; i++)
         {
@@ -382,7 +384,6 @@ public sealed class Quad : Node<Quad>, IQuad, IUniformed<Material>, IUniformed<C
                     if (DistanceToLODSplit < LODDistance && !Splitting)
                     {
                         StartCoroutine(Split());
-                        Log("Split Call");
                     }
                 }
                 else
@@ -390,7 +391,6 @@ public sealed class Quad : Node<Quad>, IQuad, IUniformed<Material>, IUniformed<C
                     if (DistanceToLODSplit > LODDistance && !Splitting)
                     {
                         Unsplit();
-                        Log("Unsplit Call");
                     }
                 }
             }
@@ -401,7 +401,6 @@ public sealed class Quad : Node<Quad>, IQuad, IUniformed<Material>, IUniformed<C
                     if (DistanceToLODSplit < LODDistance && !Splitting)
                     {
                         StartCoroutine(Split());
-                        Log("Split Call");
                     }
                 }
                 else
@@ -409,7 +408,6 @@ public sealed class Quad : Node<Quad>, IQuad, IUniformed<Material>, IUniformed<C
                     if (DistanceToLODSplit > LODDistance && !Splitting)
                     {
                         Unsplit();
-                        Log("Unsplit Call");
                     }
                 }
             }
@@ -463,9 +461,6 @@ public sealed class Quad : Node<Quad>, IQuad, IUniformed<Material>, IUniformed<C
             QuadAABB = GetVolumeBox(Planetoid.TerrainMaxHeight, 0);
         }
 
-        // TODO : Setup bounds only once...
-        QuadMesh.bounds = GetBounds(this);
-
         //if (Planetoid.Ring != null) Planetoid.Ring.SetShadows(QuadMaterial, Planetoid.Shadows);
         //if (Planetoid.NPS != null) Planetoid.NPS.UpdateUniforms(QuadMaterial); //(WIP) For SE Coloring in fragment shader work...
         //if (Planetoid.tccps != null) Planetoid.tccps.UpdateUniforms(QuadMaterial); //(WIP) For SE Coloring in fragment shader work...
@@ -476,6 +471,9 @@ public sealed class Quad : Node<Quad>, IQuad, IUniformed<Material>, IUniformed<C
 
         if (Generated && ShouldDraw && QuadMesh != null)
         {
+            // TODO : Setup bounds only once...
+            QuadMesh.bounds = GetBounds(this);
+
             TryCull();
 
             if (Visible)
@@ -826,7 +824,7 @@ public sealed class Quad : Node<Quad>, IQuad, IUniformed<Material>, IUniformed<C
     {
         if (QuadAABB.AABB == null || QuadAABB.AABB.Length == 0 || QuadAABB.AABB.Length <= 4)
         {
-            Debug.Log("Quad.GetClosestAABBCorner(...) QuadAABB.AABB problem!");
+            Debug.Log("Quad: GetClosestAABBCorner(...) QuadAABB.AABB problem!");
 
             return Mathf.Infinity;
         }
@@ -1149,11 +1147,5 @@ public sealed class Quad : Node<Quad>, IQuad, IUniformed<Material>, IUniformed<C
     private Vector3 CalculateMiddlePoint()
     {
         return ((quadCorners.topLeftCorner + quadCorners.bottomRightCorner) * (1.0f / Mathf.Abs(LODLevel))).NormalizeToRadius(Planetoid.PlanetRadius);
-    }
-
-    private void Log(string msg)
-    {
-        if (Planetoid.DebugEnabled)
-            Debug.Log(msg);
     }
 }

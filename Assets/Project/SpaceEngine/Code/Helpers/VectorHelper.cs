@@ -151,7 +151,7 @@ public static class VectorHelper
 
     public static Vector3 Max(params Vector3[] vectors)
     {
-        if (vectors == null || vectors.Length == 0) { Debug.Log("VectorHelper.Max Problem!"); return Vector3.zero; }
+        if (vectors == null || vectors.Length == 0) { Debug.Log("VectorHelper.Max: Problem!"); return Vector3.zero; }
 
         var max = new Vector3(-9e37f, -9e37f, -9e37f);
 
@@ -160,7 +160,7 @@ public static class VectorHelper
 
     public static Vector3 Min(params Vector3[] vectors)
     {
-        if (vectors == null || vectors.Length == 0) { Debug.Log("VectorHelper.Min Problem!"); return Vector3.zero; }
+        if (vectors == null || vectors.Length == 0) { Debug.Log("VectorHelper.Min: Problem!"); return Vector3.zero; }
 
         var min = new Vector3(9e37f, 9e37f, 9e37f);
 

@@ -118,32 +118,24 @@ namespace SpaceEngine.Core
         {
             var gpuSlot = slot[0] as GPUTileStorage.GPUSlot;
 
-            if (gpuSlot == null)
-            {
-                throw new NullReferenceException("gpuSlot");
-            }
+            if (gpuSlot == null) { throw new NullReferenceException("gpuSlot"); }
 
             var tileWidth = gpuSlot.Owner.TileSize;
             var tileSize = tileWidth - (1 + GetBorder() * 2);
 
             GPUTileStorage.GPUSlot parentGpuSlot = null;
 
-            if (level > 0)
-            {
-                var parentTile = FindTile(level - 1, tx / 2, ty / 2, false, true);
+            var upsample = level > 0;
+            var parentTile = FindTile(level - 1, tx / 2, ty / 2, false, true);
 
+            if (upsample)
+            {
                 if (parentTile != null)
                     parentGpuSlot = parentTile.GetSlot(0) as GPUTileStorage.GPUSlot;
-                else
-                {
-                    throw new MissingTileException("Find parent tile failed");
-                }
+                else { throw new MissingTileException("Find parent tile failed"); }
             }
 
-            if (parentGpuSlot == null && level > 0)
-            {
-                throw new NullReferenceException("parentGpuSlot");
-            }
+            if (parentGpuSlot == null && upsample) { throw new NullReferenceException("parentGpuSlot"); }
 
             var rootQuadSize = TerrainNode.TerrainQuadRoot.Length;
 
@@ -155,7 +147,7 @@ namespace SpaceEngine.Core
 
             UpSampleMaterial.SetVector(uniforms.tileWSD, tileWSD);
 
-            if (level > 0)
+            if (upsample)
             {
                 var parentTexture = parentGpuSlot.Texture;
 
@@ -181,14 +173,16 @@ namespace SpaceEngine.Core
             rs = rs / AmplitudeDiviner;
 
             var offset = Vector4d.Zero();
+
             offset.x = ((double)tx / (1 << level) - 0.5) * rootQuadSize;
             offset.y = ((double)ty / (1 << level) - 0.5) * rootQuadSize;
             offset.z = rootQuadSize / (1 << level);
             offset.w = TerrainNode.Body.Radius;
 
+            if (level == 0) UpSampleMaterial.SetFloat(uniforms.frequency, UpsampleSettings.Freqeuncy * (1 << level));
+
             var ltow = TerrainNode.FaceToLocal.ToMatrix4x4();
 
-            UpSampleMaterial.SetFloat(uniforms.frequency, UpsampleSettings.Freqeuncy * (1 << level));
             UpSampleMaterial.SetFloat(uniforms.amp, rs * UpsampleSettings.Amplitude);
             UpSampleMaterial.SetVector(uniforms.offset, offset.ToVector4());
             UpSampleMaterial.SetMatrix(uniforms.localToWorld, ltow);

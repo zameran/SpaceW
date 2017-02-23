@@ -37,6 +37,7 @@
 #define VerticesPerSideWithBorderFull 	quadGenerationConstants[0].meshSettings.w
 #define BorderModMesh					quadGenerationConstants[0].borderMod.x
 #define BorderModTexture				quadGenerationConstants[0].borderMod.y
+#define TerrainMaxHeight				quadGenerationConstants[0].terrainMaxHeight
 
 //#define NOISE_USE_DEFAULT
 
@@ -63,7 +64,7 @@ float NoiseFunction(float3 coord, float lodom)
 	float3 scaledCoord = ScaledCoordinate(coord);
 	
 	#ifdef NOISE_USE_DEFAULT
-	float noiseValue = Noise(scaledCoord * 16 + Randomize);
+	float noiseValue = Noise(scaledCoord * 64 + Randomize);
 	#else
 	//float noiseValue = HeightMapAsteroid(scaledCoord);
 	float noiseValue = HeightMapTerra(scaledCoord);
@@ -106,7 +107,7 @@ inline void Core(uint3 id, int size, int mod, QuadGenerationConstants constants,
 	float3 patchCubeCoordCentered = patchNormalizedCoord;
 
 	float noiseValue = NoiseFunction(patchCoord, constants.lodOctaveModifier);
-	float height = noiseValue * constants.terrainMaxHeight;
+	float height = DenormalizeMaximumHeight(noiseValue, constants.terrainMaxHeight);
 
 	patchCoordCentered += patchNormalizedCoord * height;
 	patchCubeCoordCentered += patchNormalizedCoord * height;

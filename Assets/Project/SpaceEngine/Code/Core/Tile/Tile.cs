@@ -169,7 +169,7 @@ namespace SpaceEngine.Core.Tile
 
             if (Task == null)
             {
-                Debug.Log("Proland::Tile::Tile - task can not be null");
+                Debug.Log("Task can't be null!");
             }
         }
 
@@ -177,7 +177,7 @@ namespace SpaceEngine.Core.Tile
         {
             if (i >= Task.Slot.Count)
             {
-                Debug.Log("Proland::Tile::GetSlot - slot at location " + i + " does not exist");
+                Debug.LogFormat("Slot at location {0} does not exist!", i);
             }
 
             return Task.Slot[i];

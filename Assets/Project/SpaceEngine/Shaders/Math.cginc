@@ -41,6 +41,19 @@
 #define M_PI2 6.28318530716
 #endif
 
+float2 Complex(float2 z) 
+{
+	return float2(-z.y, z.x); // returns i times z (complex number)
+}
+
+float2 GetSpectrum(float t, float w, float2 s0, float2 s0c) 
+{
+	float c = cos(w * t);
+	float s = sin(w * t);
+
+	return float2((s0.x + s0c.x) * c - (s0.y + s0c.y) * s, (s0.x - s0c.x) * s + (s0.y - s0c.y) * c);
+}
+
 float IntersectInnerSphere(float3 p1, float3 d, float3 p3, float r)
 {
 	float a = dot(d, d);
