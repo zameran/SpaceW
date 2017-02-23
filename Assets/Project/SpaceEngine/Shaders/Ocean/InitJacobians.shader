@@ -11,9 +11,9 @@ Shader "SpaceEngine/Ocean/InitJacobians"
 			
 			CGPROGRAM
 			#include "UnityCG.cginc"
+			#include "../Math.cginc"
 
 			#pragma target 3.0
-
 			#pragma vertex vert
 			#pragma fragment frag
 			
@@ -46,20 +46,7 @@ Shader "SpaceEngine/Ocean/InitJacobians"
 
 				return OUT;
 			}
-			
-			float2 GetSpectrum(float w, float2 s0, float2 s0c) 
-			{
-				float c = cos(w * _T);
-				float s = sin(w * _T);
 
-				return float2((s0.x + s0c.x) * c - (s0.y + s0c.y) * s, (s0.x - s0c.x) * s + (s0.y - s0c.y) * c);
-			}
-			
-			float2 COMPLEX(float2 z) 
-			{
-				return float2(-z.y, z.x); // returns i times z (complex number)
-			}
-			
 			f2a frag(v2f IN)
 			{ 
 				float2 uv = IN.uv.xy;
@@ -90,10 +77,10 @@ Shader "SpaceEngine/Ocean/InitJacobians"
 				
 				float4 w = tex2D(_WTable, uv);
 				
-				float2 h1 = GetSpectrum(w.x, s12.xy, s12c.xy);
-				float2 h2 = GetSpectrum(w.y, s12.zw, s12c.zw);
-				float2 h3 = GetSpectrum(w.z, s34.xy, s34c.xy);
-				float2 h4 = GetSpectrum(w.w, s34.zw, s34c.zw);
+				float2 h1 = GetSpectrum(_T, w.x, s12.xy, s12c.xy);
+				float2 h2 = GetSpectrum(_T, w.y, s12.zw, s12c.zw);
+				float2 h3 = GetSpectrum(_T, w.z, s34.xy, s34c.xy);
+				float2 h4 = GetSpectrum(_T, w.w, s34.zw, s34c.zw);
 				
 				/// Jacobians
 				float4 IK = float4(IK1,IK2,IK3,IK4);
