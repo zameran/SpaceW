@@ -49,8 +49,6 @@
 			
 			uniform float3 _Globals_WorldCameraPos;
 			
-			uniform float3 _Sun_WorldSunDir;
-			
 			uniform float _Ocean_Sigma;
 			uniform float3 _Ocean_Color;
 			uniform float _Ocean_DrawBRDF;
@@ -64,12 +62,18 @@
 				float3 p : TEXCOORD1;
 			};
 			
-			// returns content of currently selected tile, at uv coordinates (in [0,1]^2; relatively to this tile)
 			float4 texTileLod(sampler2D tile, float2 uv, float3 tileCoords, float3 tileSize) 
 			{
 				uv = tileCoords.xy + uv * tileSize.xy;
 
 				return tex2Dlod(tile, float4(uv, 0, 0));
+			}
+
+			float4 texTile(sampler2D tile, float2 uv, float3 tileCoords, float3 tileSize) 
+			{
+				uv = tileCoords.xy + uv * tileSize.xy;
+
+				return tex2D(tile, uv);
 			}
 
 			v2f vert(appdata_base v)
@@ -117,17 +121,9 @@
 				return OUT;
 			}
 			
-			float4 texTile(sampler2D tile, float2 uv, float3 tileCoords, float3 tileSize) 
-			{
-				uv = tileCoords.xy + uv * tileSize.xy;
-
-				return tex2D(tile, uv);
-			}
-			
 			float4 frag(v2f IN) : COLOR
 			{		
 				float3 WCP = _Globals_WorldCameraPos;
-				//float3 WSD = _Sun_WorldSunDir;
 				float3 WSD = float3(0.0, -1.0, 0.0);
 				float ht = texTile(_Elevation_Tile, IN.uv, _Elevation_TileCoords, _Elevation_TileSize).x;
 				

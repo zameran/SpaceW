@@ -94,20 +94,19 @@ namespace SpaceEngine.Core.Terrain.Deformation
 
         public override Box2d DeformedToLocalBounds(Vector3d deformedCenter, double deformedRadius)
         {
-            var p = DeformedToLocal(deformedCenter);
-            var r = deformedRadius;
+            var point = DeformedToLocal(deformedCenter);
 
-            if (double.IsInfinity(p.x) || double.IsInfinity(p.y))
+            if (double.IsInfinity(point.x) || double.IsInfinity(point.y))
             {
                 return new Box2d();
             }
 
-            var k = (1.0 - r * r / (2.0 * R * R)) * (new Vector3d(p.x, p.y, R)).Magnitude();
-            var A = k * k - p.x * p.x;
-            var B = k * k - p.y * p.y;
-            var C = -2.0 * p.x * p.y;
-            var D = -2.0 * R * R * p.x;
-            var E = -2.0 * R * R * p.y;
+            var k = (1.0 - deformedRadius * deformedRadius / (2.0 * R * R)) * (new Vector3d(point.x, point.y, R)).Magnitude();
+            var A = k * k - point.x * point.x;
+            var B = k * k - point.y * point.y;
+            var C = -2.0 * point.x * point.y;
+            var D = -2.0 * R * R * point.x;
+            var E = -2.0 * R * R * point.y;
             var F = R * R * (k * k - R * R);
 
             var a = C * C - 4.0 * A * B;
@@ -251,18 +250,18 @@ namespace SpaceEngine.Core.Terrain.Deformation
             var oy = quad.Oy;
             var l = quad.Length;
 
-            Vector3d p0 = new Vector3d(ox, oy, R);
-            Vector3d p1 = new Vector3d(ox + l, oy, R);
-            Vector3d p2 = new Vector3d(ox, oy + l, R);
-            Vector3d p3 = new Vector3d(ox + l, oy + l, R);
-            Vector3d pc = (p0 + p3) * 0.5;
+            var p0 = new Vector3d(ox, oy, R);
+            var p1 = new Vector3d(ox + l, oy, R);
+            var p2 = new Vector3d(ox, oy + l, R);
+            var p3 = new Vector3d(ox + l, oy + l, R);
+            var pc = (p0 + p3) * 0.5;
 
             double l0 = 0.0, l1 = 0.0, l2 = 0.0, l3 = 0.0;
 
-            Vector3d v0 = p0.Normalized(ref l0);
-            Vector3d v1 = p1.Normalized(ref l1);
-            Vector3d v2 = p2.Normalized(ref l2);
-            Vector3d v3 = p3.Normalized(ref l3);
+            var v0 = p0.Normalized(ref l0);
+            var v1 = p1.Normalized(ref l1);
+            var v2 = p2.Normalized(ref l2);
+            var v3 = p3.Normalized(ref l3);
 
             Matrix4x4d deformedCorners = new Matrix4x4d(v0.x * R, v1.x * R, v2.x * R, v3.x * R,
                                                         v0.y * R, v1.y * R, v2.y * R, v3.y * R,
@@ -274,11 +273,11 @@ namespace SpaceEngine.Core.Terrain.Deformation
                                                             v0.z, v1.z, v2.z, v3.z,
                                                             0.0, 0.0, 0.0, 0.0);
 
-            Vector3d uz = pc.Normalized();
-            Vector3d ux = (new Vector3d(0, 1, 0)).Cross(uz).Normalized();
-            Vector3d uy = uz.Cross(ux);
+            var uz = pc.Normalized();
+            var ux = (new Vector3d(0, 1, 0)).Cross(uz).Normalized();
+            var uy = uz.Cross(ux);
 
-            Matrix4x4d ltow = node.LocalToWorld;
+            var ltow = node.LocalToWorld;
 
             Matrix3x3d tangentFrameToWorld = new Matrix3x3d(ltow.m[0, 0], ltow.m[0, 1], ltow.m[0, 2],
                                                             ltow.m[1, 0], ltow.m[1, 1], ltow.m[1, 2],
