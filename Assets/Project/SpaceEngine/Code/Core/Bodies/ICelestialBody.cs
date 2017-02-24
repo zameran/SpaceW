@@ -33,6 +33,8 @@
 // Creator: zameran
 #endregion
 
+using System.Collections.Generic;
+
 using UnityEngine;
 
 namespace SpaceEngine.Core.Bodies
@@ -44,5 +46,7 @@ namespace SpaceEngine.Core.Bodies
         Vector3 Origin { get; set; }
 
         MaterialPropertyBlock MPB { get; set; }
+
+        List<string> GetKeywords();
     }
 }

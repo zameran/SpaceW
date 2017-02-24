@@ -33,7 +33,7 @@
 // Creator: zameran
 #endregion
 
-using SpaceEngine.Code.Core.Bodies;
+using SpaceEngine.Core.Bodies;
 
 using UnityEngine;
 
@@ -62,7 +62,7 @@ namespace SpaceEngine.Debugging
             if (UnityEditor.SceneView.currentDrawingSceneView != null) return; //Do not draw at Scene tab in editor.
 #endif
 
-            for (int i = 0; i < Planet.TerrainNodes.Count; i++)
+            for (byte i = 0; i < Planet.TerrainNodes.Count; i++)
             {
                 var q = Planet.TerrainNodes[i];
                 var root = q.TerrainQuadRoot;

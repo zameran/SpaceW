@@ -1,4 +1,4 @@
-﻿using SpaceEngine.Code.Core.Bodies;
+﻿using SpaceEngine.Core.Bodies;
 using SpaceEngine.Core.Exceptions;
 using SpaceEngine.Core.Storage;
 using SpaceEngine.Core.Terrain;
