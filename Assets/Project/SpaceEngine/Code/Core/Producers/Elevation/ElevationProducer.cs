@@ -1,5 +1,6 @@
 ﻿using SpaceEngine.Code.Core.Bodies;
 using SpaceEngine.Core.Exceptions;
+using SpaceEngine.Core.Noise;
 using SpaceEngine.Core.Storage;
 using SpaceEngine.Core.Terrain;
 using SpaceEngine.Core.Tile.Producer;
