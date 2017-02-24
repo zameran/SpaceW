@@ -374,9 +374,6 @@ namespace SpaceEngine.AtmosphericScattering
         {
             if (planetoid != null)
             {
-                InitPlanetoidUniforms(planetoid);
-                SetPlanetoidUniforms(planetoid);
-
                 InitUniforms(SkyMaterial);
                 InitUniforms(planetoid.QuadMPB);
 
@@ -651,40 +648,6 @@ namespace SpaceEngine.AtmosphericScattering
         public void InitMisc()
         {
             Keywords = planetoid.GetKeywords();
-        }
-
-        public void InitPlanetoidUniforms(Planetoid planetoid)
-        {
-            if (planetoid.Atmosphere != null)
-            {
-                for (int i = 0; i < planetoid.Quads.Count; i++)
-                {
-                    if (planetoid.Quads[i] != null)
-                    {
-                        planetoid.Atmosphere.InitUniforms(planetoid.Quads[i].QuadMaterial);
-                    }
-                }
-
-                //Just make sure that all mpb parameters are set.
-                planetoid.Atmosphere.InitUniforms(planetoid.QuadMPB);
-            }
-        }
-
-        public void SetPlanetoidUniforms(Planetoid planetoid)
-        {
-            if (planetoid.Atmosphere != null)
-            {
-                for (int i = 0; i < planetoid.Quads.Count; i++)
-                {
-                    if (planetoid.Quads[i] != null)
-                    {
-                        planetoid.Atmosphere.SetUniforms(planetoid.Quads[i].QuadMaterial);
-                    }
-                }
-
-                //Just make sure that all mpb parameters are set.
-                planetoid.Atmosphere.SetUniforms(planetoid.QuadMPB);
-            }
         }
 
         #region ExtraAPI

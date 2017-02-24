@@ -211,12 +211,8 @@ public sealed class Planetoid : Planet, IPlanet, IReanimateable
         if (NPS != null)
             NPS.LoadAndInit();
 
-        if (Atmosphere != null)
-        {
-            Atmosphere.InitPlanetoidUniforms(this);
-        }
-
         ReSetupQuads(); //NOTE : Force resetup on start.
+        Reanimate(); //NOTE : Force uniforms setup on start.
     }
 
     protected override void Update()
@@ -311,6 +307,12 @@ public sealed class Planetoid : Planet, IPlanet, IReanimateable
                 for (int i = 0; i < Quads.Count; i++)
                 {
                     Quads[i].Uniformed = false;
+
+                    if (Atmosphere != null)
+                    {
+                        Atmosphere.InitUniforms(Quads[i].QuadMaterial);
+                        Atmosphere.SetUniforms(Quads[i].QuadMaterial);
+                    }
                 }
             }
         }

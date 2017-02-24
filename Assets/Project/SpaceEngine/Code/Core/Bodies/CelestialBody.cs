@@ -66,6 +66,11 @@ namespace SpaceEngine.Core.Bodies
         public Vector3 Origin { get; set; }
         public MaterialPropertyBlock MPB { get; set; }
 
+        public List<string> GetKeywords()
+        {
+            return new List<string>();
+        }
+
         #endregion
 
         #region Node
