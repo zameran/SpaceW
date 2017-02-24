@@ -1,5 +1,7 @@
-﻿using SpaceEngine.Core.Exceptions;
+﻿using SpaceEngine.Code.Core.Bodies;
+using SpaceEngine.Core.Exceptions;
 using SpaceEngine.Core.Storage;
+using SpaceEngine.Core.Terrain;
 using SpaceEngine.Core.Terrain.Deformation;
 using SpaceEngine.Core.Tile.Producer;
 using SpaceEngine.Core.Tile.Storage;
@@ -11,46 +13,22 @@ using UnityEngine;
 
 namespace SpaceEngine.Core
 {
-    public class NormalProducer : TileProducer
+    public class NormalCoreProducer : TileProducer
     {
-        public class Uniforms
-        {
-            public int tileSD, elevationSampler, elevationOSL;
-            public int patchCorners, patchVerticals, patchCornerNorms;
-            public int deform, worldToTangentFrame;
+        public GameObject ElevationProducerGameObject;
 
-            public Uniforms()
-            {
-                tileSD = Shader.PropertyToID("_TileSD");
-                elevationSampler = Shader.PropertyToID("_ElevationSampler");
-                elevationOSL = Shader.PropertyToID("_ElevationOSL");
-                patchCorners = Shader.PropertyToID("_PatchCorners");
-                patchVerticals = Shader.PropertyToID("_PatchVerticals");
-                patchCornerNorms = Shader.PropertyToID("_PatchCornerNorms");
-                deform = Shader.PropertyToID("_Deform");
-                worldToTangentFrame = Shader.PropertyToID("_WorldToTangentFrame");
-            }
-        }
+        private TileProducer ElevationProducer;
 
-        [SerializeField]
-        GameObject ElevationProducerGameObject;
-
-        TileProducer ElevationProducer;
-
-        [SerializeField]
-        Material NormalsMaterial;
-
-        Uniforms uniforms;
+        public Material NormalsMaterial;
 
         protected override void Start()
         {
             base.Start();
 
-            uniforms = new Uniforms();
-
-            ElevationProducer = ElevationProducerGameObject.GetComponent<TileProducer>();
-
-            if (ElevationProducer.Cache == null) ElevationProducer.InitCache(); // NOTE : Brutal fix - force initialization.
+            if (TerrainNode == null) { TerrainNode = transform.parent.GetComponent<TerrainNode>(); }
+            if (TerrainNode.Body == null) { TerrainNode.Body = transform.parent.GetComponentInParent<CelestialBody>(); }
+            if (ElevationProducer == null) { ElevationProducer = ElevationProducerGameObject.GetComponent<TileProducer>(); }
+            if (ElevationProducer.Cache == null) { ElevationProducer.InitCache(); }
 
             var tileSize = Cache.GetStorage(0).TileSize;
             var elevationTileSize = ElevationProducer.Cache.GetStorage(0).TileSize;
@@ -112,10 +90,6 @@ namespace SpaceEngine.Core
             var elevationTex = elevationGpuSlot.Texture;
             var elevationOSL = new Vector4(0.25f / (float)elevationTex.width, 0.25f / (float)elevationTex.height, 1.0f / (float)elevationTex.width, 0.0f);
 
-            NormalsMaterial.SetVector(uniforms.tileSD, new Vector2((float)tileWidth, (float)(tileWidth - 1) / (float)(TerrainNode.Body.GridResolution - 1)));
-            NormalsMaterial.SetTexture(uniforms.elevationSampler, elevationTex);
-            NormalsMaterial.SetVector(uniforms.elevationOSL, elevationOSL);
-
             if (TerrainNode.Deformation.GetType() == typeof(DeformationSpherical))
             {
                 var D = TerrainNode.TerrainQuadRoot.Length;
@@ -161,11 +135,11 @@ namespace SpaceEngine.Core
 
                 var worldToTangentFrame = new Matrix4x4d(ux.x, ux.y, ux.z, 0.0, uy.x, uy.y, uy.z, 0.0, uz.x, uz.y, uz.z, 0.0, 0.0, 0.0, 0.0, 0.0);
 
-                NormalsMaterial.SetMatrix(uniforms.patchCorners, deformedCorners.ToMatrix4x4());
-                NormalsMaterial.SetMatrix(uniforms.patchVerticals, deformedVerticals.ToMatrix4x4());
-                NormalsMaterial.SetVector(uniforms.patchCornerNorms, new Vector4((float)l0, (float)l1, (float)l2, (float)l3));
-                NormalsMaterial.SetVector(uniforms.deform, new Vector4((float)x0, (float)y0, (float)D / (float)(1 << level), (float)R));
-                NormalsMaterial.SetMatrix(uniforms.worldToTangentFrame, worldToTangentFrame.ToMatrix4x4());
+                NormalsMaterial.SetMatrix("_PatchCorners", deformedCorners.ToMatrix4x4());
+                NormalsMaterial.SetMatrix("_PatchVerticals", deformedVerticals.ToMatrix4x4());
+                NormalsMaterial.SetVector("_PatchCornerNorms", new Vector4((float)l0, (float)l1, (float)l2, (float)l3));
+                NormalsMaterial.SetVector("_Deform", new Vector4((float)x0, (float)y0, (float)D / (float)(1 << level), (float)R));
+                NormalsMaterial.SetMatrix("_WorldToTangentFrame", worldToTangentFrame.ToMatrix4x4());
             }
             else
             {
@@ -174,9 +148,13 @@ namespace SpaceEngine.Core
                 var x0 = (double)tx / (double)(1 << level) * D - R;
                 var y0 = (double)ty / (double)(1 << level) * D - R;
 
-                NormalsMaterial.SetMatrix(uniforms.worldToTangentFrame, Matrix4x4.identity);
-                NormalsMaterial.SetVector(uniforms.deform, new Vector4((float)x0, (float)y0, (float)D / (float)(1 << level), 0.0f));
+                NormalsMaterial.SetVector("_Deform", new Vector4((float)x0, (float)y0, (float)D / (float)(1 << level), 0.0f));
+                NormalsMaterial.SetMatrix("_WorldToTangentFrame", Matrix4x4.identity);
             }
+
+            NormalsMaterial.SetVector("_TileSD", new Vector2((float)tileWidth, (float)(tileWidth - 1) / (float)(TerrainNode.Body.GridResolution - 1)));
+            NormalsMaterial.SetTexture("_ElevationSampler", elevationTex);
+            NormalsMaterial.SetVector("_ElevationOSL", elevationOSL);
 
             Graphics.Blit(null, gpuSlot.Texture, NormalsMaterial);
 
