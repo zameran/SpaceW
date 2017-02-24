@@ -42,12 +42,10 @@ using System.Linq;
 
 using UnityEngine;
 
-namespace SpaceEngine.Code.Core.Bodies
+namespace SpaceEngine.Core.Bodies
 {
-    public class CelestialBody : Node<CelestialBody>
+    public class CelestialBody : Node<CelestialBody>, ICelestialBody
     {
-        public float Radius = 2048;
-
         public int GridResolution = 25;
 
         public Mesh QuadMesh;
@@ -57,11 +55,18 @@ namespace SpaceEngine.Code.Core.Bodies
         public List<TerrainNode> TerrainNodes = new List<TerrainNode>(6);
         public List<TileSampler> TileSamplers = new List<TileSampler>();
 
-        public MaterialPropertyBlock MPB;
-
         public double HeightZ = 0;
 
+        #region ICelestialBody
+
+        [SerializeField]
+        private float radius = 2048;
+
+        public float Radius { get { return radius; } set { radius = value; } }
         public Vector3 Origin { get; set; }
+        public MaterialPropertyBlock MPB { get; set; }
+
+        #endregion
 
         #region Node
 
