@@ -97,7 +97,7 @@ public sealed class MainRenderer : MonoBehaviour
         for (int i = 0; i < GodManager.Instance.Planetoids.Length; i++)
         {
             if (GodManager.Instance.Planetoids[i] != null)
-                GodManager.Instance.Planetoids[i].Render(CameraHelper.Main());
+                GodManager.Instance.Planetoids[i].Render();
         }
 
         //-----------------------------------------------------------------------------

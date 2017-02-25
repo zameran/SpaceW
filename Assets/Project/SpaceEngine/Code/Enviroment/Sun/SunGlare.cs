@@ -154,7 +154,7 @@ namespace SpaceEngine.AtmosphericScattering.Sun
             {
                 if (Atmosphere == null) return;
 
-                Graphics.DrawMesh(SunGlareMesh, Vector3.zero, Quaternion.identity, SunGlareMaterial, 8, CameraHelper.Main(), 0, Atmosphere.planetoid.QuadMPB, false, false);
+                Graphics.DrawMesh(SunGlareMesh, Vector3.zero, Quaternion.identity, SunGlareMaterial, 8, CameraHelper.Main(), 0, Atmosphere.planetoid.MPB, false, false);
             }
 
             base.Update();

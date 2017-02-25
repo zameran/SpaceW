@@ -270,18 +270,13 @@ namespace SpaceEngine.Ocean
 
         #endregion
 
-        public void Render(Vector3 Origin, int drawLayer = 8)
-        {
-            Render(CameraHelper.Main(), Origin, drawLayer);
-        }
-
-        public void Render(Camera camera, Vector3 Origin, int drawLayer = 8)
+        public void Render()
         {
             if (DrawOcean == false) return;
 
             foreach (var mesh in ScreenMeshGrids)
             {
-                Graphics.DrawMesh(mesh, Matrix4x4.identity, OceanMaterial, drawLayer, camera, 0, planetoid.QuadMPB);
+                Graphics.DrawMesh(mesh, Matrix4x4.identity, OceanMaterial, planetoid.DrawLayer, CameraHelper.Main(), 0, planetoid.MPB);
             }
         }
 

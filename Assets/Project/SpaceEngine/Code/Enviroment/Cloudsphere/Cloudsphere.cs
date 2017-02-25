@@ -136,18 +136,13 @@ namespace SpaceEngine.AtmosphericScattering.Cloudsphere
 
         #endregion
 
-        public void Render(int drawLayer = 8)
-        {
-            Render(CameraHelper.Main(), drawLayer);
-        }
-
-        public void Render(Camera camera, int drawLayer = 8)
+        public void Render()
         {
             if (CloudsphereMesh == null) return;
 
             var CloudsTRS = Matrix4x4.TRS(planetoid.OriginTransform.position, transform.rotation, Vector3.one * (Radius + Height));
 
-            Graphics.DrawMesh(CloudsphereMesh, CloudsTRS, CloudMaterial, drawLayer, camera, 0, planetoid.QuadMPB);
+            Graphics.DrawMesh(CloudsphereMesh, CloudsTRS, CloudMaterial, planetoid.DrawLayer, CameraHelper.Main(), 0, planetoid.MPB);
         }
 
         public void InitMaterials()
