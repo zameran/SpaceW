@@ -6,9 +6,9 @@ namespace UnityEngine
         const int PASS_X_2 = 2, PASS_Y_2 = 3;
         const int PASS_X_3 = 4, PASS_Y_3 = 5;
 
-        int Size;
-        float FloatSize;
-        int Passes;
+        public int Size { get; private set; }
+        public int Passes { get; private set; }
+
         Texture2D[] ButterFlyLookupTable = null;
         Material FourierMaterial;
 
@@ -33,26 +33,24 @@ namespace UnityEngine
             FourierMaterial = new Material(shader);
 
             Size = size; // Must be pow2 num
-            FloatSize = (float)Size;
-            Passes = (int)(Mathf.Log(FloatSize) / Mathf.Log(2.0f));
+            Passes = (int)(Mathf.Log((float)size) / Mathf.Log(2.0f));
 
             ButterFlyLookupTable = new Texture2D[Passes];
 
             ComputeButterflyLookupTable();
 
-            FourierMaterial.SetFloat("_Size", FloatSize);
+            FourierMaterial.SetFloat("_Size", (float)size);
         }
 
         private int BitReverse(int i)
         {
-            int j = i;
-            int Sum = 0;
-            int W = 1;
-            int M = Size / 2;
+            var Sum = 0;
+            var W = 1;
+            var M = Size / 2;
 
             while (M != 0)
             {
-                j = ((i & M) > M - 1) ? 1 : 0;
+                var j = ((i & M) > M - 1) ? 1 : 0;
                 Sum += j * W;
                 W *= 2;
                 M /= 2;
@@ -63,10 +61,11 @@ namespace UnityEngine
 
         private Texture2D Make1DTex(int i)
         {
-            var tex = new Texture2D(Size, 1, TextureFormat.ARGB32, false, true);
-
-            tex.filterMode = FilterMode.Point;
-            tex.wrapMode = TextureWrapMode.Clamp;
+            var tex = new Texture2D(Size, 1, TextureFormat.ARGB32, false, true)
+            {
+                filterMode = FilterMode.Point,
+                wrapMode = TextureWrapMode.Clamp
+            };
 
             return tex;
         }

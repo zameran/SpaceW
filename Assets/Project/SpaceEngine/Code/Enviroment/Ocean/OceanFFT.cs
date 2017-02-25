@@ -54,7 +54,7 @@ namespace SpaceEngine.Ocean
         /// This is the fourier transform size, must pow2 number. Recommend no higher or lower than 64, 128 or 256.
         /// </summary>
         [SerializeField]
-        int FourierGridSize = 256;
+        int FourierGridSize = 64;
 
         int VarianceSize = 16;
 
