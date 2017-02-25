@@ -38,7 +38,7 @@ namespace SpaceEngine.Core.Utilities
         bool LeftPressed;
         bool RightPressed;
 
-        bool Initialized = false;
+        bool Initialized;
 
         /// <summary>
         /// The target position manipulated by the user via the mouse and keyboard.
