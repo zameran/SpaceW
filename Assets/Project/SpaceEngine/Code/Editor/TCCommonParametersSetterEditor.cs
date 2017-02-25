@@ -30,6 +30,8 @@
  */
 #endregion
 
+using SpaceEngine.Core.Bodies;
+
 using System;
 
 using UnityEditor;
@@ -56,8 +58,11 @@ public sealed class TCCommonParametersSetterEditor : Editor
         EditorGUILayout.LabelField("Planetoid to setup: ", EditorStyles.boldLabel);
         setter.Planet = EditorGUILayout.ObjectField(setter.Planet, typeof(Planetoid), true) as Planetoid;
 
-        EditorGUILayout.LabelField("Patche Sphere to setup: ", EditorStyles.boldLabel);
+        EditorGUILayout.LabelField("Patch Sphere to setup: ", EditorStyles.boldLabel);
         setter.PatchSphere = EditorGUILayout.ObjectField(setter.PatchSphere, typeof(PatchSphere), true) as PatchSphere;
+
+        EditorGUILayout.LabelField("Celestial Body to setup: ", EditorStyles.boldLabel);
+        setter.CelestialBody = EditorGUILayout.ObjectField(setter.CelestialBody, typeof(CelestialBody), true) as CelestialBody;
 
         EditorGUILayout.Space();
     }

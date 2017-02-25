@@ -122,6 +122,7 @@ namespace SpaceEngine.AtmosphericScattering
         public AtmosphereRunTimeBaker artb = null;
 
         public Vector3 Origin { get { return planetoid != null ? planetoid.Origin : Vector3.zero; } }
+        public float Radius { get { return planetoid != null ? planetoid.PlanetRadius : 0.0f; } }
 
         public Color[] shineColors = new Color[4] { XKCDColors.Bluish, XKCDColors.Bluish, XKCDColors.Bluish, XKCDColors.Bluish };
 
@@ -133,9 +134,8 @@ namespace SpaceEngine.AtmosphericScattering
 
         public List<string> Keywords = new List<string>();
 
-        public float Radius { get { return planetoid != null ? planetoid.PlanetRadius : 0.0f; } }
-
         #region Eventit
+
         public bool isEventit { get; set; }
 
         public void Eventit()
@@ -161,9 +161,11 @@ namespace SpaceEngine.AtmosphericScattering
 
             isEventit = false;
         }
+
         #endregion
 
         #region Events
+
         private void AtmosphereBasePropertyOnPropertyChanged(object sender, PropertyChangedEventArgs e)
         {
             EventManager.PlanetoidEvents.OnAtmospherePresetChanged.Invoke(planetoid, this);
@@ -201,9 +203,10 @@ namespace SpaceEngine.AtmosphericScattering
                 return;
             }
 
-            atmosphere.TryBake();
+            atmosphere.Bake();
             planetoid.ReSetupQuads();
         }
+
         #endregion
 
         #region Node
@@ -212,17 +215,17 @@ namespace SpaceEngine.AtmosphericScattering
         {
             ApplyPresset(AtmosphereParameters.Get(AtmosphereBase));
 
-            TryBake();
+            Bake();
 
             InitMisc();
             InitMaterials();
             InitMesh();
 
             InitUniforms(SkyMaterial);
-            InitUniforms(planetoid.QuadMPB);
+            InitUniforms(planetoid.MPB);
 
             SetUniforms(SkyMaterial);
-            SetUniforms(planetoid.QuadMPB);
+            SetUniforms(planetoid.MPB);
         }
 
         protected override void UpdateNode()
@@ -239,6 +242,8 @@ namespace SpaceEngine.AtmosphericScattering
             Fade = FadeCurve.Evaluate(float.IsNaN(fadeValue) || float.IsInfinity(fadeValue) ? 1.0f : fadeValue);
 
             Keywords = planetoid.GetKeywords();
+
+            SetUniforms(SkyMaterial);
         }
 
         protected override void Awake()
@@ -374,14 +379,11 @@ namespace SpaceEngine.AtmosphericScattering
         {
             if (planetoid != null)
             {
-                InitPlanetoidUniforms(planetoid);
-                SetPlanetoidUniforms(planetoid);
-
                 InitUniforms(SkyMaterial);
-                InitUniforms(planetoid.QuadMPB);
+                InitUniforms(planetoid.MPB);
 
                 SetUniforms(SkyMaterial);
-                SetUniforms(planetoid.QuadMPB);
+                SetUniforms(planetoid.MPB);
 
                 for (byte i = 0; i < Suns.Count; i++)
                 {
@@ -412,9 +414,9 @@ namespace SpaceEngine.AtmosphericScattering
             atmosphereParameters.SCALE = Scale;
         }
 
-        public void TryBake()
+        public void Bake()
         {
-            if (artb != null) artb.Bake(atmosphereParameters);
+            artb.Bake(atmosphereParameters);
 
             EventManager.PlanetoidEvents.OnAtmosphereBaked.Invoke(planetoid, this);
         }
@@ -518,18 +520,6 @@ namespace SpaceEngine.AtmosphericScattering
             block.SetMatrix("_Sky_LightOccluders_1", occludersMatrix1);
         }
 
-        public void SetSuns(MaterialPropertyBlock block)
-        {
-            if (block == null) return;
-
-            block.SetFloat("_Sun_Intensity", 100.0f);
-
-            CalculateSuns(out sunDirectionsMatrix, out sunPositionsMatrix);
-
-            block.SetMatrix("_Sun_WorldDirections_1", sunDirectionsMatrix);
-            block.SetMatrix("_Sun_Positions_1", sunPositionsMatrix);
-        }
-
         public void SetSuns(Material mat)
         {
             if (mat == null) return;
@@ -542,24 +532,28 @@ namespace SpaceEngine.AtmosphericScattering
             mat.SetMatrix("_Sun_Positions_1", sunPositionsMatrix);
         }
 
-        public void Render(Vector3 Origin, int drawLayer = 8)
+        public void SetSuns(MaterialPropertyBlock block)
         {
-            Render(CameraHelper.Main(), Origin, drawLayer);
+            if (block == null) return;
+
+            block.SetFloat("_Sun_Intensity", 100.0f);
+
+            CalculateSuns(out sunDirectionsMatrix, out sunPositionsMatrix);
+
+            block.SetMatrix("_Sun_WorldDirections_1", sunDirectionsMatrix);
+            block.SetMatrix("_Sun_Positions_1", sunPositionsMatrix);
         }
 
-        public void Render(Camera camera, Vector3 Origin, int drawLayer = 8)
+        public void Render()
         {
-            SetUniforms(SkyMaterial);
-            SetUniforms(planetoid.QuadMPB);
-
-            Graphics.DrawMesh(AtmosphereMesh, transform.localToWorldMatrix, SkyMaterial, drawLayer, camera, 0, planetoid.QuadMPB);
+            Graphics.DrawMesh(AtmosphereMesh, transform.localToWorldMatrix, SkyMaterial, planetoid.DrawLayer, CameraHelper.Main(), 0, planetoid.MPB);
         }
 
         public void OnApplicationFocus(bool focusStatus)
         {
             if (focusStatus == true && LostFocusForceRebake == true)
             {
-                TryBake();
+                Bake();
             }
         }
 
@@ -651,40 +645,6 @@ namespace SpaceEngine.AtmosphericScattering
         public void InitMisc()
         {
             Keywords = planetoid.GetKeywords();
-        }
-
-        public void InitPlanetoidUniforms(Planetoid planetoid)
-        {
-            if (planetoid.Atmosphere != null)
-            {
-                for (int i = 0; i < planetoid.Quads.Count; i++)
-                {
-                    if (planetoid.Quads[i] != null)
-                    {
-                        planetoid.Atmosphere.InitUniforms(planetoid.Quads[i].QuadMaterial);
-                    }
-                }
-
-                //Just make sure that all mpb parameters are set.
-                planetoid.Atmosphere.InitUniforms(planetoid.QuadMPB);
-            }
-        }
-
-        public void SetPlanetoidUniforms(Planetoid planetoid)
-        {
-            if (planetoid.Atmosphere != null)
-            {
-                for (int i = 0; i < planetoid.Quads.Count; i++)
-                {
-                    if (planetoid.Quads[i] != null)
-                    {
-                        planetoid.Atmosphere.SetUniforms(planetoid.Quads[i].QuadMaterial);
-                    }
-                }
-
-                //Just make sure that all mpb parameters are set.
-                planetoid.Atmosphere.SetUniforms(planetoid.QuadMPB);
-            }
         }
 
         #region ExtraAPI

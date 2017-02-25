@@ -35,17 +35,17 @@
 #endregion
 
 using SpaceEngine.Core.Terrain;
-using SpaceEngine.Core.Tile.Producer;
 using SpaceEngine.Core.Tile.Samplers;
+
 using System.Collections.Generic;
+using System.Linq;
+
 using UnityEngine;
 
-namespace SpaceEngine.Code.Core.Bodies
+namespace SpaceEngine.Core.Bodies
 {
-    public class CelestialBody : Node<CelestialBody>
+    public class CelestialBody : Node<CelestialBody>, ICelestialBody
     {
-        public float Radius = 2048;
-
         public int GridResolution = 25;
 
         public Mesh QuadMesh;
@@ -55,11 +55,26 @@ namespace SpaceEngine.Code.Core.Bodies
         public List<TerrainNode> TerrainNodes = new List<TerrainNode>(6);
         public List<TileSampler> TileSamplers = new List<TileSampler>();
 
-        public MaterialPropertyBlock MPB;
-
         public double HeightZ = 0;
 
+        public NoiseParametersSetter NPS = null;
+        public TCCommonParametersSetter TCCPS = null;
+
+        #region ICelestialBody
+
+        [SerializeField]
+        private float radius = 2048;
+
+        public float Radius { get { return radius; } set { radius = value; } }
         public Vector3 Origin { get; set; }
+        public MaterialPropertyBlock MPB { get; set; }
+
+        public List<string> GetKeywords()
+        {
+            return new List<string>();
+        }
+
+        #endregion
 
         #region Node
 
@@ -74,6 +89,9 @@ namespace SpaceEngine.Code.Core.Bodies
             MPB = new MaterialPropertyBlock();
 
             Origin = new Vector3(0.0f, 0.0f, Radius);
+
+            if (NPS == null) NPS = GetComponent<NoiseParametersSetter>();
+            NPS.LoadAndInit();
         }
 
         protected override void UpdateNode()
@@ -135,17 +153,8 @@ namespace SpaceEngine.Code.Core.Bodies
         private void DrawTerrain(TerrainNode node)
         {
             // Get all the samplers attached to the terrain node. The samples contain the data need to draw the quad
-            TileSampler[] allSamplers = node.transform.GetComponentsInChildren<TileSampler>();
-            List<TileSampler> samplers = new List<TileSampler>();
-
-            // Only use sample if enabled
-            foreach (var sampler in allSamplers)
-            {
-                if (sampler.enabled && sampler.StoreLeaf)
-                {
-                    samplers.Add(sampler);
-                }
-            }
+            var allSamplers = node.transform.GetComponentsInChildren<TileSampler>();
+            var samplers = allSamplers.Where(sampler => sampler.enabled && sampler.StoreLeaf).ToList();
 
             if (samplers.Count == 0) return;
 
@@ -155,6 +164,21 @@ namespace SpaceEngine.Code.Core.Bodies
             // The draw them
             DrawQuad(node, node.TerrainQuadRoot, samplers);
 
+        }
+
+        private bool FindDrawableSamplers(TerrainQuad quad, List<TileSampler> samplers)
+        {
+            for (short i = 0; i < samplers.Count; ++i)
+            {
+                var producer = samplers[i].Producer;
+
+                if (producer.HasTile(quad.Level, quad.Tx, quad.Ty) && producer.FindTile(quad.Level, quad.Tx, quad.Ty, false, true) == null)
+                {
+                    return true;
+                }
+            }
+
+            return false;
         }
 
         private void FindDrawableQuads(TerrainQuad quad, List<TileSampler> samplers)
@@ -170,66 +194,41 @@ namespace SpaceEngine.Code.Core.Bodies
 
             if (quad.IsLeaf)
             {
-                for (int i = 0; i < samplers.Count; ++i)
-                {
-                    TileProducer p = samplers[i].Producer;
-
-                    int l = quad.Level;
-                    int tx = quad.Tx;
-                    int ty = quad.Ty;
-
-                    if (p.HasTile(l, tx, ty) && p.FindTile(l, tx, ty, false, true) == null)
-                    {
-                        return;
-                    }
-                }
+                if (FindDrawableSamplers(quad, samplers)) return;
             }
             else
             {
-                int nDrawable = 0;
+                byte drawableCount = 0;
 
-                for (int i = 0; i < 4; ++i)
+                for (byte i = 0; i < 4; ++i)
                 {
                     FindDrawableQuads(quad.GetChild(i), samplers);
 
                     if (quad.GetChild(i).Drawable)
                     {
-                        ++nDrawable;
+                        ++drawableCount;
                     }
                 }
 
-                if (nDrawable < 4)
+                if (drawableCount < 4)
                 {
-                    for (int i = 0; i < samplers.Count; ++i)
-                    {
-                        TileProducer p = samplers[i].Producer;
-
-                        int l = quad.Level;
-                        int tx = quad.Tx;
-                        int ty = quad.Ty;
-
-                        if (p.HasTile(l, tx, ty) && p.FindTile(l, tx, ty, false, true) == null)
-                        {
-                            return;
-                        }
-                    }
+                    if (FindDrawableSamplers(quad, samplers)) return;
                 }
             }
 
             quad.Drawable = true;
         }
 
+        private void DrawNode(TerrainNode node)
+        {
+            // TODO : use mesh of appropriate resolution for non-leaf quads
+            Graphics.DrawMesh(QuadMesh, Matrix4x4.identity, node.TerrainMaterial, 0, CameraHelper.Main(), 0, MPB);
+        }
+
         private void DrawQuad(TerrainNode node, TerrainQuad quad, List<TileSampler> samplers)
         {
-            if (!quad.IsVisible)
-            {
-                return;
-            }
-
-            if (!quad.Drawable)
-            {
-                return;
-            }
+            if (!quad.IsVisible) return;
+            if (!quad.Drawable) return;
 
             if (quad.IsLeaf)
             {
@@ -244,22 +243,21 @@ namespace SpaceEngine.Code.Core.Bodies
                 // Set the uniforms unique to each quad
                 node.SetPerQuadUniforms(quad, MPB);
 
-                Graphics.DrawMesh(QuadMesh, Matrix4x4.identity, node.TerrainMaterial, 0, CameraHelper.Main(), 0, MPB);
+                DrawNode(node);
             }
             else
             {
                 // Draw quads in a order based on distance to camera
-                int[] order = new int[4];
+                var order = new byte[4];
 
-                double ox = node.LocalCameraPosition.x;
-                double oy = node.LocalCameraPosition.y;
+                var cameraX = node.LocalCameraPosition.x;
+                var cameraY = node.LocalCameraPosition.y;
+                var quadX = quad.Oy + quad.Length / 2.0;
+                var quadY = quad.Oy + quad.Length / 2.0;
 
-                double cx = quad.Oy + quad.Length / 2.0;
-                double cy = quad.Oy + quad.Length / 2.0;
-
-                if (oy < cy)
+                if (cameraY < quadY)
                 {
-                    if (ox < cx)
+                    if (cameraX < quadX)
                     {
                         order[0] = 0;
                         order[1] = 1;
@@ -276,7 +274,7 @@ namespace SpaceEngine.Code.Core.Bodies
                 }
                 else
                 {
-                    if (ox < cx)
+                    if (cameraX < quadX)
                     {
                         order[0] = 2;
                         order[1] = 0;
@@ -292,9 +290,9 @@ namespace SpaceEngine.Code.Core.Bodies
                     }
                 }
 
-                int done = 0;
+                var done = 0;
 
-                for (int i = 0; i < 4; ++i)
+                for (byte i = 0; i < 4; ++i)
                 {
                     if (quad.GetChild(order[i]).Visibility == Frustum.VISIBILITY.INVISIBLE)
                     {
@@ -324,8 +322,7 @@ namespace SpaceEngine.Code.Core.Bodies
                     // Set the uniforms unique to each quad
                     node.SetPerQuadUniforms(quad, MPB);
 
-                    // TODO : use mesh of appropriate resolution for non-leaf quads
-                    Graphics.DrawMesh(QuadMesh, Matrix4x4.identity, node.TerrainMaterial, 0, CameraHelper.Main(), 0, MPB);
+                    DrawNode(node);
                 }
             }
         }

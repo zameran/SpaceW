@@ -54,7 +54,7 @@ namespace SpaceEngine.Ocean
         /// This is the fourier transform size, must pow2 number. Recommend no higher or lower than 64, 128 or 256.
         /// </summary>
         [SerializeField]
-        int FourierGridSize = 256;
+        int FourierGridSize = 64;
 
         int VarianceSize = 16;
 
@@ -146,36 +146,39 @@ namespace SpaceEngine.Ocean
 
         protected override void UpdateNode()
         {
-            var t = Time.realtimeSinceStartup;
+            if (DrawOcean == true)
+            {
+                var t = Time.realtimeSinceStartup;
 
-            InitWaveSpectrum(t);
+                InitWaveSpectrum(t);
 
-            // Perform fourier transform and record what is the current index
-            IDX = Fourier.PeformFFT(FourierBuffer0, FourierBuffer1, FourierBuffer2);
-            Fourier.PeformFFT(FourierBuffer3, FourierBuffer4);
+                // Perform fourier transform and record what is the current index
+                IDX = Fourier.PeformFFT(FourierBuffer0, FourierBuffer1, FourierBuffer2);
+                Fourier.PeformFFT(FourierBuffer3, FourierBuffer4);
 
-            // Copy the contents of the completed fourier transform to the map textures.
-            // You could just use the buffer textures (FourierBuffer0,1,2,etc) to read from for the ocean shader 
-            // but they need to have mipmaps and unity updates the mipmaps
-            // every time the texture is renderer into. This impacts performance during fourier transform stage as mipmaps would be updated every pass
-            // and there is no way to disable and then enable mipmaps on render textures in Unity at time of writting.
+                // Copy the contents of the completed fourier transform to the map textures.
+                // You could just use the buffer textures (FourierBuffer0,1,2,etc) to read from for the ocean shader 
+                // but they need to have mipmaps and unity updates the mipmaps
+                // every time the texture is renderer into. This impacts performance during fourier transform stage as mipmaps would be updated every pass
+                // and there is no way to disable and then enable mipmaps on render textures in Unity at time of writting.
 
-            Graphics.Blit(FourierBuffer0[IDX], Map0);
-            Graphics.Blit(FourierBuffer1[IDX], Map1);
-            Graphics.Blit(FourierBuffer2[IDX], Map2);
-            Graphics.Blit(FourierBuffer3[IDX], Map3);
-            Graphics.Blit(FourierBuffer4[IDX], Map4);
+                Graphics.Blit(FourierBuffer0[IDX], Map0);
+                Graphics.Blit(FourierBuffer1[IDX], Map1);
+                Graphics.Blit(FourierBuffer2[IDX], Map2);
+                Graphics.Blit(FourierBuffer3[IDX], Map3);
+                Graphics.Blit(FourierBuffer4[IDX], Map4);
 
-            OceanMaterial.SetVector("_Ocean_MapSize", new Vector2(FloatSize, FloatSize));
-            OceanMaterial.SetVector("_Ocean_Choppyness", Choppyness);
-            OceanMaterial.SetVector("_Ocean_GridSizes", GridSizes);
-            OceanMaterial.SetFloat("_Ocean_HeightOffset", OceanLevel);
-            OceanMaterial.SetTexture("_Ocean_Variance", Variance);
-            OceanMaterial.SetTexture("_Ocean_Map0", Map0);
-            OceanMaterial.SetTexture("_Ocean_Map1", Map1);
-            OceanMaterial.SetTexture("_Ocean_Map2", Map2);
-            OceanMaterial.SetTexture("_Ocean_Map3", Map3);
-            OceanMaterial.SetTexture("_Ocean_Map4", Map4);
+                OceanMaterial.SetVector("_Ocean_MapSize", new Vector2(FloatSize, FloatSize));
+                OceanMaterial.SetVector("_Ocean_Choppyness", Choppyness);
+                OceanMaterial.SetVector("_Ocean_GridSizes", GridSizes);
+                OceanMaterial.SetFloat("_Ocean_HeightOffset", OceanLevel);
+                OceanMaterial.SetTexture("_Ocean_Variance", Variance);
+                OceanMaterial.SetTexture("_Ocean_Map0", Map0);
+                OceanMaterial.SetTexture("_Ocean_Map1", Map1);
+                OceanMaterial.SetTexture("_Ocean_Map2", Map2);
+                OceanMaterial.SetTexture("_Ocean_Map3", Map3);
+                OceanMaterial.SetTexture("_Ocean_Map4", Map4);
+            }
 
             base.UpdateNode();
         }

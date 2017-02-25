@@ -1,5 +1,6 @@
-﻿using SpaceEngine.Code.Core.Bodies;
+﻿using SpaceEngine.Core.Bodies;
 using SpaceEngine.Core.Exceptions;
+using SpaceEngine.Core.Noise;
 using SpaceEngine.Core.Storage;
 using SpaceEngine.Core.Terrain;
 using SpaceEngine.Core.Tile.Producer;
@@ -13,9 +14,11 @@ using UnityEngine;
 namespace SpaceEngine.Core
 {
     /// <summary>
-    /// Creates the elevations data for the terrain from perlin noise the noise amps set in the m_noiseAmps array are the amplitude of the noise for that level of the terrain quad.
+    /// Creates the elevations data for the terrain from perlin noise.
+    /// The noise amplitudes set in the <see cref="NoiseAmplitudes"/> array are the amplitude of the noise for that level of the terrain quad.
     /// If the amplitude is a negative number the upsample shader will apply the noise every where, 
-    /// if it is a positive number the noise will only be applied to steep areas and if the amplitude is 0 then the elevations will be upsampled but have no new noise applied.
+    /// if it is a positive number the noise will only be applied to steep areas,
+    /// if the amplitude is 0 then the elevations will be upsampled but have no new noise applied.
     /// </summary>
     public class ElevationProducer : TileProducer
     {
@@ -171,6 +174,7 @@ namespace SpaceEngine.Core
             var rs = level < NoiseAmplitudes.Length ? NoiseAmplitudes[level] : 0.0f;
 
             rs = rs / AmplitudeDiviner;
+            rs = -Math.Abs(rs);
 
             var offset = Vector4d.Zero();
 

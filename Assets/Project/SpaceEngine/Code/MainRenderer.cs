@@ -91,13 +91,13 @@ public sealed class MainRenderer : MonoBehaviour
         for (int i = 0; i < GodManager.Instance.Starfields.Length; i++)
         {
             if (GodManager.Instance.Starfields[i] != null)
-                GodManager.Instance.Starfields[i].Render(CameraHelper.Main());
+                GodManager.Instance.Starfields[i].Render();
         }
 
         for (int i = 0; i < GodManager.Instance.Planetoids.Length; i++)
         {
             if (GodManager.Instance.Planetoids[i] != null)
-                GodManager.Instance.Planetoids[i].Render(CameraHelper.Main());
+                GodManager.Instance.Planetoids[i].Render();
         }
 
         //-----------------------------------------------------------------------------

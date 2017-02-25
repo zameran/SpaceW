@@ -216,7 +216,7 @@ namespace UnityEngine
         {
             var matrix = Matrix4x4.identity;
 
-            for (int iRow = 0; iRow < 4; iRow++)
+            for (byte iRow = 0; iRow < 4; iRow++)
             {
                 matrix.SetRow(iRow, m.GetRow(iRow));
             }
@@ -228,7 +228,7 @@ namespace UnityEngine
         {
             var matrix = Identity();
 
-            for (int iRow = 0; iRow < 4; iRow++)
+            for (byte iRow = 0; iRow < 4; iRow++)
             {
                 matrix.SetRow(iRow, m.GetRow(iRow));
             }

@@ -120,7 +120,7 @@ public class Ring : Node<Ring>, IUniformed<Material>
 
         SetUniforms(RingMaterial);
 
-        if (planetoid != null) SetShadows(planetoid.QuadMPB, planetoid.Shadows);
+        if (planetoid != null) SetShadows(planetoid.MPB, planetoid.Shadows);
     }
 
     protected override void Awake()
@@ -227,14 +227,14 @@ public class Ring : Node<Ring>, IUniformed<Material>
 
     #endregion
 
-    public void Render(Camera camera, int drawLayer = 8)
+    public void Render()
     {
         if (Segments == null) return;
         if (Segments.Count == 0) return;
 
         for (int i = 0; i < Segments.Count; i++)
         {
-            Segments[i].Render(camera, drawLayer);
+            Segments[i].Render();
         }
     }
 

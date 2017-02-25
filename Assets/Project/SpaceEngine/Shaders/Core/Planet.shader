@@ -49,8 +49,6 @@
 			
 			uniform float3 _Globals_WorldCameraPos;
 			
-			uniform float3 _Sun_WorldSunDir;
-			
 			uniform float _Ocean_Sigma;
 			uniform float3 _Ocean_Color;
 			uniform float _Ocean_DrawBRDF;
@@ -64,12 +62,18 @@
 				float3 p : TEXCOORD1;
 			};
 			
-			// returns content of currently selected tile, at uv coordinates (in [0,1]^2; relatively to this tile)
 			float4 texTileLod(sampler2D tile, float2 uv, float3 tileCoords, float3 tileSize) 
 			{
 				uv = tileCoords.xy + uv * tileSize.xy;
 
 				return tex2Dlod(tile, float4(uv, 0, 0));
+			}
+
+			float4 texTile(sampler2D tile, float2 uv, float3 tileCoords, float3 tileSize) 
+			{
+				uv = tileCoords.xy + uv * tileSize.xy;
+
+				return tex2D(tile, uv);
 			}
 
 			v2f vert(appdata_base v)
@@ -83,14 +87,10 @@
 					
 				float2 vert = abs(_Deform_Camera.xy - v.vertex.xy);
 
-				float d = max(max(vert.x, vert.y), _Deform_Camera.z);
-				float _blend = clamp((d - _Deform_Blending.x) / _Deform_Blending.y, 0.0, 1.0);
+				float _blend = clamp((max(max(vert.x, vert.y), _Deform_Camera.z) - _Deform_Blending.x) / _Deform_Blending.y, 0.0, 1.0);
 				
-				float R = _Deform_Radius;
-				float4x4 C = _Deform_ScreenQuadCorners;
-				float4x4 N = _Deform_ScreenQuadVerticals;
 				float4 L = _Deform_ScreenQuadCornerNorms;
-				float3 P = float3(v.vertex.xy * _Deform_Offset.z + _Deform_Offset.xy, R);
+				float3 P = float3(v.vertex.xy * _Deform_Offset.z + _Deform_Offset.xy, _Deform_Radius);
 				
 				float4 uvUV = float4(v.vertex.xy, float2(1.0,1.0) - v.vertex.xy);
 				float4 alpha = uvUV.zxzx * uvUV.wwyy;
@@ -98,14 +98,14 @@
 				
 				float h = zfc.x * (1.0 - _blend) + zfc.y * _blend;
 				float k = min(length(P) / dot(alpha, L) * 1.0000003, 1.0);
-				float hPrime = (h + R * (1.0 - k)) / k;
+				float hPrime = (h + _Deform_Radius * (1.0 - k)) / k;
 				
 				v2f OUT;
 	
 				#ifdef CUBE_PROJECTION
 					OUT.pos = mul(_Deform_LocalToScreen, float4(P + float3(0.0, 0.0, h), 1.0));
 				#else
-					OUT.pos = mul(C + hPrime * N,  alphaPrime);
+					OUT.pos = mul(_Deform_ScreenQuadCorners + hPrime * _Deform_ScreenQuadVerticals,  alphaPrime);
 				#endif
 				
 				OUT.uv = v.texcoord.xy;
@@ -117,17 +117,9 @@
 				return OUT;
 			}
 			
-			float4 texTile(sampler2D tile, float2 uv, float3 tileCoords, float3 tileSize) 
-			{
-				uv = tileCoords.xy + uv * tileSize.xy;
-
-				return tex2D(tile, uv);
-			}
-			
 			float4 frag(v2f IN) : COLOR
 			{		
 				float3 WCP = _Globals_WorldCameraPos;
-				//float3 WSD = _Sun_WorldSunDir;
 				float3 WSD = float3(0.0, -1.0, 0.0);
 				float ht = texTile(_Elevation_Tile, IN.uv, _Elevation_TileCoords, _Elevation_TileSize).x;
 				
