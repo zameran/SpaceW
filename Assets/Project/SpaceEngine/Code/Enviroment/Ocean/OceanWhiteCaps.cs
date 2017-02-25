@@ -62,22 +62,25 @@ namespace SpaceEngine.Ocean
 
         protected override void UpdateNode()
         {
+            if (DrawOcean == true)
+            {
+                Fourier.PeformFFT(FourierBuffer5, FourierBuffer6, FourierBuffer7);
+
+                WhiteCapsPrecomputeMat.SetTexture("_Map5", FourierBuffer5[IDX]);
+                WhiteCapsPrecomputeMat.SetTexture("_Map6", FourierBuffer6[IDX]);
+                WhiteCapsPrecomputeMat.SetTexture("_Map7", FourierBuffer7[IDX]);
+                WhiteCapsPrecomputeMat.SetVector("_Choppyness", Choppyness);
+
+                var buffers = new RenderTexture[] { Foam0, Foam1 };
+
+                RTUtility.MultiTargetBlit(buffers, WhiteCapsPrecomputeMat);
+
+                OceanMaterial.SetFloat("_Ocean_WhiteCapStr", WhiteCapStrength);
+                OceanMaterial.SetTexture("_Ocean_Foam0", Foam0);
+                OceanMaterial.SetTexture("_Ocean_Foam1", Foam1);
+            }
+
             base.UpdateNode();
-
-            Fourier.PeformFFT(FourierBuffer5, FourierBuffer6, FourierBuffer7);
-
-            WhiteCapsPrecomputeMat.SetTexture("_Map5", FourierBuffer5[IDX]);
-            WhiteCapsPrecomputeMat.SetTexture("_Map6", FourierBuffer6[IDX]);
-            WhiteCapsPrecomputeMat.SetTexture("_Map7", FourierBuffer7[IDX]);
-            WhiteCapsPrecomputeMat.SetVector("_Choppyness", Choppyness);
-
-            var buffers = new RenderTexture[] { Foam0, Foam1 };
-
-            RTUtility.MultiTargetBlit(buffers, WhiteCapsPrecomputeMat);
-
-            OceanMaterial.SetFloat("_Ocean_WhiteCapStr", WhiteCapStrength);
-            OceanMaterial.SetTexture("_Ocean_Foam0", Foam0);
-            OceanMaterial.SetTexture("_Ocean_Foam1", Foam1);
         }
 
         protected override void Awake()

@@ -56,7 +56,7 @@ namespace SpaceEngine.Ocean
         /// If the ocean should be draw. To minimize depth fighting the ocean is not draw when the camera is far away. 
         /// Instead the terrain shader should render the ocean areas directly on the terrain
         /// </summary>
-        bool DrawOcean;
+        public bool DrawOcean { get; protected set; }
 
         public Vector3 Origin { get { return planetoid != null ? planetoid.Origin : transform.position; } }
 
