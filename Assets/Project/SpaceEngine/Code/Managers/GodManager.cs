@@ -67,11 +67,11 @@ public class GodManager : MonoSingleton<GodManager>
     public QuadCullingMethod CullingMethod = QuadCullingMethod.Unity;
     public AtmosphereHDR HDRMode = AtmosphereHDR.ProlandOptimized;
 
-    public Matrix4x4d WorldToCamera { get { return View.m_worldToCameraMatrix; } }
-    public Matrix4x4d CameraToWorld { get { return View.m_cameraToWorldMatrix; } }
-    public Matrix4x4d CameraToScreen { get { return View.m_cameraToScreenMatrix; } }
-    public Matrix4x4d ScreenToCamera { get { return View.m_screenToCameraMatrix; } }
-    public Vector3 WorldCameraPos { get { return View.m_worldCameraPos; } }
+    public Matrix4x4d WorldToCamera { get { return View.WorldToCameraMatrix; } }
+    public Matrix4x4d CameraToWorld { get { return View.CameraToWorldMatrix; } }
+    public Matrix4x4d CameraToScreen { get { return View.CameraToScreenMatrix; } }
+    public Matrix4x4d ScreenToCamera { get { return View.ScreenToCameraMatrix; } }
+    public Vector3 WorldCameraPos { get { return View.WorldCameraPosition; } }
 
     public float LODDistanceMultiplier = 2.0f;
 

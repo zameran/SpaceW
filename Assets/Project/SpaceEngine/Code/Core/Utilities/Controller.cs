@@ -90,7 +90,7 @@ namespace SpaceEngine.Core.Utilities
             // NOTE : has not been tested and not currently used
             if (AnimationValue >= 0.0)
             {
-                AnimationValue = View.Interpolate(StartPosition.x0, StartPosition.y0, StartPosition.theta, StartPosition.phi, StartPosition.distance, EndPosition.x0, EndPosition.y0, EndPosition.theta, EndPosition.phi, EndPosition.distance, AnimationValue);
+                AnimationValue = View.Interpolate(StartPosition.X, StartPosition.Y, StartPosition.Theta, StartPosition.Phi, StartPosition.Distance, EndPosition.X, EndPosition.Y, EndPosition.Theta, EndPosition.Phi, EndPosition.Distance, AnimationValue);
 
                 if (Math.Abs(AnimationValue - 1.0) < 0.00001)
                 {
@@ -114,11 +114,11 @@ namespace SpaceEngine.Core.Utilities
 
             if (NearPressed)
             {
-                TargetPosition.distance = TargetPosition.distance / (dzFactor * ZoomSpeed);
+                TargetPosition.Distance = TargetPosition.Distance / (dzFactor * ZoomSpeed);
             }
             else if (FarPressed)
             {
-                TargetPosition.distance = TargetPosition.distance * dzFactor * ZoomSpeed;
+                TargetPosition.Distance = TargetPosition.Distance * dzFactor * ZoomSpeed;
             }
 
             TerrainView.Position position = new TerrainView.Position();
@@ -157,13 +157,13 @@ namespace SpaceEngine.Core.Utilities
                 var x0 = 0.0;
                 var y0 = 0.0;
 
-                View.InterpolatePos(position.x0, position.y0, TargetPosition.x0, TargetPosition.y0, lerp, ref x0, ref y0);
+                View.InterpolatePos(position.X, position.Y, TargetPosition.X, TargetPosition.Y, lerp, ref x0, ref y0);
 
-                position.x0 = x0;
-                position.y0 = y0;
-                position.theta = Mix(position.theta, TargetPosition.theta, lerp);
-                position.phi = Mix(position.phi, TargetPosition.phi, lerp);
-                position.distance = Mix(position.distance, TargetPosition.distance, lerp);
+                position.X = x0;
+                position.Y = y0;
+                position.Theta = Mix(position.Theta, TargetPosition.Theta, lerp);
+                position.Phi = Mix(position.Phi, TargetPosition.Phi, lerp);
+                position.Distance = Mix(position.Distance, TargetPosition.Distance, lerp);
 
                 SetPosition(position);
             }
@@ -181,20 +181,20 @@ namespace SpaceEngine.Core.Utilities
 
         private void GetPosition(TerrainView.Position p)
         {
-            p.x0 = View.GetPos().x0;
-            p.y0 = View.GetPos().y0;
-            p.theta = View.GetPos().theta;
-            p.phi = View.GetPos().phi;
-            p.distance = View.GetPos().distance;
+            p.X = View.position.X;
+            p.Y = View.position.Y;
+            p.Theta = View.position.Theta;
+            p.Phi = View.position.Phi;
+            p.Distance = View.position.Distance;
         }
 
         private void SetPosition(TerrainView.Position p)
         {
-            View.GetPos().x0 = p.x0;
-            View.GetPos().y0 = p.y0;
-            View.GetPos().theta = p.theta;
-            View.GetPos().phi = p.phi;
-            View.GetPos().distance = p.distance;
+            View.position.X = p.X;
+            View.position.Y = p.Y;
+            View.position.Theta = p.Theta;
+            View.position.Phi = p.Phi;
+            View.position.Distance = p.Distance;
 
             AnimationValue = -1.0;
         }
@@ -242,8 +242,8 @@ namespace SpaceEngine.Core.Utilities
         {
             if (Input.GetMouseButton(0) && Input.GetKey(KeyCode.LeftControl))
             {
-                TargetPosition.phi -= Input.GetAxis("Mouse X") * RotateSpeed;
-                TargetPosition.theta += Input.GetAxis("Mouse Y") * RotateSpeed;
+                TargetPosition.Phi -= Input.GetAxis("Mouse X") * RotateSpeed;
+                TargetPosition.Theta += Input.GetAxis("Mouse Y") * RotateSpeed;
             }
             else if (Input.GetMouseButton(0))
             {
@@ -257,8 +257,8 @@ namespace SpaceEngine.Core.Utilities
                 preMousePos.y = PreviousMousePos.y;
                 preMousePos.z = 0.0;
 
-                Vector3d oldPosition = View.m_cameraToWorldMatrix * preMousePos;
-                Vector3d position = View.m_cameraToWorldMatrix * mousePos;
+                Vector3d oldPosition = View.CameraToWorldMatrix * preMousePos;
+                Vector3d position = View.CameraToWorldMatrix * mousePos;
 
                 if (!(double.IsNaN(oldPosition.x) || double.IsNaN(oldPosition.y) || double.IsNaN(oldPosition.z) || double.IsNaN(position.x) || double.IsNaN(position.y) || double.IsNaN(position.z)))
                 {

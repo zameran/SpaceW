@@ -5,9 +5,9 @@ using UnityEngine;
 namespace SpaceEngine.Core.Utilities
 {
     /// <summary>
-    /// A view for flat terrains. The camera position is specified from a "look at" position (<see cref="Position.x0"/>, <see cref="Position.y0"/>) on ground, 
-    /// with a distance <see cref="Position.distance"/> between camera and this position, 
-    /// and two angles (<see cref="Position.theta"/>, <see cref="Position.phi"/>) for the direction of this vector.
+    /// A view for flat terrains. The camera position is specified from a "look at" position (<see cref="Position.X"/>, <see cref="Position.Y"/>) on ground, 
+    /// with a distance <see cref="Position.Distance"/> between camera and this position, 
+    /// and two angles (<see cref="Position.Theta"/>, <see cref="Position.Phi"/>) for the direction of this vector.
     /// </summary>
     [RequireComponent(typeof(Camera))]
     [RequireComponent(typeof(Controller))]
@@ -20,58 +20,58 @@ namespace SpaceEngine.Core.Utilities
             /// The x coordinate of the point the camera is looking at on the ground.
             /// For a planet these are the longtitudes;
             /// </summary>
-            public double x0;
+            public double X;
 
             /// <summary>
             /// The y coordinate of the point the camera is looking at on the ground.
             /// For a planet these are the latitudes;
             /// </summary>
-            public double y0;
+            public double Y;
 
             /// <summary>
             /// The zenith angle of the vector between the "look at" point and the camera.
             /// </summary>
-            public double theta;
+            public double Theta;
 
             /// <summary>
             /// The azimuth angle of the vector between the "look at" point and the camera.
             /// </summary>
-            public double phi;
+            public double Phi;
 
             /// <summary>
             /// The distance between the "look at" point and the camera.
             /// </summary>
-            public double distance;
+            public double Distance;
         };
 
+        private CachedComponent<Camera> CameraCachedComponent = new CachedComponent<Camera>();
+
+        public Camera CameraComponent { get { return CameraCachedComponent.Component; } }
+
         [SerializeField]
-        protected Position m_position;
+        public Position position;
 
-        public Matrix4x4d m_worldToCameraMatrix { get; protected set; }
-        public Matrix4x4d m_cameraToWorldMatrix { get; protected set; }
-        public Matrix4x4d m_cameraToScreenMatrix { get; protected set; }
-        public Matrix4x4d m_screenToCameraMatrix { get; protected set; }
+        public Matrix4x4d WorldToCameraMatrix { get; protected set; }
+        public Matrix4x4d CameraToWorldMatrix { get; protected set; }
+        public Matrix4x4d CameraToScreenMatrix { get; protected set; }
+        public Matrix4x4d ScreenToCameraMatrix { get; protected set; }
 
-        public Vector3d m_worldCameraPos { get; protected set; }
-        public Vector3d m_cameraDir { get; protected set; }
+        public Vector3d WorldCameraPosition { get; protected set; }
+        public Vector3d CameraDirection { get; protected set; }
 
-        protected double m_groundHeight = 0.0;
+        protected double groundHeight = 0.0;
 
-        public Vector3d m_worldPos;
+        [HideInInspector]
+        public Vector3d worldPosition;
 
-        public Position GetPos()
+        public virtual Vector3d GetLookAtPosition()
         {
-            return m_position;
-        }
-
-        public virtual Vector3d GetLookAtPos()
-        {
-            return new Vector3d(m_position.x0, m_position.y0, 0.0);
+            return new Vector3d(position.X, position.Y, 0.0);
         }
 
         public virtual double GetHeight()
         {
-            return m_worldPos.z;
+            return worldPosition.z;
         }
 
         /// <summary>
@@ -79,19 +79,21 @@ namespace SpaceEngine.Core.Utilities
         /// </summary>
         public virtual void Constrain()
         {
-            m_position.theta = Math.Max(0.0001, Math.Min(Math.PI, m_position.theta));
-            m_position.distance = Math.Max(0.1, m_position.distance);
+            position.Theta = Math.Max(0.0001, Math.Min(Math.PI, position.Theta));
+            position.Distance = Math.Max(0.1, position.Distance);
         }
 
         protected virtual void Start()
         {
-            m_worldToCameraMatrix = Matrix4x4d.Identity();
-            m_cameraToWorldMatrix = Matrix4x4d.Identity();
-            m_cameraToScreenMatrix = Matrix4x4d.Identity();
-            m_screenToCameraMatrix = Matrix4x4d.Identity();
-            m_worldCameraPos = new Vector3d();
-            m_cameraDir = new Vector3d();
-            m_worldPos = new Vector3d();
+            CameraCachedComponent.TryInit(this);
+
+            WorldToCameraMatrix = Matrix4x4d.Identity();
+            CameraToWorldMatrix = Matrix4x4d.Identity();
+            CameraToScreenMatrix = Matrix4x4d.Identity();
+            ScreenToCameraMatrix = Matrix4x4d.Identity();
+            WorldCameraPosition = new Vector3d();
+            CameraDirection = new Vector3d();
+            worldPosition = new Vector3d();
 
             Constrain();
         }
@@ -103,80 +105,84 @@ namespace SpaceEngine.Core.Utilities
             SetWorldToCameraMatrix();
             SetProjectionMatrix();
 
-            m_worldCameraPos = m_worldPos;
-            m_cameraDir = (m_worldPos - GetLookAtPos()).Normalized();
+            WorldCameraPosition = worldPosition;
+            CameraDirection = (worldPosition - GetLookAtPosition()).Normalized();
         }
 
         protected virtual void SetWorldToCameraMatrix()
         {
-            Vector3d po = new Vector3d(m_position.x0, m_position.y0, 0.0);
+            Vector3d po = new Vector3d(position.X, position.Y, 0.0);
             Vector3d px = new Vector3d(1.0, 0.0, 0.0);
             Vector3d py = new Vector3d(0.0, 1.0, 0.0);
             Vector3d pz = new Vector3d(0.0, 0.0, 1.0);
 
-            double ct = Math.Cos(m_position.theta);
-            double st = Math.Sin(m_position.theta);
-            double cp = Math.Cos(m_position.phi);
-            double sp = Math.Sin(m_position.phi);
+            // NOTE : ct - x; st - y; cp - z; sp - w;
+            var tp = CalculatelongitudeLatitudeVector(position.Theta, position.Phi);
 
-            Vector3d cx = px * cp + py * sp;
-            Vector3d cy = (px * -1.0) * sp * ct + py * cp * ct + pz * st;
-            Vector3d cz = px * sp * st - py * cp * st + pz * ct;
+            Vector3d cx = px * tp.z + py * tp.w;
+            Vector3d cy = (px * -1.0) * tp.w * tp.x + py * tp.z * tp.x + pz * tp.y;
+            Vector3d cz = px * tp.w * tp.y - py * tp.z * tp.y + pz * tp.x;
 
-            m_worldPos = po + cz * m_position.distance;
+            worldPosition = po + cz * position.Distance;
 
-            if (m_worldPos.z < m_groundHeight + 10.0)
+            if (worldPosition.z < groundHeight + 10.0)
             {
-                m_worldPos.z = m_groundHeight + 10.0;
+                worldPosition.z = groundHeight + 10.0;
             }
 
             Matrix4x4d view = new Matrix4x4d(cx.x, cx.y, cx.z, 0.0, cy.x, cy.y, cy.z, 0.0, cz.x, cz.y, cz.z, 0.0, 0.0, 0.0, 0.0, 1.0);
 
-            m_worldToCameraMatrix = view * Matrix4x4d.Translate(m_worldPos * -1.0);
+            WorldToCameraMatrix = view * Matrix4x4d.Translate(worldPosition * -1.0);
 
-            m_worldToCameraMatrix.m[0, 0] *= -1.0;
-            m_worldToCameraMatrix.m[0, 1] *= -1.0;
-            m_worldToCameraMatrix.m[0, 2] *= -1.0;
-            m_worldToCameraMatrix.m[0, 3] *= -1.0;
+            WorldToCameraMatrix.m[0, 0] *= -1.0;
+            WorldToCameraMatrix.m[0, 1] *= -1.0;
+            WorldToCameraMatrix.m[0, 2] *= -1.0;
+            WorldToCameraMatrix.m[0, 3] *= -1.0;
 
-            m_cameraToWorldMatrix = m_worldToCameraMatrix.Inverse();
+            CameraToWorldMatrix = WorldToCameraMatrix.Inverse();
 
-            GetComponent<Camera>().worldToCameraMatrix = m_worldToCameraMatrix.ToMatrix4x4();
-            GetComponent<Camera>().transform.position = m_worldPos.ToVector3();
+            CameraComponent.worldToCameraMatrix = WorldToCameraMatrix.ToMatrix4x4();
+            CameraComponent.transform.position = worldPosition.ToVector3();
 
         }
 
         protected virtual void SetProjectionMatrix()
         {
-            var h = (float)(GetHeight() - m_groundHeight);
+            var h = (float)(GetHeight() - groundHeight);
 
-            GetComponent<Camera>().nearClipPlane = 0.1f * h;
-            GetComponent<Camera>().farClipPlane = 1e6f * h;
+            CameraComponent.nearClipPlane = 0.1f * h;
+            CameraComponent.farClipPlane = 1e6f * h;
 
-            GetComponent<Camera>().ResetProjectionMatrix();
+            CameraComponent.ResetProjectionMatrix();
 
-            var p = GetComponent<Camera>().projectionMatrix;
-            var d3d = SystemInfo.graphicsDeviceVersion.IndexOf("Direct3D") > -1;
+            var projectionMatrix = CameraComponent.projectionMatrix;
 
-            if (d3d)
+            if (SystemInfo.graphicsDeviceVersion.IndexOf("Direct3D") > -1)
             {
-                if (GetComponent<Camera>().actualRenderingPath == RenderingPath.DeferredLighting)
+                // NOTE : Default unity antialiasing breaks matrices?
+                if (CameraHelper.IsDeferred(CameraComponent) || QualitySettings.antiAliasing == 0)
                 {
+                    // Invert Y for rendering to a render texture
                     for (byte i = 0; i < 4; i++)
                     {
-                        p[1, i] = -p[1, i];
+                        projectionMatrix[1, i] = -projectionMatrix[1, i];
                     }
                 }
 
                 // Scale and bias depth range
                 for (byte i = 0; i < 4; i++)
                 {
-                    p[2, i] = p[2, i] * 0.5f + p[3, i] * 0.5f;
+                    projectionMatrix[2, i] = projectionMatrix[2, i] * 0.5f + projectionMatrix[3, i] * 0.5f;
                 }
             }
 
-            m_cameraToScreenMatrix = new Matrix4x4d(p);
-            m_screenToCameraMatrix = m_cameraToScreenMatrix.Inverse();
+            CameraToScreenMatrix = new Matrix4x4d(projectionMatrix);
+            ScreenToCameraMatrix = CameraToScreenMatrix.Inverse();
+        }
+
+        public Vector4d CalculatelongitudeLatitudeVector(double x, double y)
+        {
+            return new Vector4d(Math.Cos(x), Math.Sin(x), Math.Cos(y), Math.Sin(y));
         }
 
         /// <summary>
@@ -187,30 +193,30 @@ namespace SpaceEngine.Core.Utilities
         /// <param name="speed"></param>
         public virtual void Move(Vector3d oldp, Vector3d p, double speed)
         {
-            m_position.x0 -= (p.x - oldp.x) * speed * Math.Max(1.0, GetHeight());
-            m_position.y0 -= (p.y - oldp.y) * speed * Math.Max(1.0, GetHeight());
+            position.X -= (p.x - oldp.x) * speed * Math.Max(1.0, GetHeight());
+            position.Y -= (p.y - oldp.y) * speed * Math.Max(1.0, GetHeight());
         }
 
         public virtual void MoveForward(double distance)
         {
-            m_position.x0 -= Math.Sin(m_position.phi) * distance;
-            m_position.y0 += Math.Cos(m_position.phi) * distance;
+            position.X -= Math.Sin(position.Phi) * distance;
+            position.Y += Math.Cos(position.Phi) * distance;
         }
 
         public virtual void Turn(double angle)
         {
-            m_position.phi += angle;
+            position.Phi += angle;
         }
 
         public virtual double Interpolate(double sx0, double sy0, double stheta, double sphi, double sd, double dx0, double dy0, double dtheta, double dphi, double dd, double t)
         {
             // TODO : Interpolation
 
-            m_position.x0 = dx0;
-            m_position.y0 = dy0;
-            m_position.theta = dtheta;
-            m_position.phi = dphi;
-            m_position.distance = dd;
+            position.X = dx0;
+            position.Y = dy0;
+            position.Theta = dtheta;
+            position.Phi = dphi;
+            position.Distance = dd;
 
             return 1.0;
         }
