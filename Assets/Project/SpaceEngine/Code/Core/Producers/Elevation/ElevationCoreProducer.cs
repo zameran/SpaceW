@@ -115,6 +115,9 @@ namespace SpaceEngine.Core
             ElevationMaterial.SetVector("_Offset", offset.ToVector4());
             ElevationMaterial.SetMatrix("_LocalToWorld", TerrainNode.FaceToLocal.ToMatrix4x4());
 
+            if (TerrainNode.Body.NPS != null) TerrainNode.Body.NPS.SetUniforms(ElevationMaterial);
+            if (TerrainNode.Body.TCCPS != null) TerrainNode.Body.TCCPS.UpdateUniforms(ElevationMaterial);
+
             Graphics.Blit(null, gpuSlot.Texture, ElevationMaterial);
 
             base.DoCreateTile(level, tx, ty, slot);
