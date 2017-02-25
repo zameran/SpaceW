@@ -33,12 +33,15 @@
 // Creator: zameran
 #endregion
 
+using SpaceEngine.Core.Bodies;
+
 using UnityEngine;
 
 public sealed class TCCommonParametersSetter : MonoBehaviour
 {
     public Planetoid Planet;
     public PatchSphere PatchSphere;
+    public CelestialBody CelestialBody;
 
     public float Lacunarity = 2.218281828459f;
     public float H = 0.5f;

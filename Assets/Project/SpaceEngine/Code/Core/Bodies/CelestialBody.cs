@@ -57,6 +57,9 @@ namespace SpaceEngine.Core.Bodies
 
         public double HeightZ = 0;
 
+        public NoiseParametersSetter NPS = null;
+        public TCCommonParametersSetter TCCPS = null;
+
         #region ICelestialBody
 
         [SerializeField]
@@ -86,6 +89,9 @@ namespace SpaceEngine.Core.Bodies
             MPB = new MaterialPropertyBlock();
 
             Origin = new Vector3(0.0f, 0.0f, Radius);
+
+            if (NPS == null) NPS = GetComponent<NoiseParametersSetter>();
+            NPS.LoadAndInit();
         }
 
         protected override void UpdateNode()

@@ -136,6 +136,7 @@ namespace SpaceEngine.AtmosphericScattering
         public float Radius { get { return planetoid != null ? planetoid.PlanetRadius : 0.0f; } }
 
         #region Eventit
+
         public bool isEventit { get; set; }
 
         public void Eventit()
@@ -161,9 +162,11 @@ namespace SpaceEngine.AtmosphericScattering
 
             isEventit = false;
         }
+
         #endregion
 
         #region Events
+
         private void AtmosphereBasePropertyOnPropertyChanged(object sender, PropertyChangedEventArgs e)
         {
             EventManager.PlanetoidEvents.OnAtmospherePresetChanged.Invoke(planetoid, this);
@@ -204,6 +207,7 @@ namespace SpaceEngine.AtmosphericScattering
             atmosphere.TryBake();
             planetoid.ReSetupQuads();
         }
+
         #endregion
 
         #region Node

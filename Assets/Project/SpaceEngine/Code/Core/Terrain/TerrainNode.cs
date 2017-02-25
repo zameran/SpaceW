@@ -148,7 +148,8 @@ namespace SpaceEngine.Core.Terrain
                 FaceToLocal = Matrix4x4d.Rotate(faces[Face - 1]);
             }
 
-            LocalToWorld = /*Matrix4x4d.ToMatrix4x4d(transform.localToWorldMatrix) * */ FaceToLocal;
+            //LocalToWorld = Matrix4x4d.ToMatrix4x4d(transform.localToWorldMatrix) * FaceToLocal;
+            LocalToWorld = FaceToLocal;
 
             Deformation = new DeformationSpherical(Body.Radius);
 
@@ -157,26 +158,23 @@ namespace SpaceEngine.Core.Terrain
 
         protected override void UpdateNode()
         {
-            LocalToWorld = FaceToLocal;
+            var localToCamera = (Matrix4x4d)GodManager.Instance.WorldToCamera * LocalToWorld;
+            var localToScreen = (Matrix4x4d)GodManager.Instance.CameraToScreen * localToCamera;
+            var invLocalToCamera = localToCamera.Inverse();
 
-            Matrix4x4d localToCamera = (Matrix4x4d)GodManager.Instance.WorldToCamera * LocalToWorld;
-            Matrix4x4d localToScreen = (Matrix4x4d)GodManager.Instance.CameraToScreen * localToCamera;
-            Matrix4x4d invLocalToCamera = localToCamera.Inverse();
-
-            DeformedCameraPosition = invLocalToCamera * (new Vector3d(0));
+            DeformedCameraPosition = invLocalToCamera * Vector3d.zero; // TODO : Really? zero?
             DeformedFrustumPlanes = Frustum.GetFrustumPlanes(localToScreen);
             LocalCameraPosition = Deformation.DeformedToLocal(DeformedCameraPosition);
 
-            Matrix4x4d m = Deformation.LocalToDeformedDifferential(LocalCameraPosition, true);
+            var m = Deformation.LocalToDeformedDifferential(LocalCameraPosition, true);
+
+            var left = DeformedFrustumPlanes[0].XYZ().Normalized();
+            var right = DeformedFrustumPlanes[1].XYZ().Normalized();
+
+            var fov = (float)MathUtility.Safe_Acos(-left.Dot(right));
+
+            SplitDistance = SplitFactor * Screen.width / 1024.0f * Mathf.Tan(40.0f * Mathf.Deg2Rad) / Mathf.Tan(fov / 2.0f);
             DistanceFactor = (float)Math.Max((new Vector3d(m.m[0, 0], m.m[1, 0], m.m[2, 0])).Magnitude(), (new Vector3d(m.m[0, 1], m.m[1, 1], m.m[2, 1])).Magnitude());
-
-            Vector3d left = DeformedFrustumPlanes[0].XYZ().Normalized();
-            Vector3d right = DeformedFrustumPlanes[1].XYZ().Normalized();
-
-            float fov = (float)MathUtility.Safe_Acos(-left.Dot(right));
-            float width = (float)Screen.width;
-
-            SplitDistance = SplitFactor * width / 1024.0f * Mathf.Tan(40.0f * Mathf.Deg2Rad) / Mathf.Tan(fov / 2.0f);
 
             if (SplitDistance < 1.1f || !MathUtility.IsFinite(SplitDistance))
             {
@@ -186,7 +184,7 @@ namespace SpaceEngine.Core.Terrain
             // initializes data structures for horizon occlusion culling
             if (UseHorizonCulling && LocalCameraPosition.z <= TerrainQuadRoot.ZMax)
             {
-                var deformedDirection = invLocalToCamera * (new Vector3d(0, 0, 1));
+                var deformedDirection = invLocalToCamera * Vector3d.forward;
                 var localDirection = (Deformation.DeformedToLocal(deformedDirection) - LocalCameraPosition).XY().Normalized();
 
                 LocalCameraDirection = new Matrix2x2d(localDirection.y, -localDirection.x, -localDirection.x, -localDirection.y);

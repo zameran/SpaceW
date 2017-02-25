@@ -150,13 +150,7 @@ namespace SpaceEngine.Core.Terrain.Deformation
             localToCamera = (Matrix4x4d)GodManager.Instance.WorldToCamera * node.LocalToWorld;
             localToScreen = (Matrix4x4d)GodManager.Instance.CameraToScreen * localToCamera;
 
-            Vector3d localCameraPos = node.LocalCameraPosition;
-            Vector3d worldCamera = (Vector3d)GodManager.Instance.WorldCameraPos;
-
-            Matrix4x4d A = LocalToDeformedDifferential(localCameraPos);
-            Matrix4x4d B = DeformedToTangentFrame(worldCamera);
-
-            Matrix4x4d ltot = B * node.LocalToWorld * A;
+            var ltot = DeformedToTangentFrame((Vector3d)GodManager.Instance.WorldCameraPos) * node.LocalToWorld * LocalToDeformedDifferential(node.LocalCameraPosition);
 
             localToTangent = new Matrix3x3d(ltot.m[0, 0], ltot.m[0, 1], ltot.m[0, 3], ltot.m[1, 0], ltot.m[1, 1], ltot.m[1, 3], ltot.m[3, 0], ltot.m[3, 1], ltot.m[3, 3]);
 
@@ -176,14 +170,13 @@ namespace SpaceEngine.Core.Terrain.Deformation
             var distFactor = (double)node.DistanceFactor;
             var level = quad.Level;
 
-            Vector3d camera = node.LocalCameraPosition;
-            Vector3d c = node.LocalCameraPosition;
+            var camera = node.LocalCameraPosition;
 
-            Matrix3x3d m = localToTangent * (new Matrix3x3d(l, 0.0, ox - c.x, 0.0, l, oy - c.y, 0.0, 0.0, 1.0));
+            var tileToTangent = localToTangent * (new Matrix3x3d(l, 0.0, ox - camera.x, 0.0, l, oy - camera.y, 0.0, 0.0, 1.0));
 
             matPropertyBlock.SetVector(uniforms.offset, new Vector4((float)ox, (float)oy, (float)l, (float)level));
             matPropertyBlock.SetVector(uniforms.camera, new Vector4((float)((camera.x - ox) / l), (float)((camera.y - oy) / l), (float)((camera.z - node.Body.HeightZ) / (l * distFactor)), (float)camera.z));
-            matPropertyBlock.SetMatrix(uniforms.tileToTangent, m.ToMatrix4x4());
+            matPropertyBlock.SetMatrix(uniforms.tileToTangent, tileToTangent.ToMatrix4x4());
 
             SetScreenUniforms(node, quad, matPropertyBlock);
         }
