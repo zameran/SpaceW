@@ -36,10 +36,9 @@
 
 using SpaceEngine.Core.Terrain;
 using SpaceEngine.Core.Tile.Samplers;
-
+using SpaceEngine.Core.Utilities;
 using System.Collections.Generic;
 using System.Linq;
-
 using UnityEngine;
 
 namespace SpaceEngine.Core.Bodies
@@ -80,6 +79,10 @@ namespace SpaceEngine.Core.Bodies
 
         protected override void InitNode()
         {
+            // TODO : AAAAAAAAA CRAZY STUFF!
+            if (GodManager.Instance.View is PlanetView)
+                ((PlanetView)GodManager.Instance.View).Radius = Radius;
+
             QuadMesh = MeshFactory.MakePlane(GridResolution, GridResolution, MeshFactory.PLANE.XY, true, false, false);
             QuadMesh.bounds = new Bounds(Vector3.zero, new Vector3(1e8f, 1e8f, 1e8f));
 

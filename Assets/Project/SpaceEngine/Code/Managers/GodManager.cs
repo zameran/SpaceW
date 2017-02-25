@@ -43,6 +43,9 @@ using ZFramework.Unity.Common.Messenger;
 [ExecutionOrder(-9999)]
 public class GodManager : MonoSingleton<GodManager>
 {
+    public TerrainView View;
+    public Controller Controller;
+
     public Plane[] FrustumPlanes;
     public FrustumPlane[] FrustumPlanesTS;
     public Mesh PrototypeMesh;
@@ -64,11 +67,11 @@ public class GodManager : MonoSingleton<GodManager>
     public QuadCullingMethod CullingMethod = QuadCullingMethod.Unity;
     public AtmosphereHDR HDRMode = AtmosphereHDR.ProlandOptimized;
 
-    public Matrix4x4 WorldToCamera { get; private set; }
-    public Matrix4x4 CameraToWorld { get; private set; }
-    public Matrix4x4 CameraToScreen { get; private set; }
-    public Matrix4x4 ScreenToCamera { get; private set; }
-    public Vector3 WorldCameraPos { get; private set; }
+    public Matrix4x4 WorldToCamera { get { return View.GetWorldToCamera(); } }
+    public Matrix4x4 CameraToWorld { get { return View.GetCameraToWorld(); } }
+    public Matrix4x4 CameraToScreen { get { return View.GetCameraToScreen(); } }
+    public Matrix4x4 ScreenToCamera { get { return View.GetScreenToCamera(); } }
+    public Vector3 WorldCameraPos { get { return View.GetWorldCameraPos(); } }
 
     public float LODDistanceMultiplier = 2.0f;
 
@@ -102,8 +105,8 @@ public class GodManager : MonoSingleton<GodManager>
 
     private void Update()
     {
+        UpdateViewController();
         UpdateSchedular();
-        UpdateViewer();
 
         if (UpdateFrustumPlanesNow)
         {
@@ -120,18 +123,14 @@ public class GodManager : MonoSingleton<GodManager>
         Helper.Destroy(PrototypeMesh);
     }
 
+    private void UpdateViewController()
+    {
+        Controller.UpdateController();
+    }
+
     private void UpdateSchedular()
     {
         Schedular.Instance.Run();
-    }
-
-    private void UpdateViewer()
-    {
-        WorldToCamera = CameraHelper.Main().GetWorldToCamera();
-        CameraToWorld = CameraHelper.Main().GetCameraToWorld();
-        CameraToScreen = CameraHelper.Main().GetCameraToScreen();
-        ScreenToCamera = CameraHelper.Main().GetScreenToCamera();
-        WorldCameraPos = CameraHelper.Main().transform.position;
     }
 
     private void UpdateFrustumPlanes()

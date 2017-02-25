@@ -1,5 +1,4 @@
-﻿//using Proland;
-
+﻿using System;
 
 using UnityEngine;
 
@@ -11,7 +10,6 @@ namespace SpaceEngine.Core.Utilities
     /// </summary>
     public class Controller : MonoBehaviour
     {
-        /*
         [SerializeField]
         double MoveSpeed = 1e-3;
 
@@ -40,7 +38,7 @@ namespace SpaceEngine.Core.Utilities
         bool LeftPressed;
         bool RightPressed;
 
-        bool Initialized;
+        bool Initialized = false;
 
         /// <summary>
         /// The target position manipulated by the user via the mouse and keyboard.
@@ -278,6 +276,5 @@ namespace SpaceEngine.Core.Utilities
 
             PreviousMousePos = new Vector3d(Input.mousePosition);
         }
-        */
     }
 }
