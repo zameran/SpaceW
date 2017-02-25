@@ -112,7 +112,7 @@ public class CubemapCapturer : MonoBehaviour
             }
         }
 
-        planet.Render(renderCamera);
+        planet.Render();
 
         renderCamera.transform.position = transform.position;
 

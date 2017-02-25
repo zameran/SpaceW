@@ -441,12 +441,7 @@ public sealed class Quad : Node<Quad>, IQuad, IUniformed<Material>, IUniformed<C
         return new Bounds(center, size);
     }
 
-    public void Render(int drawLayer = 8)
-    {
-        Render(CameraHelper.Main(), drawLayer);
-    }
-
-    public void Render(Camera camera, int drawLayer = 8)
+    public void Render()
     {
         if (ReadyForDispatch)
         {
@@ -477,7 +472,7 @@ public sealed class Quad : Node<Quad>, IQuad, IUniformed<Material>, IUniformed<C
             TryCull();
 
             if (Visible)
-                Graphics.DrawMesh(QuadMesh, Planetoid.PlanetoidTRS, QuadMaterial, drawLayer, camera, 0, Planetoid.QuadMPB, true, true);
+                Graphics.DrawMesh(QuadMesh, Planetoid.PlanetoidTRS, QuadMaterial, Planetoid.DrawLayer, CameraHelper.Main(), 0, Planetoid.MPB, true, true);
         }
     }
 

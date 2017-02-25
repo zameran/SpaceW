@@ -133,14 +133,9 @@ namespace SpaceEngine.Startfield
 
         #endregion
 
-        public void Render(int drawLayer = 8)
+        public void Render()
         {
-            Render(CameraHelper.Main(), drawLayer);
-        }
-
-        public void Render(Camera camera, int drawLayer = 8)
-        {
-            Graphics.DrawMesh(StarfieldMesh, transform.localToWorldMatrix, StarfieldMaterial, drawLayer, CameraHelper.Main(), 0, null, false, false);
+            Graphics.DrawMesh(StarfieldMesh, transform.localToWorldMatrix, StarfieldMaterial, 0, CameraHelper.Main(), 0, null, false, false);
         }
 
         [ContextMenu("InitMesh")]

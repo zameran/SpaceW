@@ -144,7 +144,7 @@ public sealed class Planetoid : Planet, IPlanet, IReanimateable
 
     public TCCommonParametersSetter tccps;
 
-    public MaterialPropertyBlock QuadMPB;
+    public MaterialPropertyBlock MPB;
 
     public bool WaitOnSplit = false;
     [HideInInspector]
@@ -194,7 +194,7 @@ public sealed class Planetoid : Planet, IPlanet, IReanimateable
                 Ring.planetoid = this;
         }
 
-        QuadMPB = new MaterialPropertyBlock();
+        MPB = new MaterialPropertyBlock();
     }
 
     protected override void Start()
@@ -231,7 +231,7 @@ public sealed class Planetoid : Planet, IPlanet, IReanimateable
             DrawNormals = !DrawNormals;
 
             //NOTE : Update shader variable...
-            QuadMPB.SetFloat("_DrawNormals", DrawNormals ? 1.0f : 0.0f);
+            MPB.SetFloat("_DrawNormals", DrawNormals ? 1.0f : 0.0f);
         }
 
         if (Input.GetKeyDown(KeyCode.F2))
@@ -239,12 +239,12 @@ public sealed class Planetoid : Planet, IPlanet, IReanimateable
             DrawQuadTree = !DrawQuadTree;
 
             //NOTE : Update shader variable...
-            QuadMPB.SetFloat("_DrawQuadTree", DrawQuadTree ? 1.0f : 0.0f);
+            MPB.SetFloat("_DrawQuadTree", DrawQuadTree ? 1.0f : 0.0f);
         }
 
         if (Input.GetKeyDown(KeyCode.F3))
         {
-            if (Atmosphere != null) Atmosphere.TryBake();
+            if (Atmosphere != null) Atmosphere.Bake();
         }
 
         if (Input.GetKeyDown(KeyCode.F4))
@@ -255,7 +255,7 @@ public sealed class Planetoid : Planet, IPlanet, IReanimateable
             }
         }
 
-        if (Atmosphere != null) Atmosphere.SetUniforms(QuadMPB); // TODO : Full? Really?
+        if (Atmosphere != null) Atmosphere.SetUniforms(MPB); // TODO : Full? Really?
 
         if (!ExternalRendering)
         {
@@ -344,7 +344,7 @@ public sealed class Planetoid : Planet, IPlanet, IReanimateable
         }
     }
 
-    public void Render(Camera camera)
+    public void Render()
     {
         if (Quads != null)
         {
@@ -353,7 +353,7 @@ public sealed class Planetoid : Planet, IPlanet, IReanimateable
                 for (int i = 0; i < Quads.Count; i++)
                 {
                     if (Quads[i] != null && Quads[i].gameObject.activeInHierarchy)
-                        Quads[i].Render(camera, DrawLayer);
+                        Quads[i].Render();
                 }
             }
         }
@@ -362,20 +362,20 @@ public sealed class Planetoid : Planet, IPlanet, IReanimateable
         {
             if (AtmosphereEnabled)
             {
-                Atmosphere.Render(camera, Origin, DrawLayer);
+                Atmosphere.Render();
             }
         }
 
         if (Ocean != null)
         {
-            Ocean.Render(camera, Origin, DrawLayer);
+            Ocean.Render();
         }
 
         if (Cloudsphere != null)
         {
             if (CloudsphereEnabled)
             {
-                Cloudsphere.Render(camera, DrawLayer);
+                Cloudsphere.Render();
             }
         }
 
@@ -383,14 +383,9 @@ public sealed class Planetoid : Planet, IPlanet, IReanimateable
         {
             if (RingEnabled)
             {
-                Ring.Render(camera, DrawLayer);
+                Ring.Render();
             }
         }
-    }
-
-    public void Render()
-    {
-        Render(CameraHelper.Main());
     }
 
     public void CheckCutoff()

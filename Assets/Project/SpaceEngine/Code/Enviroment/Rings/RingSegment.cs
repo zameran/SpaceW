@@ -39,7 +39,7 @@ public class RingSegment : MonoBehaviour
 {
     public Ring Ring;
 
-    public void Render(Camera camera, int drawLayer = 8)
+    public void Render()
     {
         if (Ring == null) return;
         if (Ring.RingSegmentMesh == null) return;
@@ -47,7 +47,7 @@ public class RingSegment : MonoBehaviour
 
         var SegmentTRS = Matrix4x4.TRS(Ring.transform.position, transform.rotation, Vector3.one);
 
-        Graphics.DrawMesh(Ring.RingSegmentMesh, SegmentTRS, Ring.RingMaterial, drawLayer, camera);
+        Graphics.DrawMesh(Ring.RingSegmentMesh, SegmentTRS, Ring.RingMaterial, Ring.planetoid.DrawLayer, CameraHelper.Main());
     }
 
     public void UpdateNode(Mesh mesh, Material material, Quaternion rotation)
