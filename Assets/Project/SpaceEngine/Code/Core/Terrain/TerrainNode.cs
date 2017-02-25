@@ -158,8 +158,8 @@ namespace SpaceEngine.Core.Terrain
 
         protected override void UpdateNode()
         {
-            var localToCamera = (Matrix4x4d)GodManager.Instance.WorldToCamera * LocalToWorld;
-            var localToScreen = (Matrix4x4d)GodManager.Instance.CameraToScreen * localToCamera;
+            var localToCamera = GodManager.Instance.WorldToCamera * LocalToWorld;
+            var localToScreen = GodManager.Instance.CameraToScreen * localToCamera;
             var invLocalToCamera = localToCamera.Inverse();
 
             DeformedCameraPosition = invLocalToCamera * Vector3d.zero; // TODO : Really? zero?

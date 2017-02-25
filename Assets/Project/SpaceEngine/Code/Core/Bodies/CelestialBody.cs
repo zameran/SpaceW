@@ -37,8 +37,10 @@
 using SpaceEngine.Core.Terrain;
 using SpaceEngine.Core.Tile.Samplers;
 using SpaceEngine.Core.Utilities;
+
 using System.Collections.Generic;
 using System.Linq;
+
 using UnityEngine;
 
 namespace SpaceEngine.Core.Bodies
@@ -46,6 +48,9 @@ namespace SpaceEngine.Core.Bodies
     public class CelestialBody : Node<CelestialBody>, ICelestialBody
     {
         public int GridResolution = 25;
+
+        public float Amlitude = 32.0f;
+        public float Frequency = 64.0f;
 
         public Mesh QuadMesh;
 
@@ -144,10 +149,10 @@ namespace SpaceEngine.Core.Bodies
         {
             if (mat == null) return;
 
-            mat.SetMatrix("_Globals_WorldToCamera", GodManager.Instance.WorldToCamera);
-            mat.SetMatrix("_Globals_CameraToWorld", GodManager.Instance.CameraToWorld);
-            mat.SetMatrix("_Globals_CameraToScreen", GodManager.Instance.CameraToScreen);
-            mat.SetMatrix("_Globals_ScreenToCamera", GodManager.Instance.ScreenToCamera);
+            mat.SetMatrix("_Globals_WorldToCamera", GodManager.Instance.WorldToCamera.ToMatrix4x4());
+            mat.SetMatrix("_Globals_CameraToWorld", GodManager.Instance.CameraToWorld.ToMatrix4x4());
+            mat.SetMatrix("_Globals_CameraToScreen", GodManager.Instance.CameraToScreen.ToMatrix4x4());
+            mat.SetMatrix("_Globals_ScreenToCamera", GodManager.Instance.ScreenToCamera.ToMatrix4x4());
             mat.SetVector("_Globals_WorldCameraPos", GodManager.Instance.WorldCameraPos);
             mat.SetVector("_Globals_Origin", Origin);
             mat.SetFloat("_Exposure", 0.2f);

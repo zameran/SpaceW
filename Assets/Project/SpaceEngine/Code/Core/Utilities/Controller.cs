@@ -257,8 +257,8 @@ namespace SpaceEngine.Core.Utilities
                 preMousePos.y = PreviousMousePos.y;
                 preMousePos.z = 0.0;
 
-                Vector3d oldPosition = View.GetCameraToWorld() * preMousePos;
-                Vector3d position = View.GetCameraToWorld() * mousePos;
+                Vector3d oldPosition = View.m_cameraToWorldMatrix * preMousePos;
+                Vector3d position = View.m_cameraToWorldMatrix * mousePos;
 
                 if (!(double.IsNaN(oldPosition.x) || double.IsNaN(oldPosition.y) || double.IsNaN(oldPosition.z) || double.IsNaN(position.x) || double.IsNaN(position.y) || double.IsNaN(position.z)))
                 {

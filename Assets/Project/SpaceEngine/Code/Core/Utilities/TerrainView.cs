@@ -47,61 +47,21 @@ namespace SpaceEngine.Core.Utilities
         [SerializeField]
         protected Position m_position;
 
-        protected Matrix4x4d m_worldToCameraMatrix;
-        protected Matrix4x4d m_cameraToWorldMatrix;
-        protected Matrix4x4d m_cameraToScreenMatrix;
-        protected Matrix4x4d m_screenToCameraMatrix;
+        public Matrix4x4d m_worldToCameraMatrix { get; protected set; }
+        public Matrix4x4d m_cameraToWorldMatrix { get; protected set; }
+        public Matrix4x4d m_cameraToScreenMatrix { get; protected set; }
+        public Matrix4x4d m_screenToCameraMatrix { get; protected set; }
 
-        protected Vector3d m_worldCameraPos;
-        protected Vector3d m_cameraDir;
+        public Vector3d m_worldCameraPos { get; protected set; }
+        public Vector3d m_cameraDir { get; protected set; }
 
         protected double m_groundHeight = 0.0;
 
-        protected Vector3d m_worldPos;
-
-        public double GetGroundHeight()
-        {
-            return m_groundHeight;
-        }
-
-        public void SetGroundHeight(double ht)
-        {
-            m_groundHeight = ht;
-        }
+        public Vector3d m_worldPos;
 
         public Position GetPos()
         {
             return m_position;
-        }
-
-        public Matrix4x4d GetWorldToCamera()
-        {
-            return m_worldToCameraMatrix;
-        }
-
-        public Matrix4x4d GetCameraToWorld()
-        {
-            return m_cameraToWorldMatrix;
-        }
-
-        public Matrix4x4d GetCameraToScreen()
-        {
-            return m_cameraToScreenMatrix;
-        }
-
-        public Matrix4x4d GetScreenToCamera()
-        {
-            return m_screenToCameraMatrix;
-        }
-
-        public Vector3d GetWorldCameraPos()
-        {
-            return m_worldCameraPos;
-        }
-
-        public Vector3d GetCameraDir()
-        {
-            return m_cameraDir;
         }
 
         public virtual Vector3d GetLookAtPos()

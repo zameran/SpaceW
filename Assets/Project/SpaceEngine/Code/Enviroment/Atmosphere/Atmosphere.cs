@@ -347,10 +347,10 @@ namespace SpaceEngine.AtmosphericScattering
             if (artb.inscatterT_Read != null) target.SetTexture("_Sky_Inscatter", artb.inscatterT_Read);
             if (artb.irradianceT_Read != null) target.SetTexture("_Sky_Irradiance", artb.irradianceT_Read);
 
-            target.SetMatrix("_Globals_WorldToCamera", GodManager.Instance.WorldToCamera);
-            target.SetMatrix("_Globals_CameraToWorld", GodManager.Instance.CameraToWorld);
-            target.SetMatrix("_Globals_CameraToScreen", GodManager.Instance.CameraToScreen);
-            target.SetMatrix("_Globals_ScreenToCamera", GodManager.Instance.ScreenToCamera);
+            target.SetMatrix("_Globals_WorldToCamera", GodManager.Instance.WorldToCamera.ToMatrix4x4());
+            target.SetMatrix("_Globals_CameraToWorld", GodManager.Instance.CameraToWorld.ToMatrix4x4());
+            target.SetMatrix("_Globals_CameraToScreen", GodManager.Instance.CameraToScreen.ToMatrix4x4());
+            target.SetMatrix("_Globals_ScreenToCamera", GodManager.Instance.ScreenToCamera.ToMatrix4x4());
             target.SetVector("_Globals_WorldCameraPos", GodManager.Instance.WorldCameraPos);
             target.SetVector("_Globals_WorldCameraPos_Offsetted", GodManager.Instance.WorldCameraPos - Origin);
             target.SetVector("_Globals_Origin", -Origin);
