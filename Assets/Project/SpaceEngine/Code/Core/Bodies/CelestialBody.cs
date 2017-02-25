@@ -104,6 +104,9 @@ namespace SpaceEngine.Core.Bodies
 
         protected override void UpdateNode()
         {
+            // NOTE : Update controller and the draw. This can help avoid terrain nodes jitter...
+            GodManager.Instance.Controller.UpdateController();
+
             foreach (var tileSampler in TileSamplers)
             {
                 if (Helper.Enabled(tileSampler))

@@ -105,7 +105,6 @@ public class GodManager : MonoSingleton<GodManager>
 
     private void Update()
     {
-        UpdateViewController();
         UpdateSchedular();
 
         if (UpdateFrustumPlanesNow)
@@ -121,11 +120,6 @@ public class GodManager : MonoSingleton<GodManager>
         base.OnDestroy();
 
         Helper.Destroy(PrototypeMesh);
-    }
-
-    private void UpdateViewController()
-    {
-        Controller.UpdateController();
     }
 
     private void UpdateSchedular()
