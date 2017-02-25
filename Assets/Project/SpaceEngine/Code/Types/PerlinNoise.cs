@@ -25,6 +25,7 @@
 
 namespace UnityEngine
 {
+    // TODO : Move to Core.Noise
     public class PerlinNoise
     {
         const int B = 256;

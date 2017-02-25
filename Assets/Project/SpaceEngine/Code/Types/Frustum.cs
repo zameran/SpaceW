@@ -40,42 +40,42 @@ namespace UnityEngine
             var frustumPlanes = new Vector4d[6];
 
             // Extract the LEFT plane
-            frustumPlanes[0] = new Vector4d();
+            frustumPlanes[0] = Vector4d.zero;
             frustumPlanes[0].x = mat.m[3, 0] + mat.m[0, 0];
             frustumPlanes[0].y = mat.m[3, 1] + mat.m[0, 1];
             frustumPlanes[0].z = mat.m[3, 2] + mat.m[0, 2];
             frustumPlanes[0].w = mat.m[3, 3] + mat.m[0, 3];
 
             // Extract the RIGHT plane
-            frustumPlanes[1] = new Vector4d();
+            frustumPlanes[1] = Vector4d.zero;
             frustumPlanes[1].x = mat.m[3, 0] - mat.m[0, 0];
             frustumPlanes[1].y = mat.m[3, 1] - mat.m[0, 1];
             frustumPlanes[1].z = mat.m[3, 2] - mat.m[0, 2];
             frustumPlanes[1].w = mat.m[3, 3] - mat.m[0, 3];
 
             // Extract the BOTTOM plane
-            frustumPlanes[2] = new Vector4d();
+            frustumPlanes[2] = Vector4d.zero;
             frustumPlanes[2].x = mat.m[3, 0] + mat.m[1, 0];
             frustumPlanes[2].y = mat.m[3, 1] + mat.m[1, 1];
             frustumPlanes[2].z = mat.m[3, 2] + mat.m[1, 2];
             frustumPlanes[2].w = mat.m[3, 3] + mat.m[1, 3];
 
             // Extract the TOP plane
-            frustumPlanes[3] = new Vector4d();
+            frustumPlanes[3] = Vector4d.zero;
             frustumPlanes[3].x = mat.m[3, 0] - mat.m[1, 0];
             frustumPlanes[3].y = mat.m[3, 1] - mat.m[1, 1];
             frustumPlanes[3].z = mat.m[3, 2] - mat.m[1, 2];
             frustumPlanes[3].w = mat.m[3, 3] - mat.m[1, 3];
 
             // Extract the NEAR plane
-            frustumPlanes[4] = new Vector4d();
+            frustumPlanes[4] = Vector4d.zero;
             frustumPlanes[4].x = mat.m[3, 0] + mat.m[2, 0];
             frustumPlanes[4].y = mat.m[3, 1] + mat.m[2, 1];
             frustumPlanes[4].z = mat.m[3, 2] + mat.m[2, 2];
             frustumPlanes[4].w = mat.m[3, 3] + mat.m[2, 3];
 
             // Extract the FAR plane
-            frustumPlanes[5] = new Vector4d();
+            frustumPlanes[5] = Vector4d.zero;
             frustumPlanes[5].x = mat.m[3, 0] - mat.m[2, 0];
             frustumPlanes[5].y = mat.m[3, 1] - mat.m[2, 1];
             frustumPlanes[5].z = mat.m[3, 2] - mat.m[2, 2];
@@ -90,42 +90,42 @@ namespace UnityEngine
             var frustumPlanes = new Vector4d[6];
 
             // Extract the LEFT plane 
-            frustumPlanes[0] = new Vector4d();
+            frustumPlanes[0] = Vector4d.zero;
             frustumPlanes[0].x = mat.m30 + mat.m00;
             frustumPlanes[0].y = mat.m31 + mat.m01;
             frustumPlanes[0].z = mat.m32 + mat.m02;
             frustumPlanes[0].w = mat.m33 + mat.m03;
 
             // Extract the RIGHT plane 
-            frustumPlanes[1] = new Vector4d();
+            frustumPlanes[1] = Vector4d.zero;
             frustumPlanes[1].x = mat.m30 - mat.m00;
             frustumPlanes[1].y = mat.m31 - mat.m01;
             frustumPlanes[1].z = mat.m32 - mat.m02;
             frustumPlanes[1].w = mat.m33 - mat.m03;
 
             // Extract the BOTTOM plane 
-            frustumPlanes[2] = new Vector4d();
+            frustumPlanes[2] = Vector4d.zero;
             frustumPlanes[2].x = mat.m30 + mat.m10;
             frustumPlanes[2].y = mat.m31 + mat.m11;
             frustumPlanes[2].z = mat.m32 + mat.m12;
             frustumPlanes[2].w = mat.m33 + mat.m13;
 
             // Extract the TOP plane 
-            frustumPlanes[3] = new Vector4d();
+            frustumPlanes[3] = Vector4d.zero;
             frustumPlanes[3].x = mat.m30 - mat.m10;
             frustumPlanes[3].y = mat.m31 - mat.m11;
             frustumPlanes[3].z = mat.m32 - mat.m12;
             frustumPlanes[3].w = mat.m33 - mat.m13;
 
             // Extract the NEAR plane 
-            frustumPlanes[4] = new Vector4d();
+            frustumPlanes[4] = Vector4d.zero;
             frustumPlanes[4].x = mat.m30 + mat.m20;
             frustumPlanes[4].y = mat.m31 + mat.m21;
             frustumPlanes[4].z = mat.m32 + mat.m22;
             frustumPlanes[4].w = mat.m33 + mat.m23;
 
             // Extract the FAR plane 
-            frustumPlanes[5] = new Vector4d();
+            frustumPlanes[5] = Vector4d.zero;
             frustumPlanes[5].x = mat.m30 - mat.m20;
             frustumPlanes[5].y = mat.m31 - mat.m21;
             frustumPlanes[5].z = mat.m32 - mat.m22;

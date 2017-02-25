@@ -25,39 +25,27 @@
 
 namespace UnityEngine
 {
-    public class Matrix2x2d
+    public struct Matrix2x2d
     {
-        public double[,] m = new double[2, 2];
-
-        public Matrix2x2d()
-        {
-        }
+        public double[,] m;
 
         public Matrix2x2d(double m00, double m01, double m10, double m11)
         {
+            m = new double[2, 2];
+
             m[0, 0] = m00;
             m[0, 1] = m01;
             m[1, 0] = m10;
             m[1, 1] = m11;
         }
 
-        public Matrix2x2d(double[,] m)
-        {
-            System.Array.Copy(m, this.m, 4);
-        }
-
-        public Matrix2x2d(Matrix2x2d m)
-        {
-            System.Array.Copy(m.m, this.m, 4);
-        }
-
         public static Matrix2x2d operator +(Matrix2x2d m1, Matrix2x2d m2)
         {
-            var kSum = new Matrix2x2d();
+            var kSum = Matrix2x2d.identity;
 
-            for (int iRow = 0; iRow < 2; iRow++)
+            for (byte iRow = 0; iRow < 2; iRow++)
             {
-                for (int iCol = 0; iCol < 2; iCol++)
+                for (byte iCol = 0; iCol < 2; iCol++)
                 {
                     kSum.m[iRow, iCol] = m1.m[iRow, iCol] + m2.m[iRow, iCol];
                 }
@@ -68,11 +56,11 @@ namespace UnityEngine
 
         public static Matrix2x2d operator -(Matrix2x2d m1, Matrix2x2d m2)
         {
-            var kSum = new Matrix2x2d();
+            var kSum = Matrix2x2d.identity;
 
-            for (int iRow = 0; iRow < 2; iRow++)
+            for (byte iRow = 0; iRow < 2; iRow++)
             {
-                for (int iCol = 0; iCol < 2; iCol++)
+                for (byte iCol = 0; iCol < 2; iCol++)
                 {
                     kSum.m[iRow, iCol] = m1.m[iRow, iCol] - m2.m[iRow, iCol];
                 }
@@ -83,11 +71,11 @@ namespace UnityEngine
 
         public static Matrix2x2d operator *(Matrix2x2d m1, Matrix2x2d m2)
         {
-            var kProd = new Matrix2x2d();
+            var kProd = Matrix2x2d.identity;
 
-            for (int iRow = 0; iRow < 2; iRow++)
+            for (byte iRow = 0; iRow < 2; iRow++)
             {
-                for (int iCol = 0; iCol < 2; iCol++)
+                for (byte iCol = 0; iCol < 2; iCol++)
                 {
                     kProd.m[iRow, iCol] = m1.m[iRow, 0] * m2.m[0, iCol] + m1.m[iRow, 1] * m2.m[1, iCol];
                 }
@@ -98,7 +86,7 @@ namespace UnityEngine
 
         public static Vector2d operator *(Matrix2x2d m, Vector2d v)
         {
-            var kProd = new Vector2d();
+            var kProd = Vector2d.zero;
 
             kProd.x = m.m[0, 0] * v.x + m.m[0, 1] * v.y;
             kProd.y = m.m[1, 0] * v.x + m.m[1, 1] * v.y;
@@ -108,11 +96,11 @@ namespace UnityEngine
 
         public static Matrix2x2d operator *(Matrix2x2d m, double s)
         {
-            var kProd = new Matrix2x2d();
+            var kProd = Matrix2x2d.identity;
 
-            for (int iRow = 0; iRow < 2; iRow++)
+            for (byte iRow = 0; iRow < 2; iRow++)
             {
-                for (int iCol = 0; iCol < 2; iCol++)
+                for (byte iCol = 0; iCol < 2; iCol++)
                 {
                     kProd.m[iRow, iCol] = m.m[iRow, iCol] * s;
                 }
@@ -128,11 +116,11 @@ namespace UnityEngine
 
         public Matrix2x2d Transpose()
         {
-            var kTranspose = new Matrix2x2d();
+            var kTranspose = Matrix2x2d.identity;
 
-            for (int iRow = 0; iRow < 2; iRow++)
+            for (byte iRow = 0; iRow < 2; iRow++)
             {
-                for (int iCol = 0; iCol < 2; iCol++)
+                for (byte iCol = 0; iCol < 2; iCol++)
                 {
                     kTranspose.m[iRow, iCol] = m[iCol, iRow];
                 }
@@ -146,8 +134,7 @@ namespace UnityEngine
             return m[0, 0] * m[1, 1] - m[1, 0] * m[0, 1];
         }
 
-        //public bool Inverse(ref Matrix2x2d mInv, double tolerance = 1e-06)
-        public bool Inverse(ref Matrix2x2d mInv, double tolerance)
+        public bool Inverse(ref Matrix2x2d mInv, double tolerance = 1e-06)
         {
             var det = Determinant();
 
@@ -166,19 +153,15 @@ namespace UnityEngine
             return true;
         }
 
-        //public Matrix2x2d Inverse(double tolerance = 1e-06)
-        public Matrix2x2d Inverse(double tolerance)
+        public Matrix2x2d Inverse(double tolerance = 1e-06)
         {
-            var kInverse = new Matrix2x2d();
+            var kInverse = Matrix2x2d.identity;
 
             Inverse(ref kInverse, tolerance);
 
             return kInverse;
         }
 
-        public static Matrix2x2d Identity()
-        {
-            return new Matrix2x2d(1, 0, 0, 1);
-        }
+        public static Matrix2x2d identity { get { return new Matrix2x2d(1, 0, 0, 1); } }
     }
 }

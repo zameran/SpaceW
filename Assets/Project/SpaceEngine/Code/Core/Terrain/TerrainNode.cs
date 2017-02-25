@@ -139,7 +139,7 @@ namespace SpaceEngine.Core.Terrain
 
             var faces = new Vector3d[] { new Vector3d(0, 0, 0), new Vector3d(90, 0, 0), new Vector3d(90, 90, 0), new Vector3d(90, 180, 0), new Vector3d(90, 270, 0), new Vector3d(0, 180, 180) };
 
-            FaceToLocal = Matrix4x4d.Identity();
+            FaceToLocal = Matrix4x4d.identity;
 
             // If this terrain is deformed into a sphere the face matrix is the rotation of the 
             // terrain needed to make up the spherical planet. In this case there should be 6 terrains, each with a unique face number

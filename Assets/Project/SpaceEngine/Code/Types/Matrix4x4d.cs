@@ -27,13 +27,9 @@ namespace UnityEngine
 {
 #pragma warning disable 660, 661
 
-    public class Matrix4x4d
+    public struct Matrix4x4d
     {
-        public double[,] m = new double[4, 4];
-
-        public Matrix4x4d()
-        {
-        }
+        public double[,] m;
 
         public Matrix4x4d(double m00,
             double m01,
@@ -52,6 +48,8 @@ namespace UnityEngine
             double m32,
             double m33)
         {
+            m = new double[4, 4];
+
             m[0, 0] = m00;
             m[0, 1] = m01;
             m[0, 2] = m02;
@@ -72,6 +70,8 @@ namespace UnityEngine
 
         public Matrix4x4d(Matrix4x4 mat)
         {
+            m = new double[4, 4];
+
             m[0, 0] = mat.m00;
             m[0, 1] = mat.m01;
             m[0, 2] = mat.m02;
@@ -90,23 +90,13 @@ namespace UnityEngine
             m[3, 3] = mat.m33;
         }
 
-        public Matrix4x4d(double[,] m)
-        {
-            System.Array.Copy(m, this.m, 16);
-        }
-
-        public Matrix4x4d(Matrix4x4d m)
-        {
-            System.Array.Copy(m.m, this.m, 16);
-        }
-
         public static Matrix4x4d operator +(Matrix4x4d m1, Matrix4x4d m2)
         {
-            var kSum = new Matrix4x4d();
+            var kSum = Matrix4x4d.identity;
 
-            for (int iRow = 0; iRow < 4; iRow++)
+            for (byte iRow = 0; iRow < 4; iRow++)
             {
-                for (int iCol = 0; iCol < 4; iCol++)
+                for (byte iCol = 0; iCol < 4; iCol++)
                 {
                     kSum.m[iRow, iCol] = m1.m[iRow, iCol] + m2.m[iRow, iCol];
                 }
@@ -117,11 +107,11 @@ namespace UnityEngine
 
         public static Matrix4x4d operator -(Matrix4x4d m1, Matrix4x4d m2)
         {
-            var kSum = new Matrix4x4d();
+            var kSum = Matrix4x4d.identity;
 
-            for (int iRow = 0; iRow < 4; iRow++)
+            for (byte iRow = 0; iRow < 4; iRow++)
             {
-                for (int iCol = 0; iCol < 4; iCol++)
+                for (byte iCol = 0; iCol < 4; iCol++)
                 {
                     kSum.m[iRow, iCol] = m1.m[iRow, iCol] - m2.m[iRow, iCol];
                 }
@@ -132,13 +122,12 @@ namespace UnityEngine
 
         public static Matrix4x4d operator *(Matrix4x4d m1, Matrix4x4d m2)
         {
-            var kProd = new Matrix4x4d();
+            var kProd = Matrix4x4d.identity;
 
-            for (int iRow = 0; iRow < 4; iRow++)
+            for (byte iRow = 0; iRow < 4; iRow++)
             {
-                for (int iCol = 0; iCol < 4; iCol++)
+                for (byte iCol = 0; iCol < 4; iCol++)
                 {
-
                     kProd.m[iRow, iCol] = m1.m[iRow, 0] * m2.m[0, iCol] + m1.m[iRow, 1] * m2.m[1, iCol] + m1.m[iRow, 2] * m2.m[2, iCol] + m1.m[iRow, 3] * m2.m[3, iCol];
                 }
             }
@@ -173,11 +162,11 @@ namespace UnityEngine
 
         public static Matrix4x4d operator *(Matrix4x4d m, double s)
         {
-            Matrix4x4d kProd = new Matrix4x4d();
+            var kProd = Matrix4x4d.identity;
 
-            for (int iRow = 0; iRow < 4; iRow++)
+            for (byte iRow = 0; iRow < 4; iRow++)
             {
-                for (int iCol = 0; iCol < 4; iCol++)
+                for (byte iCol = 0; iCol < 4; iCol++)
                 {
                     kProd.m[iRow, iCol] = m.m[iRow, iCol] * s;
                 }
@@ -188,9 +177,9 @@ namespace UnityEngine
 
         public static bool operator ==(Matrix4x4d m1, Matrix4x4d m2)
         {
-            for (int iRow = 0; iRow < 4; iRow++)
+            for (byte iRow = 0; iRow < 4; iRow++)
             {
-                for (int iCol = 0; iCol < 4; iCol++)
+                for (byte iCol = 0; iCol < 4; iCol++)
                 {
                     if (m1.m[iRow, iCol] != m2.m[iRow, iCol]) return false;
                 }
@@ -201,9 +190,9 @@ namespace UnityEngine
 
         public static bool operator !=(Matrix4x4d m1, Matrix4x4d m2)
         {
-            for (int iRow = 0; iRow < 4; iRow++)
+            for (byte iRow = 0; iRow < 4; iRow++)
             {
-                for (int iCol = 0; iCol < 4; iCol++)
+                for (byte iCol = 0; iCol < 4; iCol++)
                 {
                     if (m1.m[iRow, iCol] != m2.m[iRow, iCol]) return true;
                 }
@@ -226,7 +215,7 @@ namespace UnityEngine
 
         public static implicit operator Matrix4x4d(Matrix4x4 m)
         {
-            var matrix = Identity();
+            var matrix = Matrix4x4d.identity;
 
             for (byte iRow = 0; iRow < 4; iRow++)
             {
@@ -239,17 +228,17 @@ namespace UnityEngine
 
         public override string ToString()
         {
-            return m[0, 0] + "," + m[0, 1] + "," + m[0, 2] + "," + m[0, 3] + "\n" + m[1, 0] + "," + m[1, 1] + "," + m[1, 2] + "," + m[1, 3] + "\n" + m[2, 0] + "," + m[2, 1] +
-                   "," + m[2, 2] + "," + m[2, 3] + "\n" + m[3, 0] + "," + m[3, 1] + "," + m[3, 2] + "," + m[3, 3];
+            return m[0, 0] + "," + m[0, 1] + "," + m[0, 2] + "," + m[0, 3] + "\n" + m[1, 0] + "," + m[1, 1] + "," + m[1, 2] + "," + m[1, 3] + "\n" + m[2, 0] + "," + m[2, 1] + "," + m[2, 2] + "," +
+                   m[2, 3] + "\n" + m[3, 0] + "," + m[3, 1] + "," + m[3, 2] + "," + m[3, 3];
         }
 
         public Matrix4x4d Transpose()
         {
-            var kTranspose = new Matrix4x4d();
+            var kTranspose = Matrix4x4d.identity;
 
-            for (int iRow = 0; iRow < 4; iRow++)
+            for (byte iRow = 0; iRow < 4; iRow++)
             {
-                for (int iCol = 0; iCol < 4; iCol++)
+                for (byte iCol = 0; iCol < 4; iCol++)
                 {
                     kTranspose.m[iRow, iCol] = m[iCol, iRow];
                 }
@@ -271,9 +260,9 @@ namespace UnityEngine
 
         private Matrix4x4d Adjoint()
         {
-            return new Matrix4x4d(MINOR(1, 2, 3, 1, 2, 3), -MINOR(0, 2, 3, 1, 2, 3), MINOR(0, 1, 3, 1, 2, 3), -MINOR(0, 1, 2, 1, 2, 3), -MINOR(1, 2, 3, 0, 2, 3),
-                MINOR(0, 2, 3, 0, 2, 3), -MINOR(0, 1, 3, 0, 2, 3), MINOR(0, 1, 2, 0, 2, 3), MINOR(1, 2, 3, 0, 1, 3), -MINOR(0, 2, 3, 0, 1, 3), MINOR(0, 1, 3, 0, 1, 3),
-                -MINOR(0, 1, 2, 0, 1, 3), -MINOR(1, 2, 3, 0, 1, 2), MINOR(0, 2, 3, 0, 1, 2), -MINOR(0, 1, 3, 0, 1, 2), MINOR(0, 1, 2, 0, 1, 2));
+            return new Matrix4x4d(MINOR(1, 2, 3, 1, 2, 3), -MINOR(0, 2, 3, 1, 2, 3), MINOR(0, 1, 3, 1, 2, 3), -MINOR(0, 1, 2, 1, 2, 3), -MINOR(1, 2, 3, 0, 2, 3), MINOR(0, 2, 3, 0, 2, 3),
+                -MINOR(0, 1, 3, 0, 2, 3), MINOR(0, 1, 2, 0, 2, 3), MINOR(1, 2, 3, 0, 1, 3), -MINOR(0, 2, 3, 0, 1, 3), MINOR(0, 1, 3, 0, 1, 3), -MINOR(0, 1, 2, 0, 1, 3), -MINOR(1, 2, 3, 0, 1, 2),
+                MINOR(0, 2, 3, 0, 1, 2), -MINOR(0, 1, 3, 0, 1, 2), MINOR(0, 1, 2, 0, 1, 2));
         }
 
         public Matrix4x4d Inverse()
@@ -335,7 +324,7 @@ namespace UnityEngine
 
         public Matrix3x3d ToMatrix3x3d()
         {
-            var mat = new Matrix3x3d();
+            var mat = Matrix3x3d.identity;
 
             mat.m[0, 0] = m[0, 0];
             mat.m[0, 1] = m[0, 1];
@@ -352,7 +341,7 @@ namespace UnityEngine
 
         public static Matrix4x4d ToMatrix4x4d(Matrix4x4 matf)
         {
-            var mat = new Matrix4x4d();
+            var mat = Matrix4x4d.identity;
 
             mat.m[0, 0] = matf.m00;
             mat.m[0, 1] = matf.m01;
@@ -452,9 +441,6 @@ namespace UnityEngine
             return new Matrix4x4d(2.0 / (xRight - xLeft), 0, 0, tx, 0, 2.0 / (yTop - yBottom), 0, ty, 0, 0, -2.0 / (zFar - zNear), tz, 0, 0, 0, 1);
         }
 
-        public static Matrix4x4d Identity()
-        {
-            return new Matrix4x4d(1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1);
-        }
+        public static Matrix4x4d identity { get { return new Matrix4x4d(1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1); } }
     }
 }

@@ -44,9 +44,9 @@ namespace SpaceEngine.Core.Terrain.Deformation
         public DeformationBase()
         {
             uniforms = new Uniforms();
-            localToCamera = new Matrix4x4d();
-            localToScreen = new Matrix4x4d();
-            localToTangent = new Matrix3x3d();
+            localToCamera = Matrix4x4d.identity;
+            localToScreen = Matrix4x4d.identity;
+            localToTangent = Matrix3x3d.identity;
         }
 
         /// <summary>
@@ -172,7 +172,7 @@ namespace SpaceEngine.Core.Terrain.Deformation
 
             var camera = node.LocalCameraPosition;
 
-            var tileToTangent = localToTangent * (new Matrix3x3d(l, 0.0, ox - camera.x, 0.0, l, oy - camera.y, 0.0, 0.0, 1.0));
+            var tileToTangent = localToTangent * new Matrix3x3d(l, 0.0, ox - camera.x, 0.0, l, oy - camera.y, 0.0, 0.0, 1.0);
 
             matPropertyBlock.SetVector(uniforms.offset, new Vector4((float)ox, (float)oy, (float)l, (float)level));
             matPropertyBlock.SetVector(uniforms.camera, new Vector4((float)((camera.x - ox) / l), (float)((camera.y - oy) / l), (float)((camera.z - node.Body.HeightZ) / (l * distFactor)), (float)camera.z));

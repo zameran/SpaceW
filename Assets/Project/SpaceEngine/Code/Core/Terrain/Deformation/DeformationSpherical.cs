@@ -33,7 +33,7 @@ namespace SpaceEngine.Core.Terrain.Deformation
         {
             if (!MathUtility.IsFinite(localPoint.x) || !MathUtility.IsFinite(localPoint.y) || !MathUtility.IsFinite(localPoint.z))
             {
-                return Matrix4x4d.Identity();
+                return Matrix4x4d.identity;
             }
 
             var point = new Vector3d(localPoint);

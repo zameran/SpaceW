@@ -87,13 +87,13 @@ namespace SpaceEngine.Core.Utilities
         {
             CameraCachedComponent.TryInit(this);
 
-            WorldToCameraMatrix = Matrix4x4d.Identity();
-            CameraToWorldMatrix = Matrix4x4d.Identity();
-            CameraToScreenMatrix = Matrix4x4d.Identity();
-            ScreenToCameraMatrix = Matrix4x4d.Identity();
-            WorldCameraPosition = new Vector3d();
-            CameraDirection = new Vector3d();
-            worldPosition = new Vector3d();
+            WorldToCameraMatrix = Matrix4x4d.identity;
+            CameraToWorldMatrix = Matrix4x4d.identity;
+            CameraToScreenMatrix = Matrix4x4d.identity;
+            ScreenToCameraMatrix = Matrix4x4d.identity;
+            WorldCameraPosition = Vector3d.zero;
+            CameraDirection = Vector3d.zero;
+            worldPosition = Vector3d.zero;
 
             Constrain();
         }

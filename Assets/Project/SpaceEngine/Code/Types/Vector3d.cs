@@ -205,12 +205,11 @@ namespace UnityEngine
             double dot = Dot(onNormal, onNormal);
 
             return (dot >= 1.40129846432482E-45 ? (onNormal * Dot(vector, onNormal)) / dot : zero);
-            ;
         }
 
         public static Vector3d Normalize(Vector3d value)
         {
-            double magnitude = value.Magnitude();
+            var magnitude = value.Magnitude();
 
             if (magnitude > 9.9999997473787516E-06) return value / magnitude;
             else return zero;
@@ -324,31 +323,6 @@ namespace UnityEngine
         public Vector3d Unit()
         {
             return (this / this.Magnitude());
-        }
-
-        public Vector3d Zero()
-        {
-            return new Vector3d(0.0, 0.0, 0.0);
-        }
-
-        public bool IsZero()
-        {
-            return this.Equals(new Vector3d(0.0, 0.0, 0.0));
-        }
-
-        public static Vector3d UnitX()
-        {
-            return new Vector3d(1, 0, 0);
-        }
-
-        public static Vector3d UnitY()
-        {
-            return new Vector3d(0, 1, 0);
-        }
-
-        public static Vector3d UnitZ()
-        {
-            return new Vector3d(0, 0, 1);
         }
 
         public static Vector3d zero { get { return new Vector3d(0.0, 0.0, 0.0); } }

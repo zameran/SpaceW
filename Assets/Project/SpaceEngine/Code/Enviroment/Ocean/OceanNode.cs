@@ -82,7 +82,7 @@ namespace SpaceEngine.Ocean
 
             planetoid.Atmosphere.InitUniforms(OceanMaterial);
 
-            OldLocalToOcean = Matrix4x4d.Identity();
+            OldLocalToOcean = Matrix4x4d.identity;
             Offset = Vector4.zero;
 
             // Create the projected grid. The resolution is the size in pixels of each square in the grid. 
@@ -128,7 +128,7 @@ namespace SpaceEngine.Ocean
 
             if ((OceanType == OceanSurfaceType.Flat && cl.z > ZMin) || (radius > 0.0 && cl.Magnitude() > radius + ZMin) || (radius < 0.0 && (new Vector2d(cl.y, cl.z)).Magnitude() < -radius - ZMin))
             {
-                OldLocalToOcean = Matrix4x4d.Identity();
+                OldLocalToOcean = Matrix4x4d.identity;
                 Offset = Vector4.zero;
                 DrawOcean = false;
 
@@ -141,9 +141,9 @@ namespace SpaceEngine.Ocean
             if (OceanType == OceanSurfaceType.Flat)
             {
                 // Terrain ocean
-                ux = Vector3d.UnitX();
-                uy = Vector3d.UnitY();
-                uz = Vector3d.UnitZ();
+                ux = Vector3d.right;
+                uy = Vector3d.up;
+                uz = Vector3d.forward;
                 oo = new Vector3d(cl.x, cl.y, 0.0);
             }
             else
@@ -151,13 +151,13 @@ namespace SpaceEngine.Ocean
                 // Planet ocean
                 uz = cl.Normalized(); // Unit z vector of ocean frame, in local space
 
-                if (OldLocalToOcean != Matrix4x4d.Identity())
+                if (OldLocalToOcean != Matrix4x4d.identity)
                 {
                     ux = (new Vector3d(OldLocalToOcean.m[1, 0], OldLocalToOcean.m[1, 1], OldLocalToOcean.m[1, 2])).Cross(uz).Normalized();
                 }
                 else
                 {
-                    ux = Vector3d.UnitZ().Cross(uz).Normalized();
+                    ux = Vector3d.forward.Cross(uz).Normalized();
                 }
 
                 uy = uz.Cross(ux); // Unit y vector
@@ -170,7 +170,7 @@ namespace SpaceEngine.Ocean
             // Compute c2o = CameraToOcean transform
             var c2o = l2o * c2w;
 
-            if (OldLocalToOcean != Matrix4x4d.Identity())
+            if (OldLocalToOcean != Matrix4x4d.identity)
             {
                 var delta = l2o * (OldLocalToOcean.Inverse() * -Origin); // TODO : Ocean origin
 
@@ -184,9 +184,9 @@ namespace SpaceEngine.Ocean
 
             var h = oc.z;
 
-            var stoc_w = (stoc * Vector4d.UnitW()).XYZ0();
-            var stoc_x = (stoc * Vector4d.UnitX()).XYZ0();
-            var stoc_y = (stoc * Vector4d.UnitY()).XYZ0();
+            var stoc_w = (stoc * new Vector4d(0.0, 0.0, 0.0, 1.0)).XYZ0();
+            var stoc_x = (stoc * new Vector4d(1.0, 0.0, 0.0, 0.0)).XYZ0();
+            var stoc_y = (stoc * new Vector4d(0.0, 1.0, 0.0, 0.0)).XYZ0();
 
             var A0 = (c2o * stoc_w).XYZ();
             var dA = (c2o * stoc_x).XYZ();

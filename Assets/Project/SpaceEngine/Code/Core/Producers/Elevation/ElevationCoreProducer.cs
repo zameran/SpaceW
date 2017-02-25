@@ -102,7 +102,7 @@ namespace SpaceEngine.Core
             //var parentTile = FindTile(level - 1, tx / 2, ty / 2, false, true);
             var rootQuadSize = TerrainNode.TerrainQuadRoot.Length;
 
-            var offset = Vector4d.Zero();
+            var offset = Vector4d.zero;
 
             offset.x = ((double)tx / (1 << level) - 0.5) * rootQuadSize;
             offset.y = ((double)ty / (1 << level) - 0.5) * rootQuadSize;

@@ -25,17 +25,12 @@
 
 namespace UnityEngine
 {
-    public class Vector4d
+    using System;
+
+    [Serializable]
+    public struct Vector4d
     {
         public double x, y, z, w;
-
-        public Vector4d()
-        {
-            this.x = 0.0f;
-            this.y = 0.0f;
-            this.z = 0.0f;
-            this.w = 0.0f;
-        }
 
         public Vector4d(double v)
         {
@@ -189,6 +184,7 @@ namespace UnityEngine
         public void Normalize()
         {
             double invLength = 1.0 / System.Math.Sqrt(x * x + y * y + z * z + w * w);
+
             x *= invLength;
             y *= invLength;
             z *= invLength;
@@ -198,32 +194,12 @@ namespace UnityEngine
         public Vector4d Normalized()
         {
             double invLength = 1.0 / System.Math.Sqrt(x * x + y * y + z * z + w * w);
+
             return new Vector4d(x * invLength, y * invLength, z * invLength, w * invLength);
         }
 
-        public static Vector4d UnitX()
-        {
-            return new Vector4d(1, 0, 0, 0);
-        }
+        public static Vector4d zero { get { return new Vector4d(0.0, 0.0, 0.0, 0.0); } }
 
-        public static Vector4d UnitY()
-        {
-            return new Vector4d(0, 1, 0, 0);
-        }
-
-        public static Vector4d UnitZ()
-        {
-            return new Vector4d(0, 0, 1, 0);
-        }
-
-        public static Vector4d UnitW()
-        {
-            return new Vector4d(0, 0, 0, 1);
-        }
-
-        public static Vector4d Zero()
-        {
-            return new Vector4d(0, 0, 0, 0);
-        }
+        public static Vector4d one { get { return new Vector4d(1.0, 1.0, 1.0, 1.0); } }
     }
 }
