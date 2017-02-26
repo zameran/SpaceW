@@ -252,6 +252,9 @@ namespace SpaceEngine.Core.Bodies
             // NOTE : Update controller and the draw. This can help avoid terrain nodes jitter...
             GodManager.Instance.Controller.UpdateController();
 
+            // TODO : PROFILE DAT SHIT!
+            ReSetMPB();
+
             foreach (var tileSampler in TileSamplers)
             {
                 if (Helper.Enabled(tileSampler))
@@ -388,6 +391,13 @@ namespace SpaceEngine.Core.Bodies
             Graphics.DrawMesh(QuadMesh, Matrix4x4.identity, node.TerrainMaterial, 0, CameraHelper.Main(), 0, MPB);
         }
 
+        private void ReSetMPB()
+        {
+            MPB.Clear();
+
+            InitSetUniforms();
+        }
+
         private void DrawQuad(TerrainNode node, TerrainQuad quad, List<TileSampler> samplers)
         {
             if (!quad.IsVisible) return;
@@ -395,9 +405,7 @@ namespace SpaceEngine.Core.Bodies
 
             if (quad.IsLeaf)
             {
-                MPB.Clear();
-
-                InitSetUniforms();
+                //ReSetMPB();
 
                 for (int i = 0; i < samplers.Count; ++i)
                 {
@@ -476,9 +484,7 @@ namespace SpaceEngine.Core.Bodies
                     // If the a leaf quad needs to be drawn but its tiles are not ready then this will draw the next parent tile instead that is ready.
                     // Because of the current set up all tiles always have there tasks run on the frame they are generated so this section of code is never reached.
 
-                    MPB.Clear();
-
-                    InitSetUniforms();
+                    //ReSetMPB();
 
                     for (int i = 0; i < samplers.Count; ++i)
                     {

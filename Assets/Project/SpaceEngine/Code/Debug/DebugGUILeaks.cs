@@ -33,9 +33,12 @@
 // Creator: zameran
 #endregion
 
+using System;
 using System.Collections.Generic;
 
 using UnityEngine;
+
+using Object = UnityEngine.Object;
 
 namespace SpaceEngine.Debugging
 {
@@ -58,7 +61,9 @@ namespace SpaceEngine.Debugging
         private void FixedUpdate()
         {
             if (Time.frameCount % 64 == 0)
+            {
                 Objects = FindObjectsOfType(typeof(Object));
+            }
         }
 
         protected override void OnGUI()
@@ -76,13 +81,12 @@ namespace SpaceEngine.Debugging
 
                 if (Objects == null) return;
 
-                var dictionary = new Dictionary<string, int>();
+                var dictionary = new Dictionary<Type, int>();
 
                 for (var i = 0; i < Objects.Length; i++)
                 {
                     var obj = Objects[i];
-
-                    var key = obj.GetType().FullName;
+                    var key = obj.GetType();
 
                     if (dictionary.ContainsKey(key))
                     {
@@ -96,7 +100,7 @@ namespace SpaceEngine.Debugging
 
                 #endregion
 
-                var entryies = new List<KeyValuePair<string, int>>(dictionary);
+                var entryies = new List<KeyValuePair<Type, int>>(dictionary);
 
                 entryies.Sort((firstPair, nextPair) => nextPair.Value.CompareTo((firstPair.Value)));
 
@@ -107,7 +111,7 @@ namespace SpaceEngine.Debugging
                     var entry = entryies[i];
 
                     GUILayout.BeginHorizontal("box");
-                    GUILayoutExtensions.LabelWithFlexibleSpace(entry.Key, entry.Value.ToString());
+                    GUILayoutExtensions.LabelWithFlexibleSpace(entry.Key.FullName, entry.Value.ToString());
                     GUILayout.EndHorizontal();
                 }
 
