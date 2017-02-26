@@ -34,6 +34,7 @@
 // 
 #endregion
 
+using SpaceEngine.AtmosphericScattering;
 using SpaceEngine.Core.Terrain;
 using SpaceEngine.Core.Tile.Samplers;
 using SpaceEngine.Core.Utilities;
@@ -47,7 +48,13 @@ namespace SpaceEngine.Core.Bodies
 {
     public class CelestialBody : Node<CelestialBody>, ICelestialBody
     {
+        public Atmosphere Atmosphere;
+
         public int GridResolution = 25;
+
+        public bool DrawGizmos = false;
+
+        public bool AtmosphereEnabled = true;
 
         public float Amlitude = 32.0f;
         public float Frequency = 64.0f;
@@ -75,7 +82,87 @@ namespace SpaceEngine.Core.Bodies
 
         public List<string> GetKeywords()
         {
-            return new List<string>();
+            var Keywords = new List<string>();
+
+            /*
+            if (planet.Ring != null)
+            {
+                Keywords.Add(planet.RingEnabled ? "RING_ON" : "RING_OFF");
+                if (planet.RingEnabled) Keywords.Add("SCATTERING");
+
+                var shadowsCount = planet.Shadows.Count((shadow) => shadow != null && Helper.Enabled(shadow));
+
+                if (shadowsCount > 0)
+                {
+                    for (byte i = 0; i < shadowsCount; i++)
+                    {
+                        Keywords.Add("SHADOW_" + (i + 1));
+                    }
+                }
+                else
+                {
+                    Keywords.Add("SHADOW_0");
+                }
+            }
+            else
+            {
+                Keywords.Add("RING_OFF");
+            }
+            */
+
+            if (Atmosphere != null)
+            {
+                if (AtmosphereEnabled)
+                {
+                    var lightCount = Atmosphere.Suns.Count((sun) => sun != null && sun.gameObject.activeInHierarchy);
+
+                    if (lightCount != 0)
+                        Keywords.Add("LIGHT_" + lightCount);
+
+                    if (Atmosphere.EclipseCasters.Count == 0)
+                    {
+                        Keywords.Add("ECLIPSES_OFF");
+                    }
+                    else
+                    {
+                        Keywords.Add(Atmosphere.Eclipses ? "ECLIPSES_ON" : "ECLIPSES_OFF");
+                    }
+
+                    if (Atmosphere.ShineCasters.Count == 0)
+                    {
+                        Keywords.Add("SHINE_OFF");
+                    }
+                    else
+                    {
+                        Keywords.Add(Atmosphere.Planetshine ? "SHINE_ON" : "SHINE_OFF");
+                    }
+
+                    Keywords.Add("ATMOSPHERE_ON");
+                }
+                else
+                {
+                    Keywords.Add("ATMOSPHERE_OFF");
+                }
+
+                /*
+                if (Ocean != null)
+                {
+                    Keywords.Add("OCEAN_ON");
+                }
+                else
+                {
+                    Keywords.Add("OCEAN_OFF");
+                }
+                */
+                Keywords.Add("OCEAN_OFF");
+            }
+            else
+            {
+                Keywords.Add("ATMOSPHERE_OFF");
+                Keywords.Add("OCEAN_OFF");
+            }
+
+            return Keywords;
         }
 
         #endregion
@@ -84,9 +171,16 @@ namespace SpaceEngine.Core.Bodies
 
         protected override void InitNode()
         {
+            if (Atmosphere != null)
+            {
+                if (Atmosphere.planetoid == null)
+                    Atmosphere.planetoid = this;
+            }
+
             // TODO : AAAAAAAAA CRAZY STUFF!
-            if (GodManager.Instance.View is PlanetView)
-                ((PlanetView)GodManager.Instance.View).Radius = Radius;
+            var view = GodManager.Instance.View as PlanetView;
+            if (view != null)
+                view.Radius = Radius;
 
             QuadMesh = MeshFactory.MakePlane(GridResolution, GridResolution, MeshFactory.PLANE.XY, true, false, false);
             QuadMesh.bounds = new Bounds(Vector3.zero, new Vector3(1e8f, 1e8f, 1e8f));
@@ -104,6 +198,16 @@ namespace SpaceEngine.Core.Bodies
 
         protected override void UpdateNode()
         {
+            if (Atmosphere != null)
+            {
+                if (AtmosphereEnabled)
+                {
+                    Atmosphere.Reanimate();
+                    Atmosphere.SetUniforms(MPB);
+                    Atmosphere.Render();
+                }
+            }
+
             // NOTE : Update controller and the draw. This can help avoid terrain nodes jitter...
             GodManager.Instance.Controller.UpdateController();
 
@@ -148,17 +252,23 @@ namespace SpaceEngine.Core.Bodies
 
         #endregion
 
-        public void SetUniforms(Material mat)
+        protected void OnApplicationFocus(bool focusStatus)
         {
-            if (mat == null) return;
+            if (focusStatus != true) return;
 
-            mat.SetMatrix("_Globals_WorldToCamera", GodManager.Instance.WorldToCamera.ToMatrix4x4());
-            mat.SetMatrix("_Globals_CameraToWorld", GodManager.Instance.CameraToWorld.ToMatrix4x4());
-            mat.SetMatrix("_Globals_CameraToScreen", GodManager.Instance.CameraToScreen.ToMatrix4x4());
-            mat.SetMatrix("_Globals_ScreenToCamera", GodManager.Instance.ScreenToCamera.ToMatrix4x4());
-            mat.SetVector("_Globals_WorldCameraPos", GodManager.Instance.WorldCameraPos);
-            mat.SetVector("_Globals_Origin", Origin);
-            mat.SetFloat("_Exposure", 0.2f);
+            foreach (var terrainNode in TerrainNodes)
+            {
+                if (Helper.Enabled(terrainNode))
+                {
+                    if (Atmosphere != null)
+                    {
+                        Atmosphere.InitUniforms(terrainNode.TerrainMaterial);
+                        Atmosphere.SetUniforms(terrainNode.TerrainMaterial);
+                    }
+                }
+            }
+
+            if (Atmosphere != null) Atmosphere.Reanimate();
         }
 
         private void DrawTerrain(TerrainNode node)

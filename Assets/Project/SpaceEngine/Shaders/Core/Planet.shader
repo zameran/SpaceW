@@ -20,8 +20,8 @@
 			
 			//#define CUBE_PROJECTION
 			
-			//#include "Assets/Proland/Shaders/Core/Utility.cginc"
-			//#include "Assets/Proland/Shaders/Atmo/Atmosphere.cginc"
+			#include "../HDR.cginc"
+			#include "../Atmosphere.cginc"
 			//#include "Assets/Proland/Shaders/Ocean/OceanBrdf.cginc"
 			
 			uniform float2 _Deform_Blending;
@@ -46,8 +46,6 @@
 			uniform sampler2D _Ortho_Tile;
 			uniform float3 _Ortho_TileSize;
 			uniform float3 _Ortho_TileCoords;
-			
-			uniform float3 _Globals_WorldCameraPos;
 			
 			uniform float _Ocean_Sigma;
 			uniform float3 _Ocean_Color;
@@ -120,7 +118,7 @@
 			float4 frag(v2f IN) : COLOR
 			{		
 				float3 WCP = _Globals_WorldCameraPos;
-				float3 WSD = float3(0.0, -1.0, 0.0);
+				float3 WSD = _Sun_WorldDirections_1[0];
 				float ht = texTile(_Elevation_Tile, IN.uv, _Elevation_TileCoords, _Elevation_TileSize).x;
 				
 				float3 V = normalize(IN.p);
@@ -143,25 +141,25 @@
 				float4 reflectance = texTile(_Ortho_Tile, IN.uv, _Ortho_TileCoords, _Ortho_TileSize);
 				reflectance.rgb = tan(1.37 * reflectance.rgb) / tan(1.37); //RGB to reflectance
 				
-				//float3 sunL;
-				//float3 skyE;
-				//SunRadianceAndSkyIrradiance(P, fn, WSD, sunL, skyE);
+				float3 sunL = 1;
+				float3 skyE = 0;
+				SunRadianceAndSkyIrradiance(V, fn, WSD, sunL, skyE);
 				
 				// diffuse ground color
-				//float3 groundColor = 1.5 * reflectance.rgb * (sunL * max(cTheta, 0.0) + skyE) / 3.14159265;
-				float3 groundColor = 1.5 * reflectance.rgb * (10 * max(cTheta, 0.0)) / 3.14159265;
+				//float3 groundColor = 1.5 * reflectance.rgb * (sunL * max(cTheta, 0.0) + skyE) / M_PI;
+				float3 groundColor = 1.5 * reflectance.rgb * (sunL * max(cTheta, 0.0) + skyE) / M_PI;
 				
 				//if(ht <= _Ocean_Level && _Ocean_DrawBRDF == 1.0)
 				//	groundColor = OceanRadiance(WSD, -v, V, _Ocean_Sigma, sunL, skyE, _Ocean_Color);
 
-				//float3 extinction;
-				//float3 inscatter = InScattering(WCP, P, WSD, extinction, 0.0);
+				float3 extinction;
+				float3 inscatter = InScattering(WCP, P, WSD, extinction, 0.0);
 
-				//float3 finalColor = hdr(groundColor * extinction + inscatter);
+				float3 finalColor = hdr(groundColor * extinction + inscatter);
 
 				//return float4(finalColor, 1.0);
 
-				return float4(fn, 1.0);
+				return float4(finalColor, 1.0);
 			}
 			
 			ENDCG

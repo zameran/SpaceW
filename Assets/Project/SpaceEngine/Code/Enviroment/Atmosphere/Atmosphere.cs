@@ -34,12 +34,11 @@
 #endregion
 
 using SpaceEngine.AtmosphericScattering.Sun;
+using SpaceEngine.Core.Bodies;
 using SpaceEngine.Core.PropertyNotification;
 using SpaceEngine.Core.Reanimator;
-
 using System.Collections.Generic;
 using System.ComponentModel;
-
 using UnityEngine;
 
 namespace SpaceEngine.AtmosphericScattering
@@ -76,7 +75,7 @@ namespace SpaceEngine.AtmosphericScattering
                                                                               new Keyframe(0.25f, 1.0f),
                                                                               new Keyframe(1.0f, 1.0f) });
 
-        public Planetoid planetoid;
+        public CelestialBody planetoid;
 
         [Range(0.0f, 1.0f)]
         public float Density = 1.0f;
@@ -121,8 +120,8 @@ namespace SpaceEngine.AtmosphericScattering
 
         public AtmosphereRunTimeBaker artb = null;
 
-        public Vector3 Origin { get { return planetoid != null ? planetoid.Origin : Vector3.zero; } }
-        public float Radius { get { return planetoid != null ? planetoid.PlanetRadius : 0.0f; } }
+        public Vector3 Origin { get { return planetoid != null ? planetoid.transform.position : Vector3.zero; } }
+        public float Radius { get { return planetoid != null ? planetoid.Radius : 0.0f; } }
 
         public Color[] shineColors = new Color[4] { XKCDColors.Bluish, XKCDColors.Bluish, XKCDColors.Bluish, XKCDColors.Bluish };
 
@@ -144,8 +143,8 @@ namespace SpaceEngine.AtmosphericScattering
 
             AtmosphereBaseProperty.PropertyChanged += AtmosphereBasePropertyOnPropertyChanged;
 
-            EventManager.PlanetoidEvents.OnAtmosphereBaked.OnEvent += OnAtmosphereBaked;
-            EventManager.PlanetoidEvents.OnAtmospherePresetChanged.OnEvent += OnAtmospherePresetChanged;
+            EventManager.CelestialBodyEvents.OnAtmosphereBaked.OnEvent += OnAtmosphereBaked;
+            EventManager.CelestialBodyEvents.OnAtmospherePresetChanged.OnEvent += OnAtmospherePresetChanged;
 
             isEventit = true;
         }
@@ -156,8 +155,8 @@ namespace SpaceEngine.AtmosphericScattering
 
             AtmosphereBaseProperty.PropertyChanged -= AtmosphereBasePropertyOnPropertyChanged;
 
-            EventManager.PlanetoidEvents.OnAtmosphereBaked.OnEvent -= OnAtmosphereBaked;
-            EventManager.PlanetoidEvents.OnAtmospherePresetChanged.OnEvent -= OnAtmospherePresetChanged;
+            EventManager.CelestialBodyEvents.OnAtmosphereBaked.OnEvent -= OnAtmosphereBaked;
+            EventManager.CelestialBodyEvents.OnAtmospherePresetChanged.OnEvent -= OnAtmospherePresetChanged;
 
             isEventit = false;
         }
@@ -168,14 +167,14 @@ namespace SpaceEngine.AtmosphericScattering
 
         private void AtmosphereBasePropertyOnPropertyChanged(object sender, PropertyChangedEventArgs e)
         {
-            EventManager.PlanetoidEvents.OnAtmospherePresetChanged.Invoke(planetoid, this);
+            EventManager.CelestialBodyEvents.OnAtmospherePresetChanged.Invoke(planetoid, this);
         }
 
-        private void OnAtmosphereBaked(Planetoid planetoid, Atmosphere atmosphere)
+        private void OnAtmosphereBaked(CelestialBody body, Atmosphere atmosphere)
         {
-            if (planetoid == null)
+            if (body == null)
             {
-                Debug.Log("Atmosphere: OnAtmosphereBaked planetoid is null!");
+                Debug.Log("Atmosphere: OnAtmosphereBaked body is null!");
                 return;
             }
 
@@ -189,11 +188,11 @@ namespace SpaceEngine.AtmosphericScattering
             atmosphere.Reanimate();
         }
 
-        private void OnAtmospherePresetChanged(Planetoid planetoid, Atmosphere atmosphere)
+        private void OnAtmospherePresetChanged(CelestialBody body, Atmosphere atmosphere)
         {
-            if (planetoid == null)
+            if (body == null)
             {
-                Debug.Log("Atmosphere: OnAtmospherePresetChanged planetoid is null!");
+                Debug.Log("Atmosphere: OnAtmospherePresetChanged body is null!");
                 return;
             }
 
@@ -204,7 +203,6 @@ namespace SpaceEngine.AtmosphericScattering
             }
 
             atmosphere.Bake();
-            planetoid.ReSetupQuads();
         }
 
         #endregion
@@ -237,7 +235,7 @@ namespace SpaceEngine.AtmosphericScattering
             atmosphereParameters.Rl = (Radius + Height * 1.05f) - TerrainRadiusHold;
             atmosphereParameters.SCALE = Scale;
 
-            var fadeValue = Mathf.Clamp01(VectorHelper.AngularRadius(Origin, planetoid.LODTarget.position, planetoid.PlanetRadius));
+            var fadeValue = Mathf.Clamp01(VectorHelper.AngularRadius(Origin, GodManager.Instance.View.worldPosition, Radius));
 
             Fade = FadeCurve.Evaluate(float.IsNaN(fadeValue) || float.IsInfinity(fadeValue) ? 1.0f : fadeValue);
 
@@ -418,7 +416,7 @@ namespace SpaceEngine.AtmosphericScattering
         {
             artb.Bake(atmosphereParameters);
 
-            EventManager.PlanetoidEvents.OnAtmosphereBaked.Invoke(planetoid, this);
+            EventManager.CelestialBodyEvents.OnAtmosphereBaked.Invoke(planetoid, this);
         }
 
         public void CalculateShine(out Matrix4x4 soc1, out Matrix4x4 sc1)
@@ -546,7 +544,7 @@ namespace SpaceEngine.AtmosphericScattering
 
         public void Render()
         {
-            Graphics.DrawMesh(AtmosphereMesh, transform.localToWorldMatrix, SkyMaterial, planetoid.DrawLayer, CameraHelper.Main(), 0, planetoid.MPB);
+            Graphics.DrawMesh(AtmosphereMesh, transform.localToWorldMatrix, SkyMaterial, 0, CameraHelper.Main(), 0, planetoid.MPB);
         }
 
         public void OnApplicationFocus(bool focusStatus)
@@ -596,8 +594,8 @@ namespace SpaceEngine.AtmosphericScattering
                 {
                     float sunRadius = Suns[i].Radius;
                     float sunToPlanetDistance = Vector3.Distance(Origin, Suns[i].transform.position);
-                    float umbraLength = CalculateUmbraLength(planetoid.PlanetRadius * 2, sunRadius, sunToPlanetDistance);
-                    float umbraAngle = CalculateUmbraSubtendedAngle(planetoid.PlanetRadius * 2, umbraLength);
+                    float umbraLength = CalculateUmbraLength(Radius * 2, sunRadius, sunToPlanetDistance);
+                    float umbraAngle = CalculateUmbraSubtendedAngle(Radius * 2, umbraLength);
 
                     Vector3 direction = GetSunDirection(Suns[i]) * umbraLength;
 
@@ -609,16 +607,16 @@ namespace SpaceEngine.AtmosphericScattering
                     Gizmos.DrawRay(Origin, direction);
 
                     Gizmos.color = Color.blue;
-                    Gizmos.DrawRay(planetoid.OriginTransform.InverseTransformVector(Origin + direction), -(Quaternion.Euler(umbraAngle, 0, 0) * direction));
-                    Gizmos.DrawRay(planetoid.OriginTransform.InverseTransformVector(Origin + direction), -(Quaternion.Euler(-umbraAngle, 0, 0) * direction));
-                    Gizmos.DrawRay(planetoid.OriginTransform.InverseTransformVector(Origin + direction), -(Quaternion.Euler(0, umbraAngle, 0) * direction));
-                    Gizmos.DrawRay(planetoid.OriginTransform.InverseTransformVector(Origin + direction), -(Quaternion.Euler(0, -umbraAngle, 0) * direction));
+                    Gizmos.DrawRay(planetoid.transform.InverseTransformVector(Origin + direction), -(Quaternion.Euler(umbraAngle, 0, 0) * direction));
+                    Gizmos.DrawRay(planetoid.transform.InverseTransformVector(Origin + direction), -(Quaternion.Euler(-umbraAngle, 0, 0) * direction));
+                    Gizmos.DrawRay(planetoid.transform.InverseTransformVector(Origin + direction), -(Quaternion.Euler(0, umbraAngle, 0) * direction));
+                    Gizmos.DrawRay(planetoid.transform.InverseTransformVector(Origin + direction), -(Quaternion.Euler(0, -umbraAngle, 0) * direction));
 
                     Gizmos.color = Color.cyan;
-                    Gizmos.DrawLine(planetoid.OriginTransform.position + Vector3.up * planetoid.PlanetRadius, planetoid.OriginTransform.InverseTransformVector(Origin + direction) + Vector3.up * planetoid.PlanetRadius);
-                    Gizmos.DrawLine(planetoid.OriginTransform.position + Vector3.down * planetoid.PlanetRadius, planetoid.OriginTransform.InverseTransformVector(Origin + direction) + Vector3.down * planetoid.PlanetRadius);
-                    Gizmos.DrawLine(planetoid.OriginTransform.position + Vector3.left * planetoid.PlanetRadius, planetoid.OriginTransform.InverseTransformVector(Origin + direction) + Vector3.left * planetoid.PlanetRadius);
-                    Gizmos.DrawLine(planetoid.OriginTransform.position + Vector3.right * planetoid.PlanetRadius, planetoid.OriginTransform.InverseTransformVector(Origin + direction) + Vector3.right * planetoid.PlanetRadius);
+                    Gizmos.DrawLine(planetoid.transform.position + Vector3.up * Radius, planetoid.transform.InverseTransformVector(Origin + direction) + Vector3.up * Radius);
+                    Gizmos.DrawLine(planetoid.transform.position + Vector3.down * Radius, planetoid.transform.InverseTransformVector(Origin + direction) + Vector3.down * Radius);
+                    Gizmos.DrawLine(planetoid.transform.position + Vector3.left * Radius, planetoid.transform.InverseTransformVector(Origin + direction) + Vector3.left * Radius);
+                    Gizmos.DrawLine(planetoid.transform.position + Vector3.right * Radius, planetoid.transform.InverseTransformVector(Origin + direction) + Vector3.right * Radius);
                 }
             }
         }

@@ -172,8 +172,8 @@ public sealed class Planetoid : Planet, IPlanet, IReanimateable
 
         if (Atmosphere != null)
         {
-            if (Atmosphere.planetoid == null)
-                Atmosphere.planetoid = this;
+            //if (Atmosphere.planetoid == null)
+            //    Atmosphere.planetoid = this;
         }
 
         if (Ocean != null)

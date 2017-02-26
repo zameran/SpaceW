@@ -56,21 +56,11 @@ namespace SpaceEngine.AtmosphericScattering
         public ComputeShader copyInscatter1, copyInscatterN, copyIrradiance;
         public ComputeShader inscatter1, inscatterN, inscatterS;
         public ComputeShader irradiance1, irradianceN, transmittance;
-        public ComputeShader readData;
 
         int step, order;
 
         [HideInInspector]
         public bool finished = false;
-
-        [ContextMenu("Bake default")]
-        public void Bake()
-        {
-            if (UseCoroutine)
-                StartCoroutine(DoWorkCoroutine(AtmosphereParameters.Earth));
-            else
-                DoWork(AtmosphereParameters.Earth);
-        }
 
         public void Bake(AtmosphereParameters AP)
         {
@@ -80,12 +70,7 @@ namespace SpaceEngine.AtmosphericScattering
                 DoWork(AP);
         }
 
-        public void PreBake(AtmosphereParameters AP)
-        {
-            PreGo(AP);
-        }
-
-        private void PreGo(AtmosphereParameters AP)
+        private void Prepeare(AtmosphereParameters AP)
         {
             CollectGarbage();
             CreateTextures(AP);
@@ -99,7 +84,7 @@ namespace SpaceEngine.AtmosphericScattering
             step = 0;
             order = 2;
 
-            PreGo(AP);
+            Prepeare(AP);
 
             while (!finished)
             {
@@ -115,13 +100,13 @@ namespace SpaceEngine.AtmosphericScattering
             step = 0;
             order = 2;
 
-            PreGo(AP);
+            Prepeare(AP);
 
             while (!finished)
             {
                 Calculate(AP);
 
-                for (int i = 0; i < 8; i++)
+                for (byte i = 0; i < 8; i++)
                 {
                     yield return Yielders.EndOfFrame;
                 }
@@ -147,7 +132,7 @@ namespace SpaceEngine.AtmosphericScattering
             if (irradianceT_Write != null) irradianceT_Write.ReleaseAndDestroy();
             if (inscatterT_Write != null) inscatterT_Write.ReleaseAndDestroy();
 
-            if (deltaET != null) deltaET.ReleaseAndDestroy();
+            //if (deltaET != null) deltaET.ReleaseAndDestroy();
             if (deltaSRT != null) deltaSRT.ReleaseAndDestroy();
             if (deltaSMT != null) deltaSMT.ReleaseAndDestroy();
             if (deltaJT != null) deltaJT.ReleaseAndDestroy();
@@ -358,37 +343,6 @@ namespace SpaceEngine.AtmosphericScattering
         }
 
         public void SetParameters(ComputeShader cs, AtmosphereParameters AP)
-        {
-            if (cs == null) return;
-
-            cs.SetFloat("Rg", AP.bRg);
-            cs.SetFloat("Rt", AP.bRt);
-            cs.SetFloat("RL", AP.bRl);
-            cs.SetInt("TRANSMITTANCE_W", AtmosphereConstants.TRANSMITTANCE_W);
-            cs.SetInt("TRANSMITTANCE_H", AtmosphereConstants.TRANSMITTANCE_H);
-            cs.SetInt("SKY_W", AtmosphereConstants.SKY_W);
-            cs.SetInt("SKY_H", AtmosphereConstants.SKY_H);
-            cs.SetInt("RES_R", AtmosphereConstants.RES_R);
-            cs.SetInt("RES_MU", AtmosphereConstants.RES_MU);
-            cs.SetInt("RES_MU_S", AtmosphereConstants.RES_MU_S);
-            cs.SetInt("RES_NU", AtmosphereConstants.RES_NU);
-            cs.SetFloat("AVERAGE_GROUND_REFLECTANCE", AP.AVERAGE_GROUND_REFLECTANCE);
-            cs.SetFloat("HR", AP.HR);
-            cs.SetFloat("HM", AP.HM);
-
-            cs.SetInt("TRANSMITTANCE_INTEGRAL_SAMPLES", AtmosphereConstants.TRANSMITTANCE_INTEGRAL_SAMPLES);
-            cs.SetInt("INSCATTER_INTEGRAL_SAMPLES", AtmosphereConstants.INSCATTER_INTEGRAL_SAMPLES);
-            cs.SetInt("IRRADIANCE_INTEGRAL_SAMPLES", AtmosphereConstants.IRRADIANCE_INTEGRAL_SAMPLES);
-            cs.SetInt("IRRADIANCE_INTEGRAL_SAMPLES_HALF", AtmosphereConstants.IRRADIANCE_INTEGRAL_SAMPLES_HALF);
-            cs.SetInt("INSCATTER_SPHERICAL_INTEGRAL_SAMPLES", AtmosphereConstants.INSCATTER_SPHERICAL_INTEGRAL_SAMPLES);
-
-            cs.SetVector("betaR", AP.BETA_R);
-            cs.SetVector("betaMSca", AP.BETA_MSca);
-            cs.SetVector("betaMEx", AP.BETA_MEx);
-            cs.SetFloat("mieG", Mathf.Clamp(AP.MIE_G, 0.0f, 0.99f));
-        }
-
-        public void SetParameters(int kernel, ComputeShader cs, AtmosphereParameters AP)
         {
             if (cs == null) return;
 
