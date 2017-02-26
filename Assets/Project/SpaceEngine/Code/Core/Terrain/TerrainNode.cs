@@ -135,7 +135,10 @@ namespace SpaceEngine.Core.Terrain
 
             TerrainMaterial = MaterialHelper.CreateTemp(Body.ColorShader, "TerrainNode");
 
-            if (Body.Atmosphere != null) Body.Atmosphere.InitUniforms(TerrainMaterial);
+            if (Body.Atmosphere != null)
+            {
+                Body.Atmosphere.InitUniforms(TerrainMaterial);
+            }
 
             var faces = new Vector3d[] { new Vector3d(0, 0, 0), new Vector3d(90, 0, 0), new Vector3d(90, 90, 0), new Vector3d(90, 180, 0), new Vector3d(90, 270, 0), new Vector3d(0, 180, 180) };
 
@@ -197,7 +200,11 @@ namespace SpaceEngine.Core.Terrain
 
             TerrainQuadRoot.UpdateLOD();
 
-            if (Body.Atmosphere != null) Body.Atmosphere.SetUniforms(TerrainMaterial);
+            if (Body.Atmosphere != null)
+            {
+                Body.Atmosphere.SetUniforms(TerrainMaterial);
+            }
+
             //Manager.GetSunNode().SetUniforms(TerrainMaterial);
             //Body.SetUniforms(TerrainMaterial);
             Deformation.SetUniforms(this, TerrainMaterial);

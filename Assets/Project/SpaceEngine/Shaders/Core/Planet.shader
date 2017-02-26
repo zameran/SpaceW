@@ -114,16 +114,23 @@
 				
 				return OUT;
 			}
+
+			inline float4 RGB2Reflectance(float4 inColor)
+			{
+				return float4(tan(1.37 * inColor.rgb) / tan(1.37), inColor.a);
+			}
 			
 			float4 frag(v2f IN) : COLOR
 			{		
 				float3 WCP = _Globals_WorldCameraPos;
+				float3 WCPO = _Globals_WorldCameraPos_Offsetted;
 				float3 WSD = _Sun_WorldDirections_1[0];
 				float ht = texTile(_Elevation_Tile, IN.uv, _Elevation_TileCoords, _Elevation_TileSize).x;
 				
 				float3 V = normalize(IN.p);
 				float3 P = V * max(length(IN.p), _Deform_Radius + 10.0);
 				float3 v = normalize(P - WCP);
+				float3 p = P + _Globals_Origin;
 				
 				float3 fn;
 				fn.xyz = texTile(_Normals_Tile, IN.uv, _Normals_TileCoords, _Normals_TileSize).xyz;
@@ -139,21 +146,20 @@
 				float vSun = dot(V, WSD);
 				
 				float4 reflectance = texTile(_Ortho_Tile, IN.uv, _Ortho_TileCoords, _Ortho_TileSize);
-				reflectance.rgb = tan(1.37 * reflectance.rgb) / tan(1.37); //RGB to reflectance
 				
-				float3 sunL = 1;
+				float3 sunL = 0;
 				float3 skyE = 0;
-				SunRadianceAndSkyIrradiance(V, fn, WSD, sunL, skyE);
+				SunRadianceAndSkyIrradiance(P, fn, WSD, sunL, skyE);
 				
 				// diffuse ground color
 				//float3 groundColor = 1.5 * reflectance.rgb * (sunL * max(cTheta, 0.0) + skyE) / M_PI;
-				float3 groundColor = 1.5 * reflectance.rgb * (sunL * max(cTheta, 0.0) + skyE) / M_PI;
+				float3 groundColor = 1.5 * RGB2Reflectance(reflectance).rgb * (sunL * max(cTheta, 0) + skyE) / M_PI;
 				
 				//if(ht <= _Ocean_Level && _Ocean_DrawBRDF == 1.0)
 				//	groundColor = OceanRadiance(WSD, -v, V, _Ocean_Sigma, sunL, skyE, _Ocean_Color);
 
 				float3 extinction;
-				float3 inscatter = InScattering(WCP, P, WSD, extinction, 0.0);
+				float3 inscatter = InScattering(WCPO, P, WSD, extinction, 0.0);
 
 				float3 finalColor = hdr(groundColor * extinction + inscatter);
 

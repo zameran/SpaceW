@@ -46,7 +46,7 @@ using UnityEngine;
 
 namespace SpaceEngine.Core.Bodies
 {
-    public class CelestialBody : Node<CelestialBody>, ICelestialBody
+    public class CelestialBody : Node<CelestialBody>, ICelestialBody, IUniformed<MaterialPropertyBlock>
     {
         public Atmosphere Atmosphere;
 
@@ -167,14 +167,44 @@ namespace SpaceEngine.Core.Bodies
 
         #endregion
 
+        #region IUniformed<MaterialPropertyBlock>
+
+        public void InitUniforms(MaterialPropertyBlock target)
+        {
+            if (target == null) return;
+
+            if (Atmosphere != null)
+            {
+                Atmosphere.InitUniforms(target);
+            }
+        }
+
+        public void SetUniforms(MaterialPropertyBlock target)
+        {
+            if (target == null) return;
+
+            if (Atmosphere != null)
+            {
+                Atmosphere.SetUniforms(target);
+            }
+        }
+
+        public void InitSetUniforms()
+        {
+            InitUniforms(MPB);
+            SetUniforms(MPB);
+        }
+
+        #endregion
+
         #region Node
 
         protected override void InitNode()
         {
             if (Atmosphere != null)
             {
-                if (Atmosphere.planetoid == null)
-                    Atmosphere.planetoid = this;
+                if (Atmosphere.body == null)
+                    Atmosphere.body = this;
             }
 
             // TODO : AAAAAAAAA CRAZY STUFF!
@@ -202,8 +232,6 @@ namespace SpaceEngine.Core.Bodies
             {
                 if (AtmosphereEnabled)
                 {
-                    Atmosphere.Reanimate();
-                    Atmosphere.SetUniforms(MPB);
                     Atmosphere.Render();
                 }
             }
@@ -355,6 +383,8 @@ namespace SpaceEngine.Core.Bodies
             {
                 MPB.Clear();
 
+                InitSetUniforms();
+
                 for (int i = 0; i < samplers.Count; ++i)
                 {
                     // Set the unifroms needed to draw the texture for this sampler
@@ -433,6 +463,8 @@ namespace SpaceEngine.Core.Bodies
                     // Because of the current set up all tiles always have there tasks run on the frame they are generated so this section of code is never reached.
 
                     MPB.Clear();
+
+                    InitSetUniforms();
 
                     for (int i = 0; i < samplers.Count; ++i)
                     {

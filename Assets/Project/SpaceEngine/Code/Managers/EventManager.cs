@@ -22,7 +22,7 @@ public sealed class PlanetoidEvents
 public sealed class CelestialBodyEvents
 {
     public EventHolder<CelestialBody, Atmosphere> OnAtmosphereBaked = new EventHolder<CelestialBody, Atmosphere>();
-    public EventHolder<CelestialBody, Atmosphere> OnAtmospherePresetChanged = new EventHolder<CelestialBody, Atmosphere>();
+    public EventHolder<CelestialBody, Atmosphere, AtmosphereBase> OnAtmospherePresetChanged = new EventHolder<CelestialBody, Atmosphere, AtmosphereBase>();
 }
 
 #region Event Holders
