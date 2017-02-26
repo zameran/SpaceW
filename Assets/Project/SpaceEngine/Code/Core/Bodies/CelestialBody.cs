@@ -210,6 +210,9 @@ namespace SpaceEngine.Core.Bodies
             {
                 if (Ocean.body == null)
                     Ocean.body = this;
+
+                // TODO : Whhhhhhaaattaaaaaafuuuuckkk!
+                StartCoroutine(Ocean.InitializationFix());
             }
 
             // TODO : AAAAAAAAA CRAZY STUFF!

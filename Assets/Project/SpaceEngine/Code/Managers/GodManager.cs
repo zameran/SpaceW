@@ -33,6 +33,7 @@
 // Creator: zameran
 #endregion
 
+using SpaceEngine.Core.Bodies;
 using SpaceEngine.Core.Utilities;
 using SpaceEngine.Startfield;
 
@@ -60,11 +61,9 @@ public class GodManager : MonoSingleton<GodManager>
     public bool Debug = true;
     public bool UpdateFrustumPlanesNow = true;
 
-    public Planetoid[] Planetoids;
+    public CelestialBody[] Bodies;
     public Starfield[] Starfields;
 
-    public QuadLODDistanceMethod LODDistanceMethod = QuadLODDistanceMethod.ClosestAABBCorner;
-    public QuadCullingMethod CullingMethod = QuadCullingMethod.Unity;
     public AtmosphereHDR HDRMode = AtmosphereHDR.ProlandOptimized;
 
     public Matrix4x4d WorldToCamera { get { return View.WorldToCameraMatrix; } }
@@ -72,8 +71,6 @@ public class GodManager : MonoSingleton<GodManager>
     public Matrix4x4d CameraToScreen { get { return View.CameraToScreenMatrix; } }
     public Matrix4x4d ScreenToCamera { get { return View.ScreenToCameraMatrix; } }
     public Vector3 WorldCameraPos { get { return View.WorldCameraPosition; } }
-
-    public float LODDistanceMultiplier = 2.0f;
 
     public bool Eclipses = true;
     public bool Planetshine = true;
@@ -86,7 +83,7 @@ public class GodManager : MonoSingleton<GodManager>
 
         Messenger.Setup(Debug);
 
-        Planetoids = FindObjectsOfType<Planetoid>();
+        Bodies = FindObjectsOfType<CelestialBody>();
         Starfields = FindObjectsOfType<Starfield>();
 
         UpdateFrustumPlanes();
@@ -141,41 +138,21 @@ public class GodManager : MonoSingleton<GodManager>
         }
     }
 
-    private void UpdateCameraCulling(QuadCullingMethod currentMethod)
-    {
-        var mainCamera = CameraHelper.Main();
-
-        if (currentMethod == QuadCullingMethod.Unity)
-        {
-            mainCamera.useOcclusionCulling = true;
-        }
-        else
-        {
-            mainCamera.useOcclusionCulling = false;
-        }
-    }
-
     private void UpdateSettings()
     {
-        UpdateCameraCulling(CullingMethod);
-
-        if (Planetoids != null)
+        if (Bodies != null)
         {
-            if (Planetoids.Length != 0)
+            if (Bodies.Length != 0)
             {
-                for (int i = 0; i < Planetoids.Length; i++)
+                for (int i = 0; i < Bodies.Length; i++)
                 {
-                    if (Planetoids[i] != null)
+                    if (Bodies[i] != null)
                     {
-                        Planetoids[i].CullingMethod = CullingMethod;
-                        Planetoids[i].LODDistanceMultiplier = LODDistanceMultiplier;
-                        Planetoids[i].LODDistanceMethod = LODDistanceMethod;
-
-                        if (Planetoids[i].Atmosphere != null)
+                        if (Bodies[i].Atmosphere != null)
                         {
-                            Planetoids[i].Atmosphere.HDRMode = HDRMode;
-                            Planetoids[i].Atmosphere.Eclipses = Eclipses;
-                            Planetoids[i].Atmosphere.Planetshine = Planetshine;
+                            Bodies[i].Atmosphere.HDRMode = HDRMode;
+                            Bodies[i].Atmosphere.Eclipses = Eclipses;
+                            Bodies[i].Atmosphere.Planetshine = Planetshine;
                         }
                     }
                 }

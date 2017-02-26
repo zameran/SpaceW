@@ -37,8 +37,10 @@ using SpaceEngine.AtmosphericScattering.Sun;
 using SpaceEngine.Core.Bodies;
 using SpaceEngine.Core.PropertyNotification;
 using SpaceEngine.Core.Reanimator;
+
 using System.Collections.Generic;
 using System.ComponentModel;
+
 using UnityEngine;
 
 namespace SpaceEngine.AtmosphericScattering

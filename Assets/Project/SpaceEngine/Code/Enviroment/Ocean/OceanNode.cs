@@ -1,6 +1,8 @@
 ﻿using SpaceEngine.Core.Bodies;
 using SpaceEngine.Core.Reanimator;
 
+using System.Collections;
+
 using UnityEngine;
 
 namespace SpaceEngine.Ocean
@@ -40,7 +42,7 @@ namespace SpaceEngine.Ocean
         /// The maximum altitude at which the ocean must be displayed.
         /// </summary>
         [SerializeField]
-        protected float ZMin = 20000.0f;
+        public float ZMin = 20000.0f;
 
         /// <summary>
         /// Size of each grid in the projected grid. (number of pixels on screen).
@@ -121,11 +123,10 @@ namespace SpaceEngine.Ocean
             OceanMaterial.renderQueue = (int)RenderQueue + RenderQueueOffset;
 
             // Calculates the required data for the projected grid
-
-            var c2w = (Matrix4x4d)GodManager.Instance.CameraToWorld;
+            var c2w = GodManager.Instance.CameraToWorld;
             var cl = c2w * -Origin; // Camera in local space // TODO : Ocean origin
 
-            var radius = body.Radius;//Manager.IsDeformed() ? Manager.GetRadius() : 0.0f;
+            var radius = (OceanType == OceanSurfaceType.Spherized) ? body.Radius : 0.0f;
 
             if ((OceanType == OceanSurfaceType.Flat && cl.z > ZMin) || (radius > 0.0 && cl.Magnitude() > radius + ZMin) || (radius < 0.0 && (new Vector2d(cl.y, cl.z)).Magnitude() < -radius - ZMin))
             {
@@ -180,7 +181,7 @@ namespace SpaceEngine.Ocean
 
             OldLocalToOcean = l2o;
 
-            var stoc = (Matrix4x4d)GodManager.Instance.ScreenToCamera;
+            var stoc = GodManager.Instance.ScreenToCamera;
             var oc = c2o * Vector3d.zero; // TODO : Ocean origin
 
             var h = oc.z;
@@ -193,8 +194,9 @@ namespace SpaceEngine.Ocean
             var dA = (c2o * stoc_x).XYZ();
             var B = (c2o * stoc_y).XYZ();
 
-            var horizon1 = Vector3d.zero;
-            var horizon2 = Vector3d.zero;
+            Vector3d horizon1;
+            Vector3d horizon2;
+
             var offset = new Vector3d(-Offset.x, -Offset.y, oc.z);
 
             if (OceanType == OceanSurfaceType.Flat)
@@ -231,11 +233,6 @@ namespace SpaceEngine.Ocean
             OceanMaterial.SetVector("_Ocean_Color", UpwellingColor * 0.1f);
             OceanMaterial.SetVector("_Ocean_ScreenGridSize", new Vector2((float)Resolution / (float)Screen.width, (float)Resolution / (float)Screen.height));
             OceanMaterial.SetFloat("_Ocean_Radius", radius);
-
-            // TODO : OCEAN
-            //Manager.GetSkyNode().SetUniforms(OceanMaterial);
-            //Manager.GetSunNode().SetUniforms(OceanMaterial);
-            //Manager.SetUniforms(OceanMaterial);
         }
 
         protected override void Awake()
@@ -318,6 +315,17 @@ namespace SpaceEngine.Ocean
         }
 
         #endregion
+
+        /// <summary>
+        /// Inverting <see cref="ZMin"/> with interval to switch the matrices for rendering.
+        /// </summary>
+        /// <returns><see cref="Yielders.EndOfFrame"/></returns>
+        public IEnumerator InitializationFix()
+        {
+            ZMin *= -1.0f;
+            yield return Yielders.EndOfFrame;
+            ZMin *= -1.0f;
+        }
 
         public void Render()
         {

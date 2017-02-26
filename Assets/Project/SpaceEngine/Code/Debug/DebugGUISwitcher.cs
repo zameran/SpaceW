@@ -41,29 +41,34 @@ namespace SpaceEngine.Debugging
     {
         public GUISkin skin;
 
-        public DebugGUI[] GUIs;
+        public DebugGUI[] DebugComponents;
 
         public int state = 0;
 
         private void Start()
         {
-            ToogleAll(GUIs, false);
+            if (DebugComponents == null || DebugComponents.Length == 0)
+            {
+                DebugComponents = GetComponents<DebugGUI>();
+            }
+
+            ToogleAll(DebugComponents, false);
         }
 
         private void Update()
         {
             if (Input.GetKeyDown(KeyCode.F5))
             {
-                if (state == GUIs.Length)
+                if (state == DebugComponents.Length)
                 {
                     state = 0;
-                    ToogleAll(GUIs, false);
+                    ToogleAll(DebugComponents, false);
                     return;
                 }
 
-                ToogleAll(GUIs, false);
+                ToogleAll(DebugComponents, false);
                 state++;
-                ToogleAt(GUIs, true, state);
+                ToogleAt(DebugComponents, true, state);
             }
         }
 

@@ -33,6 +33,10 @@
 // Creator: zameran
 #endregion
 
+using System;
+using System.Collections.Generic;
+using System.Linq;
+
 using UnityEngine;
 
 namespace SpaceEngine.Debugging
@@ -60,7 +64,11 @@ namespace SpaceEngine.Debugging
 
         protected override void UI(int id)
         {
+            scrollPosition = GUILayout.BeginScrollView(scrollPosition, false, true);
+
             GUILayout.BeginVertical();
+
+            if (GUILayout.Button("Update")) SI.Get();
 
             GUILayoutExtensions.LabelWithSpace("Device Type: " + SI.deviceType, -8);
             GUILayoutExtensions.LabelWithSpace("Operation System: " + SI.operatingSystem, -8);
@@ -84,11 +92,50 @@ namespace SpaceEngine.Debugging
             GUILayoutExtensions.LabelWithSpace("RenderTextures: " + true, -8);
             GUILayoutExtensions.LabelWithSpace("3DTextures: " + SI.supports3DTextures, -8);
             GUILayoutExtensions.LabelWithSpace("Graphics Multithreading: " + SI.graphicsMultiThreaded, -8);
-            GUILayoutExtensions.LabelWithSpace("ARGB4444: " + SI.supportsARGB4444TextureFormat, -8);
-            GUILayoutExtensions.LabelWithSpace("ARGB32: " + SI.supportsARGB32TextureFormat, -8);
-            GUILayoutExtensions.LabelWithSpace("Depth Textures: " + SI.supportsDepthRenderTextureFormat, -8);
+
+            foreach (var renderTextureFormat in SI.RenderTextureFormats)
+            {
+                var supports = false;
+                var supportState = "NULL";
+
+                try
+                {
+                    supports = SystemInfo.SupportsRenderTextureFormat(renderTextureFormat);
+                    supportState = SI.Supports(supports);
+                }
+                catch (Exception ex)
+                {
+                    supports = false;
+                    supportState = ex.Message;
+                }
+
+                GUILayoutExtensions.LabelWithSpace(string.Format("RenderTexture.{0}: {1}", renderTextureFormat, supportState), -8);
+            }
+
+            foreach (var textureFormat in SI.TextureFormats)
+            {
+                var supports = false;
+                var supportState = "NULL";
+
+                try
+                {
+                    supports = SystemInfo.SupportsTextureFormat(textureFormat);
+                    supportState = SI.Supports(supports);
+                }
+                catch (Exception ex)
+                {
+                    supports = false;
+                    supportState = ex.Message;
+                }
+
+                GUILayoutExtensions.LabelWithSpace(string.Format("Texture.{0}: {1}", textureFormat, supportState), -8);
+            }
+
+            GUILayout.Space(10);
 
             GUILayout.EndVertical();
+
+            GUILayout.EndScrollView();
         }
     }
 
@@ -116,9 +163,9 @@ namespace SpaceEngine.Debugging
         public static string supportsComputeShaders;
         public static string supports3DTextures;
         public static string graphicsMultiThreaded;
-        public static string supportsARGB4444TextureFormat;
-        public static string supportsARGB32TextureFormat;
-        public static string supportsDepthRenderTextureFormat;
+
+        public static List<RenderTextureFormat> RenderTextureFormats;
+        public static List<TextureFormat> TextureFormats;
 
         public static void Get()
         {
@@ -143,12 +190,12 @@ namespace SpaceEngine.Debugging
             supportsComputeShaders = Supports(SystemInfo.supportsComputeShaders);
             supports3DTextures = Supports(SystemInfo.supports3DTextures);
             graphicsMultiThreaded = Supports(SystemInfo.graphicsMultiThreaded);
-            supportsARGB4444TextureFormat = Supports(SystemInfo.SupportsRenderTextureFormat(RenderTextureFormat.ARGB4444));
-            supportsARGB32TextureFormat = Supports(SystemInfo.SupportsRenderTextureFormat(RenderTextureFormat.ARGB32));
-            supportsDepthRenderTextureFormat = Supports(SystemInfo.SupportsRenderTextureFormat(RenderTextureFormat.Depth));
+
+            RenderTextureFormats = Enum.GetValues(typeof(RenderTextureFormat)).OfType<RenderTextureFormat>().ToList();
+            TextureFormats = Enum.GetValues(typeof(TextureFormat)).OfType<TextureFormat>().ToList();
         }
 
-        private static string Supports(bool supported)
+        public static string Supports(bool supported)
         {
             if (supported)
             {

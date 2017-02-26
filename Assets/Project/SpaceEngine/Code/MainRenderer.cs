@@ -33,23 +33,18 @@
 // Creator: zameran
 #endregion
 
-using System;
 
 using UnityEngine;
 
 [RequireComponent(typeof(Camera))]
 public sealed class MainRenderer : MonoBehaviour
 {
-    public bool OverrideExternalRendering = true;
-
     public Planetoid.PlanetoidDistanceToLODTargetComparer pdtltc;
 
     private void Start()
     {
         if (pdtltc == null)
             pdtltc = new Planetoid.PlanetoidDistanceToLODTargetComparer();
-
-        UpdateSettings();
     }
 
     private void Update()
@@ -59,34 +54,20 @@ public sealed class MainRenderer : MonoBehaviour
 
     private void OnEnable()
     {
-        UpdateSettings();
+
     }
 
     private void OnDisable()
     {
-        UpdateSettings();
-    }
 
-    private void UpdateSettings()
-    {
-        if (GodManager.ApplicationIsQuitting) return; // BRUTAL!
-        if (GodManager.Instance == null) return;
-
-        for (int i = 0; i < GodManager.Instance.Planetoids.Length; i++)
-        {
-            var planetoid = GodManager.Instance.Planetoids[i];
-
-            if (planetoid != null)
-                if (!planetoid.ExternalRendering && OverrideExternalRendering)
-                    planetoid.ExternalRendering = true;
-        }
     }
 
     public void Render()
     {
+        /*
         if (GodManager.Instance == null) return;
 
-        Array.Sort(GodManager.Instance.Planetoids, pdtltc);
+        Array.Sort(GodManager.Instance.Bodies, pdtltc);
 
         for (int i = 0; i < GodManager.Instance.Starfields.Length; i++)
         {
@@ -94,31 +75,32 @@ public sealed class MainRenderer : MonoBehaviour
                 GodManager.Instance.Starfields[i].Render();
         }
 
-        for (int i = 0; i < GodManager.Instance.Planetoids.Length; i++)
+        for (int i = 0; i < GodManager.Instance.Bodies.Length; i++)
         {
-            if (GodManager.Instance.Planetoids[i] != null)
-                GodManager.Instance.Planetoids[i].Render();
+            if (GodManager.Instance.Bodies[i] != null)
+                GodManager.Instance.Bodies[i].Render();
         }
 
         //-----------------------------------------------------------------------------
-        GodManager.Instance.Planetoids[0].RenderQueueOffset = 10001;
-        if (GodManager.Instance.Planetoids[0].Atmosphere != null)
-            GodManager.Instance.Planetoids[0].Atmosphere.RenderQueueOffset = 10002;
-        if (GodManager.Instance.Planetoids[0].Ocean != null)
-            GodManager.Instance.Planetoids[0].Ocean.RenderQueueOffset = 10003;
-        if (GodManager.Instance.Planetoids[0].Ring != null)
-            GodManager.Instance.Planetoids[0].Ring.RenderQueueOffset = 10000;
+        GodManager.Instance.Bodies[0].RenderQueueOffset = 10001;
+        if (GodManager.Instance.Bodies[0].Atmosphere != null)
+            GodManager.Instance.Bodies[0].Atmosphere.RenderQueueOffset = 10002;
+        if (GodManager.Instance.Bodies[0].Ocean != null)
+            GodManager.Instance.Bodies[0].Ocean.RenderQueueOffset = 10003;
+        if (GodManager.Instance.Bodies[0].Ring != null)
+            GodManager.Instance.Bodies[0].Ring.RenderQueueOffset = 10000;
 
-        for (int i = 1; i < GodManager.Instance.Planetoids.Length; i++)
+        for (int i = 1; i < GodManager.Instance.Bodies.Length; i++)
         {
-            GodManager.Instance.Planetoids[i].RenderQueueOffset = 1;
-            if (GodManager.Instance.Planetoids[i].Atmosphere != null)
-                GodManager.Instance.Planetoids[i].Atmosphere.RenderQueueOffset = 2;
-            if (GodManager.Instance.Planetoids[i].Ocean != null)
-                GodManager.Instance.Planetoids[i].Ocean.RenderQueueOffset = 3;
-            if (GodManager.Instance.Planetoids[i].Ring != null)
-                GodManager.Instance.Planetoids[i].Ring.RenderQueueOffset = 0;
+            GodManager.Instance.Bodies[i].RenderQueueOffset = 1;
+            if (GodManager.Instance.Bodies[i].Atmosphere != null)
+                GodManager.Instance.Bodies[i].Atmosphere.RenderQueueOffset = 2;
+            if (GodManager.Instance.Bodies[i].Ocean != null)
+                GodManager.Instance.Bodies[i].Ocean.RenderQueueOffset = 3;
+            if (GodManager.Instance.Bodies[i].Ring != null)
+                GodManager.Instance.Bodies[i].Ring.RenderQueueOffset = 0;
         }
         //-----------------------------------------------------------------------------
+        */
     }
 }
