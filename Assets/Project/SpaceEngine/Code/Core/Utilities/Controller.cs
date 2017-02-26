@@ -219,12 +219,12 @@ namespace SpaceEngine.Core.Utilities
             NearPressed = false;
             FarPressed = false;
 
-            if (Input.GetAxis("Mouse ScrollWheel") < 0.0f || Input.GetKey(KeyCode.PageUp))
+            if (Input.GetAxis("Mouse ScrollWheel") < 0.0f || Input.GetKey(KeyCode.PageDown))
             {
                 FarPressed = true;
             }
 
-            if (Input.GetAxis("Mouse ScrollWheel") > 0.0f || Input.GetKey(KeyCode.PageDown))
+            if (Input.GetAxis("Mouse ScrollWheel") > 0.0f || Input.GetKey(KeyCode.PageUp))
             {
                 NearPressed = true;
             }
@@ -232,6 +232,8 @@ namespace SpaceEngine.Core.Utilities
 
         private void KeyDown()
         {
+            if (Input.GetKey(KeyCode.LeftControl) || Input.GetKey(KeyCode.RightControl)) return;
+
             ForwardPressed = Input.GetKey(KeyCode.UpArrow) || Input.GetKey(KeyCode.W);
             BackwardPressed = Input.GetKey(KeyCode.DownArrow) || Input.GetKey(KeyCode.S);
             LeftPressed = Input.GetKey(KeyCode.LeftArrow) || Input.GetKey(KeyCode.A);

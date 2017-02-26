@@ -1,4 +1,5 @@
-﻿using SpaceEngine.Core.Reanimator;
+﻿using SpaceEngine.Core.Bodies;
+using SpaceEngine.Core.Reanimator;
 
 using UnityEngine;
 
@@ -7,7 +8,7 @@ namespace SpaceEngine.Ocean
     /// <summary>
     /// An AbstractTask to draw a flat or spherical ocean. This class provides the functions and data to draw a flat projected grid but nothing else.
     /// </summary>
-    public abstract class OceanNode : Node<OceanNode>, IReanimateable
+    public abstract class OceanNode : Node<OceanNode>, IUniformed<Material>, IUniformed<MaterialPropertyBlock>, IReanimateable
     {
         public enum OceanSurfaceType : byte
         {
@@ -15,11 +16,11 @@ namespace SpaceEngine.Ocean
             Spherized
         }
 
-        public Planetoid planetoid;
+        public CelestialBody body;
 
         public Shader OceanShader;
 
-        public EngineRenderQueue RenderQueue = EngineRenderQueue.Background;
+        public EngineRenderQueue RenderQueue = EngineRenderQueue.Geometry;
         public int RenderQueueOffset = 0;
 
         public OceanSurfaceType OceanType = OceanSurfaceType.Spherized;
@@ -58,7 +59,7 @@ namespace SpaceEngine.Ocean
         /// </summary>
         public bool DrawOcean { get; protected set; }
 
-        public Vector3 Origin { get { return planetoid != null ? planetoid.Origin : transform.position; } }
+        public Vector3 Origin { get { return body != null ? body.transform.position : transform.position; } } //TODO : ORIGIN
 
         /// <summary>
         /// Concrete classes must provide a function that returns the variance of the waves need for the BRDF rendering of waves.
@@ -80,7 +81,7 @@ namespace SpaceEngine.Ocean
         {
             OceanMaterial = MaterialHelper.CreateTemp(OceanShader, "Ocean");
 
-            planetoid.Atmosphere.InitUniforms(OceanMaterial);
+            body.Atmosphere.InitUniforms(OceanMaterial);
 
             OldLocalToOcean = Matrix4x4d.identity;
             Offset = Vector4.zero;
@@ -124,7 +125,7 @@ namespace SpaceEngine.Ocean
             var c2w = (Matrix4x4d)GodManager.Instance.CameraToWorld;
             var cl = c2w * -Origin; // Camera in local space // TODO : Ocean origin
 
-            var radius = planetoid.PlanetRadius;//Manager.IsDeformed() ? Manager.GetRadius() : 0.0f;
+            var radius = body.Radius;//Manager.IsDeformed() ? Manager.GetRadius() : 0.0f;
 
             if ((OceanType == OceanSurfaceType.Flat && cl.z > ZMin) || (radius > 0.0 && cl.Magnitude() > radius + ZMin) || (radius < 0.0 && (new Vector2d(cl.y, cl.z)).Magnitude() < -radius - ZMin))
             {
@@ -218,7 +219,7 @@ namespace SpaceEngine.Ocean
                 horizon2 = new Vector3d(beta0 * beta0 - gamma0, 2.0 * (beta0 * beta1 - gamma1), beta1 * beta1 - gamma2);
             }
 
-            var sunDirection = planetoid.Atmosphere.GetSunDirection(planetoid.Atmosphere.Suns[0]);
+            var sunDirection = body.Atmosphere.GetSunDirection(body.Atmosphere.Suns[0]);
             var oceanSunDirection = l2o.ToMatrix3x3d() * sunDirection;
 
             OceanMaterial.SetVector("_Ocean_SunDir", oceanSunDirection.ToVector3());
@@ -261,6 +262,54 @@ namespace SpaceEngine.Ocean
 
         #endregion
 
+        #region IUniformed<Material>
+
+        public virtual void InitUniforms(Material target)
+        {
+            if (target == null) return;
+        }
+
+        public virtual void SetUniforms(Material target)
+        {
+            if (target == null) return;
+
+            target.SetFloat("_Ocean_Sigma", GetMaxSlopeVariance());
+            target.SetVector("_Ocean_Color", UpwellingColor * 0.1f);
+            target.SetFloat("_Ocean_DrawBRDF", DrawOcean ? 0.0f : 1.0f);
+            target.SetFloat("_Ocean_Level", OceanLevel);
+        }
+
+        #endregion
+
+        #region IUniformed<MaterialPropertyBlock>
+
+        public virtual void InitUniforms(MaterialPropertyBlock target)
+        {
+            if (target == null) return;
+        }
+
+        public virtual void SetUniforms(MaterialPropertyBlock target)
+        {
+            if (target == null) return;
+
+            target.SetFloat("_Ocean_Sigma", GetMaxSlopeVariance());
+            target.SetVector("_Ocean_Color", UpwellingColor * 0.1f);
+            target.SetFloat("_Ocean_DrawBRDF", DrawOcean ? 0.0f : 1.0f);
+            target.SetFloat("_Ocean_Level", OceanLevel);
+        }
+
+        #endregion
+
+        #region IUniformed
+
+        public virtual void InitSetUniforms()
+        {
+            InitUniforms(OceanMaterial);
+            SetUniforms(OceanMaterial);
+        }
+
+        #endregion
+
         #region IReanimateable
 
         public void Reanimate()
@@ -276,28 +325,8 @@ namespace SpaceEngine.Ocean
 
             foreach (var mesh in ScreenMeshGrids)
             {
-                Graphics.DrawMesh(mesh, Matrix4x4.identity, OceanMaterial, planetoid.DrawLayer, CameraHelper.Main(), 0, planetoid.MPB);
+                Graphics.DrawMesh(mesh, Matrix4x4.identity, OceanMaterial, 0, CameraHelper.Main(), 0, body.MPB);
             }
-        }
-
-        public void SetUniforms(Material mat)
-        {
-            if (mat == null) return;
-
-            mat.SetFloat("_Ocean_Sigma", GetMaxSlopeVariance());
-            mat.SetVector("_Ocean_Color", UpwellingColor * 0.1f);
-            mat.SetFloat("_Ocean_DrawBRDF", (DrawOcean) ? 0.0f : 1.0f);
-            mat.SetFloat("_Ocean_Level", OceanLevel);
-        }
-
-        public void SetUniforms(MaterialPropertyBlock block)
-        {
-            if (block == null) return;
-
-            block.SetFloat("_Ocean_Sigma", GetMaxSlopeVariance());
-            block.SetVector("_Ocean_Color", UpwellingColor * 0.1f);
-            block.SetFloat("_Ocean_DrawBRDF", (DrawOcean) ? 0.0f : 1.0f);
-            block.SetFloat("_Ocean_Level", OceanLevel);
         }
     }
 }

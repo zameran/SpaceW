@@ -22,7 +22,7 @@
 			
 			#include "../HDR.cginc"
 			#include "../Atmosphere.cginc"
-			//#include "Assets/Proland/Shaders/Ocean/OceanBrdf.cginc"
+			#include "../Ocean/OceanBRDF.cginc"
 			
 			uniform float2 _Deform_Blending;
 			uniform float4x4 _Deform_LocalToWorld;
@@ -78,7 +78,7 @@
 			{		
 				float2 zfc = texTileLod(_Elevation_Tile, v.texcoord.xy, _Elevation_TileCoords, _Elevation_TileSize).xy;
 				
-				if(zfc.x <= _Ocean_Level && _Ocean_DrawBRDF == 1.0)
+				if (zfc.x <= _Ocean_Level && _Ocean_DrawBRDF == 1.0)
 				{
 					zfc = float2(0, 0);
 				}
@@ -136,8 +136,10 @@
 				fn.xyz = texTile(_Normals_Tile, IN.uv, _Normals_TileCoords, _Normals_TileSize).xyz;
 				fn.z = sqrt(max(0.0, 1.0 - dot(fn.xy, fn.xy)));
 				
-				//if(ht <= _Ocean_Level && _Ocean_DrawBRDF == 1.0)
-				//	fn = float3(0,0,1);
+				if (ht <= _Ocean_Level && _Ocean_DrawBRDF == 1.0)
+				{
+					fn = float3(0, 0, 1);
+				}
 	
 				float3x3 TTW = _Deform_TangentFrameToWorld;
 				fn = mul(TTW, fn);
@@ -152,11 +154,12 @@
 				SunRadianceAndSkyIrradiance(P, fn, WSD, sunL, skyE);
 				
 				// diffuse ground color
-				//float3 groundColor = 1.5 * reflectance.rgb * (sunL * max(cTheta, 0.0) + skyE) / M_PI;
 				float3 groundColor = 1.5 * RGB2Reflectance(reflectance).rgb * (sunL * max(cTheta, 0) + skyE) / M_PI;
 				
-				//if(ht <= _Ocean_Level && _Ocean_DrawBRDF == 1.0)
-				//	groundColor = OceanRadiance(WSD, -v, V, _Ocean_Sigma, sunL, skyE, _Ocean_Color);
+				if (ht <= _Ocean_Level && _Ocean_DrawBRDF == 1.0)
+				{
+					groundColor = OceanRadiance(WSD, -v, V, _Ocean_Sigma, sunL, skyE, _Ocean_Color);
+				}
 
 				float3 extinction;
 				float3 inscatter = InScattering(WCPO, P, WSD, extinction, 0.0);

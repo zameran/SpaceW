@@ -38,6 +38,7 @@ using SpaceEngine.AtmosphericScattering;
 using SpaceEngine.Core.Terrain;
 using SpaceEngine.Core.Tile.Samplers;
 using SpaceEngine.Core.Utilities;
+using SpaceEngine.Ocean;
 
 using System.Collections.Generic;
 using System.Linq;
@@ -49,6 +50,7 @@ namespace SpaceEngine.Core.Bodies
     public class CelestialBody : Node<CelestialBody>, ICelestialBody, IUniformed<MaterialPropertyBlock>
     {
         public Atmosphere Atmosphere;
+        public OceanNode Ocean;
 
         public int GridResolution = 25;
 
@@ -144,7 +146,6 @@ namespace SpaceEngine.Core.Bodies
                     Keywords.Add("ATMOSPHERE_OFF");
                 }
 
-                /*
                 if (Ocean != null)
                 {
                     Keywords.Add("OCEAN_ON");
@@ -153,8 +154,6 @@ namespace SpaceEngine.Core.Bodies
                 {
                     Keywords.Add("OCEAN_OFF");
                 }
-                */
-                Keywords.Add("OCEAN_OFF");
             }
             else
             {
@@ -207,6 +206,12 @@ namespace SpaceEngine.Core.Bodies
                     Atmosphere.body = this;
             }
 
+            if (Ocean != null)
+            {
+                if (Ocean.body == null)
+                    Ocean.body = this;
+            }
+
             // TODO : AAAAAAAAA CRAZY STUFF!
             var view = GodManager.Instance.View as PlanetView;
             if (view != null)
@@ -234,6 +239,11 @@ namespace SpaceEngine.Core.Bodies
                 {
                     Atmosphere.Render();
                 }
+            }
+
+            if (Ocean != null)
+            {
+                Ocean.Render();
             }
 
             // NOTE : Update controller and the draw. This can help avoid terrain nodes jitter...
@@ -297,6 +307,7 @@ namespace SpaceEngine.Core.Bodies
             }
 
             if (Atmosphere != null) Atmosphere.Reanimate();
+            if (Ocean != null) Ocean.Reanimate();
         }
 
         private void DrawTerrain(TerrainNode node)

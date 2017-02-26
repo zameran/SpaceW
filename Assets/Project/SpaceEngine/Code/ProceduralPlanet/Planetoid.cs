@@ -178,8 +178,8 @@ public sealed class Planetoid : Planet, IPlanet, IReanimateable
 
         if (Ocean != null)
         {
-            if (Ocean.planetoid == null)
-                Ocean.planetoid = this;
+            //if (Ocean.body == null)
+            //    Ocean.body = this;
         }
 
         if (Cloudsphere != null)

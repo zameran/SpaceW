@@ -205,14 +205,17 @@ namespace SpaceEngine.Core.Terrain
                 Body.Atmosphere.SetUniforms(TerrainMaterial);
             }
 
-            //Manager.GetSunNode().SetUniforms(TerrainMaterial);
-            //Body.SetUniforms(TerrainMaterial);
-            Deformation.SetUniforms(this, TerrainMaterial);
+            if (Body.Ocean != null)
+            {
+                Body.Ocean.SetUniforms(TerrainMaterial);
+            }
+            else
+            {
+                TerrainMaterial.SetFloat("_Ocean_DrawBRDF", 0.0f);
+            }
 
-            //if (Manager.GetOceanNode() != null)
-            //    Manager.GetOceanNode().SetUniforms(TerrainMaterial);
-            //else
-            TerrainMaterial.SetFloat("_Ocean_DrawBRDF", 0.0f);
+            //Manager.GetSunNode().SetUniforms(TerrainMaterial);
+            Deformation.SetUniforms(this, TerrainMaterial);
 
             //if (Manager.GetPlantsNode() != null)
             //    Manager.GetPlantsNode().SetUniforms(TerrainMaterial);
