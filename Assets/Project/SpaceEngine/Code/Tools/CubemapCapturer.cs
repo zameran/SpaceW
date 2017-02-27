@@ -39,8 +39,6 @@ using UnityEngine;
 
 public class CubemapCapturer : MonoBehaviour
 {
-    public Planetoid planet = null;
-
     public int cubemapSize = 128;
 
     public bool oneFacePerFrame = false;
@@ -75,7 +73,7 @@ public class CubemapCapturer : MonoBehaviour
     {
         Camera mainCamera = CameraHelper.Main();
 
-        if (mainCamera == null || planet == null) return;
+        if (mainCamera == null) return;
 
         if (!renderCamera)
         {
@@ -111,8 +109,6 @@ public class CubemapCapturer : MonoBehaviour
                 }
             }
         }
-
-        planet.Render();
 
         renderCamera.transform.position = transform.position;
 

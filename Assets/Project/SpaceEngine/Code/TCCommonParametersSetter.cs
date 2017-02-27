@@ -39,8 +39,6 @@ using UnityEngine;
 
 public sealed class TCCommonParametersSetter : MonoBehaviour
 {
-    public Planetoid Planet;
-    public PatchSphere PatchSphere;
     public CelestialBody CelestialBody;
 
     public float Lacunarity = 2.218281828459f;
@@ -83,29 +81,7 @@ public sealed class TCCommonParametersSetter : MonoBehaviour
 
     private void Start()
     {
-        if ((Planet != null))
-            UpdateUniforms(false); //NOTE : Update uniforms, but do not dispatch, cuz it will be called automatically...
-    }
 
-    [ContextMenu("UpdateUniforms")]
-    public void UpdateUniforms()
-    {
-        UpdateUniforms(true);
-    }
-
-    public void UpdateUniforms(bool dispatch)
-    {
-        if (Planet.Quads.Count == 0) return;
-
-        for (int i = 0; i < Planet.Quads.Count; i++)
-        {
-            UpdateUniforms(Planet.Quads[i].CoreShader);
-
-            if (Application.isPlaying)
-            {
-                Planet.Quads[i].Dispatch();
-            }
-        }
     }
 
     public void UpdateUniforms(Material mat)
