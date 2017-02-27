@@ -51,12 +51,16 @@ namespace SpaceEngine.Core.Bodies
     {
         public Atmosphere Atmosphere;
         public OceanNode Ocean;
+        public Ring Ring;
+
+        public List<Shadow> Shadows = new List<Shadow>();
 
         public int GridResolution = 25;
 
         public bool DrawGizmos = false;
 
         public bool AtmosphereEnabled = true;
+        public bool RingEnabled = true;
 
         public float Amlitude = 32.0f;
         public float Frequency = 64.0f;
@@ -86,13 +90,12 @@ namespace SpaceEngine.Core.Bodies
         {
             var Keywords = new List<string>();
 
-            /*
-            if (planet.Ring != null)
+            if (Ring != null)
             {
-                Keywords.Add(planet.RingEnabled ? "RING_ON" : "RING_OFF");
-                if (planet.RingEnabled) Keywords.Add("SCATTERING");
+                Keywords.Add(RingEnabled ? "RING_ON" : "RING_OFF");
+                if (RingEnabled) Keywords.Add("SCATTERING");
 
-                var shadowsCount = planet.Shadows.Count((shadow) => shadow != null && Helper.Enabled(shadow));
+                var shadowsCount = Shadows.Count((shadow) => shadow != null && Helper.Enabled(shadow));
 
                 if (shadowsCount > 0)
                 {
@@ -110,7 +113,6 @@ namespace SpaceEngine.Core.Bodies
             {
                 Keywords.Add("RING_OFF");
             }
-            */
 
             if (Atmosphere != null)
             {
@@ -186,6 +188,11 @@ namespace SpaceEngine.Core.Bodies
             {
                 Atmosphere.SetUniforms(target);
             }
+
+            if (Ring != null)
+            {
+                Ring.SetShadows(MPB, Shadows);
+            }
         }
 
         public void InitSetUniforms()
@@ -213,6 +220,12 @@ namespace SpaceEngine.Core.Bodies
 
                 // TODO : Whhhhhhaaattaaaaaafuuuuckkk!
                 StartCoroutine(Ocean.InitializationFix());
+            }
+
+            if (Ring != null)
+            {
+                if (Ring.body == null)
+                    Ring.body = this;
             }
 
             // TODO : AAAAAAAAA CRAZY STUFF!
@@ -247,6 +260,11 @@ namespace SpaceEngine.Core.Bodies
             if (Ocean != null)
             {
                 Ocean.Render();
+            }
+
+            if (Ring != null)
+            {
+                Ring.Render();
             }
 
             // NOTE : Update controller and the draw. This can help avoid terrain nodes jitter...

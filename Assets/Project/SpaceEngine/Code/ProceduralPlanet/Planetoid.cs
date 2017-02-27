@@ -190,8 +190,8 @@ public sealed class Planetoid : Planet, IPlanet, IReanimateable
 
         if (Ring != null)
         {
-            if (Ring.planetoid == null)
-                Ring.planetoid = this;
+            //if (Ring.body == null)
+            //    Ring.body = this;
         }
 
         MPB = new MaterialPropertyBlock();

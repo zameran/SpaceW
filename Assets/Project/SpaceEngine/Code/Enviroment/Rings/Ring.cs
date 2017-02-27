@@ -33,6 +33,8 @@
 // Creator: zameran
 #endregion
 
+using SpaceEngine.Core.Bodies;
+
 using System.Collections.Generic;
 
 using UnityEngine;
@@ -41,7 +43,7 @@ using ZFramework.Unity.Common.PerfomanceMonitor;
 
 public class Ring : Node<Ring>, IUniformed<Material>
 {
-    public Planetoid planetoid;
+    public CelestialBody body;
 
     public List<Light> Lights = new List<Light>();
     public List<Shadow> Shadows = new List<Shadow>();
@@ -119,8 +121,6 @@ public class Ring : Node<Ring>, IUniformed<Material>
         }
 
         SetUniforms(RingMaterial);
-
-        if (planetoid != null) SetShadows(planetoid.MPB, planetoid.Shadows);
     }
 
     protected override void Awake()
