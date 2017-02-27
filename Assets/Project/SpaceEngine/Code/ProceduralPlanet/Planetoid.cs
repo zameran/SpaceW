@@ -184,8 +184,8 @@ public sealed class Planetoid : Planet, IPlanet, IReanimateable
 
         if (Cloudsphere != null)
         {
-            if (Cloudsphere.planetoid == null)
-                Cloudsphere.planetoid = this;
+            //if (Cloudsphere.body == null)
+            //    Cloudsphere.body = this;
         }
 
         if (Ring != null)

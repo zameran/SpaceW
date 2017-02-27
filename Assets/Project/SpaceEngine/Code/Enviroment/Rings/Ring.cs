@@ -234,7 +234,10 @@ public class Ring : Node<Ring>, IUniformed<Material>
 
         for (int i = 0; i < Segments.Count; i++)
         {
-            Segments[i].Render();
+            if (Segments[i] != null)
+            {
+                Segments[i].Render();
+            }
         }
     }
 

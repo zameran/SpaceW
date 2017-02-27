@@ -456,9 +456,9 @@ public sealed class Quad : Node<Quad>, IQuad, IUniformed<Material>, IUniformed<C
             QuadAABB = GetVolumeBox(Planetoid.TerrainMaxHeight, 0);
         }
 
-        //if (Planetoid.Ring != null) Planetoid.Ring.SetShadows(QuadMaterial, Planetoid.Shadows);
-        //if (Planetoid.NPS != null) Planetoid.NPS.UpdateUniforms(QuadMaterial); //(WIP) For SE Coloring in fragment shader work...
-        //if (Planetoid.tccps != null) Planetoid.tccps.UpdateUniforms(QuadMaterial); //(WIP) For SE Coloring in fragment shader work...
+        //if (Planetoid.Ring != null) Body.Ring.SetShadows(QuadMaterial, body.Shadows);
+        //if (Planetoid.NPS != null) Body.NPS.UpdateUniforms(QuadMaterial); //(WIP) For SE Coloring in fragment shader work...
+        //if (Planetoid.tccps != null) Body.tccps.UpdateUniforms(QuadMaterial); //(WIP) For SE Coloring in fragment shader work...
 
         if (QuadMaterial == null) return;
 
@@ -697,7 +697,7 @@ public sealed class Quad : Node<Quad>, IQuad, IUniformed<Material>, IUniformed<C
 
         if (CoreShader == null) return;
 
-        EventManager.PlanetoidEvents.OnDispatchStarted.Invoke(Planetoid, this);
+        //EventManager.PlanetoidEvents.OnDispatchStarted.Invoke(Planetoid, this);
 
         // NOTE : I still need this stuff...
         int kernel1 = CoreShader.FindKernel("HeightMain");
@@ -721,8 +721,8 @@ public sealed class Quad : Node<Quad>, IQuad, IUniformed<Material>, IUniformed<C
 
         BuffersCreated = false;
 
-        EventManager.PlanetoidEvents.OnDispatchEnd.Invoke(Planetoid, this);
-        EventManager.PlanetoidEvents.OnDispatchFinished.Invoke(Planetoid, this);
+        //EventManager.PlanetoidEvents.OnDispatchEnd.Invoke(Planetoid, this);
+        //EventManager.PlanetoidEvents.OnDispatchFinished.Invoke(Planetoid, this);
     }
 
     private void SetupVectors(Quad quad, int id, bool staticX, bool staticY, bool staticZ)

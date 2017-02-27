@@ -39,12 +39,9 @@ using UnityEngine;
 [RequireComponent(typeof(Camera))]
 public sealed class MainRenderer : MonoBehaviour
 {
-    public Planetoid.PlanetoidDistanceToLODTargetComparer pdtltc;
-
     private void Start()
     {
-        if (pdtltc == null)
-            pdtltc = new Planetoid.PlanetoidDistanceToLODTargetComparer();
+
     }
 
     private void Update()

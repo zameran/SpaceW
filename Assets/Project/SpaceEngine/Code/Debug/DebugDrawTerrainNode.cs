@@ -39,8 +39,12 @@ using UnityEngine;
 
 namespace SpaceEngine.Debugging
 {
-    public sealed class DebugDrawTerrainNode : DebugDraw<CelestialBody>
+    public sealed class DebugDrawTerrainNode : DebugDraw
     {
+        public CelestialBody Target;
+
+        private readonly Color[] Colors = new Color[] { Color.blue, Color.red, Color.yellow, Color.green, Color.magenta, Color.cyan };
+
         protected override void Start()
         {
             base.Start();
@@ -62,14 +66,16 @@ namespace SpaceEngine.Debugging
             if (UnityEditor.SceneView.currentDrawingSceneView != null) return; //Do not draw at Scene tab in editor.
 #endif
 
-            for (byte i = 0; i < Planet.TerrainNodes.Count; i++)
+            if (Target == null) return;
+
+            for (byte i = 0; i < Target.TerrainNodes.Count; i++)
             {
-                var q = Planet.TerrainNodes[i];
+                var q = Target.TerrainNodes[i];
                 var root = q.TerrainQuadRoot;
 
                 if (root == null) continue;
 
-                root.DrawQuadOutline(CameraHelper.Main(), lineMaterial, Color.blue);
+                root.DrawQuadOutline(CameraHelper.Main(), lineMaterial, Colors[q.Face % 6]);
             }
         }
     }

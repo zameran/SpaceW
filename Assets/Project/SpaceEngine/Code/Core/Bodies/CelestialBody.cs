@@ -62,7 +62,7 @@ namespace SpaceEngine.Core.Bodies
         public bool AtmosphereEnabled = true;
         public bool RingEnabled = true;
 
-        public float Amlitude = 32.0f;
+        public float Amplitude = 32.0f;
         public float Frequency = 64.0f;
 
         public Mesh QuadMesh;
