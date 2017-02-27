@@ -77,6 +77,8 @@ namespace SpaceEngine.Core.Bodies
         public NoiseParametersSetter NPS = null;
         public TCCommonParametersSetter TCCPS = null;
 
+        public Vector3 Offset { get; set; }
+
         #region ICelestialBody
 
         [SerializeField]
@@ -241,7 +243,7 @@ namespace SpaceEngine.Core.Bodies
 
             MPB = new MaterialPropertyBlock();
 
-            Origin = new Vector3(0.0f, 0.0f, Radius);
+            Offset = new Vector3(0.0f, 0.0f, Radius);
 
             if (NPS == null) NPS = GetComponent<NoiseParametersSetter>();
             NPS.LoadAndInit();
