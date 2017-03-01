@@ -41,69 +41,6 @@ public static class MeshFactory
 {
     public enum PLANE { XY, XZ, YZ };
 
-    public static Mesh SetupQuadMesh()
-    {
-        int nVerts = QuadSettings.Vertices;
-        int nVertsPerEdge = QuadSettings.VerticesPerSide;
-
-        Vector3[] dummyVerts = new Vector3[nVerts];
-        Vector2[] uv0 = new Vector2[nVerts];
-
-        int[] triangles = new int[(nVertsPerEdge - 1) * (nVertsPerEdge - 1) * 2 * 3];
-
-        float height = 0;
-
-        for (int r = 0; r < nVertsPerEdge; r++)
-        {
-            int rowStartID = r * nVertsPerEdge;
-
-            for (int c = 0; c < nVertsPerEdge; c++)
-            {
-                int vertID = rowStartID + c;
-
-                dummyVerts[vertID] = new Vector3(c, height, r);
-
-                Vector2 uv = new Vector2();
-
-                uv.x = r / (float)(nVertsPerEdge - 1);
-                uv.y = c / (float)(nVertsPerEdge - 1);
-
-                uv0[vertID] = uv;
-            }
-        }
-
-        int triangleIndex = 0;
-
-        for (int r = 0; r < nVertsPerEdge - 1; r++)
-        {
-            int rowStartID = r * nVertsPerEdge;
-            int rowAboveStartID = (r + 1) * nVertsPerEdge;
-
-            for (int c = 0; c < nVertsPerEdge - 1; c++)
-            {
-                int vertID = rowStartID + c;
-                int vertAboveID = rowAboveStartID + c;
-
-                triangles[triangleIndex++] = vertID;
-                triangles[triangleIndex++] = vertAboveID;
-                triangles[triangleIndex++] = vertAboveID + 1;
-
-                triangles[triangleIndex++] = vertID;
-                triangles[triangleIndex++] = vertAboveID + 1;
-                triangles[triangleIndex++] = vertID + 1;
-            }
-        }
-
-        Mesh dummyMesh = new Mesh();
-        dummyMesh.vertices = dummyVerts;
-        dummyMesh.uv = uv0;
-        dummyMesh.SetTriangles(triangles, 0);
-        dummyMesh.name = string.Format("PrototypeMesh_({0})", Random.Range(float.MinValue, float.MaxValue));
-        dummyMesh.hideFlags = HideFlags.DontSave;
-
-        return dummyMesh;
-    }
-
     public static Mesh MakeOceanPlane(int w, int h, float offset, float scale)
     {
         var vertices = new Vector3[w * h];

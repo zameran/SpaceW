@@ -122,7 +122,7 @@ namespace SpaceEngine.AtmosphericScattering
 
         public List<AtmosphereSun> Suns = new List<AtmosphereSun>();
 
-        public List<Planet> EclipseCasters = new List<Planet>();
+        public List<CelestialBody> EclipseCasters = new List<CelestialBody>();
         public List<GameObject> ShineCasters = new List<GameObject>();
 
         private AtmosphereParameters atmosphereParameters;
@@ -462,7 +462,7 @@ namespace SpaceEngine.AtmosphericScattering
                     break;
                 }
 
-                occludersMatrix.SetRow(i, VectorHelper.MakeFrom(EclipseCasters[i].Origin - Origin, EclipseCasters[i].PlanetRadius));
+                occludersMatrix.SetRow(i, VectorHelper.MakeFrom(EclipseCasters[i].Origin - Origin, EclipseCasters[i].Radius));
             }
         }
 

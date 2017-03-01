@@ -48,15 +48,9 @@ public class GodManager : MonoSingleton<GodManager>
     public Controller Controller;
 
     public Plane[] FrustumPlanes;
-    public FrustumPlane[] FrustumPlanesTS;
-    public Mesh PrototypeMesh;
 
     public ComputeShader WriteData;
     public ComputeShader ReadData;
-
-    public OutputStruct[] PreOutputDataBuffer;
-    public OutputStruct[] PreOutputSubDataBuffer;
-    public OutputStruct[] OutputDataBuffer;
 
     public bool Debug = true;
     public bool UpdateFrustumPlanesNow = true;
@@ -87,16 +81,6 @@ public class GodManager : MonoSingleton<GodManager>
         Starfields = FindObjectsOfType<Starfield>();
 
         UpdateFrustumPlanes();
-
-        if (PrototypeMesh == null)
-        {
-            PrototypeMesh = MeshFactory.SetupQuadMesh();
-        }
-
-        PreOutputDataBuffer = new OutputStruct[QuadSettings.VerticesWithBorder];
-        PreOutputSubDataBuffer = new OutputStruct[QuadSettings.VerticesWithBorderFull];
-        OutputDataBuffer = new OutputStruct[QuadSettings.Vertices];
-
         UpdateSettings();
     }
 
@@ -115,8 +99,6 @@ public class GodManager : MonoSingleton<GodManager>
     protected override void OnDestroy()
     {
         base.OnDestroy();
-
-        Helper.Destroy(PrototypeMesh);
     }
 
     private void UpdateSchedular()
@@ -129,12 +111,6 @@ public class GodManager : MonoSingleton<GodManager>
         if (CameraHelper.Main() != null)
         {
             FrustumPlanes = GeometryUtility.CalculateFrustumPlanes(CameraHelper.Main());
-            FrustumPlanesTS = new FrustumPlane[FrustumPlanes.Length];
-
-            for (byte i = 0; i < FrustumPlanes.Length; i++)
-            {
-                FrustumPlanesTS[i] = FrustumPlanes[i];
-            }
         }
     }
 
