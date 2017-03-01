@@ -10,13 +10,13 @@ namespace SpaceEngine.Core.Terrain
     /// <summary>
     /// Provides a framework to draw and update view-dependent, quadtree based terrains.
     /// This framework provides classes to represent the terrain quadtree, classes to
-    /// associate data produced by a <see cref="SpaceEngine.Core.Tile.Producer.TileProducer"/> to the quads of this
+    /// associate data produced by a <see cref="Tile.Producer.TileProducer"/> to the quads of this
     /// quadtree, as well as classes to update and draw such terrains (which can be deformed to get spherical).
     /// A view dependent, quadtree based terrain. This class provides access to the
     /// terrain quadtree, defines the terrain deformation (can be used to get planet
     /// sized terrains), and defines how the terrain quadtree must be subdivided based
     /// on the viewer position. This class does not give any direct or indirect access to the terrain data (elevations, normals, texture). 
-    /// The terrain data must be managed by <see cref="SpaceEngine.Core.Tile.Producer.TileProducer"/>, and stored in TileStorage. 
+    /// The terrain data must be managed by <see cref="Tile.Producer.TileProducer"/>, and stored in TileStorage. 
     /// The link between with the terrain quadtree is provided by the TileSampler class.
     /// </summary>
     public class TerrainNode : Node<TerrainNode>
