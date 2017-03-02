@@ -1,4 +1,6 @@
-﻿using System;
+﻿using SpaceEngine.Debugging;
+
+using System;
 
 using UnityEngine;
 
@@ -95,7 +97,8 @@ namespace SpaceEngine.Core.Utilities
             // NOTE : has not been tested and not currently used
             if (AnimationValue >= 0.0)
             {
-                AnimationValue = View.Interpolate(StartPosition.X, StartPosition.Y, StartPosition.Theta, StartPosition.Phi, StartPosition.Distance, EndPosition.X, EndPosition.Y, EndPosition.Theta, EndPosition.Phi, EndPosition.Distance, AnimationValue);
+                AnimationValue = View.Interpolate(StartPosition.X, StartPosition.Y, StartPosition.Theta, StartPosition.Phi, StartPosition.Distance, EndPosition.X, EndPosition.Y, EndPosition.Theta,
+                    EndPosition.Phi, EndPosition.Distance, AnimationValue);
 
                 if (Math.Abs(AnimationValue - 1.0) < 0.00001)
                 {
@@ -219,8 +222,23 @@ namespace SpaceEngine.Core.Utilities
             TargetPosition = p;
         }
 
+        private void KeyDown()
+        {
+            FarPressed = Input.GetKey(KeyCode.PageDown);
+            NearPressed = Input.GetKey(KeyCode.PageUp);
+
+            if (Input.GetKey(KeyCode.LeftControl) || Input.GetKey(KeyCode.RightControl)) return;
+
+            ForwardPressed = Input.GetKey(KeyCode.UpArrow) || Input.GetKey(KeyCode.W);
+            BackwardPressed = Input.GetKey(KeyCode.DownArrow) || Input.GetKey(KeyCode.S);
+            LeftPressed = Input.GetKey(KeyCode.LeftArrow) || Input.GetKey(KeyCode.A);
+            RightPressed = Input.GetKey(KeyCode.RightArrow) || Input.GetKey(KeyCode.D);
+        }
+
         private void MouseWheel()
         {
+            if (DebugGUISwitcher.Instance.MouseOverGUI) return;
+
             ScrollIn = false;
             ScrollOut = false;
 
@@ -235,21 +253,10 @@ namespace SpaceEngine.Core.Utilities
             }
         }
 
-        private void KeyDown()
-        {
-            FarPressed = Input.GetKey(KeyCode.PageDown);
-            NearPressed = Input.GetKey(KeyCode.PageUp);
-
-            if (Input.GetKey(KeyCode.LeftControl) || Input.GetKey(KeyCode.RightControl)) return;
-
-            ForwardPressed = Input.GetKey(KeyCode.UpArrow) || Input.GetKey(KeyCode.W);
-            BackwardPressed = Input.GetKey(KeyCode.DownArrow) || Input.GetKey(KeyCode.S);
-            LeftPressed = Input.GetKey(KeyCode.LeftArrow) || Input.GetKey(KeyCode.A);
-            RightPressed = Input.GetKey(KeyCode.RightArrow) || Input.GetKey(KeyCode.D);
-        }
-
         private void MouseMotion()
         {
+            if (DebugGUISwitcher.Instance.MouseOverGUI) return;
+
             if (Input.GetMouseButton(0) && Input.GetKey(KeyCode.LeftControl))
             {
                 TargetPosition.Phi -= Input.GetAxis("Mouse X") * RotateSpeed;

@@ -93,49 +93,63 @@ namespace SpaceEngine.Debugging
             GUILayoutExtensions.LabelWithSpace("3DTextures: " + SI.supports3DTextures, -8);
             GUILayoutExtensions.LabelWithSpace("Graphics Multithreading: " + SI.graphicsMultiThreaded, -8);
 
-            foreach (var renderTextureFormat in SI.RenderTextureFormats)
-            {
-                var supports = false;
-                var supportState = "NULL";
-
-                try
-                {
-                    supports = SystemInfo.SupportsRenderTextureFormat(renderTextureFormat);
-                    supportState = SI.Supports(supports);
-                }
-                catch (Exception ex)
-                {
-                    supports = false;
-                    supportState = ex.Message;
-                }
-
-                GUILayoutExtensions.LabelWithSpace(string.Format("RenderTexture.{0}: {1}", renderTextureFormat, supportState), -8);
-            }
-
-            foreach (var textureFormat in SI.TextureFormats)
-            {
-                var supports = false;
-                var supportState = "NULL";
-
-                try
-                {
-                    supports = SystemInfo.SupportsTextureFormat(textureFormat);
-                    supportState = SI.Supports(supports);
-                }
-                catch (Exception ex)
-                {
-                    supports = false;
-                    supportState = ex.Message;
-                }
-
-                GUILayoutExtensions.LabelWithSpace(string.Format("Texture.{0}: {1}", textureFormat, supportState), -8);
-            }
+            DrawSupportedFormats<RenderTextureFormat>(SI.RenderTextureFormats, "RenderTexture");
+            DrawSupportedFormats<TextureFormat>(SI.TextureFormats, "Texture");
 
             GUILayout.Space(10);
 
             GUILayout.EndVertical();
 
             GUILayout.EndScrollView();
+        }
+
+        private void DrawSupportedFormats<T>(List<T> formats, string prefix = "null") where T : struct, IConvertible
+        {
+            if (!typeof(T).IsEnum)
+            {
+                throw new ArgumentException("Only 'enum' types as T allowed!");
+            }
+
+            foreach (var format in formats)
+            {
+                var supports = false;
+                var supportState = "NULL";
+
+                try
+                {
+                    // NOTE : So, that's why i hate "bruteforce" solutions...
+                    if (typeof(T) == typeof(RenderTextureFormat))
+                    {
+                        var f = (RenderTextureFormat)Enum.ToObject(typeof(RenderTextureFormat), format);
+
+                        supports = SystemInfo.SupportsRenderTextureFormat(f);
+                    }
+                    else if (typeof(T) == typeof(TextureFormat))
+                    {
+                        var f = (TextureFormat)Enum.ToObject(typeof(TextureFormat), format);
+
+                        supports = SystemInfo.SupportsTextureFormat(f);
+                    }
+                    else
+                    {
+                        throw new NotImplementedException("Unsupported format!");
+                    }
+
+                    supportState = SI.Supports(supports);
+                }
+                catch (Exception ex)
+                {
+                    supports = false;
+                    supportState = ex.GetType().Name;
+                }
+
+                GUILayoutExtensions.LabelWithSpace(string.Format("{0}.{1}: {2}", prefix, format, supportState), -8);
+            }
+        }
+
+        private bool Check(Func<bool> assert)
+        {
+            return assert.Invoke();
         }
     }
 

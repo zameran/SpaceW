@@ -150,8 +150,8 @@ namespace SpaceEngine.Core.Utilities
         {
             var h = (float)(GetHeight() - groundHeight);
 
-            CameraComponent.nearClipPlane = 0.1f * h;
-            CameraComponent.farClipPlane = 1e6f * h;
+            CameraComponent.nearClipPlane = Mathf.Clamp(0.1f * h, 0.03f, 1000.0f);
+            CameraComponent.farClipPlane = Mathf.Clamp(1e6f * h, 1000.0f, 1e12f);
 
             CameraComponent.ResetProjectionMatrix();
 

@@ -272,9 +272,6 @@ namespace SpaceEngine.Core.Bodies
             // NOTE : Update controller and the draw. This can help avoid terrain nodes jitter...
             GodManager.Instance.Controller.UpdateController();
 
-            // TODO : PROFILE DAT SHIT!
-            ReSetMPB();
-
             foreach (var tileSampler in TileSamplers)
             {
                 if (Helper.Enabled(tileSampler))
@@ -290,6 +287,9 @@ namespace SpaceEngine.Core.Bodies
                     DrawTerrain(terrainNode);
                 }
             }
+
+            // TODO : PROFILE DAT SHIT!
+            ReSetMPB();
         }
 
         protected override void Awake()

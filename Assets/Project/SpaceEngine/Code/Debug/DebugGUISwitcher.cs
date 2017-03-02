@@ -33,23 +33,37 @@
 // Creator: zameran
 #endregion
 
+using System.Collections.Generic;
+using System.Linq;
+
 using UnityEngine;
 
 namespace SpaceEngine.Debugging
 {
-    public sealed class DebugGUISwitcher : MonoBehaviour, IDebugSwitcher
+    public sealed class DebugGUISwitcher : MonoSingleton<DebugGUISwitcher>, IDebugSwitcher
     {
         public GUISkin skin;
 
-        public DebugGUI[] DebugComponents;
+        public List<DebugGUI> DebugComponents;
 
         public int state = 0;
 
+        public bool MouseOverGUIHotControl { get { return GUIUtility.hotControl != 0; } }
+
+        public bool MouseOverGUIRect { get { return DebugComponents.Any((gui) => gui.isActiveAndEnabled && gui.debugInfoBounds.Contains(new Vector2(Input.mousePosition.x, Screen.height - Input.mousePosition.y))); } }
+
+        public bool MouseOverGUI { get { return MouseOverGUIHotControl || MouseOverGUIRect; } }
+
+        private void Awake()
+        {
+            Instance = this;
+        }
+
         private void Start()
         {
-            if (DebugComponents == null || DebugComponents.Length == 0)
+            if (DebugComponents == null || DebugComponents.Count == 0)
             {
-                DebugComponents = GetComponents<DebugGUI>();
+                DebugComponents = GetComponents<DebugGUI>().ToList();
             }
 
             ToogleAll(DebugComponents, false);
@@ -59,7 +73,7 @@ namespace SpaceEngine.Debugging
         {
             if (Input.GetKeyDown(KeyCode.F5))
             {
-                if (state == DebugComponents.Length)
+                if (state == DebugComponents.Count)
                 {
                     state = 0;
                     ToogleAll(DebugComponents, false);
@@ -77,14 +91,14 @@ namespace SpaceEngine.Debugging
             GUI.enabled = state;
         }
 
-        public void ToogleAt(DebugGUI[] GUIs, bool state, int index)
+        public void ToogleAt(List<DebugGUI> GUIs, bool state, int index)
         {
             GUIs[index - 1].enabled = state;
         }
 
-        public void ToogleAll(DebugGUI[] GUIs, bool state)
+        public void ToogleAll(List<DebugGUI> GUIs, bool state)
         {
-            for (int i = 0; i < GUIs.Length; i++)
+            for (int i = 0; i < GUIs.Count; i++)
             {
                 GUIs[i].enabled = false;
             }

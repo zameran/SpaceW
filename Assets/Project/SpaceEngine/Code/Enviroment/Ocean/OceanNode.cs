@@ -1,4 +1,5 @@
-﻿using SpaceEngine.Core.Bodies;
+﻿using SpaceEngine.AtmosphericScattering;
+using SpaceEngine.Core.Bodies;
 using SpaceEngine.Core.Reanimator;
 
 using System.Collections;
@@ -10,7 +11,7 @@ namespace SpaceEngine.Ocean
     /// <summary>
     /// An AbstractTask to draw a flat or spherical ocean. This class provides the functions and data to draw a flat projected grid but nothing else.
     /// </summary>
-    public abstract class OceanNode : Node<OceanNode>, IUniformed<Material>, IUniformed<MaterialPropertyBlock>, IReanimateable
+    public abstract class OceanNode : Node<OceanNode>, IUniformed<Material>, IUniformed<MaterialPropertyBlock>, IReanimateable, IEventit
     {
         public enum OceanSurfaceType : byte
         {
@@ -242,6 +243,8 @@ namespace SpaceEngine.Ocean
 
         protected override void Start()
         {
+            Eventit();
+
             base.Start();
         }
 
@@ -252,9 +255,11 @@ namespace SpaceEngine.Ocean
 
         protected override void OnDestroy()
         {
-            base.OnDestroy();
+            UnEventit();
 
             Helper.Destroy(OceanMaterial);
+
+            base.OnDestroy();
         }
 
         #endregion
@@ -313,6 +318,42 @@ namespace SpaceEngine.Ocean
         {
             InitNode();
         }
+
+        #endregion
+
+        #region Eventit
+
+        public bool isEventit { get; set; }
+
+        public void Eventit()
+        {
+            if (isEventit) return;
+
+            EventManager.CelestialBodyEvents.OnAtmosphereBaked.OnEvent += OnAtmosphereBaked;
+
+            isEventit = true;
+        }
+
+        public void UnEventit()
+        {
+            if (!isEventit) return;
+
+            EventManager.CelestialBodyEvents.OnAtmosphereBaked.OnEvent -= OnAtmosphereBaked;
+
+            isEventit = false;
+        }
+
+        #endregion
+
+        #region Events
+
+        /// <summary>
+        /// This event must be overridden in every inherited class, at any level of inheritance.
+        /// Should provide <see cref="UpdateNode"/> call.
+        /// </summary>
+        /// <param name="celestialBody">Celestial body.</param>
+        /// <param name="atmosphere">Atmosphere.</param>
+        protected abstract void OnAtmosphereBaked(CelestialBody celestialBody, Atmosphere atmosphere);
 
         #endregion
 
