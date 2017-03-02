@@ -20,6 +20,9 @@ namespace SpaceEngine.Core.Utilities
         double ZoomSpeed = 1.0;
 
         [SerializeField]
+        double ScrollWheelSpeed = 2.0f;
+
+        [SerializeField]
         double RotateSpeed = 0.1;
 
         [SerializeField]
@@ -31,6 +34,8 @@ namespace SpaceEngine.Core.Utilities
         [SerializeField]
         bool Smooth = true;
 
+        bool ScrollIn;
+        bool ScrollOut;
         bool NearPressed;
         bool FarPressed;
         bool ForwardPressed;
@@ -110,15 +115,15 @@ namespace SpaceEngine.Core.Utilities
 
         private void UpdateController(double dt)
         {
-            double dzFactor = Math.Pow(1.02, Math.Min(dt, 1.0));
+            var dzFactor = Math.Pow(1.02, Math.Min(dt, 1.0));
 
-            if (NearPressed)
+            if (NearPressed || ScrollOut)
             {
-                TargetPosition.Distance = TargetPosition.Distance / (dzFactor * ZoomSpeed);
+                TargetPosition.Distance = TargetPosition.Distance / (dzFactor * ZoomSpeed) / (ScrollOut ? ScrollWheelSpeed : 1.0f);
             }
-            else if (FarPressed)
+            else if (FarPressed || ScrollIn)
             {
-                TargetPosition.Distance = TargetPosition.Distance * dzFactor * ZoomSpeed;
+                TargetPosition.Distance = TargetPosition.Distance * dzFactor * ZoomSpeed * (ScrollIn ? ScrollWheelSpeed : 1.0f);
             }
 
             TerrainView.Position position = new TerrainView.Position();
@@ -216,22 +221,25 @@ namespace SpaceEngine.Core.Utilities
 
         private void MouseWheel()
         {
-            NearPressed = false;
-            FarPressed = false;
+            ScrollIn = false;
+            ScrollOut = false;
 
-            if (Input.GetAxis("Mouse ScrollWheel") < 0.0f || Input.GetKey(KeyCode.PageDown))
+            if (Input.GetAxis("Mouse ScrollWheel") < 0.0f)
             {
-                FarPressed = true;
+                ScrollIn = true;
             }
 
-            if (Input.GetAxis("Mouse ScrollWheel") > 0.0f || Input.GetKey(KeyCode.PageUp))
+            if (Input.GetAxis("Mouse ScrollWheel") > 0.0f)
             {
-                NearPressed = true;
+                ScrollOut = true;
             }
         }
 
         private void KeyDown()
         {
+            FarPressed = Input.GetKey(KeyCode.PageDown);
+            NearPressed = Input.GetKey(KeyCode.PageUp);
+
             if (Input.GetKey(KeyCode.LeftControl) || Input.GetKey(KeyCode.RightControl)) return;
 
             ForwardPressed = Input.GetKey(KeyCode.UpArrow) || Input.GetKey(KeyCode.W);
