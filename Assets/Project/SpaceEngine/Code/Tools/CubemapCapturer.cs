@@ -33,7 +33,7 @@
 // Creator: zameran
 #endregion
 
-//TODO : Make it work with space sheet. (Quads, Atmospheres etc)
+// TODO : Make it work with space sheet. (Quads, Atmospheres etc)
 
 using UnityEngine;
 

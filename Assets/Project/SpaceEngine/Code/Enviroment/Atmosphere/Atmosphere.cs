@@ -440,7 +440,7 @@ namespace SpaceEngine.AtmosphericScattering
             {
                 if (ShineCasters[i] == null) { Debug.Log("Atmosphere: Shine problem!"); break; }
 
-                var distance = shineColors[i].a; //TODO : Distance based shine power.
+                var distance = shineColors[i].a; // TODO : Distance based shine power.
 
                 soc1.SetRow(i, VectorHelper.MakeFrom((ShineCasters[i].transform.position - Origin).normalized, 1.0f));
 

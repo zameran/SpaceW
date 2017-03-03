@@ -251,7 +251,7 @@ Shader "SpaceEngine/Ring"
 			ENDCG
 		}
 
-		//TODO : Shadow pass...
+		// TODO : Shadow pass...
 		Pass 
 		{
 			Name "ShadowCaster"

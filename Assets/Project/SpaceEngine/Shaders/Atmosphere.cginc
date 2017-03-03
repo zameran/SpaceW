@@ -699,7 +699,7 @@ float4 InScattering(float3 camera, float3 _point, float3 sundir, out float3 exti
 			#endif
 
 			//cancels inscatter when sun hidden by mountains
-			//TODO: smoothstep values depend on horizon angle in sun direction
+			// TODO: smoothstep values depend on horizon angle in sun direction
 			//inScatter.w *= smoothstep(0.035, 0.07, muS);
 
 			// avoids imprecision problems in Mie scattering when sun is below horizon
