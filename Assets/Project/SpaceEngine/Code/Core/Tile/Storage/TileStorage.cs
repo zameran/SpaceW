@@ -58,7 +58,7 @@ namespace SpaceEngine.Core.Tile.Storage
         /// </summary>
         public int Capacity { get; protected set; }
 
-        Slot[] Slots;
+        public Slot[] Slots;
 
         /// <summary>
         /// The used slots counts;
