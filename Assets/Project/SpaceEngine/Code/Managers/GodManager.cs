@@ -94,6 +94,7 @@ public class GodManager : MonoSingleton<GodManager>
         }
 
         UpdateSettings();
+        UpdateHeightZ();
     }
 
     protected override void OnDestroy()
@@ -148,5 +149,11 @@ public class GodManager : MonoSingleton<GodManager>
                 }
             }
         }
+    }
+
+    private void UpdateHeightZ()
+    {
+        // TODO : CORE - PROPERLY UPDATE HEIGHT Z!
+        View.GroundHeight = Bodies[0].HeightZ;
     }
 }

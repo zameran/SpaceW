@@ -59,7 +59,7 @@ namespace SpaceEngine.Core.Utilities
         public Vector3d WorldCameraPosition { get; protected set; }
         public Vector3d CameraDirection { get; protected set; }
 
-        protected double groundHeight = 0.0;
+        public double GroundHeight { get; set; }
 
         [HideInInspector]
         public Vector3d worldPosition;
@@ -125,9 +125,9 @@ namespace SpaceEngine.Core.Utilities
 
             worldPosition = po + cz * position.Distance;
 
-            if (worldPosition.z < groundHeight + 10.0)
+            if (worldPosition.z < GroundHeight + 10.0)
             {
-                worldPosition.z = groundHeight + 10.0;
+                worldPosition.z = GroundHeight + 10.0;
             }
 
             Matrix4x4d view = new Matrix4x4d(cx.x, cx.y, cx.z, 0.0, cy.x, cy.y, cy.z, 0.0, cz.x, cz.y, cz.z, 0.0, 0.0, 0.0, 0.0, 1.0);
@@ -148,7 +148,7 @@ namespace SpaceEngine.Core.Utilities
 
         protected virtual void SetProjectionMatrix()
         {
-            var h = (float)(GetHeight() - groundHeight);
+            var h = (float)(GetHeight() - GroundHeight);
 
             CameraComponent.nearClipPlane = Mathf.Clamp(0.1f * h, 0.03f, 1000.0f);
             CameraComponent.farClipPlane = Mathf.Clamp(1e6f * h, 1000.0f, 1e12f);

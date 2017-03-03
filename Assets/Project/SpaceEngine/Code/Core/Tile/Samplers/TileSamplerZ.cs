@@ -93,7 +93,7 @@ namespace SpaceEngine.Core.Tile.Samplers
             var size = Producer.GetTileSize(0);
 
             ElevationsBuffer = new ComputeBuffer(size * size, sizeof(float));
-            GroundBuffer = new ComputeBuffer(1, sizeof(float));
+            GroundBuffer = new ComputeBuffer(1, 4 * sizeof(float));
 
         }
 
@@ -161,11 +161,11 @@ namespace SpaceEngine.Core.Tile.Samplers
                     CBUtility.ReadSingleFromRenderTexture(slot.Texture, x, y, 0, GroundBuffer, GodManager.Instance.ReadData, true);
 
                     // Get single height value from buffer
-                    var height = new float[1];
+                    var height = new Vector4[1];
 
                     GroundBuffer.GetData(height);
 
-                    TerrainNode.Body.HeightZ = Math.Max(0.0, height[0]);
+                    TerrainNode.Body.HeightZ = Math.Max(0.0, height[0].x);
 
                     OldLocalCamera.x = localCameraPosition.x;
                     OldLocalCamera.y = localCameraPosition.y;

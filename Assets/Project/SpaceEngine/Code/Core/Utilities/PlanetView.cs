@@ -60,9 +60,9 @@ namespace SpaceEngine.Core.Utilities
 
             worldPosition = po + cz * position.Distance;
 
-            if (worldPosition.Magnitude() < Radius + 10.0 + groundHeight)
+            if (worldPosition.Magnitude() < Radius + 10.0 + GroundHeight)
             {
-                worldPosition = worldPosition.Normalized(Radius + 10.0 + groundHeight);
+                worldPosition = worldPosition.Normalized(Radius + 10.0 + GroundHeight);
             }
 
             Matrix4x4d view = new Matrix4x4d(cx.x, cx.y, cx.z, 0.0, cy.x, cy.y, cy.z, 0.0, cz.x, cz.y, cz.z, 0.0, 0.0, 0.0, 0.0, 1.0);
