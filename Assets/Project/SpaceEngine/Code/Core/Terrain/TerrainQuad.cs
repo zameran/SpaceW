@@ -226,46 +226,7 @@ namespace SpaceEngine.Core.Terrain
                     Subdivide();
                 }
 
-                var order = new int[4];
-                var ox = Owner.LocalCameraPosition.x;
-                var oy = Owner.LocalCameraPosition.y;
-                var cx = Ox + Length / 2.0;
-                var cy = Oy + Length / 2.0;
-
-                if (oy < cy)
-                {
-                    if (ox < cx)
-                    {
-                        order[0] = 0;
-                        order[1] = 1;
-                        order[2] = 2;
-                        order[3] = 3;
-                    }
-                    else
-                    {
-                        order[0] = 1;
-                        order[1] = 0;
-                        order[2] = 3;
-                        order[3] = 2;
-                    }
-                }
-                else
-                {
-                    if (ox < cx)
-                    {
-                        order[0] = 2;
-                        order[1] = 0;
-                        order[2] = 3;
-                        order[3] = 1;
-                    }
-                    else
-                    {
-                        order[0] = 3;
-                        order[1] = 1;
-                        order[2] = 2;
-                        order[3] = 0;
-                    }
-                }
+                var order = CalculateOrder(Owner.LocalCameraPosition.x, Owner.LocalCameraPosition.y, Ox + Length / 2.0, Oy + Length / 2.0);
 
                 Children[order[0]].UpdateLOD();
                 Children[order[1]].UpdateLOD();
@@ -293,6 +254,48 @@ namespace SpaceEngine.Core.Terrain
                     Destroy();
                 }
             }
+        }
+
+        public byte[] CalculateOrder(double cameraX, double cameraY, double quadX, double quadY)
+        {
+            var order = new byte[4];
+
+            if (cameraY < quadY)
+            {
+                if (cameraX < quadX)
+                {
+                    order[0] = 0;
+                    order[1] = 1;
+                    order[2] = 2;
+                    order[3] = 3;
+                }
+                else
+                {
+                    order[0] = 1;
+                    order[1] = 0;
+                    order[2] = 3;
+                    order[3] = 2;
+                }
+            }
+            else
+            {
+                if (cameraX < quadX)
+                {
+                    order[0] = 2;
+                    order[1] = 0;
+                    order[2] = 3;
+                    order[3] = 1;
+                }
+                else
+                {
+                    order[0] = 3;
+                    order[1] = 1;
+                    order[2] = 2;
+                    order[3] = 0;
+                }
+            }
+
+            return order;
         }
 
         /// <summary>

@@ -66,10 +66,16 @@ namespace SpaceEngine.Debugging
 
             if (Body != null)
             {
+                GUILayout.BeginVertical();
+
+                GUILayout.Label("Body parameters: ", boldLabel);
+
+                GUILayout.Label("Nothing here!");
+
+                GUILayout.EndVertical();
+
                 if (Body.Atmosphere != null)
                 {
-                    GUILayout.Space(10);
-
                     GUILayout.BeginVertical();
 
                     GUILayout.Label("Atmosphere parameters: ", boldLabel);

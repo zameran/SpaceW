@@ -8,8 +8,8 @@ using UnityEngine;
 namespace SpaceEngine.Core.Terrain
 {
     /// <summary>
-    /// Provides a framework to draw and update view-dependent, quadtree based terrains.
-    /// This framework provides classes to represent the terrain quadtree, classes to
+    /// Provides a base class to draw and update view-dependent, quadtree based terrains.
+    /// This base class provides classes to represent the terrain quadtree, classes to
     /// associate data produced by a <see cref="Tile.Producer.TileProducer"/> to the quads of this
     /// quadtree, as well as classes to update and draw such terrains (which can be deformed to get spherical).
     /// A view dependent, quadtree based terrain. This class provides access to the

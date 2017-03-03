@@ -47,6 +47,11 @@ namespace SpaceEngine.Core.Storage
         protected override void Awake()
         {
             base.Awake();
+        }
+
+        public override void InitSlots()
+        {
+            base.InitSlots();
 
             // NOTE : Size is sqaured as the array is 2D (but stored as a 1D array)
             var size = TileSize * TileSize * Channels;

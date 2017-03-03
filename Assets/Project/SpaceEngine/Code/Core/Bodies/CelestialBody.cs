@@ -441,48 +441,9 @@ namespace SpaceEngine.Core.Bodies
             else
             {
                 // Draw quads in a order based on distance to camera
-                var order = new byte[4];
                 var done = 0;
 
-                var cameraX = node.LocalCameraPosition.x;
-                var cameraY = node.LocalCameraPosition.y;
-                var quadX = quad.Oy + quad.Length / 2.0;
-                var quadY = quad.Oy + quad.Length / 2.0;
-
-                if (cameraY < quadY)
-                {
-                    if (cameraX < quadX)
-                    {
-                        order[0] = 0;
-                        order[1] = 1;
-                        order[2] = 2;
-                        order[3] = 3;
-                    }
-                    else
-                    {
-                        order[0] = 1;
-                        order[1] = 0;
-                        order[2] = 3;
-                        order[3] = 2;
-                    }
-                }
-                else
-                {
-                    if (cameraX < quadX)
-                    {
-                        order[0] = 2;
-                        order[1] = 0;
-                        order[2] = 3;
-                        order[3] = 1;
-                    }
-                    else
-                    {
-                        order[0] = 3;
-                        order[1] = 1;
-                        order[2] = 2;
-                        order[3] = 0;
-                    }
-                }
+                var order = quad.CalculateOrder(node.LocalCameraPosition.x, node.LocalCameraPosition.y, quad.Ox + quad.Length / 2.0, quad.Oy + quad.Length / 2.0);
 
                 for (byte i = 0; i < 4; ++i)
                 {

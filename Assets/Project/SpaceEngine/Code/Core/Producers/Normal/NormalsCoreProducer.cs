@@ -13,7 +13,7 @@ using UnityEngine;
 
 namespace SpaceEngine.Core
 {
-    public class NormalCoreProducer : TileProducer
+    public class NormalsCoreProducer : TileProducer
     {
         public GameObject ElevationProducerGameObject;
 
