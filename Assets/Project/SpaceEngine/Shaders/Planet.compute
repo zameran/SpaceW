@@ -39,7 +39,7 @@
 #define BorderModTexture				quadGenerationConstants[0].borderMod.y
 #define TerrainMaxHeight				quadGenerationConstants[0].terrainMaxHeight
 
-//#define NOISE_USE_DEFAULT
+#define NOISE_USE_DEFAULT
 
 #include "UnityCG.cginc"
 #include "SpaceStuff.cginc"

@@ -55,8 +55,17 @@
 
 				noiseH          = 0.5;
 				noiseLacunarity = 2.218281828459;
+				noiseOctaves	= 8;
 
-				float noise = Fbm(p * _Frequency, 6);
+				float3 position = p * _Frequency;
+
+				float noise = 0;
+
+				noise += Fbm(position * 0.25, 2);
+				noise += Fbm(position * 0.50, 4);
+				noise += Fbm(position * 0.75, 6);
+				noise += Fbm(position * 1.00, 8);
+
 				float output = _Amplitude * noise;
 							
 				return float4(output, output, 0.0, 0.0);
