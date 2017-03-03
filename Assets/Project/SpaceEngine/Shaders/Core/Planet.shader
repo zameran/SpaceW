@@ -15,11 +15,16 @@
 			CGPROGRAM
 			#include "UnityCG.cginc"
 			#pragma target 4.0
+			#pragma only_renderers d3d11 glcore
 			#pragma vertex vert
 			#pragma fragment frag
+
+			#pragma multi_compile SHADOW_0 SHADOW_1 SHADOW_2 SHADOW_3 SHADOW_4
 			
 			//#define CUBE_PROJECTION
 			
+			#include "../SpaceStuff.cginc"
+			#include "../Eclipses.cginc"
 			#include "../HDR.cginc"
 			#include "../Atmosphere.cginc"
 			#include "../Ocean/OceanBRDF.cginc"
@@ -152,6 +157,10 @@
 				float3 sunL = 0;
 				float3 skyE = 0;
 				SunRadianceAndSkyIrradiance(P, fn, WSD, sunL, skyE);
+
+				#if SHADOW_1 || SHADOW_2 || SHADOW_3 || SHADOW_4
+					float shadow = ShadowColor(float4(P, 1));
+				#endif
 				
 				// diffuse ground color
 				float3 groundColor = 1.5 * RGB2Reflectance(reflectance).rgb * (sunL * max(cTheta, 0) + skyE) / M_PI;
@@ -163,6 +172,14 @@
 
 				float3 extinction;
 				float3 inscatter = InScattering(WCPO, P, WSD, extinction, 0.0);
+
+				#if SHADOW_1 || SHADOW_2 || SHADOW_3 || SHADOW_4
+					inscatter *= shadow;
+				#endif
+
+				#if SHADOW_1 || SHADOW_2 || SHADOW_3 || SHADOW_4
+					extinction = 1 * _ExtinctionGroundFade + (1 - _ExtinctionGroundFade) * extinction * shadow;
+				#endif
 
 				float3 finalColor = hdr(groundColor * extinction + inscatter);
 
