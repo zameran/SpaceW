@@ -28,29 +28,11 @@
 			#include "../HDR.cginc"
 			#include "../Atmosphere.cginc"
 			#include "../Ocean/OceanBRDF.cginc"
-			
-			uniform float2 _Deform_Blending;
-			uniform float4x4 _Deform_LocalToWorld;
-			uniform float4x4 _Deform_LocalToScreen;
-			uniform float4 _Deform_Offset;
-			uniform float4 _Deform_Camera;
-			uniform float4x4 _Deform_ScreenQuadCorners;
-			uniform float4x4 _Deform_ScreenQuadVerticals;
-			uniform float _Deform_Radius;
-			uniform float4 _Deform_ScreenQuadCornerNorms;
-			uniform float4x4 _Deform_TangentFrameToWorld; 
-			
-			uniform sampler2D _Elevation_Tile;
-			uniform float3 _Elevation_TileSize;
-			uniform float3 _Elevation_TileCoords;
-			
-			uniform sampler2D _Normals_Tile;
-			uniform float3 _Normals_TileSize;
-			uniform float3 _Normals_TileCoords;
-			
-			uniform sampler2D _Ortho_Tile;
-			uniform float3 _Ortho_TileSize;
-			uniform float3 _Ortho_TileCoords;
+
+			#include "Deformation.cginc"
+			#include "Elevation.cginc"
+			#include "Normals.cginc"
+			#include "Ortho.cginc"
 			
 			uniform float _Ocean_Sigma;
 			uniform float3 _Ocean_Color;
