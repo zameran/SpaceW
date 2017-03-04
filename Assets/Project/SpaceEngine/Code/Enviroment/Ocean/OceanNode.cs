@@ -125,7 +125,7 @@ namespace SpaceEngine.Ocean
 
             // Calculates the required data for the projected grid
             var c2w = GodManager.Instance.CameraToWorld;
-            var cl = c2w * -Origin; // Camera in local space // TODO : Ocean origin
+            var cl = c2w * Vector3d.zero; // Camera in local space // TODO : Ocean origin
 
             var radius = (OceanType == OceanSurfaceType.Spherized) ? body.Radius : 0.0f;
 
@@ -175,7 +175,7 @@ namespace SpaceEngine.Ocean
 
             if (OldLocalToOcean != Matrix4x4d.identity)
             {
-                var delta = l2o * (OldLocalToOcean.Inverse() * -Origin); // TODO : Ocean origin
+                var delta = l2o * (OldLocalToOcean.Inverse() * Vector3d.zero); // TODO : Ocean origin
 
                 Offset += new Vector4((float)delta.x, (float)delta.y, (float)delta.z, 0.0f);
             }

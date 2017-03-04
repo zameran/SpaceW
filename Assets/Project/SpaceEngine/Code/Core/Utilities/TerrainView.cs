@@ -18,13 +18,13 @@ namespace SpaceEngine.Core.Utilities
         {
             /// <summary>
             /// The x coordinate of the point the camera is looking at on the ground.
-            /// For a planet these are the longtitudes;
+            /// For a planet these are the longtitudes.
             /// </summary>
             public double X;
 
             /// <summary>
             /// The y coordinate of the point the camera is looking at on the ground.
-            /// For a planet these are the latitudes;
+            /// For a planet these are the latitudes.
             /// </summary>
             public double Y;
 
@@ -111,10 +111,10 @@ namespace SpaceEngine.Core.Utilities
 
         protected virtual void SetWorldToCameraMatrix()
         {
-            Vector3d po = new Vector3d(position.X, position.Y, 0.0);
-            Vector3d px = new Vector3d(1.0, 0.0, 0.0);
-            Vector3d py = new Vector3d(0.0, 1.0, 0.0);
-            Vector3d pz = new Vector3d(0.0, 0.0, 1.0);
+            var po = new Vector3d(position.X, position.Y, 0.0);
+            var px = Vector3d.right;
+            var py = Vector3d.up;
+            var pz = Vector3d.forward;
 
             // NOTE : ct - x; st - y; cp - z; sp - w;
             var tp = CalculatelongitudeLatitudeVector(position.Theta, position.Phi);
@@ -134,6 +134,7 @@ namespace SpaceEngine.Core.Utilities
 
             WorldToCameraMatrix = view * Matrix4x4d.Translate(worldPosition * -1.0);
 
+            //Flip first row to match Unity's winding order.
             WorldToCameraMatrix.m[0, 0] *= -1.0;
             WorldToCameraMatrix.m[0, 1] *= -1.0;
             WorldToCameraMatrix.m[0, 2] *= -1.0;
@@ -143,7 +144,6 @@ namespace SpaceEngine.Core.Utilities
 
             CameraComponent.worldToCameraMatrix = WorldToCameraMatrix.ToMatrix4x4();
             CameraComponent.transform.position = worldPosition.ToVector3();
-
         }
 
         protected virtual void SetProjectionMatrix()
