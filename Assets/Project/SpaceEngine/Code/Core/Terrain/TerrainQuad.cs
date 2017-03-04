@@ -79,7 +79,7 @@ namespace SpaceEngine.Core.Terrain
         /// The four subquads of this quad. If this quad is not subdivided, the four values are NULL. 
         /// The subquads are stored in the following order: [BottomLeft, BottomRight, TopLeft, TopRight].
         /// </summary>
-        TerrainQuad[] Children = new TerrainQuad[4];
+        public TerrainQuad[] Children = new TerrainQuad[4];
 
         /// <summary>
         /// The visibility of the bounding box of this quad from the current viewer position. 

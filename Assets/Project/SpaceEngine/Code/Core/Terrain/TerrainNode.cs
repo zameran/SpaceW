@@ -79,7 +79,7 @@ namespace SpaceEngine.Core.Terrain
         /// <summary>
         /// The root of the terrain quadtree. This quadtree is subdivided based on the current viewer position by the update method.
         /// </summary>
-        public TerrainQuad TerrainQuadRoot { get; private set; }
+        public TerrainQuad TerrainQuadRoot { get; set; }
 
         /// <summary>
         /// The current viewer position in the deformed terrain space.

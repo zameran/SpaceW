@@ -3,8 +3,6 @@ using System.Collections.Generic;
 
 using UnityEngine;
 
-using ZFramework.Extensions;
-
 namespace SpaceEngine.Core.Tile.Storage
 {
     /// <summary>
@@ -38,6 +36,11 @@ namespace SpaceEngine.Core.Tile.Storage
             /// Override this, if the slot needs to release data on destroy.
             /// </summary>
             public virtual void Release()
+            {
+
+            }
+
+            public virtual void Clear()
             {
 
             }
@@ -93,7 +96,7 @@ namespace SpaceEngine.Core.Tile.Storage
         /// The returned <see cref="Slot"/> is then considered to be allocated, until it is released.
         /// </summary>
         /// <returns>A free <see cref="Slot"/> in the pool of slots managed by this <see cref="TileStorage"/>.</returns>
-        public Slot NewSlot()
+        public Slot AddSlot()
         {
             if (SlotsFree.Count != 0)
             {
@@ -130,12 +133,12 @@ namespace SpaceEngine.Core.Tile.Storage
             }
         }
 
-        public void Flush()
+        public void Clear()
         {
-            Release();
-
-            Slots.ClearAll<Slot>();
-            SlotsFree.Clear();
+            for (int i = 0; i < Capacity; i++)
+            {
+                Slots[i].Clear();
+            }
         }
 
         public virtual void InitSlots()

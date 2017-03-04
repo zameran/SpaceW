@@ -64,11 +64,11 @@ namespace SpaceEngine.Debugging
 
             GUILayout.BeginVertical();
 
-            var gpuStorages = FindObjectsOfType<GPUTileStorage>().ToList();
+            var storages = FindObjectsOfType<GPUTileStorage>().ToList();
 
-            GUILayoutExtensions.LabelWithSpace(string.Format("GPU Storages Count: {0}", gpuStorages.Count));
-            GUILayoutExtensions.LabelWithSpace(string.Format("Storage Total Capacity: {0}", gpuStorages.Sum((storage) => storage.Capacity)));
-            GUILayoutExtensions.LabelWithSpace(string.Format("Storage Total Free: {0}", gpuStorages.Sum((storage) => storage.FreeSlotsCount)));
+            GUILayoutExtensions.LabelWithSpace(string.Format("GPU Storage Count: {0}", storages.Count));
+            GUILayoutExtensions.LabelWithSpace(string.Format("GPU Storage Total Capacity: {0}", storages.Sum((storage) => storage.Capacity)));
+            GUILayoutExtensions.LabelWithSpace(string.Format("GPU Storage Total Free: {0}", storages.Sum((storage) => storage.FreeSlotsCount)));
 
             GUILayout.Space(10);
 
