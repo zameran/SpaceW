@@ -106,19 +106,12 @@ namespace SpaceEngine.AtmosphericScattering
         public Shader SkyShader;
         public Material SkyMaterial;
 
-        [HideInInspector]
-        public AtmosphereHDR HDRMode = AtmosphereHDR.Proland;
-
         public EngineRenderQueue RenderQueue = EngineRenderQueue.Background;
         public int RenderQueueOffset = 0;
 
         public Mesh AtmosphereMesh;
 
         public bool LostFocusForceRebake = false;
-        [HideInInspector]
-        public bool Eclipses = true;
-        [HideInInspector]
-        public bool Planetshine = true;
 
         public List<AtmosphereSun> Suns = new List<AtmosphereSun>();
 
@@ -366,7 +359,7 @@ namespace SpaceEngine.AtmosphericScattering
             target.SetVector("_Globals_WorldCameraPos_Offsetted_Origin", (GodManager.Instance.WorldCameraPos - Origin) + (-Origin)); // NOTE : Lol.
 
             target.SetFloat("_Exposure", HDRExposure);
-            target.SetFloat("_HDRMode", (int)HDRMode);
+            target.SetFloat("_HDRMode", (int)GodManager.Instance.HDRMode);
         }
 
         #endregion
@@ -492,7 +485,7 @@ namespace SpaceEngine.AtmosphericScattering
 
         public void SetShine(Material mat)
         {
-            if (!Planetshine) return;
+            if (!GodManager.Instance.Planetshine) return;
 
             CalculateShine(out shineOccludersMatrix1, out shineColorsMatrix1);
 
@@ -502,7 +495,7 @@ namespace SpaceEngine.AtmosphericScattering
 
         public void SetShine(MaterialPropertyBlock block)
         {
-            if (!Planetshine) return;
+            if (!GodManager.Instance.Planetshine) return;
 
             CalculateShine(out shineOccludersMatrix1, out shineColorsMatrix1);
 
@@ -512,7 +505,7 @@ namespace SpaceEngine.AtmosphericScattering
 
         public void SetEclipses(Material mat)
         {
-            if (!Eclipses) return;
+            if (!GodManager.Instance.Eclipses) return;
 
             CalculateEclipses(out occludersMatrix1);
 
@@ -521,7 +514,7 @@ namespace SpaceEngine.AtmosphericScattering
 
         public void SetEclipses(MaterialPropertyBlock block)
         {
-            if (!Eclipses) return;
+            if (!GodManager.Instance.Eclipses) return;
 
             CalculateEclipses(out occludersMatrix1);
 

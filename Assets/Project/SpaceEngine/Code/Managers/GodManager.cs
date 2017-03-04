@@ -37,6 +37,8 @@ using SpaceEngine.Core.Bodies;
 using SpaceEngine.Core.Utilities;
 using SpaceEngine.Startfield;
 
+using System.Linq;
+
 using UnityEngine;
 
 using ZFramework.Unity.Common.Messenger;
@@ -47,13 +49,10 @@ public class GodManager : MonoSingleton<GodManager>
     public TerrainView View;
     public Controller Controller;
 
-    public Plane[] FrustumPlanes;
-
     public ComputeShader WriteData;
     public ComputeShader ReadData;
 
-    public bool Debug = true;
-    public bool UpdateFrustumPlanesNow = true;
+    public CelestialBody ActiveBody { get { return Bodies.FirstOrDefault(); } }
 
     public CelestialBody[] Bodies;
     public Starfield[] Starfields;
@@ -75,25 +74,15 @@ public class GodManager : MonoSingleton<GodManager>
     {
         Instance = this;
 
-        Messenger.Setup(Debug);
+        Messenger.Setup(true);
 
         Bodies = FindObjectsOfType<CelestialBody>();
         Starfields = FindObjectsOfType<Starfield>();
-
-        UpdateFrustumPlanes();
-        UpdateSettings();
     }
 
     private void Update()
     {
         UpdateSchedular();
-
-        if (UpdateFrustumPlanesNow)
-        {
-            UpdateFrustumPlanes();
-        }
-
-        UpdateSettings();
         UpdateHeightZ();
     }
 
@@ -107,53 +96,15 @@ public class GodManager : MonoSingleton<GodManager>
         Schedular.Instance.Run();
     }
 
-    private void UpdateFrustumPlanes()
-    {
-        if (CameraHelper.Main() != null)
-        {
-            FrustumPlanes = GeometryUtility.CalculateFrustumPlanes(CameraHelper.Main());
-        }
-    }
-
-    private void UpdateSettings()
-    {
-        if (Bodies != null)
-        {
-            if (Bodies.Length != 0)
-            {
-                for (int i = 0; i < Bodies.Length; i++)
-                {
-                    if (Bodies[i] != null)
-                    {
-                        if (Bodies[i].Atmosphere != null)
-                        {
-                            Bodies[i].Atmosphere.HDRMode = HDRMode;
-                            Bodies[i].Atmosphere.Eclipses = Eclipses;
-                            Bodies[i].Atmosphere.Planetshine = Planetshine;
-                        }
-                    }
-                }
-            }
-        }
-
-        if (Starfields != null)
-        {
-            if (Starfields.Length != 0)
-            {
-                for (int i = 0; i < Starfields.Length; i++)
-                {
-                    if (Starfields[i] != null)
-                    {
-                        Starfields[i].HDRMode = HDRMode;
-                    }
-                }
-            }
-        }
-    }
-
     private void UpdateHeightZ()
     {
-        // TODO : CORE - PROPERLY UPDATE HEIGHT Z!
-        View.GroundHeight = Bodies[0].HeightZ;
+        if (ActiveBody != null)
+        {
+            View.GroundHeight = ActiveBody.HeightZ;
+        }
+        else
+        {
+            View.GroundHeight = 0.0f;
+        }
     }
 }

@@ -72,6 +72,7 @@ namespace SpaceEngine.Core.Bodies
         public List<TerrainNode> TerrainNodes = new List<TerrainNode>(6);
         public List<TileSampler> TileSamplers = new List<TileSampler>();
 
+        [HideInInspector]
         public double HeightZ = 0;
 
         public NoiseParametersSetter NPS = null;
@@ -131,7 +132,7 @@ namespace SpaceEngine.Core.Bodies
                     }
                     else
                     {
-                        Keywords.Add(Atmosphere.Eclipses ? "ECLIPSES_ON" : "ECLIPSES_OFF");
+                        Keywords.Add(GodManager.Instance.Eclipses ? "ECLIPSES_ON" : "ECLIPSES_OFF");
                     }
 
                     if (Atmosphere.ShineCasters.Count == 0)
@@ -140,7 +141,7 @@ namespace SpaceEngine.Core.Bodies
                     }
                     else
                     {
-                        Keywords.Add(Atmosphere.Planetshine ? "SHINE_ON" : "SHINE_OFF");
+                        Keywords.Add(GodManager.Instance.Planetshine ? "SHINE_ON" : "SHINE_OFF");
                     }
 
                     Keywords.Add("ATMOSPHERE_ON");
