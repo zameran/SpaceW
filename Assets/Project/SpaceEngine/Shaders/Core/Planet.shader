@@ -39,6 +39,7 @@
 			uniform float _Ocean_DrawBRDF;
 			uniform float _Ocean_Level;
 			
+			uniform sampler2D _DetailedNormal;
 			
 			struct v2f 
 			{
@@ -119,10 +120,17 @@
 				float3 v = normalize(P - WCP);
 				float3 p = P + _Globals_Origin;
 				
-				float3 fn;
-				fn.xyz = texTile(_Normals_Tile, IN.uv, _Normals_TileCoords, _Normals_TileSize).xyz;
+				float4 dn = texTile(_DetailedNormal, IN.uv, _Normals_TileCoords, _Normals_TileSize);
+
+				dn = float4((dn.a * 2.0) - 1.0, (dn.g * 2.0) - 1.0, 0.0, 0.0);
+				dn.z = sqrt(1.0 - dot(dn, dn));
+
+				float3 fn = texTile(_Normals_Tile, IN.uv, _Normals_TileCoords, _Normals_TileSize).xyz;
+
 				fn.z = sqrt(max(0.0, 1.0 - dot(fn.xy, fn.xy)));
 				
+				//fn = normalize(fn + dn); // NOTE : Nope!
+
 				if (ht <= _Ocean_Level && _Ocean_DrawBRDF == 1.0)
 				{
 					fn = float3(0, 0, 1);

@@ -134,6 +134,7 @@ namespace SpaceEngine.Core.Terrain
             Body.TerrainNodes.Add(this);
 
             TerrainMaterial = MaterialHelper.CreateTemp(Body.ColorShader, "TerrainNode");
+            TerrainMaterial.SetTexture("_DetailedNormal", Body.DetailedNormal);
 
             if (Body.Atmosphere != null)
             {
