@@ -10,9 +10,10 @@
 
 		#define BORDER 2.0 
 
-		uniform float _TileSize;	
 		uniform float _Frequency;
 		uniform float _Amplitude;
+
+		uniform float2 _TileSD;	
 
 		uniform float4 _Offset;
 		uniform float4x4 _LocalToWorld;
@@ -31,9 +32,7 @@
 
 		void frag(in v2f IN, out float4 output : COLOR)
 		{			
-			float u = (0.5 + BORDER) / (_TileSize - 1 - BORDER * 2);
-
-			float2 vert = (IN.uv * (1.0 + u * 2.0) - u) * _Offset.z + _Offset.xy;
+			float2 vert = (IN.uv * _TileSD.y - _TileSD.x) * _Offset.z + _Offset.xy;
 				
 			float3 P = float3(vert, _Offset.w);
 			float3 p = normalize(mul(_LocalToWorld, P)).xyz;
