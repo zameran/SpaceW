@@ -88,7 +88,7 @@ namespace SpaceEngine.Core.Bodies
         private float radius = 2048;
 
         public float Radius { get { return radius; } set { radius = value; } }
-        public Vector3 Origin { get; set; }
+        public Vector3 Origin { get { return transform.position; } set { transform.position = value; } }
         public MaterialPropertyBlock MPB { get; set; }
 
         public List<string> GetKeywords()

@@ -43,6 +43,8 @@ namespace SpaceEngine.Core.Utilities
 
         protected override void SetWorldToCameraMatrix()
         {
+            var origin = (Vector3d)GodManager.Instance.ActiveBody.Origin;
+
             // NOTE : co - x; so - y; ca - z; sa - w;
             var oa = CalculatelongitudeLatitudeVector(position.X, position.Y);
 
@@ -64,6 +66,9 @@ namespace SpaceEngine.Core.Utilities
             {
                 worldPosition = worldPosition.Normalized(Radius + 10.0 + GroundHeight);
             }
+
+            // TODO : CORE ORIGIN
+            worldPosition = worldPosition + origin;
 
             Matrix4x4d view = new Matrix4x4d(cx.x, cx.y, cx.z, 0.0, cy.x, cy.y, cy.z, 0.0, cz.x, cz.y, cz.z, 0.0, 0.0, 0.0, 0.0, 1.0);
 

@@ -152,8 +152,9 @@ namespace SpaceEngine.Core.Terrain
                 FaceToLocal = Matrix4x4d.Rotate(faces[Face - 1]);
             }
 
-            //LocalToWorld = Matrix4x4d.ToMatrix4x4d(transform.localToWorldMatrix) * FaceToLocal;
-            LocalToWorld = FaceToLocal;
+            // Update local matrices...
+            LocalToWorld = Matrix4x4d.ToMatrix4x4d(Body.transform.localToWorldMatrix) * FaceToLocal;
+            //LocalToWorld = FaceToLocal;
 
             Deformation = new DeformationSpherical(Body.Radius);
 
@@ -162,6 +163,10 @@ namespace SpaceEngine.Core.Terrain
 
         protected override void UpdateNode()
         {
+            // Update local matrices...
+            LocalToWorld = Matrix4x4d.ToMatrix4x4d(Body.transform.localToWorldMatrix) * FaceToLocal;
+            //LocalToWorld = FaceToLocal;
+
             var localToCamera = GodManager.Instance.WorldToCamera * LocalToWorld;
             var localToScreen = GodManager.Instance.CameraToScreen * localToCamera;
             var invLocalToCamera = localToCamera.Inverse();
