@@ -369,6 +369,22 @@ inline float ColorToUnit24(in float3 color)
 {
 	return dot(color, float3(1.0, 1.0 / 255.0, 1.0 / 65025.0));
 }
+
+inline float PackColor(float3 rgb) 
+{
+	return rgb.r + rgb.g * 256.0 + rgb.b * 256.0 * 256.0;
+}
+
+float3 UnpackColor(float f) 
+{
+	float3 color;
+
+	color.b = floor(f / 256.0 / 256.0);
+	color.g = floor((f - color.b * 256.0 * 256.0) / 256.0);
+	color.r = floor(f - color.b * 256.0 * 256.0 - color.g * 256.0);
+
+	return color / 255.0;
+}
 //-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
@@ -502,7 +518,7 @@ float3 hue2rgb(in float H)
 	float G = 2 - abs(H * 6 - 2);
 	float B = 2 - abs(H * 6 - 4);
 
-	return saturate(float3(R,G,B));
+	return saturate(float3(R, G, B));
 }
 
 float3 rgb2hcv(in float3 rgb)

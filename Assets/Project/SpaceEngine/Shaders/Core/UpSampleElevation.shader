@@ -16,7 +16,7 @@
 			#pragma fragment frag
 			
 			#include "../TCCommon.cginc"
-			#include "ImprovedPerlinNoise3D.cginc"
+			#include "../TCAsteroid.cginc"
 			
 			// tile border size
 			#define BORDER 2.0 
@@ -33,8 +33,8 @@
 			uniform sampler2D _ResidualSampler;
 			uniform float4 _ResidualOSH;
 			
-			uniform float _Octaves;
-			uniform float _Amp;
+			uniform float _Frequency;
+			uniform float _Amplitude;
 			uniform float4 _Offset;
 			uniform float4x4 _LocalToWorld;
 			
@@ -174,18 +174,25 @@
 				float3 P = float3(vert, _Offset.w);
 				float3x3 LTW = _LocalToWorld;
 				float3 p = normalize(mul(LTW, P)).xyz;
-				
+				float3 v = p * _Frequency;
+
 				noiseH          = 0.5;
 				noiseLacunarity = 2.218281828459;
-				float noise = Fbm(p * _Frequency, 6);
+
+				float noise = 0;
+
+				noise += Fbm(v * 0.25, 2);
+				noise += Fbm(v * 0.50, 4);
+				noise += Fbm(v * 0.75, 6);
+				noise += Fbm(v * 1.00, 8);
 				
-				if (_Amp < 0.0) 
+				if (_Amplitude < 0.0) 
 				{
-					zf -= _Amp * noise;
+					zf -= _Amplitude * noise;
 				}
 				else 
 				{
-					zf += noiseAmp * _Amp * noise;
+					zf += noiseAmp * _Amplitude * noise;
 				}
 
 				float zc = zf;

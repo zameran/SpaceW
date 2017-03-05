@@ -7,6 +7,7 @@
 		#include "UnityCG.cginc"
 
 		#include "../TCCommon.cginc"
+		#include "../TCAsteroid.cginc"
 
 		#define BORDER 2.0 
 
@@ -40,7 +41,6 @@
 
 			noiseH          = 0.5;
 			noiseLacunarity = 2.218281828459;
-			noiseOctaves	= 8;
 
 			float noise = 0;
 
