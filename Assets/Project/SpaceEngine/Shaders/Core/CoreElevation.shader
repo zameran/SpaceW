@@ -51,7 +51,7 @@
 
 			float color = _Amplitude * noise;
 							
-			output = float4(color, color, 0.0, 0.0);		
+			output = float4(color, color, vert);		
 		}
 
 		ENDCG

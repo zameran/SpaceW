@@ -269,9 +269,9 @@ namespace SpaceEngine.Core.Terrain.Deformation
                                                         1.0, 1.0, 1.0, 1.0);
 
             Matrix4x4d deformedVerticals = new Matrix4x4d(v0.x, v1.x, v2.x, v3.x,
-                                                            v0.y, v1.y, v2.y, v3.y,
-                                                            v0.z, v1.z, v2.z, v3.z,
-                                                            0.0, 0.0, 0.0, 0.0);
+                                                          v0.y, v1.y, v2.y, v3.y,
+                                                          v0.z, v1.z, v2.z, v3.z,
+                                                          0.0, 0.0, 0.0, 0.0);
 
             var uz = pc.Normalized();
             var ux = (new Vector3d(0, 1, 0)).Cross(uz).Normalized();

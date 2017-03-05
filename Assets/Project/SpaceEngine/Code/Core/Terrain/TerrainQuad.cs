@@ -303,7 +303,7 @@ namespace SpaceEngine.Core.Terrain
         /// </summary>
         private void Subdivide()
         {
-            var hl = (float)Length / 2.0f;
+            var hl = Length / 2.0;
 
             Children[0] = new TerrainQuad(Owner, this, 2 * Tx, 2 * Ty, Ox, Oy, hl, ZMin, ZMax);
             Children[1] = new TerrainQuad(Owner, this, 2 * Tx + 1, 2 * Ty, Ox + hl, Oy, hl, ZMin, ZMax);

@@ -78,7 +78,7 @@
 				float4 L = _Deform_ScreenQuadCornerNorms;
 				float3 P = float3(v.vertex.xy * _Deform_Offset.z + _Deform_Offset.xy, _Deform_Radius);
 				
-				float4 uvUV = float4(v.vertex.xy, float2(1.0,1.0) - v.vertex.xy);
+				float4 uvUV = float4(v.vertex.xy, float2(1.0, 1.0) - v.vertex.xy);
 				float4 alpha = uvUV.zxzx * uvUV.wwyy;
 				float4 alphaPrime = alpha * L / dot(alpha, L);
 				
@@ -91,14 +91,11 @@
 				#ifdef CUBE_PROJECTION
 					OUT.pos = mul(_Deform_LocalToScreen, float4(P + float3(0.0, 0.0, h), 1.0));
 				#else
-					OUT.pos = mul(_Deform_ScreenQuadCorners + hPrime * _Deform_ScreenQuadVerticals,  alphaPrime);
+					OUT.pos = mul(_Deform_ScreenQuadCorners + hPrime * _Deform_ScreenQuadVerticals, alphaPrime);
 				#endif
 				
 				OUT.uv = v.texcoord.xy;
-				
-				float3x3 LTW = _Deform_LocalToWorld;
-				
-				OUT.p = (_Deform_Radius + max(h, _Ocean_Level)) * normalize(mul(LTW, P));
+				OUT.p = (_Deform_Radius + max(h, _Ocean_Level)) * normalize(mul(_Deform_LocalToWorld, P));
 				
 				return OUT;
 			}
@@ -173,9 +170,10 @@
 
 				float3 finalColor = hdr(groundColor * extinction + inscatter);
 
-				//return float4(finalColor, 1.0);
-
 				return float4(finalColor, 1.0);
+				//return float4(texTile(_Elevation_Tile, IN.uv, _Elevation_TileCoords, _Elevation_TileSize).xxx * 0.002, 1.0);
+				//return float4(fn, 1.0);
+				//return float4(IN.uv, 1.0, 1.0);
 			}
 			
 			ENDCG
