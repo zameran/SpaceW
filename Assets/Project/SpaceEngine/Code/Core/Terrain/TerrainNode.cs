@@ -222,6 +222,7 @@ namespace SpaceEngine.Core.Terrain
 
             //Manager.GetSunNode().SetUniforms(TerrainMaterial);
             Deformation.SetUniforms(this, TerrainMaterial);
+            TerrainMaterial.SetTexture("_DetailedNormal", Body.DetailedNormal);
 
             //if (Manager.GetPlantsNode() != null)
             //    Manager.GetPlantsNode().SetUniforms(TerrainMaterial);

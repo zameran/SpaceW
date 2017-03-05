@@ -62,6 +62,13 @@
 				return tex2D(tile, uv);
 			}
 
+			float4 texTile(sampler2D tile, float2 uv, float2 tileCoords, float3 tileSize) 
+			{
+				uv = tileCoords + uv * tileSize.xy;
+
+				return tex2D(tile, uv);
+			}
+
 			v2f vert(appdata_base v)
 			{		
 				float2 zfc = texTileLod(_Elevation_Tile, v.texcoord.xy, _Elevation_TileCoords, _Elevation_TileSize).xy;
@@ -108,22 +115,11 @@
 				float3 P = V * max(length(IN.p), _Deform_Radius + 10.0);
 				float3 v = normalize(P - WCP);
 				float3 p = P + _Globals_Origin;
-				
-				float4 dn = texTile(_DetailedNormal, IN.uv, _Normals_TileCoords, _Normals_TileSize);
-
-				dn = float4((dn.a * 2.0) - 1.0, (dn.g * 2.0) - 1.0, 0.0, 0.0);
-				dn.z = sqrt(1.0 - dot(dn, dn));
 
 				float4 fn = texTile(_Normals_Tile, IN.uv, _Normals_TileCoords, _Normals_TileSize);
+				fn.z = sqrt(max(0.0, 1.0 - dot(fn.xy, fn.xy)));		
 
-				fn.z = sqrt(max(0.0, 1.0 - dot(fn.xy, fn.xy)));
-				
-				//fn = normalize(fn + dn); // NOTE : Nope!
-
-				if (ht <= _Ocean_Level && _Ocean_DrawBRDF == 1.0)
-				{
-					fn = float4(0, 0, 1, 0);
-				}
+				if (ht <= _Ocean_Level && _Ocean_DrawBRDF == 1.0) {	fn = float4(0, 0, 1, 0); }
 	
 				float3x3 TTW = _Deform_TangentFrameToWorld;
 				fn.xyz = mul(TTW, fn.xyz);

@@ -33,6 +33,7 @@
 // Creator: zameran
 #endregion
 
+using System;
 using System.Linq;
 
 using UnityEngine;
@@ -58,6 +59,17 @@ public static class VectorHelper
     {
         return new Vector3(Mathf.Abs(v.x), Mathf.Abs(v.y), Mathf.Abs(v.z));
     }
+
+    public static Vector3d Abs(this Vector3d v)
+    {
+        return new Vector3d(Math.Abs(v.x), Math.Abs(v.y), Math.Abs(v.z));
+    }
+
+    public static Vector4d Abs(this Vector4d v)
+    {
+        return new Vector4d(Math.Abs(v.x), Math.Abs(v.y), Math.Abs(v.z), Math.Abs(v.w));
+    }
+
 
     public static Vector3 RotatePointAroundPivot(this Vector3 point, Vector3 pivot, Vector3 angles)
     {
