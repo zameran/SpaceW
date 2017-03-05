@@ -12,6 +12,8 @@
 			CGPROGRAM
 			#include "UnityCG.cginc"
 
+			#include "../TCCommon.cginc"
+
 			#pragma target 4.0
 
 			#pragma vertex vert
@@ -58,92 +60,6 @@
 				return OUT;
 			}
 			
-			float mod(float x, float y) { return x - y * floor(x/y); }
-			
-			float3 rgb_to_hsv(float3 RGB)
-			{
-				float3 HSV = float3(0, 0, 0);
-
-				float minVal = min(RGB.x, min(RGB.y, RGB.z));
-				float maxVal = max(RGB.x, max(RGB.y, RGB.z));
-				float delta = maxVal - minVal;
-
-				HSV.z = maxVal;
-
-				if (delta != 0) 
-				{
-				   HSV.y = delta / maxVal;
-				   float3 delRGB;
-				   delRGB = (((float3(maxVal,maxVal,maxVal) - RGB) / 6.0) + delta / 2.0) / delta;
-
-				   if (RGB.x == maxVal) 
-				   {
-					   HSV.x = delRGB.z - delRGB.y;
-				   } 
-				   else if (RGB.y == maxVal) 
-				   {
-					   HSV.x = ( 1.0/3.0) + delRGB.x - delRGB.z;
-				   } 
-				   else if (RGB.z == maxVal)
-				   {
-					   HSV.x = ( 2.0/3.0) + delRGB.y - delRGB.x;
-				   }
-
-				   if (HSV.x < 0.0) 
-				   {
-					   HSV.x += 1.0;
-				   }
-
-				   if (HSV.x > 1.0) 
-				   {
-					   HSV.x -= 1.0;
-				   }
-				}
-
-				return HSV;
-			}
-
-			float3 hsv_to_rgb(float3 HSV)
-			{
-				float3 RGB = HSV.zzz;
-
-				if (HSV.y != 0) 
-				{
-				   float var_h = HSV.x * 6;
-				   float var_i = floor(var_h);
-				   float var_1 = HSV.z * (1.0 - HSV.y);
-				   float var_2 = HSV.z * (1.0 - HSV.y * (var_h-var_i));
-				   float var_3 = HSV.z * (1.0 - HSV.y * (1-(var_h-var_i)));
-
-				   if (var_i == 0) 
-				   {
-					   RGB = float3(HSV.z, var_3, var_1);
-				   } 
-				   else if (var_i == 1) 
-				   {
-					   RGB = float3(var_2, HSV.z, var_1);
-				   } 
-				   else if (var_i == 2) 
-				   {
-					   RGB = float3(var_1, HSV.z, var_3);
-				   } 
-				   else if (var_i == 3) 
-				   {
-					   RGB = float3(var_1, var_2, HSV.z);
-				   } 
-				   else if (var_i == 4) 
-				   {
-					   RGB = float3(var_3, var_1, HSV.z);
-				   } 
-				   else 
-				   {
-					   RGB = float3(HSV.z, var_1, var_2);
-				   }
-			   }
-
-			   return RGB;
-			}
-			
 			float4 frag(v2f IN) : COLOR
 			{			
 				float4 result = float4(128.0, 128.0, 128.0, 128.0);
@@ -160,7 +76,7 @@
 				
 				if (_CoarseLevelOSL.x != -1.0) 
 				{
-					float4 mask = masks[ int(mod(uv.x, 2.0) + 2.0 * mod(uv.y, 2.0)) ];
+					float4 mask = masks[int(modi(uv.x, 2.0) + 2.0 * modi(uv.y, 2.0))];
 					
 					float4 _offset = float4(floor((uv + float2(1.0,1.0)) * 0.5) * _CoarseLevelOSL.z + _CoarseLevelOSL.xy, 0.0, 0.0);
 					
@@ -182,14 +98,14 @@
 				
 				if (_NoiseUVLH.w == 1.0) 
 				{
-					float3 hsv = rgb_to_hsv(result.rgb / 255.0);
+					float3 hsv = rgb2hsv(result.rgb / 255.0);
 
 					hsv *= float3(1.0, 1.0, 1.0) + (1.0 - smoothstep(0.4, 0.8, hsv.z)) * _NoiseColor.rgb * (noise.rgb - 128.0) / 255.0;
 					hsv.x = frac(hsv.x);
 					hsv.y = clamp(hsv.y, 0.0, 1.0);
 					hsv.z = clamp(hsv.z, 0.0, 1.0);
 					
-					result = float4(hsv_to_rgb(hsv) * 255.0, _NoiseColor.a * (noise.a - 128.0) + result.a);
+					result = float4(hsv2rgb(hsv) * 255.0, _NoiseColor.a * (noise.a - 128.0) + result.a);
 				} 
 				else 
 				{

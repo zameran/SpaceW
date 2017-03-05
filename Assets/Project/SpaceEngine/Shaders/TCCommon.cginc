@@ -140,6 +140,10 @@ uniform float noiseRidgeSmooth;// = 0.0001;
 #if !defined (M_PI2)
 #define M_PI2 6.28318530716
 #endif
+
+#if !defined (EPSILON)
+#define EPSILON  1e-10
+#endif
 //-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
@@ -399,7 +403,9 @@ float2 Fwidth(float2 texCoord, float2 size)
 
 	return fw;
 }
+//-----------------------------------------------------------------------------
 
+//-----------------------------------------------------------------------------
 float3 rgb2hsl(float3 rgb)
 {
 	/*
@@ -490,6 +496,45 @@ float3 hsl2rgb(float3 hsl)
 	return hsl.z * lerp(K.xxx, clamp(p - K.xxx, 0.0, 1.0), hsl.y);
 }
 
+float3 hue2rgb(in float H)
+{
+	float R = abs(H * 6 - 3) - 1;
+	float G = 2 - abs(H * 6 - 2);
+	float B = 2 - abs(H * 6 - 4);
+
+	return saturate(float3(R,G,B));
+}
+
+float3 rgb2hcv(in float3 rgb)
+{
+	// Based on work by Sam Hocevar and Emil Persson
+	float4 P = (rgb.g < rgb.b) ? float4(rgb.bg, -1.0, 2.0 / 3.0) : float4(rgb.gb, 0.0, -1.0 / 3.0);
+	float4 Q = (rgb.r < P.x) ? float4(P.xyw, rgb.r) : float4(rgb.r, P.yzx);
+
+	float C = Q.x - min(Q.w, Q.y);
+	float H = abs((Q.w - Q.y) / (6 * C + EPSILON) + Q.z);
+
+	return float3(H, C, Q.x);
+}
+
+float3 rgb2hsv(in float3 rgb)
+{
+	float3 HCV = rgb2hcv(rgb);
+
+	float S = HCV.y / (HCV.z + EPSILON);
+
+	return float3(HCV.x, S, HCV.z);
+}
+
+float3 hsv2rgb(in float3 hsv)
+{
+	float3 rgb = hue2rgb(hsv.x);
+
+	return ((rgb - 1) * hsv.y + 1) * hsv.z;
+}
+//-----------------------------------------------------------------------------
+
+//-----------------------------------------------------------------------------
 inline float hash1(float p) { return frac(sin(p) * 158.5453123); }
 inline float3 hash3(float2 p) { return frac(sin(float3(dot(p, float2(127.1, 311.7)), dot(p, float2(269.5, 183.3)), dot(p, float2(419.2, 371.9)))) * 43758.5453); }
 inline float4 hash4(float2 p) { return frac(sin(float4(dot(p, float2(127.1, 311.7)), dot(p, float2(269.5, 183.3)), dot(p, float2(419.2, 371.9)), dot(p, float2(398.1, 176.7)))) * 43758.5453); }
@@ -1182,6 +1227,7 @@ float3 Noise2DAlternativeDeriv(float2 p, float seed = 0)
 //-----------------------------------------------------------------------------
 inline float4 modi(float4 x, float y) { return x - y * floor(x / y); }
 inline float3 modi(float3 x, float y) { return x - y * floor(x / y); }
+inline float modi(float x, float y) { return x - y * floor(x / y); }
 inline float4 Permutation(float4 x) { return modi((34.0 * x + 1.0) * x, 289.0); }
 inline float3 Permutation(float3 x) { return modi((34.0 * x + 1.0) * x, 289.0); }
 inline float4 TaylorInvSqrt(float4 r) { return 1.79284291400159 - 0.85373472095314 * r; }
