@@ -114,7 +114,7 @@
 				dn = float4((dn.a * 2.0) - 1.0, (dn.g * 2.0) - 1.0, 0.0, 0.0);
 				dn.z = sqrt(1.0 - dot(dn, dn));
 
-				float3 fn = texTile(_Normals_Tile, IN.uv, _Normals_TileCoords, _Normals_TileSize).xyz;
+				float4 fn = texTile(_Normals_Tile, IN.uv, _Normals_TileCoords, _Normals_TileSize);
 
 				fn.z = sqrt(max(0.0, 1.0 - dot(fn.xy, fn.xy)));
 				
@@ -122,20 +122,20 @@
 
 				if (ht <= _Ocean_Level && _Ocean_DrawBRDF == 1.0)
 				{
-					fn = float3(0, 0, 1);
+					fn = float4(0, 0, 1, 0);
 				}
 	
 				float3x3 TTW = _Deform_TangentFrameToWorld;
-				fn = mul(TTW, fn);
+				fn.xyz = mul(TTW, fn.xyz);
 				
-				float cTheta = dot(fn, WSD);
+				float cTheta = dot(fn.xyz, WSD);
 				float vSun = dot(V, WSD);
 				
 				float4 reflectance = texTile(_Ortho_Tile, IN.uv, _Ortho_TileCoords, _Ortho_TileSize);
 				
 				float3 sunL = 0;
 				float3 skyE = 0;
-				SunRadianceAndSkyIrradiance(P, fn, WSD, sunL, skyE);
+				SunRadianceAndSkyIrradiance(P, fn.xyz, WSD, sunL, skyE);
 
 				#if SHADOW_1 || SHADOW_2 || SHADOW_3 || SHADOW_4
 					float shadow = ShadowColor(float4(P, 1));
@@ -164,9 +164,10 @@
 
 				return float4(finalColor, 1.0);
 				//return float4(texTile(_Elevation_Tile, IN.uv, _Elevation_TileCoords, _Elevation_TileSize).xxx * 0.002, 1.0);
-				//return float4(fn, 1.0);
+				//return float4(fn.xyz, 1.0);
 				//return float4(IN.uv, 1.0, 1.0);
 				//return float4(ht / 10000, ht / 10000, ht / 10000, 1.0);
+				//return float4(fn.www, 1);
 			}
 			
 			ENDCG

@@ -52,7 +52,7 @@
 			return 0;
 		}
 
-		float4 CalculateNormal(float2 uv)
+		float3 CalculateNormal(float2 uv)
 		{
 			uv = floor(uv);
 
@@ -69,9 +69,14 @@
 			float3 p2 = GetWorldPosition(uv + float2(0.0, -1.0), z2).xyz;
 			float3 p3 = GetWorldPosition(uv + float2(0.0, +1.0), z3).xyz;
 				
-			float3 nf = (mul((float3x3)_WorldToTangentFrame, normalize(cross(p1 - p0, p3 - p2)))).xyz;
-				
-			return float4(nf, 0);
+			float3 normal = normalize(cross(p1 - p0, p3 - p2));
+
+			return (mul((float3x3)_WorldToTangentFrame, normal)).xyz;
+		}
+
+		float CalculateSlope(float3 normal)
+		{		
+			return clamp(1.0 - pow(normal.z, 6.0), 0.0, 1.0);
 		}
 
 		void vert(in appdata_base v, out v2f o)
@@ -83,7 +88,10 @@
 
 		void frag(in v2f IN, out float4 output : COLOR)
 		{
-			output = CalculateNormal(IN.st);
+			float3 normal = CalculateNormal(IN.st);
+			float slope = CalculateSlope(normal);
+
+			output = float4(normal, slope);
 		}
 
 		ENDCG
