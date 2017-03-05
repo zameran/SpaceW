@@ -254,6 +254,9 @@ namespace SpaceEngine.Core.Bodies
 
         protected override void UpdateNode()
         {
+            //var value = Time.deltaTime * Mathf.Sin(Time.time * 2) * 100000;
+            //Origin += new Vector3(0, 0, value);
+
             if (Atmosphere != null)
             {
                 if (AtmosphereEnabled)

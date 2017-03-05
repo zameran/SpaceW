@@ -187,14 +187,6 @@ namespace UnityEngine
 
         public Vector3d normalized { get { return Normalize(this); } }
 
-        public void Normalize()
-        {
-            double invLength = 1.0 / System.Math.Sqrt(x * x + y * y + z * z);
-            x *= invLength;
-            y *= invLength;
-            z *= invLength;
-        }
-
         public static Vector3d Exclude(Vector3d excludeThis, Vector3d fromThat)
         {
             return fromThat - Project(fromThat, excludeThis);
@@ -209,10 +201,9 @@ namespace UnityEngine
 
         public static Vector3d Normalize(Vector3d value)
         {
-            var magnitude = value.Magnitude();
+            var invLength = 1.0 / value.Magnitude();
 
-            if (magnitude > 9.9999997473787516E-06) return value / magnitude;
-            else return zero;
+            return new Vector3d(value.x * invLength, value.y * invLength, value.z * invLength);
         }
 
         public static Vector3d Projection(Vector3d a, Vector3d b)
@@ -262,21 +253,21 @@ namespace UnityEngine
 
         public Vector3d Normalized()
         {
-            var invLength = 1.0 / Math.Sqrt(x * x + y * y + z * z);
+            var invLength = 1.0 / Magnitude();
 
             return new Vector3d(x * invLength, y * invLength, z * invLength);
         }
 
         public Vector3d Normalized(double l)
         {
-            var invLength = l / Math.Sqrt(x * x + y * y + z * z);
+            var invLength = l / Magnitude();
 
             return new Vector3d(x * invLength, y * invLength, z * invLength);
         }
 
         public Vector3d Normalized(ref double previousLength)
         {
-            previousLength = System.Math.Sqrt(x * x + y * y + z * z);
+            previousLength = Magnitude();
 
             var invLength = 1.0 / previousLength;
 

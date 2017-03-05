@@ -62,7 +62,7 @@ namespace SpaceEngine.Ocean
         /// </summary>
         public bool DrawOcean { get; protected set; }
 
-        public Vector3 Origin { get { return body != null ? body.Origin : transform.position; } } // TODO : ORIGIN
+        public Vector3d Origin { get { return body != null ? body.Origin : transform.position; } } // TODO : ORIGIN
 
         /// <summary>
         /// Concrete classes must provide a function that returns the variance of the waves need for the BRDF rendering of waves.
@@ -124,12 +124,14 @@ namespace SpaceEngine.Ocean
             OceanMaterial.renderQueue = (int)RenderQueue + RenderQueueOffset;
 
             // Calculates the required data for the projected grid
-            var c2w = GodManager.Instance.CameraToWorld;
-            var cl = c2w * Vector3d.zero; // Camera in local space // TODO : Ocean origin
+            var cameraToWorld = GodManager.Instance.CameraToWorld;
+            var oceanFrame = cameraToWorld * Vector3d.zero; // Camera in local space // TODO : Ocean origin [ZERO]
 
             var radius = (OceanType == OceanSurfaceType.Spherized) ? body.Radius : 0.0f;
 
-            if ((OceanType == OceanSurfaceType.Flat && cl.z > ZMin) || (radius > 0.0 && cl.Magnitude() > radius + ZMin) || (radius < 0.0 && (new Vector2d(cl.y, cl.z)).Magnitude() < -radius - ZMin))
+            if ((OceanType == OceanSurfaceType.Flat && oceanFrame.z > ZMin) ||
+                (radius > 0.0 && oceanFrame.Magnitude() > radius + ZMin) ||
+                (radius < 0.0 && (new Vector2d(oceanFrame.y, oceanFrame.z)).Magnitude() < -radius - ZMin))
             {
                 OldLocalToOcean = Matrix4x4d.identity;
                 Offset = Vector4.zero;
@@ -139,7 +141,7 @@ namespace SpaceEngine.Ocean
             }
 
             DrawOcean = true;
-            Vector3d ux, uy, uz, oo;
+            Vector3d ux, uy, uz, oceanOrigin;
 
             if (OceanType == OceanSurfaceType.Flat)
             {
@@ -147,12 +149,12 @@ namespace SpaceEngine.Ocean
                 ux = Vector3d.right;
                 uy = Vector3d.up;
                 uz = Vector3d.forward;
-                oo = new Vector3d(cl.x, cl.y, 0.0);
+                oceanOrigin = new Vector3d(oceanFrame.x, oceanFrame.y, 0.0);
             }
             else
             {
                 // Planet ocean
-                uz = cl.Normalized(); // Unit z vector of ocean frame, in local space
+                uz = oceanFrame.Normalized(); // Unit z vector of ocean frame, in local space
 
                 if (OldLocalToOcean != Matrix4x4d.identity)
                 {
@@ -164,41 +166,46 @@ namespace SpaceEngine.Ocean
                 }
 
                 uy = uz.Cross(ux); // Unit y vector
-                oo = uz * radius; // Origin of ocean frame, in local space
+                oceanOrigin = (uz * radius); // Origin of ocean frame, in local space // TODO : Ocean origin [ZERO]
             }
 
             // Compute l2o = LocalToOcean transform, where ocean frame = tangent space at camera projection on sphere radius in local space
-            var l2o = new Matrix4x4d(ux.x, ux.y, ux.z, -ux.Dot(oo), uy.x, uy.y, uy.z, -uy.Dot(oo), uz.x, uz.y, uz.z, -uz.Dot(oo), 0.0, 0.0, 0.0, 1.0);
+            var localToOcean = new Matrix4x4d(ux.x, ux.y, ux.z, -ux.Dot(oceanOrigin),
+                                              uy.x, uy.y, uy.z, -uy.Dot(oceanOrigin),
+                                              uz.x, uz.y, uz.z, -uz.Dot(oceanOrigin),
+                                              0.0, 0.0, 0.0, 1.0);
 
             // Compute c2o = CameraToOcean transform
-            var c2o = l2o * c2w;
+            var cameraToOcean = localToOcean * cameraToWorld;
 
             if (OldLocalToOcean != Matrix4x4d.identity)
             {
-                var delta = l2o * (OldLocalToOcean.Inverse() * Vector3d.zero); // TODO : Ocean origin
+                var delta = localToOcean * (OldLocalToOcean.Inverse() * Vector3d.zero); // TODO : Ocean origin [ZERO]
 
                 Offset += new Vector4((float)delta.x, (float)delta.y, (float)delta.z, 0.0f);
             }
 
-            OldLocalToOcean = l2o;
+            OldLocalToOcean = localToOcean;
 
-            var stoc = GodManager.Instance.ScreenToCamera;
-            var oc = c2o * Vector3d.zero; // TODO : Ocean origin
+            var screenToCamera = GodManager.Instance.ScreenToCamera;
+            var oc = cameraToOcean * Vector3d.zero; // TODO : Ocean origin [ZERO]
 
             var h = oc.z;
 
-            var stoc_w = (stoc * new Vector4d(0.0, 0.0, 0.0, 1.0)).XYZ0();
-            var stoc_x = (stoc * new Vector4d(1.0, 0.0, 0.0, 0.0)).XYZ0();
-            var stoc_y = (stoc * new Vector4d(0.0, 1.0, 0.0, 0.0)).XYZ0();
+            if (double.IsNaN(h)) { h = 1.0; }
 
-            var A0 = (c2o * stoc_w).XYZ();
-            var dA = (c2o * stoc_x).XYZ();
-            var B = (c2o * stoc_y).XYZ();
+            var stoc_w = (screenToCamera * new Vector4d(0.0, 0.0, 0.0, 1.0)).XYZ0();
+            var stoc_x = (screenToCamera * new Vector4d(1.0, 0.0, 0.0, 0.0)).XYZ0();
+            var stoc_y = (screenToCamera * new Vector4d(0.0, 1.0, 0.0, 0.0)).XYZ0();
+
+            var A0 = (cameraToOcean * stoc_w).XYZ();
+            var dA = (cameraToOcean * stoc_x).XYZ();
+            var B = (cameraToOcean * stoc_y).XYZ();
 
             Vector3d horizon1;
             Vector3d horizon2;
 
-            var offset = new Vector3d(-Offset.x, -Offset.y, oc.z);
+            var offset = new Vector3d(-Offset.x, -Offset.y, h);
 
             if (OceanType == OceanSurfaceType.Flat)
             {
@@ -223,13 +230,13 @@ namespace SpaceEngine.Ocean
             }
 
             var sunDirection = body.Atmosphere.GetSunDirection(body.Atmosphere.Suns[0]);
-            var oceanSunDirection = l2o.ToMatrix3x3d() * sunDirection;
+            var oceanSunDirection = localToOcean.ToMatrix3x3d() * sunDirection;
 
             OceanMaterial.SetVector("_Ocean_SunDir", oceanSunDirection.ToVector3());
             OceanMaterial.SetVector("_Ocean_Horizon1", horizon1.ToVector3());
             OceanMaterial.SetVector("_Ocean_Horizon2", horizon2.ToVector3());
-            OceanMaterial.SetMatrix("_Ocean_CameraToOcean", c2o.ToMatrix4x4());
-            OceanMaterial.SetMatrix("_Ocean_OceanToCamera", c2o.Inverse().ToMatrix4x4());
+            OceanMaterial.SetMatrix("_Ocean_CameraToOcean", cameraToOcean.ToMatrix4x4());
+            OceanMaterial.SetMatrix("_Ocean_OceanToCamera", cameraToOcean.Inverse().ToMatrix4x4());
             OceanMaterial.SetVector("_Ocean_CameraPos", offset.ToVector3());
             OceanMaterial.SetVector("_Ocean_Color", UpwellingColor * 0.1f);
             OceanMaterial.SetVector("_Ocean_ScreenGridSize", new Vector2((float)Resolution / (float)Screen.width, (float)Resolution / (float)Screen.height));
