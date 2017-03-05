@@ -66,14 +66,7 @@
 			{		
 				float2 zfc = texTileLod(_Elevation_Tile, v.texcoord.xy, _Elevation_TileCoords, _Elevation_TileSize).xy;
 				
-				if (zfc.x <= _Ocean_Level && _Ocean_DrawBRDF == 1.0)
-				{
-					zfc = float2(0, 0);
-				}
-					
-				float2 vert = abs(_Deform_Camera.xy - v.vertex.xy);
-
-				float _blend = clamp((max(max(vert.x, vert.y), _Deform_Camera.z) - _Deform_Blending.x) / _Deform_Blending.y, 0.0, 1.0);
+				if (zfc.x <= _Ocean_Level && _Ocean_DrawBRDF == 1.0) { zfc = float2(0, 0); }
 				
 				float4 L = _Deform_ScreenQuadCornerNorms;
 				float3 P = float3(v.vertex.xy * _Deform_Offset.z + _Deform_Offset.xy, _Deform_Radius);
@@ -82,20 +75,19 @@
 				float4 alpha = uvUV.zxzx * uvUV.wwyy;
 				float4 alphaPrime = alpha * L / dot(alpha, L);
 				
-				float h = zfc.x * (1.0 - _blend) + zfc.y * _blend;
 				float k = min(length(P) / dot(alpha, L) * 1.0000003, 1.0);
-				float hPrime = (h + _Deform_Radius * (1.0 - k)) / k;
+				float hPrime = (zfc.x + _Deform_Radius * (1.0 - k)) / k;
 				
 				v2f OUT;
 	
 				#ifdef CUBE_PROJECTION
-					OUT.pos = mul(_Deform_LocalToScreen, float4(P + float3(0.0, 0.0, h), 1.0));
+					OUT.pos = mul(_Deform_LocalToScreen, float4(P + float3(0.0, 0.0, zfc.x), 1.0));
 				#else
 					OUT.pos = mul(_Deform_ScreenQuadCorners + hPrime * _Deform_ScreenQuadVerticals, alphaPrime);
 				#endif
 				
 				OUT.uv = v.texcoord.xy;
-				OUT.p = (_Deform_Radius + max(h, _Ocean_Level)) * normalize(mul(_Deform_LocalToWorld, P));
+				OUT.p = (_Deform_Radius + max(zfc.x, _Ocean_Level)) * normalize(mul(_Deform_LocalToWorld, P));
 				
 				return OUT;
 			}
@@ -174,6 +166,7 @@
 				//return float4(texTile(_Elevation_Tile, IN.uv, _Elevation_TileCoords, _Elevation_TileSize).xxx * 0.002, 1.0);
 				//return float4(fn, 1.0);
 				//return float4(IN.uv, 1.0, 1.0);
+				//return float4(ht / 10000, ht / 10000, ht / 10000, 1.0);
 			}
 			
 			ENDCG

@@ -47,7 +47,7 @@ public class RingSegment : MonoBehaviour
 
         var SegmentTRS = Matrix4x4.TRS(Ring.transform.position, transform.rotation, Vector3.one);
 
-        Graphics.DrawMesh(Ring.RingSegmentMesh, SegmentTRS, Ring.RingMaterial, 0, CameraHelper.Main());
+        Graphics.DrawMesh(Ring.RingSegmentMesh, SegmentTRS, Ring.RingMaterial, 0, CameraHelper.Main(), 0);
     }
 
     public void UpdateNode(Mesh mesh, Material material, Quaternion rotation)

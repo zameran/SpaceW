@@ -191,6 +191,9 @@ namespace SpaceEngine.Core
             UpSampleMaterial.SetVector(uniforms.offset, offset.ToVector4());
             UpSampleMaterial.SetMatrix(uniforms.localToWorld, ltow);
 
+            if (TerrainNode.Body.NPS != null) TerrainNode.Body.NPS.SetUniforms(UpSampleMaterial);
+            if (TerrainNode.Body.TCCPS != null) TerrainNode.Body.TCCPS.UpdateUniforms(UpSampleMaterial);
+
             Graphics.Blit(null, gpuSlot.Texture, UpSampleMaterial);
 
             base.DoCreateTile(level, tx, ty, slot);
