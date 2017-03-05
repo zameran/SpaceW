@@ -35,6 +35,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 
 using UnityEngine;
 
@@ -102,9 +103,9 @@ namespace SpaceEngine.Managers
             Instance = this;
         }
 
-        public void Debug(MonoBehaviour owner)
+        public void Debug(MonoBehaviour owner, int stackFrameOffset = 1)
         {
-            var entry = new SequenceEntry(string.Format("{0} [{1}]", owner.name, owner.GetType().Name));
+            var entry = new SequenceEntry(string.Format("{0} [{1}.{2}]", owner.name, owner.GetType().Name, new StackTrace().GetFrame(stackFrameOffset).GetMethod().Name));
 
             if (Sequence.Contains(entry)) { NestedSequence.Add(entry); }
             else Sequence.Add(entry);
