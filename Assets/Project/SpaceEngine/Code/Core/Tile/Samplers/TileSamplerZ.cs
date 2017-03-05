@@ -20,7 +20,8 @@ namespace SpaceEngine.Core.Tile.Samplers
         /// An internal quadtree to store the texture tile associated with each
         /// terrain TerrainQuad, and to keep track of tiles that need to be read back.
         /// </summary>
-        class QuadTreeZ : QuadTree
+        [Serializable]
+        private class QuadTreeZ : QuadTree
         {
             public TerrainQuad TerrainQuad;
 
@@ -36,6 +37,7 @@ namespace SpaceEngine.Core.Tile.Samplers
         /// <summary>
         /// Helper class to store the retrived height data and the [min, max] values
         /// </summary>
+        [Serializable]
         private class ElevationInfo
         {
             public float[] Elevations = null;
@@ -55,6 +57,7 @@ namespace SpaceEngine.Core.Tile.Samplers
         /// <summary>
         /// The terrain <see cref="TerrainQuad"/> directly below the current viewer position.
         /// </summary>
+        [SerializeField]
         QuadTreeZ CameraQuad;
 
         /// <summary>

@@ -33,6 +33,8 @@
 // Creator: zameran
 #endregion
 
+using SpaceEngine.Managers;
+
 using UnityEngine;
 
 public abstract class Node<T> : MonoBehaviour where T : class
@@ -45,6 +47,8 @@ public abstract class Node<T> : MonoBehaviour where T : class
     protected virtual void Start()
     {
         InitNode();
+
+        if (DebugSequenceManager.Instance != null) DebugSequenceManager.Instance.Debug(this);
     }
 
     protected virtual void Update()

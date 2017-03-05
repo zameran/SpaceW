@@ -290,7 +290,7 @@ namespace SpaceEngine.Core.Bodies
             {
                 if (Helper.Enabled(terrainNode))
                 {
-                    DrawTerrain(terrainNode);
+                    DrawTerrain1(terrainNode);
                 }
             }
 
@@ -355,7 +355,21 @@ namespace SpaceEngine.Core.Bodies
 
             // The draw them
             DrawQuad(node, node.TerrainQuadRoot, samplers);
+        }
 
+        private void DrawTerrain1(TerrainNode node)
+        {
+            // Get all the samplers attached to the terrain node. The samples contain the data need to draw the quad
+            var allSamplers = node.transform.GetComponentsInChildren<TileSampler>();
+            var samplers = allSamplers.Where(sampler => sampler.enabled && sampler.StoreLeaf).ToList();
+
+            if (samplers.Count == 0) return;
+
+            // Find all the quads in the terrain node that need to be drawn
+            FindDrawableQuads(node.TerrainQuadRoot, samplers);
+
+            // The draw them
+            DrawQuad(node, node.TerrainQuadRoot, samplers);
         }
 
         private bool FindDrawableSamplers(TerrainQuad quad, List<TileSampler> samplers)

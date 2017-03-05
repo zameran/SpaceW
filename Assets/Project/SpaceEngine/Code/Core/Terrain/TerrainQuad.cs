@@ -79,6 +79,7 @@ namespace SpaceEngine.Core.Terrain
         /// The four subquads of this quad. If this quad is not subdivided, the four values are NULL. 
         /// The subquads are stored in the following order: [BottomLeft, BottomRight, TopLeft, TopRight].
         /// </summary>
+        [NonSerialized]
         public TerrainQuad[] Children = new TerrainQuad[4];
 
         /// <summary>
@@ -102,7 +103,7 @@ namespace SpaceEngine.Core.Terrain
         /// <summary>
         /// This quad is not subdivided?
         /// </summary>
-        public bool IsLeaf { get { return Children[0] == null; } }
+        public bool IsLeaf { get { return Children[0] == null || Children == null; } }
 
         /// <summary> 
         /// Creates a new <see cref="TerrainQuad"/> 
