@@ -36,6 +36,8 @@ namespace UnityEngine
 
         public static Vector4d one { get { return new Vector4d(1.0, 1.0, 1.0, 1.0); } }
 
+        public Vector2d xy { get { return new Vector2d(this.x, this.y); } }
+
         public Vector4d(double v)
         {
             this.x = v;
