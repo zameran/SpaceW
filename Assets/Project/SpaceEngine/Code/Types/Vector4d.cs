@@ -32,6 +32,10 @@ namespace UnityEngine
     {
         public double x, y, z, w;
 
+        public static Vector4d zero { get { return new Vector4d(0.0, 0.0, 0.0, 0.0); } }
+
+        public static Vector4d one { get { return new Vector4d(1.0, 1.0, 1.0, 1.0); } }
+
         public Vector4d(double v)
         {
             this.x = v;
@@ -197,9 +201,5 @@ namespace UnityEngine
 
             return new Vector4d(x * invLength, y * invLength, z * invLength, w * invLength);
         }
-
-        public static Vector4d zero { get { return new Vector4d(0.0, 0.0, 0.0, 0.0); } }
-
-        public static Vector4d one { get { return new Vector4d(1.0, 1.0, 1.0, 1.0); } }
     }
 }

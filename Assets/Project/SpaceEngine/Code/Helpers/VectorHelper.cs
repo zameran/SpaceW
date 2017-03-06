@@ -45,6 +45,16 @@ public static class VectorHelper
         return new Vector3(v.x, v.z, v.y);
     }
 
+    public static Vector3 xy0(this Vector3 v)
+    {
+        return new Vector3(v.x, v.y, 0.0f);
+    }
+
+    public static Vector2 xy(this Vector3 v)
+    {
+        return new Vector2(v.x, v.y);
+    }
+
     public static Vector3 Summ(params Vector3[] vectors)
     {
         return vectors.Aggregate(Vector3.zero, (current, t) => current + t);

@@ -118,29 +118,29 @@ namespace SpaceEngine.Core.Utilities
             position.Phi += angle;
         }
 
-        public override double Interpolate(double sx0, double sy0, double stheta, double sphi, double sd, double dx0, double dy0, double dtheta, double dphi, double dd, double t)
+        public override double Interpolate(Position from, Position to, double t)
         {
-            var s = new Vector3d(Math.Cos(sx0) * Math.Cos(sy0), Math.Sin(sx0) * Math.Cos(sy0), Math.Sin(sy0));
-            var e = new Vector3d(Math.Cos(dx0) * Math.Cos(dy0), Math.Sin(dx0) * Math.Cos(dy0), Math.Sin(dy0));
+            var s = new Vector3d(Math.Cos(from.X) * Math.Cos(from.Y), Math.Sin(from.X) * Math.Cos(from.Y), Math.Sin(from.Y));
+            var e = new Vector3d(Math.Cos(to.X) * Math.Cos(to.Y), Math.Sin(to.X) * Math.Cos(to.Y), Math.Sin(to.Y));
             var distance = Math.Max(MathUtility.Safe_Acos(s.Dot(e)) * Radius, 1e-3);
 
             t = Math.Min(t + Math.Min(0.1, 5000.0 / distance), 1.0);
 
             var T = 0.5 * Math.Atan(4.0 * (t - 0.5)) / Math.Atan(4.0 * 0.5) + 0.5;
 
-            InterpolateDirection(sx0, sy0, dx0, dy0, T, ref position.X, ref position.Y);
-            InterpolateDirection(sphi, stheta, dphi, dtheta, T, ref position.Phi, ref position.Theta);
+            InterpolateDirection(from.X, from.Y, to.X, to.Y, T, ref position.X, ref position.Y);
+            InterpolateDirection(from.Phi, from.Theta, to.Phi, to.Theta, T, ref position.Phi, ref position.Theta);
 
             var W = 10.0;
 
-            position.Distance = sd * (1.0 - t) + dd * t + distance * (Math.Exp(-W * (t - 0.5) * (t - 0.5)) - Math.Exp(-W * 0.25));
+            position.Distance = from.Distance * (1.0 - t) + to.Distance * t + distance * (Math.Exp(-W * (t - 0.5) * (t - 0.5)) - Math.Exp(-W * 0.25));
 
             return t;
         }
 
-        public override void InterpolatePos(double sx0, double sy0, double dx0, double dy0, double t, ref double x0, ref double y0)
+        public override void InterpolatePos(Position from, Position to, double t, ref Position current)
         {
-            InterpolateDirection(sx0, sy0, dx0, dy0, t, ref x0, ref y0);
+            InterpolateDirection(from.X, from.Y, to.X, to.Y, t, ref current.X, ref current.Y);
         }
     }
 }

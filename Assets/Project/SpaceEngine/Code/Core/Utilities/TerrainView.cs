@@ -45,8 +45,10 @@ namespace SpaceEngine.Core.Utilities
         };
 
         private CachedComponent<Camera> CameraCachedComponent = new CachedComponent<Camera>();
+        private CachedComponent<Controller> ControllerCachedComponent = new CachedComponent<Controller>();
 
         public Camera CameraComponent { get { return CameraCachedComponent.Component; } }
+        public Controller ControllerComponent { get { return ControllerCachedComponent.Component; } }
 
         [SerializeField]
         public Position position;
@@ -86,6 +88,7 @@ namespace SpaceEngine.Core.Utilities
         protected virtual void Start()
         {
             CameraCachedComponent.TryInit(this);
+            ControllerCachedComponent.TryInit(this);
 
             WorldToCameraMatrix = Matrix4x4d.identity;
             CameraToWorldMatrix = Matrix4x4d.identity;
@@ -208,23 +211,23 @@ namespace SpaceEngine.Core.Utilities
             position.Phi += angle;
         }
 
-        public virtual double Interpolate(double sx0, double sy0, double stheta, double sphi, double sd, double dx0, double dy0, double dtheta, double dphi, double dd, double t)
+        public virtual double Interpolate(Position from, Position to, double t)
         {
             // TODO : Interpolation
 
-            position.X = dx0;
-            position.Y = dy0;
-            position.Theta = dtheta;
-            position.Phi = dphi;
-            position.Distance = dd;
+            position.X = to.X;
+            position.Y = to.Y;
+            position.Theta = to.Theta;
+            position.Phi = to.Phi;
+            position.Distance = to.Distance;
 
             return 1.0;
         }
 
-        public virtual void InterpolatePos(double sx0, double sy0, double dx0, double dy0, double t, ref double x0, ref double y0)
+        public virtual void InterpolatePos(Position from, Position to, double t, ref Position current)
         {
-            x0 = sx0 * (1.0 - t) + dx0 * t;
-            y0 = sy0 * (1.0 - t) + dy0 * t;
+            current.X = from.X * (1.0 - t) + to.X * t;
+            current.Y = from.Y * (1.0 - t) + to.Y * t;
         }
 
         /// <summary>

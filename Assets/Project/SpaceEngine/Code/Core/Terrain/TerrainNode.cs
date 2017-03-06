@@ -194,7 +194,7 @@ namespace SpaceEngine.Core.Terrain
             if (UseHorizonCulling && LocalCameraPosition.z <= TerrainQuadRoot.ZMax)
             {
                 var deformedDirection = invLocalToCamera * Vector3d.forward;
-                var localDirection = (Deformation.DeformedToLocal(deformedDirection) - LocalCameraPosition).XY().Normalized();
+                var localDirection = (Deformation.DeformedToLocal(deformedDirection) - LocalCameraPosition).xy.Normalized();
 
                 LocalCameraDirection = new Matrix2x2d(localDirection.y, -localDirection.x, -localDirection.x, -localDirection.y);
 
@@ -275,7 +275,7 @@ namespace SpaceEngine.Core.Terrain
             }
 
             var corners = new Vector2d[4];
-            var plane = LocalCameraPosition.XY();
+            var plane = LocalCameraPosition.xy;
 
             corners[0] = LocalCameraDirection * (new Vector2d(box.xmin, box.ymin) - plane);
             corners[1] = LocalCameraDirection * (new Vector2d(box.xmin, box.ymax) - plane);
@@ -325,7 +325,7 @@ namespace SpaceEngine.Core.Terrain
             }
 
             var corners = new Vector2d[4];
-            var plane = LocalCameraPosition.XY();
+            var plane = LocalCameraPosition.xy;
 
             corners[0] = LocalCameraDirection * (new Vector2d(occluder.xmin, occluder.ymin) - plane);
             corners[1] = LocalCameraDirection * (new Vector2d(occluder.xmin, occluder.ymax) - plane);

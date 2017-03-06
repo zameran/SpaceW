@@ -32,6 +32,28 @@ namespace UnityEngine
     {
         public double x, y, z;
 
+        public static Vector3d zero { get { return new Vector3d(0.0, 0.0, 0.0); } }
+
+        public static Vector3d one { get { return new Vector3d(1.0, 1.0, 1.0); } }
+
+        public static Vector3d forward { get { return new Vector3d(0.0, 0.0, 1.0); } }
+
+        public static Vector3d back { get { return new Vector3d(0.0, 0.0, -1.0); } }
+
+        public static Vector3d up { get { return new Vector3d(0.0, 1.0, 0.0); } }
+
+        public static Vector3d down { get { return new Vector3d(0.0, -1.0, 0.0); } }
+
+        public static Vector3d left { get { return new Vector3d(-1.0, 0.0, 0.0); } }
+
+        public static Vector3d right { get { return new Vector3d(1.0, 0.0, 0.0); } }
+
+        public Vector3d xzy { get { return new Vector3d(this.x, this.z, this.y); } }
+
+        public Vector2d xy { get { return new Vector2d(this.x, this.y); } }
+
+        public Vector3d xy0 { get { return new Vector3d(this.x, this.y, 0.0); } }
+
         public Vector3d(double v)
         {
             this.x = v;
@@ -123,12 +145,12 @@ namespace UnityEngine
 
         public static bool operator !=(Vector3d v1, Vector3d v2)
         {
-            return v1.x != v2.x || v1.y != v2.y || v1.z != v2.z;
+            return !BrainFuckMath.NearlyEqual(v1.x, v2.x) || !BrainFuckMath.NearlyEqual(v1.y, v2.y) || !BrainFuckMath.NearlyEqual(v1.z, v2.z);
         }
 
         public static bool operator ==(Vector3d v1, Vector3d v2)
         {
-            return v1.x == v2.x && v1.y == v2.y && v1.z == v2.z;
+            return BrainFuckMath.NearlyEqual(v1.x, v2.x) || BrainFuckMath.NearlyEqual(v1.y, v2.y) || BrainFuckMath.NearlyEqual(v1.z, v2.z);
         }
 
         public static implicit operator Vector3(Vector3d v)
@@ -151,9 +173,9 @@ namespace UnityEngine
             if (!(obj is Vector3d))
                 return false;
 
-            var Vector = (Vector3d)obj;
+            var vector = (Vector3d)obj;
 
-            return x == Vector.x && y == Vector.y && z == Vector.z;
+            return this == vector;
         }
 
         public override string ToString()
@@ -194,7 +216,7 @@ namespace UnityEngine
 
         public static Vector3d Project(Vector3d vector, Vector3d onNormal)
         {
-            double dot = Dot(onNormal, onNormal);
+            var dot = Dot(onNormal, onNormal);
 
             return (dot >= 1.40129846432482E-45 ? (onNormal * Dot(vector, onNormal)) / dot : zero);
         }
@@ -213,7 +235,8 @@ namespace UnityEngine
 
         public static double Distance(Vector3d a, Vector3d b)
         {
-            Vector3d v = new Vector3d(a.x - b.x, a.y - b.y, a.z - b.z);
+            var v = new Vector3d(a.x - b.x, a.y - b.y, a.z - b.z);
+
             return Math.Sqrt(v.x * v.x + v.y * v.y + v.z * v.z);
         }
 
@@ -301,11 +324,6 @@ namespace UnityEngine
             return Lerp(from, to, Mathf.Clamp01(t));
         }
 
-        public Vector2d XY()
-        {
-            return new Vector2d(x, y);
-        }
-
         public Vector3 ToVector3()
         {
             return new Vector3((float)x, (float)y, (float)z);
@@ -315,23 +333,5 @@ namespace UnityEngine
         {
             return (this / this.Magnitude());
         }
-
-        public static Vector3d zero { get { return new Vector3d(0.0, 0.0, 0.0); } }
-
-        public static Vector3d one { get { return new Vector3d(1.0, 1.0, 1.0); } }
-
-        public static Vector3d forward { get { return new Vector3d(0.0, 0.0, 1.0); } }
-
-        public static Vector3d back { get { return new Vector3d(0.0, 0.0, -1.0); } }
-
-        public static Vector3d up { get { return new Vector3d(0.0, 1.0, 0.0); } }
-
-        public static Vector3d down { get { return new Vector3d(0.0, -1.0, 0.0); } }
-
-        public static Vector3d left { get { return new Vector3d(-1.0, 0.0, 0.0); } }
-
-        public static Vector3d right { get { return new Vector3d(1.0, 0.0, 0.0); } }
-
-        public Vector3d xzy { get { return new Vector3d(this.x, this.z, this.y); } }
     }
 }

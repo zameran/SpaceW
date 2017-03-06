@@ -95,7 +95,7 @@ namespace UnityEngine
 
         public double Magnitude()
         {
-            return System.Math.Sqrt(x * x + y * y);
+            return Math.Sqrt(x * x + y * y);
         }
 
         public double SqrMagnitude()
@@ -110,7 +110,7 @@ namespace UnityEngine
 
         public void Normalize()
         {
-            var invLength = 1.0 / System.Math.Sqrt(x * x + y * y);
+            var invLength = 1.0 / Math.Sqrt(x * x + y * y);
 
             x *= invLength;
             y *= invLength;
@@ -118,14 +118,14 @@ namespace UnityEngine
 
         public Vector2d Normalized()
         {
-            var invLength = 1.0 / System.Math.Sqrt(x * x + y * y);
+            var invLength = 1.0 / Math.Sqrt(x * x + y * y);
 
             return new Vector2d(x * invLength, y * invLength);
         }
 
         public Vector2d Normalized(double l)
         {
-            var length = System.Math.Sqrt(x * x + y * y);
+            var length = Math.Sqrt(x * x + y * y);
             var invLength = l / length;
 
             return new Vector2d(x * invLength, y * invLength);

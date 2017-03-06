@@ -44,13 +44,16 @@ namespace SpaceEngine.Core.Utilities
         bool BackwardPressed;
         bool LeftPressed;
         bool RightPressed;
+        bool LeftMousePressed;
+        bool RightMousePressed;
 
         bool Initialized;
 
         /// <summary>
         /// The target position manipulated by the user via the mouse and keyboard.
         /// </summary>
-        TerrainView.Position TargetPosition;
+        [HideInInspector]
+        public TerrainView.Position TargetPosition;
 
         /// <summary>
         /// Start position for an animation between two positions.
@@ -89,6 +92,7 @@ namespace SpaceEngine.Core.Utilities
 
             KeyDown();
             MouseWheel();
+            MouseButtons();
             MouseMotion();
 
             double dt = Time.deltaTime * 1000.0;
@@ -97,10 +101,9 @@ namespace SpaceEngine.Core.Utilities
             // NOTE : has not been tested and not currently used
             if (AnimationValue >= 0.0)
             {
-                AnimationValue = View.Interpolate(StartPosition.X, StartPosition.Y, StartPosition.Theta, StartPosition.Phi, StartPosition.Distance, EndPosition.X, EndPosition.Y, EndPosition.Theta,
-                    EndPosition.Phi, EndPosition.Distance, AnimationValue);
+                AnimationValue = View.Interpolate(StartPosition, EndPosition, AnimationValue);
 
-                if (Math.Abs(AnimationValue - 1.0) < 0.00001)
+                if (BrainFuckMath.NearlyEqual(AnimationValue, 1.0))
                 {
                     GetPosition(TargetPosition);
 
@@ -129,9 +132,9 @@ namespace SpaceEngine.Core.Utilities
                 TargetPosition.Distance = TargetPosition.Distance * dzFactor * ZoomSpeed * (ScrollIn ? ScrollWheelSpeed : 1.0f);
             }
 
-            TerrainView.Position position = new TerrainView.Position();
+            var currentPosition = new TerrainView.Position();
 
-            GetPosition(position);
+            GetPosition(currentPosition);
             SetPosition(TargetPosition);
 
             if (ForwardPressed || BackwardPressed)
@@ -162,18 +165,17 @@ namespace SpaceEngine.Core.Utilities
             if (Smooth)
             {
                 var lerp = 1.0 - Math.Exp(-dt * 2.301e-3);
-                var x0 = 0.0;
-                var y0 = 0.0;
+                var interpolatedPosition = new TerrainView.Position();
 
-                View.InterpolatePos(position.X, position.Y, TargetPosition.X, TargetPosition.Y, lerp, ref x0, ref y0);
+                View.InterpolatePos(currentPosition, TargetPosition, lerp, ref interpolatedPosition);
 
-                position.X = x0;
-                position.Y = y0;
-                position.Theta = Mix(position.Theta, TargetPosition.Theta, lerp);
-                position.Phi = Mix(position.Phi, TargetPosition.Phi, lerp);
-                position.Distance = Mix(position.Distance, TargetPosition.Distance, lerp);
+                currentPosition.X = interpolatedPosition.X;
+                currentPosition.Y = interpolatedPosition.Y;
+                currentPosition.Theta = Mix(currentPosition.Theta, TargetPosition.Theta, lerp);
+                currentPosition.Phi = Mix(currentPosition.Phi, TargetPosition.Phi, lerp);
+                currentPosition.Distance = Mix(currentPosition.Distance, TargetPosition.Distance, lerp);
 
-                SetPosition(position);
+                SetPosition(currentPosition);
             }
             else
             {
@@ -184,7 +186,7 @@ namespace SpaceEngine.Core.Utilities
 
         private double Mix(double x, double y, double t)
         {
-            return Math.Abs(x - y) < Math.Max(x, y) * 1e-5 ? y : x * (1.0 - t) + y * t;
+            return BrainFuckMath.NearlyEqual(x, y) ? y : x * (1.0 - t) + y * t;
         }
 
         private void GetPosition(TerrainView.Position p)
@@ -253,42 +255,44 @@ namespace SpaceEngine.Core.Utilities
             }
         }
 
+        private void MouseButtons()
+        {
+            if (DebugGUISwitcher.Instance.MouseOverGUI) return;
+
+            LeftMousePressed = Input.GetMouseButton(0);
+            RightMousePressed = Input.GetMouseButton(1);
+        }
+
         private void MouseMotion()
         {
             if (DebugGUISwitcher.Instance.MouseOverGUI) return;
 
-            if (Input.GetMouseButton(0) && Input.GetKey(KeyCode.LeftControl))
+            if (LeftMousePressed && Input.GetKey(KeyCode.LeftControl))
             {
                 TargetPosition.Phi -= Input.GetAxis("Mouse X") * RotateSpeed;
                 TargetPosition.Theta += Input.GetAxis("Mouse Y") * RotateSpeed;
             }
-            else if (Input.GetMouseButton(0))
+            else if (LeftMousePressed)
             {
-                Vector3d mousePos = Vector3d.zero;
-                mousePos.x = Input.mousePosition.x;
-                mousePos.y = Input.mousePosition.y;
-                mousePos.z = 0.0;
-
-                Vector3d preMousePos = Vector3d.zero;
-                preMousePos.x = PreviousMousePos.x;
-                preMousePos.y = PreviousMousePos.y;
-                preMousePos.z = 0.0;
-
-                Vector3d oldPosition = View.CameraToWorldMatrix * preMousePos;
-                Vector3d position = View.CameraToWorldMatrix * mousePos;
+                var oldPosition = View.CameraToWorldMatrix * Input.mousePosition.xy0();
+                var position = View.CameraToWorldMatrix * PreviousMousePos.xy0;
 
                 if (!(double.IsNaN(oldPosition.x) || double.IsNaN(oldPosition.y) || double.IsNaN(oldPosition.z) || double.IsNaN(position.x) || double.IsNaN(position.y) || double.IsNaN(position.z)))
                 {
-                    TerrainView.Position current = new TerrainView.Position();
+                    var currentPosition = new TerrainView.Position();
 
-                    GetPosition(current);
+                    GetPosition(currentPosition);
                     SetPosition(TargetPosition);
 
                     View.Move(new Vector3d(oldPosition), new Vector3d(position), DragSpeed);
 
                     GetPosition(TargetPosition);
-                    SetPosition(current);
+                    SetPosition(currentPosition);
                 }
+            }
+            else if (RightMousePressed)
+            {
+
             }
 
             PreviousMousePos = new Vector3d(Input.mousePosition);
