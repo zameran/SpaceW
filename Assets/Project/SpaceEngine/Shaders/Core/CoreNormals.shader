@@ -95,7 +95,6 @@
 
 			output = float4(normal, slope);
 		}
-
 		ENDCG
 
 		Pass

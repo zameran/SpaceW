@@ -125,7 +125,7 @@
 				return dot(a[0], b[0]) + dot(a[1], b[1]) + dot(a[2], b[2]) + dot(a[3], b[3]);
 			}
 			
-			float4 frag(VertexProducerOutput IN) : COLOR
+			void frag(in VertexProducerOutput IN, out float4 output : COLOR)
 			{
 				float2 p_uv = floor(IN.uv1) * 0.5;
 				float2 uv = (p_uv - frac(p_uv) + float2(0.5, 0.5)) * _CoarseLevelOSL.z + _CoarseLevelOSL.xy;
@@ -204,10 +204,8 @@
 					zc = (zc1 + zc3) * 0.5;
 				}
 				
-				return float4(zf, zc, 0.0, 0.0);
-				
-			}
-			
+				output = float4(zf, zc, 0.0, 0.0);			
+			}		
 			ENDCG
 		}
 	}

@@ -49,7 +49,6 @@
 							
 			output = float4(color, 1);		
 		}
-
 		ENDCG
 
 		Pass 

@@ -51,7 +51,6 @@
 							
 			output = float4(color, color, 1, noise);		
 		}
-
 		ENDCG
 
 		Pass 

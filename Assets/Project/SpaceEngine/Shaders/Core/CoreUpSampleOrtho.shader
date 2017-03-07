@@ -51,14 +51,14 @@
 				o.uv1 = v.texcoord.xy * _TileWidth;
 			}
 			
-			float4 frag(VertexProducerOutput IN) : COLOR
-			{			
+			void frag(in VertexProducerOutput IN, out float4 output : COLOR)
+			{		
 				float4 result = float4(128.0, 128.0, 128.0, 128.0);
 				float2 uv = floor(IN.uv1);
 				
 				if (_ResidualOSH.x != -1.0) 
 				{
-					return tex2Dlod(_ResidualSampler, float4(uv * _ResidualOSH.z + _ResidualOSH.xy, 0.0, 0.0));
+					output = tex2Dlod(_ResidualSampler, float4(uv * _ResidualOSH.z + _ResidualOSH.xy, 0.0, 0.0));
 				} 
 				else if (_CoarseLevelOSL.x == -1.0) 
 				{
@@ -103,9 +103,8 @@
 					result = _NoiseColor * (noise - 128.0) + result;
 				}
 
-				return result / 255.0;
-			}
-			
+				output = result / 255.0;
+			}		
 			ENDCG
 		}
 	}
