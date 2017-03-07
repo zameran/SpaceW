@@ -6,8 +6,7 @@
 
 		#include "UnityCG.cginc"
 
-		#include "Normals.cginc"
-		#include "Elevation.cginc"
+		#include "Core.cginc"
 
 		#include "../TCCommon.cginc"
 		#include "../TCAsteroid.cginc"
@@ -25,27 +24,6 @@
 			float4 pos : SV_POSITION;
 			float2 uv : TEXCOORD0;
 		};
-
-		float4 texTileLod(sampler2D tile, float2 uv, float3 tileCoords, float3 tileSize) 
-		{
-			uv = tileCoords.xy + uv * tileSize.xy;
-
-			return tex2Dlod(tile, float4(uv, 0, 0));
-		}
-
-		float4 texTile(sampler2D tile, float2 uv, float3 tileCoords, float3 tileSize) 
-		{
-			uv = tileCoords.xy + uv * tileSize.xy;
-
-			return tex2D(tile, uv);
-		}
-
-		float4 texTile(sampler2D tile, float2 uv, float2 tileCoords, float3 tileSize) 
-		{
-			uv = tileCoords + uv * tileSize.xy;
-
-			return tex2D(tile, uv);
-		}
 
 		void vert(in appdata_base v, out v2f o)
 		{	

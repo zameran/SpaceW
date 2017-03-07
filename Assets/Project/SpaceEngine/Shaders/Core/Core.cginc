@@ -31,6 +31,36 @@
 // Creation Time: Undefined
 // Creator: zameran
 
+#define CORE
+
+#define CORE_ELEVATION
+
+uniform sampler2D _Elevation_Tile;
+
+uniform float3 _Elevation_TileSize;
+uniform float3 _Elevation_TileCoords;
+
+#define CORE_NORMALS
+
+uniform sampler2D _Normals_Tile;
+
+uniform float3 _Normals_TileSize;
+uniform float3 _Normals_TileCoords;
+
+#define CORE_COLOR
+
+uniform sampler2D _Color_Tile;
+
+uniform float3 _Color_TileSize;
+uniform float3 _Color_TileCoords;
+
+#define CORE_ORTHO
+
+uniform sampler2D _Ortho_Tile;
+
+uniform float3 _Ortho_TileSize;
+uniform float3 _Ortho_TileCoords;
+
 #define CORE_DEFORMATION
 
 uniform float _Deform_Radius;
@@ -46,3 +76,24 @@ uniform float4x4 _Deform_LocalToScreen;
 uniform float4x4 _Deform_ScreenQuadCorners;
 uniform float4x4 _Deform_ScreenQuadVerticals;
 uniform float4x4 _Deform_TangentFrameToWorld; 
+
+float4 texTileLod(sampler2D tile, float2 uv, float3 tileCoords, float3 tileSize) 
+{
+	uv = tileCoords.xy + uv * tileSize.xy;
+
+	return tex2Dlod(tile, float4(uv, 0, 0));
+}
+
+float4 texTile(sampler2D tile, float2 uv, float3 tileCoords, float3 tileSize) 
+{
+	uv = tileCoords.xy + uv * tileSize.xy;
+
+	return tex2D(tile, uv);
+}
+
+float4 texTile(sampler2D tile, float2 uv, float2 tileCoords, float3 tileSize) 
+{
+	uv = tileCoords + uv * tileSize.xy;
+
+	return tex2D(tile, uv);
+}

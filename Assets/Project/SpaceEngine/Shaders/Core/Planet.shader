@@ -10,11 +10,7 @@
 
 		//#define CUBE_PROJECTION
 
-		#include "Deformation.cginc"
-		#include "Elevation.cginc"
-		#include "Normals.cginc"
-		#include "Color.cginc"
-		#include "Ortho.cginc"
+		#include "Core.cginc"
 
 		uniform float _Ocean_Sigma;
 		uniform float3 _Ocean_Color;
@@ -34,27 +30,6 @@
 			float2 uv : TEXCOORD0;
 			float3 p : TEXCOORD1;
 		};
-
-		float4 texTileLod(sampler2D tile, float2 uv, float3 tileCoords, float3 tileSize) 
-		{
-			uv = tileCoords.xy + uv * tileSize.xy;
-
-			return tex2Dlod(tile, float4(uv, 0, 0));
-		}
-
-		float4 texTile(sampler2D tile, float2 uv, float3 tileCoords, float3 tileSize) 
-		{
-			uv = tileCoords.xy + uv * tileSize.xy;
-
-			return tex2D(tile, uv);
-		}
-
-		float4 texTile(sampler2D tile, float2 uv, float2 tileCoords, float3 tileSize) 
-		{
-			uv = tileCoords + uv * tileSize.xy;
-
-			return tex2D(tile, uv);
-		}
 
 		void VERTEX_POSITION(in p2v v, out float4 position, out float3 localPosition, out float2 uv)
 		{
