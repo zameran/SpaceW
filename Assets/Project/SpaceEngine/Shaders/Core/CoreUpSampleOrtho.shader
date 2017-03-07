@@ -1,4 +1,4 @@
-﻿Shader "SpaceEngine/Terrain/UpSampleOrtho" 
+﻿Shader "SpaceEngine/Terrain/CoreUpSampleOrtho" 
 {
 	SubShader 
 	{

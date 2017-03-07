@@ -1,4 +1,4 @@
-﻿Shader "SpaceEngine/Terrain/UpSampleElevation" 
+﻿Shader "SpaceEngine/Terrain/CoreUpSampleElevation" 
 {
 	SubShader 
 	{
