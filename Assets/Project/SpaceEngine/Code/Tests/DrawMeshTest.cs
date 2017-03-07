@@ -43,6 +43,8 @@ public class DrawMeshTest : MonoBehaviour
 
     private void Update()
     {
+        if (mesh == null || material == null) return;
+
         Graphics.DrawMesh(mesh, Matrix4x4.identity, material, 0, CameraHelper.Main());
     }
 }
