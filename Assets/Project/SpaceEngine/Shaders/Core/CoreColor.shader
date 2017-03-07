@@ -1,4 +1,4 @@
-﻿Shader "SpaceEngine/Terrain/CoreElevation" 
+﻿Shader "SpaceEngine/Terrain/CoreColor" 
 {
 	SubShader 
 	{
@@ -6,14 +6,14 @@
 
 		#include "UnityCG.cginc"
 
+		#include "Normals.cginc"
+		#include "Elevation.cginc"
+
 		#include "../TCCommon.cginc"
 		#include "../TCAsteroid.cginc"
 		#include "../TCPlanet.cginc"
 
 		#define BORDER 2.0 
-
-		uniform float _Frequency;
-		uniform float _Amplitude;
 
 		uniform float2 _TileSD;	
 
@@ -25,6 +25,27 @@
 			float4 pos : SV_POSITION;
 			float2 uv : TEXCOORD0;
 		};
+
+		float4 texTileLod(sampler2D tile, float2 uv, float3 tileCoords, float3 tileSize) 
+		{
+			uv = tileCoords.xy + uv * tileSize.xy;
+
+			return tex2Dlod(tile, float4(uv, 0, 0));
+		}
+
+		float4 texTile(sampler2D tile, float2 uv, float3 tileCoords, float3 tileSize) 
+		{
+			uv = tileCoords.xy + uv * tileSize.xy;
+
+			return tex2D(tile, uv);
+		}
+
+		float4 texTile(sampler2D tile, float2 uv, float2 tileCoords, float3 tileSize) 
+		{
+			uv = tileCoords + uv * tileSize.xy;
+
+			return tex2D(tile, uv);
+		}
 
 		void vert(in appdata_base v, out v2f o)
 		{	
@@ -38,21 +59,22 @@
 				
 			float3 P = float3(vert, _Offset.w);
 			float3 p = normalize(mul(_LocalToWorld, P)).xyz;
-			float3 v = p * _Frequency;
+			float3 v = p;
+
+			float slope = texTile(_Normals_Tile, IN.uv.xy, _Normals_TileCoords, _Normals_TileSize).w;
+			float height = texTile(_Elevation_Tile, IN.uv.xy, _Elevation_TileCoords, _Elevation_TileSize).w;
 
 			noiseH          = 0.5;
 			noiseLacunarity = 2.218281828459;
 
-			float noise = HeightMapPlanet(v) - 1.5;
+			float3 color = ColorMapPlanet(v, height,  slope);
 
 			//noise += Fbm(v * 0.25, 2);
 			//noise += Fbm(v * 0.50, 4);
 			//noise += Fbm(v * 0.75, 6);
 			//noise += Fbm(v * 1.00, 8);
-
-			float color = _Amplitude * noise;
 							
-			output = float4(color, color, 1, noise);		
+			output = float4(color, 1);		
 		}
 
 		ENDCG

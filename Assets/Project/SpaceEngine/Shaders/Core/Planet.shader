@@ -13,6 +13,7 @@
 		#include "Deformation.cginc"
 		#include "Elevation.cginc"
 		#include "Normals.cginc"
+		#include "Color.cginc"
 		#include "Ortho.cginc"
 
 		uniform float _Ocean_Sigma;
@@ -169,6 +170,7 @@
 				float vSun = dot(V, WSD);
 				
 				float4 reflectance = texTile(_Ortho_Tile, IN.uv, _Ortho_TileCoords, _Ortho_TileSize);
+				float4 color = texTile(_Color_Tile, IN.uv, _Color_TileCoords, _Color_TileSize);
 				
 				float3 sunL = 0;
 				float3 skyE = 0;
@@ -179,7 +181,7 @@
 				#endif
 				
 				// diffuse ground color
-				float3 groundColor = 1.5 * RGB2Reflectance(reflectance).rgb * (sunL * max(cTheta, 0) + skyE) / M_PI;
+				float3 groundColor = 1.5 * RGB2Reflectance(color).rgb * (sunL * max(cTheta, 0) + skyE) / M_PI;
 				
 				if (ht <= _Ocean_Level && _Ocean_DrawBRDF == 1.0)
 				{
