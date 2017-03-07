@@ -102,7 +102,7 @@ namespace SpaceEngine.Core.Bodies
 
                 var shadowsCount = Shadows.Count((shadow) => shadow != null && Helper.Enabled(shadow));
 
-                if (shadowsCount > 0)
+                if (shadowsCount > 0 && GodManager.Instance.Eclipses)
                 {
                     for (byte i = 0; i < shadowsCount; i++)
                     {
