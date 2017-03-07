@@ -11,6 +11,9 @@
 
 			CGPROGRAM
 			#include "UnityCG.cginc"
+
+			#include "Core.cginc"
+
 			#pragma target 4.0
 			#pragma vertex vert
 			#pragma fragment frag
@@ -109,23 +112,12 @@
 			 -9.0/256.0, 81.0/256.0, 81.0/256.0, -9.0/256.0,
 			 -9.0/256.0, 81.0/256.0, 81.0/256.0, -9.0/256.0,
 			 1.0/256.0, -9.0/256.0, -9.0/256.0, 1.0/256.0}};
-			 
-			struct v2f 
-			{
-				float4  pos : SV_POSITION;
-				float2  uv : TEXCOORD0;
-				float2  st : TEXCOORD1;
-			};
 
-			v2f vert(appdata_base v)
-			{
-				v2f OUT;
-
-				OUT.pos = mul(UNITY_MATRIX_MVP, v.vertex);
-				OUT.uv = v.texcoord.xy;
-				OUT.st = v.texcoord.xy * _TileWSD.x;
-
-				return OUT;
+			void vert(in VertexProducerInput v, out VertexProducerOutput o)
+			{	
+				o.pos = mul(UNITY_MATRIX_MVP, v.vertex);
+				o.uv0 = v.texcoord.xy;
+				o.uv1 = v.texcoord.xy * _TileWSD.x;
 			}
 			
 			float mdot(float4x4 a, float4x4 b) 
@@ -133,9 +125,9 @@
 				return dot(a[0], b[0]) + dot(a[1], b[1]) + dot(a[2], b[2]) + dot(a[3], b[3]);
 			}
 			
-			float4 frag(v2f IN) : COLOR
+			float4 frag(VertexProducerOutput IN) : COLOR
 			{
-				float2 p_uv = floor(IN.st) * 0.5;
+				float2 p_uv = floor(IN.uv1) * 0.5;
 				float2 uv = (p_uv - frac(p_uv) + float2(0.5, 0.5)) * _CoarseLevelOSL.z + _CoarseLevelOSL.xy;
 				
 				float2 residual_uv = p_uv * _ResidualOSH.z + _ResidualOSH.xy;
@@ -168,7 +160,7 @@
 				float noiseAmp = max(clamp(4.0 * curvature, 0.0, 1.5), clamp(2.0 * slope - 0.5, 0.1, 4.0));
 				
 				float u = (0.5+BORDER) / (_TileWSD.x-1-BORDER*2);
-				float2 vert = IN.uv * (1.0+u*2.0) - u;
+				float2 vert = IN.uv0 * (1.0+u*2.0) - u;
 				vert = vert * _Offset.z + _Offset.xy;
 				
 				float3 P = float3(vert, _Offset.w);
@@ -201,7 +193,7 @@
 				{
 					zf = zf + mdot(cz, upsampleMatrix[i]);
 
-					float2 ij = floor(IN.st - float2(BORDER, BORDER));
+					float2 ij = floor(IN.uv1 - float2(BORDER, BORDER));
 					float4 uvc = float4(BORDER + 0.5, BORDER + 0.5, BORDER + 0.5, BORDER + 0.5);
 
 					uvc += _TileWSD.z * floor((ij / (2.0 * _TileWSD.z)).xyxy + float4(0.5, 0.0, 0.0, 0.5));

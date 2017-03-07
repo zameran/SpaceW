@@ -12,6 +12,8 @@
 			CGPROGRAM
 			#include "UnityCG.cginc"
 
+			#include "Core.cginc"
+
 			#include "../TCCommon.cginc"
 
 			#pragma target 4.0
@@ -41,29 +43,18 @@
 				float4(3.0, 9.0, 1.0, 3.0),
 				float4(9.0, 3.0, 3.0, 1.0)
 			};
-		
-			struct v2f 
-			{
-				float4  pos : SV_POSITION;
-				float2  uv : TEXCOORD0;
-				float2  st : TEXCOORD1;
-			};
 
-			v2f vert(appdata_base v)
-			{
-				v2f OUT;
-
-				OUT.pos = mul(UNITY_MATRIX_MVP, v.vertex);
-				OUT.uv = v.texcoord.xy;
-				OUT.st = v.texcoord.xy * _TileWidth;
-
-				return OUT;
+			void vert(in VertexProducerInput v, out VertexProducerOutput o)
+			{	
+				o.pos = mul(UNITY_MATRIX_MVP, v.vertex);
+				o.uv0 = v.texcoord.xy;
+				o.uv1 = v.texcoord.xy * _TileWidth;
 			}
 			
-			float4 frag(v2f IN) : COLOR
+			float4 frag(VertexProducerOutput IN) : COLOR
 			{			
 				float4 result = float4(128.0, 128.0, 128.0, 128.0);
-				float2 uv = floor(IN.st);
+				float2 uv = floor(IN.uv1);
 				
 				if (_ResidualOSH.x != -1.0) 
 				{

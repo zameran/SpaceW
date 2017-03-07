@@ -19,28 +19,23 @@
 		uniform float4 _Offset;
 		uniform float4x4 _LocalToWorld;
 
-		struct v2f 
-		{
-			float4 pos : SV_POSITION;
-			float2 uv : TEXCOORD0;
-		};
-
-		void vert(in appdata_base v, out v2f o)
+		void vert(in VertexProducerInput v, out VertexProducerOutput o)
 		{	
 			o.pos = mul(UNITY_MATRIX_MVP, v.vertex);
-			o.uv = v.texcoord.xy;
+			o.uv0 = v.texcoord.xy;
+			o.uv1 = v.texcoord.xy;
 		}
 
-		void frag(in v2f IN, out float4 output : COLOR)
+		void frag(in VertexProducerOutput IN, out float4 output : COLOR)
 		{			
-			float2 vert = (IN.uv * _TileSD.y - _TileSD.x) * _Offset.z + _Offset.xy;
+			float2 vert = (IN.uv0 * _TileSD.y - _TileSD.x) * _Offset.z + _Offset.xy;
 				
 			float3 P = float3(vert, _Offset.w);
 			float3 p = normalize(mul(_LocalToWorld, P)).xyz;
 			float3 v = p;
 
-			float slope = texTile(_Normals_Tile, IN.uv.xy, _Normals_TileCoords, _Normals_TileSize).w;
-			float height = texTile(_Elevation_Tile, IN.uv.xy, _Elevation_TileCoords, _Elevation_TileSize).w;
+			float slope = texTile(_Normals_Tile, IN.uv0.xy, _Normals_TileCoords, _Normals_TileSize).w;
+			float height = texTile(_Elevation_Tile, IN.uv0.xy, _Elevation_TileCoords, _Elevation_TileSize).w;
 
 			noiseH          = 0.5;
 			noiseLacunarity = 2.218281828459;

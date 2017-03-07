@@ -97,3 +97,16 @@ float4 texTile(sampler2D tile, float2 uv, float2 tileCoords, float3 tileSize)
 
 	return tex2D(tile, uv);
 }
+
+struct VertexProducerInput
+{
+	float4 vertex : POSITION;
+	float4 texcoord : TEXCOORD0;
+};
+
+struct VertexProducerOutput
+{
+	float4 pos : SV_POSITION;
+	float2 uv0 : TEXCOORD0;
+	float2 uv1 : TEXCOORD1;
+};
