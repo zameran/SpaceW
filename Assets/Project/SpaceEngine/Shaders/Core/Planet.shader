@@ -107,7 +107,7 @@
 
 		Pass 
 		{
-			Tags { "Queue" = "Geometry" "RenderType"="" "LightMode" = "Deferred" }
+			Tags { "Queue" = "Geometry" "RenderType"="" /*"LightMode" = "Deferred"*/ }
 
 			ZTest On
 			ZWrite On
