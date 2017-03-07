@@ -37,19 +37,11 @@
 			float3 p = normalize(mul(_LocalToWorld, P)).xyz;
 			float3 v = p * _Frequency;
 
-			noiseH          = 0.5;
-			noiseLacunarity = 2.218281828459;
-
 			float noise = HeightMapPlanet(v) - 1.5;
 
-			//noise += Fbm(v * 0.25, 2);
-			//noise += Fbm(v * 0.50, 4);
-			//noise += Fbm(v * 0.75, 6);
-			//noise += Fbm(v * 1.00, 8);
-
-			float color = _Amplitude * noise;
+			float height = _Amplitude * noise;
 							
-			output = float4(color, color, 1, noise);		
+			output = float4(height, height, 1, noise);		
 		}
 		ENDCG
 

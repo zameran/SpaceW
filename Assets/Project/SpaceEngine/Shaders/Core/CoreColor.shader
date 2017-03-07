@@ -37,15 +37,10 @@
 			float slope = texTile(_Normals_Tile, IN.uv0.xy, _Normals_TileCoords, _Normals_TileSize).w;
 			float height = texTile(_Elevation_Tile, IN.uv0.xy, _Elevation_TileCoords, _Elevation_TileSize).w;
 
-			noiseH          = 0.5;
-			noiseLacunarity = 2.218281828459;
+			slope = saturate(slope);
+			height = saturate(height);
 
 			float3 color = ColorMapPlanet(v, height,  slope);
-
-			//noise += Fbm(v * 0.25, 2);
-			//noise += Fbm(v * 0.50, 4);
-			//noise += Fbm(v * 0.75, 6);
-			//noise += Fbm(v * 1.00, 8);
 							
 			output = float4(color, 1);		
 		}
