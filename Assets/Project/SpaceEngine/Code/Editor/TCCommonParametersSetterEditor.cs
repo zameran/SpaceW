@@ -35,6 +35,8 @@ using SpaceEngine.Core.Bodies;
 using System;
 
 using UnityEditor;
+using UnityEditor.SceneManagement;
+
 using UnityEngine;
 
 [CustomEditor(typeof(TCCommonParametersSetter))]
@@ -264,6 +266,8 @@ public sealed class TCCommonParametersSetterEditor : Editor
         EditorGUILayout.EndVertical();
         EditorGUILayout.Space();
 
+        EditorGUI.BeginChangeCheck();
+
         switch (currentTab)
         {
             case Tab.Main:
@@ -311,6 +315,13 @@ public sealed class TCCommonParametersSetterEditor : Editor
             case Tab.Venus:
                 DrawGUIForVenus(setter);
                 break;
+        }
+
+        if (EditorGUI.EndChangeCheck())
+        {
+            var currentScene = EditorSceneManager.GetActiveScene();
+
+            EditorSceneManager.MarkSceneDirty(currentScene);
         }
     }
 }
