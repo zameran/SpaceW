@@ -18,6 +18,8 @@
 
 		#define BORDER 2.0 
 
+		uniform float _Level;
+
 		uniform float2 _TileSD;	
 
 		uniform float4 _Offset;
@@ -41,10 +43,10 @@
 			float slope = texTile(_Normals_Tile, IN.uv0.xy, _Normals_TileCoords, _Normals_TileSize).w;
 			float height = texTile(_Elevation_Tile, IN.uv0.xy, _Elevation_TileCoords, _Elevation_TileSize).w;
 
-			slope = saturate(slope);
+			slope = saturate(slope * smoothstep(4, 8, _Level)); // NOTE : Limit slope in case of very strong normals on low LOD levels...
 			height = saturate(height);
 
-			float3 color = ColorMapPlanet(v, height,  slope);
+			float3 color = ColorMapPlanet(v, height, slope);
 			//float3 color = ColorMapSelena(v, height,  slope);
 							
 			output = float4(color, 1);		

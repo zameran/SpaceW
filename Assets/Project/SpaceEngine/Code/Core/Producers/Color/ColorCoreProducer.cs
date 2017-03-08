@@ -139,6 +139,7 @@ namespace SpaceEngine.Core
             NormalsProducer.Sampler.SetTile(ColorMaterial, level, tx, ty);
             ElevationProducer.Sampler.SetTile(ColorMaterial, level, tx, ty);
 
+            ColorMaterial.SetFloat("_Level", level);
             ColorMaterial.SetVector("_TileSD", tileSD.ToVector2());
             ColorMaterial.SetVector("_Offset", offset.ToVector4());
             ColorMaterial.SetMatrix("_LocalToWorld", TerrainNode.FaceToLocal.ToMatrix4x4());
