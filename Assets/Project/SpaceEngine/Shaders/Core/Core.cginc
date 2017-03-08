@@ -98,6 +98,19 @@ float4 texTile(sampler2D tile, float2 uv, float2 tileCoords, float3 tileSize)
 	return tex2D(tile, uv);
 }
 
+float4 Triplanar(sampler2D topAndButtomSampler, sampler2D leftAndRightSampler, sampler2D frontAndBackSampler, float3 worldPosition, float3 worldNormal, float2 settings)
+{
+	half3 YSampler = tex2D(topAndButtomSampler, worldPosition.xz / settings.x);
+	half3 XSampler = tex2D(leftAndRightSampler, worldPosition.zy / settings.x);
+	half3 ZSampler = tex2D(frontAndBackSampler, worldPosition.xy / settings.x);
+
+	half3 blendWeights = pow(abs(worldNormal), settings.y);
+
+	blendWeights = blendWeights / (blendWeights.x + blendWeights.y + blendWeights.z);
+
+	return fixed4(XSampler * blendWeights.x + YSampler * blendWeights.y + ZSampler * blendWeights.z, 1.0);
+}
+
 struct VertexProducerInput
 {
 	float4 vertex : POSITION;
