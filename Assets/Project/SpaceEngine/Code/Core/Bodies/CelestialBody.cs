@@ -78,6 +78,8 @@ namespace SpaceEngine.Core.Bodies
         public NoiseParametersSetter NPS = null;
         public TCCommonParametersSetter TCCPS = null;
 
+        public Texture2D GroundDiffuse;
+        public Texture2D GroundNormal;
         public Texture2D DetailedNormal;
 
         public Vector3 Offset { get; set; }

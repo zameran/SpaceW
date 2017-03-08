@@ -2,7 +2,13 @@
 {
 	Properties
 	{
-		_Normals_Tile("Normals", 2D) = "white" {}
+		[NoScaleOffset] _Elevation_Tile("Elevation", 2D) = "white" {}
+		[NoScaleOffset] _Normals_Tile("Normals", 2D) = "white" {}
+		[NoScaleOffset] _Color_Tile("Color", 2D) = "white" {}
+		[NoScaleOffset] _Ortho_Tile("Ortho", 2D) = "white" {}
+
+		[NoScaleOffset] _Ground_Diffuse("Ground Diffuse", 2D) = "white" {}
+		[NoScaleOffset] _Ground_Normal("Ground Normal", 2D) = "white" {}
 	}
 	SubShader 
 	{
@@ -104,6 +110,8 @@
 			#include "../Atmosphere.cginc"
 			#include "../Ocean/OceanBRDF.cginc"
 			
+			uniform sampler2D _Ground_Diffuse;
+			uniform sampler2D _Ground_Normal;
 			uniform sampler2D _DetailedNormal;
 
 			void vert(in p2v v, out v2f o)
@@ -137,16 +145,18 @@
 				fn.z = sqrt(max(0.0, 1.0 - dot(fn.xy, fn.xy)));		
 
 				if (ht <= _Ocean_Level && _Ocean_DrawBRDF == 1.0) {	fn = float4(0, 0, 1, 0); }
-	
+				
 				float3x3 TTW = _Deform_TangentFrameToWorld;
 				fn.xyz = mul(TTW, fn.xyz);
-				
-				float cTheta = dot(fn.xyz, WSD);
-				float vSun = dot(V, WSD);
-				
+
 				float4 ortho = texTile(_Ortho_Tile, IN.uv, _Ortho_TileCoords, _Ortho_TileSize);
 				float4 color = texTile(_Color_Tile, IN.uv, _Color_TileCoords, _Color_TileSize);
+				//float4 triplanarDiffuse = Triplanar(_Ground_Diffuse, _Ground_Diffuse, _Ground_Diffuse, P, fn.xyz, float2(128, 4));
+				//float4 triplanarNormal = Triplanar(_Ground_Normal, _Ground_Normal, _Ground_Normal, P, fn.xyz, float2(128, 4));
 				float4 reflectance = lerp(ortho, color, clamp(length(color.xyz), 0.0, 1.0)); // Just for tests...
+
+				float cTheta = dot(fn.xyz, WSD);
+				float vSun = dot(V, WSD);
 				
 				float3 sunL = 0;
 				float3 skyE = 0;

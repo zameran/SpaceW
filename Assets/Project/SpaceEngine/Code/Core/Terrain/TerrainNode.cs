@@ -134,6 +134,8 @@ namespace SpaceEngine.Core.Terrain
             Body.TerrainNodes.Add(this);
 
             TerrainMaterial = MaterialHelper.CreateTemp(Body.ColorShader, "TerrainNode");
+            TerrainMaterial.SetTexture("_Ground_Diffuse", Body.GroundDiffuse);
+            TerrainMaterial.SetTexture("_Ground_Normal", Body.GroundNormal);
             TerrainMaterial.SetTexture("_DetailedNormal", Body.DetailedNormal);
 
             if (Body.Atmosphere != null)
@@ -220,8 +222,10 @@ namespace SpaceEngine.Core.Terrain
                 TerrainMaterial.SetFloat("_Ocean_DrawBRDF", 0.0f);
             }
 
-            //Manager.GetSunNode().SetUniforms(TerrainMaterial);
             Deformation.SetUniforms(this, TerrainMaterial);
+
+            TerrainMaterial.SetTexture("_Ground_Diffuse", Body.GroundDiffuse);
+            TerrainMaterial.SetTexture("_Ground_Normal", Body.GroundNormal);
             TerrainMaterial.SetTexture("_DetailedNormal", Body.DetailedNormal);
 
             //if (Manager.GetPlantsNode() != null)
