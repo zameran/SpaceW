@@ -10,7 +10,11 @@
 
 		#include "../TCCommon.cginc"
 		#include "../TCAsteroid.cginc"
+		#include "../TCGasgiant.cginc"
 		#include "../TCPlanet.cginc"
+		#include "../TCSelena.cginc"
+		#include "../TCSun.cginc"
+		#include "../TCTerra.cginc"
 
 		#define BORDER 2.0 
 
@@ -41,6 +45,7 @@
 			height = saturate(height);
 
 			float3 color = ColorMapPlanet(v, height,  slope);
+			//float3 color = ColorMapSelena(v, height,  slope);
 							
 			output = float4(color, 1);		
 		}

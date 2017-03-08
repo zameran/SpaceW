@@ -10,7 +10,11 @@
 
 		#include "../TCCommon.cginc"
 		#include "../TCAsteroid.cginc"
+		#include "../TCGasgiant.cginc"
 		#include "../TCPlanet.cginc"
+		#include "../TCSelena.cginc"
+		#include "../TCSun.cginc"
+		#include "../TCTerra.cginc"
 
 		#define BORDER 2.0 
 
@@ -38,6 +42,7 @@
 			float3 v = p * _Frequency;
 
 			float noise = HeightMapPlanet(v) - 1.5;
+			//float noise = HeightMapSelena(v);
 
 			float height = _Amplitude * noise;
 							
