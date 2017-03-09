@@ -37,33 +37,37 @@
 			float3 p : TEXCOORD1;
 		};
 
-		void VERTEX_POSITION(in p2v v, out float4 position, out float3 localPosition, out float2 uv)
+		void VERTEX_POSITION(in float4 vertex, in float2 texcoord, out float4 position, out float3 localPosition, out float2 uv)
 		{
-			float2 zfc = texTileLod(_Elevation_Tile, v.texcoord.xy, _Elevation_TileCoords, _Elevation_TileSize).xy;
+			float2 zfc = texTileLod(_Elevation_Tile, texcoord, _Elevation_TileCoords, _Elevation_TileSize).xy;
 				
 			if (zfc.x <= _Ocean_Level && _Ocean_DrawBRDF == 1.0) { zfc = float2(0, 0); }
 			
-			float4 L = _Deform_ScreenQuadCornerNorms;
-			float3 P = float3(v.vertex.xy * _Deform_Offset.z + _Deform_Offset.xy, _Deform_Radius);
+			float4 vertexUV = float4(vertex.xy, float2(1.0, 1.0) - vertex.xy);
+			float2 vertexToCamera = abs(_Deform_Camera.xy - vertex.xy);
+			float vertexDistance = max(max(vertexToCamera.x, vertexToCamera.y), _Deform_Camera.z);
+			float vertexBlend = clamp((vertexDistance - _Deform_Blending.x) / _Deform_Blending.y, 0.0, 1.0);
 				
-			float4 uvUV = float4(v.vertex.xy, float2(1.0, 1.0) - v.vertex.xy);
-			float4 alpha = uvUV.zxzx * uvUV.wwyy;
-			float4 alphaPrime = alpha * L / dot(alpha, L);
-				
-			float k = min(length(P) / dot(alpha, L) * 1.0000003, 1.0);
-			float hPrime = (zfc.x + _Deform_Radius * (1.0 - k)) / k;
+			float4 alpha = vertexUV.zxzx * vertexUV.wwyy;
+			float4 alphaPrime = alpha * _Deform_ScreenQuadCornerNorms / dot(alpha, _Deform_ScreenQuadCornerNorms);
 
-			//position = mul(_Deform_LocalToScreen, float4(P + float3(0.0, 0.0, zfc.x), 1.0));						//CUBE PROJECTION
+			float3 P = float3(vertex.xy * _Deform_Offset.z + _Deform_Offset.xy, _Deform_Radius);
+				
+			float h = zfc.x * (1.0 - vertexBlend) + zfc.y * vertexBlend;
+			float k = min(length(P) / dot(alpha, _Deform_ScreenQuadCornerNorms) * 1.0000003, 1.0);
+			float hPrime = (h + _Deform_Radius * (1.0 - k)) / k;
+
+			//position = mul(_Deform_LocalToScreen, float4(P + float3(0.0, 0.0, h), 1.0));						//CUBE PROJECTION
 			position = mul(_Deform_ScreenQuadCorners + hPrime * _Deform_ScreenQuadVerticals, alphaPrime);			//SPHERICAL PROJECTION
-			localPosition = (_Deform_Radius + max(zfc.x, _Ocean_Level)) * normalize(mul(_Deform_LocalToWorld, P));
-			uv = v.texcoord.xy;
-
-			v.vertex = position;
+			localPosition = (_Deform_Radius + max(h, _Ocean_Level)) * normalize(mul(_Deform_LocalToWorld, P));
+			uv = texcoord;
 		}
 
 		void VERTEX_PROGRAM(in p2v v, out v2f o)
 		{
-			VERTEX_POSITION(v, o.pos, o.p, o.uv);
+			VERTEX_POSITION(v.vertex, v.texcoord.xy, o.pos, o.p, o.uv);
+
+			v.vertex = o.pos; // Assign calculated vertex position to our data...
 		}
 		ENDCG
 		
