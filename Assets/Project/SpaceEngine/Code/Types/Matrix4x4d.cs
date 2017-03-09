@@ -181,7 +181,7 @@ namespace UnityEngine
             {
                 for (byte iCol = 0; iCol < 4; iCol++)
                 {
-                    if (m1.m[iRow, iCol] != m2.m[iRow, iCol]) return false;
+                    if (!BrainFuckMath.NearlyEqual(m1.m[iRow, iCol], m2.m[iRow, iCol])) return false;
                 }
             }
 
@@ -194,7 +194,7 @@ namespace UnityEngine
             {
                 for (byte iCol = 0; iCol < 4; iCol++)
                 {
-                    if (m1.m[iRow, iCol] != m2.m[iRow, iCol]) return true;
+                    if (!BrainFuckMath.NearlyEqual(m1.m[iRow, iCol], m2.m[iRow, iCol])) return true;
                 }
             }
 
@@ -205,10 +205,10 @@ namespace UnityEngine
         {
             var matrix = Matrix4x4.identity;
 
-            for (byte iRow = 0; iRow < 4; iRow++)
-            {
-                matrix.SetRow(iRow, m.GetRow(iRow));
-            }
+            matrix.SetRow(0, m.GetRow(0));
+            matrix.SetRow(1, m.GetRow(1));
+            matrix.SetRow(2, m.GetRow(2));
+            matrix.SetRow(3, m.GetRow(3));
 
             return matrix;
         }
@@ -217,10 +217,10 @@ namespace UnityEngine
         {
             var matrix = Matrix4x4d.identity;
 
-            for (byte iRow = 0; iRow < 4; iRow++)
-            {
-                matrix.SetRow(iRow, m.GetRow(iRow));
-            }
+            matrix.SetRow(0, m.GetRow(0));
+            matrix.SetRow(1, m.GetRow(1));
+            matrix.SetRow(2, m.GetRow(2));
+            matrix.SetRow(3, m.GetRow(3));
 
             return matrix;
         }
@@ -228,8 +228,10 @@ namespace UnityEngine
 
         public override string ToString()
         {
-            return m[0, 0] + "," + m[0, 1] + "," + m[0, 2] + "," + m[0, 3] + "\n" + m[1, 0] + "," + m[1, 1] + "," + m[1, 2] + "," + m[1, 3] + "\n" + m[2, 0] + "," + m[2, 1] + "," + m[2, 2] + "," +
-                   m[2, 3] + "\n" + m[3, 0] + "," + m[3, 1] + "," + m[3, 2] + "," + m[3, 3];
+            return m[0, 0] + "," + m[0, 1] + "," + m[0, 2] + "," + m[0, 3] + "\n" +
+                   m[1, 0] + "," + m[1, 1] + "," + m[1, 2] + "," + m[1, 3] + "\n" +
+                   m[2, 0] + "," + m[2, 1] + "," + m[2, 2] + "," + m[2, 3] + "\n" +
+                   m[3, 0] + "," + m[3, 1] + "," + m[3, 2] + "," + m[3, 3];
         }
 
         public Matrix4x4d Transpose()
@@ -247,22 +249,24 @@ namespace UnityEngine
             return kTranspose;
         }
 
-        private double MINOR(int r0, int r1, int r2, int c0, int c1, int c2)
+        private double Minor(int r0, int r1, int r2, int c0, int c1, int c2)
         {
-            return m[r0, c0] * (m[r1, c1] * m[r2, c2] - m[r2, c1] * m[r1, c2]) - m[r0, c1] * (m[r1, c0] * m[r2, c2] - m[r2, c0] * m[r1, c2]) +
+            return m[r0, c0] * (m[r1, c1] * m[r2, c2] - m[r2, c1] * m[r1, c2]) -
+                   m[r0, c1] * (m[r1, c0] * m[r2, c2] - m[r2, c0] * m[r1, c2]) +
                    m[r0, c2] * (m[r1, c0] * m[r2, c1] - m[r2, c0] * m[r1, c1]);
         }
 
         private double Determinant()
         {
-            return (m[0, 0] * MINOR(1, 2, 3, 1, 2, 3) - m[0, 1] * MINOR(1, 2, 3, 0, 2, 3) + m[0, 2] * MINOR(1, 2, 3, 0, 1, 3) - m[0, 3] * MINOR(1, 2, 3, 0, 1, 2));
+            return m[0, 0] * Minor(1, 2, 3, 1, 2, 3) - m[0, 1] * Minor(1, 2, 3, 0, 2, 3) + m[0, 2] * Minor(1, 2, 3, 0, 1, 3) - m[0, 3] * Minor(1, 2, 3, 0, 1, 2);
         }
 
         private Matrix4x4d Adjoint()
         {
-            return new Matrix4x4d(MINOR(1, 2, 3, 1, 2, 3), -MINOR(0, 2, 3, 1, 2, 3), MINOR(0, 1, 3, 1, 2, 3), -MINOR(0, 1, 2, 1, 2, 3), -MINOR(1, 2, 3, 0, 2, 3), MINOR(0, 2, 3, 0, 2, 3),
-                -MINOR(0, 1, 3, 0, 2, 3), MINOR(0, 1, 2, 0, 2, 3), MINOR(1, 2, 3, 0, 1, 3), -MINOR(0, 2, 3, 0, 1, 3), MINOR(0, 1, 3, 0, 1, 3), -MINOR(0, 1, 2, 0, 1, 3), -MINOR(1, 2, 3, 0, 1, 2),
-                MINOR(0, 2, 3, 0, 1, 2), -MINOR(0, 1, 3, 0, 1, 2), MINOR(0, 1, 2, 0, 1, 2));
+            return new Matrix4x4d(Minor(1, 2, 3, 1, 2, 3), -Minor(0, 2, 3, 1, 2, 3), Minor(0, 1, 3, 1, 2, 3), -Minor(0, 1, 2, 1, 2, 3),
+                                  -Minor(1, 2, 3, 0, 2, 3), Minor(0, 2, 3, 0, 2, 3), -Minor(0, 1, 3, 0, 2, 3), Minor(0, 1, 2, 0, 2, 3),
+                                  Minor(1, 2, 3, 0, 1, 3), -Minor(0, 2, 3, 0, 1, 3), Minor(0, 1, 3, 0, 1, 3), -Minor(0, 1, 2, 0, 1, 3),
+                                  -Minor(1, 2, 3, 0, 1, 2), Minor(0, 2, 3, 0, 1, 2), -Minor(0, 1, 3, 0, 1, 2), Minor(0, 1, 2, 0, 1, 2));
         }
 
         public Matrix4x4d Inverse()

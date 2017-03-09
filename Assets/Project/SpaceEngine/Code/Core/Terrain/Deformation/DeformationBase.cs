@@ -164,39 +164,28 @@ namespace SpaceEngine.Core.Terrain.Deformation
         {
             if (matPropertyBlock == null || node == null || quad == null) return;
 
-            var ox = quad.Ox;
-            var oy = quad.Oy;
-            var l = quad.Length;
-            var distFactor = (double)node.DistanceFactor;
-            var level = quad.Level;
+            matPropertyBlock.SetVector(uniforms.offset, new Vector4((float)quad.Ox, (float)quad.Oy, (float)quad.Length, (float)quad.Level));
+            matPropertyBlock.SetVector(uniforms.camera, new Vector4((float)((node.LocalCameraPosition.x - quad.Ox) / quad.Length),
+                                                                    (float)((node.LocalCameraPosition.y - quad.Oy) / quad.Length),
+                                                                    (float)((node.LocalCameraPosition.z - node.Body.HeightZ) / (quad.Length * (double)node.DistanceFactor)),
+                                                                    (float)node.LocalCameraPosition.z));
 
-            var camera = node.LocalCameraPosition;
-
-            var tileToTangent = localToTangent * new Matrix3x3d(l, 0.0, ox - camera.x, 0.0, l, oy - camera.y, 0.0, 0.0, 1.0);
-
-            matPropertyBlock.SetVector(uniforms.offset, new Vector4((float)ox, (float)oy, (float)l, (float)level));
-            matPropertyBlock.SetVector(uniforms.camera, new Vector4((float)((camera.x - ox) / l), (float)((camera.y - oy) / l), (float)((camera.z - node.Body.HeightZ) / (l * distFactor)), (float)camera.z));
-            matPropertyBlock.SetMatrix(uniforms.tileToTangent, tileToTangent.ToMatrix4x4());
+            matPropertyBlock.SetMatrix(uniforms.tileToTangent, (localToTangent * new Matrix3x3d(quad.Length, 0.0, quad.Ox - node.LocalCameraPosition.x,
+                                                                                                0.0, quad.Length, quad.Oy - node.LocalCameraPosition.y,
+                                                                                                0.0, 0.0, 1.0)).ToMatrix4x4());
 
             SetScreenUniforms(node, quad, matPropertyBlock);
         }
 
         protected virtual void SetScreenUniforms(TerrainNode node, TerrainQuad quad, MaterialPropertyBlock matPropertyBlock)
         {
-            var ox = quad.Ox;
-            var oy = quad.Oy;
-            var l = quad.Length;
+            var p0 = new Vector3d(quad.Ox, quad.Oy, 0.0);
+            var p1 = new Vector3d(quad.Ox + quad.Length, quad.Oy, 0.0);
+            var p2 = new Vector3d(quad.Ox, quad.Oy + quad.Length, 0.0);
+            var p3 = new Vector3d(quad.Ox + quad.Length, quad.Oy + quad.Length, 0.0);
 
-            var p0 = new Vector3d(ox, oy, 0.0);
-            var p1 = new Vector3d(ox + l, oy, 0.0);
-            var p2 = new Vector3d(ox, oy + l, 0.0);
-            var p3 = new Vector3d(ox + l, oy + l, 0.0);
-
-            var corners = new Matrix4x4d(p0.x, p1.x, p2.x, p3.x, p0.y, p1.y, p2.y, p3.y, p0.z, p1.z, p2.z, p3.z, 1.0, 1.0, 1.0, 1.0);
-            var verticals = new Matrix4x4d(0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0);
-
-            matPropertyBlock.SetMatrix(uniforms.screenQuadCorners, (localToScreen * corners).ToMatrix4x4());
-            matPropertyBlock.SetMatrix(uniforms.screenQuadVerticals, (localToScreen * verticals).ToMatrix4x4());
+            matPropertyBlock.SetMatrix(uniforms.screenQuadCorners, (localToScreen * new Matrix4x4d(p0.x, p1.x, p2.x, p3.x, p0.y, p1.y, p2.y, p3.y, p0.z, p1.z, p2.z, p3.z, 1.0, 1.0, 1.0, 1.0)).ToMatrix4x4());
+            matPropertyBlock.SetMatrix(uniforms.screenQuadVerticals, (localToScreen * new Matrix4x4d(0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0)).ToMatrix4x4());
         }
     }
 }

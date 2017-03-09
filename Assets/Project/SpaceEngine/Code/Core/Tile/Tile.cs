@@ -15,7 +15,7 @@ namespace SpaceEngine.Core.Tile
     public class Tile
     {
         /// <summary>
-        /// A tile identifier for a given <see cref="Producer.TileProducer"/>. Contains the tile coordinates Level, Tx, Ty.
+        /// A tile identifier for a given <see cref="Producer.TileProducer"/>. Contains the tile's <see cref="Tile.Level"/>, <see cref="Tile.Tx"/>, <see cref="Ty"/>.
         /// </summary>
         public class Id
         {
@@ -56,35 +56,35 @@ namespace SpaceEngine.Core.Tile
         /// </summary>
         public class TId
         {
-            public int producerId { get; set; }
+            public int ProducerId { get; set; }
 
-            public Id tileId { get; set; }
+            public Id TileId { get; set; }
 
             public TId(int producerId, int level, int tx, int ty)
             {
-                this.producerId = producerId;
+                this.ProducerId = producerId;
 
-                this.tileId = new Id(level, tx, ty);
+                this.TileId = new Id(level, tx, ty);
             }
 
             public bool Equals(TId id)
             {
-                return (producerId == id.producerId && tileId.Equals(id.tileId));
+                return (ProducerId == id.ProducerId && TileId.Equals(id.TileId));
             }
 
             public override int GetHashCode()
             {
-                return (producerId ^ tileId.GetHashCode()).GetHashCode();
+                return (ProducerId ^ TileId.GetHashCode()).GetHashCode();
             }
 
             public override string ToString()
             {
-                return producerId.ToString() + "," + tileId.ToString();
+                return ProducerId.ToString() + "," + TileId.ToString();
             }
         }
 
         /// <summary>
-        /// A <see cref="Id"/> is sorted based as its level. Sorts from lowest level to highest.
+        /// A <see cref="Id"/> is sorted based as it's level. Sorts from lowest level to highest.
         /// </summary>
         public class ComparerID : IComparer<Id>
         {
@@ -95,7 +95,7 @@ namespace SpaceEngine.Core.Tile
         }
 
         /// <summary>
-        /// A A <see cref="Id"/> is compared based on its level, tx and ty.
+        /// A A <see cref="Id"/> is compared based on it's <see cref="Tile.Level"/>, <see cref="Tile.Tx"/>, <see cref="Ty"/>.
         /// </summary>
         public class EqualityComparerID : IEqualityComparer<Id>
         {
@@ -111,7 +111,7 @@ namespace SpaceEngine.Core.Tile
         }
 
         /// <summary>
-        /// A Tid is compared based on its producer, level, tx and ty.
+        /// A Tid is compared based on it's producer, <see cref="Tile.Level"/>, <see cref="Tile.Tx"/>, <see cref="Ty"/>.
         /// </summary>
         public class EqualityComparerTID : IEqualityComparer<TId>
         {
