@@ -14,12 +14,17 @@
 
 			#include "Core.cginc"
 
+			#include "../TCCommon.cginc"
+			#include "../TCAsteroid.cginc"
+			#include "../TCGasgiant.cginc"
+			#include "../TCPlanet.cginc"
+			#include "../TCSelena.cginc"
+			#include "../TCSun.cginc"
+			#include "../TCTerra.cginc"
+
 			#pragma target 4.0
 			#pragma vertex vert
 			#pragma fragment frag
-			
-			#include "../TCCommon.cginc"
-			#include "../TCAsteroid.cginc"
 			
 			// tile border size
 			#define BORDER 2.0 
@@ -168,15 +173,8 @@
 				float3 p = normalize(mul(LTW, P)).xyz;
 				float3 v = p * _Frequency;
 
-				noiseH          = 0.5;
-				noiseLacunarity = 2.218281828459;
-
-				float noise = 0;
-
-				noise += Fbm(v * 0.25, 2);
-				noise += Fbm(v * 0.50, 4);
-				noise += Fbm(v * 0.75, 6);
-				noise += Fbm(v * 1.00, 8);
+				float noise = HeightMapPlanet(v) - 1.5;
+				//float noise = HeightMapSelena(v);
 				
 				if (_Amplitude < 0.0) 
 				{
@@ -204,7 +202,7 @@
 					zc = (zc1 + zc3) * 0.5;
 				}
 				
-				output = float4(zf, zc, 0.0, 0.0);			
+				output = float4(zf, zc, 1, noise);			
 			}		
 			ENDCG
 		}
