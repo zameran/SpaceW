@@ -69,18 +69,38 @@ public static class BrainFuckMath
         return new Vector3(mask.x < 0 ? leftValue : rightvalue, mask.y < 0 ? leftValue : rightvalue, mask.z < 0 ? leftValue : rightvalue);
     }
 
-    public static bool AlmostEquals(this float a, float b, float precision)
+    public static bool NearlyEqual(float a, float b, float precision = 0.00001f) // Use 5 digits after dot.
+    {
+        var absA = Math.Abs(a);
+        var absB = Math.Abs(b);
+        var difference = Math.Abs(a - b);
+
+        if (a * b == 0) return difference < (precision * precision);
+        else return difference / (absA + absB) < precision;
+    }
+
+    public static bool NearlyEqual(double a, double b, double precision = 0.00000000001) // Use 10 digits after dot.
+    {
+        var absA = Math.Abs(a);
+        var absB = Math.Abs(b);
+        var difference = Math.Abs(a - b);
+
+        if (a * b == 0) return difference < (precision * precision);
+        else return difference / (absA + absB) < precision;
+    }
+
+    public static bool AlmostEquals(this float a, float b, float precision = 0.00001f) // Use 5 digits after dot.
     {
         return Mathf.Abs(a - b) <= precision;
     }
 
     public static void DefineAxis(ref bool staticX, ref bool staticY, ref bool staticZ, Vector3 size)
     {
-        if (AlmostEquals(size.x, 0.0f, 0.01f))
+        if (AlmostEquals(size.x, 0.0f))
             staticX = true;
-        else if (AlmostEquals(size.y, 0.0f, 0.01f))
+        else if (AlmostEquals(size.y, 0.0f))
             staticY = true;
-        else if (AlmostEquals(size.z, 0.0f, 0.01f))
+        else if (AlmostEquals(size.z, 0.0f))
             staticZ = true;
     }
 

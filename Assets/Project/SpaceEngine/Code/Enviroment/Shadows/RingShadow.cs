@@ -67,7 +67,7 @@ public class RingShadow : Shadow
         {
             if (RingComponent == null) return false;
 
-            if (Texture != null)
+            if (GetTexture() != null)
             {
                 if (Helper.Enabled(RingComponent) == true)
                 {

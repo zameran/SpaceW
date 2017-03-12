@@ -13,6 +13,8 @@
 			#pragma only_renderers d3d11 glcore
 			#pragma vertex vert
 			#pragma fragment frag
+
+			#define OCEAN_INSCATTER_FIX
 			
 			#include "../HDR.cginc"
 			#include "../Atmosphere.cginc"
@@ -96,7 +98,13 @@
 				float3 oceanP = IN.oceanP;
 				
 				float3 earthCamera = float3(0.0, 0.0, _Ocean_CameraPos.z + radius);
-				float3 earthP = radius > 0.0 ? normalize(oceanP + float3(0.0, 0.0, radius)) * (radius + 10.0) : oceanP;
+
+				// NOTE : Vertices some times pass or lay under atmosphere 'ground terminator' and InScattering returns solid radiance color...
+				#ifdef OCEAN_INSCATTER_FIX
+					float3 earthP = radius > 0.0 ? normalize(oceanP + float3(0.0, 0.0, radius)) * (radius + 11.0) : oceanP;
+				#else
+					float3 earthP = radius > 0.0 ? normalize(oceanP + float3(0.0, 0.0, radius)) * (radius + 10.0) : oceanP;
+				#endif
 				
 				float3 oceanCamera = float3(0.0, 0.0, _Ocean_CameraPos.z);
 				float3 V = normalize(oceanCamera - oceanP);
@@ -143,6 +151,7 @@
 				SunRadianceAndSkyIrradiance(earthP, N, L, sunL, skyE);
 				
 				float3 Lsky;
+
 				if(radius == 0.0)
 				{
 					Lsky = ReflectedSkyRadiance(_Sky_Map, V, N, sigmaSq, L);

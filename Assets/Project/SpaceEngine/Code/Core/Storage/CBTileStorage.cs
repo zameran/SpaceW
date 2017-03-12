@@ -52,6 +52,11 @@ namespace SpaceEngine.Core.Storage
         protected override void Awake()
         {
             base.Awake();
+        }
+
+        public override void InitSlots()
+        {
+            base.InitSlots();
 
             for (var i = 0; i < Capacity; i++)
             {

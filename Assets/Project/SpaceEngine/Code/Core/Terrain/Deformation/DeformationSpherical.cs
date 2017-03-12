@@ -33,7 +33,7 @@ namespace SpaceEngine.Core.Terrain.Deformation
         {
             if (!MathUtility.IsFinite(localPoint.x) || !MathUtility.IsFinite(localPoint.y) || !MathUtility.IsFinite(localPoint.z))
             {
-                return Matrix4x4d.Identity();
+                return Matrix4x4d.identity;
             }
 
             var point = new Vector3d(localPoint);
@@ -269,19 +269,17 @@ namespace SpaceEngine.Core.Terrain.Deformation
                                                         1.0, 1.0, 1.0, 1.0);
 
             Matrix4x4d deformedVerticals = new Matrix4x4d(v0.x, v1.x, v2.x, v3.x,
-                                                            v0.y, v1.y, v2.y, v3.y,
-                                                            v0.z, v1.z, v2.z, v3.z,
-                                                            0.0, 0.0, 0.0, 0.0);
+                                                          v0.y, v1.y, v2.y, v3.y,
+                                                          v0.z, v1.z, v2.z, v3.z,
+                                                          0.0, 0.0, 0.0, 0.0);
 
             var uz = pc.Normalized();
             var ux = (new Vector3d(0, 1, 0)).Cross(uz).Normalized();
             var uy = uz.Cross(ux);
 
-            var ltow = node.LocalToWorld;
-
-            Matrix3x3d tangentFrameToWorld = new Matrix3x3d(ltow.m[0, 0], ltow.m[0, 1], ltow.m[0, 2],
-                                                            ltow.m[1, 0], ltow.m[1, 1], ltow.m[1, 2],
-                                                            ltow.m[2, 0], ltow.m[2, 1], ltow.m[2, 2]);
+            Matrix3x3d tangentFrameToWorld = new Matrix3x3d(node.LocalToWorld.m[0, 0], node.LocalToWorld.m[0, 1], node.LocalToWorld.m[0, 2],
+                                                            node.LocalToWorld.m[1, 0], node.LocalToWorld.m[1, 1], node.LocalToWorld.m[1, 2],
+                                                            node.LocalToWorld.m[2, 0], node.LocalToWorld.m[2, 1], node.LocalToWorld.m[2, 2]);
 
             Matrix3x3d m = new Matrix3x3d(ux.x, uy.x, uz.x, ux.y, uy.y, uz.y, ux.z, uy.z, uz.z);
 

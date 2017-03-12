@@ -60,7 +60,7 @@ namespace SpaceEngine.Core.PropertyNotification
         {
             var temp = this.PropertyChanged;
 
-            if (null != temp)
+            if (temp != null)
                 temp(this, e);
         }
 

@@ -8,15 +8,15 @@ using UnityEngine;
 namespace SpaceEngine.Core.Terrain
 {
     /// <summary>
-    /// Provides a framework to draw and update view-dependent, quadtree based terrains.
-    /// This framework provides classes to represent the terrain quadtree, classes to
-    /// associate data produced by a <see cref="SpaceEngine.Core.Tile.Producer.TileProducer"/> to the quads of this
+    /// Provides a base class to draw and update view-dependent, quadtree based terrains.
+    /// This base class provides classes to represent the terrain quadtree, classes to
+    /// associate data produced by a <see cref="Tile.Producer.TileProducer"/> to the quads of this
     /// quadtree, as well as classes to update and draw such terrains (which can be deformed to get spherical).
     /// A view dependent, quadtree based terrain. This class provides access to the
     /// terrain quadtree, defines the terrain deformation (can be used to get planet
     /// sized terrains), and defines how the terrain quadtree must be subdivided based
     /// on the viewer position. This class does not give any direct or indirect access to the terrain data (elevations, normals, texture). 
-    /// The terrain data must be managed by <see cref="SpaceEngine.Core.Tile.Producer.TileProducer"/>, and stored in TileStorage. 
+    /// The terrain data must be managed by <see cref="Tile.Producer.TileProducer"/>, and stored in TileStorage. 
     /// The link between with the terrain quadtree is provided by the TileSampler class.
     /// </summary>
     public class TerrainNode : Node<TerrainNode>
@@ -79,7 +79,7 @@ namespace SpaceEngine.Core.Terrain
         /// <summary>
         /// The root of the terrain quadtree. This quadtree is subdivided based on the current viewer position by the update method.
         /// </summary>
-        public TerrainQuad TerrainQuadRoot { get; private set; }
+        public TerrainQuad TerrainQuadRoot { get; set; }
 
         /// <summary>
         /// The current viewer position in the deformed terrain space.
@@ -134,12 +134,18 @@ namespace SpaceEngine.Core.Terrain
             Body.TerrainNodes.Add(this);
 
             TerrainMaterial = MaterialHelper.CreateTemp(Body.ColorShader, "TerrainNode");
+            TerrainMaterial.SetTexture("_Ground_Diffuse", Body.GroundDiffuse);
+            TerrainMaterial.SetTexture("_Ground_Normal", Body.GroundNormal);
+            TerrainMaterial.SetTexture("_DetailedNormal", Body.DetailedNormal);
 
-            //Manager.GetSkyNode().InitUniforms(TerrainMaterial);
+            if (Body.Atmosphere != null)
+            {
+                Body.Atmosphere.InitUniforms(TerrainMaterial);
+            }
 
             var faces = new Vector3d[] { new Vector3d(0, 0, 0), new Vector3d(90, 0, 0), new Vector3d(90, 90, 0), new Vector3d(90, 180, 0), new Vector3d(90, 270, 0), new Vector3d(0, 180, 180) };
 
-            FaceToLocal = Matrix4x4d.Identity();
+            FaceToLocal = Matrix4x4d.identity;
 
             // If this terrain is deformed into a sphere the face matrix is the rotation of the 
             // terrain needed to make up the spherical planet. In this case there should be 6 terrains, each with a unique face number
@@ -148,8 +154,9 @@ namespace SpaceEngine.Core.Terrain
                 FaceToLocal = Matrix4x4d.Rotate(faces[Face - 1]);
             }
 
-            //LocalToWorld = Matrix4x4d.ToMatrix4x4d(transform.localToWorldMatrix) * FaceToLocal;
-            LocalToWorld = FaceToLocal;
+            // Update local matrices...
+            LocalToWorld = Matrix4x4d.ToMatrix4x4d(Body.transform.localToWorldMatrix) * FaceToLocal;
+            //LocalToWorld = FaceToLocal;
 
             Deformation = new DeformationSpherical(Body.Radius);
 
@@ -158,8 +165,12 @@ namespace SpaceEngine.Core.Terrain
 
         protected override void UpdateNode()
         {
-            var localToCamera = (Matrix4x4d)GodManager.Instance.WorldToCamera * LocalToWorld;
-            var localToScreen = (Matrix4x4d)GodManager.Instance.CameraToScreen * localToCamera;
+            // Update local matrices...
+            LocalToWorld = Matrix4x4d.ToMatrix4x4d(Body.transform.localToWorldMatrix) * FaceToLocal;
+            //LocalToWorld = FaceToLocal;
+
+            var localToCamera = GodManager.Instance.WorldToCamera * LocalToWorld;
+            var localToScreen = GodManager.Instance.CameraToScreen * localToCamera;
             var invLocalToCamera = localToCamera.Inverse();
 
             DeformedCameraPosition = invLocalToCamera * Vector3d.zero; // TODO : Really? zero?
@@ -185,7 +196,7 @@ namespace SpaceEngine.Core.Terrain
             if (UseHorizonCulling && LocalCameraPosition.z <= TerrainQuadRoot.ZMax)
             {
                 var deformedDirection = invLocalToCamera * Vector3d.forward;
-                var localDirection = (Deformation.DeformedToLocal(deformedDirection) - LocalCameraPosition).XY().Normalized();
+                var localDirection = (Deformation.DeformedToLocal(deformedDirection) - LocalCameraPosition).xy.Normalized();
 
                 LocalCameraDirection = new Matrix2x2d(localDirection.y, -localDirection.x, -localDirection.x, -localDirection.y);
 
@@ -197,15 +208,25 @@ namespace SpaceEngine.Core.Terrain
 
             TerrainQuadRoot.UpdateLOD();
 
-            //Manager.GetSkyNode().SetUniforms(TerrainMaterial);
-            //Manager.GetSunNode().SetUniforms(TerrainMaterial);
-            Body.SetUniforms(TerrainMaterial);
+            if (Body.Atmosphere != null)
+            {
+                Body.Atmosphere.SetUniforms(TerrainMaterial);
+            }
+
+            if (Body.Ocean != null)
+            {
+                Body.Ocean.SetUniforms(TerrainMaterial);
+            }
+            else
+            {
+                TerrainMaterial.SetFloat("_Ocean_DrawBRDF", 0.0f);
+            }
+
             Deformation.SetUniforms(this, TerrainMaterial);
 
-            //if (Manager.GetOceanNode() != null)
-            //    Manager.GetOceanNode().SetUniforms(TerrainMaterial);
-            //else
-            TerrainMaterial.SetFloat("_Ocean_DrawBRDF", 0.0f);
+            TerrainMaterial.SetTexture("_Ground_Diffuse", Body.GroundDiffuse);
+            TerrainMaterial.SetTexture("_Ground_Normal", Body.GroundNormal);
+            TerrainMaterial.SetTexture("_DetailedNormal", Body.DetailedNormal);
 
             //if (Manager.GetPlantsNode() != null)
             //    Manager.GetPlantsNode().SetUniforms(TerrainMaterial);
@@ -258,7 +279,7 @@ namespace SpaceEngine.Core.Terrain
             }
 
             var corners = new Vector2d[4];
-            var plane = LocalCameraPosition.XY();
+            var plane = LocalCameraPosition.xy;
 
             corners[0] = LocalCameraDirection * (new Vector2d(box.xmin, box.ymin) - plane);
             corners[1] = LocalCameraDirection * (new Vector2d(box.xmin, box.ymax) - plane);
@@ -308,7 +329,7 @@ namespace SpaceEngine.Core.Terrain
             }
 
             var corners = new Vector2d[4];
-            var plane = LocalCameraPosition.XY();
+            var plane = LocalCameraPosition.xy;
 
             corners[0] = LocalCameraDirection * (new Vector2d(occluder.xmin, occluder.ymin) - plane);
             corners[1] = LocalCameraDirection * (new Vector2d(occluder.xmin, occluder.ymax) - plane);

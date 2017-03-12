@@ -33,13 +33,15 @@
 // Creator: zameran
 #endregion
 
+using SpaceEngine.Core.Bodies;
+
 using UnityEngine;
 
 namespace SpaceEngine.AtmosphericScattering.Cloudsphere
 {
     public class Cloudsphere : Node<Cloudsphere>, IUniformed<Material>
     {
-        public Planetoid planetoid;
+        public CelestialBody body;
 
         public Mesh CloudsphereMesh;
 
@@ -102,11 +104,11 @@ namespace SpaceEngine.AtmosphericScattering.Cloudsphere
         {
             if (target == null) return;
 
-            if (planetoid != null)
+            if (body != null)
             {
-                if (planetoid.Atmosphere != null)
+                if (body.Atmosphere != null)
                 {
-                    planetoid.Atmosphere.InitUniforms(target);
+                    body.Atmosphere.InitUniforms(target);
                 }
             }
 
@@ -117,11 +119,11 @@ namespace SpaceEngine.AtmosphericScattering.Cloudsphere
         {
             if (target == null) return;
 
-            if (planetoid != null)
+            if (body != null)
             {
-                if (planetoid.Atmosphere != null)
+                if (body.Atmosphere != null)
                 {
-                    planetoid.Atmosphere.SetUniforms(target);
+                    body.Atmosphere.SetUniforms(target);
                 }
             }
 
@@ -140,9 +142,9 @@ namespace SpaceEngine.AtmosphericScattering.Cloudsphere
         {
             if (CloudsphereMesh == null) return;
 
-            var CloudsTRS = Matrix4x4.TRS(planetoid.OriginTransform.position, transform.rotation, Vector3.one * (Radius + Height));
+            var CloudsTRS = Matrix4x4.TRS(body.transform.position, transform.rotation, Vector3.one * (Radius + Height));
 
-            Graphics.DrawMesh(CloudsphereMesh, CloudsTRS, CloudMaterial, planetoid.DrawLayer, CameraHelper.Main(), 0, planetoid.MPB);
+            Graphics.DrawMesh(CloudsphereMesh, CloudsTRS, CloudMaterial, 0, CameraHelper.Main(), 0, body.MPB);
         }
 
         public void InitMaterials()

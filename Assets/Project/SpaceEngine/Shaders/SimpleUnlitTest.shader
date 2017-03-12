@@ -37,51 +37,84 @@ Shader "Unlit/SimpleUnlitTest"
 	{
 
 	}
+
 	SubShader
 	{
-		Tags { "RenderType" = "Opaque" }
-		
-		ZTest On
+		Tags { "RenderType"="Opaque" "PerformanceChecks"="False" }
+		LOD 300
+	
+		Pass 
+		{
+			Name "ShadowCaster"
+			Tags { "LightMode" = "ShadowCaster" }
+
+			ZWrite On ZTest LEqual
+
+			CGPROGRAM
+			#pragma target 3.0
+
+
+			#pragma shader_feature _ _ALPHATEST_ON _ALPHABLEND_ON _ALPHAPREMULTIPLY_ON
+			#pragma multi_compile_shadowcaster
+
+			#pragma vertex vertShadowCaster
+			#pragma fragment fragShadowCaster
+
+			#include "UnityStandardShadow.cginc"
+
+			ENDCG
+		}
 
 		Pass
 		{
+			Name "DEFERRED"
+			Tags { "LightMode" = "Deferred" }
+
 			CGPROGRAM
-			#pragma vertex vert
-			#pragma fragment frag
+			#include "UnityStandardCore.cginc"
 
-			#include "UnityCG.cginc"
+			#pragma target 3.0
+			#pragma exclude_renderers nomrt
 
-			struct appdata
-			{
-				float4 vertex : POSITION;
-				float3 normal : NORMAL;
-				float2 uv : TEXCOORD0;
-			};
+			#pragma vertex vertDeferred1
+			#pragma fragment fragDeferred1
 
 			struct v2f
 			{
-				float4 vertex : SV_POSITION;
-				float2 uv : TEXCOORD0;
+				float4 pos : SV_POSITION;
+				float4 tex : TEXCOORD0;
+				float3 normal : TEXCOORD2;
 			};
-			
-			v2f vert (appdata v)
+
+			v2f vertDeferred1 (appdata_base v)
 			{
 				v2f o;
 
-				v.vertex.xyz += v.normal / 8;
+				UNITY_INITIALIZE_OUTPUT(v2f, o);
 
-				o.vertex = mul(UNITY_MATRIX_MVP, v.vertex);
-				o.uv = v.uv;
+				o.pos = UnityObjectToClipPos(v.vertex);
+				o.tex = v.texcoord;
+				o.normal = UnityObjectToWorldNormal(v.normal);
 
 				return o;
 			}
-			
-			fixed4 frag (v2f i) : SV_Target
+
+			void fragDeferred1 (
+				v2f i,
+				out half4 outDiffuse : SV_Target0,			// RT0: diffuse color (rgb), occlusion (a)
+				out half4 outSpecSmoothness : SV_Target1,	// RT1: spec color (rgb), smoothness (a)
+				out half4 outNormal : SV_Target2,			// RT2: normal (rgb), --unused, very low precision-- (a) 
+				out half4 outEmission : SV_Target3			// RT3: emission (rgb), --unused-- (a)
+			)
 			{
-				return float4(1, 1, 1, 1);
+				outDiffuse = 1;
+				outSpecSmoothness = 0;
+				outNormal = half4(i.normal * 0.5 + 0.5, 1);
+				outEmission = half4(outDiffuse.xyz, 1);
 			}
+
 			ENDCG
 		}
 	}
-	Fallback "Standart" 
+	FallBack "VertexLit"
 }

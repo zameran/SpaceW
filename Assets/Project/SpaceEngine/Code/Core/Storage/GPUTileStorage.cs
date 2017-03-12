@@ -21,6 +21,11 @@ namespace SpaceEngine.Core.Storage
                 Texture.ReleaseAndDestroy();
             }
 
+            public override void Clear()
+            {
+                RTUtility.ClearColor(Texture);
+            }
+
             public GPUSlot(TileStorage owner, RenderTexture texture) : base(owner)
             {
                 Texture = texture;
@@ -51,6 +56,11 @@ namespace SpaceEngine.Core.Storage
         protected override void Awake()
         {
             base.Awake();
+        }
+
+        public override void InitSlots()
+        {
+            base.InitSlots();
 
             for (var i = 0; i < Capacity; i++)
             {

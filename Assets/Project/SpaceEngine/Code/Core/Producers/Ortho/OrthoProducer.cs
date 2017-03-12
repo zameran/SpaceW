@@ -124,7 +124,7 @@ namespace SpaceEngine.Core
             }
 
             var tileWidth = gpuSlot.Owner.TileSize;
-            var tileSize = tileWidth - 4;
+            var tileSize = tileWidth - (GetBorder() * 2);
 
             GPUTileStorage.GPUSlot parentGpuSlot = null;
 

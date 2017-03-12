@@ -33,6 +33,8 @@
 // Creator: zameran
 #endregion
 
+using SpaceEngine.Core.Bodies;
+
 using UnityEngine;
 
 namespace SpaceEngine.Cameras
@@ -43,7 +45,7 @@ namespace SpaceEngine.Cameras
         public float rotationSpeed = 3.0f;
         public float alignDistance = 1024.0f;
 
-        public Planetoid planetoid;
+        public CelestialBody body;
         public GameObject planetoidGameObject;
 
         private float currentSpeed;
@@ -173,9 +175,9 @@ namespace SpaceEngine.Cameras
 
         protected override void Init()
         {
-            if (planetoid == null)
+            if (body == null)
                 if (planetoidGameObject != null)
-                    planetoid = planetoidGameObject.GetComponent<Planetoid>();
+                    body = planetoidGameObject.GetComponent<CelestialBody>();
 
             if (planetoidGameObject != null)
             {
@@ -195,11 +197,11 @@ namespace SpaceEngine.Cameras
         {
             if (dynamicClipPlanes)
             {
-                if (planetoid != null)
+                if (body != null)
                 {
-                    var h = (distanceToPlanetCore - planetoid.PlanetRadius - planetoid.TerrainMaxHeight);
+                    var h = (distanceToPlanetCore - body.Radius - body.Amplitude);
 
-                    if (planetoid.Ocean != null) h = h - planetoid.Ocean.OceanLevel;
+                    if (body.Ocean != null) h = h - body.Ocean.OceanLevel;
 
                     if (h < 1.0f) { h = 1.0f; }
 
@@ -252,9 +254,9 @@ namespace SpaceEngine.Cameras
 
         private void RotateAround(Vector3 rotationVector)
         {
-            if (planetoid != null)
+            if (body != null)
             {
-                RotateAroundOrigin(rotationVector, planetoid.Origin);
+                RotateAroundOrigin(rotationVector, body.Origin);
             }
             else if (planetoidGameObject != null)
             {
@@ -264,9 +266,9 @@ namespace SpaceEngine.Cameras
 
         private void RotateAround(Vector3 rotationVector, Vector3 distanceVector)
         {
-            if (planetoid != null)
+            if (body != null)
             {
-                RotateAroundOrigin(rotationVector, distanceVector, planetoid.Origin);
+                RotateAroundOrigin(rotationVector, distanceVector, body.Origin);
             }
             else if (planetoidGameObject != null)
             {

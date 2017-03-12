@@ -20,7 +20,8 @@ namespace SpaceEngine.Core.Tile.Samplers
         /// An internal quadtree to store the texture tile associated with each
         /// terrain TerrainQuad, and to keep track of tiles that need to be read back.
         /// </summary>
-        class QuadTreeZ : QuadTree
+        [Serializable]
+        private class QuadTreeZ : QuadTree
         {
             public TerrainQuad TerrainQuad;
 
@@ -36,6 +37,7 @@ namespace SpaceEngine.Core.Tile.Samplers
         /// <summary>
         /// Helper class to store the retrived height data and the [min, max] values
         /// </summary>
+        [Serializable]
         private class ElevationInfo
         {
             public float[] Elevations = null;
@@ -55,6 +57,7 @@ namespace SpaceEngine.Core.Tile.Samplers
         /// <summary>
         /// The terrain <see cref="TerrainQuad"/> directly below the current viewer position.
         /// </summary>
+        [SerializeField]
         QuadTreeZ CameraQuad;
 
         /// <summary>
@@ -93,7 +96,7 @@ namespace SpaceEngine.Core.Tile.Samplers
             var size = Producer.GetTileSize(0);
 
             ElevationsBuffer = new ComputeBuffer(size * size, sizeof(float));
-            GroundBuffer = new ComputeBuffer(1, sizeof(float));
+            GroundBuffer = new ComputeBuffer(1, 4 * sizeof(float));
 
         }
 
@@ -161,11 +164,11 @@ namespace SpaceEngine.Core.Tile.Samplers
                     CBUtility.ReadSingleFromRenderTexture(slot.Texture, x, y, 0, GroundBuffer, GodManager.Instance.ReadData, true);
 
                     // Get single height value from buffer
-                    var height = new float[1];
+                    var height = new Vector4[1];
 
                     GroundBuffer.GetData(height);
 
-                    TerrainNode.Body.HeightZ = Math.Max(0.0, height[0]);
+                    TerrainNode.Body.HeightZ = Math.Max(0.0, height[0].x);
 
                     OldLocalCamera.x = localCameraPosition.x;
                     OldLocalCamera.y = localCameraPosition.y;

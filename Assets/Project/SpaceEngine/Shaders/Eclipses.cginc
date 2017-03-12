@@ -108,7 +108,7 @@ float EclipseShadow(float3 position, float3 lightVec, float lightAngularRadius)
 
 float EclipseOuterShadow(float3 lightVec, float lightAngularRadius, float3 d, float3 camera, float3 _Globals_Origin, float Rt)
 {
-	//TODO : Switch in sphere - out sphere.
+	// TODO : Switch in sphere - out sphere.
 	float interSectPt = IntersectOuterSphere(camera, d, _Globals_Origin, Rt);
 
 	return interSectPt != -1 ? EclipseShadow(camera + d * interSectPt, lightVec, lightAngularRadius) : 1.0;

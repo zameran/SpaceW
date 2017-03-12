@@ -183,7 +183,7 @@ float4 ShadowOuterColor(float3 d, float3 WCP, float3 _Globals_Origin, float Rt)
 #endif
 //----------------------------------------------------------------------------
 
-//-----------------------------------------------------------------------------
+//----------------------------------------------------------------------------
 struct QuadGenerationConstants //For every quad
 {
 	float planetRadius;

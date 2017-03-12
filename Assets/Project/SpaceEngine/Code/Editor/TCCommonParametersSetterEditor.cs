@@ -35,6 +35,8 @@ using SpaceEngine.Core.Bodies;
 using System;
 
 using UnityEditor;
+using UnityEditor.SceneManagement;
+
 using UnityEngine;
 
 [CustomEditor(typeof(TCCommonParametersSetter))]
@@ -54,12 +56,6 @@ public sealed class TCCommonParametersSetterEditor : Editor
         setter.AutoUpdate = EditorGUILayout.Toggle(setter.AutoUpdate);
 
         EditorGUILayout.Space();
-
-        EditorGUILayout.LabelField("Planetoid to setup: ", EditorStyles.boldLabel);
-        setter.Planet = EditorGUILayout.ObjectField(setter.Planet, typeof(Planetoid), true) as Planetoid;
-
-        EditorGUILayout.LabelField("Patch Sphere to setup: ", EditorStyles.boldLabel);
-        setter.PatchSphere = EditorGUILayout.ObjectField(setter.PatchSphere, typeof(PatchSphere), true) as PatchSphere;
 
         EditorGUILayout.LabelField("Celestial Body to setup: ", EditorStyles.boldLabel);
         setter.CelestialBody = EditorGUILayout.ObjectField(setter.CelestialBody, typeof(CelestialBody), true) as CelestialBody;
@@ -237,27 +233,6 @@ public sealed class TCCommonParametersSetterEditor : Editor
         setter.textureParams.w = EditorGUILayout.Slider("venusFreq ", setter.textureParams.w, 0.0f, 1000.0f);
     }
 
-    private void ResetupSphere(TCCommonParametersSetter setter)
-    {
-        if (setter.PatchSphere != null)
-        {
-            setter.PatchSphere.Rebuild();
-            setter.PatchSphere.CallUpdate();
-        }
-    }
-
-    private void ResetupPlanetoid(TCCommonParametersSetter setter)
-    {
-        if (Application.isPlaying)
-        {
-            if (setter.Planet != null)
-            {
-                setter.Planet.ReSetupQuads();
-                setter.Planet.Reanimate();
-            }
-        }
-    }
-
     public override void OnInspectorGUI()
     {
         var setter = (TCCommonParametersSetter)target;
@@ -266,14 +241,12 @@ public sealed class TCCommonParametersSetterEditor : Editor
 
         if (GUILayout.Button("Update"))
         {
-            ResetupPlanetoid(setter);
-            ResetupSphere(setter);
+            // Update body here...
         }
 
         if (GUI.changed && setter.AutoUpdate)
         {
-            ResetupPlanetoid(setter);
-            ResetupSphere(setter);
+            // Update body here...
         }
 
         EditorGUILayout.Space();
@@ -284,8 +257,7 @@ public sealed class TCCommonParametersSetterEditor : Editor
 
         if (currentTab != prevTab && setter.AutoUpdate)
         {
-            ResetupPlanetoid(setter);
-            ResetupSphere(setter);
+            // Update body here...
         }
 
         prevTab = currentTab;
@@ -293,6 +265,8 @@ public sealed class TCCommonParametersSetterEditor : Editor
         EditorGUILayout.EndHorizontal();
         EditorGUILayout.EndVertical();
         EditorGUILayout.Space();
+
+        EditorGUI.BeginChangeCheck();
 
         switch (currentTab)
         {
@@ -341,6 +315,13 @@ public sealed class TCCommonParametersSetterEditor : Editor
             case Tab.Venus:
                 DrawGUIForVenus(setter);
                 break;
+        }
+
+        if (EditorGUI.EndChangeCheck())
+        {
+            var currentScene = EditorSceneManager.GetActiveScene();
+
+            EditorSceneManager.MarkSceneDirty(currentScene);
         }
     }
 }

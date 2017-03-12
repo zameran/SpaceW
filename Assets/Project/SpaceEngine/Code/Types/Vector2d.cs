@@ -25,15 +25,15 @@
 
 namespace UnityEngine
 {
-    public class Vector2d
+    using System;
+
+    [Serializable]
+    public struct Vector2d
     {
         public double x, y;
 
-        public Vector2d()
-        {
-            this.x = 0.0f;
-            this.y = 0.0f;
-        }
+        public static Vector2d zero { get { return new Vector2d(0.0, 0.0); } }
+        public static Vector2d one { get { return new Vector2d(1.0, 1.0); } }
 
         public Vector2d(double v)
         {
@@ -51,12 +51,6 @@ namespace UnityEngine
         {
             x = v.x;
             y = v.y;
-        }
-
-        public Vector2d(double[] v)
-        {
-            x = v[0];
-            y = v[1];
         }
 
         public static Vector2d operator +(Vector2d v1, Vector2d v2)
@@ -101,7 +95,7 @@ namespace UnityEngine
 
         public double Magnitude()
         {
-            return System.Math.Sqrt(x * x + y * y);
+            return Math.Sqrt(x * x + y * y);
         }
 
         public double SqrMagnitude()
@@ -116,7 +110,7 @@ namespace UnityEngine
 
         public void Normalize()
         {
-            var invLength = 1.0 / System.Math.Sqrt(x * x + y * y);
+            var invLength = 1.0 / Math.Sqrt(x * x + y * y);
 
             x *= invLength;
             y *= invLength;
@@ -124,14 +118,14 @@ namespace UnityEngine
 
         public Vector2d Normalized()
         {
-            var invLength = 1.0 / System.Math.Sqrt(x * x + y * y);
+            var invLength = 1.0 / Math.Sqrt(x * x + y * y);
 
             return new Vector2d(x * invLength, y * invLength);
         }
 
         public Vector2d Normalized(double l)
         {
-            var length = System.Math.Sqrt(x * x + y * y);
+            var length = Math.Sqrt(x * x + y * y);
             var invLength = l / length;
 
             return new Vector2d(x * invLength, y * invLength);
