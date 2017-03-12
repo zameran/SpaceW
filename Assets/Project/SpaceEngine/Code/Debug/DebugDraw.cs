@@ -39,7 +39,6 @@ namespace SpaceEngine.Debugging
 {
     public abstract class DebugDraw : MonoBehaviour, IDebug
     {
-        public Planetoid Planet = null;
         public Shader lineShader = null;
         public Material lineMaterial = null;
 
@@ -51,40 +50,6 @@ namespace SpaceEngine.Debugging
 
         protected virtual void OnPostRender()
         {
-            if (Planet == null) return;
-            if (lineMaterial == null) CreateLineMaterial();
-
-            Draw();
-        }
-
-        protected virtual void CreateLineMaterial()
-        {
-            if (lineShader == null) throw new System.NullReferenceException("Line Shader is null!");
-
-            if (!lineMaterial)
-            {
-                lineMaterial = MaterialHelper.CreateTemp(lineShader, "Line");
-            }
-        }
-
-        protected abstract void Draw();
-    }
-
-    public abstract class DebugDraw<T> : MonoBehaviour, IDebug where T : class
-    {
-        public T Planet = null;
-        public Shader lineShader = null;
-        public Material lineMaterial = null;
-
-        protected virtual void Start()
-        {
-            if (lineMaterial == null)
-                CreateLineMaterial();
-        }
-
-        protected virtual void OnPostRender()
-        {
-            if (Planet == null) return;
             if (lineMaterial == null) CreateLineMaterial();
 
             Draw();

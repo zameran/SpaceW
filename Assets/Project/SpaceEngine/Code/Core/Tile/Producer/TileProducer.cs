@@ -33,10 +33,10 @@ namespace SpaceEngine.Core.Tile.Producer
         [SerializeField]
         string Name;
 
-        //Does this producer use the gpu 
-        [SerializeField]
-        bool isGPUProducer = true;
-        public bool IsGPUProducer { get { return isGPUProducer; } protected set { isGPUProducer = value; } }
+        /// <summary>
+        /// Does this producer use the GPU?
+        /// </summary>
+        public bool IsGPUProducer = true;
 
         /// <summary>
         /// Layers, that may modify the tile created by this producer and are optional.

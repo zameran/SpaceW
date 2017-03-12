@@ -61,7 +61,8 @@ Shader "SpaceEngine/QuadTestUnlit"
 			#pragma only_renderers d3d11 glcore
 			#pragma vertex vert
 			#pragma fragment frag
-			//#pragma geometry geom //TODO : Move to another shader, vert - move vertices, geom - debug lines, frag - debug lines coloring.
+			//#pragma geometry geom 
+			// TODO : Move to another shader, vert - move vertices, geom - debug lines, frag - debug lines coloring.
 
 			#pragma fragmentoption ARB_precision_hint_fastest
 
@@ -314,7 +315,7 @@ Shader "SpaceEngine/QuadTestUnlit"
 				o.uv0 = v.texcoord;
 				o.normal0 =  mul(_TRS, v.normal);
 				o.vertex0 = mul(UNITY_MATRIX_MVP, v.vertex);
-				o.vertex1 = mul(unity_ObjectToWorld, v.vertex); //TODO : Apply Origin vector. //NOTE : Bug here!!!!!111
+				o.vertex1 = mul(unity_ObjectToWorld, v.vertex); // TODO : Apply Origin vector. //NOTE : Bug here!!!!!111
 				o.vertex2 = v.vertex;
 				o.vertex3 = cubePosition;
 				o.tangent0 = v.tangent;
@@ -409,7 +410,7 @@ Shader "SpaceEngine/QuadTestUnlit"
 		triplanar += (triplanarVector.z * qt3);
 		*/
 
-		//TODO : Shadow pass...
+		// TODO : Shadow pass...
 		Pass
 		{
 			Name "ShadowCaster"

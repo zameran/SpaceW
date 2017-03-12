@@ -151,13 +151,13 @@ namespace SpaceEngine.Core.Tile.Cache
         /// If anyone of the storages runs out of slots then null will be returned and the program should abort if this happens.
         /// </summary>
         /// <returns>New <see cref="Storage.TileStorage.Slot"/> instance.</returns>
-        List<TileStorage.Slot> NewSlot()
+        List<TileStorage.Slot> AddSlot()
         {
             var slots = new List<TileStorage.Slot>();
 
             foreach (var storage in TileStorage)
             {
-                var slot = storage.NewSlot();
+                var slot = storage.AddSlot();
 
                 if (slot == null) return null;
 
@@ -196,7 +196,7 @@ namespace SpaceEngine.Core.Tile.Cache
                 // If tile is also not in the unused cache
                 if (!UnusedTiles.ContainsKey(id))
                 {
-                    List<TileStorage.Slot> slot = NewSlot();
+                    List<TileStorage.Slot> slot = AddSlot();
 
                     // If there are no more free slots then start recyling slots from the unused tiles
                     if (slot == null && !UnusedTiles.Empty())

@@ -33,7 +33,6 @@
 // Creator: zameran
 #endregion
 
-using System;
 using UnityEngine;
 
 public static class BufferHelper
@@ -81,27 +80,10 @@ public static class BufferHelper
         }
     }
 
-    public static void ReleaseAndDisposeQuadBuffers(Quad quad)
-    {
-        ReleaseAndDisposeBuffers(quad.QuadGenerationConstantsBuffer, quad.PreOutDataBuffer, quad.PreOutDataSubBuffer, quad.OutDataBuffer);
-    }
-
-    public static void ReleaseQuadBuffers(Quad quad)
-    {
-        ReleaseBuffers(quad.QuadGenerationConstantsBuffer, quad.PreOutDataBuffer, quad.PreOutDataSubBuffer, quad.OutDataBuffer);
-    }
-
-    public static void GetData(this ComputeBuffer buffer, Array data, Action onGetDataAction)
-    {
-        buffer.GetData(data);
-
-        if (onGetDataAction != null)
-            onGetDataAction();
-    }
-
     public static void TransferData<T>(ComputeBuffer from, ComputeBuffer to)
     {
-        T[] data = new T[from.count];
+        var data = new T[from.count];
+
         from.GetData(data);
         to.SetData(data);
     }

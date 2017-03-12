@@ -7,7 +7,7 @@ namespace SpaceEngine.Core.Terrain
     /// </summary>
     public class QuadTree
     {
-        //TODO - make members private?
+        // TODO - make members private?
 
         /// <summary>
         /// Is a tile is needed for this quad?

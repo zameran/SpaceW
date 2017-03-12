@@ -1,4 +1,6 @@
-﻿
+﻿using SpaceEngine.AtmosphericScattering;
+using SpaceEngine.Core.Bodies;
+
 using UnityEngine;
 
 namespace SpaceEngine.Ocean
@@ -111,6 +113,21 @@ namespace SpaceEngine.Ocean
                 if (FourierBuffer6 != null) if (FourierBuffer6[i] != null) FourierBuffer6[i].Release();
                 if (FourierBuffer7 != null) if (FourierBuffer7[i] != null) FourierBuffer7[i].Release();
             }
+        }
+
+        #endregion
+
+        #region Events
+
+        protected override void OnAtmosphereBaked(CelestialBody celestialBody, Atmosphere atmosphere)
+        {
+            DrawOcean = true;
+
+            UpdateNode();
+
+            DrawOcean = false;
+
+            base.OnAtmosphereBaked(celestialBody, atmosphere);
         }
 
         #endregion

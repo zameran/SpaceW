@@ -79,7 +79,8 @@ namespace SpaceEngine.Core.Terrain
         /// The four subquads of this quad. If this quad is not subdivided, the four values are NULL. 
         /// The subquads are stored in the following order: [BottomLeft, BottomRight, TopLeft, TopRight].
         /// </summary>
-        TerrainQuad[] Children = new TerrainQuad[4];
+        [NonSerialized]
+        public TerrainQuad[] Children = new TerrainQuad[4];
 
         /// <summary>
         /// The visibility of the bounding box of this quad from the current viewer position. 
@@ -102,7 +103,7 @@ namespace SpaceEngine.Core.Terrain
         /// <summary>
         /// This quad is not subdivided?
         /// </summary>
-        public bool IsLeaf { get { return Children[0] == null; } }
+        public bool IsLeaf { get { return Children[0] == null || Children == null; } }
 
         /// <summary> 
         /// Creates a new <see cref="TerrainQuad"/> 
@@ -226,46 +227,7 @@ namespace SpaceEngine.Core.Terrain
                     Subdivide();
                 }
 
-                var order = new int[4];
-                var ox = Owner.LocalCameraPosition.x;
-                var oy = Owner.LocalCameraPosition.y;
-                var cx = Ox + Length / 2.0;
-                var cy = Oy + Length / 2.0;
-
-                if (oy < cy)
-                {
-                    if (ox < cx)
-                    {
-                        order[0] = 0;
-                        order[1] = 1;
-                        order[2] = 2;
-                        order[3] = 3;
-                    }
-                    else
-                    {
-                        order[0] = 1;
-                        order[1] = 0;
-                        order[2] = 3;
-                        order[3] = 2;
-                    }
-                }
-                else
-                {
-                    if (ox < cx)
-                    {
-                        order[0] = 2;
-                        order[1] = 0;
-                        order[2] = 3;
-                        order[3] = 1;
-                    }
-                    else
-                    {
-                        order[0] = 3;
-                        order[1] = 1;
-                        order[2] = 2;
-                        order[3] = 0;
-                    }
-                }
+                var order = CalculateOrder(Owner.LocalCameraPosition.x, Owner.LocalCameraPosition.y, Ox + Length / 2.0, Oy + Length / 2.0);
 
                 Children[order[0]].UpdateLOD();
                 Children[order[1]].UpdateLOD();
@@ -295,12 +257,54 @@ namespace SpaceEngine.Core.Terrain
             }
         }
 
+        public byte[] CalculateOrder(double cameraX, double cameraY, double quadX, double quadY)
+        {
+            var order = new byte[4];
+
+            if (cameraY < quadY)
+            {
+                if (cameraX < quadX)
+                {
+                    order[0] = 0;
+                    order[1] = 1;
+                    order[2] = 2;
+                    order[3] = 3;
+                }
+                else
+                {
+                    order[0] = 1;
+                    order[1] = 0;
+                    order[2] = 3;
+                    order[3] = 2;
+                }
+            }
+            else
+            {
+                if (cameraX < quadX)
+                {
+                    order[0] = 2;
+                    order[1] = 0;
+                    order[2] = 3;
+                    order[3] = 1;
+                }
+                else
+                {
+                    order[0] = 3;
+                    order[1] = 1;
+                    order[2] = 2;
+                    order[3] = 0;
+                }
+            }
+
+            return order;
+        }
+
         /// <summary>
         /// Creates the four subquads of this quad.
         /// </summary>
         private void Subdivide()
         {
-            var hl = (float)Length / 2.0f;
+            var hl = Length / 2.0;
 
             Children[0] = new TerrainQuad(Owner, this, 2 * Tx, 2 * Ty, Ox, Oy, hl, ZMin, ZMax);
             Children[1] = new TerrainQuad(Owner, this, 2 * Tx + 1, 2 * Ty, Ox + hl, Oy, hl, ZMin, ZMax);

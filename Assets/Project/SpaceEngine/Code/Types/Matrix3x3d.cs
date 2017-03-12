@@ -25,16 +25,14 @@
 
 namespace UnityEngine
 {
-    public class Matrix3x3d
+    public struct Matrix3x3d
     {
-        public double[,] m = new double[3, 3];
-
-        public Matrix3x3d()
-        {
-        }
+        public double[,] m;
 
         public Matrix3x3d(double m00, double m01, double m02, double m10, double m11, double m12, double m20, double m21, double m22)
         {
+            m = new double[3, 3];
+
             m[0, 0] = m00;
             m[0, 1] = m01;
             m[0, 2] = m02;
@@ -46,23 +44,13 @@ namespace UnityEngine
             m[2, 2] = m22;
         }
 
-        public Matrix3x3d(double[,] m)
-        {
-            System.Array.Copy(m, this.m, 9);
-        }
-
-        public Matrix3x3d(Matrix3x3d m)
-        {
-            System.Array.Copy(m.m, this.m, 9);
-        }
-
         public static Matrix3x3d operator +(Matrix3x3d m1, Matrix3x3d m2)
         {
-            var kSum = new Matrix3x3d();
+            var kSum = Matrix3x3d.identity;
 
-            for (int iRow = 0; iRow < 3; iRow++)
+            for (byte iRow = 0; iRow < 3; iRow++)
             {
-                for (int iCol = 0; iCol < 3; iCol++)
+                for (byte iCol = 0; iCol < 3; iCol++)
                 {
                     kSum.m[iRow, iCol] = m1.m[iRow, iCol] + m2.m[iRow, iCol];
                 }
@@ -73,11 +61,11 @@ namespace UnityEngine
 
         public static Matrix3x3d operator -(Matrix3x3d m1, Matrix3x3d m2)
         {
-            var kSum = new Matrix3x3d();
+            var kSum = Matrix3x3d.identity;
 
-            for (int iRow = 0; iRow < 3; iRow++)
+            for (byte iRow = 0; iRow < 3; iRow++)
             {
-                for (int iCol = 0; iCol < 3; iCol++)
+                for (byte iCol = 0; iCol < 3; iCol++)
                 {
                     kSum.m[iRow, iCol] = m1.m[iRow, iCol] - m2.m[iRow, iCol];
                 }
@@ -88,11 +76,11 @@ namespace UnityEngine
 
         public static Matrix3x3d operator *(Matrix3x3d m1, Matrix3x3d m2)
         {
-            var kProd = new Matrix3x3d();
+            var kProd = Matrix3x3d.identity;
 
-            for (int iRow = 0; iRow < 3; iRow++)
+            for (byte iRow = 0; iRow < 3; iRow++)
             {
-                for (int iCol = 0; iCol < 3; iCol++)
+                for (byte iCol = 0; iCol < 3; iCol++)
                 {
                     kProd.m[iRow, iCol] = m1.m[iRow, 0] * m2.m[0, iCol] + m1.m[iRow, 1] * m2.m[1, iCol] + m1.m[iRow, 2] * m2.m[2, iCol];
                 }
@@ -114,11 +102,11 @@ namespace UnityEngine
 
         public static Matrix3x3d operator *(Matrix3x3d m, double s)
         {
-            var kProd = new Matrix3x3d();
+            var kProd = Matrix3x3d.identity;
 
-            for (int iRow = 0; iRow < 3; iRow++)
+            for (byte iRow = 0; iRow < 3; iRow++)
             {
-                for (int iCol = 0; iCol < 3; iCol++)
+                for (byte iCol = 0; iCol < 3; iCol++)
                 {
                     kProd.m[iRow, iCol] = m.m[iRow, iCol] * s;
                 }
@@ -127,20 +115,20 @@ namespace UnityEngine
             return kProd;
         }
 
-        //Functions
-
         public override string ToString()
         {
-            return m[0, 0] + "," + m[0, 1] + "," + m[0, 2] + "\n" + m[1, 0] + "," + m[1, 1] + "," + m[1, 2] + "\n" + m[2, 0] + "," + m[2, 1] + "," + m[2, 2];
+            return m[0, 0] + "," + m[0, 1] + "," + m[0, 2] + "\n" +
+                   m[1, 0] + "," + m[1, 1] + "," + m[1, 2] + "\n" +
+                   m[2, 0] + "," + m[2, 1] + "," + m[2, 2];
         }
 
         public Matrix3x3d Transpose()
         {
-            var kTranspose = new Matrix3x3d();
+            var kTranspose = Matrix3x3d.identity;
 
-            for (int iRow = 0; iRow < 3; iRow++)
+            for (byte iRow = 0; iRow < 3; iRow++)
             {
-                for (int iCol = 0; iCol < 3; iCol++)
+                for (byte iCol = 0; iCol < 3; iCol++)
                 {
                     kTranspose.m[iRow, iCol] = m[iCol, iRow];
                 }
@@ -184,10 +172,12 @@ namespace UnityEngine
 
             var fInvDet = 1.0 / fDet;
 
-            for (int iRow = 0; iRow < 3; iRow++)
+            for (byte iRow = 0; iRow < 3; iRow++)
             {
-                for (int iCol = 0; iCol < 3; iCol++)
+                for (byte iCol = 0; iCol < 3; iCol++)
+                {
                     mInv.m[iRow, iCol] *= fInvDet;
+                }
             }
 
             return true;
@@ -196,7 +186,7 @@ namespace UnityEngine
         //public Matrix3x3d Inverse(double tolerance = 1e-06)
         public Matrix3x3d Inverse(double tolerance)
         {
-            var kInverse = new Matrix3x3d();
+            var kInverse = Matrix3x3d.identity;
 
             Inverse(ref kInverse, tolerance);
 
@@ -251,9 +241,6 @@ namespace UnityEngine
             return mat;
         }
 
-        public static Matrix3x3d Identity()
-        {
-            return new Matrix3x3d(1, 0, 0, 0, 1, 0, 0, 0, 1);
-        }
+        public static Matrix3x3d identity { get { return new Matrix3x3d(1, 0, 0, 0, 1, 0, 0, 0, 1); } }
     }
 }

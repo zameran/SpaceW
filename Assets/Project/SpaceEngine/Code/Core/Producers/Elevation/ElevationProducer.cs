@@ -1,6 +1,5 @@
 ﻿using SpaceEngine.Core.Bodies;
 using SpaceEngine.Core.Exceptions;
-using SpaceEngine.Core.Noise;
 using SpaceEngine.Core.Storage;
 using SpaceEngine.Core.Terrain;
 using SpaceEngine.Core.Tile.Producer;
@@ -22,14 +21,6 @@ namespace SpaceEngine.Core
     /// </summary>
     public class ElevationProducer : TileProducer
     {
-        [Serializable]
-        public class NoiseSettings
-        {
-            public float Freqeuncy = 40.0f;
-            public float Amplitude = 1.0f;
-            public int Seed = 0;
-        }
-
         public class Uniforms
         {
             public int tileWSD, coarseLevelSampler, coarseLevelOSL;
@@ -44,7 +35,7 @@ namespace SpaceEngine.Core
                 offset = Shader.PropertyToID("_Offset");
                 localToWorld = Shader.PropertyToID("_LocalToWorld");
                 frequency = Shader.PropertyToID("_Frequency");
-                amp = Shader.PropertyToID("_Amp");
+                amp = Shader.PropertyToID("_Amplitude");
                 residualOSH = Shader.PropertyToID("_ResidualOSH");
                 residualSampler = Shader.PropertyToID("_ResidualSampler");
             }
@@ -54,14 +45,9 @@ namespace SpaceEngine.Core
         Material UpSampleMaterial;
 
         [SerializeField]
-        NoiseSettings UpsampleSettings;
-
-        [SerializeField]
         float[] NoiseAmplitudes = new float[] { -3250.0f, -1590.0f, -1125.0f, -795.0f, -561.0f, -397.0f, -140.0f, -100.0f, 15.0f, 8.0f, 5.0f, 2.5f, 1.5f, 1.0f };
 
         public float AmplitudeDiviner = 1.0f;
-
-        ImprovedPerlinNoise Noise;
 
         Uniforms uniforms;
 
@@ -92,11 +78,6 @@ namespace SpaceEngine.Core
             }
 
             uniforms = new Uniforms();
-
-            Noise = new ImprovedPerlinNoise(UpsampleSettings.Seed);
-            Noise.LoadResourcesFor3DNoise();
-            UpSampleMaterial.SetTexture("_PermTable2D", Noise.GetPermutationTable2D());
-            UpSampleMaterial.SetTexture("_Gradient3D", Noise.GetGradient3D());
         }
 
         protected override void OnDestroy()
@@ -174,22 +155,25 @@ namespace SpaceEngine.Core
             var rs = level < NoiseAmplitudes.Length ? NoiseAmplitudes[level] : 0.0f;
 
             rs = rs / AmplitudeDiviner;
-            rs = -Math.Abs(rs);
 
-            var offset = Vector4d.Zero();
+            var offset = Vector4d.zero;
 
             offset.x = ((double)tx / (1 << level) - 0.5) * rootQuadSize;
             offset.y = ((double)ty / (1 << level) - 0.5) * rootQuadSize;
             offset.z = rootQuadSize / (1 << level);
             offset.w = TerrainNode.Body.Radius;
 
-            if (level == 0) UpSampleMaterial.SetFloat(uniforms.frequency, UpsampleSettings.Freqeuncy * (1 << level));
+            //if (level == 0) UpSampleMaterial.SetFloat(uniforms.frequency, TerrainNode.Body.Frequency * (1 << level));
 
             var ltow = TerrainNode.FaceToLocal.ToMatrix4x4();
 
-            UpSampleMaterial.SetFloat(uniforms.amp, rs * UpsampleSettings.Amplitude);
+            UpSampleMaterial.SetFloat(uniforms.amp, rs * TerrainNode.Body.Amplitude);
+            UpSampleMaterial.SetFloat(uniforms.frequency, TerrainNode.Body.Frequency);
             UpSampleMaterial.SetVector(uniforms.offset, offset.ToVector4());
             UpSampleMaterial.SetMatrix(uniforms.localToWorld, ltow);
+
+            if (TerrainNode.Body.NPS != null) TerrainNode.Body.NPS.SetUniforms(UpSampleMaterial);
+            if (TerrainNode.Body.TCCPS != null) TerrainNode.Body.TCCPS.UpdateUniforms(UpSampleMaterial);
 
             Graphics.Blit(null, gpuSlot.Texture, UpSampleMaterial);
 

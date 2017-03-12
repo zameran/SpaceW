@@ -33,7 +33,6 @@
 // Creator: zameran
 #endregion
 
-
 using UnityEngine;
 
 namespace SpaceEngine.Debugging
@@ -63,23 +62,7 @@ namespace SpaceEngine.Debugging
 
             GUILayout.BeginVertical();
 
-            GUILayout.Label("Misc: ", boldLabel);
-
-            GUILayoutExtensions.LabelWithSpace("Quads culling method: " + GodManager.Instance.CullingMethod, 0);
-            GodManager.Instance.CullingMethod = (QuadCullingMethod)GUILayout.SelectionGrid((int)GodManager.Instance.CullingMethod, System.Enum.GetNames(typeof(QuadCullingMethod)), 3);
-
-            GUILayoutExtensions.LabelWithSpace("Quads LOD distance method: " + GodManager.Instance.LODDistanceMethod.ToString(), 0);
-            GodManager.Instance.LODDistanceMethod = (QuadLODDistanceMethod)GUILayout.SelectionGrid((int)GodManager.Instance.LODDistanceMethod, System.Enum.GetNames(typeof(QuadLODDistanceMethod)), 3);
-
-            GUILayout.Space(10);
-
-            GUILayout.Label("LOD Distance Multiplier: " + GodManager.Instance.LODDistanceMultiplier);
-            GUILayout.BeginHorizontal();
-            GodManager.Instance.LODDistanceMultiplier = GUILayout.HorizontalSlider(GodManager.Instance.LODDistanceMultiplier, 0.75f, 3.25f);
-            if (GUILayout.Button("Reset")) GodManager.Instance.LODDistanceMultiplier = 1.0f;
-            GUILayout.EndHorizontal();
-
-            GUILayout.Space(10);
+            GUILayout.Label("Rendering: ", boldLabel);
 
             GUILayout.Label("HDR: ");
             GodManager.Instance.HDRMode = (AtmosphereHDR)GUILayout.SelectionGrid((int)GodManager.Instance.HDRMode, System.Enum.GetNames(typeof(AtmosphereHDR)), 2);

@@ -25,16 +25,14 @@
 
 namespace UnityEngine
 {
-    public class Matrix3x3
+    public struct Matrix3x3
     {
-        public float[,] m = new float[3, 3];
-
-        public Matrix3x3()
-        {
-        }
+        public float[,] m;
 
         public Matrix3x3(float m00, float m01, float m02, float m10, float m11, float m12, float m20, float m21, float m22)
         {
+            m = new float[3, 3];
+
             m[0, 0] = m00;
             m[0, 1] = m01;
             m[0, 2] = m02;
@@ -44,26 +42,15 @@ namespace UnityEngine
             m[2, 0] = m20;
             m[2, 1] = m21;
             m[2, 2] = m22;
-
-        }
-
-        public Matrix3x3(float[,] m)
-        {
-            System.Array.Copy(m, this.m, 9);
-        }
-
-        public Matrix3x3(Matrix3x3 m)
-        {
-            System.Array.Copy(m.m, this.m, 9);
         }
 
         public static Matrix3x3 operator +(Matrix3x3 m1, Matrix3x3 m2)
         {
-            var kSum = new Matrix3x3();
+            var kSum = Matrix3x3.identity;
 
-            for (int iRow = 0; iRow < 3; iRow++)
+            for (byte iRow = 0; iRow < 3; iRow++)
             {
-                for (int iCol = 0; iCol < 3; iCol++)
+                for (byte iCol = 0; iCol < 3; iCol++)
                 {
                     kSum.m[iRow, iCol] = m1.m[iRow, iCol] + m2.m[iRow, iCol];
                 }
@@ -74,11 +61,11 @@ namespace UnityEngine
 
         public static Matrix3x3 operator -(Matrix3x3 m1, Matrix3x3 m2)
         {
-            var kSum = new Matrix3x3();
+            var kSum = Matrix3x3.identity;
 
-            for (int iRow = 0; iRow < 3; iRow++)
+            for (byte iRow = 0; iRow < 3; iRow++)
             {
-                for (int iCol = 0; iCol < 3; iCol++)
+                for (byte iCol = 0; iCol < 3; iCol++)
                 {
                     kSum.m[iRow, iCol] = m1.m[iRow, iCol] - m2.m[iRow, iCol];
                 }
@@ -89,11 +76,11 @@ namespace UnityEngine
 
         public static Matrix3x3 operator *(Matrix3x3 m1, Matrix3x3 m2)
         {
-            var kProd = new Matrix3x3();
+            var kProd = Matrix3x3.identity;
 
-            for (int iRow = 0; iRow < 3; iRow++)
+            for (byte iRow = 0; iRow < 3; iRow++)
             {
-                for (int iCol = 0; iCol < 3; iCol++)
+                for (byte iCol = 0; iCol < 3; iCol++)
                 {
                     kProd.m[iRow, iCol] = m1.m[iRow, 0] * m2.m[0, iCol] + m1.m[iRow, 1] * m2.m[1, iCol] + m1.m[iRow, 2] * m2.m[2, iCol];
                 }
@@ -116,11 +103,11 @@ namespace UnityEngine
 
         public static Matrix3x3 operator *(Matrix3x3 m, float s)
         {
-            var kProd = new Matrix3x3();
+            var kProd = Matrix3x3.identity;
 
-            for (int iRow = 0; iRow < 3; iRow++)
+            for (byte iRow = 0; iRow < 3; iRow++)
             {
-                for (int iCol = 0; iCol < 3; iCol++)
+                for (byte iCol = 0; iCol < 3; iCol++)
                 {
                     kProd.m[iRow, iCol] = m.m[iRow, iCol] * s;
                 }
@@ -136,11 +123,11 @@ namespace UnityEngine
 
         public Matrix3x3 Transpose()
         {
-            var kTranspose = new Matrix3x3();
+            var kTranspose = Matrix3x3.identity;
 
-            for (int iRow = 0; iRow < 3; iRow++)
+            for (byte iRow = 0; iRow < 3; iRow++)
             {
-                for (int iCol = 0; iCol < 3; iCol++)
+                for (byte iCol = 0; iCol < 3; iCol++)
                 {
                     kTranspose.m[iRow, iCol] = m[iCol, iRow];
                 }
@@ -158,8 +145,7 @@ namespace UnityEngine
             return m[0, 0] * fCofactor00 + m[0, 1] * fCofactor10 + m[0, 2] * fCofactor20;
         }
 
-        //public bool Inverse(ref Matrix3x3 mInv, float tolerance = 1e-06f)
-        public bool Inverse(ref Matrix3x3 mInv, float tolerance)
+        public bool Inverse(ref Matrix3x3 mInv, float tolerance = 1e-06f)
         {
             // Invert a 3x3 using cofactors.  This is about 8 times faster than
             // the Numerical Recipes code which uses Gaussian elimination.
@@ -182,19 +168,21 @@ namespace UnityEngine
 
             float fInvDet = 1.0f / fDet;
 
-            for (int iRow = 0; iRow < 3; iRow++)
+            for (byte iRow = 0; iRow < 3; iRow++)
             {
-                for (int iCol = 0; iCol < 3; iCol++)
+                for (byte iCol = 0; iCol < 3; iCol++)
+                {
                     mInv.m[iRow, iCol] *= fInvDet;
+                }
             }
 
             return true;
         }
 
         //public Matrix3x3 Inverse(float tolerance = 1e-06f)
-        public Matrix3x3 Inverse(float tolerance)
+        public Matrix3x3 Inverse(float tolerance = 1e-06f)
         {
-            var kInverse = new Matrix3x3();
+            var kInverse = Matrix3x3.identity;
 
             Inverse(ref kInverse, tolerance);
 
@@ -240,7 +228,6 @@ namespace UnityEngine
                 m22 = m[2, 2]
             };
 
-
             return mat;
         }
 
@@ -253,9 +240,6 @@ namespace UnityEngine
             return (z * y * x).ToMatrix3x3();
         }
 
-        public static Matrix3x3 Identity()
-        {
-            return new Matrix3x3(1, 0, 0, 0, 1, 0, 0, 0, 1);
-        }
+        public static Matrix3x3 identity { get { return new Matrix3x3(1, 0, 0, 0, 1, 0, 0, 0, 1); } }
     }
 }

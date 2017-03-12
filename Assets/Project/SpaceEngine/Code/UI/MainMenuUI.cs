@@ -33,10 +33,9 @@
 // Creator: zameran
 #endregion
 
+using SpaceEngine.Pluginator;
 using UnityEngine;
 using UnityEngine.UI;
-
-using SpaceEngine.Pluginator;
 
 public sealed class MainMenuUI : UserInterface, IUserInterface
 {
@@ -71,7 +70,7 @@ public sealed class MainMenuUI : UserInterface, IUserInterface
                         AddToScrollView(addonsItemPrefab, addonsScrollView, assembly.Name, assembly.Version);
                     else
                     {
-                        //TODO : Logging...
+                        // TODO : Logging...
                     }
                 }
             }

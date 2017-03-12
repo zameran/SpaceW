@@ -43,13 +43,13 @@ public sealed class AddonItemUI : MonoBehaviour
 
     public void SetCaption(Text textHandler, string caption)
     {
-        if(textHandler != null)
+        if (textHandler != null)
         {
             textHandler.text = caption;
         }
         else
         {
-            //TODO : Logging
+            // TODO : Logging
         }
     }
 }

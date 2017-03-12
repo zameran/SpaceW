@@ -39,11 +39,11 @@ using UnityEngine;
 
 public static class GUILayoutExtensions
 {
-    public static void LabelWithFlexibleSpace(string text1, string text2)
+    public static void LabelWithFlexibleSpace(object text1, object text2)
     {
-        GUILayout.Label(text1);
+        GUILayout.Label(text1.ToString());
         GUILayout.FlexibleSpace();
-        GUILayout.Label(text2);
+        GUILayout.Label(text2.ToString());
     }
 
     public static void LabelWithSpace(string text, int space = -8)

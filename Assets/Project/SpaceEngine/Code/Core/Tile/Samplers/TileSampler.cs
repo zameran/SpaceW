@@ -364,6 +364,12 @@ namespace SpaceEngine.Core.Tile.Samplers
                 return;
             }
 
+            if (gpuSlot.Texture == null)
+            {
+                Debug.Log("Null gpuSlot.Texture!");
+                return;
+            }
+
             float w = gpuSlot.Texture.width;
             float h = gpuSlot.Texture.height;
 

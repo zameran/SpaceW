@@ -62,7 +62,7 @@ namespace SpaceEngine.Debugging
 
             Vector3[] nearCorners = new Vector3[4]; //Approx'd nearplane corners
             Vector3[] farCorners = new Vector3[4]; //Approx'd farplane corners
-            Plane[] camPlanes = GodManager.Instance.FrustumPlanes;
+            Plane[] camPlanes = GeometryUtility.CalculateFrustumPlanes(GodManager.Instance.ScreenToCamera); // NOTE : CameraToScreen
 
             Plane temp = camPlanes[1];
             camPlanes[1] = camPlanes[2];

@@ -150,13 +150,11 @@ Shader "SpaceEngine/Atmosphere/Atmosphere"
 				float3 extinction = 0;
 				float3 inscatter = 0;
 
-				#ifdef ECLIPSES_ON
-					#if SHADOW_1 || SHADOW_2 || SHADOW_3 || SHADOW_4
-						float4 shadow = 1.0;
+				#if SHADOW_1 || SHADOW_2 || SHADOW_3 || SHADOW_4
+					float4 shadow = 1.0;
 
-						shadow = ShadowOuterColor(d, WCP, -_Globals_Origin, Rt);
-						shadow = GroundFade(_ExtinctionGroundFade, shadow);
-					#endif
+					shadow = ShadowOuterColor(d, WCP, -_Globals_Origin, Rt);
+					shadow = GroundFade(_ExtinctionGroundFade, shadow);
 				#endif
 
 				#ifdef LIGHT_1
@@ -180,10 +178,10 @@ Shader "SpaceEngine/Atmosphere/Atmosphere"
 
 					#ifdef ECLIPSES_ON
 						inscatter *= eclipse1;
+					#endif
 
-						#if SHADOW_1 || SHADOW_2 || SHADOW_3 || SHADOW_4
-							inscatter *= shadow;
-						#endif
+					#if SHADOW_1 || SHADOW_2 || SHADOW_3 || SHADOW_4
+						inscatter *= shadow;
 					#endif
 
 					#ifdef SHINE_ON
@@ -227,10 +225,10 @@ Shader "SpaceEngine/Atmosphere/Atmosphere"
 					#ifdef ECLIPSES_ON
 						inscatter *= eclipse1;
 						inscatter *= eclipse2;
+					#endif
 
-						#if SHADOW_1 || SHADOW_2 || SHADOW_3 || SHADOW_4
-							inscatter *= shadow;
-						#endif
+					#if SHADOW_1 || SHADOW_2 || SHADOW_3 || SHADOW_4
+						inscatter *= shadow;
 					#endif
 
 					#ifdef SHINE_ON
@@ -290,10 +288,10 @@ Shader "SpaceEngine/Atmosphere/Atmosphere"
 						inscatter *= eclipse1;
 						inscatter *= eclipse2;
 						inscatter *= eclipse3;
+					#endif
 
-						#if SHADOW_1 || SHADOW_2 || SHADOW_3 || SHADOW_4
-							inscatter *= shadow;
-						#endif
+					#if SHADOW_1 || SHADOW_2 || SHADOW_3 || SHADOW_4
+						inscatter *= shadow;
 					#endif
 
 					#ifdef SHINE_ON
@@ -357,10 +355,10 @@ Shader "SpaceEngine/Atmosphere/Atmosphere"
 						inscatter *= eclipse2;
 						inscatter *= eclipse3;
 						inscatter *= eclipse4;
+					#endif
 
-						#if SHADOW_1 || SHADOW_2 || SHADOW_3 || SHADOW_4
-							inscatter *= shadow;
-						#endif
+					#if SHADOW_1 || SHADOW_2 || SHADOW_3 || SHADOW_4
+						inscatter *= shadow;
 					#endif
 
 					#ifdef SHINE_ON

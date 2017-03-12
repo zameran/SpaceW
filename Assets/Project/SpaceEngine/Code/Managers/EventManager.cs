@@ -1,4 +1,5 @@
 ﻿using SpaceEngine.AtmosphericScattering;
+using SpaceEngine.Core.Bodies;
 
 using System;
 
@@ -6,17 +7,13 @@ using UnityEngine;
 
 public static class EventManager
 {
-    public static PlanetoidEvents PlanetoidEvents = new PlanetoidEvents();
+    public static CelestialBodyEvents CelestialBodyEvents = new CelestialBodyEvents();
 }
 
-public sealed class PlanetoidEvents
+public sealed class CelestialBodyEvents
 {
-    public EventHolder<Planetoid, Atmosphere> OnAtmosphereBaked = new EventHolder<Planetoid, Atmosphere>();
-    public EventHolder<Planetoid, Atmosphere> OnAtmospherePresetChanged = new EventHolder<Planetoid, Atmosphere>();
-
-    public EventHolder<Planetoid, Quad> OnDispatchStarted = new EventHolder<Planetoid, Quad>();
-    public EventHolder<Planetoid, Quad> OnDispatchEnd = new EventHolder<Planetoid, Quad>();
-    public EventHolder<Planetoid, Quad> OnDispatchFinished = new EventHolder<Planetoid, Quad>();
+    public EventHolder<CelestialBody, Atmosphere> OnAtmosphereBaked = new EventHolder<CelestialBody, Atmosphere>();
+    public EventHolder<CelestialBody, Atmosphere, AtmosphereBase> OnAtmospherePresetChanged = new EventHolder<CelestialBody, Atmosphere, AtmosphereBase>();
 }
 
 #region Event Holders

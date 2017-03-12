@@ -33,8 +33,11 @@
 // Creator: zameran
 #endregion
 
+using SpaceEngine.Core.Bodies;
 using SpaceEngine.Core.Utilities;
 using SpaceEngine.Startfield;
+
+using System.Linq;
 
 using UnityEngine;
 
@@ -43,34 +46,24 @@ using ZFramework.Unity.Common.Messenger;
 [ExecutionOrder(-9999)]
 public class GodManager : MonoSingleton<GodManager>
 {
-    public Plane[] FrustumPlanes;
-    public FrustumPlane[] FrustumPlanesTS;
-    public Mesh PrototypeMesh;
+    public TerrainView View;
+    public Controller Controller;
 
     public ComputeShader WriteData;
     public ComputeShader ReadData;
 
-    public OutputStruct[] PreOutputDataBuffer;
-    public OutputStruct[] PreOutputSubDataBuffer;
-    public OutputStruct[] OutputDataBuffer;
+    public CelestialBody ActiveBody { get { return Bodies.FirstOrDefault(); } }
 
-    public bool Debug = true;
-    public bool UpdateFrustumPlanesNow = true;
-
-    public Planetoid[] Planetoids;
+    public CelestialBody[] Bodies;
     public Starfield[] Starfields;
 
-    public QuadLODDistanceMethod LODDistanceMethod = QuadLODDistanceMethod.ClosestAABBCorner;
-    public QuadCullingMethod CullingMethod = QuadCullingMethod.Unity;
     public AtmosphereHDR HDRMode = AtmosphereHDR.ProlandOptimized;
 
-    public Matrix4x4 WorldToCamera { get; private set; }
-    public Matrix4x4 CameraToWorld { get; private set; }
-    public Matrix4x4 CameraToScreen { get; private set; }
-    public Matrix4x4 ScreenToCamera { get; private set; }
-    public Vector3 WorldCameraPos { get; private set; }
-
-    public float LODDistanceMultiplier = 2.0f;
+    public Matrix4x4d WorldToCamera { get { return View.WorldToCameraMatrix; } }
+    public Matrix4x4d CameraToWorld { get { return View.CameraToWorldMatrix; } }
+    public Matrix4x4d CameraToScreen { get { return View.CameraToScreenMatrix; } }
+    public Matrix4x4d ScreenToCamera { get { return View.ScreenToCameraMatrix; } }
+    public Vector3 WorldCameraPos { get { return View.WorldCameraPosition; } }
 
     public bool Eclipses = true;
     public bool Planetshine = true;
@@ -81,43 +74,21 @@ public class GodManager : MonoSingleton<GodManager>
     {
         Instance = this;
 
-        Messenger.Setup(Debug);
+        Messenger.Setup(true);
 
-        Planetoids = FindObjectsOfType<Planetoid>();
+        Bodies = FindObjectsOfType<CelestialBody>();
         Starfields = FindObjectsOfType<Starfield>();
-
-        UpdateFrustumPlanes();
-
-        if (PrototypeMesh == null)
-        {
-            PrototypeMesh = MeshFactory.SetupQuadMesh();
-        }
-
-        PreOutputDataBuffer = new OutputStruct[QuadSettings.VerticesWithBorder];
-        PreOutputSubDataBuffer = new OutputStruct[QuadSettings.VerticesWithBorderFull];
-        OutputDataBuffer = new OutputStruct[QuadSettings.Vertices];
-
-        UpdateSettings();
     }
 
     private void Update()
     {
         UpdateSchedular();
-        UpdateViewer();
-
-        if (UpdateFrustumPlanesNow)
-        {
-            UpdateFrustumPlanes();
-        }
-
-        UpdateSettings();
+        UpdateHeightZ();
     }
 
     protected override void OnDestroy()
     {
         base.OnDestroy();
-
-        Helper.Destroy(PrototypeMesh);
     }
 
     private void UpdateSchedular()
@@ -125,82 +96,15 @@ public class GodManager : MonoSingleton<GodManager>
         Schedular.Instance.Run();
     }
 
-    private void UpdateViewer()
+    private void UpdateHeightZ()
     {
-        WorldToCamera = CameraHelper.Main().GetWorldToCamera();
-        CameraToWorld = CameraHelper.Main().GetCameraToWorld();
-        CameraToScreen = CameraHelper.Main().GetCameraToScreen();
-        ScreenToCamera = CameraHelper.Main().GetScreenToCamera();
-        WorldCameraPos = CameraHelper.Main().transform.position;
-    }
-
-    private void UpdateFrustumPlanes()
-    {
-        if (CameraHelper.Main() != null)
+        if (ActiveBody != null)
         {
-            FrustumPlanes = GeometryUtility.CalculateFrustumPlanes(CameraHelper.Main());
-            FrustumPlanesTS = new FrustumPlane[FrustumPlanes.Length];
-
-            for (byte i = 0; i < FrustumPlanes.Length; i++)
-            {
-                FrustumPlanesTS[i] = FrustumPlanes[i];
-            }
-        }
-    }
-
-    private void UpdateCameraCulling(QuadCullingMethod currentMethod)
-    {
-        var mainCamera = CameraHelper.Main();
-
-        if (currentMethod == QuadCullingMethod.Unity)
-        {
-            mainCamera.useOcclusionCulling = true;
+            View.GroundHeight = ActiveBody.HeightZ;
         }
         else
         {
-            mainCamera.useOcclusionCulling = false;
-        }
-    }
-
-    private void UpdateSettings()
-    {
-        UpdateCameraCulling(CullingMethod);
-
-        if (Planetoids != null)
-        {
-            if (Planetoids.Length != 0)
-            {
-                for (int i = 0; i < Planetoids.Length; i++)
-                {
-                    if (Planetoids[i] != null)
-                    {
-                        Planetoids[i].CullingMethod = CullingMethod;
-                        Planetoids[i].LODDistanceMultiplier = LODDistanceMultiplier;
-                        Planetoids[i].LODDistanceMethod = LODDistanceMethod;
-
-                        if (Planetoids[i].Atmosphere != null)
-                        {
-                            Planetoids[i].Atmosphere.HDRMode = HDRMode;
-                            Planetoids[i].Atmosphere.Eclipses = Eclipses;
-                            Planetoids[i].Atmosphere.Planetshine = Planetshine;
-                        }
-                    }
-                }
-            }
-        }
-
-        if (Starfields != null)
-        {
-            if (Starfields.Length != 0)
-            {
-                for (int i = 0; i < Starfields.Length; i++)
-                {
-                    if (Starfields[i] != null)
-                    {
-                        Starfields[i].HDRMode = HDRMode;
-                    }
-                }
-            }
+            View.GroundHeight = 0.0f;
         }
     }
 }
