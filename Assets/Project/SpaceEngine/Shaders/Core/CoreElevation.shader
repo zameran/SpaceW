@@ -43,6 +43,7 @@
 
 			float noise = HeightMapPlanet(v) - 1.5;
 			//float noise = HeightMapSelena(v);
+			//float noise = HeightMapTerra(v);
 
 			float height = _Amplitude * noise;
 							
