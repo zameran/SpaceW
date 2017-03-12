@@ -57,7 +57,7 @@
 			float k = min(length(P) / dot(alpha, _Deform_ScreenQuadCornerNorms) * 1.0000003, 1.0);
 			float hPrime = (h + _Deform_Radius * (1.0 - k)) / k;
 
-			//position = mul(_Deform_LocalToScreen, float4(P + float3(0.0, 0.0, h), 1.0));						//CUBE PROJECTION
+			//position = mul(_Deform_LocalToScreen, float4(P + float3(0.0, 0.0, h), 1.0));							//CUBE PROJECTION
 			position = mul(_Deform_ScreenQuadCorners + hPrime * _Deform_ScreenQuadVerticals, alphaPrime);			//SPHERICAL PROJECTION
 			localPosition = (_Deform_Radius + max(h, _Ocean_Level)) * normalize(mul(_Deform_LocalToWorld, P));
 			uv = texcoord;

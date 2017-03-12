@@ -41,6 +41,7 @@
 			float3 p = normalize(mul(_LocalToWorld, P)).xyz;
 			float3 v = p * _Frequency;
 
+			//float noise = HeightMapAsteroid(v);
 			float noise = HeightMapPlanet(v) - 1.5;
 			//float noise = HeightMapSelena(v);
 			//float noise = HeightMapTerra(v);
