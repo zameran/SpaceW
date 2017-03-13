@@ -6,6 +6,8 @@
 
 		#include "UnityCG.cginc"
 
+		#include "../TCCommon.cginc"
+
 		#include "Core.cginc"
 
 		uniform sampler2D _ElevationSampler; 
@@ -65,6 +67,16 @@
 			float z1 = tex2Dlod(_ElevationSampler, float4(uv0.zw, 0.0, 0.0)).x;
 			float z2 = tex2Dlod(_ElevationSampler, float4(uv1.xy, 0.0, 0.0)).x;
 			float z3 = tex2Dlod(_ElevationSampler, float4(uv1.zw, 0.0, 0.0)).x;
+
+			//float z0 = TEX2DLOD(_ElevationSampler, uv0.xy, float2(0.0, 0.0), _TileSD.x).x;
+			//float z1 = TEX2DLOD(_ElevationSampler, uv0.zw, float2(0.0, 0.0), _TileSD.x).x;
+			//float z2 = TEX2DLOD(_ElevationSampler, uv1.xy, float2(0.0, 0.0), _TileSD.x).x;
+			//float z3 = TEX2DLOD(_ElevationSampler, uv1.zw, float2(0.0, 0.0), _TileSD.x).x;
+
+			//float z0 = TEX2DLOD_GOOD(_ElevationSampler, uv0.xy, _TileSD.x).x;
+			//float z1 = TEX2DLOD_GOOD(_ElevationSampler, uv0.zw, _TileSD.x).x;
+			//float z2 = TEX2DLOD_GOOD(_ElevationSampler, uv1.xy, _TileSD.x).x;
+			//float z3 = TEX2DLOD_GOOD(_ElevationSampler, uv1.zw, _TileSD.x).x;
 
 			float3 p0 = GetWorldPosition(uv + float2(-1.0, 0.0), z0).xyz;
 			float3 p1 = GetWorldPosition(uv + float2(+1.0, 0.0), z1).xyz;

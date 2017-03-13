@@ -12,9 +12,9 @@
 			CGPROGRAM
 			#include "UnityCG.cginc"
 
-			#include "Core.cginc"
-
 			#include "../TCCommon.cginc"
+
+			#include "Core.cginc"
 
 			#pragma target 4.0
 

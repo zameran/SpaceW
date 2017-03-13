@@ -6,8 +6,6 @@
 
 		#include "UnityCG.cginc"
 
-		#include "Core.cginc"
-
 		#include "../TCCommon.cginc"
 		#include "../TCAsteroid.cginc"
 		#include "../TCGasgiant.cginc"
@@ -15,6 +13,8 @@
 		#include "../TCSelena.cginc"
 		#include "../TCSun.cginc"
 		#include "../TCTerra.cginc"
+
+		#include "Core.cginc"
 
 		#define BORDER 2.0 
 

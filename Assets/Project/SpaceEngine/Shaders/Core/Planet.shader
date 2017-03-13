@@ -14,8 +14,6 @@
 	{
 		CGINCLUDE
 
-		//#define CUBE_PROJECTION
-
 		#include "Core.cginc"
 
 		uniform float _Ocean_Sigma;

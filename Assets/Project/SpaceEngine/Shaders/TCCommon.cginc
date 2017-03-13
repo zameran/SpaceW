@@ -711,6 +711,76 @@ inline float3 Interpolation_C2_Deriv(float3 x) { return x * x * (x * (x * 30.0 -
 //-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
+// Improved texture interpolation by iq. http://www.iquilezles.org/www/articles/texture/texture.htm
+float4 TEX2D(sampler2D tex, float2 p, float res)
+{
+	p = p * res + 0.5;
+
+	float2 i = floor(p);
+	float2 f = p - i;
+
+	f = f * f * f * (f * (f * 6.0 - 15.0) + 10.0);
+
+	p = i + f;
+	p = (p - 0.5) / res;
+
+	return tex2D(tex, p);
+}
+
+float4 TEX2DLOD(sampler2D tex, float2 p, float2 lod, float res)
+{
+	p = p * res + 0.5;
+
+	float2 i = floor(p);
+	float2 f = p - i;
+
+	f = f * f * f * (f * (f * 6.0 - 15.0) + 10.0);
+
+	p = i + f;
+	p = (p - 0.5) / res;
+
+	return tex2Dlod(tex, float4(p, lod));
+}
+//-----------------------------------------------------------------------------
+
+//-----------------------------------------------------------------------------
+// Improved bilinear interpolated texture fetch by iq. http://www.iquilezles.org/www/articles/hwinterpolation/hwinterpolation.htm
+float4 TEX2D_GOOD(sampler2D tex, float2 uv, float size)
+{
+	float2 res = float2(size, size);
+
+	float2 st = uv * res - 0.5;
+
+	float2 iuv = floor(st);
+	float2 fuv = frac(st);
+
+	float4 a = tex2D(tex, (iuv + float2(0.5, 0.5)) / res);
+	float4 b = tex2D(tex, (iuv + float2(1.5, 0.5)) / res);
+	float4 c = tex2D(tex, (iuv + float2(0.5, 1.5)) / res);
+	float4 d = tex2D(tex, (iuv + float2(1.5, 1.5)) / res);
+
+	return lerp(lerp( a, b, fuv.x), lerp( c, d, fuv.x), fuv.y );
+}
+
+float4 TEX2DLOD_GOOD(sampler2D tex, float2 uv, float size)
+{
+	float2 res = float2(size, size);
+
+	float2 st = uv * res - 0.5;
+
+	float2 iuv = floor(st);
+	float2 fuv = frac(st);
+
+	float4 a = tex2Dlod(tex, float4((iuv + float2(0.5, 0.5)) / res, 0.0, 0.0));
+	float4 b = tex2Dlod(tex, float4((iuv + float2(1.5, 0.5)) / res, 0.0, 0.0));
+	float4 c = tex2Dlod(tex, float4((iuv + float2(0.5, 1.5)) / res, 0.0, 0.0));
+	float4 d = tex2Dlod(tex, float4((iuv + float2(1.5, 1.5)) / res, 0.0, 0.0));
+
+	return lerp(lerp( a, b, fuv.x), lerp( c, d, fuv.x), fuv.y );
+}
+//-----------------------------------------------------------------------------
+
+//-----------------------------------------------------------------------------
 const float4 NOISE_RND_M = float4(1.0, 1.0, 1.0, 1.0);
 const float3 NOISE_OFFSET = float3(0.5, 0.5, 0.5);
 const float3 NOISE_OFFSETOUT = float3(1.5, 1.5, 1.5);
@@ -2531,11 +2601,12 @@ float Cell3NoiseF1F0(float3 p, int octaves, float amp)
 // http://lgdv.cs.fau.de/publications/publication/Pub.2015.tech.IMMD.IMMD9.spheri/
 // Optimized by iq https://www.shadertoy.com/view/lllXz4
 //-----------------------------------------------------------------------------
-#define round(x) floor(x + 0.5)
+#define ROUND(x) floor(x + 0.5)
 //-----------------------------------------------------------------------------
 
 float2 inverseSF(float3 p, float n)
 {
+	p = normalize(p); // TODO : FIX/DEBUG THIS! BAD PORT!
 	const float phi = 1.61803398875;
 
 	float m = 1.0 - 1.0 / n;
@@ -2583,6 +2654,7 @@ float2 inverseSF(float3 p, float n)
 //-----------------------------------------------------------------------------
 float2 inverseSF(float3 p, float n, out float3 NearestPoint)
 {
+	p = normalize(p); // TODO : FIX/DEBUG THIS! BAD PORT!
 	const float phi = 1.61803398875;
 
 	float m = 1.0 - 1.0 / n;
