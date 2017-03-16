@@ -12,7 +12,7 @@ namespace UnityEngine
         Texture2D[] ButterFlyLookupTable = null;
         Material FourierMaterial;
 
-        public FourierGPU(int size)
+        public FourierGPU(int size, Shader shader)
         {
             if (size > 256)
             {
@@ -25,10 +25,6 @@ namespace UnityEngine
                 Debug.Log("FourierGPU: fourier grid size must be pow2 number, changing to nearest pow2 number...");
                 size = Mathf.NextPowerOfTwo(size);
             }
-
-            var shader = Shader.Find("Math/Fourier");
-
-            if (shader == null) Debug.Log("FourierGPU: Could not find shader Math/Fourier!");
 
             FourierMaterial = new Material(shader);
 

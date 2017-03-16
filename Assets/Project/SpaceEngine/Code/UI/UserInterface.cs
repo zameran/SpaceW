@@ -33,6 +33,11 @@
 // Creator: zameran
 #endregion
 
+using SpaceEngine.Managers;
+using SpaceEngine.Pluginator.Enums;
+
+using System;
+
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
@@ -52,19 +57,9 @@ public class UserInterface : MonoBehaviour, IEventit
         Time.timeScale = 1.0f;
     }
 
-    public void LoadGameScene()
+    public void LoadScene(string sceneName)
     {
-        LoadScene(2);
-    }
-
-    public void LoadMenuScene()
-    {
-        LoadScene(1);
-    }
-
-    public void LoadScene(int id)
-    {
-        SceneManager.LoadScene(id);
+        LevelManager.Instance.LoadScene((EntryPoint)Enum.Parse(typeof(EntryPoint), sceneName));
     }
 
     public void Quit()
@@ -73,7 +68,7 @@ public class UserInterface : MonoBehaviour, IEventit
         Debug.Break();
 #else
         Application.Quit();
-        #endif
+#endif
     }
 
     #endregion

@@ -29,6 +29,9 @@ namespace SpaceEngine.Ocean
         ComputeShader VarianceShader;
 
         [SerializeField]
+        Shader FourierShader;
+
+        [SerializeField]
         protected int Aniso = 2;
 
         /// <summary>
@@ -127,13 +130,19 @@ namespace SpaceEngine.Ocean
                 FourierGridSize = Mathf.NextPowerOfTwo(FourierGridSize);
             }
 
+            if (FourierShader == null)
+            {
+                Debug.Log("OceanFFT: fourier shader is null!");
+                FourierShader = Shader.Find("Math/Fourier");
+            }
+
             FloatSize = (float)FourierGridSize;
             Offset = new Vector4(1.0f + 0.5f / FloatSize, 1.0f + 0.5f / FloatSize, 0, 0);
 
             float factor = 2.0f * Mathf.PI * FloatSize;
             InverseGridSizes = new Vector4(factor / GridSizes.x, factor / GridSizes.y, factor / GridSizes.z, factor / GridSizes.w);
 
-            Fourier = new FourierGPU(FourierGridSize);
+            Fourier = new FourierGPU(FourierGridSize, FourierShader);
 
             //Create the data needed to make the waves each frame
             CreateRenderTextures();

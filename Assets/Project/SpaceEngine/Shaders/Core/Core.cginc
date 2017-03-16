@@ -33,6 +33,10 @@
 
 #define CORE
 
+#if !defined (TCCOMMON)
+#include "../TCCommon.cginc"
+#endif
+
 #define CORE_ELEVATION
 
 uniform sampler2D _Elevation_Tile;
@@ -84,6 +88,20 @@ float4 texTileLod(sampler2D tile, float2 uv, float3 tileCoords, float3 tileSize)
 	return tex2Dlod(tile, float4(uv, 0, 0));
 }
 
+float4 TEX2DLOD_TILE(sampler2D tile, float2 uv, float3 tileCoords, float3 tileSize, float size) 
+{
+	uv = tileCoords.xy + uv * tileSize.xy;
+
+	return TEX2DLOD(tile, uv, float2(0.0, 0.0), size);
+}
+
+float4 TEX2DLOD_GOOD_TILE(sampler2D tile, float2 uv, float3 tileCoords, float3 tileSize, float size) 
+{
+	uv = tileCoords.xy + uv * tileSize.xy;
+
+	return TEX2DLOD_GOOD(tile, uv, size);
+}
+
 float4 texTile(sampler2D tile, float2 uv, float3 tileCoords, float3 tileSize) 
 {
 	uv = tileCoords.xy + uv * tileSize.xy;
@@ -91,11 +109,18 @@ float4 texTile(sampler2D tile, float2 uv, float3 tileCoords, float3 tileSize)
 	return tex2D(tile, uv);
 }
 
-float4 texTile(sampler2D tile, float2 uv, float2 tileCoords, float3 tileSize) 
+float4 TEX2D_TILE(sampler2D tile, float2 uv, float3 tileCoords, float3 tileSize, float size) 
 {
-	uv = tileCoords + uv * tileSize.xy;
+	uv = tileCoords.xy + uv * tileSize.xy;
 
-	return tex2D(tile, uv);
+	return TEX2D(tile, uv, size);
+}
+
+float4 TEX2D_GOOD_TILE(sampler2D tile, float2 uv, float3 tileCoords, float3 tileSize, float size) 
+{
+	uv = tileCoords.xy + uv * tileSize.xy;
+
+	return TEX2D_GOOD(tile, uv, size);
 }
 
 float4 Triplanar(sampler2D topAndButtomSampler, sampler2D leftAndRightSampler, sampler2D frontAndBackSampler, float3 worldPosition, float3 worldNormal, float2 settings)

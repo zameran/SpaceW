@@ -12,8 +12,6 @@
 			CGPROGRAM
 			#include "UnityCG.cginc"
 
-			#include "Core.cginc"
-
 			#include "../TCCommon.cginc"
 			#include "../TCAsteroid.cginc"
 			#include "../TCGasgiant.cginc"
@@ -21,6 +19,8 @@
 			#include "../TCSelena.cginc"
 			#include "../TCSun.cginc"
 			#include "../TCTerra.cginc"
+
+			#include "Core.cginc"
 
 			#pragma target 4.0
 			#pragma vertex vert

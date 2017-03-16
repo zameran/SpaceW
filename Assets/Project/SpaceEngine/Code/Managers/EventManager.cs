@@ -1,13 +1,24 @@
 ﻿using SpaceEngine.AtmosphericScattering;
 using SpaceEngine.Core.Bodies;
+using SpaceEngine.Pluginator.Enums;
 
 using System;
 
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public static class EventManager
 {
+    public static BaseEvents BaseEvents = new BaseEvents();
+
     public static CelestialBodyEvents CelestialBodyEvents = new CelestialBodyEvents();
+}
+
+public sealed class BaseEvents
+{
+    public EventHolder<EntryPoint, LoadSceneMode> OnSceneWillBeLoadedNow = new EventHolder<EntryPoint, LoadSceneMode>();
+    public EventHolder<EntryPoint, LoadSceneMode> OnSceneWillBeLoaded = new EventHolder<EntryPoint, LoadSceneMode>();
+    public EventHolder<EntryPoint, LoadSceneMode> OnSceneLoaded = new EventHolder<EntryPoint, LoadSceneMode>();
 }
 
 public sealed class CelestialBodyEvents
