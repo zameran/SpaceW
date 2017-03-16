@@ -144,6 +144,14 @@ uniform float noiseRidgeSmooth;// = 0.0001;
 #if !defined (EPSILON)
 #define EPSILON  1e-10
 #endif
+
+#if !defined (M_PHI)
+#define M_PHI  1.61803398875
+#endif
+
+#if !defined (M_SQRT5)
+#define M_SQRT5 2.2360679775
+#endif
 //-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
@@ -223,7 +231,8 @@ uniform float noiseRidgeSmooth;// = 0.0001;
 //-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
-#define     saturate(x) clamp(x, 0.0, 1.0)
+#define			saturate(x) clamp(x, 0.0, 1.0)
+#define			madfrac(A, B) mad((A), (B), -floor((A) * (B)))
 //-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
@@ -288,6 +297,11 @@ float3 Rotate(float Angle, float3 Axis, float3 Vector)
 	);
 
 	return mul(M, Vector);
+}
+
+float2x2 Inverse(float2x2 m) 
+{
+  return float2x2(m[1][1], -m[0][1], -m[1][0], m[0][0]) / (m[0][0] * m[1][1] - m[0][1] * m[1][0]);
 }
 //-----------------------------------------------------------------------------
 
@@ -2623,52 +2637,45 @@ float Cell3NoiseF1F0(float3 p, int octaves, float amp)
 
 //-----------------------------------------------------------------------------
 // Spherical Fibonacci Mapping
-// http://lgdv.cs.fau.de/publications/publication/Pub.2015.tech.IMMD.IMMD9.spheri/
-// Optimized by iq https://www.shadertoy.com/view/lllXz4
-//-----------------------------------------------------------------------------
-#define ROUND(x) floor(x + 0.5)
+// http://lgdv.cs.fau.de/uploads/publications/spherical_fibonacci_mapping.pdf
+// Optimized [WIP] by zameran.
 //-----------------------------------------------------------------------------
 
-float2 inverseSF(float3 p, float n)
+//-----------------------------------------------------------------------------
+float2 inverseSF(float3 p, float n) 
 {
-	p = normalize(p); // TODO : FIX/DEBUG THIS! BAD PORT!
-	const float phi = 1.61803398875;
-
 	float m = 1.0 - 1.0 / n;
-	
-	float fi = min(atan2(p.y, p.x), M_PI);
-	float cosTheta = p.z;
-	
-	float k  = max(2.0, floor(log(n * M_PI * sqrt(5.0) * (1.0 - cosTheta * cosTheta)) / log(phi + 1.0)));
-	float Fk = pow(phi, k) / sqrt(5.0);
-	float2 F = float2(round(Fk), round(Fk * phi)); // k, k+1
+	float phi = min(atan2(p.y, p.x), M_PI), cosTheta = p.z;
+	float k = max(2, floor(log(n * M_PI * M_SQRT5 * (1 - cosTheta * cosTheta)) / log(M_PHI * M_PHI)));
+	float Fk = pow(M_PHI, k) / M_SQRT5;
+	float F0 = round(Fk), F1 = round(Fk * M_PHI);
 
-	float2 ka = 2.0 * F / n;
-	float2 kb = 2.0 * M_PI * (frac((F + 1.0) * phi) - (phi - 1.0));
-	
-	float2x2 iB = float2x2(ka.y, -ka.x, kb.y, -kb.x) / (ka.y * kb.x - ka.x * kb.y);
-	
-	float2  c = floor(mul(iB, float2(fi, cosTheta - m)));
-	float d = 8.0;
-	float j = 0.0;
+	float2x2 B = float2x2(M_PI2 * madfrac(F0 + 1, M_PHI - 1) - M_PI2 * (M_PHI - 1), M_PI2 * madfrac(F1 + 1, M_PHI - 1) - M_PI2 * (M_PHI - 1), -2 * F0 / n, -2 * F1 / n);
+	float2x2 invB = Inverse(B);
 
-	for (int s = 0; s < 4; s++)
+	float2 c = floor(mul(invB, float2(phi, cosTheta - m)));
+
+	float d = 8.0; 
+	float j = 0;
+
+	for (uint s = 0; s < 4; ++s) 
 	{
-		float2 uv = float2(float(s - 2 * (s / 2.0)), float(s / 2.0));
-		
-		float i = dot(F, uv + c);
-		
-		float fi = 2.0 * M_PI * frac(i * phi);
-		float cosTheta = m - 2.0 * i / n;
-		float sinTheta = sqrt(1.0 - cosTheta * cosTheta);
-		
-		float3 q = float3(cos(fi) * sinTheta, sin(fi) * sinTheta, cosTheta);
-		float3 r = q - p;
-		float d2 = dot(r, r);
+		float cosTheta = dot(B[1], float2(s % 2, s / 2) + c) + m;
 
-		if (d2 < d) 
+		cosTheta = clamp(cosTheta, -1.0, 1.0) * 2.0 - cosTheta;
+
+		float i = floor(n * 0.5 - cosTheta * n * 0.5);
+		float phi = M_PI2 * madfrac(i, M_PHI - 1.0);
+
+		cosTheta = 1.0 - (2.0 * i + 1.0) * rcp(n);
+
+		float sinTheta = sqrt(1.0 - cosTheta * cosTheta);
+		float3 q = float3(cos(phi) * sinTheta, sin(phi) * sinTheta, cosTheta);
+		float squaredDistance = dot(q - p, q - p);
+
+		if (squaredDistance < d) 
 		{
-			d = d2;
+			d = squaredDistance;
 			j = i;
 		}
 	}
@@ -2676,48 +2683,41 @@ float2 inverseSF(float3 p, float n)
 	return float2(j, sqrt(d));
 }
 
-//-----------------------------------------------------------------------------
-float2 inverseSF(float3 p, float n, out float3 NearestPoint)
+float2 inverseSF(float3 p, float n, out float3 NearestPoint) 
 {
-	p = normalize(p); // TODO : FIX/DEBUG THIS! BAD PORT!
-	const float phi = 1.61803398875;
-
 	float m = 1.0 - 1.0 / n;
-	
-	float fi = min(atan2(p.y, p.x), M_PI);
-	float cosTheta = p.z;
-	
-	float k  = max(2.0, floor( log(n * M_PI * sqrt(5.0) * (1.0 - cosTheta * cosTheta)) / log(phi + 1.0)));
-	float Fk = pow(phi, k) / sqrt(5.0);
-	float2 F = float2(round(Fk), round(Fk * phi)); // k, k+1
+	float phi = min(atan2(p.y, p.x), M_PI), cosTheta = p.z;
+	float k = max(2, floor(log(n * M_PI * M_SQRT5 * (1 - cosTheta * cosTheta)) / log(M_PHI * M_PHI)));
+	float Fk = pow(M_PHI, k) / M_SQRT5;
+	float F0 = round(Fk), F1 = round(Fk * M_PHI);
 
-	float2 ka = 2.0 * F / n;
-	float2 kb = 2.0 * M_PI * (frac((F + 1.0) * phi) - (phi - 1.0));
-	
-	float2x2 iB = float2x2(ka.y, -ka.x, kb.y, -kb.x ) / (ka.y * kb.x - ka.x * kb.y);
-	
-	float2 c = floor(mul(iB, float2(fi, cosTheta - m)));
-	float d = 8.0;
-	float j = 0.0;
+	float2x2 B = float2x2(M_PI2 * madfrac(F0 + 1, M_PHI - 1) - M_PI2 * (M_PHI - 1), M_PI2 * madfrac(F1 + 1, M_PHI - 1) - M_PI2 * (M_PHI - 1), -2 * F0 / n, -2 * F1 / n);
+	float2x2 invB = Inverse(B);
 
-	for (uint s = 0; s < 4; s++)
+	float2 c = floor(mul(invB, float2(phi, cosTheta - m)));
+
+	float d = 8.0; 
+	float j = 0;
+
+	for (uint s = 0; s < 4; ++s) 
 	{
-		float2 uv = float2(float(s - 2 * (s / 2)), float(s / 2));
-		
-		float i = dot(F, uv + c);
-		
-		float fi = 2.0 * M_PI * frac(i * phi);
-		float cosTheta = m - 2.0 * i / n;
-		float sinTheta = sqrt(1.0 - cosTheta * cosTheta);
-		
-		float3 q = float3(cos(fi) * sinTheta, sin(fi) * sinTheta, cosTheta);
-		float3 r = q - p;
-		float d2 = dot(r, r);
+		float cosTheta = dot(B[1], float2(s % 2, s / 2) + c) + m;
 
-		if (d2 < d) 
+		cosTheta = clamp(cosTheta, -1.0, 1.0) * 2.0 - cosTheta;
+
+		float i = floor(n * 0.5 - cosTheta * n * 0.5);
+		float phi = M_PI2 * madfrac(i, M_PHI - 1.0);
+
+		cosTheta = 1.0 - (2.0 * i + 1.0) * rcp(n);
+
+		float sinTheta = sqrt(1.0 - cosTheta * cosTheta);
+		float3 q = float3(cos(phi) * sinTheta, sin(phi) * sinTheta, cosTheta);
+		float squaredDistance = dot(q - p, q - p);
+
+		if (squaredDistance < d) 
 		{
 			NearestPoint = q;
-			d = d2;
+			d = squaredDistance;
 			j = i;
 		}
 	}
