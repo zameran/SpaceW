@@ -48,6 +48,12 @@ namespace SpaceEngine.Debugging
 
         public int state = 0;
 
+        public KeyCode SwitchKey = KeyCode.F5;
+
+        public bool ShowAdditionalInfo = true;
+
+        public bool AtLeastOneEnabled { get { return DebugComponents.Any((gui) => gui.enabled == true); } }
+
         public bool MouseOverGUIHotControl { get { return GUIUtility.hotControl != 0; } }
 
         public bool MouseOverGUIRect { get { return DebugComponents.Any((gui) => gui.isActiveAndEnabled && gui.debugInfoBounds.Contains(new Vector2(Input.mousePosition.x, Screen.height - Input.mousePosition.y))); } }
@@ -71,7 +77,7 @@ namespace SpaceEngine.Debugging
 
         private void Update()
         {
-            if (Input.GetKeyDown(KeyCode.F5))
+            if (Input.GetKeyDown(SwitchKey))
             {
                 if (state == DebugComponents.Count)
                 {
@@ -86,6 +92,17 @@ namespace SpaceEngine.Debugging
             }
         }
 
+        private void OnGUI()
+        {
+            if (ShowAdditionalInfo && !AtLeastOneEnabled)
+            {
+                GUILayoutExtensions.Vertical(() =>
+                {
+                    GUILayoutExtensions.LabelWithSpace(string.Format("Press {0} key to switch between debug GUI's...", SwitchKey.ToString()));
+                });
+            }
+        }
+
         public void Toogle(DebugGUI GUI, bool state)
         {
             GUI.enabled = state;
@@ -96,11 +113,11 @@ namespace SpaceEngine.Debugging
             GUIs[index - 1].enabled = state;
         }
 
-        public void ToogleAll(List<DebugGUI> GUIs, bool state)
+        public void ToogleAll(List<DebugGUI> GUIs, bool state = false)
         {
             for (int i = 0; i < GUIs.Count; i++)
             {
-                GUIs[i].enabled = false;
+                GUIs[i].enabled = state;
             }
         }
     }

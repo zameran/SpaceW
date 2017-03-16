@@ -6,8 +6,6 @@
 
 		#include "UnityCG.cginc"
 
-		#include "Core.cginc"
-
 		#include "../TCCommon.cginc"
 		#include "../TCAsteroid.cginc"
 		#include "../TCGasgiant.cginc"
@@ -15,6 +13,8 @@
 		#include "../TCSelena.cginc"
 		#include "../TCSun.cginc"
 		#include "../TCTerra.cginc"
+
+		#include "Core.cginc"
 
 		#define BORDER 2.0 
 
@@ -41,8 +41,10 @@
 			float3 p = normalize(mul(_LocalToWorld, P)).xyz;
 			float3 v = p * _Frequency;
 
+			//float noise = HeightMapAsteroid(v);
 			float noise = HeightMapPlanet(v) - 1.5;
 			//float noise = HeightMapSelena(v);
+			//float noise = HeightMapTerra(v);
 
 			float height = _Amplitude * noise;
 							

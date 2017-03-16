@@ -6,8 +6,6 @@
 
 		#include "UnityCG.cginc"
 
-		#include "Core.cginc"
-
 		#include "../TCCommon.cginc"
 		#include "../TCAsteroid.cginc"
 		#include "../TCGasgiant.cginc"
@@ -15,6 +13,8 @@
 		#include "../TCSelena.cginc"
 		#include "../TCSun.cginc"
 		#include "../TCTerra.cginc"
+
+		#include "Core.cginc"
 
 		#define BORDER 2.0 
 
@@ -46,10 +46,12 @@
 			slope = saturate(slope * smoothstep(4, 8, _Level)); // NOTE : Limit slope in case of very strong normals on low LOD levels...
 			height = saturate(height);
 
+			//float3 color = ColorMapAsteroid(v, height, slope);
 			float3 color = ColorMapPlanet(v, height, slope);
 			//float3 color = ColorMapSelena(v, height,  slope);
+			//float3 color = ColorMapTerra(v, height, slope);
 							
-			output = float4(color, 1);		
+			output = float4(saturate(color), 1);
 		}
 		ENDCG
 
