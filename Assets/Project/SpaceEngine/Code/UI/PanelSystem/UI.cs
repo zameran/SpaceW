@@ -1,6 +1,6 @@
 ﻿#region License
 // Procedural planet generator.
-// 
+//  
 // Copyright (C) 2015-2017 Denis Ovchinnikov [zameran] 
 // All rights reserved.
 // 
@@ -8,7 +8,7 @@
 // modification, are permitted provided that the following conditions
 // are met:
 // 1. Redistributions of source code must retain the above copyright
-//    notice, this list of conditions and the following disclaimer.
+//     notice, this list of conditions and the following disclaimer.
 // 2. Redistributions in binary form must reproduce the above copyright
 //    notice, this list of conditions and the following disclaimer in the
 //    documentation and/or other materials provided with the distribution.
@@ -28,20 +28,15 @@
 // ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF
 // THE POSSIBILITY OF SUCH DAMAGE.
 // 
-// Creation Date: Undefined
-// Creation Time: Undefined
+// Creation Date: 2017.03.16
+// Creation Time: 3:19 PM
 // Creator: zameran
 #endregion
 
-namespace SpaceEngine.Pluginator.Enums
+namespace SpaceEngine.UI
 {
-    /// <summary>
-    /// Note: Order here = build order.
-    /// </summary>
-    public enum EntryPoint : int
+    public class UI
     {
-        Init = 0,
-        MainMenu = 1,
-        Scene = 2,
+
     }
 }
