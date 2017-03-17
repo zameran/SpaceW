@@ -104,6 +104,7 @@
 			#pragma vertex vert
 			#pragma fragment frag
 
+			#pragma multi_compile OCEAN_ON OCEAN_OFF
 			#pragma multi_compile SHADOW_0 SHADOW_1 SHADOW_2 SHADOW_3 SHADOW_4
 			
 			#include "../SpaceStuff.cginc"
@@ -146,7 +147,9 @@
 				float4 fn = texTile(_Normals_Tile, IN.uv, _Normals_TileCoords, _Normals_TileSize);
 				fn.z = sqrt(max(0.0, 1.0 - dot(fn.xy, fn.xy)));		
 
-				if (ht <= _Ocean_Level && _Ocean_DrawBRDF == 1.0) {	fn = float4(0, 0, 1, 0); }
+				#if OCEAN_ON
+					if (ht <= _Ocean_Level && _Ocean_DrawBRDF == 1.0) {	fn = float4(0, 0, 1, 0); }
+				#endif
 				
 				float3x3 TTW = _Deform_TangentFrameToWorld;
 				fn.xyz = mul(TTW, fn.xyz);
@@ -171,10 +174,9 @@
 				// diffuse ground color
 				float3 groundColor = 1.5 * RGB2Reflectance(reflectance).rgb * (sunL * max(cTheta, 0) + skyE) / M_PI;
 				
-				if (ht <= _Ocean_Level && _Ocean_DrawBRDF == 1.0)
-				{
-					groundColor = OceanRadiance(WSD, -v, V, _Ocean_Sigma, sunL, skyE, _Ocean_Color);
-				}
+				#if OCEAN_ON
+					if (ht <= _Ocean_Level && _Ocean_DrawBRDF == 1.0) {	groundColor = OceanRadiance(WSD, -v, V, _Ocean_Sigma, sunL, skyE, _Ocean_Color); }
+				#endif
 
 				float3 extinction;
 				float3 inscatter = InScattering(WCPO, P, WSD, extinction, 0.0);

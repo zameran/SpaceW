@@ -223,7 +223,7 @@ public sealed class TCCommonParametersSetterEditor : Editor
 
     private void DrawGUIForMare(TCCommonParametersSetter setter)
     {
-        setter.mareParams.y = EditorGUILayout.Slider("mareFreq ", setter.mareParams.y, 0.001f, 1000.0f);
+        setter.mareParams.y = EditorGUILayout.Slider("mareFreq ", setter.mareParams.y, 0.0f, 1000.0f);
         setter.mareParams.z = EditorGUILayout.Slider("mareDensity ", setter.mareParams.z, 0.0f, 1.0f);
     }
 
