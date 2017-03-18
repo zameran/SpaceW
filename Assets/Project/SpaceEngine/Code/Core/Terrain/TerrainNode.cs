@@ -160,7 +160,7 @@ namespace SpaceEngine.Core.Terrain
 
             Deformation = new DeformationSpherical(Body.Radius);
 
-            TerrainQuadRoot = new TerrainQuad(this, null, 0, 0, -Body.Radius, -Body.Radius, 2.0 * Body.Radius, ZMin, ZMax);
+            CreateTerrainQuadRoot();
         }
 
         protected override void UpdateNode()
@@ -265,6 +265,13 @@ namespace SpaceEngine.Core.Terrain
         }
 
         #endregion
+
+        private void CreateTerrainQuadRoot()
+        {
+            if (TerrainQuadRoot != null) { Debug.Log("Hey! You're gonna create quad root, but it's already exist!"); return; }
+
+            TerrainQuadRoot = new TerrainQuad(this, null, 0, 0, -Body.Radius, -Body.Radius, 2.0 * Body.Radius, ZMin, ZMax);
+        }
 
         public void SetPerQuadUniforms(TerrainQuad quad, MaterialPropertyBlock matPropertyBlock)
         {

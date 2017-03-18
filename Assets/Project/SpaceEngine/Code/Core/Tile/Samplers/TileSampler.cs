@@ -69,7 +69,7 @@ namespace SpaceEngine.Core.Tile.Samplers
         /// <summary>
         /// An internal quadtree to store the texture tiles associated with each quad.
         /// </summary>
-        QuadTree QuadTreeRoot = null;
+        public QuadTree QuadTreeRoot = null;
 
         Uniforms uniforms;
 
