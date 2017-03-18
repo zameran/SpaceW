@@ -246,7 +246,7 @@
 					zc = (zc1 + zc3) * 0.5;
 				}
 				
-				output = float4(zf, zc, 1.0, 0.0);			
+				output = float4(zf, zc, 2.0 * slope - 0.5, 0.0);			
 			}		
 			ENDCG
 		}

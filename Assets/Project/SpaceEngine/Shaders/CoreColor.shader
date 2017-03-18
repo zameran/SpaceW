@@ -47,7 +47,7 @@
 			float slope = texTile(_Normals_Tile, IN.uv0.xy, _Normals_TileCoords, _Normals_TileSize).w;
 			float height = texTile(_Elevation_Tile, IN.uv0.xy, _Elevation_TileCoords, _Elevation_TileSize).w;
 
-			slope = saturate(slope * smoothstep(4, 8, _Level)); // NOTE : Limit slope in case of very strong normals on low LOD levels...
+			slope = saturate((2.0 * slope - 0.5) * smoothstep(4, 8, _Level)); // NOTE : Limit slope in case of very strong normals on low LOD levels...
 			height = saturate(height);
 
 			//float3 color = ColorMapAsteroid(v, height, slope);
