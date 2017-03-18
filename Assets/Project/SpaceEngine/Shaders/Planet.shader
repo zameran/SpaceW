@@ -109,11 +109,11 @@
 			#pragma multi_compile OCEAN_ON OCEAN_OFF
 			#pragma multi_compile SHADOW_0 SHADOW_1 SHADOW_2 SHADOW_3 SHADOW_4
 			
-			#include "../SpaceStuff.cginc"
-			#include "../Eclipses.cginc"
-			#include "../HDR.cginc"
-			#include "../Atmosphere.cginc"
-			#include "../Ocean/OceanBRDF.cginc"
+			#include "SpaceStuff.cginc"
+			#include "Eclipses.cginc"
+			#include "HDR.cginc"
+			#include "Atmosphere.cginc"
+			#include "Ocean/OceanBRDF.cginc"
 			
 			uniform sampler2D _Ground_Diffuse;
 			uniform sampler2D _Ground_Normal;

@@ -6,7 +6,7 @@
 
 		#include "UnityCG.cginc"
 
-		#include "../TCCommon.cginc"
+		#include "TCCommon.cginc"
 
 		#include "Core.cginc"
 

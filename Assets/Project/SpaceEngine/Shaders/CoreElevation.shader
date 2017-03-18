@@ -6,13 +6,13 @@
 
 		#include "UnityCG.cginc"
 
-		#include "../TCCommon.cginc"
-		#include "../TCAsteroid.cginc"
-		#include "../TCGasgiant.cginc"
-		#include "../TCPlanet.cginc"
-		#include "../TCSelena.cginc"
-		#include "../TCSun.cginc"
-		#include "../TCTerra.cginc"
+		#include "TCCommon.cginc"
+		#include "TCAsteroid.cginc"
+		#include "TCGasgiant.cginc"
+		#include "TCPlanet.cginc"
+		#include "TCSelena.cginc"
+		#include "TCSun.cginc"
+		#include "TCTerra.cginc"
 
 		#include "Core.cginc"
 
@@ -40,12 +40,14 @@
 			float3 P = float3(vert, _Offset.w);
 			float3 p = normalize(mul(_LocalToWorld, P)).xyz;
 			float3 v = p * _Frequency;
-
+			
 			//float noise = HeightMapAsteroid(v);
 			float noise = HeightMapPlanet(v) - 1.5;
 			//float noise = HeightMapSelena(v);
 			//float noise = HeightMapTerra(v);
 
+			//float noise = Fbm(v, 8);
+			
 			float height = _Amplitude * noise;
 							
 			output = float4(height, height, 1, noise);		

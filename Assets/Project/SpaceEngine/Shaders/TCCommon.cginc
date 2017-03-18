@@ -261,9 +261,7 @@ float smin(float a, float b, float k)
 
 inline float softExpMaxMin(float a, float b, float k)
 {
-	float res = exp(k * a) + exp(k * b);
-
-	return log(res) / k;
+	return log(exp(k * a) + exp(k * b)) / k;
 }
 
 inline float AngleBetween(float3 a, float3 b) 
@@ -3037,7 +3035,7 @@ float VolcanoNoise(float3 ppoint, float globalLand, float localLand)
 
 		if (volcanoOctaves > 1)
 		{
-			ppoint = Rotate(2.0 * M_PI * hash1(float(i)), rotVec, ppoint);
+			ppoint = Rotate(M_PI2 * hash1(float(i)), rotVec, ppoint);
 			frequency *= 2.0;
 			//density   *= 2.0;
 			size      *= 0.5;

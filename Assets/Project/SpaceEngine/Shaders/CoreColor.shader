@@ -6,13 +6,13 @@
 
 		#include "UnityCG.cginc"
 
-		#include "../TCCommon.cginc"
-		#include "../TCAsteroid.cginc"
-		#include "../TCGasgiant.cginc"
-		#include "../TCPlanet.cginc"
-		#include "../TCSelena.cginc"
-		#include "../TCSun.cginc"
-		#include "../TCTerra.cginc"
+		#include "TCCommon.cginc"
+		#include "TCAsteroid.cginc"
+		#include "TCGasgiant.cginc"
+		#include "TCPlanet.cginc"
+		#include "TCSelena.cginc"
+		#include "TCSun.cginc"
+		#include "TCTerra.cginc"
 
 		#include "Core.cginc"
 
@@ -39,7 +39,7 @@
 			float3 P = float3(vert, _Offset.w);
 			float3 p = normalize(mul(_LocalToWorld, P)).xyz;
 			float3 v = p;
-
+			
 			float slope = texTile(_Normals_Tile, IN.uv0.xy, _Normals_TileCoords, _Normals_TileSize).w;
 			float height = texTile(_Elevation_Tile, IN.uv0.xy, _Elevation_TileCoords, _Elevation_TileSize).w;
 
@@ -50,7 +50,7 @@
 			float3 color = ColorMapPlanet(v, height, slope);
 			//float3 color = ColorMapSelena(v, height,  slope);
 			//float3 color = ColorMapTerra(v, height, slope);
-							
+			
 			output = float4(saturate(color), 1);
 		}
 		ENDCG

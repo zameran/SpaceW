@@ -34,7 +34,7 @@
 #define CORE
 
 #if !defined (TCCOMMON)
-#include "../TCCommon.cginc"
+#include "TCCommon.cginc"
 #endif
 
 #define CORE_ELEVATION
