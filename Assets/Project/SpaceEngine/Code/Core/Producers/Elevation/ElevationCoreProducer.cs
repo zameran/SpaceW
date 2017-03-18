@@ -72,11 +72,6 @@ namespace SpaceEngine.Core
                 throw new InvalidStorageException("Storage must be a GPUTileStorage");
             }
 
-            if (storage.FilterMode != FilterMode.Point)
-            {
-                throw new InvalidParameterException("GPUTileStorage filter must be point. There will be seams in the terrain otherwise");
-            }
-
             // INIT STUFF GOES HERE...
         }
 

@@ -761,36 +761,32 @@ float4 TEX2DLOD(sampler2D tex, float2 p, float2 lod, float res)
 // Improved bilinear interpolated texture fetch by iq. http://www.iquilezles.org/www/articles/hwinterpolation/hwinterpolation.htm
 float4 TEX2D_GOOD(sampler2D tex, float2 uv, float size)
 {
-	float2 res = float2(size, size);
-
-	float2 st = uv * res - 0.5;
+	float2 st = uv * size - 0.5;
 
 	float2 iuv = floor(st);
 	float2 fuv = frac(st);
 
-	float4 a = tex2D(tex, (iuv + float2(0.5, 0.5)) / res);
-	float4 b = tex2D(tex, (iuv + float2(1.5, 0.5)) / res);
-	float4 c = tex2D(tex, (iuv + float2(0.5, 1.5)) / res);
-	float4 d = tex2D(tex, (iuv + float2(1.5, 1.5)) / res);
+	float4 a = tex2D(tex, (iuv + float2(0.5, 0.5)) / size);
+	float4 b = tex2D(tex, (iuv + float2(1.5, 0.5)) / size);
+	float4 c = tex2D(tex, (iuv + float2(0.5, 1.5)) / size);
+	float4 d = tex2D(tex, (iuv + float2(1.5, 1.5)) / size);
 
-	return lerp(lerp( a, b, fuv.x), lerp( c, d, fuv.x), fuv.y );
+	return lerp(lerp(a, b, fuv.x), lerp(c, d, fuv.x), fuv.y);
 }
 
 float4 TEX2DLOD_GOOD(sampler2D tex, float2 uv, float size)
 {
-	float2 res = float2(size, size);
-
-	float2 st = uv * res - 0.5;
+	float2 st = uv * size - 0.5;
 
 	float2 iuv = floor(st);
 	float2 fuv = frac(st);
 
-	float4 a = tex2Dlod(tex, float4((iuv + float2(0.5, 0.5)) / res, 0.0, 0.0));
-	float4 b = tex2Dlod(tex, float4((iuv + float2(1.5, 0.5)) / res, 0.0, 0.0));
-	float4 c = tex2Dlod(tex, float4((iuv + float2(0.5, 1.5)) / res, 0.0, 0.0));
-	float4 d = tex2Dlod(tex, float4((iuv + float2(1.5, 1.5)) / res, 0.0, 0.0));
+	float4 a = tex2Dlod(tex, float4((iuv + float2(0.5, 0.5)) / size, 0.0, 0.0));
+	float4 b = tex2Dlod(tex, float4((iuv + float2(1.5, 0.5)) / size, 0.0, 0.0));
+	float4 c = tex2Dlod(tex, float4((iuv + float2(0.5, 1.5)) / size, 0.0, 0.0));
+	float4 d = tex2Dlod(tex, float4((iuv + float2(1.5, 1.5)) / size, 0.0, 0.0));
 
-	return lerp(lerp( a, b, fuv.x), lerp( c, d, fuv.x), fuv.y );
+	return lerp(lerp(a, b, fuv.x), lerp(c, d, fuv.x), fuv.y);
 }
 //-----------------------------------------------------------------------------
 
@@ -2648,9 +2644,9 @@ float2 inverseSF(float3 p, float n)
 	float phi = min(atan2(p.y, p.x), M_PI), cosTheta = p.z;
 	float k = max(2, floor(log(n * M_PI * M_SQRT5 * (1 - cosTheta * cosTheta)) / log(M_PHI * M_PHI)));
 	float Fk = pow(M_PHI, k) / M_SQRT5;
-	float F0 = round(Fk), F1 = round(Fk * M_PHI);
+	float2 F = float2(round(Fk), round(Fk * M_PHI));
 
-	float2x2 B = float2x2(M_PI2 * madfrac(F0 + 1, M_PHI - 1) - M_PI2 * (M_PHI - 1), M_PI2 * madfrac(F1 + 1, M_PHI - 1) - M_PI2 * (M_PHI - 1), -2 * F0 / n, -2 * F1 / n);
+	float2x2 B = float2x2(M_PI2 * madfrac(F.x + 1, M_PHI - 1) - M_PI2 * (M_PHI - 1), M_PI2 * madfrac(F.y + 1, M_PHI - 1) - M_PI2 * (M_PHI - 1), -2 * F.x / n, -2 * F.y / n);
 	float2x2 invB = Inverse(B);
 
 	float2 c = floor(mul(invB, float2(phi, cosTheta - m)));
@@ -2689,9 +2685,9 @@ float2 inverseSF(float3 p, float n, out float3 NearestPoint)
 	float phi = min(atan2(p.y, p.x), M_PI), cosTheta = p.z;
 	float k = max(2, floor(log(n * M_PI * M_SQRT5 * (1 - cosTheta * cosTheta)) / log(M_PHI * M_PHI)));
 	float Fk = pow(M_PHI, k) / M_SQRT5;
-	float F0 = round(Fk), F1 = round(Fk * M_PHI);
+	float2 F = float2(round(Fk), round(Fk * M_PHI));
 
-	float2x2 B = float2x2(M_PI2 * madfrac(F0 + 1, M_PHI - 1) - M_PI2 * (M_PHI - 1), M_PI2 * madfrac(F1 + 1, M_PHI - 1) - M_PI2 * (M_PHI - 1), -2 * F0 / n, -2 * F1 / n);
+	float2x2 B = float2x2(M_PI2 * madfrac(F.x + 1, M_PHI - 1) - M_PI2 * (M_PHI - 1), M_PI2 * madfrac(F.y + 1, M_PHI - 1) - M_PI2 * (M_PHI - 1), -2 * F.x / n, -2 * F.y / n);
 	float2x2 invB = Inverse(B);
 
 	float2 c = floor(mul(invB, float2(phi, cosTheta - m)));

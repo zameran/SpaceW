@@ -38,6 +38,8 @@
 		void VERTEX_POSITION(in float4 vertex, in float2 texcoord, out float4 position, out float3 localPosition, out float2 uv)
 		{
 			float2 zfc = texTileLod(_Elevation_Tile, texcoord, _Elevation_TileCoords, _Elevation_TileSize).xy;
+			//float2 zfc = TEX2DLOD_TILE(_Elevation_Tile, texcoord, _Elevation_TileCoords, _Elevation_TileSize, _Elevation_TileSize * 10.0).xy;
+			//float2 zfc = TEX2DLOD_GOOD_TILE(_Elevation_Tile, texcoord, _Elevation_TileCoords, _Elevation_TileSize, _Elevation_TileSize * 10.0).xy;
 				
 			if (zfc.x <= _Ocean_Level && _Ocean_DrawBRDF == 1.0) { zfc = float2(0, 0); }
 			

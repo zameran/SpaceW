@@ -81,44 +81,49 @@ uniform float4x4 _Deform_ScreenQuadCorners;
 uniform float4x4 _Deform_ScreenQuadVerticals;
 uniform float4x4 _Deform_TangentFrameToWorld; 
 
-float4 texTileLod(sampler2D tile, float2 uv, float3 tileCoords, float3 tileSize) 
+void ScaleUVToTile(inout float2 uv, float3 tileCoords, float3 tileSize)
 {
 	uv = tileCoords.xy + uv * tileSize.xy;
+}
+
+float4 texTileLod(sampler2D tile, float2 uv, float3 tileCoords, float3 tileSize) 
+{
+	ScaleUVToTile(uv, tileCoords, tileSize);
 
 	return tex2Dlod(tile, float4(uv, 0, 0));
 }
 
 float4 TEX2DLOD_TILE(sampler2D tile, float2 uv, float3 tileCoords, float3 tileSize, float size) 
 {
-	uv = tileCoords.xy + uv * tileSize.xy;
+	ScaleUVToTile(uv, tileCoords, tileSize);
 
 	return TEX2DLOD(tile, uv, float2(0.0, 0.0), size);
 }
 
 float4 TEX2DLOD_GOOD_TILE(sampler2D tile, float2 uv, float3 tileCoords, float3 tileSize, float size) 
 {
-	uv = tileCoords.xy + uv * tileSize.xy;
+	ScaleUVToTile(uv, tileCoords, tileSize);
 
 	return TEX2DLOD_GOOD(tile, uv, size);
 }
 
 float4 texTile(sampler2D tile, float2 uv, float3 tileCoords, float3 tileSize) 
 {
-	uv = tileCoords.xy + uv * tileSize.xy;
+	ScaleUVToTile(uv, tileCoords, tileSize);
 
 	return tex2D(tile, uv);
 }
 
 float4 TEX2D_TILE(sampler2D tile, float2 uv, float3 tileCoords, float3 tileSize, float size) 
 {
-	uv = tileCoords.xy + uv * tileSize.xy;
+	ScaleUVToTile(uv, tileCoords, tileSize);
 
 	return TEX2D(tile, uv, size);
 }
 
 float4 TEX2D_GOOD_TILE(sampler2D tile, float2 uv, float3 tileCoords, float3 tileSize, float size) 
 {
-	uv = tileCoords.xy + uv * tileSize.xy;
+	ScaleUVToTile(uv, tileCoords, tileSize);
 
 	return TEX2D_GOOD(tile, uv, size);
 }
