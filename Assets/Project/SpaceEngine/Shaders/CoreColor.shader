@@ -20,7 +20,8 @@
 
 		uniform float _Level;
 
-		uniform float2 _TileSD;	
+		uniform float4 _TileWSD;
+		uniform float2 _TileSD;
 
 		uniform float4 _Offset;
 		uniform float4x4 _LocalToWorld;
@@ -33,8 +34,11 @@
 		}
 
 		void frag(in VertexProducerOutput IN, out float4 output : COLOR)
-		{			
-			float2 vert = (IN.uv0 * _TileSD.y - _TileSD.x) * _Offset.z + _Offset.xy;
+		{		
+			// TODO : Check it out! Test it!	
+			float u = (0.5 + BORDER) / (_TileWSD.x - 1 - BORDER * 2);
+			float2 vert = (IN.uv0 * (1.0 + u * 2.0) - u) * _Offset.z + _Offset.xy;
+			//float2 vert = (IN.uv0 * _TileSD.y - _TileSD.x) * _Offset.z + _Offset.xy;
 				
 			float3 P = float3(vert, _Offset.w);
 			float3 p = normalize(mul(_LocalToWorld, P)).xyz;

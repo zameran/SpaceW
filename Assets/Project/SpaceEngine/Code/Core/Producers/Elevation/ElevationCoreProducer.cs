@@ -97,9 +97,15 @@ namespace SpaceEngine.Core
             //var parentTile = FindTile(level - 1, tx / 2, ty / 2, false, true);
             var rootQuadSize = TerrainNode.TerrainQuadRoot.Length;
 
+            var tileWSD = Vector4.zero;
+            tileWSD.x = (float)tileWidth;
+            tileWSD.y = (float)rootQuadSize / (float)(1 << level) / (float)tileSize;
+            tileWSD.z = (float)tileSize / (float)(TerrainNode.Body.GridResolution - 1);
+            tileWSD.w = 0.0f;
+
             var tileSD = Vector2d.zero;
 
-            tileSD.x = (0.5 + GetBorder()) / (tileSize - 1 - GetBorder() * 2);
+            tileSD.x = (0.5 + GetBorder()) / (tileWidth - 1 - GetBorder() * 2);
             tileSD.y = (1.0 + tileSD.x * 2.0);
 
             var offset = Vector4d.zero;
@@ -109,6 +115,7 @@ namespace SpaceEngine.Core
             offset.z = rootQuadSize / (1 << level);
             offset.w = TerrainNode.Body.Radius;
 
+            ElevationMaterial.SetVector("_TileWSD", tileWSD);
             ElevationMaterial.SetVector("_TileSD", tileSD.ToVector2());
             ElevationMaterial.SetFloat("_Amplitude", TerrainNode.Body.Amplitude);
             ElevationMaterial.SetFloat("_Frequency", TerrainNode.Body.Frequency);

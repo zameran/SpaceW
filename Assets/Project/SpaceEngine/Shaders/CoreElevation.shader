@@ -16,13 +16,13 @@
 
 		#include "Core.cginc"
 
-		#define BORDER 2.0 
+		#define BORDER 2.0							// Tile border size
 
-		uniform float _Frequency;
-		uniform float _Amplitude;
-
+		uniform float4 _TileWSD;
 		uniform float2 _TileSD;	
 
+		uniform float _Amplitude;
+		uniform float _Frequency;
 		uniform float4 _Offset;
 		uniform float4x4 _LocalToWorld;
 
@@ -35,18 +35,21 @@
 
 		void frag(in VertexProducerOutput IN, out float4 output : COLOR)
 		{			
-			float2 vert = (IN.uv0 * _TileSD.y - _TileSD.x) * _Offset.z + _Offset.xy;
+			// TODO : Check it out! Test it!
+			float u = (0.5 + BORDER) / (_TileWSD.x - 1 - BORDER * 2);
+			float2 vert = (IN.uv0 * (1.0 + u * 2.0) - u) * _Offset.z + _Offset.xy;
+			//float2 vert = (IN.uv0 * _TileSD.y - _TileSD.x) * _Offset.z + _Offset.xy;
 				
 			float3 P = float3(vert, _Offset.w);
 			float3 p = normalize(mul(_LocalToWorld, P)).xyz;
 			float3 v = p * _Frequency;
 			
 			//float noise = HeightMapAsteroid(v);
-			float noise = HeightMapPlanet(v) - 1.5;
+			//float noise = HeightMapPlanet(v) - 1.5;
 			//float noise = HeightMapSelena(v);
 			//float noise = HeightMapTerra(v);
 
-			//float noise = Fbm(v, 8);
+			float noise = sNoise(v);
 			
 			float height = _Amplitude * noise;
 							

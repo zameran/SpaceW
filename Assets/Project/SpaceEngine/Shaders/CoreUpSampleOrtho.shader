@@ -17,16 +17,13 @@
 			#include "Core.cginc"
 
 			#pragma target 4.0
-
 			#pragma vertex vert
 			#pragma fragment frag
 			
-			// size in pixels of one tile (including borders)
-			uniform float _TileWidth;
-			// coarse level texture
-			uniform sampler2D _CoarseLevelSampler; 
-			// lower left corner of patch to upsample, one over size in pixels of coarse level texture, layer id
-			uniform float4 _CoarseLevelOSL;
+			uniform float _TileWidth;					// Size in pixels of one tile (including borders)
+
+			uniform sampler2D _CoarseLevelSampler;		// Coarse level texture
+			uniform float4 _CoarseLevelOSL;				// Lower left corner of patch to upsample, one over size in pixels of coarse level texture, layer id
 			
 			uniform sampler2D _ResidualSampler;
 			uniform float4 _ResidualOSH;
@@ -36,7 +33,7 @@
 			uniform float4 _NoiseColor;
 			uniform float4 _NoiseRootColor;
 			
-			static float4 masks[4] = 
+			static float4 _Masks[4] = 
 			{
 				float4(1.0, 3.0, 3.0, 9.0),
 				float4(3.0, 1.0, 9.0, 3.0),
@@ -67,9 +64,9 @@
 				
 				if (_CoarseLevelOSL.x != -1.0) 
 				{
-					float4 mask = masks[int(modi(uv.x, 2.0) + 2.0 * modi(uv.y, 2.0))];
+					float4 mask = _Masks[int(modi(uv.x, 2.0) + 2.0 * modi(uv.y, 2.0))];
 					
-					float4 _offset = float4(floor((uv + float2(1.0,1.0)) * 0.5) * _CoarseLevelOSL.z + _CoarseLevelOSL.xy, 0.0, 0.0);
+					float4 _offset = float4(floor((uv + 1.0) * 0.5) * _CoarseLevelOSL.z + _CoarseLevelOSL.xy, 0.0, 0.0);
 					
 					float4 c0 = tex2Dlod(_CoarseLevelSampler, _offset) * 255.0;
 					float4 c1 = tex2Dlod(_CoarseLevelSampler, _offset + float4(_CoarseLevelOSL.z, 0.0, 0.0, 0.0)) * 255.0;
@@ -81,8 +78,8 @@
 					result = (result - 128.0) * -1.0 + c;
 				}
 				
-				float2 nuv = (uv + float2(0.5, 0.5)) / _TileWidth;
-				float4 uvs = float4(nuv, float2(1.0, 1.0) - nuv);
+				float2 nuv = (uv + 0.5) / _TileWidth;
+				float4 uvs = float4(nuv, 1.0 - nuv);
 				
 				float2 noiseUV = float2(uvs[int(_NoiseUVLH.x)], uvs[int(_NoiseUVLH.y)]);
 				float4 noise = tex2Dlod(_NoiseSampler, float4(noiseUV, 0.0, 0.0)) * 255.0;

@@ -21,26 +21,6 @@ namespace SpaceEngine.Core
     /// </summary>
     public class ElevationProducer : TileProducer
     {
-        public class Uniforms
-        {
-            public int tileWSD, coarseLevelSampler, coarseLevelOSL;
-            public int offset, localToWorld, frequency, amp;
-            public int residualOSH, residualSampler;
-
-            public Uniforms()
-            {
-                tileWSD = Shader.PropertyToID("_TileWSD");
-                coarseLevelSampler = Shader.PropertyToID("_CoarseLevelSampler");
-                coarseLevelOSL = Shader.PropertyToID("_CoarseLevelOSL");
-                offset = Shader.PropertyToID("_Offset");
-                localToWorld = Shader.PropertyToID("_LocalToWorld");
-                frequency = Shader.PropertyToID("_Frequency");
-                amp = Shader.PropertyToID("_Amplitude");
-                residualOSH = Shader.PropertyToID("_ResidualOSH");
-                residualSampler = Shader.PropertyToID("_ResidualSampler");
-            }
-        }
-
         [SerializeField]
         Material UpSampleMaterial;
 
@@ -48,8 +28,6 @@ namespace SpaceEngine.Core
         float[] NoiseAmplitudes = new float[] { -3250.0f, -1590.0f, -1125.0f, -795.0f, -561.0f, -397.0f, -140.0f, -100.0f, 15.0f, 8.0f, 5.0f, 2.5f, 1.5f, 1.0f };
 
         public float AmplitudeDiviner = 1.0f;
-
-        Uniforms uniforms;
 
         protected override void Start()
         {
@@ -76,8 +54,6 @@ namespace SpaceEngine.Core
             {
                 throw new InvalidParameterException("GPUTileStorage filter must be point. There will be seams in the terrain otherwise");
             }
-
-            uniforms = new Uniforms();
         }
 
         protected override void OnDestroy()
@@ -129,28 +105,34 @@ namespace SpaceEngine.Core
             tileWSD.z = (float)tileSize / (float)(TerrainNode.Body.GridResolution - 1);
             tileWSD.w = 0.0f;
 
-            UpSampleMaterial.SetVector(uniforms.tileWSD, tileWSD);
+            var tileSD = Vector2d.zero;
+
+            tileSD.x = (0.5 + GetBorder()) / (tileWidth - 1 - GetBorder() * 2);
+            tileSD.y = (1.0 + tileSD.x * 2.0);
+
+            UpSampleMaterial.SetVector("_TileWSD", tileWSD);
+            UpSampleMaterial.SetVector("_TileSD", tileSD.ToVector2());
 
             if (upsample)
             {
                 var parentTexture = parentGpuSlot.Texture;
-
-                UpSampleMaterial.SetTexture(uniforms.coarseLevelSampler, parentTexture);
 
                 var dx = (float)(tx % 2) * (float)(tileSize / 2.0f);
                 var dy = (float)(ty % 2) * (float)(tileSize / 2.0f);
 
                 var coarseLevelOSL = new Vector4(dx / (float)parentTexture.width, dy / (float)parentTexture.height, 1.0f / (float)parentTexture.width, 0.0f);
 
-                UpSampleMaterial.SetVector(uniforms.coarseLevelOSL, coarseLevelOSL);
+                UpSampleMaterial.SetTexture("_CoarseLevelSampler", parentTexture);
+                UpSampleMaterial.SetVector("_CoarseLevelOSL", coarseLevelOSL);
             }
             else
             {
-                UpSampleMaterial.SetVector(uniforms.coarseLevelOSL, new Vector4(-1.0f, -1.0f, -1.0f, -1.0f));
+                UpSampleMaterial.SetTexture("_CoarseLevelSampler", null);
+                UpSampleMaterial.SetVector("_CoarseLevelOSL", new Vector4(-1.0f, -1.0f, -1.0f, -1.0f));
             }
 
-            UpSampleMaterial.SetTexture(uniforms.residualSampler, null);
-            UpSampleMaterial.SetVector(uniforms.residualOSH, new Vector4(0.0f, 0.0f, 1.0f, 0.0f));
+            UpSampleMaterial.SetTexture("_ResidualSampler", null);
+            UpSampleMaterial.SetVector("_ResidualOSH", new Vector4(0.0f, 0.0f, 1.0f, 0.0f));
 
             var rs = level < NoiseAmplitudes.Length ? NoiseAmplitudes[level] : 0.0f;
 
@@ -163,14 +145,10 @@ namespace SpaceEngine.Core
             offset.z = rootQuadSize / (1 << level);
             offset.w = TerrainNode.Body.Radius;
 
-            //if (level == 0) UpSampleMaterial.SetFloat(uniforms.frequency, TerrainNode.Body.Frequency * (1 << level));
-
-            var ltow = TerrainNode.FaceToLocal.ToMatrix4x4();
-
-            UpSampleMaterial.SetFloat(uniforms.amp, rs * TerrainNode.Body.Amplitude);
-            UpSampleMaterial.SetFloat(uniforms.frequency, TerrainNode.Body.Frequency);
-            UpSampleMaterial.SetVector(uniforms.offset, offset.ToVector4());
-            UpSampleMaterial.SetMatrix(uniforms.localToWorld, ltow);
+            UpSampleMaterial.SetFloat("_Amplitude", rs * 1);
+            UpSampleMaterial.SetFloat("_Frequency", TerrainNode.Body.Frequency * (1 << level));
+            UpSampleMaterial.SetVector("_Offset", offset.ToVector4());
+            UpSampleMaterial.SetMatrix("_LocalToWorld", TerrainNode.FaceToLocal.ToMatrix4x4());
 
             if (TerrainNode.Body.NPS != null) TerrainNode.Body.NPS.SetUniforms(UpSampleMaterial);
             if (TerrainNode.Body.TCCPS != null) TerrainNode.Body.TCCPS.UpdateUniforms(UpSampleMaterial);
