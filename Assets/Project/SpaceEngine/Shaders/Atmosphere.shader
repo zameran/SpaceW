@@ -89,6 +89,7 @@ Shader "SpaceEngine/Atmosphere/Atmosphere"
 			#include "Atmosphere.cginc"
 			#include "SpaceStuff.cginc"
 			#include "Eclipses.cginc"
+			#include "../Code/Enviroment/Atmosphere/New/Atmosphere.cginc"
 
 			#pragma multi_compile LIGHT_1 LIGHT_2 LIGHT_3 LIGHT_4
 			#pragma multi_compile SHINE_ON SHINE_OFF
