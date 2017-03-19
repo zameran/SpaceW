@@ -443,7 +443,8 @@ InverseSolidAngle MiePhaseFunction(Number g, Number nu)
 {
 	InverseSolidAngle k = 3.0 / (8.0 * M_PI * sr) * (1.0 - g * g) / (2.0 + g * g);
 	
-	return k * (1.0 + nu * nu) / pow(1.0 + g * g - 2.0 * g * nu, 1.5);
+	// NOTE : First value in pow method below is absolute! Originaly - not.
+	return k * (1.0 + nu * nu) / pow(abs(1.0 + g * g - 2.0 * g * nu), 1.5);
 }
 
 float4 GetScatteringTextureUvwzFromRMuMuSNu(IN(AtmosphereParameters) atmosphere, Length r, Number mu, Number mu_s, Number nu, bool ray_r_mu_intersects_ground) 
@@ -841,9 +842,9 @@ IrradianceSpectrum ComputeIndirectIrradianceTexture(IN(AtmosphereParameters) atm
 
 IrradianceSpectrum GetIrradiance(IN(AtmosphereParameters) atmosphere, IN(IrradianceTexture) irradiance_texture, Length r, Number mu_s) 
 {
-  float2 uv = GetIrradianceTextureUvFromRMuS(atmosphere, r, mu_s);
+  float4 uv = float4(GetIrradianceTextureUvFromRMuS(atmosphere, r, mu_s), 0.0, 0.0);
 
-  return IrradianceSpectrum(tex2D(irradiance_texture, uv).rgb);
+  return IrradianceSpectrum(tex2Dlod(irradiance_texture, uv).rgb);
 }
 
 #ifdef COMBINED_SCATTERING_TEXTURES
