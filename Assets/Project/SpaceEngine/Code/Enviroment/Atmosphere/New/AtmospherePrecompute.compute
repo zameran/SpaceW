@@ -1,0 +1,68 @@
+﻿// NOTE : Textures naming rule is : [STATE]_[KERNELNAME]_[TEXTURENAME]
+// NOTE : Integers name rule is : In_[KERNELNAME]_[INTEGERNAME]
+
+#include "Atmosphere.cginc"
+
+StructuredBuffer<AtmosphereParameters> atmosphereParameters;
+
+#define NUM_THREADS 8
+#define ATMOSPHERE atmosphereParameters[0]
+#define ID2UV(x) float2(x.xy)
+#define ID2UV_AND_LAYER(x, y) float3(x.xy, y)
+
+//----------------------------------------------------------------------------------------------------------------------------
+#pragma kernel ComputeTransmittance
+
+RWTexture2D<float4> Out_ComputeTransmittance_Transmittance;
+
+[numthreads(NUM_THREADS, NUM_THREADS, 1)]
+void ComputeTransmittance(uint3 id : SV_DispatchThreadID)
+{
+	float3 transmittance = ComputeTransmittanceToTopAtmosphereBoundaryTexture(ATMOSPHERE, ID2UV(id)); 
+
+	Out_ComputeTransmittance_Transmittance[id.xy] = float4(transmittance, 0.0);
+}
+//----------------------------------------------------------------------------------------------------------------------------
+
+//----------------------------------------------------------------------------------------------------------------------------
+#pragma kernel ComputeDirectIrradiance
+
+uniform sampler2D In_ComputeDirectIrradiance_Transmittance;
+
+RWTexture2D<float4> Out_ComputeDirectIrradiance_DeltaIrradiance;
+RWTexture2D<float4> Out_ComputeDirectIrradiance_Irradiance;
+
+[numthreads(NUM_THREADS, NUM_THREADS, 1)]
+void ComputeDirectIrradiance(uint3 id : SV_DispatchThreadID)
+{
+	float3 deltaIrradiance = ComputeDirectIrradianceTexture(ATMOSPHERE, In_ComputeDirectIrradiance_Transmittance, ID2UV(id));
+	float3 irradiance = float3(0.0, 0.0, 0.0);
+
+	Out_ComputeDirectIrradiance_DeltaIrradiance[id.xy] = float4(deltaIrradiance, 0.0);
+	Out_ComputeDirectIrradiance_Irradiance[id.xy] = float4(irradiance, 0.0);
+}
+//----------------------------------------------------------------------------------------------------------------------------
+
+//----------------------------------------------------------------------------------------------------------------------------
+#pragma kernel ComputeSingleScattering
+
+uniform sampler2D In_ComputeSingleScattering_Transmittance;
+uniform int In_ComputeSingleScattering_Layer;
+
+RWTexture2D<float4> Out_ComputeSingleScattering_Rayleigh;
+RWTexture2D<float4> Out_ComputeSingleScattering_DeltaMie;
+RWTexture2D<float4> Out_ComputeSingleScattering_Scattering;
+
+[numthreads(NUM_THREADS, NUM_THREADS, 1)]
+void ComputeSingleScattering(uint3 id : SV_DispatchThreadID)
+{
+	float3 delta_Rayleigh = float3(0.0, 0.0, 0.0);
+	float3 delta_Mie = float3(0.0, 0.0, 0.0);
+
+	ComputeSingleScatteringTexture(ATMOSPHERE, In_ComputeSingleScattering_Transmittance, ID2UV_AND_LAYER(id, In_ComputeSingleScattering_Layer + 0.5), delta_Rayleigh, delta_Mie);
+
+	Out_ComputeSingleScattering_Rayleigh[id.xy] = float4(delta_Rayleigh, 0.0);
+	Out_ComputeSingleScattering_DeltaMie[id.xy] = float4(delta_Mie, 0.0);
+	Out_ComputeSingleScattering_Scattering[id.xy] = float4(delta_Rayleigh.rgb, delta_Mie.r);
+}
+//----------------------------------------------------------------------------------------------------------------------------
