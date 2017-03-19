@@ -18,6 +18,11 @@
 
 		#define BORDER 2.0 
 
+		uniform sampler2D _ElevationSampler;
+		uniform float4 _ElevationOSL;
+		uniform sampler2D _NormalsSampler;
+		uniform float4 _NormalsOSL;
+
 		uniform float _Level;
 
 		uniform float4 _TileWSD;
@@ -30,7 +35,7 @@
 		{	
 			o.pos = mul(UNITY_MATRIX_MVP, v.vertex);
 			o.uv0 = v.texcoord.xy;
-			o.uv1 = v.texcoord.xy;
+			o.uv1 = v.texcoord.xy * _TileWSD.x;
 		}
 
 		void frag(in VertexProducerOutput IN, out float4 output : COLOR)
@@ -44,8 +49,8 @@
 			float3 p = normalize(mul(_LocalToWorld, P)).xyz;
 			float3 v = p;
 			
-			float slope = texTile(_Normals_Tile, IN.uv0.xy, _Normals_TileCoords, _Normals_TileSize).w;
-			float height = texTile(_Elevation_Tile, IN.uv0.xy, _Elevation_TileCoords, _Elevation_TileSize).w;
+			float slope = tex2D(_NormalsSampler, IN.uv0 + _NormalsOSL.xy).w;
+			float height = tex2D(_ElevationSampler, IN.uv0 + _ElevationOSL.xy).w;
 
 			slope = saturate((2.0 * slope - 0.5) * smoothstep(4, 8, _Level)); // NOTE : Limit slope in case of very strong normals on low LOD levels...
 			height = saturate(height);
