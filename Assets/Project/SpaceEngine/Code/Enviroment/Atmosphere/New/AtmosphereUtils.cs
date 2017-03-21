@@ -66,6 +66,7 @@
 
 using System;
 
+using UnityEngine;
 using UnityEngine.Assertions;
 
 namespace SpaceEngine.AtmosphericScatteringAcurate
@@ -77,6 +78,15 @@ namespace SpaceEngine.AtmosphericScatteringAcurate
         public const double kLambdaR = 680.0;
         public const double kLambdaG = 550.0;
         public const double kLambdaB = 440.0;
+
+        public static Vector3 ToVector(double[] l, double[] v, double scale)
+        {
+            var r = Interpolate(l, v, kLambdaR) * scale;
+            var g = Interpolate(l, v, kLambdaG) * scale;
+            var b = Interpolate(l, v, kLambdaB) * scale;
+
+            return new Vector3((float)r, (float)g, (float)b);
+        }
 
         public static double Interpolate(double[] wavelengths, double[] wavelength_function, double wavelength)
         {

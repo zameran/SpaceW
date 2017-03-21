@@ -33,10 +33,16 @@
 // Creator: zameran
 #endregion
 
+using System;
+using System.Collections.Generic;
+
 using UnityEngine;
+
+using Model = SpaceEngine.AtmosphericScatteringAcurate.AtmosphereModel;
 
 namespace SpaceEngine.AtmosphericScatteringAcurate
 {
+    [Serializable]
     public struct AtmosphereParameters
     {
         /// <summary>
@@ -101,5 +107,75 @@ namespace SpaceEngine.AtmosphericScatteringAcurate
         /// Earth case, 102 degrees is a good choice - yielding mu_s_min = -0.2).
         /// </summary>
         public float mu_s_min;
+
+        public AtmosphereParameters(Vector3 solarIrradiance, float sunAngularRadius, float bottomRadius, float topRadius, float rayleighScaleHeight, Vector3 rayleighScattering, float mieScaleHeight, Vector3 mieScattering, Vector3 mieExtinction, float miePhaseFunctionG, Vector3 groundAlbedo, float muSMin)
+        {
+            solar_irradiance = solarIrradiance;
+            sun_angular_radius = sunAngularRadius;
+            bottom_radius = bottomRadius;
+            top_radius = topRadius;
+            rayleigh_scale_height = rayleighScaleHeight;
+            rayleigh_scattering = rayleighScattering;
+            mie_scale_height = mieScaleHeight;
+            mie_scattering = mieScattering;
+            mie_extinction = mieExtinction;
+            mie_phase_function_g = miePhaseFunctionG;
+            ground_albedo = groundAlbedo;
+            mu_s_min = muSMin;
+        }
+
+        public static AtmosphereParameters Default(bool useConstantSolarSpectrum)
+        {
+            List<double> _wavelengths = new List<double>();
+            List<double> _solar_irradiance = new List<double>();
+            List<double> _rayleigh_scattering = new List<double>();
+            List<double> _mie_scattering = new List<double>();
+            List<double> _mie_extinction = new List<double>();
+            List<double> _ground_albedo = new List<double>();
+
+            for (uint l = AtmosphereUtils.kLambdaMin; l < AtmosphereUtils.kLambdaMax; l += 10)
+            {
+                var lambda = (double)l * 1e-3;  // Micro-meters...
+                var mie = Model.kMieAngstromBeta / Model.kMieScaleHeight * Math.Pow(lambda, -Model.kMieAngstromAlpha);
+
+                _wavelengths.Add(l);
+                _solar_irradiance.Add(useConstantSolarSpectrum ? Model.kConstantSolarIrradiance : Model.kSolarIrradiance[(l - Model.kLambdaMin) / 10]);
+                _rayleigh_scattering.Add(Model.kRayleigh * Math.Pow(lambda, -4));
+                _mie_scattering.Add(mie * Model.kMieSingleScatteringAlbedo);
+                _mie_extinction.Add(mie);
+                _ground_albedo.Add(Model.kGroundAlbedo);
+            }
+
+            double sky_k_r = 0;
+            double sky_k_g = 0;
+            double sky_k_b = 0;
+            AtmosphereUtils.ComputeSpectralRadianceToLuminanceFactors(_wavelengths.ToArray(), _solar_irradiance.ToArray(), -3, ref sky_k_r, ref sky_k_g, ref sky_k_b);
+
+            double sun_k_r = 0;
+            double sun_k_g = 0;
+            double sun_k_b = 0;
+            AtmosphereUtils.ComputeSpectralRadianceToLuminanceFactors(_wavelengths.ToArray(), _solar_irradiance.ToArray(), 0, ref sun_k_r, ref sun_k_g, ref sun_k_b);
+
+            Vector3 solarIrradiance = AtmosphereUtils.ToVector(_wavelengths.ToArray(), _solar_irradiance.ToArray(), 1.0);
+            Vector3 rayLeighScattering = AtmosphereUtils.ToVector(_wavelengths.ToArray(), _rayleigh_scattering.ToArray(), Model.kLengthUnitInMeters);
+            Vector3 mieScattering = AtmosphereUtils.ToVector(_wavelengths.ToArray(), _mie_scattering.ToArray(), Model.kLengthUnitInMeters);
+            Vector3 mieExtinction = AtmosphereUtils.ToVector(_wavelengths.ToArray(), _mie_extinction.ToArray(), Model.kLengthUnitInMeters);
+            Vector3 groundAlbedo = AtmosphereUtils.ToVector(_wavelengths.ToArray(), _ground_albedo.ToArray(), 1.0);
+            Vector3 skyK = new Vector3((float)sky_k_r, (float)sky_k_g, (float)sky_k_b);
+            Vector3 sunK = new Vector3((float)sun_k_r, (float)sun_k_g, (float)sun_k_b);
+
+            double maxSunZenithAngle = Math.Cos(Model.kMaxSunZenithAngle);
+
+            return new AtmosphereParameters(solarIrradiance, (float)Model.kSunAngularRadius, (float)(Model.kBottomRadius / Model.kLengthUnitInMeters),
+                                                                                (float)(Model.kTopRadius / Model.kLengthUnitInMeters),
+                                                                                (float)(Model.kRayleighScaleHeight / Model.kLengthUnitInMeters),
+                                                                                rayLeighScattering,
+                                                                                (float)(Model.kMieScaleHeight / Model.kLengthUnitInMeters),
+                                                                                mieScattering,
+                                                                                mieExtinction,
+                                                                                (float)Model.kMiePhaseFunctionG,
+                                                                                groundAlbedo,
+                                                                                (float)maxSunZenithAngle);
+        }
     }
 }

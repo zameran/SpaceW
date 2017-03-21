@@ -137,6 +137,9 @@ uint SCATTERING_TEXTURE_NU_SIZE = 8;
 
 uint IRRADIANCE_TEXTURE_WIDTH = 64;
 uint IRRADIANCE_TEXTURE_HEIGHT = 16;
+
+uniform float SKY_SPECTRAL_RADIANCE_TO_LUMINANCE;
+uniform float SUN_SPECTRAL_RADIANCE_TO_LUMINANCE;
 //----------------------------------------------------------------------------------------------------------------------------
 
 //----------------------------------------------------------------------------------------------------------------------------
