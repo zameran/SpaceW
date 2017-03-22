@@ -38,7 +38,6 @@ using SpaceEngine.AtmosphericScattering;
 using SpaceEngine.Core.Reanimator;
 using SpaceEngine.Core.Terrain;
 using SpaceEngine.Core.Tile.Samplers;
-using SpaceEngine.Core.Utilities;
 using SpaceEngine.Ocean;
 
 using System.Collections.Generic;
@@ -270,11 +269,6 @@ namespace SpaceEngine.Core.Bodies
                     Ring.body = this;
             }
 
-            // TODO : AAAAAAAAA CRAZY STUFF!
-            var view = GodManager.Instance.View as PlanetView;
-            if (view != null)
-                view.Radius = Radius;
-
             QuadMesh = MeshFactory.MakePlane(GridResolution, GridResolution, MeshFactory.PLANE.XY, true, false, false);
             QuadMesh.bounds = new Bounds(Vector3.zero, new Vector3(1e8f, 1e8f, 1e8f));
 
@@ -316,7 +310,8 @@ namespace SpaceEngine.Core.Bodies
             }
 
             // NOTE : Update controller and the draw. This can help avoid terrain nodes jitter...
-            GodManager.Instance.Controller.UpdateController();
+            if (GodManager.Instance.ActiveBody == this)
+                GodManager.Instance.UpdateControllerWrapper();
 
             foreach (var tileSampler in TileSamplers)
             {
