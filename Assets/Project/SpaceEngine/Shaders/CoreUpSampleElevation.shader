@@ -163,7 +163,7 @@
 				o.uv0 = v.texcoord.xy;
 				o.uv1 = v.texcoord.xy * _TileWSD.x;
 			}
-			
+					
 			float mdot(float4x4 a, float4x4 b) 
 			{
 				return dot(a[0], b[0]) + dot(a[1], b[1]) + dot(a[2], b[2]) + dot(a[3], b[3]);
@@ -196,7 +196,7 @@
 					tex2Dlod(_CoarseLevelSampler, float4(uv + float2(2.0, 3.0) *  _CoarseLevelOSL.z, 0.0, 0.0)).x,
 					tex2Dlod(_CoarseLevelSampler, float4(uv + float2(3.0, 3.0) *  _CoarseLevelOSL.z, 0.0, 0.0)).x
 				};
-				
+
 				int i = int(dot(frac(p_uv), float2(2.0, 4.0)));
 				float3 n = float3(mdot(cz, slopexMatrix[i]), mdot(cz, slopeyMatrix[i]), 2.0 * _TileWSD.y);
 				float slope = length(n.xy) / n.z;
