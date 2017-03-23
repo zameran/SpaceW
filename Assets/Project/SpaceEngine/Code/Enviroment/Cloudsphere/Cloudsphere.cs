@@ -34,12 +34,13 @@
 #endregion
 
 using SpaceEngine.Core.Bodies;
+using SpaceEngine.Core.Patterns.Strategy;
 
 using UnityEngine;
 
 namespace SpaceEngine.AtmosphericScattering.Cloudsphere
 {
-    public class Cloudsphere : Node<Cloudsphere>, IUniformed<Material>
+    public class Cloudsphere : Node<Cloudsphere>, IUniformed<Material>, IRenderable<Cloudsphere>
     {
         public CelestialBody body;
 
@@ -138,14 +139,18 @@ namespace SpaceEngine.AtmosphericScattering.Cloudsphere
 
         #endregion
 
-        public void Render()
+        #region IRenderable
+
+        public void Render(int layer = 0)
         {
             if (CloudsphereMesh == null) return;
 
             var CloudsTRS = Matrix4x4.TRS(body.transform.position, transform.rotation, Vector3.one * (Radius + Height));
 
-            Graphics.DrawMesh(CloudsphereMesh, CloudsTRS, CloudMaterial, 0, CameraHelper.Main(), 0, body.MPB);
+            Graphics.DrawMesh(CloudsphereMesh, CloudsTRS, CloudMaterial, layer, CameraHelper.Main(), 0, body.MPB);
         }
+
+        #endregion
 
         public void InitMaterials()
         {

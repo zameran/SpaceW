@@ -34,6 +34,7 @@
 #endregion
 
 using SpaceEngine.Core.Bodies;
+using SpaceEngine.Core.Patterns.Strategy;
 
 using System.Collections.Generic;
 
@@ -41,7 +42,7 @@ using UnityEngine;
 
 using ZFramework.Unity.Common.PerfomanceMonitor;
 
-public class Ring : Node<Ring>, IUniformed<Material>
+public class Ring : Node<Ring>, IUniformed<Material>, IRenderable<Ring>
 {
     public CelestialBody body;
 
@@ -187,6 +188,24 @@ public class Ring : Node<Ring>, IUniformed<Material>
 
     #endregion
 
+    #region IRenderable
+
+    public void Render(int layer = 0)
+    {
+        if (Segments == null) return;
+        if (Segments.Count == 0) return;
+
+        for (int i = 0; i < Segments.Count; i++)
+        {
+            if (Segments[i] != null)
+            {
+                Segments[i].Render(layer);
+            }
+        }
+    }
+
+    #endregion
+
     private void OnEnable()
     {
         for (var i = Segments.Count - 1; i >= 0; i--)
@@ -226,20 +245,6 @@ public class Ring : Node<Ring>, IUniformed<Material>
 #endif
 
     #endregion
-
-    public void Render()
-    {
-        if (Segments == null) return;
-        if (Segments.Count == 0) return;
-
-        for (int i = 0; i < Segments.Count; i++)
-        {
-            if (Segments[i] != null)
-            {
-                Segments[i].Render();
-            }
-        }
-    }
 
     public void SetLightsAndShadows(Material mat)
     {
