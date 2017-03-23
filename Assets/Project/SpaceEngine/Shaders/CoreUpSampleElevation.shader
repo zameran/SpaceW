@@ -203,7 +203,6 @@
 				float curvature = mdot(cz, curvatureMatrix[i]) / _TileWSD.y;
 				float noiseAmp = max(clamp(4.0 * curvature, 0.0, 1.5), clamp(2.0 * slope - 0.5, 0.1, 4.0));
 				
-				// TODO : Check it out! Test it!
 				float u = (0.5 + BORDER) / (_TileWSD.x - 1 - BORDER * 2);
 				float2 vert = (IN.uv0 * (1.0 + u * 2.0) - u) * _Offset.z + _Offset.xy;
 				//float2 vert = (IN.uv0 * _TileSD.y - _TileSD.x) * _Offset.z + _Offset.xy;

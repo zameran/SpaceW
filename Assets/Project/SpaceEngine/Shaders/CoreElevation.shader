@@ -18,6 +18,9 @@
 
 		#define BORDER 2.0							// Tile border size
 
+		uniform sampler2D _ResidualSampler;
+		uniform float4 _ResidualOSH;
+
 		uniform float4 _TileWSD;
 		uniform float2 _TileSD;	
 
@@ -30,15 +33,18 @@
 		{	
 			o.pos = mul(UNITY_MATRIX_MVP, v.vertex);
 			o.uv0 = v.texcoord.xy;
-			o.uv1 = v.texcoord.xy;
+			o.uv1 = v.texcoord.xy * _TileWSD.x;
 		}
 
 		void frag(in VertexProducerOutput IN, out float4 output : COLOR)
 		{			
-			// TODO : Check it out! Test it!
 			float u = (0.5 + BORDER) / (_TileWSD.x - 1 - BORDER * 2);
 			float2 vert = (IN.uv0 * (1.0 + u * 2.0) - u) * _Offset.z + _Offset.xy;
 			//float2 vert = (IN.uv0 * _TileSD.y - _TileSD.x) * _Offset.z + _Offset.xy;
+
+			float2 p_uv = floor(IN.uv1) * 0.5;
+			float2 residual_uv = p_uv * _ResidualOSH.z + _ResidualOSH.xy;
+			float residual_value = _ResidualOSH.w * tex2D(_ResidualSampler, residual_uv).x;
 				
 			float3 P = float3(vert, _Offset.w);
 			float3 p = normalize(mul(_LocalToWorld, P)).xyz;
@@ -50,6 +56,8 @@
 			//float noise = HeightMapTerra(v);
 
 			float noise = sNoise(v);
+
+			noise += residual_value; // Apply residual value!
 			
 			float height = _Amplitude * noise;
 							

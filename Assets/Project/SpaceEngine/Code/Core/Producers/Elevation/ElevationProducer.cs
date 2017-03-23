@@ -21,11 +21,13 @@ namespace SpaceEngine.Core
     /// </summary>
     public class ElevationProducer : TileProducer
     {
-        [SerializeField]
-        Material UpSampleMaterial;
+        public GameObject ResidualProducerGameObject;
 
-        [SerializeField]
-        float[] NoiseAmplitudes = new float[] { -3250.0f, -1590.0f, -1125.0f, -795.0f, -561.0f, -397.0f, -140.0f, -100.0f, 15.0f, 8.0f, 5.0f, 2.5f, 1.5f, 1.0f };
+        private TileProducer ResidualProducer;
+
+        public Material UpSampleMaterial;
+
+        public float[] NoiseAmplitudes = new float[] { -3250.0f, -1590.0f, -1125.0f, -795.0f, -561.0f, -397.0f, -140.0f, -100.0f, 15.0f, 8.0f, 5.0f, 2.5f, 1.5f, 1.0f };
 
         public float AmplitudeDiviner = 1.0f;
 
@@ -35,12 +37,20 @@ namespace SpaceEngine.Core
 
             if (TerrainNode == null) { TerrainNode = transform.parent.GetComponent<TerrainNode>(); }
             if (TerrainNode.Body == null) { TerrainNode.Body = transform.parent.GetComponentInParent<CelestialBody>(); }
+            if (ResidualProducer == null) { ResidualProducer = ResidualProducerGameObject.GetComponent<TileProducer>(); }
+            if (ResidualProducer.Cache == null) { ResidualProducer.InitCache(); }
 
             var tileSize = GetTileSize(0);
 
             if ((tileSize - GetBorder() * 2 - 1) % (TerrainNode.Body.GridResolution - 1) != 0)
             {
                 throw new InvalidParameterException("Tile size - border * 2 - 1 must be divisible by grid mesh resolution - 1" + string.Format(": {0}-{1}", tileSize, GetBorder()));
+            }
+
+            if (ResidualProducer != null)
+            {
+                if (ResidualProducer.GetTileSize(0) != tileSize) throw new InvalidParameterException("Residual tile size must match elevation tile size!");
+                if (!(ResidualProducer.Cache.GetStorage(0) is GPUTileStorage)) throw new InvalidStorageException("Residual storage must be a GPUTileStorage");
             }
 
             var storage = Cache.GetStorage(0) as GPUTileStorage;
@@ -88,6 +98,38 @@ namespace SpaceEngine.Core
             var upsample = level > 0;
             var parentTile = FindTile(level - 1, tx / 2, ty / 2, false, true);
 
+            if (ResidualProducer != null)
+            {
+                if (ResidualProducer.HasTile(level, tx, ty))
+                {
+                    GPUTileStorage.GPUSlot residualGpuSlot = null;
+
+                    var residualTile = ResidualProducer.FindTile(level, tx, ty, false, true);
+
+                    if (residualTile != null)
+                        residualGpuSlot = residualTile.GetSlot(0) as GPUTileStorage.GPUSlot;
+                    else
+                    { throw new MissingTileException("Find residual tile failed"); }
+
+                    if (residualGpuSlot == null) { throw new MissingTileException("Find parent tile failed"); }
+
+                    UpSampleMaterial.SetTexture("_ResidualSampler", residualGpuSlot.Texture);
+                    UpSampleMaterial.SetVector("_ResidualOSH", new Vector4(0.25f / (float)tileWidth, 0.25f / (float)tileWidth, 2.0f / (float)tileWidth, 1.0f));
+                }
+                else
+                {
+                    UpSampleMaterial.SetTexture("_ResidualSampler", null);
+                    UpSampleMaterial.SetVector("_ResidualOSH", new Vector4(0.0f, 0.0f, 1.0f, 0.0f));
+
+                    Debug.LogError(string.Format("Residual tile exist, but can't find any suitable tile at {0}:{1}:{2}!", level, tx, ty));
+                }
+            }
+            else
+            {
+                UpSampleMaterial.SetTexture("_ResidualSampler", null);
+                UpSampleMaterial.SetVector("_ResidualOSH", new Vector4(0.0f, 0.0f, 1.0f, 0.0f));
+            }
+
             if (upsample)
             {
                 if (parentTile != null)
@@ -130,9 +172,6 @@ namespace SpaceEngine.Core
                 UpSampleMaterial.SetTexture("_CoarseLevelSampler", null);
                 UpSampleMaterial.SetVector("_CoarseLevelOSL", new Vector4(-1.0f, -1.0f, -1.0f, -1.0f));
             }
-
-            UpSampleMaterial.SetTexture("_ResidualSampler", null);
-            UpSampleMaterial.SetVector("_ResidualOSH", new Vector4(0.0f, 0.0f, 1.0f, 0.0f));
 
             var rs = level < NoiseAmplitudes.Length ? NoiseAmplitudes[level] : 0.0f;
 

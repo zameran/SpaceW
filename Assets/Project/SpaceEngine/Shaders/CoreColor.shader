@@ -39,8 +39,7 @@
 		}
 
 		void frag(in VertexProducerOutput IN, out float4 output : COLOR)
-		{		
-			// TODO : Check it out! Test it!	
+		{
 			float u = (0.5 + BORDER) / (_TileWSD.x - 1 - BORDER * 2);
 			float2 vert = (IN.uv0 * (1.0 + u * 2.0) - u) * _Offset.z + _Offset.xy;
 			//float2 vert = (IN.uv0 * _TileSD.y - _TileSD.x) * _Offset.z + _Offset.xy;
