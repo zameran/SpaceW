@@ -35,9 +35,9 @@
 #endregion
 
 using SpaceEngine.AtmosphericScattering;
+using SpaceEngine.Core.Reanimator;
 using SpaceEngine.Core.Terrain;
 using SpaceEngine.Core.Tile.Samplers;
-using SpaceEngine.Core.Utilities;
 using SpaceEngine.Ocean;
 
 using System.Collections.Generic;
@@ -47,7 +47,7 @@ using UnityEngine;
 
 namespace SpaceEngine.Core.Bodies
 {
-    public class CelestialBody : Node<CelestialBody>, ICelestialBody, IUniformed<MaterialPropertyBlock>
+    public class CelestialBody : Node<CelestialBody>, ICelestialBody, IUniformed<MaterialPropertyBlock>, IReanimateable
     {
         public Atmosphere Atmosphere;
         public OceanNode Ocean;
@@ -59,8 +59,9 @@ namespace SpaceEngine.Core.Bodies
 
         public bool DrawGizmos = false;
 
-        public bool AtmosphereEnabled = true;
         public bool RingEnabled = true;
+        public bool AtmosphereEnabled = true;
+        public bool OceanEnabled = true;
 
         public float Amplitude = 32.0f;
         public float Frequency = 64.0f;
@@ -99,21 +100,28 @@ namespace SpaceEngine.Core.Bodies
 
             if (Ring != null)
             {
-                Keywords.Add(RingEnabled ? "RING_ON" : "RING_OFF");
-                if (RingEnabled) Keywords.Add("SCATTERING");
-
-                var shadowsCount = Shadows.Count((shadow) => shadow != null && Helper.Enabled(shadow));
-
-                if (shadowsCount > 0 && GodManager.Instance.Eclipses)
+                if (RingEnabled)
                 {
-                    for (byte i = 0; i < shadowsCount; i++)
+                    Keywords.Add("RING_ON");
+                    Keywords.Add("SCATTERING");
+
+                    var shadowsCount = Shadows.Count((shadow) => shadow != null && Helper.Enabled(shadow));
+
+                    if (shadowsCount > 0 && GodManager.Instance.Eclipses)
                     {
-                        Keywords.Add("SHADOW_" + (i + 1));
+                        for (byte i = 0; i < shadowsCount; i++)
+                        {
+                            Keywords.Add("SHADOW_" + (i + 1));
+                        }
+                    }
+                    else
+                    {
+                        Keywords.Add("SHADOW_0");
                     }
                 }
                 else
                 {
-                    Keywords.Add("SHADOW_0");
+                    Keywords.Add("RING_OFF");
                 }
             }
             else
@@ -157,7 +165,14 @@ namespace SpaceEngine.Core.Bodies
 
                 if (Ocean != null)
                 {
-                    Keywords.Add("OCEAN_ON");
+                    if (OceanEnabled)
+                    {
+                        Keywords.Add("OCEAN_ON");
+                    }
+                    else
+                    {
+                        Keywords.Add("OCEAN_OFF");
+                    }
                 }
                 else
                 {
@@ -210,6 +225,25 @@ namespace SpaceEngine.Core.Bodies
 
         #endregion
 
+        #region IReanimateable
+
+        public void Reanimate()
+        {
+            foreach (var terrainNode in TerrainNodes)
+            {
+                if (Helper.Enabled(terrainNode))
+                {
+                    if (Atmosphere != null)
+                    {
+                        Atmosphere.InitUniforms(terrainNode.TerrainMaterial);
+                        Atmosphere.SetUniforms(terrainNode.TerrainMaterial);
+                    }
+                }
+            }
+        }
+
+        #endregion
+
         #region Node
 
         protected override void InitNode()
@@ -235,11 +269,6 @@ namespace SpaceEngine.Core.Bodies
                     Ring.body = this;
             }
 
-            // TODO : AAAAAAAAA CRAZY STUFF!
-            var view = GodManager.Instance.View as PlanetView;
-            if (view != null)
-                view.Radius = Radius;
-
             QuadMesh = MeshFactory.MakePlane(GridResolution, GridResolution, MeshFactory.PLANE.XY, true, false, false);
             QuadMesh.bounds = new Bounds(Vector3.zero, new Vector3(1e8f, 1e8f, 1e8f));
 
@@ -256,9 +285,6 @@ namespace SpaceEngine.Core.Bodies
 
         protected override void UpdateNode()
         {
-            //var value = Time.deltaTime * Mathf.Sin(Time.time * 2) * 100000;
-            //Origin += new Vector3(0, 0, value);
-
             if (Atmosphere != null)
             {
                 if (AtmosphereEnabled)
@@ -269,16 +295,23 @@ namespace SpaceEngine.Core.Bodies
 
             if (Ocean != null)
             {
-                Ocean.Render();
+                if (OceanEnabled)
+                {
+                    Ocean.Render();
+                }
             }
 
             if (Ring != null)
             {
-                Ring.Render();
+                if (RingEnabled)
+                {
+                    Ring.Render();
+                }
             }
 
             // NOTE : Update controller and the draw. This can help avoid terrain nodes jitter...
-            GodManager.Instance.Controller.UpdateController();
+            if (GodManager.Instance.ActiveBody == this)
+                GodManager.Instance.UpdateControllerWrapper();
 
             foreach (var tileSampler in TileSamplers)
             {
@@ -292,7 +325,7 @@ namespace SpaceEngine.Core.Bodies
             {
                 if (Helper.Enabled(terrainNode))
                 {
-                    DrawTerrain1(terrainNode);
+                    DrawTerrain(terrainNode);
                 }
             }
 
@@ -328,17 +361,7 @@ namespace SpaceEngine.Core.Bodies
         {
             if (focusStatus != true) return;
 
-            foreach (var terrainNode in TerrainNodes)
-            {
-                if (Helper.Enabled(terrainNode))
-                {
-                    if (Atmosphere != null)
-                    {
-                        Atmosphere.InitUniforms(terrainNode.TerrainMaterial);
-                        Atmosphere.SetUniforms(terrainNode.TerrainMaterial);
-                    }
-                }
-            }
+            Reanimate();
 
             if (Atmosphere != null) Atmosphere.Reanimate();
             if (Ocean != null) Ocean.Reanimate();
@@ -351,21 +374,7 @@ namespace SpaceEngine.Core.Bodies
             var samplers = allSamplers.Where(sampler => sampler.enabled && sampler.StoreLeaf).ToList();
 
             if (samplers.Count == 0) return;
-
-            // Find all the quads in the terrain node that need to be drawn
-            FindDrawableQuads(node.TerrainQuadRoot, samplers);
-
-            // The draw them
-            DrawQuad(node, node.TerrainQuadRoot, samplers);
-        }
-
-        private void DrawTerrain1(TerrainNode node)
-        {
-            // Get all the samplers attached to the terrain node. The samples contain the data need to draw the quad
-            var allSamplers = node.transform.GetComponentsInChildren<TileSampler>();
-            var samplers = allSamplers.Where(sampler => sampler.enabled && sampler.StoreLeaf).ToList();
-
-            if (samplers.Count == 0) return;
+            if (samplers.Count > 255) { Debug.Log(string.Format("CelestialBody: Tomuch samplers! {0}", samplers.Count)); return; }
 
             // Find all the quads in the terrain node that need to be drawn
             FindDrawableQuads(node.TerrainQuadRoot, samplers);
@@ -449,7 +458,7 @@ namespace SpaceEngine.Core.Bodies
             {
                 //ReSetMPB();
 
-                for (int i = 0; i < samplers.Count; ++i)
+                for (byte i = 0; i < samplers.Count; ++i)
                 {
                     // Set the unifroms needed to draw the texture for this sampler
                     samplers[i].SetTile(MPB, quad.Level, quad.Tx, quad.Ty);
@@ -488,7 +497,7 @@ namespace SpaceEngine.Core.Bodies
 
                     //ReSetMPB();
 
-                    for (int i = 0; i < samplers.Count; ++i)
+                    for (byte i = 0; i < samplers.Count; ++i)
                     {
                         // Set the unifroms needed to draw the texture for this sampler
                         samplers[i].SetTile(MPB, quad.Level, quad.Tx, quad.Ty);

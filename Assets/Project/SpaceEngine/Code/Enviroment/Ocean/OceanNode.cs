@@ -1,5 +1,6 @@
 ﻿using SpaceEngine.AtmosphericScattering;
 using SpaceEngine.Core.Bodies;
+using SpaceEngine.Core.Patterns.Strategy;
 using SpaceEngine.Core.Reanimator;
 
 using System.Collections;
@@ -11,7 +12,7 @@ namespace SpaceEngine.Ocean
     /// <summary>
     /// An AbstractTask to draw a flat or spherical ocean. This class provides the functions and data to draw a flat projected grid but nothing else.
     /// </summary>
-    public abstract class OceanNode : Node<OceanNode>, IUniformed<Material>, IUniformed<MaterialPropertyBlock>, IReanimateable, IEventit
+    public abstract class OceanNode : Node<OceanNode>, IUniformed<Material>, IUniformed<MaterialPropertyBlock>, IReanimateable, IEventit, IRenderable<OceanNode>
     {
         public enum OceanSurfaceType : byte
         {
@@ -364,6 +365,22 @@ namespace SpaceEngine.Ocean
 
         #endregion
 
+        #region IRenderable
+
+        public void Render(int layer = 0)
+        {
+            if (DrawOcean == false) return;
+
+            foreach (var mesh in ScreenMeshGrids)
+            {
+                if (mesh == null) break;
+
+                Graphics.DrawMesh(mesh, Matrix4x4.identity, OceanMaterial, layer, CameraHelper.Main(), 0, body.MPB);
+            }
+        }
+
+        #endregion
+
         /// <summary>
         /// Inverting <see cref="ZMin"/> with interval to switch the matrices for rendering.
         /// </summary>
@@ -373,16 +390,6 @@ namespace SpaceEngine.Ocean
             ZMin *= -1.0f;
             yield return Yielders.EndOfFrame;
             ZMin *= -1.0f;
-        }
-
-        public void Render()
-        {
-            if (DrawOcean == false) return;
-
-            foreach (var mesh in ScreenMeshGrids)
-            {
-                Graphics.DrawMesh(mesh, Matrix4x4.identity, OceanMaterial, 0, CameraHelper.Main(), 0, body.MPB);
-            }
         }
     }
 }

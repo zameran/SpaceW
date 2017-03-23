@@ -160,7 +160,7 @@ namespace SpaceEngine.Core.Terrain
 
             Deformation = new DeformationSpherical(Body.Radius);
 
-            TerrainQuadRoot = new TerrainQuad(this, null, 0, 0, -Body.Radius, -Body.Radius, 2.0 * Body.Radius, ZMin, ZMax);
+            CreateTerrainQuadRoot();
         }
 
         protected override void UpdateNode()
@@ -208,14 +208,24 @@ namespace SpaceEngine.Core.Terrain
 
             TerrainQuadRoot.UpdateLOD();
 
-            if (Body.Atmosphere != null)
+            if (Body.AtmosphereEnabled)
             {
-                Body.Atmosphere.SetUniforms(TerrainMaterial);
+                if (Body.Atmosphere != null)
+                {
+                    Body.Atmosphere.SetUniforms(TerrainMaterial);
+                }
             }
 
-            if (Body.Ocean != null)
+            if (Body.OceanEnabled)
             {
-                Body.Ocean.SetUniforms(TerrainMaterial);
+                if (Body.Ocean != null)
+                {
+                    Body.Ocean.SetUniforms(TerrainMaterial);
+                }
+                else
+                {
+                    TerrainMaterial.SetFloat("_Ocean_DrawBRDF", 0.0f);
+                }
             }
             else
             {
@@ -255,6 +265,13 @@ namespace SpaceEngine.Core.Terrain
         }
 
         #endregion
+
+        private void CreateTerrainQuadRoot()
+        {
+            if (TerrainQuadRoot != null) { Debug.Log("Hey! You're gonna create quad root, but it's already exist!"); return; }
+
+            TerrainQuadRoot = new TerrainQuad(this, null, 0, 0, -Body.Radius, -Body.Radius, 2.0 * Body.Radius, ZMin, ZMax);
+        }
 
         public void SetPerQuadUniforms(TerrainQuad quad, MaterialPropertyBlock matPropertyBlock)
         {

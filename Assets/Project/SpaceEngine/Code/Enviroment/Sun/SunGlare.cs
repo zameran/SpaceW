@@ -33,12 +33,14 @@
 // Creator: zameran
 #endregion
 
+using SpaceEngine.Core.Patterns.Strategy;
 
 using UnityEngine;
 
 namespace SpaceEngine.AtmosphericScattering.Sun
 {
-    public sealed class SunGlare : Node<SunGlare>, IUniformed<Material>
+    // TODO : Render it! [Call Render() somewhere...]
+    public sealed class SunGlare : Node<SunGlare>, IUniformed<Material>, IRenderable<SunGlare>
     {
         private CachedComponent<AtmosphereSun> SunCachedComponent = new CachedComponent<AtmosphereSun>();
 
@@ -150,13 +152,6 @@ namespace SpaceEngine.AtmosphericScattering.Sun
 
         protected override void Update()
         {
-            if (ViewPortPosition.z > 0)
-            {
-                if (Atmosphere == null) return;
-
-                Graphics.DrawMesh(SunGlareMesh, Vector3.zero, Quaternion.identity, SunGlareMaterial, 8, CameraHelper.Main(), 0, Atmosphere.body.MPB, false, false);
-            }
-
             base.Update();
         }
 
@@ -223,6 +218,22 @@ namespace SpaceEngine.AtmosphericScattering.Sun
         {
             InitUniforms(SunGlareMaterial);
             SetUniforms(SunGlareMaterial);
+        }
+
+        #endregion
+
+        #region IRenderable
+
+        public void Render(int layer = 8)
+        {
+            if (SunGlareMesh == null) return;
+
+            if (ViewPortPosition.z > 0)
+            {
+                if (Atmosphere == null) return;
+
+                Graphics.DrawMesh(SunGlareMesh, Vector3.zero, Quaternion.identity, SunGlareMaterial, layer, CameraHelper.Main(), 0, Atmosphere.body.MPB, false, false);
+            }
         }
 
         #endregion

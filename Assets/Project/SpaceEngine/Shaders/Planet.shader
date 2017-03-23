@@ -38,6 +38,8 @@
 		void VERTEX_POSITION(in float4 vertex, in float2 texcoord, out float4 position, out float3 localPosition, out float2 uv)
 		{
 			float2 zfc = texTileLod(_Elevation_Tile, texcoord, _Elevation_TileCoords, _Elevation_TileSize).xy;
+			//float2 zfc = TEX2DLOD_TILE(_Elevation_Tile, texcoord, _Elevation_TileCoords, _Elevation_TileSize, _Elevation_TileSize * 10.0).xy;
+			//float2 zfc = TEX2DLOD_GOOD_TILE(_Elevation_Tile, texcoord, _Elevation_TileCoords, _Elevation_TileSize, _Elevation_TileSize * 10.0).xy;
 				
 			if (zfc.x <= _Ocean_Level && _Ocean_DrawBRDF == 1.0) { zfc = float2(0, 0); }
 			
@@ -104,13 +106,14 @@
 			#pragma vertex vert
 			#pragma fragment frag
 
+			#pragma multi_compile OCEAN_ON OCEAN_OFF
 			#pragma multi_compile SHADOW_0 SHADOW_1 SHADOW_2 SHADOW_3 SHADOW_4
 			
-			#include "../SpaceStuff.cginc"
-			#include "../Eclipses.cginc"
-			#include "../HDR.cginc"
-			#include "../Atmosphere.cginc"
-			#include "../Ocean/OceanBRDF.cginc"
+			#include "SpaceStuff.cginc"
+			#include "Eclipses.cginc"
+			#include "HDR.cginc"
+			#include "Atmosphere.cginc"
+			#include "Ocean/OceanBRDF.cginc"
 			
 			uniform sampler2D _Ground_Diffuse;
 			uniform sampler2D _Ground_Normal;
@@ -146,7 +149,9 @@
 				float4 fn = texTile(_Normals_Tile, IN.uv, _Normals_TileCoords, _Normals_TileSize);
 				fn.z = sqrt(max(0.0, 1.0 - dot(fn.xy, fn.xy)));		
 
-				if (ht <= _Ocean_Level && _Ocean_DrawBRDF == 1.0) {	fn = float4(0, 0, 1, 0); }
+				#if OCEAN_ON
+					if (ht <= _Ocean_Level && _Ocean_DrawBRDF == 1.0) {	fn = float4(0, 0, 1, 0); }
+				#endif
 				
 				float3x3 TTW = _Deform_TangentFrameToWorld;
 				fn.xyz = mul(TTW, fn.xyz);
@@ -171,10 +176,9 @@
 				// diffuse ground color
 				float3 groundColor = 1.5 * RGB2Reflectance(reflectance).rgb * (sunL * max(cTheta, 0) + skyE) / M_PI;
 				
-				if (ht <= _Ocean_Level && _Ocean_DrawBRDF == 1.0)
-				{
-					groundColor = OceanRadiance(WSD, -v, V, _Ocean_Sigma, sunL, skyE, _Ocean_Color);
-				}
+				#if OCEAN_ON
+					if (ht <= _Ocean_Level && _Ocean_DrawBRDF == 1.0) {	groundColor = OceanRadiance(WSD, -v, V, _Ocean_Sigma, sunL, skyE, _Ocean_Color); }
+				#endif
 
 				float3 extinction;
 				float3 inscatter = InScattering(WCPO, P, WSD, extinction, 0.0);

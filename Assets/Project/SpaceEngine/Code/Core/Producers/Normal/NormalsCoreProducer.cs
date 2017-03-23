@@ -47,7 +47,6 @@ namespace SpaceEngine.Core
             {
                 throw new InvalidStorageException("Storage must be a GPUTileStorage");
             }
-
         }
 
         public override bool HasTile(int level, int tx, int ty)
