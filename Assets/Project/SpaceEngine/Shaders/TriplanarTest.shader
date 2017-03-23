@@ -20,7 +20,7 @@
 			#pragma fragment frag
 			
 			#include "UnityCG.cginc"
-			#include "Core/Core.cginc"
+			#include "Core.cginc"
 
 			uniform sampler2D _TBTexture;
 			uniform sampler2D _LRTexture;

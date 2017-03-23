@@ -1,6 +1,6 @@
 ﻿#region License
 // Procedural planet generator.
-// 
+//  
 // Copyright (C) 2015-2017 Denis Ovchinnikov [zameran] 
 // All rights reserved.
 // 
@@ -8,7 +8,7 @@
 // modification, are permitted provided that the following conditions
 // are met:
 // 1. Redistributions of source code must retain the above copyright
-//    notice, this list of conditions and the following disclaimer.
+//     notice, this list of conditions and the following disclaimer.
 // 2. Redistributions in binary form must reproduce the above copyright
 //    notice, this list of conditions and the following disclaimer in the
 //    documentation and/or other materials provided with the distribution.
@@ -28,49 +28,19 @@
 // ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF
 // THE POSSIBILITY OF SUCH DAMAGE.
 // 
-// Creation Date: Undefined
-// Creation Time: Undefined
+// Creation Date: 2017.03.23
+// Creation Time: 5:14 PM
 // Creator: zameran
 #endregion
 
-using SpaceEngine.Core.Patterns.Strategy;
-
-using UnityEngine;
-
-public class RingSegment : MonoBehaviour, IRenderable<RingSegment>
+namespace SpaceEngine.Core.Patterns.Strategy
 {
-    public Ring Ring;
-
-    #region IRenderable
-
-    public void Render(int layer = 0)
+    /// <summary>
+    /// This interface should be implemented in all things, that's gonna be rendered with <see cref="UnityEngine.Graphics"/> class methods.
+    /// </summary>
+    /// <typeparam name="T">Generic class type.</typeparam>
+    public interface IRenderable<T> where T : class
     {
-        if (Ring == null) return;
-        if (Ring.RingSegmentMesh == null) return;
-        if (Ring.RingMaterial == null) return;
-
-        var SegmentTRS = Matrix4x4.TRS(Ring.transform.position, transform.rotation, Vector3.one);
-
-        Graphics.DrawMesh(Ring.RingSegmentMesh, SegmentTRS, Ring.RingMaterial, layer, CameraHelper.Main(), 0);
-    }
-
-    #endregion
-
-    public void UpdateNode(Mesh mesh, Material material, Quaternion rotation)
-    {
-        if (Ring != null)
-        {
-            Helper.SetLocalRotation(transform, rotation);
-        }
-    }
-
-    public static RingSegment Create(Ring ring)
-    {
-        var segmentGameObject = Helper.CreateGameObject("Segment", ring.transform);
-        var segment = segmentGameObject.AddComponent<RingSegment>();
-
-        segment.Ring = ring;
-
-        return segment;
+        void Render(int layer = 0);
     }
 }

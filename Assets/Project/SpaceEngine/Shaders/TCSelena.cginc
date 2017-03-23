@@ -53,12 +53,11 @@ float HeightMapSelena(float3 ppoint)
 	float montRage = saturate(DistNoise(ppoint * 22.6 + Randomize, 2.5) + 0.5);
 	montRage *= montRage;
 	float montBiomeScale = min(pow(2.2 * biomeScale, 2.5), 1.0) * montRage;
-	float inv2montesSpiky = 1.0 /(montesSpiky*montesSpiky);
+	float inv2montesSpiky = 1.0 / (montesSpiky * montesSpiky);
 
 	// Global landscape
-	noiseOctaves = 4;
-	p = ppoint * mainFreq + Randomize;
-	distort = 0.35 * Fbm3D(p * 2.37);
+	//p = ppoint * mainFreq + Randomize; // Redutant.
+	distort = 0.35 * Fbm3D(p * 2.37, 4);
 	p += distort;// + 0.005 * (1.0 - abs(Fbm3D(p * 132.3)));
 	float global = 0.6 * (1.0 - Cell3Noise(p));
 
@@ -80,7 +79,7 @@ float HeightMapSelena(float3 ppoint)
 	if (mareSqrtDensity > 0.05)
 	{
 		noiseOctaves = 2;
-		mareFloor = 0.6 * (1.0 - Cell3Noise(0.3*p));
+		mareFloor = 0.6 * (1.0 - Cell3Noise(0.3 * p));
 		craterDistortion = 1.0;
 		noiseOctaves = 6;  // Mare roundness distortion
 		mare = MareNoise(ppoint, global, mareFloor, mareSuppress);
@@ -150,14 +149,14 @@ float HeightMapSelena(float3 ppoint)
 		float craterRayedSqrtDensity = craterSqrtDensity * sqrt(craterRayedFactor);
 		float craterRayedOctaves = floor(craterOctaves * craterRayedFactor);
 		float craterRayedMagn = craterMagn * pow(0.62, craterOctaves - craterRayedOctaves);
-		crater = RayedCraterNoise(ppoint, craterRayedMagn, craterFreq, craterRayedSqrtDensity, craterRayedOctaves);
+		crater = RayedCraterNoise(normalize(ppoint), craterRayedMagn, craterFreq, craterRayedSqrtDensity, craterRayedOctaves);
 		height += crater;
 	}
 
 	// Shield volcano
 	if (volcanoOctaves > 0)
 	{
-		height = VolcanoNoise(ppoint, global, height);
+		height = VolcanoNoise(normalize(ppoint), global, height);
 	}
 
 	return height;
@@ -211,7 +210,7 @@ float4 ColorMapSelena(float3 ppoint, float height, float slope)
 		noiseOctaves = 3;
 		float volcActivity = saturate((Fbm(ppoint * 1.37 + Randomize) - 1.0 + volcanoActivity) * 5.0);
 		// Lava in volcano caldera and flows
-		float2 volcMask = VolcanoGlowNoise(ppoint);
+		float2 volcMask = VolcanoGlowNoise(normalize(ppoint));
 		volcMask.x *= volcActivity;
 		// Model lava as rocks texture
 		mat   = lerp(mat,   0.0, volcMask.x);
@@ -249,7 +248,7 @@ float4 ColorMapSelena(float3 ppoint, float height, float slope)
 	if (drivenDarkening != 0.0)
 	{
 		noiseOctaves = 3;
-		float z = -ppoint.z * sign(drivenDarkening);
+		float z = -normalize(ppoint).z * sign(drivenDarkening);
 		z += 0.2 * Fbm(ppoint * 1.63);
 		z = saturate(1.0 - z);
 		z *= z;
@@ -261,7 +260,7 @@ float4 ColorMapSelena(float3 ppoint, float height, float slope)
 	{
 		float craterRayedSqrtDensity = craterSqrtDensity * sqrt(craterRayedFactor);
 		float craterRayedOctaves = floor(craterOctaves * craterRayedFactor);
-		float crater = RayedCraterColorNoise(ppoint, craterFreq, craterRayedSqrtDensity, craterRayedOctaves);
+		float crater = RayedCraterColorNoise(normalize(ppoint), craterFreq, craterRayedSqrtDensity, craterRayedOctaves);
 		surf.color.rgb = lerp(surf.color.rgb, float3(1.0, 1.0, 1.0), crater);
 	}
 

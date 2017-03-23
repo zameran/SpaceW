@@ -69,7 +69,7 @@ namespace SpaceEngine.Core.Tile.Samplers
         /// <summary>
         /// An internal quadtree to store the texture tiles associated with each quad.
         /// </summary>
-        QuadTree QuadTreeRoot = null;
+        public QuadTree QuadTreeRoot = null;
 
         Uniforms uniforms;
 
@@ -238,7 +238,14 @@ namespace SpaceEngine.Core.Tile.Samplers
             }
         }
 
-        public void SetTile(MaterialPropertyBlock matPropertyBlock, int level, int tx, int ty)
+        /// <summary>
+        /// Sets special <see cref="TileProducer"/> uniforms for given quad.
+        /// </summary>
+        /// <param name="target">Target <see cref="MaterialPropertyBlock"/>.</param>
+        /// <param name="level">Quad level.</param>
+        /// <param name="tx">Quad tx.</param>
+        /// <param name="ty">Quad ty</param>
+        public void SetTile(MaterialPropertyBlock target, int level, int tx, int ty)
         {
             if (!Producer.IsGPUProducer) return;
 
@@ -247,12 +254,19 @@ namespace SpaceEngine.Core.Tile.Samplers
 
             SetTile(ref tex, ref coords, ref size, level, tx, ty);
 
-            matPropertyBlock.SetTexture(uniforms.tile, tex);
-            matPropertyBlock.SetVector(uniforms.tileCoords, coords);
-            matPropertyBlock.SetVector(uniforms.tileSize, size);
+            target.SetTexture(uniforms.tile, tex);
+            target.SetVector(uniforms.tileCoords, coords);
+            target.SetVector(uniforms.tileSize, size);
         }
 
-        public void SetTile(Material mat, int level, int tx, int ty)
+        /// <summary>
+        /// Sets special <see cref="TileProducer"/> uniforms for given quad.
+        /// </summary>
+        /// <param name="target">Target <see cref="Material"/>.</param>
+        /// <param name="level">Quad level.</param>
+        /// <param name="tx">Quad tx.</param>
+        /// <param name="ty">Quad ty</param>
+        public void SetTile(Material target, int level, int tx, int ty)
         {
             if (!Producer.IsGPUProducer) return;
 
@@ -261,14 +275,14 @@ namespace SpaceEngine.Core.Tile.Samplers
 
             SetTile(ref tex, ref coords, ref size, level, tx, ty);
 
-            mat.SetTexture(uniforms.tile, tex);
-            mat.SetVector(uniforms.tileCoords, coords);
-            mat.SetVector(uniforms.tileSize, size);
+            target.SetTexture(uniforms.tile, tex);
+            target.SetVector(uniforms.tileCoords, coords);
+            target.SetVector(uniforms.tileSize, size);
         }
 
         /// <summary>
         /// Sets the uniforms necessary to access the texture tile for the given quad. 
-        /// The samplers producer must be using a GPUTileStorage at the first slot for this function to work.
+        /// The samplers producer must be using a <see cref="GPUTileStorage"/> at the first slot for this function to work.
         /// </summary>
         /// <param name="tex"></param>
         /// <param name="coord"></param>

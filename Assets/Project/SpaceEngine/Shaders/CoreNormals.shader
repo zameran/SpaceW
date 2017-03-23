@@ -6,7 +6,7 @@
 
 		#include "UnityCG.cginc"
 
-		#include "../TCCommon.cginc"
+		#include "TCCommon.cginc"
 
 		#include "Core.cginc"
 
@@ -56,27 +56,24 @@
 			return 0;
 		}
 
+		float GetHeight(sampler2D elevationSampler, float2 uv)
+		{
+			return tex2D(elevationSampler, uv).x;
+			//return TEX2D(elevationSampler, uv, _TileSD.x).x;
+			//return TEX2D_GOOD(elevationSampler, uv, _TileSD.x).x;
+		}
+
 		float3 CalculateNormal(float2 uv)
 		{
 			uv = floor(uv);
 
 			float4 uv0 = floor(uv.xyxy + float4(-1.0, 0.0, 1.0, 0.0)) * _ElevationOSL.z + _ElevationOSL.xyxy;
 			float4 uv1 = floor(uv.xyxy + float4(0.0, -1.0, 0.0, 1.0)) * _ElevationOSL.z + _ElevationOSL.xyxy;
-				
-			float z0 = tex2Dlod(_ElevationSampler, float4(uv0.xy, 0.0, 0.0)).x;
-			float z1 = tex2Dlod(_ElevationSampler, float4(uv0.zw, 0.0, 0.0)).x;
-			float z2 = tex2Dlod(_ElevationSampler, float4(uv1.xy, 0.0, 0.0)).x;
-			float z3 = tex2Dlod(_ElevationSampler, float4(uv1.zw, 0.0, 0.0)).x;
 
-			//float z0 = TEX2DLOD(_ElevationSampler, uv0.xy, float2(0.0, 0.0), _TileSD.x).x;
-			//float z1 = TEX2DLOD(_ElevationSampler, uv0.zw, float2(0.0, 0.0), _TileSD.x).x;
-			//float z2 = TEX2DLOD(_ElevationSampler, uv1.xy, float2(0.0, 0.0), _TileSD.x).x;
-			//float z3 = TEX2DLOD(_ElevationSampler, uv1.zw, float2(0.0, 0.0), _TileSD.x).x;
-
-			//float z0 = TEX2DLOD_GOOD(_ElevationSampler, uv0.xy, _TileSD.x).x;
-			//float z1 = TEX2DLOD_GOOD(_ElevationSampler, uv0.zw, _TileSD.x).x;
-			//float z2 = TEX2DLOD_GOOD(_ElevationSampler, uv1.xy, _TileSD.x).x;
-			//float z3 = TEX2DLOD_GOOD(_ElevationSampler, uv1.zw, _TileSD.x).x;
+			float z0 = GetHeight(_ElevationSampler, uv0.xy);
+			float z1 = GetHeight(_ElevationSampler, uv0.zw);
+			float z2 = GetHeight(_ElevationSampler, uv1.xy);
+			float z3 = GetHeight(_ElevationSampler, uv1.zw);
 
 			float3 p0 = GetWorldPosition(uv + float2(-1.0, 0.0), z0).xyz;
 			float3 p1 = GetWorldPosition(uv + float2(+1.0, 0.0), z1).xyz;

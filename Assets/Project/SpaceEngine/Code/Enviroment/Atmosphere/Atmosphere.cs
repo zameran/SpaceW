@@ -35,6 +35,7 @@
 
 using SpaceEngine.AtmosphericScattering.Sun;
 using SpaceEngine.Core.Bodies;
+using SpaceEngine.Core.Patterns.Strategy;
 using SpaceEngine.Core.PropertyNotification;
 using SpaceEngine.Core.Reanimator;
 
@@ -74,7 +75,7 @@ namespace SpaceEngine.AtmosphericScattering
         }
     }
 
-    public sealed class Atmosphere : Node<Atmosphere>, IEventit, IUniformed<Material>, IUniformed<MaterialPropertyBlock>, IReanimateable
+    public sealed class Atmosphere : Node<Atmosphere>, IEventit, IUniformed<Material>, IUniformed<MaterialPropertyBlock>, IReanimateable, IRenderable<Atmosphere>
     {
         public AtmosphereBaseProperty AtmosphereBaseProperty = new AtmosphereBaseProperty();
 
@@ -405,6 +406,17 @@ namespace SpaceEngine.AtmosphericScattering
 
         #endregion
 
+        #region IRenderable
+
+        public void Render(int layer = 0)
+        {
+            if (AtmosphereMesh == null) return;
+
+            Graphics.DrawMesh(AtmosphereMesh, transform.localToWorldMatrix, SkyMaterial, layer, CameraHelper.Main(), 0, body.MPB);
+        }
+
+        #endregion
+
         private void ApplyPresset(AtmosphereParameters p)
         {
             atmosphereParameters = new AtmosphereParameters(p);
@@ -543,11 +555,6 @@ namespace SpaceEngine.AtmosphericScattering
 
             block.SetMatrix("_Sun_WorldDirections_1", sunDirectionsMatrix);
             block.SetMatrix("_Sun_Positions_1", sunPositionsMatrix);
-        }
-
-        public void Render()
-        {
-            Graphics.DrawMesh(AtmosphereMesh, transform.localToWorldMatrix, SkyMaterial, 0, CameraHelper.Main(), 0, body.MPB);
         }
 
         public void OnApplicationFocus(bool focusStatus)

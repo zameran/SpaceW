@@ -83,6 +83,7 @@ public class GodManager : MonoSingleton<GodManager>
     private void Update()
     {
         UpdateSchedular();
+        UpdateViewRadius();
         UpdateHeightZ();
     }
 
@@ -106,5 +107,21 @@ public class GodManager : MonoSingleton<GodManager>
         {
             View.GroundHeight = 0.0f;
         }
+    }
+
+    private void UpdateViewRadius()
+    {
+        if (ActiveBody != null)
+        {
+            if (View is PlanetView)
+            {
+                ((PlanetView)View).Radius = ActiveBody.Radius;
+            }
+        }
+    }
+
+    public void UpdateControllerWrapper()
+    {
+        Controller.UpdateController();
     }
 }
