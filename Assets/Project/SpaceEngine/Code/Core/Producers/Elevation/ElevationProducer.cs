@@ -37,8 +37,12 @@ namespace SpaceEngine.Core
 
             if (TerrainNode == null) { TerrainNode = transform.parent.GetComponent<TerrainNode>(); }
             if (TerrainNode.Body == null) { TerrainNode.Body = transform.parent.GetComponentInParent<CelestialBody>(); }
-            if (ResidualProducer == null) { ResidualProducer = ResidualProducerGameObject.GetComponent<TileProducer>(); }
-            if (ResidualProducer.Cache == null) { ResidualProducer.InitCache(); }
+
+            if (ResidualProducerGameObject != null)
+            {
+                if (ResidualProducer == null) { ResidualProducer = ResidualProducerGameObject.GetComponent<TileProducer>(); }
+                if (ResidualProducer.Cache == null) { ResidualProducer.InitCache(); }
+            }
 
             var tileSize = GetTileSize(0);
 
