@@ -127,11 +127,10 @@ namespace SpaceEngine.Core.Utilities
             t = Math.Min(t + Math.Min(0.1, 5000.0 / distance), 1.0);
 
             var T = 0.5 * Math.Atan(4.0 * (t - 0.5)) / Math.Atan(4.0 * 0.5) + 0.5;
+            var W = 10.0;
 
             InterpolateDirection(from.X, from.Y, to.X, to.Y, T, ref position.X, ref position.Y);
             InterpolateDirection(from.Phi, from.Theta, to.Phi, to.Theta, T, ref position.Phi, ref position.Theta);
-
-            var W = 10.0;
 
             position.Distance = from.Distance * (1.0 - t) + to.Distance * t + distance * (Math.Exp(-W * (t - 0.5) * (t - 0.5)) - Math.Exp(-W * 0.25));
 
