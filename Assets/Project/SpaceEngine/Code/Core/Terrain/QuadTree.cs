@@ -1,5 +1,7 @@
 ﻿using SpaceEngine.Core.Tile.Samplers;
 
+using System.Linq;
+
 namespace SpaceEngine.Core.Terrain
 {
     /// <summary>
@@ -8,6 +10,7 @@ namespace SpaceEngine.Core.Terrain
     public class QuadTree
     {
         // TODO - make members private?
+        // TODO - Is linq suff will convert array in to the list on call?
 
         /// <summary>
         /// Is a tile is needed for this quad?
@@ -29,7 +32,7 @@ namespace SpaceEngine.Core.Terrain
         /// </summary>
         public QuadTree[] Children = new QuadTree[4];
 
-        public bool IsLeaf { get { return (Children[0] == null); } }
+        public bool IsLeaf { get { return Children.All(child => child == null); } }
 
         public QuadTree(QuadTree parentTree)
         {
