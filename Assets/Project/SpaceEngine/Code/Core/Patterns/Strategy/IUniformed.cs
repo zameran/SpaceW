@@ -33,15 +33,21 @@
 // Creator: zameran
 #endregion
 
-public interface IUniformed<T> where T : class
+namespace SpaceEngine.Core.Patterns.Strategy.Uniformed
 {
-    void InitUniforms(T target);
-    void SetUniforms(T target);
-    void InitSetUniforms();
-}
+    public interface IUniformed<T> where T : class
+    {
+        void InitUniforms(T target);
 
-public interface IUniformed<T, U> where T : class where U : class
-{
-    void InitUniforms(T target0, U target1);
-    void SetUniforms(T target0, U target1);
+        void SetUniforms(T target);
+
+        void InitSetUniforms();
+    }
+
+    public interface IUniformed<T, U> where T : class where U : class
+    {
+        void InitUniforms(T target0, U target1);
+
+        void SetUniforms(T target0, U target1);
+    }
 }

@@ -33,6 +33,8 @@
 // Creator: zameran
 #endregion
 
+using SpaceEngine.Core.Patterns.Strategy.Uniformed;
+
 using UnityEngine;
 
 public sealed class NoiseParametersSetter : MonoBehaviour, IUniformed<Material>, IUniformed<ComputeShader>
