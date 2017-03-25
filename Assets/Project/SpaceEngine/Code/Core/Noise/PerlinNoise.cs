@@ -4,9 +4,9 @@ namespace SpaceEngine.Core.Noise
 {
     public class PerlinNoise
     {
-        private static int[] permutation;
+        private static int[] Permutation;
 
-        private static int[] table = new int[]
+        private static int[] Table = new int[]
         {
             15, 131, 91, 90, 13, 95, 201, 194, 96, 7, 53, 233, 140, 30, 225, 69, 36, 103, 142, 6, 8, 99, 21, 37, 240, 10, 23, 120, 190, 148, 0, 247, 94, 234, 75, 197, 26, 62, 203, 32, 252, 219, 57, 117,
             35, 11, 87, 33, 177, 149, 88, 237, 56, 20, 174, 136, 175, 125, 171, 168, 74, 68, 134, 48, 165, 71, 139, 27, 77, 166, 231, 111, 146, 158, 83, 133, 229, 60, 122, 230, 211, 220, 41, 105, 55,
@@ -19,11 +19,11 @@ namespace SpaceEngine.Core.Noise
 
         static PerlinNoise()
         {
-            permutation = new int[512];
+            Permutation = new int[512];
 
             for (ushort i = 0; i < 512; i++)
             {
-                permutation[i] = table[i & 255];
+                Permutation[i] = Table[i & 255];
             }
         }
 
@@ -37,21 +37,21 @@ namespace SpaceEngine.Core.Noise
             y -= FastFloor(y);
             z -= FastFloor(z);
 
-            var A = permutation[X] + Y;
-            var AA = permutation[A] + Z;
-            var AB = permutation[A + 1] + Z;
-            var B = permutation[X + 1] + Y;
-            var BA = permutation[B] + Z;
-            var BB = permutation[B + 1] + Z;
+            var A = Permutation[X] + Y;
+            var AA = Permutation[A] + Z;
+            var AB = Permutation[A + 1] + Z;
+            var B = Permutation[X + 1] + Y;
+            var BA = Permutation[B] + Z;
+            var BB = Permutation[B + 1] + Z;
 
             var u = Fade(x);
             var v = Fade(y);
             var w = Fade(z);
 
-            var g1 = Lerp(v, Lerp(u, Gradient(permutation[AA], x, y, z), Gradient(permutation[BA], x - 1, y, z)),
-                     Lerp(u, Gradient(permutation[AB], x, y - 1, z), Gradient(permutation[BB], x - 1, y - 1, z)));
-            var g2 = Lerp(v, Lerp(u, Gradient(permutation[AA + 1], x, y, z - 1), Gradient(permutation[BA + 1], x - 1, y, z - 1)),
-                     Lerp(u, Gradient(permutation[AB + 1], x, y - 1, z - 1), Gradient(permutation[BB + 1], x - 1, y - 1, z - 1)));
+            var g1 = Lerp(v, Lerp(u, Gradient(Permutation[AA], x, y, z), Gradient(Permutation[BA], x - 1, y, z)),
+                     Lerp(u, Gradient(Permutation[AB], x, y - 1, z), Gradient(Permutation[BB], x - 1, y - 1, z)));
+            var g2 = Lerp(v, Lerp(u, Gradient(Permutation[AA + 1], x, y, z - 1), Gradient(Permutation[BA + 1], x - 1, y, z - 1)),
+                     Lerp(u, Gradient(Permutation[AB + 1], x, y - 1, z - 1), Gradient(Permutation[BB + 1], x - 1, y - 1, z - 1)));
 
             return Lerp(w, g1, g2);
         }
@@ -82,21 +82,21 @@ namespace SpaceEngine.Core.Noise
             v = Fade(y);
             w = Fade(z);
 
-            var A = permutation[X] + Y;
-            var AA = permutation[A] + Z;
-            var AB = permutation[A + 1] + Z;
-            var B = permutation[X + 1] + Y;
-            var BA = permutation[B] + Z;
-            var BB = permutation[B + 1] + Z;
+            var A = Permutation[X] + Y;
+            var AA = Permutation[A] + Z;
+            var AB = Permutation[A + 1] + Z;
+            var B = Permutation[X + 1] + Y;
+            var BA = Permutation[B] + Z;
+            var BB = Permutation[B + 1] + Z;
 
-            var a = Gradient(permutation[AA], x, y, z);
-            var b = Gradient(permutation[BA], x - 1, y, z);
-            var c = Gradient(permutation[AB], x, y - 1, z);
-            var d = Gradient(permutation[BB], x - 1, y - 1, z);
-            var e = Gradient(permutation[AA + 1], x, y, z - 1);
-            var f = Gradient(permutation[BA + 1], x - 1, y, z - 1);
-            var g = Gradient(permutation[AB + 1], x, y - 1, z - 1);
-            var h = Gradient(permutation[BB + 1], x - 1, y - 1, z - 1);
+            var a = Gradient(Permutation[AA], x, y, z);
+            var b = Gradient(Permutation[BA], x - 1, y, z);
+            var c = Gradient(Permutation[AB], x, y - 1, z);
+            var d = Gradient(Permutation[BB], x - 1, y - 1, z);
+            var e = Gradient(Permutation[AA + 1], x, y, z - 1);
+            var f = Gradient(Permutation[BA + 1], x - 1, y, z - 1);
+            var g = Gradient(Permutation[AB + 1], x, y - 1, z - 1);
+            var h = Gradient(Permutation[BB + 1], x - 1, y - 1, z - 1);
 
             var k0 = a;
             var k1 = b - a;
@@ -132,7 +132,6 @@ namespace SpaceEngine.Core.Noise
         private static double Gradient(int hash, double x, double y, double z)
         {
             var h = hash & 15;
-
             var u = h < 8 ? x : y;
             var v = h < 4 ? y : h == 12 || h == 14 ? x : z;
 
