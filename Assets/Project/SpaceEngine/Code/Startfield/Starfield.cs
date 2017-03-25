@@ -33,7 +33,7 @@
 // Creator: zameran
 #endregion
 
-using SpaceEngine.Core.Patterns.Strategy;
+using SpaceEngine.Core.Patterns.Strategy.Renderable;
 
 using System;
 using System.Collections.Generic;

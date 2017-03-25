@@ -33,7 +33,7 @@
 // Creator: zameran
 #endregion
 
-namespace SpaceEngine.Core.Reanimator
+namespace SpaceEngine.Core.Patterns.Strategy.Reanimator
 {
     public interface IReanimateable
     {

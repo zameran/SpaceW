@@ -35,7 +35,7 @@
 #endregion
 
 using SpaceEngine.AtmosphericScattering;
-using SpaceEngine.Core.Reanimator;
+using SpaceEngine.Core.Patterns.Strategy.Reanimator;
 using SpaceEngine.Core.Terrain;
 using SpaceEngine.Core.Tile.Samplers;
 using SpaceEngine.Ocean;

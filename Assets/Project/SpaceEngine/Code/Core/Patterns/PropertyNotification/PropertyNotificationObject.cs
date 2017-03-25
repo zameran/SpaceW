@@ -33,12 +33,37 @@
 // Creator: zameran
 #endregion
 
+using System;
 using System.ComponentModel;
 
-namespace SpaceEngine.Core.PropertyNotification
+namespace SpaceEngine.Core.Patterns.PropertyNotification
 {
-    public interface IPropertyNotification : INotifyPropertyChanged
+    public class PropertyNotificationObject : IPropertyNotification
     {
+        #region IPropertyNotification
 
+        [field: NonSerialized]
+        public event PropertyChangedEventHandler PropertyChanged;
+
+        #endregion
+
+        #region Methods
+
+        protected void OnPropertyChanged(string propertyName)
+        {
+            var e = new PropertyChangedEventArgs(propertyName);
+
+            OnPropertyChanged(e);
+        }
+
+        protected void OnPropertyChanged(PropertyChangedEventArgs e)
+        {
+            var temp = this.PropertyChanged;
+
+            if (temp != null)
+                temp(this, e);
+        }
+
+        #endregion
     }
 }
