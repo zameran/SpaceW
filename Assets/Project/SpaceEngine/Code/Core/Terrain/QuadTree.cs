@@ -9,9 +9,6 @@ namespace SpaceEngine.Core.Terrain
     /// </summary>
     public class QuadTree
     {
-        // TODO - make members private?
-        // TODO - Is linq suff will convert array in to the list on call?
-
         /// <summary>
         /// Is a tile is needed for this quad?
         /// </summary>

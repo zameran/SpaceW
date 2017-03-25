@@ -95,7 +95,7 @@ public static class CBUtility
 
         if (kernel == -1)
         {
-            Debug.LogFormat("CBUtility: ReadFromRenderTexture - could not find kernel read{0}", D + C);
+            Debug.Log(string.Format("CBUtility: ReadFromRenderTexture - could not find kernel read{0}", D + C));
             return;
         }
 
@@ -160,7 +160,7 @@ public static class CBUtility
 
         if (kernel == -1)
         {
-            Debug.LogFormat("CBUtility::ReadSingleFromRenderTexture - could not find kernel readSingle{0}", B + D);
+            Debug.Log(string.Format("CBUtility::ReadSingleFromRenderTexture - could not find kernel readSingle{0}", B + D));
             return;
         }
 
@@ -236,7 +236,7 @@ public static class CBUtility
 
         if (kernel == -1)
         {
-            Debug.LogFormat("CBUtility::WriteIntoRenderTexture - could not find kernel write{0}", D + C);
+            Debug.Log(string.Format("CBUtility::WriteIntoRenderTexture - could not find kernel write{0}", D + C));
             return;
         }
 
@@ -339,7 +339,7 @@ public static class CBUtility
 
         if (kernel == -1)
         {
-            Debug.LogFormat("CBUtility::WriteIntoRenderTexture - could not find kernel write{0}", D + C);
+            Debug.Log(string.Format("CBUtility::WriteIntoRenderTexture - could not find kernel write{0}", D + C));
 
             return;
         }
@@ -382,7 +382,7 @@ public static class CBUtility
         //divide by 4 as there are 4 bytes in a 32 bit float
         if (size > fi.Length / 4)
         {
-            Debug.LogFormat("CBUtility: LoadRawFile - Raw file is not the required size! {0}", path);
+            Debug.Log(string.Format("CBUtility: LoadRawFile - Raw file is not the required size! {0}", path));
             return false;
         }
 
