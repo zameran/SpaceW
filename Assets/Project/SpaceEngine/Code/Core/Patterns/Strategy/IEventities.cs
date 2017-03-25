@@ -33,26 +33,33 @@
 // Creator: zameran
 #endregion
 
-public interface IEventit
+namespace SpaceEngine.Core.Patterns.Strategy.Eventit
 {
-    bool isEventit { get; set; }
+    public interface IEventit
+    {
+        bool isEventit { get; set; }
 
-    void Eventit();
-    void UnEventit();
-}
+        void Eventit();
 
-public interface IEventit<T> where T : class
-{
-    bool isEventit { get; set; }
+        void UnEventit();
+    }
 
-    void Eventit(T obj);
-    void UnEventit(T obj);
-}
+    public interface IEventit<T> where T : class
+    {
+        bool isEventit { get; set; }
 
-public interface IEventit<T, U> where T : class where U : class
-{
-    bool isEventit { get; set; }
+        void Eventit(T obj);
 
-    void Eventit(T obj1, U obj2);
-    void UnEventit(T obj1, U obj2);
+        void UnEventit(T obj);
+    }
+
+    public interface IEventit<T, U> where T : class
+        where U : class
+    {
+        bool isEventit { get; set; }
+
+        void Eventit(T obj1, U obj2);
+
+        void UnEventit(T obj1, U obj2);
+    }
 }

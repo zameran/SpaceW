@@ -33,6 +33,7 @@
 // Creator: zameran
 #endregion
 
+using SpaceEngine.Core.Patterns.Strategy.Eventit;
 using SpaceEngine.Pluginator.Attributes;
 
 using System;

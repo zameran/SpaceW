@@ -36,6 +36,7 @@
 using SpaceEngine.AtmosphericScattering.Sun;
 using SpaceEngine.Core.Bodies;
 using SpaceEngine.Core.Patterns.PropertyNotification;
+using SpaceEngine.Core.Patterns.Strategy.Eventit;
 using SpaceEngine.Core.Patterns.Strategy.Reanimator;
 using SpaceEngine.Core.Patterns.Strategy.Renderable;
 
