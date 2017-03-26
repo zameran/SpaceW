@@ -56,7 +56,7 @@ namespace SpaceEngine.Core
                 throw new InvalidStorageException("Storage must be a CPUTileStorage");
             }
 
-            if (storage.DataType != CPUTileStorage.DATA_TYPE.BYTE)
+            if (storage.DataType != TileStorage.DATA_TYPE.BYTE)
             {
                 throw new InvalidStorageException("Storage data type must be byte");
             }
@@ -69,10 +69,10 @@ namespace SpaceEngine.Core
                 stream.Read(data, 0, data.Length);
             }
 
-            MaxLevel = System.BitConverter.ToInt32(data, 0);
-            TileSize = System.BitConverter.ToInt32(data, 4);
-            Channels = System.BitConverter.ToInt32(data, 8);
-            Border = System.BitConverter.ToInt32(data, 12);
+            MaxLevel = BitConverter.ToInt32(data, 0);
+            TileSize = BitConverter.ToInt32(data, 4);
+            Channels = BitConverter.ToInt32(data, 8);
+            Border = BitConverter.ToInt32(data, 12);
 
             if (storage.Channels != Channels)
             {
@@ -92,7 +92,7 @@ namespace SpaceEngine.Core
 
             for (int i = 0; i < tilesCount * 2; i++)
             {
-                Offsets[i] = System.BitConverter.ToInt64(data, 8 * i);
+                Offsets[i] = BitConverter.ToInt64(data, 8 * i);
             }
         }
 
