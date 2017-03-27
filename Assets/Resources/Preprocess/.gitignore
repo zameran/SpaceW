@@ -1,0 +1,8 @@
+# Ignore preprocessed textures
+*.raw
+*.png
+
+# Ignore preprocessed textures meta files
+*.raw.meta
+*.png.meta
+

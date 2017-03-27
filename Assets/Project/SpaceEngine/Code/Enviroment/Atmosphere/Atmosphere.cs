@@ -40,6 +40,7 @@ using SpaceEngine.Core.Patterns.Strategy.Eventit;
 using SpaceEngine.Core.Patterns.Strategy.Reanimator;
 using SpaceEngine.Core.Patterns.Strategy.Renderable;
 using SpaceEngine.Core.Patterns.Strategy.Uniformed;
+using SpaceEngine.Core.Preprocess.Atmospehre;
 
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -123,7 +124,7 @@ namespace SpaceEngine.AtmosphericScattering
 
         private AtmosphereParameters atmosphereParameters;
 
-        public AtmosphereRunTimeBaker artb = null;
+        public PreProcessAtmosphere atmosphereBaker = null;
 
         public Vector3 Origin { get { return body != null ? body.transform.position : Vector3.zero; } }
         public float Radius { get { return body != null ? body.Radius : 0.0f; } }
@@ -253,6 +254,8 @@ namespace SpaceEngine.AtmosphericScattering
         protected override void Awake()
         {
             base.Awake();
+
+            if (atmosphereBaker == null) atmosphereBaker = GetComponentInChildren<PreProcessAtmosphere>();
         }
 
         protected override void Start()
@@ -347,9 +350,9 @@ namespace SpaceEngine.AtmosphericScattering
             target.SetFloat("_Aerial_Perspective_Offset", AerialPerspectiveOffset);
             target.SetFloat("_ExtinctionGroundFade", ExtinctionGroundFade);
 
-            if (artb.transmittanceT != null) target.SetTexture("_Sky_Transmittance", artb.transmittanceT);
-            if (artb.inscatterT_Read != null) target.SetTexture("_Sky_Inscatter", artb.inscatterT_Read);
-            if (artb.irradianceT_Read != null) target.SetTexture("_Sky_Irradiance", artb.irradianceT_Read);
+            if (atmosphereBaker.transmittanceT != null) target.SetTexture("_Sky_Transmittance", atmosphereBaker.transmittanceT);
+            if (atmosphereBaker.inscatterT_Read != null) target.SetTexture("_Sky_Inscatter", atmosphereBaker.inscatterT_Read);
+            if (atmosphereBaker.irradianceT_Read != null) target.SetTexture("_Sky_Irradiance", atmosphereBaker.irradianceT_Read);
 
             target.SetMatrix("_Globals_WorldToCamera", GodManager.Instance.WorldToCamera.ToMatrix4x4());
             target.SetMatrix("_Globals_CameraToWorld", GodManager.Instance.CameraToWorld.ToMatrix4x4());
@@ -431,7 +434,7 @@ namespace SpaceEngine.AtmosphericScattering
 
         public void Bake()
         {
-            artb.Bake(atmosphereParameters);
+            atmosphereBaker.Bake(atmosphereParameters);
 
             EventManager.CelestialBodyEvents.OnAtmosphereBaked.Invoke(body, this);
         }

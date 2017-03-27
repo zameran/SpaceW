@@ -99,6 +99,8 @@ public class GodManager : MonoSingleton<GodManager>
 
     private void UpdateHeightZ()
     {
+        if (View == null) return;
+
         if (ActiveBody != null)
         {
             View.GroundHeight = ActiveBody.HeightZ;

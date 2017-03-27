@@ -33,14 +33,34 @@
 // Creator: zameran
 #endregion
 
+using SpaceEngine.AtmosphericScattering;
+
+using System;
 using System.Collections;
 
 using UnityEngine;
 
-namespace SpaceEngine.AtmosphericScattering
+namespace SpaceEngine.Core.Preprocess.Atmospehre
 {
-    public sealed class AtmosphereRunTimeBaker : MonoBehaviour
+    public sealed class PreProcessAtmosphere : MonoBehaviour
     {
+        /// <summary>
+        /// Behaviour of atmosphere baker.
+        /// <see cref="NONE"/> is none!
+        /// <see cref="TO_RAM"/> is runtime baking in to the RAM.
+        /// <see cref="TO_HDD"/> is on call baking in to the HDD.
+        /// <see cref="TO_HDD_DEBUG"/> is the same as <see cref="TO_HDD"/>, but additional debug textures will be saved.
+        /// </summary>
+        [Serializable]
+        public enum AtmosphereBakeMode
+        {
+            NONE,
+            TO_RAM,
+            TO_HDD,
+            TO_HDD_DEBUG
+        }
+
+        public AtmosphereBakeMode BakeMode = AtmosphereBakeMode.TO_RAM;
         public RenderTextureFormat Format = RenderTextureFormat.ARGBFloat;
         public TextureWrapMode WrapMode = TextureWrapMode.Clamp;
 
@@ -61,6 +81,17 @@ namespace SpaceEngine.AtmosphericScattering
 
         [HideInInspector]
         public bool finished = false;
+
+        [SerializeField]
+        string DestinationFolder = "/Resources/Preprocess/Textures/Atmosphere";
+
+        private void Start()
+        {
+            if (BakeMode == AtmosphereBakeMode.TO_HDD || BakeMode == AtmosphereBakeMode.TO_HDD_DEBUG)
+            {
+                Bake(AtmosphereParameters.Earth);
+            }
+        }
 
         public void Bake(AtmosphereParameters AP)
         {
@@ -332,7 +363,21 @@ namespace SpaceEngine.AtmosphericScattering
             }
             else if (step == 10)
             {
-                //placeholder
+                if (BakeMode == AtmosphereBakeMode.TO_HDD || BakeMode == AtmosphereBakeMode.TO_HDD_DEBUG)
+                {
+                    var readDataShader = GodManager.Instance.ReadData;
+
+                    RTUtility.SaveAsRaw(AtmosphereConstants.TRANSMITTANCE_W * AtmosphereConstants.TRANSMITTANCE_H, 3, "/transmittance", DestinationFolder, transmittanceT, readDataShader);
+                    RTUtility.SaveAsRaw(AtmosphereConstants.SKY_W * AtmosphereConstants.SKY_H, 3, "/irradiance", DestinationFolder, irradianceT_Read, readDataShader);
+                    RTUtility.SaveAsRaw((AtmosphereConstants.RES_MU_S * AtmosphereConstants.RES_NU) * AtmosphereConstants.RES_MU * AtmosphereConstants.RES_R, 3, "/inscatter", DestinationFolder, inscatterT_Read, readDataShader);
+
+                    if (BakeMode == AtmosphereBakeMode.TO_HDD_DEBUG)
+                    {
+                        RTUtility.SaveAs8bit(AtmosphereConstants.TRANSMITTANCE_W, AtmosphereConstants.TRANSMITTANCE_H, 4, "/transmittance_debug", DestinationFolder, transmittanceT, readDataShader);
+                        RTUtility.SaveAs8bit(AtmosphereConstants.SKY_W, AtmosphereConstants.SKY_H, 4, "/irradiance_debug", DestinationFolder, irradianceT_Read, readDataShader, 10.0f);
+                        RTUtility.SaveAs8bit(AtmosphereConstants.RES_MU_S * AtmosphereConstants.RES_NU, AtmosphereConstants.RES_MU * AtmosphereConstants.RES_R, 4, "/inscater_debug", DestinationFolder, inscatterT_Read, readDataShader);
+                    }
+                }
             }
             else if (step == 11)
             {
