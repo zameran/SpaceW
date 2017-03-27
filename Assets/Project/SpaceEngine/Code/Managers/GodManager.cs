@@ -41,8 +41,6 @@ using System.Linq;
 
 using UnityEngine;
 
-using ZFramework.Unity.Common.Messenger;
-
 [ExecutionOrder(-9999)]
 public class GodManager : MonoSingleton<GodManager>
 {
@@ -73,8 +71,6 @@ public class GodManager : MonoSingleton<GodManager>
     private void Awake()
     {
         Instance = this;
-
-        Messenger.Setup(true);
 
         Bodies = FindObjectsOfType<CelestialBody>();
         Starfields = FindObjectsOfType<Starfield>();
