@@ -81,19 +81,69 @@
 			CGPROGRAM
 			#pragma target 3.0
 
+			#pragma shader_feature _ _ALPHATEST_ON _ALPHABLEND_ON _ALPHAPREMULTIPLY_ON
 			#pragma multi_compile_shadowcaster
 
-			#pragma vertex vertShadowCaster
-			#pragma fragment fragShadowCaster
-
 			#include "UnityStandardShadow.cginc"
+
+			#pragma vertex vertShadowCasterModified
+			#pragma fragment fragShadowCasterModified
+
+			void vertShadowCasterModified(VertexInput v,
+				#ifdef UNITY_STANDARD_USE_SHADOW_OUTPUT_STRUCT
+				out VertexOutputShadowCaster o,
+				#endif
+				out float4 opos : SV_POSITION)
+			{
+				float4 position = 0;
+				float3 localPosition = 0;
+				float2 uv = 0;
+
+				VERTEX_POSITION(v.vertex, v.uv0.xy, position, localPosition, uv);
+
+				v.vertex = position;
+
+				UNITY_SETUP_INSTANCE_ID(v);
+				TRANSFER_SHADOW_CASTER_NOPOS(o,opos)
+				#if defined(UNITY_STANDARD_USE_SHADOW_UVS)
+					o.tex = TRANSFORM_TEX(v.uv0, _MainTex);
+				#endif
+			}
+
+			half4 fragShadowCasterModified(
+				#ifdef UNITY_STANDARD_USE_SHADOW_OUTPUT_STRUCT
+				VertexOutputShadowCaster i
+				#endif
+				#ifdef UNITY_STANDARD_USE_DITHER_MASK
+				, UNITY_VPOS_TYPE vpos : VPOS
+				#endif
+				) : SV_Target
+			{
+				#if defined(UNITY_STANDARD_USE_SHADOW_UVS)
+					half alpha = tex2D(_MainTex, i.tex).a * _Color.a;
+					#if defined(_ALPHATEST_ON)
+						clip (alpha - _Cutoff);
+					#endif
+					#if defined(_ALPHABLEND_ON) || defined(_ALPHAPREMULTIPLY_ON)
+						#if defined(UNITY_STANDARD_USE_DITHER_MASK)
+							half alphaRef = tex3D(_DitherMaskLOD, float3(vpos.xy * 0.25, alpha * 0.9375)).a;
+							clip(alphaRef - 0.01);
+						#else
+							clip(alpha - _Cutoff);
+						#endif
+					#endif
+				#endif
+
+				SHADOW_CASTER_FRAGMENT(i)
+			}	
 
 			ENDCG
 		}
 
 		Pass 
 		{
-			Tags { "Queue" = "Geometry" "RenderType"="" /*"LightMode" = "Deferred"*/ }
+			Tags { "Queue" = "Geometry" }
+			//Tags { "Queue" = "Opaque" "LightMode" = "Deferred" }
 
 			ZTest On
 			ZWrite On
@@ -101,6 +151,7 @@
 
 			CGPROGRAM
 			#include "UnityCG.cginc"
+
 			#pragma target 4.0
 			#pragma only_renderers d3d11 glcore
 			#pragma vertex vert
@@ -122,11 +173,6 @@
 			void vert(in p2v v, out v2f o)
 			{	
 				VERTEX_PROGRAM(v, o);
-			}
-
-			inline float4 RGB2Reflectance(float4 inColor)
-			{
-				return float4(tan(1.37 * inColor.rgb) / tan(1.37), inColor.a);
 			}
 			
 			void frag(in v2f IN, 
@@ -194,9 +240,9 @@
 				float3 finalColor = hdr(groundColor * extinction + inscatter);
 
 				outDiffuse = float4(finalColor, 1.0);
-				outSpecSmoothness = 1;
-				outNormal = half4(fn.xyz * 0.5 + 0.5, 1);
-				outEmission = 0;
+				outSpecSmoothness = 1.0;
+				outNormal = half4(fn.xyz * 0.5 + 0.5, 1.0);
+				outEmission = half4(exp(-finalColor / 2), 1.0);
 				//return float4(texTile(_Elevation_Tile, IN.uv, _Elevation_TileCoords, _Elevation_TileSize).xxx * 0.002, 1.0);
 				//return float4(fn.xyz, 1.0);
 				//return float4(IN.uv, 1.0, 1.0);

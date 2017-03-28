@@ -141,6 +141,8 @@ float4 Triplanar(sampler2D topAndButtomSampler, sampler2D leftAndRightSampler, s
 	return fixed4(XSampler * blendWeights.x + YSampler * blendWeights.y + ZSampler * blendWeights.z, 1.0);
 }
 
+inline float4 RGB2Reflectance(float4 color) { return float4(tan(1.37 * color.rgb) / tan(1.37), color.a); }
+
 struct VertexProducerInput
 {
 	float4 vertex : POSITION;
