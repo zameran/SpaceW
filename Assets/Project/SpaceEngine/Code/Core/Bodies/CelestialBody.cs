@@ -34,8 +34,6 @@
 // 
 #endregion
 
-using SpaceEngine.AtmosphericScattering;
-
 using System.Collections.Generic;
 using System.Linq;
 
@@ -195,8 +193,8 @@ namespace SpaceEngine.Core.Bodies
         {
             if (Ring != null)
             {
-                if (Ring.body == null)
-                    Ring.body = this;
+                if (Ring.ParentBody == null)
+                    Ring.ParentBody = this;
             }
 
             Offset = new Vector3(0.0f, 0.0f, Radius);

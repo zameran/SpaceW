@@ -233,7 +233,7 @@ namespace SpaceEngine.AtmosphericScattering.Sun
             {
                 if (Atmosphere == null) return;
 
-                Graphics.DrawMesh(SunGlareMesh, Vector3.zero, Quaternion.identity, SunGlareMaterial, layer, CameraHelper.Main(), 0, Atmosphere.body.MPB, false, false);
+                Graphics.DrawMesh(SunGlareMesh, Vector3.zero, Quaternion.identity, SunGlareMaterial, layer, CameraHelper.Main(), 0, Atmosphere.ParentBody.MPB, false, false);
             }
         }
 

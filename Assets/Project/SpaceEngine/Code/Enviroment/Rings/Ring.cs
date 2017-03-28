@@ -43,7 +43,7 @@ using UnityEngine;
 
 public class Ring : Node<Ring>, IUniformed<Material>, IRenderable<Ring>
 {
-    public CelestialBody body;
+    public CelestialBody ParentBody;
 
     public List<Light> Lights = new List<Light>();
     public List<Shadow> Shadows = new List<Shadow>();

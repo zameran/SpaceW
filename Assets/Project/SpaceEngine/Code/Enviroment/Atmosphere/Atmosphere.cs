@@ -88,7 +88,7 @@ namespace SpaceEngine.AtmosphericScattering
                                                                               new Keyframe(0.25f, 1.0f),
                                                                               new Keyframe(1.0f, 1.0f) });
 
-        public Body body;
+        public Body ParentBody;
 
         [Range(0.0f, 1.0f)]
         public float Density = 1.0f;
@@ -126,8 +126,8 @@ namespace SpaceEngine.AtmosphericScattering
 
         public PreProcessAtmosphere atmosphereBaker = null;
 
-        public Vector3 Origin { get { return body != null ? body.transform.position : Vector3.zero; } }
-        public float Radius { get { return body != null ? body.Size : 0.0f; } }
+        public Vector3 Origin { get { return ParentBody != null ? ParentBody.transform.position : Vector3.zero; } }
+        public float Radius { get { return ParentBody != null ? ParentBody.Size : 0.0f; } }
 
         public Color[] shineColors = new Color[4] { XKCDColors.Bluish, XKCDColors.Bluish, XKCDColors.Bluish, XKCDColors.Bluish };
 
@@ -173,7 +173,7 @@ namespace SpaceEngine.AtmosphericScattering
 
         private void AtmosphereBasePropertyOnPropertyChanged(object sender, PropertyChangedEventArgs e)
         {
-            EventManager.BodyEvents.OnAtmospherePresetChanged.Invoke(body, this, AtmosphereBase);
+            EventManager.BodyEvents.OnAtmospherePresetChanged.Invoke(ParentBody, this, AtmosphereBase);
         }
 
         private void OnAtmosphereBaked(Body body, Atmosphere atmosphere)
@@ -227,10 +227,10 @@ namespace SpaceEngine.AtmosphericScattering
             InitMesh();
 
             InitUniforms(SkyMaterial);
-            InitUniforms(body.MPB);
+            InitUniforms(ParentBody.MPB);
 
             SetUniforms(SkyMaterial);
-            SetUniforms(body.MPB);
+            SetUniforms(ParentBody.MPB);
         }
 
         protected override void UpdateNode()
@@ -246,7 +246,7 @@ namespace SpaceEngine.AtmosphericScattering
 
             Fade = FadeCurve.Evaluate(float.IsNaN(fadeValue) || float.IsInfinity(fadeValue) ? 1.0f : fadeValue);
 
-            Keywords = body.GetKeywords();
+            Keywords = ParentBody.GetKeywords();
 
             SetUniforms(SkyMaterial);
         }
@@ -384,13 +384,13 @@ namespace SpaceEngine.AtmosphericScattering
 
         public void Reanimate()
         {
-            if (body != null)
+            if (ParentBody != null)
             {
                 InitUniforms(SkyMaterial);
-                InitUniforms(body.MPB);
+                InitUniforms(ParentBody.MPB);
 
                 SetUniforms(SkyMaterial);
-                SetUniforms(body.MPB);
+                SetUniforms(ParentBody.MPB);
 
                 for (byte i = 0; i < Suns.Count; i++)
                 {
@@ -417,7 +417,7 @@ namespace SpaceEngine.AtmosphericScattering
         {
             if (AtmosphereMesh == null) return;
 
-            Graphics.DrawMesh(AtmosphereMesh, transform.localToWorldMatrix, SkyMaterial, layer, CameraHelper.Main(), 0, body.MPB);
+            Graphics.DrawMesh(AtmosphereMesh, transform.localToWorldMatrix, SkyMaterial, layer, CameraHelper.Main(), 0, ParentBody.MPB);
         }
 
         #endregion
@@ -436,7 +436,7 @@ namespace SpaceEngine.AtmosphericScattering
         {
             atmosphereBaker.Bake(atmosphereParameters);
 
-            EventManager.BodyEvents.OnAtmosphereBaked.Invoke(body, this);
+            EventManager.BodyEvents.OnAtmosphereBaked.Invoke(ParentBody, this);
         }
 
         public void CalculateShine(out Matrix4x4 soc1, out Matrix4x4 sc1)
@@ -575,9 +575,9 @@ namespace SpaceEngine.AtmosphericScattering
 #if UNITY_EDITOR
         private void OnDrawGizmosSelected()
         {
-            if (body != null)
+            if (ParentBody != null)
             {
-                if (body.DrawGizmos == false) return;
+                if (ParentBody.DrawGizmos == false) return;
 
                 for (byte i = 0; i < Mathf.Min(4, Suns.Count); i++)
                 {
@@ -601,9 +601,9 @@ namespace SpaceEngine.AtmosphericScattering
 
         private void OnDrawGizmos()
         {
-            if (body != null)
+            if (ParentBody != null)
             {
-                if (body.DrawGizmos == false) return;
+                if (ParentBody.DrawGizmos == false) return;
 
                 for (byte i = 0; i < Mathf.Min(4, Suns.Count); i++)
                 {
@@ -622,16 +622,16 @@ namespace SpaceEngine.AtmosphericScattering
                     Gizmos.DrawRay(Origin, direction);
 
                     Gizmos.color = Color.blue;
-                    Gizmos.DrawRay(body.transform.InverseTransformVector(Origin + direction), -(Quaternion.Euler(umbraAngle, 0, 0) * direction));
-                    Gizmos.DrawRay(body.transform.InverseTransformVector(Origin + direction), -(Quaternion.Euler(-umbraAngle, 0, 0) * direction));
-                    Gizmos.DrawRay(body.transform.InverseTransformVector(Origin + direction), -(Quaternion.Euler(0, umbraAngle, 0) * direction));
-                    Gizmos.DrawRay(body.transform.InverseTransformVector(Origin + direction), -(Quaternion.Euler(0, -umbraAngle, 0) * direction));
+                    Gizmos.DrawRay(ParentBody.transform.InverseTransformVector(Origin + direction), -(Quaternion.Euler(umbraAngle, 0, 0) * direction));
+                    Gizmos.DrawRay(ParentBody.transform.InverseTransformVector(Origin + direction), -(Quaternion.Euler(-umbraAngle, 0, 0) * direction));
+                    Gizmos.DrawRay(ParentBody.transform.InverseTransformVector(Origin + direction), -(Quaternion.Euler(0, umbraAngle, 0) * direction));
+                    Gizmos.DrawRay(ParentBody.transform.InverseTransformVector(Origin + direction), -(Quaternion.Euler(0, -umbraAngle, 0) * direction));
 
                     Gizmos.color = Color.cyan;
-                    Gizmos.DrawLine(body.transform.position + Vector3.up * Radius, body.transform.InverseTransformVector(Origin + direction) + Vector3.up * Radius);
-                    Gizmos.DrawLine(body.transform.position + Vector3.down * Radius, body.transform.InverseTransformVector(Origin + direction) + Vector3.down * Radius);
-                    Gizmos.DrawLine(body.transform.position + Vector3.left * Radius, body.transform.InverseTransformVector(Origin + direction) + Vector3.left * Radius);
-                    Gizmos.DrawLine(body.transform.position + Vector3.right * Radius, body.transform.InverseTransformVector(Origin + direction) + Vector3.right * Radius);
+                    Gizmos.DrawLine(ParentBody.transform.position + Vector3.up * Radius, ParentBody.transform.InverseTransformVector(Origin + direction) + Vector3.up * Radius);
+                    Gizmos.DrawLine(ParentBody.transform.position + Vector3.down * Radius, ParentBody.transform.InverseTransformVector(Origin + direction) + Vector3.down * Radius);
+                    Gizmos.DrawLine(ParentBody.transform.position + Vector3.left * Radius, ParentBody.transform.InverseTransformVector(Origin + direction) + Vector3.left * Radius);
+                    Gizmos.DrawLine(ParentBody.transform.position + Vector3.right * Radius, ParentBody.transform.InverseTransformVector(Origin + direction) + Vector3.right * Radius);
                 }
             }
         }
@@ -657,7 +657,7 @@ namespace SpaceEngine.AtmosphericScattering
 
         public void InitMisc()
         {
-            Keywords = body.GetKeywords();
+            Keywords = ParentBody.GetKeywords();
         }
 
         #region ExtraAPI

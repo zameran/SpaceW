@@ -126,7 +126,7 @@ namespace SpaceEngine.Cameras
                         transform.Rotate(new Vector3(0, 0, Rotation.z));
                 }
 
-                if (Body != null && Body is CelestialBody)
+                if (Body.GetBodyDeformationType() == BodyDeformationType.Spherical)
                 {
                     DistanceToCore = Vector3.Distance(transform.position, Body.transform.position);
 
@@ -174,7 +174,7 @@ namespace SpaceEngine.Cameras
             {
                 var worldPosition = (Vector3d)transform.position;
 
-                if (Body is CelestialBody)
+                if (Body.GetBodyDeformationType() == BodyDeformationType.Spherical)
                 {
                     if (worldPosition.Magnitude() < Body.Size + 10.0 + Body.HeightZ)
                     {
@@ -199,7 +199,7 @@ namespace SpaceEngine.Cameras
             {
                 if (Body != null)
                 {
-                    if (Body is CelestialBody)
+                    if (Body.GetBodyDeformationType() == BodyDeformationType.Spherical)
                     {
                         var h = (DistanceToCore - Body.Size - Body.Amplitude - (float)Body.HeightZ);
 

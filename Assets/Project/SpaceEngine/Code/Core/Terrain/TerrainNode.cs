@@ -23,13 +23,7 @@ namespace SpaceEngine.Core.Terrain
     /// </summary>
     public class TerrainNode : Node<TerrainNode>
     {
-        public Body Body { get; set; }
-
-        public enum TerrainDeformationType
-        {
-            Spherical,
-            Flat
-        }
+        public Body ParentBody { get; set; }
 
         readonly static byte HORIZON_SIZE = 255;
 
@@ -134,24 +128,20 @@ namespace SpaceEngine.Core.Terrain
         /// </summary>
         float[] Horizon = new float[HORIZON_SIZE];
 
-        public bool IsSpherical { get; protected set; }
-
         #region Node
 
         protected override void InitNode()
         {
-            Body = GetComponentInParent<Body>();
-            Body.TerrainNodes.Add(this);
+            ParentBody = GetComponentInParent<Body>();
+            ParentBody.TerrainNodes.Add(this);
 
-            IsSpherical = Body is CelestialBody;
-
-            TerrainMaterial = MaterialHelper.CreateTemp(Body.ColorShader, "TerrainNode");
+            TerrainMaterial = MaterialHelper.CreateTemp(ParentBody.ColorShader, "TerrainNode");
 
             FaceToLocal = Matrix4x4d.identity;
 
-            if (IsSpherical)
+            if (ParentBody.GetBodyDeformationType() == BodyDeformationType.Spherical)
             {
-                var celestialBody = Body as CelestialBody;
+                var celestialBody = ParentBody as CelestialBody;
 
                 if (celestialBody == null) { throw new Exception("Wow! Celestial body isn't Celestial?!"); }
 
@@ -182,14 +172,14 @@ namespace SpaceEngine.Core.Terrain
                 Deformation = new DeformationBase();
             }
 
-            CreateTerrainQuadRoot(Body.Size);
+            CreateTerrainQuadRoot(ParentBody.Size);
         }
 
         protected override void UpdateNode()
         {
-            if (IsSpherical)
+            if (ParentBody.GetBodyDeformationType() == BodyDeformationType.Spherical)
             {
-                LocalToWorld = Matrix4x4d.ToMatrix4x4d(Body.transform.localToWorldMatrix) * FaceToLocal;
+                LocalToWorld = Matrix4x4d.ToMatrix4x4d(ParentBody.transform.localToWorldMatrix) * FaceToLocal;
             }
             else
             {
@@ -235,39 +225,39 @@ namespace SpaceEngine.Core.Terrain
 
             TerrainQuadRoot.UpdateLOD();
 
-            if (IsSpherical)
+            if (ParentBody.GetBodyDeformationType() == BodyDeformationType.Spherical)
             {
-                var celestialBody = Body as CelestialBody;
+                var celestialBody = ParentBody as CelestialBody;
 
                 if (celestialBody == null) { throw new Exception("Wow! Celestial body isn't Celestial?!"); }
 
-                if (celestialBody.AtmosphereEnabled)
-                {
-                    if (celestialBody.Atmosphere != null)
-                    {
-                        celestialBody.Atmosphere.SetUniforms(TerrainMaterial);
-                    }
-                }
+                TerrainMaterial.SetTexture("_Ground_Diffuse", celestialBody.GroundDiffuse);
+                TerrainMaterial.SetTexture("_Ground_Normal", celestialBody.GroundNormal);
+                TerrainMaterial.SetTexture("_DetailedNormal", celestialBody.DetailedNormal);
+            }
 
-                if (celestialBody.OceanEnabled)
+            if (ParentBody.AtmosphereEnabled)
+            {
+                if (ParentBody.Atmosphere != null)
                 {
-                    if (celestialBody.Ocean != null)
-                    {
-                        celestialBody.Ocean.SetUniforms(TerrainMaterial);
-                    }
-                    else
-                    {
-                        TerrainMaterial.SetFloat("_Ocean_DrawBRDF", 0.0f);
-                    }
+                    ParentBody.Atmosphere.SetUniforms(TerrainMaterial);
+                }
+            }
+
+            if (ParentBody.OceanEnabled)
+            {
+                if (ParentBody.Ocean != null)
+                {
+                    ParentBody.Ocean.SetUniforms(TerrainMaterial);
                 }
                 else
                 {
                     TerrainMaterial.SetFloat("_Ocean_DrawBRDF", 0.0f);
                 }
-
-                TerrainMaterial.SetTexture("_Ground_Diffuse", celestialBody.GroundDiffuse);
-                TerrainMaterial.SetTexture("_Ground_Normal", celestialBody.GroundNormal);
-                TerrainMaterial.SetTexture("_DetailedNormal", celestialBody.DetailedNormal);
+            }
+            else
+            {
+                TerrainMaterial.SetFloat("_Ocean_DrawBRDF", 0.0f);
             }
 
             Deformation.SetUniforms(this, TerrainMaterial);

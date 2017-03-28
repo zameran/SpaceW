@@ -33,9 +33,20 @@
 // Creator: zameran
 #endregion
 
+using System;
+
 namespace SpaceEngine.Core.Bodies
 {
+    [Serializable]
+    public enum BodyDeformationType
+    {
+        Flat,
+        Spherical,
+        Cyllindrycal
+    }
+
     public interface IBody
     {
+
     }
 }

@@ -168,7 +168,7 @@ namespace SpaceEngine.Core.Tile.Samplers
 
                     GroundBuffer.GetData(height);
 
-                    TerrainNode.Body.HeightZ = Math.Max(0.0, height[0].x);
+                    TerrainNode.ParentBody.HeightZ = Math.Max(0.0, height[0].x);
 
                     OldLocalCamera.x = localCameraPosition.x;
                     OldLocalCamera.y = localCameraPosition.y;

@@ -47,6 +47,20 @@ using UnityEngine;
 
 namespace SpaceEngine.Core.Bodies
 {
+    public static class BodyExtensions
+    {
+        public static BodyDeformationType GetBodyDeformationType(this Body body)
+        {
+            if (body is CelestialBody)
+            {
+                return BodyDeformationType.Spherical;
+            }
+
+            return BodyDeformationType.Flat;
+        }
+    }
+
+
     public class Body : Node<Body>, IBody, IUniformed<MaterialPropertyBlock>, IReanimateable
     {
         public Atmosphere Atmosphere;
@@ -88,14 +102,14 @@ namespace SpaceEngine.Core.Bodies
         {
             if (Atmosphere != null)
             {
-                if (Atmosphere.body == null)
-                    Atmosphere.body = this;
+                if (Atmosphere.ParentBody == null)
+                    Atmosphere.ParentBody = this;
             }
 
             if (Ocean != null)
             {
-                if (Ocean.body == null)
-                    Ocean.body = this;
+                if (Ocean.ParentBody == null)
+                    Ocean.ParentBody = this;
 
                 // TODO : Whhhhhhaaattaaaaaafuuuuckkk!
                 StartCoroutine(Ocean.InitializationFix());

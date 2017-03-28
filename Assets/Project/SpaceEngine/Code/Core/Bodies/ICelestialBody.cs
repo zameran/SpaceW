@@ -37,7 +37,7 @@ using System.Collections.Generic;
 
 namespace SpaceEngine.Core.Bodies
 {
-    public interface ICelestialBody : IBody
+    public interface ICelestialBody
     {
         float Radius { get; set; }
 

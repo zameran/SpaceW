@@ -16,20 +16,12 @@ namespace SpaceEngine.Ocean
     /// </summary>
     public abstract class OceanNode : Node<OceanNode>, IUniformed<Material>, IUniformed<MaterialPropertyBlock>, IReanimateable, IEventit, IRenderable<OceanNode>
     {
-        public enum OceanSurfaceType : byte
-        {
-            Flat,
-            Spherized
-        }
-
-        public Body body;
+        public Body ParentBody;
 
         public Shader OceanShader;
 
         public EngineRenderQueue RenderQueue = EngineRenderQueue.Geometry;
         public int RenderQueueOffset = 0;
-
-        public OceanSurfaceType OceanType = OceanSurfaceType.Spherized;
 
         [SerializeField]
         protected Material OceanMaterial;
@@ -65,7 +57,7 @@ namespace SpaceEngine.Ocean
         /// </summary>
         public bool DrawOcean { get; protected set; }
 
-        public Vector3d Origin { get { return body != null ? body.Origin : transform.position; } } // TODO : ORIGIN
+        public Vector3d Origin { get { return ParentBody != null ? ParentBody.Origin : transform.position; } } // TODO : ORIGIN
 
         /// <summary>
         /// Concrete classes must provide a function that returns the variance of the waves need for the BRDF rendering of waves.
@@ -87,7 +79,7 @@ namespace SpaceEngine.Ocean
         {
             OceanMaterial = MaterialHelper.CreateTemp(OceanShader, "Ocean");
 
-            body.Atmosphere.InitUniforms(OceanMaterial);
+            ParentBody.Atmosphere.InitUniforms(OceanMaterial);
 
             OldLocalToOcean = Matrix4x4d.identity;
             Offset = Vector4.zero;
@@ -130,10 +122,9 @@ namespace SpaceEngine.Ocean
             var cameraToWorld = GodManager.Instance.CameraToWorld;
             var oceanFrame = cameraToWorld * Vector3d.zero; // Camera in local space // TODO : Ocean origin [ZERO]
 
-            // TODO : Get surface deformation type from body globals...
-            var radius = (OceanType == OceanSurfaceType.Spherized) ? body.Size : 0.0f;
+            var radius = (ParentBody.GetBodyDeformationType() == BodyDeformationType.Spherical) ? ParentBody.Size : 0.0f;
 
-            if ((OceanType == OceanSurfaceType.Flat && oceanFrame.z > ZMin) ||
+            if ((ParentBody.GetBodyDeformationType() == BodyDeformationType.Flat && oceanFrame.z > ZMin) ||
                 (radius > 0.0 && oceanFrame.Magnitude() > radius + ZMin) ||
                 (radius < 0.0 && (new Vector2d(oceanFrame.y, oceanFrame.z)).Magnitude() < -radius - ZMin))
             {
@@ -145,9 +136,13 @@ namespace SpaceEngine.Ocean
             }
 
             DrawOcean = true;
-            Vector3d ux, uy, uz, oceanOrigin;
 
-            if (OceanType == OceanSurfaceType.Flat)
+            Vector3d ux = Vector3d.zero;
+            Vector3d uy = Vector3d.zero;
+            Vector3d uz = Vector3d.zero;
+            Vector3d oceanOrigin = Vector3d.zero;
+
+            if (ParentBody.GetBodyDeformationType() == BodyDeformationType.Flat)
             {
                 // Terrain ocean
                 ux = Vector3d.right;
@@ -155,7 +150,7 @@ namespace SpaceEngine.Ocean
                 uz = Vector3d.forward;
                 oceanOrigin = new Vector3d(oceanFrame.x, oceanFrame.y, 0.0);
             }
-            else
+            else if (ParentBody.GetBodyDeformationType() == BodyDeformationType.Spherical)
             {
                 // Planet ocean
                 uz = oceanFrame.Normalized(); // Unit z vector of ocean frame, in local space
@@ -206,18 +201,18 @@ namespace SpaceEngine.Ocean
             var dA = (cameraToOcean * stoc_x).XYZ();
             var B = (cameraToOcean * stoc_y).XYZ();
 
-            Vector3d horizon1;
-            Vector3d horizon2;
+            Vector3d horizon1 = Vector3d.zero;
+            Vector3d horizon2 = Vector3d.zero;
 
             var offset = new Vector3d(-Offset.x, -Offset.y, h);
 
-            if (OceanType == OceanSurfaceType.Flat)
+            if (ParentBody.GetBodyDeformationType() == BodyDeformationType.Flat)
             {
                 // Terrain ocean
                 horizon1 = new Vector3d(-(h * 1e-6 + A0.z) / B.z, -dA.z / B.z, 0.0);
                 horizon2 = Vector3d.zero;
             }
-            else
+            else if (ParentBody.GetBodyDeformationType() == BodyDeformationType.Spherical)
             {
                 // Planet ocean
                 var h1 = h * (h + 2.0 * radius);
@@ -233,7 +228,7 @@ namespace SpaceEngine.Ocean
                 horizon2 = new Vector3d(beta0 * beta0 - gamma0, 2.0 * (beta0 * beta1 - gamma1), beta1 * beta1 - gamma2);
             }
 
-            var sunDirection = body.Atmosphere.GetSunDirection(body.Atmosphere.Suns[0]);
+            var sunDirection = ParentBody.Atmosphere.GetSunDirection(ParentBody.Atmosphere.Suns[0]);
             var oceanSunDirection = localToOcean.ToMatrix3x3d() * sunDirection;
 
             OceanMaterial.SetVector("_Ocean_SunDir", oceanSunDirection.ToVector3());
@@ -378,7 +373,7 @@ namespace SpaceEngine.Ocean
             {
                 if (mesh == null) break;
 
-                Graphics.DrawMesh(mesh, Matrix4x4.identity, OceanMaterial, layer, CameraHelper.Main(), 0, body.MPB);
+                Graphics.DrawMesh(mesh, Matrix4x4.identity, OceanMaterial, layer, CameraHelper.Main(), 0, ParentBody.MPB);
             }
         }
 
