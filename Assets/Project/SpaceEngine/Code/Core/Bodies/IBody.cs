@@ -28,19 +28,14 @@
 // ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF
 // THE POSSIBILITY OF SUCH DAMAGE.
 // 
-// Creation Date: 2017.02.24
-// Creation Time: 11:18 AM
+// Creation Date: 2017.03.28
+// Creation Time: 2:18 PM
 // Creator: zameran
 #endregion
 
-using System.Collections.Generic;
-
 namespace SpaceEngine.Core.Bodies
 {
-    public interface ICelestialBody : IBody
+    public interface IBody
     {
-        float Radius { get; set; }
-
-        List<string> GetKeywords();
     }
 }

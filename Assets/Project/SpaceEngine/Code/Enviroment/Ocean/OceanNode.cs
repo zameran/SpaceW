@@ -22,7 +22,7 @@ namespace SpaceEngine.Ocean
             Spherized
         }
 
-        public CelestialBody body;
+        public Body body;
 
         public Shader OceanShader;
 
@@ -130,7 +130,8 @@ namespace SpaceEngine.Ocean
             var cameraToWorld = GodManager.Instance.CameraToWorld;
             var oceanFrame = cameraToWorld * Vector3d.zero; // Camera in local space // TODO : Ocean origin [ZERO]
 
-            var radius = (OceanType == OceanSurfaceType.Spherized) ? body.Radius : 0.0f;
+            // TODO : Get surface deformation type from body globals...
+            var radius = (OceanType == OceanSurfaceType.Spherized) ? body.Size : 0.0f;
 
             if ((OceanType == OceanSurfaceType.Flat && oceanFrame.z > ZMin) ||
                 (radius > 0.0 && oceanFrame.Magnitude() > radius + ZMin) ||
@@ -339,7 +340,7 @@ namespace SpaceEngine.Ocean
         {
             if (isEventit) return;
 
-            EventManager.CelestialBodyEvents.OnAtmosphereBaked.OnEvent += OnAtmosphereBaked;
+            EventManager.BodyEvents.OnAtmosphereBaked.OnEvent += OnAtmosphereBaked;
 
             isEventit = true;
         }
@@ -348,7 +349,7 @@ namespace SpaceEngine.Ocean
         {
             if (!isEventit) return;
 
-            EventManager.CelestialBodyEvents.OnAtmosphereBaked.OnEvent -= OnAtmosphereBaked;
+            EventManager.BodyEvents.OnAtmosphereBaked.OnEvent -= OnAtmosphereBaked;
 
             isEventit = false;
         }
@@ -363,7 +364,7 @@ namespace SpaceEngine.Ocean
         /// </summary>
         /// <param name="celestialBody">Celestial body.</param>
         /// <param name="atmosphere">Atmosphere.</param>
-        protected abstract void OnAtmosphereBaked(CelestialBody celestialBody, Atmosphere atmosphere);
+        protected abstract void OnAtmosphereBaked(Body celestialBody, Atmosphere atmosphere);
 
         #endregion
 

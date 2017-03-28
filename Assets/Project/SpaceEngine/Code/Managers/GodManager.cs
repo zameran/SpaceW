@@ -50,9 +50,9 @@ public class GodManager : MonoSingleton<GodManager>
     public ComputeShader WriteData;
     public ComputeShader ReadData;
 
-    public CelestialBody ActiveBody { get { return Bodies.FirstOrDefault(); } }
+    public Body ActiveBody { get { return Bodies.FirstOrDefault(body => Helper.Enabled(body)); } }
 
-    public CelestialBody[] Bodies;
+    public Body[] Bodies;
     public Starfield[] Starfields;
 
     public AtmosphereHDR HDRMode = AtmosphereHDR.ProlandOptimized;
@@ -72,7 +72,7 @@ public class GodManager : MonoSingleton<GodManager>
     {
         Instance = this;
 
-        Bodies = FindObjectsOfType<CelestialBody>();
+        Bodies = FindObjectsOfType<Body>();
         Starfields = FindObjectsOfType<Starfield>();
     }
 

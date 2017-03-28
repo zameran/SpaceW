@@ -62,7 +62,7 @@ namespace SpaceEngine.Core
             base.Start();
 
             if (TerrainNode == null) { TerrainNode = transform.parent.GetComponent<TerrainNode>(); }
-            if (TerrainNode.Body == null) { TerrainNode.Body = transform.parent.GetComponentInParent<CelestialBody>(); }
+            if (TerrainNode.Body == null) { TerrainNode.Body = transform.parent.GetComponentInParent<Body>(); }
             if (NormalsProducer == null) { NormalsProducer = NormalsProducerGameObject.GetComponent<TileProducer>(); }
             if (NormalsProducer.Cache == null) { NormalsProducer.InitCache(); }
             if (ElevationProducer == null) { ElevationProducer = ElevationProducerGameObject.GetComponent<TileProducer>(); }
@@ -178,7 +178,7 @@ namespace SpaceEngine.Core
             offset.x = ((double)tx / (1 << level) - 0.5) * rootQuadSize;
             offset.y = ((double)ty / (1 << level) - 0.5) * rootQuadSize;
             offset.z = rootQuadSize / (1 << level);
-            offset.w = TerrainNode.Body.Radius;
+            offset.w = TerrainNode.Body.Size;
 
             ColorMaterial.SetTexture("_NormalsSampler", normalsTex);
             ColorMaterial.SetVector("_NormalsOSL", normalsOSL);

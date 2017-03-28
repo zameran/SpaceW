@@ -88,7 +88,7 @@ namespace SpaceEngine.AtmosphericScattering
                                                                               new Keyframe(0.25f, 1.0f),
                                                                               new Keyframe(1.0f, 1.0f) });
 
-        public CelestialBody body;
+        public Body body;
 
         [Range(0.0f, 1.0f)]
         public float Density = 1.0f;
@@ -127,7 +127,7 @@ namespace SpaceEngine.AtmosphericScattering
         public PreProcessAtmosphere atmosphereBaker = null;
 
         public Vector3 Origin { get { return body != null ? body.transform.position : Vector3.zero; } }
-        public float Radius { get { return body != null ? body.Radius : 0.0f; } }
+        public float Radius { get { return body != null ? body.Size : 0.0f; } }
 
         public Color[] shineColors = new Color[4] { XKCDColors.Bluish, XKCDColors.Bluish, XKCDColors.Bluish, XKCDColors.Bluish };
 
@@ -149,8 +149,8 @@ namespace SpaceEngine.AtmosphericScattering
 
             AtmosphereBaseProperty.PropertyChanged += AtmosphereBasePropertyOnPropertyChanged;
 
-            EventManager.CelestialBodyEvents.OnAtmosphereBaked.OnEvent += OnAtmosphereBaked;
-            EventManager.CelestialBodyEvents.OnAtmospherePresetChanged.OnEvent += OnAtmospherePresetChanged;
+            EventManager.BodyEvents.OnAtmosphereBaked.OnEvent += OnAtmosphereBaked;
+            EventManager.BodyEvents.OnAtmospherePresetChanged.OnEvent += OnAtmospherePresetChanged;
 
             isEventit = true;
         }
@@ -161,8 +161,8 @@ namespace SpaceEngine.AtmosphericScattering
 
             AtmosphereBaseProperty.PropertyChanged -= AtmosphereBasePropertyOnPropertyChanged;
 
-            EventManager.CelestialBodyEvents.OnAtmosphereBaked.OnEvent -= OnAtmosphereBaked;
-            EventManager.CelestialBodyEvents.OnAtmospherePresetChanged.OnEvent -= OnAtmospherePresetChanged;
+            EventManager.BodyEvents.OnAtmosphereBaked.OnEvent -= OnAtmosphereBaked;
+            EventManager.BodyEvents.OnAtmospherePresetChanged.OnEvent -= OnAtmospherePresetChanged;
 
             isEventit = false;
         }
@@ -173,10 +173,10 @@ namespace SpaceEngine.AtmosphericScattering
 
         private void AtmosphereBasePropertyOnPropertyChanged(object sender, PropertyChangedEventArgs e)
         {
-            EventManager.CelestialBodyEvents.OnAtmospherePresetChanged.Invoke(body, this, AtmosphereBase);
+            EventManager.BodyEvents.OnAtmospherePresetChanged.Invoke(body, this, AtmosphereBase);
         }
 
-        private void OnAtmosphereBaked(CelestialBody body, Atmosphere atmosphere)
+        private void OnAtmosphereBaked(Body body, Atmosphere atmosphere)
         {
             if (body == null)
             {
@@ -194,7 +194,7 @@ namespace SpaceEngine.AtmosphericScattering
             atmosphere.Reanimate();
         }
 
-        private void OnAtmospherePresetChanged(CelestialBody body, Atmosphere atmosphere, AtmosphereBase atmosphereBase)
+        private void OnAtmospherePresetChanged(Body body, Atmosphere atmosphere, AtmosphereBase atmosphereBase)
         {
             if (body == null)
             {
@@ -436,7 +436,7 @@ namespace SpaceEngine.AtmosphericScattering
         {
             atmosphereBaker.Bake(atmosphereParameters);
 
-            EventManager.CelestialBodyEvents.OnAtmosphereBaked.Invoke(body, this);
+            EventManager.BodyEvents.OnAtmosphereBaked.Invoke(body, this);
         }
 
         public void CalculateShine(out Matrix4x4 soc1, out Matrix4x4 sc1)

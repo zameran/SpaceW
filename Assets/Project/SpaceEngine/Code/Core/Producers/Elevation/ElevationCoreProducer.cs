@@ -60,7 +60,7 @@ namespace SpaceEngine.Core
             base.Start();
 
             if (TerrainNode == null) { TerrainNode = transform.parent.GetComponent<TerrainNode>(); }
-            if (TerrainNode.Body == null) { TerrainNode.Body = transform.parent.GetComponentInParent<CelestialBody>(); }
+            if (TerrainNode.Body == null) { TerrainNode.Body = transform.parent.GetComponentInParent<Body>(); }
 
             if (ResidualProducerGameObject != null)
             {
@@ -159,7 +159,7 @@ namespace SpaceEngine.Core
             offset.x = ((double)tx / (1 << level) - 0.5) * rootQuadSize;
             offset.y = ((double)ty / (1 << level) - 0.5) * rootQuadSize;
             offset.z = rootQuadSize / (1 << level);
-            offset.w = TerrainNode.Body.Radius;
+            offset.w = TerrainNode.Body.Size;
 
             ElevationMaterial.SetVector("_TileWSD", tileWSD);
             ElevationMaterial.SetVector("_TileSD", tileSD.ToVector2());

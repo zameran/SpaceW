@@ -41,7 +41,7 @@ namespace SpaceEngine.Debugging
 {
     public sealed class DebugGUIBodyInfo : DebugGUI
     {
-        public CelestialBody Body;
+        public Body Body;
 
         protected override void Awake()
         {
@@ -66,6 +66,10 @@ namespace SpaceEngine.Debugging
 
             if (Body != null)
             {
+                var celestialBody = Body as CelestialBody;
+
+                if (celestialBody == null) return;
+
                 GUILayout.BeginVertical();
 
                 GUILayout.Label("Body parameters: ", boldLabel);
@@ -74,22 +78,22 @@ namespace SpaceEngine.Debugging
 
                 GUILayout.EndVertical();
 
-                if (Body.Atmosphere != null)
+                if (celestialBody.Atmosphere != null)
                 {
                     GUILayout.BeginVertical();
 
                     GUILayout.Label("Atmosphere parameters: ", boldLabel);
 
                     GUILayout.Label("Preset: ");
-                    Body.Atmosphere.AtmosphereBase = (AtmosphereBase)GUILayout.SelectionGrid((int)Body.Atmosphere.AtmosphereBase, System.Enum.GetNames(typeof(AtmosphereBase)), 2);
+                    celestialBody.Atmosphere.AtmosphereBase = (AtmosphereBase)GUILayout.SelectionGrid((int)celestialBody.Atmosphere.AtmosphereBase, System.Enum.GetNames(typeof(AtmosphereBase)), 2);
 
                     GUILayout.Space(10);
 
                     GUILayout.Label("Density: ");
-                    float.TryParse(GUILayout.TextField(Body.Atmosphere.Density.ToString("0.0")), out Body.Atmosphere.Density);
+                    float.TryParse(GUILayout.TextField(celestialBody.Atmosphere.Density.ToString("0.0")), out celestialBody.Atmosphere.Density);
 
                     GUILayout.Label("Height: ");
-                    float.TryParse(GUILayout.TextField(Body.Atmosphere.Height.ToString("0.0")), out Body.Atmosphere.Height);
+                    float.TryParse(GUILayout.TextField(celestialBody.Atmosphere.Height.ToString("0.0")), out celestialBody.Atmosphere.Height);
 
                     GUILayout.EndVertical();
                 }

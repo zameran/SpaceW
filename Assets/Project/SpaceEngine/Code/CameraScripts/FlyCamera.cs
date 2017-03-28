@@ -39,9 +39,10 @@ using UnityEngine;
 
 namespace SpaceEngine.Cameras
 {
+    [ExecutionOrder(-9998)]
     public class FlyCamera : GameCamera
     {
-        public CelestialBody Body { get { return GodManager.Instance.ActiveBody; } }
+        public Body Body { get { return GodManager.Instance.ActiveBody; } }
 
         public float Speed = 1.0f;
         public float RotationSpeed = 1.0f;
@@ -67,7 +68,7 @@ namespace SpaceEngine.Cameras
         {
             if (Body != null)
             {
-                DistanceToAlign = Body.Radius * 1.025f;
+                DistanceToAlign = Body.Size * 1.025f;
                 DistanceToCore = Vector3.Distance(transform.position, Body.transform.position);
             }
 
@@ -125,7 +126,7 @@ namespace SpaceEngine.Cameras
                         transform.Rotate(new Vector3(0, 0, Rotation.z));
                 }
 
-                if (Body != null)
+                if (Body != null && Body is CelestialBody)
                 {
                     DistanceToCore = Vector3.Distance(transform.position, Body.transform.position);
 
@@ -143,6 +144,10 @@ namespace SpaceEngine.Cameras
                     {
                         Aligned = false;
                     }
+                }
+                else
+                {
+                    Aligned = false;
                 }
 
                 Velocity.z = Input.GetAxis("Vertical");
@@ -169,9 +174,19 @@ namespace SpaceEngine.Cameras
             {
                 var worldPosition = (Vector3d)transform.position;
 
-                if (worldPosition.Magnitude() < Body.Radius + 10.0 + Body.HeightZ)
+                if (Body is CelestialBody)
                 {
-                    worldPosition = worldPosition.Normalized(Body.Radius + 10.0 + Body.HeightZ);
+                    if (worldPosition.Magnitude() < Body.Size + 10.0 + Body.HeightZ)
+                    {
+                        worldPosition = worldPosition.Normalized(Body.Size + 10.0 + Body.HeightZ);
+                    }
+                }
+                else
+                {
+                    if (worldPosition.z < 10.0 + Body.HeightZ)
+                    {
+                        worldPosition.z = 10.0 + Body.HeightZ;
+                    }
                 }
 
                 transform.position = worldPosition;
@@ -184,14 +199,30 @@ namespace SpaceEngine.Cameras
             {
                 if (Body != null)
                 {
-                    var h = (DistanceToCore - Body.Radius - Body.Amplitude - (float)Body.HeightZ);
+                    if (Body is CelestialBody)
+                    {
+                        var h = (DistanceToCore - Body.Size - Body.Amplitude - (float)Body.HeightZ);
 
-                    if (Body.Ocean != null && Body.OceanEnabled) h = h - Body.Ocean.OceanLevel;
+                        // TODO : Take ocean in to account...
+                        //if (Body.Ocean != null && Body.OceanEnabled) h = h - Body.Ocean.OceanLevel;
 
-                    if (h < 1.0f) { h = 1.0f; }
+                        if (h < 1.0f) { h = 1.0f; }
 
-                    CameraComponent.nearClipPlane = Mathf.Clamp(0.1f * h, 0.03f, 1000.0f);
-                    CameraComponent.farClipPlane = Mathf.Clamp(1e6f * h, 1000.0f, 1e12f);
+                        CameraComponent.nearClipPlane = Mathf.Clamp(0.1f * h, 0.03f, 1000.0f);
+                        CameraComponent.farClipPlane = Mathf.Clamp(1e6f * h, 1000.0f, 1e12f);
+                    }
+                    else
+                    {
+                        var h = (transform.position.z - Body.Amplitude - (float)Body.HeightZ);
+
+                        // TODO : Take ocean in to account...
+                        //if (Body.Ocean != null && Body.OceanEnabled) h = h - Body.Ocean.OceanLevel;
+
+                        if (h < 1.0f) { h = 1.0f; }
+
+                        CameraComponent.nearClipPlane = Mathf.Clamp(0.1f * h, 0.03f, 1000.0f);
+                        CameraComponent.farClipPlane = Mathf.Clamp(1e6f * h, 1000.0f, 1e12f);
+                    }
                 }
                 else
                 {

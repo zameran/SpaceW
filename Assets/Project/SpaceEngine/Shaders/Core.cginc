@@ -80,6 +80,7 @@ uniform float4x4 _Deform_LocalToScreen;
 uniform float4x4 _Deform_ScreenQuadCorners;
 uniform float4x4 _Deform_ScreenQuadVerticals;
 uniform float4x4 _Deform_TangentFrameToWorld; 
+uniform float4x4 _Deform_TileToTangent;
 
 void ScaleUVToTile(inout float2 uv, float3 tileCoords, float3 tileSize)
 {

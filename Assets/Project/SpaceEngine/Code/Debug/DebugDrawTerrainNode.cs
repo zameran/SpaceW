@@ -33,7 +33,6 @@
 // Creator: zameran
 #endregion
 
-using SpaceEngine.Core.Bodies;
 
 using UnityEngine;
 
@@ -41,8 +40,6 @@ namespace SpaceEngine.Debugging
 {
     public sealed class DebugDrawTerrainNode : DebugDraw
     {
-        public CelestialBody Target;
-
         private readonly Color[] Colors = new Color[] { Color.blue, Color.red, Color.yellow, Color.green, Color.magenta, Color.cyan };
 
         protected override void Start()
@@ -66,11 +63,13 @@ namespace SpaceEngine.Debugging
             if (UnityEditor.SceneView.currentDrawingSceneView != null) return; //Do not draw at Scene tab in editor.
 #endif
 
-            if (Target == null) return;
+            var target = GodManager.Instance.ActiveBody;
 
-            for (byte i = 0; i < Target.TerrainNodes.Count; i++)
+            if (target == null) return;
+
+            for (byte i = 0; i < target.TerrainNodes.Count; i++)
             {
-                var q = Target.TerrainNodes[i];
+                var q = target.TerrainNodes[i];
                 var root = q.TerrainQuadRoot;
 
                 if (root == null) continue;

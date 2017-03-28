@@ -26,7 +26,7 @@ namespace SpaceEngine.Core
             base.Start();
 
             if (TerrainNode == null) { TerrainNode = transform.parent.GetComponent<TerrainNode>(); }
-            if (TerrainNode.Body == null) { TerrainNode.Body = transform.parent.GetComponentInParent<CelestialBody>(); }
+            if (TerrainNode.Body == null) { TerrainNode.Body = transform.parent.GetComponentInParent<Body>(); }
             if (ElevationProducer == null) { ElevationProducer = ElevationProducerGameObject.GetComponent<TileProducer>(); }
             if (ElevationProducer.Cache == null) { ElevationProducer.InitCache(); }
 
