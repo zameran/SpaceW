@@ -166,7 +166,7 @@ namespace SpaceEngine.Core.Bodies
 
                 if (Ocean != null)
                 {
-                    if (OceanEnabled)
+                    if (OceanEnabled && AtmosphereEnabled)
                     {
                         Keywords.Add("OCEAN_ON");
                     }
@@ -182,6 +182,7 @@ namespace SpaceEngine.Core.Bodies
             }
             else
             {
+                Keywords.Add("LIGHT_0");
                 Keywords.Add("ATMOSPHERE_OFF");
                 Keywords.Add("OCEAN_OFF");
             }
