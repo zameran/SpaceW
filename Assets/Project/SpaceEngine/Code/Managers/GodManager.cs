@@ -33,6 +33,7 @@
 // Creator: zameran
 #endregion
 
+using SpaceEngine.Cameras;
 using SpaceEngine.Core.Bodies;
 using SpaceEngine.Core.Utilities;
 using SpaceEngine.Startfield;
@@ -44,8 +45,7 @@ using UnityEngine;
 [ExecutionOrder(-9999)]
 public class GodManager : MonoSingleton<GodManager>
 {
-    public TerrainView View;
-    public Controller Controller;
+    public GameCamera View;
 
     public ComputeShader WriteData;
     public ComputeShader ReadData;
@@ -79,8 +79,6 @@ public class GodManager : MonoSingleton<GodManager>
     private void Update()
     {
         UpdateSchedular();
-        UpdateViewRadius();
-        UpdateHeightZ();
     }
 
     protected override void OnDestroy()
@@ -93,33 +91,8 @@ public class GodManager : MonoSingleton<GodManager>
         Schedular.Instance.Run();
     }
 
-    private void UpdateHeightZ()
-    {
-        if (View == null) return;
-
-        if (ActiveBody != null)
-        {
-            View.GroundHeight = ActiveBody.HeightZ;
-        }
-        else
-        {
-            View.GroundHeight = 0.0f;
-        }
-    }
-
-    private void UpdateViewRadius()
-    {
-        if (ActiveBody != null)
-        {
-            if (View is PlanetView)
-            {
-                ((PlanetView)View).Radius = ActiveBody.Radius;
-            }
-        }
-    }
-
     public void UpdateControllerWrapper()
     {
-        Controller.UpdateController();
+        View.UpdateMatrices();
     }
 }

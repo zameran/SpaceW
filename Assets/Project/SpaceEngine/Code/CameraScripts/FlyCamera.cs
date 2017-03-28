@@ -39,40 +39,44 @@ using UnityEngine;
 
 namespace SpaceEngine.Cameras
 {
-    public sealed class FlyCamera : GameCamera
+    public class FlyCamera : GameCamera
     {
-        public float speed = 1.0f;
-        public float rotationSpeed = 3.0f;
-        public float alignDistance = 1024.0f;
+        public CelestialBody Body { get { return GodManager.Instance.ActiveBody; } }
 
-        public CelestialBody body;
-        public GameObject planetoidGameObject;
+        public float Speed = 1.0f;
+        public float RotationSpeed = 1.0f;
 
-        private float currentSpeed;
+        private Vector3 Velocity = Vector3.zero;
+        private Vector3 Rotation = Vector3.zero;
+        private Quaternion TargetRotation = Quaternion.identity;
 
-        private Vector3 velocity = Vector3.zero;
-        private Vector3 rotation = Vector3.zero;
-        private Quaternion targetRotation = Quaternion.identity;
+        private float CurrentSpeed;
+        private float DistanceToAlign;
+        private float DistanceToCore;
+        private float NearClipPlaneCache;
+        private float FarClipPlaneCache;
 
-        public float distanceToPlanetCore;
+        public bool DynamicClipPlanes = true;
+        public bool Controllable = true;
 
-        private float nearClipPlaneCache;
-        private float farClipPlaneCache;
+        private bool Aligned = false;
 
-        public bool dynamicClipPlanes = false;
-        public bool aligned = false;
-        public bool controllable = true;
+        private Ray RayScreen;
 
-        private Ray ray;
-
-        protected override void Start()
+        protected override void Init()
         {
-            base.Start();
-        }
+            if (Body != null)
+            {
+                DistanceToAlign = Body.Radius * 1.025f;
+                DistanceToCore = Vector3.Distance(transform.position, Body.transform.position);
+            }
 
-        protected override void Update()
-        {
-            base.Update();
+            NearClipPlaneCache = CameraComponent.nearClipPlane;
+            FarClipPlaneCache = CameraComponent.farClipPlane;
+
+            Rotation = new Vector3(transform.eulerAngles.x, transform.eulerAngles.y, 0); // NOTE : Prevent crazy rotation on start...
+
+            UpdateClipPlanes();
         }
 
         protected override void FixedUpdate()
@@ -81,20 +85,20 @@ namespace SpaceEngine.Cameras
 
             UpdateClipPlanes();
 
-            if (controllable)
+            if (Controllable)
             {
                 if (Input.GetMouseButton(0) && !MouseOverUI)
                 {
-                    rotation.z = 0;
+                    Rotation.z = 0;
 
-                    ray = CameraComponent.ScreenPointToRay(Input.mousePosition);
+                    RayScreen = CameraComponent.ScreenPointToRay(Input.mousePosition);
 
-                    targetRotation = Quaternion.LookRotation((ray.origin + ray.direction * 10.0f) - transform.position, transform.up);
+                    TargetRotation = Quaternion.LookRotation((RayScreen.origin + RayScreen.direction * 10.0f) - transform.position, transform.up);
 
-                    transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, Time.fixedDeltaTime * rotationSpeed);
+                    transform.rotation = Quaternion.Slerp(transform.rotation, TargetRotation, Time.fixedDeltaTime * RotationSpeed);
 
-                    if (!aligned)
-                        transform.Rotate(new Vector3(0.0f, 0.0f, rotation.z));
+                    if (!Aligned)
+                        transform.Rotate(new Vector3(0.0f, 0.0f, Rotation.z));
                 }
                 else if (Input.GetMouseButton(1) && !MouseOverUI)
                 {
@@ -104,123 +108,100 @@ namespace SpaceEngine.Cameras
                 {
                     if (Input.GetKey(KeyCode.E))
                     {
-                        rotation.z -= 1.0f * Time.deltaTime;
+                        Rotation.z -= 1.0f * Time.deltaTime;
                     }
                     else if (Input.GetKey(KeyCode.Q))
                     {
-                        rotation.z += 1.0f * Time.deltaTime;
+                        Rotation.z += 1.0f * Time.deltaTime;
                     }
                     else
                     {
-                        rotation.z = Mathf.Lerp(rotation.z, 0, Time.deltaTime * 2.0f);
+                        Rotation.z = Mathf.Lerp(Rotation.z, 0, Time.deltaTime * 2.0f);
                     }
 
-                    rotation.z = Mathf.Clamp(rotation.z, -100.0f, 100.0f);
+                    Rotation.z = Mathf.Clamp(Rotation.z, -100.0f, 100.0f);
 
-                    if (!aligned)
-                        transform.Rotate(new Vector3(0, 0, rotation.z));
+                    if (!Aligned)
+                        transform.Rotate(new Vector3(0, 0, Rotation.z));
                 }
 
-                if (planetoidGameObject != null)
+                if (Body != null)
                 {
-                    distanceToPlanetCore = Vector3.Distance(transform.position, planetoidGameObject.transform.position);
+                    DistanceToCore = Vector3.Distance(transform.position, Body.transform.position);
 
-                    if (distanceToPlanetCore < alignDistance)
+                    if (DistanceToCore < DistanceToAlign)
                     {
-                        aligned = true;
+                        Aligned = true;
 
-                        var gravityVector = planetoidGameObject.transform.position - transform.position;
+                        var gravityVector = Body.transform.position - transform.position;
 
-                        targetRotation = Quaternion.LookRotation(transform.forward, -gravityVector);
+                        TargetRotation = Quaternion.LookRotation(transform.forward, -gravityVector);
 
-                        transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, Time.fixedDeltaTime * rotationSpeed * 3f);
+                        transform.rotation = Quaternion.Slerp(transform.rotation, TargetRotation, Time.fixedDeltaTime * RotationSpeed * 3f);
                     }
                     else
                     {
-                        aligned = false;
+                        Aligned = false;
                     }
                 }
 
-                velocity.z = Input.GetAxis("Vertical");
-                velocity.x = Input.GetAxis("Horizontal");
+                Velocity.z = Input.GetAxis("Vertical");
+                Velocity.x = Input.GetAxis("Horizontal");
 
-                currentSpeed = speed;
+                CurrentSpeed = Speed;
 
                 if (Input.GetKey(KeyCode.LeftShift))
-                    currentSpeed = speed * 10f;
-                if (Input.GetKey(KeyCode.Space))
-                    currentSpeed = speed * 100f;
-                if (Input.GetKey(KeyCode.LeftShift) && Input.GetKey(KeyCode.Space))
-                    currentSpeed = speed * 1000f;
+                    CurrentSpeed = Speed * 10f;
                 if (Input.GetKey(KeyCode.LeftControl))
-                    currentSpeed = speed / 10f;
+                    CurrentSpeed = Speed * 100f;
+                if (Input.GetKey(KeyCode.LeftShift) && Input.GetKey(KeyCode.LeftControl))
+                    CurrentSpeed = Speed * 1000f;
+                if (Input.GetKey(KeyCode.LeftAlt))
+                    CurrentSpeed = Speed / 10f;
 
-                speed += Mathf.RoundToInt(Input.GetAxis("Mouse ScrollWheel") * 100.0f);
-                speed = Mathf.Clamp(speed, 1.0f, 10000.0f);
+                Speed += Mathf.RoundToInt(Input.GetAxis("Mouse ScrollWheel") * 100.0f);
+                Speed = Mathf.Clamp(Speed, 1.0f, 10000.0f);
 
-                transform.Translate(velocity * currentSpeed);
+                transform.Translate(Velocity * CurrentSpeed);
             }
-
-            /*
-            var cameraPosition = transform.position;
-            var universe = FindObjectOfType<Universe>();
-
-            if (Math.Abs(cameraPosition.magnitude) > 5000.000f)
-            {
-                universe.transform.position -= cameraPosition;
-                transform.position = Vector3.zero;
-            }
-            */
-        }
-
-        protected override void Init()
-        {
-            if (body == null)
-                if (planetoidGameObject != null)
-                    body = planetoidGameObject.GetComponent<CelestialBody>();
-
-            if (planetoidGameObject != null)
-            {
-                distanceToPlanetCore = Vector3.Distance(transform.position, planetoidGameObject.transform.position);
-            }
-
-            nearClipPlaneCache = CameraComponent.nearClipPlane;
-            farClipPlaneCache = CameraComponent.farClipPlane;
-
-            rotation = transform.eulerAngles;
-            rotation.z = 0; // NOTE : Prevent crazy rotation on start...
-
-            UpdateClipPlanes();
         }
 
         private void UpdateClipPlanes()
         {
-            if (dynamicClipPlanes)
+            if (DynamicClipPlanes)
             {
-                if (body != null)
+                if (Body != null)
                 {
-                    var h = (distanceToPlanetCore - body.Radius - body.Amplitude);
+                    var h = (DistanceToCore - Body.Radius - Body.Amplitude);
 
-                    if (body.Ocean != null) h = h - body.Ocean.OceanLevel;
+                    if (Body.Ocean != null && Body.OceanEnabled) h = h - Body.Ocean.OceanLevel;
 
                     if (h < 1.0f) { h = 1.0f; }
 
-                    //NOTE : 0.01 is too small value for near clip plane...
-
-                    CameraComponent.nearClipPlane = Mathf.Clamp(0.3f * Mathf.Abs(h), 0.3f, 1000.0f);
-                    CameraComponent.farClipPlane = Mathf.Clamp(1e8f * Mathf.Abs(h), 1000.0f, 1e8f);
+                    CameraComponent.nearClipPlane = Mathf.Clamp(0.1f * h, 0.03f, 1000.0f);
+                    CameraComponent.farClipPlane = Mathf.Clamp(1e6f * h, 1000.0f, 1e12f);
                 }
                 else
                 {
-                    CameraComponent.nearClipPlane = nearClipPlaneCache;
-                    CameraComponent.farClipPlane = farClipPlaneCache;
+                    CameraComponent.nearClipPlane = NearClipPlaneCache;
+                    CameraComponent.farClipPlane = FarClipPlaneCache;
                 }
             }
             else
             {
-                //CameraComponent.nearClipPlane = nearClipPlaneCache;
-                //CameraComponent.farClipPlane = farClipPlaneCache;
+                CameraComponent.nearClipPlane = NearClipPlaneCache;
+                CameraComponent.farClipPlane = FarClipPlaneCache;
             }
+        }
+
+        public override void UpdateMatrices()
+        {
+            WorldToCameraMatrix = CameraComponent.GetWorldToCamera();
+            CameraToWorldMatrix = CameraComponent.GetCameraToWorld();
+            CameraToScreenMatrix = CameraComponent.GetCameraToScreen();
+            ScreenToCameraMatrix = CameraComponent.GetScreenToCamera();
+
+            WorldCameraPosition = transform.position;
         }
 
         private void RotateAround(bool staticRotation = false)
@@ -228,67 +209,67 @@ namespace SpaceEngine.Cameras
             var mouseX = (Input.GetAxis("Mouse Y") * 480.0f) / CameraComponent.pixelWidth;
             var mouseY = (Input.GetAxis("Mouse X") * 440.0f) / CameraComponent.pixelHeight;
 
-            if (staticRotation) rotation = Vector3.zero;
+            if (staticRotation) Rotation = Vector3.zero;
 
-            rotation.x += mouseX;
-            rotation.y -= mouseY;
-            rotation.z = 0;
+            Rotation.x += mouseX;
+            Rotation.y -= mouseY;
+            Rotation.z = 0;
 
-            if (planetoidGameObject != null && !aligned)
+            if (Body != null && !Aligned)
             {
                 if (staticRotation)
                 {
-                    rotation.x *= 10.0f;
-                    rotation.y *= 10.0f;
+                    Rotation.x *= 10.0f;
+                    Rotation.y *= 10.0f;
 
-                    RotateAround(rotation);
+                    RotateAround(Rotation);
 
-                    rotation = Vector3.zero;
+                    Rotation = Vector3.zero;
                 }
                 else
                 {
-                    RotateAround(rotation, new Vector3(0, 0, -distanceToPlanetCore));
+                    RotateAround(Rotation, new Vector3(0, 0, -DistanceToCore));
                 }
             }
         }
 
         private void RotateAround(Vector3 rotationVector)
         {
-            if (body != null)
+            if (Body != null)
             {
-                RotateAroundOrigin(rotationVector, body.Origin);
+                RotateAroundOrigin(rotationVector, Body.Origin);
             }
-            else if (planetoidGameObject != null)
+            else
             {
-                RotateAroundOrigin(rotationVector, planetoidGameObject.transform.position);
+                RotateAroundOrigin(rotationVector, Vector3.zero);
             }
         }
 
         private void RotateAround(Vector3 rotationVector, Vector3 distanceVector)
         {
-            if (body != null)
+            if (Body != null)
             {
-                RotateAroundOrigin(rotationVector, distanceVector, body.Origin);
+                RotateAroundOrigin(rotationVector, distanceVector, Body.Origin);
             }
-            else if (planetoidGameObject != null)
+            else
             {
-                RotateAroundOrigin(rotationVector, distanceVector, planetoidGameObject.transform.position);
+                RotateAroundOrigin(rotationVector, distanceVector, Vector3.zero);
             }
         }
 
         private void RotateAroundOrigin(Vector3 rotationVector, Vector3 origin)
         {
-            transform.RotateAround(origin, Vector3.up, rotationVector.x * (Time.fixedDeltaTime * rotationSpeed) * 10.0f);
-            transform.RotateAround(origin, Vector3.up, rotationVector.y * (Time.fixedDeltaTime * rotationSpeed) * 10.0f);
+            transform.RotateAround(origin, Vector3.up, rotationVector.x * (Time.fixedDeltaTime * RotationSpeed) * 10.0f);
+            transform.RotateAround(origin, Vector3.up, rotationVector.y * (Time.fixedDeltaTime * RotationSpeed) * 10.0f);
         }
 
         private void RotateAroundOrigin(Vector3 rotationVector, Vector3 distanceVector, Vector3 origin)
         {
-            var currentRotation = Quaternion.Euler(rotationVector + targetRotation.eulerAngles);
+            var currentRotation = Quaternion.Euler(rotationVector + TargetRotation.eulerAngles);
             var currentPosition = currentRotation * distanceVector + origin;
 
-            transform.rotation = Quaternion.Slerp(transform.rotation, currentRotation, (Time.fixedDeltaTime * rotationSpeed) * 10.0f);
-            transform.position = Vector3.Slerp(transform.position, currentPosition, (Time.deltaTime * rotationSpeed) * 5.0f);
+            transform.rotation = Quaternion.Slerp(transform.rotation, currentRotation, (Time.fixedDeltaTime * RotationSpeed) * 10.0f);
+            transform.position = Vector3.Slerp(transform.position, currentPosition, (Time.deltaTime * RotationSpeed) * 5.0f);
         }
     }
 }
