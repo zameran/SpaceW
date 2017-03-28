@@ -164,6 +164,18 @@ namespace SpaceEngine.Cameras
 
                 transform.Translate(Velocity * CurrentSpeed);
             }
+
+            if (Body != null)
+            {
+                var worldPosition = (Vector3d)transform.position;
+
+                if (worldPosition.Magnitude() < Body.Radius + 10.0 + Body.HeightZ)
+                {
+                    worldPosition = worldPosition.Normalized(Body.Radius + 10.0 + Body.HeightZ);
+                }
+
+                transform.position = worldPosition;
+            }
         }
 
         private void UpdateClipPlanes()
@@ -172,7 +184,7 @@ namespace SpaceEngine.Cameras
             {
                 if (Body != null)
                 {
-                    var h = (DistanceToCore - Body.Radius - Body.Amplitude);
+                    var h = (DistanceToCore - Body.Radius - Body.Amplitude - (float)Body.HeightZ);
 
                     if (Body.Ocean != null && Body.OceanEnabled) h = h - Body.Ocean.OceanLevel;
 

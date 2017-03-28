@@ -53,7 +53,7 @@ namespace SpaceEngine.Debugging
 
         private readonly string[] InfoAdditional = new string[]
         {
-            "WARNING! No camera collision!"
+            "WARNING! Float precision!"
         };
 
         protected override void OnGUI()
