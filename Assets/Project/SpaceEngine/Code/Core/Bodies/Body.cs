@@ -115,7 +115,7 @@ namespace SpaceEngine.Core.Bodies
                 StartCoroutine(Ocean.InitializationFix());
             }
 
-            QuadMesh = MeshFactory.MakePlane(GridResolution, GridResolution, MeshFactory.PLANE.XY, true, false, false);
+            QuadMesh = MeshFactory.MakePlane(GridResolution, MeshFactory.PLANE.XY, true, false, false);
             QuadMesh.bounds = new Bounds(Vector3.zero, new Vector3(1e8f, 1e8f, 1e8f));
 
             TileSamplers = new List<TileSampler>(GetComponentsInChildren<TileSampler>());

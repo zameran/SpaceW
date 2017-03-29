@@ -651,7 +651,7 @@ namespace SpaceEngine.AtmosphericScattering
 
         public void InitMesh()
         {
-            AtmosphereMesh = MeshFactory.MakePlane(AtmosphereMeshResolution, AtmosphereMeshResolution, MeshFactory.PLANE.XY, false, false, false);
+            AtmosphereMesh = MeshFactory.MakePlane(AtmosphereMeshResolution, MeshFactory.PLANE.XY, false, false, false);
             AtmosphereMesh.bounds = new Bounds(Vector3.zero, new Vector3(1e8f, 1e8f, 1e8f));
         }
 

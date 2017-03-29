@@ -89,7 +89,7 @@ namespace SpaceEngine.AtmosphericScattering.Sun
 
             SunGlareMaterial = MaterialHelper.CreateTemp(SunGlareShader, "Sunglare", (int)RenderQueue);
 
-            SunGlareMesh = MeshFactory.MakePlane(8, 8, MeshFactory.PLANE.XY, false, false, false);
+            SunGlareMesh = MeshFactory.MakePlane(8, MeshFactory.PLANE.XY, false, false, false);
             SunGlareMesh.bounds = new Bounds(Vector4.zero, new Vector3(9e37f, 9e37f, 9e37f));
 
             for (int i = 0; i < Settings.Ghost1SettingsList.Count; i++)
