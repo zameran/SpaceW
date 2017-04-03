@@ -62,7 +62,7 @@ namespace SpaceEngine.Core
             base.Start();
 
             if (TerrainNode == null) { TerrainNode = transform.parent.GetComponent<TerrainNode>(); }
-            if (TerrainNode.Body == null) { TerrainNode.Body = transform.parent.GetComponentInParent<CelestialBody>(); }
+            if (TerrainNode.ParentBody == null) { TerrainNode.ParentBody = transform.parent.GetComponentInParent<Body>(); }
             if (NormalsProducer == null) { NormalsProducer = NormalsProducerGameObject.GetComponent<TileProducer>(); }
             if (NormalsProducer.Cache == null) { NormalsProducer.InitCache(); }
             if (ElevationProducer == null) { ElevationProducer = ElevationProducerGameObject.GetComponent<TileProducer>(); }
@@ -165,7 +165,7 @@ namespace SpaceEngine.Core
             var tileWSD = Vector4.zero;
             tileWSD.x = (float)tileWidth;
             tileWSD.y = (float)rootQuadSize / (float)(1 << level) / (float)tileSize;
-            tileWSD.z = (float)tileSize / (float)(TerrainNode.Body.GridResolution - 1);
+            tileWSD.z = (float)tileSize / (float)(TerrainNode.ParentBody.GridResolution - 1);
             tileWSD.w = 0.0f;
 
             var tileSD = Vector2d.zero;
@@ -178,7 +178,7 @@ namespace SpaceEngine.Core
             offset.x = ((double)tx / (1 << level) - 0.5) * rootQuadSize;
             offset.y = ((double)ty / (1 << level) - 0.5) * rootQuadSize;
             offset.z = rootQuadSize / (1 << level);
-            offset.w = TerrainNode.Body.Radius;
+            offset.w = TerrainNode.ParentBody.Size;
 
             ColorMaterial.SetTexture("_NormalsSampler", normalsTex);
             ColorMaterial.SetVector("_NormalsOSL", normalsOSL);
@@ -191,8 +191,8 @@ namespace SpaceEngine.Core
             ColorMaterial.SetVector("_Offset", offset.ToVector4());
             ColorMaterial.SetMatrix("_LocalToWorld", TerrainNode.FaceToLocal.ToMatrix4x4());
 
-            if (TerrainNode.Body.NPS != null) TerrainNode.Body.NPS.SetUniforms(ColorMaterial);
-            if (TerrainNode.Body.TCCPS != null) TerrainNode.Body.TCCPS.UpdateUniforms(ColorMaterial);
+            if (TerrainNode.ParentBody.NPS != null) TerrainNode.ParentBody.NPS.SetUniforms(ColorMaterial);
+            if (TerrainNode.ParentBody.TCCPS != null) TerrainNode.ParentBody.TCCPS.UpdateUniforms(ColorMaterial);
 
             Graphics.Blit(null, gpuSlot.Texture, ColorMaterial);
 

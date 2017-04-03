@@ -30,9 +30,9 @@
 
 		struct v2f 
 		{
-			float4 pos : POSITION;
-			float2 uv : TEXCOORD0;
-			float3 p : TEXCOORD1;
+			float4 vertex : POSITION;
+			float2 texcoord : TEXCOORD0;
+			float3 localVertex : TEXCOORD1;
 		};
 
 		void VERTEX_POSITION(in float4 vertex, in float2 texcoord, out float4 position, out float3 localPosition, out float2 uv)
@@ -65,9 +65,9 @@
 
 		void VERTEX_PROGRAM(in p2v v, out v2f o)
 		{
-			VERTEX_POSITION(v.vertex, v.texcoord.xy, o.pos, o.p, o.uv);
+			VERTEX_POSITION(v.vertex, v.texcoord.xy, o.vertex, o.localVertex, o.texcoord);
 
-			v.vertex = o.pos; // Assign calculated vertex position to our data...
+			v.vertex = o.vertex; // Assign calculated vertex position to our data...
 		}
 		ENDCG
 		
@@ -81,19 +81,69 @@
 			CGPROGRAM
 			#pragma target 3.0
 
+			#pragma shader_feature _ _ALPHATEST_ON _ALPHABLEND_ON _ALPHAPREMULTIPLY_ON
 			#pragma multi_compile_shadowcaster
 
-			#pragma vertex vertShadowCaster
-			#pragma fragment fragShadowCaster
-
 			#include "UnityStandardShadow.cginc"
+
+			#pragma vertex vertShadowCasterModified
+			#pragma fragment fragShadowCasterModified
+
+			void vertShadowCasterModified(VertexInput v,
+				#ifdef UNITY_STANDARD_USE_SHADOW_OUTPUT_STRUCT
+				out VertexOutputShadowCaster o,
+				#endif
+				out float4 opos : SV_POSITION)
+			{
+				float4 position = 0;
+				float3 localPosition = 0;
+				float2 uv = 0;
+
+				VERTEX_POSITION(v.vertex, v.uv0.xy, position, localPosition, uv);
+
+				v.vertex = position;
+
+				UNITY_SETUP_INSTANCE_ID(v);
+				TRANSFER_SHADOW_CASTER_NOPOS(o,opos)
+				#if defined(UNITY_STANDARD_USE_SHADOW_UVS)
+					o.tex = TRANSFORM_TEX(v.uv0, _MainTex);
+				#endif
+			}
+
+			half4 fragShadowCasterModified(
+				#ifdef UNITY_STANDARD_USE_SHADOW_OUTPUT_STRUCT
+				VertexOutputShadowCaster i
+				#endif
+				#ifdef UNITY_STANDARD_USE_DITHER_MASK
+				, UNITY_VPOS_TYPE vpos : VPOS
+				#endif
+				) : SV_Target
+			{
+				#if defined(UNITY_STANDARD_USE_SHADOW_UVS)
+					half alpha = tex2D(_MainTex, i.tex).a * _Color.a;
+					#if defined(_ALPHATEST_ON)
+						clip (alpha - _Cutoff);
+					#endif
+					#if defined(_ALPHABLEND_ON) || defined(_ALPHAPREMULTIPLY_ON)
+						#if defined(UNITY_STANDARD_USE_DITHER_MASK)
+							half alphaRef = tex3D(_DitherMaskLOD, float3(vpos.xy * 0.25, alpha * 0.9375)).a;
+							clip(alphaRef - 0.01);
+						#else
+							clip(alpha - _Cutoff);
+						#endif
+					#endif
+				#endif
+
+				SHADOW_CASTER_FRAGMENT(i)
+			}	
 
 			ENDCG
 		}
 
 		Pass 
 		{
-			Tags { "Queue" = "Geometry" "RenderType"="" /*"LightMode" = "Deferred"*/ }
+			Tags { "Queue" = "Geometry" }
+			//Tags { "Queue" = "Opaque" "LightMode" = "Deferred" }
 
 			ZTest On
 			ZWrite On
@@ -101,11 +151,13 @@
 
 			CGPROGRAM
 			#include "UnityCG.cginc"
+
 			#pragma target 4.0
 			#pragma only_renderers d3d11 glcore
 			#pragma vertex vert
 			#pragma fragment frag
 
+			#pragma multi_compile ATMOSPHERE_ON ATMOSPHERE_OFF
 			#pragma multi_compile OCEAN_ON OCEAN_OFF
 			#pragma multi_compile SHADOW_0 SHADOW_1 SHADOW_2 SHADOW_3 SHADOW_4
 			
@@ -123,11 +175,6 @@
 			{	
 				VERTEX_PROGRAM(v, o);
 			}
-
-			inline float4 RGB2Reflectance(float4 inColor)
-			{
-				return float4(tan(1.37 * inColor.rgb) / tan(1.37), inColor.a);
-			}
 			
 			void frag(in v2f IN, 
 				out half4 outDiffuse : SV_Target0,			// RT0: diffuse color (rgb), occlusion (a)
@@ -139,69 +186,74 @@
 				float3 WCP = _Globals_WorldCameraPos;
 				float3 WCPO = _Globals_WorldCameraPos_Offsetted;
 				float3 WSD = _Sun_WorldDirections_1[0];
-				float ht = texTile(_Elevation_Tile, IN.uv, _Elevation_TileCoords, _Elevation_TileSize).x;
+				float3 position = IN.localVertex;
+				float2 texcoord = IN.texcoord;
+
+				float height = texTile(_Elevation_Tile, texcoord, _Elevation_TileCoords, _Elevation_TileSize).x;
+				float4 ortho = texTile(_Ortho_Tile, texcoord, _Ortho_TileCoords, _Ortho_TileSize);
+				float4 color = texTile(_Color_Tile, texcoord, _Color_TileCoords, _Color_TileSize);
+				float4 normal = texTile(_Normals_Tile, texcoord, _Normals_TileCoords, _Normals_TileSize);
+				normal.z = sqrt(max(0.0, 1.0 - dot(normal.xy, normal.xy)));	
 				
-				float3 V = normalize(IN.p);
-				float3 P = V * max(length(IN.p), _Deform_Radius + 10.0);
+				//float4 triplanarDiffuse = Triplanar(_Ground_Diffuse, _Ground_Diffuse, _Ground_Diffuse, P, normal.xyz, float2(128, 4));
+				//float4 triplanarNormal = Triplanar(_Ground_Normal, _Ground_Normal, _Ground_Normal, P, normal.xyz, float2(128, 4));	
+
+				float3 V = normalize(position);
+				float3 P = V * max(length(position), _Deform_Radius + 10.0);
 				float3 v = normalize(P - WCP);
-				float3 p = P + _Globals_Origin;
 
-				float4 fn = texTile(_Normals_Tile, IN.uv, _Normals_TileCoords, _Normals_TileSize);
-				fn.z = sqrt(max(0.0, 1.0 - dot(fn.xy, fn.xy)));		
-
-				#if OCEAN_ON
-					if (ht <= _Ocean_Level && _Ocean_DrawBRDF == 1.0) {	fn = float4(0, 0, 1, 0); }
+				#if ATMOSPHERE_ON
+					#if OCEAN_ON
+						if (height <= _Ocean_Level && _Ocean_DrawBRDF == 1.0) {	normal = float4(0.0, 0.0, 1.0, 0.0); }
+					#endif
 				#endif
 				
-				float3x3 TTW = _Deform_TangentFrameToWorld;
-				fn.xyz = mul(TTW, fn.xyz);
+				normal.xyz = mul(_Deform_TangentFrameToWorld, normal.xyz);
 
-				float4 ortho = texTile(_Ortho_Tile, IN.uv, _Ortho_TileCoords, _Ortho_TileSize);
-				float4 color = texTile(_Color_Tile, IN.uv, _Color_TileCoords, _Color_TileSize);
-				//float4 triplanarDiffuse = Triplanar(_Ground_Diffuse, _Ground_Diffuse, _Ground_Diffuse, P, fn.xyz, float2(128, 4));
-				//float4 triplanarNormal = Triplanar(_Ground_Normal, _Ground_Normal, _Ground_Normal, P, fn.xyz, float2(128, 4));
 				float4 reflectance = lerp(ortho, color, clamp(length(color.xyz), 0.0, 1.0)); // Just for tests...
 
-				float cTheta = dot(fn.xyz, WSD);
-				float vSun = dot(V, WSD);
-				
-				float3 sunL = 0;
-				float3 skyE = 0;
-				SunRadianceAndSkyIrradiance(P, fn.xyz, WSD, sunL, skyE);
+				float cTheta = dot(normal.xyz, WSD);
 
 				#if SHADOW_1 || SHADOW_2 || SHADOW_3 || SHADOW_4
 					float shadow = ShadowColor(float4(P, 1));
 				#endif
 				
-				// diffuse ground color
-				float3 groundColor = 1.5 * RGB2Reflectance(reflectance).rgb * (sunL * max(cTheta, 0) + skyE) / M_PI;
+				#if ATMOSPHERE_ON
+					float3 sunL = 0.0;
+					float3 skyE = 0.0;
+					SunRadianceAndSkyIrradiance(P, normal.xyz, WSD, sunL, skyE);
+
+					float3 groundColor = 1.5 * RGB2Reflectance(reflectance).rgb * (sunL * max(cTheta, 0) + skyE) / M_PI;
 				
-				#if OCEAN_ON
-					if (ht <= _Ocean_Level && _Ocean_DrawBRDF == 1.0) {	groundColor = OceanRadiance(WSD, -v, V, _Ocean_Sigma, sunL, skyE, _Ocean_Color); }
+					#if OCEAN_ON
+						if (height <= _Ocean_Level && _Ocean_DrawBRDF == 1.0) {	groundColor = OceanRadiance(WSD, -v, V, _Ocean_Sigma, sunL, skyE, _Ocean_Color); }
+					#endif
+
+					float3 extinction;
+					float3 inscatter = InScattering(WCPO, P, WSD, extinction, 0.0);
+
+					#if SHADOW_1 || SHADOW_2 || SHADOW_3 || SHADOW_4
+						inscatter *= shadow;
+					#endif
+
+					#if SHADOW_1 || SHADOW_2 || SHADOW_3 || SHADOW_4
+						extinction = 1 * _ExtinctionGroundFade + (1 - _ExtinctionGroundFade) * extinction * shadow;
+					#endif
+
+					float3 finalColor = hdr(groundColor * extinction + inscatter);
+				#elif ATMOSPHERE_OFF
+					float3 finalColor = 1.5 * reflectance * max(cTheta, 0);
 				#endif
-
-				float3 extinction;
-				float3 inscatter = InScattering(WCPO, P, WSD, extinction, 0.0);
-
-				#if SHADOW_1 || SHADOW_2 || SHADOW_3 || SHADOW_4
-					inscatter *= shadow;
-				#endif
-
-				#if SHADOW_1 || SHADOW_2 || SHADOW_3 || SHADOW_4
-					extinction = 1 * _ExtinctionGroundFade + (1 - _ExtinctionGroundFade) * extinction * shadow;
-				#endif
-
-				float3 finalColor = hdr(groundColor * extinction + inscatter);
 
 				outDiffuse = float4(finalColor, 1.0);
-				outSpecSmoothness = 1;
-				outNormal = half4(fn.xyz * 0.5 + 0.5, 1);
-				outEmission = 0;
-				//return float4(texTile(_Elevation_Tile, IN.uv, _Elevation_TileCoords, _Elevation_TileSize).xxx * 0.002, 1.0);
-				//return float4(fn.xyz, 1.0);
-				//return float4(IN.uv, 1.0, 1.0);
+				outSpecSmoothness = 1.0;
+				outNormal = half4(normal.xyz * 0.5 + 0.5, 1.0);
+				outEmission = half4(exp(-finalColor / 2), 1.0);
+				//return float4(texTile(_Elevation_Tile, texcoord, _Elevation_TileCoords, _Elevation_TileSize).xxx * 0.002, 1.0);
+				//return float4(normal.xyz, 1.0);
+				//return float4(texcoord, 1.0, 1.0);
 				//return float4(ht / 10000, ht / 10000, ht / 10000, 1.0);
-				//return float4(fn.www, 1);
+				//return float4(normal.www, 1);
 			}
 			
 			ENDCG

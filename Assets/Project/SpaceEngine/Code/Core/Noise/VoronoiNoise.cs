@@ -1,10 +1,12 @@
+using System;
+
 using UnityEngine;
 
 namespace SpaceEngine.Core.Noise
 {
     public static class VoronoiNoise
     {
-        [System.Serializable]
+        [Serializable]
         public enum DistanceFunction
         {
             EUCLIDIAN,
@@ -12,7 +14,7 @@ namespace SpaceEngine.Core.Noise
             CHEBYSHEV
         }
 
-        [System.Serializable]
+        [Serializable]
         public enum CombineFunction
         {
             d0,
@@ -44,10 +46,12 @@ namespace SpaceEngine.Core.Noise
 
             int cubeX, cubeY, cubeZ;
 
-            float[] distanceArray = new float[3];
+            var distanceArray = new float[3];
 
-            for (int i = 0; i < distanceArray.Length; i++)
+            for (byte i = 0; i < distanceArray.Length; i++)
+            {
                 distanceArray[i] = Mathf.Infinity;
+            }
 
             var evalCubeX = Mathf.FloorToInt(input.x);
             var evalCubeY = Mathf.FloorToInt(input.y);
@@ -64,6 +68,7 @@ namespace SpaceEngine.Core.Noise
                         cubeZ = evalCubeZ + k;
 
                         var lastRandom = LCGRandom(Hash((uint)(cubeX + seed), (uint)(cubeY), (uint)(cubeZ)));
+
                         uint numberFeaturePoints = 1;
 
                         for (uint l = 0; l < numberFeaturePoints; ++l)
@@ -118,7 +123,7 @@ namespace SpaceEngine.Core.Noise
                     break;
             }
 
-            return Mathf.Clamp(combine * 2f - 1f, -1f, 1f);
+            return Mathf.Clamp(combine * 2.0f - 1.0f, -1.0f, 1.0f);
         }
 
         private static float EuclidianDistanceFunc3(Vector3 p1, Vector3 p2)
@@ -142,7 +147,7 @@ namespace SpaceEngine.Core.Noise
         {
             var value = 0.0f;
 
-            for (int i = 0; i < arr.Length; i++)
+            for (byte i = 0; i < arr.Length; i++)
             {
                 value += arr[i];
             }

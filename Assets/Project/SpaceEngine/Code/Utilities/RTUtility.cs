@@ -23,7 +23,12 @@
 // Modified by Denis Ovchinnikov 2015-2017
 #endregion
 
+using System;
+using System.IO;
+
 using UnityEngine;
+
+using Object = UnityEngine.Object;
 
 public static class RTUtility
 {
@@ -268,5 +273,62 @@ public static class RTUtility
         {
             Object.DestroyImmediate(texs[i]);
         }
+    }
+
+    public static void SaveAsRaw(int size, int channels, string fileName, string filePath, RenderTexture rtex, ComputeShader readDataComputeShader)
+    {
+        var buffer = new ComputeBuffer(size, sizeof(float) * channels);
+
+        CBUtility.ReadFromRenderTexture(rtex, channels, buffer, readDataComputeShader);
+
+        var data = new float[size * channels];
+
+        buffer.GetData(data);
+
+        var byteArray = new byte[size * 4 * channels];
+
+        Buffer.BlockCopy(data, 0, byteArray, 0, byteArray.Length);
+        File.WriteAllBytes(Application.dataPath + filePath + fileName + ".raw", byteArray);
+
+        buffer.Release();
+    }
+
+    public static void SaveAs8bit(int width, int height, int channels, string fileName, string filePath, RenderTexture rtex, ComputeShader readDataComputeShader, float scale = 1.0f)
+    {
+        var buffer = new ComputeBuffer(width * height, sizeof(float) * channels);
+
+        CBUtility.ReadFromRenderTexture(rtex, channels, buffer, readDataComputeShader);
+
+        var data = new float[width * height * channels];
+
+        buffer.GetData(data);
+
+        var texture = new Texture2D(width, height);
+
+        for (int x = 0; x < width; x++)
+        {
+            for (int y = 0; y < height; y++)
+            {
+                var color = new Color(0, 0, 0, 1);
+
+                color.r = data[(x + y * width) * channels + 0];
+
+                if (channels > 1)
+                    color.g = data[(x + y * width) * channels + 1];
+
+                if (channels > 2)
+                    color.b = data[(x + y * width) * channels + 2];
+
+                texture.SetPixel(x, y, color * scale);
+            }
+        }
+
+        texture.Apply();
+
+        var bytes = texture.EncodeToPNG();
+
+        File.WriteAllBytes(Application.dataPath + filePath + fileName + ".png", bytes);
+
+        buffer.Release();
     }
 }

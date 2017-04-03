@@ -80,6 +80,7 @@ uniform float4x4 _Deform_LocalToScreen;
 uniform float4x4 _Deform_ScreenQuadCorners;
 uniform float4x4 _Deform_ScreenQuadVerticals;
 uniform float4x4 _Deform_TangentFrameToWorld; 
+uniform float4x4 _Deform_TileToTangent;
 
 void ScaleUVToTile(inout float2 uv, float3 tileCoords, float3 tileSize)
 {
@@ -140,6 +141,8 @@ float4 Triplanar(sampler2D topAndButtomSampler, sampler2D leftAndRightSampler, s
 
 	return fixed4(XSampler * blendWeights.x + YSampler * blendWeights.y + ZSampler * blendWeights.z, 1.0);
 }
+
+inline float4 RGB2Reflectance(float4 color) { return float4(tan(1.37 * color.rgb) / tan(1.37), color.a); }
 
 struct VertexProducerInput
 {

@@ -34,12 +34,6 @@
 // 
 #endregion
 
-using SpaceEngine.AtmosphericScattering;
-using SpaceEngine.Core.Reanimator;
-using SpaceEngine.Core.Terrain;
-using SpaceEngine.Core.Tile.Samplers;
-using SpaceEngine.Ocean;
-
 using System.Collections.Generic;
 using System.Linq;
 
@@ -47,54 +41,23 @@ using UnityEngine;
 
 namespace SpaceEngine.Core.Bodies
 {
-    public class CelestialBody : Node<CelestialBody>, ICelestialBody, IUniformed<MaterialPropertyBlock>, IReanimateable
+    public class CelestialBody : Body, ICelestialBody
     {
-        public Atmosphere Atmosphere;
-        public OceanNode Ocean;
         public Ring Ring;
 
         public List<Shadow> Shadows = new List<Shadow>();
 
-        public int GridResolution = 25;
-
-        public bool DrawGizmos = false;
-
         public bool RingEnabled = true;
-        public bool AtmosphereEnabled = true;
-        public bool OceanEnabled = true;
-
-        public float Amplitude = 32.0f;
-        public float Frequency = 64.0f;
-
-        public Mesh QuadMesh;
-
-        public Shader ColorShader;
-
-        public List<TerrainNode> TerrainNodes = new List<TerrainNode>(6);
-        public List<TileSampler> TileSamplers = new List<TileSampler>();
-
-        [HideInInspector]
-        public double HeightZ = 0;
-
-        public NoiseParametersSetter NPS = null;
-        public TCCommonParametersSetter TCCPS = null;
 
         public Texture2D GroundDiffuse;
         public Texture2D GroundNormal;
         public Texture2D DetailedNormal;
 
-        public Vector3 Offset { get; set; }
-
         #region ICelestialBody
 
-        [SerializeField]
-        private float radius = 2048;
+        public float Radius { get { return Size; } set { Size = value; } }
 
-        public float Radius { get { return radius; } set { radius = value; } }
-        public Vector3 Origin { get { return transform.position; } set { transform.position = value; } }
-        public MaterialPropertyBlock MPB { get; set; }
-
-        public List<string> GetKeywords()
+        public override List<string> GetKeywords()
         {
             var Keywords = new List<string>();
 
@@ -165,7 +128,7 @@ namespace SpaceEngine.Core.Bodies
 
                 if (Ocean != null)
                 {
-                    if (OceanEnabled)
+                    if (OceanEnabled && AtmosphereEnabled)
                     {
                         Keywords.Add("OCEAN_ON");
                     }
@@ -181,6 +144,7 @@ namespace SpaceEngine.Core.Bodies
             }
             else
             {
+                Keywords.Add("LIGHT_0");
                 Keywords.Add("ATMOSPHERE_OFF");
                 Keywords.Add("OCEAN_OFF");
             }
@@ -192,24 +156,14 @@ namespace SpaceEngine.Core.Bodies
 
         #region IUniformed<MaterialPropertyBlock>
 
-        public void InitUniforms(MaterialPropertyBlock target)
+        public override void InitUniforms(MaterialPropertyBlock target)
         {
-            if (target == null) return;
-
-            if (Atmosphere != null)
-            {
-                Atmosphere.InitUniforms(target);
-            }
+            base.InitUniforms(target);
         }
 
-        public void SetUniforms(MaterialPropertyBlock target)
+        public override void SetUniforms(MaterialPropertyBlock target)
         {
-            if (target == null) return;
-
-            if (Atmosphere != null)
-            {
-                Atmosphere.SetUniforms(target);
-            }
+            base.SetUniforms(target);
 
             if (Ring != null)
             {
@@ -217,29 +171,18 @@ namespace SpaceEngine.Core.Bodies
             }
         }
 
-        public void InitSetUniforms()
+        public override void InitSetUniforms()
         {
-            InitUniforms(MPB);
-            SetUniforms(MPB);
+            base.InitSetUniforms();
         }
 
         #endregion
 
         #region IReanimateable
 
-        public void Reanimate()
+        public override void Reanimate()
         {
-            foreach (var terrainNode in TerrainNodes)
-            {
-                if (Helper.Enabled(terrainNode))
-                {
-                    if (Atmosphere != null)
-                    {
-                        Atmosphere.InitUniforms(terrainNode.TerrainMaterial);
-                        Atmosphere.SetUniforms(terrainNode.TerrainMaterial);
-                    }
-                }
-            }
+            base.Reanimate();
         }
 
         #endregion
@@ -248,59 +191,19 @@ namespace SpaceEngine.Core.Bodies
 
         protected override void InitNode()
         {
-            if (Atmosphere != null)
-            {
-                if (Atmosphere.body == null)
-                    Atmosphere.body = this;
-            }
-
-            if (Ocean != null)
-            {
-                if (Ocean.body == null)
-                    Ocean.body = this;
-
-                // TODO : Whhhhhhaaattaaaaaafuuuuckkk!
-                StartCoroutine(Ocean.InitializationFix());
-            }
-
             if (Ring != null)
             {
-                if (Ring.body == null)
-                    Ring.body = this;
+                if (Ring.ParentBody == null)
+                    Ring.ParentBody = this;
             }
-
-            QuadMesh = MeshFactory.MakePlane(GridResolution, GridResolution, MeshFactory.PLANE.XY, true, false, false);
-            QuadMesh.bounds = new Bounds(Vector3.zero, new Vector3(1e8f, 1e8f, 1e8f));
-
-            TileSamplers = new List<TileSampler>(GetComponentsInChildren<TileSampler>());
-            TileSamplers.Sort(new TileSampler.Sort());
-
-            MPB = new MaterialPropertyBlock();
 
             Offset = new Vector3(0.0f, 0.0f, Radius);
 
-            if (NPS == null) NPS = GetComponent<NoiseParametersSetter>();
-            NPS.LoadAndInit();
+            base.InitNode();
         }
 
         protected override void UpdateNode()
         {
-            if (Atmosphere != null)
-            {
-                if (AtmosphereEnabled)
-                {
-                    Atmosphere.Render();
-                }
-            }
-
-            if (Ocean != null)
-            {
-                if (OceanEnabled)
-                {
-                    Ocean.Render();
-                }
-            }
-
             if (Ring != null)
             {
                 if (RingEnabled)
@@ -309,28 +212,7 @@ namespace SpaceEngine.Core.Bodies
                 }
             }
 
-            // NOTE : Update controller and the draw. This can help avoid terrain nodes jitter...
-            if (GodManager.Instance.ActiveBody == this)
-                GodManager.Instance.UpdateControllerWrapper();
-
-            foreach (var tileSampler in TileSamplers)
-            {
-                if (Helper.Enabled(tileSampler))
-                {
-                    tileSampler.UpdateSampler();
-                }
-            }
-
-            foreach (var terrainNode in TerrainNodes)
-            {
-                if (Helper.Enabled(terrainNode))
-                {
-                    DrawTerrain(terrainNode);
-                }
-            }
-
-            // TODO : PROFILE DAT SHIT!
-            ReSetMPB();
+            base.UpdateNode();
         }
 
         protected override void Awake()
@@ -351,164 +233,18 @@ namespace SpaceEngine.Core.Bodies
         protected override void OnDestroy()
         {
             base.OnDestroy();
-
-            Helper.Destroy(QuadMesh);
         }
 
         #endregion
 
-        protected void OnApplicationFocus(bool focusStatus)
+        protected override void OnApplicationFocus(bool focusStatus)
         {
-            if (focusStatus != true) return;
-
-            Reanimate();
-
-            if (Atmosphere != null) Atmosphere.Reanimate();
-            if (Ocean != null) Ocean.Reanimate();
+            base.OnApplicationFocus(focusStatus);
         }
 
-        private void DrawTerrain(TerrainNode node)
+        protected override void ResetMPB()
         {
-            // Get all the samplers attached to the terrain node. The samples contain the data need to draw the quad
-            var allSamplers = node.transform.GetComponentsInChildren<TileSampler>();
-            var samplers = allSamplers.Where(sampler => sampler.enabled && sampler.StoreLeaf).ToList();
-
-            if (samplers.Count == 0) return;
-            if (samplers.Count > 255) { Debug.Log(string.Format("CelestialBody: Tomuch samplers! {0}", samplers.Count)); return; }
-
-            // Find all the quads in the terrain node that need to be drawn
-            FindDrawableQuads(node.TerrainQuadRoot, samplers);
-
-            // The draw them
-            DrawQuad(node, node.TerrainQuadRoot, samplers);
-        }
-
-        private bool FindDrawableSamplers(TerrainQuad quad, List<TileSampler> samplers)
-        {
-            for (short i = 0; i < samplers.Count; ++i)
-            {
-                var producer = samplers[i].Producer;
-
-                if (producer.HasTile(quad.Level, quad.Tx, quad.Ty) && producer.FindTile(quad.Level, quad.Tx, quad.Ty, false, true) == null)
-                {
-                    return true;
-                }
-            }
-
-            return false;
-        }
-
-        private void FindDrawableQuads(TerrainQuad quad, List<TileSampler> samplers)
-        {
-            quad.Drawable = false;
-
-            if (!quad.IsVisible)
-            {
-                quad.Drawable = true;
-
-                return;
-            }
-
-            if (quad.IsLeaf)
-            {
-                if (FindDrawableSamplers(quad, samplers)) return;
-            }
-            else
-            {
-                byte drawableCount = 0;
-
-                for (byte i = 0; i < 4; ++i)
-                {
-                    FindDrawableQuads(quad.GetChild(i), samplers);
-
-                    if (quad.GetChild(i).Drawable)
-                    {
-                        ++drawableCount;
-                    }
-                }
-
-                if (drawableCount < 4)
-                {
-                    if (FindDrawableSamplers(quad, samplers)) return;
-                }
-            }
-
-            quad.Drawable = true;
-        }
-
-        private void DrawNode(TerrainNode node)
-        {
-            // TODO : use mesh of appropriate resolution for non-leaf quads
-            Graphics.DrawMesh(QuadMesh, Matrix4x4.identity, node.TerrainMaterial, 0, CameraHelper.Main(), 0, MPB);
-        }
-
-        private void ReSetMPB()
-        {
-            MPB.Clear();
-
-            InitSetUniforms();
-        }
-
-        private void DrawQuad(TerrainNode node, TerrainQuad quad, List<TileSampler> samplers)
-        {
-            if (!quad.IsVisible) return;
-            if (!quad.Drawable) return;
-
-            if (quad.IsLeaf)
-            {
-                //ReSetMPB();
-
-                for (byte i = 0; i < samplers.Count; ++i)
-                {
-                    // Set the unifroms needed to draw the texture for this sampler
-                    samplers[i].SetTile(MPB, quad.Level, quad.Tx, quad.Ty);
-                }
-
-                // Set the uniforms unique to each quad
-                node.SetPerQuadUniforms(quad, MPB);
-
-                DrawNode(node);
-            }
-            else
-            {
-                // Draw quads in a order based on distance to camera
-                var done = 0;
-
-                var order = quad.CalculateOrder(node.LocalCameraPosition.x, node.LocalCameraPosition.y, quad.Ox + quad.Length / 2.0, quad.Oy + quad.Length / 2.0);
-
-                for (byte i = 0; i < 4; ++i)
-                {
-                    if (quad.GetChild(order[i]).Visibility == Frustum.VISIBILITY.INVISIBLE)
-                    {
-                        done |= (1 << order[i]);
-                    }
-                    else if (quad.GetChild(order[i]).Drawable)
-                    {
-                        DrawQuad(node, quad.GetChild(order[i]), samplers);
-
-                        done |= (1 << order[i]);
-                    }
-                }
-
-                if (done < 15)
-                {
-                    // If the a leaf quad needs to be drawn but its tiles are not ready then this will draw the next parent tile instead that is ready.
-                    // Because of the current set up all tiles always have there tasks run on the frame they are generated so this section of code is never reached.
-
-                    //ReSetMPB();
-
-                    for (byte i = 0; i < samplers.Count; ++i)
-                    {
-                        // Set the unifroms needed to draw the texture for this sampler
-                        samplers[i].SetTile(MPB, quad.Level, quad.Tx, quad.Ty);
-                    }
-
-                    // Set the uniforms unique to each quad
-                    node.SetPerQuadUniforms(quad, MPB);
-
-                    DrawNode(node);
-                }
-            }
+            base.ResetMPB();
         }
     }
 }

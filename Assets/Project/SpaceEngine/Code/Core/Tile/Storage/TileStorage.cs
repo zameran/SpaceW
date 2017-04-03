@@ -1,4 +1,6 @@
 ﻿using SpaceEngine.Core.Tile.Cache;
+
+using System;
 using System.Collections.Generic;
 
 using UnityEngine;
@@ -17,6 +19,15 @@ namespace SpaceEngine.Core.Tile.Storage
     [RequireComponent(typeof(TileCache))]
     public abstract class TileStorage : MonoBehaviour
     {
+        [Serializable]
+        public enum DATA_TYPE
+        {
+            FLOAT,
+            INT,
+            SHORT,
+            BYTE
+        }
+
         /// <summary>
         /// A slot managed by a <see cref="TileStorage"/>. Concrete sub classes of this class must provide a reference to the actual tile data.
         /// </summary>
@@ -25,7 +36,7 @@ namespace SpaceEngine.Core.Tile.Storage
             /// <summary>
             /// The <see cref="TileStorage"/> that manages this slot.
             /// </summary>
-            public TileStorage Owner { get; protected set; }
+            public TileStorage Owner { get; private set; }
 
             protected Slot(TileStorage owner)
             {

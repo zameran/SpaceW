@@ -41,17 +41,19 @@ namespace SpaceEngine.Debugging
     {
         private readonly string[] Info = new string[]
         {
-            "PageUp/PageDown or Mouse Scrollwheel to zoom in and out.",
-            "Left/Right [A/D and Arrows] to rotate around target's point Y axis.",
-            "Forward/Backward [W/S and Arrows] to 'glide' forward and backward along terrain or planet surface.",
-            "LMB hold and mouse moution for a 'glide' along terrain or planet surface.",
-            "LBM + CTRL and mouse moution for a look around target's point."
+            "Mouse Scrollwheel to control speed.",
+            "Left mouse button to orientation.",
+            "Right mouse button to rotate around target.",
+            "E/Q to roll axis.",
+            "Left Shift for more speed.",
+            "Left Control for even more speed.",
+            "Left Shift + Left Control for speed of God.",
+            "Left Alt for less speed."
         };
 
         private readonly string[] InfoAdditional = new string[]
         {
-            "WARNING! Current camera controller operating with non-clamped spherical coordinates!",
-            "Input inversion may have place!"
+            "WARNING! Float precision!"
         };
 
         protected override void OnGUI()

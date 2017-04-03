@@ -32,25 +32,18 @@ namespace SpaceEngine.Core.Storage
             }
         }
 
-        [SerializeField]
         public RenderTextureFormat Format = RenderTextureFormat.ARGB32;
 
-        [SerializeField]
         public TextureWrapMode WrapMode = TextureWrapMode.Clamp;
 
-        [SerializeField]
         public FilterMode FilterMode = FilterMode.Point;
 
-        [SerializeField]
         public RenderTextureReadWrite ReadWrite;
 
-        [SerializeField]
         public bool Mipmaps;
 
-        [SerializeField]
         public bool EnableRandomWrite;
 
-        [SerializeField]
         public int AnisoLevel;
 
         protected override void Awake()

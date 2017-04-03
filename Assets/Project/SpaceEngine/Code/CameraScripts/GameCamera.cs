@@ -44,6 +44,13 @@ namespace SpaceEngine.Cameras
 
         public Camera CameraComponent { get { return CameraCachedComponent.Component; } }
 
+        public Matrix4x4d WorldToCameraMatrix { get; protected set; }
+        public Matrix4x4d CameraToWorldMatrix { get; protected set; }
+        public Matrix4x4d CameraToScreenMatrix { get; protected set; }
+        public Matrix4x4d ScreenToCameraMatrix { get; protected set; }
+
+        public Vector3d WorldCameraPosition { get; protected set; }
+
         public bool MouseOverUI { get { return GUIUtility.hotControl != 0; } }
 
         protected virtual void Start()
@@ -51,6 +58,8 @@ namespace SpaceEngine.Cameras
             CameraCachedComponent.TryInit(this);
 
             Init();
+
+            UpdateMatrices();
         }
 
         protected virtual void Update()
@@ -64,6 +73,8 @@ namespace SpaceEngine.Cameras
         }
 
         protected abstract void Init();
+
+        public abstract void UpdateMatrices();
 
         protected float ClampAngle(float angle, float min, float max)
         {

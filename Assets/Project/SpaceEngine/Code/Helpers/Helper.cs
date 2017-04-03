@@ -44,8 +44,6 @@ using Object = UnityEngine.Object;
 
 public static class Helper
 {
-    public static readonly float InscribedBox = 1.0f / Mathf.Sqrt(2.0f);
-
     public static void Measure(string label = "Method", Action ToMeasure = null)
     {
         var time = Time.realtimeSinceStartup;
@@ -106,20 +104,17 @@ public static class Helper
 
     public static Vector3 Reciprocal3(Vector3 xyz)
     {
-        xyz.x = Reciprocal(xyz.x);
-        xyz.y = Reciprocal(xyz.y);
-        xyz.z = Reciprocal(xyz.z);
-        return xyz;
+        return new Vector3(Reciprocal(xyz.x), Reciprocal(xyz.y), Reciprocal(xyz.z));
     }
 
     public static float Divide(float a, float b)
     {
-        return b != 0.0f ? a / b : 0.0f;
+        return !BrainFuckMath.AlmostEquals(b, 0.0f) ? a / b : 0.0f;
     }
 
     public static float DampenFactor(float dampening, float elapsed)
     {
-        return 1.0f - Mathf.Pow((float)System.Math.E, -dampening * elapsed);
+        return 1.0f - Mathf.Pow((float)Math.E, -dampening * elapsed);
     }
 
     public static float Dampen(float current, float target, float dampening, float elapsed, float minStep = 0.0f)
@@ -157,11 +152,11 @@ public static class Helper
     {
         if (target > current)
         {
-            current = System.Math.Min(target, current + maxDelta);
+            current = Math.Min(target, current + maxDelta);
         }
         else
         {
-            current = System.Math.Max(target, current - maxDelta);
+            current = Math.Max(target, current - maxDelta);
         }
 
         return current;
@@ -196,7 +191,7 @@ public static class Helper
         return new Bounds(c, new Vector3(x, y, z) * 2.0f);
     }
 
-    public static void ResizeArrayTo<T>(ref List<T> array, int size, System.Func<int, T> newT, System.Action<T> removeT)
+    public static void ResizeArrayTo<T>(ref List<T> array, int size, Func<int, T> newT, Action<T> removeT)
     {
         if (array != null)
         {

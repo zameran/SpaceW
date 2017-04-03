@@ -33,9 +33,13 @@
 // Creator: zameran
 #endregion
 
+using System;
 using System.Collections.Generic;
+using System.Linq;
 
 using UnityEngine;
+
+using Random = UnityEngine.Random;
 
 public static class MeshFactory
 {
@@ -58,14 +62,15 @@ public static class MeshFactory
                 uv.y += offset;
 
                 var p = Vector2.zero;
+
                 p.x = (uv.x - 0.5f) * 2.0f;
                 p.y = (uv.y - 0.5f) * 2.0f;
 
-                var position = new Vector3(p.x, p.y, 0.0f);
+                var vertex = new Vector3(p.x, p.y, 0.0f);
                 var normal = new Vector3(0.0f, 0.0f, 1.0f);
 
                 texcoords[x + y * w] = uv;
-                vertices[x + y * w] = position;
+                vertices[x + y * w] = vertex;
                 normals[x + y * w] = normal;
             }
         }
@@ -97,114 +102,206 @@ public static class MeshFactory
         return mesh;
     }
 
-    public static Mesh MakePlane(int w, int h, PLANE plane, bool _01, bool cw, bool invert)
+    public static Mesh MakePlane(int detail, PLANE plane, bool clampedUV, bool reversedIndices, bool generateBorders = false)
     {
-        Vector3[] vertices = new Vector3[w * h];
-        Vector2[] texcoords = new Vector2[w * h];
-        Vector3[] normals = new Vector3[w * h];
-        int[] indices = new int[w * h * 6];
+        if (detail >= 255) { throw new ArgumentOutOfRangeException("detail", detail, "Detail can't be bigger or equal to 255!"); }
 
-        for (int x = 0; x < w; x++)
+        var borders = generateBorders ? detail * 4 : 0;
+
+        var vertices = new List<Vector3>(detail * detail + borders);
+        var texcoords = new List<Vector2>(detail * detail + borders);
+        var normals = new List<Vector3>(detail * detail + borders);
+        var indices = new List<int>(detail * detail * 6);
+
+        for (byte x = 0; x < detail; x++)
         {
-            for (int y = 0; y < h; y++)
+            for (byte y = 0; y < detail; y++)
             {
-                Vector2 uv = new Vector3((float)x / (float)(w - 1), (float)y / (float)(h - 1));
-                Vector2 p = new Vector2();
+                var texcoord = new Vector2((float)x / (float)(detail - 1), (float)y / (float)(detail - 1));
+                var vertex = Vector3.zero;
+                var normal = Vector3.zero;
+                var uv = Vector2.zero;
 
-                if (_01)
-                    p = uv;
+                if (clampedUV)
+                    uv = texcoord;
                 else
                 {
-                    p.x = (uv.x - 0.5f) * 2.0f;
-                    p.y = (uv.y - 0.5f) * 2.0f;
+                    uv.x = (texcoord.x - 0.5f) * 2.0f;
+                    uv.y = (texcoord.y - 0.5f) * 2.0f;
                 }
-
-                Vector3 pos = new Vector3(), norm = new Vector3();
 
                 switch ((int)plane)
                 {
                     case (int)PLANE.XY:
-                        if (!invert)
-                        {
-                            pos = new Vector3(p.x, p.y, 0.0f);
-                            norm = new Vector3(0.0f, 0.0f, 1.0f);
-                        }
-                        else
-                        {
-                            pos = new Vector3(-p.x, -p.y, 0.0f);
-                            norm = new Vector3(0.0f, 0.0f, -1.0f);
-                        }
+                        vertex = new Vector3(uv.x, uv.y, 0.0f);
+                        normal = new Vector3(0.0f, 0.0f, 1.0f);
                         break;
                     case (int)PLANE.XZ:
-                        if (!invert)
-                        {
-                            pos = new Vector3(p.x, 0.0f, p.y);
-                            norm = new Vector3(0.0f, 1.0f, 0.0f);
-                            break;
-                        }
-                        else
-                        {
-                            pos = new Vector3(-p.x, 0.0f, -p.y);
-                            norm = new Vector3(0.0f, -1.0f, 0.0f);
-                        }
+                        vertex = new Vector3(uv.x, 0.0f, uv.y);
+                        normal = new Vector3(0.0f, 1.0f, 0.0f);
                         break;
                     case (int)PLANE.YZ:
-                        if (!invert)
-                        {
-                            pos = new Vector3(0.0f, p.x, p.y);
-                            norm = new Vector3(1.0f, 0.0f, 0.0f);
-                        }
-                        else
-                        {
-                            pos = new Vector3(0.0f, -p.x, -p.y);
-                            norm = new Vector3(-1.0f, 0.0f, 0.0f);
-                        }
+                        vertex = new Vector3(0.0f, uv.x, uv.y);
+                        normal = new Vector3(1.0f, 0.0f, 0.0f);
                         break;
                 }
 
-                texcoords[x + y * w] = uv;
-                vertices[x + y * w] = pos;
-                normals[x + y * w] = norm;
+                texcoords.Add(texcoord);
+                vertices.Add(vertex);
+                normals.Add(normal);
             }
         }
 
-        int num = 0;
-        for (int x = 0; x < w - 1; x++)
+        for (byte x = 0; x < detail - 1; x++)
         {
-            for (int y = 0; y < h - 1; y++)
+            for (byte y = 0; y < detail - 1; y++)
             {
-                if (cw)
+                if (reversedIndices)
                 {
-                    indices[num++] = x + y * w;
-                    indices[num++] = x + (y + 1) * w;
-                    indices[num++] = (x + 1) + y * w;
+                    indices.Add(x + y * detail);
+                    indices.Add(x + (y + 1) * detail);
+                    indices.Add((x + 1) + y * detail);
 
-                    indices[num++] = x + (y + 1) * w;
-                    indices[num++] = (x + 1) + (y + 1) * w;
-                    indices[num++] = (x + 1) + y * w;
+                    indices.Add(x + (y + 1) * detail);
+                    indices.Add((x + 1) + (y + 1) * detail);
+                    indices.Add((x + 1) + y * detail);
                 }
                 else
                 {
-                    indices[num++] = x + y * w;
-                    indices[num++] = (x + 1) + y * w;
-                    indices[num++] = x + (y + 1) * w;
+                    indices.Add(x + y * detail);
+                    indices.Add((x + 1) + y * detail);
+                    indices.Add(x + (y + 1) * detail);
 
-                    indices[num++] = x + (y + 1) * w;
-                    indices[num++] = (x + 1) + y * w;
-                    indices[num++] = (x + 1) + (y + 1) * w;
+                    indices.Add(x + (y + 1) * detail);
+                    indices.Add((x + 1) + y * detail);
+                    indices.Add((x + 1) + (y + 1) * detail);
                 }
             }
         }
 
-        Mesh mesh = new Mesh();
+        indices.Reverse();
 
-        mesh.vertices = vertices;
-        mesh.uv = texcoords;
-        mesh.triangles = indices;
-        mesh.normals = normals;
+        #region Borders
+
+        if (generateBorders)
+        {
+            List<int> borderIndices = new List<int>((borders - 4) * 6);
+
+            var borderDepth = -0.625f;
+            var startTriangle = detail * detail;
+
+            for (byte col = 0; col < detail; col++)
+            {
+                int row = 0;
+
+                Shift(ref vertices, ref normals, ref texcoords, startTriangle, borderDepth);
+
+                if (col < detail - 1)
+                {
+                    borderIndices.Add(col * detail + row);
+                    borderIndices.Add(startTriangle);
+                    borderIndices.Add((col + 1) * detail + row);
+
+                    borderIndices.Add((col + 1) * detail + row);
+                    borderIndices.Add(startTriangle);
+                    borderIndices.Add(startTriangle + 1);
+                }
+
+                startTriangle++;
+            }
+
+            for (byte row = 0; row < detail; row++)
+            {
+                int col = 0;
+
+                Shift(ref vertices, ref normals, ref texcoords, startTriangle, borderDepth);
+
+                if (row < detail - 1)
+                {
+                    borderIndices.Add(col * detail + row);
+                    borderIndices.Add(col * detail + row + 1);
+                    borderIndices.Add(startTriangle);
+
+                    borderIndices.Add(startTriangle);
+                    borderIndices.Add(col * detail + row + 1);
+                    borderIndices.Add(startTriangle + 1);
+                }
+
+                startTriangle++;
+            }
+
+            for (byte col = 0; col < detail; col++)
+            {
+                int row = detail - 1;
+
+                Shift(ref vertices, ref normals, ref texcoords, startTriangle, borderDepth);
+
+                if (col < detail - 1)
+                {
+                    borderIndices.Add(col * detail + row);
+                    borderIndices.Add((col + 1) * detail + row);
+                    borderIndices.Add(startTriangle);
+
+                    borderIndices.Add((col + 1) * detail + row);
+                    borderIndices.Add(startTriangle + 1);
+                    borderIndices.Add(startTriangle);
+                }
+
+                startTriangle++;
+            }
+
+            for (byte row = 0; row < detail; row++)
+            {
+                int col = detail - 1;
+
+                Shift(ref vertices, ref normals, ref texcoords, startTriangle, borderDepth);
+
+                if (row < detail - 1)
+                {
+                    borderIndices.Add(col * detail + row);
+                    borderIndices.Add(startTriangle);
+                    borderIndices.Add(col * detail + row + 1);
+
+                    borderIndices.Add(startTriangle);
+                    borderIndices.Add(startTriangle + 1);
+                    borderIndices.Add(col * detail + row + 1);
+                }
+
+                startTriangle++;
+            }
+
+            borderIndices.Reverse();
+
+            indices.AddRange(borderIndices);
+
+            borderIndices.Clear();
+        }
+
+        #endregion
+
+        var mesh = new Mesh();
+
+        mesh.SetVertices(vertices);
+        mesh.SetUVs(0, texcoords);
+        mesh.SetTriangles(indices, 0);
+        mesh.SetNormals(normals);
+
+        vertices.Clear();
+        texcoords.Clear();
+        indices.Clear();
+        normals.Clear();
+
+        mesh.name = string.Format("Plane_{1}_({0})", Random.Range(float.MinValue, float.MaxValue), plane);
         mesh.hideFlags = HideFlags.DontSave;
 
         return mesh;
+    }
+
+    private static void Shift(ref List<Vector3> vertices, ref List<Vector3> normals, ref List<Vector2> texcoords, int indexFrom, float depth)
+    {
+        vertices.Add(vertices[indexFrom] + normals[indexFrom] * depth);
+        normals.Add(normals[indexFrom]);
+        texcoords.Add(texcoords[indexFrom]);
     }
 
     public static Mesh SetupRingSegmentMesh(int SegmentCount, int SegmentDetail, float InnerRadius, float OuterRadius, float BoundsShift)
@@ -237,13 +334,9 @@ public static class MeshFactory
             uvs.Add(new Vector2(1.0f, coord));
         }
 
-        mesh.vertices = positions.ToArray();
-        mesh.uv = uvs.ToArray();
-        mesh.normals = normals.ToArray();
-
         #region Indices
 
-        var steps = mesh.vertexCount / 2 - 1;
+        var steps = positions.Count / 2 - 1;
 
         for (var j = 0; j < steps; j++)
         {
@@ -257,8 +350,6 @@ public static class MeshFactory
             indices.Add(vertexOff + 1);
         }
 
-        mesh.triangles = indices.ToArray();
-
         #endregion
 
         #region Bounds
@@ -269,11 +360,17 @@ public static class MeshFactory
 
         #endregion
 
+        mesh.SetVertices(positions);
+        mesh.SetUVs(0, uvs);
+        mesh.SetTriangles(indices, 0);
+        mesh.SetNormals(normals);
+
         positions.Clear();
         normals.Clear();
         uvs.Clear();
         indices.Clear();
 
+        mesh.name = string.Format("RingSegmentMesh_({0})", Random.Range(float.MinValue, float.MaxValue));
         mesh.hideFlags = HideFlags.DontSave;
 
         return mesh;
@@ -283,39 +380,46 @@ public static class MeshFactory
     {
         Vector3[] Vertices =
         {
-            new Vector3(1, 1, 0) * size, new Vector3(-1, 1, 0) * size, new Vector3(1, -1, 0) * size, new Vector3(-1, -1, 0) * size
+            new Vector3(1, 1, 0) * size,
+            new Vector3(-1, 1, 0) * size,
+            new Vector3(1, -1, 0) * size,
+            new Vector3(-1, -1, 0) * size
         };
 
         Vector2[] uv =
         {
-            new Vector2(0, 1), new Vector2(1, 1), new Vector2(0, 0), new Vector2(1, 0)
+            new Vector2(0, 1),
+            new Vector2(1, 1),
+            new Vector2(0, 0),
+            new Vector2(1, 0)
         };
 
         var triangles = new int[6]
         {
-            0, 2, 1, 2, 3, 1
+            0, 2, 1,
+            2, 3, 1
         };
 
-        var m = new Mesh
-        {
-            vertices = Vertices,
-            uv = uv,
-            triangles = triangles,
-            name = string.Format("BillboardMesh_({0})", Random.Range(float.MinValue, float.MaxValue)),
-            hideFlags = HideFlags.DontSave
-        };
+        var mesh = new Mesh();
 
-        m.RecalculateNormals();
+        mesh.SetVertices(Vertices.ToList());
+        mesh.SetUVs(0, uv.ToList());
+        mesh.SetTriangles(triangles.ToList(), 0);
 
-        return m;
+        mesh.RecalculateNormals();
+
+        mesh.name = string.Format("BillboardMesh_({0})", Random.Range(float.MinValue, float.MaxValue));
+        mesh.hideFlags = HideFlags.DontSave;
+
+        return mesh;
     }
 
     public static Vector3 SolveNormal(Vector3 v1, Vector3 v2, Vector3 v3)
     {
-        Vector3 vt1 = new Vector3(v2.x - v1.x, v2.y - v1.y, v2.z - v1.z);
-        Vector3 vt2 = new Vector3(v3.x - v2.x, v3.y - v2.y, v3.z - v2.z);
+        var vertex1 = new Vector3(v2.x - v1.x, v2.y - v1.y, v2.z - v1.z);
+        var vertex2 = new Vector3(v3.x - v2.x, v3.y - v2.y, v3.z - v2.z);
 
-        return Vector3.Cross(vt1, vt2).normalized;
+        return Vector3.Cross(vertex1, vertex2).normalized;
     }
 
     public static void SolveTangents(this Mesh theMesh, ref int[] indices, ref List<Vector3> vertices, ref List<Vector3> normals, ref List<Vector2> uvs)

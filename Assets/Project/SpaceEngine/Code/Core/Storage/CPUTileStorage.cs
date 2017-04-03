@@ -30,18 +30,8 @@ namespace SpaceEngine.Core.Storage
             }
         }
 
-        public enum DATA_TYPE
-        {
-            FLOAT,
-            INT,
-            SHORT,
-            BYTE
-        }
-
-        [SerializeField]
         public DATA_TYPE DataType = DATA_TYPE.FLOAT;
 
-        [SerializeField]
         public int Channels = 1;
 
         protected override void Awake()
@@ -73,8 +63,13 @@ namespace SpaceEngine.Core.Storage
                         AddSlot(i, new CPUSlot<byte>(this, size));
                         break;
                     default:
-                        AddSlot(i, new CPUSlot<float>(this, size));
-                        break;
+                        {
+                            AddSlot(i, new CPUSlot<float>(this, size));
+
+                            Debug.LogWarning(string.Format("{0} data type isn't supported by {1}! Float type will be used!", DataType.ToString(), GetType().Name));
+
+                            break;
+                        }
                 }
             }
         }
