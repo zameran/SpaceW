@@ -138,7 +138,7 @@ namespace SpaceEngine.Core.Terrain.Deformation
                                   0.0, 0.0, 0.0, 1.0);
         }
 
-        public override Frustum.VISIBILITY GetVisibility(TerrainNode t, Box3d localBox)
+        public override Frustum.VISIBILITY GetVisibility(TerrainNode node, Box3d localBox)
         {
             var deformedBox = new Vector3d[4];
             deformedBox[0] = LocalToDeformed(new Vector3d(localBox.xmin, localBox.ymin, localBox.zmin));
@@ -152,7 +152,7 @@ namespace SpaceEngine.Core.Terrain.Deformation
             var dz = localBox.zmax + R;
             var f = Math.Sqrt(dx * dx + dy * dy + dz * dz) / (localBox.zmin + R);
 
-            Vector4d[] deformedFrustumPlanes = t.DeformedFrustumPlanes;
+            Vector4d[] deformedFrustumPlanes = node.DeformedFrustumPlanes;
 
             Frustum.VISIBILITY v0 = GetVisibility(deformedFrustumPlanes[0], deformedBox, f);
             if (v0 == Frustum.VISIBILITY.INVISIBLE)
@@ -184,7 +184,7 @@ namespace SpaceEngine.Core.Terrain.Deformation
                 return Frustum.VISIBILITY.INVISIBLE;
             }
 
-            var c = t.DeformedCameraPosition;
+            var c = node.DeformedCameraPosition;
 
             var lSq = c.SqrMagnitude();
             var rm = R + Math.Min(0.0, localBox.zmin);

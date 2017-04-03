@@ -33,7 +33,8 @@
 // Creator: zameran
 #endregion
 
-using SpaceEngine.Core.Patterns.Strategy;
+using SpaceEngine.Core.Patterns.Strategy.Renderable;
+using SpaceEngine.Core.Patterns.Strategy.Uniformed;
 
 using UnityEngine;
 
@@ -88,7 +89,7 @@ namespace SpaceEngine.AtmosphericScattering.Sun
 
             SunGlareMaterial = MaterialHelper.CreateTemp(SunGlareShader, "Sunglare", (int)RenderQueue);
 
-            SunGlareMesh = MeshFactory.MakePlane(8, 8, MeshFactory.PLANE.XY, false, false, false);
+            SunGlareMesh = MeshFactory.MakePlane(8, MeshFactory.PLANE.XY, false, false, false);
             SunGlareMesh.bounds = new Bounds(Vector4.zero, new Vector3(9e37f, 9e37f, 9e37f));
 
             for (int i = 0; i < Settings.Ghost1SettingsList.Count; i++)
@@ -232,7 +233,7 @@ namespace SpaceEngine.AtmosphericScattering.Sun
             {
                 if (Atmosphere == null) return;
 
-                Graphics.DrawMesh(SunGlareMesh, Vector3.zero, Quaternion.identity, SunGlareMaterial, layer, CameraHelper.Main(), 0, Atmosphere.body.MPB, false, false);
+                Graphics.DrawMesh(SunGlareMesh, Vector3.zero, Quaternion.identity, SunGlareMaterial, layer, CameraHelper.Main(), 0, Atmosphere.ParentBody.MPB, false, false);
             }
         }
 

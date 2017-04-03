@@ -94,7 +94,7 @@ struct Sun
 
 uniform float _Aerial_Perspective_Offset;
 
-uniform StructuredBuffer<Sun> Suns;
+//uniform StructuredBuffer<Sun> Suns;
 
 uniform float4x4 _Globals_CameraToWorld;
 uniform float4x4 _Globals_ScreenToCamera;

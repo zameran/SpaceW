@@ -34,17 +34,16 @@
 #endregion
 
 using SpaceEngine.Core.Bodies;
-using SpaceEngine.Core.Patterns.Strategy;
+using SpaceEngine.Core.Patterns.Strategy.Renderable;
+using SpaceEngine.Core.Patterns.Strategy.Uniformed;
 
 using System.Collections.Generic;
 
 using UnityEngine;
 
-using ZFramework.Unity.Common.PerfomanceMonitor;
-
 public class Ring : Node<Ring>, IUniformed<Material>, IRenderable<Ring>
 {
-    public CelestialBody body;
+    public CelestialBody ParentBody;
 
     public List<Light> Lights = new List<Light>();
     public List<Shadow> Shadows = new List<Shadow>();
@@ -101,24 +100,21 @@ public class Ring : Node<Ring>, IUniformed<Material>, IRenderable<Ring>
     {
         RingMaterial.renderQueue = (int)RenderQueue + RenderQueueOffset;
 
-        using (new Timer("Ring.UpdateNode()"))
+        Segments.RemoveAll(m => m == null);
+
+        if (SegmentCount != Segments.Count)
         {
-            Segments.RemoveAll(m => m == null);
+            Helper.ResizeArrayTo(ref Segments, SegmentCount, i => RingSegment.Create(this), null);
+        }
 
-            if (SegmentCount != Segments.Count)
-            {
-                Helper.ResizeArrayTo(ref Segments, SegmentCount, i => RingSegment.Create(this), null);
-            }
+        var angleStep = Helper.Divide(360.0f, SegmentCount);
 
-            var angleStep = Helper.Divide(360.0f, SegmentCount);
+        for (var i = SegmentCount - 1; i >= 0; i--)
+        {
+            var angle = angleStep * i;
+            var rotation = Quaternion.Euler(0.0f, angle, 0.0f);
 
-            for (var i = SegmentCount - 1; i >= 0; i--)
-            {
-                var angle = angleStep * i;
-                var rotation = Quaternion.Euler(0.0f, angle, 0.0f);
-
-                Segments[i].UpdateNode(RingSegmentMesh, RingMaterial, rotation);
-            }
+            Segments[i].UpdateNode(RingSegmentMesh, RingMaterial, rotation);
         }
 
         SetUniforms(RingMaterial);

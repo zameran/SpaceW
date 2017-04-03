@@ -41,7 +41,7 @@ namespace SpaceEngine.Debugging
 {
     public sealed class DebugGUIBodyInfo : DebugGUI
     {
-        public CelestialBody Body;
+        public Body Body;
 
         protected override void Awake()
         {

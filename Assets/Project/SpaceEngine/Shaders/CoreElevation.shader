@@ -51,11 +51,11 @@
 			float3 v = p * _Frequency;
 			
 			//float noise = HeightMapAsteroid(v);
-			//float noise = HeightMapPlanet(v) - 1.5;
+			float noise = HeightMapPlanet(v) - 1.5;
 			//float noise = HeightMapSelena(v);
 			//float noise = HeightMapTerra(v);
 
-			float noise = sNoise(v);
+			//float noise = sNoise(v);
 
 			noise += residual_value; // Apply residual value!
 			

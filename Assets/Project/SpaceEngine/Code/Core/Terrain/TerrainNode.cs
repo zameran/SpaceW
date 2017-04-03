@@ -1,7 +1,9 @@
 ﻿using SpaceEngine.Core.Bodies;
 using SpaceEngine.Core.Terrain.Deformation;
+using SpaceEngine.Core.Tile.Samplers;
 
 using System;
+using System.Collections.Generic;
 
 using UnityEngine;
 
@@ -21,9 +23,9 @@ namespace SpaceEngine.Core.Terrain
     /// </summary>
     public class TerrainNode : Node<TerrainNode>
     {
-        public CelestialBody Body { get; set; }
+        public Body ParentBody { get; set; }
 
-        readonly static int HORIZON_SIZE = 256;
+        readonly static byte HORIZON_SIZE = 255;
 
         /// <summary>
         /// The material used by this terrain node.
@@ -130,44 +132,59 @@ namespace SpaceEngine.Core.Terrain
 
         protected override void InitNode()
         {
-            Body = GetComponentInParent<CelestialBody>();
-            Body.TerrainNodes.Add(this);
+            ParentBody = GetComponentInParent<Body>();
+            ParentBody.TerrainNodes.Add(this);
 
-            TerrainMaterial = MaterialHelper.CreateTemp(Body.ColorShader, "TerrainNode");
-            TerrainMaterial.SetTexture("_Ground_Diffuse", Body.GroundDiffuse);
-            TerrainMaterial.SetTexture("_Ground_Normal", Body.GroundNormal);
-            TerrainMaterial.SetTexture("_DetailedNormal", Body.DetailedNormal);
-
-            if (Body.Atmosphere != null)
-            {
-                Body.Atmosphere.InitUniforms(TerrainMaterial);
-            }
-
-            var faces = new Vector3d[] { new Vector3d(0, 0, 0), new Vector3d(90, 0, 0), new Vector3d(90, 90, 0), new Vector3d(90, 180, 0), new Vector3d(90, 270, 0), new Vector3d(0, 180, 180) };
+            TerrainMaterial = MaterialHelper.CreateTemp(ParentBody.ColorShader, "TerrainNode");
 
             FaceToLocal = Matrix4x4d.identity;
 
-            // If this terrain is deformed into a sphere the face matrix is the rotation of the 
-            // terrain needed to make up the spherical planet. In this case there should be 6 terrains, each with a unique face number
-            if (Face - 1 >= 0 && Face - 1 < 6)
+            if (ParentBody.GetBodyDeformationType() == BodyDeformationType.Spherical)
             {
-                FaceToLocal = Matrix4x4d.Rotate(faces[Face - 1]);
+                var celestialBody = ParentBody as CelestialBody;
+
+                if (celestialBody == null) { throw new Exception("Wow! Celestial body isn't Celestial?!"); }
+
+                var faces = new Vector3d[] { new Vector3d(0, 0, 0), new Vector3d(90, 0, 0), new Vector3d(90, 90, 0), new Vector3d(90, 180, 0), new Vector3d(90, 270, 0), new Vector3d(0, 180, 180) };
+
+                // If this terrain is deformed into a sphere the face matrix is the rotation of the 
+                // terrain needed to make up the spherical planet. In this case there should be 6 terrains, each with a unique face number
+                if (Face - 1 >= 0 && Face - 1 < 6)
+                {
+                    FaceToLocal = Matrix4x4d.Rotate(faces[Face - 1]);
+                }
+
+                LocalToWorld = Matrix4x4d.ToMatrix4x4d(celestialBody.transform.localToWorldMatrix) * FaceToLocal;
+                Deformation = new DeformationSpherical(celestialBody.Size);
+
+                TerrainMaterial.SetTexture("_Ground_Diffuse", celestialBody.GroundDiffuse);
+                TerrainMaterial.SetTexture("_Ground_Normal", celestialBody.GroundNormal);
+                TerrainMaterial.SetTexture("_DetailedNormal", celestialBody.DetailedNormal);
+
+                if (celestialBody.Atmosphere != null)
+                {
+                    celestialBody.Atmosphere.InitUniforms(TerrainMaterial);
+                }
+            }
+            else
+            {
+                LocalToWorld = FaceToLocal;
+                Deformation = new DeformationBase();
             }
 
-            // Update local matrices...
-            LocalToWorld = Matrix4x4d.ToMatrix4x4d(Body.transform.localToWorldMatrix) * FaceToLocal;
-            //LocalToWorld = FaceToLocal;
-
-            Deformation = new DeformationSpherical(Body.Radius);
-
-            CreateTerrainQuadRoot();
+            CreateTerrainQuadRoot(ParentBody.Size);
         }
 
         protected override void UpdateNode()
         {
-            // Update local matrices...
-            LocalToWorld = Matrix4x4d.ToMatrix4x4d(Body.transform.localToWorldMatrix) * FaceToLocal;
-            //LocalToWorld = FaceToLocal;
+            if (ParentBody.GetBodyDeformationType() == BodyDeformationType.Spherical)
+            {
+                LocalToWorld = Matrix4x4d.ToMatrix4x4d(ParentBody.transform.localToWorldMatrix) * FaceToLocal;
+            }
+            else
+            {
+                LocalToWorld = FaceToLocal;
+            }
 
             var localToCamera = GodManager.Instance.WorldToCamera * LocalToWorld;
             var localToScreen = GodManager.Instance.CameraToScreen * localToCamera;
@@ -200,7 +217,7 @@ namespace SpaceEngine.Core.Terrain
 
                 LocalCameraDirection = new Matrix2x2d(localDirection.y, -localDirection.x, -localDirection.x, -localDirection.y);
 
-                for (int i = 0; i < HORIZON_SIZE; ++i)
+                for (byte i = 0; i < HORIZON_SIZE; ++i)
                 {
                     Horizon[i] = float.NegativeInfinity;
                 }
@@ -208,19 +225,30 @@ namespace SpaceEngine.Core.Terrain
 
             TerrainQuadRoot.UpdateLOD();
 
-            if (Body.AtmosphereEnabled)
+            if (ParentBody.GetBodyDeformationType() == BodyDeformationType.Spherical)
             {
-                if (Body.Atmosphere != null)
+                var celestialBody = ParentBody as CelestialBody;
+
+                if (celestialBody == null) { throw new Exception("Wow! Celestial body isn't Celestial?!"); }
+
+                TerrainMaterial.SetTexture("_Ground_Diffuse", celestialBody.GroundDiffuse);
+                TerrainMaterial.SetTexture("_Ground_Normal", celestialBody.GroundNormal);
+                TerrainMaterial.SetTexture("_DetailedNormal", celestialBody.DetailedNormal);
+            }
+
+            if (ParentBody.AtmosphereEnabled)
+            {
+                if (ParentBody.Atmosphere != null)
                 {
-                    Body.Atmosphere.SetUniforms(TerrainMaterial);
+                    ParentBody.Atmosphere.SetUniforms(TerrainMaterial);
                 }
             }
 
-            if (Body.OceanEnabled)
+            if (ParentBody.OceanEnabled)
             {
-                if (Body.Ocean != null)
+                if (ParentBody.Ocean != null)
                 {
-                    Body.Ocean.SetUniforms(TerrainMaterial);
+                    ParentBody.Ocean.SetUniforms(TerrainMaterial);
                 }
                 else
                 {
@@ -233,10 +261,6 @@ namespace SpaceEngine.Core.Terrain
             }
 
             Deformation.SetUniforms(this, TerrainMaterial);
-
-            TerrainMaterial.SetTexture("_Ground_Diffuse", Body.GroundDiffuse);
-            TerrainMaterial.SetTexture("_Ground_Normal", Body.GroundNormal);
-            TerrainMaterial.SetTexture("_DetailedNormal", Body.DetailedNormal);
 
             //if (Manager.GetPlantsNode() != null)
             //    Manager.GetPlantsNode().SetUniforms(TerrainMaterial);
@@ -266,11 +290,136 @@ namespace SpaceEngine.Core.Terrain
 
         #endregion
 
-        private void CreateTerrainQuadRoot()
+        #region Rendering
+
+        private bool FindDrawableSamplers(TerrainQuad quad, List<TileSampler> samplers)
+        {
+            for (short i = 0; i < samplers.Count; ++i)
+            {
+                var producer = samplers[i].Producer;
+
+                if (producer.HasTile(quad.Level, quad.Tx, quad.Ty) && producer.FindTile(quad.Level, quad.Tx, quad.Ty, false, true) == null)
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        public void FindDrawableQuads(TerrainQuad quad, List<TileSampler> samplers)
+        {
+            quad.Drawable = false;
+
+            if (!quad.IsVisible)
+            {
+                quad.Drawable = true;
+
+                return;
+            }
+
+            if (quad.IsLeaf)
+            {
+                if (FindDrawableSamplers(quad, samplers)) return;
+            }
+            else
+            {
+                byte drawableCount = 0;
+
+                for (byte i = 0; i < 4; ++i)
+                {
+                    FindDrawableQuads(quad.GetChild(i), samplers);
+
+                    if (quad.GetChild(i).Drawable)
+                    {
+                        ++drawableCount;
+                    }
+                }
+
+                if (drawableCount < 4)
+                {
+                    if (FindDrawableSamplers(quad, samplers)) return;
+                }
+            }
+
+            quad.Drawable = true;
+        }
+
+        private void DrawNode(Mesh mesh, MaterialPropertyBlock mpb)
+        {
+            // TODO : use mesh of appropriate resolution for non-leaf quads
+            Graphics.DrawMesh(mesh, Matrix4x4.identity, TerrainMaterial, 0, CameraHelper.Main(), 0, mpb);
+        }
+
+        public void DrawQuad(TerrainQuad quad, List<TileSampler> samplers, Mesh mesh, MaterialPropertyBlock mpb)
+        {
+            if (!quad.IsVisible) return;
+            if (!quad.Drawable) return;
+
+            if (quad.IsLeaf)
+            {
+                //ReSetMPB();
+
+                for (byte i = 0; i < samplers.Count; ++i)
+                {
+                    // Set the unifroms needed to draw the texture for this sampler
+                    samplers[i].SetTile(mpb, quad.Level, quad.Tx, quad.Ty);
+                }
+
+                // Set the uniforms unique to each quad
+                SetPerQuadUniforms(quad, mpb);
+
+                DrawNode(mesh, mpb);
+            }
+            else
+            {
+                // Draw quads in a order based on distance to camera
+                var done = 0;
+
+                var order = quad.CalculateOrder(LocalCameraPosition.x, LocalCameraPosition.y, quad.Ox + quad.Length / 2.0, quad.Oy + quad.Length / 2.0);
+
+                for (byte i = 0; i < 4; ++i)
+                {
+                    if (quad.GetChild(order[i]).Visibility == Frustum.VISIBILITY.INVISIBLE)
+                    {
+                        done |= (1 << order[i]);
+                    }
+                    else if (quad.GetChild(order[i]).Drawable)
+                    {
+                        DrawQuad(quad.GetChild(order[i]), samplers, mesh, mpb);
+
+                        done |= (1 << order[i]);
+                    }
+                }
+
+                if (done < 15)
+                {
+                    // If the a leaf quad needs to be drawn but its tiles are not ready then this will draw the next parent tile instead that is ready.
+                    // Because of the current set up all tiles always have there tasks run on the frame they are generated so this section of code is never reached.
+
+                    //ReSetMPB();
+
+                    for (byte i = 0; i < samplers.Count; ++i)
+                    {
+                        // Set the unifroms needed to draw the texture for this sampler
+                        samplers[i].SetTile(mpb, quad.Level, quad.Tx, quad.Ty);
+                    }
+
+                    // Set the uniforms unique to each quad
+                    SetPerQuadUniforms(quad, mpb);
+
+                    DrawNode(mesh, mpb);
+                }
+            }
+        }
+
+        #endregion
+
+        private void CreateTerrainQuadRoot(float size)
         {
             if (TerrainQuadRoot != null) { Debug.Log("Hey! You're gonna create quad root, but it's already exist!"); return; }
 
-            TerrainQuadRoot = new TerrainQuad(this, null, 0, 0, -Body.Radius, -Body.Radius, 2.0 * Body.Radius, ZMin, ZMax);
+            TerrainQuadRoot = new TerrainQuad(this, null, 0, 0, -size, -size, 2.0 * size, ZMin, ZMax);
         }
 
         public void SetPerQuadUniforms(TerrainQuad quad, MaterialPropertyBlock matPropertyBlock)

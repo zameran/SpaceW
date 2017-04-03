@@ -167,7 +167,7 @@ namespace SpaceEngine.Core.Terrain.Deformation
             matPropertyBlock.SetVector(uniforms.offset, new Vector4((float)quad.Ox, (float)quad.Oy, (float)quad.Length, (float)quad.Level));
             matPropertyBlock.SetVector(uniforms.camera, new Vector4((float)((node.LocalCameraPosition.x - quad.Ox) / quad.Length),
                                                                     (float)((node.LocalCameraPosition.y - quad.Oy) / quad.Length),
-                                                                    (float)((node.LocalCameraPosition.z - node.Body.HeightZ) / (quad.Length * (double)node.DistanceFactor)),
+                                                                    (float)((node.LocalCameraPosition.z - node.ParentBody.HeightZ) / (quad.Length * (double)node.DistanceFactor)),
                                                                     (float)node.LocalCameraPosition.z));
 
             matPropertyBlock.SetMatrix(uniforms.tileToTangent, (localToTangent * new Matrix3x3d(quad.Length, 0.0, quad.Ox - node.LocalCameraPosition.x,

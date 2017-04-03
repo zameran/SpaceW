@@ -39,7 +39,7 @@ using UnityEngine;
 
 public sealed class TCCommonParametersSetter : MonoBehaviour
 {
-    public CelestialBody CelestialBody;
+    public Body Body;
 
     public float Lacunarity = 2.218281828459f;
     public float H = 0.5f;

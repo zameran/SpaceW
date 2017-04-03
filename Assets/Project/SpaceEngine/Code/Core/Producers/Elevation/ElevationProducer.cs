@@ -36,13 +36,17 @@ namespace SpaceEngine.Core
             base.Start();
 
             if (TerrainNode == null) { TerrainNode = transform.parent.GetComponent<TerrainNode>(); }
-            if (TerrainNode.Body == null) { TerrainNode.Body = transform.parent.GetComponentInParent<CelestialBody>(); }
-            if (ResidualProducer == null) { ResidualProducer = ResidualProducerGameObject.GetComponent<TileProducer>(); }
-            if (ResidualProducer.Cache == null) { ResidualProducer.InitCache(); }
+            if (TerrainNode.ParentBody == null) { TerrainNode.ParentBody = transform.parent.GetComponentInParent<Body>(); }
+
+            if (ResidualProducerGameObject != null)
+            {
+                if (ResidualProducer == null) { ResidualProducer = ResidualProducerGameObject.GetComponent<TileProducer>(); }
+                if (ResidualProducer.Cache == null) { ResidualProducer.InitCache(); }
+            }
 
             var tileSize = GetTileSize(0);
 
-            if ((tileSize - GetBorder() * 2 - 1) % (TerrainNode.Body.GridResolution - 1) != 0)
+            if ((tileSize - GetBorder() * 2 - 1) % (TerrainNode.ParentBody.GridResolution - 1) != 0)
             {
                 throw new InvalidParameterException("Tile size - border * 2 - 1 must be divisible by grid mesh resolution - 1" + string.Format(": {0}-{1}", tileSize, GetBorder()));
             }
@@ -144,7 +148,7 @@ namespace SpaceEngine.Core
             var tileWSD = Vector4.zero;
             tileWSD.x = (float)tileWidth;
             tileWSD.y = (float)rootQuadSize / (float)(1 << level) / (float)tileSize;
-            tileWSD.z = (float)tileSize / (float)(TerrainNode.Body.GridResolution - 1);
+            tileWSD.z = (float)tileSize / (float)(TerrainNode.ParentBody.GridResolution - 1);
             tileWSD.w = 0.0f;
 
             var tileSD = Vector2d.zero;
@@ -182,15 +186,15 @@ namespace SpaceEngine.Core
             offset.x = ((double)tx / (1 << level) - 0.5) * rootQuadSize;
             offset.y = ((double)ty / (1 << level) - 0.5) * rootQuadSize;
             offset.z = rootQuadSize / (1 << level);
-            offset.w = TerrainNode.Body.Radius;
+            offset.w = TerrainNode.ParentBody.Size;
 
             UpSampleMaterial.SetFloat("_Amplitude", rs * 1);
-            UpSampleMaterial.SetFloat("_Frequency", TerrainNode.Body.Frequency * (1 << level));
+            UpSampleMaterial.SetFloat("_Frequency", TerrainNode.ParentBody.Frequency * (1 << level));
             UpSampleMaterial.SetVector("_Offset", offset.ToVector4());
             UpSampleMaterial.SetMatrix("_LocalToWorld", TerrainNode.FaceToLocal.ToMatrix4x4());
 
-            if (TerrainNode.Body.NPS != null) TerrainNode.Body.NPS.SetUniforms(UpSampleMaterial);
-            if (TerrainNode.Body.TCCPS != null) TerrainNode.Body.TCCPS.UpdateUniforms(UpSampleMaterial);
+            if (TerrainNode.ParentBody.NPS != null) TerrainNode.ParentBody.NPS.SetUniforms(UpSampleMaterial);
+            if (TerrainNode.ParentBody.TCCPS != null) TerrainNode.ParentBody.TCCPS.UpdateUniforms(UpSampleMaterial);
 
             Graphics.Blit(null, gpuSlot.Texture, UpSampleMaterial);
 

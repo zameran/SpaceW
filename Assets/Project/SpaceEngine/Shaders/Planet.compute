@@ -31,6 +31,10 @@
 // Creation Time: Undefined
 // Creator: zameran
 
+#if !defined (COMPUTE_SHADER)
+#define COMPUTE_SHADER
+#endif
+
 #define VerticesPerSide 				quadGenerationConstants[0].meshSettings.x
 #define VerticesPerSideWithBorder 		quadGenerationConstants[0].meshSettings.y
 #define VerticesPerSideFull 			quadGenerationConstants[0].meshSettings.z

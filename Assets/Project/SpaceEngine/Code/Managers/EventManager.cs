@@ -1,6 +1,7 @@
 ﻿using SpaceEngine.AtmosphericScattering;
 using SpaceEngine.Core.Bodies;
 using SpaceEngine.Pluginator.Enums;
+using SpaceEngine.UI;
 
 using System;
 
@@ -11,7 +12,9 @@ public static class EventManager
 {
     public static BaseEvents BaseEvents = new BaseEvents();
 
-    public static CelestialBodyEvents CelestialBodyEvents = new CelestialBodyEvents();
+    public static BodyEvents BodyEvents = new BodyEvents();
+
+    public static UIEvents UIEvents = new UIEvents();
 }
 
 public sealed class BaseEvents
@@ -21,10 +24,16 @@ public sealed class BaseEvents
     public EventHolder<EntryPoint, LoadSceneMode> OnSceneLoaded = new EventHolder<EntryPoint, LoadSceneMode>();
 }
 
-public sealed class CelestialBodyEvents
+public sealed class BodyEvents
 {
-    public EventHolder<CelestialBody, Atmosphere> OnAtmosphereBaked = new EventHolder<CelestialBody, Atmosphere>();
-    public EventHolder<CelestialBody, Atmosphere, AtmosphereBase> OnAtmospherePresetChanged = new EventHolder<CelestialBody, Atmosphere, AtmosphereBase>();
+    public EventHolder<Body, Atmosphere> OnAtmosphereBaked = new EventHolder<Body, Atmosphere>();
+    public EventHolder<Body, Atmosphere, AtmosphereBase> OnAtmospherePresetChanged = new EventHolder<Body, Atmosphere, AtmosphereBase>();
+}
+
+public sealed class UIEvents
+{
+    public EventHolder AllAdditiveUILoaded = new EventHolder();
+    public EventHolder<UICore> UIRemixed = new EventHolder<UICore>();
 }
 
 #region Event Holders

@@ -32,22 +32,11 @@ namespace SpaceEngine.Core.Storage
             }
         }
 
-        public enum DATA_TYPE : byte
-        {
-            FLOAT,
-            INT,
-            BYTE
-        }
-
-        [SerializeField]
         public DATA_TYPE DataType = DATA_TYPE.FLOAT;
 
-        [SerializeField]
         public int Channels = 1;
 
-        [SerializeField]
-        ComputeBufferType computeBufferType = ComputeBufferType.Default;
-        public ComputeBufferType ComputeBufferType { get { return computeBufferType; } set { computeBufferType = value; } }
+        public ComputeBufferType ComputeBufferType = ComputeBufferType.Default;
 
         protected override void Awake()
         {
@@ -65,19 +54,22 @@ namespace SpaceEngine.Core.Storage
                 switch (DataType)
                 {
                     case DATA_TYPE.FLOAT:
-                        buffer = new ComputeBuffer(TileSize, sizeof(float) * Channels, computeBufferType);
+                        buffer = new ComputeBuffer(TileSize, sizeof(float) * Channels, ComputeBufferType);
                         break;
-
                     case DATA_TYPE.INT:
-                        buffer = new ComputeBuffer(TileSize, sizeof(int) * Channels, computeBufferType);
+                        buffer = new ComputeBuffer(TileSize, sizeof(int) * Channels, ComputeBufferType);
                         break;
-
                     case DATA_TYPE.BYTE:
-                        buffer = new ComputeBuffer(TileSize, sizeof(byte) * Channels, computeBufferType);
+                        buffer = new ComputeBuffer(TileSize, sizeof(byte) * Channels, ComputeBufferType);
                         break;
                     default:
-                        buffer = new ComputeBuffer(TileSize, sizeof(float) * Channels, computeBufferType);
-                        break;
+                        {
+                            buffer = new ComputeBuffer(TileSize, sizeof(float) * Channels, ComputeBufferType);
+
+                            Debug.LogWarning(string.Format("{0} data type isn't supported by {1}! Float type will be used!", DataType.ToString(), GetType().Name));
+
+                            break;
+                        }
                 }
 
                 var slot = new CBSlot(this, buffer);
