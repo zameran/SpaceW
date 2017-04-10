@@ -47,10 +47,16 @@ Shader "SpaceEngine/QuadTestUnlit"
 	}
 	SubShader
 	{
-		Tags { "Queue" = "Geometry" "RenderType" = "Opaque" "IgnoreProjector" = "True" }
-
 		Pass
 		{
+			Name "Quad"
+			Tags
+			{ 
+				"Queue" = "Geometry" 
+				"RenderType" = "Opaque" 
+				"IgnoreProjector" = "True" 
+			}
+
 			ZWrite On
 			ZTest LEqual 
 			Cull Back
