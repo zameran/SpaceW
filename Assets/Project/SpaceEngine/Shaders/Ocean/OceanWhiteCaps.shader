@@ -2,10 +2,15 @@
 {
 	SubShader 
 	{
-		Tags { "Queue" = "Geometry+100" "RenderType"="" }
-	
 		Pass 
-		{	
+		{
+			Name "Ocean White Caps"
+			Tags 
+			{ 
+				"Queue" = "Geometry+100" 
+				"RenderType"="" 
+			}
+
 			CGPROGRAM
 			#include "UnityCG.cginc"
 

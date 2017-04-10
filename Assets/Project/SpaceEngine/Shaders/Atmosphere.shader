@@ -71,11 +71,17 @@ Shader "SpaceEngine/Atmosphere/Atmosphere"
 
 	}
 	SubShader 
-	{
-		Tags { "Queue" = "Transparent" "RenderType" = "Transparent" "IgnoreProjector" = "True" }
-	
+	{	
 		Pass 
 		{
+			Name "Atmosphere"
+			Tags 
+			{
+				"Queue" = "Transparent" 
+				"RenderType" = "Transparent" 
+				"IgnoreProjector" = "True" 
+			}
+
 			ZWrite On
 			ZTest Always  
 			Fog { Mode Off }

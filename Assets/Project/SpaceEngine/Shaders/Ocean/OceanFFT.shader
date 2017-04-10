@@ -2,10 +2,15 @@
 {
 	SubShader 
 	{
-		Tags { "Queue" = "Geometry+100" "RenderType"="" }
-	
 		Pass 
 		{	
+			Name "Ocean FFT"
+			Tags 
+			{ 
+				"Queue" = "Geometry+100" 
+				"RenderType"="" 
+			}
+
 			CGPROGRAM
 			#include "UnityCG.cginc"
 
