@@ -4,20 +4,23 @@ SpaceW is procedural universe generator - simulator.
 
 ![alt tag](https://github.com/zameran/SpaceW/blob/develop/Logo.png?raw=true)
 
-[gitter channel placeholder] : [discord channel placeholder] : [telegram channel placeholder] : [other paceholder] : [other placeholder]
+[gitter channel placeholder]
+[discord channel placeholder]
+[telegram channel placeholder]
+[other placeholder]
 
 ## Current Engine version support ##
-Unity 5.4.1f1 (Windows)
-Unity 5.6.0b3 (Linux)
+* Unity 5.4.1f1 (Windows)
+* Unity 5.6.0b3 (Linux)
 
 ## Current OS/API support ##
-* DirectX 11 (Shader Model 5.0)
+* Shader Model 5.0
+* DirectX 11
 * OpenGL 4.5 (Experimental)
 
 ### Warning ###
-* This is hobby project.
-* Project under active development.
-* Project can be sold. Contact me.
+* This is project of life.
+* Project under active development forever.
 
 ### Install ###
 * Clone the repository.
@@ -30,19 +33,17 @@ Unity 5.6.0b3 (Linux)
 * Make your changes in separate branch [Git Flow].
 * Create pull request.
 
-### TODO ###
-* Infinite coordinate system.
-* Replace LOD system.
-* Replace atmosphere with volumetric stuff.
-* Other stuff will be in trello.
+### Core guidelines ###
+* Currently project have two cores inside: ZCore and Proland [Refactored and fixed]. ZCore is very buggy and semi-stable, will be replaced via Proland core in future.
 
 ### License ###
+* Project have mixed-license scheme.
 * The 3-Clause BSD License
 
 ### Extra ###
-* Some shader code was ported to Unity from Space Engine.
-* Some code contain shit and dirty magic.
-* Some stuff may not work.
+* Some shader code was ported to Unity from Space Engine and Proland.
+* Some code contain dirty magic.
+* Some stuff may not work or very experimental.
 * Codestyle somewhere is very bad.
 * Zameran is stupid.
 
@@ -52,6 +53,6 @@ Unity 5.6.0b3 (Linux)
 * [Eric Bruneton](http://www-evasion.imag.fr/Membres/Eric.Bruneton/)
 * [Google](https://www.google.com)
 
-### Contact me ###
+### Contacts ###
 * [zameran9@gmail.com](zameran9@gmail.com)
 * [Telegram](https://t.me/zameran)
