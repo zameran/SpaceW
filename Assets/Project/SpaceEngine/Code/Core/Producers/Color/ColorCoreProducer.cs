@@ -159,7 +159,6 @@ namespace SpaceEngine.Core
             var elevationOSL = new Vector4(0.25f / (float)elevationTex.width, 0.25f / (float)elevationTex.height, 1.0f / (float)elevationTex.width, 0.0f);
             var tileSize = tileWidth - (float)(1 + GetBorder() * 2);
 
-            //var parentTile = FindTile(level - 1, tx / 2, ty / 2, false, true);
             var rootQuadSize = TerrainNode.TerrainQuadRoot.Length;
 
             var tileWSD = Vector4.zero;
@@ -169,12 +168,10 @@ namespace SpaceEngine.Core
             tileWSD.w = 0.0f;
 
             var tileSD = Vector2d.zero;
-
             tileSD.x = (0.5 + GetBorder()) / (tileWidth - 1 - GetBorder() * 2);
             tileSD.y = (1.0 + tileSD.x * 2.0);
 
             var offset = Vector4d.zero;
-
             offset.x = ((double)tx / (1 << level) - 0.5) * rootQuadSize;
             offset.y = ((double)ty / (1 << level) - 0.5) * rootQuadSize;
             offset.z = rootQuadSize / (1 << level);

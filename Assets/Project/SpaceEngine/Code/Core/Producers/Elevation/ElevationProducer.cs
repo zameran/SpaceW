@@ -125,7 +125,7 @@ namespace SpaceEngine.Core
                     UpSampleMaterial.SetTexture("_ResidualSampler", null);
                     UpSampleMaterial.SetVector("_ResidualOSH", new Vector4(0.0f, 0.0f, 1.0f, 0.0f));
 
-                    Debug.LogError(string.Format("Residual tile exist, but can't find any suitable tile at {0}:{1}:{2}!", level, tx, ty));
+                    Debug.LogError(string.Format("Residual producer exist, but can't find any suitable tile at {0}:{1}:{2}!", level, tx, ty));
                 }
             }
             else
