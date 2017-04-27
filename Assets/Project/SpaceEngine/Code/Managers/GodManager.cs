@@ -65,6 +65,7 @@ public class GodManager : MonoSingleton<GodManager>
 
     public bool Eclipses = true;
     public bool Planetshine = true;
+    public bool DelayedCalculations = false;
 
     protected GodManager() { }
 
