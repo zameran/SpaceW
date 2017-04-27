@@ -39,6 +39,7 @@ using System.Threading;
 
 using UnityEngine;
 
+[Obsolete("Do not use this class!")]
 public class ThreadScheduler : MonoBehaviour
 {
     private static bool initialized = false;

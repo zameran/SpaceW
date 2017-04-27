@@ -59,79 +59,6 @@ using System.Collections;
 
 namespace SpaceEngine.Managers
 {
-    /// <summary>
-    /// A Task object represents a coroutine. Tasks can be started, paused, and stopped.
-    /// It is an error to attempt to start a task that has been stopped or which has naturally terminated.
-    /// </summary>
-    public class Task
-    {
-        /// <summary>
-        /// Returns true if and only if the coroutine is running. Paused tasks are considered to be running.
-        /// </summary>
-        public bool Running { get { return InternalTask.Running; } }
-
-        /// <summary>
-        /// Returns true if and only if the coroutine is currently paused.
-        /// </summary>
-        public bool Paused { get { return InternalTask.Paused; } }
-
-        /// <summary>
-        /// Delegate for termination subscribers.  manual is true if and only if the coroutine was stopped with an explicit call to <see cref="Task.Stop"/>.
-        /// </summary>
-        public delegate void FinishedHandler(bool manual);
-
-        /// <summary>
-        /// Termination event.  Triggered when the coroutine completes execution.
-        /// </summary>
-        public event FinishedHandler Finished;
-
-        TaskManager.TaskState InternalTask;
-
-        /// <summary>
-        /// Creates a new Task object for the given coroutine.
-        /// If <see cref="autoStart"/> is true (default) the task is automatically started upon construction.
-        /// </summary>
-        public Task(IEnumerator c, bool autoStart = true)
-        {
-            InternalTask = TaskManager.CreateTask(c);
-            InternalTask.OnFinished += OnTaskFinished;
-
-            if (autoStart) { Start(); }
-        }
-
-        /// <summary>
-        /// Begins execution of the coroutine.
-        /// </summary>
-        public void Start()
-        {
-            InternalTask.Start();
-        }
-
-        /// <summary>
-        /// Discontinues execution of the coroutine at its next yield.
-        /// </summary>
-        public void Stop()
-        {
-            InternalTask.Stop();
-        }
-
-        public void Pause()
-        {
-            InternalTask.Pause();
-        }
-
-        public void Unpause()
-        {
-            InternalTask.Unpause();
-        }
-
-        void OnTaskFinished(bool manual)
-        {
-            if (Finished != null)
-                Finished(manual);
-        }
-    }
-
     public sealed class TaskManager : MonoSingleton<TaskManager>
     {
         public class TaskState
@@ -212,6 +139,79 @@ namespace SpaceEngine.Managers
         public static TaskState CreateTask(IEnumerator coroutine)
         {
             return new TaskState(coroutine);
+        }
+    }
+
+    /// <summary>
+    /// A Task object represents a coroutine. Tasks can be started, paused, and stopped.
+    /// It is an error to attempt to start a task that has been stopped or which has naturally terminated.
+    /// </summary>
+    public class Task
+    {
+        /// <summary>
+        /// Returns true if and only if the coroutine is running. Paused tasks are considered to be running.
+        /// </summary>
+        public bool Running { get { return InternalTaskState.Running; } }
+
+        /// <summary>
+        /// Returns true if and only if the coroutine is currently paused.
+        /// </summary>
+        public bool Paused { get { return InternalTaskState.Paused; } }
+
+        /// <summary>
+        /// Delegate for termination subscribers.  manual is true if and only if the coroutine was stopped with an explicit call to <see cref="Task.Stop"/>.
+        /// </summary>
+        public delegate void FinishedHandler(bool manual);
+
+        /// <summary>
+        /// Termination event.  Triggered when the coroutine completes execution.
+        /// </summary>
+        public event FinishedHandler Finished;
+
+        TaskManager.TaskState InternalTaskState;
+
+        /// <summary>
+        /// Creates a new Task object for the given coroutine.
+        /// If <see cref="autoStart"/> is true (default) the task is automatically started upon construction.
+        /// </summary>
+        public Task(IEnumerator c, bool autoStart = true)
+        {
+            InternalTaskState = TaskManager.CreateTask(c);
+            InternalTaskState.OnFinished += OnTaskStateFinished;
+
+            if (autoStart) { Start(); }
+        }
+
+        /// <summary>
+        /// Begins execution of the coroutine.
+        /// </summary>
+        public void Start()
+        {
+            InternalTaskState.Start();
+        }
+
+        /// <summary>
+        /// Discontinues execution of the coroutine at it's next yield.
+        /// </summary>
+        public void Stop()
+        {
+            InternalTaskState.Stop();
+        }
+
+        public void Pause()
+        {
+            InternalTaskState.Pause();
+        }
+
+        public void Unpause()
+        {
+            InternalTaskState.Unpause();
+        }
+
+        void OnTaskStateFinished(bool manual)
+        {
+            if (Finished != null)
+                Finished(manual);
         }
     }
 }
