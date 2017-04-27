@@ -49,6 +49,9 @@ namespace SpaceEngine.Core.Tile.Samplers
         bool EnableReadBack = false;
 
         [SerializeField]
+        bool EnableGroundHeightUpdate = true;
+
+        [SerializeField]
         int MaxReadBacksPerFrame = 5;
 
         [SerializeField]
@@ -144,7 +147,7 @@ namespace SpaceEngine.Core.Tile.Samplers
             var localCameraPosition = TerrainNode.LocalCameraPosition;
 
             // If camera has moved update ground height
-            if ((localCameraPosition - OldLocalCamera).Magnitude() > 1.0 && CameraQuad != null && CameraQuad.Tile != null)
+            if ((localCameraPosition - OldLocalCamera).Magnitude() > 1.0 && CameraQuad != null && CameraQuad.Tile != null && EnableGroundHeightUpdate)
             {
                 var slot = CameraQuad.Tile.Slot[0] as GPUTileStorage.GPUSlot;
 
