@@ -58,7 +58,11 @@ namespace SpaceEngine.Core.Tile.Tasks
 
             if (GodManager.Instance.DelayedCalculations)
             {
-                Owner.StartCoroutine(Owner.DoCreateTileCoroutine(Level, Tx, Ty, Slot, this));
+                Owner.StartCoroutine(Owner.DoCreateTileCoroutine(Level, Tx, Ty, Slot, () =>
+                {
+                    // Manualy finish the particular tile creation task.
+                    this.Finish();
+                }));
 
                 // So, task will be finished in the end of coroutine...
             }

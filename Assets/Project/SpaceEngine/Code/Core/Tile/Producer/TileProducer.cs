@@ -1,10 +1,10 @@
-using JetBrains.Annotations;
 using SpaceEngine.Core.Terrain;
 using SpaceEngine.Core.Tile.Cache;
 using SpaceEngine.Core.Tile.Layer;
 using SpaceEngine.Core.Tile.Samplers;
 using SpaceEngine.Core.Tile.Storage;
 using SpaceEngine.Core.Tile.Tasks;
+
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -251,10 +251,12 @@ namespace SpaceEngine.Core.Tile.Producer
         /// <param name="tx">The tile's quadtree X coordinate.</param>
         /// <param name="ty">The tile's quadtree Y coordinate.</param>
         /// <param name="slot">Slot, where the crated tile data must be stored.</param>
-        /// <param name="task">The tile's creation task. Not null!</param>
-        public virtual IEnumerator DoCreateTileCoroutine(int level, int tx, int ty, List<TileStorage.Slot> slot, [NotNull] CreateTileTask task)
+        /// <param name="Callback">Callback after all. Finish the task here and do some extra post-calculation work.</param>
+        public virtual IEnumerator DoCreateTileCoroutine(int level, int tx, int ty, List<TileStorage.Slot> slot, Action Callback)
         {
             // TODO : Should wait, until parented producers complete their work...
+            // So, now i have a special order list of sorted samplers.
+            // What i need to do, is determinate current task/tile/sampler priority and wait for all of producers, wich have the lower prior. 
 
             this.DoCreateTile(level, tx, ty, slot); // Do our work...
 
@@ -265,20 +267,9 @@ namespace SpaceEngine.Core.Tile.Producer
                 yield return Yielders.EndOfFrame;
             }
 
-            // TODO : Remove circular Tile-Task-Tile dependency... Use a callback or something...
-            if (Layers != null)
-            {
-                foreach (var layer in Layers)
-                {
-                    layer.DoCreateTile(level, tx, ty, slot);
-
-                    yield return Yielders.EndOfFrame;
-                }
-            }
-
             yield return Yielders.EndOfFrame;
 
-            task.Finish(); // Manualy finish the particular tile creation task.
+            if (Callback != null) Callback();
         }
 
         private int GetAwaitingFramesCount(int level)
