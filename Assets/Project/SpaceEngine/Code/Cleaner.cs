@@ -37,10 +37,6 @@ using System.IO;
 
 using UnityEngine;
 
-using ZFramework.Unity.Common;
-
-[UseLogger(Category.Important)]
-[UseLoggerFile(false, "Log")]
 public sealed class Cleaner : MonoBehaviour
 {
     private void Awake()

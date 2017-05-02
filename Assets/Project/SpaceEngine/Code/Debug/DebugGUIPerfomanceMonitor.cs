@@ -33,9 +33,9 @@
 // Creator: zameran
 #endregion
 
-using UnityEngine;
+using SpaceEngine.Core.Debugging;
 
-using ZFramework.Unity.Common.PerfomanceMonitor;
+using UnityEngine;
 
 namespace SpaceEngine.Debugging
 {
@@ -55,7 +55,7 @@ namespace SpaceEngine.Debugging
         {
             base.OnGUI();
 
-            using (new Timer("Repfomance Monitor OnGUI"))
+            using (new PerformanceMonitor.Timer("Repfomance Monitor OnGUI"))
             {
                 GUI.Window(0, debugInfoBounds, UI, "Perfomance Monitor (in milliseconds)");
             }
