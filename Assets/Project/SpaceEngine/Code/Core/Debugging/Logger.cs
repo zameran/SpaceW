@@ -69,7 +69,7 @@ namespace SpaceEngine.Core.Debugging
             {Category.Triggers, XKCDColors.Orange},
             {Category.InGameUI, XKCDColors.DullGreen},
             {Category.Camera, XKCDColors.Green},
-            {Category.Data, XKCDColors.BrightBlue},
+            {Category.Data, XKCDColors.BrightSkyBlue},
             {Category.Input, XKCDColors.Yellow},
             {Category.Core, XKCDColors.DullRed},
             {Category.Animation, XKCDColors.Purple},
@@ -224,7 +224,7 @@ namespace SpaceEngine.Core.Debugging
             }
             else
             {
-                obj = string.Format("<color=#{0}>[{1}] <b>{2}</b> </color>", colorString, categoryString, obj.ToString());
+                obj = string.Format("<color={0}>[{1}] <b>{2}</b> </color>", colorString, categoryString, obj.ToString());
             }
 
             Debug.Log(obj);
