@@ -64,7 +64,7 @@ namespace SpaceEngine.Debugging
         {
             scrollPosition = GUILayout.BeginScrollView(scrollPosition, false, true);
 
-            if (Body != null)
+            if (Body != null && Helper.Enabled(Body))
             {
                 GUILayout.BeginVertical();
 
@@ -74,7 +74,7 @@ namespace SpaceEngine.Debugging
 
                 GUILayout.EndVertical();
 
-                if (Body.Atmosphere != null)
+                if (Body.Atmosphere != null && Helper.Enabled(Body.Atmosphere))
                 {
                     GUILayout.BeginVertical();
 

@@ -37,6 +37,9 @@ using UnityEngine;
 
 namespace SpaceEngine.Debugging
 {
+    /// <summary>
+    /// This class provides default behaviour of all <see cref="GUI"/>-based debug panels.
+    /// </summary>
     public abstract class DebugGUI : MonoBehaviour, IDebug
     {
         private CachedComponent<DebugGUISwitcher> SwitcherCachedComponent = new CachedComponent<DebugGUISwitcher>();

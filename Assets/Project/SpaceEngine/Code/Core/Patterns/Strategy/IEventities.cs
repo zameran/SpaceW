@@ -35,6 +35,10 @@
 
 namespace SpaceEngine.Core.Patterns.Strategy.Eventit
 {
+    /// <summary>
+    /// Interface provides some strategy methods for a subscription/unsubscription to particular events.
+    /// Use this to work with <see cref="EventManager"/>.
+    /// </summary>
     public interface IEventit
     {
         bool isEventit { get; set; }
@@ -44,6 +48,11 @@ namespace SpaceEngine.Core.Patterns.Strategy.Eventit
         void UnEventit();
     }
 
+    /// <summary>
+    /// Interface provides some generic strategy methods for a subscription/unsubscription to particular events.
+    /// Use this to work with <see cref="EventManager"/>.
+    /// </summary>
+    /// <typeparam name="T">Generic.</typeparam>
     public interface IEventit<T> where T : class
     {
         bool isEventit { get; set; }
@@ -53,6 +62,12 @@ namespace SpaceEngine.Core.Patterns.Strategy.Eventit
         void UnEventit(T obj);
     }
 
+    /// <summary>
+    /// Interface provides some several strategy generic methods for a subscription/unsubscription to particular events.
+    /// Use this to work with <see cref="EventManager"/>.
+    /// </summary>
+    /// <typeparam name="T">Generic.</typeparam>
+    /// <typeparam name="U"></typeparam>
     public interface IEventit<T, U> where T : class
         where U : class
     {

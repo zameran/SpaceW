@@ -33,13 +33,23 @@
 // Creator: zameran
 #endregion
 
+
 namespace SpaceEngine.Core.Patterns.Strategy.Reanimator
 {
+    /// <summary>
+    /// Interface provides some strategy methods for a special 
+    /// <see cref="UnityEngine.Material"/> and <see cref="UnityEngine.Shader"/>, or <see cref="UnityEngine.MaterialPropertyBlock"/> uniforms behaviour.
+    /// </summary>
     public interface IReanimateable
     {
         void Reanimate();
     }
 
+    /// <summary>
+    /// Interface provides some generic strategy methods for a special 
+    /// <see cref="UnityEngine.Material"/> and <see cref="UnityEngine.Shader"/>, or <see cref="UnityEngine.MaterialPropertyBlock"/> uniforms behaviour.
+    /// </summary>
+    /// <typeparam name="T">Generic.</typeparam>
     public interface IReanimateable<T> : IReanimateable
     {
         void Reanimate(T state);

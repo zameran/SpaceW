@@ -35,6 +35,9 @@
 
 using UnityEngine;
 
+/// <summary>
+/// Class - extensions holder for a <see cref="ComputeBuffer"/>.
+/// </summary>
 public static class BufferHelper
 {
     public static void ReleaseBuffers(params ComputeBuffer[] buffers)

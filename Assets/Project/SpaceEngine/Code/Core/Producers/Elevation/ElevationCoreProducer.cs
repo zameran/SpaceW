@@ -89,11 +89,6 @@ namespace SpaceEngine.Core
             }
         }
 
-        protected override void OnDestroy()
-        {
-            base.OnDestroy();
-        }
-
         public override int GetBorder()
         {
             return 2;
@@ -108,7 +103,6 @@ namespace SpaceEngine.Core
             var tileWidth = gpuSlot.Owner.TileSize;
             var tileSize = tileWidth - (1 + GetBorder() * 2);
 
-            //var parentTile = FindTile(level - 1, tx / 2, ty / 2, false, true);
             var rootQuadSize = TerrainNode.TerrainQuadRoot.Length;
 
             if (ResidualProducer != null)
@@ -134,7 +128,7 @@ namespace SpaceEngine.Core
                     ElevationMaterial.SetTexture("_ResidualSampler", null);
                     ElevationMaterial.SetVector("_ResidualOSH", new Vector4(0.0f, 0.0f, 1.0f, 0.0f));
 
-                    Debug.LogError(string.Format("Residual tile exist, but can't find any suitable tile at {0}:{1}:{2}!", level, tx, ty));
+                    Debug.LogError(string.Format("Residual producer exist, but can't find any suitable tile at {0}:{1}:{2}!", level, tx, ty));
                 }
             }
             else
@@ -150,12 +144,10 @@ namespace SpaceEngine.Core
             tileWSD.w = 0.0f;
 
             var tileSD = Vector2d.zero;
-
             tileSD.x = (0.5 + GetBorder()) / (tileWidth - 1 - GetBorder() * 2);
             tileSD.y = (1.0 + tileSD.x * 2.0);
 
             var offset = Vector4d.zero;
-
             offset.x = ((double)tx / (1 << level) - 0.5) * rootQuadSize;
             offset.y = ((double)ty / (1 << level) - 0.5) * rootQuadSize;
             offset.z = rootQuadSize / (1 << level);

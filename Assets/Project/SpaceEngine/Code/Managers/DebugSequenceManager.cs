@@ -91,6 +91,9 @@ namespace SpaceEngine.Managers
         }
     }
 
+    /// <summary>
+    /// Manager for a special debug. Some <see cref="MonoBehaviour"/>s can be added to the debug sequence and sorted via call timestamp.
+    /// </summary>
     public class DebugSequenceManager : MonoSingleton<DebugSequenceManager>
     {
         public List<SequenceEntry> Sequence = new List<SequenceEntry>();
@@ -103,6 +106,11 @@ namespace SpaceEngine.Managers
             Instance = this;
         }
 
+        /// <summary>
+        /// Add a <see cref="MonoBehaviour"/> to the debug sequence.
+        /// </summary>
+        /// <param name="owner">Owner.</param>
+        /// <param name="stackFrameOffset">Stack fram offset for a method, wich will be added.</param>
         public void Debug(MonoBehaviour owner, int stackFrameOffset = 1)
         {
             var entry = new SequenceEntry(string.Format("{0} [{1}.{2}]", owner.name, owner.GetType().Name, new StackTrace().GetFrame(stackFrameOffset).GetMethod().Name));

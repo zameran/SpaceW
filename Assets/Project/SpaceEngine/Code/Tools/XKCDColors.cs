@@ -12,6 +12,18 @@ public static class XKCDColors
                              Convert.ToInt32(hexString.Substring(3, 2), 16) / 255f,
                              Convert.ToInt32(hexString.Substring(5, 2), 16) / 255f);
         }
+
+        public static string ToRGBHex(Color color)
+        {
+            return string.Format("#{0:X2}{1:X2}{2:X2}", ToByte(color.r), ToByte(color.g), ToByte(color.b));
+        }
+
+        private static byte ToByte(float value)
+        {
+            value = Mathf.Clamp01(value);
+
+            return (byte)(value * 255);
+        }
     }
 
     public static Color CloudyBlue { get { return ColorTranslator.FromHtml("#acc2d9"); } }

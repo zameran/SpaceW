@@ -35,6 +35,9 @@
 
 using UnityEngine;
 
+/// <summary>
+/// Class - extensions holder for a <see cref="Material"/>.
+/// </summary>
 public static class MaterialHelper
 {
     public static Material CreateTemp(Shader shader, string name)

@@ -35,6 +35,9 @@
 
 using UnityEngine;
 
+/// <summary>
+/// Class - extensions holder for a <see cref="Camera"/>.
+/// </summary>
 public static class CameraHelper
 {
     public static Camera Main()

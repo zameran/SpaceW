@@ -10,6 +10,22 @@ using UnityEngine;
 namespace SpaceEngine.Core.Terrain
 {
     /// <summary>
+    /// Class, that holds all <see cref="TerrainNode"/>'s <see cref="TileSampler"/>s, sorted by priority.
+    /// The size of order is limited to 255.
+    /// </summary>
+    public sealed class TileSamplerOrder
+    {
+        public List<TileSampler> OrderList;
+
+        public TileSamplerOrder(IEnumerable<TileSampler> queue)
+        {
+            OrderList = new List<TileSampler>(255);
+            OrderList.AddRange(queue);
+            OrderList.Sort(new TileSampler.Sort());
+        }
+    }
+
+    /// <summary>
     /// Provides a base class to draw and update view-dependent, quadtree based terrains.
     /// This base class provides classes to represent the terrain quadtree, classes to
     /// associate data produced by a <see cref="Tile.Producer.TileProducer"/> to the quads of this
@@ -128,6 +144,8 @@ namespace SpaceEngine.Core.Terrain
         /// </summary>
         float[] Horizon = new float[HORIZON_SIZE];
 
+        public TileSamplerOrder SamplersOrder;
+
         #region Node
 
         protected override void InitNode()
@@ -173,6 +191,8 @@ namespace SpaceEngine.Core.Terrain
             }
 
             CreateTerrainQuadRoot(ParentBody.Size);
+
+            SamplersOrder = new TileSamplerOrder(GetComponentsInChildren<TileSampler>());
         }
 
         protected override void UpdateNode()

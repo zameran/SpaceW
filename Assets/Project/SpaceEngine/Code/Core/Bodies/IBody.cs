@@ -45,6 +45,9 @@ namespace SpaceEngine.Core.Bodies
         Cyllindrycal
     }
 
+    /// <summary>
+    /// This interface should be implemented in all things, that's gonna be in space.
+    /// </summary>
     public interface IBody
     {
 

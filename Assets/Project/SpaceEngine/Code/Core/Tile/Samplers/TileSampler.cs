@@ -17,7 +17,7 @@ namespace SpaceEngine.Core.Tile.Samplers
     public class TileSampler : Node<TileSampler>
     {
         /// <summary>
-        /// Class used to sort a <see cref="TileSampler"/> based on its priority.
+        /// Class used to sort a <see cref="TileSampler"/> based on it's priority.
         /// </summary>
         public class Sort : IComparer<TileSampler>
         {

@@ -10,13 +10,14 @@ SpaceW is procedural universe generator - simulator.
 [other placeholder]
 
 ## Current Engine version support ##
-* Unity 5.4.1f1 (Windows)
+* Unity 5.4.1p2 (Windows)
 * Unity 5.6.0b3 (Linux)
 
 ## Current OS/API support ##
+* Windows/Linux/Ubuntu/Mac
 * Shader Model 5.0
 * DirectX 11
-* OpenGL 4.5 (Experimental)
+* OpenGL 4.3 and higher [Experimental and early WIP]
 
 ### Warning ###
 * This is project of life.
@@ -25,7 +26,7 @@ SpaceW is procedural universe generator - simulator.
 ### Install ###
 * Clone the repository.
 * Open project in Unity.
-* Open 'Scene' scene.
+* Open the 'Scene' scene.
 * Profit!
 
 ### Contribution guidelines ###
@@ -34,11 +35,10 @@ SpaceW is procedural universe generator - simulator.
 * Create pull request.
 
 ### Core guidelines ###
-* Currently project have two cores inside: ZCore and Proland [Refactored and fixed]. ZCore is very buggy and semi-stable, will be replaced via Proland core in future.
+* Currently there are a lot of trash, but something is marked as [Obsolete] or */ //Commented */
 
 ### License ###
-* Project have mixed-license scheme.
-* The 3-Clause BSD License
+* The 3-Clause BSD License [Mixed-license scheme].
 
 ### Extra ###
 * Some shader code was ported to Unity from Space Engine and Proland.

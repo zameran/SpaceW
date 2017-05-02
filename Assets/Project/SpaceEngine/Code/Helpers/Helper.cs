@@ -42,6 +42,10 @@ using UnityEngine;
 using Debug = UnityEngine.Debug;
 using Object = UnityEngine.Object;
 
+/// <summary>
+/// Class - extensions holder for a various stuff, such as 
+/// <see cref="Object"/>, <see cref="Vector3"/>, <see cref="Material"/>, <see cref="GameObject"/> and special math.
+/// </summary>
 public static class Helper
 {
     public static void Measure(string label = "Method", Action ToMeasure = null)

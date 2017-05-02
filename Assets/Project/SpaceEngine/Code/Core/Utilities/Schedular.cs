@@ -30,6 +30,11 @@ namespace SpaceEngine.Core.Utilities
             }
 
             public abstract void Run();
+
+            public virtual void Finish()
+            {
+                IsDone = true;
+            }
         }
 
         Task.EqualityComparer Comparer;

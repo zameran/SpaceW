@@ -35,6 +35,9 @@
 
 using UnityEngine;
 
+/// <summary>
+/// Class - extensions holder for a matrices.
+/// </summary>
 public static class MatrixHelper
 {
     public static Matrix4x4 Rotation(Quaternion q)
