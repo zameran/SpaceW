@@ -59,6 +59,11 @@ public class MonoSingleton<T> : MonoBehaviour where T : MonoBehaviour
 
     public static bool ApplicationIsQuitting { get; private set; }
 
+    protected virtual bool UnstableSingleton()
+    {
+        return false;
+    }
+
     /// <summary>
     /// When Unity quits, it destroys objects in a random order.
     /// In principle, a Singleton is only destroyed when application quits.
@@ -68,6 +73,6 @@ public class MonoSingleton<T> : MonoBehaviour where T : MonoBehaviour
     /// </summary>
     protected virtual void OnDestroy()
     {
-        ApplicationIsQuitting = true;
+        if (UnstableSingleton()) ApplicationIsQuitting = true;
     }
 }

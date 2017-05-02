@@ -18,6 +18,10 @@ namespace SpaceEngine.UI
 
         public UnityEvent OnShow;
         public UnityEvent OnHide;
+        public UnityEvent OnAfterShow;
+        public UnityEvent OnAfterHide;
+        public UnityEvent OnBeforeShow;
+        public UnityEvent OnBeforeHide;
 
         private CanvasGroup canvasGroup;
         protected Coroutine routine;
@@ -65,14 +69,18 @@ namespace SpaceEngine.UI
         {
             if (IsShown)
             {
+                OnBeforeHide.Invoke();
+
                 if (time > 0)
                 {
                     while (canvasGroup.alpha > 0)
                     {
                         canvasGroup.alpha -= Time.deltaTime / time;
 
-                        yield return new WaitForEndOfFrame();
+                        yield return Yielders.EndOfFrame;
                     }
+
+                    OnAfterHide.Invoke();
                 }
 
                 canvasGroup.alpha = 0;
@@ -86,6 +94,8 @@ namespace SpaceEngine.UI
             else
             {
                 gameObject.SendMessage("OnShow", SendMessageOptions.DontRequireReceiver);
+
+                OnBeforeShow.Invoke();
 
                 if (Overlay)
                 {
@@ -109,13 +119,15 @@ namespace SpaceEngine.UI
                     {
                         canvasGroup.alpha += Time.deltaTime / time;
 
-                        yield return new WaitForEndOfFrame();
+                        yield return Yielders.EndOfFrame;
                     }
                 }
 
                 canvasGroup.alpha = 1;
                 canvasGroup.interactable = true;
                 canvasGroup.blocksRaycasts = true;
+
+                OnAfterShow.Invoke();
             }
 
             IsShown = !IsShown;

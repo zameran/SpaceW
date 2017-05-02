@@ -33,7 +33,13 @@
 // Creator: zameran
 #endregion
 
+using DG.Tweening;
+
+using SpaceEngine.Managers;
 using SpaceEngine.Pluginator;
+using SpaceEngine.Pluginator.Enums;
+using SpaceEngine.UI;
+
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -64,13 +70,13 @@ public sealed class MainMenuUI : UserInterface, IUserInterface
             {
                 for (int i = 0; i < loader.ExternalAssemblies.Count; i++)
                 {
-                    AssemblyExternal assembly = loader.ExternalAssemblies[i];
+                    var assembly = loader.ExternalAssemblies[i];
 
                     if (assembly != null)
                         AddToScrollView(addonsItemPrefab, addonsScrollView, assembly.Name, assembly.Version);
                     else
                     {
-                        // TODO : Logging...
+                        Debug.LogError(string.Format("MainMenuUI: {0} assembly is null!", i));
                     }
                 }
             }
@@ -85,6 +91,15 @@ public sealed class MainMenuUI : UserInterface, IUserInterface
 
         if (addonsCounterText != null)
             addonsCounterText.text = addonsCounterText.text + " " + ((loader == null) ? "0" : loader.ExternalAssemblies.Count.ToString());
+    }
+
+    public void LoadScene()
+    {
+        LevelManager.Instance.LoadSceneDelayed(EntryPoint.Scene, 0.5f);
+
+        GetComponent<UIPanel>().Hide(0.5f);
+
+        DOTween.To(() => CameraHelper.Main().backgroundColor, value => CameraHelper.Main().backgroundColor = value, Color.black, 1.0f);
     }
 
     public void AddToScrollView(GameObject item, ScrollRect scrollView, string name = "", string version = "")
