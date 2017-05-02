@@ -109,7 +109,7 @@ namespace SpaceEngine.UI
 
         private void OnAllAdditiveUILoaded()
         {
-            var loadingScreenPanel = Panels.Find((panel) => panel.gameObject.name == "Loading Screen Panel");
+            var loadingScreenPanel = Panels.Find((panel) => panel.gameObject.name == "Loading Panel");
 
             if (loadingScreenPanel != null)
             {

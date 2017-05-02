@@ -1,6 +1,6 @@
 ﻿#region License
 // Procedural planet generator.
-// 
+//  
 // Copyright (C) 2015-2017 Denis Ovchinnikov [zameran] 
 // All rights reserved.
 // 
@@ -8,7 +8,7 @@
 // modification, are permitted provided that the following conditions
 // are met:
 // 1. Redistributions of source code must retain the above copyright
-//    notice, this list of conditions and the following disclaimer.
+//     notice, this list of conditions and the following disclaimer.
 // 2. Redistributions in binary form must reproduce the above copyright
 //    notice, this list of conditions and the following disclaimer in the
 //    documentation and/or other materials provided with the distribution.
@@ -28,101 +28,20 @@
 // ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF
 // THE POSSIBILITY OF SUCH DAMAGE.
 // 
-// Creation Date: Undefined
-// Creation Time: Undefined
+// Creation Date: 2017.05.02
+// Creation Time: 7:43 PM
 // Creator: zameran
 #endregion
 
-using SpaceEngine.Core.Patterns.Strategy.Eventit;
-using SpaceEngine.Managers;
-using SpaceEngine.Pluginator.Enums;
-
-using System;
-
 using UnityEngine;
-using UnityEngine.SceneManagement;
 
-public class UserInterface : MonoBehaviour, IEventit
+namespace SpaceEngine
 {
-    public GameObject Controllable;
-
-    #region API
-
-    public void FreezeTime()
+    public class DontDestroyOnLoad : MonoBehaviour
     {
-        Time.timeScale = 0.001f;
+        private void OnEnable()
+        {
+            DontDestroyOnLoad(this.gameObject);
+        }
     }
-
-    public void UnFreezeTime()
-    {
-        Time.timeScale = 1.0f;
-    }
-
-    public void LoadScene(string sceneName)
-    {
-        LevelManager.Instance.LoadScene((EntryPoint)Enum.Parse(typeof(EntryPoint), sceneName));
-    }
-
-    public void Quit()
-    {
-#if UNITY_EDITOR
-        Debug.Break();
-#else
-        Application.Quit();
-#endif
-    }
-
-    #endregion
-
-    #region Subscribtion/Unsubscription
-
-    protected void OnEnable()
-    {
-        Eventit();
-    }
-
-    protected void OnDisable()
-    {
-        UnEventit();
-    }
-
-    protected void OnDestroy()
-    {
-        UnEventit();
-    }
-
-    #endregion
-
-    #region Eventit
-
-    public bool isEventit { get; set; }
-
-    public void Eventit()
-    {
-        if (isEventit) return;
-
-        SceneManager.activeSceneChanged += OnActiveSceneChanged;
-
-        isEventit = true;
-    }
-
-    public void UnEventit()
-    {
-        if (!isEventit) return;
-
-        SceneManager.activeSceneChanged -= OnActiveSceneChanged;
-
-        isEventit = false;
-    }
-
-    #endregion
-
-    #region Events
-
-    private void OnActiveSceneChanged(Scene arg0, Scene arg1)
-    {
-        UnFreezeTime();
-    }
-
-    #endregion
 }

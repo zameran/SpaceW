@@ -5,7 +5,7 @@ using UnityEngine;
 namespace SpaceEngine.UI
 {
     [RequireComponent(typeof(CanvasGroup))]
-    public abstract class UIOverlay : MonoSingleton<UIOverlay>
+    public abstract class UIOverlay : MonoBehaviour
     {
         [SerializeField]
         protected float transitionTime = .5f;
@@ -36,6 +36,8 @@ namespace SpaceEngine.UI
     [RequireComponent(typeof(CanvasGroup))]
     public abstract class UIOverlay<T> : UIOverlay where T : UIOverlay
     {
+        protected static T Instance;
+
         protected override void Awake()
         {
             Instance = GetComponent<T>();

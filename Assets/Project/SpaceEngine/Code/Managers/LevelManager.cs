@@ -34,10 +34,9 @@
 #endregion
 
 using SpaceEngine.Pluginator.Enums;
-
+using SpaceEngine.UI.Panels;
 using System;
 using System.Collections;
-
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
@@ -67,7 +66,7 @@ namespace SpaceEngine.Managers
 
         private IEnumerator Delay(float delay, Action OnDone = null)
         {
-            yield return new WaitForSeconds(delay);
+            yield return Yielders.Get(delay);
 
             if (InjectedWaiter != null) yield return InjectedWaiter;
 
@@ -88,8 +87,7 @@ namespace SpaceEngine.Managers
 
         public void LoadSceneDelayed(EntryPoint sceneName, float delay)
         {
-            // TODO : UI
-            //LoadingPanel.Show();
+            LoadingPanel.Show();
 
             StartCoroutine(Delay(delay, () => { LoadScene(sceneName); }));
         }
@@ -101,8 +99,7 @@ namespace SpaceEngine.Managers
 
         public void LoadSceneAsyncDelayed(EntryPoint sceneName, float delay = 2.0f)
         {
-            // TODO : UI
-            //LoadingPanel.Show();
+            LoadingPanel.Show();
 
             EventManager.BaseEvents.OnSceneWillBeLoaded.Invoke(sceneName, LoadSceneMode.Additive);
 
@@ -181,8 +178,7 @@ namespace SpaceEngine.Managers
         {
             EventManager.BaseEvents.OnSceneLoaded.Invoke((EntryPoint)Enum.Parse(typeof(EntryPoint), loadedScene.name, true), mode);
 
-            // TODO : UI
-            //LoadingPanel.Hide();
+            LoadingPanel.Hide();
         }
 
         #endregion

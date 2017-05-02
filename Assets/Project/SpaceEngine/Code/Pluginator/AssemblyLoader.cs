@@ -162,7 +162,8 @@ namespace SpaceEngine.Pluginator
 
             if (SceneManager.GetActiveScene().buildIndex == 0 && Loaded)
             {
-                Delay((TotalDetected + 1) * 2, () => { SceneManager.LoadScene(1); });
+                //Delay((TotalDetected + 1) * 2, () => { SceneManager.LoadScene(1); });
+                SceneManager.LoadScene(1);
             }
 
             base.Pass();
@@ -242,7 +243,8 @@ namespace SpaceEngine.Pluginator
             {
                 string path = allPaths[i];
 
-                Delay(0.5f, () => { LoadAssembly(path); });
+                //Delay(0.5f, () => { LoadAssembly(path); });
+                LoadAssembly(path);
             }
         }
 
