@@ -244,7 +244,7 @@ Shader "SpaceEngine/Ring"
 			#pragma only_renderers d3d11 glcore
 			#pragma vertex main_Vertex
 			#pragma fragment main_Fragment
-			#pragma multi_compile DUMMY LIGHT_1 LIGHT_2 LIGHT_3 LIGHT_3
+			#pragma multi_compile DUMMY LIGHT_1 LIGHT_2 LIGHT_3 LIGHT_4
 			#pragma multi_compile DUMMY SHADOW_1 SHADOW_2 SHADOW_3 SHADOW_4
 			#pragma multi_compile DUMMY SCATTERING
 				
