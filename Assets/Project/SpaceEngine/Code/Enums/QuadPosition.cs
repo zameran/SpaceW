@@ -33,9 +33,12 @@
 // Creator: zameran
 #endregion
 
+using System;
+
 /// <summary>
 /// Quad position [Orientation] relative to planet center.
 /// </summary>
+[Obsolete("Was used in old core...")]
 public enum QuadPosition : byte
 {
     Top,        //0

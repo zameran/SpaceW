@@ -35,6 +35,9 @@
 
 namespace SpaceEngine.Debugging
 {
+    /// <summary>
+    /// This interface should be implemented in all things, that's gonna be helpful in debugging.
+    /// </summary>
     internal interface IDebug
     {
 

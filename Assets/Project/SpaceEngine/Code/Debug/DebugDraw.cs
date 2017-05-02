@@ -37,6 +37,9 @@ using UnityEngine;
 
 namespace SpaceEngine.Debugging
 {
+    /// <summary>
+    /// This class provides default behaviour of all <see cref="GL"/>-based debug drawings.
+    /// </summary>
     public abstract class DebugDraw : MonoBehaviour, IDebug
     {
         public Shader lineShader = null;

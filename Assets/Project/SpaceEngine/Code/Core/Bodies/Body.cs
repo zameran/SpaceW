@@ -47,8 +47,16 @@ using UnityEngine;
 
 namespace SpaceEngine.Core.Bodies
 {
+    /// <summary>
+    /// Class - extensions holder for a <see cref="Body"/>.
+    /// </summary>
     public static class BodyExtensions
     {
+        /// <summary>
+        /// Get the deformation type enumerator.
+        /// </summary>
+        /// <param name="body">Target.</param>
+        /// <returns>Returns <see cref="BodyDeformationType"/> of target body.</returns>
         public static BodyDeformationType GetBodyDeformationType(this Body body)
         {
             if (body is CelestialBody)

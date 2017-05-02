@@ -28,16 +28,74 @@
 // ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF
 // THE POSSIBILITY OF SUCH DAMAGE.
 // 
-// Creation Date: Undefined
-// Creation Time: Undefined
+// Creation Date: 2016.05.18
+// Creation Time: 16:45
 // Creator: zameran
 #endregion
 
+using System;
+
+using UnityEngine;
+
 /// <summary>
-/// Quad LOD Splitting behaviour.
+/// Class - extensions holder for a <see cref="Material"/>.
 /// </summary>
-public enum QuadLODDistanceMethod
+[Obsolete("Please, use direct methods. Material.Set[]/Shader.Set[]/MaterialPropertyBlock.Set[].")]
+public static class MaterialUniformsHelper
 {
-    ClosestCorner,
-    ClosestAABBCorner
+    public static void SetProperty(this Material mat, string name, ComputeBuffer buffer)
+    {
+        if (mat.HasProperty(name))
+        {
+            mat.SetBuffer(name, buffer);
+        }
+    }
+
+    public static void SetProperty(this Material mat, string name, Color color)
+    {
+        if (mat.HasProperty(name))
+        {
+            mat.SetColor(name, color);
+        }
+    }
+
+    public static void SetProperty(this Material mat, string name, float value)
+    {
+        if (mat.HasProperty(name))
+        {
+            mat.SetFloat(name, value);
+        }
+    }
+
+    public static void SetProperty(this Material mat, string name, int value)
+    {
+        if (mat.HasProperty(name))
+        {
+            mat.SetInt(name, value);
+        }
+    }
+
+    public static void SetProperty(this Material mat, string name, Matrix4x4 value)
+    {
+        if (mat.HasProperty(name))
+        {
+            mat.SetMatrix(name, value);
+        }
+    }
+
+    public static void SetProperty(this Material mat, string name, Vector4 value)
+    {
+        if (mat.HasProperty(name))
+        {
+            mat.SetVector(name, value);
+        }
+    }
+
+    public static void SetProperty(this Material mat, string name, Texture value)
+    {
+        if (mat.HasProperty(name))
+        {
+            mat.SetTexture(name, value);
+        }
+    }
 }

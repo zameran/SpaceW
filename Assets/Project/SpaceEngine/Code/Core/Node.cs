@@ -37,6 +37,13 @@ using SpaceEngine.Managers;
 
 using UnityEngine;
 
+/// <summary>
+/// Class-wrapper around default <see cref="MonoBehaviour"/> for special purposes of space engine.
+/// <remarks>
+/// Various stuff should be destroyed in <see cref="OnDestroy"/>!
+/// </remarks>
+/// </summary>
+/// <typeparam name="T">Generic.</typeparam>
 public abstract class Node<T> : MonoBehaviour where T : class
 {
     protected virtual void Awake()
@@ -61,7 +68,14 @@ public abstract class Node<T> : MonoBehaviour where T : class
 
     }
 
+    /// <summary>
+    /// This method will be automatically called in <see cref="Start"/>.
+    /// Use this for initialization.
+    /// </summary>
     protected abstract void InitNode();
 
+    /// <summary>
+    /// This method will be automatically called in <see cref="Update"/>.
+    /// </summary>
     protected abstract void UpdateNode();
 }

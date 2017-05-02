@@ -35,7 +35,13 @@
 
 namespace SpaceEngine.Core.Patterns.Strategy.Uniformed
 {
-    public interface IUniformed<T> where T : class
+    /// <summary>
+    /// This interface should be implemented in all things, that's gonna manipulate with 
+    /// <see cref="UnityEngine.Material"/> and <see cref="UnityEngine.Shader"/>, or <see cref="UnityEngine.MaterialPropertyBlock"/> uniforms.
+    /// Target for manipulations is a generic type.
+    /// </summary>
+    /// <typeparam name="T">Generic. <example><see cref="UnityEngine.Material"/> or <see cref="UnityEngine.Shader"/>.</example></typeparam>
+    public interface IUniformed<in T> where T : class
     {
         void InitUniforms(T target);
 
@@ -44,6 +50,18 @@ namespace SpaceEngine.Core.Patterns.Strategy.Uniformed
         void InitSetUniforms();
     }
 
+    /// <summary>
+    /// This interface should be implemented in all things, that's gonna manipulate with 
+    /// <see cref="UnityEngine.Material"/> and <see cref="UnityEngine.Shader"/>, or <see cref="UnityEngine.MaterialPropertyBlock"/> uniforms.
+    /// Targets for manipulations is a generic type.
+    /// Two targets at the same time!
+    /// <remarks>
+    /// This interface slightly different: <see cref="IUniformed{T}.InitSetUniforms"/>. It's done, 
+    /// because class can implement sequence of <see cref="IUniformed{T}"/> and <see cref="IUniformed{T, U}"/>
+    /// </remarks>
+    /// </summary>
+    /// <typeparam name="T">Generic. <example><see cref="UnityEngine.Material"/> or <see cref="UnityEngine.Shader"/>.</example></typeparam>
+    /// <typeparam name="U">Generic. <example><see cref="UnityEngine.Material"/> or <see cref="UnityEngine.Shader"/>.</example></typeparam>
     public interface IUniformed<T, U> where T : class where U : class
     {
         void InitUniforms(T target0, U target1);
