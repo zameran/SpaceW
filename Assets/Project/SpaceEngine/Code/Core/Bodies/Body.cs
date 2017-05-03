@@ -143,6 +143,12 @@ namespace SpaceEngine.Core.Bodies
                 {
                     Atmosphere.Render();
                 }
+
+                foreach (var sunGlare in GodManager.Instance.Sunglares)
+                {
+                    sunGlare.Atmosphere = Atmosphere;
+                    sunGlare.Render();
+                }
             }
 
             if (Ocean != null)

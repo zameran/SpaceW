@@ -33,6 +33,7 @@
 // Creator: zameran
 #endregion
 
+using SpaceEngine.AtmosphericScattering.Sun;
 using SpaceEngine.Cameras;
 using SpaceEngine.Core.Bodies;
 using SpaceEngine.Core.Utilities;
@@ -54,6 +55,7 @@ public class GodManager : MonoSingleton<GodManager>
 
     public Body[] Bodies;
     public Starfield[] Starfields;
+    public SunGlare[] Sunglares;
 
     public AtmosphereHDR HDRMode = AtmosphereHDR.ProlandOptimized;
 
@@ -75,6 +77,7 @@ public class GodManager : MonoSingleton<GodManager>
 
         Bodies = FindObjectsOfType<Body>();
         Starfields = FindObjectsOfType<Starfield>();
+        Sunglares = FindObjectsOfType<SunGlare>();
     }
 
     private void Update()

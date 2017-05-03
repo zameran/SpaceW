@@ -40,7 +40,6 @@ using UnityEngine;
 
 namespace SpaceEngine.AtmosphericScattering.Sun
 {
-    // TODO : Render it! [Call Render() somewhere...]
     public sealed class SunGlare : Node<SunGlare>, IUniformed<Material>, IRenderable<SunGlare>
     {
         private CachedComponent<AtmosphereSun> SunCachedComponent = new CachedComponent<AtmosphereSun>();
@@ -92,13 +91,13 @@ namespace SpaceEngine.AtmosphericScattering.Sun
             SunGlareMesh = MeshFactory.MakePlane(8, MeshFactory.PLANE.XY, false, false, false);
             SunGlareMesh.bounds = new Bounds(Vector4.zero, new Vector3(9e37f, 9e37f, 9e37f));
 
-            for (int i = 0; i < Settings.Ghost1SettingsList.Count; i++)
+            for (byte i = 0; i < Settings.Ghost1SettingsList.Count; i++)
                 Ghost1Settings.SetRow(i, Settings.Ghost1SettingsList[i]);
 
-            for (int i = 0; i < Settings.Ghost2SettingsList.Count; i++)
+            for (byte i = 0; i < Settings.Ghost2SettingsList.Count; i++)
                 Ghost2Settings.SetRow(i, Settings.Ghost2SettingsList[i]);
 
-            for (int i = 0; i < Settings.Ghost3SettingsList.Count; i++)
+            for (byte i = 0; i < Settings.Ghost3SettingsList.Count; i++)
                 Ghost3Settings.SetRow(i, Settings.Ghost3SettingsList[i]);
 
             InitUniforms(SunGlareMaterial);
