@@ -38,7 +38,7 @@ using UnityEngine;
 [ExecuteInEditMode]
 public class RingShadow : Shadow
 {
-    private CachedComponent<Ring> RingCachedComponent = new CachedComponent<Ring>();
+    private readonly CachedComponent<Ring> RingCachedComponent = new CachedComponent<Ring>();
 
     public Ring RingComponent { get { return RingCachedComponent.Component; } }
 

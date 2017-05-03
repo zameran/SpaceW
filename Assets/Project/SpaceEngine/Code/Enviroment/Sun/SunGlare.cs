@@ -42,7 +42,7 @@ namespace SpaceEngine.AtmosphericScattering.Sun
 {
     public sealed class SunGlare : Node<SunGlare>, IUniformed<Material>, IRenderable<SunGlare>
     {
-        private CachedComponent<AtmosphereSun> SunCachedComponent = new CachedComponent<AtmosphereSun>();
+        private readonly CachedComponent<AtmosphereSun> SunCachedComponent = new CachedComponent<AtmosphereSun>();
 
         public AtmosphereSun SunComponent { get { return SunCachedComponent.Component; } }
 

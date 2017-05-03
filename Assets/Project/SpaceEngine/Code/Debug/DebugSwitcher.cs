@@ -1,6 +1,6 @@
 ﻿#region License
 // Procedural planet generator.
-// 
+//  
 // Copyright (C) 2015-2017 Denis Ovchinnikov [zameran] 
 // All rights reserved.
 // 
@@ -8,7 +8,7 @@
 // modification, are permitted provided that the following conditions
 // are met:
 // 1. Redistributions of source code must retain the above copyright
-//    notice, this list of conditions and the following disclaimer.
+//     notice, this list of conditions and the following disclaimer.
 // 2. Redistributions in binary form must reproduce the above copyright
 //    notice, this list of conditions and the following disclaimer in the
 //    documentation and/or other materials provided with the distribution.
@@ -28,62 +28,78 @@
 // ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF
 // THE POSSIBILITY OF SUCH DAMAGE.
 // 
-// Creation Date: Undefined
-// Creation Time: Undefined
+// Creation Date: 2017.05.03
+// Creation Time: 5:24 PM
 // Creator: zameran
 #endregion
 
+using System.Collections.Generic;
+using System.Linq;
+
 using UnityEngine;
 
-namespace SpaceEngine.Cameras
+namespace SpaceEngine.Debugging
 {
-    [RequireComponent(typeof(Camera))]
-    public abstract class GameCamera : MonoBehaviour, ICamera
+    public abstract class DebugSwitcher<T> : MonoSingleton<DebugSwitcher<T>>, IDebugSwitcher where T : MonoBehaviour
     {
-        private readonly CachedComponent<Camera> CameraCachedComponent = new CachedComponent<Camera>();
+        public List<T> DebugComponents = new List<T>(255);
 
-        public Camera CameraComponent { get { return CameraCachedComponent.Component; } }
+        private int State;
 
-        public Matrix4x4d WorldToCameraMatrix { get; protected set; }
-        public Matrix4x4d CameraToWorldMatrix { get; protected set; }
-        public Matrix4x4d CameraToScreenMatrix { get; protected set; }
-        public Matrix4x4d ScreenToCameraMatrix { get; protected set; }
+        protected abstract KeyCode SwitchKey { get; }
 
-        public Vector3d WorldCameraPosition { get; protected set; }
-
-        public bool MouseOverUI { get { return GUIUtility.hotControl != 0; } }
-
-        protected virtual void Start()
+        protected void Awake()
         {
-            CameraCachedComponent.TryInit(this);
-
-            Init();
-
-            UpdateMatrices();
+            Instance = this;
         }
 
-        protected virtual void Update()
+        protected void Start()
         {
+            if (DebugComponents == null || DebugComponents.Count == 0)
+            {
+                DebugComponents = GetComponents<T>().ToList();
+            }
 
+            ToogleAll(DebugComponents, false);
         }
 
-        protected virtual void FixedUpdate()
+        protected void Update()
         {
+            if (Input.GetKeyDown(SwitchKey))
+            {
+                if (State == DebugComponents.Count)
+                {
+                    State = 0;
+                    ToogleAll(DebugComponents, false);
+                    return;
+                }
 
+                ToogleAll(DebugComponents, false);
+                State++;
+                ToogleAt(DebugComponents, true, State);
+            }
         }
 
-        protected abstract void Init();
+        #region API
 
-        public abstract void UpdateMatrices();
-
-        protected float ClampAngle(float angle, float min, float max)
+        public void Toogle(T component, bool state)
         {
-            if (angle < -360)
-                angle += 360;
-            if (angle > 360)
-                angle -= 360;
-
-            return Mathf.Clamp(angle, min, max);
+            component.enabled = state;
         }
+
+        public void ToogleAt(List<T> components, bool state, int index)
+        {
+            components[index - 1].enabled = state;
+        }
+
+        public void ToogleAll(List<T> components, bool state)
+        {
+            for (byte i = 0; i < components.Count; i++)
+            {
+                components[i].enabled = state;
+            }
+        }
+
+        #endregion
     }
 }

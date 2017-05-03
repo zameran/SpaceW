@@ -68,7 +68,7 @@ namespace SpaceEngine.Debugging
 
             if (sequence.Count != 0)
             {
-                scrollPosition = GUILayout.BeginScrollView(scrollPosition, false, true);
+                ScrollPosition = GUILayout.BeginScrollView(ScrollPosition, false, true);
                 {
                     GUILayout.BeginVertical();
 
@@ -76,13 +76,13 @@ namespace SpaceEngine.Debugging
                     {
                         var entry = sequence[i];
 
-                        GUILayout.BeginVertical(string.Format("{0}", entry.Name), skin.box, GUILayout.Width(debugInfoBounds.width - 40));
+                        GUILayout.BeginVertical(string.Format("{0}", entry.Name), GUISkin.box, GUILayout.Width(debugInfoBounds.width - 40));
                         {
                             GUILayout.Space(20);
 
                             if (true)
                             {
-                                GUILayout.BeginVertical("", skin.box, GUILayout.Width(debugInfoBounds.width - 45));
+                                GUILayout.BeginVertical("", GUISkin.box, GUILayout.Width(debugInfoBounds.width - 45));
                                 {
                                     GUILayoutExtensions.Vertical(() =>
                                     {
@@ -117,7 +117,7 @@ namespace SpaceEngine.Debugging
             }
             else
             {
-                GUILayout.Label("No sequence!", boldLabel);
+                GUILayout.Label("No sequence!", BoldLabelStyle);
             }
         }
     }

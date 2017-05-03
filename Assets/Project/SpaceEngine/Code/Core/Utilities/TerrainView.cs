@@ -44,8 +44,8 @@ namespace SpaceEngine.Core.Utilities
             public double Distance;
         };
 
-        private CachedComponent<Camera> CameraCachedComponent = new CachedComponent<Camera>();
-        private CachedComponent<Controller> ControllerCachedComponent = new CachedComponent<Controller>();
+        private readonly CachedComponent<Camera> CameraCachedComponent = new CachedComponent<Camera>();
+        private readonly CachedComponent<Controller> ControllerCachedComponent = new CachedComponent<Controller>();
 
         public Camera CameraComponent { get { return CameraCachedComponent.Component; } }
         public Controller ControllerComponent { get { return ControllerCachedComponent.Component; } }
