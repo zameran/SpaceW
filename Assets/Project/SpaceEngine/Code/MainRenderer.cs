@@ -33,9 +33,9 @@
 // Creator: zameran
 #endregion
 
-
 using UnityEngine;
 
+[ExecutionOrder(-9997)]
 [RequireComponent(typeof(Camera))]
 public sealed class MainRenderer : MonoBehaviour
 {
@@ -46,7 +46,7 @@ public sealed class MainRenderer : MonoBehaviour
 
     private void Update()
     {
-        Render();
+
     }
 
     private void OnEnable()
@@ -55,6 +55,11 @@ public sealed class MainRenderer : MonoBehaviour
     }
 
     private void OnDisable()
+    {
+
+    }
+
+    private void OnPostRender()
     {
 
     }

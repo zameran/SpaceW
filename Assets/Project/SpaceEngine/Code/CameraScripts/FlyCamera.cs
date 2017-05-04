@@ -39,7 +39,7 @@ using UnityEngine;
 
 namespace SpaceEngine.Cameras
 {
-    [ExecutionOrder(-9998)]
+    [ExecutionOrder(-9990)]
     public class FlyCamera : GameCamera
     {
         public Body Body { get { return GodManager.Instance.ActiveBody; } }

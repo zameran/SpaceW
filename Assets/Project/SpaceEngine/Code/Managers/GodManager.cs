@@ -33,6 +33,7 @@
 // Creator: zameran
 #endregion
 
+using SpaceEngine;
 using SpaceEngine.AtmosphericScattering.Sun;
 using SpaceEngine.Cameras;
 using SpaceEngine.Core.Bodies;
@@ -43,7 +44,7 @@ using System.Linq;
 
 using UnityEngine;
 
-[ExecutionOrder(-9999)]
+[ExecutionOrder(-9998)]
 public class GodManager : MonoSingleton<GodManager>
 {
     public GameCamera View;
@@ -68,6 +69,7 @@ public class GodManager : MonoSingleton<GodManager>
     public bool Eclipses = true;
     public bool Planetshine = true;
     public bool DelayedCalculations = false;
+    public bool DebugFBO = false;
 
     protected GodManager() { }
 
@@ -88,6 +90,16 @@ public class GodManager : MonoSingleton<GodManager>
     protected override void OnDestroy()
     {
         base.OnDestroy();
+    }
+
+    private void OnGUI()
+    {
+        if (FrameBufferCapturer.Instance.FBOExist() && DebugFBO)
+        {
+            var fboDebugDrawSize = FrameBufferCapturer.Instance.DebugDrawSize;
+
+            GUI.DrawTexture(new Rect(new Vector2(Screen.width - fboDebugDrawSize.x, 0), fboDebugDrawSize), FrameBufferCapturer.Instance.FBOTexture, ScaleMode.StretchToFill, false);
+        }
     }
 
     private void UpdateSchedular()
