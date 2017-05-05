@@ -36,6 +36,9 @@ SpaceW is procedural universe generator - simulator.
 ### Core guidelines ###
 * Currently project have two cores inside: ZCore and Proland [Refactored and fixed]. ZCore is very buggy and semi-stable, will be replaced via Proland core in future.
 
+### Troubleshooting ###
+* Assets -> Reimport All.
+
 ### License ###
 * Project have mixed-license scheme.
 * The 3-Clause BSD License
