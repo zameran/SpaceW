@@ -71,6 +71,8 @@ namespace SpaceEngine.Core.Utilities
 
         public TerrainView View { get; private set; }
 
+        private DebugGUISwitcher DebugGUISwitcherInstance { get { return DebugGUISwitcher.Instance as DebugGUISwitcher; } }
+
         private void Start()
         {
             View = GetComponent<TerrainView>();
@@ -239,7 +241,7 @@ namespace SpaceEngine.Core.Utilities
 
         private void MouseWheel()
         {
-            if (DebugGUISwitcher.Instance.MouseOverGUI) return;
+            if (DebugGUISwitcherInstance.MouseOverGUI) return;
 
             ScrollIn = false;
             ScrollOut = false;
@@ -257,7 +259,7 @@ namespace SpaceEngine.Core.Utilities
 
         private void MouseButtons()
         {
-            if (DebugGUISwitcher.Instance.MouseOverGUI) return;
+            if (DebugGUISwitcherInstance.MouseOverGUI) return;
 
             LeftMousePressed = Input.GetMouseButton(0);
             RightMousePressed = Input.GetMouseButton(1);
@@ -265,7 +267,7 @@ namespace SpaceEngine.Core.Utilities
 
         private void MouseMotion()
         {
-            if (DebugGUISwitcher.Instance.MouseOverGUI) return;
+            if (DebugGUISwitcherInstance.MouseOverGUI) return;
 
             if (LeftMousePressed && Input.GetKey(KeyCode.LeftControl))
             {

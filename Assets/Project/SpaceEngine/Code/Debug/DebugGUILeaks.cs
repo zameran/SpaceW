@@ -75,7 +75,7 @@ namespace SpaceEngine.Debugging
 
         protected override void UI(int id)
         {
-            scrollPosition = GUILayout.BeginScrollView(scrollPosition, false, true, GUILayout.Width(debugInfoBounds.width), GUILayout.Height(debugInfoBounds.height));
+            ScrollPosition = GUILayout.BeginScrollView(ScrollPosition, false, true, GUILayout.Width(debugInfoBounds.width), GUILayout.Height(debugInfoBounds.height));
             {
                 #region Do Magic
 

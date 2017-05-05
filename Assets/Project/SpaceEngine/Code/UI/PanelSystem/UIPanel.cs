@@ -26,7 +26,7 @@ namespace SpaceEngine.UI
         private CanvasGroup canvasGroup;
         protected Coroutine routine;
 
-        private bool _hideAfter;
+        private bool hideAfter;
 
         protected override void Awake()
         {
@@ -53,7 +53,7 @@ namespace SpaceEngine.UI
         {
             if (!IsShown)
             {
-                _hideAfter = true;
+                hideAfter = true;
                 return;
             }
 
@@ -134,7 +134,7 @@ namespace SpaceEngine.UI
 
             yield return null;
 
-            if (_hideAfter)
+            if (hideAfter)
             {
                 ChangeShowness(time);
             }

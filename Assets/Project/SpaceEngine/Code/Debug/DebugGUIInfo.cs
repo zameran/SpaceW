@@ -65,15 +65,15 @@ namespace SpaceEngine.Debugging
 
         protected override void UI(int id)
         {
-            scrollPosition = GUILayout.BeginScrollView(scrollPosition, false, true, GUILayout.Width(debugInfoBounds.width), GUILayout.Height(debugInfoBounds.height));
+            ScrollPosition = GUILayout.BeginScrollView(ScrollPosition, false, true, GUILayout.Width(debugInfoBounds.width), GUILayout.Height(debugInfoBounds.height));
             {
-                GUILayout.Label("Input info: ", boldLabel);
+                GUILayout.Label("Input info: ", BoldLabelStyle);
 
                 DrawLabelLines(Info);
 
                 GUILayout.Space(10);
 
-                GUILayout.Label("Additional info: ", boldLabel);
+                GUILayout.Label("Additional info: ", BoldLabelStyle);
 
                 DrawLabelLines(InfoAdditional);
             }

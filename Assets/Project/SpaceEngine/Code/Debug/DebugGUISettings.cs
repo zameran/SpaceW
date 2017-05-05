@@ -58,11 +58,11 @@ namespace SpaceEngine.Debugging
 
         protected override void UI(int id)
         {
-            scrollPosition = GUILayout.BeginScrollView(scrollPosition, false, true);
+            ScrollPosition = GUILayout.BeginScrollView(ScrollPosition, false, true);
 
             GUILayout.BeginVertical();
 
-            GUILayout.Label("Rendering: ", boldLabel);
+            GUILayout.Label("Rendering: ", BoldLabelStyle);
 
             GUILayout.Label("HDR: ");
             GodManager.Instance.HDRMode = (AtmosphereHDR)GUILayout.SelectionGrid((int)GodManager.Instance.HDRMode, System.Enum.GetNames(typeof(AtmosphereHDR)), 2);
