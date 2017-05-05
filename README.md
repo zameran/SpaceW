@@ -37,6 +37,9 @@ SpaceW is procedural universe generator - simulator.
 ### Core guidelines ###
 * Currently there are a lot of trash, but something is marked as [Obsolete] or */ //Commented */
 
+### Troubleshooting ###
+* Assets -> Reimport All.
+
 ### License ###
 * The 3-Clause BSD License [Mixed-license scheme].
 
