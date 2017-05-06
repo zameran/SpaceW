@@ -14,9 +14,10 @@
 		#include "TCSun.cginc"
 		#include "TCTerra.cginc"
 
-		#include "Core.cginc"
+		#define CORE_PORDUCER_ADDITIONAL_UV
+		#define BORDER 2.0	// Tile border size
 
-		#define BORDER 2.0							// Tile border size
+		#include "Core.cginc"
 
 		uniform sampler2D _ResidualSampler;
 		uniform float4 _ResidualOSH;
@@ -29,12 +30,7 @@
 		uniform float4 _Offset;
 		uniform float4x4 _LocalToWorld;
 
-		void vert(in VertexProducerInput v, out VertexProducerOutput o)
-		{	
-			o.pos = mul(UNITY_MATRIX_MVP, v.vertex);
-			o.uv0 = v.texcoord.xy;
-			o.uv1 = v.texcoord.xy * _TileWSD.x;
-		}
+		CORE_PRODUCER_VERTEX_PROGRAM(_TileWSD.x)
 
 		void frag(in VertexProducerOutput IN, out float4 output : COLOR)
 		{			

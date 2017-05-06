@@ -154,5 +154,29 @@ struct VertexProducerOutput
 {
 	float4 pos : SV_POSITION;
 	float2 uv0 : TEXCOORD0;
+#if defined(CORE_PORDUCER_ADDITIONAL_UV)
 	float2 uv1 : TEXCOORD1;
+#endif
 };
+
+#define CORE_PRODUCER_VERTEX_PROGRAM_BODY \
+	o.pos = mul(UNITY_MATRIX_MVP, v.vertex); \
+	o.uv0 = v.texcoord.xy; \
+
+#define CORE_PRODUCER_VERTEX_PROGRAM_BODY_ADDITIONAL_UV(scale) \
+	o.uv1 = v.texcoord.xy * scale; \
+
+#if defined(CORE_PORDUCER_ADDITIONAL_UV)
+#define CORE_PRODUCER_VERTEX_PROGRAM(scale) \
+	void vert(in VertexProducerInput v, out VertexProducerOutput o) \
+	{ \
+		CORE_PRODUCER_VERTEX_PROGRAM_BODY; \
+		CORE_PRODUCER_VERTEX_PROGRAM_BODY_ADDITIONAL_UV(scale); \
+	}
+#else
+#define CORE_PRODUCER_VERTEX_PROGRAM \
+	void vert(in VertexProducerInput v, out VertexProducerOutput o) \
+	{ \
+		CORE_PRODUCER_VERTEX_PROGRAM_BODY; \
+	}
+#endif
