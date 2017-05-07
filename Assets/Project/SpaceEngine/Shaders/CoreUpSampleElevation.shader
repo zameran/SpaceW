@@ -20,13 +20,14 @@
 			#include "TCSun.cginc"
 			#include "TCTerra.cginc"
 
+			#define CORE_PORDUCER_ADDITIONAL_UV
+			#define BORDER 2.0	// Tile border size
+
 			#include "Core.cginc"
 
 			#pragma target 4.0
 			#pragma vertex vert
 			#pragma fragment frag
-			
-			#define BORDER 2.0							// Tile border size
 			
 			//x - size in pixels of one tile (including borders), 
 			//y - size in meters of a pixel of the elevation texture, 
@@ -156,18 +157,13 @@
 					1.0 / 256.0, -9.0 / 256.0, -9.0 / 256.0, 1.0 / 256.0
 				}
 			};
-
-			void vert(in VertexProducerInput v, out VertexProducerOutput o)
-			{	
-				o.pos = mul(UNITY_MATRIX_MVP, v.vertex);
-				o.uv0 = v.texcoord.xy;
-				o.uv1 = v.texcoord.xy * _TileWSD.x;
-			}
-					
+						
 			float mdot(float4x4 a, float4x4 b) 
 			{
 				return dot(a[0], b[0]) + dot(a[1], b[1]) + dot(a[2], b[2]) + dot(a[3], b[3]);
 			}
+
+			CORE_PRODUCER_VERTEX_PROGRAM(_TileWSD.x)
 			
 			void frag(in VertexProducerOutput IN, out float4 output : COLOR)
 			{

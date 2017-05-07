@@ -48,8 +48,8 @@ public class Ring : Node<Ring>, IUniformed<Material>, IRenderable<Ring>
     public List<Light> Lights = new List<Light>();
     public List<Shadow> Shadows = new List<Shadow>();
 
-    public Texture MainTex;
-    public Texture NoiseTex;
+    public Texture DiffuseTexture;
+    public Texture NoiseTexture;
 
     public Color Color = Color.white;
 
@@ -165,8 +165,8 @@ public class Ring : Node<Ring>, IUniformed<Material>, IRenderable<Ring>
 
         SetLightsAndShadows(target);
 
-        target.SetTexture("_DiffuseTexture", MainTex);
-        target.SetTexture("_NoiseTex", NoiseTex);
+        target.SetTexture("_DiffuseTexture", DiffuseTexture);
+        target.SetTexture("_NoiseTexture", NoiseTexture);
         target.SetColor("_DiffuseColor", Helper.Brighten(Color, Brightness));
         target.SetFloat("_LightingBias", LightingBias);
         target.SetFloat("_LightingSharpness", LightingSharpness);

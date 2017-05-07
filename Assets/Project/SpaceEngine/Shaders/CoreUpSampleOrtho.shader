@@ -14,6 +14,8 @@
 
 			#include "TCCommon.cginc"
 
+			#define CORE_PORDUCER_ADDITIONAL_UV
+
 			#include "Core.cginc"
 
 			#pragma target 4.0
@@ -41,12 +43,7 @@
 				float4(9.0, 3.0, 3.0, 1.0)
 			};
 
-			void vert(in VertexProducerInput v, out VertexProducerOutput o)
-			{	
-				o.pos = mul(UNITY_MATRIX_MVP, v.vertex);
-				o.uv0 = v.texcoord.xy;
-				o.uv1 = v.texcoord.xy * _TileWidth;
-			}
+			CORE_PRODUCER_VERTEX_PROGRAM(_TileWidth.x)
 			
 			void frag(in VertexProducerOutput IN, out float4 output : COLOR)
 			{		

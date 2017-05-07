@@ -8,6 +8,9 @@
 
 		#include "TCCommon.cginc"
 
+		#define CORE_PORDUCER_ADDITIONAL_UV
+		//#define BORDER 2.0	// Tile border size
+
 		#include "Core.cginc"
 
 		uniform sampler2D _ElevationSampler; 
@@ -90,12 +93,7 @@
 			return clamp(1.0 - pow(normal.z, 6.0), 0.0, 1.0);
 		}
 
-		void vert(in VertexProducerInput v, out VertexProducerOutput o)
-		{	
-			o.pos = mul(UNITY_MATRIX_MVP, v.vertex);
-			o.uv0 = v.texcoord.xy;
-			o.uv1 = v.texcoord.xy * _TileSD.x;
-		}
+		CORE_PRODUCER_VERTEX_PROGRAM(_TileSD.x)
 
 		void frag(in VertexProducerOutput IN, out float4 output : COLOR)
 		{

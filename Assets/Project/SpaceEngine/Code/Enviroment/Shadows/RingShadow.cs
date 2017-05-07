@@ -53,7 +53,7 @@ public class RingShadow : Shadow
 
     public override Texture GetTexture()
     {
-        return RingComponent.MainTex ?? Texture;
+        return RingComponent.DiffuseTexture ?? Texture;
     }
 
     public override bool CalculateShadow()
