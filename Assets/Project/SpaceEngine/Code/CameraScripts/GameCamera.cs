@@ -33,6 +33,8 @@
 // Creator: zameran
 #endregion
 
+using SpaceEngine.Debugging;
+
 using UnityEngine;
 
 namespace SpaceEngine.Cameras
@@ -51,7 +53,9 @@ namespace SpaceEngine.Cameras
 
         public Vector3d WorldCameraPosition { get; protected set; }
 
-        public bool MouseOverUI { get { return GUIUtility.hotControl != 0; } }
+        private DebugGUISwitcher DebugGUISwitcherInstance { get { return DebugGUISwitcher.Instance as DebugGUISwitcher; } }
+
+        public bool MouseOverUI { get { if (DebugGUISwitcherInstance != null) return DebugGUISwitcherInstance.MouseOverGUI; else return false; } }
 
         protected virtual void Start()
         {
