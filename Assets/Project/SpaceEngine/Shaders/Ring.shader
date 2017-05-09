@@ -139,13 +139,19 @@ Shader "SpaceEngine/Ring"
 			o.color = i.color * mainColor;
 
 			float cameraDistance = length(i.relativeDirection);
+			float rotationAngle = 0.0000125 * _Time.y;
+			float sina = sin(rotationAngle);
+			float cosa = cos(rotationAngle);
+			float2x2 rotationMatrix = float2x2(cosa, -sina, sina, cosa);
 
-			float2 position = i.worldPosition.xz * 0.1;
-			float2 deltaPosition = float2(position.x, position.y + _Time.y);
+			// TODO : Fix fading magic. Now fading obly works properly in 'center' of the ring...
+
+			float2 position = i.worldPosition.xz * 0.01;
+			float2 deltaPosition = mul(float2(position.x, position.y), rotationMatrix);
 			float radial = i.uv * 512;
 			float noiseValue = 1;
-			float fadeIn = 1.0 - cameraDistance * 0.00002;
-			float fadeOut = smoothstep(0.0, 1.0, cameraDistance * 0.02 - 0.25);
+			float fadeIn = 1.0 - cameraDistance * 32;
+			float fadeOut = smoothstep(0.0, 1.0, (cameraDistance * 128) - 0.25);
 					
 			if(fadeIn > 0.0)
 			{
@@ -208,13 +214,14 @@ Shader "SpaceEngine/Ring"
 
 			#if !LIGHT_1 && !LIGHT_2 && !LIGHT_3 && !LIGHT_4
 				o.color = mainColor;
-				o.color *= fadeOut;
 
 				// Shadows with no lights?
 				//#if SHADOW_1 || SHADOW_2 || SHADOW_3 || SHADOW_4
 				//	o.color.xyz *= ShadowColor(i.worldPosition).xyz;
 				//#endif
 			#endif
+
+			o.color *= fadeOut;
 		}
 		ENDCG
 
