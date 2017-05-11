@@ -1,5 +1,6 @@
 ﻿using SpaceEngine.Core.Bodies;
 using SpaceEngine.Core.Terrain.Deformation;
+using SpaceEngine.Core.Tile.Producer;
 using SpaceEngine.Core.Tile.Samplers;
 
 using System;
@@ -193,6 +194,16 @@ namespace SpaceEngine.Core.Terrain
             CreateTerrainQuadRoot(ParentBody.Size);
 
             SamplersOrder = new TileSamplerOrder(GetComponentsInChildren<TileSampler>());
+
+            var producers = GetComponentsInChildren<TileProducer>();
+            var lastProducer = producers[producers.Length - 1];
+
+            if (lastProducer.IsLastInSequence == false)
+            {
+                lastProducer.IsLastInSequence = true;
+
+                Debug.Log(string.Format("{0} probably last in generation sequence, but maybe accidentally not marked as. Fixed!"));
+            }
         }
 
         protected override void UpdateNode()
