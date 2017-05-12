@@ -34,6 +34,7 @@
 #endregion
 
 using UnityEngine;
+using UnityEngine.Rendering;
 
 namespace SpaceEngine
 {
@@ -50,7 +51,15 @@ namespace SpaceEngine
 
         private Vector2 LastScreenSize { get; set; }
 
+        private CameraEvent CommandBufferCameraEvent { get { return CameraEvent.BeforeImageEffectsOpaque; } }
+
+        private CommandBuffer CMDBuffer;
+
         public RenderTexture FBOTexture;
+
+        public RenderTargetIdentifier FBOTextureRTI;
+        public RenderTargetIdentifier SourceRTI;
+        public RenderTargetIdentifier DestinationRTI;
 
         private void Awake()
         {
@@ -59,6 +68,7 @@ namespace SpaceEngine
 
         private void Start()
         {
+            CMDBufferCreate();
             FBORecreate();
 
             LastScreenSize = ScreenSize;
@@ -79,10 +89,7 @@ namespace SpaceEngine
 
         private void OnRenderImage(RenderTexture src, RenderTexture dest)
         {
-            if (FBOExist())
-            {
-                Graphics.Blit(src, FBOTexture);
-            }
+            CMDBufferUpdate(src, dest);
 
             // Blitting second time to evade the overlay drawing of fbo texture over gui and other stuff.
             Graphics.Blit(src, dest);
@@ -95,6 +102,39 @@ namespace SpaceEngine
             return FBOTexture != null && FBOTexture.IsCreated();
         }
 
+        public void CMDBufferCreate()
+        {
+            CMDBuffer = new CommandBuffer();
+            CMDBuffer.name = "FrameBufferCapturer";
+        }
+
+        public void CMDBufferUpdate(RenderTexture src, RenderTexture dest)
+        {
+            if (CMDBuffer == null) { CMDBufferCreate(); }
+            else { CMDBuffer.Clear(); }
+
+            FBOTextureRTI = new RenderTargetIdentifier(FBOTexture);
+            SourceRTI = new RenderTargetIdentifier(src);
+            DestinationRTI = new RenderTargetIdentifier(dest);
+
+            if (FBOExist())
+            {
+                CMDBuffer.Blit(SourceRTI, FBOTextureRTI);
+            }
+
+            CMDBuffer.Blit(SourceRTI, DestinationRTI);
+
+            // TODO : A lot of garbage, if there are a lot of command buffers exist...
+            // TODO : FBO Texture inverted verticaly, when rendering path != deffered...
+
+            if (CameraHelper.Main().CommandBufferExistByName(CommandBufferCameraEvent, "FrameBufferCapturer"))
+            {
+                CameraHelper.Main().RemoveCommandBuffer(CommandBufferCameraEvent, CMDBuffer);
+            }
+
+            CameraHelper.Main().AddCommandBuffer(CommandBufferCameraEvent, CMDBuffer);
+        }
+
         public void FBORecreate()
         {
             if (FBOExist())
@@ -102,7 +142,7 @@ namespace SpaceEngine
                 FBOTexture.ReleaseAndDestroy();
             }
 
-            FBOTexture = RTExtensions.CreateRTexture(FBOSize, 0, RenderTextureFormat.ARGBHalf, FilterMode.Point, TextureWrapMode.Clamp, false, true, 0);
+            FBOTexture = RTExtensions.CreateRTexture(FBOSize, 0, RenderTextureFormat.ARGBHalf, FilterMode.Point, TextureWrapMode.Clamp, false, true, CameraHelper.Main().GetAntiAliasing());
         }
 
         #endregion

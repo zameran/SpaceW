@@ -63,7 +63,7 @@ namespace SpaceEngine
                 }
             }
 
-            CameraHelper.Main().AddCommandBuffer(CameraEvent.AfterEverything, CMDBuffer);
+            CameraHelper.Main().AddCommandBuffer(CameraEvent.BeforeImageEffectsOpaque, CMDBuffer);
         }
 
         private void Update()
