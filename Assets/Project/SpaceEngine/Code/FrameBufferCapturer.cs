@@ -51,7 +51,7 @@ namespace SpaceEngine
 
         private Vector2 LastScreenSize { get; set; }
 
-        private CameraEvent CommandBufferCameraEvent { get { return CameraEvent.BeforeImageEffectsOpaque; } }
+        private CameraEvent CommandBufferCameraEvent { get { return CameraEvent.BeforeImageEffects; } }
 
         private CommandBuffer CMDBuffer;
 
@@ -61,6 +61,9 @@ namespace SpaceEngine
         public RenderTargetIdentifier SourceRTI;
         public RenderTargetIdentifier DestinationRTI;
 
+        public Material FBProcessMaterial;
+        public Shader FBProcessShader;
+
         private void Awake()
         {
             Instance = this;
@@ -68,6 +71,10 @@ namespace SpaceEngine
 
         private void Start()
         {
+            if (FBProcessShader == null) FBProcessShader = Shader.Find("Hidden/FrameBufferProcess");
+
+            FBProcessMaterial = MaterialHelper.CreateTemp(FBProcessShader, "FrameBufferProcess");
+
             CMDBufferCreate();
             FBORecreate();
 
@@ -85,6 +92,13 @@ namespace SpaceEngine
                 // NOTE : A special event can be fired here for MOAR globalization...
                 FBORecreate();
             }
+        }
+
+        protected override void OnDestroy()
+        {
+            base.OnDestroy();
+
+            Helper.Destroy(FBProcessMaterial);
         }
 
         private void OnRenderImage(RenderTexture src, RenderTexture dest)
@@ -119,7 +133,9 @@ namespace SpaceEngine
 
             if (FBOExist())
             {
-                CMDBuffer.Blit(SourceRTI, FBOTextureRTI);
+                FBProcessMaterial.SetTexture("_FrameBuffer", src);
+
+                CMDBuffer.Blit(SourceRTI, FBOTextureRTI, FBProcessMaterial);
             }
 
             CMDBuffer.Blit(SourceRTI, DestinationRTI);
