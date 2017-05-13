@@ -63,9 +63,8 @@ namespace SpaceEngine.AtmosphericScattering.Sun
         public bool UseRadiance = true;
 
         private bool Eclipse = false;
-        private bool UseTransmittanceOffset = false;
 
-        private Vector3 ViewPortPosition = Vector3.zero;
+        private Vector3 SunViewPortPosition = Vector3.zero;
 
         private float Scale = 1;
         private float Fade = 1;
@@ -111,14 +110,15 @@ namespace SpaceEngine.AtmosphericScattering.Sun
 
             var distance = (CameraHelper.Main().transform.position.normalized - SunComponent.transform.position.normalized).magnitude;
 
-            ViewPortPosition = CameraHelper.Main().WorldToViewportPoint(SunComponent.transform.position);
+            SunViewPortPosition = CameraHelper.Main().WorldToViewportPoint(SunComponent.transform.position);
 
             // NOTE : So, camera's projection matrix replacement is bad idea in fact of strange clip planes behaviour.
             // Instead i will invert the y component of resulting vector of WorldToViewportPoint.
             // Looks like better idea...
+            // Btw, i can do this in shader...
             if (CameraHelper.Main().IsDeferred())
             {
-                ViewPortPosition.y = 1.0f - ViewPortPosition.y;
+                SunViewPortPosition.y = 1.0f - SunViewPortPosition.y;
             }
 
             Scale = distance / Magnitude;
@@ -190,7 +190,8 @@ namespace SpaceEngine.AtmosphericScattering.Sun
         {
             if (target == null) return;
 
-            target.SetVector("sunViewPortPos", ViewPortPosition);
+            target.SetFloat("SunID", Mathf.Clamp(SunComponent.sunID - 1, 0.0f, 3.0f));
+            target.SetVector("SunViewPortPosition", SunViewPortPosition);
 
             target.SetFloat("AspectRatio", CameraHelper.Main().aspect);
             target.SetFloat("Scale", Scale);
@@ -198,16 +199,6 @@ namespace SpaceEngine.AtmosphericScattering.Sun
             target.SetFloat("UseAtmosphereColors", UseAtmosphereColors ? 1.0f : 0.0f);
             target.SetFloat("UseRadiance", UseRadiance ? 1.0f : 0.0f);
             target.SetFloat("Eclipse", Eclipse ? 0.0f : 1.0f);
-
-            if (Atmosphere != null)
-            {
-                // NOTE : Only on these atmospheres we don't gonna use special transmittance uv offset... Magic!
-                UseTransmittanceOffset = Atmosphere.AtmosphereBase != AtmosphereBase.Earth &&
-                                         Atmosphere.AtmosphereBase != AtmosphereBase.Neptune &&
-                                         Atmosphere.AtmosphereBase != AtmosphereBase.Jupiter;
-
-                target.SetFloat("UseTransmittanceOffset", UseTransmittanceOffset ? 1.0f : 0.0f);
-            }
 
             target.renderQueue = (int)RenderQueue + RenderQueueOffset;
 
@@ -228,7 +219,7 @@ namespace SpaceEngine.AtmosphericScattering.Sun
         {
             if (SunGlareMesh == null) return;
 
-            if (ViewPortPosition.z > 0)
+            if (SunViewPortPosition.z > 0)
             {
                 if (Atmosphere == null) return;
 
