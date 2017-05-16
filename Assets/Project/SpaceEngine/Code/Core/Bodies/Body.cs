@@ -99,7 +99,6 @@ namespace SpaceEngine.Core.Bodies
         public Vector3 Offset { get; set; }
         public Vector3 Origin { get { return transform.position; } set { transform.position = value; } }
 
-        public NoiseParametersSetter NPS = null;
         public TCCommonParametersSetter TCCPS = null;
 
         public MaterialPropertyBlock MPB { get; set; }
@@ -130,9 +129,6 @@ namespace SpaceEngine.Core.Bodies
             TileSamplers.Sort(new TileSampler.Sort());
 
             MPB = new MaterialPropertyBlock();
-
-            if (NPS == null) NPS = GetComponent<NoiseParametersSetter>();
-            NPS.LoadAndInit();
         }
 
         protected override void UpdateNode()

@@ -37,7 +37,10 @@ using SpaceEngine.Core.Patterns.Strategy.Uniformed;
 
 using UnityEngine;
 
-public sealed class NoiseParametersSetter : MonoBehaviour, IUniformed<Material>, IUniformed<ComputeShader>
+// TODO : Special 'framework' for a global uniforms.
+// TODO : PlanetColor move to body. Generate this lut from a gradient.
+
+public class UniformsManager : MonoSingleton<UniformsManager>, IUniformed, IUniformed<Material>, IUniformed<ComputeShader>
 {
     public Texture2D PermSampler = null;
     public Texture2D PermGradSampler = null;
@@ -52,6 +55,34 @@ public sealed class NoiseParametersSetter : MonoBehaviour, IUniformed<Material>,
     public Texture2D QuadTexture2 = null;
     public Texture2D QuadTexture3 = null;
     public Texture2D QuadTexture4 = null;
+
+    #region IUniformed
+
+    public void InitUniforms()
+    {
+
+    }
+
+    public void SetUniforms()
+    {
+        Shader.SetGlobalTexture("PermSampler", PermSampler);
+        Shader.SetGlobalTexture("PermGradSampler", PermGradSampler);
+        Shader.SetGlobalTexture("PermSamplerGL", PermSamplerGL);
+        Shader.SetGlobalTexture("PermGradSamplerGL", PermSamplerGL);
+
+        Shader.SetGlobalTexture("AtlasDiffSampler", PlanetAtlas);
+        Shader.SetGlobalTexture("MaterialTable", PlanetColor);
+        Shader.SetGlobalTexture("ColorMap", PlanetColorMap);
+
+        Shader.SetGlobalTexture("_PlanetUVSampler", PlanetUVSampler);
+
+        Shader.SetGlobalTexture("_QuadTexture1", QuadTexture1);
+        Shader.SetGlobalTexture("_QuadTexture2", QuadTexture2);
+        Shader.SetGlobalTexture("_QuadTexture3", QuadTexture3);
+        Shader.SetGlobalTexture("_QuadTexture4", QuadTexture4);
+    }
+
+    #endregion
 
     #region IUniformed<Material>
 
@@ -134,14 +165,11 @@ public sealed class NoiseParametersSetter : MonoBehaviour, IUniformed<Material>,
     private void Awake()
     {
         LoadAndInit();
+
+        SetUniforms();
     }
 
     private void Update()
-    {
-
-    }
-
-    private void OnDestroy()
     {
 
     }

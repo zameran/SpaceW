@@ -193,7 +193,6 @@ namespace SpaceEngine.Core
             UpSampleMaterial.SetVector("_Offset", offset.ToVector4());
             UpSampleMaterial.SetMatrix("_LocalToWorld", TerrainNode.FaceToLocal.ToMatrix4x4());
 
-            if (TerrainNode.ParentBody.NPS != null) TerrainNode.ParentBody.NPS.SetUniforms(UpSampleMaterial);
             if (TerrainNode.ParentBody.TCCPS != null) TerrainNode.ParentBody.TCCPS.UpdateUniforms(UpSampleMaterial);
 
             Graphics.Blit(null, gpuSlot.Texture, UpSampleMaterial);
