@@ -9,14 +9,19 @@ SpaceW is procedural universe generator - simulator.
 [telegram channel placeholder]
 [other placeholder]
 
+## Disclaimer ##
+* Strong language. So you don't give me crap about it.
+* Strange code. This is like a nuclear test site.
+* Black dirty magic. Like in 15th century, yay.
+
 ## Current Engine version support ##
 * Unity 5.4.5f1 (Windows)
 * Unity 5.6.0b3 (Linux)
 
 ## Current OS/API support ##
-* Shader Model 5.0
-* DirectX 11
-* OpenGL 4.5 (Experimental)
+* Windows/Linux/Ubuntu/Mac
+* DirectX 11 [Shader Model 5.0]
+* OpenGL 4.3 and higher [Experimental and early WIP]
 
 ### Warning ###
 * This is project of life.
@@ -25,7 +30,7 @@ SpaceW is procedural universe generator - simulator.
 ### Install ###
 * Clone the repository.
 * Open project in Unity.
-* Open 'Scene' scene.
+* Open the 'Scene' scene.
 * Profit!
 
 ### Contribution guidelines ###
@@ -34,21 +39,19 @@ SpaceW is procedural universe generator - simulator.
 * Create pull request.
 
 ### Core guidelines ###
-* Currently project have two cores inside: ZCore and Proland [Refactored and fixed]. ZCore is very buggy and semi-stable, will be replaced via Proland core in future.
+* Currently there are a lot of trash, but something is marked as [Obsolete] or */ //Commented */
+* All core features and API's are well documented.
 
 ### Troubleshooting ###
 * Assets -> Reimport All.
+* Build Settings -> Switch Platform.
 
 ### License ###
-* Project have mixed-license scheme.
-* The 3-Clause BSD License
+* The 3-Clause BSD License [Mixed-license scheme].
 
 ### Extra ###
 * Some shader code was ported to Unity from Space Engine and Proland.
-* Some code contain dirty magic.
 * Some stuff may not work or very experimental.
-* Codestyle somewhere is very bad.
-* Zameran is stupid.
 
 ### References ###
 * [Space Engine](http://spaceengine.org/)
@@ -57,5 +60,6 @@ SpaceW is procedural universe generator - simulator.
 * [Google](https://www.google.com)
 
 ### Contacts ###
-* [zameran9@gmail.com](zameran9@gmail.com)
+* [Protonmail](zameran@protonmail.com)
+* [GMail](zameran9@gmail.com)
 * [Telegram](https://t.me/zameran)
