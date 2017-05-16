@@ -55,143 +55,63 @@
 // Task also provides an event that is triggered when the coroutine exits.
 #endregion
 
-
 using System.Collections;
 
 namespace SpaceEngine.Managers
 {
-    /// <summary>
-    /// A Task object represents a coroutine. Tasks can be started, paused, and stopped.
-    /// It is an error to attempt to start a task that has been stopped or which has
-    /// naturally terminated.
-    /// </summary>
-    public class Task
-    {
-        /// <summary>
-        /// Returns true if and only if the coroutine is running.  Paused tasks
-        /// are considered to be running.
-        /// </summary>
-        public bool Running { get { return task.Running; } }
-
-        /// <summary>
-        /// Returns true if and only if the coroutine is currently paused.
-        /// </summary>
-        public bool Paused { get { return task.Paused; } }
-
-        /// <summary>
-        /// Delegate for termination subscribers.  manual is true if and only if
-        /// the coroutine was stopped with an explicit call to Stop().
-        /// </summary>
-        public delegate void FinishedHandler(bool manual);
-
-        /// <summary>
-        /// Termination event.  Triggered when the coroutine completes execution.
-        /// </summary>
-        public event FinishedHandler Finished;
-
-        /// <summary>
-        /// Creates a new Task object for the given coroutine.
-        /// If autoStart is true (default) the task is automatically started
-        /// upon construction.
-        /// </summary>
-        public Task(IEnumerator c, bool autoStart = true)
-        {
-            task = TaskManager.CreateTask(c);
-            task.Finished += TaskFinished;
-            if (autoStart)
-                Start();
-        }
-
-        /// <summary>
-        /// Begins execution of the coroutine
-        /// </summary>
-        public void Start()
-        {
-            task.Start();
-        }
-
-        /// <summary>
-        /// Discontinues execution of the coroutine at its next yield.
-        /// </summary>
-        public void Stop()
-        {
-            task.Stop();
-        }
-
-        public void Pause()
-        {
-            task.Pause();
-        }
-
-        public void Unpause()
-        {
-            task.Unpause();
-        }
-
-        void TaskFinished(bool manual)
-        {
-            FinishedHandler handler = Finished;
-            if (handler != null)
-                handler(manual);
-        }
-
-        TaskManager.TaskState task;
-    }
-
-    class TaskManager : MonoSingleton<TaskManager>
+    public sealed class TaskManager : MonoSingleton<TaskManager>
     {
         public class TaskState
         {
-            public bool Running { get { return running; } }
+            public bool Running { get; private set; }
 
-            public bool Paused { get { return paused; } }
+            public bool Paused { get; private set; }
+
+            public bool Stopped { get; private set; }
 
             public delegate void FinishedHandler(bool manual);
 
-            public event FinishedHandler Finished;
+            public event FinishedHandler OnFinished;
 
-            IEnumerator coroutine;
-            bool running;
-            bool paused;
-            bool stopped;
+            private IEnumerator Coroutine;
 
-            public TaskState(IEnumerator c)
+            public TaskState(IEnumerator coroutine)
             {
-                coroutine = c;
+                this.Coroutine = coroutine;
             }
 
             public void Pause()
             {
-                paused = true;
+                Paused = true;
             }
 
             public void Unpause()
             {
-                paused = false;
+                Paused = false;
             }
 
             public void Start()
             {
-                running = true;
+                Running = true;
 
                 Instance.StartCoroutine(CallWrapper());
             }
 
             public void Stop()
             {
-                stopped = true;
-                running = false;
+                Stopped = true;
+                Running = false;
             }
 
-            IEnumerator CallWrapper()
+            private IEnumerator CallWrapper()
             {
                 yield return null;
 
-                var e = coroutine;
+                var e = Coroutine;
 
-                while (running)
+                while (Running)
                 {
-                    if (paused)
+                    if (Paused)
                         yield return null;
                     else
                     {
@@ -201,19 +121,15 @@ namespace SpaceEngine.Managers
                         }
                         else
                         {
-                            running = false;
+                            Running = false;
                         }
                     }
                 }
 
-                var handler = Finished;
-
-                if (handler != null)
-                    handler(stopped);
+                if (OnFinished != null)
+                    OnFinished(Stopped);
             }
         }
-
-        static TaskManager singleton;
 
         private void Awake()
         {
@@ -222,15 +138,80 @@ namespace SpaceEngine.Managers
 
         public static TaskState CreateTask(IEnumerator coroutine)
         {
-            /*
-            if (singleton == null)
-            {
-                GameObject go = new GameObject("TaskManager");
-                singleton = go.AddComponent<TaskManager>();
-            }
-            */
-
             return new TaskState(coroutine);
+        }
+    }
+
+    /// <summary>
+    /// A Task object represents a coroutine. Tasks can be started, paused, and stopped.
+    /// It is an error to attempt to start a task that has been stopped or which has naturally terminated.
+    /// </summary>
+    public class Task
+    {
+        /// <summary>
+        /// Returns true if and only if the coroutine is running. Paused tasks are considered to be running.
+        /// </summary>
+        public bool Running { get { return InternalTaskState.Running; } }
+
+        /// <summary>
+        /// Returns true if and only if the coroutine is currently paused.
+        /// </summary>
+        public bool Paused { get { return InternalTaskState.Paused; } }
+
+        /// <summary>
+        /// Delegate for termination subscribers.  manual is true if and only if the coroutine was stopped with an explicit call to <see cref="Task.Stop"/>.
+        /// </summary>
+        public delegate void FinishedHandler(bool manual);
+
+        /// <summary>
+        /// Termination event.  Triggered when the coroutine completes execution.
+        /// </summary>
+        public event FinishedHandler Finished;
+
+        TaskManager.TaskState InternalTaskState;
+
+        /// <summary>
+        /// Creates a new Task object for the given coroutine.
+        /// If <see cref="autoStart"/> is true (default) the task is automatically started upon construction.
+        /// </summary>
+        public Task(IEnumerator c, bool autoStart = true)
+        {
+            InternalTaskState = TaskManager.CreateTask(c);
+            InternalTaskState.OnFinished += OnTaskStateFinished;
+
+            if (autoStart) { Start(); }
+        }
+
+        /// <summary>
+        /// Begins execution of the coroutine.
+        /// </summary>
+        public void Start()
+        {
+            InternalTaskState.Start();
+        }
+
+        /// <summary>
+        /// Discontinues execution of the coroutine at it's next yield.
+        /// </summary>
+        public void Stop()
+        {
+            InternalTaskState.Stop();
+        }
+
+        public void Pause()
+        {
+            InternalTaskState.Pause();
+        }
+
+        public void Unpause()
+        {
+            InternalTaskState.Unpause();
+        }
+
+        void OnTaskStateFinished(bool manual)
+        {
+            if (Finished != null)
+                Finished(manual);
         }
     }
 }

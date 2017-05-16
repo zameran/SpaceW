@@ -6,6 +6,7 @@ using SpaceEngine.Core.Tile.Storage;
 using SpaceEngine.Core.Tile.Tasks;
 
 using System;
+using System.Collections;
 using System.Collections.Generic;
 
 using UnityEngine;
@@ -37,6 +38,11 @@ namespace SpaceEngine.Core.Tile.Producer
         /// Does this producer use the GPU?
         /// </summary>
         public bool IsGPUProducer = true;
+
+        /// <summary>
+        /// Does this producer calculaed as last one?
+        /// </summary>
+        public bool IsLastInSequence = false;
 
         /// <summary>
         /// Layers, that may modify the tile created by this producer and are optional.
@@ -239,6 +245,53 @@ namespace SpaceEngine.Core.Tile.Producer
             {
                 layer.DoCreateTile(level, tx, ty, slot);
             }
+        }
+
+        /// <summary>
+        /// Basically, should call <see cref="DoCreateTile"/> and wait some time or frames.
+        /// In the base implementation will wait one frame after each <see cref="TileLayer.DoCreateTile"/> call, and one frame after all.
+        /// <remarks>WARNING! <see cref="CreateTileTask.IsDone"/> field will be changed here, after all work is done! Use this with attention!</remarks> 
+        /// </summary>
+        /// <param name="level">The tile's quadtree level.</param>
+        /// <param name="tx">The tile's quadtree X coordinate.</param>
+        /// <param name="ty">The tile's quadtree Y coordinate.</param>
+        /// <param name="slot">Slot, where the crated tile data must be stored.</param>
+        /// <param name="Callback">Callback after all. Finish the task here and do some extra post-calculation work.</param>
+        public virtual IEnumerator DoCreateTileCoroutine(int level, int tx, int ty, List<TileStorage.Slot> slot, Action Callback)
+        {
+            var samplersOrder = TerrainNode.SamplersOrder;
+            var currentIndexInSamplerQueue = samplersOrder.OrderList.IndexOf(Sampler);
+            var samplersToWait = samplersOrder.OrderList.GetRange(0, currentIndexInSamplerQueue);
+
+            if (currentIndexInSamplerQueue != 0)
+            {
+                foreach (var samplerToWait in samplersToWait)
+                {
+                    do
+                    {
+                        yield return Yielders.EndOfFrame;
+                    }
+                    while (samplerToWait.Producer.FindTile(level, tx, ty, false, true) == null);
+                }
+            }
+
+            this.DoCreateTile(level, tx, ty, slot); // Do our work...
+
+            var afterWorkAwaitFramesCount = GetAwaitingFramesCount(level); // Calculate idle frames count per particular tile LOD level...
+
+            for (var i = 0; i < afterWorkAwaitFramesCount; i++) // Wait it...
+            {
+                yield return Yielders.EndOfFrame;
+            }
+
+            yield return Yielders.EndOfFrame;
+
+            if (Callback != null) Callback();
+        }
+
+        private int GetAwaitingFramesCount(int level)
+        {
+            return 4 * (level + 1);
         }
 
         [Obsolete("Not currently used and maybe not working correctly.")]

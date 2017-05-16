@@ -340,6 +340,7 @@ inline float GetSlope(float3 normal)
 //-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
+#if defined (COMPUTE_SHADER)
 inline float3 GetSobelNormal(QuadGenerationConstants constants, RWStructuredBuffer<OutputStruct> buffer, int size, uint3 id)
 {
 	//float normalStrength = 0.5 / ((constants.lodLevel / 20.0 + 1.0) * (constants.lodLevel / 20.0 + 1.0));
@@ -431,4 +432,5 @@ inline float3 GetPackedNormal(QuadGenerationConstants constants, RWStructuredBuf
 			   
 	return cross(normalize(float3(dir.xy, right - left)), normalize(float3(dir.yx, down - up))).xyz; 
 }
+#endif
 //-----------------------------------------------------------------------------

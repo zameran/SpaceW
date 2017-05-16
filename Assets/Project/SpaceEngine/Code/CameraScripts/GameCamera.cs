@@ -33,6 +33,8 @@
 // Creator: zameran
 #endregion
 
+using SpaceEngine.Debugging;
+
 using UnityEngine;
 
 namespace SpaceEngine.Cameras
@@ -40,17 +42,28 @@ namespace SpaceEngine.Cameras
     [RequireComponent(typeof(Camera))]
     public abstract class GameCamera : MonoBehaviour, ICamera
     {
-        private CachedComponent<Camera> CameraCachedComponent = new CachedComponent<Camera>();
+        private readonly CachedComponent<Camera> CameraCachedComponent = new CachedComponent<Camera>();
 
         public Camera CameraComponent { get { return CameraCachedComponent.Component; } }
 
-        public bool MouseOverUI { get { return GUIUtility.hotControl != 0; } }
+        public Matrix4x4d WorldToCameraMatrix { get; protected set; }
+        public Matrix4x4d CameraToWorldMatrix { get; protected set; }
+        public Matrix4x4d CameraToScreenMatrix { get; protected set; }
+        public Matrix4x4d ScreenToCameraMatrix { get; protected set; }
+
+        public Vector3d WorldCameraPosition { get; protected set; }
+
+        private DebugGUISwitcher DebugGUISwitcherInstance { get { return DebugGUISwitcher.Instance as DebugGUISwitcher; } }
+
+        public bool MouseOverUI { get { if (DebugGUISwitcherInstance != null) return DebugGUISwitcherInstance.MouseOverGUI; else return false; } }
 
         protected virtual void Start()
         {
             CameraCachedComponent.TryInit(this);
 
             Init();
+
+            UpdateMatrices();
         }
 
         protected virtual void Update()
@@ -64,6 +77,8 @@ namespace SpaceEngine.Cameras
         }
 
         protected abstract void Init();
+
+        public abstract void UpdateMatrices();
 
         protected float ClampAngle(float angle, float min, float max)
         {

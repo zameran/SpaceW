@@ -57,8 +57,8 @@ public sealed class TCCommonParametersSetterEditor : Editor
 
         EditorGUILayout.Space();
 
-        EditorGUILayout.LabelField("Celestial Body to setup: ", EditorStyles.boldLabel);
-        setter.CelestialBody = EditorGUILayout.ObjectField(setter.CelestialBody, typeof(CelestialBody), true) as CelestialBody;
+        EditorGUILayout.LabelField("Body to setup: ", EditorStyles.boldLabel);
+        setter.Body = EditorGUILayout.ObjectField(setter.Body, typeof(Body), true) as Body;
 
         EditorGUILayout.Space();
     }
@@ -317,7 +317,7 @@ public sealed class TCCommonParametersSetterEditor : Editor
                 break;
         }
 
-        if (EditorGUI.EndChangeCheck())
+        if (EditorGUI.EndChangeCheck() && !Application.isPlaying)
         {
             var currentScene = EditorSceneManager.GetActiveScene();
 

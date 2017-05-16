@@ -33,6 +33,12 @@
 // Creator: zameran
 #endregion
 
+using DG.Tweening;
+
+using SpaceEngine.Managers;
+using SpaceEngine.Pluginator.Enums;
+using SpaceEngine.UI;
+
 using UnityEngine;
 
 public sealed class InGamePauseMenuUI : UserInterface, IUserInterface
@@ -46,11 +52,22 @@ public sealed class InGamePauseMenuUI : UserInterface, IUserInterface
             Paused = !Paused;
 
             if (Paused)
-                FreezeTime();
+            {
+                GetComponent<UIPanel>().Show(0.25f);
+            }
             else
-                UnFreezeTime();
+            {
+                GetComponent<UIPanel>().Hide(0.25f);
+            }
         }
+    }
 
-        Controllable.SetActive(Paused);
+    public void LoadScene()
+    {
+        LevelManager.Instance.LoadSceneDelayed(EntryPoint.MainMenu, 0.5f);
+
+        GetComponent<UIPanel>().Hide(0.5f);
+
+        DOTween.To(() => CameraHelper.Main().backgroundColor, value => CameraHelper.Main().backgroundColor = value, XKCDColors.ColorTranslator.FromHtml("#222C3705"), 1.0f);
     }
 }

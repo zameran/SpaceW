@@ -33,16 +33,20 @@
 // Creator: zameran
 #endregion
 
+using SpaceEngine.Core.Patterns.Strategy.Renderable;
+using SpaceEngine.Core.Patterns.Strategy.Uniformed;
+
 using System;
 using System.Collections.Generic;
 using System.IO;
 
 using UnityEngine;
+
 using Random = UnityEngine.Random;
 
 namespace SpaceEngine.Startfield
 {
-    public class Starfield : Node<Starfield>, IUniformed<Material>
+    public class Starfield : Node<Starfield>, IUniformed<Material>, IRenderable<Starfield>
     {
         public float StarIntensity = 1.0f;
         public float StarsScale = 1.0f;
@@ -130,12 +134,17 @@ namespace SpaceEngine.Startfield
 
         #endregion
 
-        public void Render()
+        #region IRenderable
+
+        public void Render(int layer = 0)
         {
-            Graphics.DrawMesh(StarfieldMesh, transform.localToWorldMatrix, StarfieldMaterial, 0, CameraHelper.Main(), 0, null, false, false);
+            if (StarfieldMesh == null) return;
+
+            Graphics.DrawMesh(StarfieldMesh, transform.localToWorldMatrix, StarfieldMaterial, layer, CameraHelper.Main(), 0, null, false, false);
         }
 
-        [ContextMenu("InitMesh")]
+        #endregion
+
         public void InitMesh()
         {
             StarfieldMesh = CreateStarfieldMesh(StarsDistance);

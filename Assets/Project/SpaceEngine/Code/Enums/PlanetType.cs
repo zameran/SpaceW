@@ -34,9 +34,9 @@
 #endregion
 
 /// <summary>
-/// Planet type enumerator for using in planet generator.
+/// Space body type description enumerator for using in generator.
 /// </summary>
-public enum PlanetType
+public enum BodyType
 {
     HotSelena,
     WarmSelena,
@@ -84,5 +84,8 @@ public enum PlanetType
     TemperateJupiter,
     CoolJupiter,
     ColdJupiter,
-    FrozenJupiter
+    FrozenJupiter,
+
+    Asteroid,
+    Comet
 }

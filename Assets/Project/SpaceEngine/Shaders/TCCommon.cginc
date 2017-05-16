@@ -261,9 +261,7 @@ float smin(float a, float b, float k)
 
 inline float softExpMaxMin(float a, float b, float k)
 {
-	float res = exp(k * a) + exp(k * b);
-
-	return log(res) / k;
+	return log(exp(k * a) + exp(k * b)) / k;
 }
 
 inline float AngleBetween(float3 a, float3 b) 
@@ -722,6 +720,16 @@ void FAST32_hash_3D(float3 gridcell, out float4 lowz_hash, out float4 highz_hash
 //-----------------------------------------------------------------------------
 inline float3 Interpolation_C2(float3 x) { return x * x * x * (x * (x * 6.0 - 15.0) + 10.0); }
 inline float3 Interpolation_C2_Deriv(float3 x) { return x * x * (x * (x * 30.0 - 60.0) + 30.0); }
+
+inline float CubicHermite(float A, float B, float C, float D, float t)
+{
+	return (-A / 2.0 + (3.0 * B) / 2.0 - (3.0 * C) / 2.0 + D / 2.0) * t * t * t + (A - (5.0 * B) / 2.0 + 2.0 * C - D / 2.0) * t * t + (-A / 2.0 + C / 2.0) * t + B;
+}
+
+inline float CubicHermite(float4 V, float t)
+{
+	return CubicHermite(V.x, V.y, V.z, V.w, t);
+}
 //-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
@@ -3037,7 +3045,7 @@ float VolcanoNoise(float3 ppoint, float globalLand, float localLand)
 
 		if (volcanoOctaves > 1)
 		{
-			ppoint = Rotate(2.0 * M_PI * hash1(float(i)), rotVec, ppoint);
+			ppoint = Rotate(M_PI2 * hash1(float(i)), rotVec, ppoint);
 			frequency *= 2.0;
 			//density   *= 2.0;
 			size      *= 0.5;

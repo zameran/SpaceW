@@ -33,9 +33,9 @@
 // Creator: zameran
 #endregion
 
-using UnityEngine;
+using SpaceEngine.Core.Debugging;
 
-using ZFramework.Unity.Common.PerfomanceMonitor;
+using UnityEngine;
 
 namespace SpaceEngine.Debugging
 {
@@ -55,7 +55,7 @@ namespace SpaceEngine.Debugging
         {
             base.OnGUI();
 
-            using (new Timer("Repfomance Monitor OnGUI"))
+            using (new PerformanceMonitor.Timer("Repfomance Monitor OnGUI"))
             {
                 GUI.Window(0, debugInfoBounds, UI, "Perfomance Monitor (in milliseconds)");
             }
@@ -67,7 +67,7 @@ namespace SpaceEngine.Debugging
 
             debugInfoBounds.width = Screen.width - 20;
 
-            scrollPosition = GUILayout.BeginScrollView(scrollPosition, false, true);
+            ScrollPosition = GUILayout.BeginScrollView(ScrollPosition, false, true);
             {
                 GUILayout.BeginVertical();
 
@@ -75,13 +75,13 @@ namespace SpaceEngine.Debugging
                 {
                     var counter = counters[i];
 
-                    GUILayout.BeginVertical(string.Format("{0}", counter.Name), skin.box, GUILayout.Width(debugInfoBounds.width - 40));
+                    GUILayout.BeginVertical(string.Format("{0}", counter.Name), GUISkin.box, GUILayout.Width(debugInfoBounds.width - 40));
                     {
                         GUILayout.Space(20);
 
                         if (true)
                         {
-                            GUILayout.BeginVertical("", skin.box, GUILayout.Width(debugInfoBounds.width - 45));
+                            GUILayout.BeginVertical("", GUISkin.box, GUILayout.Width(debugInfoBounds.width - 45));
                             {
                                 GUILayout.BeginHorizontal();
                                 GUILayoutExtensions.LabelWithSpace(string.Format("Total: {0}", counter.Time / 1000.0f), -8);

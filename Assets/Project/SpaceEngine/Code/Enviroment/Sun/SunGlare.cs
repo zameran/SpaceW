@@ -33,14 +33,16 @@
 // Creator: zameran
 #endregion
 
+using SpaceEngine.Core.Patterns.Strategy.Renderable;
+using SpaceEngine.Core.Patterns.Strategy.Uniformed;
 
 using UnityEngine;
 
 namespace SpaceEngine.AtmosphericScattering.Sun
 {
-    public sealed class SunGlare : Node<SunGlare>, IUniformed<Material>
+    public sealed class SunGlare : Node<SunGlare>, IUniformed<Material>, IRenderable<SunGlare>
     {
-        private CachedComponent<AtmosphereSun> SunCachedComponent = new CachedComponent<AtmosphereSun>();
+        private readonly CachedComponent<AtmosphereSun> SunCachedComponent = new CachedComponent<AtmosphereSun>();
 
         public AtmosphereSun SunComponent { get { return SunCachedComponent.Component; } }
 
@@ -61,9 +63,8 @@ namespace SpaceEngine.AtmosphericScattering.Sun
         public bool UseRadiance = true;
 
         private bool Eclipse = false;
-        private bool UseTransmittanceOffset = false;
 
-        private Vector3 ViewPortPosition = Vector3.zero;
+        private Vector3 SunViewPortPosition = Vector3.zero;
 
         private float Scale = 1;
         private float Fade = 1;
@@ -86,16 +87,16 @@ namespace SpaceEngine.AtmosphericScattering.Sun
 
             SunGlareMaterial = MaterialHelper.CreateTemp(SunGlareShader, "Sunglare", (int)RenderQueue);
 
-            SunGlareMesh = MeshFactory.MakePlane(8, 8, MeshFactory.PLANE.XY, false, false, false);
+            SunGlareMesh = MeshFactory.MakePlane(8, MeshFactory.PLANE.XY, false, false, false);
             SunGlareMesh.bounds = new Bounds(Vector4.zero, new Vector3(9e37f, 9e37f, 9e37f));
 
-            for (int i = 0; i < Settings.Ghost1SettingsList.Count; i++)
+            for (byte i = 0; i < Settings.Ghost1SettingsList.Count; i++)
                 Ghost1Settings.SetRow(i, Settings.Ghost1SettingsList[i]);
 
-            for (int i = 0; i < Settings.Ghost2SettingsList.Count; i++)
+            for (byte i = 0; i < Settings.Ghost2SettingsList.Count; i++)
                 Ghost2Settings.SetRow(i, Settings.Ghost2SettingsList[i]);
 
-            for (int i = 0; i < Settings.Ghost3SettingsList.Count; i++)
+            for (byte i = 0; i < Settings.Ghost3SettingsList.Count; i++)
                 Ghost3Settings.SetRow(i, Settings.Ghost3SettingsList[i]);
 
             InitUniforms(SunGlareMaterial);
@@ -109,14 +110,15 @@ namespace SpaceEngine.AtmosphericScattering.Sun
 
             var distance = (CameraHelper.Main().transform.position.normalized - SunComponent.transform.position.normalized).magnitude;
 
-            ViewPortPosition = CameraHelper.Main().WorldToViewportPoint(SunComponent.transform.position);
+            SunViewPortPosition = CameraHelper.Main().WorldToViewportPoint(SunComponent.transform.position);
 
             // NOTE : So, camera's projection matrix replacement is bad idea in fact of strange clip planes behaviour.
             // Instead i will invert the y component of resulting vector of WorldToViewportPoint.
             // Looks like better idea...
+            // Btw, i can do this in shader...
             if (CameraHelper.Main().IsDeferred())
             {
-                ViewPortPosition.y = 1.0f - ViewPortPosition.y;
+                SunViewPortPosition.y = 1.0f - SunViewPortPosition.y;
             }
 
             Scale = distance / Magnitude;
@@ -150,13 +152,6 @@ namespace SpaceEngine.AtmosphericScattering.Sun
 
         protected override void Update()
         {
-            if (ViewPortPosition.z > 0)
-            {
-                if (Atmosphere == null) return;
-
-                Graphics.DrawMesh(SunGlareMesh, Vector3.zero, Quaternion.identity, SunGlareMaterial, 8, CameraHelper.Main(), 0, Atmosphere.body.MPB, false, false);
-            }
-
             base.Update();
         }
 
@@ -195,7 +190,8 @@ namespace SpaceEngine.AtmosphericScattering.Sun
         {
             if (target == null) return;
 
-            target.SetVector("sunViewPortPos", ViewPortPosition);
+            target.SetFloat("SunID", Mathf.Clamp(SunComponent.sunID - 1, 0.0f, 3.0f));
+            target.SetVector("SunViewPortPosition", SunViewPortPosition);
 
             target.SetFloat("AspectRatio", CameraHelper.Main().aspect);
             target.SetFloat("Scale", Scale);
@@ -203,16 +199,6 @@ namespace SpaceEngine.AtmosphericScattering.Sun
             target.SetFloat("UseAtmosphereColors", UseAtmosphereColors ? 1.0f : 0.0f);
             target.SetFloat("UseRadiance", UseRadiance ? 1.0f : 0.0f);
             target.SetFloat("Eclipse", Eclipse ? 0.0f : 1.0f);
-
-            if (Atmosphere != null)
-            {
-                // NOTE : Only on these atmospheres we don't gonna use special transmittance uv offset... Magic!
-                UseTransmittanceOffset = Atmosphere.AtmosphereBase != AtmosphereBase.Earth &&
-                                         Atmosphere.AtmosphereBase != AtmosphereBase.Neptune &&
-                                         Atmosphere.AtmosphereBase != AtmosphereBase.Jupiter;
-
-                target.SetFloat("UseTransmittanceOffset", UseTransmittanceOffset ? 1.0f : 0.0f);
-            }
 
             target.renderQueue = (int)RenderQueue + RenderQueueOffset;
 
@@ -223,6 +209,22 @@ namespace SpaceEngine.AtmosphericScattering.Sun
         {
             InitUniforms(SunGlareMaterial);
             SetUniforms(SunGlareMaterial);
+        }
+
+        #endregion
+
+        #region IRenderable
+
+        public void Render(int layer = 8)
+        {
+            if (SunGlareMesh == null) return;
+
+            if (SunViewPortPosition.z > 0)
+            {
+                if (Atmosphere == null) return;
+
+                Graphics.DrawMesh(SunGlareMesh, Vector3.zero, Quaternion.identity, SunGlareMaterial, layer, CameraHelper.Main(), 0, Atmosphere.ParentBody.MPB, false, false);
+            }
         }
 
         #endregion

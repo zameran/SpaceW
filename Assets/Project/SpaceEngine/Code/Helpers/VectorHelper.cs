@@ -38,6 +38,9 @@ using System.Linq;
 
 using UnityEngine;
 
+/// <summary>
+/// Class - extensions holder for a <see cref="Vector2"/>, <see cref="Vector3"/> and <see cref="Vector4"/>.
+/// </summary>
 public static class VectorHelper
 {
     public static Vector3 xzy(this Vector3 v)

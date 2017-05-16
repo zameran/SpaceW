@@ -37,8 +37,12 @@ using System;
 
 using UnityEngine;
 
+/// <summary>
+/// Class with strange-magic math stuff.
+/// </summary>
 public static class BrainFuckMath
 {
+    [Obsolete("Was used in old core...")]
     public static Vector3 FromQuadPositionMask(float r, byte[] sign, byte[] axis, QuadPosition quadPosition)
     {
         var indexOf = Array.IndexOf(Enum.GetValues(typeof(QuadPosition)), quadPosition);
@@ -51,18 +55,21 @@ public static class BrainFuckMath
         return output;
     }
 
+    [Obsolete("Was used in old core...")]
     public static Vector3 MakeBitMask(byte x)
     {
         // NOTE : So, here i have a bit magic!
         return new Vector3((x & (1 << 2)) > 0 ? -1 : 1, (x & (1 << 1)) > 0 ? -1 : 1, (x & (1 << 0)) > 0 ? -1 : 1);
     }
 
+    [Obsolete("Was used in old core...")]
     public static Vector3 ApplyBitMask(Vector3 vector, Vector3 mask)
     {
         // NOTE : So, i have mask vector with only [1.0 or -1.0] values and i will change sign of components via multiplication.
         return new Vector3(vector.x * mask.x, vector.y * mask.y, vector.z * mask.z);
     }
 
+    [Obsolete("Was used in old core...")]
     public static Vector3 ApplyBitMask(Vector3 mask, float leftValue, float rightvalue)
     {
         // NOTE : So, i have mask vector with only [1.0 or -1.0] values and i will set 'left' or 'right' stuff to components.
@@ -94,6 +101,7 @@ public static class BrainFuckMath
         return Mathf.Abs(a - b) <= precision;
     }
 
+    [Obsolete("Was used in old core...")]
     public static void DefineAxis(ref bool staticX, ref bool staticY, ref bool staticZ, Vector3 size)
     {
         if (AlmostEquals(size.x, 0.0f))
@@ -104,6 +112,7 @@ public static class BrainFuckMath
             staticZ = true;
     }
 
+    [Obsolete("Was used in old core...")]
     public static void LockAxis(ref float tempAxisValue, ref Vector3 temp, bool staticX, bool staticY, bool staticZ)
     {
         if (staticX)
@@ -114,6 +123,7 @@ public static class BrainFuckMath
             tempAxisValue = temp.z;
     }
 
+    [Obsolete("Was used in old core...")]
     public static void UnlockAxis(ref Vector3 temp, ref float tempAxisValue, bool staticX, bool staticY, bool staticZ)
     {
         if (staticX)
@@ -124,6 +134,7 @@ public static class BrainFuckMath
             temp.z = tempAxisValue;
     }
 
+    [Obsolete("Was used in old core...")]
     public static decimal CalculateK(int lodLevel)
     {
         if (lodLevel == 1)
@@ -142,6 +153,7 @@ public static class BrainFuckMath
         }
     }
 
+    [Obsolete("Was used in old core...")]
     public static decimal CalculateJ(int lodLevel)
     {
         if (lodLevel == 0)
@@ -157,11 +169,13 @@ public static class BrainFuckMath
         return prev1 + summ;
     }
 
+    [Obsolete("Was used in old core...")]
     public static decimal CalculateI(decimal J)
     {
         return 15.0M / J;
     }
 
+    [Obsolete("Was used in old core...")]
     public static Vector3 Multiply(Vector3 v, double d)
     {
         Vector3d vd = v; //Cast vector to double typed.
@@ -171,6 +185,7 @@ public static class BrainFuckMath
         return result.ToVector3(); //Cast it back to float typed.
     }
 
+    [Obsolete("Was used in old core...")]
     public static Vector3 LinearInterpolate(Vector3 a, Vector3 b, double t)
     {
         Vector3d ad = a; //Cast first vector to double typed.
@@ -181,6 +196,7 @@ public static class BrainFuckMath
         return result.ToVector3(); //Cast it back to float typed.
     }
 
+    [Obsolete("Was used in old core...")]
     public static void CalculatePatchCubeCenter(int lodLevel, Vector3 patchCubeCenter, ref Vector3 temp)
     {
         /*

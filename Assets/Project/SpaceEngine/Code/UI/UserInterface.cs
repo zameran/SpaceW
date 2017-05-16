@@ -33,6 +33,7 @@
 // Creator: zameran
 #endregion
 
+using SpaceEngine.Core.Patterns.Strategy.Eventit;
 using SpaceEngine.Managers;
 using SpaceEngine.Pluginator.Enums;
 
@@ -49,7 +50,7 @@ public class UserInterface : MonoBehaviour, IEventit
 
     public void FreezeTime()
     {
-        Time.timeScale = 0.0000001f;
+        Time.timeScale = 0.001f;
     }
 
     public void UnFreezeTime()

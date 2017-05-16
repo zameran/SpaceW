@@ -33,6 +33,8 @@
 // Creator: zameran
 #endregion
 
+using SpaceEngine.Core.Debugging;
+using SpaceEngine.Core.Patterns.Strategy.Eventit;
 using SpaceEngine.Pluginator.Attributes;
 
 using System;
@@ -44,15 +46,12 @@ using System.Reflection;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
-using ZFramework.Extensions;
-using ZFramework.Unity.Common;
-
-using Logger = ZFramework.Unity.Common.Logger;
+using Logger = SpaceEngine.Core.Debugging.Logger;
 
 namespace SpaceEngine.Pluginator
 {
     [UseLogger(Category.Data)]
-    [UseLoggerFile(false, "Log")]
+    [UseLoggerFile("Log")]
     public sealed class AssemblyLoader : Loader, IEventit
     {
         public GUISkin UISkin = null;
@@ -163,7 +162,8 @@ namespace SpaceEngine.Pluginator
 
             if (SceneManager.GetActiveScene().buildIndex == 0 && Loaded)
             {
-                Delay((TotalDetected + 1) * 2, () => { SceneManager.LoadScene(1); });
+                //Delay((TotalDetected + 1) * 2, () => { SceneManager.LoadScene(1); });
+                SceneManager.LoadScene(1);
             }
 
             base.Pass();
@@ -243,7 +243,8 @@ namespace SpaceEngine.Pluginator
             {
                 string path = allPaths[i];
 
-                Delay(0.5f, () => { LoadAssembly(path); });
+                //Delay(0.5f, () => { LoadAssembly(path); });
+                LoadAssembly(path);
             }
         }
 
@@ -280,7 +281,7 @@ namespace SpaceEngine.Pluginator
 
         private bool FirePlugin(Type type, int level)
         {
-            SpaceAddonMonoBehaviour atr = AttributeUtils.GetTypeAttribute<SpaceAddonMonoBehaviour>(type);
+            SpaceAddonMonoBehaviour atr = AttributeHelper.GetTypeAttribute<SpaceAddonMonoBehaviour>(type);
 
             if (atr != null)
             {
@@ -302,7 +303,7 @@ namespace SpaceEngine.Pluginator
         {
             int currentScene = SceneManager.GetActiveScene().buildIndex;
 
-            SpaceAddonMonoBehaviour atr = AttributeUtils.GetTypeAttribute<SpaceAddonMonoBehaviour>(type);
+            SpaceAddonMonoBehaviour atr = AttributeHelper.GetTypeAttribute<SpaceAddonMonoBehaviour>(type);
 
             if (atr != null)
             {
@@ -330,7 +331,7 @@ namespace SpaceEngine.Pluginator
             {
                 if (type.IsSubclassOf(typeof(Y)))
                 {
-                    U atr = AttributeUtils.GetTypeAttribute<U>(type);
+                    U atr = AttributeHelper.GetTypeAttribute<U>(type);
 
                     if (atr != null)
                         output.Add(type as T);

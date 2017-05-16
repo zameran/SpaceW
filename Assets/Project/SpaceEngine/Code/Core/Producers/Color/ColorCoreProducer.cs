@@ -62,7 +62,7 @@ namespace SpaceEngine.Core
             base.Start();
 
             if (TerrainNode == null) { TerrainNode = transform.parent.GetComponent<TerrainNode>(); }
-            if (TerrainNode.Body == null) { TerrainNode.Body = transform.parent.GetComponentInParent<CelestialBody>(); }
+            if (TerrainNode.ParentBody == null) { TerrainNode.ParentBody = transform.parent.GetComponentInParent<Body>(); }
             if (NormalsProducer == null) { NormalsProducer = NormalsProducerGameObject.GetComponent<TileProducer>(); }
             if (NormalsProducer.Cache == null) { NormalsProducer.InitCache(); }
             if (ElevationProducer == null) { ElevationProducer = ElevationProducerGameObject.GetComponent<TileProducer>(); }
@@ -112,40 +112,84 @@ namespace SpaceEngine.Core
         public override void DoCreateTile(int level, int tx, int ty, List<TileStorage.Slot> slot)
         {
             var gpuSlot = slot[0] as GPUTileStorage.GPUSlot;
+            var normalsTile = NormalsProducer.FindTile(level, tx, ty, false, true);
+            var elevationTile = ElevationProducer.FindTile(level, tx, ty, false, true);
+
+            GPUTileStorage.GPUSlot normalsGpuSlot = null;
+
+            if (normalsTile != null)
+            {
+                normalsGpuSlot = normalsTile.GetSlot(0) as GPUTileStorage.GPUSlot;
+            }
+            else
+            {
+                throw new MissingTileException("Find normals tile failed");
+            }
+
+            GPUTileStorage.GPUSlot elevationGpuSlot = null;
+
+            if (elevationTile != null)
+            {
+                elevationGpuSlot = elevationTile.GetSlot(0) as GPUTileStorage.GPUSlot;
+            }
+            else
+            {
+                throw new MissingTileException("Find elevation tile failed");
+            }
 
             if (gpuSlot == null)
             {
                 throw new NullReferenceException("gpuSlot");
             }
 
-            var tileWidth = gpuSlot.Owner.TileSize;
-            var tileSize = tileWidth - (1 + GetBorder() * 2);
+            if (elevationGpuSlot == null)
+            {
+                throw new NullReferenceException("elevationGpuSlot");
+            }
 
-            //var parentTile = FindTile(level - 1, tx / 2, ty / 2, false, true);
+            if (normalsGpuSlot == null)
+            {
+                throw new NullReferenceException("normalsGpuSlot");
+            }
+
+            var tileWidth = gpuSlot.Owner.TileSize;
+            var normalsTex = normalsGpuSlot.Texture;
+            var elevationTex = elevationGpuSlot.Texture;
+            var normalsOSL = new Vector4(0.25f / (float)normalsTex.width, 0.25f / (float)normalsTex.height, 1.0f / (float)normalsTex.width, 0.0f);
+            var elevationOSL = new Vector4(0.25f / (float)elevationTex.width, 0.25f / (float)elevationTex.height, 1.0f / (float)elevationTex.width, 0.0f);
+            var tileSize = tileWidth - (float)(1 + GetBorder() * 2);
+
             var rootQuadSize = TerrainNode.TerrainQuadRoot.Length;
 
-            var tileSD = Vector2d.zero;
+            var tileWSD = Vector4.zero;
+            tileWSD.x = (float)tileWidth;
+            tileWSD.y = (float)rootQuadSize / (float)(1 << level) / (float)tileSize;
+            tileWSD.z = (float)tileSize / (float)(TerrainNode.ParentBody.GridResolution - 1);
+            tileWSD.w = 0.0f;
 
-            tileSD.x = (0.5 + GetBorder()) / (tileSize - 1 - GetBorder() * 2);
+            var tileSD = Vector2d.zero;
+            tileSD.x = (0.5 + GetBorder()) / (tileWidth - 1 - GetBorder() * 2);
             tileSD.y = (1.0 + tileSD.x * 2.0);
 
             var offset = Vector4d.zero;
-
             offset.x = ((double)tx / (1 << level) - 0.5) * rootQuadSize;
             offset.y = ((double)ty / (1 << level) - 0.5) * rootQuadSize;
             offset.z = rootQuadSize / (1 << level);
-            offset.w = TerrainNode.Body.Radius;
+            offset.w = TerrainNode.ParentBody.Size;
 
-            NormalsProducer.Sampler.SetTile(ColorMaterial, level, tx, ty);
-            ElevationProducer.Sampler.SetTile(ColorMaterial, level, tx, ty);
+            ColorMaterial.SetTexture("_NormalsSampler", normalsTex);
+            ColorMaterial.SetVector("_NormalsOSL", normalsOSL);
+            ColorMaterial.SetTexture("_ElevationSampler", elevationTex);
+            ColorMaterial.SetVector("_ElevationOSL", elevationOSL);
 
             ColorMaterial.SetFloat("_Level", level);
+            ColorMaterial.SetVector("_TileWSD", tileWSD);
             ColorMaterial.SetVector("_TileSD", tileSD.ToVector2());
             ColorMaterial.SetVector("_Offset", offset.ToVector4());
             ColorMaterial.SetMatrix("_LocalToWorld", TerrainNode.FaceToLocal.ToMatrix4x4());
 
-            if (TerrainNode.Body.NPS != null) TerrainNode.Body.NPS.SetUniforms(ColorMaterial);
-            if (TerrainNode.Body.TCCPS != null) TerrainNode.Body.TCCPS.UpdateUniforms(ColorMaterial);
+            if (TerrainNode.ParentBody.NPS != null) TerrainNode.ParentBody.NPS.SetUniforms(ColorMaterial);
+            if (TerrainNode.ParentBody.TCCPS != null) TerrainNode.ParentBody.TCCPS.UpdateUniforms(ColorMaterial);
 
             Graphics.Blit(null, gpuSlot.Texture, ColorMaterial);
 

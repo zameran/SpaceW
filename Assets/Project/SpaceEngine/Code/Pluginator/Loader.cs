@@ -33,19 +33,19 @@
 // Creator: zameran
 #endregion
 
+using SpaceEngine.Core.Debugging;
+
 using System;
 using System.Collections;
 
 using UnityEngine;
 
-using ZFramework.Unity.Common;
-
-using Logger = ZFramework.Unity.Common.Logger;
+using Logger = SpaceEngine.Core.Debugging.Logger;
 
 namespace SpaceEngine.Pluginator
 {
     [UseLogger(Category.Data)]
-    [UseLoggerFile(false, "Log")]
+    [UseLoggerFile("Log")]
     public abstract class Loader : MonoBehaviour
     {
         public bool ShouldDontDestroyOnLoad = true;

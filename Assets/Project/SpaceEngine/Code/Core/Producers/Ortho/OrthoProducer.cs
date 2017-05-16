@@ -4,6 +4,7 @@ using SpaceEngine.Core.Tile.Producer;
 using SpaceEngine.Core.Tile.Storage;
 
 using System;
+using System.Collections;
 using System.Collections.Generic;
 
 using UnityEngine;
@@ -278,6 +279,20 @@ namespace SpaceEngine.Core
             Graphics.Blit(null, gpuSlot.Texture, UpSampleMaterial);
 
             base.DoCreateTile(level, tx, ty, slot);
+        }
+
+        public override IEnumerator DoCreateTileCoroutine(int level, int tx, int ty, List<TileStorage.Slot> slot, Action Callback)
+        {
+            if (level > 0)
+            {
+                do
+                {
+                    yield return Yielders.EndOfFrame;
+                }
+                while (FindTile(level - 1, tx / 2, ty / 2, false, true) == null);
+            }
+
+            yield return base.DoCreateTileCoroutine(level, tx, ty, slot, Callback);
         }
 
         private void CreateOrthoNoise()

@@ -242,7 +242,7 @@ namespace SpaceEngine.Ocean
 
         #region Events
 
-        protected override void OnAtmosphereBaked(CelestialBody celestialBody, Atmosphere atmosphere)
+        protected override void OnAtmosphereBaked(Body celestialBody, Atmosphere atmosphere)
         {
             DrawOcean = true;
 

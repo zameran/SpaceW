@@ -9,7 +9,7 @@ using UnityEngine;
 namespace SpaceEngine.Core.Tile.Tasks
 {
     /// <summary>
-    /// The task that creates the tiles. The task calles the producers DoCreateTile function and the data created is stored in the slot.
+    /// The task that creates the tiles. The task calles the producers <see cref="TileProducer.DoCreateTile"/> function and the data created is stored in the slot.
     /// </summary>
     public class CreateTileTask : Schedular.Task
     {
@@ -51,14 +51,35 @@ namespace SpaceEngine.Core.Tile.Tasks
         {
             if (IsDone)
             {
-                Debug.Log("Task has already been run, task will not run!");
+                Debug.Log(string.Format("Task for {0} at {1}:{2}:{3} has already been run. This task will not proceed!", Owner.GetType().Name, Level, Tx, Ty));
 
                 return;
             }
 
-            Owner.DoCreateTile(Level, Tx, Ty, Slot);
+            if (GodManager.Instance.DelayedCalculations && !Owner.IsLastInSequence)
+            {
+                Owner.StartCoroutine(Owner.DoCreateTileCoroutine(Level, Tx, Ty, Slot, () =>
+                {
+                    // Manualy finish the particular tile creation task.
+                    this.Finish();
+                }));
 
-            IsDone = true;
+                // So, task will be finished in the end of coroutine...
+            }
+            else
+            {
+                Owner.DoCreateTile(Level, Tx, Ty, Slot);
+
+                // So, finish task NOW! It's done already, yah?
+                Finish();
+            }
+        }
+
+        public override void Finish()
+        {
+            base.Finish();
+
+            // DEBUG HERE - AHAHAHAHAHAHAHAHAHA!
         }
 
         public override string ToString()

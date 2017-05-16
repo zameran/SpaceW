@@ -49,6 +49,10 @@ namespace SpaceEngine.Core
 {
     public class ElevationCoreProducer : TileProducer
     {
+        public GameObject ResidualProducerGameObject;
+
+        private TileProducer ResidualProducer;
+
         public Material ElevationMaterial;
 
         protected override void Start()
@@ -56,13 +60,25 @@ namespace SpaceEngine.Core
             base.Start();
 
             if (TerrainNode == null) { TerrainNode = transform.parent.GetComponent<TerrainNode>(); }
-            if (TerrainNode.Body == null) { TerrainNode.Body = transform.parent.GetComponentInParent<CelestialBody>(); }
+            if (TerrainNode.ParentBody == null) { TerrainNode.ParentBody = transform.parent.GetComponentInParent<Body>(); }
+
+            if (ResidualProducerGameObject != null)
+            {
+                if (ResidualProducer == null) { ResidualProducer = ResidualProducerGameObject.GetComponent<TileProducer>(); }
+                if (ResidualProducer.Cache == null) { ResidualProducer.InitCache(); }
+            }
 
             var tileSize = GetTileSize(0);
 
-            if ((tileSize - GetBorder() * 2 - 1) % (TerrainNode.Body.GridResolution - 1) != 0)
+            if ((tileSize - GetBorder() * 2 - 1) % (TerrainNode.ParentBody.GridResolution - 1) != 0)
             {
                 throw new InvalidParameterException("Tile size - border * 2 - 1 must be divisible by grid mesh resolution - 1" + string.Format(": {0}-{1}", tileSize, GetBorder()));
+            }
+
+            if (ResidualProducer != null)
+            {
+                if (ResidualProducer.GetTileSize(0) != tileSize) throw new InvalidParameterException("Residual tile size must match elevation tile size!");
+                if (!(ResidualProducer.Cache.GetStorage(0) is GPUTileStorage)) throw new InvalidStorageException("Residual storage must be a GPUTileStorage");
             }
 
             var storage = Cache.GetStorage(0) as GPUTileStorage;
@@ -71,13 +87,6 @@ namespace SpaceEngine.Core
             {
                 throw new InvalidStorageException("Storage must be a GPUTileStorage");
             }
-
-            // INIT STUFF GOES HERE...
-        }
-
-        protected override void OnDestroy()
-        {
-            base.OnDestroy();
         }
 
         public override int GetBorder()
@@ -94,29 +103,65 @@ namespace SpaceEngine.Core
             var tileWidth = gpuSlot.Owner.TileSize;
             var tileSize = tileWidth - (1 + GetBorder() * 2);
 
-            //var parentTile = FindTile(level - 1, tx / 2, ty / 2, false, true);
             var rootQuadSize = TerrainNode.TerrainQuadRoot.Length;
 
-            var tileSD = Vector2d.zero;
+            if (ResidualProducer != null)
+            {
+                if (ResidualProducer.HasTile(level, tx, ty))
+                {
+                    GPUTileStorage.GPUSlot residualGpuSlot = null;
 
-            tileSD.x = (0.5 + GetBorder()) / (tileSize - 1 - GetBorder() * 2);
+                    var residualTile = ResidualProducer.FindTile(level, tx, ty, false, true);
+
+                    if (residualTile != null)
+                        residualGpuSlot = residualTile.GetSlot(0) as GPUTileStorage.GPUSlot;
+                    else
+                    { throw new MissingTileException("Find residual tile failed"); }
+
+                    if (residualGpuSlot == null) { throw new MissingTileException("Find parent tile failed"); }
+
+                    ElevationMaterial.SetTexture("_ResidualSampler", residualGpuSlot.Texture);
+                    ElevationMaterial.SetVector("_ResidualOSH", new Vector4(0.25f / (float)tileWidth, 0.25f / (float)tileWidth, 2.0f / (float)tileWidth, 1.0f));
+                }
+                else
+                {
+                    ElevationMaterial.SetTexture("_ResidualSampler", null);
+                    ElevationMaterial.SetVector("_ResidualOSH", new Vector4(0.0f, 0.0f, 1.0f, 0.0f));
+
+                    Debug.LogError(string.Format("Residual producer exist, but can't find any suitable tile at {0}:{1}:{2}!", level, tx, ty));
+                }
+            }
+            else
+            {
+                ElevationMaterial.SetTexture("_ResidualSampler", null);
+                ElevationMaterial.SetVector("_ResidualOSH", new Vector4(0.0f, 0.0f, 1.0f, 0.0f));
+            }
+
+            var tileWSD = Vector4.zero;
+            tileWSD.x = (float)tileWidth;
+            tileWSD.y = (float)rootQuadSize / (float)(1 << level) / (float)tileSize;
+            tileWSD.z = (float)tileSize / (float)(TerrainNode.ParentBody.GridResolution - 1);
+            tileWSD.w = 0.0f;
+
+            var tileSD = Vector2d.zero;
+            tileSD.x = (0.5 + GetBorder()) / (tileWidth - 1 - GetBorder() * 2);
             tileSD.y = (1.0 + tileSD.x * 2.0);
 
             var offset = Vector4d.zero;
-
             offset.x = ((double)tx / (1 << level) - 0.5) * rootQuadSize;
             offset.y = ((double)ty / (1 << level) - 0.5) * rootQuadSize;
             offset.z = rootQuadSize / (1 << level);
-            offset.w = TerrainNode.Body.Radius;
+            offset.w = TerrainNode.ParentBody.Size;
 
+            ElevationMaterial.SetVector("_TileWSD", tileWSD);
             ElevationMaterial.SetVector("_TileSD", tileSD.ToVector2());
-            ElevationMaterial.SetFloat("_Amplitude", TerrainNode.Body.Amplitude);
-            ElevationMaterial.SetFloat("_Frequency", TerrainNode.Body.Frequency);
+            ElevationMaterial.SetFloat("_Amplitude", TerrainNode.ParentBody.Amplitude);
+            ElevationMaterial.SetFloat("_Frequency", TerrainNode.ParentBody.Frequency);
             ElevationMaterial.SetVector("_Offset", offset.ToVector4());
             ElevationMaterial.SetMatrix("_LocalToWorld", TerrainNode.FaceToLocal.ToMatrix4x4());
 
-            if (TerrainNode.Body.NPS != null) TerrainNode.Body.NPS.SetUniforms(ElevationMaterial);
-            if (TerrainNode.Body.TCCPS != null) TerrainNode.Body.TCCPS.UpdateUniforms(ElevationMaterial);
+            if (TerrainNode.ParentBody.NPS != null) TerrainNode.ParentBody.NPS.SetUniforms(ElevationMaterial);
+            if (TerrainNode.ParentBody.TCCPS != null) TerrainNode.ParentBody.TCCPS.UpdateUniforms(ElevationMaterial);
 
             Graphics.Blit(null, gpuSlot.Texture, ElevationMaterial);
 

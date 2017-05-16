@@ -94,7 +94,7 @@ namespace SpaceEngine.Core.Tile.Cache
         {
             if (Producers.ContainsKey(id))
             {
-                Debug.LogFormat("Producer with {0} already inserted!", id);
+                Debug.Log(string.Format("Producer with {0} already inserted!", id));
             }
             else
             {
@@ -111,7 +111,7 @@ namespace SpaceEngine.Core.Tile.Cache
         {
             if (i >= TileStorage.Length)
             {
-                Debug.LogFormat("Tile storage at location {0} does not exist!", i);
+                Debug.Log(string.Format("Tile storage at location {0} does not exist!", i));
             }
 
             return TileStorage[i];
@@ -182,7 +182,7 @@ namespace SpaceEngine.Core.Tile.Cache
             // If this producer id does not exist can not create tile.
             if (!Producers.ContainsKey(producerId))
             {
-                Debug.LogFormat("GetTile Producer {0} not been inserted into cache!", producerId);
+                Debug.Log(string.Format("GetTile Producer {0} not been inserted into cache!", producerId));
                 return null;
             }
 
@@ -239,7 +239,7 @@ namespace SpaceEngine.Core.Tile.Cache
             // Should never be null be this stage
             if (tile == null)
             {
-                throw new System.ArgumentNullException("Tile should't be null");
+                throw new System.NullReferenceException("Tile should't be null!");
             }
 
             // Keep track of the max number of tiles ever used for debug purposes

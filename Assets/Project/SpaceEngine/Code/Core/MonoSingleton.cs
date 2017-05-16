@@ -59,16 +59,20 @@ public class MonoSingleton<T> : MonoBehaviour where T : MonoBehaviour
 
     public static bool ApplicationIsQuitting { get; private set; }
 
+    protected virtual bool UnstableSingleton()
+    {
+        return false;
+    }
+
     /// <summary>
     /// When Unity quits, it destroys objects in a random order.
     /// In principle, a Singleton is only destroyed when application quits.
     /// If any script calls Instance after it have been destroyed, 
-    ///   it will create a buggy ghost object that will stay on the Editor scene
-    ///   even after stopping playing the Application. Really bad!
+    /// it will create a buggy ghost object that will stay on the Editor scene even after stopping playing the Application.
     /// So, this was made to be sure we're not creating that buggy ghost object.
     /// </summary>
     protected virtual void OnDestroy()
     {
-        ApplicationIsQuitting = true;
+        if (UnstableSingleton()) ApplicationIsQuitting = true;
     }
 }

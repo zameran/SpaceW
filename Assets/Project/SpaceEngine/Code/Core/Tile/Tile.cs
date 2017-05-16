@@ -177,7 +177,7 @@ namespace SpaceEngine.Core.Tile
         {
             if (i >= Task.Slot.Count)
             {
-                Debug.LogFormat("Slot at location {0} does not exist!", i);
+                Debug.Log(string.Format("Slot at location {0} does not exist!", i));
             }
 
             return Task.Slot[i];

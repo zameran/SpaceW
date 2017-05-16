@@ -35,17 +35,11 @@
 
 using System.Collections.Generic;
 
-using UnityEngine;
-
 namespace SpaceEngine.Core.Bodies
 {
     public interface ICelestialBody
     {
         float Radius { get; set; }
-
-        Vector3 Origin { get; set; }
-
-        MaterialPropertyBlock MPB { get; set; }
 
         List<string> GetKeywords();
     }

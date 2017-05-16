@@ -33,13 +33,17 @@
 // Creator: zameran
 #endregion
 
+using SpaceEngine.Core.Patterns.Strategy.Renderable;
+
 using UnityEngine;
 
-public class RingSegment : MonoBehaviour
+public class RingSegment : MonoBehaviour, IRenderable<RingSegment>
 {
     public Ring Ring;
 
-    public void Render()
+    #region IRenderable
+
+    public void Render(int layer = 0)
     {
         if (Ring == null) return;
         if (Ring.RingSegmentMesh == null) return;
@@ -47,8 +51,10 @@ public class RingSegment : MonoBehaviour
 
         var SegmentTRS = Matrix4x4.TRS(Ring.transform.position, transform.rotation, Vector3.one);
 
-        Graphics.DrawMesh(Ring.RingSegmentMesh, SegmentTRS, Ring.RingMaterial, 0, CameraHelper.Main(), 0);
+        Graphics.DrawMesh(Ring.RingSegmentMesh, SegmentTRS, Ring.RingMaterial, layer, CameraHelper.Main(), 0);
     }
+
+    #endregion
 
     public void UpdateNode(Mesh mesh, Material material, Quaternion rotation)
     {

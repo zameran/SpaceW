@@ -41,7 +41,7 @@ namespace SpaceEngine.Debugging
 {
     public sealed class DebugGUIBodyInfo : DebugGUI
     {
-        public CelestialBody Body;
+        public Body Body;
 
         protected override void Awake()
         {
@@ -62,23 +62,23 @@ namespace SpaceEngine.Debugging
 
         protected override void UI(int id)
         {
-            scrollPosition = GUILayout.BeginScrollView(scrollPosition, false, true);
+            ScrollPosition = GUILayout.BeginScrollView(ScrollPosition, false, true);
 
-            if (Body != null)
+            if (Body != null && Helper.Enabled(Body))
             {
                 GUILayout.BeginVertical();
 
-                GUILayout.Label("Body parameters: ", boldLabel);
+                GUILayout.Label("Body parameters: ", BoldLabelStyle);
 
                 GUILayout.Label("Nothing here!");
 
                 GUILayout.EndVertical();
 
-                if (Body.Atmosphere != null)
+                if (Body.Atmosphere != null && Helper.Enabled(Body.Atmosphere))
                 {
                     GUILayout.BeginVertical();
 
-                    GUILayout.Label("Atmosphere parameters: ", boldLabel);
+                    GUILayout.Label("Atmosphere parameters: ", BoldLabelStyle);
 
                     GUILayout.Label("Preset: ");
                     Body.Atmosphere.AtmosphereBase = (AtmosphereBase)GUILayout.SelectionGrid((int)Body.Atmosphere.AtmosphereBase, System.Enum.GetNames(typeof(AtmosphereBase)), 2);

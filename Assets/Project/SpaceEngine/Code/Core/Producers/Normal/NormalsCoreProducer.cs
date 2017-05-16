@@ -26,7 +26,7 @@ namespace SpaceEngine.Core
             base.Start();
 
             if (TerrainNode == null) { TerrainNode = transform.parent.GetComponent<TerrainNode>(); }
-            if (TerrainNode.Body == null) { TerrainNode.Body = transform.parent.GetComponentInParent<CelestialBody>(); }
+            if (TerrainNode.ParentBody == null) { TerrainNode.ParentBody = transform.parent.GetComponentInParent<Body>(); }
             if (ElevationProducer == null) { ElevationProducer = ElevationProducerGameObject.GetComponent<TileProducer>(); }
             if (ElevationProducer.Cache == null) { ElevationProducer.InitCache(); }
 
@@ -47,7 +47,6 @@ namespace SpaceEngine.Core
             {
                 throw new InvalidStorageException("Storage must be a GPUTileStorage");
             }
-
         }
 
         public override bool HasTile(int level, int tx, int ty)
@@ -152,7 +151,7 @@ namespace SpaceEngine.Core
                 NormalsMaterial.SetMatrix("_WorldToTangentFrame", Matrix4x4.identity);
             }
 
-            NormalsMaterial.SetVector("_TileSD", new Vector2((float)tileWidth, (float)(tileWidth - 1) / (float)(TerrainNode.Body.GridResolution - 1)));
+            NormalsMaterial.SetVector("_TileSD", new Vector2((float)tileWidth, (float)(tileWidth - 1) / (float)(TerrainNode.ParentBody.GridResolution - 1)));
             NormalsMaterial.SetTexture("_ElevationSampler", elevationTex);
             NormalsMaterial.SetVector("_ElevationOSL", elevationOSL);
 

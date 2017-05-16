@@ -1,17 +1,15 @@
+
 Shader "Hidden/Internal-Flare" 
 {
-	SubShader 
-	{
+	SubShader {
 
-		Tags  {"RenderType" = "Overlay" }
-
+		Tags {"RenderType"="Overlay"}
 		ZWrite Off ZTest Always
 		Cull Off
 		Blend One One
 		ColorMask RGB
 
-		Pass
-		{	
+		Pass {	
 			CGPROGRAM
 			#pragma vertex vert
 			#pragma fragment frag
@@ -21,15 +19,13 @@ Shader "Hidden/Internal-Flare"
 
 			sampler2D _FlareTexture;
 			
-			struct appdata_t 
-			{
+			struct appdata_t {
 				float4 vertex : POSITION;
 				fixed4 color : COLOR;
 				float2 texcoord : TEXCOORD0;
 			};
 
-			struct v2f 
-			{
+			struct v2f {
 				float4 vertex : SV_POSITION;
 				fixed4 color : COLOR;
 				float2 texcoord : TEXCOORD0;
@@ -40,11 +36,9 @@ Shader "Hidden/Internal-Flare"
 			v2f vert (appdata_t v)
 			{
 				v2f o;
-
 				o.vertex = UnityObjectToClipPos(v.vertex);
 				o.color = v.color;
 				o.texcoord = TRANSFORM_TEX(v.texcoord, _FlareTexture);
-
 				return o;
 			}
 

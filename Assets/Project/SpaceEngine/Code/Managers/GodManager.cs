@@ -33,6 +33,9 @@
 // Creator: zameran
 #endregion
 
+using SpaceEngine;
+using SpaceEngine.AtmosphericScattering.Sun;
+using SpaceEngine.Cameras;
 using SpaceEngine.Core.Bodies;
 using SpaceEngine.Core.Utilities;
 using SpaceEngine.Startfield;
@@ -41,21 +44,19 @@ using System.Linq;
 
 using UnityEngine;
 
-using ZFramework.Unity.Common.Messenger;
-
-[ExecutionOrder(-9999)]
+[ExecutionOrder(-9998)]
 public class GodManager : MonoSingleton<GodManager>
 {
-    public TerrainView View;
-    public Controller Controller;
+    public GameCamera View;
 
     public ComputeShader WriteData;
     public ComputeShader ReadData;
 
-    public CelestialBody ActiveBody { get { return Bodies.FirstOrDefault(); } }
+    public Body ActiveBody { get { return Bodies.FirstOrDefault(body => Helper.Enabled(body)); } }
 
-    public CelestialBody[] Bodies;
+    public Body[] Bodies;
     public Starfield[] Starfields;
+    public SunGlare[] Sunglares;
 
     public AtmosphereHDR HDRMode = AtmosphereHDR.ProlandOptimized;
 
@@ -67,6 +68,8 @@ public class GodManager : MonoSingleton<GodManager>
 
     public bool Eclipses = true;
     public bool Planetshine = true;
+    public bool DelayedCalculations = false;
+    public bool DebugFBO = false;
 
     protected GodManager() { }
 
@@ -74,16 +77,14 @@ public class GodManager : MonoSingleton<GodManager>
     {
         Instance = this;
 
-        Messenger.Setup(true);
-
-        Bodies = FindObjectsOfType<CelestialBody>();
+        Bodies = FindObjectsOfType<Body>();
         Starfields = FindObjectsOfType<Starfield>();
+        Sunglares = FindObjectsOfType<SunGlare>();
     }
 
     private void Update()
     {
         UpdateSchedular();
-        UpdateHeightZ();
     }
 
     protected override void OnDestroy()
@@ -91,20 +92,23 @@ public class GodManager : MonoSingleton<GodManager>
         base.OnDestroy();
     }
 
+    private void OnGUI()
+    {
+        if (FrameBufferCapturer.Instance.FBOExist() && DebugFBO)
+        {
+            var fboDebugDrawSize = FrameBufferCapturer.Instance.DebugDrawSize;
+
+            GUI.DrawTexture(new Rect(new Vector2(Screen.width - fboDebugDrawSize.x, 0), fboDebugDrawSize), FrameBufferCapturer.Instance.FBOTexture, ScaleMode.StretchToFill, false);
+        }
+    }
+
     private void UpdateSchedular()
     {
         Schedular.Instance.Run();
     }
 
-    private void UpdateHeightZ()
+    public void UpdateControllerWrapper()
     {
-        if (ActiveBody != null)
-        {
-            View.GroundHeight = ActiveBody.HeightZ;
-        }
-        else
-        {
-            View.GroundHeight = 0.0f;
-        }
+        View.UpdateMatrices();
     }
 }
