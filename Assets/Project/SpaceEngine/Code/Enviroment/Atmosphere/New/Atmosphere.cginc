@@ -76,6 +76,7 @@
 #define Power						float
 #define LuminousPower				float
 
+#define InverseLength				float 
 #define Number						float
 #define Area						float
 #define Volume						float
@@ -166,18 +167,39 @@ uniform float SUN_SPECTRAL_RADIANCE_TO_LUMINANCE;
 //----------------------------------------------------------------------------------------------------------------------------
 
 //----------------------------------------------------------------------------------------------------------------------------
+
+// An atmosphere layer of width 'width', and whose density is defined as 'exp_term' * exp('exp_scale' * h) + 'linear_term' * h + 'constant_term', clamped to [0,1], and where h is the altitude. 
+struct DensityProfileLayer 
+{ 
+	Length					width; 
+	Number					exp_term; 
+	InverseLength			exp_scale; 
+	InverseLength			linear_term; 
+	Number					constant_term; 
+};
+
+// An atmosphere density profile made of several layers on top of each other (from bottom to top). 
+// The width of the last layer is ignored, i.e. it always extend to the top atmosphere boundary. 
+// The profile values vary between 0 (null density) to 1 (maximum density). 
+struct DensityProfile 
+{ 
+	DensityProfileLayer		layers[2]; 
+}; 
+
 struct AtmosphereParameters 
 {
 	IrradianceSpectrum		solar_irradiance;		// The solar irradiance at the top of the atmosphere.
 	Angle					sun_angular_radius;		// The sun's angular radius.
 	Length					bottom_radius;			// The distance between the planet center and the bottom of the atmosphere.
 	Length					top_radius;				// The distance between the planet center and the top of the atmosphere.
-	Length					rayleigh_scale_height;	// The scale height of air molecules, meaning that their density is proportional to exp(-h / rayleigh_scale_height), with h the altitude (with the bottom of the atmosphere at altitude 0).
-	ScatteringSpectrum		rayleigh_scattering;	// The scattering coefficient of air molecules at the bottom of the atmosphere, as a function of wavelength.
-	Length					mie_scale_height;		// The scale height of aerosols, meaning that their density is proportional to exp(-h / mie_scale_height), with h the altitude.
-	ScatteringSpectrum		mie_scattering;			// The scattering coefficient of aerosols at the bottom of the atmosphere, as a function of wavelength.
-	ScatteringSpectrum		mie_extinction;			// The extinction coefficient of aerosols at the bottom of the atmosphere, as a function of wavelength.
+	DensityProfile			rayleigh_density;		// The density profile of air molecules, i.e. a function from altitude to dimensionless values between 0 (null density) and 1 (maximum density). 
+	ScatteringSpectrum		rayleigh_scattering;	// The scattering coefficient of air molecules at the altitude where their density is maximum (usually the bottom of the atmosphere), as a function of wavelength. The scattering coefficient at altitude h is equal to 'rayleigh_scattering' times 'rayleigh_density' at this altitude. 
+	DensityProfile			mie_density;			// The density profile of aerosols, i.e. a function from altitude to dimensionless values between 0 (null density) and 1 (maximum density). 
+	ScatteringSpectrum		mie_scattering;			// The scattering coefficient of aerosols at the altitude where their density is maximum (usually the bottom of the atmosphere), as a function of wavelength. The scattering coefficient at altitude h is equal to 'mie_scattering' times 'mie_density' at this altitude. 
+	ScatteringSpectrum		mie_extinction;			// The extinction coefficient of aerosols at the altitude where their density is maximum (usually the bottom of the atmosphere), as a function of wavelength. The extinction coefficient at altitude h is equal to 'mie_extinction' times 'mie_density' at this altitude. 
 	Number					mie_phase_function_g;	// The asymetry parameter for the Cornette-Shanks phase function for the aerosols.
+	DensityProfile			absorption_density; 	// The density profile of air molecules that absorb light (e.g. ozone), i.e. a function from altitude to dimensionless values between 0 (null density) and 1 (maximum density).
+	ScatteringSpectrum		absorption_extinction;	// The extinction coefficient of molecules that absorb light (e.g. ozone) at the altitude where their density is maximum, as a function of wavelength. The extinction coefficient at altitude h is equal to 'absorption_extinction' times 'absorption_density' at this altitude. 
 	DimensionlessSpectrum	ground_albedo;			// The average albedo of the ground.
 
 	// The cosine of the maximum Sun zenith angle for which atmospheric scattering
@@ -189,6 +211,19 @@ struct AtmosphereParameters
 //----------------------------------------------------------------------------------------------------------------------------
 
 //----------------------------------------------------------------------------------------------------------------------------
+Number GetLayerDensity(IN(DensityProfileLayer) layer, Length altitude) 
+{ 
+	Number density = layer.exp_term * exp(layer.exp_scale * altitude) + layer.linear_term * altitude + layer.constant_term;
+
+	return clamp(density, Number(0.0), Number(1.0)); 
+} 
+ 
+Number GetProfileDensity(IN(DensityProfile) profile, Length altitude) 
+{ 
+	return altitude < profile.layers[0].width ? GetLayerDensity(profile.layers[0], altitude) : 
+												GetLayerDensity(profile.layers[1], altitude); 
+} 
+
 Number ClampCosine(Number mu) 
 {
 	return clamp(mu, Number(-1.0), Number(1.0));
@@ -237,7 +272,7 @@ bool RayIntersectsGround(IN(AtmosphereParameters) atmosphere, Length r, Number m
 	return mu < 0.0 && r * r * (mu * mu - 1.0) + atmosphere.bottom_radius * atmosphere.bottom_radius >= 0.0 * m2;
 }
 
-Length ComputeOpticalLengthToTopAtmosphereBoundary(IN(AtmosphereParameters) atmosphere, Length scale_height, Length r, Number mu) 
+Length ComputeOpticalLengthToTopAtmosphereBoundary(IN(AtmosphereParameters) atmosphere, IN(DensityProfile) profile, Length r, Number mu) 
 {
 	assert(r >= atmosphere.bottom_radius && r <= atmosphere.top_radius);
 	assert(mu >= -1.0 && mu <= 1.0);
@@ -252,7 +287,7 @@ Length ComputeOpticalLengthToTopAtmosphereBoundary(IN(AtmosphereParameters) atmo
 		Length d_i = Number(i) * dx;	
 		Length r_i = sqrt(d_i * d_i + 2.0 * r * mu * d_i + r * r); // Distance between the current sample point and the planet center.
 
-		Number y_i = exp(-(r_i - atmosphere.bottom_radius) / scale_height); // Number density at the current sample point (divided by the number density at the bottom of the atmosphere, yielding a dimensionless number).
+		Number y_i = GetProfileDensity(profile, r_i - atmosphere.bottom_radius);  // Number density at the current sample point (divided by the number density at the bottom of the atmosphere, yielding a dimensionless number).
 		Number weight_i = i == 0 || i == SAMPLE_COUNT ? 0.5 : 1.0; // Sample weight (from the trapezoidal rule).
 
 		result += y_i * weight_i * dx;
@@ -266,10 +301,9 @@ DimensionlessSpectrum ComputeTransmittanceToTopAtmosphereBoundary(IN(AtmosphereP
 	assert(r >= atmosphere.bottom_radius && r <= atmosphere.top_radius);
 	assert(mu >= -1.0 && mu <= 1.0);
 
-	return exp(-(atmosphere.rayleigh_scattering * 
-				ComputeOpticalLengthToTopAtmosphereBoundary(atmosphere, atmosphere.rayleigh_scale_height, r, mu) +
-				atmosphere.mie_extinction *
-				ComputeOpticalLengthToTopAtmosphereBoundary(atmosphere, atmosphere.mie_scale_height, r, mu)));
+	return exp(-(atmosphere.rayleigh_scattering * ComputeOpticalLengthToTopAtmosphereBoundary(atmosphere, atmosphere.rayleigh_density, r, mu) +
+				 atmosphere.mie_extinction * ComputeOpticalLengthToTopAtmosphereBoundary(atmosphere, atmosphere.mie_density, r, mu) +
+				 atmosphere.absorption_extinction * ComputeOpticalLengthToTopAtmosphereBoundary(atmosphere, atmosphere.absorption_density, r, mu)));
 }
 
 Number GetTextureCoordFromUnitRange(Number x, int texture_size) 
@@ -385,8 +419,8 @@ void ComputeSingleScatteringIntegrand(IN(AtmosphereParameters) atmosphere, IN(Tr
 		DimensionlessSpectrum transmittance = GetTransmittance(atmosphere, transmittance_texture, r, mu, d,	ray_r_mu_intersects_ground) *
 											  GetTransmittanceToTopAtmosphereBoundary(atmosphere, transmittance_texture, r_d, mu_s_d);
 
-		rayleigh = transmittance * exp(-(r_d - atmosphere.bottom_radius) / atmosphere.rayleigh_scale_height);
-		mie = transmittance * exp(-(r_d - atmosphere.bottom_radius) / atmosphere.mie_scale_height);
+		rayleigh = transmittance * GetProfileDensity(atmosphere.rayleigh_density, r_d - atmosphere.bottom_radius);
+		mie = transmittance * GetProfileDensity(atmosphere.mie_density, r_d - atmosphere.bottom_radius);
 	}
 }
 
@@ -675,8 +709,8 @@ RadianceDensitySpectrum ComputeScatteringDensity(IN(AtmosphereParameters) atmosp
 			// The radiance finally scattered from direction omega_i towards direction -omega is the product of the incident radiance, the scattering
 			// coefficient, and the phase function for directions omega and omega_i (all this summed over all particle types, i.e. Rayleigh and Mie).
 			Number nu2 = dot(omega, omega_i);
-			Number rayleigh_density = exp(-(r - atmosphere.bottom_radius) / atmosphere.rayleigh_scale_height);
-			Number mie_density = exp(-(r - atmosphere.bottom_radius) / atmosphere.mie_scale_height);
+			Number rayleigh_density = GetProfileDensity(atmosphere.rayleigh_density, r - atmosphere.bottom_radius); 
+			Number mie_density = GetProfileDensity(atmosphere.mie_density, r - atmosphere.bottom_radius); 
 
 			rayleigh_mie += incident_radiance * (atmosphere.rayleigh_scattering * rayleigh_density * RayleighPhaseFunction(nu2) + 
 												 atmosphere.mie_scattering * mie_density * MiePhaseFunction(atmosphere.mie_phase_function_g, nu2)) * domega_i;
@@ -902,9 +936,7 @@ RadianceSpectrum GetSkyRadiance(IN(AtmosphereParameters) atmosphere, IN(Transmit
 		r = atmosphere.top_radius;
 		rmu += distance_to_top_atmosphere_boundary;
 	}
-
-	// If the view ray does not intersect the atmosphere, simply return 0.
-	if (r > atmosphere.top_radius) 
+	else if (r > atmosphere.top_radius) // If the view ray does not intersect the atmosphere, simply return 0.
 	{
 		transmittance = DimensionlessSpectrum(1.0, 1.0, 1.0);
 
