@@ -46,9 +46,9 @@ namespace SpaceEngine.Core.Bodies
         public Ring Ring;
 
         public List<Shadow> Shadows = new List<Shadow>();
-
+        
         public bool RingEnabled = true;
-
+        
         public Texture2D GroundDiffuse;
         public Texture2D GroundNormal;
         public Texture2D DetailedNormal;

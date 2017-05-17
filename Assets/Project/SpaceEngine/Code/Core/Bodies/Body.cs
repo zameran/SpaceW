@@ -38,6 +38,7 @@ using SpaceEngine.Core.Patterns.Strategy.Reanimator;
 using SpaceEngine.Core.Patterns.Strategy.Uniformed;
 using SpaceEngine.Core.Terrain;
 using SpaceEngine.Core.Tile.Samplers;
+using SpaceEngine.Core.Utilities.Gradients;
 using SpaceEngine.Ocean;
 
 using System.Collections.Generic;
@@ -103,6 +104,8 @@ namespace SpaceEngine.Core.Bodies
 
         public MaterialPropertyBlock MPB { get; set; }
 
+        public MaterialTableGradientLut MaterialTable = new MaterialTableGradientLut();
+
         #region Node
 
         protected override void InitNode()
@@ -129,6 +132,8 @@ namespace SpaceEngine.Core.Bodies
             TileSamplers.Sort(new TileSampler.Sort());
 
             MPB = new MaterialPropertyBlock();
+
+            MaterialTable.GenerateLut();
         }
 
         protected override void UpdateNode()
@@ -198,6 +203,8 @@ namespace SpaceEngine.Core.Bodies
             base.OnDestroy();
 
             Helper.Destroy(QuadMesh);
+
+            MaterialTable.DestroyLut();
         }
 
         #endregion

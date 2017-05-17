@@ -37,9 +37,6 @@ using SpaceEngine.Core.Patterns.Strategy.Uniformed;
 
 using UnityEngine;
 
-// TODO : Special 'framework' for a global uniforms.
-// TODO : PlanetColor move to body. Generate this lut from a gradient.
-
 public class UniformsManager : MonoSingleton<UniformsManager>, IUniformed, IUniformed<Material>, IUniformed<ComputeShader>
 {
     public Texture2D PermSampler = null;
@@ -47,8 +44,6 @@ public class UniformsManager : MonoSingleton<UniformsManager>, IUniformed, IUnif
     public Texture2D PermSamplerGL = null;
     public Texture2D PermGradSamplerGL = null;
     public Texture2D PlanetAtlas = null;
-    public Texture2D PlanetColor = null;
-    public Texture2D PlanetColorMap = null;
     public Texture2D PlanetUVSampler = null;
 
     public Texture2D QuadTexture1 = null;
@@ -71,8 +66,6 @@ public class UniformsManager : MonoSingleton<UniformsManager>, IUniformed, IUnif
         Shader.SetGlobalTexture("PermGradSamplerGL", PermSamplerGL);
 
         Shader.SetGlobalTexture("AtlasDiffSampler", PlanetAtlas);
-        Shader.SetGlobalTexture("MaterialTable", PlanetColor);
-        Shader.SetGlobalTexture("ColorMap", PlanetColorMap);
 
         Shader.SetGlobalTexture("_PlanetUVSampler", PlanetUVSampler);
 
@@ -101,8 +94,6 @@ public class UniformsManager : MonoSingleton<UniformsManager>, IUniformed, IUnif
         target.SetTexture("PermGradSamplerGL", PermSamplerGL);
 
         target.SetTexture("AtlasDiffSampler", PlanetAtlas);
-        target.SetTexture("MaterialTable", PlanetColor);
-        target.SetTexture("ColorMap", PlanetColorMap);
 
         target.SetTexture("_PlanetUVSampler", PlanetUVSampler);
 
@@ -147,8 +138,6 @@ public class UniformsManager : MonoSingleton<UniformsManager>, IUniformed, IUnif
         target.SetTexture(kernel, "PermGradSamplerGL", PermSamplerGL);
 
         target.SetTexture(kernel, "AtlasDiffSampler", PlanetAtlas);
-        target.SetTexture(kernel, "MaterialTable", PlanetColor);
-        target.SetTexture(kernel, "ColorMap", PlanetColorMap);
     }
 
     #endregion
@@ -191,8 +180,6 @@ public class UniformsManager : MonoSingleton<UniformsManager>, IUniformed, IUnif
         if (PermSamplerGL == null) PermSamplerGL = LoadTextureFromResources("Noise/PerlinPerm2D_GL");
         if (PermGradSamplerGL == null) PermGradSamplerGL = LoadTextureFromResources("Noise/PerlinGrad2D_GL");
         if (PlanetAtlas == null) PlanetAtlas = LoadTextureFromResources("PlanetAtlas");
-        if (PlanetColor == null) PlanetColor = LoadTextureFromResources("PlanetColorHeightGradient");
-        if (PlanetColorMap == null) PlanetColorMap = LoadTextureFromResources("PlanetColorHumanityToTemp");
     }
 
     public Texture2D LoadTextureFromResources(string name)
