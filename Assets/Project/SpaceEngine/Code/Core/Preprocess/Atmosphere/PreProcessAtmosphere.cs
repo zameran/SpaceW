@@ -367,15 +367,15 @@ namespace SpaceEngine.Core.Preprocess.Atmospehre
                 {
                     var readDataShader = GodManager.Instance.ReadData;
 
-                    RTUtility.SaveAsRaw(AtmosphereConstants.TRANSMITTANCE_W * AtmosphereConstants.TRANSMITTANCE_H, 3, "/transmittance", DestinationFolder, transmittanceT, readDataShader);
-                    RTUtility.SaveAsRaw(AtmosphereConstants.SKY_W * AtmosphereConstants.SKY_H, 3, "/irradiance", DestinationFolder, irradianceT_Read, readDataShader);
-                    RTUtility.SaveAsRaw((AtmosphereConstants.RES_MU_S * AtmosphereConstants.RES_NU) * AtmosphereConstants.RES_MU * AtmosphereConstants.RES_R, 3, "/inscatter", DestinationFolder, inscatterT_Read, readDataShader);
+                    RTUtility.SaveAsRaw(AtmosphereConstants.TRANSMITTANCE_W * AtmosphereConstants.TRANSMITTANCE_H, CBUtility.Channels.RGB, "/transmittance", DestinationFolder, transmittanceT, readDataShader);
+                    RTUtility.SaveAsRaw(AtmosphereConstants.SKY_W * AtmosphereConstants.SKY_H, CBUtility.Channels.RGB, "/irradiance", DestinationFolder, irradianceT_Read, readDataShader);
+                    RTUtility.SaveAsRaw((AtmosphereConstants.RES_MU_S * AtmosphereConstants.RES_NU) * AtmosphereConstants.RES_MU * AtmosphereConstants.RES_R, CBUtility.Channels.RGB, "/inscatter", DestinationFolder, inscatterT_Read, readDataShader);
 
                     if (BakeMode == AtmosphereBakeMode.TO_HDD_DEBUG)
                     {
-                        RTUtility.SaveAs8bit(AtmosphereConstants.TRANSMITTANCE_W, AtmosphereConstants.TRANSMITTANCE_H, 4, "/transmittance_debug", DestinationFolder, transmittanceT, readDataShader);
-                        RTUtility.SaveAs8bit(AtmosphereConstants.SKY_W, AtmosphereConstants.SKY_H, 4, "/irradiance_debug", DestinationFolder, irradianceT_Read, readDataShader, 10.0f);
-                        RTUtility.SaveAs8bit(AtmosphereConstants.RES_MU_S * AtmosphereConstants.RES_NU, AtmosphereConstants.RES_MU * AtmosphereConstants.RES_R, 4, "/inscater_debug", DestinationFolder, inscatterT_Read, readDataShader);
+                        RTUtility.SaveAs8bit(AtmosphereConstants.TRANSMITTANCE_W, AtmosphereConstants.TRANSMITTANCE_H, CBUtility.Channels.RGBA, "/transmittance_debug", DestinationFolder, transmittanceT, readDataShader);
+                        RTUtility.SaveAs8bit(AtmosphereConstants.SKY_W, AtmosphereConstants.SKY_H, CBUtility.Channels.RGBA, "/irradiance_debug", DestinationFolder, irradianceT_Read, readDataShader, 10.0f);
+                        RTUtility.SaveAs8bit(AtmosphereConstants.RES_MU_S * AtmosphereConstants.RES_NU, AtmosphereConstants.RES_MU * AtmosphereConstants.RES_R, CBUtility.Channels.RGBA, "/inscater_debug", DestinationFolder, inscatterT_Read, readDataShader);
                     }
                 }
             }

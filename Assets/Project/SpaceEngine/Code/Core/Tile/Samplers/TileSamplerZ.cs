@@ -242,7 +242,7 @@ namespace SpaceEngine.Core.Tile.Samplers
                     elevationInfo.Elevations = new float[size];
 
                     // Read back heights data from texture
-                    CBUtility.ReadFromRenderTexture(texture, 1, ElevationsBuffer, GodManager.Instance.ReadData);
+                    CBUtility.ReadFromRenderTexture(texture, CBUtility.Channels.R, ElevationsBuffer, GodManager.Instance.ReadData);
 
                     // Copy into elevations info
                     ElevationsBuffer.GetData(elevationInfo.Elevations);

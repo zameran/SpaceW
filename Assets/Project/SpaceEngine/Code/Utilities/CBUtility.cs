@@ -23,12 +23,30 @@
 // Modified by Denis Ovchinnikov 2015-2017
 #endregion
 
+using System;
 using System.IO;
 
 using UnityEngine;
 
 public static class CBUtility
 {
+    [Serializable]
+    public enum Channels : byte
+    {
+        R = 1,
+        RG = 2,
+        RGB = 3,
+        RGBA = 4
+    }
+
+    [Serializable]
+    public enum Manipulation : byte
+    {
+        Read = 1,
+        Write = 2,
+        WriteFromFile = 3
+    }
+
     public static ComputeBuffer CreateArgBuffer(int vertexCountPerInstance, int instanceCount, int startVertex, int startInstance)
     {
         var buffer = new ComputeBuffer(4, sizeof(int), ComputeBufferType.IndirectArguments);
@@ -48,106 +66,124 @@ public static class CBUtility
         return args[0];
     }
 
-    public static void ReadFromRenderTexture(RenderTexture tex, int channels, ComputeBuffer buffer, ComputeShader readData)
+    public static void Execute(RenderTexture tex, Channels channels, ComputeBuffer buffer, Manipulation manipulation, ComputeShader manipulationShader, params object[] args)
     {
-        if (tex == null)
-        {
-            Debug.Log("CBUtility: ReadFromRenderTexture - RenderTexture is null!");
-            return;
-        }
+        if (tex == null) { Debug.Log("CBUtility: Execute - RenderTexture is null!"); return; }
+        if (buffer == null) { Debug.Log("CBUtility: Execute - buffer is null!"); return; }
+        if (manipulationShader == null) { Debug.Log("CBUtility: Execute - Computer shader is null!"); return; }
+        if (!tex.IsCreated()) { Debug.Log("CBUtility: Execute - tex has not been created (Call Create() on tex)!"); return; }
 
-        if (buffer == null)
-        {
-            Debug.Log("CBUtility: ReadFromRenderTexture - buffer is null!");
-            return;
-        }
+        string filePath = "";
 
-        if (readData == null)
+        if (manipulation == Manipulation.WriteFromFile)
         {
-            Debug.Log("CBUtility: ReadFromRenderTexture - Computer shader is null!");
-            return;
-        }
+            if (!tex.enableRandomWrite) { Debug.Log("CBUtility: WriteIntoRenderTexture - you must enable random write on render texture!"); return; }
 
-        if (channels < 1 || channels > 4)
-        {
-            Debug.Log("CBUtility: ReadFromRenderTexture - Channels must be 1, 2, 3, or 4!");
-            return;
-        }
-
-        if (!tex.IsCreated())
-        {
-            Debug.Log("CBUtility: ReadFromRenderTexture - tex has not been created (Call Create() on tex)!");
-            return;
+            if (args == null || args.Length == 0) { Debug.Log("CBUtility: Execute - Can't proceed without args!"); return; }
+            else
+            {
+                var filePathArg = args[0] as string;
+                if (filePathArg != null)
+                {
+                    filePath = filePathArg;
+                }
+            }
         }
 
         int kernel = -1;
-        int depth = 1;
-        string D = "2D";
-        string C = "C" + channels.ToString();
+        int depth = -1;
+        int width = tex.width;
+        int height = tex.height;
+
+        byte channelsCount = (byte)channels;
+
+        string D = "";
+        string C = "C" + channelsCount;
+        string M = manipulation.ToString().ToLower();
 
         if (tex.dimension == UnityEngine.Rendering.TextureDimension.Tex3D)
         {
             depth = tex.volumeDepth;
             D = "3D";
         }
-
-        kernel = readData.FindKernel("read" + D + C);
-
-        if (kernel == -1)
+        else
         {
-            Debug.Log(string.Format("CBUtility: ReadFromRenderTexture - could not find kernel read{0}", D + C));
-            return;
+            depth = 1;
+            D = "2D";
         }
 
-        int width = tex.width;
-        int height = tex.height;
+        string dimensionAndChannel = string.Format("{0}{1}", D, C);
 
-        //set the compute shader uniforms
-        readData.SetTexture(kernel, "_Tex" + D, tex);
-        readData.SetInt("_Width", width);
-        readData.SetInt("_Height", height);
-        readData.SetInt("_Depth", depth);
-        readData.SetBuffer(kernel, "_Buffer" + D + C, buffer);
+        kernel = manipulationShader.FindKernel(string.Format("{0}{1}", M, dimensionAndChannel));
 
-        //run the  compute shader. Runs in threads of 8 so non divisable by 8 numbers will need
-        //some extra threadBlocks. This will result in some unneeded threads running 
+        if (kernel == -1) { Debug.Log(string.Format("CBUtility: Execute - could not find kernel read{0}", dimensionAndChannel)); return; }
+
+        switch (manipulation)
+        {
+            case Manipulation.Read:
+            {
+                manipulationShader.SetTexture(kernel, "_Tex" + D, tex);
+                manipulationShader.SetInt("_Width", width);
+                manipulationShader.SetInt("_Height", height);
+                manipulationShader.SetInt("_Depth", depth);
+                manipulationShader.SetBuffer(kernel, "_Buffer" + dimensionAndChannel, buffer);
+            }
+                break;
+            case Manipulation.Write:
+            {
+                manipulationShader.SetTexture(kernel, "_Des" + dimensionAndChannel, tex);
+                manipulationShader.SetInt("_Width", width);
+                manipulationShader.SetInt("_Height", height);
+                manipulationShader.SetInt("_Depth", depth);
+                manipulationShader.SetBuffer(kernel, "_Buffer" + dimensionAndChannel, buffer);
+            }
+                break;
+            case Manipulation.WriteFromFile:
+            {
+                int size = width * height * depth * channelsCount;
+
+                float[] map = new float[size];
+
+                if (!LoadRawFile(filePath, map, size)) return;
+
+                buffer.SetData(map);
+
+                    //set the compute shader uniforms
+                manipulationShader.SetTexture(kernel, "_Des" + D + C, tex);
+                manipulationShader.SetInt("_Width", width);
+                manipulationShader.SetInt("_Height", height);
+                manipulationShader.SetInt("_Depth", depth);
+                manipulationShader.SetBuffer(kernel, "_Buffer" + D + C, buffer);
+            }
+                break;
+            default:
+                throw new ArgumentOutOfRangeException("manipulation", manipulation, null);
+        }
+
+        // NOTE : Runs in threads of 8 so non divisable by 8 numbers will need some extra threadBlocks. This will result in some unneeded threads running...
         int padX = (width % 8 == 0) ? 0 : 1;
         int padY = (height % 8 == 0) ? 0 : 1;
         int padZ = (depth % 8 == 0) ? 0 : 1;
 
-        readData.Dispatch(kernel, Mathf.Max(1, width / 8 + padX), Mathf.Max(1, height / 8 + padY), Mathf.Max(1, depth / 8 + padZ));
+        manipulationShader.Dispatch(kernel, Mathf.Max(1, width / 8 + padX), Mathf.Max(1, height / 8 + padY), Mathf.Max(1, depth / 8 + padZ));
+    }
 
+    public static void ReadFromRenderTexture(RenderTexture tex, Channels channels, ComputeBuffer buffer, ComputeShader readData)
+    {
+        Execute(tex, channels, buffer, Manipulation.Read, readData);
     }
 
     public static void ReadSingleFromRenderTexture(RenderTexture tex, float x, float y, float z, ComputeBuffer buffer, ComputeShader readData, bool useBilinear)
     {
-        if (tex == null)
-        {
-            Debug.Log("CBUtility: ReadSingleFromRenderTexture - RenderTexture is null!");
-            return;
-        }
-
-        if (buffer == null)
-        {
-            Debug.Log("CBUtility: ReadSingleFromRenderTexture - buffer is null!");
-            return;
-        }
-
-        if (readData == null)
-        {
-            Debug.Log("CBUtility: ReadSingleFromRenderTexture - Computer shader is null!");
-            return;
-        }
-
-        if (!tex.IsCreated())
-        {
-            Debug.Log("CBUtility: ReadSingleFromRenderTexture - tex has not been created (Call Create() on tex)!");
-            return;
-        }
+        // TODO : Merge this in to the Execute method...
+        if (tex == null) { Debug.Log("CBUtility: ReadSingleFromRenderTexture - RenderTexture is null!"); return; }
+        if (buffer == null) { Debug.Log("CBUtility: ReadSingleFromRenderTexture - buffer is null!"); return; }
+        if (readData == null) { Debug.Log("CBUtility: ReadSingleFromRenderTexture - Computer shader is null!"); return; }
+        if (!tex.IsCreated()) { Debug.Log("CBUtility: ReadSingleFromRenderTexture - tex has not been created (Call Create() on tex)!"); return; }
 
         int kernel = -1;
-        int depth = 1;
-        string D = "2D";
+        int depth = -1;
+        string D = "";
         string B = (useBilinear) ? "Bilinear" : "";
 
         if (tex.dimension == UnityEngine.Rendering.TextureDimension.Tex3D)
@@ -155,12 +191,17 @@ public static class CBUtility
             depth = tex.volumeDepth;
             D = "3D";
         }
+        else
+        {
+            depth = 1;
+            D = "2D";
+        }
 
         kernel = readData.FindKernel("readSingle" + B + D);
 
         if (kernel == -1)
         {
-            Debug.Log(string.Format("CBUtility::ReadSingleFromRenderTexture - could not find kernel readSingle{0}", B + D));
+            Debug.Log(string.Format("CBUtility: ReadSingleFromRenderTexture - could not find kernel readSingle{0}", B + D));
             return;
         }
 
@@ -180,83 +221,11 @@ public static class CBUtility
         readData.SetVector("_UV", new Vector4(x / (float)(width - 1), y / (float)(height - 1), z / (float)(depth - 1), 0.0f));
 
         readData.Dispatch(kernel, 1, 1, 1);
-
     }
 
-    public static void WriteIntoRenderTexture(RenderTexture tex, int channels, ComputeBuffer buffer, ComputeShader writeData)
+    public static void WriteIntoRenderTexture(RenderTexture tex, Channels channels, ComputeBuffer buffer, ComputeShader writeData)
     {
-        if (tex == null)
-        {
-            Debug.Log("CBUtility: WriteIntoRenderTexture - RenderTexture is null");
-            return;
-        }
-
-        if (buffer == null)
-        {
-            Debug.Log("CBUtility: WriteIntoRenderTexture - buffer is null");
-            return;
-        }
-
-        if (writeData == null)
-        {
-            Debug.Log("CBUtility: WriteIntoRenderTexture - Computer shader is null");
-            return;
-        }
-
-        if (channels < 1 || channels > 4)
-        {
-            Debug.Log("CBUtility: WriteIntoRenderTexture - Channels must be 1, 2, 3, or 4");
-            return;
-        }
-
-        if (!tex.enableRandomWrite)
-        {
-            Debug.Log("CBUtility: WriteIntoRenderTexture - you must enable random write on render texture");
-            return;
-        }
-
-        if (!tex.IsCreated())
-        {
-            Debug.Log("CBUtility: WriteIntoRenderTexture - tex has not been created (Call Create() on tex)");
-            return;
-        }
-
-        int kernel = -1;
-        int depth = 1;
-        string D = "2D";
-        string C = "C" + channels.ToString();
-
-        if (tex.dimension == UnityEngine.Rendering.TextureDimension.Tex3D)
-        {
-            depth = tex.volumeDepth;
-            D = "3D";
-        }
-
-        kernel = writeData.FindKernel("write" + D + C);
-
-        if (kernel == -1)
-        {
-            Debug.Log(string.Format("CBUtility::WriteIntoRenderTexture - could not find kernel write{0}", D + C));
-            return;
-        }
-
-        int width = tex.width;
-        int height = tex.height;
-
-        //set the compute shader uniforms
-        writeData.SetTexture(kernel, "_Des" + D + C, tex);
-        writeData.SetInt("_Width", width);
-        writeData.SetInt("_Height", height);
-        writeData.SetInt("_Depth", depth);
-        writeData.SetBuffer(kernel, "_Buffer" + D + C, buffer);
-
-        //run the  compute shader. Runs in threads of 8 so non divisable by 8 numbers will need
-        //some extra threadBlocks. This will result in some unneeded threads running 
-        int padX = (width % 8 == 0) ? 0 : 1;
-        int padY = (height % 8 == 0) ? 0 : 1;
-        int padZ = (depth % 8 == 0) ? 0 : 1;
-
-        writeData.Dispatch(kernel, Mathf.Max(1, width / 8 + padX), Mathf.Max(1, height / 8 + padY), Mathf.Max(1, depth / 8 + padZ));
+        Execute(tex, channels, buffer, Manipulation.Write, writeData);
     }
 
     public static void Three2Three(RenderTexture from, RenderTexture to, ComputeShader transfer)
@@ -286,88 +255,9 @@ public static class CBUtility
         transfer.Dispatch(kernel, Mathf.Max(1, width / 8 + padX), Mathf.Max(1, height / 8 + padY), Mathf.Max(1, depth / 8 + padZ));
     }
 
-    public static void WriteIntoRenderTexture(RenderTexture tex, int channels, string path, ComputeBuffer buffer, ComputeShader writeData)
+    public static void WriteIntoRenderTexture(RenderTexture tex, Channels channels, string path, ComputeBuffer buffer, ComputeShader writeData)
     {
-        if (tex == null)
-        {
-            Debug.Log("CBUtility: WriteIntoRenderTexture - RenderTexture is null!");
-            return;
-        }
-
-        if (buffer == null)
-        {
-            Debug.Log("CBUtility: WriteIntoRenderTexture - buffer is null!");
-            return;
-        }
-
-        if (writeData == null)
-        {
-            Debug.Log("CBUtility: WriteIntoRenderTexture - Computer shader is null!");
-            return;
-        }
-
-        if (channels < 1 || channels > 4)
-        {
-            Debug.Log("CBUtility: WriteIntoRenderTexture - Channels must be 1, 2, 3, or 4!");
-            return;
-        }
-
-        if (!tex.enableRandomWrite)
-        {
-            Debug.Log("CBUtility: WriteIntoRenderTexture - you must enable random write on render texture!");
-            return;
-        }
-
-        if (!tex.IsCreated())
-        {
-            Debug.Log("CBUtility: WriteIntoRenderTexture - tex has not been created (Call Create() on tex)!");
-            return;
-        }
-
-        int kernel = -1;
-        int depth = 1;
-        string D = "2D";
-        string C = "C" + channels.ToString();
-
-        if (tex.dimension == UnityEngine.Rendering.TextureDimension.Tex3D)
-        {
-            depth = tex.volumeDepth;
-            D = "3D";
-        }
-
-        kernel = writeData.FindKernel("write" + D + C);
-
-        if (kernel == -1)
-        {
-            Debug.Log(string.Format("CBUtility::WriteIntoRenderTexture - could not find kernel write{0}", D + C));
-
-            return;
-        }
-
-        int width = tex.width;
-        int height = tex.height;
-        int size = width * height * depth * channels;
-
-        float[] map = new float[size];
-
-        if (!LoadRawFile(path, map, size)) return;
-
-        buffer.SetData(map);
-
-        //set the compute shader uniforms
-        writeData.SetTexture(kernel, "_Des" + D + C, tex);
-        writeData.SetInt("_Width", width);
-        writeData.SetInt("_Height", height);
-        writeData.SetInt("_Depth", depth);
-        writeData.SetBuffer(kernel, "_Buffer" + D + C, buffer);
-
-        //run the  compute shader. Runs in threads of 8 so non divisable by 8 numbers will need
-        //some extra threadBlocks. This will result in some unneeded threads running 
-        int padX = (width % 8 == 0) ? 0 : 1;
-        int padY = (height % 8 == 0) ? 0 : 1;
-        int padZ = (depth % 8 == 0) ? 0 : 1;
-
-        writeData.Dispatch(kernel, Mathf.Max(1, width / 8 + padX), Mathf.Max(1, height / 8 + padY), Mathf.Max(1, depth / 8 + padZ));
+        Execute(tex, channels, buffer, Manipulation.WriteFromFile, writeData, new object[] { path });
     }
 
     static bool LoadRawFile(string path, float[] map, int size)
