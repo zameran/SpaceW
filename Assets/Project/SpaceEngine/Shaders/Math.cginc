@@ -115,3 +115,24 @@ float IntersectOuterSphereInverted(float3 p1, float3 d, float3 p3, float r)
 			
 	return (-b + sqrt(test)) / (2.0 * a);
 }
+
+float4 Blur(sampler2D inputTexture, float2 inputUV, float inputStep = 0.00015f)
+{
+	float2 blurCoordinates[5];
+
+	blurCoordinates[0] = inputUV.xy;
+	blurCoordinates[1] = inputUV.xy + inputStep * 1.407333;
+	blurCoordinates[2] = inputUV.xy - inputStep * 1.407333;
+	blurCoordinates[3] = inputUV.xy + inputStep * 3.294215;
+	blurCoordinates[4] = inputUV.xy - inputStep * 3.294215;
+
+	float4 bluredColor = float4(0, 0, 0, 0);
+
+	bluredColor += tex2D(inputTexture, blurCoordinates[0]) * 0.204164;
+	bluredColor += tex2D(inputTexture, blurCoordinates[1]) * 0.304005;
+	bluredColor += tex2D(inputTexture, blurCoordinates[2]) * 0.304005;
+	bluredColor += tex2D(inputTexture, blurCoordinates[3]) * 0.093913;
+	bluredColor += tex2D(inputTexture, blurCoordinates[4]) * 0.093913;
+
+	return bluredColor;
+}

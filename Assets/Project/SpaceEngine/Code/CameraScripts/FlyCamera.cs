@@ -165,7 +165,7 @@ namespace SpaceEngine.Cameras
                     CurrentSpeed = Speed / 10f;
 
                 Speed += Mathf.RoundToInt(Input.GetAxis("Mouse ScrollWheel") * 100.0f);
-                Speed = Mathf.Clamp(Speed, 1.0f, 10000.0f);
+                Speed = Mathf.Clamp(Speed, 1.0f, 100000000.0f);
 
                 transform.Translate(Velocity * CurrentSpeed);
             }
