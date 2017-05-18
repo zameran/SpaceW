@@ -69,7 +69,7 @@
 uniform float _Exposure;
 uniform float _HDRMode;
 
-inline float3 hdrF(float c)
+inline float3 hdrFunction(float c)
 {
 	if (_HDRMode == 0) { return c; }
 	else if (_HDRMode == 1) { return 1.0 - exp(-c); }
@@ -83,9 +83,9 @@ float3 hdr(float3 L)
 {
 	L *= _Exposure;
 
-	L.r = hdrF(L.r);
-	L.g = hdrF(L.g);
-	L.b = hdrF(L.b);
+	L.r = hdrFunction(L.r);
+	L.g = hdrFunction(L.g);
+	L.b = hdrFunction(L.b);
 
 	return L;
 }
@@ -94,9 +94,9 @@ float4 hdr(float4 L)
 {
 	L *= _Exposure;
 
-	L.r = hdrF(L.r);
-	L.g = hdrF(L.g);
-	L.b = hdrF(L.b);
+	L.r = hdrFunction(L.r);
+	L.g = hdrFunction(L.g);
+	L.b = hdrFunction(L.b);
 	L.a = L.a;
 
 	return L;

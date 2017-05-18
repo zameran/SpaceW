@@ -145,6 +145,11 @@ Shader "SpaceEngine/Ring"
 			float2x2 rotationMatrix = float2x2(cosa, -sina, sina, cosa);
 
 			// TODO : Fix fading magic. Now fading obly works properly in 'center' of the ring...
+			// NOTE : This happends, because of edge stripes exist only at ring border. Can be fixed via adding extra 'stripe' at center.
+			// |-----|		|--|--|
+			// |-----|		|--|--|
+			// |-----|		|--|--|
+			// |-----|		|--|--|
 
 			float2 position = i.worldPosition.xz * 0.01;
 			float2 deltaPosition = mul(float2(position.x, position.y), rotationMatrix);

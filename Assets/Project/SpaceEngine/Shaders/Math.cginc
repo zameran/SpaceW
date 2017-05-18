@@ -41,6 +41,18 @@
 #define M_PI2 6.28318530716
 #endif
 
+#if !defined (EPSILON)
+#define EPSILON 1e-10
+#endif
+
+#if !defined (M_PHI)
+#define M_PHI 1.61803398875
+#endif
+
+#if !defined (M_SQRT5)
+#define M_SQRT5 2.2360679775
+#endif
+
 float2 Complex(float2 z) 
 {
 	return float2(-z.y, z.x); // returns i times z (complex number)

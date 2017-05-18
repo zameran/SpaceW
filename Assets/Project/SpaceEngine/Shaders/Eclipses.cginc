@@ -33,14 +33,6 @@
 
 #define ECLIPSES
 
-#if !defined (M_PI)
-#define M_PI 3.14159265358
-#endif
-
-#if !defined (M_PI2)
-#define M_PI2 6.28318530716
-#endif
-
 #if !defined (MATH)
 #include "Math.cginc"
 #endif

@@ -17,14 +17,14 @@ namespace SpaceEngine.Core
     {
         public class Uniforms
         {
-            public int tileWidth, coarseLevelSampler, coarseLevelOSL;
+            public int tileWSD, coarseLevelSampler, coarseLevelOSL;
             public int noiseSampler, noiseUVLH, noiseColor;
             public int noiseRootColor;
             public int residualOSH, residualSampler;
 
             public Uniforms()
             {
-                tileWidth = Shader.PropertyToID("_TileWidth");
+                tileWSD = Shader.PropertyToID("_TileWSD");
                 coarseLevelSampler = Shader.PropertyToID("_CoarseLevelSampler");
                 coarseLevelOSL = Shader.PropertyToID("_CoarseLevelOSL");
                 noiseSampler = Shader.PropertyToID("_NoiseSampler");
@@ -127,6 +127,14 @@ namespace SpaceEngine.Core
             var tileWidth = gpuSlot.Owner.TileSize;
             var tileSize = tileWidth - (GetBorder() * 2);
 
+            var rootQuadSize = TerrainNode.TerrainQuadRoot.Length;
+
+            var tileWSD = Vector4.zero;
+            tileWSD.x = (float)tileWidth;
+            tileWSD.y = (float)rootQuadSize / (float)(1 << level) / (float)tileSize;
+            tileWSD.z = (float)tileSize / (float)(TerrainNode.ParentBody.GridResolution - 1);
+            tileWSD.w = 0.0f;
+
             GPUTileStorage.GPUSlot parentGpuSlot = null;
 
             if (level > 0)
@@ -146,7 +154,7 @@ namespace SpaceEngine.Core
                 throw new NullReferenceException("parentGpuSlot");
             }
 
-            UpSampleMaterial.SetFloat(uniforms.tileWidth, tileWidth);
+            UpSampleMaterial.SetVector(uniforms.tileWSD, tileWSD);
 
             if (level > 0)
             {

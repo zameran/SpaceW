@@ -31,11 +31,16 @@
 // Creation Time: Undefined
 // Creator: zameran
 
+// NOTE : If you wanna use this file as include, please provide special defines before (defines, that provided after include doesn't taken in to the account) :
+// CORE_PORDUCER_ADDITIONAL_UV
+
 #define CORE
 
 #if !defined (TCCOMMON)
 #include "TCCommon.cginc"
 #endif
+
+//-----------------------------------------------------------------------------
 
 #define CORE_ELEVATION
 
@@ -81,12 +86,16 @@ uniform float4x4 _Deform_ScreenQuadCorners;
 uniform float4x4 _Deform_ScreenQuadVerticals;
 uniform float4x4 _Deform_TangentFrameToWorld; 
 uniform float4x4 _Deform_TileToTangent;
+//-----------------------------------------------------------------------------
 
+//-----------------------------------------------------------------------------
 void ScaleUVToTile(inout float2 uv, float3 tileCoords, float3 tileSize)
 {
 	uv = tileCoords.xy + uv * tileSize.xy;
 }
+//-----------------------------------------------------------------------------
 
+//-----------------------------------------------------------------------------
 float4 texTileLod(sampler2D tile, float2 uv, float3 tileCoords, float3 tileSize) 
 {
 	ScaleUVToTile(uv, tileCoords, tileSize);
@@ -128,7 +137,9 @@ float4 TEX2D_GOOD_TILE(sampler2D tile, float2 uv, float3 tileCoords, float3 tile
 
 	return TEX2D_GOOD(tile, uv, size);
 }
+//-----------------------------------------------------------------------------
 
+//-----------------------------------------------------------------------------
 float4 Triplanar(sampler2D topAndButtomSampler, sampler2D leftAndRightSampler, sampler2D frontAndBackSampler, float3 worldPosition, float3 worldNormal, float2 settings)
 {
 	half3 YSampler = tex2D(topAndButtomSampler, worldPosition.xz / settings.x);
@@ -141,9 +152,13 @@ float4 Triplanar(sampler2D topAndButtomSampler, sampler2D leftAndRightSampler, s
 
 	return fixed4(XSampler * blendWeights.x + YSampler * blendWeights.y + ZSampler * blendWeights.z, 1.0);
 }
+//-----------------------------------------------------------------------------
 
+//-----------------------------------------------------------------------------
 inline float4 RGB2Reflectance(float4 color) { return float4(tan(1.37 * color.rgb) / tan(1.37), color.a); }
+//-----------------------------------------------------------------------------
 
+//-----------------------------------------------------------------------------
 struct VertexProducerInput
 {
 	float4 vertex : POSITION;
@@ -180,3 +195,4 @@ struct VertexProducerOutput
 		CORE_PRODUCER_VERTEX_PROGRAM_BODY; \
 	}
 #endif
+//-----------------------------------------------------------------------------

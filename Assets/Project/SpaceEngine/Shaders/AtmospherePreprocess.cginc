@@ -111,12 +111,8 @@ int IRRADIANCE_INTEGRAL_SAMPLES;
 int IRRADIANCE_INTEGRAL_SAMPLES_HALF;
 int INSCATTER_SPHERICAL_INTEGRAL_SAMPLES;
  
-#if !defined (M_PI)
-#define M_PI 3.14159265358
-#endif
-
-#if !defined (M_PI2)
-#define M_PI2 6.28318530716
+#if !defined (MATH)
+#include "Math.cginc"
 #endif
  
 // ---------------------------------------------------------------------------- 
