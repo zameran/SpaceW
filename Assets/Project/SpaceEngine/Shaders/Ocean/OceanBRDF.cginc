@@ -60,7 +60,28 @@
 #if !defined (M_PI)
 #define M_PI 3.141592657
 #endif
- 
+
+#define OCEAN_ONLY_SPHERICAL
+
+uniform float4x4 _Globals_WorldToScreen;
+
+uniform float2 _Ocean_MapSize;
+uniform float4 _Ocean_Choppyness;
+uniform float3 _Ocean_SunDir;
+uniform float4 _Ocean_GridSizes;
+uniform float2 _Ocean_ScreenGridSize;
+uniform float _Ocean_WhiteCapStr;
+uniform sampler3D _Ocean_Variance;
+uniform sampler2D _Ocean_Map0;
+uniform sampler2D _Ocean_Map1;
+uniform sampler2D _Ocean_Map2;
+uniform sampler2D _Ocean_Map3;
+uniform sampler2D _Ocean_Map4;
+uniform sampler2D _Ocean_Foam0;
+uniform sampler2D _Ocean_Foam1;
+
+uniform sampler2D _Sky_Map;
+
 float MeanFresnel(float cosThetaV, float sigmaV) 
 {
 	return pow(1.0 - cosThetaV, 5.0 * exp(-2.69 * sigmaV)) / (1.0 + 22.7 * pow(sigmaV, 1.5));
