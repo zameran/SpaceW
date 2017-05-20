@@ -82,6 +82,9 @@ namespace SpaceEngine.Startfield
             StarfieldMaterial.renderQueue = (int)RenderQueue + RenderQueueOffset;
 
             SetUniforms(StarfieldMaterial);
+
+            // NOTE : Self - rendering!
+            Render();
         }
 
         protected override void Awake()
