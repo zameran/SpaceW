@@ -35,6 +35,7 @@
 
 using SpaceEngine.AtmosphericScattering;
 using SpaceEngine.Core.Patterns.Strategy.Reanimator;
+using SpaceEngine.Core.Patterns.Strategy.Renderable;
 using SpaceEngine.Core.Patterns.Strategy.Uniformed;
 using SpaceEngine.Core.Terrain;
 using SpaceEngine.Core.Tile.Samplers;
@@ -43,7 +44,6 @@ using SpaceEngine.Ocean;
 
 using System.Collections.Generic;
 using System.Linq;
-
 using UnityEngine;
 
 namespace SpaceEngine.Core.Bodies
@@ -70,7 +70,7 @@ namespace SpaceEngine.Core.Bodies
     }
 
 
-    public class Body : Node<Body>, IBody, IUniformed<MaterialPropertyBlock>, IReanimateable
+    public class Body : Node<Body>, IBody, IUniformed<MaterialPropertyBlock>, IReanimateable, IRenderable<Body>
     {
         public Atmosphere Atmosphere;
         public OceanNode Ocean;
@@ -138,49 +138,8 @@ namespace SpaceEngine.Core.Bodies
 
         protected override void UpdateNode()
         {
-            if (Atmosphere != null)
-            {
-                if (AtmosphereEnabled)
-                {
-                    Atmosphere.Render();
-                }
-
-                foreach (var sunGlare in GodManager.Instance.Sunglares)
-                {
-                    sunGlare.Atmosphere = Atmosphere;
-                    sunGlare.Render();
-                }
-            }
-
-            if (Ocean != null)
-            {
-                if (OceanEnabled)
-                {
-                    Ocean.Render();
-                }
-            }
-
-            // NOTE : Update controller and the draw. This can help avoid terrain nodes jitter...
-            if (GodManager.Instance.ActiveBody == this)
-                GodManager.Instance.UpdateControllerWrapper();
-
-            foreach (var tileSampler in TileSamplers)
-            {
-                if (Helper.Enabled(tileSampler))
-                {
-                    tileSampler.UpdateSampler();
-                }
-            }
-
-            foreach (var terrainNode in TerrainNodes)
-            {
-                if (Helper.Enabled(terrainNode))
-                {
-                    DrawTerrain(terrainNode);
-                }
-            }
-
-            ResetMPB();
+            // NOTE : Self - rendering!
+            Render();
         }
 
         protected override void Awake()
@@ -254,6 +213,57 @@ namespace SpaceEngine.Core.Bodies
                     }
                 }
             }
+        }
+
+        #endregion
+
+        #region IRenderable
+
+        public virtual void Render(int layer = 0)
+        {
+            if (Atmosphere != null)
+            {
+                if (AtmosphereEnabled)
+                {
+                    Atmosphere.Render();
+                }
+
+                foreach (var sunGlare in GodManager.Instance.Sunglares)
+                {
+                    sunGlare.Atmosphere = Atmosphere;
+                    sunGlare.Render();
+                }
+            }
+
+            if (Ocean != null)
+            {
+                if (OceanEnabled)
+                {
+                    Ocean.Render();
+                }
+            }
+
+            // NOTE : Update controller and the draw. This can help avoid terrain nodes jitter...
+            if (GodManager.Instance.ActiveBody == this)
+                GodManager.Instance.UpdateControllerWrapper();
+
+            foreach (var tileSampler in TileSamplers)
+            {
+                if (Helper.Enabled(tileSampler))
+                {
+                    tileSampler.UpdateSampler();
+                }
+            }
+
+            foreach (var terrainNode in TerrainNodes)
+            {
+                if (Helper.Enabled(terrainNode))
+                {
+                    DrawTerrain(terrainNode);
+                }
+            }
+
+            ResetMPB();
         }
 
         #endregion

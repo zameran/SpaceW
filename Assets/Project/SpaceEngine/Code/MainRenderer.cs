@@ -64,7 +64,7 @@ public sealed class MainRenderer : MonoBehaviour
 
     }
 
-    public void Render()
+    public void ComposeOutputRender()
     {
         /*
         if (GodManager.Instance == null) return;

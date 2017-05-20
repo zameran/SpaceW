@@ -204,14 +204,6 @@ namespace SpaceEngine.Core.Bodies
 
         protected override void UpdateNode()
         {
-            if (Ring != null)
-            {
-                if (RingEnabled)
-                {
-                    Ring.Render();
-                }
-            }
-
             base.UpdateNode();
         }
 
@@ -233,6 +225,23 @@ namespace SpaceEngine.Core.Bodies
         protected override void OnDestroy()
         {
             base.OnDestroy();
+        }
+
+        #endregion
+
+        #region IRenderable
+
+        public override void Render(int layer = 0)
+        {
+            if (Ring != null)
+            {
+                if (RingEnabled)
+                {
+                    Ring.Render();
+                }
+            }
+
+            base.Render(layer);
         }
 
         #endregion
