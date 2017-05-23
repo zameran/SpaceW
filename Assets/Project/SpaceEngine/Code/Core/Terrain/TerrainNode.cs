@@ -202,7 +202,7 @@ namespace SpaceEngine.Core.Terrain
             {
                 lastProducer.IsLastInSequence = true;
 
-                Debug.Log(string.Format("{0} probably last in generation sequence, but maybe accidentally not marked as. Fixed!"));
+                Debug.Log(string.Format("{0} probably last in generation sequence, but maybe accidentally not marked as. Fixed!", lastProducer.name));
             }
         }
 
@@ -218,11 +218,10 @@ namespace SpaceEngine.Core.Terrain
             }
 
             var localToCamera = GodManager.Instance.WorldToCamera * LocalToWorld;
-            var localToScreen = GodManager.Instance.CameraToScreen * localToCamera;
             var invLocalToCamera = localToCamera.Inverse();
 
-            DeformedCameraPosition = invLocalToCamera * Vector3d.zero; // TODO : Really? zero?
-            DeformedFrustumPlanes = Frustum.GetFrustumPlanes(localToScreen);
+            DeformedCameraPosition = invLocalToCamera * Vector3d.zero;
+            DeformedFrustumPlanes = Frustum.GetFrustumPlanes(GodManager.Instance.CameraToScreen * localToCamera); // NOTE : Extract frustum planes from LocalToScreen matrix...
             LocalCameraPosition = Deformation.DeformedToLocal(DeformedCameraPosition);
 
             var m = Deformation.LocalToDeformedDifferential(LocalCameraPosition, true);

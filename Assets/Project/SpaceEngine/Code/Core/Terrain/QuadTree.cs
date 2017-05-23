@@ -29,7 +29,7 @@ namespace SpaceEngine.Core.Terrain
         /// </summary>
         public QuadTree[] Children = new QuadTree[4];
 
-        public bool IsLeaf { get { return Children.All(child => child == null); } }
+        public bool IsLeaf { get { return Children.First() == null; } } // NOTE : Use LINQ.All/Any(child => child == null) to 100% ensure in childs unexistance, but too slow.
 
         public QuadTree(QuadTree parentTree)
         {

@@ -47,7 +47,7 @@ namespace SpaceEngine.Core.Storage
         {
             base.InitSlots();
 
-            for (var i = 0; i < Capacity; i++)
+            for (ushort i = 0; i < Capacity; i++)
             {
                 ComputeBuffer buffer;
 

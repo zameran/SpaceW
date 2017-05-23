@@ -23,6 +23,8 @@
 // Modified by Denis Ovchinnikov 2015-2017
 #endregion
 
+#define MATICES_UNROLL
+
 namespace UnityEngine
 {
     public struct Matrix3x3d
@@ -78,6 +80,19 @@ namespace UnityEngine
         {
             var kProd = Matrix3x3d.identity;
 
+#if (MATICES_UNROLL)
+            kProd.m[0, 0] = m1.m[0, 0] * m2.m[0, 0] + m1.m[0, 1] * m2.m[1, 0] + m1.m[0, 2] * m2.m[2, 0];
+            kProd.m[0, 1] = m1.m[0, 0] * m2.m[0, 1] + m1.m[0, 1] * m2.m[1, 1] + m1.m[0, 2] * m2.m[2, 1];
+            kProd.m[0, 2] = m1.m[0, 0] * m2.m[0, 2] + m1.m[0, 1] * m2.m[1, 2] + m1.m[0, 2] * m2.m[2, 2];
+
+            kProd.m[1, 0] = m1.m[1, 0] * m2.m[0, 0] + m1.m[1, 1] * m2.m[1, 0] + m1.m[1, 2] * m2.m[2, 0];
+            kProd.m[1, 1] = m1.m[1, 0] * m2.m[0, 1] + m1.m[1, 1] * m2.m[1, 1] + m1.m[1, 2] * m2.m[2, 1];
+            kProd.m[1, 2] = m1.m[1, 0] * m2.m[0, 2] + m1.m[1, 1] * m2.m[1, 2] + m1.m[1, 2] * m2.m[2, 2];
+
+            kProd.m[2, 0] = m1.m[2, 0] * m2.m[0, 0] + m1.m[2, 1] * m2.m[1, 0] + m1.m[2, 2] * m2.m[2, 0];
+            kProd.m[2, 1] = m1.m[2, 0] * m2.m[0, 1] + m1.m[2, 1] * m2.m[1, 1] + m1.m[2, 2] * m2.m[2, 1];
+            kProd.m[2, 2] = m1.m[2, 0] * m2.m[0, 2] + m1.m[2, 1] * m2.m[1, 2] + m1.m[2, 2] * m2.m[2, 2];
+#else
             for (byte iRow = 0; iRow < 3; iRow++)
             {
                 for (byte iCol = 0; iCol < 3; iCol++)
@@ -85,6 +100,7 @@ namespace UnityEngine
                     kProd.m[iRow, iCol] = m1.m[iRow, 0] * m2.m[0, iCol] + m1.m[iRow, 1] * m2.m[1, iCol] + m1.m[iRow, 2] * m2.m[2, iCol];
                 }
             }
+#endif
 
             return kProd;
         }
@@ -104,13 +120,27 @@ namespace UnityEngine
         {
             var kProd = Matrix3x3d.identity;
 
-            for (byte iRow = 0; iRow < 3; iRow++)
+#if (MATICES_UNROLL)
+            kProd.m[0, 0] = m.m[0, 0] * s;
+            kProd.m[0, 1] = m.m[0, 1] * s;
+            kProd.m[0, 2] = m.m[0, 2] * s;
+
+            kProd.m[1, 0] = m.m[1, 0] * s;
+            kProd.m[1, 1] = m.m[1, 1] * s;
+            kProd.m[1, 2] = m.m[1, 2] * s;
+
+            kProd.m[2, 0] = m.m[2, 0] * s;
+            kProd.m[2, 1] = m.m[2, 1] * s;
+            kProd.m[2, 2] = m.m[2, 2] * s;
+#else
+            for (byte iRow = 0; iRow < 4; iRow++)
             {
-                for (byte iCol = 0; iCol < 3; iCol++)
+                for (byte iCol = 0; iCol < 4; iCol++)
                 {
                     kProd.m[iRow, iCol] = m.m[iRow, iCol] * s;
                 }
             }
+#endif
 
             return kProd;
         }
