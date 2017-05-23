@@ -1,6 +1,6 @@
 ﻿#region License
 // Procedural planet generator.
-// 
+//  
 // Copyright (C) 2015-2017 Denis Ovchinnikov [zameran] 
 // All rights reserved.
 // 
@@ -8,7 +8,7 @@
 // modification, are permitted provided that the following conditions
 // are met:
 // 1. Redistributions of source code must retain the above copyright
-//    notice, this list of conditions and the following disclaimer.
+//     notice, this list of conditions and the following disclaimer.
 // 2. Redistributions in binary form must reproduce the above copyright
 //    notice, this list of conditions and the following disclaimer in the
 //    documentation and/or other materials provided with the distribution.
@@ -28,23 +28,47 @@
 // ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF
 // THE POSSIBILITY OF SUCH DAMAGE.
 // 
-// Creation Date: 2016.05.19
-// Creation Time: 21:42
+// Creation Date: 2017.05.04
+// Creation Time: 1:46 PM
 // Creator: zameran
 #endregion
 
 using UnityEngine;
+using UnityEngine.Rendering;
 
-public class DrawMeshTest : MonoBehaviour
+namespace SpaceEngine.Tests
 {
-    public Mesh mesh;
-
-    public Material material;
-
-    private void Update()
+    public class CommandBufferTest : MonoBehaviour
     {
-        if (mesh == null || material == null) return;
+        public Material TestMaterial;
 
-        Graphics.DrawMesh(mesh, Matrix4x4.identity, material, 0, CameraHelper.Main());
+        public Mesh TestMesh;
+
+        public CommandBuffer CMDBuffer;
+
+        private void Start()
+        {
+            CMDBuffer = new CommandBuffer();
+
+            if (TestMesh != null && TestMaterial != null)
+            {
+                for (int i = 0; i < 128; i++)
+                {
+                    var position = Random.insideUnitSphere * 100;
+                    var rotation = Random.rotationUniform;
+
+                    var TRS = Matrix4x4.TRS(position, rotation, Vector3.one);
+
+                    CMDBuffer.DrawMesh(TestMesh, TRS, TestMaterial);
+                }
+            }
+
+            CameraHelper.Main().AddCommandBuffer(CameraEvent.BeforeImageEffectsOpaque, CMDBuffer);
+        }
+
+        private void Update()
+        {
+
+        }
     }
 }

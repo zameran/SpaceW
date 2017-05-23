@@ -1,6 +1,5 @@
-﻿#region License
-// Procedural planet generator.
-//  
+﻿// Procedural planet generator.
+// 
 // Copyright (C) 2015-2017 Denis Ovchinnikov [zameran] 
 // All rights reserved.
 // 
@@ -8,7 +7,7 @@
 // modification, are permitted provided that the following conditions
 // are met:
 // 1. Redistributions of source code must retain the above copyright
-//     notice, this list of conditions and the following disclaimer.
+//    notice, this list of conditions and the following disclaimer.
 // 2. Redistributions in binary form must reproduce the above copyright
 //    notice, this list of conditions and the following disclaimer in the
 //    documentation and/or other materials provided with the distribution.
@@ -28,47 +27,67 @@
 // ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF
 // THE POSSIBILITY OF SUCH DAMAGE.
 // 
-// Creation Date: 2017.05.04
-// Creation Time: 1:46 PM
+// Creation Date: Undefined
+// Creation Time: Undefined
 // Creator: zameran
-#endregion
 
-using UnityEngine;
-using UnityEngine.Rendering;
-
-namespace SpaceEngine
+Shader "SpaceEngine/Test/TriplanarTest"
 {
-    public class CommandBufferTest : MonoBehaviour
-    {
-        public Material TestMaterial;
+	Properties
+	{
+		_TBTexture("Top/Buttom Diffuse Map", 2D) = "white" {}
+		_LRTexture("Left/Right Diffuse Map", 2D) = "white" {}
+		_FBTexture("Front/Back Diffuse Map", 2D) = "white" {}
+		_TextureScale("Texture Scale", Range(0, 32)) = 0.0
+		_TriplanarBlendSharpness("Triplanar Blend Sharpness", Range(0, 8)) = 0.0
+	}
+	SubShader
+	{
+		Tags { "RenderType"="Opaque" }
+		LOD 100
 
-        public Mesh TestMesh;
+		Pass
+		{
+			CGPROGRAM
+			#pragma vertex vert
+			#pragma fragment frag
+			
+			#include "UnityCG.cginc"
+			#include "../Core.cginc"
 
-        public CommandBuffer CMDBuffer;
+			uniform sampler2D _TBTexture;
+			uniform sampler2D _LRTexture;
+			uniform sampler2D _FBTexture;
+			uniform float _TextureScale;
+			uniform float _TriplanarBlendSharpness;
 
-        private void Start()
-        {
-            CMDBuffer = new CommandBuffer();
+			struct v2f
+			{
+				float4 vertex : SV_POSITION;
+				float2 uv : TEXCOORD0;
 
-            if (TestMesh != null && TestMaterial != null)
-            {
-                for (int i = 0; i < 128; i++)
-                {
-                    var position = Random.insideUnitSphere * 100;
-                    var rotation = Random.rotationUniform;
+				float3 worldNormal : TEXCOORD1;
+				float3 worldPosition : TEXCOORD2;
+			};
+			
+			v2f vert (appdata_base v)
+			{
+				v2f o;
 
-                    var TRS = Matrix4x4.TRS(position, rotation, Vector3.one);
+				o.vertex = UnityObjectToClipPos(v.vertex);
+				o.uv = v.texcoord.xy;
 
-                    CMDBuffer.DrawMesh(TestMesh, TRS, TestMaterial);
-                }
-            }
+				o.worldNormal = v.normal.xyz;
+				o.worldPosition = mul(UNITY_MATRIX_M, v.vertex).xyz;
 
-            CameraHelper.Main().AddCommandBuffer(CameraEvent.BeforeImageEffectsOpaque, CMDBuffer);
-        }
+				return o;
+			}
 
-        private void Update()
-        {
-
-        }
-    }
+			fixed4 frag (v2f IN) : SV_Target
+			{
+				return Triplanar(_TBTexture, _LRTexture, _FBTexture, IN.worldPosition, IN.worldNormal, float2(_TextureScale, _TriplanarBlendSharpness));
+			}
+			ENDCG
+		}
+	}
 }

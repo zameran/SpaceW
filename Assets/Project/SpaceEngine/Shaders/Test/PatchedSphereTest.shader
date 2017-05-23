@@ -31,7 +31,7 @@
 // Creation Time: Undefined
 // Creator: zameran
 
-Shader "SpaceEngine/PatchedSphereTest"
+Shader "SpaceEngine/Test/PatchedSphereTest"
 {
 	Properties
 	{
@@ -51,7 +51,7 @@ Shader "SpaceEngine/PatchedSphereTest"
 			#pragma fragment frag
 
 			#include "UnityCG.cginc"
-			#include "TCCommon.cginc"
+			#include "../TCCommon.cginc"
 
 			struct vtx_out
 			{

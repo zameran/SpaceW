@@ -31,7 +31,7 @@
 // Creation Time: Undefined
 // Creator: zameran
 
-Shader "SpaceEngine/QuadTest" 
+Shader "SpaceEngine/Test/QuadTest" 
 {
 	Properties
 	{

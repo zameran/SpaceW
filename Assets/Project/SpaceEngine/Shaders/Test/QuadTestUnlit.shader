@@ -31,7 +31,7 @@
 // Creation Time: Undefined
 // Creator: zameran
 
-Shader "SpaceEngine/QuadTestUnlit"
+Shader "SpaceEngine/Test/QuadTestUnlit"
 {
 	Properties
 	{
@@ -80,13 +80,13 @@ Shader "SpaceEngine/QuadTestUnlit"
 			#pragma multi_compile ATMOSPHERE_ON ATMOSPHERE_OFF
 
 			#include "UnityCG.cginc"
-			#include "SpaceStuff.cginc"
-			#include "Eclipses.cginc"
-			#include "TCCommon.cginc"
-			#include "HDR.cginc"
-			#include "Atmosphere.cginc"
-			#include "LogarithmicDepthBuffer.cginc"
-			#include "Ocean/OceanBRDF.cginc"
+			#include "../SpaceStuff.cginc"
+			#include "../Eclipses.cginc"
+			#include "../TCCommon.cginc"
+			#include "../HDR.cginc"
+			#include "../Atmosphere.cginc"
+			#include "../LogarithmicDepthBuffer.cginc"
+			#include "../Ocean/OceanBRDF.cginc"
 
 			struct appdata_full_compute 
 			{
@@ -438,7 +438,7 @@ Shader "SpaceEngine/QuadTestUnlit"
 			#pragma fragment fragShadowCasterModified
 
 			#include "UnityStandardShadow.cginc"
-			#include "SpaceStuff.cginc"
+			#include "../SpaceStuff.cginc"
 
 			uniform StructuredBuffer<OutputStruct> data;
 			uniform StructuredBuffer<QuadGenerationConstants> quadGenerationConstants;

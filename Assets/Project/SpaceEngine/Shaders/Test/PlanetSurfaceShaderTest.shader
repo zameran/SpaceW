@@ -1,4 +1,4 @@
-﻿Shader "SpaceEngine/PlanetSurfaceShaderTest" 
+﻿Shader "SpaceEngine/Test/PlanetSurfaceShaderTest" 
 {
 	Properties 
 	{
