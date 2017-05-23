@@ -133,7 +133,7 @@ public class ScreenshotHelper : MonoSingleton<ScreenshotHelper>
             Logger.Log(string.Format("ScreenshotHelper: Screenshot Saved. {0}", file));
         }
         else
-            Logger.Log("ScreenshotHelper: screenShotTexture is null!");
+            Logger.LogError("ScreenshotHelper: screenShotTexture is null!");
     }
 
     private void OnRenderImage(RenderTexture source, RenderTexture destination)
