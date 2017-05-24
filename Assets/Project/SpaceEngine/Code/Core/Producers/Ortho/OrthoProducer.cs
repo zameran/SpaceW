@@ -1,4 +1,5 @@
 ﻿using SpaceEngine.Core.Exceptions;
+using SpaceEngine.Core.Noise;
 using SpaceEngine.Core.Storage;
 using SpaceEngine.Core.Tile.Producer;
 using SpaceEngine.Core.Tile.Storage;
@@ -67,7 +68,7 @@ namespace SpaceEngine.Core
 
         Uniforms uniforms;
 
-        PerlinNoise Noise;
+        PerlinNoiseSimple Noise;
 
         Texture2D[] NoiseTextures;
 
@@ -96,7 +97,7 @@ namespace SpaceEngine.Core
 
             uniforms = new Uniforms();
 
-            Noise = new PerlinNoise(Seed);
+            Noise = new PerlinNoiseSimple(Seed);
 
             ResidualTexture = new Texture2D(tileSize, tileSize, TextureFormat.ARGB32, false);
             ResidualTexture.wrapMode = TextureWrapMode.Clamp;

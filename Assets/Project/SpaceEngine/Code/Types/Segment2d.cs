@@ -23,37 +23,40 @@
 // Modified by Denis Ovchinnikov 2015-2017
 #endregion
 
+using System;
+
 namespace UnityEngine
 {
-    public class Seg2d
+    [Serializable]
+    public struct Segment2d
     {
-        //One of the segment extremity.
+        /// <summary>
+        /// One of the segment extremity.
+        /// </summary>
         public Vector2d a;
 
-        //The vector joining #a to the other segment extremity.
+        /// <summary>
+        /// The vector joining <see cref="Segment2d.a"/> to the other segment extremity.
+        /// </summary>
         public Vector2d ab;
 
-        /*
-         * Creates a new segment with the given extremities.
-         *
-         * @param a a segment extremity.
-         * @param b the other segment extremity.
-         */
-
-        public Seg2d(Vector2d a, Vector2d b)
+        /// <summary>
+        /// Creates a new segment with the given extremities.
+        /// </summary>
+        /// <param name="a">A segment extremity.</param>
+        /// <param name="b">The other segment extremity.</param>
+        public Segment2d(Vector2d a, Vector2d b)
         {
             this.a = new Vector2d(a);
             this.ab = b - a;
         }
 
-        /*
-         * Returns the square distance between the given point and the line
-         * defined by this segment.
-         *
-         * @param p a point.
-         */
-
-        public double LineDistSq(Vector2d p)
+        /// <summary>
+        /// The square distance between the given point and the line, defined by this segment.
+        /// </summary>
+        /// <param name="p">The point.</param>
+        /// <returns>Returns the square distance between the given point and the line, defined by this segment.</returns>
+        public double LineDistanceSqr(Vector2d p)
         {
             var ap = p - a;
             var dotprod = ab.Dot(ap);
@@ -62,13 +65,12 @@ namespace UnityEngine
             return ap.SqrMagnitude() - projLenSq;
         }
 
-        /*
-         * Returns the square distance between the given point and this segment.
-         *
-         * @param p a point.
-         */
-
-        public double SegmentDistSq(Vector2d p)
+        /// <summary>
+        /// The square distance between the given point and this segment.
+        /// </summary>
+        /// <param name="p">The point.</param>
+        /// <returns>Returns the square distance between the given point and this segment.</returns>
+        public double SegmentDistanceSqr(Vector2d p)
         {
             var ap = p - a;
             var dotprod = ab.Dot(ap);
@@ -97,104 +99,89 @@ namespace UnityEngine
             return ap.SqrMagnitude() - projlenSq;
         }
 
-        /*
-         * Returns true if this segment intersects the given segment.
-         *
-         * @param s a segment.
-         */
-
-        public bool Intersects(Seg2d s)
+        /// <summary>
+        /// Is this segment interesects the given segment?
+        /// </summary>
+        /// <param name="s">The segment</param>
+        /// <returns>Returns true if this segment intersects the given segment.</returns>
+        public bool Intersects(Segment2d s)
         {
             var aa = s.a - a;
             var det = Vector2d.Cross(ab, s.ab);
             var t0 = Vector2d.Cross(aa, s.ab) / det;
 
-            if (t0 > 0 && t0 < 1)
+            if (t0 > 0.0 && t0 < 1.0)
             {
                 var t1 = Vector2d.Cross(aa, ab) / det;
+
                 return t1 > 0 && t1 < 1;
             }
 
             return false;
         }
 
-        /*
-         * Returns true if this segment intersects the given segment. If there
-         * is an intersection it is returned in the vector.
-         *
-         * @param s a segment.
-         * @param i where to store the intersection point, if any.
-         */
-
-        public bool Intersects(Seg2d s, ref Vector2d i)
+        /// <summary>
+        /// Is this segment intersects the given segment? If any, an intersection will be returned as vector.
+        /// </summary>
+        /// <param name="s">The segment.</param>
+        /// <param name="i">Where to store the intersection point, if any.</param>
+        /// <returns>Returns true if this segment intersects the given segment.</returns>
+        public bool Intersects(Segment2d s, ref Vector2d i)
         {
             var aa = s.a - a;
             var det = Vector2d.Cross(ab, s.ab);
             var t0 = Vector2d.Cross(aa, s.ab) / det;
 
-            if (t0 > 0 && t0 < 1)
+            if (t0 > 0.0 && t0 < 1.0)
             {
                 i = a + ab * t0;
+
                 var t1 = Vector2d.Cross(aa, ab) / det;
+
                 return t1 > 0 && t1 < 1;
             }
 
             return false;
         }
 
-        /*
-         * Returns true if this segment is inside or intersects the given
-         * bounding box.
-         *
-         * @param r a bounding box.
-         */
-
+        /// <summary>
+        /// Is this segment is inside or intersects the given bounding box?
+        /// </summary>
+        /// <param name="r">The bounding box.</param>
+        /// <returns>Returns true if this segment is inside or intersects the given bounding box.</returns>
         public bool Intersects(Box2d r)
         {
             var b = a + ab;
-            if (r.Contains(a) || r.Contains(b))
-            {
-                return true;
-            }
+
+            if (r.Contains(a) || r.Contains(b)) { return true; }
 
             var t = new Box2d(a, b);
-            if (t.xmin > r.xmax || t.xmax < r.xmin || t.ymin > r.ymax || t.ymax < r.ymin)
-            {
-                return false;
-            }
+
+            if (t.xmin > r.xmax || t.xmax < r.xmin || t.ymin > r.ymax || t.ymax < r.ymin) { return false; }
 
             var p0 = Vector2d.Cross(ab, new Vector2d(r.xmin, r.ymin) - a);
             var p1 = Vector2d.Cross(ab, new Vector2d(r.xmax, r.ymin) - a);
-            if (p1 * p0 <= 0)
-            {
-                return true;
-            }
+
+            if (p1 * p0 <= 0.0) { return true; }
 
             var p2 = Vector2d.Cross(ab, new Vector2d(r.xmin, r.ymax) - a);
-            if (p2 * p0 <= 0)
-            {
-                return true;
-            }
+
+            if (p2 * p0 <= 0.0) { return true; }
 
             var p3 = Vector2d.Cross(ab, new Vector2d(r.xmax, r.ymax) - a);
-            if (p3 * p0 <= 0)
-            {
-                return true;
-            }
+
+            if (p3 * p0 <= 0.0) { return true; }
 
             return false;
         }
 
-        /*
-         * Returns true if this segment, with the given width, contains the given
-         * point. More precisely this method returns true if the stroked path
-         * defined from this segment, with a cap "butt" style, contains the given
-         * point.
-         *
-         * @param p a point.
-         * @param w width of this segment.
-         */
-
+        /// <summary>
+        /// Is this segment, with the given width, contains the given point?
+        /// More precisely this method returns true if the stroked path defined from this segment, with a cap "butt" style, contains the given point.
+        /// </summary>
+        /// <param name="p">The point.</param>
+        /// <param name="w">The width of this segment.</param>
+        /// <returns>Returns true if this segment, with the given width, contains the given point. </returns>
         public bool Contains(Vector2d p, double w)
         {
             var ap = p - a;

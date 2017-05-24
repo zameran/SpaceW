@@ -459,18 +459,18 @@ namespace UnityEngine
 
         public static Matrix4x4d Rotate(Vector3 rotation)
         {
-            var x = new Quat(new Vector3d(1, 0, 0), rotation.x * MathUtility.Deg2Rad);
-            var y = new Quat(new Vector3d(0, 1, 0), rotation.y * MathUtility.Deg2Rad);
-            var z = new Quat(new Vector3d(0, 0, 1), rotation.z * MathUtility.Deg2Rad);
+            var x = new Quaternion4d(new Vector3d(1, 0, 0), rotation.x * MathUtility.Deg2Rad);
+            var y = new Quaternion4d(new Vector3d(0, 1, 0), rotation.y * MathUtility.Deg2Rad);
+            var z = new Quaternion4d(new Vector3d(0, 0, 1), rotation.z * MathUtility.Deg2Rad);
 
             return (z * y * x).ToMatrix4x4d();
         }
 
         public static Matrix4x4d Rotate(Vector3d rotation)
         {
-            var x = new Quat(new Vector3d(1, 0, 0), rotation.x * MathUtility.Deg2Rad);
-            var y = new Quat(new Vector3d(0, 1, 0), rotation.y * MathUtility.Deg2Rad);
-            var z = new Quat(new Vector3d(0, 0, 1), rotation.z * MathUtility.Deg2Rad);
+            var x = new Quaternion4d(new Vector3d(1, 0, 0), rotation.x * MathUtility.Deg2Rad);
+            var y = new Quaternion4d(new Vector3d(0, 1, 0), rotation.y * MathUtility.Deg2Rad);
+            var z = new Quaternion4d(new Vector3d(0, 0, 1), rotation.z * MathUtility.Deg2Rad);
 
             return (z * y * x).ToMatrix4x4d();
         }

@@ -23,10 +23,10 @@
 // Modified by Denis Ovchinnikov 2015-2017
 #endregion
 
+using System;
+
 namespace UnityEngine
 {
-    using System;
-
     public class MathUtility
     {
         public static readonly double Rad2Deg = 180.0 / Math.PI;
@@ -70,42 +70,6 @@ namespace UnityEngine
         public static double VerticalFovToHorizontalFov(double vfov, double screenWidth, double screenHeight)
         {
             return 2.0 * Math.Atan(Math.Tan(vfov * 0.5 * Deg2Rad) * screenWidth / screenHeight) * Rad2Deg;
-        }
-
-        private static bool USE_LAST = false;
-        private static float Y2;
-
-        public static void ResetGRandom()
-        {
-            USE_LAST = false;
-        }
-
-        public static float GRandom(float mean, float stdDeviation)
-        {
-            float x1, x2, w, y1;
-
-            if (USE_LAST)
-            {
-                y1 = Y2;
-                USE_LAST = false;
-            }
-            else
-            {
-                do
-                {
-                    x1 = 2.0f * Random.value - 1.0f;
-                    x2 = 2.0f * Random.value - 1.0f;
-                    w = x1 * x1 + x2 * x2;
-                }
-                while (w >= 1.0f);
-
-                w = Mathf.Sqrt((-2.0f * Mathf.Log(w)) / w);
-                y1 = x1 * w;
-                Y2 = x2 * w;
-                USE_LAST = true;
-            }
-
-            return mean + y1 * stdDeviation;
         }
     }
 }
