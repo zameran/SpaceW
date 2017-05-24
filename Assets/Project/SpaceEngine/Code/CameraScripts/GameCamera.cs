@@ -46,6 +46,9 @@ namespace SpaceEngine.Cameras
 
         public Camera CameraComponent { get { return CameraCachedComponent.Component; } }
 
+        // NOTE : A big problem can be here with a float precision, because matrices provided as is.
+        // NOTE : If matrices calculation will be provided, i.e from spherical coordinates around the body (Somesort of 'Body Space').
+
         public Matrix4x4d WorldToCameraMatrix { get; protected set; }
         public Matrix4x4d CameraToWorldMatrix { get; protected set; }
         public Matrix4x4d CameraToScreenMatrix { get; protected set; }

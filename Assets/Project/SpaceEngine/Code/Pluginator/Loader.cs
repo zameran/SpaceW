@@ -56,13 +56,13 @@ namespace SpaceEngine.Pluginator
         {
             get
             {
-                if (instance == null) { Logger.Log("Loader Instance get fail!"); }
+                if (instance == null) { Logger.LogError("Loader Instance get fail!"); }
                 return instance;
             }
             private set
             {
                 if (value != null) instance = value;
-                else Logger.Log("Loader Instance set fail!");
+                else Logger.LogError("Loader Instance set fail!");
             }
         }
 

@@ -27,36 +27,36 @@ using System.Collections.Generic;
 
 namespace SpaceEngine.Types.Containers
 {
-    public class SetQueue<VALUE>
+    public class SetQueue<TValue>
     {
-        private readonly Dictionary<VALUE, LinkedListNode<KeyValuePair<VALUE, VALUE>>> dictionary;
-        private readonly LinkedList<KeyValuePair<VALUE, VALUE>> list;
+        private readonly Dictionary<TValue, LinkedListNode<KeyValuePair<TValue, TValue>>> dictionary;
+        private readonly LinkedList<KeyValuePair<TValue, TValue>> list;
 
         public SetQueue()
         {
-            dictionary = new Dictionary<VALUE, LinkedListNode<KeyValuePair<VALUE, VALUE>>>();
-            list = new LinkedList<KeyValuePair<VALUE, VALUE>>();
+            dictionary = new Dictionary<TValue, LinkedListNode<KeyValuePair<TValue, TValue>>>();
+            list = new LinkedList<KeyValuePair<TValue, TValue>>();
         }
 
-        public SetQueue(IEqualityComparer<VALUE> comparer)
+        public SetQueue(IEqualityComparer<TValue> comparer)
         {
-            dictionary = new Dictionary<VALUE, LinkedListNode<KeyValuePair<VALUE, VALUE>>>(comparer);
-            list = new LinkedList<KeyValuePair<VALUE, VALUE>>();
+            dictionary = new Dictionary<TValue, LinkedListNode<KeyValuePair<TValue, TValue>>>(comparer);
+            list = new LinkedList<KeyValuePair<TValue, TValue>>();
         }
 
-        public bool Contains(VALUE val)
+        public bool Contains(TValue val)
         {
             return dictionary.ContainsKey(val);
         }
 
-        public void AddFirst(VALUE val)
+        public void AddFirst(TValue val)
         {
-            dictionary.Add(val, list.AddFirst(new KeyValuePair<VALUE, VALUE>(val, val)));
+            dictionary.Add(val, list.AddFirst(new KeyValuePair<TValue, TValue>(val, val)));
         }
 
-        public void AddLast(VALUE val)
+        public void AddLast(TValue val)
         {
-            dictionary.Add(val, list.AddLast(new KeyValuePair<VALUE, VALUE>(val, val)));
+            dictionary.Add(val, list.AddLast(new KeyValuePair<TValue, TValue>(val, val)));
         }
 
         public int Count()
@@ -69,17 +69,17 @@ namespace SpaceEngine.Types.Containers
             return (dictionary.Count == 0);
         }
 
-        public VALUE First()
+        public TValue First()
         {
             return list.First.Value.Value;
         }
 
-        public VALUE Last()
+        public TValue Last()
         {
             return list.Last.Value.Value;
         }
 
-        public VALUE RemoveFirst()
+        public TValue RemoveFirst()
         {
             var node = list.First;
 
@@ -89,7 +89,7 @@ namespace SpaceEngine.Types.Containers
             return node.Value.Value;
         }
 
-        public VALUE RemoveLast()
+        public TValue RemoveLast()
         {
             var node = list.Last;
 
@@ -99,7 +99,7 @@ namespace SpaceEngine.Types.Containers
             return node.Value.Value;
         }
 
-        public void Remove(VALUE val)
+        public void Remove(TValue val)
         {
             var node = dictionary[val];
 

@@ -23,10 +23,10 @@
 // Modified by Denis Ovchinnikov 2015-2017
 #endregion
 
+using System;
+
 namespace UnityEngine
 {
-    using System;
-
     [Serializable]
     public struct Vector2d
     {

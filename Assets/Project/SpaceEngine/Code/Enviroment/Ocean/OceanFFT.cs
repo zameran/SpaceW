@@ -512,10 +512,10 @@ namespace SpaceEngine.Ocean
             ComputeBuffer buffer = new ComputeBuffer(FourierGridSize * FourierGridSize, sizeof(float) * 4);
 
             buffer.SetData(spectrum01);
-            CBUtility.WriteIntoRenderTexture(Spectrum01, 4, buffer, GodManager.Instance.WriteData);
+            CBUtility.WriteIntoRenderTexture(Spectrum01, CBUtility.Channels.RGBA, buffer, GodManager.Instance.WriteData);
 
             buffer.SetData(spectrum23);
-            CBUtility.WriteIntoRenderTexture(Spectrum23, 4, buffer, GodManager.Instance.WriteData);
+            CBUtility.WriteIntoRenderTexture(Spectrum23, CBUtility.Channels.RGBA, buffer, GodManager.Instance.WriteData);
 
             buffer.Release();
 
@@ -532,7 +532,7 @@ namespace SpaceEngine.Ocean
             // Find the maximum value for slope variance
 
             buffer = new ComputeBuffer(VarianceSize * VarianceSize * VarianceSize, sizeof(float));
-            CBUtility.ReadFromRenderTexture(Variance, 1, buffer, GodManager.Instance.ReadData);
+            CBUtility.ReadFromRenderTexture(Variance, CBUtility.Channels.R, buffer, GodManager.Instance.ReadData);
 
             var varianceData = new float[VarianceSize * VarianceSize * VarianceSize];
 
@@ -590,7 +590,7 @@ namespace SpaceEngine.Ocean
             var buffer = new ComputeBuffer(FourierGridSize * FourierGridSize, sizeof(float) * 4);
 
             buffer.SetData(table);
-            CBUtility.WriteIntoRenderTexture(WTable, 4, buffer, GodManager.Instance.WriteData);
+            CBUtility.WriteIntoRenderTexture(WTable, CBUtility.Channels.RGBA, buffer, GodManager.Instance.WriteData);
             buffer.ReleaseAndDisposeBuffer();
         }
     }

@@ -33,7 +33,12 @@
 // Creator: zameran
 #endregion
 
+using System.Linq;
+using System.Collections;
+using System.Collections.Generic;
+
 using UnityEngine;
+using UnityEngine.Rendering;
 
 /// <summary>
 /// Class - extensions holder for a <see cref="Camera"/>.
@@ -120,5 +125,37 @@ public static class CameraHelper
     public static bool IsDeferred(this Camera camera)
     {
         return camera.actualRenderingPath == (RenderingPath.DeferredLighting | RenderingPath.DeferredShading);
+    }
+
+    public static int GetAntiAliasing(this Camera camera)
+    {
+        var antiAliasing = QualitySettings.antiAliasing;
+
+        if (antiAliasing == 0) { antiAliasing = 1; }
+
+        // Reset aa value to 1 in case camera is in DeferredLighting or DeferredShading Rendering Path
+        if (camera.IsDeferred()) { antiAliasing = 1; }
+
+        return antiAliasing;
+    }
+
+    public static bool CommandBufferExistByName(this Camera camera, CameraEvent evt, string name)
+    {
+        return camera.GetCommandBuffers(evt).ToList().Any((buffer) => buffer.name == name);
+    }
+
+    public static IEnumerable<CommandBuffer> GetCommandBuffersByName(this Camera camera, CameraEvent evt, string name)
+    {
+        return camera.GetCommandBuffers(evt).ToList().Where((buffer) => buffer.name == name);
+    }
+
+    public static void RemoveAllCommandBuffersByName(this Camera camera, CameraEvent evt, string name)
+    {
+        var commandBuffersToRemove = camera.GetCommandBuffersByName(evt, name);
+
+        foreach (var commandBufferToRemove in commandBuffersToRemove)
+        {
+            camera.RemoveCommandBuffer(evt, commandBufferToRemove);
+        }
     }
 }

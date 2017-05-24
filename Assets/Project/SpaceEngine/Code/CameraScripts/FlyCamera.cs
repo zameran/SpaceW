@@ -165,7 +165,7 @@ namespace SpaceEngine.Cameras
                     CurrentSpeed = Speed / 10f;
 
                 Speed += Mathf.RoundToInt(Input.GetAxis("Mouse ScrollWheel") * 100.0f);
-                Speed = Mathf.Clamp(Speed, 1.0f, 10000.0f);
+                Speed = Mathf.Clamp(Speed, 1.0f, 100000000.0f);
 
                 transform.Translate(Velocity * CurrentSpeed);
             }
@@ -201,7 +201,7 @@ namespace SpaceEngine.Cameras
                 {
                     if (Body.GetBodyDeformationType() == BodyDeformationType.Spherical)
                     {
-                        var h = (DistanceToCore - Body.Size - Body.Amplitude - (float)Body.HeightZ);
+                        var h = (DistanceToCore - Body.Size - (float)Body.HeightZ);
 
                         // TODO : Take ocean in to account...
                         //if (Body.Ocean != null && Body.OceanEnabled) h = h - Body.Ocean.OceanLevel;
@@ -213,7 +213,7 @@ namespace SpaceEngine.Cameras
                     }
                     else
                     {
-                        var h = (transform.position.z - Body.Amplitude - (float)Body.HeightZ);
+                        var h = (transform.position.z - (float)Body.HeightZ);
 
                         // TODO : Take ocean in to account...
                         //if (Body.Ocean != null && Body.OceanEnabled) h = h - Body.Ocean.OceanLevel;

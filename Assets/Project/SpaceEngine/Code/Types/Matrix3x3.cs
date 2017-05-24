@@ -118,7 +118,9 @@ namespace UnityEngine
 
         public override string ToString()
         {
-            return m[0, 0] + "," + m[0, 1] + "," + m[0, 2] + "\n" + m[1, 0] + "," + m[1, 1] + "," + m[1, 2] + "\n" + m[2, 0] + "," + m[2, 1] + "," + m[2, 2];
+            return m[0, 0] + "," + m[0, 1] + "," + m[0, 2] + "\n" + 
+                   m[1, 0] + "," + m[1, 1] + "," + m[1, 2] + "\n" + 
+                   m[2, 0] + "," + m[2, 1] + "," + m[2, 2];
         }
 
         public Matrix3x3 Transpose()
@@ -233,9 +235,9 @@ namespace UnityEngine
 
         public static Matrix3x3 Rotate(Vector3 rotation)
         {
-            var x = new Quat(new Vector3d(1, 0, 0), rotation.x * MathUtility.Deg2Rad);
-            var y = new Quat(new Vector3d(0, 1, 0), rotation.y * MathUtility.Deg2Rad);
-            var z = new Quat(new Vector3d(0, 0, 1), rotation.z * MathUtility.Deg2Rad);
+            var x = new Quaternion4d(new Vector3d(1, 0, 0), rotation.x * MathUtility.Deg2Rad);
+            var y = new Quaternion4d(new Vector3d(0, 1, 0), rotation.y * MathUtility.Deg2Rad);
+            var z = new Quaternion4d(new Vector3d(0, 0, 1), rotation.z * MathUtility.Deg2Rad);
 
             return (z * y * x).ToMatrix3x3();
         }

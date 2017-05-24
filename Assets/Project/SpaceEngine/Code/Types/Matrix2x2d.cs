@@ -111,7 +111,8 @@ namespace UnityEngine
 
         public override string ToString()
         {
-            return m[0, 0] + "," + m[0, 1] + "\n" + m[1, 0] + "," + m[1, 1];
+            return m[0, 0] + "," + m[0, 1] + "\n" + 
+                   m[1, 0] + "," + m[1, 1];
         }
 
         public Matrix2x2d Transpose()

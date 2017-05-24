@@ -41,6 +41,18 @@
 #define M_PI2 6.28318530716
 #endif
 
+#if !defined (EPSILON)
+#define EPSILON 1e-10
+#endif
+
+#if !defined (M_PHI)
+#define M_PHI 1.61803398875
+#endif
+
+#if !defined (M_SQRT5)
+#define M_SQRT5 2.2360679775
+#endif
+
 float2 Complex(float2 z) 
 {
 	return float2(-z.y, z.x); // returns i times z (complex number)
@@ -102,4 +114,25 @@ float IntersectOuterSphereInverted(float3 p1, float3 d, float3 p3, float r)
 	if (test < 0) return -1.0;
 			
 	return (-b + sqrt(test)) / (2.0 * a);
+}
+
+float4 Blur(sampler2D inputTexture, float2 inputUV, float inputStep = 0.00015f)
+{
+	float2 blurCoordinates[5];
+
+	blurCoordinates[0] = inputUV.xy;
+	blurCoordinates[1] = inputUV.xy + inputStep * 1.407333;
+	blurCoordinates[2] = inputUV.xy - inputStep * 1.407333;
+	blurCoordinates[3] = inputUV.xy + inputStep * 3.294215;
+	blurCoordinates[4] = inputUV.xy - inputStep * 3.294215;
+
+	float4 bluredColor = float4(0, 0, 0, 0);
+
+	bluredColor += tex2D(inputTexture, blurCoordinates[0]) * 0.204164;
+	bluredColor += tex2D(inputTexture, blurCoordinates[1]) * 0.304005;
+	bluredColor += tex2D(inputTexture, blurCoordinates[2]) * 0.304005;
+	bluredColor += tex2D(inputTexture, blurCoordinates[3]) * 0.093913;
+	bluredColor += tex2D(inputTexture, blurCoordinates[4]) * 0.093913;
+
+	return bluredColor;
 }

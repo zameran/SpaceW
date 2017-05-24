@@ -188,8 +188,7 @@ namespace SpaceEngine.Core
             ColorMaterial.SetVector("_Offset", offset.ToVector4());
             ColorMaterial.SetMatrix("_LocalToWorld", TerrainNode.FaceToLocal.ToMatrix4x4());
 
-            if (TerrainNode.ParentBody.NPS != null) TerrainNode.ParentBody.NPS.SetUniforms(ColorMaterial);
-            if (TerrainNode.ParentBody.TCCPS != null) TerrainNode.ParentBody.TCCPS.UpdateUniforms(ColorMaterial);
+            if (TerrainNode.ParentBody.TCCPS != null) TerrainNode.ParentBody.TCCPS.SetUniforms(ColorMaterial);
 
             Graphics.Blit(null, gpuSlot.Texture, ColorMaterial);
 

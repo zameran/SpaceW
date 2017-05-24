@@ -58,6 +58,11 @@ namespace SpaceEngine.Debugging
             Draw();
         }
 
+        protected virtual void OnDestroy()
+        {
+            Helper.Destroy(lineMaterial);
+        }
+
         protected virtual void CreateLineMaterial()
         {
             if (lineShader == null) throw new System.NullReferenceException("Line Shader is null!");

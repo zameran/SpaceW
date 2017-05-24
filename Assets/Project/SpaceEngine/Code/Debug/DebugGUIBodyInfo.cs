@@ -70,7 +70,18 @@ namespace SpaceEngine.Debugging
 
                 GUILayout.Label("Body parameters: ", BoldLabelStyle);
 
-                GUILayout.Label("Nothing here!");
+                if (Body.MaterialTable != null && Body.MaterialTable.Lut != null)
+                {
+                    GUILayout.Label("Material Table: ");
+                    GUILayout.BeginVertical("", GUISkin.box);
+                    {
+                        GUILayoutExtensions.Horizontal(() =>
+                        {
+                            GUILayout.Label(Body.MaterialTable.Lut);
+                        });
+                    }
+                    GUILayout.EndVertical();
+                }
 
                 GUILayout.EndVertical();
 
@@ -98,6 +109,25 @@ namespace SpaceEngine.Debugging
                     GUILayout.BeginVertical();
 
                     GUILayoutExtensions.LabelWithSpace("No Atmosphere!?", -8);
+
+                    GUILayout.EndVertical();
+                }
+
+                if (Body.Ocean != null && Helper.Enabled(Body.Ocean))
+                {
+                    GUILayout.BeginVertical();
+
+                    GUILayout.Label("Ocean parameters: ", BoldLabelStyle);
+
+                    GUILayout.Label("Nothing there!");
+
+                    GUILayout.EndVertical();
+                }
+                else
+                {
+                    GUILayout.BeginVertical();
+
+                    GUILayoutExtensions.LabelWithSpace("No Ocean!?", -8);
 
                     GUILayout.EndVertical();
                 }

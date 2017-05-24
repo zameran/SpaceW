@@ -27,16 +27,20 @@ namespace UnityEngine
 {
     public class Frustum
     {
-        public enum VISIBILITY
+        public enum VISIBILITY : byte
         {
             FULLY = 0,
             PARTIALLY = 1,
             INVISIBLE = 3
         };
 
+        /// <summary>
+        /// Extract the frustum planes from a projection matrix.
+        /// </summary>
+        /// <param name="mat">The projection matrix.</param>
+        /// <returns>Returns frustum planes extracted from specified projection matrix.</returns>
         public static Vector4d[] GetFrustumPlanes(Matrix4x4d mat)
         {
-            //extract frustum planes from a projection matrix
             var frustumPlanes = new Vector4d[6];
 
             // Extract the LEFT plane
@@ -84,9 +88,13 @@ namespace UnityEngine
             return frustumPlanes;
         }
 
+        /// <summary>
+        /// Extract the frustum planes from a projection matrix.
+        /// </summary>
+        /// <param name="mat">The projection matrix.</param>
+        /// <returns>Returns frustum planes extracted from specified projection matrix.</returns>
         public static Vector4d[] GetFrustumPlanes(Matrix4x4 mat)
         {
-            //extract frustum planes from a projection matrix 
             var frustumPlanes = new Vector4d[6];
 
             // Extract the LEFT plane 
@@ -174,7 +182,7 @@ namespace UnityEngine
             return VISIBILITY.PARTIALLY;
         }
 
-        static VISIBILITY GetVisibility(Vector4d clip, Box3d box)
+        private static VISIBILITY GetVisibility(Vector4d clip, Box3d box)
         {
             double x0 = box.xmin * clip.x;
             double x1 = box.xmax * clip.x;

@@ -68,7 +68,7 @@ namespace SpaceEngine.Core.Tile.Storage
         /// <summary>
         /// The total number of slots managed by this <see cref="TileStorage"/>. This includes both unused and used tiles.
         /// </summary>
-        public int Capacity { get; protected set; }
+        public ushort Capacity { get; protected set; }
 
         public Slot[] Slots;
 
@@ -138,7 +138,7 @@ namespace SpaceEngine.Core.Tile.Storage
         /// </summary>
         public void Release()
         {
-            for (int i = 0; i < Capacity; i++)
+            for (ushort i = 0; i < Capacity; i++)
             {
                 Slots[i].Release();
             }
@@ -146,7 +146,7 @@ namespace SpaceEngine.Core.Tile.Storage
 
         public void Clear()
         {
-            for (int i = 0; i < Capacity; i++)
+            for (ushort i = 0; i < Capacity; i++)
             {
                 Slots[i].Clear();
             }

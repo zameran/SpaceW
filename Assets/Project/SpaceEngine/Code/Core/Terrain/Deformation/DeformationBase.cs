@@ -150,7 +150,7 @@ namespace SpaceEngine.Core.Terrain.Deformation
             localToCamera = GodManager.Instance.WorldToCamera * node.LocalToWorld;
             localToScreen = GodManager.Instance.CameraToScreen * localToCamera;
 
-            var ltot = DeformedToTangentFrame((Vector3d)GodManager.Instance.WorldCameraPos) * node.LocalToWorld * LocalToDeformedDifferential(node.LocalCameraPosition);
+            var ltot = DeformedToTangentFrame(GodManager.Instance.WorldCameraPos) * node.LocalToWorld * LocalToDeformedDifferential(node.LocalCameraPosition);
 
             localToTangent = new Matrix3x3d(ltot.m[0, 0], ltot.m[0, 1], ltot.m[0, 3], ltot.m[1, 0], ltot.m[1, 1], ltot.m[1, 3], ltot.m[3, 0], ltot.m[3, 1], ltot.m[3, 3]);
 

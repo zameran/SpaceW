@@ -58,7 +58,8 @@ namespace SpaceEngine.Core.Debugging
         Gameplay = 10,
         External = 11,
         Other = 12,
-        Graphics = 13
+        Graphics = 13,
+        Error = 14
     };
 
     public sealed class LoggerPalette
@@ -79,6 +80,7 @@ namespace SpaceEngine.Core.Debugging
             {Category.External, XKCDColors.Brownish},
             {Category.Other, XKCDColors.DirtyGreen},
             {Category.Graphics, XKCDColors.BrightRed},
+            {Category.Error, XKCDColors.Violet}
         };
 
         public Color GetColorFromCategory(Category category)
@@ -119,7 +121,43 @@ namespace SpaceEngine.Core.Debugging
 
         private static LoggerPalette Palette = new LoggerPalette();
 
-        //TODO: DoWork cashing in to temp array. Infinite cycle will save (write to file) cache.
+        // TODO : DoWork cashing in to temp array. Infinite cycle will save (write to file) cache.
+        // TODO : Refactor this bicycle.
+
+        public static void LogError(object obj)
+        {
+            var shouldDump = false;
+            var logFileNamePrefixes = new string[0];
+
+            var frame = new System.Diagnostics.StackFrame(1, true);
+            var declaringType = frame.GetMethod().DeclaringType;
+
+            if (declaringType == null)
+            {
+                shouldDump = false;
+
+                Debug.LogWarning("Logger: Declaring type is null!");
+
+                return;
+            }
+
+            var loggerFileClassAttributes = declaringType.GetCustomAttributes(typeof(UseLoggerFile), true) as UseLoggerFile[];
+
+            if (loggerFileClassAttributes != null && loggerFileClassAttributes.Length != 0)
+            {
+                logFileNamePrefixes = loggerFileClassAttributes[0].LogFileNamePrefixes;
+
+                shouldDump = true;
+            }
+            else
+            { shouldDump = false; }
+
+            DebugCategory = Category.Error;
+            DebuggerActive = true;
+
+            DoWork(obj, shouldDump, logFileNamePrefixes);
+        }
+
         public static void Log(object obj)
         {
             var shouldDump = false;
@@ -132,7 +170,7 @@ namespace SpaceEngine.Core.Debugging
             {
                 shouldDump = false;
 
-                Debug.Log("Logger: Declaring type is null!");
+                Debug.LogWarning("Logger: Declaring type is null!");
 
                 return;
             }

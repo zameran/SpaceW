@@ -46,9 +46,9 @@ namespace SpaceEngine.Core.Bodies
         public Ring Ring;
 
         public List<Shadow> Shadows = new List<Shadow>();
-
+        
         public bool RingEnabled = true;
-
+        
         public Texture2D GroundDiffuse;
         public Texture2D GroundNormal;
         public Texture2D DetailedNormal;
@@ -204,14 +204,6 @@ namespace SpaceEngine.Core.Bodies
 
         protected override void UpdateNode()
         {
-            if (Ring != null)
-            {
-                if (RingEnabled)
-                {
-                    Ring.Render();
-                }
-            }
-
             base.UpdateNode();
         }
 
@@ -233,6 +225,23 @@ namespace SpaceEngine.Core.Bodies
         protected override void OnDestroy()
         {
             base.OnDestroy();
+        }
+
+        #endregion
+
+        #region IRenderable
+
+        public override void Render(int layer = 0)
+        {
+            if (Ring != null)
+            {
+                if (RingEnabled)
+                {
+                    Ring.Render();
+                }
+            }
+
+            base.Render(layer);
         }
 
         #endregion

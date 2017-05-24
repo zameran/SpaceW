@@ -35,6 +35,15 @@
 
 namespace SpaceEngine.Core.Patterns.Strategy.Uniformed
 {
+    public interface IUniformed
+    {
+        void InitUniforms();
+
+        void SetUniforms();
+
+        void InitSetUniforms();
+    }
+
     /// <summary>
     /// This interface should be implemented in all things, that's gonna manipulate with 
     /// <see cref="UnityEngine.Material"/> and <see cref="UnityEngine.Shader"/>, or <see cref="UnityEngine.MaterialPropertyBlock"/> uniforms.

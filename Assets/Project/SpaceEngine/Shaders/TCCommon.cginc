@@ -133,24 +133,8 @@ uniform float noiseRidgeSmooth;// = 0.0001;
 //-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
-#if !defined (M_PI)
-#define M_PI 3.14159265358
-#endif
-
-#if !defined (M_PI2)
-#define M_PI2 6.28318530716
-#endif
-
-#if !defined (EPSILON)
-#define EPSILON  1e-10
-#endif
-
-#if !defined (M_PHI)
-#define M_PHI  1.61803398875
-#endif
-
-#if !defined (M_SQRT5)
-#define M_SQRT5 2.2360679775
+#if !defined (MATH)
+#include "Math.cginc"
 #endif
 //-----------------------------------------------------------------------------
 

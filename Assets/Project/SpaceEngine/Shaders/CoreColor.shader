@@ -42,7 +42,6 @@
 				
 			float3 P = float3(vert, _Offset.w);
 			float3 p = normalize(mul(_LocalToWorld, P)).xyz;
-			float3 v = p;
 			
 			float slope = tex2D(_NormalsSampler, IN.uv0 + _NormalsOSL.xy).w;
 			float height = tex2D(_ElevationSampler, IN.uv0 + _ElevationOSL.xy).w;
@@ -50,10 +49,10 @@
 			slope = saturate((2.0 * slope - 0.5) * smoothstep(4, 8, _Level)); // NOTE : Limit slope in case of very strong normals on low LOD levels...
 			height = saturate(height);
 
-			//float3 color = ColorMapAsteroid(v, height, slope);
-			float3 color = ColorMapPlanet(v, height, slope);
-			//float3 color = ColorMapSelena(v, height,  slope);
-			//float3 color = ColorMapTerra(v, height, slope);
+			//float3 color = ColorMapAsteroid(p, height, slope);
+			float3 color = ColorMapPlanet(p, height, slope);
+			//float3 color = ColorMapSelena(p, height,  slope);
+			//float3 color = ColorMapTerra(p, height, slope);
 			
 			output = float4(saturate(color), 1);
 		}

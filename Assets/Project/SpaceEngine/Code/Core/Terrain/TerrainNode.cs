@@ -1,5 +1,7 @@
 ﻿using SpaceEngine.Core.Bodies;
+using SpaceEngine.Core.Patterns.Strategy.Uniformed;
 using SpaceEngine.Core.Terrain.Deformation;
+using SpaceEngine.Core.Tile.Producer;
 using SpaceEngine.Core.Tile.Samplers;
 
 using System;
@@ -37,7 +39,7 @@ namespace SpaceEngine.Core.Terrain
     /// The terrain data must be managed by <see cref="Tile.Producer.TileProducer"/>, and stored in TileStorage. 
     /// The link between with the terrain quadtree is provided by the TileSampler class.
     /// </summary>
-    public class TerrainNode : Node<TerrainNode>
+    public class TerrainNode : Node<TerrainNode>, IUniformed<Material>
     {
         public Body ParentBody { get; set; }
 
@@ -175,9 +177,7 @@ namespace SpaceEngine.Core.Terrain
                 LocalToWorld = Matrix4x4d.ToMatrix4x4d(celestialBody.transform.localToWorldMatrix) * FaceToLocal;
                 Deformation = new DeformationSpherical(celestialBody.Size);
 
-                TerrainMaterial.SetTexture("_Ground_Diffuse", celestialBody.GroundDiffuse);
-                TerrainMaterial.SetTexture("_Ground_Normal", celestialBody.GroundNormal);
-                TerrainMaterial.SetTexture("_DetailedNormal", celestialBody.DetailedNormal);
+                InitUniforms(TerrainMaterial);
 
                 if (celestialBody.Atmosphere != null)
                 {
@@ -193,6 +193,16 @@ namespace SpaceEngine.Core.Terrain
             CreateTerrainQuadRoot(ParentBody.Size);
 
             SamplersOrder = new TileSamplerOrder(GetComponentsInChildren<TileSampler>());
+
+            var producers = GetComponentsInChildren<TileProducer>();
+            var lastProducer = producers[producers.Length - 1];
+
+            if (lastProducer.IsLastInSequence == false)
+            {
+                lastProducer.IsLastInSequence = true;
+
+                Debug.Log(string.Format("{0} probably last in generation sequence, but maybe accidentally not marked as. Fixed!", lastProducer.name));
+            }
         }
 
         protected override void UpdateNode()
@@ -207,11 +217,10 @@ namespace SpaceEngine.Core.Terrain
             }
 
             var localToCamera = GodManager.Instance.WorldToCamera * LocalToWorld;
-            var localToScreen = GodManager.Instance.CameraToScreen * localToCamera;
             var invLocalToCamera = localToCamera.Inverse();
 
-            DeformedCameraPosition = invLocalToCamera * Vector3d.zero; // TODO : Really? zero?
-            DeformedFrustumPlanes = Frustum.GetFrustumPlanes(localToScreen);
+            DeformedCameraPosition = invLocalToCamera * Vector3d.zero;
+            DeformedFrustumPlanes = Frustum.GetFrustumPlanes(GodManager.Instance.CameraToScreen * localToCamera); // NOTE : Extract frustum planes from LocalToScreen matrix...
             LocalCameraPosition = Deformation.DeformedToLocal(DeformedCameraPosition);
 
             var m = Deformation.LocalToDeformedDifferential(LocalCameraPosition, true);
@@ -245,16 +254,7 @@ namespace SpaceEngine.Core.Terrain
 
             TerrainQuadRoot.UpdateLOD();
 
-            if (ParentBody.GetBodyDeformationType() == BodyDeformationType.Spherical)
-            {
-                var celestialBody = ParentBody as CelestialBody;
-
-                if (celestialBody == null) { throw new Exception("Wow! Celestial body isn't Celestial?!"); }
-
-                TerrainMaterial.SetTexture("_Ground_Diffuse", celestialBody.GroundDiffuse);
-                TerrainMaterial.SetTexture("_Ground_Normal", celestialBody.GroundNormal);
-                TerrainMaterial.SetTexture("_DetailedNormal", celestialBody.DetailedNormal);
-            }
+            SetUniforms(TerrainMaterial);
 
             if (ParentBody.AtmosphereEnabled)
             {
@@ -306,6 +306,41 @@ namespace SpaceEngine.Core.Terrain
             Helper.Destroy(TerrainMaterial);
 
             base.OnDestroy();
+        }
+
+        #endregion
+
+        #region IUniformed<Material>
+
+        public void InitUniforms(Material target)
+        {
+            if (target == null) return;
+        }
+
+        public void SetUniforms(Material target)
+        {
+            if (target == null) return;
+
+            if (ParentBody.GetBodyDeformationType() == BodyDeformationType.Spherical)
+            {
+                var celestialBody = ParentBody as CelestialBody;
+
+                if (celestialBody == null) { throw new Exception("Wow! Celestial body isn't Celestial?!"); }
+
+                target.SetTexture("_Ground_Diffuse", celestialBody.GroundDiffuse);
+                target.SetTexture("_Ground_Normal", celestialBody.GroundNormal);
+                target.SetTexture("_DetailedNormal", celestialBody.DetailedNormal);
+            }
+        }
+
+        #endregion
+
+        #region IUniformed
+
+        public void InitSetUniforms()
+        {
+            InitUniforms(TerrainMaterial);
+            SetUniforms(TerrainMaterial);
         }
 
         #endregion

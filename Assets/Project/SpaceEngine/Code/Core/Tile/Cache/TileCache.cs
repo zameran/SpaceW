@@ -44,7 +44,7 @@ namespace SpaceEngine.Core.Tile.Cache
         /// The total number of slots managed by the TileStorage attached to the cache.
         /// </summary>
         [SerializeField]
-        public int Capacity = 1296;
+        public ushort Capacity = 1296;
 
         /// <summary>
         /// The storage to store the tiles data.

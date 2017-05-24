@@ -46,7 +46,7 @@ namespace SpaceEngine.Core.Storage
             // NOTE : Size is sqaured as the array is 2D (but stored as a 1D array)
             var size = TileSize * TileSize * Channels;
 
-            for (var i = 0; i < Capacity; i++)
+            for (ushort i = 0; i < Capacity; i++)
             {
                 switch ((int)DataType)
                 {

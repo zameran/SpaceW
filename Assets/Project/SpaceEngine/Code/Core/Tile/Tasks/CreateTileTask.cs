@@ -51,12 +51,12 @@ namespace SpaceEngine.Core.Tile.Tasks
         {
             if (IsDone)
             {
-                Debug.Log("Task has already been run, task will not run!");
+                Debug.Log(string.Format("Task for {0} at {1}:{2}:{3} has already been run. This task will not proceed!", Owner.GetType().Name, Level, Tx, Ty));
 
                 return;
             }
 
-            if (GodManager.Instance.DelayedCalculations)
+            if (GodManager.Instance.DelayedCalculations && !Owner.IsLastInSequence)
             {
                 Owner.StartCoroutine(Owner.DoCreateTileCoroutine(Level, Tx, Ty, Slot, () =>
                 {

@@ -40,6 +40,11 @@ namespace SpaceEngine.Core.Tile.Producer
         public bool IsGPUProducer = true;
 
         /// <summary>
+        /// Does this producer calculaed as last one?
+        /// </summary>
+        public bool IsLastInSequence = false;
+
+        /// <summary>
         /// Layers, that may modify the tile created by this producer and are optional.
         /// </summary>
         public TileLayer[] Layers { get; protected set; }
@@ -254,9 +259,21 @@ namespace SpaceEngine.Core.Tile.Producer
         /// <param name="Callback">Callback after all. Finish the task here and do some extra post-calculation work.</param>
         public virtual IEnumerator DoCreateTileCoroutine(int level, int tx, int ty, List<TileStorage.Slot> slot, Action Callback)
         {
-            // TODO : Should wait, until parented producers complete their work...
-            // So, now i have a special order list of sorted samplers.
-            // What i need to do, is determinate current task/tile/sampler priority and wait for all of producers, wich have the lower prior. 
+            var samplersOrder = TerrainNode.SamplersOrder;
+            var currentIndexInSamplerQueue = samplersOrder.OrderList.IndexOf(Sampler);
+            var samplersToWait = samplersOrder.OrderList.GetRange(0, currentIndexInSamplerQueue);
+
+            if (currentIndexInSamplerQueue != 0)
+            {
+                foreach (var samplerToWait in samplersToWait)
+                {
+                    do
+                    {
+                        yield return Yielders.EndOfFrame;
+                    }
+                    while (samplerToWait.Producer.FindTile(level, tx, ty, false, true) == null);
+                }
+            }
 
             this.DoCreateTile(level, tx, ty, slot); // Do our work...
 

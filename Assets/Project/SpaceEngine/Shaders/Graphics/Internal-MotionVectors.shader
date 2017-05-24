@@ -32,15 +32,13 @@ Shader "Hidden/Internal-MotionVectors"
 
 			// this works around an issue with dynamic batching
 			// potentially remove in 5.4 when we use instancing
-			#if defined(UNITY_REVERSED_Z)
-				o.pos.z -= _MotionVectorDepthBias * o.pos.w;
-			#else
-				o.pos.z += _MotionVectorDepthBias * o.pos.w;
-			#endif
-
+#if defined(UNITY_REVERSED_Z)
+			o.pos.z -= _MotionVectorDepthBias * o.pos.w;
+#else
+			o.pos.z += _MotionVectorDepthBias * o.pos.w;
+#endif
 			o.transferPos = mul(_NonJitteredVP, mul(unity_ObjectToWorld, v.vertex));
 			o.transferPosOld = mul(_PreviousVP, mul(_PreviousM, _HasLastPositionData ? float4(v.oldPos, 1) : v.vertex));
-
 			return o;
 		}
 
@@ -53,13 +51,11 @@ Shader "Hidden/Internal-MotionVectors"
 			float2 vPos = (hPos.xy + 1.0f) / 2.0f;
 			float2 vPosOld = (hPosOld.xy + 1.0f) / 2.0f;
 
-			#if UNITY_UV_STARTS_AT_TOP
-				vPos.y = 1.0 - vPos.y;
-				vPosOld.y = 1.0 - vPosOld.y;
-			#endif
-
+#if UNITY_UV_STARTS_AT_TOP
+			vPos.y = 1.0 - vPos.y;
+			vPosOld.y = 1.0 - vPosOld.y;
+#endif
 			half2 uvDiff = vPos - vPosOld;
-
 			return half4(uvDiff, 0, 1);
 		}
 
@@ -78,15 +74,13 @@ Shader "Hidden/Internal-MotionVectors"
 			CamMotionVectors o;
 			o.pos = UnityObjectToClipPos(vertex);
 
-			#ifdef UNITY_HALF_TEXEL_OFFSET
-				o.pos.xy += (_ScreenParams.zw - 1.0) * float2(-1, 1) * o.pos.w;
-			#endif
-
+#ifdef UNITY_HALF_TEXEL_OFFSET
+			o.pos.xy += (_ScreenParams.zw - 1.0) * float2(-1, 1) * o.pos.w;
+#endif
 			o.uv = ComputeScreenPos(o.pos);
 			// we know we are rendering a quad,
 			// and the normal passed from C++ is the raw ray.
 			o.ray = normal;
-
 			return o;
 		}
 		
@@ -106,28 +100,23 @@ Shader "Hidden/Internal-MotionVectors"
 			// V is the viewport position at this pixel in the range 0 to 1.
 			float2 vPosPrev = (prevHPos.xy + 1.0f) / 2.0f;
 			float2 vPosCur = (curHPos.xy + 1.0f) / 2.0f;
-
-			#if UNITY_UV_STARTS_AT_TOP
-				vPosPrev.y = 1.0 - vPosPrev.y;
-				vPosCur.y = 1.0 - vPosCur.y;
-			#endif
-
+#if UNITY_UV_STARTS_AT_TOP
+			vPosPrev.y = 1.0 - vPosPrev.y;
+			vPosCur.y = 1.0 - vPosCur.y;
+#endif
 			return vPosCur - vPosPrev;
 		}
 
 		half4 FragMotionVectorsCamera(CamMotionVectors i) : SV_Target
 		{
-			float depth = SAMPLE_DEPTH_TEXTURE(_CameraDepthTexture, i.uv);
-
+ 			float depth = SAMPLE_DEPTH_TEXTURE(_CameraDepthTexture, i.uv);
 			return half4(CalculateMotion(depth, i.uv, i.ray), 0, 1);
 		}
 
 		half4 FragMotionVectorsCameraWithDepth(CamMotionVectors i, out float outDepth : SV_Depth) : SV_Target
 		{
 			float depth = SAMPLE_DEPTH_TEXTURE(_CameraDepthTexture, i.uv);
-
 			outDepth = depth;
-
 			return half4(CalculateMotion(depth, i.uv, i.ray), 0, 1);
 		}
 		ENDCG
@@ -135,7 +124,7 @@ Shader "Hidden/Internal-MotionVectors"
 		// 0 - Motion vectors
 		Pass
 		{
-			Tags { "LightMode" = "MotionVectors" }
+			Tags{ "LightMode" = "MotionVectors" }
 			
 			ZTest LEqual
 			Cull Back
@@ -173,5 +162,6 @@ Shader "Hidden/Internal-MotionVectors"
 			ENDCG
 		}
 	}
+
 	Fallback Off
 }

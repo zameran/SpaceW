@@ -1,9 +1,11 @@
 ﻿using SpaceEngine.Core.Exceptions;
+using SpaceEngine.Core.Noise;
 using SpaceEngine.Core.Storage;
 using SpaceEngine.Core.Tile.Producer;
 using SpaceEngine.Core.Tile.Storage;
 
 using System;
+using System.Collections;
 using System.Collections.Generic;
 
 using UnityEngine;
@@ -16,14 +18,14 @@ namespace SpaceEngine.Core
     {
         public class Uniforms
         {
-            public int tileWidth, coarseLevelSampler, coarseLevelOSL;
+            public int tileWSD, coarseLevelSampler, coarseLevelOSL;
             public int noiseSampler, noiseUVLH, noiseColor;
             public int noiseRootColor;
             public int residualOSH, residualSampler;
 
             public Uniforms()
             {
-                tileWidth = Shader.PropertyToID("_TileWidth");
+                tileWSD = Shader.PropertyToID("_TileWSD");
                 coarseLevelSampler = Shader.PropertyToID("_CoarseLevelSampler");
                 coarseLevelOSL = Shader.PropertyToID("_CoarseLevelOSL");
                 noiseSampler = Shader.PropertyToID("_NoiseSampler");
@@ -66,7 +68,7 @@ namespace SpaceEngine.Core
 
         Uniforms uniforms;
 
-        PerlinNoise Noise;
+        PerlinNoiseSimple Noise;
 
         Texture2D[] NoiseTextures;
 
@@ -95,7 +97,7 @@ namespace SpaceEngine.Core
 
             uniforms = new Uniforms();
 
-            Noise = new PerlinNoise(Seed);
+            Noise = new PerlinNoiseSimple(Seed);
 
             ResidualTexture = new Texture2D(tileSize, tileSize, TextureFormat.ARGB32, false);
             ResidualTexture.wrapMode = TextureWrapMode.Clamp;
@@ -126,6 +128,14 @@ namespace SpaceEngine.Core
             var tileWidth = gpuSlot.Owner.TileSize;
             var tileSize = tileWidth - (GetBorder() * 2);
 
+            var rootQuadSize = TerrainNode.TerrainQuadRoot.Length;
+
+            var tileWSD = Vector4.zero;
+            tileWSD.x = (float)tileWidth;
+            tileWSD.y = (float)rootQuadSize / (float)(1 << level) / (float)tileSize;
+            tileWSD.z = (float)tileSize / (float)(TerrainNode.ParentBody.GridResolution - 1);
+            tileWSD.w = 0.0f;
+
             GPUTileStorage.GPUSlot parentGpuSlot = null;
 
             if (level > 0)
@@ -145,7 +155,7 @@ namespace SpaceEngine.Core
                 throw new NullReferenceException("parentGpuSlot");
             }
 
-            UpSampleMaterial.SetFloat(uniforms.tileWidth, tileWidth);
+            UpSampleMaterial.SetVector(uniforms.tileWSD, tileWSD);
 
             if (level > 0)
             {
@@ -278,6 +288,20 @@ namespace SpaceEngine.Core
             Graphics.Blit(null, gpuSlot.Texture, UpSampleMaterial);
 
             base.DoCreateTile(level, tx, ty, slot);
+        }
+
+        public override IEnumerator DoCreateTileCoroutine(int level, int tx, int ty, List<TileStorage.Slot> slot, Action Callback)
+        {
+            if (level > 0)
+            {
+                do
+                {
+                    yield return Yielders.EndOfFrame;
+                }
+                while (FindTile(level - 1, tx / 2, ty / 2, false, true) == null);
+            }
+
+            yield return base.DoCreateTileCoroutine(level, tx, ty, slot, Callback);
         }
 
         private void CreateOrthoNoise()

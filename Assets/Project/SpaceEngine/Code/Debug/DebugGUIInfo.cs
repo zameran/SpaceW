@@ -48,7 +48,8 @@ namespace SpaceEngine.Debugging
             "Left Shift for more speed.",
             "Left Control for even more speed.",
             "Left Shift + Left Control for speed of God.",
-            "Left Alt for less speed."
+            "Left Alt for less speed.",
+            "F12 to capture screenshot."
         };
 
         private readonly string[] InfoAdditional = new string[]

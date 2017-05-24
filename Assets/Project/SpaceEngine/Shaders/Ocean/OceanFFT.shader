@@ -25,29 +25,14 @@
 			#include "../Atmosphere.cginc"
 			#include "OceanBRDF.cginc"
 			#include "OceanDisplacement.cginc"
-			
-			uniform float4x4 _Globals_WorldToScreen;
 
-			uniform float2 _Ocean_MapSize;
-			uniform float4 _Ocean_Choppyness;
-			uniform float3 _Ocean_SunDir;
 			uniform float3 _Ocean_Color;
-			uniform float4 _Ocean_GridSizes;
-			uniform float2 _Ocean_ScreenGridSize;
-			uniform sampler3D _Ocean_Variance;
-			uniform sampler2D _Ocean_Map0;
-			uniform sampler2D _Ocean_Map1;
-			uniform sampler2D _Ocean_Map2;
-			uniform sampler2D _Ocean_Map3;
-			uniform sampler2D _Ocean_Map4;
-			
-			uniform sampler2D _Sky_Map;
 			
 			struct v2f 
 			{
-				float4  pos : SV_POSITION;
-				float2  oceanU : TEXCOORD0;
-				float3  oceanP : TEXCOORD1;
+				float4 pos : SV_POSITION;
+				float2 oceanU : TEXCOORD0;
+				float3 oceanP : TEXCOORD1;
 			};
 			
 			v2f vert(appdata_base v)
@@ -57,7 +42,7 @@
 				
 				float4 vert = v.vertex;
 				vert.xy *= 1.25;
-			
+
 				float2 u = OceanPos(vert, _Globals_ScreenToCamera, t, cameraDir, oceanDir);
 				float2 dux = OceanPos(vert + float4(_Ocean_ScreenGridSize.x, 0.0, 0.0, 0.0), _Globals_ScreenToCamera) - u;
 				float2 duy = OceanPos(vert + float4(0.0, _Ocean_ScreenGridSize.y, 0.0, 0.0), _Globals_ScreenToCamera) - u;
@@ -82,6 +67,12 @@
 				v2f OUT;
 				
 				float3x3 otoc = _Ocean_OceanToCamera;
+
+				#ifdef OCEAN_ONLY_SPHERICAL
+					float tClamped = clamp(t * 0.25, 0.0, 1.0);
+					dP = lerp(float3(0.0, 0.0, -0.1), dP, tClamped);
+				#endif
+
 				float4 screenP = float4(t * cameraDir + mul(otoc, dP), 1.0);
 				float3 oceanP = t * oceanDir + dP + float3(0.0, 0.0, _Ocean_CameraPos.z);
 				
