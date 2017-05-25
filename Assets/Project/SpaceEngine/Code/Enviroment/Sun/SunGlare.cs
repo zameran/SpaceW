@@ -190,7 +190,7 @@ namespace SpaceEngine.AtmosphericScattering.Sun
         {
             if (target == null) return;
 
-            target.SetFloat("SunID", Mathf.Clamp(SunComponent.sunID - 1, 0.0f, 3.0f));
+            target.SetFloat("SunIndex", Mathf.Clamp(SunComponent.Index - 1, 0.0f, 3.0f));
             target.SetVector("SunViewPortPosition", SunViewPortPosition);
 
             target.SetFloat("AspectRatio", CameraHelper.Main().aspect);

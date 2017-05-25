@@ -34,9 +34,8 @@
 #endregion
 
 using SpaceEngine.Core.Debugging;
-using UnityEngine;
 
-using SpaceEngine.Debugging;
+using UnityEngine;
 
 namespace SpaceEngine.Tests
 {
@@ -45,29 +44,29 @@ namespace SpaceEngine.Tests
     {
         public class Uniforms
         {
-            public int permSampler;
-            public int permGradSampler;
-            public int planetAtlas;
-            public int planetColor;
-            public int planetColorMap;
+            public int PermSampler;
+            public int PermGradSampler;
+            public int AtlasDiffSampler;
+            public int MaterialTable;
+            public int ColorMap;
 
-            public int lacunarity;
-            public int h;
-            public int offset;
-            public int ridgeSmooth;
+            public int noiseLacunarity;
+            public int noiseH;
+            public int noiseOffset;
+            public int noiseRidgeSmooth;
 
             public Uniforms()
             {
-                permSampler = Shader.PropertyToID("PermSampler");
-                permGradSampler = Shader.PropertyToID("PermGradSampler");
-                planetAtlas = Shader.PropertyToID("AtlasDiffSampler");
-                planetColor = Shader.PropertyToID("MaterialTable");
-                planetColorMap = Shader.PropertyToID("ColorMap");
+                PermSampler = Shader.PropertyToID("PermSampler");
+                PermGradSampler = Shader.PropertyToID("PermGradSampler");
+                AtlasDiffSampler = Shader.PropertyToID("AtlasDiffSampler");
+                MaterialTable = Shader.PropertyToID("MaterialTable");
+                ColorMap = Shader.PropertyToID("ColorMap");
 
-                lacunarity = Shader.PropertyToID("noiseLacunarity");
-                h = Shader.PropertyToID("noiseH");
-                offset = Shader.PropertyToID("noiseOffset");
-                ridgeSmooth = Shader.PropertyToID("noiseRidgeSmooth");
+                noiseLacunarity = Shader.PropertyToID("noiseLacunarity");
+                noiseH = Shader.PropertyToID("noiseH");
+                noiseOffset = Shader.PropertyToID("noiseOffset");
+                noiseRidgeSmooth = Shader.PropertyToID("noiseRidgeSmooth");
             }
         }
 
@@ -131,16 +130,16 @@ namespace SpaceEngine.Tests
         {
             if (mat == null || u == null) return;
 
-            mat.SetTexture(u.permSampler, PermSampler);
-            mat.SetTexture(u.permGradSampler, PermGradSampler);
-            mat.SetTexture(u.planetAtlas, PlanetAtlas);
-            mat.SetTexture(u.planetColor, PlanetColor);
-            mat.SetTexture(u.planetColorMap, PlanetColorMap);
+            mat.SetTexture(u.PermSampler, PermSampler);
+            mat.SetTexture(u.PermGradSampler, PermGradSampler);
+            mat.SetTexture(u.AtlasDiffSampler, PlanetAtlas);
+            mat.SetTexture(u.MaterialTable, PlanetColor);
+            mat.SetTexture(u.ColorMap, PlanetColorMap);
 
-            mat.SetFloat(u.lacunarity, Lacunarity);
-            mat.SetFloat(u.h, H);
-            mat.SetFloat(u.offset, Offset);
-            mat.SetFloat(u.ridgeSmooth, RidgeSmooth);
+            mat.SetFloat(u.noiseLacunarity, Lacunarity);
+            mat.SetFloat(u.noiseH, H);
+            mat.SetFloat(u.noiseOffset, Offset);
+            mat.SetFloat(u.noiseRidgeSmooth, RidgeSmooth);
 
             mat.SetPass(0);
         }

@@ -40,7 +40,7 @@ namespace SpaceEngine.AtmosphericScattering.Sun
     public sealed class AtmosphereSun : Node<AtmosphereSun>
     {
         [Range(1, 4)]
-        public int sunID = 1;
+        public int Index = 1;
 
         public float Radius = 250000;
 
@@ -53,14 +53,16 @@ namespace SpaceEngine.AtmosphericScattering.Sun
 
         protected override void UpdateNode()
         {
-            if ((sunID == 1 && Input.GetKey(KeyCode.RightControl)) ||
-                (sunID == 2 && Input.GetKey(KeyCode.RightShift)) ||
-                (sunID == 3 && Input.GetKey(KeyCode.LeftControl)) ||
-                (sunID == 4 && Input.GetKey(KeyCode.LeftShift)))
+            if ((Index == 1 && Input.GetKey(KeyCode.RightControl)) ||
+                (Index == 2 && Input.GetKey(KeyCode.RightShift)) ||
+                (Index == 3 && Input.GetKey(KeyCode.LeftControl)) ||
+                (Index == 4 && Input.GetKey(KeyCode.LeftShift)))
             {
                 var h = Input.GetAxis("HorizontalArrows") * 0.75f;
+                var v = Input.GetAxis("VerticalArrows") * 0.75f;
 
                 transform.RotateAround(new Vector3(0, 0, 0), new Vector3(0, 1, 0), h);
+                transform.RotateAround(new Vector3(0, 0, 0), new Vector3(1, 0, 0), v);
             }
         }
 

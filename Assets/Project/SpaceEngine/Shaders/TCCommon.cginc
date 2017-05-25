@@ -228,9 +228,9 @@ uniform float noiseRidgeSmooth;// = 0.0001;
 inline float SavePow(float f, float p) 
 { 
 	#ifdef USESAVEPOW 
-	return pow(abs(f), p);
+		return pow(abs(f), p);
 	#else
-	return pow(f, p);
+		return pow(f, p);
 	#endif
 }
 //-----------------------------------------------------------------------------
@@ -363,7 +363,9 @@ float3 UnitToColor24(in float unit)
 
 inline float ColorToUnit24(in float3 color)
 {
-	return dot(color, float3(1.0, 1.0 / 255.0, 1.0 / 65025.0));
+	const float3 factor = float3(1.0, 1.0 / 255.0, 1.0 / 65025.0);
+
+	return dot(color, factor);
 }
 
 inline float PackColor(float3 rgb) 
@@ -387,7 +389,7 @@ float3 UnpackColor(float f)
 struct  Surface
 {
 	float4 color;
-	float  height;
+	float height;
 };
 //-----------------------------------------------------------------------------
 
@@ -644,22 +646,20 @@ Surface GetSurfaceColor(float height, float slope, float vary)
 //-----------------------------------------------------------------------------
 void FAST32_hash_3D(float3 gridcell, out float4 lowz_hash_0, out float4 lowz_hash_1, out float4 lowz_hash_2, out float4 highz_hash_0, out float4 highz_hash_1, out float4 highz_hash_2)
 {
-	//generates 3 random numbers for each of the 8 cell corners
-	//gridcell is assumed to be an integer coordinate
+	// Generates 3 random numbers for each of the 8 cell corners gridcell is assumed to be an integer coordinate
 
-	// TODO: these constants need tweaked to find the best possible noise.
-	//probably requires some kind of brute force computational searching or something....
+	// TODO: these constants need tweaked to find the best possible noise. Probably requires some kind of brute force computational searching or something....
 	const float2 OFFSET = float2(50.0, 161.0);
 	const float DOMAIN = 69.0;
 	const float3 SOMELARGEFLOATS = float3(635.298681, 682.357502, 668.926525);
 	const float3 ZINC = float3(48.500388, 65.294118, 63.934599);
 
-	//truncate the domain
+	// Truncate the domain
 	gridcell.xyz = gridcell.xyz - floor(gridcell.xyz * (1.0 / DOMAIN)) * DOMAIN;
 
 	float3 gridcell_inc1 = step(gridcell, float3(DOMAIN - 1.5, DOMAIN - 1.5, DOMAIN - 1.5)) * (gridcell + 1.0);
 
-	//calculate the noise
+	// Calculate the noise
 	float4 P = float4(gridcell.xy, gridcell_inc1.xy) + OFFSET.xyxy;
 
 	P *= P;
@@ -668,17 +668,17 @@ void FAST32_hash_3D(float3 gridcell, out float4 lowz_hash_0, out float4 lowz_has
 	float3 lowz_mod = float3(1.0 / (SOMELARGEFLOATS.xyz + gridcell.zzz * ZINC.xyz));
 	float3 highz_mod = float3(1.0 / (SOMELARGEFLOATS.xyz + gridcell_inc1.zzz * ZINC.xyz));
 
-	lowz_hash_0 = frac(P * lowz_mod.xxxx);
+	lowz_hash_0  = frac(P * lowz_mod.xxxx);
 	highz_hash_0 = frac(P * highz_mod.xxxx);
-	lowz_hash_1 = frac(P * lowz_mod.yyyy);
+	lowz_hash_1  = frac(P * lowz_mod.yyyy);
 	highz_hash_1 = frac(P * highz_mod.yyyy);
-	lowz_hash_2 = frac(P * lowz_mod.zzzz);
+	lowz_hash_2  = frac(P * lowz_mod.zzzz);
 	highz_hash_2 = frac(P * highz_mod.zzzz);
 }
 
 void FAST32_hash_3D(float3 gridcell, out float4 lowz_hash, out float4 highz_hash)
 {
-	// g ridcell is assumed to be an integer coordinate
+	// Gridcell is assumed to be an integer coordinate
 	const float2 OFFSET = float2(50.0, 161.0);
 	const float DOMAIN = 69.0;
 	const float SOMELARGEFLOAT = 635.298681;
@@ -689,7 +689,7 @@ void FAST32_hash_3D(float3 gridcell, out float4 lowz_hash, out float4 highz_hash
 
 	float3 gridcell_inc1 = step(gridcell, float3(DOMAIN - 1.5, DOMAIN - 1.5, DOMAIN - 1.5)) * (gridcell + 1.0);
 
-	//	calculate the noise
+	// Calculate the noise
 	float4 P = float4(gridcell.xy, gridcell_inc1.xy) + OFFSET.xyxy;
 
 	P *= P;
@@ -730,6 +730,7 @@ float4 TEX2D(sampler2D tex, float2 p, float res)
 	p = i + f;
 	p = (p - 0.5) / res;
 
+	// TODO : Texture2D.Sample should be used for a custom interpolation...
 	return tex2D(tex, p);
 }
 
@@ -745,6 +746,7 @@ float4 TEX2DLOD(sampler2D tex, float2 p, float2 lod, float res)
 	p = i + f;
 	p = (p - 0.5) / res;
 
+	// TODO : Texture2D.Sample should be used for a custom interpolation...
 	return tex2Dlod(tex, float4(p, lod));
 }
 //-----------------------------------------------------------------------------
@@ -758,6 +760,7 @@ float4 TEX2D_GOOD(sampler2D tex, float2 uv, float size)
 	float2 iuv = floor(st);
 	float2 fuv = frac(st);
 
+	// TODO : Texture2D.Sample should be used for a custom interpolation...
 	float4 a = tex2D(tex, (iuv + float2(0.5, 0.5)) / size);
 	float4 b = tex2D(tex, (iuv + float2(1.5, 0.5)) / size);
 	float4 c = tex2D(tex, (iuv + float2(0.5, 1.5)) / size);
@@ -773,6 +776,7 @@ float4 TEX2DLOD_GOOD(sampler2D tex, float2 uv, float size)
 	float2 iuv = floor(st);
 	float2 fuv = frac(st);
 
+	// TODO : Texture2D.Sample should be used for a custom interpolation...
 	float4 a = tex2Dlod(tex, float4((iuv + float2(0.5, 0.5)) / size, 0.0, 0.0));
 	float4 b = tex2Dlod(tex, float4((iuv + float2(1.5, 0.5)) / size, 0.0, 0.0));
 	float4 c = tex2Dlod(tex, float4((iuv + float2(0.5, 1.5)) / size, 0.0, 0.0));
@@ -814,10 +818,7 @@ const float3 NOISE_OFFSETOUT = float3(1.5, 1.5, 1.5);
 //-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
-inline float4 LessThan(float4 x, float4 y)
-{
-	return 1.0 - step(y, x);
-}
+inline float4 LessThan(float4 x, float4 y) { return 1.0 - step(y, x); }
 //-----------------------------------------------------------------------------
 
 #ifdef NOISE_ENGINE_SE
@@ -880,7 +881,7 @@ float4 NoiseDeriv(float3 p)
 	// Hash coordinates of the 8 cube corners
 	// NOTE : I FUCKING DID IT! I FIX DAT FORMULA FOR 3D!
 	// Solution is "+ P.z"
-	float4 AA = tex2Dlod(PermSampler, float4(P.xy, 0, 0)) + P.z;
+	float4 AA = tex2Dlod(PermSampler, float4(P.xy, 0, 0)) + P.z; // <- Here!
 	
 	float a = dot(tex2Dlod(PermGradSampler, AA.x).rgb, p);
 	float b = dot(tex2Dlod(PermGradSampler, AA.z).rgb, p + float3(-1, 0, 0));
@@ -948,17 +949,16 @@ float Noise(float3 p)
 //-----------------------------------------------------------------------------
 float4 NoiseDeriv(float3 p)
 {
-	//establish our grid cell and unit position
+	// Establish our grid cell and unit position
 	float3 Pi = floor(p);
 	float3 Pf = p - Pi;
 	float3 Pf_min1 = Pf - 1.0;
 
-	//calculate the hash.
-	//(various hashing methods listed in order of speed)
+	// Calculate the hash (various hashing methods listed in order of speed).
 	float4 hashx0, hashy0, hashz0, hashx1, hashy1, hashz1;
 	FAST32_hash_3D(Pi, hashx0, hashy0, hashz0, hashx1, hashy1, hashz1);
 
-	//calculate the gradients
+	// Calculate the gradients
 	float4 grad_x0 = hashx0 - 0.49999;
 	float4 grad_y0 = hashy0 - 0.49999;
 	float4 grad_z0 = hashz0 - 0.49999;
@@ -976,14 +976,13 @@ float4 NoiseDeriv(float3 p)
 	grad_y1 *= norm_1;
 	grad_z1 *= norm_1;
 
-	//calculate the dot products
+	// Calculate the dot products
 	float4 dotval_0 = float2(Pf.x, Pf_min1.x).xyxy * grad_x0 + float2(Pf.y, Pf_min1.y).xxyy * grad_y0 + Pf.zzzz * grad_z0;
 	float4 dotval_1 = float2(Pf.x, Pf_min1.x).xyxy * grad_x1 + float2(Pf.y, Pf_min1.y).xxyy * grad_y1 + Pf_min1.zzzz * grad_z1;
 
-	//NOTE:the following is based off Milo Yips derivation, but modified for parallel execution
-	//http://stackoverflow.com/a/14141774
+	// NOTE : the following is based off Milo Yips derivation, but modified for parallel execution http://stackoverflow.com/a/14141774
 
-	//Convert our data to a more parallel format
+	// Convert our data to a more parallel format
 	float4 dotval0_grad0 = float4(dotval_0.x, grad_x0.x, grad_y0.x, grad_z0.x);
 	float4 dotval1_grad1 = float4(dotval_0.y, grad_x0.y, grad_y0.y, grad_z0.y);
 	float4 dotval2_grad2 = float4(dotval_0.z, grad_x0.z, grad_y0.z, grad_z0.z);
@@ -993,7 +992,7 @@ float4 NoiseDeriv(float3 p)
 	float4 dotval6_grad6 = float4(dotval_1.z, grad_x1.z, grad_y1.z, grad_z1.z);
 	float4 dotval7_grad7 = float4(dotval_1.w, grad_x1.w, grad_y1.w, grad_z1.w);
 
-	//evaluate common constants
+	// Evaluate common constants
 	float4 k0_gk0 = dotval1_grad1 - dotval0_grad0;
 	float4 k1_gk1 = dotval2_grad2 - dotval0_grad0;
 	float4 k2_gk2 = dotval4_grad4 - dotval0_grad0;
@@ -1002,11 +1001,11 @@ float4 NoiseDeriv(float3 p)
 	float4 k5_gk5 = dotval6_grad6 - dotval4_grad4 - k1_gk1;
 	float4 k6_gk6 = (dotval7_grad7 - dotval6_grad6) - (dotval5_grad5 - dotval4_grad4) - k3_gk3;
 
-	//C2 Interpolation
+	// C2 Interpolation
 	float3 blend = Interpolation_C2(Pf);
 	float3 blendDeriv = Interpolation_C2_Deriv(Pf);
 
-	//calculate final noise + deriv
+	// Calculate final noise + deriv
 	float u = blend.x;
 	float v = blend.y;
 	float w = blend.z;
@@ -1015,15 +1014,16 @@ float4 NoiseDeriv(float3 p)
 	float4 yyy = (v * (k1_gk1 + w * k5_gk5));
 	float4 zzz = (w * (k2_gk2 + u * (k4_gk4 + v * k6_gk6)));
 
-	float4 noiseresult = dotval0_grad0 + xxx + yyy + zzz;
+	float4 deriv = dotval0_grad0 + xxx + yyy + zzz;
 
-	float4 result = float4(0.0, 0.0, 0.0, noiseresult.x); //ONLY noiseresult.x!!!!!!!!
+	float4 result = 0;
 
 	result.x = dot(float4(k0_gk0.x, k3_gk3.x * v, float2(k4_gk4.x, k6_gk6.x * v) * w), float4(blendDeriv.x, blendDeriv.x, blendDeriv.x, blendDeriv.x));
 	result.y = dot(float4(k1_gk1.x, k3_gk3.x * u, float2(k5_gk5.x, k6_gk6.x * u) * w), float4(blendDeriv.y, blendDeriv.y, blendDeriv.y, blendDeriv.y));
 	result.z = dot(float4(k2_gk2.x, k4_gk4.x * u, float2(k5_gk5.x, k6_gk6.x * u) * v), float4(blendDeriv.z, blendDeriv.z, blendDeriv.z, blendDeriv.z));
+	result.w = deriv.x;
 
-	//normalize and return
+	// Normalize
 	return result *= 1.1547005383792515290182975610039;
 }
 
@@ -1039,8 +1039,7 @@ float Noise(float3 p)
 	float3 Pf_min1 = Pf - 1.0;
 
 	#if (NOISE_ENGINE_TECHNIQUE == 0)
-		// Classic noise. Requires 3 random values per point.
-		// With an efficent hash function will run faster than improved noise.
+		// Classic noise. Requires 3 random values per point. With an efficent hash function will run faster than improved noise.
 
 		// Calculate the hash
 		float4 hashx0, hashy0, hashz0, hashx1, hashy1, hashz1;
@@ -1061,15 +1060,13 @@ float Noise(float3 p)
 		float3 blend = Interpolation_C2(Pf);
 
 		float4 res0 = lerp(grad_results_0, grad_results_1, blend.z);
-
 		float2 res1 = lerp(res0.xy, res0.zw, blend.y);
 
 		float finalValue = lerp(res1.x, res1.y, blend.x);
 
-		return finalValue * 1.1547005383792515290182975610039; // (optionally) scale things to a strict -1.0->1.0 rang *= 1.0/sqrt(0.75);
+		return finalValue * 1.1547005383792515290182975610039; // [optionally] Scale things to a strict [-1.0, 1.0] range; -> *= 1.0 / sqrt(0.75)
 	#else
-		// Improved noise. Requires 1 random value per point.
-		// Will run faster than classic noise if a slow hashing function is used.
+		// Improved noise. Requires 1 random value per point. Will run faster than classic noise if a slow hashing function is used.
 
 		// Calculate the hash
 		float4 hash_lowz, hash_highz;
@@ -1077,7 +1074,7 @@ float Noise(float3 p)
 
 		#if (NOISE_ENGINE_TECHNIQUE == 1)
 			// This will implement Ken Perlins "improved" classic noise using the 12 mid-edge gradient points.
-			// NOTE: mid-edge gradients give us a nice strict -1.0->1.0 range without additional scaling.
+			// NOTE : mid-edge gradients give us a nice strict -1.0->1.0 range without additional scaling.
 			// [1,1,0] [-1,1,0] [1,-1,0] [-1,-1,0]
 			// [1,0,1] [-1,0,1] [1,0,-1] [-1,0,-1]
 			// [0,1,1] [0,-1,1] [0,1,-1] [0,-1,-1]
@@ -1104,7 +1101,7 @@ float Noise(float3 p)
 			float4 res0 = lerp(grad_results_0, grad_results_1, blend.z);
 			float2 res1 = lerp(res0.xy, res0.zw, blend.y);
 
-			return lerp(res1.x, res1.y, blend.x) * 0.66666666666; //0.66666666666 = (2.0 / 3.0) //(2.0 / 3.0);   // (optionally) mult by (2.0/3.0)to scale to a strict -1.0->1.0 range
+			return lerp(res1.x, res1.y, blend.x) * 0.66666666666; //0.66666666666 = (2.0 / 3.0) //(2.0 / 3.0); // [optionally] mult by (2.0 / 3.0) to scale to a strict [-1.0, 1.0] range.
 		#else
 			// "Improved" noise using 8 corner gradients. Faster than the 12 mid-edge point method.
 			// Ken mentions using diagonals like this can cause "clumping", but we'll live with that.
@@ -1135,7 +1132,7 @@ float Noise(float3 p)
 			float4 res0 = lerp(grad_results_0, grad_results_1, blend.z);
 			float2 res1 = lerp(res0.xy, res0.zw, blend.y);
 
-			return lerp(res1.x, res1.y, blend.x) * 0.66666666666; //0.66666666666 = (2.0 / 3.0) //(2.0 / 3.0);   // (optionally) mult by (2.0/3.0)to scale to a strict -1.0->1.0 range
+			return lerp(res1.x, res1.y, blend.x) * 0.66666666666; //0.66666666666 = (2.0 / 3.0) //(2.0 / 3.0); // [optionally] multiply by (2.0 / 3.0) to scale to a strict [-1.0, 1.0] range.
 		#endif
 	#endif
 }
@@ -1149,12 +1146,11 @@ float4 NoiseDeriv(float3 p)
 	float3 Pf = p - Pi;
 	float3 Pf_min1 = Pf - 1.0;
 
-	// calculate the hash
-	// (various hashing methods listed in order of speed)
+	// Calculate the hash (various hashing methods listed in order of speed).
 	float4 hashx0, hashy0, hashz0, hashx1, hashy1, hashz1;
 	FAST32_hash_3D(Pi, hashx0, hashy0, hashz0, hashx1, hashy1, hashz1);
 
-	//	calculate the gradients
+	// Calculate the gradients
 	const float4 C = float4(0.49999, 0.49999, 0.49999, 0.49999);
 	float4 grad_x0 = hashx0 - C;
 	float4 grad_y0 = hashy0 - C;
@@ -1177,12 +1173,12 @@ float4 NoiseDeriv(float3 p)
 	float4 grad_results_0 = float2(Pf.x, Pf_min1.x).xyxy * grad_x0 + float2(Pf.y, Pf_min1.y).xxyy * grad_y0 + Pf.zzzz * grad_z0;
 	float4 grad_results_1 = float2(Pf.x, Pf_min1.x).xyxy * grad_x1 + float2(Pf.y, Pf_min1.y).xxyy * grad_y1 + Pf_min1.zzzz * grad_z1;
 
-	// get lengths in the x+y plane
+	// Get lengths in the x+y plane
 	float3 Pf_sq = Pf * Pf;
 	float3 Pf_min1_sq = Pf_min1 * Pf_min1;
 	float4 vecs_len_sq = float2(Pf_sq.x, Pf_min1_sq.x).xyxy + float2(Pf_sq.y, Pf_min1_sq.y).xxyy;
 
-	// evaluate the surflet
+	// Evaluate the surflet
 	float4 m_0 = vecs_len_sq + Pf_sq.zzzz;
 	m_0 = max(1.0 - m_0, 0.0);
 	float4 m2_0 = m_0 * m_0;
@@ -1193,7 +1189,7 @@ float4 NoiseDeriv(float3 p)
 	float4 m2_1 = m_1 * m_1;
 	float4 m3_1 = m_1 * m2_1;
 
-	// calculate the derivatives
+	// Calculate the derivatives
 	float4 temp_0 = -6.0 * m2_0 * grad_results_0;
 	float xderiv_0 = dot(temp_0, float2(Pf.x, Pf_min1.x).xyxy) + dot(m3_0, grad_x0);
 	float yderiv_0 = dot(temp_0, float2(Pf.y, Pf_min1.y).xxyy) + dot(m3_0, grad_y0);
@@ -1204,7 +1200,7 @@ float4 NoiseDeriv(float3 p)
 	float yderiv_1 = dot(temp_1, float2(Pf.y, Pf_min1.y).xxyy) + dot(m3_1, grad_y1);
 	float zderiv_1 = dot(temp_1, Pf_min1.zzzz) + dot(m3_1, grad_z1);
 
-	const float FINAL_NORMALIZATION = 2.3703703703703703703703703703704;	//	scales the final result to a strict (-1.0, 1.0) range
+	const float FINAL_NORMALIZATION = 2.3703703703703703703703703703704;	// Scale the final result to a strict [-1.0, 1.0] range.
 	return float4(float3(xderiv_0, yderiv_0, zderiv_0) + float3(xderiv_1, yderiv_1, zderiv_1),
 				 dot(m3_0, grad_results_0) + dot(m3_1, grad_results_1)) * FINAL_NORMALIZATION;
 }
@@ -1224,12 +1220,10 @@ float Noise2D(float2 p, float seed = 0)
 	float2 w = p * p * p * (p * (p * 6 - 15) + 10);
 	float4 w4 = float4(1, w.x, w.y, w.x * w.y);
 
-	// Get the four randomly permutated indices from the noise lattice nearest to
-	// p and offset these numbers with the seed number.
+	// Get the four randomly permutated indices from the noise lattice nearest to p and offset these numbers with the seed number.
 	float4 perm = tex2Dlod(PermSamplerGL, float4(P, 0, 0)) + seed;
 
-	// Permutate the four offseted indices again and get the 2D gradient for each
-	// of the four permutated coordinates-seed pairs.
+	// Permutate the four offseted indices again and get the 2D gradient for each of the four permutated coordinates-seed pairs.
 	float4 g1 = tex2Dlod(PermGradSamplerGL, float4(perm.xy, 0, 0)) * 2 - 1;
 	float4 g2 = tex2Dlod(PermGradSamplerGL, float4(perm.zw, 0, 0)) * 2 - 1;
 
@@ -1241,9 +1235,10 @@ float Noise2D(float2 p, float seed = 0)
 
 	// Bi-linearly blend between the gradients, using w4 as blend factors.
 	float4 grads = float4(a, b - a, c - a, a - b - c + d);
+
 	float n = dot(grads, w4);
 
-	// Return the noise value, roughly normalized in the range [-1, 1]
+	// Return the noise value, roughly normalized in the range [-1.0, 1.0]
 	return n * 1.5;
 }
 
@@ -1340,6 +1335,7 @@ float3 Noise2DAlternativeDeriv(float2 p, float seed = 0)
 //-----------------------------------------------------------------------------
 inline float4 modi(float4 x, float y) { return x - y * floor(x / y); }
 inline float3 modi(float3 x, float y) { return x - y * floor(x / y); }
+inline float2 modi(float2 x, float y) { return x - y * floor(x / y); }
 inline float modi(float x, float y) { return x - y * floor(x / y); }
 inline float4 Permutation(float4 x) { return modi((34.0 * x + 1.0) * x, 289.0); }
 inline float3 Permutation(float3 x) { return modi((34.0 * x + 1.0) * x, 289.0); }
@@ -1352,8 +1348,8 @@ float2 iNoise(float3 P, float jitter)
 {			
 	float3 Pi = modi(floor(P), 289.0);
 	float3 Pf = frac(P);
-	float3 oi = float3(-1.0, 0.0, 1.0);
-	float3 of = float3(-0.5, 0.5, 1.5);
+	const float3 oi = float3(-1.0, 0.0, 1.0);
+	const float3 of = float3(-0.5, 0.5, 1.5);
 	float3 px = Permutation(Pi.x + oi);
 	float3 py = Permutation(Pi.y + oi);
 
@@ -1367,11 +1363,11 @@ float2 iNoise(float3 P, float jitter)
 			p = Permutation(px[i] + py[j] + Pi.z + oi); // pij1, pij2, pij3
 
 			ox = frac(p * K) - Ko;
-			oy = modi(floor(p * K),7.0) * K - Ko;
+			oy = modi(floor(p * K), 7.0) * K - Ko;
 			
 			p = Permutation(p);
 			
-			oz = frac(p*K) - Ko;
+			oz = frac(p * K) - Ko;
 		
 			dx = Pf.x - of[i] + jitter * ox;
 			dy = Pf.y - of[j] + jitter * oy;
@@ -1379,7 +1375,7 @@ float2 iNoise(float3 P, float jitter)
 			
 			float3 d = dx * dx + dy * dy + dz * dz; // dij1, dij2 and dij3, squared
 			
-			//Find lowest and second lowest distances
+			// Find lowest and second lowest distances
 			for(int n = 0; n < 3; n++)
 			{
 				if(d[n] < F[0])
@@ -1401,12 +1397,12 @@ float2 iNoise(float3 P, float jitter)
 // 3D simplex noise
 float sNoise(float3 v)
 {
-	float2 C = float2(1.0 / 6.0, 1.0 / 3.0);
-	float4 D = float4(0.0, 0.5, 1.0, 2.0);
+	const float2 C = float2(1.0 / 6.0, 1.0 / 3.0);
+	const float4 D = float4(0.0, 0.5, 1.0, 2.0);
 
 	// First corner
 	float3 i  = floor(v + dot(v, C.yyy));
-	float3 x0 =   v - i + dot(i, C.xxx);
+	float3 x0 = v - i + dot(i, C.xxx);
 
 	// Other corners
 	float3 g = step(x0.yzx, x0.xyz);
@@ -1414,27 +1410,26 @@ float sNoise(float3 v)
 	float3 i1 = min(g.xyz, l.zxy);
 	float3 i2 = max(g.xyz, l.zxy);
 
-	//   x0 = x0 - 0.0 + 0.0 * C.xxx;
-	//   x1 = x0 - i1  + 1.0 * C.xxx;
-	//   x2 = x0 - i2  + 2.0 * C.xxx;
-	//   x3 = x0 - 1.0 + 3.0 * C.xxx;
+	// x0 = x0 - 0.0 + 0.0 * C.xxx;
+	// x1 = x0 - i1  + 1.0 * C.xxx;
+	// x2 = x0 - i2  + 2.0 * C.xxx;
+	// x3 = x0 - 1.0 + 3.0 * C.xxx;
 	float3 x1 = x0 - i1 + C.xxx;
-	float3 x2 = x0 - i2 + C.yyy; // 2.0*C.x = 1/3 = C.y
-	float3 x3 = x0 - D.yyy;      // -1.0+3.0*C.x = -0.5 = -D.y
+	float3 x2 = x0 - i2 + C.yyy; // 2.0 * C.x = 1 / 3 = C.y
+	float3 x3 = x0 - D.yyy;      // -1.0 + 3.0 * C.x = -0.5 = -D.y
 
 	// Permutations
 	i = modi(i, 289.0); 
-	float4 p = Permutation(Permutation(Permutation(
-		  i.z + float4(0.0, i1.z, i2.z, 1.0))
-		+ i.y + float4(0.0, i1.y, i2.y, 1.0))
-		+ i.x + float4(0.0, i1.x, i2.x, 1.0));
+
+	float4 p = Permutation(Permutation(Permutation(i.z + float4(0.0, i1.z, i2.z, 1.0)) + i.y + float4(0.0, i1.y, i2.y, 1.0)) + i.x + float4(0.0, i1.x, i2.x, 1.0));
 
 	// Gradients: 7x7 points over a square, mapped onto an octahedron.
-	// The ring size 17*17 = 289 is close to a multiple of 49 (49*6 = 294)
-	float n_ = 0.142857142857; // 1.0/7.0
+	// The ring size 17 * 17 = 289 is close to a multiple of 49 (49 * 6 = 294)
+
+	const float n_ = 0.142857142857; // 1.0 / 7.0
 	float3 ns = n_ * D.wyz - D.xzx;
 
-	float4 j = p - 49.0 * floor(p * ns.z * ns.z);  //  mod(p,7*7)
+	float4 j = p - 49.0 * floor(p * ns.z * ns.z);  // mod(p,7*7)
 
 	float4 x_ = floor(j * ns.z);
 	float4 y_ = floor(j - 7.0 * x_);    // mod(j,N)
@@ -1446,8 +1441,8 @@ float sNoise(float3 v)
 	float4 b0 = float4(x.xy, y.xy);
 	float4 b1 = float4(x.zw, y.zw);
 
-	//vec4 s0 = vec4(lessThan(b0,0.0))*2.0 - 1.0;
-	//vec4 s1 = vec4(lessThan(b1,0.0))*2.0 - 1.0;
+	//vec4 s0 = vec4(lessThan(b0, 0.0)) * 2.0 - 1.0;
+	//vec4 s1 = vec4(lessThan(b1, 0.0)) * 2.0 - 1.0;
 	float4 s0 = floor(b0) * 2.0 + 1.0;
 	float4 s1 = floor(b1) * 2.0 + 1.0;
 	float4 sh = -step(h, float4(0, 0, 0, 0));
@@ -1460,8 +1455,9 @@ float sNoise(float3 v)
 	float3 p2 = float3(a1.xy, h.z);
 	float3 p3 = float3(a1.zw, h.w);
 
-	//Normalise gradients
+	// Normalise gradients
 	float4 norm = TaylorInvSqrt(float4(dot(p0, p0), dot(p1, p1), dot(p2, p2), dot(p3, p3)));
+
 	p0 *= norm.x;
 	p1 *= norm.y;
 	p2 *= norm.z;
@@ -1469,25 +1465,27 @@ float sNoise(float3 v)
 
 	// Mix final noise value
 	float4 m = max(0.6 - float4(dot(x0, x0), dot(x1, x1), dot(x2, x2), dot(x3, x3)), 0.0);
+
 	m = m * m;
+
 	return 42.0 * dot(m * m, float4(dot(p0, x0), dot(p1, x1), dot(p2, x2), dot(p3, x3)));
 }
 
 float SimplexRidgedMultifractal(float3 position, int octaves, float frequency, float persistence) 
 {
-  float total = 0.0;
-  float maxAmplitude = 0.0;
-  float amplitude = 1.0;
+	float total = 0.0;
+	float maxAmplitude = 0.0;
+	float amplitude = 1.0;
 
-  for (int i = 0; i < octaves; i++) 
-  {
-	total += ((1.0 - abs(sNoise(position * frequency))) * 2.0 - 1.0) * amplitude;
-	frequency *= 2.0;
-	maxAmplitude += amplitude;
-	amplitude *= persistence;
-  }
+	for (int i = 0; i < octaves; i++) 
+	{
+		total += ((1.0 - abs(sNoise(position * frequency))) * 2.0 - 1.0) * amplitude;
+		frequency *= 2.0;
+		maxAmplitude += amplitude;
+		amplitude *= persistence;
+	}
 
-  return total / maxAmplitude;
+	return total / maxAmplitude;
 }
 //-----------------------------------------------------------------------------
 
@@ -1661,7 +1659,7 @@ float3 Fbm3DClouds(float3 ppoint)
 
 float3 Fbm3DClouds(float3 ppoint, int o)
 {
-	float3  summ = float3(0.0, 0.0, 0.0);
+	float3 summ = float3(0.0, 0.0, 0.0);
 	float ampl = 1.0;
 
 	for (int i = 0; i < o; ++i)
@@ -1795,8 +1793,7 @@ float RidgedMultifractalExtra(float3 ppoint, int octaves, float frequency, float
 
 	for(int i = 0; i < octaves; i++)
 	{
-		float n = RidgedNoise(ppoint * frequency);
-		sum += n * ampl;
+		sum += RidgedNoise(ppoint * frequency) * ampl;
 		frequency *= lacunarity;
 		ampl *= gain;
 	}
@@ -1815,8 +1812,8 @@ float RidgedMultifractalEroded(float3 ppoint, float gain, float warp)
 	float summ = 0.0;
 	float signal = 1.0;
 	float weight;
-	float3  dsum = float3(0.0, 0.0, 0.0);
-	float4  noiseDeriv;
+	float3 dsum = float3(0.0, 0.0, 0.0);
+	float4 noiseDeriv;
 
 	for (int i = 0; i < noiseOctaves; ++i)
 	{
@@ -1840,8 +1837,8 @@ float RidgedMultifractalEroded(float3 ppoint, float gain, float warp, int o)
 	float summ = 0.0;
 	float signal = 1.0;
 	float weight;
-	float3  dsum = float3(0.0, 0.0, 0.0);
-	float4  noiseDeriv;
+	float3 dsum = float3(0.0, 0.0, 0.0);
+	float4 noiseDeriv;
 
 	for (int i = 0; i < o; ++i)
 	{
@@ -1867,8 +1864,8 @@ float RidgedMultifractalErodedDetail(float3 ppoint, float gain, float warp, floa
 	float summ = firstOctaveValue;
 	float signal = firstOctaveValue;
 	float weight;
-	float3  dsum = float3(0.0, 0.0, 0.0);
-	float4  noiseDeriv;
+	float3 dsum = float3(0.0, 0.0, 0.0);
+	float4 noiseDeriv;
 
 	for (int i = 0; i < noiseOctaves; ++i)
 	{
@@ -1892,8 +1889,8 @@ float RidgedMultifractalErodedDetail(float3 ppoint, float gain, float warp, floa
 	float summ = firstOctaveValue;
 	float signal = firstOctaveValue;
 	float weight;
-	float3  dsum = float3(0.0, 0.0, 0.0);
-	float4  noiseDeriv;
+	float3 dsum = float3(0.0, 0.0, 0.0);
+	float4 noiseDeriv;
 
 	for (int i = 0; i < o; ++i)
 	{
@@ -1972,11 +1969,11 @@ float iqTurbulence(float3 ppoint, float gain)
 // iqTurbulence with faded octave 2 mudulates octaves oct to noiseOctaves
 float iqTurbulence2(float3 ppoint, float gain, int oct)
 {
-	// octave 2
+	// Octave 2
 	float4 n = NoiseDeriv(ppoint * noiseLacunarity * noiseLacunarity);
 	float oct0 = 0.5 + n.x / (1.0 + dot(n.yz, n.yz));
 
-	// octaves oct to noiseOctaves
+	// Octaves oct to noiseOctaves
 	float summ = 0.5;
 	float freq = pow(noiseLacunarity, noiseOctaves - oct);
 	float amp  = 1.0;
@@ -1991,7 +1988,7 @@ float iqTurbulence2(float3 ppoint, float gain, int oct)
 		amp  *= gain;
 	}
 
-	// modulate noise with octave 2
+	// Modulate noise with octave 2
 	return summ * oct0;
 }
 //-----------------------------------------------------------------------------
@@ -2627,9 +2624,6 @@ float Cell3NoiseF1F0(float3 p, int octaves, float amp)
 // Spherical Fibonacci Mapping
 // http://lgdv.cs.fau.de/uploads/publications/spherical_fibonacci_mapping.pdf
 // Optimized [WIP] by zameran.
-//-----------------------------------------------------------------------------
-
-//-----------------------------------------------------------------------------
 float2 inverseSF(float3 p, float n) 
 {
 	float m = 1.0 - 1.0 / n;
@@ -2753,13 +2747,13 @@ float CraterNoise(float3 ppoint, float cratMagn, float cratFreq, float cratSqrtD
 	//ppoint *= craterSphereRadius;
 	ppoint = (ppoint * cratFreq + Randomize) * cratSqrtDensity;
 
-	float  newLand = 0.0;
-	float  lastLand = 0.0;
-	float  lastlastLand = 0.0;
-	float  lastlastlastLand = 0.0;
-	float  amplitude = 1.0;
-	float  cell;
-	float  radFactor = 1.0 / cratSqrtDensity;
+	float newLand = 0.0;
+	float lastLand = 0.0;
+	float lastlastLand = 0.0;
+	float lastlastlastLand = 0.0;
+	float amplitude = 1.0;
+	float cell;
+	float radFactor = 1.0 / cratSqrtDensity;
 
 	// Craters roundness distortion
 	noiseH           = 0.5;
@@ -2802,7 +2796,7 @@ float CraterNoise(float3 ppoint, float cratMagn, float cratFreq, float cratSqrtD
 		}
 	}
 
-	return  cratMagn * newLand;
+	return cratMagn * newLand;
 }
 
 float RayedCraterColorFunc(float r, float fi, float rnd)
@@ -2820,7 +2814,7 @@ float RayedCraterColorFunc(float r, float fi, float rnd)
 	return sqrt(t) * pow(saturate(/*0.001 * t * t +*/ d16 + 1.0 - smoothstep(d4, d4 + 0.75, r)), 2.5);
 }
 
-float   RayedCraterNoise(float3 ppoint, float cratMagn, float cratFreq, float cratSqrtDensity, float cratOctaves)
+float RayedCraterNoise(float3 ppoint, float cratMagn, float cratFreq, float cratSqrtDensity, float cratOctaves)
 {
 	float3 rotVec = normalize(Randomize);
 
@@ -2831,6 +2825,7 @@ float   RayedCraterNoise(float3 ppoint, float cratMagn, float cratFreq, float cr
 	noiseOctaves     = 3;
 	craterDistortion = 1.0;
 	craterRoundDist  = 0.03;
+
 	float shapeDist = 1.0 + 0.5 * craterRoundDist * Fbm(ppoint * 419.54);
 
 	radPeak  = 0.002;
@@ -2874,7 +2869,7 @@ float   RayedCraterNoise(float3 ppoint, float cratMagn, float cratFreq, float cr
 		}
 	}
 
-	return  cratMagn * newLand;
+	return cratMagn * newLand;
 }
 
 //-----------------------------------------------------------------------------
@@ -2891,6 +2886,7 @@ float RayedCraterColorNoise(float3 ppoint, float cratFreq, float cratSqrtDensity
 	noiseOctaves     = 3;
 	craterDistortion = 1.0;
 	craterRoundDist  = 0.03;
+
 	float shapeDist = 1.0 + 0.5 * craterRoundDist * Fbm(ppoint * 419.54);
 	float colorDist = 1.0 - 0.2 * Fbm(ppoint * 4315.16);
 
@@ -3014,6 +3010,7 @@ float VolcanoNoise(float3 ppoint, float globalLand, float localLand)
 
 		float h = hash1(cell.x);
 		float r = 40.0 * cell.y;
+
 		if ((h < density) && (r < 1.0))
 		{
 			float rnd = 48.3 * dot(cellCenter, Randomize);
@@ -3067,6 +3064,7 @@ float2 VolcanoGlowNoise(float3 ppoint)
 
 		float h = hash1(cell.x);
 		float r = 40.0 * cell.y;
+
 		if ((h < density) && (r < 1.0))
 		{
 			float rnd = 48.3 * dot(cellCenter, Randomize);
@@ -3096,23 +3094,25 @@ float MareHeightFunc(float lastLand, float lastlastLand, float height, float r, 
 {
 	float t;
 
-	if (r < radInner) // crater bottom
+	if (r < radInner) // Crater bottom
 	{  
 		mareFloor = 1.0;
 
 		return lastlastLand + height * heightFloor;
 	}
-	else if (r < radRim) // inner rim
+	else if (r < radRim) // Inner rim
 	{   
 		t = (r - radInner) / (radRim - radInner);
 		t = smoothstep(0.0, 1.0, t);
+
 		mareFloor = 1.0 - t;
 
 		return lerp(lastlastLand + height * heightFloor, lastLand + height * heightRim * craterDistortion, t);
 	}
-	else if (r < radOuter) // outer rim
+	else if (r < radOuter) // Outer rim
 	{  
 		t = 1.0 - (r - radRim) / (radOuter - radRim);
+
 		mareFloor = 0.0;
 
 		return lerp(lastLand, lastLand + height * heightRim * craterDistortion, smoothstep(0.0, 1.0, t * t));
@@ -3173,12 +3173,12 @@ float CrackNoise(float3 ppoint, out float mask)
 {
 	ppoint = (ppoint + Randomize) * cracksFreq;
 
-	float  newLand = 0.0;
-	float  lastLand = 0.0;
-	float  lastlastLand = 0.0;
+	float newLand = 0.0;
+	float lastLand = 0.0;
+	float lastlastLand = 0.0;
 	float2 cell;
-	float  r;
-	float  ampl = 0.4 * cracksMagn;
+	float r;
+	float ampl = 0.4 * cracksMagn;
 
 	mask = 1.0;
 
@@ -3417,7 +3417,7 @@ float3 TurbulenceTerra(float3 ppoint)
 
 	for (int i = 0; i < 2; i++)
 	{
-		float2  cell = inverseSF(ppoint, freq, cellCenter);
+		cell = inverseSF(ppoint, freq, cellCenter);
 
 		rnd = hash1(cell.x);
 		r = size * cell.y;
@@ -3507,7 +3507,7 @@ float HeightMapCloudsTerra(float3 ppoint)
 			coverage = lerp(coverage, 1.0, dist);
 		}
 
-		weight *= smoothstep(-0.2, 0.0, ppoint.y);   // surpress clouds on a night side
+		weight *= smoothstep(-0.2, 0.0, ppoint.y);   // Surpress clouds on a night side
 	}
 	else
 		twistedPoint = CycloneNoiseTerra(ppoint, weight, coverage);

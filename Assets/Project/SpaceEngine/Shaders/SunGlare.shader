@@ -74,7 +74,7 @@ Shader "SpaceEngine/Atmosphere/SunGlare"
 			uniform float UseRadiance;
 			uniform float Eclipse;
 		
-			uniform float SunID;
+			uniform float SunIndex;
 			uniform float3 SunViewPortPosition;
 
 			uniform float AspectRatio;
@@ -127,8 +127,8 @@ Shader "SpaceEngine/Atmosphere/SunGlare"
 			float4 frag(v2f IN) : COLOR
 			{
 				float3 WCP = _Globals_WorldCameraPos;
-				//float3 WSD = _Sun_WorldDirections_1[SunID];
-				float3 WSD = normalize(_Sun_Positions_1[SunID] - WCP);
+				//float3 WSD = _Sun_WorldDirections_1[SunIndex];
+				float3 WSD = normalize(_Sun_Positions_1[SunIndex] - WCP);
 
 				float2 toScreenCenter = SunViewPortPosition.xy - 0.5;
 
