@@ -1,9 +1,10 @@
 using SpaceEngine.Core.Exceptions;
 using SpaceEngine.Types.Containers;
 
-using System.Collections.Generic;
-
 using UnityEngine;
+
+using Id = SpaceEngine.Core.Tile.Tile.Id;
+using EqualityComparerID = SpaceEngine.Core.Tile.Tile.EqualityComparerID;
 
 namespace SpaceEngine.Core.Preprocess.Terrain
 {
@@ -13,41 +14,6 @@ namespace SpaceEngine.Core.Preprocess.Terrain
     /// </summary>
     public abstract class InputMap : MonoBehaviour
     {
-        // TODO : Use id from incore Tile class...
-        public class Id
-        {
-            public int Tx, Ty;
-
-            public Id(int Tx, int Ty)
-            {
-                this.Tx = Tx;
-                this.Ty = Ty;
-            }
-
-            public bool Equals(Id id)
-            {
-                return (Tx == id.Tx && Ty == id.Ty);
-            }
-
-            public override int GetHashCode()
-            {
-                return (Tx ^ Ty).GetHashCode();
-            }
-        }
-
-        public class EqualityComparerID : IEqualityComparer<Id>
-        {
-            public bool Equals(Id t1, Id t2)
-            {
-                return t1.Equals(t2);
-            }
-
-            public int GetHashCode(Id t)
-            {
-                return t.GetHashCode();
-            }
-        }
-
         DictionaryQueue<Id, Tile> Cache;
 
         /// <summary>

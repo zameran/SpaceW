@@ -204,8 +204,6 @@ namespace SpaceEngine.Ocean
             var sunDirection = ParentBody.Atmosphere.GetSunDirection(ParentBody.Atmosphere.Suns[0]);
             var oceanSunDirection = localToOcean.ToMatrix3x3d() * sunDirection;
 
-            // TODO : Set uniforms
-
             var sphereDirection = (localToCamera * Vector3d.zero).Normalized();   // Direction to center of planet			
             var OHL = (localToCamera * Vector3d.zero).Magnitude();                // Distance to center of planet
             var rHorizon = Math.Sqrt(OHL * OHL - radius * radius);                // Distance to the horizon, i.e distance to ocean sphere tangent
@@ -479,6 +477,7 @@ namespace SpaceEngine.Ocean
         /// Inverting <see cref="ZMin"/> with interval to switch the matrices for rendering.
         /// </summary>
         /// <returns><see cref="Yielders.EndOfFrame"/></returns>
+        [Obsolete("Don't use it! Looks like a useless bugfix.")]
         public IEnumerator InitializationFix()
         {
             ZMin *= -1.0f;

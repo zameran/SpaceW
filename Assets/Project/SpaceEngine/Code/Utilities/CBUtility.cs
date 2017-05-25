@@ -175,7 +175,6 @@ public static class CBUtility
 
     public static void ReadSingleFromRenderTexture(RenderTexture tex, float x, float y, float z, ComputeBuffer buffer, ComputeShader readData, bool useBilinear)
     {
-        // TODO : Merge this in to the Execute method...
         if (tex == null) { Debug.Log("CBUtility: ReadSingleFromRenderTexture - RenderTexture is null!"); return; }
         if (buffer == null) { Debug.Log("CBUtility: ReadSingleFromRenderTexture - buffer is null!"); return; }
         if (readData == null) { Debug.Log("CBUtility: ReadSingleFromRenderTexture - Computer shader is null!"); return; }

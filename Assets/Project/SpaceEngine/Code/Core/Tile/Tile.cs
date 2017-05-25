@@ -30,6 +30,13 @@ namespace SpaceEngine.Core.Tile
                 this.Ty = ty;
             }
 
+            public Id(int tx, int ty)
+            {
+                this.Level = 0;
+                this.Tx = tx;
+                this.Ty = ty;
+            }
+
             public int Compare(Id id)
             {
                 return Level.CompareTo(id.Level);
