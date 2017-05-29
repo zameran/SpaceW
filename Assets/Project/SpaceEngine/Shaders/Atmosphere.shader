@@ -198,7 +198,13 @@ Shader "SpaceEngine/Atmosphere/Atmosphere"
 
 					float3 finalColor = sunColor * extinction + inscatter;
 
-					return float4(hdr(finalColor), 1) * fade;
+					finalColor = hdr(finalColor);
+
+					// NOTE : Hm, if i pass this value to w component of return state - looks like cutoff. Maybe thi is a fix for a Unity 5.5.
+					// TODO : Test Opacity cutout in newer versions of Unity!
+					//float opacity = dot(normalize(finalColor), float3(1.0, 1.0, 1.0));
+
+					return float4(finalColor, 1.0) * fade;
 				#endif
 
 				#ifdef LIGHT_2
@@ -252,7 +258,9 @@ Shader "SpaceEngine/Atmosphere/Atmosphere"
 
 					float3 finalColor = sunColor * extinction + inscatter;
 
-					return float4(hdr(finalColor), 1) * fade;
+					finalColor = hdr(finalColor);
+
+					return float4(finalColor, 1.0) * fade;
 				#endif
 
 				#ifdef LIGHT_3
@@ -310,7 +318,9 @@ Shader "SpaceEngine/Atmosphere/Atmosphere"
 
 					float3 finalColor = sunColor * extinction + inscatter;
 
-					return float4(hdr(finalColor), 1) * fade;
+					finalColor = hdr(finalColor);
+
+					return float4(finalColor, 1.0) * fade;
 				#endif
 
 				#ifdef LIGHT_4
@@ -378,7 +388,9 @@ Shader "SpaceEngine/Atmosphere/Atmosphere"
 
 					float3 finalColor = sunColor * extinction + inscatter;
 
-					return float4(hdr(finalColor), 1) * fade;
+					finalColor = hdr(finalColor);
+
+					return float4(finalColor, 1.0) * fade;
 				#endif
 
 				return float4(0, 0, 0, 0);
