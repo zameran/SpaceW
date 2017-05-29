@@ -33,8 +33,11 @@
 // Creator: zameran
 #endregion
 
+using SpaceEngine.Core.Tile.Storage;
 using SpaceEngine.Core.Storage;
+
 using System.Linq;
+
 using UnityEngine;
 
 namespace SpaceEngine.Debugging
@@ -62,19 +65,39 @@ namespace SpaceEngine.Debugging
         {
             ScrollPosition = GUILayout.BeginScrollView(ScrollPosition, false, true);
 
-            GUILayout.BeginVertical();
-
-            var storages = FindObjectsOfType<GPUTileStorage>().ToList();
-
-            GUILayoutExtensions.LabelWithSpace(string.Format("GPU Storage Count: {0}", storages.Count));
-            GUILayoutExtensions.LabelWithSpace(string.Format("GPU Storage Total Capacity: {0}", storages.Sum((storage) => storage.Capacity)));
-            GUILayoutExtensions.LabelWithSpace(string.Format("GPU Storage Total Free: {0}", storages.Sum((storage) => storage.FreeSlotsCount)));
-
-            GUILayout.Space(10);
-
-            GUILayout.EndVertical();
+            DrawStorageInfo<GPUTileStorage>("GPU Storage");
+            DrawStorageInfo<CBTileStorage>("CB Storage");
+            DrawStorageInfo<CPUTileStorage>("CPU Storage");
 
             GUILayout.EndScrollView();
+        }
+
+        protected void DrawStorageInfo<T>(string prefix = "Storage") where T : TileStorage
+        {
+            GUILayout.BeginVertical(prefix, GUISkin.box, GUILayout.Width(debugInfoBounds.width - 40));
+            {
+                var storages = GodManager.Instance.ActiveBody.transform.GetComponentsInChildren<T>().ToList();
+
+                GUILayout.Space(20);
+
+                GUILayout.BeginVertical("", GUISkin.box, GUILayout.Width(debugInfoBounds.width - 45));
+                {
+                    if (storages.Count == 0)
+                    {
+                        GUILayoutExtensions.LabelWithSpace(string.Format("Active body doesn't have any storages of provided type {0}", typeof(T).Name));
+                    }
+                    else
+                    {
+                        GUILayoutExtensions.LabelWithSpace(string.Format("{0} Count: {1}", prefix, storages.Count));
+                        GUILayoutExtensions.LabelWithSpace(string.Format("{0} Total Capacity: {1}", prefix, storages.Sum((storage) => storage.Capacity)));
+                        GUILayoutExtensions.LabelWithSpace(string.Format("{0} Total Free: {1}", prefix, storages.Sum((storage) => storage.FreeSlotsCount)));
+                    }
+
+                    GUILayout.Space(5);
+                }
+                GUILayout.EndVertical();
+            }
+            GUILayout.EndVertical();
         }
     }
 }

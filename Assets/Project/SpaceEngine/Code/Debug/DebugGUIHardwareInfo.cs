@@ -47,7 +47,7 @@ namespace SpaceEngine.Debugging
         {
             base.Awake();
 
-            SI.Get();
+            HardwareInfo.Get();
         }
 
         protected override void Start()
@@ -64,37 +64,39 @@ namespace SpaceEngine.Debugging
 
         protected override void UI(int id)
         {
+            if (GUILayout.Button("Update")) HardwareInfo.Get();
+
+            GUILayout.Space(5);
+
             ScrollPosition = GUILayout.BeginScrollView(ScrollPosition, false, true);
 
             GUILayout.BeginVertical();
 
-            if (GUILayout.Button("Update")) SI.Get();
+            GUILayoutExtensions.LabelWithSpace("Device Type: " + HardwareInfo.deviceType, -8);
+            GUILayoutExtensions.LabelWithSpace("Operation System: " + HardwareInfo.operatingSystem, -8);
+            GUILayoutExtensions.LabelWithSpace("Unity Version: " + HardwareInfo.unityVersion, -8);
+            GUILayoutExtensions.LabelWithSpace("Graphics Device: " + HardwareInfo.graphicsDeviceName, -8);
+            GUILayoutExtensions.LabelWithSpace("Graphics Device API: " + HardwareInfo.graphicsDeviceVersion, -8);
+            GUILayoutExtensions.LabelWithSpace("Graphics Device ID: " + HardwareInfo.graphicsDeviceID, -8);
+            GUILayoutExtensions.LabelWithSpace("Graphics Memory Size: " + HardwareInfo.graphicsMemorySize, -8);
+            GUILayoutExtensions.LabelWithSpace("Supported Shader Level: " + HardwareInfo.graphicsShaderLevel, -8);
 
-            GUILayoutExtensions.LabelWithSpace("Device Type: " + SI.deviceType, -8);
-            GUILayoutExtensions.LabelWithSpace("Operation System: " + SI.operatingSystem, -8);
-            GUILayoutExtensions.LabelWithSpace("Unity Version: " + SI.unityVersion, -8);
-            GUILayoutExtensions.LabelWithSpace("Graphics Device: " + SI.graphicsDeviceName, -8);
-            GUILayoutExtensions.LabelWithSpace("Graphics Device API: " + SI.graphicsDeviceVersion, -8);
-            GUILayoutExtensions.LabelWithSpace("Graphics Device ID: " + SI.graphicsDeviceID, -8);
-            GUILayoutExtensions.LabelWithSpace("Graphics Memory Size: " + SI.graphicsMemorySize, -8);
-            GUILayoutExtensions.LabelWithSpace("Supported Shader Level: " + SI.graphicsShaderLevel, -8);
+            GUILayoutExtensions.LabelWithSpace("CPU: " + HardwareInfo.processorType, -8);
+            GUILayoutExtensions.LabelWithSpace("CPU Cores Count (Threads Count): " + HardwareInfo.processorCount, -8);
+            GUILayoutExtensions.LabelWithSpace("CPU Current Frequency: " + HardwareInfo.processorFrequency + "Hz", -8);
 
-            GUILayoutExtensions.LabelWithSpace("CPU: " + SI.processorType, -8);
-            GUILayoutExtensions.LabelWithSpace("CPU Cores Count (Threads Count): " + SI.processorCount, -8);
-            GUILayoutExtensions.LabelWithSpace("CPU Current Frequency: " + SI.processorFrequency + "Hz", -8);
+            GUILayoutExtensions.LabelWithSpace("RAM: " + HardwareInfo.systemMemorySize, -8);
 
-            GUILayoutExtensions.LabelWithSpace("RAM: " + SI.systemMemorySize, -8);
+            GUILayoutExtensions.LabelWithSpace("Maximum Texture Size: " + HardwareInfo.maxTextureSize, -8);
+            GUILayoutExtensions.LabelWithSpace("Non-Power-Of-Two Texture Support: " + HardwareInfo.npotSupport, -8);
 
-            GUILayoutExtensions.LabelWithSpace("Maximum Texture Size: " + SI.maxTextureSize, -8);
-            GUILayoutExtensions.LabelWithSpace("Non-Power-Of-Two Texture Support: " + SI.npotSupport, -8);
-
-            GUILayoutExtensions.LabelWithSpace("ComputeShaders: " + SI.supportsComputeShaders, -8);
+            GUILayoutExtensions.LabelWithSpace("ComputeShaders: " + HardwareInfo.supportsComputeShaders, -8);
             GUILayoutExtensions.LabelWithSpace("RenderTextures: " + true, -8);
-            GUILayoutExtensions.LabelWithSpace("3DTextures: " + SI.supports3DTextures, -8);
-            GUILayoutExtensions.LabelWithSpace("Graphics Multithreading: " + SI.graphicsMultiThreaded, -8);
+            GUILayoutExtensions.LabelWithSpace("3DTextures: " + HardwareInfo.supports3DTextures, -8);
+            GUILayoutExtensions.LabelWithSpace("Graphics Multithreading: " + HardwareInfo.graphicsMultiThreaded, -8);
 
-            DrawSupportedFormats<RenderTextureFormat>(SI.RenderTextureFormats, "RenderTexture");
-            DrawSupportedFormats<TextureFormat>(SI.TextureFormats, "Texture");
+            DrawSupportedFormats<RenderTextureFormat>(HardwareInfo.RenderTextureFormats, "RenderTexture");
+            DrawSupportedFormats<TextureFormat>(HardwareInfo.TextureFormats, "Texture");
 
             GUILayout.Space(10);
 
@@ -135,7 +137,7 @@ namespace SpaceEngine.Debugging
                         throw new NotImplementedException("Unsupported format!");
                     }
 
-                    supportState = SI.Supports(supports);
+                    supportState = HardwareInfo.Supports(supports);
                 }
                 catch (Exception ex)
                 {
@@ -153,7 +155,7 @@ namespace SpaceEngine.Debugging
         }
     }
 
-    public static class SI
+    public static class HardwareInfo
     {
         public static string deviceType;
         public static string operatingSystem;

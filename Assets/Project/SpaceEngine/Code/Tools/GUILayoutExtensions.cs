@@ -39,6 +39,18 @@ using UnityEngine;
 
 public static class GUILayoutExtensions
 {
+    public static void SliderWithField(object caption, float leftValue, float rightValue, ref float value, string pattern = "0.0")
+    {
+        GUILayout.Label(caption.ToString());
+
+        GUILayout.BeginHorizontal();
+
+        GUILayout.TextField(value.ToString(pattern), GUILayout.MaxWidth(50));
+        value = GUILayout.HorizontalSlider(value, leftValue, rightValue);
+
+        GUILayout.EndHorizontal();
+    }
+
     public static void LabelWithFlexibleSpace(object text1, object text2)
     {
         GUILayout.Label(text1.ToString());

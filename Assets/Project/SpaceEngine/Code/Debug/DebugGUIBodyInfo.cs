@@ -41,7 +41,7 @@ namespace SpaceEngine.Debugging
 {
     public sealed class DebugGUIBodyInfo : DebugGUI
     {
-        public Body Body;
+        public Body Body { get { return GodManager.Instance.ActiveBody; } }
 
         protected override void Awake()
         {
@@ -96,11 +96,8 @@ namespace SpaceEngine.Debugging
 
                     GUILayout.Space(10);
 
-                    GUILayout.Label("Density: ");
-                    float.TryParse(GUILayout.TextField(Body.Atmosphere.Density.ToString("0.0")), out Body.Atmosphere.Density);
-
-                    GUILayout.Label("Height: ");
-                    float.TryParse(GUILayout.TextField(Body.Atmosphere.Height.ToString("0.0")), out Body.Atmosphere.Height);
+                    GUILayoutExtensions.SliderWithField("Density: ", 0.0f, 1.0f, ref Body.Atmosphere.Density);
+                    GUILayoutExtensions.SliderWithField("Height: ", 0.0f, Body.Size / 1000.0f, ref Body.Atmosphere.Height);
 
                     GUILayout.EndVertical();
                 }
@@ -119,7 +116,8 @@ namespace SpaceEngine.Debugging
 
                     GUILayout.Label("Ocean parameters: ", BoldLabelStyle);
 
-                    GUILayout.Label("Nothing there!");
+                    GUILayoutExtensions.SliderWithField("Level: ", 0.0f, 5.0f, ref Body.Ocean.OceanLevel);
+                    GUILayoutExtensions.SliderWithField("Z Min: ", 0.0f, 50000.0f, ref Body.Ocean.ZMin);
 
                     GUILayout.EndVertical();
                 }
