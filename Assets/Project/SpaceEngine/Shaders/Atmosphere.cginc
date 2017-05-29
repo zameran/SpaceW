@@ -347,13 +347,13 @@ float3 Irradiance(sampler2D samp, float r, float muS)
 // Rayleigh phase function
 float PhaseFunctionR(float mu) 
 {
-	return (3.0 / (16.0 * M_PI)) * (1.0 + mu * mu);
+	return (3.0 / M_PI16) * (1.0 + mu * mu);
 }
 
 // Mie phase function
 float PhaseFunctionM(float mu) 
 {
-	return 1.5 * 1.0 / (4.0 * M_PI) * (1.0 - mieG * mieG) * pow(1.0 + (mieG * mieG) - 2.0 * mieG * mu, -3.0 / 2.0) * (1.0 + mu * mu) / (2.0 + mieG * mieG);
+	return 1.5 * 1.0 / M_PI4 * (1.0 - mieG * mieG) * pow(1.0 + (mieG * mieG) - 2.0 * mieG * mu, -3.0 / 2.0) * (1.0 + mu * mu) / (2.0 + mieG * mieG);
 }
 
 // approximated single Mie scattering (cf. approximate Cm in paragraph "Angular precision")

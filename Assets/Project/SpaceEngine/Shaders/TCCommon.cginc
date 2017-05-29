@@ -3081,7 +3081,7 @@ float2 VolcanoGlowNoise(float3 ppoint)
 
 		if (volcanoOctaves > 1)
 		{
-			ppoint = Rotate(2.0 * M_PI * hash1(float(i)), rotVec, ppoint);
+			ppoint = Rotate(M_PI2 * hash1(float(i)), rotVec, ppoint);
 			frequency *= 2.0;
 			size      *= 0.5;
 			distFreq  *= 2.0;

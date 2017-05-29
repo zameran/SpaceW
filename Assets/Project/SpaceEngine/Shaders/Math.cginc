@@ -41,6 +41,14 @@
 #define M_PI2 6.28318530716
 #endif
 
+#if !defined (M_PI4)
+#define M_PI4 12.56637061432
+#endif
+
+#if !defined (M_PI16)
+#define M_PI16 50.26548245728
+#endif
+
 #if !defined (EPSILON)
 #define EPSILON 1e-10
 #endif
