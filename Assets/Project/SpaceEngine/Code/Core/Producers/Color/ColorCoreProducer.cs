@@ -168,7 +168,7 @@ namespace SpaceEngine.Core
             tileWSD.w = 0.0f;
 
             var tileSD = Vector2d.zero;
-            tileSD.x = (0.5 + GetBorder()) / (tileWidth - 1 - GetBorder() * 2);
+            tileSD.x = (0.5 + (float)GetBorder()) / (tileWSD.x - 1 - (float)GetBorder() * 2);
             tileSD.y = (1.0 + tileSD.x * 2.0);
 
             var offset = Vector4d.zero;

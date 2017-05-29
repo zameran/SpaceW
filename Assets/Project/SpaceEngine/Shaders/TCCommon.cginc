@@ -60,7 +60,9 @@
 // 0 - classic noise - OK.
 // 1 - Ken Perlin's "improved" - OK.
 // 2 - fast "improved" - OK.
+#ifdef NOISE_ENGINE_I
 #define NOISE_ENGINE_TECHNIQUE 2
+#endif
 //-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------

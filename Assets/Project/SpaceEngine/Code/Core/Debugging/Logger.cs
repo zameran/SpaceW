@@ -115,6 +115,7 @@ namespace SpaceEngine.Core.Debugging
     {
         private static readonly ReaderWriterLockSlim IOLock = new ReaderWriterLockSlim();
         private static readonly LoggerPalette Palette = new LoggerPalette();
+        private static readonly Category DefaultDebugCategory = Category.Other;
 
         private static bool DebuggerActive;
 
@@ -125,7 +126,8 @@ namespace SpaceEngine.Core.Debugging
             shouldDump = false;
             logFileNamePrefixes = new string[0];
 
-            var frame = new System.Diagnostics.StackFrame(1, true);
+            // NOTE : Be careful with skipFrames parameter!
+            var frame = new System.Diagnostics.StackFrame(2, true);
             var declaringType = frame.GetMethod().DeclaringType;
 
             if (declaringType == null)
@@ -161,7 +163,10 @@ namespace SpaceEngine.Core.Debugging
                     DebuggerActive = true;
                 }
                 else
-                { DebuggerActive = false; }
+                {
+                    DebugCategory = DefaultDebugCategory;
+                    DebuggerActive = false;
+                }
             }
         }
 
