@@ -4,8 +4,8 @@ SpaceW is procedural universe generator - simulator.
 
 ![alt tag](https://github.com/zameran/SpaceW/blob/develop/Logo.png?raw=true)
 
+[Discord Server](https://discord.gg/kmkKbra)
 [gitter channel placeholder]
-[discord channel placeholder]
 [telegram channel placeholder]
 [other placeholder]
 
@@ -55,6 +55,7 @@ SpaceW is procedural universe generator - simulator.
 * Some shader code was ported to Unity from Space Engine and Proland.
 * Some stuff may not work or very experimental.
 * Sphecial thanks goes to @dotBunny and @JetBrains for a special support IDE's plugins!
+* New builds will be available via Unity Cloud Build in special channel inside the discord.
 
 ### References ###
 * [Space Engine](http://spaceengine.org/)
