@@ -172,7 +172,7 @@ namespace SpaceEngine.Cameras
 
             if (Body != null)
             {
-                var worldPosition = (Vector3d)transform.position;
+                var worldPosition = (Vector3d)(transform.position - Body.Origin);
 
                 if (Body.GetBodyDeformationType() == BodyDeformationType.Spherical)
                 {
@@ -189,7 +189,7 @@ namespace SpaceEngine.Cameras
                     }
                 }
 
-                transform.position = worldPosition;
+                transform.position = worldPosition + (Vector3d)Body.Origin;
             }
         }
 

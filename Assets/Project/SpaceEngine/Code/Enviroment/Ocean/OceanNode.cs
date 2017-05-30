@@ -162,7 +162,7 @@ namespace SpaceEngine.Ocean
 
             if (OldLocalToOcean != Matrix4x4d.identity)
             {
-                ux = (new Vector3d(OldLocalToOcean.m[1, 0], OldLocalToOcean.m[1, 1], OldLocalToOcean.m[1, 2])).Cross(uz).Normalized();
+                ux = new Vector3d(OldLocalToOcean.m[1, 0], OldLocalToOcean.m[1, 1], OldLocalToOcean.m[1, 2]).Cross(uz).Normalized();
             }
             else
             {
@@ -186,7 +186,7 @@ namespace SpaceEngine.Ocean
                 Offset += VectorHelper.MakeFrom(delta, 0.0f);
             }
 
-            if (Mathf.Max(Mathf.Abs(Offset.x), Mathf.Abs(Offset.y)) > 20000f)
+            if (Mathf.Max(Mathf.Abs(Offset.x), Mathf.Abs(Offset.y)) > 20000.0f)
             {
                 Offset.x = 0.0f;
                 Offset.y = 0.0f;
