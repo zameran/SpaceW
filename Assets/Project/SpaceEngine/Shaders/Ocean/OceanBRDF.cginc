@@ -98,7 +98,7 @@ float ReflectedSunRadiance(float3 L, float3 V, float3 N, float sigmaSq)
 	float3 H = normalize(L + V);
 
 	float hn = dot(H, N);
-	float p = exp(-2.0 * ((1.0 - hn * hn) / sigmaSq) / (1.0 + hn)) / (4.0 * M_PI * sigmaSq);
+	float p = exp(-2.0 * ((1.0 - hn * hn) / sigmaSq) / (1.0 + hn)) / (M_PI4 * sigmaSq);
 
 	float c = 1.0 - dot(V, H);
 	float c2 = c * c;

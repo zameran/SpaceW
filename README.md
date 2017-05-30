@@ -4,8 +4,8 @@ SpaceW is procedural universe generator - simulator.
 
 ![alt tag](https://github.com/zameran/SpaceW/blob/develop/Logo.png?raw=true)
 
+[Discord Server](https://discord.gg/kmkKbra)
 [gitter channel placeholder]
-[discord channel placeholder]
 [telegram channel placeholder]
 [other placeholder]
 
@@ -13,6 +13,9 @@ SpaceW is procedural universe generator - simulator.
 * Strong language. So you don't give me crap about it.
 * Strange code. This is like a nuclear test site.
 * Black dirty magic. Like in 15th century, yay.
+* That's a project of life.
+* Under active development forever.
+* Take it easy...
 
 ## Current Engine version support ##
 * Unity 5.4.5f1 (Windows)
@@ -23,11 +26,8 @@ SpaceW is procedural universe generator - simulator.
 * DirectX 11 [Shader Model 5.0]
 * OpenGL 4.3 and higher [Experimental and early WIP]
 
-### Warning ###
-* This is project of life.
-* Project under active development forever.
-
 ### Install ###
+* RTFM and JRTI.
 * Clone the repository.
 * Open project in Unity.
 * Open the 'Scene' scene.
@@ -36,7 +36,7 @@ SpaceW is procedural universe generator - simulator.
 ### Contribution guidelines ###
 * Fork the repository.
 * Make your changes in separate branch [Git Flow].
-* Create pull request.
+* Create a pull request.
 
 ### Core guidelines ###
 * Currently there are a lot of trash, but something is marked as [Obsolete] or */ //Commented */
@@ -44,6 +44,8 @@ SpaceW is procedural universe generator - simulator.
 
 ### Troubleshooting ###
 * Assets -> Reimport All.
+* Asset -> Reimport.
+* Asset -> Refresh.
 * Build Settings -> Switch Platform.
 
 ### License ###
@@ -52,12 +54,16 @@ SpaceW is procedural universe generator - simulator.
 ### Extra ###
 * Some shader code was ported to Unity from Space Engine and Proland.
 * Some stuff may not work or very experimental.
+* Sphecial thanks goes to @dotBunny and @JetBrains for a special support IDE's plugins!
+* New builds will be available via Unity Cloud Build in special channel inside the discord.
 
 ### References ###
 * [Space Engine](http://spaceengine.org/)
 * [Proland](http://proland.imag.fr/)
 * [Eric Bruneton](http://www-evasion.imag.fr/Membres/Eric.Bruneton/)
 * [Google](https://www.google.com)
+* [JetBrains Rider Support Plugin](https://github.com/JetBrains/Unity3dRider)
+* [VSCode Support Plugin](https://github.com/dotBunny/VSCode)
 
 ### Contacts ###
 * [Protonmail](zameran@protonmail.com)

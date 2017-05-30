@@ -29,8 +29,17 @@ namespace UnityEngine
 {
     public class MathUtility
     {
-        public static readonly double Rad2Deg = 180.0 / Math.PI;
-        public static readonly double Deg2Rad = Math.PI / 180.0;
+        /// <summary>
+        ///   <para>Radians-to-degrees conversion constant (Read Only).</para>
+        /// Originally equals to <code>180.0 / Math.PI</code>
+        /// </summary>
+        public static readonly double Rad2Deg = 57.29577951308232;
+
+        /// <summary>
+        ///   <para>Degrees-to-radians conversion constant (Read Only).</para>
+        /// Originally equals to <code>Math.PI / 180.0</code>
+        /// </summary>
+        public static readonly double Deg2Rad = 0.017453292519943295;
 
         public static double Safe_Acos(double r)
         {

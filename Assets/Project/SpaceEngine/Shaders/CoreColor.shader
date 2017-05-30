@@ -15,7 +15,7 @@
 		#include "TCTerra.cginc"
 
 		#define CORE_PORDUCER_ADDITIONAL_UV
-		#define BORDER 2.0	// Tile border size
+		//#define BORDER 2.0
 
 		#include "Core.cginc"
 
@@ -36,9 +36,9 @@
 
 		void frag(in VertexProducerOutput IN, out float4 output : COLOR)
 		{
-			float u = (0.5 + BORDER) / (_TileWSD.x - 1 - BORDER * 2);
-			float2 vert = (IN.uv0 * (1.0 + u * 2.0) - u) * _Offset.z + _Offset.xy;
-			//float2 vert = (IN.uv0 * _TileSD.y - _TileSD.x) * _Offset.z + _Offset.xy;
+			//float u = (0.5 + BORDER) / (_TileWSD.x - 1 - BORDER * 2);
+			//float2 vert = (IN.uv0 * (1.0 + u * 2.0) - u) * _Offset.z + _Offset.xy;
+			float2 vert = (IN.uv0 * _TileSD.y - _TileSD.x) * _Offset.z + _Offset.xy;
 				
 			float3 P = float3(vert, _Offset.w);
 			float3 p = normalize(mul(_LocalToWorld, P)).xyz;

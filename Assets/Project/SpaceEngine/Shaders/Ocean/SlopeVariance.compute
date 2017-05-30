@@ -60,6 +60,10 @@
  * Modified by Denis Ovchinnikov 2015-2017
  */
 
+#if !defined (MATH)
+#include "../Math.cginc"
+#endif
+
 #pragma kernel CSMain
 
 Texture2D _Spectrum01;
@@ -85,7 +89,6 @@ float GetSlopeVariances(float2 k, float A, float B, float C, float2 spectrumSamp
 void CSMain (uint3 id : SV_DispatchThreadID)
 {
     const float SCALE = 10.0;
-    const float M_PI = 3.14159265;
     
     float a = id.x;
     float b = id.y;
@@ -110,7 +113,7 @@ void CSMain (uint3 id : SV_DispatchThreadID)
             int i = x >= _Size / 2.0 ? x - size : x;
             int j = y >= _Size / 2.0 ? y - size : y;
 
-            float2 k = 2.0 * M_PI * float2(i, j);
+            float2 k = M_PI2 * float2(i, j);
 
             float4 spectrum01 = _Spectrum01[uint2(x,y)];
             float4 spectrum23 = _Spectrum23[uint2(x,y)];

@@ -44,6 +44,7 @@ using SpaceEngine.Ocean;
 
 using System.Collections.Generic;
 using System.Linq;
+
 using UnityEngine;
 
 namespace SpaceEngine.Core.Bodies
@@ -121,8 +122,8 @@ namespace SpaceEngine.Core.Bodies
                 if (Ocean.ParentBody == null)
                     Ocean.ParentBody = this;
 
-                // TODO : Whhhhhhaaattaaaaaafuuuuckkk!
-                StartCoroutine(Ocean.InitializationFix());
+                // NOTE : Reinvert particular value to switch matrices for ocean rendering... Not used at the moment...
+                //StartCoroutine(Ocean.InitializationFix());
             }
 
             QuadMesh = MeshFactory.MakePlane(GridResolution, MeshFactory.PLANE.XY, true, false, false);

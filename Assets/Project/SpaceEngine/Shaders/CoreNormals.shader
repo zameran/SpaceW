@@ -73,19 +73,17 @@
 			float4 uv0 = floor(uv.xyxy + float4(-1.0, 0.0, 1.0, 0.0)) * _ElevationOSL.z + _ElevationOSL.xyxy;
 			float4 uv1 = floor(uv.xyxy + float4(0.0, -1.0, 0.0, 1.0)) * _ElevationOSL.z + _ElevationOSL.xyxy;
 
-			float z0 = GetHeight(_ElevationSampler, uv0.xy);
-			float z1 = GetHeight(_ElevationSampler, uv0.zw);
-			float z2 = GetHeight(_ElevationSampler, uv1.xy);
-			float z3 = GetHeight(_ElevationSampler, uv1.zw);
+			float4 Z = float4(GetHeight(_ElevationSampler, uv0.xy),
+							  GetHeight(_ElevationSampler, uv0.zw),
+							  GetHeight(_ElevationSampler, uv1.xy),
+							  GetHeight(_ElevationSampler, uv1.zw));
 
-			float3 p0 = GetWorldPosition(uv + float2(-1.0, 0.0), z0).xyz;
-			float3 p1 = GetWorldPosition(uv + float2(+1.0, 0.0), z1).xyz;
-			float3 p2 = GetWorldPosition(uv + float2(0.0, -1.0), z2).xyz;
-			float3 p3 = GetWorldPosition(uv + float2(0.0, +1.0), z3).xyz;
-				
-			float3 normal = normalize(cross(p1 - p0, p3 - p2));
+			float3 p0 = GetWorldPosition(uv + float2(-1.0, 0.0), Z.x).xyz;
+			float3 p1 = GetWorldPosition(uv + float2(+1.0, 0.0), Z.y).xyz;
+			float3 p2 = GetWorldPosition(uv + float2(0.0, -1.0), Z.z).xyz;
+			float3 p3 = GetWorldPosition(uv + float2(0.0, +1.0), Z.w).xyz;
 
-			return (mul((float3x3)_WorldToTangentFrame, normal)).xyz;
+			return (mul((float3x3)_WorldToTangentFrame, normalize(cross(p1 - p0, p3 - p2)))).xyz;
 		}
 
 		float CalculateSlope(float3 normal)

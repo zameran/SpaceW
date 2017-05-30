@@ -123,7 +123,7 @@ namespace SpaceEngine.Core.Tile.Producer
 
         public int GetTileSize(int i)
         {
-            // TODO : CORE FIX.
+            // NOTE : So, if we already doesn't have any cache initialized - initialize it!
             InitCache();
 
             return Cache.GetStorage(i).TileSize;

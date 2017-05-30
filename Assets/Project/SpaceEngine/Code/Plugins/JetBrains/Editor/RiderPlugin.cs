@@ -4,9 +4,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Net;
-using System.Net.Sockets;
 using System.Runtime.InteropServices;
-using System.Text;
 using UnityEditor;
 using UnityEngine;
 using Debug = UnityEngine.Debug;
@@ -17,7 +15,6 @@ namespace Plugins.Editor.JetBrains
     public static class RiderPlugin
     {
         private static bool Initialized;
-
         private static string SlnFile;
 
         private static string DefaultApp
@@ -29,6 +26,12 @@ namespace Plugins.Editor.JetBrains
         {
             get { return EditorPrefs.GetBool("Rider_TargetFrameworkVersion45", true); }
             set { EditorPrefs.SetBool("Rider_TargetFrameworkVersion45", value); }
+        }
+
+        public static bool EnableLogging
+        {
+            get { return EditorPrefs.GetBool("Rider_EnableLogging", false); }
+            set { EditorPrefs.SetBool("Rider_EnableLogging", value); }
         }
 
         internal static bool Enabled
@@ -49,40 +52,63 @@ namespace Plugins.Editor.JetBrains
 
         private static void InitRiderPlugin()
         {
-            var riderFileInfo = new FileInfo(DefaultApp);
-
-            var newPath = riderFileInfo.FullName;
-            // try to search the new version
-
-            if (!riderFileInfo.Exists)
-            {
-                switch (riderFileInfo.Extension)
-                {
-                    case ".exe":
-                        {
-                            var possibleNew =
-                              riderFileInfo.Directory.Parent.Parent.GetDirectories("*ider*")
-                                .SelectMany(a => a.GetDirectories("bin"))
-                                .SelectMany(a => a.GetFiles(riderFileInfo.Name))
-                                .ToArray();
-                            if (possibleNew.Length > 0)
-                                newPath = possibleNew.OrderBy(a => a.LastWriteTime).Last().FullName;
-                            break;
-                        }
-                }
-                if (newPath != riderFileInfo.FullName)
-                {
-                    Log(string.Format("Update {0} to {1}", riderFileInfo.FullName, newPath));
-                    EditorPrefs.SetString("kScriptsDefaultApp", newPath);
-                }
-            }
+            AutomaticChangeRiderLocation(DefaultApp);
 
             var projectDirectory = Directory.GetParent(Application.dataPath).FullName;
+
             var projectName = Path.GetFileName(projectDirectory);
             SlnFile = Path.Combine(projectDirectory, string.Format("{0}.sln", projectName));
             UpdateUnitySettings(SlnFile);
 
+            InitializeEditorInstanceJson(projectDirectory);
+
             Initialized = true;
+        }
+
+        private static bool RiderPathExist(string path)
+        {
+            // windows or mac
+            var fileInfo = new FileInfo(path);
+            var directoryInfo = new DirectoryInfo(path);
+            return fileInfo.Exists || (directoryInfo.Extension == ".app" && directoryInfo.Exists);
+        }
+
+        private static bool AutomaticChangeRiderLocation(string riderPath)
+        {
+            // at least on windows new version of Rider gets always installed to new location - so try to search that new location
+            var riderFileInfo = new FileInfo(riderPath);
+
+            if (RiderPathExist(riderPath))
+                return true;
+
+            var newPath = riderFileInfo.FullName + ".non-existing extension";
+
+            switch (riderFileInfo.Extension)
+            {
+                case ".exe":
+                {
+                    var possibleNew =
+                        riderFileInfo.Directory.Parent.Parent.GetDirectories("*ider*")
+                            .SelectMany(a => a.GetDirectories("bin"))
+                            .SelectMany(a => a.GetFiles(riderFileInfo.Name))
+                            .ToArray();
+                    if (possibleNew.Length > 0)
+                        newPath = possibleNew.OrderBy(a => a.LastWriteTime).Last().FullName;
+                    break;
+                }
+            }
+            if (RiderPathExist(newPath) && newPath != riderPath)
+            {
+                if (EnableLogging) Debug.Log("[Rider] " + string.Format("Update {0} to {1}", riderFileInfo.FullName, newPath));
+                EditorPrefs.SetString("kScriptsDefaultApp", newPath);
+            }
+            else
+            {
+                EditorUtility.DisplayDialog("Rider executable not found",
+                    string.Format("Rider was not found in {0}{1}Please update 'External Script Editor'.", new FileInfo(riderPath).Directory, Environment.NewLine), "OK");
+                return false;
+            }
+            return true;
         }
 
         /// <summary>
@@ -97,8 +123,34 @@ namespace Plugins.Editor.JetBrains
             }
             catch (Exception e)
             {
-                Log("Exception on updating kScriptEditorArgs: " + e.Message);
+                if (EnableLogging) Debug.Log("[Rider] " + ("Exception on updating kScriptEditorArgs: " + e.Message));
             }
+        }
+
+        /// <summary>
+        /// Creates and deletes Library/EditorInstance.json containing version and process ID
+        /// </summary>
+        /// <param name="projectDirectory">Path to the project root directory</param>
+        private static void InitializeEditorInstanceJson(string projectDirectory)
+        {
+            // Only manage EditorInstance.json for 4.x and 5.x - it's a native feature for 2017.x
+#if UNITY_4 || UNITY_5
+            if (EnableLogging) Debug.Log("[Rider] " + "Writing Library/EditorInstance.json");
+
+            var library = Path.Combine(projectDirectory, "Library");
+            var editorInstanceJsonPath = Path.Combine(library, "EditorInstance.json");
+
+            File.WriteAllText(editorInstanceJsonPath, string.Format(@"{{
+  ""process_id"": {0},
+  ""version"": ""{1}""
+}}", Process.GetCurrentProcess().Id, Application.unityVersion));
+
+            AppDomain.CurrentDomain.DomainUnload += (sender, args) =>
+            {
+                if (EnableLogging) Debug.Log("[Rider] " + "Deleting Library/EditorInstance.json");
+                File.Delete(editorInstanceJsonPath);
+            };
+#endif
         }
 
         /// <summary>
@@ -130,10 +182,10 @@ namespace Plugins.Editor.JetBrains
                 {
                     SyncSolution(); // added to handle opening file, which was just recently created.
                     var assetFilePath = Path.Combine(appPath, AssetDatabase.GetAssetPath(selected));
-                    if (!CallUDPRider(line, SlnFile, assetFilePath))
+                    if (!DetectPortAndOpenFile(line, assetFilePath, new FileInfo(DefaultApp).Extension == ".exe"))
                     {
-                        var args = string.Format("{0}{1}{0} -l {2} {0}{3}{0}", "\"", SlnFile, line, assetFilePath);
-                        CallRider(DefaultApp, args);
+                        var args = string.Format("{0}{1}{0} --line {2} {0}{3}{0}", "\"", SlnFile, line, assetFilePath);
+                        return CallRider(args);
                     }
                     return true;
                 }
@@ -141,70 +193,83 @@ namespace Plugins.Editor.JetBrains
             return false;
         }
 
-        private static bool CallUDPRider(int line, string slnPath, string filePath)
+
+        private static bool DetectPortAndOpenFile(int line, string filePath, bool isWindows)
         {
-            Log(string.Format("CallUDPRider({0} {1} {2})", line, slnPath, filePath));
-            using (var sock = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp))
+            var startPort = 63342;
+            for (int port = startPort; port < startPort + 21; port++)
             {
-                try
+                var aboutUrl = string.Format("http://localhost:{0}/api/about/", port);
+                var aboutUri = new Uri(aboutUrl);
+                var responce = CallHttpApi(port, aboutUri);
+                if (responce.ToLower().Contains("rider"))
                 {
-                    sock.ReceiveTimeout = 10000;
-
-                    var serverAddr = IPAddress.Parse("127.0.0.1");
-                    var endPoint = new IPEndPoint(serverAddr, 11234);
-
-                    var text = line + "\r\n" + slnPath + "\r\n" + filePath + "\r\n";
-                    var send_buffer = Encoding.ASCII.GetBytes(text);
-                    sock.SendTo(send_buffer, endPoint);
-
-                    var rcv_buffer = new byte[1024];
-
-                    // Poll the socket for reception with a 10 ms timeout.
-                    if (!sock.Poll(10000, SelectMode.SelectRead))
-                    {
-                        throw new TimeoutException();
-                    }
-
-                    int bytesRec = sock.Receive(rcv_buffer); // This call will not block
-                    string status = Encoding.ASCII.GetString(rcv_buffer, 0, bytesRec);
-                    if (status == "ok")
-                    {
-                        ActivateWindow(new FileInfo(DefaultApp).FullName);
-                        return true;
-                    }
-                }
-                catch (Exception)
-                {
-                    //error Timed out
-                    Log("Socket error or no response. Have you installed RiderUnity3DConnector in Rider?");
+                    return HttpOpenFile(line, filePath, isWindows, port);
                 }
             }
             return false;
         }
 
-        private static void CallRider(string riderPath, string args)
+        private static bool HttpOpenFile(int line, string filePath, bool isWindows, int port)
         {
-            var riderFileInfo = new FileInfo(riderPath);
+            var url = string.Format("http://localhost:{0}/api/file?file={1}{2}", port, filePath,
+                line < 0 ? "&p=0" : "&line=" + line); // &p is needed to workaround https://youtrack.jetbrains.com/issue/IDEA-172350
+            if (isWindows)
+                url = string.Format(@"http://localhost:{0}/api/file/{1}{2}", port, filePath, line < 0 ? "" : ":" + line);
+
+            var uri = new Uri(url);
+            if (EnableLogging) Debug.Log("[Rider] " + string.Format("HttpRequestOpenFile({0})", uri.AbsoluteUri));
+
+            try
+            {
+                CallHttpApi(port, uri);
+            }
+            catch (Exception e)
+            {
+                Debug.Log("[Rider] " + "Exception in HttpRequestOpenFile: " + e);
+                return false;
+            }
+            ActivateWindow(new FileInfo(DefaultApp).FullName);
+            return true;
+        }
+
+        private static string CallHttpApi(int port, Uri uri)
+        {
+            using (var client = new WebClient())
+            {
+                client.Headers.Add("origin", string.Format("http://localhost:{0}", port));
+                client.Headers[HttpRequestHeader.ContentType] = "application/x-www-form-urlencoded";
+                var responseString = client.DownloadString(uri);
+                if (EnableLogging) Debug.Log("[Rider] HttpRequestOpenFile response: " + responseString);
+                return responseString;
+            }
+        }
+
+        private static bool CallRider(string args)
+        {
+            var riderFileInfo = new FileInfo(DefaultApp);
             var macOSVersion = riderFileInfo.Extension == ".app";
-            var riderExists = macOSVersion ? new DirectoryInfo(riderPath).Exists : riderFileInfo.Exists;
+            var riderExists = macOSVersion ? new DirectoryInfo(DefaultApp).Exists : riderFileInfo.Exists;
 
             if (!riderExists)
             {
-                EditorUtility.DisplayDialog("Rider executable not found", "Please update 'External Script Editor' path to JetBrains Rider.", "OK");
+                var res = AutomaticChangeRiderLocation(DefaultApp);
+                if (res == false)
+                    return res;
             }
 
             var proc = new Process();
             if (macOSVersion)
             {
                 proc.StartInfo.FileName = "open";
-                proc.StartInfo.Arguments = string.Format("-n {0}{1}{0} --args {2}", "\"", "/" + riderPath, args);
-                Log(proc.StartInfo.FileName + " " + proc.StartInfo.Arguments);
+                proc.StartInfo.Arguments = string.Format("-n {0}{1}{0} --args {2}", "\"", "/" + DefaultApp, args);
+                if (EnableLogging) Debug.Log("[Rider] " + proc.StartInfo.FileName + " " + proc.StartInfo.Arguments);
             }
             else
             {
-                proc.StartInfo.FileName = riderPath;
+                proc.StartInfo.FileName = DefaultApp;
                 proc.StartInfo.Arguments = args;
-                Log("\"" + proc.StartInfo.FileName + "\"" + " " + proc.StartInfo.Arguments);
+                if (EnableLogging) Debug.Log("[Rider] " + ("\"" + proc.StartInfo.FileName + "\"" + " " + proc.StartInfo.Arguments));
             }
 
             proc.StartInfo.UseShellExecute = false;
@@ -213,7 +278,8 @@ namespace Plugins.Editor.JetBrains
             proc.StartInfo.RedirectStandardOutput = true;
             proc.Start();
 
-            ActivateWindow(riderPath);
+            ActivateWindow(DefaultApp);
+            return true;
         }
 
         private static void ActivateWindow(string riderPath)
@@ -242,13 +308,17 @@ namespace Plugins.Editor.JetBrains
                         var topLevelWindows = User32Dll.GetTopLevelWindowHandles();
                         // Get process main window title
                         var windowHandle = topLevelWindows.FirstOrDefault(hwnd => User32Dll.GetWindowProcessId(hwnd) == process.Id);
+                        Debug.Log("[Rider] ActivateWindow: " + process.Id + " " + windowHandle);
                         if (windowHandle != IntPtr.Zero)
+                        {
+                            //User32Dll.ShowWindow(windowHandle, 9); //SW_RESTORE = 9
                             User32Dll.SetForegroundWindow(windowHandle);
+                        }
                     }
                 }
                 catch (Exception e)
                 {
-                    Log("Exception on ActivateWindow: " + e);
+                    Debug.Log("[Rider] " + ("Exception on ActivateWindow: " + e));
                 }
             }
         }
@@ -260,7 +330,7 @@ namespace Plugins.Editor.JetBrains
             SyncSolution();
 
             // Load Project
-            CallRider(DefaultApp, string.Format("{0}{1}{0}", "\"", SlnFile));
+            CallRider(string.Format("{0}{1}{0}", "\"", SlnFile));
         }
 
         [MenuItem("Assets/Open C# Project in Rider", true, 1000)]
@@ -276,13 +346,8 @@ namespace Plugins.Editor.JetBrains
         {
             System.Type T = System.Type.GetType("UnityEditor.SyncVS,UnityEditor");
             System.Reflection.MethodInfo SyncSolution = T.GetMethod("SyncSolution",
-              System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Static);
+                System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Static);
             SyncSolution.Invoke(null, null);
-        }
-
-        public static void Log(object message)
-        {
-            Debug.Log("[Rider] " + message);
         }
 
         /// <summary>
@@ -311,10 +376,21 @@ namespace Plugins.Editor.JetBrains
  - With 4.5 Rider will show ambiguous references in UniRx.
 All those problems will go away after Unity upgrades to mono4.";
             TargetFrameworkVersion45 =
-              EditorGUILayout.Toggle(
-                new GUIContent("TargetFrameworkVersion 4.5",
-                  help), TargetFrameworkVersion45);
+                EditorGUILayout.Toggle(
+                    new GUIContent("TargetFrameworkVersion 4.5",
+                        help), TargetFrameworkVersion45);
             EditorGUILayout.HelpBox(help, MessageType.None);
+
+            EditorGUI.EndChangeCheck();
+
+            EditorGUI.BeginChangeCheck();
+
+            var loggingMsg = @"Enable logging. If you are about to report an issue, please enable logging and attach Unity console output to the issue.";
+            EnableLogging =
+                EditorGUILayout.Toggle(
+                    new GUIContent("Enable Logging",
+                        loggingMsg), EnableLogging);
+            EditorGUILayout.HelpBox(loggingMsg, MessageType.None);
 
             EditorGUI.EndChangeCheck();
         }
@@ -359,6 +435,9 @@ All those problems will go away after Unity upgrades to mono4.";
 
             [DllImport("user32.dll", CharSet = CharSet.Unicode, PreserveSig = true, SetLastError = true, ExactSpelling = true)]
             public static extern Int32 SetForegroundWindow(IntPtr hWnd);
+
+            [DllImport("user32.dll", CharSet = CharSet.Unicode, PreserveSig = true, SetLastError = true, ExactSpelling = true)]
+            public static extern UInt32 ShowWindow(IntPtr hWnd, Int32 nCmdShow);
         }
     }
 }

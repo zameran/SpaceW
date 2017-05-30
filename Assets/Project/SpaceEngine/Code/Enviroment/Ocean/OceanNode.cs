@@ -162,7 +162,7 @@ namespace SpaceEngine.Ocean
 
             if (OldLocalToOcean != Matrix4x4d.identity)
             {
-                ux = (new Vector3d(OldLocalToOcean.m[1, 0], OldLocalToOcean.m[1, 1], OldLocalToOcean.m[1, 2])).Cross(uz).Normalized();
+                ux = new Vector3d(OldLocalToOcean.m[1, 0], OldLocalToOcean.m[1, 1], OldLocalToOcean.m[1, 2]).Cross(uz).Normalized();
             }
             else
             {
@@ -186,7 +186,7 @@ namespace SpaceEngine.Ocean
                 Offset += VectorHelper.MakeFrom(delta, 0.0f);
             }
 
-            if (Mathf.Max(Mathf.Abs(Offset.x), Mathf.Abs(Offset.y)) > 20000f)
+            if (Mathf.Max(Mathf.Abs(Offset.x), Mathf.Abs(Offset.y)) > 20000.0f)
             {
                 Offset.x = 0.0f;
                 Offset.y = 0.0f;
@@ -203,8 +203,6 @@ namespace SpaceEngine.Ocean
 
             var sunDirection = ParentBody.Atmosphere.GetSunDirection(ParentBody.Atmosphere.Suns[0]);
             var oceanSunDirection = localToOcean.ToMatrix3x3d() * sunDirection;
-
-            // TODO : Set uniforms
 
             var sphereDirection = (localToCamera * Vector3d.zero).Normalized();   // Direction to center of planet			
             var OHL = (localToCamera * Vector3d.zero).Magnitude();                // Distance to center of planet
@@ -479,6 +477,7 @@ namespace SpaceEngine.Ocean
         /// Inverting <see cref="ZMin"/> with interval to switch the matrices for rendering.
         /// </summary>
         /// <returns><see cref="Yielders.EndOfFrame"/></returns>
+        [Obsolete("Don't use it! Looks like a useless bugfix.")]
         public IEnumerator InitializationFix()
         {
             ZMin *= -1.0f;
