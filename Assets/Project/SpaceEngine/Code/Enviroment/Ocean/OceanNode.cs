@@ -129,9 +129,10 @@ namespace SpaceEngine.Ocean
             var oceanFrame = cameraToWorld * Vector3d.zero; // Camera in local space
 
             var radius = (ParentBody.GetBodyDeformationType() == BodyDeformationType.Spherical) ? ParentBody.Size : 0.0f;
+            var trueAltitude = Vector3d.Distance(GodManager.Instance.WorldCameraPos, Origin) - radius;
 
             if ((ParentBody.GetBodyDeformationType() == BodyDeformationType.Flat && oceanFrame.z > ZMin) ||
-                (radius > 0.0 && oceanFrame.Magnitude() > radius + ZMin) ||
+                (radius > 0.0 && trueAltitude > ZMin) ||
                 (radius < 0.0 && new Vector2d(oceanFrame.y, oceanFrame.z).Magnitude() < -radius - ZMin))
             {
                 OldLocalToOcean = Matrix4x4d.identity;
