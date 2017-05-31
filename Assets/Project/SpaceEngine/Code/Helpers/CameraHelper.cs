@@ -33,9 +33,9 @@
 // Creator: zameran
 #endregion
 
-using System.Linq;
-using System.Collections;
+using System;
 using System.Collections.Generic;
+using System.Linq;
 
 using UnityEngine;
 using UnityEngine.Rendering;
@@ -77,7 +77,7 @@ public static class CameraHelper
 
         if (!useFix) return projectionMatrix;
 
-        if (SystemInfo.graphicsDeviceVersion.IndexOf("Direct3D") > -1)
+        if (SystemInfo.graphicsDeviceVersion.IndexOf("Direct3D", StringComparison.Ordinal) > -1)
         {
             // NOTE : Default unity antialiasing breaks matrices?
             if (IsDeferred(camera) || QualitySettings.antiAliasing == 0)

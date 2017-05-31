@@ -46,6 +46,8 @@ namespace SpaceEngine.Tests
         {
             public int PermSampler;
             public int PermGradSampler;
+            public int PermSamplerGL;
+            public int PermGradSamplerGL;
             public int AtlasDiffSampler;
             public int MaterialTable;
             public int ColorMap;
@@ -59,6 +61,8 @@ namespace SpaceEngine.Tests
             {
                 PermSampler = Shader.PropertyToID("PermSampler");
                 PermGradSampler = Shader.PropertyToID("PermGradSampler");
+                PermSamplerGL = Shader.PropertyToID("PermSamplerGL");
+                PermGradSamplerGL = Shader.PropertyToID("PermGradSamplerGL");
                 AtlasDiffSampler = Shader.PropertyToID("AtlasDiffSampler");
                 MaterialTable = Shader.PropertyToID("MaterialTable");
                 ColorMap = Shader.PropertyToID("ColorMap");
@@ -77,6 +81,8 @@ namespace SpaceEngine.Tests
 
         public Texture2D PermSampler = null;
         public Texture2D PermGradSampler = null;
+        public Texture2D PermSamplerGL = null;
+        public Texture2D PermGradSamplerGL = null;
         public Texture2D PlanetAtlas = null;
         public Texture2D PlanetColor = null;
         public Texture2D PlanetColorMap = null;
@@ -114,6 +120,8 @@ namespace SpaceEngine.Tests
 
             mat.SetTexture("PermSampler", PermSampler);
             mat.SetTexture("PermGradSampler", PermGradSampler);
+            mat.SetTexture("PermSamplerGL", PermSamplerGL);
+            mat.SetTexture("PermGradSamplerGL", PermGradSamplerGL);
             mat.SetTexture("AtlasDiffSampler", PlanetAtlas);
             mat.SetTexture("MaterialTable", PlanetColor);
             mat.SetTexture("ColorMap", PlanetColorMap);
@@ -132,6 +140,8 @@ namespace SpaceEngine.Tests
 
             mat.SetTexture(u.PermSampler, PermSampler);
             mat.SetTexture(u.PermGradSampler, PermGradSampler);
+            mat.SetTexture(u.PermSamplerGL, PermSamplerGL);
+            mat.SetTexture(u.PermGradSamplerGL, PermGradSamplerGL);
             mat.SetTexture(u.AtlasDiffSampler, PlanetAtlas);
             mat.SetTexture(u.MaterialTable, PlanetColor);
             mat.SetTexture(u.ColorMap, PlanetColorMap);
