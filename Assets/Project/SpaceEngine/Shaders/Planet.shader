@@ -145,8 +145,10 @@
 			Tags { "Queue" = "Geometry" }
 			//Tags { "Queue" = "Opaque" "LightMode" = "Deferred" }
 
-			ZTest On
 			ZWrite On
+			ZTest On
+			Fog { Mode Off }
+			//Blend One OneMinusSrcAlpha
 			Cull Back
 
 			CGPROGRAM

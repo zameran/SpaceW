@@ -77,6 +77,9 @@ namespace SpaceEngine.Core.Bodies
         public OceanNode Ocean;
         public Ring Ring;
 
+        public EngineRenderQueue RenderQueue = EngineRenderQueue.Geometry;
+        public int RenderQueueOffset = 0;
+
         public bool DrawGizmos = false;
 
         public bool AtmosphereEnabled = true;
