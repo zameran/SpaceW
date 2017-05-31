@@ -42,13 +42,7 @@ using UnityEngine;
 namespace SpaceEngine.Core.Bodies
 {
     public class CelestialBody : Body, ICelestialBody
-    {
-        public Ring Ring;
-
-        public List<Shadow> Shadows = new List<Shadow>();
-        
-        public bool RingEnabled = true;
-        
+    {              
         public Texture2D GroundDiffuse;
         public Texture2D GroundNormal;
         public Texture2D DetailedNormal;
@@ -164,11 +158,6 @@ namespace SpaceEngine.Core.Bodies
         public override void SetUniforms(MaterialPropertyBlock target)
         {
             base.SetUniforms(target);
-
-            if (Ring != null)
-            {
-                Ring.SetShadows(MPB, Shadows);
-            }
         }
 
         public override void InitSetUniforms()
@@ -191,12 +180,6 @@ namespace SpaceEngine.Core.Bodies
 
         protected override void InitNode()
         {
-            if (Ring != null)
-            {
-                if (Ring.ParentBody == null)
-                    Ring.ParentBody = this;
-            }
-
             Offset = new Vector3(0.0f, 0.0f, Radius);
 
             base.InitNode();
@@ -233,14 +216,6 @@ namespace SpaceEngine.Core.Bodies
 
         public override void Render(int layer = 0)
         {
-            if (Ring != null)
-            {
-                if (RingEnabled)
-                {
-                    Ring.Render();
-                }
-            }
-
             base.Render(layer);
         }
 

@@ -145,8 +145,10 @@
 			Tags { "Queue" = "Geometry" }
 			//Tags { "Queue" = "Opaque" "LightMode" = "Deferred" }
 
-			ZTest On
 			ZWrite On
+			ZTest On
+			Fog { Mode Off }
+			//Blend One OneMinusSrcAlpha
 			Cull Back
 
 			CGPROGRAM
@@ -200,7 +202,7 @@
 
 				float3 V = normalize(position);
 				float3 P = V * max(length(position), _Deform_Radius + 10.0);
-				float3 v = normalize(P - WCP);
+				float3 v = normalize(P - WCP - _Globals_Origin); // Body origin take in to account...
 
 				#if ATMOSPHERE_ON
 					#if OCEAN_ON
@@ -215,7 +217,7 @@
 				float cTheta = dot(normal.xyz, WSD);
 
 				#if SHADOW_1 || SHADOW_2 || SHADOW_3 || SHADOW_4
-					float shadow = ShadowColor(float4(P, 1));
+					float shadow = ShadowColor(float4(P - _Globals_Origin, 1)); // Body origin take in to account...
 				#endif
 				
 				#if ATMOSPHERE_ON

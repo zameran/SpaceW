@@ -33,6 +33,8 @@
 // Creator: zameran
 #endregion
 
+using SpaceEngine.Core.Utilities.Gradients;
+
 using UnityEngine;
 
 public class SphereShadow : Shadow
@@ -40,20 +42,16 @@ public class SphereShadow : Shadow
     public float InnerRadius = 1.0f;
     public float OuterRadius = 2.0f;
 
-    public Gradient PenumbraBrightness = new Gradient();
-    public Gradient PenumbraColor = new Gradient();
-
-    private Texture2D penumbraLut;
+    public PenumbraGradientLut Penumbra = new PenumbraGradientLut();
 
     readonly Vector3[] vectors = new Vector3[3];
-
     readonly float[] magnitudes = new float[3];
 
     public override Texture GetTexture()
     {
-        RegenerateLightingLut();
+        Penumbra.GenerateLut();
 
-        return penumbraLut;
+        return Penumbra.Lut;
     }
 
     public override bool CalculateShadow()
@@ -92,12 +90,14 @@ public class SphereShadow : Shadow
 
     protected virtual void Awake()
     {
-        RegenerateLightingLut();
+        Penumbra.GenerateLut();
     }
 
     protected virtual void OnDestroy()
     {
-        Helper.Destroy(penumbraLut);
+        Helper.Destroy(Penumbra.Lut);
+
+        Penumbra.DestroyLut();
     }
 
     #region Gizmos
@@ -129,34 +129,6 @@ public class SphereShadow : Shadow
 #endif
 
     #endregion
-
-    private void RegenerateLightingLut()
-    {
-        if (penumbraLut == null || penumbraLut.width != 1 || penumbraLut.height != 64)
-        {
-            Helper.Destroy(penumbraLut);
-
-            penumbraLut = Helper.CreateTempTeture2D(1, 64);
-        }
-
-        for (var y = 0; y < penumbraLut.height; y++)
-        {
-            var t = y / (float)penumbraLut.height;
-            var a = PenumbraBrightness.Evaluate(t);
-            var b = PenumbraColor.Evaluate(t);
-            var c = a * b;
-
-            c.a = c.grayscale;
-
-            penumbraLut.SetPixel(0, y, c);
-        }
-
-        // Make sure the last pixel is white
-        penumbraLut.SetPixel(0, penumbraLut.height - 1, Color.white);
-
-        penumbraLut.wrapMode = TextureWrapMode.Clamp;
-        penumbraLut.Apply();
-    }
 
     private void SetVector(int index, Vector3 vector)
     {
