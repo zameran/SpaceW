@@ -28,42 +28,64 @@
 // ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF
 // THE POSSIBILITY OF SUCH DAMAGE.
 //  
-// Creation Date: 2017.05.17
-// Creation Time: 1:57 AM
+// Creation Date: 2017.05.31
+// Creation Time: 5:16 PM
 // Creator: zameran
 #endregion
+
+using System;
 
 using UnityEngine;
 
 namespace SpaceEngine.Core.Utilities.Gradients
 {
-    // NOTE : Dont't forget to clean up the Lut texture in OnDestroy!
-    // NOTE : Gradients can be used as PropertyNotificationObject for particular generation of Lut in some dynamic cases...
-
-    public abstract class GradientLut
+    [Serializable]
+    public class PenumbraGradientLut : GradientLut
     {
-        public Gradient Gradient = new Gradient();
+        public Gradient BrighnessGradient = new Gradient();
 
         /// <summary>
-        /// The lut texture, generated from <see cref="Gradient"/>
+        /// Should <see cref="GradientLut.Lut"/> be inverted along X axis?
         /// </summary>
-        public Texture2D Lut { get; protected set; }
+        public bool ReverseX = false;
 
-        /// <summary>
-        /// Size of lut texture in pixels.
-        /// <see cref="Vector2.x"/> is width.
-        /// <see cref="Vector2.y"/> is height.
-        /// </summary>
-        protected abstract Vector2 Size { get; }
+        /// <inheritdoc />
+        protected override Vector2 Size { get { return new Vector2(1, 64); } }
 
-        /// <summary>
-        /// Generates the <see cref="Lut"/>.
-        /// </summary>
-        public abstract void GenerateLut();
+        /// <inheritdoc />
+        public override void GenerateLut()
+        {
+            if (Lut == null || Lut.width != (int)Size.x || Lut.height != (int)Size.y)
+            {
+                DestroyLut();
 
-        /// <summary>
-        /// Destroy the <see cref="Lut"/>.
-        /// </summary>
-        public abstract void DestroyLut();
+                Lut = Helper.CreateTempTeture2D((int)Size.x, (int)Size.y, TextureFormat.ARGB32, false, false, false);
+            }
+
+            for (var y = 0; y < Lut.height; y++)
+            {
+                var t = y / (float)Lut.height;
+                var a = BrighnessGradient.Evaluate(ReverseX ? (1.0f - t) : t);
+                var b = Gradient.Evaluate(ReverseX ? (1.0f - t) : t);
+                var c = a * b;
+
+                c.a = c.grayscale;
+
+                Lut.SetPixel(0, y, c);
+            }
+
+            // Make sure the last pixel is white
+            Lut.SetPixel(0, Lut.height - 1, Color.white);
+
+            Lut.wrapMode = TextureWrapMode.Clamp;
+
+            Lut.Apply();
+        }
+
+        /// <inheritdoc />
+        public override void DestroyLut()
+        {
+            if (Lut != null) Helper.Destroy(Lut);
+        }
     }
 }
