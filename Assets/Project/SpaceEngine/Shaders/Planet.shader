@@ -108,7 +108,7 @@
 			{	
 				VERTEX_PROGRAM(v, o);
 			}
-			
+
 			void frag(in v2f IN, 
 				out half4 outDiffuse : SV_Target0,			// RT0: diffuse color (rgb), occlusion (a)
 				out half4 outSpecSmoothness : SV_Target1,	// RT1: spec color (rgb), smoothness (a)

@@ -46,7 +46,12 @@
 			float slope = tex2D(_NormalsSampler, IN.uv0 + _NormalsOSL.xy).w;
 			float height = tex2D(_ElevationSampler, IN.uv0 + _ElevationOSL.xy).w;
 
-			slope = saturate((2.0 * slope - 0.5) * smoothstep(4, 8, _Level)); // NOTE : Limit slope in case of very strong normals on low LOD levels...
+			// NOTE : Limit slope in case of very strong normals on low LOD levels...
+			// TODO : Good slope calculation...
+			// TODO : Runtime/Visual test results...
+			//slope = saturate((2.0 * slope - 0.5) * smoothstep(4, 8, _Level));
+			//slope = saturate(((slope + 1.0) * 0.5) * smoothstep(4, 8, _Level));
+			slope = saturate(((slope + 1.0) * 0.5));
 			height = saturate(height);
 
 			//float3 color = ColorMapAsteroid(p, height, slope);

@@ -66,12 +66,18 @@
 //-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
-// color space to use:
-// 0 - hsl with adjusting.
-// 1 - rgb with adjusting.
-// 2 - default with adjusting.
-// 3 - default without adjusting.
-#define COLOR_SPACE 3
+// tiles blending method:
+// 0 - hard mix (no blending)
+// 1 - soft blending
+// 2 - "smart" blening (based on atlas heightmap texture)
+#define TILE_BLEND_MODE 0
+//-----------------------------------------------------------------------------
+
+//-----------------------------------------------------------------------------
+// tiling fix method:
+// 0 - no tiling fix
+// 1 - sampling texture 2 times at different scales
+#define TILING_FIX_MODE 0
 //-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
@@ -609,8 +615,9 @@ Surface GetSurfaceColorAtlas(float height, float slope, float vary)
 	const float4  PackFactors = float4(1.0 / ATLAS_RES_X, 1.0 / ATLAS_RES_Y, ATLAS_TILE_RES, ATLAS_TILE_RES_LOG2);
 	slope = saturate(slope * 0.5);
 
-	float4 IdScale = tex2Dlod(MaterialTable, float4(height + texturingHeightOffset, (slope + 0.5) + texturingSlopeOffset, 0, 0));
+	float4 IdScale = tex2D(MaterialTable, float2(height + texturingHeightOffset, slope + 0.5));
 	uint materialID = min(uint(IdScale.x) + uint(vary), uint(ATLAS_RES_X * ATLAS_RES_Y - 1));
+	float2 tileOffs = float2(materialID % ATLAS_RES_X, materialID / ATLAS_RES_X) * PackFactors.xy;
 
 	Surface res;
 
@@ -618,10 +625,16 @@ Surface GetSurfaceColorAtlas(float height, float slope, float vary)
 	float2 invSize = InvSize * PackFactors.xy;
 	float2 uv = float2(materialID % ATLAS_RES_X, materialID / ATLAS_RES_X) * PackFactors.xy + frac(tileUV) * (PackFactors.xy - invSize) + 0.5 * invSize;
 
-	res.color = tex2Dlod(AtlasDiffSampler, ruvy(float4(uv, 0, 0)));
+	#if (TILING_FIX_MODE == 0)
+		res.color = tex2D(AtlasDiffSampler, ruvy(uv));
+	#elif (TILING_FIX_MODE == 1)
+		float2 uv2 = tileOffs + frac(-0.173 * tileUV) * (PackFactors.xy - invSize) + 0.5 * invSize;
+		res.color = lerp(tex2D(AtlasDiffSampler, ruvy(uv)), tex2D(AtlasDiffSampler, ruvy(uv2)), 0.5);
+	#endif
+
 	res.height = res.color.a;
 
-	float4 adjust = tex2Dlod(MaterialTable, float4(height + texturingHeightOffset, slope + texturingSlopeOffset, 0, 0));
+	float4 adjust = tex2D(MaterialTable, float2(height + texturingHeightOffset, slope + texturingSlopeOffset));
 	adjust.xyz *= texColorConv;
 
 	float3 hsl = rgb2hsl(res.color.rgb);
@@ -639,10 +652,102 @@ Surface GetSurfaceColorAtlas(float height, float slope, float vary)
 // Planet surface color function (uses the texture atlas sampling function)
 // height, slope defines the tile based on MaterialTable texture
 // vary sets one of 4 different tiles of the same material
+#if (TILE_BLEND_MODE == 0)
+
 Surface GetSurfaceColor(float height, float slope, float vary)
 {
 	return GetSurfaceColorAtlas(height, slope, vary * 4.0);
 }
+
+#elif (TILE_BLEND_MODE == 1)
+
+Surface GetSurfaceColor(float height, float slope, float vary)
+{
+	height = clamp(height - 0.0625, 0.0, 1.0);
+	slope  = clamp(slope  + 0.1250, 0.0, 1.0);
+
+	float h0 = floor(height * 8.0) * 0.125;
+	float h1 = h0 + 0.125;
+	float dh = (height - h0) * 8.0;
+	float s0 = floor(slope  * 4.0) * 0.25;
+	float s1 = s0 - 0.25;
+	float ds = 1.0 - (slope - s0) * 4.0;
+	float v0 = floor(vary * 16.0) * 0.25;
+	float v1 = v0 - 0.25;
+	float dv = 1.0 - (vary * 4.0 - v0) * 4.0;
+
+	Surface surfH0, surfH1;
+	Surface surfS0, surfS1;
+	Surface surfV0, surfV1;
+
+	surfH0 = GetSurfaceColorAtlas(h0, s0, v0);
+	surfH1 = GetSurfaceColorAtlas(h1, s0, v0);
+	surfS0 = Blend(surfH0, surfH1, dh);
+
+	surfH0 = GetSurfaceColorAtlas(h0, s1, v0);
+	surfH1 = GetSurfaceColorAtlas(h1, s1, v0);
+	surfS1 = Blend(surfH0, surfH1, dh);
+
+	surfV0 = Blend(surfS0, surfS1, ds);
+
+	surfH0 = GetSurfaceColorAtlas(h0, s0, v1);
+	surfH1 = GetSurfaceColorAtlas(h1, s0, v1);
+	surfS0 = Blend(surfH0, surfH1, dh);
+
+	surfH0 = GetSurfaceColorAtlas(h0, s1, v1);
+	surfH1 = GetSurfaceColorAtlas(h1, s1, v1);
+	surfS1 = Blend(surfH0, surfH1, dh);
+
+	surfV1 = Blend(surfS0, surfS1, ds);
+
+	return   Blend(surfV0, surfV1, dv);
+}
+
+#elif (TILE_BLEND_MODE == 2)
+
+Surface GetSurfaceColor(float height, float slope, float vary)
+{
+	height = clamp(height - 0.0625, 0.0, 1.0);
+	slope  = clamp(slope  + 0.1250, 0.0, 1.0);
+
+	float h0 = floor(height * 8.0) * 0.125;
+	float h1 = h0 + 0.125;
+	float dh = (height - h0) * 8.0;
+	float s0 = floor(slope  * 4.0) * 0.25;
+	float s1 = s0 - 0.25;
+	float ds = 1.0 - (slope - s0) * 4.0;
+	float v0 = floor(vary * 16.0) * 0.25;
+	float v1 = v0 - 0.25;
+	float dv = 1.0 - (vary * 4.0 - v0) * 4.0;
+
+	Surface surfH0, surfH1;
+	Surface surfS0, surfS1;
+	Surface surfV0, surfV1;
+
+	surfH0 = GetSurfaceColorAtlas(h0, s0, v0);
+	surfH1 = GetSurfaceColorAtlas(h1, s0, v0);
+	surfS0 = BlendSmart(surfH0, surfH1, dh);
+
+	surfH0 = GetSurfaceColorAtlas(h0, s1, v0);
+	surfH1 = GetSurfaceColorAtlas(h1, s1, v0);
+	surfS1 = BlendSmart(surfH0, surfH1, dh);
+
+	surfV0 = BlendSmart(surfS0, surfS1, ds);
+
+	surfH0 = GetSurfaceColorAtlas(h0, s0, v1);
+	surfH1 = GetSurfaceColorAtlas(h1, s0, v1);
+	surfS0 = BlendSmart(surfH0, surfH1, dh);
+
+	surfH0 = GetSurfaceColorAtlas(h0, s1, v1);
+	surfH1 = GetSurfaceColorAtlas(h1, s1, v1);
+	surfS1 = BlendSmart(surfH0, surfH1, dh);
+
+	surfV1 = BlendSmart(surfS0, surfS1, ds);
+
+	return   BlendSmart(surfV0, surfV1, dv);
+}
+
+#endif
 //-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------

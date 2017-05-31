@@ -87,7 +87,10 @@
 		}
 
 		float CalculateSlope(float3 normal)
-		{		
+		{
+			// NOTE : Looks like i need a 'good' normal Z component, not simply local space...
+			normal.z = sqrt(max(0.0, 1.0 - dot(normal.xy, normal.xy)));
+
 			return clamp(1.0 - pow(normal.z, 6.0), 0.0, 1.0);
 		}
 
