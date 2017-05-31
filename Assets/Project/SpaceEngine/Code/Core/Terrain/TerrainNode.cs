@@ -207,6 +207,8 @@ namespace SpaceEngine.Core.Terrain
 
         protected override void UpdateNode()
         {
+            TerrainMaterial.renderQueue = (int)ParentBody.RenderQueue + ParentBody.RenderQueueOffset;
+
             if (ParentBody.GetBodyDeformationType() == BodyDeformationType.Spherical)
             {
                 LocalToWorld = Matrix4x4d.ToMatrix4x4d(ParentBody.transform.localToWorldMatrix) * FaceToLocal;

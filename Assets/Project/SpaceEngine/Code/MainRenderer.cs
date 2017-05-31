@@ -33,12 +33,35 @@
 // Creator: zameran
 #endregion
 
+using SpaceEngine.Core.Bodies;
+
+using System;
+using System.Collections.Generic;
+
 using UnityEngine;
 
 [ExecutionOrder(-9997)]
 [RequireComponent(typeof(Camera))]
 public sealed class MainRenderer : MonoBehaviour
 {
+    public class BodySort : IComparer<Body>
+    {
+        int IComparer<Body>.Compare(Body a, Body b)
+        {
+            if (a == null || b == null) return 0;
+
+            var D2A = Vector3.Distance(GodManager.Instance.WorldCameraPos, a.Origin);
+            var D2B = Vector3.Distance(GodManager.Instance.WorldCameraPos, b.Origin);
+
+            if (D2A > D2B)
+                return 1;
+            if (D2A < D2B)
+                return -1;
+            else
+                return 0;
+        }
+    }
+
     private void Start()
     {
 
@@ -46,7 +69,7 @@ public sealed class MainRenderer : MonoBehaviour
 
     private void Update()
     {
-
+        if (Input.GetKey(KeyCode.J)) ComposeOutputRender();
     }
 
     private void OnEnable()
@@ -66,10 +89,9 @@ public sealed class MainRenderer : MonoBehaviour
 
     public void ComposeOutputRender()
     {
-        /*
         if (GodManager.Instance == null) return;
 
-        Array.Sort(GodManager.Instance.Bodies, pdtltc);
+        Array.Sort(GodManager.Instance.Bodies, new BodySort());
 
         for (int i = 0; i < GodManager.Instance.Starfields.Length; i++)
         {
@@ -103,6 +125,5 @@ public sealed class MainRenderer : MonoBehaviour
                 GodManager.Instance.Bodies[i].Ring.RenderQueueOffset = 0;
         }
         //-----------------------------------------------------------------------------
-        */
     }
 }

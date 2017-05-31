@@ -75,11 +75,16 @@ namespace SpaceEngine.Core.Bodies
     {
         public Atmosphere Atmosphere;
         public OceanNode Ocean;
+        public Ring Ring;
+
+        public EngineRenderQueue RenderQueue = EngineRenderQueue.Geometry;
+        public int RenderQueueOffset = 0;
 
         public bool DrawGizmos = false;
 
         public bool AtmosphereEnabled = true;
         public bool OceanEnabled = true;
+        public bool RingEnabled = true;
 
         public int GridResolution = 25;
 
@@ -92,6 +97,7 @@ namespace SpaceEngine.Core.Bodies
 
         public List<TerrainNode> TerrainNodes = new List<TerrainNode>(6);
         public List<TileSampler> TileSamplers = new List<TileSampler>();
+        public List<Shadow> Shadows = new List<Shadow>(255);
 
         [HideInInspector]
         public double HeightZ = 0;
@@ -124,6 +130,12 @@ namespace SpaceEngine.Core.Bodies
 
                 // NOTE : Reinvert particular value to switch matrices for ocean rendering... Not used at the moment...
                 //StartCoroutine(Ocean.InitializationFix());
+            }
+
+            if (Ring != null)
+            {
+                if (Ring.ParentBody == null)
+                    Ring.ParentBody = this;
             }
 
             QuadMesh = MeshFactory.MakePlane(GridResolution, MeshFactory.PLANE.XY, true, false, false);
@@ -189,6 +201,11 @@ namespace SpaceEngine.Core.Bodies
             {
                 Atmosphere.SetUniforms(target);
             }
+
+            if (Ring != null)
+            {
+                Ring.SetShadows(MPB, Shadows);
+            }
         }
 
         public virtual void InitSetUniforms()
@@ -241,6 +258,14 @@ namespace SpaceEngine.Core.Bodies
                 if (OceanEnabled)
                 {
                     Ocean.Render();
+                }
+            }
+
+            if (Ring != null)
+            {
+                if (RingEnabled)
+                {
+                    Ring.Render();
                 }
             }
 
@@ -300,7 +325,7 @@ namespace SpaceEngine.Core.Bodies
             var samplers = allSamplers.Where(sampler => sampler.enabled && sampler.StoreLeaf).ToList();
 
             if (samplers.Count == 0) return;
-            if (samplers.Count > 255) { Debug.Log(string.Format("Body: Tomuch samplers! {0}", samplers.Count)); return; }
+            if (samplers.Count > 255) { Debug.Log(string.Format("Body: Toomuch samplers! {0}", samplers.Count)); return; }
 
             // Find all the quads in the terrain node that need to be drawn
             node.FindDrawableQuads(node.TerrainQuadRoot, samplers);
