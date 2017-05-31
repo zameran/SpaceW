@@ -61,6 +61,7 @@ namespace SpaceEngine.Cameras
         public bool Controllable = true;
 
         private bool Aligned = false;
+        private bool Supercruise = false;
 
         private Ray RayScreen;
 
@@ -88,6 +89,8 @@ namespace SpaceEngine.Cameras
 
             if (Controllable)
             {
+                Supercruise = !Aligned && Input.GetKey(KeyCode.F);
+
                 if (Input.GetMouseButton(0) && !MouseOverUI)
                 {
                     Rotation.z = 0;
@@ -166,6 +169,8 @@ namespace SpaceEngine.Cameras
 
                 Speed += Mathf.RoundToInt(Input.GetAxis("Mouse ScrollWheel") * 100.0f);
                 Speed = Mathf.Clamp(Speed, 1.0f, 100000000.0f);
+
+                if (Supercruise) CurrentSpeed *= 1000.0f;
 
                 transform.Translate(Velocity * CurrentSpeed);
             }

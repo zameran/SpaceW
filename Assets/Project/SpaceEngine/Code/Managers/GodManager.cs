@@ -69,6 +69,7 @@ public class GodManager : MonoSingleton<GodManager>
     public bool Eclipses = true;
     public bool Planetshine = true;
     public bool DelayedCalculations = false;
+    public bool FloatingOrigin = false;
     public bool DebugFBO = false;
 
     protected GodManager() { }
@@ -109,6 +110,43 @@ public class GodManager : MonoSingleton<GodManager>
 
     public void UpdateControllerWrapper()
     {
+        UpdateWorldShift();
+
         View.UpdateMatrices();
+    }
+
+    private void UpdateWorldShift()
+    {
+        if (FloatingOrigin == false) return;
+
+        var cameraPosition = View.transform.position;
+
+        if (cameraPosition.sqrMagnitude > 500000.0)
+        {
+            var suns = FindObjectsOfType<AtmosphereSun>();
+            var bodies = FindObjectsOfType<CelestialBody>();
+
+            foreach (var sun in suns)
+            {
+                var sunTransform = sun.transform;
+
+                if (sunTransform.parent == null)
+                {
+                    sun.transform.position -= cameraPosition;
+                }
+            }
+
+            foreach (var body in bodies)
+            {
+                var bodyTransform = body.transform;
+
+                if (bodyTransform.parent == null)
+                {
+                    body.Origin -= cameraPosition;
+                }
+            }
+
+            if (View.transform.parent == null) View.transform.position -= cameraPosition;
+        }
     }
 }

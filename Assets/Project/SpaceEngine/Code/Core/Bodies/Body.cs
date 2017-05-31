@@ -300,7 +300,7 @@ namespace SpaceEngine.Core.Bodies
             var samplers = allSamplers.Where(sampler => sampler.enabled && sampler.StoreLeaf).ToList();
 
             if (samplers.Count == 0) return;
-            if (samplers.Count > 255) { Debug.Log(string.Format("Body: Tomuch samplers! {0}", samplers.Count)); return; }
+            if (samplers.Count > 255) { Debug.Log(string.Format("Body: Toomuch samplers! {0}", samplers.Count)); return; }
 
             // Find all the quads in the terrain node that need to be drawn
             node.FindDrawableQuads(node.TerrainQuadRoot, samplers);

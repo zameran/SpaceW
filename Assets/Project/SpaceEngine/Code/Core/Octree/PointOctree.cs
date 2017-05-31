@@ -165,7 +165,7 @@ namespace SpaceEngine.Core.Octree
         /// Grow the octree to fit in all objects.
         /// </summary>
         /// <param name="direction">Direction to grow.</param>
-        void Grow(Vector3 direction)
+        public void Grow(Vector3 direction)
         {
             sbyte xDirection = direction.x >= 0 ? (sbyte)1 : (sbyte)-1;
             sbyte yDirection = direction.y >= 0 ? (sbyte)1 : (sbyte)-1;

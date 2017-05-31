@@ -224,7 +224,7 @@ namespace SpaceEngine.Core.Octree
 
             Gizmos.color = new Color(tintVal, 0, 1.0f - tintVal);
 
-            var thisBounds = new Bounds(Center, new Vector3(SideLength, SideLength, SideLength));
+            var thisBounds = new Bounds(Center, Vector3.one * SideLength);
 
             Gizmos.DrawWireCube(thisBounds.center, thisBounds.size);
 
