@@ -134,8 +134,6 @@ Shader "SpaceEngine/Test/QuadTestUnlit"
 			uniform float _ID;
 			uniform float _TerrainMaxHeight;
 
-			uniform float3 _Globals_WorldCameraPos_Offsetted_Origin;
-
 			uniform float _Ocean_Sigma;
 			uniform float3 _Ocean_Color;
 			uniform float _Ocean_DrawBRDF;
