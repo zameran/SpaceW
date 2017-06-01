@@ -160,7 +160,7 @@ public class UniformsManager : MonoSingleton<UniformsManager>, IUniformed, IUnif
 
     private void Update()
     {
-
+        if (Input.GetKey(KeyCode.H)) SetUniforms();
     }
 
     public void UpdateUniforms(Material mat)

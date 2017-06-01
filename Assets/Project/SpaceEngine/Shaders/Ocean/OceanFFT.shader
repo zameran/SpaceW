@@ -8,8 +8,10 @@
 			Tags 
 			{ 
 				"Queue" = "Geometry+100" 
-				"RenderType"="" 
+				"RenderType" = "" 
 			}
+
+			Cull Back
 
 			CGPROGRAM
 			#include "UnityCG.cginc"
@@ -84,7 +86,7 @@
 			}
 			
 			float4 frag(v2f IN) : COLOR
-			{	
+			{
 				float3 L = _Ocean_SunDir;
 				float radius = _Ocean_Radius;
 				float2 u = IN.oceanU;
@@ -143,16 +145,7 @@
 
 				SunRadianceAndSkyIrradiance(earthP, N, L, sunL, skyE);
 				
-				float3 Lsky;
-				if(radius == 0.0)
-				{
-					Lsky = ReflectedSkyRadiance(_Sky_Map, V, N, sigmaSq, L);
-				}
-				else
-				{
-					Lsky = MeanFresnel(V, N, sigmaSq) * skyE / M_PI;
-				}
-				
+				float3 Lsky = MeanFresnel(V, N, sigmaSq) * skyE / M_PI;
 				float3 Lsun = ReflectedSunRadiance(L, V, N, sigmaSq) * sunL;
 				float3 Lsea = RefractedSeaRadiance(V, N, sigmaSq) * _Ocean_Color * skyE / M_PI;
 				

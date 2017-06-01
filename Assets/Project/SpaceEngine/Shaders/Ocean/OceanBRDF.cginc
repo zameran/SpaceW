@@ -80,8 +80,6 @@ uniform sampler2D _Ocean_Map4;
 uniform sampler2D _Ocean_Foam0;
 uniform sampler2D _Ocean_Foam1;
 
-uniform sampler2D _Sky_Map;
-
 float MeanFresnel(float cosThetaV, float sigmaV) 
 {
 	return pow(1.0 - cosThetaV, 5.0 * exp(-2.69 * sigmaV)) / (1.0 + 22.7 * pow(sigmaV, 1.5));

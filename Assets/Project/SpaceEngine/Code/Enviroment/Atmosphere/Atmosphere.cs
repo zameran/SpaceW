@@ -362,8 +362,6 @@ namespace SpaceEngine.AtmosphericScattering
             target.SetVector("_Globals_WorldCameraPos_Offsetted", GodManager.Instance.WorldCameraPos - Origin);
             target.SetVector("_Globals_Origin", -Origin);
 
-            target.SetVector("_Globals_WorldCameraPos_Offsetted_Origin", (GodManager.Instance.WorldCameraPos - Origin) + (-Origin)); // NOTE : Lol.
-
             target.SetFloat("_Exposure", HDRExposure);
             target.SetFloat("_HDRMode", (int)GodManager.Instance.HDRMode);
         }

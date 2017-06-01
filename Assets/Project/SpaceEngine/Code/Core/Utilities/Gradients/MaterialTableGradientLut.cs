@@ -47,6 +47,13 @@ namespace SpaceEngine.Core.Utilities.Gradients
         /// </summary>
         public bool ReverseX = false;
 
+        /// <summary>
+        /// Should <see cref="GradientLut.Lut"/> be inverted along X axis?
+        /// </summary>
+        public bool ReverseY = false;
+
+        public bool NonLinear = true;
+
         /// <inheritdoc />
         protected override Vector2 Size { get { return new Vector2(256, 32); } }
 
@@ -58,13 +65,14 @@ namespace SpaceEngine.Core.Utilities.Gradients
                 DestroyLut();
 
                 Lut = Helper.CreateTempTeture2D((int)Size.x, (int)Size.y, TextureFormat.ARGB32, false, false, false);
+                Lut.wrapMode = TextureWrapMode.Repeat;
             }
 
             for (ushort x = 0; x < Lut.width; x++)
             {
                 for (ushort y = 0; y < Lut.height; y++)
                 {
-                    var t = x / Size.x;
+                    var t = (x / Size.x) - (NonLinear ? (ReverseY ? (y / Size.y) : ((Size.y - y) / Size.y)) : 0.0f);
                     var gradientColor = Gradient.Evaluate(ReverseX ? (1.0f - t) : t);
 
                     Lut.SetPixel(x, y, gradientColor);

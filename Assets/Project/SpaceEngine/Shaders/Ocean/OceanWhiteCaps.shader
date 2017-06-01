@@ -8,8 +8,10 @@
 			Tags 
 			{ 
 				"Queue" = "Geometry+100" 
-				"RenderType"="" 
+				"RenderType" = "" 
 			}
+
+			Cull Back
 
 			CGPROGRAM
 			#include "UnityCG.cginc"
@@ -23,6 +25,7 @@
 			
 			#include "../HDR.cginc"
 			#include "../Atmosphere.cginc"
+			//#include "../TCCommon.cginc"
 			#include "OceanBRDF.cginc"
 			#include "OceanDisplacement.cginc"
 
@@ -143,16 +146,7 @@
 
 				SunRadianceAndSkyIrradiance(earthP, N, L, sunL, skyE);
 				
-				float3 Lsky;
-
-				if(radius == 0.0)
-				{
-					Lsky = ReflectedSkyRadiance(_Sky_Map, V, N, sigmaSq, L);
-				}
-				else
-				{
-					Lsky = MeanFresnel(V, N, sigmaSq) * skyE / M_PI;
-				}
+				float3 Lsky = MeanFresnel(V, N, sigmaSq) * skyE / M_PI;
 				
 				float3 Lsun = ReflectedSunRadiance(L, V, N, sigmaSq) * sunL;
 				float3 Lsea = RefractedSeaRadiance(V, N, sigmaSq) * _Ocean_Color * skyE / M_PI;
@@ -167,6 +161,12 @@
 				float jSigma2 = max(jm.y - (jm1.x * jm1.x + jm2.x * jm2.x + jm3.x * jm3.x + jm4.x * jm4.x), 0.0);
 
 				// get coverage
+				// Modulated...
+				//float noiseValue = Noise(float3(u * 0.01, 0)) * _Ocean_WhiteCapStr;
+				//float whiteCapStr = clamp((noiseValue + 1.0) * 0.5, 0.0, 1.0);
+				//float W = WhitecapCoverage(whiteCapStr, jm.x, jSigma2);
+
+				// Simple...
 				float W = WhitecapCoverage(_Ocean_WhiteCapStr, jm.x, jSigma2);
 				
 				// compute and add whitecap radiance
