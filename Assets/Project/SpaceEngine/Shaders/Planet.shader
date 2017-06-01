@@ -13,7 +13,7 @@
 	SubShader 
 	{
 		CGINCLUDE
-
+		#include "UnityCG.cginc"
 		#include "Core.cginc"
 
 		uniform float _Ocean_Sigma;
@@ -83,8 +83,6 @@
 			Cull Back
 
 			CGPROGRAM
-			#include "UnityCG.cginc"
-
 			#pragma target 4.0
 			#pragma only_renderers d3d11 glcore
 			#pragma vertex vert

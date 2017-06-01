@@ -48,7 +48,12 @@
 
 			fixed4 frag (v2f i) : SV_Target
 			{
-				return tex2D(_FrameBuffer, i.uv);
+				float4 fboColor = tex2D(_FrameBuffer, i.uv);
+
+				fboColor.a = (fboColor.a + 1.0) * 0.5;
+				fboColor.a = saturate(fboColor.a);
+
+				return fboColor;
 			}
 			ENDCG
 		}

@@ -55,6 +55,8 @@ namespace SpaceEngine
 
         private CommandBuffer CMDBuffer;
 
+        public RenderTextureFormat FBOFormat = RenderTextureFormat.ARGB32;
+
         public RenderTexture FBOTexture;
 
         public RenderTargetIdentifier FBOTextureRTI;
@@ -158,7 +160,7 @@ namespace SpaceEngine
                 FBOTexture.ReleaseAndDestroy();
             }
 
-            FBOTexture = RTExtensions.CreateRTexture(FBOSize, 0, RenderTextureFormat.ARGBHalf, FilterMode.Point, TextureWrapMode.Clamp, false, true, CameraHelper.Main().GetAntiAliasing());
+            FBOTexture = RTExtensions.CreateRTexture(FBOSize, 0, FBOFormat, FilterMode.Point, TextureWrapMode.Clamp, false, true, CameraHelper.Main().GetAntiAliasing());
         }
 
         #endregion
