@@ -39,10 +39,12 @@
 		void VERTEX_POSITION(in float4 vertex, in float2 texcoord, out float4 position, out float3 localPosition, out float2 uv)
 		{
 			float2 zfc = texTileLod(_Elevation_Tile, texcoord, _Elevation_TileCoords, _Elevation_TileSize).xy;
-			//float2 zfc = TEX2DLOD_TILE(_Elevation_Tile, texcoord, _Elevation_TileCoords, _Elevation_TileSize, _Elevation_TileSize * 10.0).xy;
-			//float2 zfc = TEX2DLOD_GOOD_TILE(_Elevation_Tile, texcoord, _Elevation_TileCoords, _Elevation_TileSize, _Elevation_TileSize * 10.0).xy;
-				
-			if (zfc.x <= _Ocean_Level && _Ocean_DrawBRDF == 1.0) { zfc = float2(0, 0); }
+
+			#if ATMOSPHERE_ON
+				#if OCEAN_ON
+					if (zfc.x <= _Ocean_Level && _Ocean_DrawBRDF == 1.0) { zfc = float2(0, 0); }
+				#endif
+			#endif
 			
 			float4 vertexUV = float4(vertex.xy, float2(1.0, 1.0) - vertex.xy);
 			float2 vertexToCamera = abs(_Deform_Camera.xy - vertex.xy);
