@@ -52,6 +52,16 @@ public class GodManager : MonoSingleton<GodManager>
     public ComputeShader WriteData;
     public ComputeShader ReadData;
 
+    public ComputeShader CopyInscatter1;
+    public ComputeShader CopyInscatterN;
+    public ComputeShader CopyIrradiance;
+    public ComputeShader Inscatter1;
+    public ComputeShader InscatterN;
+    public ComputeShader InscatterS;
+    public ComputeShader Irradiance1;
+    public ComputeShader IrradianceN;
+    public ComputeShader Transmittance;
+
     public Body ActiveBody { get { return Bodies.FirstOrDefault(body => Helper.Enabled(body)); } }
 
     public Body[] Bodies;
