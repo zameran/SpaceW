@@ -127,6 +127,7 @@ Shader "SpaceEngine/Atmosphere/SunGlare"
 			float4 frag(v2f IN) : COLOR
 			{
 				float3 WCP = _Globals_WorldCameraPos;
+				float3 WCPG = WCP + _Globals_Origin; // Current camera position with offset applied...
 				//float3 WSD = _Sun_WorldDirections_1[SunIndex];
 				float3 WSD = normalize(_Sun_Positions_1[SunIndex] - WCP);
 
@@ -168,7 +169,7 @@ Shader "SpaceEngine/Atmosphere/SunGlare"
 
 				if (UseAtmosphereColors > 0.0)
 				{
-					outputColor *= SkyRadiance_SunGlare(WCP, WSD);
+					outputColor *= SkyRadiance_SunGlare(WCPG, WSD);
 				}
 
 				return float4(outputColor, 1.0);				

@@ -85,6 +85,7 @@ namespace SpaceEngine.Core.Bodies
         public bool AtmosphereEnabled = true;
         public bool OceanEnabled = true;
         public bool RingEnabled = true;
+        public bool TerrainEnabled = true;
 
         public int GridResolution = 25;
 
@@ -281,11 +282,14 @@ namespace SpaceEngine.Core.Bodies
                 }
             }
 
-            foreach (var terrainNode in TerrainNodes)
+            if (TerrainEnabled)
             {
-                if (Helper.Enabled(terrainNode))
+                foreach (var terrainNode in TerrainNodes)
                 {
-                    DrawTerrain(terrainNode);
+                    if (Helper.Enabled(terrainNode))
+                    {
+                        DrawTerrain(terrainNode);
+                    }
                 }
             }
 

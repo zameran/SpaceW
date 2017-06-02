@@ -50,8 +50,8 @@ public sealed class MainRenderer : MonoBehaviour
         {
             if (a == null || b == null) return 0;
 
-            var D2A = Vector3.Distance(GodManager.Instance.WorldCameraPos, a.Origin);
-            var D2B = Vector3.Distance(GodManager.Instance.WorldCameraPos, b.Origin);
+            var D2A = Vector3.Distance(GodManager.Instance.WorldCameraPos, a.Origin) - a.Size;
+            var D2B = Vector3.Distance(GodManager.Instance.WorldCameraPos, b.Origin) - b.Size;
 
             if (D2A > D2B)
                 return 1;

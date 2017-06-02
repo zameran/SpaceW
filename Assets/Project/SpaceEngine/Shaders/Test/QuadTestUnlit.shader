@@ -203,7 +203,7 @@ Shader "SpaceEngine/Test/QuadTestUnlit"
 				#endif
 
 				#ifdef SHINE_ON
-					inscatter += float4(SkyShineRadiance(p, d, _Sky_ShineOccluders_1, _Sky_ShineColors_1), 0.0);
+					inscatter += float4(SkyShineRadiance(p, d, WSD), 0.0);
 				#endif
 
 				float3 groundColor = 1.5 * RGB2Reflectance(terrainColor).rgb * (sunL * max(cTheta, 0) + skyE) / M_PI;

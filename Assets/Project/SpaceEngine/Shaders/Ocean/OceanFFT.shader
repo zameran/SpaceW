@@ -145,9 +145,16 @@
 
 				SunRadianceAndSkyIrradiance(earthP, N, L, sunL, skyE);
 				
-				float3 Lsky = MeanFresnel(V, N, sigmaSq) * skyE / M_PI;
-				float3 Lsun = ReflectedSunRadiance(L, V, N, sigmaSq) * sunL;
-				float3 Lsea = RefractedSeaRadiance(V, N, sigmaSq) * _Ocean_Color * skyE / M_PI;
+				#ifdef OCEAN_SKY_REFLECTIONS
+					float fresnel = MeanFresnel(V, N, sigmaSq);
+					float3 Lsky = fresnel * ReflectedSky(V, N, L, earthP);
+					float3 Lsun = ReflectedSunRadiance(L, V, N, sigmaSq) * sunL;
+					float3 Lsea = 0.98 * (1.0 - fresnel) * _Ocean_Color * (skyE / M_PI);
+				#else
+					float3 Lsky = MeanFresnel(V, N, sigmaSq) * skyE / M_PI;
+					float3 Lsun = ReflectedSunRadiance(L, V, N, sigmaSq) * sunL;
+					float3 Lsea = RefractedSeaRadiance(V, N, sigmaSq) * _Ocean_Color * skyE / M_PI;
+				#endif
 				
 				float3 surfaceColor = Lsun + Lsky + Lsea;
 				

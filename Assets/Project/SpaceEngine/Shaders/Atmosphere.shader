@@ -191,7 +191,7 @@ Shader "SpaceEngine/Atmosphere/Atmosphere"
 					#endif
 
 					#ifdef SHINE_ON
-						inscatter += SkyShineRadiance(WCPG, d, _Sky_ShineOccluders_1, _Sky_ShineColors_1);
+						inscatter += SkyShineRadiance(WCPG, d, _Sun_WorldDirections_1[0]);
 					#endif
 
 					extinction += extinction1;

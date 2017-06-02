@@ -33,6 +33,7 @@
 			float4 vertex : POSITION;
 			float2 texcoord : TEXCOORD0;
 			float3 localVertex : TEXCOORD1;
+			float3 direction : TEXCOORD2;
 		};
 
 		void VERTEX_POSITION(in float4 vertex, in float2 texcoord, out float4 position, out float3 localPosition, out float2 uv)
@@ -67,6 +68,8 @@
 		{
 			VERTEX_POSITION(v.vertex, v.texcoord.xy, o.vertex, o.localVertex, o.texcoord);
 
+			o.direction = 0;
+
 			v.vertex = o.vertex; // Assign calculated vertex position to our data...
 		}
 		ENDCG
@@ -89,6 +92,8 @@
 			#pragma fragment frag
 
 			#pragma multi_compile ATMOSPHERE_ON ATMOSPHERE_OFF
+			#pragma multi_compile SHINE_ON SHINE_OFF
+			#pragma multi_compile ECLIPSES_ON ECLIPSES_OFF
 			#pragma multi_compile OCEAN_ON OCEAN_OFF
 			#pragma multi_compile SHADOW_0 SHADOW_1 SHADOW_2 SHADOW_3 SHADOW_4
 			
@@ -105,6 +110,9 @@
 			void vert(in p2v v, out v2f o)
 			{	
 				VERTEX_PROGRAM(v, o);
+
+				//o.direction = ((_Globals_WorldCameraPos_Offsetted + _Globals_Origin) - mul(_Globals_CameraToWorld, o.vertex)).xyz;
+				o.direction = (_Globals_WorldCameraPos_Offsetted + _Globals_Origin) - (mul(_Globals_CameraToWorld, float4((mul(_Globals_ScreenToCamera, v.vertex)).xyz, 0.0))).xyz;
 			}
 
 			void frag(in v2f IN, 
@@ -117,6 +125,7 @@
 				float3 WCP = _Globals_WorldCameraPos;
 				float3 WCPO = _Globals_WorldCameraPos_Offsetted;
 				float3 WSD = _Sun_WorldDirections_1[0];
+				float4 WSPR = _Sun_Positions_1[0];
 				float3 position = IN.localVertex;
 				float2 texcoord = IN.texcoord;
 
@@ -131,7 +140,9 @@
 
 				float3 V = normalize(position);
 				float3 P = V * max(length(position), _Deform_Radius + 10.0);
+				float3 PO = P - _Globals_Origin;
 				float3 v = normalize(P - WCP - _Globals_Origin); // Body origin take in to account...
+				float3 d = normalize(IN.direction);
 
 				#if ATMOSPHERE_ON
 					#if OCEAN_ON
@@ -145,8 +156,19 @@
 
 				float cTheta = dot(normal.xyz, WSD);
 
-				#if SHADOW_1 || SHADOW_2 || SHADOW_3 || SHADOW_4
-					float shadow = ShadowColor(float4(P - _Globals_Origin, 1)); // Body origin take in to account...
+				#ifdef ECLIPSES_ON
+					float eclipse = 1;
+
+					float3 invertedLightDistance = rsqrt(dot(WSPR.xyz, WSPR.xyz));
+					float3 lightPosition = WSPR.xyz * invertedLightDistance;
+
+					float lightAngularRadius = asin(WSPR.w * invertedLightDistance);
+
+					eclipse *= EclipseShadow(P, lightPosition, lightAngularRadius);
+
+					#if SHADOW_1 || SHADOW_2 || SHADOW_3 || SHADOW_4
+						float shadow = ShadowColor(float4(P, 1));	// Body origin take in to account...
+					#endif
 				#endif
 				
 				#if ATMOSPHERE_ON
@@ -155,20 +177,35 @@
 					SunRadianceAndSkyIrradiance(P, normal.xyz, WSD, sunL, skyE);
 
 					float3 groundColor = 1.5 * RGB2Reflectance(reflectance).rgb * (sunL * max(cTheta, 0) + skyE) / M_PI;
-				
+					
 					#if OCEAN_ON
-						if (height <= _Ocean_Level && _Ocean_DrawBRDF == 1.0) {	groundColor = OceanRadiance(WSD, -v, V, _Ocean_Sigma, sunL, skyE, _Ocean_Color); }
+						if (height <= _Ocean_Level && _Ocean_DrawBRDF == 1.0)
+						{	
+							groundColor = OceanRadiance(WSD, -v, V, _Ocean_Sigma, sunL, skyE, _Ocean_Color, P);
+						}
 					#endif
 
 					float3 extinction;
 					float3 inscatter = InScattering(WCPO, P, WSD, extinction, 0.0);
 
-					#if SHADOW_1 || SHADOW_2 || SHADOW_3 || SHADOW_4
-						inscatter *= shadow;
+					#ifdef ECLIPSES_ON
+						inscatter *= eclipse;
+
+						#if SHADOW_1 || SHADOW_2 || SHADOW_3 || SHADOW_4
+							inscatter *= shadow;
+						#endif
 					#endif
 
-					#if SHADOW_1 || SHADOW_2 || SHADOW_3 || SHADOW_4
-						extinction = 1 * _ExtinctionGroundFade + (1 - _ExtinctionGroundFade) * extinction * shadow;
+					#ifdef SHINE_ON
+						inscatter += float4(SkyShineRadiance(P, d, WSD), 0.0);
+					#endif
+
+					#ifdef ECLIPSES_ON
+						#if SHADOW_1 || SHADOW_2 || SHADOW_3 || SHADOW_4
+							extinction = 1 * _ExtinctionGroundFade + (1 - _ExtinctionGroundFade) * extinction * eclipse * shadow;
+						#else
+							extinction = 1 * _ExtinctionGroundFade + (1 - _ExtinctionGroundFade) * extinction * eclipse;
+						#endif
 					#endif
 
 					float3 finalColor = hdr(groundColor * extinction + inscatter);

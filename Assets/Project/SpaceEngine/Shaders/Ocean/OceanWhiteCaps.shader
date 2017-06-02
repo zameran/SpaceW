@@ -145,11 +145,17 @@
 				float3 extinction;
 
 				SunRadianceAndSkyIrradiance(earthP, N, L, sunL, skyE);
-				
-				float3 Lsky = MeanFresnel(V, N, sigmaSq) * skyE / M_PI;
-				
-				float3 Lsun = ReflectedSunRadiance(L, V, N, sigmaSq) * sunL;
-				float3 Lsea = RefractedSeaRadiance(V, N, sigmaSq) * _Ocean_Color * skyE / M_PI;
+
+				#ifdef OCEAN_SKY_REFLECTIONS
+					float fresnel = MeanFresnel(V, N, sigmaSq);
+					float3 Lsky = fresnel * ReflectedSky(V, N, L, earthP);
+					float3 Lsun = ReflectedSunRadiance(L, V, N, sigmaSq) * sunL;
+					float3 Lsea = 0.98 * (1.0 - fresnel) * _Ocean_Color * (skyE / M_PI);
+				#else
+					float3 Lsky = MeanFresnel(V, N, sigmaSq) * skyE / M_PI;
+					float3 Lsun = ReflectedSunRadiance(L, V, N, sigmaSq) * sunL;
+					float3 Lsea = RefractedSeaRadiance(V, N, sigmaSq) * _Ocean_Color * skyE / M_PI;
+				#endif
 				
 				// extract mean and variance of the jacobian matrix determinant
 				float2 jm1 = tex2D(_Ocean_Foam0, u / _Ocean_GridSizes.x).xy;
@@ -170,7 +176,8 @@
 				float W = WhitecapCoverage(_Ocean_WhiteCapStr, jm.x, jSigma2);
 				
 				// compute and add whitecap radiance
-				float3 l = (sunL * (max(dot(N, L), 0.0)) + skyE) / M_PI;
+				 float3 l = (sunL * (max(dot(N, L), 0.0)) + skyE) / M_PI;
+				//float3 l = (sunL * (max(dot(N, L), 0.0)) + skyE + UNITY_LIGHTMODEL_AMBIENT.rgb * 30) / M_PI;
 				float3 R_ftot = float3(W * l * 0.4);
 				
 				float3 surfaceColor = Lsun + Lsky + Lsea + R_ftot;

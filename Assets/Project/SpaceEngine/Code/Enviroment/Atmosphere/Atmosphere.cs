@@ -133,6 +133,8 @@ namespace SpaceEngine.AtmosphericScattering
 
         private Matrix4x4 shineColorsMatrix1;
         private Matrix4x4 shineOccludersMatrix1;
+        private Matrix4x4 shineOccludersMatrix2;
+        private Matrix4x4 shineParameters1;
         private Matrix4x4 occludersMatrix1;
         private Matrix4x4 sunPositionsMatrix;
         private Matrix4x4 sunDirectionsMatrix;
@@ -437,10 +439,12 @@ namespace SpaceEngine.AtmosphericScattering
             EventManager.BodyEvents.OnAtmosphereBaked.Invoke(ParentBody, this);
         }
 
-        public void CalculateShine(out Matrix4x4 soc1, out Matrix4x4 sc1)
+        public void CalculateShine(out Matrix4x4 soc1, out Matrix4x4 soc2, out Matrix4x4 sc1, out Matrix4x4 sp1)
         {
             soc1 = Matrix4x4.zero;
+            soc2 = Matrix4x4.zero;
             sc1 = Matrix4x4.zero;
+            sp1 = Matrix4x4.zero;
 
             byte index = 0;
 
@@ -448,11 +452,17 @@ namespace SpaceEngine.AtmosphericScattering
             {
                 if (ShineCasters[i] == null) { Debug.Log("Atmosphere: Shine problem!"); break; }
 
-                var distance = shineColors[i].a; // TODO : Distance based shine power.
+                // TODO : Planetshine distance based shine influence...
+                // TODO : Planetshine distance don't gonna work correctly on screenspace, e.g Atmosphere...
+                // NOTE : Distance is inversed.
+                var distance = 0.0f;
 
                 soc1.SetRow(i, VectorHelper.MakeFrom((ShineCasters[i].transform.position - Origin).normalized, 1.0f));
+                soc2.SetRow(i, VectorHelper.MakeFrom((Origin - ShineCasters[i].transform.position).normalized, 1.0f));
+                
+                sc1.SetRow(index, VectorHelper.FromColor(shineColors[i]));
 
-                sc1.SetRow(index, VectorHelper.FromColor(shineColors[i], distance));
+                sp1.SetRow(i, new Vector4(distance, 1.0f, 1.0f, 1.0f));
 
                 index++;
             }
@@ -502,20 +512,24 @@ namespace SpaceEngine.AtmosphericScattering
         {
             if (!GodManager.Instance.Planetshine) return;
 
-            CalculateShine(out shineOccludersMatrix1, out shineColorsMatrix1);
+            CalculateShine(out shineOccludersMatrix1, out shineOccludersMatrix2, out shineColorsMatrix1, out shineParameters1);
 
             mat.SetMatrix("_Sky_ShineOccluders_1", shineOccludersMatrix1);
+            mat.SetMatrix("_Sky_ShineOccluders_2", shineOccludersMatrix2);
             mat.SetMatrix("_Sky_ShineColors_1", shineColorsMatrix1);
+            mat.SetMatrix("_Sky_ShineParameters_1", shineParameters1);
         }
 
         public void SetShine(MaterialPropertyBlock block)
         {
             if (!GodManager.Instance.Planetshine) return;
 
-            CalculateShine(out shineOccludersMatrix1, out shineColorsMatrix1);
+            CalculateShine(out shineOccludersMatrix1, out shineOccludersMatrix2, out shineColorsMatrix1, out shineParameters1);
 
             block.SetMatrix("_Sky_ShineOccluders_1", shineOccludersMatrix1);
+            block.SetMatrix("_Sky_ShineOccluders_2", shineOccludersMatrix2);
             block.SetMatrix("_Sky_ShineColors_1", shineColorsMatrix1);
+            block.SetMatrix("_Sky_ShineParameters_1", shineParameters1);
         }
 
         public void SetEclipses(Material mat)
