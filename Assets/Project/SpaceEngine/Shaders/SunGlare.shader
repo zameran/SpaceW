@@ -78,8 +78,8 @@ Shader "SpaceEngine/Atmosphere/SunGlare"
 			uniform float3 SunViewPortPosition;
 
 			uniform float AspectRatio;
-		
-			uniform float3 WCPG;
+
+			uniform sampler2D _FrameBuffer;
 			
 			struct v2f 
 			{
@@ -129,7 +129,7 @@ Shader "SpaceEngine/Atmosphere/SunGlare"
 				float3 WCP = _Globals_WorldCameraPos;
 				float3 WCPG = WCP + _Globals_Origin; // Current camera position with offset applied...
 				//float3 WSD = _Sun_WorldDirections_1[SunIndex];
-				float3 WSD = normalize(_Sun_Positions_1[SunIndex] - WCP);
+				float3 WSD = normalize(_Sun_Positions_1[SunIndex] - WCPG);
 
 				float2 toScreenCenter = SunViewPortPosition.xy - 0.5;
 
@@ -161,7 +161,7 @@ Shader "SpaceEngine/Atmosphere/SunGlare"
 				outputColor += ghosts;
 				outputColor *= Fade;
 				outputColor *= Eclipse;
-						
+				
 				if (UseRadiance > 0.0)
 				{
 					outputColor = OuterRadiance_SunGlare(outputColor);
@@ -171,6 +171,11 @@ Shader "SpaceEngine/Atmosphere/SunGlare"
 				{
 					outputColor *= SkyRadiance_SunGlare(WCPG, WSD);
 				}
+
+				//float3 gray = float3(0.299, 0.587, 0.114);
+				//float4 frameBuffer = tex2D(_FrameBuffer, SunViewPortPosition.xy);
+
+				//if (dot(frameBuffer, gray) >= 1.0) {  }
 
 				return float4(outputColor, 1.0);				
 			}			

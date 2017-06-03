@@ -28,7 +28,7 @@
 				float4 vertex : SV_POSITION;
 			};
 
-			sampler2D _FrameBuffer;
+			uniform sampler2D _FrameBuffer;
 			float4 _FrameBuffer_TexelSize;
 
 			v2f vert (appdata v)
