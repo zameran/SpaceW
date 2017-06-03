@@ -99,18 +99,30 @@ Shader "SpaceEngine/Atmosphere/SunGlare"
 				return OUT;
 			}
 
-			float3 OuterRadiance_SunGlare(float3 sunColor)
+			float2 GetTransmittanceUV_SunGlare(float r, float mu) 
 			{
-				return pow(max(0, sunColor), 2.2) * 2;
+				float uR, uMu;
+
+				uR = sqrt((r - Rg) / (Rt - Rg));
+				uMu = atan((mu + 0.15) / (1.0 + 0.15) * tan(1.5)) / 1.5;
+
+				return float2(uMu, uR);
 			}
 
-			float3 SkyRadiance_SunGlare(float3 camera, float3 viewdir)
+			float3 Transmittance_SunGlare(float r, float mu) 
+			{
+				float2 uv = GetTransmittanceUV_SunGlare(r, mu);
+
+				return tex2D(_Sky_Transmittance, uv).rgb;
+			}
+
+			float3 Extinction_SunGlare(float3 camera, float3 viewdir)
 			{
 				float r = length(camera);
 				float rMu = dot(camera, viewdir);
 				float mu = rMu / r;
 
-				float deltaSq = SQRT(rMu * rMu - r * r + Rt * Rt, 1e30);
+				float deltaSq = SQRT(rMu * rMu - r * r + Rt * Rt, 0.000001);
 				float din = max(-rMu - deltaSq, 0.0);
 
 				if (din > 0.0)
@@ -121,7 +133,12 @@ Shader "SpaceEngine/Atmosphere/SunGlare"
 					r = Rt;
 				}
 
-				return (r > Rt) ? float3(1.0, 1.0, 1.0) : Transmittance(r, mu);
+				return (r > Rt) ? float3(1.0, 1.0, 1.0) : Transmittance_SunGlare(r, mu);;
+			}
+
+			float3 OuterRadiance_SunGlare(float3 sunColor)
+			{
+				return pow(max(0, sunColor), 2.2) * 2;
 			}
 
 			float4 frag(v2f IN) : COLOR
@@ -169,7 +186,7 @@ Shader "SpaceEngine/Atmosphere/SunGlare"
 
 				if (UseAtmosphereColors > 0.0)
 				{
-					outputColor *= SkyRadiance_SunGlare(WCPG, WSD);
+					outputColor *= Extinction_SunGlare(WCPG, WSD);
 				}
 
 				//float3 gray = float3(0.299, 0.587, 0.114);
@@ -177,7 +194,7 @@ Shader "SpaceEngine/Atmosphere/SunGlare"
 
 				//if (dot(frameBuffer, gray) >= 1.0) {  }
 
-				return float4(outputColor, 1.0);				
+				return float4(outputColor, 0.0);				
 			}			
 			ENDCG
 		}
