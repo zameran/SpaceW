@@ -191,7 +191,7 @@ Shader "SpaceEngine/Atmosphere/Atmosphere"
 					#endif
 
 					#ifdef SHINE_ON
-						inscatter += SkyShineRadiance(WCPG, d, _Sun_WorldDirections_1[0]);
+						inscatter += SkyShineRadiance(WCPG, d);
 					#endif
 
 					extinction += extinction1;
@@ -244,7 +244,7 @@ Shader "SpaceEngine/Atmosphere/Atmosphere"
 					#endif
 
 					#ifdef SHINE_ON
-						inscatter += SkyShineRadiance(WCPG, d, _Sky_ShineOccluders_1, _Sky_ShineColors_1);
+						inscatter += SkyShineRadiance(WCPG, d);
 					#endif
 
 					extinction += extinction1;
@@ -309,7 +309,7 @@ Shader "SpaceEngine/Atmosphere/Atmosphere"
 					#endif
 
 					#ifdef SHINE_ON
-						inscatter += SkyShineRadiance(WCPG, d, _Sky_ShineOccluders_1, _Sky_ShineColors_1);
+						inscatter += SkyShineRadiance(WCPG, d);
 					#endif
 
 					extinction += extinction1;
@@ -378,7 +378,7 @@ Shader "SpaceEngine/Atmosphere/Atmosphere"
 					#endif
 
 					#ifdef SHINE_ON
-						inscatter += SkyShineRadiance(WCPG, d, _Sky_ShineOccluders_1, _Sky_ShineColors_1);
+						inscatter += SkyShineRadiance(WCPG, d);
 					#endif
 
 					extinction += extinction1;

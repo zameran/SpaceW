@@ -199,7 +199,7 @@
 					#endif
 
 					#ifdef SHINE_ON
-						inscatter += float4(SkyShineRadiance(P, d, WSD), 0.0);
+						inscatter += SkyShineRadiance(P, d);
 					#endif
 
 					#ifdef ECLIPSES_ON

@@ -665,7 +665,7 @@ float3 InScatteringShine(float3 camera, float3 _point, out float3 extinction, fl
 	return result * _Sun_Intensity;
 }
 
-float3 SkyShineRadiance(float3 worldPosition, float3 viewdir, float3 sunDirection)
+float3 SkyShineRadiance(float3 worldPosition, float3 viewdir)
 {
 	float3 inscatter = 0;
 	float3 occluderDirection = 0;
