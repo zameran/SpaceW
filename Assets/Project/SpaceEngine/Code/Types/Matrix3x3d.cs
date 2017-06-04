@@ -267,7 +267,6 @@ namespace UnityEngine
                 m22 = (float)m[2, 2]
             };
 
-
             return mat;
         }
 

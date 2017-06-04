@@ -105,6 +105,43 @@ namespace SpaceEngine.Core.Terrain
         /// </summary>
         public bool IsLeaf { get { return Children[0] == null || Children == null; } }
 
+        public Matrix4x4d DeformedCorners { get; private set; }
+
+        public Matrix4x4d DeformedVerticals { get; private set; }
+
+        public Vector3d Center { get; private set; }
+
+        public Vector4d Lengths { get; private set; }
+
+        private void CalculateMatrices(double ox, double oy, double length, double r)
+        {
+            var p0 = new Vector3d(ox, oy, r);
+            var p1 = new Vector3d(ox + length, oy, r);
+            var p2 = new Vector3d(ox, oy + length, r);
+            var p3 = new Vector3d(ox + length, oy + length, r);
+
+            Center = (p0 + p3) * 0.5;
+
+            double l0 = 0.0, l1 = 0.0, l2 = 0.0, l3 = 0.0;
+
+            var v0 = p0.Normalized(ref l0);
+            var v1 = p1.Normalized(ref l1);
+            var v2 = p2.Normalized(ref l2);
+            var v3 = p3.Normalized(ref l3);
+
+            Lengths = new Vector4d(l0, l1, l2, l3);
+
+            DeformedCorners = new Matrix4x4d(v0.x * r, v1.x * r, v2.x * r, v3.x * r,
+                                             v0.y * r, v1.y * r, v2.y * r, v3.y * r,
+                                             v0.z * r, v1.z * r, v2.z * r, v3.z * r,
+                                             1.0, 1.0, 1.0, 1.0);
+
+            DeformedVerticals = new Matrix4x4d(v0.x, v1.x, v2.x, v3.x,
+                                               v0.y, v1.y, v2.y, v3.y,
+                                               v0.z, v1.z, v2.z, v3.z,
+                                               0.0, 0.0, 0.0, 0.0);
+        }
+
         /// <summary> 
         /// Creates a new <see cref="TerrainQuad"/> 
         /// </summary> 
@@ -130,6 +167,9 @@ namespace SpaceEngine.Core.Terrain
             ZMin = zmin;
             Length = length;
             LocalBox = new Box3d(Ox, Ox + Length, Oy, Oy + Length, ZMin, ZMax);
+
+            // TODO : Hm. Maybe too heavy for a ctor? Threading? Hueading?
+            CalculateMatrices(ox, oy, length, owner.ParentBody.Size);
         }
 
         /// <summary>

@@ -143,6 +143,11 @@ namespace SpaceEngine.Core.Terrain
         public Matrix4x4d FaceToLocal { get; private set; }
 
         /// <summary>
+        /// Tangent frame to world matrix.
+        /// </summary>
+        public Matrix3x3d TangentFrameToWorld { get; private set; }
+
+        /// <summary>
         /// Rasterized horizon elevation angle for each azimuth angle.
         /// </summary>
         float[] Horizon = new float[HORIZON_SIZE];
@@ -192,6 +197,10 @@ namespace SpaceEngine.Core.Terrain
                 Deformation = new DeformationBase();
             }
 
+            TangentFrameToWorld = new Matrix3x3d(LocalToWorld.m[0, 0], LocalToWorld.m[0, 1], LocalToWorld.m[0, 2],
+                                                 LocalToWorld.m[1, 0], LocalToWorld.m[1, 1], LocalToWorld.m[1, 2],
+                                                 LocalToWorld.m[2, 0], LocalToWorld.m[2, 1], LocalToWorld.m[2, 2]);
+
             CreateTerrainQuadRoot(ParentBody.Size);
 
             CollectSamplers();
@@ -221,6 +230,10 @@ namespace SpaceEngine.Core.Terrain
             {
                 LocalToWorld = FaceToLocal;
             }
+
+            TangentFrameToWorld = new Matrix3x3d(LocalToWorld.m[0, 0], LocalToWorld.m[0, 1], LocalToWorld.m[0, 2],
+                                                 LocalToWorld.m[1, 0], LocalToWorld.m[1, 1], LocalToWorld.m[1, 2],
+                                                 LocalToWorld.m[2, 0], LocalToWorld.m[2, 1], LocalToWorld.m[2, 2]);
 
             var localToCamera = GodManager.Instance.WorldToCamera * LocalToWorld;
             var invLocalToCamera = localToCamera.Inverse();
