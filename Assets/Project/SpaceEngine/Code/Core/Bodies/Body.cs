@@ -274,21 +274,21 @@ namespace SpaceEngine.Core.Bodies
             if (GodManager.Instance.ActiveBody == this)
                 GodManager.Instance.UpdateControllerWrapper();
 
-            foreach (var tileSampler in TileSamplers)
+            for (int i = 0; i < TileSamplers.Count; i++)
             {
-                if (Helper.Enabled(tileSampler))
+                if (Helper.Enabled(TileSamplers[i]))
                 {
-                    tileSampler.UpdateSampler();
+                    TileSamplers[i].UpdateSampler();
                 }
             }
 
             if (TerrainEnabled)
             {
-                foreach (var terrainNode in TerrainNodes)
+                for (int i = 0; i < TerrainNodes.Count; i++)
                 {
-                    if (Helper.Enabled(terrainNode))
+                    if (Helper.Enabled(TerrainNodes[i]))
                     {
-                        DrawTerrain(terrainNode);
+                        DrawTerrain(TerrainNodes[i]);
                     }
                 }
             }
@@ -325,11 +325,10 @@ namespace SpaceEngine.Core.Bodies
         private void DrawTerrain(TerrainNode node)
         {
             // Get all the samplers attached to the terrain node. The samples contain the data need to draw the quad
-            var allSamplers = node.transform.GetComponentsInChildren<TileSampler>();
-            var samplers = allSamplers.Where(sampler => sampler.enabled && sampler.StoreLeaf).ToList();
+            var samplers = node.Samplers.Where(sampler => sampler.enabled && sampler.StoreLeaf).ToList();
 
+            // So, if doesn't have any samplers - do anything...
             if (samplers.Count == 0) return;
-            if (samplers.Count > 255) { Debug.Log(string.Format("Body: Toomuch samplers! {0}", samplers.Count)); return; }
 
             // Find all the quads in the terrain node that need to be drawn
             node.FindDrawableQuads(node.TerrainQuadRoot, samplers);

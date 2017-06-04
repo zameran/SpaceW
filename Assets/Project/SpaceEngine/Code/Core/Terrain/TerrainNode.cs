@@ -6,6 +6,7 @@ using SpaceEngine.Core.Tile.Samplers;
 
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 using UnityEngine;
 
@@ -146,6 +147,7 @@ namespace SpaceEngine.Core.Terrain
         /// </summary>
         float[] Horizon = new float[HORIZON_SIZE];
 
+        public List<TileSampler> Samplers = new List<TileSampler>(255);
         public TileSamplerOrder SamplersOrder;
 
         #region Node
@@ -192,7 +194,9 @@ namespace SpaceEngine.Core.Terrain
 
             CreateTerrainQuadRoot(ParentBody.Size);
 
-            SamplersOrder = new TileSamplerOrder(GetComponentsInChildren<TileSampler>());
+            CollectSamplers();
+
+            SamplersOrder = new TileSamplerOrder(Samplers);
 
             var producers = GetComponentsInChildren<TileProducer>();
             var lastProducer = producers[producers.Length - 1];
@@ -402,7 +406,7 @@ namespace SpaceEngine.Core.Terrain
             quad.Drawable = true;
         }
 
-        private void DrawNode(Mesh mesh, MaterialPropertyBlock mpb)
+        private void DrawMesh(Mesh mesh, MaterialPropertyBlock mpb)
         {
             // TODO : use mesh of appropriate resolution for non-leaf quads
             Graphics.DrawMesh(mesh, Matrix4x4.identity, TerrainMaterial, 0, CameraHelper.Main(), 0, mpb);
@@ -415,8 +419,6 @@ namespace SpaceEngine.Core.Terrain
 
             if (quad.IsLeaf)
             {
-                //ReSetMPB();
-
                 for (byte i = 0; i < samplers.Count; ++i)
                 {
                     // Set the unifroms needed to draw the texture for this sampler
@@ -426,7 +428,7 @@ namespace SpaceEngine.Core.Terrain
                 // Set the uniforms unique to each quad
                 SetPerQuadUniforms(quad, mpb);
 
-                DrawNode(mesh, mpb);
+                DrawMesh(mesh, mpb);
             }
             else
             {
@@ -454,8 +456,6 @@ namespace SpaceEngine.Core.Terrain
                     // If the a leaf quad needs to be drawn but its tiles are not ready then this will draw the next parent tile instead that is ready.
                     // Because of the current set up all tiles always have there tasks run on the frame they are generated so this section of code is never reached.
 
-                    //ReSetMPB();
-
                     for (byte i = 0; i < samplers.Count; ++i)
                     {
                         // Set the unifroms needed to draw the texture for this sampler
@@ -465,16 +465,31 @@ namespace SpaceEngine.Core.Terrain
                     // Set the uniforms unique to each quad
                     SetPerQuadUniforms(quad, mpb);
 
-                    DrawNode(mesh, mpb);
+                    DrawMesh(mesh, mpb);
                 }
             }
         }
 
         #endregion
 
+        /// <summary>
+        /// This mehod will collect all child <see cref="TileSampler"/>s in to <see cref="Samplers"/> collection.
+        /// Don't forget to call this method after Add/Remove operations on <see cref="TileSampler"/>.
+        /// </summary>
+        public virtual void CollectSamplers()
+        {
+            Samplers.Clear();
+
+            var samplers = GetComponentsInChildren<TileSampler>().ToList();
+
+            if (samplers.Count > 255) { Debug.Log(string.Format("TerrainNode: Toomuch samplers! {0}", samplers.Count)); return; }
+
+            Samplers = samplers;
+        }
+
         private void CreateTerrainQuadRoot(float size)
         {
-            if (TerrainQuadRoot != null) { Debug.Log("Hey! You're gonna create quad root, but it's already exist!"); return; }
+            if (TerrainQuadRoot != null) { Debug.Log("TerrainNode: Hey! You're gonna create quad root, but it's already exist!"); return; }
 
             TerrainQuadRoot = new TerrainQuad(this, null, 0, 0, -size, -size, 2.0 * size, ZMin, ZMax);
         }
@@ -617,7 +632,7 @@ namespace SpaceEngine.Core.Terrain
         /// </summary>
         /// <param name="localBox"></param>
         /// <returns>Returns the distance between the current viewer position and the given bounding box.</returns>
-        public double GetCameraDist(Box3d localBox)
+        public double GetCameraDistance(Box3d localBox)
         {
             return Math.Max(Math.Abs(LocalCameraPosition.z - localBox.zmax) / DistanceFactor,
                    Math.Max(Math.Min(Math.Abs(LocalCameraPosition.x - localBox.xmin), Math.Abs(LocalCameraPosition.x - localBox.xmax)),
