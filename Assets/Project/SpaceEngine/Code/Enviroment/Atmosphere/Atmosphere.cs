@@ -113,7 +113,7 @@ namespace SpaceEngine.AtmosphericScattering
         public EngineRenderQueue RenderQueue = EngineRenderQueue.Background;
         public int RenderQueueOffset = 0;
 
-        public Mesh AtmosphereMesh;
+        public Mesh AtmosphereMesh { get { return GodManager.Instance.AtmosphereMesh; } }
 
         public bool LostFocusForceRebake = false;
 
@@ -226,7 +226,6 @@ namespace SpaceEngine.AtmosphericScattering
 
             InitMisc();
             InitMaterials();
-            InitMesh();
 
             InitUniforms(SkyMaterial);
             InitUniforms(ParentBody.MPB);
@@ -275,7 +274,6 @@ namespace SpaceEngine.AtmosphericScattering
         protected override void OnDestroy()
         {
             Helper.Destroy(SkyMaterial);
-            Helper.Destroy(AtmosphereMesh);
 
             UnEventit();
 
@@ -417,7 +415,9 @@ namespace SpaceEngine.AtmosphericScattering
         {
             if (AtmosphereMesh == null) return;
 
-            Graphics.DrawMesh(AtmosphereMesh, transform.localToWorldMatrix, SkyMaterial, layer, CameraHelper.Main(), 0, ParentBody.MPB);
+            var atmosphereTRS = Matrix4x4.TRS(ParentBody.transform.position, transform.rotation, Vector3.one * (Radius + Height));
+
+            Graphics.DrawMesh(AtmosphereMesh, atmosphereTRS, SkyMaterial, layer, CameraHelper.Main(), 0, ParentBody.MPB);
         }
 
         #endregion
@@ -659,12 +659,6 @@ namespace SpaceEngine.AtmosphericScattering
         public void InitMaterials()
         {
             SkyMaterial = MaterialHelper.CreateTemp(SkyShader, "Sky");
-        }
-
-        public void InitMesh()
-        {
-            AtmosphereMesh = MeshFactory.MakePlane(AtmosphereMeshResolution, MeshFactory.PLANE.XY, false, false, false);
-            AtmosphereMesh.bounds = new Bounds(Vector3.zero, new Vector3(1e8f, 1e8f, 1e8f));
         }
 
         public void InitMisc()

@@ -62,6 +62,8 @@ public class GodManager : MonoSingleton<GodManager>
     public ComputeShader IrradianceN;
     public ComputeShader Transmittance;
 
+    public Mesh AtmosphereMesh;
+
     public Body ActiveBody { get { return Bodies.FirstOrDefault(body => Helper.Enabled(body)); } }
 
     public Body[] Bodies;
@@ -88,6 +90,9 @@ public class GodManager : MonoSingleton<GodManager>
     {
         Instance = this;
 
+        AtmosphereMesh = MeshFactory.IcoSphere.Create();
+        AtmosphereMesh.bounds = new Bounds(Vector3.zero, new Vector3(1e8f, 1e8f, 1e8f));
+
         Bodies = FindObjectsOfType<Body>();
         Starfields = FindObjectsOfType<Starfield>();
         Sunglares = FindObjectsOfType<SunGlare>();
@@ -100,6 +105,8 @@ public class GodManager : MonoSingleton<GodManager>
 
     protected override void OnDestroy()
     {
+        Helper.Destroy(AtmosphereMesh);
+
         base.OnDestroy();
     }
 

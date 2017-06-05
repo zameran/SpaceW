@@ -82,12 +82,22 @@ Shader "SpaceEngine/Atmosphere/Atmosphere"
 				"IgnoreProjector" = "True" 
 			}
 
+			/*
 			ZWrite On
 			ZTest Always  
 			Fog { Mode Off }
 			Blend SrcAlpha OneMinusSrcColor
 
 			Cull Off
+			*/
+
+			Blend SrcAlpha OneMinusSrcColor
+			Cull Front
+			Lighting Off
+			ZWrite Off
+			ZTest LEqual
+			Offset -1, -1
+			Fog { Mode Off }
 
 			CGPROGRAM
 			#include "UnityCG.cginc"		
@@ -126,9 +136,11 @@ Shader "SpaceEngine/Atmosphere/Atmosphere"
 
 			void main_Vertex(a2v i, out v2f o)
 			{
-				o.pos = float4(i.vertex.xy, 1.0, 1.0);
+				//o.pos = float4(i.vertex.xy, 1.0, 1.0);
+				o.pos = mul(UNITY_MATRIX_MVP, i.vertex);
 				o.uv = i.uv.xy;
-				o.dir = (mul(_Globals_CameraToWorld, float4((mul(_Globals_ScreenToCamera, i.vertex)).xyz, 0.0))).xyz;
+				//o.dir = (mul(_Globals_CameraToWorld, float4((mul(_Globals_ScreenToCamera, i.vertex)).xyz, 0.0))).xyz;
+				o.dir = (mul(_Globals_CameraToWorld, float4((mul(_Globals_ScreenToCamera, o.pos)).xyz, 0.0))).xyz;
 			}
 			
 			void main_Fragment(v2f i, out f2g o)

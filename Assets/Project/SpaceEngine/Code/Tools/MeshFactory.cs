@@ -487,4 +487,158 @@ public static class MeshFactory
 
         theMesh.SetTangents(tangents);
     }
+
+    public static class IcoSphere
+    {
+        private struct TriangleIndices
+        {
+            public int v1;
+            public int v2;
+            public int v3;
+
+            public TriangleIndices(int v1, int v2, int v3)
+            {
+                this.v1 = v1;
+                this.v2 = v2;
+                this.v3 = v3;
+            }
+        }
+
+        private static int GetMiddlePoint(int p1, int p2, ref List<Vector3> vertices, ref Dictionary<long, int> cache, float radius)
+        {
+            var firstIsSmaller = p1 < p2;
+
+            long smallerIndex = firstIsSmaller ? p1 : p2;
+            long greaterIndex = firstIsSmaller ? p2 : p1;
+
+            var key = (smallerIndex << 32) + greaterIndex;
+
+            int ret;
+            if (cache.TryGetValue(key, out ret)) { return ret; }
+
+            var point1 = vertices[p1];
+            var point2 = vertices[p2];
+            var middle = new Vector3
+            (
+                (point1.x + point2.x) / 2.0f,
+                (point1.y + point2.y) / 2.0f,
+                (point1.z + point2.z) / 2.0f
+            );
+
+            var i = vertices.Count;
+
+            vertices.Add(middle.normalized * radius);
+
+            cache.Add(key, i);
+
+            return i;
+        }
+
+        public static Mesh Create()
+        {
+            var mesh = new Mesh();
+
+            var vertices = new List<Vector3>();
+            var middlePointIndexCache = new Dictionary<long, int>();
+
+            const int recursionLevel = 6;
+            const float radius = 1.0f;
+
+            var t = (1.0f + Mathf.Sqrt(5.0f)) / 2.0f;
+
+            vertices.Add(new Vector3(-1f, t, 0f).normalized * radius);
+            vertices.Add(new Vector3(1f, t, 0f).normalized * radius);
+            vertices.Add(new Vector3(-1f, -t, 0f).normalized * radius);
+            vertices.Add(new Vector3(1f, -t, 0f).normalized * radius);
+
+            vertices.Add(new Vector3(0f, -1f, t).normalized * radius);
+            vertices.Add(new Vector3(0f, 1f, t).normalized * radius);
+            vertices.Add(new Vector3(0f, -1f, -t).normalized * radius);
+            vertices.Add(new Vector3(0f, 1f, -t).normalized * radius);
+
+            vertices.Add(new Vector3(t, 0f, -1f).normalized * radius);
+            vertices.Add(new Vector3(t, 0f, 1f).normalized * radius);
+            vertices.Add(new Vector3(-t, 0f, -1f).normalized * radius);
+            vertices.Add(new Vector3(-t, 0f, 1f).normalized * radius);
+
+            var faces = new List<TriangleIndices>();
+
+            // 5 faces around point 0
+            faces.Add(new TriangleIndices(0, 11, 5));
+            faces.Add(new TriangleIndices(0, 5, 1));
+            faces.Add(new TriangleIndices(0, 1, 7));
+            faces.Add(new TriangleIndices(0, 7, 10));
+            faces.Add(new TriangleIndices(0, 10, 11));
+
+            // 5 adjacent faces
+            faces.Add(new TriangleIndices(1, 5, 9));
+            faces.Add(new TriangleIndices(5, 11, 4));
+            faces.Add(new TriangleIndices(11, 10, 2));
+            faces.Add(new TriangleIndices(10, 7, 6));
+            faces.Add(new TriangleIndices(7, 1, 8));
+
+            // 5 faces around point 3
+            faces.Add(new TriangleIndices(3, 9, 4));
+            faces.Add(new TriangleIndices(3, 4, 2));
+            faces.Add(new TriangleIndices(3, 2, 6));
+            faces.Add(new TriangleIndices(3, 6, 8));
+            faces.Add(new TriangleIndices(3, 8, 9));
+
+            // 5 adjacent faces
+            faces.Add(new TriangleIndices(4, 9, 5));
+            faces.Add(new TriangleIndices(2, 4, 11));
+            faces.Add(new TriangleIndices(6, 2, 10));
+            faces.Add(new TriangleIndices(8, 6, 7));
+            faces.Add(new TriangleIndices(9, 8, 1));
+
+            for (byte i = 0; i < recursionLevel; i++)
+            {
+                var innerFaces = new List<TriangleIndices>();
+
+                foreach (var tri in faces)
+                {
+                    // Replace triangle by 4 triangles
+                    var a = GetMiddlePoint(tri.v1, tri.v2, ref vertices, ref middlePointIndexCache, radius);
+                    var b = GetMiddlePoint(tri.v2, tri.v3, ref vertices, ref middlePointIndexCache, radius);
+                    var c = GetMiddlePoint(tri.v3, tri.v1, ref vertices, ref middlePointIndexCache, radius);
+
+                    innerFaces.Add(new TriangleIndices(tri.v1, a, c));
+                    innerFaces.Add(new TriangleIndices(tri.v2, b, a));
+                    innerFaces.Add(new TriangleIndices(tri.v3, c, b));
+                    innerFaces.Add(new TriangleIndices(a, b, c));
+                }
+
+                faces = innerFaces;
+            }
+
+            var triangles = new List<int>();
+            var normals = new List<Vector3>(vertices.Count);
+
+            for (var i = 0; i < faces.Count; i++)
+            {
+                triangles.Add(faces[i].v1);
+                triangles.Add(faces[i].v2);
+                triangles.Add(faces[i].v3);
+            }
+
+            for (var i = 0; i < normals.Count; i++)
+            {
+                normals[i] = vertices[i].normalized;
+            }
+
+            mesh.SetVertices(vertices);
+            mesh.SetUVs(0, new List<Vector2>(vertices.Count));
+            mesh.SetTriangles(triangles, 0);
+            mesh.SetNormals(normals);
+
+            vertices.Clear();
+            triangles.Clear();
+            normals.Clear();
+
+            mesh.name = string.Format("IcoSphereMesh_({0})", Random.Range(float.MinValue, float.MaxValue));
+            mesh.hideFlags = HideFlags.DontSave;
+
+            return mesh;
+        }
+    }
 }
