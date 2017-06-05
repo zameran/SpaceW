@@ -91,6 +91,8 @@ Shader "SpaceEngine/Atmosphere/Atmosphere"
 			Cull Off
 			*/
 
+			// TODO : Fix black half on big distance...
+
 			Blend SrcAlpha OneMinusSrcColor
 			Cull Front
 			Lighting Off
@@ -124,9 +126,9 @@ Shader "SpaceEngine/Atmosphere/Atmosphere"
 
 			struct v2f 
 			{
-				float4 pos : SV_POSITION;
+				float4 position : SV_POSITION;
 				float2 uv : TEXCOORD0;
-				float3 dir : TEXCOORD1;
+				float3 direction : TEXCOORD1;
 			};
 
 			struct f2g
@@ -137,10 +139,10 @@ Shader "SpaceEngine/Atmosphere/Atmosphere"
 			void main_Vertex(a2v i, out v2f o)
 			{
 				//o.pos = float4(i.vertex.xy, 1.0, 1.0);
-				o.pos = mul(UNITY_MATRIX_MVP, i.vertex);
+				o.position = mul(UNITY_MATRIX_MVP, i.vertex);
 				o.uv = i.uv.xy;
-				//o.dir = (mul(_Globals_CameraToWorld, float4((mul(_Globals_ScreenToCamera, i.vertex)).xyz, 0.0))).xyz;
-				o.dir = (mul(_Globals_CameraToWorld, float4((mul(_Globals_ScreenToCamera, o.pos)).xyz, 0.0))).xyz;
+				//o.direction = (mul(_Globals_CameraToWorld, float4((mul(_Globals_ScreenToCamera, i.vertex)).xyz, 0.0))).xyz;
+				o.direction = (mul(_Globals_CameraToWorld, float4((mul(_Globals_ScreenToCamera, o.position)).xyz, 0.0))).xyz;
 			}
 			
 			void main_Fragment(v2f i, out f2g o)
@@ -162,7 +164,7 @@ Shader "SpaceEngine/Atmosphere/Atmosphere"
 				// NOTE : Please don't hurt me, baby...
 				// NOTE : _Globals_Origin Should be inverted for shadows stuff, aka Planet.transform.position...
 
-				float3 d = normalize(IN.dir);
+				float3 d = normalize(IN.direction);
 
 				float sunColor = 0;
 				float3 extinction = 0;
