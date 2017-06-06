@@ -91,8 +91,6 @@ Shader "SpaceEngine/Atmosphere/Atmosphere"
 			Cull Off
 			*/
 
-			// TODO : Fix black half on big distance...
-
 			Blend SrcAlpha OneMinusSrcColor
 			Cull Front
 			Lighting Off
@@ -116,7 +114,7 @@ Shader "SpaceEngine/Atmosphere/Atmosphere"
 			#pragma target 5.0
 			#pragma only_renderers d3d11 glcore
 			#pragma vertex main_Vertex
-			#pragma fragment frag
+			#pragma fragment main_Fragment
 
 			struct a2v
 			{
@@ -147,11 +145,6 @@ Shader "SpaceEngine/Atmosphere/Atmosphere"
 			
 			void main_Fragment(v2f i, out f2g o)
 			{
-				
-			}
-
-			float4 frag(v2f IN) : COLOR
-			{
 				float3 WCP = _Globals_WorldCameraPos;
 				float3 WCPG = WCP + _Globals_Origin; // Current camera position with offset applied...
 				float3 WCPGG = WCPG + _Globals_Origin; // I HAVE NO IDEA HOW, BUT IT WORKS!
@@ -164,7 +157,7 @@ Shader "SpaceEngine/Atmosphere/Atmosphere"
 				// NOTE : Please don't hurt me, baby...
 				// NOTE : _Globals_Origin Should be inverted for shadows stuff, aka Planet.transform.position...
 
-				float3 d = normalize(IN.direction);
+				float3 d = normalize(i.direction);
 
 				float sunColor = 0;
 				float3 extinction = 0;
@@ -218,7 +211,7 @@ Shader "SpaceEngine/Atmosphere/Atmosphere"
 					// TODO : Test Opacity cutout in newer versions of Unity!
 					//float opacity = dot(normalize(finalColor), float3(1.0, 1.0, 1.0));
 
-					return float4(finalColor, 1.0) * fade;
+					o.color = float4(finalColor, 1.0) * fade;
 				#endif
 
 				#ifdef LIGHT_2
@@ -274,7 +267,7 @@ Shader "SpaceEngine/Atmosphere/Atmosphere"
 
 					finalColor = hdr(finalColor);
 
-					return float4(finalColor, 1.0) * fade;
+					o.color = float4(finalColor, 1.0) * fade;
 				#endif
 
 				#ifdef LIGHT_3
@@ -334,7 +327,7 @@ Shader "SpaceEngine/Atmosphere/Atmosphere"
 
 					finalColor = hdr(finalColor);
 
-					return float4(finalColor, 1.0) * fade;
+					o.color = float4(finalColor, 1.0) * fade;
 				#endif
 
 				#ifdef LIGHT_4
@@ -404,11 +397,9 @@ Shader "SpaceEngine/Atmosphere/Atmosphere"
 
 					finalColor = hdr(finalColor);
 
-					return float4(finalColor, 1.0) * fade;
+					o.color = float4(finalColor, 1.0) * fade;
 				#endif
-
-				return float4(0, 0, 0, 0);
-			}		
+			}
 			ENDCG
 		}
 	}
