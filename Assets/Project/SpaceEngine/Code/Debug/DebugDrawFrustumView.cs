@@ -57,16 +57,16 @@ namespace SpaceEngine.Debugging
         protected override void Draw()
         {
 #if UNITY_EDITOR
-            if (UnityEditor.SceneView.currentDrawingSceneView != null) return; //Do not draw at Scene tab in editor.
+            if (UnityEditor.SceneView.currentDrawingSceneView != null) return; // Do not draw at Scene tab in editor.
 #endif
 
-            Vector3[] nearCorners = new Vector3[4]; //Approx'd nearplane corners
-            Vector3[] farCorners = new Vector3[4]; //Approx'd farplane corners
-            Plane[] camPlanes = GeometryUtility.CalculateFrustumPlanes(GodManager.Instance.ScreenToCamera); // NOTE : CameraToScreen
+            var nearCorners = new Vector3[4]; // Approx'd nearplane corners
+            var farCorners = new Vector3[4]; // Approx'd farplane corners
+            var frustumPlanes = GeometryUtility.CalculateFrustumPlanes(GodManager.Instance.ScreenToCamera); // NOTE : CameraToScreen
 
-            Plane temp = camPlanes[1];
-            camPlanes[1] = camPlanes[2];
-            camPlanes[2] = temp; //swap [1] and [2] so the order is better for the loop
+            var tempFrustumPlane = frustumPlanes[1];
+            frustumPlanes[1] = frustumPlanes[2];
+            frustumPlanes[2] = tempFrustumPlane; // Swap [1] and [2] so the order is better for the loop
 
             GL.PushMatrix();
             GL.LoadIdentity();
@@ -80,8 +80,8 @@ namespace SpaceEngine.Debugging
 
             for (byte i = 0; i < 4; i++)
             {
-                nearCorners[i] = VectorHelper.Plane3Intersect(camPlanes[4], camPlanes[i], camPlanes[(i + 1) % 4]); //near corners on the created projection matrix
-                farCorners[i] = VectorHelper.Plane3Intersect(camPlanes[5], camPlanes[i], camPlanes[(i + 1) % 4]); //far corners on the created projection matrix
+                nearCorners[i] = VectorHelper.Plane3Intersect(frustumPlanes[4], frustumPlanes[i], frustumPlanes[(i + 1) % 4]); // Near corners on the created projection matrix
+                farCorners[i] = VectorHelper.Plane3Intersect(frustumPlanes[5], frustumPlanes[i], frustumPlanes[(i + 1) % 4]); // Far corners on the created projection matrix
             }
 
             for (byte i = 0; i < 4; i++)

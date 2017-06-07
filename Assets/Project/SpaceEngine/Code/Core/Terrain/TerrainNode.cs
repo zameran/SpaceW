@@ -421,7 +421,6 @@ namespace SpaceEngine.Core.Terrain
 
         private void DrawMesh(Mesh mesh, MaterialPropertyBlock mpb)
         {
-            // TODO : use mesh of appropriate resolution for non-leaf quads
             Graphics.DrawMesh(mesh, Matrix4x4.identity, TerrainMaterial, 0, CameraHelper.Main(), 0, mpb);
         }
 

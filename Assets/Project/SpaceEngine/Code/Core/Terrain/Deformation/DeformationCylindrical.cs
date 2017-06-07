@@ -91,7 +91,7 @@ namespace SpaceEngine.Core.Terrain.Deformation
         public override Matrix4x4d DeformedToTangentFrame(Vector3d deformedPoint)
         {
             var Uz = new Vector3d(0.0, -deformedPoint.y, -deformedPoint.z).normalized;
-            var Ux = Vector3d.right; // TODO : UNIT_X
+            var Ux = Vector3d.right;
             var Uy = Uz.Cross(Ux);
             var O = new Vector3d(deformedPoint.x, -Uz.y * R, -Uz.z * R);
 

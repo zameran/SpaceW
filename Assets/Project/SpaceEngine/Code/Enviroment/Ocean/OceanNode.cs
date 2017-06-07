@@ -63,7 +63,7 @@ namespace SpaceEngine.Ocean
         /// </summary>
         public bool DrawOcean { get; protected set; }
 
-        public Vector3d Origin { get { return ParentBody != null ? ParentBody.Origin : transform.position; } } // TODO : ORIGIN
+        public Vector3d Origin { get { return ParentBody != null ? ParentBody.Origin : transform.position; } }
 
         /// <summary>
         /// Concrete classes must provide a function that returns the variance of the waves need for the BRDF rendering of waves.

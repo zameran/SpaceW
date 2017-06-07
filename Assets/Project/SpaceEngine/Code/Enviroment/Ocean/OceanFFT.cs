@@ -388,10 +388,9 @@ namespace SpaceEngine.Ocean
             float Fm = Mathf.Exp(-0.25f * Sqrt(k / WAVE_KM - 1.0f)); // Eq 41
             float Bh = 0.5f * alpham * WAVE_CM / c * Fm * Lpm; // Eq 40 (fixed)
 
-            Bh *= Lpm; // bug fix???
+            Bh *= Lpm;
 
-            if (omnispectrum)
-                return AMP * (Bl + Bh) / (k * Sqrt(k)); // Eq 30
+            if (omnispectrum) return AMP * (Bl + Bh) / (k * Sqrt(k)); // Eq 30
 
             float a0 = Mathf.Log(2.0f) / 4.0f;
             float ap = 4.0f;
