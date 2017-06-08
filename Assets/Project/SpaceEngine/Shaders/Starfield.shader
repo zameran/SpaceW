@@ -52,7 +52,7 @@ Shader "SpaceEngine/Stars/Starfield"
 			uniform float4x4 _RotationMatrix;
 			uniform float4 _Tab[8];
 		
-			struct appdata
+			struct a2v
 			{
 				float4 vertex : POSITION;
 				float4 color : COLOR;
@@ -79,31 +79,25 @@ Shader "SpaceEngine/Stars/Starfield"
 				return _Tab[i].x + f * _Tab[i].y;
 			}	
 		
-			v2f vert(appdata v)
+			void vert(in a2v i, out v2f o)
 			{
-				v2f OUT;
+				float3 worldPosition = mul((float3x3)_RotationMatrix, i.vertex.xyz) + _WorldSpaceCameraPos.xyz; 
 
-				float3 worldPosition = mul((float3x3)_RotationMatrix, v.vertex.xyz) + _WorldSpaceCameraPos.xyz; 
-
-				float magnitude = 6.5 + v.color.w * (-1.44 - 1.5);
-				float brightness = GetFlickerAmount(v.vertex.xy) * pow(5.0, (-magnitude - 1.44) / 2.5);
+				float magnitude = 6.5 + i.color.w * (-1.44 - 1.5);
+				float brightness = GetFlickerAmount(i.vertex.xy) * pow(5.0, (-magnitude - 1.44) / 2.5);
 						
-				half4 color = _StarIntensity * half4(brightness * v.color.xyz * 3, brightness);
+				half4 color = _StarIntensity * half4(brightness * i.color.xyz * 3, brightness);
 			
-				OUT.pos = mul(UNITY_MATRIX_MVP, float4(worldPosition, 1));
-				OUT.color = color;
-				OUT.uv = 6.5 * v.texcoord.xy - 6.5 * float2(0.5, 0.5);
-			
-				return OUT;
+				o.pos = mul(UNITY_MATRIX_MVP, float4(worldPosition, 1));
+				o.color = color;
+				o.uv = 6.5 * i.texcoord.xy - 6.5 * float2(0.5, 0.5);
 			}
 
-			half4 frag(v2f IN) : SV_Target
+			void frag(in v2f i, out float4 color : SV_Target)
 			{
-				half scale = exp(-dot(IN.uv.xy, IN.uv.xy));
+				half scale = exp(-dot(i.uv.xy, i.uv.xy));
 
-				half3 color = IN.color.xyz * scale + 5 * IN.color.w * pow(scale, 10);
-
-				return half4(color, 0);
+				color = float4(i.color.xyz * scale + 5 * i.color.w * pow(scale, 10), 1.0);
 			}
 			ENDCG
 		}

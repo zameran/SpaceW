@@ -96,7 +96,7 @@ Shader "SpaceEngine/Ring"
 			float4 color : COLOR;
 		};
 			
-		void main_Vertex(a2v i, out v2f o)
+		void vert(in a2v i, out v2f o)
 		{
 			float4 worldPosition = mul(unity_ObjectToWorld, i.vertex);
 			
@@ -131,12 +131,12 @@ Shader "SpaceEngine/Ring"
 			o.worldPosition = worldPosition;
 		}
 				
-		void main_Fragment(v2f i, out f2g o)
+		void frag(in v2f i, out float4 color : SV_Target)
 		{
 			float4 mainTex = tex2D(_DiffuseTexture, i.uv);
 			float4 mainColor = mainTex * _DiffuseColor;
 					
-			o.color = i.color * mainColor;
+			color = i.color * mainColor;
 
 			float cameraDistance = length(i.relativeDirection);
 			float rotationAngle = 0.0000125 * _Time.y;
@@ -214,30 +214,33 @@ Shader "SpaceEngine/Ring"
 					lighting *= ShadowColor(i.worldPosition);
 				#endif
 
-				o.color += lighting * mainColor;
+				color += lighting * mainColor;
 			#endif
 
 			#if !LIGHT_1 && !LIGHT_2 && !LIGHT_3 && !LIGHT_4
-				o.color = mainColor;
+				color = mainColor;
 
 				// Shadows with no lights?
 				//#if SHADOW_1 || SHADOW_2 || SHADOW_3 || SHADOW_4
-				//	o.color.xyz *= ShadowColor(i.worldPosition).xyz;
+				//	color.xyz *= ShadowColor(i.worldPosition).xyz;
 				//#endif
 			#endif
 
-			o.color *= fadeOut;
+			color *= fadeOut;
 		}
 		ENDCG
 
 		Pass
 		{
 			Name "Ring"
-			Tags
+			Tags 
 			{
-				"Queue"           = "Transparent"
-				"RenderType"      = "Transparent"
-				"IgnoreProjector" = "True"
+				"Queue"					= "Transparent"
+				"RenderType"			= "Transparent"
+				"ForceNoShadowCasting"	= "True"
+				"IgnoreProjector"		= "True"
+
+				"LightMode"				= "Always"
 			}
 
 			Blend One OneMinusSrcColor
@@ -245,47 +248,17 @@ Shader "SpaceEngine/Ring"
 			Lighting Off
 			ZWrite On
 			ZTest LEqual 
-			Fog 
-			{ 
-				Mode Off 
-			}
+			Fog { Mode Off }
 			
 			CGPROGRAM
-
 			#pragma target 5.0
 			#pragma only_renderers d3d11 glcore
-			#pragma vertex main_Vertex
-			#pragma fragment main_Fragment
+			#pragma vertex vert
+			#pragma fragment frag
+
 			#pragma multi_compile DUMMY LIGHT_1 LIGHT_2 LIGHT_3 LIGHT_4
 			#pragma multi_compile DUMMY SHADOW_1 SHADOW_2 SHADOW_3 SHADOW_4
-			#pragma multi_compile DUMMY SCATTERING
-				
-			ENDCG
-		}
-
-		// TODO : Shadow pass...
-		Pass 
-		{
-			Name "ShadowCaster"
-			Tags 
-			{ 
-				"LightMode" = "ShadowCaster" 
-			}
-
-			ZWrite On 
-			ZTest LEqual
-
-			CGPROGRAM
-			#pragma target 3.0
-
-			#pragma shader_feature _ _ALPHATEST_ON _ALPHABLEND_ON _ALPHAPREMULTIPLY_ON
-			#pragma multi_compile_shadowcaster
-
-			#pragma vertex vertShadowCaster
-			#pragma fragment fragShadowCaster
-
-			#include "UnityStandardShadow.cginc"
-
+			#pragma multi_compile DUMMY SCATTERING			
 			ENDCG
 		}
 	}

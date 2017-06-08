@@ -21,7 +21,7 @@
 		uniform float _Ocean_DrawBRDF;
 		uniform float _Ocean_Level;
 
-		struct p2v
+		struct a2v
 		{
 			float4 vertex : POSITION;
 			float3 normal : NORMAL;
@@ -66,7 +66,7 @@
 			uv = texcoord;
 		}
 
-		void VERTEX_PROGRAM(in p2v v, out v2f o)
+		void VERTEX_PROGRAM(in a2v v, out v2f o)
 		{
 			VERTEX_POSITION(v.vertex, v.texcoord.xy, o.vertex, o.localVertex, o.texcoord);
 
@@ -78,14 +78,21 @@
 
 		Pass 
 		{
-			Tags { "Queue" = "Geometry" }
-			//Tags { "Queue" = "Opaque" "LightMode" = "Deferred" }
+			Name "Planet"
+			Tags 
+			{
+				"Queue"					= "Geometry"	// "Opaque"
+				"RenderType"			= "Geometry"
+				"ForceNoShadowCasting"	= "True"
+				"IgnoreProjector"		= "True"
 
+				"LightMode"				= "Always"		// "Deferred" 
+			}
+
+			Cull Back
 			ZWrite On
 			ZTest On
 			Fog { Mode Off }
-			//Blend One OneMinusSrcAlpha
-			Cull Back
 
 			CGPROGRAM
 			#pragma target 4.0
@@ -109,7 +116,7 @@
 			uniform sampler2D _Ground_Normal;
 			uniform sampler2D _DetailedNormal;
 
-			void vert(in p2v v, out v2f o)
+			void vert(in a2v v, out v2f o)
 			{	
 				VERTEX_PROGRAM(v, o);
 
@@ -117,7 +124,7 @@
 				o.direction = (_Globals_WorldCameraPos_Offsetted + _Globals_Origin) - (mul(_Globals_CameraToWorld, float4((mul(_Globals_ScreenToCamera, v.vertex)).xyz, 0.0))).xyz;
 			}
 
-			void frag(in v2f IN, 
+			void frag(in v2f i, 
 				out half4 outDiffuse : SV_Target0,			// RT0: diffuse color (rgb), occlusion (a)
 				out half4 outSpecSmoothness : SV_Target1,	// RT1: spec color (rgb), smoothness (a)
 				out half4 outNormal : SV_Target2,			// RT2: normal (rgb), --unused, very low precision-- (a) 
@@ -128,8 +135,8 @@
 				float3 WCPO = _Globals_WorldCameraPos_Offsetted;
 				float3 WSD = _Sun_WorldDirections_1[0];
 				float4 WSPR = _Sun_Positions_1[0];
-				float3 position = IN.localVertex;
-				float2 texcoord = IN.texcoord;
+				float3 position = i.localVertex;
+				float2 texcoord = i.texcoord;
 
 				float height = texTile(_Elevation_Tile, texcoord, _Elevation_TileCoords, _Elevation_TileSize).x;
 				float4 ortho = texTile(_Ortho_Tile, texcoord, _Ortho_TileCoords, _Ortho_TileSize);
@@ -144,7 +151,7 @@
 				float3 P = V * max(length(position), _Deform_Radius + 10.0);
 				float3 PO = P - _Globals_Origin;
 				float3 v = normalize(P - WCP - _Globals_Origin); // Body origin take in to account...
-				float3 d = normalize(IN.direction);
+				float3 d = normalize(i.direction);
 
 				#if ATMOSPHERE_ON
 					#if OCEAN_ON
@@ -219,11 +226,6 @@
 				outSpecSmoothness = 1.0;
 				outNormal = half4(normal.xyz * 0.5 + 0.5, 1.0);
 				outEmission = half4(exp(-finalColor / 2), 1.0);
-				//return float4(texTile(_Elevation_Tile, texcoord, _Elevation_TileCoords, _Elevation_TileSize).xxx * 0.002, 1.0);
-				//return float4(normal.xyz, 1.0);
-				//return float4(texcoord, 1.0, 1.0);
-				//return float4(ht / 10000, ht / 10000, ht / 10000, 1.0);
-				//return float4(normal.www, 1);
 			}
 			
 			ENDCG

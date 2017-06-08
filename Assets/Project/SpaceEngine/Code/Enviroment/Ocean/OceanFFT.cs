@@ -93,6 +93,9 @@ namespace SpaceEngine.Ocean
 
         protected FourierGPU Fourier;
 
+        /// <inheritdoc />
+        protected override int ShaderPass { get { return 0; } }
+
         public override float GetMaxSlopeVariance()
         {
             return MaxSlopeVariance;

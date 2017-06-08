@@ -77,19 +77,13 @@ Shader "SpaceEngine/Atmosphere/Atmosphere"
 			Name "Atmosphere"
 			Tags 
 			{
-				"Queue" = "Transparent" 
-				"RenderType" = "Transparent" 
-				"IgnoreProjector" = "True" 
+				"Queue"					= "Transparent"
+				"RenderType"			= "Transparent"
+				"ForceNoShadowCasting"	= "True"
+				"IgnoreProjector"		= "True"
+
+				"LightMode"				= "Always"
 			}
-
-			/*
-			ZWrite On
-			ZTest Always  
-			Fog { Mode Off }
-			Blend SrcAlpha OneMinusSrcColor
-
-			Cull Off
-			*/
 
 			Blend SrcAlpha OneMinusSrcColor
 			Cull Front
@@ -106,15 +100,15 @@ Shader "SpaceEngine/Atmosphere/Atmosphere"
 			#include "SpaceStuff.cginc"
 			#include "Eclipses.cginc"
 
+			#pragma target 5.0
+			#pragma only_renderers d3d11 glcore
+			#pragma vertex vert
+			#pragma fragment frag
+
 			#pragma multi_compile LIGHT_1 LIGHT_2 LIGHT_3 LIGHT_4
 			#pragma multi_compile SHINE_ON SHINE_OFF
 			#pragma multi_compile ECLIPSES_ON ECLIPSES_OFF
 			#pragma multi_compile SHADOW_0 SHADOW_1 SHADOW_2 SHADOW_3 SHADOW_4
-
-			#pragma target 5.0
-			#pragma only_renderers d3d11 glcore
-			#pragma vertex main_Vertex
-			#pragma fragment main_Fragment
 
 			struct a2v
 			{
@@ -134,7 +128,7 @@ Shader "SpaceEngine/Atmosphere/Atmosphere"
 				float4 color : COLOR;
 			};
 
-			void main_Vertex(a2v i, out v2f o)
+			void vert(a2v i, out v2f o)
 			{
 				//o.pos = float4(i.vertex.xy, 1.0, 1.0);
 				o.position = mul(UNITY_MATRIX_MVP, i.vertex);
@@ -143,7 +137,7 @@ Shader "SpaceEngine/Atmosphere/Atmosphere"
 				o.direction = (mul(_Globals_CameraToWorld, float4((mul(_Globals_ScreenToCamera, o.position)).xyz, 0.0))).xyz;
 			}
 			
-			void main_Fragment(v2f i, out f2g o)
+			void frag(in v2f i, out f2g o)
 			{
 				float3 WCP = _Globals_WorldCameraPos;
 				float3 WCPG = WCP + _Globals_Origin; // Current camera position with offset applied...

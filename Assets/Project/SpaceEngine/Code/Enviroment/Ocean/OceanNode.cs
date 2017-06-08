@@ -65,6 +65,8 @@ namespace SpaceEngine.Ocean
 
         public Vector3d Origin { get { return ParentBody != null ? ParentBody.Origin : transform.position; } }
 
+        protected abstract int ShaderPass { get; }
+
         /// <summary>
         /// Concrete classes must provide a function that returns the variance of the waves need for the BRDF rendering of waves.
         /// </summary>
@@ -357,6 +359,8 @@ namespace SpaceEngine.Ocean
             foreach (var mesh in ScreenMeshGrids)
             {
                 if (mesh == null) break;
+
+                OceanMaterial.SetPass(ShaderPass);
 
                 Graphics.DrawMesh(mesh, Matrix4x4.identity, OceanMaterial, layer, CameraHelper.Main(), 0, ParentBody.MPB);
             }

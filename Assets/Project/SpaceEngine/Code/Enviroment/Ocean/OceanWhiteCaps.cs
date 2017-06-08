@@ -35,6 +35,9 @@ namespace SpaceEngine.Ocean
         RenderTexture Foam0;
         RenderTexture Foam1;
 
+        /// <inheritdoc />
+        protected override int ShaderPass { get { return 1; } }
+
         #region OceanNode
 
         protected override void InitOceanNode()
