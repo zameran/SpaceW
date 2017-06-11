@@ -147,7 +147,7 @@ struct VertexProducerOutput
 };
 
 #define CORE_PRODUCER_VERTEX_PROGRAM_BODY \
-	o.pos = mul(UNITY_MATRIX_MVP, v.vertex); \
+	o.pos = UnityObjectToClipPos(v.vertex); \
 	o.uv0 = v.texcoord.xy; \
 
 #define CORE_PRODUCER_VERTEX_PROGRAM_BODY_ADDITIONAL_UV(scale) \

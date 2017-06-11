@@ -69,7 +69,7 @@ Shader "SpaceEngine/Test/NoiseEngineTest"
 			{
 			    v2f o;
 
-			    o.vertex = mul(UNITY_MATRIX_MVP, v.vertex);
+			    o.vertex = UnityObjectToClipPos(v.vertex);
 			    o.uv = v.uv * _Freq;
 
 			    return o;

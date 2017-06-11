@@ -41,7 +41,7 @@ Shader "SpaceEngine/Ocean/WhiteCapsPrecompute"
 
 			void vert(in a2v i, out v2f o)
 			{
-				o.pos = mul(UNITY_MATRIX_MVP, i.vertex);
+				o.pos = UnityObjectToClipPos(i.vertex);
 				o.uv = i.texcoord;
 			}
 			

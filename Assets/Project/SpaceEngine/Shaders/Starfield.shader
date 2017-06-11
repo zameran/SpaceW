@@ -88,7 +88,7 @@ Shader "SpaceEngine/Stars/Starfield"
 						
 				half4 color = _StarIntensity * half4(brightness * i.color.xyz * 3, brightness);
 			
-				o.pos = mul(UNITY_MATRIX_MVP, float4(worldPosition, 1));
+				o.pos = UnityObjectToClipPos(float4(worldPosition, 1.0));
 				o.color = color;
 				o.uv = 6.5 * i.texcoord.xy - 6.5 * float2(0.5, 0.5);
 			}

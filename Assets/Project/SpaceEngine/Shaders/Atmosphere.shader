@@ -130,8 +130,8 @@ Shader "SpaceEngine/Atmosphere/Atmosphere"
 
 			void vert(a2v i, out v2f o)
 			{
-				//o.pos = float4(i.vertex.xy, 1.0, 1.0);
-				o.position = mul(UNITY_MATRIX_MVP, i.vertex);
+				//o.position = UnityObjectToClipPos(float4(i.vertex.xy, 1.0, 1.0));
+				o.position = UnityObjectToClipPos(i.vertex);
 				o.uv = i.uv.xy;
 				//o.direction = (mul(_Globals_CameraToWorld, float4((mul(_Globals_ScreenToCamera, i.vertex)).xyz, 0.0))).xyz;
 				o.direction = (mul(_Globals_CameraToWorld, float4((mul(_Globals_ScreenToCamera, o.position)).xyz, 0.0))).xyz;

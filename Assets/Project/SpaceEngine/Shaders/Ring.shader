@@ -100,7 +100,7 @@ Shader "SpaceEngine/Ring"
 		{
 			float4 worldPosition = mul(unity_ObjectToWorld, i.vertex);
 			
-			o.vertex = mul(UNITY_MATRIX_MVP, i.vertex);
+			o.vertex = UnityObjectToClipPos(i.vertex);
 			o.uv = float2(clamp(i.uv.x, 0.0064, 0.9936), i.uv.y); //NOTE : Oh shit...
 			o.color = 1.0f;
 
@@ -108,23 +108,18 @@ Shader "SpaceEngine/Ring"
 				o.color *= UNITY_LIGHTMODEL_AMBIENT * 2.0f;
 			#endif
 
-			o.relativeDirection = _WorldSpaceCameraPos - worldPosition.xyz;
-			o.relativeDirection = normalize(o.relativeDirection);
+			o.relativeDirection = normalize(_WorldSpaceCameraPos - worldPosition.xyz);
 
 			#if LIGHT_1 || LIGHT_2 || LIGHT_3 || LIGHT_4
-					o.sunRelDirection_1 = _Light1Position.xyz - worldPosition.xyz;
-					o.sunRelDirection_1 = normalize(o.sunRelDirection_1);
+					o.sunRelDirection_1 = normalize(_Light1Position.xyz - worldPosition.xyz);
 				#if LIGHT_2
-					o.sunRelDirection_2 = _Light2Position.xyz - worldPosition.xyz;
-					o.sunRelDirection_2 = normalize(o.sunRelDirection_2);
+					o.sunRelDirection_2 = normalize(_Light2Position.xyz - worldPosition.xyz);
 				#endif
 				#if LIGHT_3
-					o.sunRelDirection_3 = _Light3Position.xyz - worldPosition.xyz;
-					o.sunRelDirection_3 = normalize(o.sunRelDirection_3);
+					o.sunRelDirection_3 = normalize(_Light3Position.xyz - worldPosition.xyz);
 				#endif
 				#if LIGHT_4
-					o.sunRelDirection_4 = _Light4Position.xyz - worldPosition.xyz;
-					o.sunRelDirection_4 = normalize(o.sunRelDirection_4);
+					o.sunRelDirection_4 = normalize(_Light4Position.xyz - worldPosition.xyz);
 				#endif
 			#endif
 
