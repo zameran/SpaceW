@@ -190,7 +190,7 @@
 				"LightMode"				= "Always"
 			}
 
-			Cull Back
+			Cull Front
 			Lighting Off
 			ZWrite Off
 			ZTest LEqual
@@ -220,7 +220,7 @@
 				"LightMode"				= "Always"
 			}
 
-			Cull Back
+			Cull Front
 			Lighting Off
 			ZWrite Off
 			ZTest LEqual

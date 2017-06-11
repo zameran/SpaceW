@@ -13,7 +13,6 @@
 	SubShader 
 	{
 		CGINCLUDE
-		#include "UnityCG.cginc"
 		#include "Core.cginc"
 
 		uniform float _Ocean_Sigma;
