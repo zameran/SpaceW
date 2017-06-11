@@ -6,7 +6,9 @@
 	}
 	SubShader
 	{
-		Cull Off ZWrite Off ZTest Always
+		Cull Off 
+		ZWrite Off 
+		ZTest Always
 
 		Pass
 		{
@@ -16,10 +18,10 @@
 			
 			#include "UnityCG.cginc"
 
-			struct appdata
+			struct a2v
 			{
 				float4 vertex : POSITION;
-				float2 uv : TEXCOORD0;
+				float2 texcoord : TEXCOORD0;
 			};
 
 			struct v2f
@@ -31,30 +33,27 @@
 			uniform sampler2D _FrameBuffer;
 			float4 _FrameBuffer_TexelSize;
 
-			v2f vert (appdata v)
+			void vert(in a2v v, out v2f o)
 			{
-				v2f o;
-
 				o.vertex = mul(UNITY_MATRIX_MVP, v.vertex);
-				o.uv = v.uv;
+				o.uv = v.texcoord;
 
 				#if UNITY_UV_STARTS_AT_TOP
 					if (_FrameBuffer_TexelSize.y < 0)
 						o.uv.y = 1 - o.uv.y;
 				#endif
-
-				return o;
 			}
 
-			fixed4 frag (v2f i) : SV_Target
+			void frag(in v2f i, out float4 output : SV_Target)
 			{
 				float4 fboColor = tex2D(_FrameBuffer, i.uv);
 
 				fboColor.a = (fboColor.a + 1.0) * 0.5;
 				fboColor.a = saturate(fboColor.a);
 
-				return fboColor;
+				output = fboColor;
 			}
+
 			ENDCG
 		}
 	}

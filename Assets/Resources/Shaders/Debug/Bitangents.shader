@@ -4,7 +4,7 @@
 	{
 		Pass
 		{
-			Fog{ Mode Off }
+			Fog { Mode Off }
 
 			CGPROGRAM
 			#pragma vertex vert
@@ -26,6 +26,7 @@
 			v2f vert(appdata v) 
 			{
 				v2f o;
+
 				o.pos = mul(UNITY_MATRIX_MVP, v.vertex);
 
 				float3 bitangent = cross(v.normal, v.tangent.xyz) * v.tangent.w;

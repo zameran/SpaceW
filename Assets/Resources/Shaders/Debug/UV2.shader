@@ -23,8 +23,10 @@
 			v2f vert(appdata v) 
 			{
 				v2f o;
+
 				o.pos = mul(UNITY_MATRIX_MVP, v.vertex);
 				o.uv = float4(v.texcoord1.xy, 0, 0);
+
 				return o;
 			}
 

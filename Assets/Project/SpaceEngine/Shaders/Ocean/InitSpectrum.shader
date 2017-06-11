@@ -10,7 +10,6 @@ Shader "SpaceEngine/Ocean/InitSpectrum"
 			Fog { Mode Off }
 			
 			CGPROGRAM
-			#include "UnityCG.cginc"
 			#include "../Math.cginc"
 
 			#pragma target 3.0
@@ -23,6 +22,12 @@ Shader "SpaceEngine/Ocean/InitSpectrum"
 			uniform float4 _Offset;
 			uniform float4 _InverseGridSizes;
 			uniform float _T;
+
+			struct a2v
+			{
+				float4 vertex : POSITION;
+				float2 texcoord : TEXCOORD0;
+			};
 
 			struct v2f 
 			{
@@ -37,17 +42,13 @@ Shader "SpaceEngine/Ocean/InitSpectrum"
 				float4 col2 : COLOR2;
 			};
 
-			v2f vert(appdata_base v)
+			void vert(in a2v i, out v2f o)
 			{
-				v2f OUT;
-
-				OUT.pos = mul(UNITY_MATRIX_MVP, v.vertex);
-				OUT.uv = v.texcoord;
-
-				return OUT;
+				o.pos = mul(UNITY_MATRIX_MVP, i.vertex);
+				o.uv = i.texcoord;
 			}
 			
-			f2a frag(v2f IN)
+			void frag(in v2f IN, out f2a OUT)
 			{ 
 				float2 uv = IN.uv.xy;
 			
@@ -80,13 +81,9 @@ Shader "SpaceEngine/Ocean/InitSpectrum"
 				float2 n3 = Complex(k3.x * h3) - k3.y * h3;
 				float2 n4 = Complex(k4.x * h4) - k4.y * h4;
 				
-				f2a OUT;
-				
 				OUT.col0 = float4(h12, h34);
 				OUT.col1 = float4(n1, n2);
 				OUT.col2 = float4(n3, n4);
-				
-				return OUT;
 			}
 			
 			ENDCG
