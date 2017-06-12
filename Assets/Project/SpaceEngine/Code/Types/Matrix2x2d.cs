@@ -27,7 +27,7 @@ namespace UnityEngine
 {
     public struct Matrix2x2d
     {
-        public double[,] m;
+        public readonly double[,] m;
 
         public Matrix2x2d(double m00, double m01, double m10, double m11)
         {
@@ -37,6 +37,23 @@ namespace UnityEngine
             m[0, 1] = m01;
             m[1, 0] = m10;
             m[1, 1] = m11;
+        }
+
+        public override int GetHashCode()
+        {
+            return m[0, 0].GetHashCode() + m[1, 0].GetHashCode() +
+                   m[0, 1].GetHashCode() + m[1, 1].GetHashCode();
+        }
+
+        public override bool Equals(object obj)
+        {
+            if (obj is Matrix2x2d) { return Equals((Matrix2x2d)obj); }
+            return false;
+        }
+
+        public bool Equals(Matrix2x2d other)
+        {
+            return this == other;
         }
 
         public static Matrix2x2d operator +(Matrix2x2d m1, Matrix2x2d m2)
@@ -107,6 +124,32 @@ namespace UnityEngine
             }
 
             return kProd;
+        }
+
+        public static bool operator ==(Matrix2x2d m1, Matrix2x2d m2)
+        {
+            for (byte iRow = 0; iRow < 2; iRow++)
+            {
+                for (byte iCol = 0; iCol < 2; iCol++)
+                {
+                    if (!BrainFuckMath.NearlyEqual(m1.m[iRow, iCol], m2.m[iRow, iCol])) return false;
+                }
+            }
+
+            return true;
+        }
+
+        public static bool operator !=(Matrix2x2d m1, Matrix2x2d m2)
+        {
+            for (byte iRow = 0; iRow < 2; iRow++)
+            {
+                for (byte iCol = 0; iCol < 2; iCol++)
+                {
+                    if (!BrainFuckMath.NearlyEqual(m1.m[iRow, iCol], m2.m[iRow, iCol])) return true;
+                }
+            }
+
+            return false;
         }
 
         public override string ToString()

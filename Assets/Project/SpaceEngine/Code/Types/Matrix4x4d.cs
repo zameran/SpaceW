@@ -27,11 +27,9 @@
 
 namespace UnityEngine
 {
-#pragma warning disable 660, 661
-
     public struct Matrix4x4d
     {
-        public double[,] m;
+        public readonly double[,] m;
 
         public Matrix4x4d(double m00,
             double m01,
@@ -90,6 +88,25 @@ namespace UnityEngine
             m[3, 1] = mat.m31;
             m[3, 2] = mat.m32;
             m[3, 3] = mat.m33;
+        }
+
+        public override int GetHashCode()
+        {
+            return m[0, 0].GetHashCode() + m[1, 0].GetHashCode() + m[2, 0].GetHashCode() + m[3, 0].GetHashCode() +
+                   m[0, 1].GetHashCode() + m[1, 1].GetHashCode() + m[2, 1].GetHashCode() + m[3, 1].GetHashCode() +
+                   m[0, 2].GetHashCode() + m[1, 2].GetHashCode() + m[2, 2].GetHashCode() + m[3, 2].GetHashCode() +
+                   m[0, 3].GetHashCode() + m[1, 3].GetHashCode() + m[2, 3].GetHashCode() + m[3, 3].GetHashCode();
+        }
+
+        public override bool Equals(object obj)
+        {
+            if (obj is Matrix4x4d) { return Equals((Matrix4x4d)obj); }
+            return false;
+        }
+
+        public bool Equals(Matrix4x4d other)
+        {
+            return this == other;
         }
 
         public static Matrix4x4d operator +(Matrix4x4d m1, Matrix4x4d m2)

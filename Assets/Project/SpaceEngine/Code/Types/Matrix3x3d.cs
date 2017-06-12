@@ -29,7 +29,7 @@ namespace UnityEngine
 {
     public struct Matrix3x3d
     {
-        public double[,] m;
+        public readonly double[,] m;
 
         public Matrix3x3d(double m00, double m01, double m02, double m10, double m11, double m12, double m20, double m21, double m22)
         {
@@ -44,6 +44,24 @@ namespace UnityEngine
             m[2, 0] = m20;
             m[2, 1] = m21;
             m[2, 2] = m22;
+        }
+
+        public override int GetHashCode()
+        {
+            return m[0, 0].GetHashCode() + m[1, 0].GetHashCode() + m[2, 0].GetHashCode() +
+                   m[0, 1].GetHashCode() + m[1, 1].GetHashCode() + m[2, 1].GetHashCode() +
+                   m[0, 2].GetHashCode() + m[1, 2].GetHashCode() + m[2, 2].GetHashCode();
+        }
+
+        public override bool Equals(object obj)
+        {
+            if (obj is Matrix3x3d) { return Equals((Matrix3x3d)obj); }
+            return false;
+        }
+
+        public bool Equals(Matrix3x3d other)
+        {
+            return this == other;
         }
 
         public static Matrix3x3d operator +(Matrix3x3d m1, Matrix3x3d m2)
@@ -143,6 +161,32 @@ namespace UnityEngine
 #endif
 
             return kProd;
+        }
+
+        public static bool operator ==(Matrix3x3d m1, Matrix3x3d m2)
+        {
+            for (byte iRow = 0; iRow < 3; iRow++)
+            {
+                for (byte iCol = 0; iCol < 3; iCol++)
+                {
+                    if (!BrainFuckMath.NearlyEqual(m1.m[iRow, iCol], m2.m[iRow, iCol])) return false;
+                }
+            }
+
+            return true;
+        }
+
+        public static bool operator !=(Matrix3x3d m1, Matrix3x3d m2)
+        {
+            for (byte iRow = 0; iRow < 3; iRow++)
+            {
+                for (byte iCol = 0; iCol < 3; iCol++)
+                {
+                    if (!BrainFuckMath.NearlyEqual(m1.m[iRow, iCol], m2.m[iRow, iCol])) return true;
+                }
+            }
+
+            return false;
         }
 
         public override string ToString()

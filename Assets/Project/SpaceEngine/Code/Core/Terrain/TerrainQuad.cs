@@ -109,6 +109,11 @@ namespace SpaceEngine.Core.Terrain
 
         public Matrix4x4d DeformedVerticals { get; private set; }
 
+        /// <summary>
+        /// Tangent frame to world matrix.
+        /// </summary>
+        public Matrix3x3d TangentFrameToWorld { get; private set; }
+
         public Vector3d Center { get; private set; }
 
         public Vector4d Lengths { get; private set; }
@@ -140,6 +145,12 @@ namespace SpaceEngine.Core.Terrain
                                                v0.y, v1.y, v2.y, v3.y,
                                                v0.z, v1.z, v2.z, v3.z,
                                                0.0, 0.0, 0.0, 0.0);
+
+            var uz = Center.Normalized();
+            var ux = new Vector3d(0.0, 1.0, 0.0).Cross(uz).Normalized();
+            var uy = uz.Cross(ux);
+
+            TangentFrameToWorld = Owner.TangentFrameToWorld * new Matrix3x3d(ux.x, uy.x, uz.x, ux.y, uy.y, uz.y, ux.z, uy.z, uz.z);
         }
 
         /// <summary> 

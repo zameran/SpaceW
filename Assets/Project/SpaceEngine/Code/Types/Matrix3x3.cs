@@ -27,7 +27,7 @@ namespace UnityEngine
 {
     public struct Matrix3x3
     {
-        public float[,] m;
+        public readonly float[,] m;
 
         public Matrix3x3(float m00, float m01, float m02, float m10, float m11, float m12, float m20, float m21, float m22)
         {
@@ -42,6 +42,24 @@ namespace UnityEngine
             m[2, 0] = m20;
             m[2, 1] = m21;
             m[2, 2] = m22;
+        }
+
+        public override int GetHashCode()
+        {
+            return m[0, 0].GetHashCode() + m[1, 0].GetHashCode() + m[2, 0].GetHashCode() +
+                   m[0, 1].GetHashCode() + m[1, 1].GetHashCode() + m[2, 1].GetHashCode() +
+                   m[0, 2].GetHashCode() + m[1, 2].GetHashCode() + m[2, 2].GetHashCode();
+        }
+
+        public override bool Equals(object obj)
+        {
+            if (obj is Matrix3x3) { return Equals((Matrix3x3)obj); }
+            return false;
+        }
+
+        public bool Equals(Matrix3x3 other)
+        {
+            return this == other;
         }
 
         public static Matrix3x3 operator +(Matrix3x3 m1, Matrix3x3 m2)
@@ -114,6 +132,32 @@ namespace UnityEngine
             }
 
             return kProd;
+        }
+
+        public static bool operator ==(Matrix3x3 m1, Matrix3x3 m2)
+        {
+            for (byte iRow = 0; iRow < 3; iRow++)
+            {
+                for (byte iCol = 0; iCol < 3; iCol++)
+                {
+                    if (!BrainFuckMath.NearlyEqual(m1.m[iRow, iCol], m2.m[iRow, iCol])) return false;
+                }
+            }
+
+            return true;
+        }
+
+        public static bool operator !=(Matrix3x3 m1, Matrix3x3 m2)
+        {
+            for (byte iRow = 0; iRow < 3; iRow++)
+            {
+                for (byte iCol = 0; iCol < 3; iCol++)
+                {
+                    if (!BrainFuckMath.NearlyEqual(m1.m[iRow, iCol], m2.m[iRow, iCol])) return true;
+                }
+            }
+
+            return false;
         }
 
         public override string ToString()

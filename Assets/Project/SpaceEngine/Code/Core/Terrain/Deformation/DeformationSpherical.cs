@@ -246,16 +246,10 @@ namespace SpaceEngine.Core.Terrain.Deformation
 
         protected override void SetScreenUniforms(TerrainNode node, TerrainQuad quad, MaterialPropertyBlock matPropertyBlock)
         {
-            var uz = quad.Center.Normalized();
-            var ux = new Vector3d(0.0, 1.0, 0.0).Cross(uz).Normalized();
-            var uy = uz.Cross(ux);
-
-            var m = new Matrix3x3d(ux.x, uy.x, uz.x, ux.y, uy.y, uz.y, ux.z, uy.z, uz.z);
-
             matPropertyBlock.SetMatrix(uniforms.screenQuadCorners, (localToScreen * quad.DeformedCorners).ToMatrix4x4());
             matPropertyBlock.SetMatrix(uniforms.screenQuadVerticals, (localToScreen * quad.DeformedVerticals).ToMatrix4x4());
             matPropertyBlock.SetVector(uniforms.screenQuadCornerNorms, quad.Lengths.ToVector4());
-            matPropertyBlock.SetMatrix(uniforms.tangentFrameToWorld, (node.TangentFrameToWorld * m).ToMatrix4x4());
+            matPropertyBlock.SetMatrix(uniforms.tangentFrameToWorld, quad.TangentFrameToWorld.ToMatrix4x4());
         }
     }
 }
