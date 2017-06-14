@@ -113,6 +113,27 @@ namespace UnityEngine
         {
             var kSum = Matrix4x4d.identity;
 
+#if (MATICES_UNROLL)
+            kSum.m[0, 0] = m1.m[0, 0] + m2.m[0, 0];
+            kSum.m[0, 1] = m1.m[0, 1] + m2.m[0, 1];
+            kSum.m[0, 2] = m1.m[0, 2] + m2.m[0, 2];
+            kSum.m[0, 3] = m1.m[0, 3] + m2.m[0, 3];
+
+            kSum.m[1, 0] = m1.m[1, 0] + m2.m[1, 0];
+            kSum.m[1, 1] = m1.m[1, 1] + m2.m[1, 1];
+            kSum.m[1, 2] = m1.m[1, 2] + m2.m[1, 2];
+            kSum.m[1, 3] = m1.m[1, 3] + m2.m[1, 3];
+
+            kSum.m[2, 0] = m1.m[2, 0] + m2.m[2, 0];
+            kSum.m[2, 1] = m1.m[2, 1] + m2.m[2, 1];
+            kSum.m[2, 2] = m1.m[2, 2] + m2.m[2, 2];
+            kSum.m[2, 3] = m1.m[2, 3] + m2.m[2, 3];
+
+            kSum.m[3, 0] = m1.m[3, 0] + m2.m[3, 0];
+            kSum.m[3, 1] = m1.m[3, 1] + m2.m[3, 1];
+            kSum.m[3, 2] = m1.m[3, 2] + m2.m[3, 2];
+            kSum.m[3, 3] = m1.m[3, 3] + m2.m[3, 3];
+#else
             for (byte iRow = 0; iRow < 4; iRow++)
             {
                 for (byte iCol = 0; iCol < 4; iCol++)
@@ -120,6 +141,7 @@ namespace UnityEngine
                     kSum.m[iRow, iCol] = m1.m[iRow, iCol] + m2.m[iRow, iCol];
                 }
             }
+#endif
 
             return kSum;
         }
@@ -128,6 +150,27 @@ namespace UnityEngine
         {
             var kSum = Matrix4x4d.identity;
 
+#if (MATICES_UNROLL)
+            kSum.m[0, 0] = m1.m[0, 0] - m2.m[0, 0];
+            kSum.m[0, 1] = m1.m[0, 1] - m2.m[0, 1];
+            kSum.m[0, 2] = m1.m[0, 2] - m2.m[0, 2];
+            kSum.m[0, 3] = m1.m[0, 3] - m2.m[0, 3];
+
+            kSum.m[1, 0] = m1.m[1, 0] - m2.m[1, 0];
+            kSum.m[1, 1] = m1.m[1, 1] - m2.m[1, 1];
+            kSum.m[1, 2] = m1.m[1, 2] - m2.m[1, 2];
+            kSum.m[1, 3] = m1.m[1, 3] - m2.m[1, 3];
+
+            kSum.m[2, 0] = m1.m[2, 0] - m2.m[2, 0];
+            kSum.m[2, 1] = m1.m[2, 1] - m2.m[2, 1];
+            kSum.m[2, 2] = m1.m[2, 2] - m2.m[2, 2];
+            kSum.m[2, 3] = m1.m[2, 3] - m2.m[2, 3];
+
+            kSum.m[3, 0] = m1.m[3, 0] - m2.m[3, 0];
+            kSum.m[3, 1] = m1.m[3, 1] - m2.m[3, 1];
+            kSum.m[3, 2] = m1.m[3, 2] - m2.m[3, 2];
+            kSum.m[3, 3] = m1.m[3, 3] - m2.m[3, 3];
+#else
             for (byte iRow = 0; iRow < 4; iRow++)
             {
                 for (byte iCol = 0; iCol < 4; iCol++)
@@ -135,6 +178,7 @@ namespace UnityEngine
                     kSum.m[iRow, iCol] = m1.m[iRow, iCol] - m2.m[iRow, iCol];
                 }
             }
+#endif
 
             return kSum;
         }
@@ -178,27 +222,24 @@ namespace UnityEngine
 
         public static Vector3d operator *(Matrix4x4d m, Vector3d v)
         {
-            var kProd = Vector3d.zero;
             var fInvW = 1.0 / (m.m[3, 0] * v.x + m.m[3, 1] * v.y + m.m[3, 2] * v.z + m.m[3, 3]);
 
-            kProd.x = (m.m[0, 0] * v.x + m.m[0, 1] * v.y + m.m[0, 2] * v.z + m.m[0, 3]) * fInvW;
-            kProd.y = (m.m[1, 0] * v.x + m.m[1, 1] * v.y + m.m[1, 2] * v.z + m.m[1, 3]) * fInvW;
-            kProd.z = (m.m[2, 0] * v.x + m.m[2, 1] * v.y + m.m[2, 2] * v.z + m.m[2, 3]) * fInvW;
-
-            return kProd;
+            return new Vector3d
+            {
+                x = (m.m[0, 0] * v.x + m.m[0, 1] * v.y + m.m[0, 2] * v.z + m.m[0, 3]) * fInvW,
+                y = (m.m[1, 0] * v.x + m.m[1, 1] * v.y + m.m[1, 2] * v.z + m.m[1, 3]) * fInvW,
+                z = (m.m[2, 0] * v.x + m.m[2, 1] * v.y + m.m[2, 2] * v.z + m.m[2, 3]) * fInvW
+            };
         }
 
         public static Vector4d operator *(Matrix4x4d m, Vector4d v)
         {
-            var kProd = new Vector4d
+            return new Vector4d
             {
                 x = m.m[0, 0] * v.x + m.m[0, 1] * v.y + m.m[0, 2] * v.z + m.m[0, 3] * v.w,
                 y = m.m[1, 0] * v.x + m.m[1, 1] * v.y + m.m[1, 2] * v.z + m.m[1, 3] * v.w,
                 z = m.m[2, 0] * v.x + m.m[2, 1] * v.y + m.m[2, 2] * v.z + m.m[2, 3] * v.w
             };
-
-
-            return kProd;
         }
 
         public static Matrix4x4d operator *(Matrix4x4d m, double s)

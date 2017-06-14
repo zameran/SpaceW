@@ -182,10 +182,7 @@ namespace UnityEngine
         {
             var det = Determinant();
 
-            if (System.Math.Abs(det) <= tolerance)
-            {
-                return false;
-            }
+            if (System.Math.Abs(det) <= tolerance) { return false; }
 
             var invDet = 1.0 / det;
 
