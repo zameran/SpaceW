@@ -85,6 +85,7 @@ namespace SpaceEngine.Core.Bodies
         public bool AtmosphereEnabled = true;
         public bool OceanEnabled = true;
         public bool RingEnabled = true;
+        public bool TerrainEnabled = true;
 
         public int GridResolution = 25;
 
@@ -273,19 +274,22 @@ namespace SpaceEngine.Core.Bodies
             if (GodManager.Instance.ActiveBody == this)
                 GodManager.Instance.UpdateControllerWrapper();
 
-            foreach (var tileSampler in TileSamplers)
+            for (int i = 0; i < TileSamplers.Count; i++)
             {
-                if (Helper.Enabled(tileSampler))
+                if (Helper.Enabled(TileSamplers[i]))
                 {
-                    tileSampler.UpdateSampler();
+                    TileSamplers[i].UpdateSampler();
                 }
             }
 
-            foreach (var terrainNode in TerrainNodes)
+            if (TerrainEnabled)
             {
-                if (Helper.Enabled(terrainNode))
+                for (int i = 0; i < TerrainNodes.Count; i++)
                 {
-                    DrawTerrain(terrainNode);
+                    if (Helper.Enabled(TerrainNodes[i]))
+                    {
+                        DrawTerrain(TerrainNodes[i]);
+                    }
                 }
             }
 
@@ -308,6 +312,19 @@ namespace SpaceEngine.Core.Bodies
         {
             MPB.Clear();
 
+            // TODO : How to set these values per quad avoiding material property block and material uniforms?
+            // NOTE : So, only these uniforms are variable per quad, but i don't know how to vary avoiding mpb and material uniforms, maybe instancing?
+            //_Elevation_Tile
+            //_Ortho_Tile
+            //_Color_Tile
+            //_Normals_Tile
+            //_Deform_Offset
+            //_Deform_Camera
+            //_Deform_ScreenQuadCornerNorms
+            //_Deform_ScreenQuadCorners
+            //_Deform_ScreenQuadVericals
+            //_Deform_TangentFrameToWorld
+
             InitSetUniforms();
         }
 
@@ -321,11 +338,10 @@ namespace SpaceEngine.Core.Bodies
         private void DrawTerrain(TerrainNode node)
         {
             // Get all the samplers attached to the terrain node. The samples contain the data need to draw the quad
-            var allSamplers = node.transform.GetComponentsInChildren<TileSampler>();
-            var samplers = allSamplers.Where(sampler => sampler.enabled && sampler.StoreLeaf).ToList();
+            var samplers = node.Samplers.Where(sampler => sampler.enabled && sampler.StoreLeaf).ToList();
 
+            // So, if doesn't have any samplers - do anything...
             if (samplers.Count == 0) return;
-            if (samplers.Count > 255) { Debug.Log(string.Format("Body: Toomuch samplers! {0}", samplers.Count)); return; }
 
             // Find all the quads in the terrain node that need to be drawn
             node.FindDrawableQuads(node.TerrainQuadRoot, samplers);

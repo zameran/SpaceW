@@ -6,6 +6,7 @@ using SpaceEngine.Core.Tile.Samplers;
 
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 using UnityEngine;
 
@@ -142,10 +143,16 @@ namespace SpaceEngine.Core.Terrain
         public Matrix4x4d FaceToLocal { get; private set; }
 
         /// <summary>
+        /// Tangent frame to world matrix.
+        /// </summary>
+        public Matrix3x3d TangentFrameToWorld { get; private set; }
+
+        /// <summary>
         /// Rasterized horizon elevation angle for each azimuth angle.
         /// </summary>
         float[] Horizon = new float[HORIZON_SIZE];
 
+        public List<TileSampler> Samplers = new List<TileSampler>(255);
         public TileSamplerOrder SamplersOrder;
 
         #region Node
@@ -190,9 +197,15 @@ namespace SpaceEngine.Core.Terrain
                 Deformation = new DeformationBase();
             }
 
+            TangentFrameToWorld = new Matrix3x3d(LocalToWorld.m[0, 0], LocalToWorld.m[0, 1], LocalToWorld.m[0, 2],
+                                                 LocalToWorld.m[1, 0], LocalToWorld.m[1, 1], LocalToWorld.m[1, 2],
+                                                 LocalToWorld.m[2, 0], LocalToWorld.m[2, 1], LocalToWorld.m[2, 2]);
+
             CreateTerrainQuadRoot(ParentBody.Size);
 
-            SamplersOrder = new TileSamplerOrder(GetComponentsInChildren<TileSampler>());
+            CollectSamplers();
+
+            SamplersOrder = new TileSamplerOrder(Samplers);
 
             var producers = GetComponentsInChildren<TileProducer>();
             var lastProducer = producers[producers.Length - 1];
@@ -217,6 +230,10 @@ namespace SpaceEngine.Core.Terrain
             {
                 LocalToWorld = FaceToLocal;
             }
+
+            TangentFrameToWorld = new Matrix3x3d(LocalToWorld.m[0, 0], LocalToWorld.m[0, 1], LocalToWorld.m[0, 2],
+                                                 LocalToWorld.m[1, 0], LocalToWorld.m[1, 1], LocalToWorld.m[1, 2],
+                                                 LocalToWorld.m[2, 0], LocalToWorld.m[2, 1], LocalToWorld.m[2, 2]);
 
             var localToCamera = GodManager.Instance.WorldToCamera * LocalToWorld;
             var invLocalToCamera = localToCamera.Inverse();
@@ -402,9 +419,11 @@ namespace SpaceEngine.Core.Terrain
             quad.Drawable = true;
         }
 
-        private void DrawNode(Mesh mesh, MaterialPropertyBlock mpb)
+        private void DrawMesh(TerrainQuad quad, Mesh mesh, MaterialPropertyBlock mpb)
         {
-            // TODO : use mesh of appropriate resolution for non-leaf quads
+            // Set the uniforms unique to each quad
+            SetPerQuadUniforms(quad, mpb);
+
             Graphics.DrawMesh(mesh, Matrix4x4.identity, TerrainMaterial, 0, CameraHelper.Main(), 0, mpb);
         }
 
@@ -415,25 +434,20 @@ namespace SpaceEngine.Core.Terrain
 
             if (quad.IsLeaf)
             {
-                //ReSetMPB();
-
                 for (byte i = 0; i < samplers.Count; ++i)
                 {
                     // Set the unifroms needed to draw the texture for this sampler
                     samplers[i].SetTile(mpb, quad.Level, quad.Tx, quad.Ty);
                 }
 
-                // Set the uniforms unique to each quad
-                SetPerQuadUniforms(quad, mpb);
-
-                DrawNode(mesh, mpb);
+                DrawMesh(quad, mesh, mpb);
             }
             else
             {
                 // Draw quads in a order based on distance to camera
                 var done = 0;
 
-                var order = quad.CalculateOrder(LocalCameraPosition.x, LocalCameraPosition.y, quad.Ox + quad.Length / 2.0, quad.Oy + quad.Length / 2.0);
+                var order = quad.CalculateOrder(LocalCameraPosition.x, LocalCameraPosition.y, quad.Ox + quad.LengthHalf, quad.Oy + quad.LengthHalf);
 
                 for (byte i = 0; i < 4; ++i)
                 {
@@ -454,39 +468,45 @@ namespace SpaceEngine.Core.Terrain
                     // If the a leaf quad needs to be drawn but its tiles are not ready then this will draw the next parent tile instead that is ready.
                     // Because of the current set up all tiles always have there tasks run on the frame they are generated so this section of code is never reached.
 
-                    //ReSetMPB();
-
                     for (byte i = 0; i < samplers.Count; ++i)
                     {
                         // Set the unifroms needed to draw the texture for this sampler
                         samplers[i].SetTile(mpb, quad.Level, quad.Tx, quad.Ty);
                     }
 
-                    // Set the uniforms unique to each quad
-                    SetPerQuadUniforms(quad, mpb);
-
-                    DrawNode(mesh, mpb);
+                    DrawMesh(quad, mesh, mpb);
                 }
             }
         }
 
         #endregion
 
+        /// <summary>
+        /// This mehod will collect all child <see cref="TileSampler"/>s in to <see cref="Samplers"/> collection.
+        /// Don't forget to call this method after Add/Remove operations on <see cref="TileSampler"/>.
+        /// </summary>
+        public virtual void CollectSamplers()
+        {
+            Samplers.Clear();
+
+            var samplers = GetComponentsInChildren<TileSampler>().ToList();
+
+            if (samplers.Count > 255) { Debug.Log(string.Format("TerrainNode: Toomuch samplers! {0}", samplers.Count)); return; }
+
+            Samplers = samplers;
+        }
+
         private void CreateTerrainQuadRoot(float size)
         {
-            if (TerrainQuadRoot != null) { Debug.Log("Hey! You're gonna create quad root, but it's already exist!"); return; }
+            if (TerrainQuadRoot != null) { Debug.Log("TerrainNode: Hey! You're gonna create quad root, but it's already exist!"); return; }
 
             TerrainQuadRoot = new TerrainQuad(this, null, 0, 0, -size, -size, 2.0 * size, ZMin, ZMax);
         }
 
         public void SetPerQuadUniforms(TerrainQuad quad, MaterialPropertyBlock matPropertyBlock)
         {
+            // TODO : BOTTLENECK!
             Deformation.SetUniforms(this, quad, matPropertyBlock);
-        }
-
-        public Frustum.VISIBILITY GetVisibility(Box3d localBox)
-        {
-            return Deformation.GetVisibility(this, localBox);
         }
 
         /// <summary>
@@ -617,7 +637,7 @@ namespace SpaceEngine.Core.Terrain
         /// </summary>
         /// <param name="localBox"></param>
         /// <returns>Returns the distance between the current viewer position and the given bounding box.</returns>
-        public double GetCameraDist(Box3d localBox)
+        public double GetCameraDistance(Box3d localBox)
         {
             return Math.Max(Math.Abs(LocalCameraPosition.z - localBox.zmax) / DistanceFactor,
                    Math.Max(Math.Min(Math.Abs(LocalCameraPosition.x - localBox.xmin), Math.Abs(LocalCameraPosition.x - localBox.xmax)),

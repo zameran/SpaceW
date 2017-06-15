@@ -7,7 +7,6 @@ using SpaceEngine.Core.Patterns.Strategy.Uniformed;
 
 using System;
 using System.Collections;
-
 using UnityEngine;
 
 namespace SpaceEngine.Ocean
@@ -63,7 +62,10 @@ namespace SpaceEngine.Ocean
         /// </summary>
         public bool DrawOcean { get; protected set; }
 
-        public Vector3d Origin { get { return ParentBody != null ? ParentBody.Origin : transform.position; } } // TODO : ORIGIN
+        public Vector3d Origin { get { return ParentBody != null ? ParentBody.Origin : transform.position; } }
+
+        protected const string FFT_KEYWORD = "OCEAN_FFT";
+        protected const string WHITECAPS_KEYWORD = "OCEAN_WHITECAPS";
 
         /// <summary>
         /// Concrete classes must provide a function that returns the variance of the waves need for the BRDF rendering of waves.
@@ -83,6 +85,8 @@ namespace SpaceEngine.Ocean
 
         protected override void InitNode()
         {
+            InitOceanNode();
+
             OceanMaterial = MaterialHelper.CreateTemp(OceanShader, "Ocean");
 
             ParentBody.Atmosphere.InitUniforms(OceanMaterial);
@@ -122,6 +126,8 @@ namespace SpaceEngine.Ocean
 
         protected override void UpdateNode()
         {
+            UpdateOceanNode();
+
             OceanMaterial.renderQueue = (int)RenderQueue + RenderQueueOffset;
 
             // Calculates the required data for the projected grid
@@ -350,7 +356,7 @@ namespace SpaceEngine.Ocean
 
         #region IRenderable
 
-        public void Render(int layer = 0)
+        public virtual void Render(int layer = 0)
         {
             if (DrawOcean == false) return;
 

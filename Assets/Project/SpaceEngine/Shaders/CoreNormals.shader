@@ -62,8 +62,6 @@
 		float GetHeight(sampler2D elevationSampler, float2 uv)
 		{
 			return tex2D(elevationSampler, uv).x;
-			//return TEX2D(elevationSampler, uv, _TileSD.x).x;
-			//return TEX2D_GOOD(elevationSampler, uv, _TileSD.x).x;
 		}
 
 		float3 CalculateNormal(float2 uv)

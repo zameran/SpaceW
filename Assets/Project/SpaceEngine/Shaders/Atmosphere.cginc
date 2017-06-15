@@ -64,6 +64,8 @@
  * Modified by Denis Ovchinnikov 2015-2017
  */
 
+#define ATMOSPHERE
+
 #define OPTIMIZE
 #define ATMO_FULL
 #define HORIZON_HACK
@@ -97,7 +99,7 @@ uniform float3 _Globals_Origin;
 
 // ----------------------------------------------------------------------------
 // PHYSICAL MODEL PARAMETERS
-// ---------------------------------------------------------------------------
+// ----------------------------------------------------------------------------
 
 uniform float fade;
 uniform float density;
@@ -144,7 +146,9 @@ uniform sampler2D _Sky_Irradiance;
 uniform sampler3D _Sky_Inscatter;
 
 uniform float4x4 _Sky_ShineOccluders_1;
+uniform float4x4 _Sky_ShineOccluders_2;
 uniform float4x4 _Sky_ShineColors_1;
+uniform float4x4 _Sky_ShineParameters_1;
 uniform float4x4 _Sun_Positions_1;
 uniform float4x4 _Sun_WorldDirections_1;
 
@@ -534,16 +538,150 @@ float3 SkyRadiance(float3 camera, float3 viewdir, float3 sundir, out float3 exti
 	return SkyRadiance(camera, viewdir, sun.WorldDirection, extinction, shaftWidth);
 }
 
-float3 SkyShineRadiance(float3 camera, float3 viewdir, float4x4 _Sky_ShineOccluders_1, float4x4 _Sky_ShineColors_1)
+float3 SkyRadianceSimple(float3 camera, float3 viewdir, float3 sundir)
+{
+	float3 result = float3(0, 0, 0);
+	
+	Rt = Rg + (Rt - Rg) * 1.0;
+	
+	viewdir = normalize(viewdir);
+
+	float r = length(camera);
+	float rMu = dot(camera, viewdir);
+	float deltaSq = SQRT(rMu * rMu - r * r + Rt * Rt, 0.000001);
+	float din = max(-rMu - deltaSq, 0.0);
+
+	if (din > 0.0)
+	{
+		camera += din * viewdir;
+		rMu += din;
+		r = Rt;
+	}
+	
+	float nu = dot(viewdir, sundir);
+	float muS = dot(camera, sundir) / r;
+	
+	float4 inScatter = Texture4D(_Sky_Inscatter, r, rMu / r, muS, nu);
+	
+	if (r <= Rt) 
+	{
+		float3 inScatterM = GetMie(inScatter);
+		float phase = PhaseFunctionR(nu);
+		float phaseM = PhaseFunctionM(nu);
+
+		result = inScatter.rgb * phase + inScatterM * phaseM;
+	}    
+	else
+	{
+		result = float3(0, 0, 0);
+	} 
+	
+	return result * _Sun_Intensity;
+}
+
+float3 InScatteringShine(float3 camera, float3 _point, out float3 extinction, float3 sunDir, float shaftWidth, float scaleCoeff, float irradianceFactor) 
+{
+	float3 result = float3(0, 0, 0);
+
+	extinction = float3(1, 1, 1);
+
+	float3 viewdir = _point - camera;
+	float d = length(viewdir) * scaleCoeff;
+
+	viewdir = viewdir / d;
+
+	Rt = Rg + (Rt - Rg) * 1.0;
+	viewdir = normalize(viewdir);
+
+	float r = length(camera) * scaleCoeff;
+
+	if (r < 0.9 * Rg) 
+	{
+		camera.y += Rg;
+		_point.y += Rg;
+		r = length(camera) * scaleCoeff;
+	}
+
+	float rMu = dot(camera, viewdir);
+	float mu = rMu / r;
+	float r0 = r;
+	float mu0 = mu;
+	float muExtinction=mu;
+
+	_point -= viewdir * clamp(shaftWidth, 0.0, d);
+
+	float deltaSq = SQRT(rMu * rMu - r * r + Rt * Rt, 0.000001);
+
+	float din = max(-rMu - deltaSq, 0.0);
+
+	if (din > 0.0 && din < d)
+	{
+		camera += din * viewdir;
+		rMu += din;
+		mu = rMu / Rt;
+		r = Rt;
+		d -= din;
+	}
+	
+	if (r <= Rt)
+	{ 
+		float nu = dot(viewdir, sunDir);
+		float muS = dot(camera, sunDir) / r;
+		float4 inScatter;
+
+		if (r < Rg + 1600.0) 
+		{
+			float f = (Rg + 1600.0) / r;
+
+			r = r * f;
+			rMu = rMu * f;
+			_point = _point * f;
+		}
+
+		float r1 = length(_point);
+		float rMu1 = dot(_point, viewdir);
+		float mu1 = rMu1 / r1;
+		float muS1 = dot(_point, sunDir) / r1;
+
+		extinction = min(AnalyticTransmittance(r, mu, d), 1.0);
+
+		float4 inScatter0 = Texture4D(_Sky_Inscatter, r, mu, muS, nu);
+		float4 inScatter1 = Texture4D(_Sky_Inscatter, r1, mu1, muS1, nu);
+		inScatter = max(inScatter0 - inScatter1 * extinction.rgbr, 0.0);
+
+		inScatter.w *= smoothstep(0.00, 0.02, muS);
+
+		float3 inScatterM = GetMie(inScatter);
+		float phase = PhaseFunctionR(nu);
+		float phaseM = PhaseFunctionM(nu);
+
+		result = inScatter.rgb * phase + inScatterM * phaseM;
+	}
+	else
+	{
+		result = float3(0, 0, 0);
+	}
+
+	return result * _Sun_Intensity;
+}
+
+float3 SkyShineRadiance(float3 worldPosition, float3 viewdir)
 {
 	float3 inscatter = 0;
+	float3 occluderDirection = 0;
+	float3 occluderOppositeDirection = 0;
+	float intensity = 1;
 
 	for (int i = 0; i < 4; ++i)
 	{
 		if (_Sky_ShineColors_1[i].w <= 0) break;
 
-		inscatter += SkyRadiance(camera, viewdir, _Sky_ShineOccluders_1[i].xyz, 0.0);
-		inscatter *= _Sky_ShineColors_1[i].xyz * _Sky_ShineColors_1[i].w;
+		occluderDirection = normalize(_Sky_ShineOccluders_1[i].xyz - worldPosition);			// Occluder direction with origin offset...
+		occluderOppositeDirection = _Sky_ShineOccluders_2[i].xyz;								// Occluder opposite direction with origin offset...
+		intensity = 0.57 * max((dot(occluderDirection, occluderOppositeDirection) - _Sky_ShineParameters_1[i].xyz), 0);
+
+		inscatter += SkyRadiance(worldPosition, viewdir, _Sky_ShineOccluders_1[i].xyz, 0.0);
+		inscatter *= _Sky_ShineColors_1[i].xyz * _Sky_ShineColors_1[i].w * intensity;
 	}
 
 	return inscatter;

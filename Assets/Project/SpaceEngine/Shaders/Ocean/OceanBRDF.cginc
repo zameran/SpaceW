@@ -57,8 +57,12 @@
  * Modified by Denis Ovchinnikov 2015-2017
  */
 
-#if !defined (M_PI)
-#define M_PI 3.141592657
+#if !defined (ATMOSPHERE)
+#include "../Atmosphere.cginc"
+#endif
+
+#if !defined (MATH)
+#include "../Math.cginc"
 #endif
 
 #define OCEAN_ONLY_SPHERICAL
@@ -159,13 +163,64 @@ float WhitecapCoverage(float epsilon, float mu, float sigma2)
 	return 0.5 * erf((0.5 * sqrt(2.0) * (epsilon - mu) * (1.0 / sqrt(sigma2)))) + 0.5;
 }
 
+#define OCEAN_SKY_REFLECTIONS
+
+#ifdef OCEAN_SKY_REFLECTIONS
+
+float3 ReflectedSky(float3 V, float3 N, float3 sunDir, float3 earthP) 
+{
+	float3 result = float3(0.0, 0.0, 0.0);
+	float3 reflectedAngle = reflect(-V, N);
+
+	reflectedAngle.z = max(reflectedAngle.z, 0.0);	// Hack to avoid unsightly black pixels from downwards reflections
+	result = SkyRadianceSimple(earthP, reflectedAngle, sunDir);
+
+	return result;
+}
+
+#endif
+
+float3 OceanRadianceWithoutSkyReflection(float3 L, float3 V, float3 N, float sigmaSq, float3 sunL, float3 skyE, float3 seaColor) 
+{
+	float fresnel = MeanFresnel(V, N, sigmaSq);
+
+	float3 Lsky = skyE * fresnel / M_PI;
+	float3 Lsun = ReflectedSunRadiance(L, V, N, sigmaSq) * sunL;
+	float3 Lsea = (1.0 - fresnel) * seaColor * skyE / M_PI;
+
+	return Lsun + Lsky + Lsea;
+}
+
+float3 OceanRadianceWithSkyReflection(float3 L, float3 V, float3 N, float sigmaSq, float3 sunL, float3 skyE, float3 seaColor, float3 earthP) 
+{
+	float fresnel = MeanFresnel(V, N, sigmaSq);
+
+	float3 Lsky = fresnel * ReflectedSky(V, N, L, earthP);
+	float3 Lsun = ReflectedSunRadiance(L, V, N, sigmaSq) * sunL;
+	float3 Lsea = 0.98 * (1.0 - fresnel) * seaColor * (skyE / M_PI);
+
+	return Lsun + Lsky + Lsea;
+}
+
+float3 OceanRadiance(float3 L, float3 V, float3 N, float sigmaSq, float3 sunL, float3 skyE, float3 seaColor, float3 earthP) 
+{
+	#ifdef OCEAN_SKY_REFLECTIONS
+		return OceanRadianceWithSkyReflection(L, V, N, sigmaSq, sunL, skyE, seaColor, earthP);
+	#else
+		return OceanRadianceWithoutSkyReflection(L, V, N, sigmaSq, sunL, skyE, seaColor);
+	#endif
+
+	return 0;
+}
+
+// [Obsolete("...")]
 float3 OceanRadiance(float3 L, float3 V, float3 N, float sigmaSq, float3 sunL, float3 skyE, float3 seaColor) 
 {
-	float F = MeanFresnel(V, N, sigmaSq);
+	float fresnel = MeanFresnel(V, N, sigmaSq);
 
+	float3 Lsky = skyE * fresnel / M_PI;
 	float3 Lsun = ReflectedSunRadiance(L, V, N, sigmaSq) * sunL;
-	float3 Lsky = skyE * F / M_PI;
-	float3 Lsea = (1.0 - F) * seaColor * skyE / M_PI;
+	float3 Lsea = (1.0 - fresnel) * seaColor * skyE / M_PI;
 
 	return Lsun + Lsky + Lsea;
 }

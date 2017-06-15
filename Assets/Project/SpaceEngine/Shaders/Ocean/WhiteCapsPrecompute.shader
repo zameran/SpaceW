@@ -16,8 +16,16 @@ Shader "SpaceEngine/Ocean/WhiteCapsPrecompute"
 			#pragma vertex vert
 			#pragma fragment frag
 			
-			uniform sampler2D _Map5, _Map6, _Map7;
+			uniform sampler2D _Map5;
+			uniform sampler2D _Map6;
+			uniform sampler2D _Map7;
 			uniform float4 _Choppyness;
+
+			struct a2v
+			{
+				float4 vertex : POSITION;
+				float2 texcoord : TEXCOORD0;
+			};
 
 			struct v2f 
 			{
@@ -31,21 +39,17 @@ Shader "SpaceEngine/Ocean/WhiteCapsPrecompute"
 				float4 col1 : COLOR1;
 			};
 
-			v2f vert(appdata_base v)
+			void vert(in a2v i, out v2f o)
 			{
-				v2f OUT;
-
-				OUT.pos = mul(UNITY_MATRIX_MVP, v.vertex);
-				OUT.uv = v.texcoord;
-
-				return OUT;
+				o.pos = UnityObjectToClipPos(i.vertex);
+				o.uv = i.texcoord;
 			}
 			
-			f2a frag(v2f IN)
+			void frag(in v2f IN, out f2a OUT)
 			{ 
 				float2 uv = IN.uv;
 				
-				// store Jacobian coeff value and variance
+				// Store Jacobian coeff value and variance
 				float4 Jxx = _Choppyness * tex2D(_Map5, uv);
 				float4 Jyy = _Choppyness * tex2D(_Map6, uv);
 				float4 Jxy = _Choppyness * _Choppyness * tex2D(_Map7, uv);
@@ -54,12 +58,8 @@ Shader "SpaceEngine/Ocean/WhiteCapsPrecompute"
 				float4 res = 0.25 + Jxx + Jyy + _Choppyness * Jxx * Jyy - Jxy * Jxy;
 				float4 res2 = res*res;
 				
-				f2a OUT;
-				
 				OUT.col0 = float4(res.x, res2.x, res.y, res2.y);
 				OUT.col1 = float4(res.z, res2.z, res.w, res2.w);
-				
-				return OUT;
 			}
 			
 			ENDCG

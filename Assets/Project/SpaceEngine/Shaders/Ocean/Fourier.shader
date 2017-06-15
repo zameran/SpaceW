@@ -1,14 +1,21 @@
 Shader "Math/Fourier" 
 {
 	CGINCLUDE
-	
-	#include "UnityCG.cginc"
 
 	#include "../Math.cginc"
 			
-	uniform sampler2D _ReadBuffer0, _ReadBuffer1, _ReadBuffer2;
+	uniform sampler2D _ReadBuffer0;
+	uniform sampler2D _ReadBuffer1;
+	uniform sampler2D _ReadBuffer2;
 	uniform sampler2D _ButterFlyLookUp;
+
 	uniform float _Size;
+
+	struct a2v
+	{
+		float4 vertex : POSITION;
+		float2 texcoord : TEXCOORD0;
+	};
 
 	struct v2f 
 	{
@@ -33,16 +40,6 @@ Shader "Math/Fourier"
 		float4 col1 : COLOR1;
 		float4 col2 : COLOR2;
 	};
-
-	v2f vert(appdata_base v)
-	{
-		v2f OUT;
-
-		OUT.pos = mul(UNITY_MATRIX_MVP, v.vertex);
-		OUT.uv = v.texcoord;
-
-		return OUT;
-	}
 	
 	//Performs two FFTs on two complex numbers packed in a vector4
 	float4 FFT(float2 w, float4 input1, float4 input2) 
@@ -55,109 +52,81 @@ Shader "Math/Fourier"
 		return input1 + float4(rx,ry,rz,rw);
 	}
 
-	float2 CalculateW(float4 lookUp)
+	inline float2 CalculateW(float4 lookUp)
 	{
 		return float2(cos(M_PI2 * lookUp.z / _Size), sin(M_PI2 * lookUp.z / _Size));
 	}
-	
-	f2a_1 fragX_1(v2f IN)
+
+	inline float4 CalculateLookUp(float uv, out float2 w)
 	{
-		float4 lookUp = tex2D(_ButterFlyLookUp, float2(IN.uv.x, 0));
+		float4 lookUp = tex2D(_ButterFlyLookUp, float2(uv, 0));
 		
 		lookUp.xyz *= 255.0;
 		lookUp.xy /= _Size - 1.0;
 		
-		float2 w = CalculateW(lookUp);
+		w = CalculateW(lookUp);
 		
 		if(lookUp.w > 0.5) w *= -1.0;
-		
-		f2a_1 OUT;
+
+		return lookUp;
+	}
+	
+	void vert(in a2v i, out v2f o)
+	{
+		o.pos = UnityObjectToClipPos(i.vertex);
+		o.uv = i.texcoord;
+	}
+
+	void fragX_1(in v2f IN, out f2a_1 OUT)
+	{
+		float2 w = 0;
+		float4 lookUp = CalculateLookUp(IN.uv.x, w);
 		
 		float2 uv1 = float2(lookUp.x, IN.uv.y);
 		float2 uv2 = float2(lookUp.y, IN.uv.y);
 		
 		OUT.col0 = FFT(w, tex2D(_ReadBuffer0, uv1), tex2D(_ReadBuffer0, uv2));
-
-		return OUT;
 	}
 	
-	f2a_1 fragY_1(v2f IN)
+	void fragY_1(in v2f IN, out f2a_1 OUT)
 	{
-		float4 lookUp = tex2D(_ButterFlyLookUp, float2(IN.uv.y, 0));
-		
-		lookUp.xyz *= 255.0;
-		lookUp.xy /= _Size - 1.0;
-		
-		float2 w = CalculateW(lookUp);
-		
-		if(lookUp.w > 0.5) w *= -1.0;
-		
-		f2a_1 OUT;
+		float2 w = 0;
+		float4 lookUp = CalculateLookUp(IN.uv.y, w);
 		
 		float2 uv1 = float2(IN.uv.x, lookUp.x);
 		float2 uv2 = float2(IN.uv.x, lookUp.y);
 		
 		OUT.col0 = FFT(w, tex2D(_ReadBuffer0, uv1), tex2D(_ReadBuffer0, uv2));
-
-		return OUT;
 	}
 	
-	f2a_2 fragX_2(v2f IN)
+	void fragX_2(in v2f IN, out f2a_2 OUT)
 	{
-		float4 lookUp = tex2D(_ButterFlyLookUp, float2(IN.uv.x, 0));
-		
-		lookUp.xyz *= 255.0;
-		lookUp.xy /= _Size - 1.0;
-		
-		float2 w = CalculateW(lookUp);
-		
-		if(lookUp.w > 0.5) w *= -1.0;
-		
-		f2a_2 OUT;
+		float2 w = 0;
+		float4 lookUp = CalculateLookUp(IN.uv.x, w);
 		
 		float2 uv1 = float2(lookUp.x, IN.uv.y);
 		float2 uv2 = float2(lookUp.y, IN.uv.y);
 		
 		OUT.col0 = FFT(w, tex2D(_ReadBuffer0, uv1), tex2D(_ReadBuffer0, uv2));
 		OUT.col1 = FFT(w, tex2D(_ReadBuffer1, uv1), tex2D(_ReadBuffer1, uv2));
-
-		return OUT;
 	}
 	
-	f2a_2 fragY_2(v2f IN)
+	void fragY_2(in v2f IN, out f2a_2 OUT)
 	{
-		float4 lookUp = tex2D(_ButterFlyLookUp, float2(IN.uv.y, 0));
-		
-		lookUp.xyz *= 255.0;
-		lookUp.xy /= _Size - 1.0;
-		
-		float2 w = CalculateW(lookUp);
-		
-		if(lookUp.w > 0.5) w *= -1.0;
-		
-		f2a_2 OUT;
+		float2 w = 0;
+		float4 lookUp = CalculateLookUp(IN.uv.y, w);
 		
 		float2 uv1 = float2(IN.uv.x, lookUp.x);
 		float2 uv2 = float2(IN.uv.x, lookUp.y);
 		
 		OUT.col0 = FFT(w, tex2D(_ReadBuffer0, uv1), tex2D(_ReadBuffer0, uv2));
 		OUT.col1 = FFT(w, tex2D(_ReadBuffer1, uv1), tex2D(_ReadBuffer1, uv2));
-
-		return OUT;
 	}
 	
-	f2a_3 fragX_3(v2f IN)
+	void fragX_3(in v2f IN, out f2a_3 OUT)
 	{
-		float4 lookUp = tex2D(_ButterFlyLookUp, float2(IN.uv.x, 0));
-		
-		lookUp.xyz *= 255.0;
-		lookUp.xy /= _Size - 1.0;
-		
-		float2 w = CalculateW(lookUp);
-		
-		if(lookUp.w > 0.5) w *= -1.0;
-		
-		f2a_3 OUT;
+		float2 w = 0;
+		float4 lookUp = CalculateLookUp(IN.uv.x, w);
 		
 		float2 uv1 = float2(lookUp.x, IN.uv.y);
 		float2 uv2 = float2(lookUp.y, IN.uv.y);
@@ -165,22 +134,12 @@ Shader "Math/Fourier"
 		OUT.col0 = FFT(w, tex2D(_ReadBuffer0, uv1), tex2D(_ReadBuffer0, uv2));
 		OUT.col1 = FFT(w, tex2D(_ReadBuffer1, uv1), tex2D(_ReadBuffer1, uv2));
 		OUT.col2 = FFT(w, tex2D(_ReadBuffer2, uv1), tex2D(_ReadBuffer2, uv2));
-		
-		return OUT;
 	}
 	
-	f2a_3 fragY_3(v2f IN)
+	void fragY_3(in v2f IN, out f2a_3 OUT)
 	{
-		float4 lookUp = tex2D(_ButterFlyLookUp, float2(IN.uv.y, 0));
-		
-		lookUp.xyz *= 255.0;
-		lookUp.xy /= _Size - 1.0;
-		
-		float2 w = CalculateW(lookUp);
-		
-		if(lookUp.w > 0.5) w *= -1.0;
-		
-		f2a_3 OUT;
+		float2 w = 0;
+		float4 lookUp = CalculateLookUp(IN.uv.y, w);
 		
 		float2 uv1 = float2(IN.uv.x, lookUp.x);
 		float2 uv2 = float2(IN.uv.x, lookUp.y);
@@ -188,8 +147,6 @@ Shader "Math/Fourier"
 		OUT.col0 = FFT(w, tex2D(_ReadBuffer0, uv1), tex2D(_ReadBuffer0, uv2));
 		OUT.col1 = FFT(w, tex2D(_ReadBuffer1, uv1), tex2D(_ReadBuffer1, uv2));
 		OUT.col2 = FFT(w, tex2D(_ReadBuffer2, uv1), tex2D(_ReadBuffer2, uv2));
-
-		return OUT;
 	}
 	
 	ENDCG

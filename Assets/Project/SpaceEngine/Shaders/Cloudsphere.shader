@@ -66,7 +66,7 @@ Shader "SpaceEngine/Atmosphere/Cloudsphere"
 
 		void main_Vertex(a2v i, out v2f o)
 		{
-			o.vertex0 = mul(UNITY_MATRIX_MVP, i.vertex);
+			o.vertex0 = UnityObjectToClipPos(i.vertex);
 			o.vertex1 = i.vertex;
 			o.normal = i.normal;
 			o.uv = i.normal;

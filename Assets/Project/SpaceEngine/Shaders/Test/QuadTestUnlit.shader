@@ -1,4 +1,7 @@
-﻿// Procedural planet generator.
+﻿// Upgrade NOTE: replaced 'UNITY_INSTANCE_ID' with 'UNITY_VERTEX_INPUT_INSTANCE_ID'
+// Upgrade NOTE: replaced 'mul(UNITY_MATRIX_MVP,*)' with 'UnityObjectToClipPos(*)'
+
+// Procedural planet generator.
 // 
 // Copyright (C) 2015-2017 Denis Ovchinnikov [zameran] 
 // All rights reserved.
@@ -203,7 +206,7 @@ Shader "SpaceEngine/Test/QuadTestUnlit"
 				#endif
 
 				#ifdef SHINE_ON
-					inscatter += float4(SkyShineRadiance(p, d, _Sky_ShineOccluders_1, _Sky_ShineColors_1), 0.0);
+					inscatter += float4(SkyShineRadiance(p, d), 0.0);
 				#endif
 
 				float3 groundColor = 1.5 * RGB2Reflectance(terrainColor).rgb * (sunL * max(cTheta, 0) + skyE) / M_PI;
@@ -318,7 +321,7 @@ Shader "SpaceEngine/Test/QuadTestUnlit"
 
 				o.uv0 = v.texcoord;
 				o.normal0 =  mul(_TRS, v.normal);
-				o.vertex0 = mul(UNITY_MATRIX_MVP, v.vertex);
+				o.vertex0 = UnityObjectToClipPos(v.vertex);
 				o.vertex1 = mul(unity_ObjectToWorld, v.vertex); // TODO : Apply Origin vector. //NOTE : Bug here!!!!!111
 				o.vertex2 = v.vertex;
 				o.vertex3 = cubePosition;
@@ -344,8 +347,8 @@ Shader "SpaceEngine/Test/QuadTestUnlit"
 				float3 P = Input[0].vertex2.xyz;
 				float3 N = Input[0].normal0.xyz;
 
-				float4 PositionA = mul(UNITY_MATRIX_MVP, float4(P, 1.0));
-				float4 PositionB = mul(UNITY_MATRIX_MVP, float4(P + N * 1000, 1.0));
+				float4 PositionA = UnityObjectToClipPos(float4(P, 1.0));
+				float4 PositionB = UnityObjectToClipPos(float4(P + N * 1000, 1.0));
 
 				v2fg a = Input[0];
 				v2fg b = Input[0];
@@ -414,93 +417,5 @@ Shader "SpaceEngine/Test/QuadTestUnlit"
 		triplanar += (triplanarVector.z * qt3);
 		*/
 
-		// TODO : Shadow pass...
-		Pass
-		{
-			Name "ShadowCaster"
-			Tags
-			{ 
-				"LightMode" = "ShadowCaster" 
-				"IgnoreProjector" = "True"
-			}
-
-			ZWrite On
-
-			CGPROGRAM
-			#pragma target 5.0
-
-			#pragma shader_feature _ALPHAPREMULTIPLY_ON
-			#pragma multi_compile_shadowcaster
-
-			#pragma vertex vertShadowCasterModified
-			#pragma fragment fragShadowCasterModified
-
-			#include "UnityStandardShadow.cginc"
-			#include "../SpaceStuff.cginc"
-
-			uniform StructuredBuffer<OutputStruct> data;
-			uniform StructuredBuffer<QuadGenerationConstants> quadGenerationConstants;
-
-			struct VertexInputModified
-			{
-				float4 vertex	: POSITION;
-				float3 normal	: NORMAL;
-				float2 uv0		: TEXCOORD0;
-				uint id : SV_VertexID;
-				UNITY_INSTANCE_ID
-			};
-
-			void vertShadowCasterModified (VertexInputModified v,
-				#ifdef UNITY_STANDARD_USE_SHADOW_OUTPUT_STRUCT
-				out VertexOutputShadowCaster o,
-				#endif
-				out float4 opos : SV_POSITION)
-			{
-				float3 patchCenter = data[v.id].patchCenter;
-				float4 position = data[v.id].position;
-
-				position.w = 1.0;
-				position.xyz += patchCenter;
-
-				v.vertex = position;
-
-				UNITY_SETUP_INSTANCE_ID(v);
-				TRANSFER_SHADOW_CASTER_NOPOS(o,opos)
-				#if defined(UNITY_STANDARD_USE_SHADOW_UVS)
-					o.tex = TRANSFORM_TEX(v.uv0, _MainTex);
-				#endif
-			}
-
-			half4 fragShadowCasterModified (
-				#ifdef UNITY_STANDARD_USE_SHADOW_OUTPUT_STRUCT
-				VertexOutputShadowCaster i
-				#endif
-				#ifdef UNITY_STANDARD_USE_DITHER_MASK
-				, UNITY_VPOS_TYPE vpos : VPOS
-				#endif
-				) : SV_Target
-			{
-				#if defined(UNITY_STANDARD_USE_SHADOW_UVS)
-					half alpha = tex2D(_MainTex, i.tex).a * _Color.a;
-					#if defined(_ALPHATEST_ON)
-						clip (alpha - _Cutoff);
-					#endif
-					#if defined(_ALPHABLEND_ON) || defined(_ALPHAPREMULTIPLY_ON)
-						#if defined(UNITY_STANDARD_USE_DITHER_MASK)
-							// Use dither mask for alpha blended shadows, based on pixel position xy
-							// and alpha level. Our dither texture is 4x4x16.
-							half alphaRef = tex3D(_DitherMaskLOD, float3(vpos.xy*0.25,alpha*0.9375)).a;
-							clip (alphaRef - 0.01);
-						#else
-							clip (alpha - _Cutoff);
-						#endif
-					#endif
-				#endif // #if defined(UNITY_STANDARD_USE_SHADOW_UVS)
-
-				SHADOW_CASTER_FRAGMENT(i)
-			}	
-
-			ENDCG
-		}
 	}
 }

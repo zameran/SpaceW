@@ -53,6 +53,11 @@ namespace SpaceEngine.Core.Terrain
         /// </summary> 
         public double Length { get; private set; }
 
+        /// <summary>
+        /// The physical size of this quad divided by two (in local space).
+        /// </summary>
+        public double LengthHalf { get; private set; }
+
         /// <summary> 
         /// Local bounding box. 
         /// </summary> 
@@ -105,6 +110,54 @@ namespace SpaceEngine.Core.Terrain
         /// </summary>
         public bool IsLeaf { get { return Children[0] == null || Children == null; } }
 
+        public Matrix4x4d DeformedCorners { get; private set; }
+
+        public Matrix4x4d DeformedVerticals { get; private set; }
+
+        /// <summary>
+        /// Tangent frame to world matrix.
+        /// </summary>
+        public Matrix3x3d TangentFrameToWorld { get; private set; }
+
+        public Vector3d Center { get; private set; }
+
+        public Vector4d Lengths { get; private set; }
+
+        private void CalculateMatrices(double ox, double oy, double length, double r)
+        {
+            var p0 = new Vector3d(ox, oy, r);
+            var p1 = new Vector3d(ox + length, oy, r);
+            var p2 = new Vector3d(ox, oy + length, r);
+            var p3 = new Vector3d(ox + length, oy + length, r);
+
+            Center = (p0 + p3) * 0.5;
+
+            double l0 = 0.0, l1 = 0.0, l2 = 0.0, l3 = 0.0;
+
+            var v0 = p0.Normalized(ref l0);
+            var v1 = p1.Normalized(ref l1);
+            var v2 = p2.Normalized(ref l2);
+            var v3 = p3.Normalized(ref l3);
+
+            Lengths = new Vector4d(l0, l1, l2, l3);
+
+            DeformedCorners = new Matrix4x4d(v0.x * r, v1.x * r, v2.x * r, v3.x * r,
+                                             v0.y * r, v1.y * r, v2.y * r, v3.y * r,
+                                             v0.z * r, v1.z * r, v2.z * r, v3.z * r,
+                                             1.0, 1.0, 1.0, 1.0);
+
+            DeformedVerticals = new Matrix4x4d(v0.x, v1.x, v2.x, v3.x,
+                                               v0.y, v1.y, v2.y, v3.y,
+                                               v0.z, v1.z, v2.z, v3.z,
+                                               0.0, 0.0, 0.0, 0.0);
+
+            var uz = Center.Normalized();
+            var ux = new Vector3d(0.0, 1.0, 0.0).Cross(uz).Normalized();
+            var uy = uz.Cross(ux);
+
+            TangentFrameToWorld = Owner.TangentFrameToWorld * new Matrix3x3d(ux.x, uy.x, uz.x, ux.y, uy.y, uz.y, ux.z, uy.z, uz.z);
+        }
+
         /// <summary> 
         /// Creates a new <see cref="TerrainQuad"/> 
         /// </summary> 
@@ -129,7 +182,11 @@ namespace SpaceEngine.Core.Terrain
             ZMax = zmax;
             ZMin = zmin;
             Length = length;
+            LengthHalf = length / 2.0;
             LocalBox = new Box3d(Ox, Ox + Length, Oy, Oy + Length, ZMin, ZMax);
+
+            // TODO : Hm. Maybe too heavy for a ctor? Threading? Hueading?
+            CalculateMatrices(ox, oy, length, owner.ParentBody.Size);
         }
 
         /// <summary>
@@ -198,7 +255,7 @@ namespace SpaceEngine.Core.Terrain
 
             if (visibility == Frustum.VISIBILITY.PARTIALLY)
             {
-                Visibility = Owner.GetVisibility(LocalBox);
+                Visibility = Owner.Deformation.GetVisibility(Owner, LocalBox);
             }
             else
             {
@@ -218,7 +275,7 @@ namespace SpaceEngine.Core.Terrain
             }
 
             var ground = Owner.ParentBody.HeightZ;
-            var distance = Owner.GetCameraDist(new Box3d(Ox, Ox + Length, Oy, Oy + Length, Math.Min(0.0, ground), Math.Max(0.0, ground)));
+            var distance = Owner.GetCameraDistance(new Box3d(Ox, Ox + Length, Oy, Oy + Length, Math.Min(0.0, ground), Math.Max(0.0, ground)));
 
             if ((Owner.SplitInvisibleQuads || Visibility != Frustum.VISIBILITY.INVISIBLE) && distance < Length * Owner.SplitDistance && Level < Owner.MaxLevel)
             {
@@ -227,7 +284,7 @@ namespace SpaceEngine.Core.Terrain
                     Subdivide();
                 }
 
-                var order = CalculateOrder(Owner.LocalCameraPosition.x, Owner.LocalCameraPosition.y, Ox + Length / 2.0, Oy + Length / 2.0);
+                var order = CalculateOrder(Owner.LocalCameraPosition.x, Owner.LocalCameraPosition.y, Ox + LengthHalf, Oy + LengthHalf);
 
                 Children[order[0]].UpdateLOD();
                 Children[order[1]].UpdateLOD();
@@ -304,12 +361,10 @@ namespace SpaceEngine.Core.Terrain
         /// </summary>
         private void Subdivide()
         {
-            var hl = Length / 2.0;
-
-            Children[0] = new TerrainQuad(Owner, this, 2 * Tx, 2 * Ty, Ox, Oy, hl, ZMin, ZMax);
-            Children[1] = new TerrainQuad(Owner, this, 2 * Tx + 1, 2 * Ty, Ox + hl, Oy, hl, ZMin, ZMax);
-            Children[2] = new TerrainQuad(Owner, this, 2 * Tx, 2 * Ty + 1, Ox, Oy + hl, hl, ZMin, ZMax);
-            Children[3] = new TerrainQuad(Owner, this, 2 * Tx + 1, 2 * Ty + 1, Ox + hl, Oy + hl, hl, ZMin, ZMax);
+            Children[0] = new TerrainQuad(Owner, this, 2 * Tx, 2 * Ty, Ox, Oy, LengthHalf, ZMin, ZMax);
+            Children[1] = new TerrainQuad(Owner, this, 2 * Tx + 1, 2 * Ty, Ox + LengthHalf, Oy, LengthHalf, ZMin, ZMax);
+            Children[2] = new TerrainQuad(Owner, this, 2 * Tx, 2 * Ty + 1, Ox, Oy + LengthHalf, LengthHalf, ZMin, ZMax);
+            Children[3] = new TerrainQuad(Owner, this, 2 * Tx + 1, 2 * Ty + 1, Ox + LengthHalf, Oy + LengthHalf, LengthHalf, ZMin, ZMax);
         }
 
         public void DrawQuadOutline(Camera camera, Material lineMaterial, Color lineColor)

@@ -54,9 +54,9 @@ public static class CameraHelper
     {
         var mainCamera = Main();
 
-        if (mainCamera.gameObject.transform.FindChild("CustomDepthCamera") != null)
-            if (mainCamera.gameObject.transform.FindChild("CustomDepthCamera").GetComponent<Camera>() != null)
-                return mainCamera.gameObject.transform.FindChild("CustomDepthCamera").GetComponent<Camera>();
+        if (mainCamera.gameObject.transform.Find("CustomDepthCamera") != null)
+            if (mainCamera.gameObject.transform.Find("CustomDepthCamera").GetComponent<Camera>() != null)
+                return mainCamera.gameObject.transform.Find("CustomDepthCamera").GetComponent<Camera>();
 
         return null;
     }
@@ -71,7 +71,7 @@ public static class CameraHelper
         return camera.cameraToWorldMatrix;
     }
 
-    public static Matrix4x4 GetCameraToScreen(this Camera camera, bool useFix = true)
+    public static Matrix4x4 GetCameraToScreen(this Camera camera, bool useFix = true, bool overrideMatrixY = true)
     {
         var projectionMatrix = camera.projectionMatrix;
 
@@ -80,7 +80,7 @@ public static class CameraHelper
         if (SystemInfo.graphicsDeviceVersion.IndexOf("Direct3D", StringComparison.Ordinal) > -1)
         {
             // NOTE : Default unity antialiasing breaks matrices?
-            if (IsDeferred(camera) || QualitySettings.antiAliasing == 0)
+            if (overrideMatrixY || (IsDeferred(camera) || QualitySettings.antiAliasing == 0))
             {
                 // Invert Y for rendering to a render texture
                 for (byte i = 0; i < 4; i++)
@@ -92,7 +92,9 @@ public static class CameraHelper
             // Scale and bias depth range
             for (byte i = 0; i < 4; i++)
             {
-                projectionMatrix[2, i] = projectionMatrix[2, i] * 0.5f + projectionMatrix[3, i] * 0.5f;
+                // NOTE : Hm. I saw something about reverse depth buffer in release notes...
+                projectionMatrix[2, i] = -(projectionMatrix[2, i] * 0.5f + projectionMatrix[3, i] * -0.5f);
+                //projectionMatrix[2, i] = projectionMatrix[2, i] * 0.5f + projectionMatrix[3, i] * 0.5f;
             }
         }
 
@@ -102,11 +104,6 @@ public static class CameraHelper
     public static Matrix4x4 GetScreenToCamera(this Camera camera)
     {
         return camera.GetCameraToScreen().inverse;
-    }
-
-    public static Matrix4x4 GetScreenToCamera(this Camera camera, bool useFix)
-    {
-        return camera.GetCameraToScreen(useFix).inverse;
     }
 
     public static Vector3 GetProjectedDirection(this Vector3 v)

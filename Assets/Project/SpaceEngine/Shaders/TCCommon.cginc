@@ -394,7 +394,7 @@ float3 UnpackColor(float f)
 //-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
-struct  Surface
+struct Surface
 {
 	float4 color;
 	float height;
@@ -825,9 +825,9 @@ inline float CubicHermite(float4 V, float t)
 
 //-----------------------------------------------------------------------------
 // Improved texture interpolation by iq. http://www.iquilezles.org/www/articles/texture/texture.htm
-float4 TEX2D(sampler2D tex, float2 p, float res)
+float4 SampleCustom(Texture2D tex, SamplerState texSampler, float2 p, float resolution)
 {
-	p = p * res + 0.5;
+	p = p * resolution + 0.5;
 
 	float2 i = floor(p);
 	float2 f = p - i;
@@ -835,59 +835,25 @@ float4 TEX2D(sampler2D tex, float2 p, float res)
 	f = f * f * f * (f * (f * 6.0 - 15.0) + 10.0);
 
 	p = i + f;
-	p = (p - 0.5) / res;
+	p = (p - 0.5) / resolution;
 
-	// TODO : Texture2D.Sample should be used for a custom interpolation...
-	return tex2D(tex, p);
-}
-
-float4 TEX2DLOD(sampler2D tex, float2 p, float2 lod, float res)
-{
-	p = p * res + 0.5;
-
-	float2 i = floor(p);
-	float2 f = p - i;
-
-	f = f * f * f * (f * (f * 6.0 - 15.0) + 10.0);
-
-	p = i + f;
-	p = (p - 0.5) / res;
-
-	// TODO : Texture2D.Sample should be used for a custom interpolation...
-	return tex2Dlod(tex, float4(p, lod));
+	return tex.Sample(texSampler, p);
 }
 //-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
 // Improved bilinear interpolated texture fetch by iq. http://www.iquilezles.org/www/articles/hwinterpolation/hwinterpolation.htm
-float4 TEX2D_GOOD(sampler2D tex, float2 uv, float size)
+float4 SampleCustomBilinear(Texture2D tex, SamplerState texSampler, float2 uv, float resolution)
 {
-	float2 st = uv * size - 0.5;
+	float2 st = uv * resolution - 0.5;
 
 	float2 iuv = floor(st);
 	float2 fuv = frac(st);
 
-	// TODO : Texture2D.Sample should be used for a custom interpolation...
-	float4 a = tex2D(tex, (iuv + float2(0.5, 0.5)) / size);
-	float4 b = tex2D(tex, (iuv + float2(1.5, 0.5)) / size);
-	float4 c = tex2D(tex, (iuv + float2(0.5, 1.5)) / size);
-	float4 d = tex2D(tex, (iuv + float2(1.5, 1.5)) / size);
-
-	return lerp(lerp(a, b, fuv.x), lerp(c, d, fuv.x), fuv.y);
-}
-
-float4 TEX2DLOD_GOOD(sampler2D tex, float2 uv, float size)
-{
-	float2 st = uv * size - 0.5;
-
-	float2 iuv = floor(st);
-	float2 fuv = frac(st);
-
-	// TODO : Texture2D.Sample should be used for a custom interpolation...
-	float4 a = tex2Dlod(tex, float4((iuv + float2(0.5, 0.5)) / size, 0.0, 0.0));
-	float4 b = tex2Dlod(tex, float4((iuv + float2(1.5, 0.5)) / size, 0.0, 0.0));
-	float4 c = tex2Dlod(tex, float4((iuv + float2(0.5, 1.5)) / size, 0.0, 0.0));
-	float4 d = tex2Dlod(tex, float4((iuv + float2(1.5, 1.5)) / size, 0.0, 0.0));
+	float4 a = tex.Sample(texSampler, (iuv + float2(0.5, 0.5)) / resolution);
+	float4 b = tex.Sample(texSampler, (iuv + float2(1.5, 0.5)) / resolution);
+	float4 c = tex.Sample(texSampler, (iuv + float2(0.5, 1.5)) / resolution);
+	float4 d = tex.Sample(texSampler, (iuv + float2(1.5, 1.5)) / resolution);
 
 	return lerp(lerp(a, b, fuv.x), lerp(c, d, fuv.x), fuv.y);
 }

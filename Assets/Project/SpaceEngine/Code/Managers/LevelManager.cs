@@ -73,9 +73,9 @@ namespace SpaceEngine.Managers
             if (OnDone != null) OnDone();
         }
 
-        public void UnloadScene(EntryPoint sceneName)
+        public AsyncOperation UnloadScene(EntryPoint sceneName)
         {
-            SceneManager.UnloadScene(sceneName.ToString());
+            return SceneManager.UnloadSceneAsync(sceneName.ToString());
         }
 
         #region SingleScene

@@ -199,8 +199,7 @@ namespace SpaceEngine.AtmosphericScattering.Sun
             target.SetFloat("UseAtmosphereColors", UseAtmosphereColors ? 1.0f : 0.0f);
             target.SetFloat("UseRadiance", UseRadiance ? 1.0f : 0.0f);
             target.SetFloat("Eclipse", Eclipse ? 0.0f : 1.0f);
-
-            target.renderQueue = (int)RenderQueue + RenderQueueOffset;
+            target.SetTexture("_FrameBuffer", FrameBufferCapturer.Instance.FBOTexture);
 
             if (Atmosphere != null) Atmosphere.SetUniforms(target);
         }
@@ -222,6 +221,8 @@ namespace SpaceEngine.AtmosphericScattering.Sun
             if (SunViewPortPosition.z > 0)
             {
                 if (Atmosphere == null) return;
+
+                SunGlareMaterial.renderQueue = (int)RenderQueue + RenderQueueOffset;
 
                 Graphics.DrawMesh(SunGlareMesh, Vector3.zero, Quaternion.identity, SunGlareMaterial, layer, CameraHelper.Main(), 0, Atmosphere.ParentBody.MPB, false, false);
             }

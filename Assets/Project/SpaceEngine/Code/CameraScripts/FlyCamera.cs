@@ -67,17 +67,12 @@ namespace SpaceEngine.Cameras
 
         protected override void Init()
         {
-            if (Body != null)
-            {
-                DistanceToAlign = Body.Size * 1.025f;
-                DistanceToCore = Vector3.Distance(transform.position, Body.transform.position);
-            }
-
             NearClipPlaneCache = CameraComponent.nearClipPlane;
             FarClipPlaneCache = CameraComponent.farClipPlane;
 
             Rotation = new Vector3(transform.eulerAngles.x, transform.eulerAngles.y, 0); // NOTE : Prevent crazy rotation on start...
 
+            UpdateDistances();
             UpdateClipPlanes();
         }
 
@@ -85,6 +80,7 @@ namespace SpaceEngine.Cameras
         {
             base.FixedUpdate();
 
+            UpdateDistances();
             UpdateClipPlanes();
 
             if (Controllable)
@@ -131,8 +127,6 @@ namespace SpaceEngine.Cameras
 
                 if (Body.GetBodyDeformationType() == BodyDeformationType.Spherical)
                 {
-                    DistanceToCore = Vector3.Distance(transform.position, Body.transform.position);
-
                     if (DistanceToCore < DistanceToAlign)
                     {
                         Aligned = true;
@@ -195,6 +189,15 @@ namespace SpaceEngine.Cameras
                 }
 
                 transform.position = worldPosition + (Vector3d)Body.Origin;
+            }
+        }
+
+        private void UpdateDistances()
+        {
+            if (Body != null)
+            {
+                DistanceToAlign = Body.Size * 1.025f;
+                DistanceToCore = Vector3.Distance(transform.position, Body.transform.position);
             }
         }
 

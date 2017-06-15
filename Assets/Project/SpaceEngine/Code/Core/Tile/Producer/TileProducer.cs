@@ -108,12 +108,11 @@ namespace SpaceEngine.Core.Tile.Producer
         /// </summary>
         public void InitCache()
         {
-            if (Cache == null)
-            {
-                Cache = CacheGameObject.GetComponent<TileCache>();
-                ID = Cache.NextProducerId;
-                Cache.InsertProducer(ID, this);
-            }
+            if (Cache != null) return;
+
+            Cache = CacheGameObject.GetComponent<TileCache>();
+            ID = Cache.NextProducerId;
+            Cache.InsertProducer(ID, this);
         }
 
         public string GetName()

@@ -77,17 +77,21 @@ Shader "SpaceEngine/Atmosphere/Atmosphere"
 			Name "Atmosphere"
 			Tags 
 			{
-				"Queue" = "Transparent" 
-				"RenderType" = "Transparent" 
-				"IgnoreProjector" = "True" 
+				"Queue"					= "Transparent"
+				"RenderType"			= "Transparent"
+				"ForceNoShadowCasting"	= "True"
+				"IgnoreProjector"		= "True"
+
+				"LightMode"				= "Always"
 			}
 
-			ZWrite On
-			ZTest Always  
-			Fog { Mode Off }
 			Blend SrcAlpha OneMinusSrcColor
-
-			Cull Off
+			Cull Front
+			Lighting Off
+			ZWrite Off
+			ZTest LEqual
+			Offset -1, -1
+			Fog { Mode Off }
 
 			CGPROGRAM
 			#include "UnityCG.cginc"		
@@ -96,15 +100,15 @@ Shader "SpaceEngine/Atmosphere/Atmosphere"
 			#include "SpaceStuff.cginc"
 			#include "Eclipses.cginc"
 
+			#pragma target 5.0
+			#pragma only_renderers d3d11 glcore
+			#pragma vertex vert
+			#pragma fragment frag
+
 			#pragma multi_compile LIGHT_1 LIGHT_2 LIGHT_3 LIGHT_4
 			#pragma multi_compile SHINE_ON SHINE_OFF
 			#pragma multi_compile ECLIPSES_ON ECLIPSES_OFF
 			#pragma multi_compile SHADOW_0 SHADOW_1 SHADOW_2 SHADOW_3 SHADOW_4
-
-			#pragma target 5.0
-			#pragma only_renderers d3d11 glcore
-			#pragma vertex main_Vertex
-			#pragma fragment frag
 
 			struct a2v
 			{
@@ -114,9 +118,9 @@ Shader "SpaceEngine/Atmosphere/Atmosphere"
 
 			struct v2f 
 			{
-				float4 pos : SV_POSITION;
+				float4 position : SV_POSITION;
 				float2 uv : TEXCOORD0;
-				float3 dir : TEXCOORD1;
+				float3 direction : TEXCOORD1;
 			};
 
 			struct f2g
@@ -124,19 +128,16 @@ Shader "SpaceEngine/Atmosphere/Atmosphere"
 				float4 color : COLOR;
 			};
 
-			void main_Vertex(a2v i, out v2f o)
+			void vert(a2v i, out v2f o)
 			{
-				o.pos = float4(i.vertex.xy, 1.0, 1.0);
+				//o.position = UnityObjectToClipPos(float4(i.vertex.xy, 1.0, 1.0));
+				o.position = UnityObjectToClipPos(i.vertex);
 				o.uv = i.uv.xy;
-				o.dir = (mul(_Globals_CameraToWorld, float4((mul(_Globals_ScreenToCamera, i.vertex)).xyz, 0.0))).xyz;
+				//o.direction = (mul(_Globals_CameraToWorld, float4((mul(_Globals_ScreenToCamera, i.vertex)).xyz, 0.0))).xyz;
+				o.direction = (mul(_Globals_CameraToWorld, float4((mul(_Globals_ScreenToCamera, o.position)).xyz, 0.0))).xyz;
 			}
 			
-			void main_Fragment(v2f i, out f2g o)
-			{
-				
-			}
-
-			float4 frag(v2f IN) : COLOR
+			void frag(in v2f i, out f2g o)
 			{
 				float3 WCP = _Globals_WorldCameraPos;
 				float3 WCPG = WCP + _Globals_Origin; // Current camera position with offset applied...
@@ -150,7 +151,7 @@ Shader "SpaceEngine/Atmosphere/Atmosphere"
 				// NOTE : Please don't hurt me, baby...
 				// NOTE : _Globals_Origin Should be inverted for shadows stuff, aka Planet.transform.position...
 
-				float3 d = normalize(IN.dir);
+				float3 d = normalize(i.direction);
 
 				float sunColor = 0;
 				float3 extinction = 0;
@@ -191,7 +192,7 @@ Shader "SpaceEngine/Atmosphere/Atmosphere"
 					#endif
 
 					#ifdef SHINE_ON
-						inscatter += SkyShineRadiance(WCPG, d, _Sky_ShineOccluders_1, _Sky_ShineColors_1);
+						inscatter += SkyShineRadiance(WCPG, d);
 					#endif
 
 					extinction += extinction1;
@@ -204,7 +205,7 @@ Shader "SpaceEngine/Atmosphere/Atmosphere"
 					// TODO : Test Opacity cutout in newer versions of Unity!
 					//float opacity = dot(normalize(finalColor), float3(1.0, 1.0, 1.0));
 
-					return float4(finalColor, 1.0) * fade;
+					o.color = float4(finalColor, 1.0) * fade;
 				#endif
 
 				#ifdef LIGHT_2
@@ -244,7 +245,7 @@ Shader "SpaceEngine/Atmosphere/Atmosphere"
 					#endif
 
 					#ifdef SHINE_ON
-						inscatter += SkyShineRadiance(WCPG, d, _Sky_ShineOccluders_1, _Sky_ShineColors_1);
+						inscatter += SkyShineRadiance(WCPG, d);
 					#endif
 
 					extinction += extinction1;
@@ -260,7 +261,7 @@ Shader "SpaceEngine/Atmosphere/Atmosphere"
 
 					finalColor = hdr(finalColor);
 
-					return float4(finalColor, 1.0) * fade;
+					o.color = float4(finalColor, 1.0) * fade;
 				#endif
 
 				#ifdef LIGHT_3
@@ -309,7 +310,7 @@ Shader "SpaceEngine/Atmosphere/Atmosphere"
 					#endif
 
 					#ifdef SHINE_ON
-						inscatter += SkyShineRadiance(WCPG, d, _Sky_ShineOccluders_1, _Sky_ShineColors_1);
+						inscatter += SkyShineRadiance(WCPG, d);
 					#endif
 
 					extinction += extinction1;
@@ -320,7 +321,7 @@ Shader "SpaceEngine/Atmosphere/Atmosphere"
 
 					finalColor = hdr(finalColor);
 
-					return float4(finalColor, 1.0) * fade;
+					o.color = float4(finalColor, 1.0) * fade;
 				#endif
 
 				#ifdef LIGHT_4
@@ -378,7 +379,7 @@ Shader "SpaceEngine/Atmosphere/Atmosphere"
 					#endif
 
 					#ifdef SHINE_ON
-						inscatter += SkyShineRadiance(WCPG, d, _Sky_ShineOccluders_1, _Sky_ShineColors_1);
+						inscatter += SkyShineRadiance(WCPG, d);
 					#endif
 
 					extinction += extinction1;
@@ -390,11 +391,9 @@ Shader "SpaceEngine/Atmosphere/Atmosphere"
 
 					finalColor = hdr(finalColor);
 
-					return float4(finalColor, 1.0) * fade;
+					o.color = float4(finalColor, 1.0) * fade;
 				#endif
-
-				return float4(0, 0, 0, 0);
-			}		
+			}
 			ENDCG
 		}
 	}

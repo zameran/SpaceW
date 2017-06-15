@@ -29,7 +29,7 @@ namespace UnityEngine
 {
     public struct Matrix3x3d
     {
-        public double[,] m;
+        public readonly double[,] m;
 
         public Matrix3x3d(double m00, double m01, double m02, double m10, double m11, double m12, double m20, double m21, double m22)
         {
@@ -46,10 +46,41 @@ namespace UnityEngine
             m[2, 2] = m22;
         }
 
+        public override int GetHashCode()
+        {
+            return m[0, 0].GetHashCode() + m[1, 0].GetHashCode() + m[2, 0].GetHashCode() +
+                   m[0, 1].GetHashCode() + m[1, 1].GetHashCode() + m[2, 1].GetHashCode() +
+                   m[0, 2].GetHashCode() + m[1, 2].GetHashCode() + m[2, 2].GetHashCode();
+        }
+
+        public override bool Equals(object obj)
+        {
+            if (obj is Matrix3x3d) { return Equals((Matrix3x3d)obj); }
+            return false;
+        }
+
+        public bool Equals(Matrix3x3d other)
+        {
+            return this == other;
+        }
+
         public static Matrix3x3d operator +(Matrix3x3d m1, Matrix3x3d m2)
         {
             var kSum = Matrix3x3d.identity;
 
+#if (MATICES_UNROLL)
+            kSum.m[0, 0] = m1.m[0, 0] + m2.m[0, 0];
+            kSum.m[0, 1] = m1.m[0, 1] + m2.m[0, 1];
+            kSum.m[0, 2] = m1.m[0, 2] + m2.m[0, 2];
+
+            kSum.m[1, 0] = m1.m[1, 0] + m2.m[1, 0];
+            kSum.m[1, 1] = m1.m[1, 1] + m2.m[1, 1];
+            kSum.m[1, 2] = m1.m[1, 2] + m2.m[1, 2];
+
+            kSum.m[2, 0] = m1.m[2, 0] + m2.m[2, 0];
+            kSum.m[2, 1] = m1.m[2, 1] + m2.m[2, 1];
+            kSum.m[2, 2] = m1.m[2, 2] + m2.m[2, 2];
+#else
             for (byte iRow = 0; iRow < 3; iRow++)
             {
                 for (byte iCol = 0; iCol < 3; iCol++)
@@ -57,6 +88,7 @@ namespace UnityEngine
                     kSum.m[iRow, iCol] = m1.m[iRow, iCol] + m2.m[iRow, iCol];
                 }
             }
+#endif
 
             return kSum;
         }
@@ -65,6 +97,19 @@ namespace UnityEngine
         {
             var kSum = Matrix3x3d.identity;
 
+#if (MATICES_UNROLL)
+            kSum.m[0, 0] = m1.m[0, 0] - m2.m[0, 0];
+            kSum.m[0, 1] = m1.m[0, 1] - m2.m[0, 1];
+            kSum.m[0, 2] = m1.m[0, 2] - m2.m[0, 2];
+
+            kSum.m[1, 0] = m1.m[1, 0] - m2.m[1, 0];
+            kSum.m[1, 1] = m1.m[1, 1] - m2.m[1, 1];
+            kSum.m[1, 2] = m1.m[1, 2] - m2.m[1, 2];
+
+            kSum.m[2, 0] = m1.m[2, 0] - m2.m[2, 0];
+            kSum.m[2, 1] = m1.m[2, 1] - m2.m[2, 1];
+            kSum.m[2, 2] = m1.m[2, 2] - m2.m[2, 2];
+#else
             for (byte iRow = 0; iRow < 3; iRow++)
             {
                 for (byte iCol = 0; iCol < 3; iCol++)
@@ -72,6 +117,7 @@ namespace UnityEngine
                     kSum.m[iRow, iCol] = m1.m[iRow, iCol] - m2.m[iRow, iCol];
                 }
             }
+#endif
 
             return kSum;
         }
@@ -107,13 +153,12 @@ namespace UnityEngine
 
         public static Vector3d operator *(Matrix3x3d m, Vector3d v)
         {
-            var kProd = Vector3d.zero;
-
-            kProd.x = m.m[0, 0] * v.x + m.m[0, 1] * v.y + m.m[0, 2] * v.z;
-            kProd.y = m.m[1, 0] * v.x + m.m[1, 1] * v.y + m.m[1, 2] * v.z;
-            kProd.z = m.m[2, 0] * v.x + m.m[2, 1] * v.y + m.m[2, 2] * v.z;
-
-            return kProd;
+            return new Vector3d
+            {
+                x = m.m[0, 0] * v.x + m.m[0, 1] * v.y + m.m[0, 2] * v.z,
+                y = m.m[1, 0] * v.x + m.m[1, 1] * v.y + m.m[1, 2] * v.z,
+                z = m.m[2, 0] * v.x + m.m[2, 1] * v.y + m.m[2, 2] * v.z
+            };
         }
 
         public static Matrix3x3d operator *(Matrix3x3d m, double s)
@@ -143,6 +188,32 @@ namespace UnityEngine
 #endif
 
             return kProd;
+        }
+
+        public static bool operator ==(Matrix3x3d m1, Matrix3x3d m2)
+        {
+            for (byte iRow = 0; iRow < 3; iRow++)
+            {
+                for (byte iCol = 0; iCol < 3; iCol++)
+                {
+                    if (!BrainFuckMath.NearlyEqual(m1.m[iRow, iCol], m2.m[iRow, iCol])) return false;
+                }
+            }
+
+            return true;
+        }
+
+        public static bool operator !=(Matrix3x3d m1, Matrix3x3d m2)
+        {
+            for (byte iRow = 0; iRow < 3; iRow++)
+            {
+                for (byte iCol = 0; iCol < 3; iCol++)
+                {
+                    if (!BrainFuckMath.NearlyEqual(m1.m[iRow, iCol], m2.m[iRow, iCol])) return true;
+                }
+            }
+
+            return false;
         }
 
         public override string ToString()
@@ -178,11 +249,10 @@ namespace UnityEngine
             return fDet;
         }
 
-        //public bool Inverse(ref Matrix3x3d mInv, double tolerance = 1e-06)
-        public bool Inverse(ref Matrix3x3d mInv, double tolerance)
+        public bool Inverse(ref Matrix3x3d mInv, double tolerance = 1e-06)
         {
-            // Invert a 3x3 using cofactors.  This is about 8 times faster than
-            // the Numerical Recipes code which uses Gaussian elimination.
+            // Invert a 3x3 using cofactors. 
+            // This is about 8 times faster than the Numerical Recipes code which uses Gaussian elimination.
             mInv.m[0, 0] = m[1, 1] * m[2, 2] - m[1, 2] * m[2, 1];
             mInv.m[0, 1] = m[0, 2] * m[2, 1] - m[0, 1] * m[2, 2];
             mInv.m[0, 2] = m[0, 1] * m[1, 2] - m[0, 2] * m[1, 1];
@@ -195,13 +265,23 @@ namespace UnityEngine
 
             var fDet = m[0, 0] * mInv.m[0, 0] + m[0, 1] * mInv.m[1, 0] + m[0, 2] * mInv.m[2, 0];
 
-            if (System.Math.Abs(fDet) <= tolerance)
-            {
-                return false;
-            }
+            if (System.Math.Abs(fDet) <= tolerance) { return false; }
 
             var fInvDet = 1.0 / fDet;
 
+#if (MATICES_UNROLL)
+            mInv.m[0, 0] *= fInvDet;
+            mInv.m[0, 1] *= fInvDet;
+            mInv.m[0, 2] *= fInvDet;
+
+            mInv.m[1, 0] *= fInvDet;
+            mInv.m[1, 1] *= fInvDet;
+            mInv.m[1, 2] *= fInvDet;
+
+            mInv.m[2, 0] *= fInvDet;
+            mInv.m[2, 1] *= fInvDet;
+            mInv.m[2, 2] *= fInvDet;
+#else
             for (byte iRow = 0; iRow < 3; iRow++)
             {
                 for (byte iCol = 0; iCol < 3; iCol++)
@@ -209,12 +289,12 @@ namespace UnityEngine
                     mInv.m[iRow, iCol] *= fInvDet;
                 }
             }
+#endif
 
             return true;
         }
 
-        //public Matrix3x3d Inverse(double tolerance = 1e-06)
-        public Matrix3x3d Inverse(double tolerance)
+        public Matrix3x3d Inverse(double tolerance = 1e-06)
         {
             var kInverse = Matrix3x3d.identity;
 
@@ -266,7 +346,6 @@ namespace UnityEngine
                 m21 = (float)m[2, 1],
                 m22 = (float)m[2, 2]
             };
-
 
             return mat;
         }
