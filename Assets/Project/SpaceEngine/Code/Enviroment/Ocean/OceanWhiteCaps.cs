@@ -35,19 +35,17 @@ namespace SpaceEngine.Ocean
         RenderTexture Foam0;
         RenderTexture Foam1;
 
-        /// <inheritdoc />
-        protected override int ShaderPass { get { return 1; } }
-
         #region OceanNode
 
         protected override void InitOceanNode()
         {
-            base.InitOceanNode();
+            
         }
 
         protected override void UpdateOceanNode()
         {
-            base.UpdateOceanNode();
+            OceanMaterial.DisableKeyword(FFT_KEYWORD);
+            OceanMaterial.EnableKeyword(WHITECAPS_KEYWORD);
         }
 
         #endregion
@@ -131,6 +129,15 @@ namespace SpaceEngine.Ocean
             DrawOcean = false;
 
             base.OnAtmosphereBaked(celestialBody, atmosphere);
+        }
+
+        #endregion
+
+        #region IRenderable
+
+        public override void Render(int layer = 0)
+        {
+            base.Render(layer);
         }
 
         #endregion

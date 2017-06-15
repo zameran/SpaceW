@@ -93,9 +93,6 @@ namespace SpaceEngine.Ocean
 
         protected FourierGPU Fourier;
 
-        /// <inheritdoc />
-        protected override int ShaderPass { get { return 0; } }
-
         public override float GetMaxSlopeVariance()
         {
             return MaxSlopeVariance;
@@ -110,7 +107,8 @@ namespace SpaceEngine.Ocean
 
         protected override void UpdateOceanNode()
         {
-
+            OceanMaterial.EnableKeyword(FFT_KEYWORD);
+            OceanMaterial.DisableKeyword(WHITECAPS_KEYWORD);
         }
 
         #endregion
@@ -252,6 +250,15 @@ namespace SpaceEngine.Ocean
             UpdateNode();
 
             DrawOcean = false;
+        }
+
+        #endregion
+
+        #region IRenderable
+
+        public override void Render(int layer = 0)
+        {
+            base.Render(layer);
         }
 
         #endregion

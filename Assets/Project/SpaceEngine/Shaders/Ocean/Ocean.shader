@@ -179,7 +179,7 @@
 
 		Pass
 		{	
-			Name "Ocean FFT"
+			Name "Ocean"
 			Tags 
 			{
 				"Queue"					= "Geometry+100"
@@ -202,37 +202,7 @@
 			#pragma vertex vert
 			#pragma fragment frag
 
-			#pragma multi_compile OCEAN_FFT
-			#pragma multi_compile OCEAN_INSCATTER_FIX		
-			ENDCG
-		}
-
-		Pass 
-		{
-			Name "Ocean White Caps"
-			Tags 
-			{
-				"Queue"					= "Geometry+100"
-				"RenderType"			= "Geometry"
-				"ForceNoShadowCasting"	= "True"
-				"IgnoreProjector"		= "True"
-
-				"LightMode"				= "Always"
-			}
-
-			Cull Front
-			Lighting Off
-			ZWrite Off
-			ZTest LEqual
-			Fog { Mode Off }
-
-			CGPROGRAM
-			#pragma target 5.0
-			#pragma only_renderers d3d11 glcore
-			#pragma vertex vert
-			#pragma fragment frag
-
-			#pragma multi_compile OCEAN_WHITECAPS
+			#pragma multi_compile OCEAN_NONE OCEAN_FFT OCEAN_WHITECAPS
 			#pragma multi_compile OCEAN_INSCATTER_FIX
 			ENDCG
 		}

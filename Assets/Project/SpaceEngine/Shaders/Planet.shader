@@ -129,7 +129,7 @@
 				out half4 outNormal : SV_Target2,			// RT2: normal (rgb), --unused, very low precision-- (a) 
 				out half4 outEmission : SV_Target3			// RT3: emission (rgb), --unused-- (a)
 			)
-			{		
+			{
 				float3 WCP = _Globals_WorldCameraPos;
 				float3 WCPO = _Globals_WorldCameraPos_Offsetted;
 				float3 WSD = _Sun_WorldDirections_1[0];
