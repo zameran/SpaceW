@@ -312,6 +312,19 @@ namespace SpaceEngine.Core.Bodies
         {
             MPB.Clear();
 
+            // TODO : How to set these values per quad avoiding material property block and material uniforms?
+            // NOTE : So, only these uniforms are variable per quad, but i don't know how to vary avoiding mpb and material uniforms, maybe instancing?
+            //_Elevation_Tile
+            //_Ortho_Tile
+            //_Color_Tile
+            //_Normals_Tile
+            //_Deform_Offset
+            //_Deform_Camera
+            //_Deform_ScreenQuadCornerNorms
+            //_Deform_ScreenQuadCorners
+            //_Deform_ScreenQuadVericals
+            //_Deform_TangentFrameToWorld
+
             InitSetUniforms();
         }
 

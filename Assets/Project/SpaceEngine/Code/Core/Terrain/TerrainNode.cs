@@ -419,8 +419,11 @@ namespace SpaceEngine.Core.Terrain
             quad.Drawable = true;
         }
 
-        private void DrawMesh(Mesh mesh, MaterialPropertyBlock mpb)
+        private void DrawMesh(TerrainQuad quad, Mesh mesh, MaterialPropertyBlock mpb)
         {
+            // Set the uniforms unique to each quad
+            SetPerQuadUniforms(quad, mpb);
+
             Graphics.DrawMesh(mesh, Matrix4x4.identity, TerrainMaterial, 0, CameraHelper.Main(), 0, mpb);
         }
 
@@ -437,17 +440,14 @@ namespace SpaceEngine.Core.Terrain
                     samplers[i].SetTile(mpb, quad.Level, quad.Tx, quad.Ty);
                 }
 
-                // Set the uniforms unique to each quad
-                SetPerQuadUniforms(quad, mpb);
-
-                DrawMesh(mesh, mpb);
+                DrawMesh(quad, mesh, mpb);
             }
             else
             {
                 // Draw quads in a order based on distance to camera
                 var done = 0;
 
-                var order = quad.CalculateOrder(LocalCameraPosition.x, LocalCameraPosition.y, quad.Ox + quad.Length / 2.0, quad.Oy + quad.Length / 2.0);
+                var order = quad.CalculateOrder(LocalCameraPosition.x, LocalCameraPosition.y, quad.Ox + quad.LengthHalf, quad.Oy + quad.LengthHalf);
 
                 for (byte i = 0; i < 4; ++i)
                 {
@@ -474,10 +474,7 @@ namespace SpaceEngine.Core.Terrain
                         samplers[i].SetTile(mpb, quad.Level, quad.Tx, quad.Ty);
                     }
 
-                    // Set the uniforms unique to each quad
-                    SetPerQuadUniforms(quad, mpb);
-
-                    DrawMesh(mesh, mpb);
+                    DrawMesh(quad, mesh, mpb);
                 }
             }
         }
@@ -508,12 +505,8 @@ namespace SpaceEngine.Core.Terrain
 
         public void SetPerQuadUniforms(TerrainQuad quad, MaterialPropertyBlock matPropertyBlock)
         {
+            // TODO : BOTTLENECK!
             Deformation.SetUniforms(this, quad, matPropertyBlock);
-        }
-
-        public Frustum.VISIBILITY GetVisibility(Box3d localBox)
-        {
-            return Deformation.GetVisibility(this, localBox);
         }
 
         /// <summary>

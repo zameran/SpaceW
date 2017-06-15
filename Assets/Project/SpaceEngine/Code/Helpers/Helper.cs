@@ -385,10 +385,7 @@ public static class Helper
         return color;
     }
 
-    public static void CalculateLight(Light light,
-        Vector3 center,
-        Transform directionTransform,
-        Transform positionTransform,
+    public static void CalculateLight(Light light, Vector3 center, Transform directionTransform, Transform positionTransform,
         ref Vector3 position,
         ref Vector3 direction,
         ref Color color)
@@ -404,9 +401,9 @@ public static class Helper
                 case LightType.Point:
                     direction = Vector3.Normalize(position - center);
                     break;
-
-                    //distances fix.
-                    //case LightType.Directional: position = center + direction * (position - center).magnitude; break;
+                case LightType.Directional: // NOTE : Fix directions for directional light...
+                    position = center + direction * (position - center).magnitude;
+                    break;
             }
 
             // Transform into local space?
@@ -430,12 +427,11 @@ public static class Helper
         {
             for (var i = 1; i <= lights.Count; i++)
             {
-                var index = i - 1;
-                var light = lights[index];
+                var light = lights[i - 1];
 
                 if (Enabled(light) == true && light.intensity > 0.0f && lightCount < maxLights)
                 {
-                    var prefix = "_Light" + (++lightCount);
+                    var prefix = string.Format("_Light{0}", ++lightCount);
                     var direction = default(Vector3);
                     var position = default(Vector3);
                     var color = default(Color);
@@ -448,9 +444,9 @@ public static class Helper
 
                         if (material != null)
                         {
-                            material.SetVector(prefix + "Direction", direction);
-                            material.SetVector(prefix + "Position", VectorHelper.MakeFrom(position, 1.0f));
-                            material.SetColor(prefix + "Color", color);
+                            material.SetVector(string.Format("{0}Direction", prefix), direction);
+                            material.SetVector(string.Format("{0}Position", prefix), VectorHelper.MakeFrom(position, 1.0f));
+                            material.SetColor(string.Format("{0}Color", prefix), color);
                         }
                     }
                 }
@@ -468,12 +464,11 @@ public static class Helper
         {
             for (var i = 1; i <= shadows.Count; i++)
             {
-                var index = i - 1;
-                var shadow = shadows[index];
+                var shadow = shadows[i - 1];
 
                 if (Enabled(shadow) == true && shadow.CalculateShadow() == true && shadowCount < maxShadows)
                 {
-                    var prefix = "_Shadow" + (++shadowCount);
+                    var prefix = string.Format("_Shadow{0}", ++shadowCount);
 
                     for (var j = materials.Length - 1; j >= 0; j--)
                     {
@@ -481,9 +476,9 @@ public static class Helper
 
                         if (material != null)
                         {
-                            material.SetTexture(prefix + "Texture", shadow.GetTexture());
-                            material.SetMatrix(prefix + "Matrix", shadow.Matrix);
-                            material.SetFloat(prefix + "Ratio", shadow.Ratio);
+                            material.SetTexture(string.Format("{0}Texture", prefix), shadow.GetTexture());
+                            material.SetMatrix(string.Format("{0}Matrix", prefix), shadow.Matrix);
+                            material.SetFloat(string.Format("{0}Ratio", prefix), shadow.Ratio);
                         }
                     }
                 }
@@ -501,12 +496,11 @@ public static class Helper
         {
             for (var i = 1; i <= shadows.Count; i++)
             {
-                var index = i - 1;
-                var shadow = shadows[index];
+                var shadow = shadows[i - 1];
 
                 if (Enabled(shadow) == true && shadow.CalculateShadow() == true && shadowCount < maxShadows)
                 {
-                    var prefix = "_Shadow" + (++shadowCount);
+                    var prefix = string.Format("_Shadow{0}", ++shadowCount);
 
                     for (var j = blocks.Length - 1; j >= 0; j--)
                     {
@@ -514,9 +508,9 @@ public static class Helper
 
                         if (block != null)
                         {
-                            block.SetTexture(prefix + "Texture", shadow.GetTexture());
-                            block.SetMatrix(prefix + "Matrix", shadow.Matrix);
-                            block.SetFloat(prefix + "Ratio", shadow.Ratio);
+                            block.SetTexture(string.Format("{0}Texture", prefix), shadow.GetTexture());
+                            block.SetMatrix(string.Format("{0}Matrix", prefix), shadow.Matrix);
+                            block.SetFloat(string.Format("{0}Ratio", prefix), shadow.Ratio);
                         }
                     }
                 }

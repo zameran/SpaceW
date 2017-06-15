@@ -53,6 +53,11 @@ namespace SpaceEngine.Core.Terrain
         /// </summary> 
         public double Length { get; private set; }
 
+        /// <summary>
+        /// The physical size of this quad divided by two (in local space).
+        /// </summary>
+        public double LengthHalf { get; private set; }
+
         /// <summary> 
         /// Local bounding box. 
         /// </summary> 
@@ -109,6 +114,11 @@ namespace SpaceEngine.Core.Terrain
 
         public Matrix4x4d DeformedVerticals { get; private set; }
 
+        /// <summary>
+        /// Tangent frame to world matrix.
+        /// </summary>
+        public Matrix3x3d TangentFrameToWorld { get; private set; }
+
         public Vector3d Center { get; private set; }
 
         public Vector4d Lengths { get; private set; }
@@ -140,6 +150,12 @@ namespace SpaceEngine.Core.Terrain
                                                v0.y, v1.y, v2.y, v3.y,
                                                v0.z, v1.z, v2.z, v3.z,
                                                0.0, 0.0, 0.0, 0.0);
+
+            var uz = Center.Normalized();
+            var ux = new Vector3d(0.0, 1.0, 0.0).Cross(uz).Normalized();
+            var uy = uz.Cross(ux);
+
+            TangentFrameToWorld = Owner.TangentFrameToWorld * new Matrix3x3d(ux.x, uy.x, uz.x, ux.y, uy.y, uz.y, ux.z, uy.z, uz.z);
         }
 
         /// <summary> 
@@ -166,6 +182,7 @@ namespace SpaceEngine.Core.Terrain
             ZMax = zmax;
             ZMin = zmin;
             Length = length;
+            LengthHalf = length / 2.0;
             LocalBox = new Box3d(Ox, Ox + Length, Oy, Oy + Length, ZMin, ZMax);
 
             // TODO : Hm. Maybe too heavy for a ctor? Threading? Hueading?
@@ -238,7 +255,7 @@ namespace SpaceEngine.Core.Terrain
 
             if (visibility == Frustum.VISIBILITY.PARTIALLY)
             {
-                Visibility = Owner.GetVisibility(LocalBox);
+                Visibility = Owner.Deformation.GetVisibility(Owner, LocalBox);
             }
             else
             {
@@ -267,7 +284,7 @@ namespace SpaceEngine.Core.Terrain
                     Subdivide();
                 }
 
-                var order = CalculateOrder(Owner.LocalCameraPosition.x, Owner.LocalCameraPosition.y, Ox + Length / 2.0, Oy + Length / 2.0);
+                var order = CalculateOrder(Owner.LocalCameraPosition.x, Owner.LocalCameraPosition.y, Ox + LengthHalf, Oy + LengthHalf);
 
                 Children[order[0]].UpdateLOD();
                 Children[order[1]].UpdateLOD();
@@ -344,12 +361,10 @@ namespace SpaceEngine.Core.Terrain
         /// </summary>
         private void Subdivide()
         {
-            var hl = Length / 2.0;
-
-            Children[0] = new TerrainQuad(Owner, this, 2 * Tx, 2 * Ty, Ox, Oy, hl, ZMin, ZMax);
-            Children[1] = new TerrainQuad(Owner, this, 2 * Tx + 1, 2 * Ty, Ox + hl, Oy, hl, ZMin, ZMax);
-            Children[2] = new TerrainQuad(Owner, this, 2 * Tx, 2 * Ty + 1, Ox, Oy + hl, hl, ZMin, ZMax);
-            Children[3] = new TerrainQuad(Owner, this, 2 * Tx + 1, 2 * Ty + 1, Ox + hl, Oy + hl, hl, ZMin, ZMax);
+            Children[0] = new TerrainQuad(Owner, this, 2 * Tx, 2 * Ty, Ox, Oy, LengthHalf, ZMin, ZMax);
+            Children[1] = new TerrainQuad(Owner, this, 2 * Tx + 1, 2 * Ty, Ox + LengthHalf, Oy, LengthHalf, ZMin, ZMax);
+            Children[2] = new TerrainQuad(Owner, this, 2 * Tx, 2 * Ty + 1, Ox, Oy + LengthHalf, LengthHalf, ZMin, ZMax);
+            Children[3] = new TerrainQuad(Owner, this, 2 * Tx + 1, 2 * Ty + 1, Ox + LengthHalf, Oy + LengthHalf, LengthHalf, ZMin, ZMax);
         }
 
         public void DrawQuadOutline(Camera camera, Material lineMaterial, Color lineColor)

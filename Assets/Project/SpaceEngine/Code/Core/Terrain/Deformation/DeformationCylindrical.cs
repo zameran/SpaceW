@@ -39,6 +39,8 @@ using UnityEngine;
 
 namespace SpaceEngine.Core.Terrain.Deformation
 {
+    // TODO : Finish it!
+
     /// <summary>
     /// A Deformation of space transforming planes to cylinders. 
     /// This deformation transforms the plane z=0 into a cylinder of radius R.
@@ -84,7 +86,6 @@ namespace SpaceEngine.Core.Terrain.Deformation
 
         public override Box2d DeformedToLocalBounds(Vector3d deformedCenter, double deformedRadius)
         {
-            // TODO : Make it!
             return base.DeformedToLocalBounds(deformedCenter, deformedRadius);
         }
 
@@ -109,36 +110,22 @@ namespace SpaceEngine.Core.Terrain.Deformation
             deformedBox[2] = LocalToDeformed(new Vector3d(localBox.xmax, localBox.ymax, localBox.zmax));
             deformedBox[3] = LocalToDeformed(new Vector3d(localBox.xmin, localBox.ymax, localBox.zmax));
 
-            var dy = localBox.ymax - localBox.ymin;
-            var f = (float)((R - localBox.zmin) / ((R - localBox.zmax) * Math.Cos(dy / (2.0 * R))));
+            var f = (float)((R - localBox.zmin) / ((R - localBox.zmax) * Math.Cos((localBox.ymax - localBox.ymin) / (2.0 * R))));
 
-            Vector4d[] deformedFrustumPlanes = node.DeformedFrustumPlanes;
+            var v0 = GetClipVisibility(node.DeformedFrustumPlanes[0], deformedBox, f);
+            if (v0 == Frustum.VISIBILITY.INVISIBLE) { return Frustum.VISIBILITY.INVISIBLE; }
 
-            Frustum.VISIBILITY v0 = GetVisibility(deformedFrustumPlanes[0], deformedBox, f);
-            if (v0 == Frustum.VISIBILITY.INVISIBLE)
-            {
-                return Frustum.VISIBILITY.INVISIBLE;
-            }
-            Frustum.VISIBILITY v1 = GetVisibility(deformedFrustumPlanes[1], deformedBox, f);
-            if (v1 == Frustum.VISIBILITY.INVISIBLE)
-            {
-                return Frustum.VISIBILITY.INVISIBLE;
-            }
-            Frustum.VISIBILITY v2 = GetVisibility(deformedFrustumPlanes[2], deformedBox, f);
-            if (v2 == Frustum.VISIBILITY.INVISIBLE)
-            {
-                return Frustum.VISIBILITY.INVISIBLE;
-            }
-            Frustum.VISIBILITY v3 = GetVisibility(deformedFrustumPlanes[3], deformedBox, f);
-            if (v3 == Frustum.VISIBILITY.INVISIBLE)
-            {
-                return Frustum.VISIBILITY.INVISIBLE;
-            }
-            Frustum.VISIBILITY v4 = GetVisibility(deformedFrustumPlanes[4], deformedBox, f);
-            if (v4 == Frustum.VISIBILITY.INVISIBLE)
-            {
-                return Frustum.VISIBILITY.INVISIBLE;
-            }
+            var v1 = GetClipVisibility(node.DeformedFrustumPlanes[1], deformedBox, f);
+            if (v1 == Frustum.VISIBILITY.INVISIBLE) { return Frustum.VISIBILITY.INVISIBLE; }
+
+            var v2 = GetClipVisibility(node.DeformedFrustumPlanes[2], deformedBox, f);
+            if (v2 == Frustum.VISIBILITY.INVISIBLE) { return Frustum.VISIBILITY.INVISIBLE; }
+
+            var v3 = GetClipVisibility(node.DeformedFrustumPlanes[3], deformedBox, f);
+            if (v3 == Frustum.VISIBILITY.INVISIBLE) { return Frustum.VISIBILITY.INVISIBLE; }
+
+            var v4 = GetClipVisibility(node.DeformedFrustumPlanes[4], deformedBox, f);
+            if (v4 == Frustum.VISIBILITY.INVISIBLE) { return Frustum.VISIBILITY.INVISIBLE; }
 
             if (v0 == Frustum.VISIBILITY.FULLY && v1 == Frustum.VISIBILITY.FULLY &&
                 v2 == Frustum.VISIBILITY.FULLY && v3 == Frustum.VISIBILITY.FULLY &&
@@ -150,7 +137,7 @@ namespace SpaceEngine.Core.Terrain.Deformation
             return Frustum.VISIBILITY.PARTIALLY;
         }
 
-        public static Frustum.VISIBILITY GetVisibility(Vector4d clip, Vector3d[] b, double f)
+        public static Frustum.VISIBILITY GetClipVisibility(Vector4d clip, Vector3d[] b, double f)
         {
             double c1 = b[0].x * clip.x + clip.w;
             double c2 = b[1].x * clip.x + clip.w;

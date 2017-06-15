@@ -27,7 +27,7 @@
 			{
 				v2f o;
 
-				o.pos = mul(UNITY_MATRIX_MVP, v.vertex);
+				o.pos = UnityObjectToClipPos(v.vertex);
 
 				float3 bitangent = cross(v.normal, v.tangent.xyz) * v.tangent.w;
 

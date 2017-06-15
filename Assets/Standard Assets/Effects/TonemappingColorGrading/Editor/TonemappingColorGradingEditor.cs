@@ -1,11 +1,11 @@
 namespace UnityStandardAssets.CinematicEffects
 {
-    using UnityEngine;
-    using UnityEditor;
-    using UnityEditorInternal;
-    using System.Reflection;
     using System.Collections.Generic;
     using System.Linq;
+    using System.Reflection;
+    using UnityEditor;
+    using UnityEditorInternal;
+    using UnityEngine;
 
     [CanEditMultipleObjects, CustomEditor(typeof(TonemappingColorGrading))]
     public class TonemappingColorGradingEditor : Editor
@@ -353,7 +353,7 @@ namespace UnityStandardAssets.CinematicEffects
             {
                 Camera camera = concreteTarget.GetComponent<Camera>();
 
-                if (camera != null && !camera.hdr)
+                if (camera != null && !camera.allowHDR)
                     EditorGUILayout.HelpBox("The camera is not HDR enabled. This will likely break the tonemapper.", MessageType.Warning);
                 else if (!concreteTarget.validRenderTextureFormat)
                     EditorGUILayout.HelpBox("The input to tonemapper is not in HDR. Make sure that all effects prior to this are executed in HDR.", MessageType.Warning);
