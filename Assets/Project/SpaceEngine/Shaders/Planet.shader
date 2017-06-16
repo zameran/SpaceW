@@ -173,10 +173,10 @@
 					float lightAngularRadius = asin(WSPR.w * invertedLightDistance);
 
 					eclipse *= EclipseShadow(P, lightPosition, lightAngularRadius);
+				#endif
 
-					#if SHADOW_1 || SHADOW_2 || SHADOW_3 || SHADOW_4
-						float shadow = ShadowColor(float4(P, 1));	// Body origin take in to account...
-					#endif
+				#if SHADOW_1 || SHADOW_2 || SHADOW_3 || SHADOW_4
+					float shadow = ShadowColor(float4(P, 1));	// Body origin take in to account...
 				#endif
 				
 				#if ATMOSPHERE_ON
@@ -193,15 +193,16 @@
 						}
 					#endif
 
+					float darknessAccumulation = 1.0;
 					float3 extinction;
 					float3 inscatter = InScattering(WCPO, P, WSD, extinction, 0.0);
 
 					#ifdef ECLIPSES_ON
 						inscatter *= eclipse;
+					#endif
 
-						#if SHADOW_1 || SHADOW_2 || SHADOW_3 || SHADOW_4
-							inscatter *= shadow;
-						#endif
+					#if SHADOW_1 || SHADOW_2 || SHADOW_3 || SHADOW_4
+						inscatter *= shadow;
 					#endif
 
 					#ifdef SHINE_ON
@@ -210,11 +211,17 @@
 
 					#ifdef ECLIPSES_ON
 						#if SHADOW_1 || SHADOW_2 || SHADOW_3 || SHADOW_4
-							extinction = 1 * _ExtinctionGroundFade + (1 - _ExtinctionGroundFade) * extinction * eclipse * shadow;
+							darknessAccumulation = eclipse * shadow;
 						#else
-							extinction = 1 * _ExtinctionGroundFade + (1 - _ExtinctionGroundFade) * extinction * eclipse;
+							darknessAccumulation = eclipse;
+						#endif
+					#else
+						#if SHADOW_1 || SHADOW_2 || SHADOW_3 || SHADOW_4
+							darknessAccumulation = shadow;
 						#endif
 					#endif
+
+					extinction = GroundFade(_ExtinctionGroundFade, extinction, darknessAccumulation);
 
 					float3 finalColor = hdr(groundColor * extinction + inscatter);
 				#elif ATMOSPHERE_OFF

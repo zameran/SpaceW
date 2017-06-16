@@ -117,10 +117,10 @@ namespace SpaceEngine.AtmosphericScattering
 
         public bool LostFocusForceRebake = false;
 
-        public List<AtmosphereSun> Suns = new List<AtmosphereSun>();
+        public List<AtmosphereSun> Suns = new List<AtmosphereSun>(4);
 
-        public List<CelestialBody> EclipseCasters = new List<CelestialBody>();
-        public List<GameObject> ShineCasters = new List<GameObject>();
+        public List<CelestialBody> EclipseCasters = new List<CelestialBody>(4);
+        public List<GameObject> ShineCasters = new List<GameObject>(8);
 
         private AtmosphereParameters atmosphereParameters;
 
@@ -129,7 +129,7 @@ namespace SpaceEngine.AtmosphericScattering
         public Vector3 Origin { get { return ParentBody != null ? ParentBody.transform.position : Vector3.zero; } }
         public float Radius { get { return ParentBody != null ? ParentBody.Size : 0.0f; } }
 
-        public Color[] shineColors = new Color[4] { XKCDColors.Bluish, XKCDColors.Bluish, XKCDColors.Bluish, XKCDColors.Bluish };
+        public List<Color> shineColors = new List<Color>(4) { XKCDColors.Bluish, XKCDColors.Bluish, XKCDColors.Bluish, XKCDColors.Bluish };
 
         private Matrix4x4 shineColorsMatrix1;
         private Matrix4x4 shineOccludersMatrix1;
@@ -138,8 +138,6 @@ namespace SpaceEngine.AtmosphericScattering
         private Matrix4x4 occludersMatrix1;
         private Matrix4x4 sunPositionsMatrix;
         private Matrix4x4 sunDirectionsMatrix;
-
-        public List<string> Keywords = new List<string>();
 
         #region Eventit
 
@@ -224,7 +222,6 @@ namespace SpaceEngine.AtmosphericScattering
 
             Bake();
 
-            InitMisc();
             InitMaterials();
 
             InitUniforms(SkyMaterial);
@@ -246,8 +243,6 @@ namespace SpaceEngine.AtmosphericScattering
             var fadeValue = Mathf.Clamp01(VectorHelper.AngularRadius(Origin, GodManager.Instance.View.WorldCameraPosition, Radius));
 
             Fade = FadeCurve.Evaluate(float.IsNaN(fadeValue) || float.IsInfinity(fadeValue) ? 1.0f : fadeValue);
-
-            Keywords = ParentBody.GetKeywords();
 
             SetUniforms(SkyMaterial);
         }
@@ -288,14 +283,14 @@ namespace SpaceEngine.AtmosphericScattering
         {
             if (target == null) return;
 
-            Helper.SetKeywords(target, Keywords);
+            Helper.SetKeywords(target, ParentBody.Keywords);
         }
 
         public void SetUniforms(Material target)
         {
             if (target == null) return;
 
-            Helper.SetKeywords(target, Keywords);
+            Helper.SetKeywords(target, ParentBody.Keywords);
         }
 
         #endregion
@@ -659,11 +654,6 @@ namespace SpaceEngine.AtmosphericScattering
         public void InitMaterials()
         {
             SkyMaterial = MaterialHelper.CreateTemp(SkyShader, "Sky");
-        }
-
-        public void InitMisc()
-        {
-            Keywords = ParentBody.GetKeywords();
         }
 
         #region ExtraAPI

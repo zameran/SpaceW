@@ -70,6 +70,7 @@ namespace SpaceEngine.Debugging
             GUILayout.Space(10);
 
             GodManager.Instance.Eclipses = GUILayout.Toggle(GodManager.Instance.Eclipses, " - Eclipses?");
+            GodManager.Instance.Planetshadows = GUILayout.Toggle(GodManager.Instance.Planetshadows, " - Planetshadows?");
             GodManager.Instance.Planetshine = GUILayout.Toggle(GodManager.Instance.Planetshine, " - Planetshine?");
 
             GUILayout.EndVertical();

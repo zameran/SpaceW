@@ -79,6 +79,7 @@ public class GodManager : MonoSingleton<GodManager>
     public Vector3 WorldCameraPos { get { return View.WorldCameraPosition; } }
 
     public bool Eclipses = true;
+    public bool Planetshadows = true;
     public bool Planetshine = true;
     public bool DelayedCalculations = false;
     public bool FloatingOrigin = false;

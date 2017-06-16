@@ -98,7 +98,7 @@ namespace SpaceEngine.Core.Bodies
 
         public List<TerrainNode> TerrainNodes = new List<TerrainNode>(6);
         public List<TileSampler> TileSamplers = new List<TileSampler>();
-        public List<Shadow> Shadows = new List<Shadow>(255);
+        public List<Shadow> Shadows = new List<Shadow>(4);
 
         [HideInInspector]
         public double HeightZ = 0;
@@ -114,6 +114,8 @@ namespace SpaceEngine.Core.Bodies
 
         public MaterialTableGradientLut MaterialTable = new MaterialTableGradientLut();
 
+        public List<string> Keywords = new List<string>();
+
         #region Node
 
         protected override void InitNode()
@@ -128,9 +130,6 @@ namespace SpaceEngine.Core.Bodies
             {
                 if (Ocean.ParentBody == null)
                     Ocean.ParentBody = this;
-
-                // NOTE : Reinvert particular value to switch matrices for ocean rendering... Not used at the moment...
-                //StartCoroutine(Ocean.InitializationFix());
             }
 
             if (Ring != null)
@@ -148,10 +147,14 @@ namespace SpaceEngine.Core.Bodies
             MPB = new MaterialPropertyBlock();
 
             MaterialTable.GenerateLut();
+
+            Keywords = GetKeywords();
         }
 
         protected override void UpdateNode()
         {
+            Keywords = GetKeywords();
+
             // NOTE : Self - rendering!
             Render();
         }

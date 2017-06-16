@@ -113,6 +113,11 @@ float4 GroundFade(float fade, float4 value)
 	return 1.0f * fade + (1.0f - fade) * value;
 }
 
+float3 GroundFade(float fade, float3 extinction, float4 value)
+{
+	return 1.0f * fade + (1.0f - fade) * extinction * value;
+}
+
 float4 BrightnessContrast(float brightness, float contrast, float4 value)
 {
 	return (value - 1.0) * contrast + 1.0 + brightness;

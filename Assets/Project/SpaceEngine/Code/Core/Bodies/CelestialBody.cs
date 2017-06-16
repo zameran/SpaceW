@@ -54,6 +54,16 @@ namespace SpaceEngine.Core.Bodies
         public override List<string> GetKeywords()
         {
             var Keywords = new List<string>();
+            var shadowsCount = Shadows.Count((shadow) => shadow != null && Helper.Enabled(shadow));
+
+            if (shadowsCount > 0 && GodManager.Instance.Planetshadows)
+            {
+                Keywords.Add(string.Format("SHADOW_{0}", shadowsCount));
+            }
+            else
+            {
+                Keywords.Add("SHADOW_0");
+            }
 
             if (Ring != null)
             {
@@ -61,20 +71,6 @@ namespace SpaceEngine.Core.Bodies
                 {
                     Keywords.Add("RING_ON");
                     Keywords.Add("SCATTERING");
-
-                    var shadowsCount = Shadows.Count((shadow) => shadow != null && Helper.Enabled(shadow));
-
-                    if (shadowsCount > 0 && GodManager.Instance.Eclipses)
-                    {
-                        for (byte i = 0; i < shadowsCount; i++)
-                        {
-                            Keywords.Add("SHADOW_" + (i + 1));
-                        }
-                    }
-                    else
-                    {
-                        Keywords.Add("SHADOW_0");
-                    }
                 }
                 else
                 {
@@ -93,7 +89,9 @@ namespace SpaceEngine.Core.Bodies
                     var lightCount = Atmosphere.Suns.Count((sun) => sun != null && sun.gameObject.activeInHierarchy);
 
                     if (lightCount != 0)
-                        Keywords.Add("LIGHT_" + lightCount);
+                    {
+                        Keywords.Add(string.Format("LIGHT_{0}", lightCount));
+                    }
 
                     if (Atmosphere.EclipseCasters.Count == 0)
                     {
