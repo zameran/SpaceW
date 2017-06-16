@@ -122,14 +122,14 @@ namespace SpaceEngine.AtmosphericScattering
         public List<CelestialBody> EclipseCasters = new List<CelestialBody>(4);
         public List<GameObject> ShineCasters = new List<GameObject>(8);
 
-        private AtmosphereParameters atmosphereParameters;
+        private AtmosphereParameters AtmosphereParameters;
 
-        public PreProcessAtmosphere atmosphereBaker = null;
+        public PreProcessAtmosphere AtmosphereBaker = null;
 
         public Vector3 Origin { get { return ParentBody != null ? ParentBody.transform.position : Vector3.zero; } }
         public float Radius { get { return ParentBody != null ? ParentBody.Size : 0.0f; } }
 
-        public List<Color> shineColors = new List<Color>(4) { XKCDColors.Bluish, XKCDColors.Bluish, XKCDColors.Bluish, XKCDColors.Bluish };
+        public List<Color> ShineColors = new List<Color>(4) { XKCDColors.Bluish, XKCDColors.Bluish, XKCDColors.Bluish, XKCDColors.Bluish };
 
         private Matrix4x4 shineColorsMatrix1;
         private Matrix4x4 shineOccludersMatrix1;
@@ -235,10 +235,10 @@ namespace SpaceEngine.AtmosphericScattering
         {
             SkyMaterial.renderQueue = (int)RenderQueue + RenderQueueOffset;
 
-            atmosphereParameters.Rg = Radius - TerrainRadiusHold;
-            atmosphereParameters.Rt = (Radius + Height) - TerrainRadiusHold;
-            atmosphereParameters.Rl = (Radius + Height * 1.05f) - TerrainRadiusHold;
-            atmosphereParameters.SCALE = Scale;
+            AtmosphereParameters.Rg = Radius - TerrainRadiusHold;
+            AtmosphereParameters.Rt = (Radius + Height) - TerrainRadiusHold;
+            AtmosphereParameters.Rl = (Radius + Height * 1.05f) - TerrainRadiusHold;
+            AtmosphereParameters.SCALE = Scale;
 
             var fadeValue = Mathf.Clamp01(VectorHelper.AngularRadius(Origin, GodManager.Instance.View.WorldCameraPosition, Radius));
 
@@ -251,7 +251,7 @@ namespace SpaceEngine.AtmosphericScattering
         {
             base.Awake();
 
-            if (atmosphereBaker == null) atmosphereBaker = GetComponentInChildren<PreProcessAtmosphere>();
+            if (AtmosphereBaker == null) AtmosphereBaker = GetComponentInChildren<PreProcessAtmosphere>();
         }
 
         protected override void Start()
@@ -306,9 +306,9 @@ namespace SpaceEngine.AtmosphericScattering
 
             target.SetFloat("_Aerial_Perspective_Offset", AerialPerspectiveOffset);
 
-            target.SetFloat("Rg", atmosphereParameters.Rg);
-            target.SetFloat("Rt", atmosphereParameters.Rt);
-            target.SetFloat("RL", atmosphereParameters.Rl);
+            target.SetFloat("Rg", AtmosphereParameters.Rg);
+            target.SetFloat("Rt", AtmosphereParameters.Rt);
+            target.SetFloat("RL", AtmosphereParameters.Rl);
 
             target.SetFloat("TRANSMITTANCE_W", AtmosphereConstants.TRANSMITTANCE_W);
             target.SetFloat("TRANSMITTANCE_H", AtmosphereConstants.TRANSMITTANCE_H);
@@ -318,9 +318,9 @@ namespace SpaceEngine.AtmosphericScattering
             target.SetFloat("RES_MU", AtmosphereConstants.RES_MU);
             target.SetFloat("RES_MU_S", AtmosphereConstants.RES_MU_S);
             target.SetFloat("RES_NU", AtmosphereConstants.RES_NU);
-            target.SetFloat("AVERAGE_GROUND_REFLECTANCE", atmosphereParameters.AVERAGE_GROUND_REFLECTANCE);
-            target.SetFloat("HR", atmosphereParameters.HR * 1000.0f);
-            target.SetFloat("HM", atmosphereParameters.HM * 1000.0f);
+            target.SetFloat("AVERAGE_GROUND_REFLECTANCE", AtmosphereParameters.AVERAGE_GROUND_REFLECTANCE);
+            target.SetFloat("HR", AtmosphereParameters.HR * 1000.0f);
+            target.SetFloat("HM", AtmosphereParameters.HM * 1000.0f);
         }
 
         public void SetUniforms(MaterialPropertyBlock target)
@@ -333,21 +333,21 @@ namespace SpaceEngine.AtmosphericScattering
 
             target.SetFloat("fade", Fade);
             target.SetFloat("density", Density);
-            target.SetFloat("scale", atmosphereParameters.SCALE);
-            target.SetFloat("Rg", atmosphereParameters.Rg);
-            target.SetFloat("Rt", atmosphereParameters.Rt);
-            target.SetFloat("RL", atmosphereParameters.Rl);
-            target.SetVector("betaR", atmosphereParameters.BETA_R / 1000);
-            target.SetVector("betaMSca", atmosphereParameters.BETA_MSca / 1000);
-            target.SetVector("betaMEx", atmosphereParameters.BETA_MEx / 1000);
-            target.SetFloat("mieG", Mathf.Clamp(atmosphereParameters.MIE_G, 0.0f, 0.99f));
+            target.SetFloat("scale", AtmosphereParameters.SCALE);
+            target.SetFloat("Rg", AtmosphereParameters.Rg);
+            target.SetFloat("Rt", AtmosphereParameters.Rt);
+            target.SetFloat("RL", AtmosphereParameters.Rl);
+            target.SetVector("betaR", AtmosphereParameters.BETA_R / 1000);
+            target.SetVector("betaMSca", AtmosphereParameters.BETA_MSca / 1000);
+            target.SetVector("betaMEx", AtmosphereParameters.BETA_MEx / 1000);
+            target.SetFloat("mieG", Mathf.Clamp(AtmosphereParameters.MIE_G, 0.0f, 0.99f));
 
             target.SetFloat("_Aerial_Perspective_Offset", AerialPerspectiveOffset);
             target.SetFloat("_ExtinctionGroundFade", ExtinctionGroundFade);
 
-            if (atmosphereBaker.transmittanceT != null) target.SetTexture("_Sky_Transmittance", atmosphereBaker.transmittanceT);
-            if (atmosphereBaker.inscatterT_Read != null) target.SetTexture("_Sky_Inscatter", atmosphereBaker.inscatterT_Read);
-            if (atmosphereBaker.irradianceT_Read != null) target.SetTexture("_Sky_Irradiance", atmosphereBaker.irradianceT_Read);
+            if (AtmosphereBaker.transmittanceT != null) target.SetTexture("_Sky_Transmittance", AtmosphereBaker.transmittanceT);
+            if (AtmosphereBaker.inscatterT_Read != null) target.SetTexture("_Sky_Inscatter", AtmosphereBaker.inscatterT_Read);
+            if (AtmosphereBaker.irradianceT_Read != null) target.SetTexture("_Sky_Irradiance", AtmosphereBaker.irradianceT_Read);
 
             target.SetMatrix("_Globals_WorldToCamera", GodManager.Instance.WorldToCamera.ToMatrix4x4());
             target.SetMatrix("_Globals_CameraToWorld", GodManager.Instance.CameraToWorld.ToMatrix4x4());
@@ -419,17 +419,17 @@ namespace SpaceEngine.AtmosphericScattering
 
         private void ApplyPresset(AtmosphereParameters p)
         {
-            atmosphereParameters = new AtmosphereParameters(p);
+            AtmosphereParameters = new AtmosphereParameters(p);
 
-            atmosphereParameters.Rg = Radius - TerrainRadiusHold;
-            atmosphereParameters.Rt = (Radius + Height) - TerrainRadiusHold;
-            atmosphereParameters.Rl = (Radius + Height * 1.05f) - TerrainRadiusHold;
-            atmosphereParameters.SCALE = Scale;
+            AtmosphereParameters.Rg = Radius - TerrainRadiusHold;
+            AtmosphereParameters.Rt = (Radius + Height) - TerrainRadiusHold;
+            AtmosphereParameters.Rl = (Radius + Height * 1.05f) - TerrainRadiusHold;
+            AtmosphereParameters.SCALE = Scale;
         }
 
         public void Bake()
         {
-            atmosphereBaker.Bake(atmosphereParameters);
+            AtmosphereBaker.Bake(AtmosphereParameters);
 
             EventManager.BodyEvents.OnAtmosphereBaked.Invoke(ParentBody, this);
         }
@@ -455,7 +455,7 @@ namespace SpaceEngine.AtmosphericScattering
                 soc1.SetRow(i, VectorHelper.MakeFrom((ShineCasters[i].transform.position - Origin).normalized, 1.0f));
                 soc2.SetRow(i, VectorHelper.MakeFrom((Origin - ShineCasters[i].transform.position).normalized, 1.0f));
                 
-                sc1.SetRow(index, VectorHelper.FromColor(shineColors[i]));
+                sc1.SetRow(index, VectorHelper.FromColor(ShineColors[i]));
 
                 sp1.SetRow(i, new Vector4(distance, 1.0f, 1.0f, 1.0f));
 
