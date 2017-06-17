@@ -211,7 +211,6 @@
 
 			#pragma multi_compile OCEAN_SKY_REFLECTIONS_ON OCEAN_SKY_REFLECTIONS_OFF
 			#pragma multi_compile OCEAN_NONE OCEAN_FFT OCEAN_WHITECAPS
-			#pragma multi_compile OCEAN_INSCATTER_FIX
 			ENDCG
 		}
 	}

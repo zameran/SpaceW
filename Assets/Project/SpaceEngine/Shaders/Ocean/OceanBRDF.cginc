@@ -66,6 +66,7 @@
 #endif
 
 #define OCEAN_ONLY_SPHERICAL
+#define OCEAN_INSCATTER_FIX
 
 uniform float4x4 _Globals_WorldToScreen;
 
