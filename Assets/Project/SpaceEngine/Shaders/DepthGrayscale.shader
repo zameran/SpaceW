@@ -2,7 +2,7 @@
 {
 	SubShader 
 	{
-		Tags { "RenderType" = "Opaque" }
+		Tags { "RenderType" = "Opaque" "IgnoreProjector" = "True" }
 
 		Pass 
 		{
@@ -14,23 +14,42 @@
 
 			struct v2f 
 			{
-				float4 pos : SV_POSITION;
-				float2 depth : TEXCOORD0;
+				float4 position : SV_POSITION;
+				float4 positionClip : TEXCOORD0;
+				float3 positionView : TEXCOORD1;
+				float2 depth : TEXCOORD2;
+			};
+
+			struct f2a
+			{
+				float4 color : COLOR;
+				float depth : DEPTH;
 			};
 
 			v2f vert (appdata_base v) 
 			{
 				v2f o;
 
-				o.pos = UnityObjectToClipPos(v.vertex);
-				o.depth = o.pos.zw;
+				o.position = UnityObjectToClipPos(v.vertex);
+				o.positionClip = o.position;
+				o.positionView = UnityObjectToViewPos(v.vertex);
+				o.depth = o.position.zw;
 
 				return o;
 			}
 
-			half4 frag(v2f i) : SV_Target 
+			f2a frag(v2f i) 
 			{
-				return (i.depth.x / i.depth.y);
+				f2a o;
+
+				float C = 1;
+				float offset = 2.0;
+				float scale = 8.0;
+
+				o.color = abs(i.positionView.z) / scale;
+				o.depth = (log(C * i.positionClip.z + offset) / log(C * _ProjectionParams.z + offset));
+
+				return o;
 			}
 			ENDCG
 		}
