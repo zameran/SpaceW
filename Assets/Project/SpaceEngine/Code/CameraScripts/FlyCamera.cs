@@ -80,6 +80,8 @@ namespace SpaceEngine.Cameras
         {
             base.FixedUpdate();
 
+            CameraComponent.depthTextureMode = DepthTextureMode.Depth;
+
             UpdateDistances();
             UpdateClipPlanes();
 

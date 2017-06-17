@@ -34,10 +34,10 @@
 				#endif
 				out float4 opos : SV_POSITION)
 			{
-				v.vertex.xyz += v.normal * 0.05f;
-
 				UNITY_SETUP_INSTANCE_ID(v);
+				v.vertex.xyz += v.normal * 0.05f;
 				TRANSFER_SHADOW_CASTER_NOPOS(o,opos)
+
 				#if defined(UNITY_STANDARD_USE_SHADOW_UVS)
 					o.tex = TRANSFORM_TEX(v.uv0, _MainTex);
 				#endif
