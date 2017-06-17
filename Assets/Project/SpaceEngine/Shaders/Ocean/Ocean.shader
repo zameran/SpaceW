@@ -135,9 +135,13 @@
 			#endif
 
 			float3 surfaceColor = 0;
+			float surfaceAlpha = 1;
+
+			// TODO : Sample scene depth for ocean transparency...
 
 			#ifdef OCEAN_FFT
 				surfaceColor = Lsun + Lsky + Lsea;
+				surfaceAlpha = min(max(hdr(Lsun), fresnel + surfaceAlpha), 1.0);
 			#endif
 					
 			#ifdef OCEAN_WHITECAPS
@@ -166,13 +170,14 @@
 				float3 R_ftot = float3(W * l * 0.4);
 				
 				surfaceColor = Lsun + Lsky + Lsea + R_ftot;
+				surfaceAlpha = min(max(hdr(Lsun + R_ftot), fresnel + surfaceAlpha), 1.0);
 			#endif
 
 			// Aerial perspective
 			float3 inscatter = InScattering(earthCamera, earthP, L, extinction, 0.0);
 			float3 finalColor = surfaceColor * extinction + inscatter;
 			
-			color = float4(hdr(finalColor), 1);
+			color = float4(hdr(finalColor), surfaceAlpha);
 		}
 		ENDCG
 
@@ -189,6 +194,7 @@
 				"LightMode"				= "Always"
 			}
 
+			Blend SrcAlpha OneMinusSrcAlpha
 			Cull Front
 			Lighting Off
 			ZWrite Off
