@@ -10,6 +10,7 @@
 		#include "OceanDisplacement.cginc"
 
 		uniform float3 _Ocean_Color;
+		uniform float _Ocean_Wave_Level;
 
 		struct a2v
 		{
@@ -56,7 +57,7 @@
 			float3x3 otoc = _Ocean_OceanToCamera;
 
 			#ifdef OCEAN_ONLY_SPHERICAL
-				float tClamped = clamp(t * 0.25, 0.0, 1.0);
+				float tClamped = clamp(t * 0.25, 0.0, _Ocean_Wave_Level);
 				dP = lerp(float3(0.0, 0.0, -0.1), dP, tClamped);
 			#endif
 

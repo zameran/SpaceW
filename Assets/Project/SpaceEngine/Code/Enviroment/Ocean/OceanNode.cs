@@ -34,6 +34,9 @@ namespace SpaceEngine.Ocean
         /// </summary>
         public float OceanLevel = 5.0f;
 
+        [Range(0.0f, 1.0f)]
+        public float OceanWaveLevel = 1.0f;
+
         /// <summary>
         /// The maximum altitude at which the ocean must be displayed.
         /// </summary>
@@ -241,6 +244,7 @@ namespace SpaceEngine.Ocean
             OceanMaterial.SetVector("_Ocean_Color", UpwellingColor * 0.1f);
             OceanMaterial.SetVector("_Ocean_ScreenGridSize", new Vector2((float)Resolution / (float)Screen.width, (float)Resolution / (float)Screen.height));
             OceanMaterial.SetFloat("_Ocean_Radius", radius);
+            OceanMaterial.SetFloat("_Ocean_Wave_Level", OceanWaveLevel);
 
             // TODO : Complete ocean matrices calculation for a cyllindrical worlds...
         }
