@@ -103,8 +103,6 @@ namespace SpaceEngine.AtmosphericScattering
         [Range(0.000025f, 0.1f)]
         public float ExtinctionGroundFade = 0.000025f;
 
-        public int AtmosphereMeshResolution = 2;
-
         public float HDRExposure = 0.2f;
 
         public Shader SkyShader;
