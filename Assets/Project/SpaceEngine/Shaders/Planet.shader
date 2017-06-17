@@ -289,7 +289,7 @@
 				#endif
 
 				#if SHADOW_1 || SHADOW_2 || SHADOW_3 || SHADOW_4
-					float shadow = ShadowColor(float4(P, 1));	// Body origin take in to account...
+					float shadow = ShadowColor(float4(PO, 1));	// Body origin take in to account...
 				#endif
 				
 				#if ATMOSPHERE_ON
