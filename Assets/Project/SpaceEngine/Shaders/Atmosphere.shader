@@ -94,7 +94,6 @@ Shader "SpaceEngine/Atmosphere/Atmosphere"
 			Fog { Mode Off }
 
 			CGPROGRAM
-			#include "UnityCG.cginc"		
 			#include "HDR.cginc"
 			#include "Atmosphere.cginc"
 			#include "SpaceStuff.cginc"
@@ -128,7 +127,7 @@ Shader "SpaceEngine/Atmosphere/Atmosphere"
 				float4 color : COLOR;
 			};
 
-			void vert(a2v i, out v2f o)
+			void vert(in a2v i, out v2f o)
 			{
 				//o.position = UnityObjectToClipPos(float4(i.vertex.xy, 1.0, 1.0));
 				o.position = UnityObjectToClipPos(i.vertex);
