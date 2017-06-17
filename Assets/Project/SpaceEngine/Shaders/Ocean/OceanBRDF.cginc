@@ -163,10 +163,6 @@ float WhitecapCoverage(float epsilon, float mu, float sigma2)
 	return 0.5 * erf((0.5 * sqrt(2.0) * (epsilon - mu) * (1.0 / sqrt(sigma2)))) + 0.5;
 }
 
-#define OCEAN_SKY_REFLECTIONS
-
-#ifdef OCEAN_SKY_REFLECTIONS
-
 float3 ReflectedSky(float3 V, float3 N, float3 sunDir, float3 earthP) 
 {
 	float3 result = float3(0.0, 0.0, 0.0);
@@ -177,8 +173,6 @@ float3 ReflectedSky(float3 V, float3 N, float3 sunDir, float3 earthP)
 
 	return result;
 }
-
-#endif
 
 float3 OceanRadianceWithoutSkyReflection(float3 L, float3 V, float3 N, float sigmaSq, float3 sunL, float3 skyE, float3 seaColor) 
 {
@@ -204,23 +198,11 @@ float3 OceanRadianceWithSkyReflection(float3 L, float3 V, float3 N, float sigmaS
 
 float3 OceanRadiance(float3 L, float3 V, float3 N, float sigmaSq, float3 sunL, float3 skyE, float3 seaColor, float3 earthP) 
 {
-	#ifdef OCEAN_SKY_REFLECTIONS
+	#ifdef OCEAN_SKY_REFLECTIONS_ON
 		return OceanRadianceWithSkyReflection(L, V, N, sigmaSq, sunL, skyE, seaColor, earthP);
 	#else
 		return OceanRadianceWithoutSkyReflection(L, V, N, sigmaSq, sunL, skyE, seaColor);
 	#endif
 
 	return 0;
-}
-
-// [Obsolete("...")]
-float3 OceanRadiance(float3 L, float3 V, float3 N, float sigmaSq, float3 sunL, float3 skyE, float3 seaColor) 
-{
-	float fresnel = MeanFresnel(V, N, sigmaSq);
-
-	float3 Lsky = skyE * fresnel / M_PI;
-	float3 Lsun = ReflectedSunRadiance(L, V, N, sigmaSq) * sunL;
-	float3 Lsea = (1.0 - fresnel) * seaColor * skyE / M_PI;
-
-	return Lsun + Lsky + Lsea;
 }

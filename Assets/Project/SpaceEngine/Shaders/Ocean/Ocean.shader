@@ -4,7 +4,6 @@
 	{
 		CGINCLUDE
 
-		#include "UnityCG.cginc"
 		#include "../HDR.cginc"
 		#include "../Atmosphere.cginc"
 		#include "OceanBRDF.cginc"
@@ -25,7 +24,7 @@
 			float3 oceanP : TEXCOORD1;
 		};
 
-		void vert(in appdata_base v, out v2f o)
+		void vert(in a2v v, out v2f o)
 		{
 			float t = 0;
 			float3 cameraDir = 0;
@@ -124,7 +123,7 @@
 
 			SunRadianceAndSkyIrradiance(earthP, N, L, sunL, skyE);
 
-			#ifdef OCEAN_SKY_REFLECTIONS
+			#ifdef OCEAN_SKY_REFLECTIONS_ON
 				float fresnel = MeanFresnel(V, N, sigmaSq);
 				float3 Lsky = fresnel * ReflectedSky(V, N, L, earthP);
 				float3 Lsun = ReflectedSunRadiance(L, V, N, sigmaSq) * sunL;
@@ -140,7 +139,7 @@
 			#ifdef OCEAN_FFT
 				surfaceColor = Lsun + Lsky + Lsea;
 			#endif
-			
+					
 			#ifdef OCEAN_WHITECAPS
 				// Extract mean and variance of the jacobian matrix determinant
 				float2 jm1 = tex2D(_Ocean_Foam0, u / _Ocean_GridSizes.x).xy;
@@ -202,6 +201,7 @@
 			#pragma vertex vert
 			#pragma fragment frag
 
+			#pragma multi_compile OCEAN_SKY_REFLECTIONS_ON OCEAN_SKY_REFLECTIONS_OFF
 			#pragma multi_compile OCEAN_NONE OCEAN_FFT OCEAN_WHITECAPS
 			#pragma multi_compile OCEAN_INSCATTER_FIX
 			ENDCG

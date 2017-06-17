@@ -107,8 +107,10 @@ namespace SpaceEngine.Ocean
 
         protected override void UpdateOceanNode()
         {
-            OceanMaterial.EnableKeyword(FFT_KEYWORD);
-            OceanMaterial.DisableKeyword(WHITECAPS_KEYWORD);
+            if (!OceanMaterial.IsKeywordEnabled(FFT_KEYWORD)) OceanMaterial.EnableKeyword(FFT_KEYWORD);
+            if (OceanMaterial.IsKeywordEnabled(WHITECAPS_KEYWORD)) OceanMaterial.DisableKeyword(WHITECAPS_KEYWORD);
+
+            UpdateKeywords();
         }
 
         #endregion

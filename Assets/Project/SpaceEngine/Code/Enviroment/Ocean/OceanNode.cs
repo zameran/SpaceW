@@ -54,6 +54,8 @@ namespace SpaceEngine.Ocean
         Vector3d uz = Vector3d.zero;
         Vector3d oo = Vector3d.zero;
 
+        protected double H = 0;
+
         protected Vector4 Offset;
 
         /// <summary>
@@ -78,6 +80,23 @@ namespace SpaceEngine.Ocean
         protected abstract void InitOceanNode();
 
         protected abstract void UpdateOceanNode();
+
+        /// <summary>
+        /// Update current ocean state important shader keywords. Call this somewhere per frame.
+        /// </summary>
+        protected virtual void UpdateKeywords()
+        {
+            if (GodManager.Instance.OceanSkyReflections)
+            {
+                if (OceanMaterial.IsKeywordEnabled("OCEAN_SKY_REFLECTIONS_OFF")) OceanMaterial.DisableKeyword("OCEAN_SKY_REFLECTIONS_OFF");
+                if (!OceanMaterial.IsKeywordEnabled("OCEAN_SKY_REFLECTIONS_ON")) OceanMaterial.EnableKeyword("OCEAN_SKY_REFLECTIONS_ON");
+            }
+            else
+            {
+                if (OceanMaterial.IsKeywordEnabled("OCEAN_SKY_REFLECTIONS_ON")) OceanMaterial.DisableKeyword("OCEAN_SKY_REFLECTIONS_ON");
+                if (!OceanMaterial.IsKeywordEnabled("OCEAN_SKY_REFLECTIONS_OFF")) OceanMaterial.EnableKeyword("OCEAN_SKY_REFLECTIONS_OFF");
+            }
+        }
 
         #endregion
 
@@ -201,11 +220,12 @@ namespace SpaceEngine.Ocean
             OldLocalToOcean = localToOcean;
 
             var oc = cameraToOcean * Vector3d.zero;
-            var h = oc.z;
 
-            if (double.IsNaN(h)) { h = 1.0; }
+            H = oc.z;
 
-            var offset = new Vector3d(-Offset.x, -Offset.y, h);
+            if (double.IsNaN(H)) { H = 1.0; }
+
+            var offset = new Vector3d(-Offset.x, -Offset.y, H);
 
             var sunDirection = ParentBody.Atmosphere.GetSunDirection(ParentBody.Atmosphere.Suns[0]);
             var oceanSunDirection = localToOcean.ToMatrix3x3d() * sunDirection;

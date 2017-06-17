@@ -53,33 +53,33 @@ namespace SpaceEngine.Core.Bodies
 
         public override List<string> GetKeywords()
         {
-            var Keywords = new List<string>();
+            var keywords = new List<string>();
             var shadowsCount = Shadows.Count((shadow) => shadow != null && Helper.Enabled(shadow));
 
             if (shadowsCount > 0 && GodManager.Instance.Planetshadows)
             {
-                Keywords.Add(string.Format("SHADOW_{0}", shadowsCount));
+                keywords.Add(string.Format("SHADOW_{0}", shadowsCount));
             }
             else
             {
-                Keywords.Add("SHADOW_0");
+                keywords.Add("SHADOW_0");
             }
 
             if (Ring != null)
             {
                 if (RingEnabled)
                 {
-                    Keywords.Add("RING_ON");
-                    Keywords.Add("SCATTERING");
+                    keywords.Add("RING_ON");
+                    keywords.Add("SCATTERING");
                 }
                 else
                 {
-                    Keywords.Add("RING_OFF");
+                    keywords.Add("RING_OFF");
                 }
             }
             else
             {
-                Keywords.Add("RING_OFF");
+                keywords.Add("RING_OFF");
             }
 
             if (Atmosphere != null)
@@ -90,58 +90,58 @@ namespace SpaceEngine.Core.Bodies
 
                     if (lightCount != 0)
                     {
-                        Keywords.Add(string.Format("LIGHT_{0}", lightCount));
+                        keywords.Add(string.Format("LIGHT_{0}", lightCount));
                     }
 
                     if (Atmosphere.EclipseCasters.Count == 0)
                     {
-                        Keywords.Add("ECLIPSES_OFF");
+                        keywords.Add("ECLIPSES_OFF");
                     }
                     else
                     {
-                        Keywords.Add(GodManager.Instance.Eclipses ? "ECLIPSES_ON" : "ECLIPSES_OFF");
+                        keywords.Add(GodManager.Instance.Eclipses ? "ECLIPSES_ON" : "ECLIPSES_OFF");
                     }
 
                     if (Atmosphere.ShineCasters.Count == 0)
                     {
-                        Keywords.Add("SHINE_OFF");
+                        keywords.Add("SHINE_OFF");
                     }
                     else
                     {
-                        Keywords.Add(GodManager.Instance.Planetshine ? "SHINE_ON" : "SHINE_OFF");
+                        keywords.Add(GodManager.Instance.Planetshine ? "SHINE_ON" : "SHINE_OFF");
                     }
 
-                    Keywords.Add("ATMOSPHERE_ON");
+                    keywords.Add("ATMOSPHERE_ON");
                 }
                 else
                 {
-                    Keywords.Add("ATMOSPHERE_OFF");
+                    keywords.Add("ATMOSPHERE_OFF");
                 }
 
                 if (Ocean != null)
                 {
                     if (OceanEnabled && AtmosphereEnabled)
                     {
-                        Keywords.Add("OCEAN_ON");
+                        keywords.Add("OCEAN_ON");
                     }
                     else
                     {
-                        Keywords.Add("OCEAN_OFF");
+                        keywords.Add("OCEAN_OFF");
                     }
                 }
                 else
                 {
-                    Keywords.Add("OCEAN_OFF");
+                    keywords.Add("OCEAN_OFF");
                 }
             }
             else
             {
-                Keywords.Add("LIGHT_0");
-                Keywords.Add("ATMOSPHERE_OFF");
-                Keywords.Add("OCEAN_OFF");
+                keywords.Add("LIGHT_0");
+                keywords.Add("ATMOSPHERE_OFF");
+                keywords.Add("OCEAN_OFF");
             }
 
-            return Keywords;
+            return keywords;
         }
 
         #endregion
