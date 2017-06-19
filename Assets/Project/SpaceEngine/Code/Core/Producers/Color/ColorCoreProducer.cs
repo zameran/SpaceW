@@ -35,6 +35,7 @@
 
 using SpaceEngine.Core.Bodies;
 using SpaceEngine.Core.Exceptions;
+using SpaceEngine.Core.Numerics;
 using SpaceEngine.Core.Storage;
 using SpaceEngine.Core.Terrain;
 using SpaceEngine.Core.Tile.Producer;
@@ -167,15 +168,13 @@ namespace SpaceEngine.Core
             tileWSD.z = (float)tileSize / (float)(TerrainNode.ParentBody.GridResolution - 1);
             tileWSD.w = 0.0f;
 
-            var tileSD = Vector2d.zero;
-            tileSD.x = (0.5 + (float)GetBorder()) / (tileWSD.x - 1 - (float)GetBorder() * 2);
-            tileSD.y = (1.0 + tileSD.x * 2.0);
+            var tileScreenSize = (0.5 + (float)GetBorder()) / (tileWSD.x - 1 - (float)GetBorder() * 2);
+            var tileSD = new Vector2d(tileScreenSize, 1.0 + tileScreenSize * 2.0);
 
-            var offset = Vector4d.zero;
-            offset.x = ((double)tx / (1 << level) - 0.5) * rootQuadSize;
-            offset.y = ((double)ty / (1 << level) - 0.5) * rootQuadSize;
-            offset.z = rootQuadSize / (1 << level);
-            offset.w = TerrainNode.ParentBody.Size;
+            var offset = new Vector4d(((double)tx / (1 << level) - 0.5) * rootQuadSize,
+                                      ((double)ty / (1 << level) - 0.5) * rootQuadSize,
+                                      rootQuadSize / (1 << level),
+                                      TerrainNode.ParentBody.Size);
 
             ColorMaterial.SetTexture("_NormalsSampler", normalsTex);
             ColorMaterial.SetVector("_NormalsOSL", normalsOSL);

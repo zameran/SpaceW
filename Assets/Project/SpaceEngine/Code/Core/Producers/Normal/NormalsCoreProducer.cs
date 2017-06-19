@@ -1,5 +1,6 @@
 ﻿using SpaceEngine.Core.Bodies;
 using SpaceEngine.Core.Exceptions;
+using SpaceEngine.Core.Numerics;
 using SpaceEngine.Core.Storage;
 using SpaceEngine.Core.Terrain;
 using SpaceEngine.Core.Terrain.Deformation;
@@ -107,32 +108,32 @@ namespace SpaceEngine.Core
 
                 double l0 = 0, l1 = 0, l2 = 0, l3 = 0;
 
-                var v0 = p0.Normalized(ref l0);
-                var v1 = p1.Normalized(ref l1);
-                var v2 = p2.Normalized(ref l2);
-                var v3 = p3.Normalized(ref l3);
+                var v0 = p0.Normalize(out l0);
+                var v1 = p1.Normalize(out l1);
+                var v2 = p2.Normalize(out l2);
+                var v3 = p3.Normalize(out l3);
                 var vc = (v0 + v1 + v2 + v3) * 0.25;
 
-                var deformedCorners = new Matrix4x4d(v0.x * R - vc.x * R,
-                                                     v1.x * R - vc.x * R,
-                                                     v2.x * R - vc.x * R,
-                                                     v3.x * R - vc.x * R,
-                                                     v0.y * R - vc.y * R,
-                                                     v1.y * R - vc.y * R,
-                                                     v2.y * R - vc.y * R,
-                                                     v3.y * R - vc.y * R,
-                                                     v0.z * R - vc.z * R,
-                                                     v1.z * R - vc.z * R,
-                                                     v2.z * R - vc.z * R,
-                                                     v3.z * R - vc.z * R, 1.0, 1.0, 1.0, 1.0);
+                var deformedCorners = new Matrix4x4d(v0.X * R - vc.X * R,
+                                                     v1.X * R - vc.X * R,
+                                                     v2.X * R - vc.X * R,
+                                                     v3.X * R - vc.X * R,
+                                                     v0.Y * R - vc.Y * R,
+                                                     v1.Y * R - vc.Y * R,
+                                                     v2.Y * R - vc.Y * R,
+                                                     v3.Y * R - vc.Y * R,
+                                                     v0.Z * R - vc.Z * R,
+                                                     v1.Z * R - vc.Z * R,
+                                                     v2.Z * R - vc.Z * R,
+                                                     v3.Z * R - vc.Z * R, 1.0, 1.0, 1.0, 1.0);
 
-                var deformedVerticals = new Matrix4x4d(v0.x, v1.x, v2.x, v3.x, v0.y, v1.y, v2.y, v3.y, v0.z, v1.z, v2.z, v3.z, 0.0, 0.0, 0.0, 0.0);
+                var deformedVerticals = new Matrix4x4d(v0.X, v1.X, v2.X, v3.X, v0.Y, v1.Y, v2.Y, v3.Y, v0.Z, v1.Z, v2.Z, v3.Z, 0.0, 0.0, 0.0, 0.0);
 
                 var uz = pc.Normalized();
                 var ux = new Vector3d(0.0, 1.0, 0.0).Cross(uz).Normalized();
                 var uy = uz.Cross(ux);
 
-                var worldToTangentFrame = new Matrix4x4d(ux.x, ux.y, ux.z, 0.0, uy.x, uy.y, uy.z, 0.0, uz.x, uz.y, uz.z, 0.0, 0.0, 0.0, 0.0, 0.0);
+                var worldToTangentFrame = new Matrix4x4d(ux.X, ux.Y, ux.Z, 0.0, uy.X, uy.Y, uy.Z, 0.0, uz.X, uz.Y, uz.Z, 0.0, 0.0, 0.0, 0.0, 0.0);
 
                 NormalsMaterial.SetMatrix("_PatchCorners", deformedCorners.ToMatrix4x4());
                 NormalsMaterial.SetMatrix("_PatchVerticals", deformedVerticals.ToMatrix4x4());

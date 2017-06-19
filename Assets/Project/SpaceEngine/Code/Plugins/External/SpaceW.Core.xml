@@ -2722,6 +2722,12 @@
             <param name="x">Value for the X component of the vector.</param>
             <param name="y">Value for the Y component of the vector.</param>
         </member>
+        <member name="M:SpaceEngine.Core.Numerics.Vector2d.#ctor(SpaceEngine.Core.Numerics.Vector2d)">
+            <summary>
+                Initializes a new instance of the <see cref="T:SpaceEngine.Core.Numerics.Vector2d" /> using the specified values.
+            </summary>
+            <param name="value">A vector containing the values with which to initialize the X and Y components</param>
+        </member>
         <member name="M:SpaceEngine.Core.Numerics.Vector2d.#ctor(System.Double[])">
             <summary>
                 Initializes a new instance of the <see cref="T:SpaceEngine.Core.Numerics.Vector2d" /> using the specified array.
@@ -3260,6 +3266,14 @@
             <returns>The product of the left and right parameters.</returns>
         </member>
         <member name="M:SpaceEngine.Core.Numerics.Vector.Multiply(SpaceEngine.Core.Numerics.Matrix3x3d,SpaceEngine.Core.Numerics.Vector3d)">
+            <summary>
+                Returns the product of a matrix and vector.
+            </summary>
+            <param name="matrix">The matrix to multiply.</param>
+            <param name="vector">The vector to multiply.</param>
+            <returns>The product of the left and right parameters.</returns>
+        </member>
+        <member name="M:SpaceEngine.Core.Numerics.Vector.Multiply(SpaceEngine.Core.Numerics.Matrix4x4d,SpaceEngine.Core.Numerics.Vector3d)">
             <summary>
                 Returns the product of a matrix and vector.
             </summary>
@@ -4483,6 +4497,12 @@
             <param name="y">Value for the Y component of the vector.</param>
             <param name="z">Value for the Z component of the vector.</param>
         </member>
+        <member name="M:SpaceEngine.Core.Numerics.Vector3d.#ctor(SpaceEngine.Core.Numerics.Vector3d)">
+            <summary>
+                Initializes a new instance of the <see cref="T:SpaceEngine.Core.Numerics.Vector3d" /> using the specified values.
+            </summary>
+            <param name="value">A vector containing the values with which to initialize the X, Y, Z components</param>
+        </member>
         <member name="M:SpaceEngine.Core.Numerics.Vector3d.#ctor(System.Double[])">
             <summary>
                 Initializes a new instance of the <see cref="T:SpaceEngine.Core.Numerics.Vector3d" /> using the specified array.
@@ -4551,6 +4571,22 @@
             <returns>The product of the left and right parameters.</returns>
         </member>
         <member name="M:SpaceEngine.Core.Numerics.Vector3d.op_Multiply(SpaceEngine.Core.Numerics.Vector3d,SpaceEngine.Core.Numerics.Matrix3x3d)">
+            <summary>
+                Returns the product of a matrix and vector.
+            </summary>
+            <param name="right">The vector to multiply.</param>
+            <param name="left">The matrix to multiply.</param>
+            <returns>The product of the left and right parameters.</returns>
+        </member>
+        <member name="M:SpaceEngine.Core.Numerics.Vector3d.op_Multiply(SpaceEngine.Core.Numerics.Matrix4x4d,SpaceEngine.Core.Numerics.Vector3d)">
+            <summary>
+                Returns the product of a matrix and vector.
+            </summary>
+            <param name="left">The matrix to multiply.</param>
+            <param name="right">The vector to multiply.</param>
+            <returns>The product of the left and right parameters.</returns>
+        </member>
+        <member name="M:SpaceEngine.Core.Numerics.Vector3d.op_Multiply(SpaceEngine.Core.Numerics.Vector3d,SpaceEngine.Core.Numerics.Matrix4x4d)">
             <summary>
                 Returns the product of a matrix and vector.
             </summary>
@@ -6422,6 +6458,12 @@
             <param name="y">Value for the Y component of the vector.</param>
             <param name="z">Value for the Z component of the vector.</param>
             <param name="w">Value for the W component of the vector.</param>
+        </member>
+        <member name="M:SpaceEngine.Core.Numerics.Vector4d.#ctor(SpaceEngine.Core.Numerics.Vector4d)">
+            <summary>
+                Initializes a new instance of the <see cref="T:SpaceEngine.Core.Numerics.Vector4d" /> using the specified values.
+            </summary>
+            <param name="value">A vector containing the values with which to initialize the X, Y, Z, W components</param>
         </member>
         <member name="M:SpaceEngine.Core.Numerics.Vector4d.#ctor(System.Double[])">
             <summary>
