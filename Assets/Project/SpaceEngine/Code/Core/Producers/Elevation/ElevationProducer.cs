@@ -11,6 +11,9 @@ using System.Collections.Generic;
 
 using UnityEngine;
 
+using Vector2d = SpaceEngine.Core.Numerics.Vector2d;
+using Vector4d = SpaceEngine.Core.Numerics.Vector4d;
+
 namespace SpaceEngine.Core
 {
     /// <summary>

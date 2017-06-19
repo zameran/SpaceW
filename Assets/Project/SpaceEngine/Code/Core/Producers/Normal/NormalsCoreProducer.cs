@@ -12,6 +12,9 @@ using System.Collections.Generic;
 
 using UnityEngine;
 
+using Matrix4x4d = SpaceEngine.Core.Numerics.Matrix4x4d;
+using Vector3d = SpaceEngine.Core.Numerics.Vector3d;
+
 namespace SpaceEngine.Core
 {
     public class NormalsCoreProducer : TileProducer
