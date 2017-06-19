@@ -71,7 +71,7 @@ namespace SpaceEngine.Core.Tile.Samplers
         /// </summary>
         public QuadTree QuadTreeRoot = null;
 
-        Uniforms uniforms;
+        private Uniforms uniforms;
 
         /// <summary>
         /// The producer to be used to create texture tiles for newly created quads.
@@ -290,7 +290,7 @@ namespace SpaceEngine.Core.Tile.Samplers
         /// <param name="level"></param>
         /// <param name="tx"></param>
         /// <param name="ty"></param>
-        void SetTile(ref RenderTexture tex, ref Vector3 coord, ref Vector3 size, int level, int tx, int ty)
+        private void SetTile(ref RenderTexture tex, ref Vector3 coord, ref Vector3 size, int level, int tx, int ty)
         {
             if (!Producer.IsGPUProducer) return;
 

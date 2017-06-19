@@ -233,7 +233,7 @@ namespace SpaceEngine.Core.Terrain
             }
         }
 
-        private void Destroy()
+        public void Destroy()
         {
             for (byte i = 0; i < 4; i++)
             {

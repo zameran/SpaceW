@@ -36,6 +36,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Text;
 
 using UnityEngine;
 
@@ -76,8 +77,6 @@ namespace SpaceEngine.Managers
 
         public override bool Equals(object obj)
         {
-            if (obj == null) return false;
-
             var p = obj as SequenceEntry;
 
             if (p == null) return false;
@@ -106,6 +105,27 @@ namespace SpaceEngine.Managers
             Instance = this;
         }
 
+        private void Update()
+        {
+            #region DEBUG
+
+            if (Input.GetKeyDown(KeyCode.F8))
+            {
+                var stringBuilder = new StringBuilder();
+
+                for (short i = 0; i < Sequence.Count; i++)
+                {
+                    var sequenceEntry = Sequence[i];
+
+                    stringBuilder.AppendLine(string.Format("{0}:{1}", sequenceEntry.Name, sequenceEntry.TimeSinceStartup));
+                }
+
+                UnityEngine.Debug.Log(stringBuilder.ToString());
+            }
+
+            #endregion
+        }
+
         /// <summary>
         /// Add a <see cref="MonoBehaviour"/> to the debug sequence.
         /// </summary>
@@ -113,7 +133,9 @@ namespace SpaceEngine.Managers
         /// <param name="stackFrameOffset">Stack fram offset for a method, wich will be added.</param>
         public void Debug(MonoBehaviour owner, int stackFrameOffset = 1)
         {
-            var entry = new SequenceEntry(string.Format("{0} [{1}.{2}]", owner.name, owner.GetType().Name, new StackTrace().GetFrame(stackFrameOffset).GetMethod().Name));
+            var entry = new SequenceEntry(string.Format("{0} [{1}:{2}.{3}]", owner.gameObject.name, 
+                                                                             owner.name, 
+                                                                             owner.GetType().Name, new StackTrace().GetFrame(stackFrameOffset).GetMethod().Name));
 
             if (Sequence.Contains(entry)) { NestedSequence.Add(entry); }
             else Sequence.Add(entry);

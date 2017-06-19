@@ -43,7 +43,6 @@ using SpaceEngine.Core.Utilities.Gradients;
 using SpaceEngine.Ocean;
 
 using System.Collections.Generic;
-using System.Linq;
 
 using UnityEngine;
 
@@ -174,8 +173,6 @@ namespace SpaceEngine.Core.Bodies
         protected override void OnDestroy()
         {
             base.OnDestroy();
-
-            Helper.Destroy(QuadMesh);
 
             MaterialTable.DestroyLut();
         }
@@ -338,16 +335,17 @@ namespace SpaceEngine.Core.Bodies
         private void DrawTerrain(TerrainNode node)
         {
             // Get all the samplers attached to the terrain node. The samples contain the data need to draw the quad
-            var samplers = node.Samplers.Where(sampler => sampler.enabled && sampler.StoreLeaf).ToList();
+            //node.CollectSamplersSuitable();
+            // TODO : Collect suitable samplers again, if some changes are done...
 
             // So, if doesn't have any samplers - do anything...
-            if (samplers.Count == 0) return;
+            if (node.Samplers.Count == 0 || node.SamplersSuitable.Count == 0) return;
 
             // Find all the quads in the terrain node that need to be drawn
-            node.FindDrawableQuads(node.TerrainQuadRoot, samplers);
+            node.FindDrawableQuads(node.TerrainQuadRoot);
 
             // The draw them
-            node.DrawQuad(node.TerrainQuadRoot, samplers, QuadMesh, MPB);
+            node.DrawQuad(node.TerrainQuadRoot, QuadMesh, MPB);
         }
     }
 }

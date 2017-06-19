@@ -250,12 +250,6 @@ Shader "SpaceEngine/Atmosphere/Atmosphere"
 					extinction += extinction1;
 					extinction += extinction2;
 
-					#ifdef ECLIPSES_ON
-						#if SHADOW_1 || SHADOW_2 || SHADOW_3 || SHADOW_4
-							extinction = 1 * _ExtinctionGroundFade + (1 - _ExtinctionGroundFade) * extinction;
-						#endif
-					#endif
-
 					float3 finalColor = sunColor * extinction + inscatter;
 
 					finalColor = hdr(finalColor);

@@ -155,6 +155,8 @@ namespace SpaceEngine.Core.Terrain
         float[] Horizon = new float[HORIZON_SIZE];
 
         public List<TileSampler> Samplers = new List<TileSampler>(255);
+        public List<TileSampler> SamplersSuitable = new List<TileSampler>(255);
+
         public TileSamplerOrder SamplersOrder;
 
         #region Node
@@ -206,6 +208,7 @@ namespace SpaceEngine.Core.Terrain
             CreateTerrainQuadRoot(ParentBody.Size);
 
             CollectSamplers();
+            CollectSamplersSuitable();
 
             SamplersOrder = new TileSamplerOrder(Samplers);
 
@@ -254,12 +257,9 @@ namespace SpaceEngine.Core.Terrain
             SplitDistance = SplitFactor * Screen.width / 1024.0f * Mathf.Tan(40.0f * Mathf.Deg2Rad) / Mathf.Tan(fov / 2.0f);
             DistanceFactor = (float)Math.Max((new Vector3d(m.m[0, 0], m.m[1, 0], m.m[2, 0])).Magnitude(), (new Vector3d(m.m[0, 1], m.m[1, 1], m.m[2, 1])).Magnitude());
 
-            if (SplitDistance < 1.1f || !Functions.IsFinite(SplitDistance))
-            {
-                SplitDistance = 1.1f;
-            }
+            if (SplitDistance < 1.1f || SplitDistance > 128.0f || !Functions.IsFinite(SplitDistance)) { SplitDistance = 1.1f; }
 
-            // initializes data structures for horizon occlusion culling
+            // Initializes data structures for horizon occlusion culling
             if (UseHorizonCulling && LocalCameraPosition.z <= TerrainQuadRoot.ZMax)
             {
                 var deformedDirection = invLocalToCamera * Vector3d.forward;
@@ -368,11 +368,11 @@ namespace SpaceEngine.Core.Terrain
 
         #region Rendering
 
-        private bool FindDrawableSamplers(TerrainQuad quad, List<TileSampler> samplers)
+        private bool FindDrawableSamplers(TerrainQuad quad)
         {
-            for (short i = 0; i < samplers.Count; ++i)
+            for (short i = 0; i < SamplersSuitable.Count; ++i)
             {
-                var producer = samplers[i].Producer;
+                var producer = SamplersSuitable[i].Producer;
 
                 if (producer.HasTile(quad.Level, quad.Tx, quad.Ty) && producer.FindTile(quad.Level, quad.Tx, quad.Ty, false, true) == null)
                 {
@@ -383,7 +383,7 @@ namespace SpaceEngine.Core.Terrain
             return false;
         }
 
-        public void FindDrawableQuads(TerrainQuad quad, List<TileSampler> samplers)
+        public void FindDrawableQuads(TerrainQuad quad)
         {
             quad.Drawable = false;
 
@@ -396,7 +396,7 @@ namespace SpaceEngine.Core.Terrain
 
             if (quad.IsLeaf)
             {
-                if (FindDrawableSamplers(quad, samplers)) return;
+                if (FindDrawableSamplers(quad)) return;
             }
             else
             {
@@ -404,7 +404,7 @@ namespace SpaceEngine.Core.Terrain
 
                 for (byte i = 0; i < 4; ++i)
                 {
-                    FindDrawableQuads(quad.GetChild(i), samplers);
+                    FindDrawableQuads(quad.GetChild(i));
 
                     if (quad.GetChild(i).Drawable)
                     {
@@ -414,7 +414,7 @@ namespace SpaceEngine.Core.Terrain
 
                 if (drawableCount < 4)
                 {
-                    if (FindDrawableSamplers(quad, samplers)) return;
+                    if (FindDrawableSamplers(quad)) return;
                 }
             }
 
@@ -429,17 +429,17 @@ namespace SpaceEngine.Core.Terrain
             Graphics.DrawMesh(mesh, Matrix4x4.identity, TerrainMaterial, 0, CameraHelper.Main(), 0, mpb);
         }
 
-        public void DrawQuad(TerrainQuad quad, List<TileSampler> samplers, Mesh mesh, MaterialPropertyBlock mpb)
+        public void DrawQuad(TerrainQuad quad, Mesh mesh, MaterialPropertyBlock mpb)
         {
             if (!quad.IsVisible) return;
             if (!quad.Drawable) return;
 
             if (quad.IsLeaf)
             {
-                for (byte i = 0; i < samplers.Count; ++i)
+                for (byte i = 0; i < SamplersSuitable.Count; ++i)
                 {
                     // Set the unifroms needed to draw the texture for this sampler
-                    samplers[i].SetTile(mpb, quad.Level, quad.Tx, quad.Ty);
+                    SamplersSuitable[i].SetTile(mpb, quad.Level, quad.Tx, quad.Ty);
                 }
 
                 DrawMesh(quad, mesh, mpb);
@@ -459,7 +459,7 @@ namespace SpaceEngine.Core.Terrain
                     }
                     else if (quad.GetChild(order[i]).Drawable)
                     {
-                        DrawQuad(quad.GetChild(order[i]), samplers, mesh, mpb);
+                        DrawQuad(quad.GetChild(order[i]), mesh, mpb);
 
                         done |= (1 << order[i]);
                     }
@@ -470,10 +470,10 @@ namespace SpaceEngine.Core.Terrain
                     // If the a leaf quad needs to be drawn but its tiles are not ready then this will draw the next parent tile instead that is ready.
                     // Because of the current set up all tiles always have there tasks run on the frame they are generated so this section of code is never reached.
 
-                    for (byte i = 0; i < samplers.Count; ++i)
+                    for (byte i = 0; i < SamplersSuitable.Count; ++i)
                     {
                         // Set the unifroms needed to draw the texture for this sampler
-                        samplers[i].SetTile(mpb, quad.Level, quad.Tx, quad.Ty);
+                        SamplersSuitable[i].SetTile(mpb, quad.Level, quad.Tx, quad.Ty);
                     }
 
                     DrawMesh(quad, mesh, mpb);
@@ -490,12 +490,43 @@ namespace SpaceEngine.Core.Terrain
         public virtual void CollectSamplers()
         {
             Samplers.Clear();
-
+            
             var samplers = GetComponentsInChildren<TileSampler>().ToList();
 
-            if (samplers.Count > 255) { Debug.Log(string.Format("TerrainNode: Toomuch samplers! {0}", samplers.Count)); return; }
+            if (samplers.Count > 255)
+            {
+                Debug.LogWarning(string.Format("TerrainNode: Toomuch samplers! {0}; Only first 255 will be taken!", samplers.Count));
 
-            Samplers = samplers;
+                Samplers = samplers.GetRange(0, 255);
+
+                return;
+            }
+
+            Samplers = samplers;      
+        }
+
+        /// <summary>
+        /// This mehod will collect all child <see cref="TileSampler"/>s, wich will be used by rendering pipeline in to <see cref="SamplersSuitable"/> collection.
+        /// Don't forget to call this method after Add/Remove operations on <see cref="TileSampler"/>.
+        /// </summary>
+        public virtual void CollectSamplersSuitable()
+        {
+            // NOTE : Should i check for Samplers list before? I SAY - NOPE!
+
+            SamplersSuitable.Clear();
+
+            var samplersSuitable = Samplers.Where(sampler => sampler.enabled && sampler.StoreLeaf).ToList();
+
+            if (samplersSuitable.Count > 255)
+            {
+                Debug.LogWarning(string.Format("TerrainNode: Toomuch suitable samplers! {0}; Only first 255 will be taken!", samplersSuitable.Count));
+
+                Samplers = samplersSuitable.GetRange(0, 255);
+
+                return;
+            }
+
+            SamplersSuitable = samplersSuitable;
         }
 
         private void CreateTerrainQuadRoot(float size)
@@ -549,6 +580,8 @@ namespace SpaceEngine.Core.Terrain
 
             var imin = Math.Max((int)Math.Floor(xmin * HORIZON_SIZE), 0);
             var imax = Math.Min((int)Math.Ceiling(xmax * HORIZON_SIZE), HORIZON_SIZE - 1);
+
+            // NOTE : Looks like horizon culling isn't working properly. Maybe should be debugged or something...
 
             for (int i = imin; i <= imax; ++i)
             {

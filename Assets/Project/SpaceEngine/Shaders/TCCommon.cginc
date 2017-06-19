@@ -623,7 +623,7 @@ Surface GetSurfaceColorAtlas(float height, float slope, float vary)
 
 	float2 tileUV = (float2(1.0, 1.0) * faceParams.z + faceParams.xy) * texScale * IdScale.y;
 	float2 invSize = InvSize * PackFactors.xy;
-	float2 uv = float2(materialID % ATLAS_RES_X, materialID / ATLAS_RES_X) * PackFactors.xy + frac(tileUV) * (PackFactors.xy - invSize) + 0.5 * invSize;
+	float2 uv = tileOffs + frac(tileUV) * (PackFactors.xy - invSize) + 0.5 * invSize;
 
 	#if (TILING_FIX_MODE == 0)
 		res.color = tex2D(AtlasDiffSampler, ruvy(uv));

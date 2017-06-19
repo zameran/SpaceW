@@ -60,7 +60,6 @@ namespace SpaceEngine.Core.Tile.Samplers
         /// <summary>
         /// The terrain <see cref="TerrainQuad"/> directly below the current viewer position.
         /// </summary>
-        [SerializeField]
         QuadTreeZ CameraQuad;
 
         /// <summary>
