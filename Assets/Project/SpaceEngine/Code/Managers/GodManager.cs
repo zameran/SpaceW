@@ -63,6 +63,7 @@ public class GodManager : MonoSingleton<GodManager>
     public ComputeShader Transmittance;
 
     public Mesh AtmosphereMesh;
+    public Mesh QuadMesh;
 
     public Body ActiveBody { get { return Bodies.FirstOrDefault(body => Helper.Enabled(body)); } }
 
@@ -77,6 +78,8 @@ public class GodManager : MonoSingleton<GodManager>
     public Matrix4x4d CameraToScreen { get { return View.CameraToScreenMatrix; } }
     public Matrix4x4d ScreenToCamera { get { return View.ScreenToCameraMatrix; } }
     public Vector3 WorldCameraPos { get { return View.WorldCameraPosition; } }
+
+    public int GridResolution = 25;
 
     // TODO : Make these settings switching event based. To avoid constant every-frame checkings...
     public bool Eclipses = true;
@@ -96,6 +99,9 @@ public class GodManager : MonoSingleton<GodManager>
         AtmosphereMesh = MeshFactory.IcoSphere.Create();
         AtmosphereMesh.bounds = new Bounds(Vector3.zero, new Vector3(1e8f, 1e8f, 1e8f));
 
+        QuadMesh = MeshFactory.MakePlane(GridResolution, MeshFactory.PLANE.XY, true, false, false);
+        QuadMesh.bounds = new Bounds(Vector3.zero, new Vector3(1e8f, 1e8f, 1e8f));
+
         Bodies = FindObjectsOfType<Body>();
         Starfields = FindObjectsOfType<Starfield>();
         Sunglares = FindObjectsOfType<SunGlare>();
@@ -109,6 +115,7 @@ public class GodManager : MonoSingleton<GodManager>
     protected override void OnDestroy()
     {
         Helper.Destroy(AtmosphereMesh);
+        Helper.Destroy(QuadMesh);
 
         base.OnDestroy();
     }

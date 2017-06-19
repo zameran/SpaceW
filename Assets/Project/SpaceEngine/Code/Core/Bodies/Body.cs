@@ -87,12 +87,12 @@ namespace SpaceEngine.Core.Bodies
         public bool RingEnabled = true;
         public bool TerrainEnabled = true;
 
-        public int GridResolution = 25;
+        public int GridResolution { get { return GodManager.Instance.GridResolution; } }
 
         public float Amplitude = 32.0f;
         public float Frequency = 64.0f;
 
-        public Mesh QuadMesh;
+        public Mesh QuadMesh { get { return GodManager.Instance.QuadMesh; } }
 
         public Shader ColorShader;
 
@@ -137,9 +137,6 @@ namespace SpaceEngine.Core.Bodies
                 if (Ring.ParentBody == null)
                     Ring.ParentBody = this;
             }
-
-            QuadMesh = MeshFactory.MakePlane(GridResolution, MeshFactory.PLANE.XY, true, false, false);
-            QuadMesh.bounds = new Bounds(Vector3.zero, new Vector3(1e8f, 1e8f, 1e8f));
 
             TileSamplers = new List<TileSampler>(GetComponentsInChildren<TileSampler>());
             TileSamplers.Sort(new TileSampler.Sort());
