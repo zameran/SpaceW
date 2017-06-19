@@ -25,6 +25,9 @@
 
 using System;
 
+using Constants = SpaceEngine.Core.Numerics.Constants;
+using Functions = SpaceEngine.Core.Numerics.Functions;
+
 namespace UnityEngine
 {
 #pragma warning disable 660, 661
@@ -160,8 +163,8 @@ namespace UnityEngine
             }
             else
             {
-                var cosa = Math.Cos(angle * MathUtility.Deg2Rad / 2);
-                var sina = Math.Sin(angle * MathUtility.Deg2Rad / 2);
+                var cosa = Math.Cos(angle * Constants.Deg2Rad / 2);
+                var sina = Math.Sin(angle * Constants.Deg2Rad / 2);
 
                 x = axis.x / magnitude * sina;
                 y = axis.y / magnitude * sina;
@@ -314,7 +317,7 @@ namespace UnityEngine
 
                 if ((1 - absCosom) > 1e-6)
                 {
-                    var omega = MathUtility.Safe_Acos(absCosom);
+                    var omega = Functions.Safe_Acos(absCosom);
                     var sinom = 1.0 / Math.Sin(omega);
 
                     scale0 = Math.Sin((1.0 - t) * omega) * sinom;

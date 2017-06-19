@@ -10,6 +10,8 @@ using System.Linq;
 
 using UnityEngine;
 
+using Functions = SpaceEngine.Core.Numerics.Functions;
+
 namespace SpaceEngine.Core.Terrain
 {
     /// <summary>
@@ -247,12 +249,12 @@ namespace SpaceEngine.Core.Terrain
             var left = DeformedFrustumPlanes[0].XYZ().Normalized();
             var right = DeformedFrustumPlanes[1].XYZ().Normalized();
 
-            var fov = (float)MathUtility.Safe_Acos(-left.Dot(right));
+            var fov = (float)Functions.Safe_Acos(-left.Dot(right));
 
             SplitDistance = SplitFactor * Screen.width / 1024.0f * Mathf.Tan(40.0f * Mathf.Deg2Rad) / Mathf.Tan(fov / 2.0f);
             DistanceFactor = (float)Math.Max((new Vector3d(m.m[0, 0], m.m[1, 0], m.m[2, 0])).Magnitude(), (new Vector3d(m.m[0, 1], m.m[1, 1], m.m[2, 1])).Magnitude());
 
-            if (SplitDistance < 1.1f || !MathUtility.IsFinite(SplitDistance))
+            if (SplitDistance < 1.1f || !Functions.IsFinite(SplitDistance))
             {
                 SplitDistance = 1.1f;
             }

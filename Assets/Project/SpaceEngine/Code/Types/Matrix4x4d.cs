@@ -25,6 +25,8 @@
 
 #define MATICES_UNROLL
 
+using Constants = SpaceEngine.Core.Numerics.Constants;
+
 namespace UnityEngine
 {
     public struct Matrix4x4d
@@ -493,49 +495,49 @@ namespace UnityEngine
 
         public static Matrix4x4d RotateX(double angle)
         {
-            var ca = System.Math.Cos(angle * MathUtility.Deg2Rad);
-            var sa = System.Math.Sin(angle * MathUtility.Deg2Rad);
+            var ca = System.Math.Cos(angle * Constants.Deg2Rad);
+            var sa = System.Math.Sin(angle * Constants.Deg2Rad);
 
             return new Matrix4x4d(1, 0, 0, 0, 0, ca, -sa, 0, 0, sa, ca, 0, 0, 0, 0, 1);
         }
 
         public static Matrix4x4d RotateY(double angle)
         {
-            var ca = System.Math.Cos(angle * MathUtility.Deg2Rad);
-            var sa = System.Math.Sin(angle * MathUtility.Deg2Rad);
+            var ca = System.Math.Cos(angle * Constants.Deg2Rad);
+            var sa = System.Math.Sin(angle * Constants.Deg2Rad);
 
             return new Matrix4x4d(ca, 0, sa, 0, 0, 1, 0, 0, -sa, 0, ca, 0, 0, 0, 0, 1);
         }
 
         public static Matrix4x4d RotateZ(double angle)
         {
-            var ca = System.Math.Cos(angle * MathUtility.Deg2Rad);
-            var sa = System.Math.Sin(angle * MathUtility.Deg2Rad);
+            var ca = System.Math.Cos(angle * Constants.Deg2Rad);
+            var sa = System.Math.Sin(angle * Constants.Deg2Rad);
 
             return new Matrix4x4d(ca, -sa, 0, 0, sa, ca, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1);
         }
 
         public static Matrix4x4d Rotate(Vector3 rotation)
         {
-            var x = new Quaternion4d(new Vector3d(1, 0, 0), rotation.x * MathUtility.Deg2Rad);
-            var y = new Quaternion4d(new Vector3d(0, 1, 0), rotation.y * MathUtility.Deg2Rad);
-            var z = new Quaternion4d(new Vector3d(0, 0, 1), rotation.z * MathUtility.Deg2Rad);
+            var x = new Quaternion4d(new Vector3d(1, 0, 0), rotation.x * Constants.Deg2Rad);
+            var y = new Quaternion4d(new Vector3d(0, 1, 0), rotation.y * Constants.Deg2Rad);
+            var z = new Quaternion4d(new Vector3d(0, 0, 1), rotation.z * Constants.Deg2Rad);
 
             return (z * y * x).ToMatrix4x4d();
         }
 
         public static Matrix4x4d Rotate(Vector3d rotation)
         {
-            var x = new Quaternion4d(new Vector3d(1, 0, 0), rotation.x * MathUtility.Deg2Rad);
-            var y = new Quaternion4d(new Vector3d(0, 1, 0), rotation.y * MathUtility.Deg2Rad);
-            var z = new Quaternion4d(new Vector3d(0, 0, 1), rotation.z * MathUtility.Deg2Rad);
+            var x = new Quaternion4d(new Vector3d(1, 0, 0), rotation.x * Constants.Deg2Rad);
+            var y = new Quaternion4d(new Vector3d(0, 1, 0), rotation.y * Constants.Deg2Rad);
+            var z = new Quaternion4d(new Vector3d(0, 0, 1), rotation.z * Constants.Deg2Rad);
 
             return (z * y * x).ToMatrix4x4d();
         }
 
         public static Matrix4x4d Perspective(double fovy, double aspect, double zNear, double zFar)
         {
-            var f = 1.0 / System.Math.Tan((fovy * MathUtility.Deg2Rad) / 2.0);
+            var f = 1.0 / System.Math.Tan((fovy * Constants.Deg2Rad) / 2.0);
 
             return new Matrix4x4d(f / aspect, 0, 0, 0, 0, f, 0, 0, 0, 0, (zFar + zNear) / (zNear - zFar), (2.0 * zFar * zNear) / (zNear - zFar), 0, 0, -1, 0);
         }

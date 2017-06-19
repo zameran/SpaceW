@@ -2,6 +2,8 @@
 
 using UnityEngine;
 
+using Functions = SpaceEngine.Core.Numerics.Functions;
+
 namespace SpaceEngine.Core.Utilities
 {
     /// <summary>
@@ -246,7 +248,7 @@ namespace SpaceEngine.Core.Utilities
             var e = new Vector3d(Math.Cos(elon) * Math.Cos(elat), Math.Sin(elon) * Math.Cos(elat), Math.Sin(elat));
             var v = (s * (1.0 - t) + e * t).Normalized();
 
-            lat = MathUtility.Safe_Asin(v.z);
+            lat = Functions.Safe_Asin(v.z);
             lon = Math.Atan2(v.y, v.x);
         }
     }

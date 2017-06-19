@@ -2,6 +2,8 @@
 
 using UnityEngine;
 
+using Functions = SpaceEngine.Core.Numerics.Functions;
+
 namespace SpaceEngine.Core.Terrain.Deformation
 {
     /// <summary>
@@ -31,7 +33,7 @@ namespace SpaceEngine.Core.Terrain.Deformation
 
         public override Matrix4x4d LocalToDeformedDifferential(Vector3d localPoint, bool clamp = false)
         {
-            if (!MathUtility.IsFinite(localPoint.x) || !MathUtility.IsFinite(localPoint.y) || !MathUtility.IsFinite(localPoint.z))
+            if (!Functions.IsFinite(localPoint.x) || !Functions.IsFinite(localPoint.y) || !Functions.IsFinite(localPoint.z))
             {
                 return Matrix4x4d.identity;
             }

@@ -313,15 +313,6 @@ namespace UnityEngine
             return mat;
         }
 
-        public static Matrix3x3 Rotate(Vector3 rotation)
-        {
-            var x = new Quaternion4d(new Vector3d(1, 0, 0), rotation.x * MathUtility.Deg2Rad);
-            var y = new Quaternion4d(new Vector3d(0, 1, 0), rotation.y * MathUtility.Deg2Rad);
-            var z = new Quaternion4d(new Vector3d(0, 0, 1), rotation.z * MathUtility.Deg2Rad);
-
-            return (z * y * x).ToMatrix3x3();
-        }
-
         public static Matrix3x3 identity { get { return new Matrix3x3(1, 0, 0, 0, 1, 0, 0, 0, 1); } }
     }
 }
