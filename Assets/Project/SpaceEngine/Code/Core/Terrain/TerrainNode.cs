@@ -219,7 +219,7 @@ namespace SpaceEngine.Core.Terrain
             {
                 lastProducer.IsLastInSequence = true;
 
-                Debug.Log(string.Format("{0} probably last in generation sequence, but maybe accidentally not marked as. Fixed!", lastProducer.name));
+                Debug.Log(string.Format("TerrainNode: {0} probably last in generation sequence, but maybe accidentally not marked as. Fixed!", lastProducer.name));
             }
         }
 

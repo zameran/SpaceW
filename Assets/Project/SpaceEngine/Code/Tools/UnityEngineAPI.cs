@@ -49,7 +49,7 @@ public class UnityEngineAPI
 
             method.Invoke(obj, MethodParams);
         }
-        catch (Exception ex) { Debug.LogError("[InvokeAPI] Exception!" + "\n" + ex.Message + "\n" + ex.StackTrace); }
+        catch (Exception ex) { Debug.LogError("UnityEngineAPI.InvokeAPI: Exception!" + "\n" + ex.Message + "\n" + ex.StackTrace); }
         finally { }
     }
 }

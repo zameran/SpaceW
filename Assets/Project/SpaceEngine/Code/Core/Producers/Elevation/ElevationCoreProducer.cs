@@ -132,7 +132,7 @@ namespace SpaceEngine.Core
                     ElevationMaterial.SetTexture("_ResidualSampler", null);
                     ElevationMaterial.SetVector("_ResidualOSH", new Vector4(0.0f, 0.0f, 1.0f, 0.0f));
 
-                    Debug.LogError(string.Format("Residual producer exist, but can't find any suitable tile at {0}:{1}:{2}!", level, tx, ty));
+                    Debug.LogError(string.Format("ElevationCoreProducer.DoCreateTile: Residual producer exist, but can't find any suitable tile at {0}:{1}:{2}!", level, tx, ty));
                 }
             }
             else

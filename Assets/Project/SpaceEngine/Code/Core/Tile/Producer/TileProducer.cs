@@ -317,7 +317,7 @@ namespace SpaceEngine.Core.Tile.Producer
 
                 if (level < 0)
                 {
-                    Debug.LogError("Invalid level (A)!");
+                    Debug.LogError("TileProducer.GetGpuTileCoords: Invalid level (A)!");
                     Debug.Break();
                 }
             }
@@ -336,7 +336,7 @@ namespace SpaceEngine.Core.Tile.Producer
 
                 if (level < 0)
                 {
-                    Debug.LogError("Invalid level (B)!");
+                    Debug.LogError("TileProducer.GetGpuTileCoords: Invalid level (B)!");
                     Debug.Break();
                 }
 

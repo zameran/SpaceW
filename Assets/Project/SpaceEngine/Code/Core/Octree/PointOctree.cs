@@ -71,7 +71,7 @@ namespace SpaceEngine.Core.Octree
         {
             if (minNodeSize > initialWorldSize)
             {
-                Debug.LogWarning(string.Format("Minimum node size must be at least as big as the initial world size. Was: {0} Adjusted to: {1}", minNodeSize, initialWorldSize));
+                Debug.LogWarning(string.Format("PointOctree: Minimum node size must be at least as big as the initial world size. Was: {0} Adjusted to: {1}", minNodeSize, initialWorldSize));
 
                 minNodeSize = initialWorldSize;
             }
@@ -98,7 +98,7 @@ namespace SpaceEngine.Core.Octree
 
                 if (++count > 32)
                 {
-                    Debug.LogError(string.Format("Aborted Add operation as it seemed to be going on forever ({0}) attempts at growing the octree.", count - 1));
+                    Debug.LogError(string.Format("PointOctree: Aborted Add operation as it seemed to be going on forever ({0}) attempts at growing the octree.", count - 1));
 
                     return;
                 }

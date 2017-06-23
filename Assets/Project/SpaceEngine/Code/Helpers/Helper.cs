@@ -222,7 +222,7 @@ public static class Helper
 
         if (shader == null)
         {
-            Debug.LogError("Failed to find shader: " + shaderName);
+            Debug.LogError("Helper.CreateTempMaterial: Failed to find shader: " + shaderName);
             return null;
         }
 

@@ -164,7 +164,7 @@ namespace SpaceEngine.Managers
             }
             catch (Exception ex)
             {
-                Debug.Log("[LevelManager] => LoadScene() Exception!\n" + ex.Message);
+                Debug.LogError("LevelManager.LoadScene: Exception!\n" + ex.Message);
             }
 
             return null;

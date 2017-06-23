@@ -176,7 +176,7 @@ namespace SpaceEngine.Core.Tile
 
             if (Task == null)
             {
-                Debug.Log("Task can't be null!");
+                Debug.Log("Tile.ctor: Task can't be null!");
             }
         }
 
@@ -184,7 +184,7 @@ namespace SpaceEngine.Core.Tile
         {
             if (i >= Task.Slot.Count)
             {
-                Debug.Log(string.Format("Slot at location {0} does not exist!", i));
+                Debug.Log(string.Format("Tile: Slot at location {0} does not exist!", i));
             }
 
             return Task.Slot[i];

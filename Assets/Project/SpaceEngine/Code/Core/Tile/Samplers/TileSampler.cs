@@ -318,7 +318,7 @@ namespace SpaceEngine.Core.Tile.Samplers
 
                 if (level < 0)
                 {
-                    Debug.Log("Invalid level!");
+                    Debug.Log("TileSampler.SetTile: Invalid level!");
                     return;
                 }
             }
@@ -360,7 +360,7 @@ namespace SpaceEngine.Core.Tile.Samplers
 
                 if (tt == null)
                 {
-                    Debug.Log("Null tile!");
+                    Debug.Log("TileSampler.SetTile: Null tile!");
                     return;
                 }
 
@@ -374,13 +374,13 @@ namespace SpaceEngine.Core.Tile.Samplers
 
             if (gpuSlot == null)
             {
-                Debug.Log("Null gpuSlot!");
+                Debug.Log("TileSampler.SetTile: Null gpuSlot!");
                 return;
             }
 
             if (gpuSlot.Texture == null)
             {
-                Debug.Log("Null gpuSlot.Texture!");
+                Debug.Log("TileSampler.SetTile: Null gpuSlot.Texture!");
                 return;
             }
 

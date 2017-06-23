@@ -68,18 +68,18 @@ public static class CBUtility
 
     public static void Execute(RenderTexture tex, Channels channels, ComputeBuffer buffer, Manipulation manipulation, ComputeShader manipulationShader, params object[] args)
     {
-        if (tex == null) { Debug.Log("CBUtility: Execute - RenderTexture is null!"); return; }
-        if (buffer == null) { Debug.Log("CBUtility: Execute - buffer is null!"); return; }
-        if (manipulationShader == null) { Debug.Log("CBUtility: Execute - Computer shader is null!"); return; }
-        if (!tex.IsCreated()) { Debug.Log("CBUtility: Execute - tex has not been created (Call Create() on tex)!"); return; }
+        if (tex == null) { Debug.Log("CBUtility.Execute: RenderTexture is null!"); return; }
+        if (buffer == null) { Debug.Log("CBUtility.Execute: Buffer is null!"); return; }
+        if (manipulationShader == null) { Debug.Log("CBUtility.Execute: Computer shader is null!"); return; }
+        if (!tex.IsCreated()) { Debug.Log("CBUtility.Execute: Parameter tex has not been created (Call Create() on tex)!"); return; }
 
         string filePath = "";
 
         if (manipulation == Manipulation.WriteFromFile)
         {
-            if (!tex.enableRandomWrite) { Debug.Log("CBUtility: WriteIntoRenderTexture - you must enable random write on render texture!"); return; }
+            if (!tex.enableRandomWrite) { Debug.Log("CBUtility.Execute: You must enable random write on target render texture!"); return; }
 
-            if (args == null || args.Length == 0) { Debug.Log("CBUtility: Execute - Can't proceed without args!"); return; }
+            if (args == null || args.Length == 0) { Debug.Log("CBUtility.Execute: Can't proceed without args!"); return; }
             else
             {
                 var filePathArg = args[0] as string;
@@ -116,7 +116,7 @@ public static class CBUtility
 
         kernel = manipulationShader.FindKernel(string.Format("{0}{1}", M, dimensionAndChannel));
 
-        if (kernel == -1) { Debug.Log(string.Format("CBUtility: Execute - could not find kernel read{0}", dimensionAndChannel)); return; }
+        if (kernel == -1) { Debug.Log(string.Format("CBUtility.Execute: Could not find kernel read{0}", dimensionAndChannel)); return; }
 
         switch (manipulation)
         {
@@ -175,10 +175,10 @@ public static class CBUtility
 
     public static void ReadSingleFromRenderTexture(RenderTexture tex, float x, float y, float z, ComputeBuffer buffer, ComputeShader readData, bool useBilinear)
     {
-        if (tex == null) { Debug.Log("CBUtility: ReadSingleFromRenderTexture - RenderTexture is null!"); return; }
-        if (buffer == null) { Debug.Log("CBUtility: ReadSingleFromRenderTexture - buffer is null!"); return; }
-        if (readData == null) { Debug.Log("CBUtility: ReadSingleFromRenderTexture - Computer shader is null!"); return; }
-        if (!tex.IsCreated()) { Debug.Log("CBUtility: ReadSingleFromRenderTexture - tex has not been created (Call Create() on tex)!"); return; }
+        if (tex == null) { Debug.Log("CBUtility.ReadSingleFromRenderTexture: RenderTexture is null!"); return; }
+        if (buffer == null) { Debug.Log("CBUtility.ReadSingleFromRenderTexture: Buffer is null!"); return; }
+        if (readData == null) { Debug.Log("CBUtility.ReadSingleFromRenderTexture: Computer shader is null!"); return; }
+        if (!tex.IsCreated()) { Debug.Log("CBUtility.ReadSingleFromRenderTexture: Parameter tex has not been created (Call Create() on tex)!"); return; }
 
         int kernel = -1;
         int depth = -1;
@@ -200,7 +200,7 @@ public static class CBUtility
 
         if (kernel == -1)
         {
-            Debug.Log(string.Format("CBUtility: ReadSingleFromRenderTexture - could not find kernel readSingle{0}", B + D));
+            Debug.Log(string.Format("CBUtility.ReadSingleFromRenderTexture: Could not find kernel readSingle{0}", B + D));
             return;
         }
 
@@ -234,7 +234,7 @@ public static class CBUtility
 
         if (kernel == -1)
         {
-            Debug.Log("CBUtility: Three2Three - could not find kernel " + "Three2Three");
+            Debug.Log("CBUtility.Three2Three: Could not find kernel " + "Three2Three");
             return;
         }
 
@@ -271,7 +271,7 @@ public static class CBUtility
         //divide by 4 as there are 4 bytes in a 32 bit float
         if (size > fi.Length / 4)
         {
-            Debug.Log(string.Format("CBUtility: LoadRawFile - Raw file is not the required size! {0}", path));
+            Debug.Log(string.Format("CBUtility.LoadRawFile: Raw file is not the required size! {0}", path));
             return false;
         }
 

@@ -44,7 +44,7 @@ public class HideFlagSetterHelper : MonoBehaviour
     [ContextMenu("Set Flag")]
     public void SetFlag()
     {
-        if (obj == null) { Debug.LogError("Obj is null!"); return; }
+        if (obj == null) { Debug.LogError("HideFlagSetterHelper.SetFlag: Obj is null!"); return; }
 
         obj.hideFlags = flag;
     }

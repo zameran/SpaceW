@@ -206,7 +206,7 @@ namespace SpaceEngine.Core.Octree
         {
             if (childOctrees.Length != 8)
             {
-                Debug.LogError(string.Format("Child octree array must be length 8. Was length: {0}", childOctrees.Length));
+                Debug.LogError(string.Format("PointOctreeNode: Child octree array must be length 8. Was length: {0}", childOctrees.Length));
 
                 return;
             }
@@ -392,7 +392,7 @@ namespace SpaceEngine.Core.Octree
 
                     if (Children == null)
                     {
-                        Debug.Log("Child creation failed for an unknown reason! Early exit...");
+                        Debug.Log("PointOctreeNode: Child creation failed for an unknown reason! Early exit...");
 
                         return;
                     }
