@@ -355,19 +355,19 @@ namespace UnityEngine
             return kTranspose;
         }
 
-        private double Minor(int r0, int r1, int r2, int c0, int c1, int c2)
+        public double Minor(int r0, int r1, int r2, int c0, int c1, int c2)
         {
             return m[r0, c0] * (m[r1, c1] * m[r2, c2] - m[r2, c1] * m[r1, c2]) -
                    m[r0, c1] * (m[r1, c0] * m[r2, c2] - m[r2, c0] * m[r1, c2]) +
                    m[r0, c2] * (m[r1, c0] * m[r2, c1] - m[r2, c0] * m[r1, c1]);
         }
 
-        private double Determinant()
+        public double Determinant()
         {
             return m[0, 0] * Minor(1, 2, 3, 1, 2, 3) - m[0, 1] * Minor(1, 2, 3, 0, 2, 3) + m[0, 2] * Minor(1, 2, 3, 0, 1, 3) - m[0, 3] * Minor(1, 2, 3, 0, 1, 2);
         }
 
-        private Matrix4x4d Adjoint()
+        public Matrix4x4d Adjoint()
         {
             return new Matrix4x4d(Minor(1, 2, 3, 1, 2, 3), -Minor(0, 2, 3, 1, 2, 3), Minor(0, 1, 3, 1, 2, 3), -Minor(0, 1, 2, 1, 2, 3),
                                   -Minor(1, 2, 3, 0, 2, 3), Minor(0, 2, 3, 0, 2, 3), -Minor(0, 1, 3, 0, 2, 3), Minor(0, 1, 2, 0, 2, 3),
@@ -377,7 +377,7 @@ namespace UnityEngine
 
         public Matrix4x4d Inverse()
         {
-            return Adjoint() * (1.0f / Determinant());
+            return Adjoint() * (1.0 / Determinant());
         }
 
         public Vector4d GetColumn(int iCol)
@@ -552,5 +552,7 @@ namespace UnityEngine
         }
 
         public static Matrix4x4d identity { get { return new Matrix4x4d(1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1); } }
+
+        public static Matrix4x4d one { get { return new Matrix4x4d(1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1); } }
     }
 }

@@ -173,7 +173,7 @@ namespace UnityEngine
             return kTranspose;
         }
 
-        private double Determinant()
+        public double Determinant()
         {
             return m[0, 0] * m[1, 1] - m[1, 0] * m[0, 1];
         }
@@ -204,5 +204,7 @@ namespace UnityEngine
         }
 
         public static Matrix2x2d identity { get { return new Matrix2x2d(1, 0, 0, 1); } }
+
+        public static Matrix2x2d one { get { return new Matrix2x2d(1, 1, 1, 1); } }
     }
 }

@@ -238,7 +238,7 @@ namespace UnityEngine
             return kTranspose;
         }
 
-        private double Determinant()
+        public double Determinant()
         {
             var fCofactor00 = m[1, 1] * m[2, 2] - m[1, 2] * m[2, 1];
             var fCofactor10 = m[1, 2] * m[2, 0] - m[1, 0] * m[2, 2];
@@ -351,5 +351,7 @@ namespace UnityEngine
         }
 
         public static Matrix3x3d identity { get { return new Matrix3x3d(1, 0, 0, 0, 1, 0, 0, 0, 1); } }
+
+        public static Matrix3x3d one { get { return new Matrix3x3d(1, 1, 1, 1, 1, 1, 1, 1, 1); } }
     }
 }
