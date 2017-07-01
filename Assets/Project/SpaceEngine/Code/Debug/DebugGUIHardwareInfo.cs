@@ -132,10 +132,6 @@ namespace SpaceEngine.Debugging
 
                         supports = SystemInfo.SupportsTextureFormat(f);
                     }
-                    else
-                    {
-                        throw new NotImplementedException("Unsupported format!");
-                    }
 
                     supportState = HardwareInfo.Supports(supports);
                 }
@@ -147,11 +143,6 @@ namespace SpaceEngine.Debugging
 
                 GUILayoutExtensions.LabelWithSpace(string.Format("{0}.{1}: {2}", prefix, format, supportState), -8);
             }
-        }
-
-        private bool Check(Func<bool> assert)
-        {
-            return assert.Invoke();
         }
     }
 
