@@ -86,8 +86,8 @@
 
 		float CalculateSlope(float3 normal)
 		{
-			// NOTE : Looks like i need a 'good' normal Z component, not simply local space...
-			normal.z = sqrt(max(0.0, 1.0 - dot(normal.xy, normal.xy)));
+			// NOTE : First of all we need to take in to the account actual normal vector.
+			normal = DecodeNormal(normal);
 
 			return clamp(1.0 - pow(normal.z, 6.0), 0.0, 1.0);
 		}

@@ -254,7 +254,8 @@
 				float4 ortho = texTile(_Ortho_Tile, texcoord, _Ortho_TileCoords, _Ortho_TileSize);
 				float4 color = texTile(_Color_Tile, texcoord, _Color_TileCoords, _Color_TileSize);
 				float4 normal = texTile(_Normals_Tile, texcoord, _Normals_TileCoords, _Normals_TileSize);
-				normal.z = sqrt(max(0.0, 1.0 - dot(normal.xy, normal.xy)));	
+
+				normal.xyz = DecodeNormal(normal.xyz);
 				
 				//float4 triplanarDiffuse = Triplanar(_Ground_Diffuse, _Ground_Diffuse, _Ground_Diffuse, P, normal.xyz, float2(128, 4));
 				//float4 triplanarNormal = Triplanar(_Ground_Normal, _Ground_Normal, _Ground_Normal, P, normal.xyz, float2(128, 4));	
