@@ -9,6 +9,7 @@ using System.Collections.Generic;
 using System.Linq;
 
 using UnityEngine;
+using UnityEngine.Rendering;
 
 using Functions = SpaceEngine.Core.Numerics.Functions;
 
@@ -426,7 +427,7 @@ namespace SpaceEngine.Core.Terrain
             // Set the uniforms unique to each quad
             SetPerQuadUniforms(quad, mpb);
 
-            Graphics.DrawMesh(mesh, Matrix4x4.identity, TerrainMaterial, 0, CameraHelper.Main(), 0, mpb);
+            Graphics.DrawMesh(mesh, Matrix4x4.identity, TerrainMaterial, 0, CameraHelper.Main(), 0, mpb, ShadowCastingMode.TwoSided, true);
         }
 
         public void DrawQuad(TerrainQuad quad, Mesh mesh, MaterialPropertyBlock mpb)
