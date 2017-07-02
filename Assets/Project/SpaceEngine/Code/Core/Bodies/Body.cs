@@ -327,9 +327,9 @@ namespace SpaceEngine.Core.Bodies
 
         public virtual List<string> GetKeywords()
         {
-            var Keywords = new List<string>();
+            var keywords = new List<string>();
 
-            return Keywords;
+            return keywords;
         }
 
         private void DrawTerrain(TerrainNode node)
