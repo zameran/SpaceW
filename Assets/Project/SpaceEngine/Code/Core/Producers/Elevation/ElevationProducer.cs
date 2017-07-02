@@ -188,7 +188,7 @@ namespace SpaceEngine.Core
                                       rootQuadSize / (1 << level),
                                       TerrainNode.ParentBody.Size);
 
-            UpSampleMaterial.SetFloat("_Amplitude", rs * 1);
+            UpSampleMaterial.SetFloat("_Amplitude", rs);
             UpSampleMaterial.SetFloat("_Frequency", TerrainNode.ParentBody.Frequency * (1 << level));
             UpSampleMaterial.SetVector("_Offset", offset.ToVector4());
             UpSampleMaterial.SetMatrix("_LocalToWorld", TerrainNode.FaceToLocal.ToMatrix4x4());

@@ -76,6 +76,11 @@ public static class Helper
         return b != null && b.enabled == true && b.gameObject.activeInHierarchy == true;
     }
 
+    public static bool Enabled(GameObject b)
+    {
+        return b != null && b.activeInHierarchy;
+    }
+
     public static T Destroy<T>(T o) where T : Object
     {
         if (o != null)

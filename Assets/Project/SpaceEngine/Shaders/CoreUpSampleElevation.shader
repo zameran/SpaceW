@@ -215,7 +215,7 @@
 
 				float zc = zf;
 
-				if (_CoarseLevelOSL.x != -1.0) 
+				if (_CoarseLevelOSL.x != -1.0)
 				{
 					zf = zf + mdot(cz, upsampleMatrix[i]);
 
@@ -230,7 +230,7 @@
 					zc = (zc1 + zc3) * 0.5;
 				}
 				
-				output = float4(zf, zc, 2.0 * slope - 0.5, 0.0);			
+				output = float4(zf, zc, 2.0 * slope - 0.5, zf * 0.001);
 			}		
 			ENDCG
 		}

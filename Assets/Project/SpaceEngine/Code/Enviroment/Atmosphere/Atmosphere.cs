@@ -453,7 +453,7 @@ namespace SpaceEngine.AtmosphericScattering
                 soc1.SetRow(i, VectorHelper.MakeFrom((ShineCasters[i].transform.position - Origin).normalized, 1.0f));
                 soc2.SetRow(i, VectorHelper.MakeFrom((Origin - ShineCasters[i].transform.position).normalized, 1.0f));
                 
-                sc1.SetRow(index, VectorHelper.FromColor(ShineColors[i]));
+                sc1.SetRow(index, VectorHelper.FromColor(Helper.Enabled(ShineCasters[i]) ? ShineColors[i] : new Color(0, 0, 0, 0)));
 
                 sp1.SetRow(i, new Vector4(distance, 1.0f, 1.0f, 1.0f));
 
@@ -467,13 +467,9 @@ namespace SpaceEngine.AtmosphericScattering
 
             for (byte i = 0; i < Mathf.Min(4, EclipseCasters.Count); i++)
             {
-                if (EclipseCasters[i] == null)
-                {
-                    Debug.Log("Atmosphere: Eclipse caster problem!");
-                    break;
-                }
+                if (EclipseCasters[i] == null) { Debug.Log("Atmosphere: Eclipse caster problem!"); break; }
 
-                occludersMatrix.SetRow(i, VectorHelper.MakeFrom(EclipseCasters[i].Origin - Origin, EclipseCasters[i].Radius));
+                occludersMatrix.SetRow(i, VectorHelper.MakeFrom(EclipseCasters[i].Origin - Origin, Helper.Enabled(EclipseCasters[i]) ? EclipseCasters[i].Radius : 0.0f));
             }
         }
 
