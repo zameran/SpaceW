@@ -106,19 +106,21 @@ namespace SpaceEngine.Core.Terrain
         public TerrainQuad TerrainQuadRoot { get; set; }
 
         /// <summary>
-        /// The current viewer position in the deformed terrain space.
-        /// </summary>
-        public Vector3d DeformedCameraPosition { get; private set; }
-
-        /// <summary>
         /// The current viewer frustum planes in the deformed terrain space.
         /// </summary>
         public Vector4d[] DeformedFrustumPlanes { get; private set; }
 
         /// <summary>
+        /// The current viewer position in the deformed terrain space.
+        /// </summary>
+        public Vector3d DeformedCameraPosition { get; private set; }
+
+        /// <summary>
         /// The current viewer position in the local terrain space.
         /// </summary>
         public Vector3d LocalCameraPosition { get; private set; }
+
+        public Vector2 DistanceBlending { get; private set; }
 
         /// <summary>
         /// The viewer distance at which a quad is subdivided, relatively to the quad size.
@@ -256,9 +258,13 @@ namespace SpaceEngine.Core.Terrain
             var fov = (float)Functions.Safe_Acos(-left.Dot(right));
 
             SplitDistance = SplitFactor * Screen.width / 1024.0f * Mathf.Tan(40.0f * Mathf.Deg2Rad) / Mathf.Tan(fov / 2.0f);
-            DistanceFactor = (float)Math.Max((new Vector3d(m.m[0, 0], m.m[1, 0], m.m[2, 0])).Magnitude(), (new Vector3d(m.m[0, 1], m.m[1, 1], m.m[2, 1])).Magnitude());
+            DistanceFactor = (float)Math.Max(new Vector3d(m.m[0, 0], m.m[1, 0], m.m[2, 0]).Magnitude(), new Vector3d(m.m[0, 1], m.m[1, 1], m.m[2, 1]).Magnitude());
 
             if (SplitDistance < 1.1f || SplitDistance > 128.0f || !Functions.IsFinite(SplitDistance)) { SplitDistance = 1.1f; }
+
+            var splitDistanceBlending = SplitDistance + 1.0f;
+
+            DistanceBlending = new Vector2(splitDistanceBlending, 2.0f * SplitDistance - splitDistanceBlending);
 
             // Initializes data structures for horizon occlusion culling
             if (UseHorizonCulling && LocalCameraPosition.z <= TerrainQuadRoot.ZMax)

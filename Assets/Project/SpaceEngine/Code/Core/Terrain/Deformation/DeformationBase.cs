@@ -39,14 +39,14 @@ namespace SpaceEngine.Core.Terrain.Deformation
         protected Uniforms uniforms;
         protected Matrix4x4d localToCamera;
         protected Matrix4x4d localToScreen;
-        protected Matrix3x3d localToTangent;
+        protected Matrix4x4d localToTangent;
 
         public DeformationBase()
         {
             uniforms = new Uniforms();
             localToCamera = Matrix4x4d.identity;
             localToScreen = Matrix4x4d.identity;
-            localToTangent = Matrix3x3d.identity;
+            localToTangent = Matrix4x4d.identity;
         }
 
         /// <summary>
@@ -144,17 +144,11 @@ namespace SpaceEngine.Core.Terrain.Deformation
         {
             if (mat == null || node == null) return;
 
-            var d1 = node.SplitDistance + 1.0f;
-            var d2 = 2.0f * node.SplitDistance;
-
             localToCamera = GodManager.Instance.WorldToCamera * node.LocalToWorld;
             localToScreen = GodManager.Instance.CameraToScreen * localToCamera;
+            localToTangent = DeformedToTangentFrame(GodManager.Instance.WorldCameraPos) * node.LocalToWorld * LocalToDeformedDifferential(node.LocalCameraPosition);
 
-            var ltot = DeformedToTangentFrame(GodManager.Instance.WorldCameraPos) * node.LocalToWorld * LocalToDeformedDifferential(node.LocalCameraPosition);
-
-            localToTangent = new Matrix3x3d(ltot.m[0, 0], ltot.m[0, 1], ltot.m[0, 3], ltot.m[1, 0], ltot.m[1, 1], ltot.m[1, 3], ltot.m[3, 0], ltot.m[3, 1], ltot.m[3, 3]);
-
-            mat.SetVector(uniforms.blending, new Vector2(d1, d2 - d1));
+            mat.SetVector(uniforms.blending, node.DistanceBlending);
             mat.SetMatrix(uniforms.localToScreen, localToScreen.ToMatrix4x4());
             mat.SetMatrix(uniforms.localToWorld, node.LocalToWorld.ToMatrix4x4());
 
@@ -164,28 +158,24 @@ namespace SpaceEngine.Core.Terrain.Deformation
         {
             if (matPropertyBlock == null || node == null || quad == null) return;
 
-            matPropertyBlock.SetVector(uniforms.offset, new Vector4((float)quad.Ox, (float)quad.Oy, (float)quad.Length, (float)quad.Level));
+            matPropertyBlock.SetVector(uniforms.offset, quad.DeformedOffset);
             matPropertyBlock.SetVector(uniforms.camera, new Vector4((float)((node.LocalCameraPosition.x - quad.Ox) / quad.Length),
                                                                     (float)((node.LocalCameraPosition.y - quad.Oy) / quad.Length),
                                                                     (float)((node.LocalCameraPosition.z - node.ParentBody.HeightZ) / (quad.Length * (double)node.DistanceFactor)),
                                                                     (float)node.LocalCameraPosition.z));
 
-            matPropertyBlock.SetMatrix(uniforms.tileToTangent, (localToTangent * new Matrix3x3d(quad.Length, 0.0, quad.Ox - node.LocalCameraPosition.x,
-                                                                                                0.0, quad.Length, quad.Oy - node.LocalCameraPosition.y,
-                                                                                                0.0, 0.0, 1.0)).ToMatrix4x4());
+            matPropertyBlock.SetMatrix(uniforms.tileToTangent, localToTangent * new Matrix4x4d(quad.Length, 0.0, quad.Ox - node.LocalCameraPosition.x, 0.0,
+                                                                                               0.0, quad.Length, quad.Oy - node.LocalCameraPosition.y, 0.0,
+                                                                                               0.0, 0.0, 1.0, 0.0,
+                                                                                               0.0, 0.0, 0.0, 1.0));
 
             SetScreenUniforms(node, quad, matPropertyBlock);
         }
 
         protected virtual void SetScreenUniforms(TerrainNode node, TerrainQuad quad, MaterialPropertyBlock matPropertyBlock)
         {
-            var p0 = new Vector3d(quad.Ox, quad.Oy, 0.0);
-            var p1 = new Vector3d(quad.Ox + quad.Length, quad.Oy, 0.0);
-            var p2 = new Vector3d(quad.Ox, quad.Oy + quad.Length, 0.0);
-            var p3 = new Vector3d(quad.Ox + quad.Length, quad.Oy + quad.Length, 0.0);
-
-            matPropertyBlock.SetMatrix(uniforms.screenQuadCorners, (localToScreen * new Matrix4x4d(p0.x, p1.x, p2.x, p3.x, p0.y, p1.y, p2.y, p3.y, p0.z, p1.z, p2.z, p3.z, 1.0, 1.0, 1.0, 1.0)).ToMatrix4x4());
-            matPropertyBlock.SetMatrix(uniforms.screenQuadVerticals, (localToScreen * new Matrix4x4d(0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0)).ToMatrix4x4());
+            matPropertyBlock.SetMatrix(uniforms.screenQuadCorners, (localToScreen * quad.FlatCorners).ToMatrix4x4());
+            matPropertyBlock.SetMatrix(uniforms.screenQuadVerticals, (localToScreen * quad.FlatVerticals).ToMatrix4x4());
         }
     }
 }
