@@ -4,6 +4,664 @@
         <name>SpaceW.Core</name>
     </assembly>
     <members>
+        <member name="T:SpaceEngine.Core.Numerics.Complex">
+            <summary>
+                Represents a complex number, of the form (A + Bi).
+            </summary>
+        </member>
+        <member name="F:SpaceEngine.Core.Numerics.Complex.Zero">
+            <summary>
+                Returns a new <see cref="T:SpaceEngine.Core.Numerics.Complex" /> with a real number equal to
+                zero and an imaginary number equal to zero.
+            </summary>
+        </member>
+        <member name="F:SpaceEngine.Core.Numerics.Complex.One">
+            <summary>
+                Returns a new <see cref="T:SpaceEngine.Core.Numerics.Complex" /> with a real number equal to
+                one and an imaginary number equal to zero.
+            </summary>
+        </member>
+        <member name="F:SpaceEngine.Core.Numerics.Complex.I">
+            <summary>
+                Returns a new <see cref="T:SpaceEngine.Core.Numerics.Complex" /> with a real number equal to
+                zero and an imaginary number equal to one.
+            </summary>
+        </member>
+        <member name="F:SpaceEngine.Core.Numerics.Complex.A">
+            <summary>
+                The real component of the complex number.
+            </summary>
+        </member>
+        <member name="F:SpaceEngine.Core.Numerics.Complex.B">
+            <summary>
+                The imaginary component of the complex number.
+            </summary>
+        </member>
+        <member name="M:SpaceEngine.Core.Numerics.Complex.#ctor(System.Double,System.Double)">
+            <summary>
+                Initializes a new instance of the <see cref="T:SpaceEngine.Core.Numerics.Complex" /> using
+                the specified real and imaginary values.
+            </summary>
+            <param name="a">The real component of the complex number.</param>
+            <param name="b">The imaginary component of the complex number.</param>
+        </member>
+        <member name="M:SpaceEngine.Core.Numerics.Complex.FromPolarCoordinates(System.Double,System.Double)">
+            <summary>
+                Creates a complex number from a point's polar coordinates.
+            </summary>
+            <param name="magnitude">
+                The magnitude, which is the distance from the origin (the intersection of
+                the x-axis and the y-axis) to the number.
+            </param>
+            <param name="phase">
+                The phase, which is the angle from the line to the horizontal axis, measured
+                in radians.
+            </param>
+        </member>
+        <member name="M:SpaceEngine.Core.Numerics.Complex.FromPolarCoordinates(SpaceEngine.Core.Numerics.Geometry.PolarCoordinate)">
+            <summary>
+                Creates a complex number from a point's polar coordinates.
+            </summary>
+            <param name="coordinate">The polar coordinate</param>
+        </member>
+        <member name="M:SpaceEngine.Core.Numerics.Complex.Negative(SpaceEngine.Core.Numerics.Complex)">
+            <summary>
+                Returns the additive inverse of a complex number.
+            </summary>
+            <param name="value">A complex number.</param>
+            <returns>The negative of value.</returns>
+        </member>
+        <member name="M:SpaceEngine.Core.Numerics.Complex.Add(SpaceEngine.Core.Numerics.Complex,SpaceEngine.Core.Numerics.Complex)">
+            <summary>
+                Adds two complex numbers and returns the result.
+            </summary>
+            <param name="left">The first value to add.</param>
+            <param name="right">The second value to add.</param>
+            <returns>The sum of left and right.</returns>
+        </member>
+        <member name="M:SpaceEngine.Core.Numerics.Complex.Subtract(SpaceEngine.Core.Numerics.Complex,SpaceEngine.Core.Numerics.Complex)">
+            <summary>
+                Subtracts one complex number from another and returns the result.
+            </summary>
+            <param name="left">The value to subtract from (the minuend).</param>
+            <param name="right">The value to subtract (the subtrahend).</param>
+            <returns>The result of subtracting right from left (the difference).</returns>
+        </member>
+        <member name="M:SpaceEngine.Core.Numerics.Complex.Multiply(SpaceEngine.Core.Numerics.Complex,SpaceEngine.Core.Numerics.Complex)">
+            <summary>
+                Returns the product of two complex numbers.
+            </summary>
+            <param name="left">The first complex number to multiply.</param>
+            <param name="right">The second complex number to multiply.</param>
+            <returns>The product of the left and right parameters.</returns>
+        </member>
+        <member name="M:SpaceEngine.Core.Numerics.Complex.Divide(SpaceEngine.Core.Numerics.Complex,SpaceEngine.Core.Numerics.Complex)">
+            <summary>
+                Divides one complex number by another and returns the result.
+            </summary>
+            <param name="left">The complex number to be divided (the dividend).</param>
+            <param name="right">The complex number to divide by (the divisor).</param>
+            <returns>The result of dividing left by right (the quotient).</returns>
+        </member>
+        <member name="M:SpaceEngine.Core.Numerics.Complex.op_UnaryPlus(SpaceEngine.Core.Numerics.Complex)">
+            <summary>
+                Returns the identity of a specified complex number.
+            </summary>
+            <param name="value">A complex number.</param>
+            <returns>The identity of value.</returns>
+        </member>
+        <member name="M:SpaceEngine.Core.Numerics.Complex.op_UnaryNegation(SpaceEngine.Core.Numerics.Complex)">
+            <summary>
+                Returns the additive inverse of a specified complex number.
+            </summary>
+            <param name="value">A complex number.</param>
+            <returns>The negative of value.</returns>
+        </member>
+        <member name="M:SpaceEngine.Core.Numerics.Complex.op_Addition(SpaceEngine.Core.Numerics.Complex,SpaceEngine.Core.Numerics.Complex)">
+            <summary>
+                Adds two complex numbers.
+            </summary>
+            <param name="left">The first value to add.</param>
+            <param name="right">The second value to add.</param>
+            <returns>The sum of left and right.</returns>
+        </member>
+        <member name="M:SpaceEngine.Core.Numerics.Complex.op_Subtraction(SpaceEngine.Core.Numerics.Complex,SpaceEngine.Core.Numerics.Complex)">
+            <summary>
+                Subtracts a complex number from another complex number.
+            </summary>
+            <param name="left">The value to subtract from (the minuend).</param>
+            <param name="right">The value to subtract (the subtrahend).</param>
+            <returns>The result of subtracting right from left (the difference).</returns>
+        </member>
+        <member name="M:SpaceEngine.Core.Numerics.Complex.op_Multiply(SpaceEngine.Core.Numerics.Complex,SpaceEngine.Core.Numerics.Complex)">
+            <summary>
+                Multiplies two specified complex numbers.
+            </summary>
+            <param name="left">The first value to multiply.</param>
+            <param name="right">The second value to multiply.</param>
+            <returns>The product of left and right.</returns>
+        </member>
+        <member name="M:SpaceEngine.Core.Numerics.Complex.op_Division(SpaceEngine.Core.Numerics.Complex,SpaceEngine.Core.Numerics.Complex)">
+            <summary>
+                Divides a specified complex number by another specified complex number.
+            </summary>
+            <param name="left">The value to be divided (the dividend).</param>
+            <param name="right">The value to divide by (the divisor).</param>
+            <returns>The result of dividing left by right (the quotient).</returns>
+        </member>
+        <member name="M:SpaceEngine.Core.Numerics.Complex.Dot(SpaceEngine.Core.Numerics.Complex,SpaceEngine.Core.Numerics.Complex)">
+            <summary>
+                Calculates the dot product (inner product) of two complex numbers.
+            </summary>
+            <param name="left">First source complex number.</param>
+            <param name="right">Second source complex number.</param>
+            <returns>The dot product of the two complex numbers.</returns>
+        </member>
+        <member name="M:SpaceEngine.Core.Numerics.Complex.Real(SpaceEngine.Core.Numerics.Complex)">
+            <summary>
+                Return real part of a complex number.
+            </summary>
+            <param name="value">A complex number.</param>
+            <returns>The real part of a complex number.</returns>
+        </member>
+        <member name="M:SpaceEngine.Core.Numerics.Complex.Imaginary(SpaceEngine.Core.Numerics.Complex)">
+            <summary>
+                Return imaginary part of a complex number.
+            </summary>
+            <param name="value">A complex number.</param>
+            <returns>The imaginary part of a complex number.</returns>
+        </member>
+        <member name="M:SpaceEngine.Core.Numerics.Complex.AbsoluteSquared(SpaceEngine.Core.Numerics.Complex)">
+            <summary>
+                Computes the absolute squared value of a complex number and returns the result.
+            </summary>
+            <param name="value">A complex number.</param>
+            <returns>The absolute squared value of value.</returns>
+        </member>
+        <member name="M:SpaceEngine.Core.Numerics.Complex.Absolute(SpaceEngine.Core.Numerics.Complex)">
+            <summary>
+                Computes the absolute value (or modulus or magnitude) of a complex number and returns the result.
+            </summary>
+            <param name="value">A complex number.</param>
+            <returns>The absolute value of value.</returns>
+        </member>
+        <member name="M:SpaceEngine.Core.Numerics.Complex.Normalize(SpaceEngine.Core.Numerics.Complex)">
+            <summary>
+                Computes the normalized value (or unit) of a complex number.
+            </summary>
+            <param name="value">A complex number.</param>
+            <returns>The normalized value of value.</returns>
+        </member>
+        <member name="M:SpaceEngine.Core.Numerics.Complex.Reciprocal(SpaceEngine.Core.Numerics.Complex)">
+            <summary>
+                Returns the multiplicative inverse of a complex number.
+            </summary>
+            <param name="value">A complex number.</param>
+            <returns>The reciprocal of value.</returns>
+        </member>
+        <member name="M:SpaceEngine.Core.Numerics.Complex.Conjugate(SpaceEngine.Core.Numerics.Complex)">
+            <summary>
+                Computes the conjugate of a complex number and returns the result.
+            </summary>
+            <param name="value">A complex number.</param>
+            <returns>The conjugate of value.</returns>
+        </member>
+        <member name="M:SpaceEngine.Core.Numerics.Complex.Argument(SpaceEngine.Core.Numerics.Complex)">
+            <summary>
+                Computes the argument (or phase) of a complex number and returns the result.
+            </summary>
+            <param name="value">A complex number.</param>
+            <returns>The argument of value.</returns>
+        </member>
+        <member name="M:SpaceEngine.Core.Numerics.Complex.IsInfinity(SpaceEngine.Core.Numerics.Complex)">
+            <summary>
+                Returns a value indicating wheter any components of the specified complex number evaluate to
+                negative or positive infinity.
+            </summary>
+            <param name="value">A complex number.</param>
+            <returns>
+                true if any component evaluates to System.Double.PositiveInfinity or System.Double.NegativeInfinity;
+                otherwise, false.
+            </returns>
+        </member>
+        <member name="M:SpaceEngine.Core.Numerics.Complex.IsNaN(SpaceEngine.Core.Numerics.Complex)">
+            <summary>
+                Returns a value indicating wheter any components of the specified complex number evaluate to
+                a value that is not a number (System.Double.NaN).
+            </summary>
+            <param name="value">A complex number.</param>
+            <returns>true if any component evaluates to System.Double.NaN; otherwise, false.</returns>
+        </member>
+        <member name="M:SpaceEngine.Core.Numerics.Complex.Ceiling(SpaceEngine.Core.Numerics.Complex)">
+            <summary>
+                Returns a complex number where each component is the smallest integral value that
+                is greater than or equal to the specified component.
+            </summary>
+            <param name="value">A complex number.</param>
+            <returns>The ceiling of value.</returns>
+        </member>
+        <member name="M:SpaceEngine.Core.Numerics.Complex.Floor(SpaceEngine.Core.Numerics.Complex)">
+            <summary>
+                Returns a complex number where each component is the largest integral value that
+                is less than or equal to the specified component.
+            </summary>
+            <param name="value">A complex number.</param>
+            <returns>The floor of value.</returns>
+        </member>
+        <member name="M:SpaceEngine.Core.Numerics.Complex.Truncate(SpaceEngine.Core.Numerics.Complex)">
+            <summary>
+                Returns a complex number where each component is the integral part of the specified component.
+            </summary>
+            <param name="value">A complex number.</param>
+            <returns>The integral of value.</returns>
+        </member>
+        <member name="M:SpaceEngine.Core.Numerics.Complex.Fractional(SpaceEngine.Core.Numerics.Complex)">
+            <summary>
+                Returns a complex number where each component is the fractional part of the specified component.
+            </summary>
+            <param name="value">A complex number.</param>
+            <returns>The fractional of value.</returns>
+        </member>
+        <member name="M:SpaceEngine.Core.Numerics.Complex.Round(SpaceEngine.Core.Numerics.Complex)">
+            <summary>
+                Returns a complex number where each component is rounded to the nearest integral value.
+            </summary>
+            <param name="value">A complex number.</param>
+            <returns>The result of rounding value.</returns>
+        </member>
+        <member name="M:SpaceEngine.Core.Numerics.Complex.Round(SpaceEngine.Core.Numerics.Complex,System.Int32)">
+            <summary>
+                Returns a complex number where each component is rounded to the nearest integral value.
+            </summary>
+            <param name="value">A complex number.</param>
+            <param name="digits">The number of fractional digits in the return value.</param>
+            <returns>The result of rounding value.</returns>
+        </member>
+        <member name="M:SpaceEngine.Core.Numerics.Complex.Round(SpaceEngine.Core.Numerics.Complex,System.MidpointRounding)">
+            <summary>
+                Returns a complex number where each component is rounded to the nearest integral value.
+            </summary>
+            <param name="value">A complex number.</param>
+            <param name="mode">Specification for how to round value if it is midway between two other numbers.</param>
+            <returns>The result of rounding value.</returns>
+        </member>
+        <member name="M:SpaceEngine.Core.Numerics.Complex.Round(SpaceEngine.Core.Numerics.Complex,System.Int32,System.MidpointRounding)">
+            <summary>
+                Returns a complex number where each component is rounded to the nearest integral value.
+            </summary>
+            <param name="value">A complex number.</param>
+            <param name="digits">The number of fractional digits in the return value.</param>
+            <param name="mode">Specification for how to round value if it is midway between two other numbers.</param>
+            <returns>The result of rounding value.</returns>
+        </member>
+        <member name="M:SpaceEngine.Core.Numerics.Complex.Sqrt(SpaceEngine.Core.Numerics.Complex)">
+            <summary>
+                Returns the square root of a specified complex number.
+            </summary>
+            <param name="value">A complex number.</param>
+            <returns>The square root of value.</returns>
+        </member>
+        <member name="M:SpaceEngine.Core.Numerics.Complex.Pow(SpaceEngine.Core.Numerics.Complex,SpaceEngine.Core.Numerics.Complex)">
+            <summary>
+                Returns a specified complex number raised to a power specified by a complex number.
+            </summary>
+            <param name="value">A complex number to be raised to a power.</param>
+            <param name="power">A complex number that specifies a power.</param>
+            <returns>The complex number value raised to the power power.</returns>
+        </member>
+        <member name="M:SpaceEngine.Core.Numerics.Complex.Exp(SpaceEngine.Core.Numerics.Complex)">
+            <summary>
+                Returns e raised to the power specified by a complex number.
+            </summary>
+            <param name="value">A complex number that specifies a power.</param>
+            <returns>The number e raised to the power value.</returns>
+        </member>
+        <member name="M:SpaceEngine.Core.Numerics.Complex.Log(SpaceEngine.Core.Numerics.Complex)">
+            <summary>
+                Returns the natural (base e) logarithm of a specified complex number.
+            </summary>
+            <param name="value">A complex number.</param>
+            <returns>The natural (base e) logarithm of value.</returns>
+        </member>
+        <member name="M:SpaceEngine.Core.Numerics.Complex.Log(SpaceEngine.Core.Numerics.Complex,System.Double)">
+            <summary>
+                Returns the logarithm of a specified complex number in a specified base.
+            </summary>
+            <param name="value">A complex number.</param>
+            <param name="baseValue">The base of the logarithm.</param>
+            <returns>The logarithm of value in base baseValue.</returns>
+        </member>
+        <member name="M:SpaceEngine.Core.Numerics.Complex.Log10(SpaceEngine.Core.Numerics.Complex)">
+            <summary>
+                Returns the base-10 logarithm of a specified complex number.
+            </summary>
+            <param name="value">A complex number.</param>
+            <returns>The base-10 logarithm of value.</returns>
+        </member>
+        <member name="M:SpaceEngine.Core.Numerics.Complex.Cos(SpaceEngine.Core.Numerics.Complex)">
+            <summary>
+                Returns the cosine of the specified complex number.
+            </summary>
+            <param name="value">A complex number.</param>
+            <returns>The cosine of value.</returns>
+        </member>
+        <member name="M:SpaceEngine.Core.Numerics.Complex.Acos(SpaceEngine.Core.Numerics.Complex)">
+            <summary>
+                Returns the angle that is the arc cosine of the specified complex number.
+            </summary>
+            <param name="value">A complex number that represents a cosine.</param>
+            <returns>The angle, measured in radians, which is the arc cosine of value.</returns>
+        </member>
+        <member name="M:SpaceEngine.Core.Numerics.Complex.Cosh(SpaceEngine.Core.Numerics.Complex)">
+            <summary>
+                Returns the hyperbolic cosine of the specified complex number.
+            </summary>
+            <param name="value">A complex number.</param>
+            <returns>The hyperbolic cosine of value.</returns>
+        </member>
+        <member name="M:SpaceEngine.Core.Numerics.Complex.Acosh(SpaceEngine.Core.Numerics.Complex)">
+            <summary>
+                Returns the hyperbolic angle whose hyperbolic cosine is the specified number.
+            </summary>
+            <param name="value">A number representing a hyperbolic cosine.</param>
+            <returns>A hyperbolic angle, θ, measured in radians.</returns>
+        </member>
+        <member name="M:SpaceEngine.Core.Numerics.Complex.Sin(SpaceEngine.Core.Numerics.Complex)">
+            <summary>
+                Returns the sine of the specified complex number.
+            </summary>
+            <param name="value">A complex number.</param>
+            <returns>The sine of value.</returns>
+        </member>
+        <member name="M:SpaceEngine.Core.Numerics.Complex.Asin(SpaceEngine.Core.Numerics.Complex)">
+            <summary>
+                Returns the angle that is the arc sine of the specified complex number.
+            </summary>
+            <param name="value">A complex number.</param>
+            <returns>The angle which is the arc sine of value.</returns>
+        </member>
+        <member name="M:SpaceEngine.Core.Numerics.Complex.Sinh(SpaceEngine.Core.Numerics.Complex)">
+            <summary>
+                Returns the hyperbolic sine of the specified complex number.
+            </summary>
+            <param name="value">A complex number.</param>
+            <returns>The hyperbolic sine of value.</returns>
+        </member>
+        <member name="M:SpaceEngine.Core.Numerics.Complex.Asinh(SpaceEngine.Core.Numerics.Complex)">
+            <summary>
+                Returns the hyperbolic angle whose hyperbolic sine is the specified number.
+            </summary>
+            <param name="value">A number representing a hyperbolic sine.</param>
+            <returns>A hyperbolic angle, θ, measured in radians.</returns>
+        </member>
+        <member name="M:SpaceEngine.Core.Numerics.Complex.Tan(SpaceEngine.Core.Numerics.Complex)">
+            <summary>
+                Returns the tangent of the specified complex number.
+            </summary>
+            <param name="value">A complex number.</param>
+            <returns>The tangent of value.</returns>
+        </member>
+        <member name="M:SpaceEngine.Core.Numerics.Complex.Atan(SpaceEngine.Core.Numerics.Complex)">
+            <summary>
+                Returns the angle that is the arc tangent of the specified complex number.
+            </summary>
+            <param name="value">A complex number.</param>
+            <returns>The angle that is the arc tangent of value.</returns>
+        </member>
+        <member name="M:SpaceEngine.Core.Numerics.Complex.Tanh(SpaceEngine.Core.Numerics.Complex)">
+            <summary>
+                Returns the hyperbolic tangent of the specified complex number.
+            </summary>
+            <param name="value">A complex number.</param>
+            <returns>The hyperbolic tangent of value.</returns>
+        </member>
+        <member name="M:SpaceEngine.Core.Numerics.Complex.Atanh(SpaceEngine.Core.Numerics.Complex)">
+            <summary>
+                Returns the hyperbolic angle whose hyperbolic tangent is the specified number.
+            </summary>
+            <param name="value">A number representing a hyperbolic tangent.</param>
+            <returns>A hyperbolic angle, θ, measured in radians.</returns>
+        </member>
+        <member name="M:SpaceEngine.Core.Numerics.Complex.Lerp(SpaceEngine.Core.Numerics.Complex,SpaceEngine.Core.Numerics.Complex,System.Double)">
+            <summary>
+                Performs a linear interpolation between two complex numbers.
+            </summary>
+            <param name="start">Start complex number.</param>
+            <param name="end">End complex number.</param>
+            <param name="amount">Value between 0 and 1 indicating the weight of <paramref name="end" />.</param>
+            <returns>The linear interpolation of the two complex numbers.</returns>
+            <remarks>
+                This method performs the linear interpolation based on the following formula.
+                <code>start + (end - start) * amount</code>
+                Passing <paramref name="amount" /> a value of 0 will cause <paramref name="start" /> to be returned; a value of 1
+                will cause <paramref name="end" /> to be returned.
+            </remarks>
+        </member>
+        <member name="M:SpaceEngine.Core.Numerics.Complex.Slerp(SpaceEngine.Core.Numerics.Complex,SpaceEngine.Core.Numerics.Complex,System.Double)">
+            <summary>
+                Interpolates between two unit complex numbers, using spherical linear interpolation.
+            </summary>
+            <param name="start">Start complex number.</param>
+            <param name="end">End complex number.</param>
+            <param name="amount">Value between 0 and 1 indicating the weight of <paramref name="end" />.</param>
+            <returns>The spherical linear interpolation of the two complex numbers.</returns>
+            <remarks>
+                Passing <paramref name="amount" /> a value of 0 will cause <paramref name="start" /> to be returned; a value of 1
+                will cause <paramref name="end" /> to be returned.
+            </remarks>
+        </member>
+        <member name="M:SpaceEngine.Core.Numerics.Complex.op_Explicit(System.Decimal)~SpaceEngine.Core.Numerics.Complex">
+            <summary>
+                Defines an explicit conversion of a System.Decimal value to a complex number.
+            </summary>
+            <param name="value">The value to convert to a complex number.</param>
+            <returns>
+                A complex number that has a real component equal to value and an imaginary
+                component equal to zero.
+            </returns>
+        </member>
+        <member name="M:SpaceEngine.Core.Numerics.Complex.op_Implicit(System.Double)~SpaceEngine.Core.Numerics.Complex">
+            <summary>
+                Defines an implicit conversion of a double-precision floating-point number
+                to a complex number.
+            </summary>
+            <param name="value">The value to convert to a complex number.</param>
+            <returns>
+                A complex number that has a real component equal to value and an imaginary
+                component equal to zero.
+            </returns>
+        </member>
+        <member name="M:SpaceEngine.Core.Numerics.Complex.op_Implicit(System.Single)~SpaceEngine.Core.Numerics.Complex">
+            <summary>
+                Defines an implicit conversion of a single-precision floating-point number
+                to a complex number.
+            </summary>
+            <param name="value">The value to convert to a complex number.</param>
+            <returns>
+                A complex number that has a real component equal to value and an imaginary
+                component equal to zero.
+            </returns>
+        </member>
+        <member name="M:SpaceEngine.Core.Numerics.Complex.op_Implicit(System.Int32)~SpaceEngine.Core.Numerics.Complex">
+            <summary>
+                Defines an implicit conversion of a 32-bit signed integer
+                to a complex number.
+            </summary>
+            <param name="value">The value to convert to a complex number.</param>
+            <returns>
+                A complex number that has a real component equal to value and an imaginary
+                component equal to zero.
+            </returns>
+        </member>
+        <member name="M:SpaceEngine.Core.Numerics.Complex.op_Implicit(System.Int64)~SpaceEngine.Core.Numerics.Complex">
+            <summary>
+                Defines an implicit conversion of a 64-bit signed integer
+                to a complex number.
+            </summary>
+            <param name="value">The value to convert to a complex number.</param>
+            <returns>
+                A complex number that has a real component equal to value and an imaginary
+                component equal to zero.
+            </returns>
+        </member>
+        <member name="M:SpaceEngine.Core.Numerics.Complex.op_Implicit(System.SByte)~SpaceEngine.Core.Numerics.Complex">
+            <summary>
+                Defines an implicit conversion of a signed byte
+                to a complex number.
+            </summary>
+            <param name="value">The value to convert to a complex number.</param>
+            <returns>
+                A complex number that has a real component equal to value and an imaginary
+                component equal to zero.
+            </returns>
+        </member>
+        <member name="M:SpaceEngine.Core.Numerics.Complex.op_Implicit(System.Int16)~SpaceEngine.Core.Numerics.Complex">
+            <summary>
+                Defines an implicit conversion of a 16-bit signed integer
+                to a complex number.
+            </summary>
+            <param name="value">The value to convert to a complex number.</param>
+            <returns>
+                A complex number that has a real component equal to value and an imaginary
+                component equal to zero.
+            </returns>
+        </member>
+        <member name="M:SpaceEngine.Core.Numerics.Complex.op_Implicit(System.UInt32)~SpaceEngine.Core.Numerics.Complex">
+            <summary>
+                Defines an implicit conversion of a 32-bit unsigned integer
+                to a complex number.
+            </summary>
+            <param name="value">The value to convert to a complex number.</param>
+            <returns>
+                A complex number that has a real component equal to value and an imaginary
+                component equal to zero.
+            </returns>
+        </member>
+        <member name="M:SpaceEngine.Core.Numerics.Complex.op_Implicit(System.UInt64)~SpaceEngine.Core.Numerics.Complex">
+            <summary>
+                Defines an implicit conversion of a 64-bit unsigned integer
+                to a complex number.
+            </summary>
+            <param name="value">The value to convert to a complex number.</param>
+            <returns>
+                A complex number that has a real component equal to value and an imaginary
+                component equal to zero.
+            </returns>
+        </member>
+        <member name="M:SpaceEngine.Core.Numerics.Complex.op_Implicit(System.Byte)~SpaceEngine.Core.Numerics.Complex">
+            <summary>
+                Defines an implicit conversion of a unsigned byte integer
+                to a complex number.
+            </summary>
+            <param name="value">The value to convert to a complex number.</param>
+            <returns>
+                A complex number that has a real component equal to value and an imaginary
+                component equal to zero.
+            </returns>
+        </member>
+        <member name="M:SpaceEngine.Core.Numerics.Complex.op_Implicit(System.UInt16)~SpaceEngine.Core.Numerics.Complex">
+            <summary>
+                Defines an implicit conversion of a 16-bit unsigned integer
+                to a complex number.
+            </summary>
+            <param name="value">The value to convert to a complex number.</param>
+            <returns>
+                A complex number that has a real component equal to value and an imaginary
+                component equal to zero.
+            </returns>
+        </member>
+        <member name="M:SpaceEngine.Core.Numerics.Complex.GetHashCode">
+            <summary>
+                Returns the hash code for the current Complex object.
+            </summary>
+            <returns>A 32-bit signed integer hash code.</returns>
+        </member>
+        <member name="M:SpaceEngine.Core.Numerics.Complex.Equals(System.Object)">
+            <summary>
+                Returns a value that indicates whether the current instance and a specified
+                object have the same value.
+            </summary>
+            <param name="obj">The object to compare.</param>
+            <returns>
+                true if the obj parameter is a Complex object and its value
+                is equal to the current Complex object; otherwise, false.
+            </returns>
+        </member>
+        <member name="M:SpaceEngine.Core.Numerics.Complex.Equals(SpaceEngine.Core.Numerics.Complex)">
+            <summary>
+                Returns a value that indicates whether the current instance and a specified
+                complex number have the same value.
+            </summary>
+            <param name="other">The complex number to compare.</param>
+            <returns>true if this complex number and value have the same value; otherwise, false.</returns>
+        </member>
+        <member name="M:SpaceEngine.Core.Numerics.Complex.Equals(SpaceEngine.Core.Numerics.Complex,SpaceEngine.Core.Numerics.Complex)">
+            <summary>
+                Returns a value that indicates whether two complex numbers are equal.
+            </summary>
+            <param name="left">The first complex number to compare.</param>
+            <param name="right">The second complex number to compare.</param>
+            <returns>true if the left and right are equal; otherwise, false.</returns>
+        </member>
+        <member name="M:SpaceEngine.Core.Numerics.Complex.op_Equality(SpaceEngine.Core.Numerics.Complex,SpaceEngine.Core.Numerics.Complex)">
+            <summary>
+                Returns a value that indicates whether two complex numbers are equal.
+            </summary>
+            <param name="left">The first complex number to compare.</param>
+            <param name="right">The second complex number to compare.</param>
+            <returns>true if the left and right are equal; otherwise, false.</returns>
+        </member>
+        <member name="M:SpaceEngine.Core.Numerics.Complex.op_Inequality(SpaceEngine.Core.Numerics.Complex,SpaceEngine.Core.Numerics.Complex)">
+            <summary>
+                Returns a value that indicates whether two complex numbers are not equal.
+            </summary>
+            <param name="left">The first complex number to compare.</param>
+            <param name="right">The second complex number to compare.</param>
+            <returns>true if left and right are not equal; otherwise, false.</returns>
+        </member>
+        <member name="M:SpaceEngine.Core.Numerics.Complex.ToString">
+            <summary>
+                Converts the value of the current complex number to its equivalent string
+                representation in Cartesian form.
+            </summary>
+            <returns>The string representation of the current instance in Cartesian form.</returns>
+        </member>
+        <member name="M:SpaceEngine.Core.Numerics.Complex.ToString(System.IFormatProvider)">
+            <summary>
+                Converts the value of the current complex number to its equivalent string
+                representation in Cartesian form by using the specified culture-specific
+                formatting information.
+            </summary>
+            <param name="provider">An object that supplies culture-specific formatting information.</param>
+            <returns>
+                The string representation of the current instance in Cartesian form, as specified
+                by provider.
+            </returns>
+        </member>
+        <member name="M:SpaceEngine.Core.Numerics.Complex.ToString(System.String)">
+            <summary>
+                Converts the value of the current complex number to its equivalent string
+                representation in Cartesian form by using the specified format for its real
+                and imaginary parts.
+            </summary>
+            <param name="format">A standard or custom numeric format string.</param>
+            <returns>The string representation of the current instance in Cartesian form.</returns>
+            <exception cref="T:System.FormatException">format is not a valid format string.</exception>
+        </member>
+        <member name="M:SpaceEngine.Core.Numerics.Complex.ToString(System.String,System.IFormatProvider)">
+            <summary>
+                Converts the value of the current complex number to its equivalent string
+                representation in Cartesian form by using the specified format and culture-specific
+                format information for its real and imaginary parts.
+            </summary>
+            <param name="format">A standard or custom numeric format string.</param>
+            <param name="provider">An object that supplies culture-specific formatting information.</param>
+            <returns>
+                The string representation of the current instance in Cartesian form, as specified
+                by format and provider.
+            </returns>
+            <exception cref="T:System.FormatException">format is not a valid format string.</exception>
+        </member>
         <member name="T:SpaceEngine.Core.Numerics.Constants">
             <summary>
                 Provides common mathematical and physical constants.
@@ -1854,6 +2512,13 @@
             </summary>
             <returns>The determinant of the matrix.</returns>
         </member>
+        <member name="M:SpaceEngine.Core.Numerics.Matrix.ToMatrix4x4(SpaceEngine.Core.Numerics.Matrix3x3d)">
+            <summary>
+            Converts target matrix to <see cref="T:UnityEngine.Matrix4x4"/>.
+            </summary>
+            <param name="m">Target matrix.</param>
+            <returns>Converted matrix.</returns>
+        </member>
         <member name="M:SpaceEngine.Core.Numerics.Matrix.Submatrix(SpaceEngine.Core.Numerics.Matrix4x4d,System.Int32,System.Int32)">
             <summary>
                 Returns the specified submatrix of the given matrix.
@@ -2047,6 +2712,34 @@
                 Calculates the determinant of the matrix.
             </summary>
             <returns>The determinant of the matrix.</returns>
+        </member>
+        <member name="M:SpaceEngine.Core.Numerics.Matrix.ToMatrix4x4(SpaceEngine.Core.Numerics.Matrix4x4d)">
+            <summary>
+            Converts target matrix to <see cref="T:UnityEngine.Matrix4x4"/>.
+            </summary>
+            <param name="m">Target matrix.</param>
+            <returns>Converted matrix.</returns>
+        </member>
+        <member name="M:SpaceEngine.Core.Numerics.Matrix.ToMatrix4x4d(UnityEngine.Matrix4x4)">
+            <summary>
+            Converts target matrix to <see cref="T:SpaceEngine.Core.Numerics.Matrix4x4d"/>.
+            </summary>
+            <param name="m">Target matrix.</param>
+            <returns>Converted matrix.</returns>
+        </member>
+        <member name="M:SpaceEngine.Core.Numerics.Matrix.ToMatrix3x3d(SpaceEngine.Core.Numerics.Matrix4x4d)">
+            <summary>
+            Converts target matrix to <see cref="T:SpaceEngine.Core.Numerics.Matrix3x3d"/>.
+            </summary>
+            <param name="m">Target matrix.</param>
+            <returns>Converted matrix.</returns>
+        </member>
+        <member name="M:SpaceEngine.Core.Numerics.Matrix.ToMatrix3x3d(UnityEngine.Matrix4x4)">
+            <summary>
+            Converts target matrix to <see cref="T:SpaceEngine.Core.Numerics.Matrix3x3d"/>.
+            </summary>
+            <param name="m">Target matrix.</param>
+            <returns>Converted matrix.</returns>
         </member>
         <member name="T:SpaceEngine.Core.Numerics.Matrix3x3d">
             <summary>

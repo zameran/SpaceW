@@ -142,6 +142,19 @@ public class NumericsMigrationUnitTest
     }
 
     [Test]
+    public void Matrix4x4Comparsion()
+    {
+        UnityEngine.Matrix4x4d matrix1;
+        SpaceEngine.Core.Numerics.Matrix4x4d matrix2;
+
+        InitializeRandomMatrix4x4d(out matrix1, out matrix2);
+
+        var result1 = SpaceEngine.Core.Numerics.Matrix.ToMatrix4x4(matrix2);
+
+        Iterate2D(4, 4, (i, j) => Assert.IsTrue(BrainFuckMath.NearlyEqual(matrix1.m[i, j], result1[i, j], 0.0000001)));
+    }
+
+    [Test]
     public void Vector2dSimpleMath()
     {
         var vector1 = new UnityEngine.Vector2d(X, Y);
