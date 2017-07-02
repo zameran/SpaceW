@@ -114,6 +114,10 @@ namespace SpaceEngine.Core.Terrain
 
         public Matrix4x4d DeformedVerticals { get; private set; }
 
+        public Matrix4x4d FlatCorners { get; private set; }
+
+        public Matrix4x4d FlatVerticals { get; private set; }
+
         /// <summary>
         /// Tangent frame to world matrix.
         /// </summary>
@@ -122,6 +126,11 @@ namespace SpaceEngine.Core.Terrain
         public Vector3d Center { get; private set; }
 
         public Vector4d Lengths { get; private set; }
+
+        /// <summary>
+        /// Vector to handle <see cref="Ox"/>, <see cref="Oy"/>, <see cref="Length"/> and <see cref="Level"/> values.
+        /// </summary>
+        public Vector4 DeformedOffset { get; private set; }
 
         private void CalculateMatrices(double ox, double oy, double length, double r)
         {
@@ -150,6 +159,9 @@ namespace SpaceEngine.Core.Terrain
                                                v0.y, v1.y, v2.y, v3.y,
                                                v0.z, v1.z, v2.z, v3.z,
                                                0.0, 0.0, 0.0, 0.0);
+
+            FlatCorners = new Matrix4x4d(p0.x, p1.x, p2.x, p3.x, p0.y, p1.y, p2.y, p3.y, 0.0, 0.0, 0.0, 0.0, 1.0, 1.0, 1.0, 1.0);
+            FlatVerticals = new Matrix4x4d(0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0);
 
             var uz = Center.Normalized();
             var ux = new Vector3d(0.0, 1.0, 0.0).Cross(uz).Normalized();
@@ -184,6 +196,7 @@ namespace SpaceEngine.Core.Terrain
             Length = length;
             LengthHalf = length / 2.0;
             LocalBox = new Box3d(Ox, Ox + Length, Oy, Oy + Length, ZMin, ZMax);
+            DeformedOffset = new Vector4((float)Ox, (float)Oy, (float)Length, Level);
 
             // TODO : Hm. Maybe too heavy for a ctor? Threading? Hueading?
             CalculateMatrices(ox, oy, length, owner.ParentBody.Size);
