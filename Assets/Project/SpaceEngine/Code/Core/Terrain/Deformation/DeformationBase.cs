@@ -52,11 +52,13 @@ namespace SpaceEngine.Core.Terrain.Deformation
         /// <summary>
         /// The corresponding point in the deformed (destination) space.
         /// </summary>
-        /// <param name="localPoint">A point in the local (source) space.</param>
+        /// <param name="x">A X coordinate of point in the local (source) space.</param>
+        /// <param name="y">A Y coordinate of point in the local (source) space.</param>
+        /// <param name="z">A Z coordinate of point in the local (source) space.</param>
         /// <returns>Returns the deformed point corresponding to the given source point.</returns>
-        public virtual Vector3d LocalToDeformed(Vector3d localPoint)
+        public virtual Vector3d LocalToDeformed(double x, double y, double z)
         {
-            return localPoint;
+            return new Vector3d(x, y, z);
         }
 
         /// <summary>
@@ -132,9 +134,10 @@ namespace SpaceEngine.Core.Terrain.Deformation
         /// <code>TerrainNode.GetLocalCamera</code> and <code>TerrainNode.GetDeformedCamera</code>,
         /// as well as the view frustum planes in deformed space with <code>TerrainNode.GetDeformedFrustumPlanes</code>.
         /// </param>
-        /// <param name="localBox">a bounding box in local space.</param>
+        /// <param name="localBox">A bounding box in local space.</param>
+        /// <param name="deformedBox">A bounding box in deformation space. Should be precalculated.</param>
         /// <returns>Returns the visibility of a bounding box in local space, in a view frustum defined in deformed space.</returns>
-        public virtual Frustum.VISIBILITY GetVisibility(TerrainNode node, Box3d localBox)
+        public virtual Frustum.VISIBILITY GetVisibility(TerrainNode node, Box3d localBox, Vector3d[] deformedBox)
         {
             // localBox = deformedBox, so we can compare the deformed frustum with it
             return Frustum.GetVisibility(node.DeformedFrustumPlanes, localBox);

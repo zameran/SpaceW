@@ -127,6 +127,10 @@ namespace SpaceEngine.Core.Terrain
 
         public Vector4d Lengths { get; private set; }
 
+        public Vector3d[] DeformedBox { get; private set; }
+
+        public byte[] Order { get; private set; }
+
         /// <summary>
         /// Vector to handle <see cref="Ox"/>, <see cref="Oy"/>, <see cref="Length"/> and <see cref="Level"/> values.
         /// </summary>
@@ -198,6 +202,18 @@ namespace SpaceEngine.Core.Terrain
             LocalBox = new Box3d(Ox, Ox + Length, Oy, Oy + Length, ZMin, ZMax);
             DeformedOffset = new Vector4((float)Ox, (float)Oy, (float)Length, Level);
 
+            DeformedBox = new Vector3d[4];
+            DeformedBox[0] = Owner.Deformation.LocalToDeformed(LocalBox.xmin, LocalBox.ymin, LocalBox.zmin);
+            DeformedBox[1] = Owner.Deformation.LocalToDeformed(LocalBox.xmax, LocalBox.ymin, LocalBox.zmin);
+            DeformedBox[2] = Owner.Deformation.LocalToDeformed(LocalBox.xmax, LocalBox.ymax, LocalBox.zmin);
+            DeformedBox[3] = Owner.Deformation.LocalToDeformed(LocalBox.xmin, LocalBox.ymax, LocalBox.zmin);
+
+            Order = new byte[4];
+            Order[0] = 0;
+            Order[1] = 1;
+            Order[2] = 2;
+            Order[3] = 3;
+
             // TODO : Hm. Maybe too heavy for a ctor? Threading? Hueading?
             CalculateMatrices(ox, oy, length, owner.ParentBody.Size);
         }
@@ -268,7 +284,7 @@ namespace SpaceEngine.Core.Terrain
 
             if (visibility == Frustum.VISIBILITY.PARTIALLY)
             {
-                Visibility = Owner.Deformation.GetVisibility(Owner, LocalBox);
+                Visibility = Owner.Deformation.GetVisibility(Owner, LocalBox, DeformedBox);
             }
             else
             {
@@ -297,12 +313,12 @@ namespace SpaceEngine.Core.Terrain
                     Subdivide();
                 }
 
-                var order = CalculateOrder(Owner.LocalCameraPosition.x, Owner.LocalCameraPosition.y, Ox + LengthHalf, Oy + LengthHalf);
+                CalculateOrder(Owner.LocalCameraPosition.x, Owner.LocalCameraPosition.y, Ox + LengthHalf, Oy + LengthHalf);
 
-                Children[order[0]].UpdateLOD();
-                Children[order[1]].UpdateLOD();
-                Children[order[2]].UpdateLOD();
-                Children[order[3]].UpdateLOD();
+                Children[Order[0]].UpdateLOD();
+                Children[Order[1]].UpdateLOD();
+                Children[Order[2]].UpdateLOD();
+                Children[Order[3]].UpdateLOD();
 
                 // We compute a more precise occlusion for the next frame (see above), by combining the occlusion status of the child nodes.
                 Occluded = (Children[0].Occluded && Children[1].Occluded && Children[2].Occluded && Children[3].Occluded);
@@ -327,46 +343,42 @@ namespace SpaceEngine.Core.Terrain
             }
         }
 
-        public byte[] CalculateOrder(double cameraX, double cameraY, double quadX, double quadY)
+        public void CalculateOrder(double cameraX, double cameraY, double quadX, double quadY)
         {
-            var order = new byte[4];
-
             if (cameraY < quadY)
             {
                 if (cameraX < quadX)
                 {
-                    order[0] = 0;
-                    order[1] = 1;
-                    order[2] = 2;
-                    order[3] = 3;
+                    Order[0] = 0;
+                    Order[1] = 1;
+                    Order[2] = 2;
+                    Order[3] = 3;
                 }
                 else
                 {
-                    order[0] = 1;
-                    order[1] = 0;
-                    order[2] = 3;
-                    order[3] = 2;
+                    Order[0] = 1;
+                    Order[1] = 0;
+                    Order[2] = 3;
+                    Order[3] = 2;
                 }
             }
             else
             {
                 if (cameraX < quadX)
                 {
-                    order[0] = 2;
-                    order[1] = 0;
-                    order[2] = 3;
-                    order[3] = 1;
+                    Order[0] = 2;
+                    Order[1] = 0;
+                    Order[2] = 3;
+                    Order[3] = 1;
                 }
                 else
                 {
-                    order[0] = 3;
-                    order[1] = 1;
-                    order[2] = 2;
-                    order[3] = 0;
+                    Order[0] = 3;
+                    Order[1] = 1;
+                    Order[2] = 2;
+                    Order[3] = 0;
                 }
             }
-
-            return order;
         }
 
         /// <summary>
@@ -390,15 +402,15 @@ namespace SpaceEngine.Core.Terrain
 
                 var verts = new Vector3[8];
 
-                verts[0] = Owner.Deformation.LocalToDeformed(new Vector3d(Ox, Oy, ZMin)).ToVector3();
-                verts[1] = Owner.Deformation.LocalToDeformed(new Vector3d(Ox + Length, Oy, ZMin)).ToVector3();
-                verts[2] = Owner.Deformation.LocalToDeformed(new Vector3d(Ox, Oy + Length, ZMin)).ToVector3();
-                verts[3] = Owner.Deformation.LocalToDeformed(new Vector3d(Ox + Length, Oy + Length, ZMin)).ToVector3();
+                verts[0] = Owner.Deformation.LocalToDeformed(Ox, Oy, ZMin).ToVector3();
+                verts[1] = Owner.Deformation.LocalToDeformed(Ox + Length, Oy, ZMin).ToVector3();
+                verts[2] = Owner.Deformation.LocalToDeformed(Ox, Oy + Length, ZMin).ToVector3();
+                verts[3] = Owner.Deformation.LocalToDeformed(Ox + Length, Oy + Length, ZMin).ToVector3();
 
-                verts[4] = Owner.Deformation.LocalToDeformed(new Vector3d(Ox, Oy, ZMax)).ToVector3();
-                verts[5] = Owner.Deformation.LocalToDeformed(new Vector3d(Ox + Length, Oy, ZMax)).ToVector3();
-                verts[6] = Owner.Deformation.LocalToDeformed(new Vector3d(Ox, Oy + Length, ZMax)).ToVector3();
-                verts[7] = Owner.Deformation.LocalToDeformed(new Vector3d(Ox + Length, Oy + Length, ZMax)).ToVector3();
+                verts[4] = Owner.Deformation.LocalToDeformed(Ox, Oy, ZMax).ToVector3();
+                verts[5] = Owner.Deformation.LocalToDeformed(Ox + Length, Oy, ZMax).ToVector3();
+                verts[6] = Owner.Deformation.LocalToDeformed(Ox, Oy + Length, ZMax).ToVector3();
+                verts[7] = Owner.Deformation.LocalToDeformed(Ox + Length, Oy + Length, ZMax).ToVector3();
 
                 GL.PushMatrix();
 

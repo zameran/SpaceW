@@ -58,12 +58,17 @@ namespace SpaceEngine.Core.Terrain.Deformation
             this.R = R;
         }
 
-        public override Vector3d LocalToDeformed(Vector3d localPoint)
+        public override Vector3d LocalToDeformed(double x, double y, double z)
         {
-            var alpha = localPoint.y / R;
-            var r = R - localPoint.z;
+            var alpha = y / R;
+            var r = R - z;
 
-            return new Vector3d(localPoint.x, r * Math.Sin(alpha), -r * Math.Cos(alpha));
+            return new Vector3d(x, r * Math.Sin(alpha), -r * Math.Cos(alpha));
+        }
+
+        public Vector3d LocalToDeformed(Vector3d localPoint)
+        {
+            return LocalToDeformed(localPoint.x, localPoint.y, localPoint.z);
         }
 
         public override Matrix4x4d LocalToDeformedDifferential(Vector3d localPoint, bool clamp = false)
@@ -102,14 +107,8 @@ namespace SpaceEngine.Core.Terrain.Deformation
                                   0.0, 0.0, 0.0, 1.0);
         }
 
-        public override Frustum.VISIBILITY GetVisibility(TerrainNode node, Box3d localBox)
+        public override Frustum.VISIBILITY GetVisibility(TerrainNode node, Box3d localBox, Vector3d[] deformedBox)
         {
-            var deformedBox = new Vector3d[4];
-            deformedBox[0] = LocalToDeformed(new Vector3d(localBox.xmin, localBox.ymin, localBox.zmax));
-            deformedBox[1] = LocalToDeformed(new Vector3d(localBox.xmax, localBox.ymin, localBox.zmax));
-            deformedBox[2] = LocalToDeformed(new Vector3d(localBox.xmax, localBox.ymax, localBox.zmax));
-            deformedBox[3] = LocalToDeformed(new Vector3d(localBox.xmin, localBox.ymax, localBox.zmax));
-
             var f = (float)((R - localBox.zmin) / ((R - localBox.zmax) * Math.Cos((localBox.ymax - localBox.ymin) / (2.0 * R))));
 
             var v0 = GetClipVisibility(node.DeformedFrustumPlanes[0], deformedBox, f);

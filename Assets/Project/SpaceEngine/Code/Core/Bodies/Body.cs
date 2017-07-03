@@ -80,6 +80,7 @@ namespace SpaceEngine.Core.Bodies
         public int RenderQueueOffset = 0;
 
         public bool DrawGizmos = false;
+        public bool UpdateLOD = true;
 
         public bool AtmosphereEnabled = true;
         public bool OceanEnabled = true;

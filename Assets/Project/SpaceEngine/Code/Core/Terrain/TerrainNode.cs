@@ -47,7 +47,7 @@ namespace SpaceEngine.Core.Terrain
     {
         public Body ParentBody { get; set; }
 
-        readonly static byte HORIZON_SIZE = 255;
+        static readonly byte HORIZON_SIZE = 255;
 
         /// <summary>
         /// The material used by this terrain node.
@@ -280,7 +280,7 @@ namespace SpaceEngine.Core.Terrain
                 }
             }
 
-            TerrainQuadRoot.UpdateLOD();
+            if (ParentBody.UpdateLOD) TerrainQuadRoot.UpdateLOD();
 
             SetUniforms(TerrainMaterial);
 
@@ -411,9 +411,11 @@ namespace SpaceEngine.Core.Terrain
 
                 for (byte i = 0; i < 4; ++i)
                 {
-                    FindDrawableQuads(quad.GetChild(i));
+                    var targetQuad = quad.GetChild(i);
 
-                    if (quad.GetChild(i).Drawable)
+                    FindDrawableQuads(targetQuad);
+
+                    if (targetQuad.Drawable)
                     {
                         ++drawableCount;
                     }
@@ -456,19 +458,21 @@ namespace SpaceEngine.Core.Terrain
                 // Draw quads in a order based on distance to camera
                 var done = 0;
 
-                var order = quad.CalculateOrder(LocalCameraPosition.x, LocalCameraPosition.y, quad.Ox + quad.LengthHalf, quad.Oy + quad.LengthHalf);
+                quad.CalculateOrder(LocalCameraPosition.x, LocalCameraPosition.y, quad.Ox + quad.LengthHalf, quad.Oy + quad.LengthHalf);
 
                 for (byte i = 0; i < 4; ++i)
                 {
-                    if (quad.GetChild(order[i]).Visibility == Frustum.VISIBILITY.INVISIBLE)
-                    {
-                        done |= (1 << order[i]);
-                    }
-                    else if (quad.GetChild(order[i]).Drawable)
-                    {
-                        DrawQuad(quad.GetChild(order[i]), mesh, mpb);
+                    var targetQuad = quad.GetChild(quad.Order[i]);
 
-                        done |= (1 << order[i]);
+                    if (targetQuad.Visibility == Frustum.VISIBILITY.INVISIBLE)
+                    {
+                        done |= (1 << quad.Order[i]);
+                    }
+                    else if (targetQuad.Drawable)
+                    {
+                        DrawQuad(targetQuad, mesh, mpb);
+
+                        done |= 1 << quad.Order[i];
                     }
                 }
 
@@ -590,7 +594,7 @@ namespace SpaceEngine.Core.Terrain
 
             // NOTE : Looks like horizon culling isn't working properly. Maybe should be debugged or something...
 
-            for (int i = imin; i <= imax; ++i)
+            for (byte i = (byte)imin; i <= imax; ++i)
             {
                 if (zmax > Horizon[i])
                 {
@@ -648,7 +652,7 @@ namespace SpaceEngine.Core.Terrain
             // First checks if the bounding box projection is below the current horizon line
             var occluded = (imax >= imin);
 
-            for (int i = imin; i <= imax; ++i)
+            for (byte i = (byte)imin; i <= imax; ++i)
             {
                 if (zmax > Horizon[i])
                 {
@@ -664,7 +668,7 @@ namespace SpaceEngine.Core.Terrain
                 imin = Math.Max((int)Math.Ceiling(xmin * HORIZON_SIZE), 0);
                 imax = Math.Min((int)Math.Floor(xmax * HORIZON_SIZE), HORIZON_SIZE - 1);
 
-                for (int i = imin; i <= imax; ++i)
+                for (byte i = (byte)imin; i <= imax; ++i)
                 {
                     Horizon[i] = (float)Math.Max(Horizon[i], zmin);
                 }

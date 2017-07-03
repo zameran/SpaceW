@@ -26,9 +26,14 @@ namespace SpaceEngine.Core.Terrain.Deformation
             this.R = R;
         }
 
-        public override Vector3d LocalToDeformed(Vector3d localPoint)
+        public override Vector3d LocalToDeformed(double x, double y, double z)
         {
-            return (new Vector3d(localPoint.x, localPoint.y, R)).Normalized(localPoint.z + R);
+            return new Vector3d(x, y, R).Normalized(z + R);
+        }
+
+        public Vector3d LocalToDeformed(Vector3d localPoint)
+        {
+            return LocalToDeformed(localPoint.x, localPoint.y, localPoint.z);
         }
 
         public override Matrix4x4d LocalToDeformedDifferential(Vector3d localPoint, bool clamp = false)
@@ -140,14 +145,8 @@ namespace SpaceEngine.Core.Terrain.Deformation
                                   0.0, 0.0, 0.0, 1.0);
         }
 
-        public override Frustum.VISIBILITY GetVisibility(TerrainNode node, Box3d localBox)
+        public override Frustum.VISIBILITY GetVisibility(TerrainNode node, Box3d localBox, Vector3d[] deformedBox)
         {
-            var deformedBox = new Vector3d[4];
-            deformedBox[0] = LocalToDeformed(new Vector3d(localBox.xmin, localBox.ymin, localBox.zmin));
-            deformedBox[1] = LocalToDeformed(new Vector3d(localBox.xmax, localBox.ymin, localBox.zmin));
-            deformedBox[2] = LocalToDeformed(new Vector3d(localBox.xmax, localBox.ymax, localBox.zmin));
-            deformedBox[3] = LocalToDeformed(new Vector3d(localBox.xmin, localBox.ymax, localBox.zmin));
-
             var a = (localBox.zmax + R) / (localBox.zmin + R);
             var dx = (localBox.xmax - localBox.xmin) / 2 * a;
             var dy = (localBox.ymax - localBox.ymin) / 2 * a;
