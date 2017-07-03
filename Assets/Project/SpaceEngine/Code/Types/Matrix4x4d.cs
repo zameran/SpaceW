@@ -309,26 +309,30 @@ namespace UnityEngine
 
         public static implicit operator Matrix4x4(Matrix4x4d m)
         {
-            var matrix = Matrix4x4.identity;
-
-            matrix.SetRow(0, m.GetRow(0));
-            matrix.SetRow(1, m.GetRow(1));
-            matrix.SetRow(2, m.GetRow(2));
-            matrix.SetRow(3, m.GetRow(3));
-
-            return matrix;
+            return new Matrix4x4
+            {
+                m00 = (float)m.m[0, 0],
+                m01 = (float)m.m[0, 1],
+                m02 = (float)m.m[0, 2],
+                m03 = (float)m.m[0, 3],
+                m10 = (float)m.m[1, 0],
+                m11 = (float)m.m[1, 1],
+                m12 = (float)m.m[1, 2],
+                m13 = (float)m.m[1, 3],
+                m20 = (float)m.m[2, 0],
+                m21 = (float)m.m[2, 1],
+                m22 = (float)m.m[2, 2],
+                m23 = (float)m.m[2, 3],
+                m30 = (float)m.m[3, 0],
+                m31 = (float)m.m[3, 1],
+                m32 = (float)m.m[3, 2],
+                m33 = (float)m.m[3, 3],
+            };
         }
 
         public static implicit operator Matrix4x4d(Matrix4x4 m)
         {
-            var matrix = Matrix4x4d.identity;
-
-            matrix.SetRow(0, m.GetRow(0));
-            matrix.SetRow(1, m.GetRow(1));
-            matrix.SetRow(2, m.GetRow(2));
-            matrix.SetRow(3, m.GetRow(3));
-
-            return matrix;
+            return new Matrix4x4d(m);
         }
 
 

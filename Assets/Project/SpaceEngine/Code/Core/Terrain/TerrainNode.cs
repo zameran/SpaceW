@@ -142,6 +142,10 @@ namespace SpaceEngine.Core.Terrain
         /// </summary>
         public Matrix4x4d LocalToWorld { get; private set; }
 
+        public Matrix4x4d LocalToCamera { get; private set; }
+
+        public Matrix4x4d LocalToScreen { get; private set; }
+
         /// <summary>
         /// The rotation of the face to object space.
         /// </summary>
@@ -151,6 +155,8 @@ namespace SpaceEngine.Core.Terrain
         /// Tangent frame to world matrix.
         /// </summary>
         public Matrix3x3d TangentFrameToWorld { get; private set; }
+
+        public Matrix4x4d DeformedLocalToTangent { get; private set; }
 
         /// <summary>
         /// Rasterized horizon elevation angle for each azimuth angle.
@@ -243,12 +249,17 @@ namespace SpaceEngine.Core.Terrain
                                                  LocalToWorld.m[1, 0], LocalToWorld.m[1, 1], LocalToWorld.m[1, 2],
                                                  LocalToWorld.m[2, 0], LocalToWorld.m[2, 1], LocalToWorld.m[2, 2]);
 
-            var localToCamera = GodManager.Instance.WorldToCamera * LocalToWorld;
-            var invLocalToCamera = localToCamera.Inverse();
+            LocalToCamera = GodManager.Instance.WorldToCamera * LocalToWorld;
+            LocalToScreen = GodManager.Instance.CameraToScreen * LocalToCamera;
+
+            var invLocalToCamera = LocalToCamera.Inverse();
 
             DeformedCameraPosition = invLocalToCamera * Vector3d.zero;
-            DeformedFrustumPlanes = Frustum.GetFrustumPlanes(GodManager.Instance.CameraToScreen * localToCamera); // NOTE : Extract frustum planes from LocalToScreen matrix...
+            DeformedFrustumPlanes = Frustum.GetFrustumPlanes(LocalToScreen); // NOTE : Extract frustum planes from LocalToScreen matrix...
+
             LocalCameraPosition = Deformation.DeformedToLocal(DeformedCameraPosition);
+
+            DeformedLocalToTangent = Deformation.DeformedToTangentFrame(GodManager.Instance.WorldCameraPos) * LocalToWorld * Deformation.LocalToDeformedDifferential(LocalCameraPosition);
 
             var m = Deformation.LocalToDeformedDifferential(LocalCameraPosition, true);
 
@@ -457,8 +468,6 @@ namespace SpaceEngine.Core.Terrain
             {
                 // Draw quads in a order based on distance to camera
                 var done = 0;
-
-                quad.CalculateOrder(LocalCameraPosition.x, LocalCameraPosition.y, quad.Ox + quad.LengthHalf, quad.Oy + quad.LengthHalf);
 
                 for (byte i = 0; i < 4; ++i)
                 {
