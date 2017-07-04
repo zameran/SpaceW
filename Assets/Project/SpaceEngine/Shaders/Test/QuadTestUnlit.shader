@@ -214,7 +214,7 @@ Shader "SpaceEngine/Test/QuadTestUnlit"
 				#ifdef OCEAN_ON
 					if(height <= _Ocean_Level && _Ocean_DrawBRDF == 1.0)
 					{
-						groundColor = OceanRadiance(WSD, -v, V, _Ocean_Sigma, sunL, skyE, _Ocean_Color);
+						groundColor = OceanRadiance(WSD, -v, V, _Ocean_Sigma, sunL, skyE, _Ocean_Color, P);
 					}
 				#endif
 

@@ -18,7 +18,7 @@ SpaceW is procedural universe generator - simulator.
 * Take it easy...
 
 ## Current Engine version support ##
-* Unity 5.6.1f1 (Windows)
+* Unity 2017.1.0f1 (Windows)
 * Unity 5.6.0b3 (Linux)
 
 ## Current OS/API support ##
@@ -55,7 +55,7 @@ SpaceW is procedural universe generator - simulator.
 * Some shader code was ported to Unity from Space Engine and Proland.
 * Some stuff may not work or very experimental.
 * Some small artifacts are normal due to engine version migrations and unexistance of testers.
-* Sphecial thanks goes to @dotBunny and @JetBrains for a special support IDE's plugins!
+* Special thanks goes to @dotBunny and @JetBrains for a special support IDE's plugins!
 * New builds will be available via Unity Cloud Build in special channel inside the discord.
 
 ### References ###
