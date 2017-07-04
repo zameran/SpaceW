@@ -90,6 +90,11 @@ public class GodManager : MonoSingleton<GodManager>
     /// </summary>
     public int OceanGridResolution = 4;
 
+    /// <summary>
+    /// The size of each tile. For tiles made of raster data, this size is the tile width in pixels (the tile height is supposed equal to the tile width).
+    /// </summary>
+    public int TileSize { get { return GridResolution * 4; } }
+
     // TODO : Make these settings switching event based. To avoid constant every-frame checkings...
     public bool Eclipses = true;
     public bool Planetshadows = true;
@@ -98,6 +103,8 @@ public class GodManager : MonoSingleton<GodManager>
     public bool DelayedCalculations = false;
     public bool FloatingOrigin = false;
     public bool DebugFBO = false;
+
+    public Texture2D[] NoiseTextures;
 
     protected GodManager() { }
 
@@ -112,6 +119,8 @@ public class GodManager : MonoSingleton<GodManager>
         Bodies = FindObjectsOfType<Body>();
         Starfields = FindObjectsOfType<Starfield>();
         Sunglares = FindObjectsOfType<SunGlare>();
+
+        CreateOrthoNoise();
     }
 
     private void Update()
@@ -223,6 +232,125 @@ public class GodManager : MonoSingleton<GodManager>
             }
 
             if (View.transform.parent == null) View.transform.position -= cameraPosition;
+        }
+    }
+
+    private void CreateOrthoNoise()
+    {
+        var tileWidth = TileSize;
+        var color = new Color();
+
+        NoiseTextures = new Texture2D[6];
+
+        var layers = new int[] { 0, 1, 3, 5, 7, 15 };
+        var rand = 1234567;
+
+        Random.InitState(0);
+
+        for (byte nl = 0; nl < 6; ++nl)
+        {
+            var layer = layers[nl];
+
+            NoiseTextures[nl] = new Texture2D(tileWidth, tileWidth, TextureFormat.ARGB32, false, true);
+
+            // Corners
+            for (int j = 0; j < tileWidth; ++j)
+            {
+                for (int i = 0; i < tileWidth; ++i)
+                {
+                    NoiseTextures[nl].SetPixel(i, j, new Color(0.5f, 0.5f, 0.5f, 0.5f));
+                }
+            }
+
+            // Bottom border
+            Random.InitState((layer & 1) == 0 ? 7654321 : 5647381);
+
+            for (int v = 2; v < 4; ++v)
+            {
+                for (int h = 4; h < tileWidth - 4; ++h)
+                {
+                    for (byte c = 0; c < 4; ++c)
+                    {
+                        color[c] = Random.value;
+                    }
+
+                    NoiseTextures[nl].SetPixel(h, v, color);
+                    NoiseTextures[nl].SetPixel(tileWidth - 1 - h, 3 - v, color);
+                }
+            }
+
+            // Right border
+            Random.InitState((layer & 2) == 0 ? 7654321 : 5647381);
+
+            for (int h = tileWidth - 3; h >= tileWidth - 4; --h)
+            {
+                for (int v = 4; v < tileWidth - 4; ++v)
+                {
+                    for (byte c = 0; c < 4; ++c)
+                    {
+                        color[c] = Random.value;
+                    }
+
+                    NoiseTextures[nl].SetPixel(h, v, color);
+                    NoiseTextures[nl].SetPixel(2 * tileWidth - 5 - h, tileWidth - 1 - v, color);
+                }
+            }
+
+            // Top border
+            Random.InitState((layer & 4) == 0 ? 7654321 : 5647381);
+
+            for (int v = tileWidth - 2; v < tileWidth; ++v)
+            {
+                for (int h = 4; h < tileWidth - 4; ++h)
+                {
+                    for (byte c = 0; c < 4; ++c)
+                    {
+                        color[c] = Random.value;
+                    }
+
+                    NoiseTextures[nl].SetPixel(h, v, color);
+                    NoiseTextures[nl].SetPixel(tileWidth - 1 - h, 2 * tileWidth - 5 - v, color);
+                }
+            }
+
+            // Left border
+            Random.InitState((layer & 8) == 0 ? 7654321 : 5647381);
+
+            for (int h = 1; h >= 0; --h)
+            {
+                for (int v = 4; v < tileWidth - 4; ++v)
+                {
+                    for (byte c = 0; c < 4; ++c)
+                    {
+                        color[c] = Random.value;
+                    }
+
+                    NoiseTextures[nl].SetPixel(h, v, color);
+                    NoiseTextures[nl].SetPixel(3 - h, tileWidth - 1 - v, color);
+                }
+            }
+
+            // Center
+            Random.InitState(rand);
+
+            for (int v = 4; v < tileWidth - 4; ++v)
+            {
+                for (int h = 4; h < tileWidth - 4; ++h)
+                {
+                    for (byte c = 0; c < 4; ++c)
+                    {
+                        color[c] = Random.value;
+                    }
+
+                    NoiseTextures[nl].SetPixel(h, v, color);
+                }
+            }
+
+            //randomize for next texture
+            rand = (rand * 1103515245 + 12345) & 0x7FFFFFFF;
+
+            NoiseTextures[nl].name = string.Format("OrthoNoise_{0}x{0}_{1}", tileWidth, nl);
+            NoiseTextures[nl].Apply();
         }
     }
 }

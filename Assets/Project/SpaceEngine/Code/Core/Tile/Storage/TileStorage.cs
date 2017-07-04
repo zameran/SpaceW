@@ -57,13 +57,12 @@ namespace SpaceEngine.Core.Tile.Storage
             }
         }
 
-        [SerializeField]
-        int tileSize;
+        [SerializeField] private bool OnePixelBorder = false;
 
         /// <summary>
         /// The size of each tile. For tiles made of raster data, this size is the tile width in pixels (the tile height is supposed equal to the tile width).
         /// </summary>
-        public int TileSize { get { return tileSize; } protected set { tileSize = value; } }
+        public int TileSize { get { var size = GodManager.Instance.TileSize; return OnePixelBorder ? size + 1 : size; } }
 
         /// <summary>
         /// The total number of slots managed by this <see cref="TileStorage"/>. This includes both unused and used tiles.
