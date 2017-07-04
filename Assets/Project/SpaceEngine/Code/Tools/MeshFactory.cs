@@ -47,49 +47,44 @@ public static class MeshFactory
 
     public static Mesh MakeOceanPlane(int w, int h, float offset, float scale)
     {
-        var vertices = new List<Vector3>(w * h);
-        var texcoords = new List<Vector2>(w * h);
-        var normals = new List<Vector3>(w * h);
-        var indices = new List<int>(w * h * 6);
+        var vertices = new Vector3[w * h];
+        var texcoords = new Vector2[w * h];
+        var normals = new Vector3[w * h];
+        var indices = new int[w * h * 6];
 
         for (int x = 0; x < w; x++)
         {
             for (int y = 0; y < h; y++)
             {
-                var uv = new Vector2((float)x / (float)(w - 1), ((float)y / (float)(h - 1)) * scale + offset);
+                var uv = new Vector2((float)x / (float)(w - 1), (float)y / (float)(h - 1) * scale + offset);
 
-                texcoords.Add(uv);
-                vertices.Add(new Vector3((uv.x - 0.5f) * 2.0f, (uv.y - 0.5f) * 2.0f, 0.0f));
-                normals.Add(new Vector3(0.0f, 0.0f, 1.0f));
+                texcoords[x + y * w] = uv;
+                vertices[x + y * w] = new Vector3((uv.x - 0.5f) * 2.0f, (uv.y - 0.5f) * 2.0f, 0.0f);
+                normals[x + y * w] = new Vector3(0.0f, 0.0f, 1.0f);
             }
         }
 
+        var num = 0;
         for (int x = 0; x < w - 1; x++)
         {
             for (int y = 0; y < h - 1; y++)
             {
-                indices.Add(x + y * w);
-                indices.Add(x + (y + 1) * w);
-                indices.Add((x + 1) + y * w);
+                indices[num++] = x + y * w;
+                indices[num++] = x + (y + 1) * w;
+                indices[num++] = (x + 1) + y * w;
 
-                indices.Add(x + (y + 1) * w);
-                indices.Add((x + 1) + (y + 1) * w);
-                indices.Add((x + 1) + y * w);
+                indices[num++] = x + (y + 1) * w;
+                indices[num++] = (x + 1) + (y + 1) * w;
+                indices[num++] = (x + 1) + y * w;
             }
         }
 
         var mesh = new Mesh();
 
-        mesh.SetVertices(vertices);
-        mesh.SetUVs(0, texcoords);
-        mesh.SetTriangles(indices, 0);
-        mesh.SetNormals(normals);
-
-        vertices.Clear();
-        texcoords.Clear();
-        indices.Clear();
-        normals.Clear();
-
+        mesh.vertices = vertices;
+        mesh.uv = texcoords;
+        mesh.triangles = indices;
+        mesh.normals = normals;
         mesh.name = string.Format("OceanMesh_({0})", Random.Range(float.MinValue, float.MaxValue));
         mesh.hideFlags = HideFlags.DontSave;
 
