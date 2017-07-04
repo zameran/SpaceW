@@ -47,55 +47,49 @@ public static class MeshFactory
 
     public static Mesh MakeOceanPlane(int w, int h, float offset, float scale)
     {
-        var vertices = new Vector3[w * h];
-        var texcoords = new Vector2[w * h];
-        var normals = new Vector3[w * h];
-        var indices = new int[w * h * 6];
+        var vertices = new List<Vector3>(w * h);
+        var texcoords = new List<Vector2>(w * h);
+        var normals = new List<Vector3>(w * h);
+        var indices = new List<int>(w * h * 6);
 
         for (int x = 0; x < w; x++)
         {
             for (int y = 0; y < h; y++)
             {
-                Vector2 uv = new Vector3((float)x / (float)(w - 1), (float)y / (float)(h - 1));
+                var uv = new Vector2((float)x / (float)(w - 1), ((float)y / (float)(h - 1)) * scale + offset);
 
-                uv.y *= scale;
-                uv.y += offset;
-
-                var p = Vector2.zero;
-
-                p.x = (uv.x - 0.5f) * 2.0f;
-                p.y = (uv.y - 0.5f) * 2.0f;
-
-                var vertex = new Vector3(p.x, p.y, 0.0f);
-                var normal = new Vector3(0.0f, 0.0f, 1.0f);
-
-                texcoords[x + y * w] = uv;
-                vertices[x + y * w] = vertex;
-                normals[x + y * w] = normal;
+                texcoords.Add(uv);
+                vertices.Add(new Vector3((uv.x - 0.5f) * 2.0f, (uv.y - 0.5f) * 2.0f, 0.0f));
+                normals.Add(new Vector3(0.0f, 0.0f, 1.0f));
             }
         }
 
-        var num = 0;
         for (int x = 0; x < w - 1; x++)
         {
             for (int y = 0; y < h - 1; y++)
             {
-                indices[num++] = x + y * w;
-                indices[num++] = x + (y + 1) * w;
-                indices[num++] = (x + 1) + y * w;
+                indices.Add(x + y * w);
+                indices.Add(x + (y + 1) * w);
+                indices.Add((x + 1) + y * w);
 
-                indices[num++] = x + (y + 1) * w;
-                indices[num++] = (x + 1) + (y + 1) * w;
-                indices[num++] = (x + 1) + y * w;
+                indices.Add(x + (y + 1) * w);
+                indices.Add((x + 1) + (y + 1) * w);
+                indices.Add((x + 1) + y * w);
             }
         }
 
-        Mesh mesh = new Mesh();
+        var mesh = new Mesh();
 
-        mesh.vertices = vertices;
-        mesh.uv = texcoords;
-        mesh.triangles = indices;
-        mesh.normals = normals;
+        mesh.SetVertices(vertices);
+        mesh.SetUVs(0, texcoords);
+        mesh.SetTriangles(indices, 0);
+        mesh.SetNormals(normals);
+
+        vertices.Clear();
+        texcoords.Clear();
+        indices.Clear();
+        normals.Clear();
+
         mesh.name = string.Format("OceanMesh_({0})", Random.Range(float.MinValue, float.MaxValue));
         mesh.hideFlags = HideFlags.DontSave;
 

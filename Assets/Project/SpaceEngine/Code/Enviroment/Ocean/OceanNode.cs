@@ -43,13 +43,6 @@ namespace SpaceEngine.Ocean
         [SerializeField]
         public float ZMin = 20000.0f;
 
-        /// <summary>
-        /// Size of each grid in the projected grid. (number of pixels on screen).
-        /// </summary>
-        [SerializeField]
-        protected int Resolution = 4;
-
-        Mesh[] ScreenMeshGrids;
         Matrix4x4d OldLocalToOcean;
         Matrix4x4d CameraToWorld;
 
@@ -116,35 +109,6 @@ namespace SpaceEngine.Ocean
 
             OldLocalToOcean = Matrix4x4d.identity;
             Offset = Vector4.zero;
-
-            // Create the projected grid. The resolution is the size in pixels of each square in the grid. 
-            // If the squares are small the size of the mesh will exceed the max verts for a mesh in Unity. In this case split the mesh up into smaller meshes.
-            Resolution = Mathf.Max(1, Resolution);
-
-            // The number of squares in the grid on the x and y axis
-            var NX = Screen.width / Resolution;
-            var NY = Screen.height / Resolution;
-            var numGrids = 1;
-
-            const int MAX_VERTS = 65000;
-
-            // The number of meshes need to make a grid of this resolution
-            if (NX * NY > MAX_VERTS)
-            {
-                numGrids += (NX * NY) / MAX_VERTS;
-            }
-
-            ScreenMeshGrids = new Mesh[numGrids];
-
-            // Make the meshes. The end product will be a grid of verts that cover the screen on the x and y axis with the z depth at 0. 
-            // This grid is then projected as the ocean by the shader
-            for (byte i = 0; i < numGrids; i++)
-            {
-                NY = Screen.height / numGrids / Resolution;
-
-                ScreenMeshGrids[i] = MeshFactory.MakeOceanPlane(NX, NY, (float)i / (float)numGrids, 1.0f / (float)numGrids);
-                ScreenMeshGrids[i].bounds = new Bounds(Vector3.zero, new Vector3(1e8f, 1e8f, 1e8f));
-            }
         }
 
         protected override void UpdateNode()
@@ -232,6 +196,7 @@ namespace SpaceEngine.Ocean
             // Theta equals angle to horizon, now all that is left to do is check the view direction against this angle
             var cosTheta = rHorizon / OHL;
             var sinTheta = Math.Sqrt(1.0 - cosTheta * cosTheta);
+            var oceanGridResolution = GodManager.Instance.OceanGridResolution;
 
             OceanMaterial.SetVector("_SphereDirection", sphereDirection.ToVector3());
             OceanMaterial.SetFloat("_CosTheta", (float)cosTheta);
@@ -242,7 +207,7 @@ namespace SpaceEngine.Ocean
             OceanMaterial.SetMatrix("_Ocean_OceanToCamera", cameraToOcean.Inverse().ToMatrix4x4());
             OceanMaterial.SetVector("_Ocean_CameraPos", offset.ToVector3());
             OceanMaterial.SetVector("_Ocean_Color", UpwellingColor * 0.1f);
-            OceanMaterial.SetVector("_Ocean_ScreenGridSize", new Vector2((float)Resolution / (float)Screen.width, (float)Resolution / (float)Screen.height));
+            OceanMaterial.SetVector("_Ocean_ScreenGridSize", new Vector2((float)oceanGridResolution / (float)Screen.width, (float)oceanGridResolution / (float)Screen.height));
             OceanMaterial.SetFloat("_Ocean_Radius", radius);
             OceanMaterial.SetFloat("_Ocean_Wave_Level", OceanWaveLevel);
 
@@ -376,7 +341,9 @@ namespace SpaceEngine.Ocean
         {
             if (DrawOcean == false) return;
 
-            foreach (var mesh in ScreenMeshGrids)
+            var oceanScreenMeshGrids = GodManager.Instance.OceanScreenMeshGrids;
+
+            foreach (var mesh in oceanScreenMeshGrids)
             {
                 if (mesh == null) break;
 

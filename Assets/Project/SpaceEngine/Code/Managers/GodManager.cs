@@ -63,6 +63,7 @@ public class GodManager : MonoSingleton<GodManager>
     public ComputeShader Transmittance;
 
     public Mesh AtmosphereMesh;
+    public Mesh[] OceanScreenMeshGrids;
     public Mesh QuadMesh;
 
     public Body ActiveBody { get { return Bodies.FirstOrDefault(body => Helper.Enabled(body)); } }
@@ -79,7 +80,15 @@ public class GodManager : MonoSingleton<GodManager>
     public Matrix4x4d ScreenToCamera { get { return View.ScreenToCameraMatrix; } }
     public Vector3 WorldCameraPos { get { return View.WorldCameraPosition; } }
 
+    /// <summary>
+    /// Quad mesh resolution in vertices.
+    /// </summary>
     public int GridResolution = 25;
+
+    /// <summary>
+    /// Size of each grid in the projected grid. (number of pixels on screen).
+    /// </summary>
+    public int OceanGridResolution = 4;
 
     // TODO : Make these settings switching event based. To avoid constant every-frame checkings...
     public bool Eclipses = true;
@@ -96,11 +105,9 @@ public class GodManager : MonoSingleton<GodManager>
     {
         Instance = this;
 
-        AtmosphereMesh = MeshFactory.IcoSphere.Create();
-        AtmosphereMesh.bounds = new Bounds(Vector3.zero, new Vector3(1e8f, 1e8f, 1e8f));
-
-        QuadMesh = MeshFactory.MakePlane(GridResolution, MeshFactory.PLANE.XY, true, false, false);
-        QuadMesh.bounds = new Bounds(Vector3.zero, new Vector3(1e8f, 1e8f, 1e8f));
+        InitAtmosphereMesh();
+        InitQuadMesh();
+        InitOceanScreenGridMeshes();
 
         Bodies = FindObjectsOfType<Body>();
         Starfields = FindObjectsOfType<Starfield>();
@@ -127,6 +134,48 @@ public class GodManager : MonoSingleton<GodManager>
             var fboDebugDrawSize = FrameBufferCapturer.Instance.DebugDrawSize;
 
             GUI.DrawTexture(new Rect(new Vector2(Screen.width - fboDebugDrawSize.x, 0), fboDebugDrawSize), FrameBufferCapturer.Instance.FBOTexture, ScaleMode.StretchToFill, false);
+        }
+    }
+
+    private void InitAtmosphereMesh()
+    {
+        AtmosphereMesh = MeshFactory.IcoSphere.Create();
+        AtmosphereMesh.bounds = new Bounds(Vector3.zero, new Vector3(1e8f, 1e8f, 1e8f));
+    }
+
+    private void InitQuadMesh()
+    {
+        QuadMesh = MeshFactory.MakePlane(GridResolution, MeshFactory.PLANE.XY, true, false, false);
+        QuadMesh.bounds = new Bounds(Vector3.zero, new Vector3(1e8f, 1e8f, 1e8f));
+    }
+
+    private void InitOceanScreenGridMeshes()
+    {
+        OceanGridResolution = Mathf.Max(1, OceanGridResolution);
+
+        // The number of squares in the grid on the x and y axis
+        var NX = Screen.width / OceanGridResolution;
+        var NY = Screen.height / OceanGridResolution;
+        var gridsCount = 1;
+
+        const int MAX_VERTS = 65000;
+
+        // The number of meshes need to make a grid of this resolution
+        if (NX * NY > MAX_VERTS)
+        {
+            gridsCount += (NX * NY) / MAX_VERTS;
+        }
+
+        OceanScreenMeshGrids = new Mesh[gridsCount];
+
+        // Make the meshes. The end product will be a grid of verts that cover the screen on the x and y axis with the z depth at 0. 
+        // This grid is then projected as the ocean by the shader
+        for (byte i = 0; i < gridsCount; i++)
+        {
+            NY = Screen.height / gridsCount / OceanGridResolution;
+
+            OceanScreenMeshGrids[i] = MeshFactory.MakeOceanPlane(NX, NY, (float)i / (float)gridsCount, 1.0f / (float)gridsCount);
+            OceanScreenMeshGrids[i].bounds = new Bounds(Vector3.zero, new Vector3(1e8f, 1e8f, 1e8f));
         }
     }
 
