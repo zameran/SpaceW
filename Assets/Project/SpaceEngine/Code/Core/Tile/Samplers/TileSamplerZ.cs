@@ -287,6 +287,8 @@ namespace SpaceEngine.Core.Tile.Samplers
 
             var treeZ = tree as QuadTreeZ;
 
+            if (treeZ == null) { Debug.LogError("TileSamplerZ.GetTiles: Can't get provided tree as QuadTreeZ!"); base.GetTiles(parent, ref tree, quad); return; }
+
             // If tile needs elevation data read back add to container
             if (treeZ.Tile != null && treeZ.Tile.Task.IsDone && !treeZ.ReadBack && MaxReadBacksPerFrame > 0)
             {
