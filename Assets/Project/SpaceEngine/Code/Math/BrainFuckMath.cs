@@ -103,6 +103,16 @@ public static class BrainFuckMath
         return Mathf.Abs(a - b) <= precision;
     }
 
+    public static double Wrap(double value, double min, double max)
+    {
+        if (NearlyEqual(min, max)) return min;
+        if (min > max) throw new ArgumentException(string.Format("Argument min {0} should be less or equal to argument max {1}", min, max), "min");
+
+        var rangeSize = max - min;
+
+        return (min + (value - min) - (rangeSize * Math.Floor((value - min) / rangeSize)));
+    }
+
     [Obsolete("Was used in old core...")]
     public static void DefineAxis(ref bool staticX, ref bool staticY, ref bool staticZ, Vector3 size)
     {
