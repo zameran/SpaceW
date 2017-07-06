@@ -54,7 +54,7 @@ namespace SpaceEngine.Core.Tile
 
             public override string ToString()
             {
-                return Level.ToString() + "," + Tx.ToString() + "," + Ty.ToString();
+                return string.Format("({0}, {1}, {2})", Level, Tx, Ty);
             }
         }
 
@@ -86,7 +86,7 @@ namespace SpaceEngine.Core.Tile
 
             public override string ToString()
             {
-                return ProducerId.ToString() + "," + TileId.ToString();
+                return string.Format("({0}, {1})", ProducerId, TileId);
             }
         }
 

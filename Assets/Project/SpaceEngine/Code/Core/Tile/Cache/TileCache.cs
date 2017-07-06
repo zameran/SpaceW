@@ -33,15 +33,15 @@ namespace SpaceEngine.Core.Tile.Cache
     /// </summary>
     public class TileCache : MonoBehaviour
     {
-        private static int nextProducerId = 0;
+        private static int nextProducerId;
 
         /// <summary>
-        /// Next local identifier to be used for a TileProducer using this cache.
+        /// Next local identifier to be used for a <see cref="TileProducer"/> using this cache.
         /// </summary>
         public int NextProducerId { get { return nextProducerId++; } }
 
         /// <summary>
-        /// The total number of slots managed by the TileStorage attached to the cache.
+        /// The total number of slots managed by the <see cref="Storage.TileStorage"/> attached to the cache.
         /// </summary>
         [SerializeField]
         public ushort Capacity = 1296;
@@ -57,11 +57,10 @@ namespace SpaceEngine.Core.Tile.Cache
         public int TileStorageLength { get { return TileStorage.Length; } }
 
         /// <summary>
-        /// The tiles currently in use. These tiles cannot be evicted from the cache
-        /// and from the TileStorage, until they become unused. 
+        /// The tiles currently in use. These tiles cannot be evicted from the cache and from the TileStorage, until they become unused. 
         /// Maps tile identifiers to actual tiles.
         /// </summary>
-        Dictionary<Tile.TId, Tile> UsedTiles;
+        private Dictionary<Tile.TId, Tile> UsedTiles;
 
         public int UsedTilesCount { get { return UsedTiles.Count; } }
 
@@ -70,19 +69,19 @@ namespace SpaceEngine.Core.Tile.Cache
         /// Uses a custom container (DictionaryQueue) that can store tiles by there Tid for fast look up
         /// and also keeps track of the order the tiles were inserted so it can also act as a queue.
         /// </summary>
-        DictionaryQueue<Tile.TId, Tile> UnusedTiles;
+        public DictionaryQueue<Tile.TId, Tile> UnusedTiles;
 
         public int UnusedTilesCount { get { return UnusedTiles.Count(); } }
 
         /// <summary>
         /// The producers that use this TileCache. Maps local producer identifiers to actual producers.
         /// </summary>
-        Dictionary<int, TileProducer> Producers;
+        private Dictionary<int, TileProducer> Producers;
 
         [HideInInspector]
-        public int MaximumUsedTiles = 0;
+        public int MaximumUsedTiles;
 
-        void Awake()
+        private void Awake()
         {
             TileStorage = GetComponents<TileStorage>();
             Producers = new Dictionary<int, TileProducer>();
@@ -151,7 +150,7 @@ namespace SpaceEngine.Core.Tile.Cache
         /// If anyone of the storages runs out of slots then null will be returned and the program should abort if this happens.
         /// </summary>
         /// <returns>New <see cref="Storage.TileStorage.Slot"/> instance.</returns>
-        List<TileStorage.Slot> AddSlot()
+        private List<TileStorage.Slot> AddSlot()
         {
             var slots = new List<TileStorage.Slot>();
 
@@ -196,7 +195,7 @@ namespace SpaceEngine.Core.Tile.Cache
                 // If tile is also not in the unused cache
                 if (!UnusedTiles.ContainsKey(id))
                 {
-                    List<TileStorage.Slot> slot = AddSlot();
+                    var slot = AddSlot();
 
                     // If there are no more free slots then start recyling slots from the unused tiles
                     if (slot == null && !UnusedTiles.Empty())

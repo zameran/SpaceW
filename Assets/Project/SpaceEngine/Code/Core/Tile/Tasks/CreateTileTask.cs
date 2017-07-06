@@ -84,7 +84,7 @@ namespace SpaceEngine.Core.Tile.Tasks
 
         public override string ToString()
         {
-            return string.Format("[CreateTileTask] {0}:{1}:{2}:{3}", Owner.name, Level, Tx, Ty);
+            return string.Format("({0},{1},{2},{3})", Owner.name, Level, Tx, Ty);
         }
     }
 }
