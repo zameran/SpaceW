@@ -290,10 +290,10 @@ namespace SpaceEngine.Core.Tile.Samplers
             // If tile needs elevation data read back add to container
             if (treeZ.Tile != null && treeZ.Tile.Task.IsDone && !treeZ.ReadBack && MaxReadBacksPerFrame > 0)
             {
-                if (!NeedsReadBackDictionary.ContainsKey(treeZ.Tile.GetId()))
+                if (!NeedsReadBackDictionary.ContainsKey(treeZ.Tile.ID))
                 {
                     treeZ.ReadBack = true;
-                    NeedsReadBackDictionary.Add(treeZ.Tile.GetId(), treeZ);
+                    NeedsReadBackDictionary.Add(treeZ.Tile.ID, treeZ);
                 }
             }
 

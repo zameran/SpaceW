@@ -131,7 +131,7 @@ namespace SpaceEngine.Core.Tile.Cache
             // If there are no more users of this tile move the tile from the used cahce to the unused cache
             if (tile.Users <= 0)
             {
-                var id = tile.GetTId();
+                var id = tile.TID;
 
                 if (UsedTiles.ContainsKey(id))
                 {

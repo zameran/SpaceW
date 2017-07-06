@@ -165,6 +165,10 @@ namespace SpaceEngine.Core.Tile
 
         public List<TileStorage.Slot> Slot { get { return Task.Slot; } }
 
+        public Id ID { get; private set; }
+
+        public TId TID { get; private set; }
+
         public Tile(int producerId, int level, int tx, int ty, CreateTileTask task)
         {
             ProducerId = producerId;
@@ -173,6 +177,9 @@ namespace SpaceEngine.Core.Tile
             Ty = ty;
             Task = task;
             Users = 0;
+
+            ID = GetId(level, tx, ty);
+            TID = GetTId(producerId, ID);
 
             if (Task == null)
             {
@@ -203,24 +210,6 @@ namespace SpaceEngine.Core.Tile
         /// <summary>
         /// The identifier of this tile.
         /// </summary>
-        /// <returns>Returns the identifier of this tile.</returns>
-        public Id GetId()
-        {
-            return GetId(Level, Tx, Ty);
-        }
-
-        /// <summary>
-        /// The identifier of this tile.
-        /// </summary>
-        /// <returns>Returns the identifier of this tile.</returns>
-        public TId GetTId()
-        {
-            return GetTId(ProducerId, Level, Tx, Ty);
-        }
-
-        /// <summary>
-        /// The identifier of this tile.
-        /// </summary>
         /// <param name="level">The <see cref="Tile"/>'s quadtree level.</param>
         /// <param name="tx">The <see cref="Tile"/>'s quadtree x coordinate.</param>
         /// <param name="ty">The <see cref="Tile"/>'s quadtree y coordinate.</param>
@@ -241,6 +230,17 @@ namespace SpaceEngine.Core.Tile
         public static TId GetTId(int producerId, int level, int tx, int ty)
         {
             return new TId(producerId, level, tx, ty);
+        }
+
+        /// <summary>
+        /// The identifier of this tile.
+        /// </summary>
+        /// <param name="producerId">The <see cref="Id"/> of the <see cref="Tile"/>'s producer.</param>
+        /// <param name="id">The identifier of this tile.</param>
+        /// <returns></returns>
+        public static TId GetTId(int producerId, Id id)
+        {
+            return new TId(producerId, id.Level, id.Tx, id.Ty);
         }
     }
 }
