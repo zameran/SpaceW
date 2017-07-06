@@ -487,8 +487,8 @@ namespace SpaceEngine.Core.Terrain
 
                 if (done < 15)
                 {
-                    // If the a leaf quad needs to be drawn but its tiles are not ready then this will draw the next parent tile instead that is ready.
-                    // Because of the current set up all tiles always have there tasks run on the frame they are generated so this section of code is never reached.
+                    // If the a leaf quad needs to be drawn but its tiles are not ready, then this will draw the next parent tile instead that is ready.
+                    // Because of the current set up all tiles always have there tasks run on the frame they are generated, so this section of code is never reached.
 
                     for (byte i = 0; i < SamplersSuitable.Count; ++i)
                     {
@@ -565,9 +565,9 @@ namespace SpaceEngine.Core.Terrain
         /// <summary>
         /// Check if the given bounding box is occluded.
         /// </summary>
-        /// <param name="box">A bounding box in local (non deformed) coordinates.</param>
+        /// <param name="occluder">A bounding box in local (non deformed) coordinates.</param>
         /// <returns>Returns 'True' if the given bounding box is occluded by the bounding boxes previously added as occluders by <see cref="AddOccluder"/></returns>
-        public bool IsOccluded(Box3d box)
+        public bool IsOccluded(Box3d occluder)
         {
             if (!UseHorizonCulling || LocalCameraPosition.z > TerrainQuadRoot.ZMax)
             {
@@ -577,22 +577,22 @@ namespace SpaceEngine.Core.Terrain
             var corners = new Vector2d[4];
             var plane = LocalCameraPosition.xy;
 
-            corners[0] = LocalCameraDirection * (new Vector2d(box.xmin, box.ymin) - plane);
-            corners[1] = LocalCameraDirection * (new Vector2d(box.xmin, box.ymax) - plane);
-            corners[2] = LocalCameraDirection * (new Vector2d(box.xmax, box.ymin) - plane);
-            corners[3] = LocalCameraDirection * (new Vector2d(box.xmax, box.ymax) - plane);
+            corners[0] = LocalCameraDirection * (new Vector2d(occluder.xmin, occluder.ymin) - plane);
+            corners[1] = LocalCameraDirection * (new Vector2d(occluder.xmin, occluder.ymax) - plane);
+            corners[2] = LocalCameraDirection * (new Vector2d(occluder.xmax, occluder.ymin) - plane);
+            corners[3] = LocalCameraDirection * (new Vector2d(occluder.xmax, occluder.ymax) - plane);
 
             if (corners[0].y <= 0.0 || corners[1].y <= 0.0 || corners[2].y <= 0.0 || corners[3].y <= 0.0)
             {
                 return false;
             }
 
-            var dz = box.zmax - LocalCameraPosition.z;
+            var dzmax = occluder.zmax - LocalCameraPosition.z;
 
-            corners[0] = new Vector2d(corners[0].x, dz) / corners[0].y;
-            corners[1] = new Vector2d(corners[1].x, dz) / corners[1].y;
-            corners[2] = new Vector2d(corners[2].x, dz) / corners[2].y;
-            corners[3] = new Vector2d(corners[3].x, dz) / corners[3].y;
+            corners[0] = new Vector2d(corners[0].x, dzmax) / corners[0].y;
+            corners[1] = new Vector2d(corners[1].x, dzmax) / corners[1].y;
+            corners[2] = new Vector2d(corners[2].x, dzmax) / corners[2].y;
+            corners[3] = new Vector2d(corners[3].x, dzmax) / corners[3].y;
 
             var xmin = Math.Min(Math.Min(corners[0].x, corners[1].x), Math.Min(corners[2].x, corners[3].x)) * 0.33 + 0.5;
             var xmax = Math.Max(Math.Max(corners[0].x, corners[1].x), Math.Max(corners[2].x, corners[3].x)) * 0.33 + 0.5;
@@ -690,7 +690,7 @@ namespace SpaceEngine.Core.Terrain
         /// Distance between the current viewer position and the given bounding box.
         /// This distance is measured in the local terrain space. Deformations taken in to account.
         /// </summary>
-        /// <param name="localBox"></param>
+        /// <param name="localBox">Target bounding box.</param>
         /// <returns>Returns the distance between the current viewer position and the given bounding box.</returns>
         public double GetCameraDistance(Box3d localBox)
         {

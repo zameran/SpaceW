@@ -106,12 +106,12 @@ namespace SpaceEngine.Core.Terrain.Deformation
         }
 
         /// <summary>
-        /// The distance in local (source) space between 'a' point and a bounding box.
+        /// The distance in local (source) space between a point and a bounding box.
         /// </summary>
         /// <param name="localPoint">A point in local space.</param>
         /// <param name="localBox">A bounding box in local space.</param>
         /// <returns>Returns the distance in local (source) space between 'a' point and a bounding box.</returns>
-        public virtual double GetLocalDist(Vector3d localPoint, Box3d localBox)
+        public virtual double GetLocalDistance(Vector3d localPoint, Box3d localBox)
         {
             return Math.Max(Math.Abs(localPoint.z - localBox.zmax),
                    Math.Max(Math.Min(Math.Abs(localPoint.x - localBox.xmin),
