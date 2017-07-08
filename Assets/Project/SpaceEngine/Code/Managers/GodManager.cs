@@ -110,6 +110,7 @@ public class GodManager : MonoSingleton<GodManager>
 
     private void Awake()
     {
+        UnsaveSingleton = true;
         Instance = this;
 
         InitAtmosphereMesh();
