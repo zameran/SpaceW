@@ -145,9 +145,9 @@ float4 ShadowColor(float4 worldPoint)
 	return color;
 }
 
-float4 ShadowOuterColor(float3 d, float3 WCP, float3 _Globals_Origin, float Rt)
+float4 ShadowOuterColor(float3 d, float3 WCP, float3 origin, float Rt)
 {
-	float interSectPt = IntersectOuterSphereInverted(WCP, d, _Globals_Origin, Rt);
+	float interSectPt = IntersectOuterSphereInverted(WCP, d, origin, Rt);
 
 	return interSectPt != -1.0 ? ShadowColor(float4(WCP + d * interSectPt, 1.0)) : 1.0;
 }

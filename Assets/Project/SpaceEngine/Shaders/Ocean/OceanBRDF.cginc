@@ -68,8 +68,6 @@
 #define OCEAN_ONLY_SPHERICAL
 #define OCEAN_INSCATTER_FIX
 
-uniform float4x4 _Globals_WorldToScreen;
-
 uniform float2 _Ocean_MapSize;
 uniform float4 _Ocean_Choppyness;
 uniform float3 _Ocean_SunDir;

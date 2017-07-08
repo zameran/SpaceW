@@ -42,6 +42,12 @@
 
 //-----------------------------------------------------------------------------
 
+#define CORE_GLOBALS
+uniform float4x4 _Globals_CameraToWorld;
+uniform float4x4 _Globals_ScreenToCamera;
+uniform float4x4 _Globals_CameraToScreen;
+uniform float3 _Globals_WorldCameraPos;
+
 #define CORE_ELEVATION
 
 uniform sampler2D _Elevation_Tile;

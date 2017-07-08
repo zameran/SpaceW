@@ -347,13 +347,8 @@ namespace SpaceEngine.AtmosphericScattering
             if (AtmosphereBaker.inscatterT_Read != null) target.SetTexture("_Sky_Inscatter", AtmosphereBaker.inscatterT_Read);
             if (AtmosphereBaker.irradianceT_Read != null) target.SetTexture("_Sky_Irradiance", AtmosphereBaker.irradianceT_Read);
 
-            target.SetMatrix("_Globals_WorldToCamera", GodManager.Instance.WorldToCamera.ToMatrix4x4());
-            target.SetMatrix("_Globals_CameraToWorld", GodManager.Instance.CameraToWorld.ToMatrix4x4());
-            target.SetMatrix("_Globals_CameraToScreen", GodManager.Instance.CameraToScreen.ToMatrix4x4());
-            target.SetMatrix("_Globals_ScreenToCamera", GodManager.Instance.ScreenToCamera.ToMatrix4x4());
-            target.SetVector("_Globals_WorldCameraPos", GodManager.Instance.WorldCameraPos);
-            target.SetVector("_Globals_WorldCameraPos_Offsetted", GodManager.Instance.WorldCameraPos - Origin);
-            target.SetVector("_Globals_Origin", -Origin);
+            target.SetVector("_Atmosphere_WorldCameraPos", GodManager.Instance.WorldCameraPos - Origin);
+            target.SetVector("_Atmosphere_Origin", -Origin);
 
             target.SetFloat("_Exposure", HDRExposure);
             target.SetFloat("_HDRMode", (int)GodManager.Instance.HDRMode);

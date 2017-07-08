@@ -40,7 +40,7 @@ using System.Collections.Generic;
 
 using UnityEngine;
 
-[ExecutionOrder(-9997)]
+[ExecutionOrder(-9996)]
 [RequireComponent(typeof(Camera))]
 public sealed class MainRenderer : MonoBehaviour
 {

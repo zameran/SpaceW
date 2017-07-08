@@ -170,8 +170,8 @@
 			{	
 				VERTEX_PROGRAM(v, o);
 
-				//o.direction = ((_Globals_WorldCameraPos_Offsetted + _Globals_Origin) - mul(_Globals_CameraToWorld, o.vertex)).xyz;
-				o.direction = (_Globals_WorldCameraPos_Offsetted + _Globals_Origin) - (mul(_Globals_CameraToWorld, float4((mul(_Globals_ScreenToCamera, v.vertex)).xyz, 0.0))).xyz;
+				//o.direction = ((_Atmosphere_WorldCameraPos + _Atmosphere_Origin) - mul(_Globals_CameraToWorld, o.vertex)).xyz;
+				o.direction = (_Atmosphere_WorldCameraPos + _Atmosphere_Origin) - (mul(_Globals_CameraToWorld, float4((mul(_Globals_ScreenToCamera, v.vertex)).xyz, 0.0))).xyz;
 			}
 
 			void frag(in v2f i, 
@@ -182,7 +182,7 @@
 			)
 			{
 				float3 WCP = _Globals_WorldCameraPos;
-				float3 WCPO = _Globals_WorldCameraPos_Offsetted;
+				float3 WCPO = _Atmosphere_WorldCameraPos;
 				float3 WSD = _Sun_WorldDirections_1[0];
 				float4 WSPR = _Sun_Positions_1[0];
 				float3 position = i.localVertex;
@@ -200,8 +200,8 @@
 
 				float3 V = normalize(position);
 				float3 P = V * max(length(position), _Deform_Radius + 10.0);
-				float3 PO = P - _Globals_Origin;
-				float3 v = normalize(P - WCP - _Globals_Origin); // Body origin take in to account...
+				float3 PO = P - _Atmosphere_Origin;
+				float3 v = normalize(P - WCP - _Atmosphere_Origin); // Body origin take in to account...
 				float3 d = normalize(i.direction);
 
 				#if ATMOSPHERE_ON

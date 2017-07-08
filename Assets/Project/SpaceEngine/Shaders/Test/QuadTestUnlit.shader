@@ -167,7 +167,7 @@ Shader "SpaceEngine/Test/QuadTestUnlit"
 				float3 P = V * max(length(p), Rg + 10.0);
 				float3 v = normalize(P - _Globals_WorldCameraPos);
 
-				p += _Globals_Origin;
+				p += _Atmosphere_Origin;
 
 				float cTheta = dot(n, -WSD);
 
@@ -195,7 +195,7 @@ Shader "SpaceEngine/Test/QuadTestUnlit"
 					#endif
 				#endif
 
-				float4 inscatter = InScattering(_Globals_WorldCameraPos_Offsetted, p, WSD, extinction, 1.0);
+				float4 inscatter = InScattering(_Atmosphere_WorldCameraPos, p, WSD, extinction, 1.0);
 
 				#ifdef ECLIPSES_ON
 					inscatter *= eclipse;
@@ -328,8 +328,8 @@ Shader "SpaceEngine/Test/QuadTestUnlit"
 				o.tangent0 = v.tangent;
 				o.depth = 1;
 
-				o.direction = normalize(((_Globals_WorldCameraPos_Offsetted + _Globals_Origin) - mul(_Globals_CameraToWorld, o.vertex1)).xyz);
-				o.relativeDirection = (_Globals_WorldCameraPos_Offsetted - o.vertex1.xyz);
+				o.direction = normalize(((_Atmosphere_WorldCameraPos + _Atmosphere_Origin) - mul(_Globals_CameraToWorld, o.vertex1)).xyz);
+				o.relativeDirection = (_Atmosphere_WorldCameraPos - o.vertex1.xyz);
 				//Log. depth
 				//o.vertex0.z = log2(max(1e-6, 1.0 + o.vertex0.w)) * (2.0 / log2(_ProjectionParams.z + 1.0)) - 1.0;
 				//o.vertex0.z *= o.vertex0.w;

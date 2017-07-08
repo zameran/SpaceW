@@ -78,6 +78,10 @@
 #include "Math.cginc"
 #endif
 
+#if !defined (CORE)
+#include "Core.cginc"
+#endif
+
 struct Sun
 {
 	float Intensity;
@@ -88,14 +92,10 @@ struct Sun
 
 uniform float _Aerial_Perspective_Offset;
 
-//uniform StructuredBuffer<Sun> Suns;
+uniform float3 _Atmosphere_WorldCameraPos;
+uniform float3 _Atmosphere_Origin;
 
-uniform float4x4 _Globals_CameraToWorld;
-uniform float4x4 _Globals_ScreenToCamera;
-uniform float4x4 _Globals_CameraToScreen;
-uniform float3 _Globals_WorldCameraPos;
-uniform float3 _Globals_WorldCameraPos_Offsetted;
-uniform float3 _Globals_Origin;
+//uniform StructuredBuffer<Sun> Suns;
 
 // ----------------------------------------------------------------------------
 // PHYSICAL MODEL PARAMETERS

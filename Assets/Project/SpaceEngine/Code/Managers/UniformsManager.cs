@@ -37,6 +37,7 @@ using SpaceEngine.Core.Patterns.Strategy.Uniformed;
 
 using UnityEngine;
 
+[ExecutionOrder(-9997)]
 public class UniformsManager : MonoSingleton<UniformsManager>, IUniformed, IUniformed<Material>, IUniformed<ComputeShader>
 {
     public Texture2D PermSampler = null;
@@ -55,11 +56,6 @@ public class UniformsManager : MonoSingleton<UniformsManager>, IUniformed, IUnif
 
     public void InitUniforms()
     {
-
-    }
-
-    public void SetUniforms()
-    {
         Shader.SetGlobalTexture("PermSampler", PermSampler);
         Shader.SetGlobalTexture("PermGradSampler", PermGradSampler);
         Shader.SetGlobalTexture("PermSamplerGL", PermSamplerGL);
@@ -73,6 +69,15 @@ public class UniformsManager : MonoSingleton<UniformsManager>, IUniformed, IUnif
         Shader.SetGlobalTexture("_QuadTexture2", QuadTexture2);
         Shader.SetGlobalTexture("_QuadTexture3", QuadTexture3);
         Shader.SetGlobalTexture("_QuadTexture4", QuadTexture4);
+    }
+
+    public void SetUniforms()
+    {
+        Shader.SetGlobalMatrix("_Globals_WorldToCamera", GodManager.Instance.WorldToCamera.ToMatrix4x4());
+        Shader.SetGlobalMatrix("_Globals_CameraToWorld", GodManager.Instance.CameraToWorld.ToMatrix4x4());
+        Shader.SetGlobalMatrix("_Globals_CameraToScreen", GodManager.Instance.CameraToScreen.ToMatrix4x4());
+        Shader.SetGlobalMatrix("_Globals_ScreenToCamera", GodManager.Instance.ScreenToCamera.ToMatrix4x4());
+        Shader.SetGlobalVector("_Globals_WorldCameraPos", GodManager.Instance.WorldCameraPos);
     }
 
     #endregion
@@ -155,12 +160,14 @@ public class UniformsManager : MonoSingleton<UniformsManager>, IUniformed, IUnif
     {
         LoadAndInit();
 
-        SetUniforms();
+        InitUniforms();
     }
 
     private void Update()
     {
-        if (Input.GetKey(KeyCode.H)) SetUniforms();
+        if (Input.GetKey(KeyCode.H)) InitUniforms();
+
+        SetUniforms();
     }
 
     public void UpdateUniforms(Material mat)
