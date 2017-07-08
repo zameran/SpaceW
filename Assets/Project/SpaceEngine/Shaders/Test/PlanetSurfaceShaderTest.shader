@@ -10,40 +10,6 @@
 
 	SubShader 
 	{
-		Pass
-		{
-			Tags { "LightMode"="ShadowCaster" }
- 
-			CGPROGRAM
-			#pragma vertex vert
-			#pragma fragment frag
-			#pragma multi_compile_shadowcaster
-
-			#include "UnityCG.cginc"
- 
-			struct v2f 
-			{
-				V2F_SHADOW_CASTER;
-			};
- 
-			v2f vert(appdata_base v)
-			{
-				v2f o;
-
-				v.vertex.xyz += v.normal * 0.05f;
-
-				TRANSFER_SHADOW_CASTER_NORMALOFFSET(o)
-
-				return o;
-			}
- 
-			float4 frag(v2f i) : SV_Target
-			{
-				SHADOW_CASTER_FRAGMENT(i)
-			}
-			ENDCG
-		}
-
 		Tags { "RenderType" = "Opaque" }
 		LOD 200
 		
@@ -64,7 +30,7 @@
 
 		void vert(inout appdata_full v) 
 		{
-			v.vertex.xyz += v.normal * 0.05f;
+			//v.vertex.xyz += v.normal * 0.05f;
 		}
 
 		void surf(Input IN, inout SurfaceOutputStandard o) 
@@ -77,6 +43,43 @@
 			o.Alpha = color.a;
 		}
 		ENDCG
+	
+		Pass 
+		{
+			Name "ShadowCaster"
+			Tags { "LightMode" = "ShadowCaster" }
+		
+			CGPROGRAM
+			#pragma vertex vert
+			#pragma fragment frag
+
+			#pragma target 2.0
+
+			#pragma multi_compile_shadowcaster
+
+			#include "UnityCG.cginc"
+
+			struct v2f 
+			{ 
+				V2F_SHADOW_CASTER;
+			};
+
+			v2f vert(appdata_base v)
+			{
+				v2f o;
+
+				//v.vertex.xyz += v.normal * 0.05f;
+
+				TRANSFER_SHADOW_CASTER_NORMALOFFSET(o)
+
+				return o;
+			}
+
+			float4 frag(v2f i) : SV_Target
+			{
+				SHADOW_CASTER_FRAGMENT(i)
+			}
+			ENDCG
+		}
 	}
-	//FallBack "Diffuse"
 }
