@@ -83,6 +83,10 @@ namespace SpaceEngine.Core.Tile.Samplers
         /// </summary>
         public TileFilter[] Filters { get; private set; }
 
+        private RenderTexture SamplerTextureBuffer;
+        private Vector3 SamplerCoordsBuffer;
+        private Vector3 SamplerSizeBuffer;
+
         #region Node
 
         protected override void InitNode()
@@ -249,14 +253,11 @@ namespace SpaceEngine.Core.Tile.Samplers
         {
             if (!Producer.IsGPUProducer) return;
 
-            RenderTexture tex = null;
-            Vector3 coords = Vector3.zero, size = Vector3.zero;
+            SetTile(ref SamplerTextureBuffer, ref SamplerCoordsBuffer, ref SamplerSizeBuffer, level, tx, ty);
 
-            SetTile(ref tex, ref coords, ref size, level, tx, ty);
-
-            target.SetTexture(uniforms.tile, tex);
-            target.SetVector(uniforms.tileCoords, coords);
-            target.SetVector(uniforms.tileSize, size);
+            target.SetTexture(uniforms.tile, SamplerTextureBuffer);
+            target.SetVector(uniforms.tileCoords, SamplerCoordsBuffer);
+            target.SetVector(uniforms.tileSize, SamplerSizeBuffer);
         }
 
         /// <summary>
@@ -270,14 +271,11 @@ namespace SpaceEngine.Core.Tile.Samplers
         {
             if (!Producer.IsGPUProducer) return;
 
-            RenderTexture tex = null;
-            Vector3 coords = Vector3.zero, size = Vector3.zero;
+            SetTile(ref SamplerTextureBuffer, ref SamplerCoordsBuffer, ref SamplerSizeBuffer, level, tx, ty);
 
-            SetTile(ref tex, ref coords, ref size, level, tx, ty);
-
-            target.SetTexture(uniforms.tile, tex);
-            target.SetVector(uniforms.tileCoords, coords);
-            target.SetVector(uniforms.tileSize, size);
+            target.SetTexture(uniforms.tile, SamplerTextureBuffer);
+            target.SetVector(uniforms.tileCoords, SamplerCoordsBuffer);
+            target.SetVector(uniforms.tileSize, SamplerSizeBuffer);
         }
 
         /// <summary>
