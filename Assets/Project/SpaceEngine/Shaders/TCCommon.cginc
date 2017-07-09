@@ -824,6 +824,7 @@ inline float CubicHermite(float4 V, float t)
 //-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
+#ifdef COMPUTE_SHADER
 // Improved texture interpolation by iq. http://www.iquilezles.org/www/articles/texture/texture.htm
 float4 SampleCustom(Texture2D tex, SamplerState texSampler, float2 uv, float resolution)
 {
@@ -857,6 +858,7 @@ float4 SampleCustomBilinear(Texture2D tex, SamplerState texSampler, float2 uv, f
 
 	return lerp(lerp(a, b, fuv.x), lerp(c, d, fuv.x), fuv.y);
 }
+#endif
 //-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
