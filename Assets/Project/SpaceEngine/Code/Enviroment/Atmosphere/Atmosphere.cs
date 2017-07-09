@@ -399,7 +399,7 @@ namespace SpaceEngine.AtmosphericScattering
 
         #region IRenderable
 
-        public void Render(int layer = 0)
+        public void Render(int layer = 9)
         {
             if (AtmosphereMesh == null) return;
 

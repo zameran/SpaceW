@@ -337,7 +337,7 @@ namespace SpaceEngine.Ocean
 
         #region IRenderable
 
-        public virtual void Render(int layer = 0)
+        public virtual void Render(int layer = 10)
         {
             if (DrawOcean == false) return;
 

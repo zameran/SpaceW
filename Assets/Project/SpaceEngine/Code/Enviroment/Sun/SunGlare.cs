@@ -214,7 +214,7 @@ namespace SpaceEngine.AtmosphericScattering.Sun
 
         #region IRenderable
 
-        public void Render(int layer = 8)
+        public void Render(int layer = 12)
         {
             if (SunGlareMesh == null) return;
 

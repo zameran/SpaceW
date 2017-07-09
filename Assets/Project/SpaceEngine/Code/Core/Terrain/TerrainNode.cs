@@ -441,15 +441,15 @@ namespace SpaceEngine.Core.Terrain
             quad.Drawable = true;
         }
 
-        private void DrawMesh(TerrainQuad quad, Mesh mesh, MaterialPropertyBlock mpb)
+        private void DrawMesh(TerrainQuad quad, Mesh mesh, MaterialPropertyBlock mpb, int layer)
         {
             // Set the uniforms unique to each quad
             SetPerQuadUniforms(quad, mpb);
 
-            Graphics.DrawMesh(mesh, Matrix4x4.identity, TerrainMaterial, 0, CameraHelper.Main(), 0, mpb, ShadowCastingMode.TwoSided, true);
+            Graphics.DrawMesh(mesh, Matrix4x4.identity, TerrainMaterial, layer, CameraHelper.Main(), 0, mpb, ShadowCastingMode.TwoSided, true);
         }
 
-        public void DrawQuad(TerrainQuad quad, Mesh mesh, MaterialPropertyBlock mpb)
+        public void DrawQuad(TerrainQuad quad, Mesh mesh, MaterialPropertyBlock mpb, int layer)
         {
             if (!quad.IsVisible) return;
             if (!quad.Drawable) return;
@@ -462,7 +462,7 @@ namespace SpaceEngine.Core.Terrain
                     SamplersSuitable[i].SetUniforms(mpb, quad);
                 }
 
-                DrawMesh(quad, mesh, mpb);
+                DrawMesh(quad, mesh, mpb, layer);
             }
             else
             {
@@ -479,7 +479,7 @@ namespace SpaceEngine.Core.Terrain
                     }
                     else if (targetQuad.Drawable)
                     {
-                        DrawQuad(targetQuad, mesh, mpb);
+                        DrawQuad(targetQuad, mesh, mpb, layer);
 
                         done |= 1 << quad.Order[i];
                     }
@@ -496,7 +496,7 @@ namespace SpaceEngine.Core.Terrain
                         SamplersSuitable[i].SetUniforms(mpb, quad);
                     }
 
-                    DrawMesh(quad, mesh, mpb);
+                    DrawMesh(quad, mesh, mpb, layer);
                 }
             }
         }

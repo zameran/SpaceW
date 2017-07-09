@@ -236,7 +236,7 @@ namespace SpaceEngine.Core.Bodies
 
         #region IRenderable
 
-        public virtual void Render(int layer = 0)
+        public virtual void Render(int layer = 8)
         {
             if (Atmosphere != null)
             {
@@ -286,7 +286,7 @@ namespace SpaceEngine.Core.Bodies
                 {
                     if (Helper.Enabled(TerrainNodes[i]))
                     {
-                        DrawTerrain(TerrainNodes[i]);
+                        DrawTerrain(TerrainNodes[i], layer);
                     }
                 }
             }
@@ -333,7 +333,7 @@ namespace SpaceEngine.Core.Bodies
             return keywords;
         }
 
-        private void DrawTerrain(TerrainNode node)
+        private void DrawTerrain(TerrainNode node, int layer)
         {
             // Get all the samplers attached to the terrain node. The samples contain the data need to draw the quad
             //node.CollectSamplersSuitable();
@@ -346,7 +346,7 @@ namespace SpaceEngine.Core.Bodies
             node.FindDrawableQuads(node.TerrainQuadRoot);
 
             // The draw them
-            node.DrawQuad(node.TerrainQuadRoot, QuadMesh, MPB);
+            node.DrawQuad(node.TerrainQuadRoot, QuadMesh, MPB, layer);
         }
     }
 }

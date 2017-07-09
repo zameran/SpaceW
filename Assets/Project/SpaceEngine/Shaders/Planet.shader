@@ -136,7 +136,7 @@
 				"ForceNoShadowCasting"	= "True"
 				"IgnoreProjector"		= "True"
 
-				"LightMode"				= "Always"		// "Deferred" 
+				"LightMode"				= "ForwardBase"		// "Deferred" 
 			}
 
 			Cull Back
@@ -174,12 +174,7 @@
 				o.direction = (_Atmosphere_WorldCameraPos + _Atmosphere_Origin) - (mul(_Globals_CameraToWorld, float4((mul(_Globals_ScreenToCamera, v.vertex)).xyz, 0.0))).xyz;
 			}
 
-			void frag(in v2f i, 
-				out half4 outDiffuse : SV_Target0,			// RT0: diffuse color (rgb), occlusion (a)
-				out half4 outSpecSmoothness : SV_Target1,	// RT1: spec color (rgb), smoothness (a)
-				out half4 outNormal : SV_Target2,			// RT2: normal (rgb), --unused, very low precision-- (a) 
-				out half4 outEmission : SV_Target3			// RT3: emission (rgb), --unused-- (a)
-			)
+			void frag(in v2f i, out half4 outDiffuse : SV_Target)
 			{
 				float3 WCP = _Globals_WorldCameraPos;
 				float3 WCPO = _Atmosphere_WorldCameraPos;
@@ -281,9 +276,6 @@
 				#endif
 
 				outDiffuse = float4(finalColor, 1.0);
-				outSpecSmoothness = 1.0;
-				outNormal = half4(normal.xyz * 0.5 + 0.5, 1.0);
-				outEmission = half4(exp(-finalColor / 2), 1.0);
 			}
 			
 			ENDCG

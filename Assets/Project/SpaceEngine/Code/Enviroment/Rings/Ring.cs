@@ -186,7 +186,7 @@ public class Ring : Node<Ring>, IUniformed<Material>, IRenderable<Ring>
 
     #region IRenderable
 
-    public void Render(int layer = 0)
+    public void Render(int layer = 11)
     {
         if (Segments == null) return;
         if (Segments.Count == 0) return;
