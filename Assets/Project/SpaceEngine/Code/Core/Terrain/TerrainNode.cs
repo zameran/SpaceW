@@ -459,7 +459,7 @@ namespace SpaceEngine.Core.Terrain
                 for (byte i = 0; i < SamplersSuitable.Count; ++i)
                 {
                     // Set the unifroms needed to draw the texture for this sampler
-                    SamplersSuitable[i].SetTile(mpb, quad.Level, quad.Tx, quad.Ty);
+                    SamplersSuitable[i].SetUniforms(mpb, quad);
                 }
 
                 DrawMesh(quad, mesh, mpb);
@@ -493,7 +493,7 @@ namespace SpaceEngine.Core.Terrain
                     for (byte i = 0; i < SamplersSuitable.Count; ++i)
                     {
                         // Set the unifroms needed to draw the texture for this sampler
-                        SamplersSuitable[i].SetTile(mpb, quad.Level, quad.Tx, quad.Ty);
+                        SamplersSuitable[i].SetUniforms(mpb, quad);
                     }
 
                     DrawMesh(quad, mesh, mpb);

@@ -1,4 +1,5 @@
-﻿using SpaceEngine.Core.Storage;
+﻿using SpaceEngine.Core.Patterns.Strategy.Uniformed;
+using SpaceEngine.Core.Storage;
 using SpaceEngine.Core.Terrain;
 using SpaceEngine.Core.Tile.Filter;
 using SpaceEngine.Core.Tile.Producer;
@@ -14,7 +15,7 @@ namespace SpaceEngine.Core.Tile.Samplers
     /// This class can set the uniforms necessary to access a given texture tile on GPU, stored in a GPUTileStorage. 
     /// This class also manages the creation of new texture tiles when a terrain quadtree is updated, via a TileProducer.
     /// </summary>
-    public class TileSampler : Node<TileSampler>
+    public class TileSampler : Node<TileSampler>, IUniformed<MaterialPropertyBlock, TerrainQuad>
     {
         /// <summary>
         /// Class used to sort a <see cref="TileSampler"/> based on it's priority.
@@ -206,7 +207,7 @@ namespace SpaceEngine.Core.Tile.Samplers
         }
 
         /// <summary>
-        /// Updates the internal quadtree to make it identical to the given terrain quadtree. 
+        /// Updates the internal <see cref="QuadTree"/> to make it identical to the given terrain <see cref="QuadTree"/>. 
         /// Collects the tasks necessary to create the missing texture tiles, corresponding to newly created quads.
         /// </summary>
         /// <param name="parent">Parent quadtree.</param>
@@ -242,53 +243,60 @@ namespace SpaceEngine.Core.Tile.Samplers
             }
         }
 
+        #region IUniformed<MaterialPropertyBlock>
+
         /// <summary>
-        /// Sets special <see cref="TileProducer"/> uniforms for given quad.
+        /// Init special <see cref="TileProducer"/> uniforms for target <see cref="TerrainQuad"/>.
         /// </summary>
         /// <param name="target">Target <see cref="MaterialPropertyBlock"/>.</param>
-        /// <param name="level">Quad level.</param>
-        /// <param name="tx">Quad tx.</param>
-        /// <param name="ty">Quad ty</param>
-        public void SetTile(MaterialPropertyBlock target, int level, int tx, int ty)
+        /// <param name="quad">Target quad.</param>
+        public void InitUniforms(MaterialPropertyBlock target, TerrainQuad quad)
         {
+            if (target == null) return;
+            if (quad == null) return;
             if (!Producer.IsGPUProducer) return;
-
-            SetTile(ref SamplerTextureBuffer, ref SamplerCoordsBuffer, ref SamplerSizeBuffer, level, tx, ty);
-
-            target.SetTexture(uniforms.tile, SamplerTextureBuffer);
-            target.SetVector(uniforms.tileCoords, SamplerCoordsBuffer);
-            target.SetVector(uniforms.tileSize, SamplerSizeBuffer);
         }
 
         /// <summary>
-        /// Sets special <see cref="TileProducer"/> uniforms for given quad.
+        /// Set special <see cref="TileProducer"/> uniforms for target <see cref="TerrainQuad"/>.
         /// </summary>
-        /// <param name="target">Target <see cref="Material"/>.</param>
-        /// <param name="level">Quad level.</param>
-        /// <param name="tx">Quad tx.</param>
-        /// <param name="ty">Quad ty</param>
-        public void SetTile(Material target, int level, int tx, int ty)
+        /// <param name="target">Target <see cref="MaterialPropertyBlock"/>.</param>
+        /// <param name="quad">Target quad.</param>
+        public void SetUniforms(MaterialPropertyBlock target, TerrainQuad quad)
         {
+            if (target == null) return;
+            if (quad == null) return;
             if (!Producer.IsGPUProducer) return;
 
-            SetTile(ref SamplerTextureBuffer, ref SamplerCoordsBuffer, ref SamplerSizeBuffer, level, tx, ty);
+            CalculateTileGPUCoordinates(ref SamplerTextureBuffer, ref SamplerCoordsBuffer, ref SamplerSizeBuffer, quad.Level, quad.Tx, quad.Ty);
 
             target.SetTexture(uniforms.tile, SamplerTextureBuffer);
             target.SetVector(uniforms.tileCoords, SamplerCoordsBuffer);
             target.SetVector(uniforms.tileSize, SamplerSizeBuffer);
         }
 
+        #endregion
+
+        #region IUniformed
+
+        public void InitSetUniforms()
+        {
+
+        }
+
+        #endregion
+
         /// <summary>
-        /// Sets the uniforms necessary to access the texture tile for the given quad. 
+        /// Calculates the uniforms necessary to access the texture tile for the given quad. 
         /// The samplers producer must be using a <see cref="GPUTileStorage"/> at the first slot for this function to work.
         /// </summary>
-        /// <param name="tex"></param>
-        /// <param name="coord"></param>
+        /// <param name="tileTexture"></param>
+        /// <param name="coordinates"></param>
         /// <param name="size"></param>
         /// <param name="level"></param>
         /// <param name="tx"></param>
         /// <param name="ty"></param>
-        private void SetTile(ref RenderTexture tex, ref Vector3 coord, ref Vector3 size, int level, int tx, int ty)
+        private void CalculateTileGPUCoordinates(ref RenderTexture tileTexture, ref Vector3 coordinates, ref Vector3 size, int level, int tx, int ty)
         {
             if (!Producer.IsGPUProducer) return;
 
@@ -396,8 +404,8 @@ namespace SpaceEngine.Core.Tile.Samplers
                 coords = new Vector4((dx + b + 0.5f) / w, (dy + b + 0.5f) / h, 0.0f, ds / w);
             }
 
-            tex = gpuSlot.Texture;
-            coord = new Vector3(coords.x, coords.y, coords.z);
+            tileTexture = gpuSlot.Texture;
+            coordinates = new Vector3(coords.x, coords.y, coords.z);
             size = new Vector3(coords.w, coords.w, sDivTwo * 2.0f - 2.0f * b);
         }
     }

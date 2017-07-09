@@ -238,7 +238,7 @@ namespace SpaceEngine.AtmosphericScattering
             AtmosphereParameters.Rl = (Radius + Height * 1.05f) - TerrainRadiusHold;
             AtmosphereParameters.SCALE = Scale;
 
-            var fadeValue = Mathf.Clamp01(VectorHelper.AngularRadius(Origin, GodManager.Instance.View.WorldCameraPosition, Radius));
+            var fadeValue = Mathf.Clamp01(VectorHelper.AngularRadius(Origin, GodManager.Instance.WorldCameraPos, Radius));
 
             Fade = FadeCurve.Evaluate(float.IsNaN(fadeValue) || float.IsInfinity(fadeValue) ? 1.0f : fadeValue);
 
