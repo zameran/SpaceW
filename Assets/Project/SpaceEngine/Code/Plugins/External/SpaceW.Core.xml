@@ -3464,6 +3464,14 @@
             <param name="right">The value to subtract (the subtrahend).</param>
             <returns>The result of subtracting right from left (the difference).</returns>
         </member>
+        <member name="M:SpaceEngine.Core.Numerics.Vector2d.op_Subtraction(SpaceEngine.Core.Numerics.Vector2d,System.Double)">
+            <summary>
+                Subtracts one value from another vector and returns the result.
+            </summary>
+            <param name="left">The value to subtract from (the minuend).</param>
+            <param name="right">The value to subtract (the subtrahend).</param>
+            <returns>The result of subtracting right from left (the difference).</returns>
+        </member>
         <member name="M:SpaceEngine.Core.Numerics.Vector2d.op_Multiply(SpaceEngine.Core.Numerics.Vector2d,System.Double)">
             <summary>
                 Returns the product of a vector and scalar.
@@ -3643,6 +3651,14 @@
         <member name="M:SpaceEngine.Core.Numerics.Vector.Subtract(SpaceEngine.Core.Numerics.Vector2d,SpaceEngine.Core.Numerics.Vector2d)">
             <summary>
                 Subtracts one vectors from another and returns the result.
+            </summary>
+            <param name="left">The value to subtract from (the minuend).</param>
+            <param name="right">The value to subtract (the subtrahend).</param>
+            <returns>The result of subtracting right from left (the difference).</returns>
+        </member>
+        <member name="M:SpaceEngine.Core.Numerics.Vector.Subtract(SpaceEngine.Core.Numerics.Vector2d,System.Double)">
+            <summary>
+                Subtracts one value from another vector and returns the result.
             </summary>
             <param name="left">The value to subtract from (the minuend).</param>
             <param name="right">The value to subtract (the subtrahend).</param>
@@ -3945,6 +3961,14 @@
         <member name="M:SpaceEngine.Core.Numerics.Vector.Subtract(SpaceEngine.Core.Numerics.Vector3d,SpaceEngine.Core.Numerics.Vector3d)">
             <summary>
                 Subtracts one vectors from another and returns the result.
+            </summary>
+            <param name="left">The value to subtract from (the minuend).</param>
+            <param name="right">The value to subtract (the subtrahend).</param>
+            <returns>The result of subtracting right from left (the difference).</returns>
+        </member>
+        <member name="M:SpaceEngine.Core.Numerics.Vector.Subtract(SpaceEngine.Core.Numerics.Vector3d,System.Double)">
+            <summary>
+                Subtracts one value from another vector and returns the result.
             </summary>
             <param name="left">The value to subtract from (the minuend).</param>
             <param name="right">The value to subtract (the subtrahend).</param>
@@ -4279,6 +4303,14 @@
         <member name="M:SpaceEngine.Core.Numerics.Vector.Subtract(SpaceEngine.Core.Numerics.Vector4d,SpaceEngine.Core.Numerics.Vector4d)">
             <summary>
                 Subtracts one vectors from another and returns the result.
+            </summary>
+            <param name="left">The value to subtract from (the minuend).</param>
+            <param name="right">The value to subtract (the subtrahend).</param>
+            <returns>The result of subtracting right from left (the difference).</returns>
+        </member>
+        <member name="M:SpaceEngine.Core.Numerics.Vector.Subtract(SpaceEngine.Core.Numerics.Vector4d,System.Double)">
+            <summary>
+                Subtracts one value from another vector and returns the result.
             </summary>
             <param name="left">The value to subtract from (the minuend).</param>
             <param name="right">The value to subtract (the subtrahend).</param>
@@ -5234,6 +5266,14 @@
         <member name="M:SpaceEngine.Core.Numerics.Vector3d.op_Subtraction(SpaceEngine.Core.Numerics.Vector3d,SpaceEngine.Core.Numerics.Vector3d)">
             <summary>
                 Subtracts one vector from another and returns the result.
+            </summary>
+            <param name="left">The value to subtract from (the minuend).</param>
+            <param name="right">The value to subtract (the subtrahend).</param>
+            <returns>The result of subtracting right from left (the difference).</returns>
+        </member>
+        <member name="M:SpaceEngine.Core.Numerics.Vector3d.op_Subtraction(SpaceEngine.Core.Numerics.Vector3d,System.Double)">
+            <summary>
+                Subtracts one value from another vector and returns the result.
             </summary>
             <param name="left">The value to subtract from (the minuend).</param>
             <param name="right">The value to subtract (the subtrahend).</param>
@@ -7196,6 +7236,14 @@
         <member name="M:SpaceEngine.Core.Numerics.Vector4d.op_Subtraction(SpaceEngine.Core.Numerics.Vector4d,SpaceEngine.Core.Numerics.Vector4d)">
             <summary>
                 Subtracts one vector from another and returns the result.
+            </summary>
+            <param name="left">The value to subtract from (the minuend).</param>
+            <param name="right">The value to subtract (the subtrahend).</param>
+            <returns>The result of subtracting right from left (the difference).</returns>
+        </member>
+        <member name="M:SpaceEngine.Core.Numerics.Vector4d.op_Subtraction(SpaceEngine.Core.Numerics.Vector4d,System.Double)">
+            <summary>
+                Subtracts one value from another vector and returns the result.
             </summary>
             <param name="left">The value to subtract from (the minuend).</param>
             <param name="right">The value to subtract (the subtrahend).</param>

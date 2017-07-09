@@ -825,19 +825,19 @@ inline float CubicHermite(float4 V, float t)
 
 //-----------------------------------------------------------------------------
 // Improved texture interpolation by iq. http://www.iquilezles.org/www/articles/texture/texture.htm
-float4 SampleCustom(Texture2D tex, SamplerState texSampler, float2 p, float resolution)
+float4 SampleCustom(Texture2D tex, SamplerState texSampler, float2 uv, float resolution)
 {
-	p = p * resolution + 0.5;
+	uv = uv * resolution + 0.5;
 
-	float2 i = floor(p);
-	float2 f = p - i;
+	float2 i = floor(uv);
+	float2 f = uv - i;
 
 	f = f * f * f * (f * (f * 6.0 - 15.0) + 10.0);
 
-	p = i + f;
-	p = (p - 0.5) / resolution;
+	uv = i + f;
+	uv = (uv - 0.5) / resolution;
 
-	return tex.Sample(texSampler, p);
+	return tex.Sample(texSampler, uv);
 }
 //-----------------------------------------------------------------------------
 
