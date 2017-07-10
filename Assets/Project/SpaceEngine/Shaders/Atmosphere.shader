@@ -86,7 +86,7 @@ Shader "SpaceEngine/Atmosphere/Atmosphere"
 			}
 
 			Blend SrcAlpha OneMinusSrcColor
-			Cull Front
+			Cull Back
 			Lighting Off
 			ZWrite Off
 			ZTest LEqual
