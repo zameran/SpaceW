@@ -1,4 +1,4 @@
-﻿Shader "SpaceEngine/Terrain/Planet" 
+﻿Shader "SpaceEngine/Terrain/PlanetTerrain" 
 {
 	Properties
 	{
@@ -157,9 +157,8 @@
 			#pragma multi_compile SHADOW_0 SHADOW_1 SHADOW_2 SHADOW_3 SHADOW_4
 			
 			#include "SpaceStuff.cginc"
-			#include "Eclipses.cginc"
-			#include "HDR.cginc"
-			#include "Atmosphere.cginc"
+			#include "SpaceEclipses.cginc"
+			#include "SpaceAtmosphere.cginc"
 			#include "Ocean/OceanBRDF.cginc"
 			
 			uniform sampler2D _Ground_Diffuse;

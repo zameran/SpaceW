@@ -31,7 +31,7 @@
 // Creation Time: Undefined
 // Creator: zameran
 
-Shader "SpaceEngine/Ring"
+Shader "SpaceEngine/Ring/PlanetRing"
 {
 	Properties
 	{

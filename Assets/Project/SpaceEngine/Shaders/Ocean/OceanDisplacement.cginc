@@ -57,6 +57,8 @@
  * Modified by Denis Ovchinnikov 2015-2017
  */
 
+#define OCEAN_DISPLACEMENT
+
 uniform float _Ocean_Radius;
 uniform float _Ocean_HeightOffset;
 uniform float3 _Ocean_CameraPos;

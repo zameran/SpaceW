@@ -64,7 +64,7 @@
  * Modified by Denis Ovchinnikov 2015-2017
  */
 
-Shader "SpaceEngine/Atmosphere/Atmosphere" 
+Shader "SpaceEngine/Atmosphere/PlanetAtmosphere" 
 {
 	Properties
 	{
@@ -94,10 +94,9 @@ Shader "SpaceEngine/Atmosphere/Atmosphere"
 			Fog { Mode Off }
 
 			CGPROGRAM
-			#include "HDR.cginc"
-			#include "Atmosphere.cginc"
 			#include "SpaceStuff.cginc"
-			#include "Eclipses.cginc"
+			#include "SpaceEclipses.cginc"
+			#include "SpaceAtmosphere.cginc"
 
 			#pragma target 5.0
 			#pragma only_renderers d3d11 glcore

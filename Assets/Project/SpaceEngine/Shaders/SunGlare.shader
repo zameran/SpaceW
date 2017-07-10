@@ -47,8 +47,8 @@ Shader "SpaceEngine/Atmosphere/SunGlare"
 
 			CGPROGRAM
 			#include "UnityCG.cginc"
-			#include "Atmosphere.cginc"
-			#include "HDR.cginc"
+
+			#include "SpaceAtmosphere.cginc"
 
 			#pragma target 3.0
 			#pragma vertex vert

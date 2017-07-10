@@ -64,7 +64,7 @@
  * Modified by Denis Ovchinnikov 2015-2017
  */
 
-#define ATMOSPHERE
+#define SPACE_ATMOSPHERE
 
 #define OPTIMIZE
 #define ATMO_FULL

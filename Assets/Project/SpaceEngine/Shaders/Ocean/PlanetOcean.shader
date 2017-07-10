@@ -1,11 +1,10 @@
-﻿Shader "SpaceEngine/Ocean/Ocean" 
+﻿Shader "SpaceEngine/Ocean/PlanetOcean" 
 {
 	SubShader 
 	{
 		CGINCLUDE
 
-		#include "../HDR.cginc"
-		#include "../Atmosphere.cginc"
+		#include "../SpaceAtmosphere.cginc"
 		#include "OceanBRDF.cginc"
 		#include "OceanDisplacement.cginc"
 

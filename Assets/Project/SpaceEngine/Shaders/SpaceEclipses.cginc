@@ -31,7 +31,7 @@
 // Creation Time: Undefined
 // Creator: zameran
 
-#define ECLIPSES
+#define SPACE_ECLIPSES
 
 #if !defined (MATH)
 #include "Math.cginc"

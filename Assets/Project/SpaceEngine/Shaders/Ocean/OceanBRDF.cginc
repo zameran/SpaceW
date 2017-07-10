@@ -57,8 +57,10 @@
  * Modified by Denis Ovchinnikov 2015-2017
  */
 
-#if !defined (ATMOSPHERE)
-#include "../Atmosphere.cginc"
+#define OCEAN_BRDF
+
+#if !defined (SPACE_ATMOSPHERE)
+#include "../SpaceAtmosphere.cginc"
 #endif
 
 #if !defined (MATH)
