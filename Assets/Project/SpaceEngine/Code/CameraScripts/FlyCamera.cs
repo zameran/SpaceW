@@ -74,6 +74,8 @@ namespace SpaceEngine.Cameras
 
             UpdateDistances();
             UpdateClipPlanes();
+
+            MainRenderer.Instance.ComposeOutputRender();
         }
 
         protected override void FixedUpdate()

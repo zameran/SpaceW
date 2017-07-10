@@ -42,7 +42,7 @@ using UnityEngine;
 
 [ExecutionOrder(-9996)]
 [RequireComponent(typeof(Camera))]
-public sealed class MainRenderer : MonoBehaviour
+public sealed class MainRenderer : MonoSingleton<MainRenderer>
 {
     public class BodySort : IComparer<Body>
     {
@@ -60,6 +60,11 @@ public sealed class MainRenderer : MonoBehaviour
             else
                 return 0;
         }
+    }
+
+    private void Awake()
+    {
+        Instance = this;
     }
 
     private void Start()
@@ -93,6 +98,7 @@ public sealed class MainRenderer : MonoBehaviour
 
         Array.Sort(GodManager.Instance.Bodies, new BodySort());
 
+        /*
         for (int i = 0; i < GodManager.Instance.Starfields.Length; i++)
         {
             if (GodManager.Instance.Starfields[i] != null)
@@ -104,6 +110,7 @@ public sealed class MainRenderer : MonoBehaviour
             if (GodManager.Instance.Bodies[i] != null)
                 GodManager.Instance.Bodies[i].Render();
         }
+        */
 
         //-----------------------------------------------------------------------------
         GodManager.Instance.Bodies[0].RenderQueueOffset = 10001;

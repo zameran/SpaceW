@@ -31,15 +31,20 @@
 // Creation Time: Undefined
 // Creator: zameran
 
-Shader "SpaceEngine/Stars/Starfield" 
+Shader "SpaceEngine/Space/Starfield"
 {
 	SubShader 
 	{
-		Tags { "Queue" = "Geometry" "IgnoreProjector" = "True" "RenderType" = "Background" }
+		Tags 
+		{ 
+			"Queue" = "Geometry"
+			"IgnoreProjector" = "True"
+			"RenderType" = "Background"
+		}
 		//Blend OneMinusDstColor OneMinusSrcAlpha
 		//Blend OneMinusDstAlpha SrcAlpha
 		Blend OneMinusDstAlpha OneMinusSrcAlpha
-		ZWrite Off 
+		ZWrite Off
 		Fog { Mode Off }
 
 		Pass
@@ -50,7 +55,8 @@ Shader "SpaceEngine/Stars/Starfield"
 
 			uniform float _StarIntensity;
 			uniform float4x4 _RotationMatrix;
-			uniform float4 _Tab[8];
+
+			float4 _Tab[8];
 		
 			struct a2v
 			{

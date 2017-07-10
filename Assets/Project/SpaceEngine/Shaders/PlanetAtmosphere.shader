@@ -64,7 +64,7 @@
  * Modified by Denis Ovchinnikov 2015-2017
  */
 
-Shader "SpaceEngine/Atmosphere/PlanetAtmosphere" 
+Shader "SpaceEngine/Planet/Atmosphere"
 {
 	Properties
 	{
@@ -86,7 +86,7 @@ Shader "SpaceEngine/Atmosphere/PlanetAtmosphere"
 			}
 
 			Blend SrcAlpha OneMinusSrcColor
-			Cull Back
+			Cull Front
 			Lighting Off
 			ZWrite Off
 			ZTest LEqual

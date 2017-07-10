@@ -31,7 +31,7 @@
 // Creation Time: Undefined
 // Creator: zameran
 
-Shader "SpaceEngine/Atmosphere/Cloudsphere" 
+Shader "SpaceEngine/Planet/Cloudsphere"
 {
 	Properties
 	{
@@ -42,8 +42,10 @@ Shader "SpaceEngine/Atmosphere/Cloudsphere"
 		CGINCLUDE
 
 		#include "UnityCG.cginc"
-		#include "Atmosphere.cginc"
+
 		#include "TCCommon.cginc"
+
+		#include "SpaceAtmosphere.cginc"
 					
 		uniform float _TransmittanceOffset;
 		uniform float4 _DiffuseColor;
@@ -96,9 +98,9 @@ Shader "SpaceEngine/Atmosphere/Cloudsphere"
 			Name "Cloudsphere"
 			Tags
 			{ 
-				"Queue" = "Transparent" 
-				"RenderType" = "Transparent" 
-				"IgnoreProjector" = "True" 
+				"Queue" = "Transparent"
+				"RenderType" = "Transparent"
+				"IgnoreProjector" = "True"
 			}
 
 			Blend SrcAlpha OneMinusSrcAlpha

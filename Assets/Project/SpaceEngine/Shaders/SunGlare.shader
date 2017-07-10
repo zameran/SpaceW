@@ -31,11 +31,16 @@
 // Creation Time: Undefined
 // Creator: zameran
 
-Shader "SpaceEngine/Atmosphere/SunGlare"
+Shader "SpaceEngine/Other/Sun Glare"
 {
 	SubShader 
 	{
-		Tags { "Queue" = "Transparent" "IgnoreProjector" = "True" "RenderType" = "Transparent" }
+		Tags 
+		{ 
+			"Queue" = "Transparent"
+			"IgnoreProjector" = "True"
+			"RenderType" = "Transparent"
+		}
 	
 		Pass 
 		{
