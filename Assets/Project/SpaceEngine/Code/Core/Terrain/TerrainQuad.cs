@@ -11,8 +11,10 @@ namespace SpaceEngine.Core.Terrain
     /// It can be used in <see cref="Tile.Samplers.TileSampler"/> to decide whether or not data must be produced for invisible tiles  
     /// (we recall that the terrain quadtree itself does not store any terrain data). 
     /// </summary>
-    public class TerrainQuad
+    public class TerrainQuad : IEquatable<TerrainQuad>
     {
+        public SerializableGuid GUID { get; }
+
         /// <summary> 
         /// The <see cref="TerrainNode"/> to which this terrain quadtree belongs. 
         /// </summary> 
@@ -188,6 +190,8 @@ namespace SpaceEngine.Core.Terrain
         /// <param name="zmax">The maximum terrain elevation inside this quad.</param> 
         public TerrainQuad(TerrainNode owner, TerrainQuad parent, int tx, int ty, double ox, double oy, double length, float zmin, float zmax)
         {
+            GUID = Guid.NewGuid();
+
             Owner = owner;
             Parent = parent;
             Level = (Parent == null) ? 0 : Parent.Level + 1;
@@ -450,5 +454,27 @@ namespace SpaceEngine.Core.Terrain
                 Children[3].DrawQuadOutline(camera, lineMaterial, lineColor);
             }
         }
+
+        #region IEquatable<TerrainQuad>
+
+        /// <inheritdoc />
+        public bool Equals(TerrainQuad other)
+        {
+            return other != null && GUID.Equals(other.GUID);
+        }
+
+        /// <inheritdoc />
+        public override bool Equals(object obj)
+        {
+            return obj != null && (obj.GetType() == this.GetType() && Equals(obj as TerrainQuad));
+        }
+
+        /// <inheritdoc />
+        public override int GetHashCode()
+        {
+            return GUID.GetHashCode();
+        }
+
+        #endregion
     }
 }

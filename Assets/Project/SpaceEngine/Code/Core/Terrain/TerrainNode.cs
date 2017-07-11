@@ -449,6 +449,46 @@ namespace SpaceEngine.Core.Terrain
             Graphics.DrawMesh(mesh, Matrix4x4.identity, TerrainMaterial, layer, CameraHelper.Main(), 0, mpb, ShadowCastingMode.TwoSided, true);
         }
 
+        public Queue<TerrainQuad> Traverse(TerrainQuad root)
+        {
+            if (!root.IsVisible) return null;
+            if (!root.Drawable) return null;
+
+            var traverse = new Queue<TerrainQuad>();
+            var quadsQueue = new Queue<TerrainQuad>();
+            var quadsSet = new HashSet<TerrainQuad>();
+
+            quadsQueue.Enqueue(root);
+            quadsSet.Add(root);
+
+            while (quadsQueue.Count > 0)
+            {
+                var currentQuad = quadsQueue.Dequeue();
+
+                traverse.Enqueue(currentQuad);
+
+                if (currentQuad.IsLeaf)
+                {
+                    quadsSet.Add(currentQuad);
+                }
+                else
+                {
+                    for (byte i = 0; i < 4; ++i)
+                    {
+                        var currentQuadChild = currentQuad.GetChild(currentQuad.Order[i]);
+
+                        if (!quadsSet.Contains(currentQuadChild) && (currentQuadChild.IsVisible && currentQuadChild.Drawable))
+                        {
+                            quadsQueue.Enqueue(currentQuadChild);
+                            quadsSet.Add(currentQuadChild);
+                        }
+                    }
+                }
+            }
+
+            return traverse;
+        }
+
         public void DrawQuad(TerrainQuad quad, Mesh mesh, MaterialPropertyBlock mpb, int layer)
         {
             if (!quad.IsVisible) return;
