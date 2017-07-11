@@ -175,6 +175,8 @@ namespace SpaceEngine.Cameras
 
             if (Body != null)
             {
+                // NOTE : BigToSmall
+
                 var worldPosition = (Vector3d)(transform.position - Body.Origin);
 
                 if (Body.GetBodyDeformationType() == BodyDeformationType.Spherical)

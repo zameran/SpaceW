@@ -226,7 +226,7 @@ Shader "SpaceEngine/Planet/Terrain"
 				//float4 triplanarNormal = Triplanar(_Ground_Normal, _Ground_Normal, _Ground_Normal, P, normal.xyz, float2(128, 4));	
 
 				float3 V = normalize(position);
-				float3 P = V * max(length(position), _Deform_Radius + 10.0);
+				float3 P = V * max(length(position), _Deform_Radius) + 10.0); // NOTE : BigToSmall
 				float3 PO = P - _Atmosphere_Origin;
 				float3 v = normalize(P - WCP - _Atmosphere_Origin); // Body origin take in to account...
 				float3 d = normalize(i.direction);
