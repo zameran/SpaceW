@@ -43,7 +43,7 @@ namespace SpaceEngine.AtmosphericScattering.Cloudsphere
 {
     public class Cloudsphere : Node<Cloudsphere>, IUniformed<Material>, IRenderable<Cloudsphere>
     {
-        public CelestialBody ParentBody;
+        public Body ParentBody;
 
         public Mesh CloudsphereMesh;
 

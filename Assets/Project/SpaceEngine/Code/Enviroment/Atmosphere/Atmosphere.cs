@@ -117,7 +117,7 @@ namespace SpaceEngine.AtmosphericScattering
 
         public List<AtmosphereSun> Suns = new List<AtmosphereSun>(4);
 
-        public List<CelestialBody> EclipseCasters = new List<CelestialBody>(4);
+        public List<Body> EclipseCasters = new List<Body>(4);
         public List<GameObject> ShineCasters = new List<GameObject>(8);
 
         private AtmosphereParameters AtmosphereParameters;
@@ -134,8 +134,8 @@ namespace SpaceEngine.AtmosphericScattering
         private Matrix4x4 shineOccludersMatrix2;
         private Matrix4x4 shineParameters1;
         private Matrix4x4 occludersMatrix1;
-        private Matrix4x4 sunPositionsMatrix;
-        private Matrix4x4 sunDirectionsMatrix;
+        private Matrix4x4 sunPositionsMatrix1;
+        private Matrix4x4 sunDirectionsMatrix1;
 
         #region Eventit
 
@@ -463,8 +463,9 @@ namespace SpaceEngine.AtmosphericScattering
             for (byte i = 0; i < Mathf.Min(4, EclipseCasters.Count); i++)
             {
                 if (EclipseCasters[i] == null) { Debug.Log("Atmosphere: Eclipse caster problem!"); break; }
+                if ((EclipseCasters[i] as CelestialBody) == null) { Debug.Log("Atmosphere: Eclipse caster should be a planet!"); break; }
 
-                occludersMatrix.SetRow(i, VectorHelper.MakeFrom(EclipseCasters[i].Origin - Origin, Helper.Enabled(EclipseCasters[i]) ? EclipseCasters[i].Radius : 0.0f));
+                occludersMatrix.SetRow(i, VectorHelper.MakeFrom(EclipseCasters[i].Origin - Origin, Helper.Enabled(EclipseCasters[i]) ? EclipseCasters[i].Size : 0.0f));
             }
         }
 
@@ -475,11 +476,7 @@ namespace SpaceEngine.AtmosphericScattering
 
             for (byte i = 0; i < Mathf.Min(4, Suns.Count); i++)
             {
-                if (Suns[i] == null)
-                {
-                    Debug.Log("Atmosphere: Sun calculation problem!");
-                    break;
-                }
+                if (Suns[i] == null) { Debug.Log("Atmosphere: Sun calculation problem!"); break; }
 
                 var sun = Suns[i];
                 var direction = GetSunDirection(sun);
@@ -540,10 +537,10 @@ namespace SpaceEngine.AtmosphericScattering
 
             mat.SetFloat("_Sun_Intensity", 100.0f);
 
-            CalculateSuns(out sunDirectionsMatrix, out sunPositionsMatrix);
+            CalculateSuns(out sunDirectionsMatrix1, out sunPositionsMatrix1);
 
-            mat.SetMatrix("_Sun_WorldDirections_1", sunDirectionsMatrix);
-            mat.SetMatrix("_Sun_Positions_1", sunPositionsMatrix);
+            mat.SetMatrix("_Sun_WorldDirections_1", sunDirectionsMatrix1);
+            mat.SetMatrix("_Sun_Positions_1", sunPositionsMatrix1);
         }
 
         public void SetSuns(MaterialPropertyBlock block)
@@ -552,10 +549,10 @@ namespace SpaceEngine.AtmosphericScattering
 
             block.SetFloat("_Sun_Intensity", 100.0f);
 
-            CalculateSuns(out sunDirectionsMatrix, out sunPositionsMatrix);
+            CalculateSuns(out sunDirectionsMatrix1, out sunPositionsMatrix1);
 
-            block.SetMatrix("_Sun_WorldDirections_1", sunDirectionsMatrix);
-            block.SetMatrix("_Sun_Positions_1", sunPositionsMatrix);
+            block.SetMatrix("_Sun_WorldDirections_1", sunDirectionsMatrix1);
+            block.SetMatrix("_Sun_Positions_1", sunPositionsMatrix1);
         }
 
         public void OnApplicationFocus(bool focusStatus)
