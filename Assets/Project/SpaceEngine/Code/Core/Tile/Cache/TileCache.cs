@@ -78,6 +78,11 @@ namespace SpaceEngine.Core.Tile.Cache
         /// </summary>
         private Dictionary<int, TileProducer> Producers;
 
+        /// <summary>
+        /// Temporary <see cref="Tile.TId"/> class object obly used in <see cref="FindTile"/>.
+        /// </summary>
+        protected Tile.TId TileTIDBuffer { get; private set; }
+
         [HideInInspector]
         public int MaximumUsedTiles;
 
@@ -87,6 +92,7 @@ namespace SpaceEngine.Core.Tile.Cache
             Producers = new Dictionary<int, TileProducer>();
             UsedTiles = new Dictionary<Tile.TId, Tile>(new Tile.EqualityComparerTID());
             UnusedTiles = new DictionaryQueue<Tile.TId, Tile>(new Tile.EqualityComparerTID());
+            TileTIDBuffer = new Tile.TId(-1, -1, 0, 0);
         }
 
         public void InsertProducer(int id, TileProducer producer)
@@ -265,26 +271,27 @@ namespace SpaceEngine.Core.Tile.Cache
         /// <returns>Tile instance.</returns>
         public Tile FindTile(int producerId, int level, int tx, int ty, bool includeUnusedCache)
         {
-            var id = Tile.GetTId(producerId, level, tx, ty);
-
-            Tile tile = null;
+            TileTIDBuffer.Set(producerId, level, tx, ty);
 
             // Looks for the requested tile in the used tiles list
-            if (UsedTiles.ContainsKey(id))
+            if (UsedTiles.ContainsKey(TileTIDBuffer))
             {
-                tile = UsedTiles[id];
+                return UsedTiles[TileTIDBuffer];
             }
-
-            // Looks for the requested tile in the unused tiles list (if includeUnusedCache is true)
-            if (tile == null && includeUnusedCache)
+            else
             {
-                if (UnusedTiles.ContainsKey(id))
+                // Looks for the requested tile in the unused tiles list (if includeUnusedCache is true)
+                if (includeUnusedCache)
                 {
-                    tile = UnusedTiles.Get(id);
+                    if (UnusedTiles.ContainsKey(TileTIDBuffer))
+                    {
+                        return UnusedTiles.Get(TileTIDBuffer);
+                    }
                 }
+
             }
 
-            return tile;
+            return null;
         }
     }
 }

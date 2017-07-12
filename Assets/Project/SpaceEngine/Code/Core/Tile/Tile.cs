@@ -25,16 +25,19 @@ namespace SpaceEngine.Core.Tile
 
             public Id(int level, int tx, int ty)
             {
-                this.Level = level;
-                this.Tx = tx;
-                this.Ty = ty;
+                Set(level, tx, ty);
             }
 
             public Id(int tx, int ty)
             {
-                this.Level = 0;
-                this.Tx = tx;
-                this.Ty = ty;
+                Set(0, tx, ty);
+            }
+
+            public void Set(int level, int tx, int ty)
+            {
+                Level = level;
+                Tx = tx;
+                Ty = ty;
             }
 
             public int Compare(Id id)
@@ -69,9 +72,16 @@ namespace SpaceEngine.Core.Tile
 
             public TId(int producerId, int level, int tx, int ty)
             {
-                this.ProducerId = producerId;
+                ProducerId = producerId;
 
-                this.TileId = new Id(level, tx, ty);
+                TileId = new Id(level, tx, ty);
+            }
+
+            public void Set(int producerId, int level, int tx, int ty)
+            {
+                ProducerId = producerId;
+
+                TileId.Set(level, tx, ty);
             }
 
             public bool Equals(TId id)
