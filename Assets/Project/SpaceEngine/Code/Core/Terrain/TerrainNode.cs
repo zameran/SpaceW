@@ -1,5 +1,4 @@
 ﻿using SpaceEngine.Core.Bodies;
-using SpaceEngine.Core.Patterns.Strategy.Uniformed;
 using SpaceEngine.Core.Terrain.Deformation;
 using SpaceEngine.Core.Tile.Producer;
 using SpaceEngine.Core.Tile.Samplers;
@@ -43,7 +42,7 @@ namespace SpaceEngine.Core.Terrain
     /// The terrain data must be managed by <see cref="Tile.Producer.TileProducer"/>, and stored in TileStorage. 
     /// The link between with the terrain quadtree is provided by the TileSampler class.
     /// </summary>
-    public class TerrainNode : Node<TerrainNode>, IUniformed<Material>
+    public class TerrainNode : Node<TerrainNode>
     {
         public Body ParentBody { get; set; }
 
@@ -197,8 +196,6 @@ namespace SpaceEngine.Core.Terrain
                 LocalToWorld = Matrix4x4d.ToMatrix4x4d(celestialBody.transform.localToWorldMatrix) * FaceToLocal;
                 Deformation = new DeformationSpherical(celestialBody.Size);
 
-                InitUniforms(TerrainMaterial);
-
                 if (celestialBody.Atmosphere != null)
                 {
                     celestialBody.Atmosphere.InitUniforms(TerrainMaterial);
@@ -293,8 +290,6 @@ namespace SpaceEngine.Core.Terrain
 
             if (ParentBody.UpdateLOD) TerrainQuadRoot.UpdateLOD();
 
-            SetUniforms(TerrainMaterial);
-
             if (ParentBody.AtmosphereEnabled)
             {
                 if (ParentBody.Atmosphere != null)
@@ -345,41 +340,6 @@ namespace SpaceEngine.Core.Terrain
             Helper.Destroy(TerrainMaterial);
 
             base.OnDestroy();
-        }
-
-        #endregion
-
-        #region IUniformed<Material>
-
-        public void InitUniforms(Material target)
-        {
-            if (target == null) return;
-        }
-
-        public void SetUniforms(Material target)
-        {
-            if (target == null) return;
-
-            if (ParentBody.GetBodyDeformationType() == BodyDeformationType.Spherical)
-            {
-                var celestialBody = ParentBody as CelestialBody;
-
-                if (celestialBody == null) { throw new Exception("Wow! Celestial body isn't Celestial?!"); }
-
-                target.SetTexture("_Ground_Diffuse", celestialBody.GroundDiffuse);
-                target.SetTexture("_Ground_Normal", celestialBody.GroundNormal);
-                target.SetTexture("_DetailedNormal", celestialBody.DetailedNormal);
-            }
-        }
-
-        #endregion
-
-        #region IUniformed
-
-        public void InitSetUniforms()
-        {
-            InitUniforms(TerrainMaterial);
-            SetUniforms(TerrainMaterial);
         }
 
         #endregion

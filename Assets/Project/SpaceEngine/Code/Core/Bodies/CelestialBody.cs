@@ -43,10 +43,6 @@ namespace SpaceEngine.Core.Bodies
 {
     public class CelestialBody : Body, ICelestialBody
     {              
-        public Texture2D GroundDiffuse;
-        public Texture2D GroundNormal;
-        public Texture2D DetailedNormal;
-
         #region ICelestialBody
 
         public float Radius { get { return Size; } set { Size = value; } }

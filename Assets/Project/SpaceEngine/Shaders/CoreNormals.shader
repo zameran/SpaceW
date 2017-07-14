@@ -99,7 +99,7 @@
 			float3 normal = CalculateNormal(IN.uv1);
 			float slope = CalculateSlope(normal);
 
-			output = float4(normal, slope);
+			output = EncodeNormalAndSlope(normal, slope);
 		}
 		ENDCG
 

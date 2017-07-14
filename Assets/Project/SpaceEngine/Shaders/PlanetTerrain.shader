@@ -194,10 +194,6 @@ Shader "SpaceEngine/Planet/Terrain"
 			#include "SpaceAtmosphere.cginc"
 			#include "Ocean/OceanBRDF.cginc"
 			
-			uniform sampler2D _Ground_Diffuse;
-			uniform sampler2D _Ground_Normal;
-			uniform sampler2D _DetailedNormal;
-
 			void vert(in a2v v, out v2f o)
 			{	
 				VERTEX_PROGRAM(v, o);
@@ -221,9 +217,6 @@ Shader "SpaceEngine/Planet/Terrain"
 				float4 normal = texTile(_Normals_Tile, texcoord, _Normals_TileCoords, _Normals_TileSize);
 
 				normal.xyz = DecodeNormal(normal.xyz);
-				
-				//float4 triplanarDiffuse = Triplanar(_Ground_Diffuse, _Ground_Diffuse, _Ground_Diffuse, P, normal.xyz, float2(128, 4));
-				//float4 triplanarNormal = Triplanar(_Ground_Normal, _Ground_Normal, _Ground_Normal, P, normal.xyz, float2(128, 4));	
 
 				float3 V = normalize(position);
 				float3 P = V * max(length(position), _Deform_Radius) + 10.0; // NOTE : BigToSmall

@@ -183,7 +183,9 @@ float4 Triplanar(sampler2D topAndButtomSampler, sampler2D leftAndRightSampler, s
 
 //-----------------------------------------------------------------------------
 inline float4 RGB2Reflectance(float4 color) { return float4(tan(1.37 * color.rgb) / tan(1.37), color.a); }
+inline float4 EncodeNormalAndSlope(float3 normal, float slope) { return float4(normal, slope); }
 inline float3 DecodeNormal(float3 normal) { return float3(normal.xy, sqrt(max(0.0, 1.0 - dot(normal.xy, normal.xy)))); }
+inline float4 DecodeNormalAndSlope(float4 normalAndSlope) { return float4(DecodeNormal(normalAndSlope.xyz), normalAndSlope.w); }
 //-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
