@@ -196,9 +196,12 @@ namespace SpaceEngine.Core.Terrain
                 LocalToWorld = Matrix4x4d.ToMatrix4x4d(celestialBody.transform.localToWorldMatrix) * FaceToLocal;
                 Deformation = new DeformationSpherical(celestialBody.Size);
 
-                if (celestialBody.Atmosphere != null)
+                if (celestialBody.AtmosphereEnabled)
                 {
-                    celestialBody.Atmosphere.InitUniforms(TerrainMaterial);
+                    if (celestialBody.Atmosphere != null)
+                    {
+                        celestialBody.Atmosphere.InitUniforms(TerrainMaterial);
+                    }
                 }
             }
             else
@@ -288,7 +291,10 @@ namespace SpaceEngine.Core.Terrain
                 }
             }
 
-            if (ParentBody.UpdateLOD) TerrainQuadRoot.UpdateLOD();
+            if (ParentBody.UpdateLOD)
+            {
+                TerrainQuadRoot.UpdateLOD();
+            }
 
             if (ParentBody.AtmosphereEnabled)
             {

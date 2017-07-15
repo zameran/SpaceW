@@ -340,6 +340,8 @@ public static class Helper
 
     public static void SetKeywords(Material m, List<string> keywords, bool checkShaderKeywords = false)
     {
+        if (keywords == null) return;
+
         if (checkShaderKeywords)
         {
             if (m != null && ArraysEqual(m.shaderKeywords, keywords) == false)

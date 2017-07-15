@@ -114,7 +114,7 @@ namespace SpaceEngine.Core.Bodies
 
         public MaterialTableGradientLut MaterialTable = new MaterialTableGradientLut();
 
-        public List<string> Keywords = new List<string>();
+        public List<string> Keywords { get; set; }
 
         #region Node
 
@@ -145,7 +145,7 @@ namespace SpaceEngine.Core.Bodies
 
             MaterialTable.GenerateLut();
 
-            Keywords = GetKeywords();
+            Keywords = new List<string>();
         }
 
         protected override void UpdateNode()
