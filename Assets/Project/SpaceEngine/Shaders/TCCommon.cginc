@@ -296,6 +296,24 @@ float2x2 Inverse(float2x2 m)
 //-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
+// Normal vector blending. Source: http://blog.selfshadow.com/publications/blending-in-detail/
+float3 BlendNormalUnity(float4 n1, float4 n2)
+{
+	const float4 size = float4(2.0, 2.0, 2.0, -2.0);
+	const float4 offset = float4(-1.0, -1.0, -1.0, 1.0);
+
+	n1 = n1.xyzz * size + offset;
+	n2 = n2 * 2.0 - 1.0;
+
+	float3 r = float3(dot(n1.zxx, n2.xyz),
+					  dot(n1.yzy, n2.xyz),
+					  dot(n1.xyw, -n2.xyz));
+
+	return normalize(r);
+}
+//-----------------------------------------------------------------------------
+
+//-----------------------------------------------------------------------------
 float2 CartesianToSpherical(float3 xyz)
 {
 	float longitude = atan2(xyz.x, xyz.z);
@@ -409,7 +427,7 @@ inline float2 dFdx(float2 p)
 
 inline float2 dFdy(float2 p)
 {
-	return float2(p.y * p.y - p.x, p.y);
+	return float2(p.y * p.y - p.x, p.x);
 }
 
 float2 Fwidth(float2 texCoord, float2 size)

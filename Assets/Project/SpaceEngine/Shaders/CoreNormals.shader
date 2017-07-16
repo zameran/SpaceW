@@ -59,9 +59,19 @@
 			return 0;
 		}
 
-		float GetHeight(sampler2D elevationSampler, float2 uv)
+		inline float4 SampleElevationData(sampler2D elevationSampler, float2 uv)
 		{
-			return tex2D(elevationSampler, uv).x;
+			return tex2D(elevationSampler, uv);
+		}
+
+		inline float GetHeight(sampler2D elevationSampler, float2 uv)
+		{
+			return SampleElevationData(elevationSampler, uv).x;
+		}
+
+		inline float GetNoise(sampler2D elevationSampler, float2 uv)
+		{
+			return SampleElevationData(elevationSampler, uv).w;
 		}
 
 		float3 CalculateNormal(float2 uv)
@@ -92,12 +102,33 @@
 			return clamp(1.0 - pow(normal.z, 6.0), 0.0, 1.0);
 		}
 
+		float CalculateStepness(float2 uv)
+		{
+			uv = floor(uv);
+
+			float2 uv0 = floor(uv.xy) * _ElevationOSL.z + _ElevationOSL.xy;
+			float4 uv1 = floor(uv.xyxy + float4(1.0, 0.0, 0.0, 1.0)) * _ElevationOSL.z + _ElevationOSL.xyxy;
+
+			float2 height = float2(GetNoise(_ElevationSampler, uv0.xy), GetHeight(_ElevationSampler, uv0.xy));
+
+			float4 dxdy = float4(GetNoise(_ElevationSampler, uv1.xy) - height.x, 
+								 GetNoise(_ElevationSampler, uv1.zw) - height.x,
+								 GetHeight(_ElevationSampler, uv1.xy) - height.y, 
+								 GetHeight(_ElevationSampler, uv1.zw) - height.y);
+
+			//float stepness = abs(dxdy.x) + abs(dxdy.y);
+			//float stepness = sqrt(dxdy.x * dxdy.x + dxdy.y * dxdy.y);
+			// TODO : Value degenerating along LOD sundivision depth...
+			return 0.0;
+		}
+
 		CORE_PRODUCER_VERTEX_PROGRAM(_TileSD.x)
 
 		void frag(in VertexProducerOutput IN, out float4 output : COLOR)
 		{
 			float3 normal = CalculateNormal(IN.uv1);
 			float slope = CalculateSlope(normal);
+			//float stepness = CalculateStepness(IN.uv1);
 
 			output = EncodeNormalAndSlope(normal, slope);
 		}
