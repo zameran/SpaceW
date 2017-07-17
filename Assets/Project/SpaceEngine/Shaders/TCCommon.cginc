@@ -244,6 +244,18 @@ inline float SavePow(float f, float p)
 //-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
+float Wrap(float value, float minimum, float maximum)
+{
+	float rangeSize = maximum - minimum;
+
+	return (minimum + (value - minimum) - (rangeSize * floor((value - minimum) / rangeSize)));
+}
+
+float Wrap01(float value) { return Wrap(value, 0.0, 1.0); }
+float Wrap101(float value) { return Wrap(value, -1.0, 1.0); }
+//-----------------------------------------------------------------------------
+
+//-----------------------------------------------------------------------------
 float smin(float a, float b, float k)
 {
 	float h = clamp(0.5 + 0.5 * (b - a) / k, 0.0, 1.0);
