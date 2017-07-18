@@ -158,6 +158,7 @@ namespace SpaceEngine.Core
             NormalsMaterial.SetVector("_TileSD", new Vector2((float)tileWidth, (float)(tileWidth - 1) / (float)(TerrainNode.ParentBody.GridResolution - 1)));
             NormalsMaterial.SetTexture("_ElevationSampler", elevationTex);
             NormalsMaterial.SetVector("_ElevationOSL", elevationOSL);
+            NormalsMaterial.SetFloat("_Level", (float)(1 << level) / 2.0f);
 
             Graphics.Blit(null, gpuSlot.Texture, NormalsMaterial);
 

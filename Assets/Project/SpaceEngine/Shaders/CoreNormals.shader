@@ -25,6 +25,8 @@
 		uniform float4x4 _PatchVerticals;
 		uniform float4x4 _WorldToTangentFrame;
 
+		uniform float _Level;
+
 		struct v2f 
 		{
 			float4 pos : SV_POSITION;
@@ -78,18 +80,21 @@
 		{
 			uv = floor(uv);
 
-			float4 uv0 = floor(uv.xyxy + float4(-1.0, 0.0, 1.0, 0.0)) * _ElevationOSL.z + _ElevationOSL.xyxy;
-			float4 uv1 = floor(uv.xyxy + float4(0.0, -1.0, 0.0, 1.0)) * _ElevationOSL.z + _ElevationOSL.xyxy;
+			const float4 OFFSET_H = float4(-1.0, 0.0, 1.0, 0.0);
+			const float4 OFFSET_V = float4(0.0, -1.0, 0.0, 1.0);
+
+			float4 uv0 = floor(uv.xyxy + OFFSET_H) * _ElevationOSL.z + _ElevationOSL.xyxy;
+			float4 uv1 = floor(uv.xyxy + OFFSET_V) * _ElevationOSL.z + _ElevationOSL.xyxy;
 
 			float4 Z = float4(GetHeight(_ElevationSampler, uv0.xy),
 							  GetHeight(_ElevationSampler, uv0.zw),
 							  GetHeight(_ElevationSampler, uv1.xy),
 							  GetHeight(_ElevationSampler, uv1.zw));
 
-			float3 p0 = GetWorldPosition(uv + float2(-1.0, 0.0), Z.x).xyz;
-			float3 p1 = GetWorldPosition(uv + float2(+1.0, 0.0), Z.y).xyz;
-			float3 p2 = GetWorldPosition(uv + float2(0.0, -1.0), Z.z).xyz;
-			float3 p3 = GetWorldPosition(uv + float2(0.0, +1.0), Z.w).xyz;
+			float3 p0 = GetWorldPosition(uv + OFFSET_H.xy, Z.x).xyz;
+			float3 p1 = GetWorldPosition(uv + OFFSET_H.zw, Z.y).xyz;
+			float3 p2 = GetWorldPosition(uv + OFFSET_V.xy, Z.z).xyz;
+			float3 p3 = GetWorldPosition(uv + OFFSET_V.zw, Z.w).xyz;
 
 			return (mul((float3x3)_WorldToTangentFrame, normalize(cross(p1 - p0, p3 - p2)))).xyz;
 		}
@@ -102,24 +107,26 @@
 			return clamp(1.0 - pow(normal.z, 6.0), 0.0, 1.0);
 		}
 
-		float CalculateStepness(float2 uv)
+		float CalculateSteepness(float2 uv)
 		{
 			uv = floor(uv);
 
-			float2 uv0 = floor(uv.xy) * _ElevationOSL.z + _ElevationOSL.xy;
-			float4 uv1 = floor(uv.xyxy + float4(1.0, 0.0, 0.0, 1.0)) * _ElevationOSL.z + _ElevationOSL.xyxy;
+			const float4 OFFSET_H = float4(-1.0, 0.0, 1.0, 0.0);
+			const float4 OFFSET_V = float4(0.0, -1.0, 0.0, 1.0);
 
-			float2 height = float2(GetNoise(_ElevationSampler, uv0.xy), GetHeight(_ElevationSampler, uv0.xy));
+			float4 uv0 = floor(uv.xyxy + OFFSET_H) * _ElevationOSL.z + _ElevationOSL.xyxy;
+			float4 uv1 = floor(uv.xyxy + OFFSET_V) * _ElevationOSL.z + _ElevationOSL.xyxy;
 
-			float4 dxdy = float4(GetNoise(_ElevationSampler, uv1.xy) - height.x, 
-								 GetNoise(_ElevationSampler, uv1.zw) - height.x,
-								 GetHeight(_ElevationSampler, uv1.xy) - height.y, 
-								 GetHeight(_ElevationSampler, uv1.zw) - height.y);
+			// dfdu = (heightmap[u + 1][v] - heightmap[u - 1][v]) / 2
+			// dfdv = (heightmap[u][v + 1] - heightmap[u][v - 1]) / 2
+			float dfdu = (GetNoise(_ElevationSampler, uv0.zw) - GetNoise(_ElevationSampler, uv0.xy)) / 2.0;
+			float dfdv = (GetNoise(_ElevationSampler, uv1.zw) - GetNoise(_ElevationSampler, uv1.xy)) / 2.0;
+			
+			float steepness = abs(dfdu) + abs(dfdv);
+			//float steepness = sqrt(dfdu * dfdu + dfdv * dfdv);
 
-			//float stepness = abs(dxdy.x) + abs(dxdy.y);
-			//float stepness = sqrt(dxdy.x * dxdy.x + dxdy.y * dxdy.y);
-			// TODO : Value degenerating along LOD sundivision depth...
-			return 0.0;
+			// TODO : Value degenerating along LOD subdivision depth...
+			return saturate(steepness * (_Level + 2.0) / 2.0);
 		}
 
 		CORE_PRODUCER_VERTEX_PROGRAM(_TileSD.x)
@@ -128,7 +135,7 @@
 		{
 			float3 normal = CalculateNormal(IN.uv1);
 			float slope = CalculateSlope(normal);
-			//float stepness = CalculateStepness(IN.uv1);
+			//float steepness = CalculateSteepness(IN.uv1);
 
 			output = EncodeNormalAndSlope(normal, slope);
 		}
