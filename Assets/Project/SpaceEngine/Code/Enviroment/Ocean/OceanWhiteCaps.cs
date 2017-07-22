@@ -14,7 +14,7 @@ namespace SpaceEngine.Ocean
         Material InitJacobiansMaterial;
 
         [SerializeField]
-        Material WhiteCapsPrecomputeMat;
+        Material WhiteCapsPrecomputeMaterial;
 
         [SerializeField]
         int FoamAniso = 9;
@@ -58,6 +58,18 @@ namespace SpaceEngine.Ocean
         {
             base.InitNode();
 
+            if (InitJacobiansMaterial == null)
+            {
+                Debug.Log("OceanWhiteCaps: Init jacobians material is null! Trying to find it out...");
+                InitJacobiansMaterial = MaterialHelper.CreateTemp(Shader.Find("SpaceEngine/Ocean/InitJacobians"), "InitJacobians");
+            }
+
+            if (WhiteCapsPrecomputeMaterial == null)
+            {
+                Debug.Log("OceanWhiteCaps: White caps precompute material is null! Trying to find it out...");
+                WhiteCapsPrecomputeMaterial = MaterialHelper.CreateTemp(Shader.Find("SpaceEngine/Ocean/WhiteCapsPrecompute"), "WhiteCapsPrecompute");
+            }
+
             InitJacobiansMaterial.SetTexture("_Spectrum01", Spectrum01);
             InitJacobiansMaterial.SetTexture("_Spectrum23", Spectrum23);
             InitJacobiansMaterial.SetTexture("_WTable", WTable);
@@ -71,14 +83,14 @@ namespace SpaceEngine.Ocean
             {
                 Fourier.PeformFFT(FourierBuffer5, FourierBuffer6, FourierBuffer7);
 
-                WhiteCapsPrecomputeMat.SetTexture("_Map5", FourierBuffer5[IDX]);
-                WhiteCapsPrecomputeMat.SetTexture("_Map6", FourierBuffer6[IDX]);
-                WhiteCapsPrecomputeMat.SetTexture("_Map7", FourierBuffer7[IDX]);
-                WhiteCapsPrecomputeMat.SetVector("_Choppyness", Choppyness);
+                WhiteCapsPrecomputeMaterial.SetTexture("_Map5", FourierBuffer5[IDX]);
+                WhiteCapsPrecomputeMaterial.SetTexture("_Map6", FourierBuffer6[IDX]);
+                WhiteCapsPrecomputeMaterial.SetTexture("_Map7", FourierBuffer7[IDX]);
+                WhiteCapsPrecomputeMaterial.SetVector("_Choppyness", Choppyness);
 
                 var buffers = new RenderTexture[] { Foam0, Foam1 };
 
-                RTUtility.MultiTargetBlit(buffers, WhiteCapsPrecomputeMat);
+                RTUtility.MultiTargetBlit(buffers, WhiteCapsPrecomputeMaterial);
 
                 OceanMaterial.SetFloat("_Ocean_WhiteCapStr", WhiteCapStrength);
                 OceanMaterial.SetTexture("_Ocean_Foam0", Foam0);

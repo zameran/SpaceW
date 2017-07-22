@@ -1281,8 +1281,10 @@ MonoBehaviour:
   OceanLevel: 5
   OceanWaveLevel: 1
   ZMin: 20000
-  InitSpectrumMat: {fileID: 2100000, guid: 5031b12fb29d9994c8308cb7a1e0c160, type: 2}
-  InitDisplacementMat: {fileID: 2100000, guid: d71731534f4f7a349a0d1af0b86336aa, type: 2}
+  InitSpectrumMaterial: {fileID: 2100000, guid: 5031b12fb29d9994c8308cb7a1e0c160,
+    type: 2}
+  InitDisplacementMaterial: {fileID: 2100000, guid: d71731534f4f7a349a0d1af0b86336aa,
+    type: 2}
   VarianceShader: {fileID: 7200000, guid: c7da59439bff364449d9db4c50cee439, type: 3}
   FourierShader: {fileID: 4800000, guid: 1cca648048bb4614ba000d825b451fde, type: 3}
   Aniso: 2
@@ -1293,7 +1295,7 @@ MonoBehaviour:
   FourierGridSize: 64
   InitJacobiansMaterial: {fileID: 2100000, guid: 3fb2adcb831e928459999d4736573f21,
     type: 2}
-  WhiteCapsPrecomputeMat: {fileID: 2100000, guid: 2653e30a6ed623d4d94880f44f44a935,
+  WhiteCapsPrecomputeMaterial: {fileID: 2100000, guid: 2653e30a6ed623d4d94880f44f44a935,
     type: 2}
   FoamAniso: 9
   FoamMipmapBias: -2
@@ -4038,8 +4040,10 @@ MonoBehaviour:
   OceanLevel: 0.5
   OceanWaveLevel: 1
   ZMin: 2000
-  InitSpectrumMat: {fileID: 2100000, guid: 5031b12fb29d9994c8308cb7a1e0c160, type: 2}
-  InitDisplacementMat: {fileID: 2100000, guid: d71731534f4f7a349a0d1af0b86336aa, type: 2}
+  InitSpectrumMaterial: {fileID: 2100000, guid: 5031b12fb29d9994c8308cb7a1e0c160,
+    type: 2}
+  InitDisplacementMaterial: {fileID: 2100000, guid: d71731534f4f7a349a0d1af0b86336aa,
+    type: 2}
   VarianceShader: {fileID: 7200000, guid: c7da59439bff364449d9db4c50cee439, type: 3}
   FourierShader: {fileID: 4800000, guid: 1cca648048bb4614ba000d825b451fde, type: 3}
   Aniso: 2
@@ -4050,7 +4054,7 @@ MonoBehaviour:
   FourierGridSize: 64
   InitJacobiansMaterial: {fileID: 2100000, guid: 3fb2adcb831e928459999d4736573f21,
     type: 2}
-  WhiteCapsPrecomputeMat: {fileID: 2100000, guid: 2653e30a6ed623d4d94880f44f44a935,
+  WhiteCapsPrecomputeMaterial: {fileID: 2100000, guid: 2653e30a6ed623d4d94880f44f44a935,
     type: 2}
   FoamAniso: 9
   FoamMipmapBias: -2
@@ -5921,10 +5925,6 @@ MonoBehaviour:
     ReverseX: 0
     ReverseY: 0
     NonLinear: 1
-  Keywords: []
-  GroundDiffuse: {fileID: 2800000, guid: e75e77dfa01817041b9635071c2e0f86, type: 3}
-  GroundNormal: {fileID: 2800000, guid: ea2fb6b7ac2e9854cb93878ea2cea7f0, type: 3}
-  DetailedNormal: {fileID: 2800000, guid: a332485bf464a79409510d6c4a576e1f, type: 3}
 --- !u!114 &1497659645
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -8086,10 +8086,6 @@ MonoBehaviour:
     ReverseX: 0
     ReverseY: 0
     NonLinear: 1
-  Keywords: []
-  GroundDiffuse: {fileID: 2800000, guid: e75e77dfa01817041b9635071c2e0f86, type: 3}
-  GroundNormal: {fileID: 2800000, guid: ea2fb6b7ac2e9854cb93878ea2cea7f0, type: 3}
-  DetailedNormal: {fileID: 2800000, guid: a332485bf464a79409510d6c4a576e1f, type: 3}
 --- !u!4 &1912963790
 Transform:
   m_ObjectHideFlags: 0

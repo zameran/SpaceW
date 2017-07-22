@@ -20,10 +20,10 @@ namespace SpaceEngine.Ocean
         const float AMP = 1.0f;
 
         [SerializeField]
-        Material InitSpectrumMat;
+        Material InitSpectrumMaterial;
 
         [SerializeField]
-        Material InitDisplacementMat;
+        Material InitDisplacementMaterial;
 
         [SerializeField]
         ComputeShader VarianceShader;
@@ -123,20 +123,32 @@ namespace SpaceEngine.Ocean
 
             if (FourierGridSize > 256)
             {
-                Debug.Log("OceanFFT: fourier grid size must not be greater than 256, changing to 256...");
+                Debug.Log("OceanFFT: Fourier grid size must not be greater than 256, changing to 256...");
                 FourierGridSize = 256;
             }
 
             if (!Mathf.IsPowerOfTwo(FourierGridSize))
             {
-                Debug.Log("OceanFFT: fourier grid size must be pow2 number, changing to nearest pow2 number...");
+                Debug.Log("OceanFFT: Fourier grid size must be pow2 number, changing to nearest pow2 number...");
                 FourierGridSize = Mathf.NextPowerOfTwo(FourierGridSize);
             }
 
             if (FourierShader == null)
             {
-                Debug.Log("OceanFFT: fourier shader is null!");
+                Debug.Log("OceanFFT: Fourier shader is null!");
                 FourierShader = Shader.Find("Math/Fourier");
+            }
+
+            if (InitSpectrumMaterial == null)
+            {
+                Debug.Log("OceanFFT: Init spectrum material is null! Trying to find it out...");
+                InitSpectrumMaterial = MaterialHelper.CreateTemp(Shader.Find("SpaceEngine/Ocean/InitSpectrum"), "InitSpectrum");
+            }
+
+            if (InitDisplacementMaterial == null)
+            {
+                Debug.Log("OceanFFT: Init displacement material is null! Trying to find it out..");
+                InitDisplacementMaterial = MaterialHelper.CreateTemp(Shader.Find("SpaceEngine/Ocean/InitDisplacement"), "InitDisplacement");
             }
 
             FloatSize = (float)FourierGridSize;
@@ -152,13 +164,13 @@ namespace SpaceEngine.Ocean
             GenerateWavesSpectrum();
             CreateWTable();
 
-            InitSpectrumMat.SetTexture("_Spectrum01", Spectrum01);
-            InitSpectrumMat.SetTexture("_Spectrum23", Spectrum23);
-            InitSpectrumMat.SetTexture("_WTable", WTable);
-            InitSpectrumMat.SetVector("_Offset", Offset);
-            InitSpectrumMat.SetVector("_InverseGridSizes", InverseGridSizes);
+            InitSpectrumMaterial.SetTexture("_Spectrum01", Spectrum01);
+            InitSpectrumMaterial.SetTexture("_Spectrum23", Spectrum23);
+            InitSpectrumMaterial.SetTexture("_WTable", WTable);
+            InitSpectrumMaterial.SetVector("_Offset", Offset);
+            InitSpectrumMaterial.SetVector("_InverseGridSizes", InverseGridSizes);
 
-            InitDisplacementMat.SetVector("_InverseGridSizes", InverseGridSizes);
+            InitDisplacementMaterial.SetVector("_InverseGridSizes", InverseGridSizes);
         }
 
         protected override void UpdateNode()
@@ -274,17 +286,17 @@ namespace SpaceEngine.Ocean
             // Init heights (0) and slopes (1,2)
             var buffers012 = new RenderTexture[] { FourierBuffer0[1], FourierBuffer1[1], FourierBuffer2[1] };
 
-            InitSpectrumMat.SetFloat("_T", t);
+            InitSpectrumMaterial.SetFloat("_T", t);
 
-            RTUtility.MultiTargetBlit(buffers012, InitSpectrumMat);
+            RTUtility.MultiTargetBlit(buffers012, InitSpectrumMaterial);
 
             // Init displacement (3,4)
             var buffers34 = new RenderTexture[] { FourierBuffer3[1], FourierBuffer4[1] };
 
-            InitDisplacementMat.SetTexture("_Buffer1", FourierBuffer1[1]);
-            InitDisplacementMat.SetTexture("_Buffer2", FourierBuffer2[1]);
+            InitDisplacementMaterial.SetTexture("_Buffer1", FourierBuffer1[1]);
+            InitDisplacementMaterial.SetTexture("_Buffer2", FourierBuffer2[1]);
 
-            RTUtility.MultiTargetBlit(buffers34, InitDisplacementMat);
+            RTUtility.MultiTargetBlit(buffers34, InitDisplacementMaterial);
         }
 
         protected virtual void CreateRenderTextures()
