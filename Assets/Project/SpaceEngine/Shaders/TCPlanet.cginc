@@ -62,14 +62,16 @@ float HeightMapPlanet(float3 ppoint)
 
 	float t0 = Fbm(p * 0.75, 4);
 	//float v0 = t0 + pow(2.0, RidgedMultifractalExtra(p, 18, 1, 1.75, 0.6));
-	float v0 = t0 + pow(2.0, SimplexRidgedMultifractal(p, 18, 2, 0.5));
+	//float v0 = t0 + pow(2.0, SimplexRidgedMultifractal(p, 18, 2, 0.5));
+	float v0 = t0 + pow(4.0, SimplexRidgedMultifractal(p, 18, 2, 0.5));
+	//float v0 = t0 + SimplexRidgedMultifractal(p, 18, 2, 0.5);
 
 	total = GetTerraced(v0, 4, 2);
 
 	float iceCap = saturate((latitude / latIceCaps - 1.0) * 50.0 * 1);
 	total = total * 1 + icecapHeight * smoothstep(0.0, 1.0, iceCap);
 
-	return total;
+	return total - 1.5;
 }
 //-----------------------------------------------------------------------------
 

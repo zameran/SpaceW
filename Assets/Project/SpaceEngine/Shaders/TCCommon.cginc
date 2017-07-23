@@ -3467,6 +3467,15 @@ float GetTerraced(float value, float n, float power)
 	return (i + pow(f, power)) / n;
 }
 
+float GetTerracedDetail(float value, float detail, float n, float power)
+{
+	float dValue = value * n;
+	float f = frac(dValue);
+	float i = floor(dValue) + detail;
+
+	return (i + pow(f, power)) / n;
+}
+
 float RidgedMultifractalTerraced(float3 ppoint, float n, float power)
 {
 	float total = 0.0;

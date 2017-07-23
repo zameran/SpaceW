@@ -720,8 +720,8 @@ MonoBehaviour:
   TerrainMaterial: {fileID: 0}
   SplitFactor: 2
   MaxLevel: 16
-  ZMin: -1000
-  ZMax: 1000
+  ZMin: -5000
+  ZMax: 5000
   Face: 6
   UseHorizonCulling: 1
   SplitInvisibleQuads: 1
@@ -1740,8 +1740,8 @@ MonoBehaviour:
   TerrainMaterial: {fileID: 0}
   SplitFactor: 2
   MaxLevel: 16
-  ZMin: -1000
-  ZMax: 1000
+  ZMin: -5000
+  ZMax: 5000
   Face: 5
   UseHorizonCulling: 1
   SplitInvisibleQuads: 1
@@ -4122,8 +4122,8 @@ MonoBehaviour:
   TerrainMaterial: {fileID: 0}
   SplitFactor: 2
   MaxLevel: 16
-  ZMin: -1000
-  ZMax: 1000
+  ZMin: -5000
+  ZMax: 5000
   Face: 1
   UseHorizonCulling: 1
   SplitInvisibleQuads: 1
@@ -4197,7 +4197,7 @@ MonoBehaviour:
   ParentBody: {fileID: 1497659642}
   Density: 1
   TerrainRadiusHold: 0
-  Height: 3000
+  Height: 10000
   Scale: 1
   Fade: 1
   AerialPerspectiveOffset: 200
@@ -4497,8 +4497,8 @@ MonoBehaviour:
   TerrainMaterial: {fileID: 0}
   SplitFactor: 2
   MaxLevel: 16
-  ZMin: -1000
-  ZMax: 1000
+  ZMin: -5000
+  ZMax: 5000
   Face: 2
   UseHorizonCulling: 1
   SplitInvisibleQuads: 1
@@ -5882,7 +5882,7 @@ MonoBehaviour:
   OceanEnabled: 1
   RingEnabled: 1
   TerrainEnabled: 1
-  Amplitude: 512
+  Amplitude: 1024
   Frequency: 64
   ColorShader: {fileID: 4800000, guid: 797ca199aa64b8c41bc1aae3e12f7a1f, type: 3}
   TerrainNodes: []
@@ -5897,18 +5897,18 @@ MonoBehaviour:
       serializedVersion: 2
       key0: {r: 0.40392157, g: 0.40392157, b: 0.40392157, a: 1}
       key1: {r: 0.654902, g: 0.654902, b: 0.654902, a: 1}
-      key2: {r: 1, g: 1, b: 1, a: 0}
-      key3: {r: 1, g: 1, b: 1, a: 0}
-      key4: {r: 1, g: 1, b: 1, a: 0}
-      key5: {r: 0, g: 0, b: 0, a: 0}
+      key2: {r: 0.31617647, g: 0.31617647, b: 0.31617647, a: 0}
+      key3: {r: 0.46323532, g: 0.46323532, b: 0.46323532, a: 0}
+      key4: {r: 0.43382353, g: 0.43382353, b: 0.43382353, a: 0}
+      key5: {r: 0.6397059, g: 0.6397059, b: 0.6397059, a: 0}
       key6: {r: 0, g: 0, b: 0, a: 0}
       key7: {r: 0, g: 0, b: 0, a: 0}
       ctime0: 0
       ctime1: 65535
-      ctime2: 65535
-      ctime3: 65535
-      ctime4: 65535
-      ctime5: 0
+      ctime2: 31997
+      ctime3: 48766
+      ctime4: 58789
+      ctime5: 65535
       ctime6: 0
       ctime7: 0
       atime0: 0
@@ -6232,8 +6232,8 @@ MonoBehaviour:
   TerrainMaterial: {fileID: 0}
   SplitFactor: 2
   MaxLevel: 16
-  ZMin: -1000
-  ZMax: 1000
+  ZMin: -5000
+  ZMax: 5000
   Face: 3
   UseHorizonCulling: 1
   SplitInvisibleQuads: 1
@@ -8503,8 +8503,8 @@ MonoBehaviour:
   TerrainMaterial: {fileID: 0}
   SplitFactor: 2
   MaxLevel: 16
-  ZMin: -1000
-  ZMax: 1000
+  ZMin: -5000
+  ZMax: 5000
   Face: 4
   UseHorizonCulling: 1
   SplitInvisibleQuads: 1
