@@ -219,7 +219,7 @@ Shader "SpaceEngine/Planet/Terrain"
 				normal.xyz = DecodeNormal(normal.xyz);
 
 				float3 V = normalize(position);
-				float3 P = V * max(length(position), _Deform_Radius) + 10.0; // NOTE : BigToSmall
+				float3 P = V * max(length(position), _Deform_Radius + 10.0); // NOTE : BigToSmall
 				float3 PO = P - _Atmosphere_Origin;
 				float3 v = normalize(P - WCP - _Atmosphere_Origin); // Body origin take in to account...
 				float3 d = normalize(i.direction);
