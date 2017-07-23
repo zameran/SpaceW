@@ -144,7 +144,6 @@ namespace SpaceEngine.Core.Terrain.Deformation
             mat.SetVector(uniforms.blending, node.DistanceBlending);
             mat.SetMatrix(uniforms.localToScreen, node.LocalToScreen.ToMatrix4x4());
             mat.SetMatrix(uniforms.localToWorld, node.LocalToWorld.ToMatrix4x4());
-
         }
 
         public virtual void SetUniforms(TerrainNode node, TerrainQuad quad, MaterialPropertyBlock matPropertyBlock)

@@ -69,7 +69,6 @@ namespace SpaceEngine.Core.Bodies
         }
     }
 
-
     public class Body : Node<Body>, IBody, IUniformed<MaterialPropertyBlock>, IReanimateable, IRenderable<Body>
     {
         public Atmosphere Atmosphere;
