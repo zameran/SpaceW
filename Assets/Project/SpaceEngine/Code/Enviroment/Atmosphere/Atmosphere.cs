@@ -301,12 +301,7 @@ namespace SpaceEngine.AtmosphericScattering
 
             SetEclipses(target);
             SetShine(target);
-
-            target.SetFloat("_Aerial_Perspective_Offset", AerialPerspectiveOffset);
-
-            target.SetFloat("Rg", AtmosphereParameters.Rg);
-            target.SetFloat("Rt", AtmosphereParameters.Rt);
-            target.SetFloat("RL", AtmosphereParameters.Rl);
+            SetSuns(target);
 
             target.SetFloat("TRANSMITTANCE_W", AtmosphereConstants.TRANSMITTANCE_W);
             target.SetFloat("TRANSMITTANCE_H", AtmosphereConstants.TRANSMITTANCE_H);

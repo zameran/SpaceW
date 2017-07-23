@@ -1,4 +1,5 @@
 ﻿using SpaceEngine.Core.Bodies;
+using SpaceEngine.Core.Patterns.Strategy.Uniformed;
 using SpaceEngine.Core.Terrain.Deformation;
 using SpaceEngine.Core.Tile.Producer;
 using SpaceEngine.Core.Tile.Samplers;
@@ -42,7 +43,7 @@ namespace SpaceEngine.Core.Terrain
     /// The terrain data must be managed by <see cref="Tile.Producer.TileProducer"/>, and stored in TileStorage. 
     /// The link between with the terrain quadtree is provided by the TileSampler class.
     /// </summary>
-    public class TerrainNode : Node<TerrainNode>
+    public class TerrainNode : Node<TerrainNode>, IUniformed<Material>
     {
         public Body ParentBody { get; set; }
 
@@ -195,14 +196,6 @@ namespace SpaceEngine.Core.Terrain
 
                 LocalToWorld = Matrix4x4d.ToMatrix4x4d(celestialBody.transform.localToWorldMatrix) * FaceToLocal;
                 Deformation = new DeformationSpherical(celestialBody.Size);
-
-                if (celestialBody.AtmosphereEnabled)
-                {
-                    if (celestialBody.Atmosphere != null)
-                    {
-                        celestialBody.Atmosphere.InitUniforms(TerrainMaterial);
-                    }
-                }
             }
             else
             {
@@ -213,6 +206,8 @@ namespace SpaceEngine.Core.Terrain
             TangentFrameToWorld = new Matrix3x3d(LocalToWorld.m[0, 0], LocalToWorld.m[0, 1], LocalToWorld.m[0, 2],
                                                  LocalToWorld.m[1, 0], LocalToWorld.m[1, 1], LocalToWorld.m[1, 2],
                                                  LocalToWorld.m[2, 0], LocalToWorld.m[2, 1], LocalToWorld.m[2, 2]);
+
+            InitUniforms(TerrainMaterial);
 
             CreateTerrainQuadRoot(ParentBody.Size);
 
@@ -296,6 +291,52 @@ namespace SpaceEngine.Core.Terrain
                 TerrainQuadRoot.UpdateLOD();
             }
 
+            SetUniforms(TerrainMaterial);
+        }
+
+        protected override void Awake()
+        {
+            base.Awake();
+        }
+
+        protected override void Start()
+        {
+            base.Start();
+        }
+
+        protected override void Update()
+        {
+            base.Update();
+        }
+
+        protected override void OnDestroy()
+        {
+            Helper.Destroy(TerrainMaterial);
+
+            base.OnDestroy();
+        }
+
+        #endregion
+
+        #region IUniformed<Material>
+
+        public virtual void InitUniforms(Material target)
+        {
+            if (target == null) return;
+
+            if (ParentBody.AtmosphereEnabled)
+            {
+                if (ParentBody.Atmosphere != null)
+                {
+                    ParentBody.Atmosphere.InitUniforms(TerrainMaterial);
+                }
+            }
+        }
+
+        public virtual void SetUniforms(Material target)
+        {
+            if (target == null) return;
+
             if (ParentBody.AtmosphereEnabled)
             {
                 if (ParentBody.Atmosphere != null)
@@ -326,26 +367,14 @@ namespace SpaceEngine.Core.Terrain
             //    Manager.GetPlantsNode().SetUniforms(TerrainMaterial);
         }
 
-        protected override void Awake()
-        {
-            base.Awake();
-        }
+        #endregion
 
-        protected override void Start()
-        {
-            base.Start();
-        }
+        #region IUniformed
 
-        protected override void Update()
+        public virtual void InitSetUniforms()
         {
-            base.Update();
-        }
-
-        protected override void OnDestroy()
-        {
-            Helper.Destroy(TerrainMaterial);
-
-            base.OnDestroy();
+            InitUniforms(TerrainMaterial);
+            SetUniforms(TerrainMaterial);
         }
 
         #endregion
