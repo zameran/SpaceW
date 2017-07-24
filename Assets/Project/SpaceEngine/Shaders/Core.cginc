@@ -41,7 +41,6 @@
 #endif
 
 //-----------------------------------------------------------------------------
-
 #define CORE_GLOBALS
 uniform float4x4 _Globals_CameraToWorld;
 uniform float4x4 _Globals_ScreenToCamera;
@@ -172,6 +171,19 @@ float4 Triplanar(sampler2D topAndButtomSampler, sampler2D leftAndRightSampler, s
 	half3 YSampler = tex2D(topAndButtomSampler, worldPosition.xz / settings.x);
 	half3 XSampler = tex2D(leftAndRightSampler, worldPosition.zy / settings.x);
 	half3 ZSampler = tex2D(frontAndBackSampler, worldPosition.xy / settings.x);
+
+	half3 blendWeights = pow(abs(worldNormal), settings.y);
+
+	blendWeights = blendWeights / (blendWeights.x + blendWeights.y + blendWeights.z);
+
+	return fixed4(XSampler * blendWeights.x + YSampler * blendWeights.y + ZSampler * blendWeights.z, 1.0);
+}
+
+float4 TriplanarColor(float3 worldPosition, float3 worldNormal, float2 settings)
+{
+	half3 YSampler = half3(0, 1, 0);
+	half3 XSampler = half3(1, 0, 0);
+	half3 ZSampler = half3(0, 0, 1);
 
 	half3 blendWeights = pow(abs(worldNormal), settings.y);
 
