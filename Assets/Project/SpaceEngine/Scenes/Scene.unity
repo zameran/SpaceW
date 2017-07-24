@@ -2590,21 +2590,21 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!114 &711368265
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_PrefabParentObject: {fileID: 0}
   m_PrefabInternal: {fileID: 0}
   m_GameObject: {fileID: 711368264}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 68653af105089ee46a810407cf512fba, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   StarIntensity: 10
   StarsScale: 1
-  StarsDistance: 1000
+  StarsDistance: 10000
   StarfieldShader: {fileID: 4800000, guid: ece832e0047eda44d9e40d94f8df8fda, type: 3}
   StarfieldMaterial: {fileID: 0}
   StarfieldMesh: {fileID: 0}

@@ -45,6 +45,7 @@ Shader "SpaceEngine/Space/Starfield"
 		//Blend OneMinusDstAlpha SrcAlpha
 		Blend OneMinusDstAlpha OneMinusSrcAlpha
 		ZWrite Off
+		Cull Back
 		Fog { Mode Off }
 
 		Pass

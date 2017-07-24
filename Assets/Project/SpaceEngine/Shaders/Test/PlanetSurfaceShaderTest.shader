@@ -2,45 +2,51 @@
 {
 	Properties 
 	{
-		_Color("Color", Color) = (1,1,1,1)
 		_MainTex("Albedo (RGB)", 2D) = "white" {}
-		_Glossiness("Smoothness", Range(0,1)) = 0.5
-		_Metallic("Metallic", Range(0,1)) = 0.0
 	}
 
 	SubShader 
 	{
-		Tags { "RenderType" = "Opaque" }
-		LOD 200
+		Tags 
+		{
+			"Queue"					= "Geometry"
+			"RenderType"			= "Geometry"
+			"ForceNoShadowCasting"	= "False"
+			"IgnoreProjector"		= "True"
+		}
+
+		Cull Back
+		ZWrite On
+		ZTest On
+		Fog { Mode Off }
 		
 		CGPROGRAM
-		#pragma surface surf Standard fullforwardshadows vertex:vert
-
-		#pragma target 3.0
+		#pragma surface surf Standard fullforwardshadows vertex:vert exclude_path:deferred exclude_path:prepass noambient novertexlights nolightmap nodynlightmap nodirlightmap nofog nometa nolppv noshadowmask
+		#pragma target 5.0
+		#pragma only_renderers d3d11 glcore
 
 		struct Input 
 		{
 			float2 uv_MainTex;
 		};
 
-		fixed4 _Color;
 		sampler2D _MainTex;
-		half _Glossiness;
-		half _Metallic;
 
-		void vert(inout appdata_full v) 
+		void vert(inout appdata_full v, out Input o) 
 		{
 			//v.vertex.xyz += v.normal * 0.05f;
+
+			o.uv_MainTex = v.texcoord;
 		}
 
 		void surf(Input IN, inout SurfaceOutputStandard o) 
 		{
-			fixed4 color = tex2D(_MainTex, IN.uv_MainTex) * _Color;
+			fixed4 color = tex2D(_MainTex, IN.uv_MainTex);
 
 			o.Albedo = color.rgb;
-			o.Metallic = _Metallic;
-			o.Smoothness = _Glossiness;
-			o.Alpha = color.a;
+			o.Metallic = 0.0;
+			o.Smoothness = 1.0;
+			o.Alpha = 1.0;
 		}
 		ENDCG
 	
