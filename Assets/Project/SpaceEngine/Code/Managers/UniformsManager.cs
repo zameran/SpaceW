@@ -187,6 +187,7 @@ public class UniformsManager : MonoSingleton<UniformsManager>, IUniformed, IUnif
         if (PermSamplerGL == null) PermSamplerGL = LoadTextureFromResources("Noise/PerlinPerm2D_GL");
         if (PermGradSamplerGL == null) PermGradSamplerGL = LoadTextureFromResources("Noise/PerlinGrad2D_GL");
         if (PlanetAtlas == null) PlanetAtlas = LoadTextureFromResources("PlanetAtlas");
+        if (PlanetUVSampler == null) PlanetUVSampler = LoadTextureFromResources("UV");
     }
 
     public Texture2D LoadTextureFromResources(string name)

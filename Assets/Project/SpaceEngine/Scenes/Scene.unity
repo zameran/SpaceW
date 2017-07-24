@@ -8260,8 +8260,8 @@ MonoBehaviour:
   PermGradSampler: {fileID: 0}
   PermSamplerGL: {fileID: 0}
   PermGradSamplerGL: {fileID: 0}
-  PlanetAtlas: {fileID: 2800000, guid: 24d9d7c1baae4694d8c15c0b14127f91, type: 3}
-  PlanetUVSampler: {fileID: 2800000, guid: 35897c20cccd9294d9f1321349bd1ef4, type: 3}
+  PlanetAtlas: {fileID: 0}
+  PlanetUVSampler: {fileID: 0}
   QuadTexture1: {fileID: 0}
   QuadTexture2: {fileID: 0}
   QuadTexture3: {fileID: 0}
