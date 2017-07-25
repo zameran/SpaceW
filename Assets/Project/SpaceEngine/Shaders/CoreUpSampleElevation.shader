@@ -202,7 +202,7 @@
 				float3 p = normalize(mul(LTW, P)).xyz;
 				float3 v = p * _Frequency;
 
-				float noise = sNoise(v);
+				float noise = Noise(v);
 				
 				if (_Amplitude < 0.0) 
 				{
