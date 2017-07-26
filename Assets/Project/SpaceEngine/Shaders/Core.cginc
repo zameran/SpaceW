@@ -238,3 +238,145 @@ struct VertexProducerOutput
 	}
 #endif
 //-----------------------------------------------------------------------------
+
+//-----------------------------------------------------------------------------
+static float4x4 slopexMatrix[4] = 
+{
+	{ 
+		0.0, 0.0, 0.0, 0.0,
+		1.0, 0.0, -1.0, 0.0,
+		0.0, 0.0, 0.0, 0.0,
+		0.0, 0.0, 0.0, 0.0
+	},
+{
+		0.0, 0.0, 0.0, 0.0,
+		0.5, 0.5, -0.5, -0.5,
+		0.0, 0.0, 0.0, 0.0,
+		0.0, 0.0, 0.0, 0.0
+	},
+	{
+		0.0, 0.0, 0.0, 0.0,
+		0.5, 0.0, -0.5, 0.0,
+		0.5, 0.0, -0.5, 0.0,
+		0.0, 0.0, 0.0, 0.0
+	},
+	{
+		0.0, 0.0, 0.0, 0.0,
+		0.25, 0.25, -0.25, -0.25,
+		0.25, 0.25, -0.25, -0.25,
+		0.0, 0.0, 0.0, 0.0
+	}
+};
+
+static float4x4 slopeyMatrix[4] = 
+{
+	{
+		0.0, 1.0, 0.0, 0.0,
+		0.0, 0.0, 0.0, 0.0,
+		0.0, -1.0, 0.0, 0.0,
+		0.0, 0.0, 0.0, 0.0
+	},
+	{
+		0.0, 0.5, 0.5, 0.0,
+		0.0, 0.0, 0.0, 0.0,
+		0.0, -0.5, -0.5, 0.0,
+		0.0, 0.0, 0.0, 0.0
+	},
+	{
+		0.0, 0.5, 0.0, 0.0,
+		0.0, 0.5, 0.0, 0.0,
+		0.0, -0.5, 0.0, 0.0,
+		0.0, -0.5, 0.0, 0.0
+	},
+	{
+		0.0, 0.25, 0.25, 0.0,
+		0.0, 0.25, 0.25, 0.0,
+		0.0, -0.25, -0.25, 0.0,
+		0.0, -0.25, -0.25, 0.0
+	}
+};
+
+static float4x4 curvatureMatrix[4] = 
+{
+	{
+		0.0, -1.0, 0.0, 0.0,
+		-1.0, 4.0, -1.0, 0.0,
+		0.0, -1.0, 0.0, 0.0,
+		0.0, 0.0, 0.0, 0.0
+	},
+	{
+		0.0, -0.5, -0.5, 0.0,
+		-0.5, 1.5, 1.5, -0.5,
+		0.0, -0.5, -0.5, 0.0,
+		0.0, 0.0, 0.0, 0.0
+	},
+	{
+		0.0, -0.5, 0.0, 0.0,
+		-0.5, 1.5, -0.5, 0.0,
+		-0.5, 1.5, -0.5, 0.0,
+		0.0, -0.5, 0.0, 0.0
+	},
+	{
+		0.0, -0.25, -0.25, 0.0,
+		-0.25, 0.5, 0.5, -0.25,
+		-0.25, 0.5, 0.5, -0.25,
+		0.0, -0.25, -0.25, 0.0
+	}
+};
+
+static float4x4 upsampleMatrix[4] = 
+{
+	{
+		0.0, 0.0, 0.0, 0.0,
+		0.0, 1.0, 0.0, 0.0,
+		0.0, 0.0, 0.0, 0.0,
+		0.0, 0.0, 0.0, 0.0
+	},
+	{
+		0.0, 0.0, 0.0, 0.0,
+		-1.0 / 16.0, 9.0 / 16.0, 9.0 / 16.0, -1.0 / 16.0,
+		0.0, 0.0, 0.0, 0.0,
+		0.0, 0.0, 0.0, 0.0
+	},
+	{
+		0.0, -1.0 / 16.0, 0.0, 0.0,
+		0.0, 9.0 / 16.0, 0.0, 0.0,
+		0.0, 9.0 / 16.0, 0.0, 0.0,
+		0.0, -1.0 / 16.0, 0.0, 0.0
+	},
+				{
+		1.0 / 256.0, -9.0 / 256.0, -9.0 / 256.0, 1.0 / 256.0,
+		-9.0 / 256.0, 81.0 / 256.0, 81.0 / 256.0, -9.0 / 256.0,
+		-9.0 / 256.0, 81.0 / 256.0, 81.0 / 256.0, -9.0 / 256.0,
+		1.0 / 256.0, -9.0 / 256.0, -9.0 / 256.0, 1.0 / 256.0
+	}
+};
+
+float mdot(float4x4 a, float4x4 b) 
+{
+	return dot(a[0], b[0]) + dot(a[1], b[1]) + dot(a[2], b[2]) + dot(a[3], b[3]);
+}
+
+float4x4 SampleCoarseLevelHeights(sampler2D coarseLevelSampler, float2 uv, float3 coarseLevelOSL)
+{
+	return float4x4
+	(
+		tex2Dlod(coarseLevelSampler, float4(uv + float2(0.0, 0.0) *  coarseLevelOSL.z, 0.0, 0.0)).x,
+		tex2Dlod(coarseLevelSampler, float4(uv + float2(1.0, 0.0) *  coarseLevelOSL.z, 0.0, 0.0)).x,
+		tex2Dlod(coarseLevelSampler, float4(uv + float2(2.0, 0.0) *  coarseLevelOSL.z, 0.0, 0.0)).x,
+		tex2Dlod(coarseLevelSampler, float4(uv + float2(3.0, 0.0) *  coarseLevelOSL.z, 0.0, 0.0)).x,
+		tex2Dlod(coarseLevelSampler, float4(uv + float2(0.0, 1.0) *  coarseLevelOSL.z, 0.0, 0.0)).x,
+		tex2Dlod(coarseLevelSampler, float4(uv + float2(1.0, 1.0) *  coarseLevelOSL.z, 0.0, 0.0)).x,
+		tex2Dlod(coarseLevelSampler, float4(uv + float2(2.0, 1.0) *  coarseLevelOSL.z, 0.0, 0.0)).x,
+		tex2Dlod(coarseLevelSampler, float4(uv + float2(3.0, 1.0) *  coarseLevelOSL.z, 0.0, 0.0)).x,
+		tex2Dlod(coarseLevelSampler, float4(uv + float2(0.0, 2.0) *  coarseLevelOSL.z, 0.0, 0.0)).x,
+		tex2Dlod(coarseLevelSampler, float4(uv + float2(1.0, 2.0) *  coarseLevelOSL.z, 0.0, 0.0)).x,
+		tex2Dlod(coarseLevelSampler, float4(uv + float2(2.0, 2.0) *  coarseLevelOSL.z, 0.0, 0.0)).x,
+		tex2Dlod(coarseLevelSampler, float4(uv + float2(3.0, 2.0) *  coarseLevelOSL.z, 0.0, 0.0)).x,
+		tex2Dlod(coarseLevelSampler, float4(uv + float2(0.0, 3.0) *  coarseLevelOSL.z, 0.0, 0.0)).x,
+		tex2Dlod(coarseLevelSampler, float4(uv + float2(1.0, 3.0) *  coarseLevelOSL.z, 0.0, 0.0)).x,
+		tex2Dlod(coarseLevelSampler, float4(uv + float2(2.0, 3.0) *  coarseLevelOSL.z, 0.0, 0.0)).x,
+		tex2Dlod(coarseLevelSampler, float4(uv + float2(3.0, 3.0) *  coarseLevelOSL.z, 0.0, 0.0)).x
+	);
+}
+//-----------------------------------------------------------------------------

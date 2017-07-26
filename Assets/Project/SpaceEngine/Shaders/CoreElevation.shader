@@ -15,15 +15,18 @@
 		#include "TCTerra.cginc"
 
 		#define CORE_PORDUCER_ADDITIONAL_UV
-		//#define BORDER 2.0
+		#define BORDER 2.0
 
 		#include "Core.cginc"
 
 		uniform sampler2D _ResidualSampler;
 		uniform float4 _ResidualOSH;
 
+		uniform sampler2D _CoarseLevelSampler;		// Coarse level texture
+		uniform float4 _CoarseLevelOSL;				// Lower left corner of patch to upsample, one over size in pixels of coarse level texture, layer id
+
 		uniform float4 _TileWSD;
-		uniform float2 _TileSD;	
+		uniform float2 _TileSD;
 
 		uniform float _Amplitude;
 		uniform float _Frequency;
@@ -39,6 +42,7 @@
 			float2 vert = (IN.uv0 * _TileSD.y - _TileSD.x) * _Offset.z + _Offset.xy;
 
 			float2 p_uv = floor(IN.uv1) * 0.5;
+			float2 uv = (p_uv - frac(p_uv) + float2(0.5, 0.5)) * _CoarseLevelOSL.z + _CoarseLevelOSL.xy;
 			float2 residual_uv = p_uv * _ResidualOSH.z + _ResidualOSH.xy;
 			float residual_value = _ResidualOSH.w * tex2D(_ResidualSampler, residual_uv).x;
 				
@@ -56,8 +60,15 @@
 			noise += residual_value; // Apply residual value!
 			
 			float height = _Amplitude * noise;
+
+			float4x4 coarseLevelHeights = SampleCoarseLevelHeights(_CoarseLevelSampler, uv, _CoarseLevelOSL);
+			int i = int(dot(frac(p_uv), float2(2.0, 4.0)));
+			float3 n = float3(mdot(coarseLevelHeights, slopexMatrix[i]), mdot(coarseLevelHeights, slopeyMatrix[i]), 2.0 * _TileWSD.y);
+			float slope = length(n.xy) / n.z;
+			//float curvature = mdot(coarseLevelHeights, curvatureMatrix[i]) / _TileWSD.y;
+			//float noiseAmp = max(clamp(4.0 * curvature, 0.0, 1.5), clamp(2.0 * slope - 0.5, 0.1, 4.0));
 							
-			output = float4(height, height, 1, noise);		
+			output = float4(height, height, 2.0 * slope - 0.5, noise);		
 		}
 		ENDCG
 

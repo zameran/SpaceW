@@ -43,8 +43,11 @@
 			float3 P = float3(vert, _Offset.w);
 			float3 p = normalize(mul(_LocalToWorld, P)).xyz;
 			
-			float slope = tex2D(_NormalsSampler, IN.uv0 + _NormalsOSL.xy).w;
-			float height = tex2D(_ElevationSampler, IN.uv0 + _ElevationOSL.xy).w;
+			float4 elevationData = tex2D(_ElevationSampler, IN.uv0 + _ElevationOSL.xy);
+			float4 normalData = tex2D(_NormalsSampler, IN.uv0 + _NormalsOSL.xy);
+
+			float slope = elevationData.z;
+			float height = elevationData.w;
 
 			// NOTE : Limit slope in case of very strong normals on low LOD levels...
 			// TODO : Good slope calculation...

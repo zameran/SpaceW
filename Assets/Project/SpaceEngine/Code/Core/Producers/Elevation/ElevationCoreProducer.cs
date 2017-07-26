@@ -109,6 +109,11 @@ namespace SpaceEngine.Core
 
             var rootQuadSize = TerrainNode.TerrainQuadRoot.Length;
 
+            GPUTileStorage.GPUSlot parentGpuSlot = null;
+
+            var upsample = level > 0;
+            var parentTile = FindTile(level - 1, tx / 2, ty / 2, false, true);
+
             if (ResidualProducer != null)
             {
                 if (ResidualProducer.HasTile(level, tx, ty))
@@ -139,6 +144,33 @@ namespace SpaceEngine.Core
             {
                 ElevationMaterial.SetTexture("_ResidualSampler", null);
                 ElevationMaterial.SetVector("_ResidualOSH", new Vector4(0.0f, 0.0f, 1.0f, 0.0f));
+            }
+
+            if (upsample)
+            {
+                if (parentTile != null)
+                    parentGpuSlot = parentTile.GetSlot(0) as GPUTileStorage.GPUSlot;
+                else { throw new MissingTileException("Find parent tile failed"); }
+            }
+
+            if (parentGpuSlot == null && upsample) { throw new NullReferenceException("parentGpuSlot"); }
+
+            if (upsample)
+            {
+                var parentTexture = parentGpuSlot.Texture;
+
+                var dx = (float)(tx % 2) * (float)(tileSize / 2.0f);
+                var dy = (float)(ty % 2) * (float)(tileSize / 2.0f);
+
+                var coarseLevelOSL = new Vector4(dx / (float)parentTexture.width, dy / (float)parentTexture.height, 1.0f / (float)parentTexture.width, 0.0f);
+
+                ElevationMaterial.SetTexture("_CoarseLevelSampler", parentTexture);
+                ElevationMaterial.SetVector("_CoarseLevelOSL", coarseLevelOSL);
+            }
+            else
+            {
+                ElevationMaterial.SetTexture("_CoarseLevelSampler", null);
+                ElevationMaterial.SetVector("_CoarseLevelOSL", new Vector4(-1.0f, -1.0f, -1.0f, -1.0f));
             }
 
             var tileWSD = Vector4.zero;

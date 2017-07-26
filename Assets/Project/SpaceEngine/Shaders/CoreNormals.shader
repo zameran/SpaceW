@@ -134,10 +134,10 @@
 		void frag(in VertexProducerOutput IN, out float4 output : COLOR)
 		{
 			float3 normal = CalculateNormal(IN.uv1);
-			float slope = CalculateSlope(normal);
+			//float slope = CalculateSlope(normal);
 			//float steepness = CalculateSteepness(IN.uv1);
 
-			output = EncodeNormalAndSlope(normal, slope);
+			output = EncodeNormalAndSlope(normal, 1.0);
 		}
 		ENDCG
 
