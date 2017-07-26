@@ -5882,7 +5882,7 @@ MonoBehaviour:
   OceanEnabled: 1
   RingEnabled: 1
   TerrainEnabled: 1
-  Amplitude: 1024
+  Amplitude: 768
   Frequency: 64
   ColorShader: {fileID: 4800000, guid: 797ca199aa64b8c41bc1aae3e12f7a1f, type: 3}
   TerrainNodes: []

@@ -3458,6 +3458,28 @@ void SolarSpotsTempNoise(float3 ppoint, out float botMask, out float filMask, ou
 //-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
+float GetTerraced(float value)
+{
+	const float W = 0.4;
+
+	float k = floor(value / W);
+	float f = (value - k * W) / W;
+	float s = min(2.0 * f, 1.0);
+
+	return (k + s) * W;
+}
+
+float GetTerraced(float value, float terraceLayers)
+{
+	float height = value;
+	float h = height * terraceLayers;
+
+	height = (floor(h) + smoothstep(0.0, 1.0, frac(h))) / terraceLayers;
+	height *= 0.75;
+
+	return height;
+}
+
 float GetTerraced(float value, float n, float power)
 {
 	float dValue = value * n;
@@ -3467,13 +3489,13 @@ float GetTerraced(float value, float n, float power)
 	return (i + pow(f, power)) / n;
 }
 
-float GetTerracedDetail(float value, float detail, float n, float power)
+float GetTerraced(float value, float detail, float n, float power)
 {
 	float dValue = value * n;
 	float f = frac(dValue);
-	float i = floor(dValue) + detail;
+	float i = floor(dValue);
 
-	return (i + pow(f, power)) / n;
+	return (i + pow(f, power)) / (n / detail);
 }
 
 float RidgedMultifractalTerraced(float3 ppoint, float n, float power)
