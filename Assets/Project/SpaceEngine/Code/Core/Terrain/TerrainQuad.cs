@@ -405,6 +405,7 @@ namespace SpaceEngine.Core.Terrain
                 if (Visibility == Frustum.VISIBILITY.INVISIBLE) return;
 
                 var verts = new Vector3[8];
+                var isMaximumLevel = Level == Owner.MaxLevel;
 
                 verts[0] = Owner.Deformation.LocalToDeformed(Ox, Oy, ZMin).ToVector3();
                 verts[1] = Owner.Deformation.LocalToDeformed(Ox + Length, Oy, ZMin).ToVector3();
@@ -425,7 +426,7 @@ namespace SpaceEngine.Core.Terrain
                 lineMaterial.SetPass(0);
 
                 GL.Begin(GL.LINES);
-                GL.Color(lineColor);
+                GL.Color(isMaximumLevel ? XKCDColors.DarkOrange : lineColor);
 
                 for (byte i = 0; i < 4; i++)
                 {
