@@ -118,7 +118,7 @@ namespace SpaceEngine.AtmosphericScattering
         public List<AtmosphereSun> Suns = new List<AtmosphereSun>(4);
 
         public List<Body> EclipseCasters = new List<Body>(4);
-        public List<GameObject> ShineCasters = new List<GameObject>(8);
+        public List<Body> ShineCasters = new List<Body>(8);
 
         private AtmosphereParameters AtmosphereParameters;
 

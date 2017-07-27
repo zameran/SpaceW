@@ -19,9 +19,6 @@
 
 		#include "Core.cginc"
 
-		uniform sampler2D _ResidualSampler;
-		uniform float4 _ResidualOSH;
-
 		uniform sampler2D _CoarseLevelSampler;		// Coarse level texture
 		uniform float4 _CoarseLevelOSL;				// Lower left corner of patch to upsample, one over size in pixels of coarse level texture, layer id
 
@@ -43,8 +40,6 @@
 
 			float2 p_uv = floor(IN.uv1) * 0.5;
 			float2 uv = (p_uv - frac(p_uv) + float2(0.5, 0.5)) * _CoarseLevelOSL.z + _CoarseLevelOSL.xy;
-			float2 residual_uv = p_uv * _ResidualOSH.z + _ResidualOSH.xy;
-			float residual_value = _ResidualOSH.w * tex2D(_ResidualSampler, residual_uv).x;
 				
 			float3 P = float3(vert, _Offset.w);
 			float3 p = normalize(mul(_LocalToWorld, P)).xyz;
@@ -56,8 +51,6 @@
 			//float noise = HeightMapTerra(v);
 
 			//float noise = sNoise(v);
-
-			noise += residual_value; // Apply residual value!
 			
 			float height = _Amplitude * noise;
 
