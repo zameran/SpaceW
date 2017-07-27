@@ -889,6 +889,21 @@ float4 SampleCustomBilinear(Texture2D tex, SamplerState texSampler, float2 uv, f
 	return lerp(lerp(a, b, fuv.x), lerp(c, d, fuv.x), fuv.y);
 }
 #endif
+
+float4 SampleCustomBilinear(sampler2D tex, float2 uv, float resolution)
+{
+	float2 st = uv * resolution + 0.5; 
+
+	float2 iuv = floor(st);
+	float2 fuv = frac(st);
+
+	float4 a = tex2Dlod(tex, float4((iuv + float2(0.5, 0.5)) / resolution, 0, 0));
+	float4 b = tex2Dlod(tex, float4((iuv + float2(1.5, 0.5)) / resolution, 0, 0));
+	float4 c = tex2Dlod(tex, float4((iuv + float2(0.5, 1.5)) / resolution, 0, 0));
+	float4 d = tex2Dlod(tex, float4((iuv + float2(1.5, 1.5)) / resolution, 0, 0));
+
+	return lerp(lerp(a, b, fuv.x), lerp(c, d, fuv.x), fuv.y);
+}
 //-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
