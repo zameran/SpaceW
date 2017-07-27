@@ -902,7 +902,6 @@ MonoBehaviour:
   Name: Elevation
   IsGPUProducer: 1
   IsLastInSequence: 0
-  ResidualProducerGameObject: {fileID: 0}
   ElevationMaterial: {fileID: 2100000, guid: 10e30e69c04a2894b98bb57ee19eb190, type: 2}
 --- !u!1 &230248927
 GameObject:
@@ -1654,7 +1653,6 @@ MonoBehaviour:
   Name: Elevation
   IsGPUProducer: 1
   IsLastInSequence: 0
-  ResidualProducerGameObject: {fileID: 0}
   ElevationMaterial: {fileID: 2100000, guid: 10e30e69c04a2894b98bb57ee19eb190, type: 2}
 --- !u!114 &503305959
 MonoBehaviour:
@@ -2689,7 +2687,6 @@ MonoBehaviour:
   Name: Elevation
   IsGPUProducer: 1
   IsLastInSequence: 0
-  ResidualProducerGameObject: {fileID: 0}
   ElevationMaterial: {fileID: 2100000, guid: 10e30e69c04a2894b98bb57ee19eb190, type: 2}
 --- !u!114 &713155186
 MonoBehaviour:
@@ -4376,7 +4373,6 @@ MonoBehaviour:
   Name: Elevation
   IsGPUProducer: 1
   IsLastInSequence: 0
-  ResidualProducerGameObject: {fileID: 0}
   ElevationMaterial: {fileID: 2100000, guid: 10e30e69c04a2894b98bb57ee19eb190, type: 2}
 --- !u!1 &1014796139
 GameObject:
@@ -6083,7 +6079,6 @@ MonoBehaviour:
   Name: Elevation
   IsGPUProducer: 1
   IsLastInSequence: 0
-  ResidualProducerGameObject: {fileID: 0}
   ElevationMaterial: {fileID: 2100000, guid: 10e30e69c04a2894b98bb57ee19eb190, type: 2}
 --- !u!114 &1534637197
 MonoBehaviour:
@@ -6487,7 +6482,6 @@ MonoBehaviour:
   Name: Elevation
   IsGPUProducer: 1
   IsLastInSequence: 0
-  ResidualProducerGameObject: {fileID: 0}
   ElevationMaterial: {fileID: 2100000, guid: 10e30e69c04a2894b98bb57ee19eb190, type: 2}
 --- !u!1 &1633300307
 GameObject:
@@ -6901,7 +6895,6 @@ MonoBehaviour:
   Name: Elevation
   IsGPUProducer: 1
   IsLastInSequence: 0
-  ResidualProducerGameObject: {fileID: 0}
   ElevationMaterial: {fileID: 2100000, guid: 10e30e69c04a2894b98bb57ee19eb190, type: 2}
 --- !u!114 &1682580639
 MonoBehaviour:
@@ -7045,7 +7038,6 @@ MonoBehaviour:
   Name: Elevation
   IsGPUProducer: 1
   IsLastInSequence: 0
-  ResidualProducerGameObject: {fileID: 0}
   ElevationMaterial: {fileID: 2100000, guid: 10e30e69c04a2894b98bb57ee19eb190, type: 2}
 --- !u!1 &1697813989
 GameObject:
@@ -7296,7 +7288,6 @@ MonoBehaviour:
   Name: Elevation
   IsGPUProducer: 1
   IsLastInSequence: 0
-  ResidualProducerGameObject: {fileID: 0}
   ElevationMaterial: {fileID: 2100000, guid: 10e30e69c04a2894b98bb57ee19eb190, type: 2}
 --- !u!1 &1733853063
 GameObject:
@@ -7451,7 +7442,7 @@ MonoBehaviour:
   - {fileID: 1370843065}
   EclipseCasters: []
   ShineCasters:
-  - {fileID: 1497659640}
+  - {fileID: 1497659642}
   AtmosphereBaker: {fileID: 0}
   ShineColors:
   - {r: 0.16078432, g: 0.4627451, b: 0.73333335, a: 1}
@@ -7834,7 +7825,6 @@ MonoBehaviour:
   Name: Elevation
   IsGPUProducer: 1
   IsLastInSequence: 0
-  ResidualProducerGameObject: {fileID: 0}
   ElevationMaterial: {fileID: 2100000, guid: 10e30e69c04a2894b98bb57ee19eb190, type: 2}
 --- !u!114 &1867835433
 MonoBehaviour:
@@ -8417,7 +8407,6 @@ MonoBehaviour:
   Name: Elevation
   IsGPUProducer: 1
   IsLastInSequence: 0
-  ResidualProducerGameObject: {fileID: 0}
   ElevationMaterial: {fileID: 2100000, guid: 10e30e69c04a2894b98bb57ee19eb190, type: 2}
 --- !u!114 &1953009946
 MonoBehaviour:
@@ -8961,7 +8950,6 @@ MonoBehaviour:
   Name: Elevation
   IsGPUProducer: 1
   IsLastInSequence: 0
-  ResidualProducerGameObject: {fileID: 0}
   ElevationMaterial: {fileID: 2100000, guid: 10e30e69c04a2894b98bb57ee19eb190, type: 2}
 --- !u!1 &2089371355
 GameObject:
