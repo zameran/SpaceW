@@ -298,18 +298,21 @@ namespace SpaceEngine.Core.Tile.Samplers
         /// <param name="ty"></param>
         private void CalculateTileGPUCoordinates(ref RenderTexture tileTexture, ref Vector3 coordinates, ref Vector3 size, int level, int tx, int ty)
         {
+            // TODO : BOTTLENECK
+
             if (!Producer.IsGPUProducer) return;
 
             Tile t = null;
 
-            var b = Producer.GetBorder();
-            var s = Producer.Cache.GetStorage(0).TileSize;
-            var sDivTwo = s / 2;
+            var border = Producer.GetBorder();
+            var tileSize = Producer.Cache.GetStorage(0).TileSize;
+            var tileSizeHalf = tileSize / 2;
+            var tileSizeCentered = tileSizeHalf * 2.0f - 2.0f * border;
 
             var dx = 0.0f;
             var dy = 0.0f;
             var dd = 1.0f;
-            var ds0 = sDivTwo * 2.0f - 2.0f * b;
+            var ds0 = tileSizeCentered;
             var ds = ds0;
 
             while (!Producer.HasTile(level, tx, ty))
@@ -373,8 +376,8 @@ namespace SpaceEngine.Core.Tile.Samplers
                 t = tt.Tile;
             }
 
-            dx = dx * (sDivTwo * 2 - 2 * b) / dd;
-            dy = dy * (sDivTwo * 2 - 2 * b) / dd;
+            dx = dx * (tileSizeHalf * 2 - 2 * border) / dd;
+            dy = dy * (tileSizeHalf * 2 - 2 * border) / dd;
 
             var gpuSlot = t.GetSlot(0) as GPUTileStorage.GPUSlot;
 
@@ -395,18 +398,18 @@ namespace SpaceEngine.Core.Tile.Samplers
 
             var coords = Vector4.zero;
 
-            if (s % 2 == 0)
+            if (tileSize % 2 == 0)
             {
-                coords = new Vector4((dx + b) / w, (dy + b) / h, 0.0f, ds / w);
+                coords = new Vector4((dx + border) / w, (dy + border) / h, 0.0f, ds / w);
             }
             else
             {
-                coords = new Vector4((dx + b + 0.5f) / w, (dy + b + 0.5f) / h, 0.0f, ds / w);
+                coords = new Vector4((dx + border + 0.5f) / w, (dy + border + 0.5f) / h, 0.0f, ds / w);
             }
 
             tileTexture = gpuSlot.Texture;
             coordinates = new Vector3(coords.x, coords.y, coords.z);
-            size = new Vector3(coords.w, coords.w, sDivTwo * 2.0f - 2.0f * b);
+            size = new Vector3(coords.w, coords.w, tileSizeCentered);
         }
     }
 }
