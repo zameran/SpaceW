@@ -144,9 +144,14 @@ float3 ReflectedSkyRadiance(sampler2D skymap, float3 V, float3 N, float sigmaSq,
 	return result;
 }
 
+float RefractedSeaRadiance(float fresnel) 
+{
+	return 0.98 * (1.0 - fresnel);
+}
+
 float RefractedSeaRadiance(float3 V, float3 N, float sigmaSq) 
 {
-	return 0.98 * (1.0 - MeanFresnel(V, N, sigmaSq));
+	return RefractedSeaRadiance(MeanFresnel(V, N, sigmaSq));
 }
 
 float erf(float x) 
@@ -156,7 +161,7 @@ float erf(float x)
 	float x2 = x * x;
 	float ax2 = a * x2;
 
-	return sign(x) * sqrt( 1.0 - exp(-x2*(4.0 / M_PI + ax2)/(1.0 + ax2)) );
+	return sign(x) * sqrt(1.0 - exp(-x2 * (4.0 / M_PI + ax2) / (1.0 + ax2)));
 }
 
 float WhitecapCoverage(float epsilon, float mu, float sigma2) 
@@ -192,7 +197,7 @@ float3 OceanRadianceWithSkyReflection(float3 L, float3 V, float3 N, float sigmaS
 
 	float3 Lsky = fresnel * ReflectedSky(V, N, L, earthP);
 	float3 Lsun = ReflectedSunRadiance(L, V, N, sigmaSq) * sunL;
-	float3 Lsea = 0.98 * (1.0 - fresnel) * seaColor * (skyE / M_PI);
+	float3 Lsea = RefractedSeaRadiance(fresnel) * seaColor * (skyE / M_PI);
 
 	return Lsun + Lsky + Lsea;
 }

@@ -127,6 +127,11 @@ namespace SpaceEngine.Cameras
 
                     if (!Aligned)
                         transform.Rotate(new Vector3(0, 0, Rotation.z));
+
+                    if (Input.GetKey(KeyCode.G))
+                    {
+                        transform.rotation = Quaternion.RotateTowards(transform.rotation, Quaternion.LookRotation(Body.Origin - transform.position), Time.fixedDeltaTime * RotationSpeed * 30.0f);
+                    }
                 }
 
                 if (Body.GetBodyDeformationType() == BodyDeformationType.Spherical)
@@ -139,7 +144,7 @@ namespace SpaceEngine.Cameras
 
                         TargetRotation = Quaternion.LookRotation(transform.forward, -gravityVector);
 
-                        transform.rotation = Quaternion.Slerp(transform.rotation, TargetRotation, Time.fixedDeltaTime * RotationSpeed * 3f);
+                        transform.rotation = Quaternion.Slerp(transform.rotation, TargetRotation, Time.fixedDeltaTime * RotationSpeed * 3.0f);
                     }
                     else
                     {

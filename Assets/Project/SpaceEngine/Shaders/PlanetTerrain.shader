@@ -264,7 +264,7 @@ Shader "SpaceEngine/Planet/Terrain"
 							groundColor = OceanRadiance(WSD, -v, V, _Ocean_Sigma, sunL, skyE, _Ocean_Color, P);
 						}
 					#endif
-
+					
 					float darknessAccumulation = 1.0;
 					float3 extinction;
 					float3 inscatter = InScattering(WCPO, P, WSD, extinction, 0.0);
