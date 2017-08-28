@@ -112,12 +112,24 @@ namespace SpaceEngine.Core.Terrain
         /// </summary>
         public bool IsLeaf { get { return Children[0] == null || Children == null; } }
 
+        /// <summary>
+        /// Deformed space quad corners.
+        /// </summary>
         public Matrix4x4d DeformedCorners { get; private set; }
 
+        /// <summary>
+        /// Deformed space quad verticals.
+        /// </summary>
         public Matrix4x4d DeformedVerticals { get; private set; }
 
+        /// <summary>
+        /// Screen space quad corners.
+        /// </summary>
         public Matrix4x4d FlatCorners { get; private set; }
 
+        /// <summary>
+        /// Screen space quad veritcals.
+        /// </summary>
         public Matrix4x4d FlatVerticals { get; private set; }
 
         /// <summary>

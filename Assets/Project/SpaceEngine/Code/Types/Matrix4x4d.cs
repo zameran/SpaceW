@@ -335,7 +335,6 @@ namespace UnityEngine
             return new Matrix4x4d(m);
         }
 
-
         public override string ToString()
         {
             return m[0, 0] + "," + m[0, 1] + "," + m[0, 2] + "," + m[0, 3] + "\n" +

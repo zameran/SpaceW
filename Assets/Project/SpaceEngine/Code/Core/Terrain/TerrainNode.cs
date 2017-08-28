@@ -379,6 +379,12 @@ namespace SpaceEngine.Core.Terrain
 
         #endregion
 
+        public void SetPerQuadUniforms(TerrainQuad quad, MaterialPropertyBlock matPropertyBlock)
+        {
+            // TODO : BOTTLENECK!
+            Deformation.SetUniforms(this, quad, matPropertyBlock);
+        }
+
         #region Rendering
 
         private bool FindDrawableSamplers(TerrainQuad quad)
@@ -510,7 +516,7 @@ namespace SpaceEngine.Core.Terrain
 
                     if (targetQuad.Visibility == Frustum.VISIBILITY.INVISIBLE)
                     {
-                        done |= (1 << quad.Order[i]);
+                        done |= 1 << quad.Order[i];
                     }
                     else if (targetQuad.Drawable)
                     {
@@ -591,11 +597,10 @@ namespace SpaceEngine.Core.Terrain
             TerrainQuadRoot = new TerrainQuad(this, null, 0, 0, -size, -size, 2.0 * size, ZMin, ZMax);
         }
 
-        public void SetPerQuadUniforms(TerrainQuad quad, MaterialPropertyBlock matPropertyBlock)
-        {
-            // TODO : BOTTLENECK!
-            Deformation.SetUniforms(this, quad, matPropertyBlock);
-        }
+        #region Occluding
+
+        private readonly Vector2d[] OccluderCorners = new Vector2d[4];
+        private readonly Vector3d[] OccluderBounds = new Vector3d[4];
 
         /// <summary>
         /// Check if the given bounding box is occluded.
@@ -609,35 +614,33 @@ namespace SpaceEngine.Core.Terrain
                 return false;
             }
 
-            var corners = new Vector2d[4];
             var plane = LocalCameraPosition.xy;
 
-            corners[0] = LocalCameraDirection * (new Vector2d(occluder.xmin, occluder.ymin) - plane);
-            corners[1] = LocalCameraDirection * (new Vector2d(occluder.xmin, occluder.ymax) - plane);
-            corners[2] = LocalCameraDirection * (new Vector2d(occluder.xmax, occluder.ymin) - plane);
-            corners[3] = LocalCameraDirection * (new Vector2d(occluder.xmax, occluder.ymax) - plane);
+            OccluderCorners[0] = LocalCameraDirection * (new Vector2d(occluder.xmin, occluder.ymin) - plane);
+            OccluderCorners[1] = LocalCameraDirection * (new Vector2d(occluder.xmin, occluder.ymax) - plane);
+            OccluderCorners[2] = LocalCameraDirection * (new Vector2d(occluder.xmax, occluder.ymin) - plane);
+            OccluderCorners[3] = LocalCameraDirection * (new Vector2d(occluder.xmax, occluder.ymax) - plane);
 
-            if (corners[0].y <= 0.0 || corners[1].y <= 0.0 || corners[2].y <= 0.0 || corners[3].y <= 0.0)
+            if (OccluderCorners[0].y <= 0.0 || OccluderCorners[1].y <= 0.0 || OccluderCorners[2].y <= 0.0 || OccluderCorners[3].y <= 0.0)
             {
                 return false;
             }
 
             var dzmax = occluder.zmax - LocalCameraPosition.z;
 
-            corners[0] = new Vector2d(corners[0].x, dzmax) / corners[0].y;
-            corners[1] = new Vector2d(corners[1].x, dzmax) / corners[1].y;
-            corners[2] = new Vector2d(corners[2].x, dzmax) / corners[2].y;
-            corners[3] = new Vector2d(corners[3].x, dzmax) / corners[3].y;
+            OccluderCorners[0] = new Vector2d(OccluderCorners[0].x, dzmax) / OccluderCorners[0].y;
+            OccluderCorners[1] = new Vector2d(OccluderCorners[1].x, dzmax) / OccluderCorners[1].y;
+            OccluderCorners[2] = new Vector2d(OccluderCorners[2].x, dzmax) / OccluderCorners[2].y;
+            OccluderCorners[3] = new Vector2d(OccluderCorners[3].x, dzmax) / OccluderCorners[3].y;
 
-            var xmin = Math.Min(Math.Min(corners[0].x, corners[1].x), Math.Min(corners[2].x, corners[3].x)) * 0.33 + 0.5;
-            var xmax = Math.Max(Math.Max(corners[0].x, corners[1].x), Math.Max(corners[2].x, corners[3].x)) * 0.33 + 0.5;
-            var zmax = Math.Max(Math.Max(corners[0].y, corners[1].y), Math.Max(corners[2].y, corners[3].y));
+            var xmin = Math.Min(Math.Min(OccluderCorners[0].x, OccluderCorners[1].x), Math.Min(OccluderCorners[2].x, OccluderCorners[3].x)) * 0.33 + 0.5;
+            var xmax = Math.Max(Math.Max(OccluderCorners[0].x, OccluderCorners[1].x), Math.Max(OccluderCorners[2].x, OccluderCorners[3].x)) * 0.33 + 0.5;
+            var zmax = Math.Max(Math.Max(OccluderCorners[0].y, OccluderCorners[1].y), Math.Max(OccluderCorners[2].y, OccluderCorners[3].y));
 
             var imin = Math.Max((int)Math.Floor(xmin * HORIZON_SIZE), 0);
             var imax = Math.Min((int)Math.Ceiling(xmax * HORIZON_SIZE), HORIZON_SIZE - 1);
 
             // NOTE : Looks like horizon culling isn't working properly. Maybe should be debugged or something...
-
             for (byte i = (byte)imin; i <= imax; ++i)
             {
                 if (zmax > Horizon[i])
@@ -661,15 +664,14 @@ namespace SpaceEngine.Core.Terrain
                 return false;
             }
 
-            var corners = new Vector2d[4];
             var plane = LocalCameraPosition.xy;
 
-            corners[0] = LocalCameraDirection * (new Vector2d(occluder.xmin, occluder.ymin) - plane);
-            corners[1] = LocalCameraDirection * (new Vector2d(occluder.xmin, occluder.ymax) - plane);
-            corners[2] = LocalCameraDirection * (new Vector2d(occluder.xmax, occluder.ymin) - plane);
-            corners[3] = LocalCameraDirection * (new Vector2d(occluder.xmax, occluder.ymax) - plane);
+            OccluderCorners[0] = LocalCameraDirection * (new Vector2d(occluder.xmin, occluder.ymin) - plane);
+            OccluderCorners[1] = LocalCameraDirection * (new Vector2d(occluder.xmin, occluder.ymax) - plane);
+            OccluderCorners[2] = LocalCameraDirection * (new Vector2d(occluder.xmax, occluder.ymin) - plane);
+            OccluderCorners[3] = LocalCameraDirection * (new Vector2d(occluder.xmax, occluder.ymax) - plane);
 
-            if (corners[0].y <= 0.0 || corners[1].y <= 0.0 || corners[2].y <= 0.0 || corners[3].y <= 0.0)
+            if (OccluderCorners[0].y <= 0.0 || OccluderCorners[1].y <= 0.0 || OccluderCorners[2].y <= 0.0 || OccluderCorners[3].y <= 0.0)
             {
                 // Skips bounding boxes that are not fully behind the "near plane" of the reference frame used for horizon occlusion culling
                 return false;
@@ -678,17 +680,15 @@ namespace SpaceEngine.Core.Terrain
             var dzmin = occluder.zmin - LocalCameraPosition.z;
             var dzmax = occluder.zmax - LocalCameraPosition.z;
 
-            var bounds = new Vector3d[4];
+            OccluderBounds[0] = new Vector3d(OccluderCorners[0].x, dzmin, dzmax) / OccluderCorners[0].y;
+            OccluderBounds[1] = new Vector3d(OccluderCorners[1].x, dzmin, dzmax) / OccluderCorners[1].y;
+            OccluderBounds[2] = new Vector3d(OccluderCorners[2].x, dzmin, dzmax) / OccluderCorners[2].y;
+            OccluderBounds[3] = new Vector3d(OccluderCorners[3].x, dzmin, dzmax) / OccluderCorners[3].y;
 
-            bounds[0] = new Vector3d(corners[0].x, dzmin, dzmax) / corners[0].y;
-            bounds[1] = new Vector3d(corners[1].x, dzmin, dzmax) / corners[1].y;
-            bounds[2] = new Vector3d(corners[2].x, dzmin, dzmax) / corners[2].y;
-            bounds[3] = new Vector3d(corners[3].x, dzmin, dzmax) / corners[3].y;
-
-            var xmin = Math.Min(Math.Min(bounds[0].x, bounds[1].x), Math.Min(bounds[2].x, bounds[3].x)) * 0.33 + 0.5;
-            var xmax = Math.Max(Math.Max(bounds[0].x, bounds[1].x), Math.Max(bounds[2].x, bounds[3].x)) * 0.33 + 0.5;
-            var zmin = Math.Min(Math.Min(bounds[0].y, bounds[1].y), Math.Min(bounds[2].y, bounds[3].y));
-            var zmax = Math.Max(Math.Max(bounds[0].z, bounds[1].z), Math.Max(bounds[2].z, bounds[3].z));
+            var xmin = Math.Min(Math.Min(OccluderBounds[0].x, OccluderBounds[1].x), Math.Min(OccluderBounds[2].x, OccluderBounds[3].x)) * 0.33 + 0.5;
+            var xmax = Math.Max(Math.Max(OccluderBounds[0].x, OccluderBounds[1].x), Math.Max(OccluderBounds[2].x, OccluderBounds[3].x)) * 0.33 + 0.5;
+            var zmin = Math.Min(Math.Min(OccluderBounds[0].y, OccluderBounds[1].y), Math.Min(OccluderBounds[2].y, OccluderBounds[3].y));
+            var zmax = Math.Max(Math.Max(OccluderBounds[0].z, OccluderBounds[1].z), Math.Max(OccluderBounds[2].z, OccluderBounds[3].z));
 
             var imin = Math.Max((int)Math.Floor(xmin * HORIZON_SIZE), 0);
             var imax = Math.Min((int)Math.Ceiling(xmax * HORIZON_SIZE), HORIZON_SIZE - 1);
@@ -720,6 +720,8 @@ namespace SpaceEngine.Core.Terrain
 
             return occluded;
         }
+
+        #endregion
 
         /// <summary>
         /// Distance between the current viewer position and the given bounding box.
