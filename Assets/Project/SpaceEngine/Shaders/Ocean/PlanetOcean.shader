@@ -113,7 +113,7 @@ Shader "SpaceEngine/Planet/Ocean"
 
 			// NOTE : Vertices some times pass or lay under atmosphere 'ground terminator' and InScattering returns solid radiance color...
 			#ifdef OCEAN_INSCATTER_FIX
-				float3 earthP = radius > 0.0 ? normalize(oceanP + float3(0.0, 0.0, radius)) * (radius + 11.0) : oceanP;
+				float3 earthP = radius > 0.0 ? normalize(oceanP + float3(0.0, 0.0, radius)) * (radius + 10.0 - (_Ocean_HeightOffset * 1.25)) : oceanP;
 			#else
 				float3 earthP = radius > 0.0 ? normalize(oceanP + float3(0.0, 0.0, radius)) * (radius + 10.0) : oceanP;
 			#endif
