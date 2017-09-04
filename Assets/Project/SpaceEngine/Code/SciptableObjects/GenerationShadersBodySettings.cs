@@ -28,8 +28,8 @@
 // ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF
 // THE POSSIBILITY OF SUCH DAMAGE.
 // 
-// Creation Date: 2017.01.25
-// Creation Time: 10:46 AM
+// Creation Date: 2017.03.03
+// Creation Time: 12:25 PM
 // Creator: zameran
 #endregion
 
@@ -41,40 +41,16 @@ using UnityEngine;
 namespace SpaceEngine.SciptableObjects
 {
     [Serializable]
-    [CreateAssetMenuAttribute(fileName = "SunGlareSettings", menuName = "Create SunGlare Settings")]
-    public class SunGlareSettings : ScriptableObject
+    [CreateAssetMenuAttribute(fileName = "GenerationShadersBodySettings", menuName = "Create Generation Shaders Body Settings")]
+    public class GenerationShadersBodySettings : ScriptableObject
     {
-        [Header("Textures")]
-        public Texture2D SunSpikes;
-        public Texture2D SunFlare;
-        public Texture2D SunGhost1;
-        public Texture2D SunGhost2;
-        public Texture2D SunGhost3;
+        [Header("Elevation")]
+        public List<Shader> ElevationShaders;
 
-        [Header("Settings")]
-        public Vector3 FlareSettings = new Vector3(0.45f, 1.0f, 0.85f);
-        public Vector3 SpikesSettings = new Vector3(0.6f, 1.0f, 1.0f);
+        [Header("Normals")]
+        public List<Shader> NormalsShaders;
 
-        public List<Vector4> Ghost1SettingsList = new List<Vector4>
-        {
-            new Vector4(0.54f, 0.65f, 2.3f, 0.5f),
-            new Vector4(0.54f, 1.0f, 6.0f, 0.7f)
-        };
-
-        public List<Vector4> Ghost2SettingsList = new List<Vector4>
-        {
-            new Vector4(0.135f, 1.0f, 3.0f, 0.9f),
-            new Vector4(0.054f, 1.0f, 8.0f, 1.1f),
-            new Vector4(0.054f, 1.0f, 4.0f, 1.3f),
-            new Vector4(0.054f, 1.0f, 5.0f, 1.5f)
-        };
-
-        public List<Vector4> Ghost3SettingsList = new List<Vector4>
-        {
-            new Vector4(0.135f, 1.0f, 3.0f, 0.9f),
-            new Vector4(0.054f, 1.0f, 8.0f, 1.1f),
-            new Vector4(0.054f, 1.0f, 4.0f, 1.3f),
-            new Vector4(0.054f, 1.0f, 5.0f, 1.5f)
-        };
+        [Header("Ortho")]
+        public List<Shader> OrthoShaders;
     }
 }

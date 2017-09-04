@@ -35,6 +35,7 @@
 
 using SpaceEngine.Core.Patterns.Strategy.Renderable;
 using SpaceEngine.Core.Patterns.Strategy.Uniformed;
+using SpaceEngine.SciptableObjects;
 
 using UnityEngine;
 

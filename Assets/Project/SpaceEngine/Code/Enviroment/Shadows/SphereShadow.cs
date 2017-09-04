@@ -137,7 +137,6 @@ public class SphereShadow : Shadow
         magnitudes[index] = new Vector2(vector.x, vector.y).magnitude;
     }
 
-    // Put the highest magnitude vectors in indices 0 & 1
     private void SortVectors()
     {
         // Lowest is 0 or 2
@@ -150,9 +149,7 @@ public class SphereShadow : Shadow
                 magnitudes[0] = magnitudes[2];
             }
         }
-
-        // Lowest is 1 or 2
-        else
+        else // Lowest is 1 or 2
         {
             // Lowest is 1
             if (magnitudes[1] < magnitudes[2])

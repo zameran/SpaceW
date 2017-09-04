@@ -38,6 +38,7 @@ using SpaceEngine.AtmosphericScattering.Sun;
 using SpaceEngine.Cameras;
 using SpaceEngine.Core.Bodies;
 using SpaceEngine.Core.Utilities;
+using SpaceEngine.SciptableObjects;
 using SpaceEngine.Startfield;
 
 using System.Linq;
@@ -49,24 +50,9 @@ public class GodManager : MonoSingleton<GodManager>
 {
     public GameCamera View;
 
-    public ComputeShader WriteData;
-    public ComputeShader ReadData;
-
-    public ComputeShader CopyInscatter1;
-    public ComputeShader CopyInscatterN;
-    public ComputeShader CopyIrradiance;
-    public ComputeShader Inscatter1;
-    public ComputeShader InscatterN;
-    public ComputeShader InscatterS;
-    public ComputeShader Irradiance1;
-    public ComputeShader IrradianceN;
-    public ComputeShader Transmittance;
-
     public Mesh AtmosphereMesh;
     public Mesh[] OceanScreenMeshGrids;
     public Mesh QuadMesh;
-
-    public Body ActiveBody { get { return Bodies.FirstOrDefault(body => Helper.Enabled(body)); } }
 
     public Body[] Bodies;
     public Starfield[] Starfields;
@@ -74,11 +60,28 @@ public class GodManager : MonoSingleton<GodManager>
 
     public AtmosphereHDR HDRMode = AtmosphereHDR.ProlandOptimized;
 
+    public GenerationShadersCoreSettings GSCS;
+
+    public Body ActiveBody { get { return Bodies.FirstOrDefault(body => Helper.Enabled(body)); } }
+
     public Matrix4x4d WorldToCamera { get { return View.WorldToCameraMatrix; } }
     public Matrix4x4d CameraToWorld { get { return View.CameraToWorldMatrix; } }
     public Matrix4x4d CameraToScreen { get { return View.CameraToScreenMatrix; } }
     public Matrix4x4d ScreenToCamera { get { return View.ScreenToCameraMatrix; } }
     public Vector3 WorldCameraPos { get { return View.WorldCameraPosition; } }
+
+    public ComputeShader WriteData { get { return GSCS.WriteData; } }
+    public ComputeShader ReadData { get { return GSCS.ReadData; } }
+
+    public ComputeShader CopyInscatter1 { get { return GSCS.CopyInscatter1; } }
+    public ComputeShader CopyInscatterN { get { return GSCS.CopyInscatterN; } }
+    public ComputeShader CopyIrradiance { get { return GSCS.CopyIrradiance; } }
+    public ComputeShader Inscatter1 { get { return GSCS.Inscatter1; } }
+    public ComputeShader InscatterN { get { return GSCS.InscatterN; } }
+    public ComputeShader InscatterS { get { return GSCS.InscatterS; } }
+    public ComputeShader Irradiance1 { get { return GSCS.Irradiance1; } }
+    public ComputeShader IrradianceN { get { return GSCS.IrradianceN; } }
+    public ComputeShader Transmittance { get { return GSCS.Transmittance; } }
 
     /// <summary>
     /// Quad mesh resolution in vertices.

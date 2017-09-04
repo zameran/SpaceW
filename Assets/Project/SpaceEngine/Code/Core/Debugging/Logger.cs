@@ -33,11 +33,10 @@
 // Creator: zameran
 #endregion
 
-using System.Collections.Generic;
-
 namespace SpaceEngine.Core.Debugging
 {
     using System;
+    using System.Collections.Generic;
     using System.IO;
     using System.Threading;
 
@@ -183,6 +182,9 @@ namespace SpaceEngine.Core.Debugging
 
             DoWork(obj, shouldDump, logFileNamePrefixes);
         }
+
+        public static void LogException(object obj)
+        { }
 
         public static void Log(object obj)
         {

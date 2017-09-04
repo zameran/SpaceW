@@ -2546,17 +2546,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   View: {fileID: 680484796}
-  WriteData: {fileID: 7200000, guid: 9cf8284180848cf40a2e80294b128a0c, type: 3}
-  ReadData: {fileID: 7200000, guid: 0d5f05c38659f984aa0dbd6afbe5de96, type: 3}
-  CopyInscatter1: {fileID: 7200000, guid: 3cb24fcb61932b8428bd64995aaa2c1e, type: 3}
-  CopyInscatterN: {fileID: 7200000, guid: 8e80c76fbd476a7408ee77db5f8c4891, type: 3}
-  CopyIrradiance: {fileID: 7200000, guid: bf7872249ef3e02458f3e07ddef91c7d, type: 3}
-  Inscatter1: {fileID: 7200000, guid: f1c7af1ecfbcfa5408d2b0ac9a3b0b8f, type: 3}
-  InscatterN: {fileID: 7200000, guid: 050de4f64c0ea9f45b734bdefc90eb05, type: 3}
-  InscatterS: {fileID: 7200000, guid: 461fc3e48b56f4744a796e7fdeb2cc43, type: 3}
-  Irradiance1: {fileID: 7200000, guid: 2068255f3c90cba4483b4e02c8a3eb6c, type: 3}
-  IrradianceN: {fileID: 7200000, guid: 53a0acd5feb59ae41955641aea3283b0, type: 3}
-  Transmittance: {fileID: 7200000, guid: ab8db4d0ea52821488a53f0c42875089, type: 3}
   AtmosphereMesh: {fileID: 0}
   OceanScreenMeshGrids: []
   QuadMesh: {fileID: 0}
@@ -2564,6 +2553,7 @@ MonoBehaviour:
   Starfields: []
   Sunglares: []
   HDRMode: 4
+  GSCS: {fileID: 11400000, guid: 1df83c97158884340af77d277fcca4bf, type: 2}
   GridResolution: 32
   OceanGridResolution: 32
   Eclipses: 1
