@@ -111,15 +111,8 @@ namespace SpaceEngine.AtmosphericScattering.Sun
             var distance = (CameraHelper.Main().transform.position.normalized - SunComponent.transform.position.normalized).magnitude;
 
             SunViewPortPosition = CameraHelper.Main().WorldToViewportPoint(SunComponent.transform.position);
-
-            // NOTE : So, camera's projection matrix replacement is bad idea in fact of strange clip planes behaviour.
-            // Instead i will invert the y component of resulting vector of WorldToViewportPoint.
-            // Looks like better idea...
-            // Btw, i can do this in shader...
-            if (CameraHelper.Main().IsDeferred())
-            {
-                SunViewPortPosition.y = 1.0f - SunViewPortPosition.y;
-            }
+            SunViewPortPosition.y = 1.0f - SunViewPortPosition.y;
+            // NOTE : So, looks like i should invert it... REALY?!
 
             Scale = distance / Magnitude;
             Fade = FadeCurve.Evaluate(Mathf.Clamp(Scale, 0.0f, 100.0f));
@@ -136,6 +129,9 @@ namespace SpaceEngine.AtmosphericScattering.Sun
             if (InitUniformsInUpdate) InitUniforms(SunGlareMaterial);
 
             SetUniforms(SunGlareMaterial);
+
+            // NOTE : Self - rendering!
+            Render();
         }
 
         protected override void Awake()
@@ -217,6 +213,9 @@ namespace SpaceEngine.AtmosphericScattering.Sun
         public void Render(int layer = 12)
         {
             if (SunGlareMesh == null) return;
+            if (GodManager.Instance.ActiveBody == null) return;
+
+            Atmosphere = GodManager.Instance.ActiveBody.Atmosphere;
 
             if (SunViewPortPosition.z > 0)
             {

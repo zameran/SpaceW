@@ -44,6 +44,10 @@ using UnityEngine;
 [RequireComponent(typeof(Camera))]
 public sealed class MainRenderer : MonoSingleton<MainRenderer>
 {
+    public bool ZSort = true;
+
+    private BodySort comparer = null;
+
     public class BodySort : IComparer<Body>
     {
         int IComparer<Body>.Compare(Body a, Body b)
@@ -65,6 +69,7 @@ public sealed class MainRenderer : MonoSingleton<MainRenderer>
     private void Awake()
     {
         Instance = this;
+        comparer = new BodySort();
     }
 
     private void Start()
@@ -74,7 +79,7 @@ public sealed class MainRenderer : MonoSingleton<MainRenderer>
 
     private void Update()
     {
-        if (Input.GetKey(KeyCode.J)) ComposeOutputRender();
+        if (Input.GetKey(KeyCode.J) || ZSort) ComposeOutputRender();
     }
 
     private void OnEnable()
@@ -94,9 +99,7 @@ public sealed class MainRenderer : MonoSingleton<MainRenderer>
 
     public void ComposeOutputRender()
     {
-        if (GodManager.Instance == null) return;
-
-        Array.Sort(GodManager.Instance.Bodies, new BodySort());
+        Array.Sort(GodManager.Instance.Bodies, comparer);
 
         /*
         for (int i = 0; i < GodManager.Instance.Starfields.Length; i++)

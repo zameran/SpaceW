@@ -43,7 +43,7 @@ using Random = UnityEngine.Random;
 
 public static class MeshFactory
 {
-    public enum PLANE { XY, XZ, YZ };
+    public enum PLANE { XY, XZ, YZ }
 
     public static Mesh MakeOceanPlane(int w, int h, float offset, float scale)
     {
@@ -52,11 +52,11 @@ public static class MeshFactory
         var normals = new Vector3[w * h];
         var indices = new int[w * h * 6];
 
-        for (int x = 0; x < w; x++)
+        for (var x = 0; x < w; x++)
         {
-            for (int y = 0; y < h; y++)
+            for (var y = 0; y < h; y++)
             {
-                var uv = new Vector2((float)x / (float)(w - 1), (float)y / (float)(h - 1) * scale + offset);
+                var uv = new Vector2(x / (w - 1.0f), y / (h - 1.0f) * scale + offset);
 
                 texcoords[x + y * w] = uv;
                 vertices[x + y * w] = new Vector3((uv.x - 0.5f) * 2.0f, (uv.y - 0.5f) * 2.0f, 0.0f);
@@ -64,18 +64,19 @@ public static class MeshFactory
             }
         }
 
-        var num = 0;
-        for (int x = 0; x < w - 1; x++)
-        {
-            for (int y = 0; y < h - 1; y++)
-            {
-                indices[num++] = x + y * w;
-                indices[num++] = x + (y + 1) * w;
-                indices[num++] = (x + 1) + y * w;
+        var index = 0;
 
-                indices[num++] = x + (y + 1) * w;
-                indices[num++] = (x + 1) + (y + 1) * w;
-                indices[num++] = (x + 1) + y * w;
+        for (var x = 0; x < w - 1; x++)
+        {
+            for (var y = 0; y < h - 1; y++)
+            {
+                indices[index++] = x + y * w;
+                indices[index++] = x + (y + 1) * w;
+                indices[index++] = (x + 1) + y * w;
+
+                indices[index++] = x + (y + 1) * w;
+                indices[index++] = (x + 1) + (y + 1) * w;
+                indices[index++] = (x + 1) + y * w;
             }
         }
 
@@ -106,18 +107,10 @@ public static class MeshFactory
         {
             for (byte y = 0; y < detail; y++)
             {
-                var texcoord = new Vector2((float)x / (float)(detail - 1), (float)y / (float)(detail - 1));
+                var texcoord = new Vector2(x / (detail - 1.0f), y / (detail - 1.0f));
                 var vertex = Vector3.zero;
                 var normal = Vector3.zero;
-                var uv = Vector2.zero;
-
-                if (clampedUV)
-                    uv = texcoord;
-                else
-                {
-                    uv.x = (texcoord.x - 0.5f) * 2.0f;
-                    uv.y = (texcoord.y - 0.5f) * 2.0f;
-                }
+                var uv = clampedUV ? texcoord : new Vector2((texcoord.x - 0.5f) * 2.0f, (texcoord.y - 0.5f) * 2.0f);
 
                 switch ((int)plane)
                 {
@@ -293,7 +286,7 @@ public static class MeshFactory
         texcoords.Add(texcoords[indexFrom]);
     }
 
-    public static Mesh SetupRingSegmentMesh(int SegmentCount, int SegmentDetail, float InnerRadius, float OuterRadius, float BoundsShift)
+    public static Mesh SetupRingSegmentMesh(int segmentCount, int segmentDetail, float innerRadius, float outerRadius, float boundsShift)
     {
         var mesh = new Mesh();
 
@@ -302,19 +295,19 @@ public static class MeshFactory
         var uvs = new List<Vector2>();
         var indices = new List<int>();
 
-        var angleTotal = Helper.Divide(Mathf.PI * 2.0f, SegmentCount);
-        var angleStep = Helper.Divide(angleTotal, SegmentDetail);
-        var coordStep = Helper.Reciprocal(SegmentDetail);
+        var angleTotal = Helper.Divide(Mathf.PI * 2.0f, segmentCount);
+        var angleStep = Helper.Divide(angleTotal, segmentDetail);
+        var coordStep = Helper.Reciprocal(segmentDetail);
 
-        for (var i = 0; i <= SegmentDetail; i++)
+        for (var i = 0; i <= segmentDetail; i++)
         {
             var coord = coordStep * i;
             var angle = angleStep * i;
             var sin = Mathf.Sin(angle);
             var cos = Mathf.Cos(angle);
 
-            positions.Add(new Vector3(sin * InnerRadius, 0.0f, cos * InnerRadius));
-            positions.Add(new Vector3(sin * OuterRadius, 0.0f, cos * OuterRadius));
+            positions.Add(new Vector3(sin * innerRadius, 0.0f, cos * innerRadius));
+            positions.Add(new Vector3(sin * outerRadius, 0.0f, cos * outerRadius));
 
             normals.Add(Vector3.up);
             normals.Add(Vector3.up);
@@ -329,14 +322,14 @@ public static class MeshFactory
 
         for (var j = 0; j < steps; j++)
         {
-            var vertexOff = j * 2;
+            var index = j * 2;
 
-            indices.Add(vertexOff + 0);
-            indices.Add(vertexOff + 1);
-            indices.Add(vertexOff + 2);
-            indices.Add(vertexOff + 3);
-            indices.Add(vertexOff + 2);
-            indices.Add(vertexOff + 1);
+            indices.Add(index + 0);
+            indices.Add(index + 1);
+            indices.Add(index + 2);
+            indices.Add(index + 3);
+            indices.Add(index + 2);
+            indices.Add(index + 1);
         }
 
         #endregion
@@ -345,7 +338,7 @@ public static class MeshFactory
 
         var bounds = mesh.bounds;
 
-        mesh.bounds = Helper.NewBoundsCenter(bounds, bounds.center + bounds.center.normalized * BoundsShift);
+        mesh.bounds = Helper.NewBoundsCenter(bounds, bounds.center + bounds.center.normalized * boundsShift);
 
         #endregion
 
@@ -383,7 +376,7 @@ public static class MeshFactory
             new Vector2(1, 0)
         };
 
-        var triangles = new int[6]
+        var triangles = new[]
         {
             0, 2, 1,
             2, 3, 1
@@ -481,9 +474,9 @@ public static class MeshFactory
     {
         private struct TriangleIndices
         {
-            public int v1;
-            public int v2;
-            public int v3;
+            public readonly int v1;
+            public readonly int v2;
+            public readonly int v3;
 
             public TriangleIndices(int v1, int v2, int v3)
             {

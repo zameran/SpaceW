@@ -34,6 +34,7 @@
 #endregion
 
 using SpaceEngine.AtmosphericScattering;
+using SpaceEngine.Core.Patterns.Strategy.Eventit;
 using SpaceEngine.Core.Patterns.Strategy.Reanimator;
 using SpaceEngine.Core.Patterns.Strategy.Renderable;
 using SpaceEngine.Core.Patterns.Strategy.Uniformed;
@@ -69,7 +70,7 @@ namespace SpaceEngine.Core.Bodies
         }
     }
 
-    public class Body : Node<Body>, IBody, IUniformed<MaterialPropertyBlock>, IReanimateable, IRenderable<Body>
+    public class Body : Node<Body>, IEventit, IBody, IUniformed<MaterialPropertyBlock>, IReanimateable, IRenderable<Body>
     {
         public Atmosphere Atmosphere;
         public OceanNode Ocean;
@@ -114,6 +115,40 @@ namespace SpaceEngine.Core.Bodies
         public MaterialTableGradientLut MaterialTable = new MaterialTableGradientLut();
 
         public List<string> Keywords { get; set; }
+
+        #region Eventit
+
+        public bool isEventit { get; set; }
+
+        public void Eventit()
+        {
+            if (isEventit) return;
+
+            EventManager.BodyEvents.OnSamplersChanged.OnEvent += OnSamplersChanged;
+
+            isEventit = true;
+        }
+
+        public void UnEventit()
+        {
+            if (!isEventit) return;
+
+            EventManager.BodyEvents.OnSamplersChanged.OnEvent -= OnSamplersChanged;
+
+            isEventit = false;
+        }
+
+        #endregion
+
+        #region Events
+
+        private void OnSamplersChanged(Body body, TerrainNode node)
+        {
+            node.CollectSamplers();
+            node.CollectSamplersSuitable();
+        }
+
+        #endregion
 
         #region Node
 
@@ -243,12 +278,6 @@ namespace SpaceEngine.Core.Bodies
                 {
                     Atmosphere.Render();
                 }
-
-                foreach (var sunGlare in GodManager.Instance.Sunglares)
-                {
-                    sunGlare.Atmosphere = Atmosphere;
-                    sunGlare.Render();
-                }
             }
 
             if (Ocean != null)
@@ -334,10 +363,6 @@ namespace SpaceEngine.Core.Bodies
 
         private void DrawTerrain(TerrainNode node, int layer)
         {
-            // Get all the samplers attached to the terrain node. The samples contain the data need to draw the quad
-            //node.CollectSamplersSuitable();
-            // TODO : Collect suitable samplers again, if some changes are done...
-
             // So, if doesn't have any samplers - do anything...
             if (node.Samplers.Count == 0 || node.SamplersSuitable.Count == 0) return;
 

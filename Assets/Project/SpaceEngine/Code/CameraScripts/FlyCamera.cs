@@ -222,9 +222,6 @@ namespace SpaceEngine.Cameras
                     {
                         var h = (DistanceToCore - Body.Size - (float)Body.HeightZ);
 
-                        // TODO : Take ocean in to account...
-                        //if (Body.Ocean != null && Body.OceanEnabled) h = h - Body.Ocean.OceanLevel;
-
                         if (h < 1.0f) { h = 1.0f; }
 
                         CameraComponent.nearClipPlane = Mathf.Clamp(0.1f * h, 0.03f, 1000.0f);
@@ -233,9 +230,6 @@ namespace SpaceEngine.Cameras
                     else
                     {
                         var h = (transform.position.z - (float)Body.HeightZ);
-
-                        // TODO : Take ocean in to account...
-                        //if (Body.Ocean != null && Body.OceanEnabled) h = h - Body.Ocean.OceanLevel;
 
                         if (h < 1.0f) { h = 1.0f; }
 

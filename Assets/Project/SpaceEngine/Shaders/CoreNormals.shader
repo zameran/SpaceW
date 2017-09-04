@@ -117,8 +117,6 @@
 			float4 uv0 = floor(uv.xyxy + OFFSET_H) * _ElevationOSL.z + _ElevationOSL.xyxy;
 			float4 uv1 = floor(uv.xyxy + OFFSET_V) * _ElevationOSL.z + _ElevationOSL.xyxy;
 
-			// dfdu = (heightmap[u + 1][v] - heightmap[u - 1][v]) / 2
-			// dfdv = (heightmap[u][v + 1] - heightmap[u][v - 1]) / 2
 			float dfdu = (GetNoise(_ElevationSampler, uv0.zw) - GetNoise(_ElevationSampler, uv0.xy)) / 2.0;
 			float dfdv = (GetNoise(_ElevationSampler, uv1.zw) - GetNoise(_ElevationSampler, uv1.xy)) / 2.0;
 			
