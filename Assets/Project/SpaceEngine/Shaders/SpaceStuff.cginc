@@ -33,6 +33,7 @@
 
 #define SPACE_STUFF
 
+// TODO : Blur shadows oly on specified shadow casters...
 #define SHADOW_BLUR
 
 #if !defined (MATH)
@@ -115,7 +116,7 @@ float4 ShadowColor(float4x4 shadowMatrix, sampler2D shadowSampler, float shadowR
 	#ifdef SHADOW_BLUR
 		shadow = Blur(shadowSampler, shadowMag, 0.00015f);
 	#else
-		shadow = tex2D(shadowSampler, shadowMag.xy);
+		shadow = tex2Dlod(shadowSampler, float4(shadowMag.xy, 0.0, 0.0));
 	#endif
 	
 	shadow += shadowPoint.z < 0.0f ? 1.0f : 0.0f;
