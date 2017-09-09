@@ -4,9 +4,12 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Net;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
+using System.Text;
 using UnityEditor;
 using UnityEngine;
+using Application = UnityEngine.Application;
 using Debug = UnityEngine.Debug;
 
 namespace Plugins.Editor.JetBrains
@@ -17,33 +20,175 @@ namespace Plugins.Editor.JetBrains
         private static bool Initialized;
         private static string SlnFile;
 
-        private static string DefaultApp
+        public static void Log(LoggingLevel level, string initialText)
         {
-            get { return EditorPrefs.GetString("kScriptsDefaultApp"); }
+            if (level < SelectedLoggingLevel) return;
+
+            var text = "[Rider] [" + level + "] " + initialText;
+
+            switch (level)
+            {
+                case LoggingLevel.Warning:
+                    Debug.LogWarning(text);
+                    break;
+                default:
+                    Debug.Log(text);
+                    break;
+            }
         }
 
-        public static bool TargetFrameworkVersion45
+        private static string GetDefaultApp()
         {
-            get { return EditorPrefs.GetBool("Rider_TargetFrameworkVersion45", true); }
-            set { EditorPrefs.SetBool("Rider_TargetFrameworkVersion45", value); }
+            var alreadySetPath = GetExternalScriptEditor();
+            if (!string.IsNullOrEmpty(alreadySetPath) && RiderPathExist(alreadySetPath))
+                return alreadySetPath;
+
+            return RiderPath;
         }
 
-        public static bool EnableLogging
+        private static string[] GetAllRiderPaths()
         {
-            get { return EditorPrefs.GetBool("Rider_EnableLogging", false); }
-            set { EditorPrefs.SetBool("Rider_EnableLogging", value); }
+            switch (SystemInfoRiderPlugin.operatingSystemFamily)
+            {
+                case OperatingSystemFamily.Windows:
+                    string[] folders =
+                    {
+                        @"C:\ProgramData\Microsoft\Windows\Start Menu\Programs\JetBrains", Path.Combine(
+                            Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
+                            @"Microsoft\Windows\Start Menu\Programs\JetBrains Toolbox")
+                    };
+
+                    var newPathLnks = folders.Select(b => new DirectoryInfo(b)).Where(a => a.Exists)
+                        .SelectMany(c => c.GetFiles("*Rider*.lnk")).ToArray();
+                    if (newPathLnks.Any())
+                    {
+                        var newPaths = newPathLnks
+                            .Select(newPathLnk => new FileInfo(ShortcutResolver.Resolve(newPathLnk.FullName)))
+                            .Where(fi => File.Exists(fi.FullName))
+                            .ToArray()
+                            .OrderByDescending(fi => FileVersionInfo.GetVersionInfo(fi.FullName).ProductVersion)
+                            .Select(a => a.FullName).ToArray();
+
+                        return newPaths;
+                    }
+                    break;
+
+                case OperatingSystemFamily.MacOSX:
+                    // "/Applications/*Rider*.app"
+                    //"~/Applications/JetBrains Toolbox/*Rider*.app"
+                    string[] foldersMac =
+                    {
+                        "/Applications", Path.Combine(Environment.GetEnvironmentVariable("HOME"), "Applications/JetBrains Toolbox")
+                    };
+                    var newPathsMac = foldersMac.Select(b => new DirectoryInfo(b)).Where(a => a.Exists)
+                        .SelectMany(c => c.GetDirectories("*Rider*.app"))
+                        .Select(a => a.FullName).ToArray();
+                    return newPathsMac;
+            }
+            return new string[0];
+        }
+
+        private static string TargetFrameworkVersionDefault
+        {
+            get
+            {
+                var defaultValue = "4.5";
+                if (SystemInfoRiderPlugin.operatingSystemFamily == OperatingSystemFamily.Windows)
+                {
+                    var dir = new DirectoryInfo(@"C:\Program Files (x86)\Reference Assemblies\Microsoft\Framework\.NETFramework");
+                    if (dir.Exists)
+                    {
+                        var availableVersions = dir.GetDirectories("v*").Select(a => a.Name.Substring(1))
+                            .Where(v => TryCatch(v, s => { })).ToArray();
+                        if (availableVersions.Any() && !availableVersions.Contains(defaultValue))
+                        {
+                            defaultValue = availableVersions.OrderBy(a => new Version(a)).Last();
+                        }
+                    }
+                }
+                return defaultValue;
+            }
+        }
+
+        public static string TargetFrameworkVersion
+        {
+            get
+            {
+                return EditorPrefs.GetString("Rider_TargetFrameworkVersion",
+                    EditorPrefs.GetBool("Rider_TargetFrameworkVersion45", true) ? TargetFrameworkVersionDefault : "3.5");
+            }
+            set
+            {
+                TryCatch(value, val =>
+                {
+                    EditorPrefs.SetString("Rider_TargetFrameworkVersion", val);
+                });
+            }
+        }
+
+        private static bool TryCatch(string value, Action<string> action)
+        {
+            try
+            {
+                new Version(value); // mono 2.6 doesn't support Version.TryParse
+                action(value);
+                return true;
+            }
+            catch (ArgumentException)
+            {
+            } // can't put loggin here because ot fire on every symbol
+            catch (FormatException)
+            {
+            }
+            return false;
+        }
+
+        public static string RiderPath
+        {
+            get { return EditorPrefs.GetString("Rider_RiderPath", GetAllRiderPaths().FirstOrDefault()); }
+            set { EditorPrefs.SetString("Rider_RiderPath", value); }
+        }
+
+        public enum LoggingLevel
+        {
+            Verbose = 0,
+            Info = 1,
+            Warning = 2
+        }
+
+        public static LoggingLevel SelectedLoggingLevel
+        {
+            get { return (LoggingLevel)EditorPrefs.GetInt("Rider_SelectedLoggingLevel", 1); }
+            set { EditorPrefs.SetInt("Rider_SelectedLoggingLevel", (int)value); }
+        }
+
+        public static bool RiderInitializedOnce
+        {
+            get { return EditorPrefs.GetBool("RiderInitializedOnce", false); }
+            set { EditorPrefs.SetBool("RiderInitializedOnce", value); }
         }
 
         internal static bool Enabled
         {
             get
             {
-                return !string.IsNullOrEmpty(DefaultApp) && DefaultApp.ToLower().Contains("rider");
+                var defaultApp = GetExternalScriptEditor();
+                return !string.IsNullOrEmpty(defaultApp) && Path.GetFileName(defaultApp).ToLower().Contains("rider");
             }
         }
 
         static RiderPlugin()
         {
+            var riderPath = GetDefaultApp();
+            if (!RiderPathExist(riderPath))
+                return;
+
+            AddRiderToRecentlyUsedScriptApp(riderPath, "RecentlyUsedScriptApp");
+            if (!RiderInitializedOnce)
+            {
+                SetExternalScriptEditor(riderPath);
+                RiderInitializedOnce = true;
+            }
             if (Enabled)
             {
                 InitRiderPlugin();
@@ -52,79 +197,49 @@ namespace Plugins.Editor.JetBrains
 
         private static void InitRiderPlugin()
         {
-            AutomaticChangeRiderLocation(DefaultApp);
-
             var projectDirectory = Directory.GetParent(Application.dataPath).FullName;
 
             var projectName = Path.GetFileName(projectDirectory);
             SlnFile = Path.Combine(projectDirectory, string.Format("{0}.sln", projectName));
-            UpdateUnitySettings(SlnFile);
 
             InitializeEditorInstanceJson(projectDirectory);
 
+            Log(LoggingLevel.Info, "Rider plugin initialized. You may change the amount of Rider Debug output via Edit -> Preferences -> Rider -> Logging Level");
             Initialized = true;
+        }
+
+        private static void AddRiderToRecentlyUsedScriptApp(string userAppPath, string recentAppsKey)
+        {
+            for (int index = 0; index < 10; ++index)
+            {
+                string path = EditorPrefs.GetString(recentAppsKey + (object)index);
+                if (File.Exists(path) && Path.GetFileName(path).ToLower().Contains("rider"))
+                    return;
+            }
+            EditorPrefs.SetString(recentAppsKey + 9, userAppPath);
+        }
+
+        private static string GetExternalScriptEditor()
+        {
+            return EditorPrefs.GetString("kScriptsDefaultApp");
+        }
+
+        private static void SetExternalScriptEditor(string path)
+        {
+            EditorPrefs.SetString("kScriptsDefaultApp", path);
         }
 
         private static bool RiderPathExist(string path)
         {
+            if (string.IsNullOrEmpty(path))
+                return false;
             // windows or mac
             var fileInfo = new FileInfo(path);
-            var directoryInfo = new DirectoryInfo(path);
-            return fileInfo.Exists || (directoryInfo.Extension == ".app" && directoryInfo.Exists);
-        }
-
-        private static bool AutomaticChangeRiderLocation(string riderPath)
-        {
-            // at least on windows new version of Rider gets always installed to new location - so try to search that new location
-            var riderFileInfo = new FileInfo(riderPath);
-
-            if (RiderPathExist(riderPath))
-                return true;
-
-            var newPath = riderFileInfo.FullName + ".non-existing extension";
-
-            switch (riderFileInfo.Extension)
-            {
-                case ".exe":
-                {
-                    var possibleNew =
-                        riderFileInfo.Directory.Parent.Parent.GetDirectories("*ider*")
-                            .SelectMany(a => a.GetDirectories("bin"))
-                            .SelectMany(a => a.GetFiles(riderFileInfo.Name))
-                            .ToArray();
-                    if (possibleNew.Length > 0)
-                        newPath = possibleNew.OrderBy(a => a.LastWriteTime).Last().FullName;
-                    break;
-                }
-            }
-            if (RiderPathExist(newPath) && newPath != riderPath)
-            {
-                if (EnableLogging) Debug.Log("[Rider] " + string.Format("Update {0} to {1}", riderFileInfo.FullName, newPath));
-                EditorPrefs.SetString("kScriptsDefaultApp", newPath);
-            }
-            else
-            {
-                EditorUtility.DisplayDialog("Rider executable not found",
-                    string.Format("Rider was not found in {0}{1}Please update 'External Script Editor'.", new FileInfo(riderPath).Directory, Environment.NewLine), "OK");
+            if (!fileInfo.Name.ToLower().Contains("rider"))
                 return false;
-            }
-            return true;
-        }
-
-        /// <summary>
-        /// Helps to open xml and txt files at least on Windows
-        /// </summary>
-        /// <param name="slnFile"></param>
-        private static void UpdateUnitySettings(string slnFile)
-        {
-            try
-            {
-                EditorPrefs.SetString("kScriptEditorArgs", string.Format("{0}{1}{0} {0}$(File){0}", "\"", slnFile));
-            }
-            catch (Exception e)
-            {
-                if (EnableLogging) Debug.Log("[Rider] " + ("Exception on updating kScriptEditorArgs: " + e.Message));
-            }
+            var directoryInfo = new DirectoryInfo(path);
+            return fileInfo.Exists || (SystemInfoRiderPlugin.operatingSystemFamily == OperatingSystemFamily.MacOSX &&
+                                       directoryInfo.Exists);
         }
 
         /// <summary>
@@ -134,22 +249,22 @@ namespace Plugins.Editor.JetBrains
         private static void InitializeEditorInstanceJson(string projectDirectory)
         {
             // Only manage EditorInstance.json for 4.x and 5.x - it's a native feature for 2017.x
-#if UNITY_4 || UNITY_5
-            if (EnableLogging) Debug.Log("[Rider] " + "Writing Library/EditorInstance.json");
+#if !UNITY_2017_1_OR_NEWER
+      Log(LoggingLevel.Verbose, "Writing Library/EditorInstance.json");
 
-            var library = Path.Combine(projectDirectory, "Library");
-            var editorInstanceJsonPath = Path.Combine(library, "EditorInstance.json");
+      var library = Path.Combine(projectDirectory, "Library");
+      var editorInstanceJsonPath = Path.Combine(library, "EditorInstance.json");
 
-            File.WriteAllText(editorInstanceJsonPath, string.Format(@"{{
+      File.WriteAllText(editorInstanceJsonPath, string.Format(@"{{
   ""process_id"": {0},
   ""version"": ""{1}""
 }}", Process.GetCurrentProcess().Id, Application.unityVersion));
 
-            AppDomain.CurrentDomain.DomainUnload += (sender, args) =>
-            {
-                if (EnableLogging) Debug.Log("[Rider] " + "Deleting Library/EditorInstance.json");
-                File.Delete(editorInstanceJsonPath);
-            };
+      AppDomain.CurrentDomain.DomainUnload += (sender, args) =>
+      {
+        Log(LoggingLevel.Verbose, "Deleting Library/EditorInstance.json");
+        File.Delete(editorInstanceJsonPath);
+      };
 #endif
         }
 
@@ -177,99 +292,114 @@ namespace Plugins.Editor.JetBrains
                 // determine asset that has been double clicked in the project view
                 var selected = EditorUtility.InstanceIDToObject(instanceID);
 
-                if (selected.GetType().ToString() == "UnityEditor.MonoScript" ||
-                    selected.GetType().ToString() == "UnityEngine.Shader")
+                var assetFilePath = Path.Combine(appPath, AssetDatabase.GetAssetPath(selected));
+                if (!(selected.GetType().ToString() == "UnityEditor.MonoScript" ||
+                      selected.GetType().ToString() == "UnityEngine.Shader" ||
+                      (selected.GetType().ToString() == "UnityEngine.TextAsset" &&
+#if UNITY_5 || UNITY_5_5_OR_NEWER
+                       EditorSettings.projectGenerationUserExtensions.Contains(Path.GetExtension(assetFilePath).Substring(1))
+#else
+            EditorSettings.externalVersionControl.Contains(Path.GetExtension(assetFilePath).Substring(1))
+#endif
+                      )))
+                    return false;
+
+                SyncSolution(); // added to handle opening file, which was just recently created.
+                if (!DetectPortAndOpenFile(line, assetFilePath,
+                    SystemInfoRiderPlugin.operatingSystemFamily == OperatingSystemFamily.Windows))
                 {
-                    SyncSolution(); // added to handle opening file, which was just recently created.
-                    var assetFilePath = Path.Combine(appPath, AssetDatabase.GetAssetPath(selected));
-                    if (!DetectPortAndOpenFile(line, assetFilePath, new FileInfo(DefaultApp).Extension == ".exe"))
-                    {
-                        var args = string.Format("{0}{1}{0} --line {2} {0}{3}{0}", "\"", SlnFile, line, assetFilePath);
-                        return CallRider(args);
-                    }
-                    return true;
+                    var args = string.Format("{0}{1}{0} --line {2} {0}{3}{0}", "\"", SlnFile, line, assetFilePath);
+                    return CallRider(args);
                 }
+                return true;
             }
+
             return false;
         }
 
 
         private static bool DetectPortAndOpenFile(int line, string filePath, bool isWindows)
         {
-            var startPort = 63342;
-            for (int port = startPort; port < startPort + 21; port++)
+            if (SystemInfoRiderPlugin.operatingSystemFamily == OperatingSystemFamily.Windows)
+            {
+                var process = GetRiderProcess();
+                if (process == null)
+                    return false;
+            }
+
+            int[] ports = Enumerable.Range(63342, 20).ToArray();
+            var res = ports.Any(port =>
             {
                 var aboutUrl = string.Format("http://localhost:{0}/api/about/", port);
                 var aboutUri = new Uri(aboutUrl);
-                var responce = CallHttpApi(port, aboutUri);
-                if (responce.ToLower().Contains("rider"))
+
+                using (var client = new WebClient())
                 {
-                    return HttpOpenFile(line, filePath, isWindows, port);
+                    client.Headers.Add("origin", string.Format("http://localhost:{0}", port));
+                    client.Headers[HttpRequestHeader.ContentType] = "application/x-www-form-urlencoded";
+
+                    try
+                    {
+                        var responce = CallHttpApi(aboutUri, client);
+                        if (responce.ToLower().Contains("rider"))
+                        {
+                            return HttpOpenFile(line, filePath, isWindows, port, client);
+                        }
+                    }
+                    catch (Exception e)
+                    {
+                        Log(LoggingLevel.Verbose, string.Format("Exception in DetectPortAndOpenFile: {0}", e));
+                    }
                 }
-            }
-            return false;
+                return false;
+            });
+            return res;
         }
 
-        private static bool HttpOpenFile(int line, string filePath, bool isWindows, int port)
+        private static bool HttpOpenFile(int line, string filePath, bool isWindows, int port, WebClient client)
         {
             var url = string.Format("http://localhost:{0}/api/file?file={1}{2}", port, filePath,
-                line < 0 ? "&p=0" : "&line=" + line); // &p is needed to workaround https://youtrack.jetbrains.com/issue/IDEA-172350
+                line < 0
+                    ? "&p=0"
+                    : "&line=" + line); // &p is needed to workaround https://youtrack.jetbrains.com/issue/IDEA-172350
             if (isWindows)
                 url = string.Format(@"http://localhost:{0}/api/file/{1}{2}", port, filePath, line < 0 ? "" : ":" + line);
 
             var uri = new Uri(url);
-            if (EnableLogging) Debug.Log("[Rider] " + string.Format("HttpRequestOpenFile({0})", uri.AbsoluteUri));
+            Log(LoggingLevel.Verbose, string.Format("HttpRequestOpenFile({0})", uri.AbsoluteUri));
 
-            try
-            {
-                CallHttpApi(port, uri);
-            }
-            catch (Exception e)
-            {
-                Debug.Log("[Rider] " + "Exception in HttpRequestOpenFile: " + e);
-                return false;
-            }
-            ActivateWindow(new FileInfo(DefaultApp).FullName);
+            CallHttpApi(uri, client);
+            ActivateWindow();
             return true;
         }
 
-        private static string CallHttpApi(int port, Uri uri)
+        private static string CallHttpApi(Uri uri, WebClient client)
         {
-            using (var client = new WebClient())
-            {
-                client.Headers.Add("origin", string.Format("http://localhost:{0}", port));
-                client.Headers[HttpRequestHeader.ContentType] = "application/x-www-form-urlencoded";
-                var responseString = client.DownloadString(uri);
-                if (EnableLogging) Debug.Log("[Rider] HttpRequestOpenFile response: " + responseString);
-                return responseString;
-            }
+            var responseString = client.DownloadString(uri.AbsoluteUri);
+            Log(LoggingLevel.Verbose, string.Format("CallHttpApi {0} response: {1}", uri.AbsoluteUri, responseString));
+            return responseString;
         }
 
         private static bool CallRider(string args)
         {
-            var riderFileInfo = new FileInfo(DefaultApp);
-            var macOSVersion = riderFileInfo.Extension == ".app";
-            var riderExists = macOSVersion ? new DirectoryInfo(DefaultApp).Exists : riderFileInfo.Exists;
-
-            if (!riderExists)
+            var defaultApp = GetDefaultApp();
+            if (!RiderPathExist(defaultApp))
             {
-                var res = AutomaticChangeRiderLocation(DefaultApp);
-                if (res == false)
-                    return res;
+                return false;
             }
 
             var proc = new Process();
-            if (macOSVersion)
+            if (SystemInfoRiderPlugin.operatingSystemFamily == OperatingSystemFamily.MacOSX)
             {
                 proc.StartInfo.FileName = "open";
-                proc.StartInfo.Arguments = string.Format("-n {0}{1}{0} --args {2}", "\"", "/" + DefaultApp, args);
-                if (EnableLogging) Debug.Log("[Rider] " + proc.StartInfo.FileName + " " + proc.StartInfo.Arguments);
+                proc.StartInfo.Arguments = string.Format("-n {0}{1}{0} --args {2}", "\"", "/" + defaultApp, args);
+                Log(LoggingLevel.Verbose, string.Format("{0} {1}", proc.StartInfo.FileName, proc.StartInfo.Arguments));
             }
             else
             {
-                proc.StartInfo.FileName = DefaultApp;
+                proc.StartInfo.FileName = defaultApp;
                 proc.StartInfo.Arguments = args;
-                if (EnableLogging) Debug.Log("[Rider] " + ("\"" + proc.StartInfo.FileName + "\"" + " " + proc.StartInfo.Arguments));
+                Log(LoggingLevel.Verbose, string.Format("{2}{0}{2}" + " {1}", proc.StartInfo.FileName, proc.StartInfo.Arguments, "\""));
             }
 
             proc.StartInfo.UseShellExecute = false;
@@ -278,37 +408,24 @@ namespace Plugins.Editor.JetBrains
             proc.StartInfo.RedirectStandardOutput = true;
             proc.Start();
 
-            ActivateWindow(DefaultApp);
+            ActivateWindow();
             return true;
         }
 
-        private static void ActivateWindow(string riderPath)
+        private static void ActivateWindow()
         {
-            if (new FileInfo(riderPath).Extension == ".exe")
+            if (SystemInfoRiderPlugin.operatingSystemFamily == OperatingSystemFamily.Windows)
             {
                 try
                 {
-                    var process = Process.GetProcesses().FirstOrDefault(p =>
-                    {
-                        string processName;
-                        try
-                        {
-                            processName = p.ProcessName; // some processes like kaspersky antivirus throw exception on attempt to get ProcessName
-                        }
-                        catch (Exception)
-                        {
-                            return false;
-                        }
-
-                        return !p.HasExited && processName.ToLower().Contains("rider");
-                    });
+                    var process = GetRiderProcess();
                     if (process != null)
                     {
                         // Collect top level windows
                         var topLevelWindows = User32Dll.GetTopLevelWindowHandles();
                         // Get process main window title
                         var windowHandle = topLevelWindows.FirstOrDefault(hwnd => User32Dll.GetWindowProcessId(hwnd) == process.Id);
-                        Debug.Log("[Rider] ActivateWindow: " + process.Id + " " + windowHandle);
+                        Log(LoggingLevel.Info, string.Format("ActivateWindow: {0} {1}", process.Id, windowHandle));
                         if (windowHandle != IntPtr.Zero)
                         {
                             //User32Dll.ShowWindow(windowHandle, 9); //SW_RESTORE = 9
@@ -318,11 +435,37 @@ namespace Plugins.Editor.JetBrains
                 }
                 catch (Exception e)
                 {
-                    Debug.Log("[Rider] " + ("Exception on ActivateWindow: " + e));
+                    Log(LoggingLevel.Warning, "Exception on ActivateWindow: " + e);
                 }
             }
         }
 
+        private static Process GetRiderProcess()
+        {
+            var process = Process.GetProcesses().FirstOrDefault(p =>
+            {
+                string processName;
+                try
+                {
+                    processName =
+                        p.ProcessName; // some processes like kaspersky antivirus throw exception on attempt to get ProcessName
+                }
+                catch (Exception)
+                {
+                    return false;
+                }
+
+                return !p.HasExited && processName.ToLower().Contains("rider");
+            });
+            return process;
+        }
+
+        // The default "Open C# Project" menu item will use the external script editor to load the .sln
+        // file, but unless Unity knows the external script editor can properly load solutions, it will
+        // also launch MonoDevelop (or the OS registered app for .sln files). This menu item side steps
+        // that issue, and opens the solution in Rider without opening MonoDevelop as well.
+        // Unity 2017.1 and later recognise Rider as an app that can load solutions, so this menu isn't
+        // needed in newer versions.
         [MenuItem("Assets/Open C# Project in Rider", false, 1000)]
         static void MenuOpenProject()
         {
@@ -360,40 +503,115 @@ namespace Plugins.Editor.JetBrains
         static void RiderPreferencesItem()
         {
             EditorGUILayout.BeginVertical();
-
-            var url = "https://github.com/JetBrains/Unity3dRider";
-            if (GUILayout.Button(url))
-            {
-                Application.OpenURL(url);
-            }
-
             EditorGUI.BeginChangeCheck();
 
-            var help = @"For now target 4.5 is strongly recommended.
+            var alternatives = GetAllRiderPaths();
+            if (alternatives.Any())
+            {
+                int index = Array.IndexOf(alternatives, RiderPath);
+                var alts = alternatives.Select(s => s.Replace("/", ":"))
+                    .ToArray(); // hack around https://fogbugz.unity3d.com/default.asp?940857_tirhinhe3144t4vn
+                RiderPath = alternatives[EditorGUILayout.Popup("Rider executable:", index == -1 ? 0 : index, alts)];
+                if (EditorGUILayout.Toggle(new GUIContent("Rider is default editor"), Enabled))
+                {
+                    SetExternalScriptEditor(RiderPath);
+                    EditorGUILayout.HelpBox("Unckecking will restore default external editor.", MessageType.None);
+                }
+                else
+                {
+                    SetExternalScriptEditor(string.Empty);
+                    EditorGUILayout.HelpBox("Checking will set Rider as default external editor", MessageType.None);
+                }
+
+            }
+            var help = @"TargetFramework >= 4.5 is strongly recommended.
  - Without 4.5:
     - Rider will fail to resolve System.Linq on Mac/Linux
     - Rider will fail to resolve Firebase Analytics.
- - With 4.5 Rider will show ambiguous references in UniRx.
+ - With 4.5 Rider may show ambiguous references in UniRx.
 All those problems will go away after Unity upgrades to mono4.";
-            TargetFrameworkVersion45 =
-                EditorGUILayout.Toggle(
-                    new GUIContent("TargetFrameworkVersion 4.5",
-                        help), TargetFrameworkVersion45);
+
+            TargetFrameworkVersion =
+                EditorGUILayout.TextField(
+                    new GUIContent("TargetFrameworkVersion",
+                        help), TargetFrameworkVersion);
             EditorGUILayout.HelpBox(help, MessageType.None);
 
             EditorGUI.EndChangeCheck();
 
             EditorGUI.BeginChangeCheck();
 
-            var loggingMsg = @"Enable logging. If you are about to report an issue, please enable logging and attach Unity console output to the issue.";
-            EnableLogging =
-                EditorGUILayout.Toggle(
-                    new GUIContent("Enable Logging",
-                        loggingMsg), EnableLogging);
+            var loggingMsg =
+                @"Sets the amount of Rider Debug output. If you are about to report an issue, please select Verbose logging level and attach Unity console output to the issue.";
+            SelectedLoggingLevel = (LoggingLevel)EditorGUILayout.EnumPopup(new GUIContent("Logging Level", loggingMsg), SelectedLoggingLevel);
             EditorGUILayout.HelpBox(loggingMsg, MessageType.None);
 
             EditorGUI.EndChangeCheck();
+
+            var url = "https://github.com/JetBrains/resharper-unity";
+            LinkButton(url, url);
+
+            /*      if (GUILayout.Button("reset RiderInitializedOnce = false"))
+                  {
+                    RiderInitializedOnce = false;
+                  }*/
+
+            EditorGUILayout.EndVertical();
         }
+
+        private static void LinkButton(string caption, string url)
+        {
+            var style = GUI.skin.label;
+            style.richText = true;
+            caption = string.Format("<color=#0000FF>{0}</color>", caption);
+
+            bool bClicked = GUILayout.Button(caption, style);
+
+            var rect = GUILayoutUtility.GetLastRect();
+            rect.width = style.CalcSize(new GUIContent(caption)).x;
+            EditorGUIUtility.AddCursorRect(rect, MouseCursor.Link);
+
+            if (bClicked)
+                Application.OpenURL(url);
+        }
+
+        #region SystemInfoRiderPlugin
+        static class SystemInfoRiderPlugin
+        {
+            public static OperatingSystemFamily operatingSystemFamily
+            {
+                get
+                {
+#if UNITY_5_5_OR_NEWER
+                    return SystemInfo.operatingSystemFamily;
+#else
+          if (SystemInfo.operatingSystem.StartsWith("Mac", StringComparison.InvariantCultureIgnoreCase))
+          {
+            return OperatingSystemFamily.MacOSX;
+          }
+          if (SystemInfo.operatingSystem.StartsWith("Win", StringComparison.InvariantCultureIgnoreCase))
+          {
+            return OperatingSystemFamily.Windows;
+          }
+          if (SystemInfo.operatingSystem.StartsWith("Lin", StringComparison.InvariantCultureIgnoreCase))
+          {
+            return OperatingSystemFamily.Linux;
+          }
+          return OperatingSystemFamily.Other;
+#endif
+                }
+            }
+        }
+#if !UNITY_5_5_OR_NEWER
+    enum OperatingSystemFamily
+    {
+      Other,
+      MacOSX,
+      Windows,
+      Linux,
+    }
+#endif
+        #endregion
 
         static class User32Dll
         {
@@ -427,17 +645,234 @@ All those problems will go away after Unity upgrades to mono4.";
 
             public delegate Int32 EnumWindowsProc(IntPtr hwnd, IntPtr lParam);
 
-            [DllImport("user32.dll", CharSet = CharSet.Unicode, PreserveSig = true, SetLastError = true, ExactSpelling = true)]
+            [DllImport("user32.dll", CharSet = CharSet.Unicode, PreserveSig = true, SetLastError = true,
+                ExactSpelling = true)]
             public static extern Int32 EnumWindows(IntPtr lpEnumFunc, IntPtr lParam);
 
             [DllImport("user32.dll", SetLastError = true)]
             static extern uint GetWindowThreadProcessId(IntPtr hWnd, out uint lpdwProcessId);
 
-            [DllImport("user32.dll", CharSet = CharSet.Unicode, PreserveSig = true, SetLastError = true, ExactSpelling = true)]
+            [DllImport("user32.dll", CharSet = CharSet.Unicode, PreserveSig = true, SetLastError = true,
+                ExactSpelling = true)]
             public static extern Int32 SetForegroundWindow(IntPtr hWnd);
 
-            [DllImport("user32.dll", CharSet = CharSet.Unicode, PreserveSig = true, SetLastError = true, ExactSpelling = true)]
+            [DllImport("user32.dll", CharSet = CharSet.Unicode, PreserveSig = true, SetLastError = true,
+                ExactSpelling = true)]
             public static extern UInt32 ShowWindow(IntPtr hWnd, Int32 nCmdShow);
+        }
+
+        static class ShortcutResolver
+        {
+            #region Signitures imported from http://pinvoke.net
+
+            [DllImport("shfolder.dll", CharSet = CharSet.Auto)]
+            internal static extern int SHGetFolderPath(IntPtr hwndOwner, int nFolder, IntPtr hToken, int dwFlags, StringBuilder lpszPath);
+
+            [Flags()]
+            enum SLGP_FLAGS
+            {
+                /// <summary>Retrieves the standard short (8.3 format) file name</summary>
+                SLGP_SHORTPATH = 0x1,
+
+                /// <summary>Retrieves the Universal Naming Convention (UNC) path name of the file</summary>
+                SLGP_UNCPRIORITY = 0x2,
+
+                /// <summary>Retrieves the raw path name. A raw path is something that might not exist and may include environment variables that need to be expanded</summary>
+                SLGP_RAWPATH = 0x4
+            }
+
+            [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Auto)]
+            struct WIN32_FIND_DATAW
+            {
+                public uint dwFileAttributes;
+                public long ftCreationTime;
+                public long ftLastAccessTime;
+                public long ftLastWriteTime;
+                public uint nFileSizeHigh;
+                public uint nFileSizeLow;
+                public uint dwReserved0;
+                public uint dwReserved1;
+                [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 260)]
+                public string cFileName;
+                [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 14)]
+                public string cAlternateFileName;
+            }
+
+            [Flags()]
+            enum SLR_FLAGS
+            {
+                /// <summary>
+                /// Do not display a dialog box if the link cannot be resolved. When SLR_NO_UI is set,
+                /// the high-order word of fFlags can be set to a time-out value that specifies the
+                /// maximum amount of time to be spent resolving the link. The function returns if the
+                /// link cannot be resolved within the time-out duration. If the high-order word is set
+                /// to zero, the time-out duration will be set to the default value of 3,000 milliseconds
+                /// (3 seconds). To specify a value, set the high word of fFlags to the desired time-out
+                /// duration, in milliseconds.
+                /// </summary>
+                SLR_NO_UI = 0x1,
+
+                /// <summary>Obsolete and no longer used</summary>
+                SLR_ANY_MATCH = 0x2,
+
+                /// <summary>If the link object has changed, update its path and list of identifiers.
+                /// If SLR_UPDATE is set, you do not need to call IPersistFile::IsDirty to determine
+                /// whether or not the link object has changed.</summary>
+                SLR_UPDATE = 0x4,
+
+                /// <summary>Do not update the link information</summary>
+                SLR_NOUPDATE = 0x8,
+
+                /// <summary>Do not execute the search heuristics</summary>
+                SLR_NOSEARCH = 0x10,
+
+                /// <summary>Do not use distributed link tracking</summary>
+                SLR_NOTRACK = 0x20,
+
+                /// <summary>Disable distributed link tracking. By default, distributed link tracking tracks
+                /// removable media across multiple devices based on the volume name. It also uses the
+                /// Universal Naming Convention (UNC) path to track remote file systems whose drive letter
+                /// has changed. Setting SLR_NOLINKINFO disables both types of tracking.</summary>
+                SLR_NOLINKINFO = 0x40,
+
+                /// <summary>Call the Microsoft Windows Installer</summary>
+                SLR_INVOKE_MSI = 0x80
+            }
+
+
+            /// <summary>The IShellLink interface allows Shell links to be created, modified, and resolved</summary>
+            [ComImport(), InterfaceType(ComInterfaceType.InterfaceIsIUnknown), Guid("000214F9-0000-0000-C000-000000000046")]
+            interface IShellLinkW
+            {
+                /// <summary>Retrieves the path and file name of a Shell link object</summary>
+                [MethodImpl(MethodImplOptions.InternalCall | MethodImplOptions.PreserveSig, MethodCodeType = MethodCodeType.Runtime)]
+                void GetPath([Out(), MarshalAs(UnmanagedType.LPWStr)] StringBuilder pszFile, int cchMaxPath, out WIN32_FIND_DATAW pfd, SLGP_FLAGS fFlags);
+
+                /// <summary>Retrieves the list of item identifiers for a Shell link object</summary>
+                [MethodImpl(MethodImplOptions.InternalCall | MethodImplOptions.PreserveSig, MethodCodeType = MethodCodeType.Runtime)]
+                void GetIDList(out IntPtr ppidl);
+
+                /// <summary>Sets the pointer to an item identifier list (PIDL) for a Shell link object.</summary>
+                [MethodImpl(MethodImplOptions.InternalCall | MethodImplOptions.PreserveSig, MethodCodeType = MethodCodeType.Runtime)]
+                void SetIDList(IntPtr pidl);
+
+                /// <summary>Retrieves the description string for a Shell link object</summary>
+                [MethodImpl(MethodImplOptions.InternalCall | MethodImplOptions.PreserveSig, MethodCodeType = MethodCodeType.Runtime)]
+                void GetDescription([Out(), MarshalAs(UnmanagedType.LPWStr)] StringBuilder pszName, int cchMaxName);
+
+                /// <summary>Sets the description for a Shell link object. The description can be any application-defined string</summary>
+                [MethodImpl(MethodImplOptions.InternalCall | MethodImplOptions.PreserveSig, MethodCodeType = MethodCodeType.Runtime)]
+                void SetDescription([MarshalAs(UnmanagedType.LPWStr)] string pszName);
+
+                /// <summary>Retrieves the name of the working directory for a Shell link object</summary>
+                [MethodImpl(MethodImplOptions.InternalCall | MethodImplOptions.PreserveSig, MethodCodeType = MethodCodeType.Runtime)]
+                void GetWorkingDirectory([Out(), MarshalAs(UnmanagedType.LPWStr)] StringBuilder pszDir, int cchMaxPath);
+
+                /// <summary>Sets the name of the working directory for a Shell link object</summary>
+                [MethodImpl(MethodImplOptions.InternalCall | MethodImplOptions.PreserveSig, MethodCodeType = MethodCodeType.Runtime)]
+                void SetWorkingDirectory([MarshalAs(UnmanagedType.LPWStr)] string pszDir);
+
+                /// <summary>Retrieves the command-line arguments associated with a Shell link object</summary>
+                [MethodImpl(MethodImplOptions.InternalCall | MethodImplOptions.PreserveSig, MethodCodeType = MethodCodeType.Runtime)]
+                void GetArguments([Out(), MarshalAs(UnmanagedType.LPWStr)] StringBuilder pszArgs, int cchMaxPath);
+
+                /// <summary>Sets the command-line arguments for a Shell link object</summary>
+                [MethodImpl(MethodImplOptions.InternalCall | MethodImplOptions.PreserveSig, MethodCodeType = MethodCodeType.Runtime)]
+                void SetArguments([MarshalAs(UnmanagedType.LPWStr)] string pszArgs);
+
+                /// <summary>Retrieves the hot key for a Shell link object</summary>
+                [MethodImpl(MethodImplOptions.InternalCall | MethodImplOptions.PreserveSig, MethodCodeType = MethodCodeType.Runtime)]
+                void GetHotkey(out short pwHotkey);
+
+                /// <summary>Sets a hot key for a Shell link object</summary>
+                [MethodImpl(MethodImplOptions.InternalCall | MethodImplOptions.PreserveSig, MethodCodeType = MethodCodeType.Runtime)]
+                void SetHotkey(short wHotkey);
+
+                /// <summary>Retrieves the show command for a Shell link object</summary>
+                [MethodImpl(MethodImplOptions.InternalCall | MethodImplOptions.PreserveSig, MethodCodeType = MethodCodeType.Runtime)]
+                void GetShowCmd(out int piShowCmd);
+
+                /// <summary>Sets the show command for a Shell link object. The show command sets the initial show state of the window.</summary>
+                [MethodImpl(MethodImplOptions.InternalCall | MethodImplOptions.PreserveSig, MethodCodeType = MethodCodeType.Runtime)]
+                void SetShowCmd(int iShowCmd);
+
+                /// <summary>Retrieves the location (path and index) of the icon for a Shell link object</summary>
+                [MethodImpl(MethodImplOptions.InternalCall | MethodImplOptions.PreserveSig, MethodCodeType = MethodCodeType.Runtime)]
+                void GetIconLocation([Out(), MarshalAs(UnmanagedType.LPWStr)] StringBuilder pszIconPath, int cchIconPath, out int piIcon);
+
+                /// <summary>Sets the location (path and index) of the icon for a Shell link object</summary>
+                [MethodImpl(MethodImplOptions.InternalCall | MethodImplOptions.PreserveSig, MethodCodeType = MethodCodeType.Runtime)]
+                void SetIconLocation([MarshalAs(UnmanagedType.LPWStr)] string pszIconPath, int iIcon);
+
+                /// <summary>Sets the relative path to the Shell link object</summary>
+                [MethodImpl(MethodImplOptions.InternalCall | MethodImplOptions.PreserveSig, MethodCodeType = MethodCodeType.Runtime)]
+                void SetRelativePath([MarshalAs(UnmanagedType.LPWStr)] string pszPathRel, int dwReserved);
+
+                /// <summary>Attempts to find the target of a Shell link, even if it has been moved or renamed</summary>
+                [MethodImpl(MethodImplOptions.InternalCall | MethodImplOptions.PreserveSig, MethodCodeType = MethodCodeType.Runtime)]
+                void Resolve(IntPtr hwnd, SLR_FLAGS fFlags);
+
+                /// <summary>Sets the path and file name of a Shell link object</summary>
+                [MethodImpl(MethodImplOptions.InternalCall | MethodImplOptions.PreserveSig, MethodCodeType = MethodCodeType.Runtime)]
+                void SetPath([MarshalAs(UnmanagedType.LPWStr)] string pszFile);
+            }
+
+            [ComImport, Guid("0000010c-0000-0000-c000-000000000046"), InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
+            public interface IPersist
+            {
+                [MethodImpl(MethodImplOptions.InternalCall | MethodImplOptions.PreserveSig, MethodCodeType = MethodCodeType.Runtime)]
+                void GetClassID(out Guid pClassID);
+            }
+
+
+            [ComImport, Guid("0000010b-0000-0000-C000-000000000046"),
+             InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
+            public interface IPersistFile : IPersist
+            {
+                [MethodImpl(MethodImplOptions.InternalCall | MethodImplOptions.PreserveSig, MethodCodeType = MethodCodeType.Runtime)]
+                new void GetClassID(out Guid pClassID);
+
+                [MethodImpl(MethodImplOptions.InternalCall | MethodImplOptions.PreserveSig, MethodCodeType = MethodCodeType.Runtime)]
+                int IsDirty();
+
+                [MethodImpl(MethodImplOptions.InternalCall | MethodImplOptions.PreserveSig, MethodCodeType = MethodCodeType.Runtime)]
+                void Load([In, MarshalAs(UnmanagedType.LPWStr)] string pszFileName, uint dwMode);
+
+                [MethodImpl(MethodImplOptions.InternalCall | MethodImplOptions.PreserveSig, MethodCodeType = MethodCodeType.Runtime)]
+                void Save([In, MarshalAs(UnmanagedType.LPWStr)] string pszFileName, [In, MarshalAs(UnmanagedType.Bool)] bool fRemember);
+
+                [MethodImpl(MethodImplOptions.InternalCall | MethodImplOptions.PreserveSig, MethodCodeType = MethodCodeType.Runtime)]
+                void SaveCompleted([In, MarshalAs(UnmanagedType.LPWStr)] string pszFileName);
+
+                [MethodImpl(MethodImplOptions.InternalCall | MethodImplOptions.PreserveSig, MethodCodeType = MethodCodeType.Runtime)]
+                void GetCurFile([In, MarshalAs(UnmanagedType.LPWStr)] string ppszFileName);
+            }
+
+            const uint STGM_READ = 0;
+            const int MAX_PATH = 260;
+
+            // CLSID_ShellLink from ShlGuid.h 
+            [
+                ComImport(),
+                Guid("00021401-0000-0000-C000-000000000046")
+            ]
+            public class ShellLink
+            {
+            }
+
+            #endregion
+
+            public static string Resolve(string filename)
+            {
+                ShellLink link = new ShellLink();
+                ((IPersistFile)link).Load(filename, STGM_READ);
+                // If I can get hold of the hwnd call resolve first. This handles moved and renamed files.  
+                // ((IShellLinkW)link).Resolve(hwnd, 0) 
+                StringBuilder sb = new StringBuilder(MAX_PATH);
+                WIN32_FIND_DATAW data = new WIN32_FIND_DATAW();
+                ((IShellLinkW)link).GetPath(sb, sb.Capacity, out data, 0);
+                return sb.ToString();
+            }
         }
     }
 }
