@@ -296,6 +296,8 @@ namespace SpaceEngine.Core.Terrain
         /// </summary>
         public void UpdateLOD()
         {
+            // TODO : AddOccluder/IsOccluded Threading!!!
+
             var visibility = (Parent == null) ? Frustum.VISIBILITY.PARTIALLY : Parent.Visibility;
 
             if (visibility == Frustum.VISIBILITY.PARTIALLY)
