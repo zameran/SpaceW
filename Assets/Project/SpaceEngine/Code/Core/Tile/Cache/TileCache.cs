@@ -114,7 +114,7 @@ namespace SpaceEngine.Core.Tile.Cache
         /// <returns>Returns the storage used to store the actual tiles data.</returns>
         public TileStorage GetStorage(int i)
         {
-            if (i >= TileStorage.Length)
+            if (i >= TileStorageLength)
             {
                 Debug.Log(string.Format("TileCache: Tile storage at location {0} does not exist!", i));
             }
@@ -248,9 +248,9 @@ namespace SpaceEngine.Core.Tile.Cache
             }
 
             // Keep track of the max number of tiles ever used for debug purposes
-            if (UsedTiles.Count > MaximumUsedTiles)
+            if (UsedTilesCount > MaximumUsedTiles)
             {
-                MaximumUsedTiles = UsedTiles.Count;
+                MaximumUsedTiles = UsedTilesCount;
             }
 
             // Increment the num of users
