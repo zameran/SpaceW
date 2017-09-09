@@ -29,9 +29,6 @@ namespace SpaceEngine.Ocean
         RenderTexture[] FourierBuffer6;
         RenderTexture[] FourierBuffer7;
 
-        RenderTexture Map5;
-        RenderTexture Map6;
-
         RenderTexture Foam0;
         RenderTexture Foam1;
 
@@ -158,12 +155,9 @@ namespace SpaceEngine.Ocean
 
         protected override void CreateRenderTextures()
         {
-            var mapFormat = RenderTextureFormat.ARGBFloat;
             var format = RenderTextureFormat.ARGBFloat;
 
             // These texture hold the actual data use in the ocean renderer
-            Map5 = RTExtensions.CreateRTexture(FourierGridSize, 0, mapFormat, FilterMode.Trilinear, TextureWrapMode.Repeat, true, true, Aniso);
-            Map6 = RTExtensions.CreateRTexture(FourierGridSize, 0, mapFormat, FilterMode.Trilinear, TextureWrapMode.Repeat, true, true, Aniso);
             Foam0 = RTExtensions.CreateRTexture(FourierGridSize, 0, format, FilterMode.Trilinear, TextureWrapMode.Repeat, true, true, FoamAniso);
             Foam1 = RTExtensions.CreateRTexture(FourierGridSize, 0, format, FilterMode.Trilinear, TextureWrapMode.Repeat, true, true, FoamAniso);
 
