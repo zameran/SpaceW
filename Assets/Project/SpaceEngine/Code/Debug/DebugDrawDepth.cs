@@ -54,11 +54,7 @@ namespace SpaceEngine.Debugging
             customDepthCamera.depthTextureMode = DepthTextureMode.Depth;
             customDepthCamera.enabled = false;
 
-            DepthTexture = new RenderTexture(Screen.width, Screen.height, 16, RenderTextureFormat.ARGB32);
-
-            DepthTexture.filterMode = FilterMode.Point;
-            DepthTexture.useMipMap = false;
-            DepthTexture.Create();
+            DepthTexture = RTExtensions.CreateRTexture(new Vector2(Screen.width, Screen.height), 16, RenderTextureFormat.ARGB32, FilterMode.Point, TextureWrapMode.Clamp);
         }
 
         private void Update()

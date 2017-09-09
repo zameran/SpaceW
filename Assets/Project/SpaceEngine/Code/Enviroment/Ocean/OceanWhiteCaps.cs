@@ -162,18 +162,18 @@ namespace SpaceEngine.Ocean
             var format = RenderTextureFormat.ARGBFloat;
 
             // These texture hold the actual data use in the ocean renderer
-            CreateMap(ref Map5, mapFormat, Aniso);
-            CreateMap(ref Map6, mapFormat, Aniso);
+            Map5 = RTExtensions.CreateRTexture(FourierGridSize, 0, mapFormat, FilterMode.Trilinear, TextureWrapMode.Repeat, true, true, Aniso);
+            Map6 = RTExtensions.CreateRTexture(FourierGridSize, 0, mapFormat, FilterMode.Trilinear, TextureWrapMode.Repeat, true, true, Aniso);
+            Foam0 = RTExtensions.CreateRTexture(FourierGridSize, 0, format, FilterMode.Trilinear, TextureWrapMode.Repeat, true, true, FoamAniso);
+            Foam1 = RTExtensions.CreateRTexture(FourierGridSize, 0, format, FilterMode.Trilinear, TextureWrapMode.Repeat, true, true, FoamAniso);
 
-            CreateMap(ref Foam0, format, FoamAniso);
-            CreateMap(ref Foam1, format, FoamAniso);
-
+            Foam0.mipMapBias = FoamMipmapBias;
             Foam1.mipMapBias = FoamMipmapBias;
 
             // These textures are used to perform the fourier transform
-            CreateBuffer(ref FourierBuffer5, format);// Jacobians XX
-            CreateBuffer(ref FourierBuffer6, format);// Jacobians YY
-            CreateBuffer(ref FourierBuffer7, format);// Jacobians XY
+            CreateBuffer(out FourierBuffer5, format);// Jacobians XX
+            CreateBuffer(out FourierBuffer6, format);// Jacobians YY
+            CreateBuffer(out FourierBuffer7, format);// Jacobians XY
 
             // Make sure the base textures are also created
             base.CreateRenderTextures();

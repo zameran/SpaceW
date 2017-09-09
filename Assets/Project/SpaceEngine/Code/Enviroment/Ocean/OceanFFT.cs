@@ -2,7 +2,6 @@
 using SpaceEngine.Core.Bodies;
 
 using UnityEngine;
-using UnityEngine.Rendering;
 
 using Random = UnityEngine.Random;
 
@@ -62,7 +61,7 @@ namespace SpaceEngine.Ocean
         /// This is the fourier transform size, must pow2 number. Recommend no higher or lower than 64, 128 or 256.
         /// </summary>
         [SerializeField]
-        int FourierGridSize = 64;
+        protected int FourierGridSize = 64;
 
         int VarianceSize = 16;
 
@@ -305,79 +304,46 @@ namespace SpaceEngine.Ocean
             var format = RenderTextureFormat.ARGBFloat;
 
             // These texture hold the actual data use in the ocean renderer
-            CreateMap(ref Map0, mapFormat, Aniso);
-            CreateMap(ref Map1, mapFormat, Aniso);
-            CreateMap(ref Map2, mapFormat, Aniso);
-            CreateMap(ref Map3, mapFormat, Aniso);
-            CreateMap(ref Map4, mapFormat, Aniso);
+            Map0 = RTExtensions.CreateRTexture(FourierGridSize, 0, mapFormat, FilterMode.Trilinear, TextureWrapMode.Repeat, true, true, Aniso);
+            Map1 = RTExtensions.CreateRTexture(FourierGridSize, 0, mapFormat, FilterMode.Trilinear, TextureWrapMode.Repeat, true, true, Aniso);
+            Map2 = RTExtensions.CreateRTexture(FourierGridSize, 0, mapFormat, FilterMode.Trilinear, TextureWrapMode.Repeat, true, true, Aniso);
+            Map3 = RTExtensions.CreateRTexture(FourierGridSize, 0, mapFormat, FilterMode.Trilinear, TextureWrapMode.Repeat, true, true, Aniso);
+            Map4 = RTExtensions.CreateRTexture(FourierGridSize, 0, mapFormat, FilterMode.Trilinear, TextureWrapMode.Repeat, true, true, Aniso);
 
             // These textures are used to perform the fourier transform
-            CreateBuffer(ref FourierBuffer0, format); // heights
-            CreateBuffer(ref FourierBuffer1, format); // slopes X
-            CreateBuffer(ref FourierBuffer2, format); // slopes Y
-            CreateBuffer(ref FourierBuffer3, format); // displacement X
-            CreateBuffer(ref FourierBuffer4, format); // displacement Y
+            CreateBuffer(out FourierBuffer0, format); // heights
+            CreateBuffer(out FourierBuffer1, format); // slopes X
+            CreateBuffer(out FourierBuffer2, format); // slopes Y
+            CreateBuffer(out FourierBuffer3, format); // displacement X
+            CreateBuffer(out FourierBuffer4, format); // displacement Y
 
             // These textures hold the specturm the fourier transform is performed on
-            Spectrum01 = new RenderTexture(FourierGridSize, FourierGridSize, 0, format);
-            Spectrum01.filterMode = FilterMode.Point;
-            Spectrum01.wrapMode = TextureWrapMode.Repeat;
-            Spectrum01.enableRandomWrite = true;
-            Spectrum01.Create();
+            Spectrum01 = RTExtensions.CreateRTexture(FourierGridSize, 0, format, FilterMode.Point, TextureWrapMode.Repeat);
+            Spectrum23 = RTExtensions.CreateRTexture(FourierGridSize, 0, format, FilterMode.Point, TextureWrapMode.Repeat);
 
-            Spectrum23 = new RenderTexture(FourierGridSize, FourierGridSize, 0, format);
-            Spectrum23.filterMode = FilterMode.Point;
-            Spectrum23.wrapMode = TextureWrapMode.Repeat;
-            Spectrum23.enableRandomWrite = true;
-            Spectrum23.Create();
+            WTable = RTExtensions.CreateRTexture(FourierGridSize, 0, format, FilterMode.Point, TextureWrapMode.Clamp);
 
-            WTable = new RenderTexture(FourierGridSize, FourierGridSize, 0, format);
-            WTable.filterMode = FilterMode.Point;
-            WTable.wrapMode = TextureWrapMode.Clamp;
-            WTable.enableRandomWrite = true;
-            WTable.Create();
-
-            Variance = new RenderTexture(VarianceSize, VarianceSize, 0, RenderTextureFormat.RHalf);
-            Variance.volumeDepth = VarianceSize;
-            Variance.wrapMode = TextureWrapMode.Clamp;
-            Variance.filterMode = FilterMode.Bilinear;
-            Variance.dimension = TextureDimension.Tex3D;
-            Variance.enableRandomWrite = true;
-            Variance.useMipMap = true;
-            Variance.Create();
+            Variance = RTExtensions.CreateRTexture(VarianceSize, 0, RenderTextureFormat.RHalf, FilterMode.Bilinear, TextureWrapMode.Clamp, VarianceSize);
         }
 
-        protected void CreateBuffer(ref RenderTexture[] tex, RenderTextureFormat format)
+        protected void CreateBuffer(out RenderTexture[] textures, RenderTextureFormat format)
         {
-            tex = new RenderTexture[2];
+            textures = new RenderTexture[2];
 
             for (byte i = 0; i < 2; i++)
             {
-                tex[i] = new RenderTexture(FourierGridSize, FourierGridSize, 0, format);
-                tex[i].filterMode = FilterMode.Point;
-                tex[i].wrapMode = TextureWrapMode.Clamp;
-                tex[i].Create();
+                textures[i] = RTExtensions.CreateRTexture(FourierGridSize, 0, format, FilterMode.Point, TextureWrapMode.Clamp);
             }
         }
 
-        protected void CreateMap(ref RenderTexture map, RenderTextureFormat format, int aniso)
-        {
-            map = new RenderTexture(FourierGridSize, FourierGridSize, 0, format);
-            map.filterMode = FilterMode.Trilinear;
-            map.wrapMode = TextureWrapMode.Repeat;
-            map.anisoLevel = aniso;
-            map.useMipMap = true;
-            map.Create();
-        }
-
-        private float Sqrt(float x)
+        private float Sqr(float x)
         {
             return x * x;
         }
 
         private float Omega(float k)
         {
-            return Mathf.Sqrt(9.81f * k * (1.0f + Sqrt(k / WAVE_KM))); // Eq 24
+            return Mathf.Sqrt(9.81f * k * (1.0f + Sqr(k / WAVE_KM))); // Eq 24
         }
 
         private float Spectrum(float kx, float ky, bool omnispectrum)
@@ -392,29 +358,29 @@ namespace SpaceEngine.Ocean
             float c = Omega(k) / k;
 
             // spectral peak
-            float kp = 9.81f * Sqrt(WavesOmega / U10); // after Eq 3
+            float kp = 9.81f * Sqr(WavesOmega / U10); // after Eq 3
             float cp = Omega(kp) / kp;
 
             // Friction velocity
-            float z0 = 3.7e-5f * Sqrt(U10) / 9.81f * Mathf.Pow(U10 / cp, 0.9f); // Eq 66
+            float z0 = 3.7e-5f * Sqr(U10) / 9.81f * Mathf.Pow(U10 / cp, 0.9f); // Eq 66
             float u_star = 0.41f * U10 / Mathf.Log(10.0f / z0); // Eq 60
 
-            float Lpm = Mathf.Exp(-5.0f / 4.0f * Sqrt(kp / k)); // after Eq 3
+            float Lpm = Mathf.Exp(-5.0f / 4.0f * Sqr(kp / k)); // after Eq 3
             float gamma = (WavesOmega < 1.0f) ? 1.7f : 1.7f + 6.0f * Mathf.Log(WavesOmega); // after Eq 3 // log10 or log?
             float sigma = 0.08f * (1.0f + 4.0f / Mathf.Pow(WavesOmega, 3.0f)); // after Eq 3
-            float Gamma = Mathf.Exp(-1.0f / (2.0f * Sqrt(sigma)) * Sqrt(Mathf.Sqrt(k / kp) - 1.0f));
+            float Gamma = Mathf.Exp(-1.0f / (2.0f * Sqr(sigma)) * Sqr(Mathf.Sqrt(k / kp) - 1.0f));
             float Jp = Mathf.Pow(gamma, Gamma); // Eq 3
             float Fp = Lpm * Jp * Mathf.Exp(-WavesOmega / Mathf.Sqrt(10.0f) * (Mathf.Sqrt(k / kp) - 1.0f)); // Eq 32
             float alphap = 0.006f * Mathf.Sqrt(WavesOmega); // Eq 34
             float Bl = 0.5f * alphap * cp / c * Fp; // Eq 31
 
             float alpham = 0.01f * (u_star < WAVE_CM ? 1.0f + Mathf.Log(u_star / WAVE_CM) : 1.0f + 3.0f * Mathf.Log(u_star / WAVE_CM)); // Eq 44
-            float Fm = Mathf.Exp(-0.25f * Sqrt(k / WAVE_KM - 1.0f)); // Eq 41
+            float Fm = Mathf.Exp(-0.25f * Sqr(k / WAVE_KM - 1.0f)); // Eq 41
             float Bh = 0.5f * alpham * WAVE_CM / c * Fm * Lpm; // Eq 40 (fixed)
 
             Bh *= Lpm;
 
-            if (omnispectrum) return AMP * (Bl + Bh) / (k * Sqrt(k)); // Eq 30
+            if (omnispectrum) return AMP * (Bl + Bh) / (k * Sqr(k)); // Eq 30
 
             float a0 = Mathf.Log(2.0f) / 4.0f;
             float ap = 4.0f;
@@ -431,7 +397,7 @@ namespace SpaceEngine.Ocean
             // Remove waves perpendicular to wind dir
             float tweak = Mathf.Sqrt(Mathf.Max(kx / Mathf.Sqrt(kx * kx + ky * ky), 0.0f));
 
-            return AMP * (Bl + Bh) * (1.0f + Delta * Mathf.Cos(2.0f * phi)) / (2.0f * Mathf.PI * Sqrt(Sqrt(k))) * tweak; // Eq 67
+            return AMP * (Bl + Bh) * (1.0f + Delta * Mathf.Cos(2.0f * phi)) / (2.0f * Mathf.PI * Sqr(Sqr(k))) * tweak; // Eq 67
         }
 
         private Vector2 GetSpectrumSample(float i, float j, float lengthScale, float kMin)
@@ -532,7 +498,7 @@ namespace SpaceEngine.Ocean
             }
 
             //Write floating point data into render texture
-            ComputeBuffer buffer = new ComputeBuffer(FourierGridSize * FourierGridSize, sizeof(float) * 4);
+            var buffer = new ComputeBuffer(FourierGridSize * FourierGridSize, sizeof(float) * 4);
 
             buffer.SetData(spectrum01);
             CBUtility.WriteIntoRenderTexture(Spectrum01, CBUtility.Channels.RGBA, buffer, GodManager.Instance.WriteData);
