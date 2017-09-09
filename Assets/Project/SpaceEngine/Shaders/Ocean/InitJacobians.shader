@@ -11,6 +11,7 @@ Shader "SpaceEngine/Ocean/InitJacobians"
 			
 			CGPROGRAM
 			#include "../Math.cginc"
+			#include "../Time.cginc"
 
 			#pragma target 3.0
 			#pragma vertex vert
@@ -21,7 +22,6 @@ Shader "SpaceEngine/Ocean/InitJacobians"
 			uniform sampler2D _WTable;
 			uniform float4 _Offset;
 			uniform float4 _InverseGridSizes;
-			uniform float _T;
 
 			struct a2v
 			{
@@ -78,10 +78,10 @@ Shader "SpaceEngine/Ocean/InitJacobians"
 				
 				float4 w = tex2D(_WTable, uv);
 				
-				float2 h1 = GetSpectrum(_T, w.x, s12.xy, s12c.xy);
-				float2 h2 = GetSpectrum(_T, w.y, s12.zw, s12c.zw);
-				float2 h3 = GetSpectrum(_T, w.z, s34.xy, s34c.xy);
-				float2 h4 = GetSpectrum(_T, w.w, s34.zw, s34c.zw);
+				float2 h1 = GetSpectrum(_RealTime, w.x, s12.xy, s12c.xy);
+				float2 h2 = GetSpectrum(_RealTime, w.y, s12.zw, s12c.zw);
+				float2 h3 = GetSpectrum(_RealTime, w.z, s34.xy, s34c.xy);
+				float2 h4 = GetSpectrum(_RealTime, w.w, s34.zw, s34c.zw);
 				
 				/// Jacobians
 				float4 IK = float4(IK1,IK2,IK3,IK4);

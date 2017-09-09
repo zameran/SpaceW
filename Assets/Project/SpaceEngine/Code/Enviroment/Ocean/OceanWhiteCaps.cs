@@ -180,8 +180,6 @@ namespace SpaceEngine.Ocean
             // Init jacobians (5,6,7)
             var buffers567 = new RenderTexture[] { FourierBuffer5[1], FourierBuffer6[1], FourierBuffer7[1] };
 
-            InitJacobiansMaterial.SetFloat("_T", t);
-
             RTUtility.MultiTargetBlit(buffers567, InitJacobiansMaterial);
         }
     }

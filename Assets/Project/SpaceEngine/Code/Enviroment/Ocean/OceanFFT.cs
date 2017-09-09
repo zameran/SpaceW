@@ -176,9 +176,7 @@ namespace SpaceEngine.Ocean
         {
             if (DrawOcean == true)
             {
-                var t = Time.realtimeSinceStartup;
-
-                InitWaveSpectrum(t);
+                InitWaveSpectrum(Time.realtimeSinceStartup);
 
                 // Perform fourier transform and record what is the current index
                 IDX = Fourier.PeformFFT(FourierBuffer0, FourierBuffer1, FourierBuffer2);
@@ -284,8 +282,6 @@ namespace SpaceEngine.Ocean
         {
             // Init heights (0) and slopes (1,2)
             var buffers012 = new RenderTexture[] { FourierBuffer0[1], FourierBuffer1[1], FourierBuffer2[1] };
-
-            InitSpectrumMaterial.SetFloat("_T", t);
 
             RTUtility.MultiTargetBlit(buffers012, InitSpectrumMaterial);
 
