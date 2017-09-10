@@ -76,13 +76,13 @@ namespace SpaceEngine.Debugging
                     {
                         var entry = sequence[i];
 
-                        GUILayout.BeginVertical(string.Format("{0}", entry.Name), GUISkin.box, GUILayout.Width(debugInfoBounds.width - 40));
+                        GUILayoutExtensions.VerticalBoxed(string.Format("{0}", entry.Name), GUISkin, () =>
                         {
                             GUILayout.Space(20);
 
                             if (true)
                             {
-                                GUILayout.BeginVertical("", GUISkin.box, GUILayout.Width(debugInfoBounds.width - 45));
+                                GUILayoutExtensions.VerticalBoxed("", GUISkin, () =>
                                 {
                                     GUILayoutExtensions.Vertical(() =>
                                     {
@@ -101,11 +101,9 @@ namespace SpaceEngine.Debugging
                                             GUILayoutExtensions.LabelWithFlexibleSpace("Frame: ", entry.Frame);
                                         });
                                     });
-                                }
-                                GUILayout.EndVertical();
+                                }, GUILayout.Width(debugInfoBounds.width - 45));
                             }
-                        }
-                        GUILayout.EndVertical();
+                        }, GUILayout.Width(debugInfoBounds.width - 40));
                     }
 
                     GUILayout.Space(10);

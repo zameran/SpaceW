@@ -110,9 +110,10 @@ namespace SpaceEngine.Debugging
                 {
                     var entry = entryies[i];
 
-                    GUILayout.BeginHorizontal("box");
-                    GUILayoutExtensions.LabelWithFlexibleSpace(entry.Key.FullName, entry.Value.ToString());
-                    GUILayout.EndHorizontal();
+                    GUILayoutExtensions.HorizontalBoxed("", GUISkin, () =>
+                    {
+                        GUILayoutExtensions.LabelWithFlexibleSpace(entry.Key.FullName, entry.Value.ToString());
+                    });
                 }
 
                 GUILayout.Space(10);

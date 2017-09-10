@@ -33,11 +33,9 @@
 // Creator: zameran
 #endregion
 
-using SpaceEngine.Core.Tile.Storage;
 using SpaceEngine.Core.Storage;
-
+using SpaceEngine.Core.Tile.Storage;
 using System.Linq;
-
 using UnityEngine;
 
 namespace SpaceEngine.Debugging
@@ -74,13 +72,13 @@ namespace SpaceEngine.Debugging
 
         protected void DrawStorageInfo<T>(string prefix = "Storage") where T : TileStorage
         {
-            GUILayout.BeginVertical(prefix, GUISkin.box, GUILayout.Width(debugInfoBounds.width - 40));
+            GUILayoutExtensions.VerticalBoxed(prefix, GUISkin, () =>
             {
                 var storages = GodManager.Instance.ActiveBody.transform.GetComponentsInChildren<T>().ToList();
 
                 GUILayout.Space(20);
 
-                GUILayout.BeginVertical("", GUISkin.box, GUILayout.Width(debugInfoBounds.width - 45));
+                GUILayoutExtensions.VerticalBoxed("", GUISkin, () =>
                 {
                     if (storages.Count == 0)
                     {
@@ -94,10 +92,8 @@ namespace SpaceEngine.Debugging
                     }
 
                     GUILayout.Space(5);
-                }
-                GUILayout.EndVertical();
-            }
-            GUILayout.EndVertical();
+                }, GUILayout.Width(debugInfoBounds.width - 45));
+            }, GUILayout.Width(debugInfoBounds.width - 40));
         }
     }
 }

@@ -68,15 +68,27 @@ namespace SpaceEngine.Debugging
         {
             ScrollPosition = GUILayout.BeginScrollView(ScrollPosition, false, true, GUILayout.Width(debugInfoBounds.width), GUILayout.Height(debugInfoBounds.height));
             {
-                GUILayout.Label("Input info: ", BoldLabelStyle);
+                GUILayoutExtensions.VerticalBoxed("Input info: ", GUISkin, () =>
+                {
+                    GUILayout.Space(20);
 
-                DrawLabelLines(Info);
+                    GUILayoutExtensions.VerticalBoxed("", GUISkin, () =>
+                    {
+                        DrawLabelLines(Info);
+                    });
+                });
 
-                GUILayout.Space(10);
+                GUILayout.Space(5);
 
-                GUILayout.Label("Additional info: ", BoldLabelStyle);
+                GUILayoutExtensions.VerticalBoxed("Additional info: ", GUISkin, () =>
+                {
+                    GUILayout.Space(20);
 
-                DrawLabelLines(InfoAdditional);
+                    GUILayoutExtensions.VerticalBoxed("", GUISkin, () =>
+                    {
+                        DrawLabelLines(InfoAdditional);
+                    });
+                });
             }
 
             GUILayout.EndScrollView();
@@ -91,6 +103,8 @@ namespace SpaceEngine.Debugging
                     GUILayoutExtensions.LabelWithSpace(lines[i]);
                 }
             });
+
+            GUILayout.Space(8);
         }
     }
 }

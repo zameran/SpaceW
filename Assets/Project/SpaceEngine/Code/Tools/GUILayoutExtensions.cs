@@ -83,4 +83,50 @@ public static class GUILayoutExtensions
         if (body != null) body();
         GUILayout.EndVertical();
     }
+
+    public static void VerticalBoxed(string caption, GUISkin skin, Action body, params GUILayoutOption[] options)
+    {
+        GUILayout.BeginVertical(caption, skin.box, options);
+        {
+            if (body != null) body();
+        }
+        GUILayout.EndVertical();
+    }
+
+    public static void HorizontalBoxed(string caption, GUISkin skin, Action body, params GUILayoutOption[] options)
+    {
+        GUILayout.BeginHorizontal(caption, skin.box, options);
+        {
+            if (body != null) body();
+        }
+        GUILayout.EndHorizontal();
+    }
+
+    public static void DrawWithColor(Action body, Color color)
+    {
+        var tempColor = GUI.color;
+
+        GUI.color = color;
+
+        if (body != null) body();
+        
+        GUI.color = tempColor;
+    }
+
+    public static void DrawBadHolder(string caption, string message, GUISkin skin)
+    {
+        VerticalBoxed(caption, skin, () =>
+        {
+            GUILayout.Space(20);
+
+            VerticalBoxed("", skin, () =>
+            {
+                LabelWithSpace(message, -8);
+
+                GUILayout.Space(5);
+            });
+        });
+
+        GUILayout.Space(5);
+    }
 }

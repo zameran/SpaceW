@@ -75,26 +75,21 @@ namespace SpaceEngine.Debugging
                 {
                     var counter = counters[i];
 
-                    GUILayout.BeginVertical(string.Format("{0}", counter.Name), GUISkin.box, GUILayout.Width(debugInfoBounds.width - 40));
+                    GUILayoutExtensions.VerticalBoxed(string.Format("{0}", counter.Name), GUISkin, () =>
                     {
                         GUILayout.Space(20);
 
-                        if (true)
+                        GUILayoutExtensions.VerticalBoxed("", GUISkin, () =>
                         {
-                            GUILayout.BeginVertical("", GUISkin.box, GUILayout.Width(debugInfoBounds.width - 45));
-                            {
-                                GUILayout.BeginHorizontal();
-                                GUILayoutExtensions.LabelWithSpace(string.Format("Total: {0}", counter.Time / 1000.0f), -8);
-                                GUILayoutExtensions.LabelWithSpace(string.Format("Average: {0}", counter.Average / 1000.0f), -8);
-                                GUILayoutExtensions.LabelWithSpace(string.Format("Last: {0}", counter.Last / 1000.0f), -8);
-                                GUILayoutExtensions.LabelWithSpace(string.Format("Max: {0}", counter.Max / 1000.0f), -8);
-                                GUILayoutExtensions.LabelWithSpace(string.Format("Count: {0}", counter.Count), -8);
-                                GUILayout.EndHorizontal();
-                            }
-                            GUILayout.EndVertical();
-                        }
-                    }
-                    GUILayout.EndVertical();
+                            GUILayout.BeginHorizontal();
+                            GUILayoutExtensions.LabelWithSpace(string.Format("Total: {0}", counter.Time / 1000.0f), -8);
+                            GUILayoutExtensions.LabelWithSpace(string.Format("Average: {0}", counter.Average / 1000.0f),-8);
+                            GUILayoutExtensions.LabelWithSpace(string.Format("Last: {0}", counter.Last / 1000.0f), -8);
+                            GUILayoutExtensions.LabelWithSpace(string.Format("Max: {0}", counter.Max / 1000.0f), -8);
+                            GUILayoutExtensions.LabelWithSpace(string.Format("Count: {0}", counter.Count), -8);
+                            GUILayout.EndHorizontal();
+                        }, GUILayout.Width(debugInfoBounds.width - 45));
+                    }, GUILayout.Width(debugInfoBounds.width - 40));
                 }
 
                 GUILayout.Space(10);

@@ -44,6 +44,8 @@ namespace SpaceEngine.Debugging
     {
         public List<T> DebugComponents = new List<T>(255);
 
+        public bool DisableAllOnStart = true;
+
         private int State;
 
         protected abstract KeyCode SwitchKey { get; }
@@ -60,7 +62,7 @@ namespace SpaceEngine.Debugging
                 DebugComponents = GetComponents<T>().ToList();
             }
 
-            ToogleAll(DebugComponents, false);
+            if (DisableAllOnStart) ToogleAll(DebugComponents, false);
         }
 
         protected void Update()
