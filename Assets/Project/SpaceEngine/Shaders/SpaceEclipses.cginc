@@ -33,6 +33,8 @@
 
 #define SPACE_ECLIPSES
 
+#define ECLIPSES_METHOD 0
+
 #if !defined (MATH)
 #include "Math.cginc"
 #endif
@@ -42,6 +44,8 @@ uniform float4x4 _Sky_LightOccluders_1;
 uniform float _ExtinctionGroundFade;
 
 //-----------------------------------------------------------------------------
+#if (ECLIPSES_METHOD == 0)
+
 float EclipseValue(float lightRadius, float casterRadius, float Dist)
 {
 	float sumRadius = lightRadius + casterRadius;
@@ -75,10 +79,8 @@ float EclipseValue(float lightRadius, float casterRadius, float Dist)
 	// Partial intersection
 	return maxPhase * smoothstep(0.0, 1.0, 1.0 - clamp((Dist-Diff)/(sumRadius-Diff), 0.0, 1.0));
 }
-//-----------------------------------------------------------------------------
 
-//-----------------------------------------------------------------------------
-float EclipseShadow(float3 position, float3 lightVec, float lightAngularRadius)
+float EclipseShadow(float3 worldPos, float3 lightVec, float lightAngularRadius)
 {
 	// TODO : Fix eclipse mirror around (Planet2Light-Light2Planet) plane...
 	float3 lightCasterPos = 0;
@@ -92,7 +94,7 @@ float EclipseShadow(float3 position, float3 lightVec, float lightAngularRadius)
 	{
 		if (_Sky_LightOccluders_1[i].w <= 0.0) { break; }
 
-		lightCasterPos = _Sky_LightOccluders_1[i].xyz - position;
+		lightCasterPos = _Sky_LightOccluders_1[i].xyz - worldPos;
 
 		lightCasterInvDist  = rsqrt(dot(lightCasterPos, lightCasterPos));
 		casterAngularRadius = asin(clamp(_Sky_LightOccluders_1[i].w * lightCasterInvDist, 0.0, 1.0));
@@ -112,6 +114,59 @@ float EclipseOuterShadow(float3 lightVec, float lightAngularRadius, float3 d, fl
 	return interSectPt != -1 ? EclipseShadow(camera + d * interSectPt, lightVec, lightAngularRadius) : 1.0;
 }
 //-----------------------------------------------------------------------------
+
+#elif (ECLIPSES_METHOD == 1)
+
+//-----------------------------------------------------------------------------
+// Source: https://en.wikibooks.org/wiki/GLSL_Programming/Unity/Soft_Shadows_of_Spheres
+float EclipseValue(float3 worldPos, float3 worldLightPos,float3 occluderSpherePosition, float3 occluderSphereRadius, float3 lightSourceRadius)
+{
+	float3 lightDirection = float3(worldLightPos - worldPos);	// Light source direction...
+	float3 lightDistance = length(lightDirection);				// Light distance...
+
+	lightDirection = lightDirection / lightDistance;			// Post fake normalization....
+			   
+	// Computation of level of shadowing...
+	float3 sphereDirection = float3(occluderSpherePosition - worldPos);  // Occluder sphere....
+	float sphereDistance = length(sphereDirection);
+
+	sphereDirection = sphereDirection / sphereDistance;
+					
+	float dd = lightDistance * (asin(min(1.0, length(cross(lightDirection, sphereDirection)))) - asin(min(1.0, occluderSphereRadius / sphereDistance)));
+			
+	float w = smoothstep(-1.0, 1.0, -dd / lightSourceRadius);
+
+	w = w * smoothstep(0.0, 0.2, dot(lightDirection, sphereDirection));
+					
+	return (1 - w);
+}
+
+float EclipseShadow(float3 worldPos, float3 worldLightPos, float lightRadius)
+{
+	// TODO : Fix eclipse mirror around (Planet2Light-Light2Planet) plane...
+
+	float shadow = 1;
+
+	for (int i = 0; i < 4; ++i)
+	{
+		if (_Sky_LightOccluders_1[i].w <= 0.0) { break; }
+
+		shadow *= EclipseValue(worldPos, worldLightPos, _Sky_LightOccluders_1[i].xyz, _Sky_LightOccluders_1[i].w, lightRadius);
+	}
+
+	return shadow;
+}
+
+float EclipseOuterShadow(float3 lightVec, float lightAngularRadius, float3 d, float3 camera, float3 origin, float Rt)
+{
+	// TODO : Switch in sphere - out sphere.
+	float interSectPt = IntersectOuterSphere(camera, d, origin, Rt);
+
+	return interSectPt != -1 ? EclipseShadow(camera + d * interSectPt, lightVec, lightAngularRadius) : 1.0;
+}
+//-----------------------------------------------------------------------------
+
+#endif
 
 //-----------------------------------------------------------------------------
 float4 GroundFade(float fade, float4 value)
