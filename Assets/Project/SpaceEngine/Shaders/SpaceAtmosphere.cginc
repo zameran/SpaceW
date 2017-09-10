@@ -670,6 +670,7 @@ float3 SkyShineRadiance(float3 worldPosition, float3 viewdir)
 	float3 inscatter = 0;
 	float3 occluderDirection = 0;
 	float3 occluderOppositeDirection = 0;
+
 	float intensity = 1;
 
 	for (int i = 0; i < 4; ++i)

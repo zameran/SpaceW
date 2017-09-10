@@ -80,22 +80,28 @@ float EclipseValue(float lightRadius, float casterRadius, float Dist)
 //-----------------------------------------------------------------------------
 float EclipseShadow(float3 position, float3 lightVec, float lightAngularRadius)
 {
-	float Shadow = 1.0;
+	// TODO : Fix eclipse mirror around (Planet2Light-Light2Planet) plane...
+	float3 lightCasterPos = 0;
+
+	float lightCasterInvDist = 0;
+	float casterAngularRadius = 0;
+	float lightToCasterAngle = 0;
+	float shadow = 1.0;
 
 	for (int i = 0; i < 4; ++i)
 	{
 		if (_Sky_LightOccluders_1[i].w <= 0.0) { break; }
 
-		float3 lightCasterPos = _Sky_LightOccluders_1[i].xyz - position;
+		lightCasterPos = _Sky_LightOccluders_1[i].xyz - position;
 
-		float lightCasterInvDist  = rsqrt(dot(lightCasterPos, lightCasterPos));
-		float casterAngularRadius = asin(clamp(_Sky_LightOccluders_1[i].w * lightCasterInvDist, 0.0, 1.0));
-		float lightToCasterAngle  = acos(clamp(dot(lightVec, lightCasterPos * lightCasterInvDist), 0.0, 1.0));
+		lightCasterInvDist  = rsqrt(dot(lightCasterPos, lightCasterPos));
+		casterAngularRadius = asin(clamp(_Sky_LightOccluders_1[i].w * lightCasterInvDist, 0.0, 1.0));
+		lightToCasterAngle  = acos(clamp(dot(lightVec, lightCasterPos * lightCasterInvDist), 0.0, 1.0));
 
-		Shadow *= clamp(1.0 - EclipseValue(lightAngularRadius, casterAngularRadius, lightToCasterAngle), 0.0, 1.0);
+		shadow *= clamp(1.0 - EclipseValue(lightAngularRadius, casterAngularRadius, lightToCasterAngle), 0.0, 1.0);
 	}
 
-	return Shadow;
+	return shadow;
 }
 
 float EclipseOuterShadow(float3 lightVec, float lightAngularRadius, float3 d, float3 camera, float3 origin, float Rt)

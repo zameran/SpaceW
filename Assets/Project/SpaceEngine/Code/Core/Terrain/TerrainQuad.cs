@@ -230,7 +230,6 @@ namespace SpaceEngine.Core.Terrain
             Order[2] = 2;
             Order[3] = 3;
 
-            // TODO : Hm. Maybe too heavy for a ctor? Threading? Hueading?
             CalculateMatrices(ox, oy, length, owner.ParentBody.Size);
         }
 

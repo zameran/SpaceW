@@ -80,7 +80,7 @@ namespace SpaceEngine.AtmosphericScattering
 
     public sealed class Atmosphere : Node<Atmosphere>, IEventit, IUniformed<Material>, IUniformed<MaterialPropertyBlock>, IReanimateable, IRenderable<Atmosphere>
     {
-        public AtmosphereBaseProperty AtmosphereBaseProperty = new AtmosphereBaseProperty();
+        private readonly AtmosphereBaseProperty AtmosphereBaseProperty = new AtmosphereBaseProperty();
 
         public AtmosphereBase AtmosphereBase { get { return AtmosphereBaseProperty.Value; } set { AtmosphereBaseProperty.Value = value; } }
 
