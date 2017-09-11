@@ -85,7 +85,32 @@ namespace SpaceEngine.Debugging
             {
                 if (Atmosphere != null && Helper.Enabled(Body.Atmosphere) && Body.AtmosphereEnabled)
                 {
-                    
+                    GUILayoutExtensions.VerticalBoxed("Realtime parameters: ", GUISkin, () =>
+                    {
+                        GUILayout.Space(20);
+
+                        GUILayoutExtensions.VerticalBoxed("", GUISkin, () =>
+                        {
+                            GUILayoutExtensions.VerticalBoxed("Preset: ", GUISkin, () =>
+                            {
+                                GUILayout.Space(20);
+
+                                Atmosphere.AtmosphereBase = (AtmosphereBase)GUILayout.SelectionGrid((int)Atmosphere.AtmosphereBase, System.Enum.GetNames(typeof(AtmosphereBase)), 2);
+                            });
+
+                            GUILayout.Space(10);
+
+                            GUILayoutExtensions.SliderWithField("Density: ", 0.0f, 1.0f, ref Atmosphere.Density);
+                            GUILayoutExtensions.SliderWithField("Radius Hold (Terrain Radius)", 0.0f, 2048.0f, ref Atmosphere.TerrainRadiusHold, "0.00");
+                            GUILayoutExtensions.SliderWithField("Scale", 0.01f, 16.0f, ref Atmosphere.Scale, "0.000");
+                            GUILayoutExtensions.SliderWithField("Height: ", 0.0f, Body.Size / 512.0f, ref Atmosphere.Height);
+                            GUILayoutExtensions.SliderWithField("Aerial Perspective Offset", 0.0f, 4096.0f, ref Atmosphere.AerialPerspectiveOffset, "0.00");
+                            GUILayoutExtensions.SliderWithField("Extinction Ground Fade", 0.000025f, 0.1f, ref Atmosphere.ExtinctionGroundFade, "0.000000");
+                            GUILayoutExtensions.SliderWithField("HDR Exposure", 0.0f, 1.0f, ref Atmosphere.HDRExposure, "0.00");
+                        });
+                    });
+
+                    GUILayout.Space(5);
                 }
                 else
                 {

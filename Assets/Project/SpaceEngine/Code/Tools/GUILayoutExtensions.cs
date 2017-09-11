@@ -45,7 +45,7 @@ public static class GUILayoutExtensions
 
         GUILayout.BeginHorizontal();
 
-        GUILayout.TextField(value.ToString(pattern), GUILayout.MaxWidth(50));
+        GUILayout.TextField(value.ToString(pattern), GUILayout.MaxWidth(75));
         value = GUILayout.HorizontalSlider(value, leftValue, rightValue);
 
         GUILayout.EndHorizontal();

@@ -88,35 +88,6 @@ namespace SpaceEngine.Debugging
 
                 GUILayout.Space(5);
 
-                if (Body.Atmosphere != null && Body.AtmosphereEnabled && Helper.Enabled(Body.Atmosphere))
-                {
-                    GUILayoutExtensions.VerticalBoxed("Atmosphere parameters: ", GUISkin, () =>
-                    {
-                        GUILayout.Space(20);
-
-                        GUILayoutExtensions.VerticalBoxed("", GUISkin, () =>
-                        {
-                            GUILayoutExtensions.VerticalBoxed("Preset: ", GUISkin, () =>
-                            {
-                                GUILayout.Space(20);
-
-                                Body.Atmosphere.AtmosphereBase = (AtmosphereBase)GUILayout.SelectionGrid((int)Body.Atmosphere.AtmosphereBase, System.Enum.GetNames(typeof(AtmosphereBase)), 2);
-                            });
-
-                            GUILayout.Space(10);
-
-                            GUILayoutExtensions.SliderWithField("Density: ", 0.0f, 1.0f, ref Body.Atmosphere.Density);
-                            GUILayoutExtensions.SliderWithField("Height: ", 0.0f, Body.Size / 1000.0f, ref Body.Atmosphere.Height);
-                        });
-                    });
-
-                    GUILayout.Space(5);
-                }
-                else
-                {
-                    GUILayoutExtensions.DrawBadHolder("Atmosphere Parameters: ", "No Atmosphere!?", GUISkin);
-                }
-
                 if (Body.Ocean != null && Body.OceanEnabled && Helper.Enabled(Body.Ocean))
                 {
                     GUILayoutExtensions.VerticalBoxed("Ocean parameters: ", GUISkin, () =>
