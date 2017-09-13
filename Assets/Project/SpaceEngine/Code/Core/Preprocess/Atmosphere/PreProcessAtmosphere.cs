@@ -67,7 +67,8 @@ namespace SpaceEngine.Core.Preprocess.Atmospehre
         public bool ClearAfterBake = true;
         public bool UseCoroutine = true;
 
-        const int NUM_THREADS = 8;
+        private const int NUM_THREADS = 8;
+        private const int WAIT_FRAMES = 4;
 
         public RenderTexture transmittanceT;
         public RenderTexture irradianceT_Read, irradianceT_Write, inscatterT_Read, inscatterT_Write;
@@ -143,7 +144,7 @@ namespace SpaceEngine.Core.Preprocess.Atmospehre
             {
                 Calculate(AP);
 
-                for (byte i = 0; i < 8; i++)
+                for (byte i = 0; i < WAIT_FRAMES; i++)
                 {
                     yield return Yielders.EndOfFrame;
                 }

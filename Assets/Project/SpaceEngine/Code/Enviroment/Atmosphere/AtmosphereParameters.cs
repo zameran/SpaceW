@@ -126,16 +126,17 @@ namespace SpaceEngine.AtmosphericScattering
         {
             switch (preset)
             {
-                case AtmosphereBase.Default: return new AtmosphereParameters(Default);
-                case AtmosphereBase.Earth: return new AtmosphereParameters(Earth);
-                case AtmosphereBase.Venus: return new AtmosphereParameters(Venus);
-                case AtmosphereBase.Mars: return new AtmosphereParameters(Mars);
-                case AtmosphereBase.Jupiter: return new AtmosphereParameters(Jupiter);
-                case AtmosphereBase.Titan: return new AtmosphereParameters(Titan);
-                case AtmosphereBase.Neptune: return new AtmosphereParameters(Neptune);
-                case AtmosphereBase.Sun: return new AtmosphereParameters(Sun);
-                case AtmosphereBase.Pluto: return new AtmosphereParameters(Pluto);
-                default: { Debug.Log("Atmosphere: AtmosphereParameters.Get(...) fail!"); return new AtmosphereParameters(Default); }
+                case AtmosphereBase.Default: return Default;
+                case AtmosphereBase.Earth: return Earth;
+                case AtmosphereBase.Venus: return Venus;
+                case AtmosphereBase.Mars: return Mars;
+                case AtmosphereBase.Jupiter: return Jupiter;
+                case AtmosphereBase.Titan: return Titan;
+                case AtmosphereBase.Neptune: return Neptune;
+                case AtmosphereBase.Sun: return Sun;
+                case AtmosphereBase.Pluto: return Pluto;
+                case AtmosphereBase.Custom: return Default;
+                default: { Debug.Log(string.Format("AtmosphereParameters: Get({0}) fail!", preset)); return new AtmosphereParameters(Default); }
             }
         }
 
@@ -165,7 +166,7 @@ namespace SpaceEngine.AtmosphericScattering
                                                                    new Vector4(0.0040f, 0.0040f, 0.0040f, 0.0f),
                                                                    6000.0f, 6056.6f, 6057.5f,
                                                                    6000.0f, 6056.6f, 6057.5f,
-                                                                   6360.0f);
+                                                                   0.0f);
 
                 return ap;
             }

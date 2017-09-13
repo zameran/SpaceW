@@ -188,7 +188,7 @@ namespace SpaceEngine.AtmosphericScattering
                 return;
             }
 
-            atmosphere.ApplyPresset(AtmosphereParameters.Get(atmosphere.AtmosphereBase));
+            atmosphere.PushPreset(AtmosphereParameters.Get(atmosphere.AtmosphereBase));
             atmosphere.Reanimate();
         }
 
@@ -206,7 +206,7 @@ namespace SpaceEngine.AtmosphericScattering
                 return;
             }
 
-            atmosphere.ApplyPresset(AtmosphereParameters.Get(atmosphereBase));
+            atmosphere.PushPreset(AtmosphereParameters.Get(atmosphereBase));
             atmosphere.Bake();
         }
 
@@ -216,7 +216,7 @@ namespace SpaceEngine.AtmosphericScattering
 
         protected override void InitNode()
         {
-            ApplyPresset(AtmosphereParameters.Get(AtmosphereBase));
+            PushPreset(AtmosphereParameters.Get(AtmosphereBase));
 
             Bake();
 
@@ -405,9 +405,14 @@ namespace SpaceEngine.AtmosphericScattering
 
         #endregion
 
-        private void ApplyPresset(AtmosphereParameters p)
+        public AtmosphereParameters PopPreset()
         {
-            AtmosphereParameters = new AtmosphereParameters(p);
+            return AtmosphereParameters;
+        }
+
+        public void PushPreset(AtmosphereParameters ap)
+        {
+            AtmosphereParameters = new AtmosphereParameters(ap);
 
             AtmosphereParameters.Rg = Radius - TerrainRadiusHold;
             AtmosphereParameters.Rt = (Radius + Height) - TerrainRadiusHold;
@@ -416,6 +421,11 @@ namespace SpaceEngine.AtmosphericScattering
         }
 
         public void Bake()
+        {
+            Bake(AtmosphereParameters);
+        }
+
+        public void Bake(AtmosphereParameters ap)
         {
             AtmosphereBaker.Bake(AtmosphereParameters);
 

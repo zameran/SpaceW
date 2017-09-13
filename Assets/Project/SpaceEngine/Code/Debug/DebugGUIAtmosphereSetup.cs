@@ -48,6 +48,8 @@ namespace SpaceEngine.Debugging
 
         public Atmosphere Atmosphere { get { return Body.Atmosphere; } }
 
+        public AtmosphereParameters AtmosphereParameters = AtmosphereParameters.Default;
+
         protected override void Awake()
         {
             base.Awake();
@@ -73,7 +75,7 @@ namespace SpaceEngine.Debugging
 
                 GUILayoutExtensions.VerticalBoxed("", GUISkin, () =>
                 {
-                    DrawApplyButton(() => { });
+                    DrawApplyButton(() => { if (Body != null && Atmosphere != null) Atmosphere.Bake(); });
                 });
             });
 
@@ -111,18 +113,89 @@ namespace SpaceEngine.Debugging
                     });
 
                     GUILayout.Space(5);
+
+                    if (Atmosphere.AtmosphereBase == AtmosphereBase.Custom)
+                    {
+                        GUILayoutExtensions.VerticalBoxed("Bake parameters: ", GUISkin, () =>
+                        {
+                            GUILayout.Space(20);
+
+                            GUILayoutExtensions.HorizontalBoxed("", GUISkin, () =>
+                            {
+                                GUILayoutExtensions.LabelWithFlexibleSpace("Preset: ", Atmosphere.AtmosphereBase.ToString());
+                            });
+
+                            GUILayout.Space(5);
+
+                            var parameters = new AtmosphereParameters(AtmosphereParameters);
+
+                            var mieG = parameters.MIE_G;
+                            var hr = parameters.HR;
+                            var hm = parameters.HM;
+                            var agr = parameters.AVERAGE_GROUND_REFLECTANCE;
+                            var betaR = parameters.BETA_R;
+                            var betaM = parameters.BETA_MSca;
+                            var betaE = parameters.BETA_MEx;
+                            var rg = parameters.Rg;
+                            var rt = parameters.Rt;
+                            var rl = parameters.Rl;
+
+                            GUILayoutExtensions.SliderWithField("Mie G: ", 0.0f, 1.0f, ref mieG, "0.0000", textFieldWidth: 100);
+                            GUILayoutExtensions.SliderWithFieldAndControls("Air density (HR At half-height in KM): ", 0.0f, 256.0f, ref hr, "0.00", textFieldWidth: 100, controlStep: 1.0f);
+                            GUILayoutExtensions.SliderWithFieldAndControls("Particle density (HM At half-height in KM): ", 0.0f, 256.0f, ref hm, "0.00", textFieldWidth: 100, controlStep: 1.0f);
+                            GUILayoutExtensions.SliderWithField("Average Ground Reflectance: ", 0.0f, 1.0f, ref agr, "0.0000", textFieldWidth: 100);
+                            GUILayoutExtensions.SliderWithField("Rg (Planet Radius in KM): ", 0.0f, 63600.0f, ref rg, "0.00000", textFieldWidth: 100);
+                            GUILayoutExtensions.SliderWithField("Rt (Atmosphere Top Radius in KM): ", rg, 63600.0f, ref rt, "0.00000", textFieldWidth: 100);
+                            GUILayoutExtensions.SliderWithField("Rl (Planet Bottom Radius in KM): ", rt, 63600.0f, ref rl, "0.00000", textFieldWidth: 100);
+
+                            DrawVectorSlidersWithField(ref betaR, 0.0f, 1.0f, "Beta R (Rayliegh Scattering)", "0.0000", textFieldWidth: 100);
+                            DrawVectorSlidersWithField(ref betaM, 0.0f, 1.0f, "Beta M (Mie Scattering)", "0.0000", textFieldWidth: 100);
+                            DrawVectorSlidersWithField(ref betaE, 0.0f, 1.0f, "Beta E (Extinction Scattering)", "0.0000", textFieldWidth: 100);
+
+                            parameters = new AtmosphereParameters(mieG, hr, hm, agr, betaR, betaM, betaE, rg, rt, rl, rg, rt, rl, SCALE: 1.0f);
+
+                            AtmosphereParameters = new AtmosphereParameters(parameters);
+                            Atmosphere.PushPreset(parameters);
+                        });
+                    }
+                    else
+                    {
+                        GUILayoutExtensions.DrawBadHolder("Atmosphere Bake parameters: ", "Use 'Custom' preset please...", GUISkin);
+                    }
                 }
                 else
                 {
-                    GUILayoutExtensions.DrawBadHolder("Atmosphere Parameters: ", "No Atmosphere!?", GUISkin);
+                    GUILayoutExtensions.DrawBadHolder("Atmosphere parameters: ", "No Atmosphere!?", GUISkin);
                 }
             }
             else
             {
-                GUILayoutExtensions.DrawBadHolder("Body parameters: ", "No Body!?", GUISkin);
+                GUILayoutExtensions.DrawBadHolder("Atmosphere parameters: ", "No Body!?", GUISkin);
             }
 
             GUILayout.EndScrollView();
+        }
+
+        protected void DrawVectorSlidersWithField(ref Vector4 value, float leftValue, float rightValue, string caption = "Vector", string pattern = "0.0", int textFieldWidth = 100)
+        {
+            var x = value.x;
+            var y = value.y;
+            var z = value.z;
+            var w = value.w;
+
+            GUILayoutExtensions.VerticalBoxed(caption, GUISkin, () =>
+            {
+                GUILayout.Space(20);
+
+                GUILayoutExtensions.SliderWithField("X: ", leftValue, rightValue, ref x, pattern, textFieldWidth);
+                GUILayoutExtensions.SliderWithField("Y: ", leftValue, rightValue, ref y, pattern, textFieldWidth);
+                GUILayoutExtensions.SliderWithField("Z: ", leftValue, rightValue, ref z, pattern, textFieldWidth);
+                GUILayoutExtensions.SliderWithField("W: ", leftValue, rightValue, ref w, pattern, textFieldWidth);
+            });
+
+            GUILayout.Space(5);
+
+            value = new Vector4(x, y, z, w);
         }
 
         protected void DrawApplyButton(Action action, params GUILayoutOption[] options)

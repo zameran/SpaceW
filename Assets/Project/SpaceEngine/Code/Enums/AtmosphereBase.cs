@@ -43,5 +43,7 @@ public enum AtmosphereBase : byte
     Titan = 5,
     Neptune = 6,
     Sun = 7,
-    Pluto = 8
+    Pluto = 8,
+
+    Custom = 9
 }

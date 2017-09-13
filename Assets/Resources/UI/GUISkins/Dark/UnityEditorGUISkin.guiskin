@@ -121,7 +121,7 @@ MonoBehaviour:
     m_Margin:
       m_Left: 4
       m_Right: 4
-      m_Top: 3
+      m_Top: 0
       m_Bottom: 3
     m_Padding:
       m_Left: 6

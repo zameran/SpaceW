@@ -39,13 +39,29 @@ using UnityEngine;
 
 public static class GUILayoutExtensions
 {
-    public static void SliderWithField(object caption, float leftValue, float rightValue, ref float value, string pattern = "0.0")
+    public static void SliderWithField(object caption, float leftValue, float rightValue, ref float value, string pattern = "0.0", int textFieldWidth = 75)
     {
         GUILayout.Label(caption.ToString());
 
         GUILayout.BeginHorizontal();
 
-        GUILayout.TextField(value.ToString(pattern), GUILayout.MaxWidth(75));
+        GUILayout.TextField(value.ToString(pattern), GUILayout.MaxWidth(textFieldWidth));
+        value = GUILayout.HorizontalSlider(value, leftValue, rightValue);
+
+        GUILayout.EndHorizontal();
+    }
+
+    public static void SliderWithFieldAndControls(object caption, float leftValue, float rightValue, ref float value, string pattern = "0.0", int textFieldWidth = 75, float controlStep = 1.0f)
+    {
+        GUILayout.Label(caption.ToString());
+
+        GUILayout.BeginHorizontal();
+
+        GUILayout.TextField(value.ToString(pattern), GUILayout.MaxWidth(textFieldWidth));
+
+        if (GUILayout.Button("+", GUILayout.Width(20))) { value += controlStep; }
+        if (GUILayout.Button("-", GUILayout.Width(20))) { value -= controlStep; }
+
         value = GUILayout.HorizontalSlider(value, leftValue, rightValue);
 
         GUILayout.EndHorizontal();
