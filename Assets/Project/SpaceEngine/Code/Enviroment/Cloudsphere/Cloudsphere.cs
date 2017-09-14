@@ -106,13 +106,7 @@ namespace SpaceEngine.AtmosphericScattering.Cloudsphere
         {
             if (target == null) return;
 
-            if (ParentBody != null)
-            {
-                if (ParentBody.Atmosphere != null)
-                {
-                    ParentBody.Atmosphere.InitUniforms(target);
-                }
-            }
+            ParentBody.InitUniforms(target);
 
             target.SetFloat("_TransmittanceOffset", TransmittanceOffset);
         }
@@ -121,13 +115,7 @@ namespace SpaceEngine.AtmosphericScattering.Cloudsphere
         {
             if (target == null) return;
 
-            if (ParentBody != null)
-            {
-                if (ParentBody.Atmosphere != null)
-                {
-                    ParentBody.Atmosphere.SetUniforms(target);
-                }
-            }
+            ParentBody.SetUniforms(target);
 
             target.SetFloat("_TransmittanceOffset", TransmittanceOffset);
         }

@@ -37,7 +37,7 @@ using System;
 
 using UnityEngine;
 
-namespace SpaceEngine.AtmosphericScattering
+namespace SpaceEngine.Enviroment.Atmospheric
 {
     [Serializable]
     public struct AtmosphereParameters
@@ -218,8 +218,6 @@ namespace SpaceEngine.AtmosphericScattering
 
                 return ap;
             }
-
-            private set { }
         }
 
         public static AtmosphereParameters Titan

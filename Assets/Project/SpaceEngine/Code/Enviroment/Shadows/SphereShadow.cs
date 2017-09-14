@@ -37,125 +37,128 @@ using SpaceEngine.Core.Utilities.Gradients;
 
 using UnityEngine;
 
-public class SphereShadow : Shadow
+namespace SpaceEngine.Enviroment.Shadows
 {
-    public float InnerRadius = 1.0f;
-    public float OuterRadius = 2.0f;
-
-    public PenumbraGradientLut Penumbra = new PenumbraGradientLut();
-
-    readonly Vector3[] vectors = new Vector3[3];
-    readonly float[] magnitudes = new float[3];
-
-    public override Texture GetTexture()
+    public class SphereShadow : Shadow
     {
-        Penumbra.GenerateLut();
+        public float InnerRadius = 1.0f;
+        public float OuterRadius = 2.0f;
 
-        return Penumbra.Lut;
-    }
+        public PenumbraGradientLut Penumbra = new PenumbraGradientLut();
 
-    public override bool CalculateShadow()
-    {
-        if (base.CalculateShadow() == true)
+        readonly Vector3[] vectors = new Vector3[3];
+        readonly float[] magnitudes = new float[3];
+
+        public override Texture GetTexture()
         {
-            var direction = default(Vector3);
-            var position = default(Vector3);
-            var color = default(Color);
+            Penumbra.GenerateLut();
 
-            Helper.CalculateLight(Light, transform.position, null, null, ref position, ref direction, ref color);
-
-            var rotation = Quaternion.FromToRotation(direction, Vector3.back);
-
-            SetVector(0, rotation * transform.right * transform.lossyScale.x * OuterRadius);
-            SetVector(1, rotation * transform.up * transform.lossyScale.y * OuterRadius);
-            SetVector(2, rotation * transform.forward * transform.lossyScale.z * OuterRadius);
-
-            SortVectors();
-
-            var spin = Quaternion.LookRotation(Vector3.forward, new Vector2(-vectors[1].x, vectors[1].y)); // Orient the shadow ellipse
-            var scale = Helper.Reciprocal3(new Vector3(magnitudes[0], magnitudes[1], 1.0f));
-
-            var shadowT = Helper.Translation(-transform.position);
-            var shadowR = Helper.Rotation(spin * rotation);
-            var shadowS = Helper.Scaling(scale);
-
-            Matrix = shadowS * shadowR * shadowT;
-            Ratio = Helper.Divide(OuterRadius, OuterRadius - InnerRadius);
-
-            return true;
+            return Penumbra.Lut;
         }
 
-        return false;
-    }
-
-    protected virtual void Awake()
-    {
-        Penumbra.GenerateLut();
-    }
-
-    protected virtual void OnDestroy()
-    {
-        Helper.Destroy(Penumbra.Lut);
-
-        Penumbra.DestroyLut();
-    }
-
-    #region Gizmos
-
-#if UNITY_EDITOR
-    protected virtual void OnDrawGizmosSelected()
-    {
-        if (Helper.Enabled(this) == true)
+        public override bool CalculateShadow()
         {
-            Gizmos.color = Color.red;
-            Gizmos.DrawRay(transform.position, transform.right * OuterRadius * 1.5f);
-            Gizmos.DrawRay(transform.position, transform.up * OuterRadius * 1.5f);
-            Gizmos.DrawRay(transform.position, transform.forward * OuterRadius * 1.5f);
-            Gizmos.color = Color.white;
-
-            Gizmos.matrix = transform.localToWorldMatrix;
-
-            Gizmos.DrawWireSphere(Vector3.zero, InnerRadius);
-            Gizmos.DrawWireSphere(Vector3.zero, OuterRadius);
-
-            if (CalculateShadow() == true)
+            if (base.CalculateShadow() == true)
             {
-                Gizmos.matrix = Matrix.inverse;
+                var direction = default(Vector3);
+                var position = default(Vector3);
+                var color = default(Color);
 
-                Gizmos.DrawWireCube(new Vector3(0, 0, 5), new Vector3(2, 2, 10));
+                Helper.CalculateLight(Light, transform.position, null, null, ref position, ref direction, ref color);
+
+                var rotation = Quaternion.FromToRotation(direction, Vector3.back);
+
+                SetVector(0, rotation * transform.right * transform.lossyScale.x * OuterRadius);
+                SetVector(1, rotation * transform.up * transform.lossyScale.y * OuterRadius);
+                SetVector(2, rotation * transform.forward * transform.lossyScale.z * OuterRadius);
+
+                SortVectors();
+
+                var spin = Quaternion.LookRotation(Vector3.forward, new Vector2(-vectors[1].x, vectors[1].y)); // Orient the shadow ellipse
+                var scale = Helper.Reciprocal3(new Vector3(magnitudes[0], magnitudes[1], 1.0f));
+
+                var shadowT = Helper.Translation(-transform.position);
+                var shadowR = Helper.Rotation(spin * rotation);
+                var shadowS = Helper.Scaling(scale);
+
+                Matrix = shadowS * shadowR * shadowT;
+                Ratio = Helper.Divide(OuterRadius, OuterRadius - InnerRadius);
+
+                return true;
+            }
+
+            return false;
+        }
+
+        protected virtual void Awake()
+        {
+            Penumbra.GenerateLut();
+        }
+
+        protected virtual void OnDestroy()
+        {
+            Helper.Destroy(Penumbra.Lut);
+
+            Penumbra.DestroyLut();
+        }
+
+        #region Gizmos
+
+    #if UNITY_EDITOR
+        protected virtual void OnDrawGizmosSelected()
+        {
+            if (Helper.Enabled(this) == true)
+            {
+                Gizmos.color = Color.red;
+                Gizmos.DrawRay(transform.position, transform.right * OuterRadius * 1.5f);
+                Gizmos.DrawRay(transform.position, transform.up * OuterRadius * 1.5f);
+                Gizmos.DrawRay(transform.position, transform.forward * OuterRadius * 1.5f);
+                Gizmos.color = Color.white;
+
+                Gizmos.matrix = transform.localToWorldMatrix;
+
+                Gizmos.DrawWireSphere(Vector3.zero, InnerRadius);
+                Gizmos.DrawWireSphere(Vector3.zero, OuterRadius);
+
+                if (CalculateShadow() == true)
+                {
+                    Gizmos.matrix = Matrix.inverse;
+
+                    Gizmos.DrawWireCube(new Vector3(0, 0, 5), new Vector3(2, 2, 10));
+                }
             }
         }
-    }
-#endif
+    #endif
 
-    #endregion
+        #endregion
 
-    private void SetVector(int index, Vector3 vector)
-    {
-        vectors[index] = vector;
-
-        magnitudes[index] = new Vector2(vector.x, vector.y).magnitude;
-    }
-
-    private void SortVectors()
-    {
-        // Lowest is 0 or 2
-        if (magnitudes[0] < magnitudes[1])
+        private void SetVector(int index, Vector3 vector)
         {
-            // Lowest is 0
-            if (magnitudes[0] < magnitudes[2])
-            {
-                vectors[0] = vectors[2];
-                magnitudes[0] = magnitudes[2];
-            }
+            vectors[index] = vector;
+
+            magnitudes[index] = new Vector2(vector.x, vector.y).magnitude;
         }
-        else // Lowest is 1 or 2
+
+        private void SortVectors()
         {
-            // Lowest is 1
-            if (magnitudes[1] < magnitudes[2])
+            // Lowest is 0 or 2
+            if (magnitudes[0] < magnitudes[1])
             {
-                vectors[1] = vectors[2];
-                magnitudes[1] = magnitudes[2];
+                // Lowest is 0
+                if (magnitudes[0] < magnitudes[2])
+                {
+                    vectors[0] = vectors[2];
+                    magnitudes[0] = magnitudes[2];
+                }
+            }
+            else // Lowest is 1 or 2
+            {
+                // Lowest is 1
+                if (magnitudes[1] < magnitudes[2])
+                {
+                    vectors[1] = vectors[2];
+                    magnitudes[1] = magnitudes[2];
+                }
             }
         }
     }

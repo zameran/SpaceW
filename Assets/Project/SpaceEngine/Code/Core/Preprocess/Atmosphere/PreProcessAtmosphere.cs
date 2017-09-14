@@ -33,7 +33,8 @@
 // Creator: zameran
 #endregion
 
-using SpaceEngine.AtmosphericScattering;
+
+using SpaceEngine.Enviroment.Atmospheric;
 
 using System;
 using System.Collections;

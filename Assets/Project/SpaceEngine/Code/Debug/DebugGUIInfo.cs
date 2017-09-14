@@ -49,6 +49,8 @@ namespace SpaceEngine.Debugging
             "Left Control for even more speed.",
             "Left Shift + Left Control for speed of God.",
             "Left Alt for less speed.",
+            "F5 to switch between debug modes.",
+            "F6 to switch between debug visualizations.",
             "F12 to capture screenshot."
         };
 

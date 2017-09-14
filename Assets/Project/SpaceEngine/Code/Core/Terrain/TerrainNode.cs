@@ -324,26 +324,14 @@ namespace SpaceEngine.Core.Terrain
         {
             if (target == null) return;
 
-            if (ParentBody.AtmosphereEnabled)
-            {
-                if (ParentBody.Atmosphere != null)
-                {
-                    ParentBody.Atmosphere.InitUniforms(TerrainMaterial);
-                }
-            }
+            ParentBody.InitUniforms(TerrainMaterial);
         }
 
         public virtual void SetUniforms(Material target)
         {
             if (target == null) return;
 
-            if (ParentBody.AtmosphereEnabled)
-            {
-                if (ParentBody.Atmosphere != null)
-                {
-                    ParentBody.Atmosphere.SetUniforms(TerrainMaterial);
-                }
-            }
+            ParentBody.SetUniforms(TerrainMaterial);
 
             if (ParentBody.OceanEnabled)
             {

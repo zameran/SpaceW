@@ -34,10 +34,10 @@
 #endregion
 
 using SpaceEngine;
-using SpaceEngine.AtmosphericScattering.Sun;
 using SpaceEngine.Cameras;
 using SpaceEngine.Core.Bodies;
 using SpaceEngine.Core.Utilities;
+using SpaceEngine.Enviroment.Sun;
 using SpaceEngine.SciptableObjects;
 using SpaceEngine.Startfield;
 
@@ -212,7 +212,7 @@ public class GodManager : MonoSingleton<GodManager>
 
         if (cameraPosition.sqrMagnitude > 500000.0)
         {
-            var suns = FindObjectsOfType<AtmosphereSun>();
+            var suns = FindObjectsOfType<Sun>();
             var bodies = FindObjectsOfType<CelestialBody>();
 
             foreach (var sun in suns)

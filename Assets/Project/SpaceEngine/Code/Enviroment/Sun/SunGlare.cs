@@ -35,17 +35,18 @@
 
 using SpaceEngine.Core.Patterns.Strategy.Renderable;
 using SpaceEngine.Core.Patterns.Strategy.Uniformed;
+using SpaceEngine.Enviroment.Atmospheric;
 using SpaceEngine.SciptableObjects;
 
 using UnityEngine;
 
-namespace SpaceEngine.AtmosphericScattering.Sun
+namespace SpaceEngine.Enviroment.Sun
 {
     public sealed class SunGlare : Node<SunGlare>, IUniformed<Material>, IRenderable<SunGlare>
     {
-        private readonly CachedComponent<AtmosphereSun> SunCachedComponent = new CachedComponent<AtmosphereSun>();
+        private readonly CachedComponent<Sun> SunCachedComponent = new CachedComponent<Sun>();
 
-        public AtmosphereSun SunComponent { get { return SunCachedComponent.Component; } }
+        public Sun SunComponent { get { return SunCachedComponent.Component; } }
 
         public Atmosphere Atmosphere;
 
@@ -180,7 +181,7 @@ namespace SpaceEngine.AtmosphericScattering.Sun
             target.SetMatrix("ghost2Settings", Ghost2Settings);
             target.SetMatrix("ghost3Settings", Ghost2Settings);
 
-            if (Atmosphere != null) Atmosphere.InitUniforms(target);
+            if (Atmosphere != null) Atmosphere.ParentBody.InitUniforms(target);
         }
 
         public void SetUniforms(Material target)
@@ -198,7 +199,7 @@ namespace SpaceEngine.AtmosphericScattering.Sun
             target.SetFloat("Eclipse", Eclipse ? 0.0f : 1.0f);
             target.SetTexture("_FrameBuffer", FrameBufferCapturer.Instance.FBOTexture);
 
-            if (Atmosphere != null) Atmosphere.SetUniforms(target);
+            if (Atmosphere != null) Atmosphere.ParentBody.SetUniforms(target);
         }
 
         public void InitSetUniforms()

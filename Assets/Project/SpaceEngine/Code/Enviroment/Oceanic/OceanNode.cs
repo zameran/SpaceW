@@ -1,15 +1,16 @@
-﻿using SpaceEngine.AtmosphericScattering;
-using SpaceEngine.Core.Bodies;
+﻿using SpaceEngine.Core.Bodies;
 using SpaceEngine.Core.Patterns.Strategy.Eventit;
 using SpaceEngine.Core.Patterns.Strategy.Reanimator;
 using SpaceEngine.Core.Patterns.Strategy.Renderable;
 using SpaceEngine.Core.Patterns.Strategy.Uniformed;
+using SpaceEngine.Enviroment.Atmospheric;
 
 using System;
 using System.Collections;
+
 using UnityEngine;
 
-namespace SpaceEngine.Ocean
+namespace SpaceEngine.Enviroment.Oceanic
 {
     /// <summary>
     /// An AbstractTask to draw a flat or spherical ocean. This class provides the functions and data to draw a flat projected grid but nothing else.
@@ -105,7 +106,7 @@ namespace SpaceEngine.Ocean
 
             OceanMaterial = MaterialHelper.CreateTemp(OceanShader, "Ocean");
 
-            ParentBody.Atmosphere.InitUniforms(OceanMaterial);
+            ParentBody.InitUniforms(OceanMaterial);
 
             OldLocalToOcean = Matrix4x4d.identity;
             Offset = Vector4.zero;
@@ -186,7 +187,8 @@ namespace SpaceEngine.Ocean
 
             var offset = new Vector3d(-Offset.x, -Offset.y, H);
 
-            var sunDirection = ParentBody.Atmosphere.GetSunDirection(ParentBody.Atmosphere.Suns[0]);
+            // TODO : Up to four light sources support...
+            var sunDirection = ParentBody.GetSunDirection(ParentBody.Suns[0]);
             var oceanSunDirection = localToOcean.ToMatrix3x3d() * sunDirection;
 
             var sphereDirection = (localToCamera * Vector3d.zero).Normalized();   // Direction to center of planet			

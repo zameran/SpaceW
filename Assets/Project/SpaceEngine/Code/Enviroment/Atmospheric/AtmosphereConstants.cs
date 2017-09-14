@@ -33,59 +33,23 @@
 // Creator: zameran
 #endregion
 
-using UnityEngine;
-
-namespace SpaceEngine.AtmosphericScattering.Sun
+namespace SpaceEngine.Enviroment.Atmospheric
 {
-    public sealed class AtmosphereSun : Node<AtmosphereSun>
+    public static class AtmosphereConstants
     {
-        [Range(1, 4)]
-        public int Index = 1;
+        public const int TRANSMITTANCE_INTEGRAL_SAMPLES = 256;          //500
+        public const int INSCATTER_INTEGRAL_SAMPLES = 32;               //50
+        public const int IRRADIANCE_INTEGRAL_SAMPLES = 16;              //32
+        public const int IRRADIANCE_INTEGRAL_SAMPLES_HALF = 8;          //16
+        public const int INSCATTER_SPHERICAL_INTEGRAL_SAMPLES = 4;      //16
 
-        public float Radius = 250000;
-
-        #region Node
-
-        protected override void InitNode()
-        {
-
-        }
-
-        protected override void UpdateNode()
-        {
-            if ((Index == 1 && Input.GetKey(KeyCode.RightControl)) ||
-                (Index == 2 && Input.GetKey(KeyCode.RightShift)) ||
-                (Index == 3 && Input.GetKey(KeyCode.LeftControl)) ||
-                (Index == 4 && Input.GetKey(KeyCode.LeftShift)))
-            {
-                var h = Input.GetAxis("HorizontalArrows") * 0.75f;
-                var v = Input.GetAxis("VerticalArrows") * 0.75f;
-
-                transform.RotateAround(new Vector3(0, 0, 0), new Vector3(0, 1, 0), h);
-                transform.RotateAround(new Vector3(0, 0, 0), new Vector3(1, 0, 0), v);
-            }
-        }
-
-        protected override void Awake()
-        {
-            base.Awake();
-        }
-
-        protected override void Start()
-        {
-            base.Start();
-        }
-
-        protected override void Update()
-        {
-            base.Update();
-        }
-
-        protected override void OnDestroy()
-        {
-            base.OnDestroy();
-        }
-
-        #endregion
+        public const int TRANSMITTANCE_W = 256;
+        public const int TRANSMITTANCE_H = 64;
+        public const int SKY_W = 64;
+        public const int SKY_H = 16;
+        public const int RES_R = 32;
+        public const int RES_MU = 128;
+        public const int RES_MU_S = 32;
+        public const int RES_NU = 8;
     }
 }

@@ -3778,6 +3778,21 @@ MonoBehaviour:
     m_StretchWidth: 1
     m_StretchHeight: 0
   ScrollPosition: {x: 0, y: 0}
+  AtmosphereParameters:
+    MIE_G: 0.8
+    HR: 8
+    HM: 2
+    AVERAGE_GROUND_REFLECTANCE: 0.1
+    BETA_R: {x: 0.0058, y: 0.0135, z: 0.0331, w: 0}
+    BETA_MSca: {x: 0.004, y: 0.004, z: 0.004, w: 0}
+    BETA_MEx: {x: 0.004, y: 0.004, z: 0.004, w: 0}
+    Rg: 6360
+    Rt: 6420
+    Rl: 6421
+    bRg: 6360
+    bRt: 6420
+    bRl: 6421
+    SCALE: 6360
 --- !u!1 &839125405
 GameObject:
   m_ObjectHideFlags: 0
@@ -4244,17 +4259,7 @@ MonoBehaviour:
   RenderQueue: 1000
   RenderQueueOffset: 0
   LostFocusForceRebake: 0
-  Suns:
-  - {fileID: 1370843065}
-  EclipseCasters:
-  - {fileID: 1912963789}
-  ShineCasters: []
   AtmosphereBaker: {fileID: 0}
-  ShineColors:
-  - {r: 0.16078432, g: 0.4627451, b: 0.73333335, a: 1}
-  - {r: 0.16078432, g: 0.4627451, b: 0.73333335, a: 1}
-  - {r: 0.16078432, g: 0.4627451, b: 0.73333335, a: 1}
-  - {r: 0.16078432, g: 0.4627451, b: 0.73333335, a: 1}
 --- !u!1 &966189781
 GameObject:
   m_ObjectHideFlags: 0
@@ -5922,8 +5927,6 @@ MonoBehaviour:
   ColorShader: {fileID: 4800000, guid: 797ca199aa64b8c41bc1aae3e12f7a1f, type: 3}
   TerrainNodes: []
   TileSamplers: []
-  Shadows:
-  - {fileID: 1654467277}
   HeightZ: 0
   Size: 6360000
   TCCPS: {fileID: 693596358}
@@ -5960,6 +5963,18 @@ MonoBehaviour:
     ReverseX: 0
     ReverseY: 0
     NonLinear: 1
+  Suns:
+  - {fileID: 1370843065}
+  ShadowCasters:
+  - {fileID: 1654467277}
+  EclipseCasters:
+  - {fileID: 1912963789}
+  ShineCasters: []
+  ShineColors:
+  - {r: 0.16078432, g: 0.4627451, b: 0.73333335, a: 1}
+  - {r: 0.16078432, g: 0.4627451, b: 0.73333335, a: 1}
+  - {r: 0.16078432, g: 0.4627451, b: 0.73333335, a: 1}
+  - {r: 0.16078432, g: 0.4627451, b: 0.73333335, a: 1}
 --- !u!114 &1497659645
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -7477,17 +7492,7 @@ MonoBehaviour:
   RenderQueue: 1000
   RenderQueueOffset: 0
   LostFocusForceRebake: 0
-  Suns:
-  - {fileID: 1370843065}
-  EclipseCasters: []
-  ShineCasters:
-  - {fileID: 1497659642}
   AtmosphereBaker: {fileID: 0}
-  ShineColors:
-  - {r: 0.16078432, g: 0.4627451, b: 0.73333335, a: 1}
-  - {r: 0.16078432, g: 0.4627451, b: 0.73333335, a: 1}
-  - {r: 0.16078432, g: 0.4627451, b: 0.73333335, a: 1}
-  - {r: 0.16078432, g: 0.4627451, b: 0.73333335, a: 1}
 --- !u!4 &1757335315
 Transform:
   m_ObjectHideFlags: 0
@@ -8078,7 +8083,6 @@ MonoBehaviour:
   ColorShader: {fileID: 4800000, guid: 797ca199aa64b8c41bc1aae3e12f7a1f, type: 3}
   TerrainNodes: []
   TileSamplers: []
-  Shadows: []
   HeightZ: 0
   Size: 636000
   TCCPS: {fileID: 1949857087}
@@ -8115,6 +8119,17 @@ MonoBehaviour:
     ReverseX: 0
     ReverseY: 0
     NonLinear: 1
+  Suns:
+  - {fileID: 1370843065}
+  ShadowCasters: []
+  EclipseCasters: []
+  ShineCasters:
+  - {fileID: 1497659642}
+  ShineColors:
+  - {r: 0.16078432, g: 0.4627451, b: 0.73333335, a: 1}
+  - {r: 0.16078432, g: 0.4627451, b: 0.73333335, a: 1}
+  - {r: 0.16078432, g: 0.4627451, b: 0.73333335, a: 1}
+  - {r: 0.16078432, g: 0.4627451, b: 0.73333335, a: 1}
 --- !u!4 &1912963790
 Transform:
   m_ObjectHideFlags: 0

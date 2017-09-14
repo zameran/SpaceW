@@ -1,11 +1,11 @@
-﻿using SpaceEngine.AtmosphericScattering;
-using SpaceEngine.Core.Bodies;
+﻿using SpaceEngine.Core.Bodies;
+using SpaceEngine.Enviroment.Atmospheric;
 
 using UnityEngine;
 
 using Random = UnityEngine.Random;
 
-namespace SpaceEngine.Ocean
+namespace SpaceEngine.Enviroment.Oceanic
 {
     /// <summary>
     /// Extend the base class <see cref="OceanNode"/> to provide the data need to create the waves using fourier transform,
