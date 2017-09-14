@@ -458,25 +458,23 @@ namespace SpaceEngine.Core.Bodies
             sc1 = Matrix4x4.zero;
             sp1 = Matrix4x4.zero;
 
-            byte index = 0;
-
             for (byte i = 0; i < Mathf.Min(4, ShineCasters.Count); i++)
             {
                 if (ShineCasters[i] == null) { Debug.Log("Atmosphere: Shine problem!"); break; }
+
+                var shineCaster = ShineCasters[i];
 
                 // TODO : Planetshine distance based shine influence...
                 // TODO : Planetshine distance don't gonna work correctly on screenspace, e.g Atmosphere...
                 // NOTE : Distance is inversed.
                 var distance = 0.0f;
 
-                soc1.SetRow(i, VectorHelper.MakeFrom((ShineCasters[i].transform.position - Origin).normalized, 1.0f));
-                soc2.SetRow(i, VectorHelper.MakeFrom((Origin - ShineCasters[i].transform.position).normalized, 1.0f));
+                soc1.SetRow(i, VectorHelper.MakeFrom((shineCaster.transform.position - Origin).normalized, 1.0f));
+                soc2.SetRow(i, VectorHelper.MakeFrom((Origin - shineCaster.transform.position).normalized, 1.0f));
 
-                sc1.SetRow(index, VectorHelper.FromColor(Helper.Enabled(ShineCasters[i]) ? ShineColors[i] : new Color(0, 0, 0, 0)));
+                sc1.SetRow(i, VectorHelper.FromColor(Helper.Enabled(shineCaster) ? ShineColors[i] : new Color(0, 0, 0, 0)));
 
-                sp1.SetRow(i, new Vector4(distance, 1.0f, 1.0f, 1.0f));
-
-                index++;
+                sp1.SetRow(i, new Vector4(0.0f, 0.0f, 0.0f, distance));
             }
         }
 
@@ -489,7 +487,9 @@ namespace SpaceEngine.Core.Bodies
                 if (EclipseCasters[i] == null) { Debug.Log("Atmosphere: Eclipse caster problem!"); break; }
                 if ((EclipseCasters[i] as CelestialBody) == null) { Debug.Log("Atmosphere: Eclipse caster should be a planet!"); break; }
 
-                occludersMatrix.SetRow(i, VectorHelper.MakeFrom(EclipseCasters[i].Origin - Origin, Helper.Enabled(EclipseCasters[i]) ? EclipseCasters[i].Size : 0.0f));
+                var eclipseCaster = EclipseCasters[i];
+
+                occludersMatrix.SetRow(i, VectorHelper.MakeFrom(eclipseCaster.Origin - Origin, Helper.Enabled(eclipseCaster) ? eclipseCaster.Size : 0.0f));
             }
         }
 
@@ -503,6 +503,7 @@ namespace SpaceEngine.Core.Bodies
                 if (Suns[i] == null) { Debug.Log("Atmosphere: Sun calculation problem!"); break; }
 
                 var sun = Suns[i];
+
                 var direction = GetSunDirection(sun);
                 var position = sun.transform.position;
                 var radius = sun.Radius;

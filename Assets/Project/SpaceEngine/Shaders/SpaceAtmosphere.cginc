@@ -667,7 +667,7 @@ float3 InScatteringShine(float3 camera, float3 _point, out float3 extinction, fl
 
 float3 SkyShineRadiance(float3 worldPosition, float3 viewdir)
 {
-	float3 inscatter = 0;
+	float3 radiance = 0;
 	float3 occluderDirection = 0;
 	float3 occluderOppositeDirection = 0;
 
@@ -679,13 +679,13 @@ float3 SkyShineRadiance(float3 worldPosition, float3 viewdir)
 
 		occluderDirection = normalize(_Sky_ShineOccluders_1[i].xyz - worldPosition);			// Occluder direction with origin offset...
 		occluderOppositeDirection = _Sky_ShineOccluders_2[i].xyz;								// Occluder opposite direction with origin offset...
-		intensity = 0.57 * max((dot(occluderDirection, occluderOppositeDirection) - _Sky_ShineParameters_1[i].xyz), 0);
+		intensity = 0.57 * max((dot(occluderDirection, occluderOppositeDirection) - _Sky_ShineParameters_1[i].w), 0);
 
-		inscatter += SkyRadiance(worldPosition, viewdir, _Sky_ShineOccluders_1[i].xyz, 0.0);
-		inscatter *= _Sky_ShineColors_1[i].xyz * _Sky_ShineColors_1[i].w * intensity;
+		radiance += SkyRadiance(worldPosition, viewdir, _Sky_ShineOccluders_1[i].xyz, 0.0);
+		radiance *= _Sky_ShineColors_1[i].xyz * _Sky_ShineColors_1[i].w * intensity;
 	}
 
-	return inscatter;
+	return radiance;
 }
 
 void SunRadianceAndSkyIrradiance(float3 worldP, float3 worldN, float3 worldS, out float3 sunL, out float3 skyE)
