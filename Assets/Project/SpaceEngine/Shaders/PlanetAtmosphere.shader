@@ -180,7 +180,7 @@ Shader "SpaceEngine/Planet/Atmosphere"
 						eclipse1 = GroundFade(_ExtinctionGroundFade, eclipse1);
 					#endif
 
-					inscatter += SkyRadiance(WCPG, d, float3(0.0, 0.0, 0.0), glowExtinction1, 0.0);
+					inscatter += SkyRadiance(WCPG, d, float3(0.0, 0.0, 0.0), glowExtinction1, 0.0) * _Atmosphere_GlowColor;
 					inscatter += SkyRadiance(WCPG, d, _Sun_WorldDirections_1[0], extinction1, 0.0);
 
 					#ifdef ECLIPSES_ON
