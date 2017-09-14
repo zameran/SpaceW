@@ -180,22 +180,20 @@ namespace SpaceEngine.Cameras
 
             if (Body != null)
             {
-                // NOTE : BigToSmall
-
                 var worldPosition = (Vector3d)(transform.position - Body.Origin);
 
                 if (Body.GetBodyDeformationType() == BodyDeformationType.Spherical)
                 {
-                    if (worldPosition.Magnitude() < Body.Size + 10.0 + Body.HeightZ)
+                    if (worldPosition.Magnitude() < Body.Size + Body.SizeOffset + Body.HeightZ)
                     {
-                        worldPosition = worldPosition.Normalized(Body.Size + 10.0 + Body.HeightZ);
+                        worldPosition = worldPosition.Normalized(Body.Size + Body.SizeOffset + Body.HeightZ);
                     }
                 }
                 else
                 {
-                    if (worldPosition.z < 10.0 + Body.HeightZ)
+                    if (worldPosition.z < Body.SizeOffset + Body.HeightZ)
                     {
-                        worldPosition.z = 10.0 + Body.HeightZ;
+                        worldPosition.z = Body.SizeOffset + Body.HeightZ;
                     }
                 }
 

@@ -46,6 +46,7 @@ uniform float4x4 _Globals_CameraToWorld;
 uniform float4x4 _Globals_ScreenToCamera;
 uniform float4x4 _Globals_CameraToScreen;
 uniform float3 _Globals_WorldCameraPos;
+uniform float _Globals_RadiusOffset;
 
 #define CORE_ELEVATION
 
@@ -239,7 +240,7 @@ static float4x4 slopexMatrix[4] =
 		0.0, 0.0, 0.0, 0.0,
 		0.0, 0.0, 0.0, 0.0
 	},
-{
+	{
 		0.0, 0.0, 0.0, 0.0,
 		0.5, 0.5, -0.5, -0.5,
 		0.0, 0.0, 0.0, 0.0,

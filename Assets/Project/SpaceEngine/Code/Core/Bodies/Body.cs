@@ -82,6 +82,8 @@ namespace SpaceEngine.Core.Bodies
         public EngineRenderQueue RenderQueue = EngineRenderQueue.Geometry;
         public int RenderQueueOffset = 0;
 
+        public float SizeOffset = 10.0f;
+
         public bool DrawGizmos = false;
         public bool UpdateLOD = true;
 
@@ -266,6 +268,8 @@ namespace SpaceEngine.Core.Bodies
             SetEclipses(target);
             SetShine(target);
             SetSuns(target);
+
+            target.SetFloat("_Globals_RadiusOffset", SizeOffset);
 
             if (Atmosphere != null)
             {
