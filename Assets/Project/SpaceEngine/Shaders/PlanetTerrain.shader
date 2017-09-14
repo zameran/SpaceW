@@ -267,7 +267,11 @@ Shader "SpaceEngine/Planet/Terrain"
 					
 					float darknessAccumulation = 1.0;
 					float3 extinction;
-					float3 inscatter = InScattering(WCPO, P, WSD, extinction, 0.0);
+					float3 glowExtinction;
+					float3 inscatter = 0;
+
+					inscatter += InScattering(WCPO, P, float3(0, 0, 0), glowExtinction, 0.0) * _Atmosphere_GlowColor;
+					inscatter += InScattering(WCPO, P, WSD, extinction, 0.0);
 
 					#ifdef ECLIPSES_ON
 						inscatter *= eclipse;

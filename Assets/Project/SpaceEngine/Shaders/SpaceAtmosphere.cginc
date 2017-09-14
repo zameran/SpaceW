@@ -69,7 +69,6 @@
 #define OPTIMIZE
 #define ATMO_FULL
 #define HORIZON_HACK
-//#define HORIZON_HACK_BIG_EPSILON
 #define ANALYTIC_TRANSMITTANCE
 #define TRANSMITTANCE_NON_LINEAR
 #define INSCATTER_NON_LINEAR
@@ -94,7 +93,7 @@ uniform float _Aerial_Perspective_Offset;
 
 uniform float3 _Atmosphere_WorldCameraPos;
 uniform float3 _Atmosphere_Origin;
-
+uniform float3 _Atmosphere_GlowColor;
 //uniform StructuredBuffer<Sun> Suns;
 
 // ----------------------------------------------------------------------------
@@ -144,6 +143,8 @@ uniform float _Sun_Intensity;
 uniform sampler2D _Sky_Transmittance;
 uniform sampler2D _Sky_Irradiance;
 uniform sampler3D _Sky_Inscatter;
+
+uniform float _Sky_HorizonFixEps;
 
 uniform float4x4 _Sky_ShineOccluders_1;
 uniform float4x4 _Sky_ShineOccluders_2;
@@ -751,6 +752,7 @@ float4 InScattering(float3 camera, float3 _point, float3 sundir, out float3 exti
 
 		float deltaSq = SQRT(rMu * rMu - r * r + Rt * Rt, 1e30);
 		float din = max(-rMu - deltaSq, 0.0);
+
 		if (din > 0.0 && din < d) 
 		{
 			camera += din * viewdir;
@@ -789,26 +791,20 @@ float4 InScattering(float3 camera, float3 _point, float3 sundir, out float3 exti
 			#endif
 
 			#ifdef HORIZON_HACK
-				#ifdef HORIZON_HACK_BIG_EPSILON
-					const float EPS = 0.4;
-				#else
-					const float EPS = 0.004; //0.004 - default. 0.4 - maybe normal?
-				#endif
-
 				float lim = -sqrt(1.0 - (Rg / r) * (Rg / r));
 
-				if (abs(mu - lim) < EPS) 
+				if (abs(mu - lim) < _Sky_HorizonFixEps) 
 				{
-					float a = ((mu - lim) + EPS) / (2.0 * EPS);
+					float a = ((mu - lim) + _Sky_HorizonFixEps) / (2.0 * _Sky_HorizonFixEps);
 
-					mu = lim - EPS;
+					mu = lim - _Sky_HorizonFixEps;
 					r1 = sqrt(r * r + d * d + 2.0 * r * d * mu);
 					mu1 = (r * mu + d) / r1;
 					float4 inScatter0 = Texture4D(_Sky_Inscatter, r, mu, muS, nu);
 					float4 inScatter1 = Texture4D(_Sky_Inscatter, r1, mu1, muS1, nu);
 					float4 inScatterA = max(inScatter0 - inScatter1 * extinction.rgbr, 0.0);
 
-					mu = lim + EPS;
+					mu = lim + _Sky_HorizonFixEps;
 					r1 = sqrt(r * r + d * d + 2.0 * r * d * mu);
 					mu1 = (r * mu + d) / r1;
 					inScatter0 = Texture4D(_Sky_Inscatter, r, mu, muS, nu);
@@ -816,12 +812,14 @@ float4 InScattering(float3 camera, float3 _point, float3 sundir, out float3 exti
 					float4 inScatterB = max(inScatter0 - inScatter1 * extinction.rgbr, 0.0);
 
 					inScatter = lerp(inScatterA, inScatterB, a);
+					//inScatter = 1;
 				} 
 				else 
 				{
 					float4 inScatter0 = Texture4D(_Sky_Inscatter, r, mu, muS, nu);
 					float4 inScatter1 = Texture4D(_Sky_Inscatter, r1, mu1, muS1, nu);
 					inScatter = max(inScatter0 - inScatter1 * extinction.rgbr, 0.0);
+					//inScatter = 0;
 				}
 			#else
 				float4 inScatter0 = Texture4D(_Sky_Inscatter, r, mu, muS, nu);

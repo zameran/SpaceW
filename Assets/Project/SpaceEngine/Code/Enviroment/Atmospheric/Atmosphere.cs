@@ -88,6 +88,8 @@ namespace SpaceEngine.Enviroment.Atmospheric
 
         public Body ParentBody;
 
+        public Color GlowColor = Color.black;
+
         [Range(0.0f, 1.0f)]
         public float Density = 1.0f;
 
@@ -97,6 +99,7 @@ namespace SpaceEngine.Enviroment.Atmospheric
         public float Scale = 1.0f;
         public float Fade = 1.0f;
         public float AerialPerspectiveOffset = 2000.0f;
+        public float HorizonFixEps = 0.004f;
 
         [Range(0.000025f, 0.1f)]
         public float ExtinctionGroundFade = 0.000025f;
@@ -292,6 +295,8 @@ namespace SpaceEngine.Enviroment.Atmospheric
             target.SetVector("betaMEx", AtmosphereParameters.BETA_MEx / 1000);
             target.SetFloat("mieG", Mathf.Clamp(AtmosphereParameters.MIE_G, 0.0f, 0.99f));
 
+            target.SetFloat("_Sky_HorizonFixEps", HorizonFixEps);
+
             target.SetFloat("_Aerial_Perspective_Offset", AerialPerspectiveOffset);
             target.SetFloat("_ExtinctionGroundFade", ExtinctionGroundFade);
 
@@ -301,6 +306,7 @@ namespace SpaceEngine.Enviroment.Atmospheric
 
             target.SetVector("_Atmosphere_WorldCameraPos", GodManager.Instance.WorldCameraPos - Origin);
             target.SetVector("_Atmosphere_Origin", -Origin);
+            target.SetVector("_Atmosphere_GlowColor", GlowColor);
 
             target.SetFloat("_Exposure", HDRExposure);
             target.SetFloat("_HDRMode", (int)GodManager.Instance.HDRMode);
