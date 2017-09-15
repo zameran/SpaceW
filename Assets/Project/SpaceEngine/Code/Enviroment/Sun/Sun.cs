@@ -43,6 +43,7 @@ namespace SpaceEngine.Enviroment.Sun
         public int Index = 1;
 
         public float Radius = 250000;
+        public float Intensity = 100.0f;
 
         #region Node
 

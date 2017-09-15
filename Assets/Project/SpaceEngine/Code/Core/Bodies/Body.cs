@@ -125,13 +125,14 @@ namespace SpaceEngine.Core.Bodies
         public List<Body> ShineCasters = new List<Body>(8);
         public List<Color> ShineColors = new List<Color>(4) { XKCDColors.Bluish, XKCDColors.Bluish, XKCDColors.Bluish, XKCDColors.Bluish };
 
-        private Matrix4x4 shineColorsMatrix1;
-        private Matrix4x4 shineOccludersMatrix1;
-        private Matrix4x4 shineOccludersMatrix2;
-        private Matrix4x4 shineParameters1;
-        private Matrix4x4 occludersMatrix1;
-        private Matrix4x4 sunPositionsMatrix1;
-        private Matrix4x4 sunDirectionsMatrix1;
+        private Matrix4x4 shineColorsMatrix1 = Matrix4x4.zero;
+        private Matrix4x4 shineOccludersMatrix1 = Matrix4x4.zero;
+        private Matrix4x4 shineOccludersMatrix2 = Matrix4x4.zero;
+        private Matrix4x4 shineParameters1 = Matrix4x4.zero;
+        private Matrix4x4 occludersMatrix1 = Matrix4x4.zero;
+        private Matrix4x4 sunColorsMatrix1 = Matrix4x4.zero;
+        private Matrix4x4 sunPositionsMatrix1 = Matrix4x4.zero;
+        private Matrix4x4 sunDirectionsMatrix1 = Matrix4x4.zero;
 
         #region Eventit
 
@@ -385,7 +386,7 @@ namespace SpaceEngine.Core.Bodies
         {
             if (!GodManager.Instance.Planetshine) return;
 
-            CalculateShine(out shineOccludersMatrix1, out shineOccludersMatrix2, out shineColorsMatrix1, out shineParameters1);
+            CalculateShine(ref shineOccludersMatrix1, ref shineOccludersMatrix2, ref shineColorsMatrix1, ref shineParameters1);
 
             mat.SetMatrix("_Sky_ShineOccluders_1", shineOccludersMatrix1);
             mat.SetMatrix("_Sky_ShineOccluders_2", shineOccludersMatrix2);
@@ -397,7 +398,7 @@ namespace SpaceEngine.Core.Bodies
         {
             if (!GodManager.Instance.Planetshine) return;
 
-            CalculateShine(out shineOccludersMatrix1, out shineOccludersMatrix2, out shineColorsMatrix1, out shineParameters1);
+            CalculateShine(ref shineOccludersMatrix1, ref shineOccludersMatrix2, ref shineColorsMatrix1, ref shineParameters1);
 
             block.SetMatrix("_Sky_ShineOccluders_1", shineOccludersMatrix1);
             block.SetMatrix("_Sky_ShineOccluders_2", shineOccludersMatrix2);
@@ -409,7 +410,7 @@ namespace SpaceEngine.Core.Bodies
         {
             if (!GodManager.Instance.Eclipses) return;
 
-            CalculateEclipses(out occludersMatrix1);
+            CalculateEclipses(ref occludersMatrix1);
 
             mat.SetMatrix("_Sky_LightOccluders_1", occludersMatrix1);
         }
@@ -418,7 +419,7 @@ namespace SpaceEngine.Core.Bodies
         {
             if (!GodManager.Instance.Eclipses) return;
 
-            CalculateEclipses(out occludersMatrix1);
+            CalculateEclipses(ref occludersMatrix1);
 
             block.SetMatrix("_Sky_LightOccluders_1", occludersMatrix1);
         }
@@ -429,8 +430,9 @@ namespace SpaceEngine.Core.Bodies
 
             mat.SetFloat("_Sun_Intensity", 100.0f);
 
-            CalculateSuns(out sunDirectionsMatrix1, out sunPositionsMatrix1);
+            CalculateSuns(ref sunColorsMatrix1, ref sunDirectionsMatrix1, ref sunPositionsMatrix1);
 
+            mat.SetMatrix("_Sun_Colors_1", sunColorsMatrix1);
             mat.SetMatrix("_Sun_WorldDirections_1", sunDirectionsMatrix1);
             mat.SetMatrix("_Sun_Positions_1", sunPositionsMatrix1);
         }
@@ -441,8 +443,9 @@ namespace SpaceEngine.Core.Bodies
 
             block.SetFloat("_Sun_Intensity", 100.0f);
 
-            CalculateSuns(out sunDirectionsMatrix1, out sunPositionsMatrix1);
+            CalculateSuns(ref sunColorsMatrix1, ref sunDirectionsMatrix1, ref sunPositionsMatrix1);
 
+            block.SetMatrix("_Sun_Colors_1", sunColorsMatrix1);
             block.SetMatrix("_Sun_WorldDirections_1", sunDirectionsMatrix1);
             block.SetMatrix("_Sun_Positions_1", sunPositionsMatrix1);
         }
@@ -451,13 +454,8 @@ namespace SpaceEngine.Core.Bodies
 
         #region Calculations
 
-        public void CalculateShine(out Matrix4x4 soc1, out Matrix4x4 soc2, out Matrix4x4 sc1, out Matrix4x4 sp1)
+        public void CalculateShine(ref Matrix4x4 soc1, ref Matrix4x4 soc2, ref Matrix4x4 sc1, ref Matrix4x4 sp1)
         {
-            soc1 = Matrix4x4.zero;
-            soc2 = Matrix4x4.zero;
-            sc1 = Matrix4x4.zero;
-            sp1 = Matrix4x4.zero;
-
             for (byte i = 0; i < Mathf.Min(4, ShineCasters.Count); i++)
             {
                 if (ShineCasters[i] == null) { Debug.Log("Atmosphere: Shine problem!"); break; }
@@ -478,10 +476,8 @@ namespace SpaceEngine.Core.Bodies
             }
         }
 
-        public void CalculateEclipses(out Matrix4x4 occludersMatrix)
+        public void CalculateEclipses(ref Matrix4x4 occludersMatrix)
         {
-            occludersMatrix = Matrix4x4.zero;
-
             for (byte i = 0; i < Mathf.Min(4, EclipseCasters.Count); i++)
             {
                 if (EclipseCasters[i] == null) { Debug.Log("Atmosphere: Eclipse caster problem!"); break; }
@@ -493,11 +489,8 @@ namespace SpaceEngine.Core.Bodies
             }
         }
 
-        public void CalculateSuns(out Matrix4x4 sunDirectionsMatrix, out Matrix4x4 sunPositionsMatrix)
+        public void CalculateSuns(ref Matrix4x4 sunColorsMatrix, ref Matrix4x4 sunDirectionsMatrix, ref Matrix4x4 sunPositionsMatrix)
         {
-            sunDirectionsMatrix = Matrix4x4.zero;
-            sunPositionsMatrix = Matrix4x4.zero;
-
             for (byte i = 0; i < Mathf.Min(4, Suns.Count); i++)
             {
                 if (Suns[i] == null) { Debug.Log("Atmosphere: Sun calculation problem!"); break; }
@@ -508,6 +501,7 @@ namespace SpaceEngine.Core.Bodies
                 var position = sun.transform.position;
                 var radius = sun.Radius;
 
+                sunColorsMatrix.SetRow(i, VectorHelper.MakeFrom(Vector3.one, sun.Intensity));
                 sunDirectionsMatrix.SetRow(i, VectorHelper.MakeFrom(direction));
                 sunPositionsMatrix.SetRow(i, VectorHelper.MakeFrom(position, radius));
                 //sunPositions.SetRow(i, VectorHelper.MakeFrom(position, VectorHelper.AngularRadius(position, Origin, radius)));

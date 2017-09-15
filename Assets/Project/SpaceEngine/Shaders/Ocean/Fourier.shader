@@ -49,7 +49,7 @@ Shader "Math/Fourier"
 		float rz = w.x * input2.z - w.y * input2.w;
 		float rw = w.y * input2.z + w.x * input2.w;
 
-		return input1 + float4(rx,ry,rz,rw);
+		return input1 + float4(rx, ry, rz, rw);
 	}
 
 	inline float2 CalculateW(float4 lookUp)

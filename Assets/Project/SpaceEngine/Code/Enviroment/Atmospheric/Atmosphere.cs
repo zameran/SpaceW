@@ -100,6 +100,7 @@ namespace SpaceEngine.Enviroment.Atmospheric
         public float Fade = 1.0f;
         public float AerialPerspectiveOffset = 2000.0f;
         public float HorizonFixEps = 0.004f;
+        public float MieFadeFix = 0.02f;
 
         [Range(0.000025f, 0.1f)]
         public float ExtinctionGroundFade = 0.000025f;
@@ -296,6 +297,7 @@ namespace SpaceEngine.Enviroment.Atmospheric
             target.SetFloat("mieG", Mathf.Clamp(AtmosphereParameters.MIE_G, 0.0f, 0.99f));
 
             target.SetFloat("_Sky_HorizonFixEps", HorizonFixEps);
+            target.SetFloat("_Sky_MieFadeFix", MieFadeFix);
 
             target.SetFloat("_Aerial_Perspective_Offset", AerialPerspectiveOffset);
             target.SetFloat("_ExtinctionGroundFade", ExtinctionGroundFade);

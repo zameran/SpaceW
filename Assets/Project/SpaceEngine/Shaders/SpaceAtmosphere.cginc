@@ -81,20 +81,11 @@
 #include "Core.cginc"
 #endif
 
-struct Sun
-{
-	float Intensity;
-	float3 WorldDirection;
-	float3 WorldPosition;
-	float3x3 WorldToLocalRotation;
-};
-
 uniform float _Aerial_Perspective_Offset;
 
 uniform float3 _Atmosphere_WorldCameraPos;
 uniform float3 _Atmosphere_Origin;
 uniform float3 _Atmosphere_GlowColor;
-//uniform StructuredBuffer<Sun> Suns;
 
 // ----------------------------------------------------------------------------
 // PHYSICAL MODEL PARAMETERS
@@ -145,13 +136,12 @@ uniform sampler2D _Sky_Irradiance;
 uniform sampler3D _Sky_Inscatter;
 
 uniform float _Sky_HorizonFixEps;
+uniform float _Sky_MieFadeFix;
 
 uniform float4x4 _Sky_ShineOccluders_1;
 uniform float4x4 _Sky_ShineOccluders_2;
 uniform float4x4 _Sky_ShineColors_1;
 uniform float4x4 _Sky_ShineParameters_1;
-uniform float4x4 _Sun_Positions_1;
-uniform float4x4 _Sun_WorldDirections_1;
 
 float2 GetTransmittanceUV(float r, float mu) 
 {
@@ -534,11 +524,6 @@ float3 SkyRadiance(float3 camera, float3 viewdir, float3 sundir, out float3 exti
 	#endif
 }
 
-float3 SkyRadiance(float3 camera, float3 viewdir, float3 sundir, out float3 extinction, float shaftWidth, Sun sun)
-{
-	return SkyRadiance(camera, viewdir, sun.WorldDirection, extinction, shaftWidth);
-}
-
 float3 SkyRadianceSimple(float3 camera, float3 viewdir, float3 sundir)
 {
 	float3 result = float3(0, 0, 0);
@@ -714,11 +699,6 @@ void SunRadianceAndSkyIrradiance(float3 worldP, float3 worldN, float3 worldS, ou
 	skyE = 2.0 * SkyIrradiance(r, muS) * skyOcclusion;
 }
 
-void SunRadianceAndSkyIrradiance(float3 worldP, float3 worldN, Sun sun, out float3 sunL, out float3 skyE)
-{
-	SunRadianceAndSkyIrradiance(worldP, worldN, sun.WorldDirection, sunL, skyE);
-}
-
 // single scattered sunlight between two points
 // camera=observer
 // point=point on the ground
@@ -795,6 +775,7 @@ float4 InScattering(float3 camera, float3 _point, float3 sundir, out float3 exti
 
 				if (abs(mu - lim) < _Sky_HorizonFixEps) 
 				{
+					// avoids imprecision problems near horizon by interpolating between two points above and below horizon
 					float a = ((mu - lim) + _Sky_HorizonFixEps) / (2.0 * _Sky_HorizonFixEps);
 
 					mu = lim - _Sky_HorizonFixEps;
@@ -812,14 +793,12 @@ float4 InScattering(float3 camera, float3 _point, float3 sundir, out float3 exti
 					float4 inScatterB = max(inScatter0 - inScatter1 * extinction.rgbr, 0.0);
 
 					inScatter = lerp(inScatterA, inScatterB, a);
-					//inScatter = 1;
 				} 
 				else 
 				{
 					float4 inScatter0 = Texture4D(_Sky_Inscatter, r, mu, muS, nu);
 					float4 inScatter1 = Texture4D(_Sky_Inscatter, r1, mu1, muS1, nu);
 					inScatter = max(inScatter0 - inScatter1 * extinction.rgbr, 0.0);
-					//inScatter = 0;
 				}
 			#else
 				float4 inScatter0 = Texture4D(_Sky_Inscatter, r, mu, muS, nu);
@@ -827,12 +806,12 @@ float4 InScattering(float3 camera, float3 _point, float3 sundir, out float3 exti
 				inScatter = max(inScatter0 - inScatter1 * extinction.rgbr, 0.0);
 			#endif
 
-			//cancels inscatter when sun hidden by mountains
+			// cancels inscatter when sun hidden by mountains
 			// TODO: smoothstep values depend on horizon angle in sun direction
 			//inScatter.w *= smoothstep(0.035, 0.07, muS);
 
 			// avoids imprecision problems in Mie scattering when sun is below horizon
-			inScatter.w *= smoothstep(0.00, 0.02, muS);
+			inScatter.w *= smoothstep(0.00, _Sky_MieFadeFix, muS);
 			
 			float4 inScatterM = float4(GetMie(inScatter), 1);
 			float phase = PhaseFunctionR(nu);
@@ -850,9 +829,4 @@ float4 InScattering(float3 camera, float3 _point, float3 sundir, out float3 exti
 		extinction = float4(1, 1, 1);
 		return float4(0, 0, 0, 0);
 	#endif
-}
-
-float4 InScattering(float3 camera, float3 _point, out float3 extinction, float shaftWidth, Sun sun) 
-{
-	return InScattering(camera, _point, sun.WorldDirection, extinction, shaftWidth);
 }
