@@ -59,10 +59,6 @@ namespace SpaceEngine.Debugging
 
         protected override void Draw()
         {
-#if UNITY_EDITOR
-            if (UnityEditor.SceneView.currentDrawingSceneView != null) return; //Do not draw at Scene tab in editor.
-#endif
-
             var target = GodManager.Instance.ActiveBody;
 
             if (target == null) return;

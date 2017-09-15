@@ -56,6 +56,7 @@ Shader "SpaceEngine/Planet/Ocean"
 			float4 pos : SV_POSITION;
 			float2 oceanU : TEXCOORD0;
 			float3 oceanP : TEXCOORD1;
+			float4 screenP : TEXCOORD2;
 		};
 
 		void vert(in a2v v, out v2f o)
@@ -100,6 +101,7 @@ Shader "SpaceEngine/Planet/Ocean"
 			o.pos = mul(_Globals_CameraToScreen, screenP);
 			o.oceanU = u;
 			o.oceanP = oceanP;
+			o.screenP = screenP;
 		}
 
 		void frag(in v2f i, out float4 color : SV_Target)
@@ -108,6 +110,7 @@ Shader "SpaceEngine/Planet/Ocean"
 			float radius = _Ocean_Radius;
 			float2 u = i.oceanU;
 			float3 oceanP = i.oceanP;
+			float3 screenP = i.screenP.xyz;
 			
 			float3 earthCamera = float3(0.0, 0.0, _Ocean_CameraPos.z + radius);
 
@@ -211,7 +214,7 @@ Shader "SpaceEngine/Planet/Ocean"
 			// Aerial perspective
 			float3 inscatter = InScattering(earthCamera, earthP, L, extinction, 0.0);
 			float3 finalColor = surfaceColor * extinction + inscatter;
-			
+
 			color = float4(hdr(finalColor), surfaceAlpha);
 		}
 		ENDCG

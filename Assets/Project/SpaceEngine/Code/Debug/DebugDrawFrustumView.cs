@@ -33,7 +33,6 @@
 // Creator: zameran
 #endregion
 
-using SpaceEngine.Core.Numerics;
 
 using UnityEngine;
 
@@ -58,10 +57,6 @@ namespace SpaceEngine.Debugging
 
         protected override void Draw()
         {
-#if UNITY_EDITOR
-            if (UnityEditor.SceneView.currentDrawingSceneView != null) return; // Do not draw at Scene tab in editor.
-#endif
-
             var nearCorners = new Vector3[4]; // Approx'd nearplane corners
             var farCorners = new Vector3[4]; // Approx'd farplane corners
             var frustumPlanes = GeometryUtility.CalculateFrustumPlanes(GodManager.Instance.ScreenToCamera.ToMatrix4x4()); // NOTE : CameraToScreen
