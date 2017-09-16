@@ -127,7 +127,7 @@ float2 U(float2 zeta, float3 V)
 // V, N, sunDir in world space
 float3 ReflectedSkyRadiance(sampler2D skymap, float3 V, float3 N, float sigmaSq, float3 sunDir) 
 {
-	float3 result = float3(0,0,0);
+	float3 result = float3(0.0, 0.0, 0.0);
 
 	float2 zeta0 = -N.xy / N.z;
 	float2 tau0 = U(zeta0, V);

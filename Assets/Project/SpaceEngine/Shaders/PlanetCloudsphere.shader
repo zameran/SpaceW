@@ -84,7 +84,7 @@ Shader "SpaceEngine/Planet/Cloudsphere"
 			float cloudsAlpha = clouds.w;
 
 			clouds *= _DiffuseColor;
-			clouds += float4(transmittance.rgb, 1);
+			clouds += float4(transmittance.rgb, 1.0);
 
 			float4 output = float4(clouds.xyz, cloudsAlpha);
 

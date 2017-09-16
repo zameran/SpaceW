@@ -59,7 +59,7 @@ Shader "Math/Fourier"
 
 	inline float4 CalculateLookUp(float uv, out float2 w)
 	{
-		float4 lookUp = tex2D(_ButterFlyLookUp, float2(uv, 0));
+		float4 lookUp = tex2D(_ButterFlyLookUp, float2(uv, 0.0));
 		
 		lookUp.xyz *= 255.0;
 		lookUp.xy /= _Size - 1.0;

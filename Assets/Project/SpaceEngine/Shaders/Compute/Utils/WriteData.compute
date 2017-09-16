@@ -53,7 +53,7 @@ void write2DC3(uint3 id : SV_DispatchThreadID)
 	
 	if(id.x < _Width && id.y < _Height)
 	{
-		_Des2DC3[id.xy] = float4(_Buffer2DC3[idx].xyz, 1);
+		_Des2DC3[id.xy] = float4(_Buffer2DC3[idx].xyz, 1.0);
 	}
 }
 
@@ -121,7 +121,7 @@ void write3DC3(uint3 id : SV_DispatchThreadID)
 	
 	if(id.x < _Width && id.y < _Height && id.z < _Depth)
 	{
-		_Des3DC3[id] = float4(_Buffer3DC3[idx].xyz, 1);
+		_Des3DC3[id] = float4(_Buffer3DC3[idx].xyz, 1.0);
 	}
 }
 

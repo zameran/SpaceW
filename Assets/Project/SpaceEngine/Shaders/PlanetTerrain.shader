@@ -74,7 +74,7 @@ Shader "SpaceEngine/Planet/Terrain"
 
 			#if ATMOSPHERE_ON
 				#if OCEAN_ON
-					if (zfc.x <= _Ocean_Level && _Ocean_DrawBRDF == 1.0) { zfc = float2(0, 0); }
+					if (zfc.x <= _Ocean_Level && _Ocean_DrawBRDF == 1.0) { zfc = float2(0.0, 0.0); }
 				#endif
 			#endif
 			
@@ -248,7 +248,7 @@ Shader "SpaceEngine/Planet/Terrain"
 				#endif
 
 				#if SHADOW_1 || SHADOW_2 || SHADOW_3 || SHADOW_4
-					float shadow = ShadowColor(float4(PO, 1));	// Body origin take in to account...
+					float shadow = ShadowColor(float4(PO, 1.0));	// Body origin take in to account...
 				#endif
 				
 				#if ATMOSPHERE_ON

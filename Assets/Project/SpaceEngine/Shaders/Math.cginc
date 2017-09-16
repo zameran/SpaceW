@@ -134,13 +134,13 @@ float4 Blur(sampler2D inputTexture, float2 inputUV, float inputStep = 0.00015f)
 	blurCoordinates[3] = inputUV.xy + inputStep * 3.294215;
 	blurCoordinates[4] = inputUV.xy - inputStep * 3.294215;
 
-	float4 bluredColor = float4(0, 0, 0, 0);
+	float4 bluredColor = float4(0.0, 0.0, 0.0, 0.0);
 
-	bluredColor += tex2Dlod(inputTexture, float4(blurCoordinates[0], 0, 0)) * 0.204164;
-	bluredColor += tex2Dlod(inputTexture, float4(blurCoordinates[1], 0, 0)) * 0.304005;
-	bluredColor += tex2Dlod(inputTexture, float4(blurCoordinates[2], 0, 0)) * 0.304005;
-	bluredColor += tex2Dlod(inputTexture, float4(blurCoordinates[3], 0, 0)) * 0.093913;
-	bluredColor += tex2Dlod(inputTexture, float4(blurCoordinates[4], 0, 0)) * 0.093913;
+	bluredColor += tex2Dlod(inputTexture, float4(blurCoordinates[0], 0.0, 0.0)) * 0.204164;
+	bluredColor += tex2Dlod(inputTexture, float4(blurCoordinates[1], 0.0, 0.0)) * 0.304005;
+	bluredColor += tex2Dlod(inputTexture, float4(blurCoordinates[2], 0.0, 0.0)) * 0.304005;
+	bluredColor += tex2Dlod(inputTexture, float4(blurCoordinates[3], 0.0, 0.0)) * 0.093913;
+	bluredColor += tex2Dlod(inputTexture, float4(blurCoordinates[4], 0.0, 0.0)) * 0.093913;
 
 	return bluredColor;
 }

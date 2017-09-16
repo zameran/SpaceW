@@ -25,7 +25,7 @@ void CSMain (uint3 id : SV_DispatchThreadID)
 	
 	float3 s = float3(sqrt(max(1.0 - muS * muS, 0.0)), 0.0, muS); 
  
-	float3 result = float3(0, 0, 0); 
+	float3 result = float3(0.0, 0.0, 0.0); 
 
 	// integral over 2.PI around x with two nested loops over w directions (theta,phi) -- Eq (15) 
 

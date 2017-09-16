@@ -166,5 +166,5 @@ float4 Tex2DGrad(sampler2D tex, float2 uv, float2 dx, float2 dy, float2 texSize)
 
 	float lod = 0.5 * log2(max(dot(px, px), dot(py, py)));
 
-	return tex2Dlod(tex, float4(uv, 0, lod));
+	return tex2Dlod(tex, float4(uv, 0.0, lod));
 }

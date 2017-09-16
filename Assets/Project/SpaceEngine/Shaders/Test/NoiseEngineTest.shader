@@ -85,17 +85,17 @@ Shader "SpaceEngine/Test/NoiseEngineTest"
 				float3 offsets[4];
 				float hts[4];
 
-				offsets[0] = pos + float3(-u, 0, 0);
-				offsets[1] = pos + float3(u, 0, 0);
-				offsets[2] = pos + float3(0, -u, 0);
-				offsets[3] = pos + float3(0, u, 0);
+				offsets[0] = pos + float3(-u, 0.0, 0.0);
+				offsets[1] = pos + float3(u, 0.0, 0.0);
+				offsets[2] = pos + float3(0.0, -u, 0.0);
+				offsets[3] = pos + float3(0.0, u, 0.0);
 
 				for(int i = 0; i < 4; i++)
 				{
 					hts[i] = NoiseFunction(offsets[i]);
 				}
 
-				float3 _step = float3(1, 0, 1);
+				float3 _step = float3(1.0, 0.0, 1.0);
 			   
 				float3 va = normalize(float3(_step.xy, hts[1] - hts[0]));
 				float3 vb = normalize(float3(_step.yx, hts[3] - hts[2]));
@@ -107,8 +107,8 @@ Shader "SpaceEngine/Test/NoiseEngineTest"
 			{
 				float v = NoiseFunction(i.uv);
 				
-				return float4(v, v, v, 1);
-				//return float4(FindNormal(i.uv, 1), 1);
+				return float4(v, v, v, 1.0);
+				//return float4(FindNormal(i.uv, 1.0), 1.0);
 			}
 			ENDCG
 		}

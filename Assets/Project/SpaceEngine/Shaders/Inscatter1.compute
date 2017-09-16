@@ -15,8 +15,8 @@ RWTexture3D<float4> deltaSRWrite, deltaSMWrite;
 
 void Integrand(float r, float mu, float muS, float nu, float t, out float3 ray, out float3 mie) 
 { 
-    ray = float3(0, 0, 0); 
-    mie = float3(0, 0, 0); 
+    ray = float3(0.0, 0.0, 0.0); 
+    mie = float3(0.0, 0.0, 0.0); 
 
     float ri = sqrt(r * r + t * t + 2.0 * r * mu * t); 
     float muSi = (nu * t + muS * r) / ri; 
@@ -34,8 +34,8 @@ void Integrand(float r, float mu, float muS, float nu, float t, out float3 ray, 
 
 void Inscatter(float r, float mu, float muS, float nu, out float3 ray, out float3 mie) 
 { 
-    ray = float3(0, 0, 0); 
-    mie = float3(0, 0, 0);
+    ray = float3(0.0, 0.0, 0.0); 
+    mie = float3(0.0, 0.0, 0.0);
 
     float dx = Limit(r, mu) / float(INSCATTER_INTEGRAL_SAMPLES); 
     float xi = 0.0; 
@@ -82,6 +82,6 @@ void CSMain (uint3 id : SV_DispatchThreadID)
     
     // store separately Rayleigh and Mie contributions, WITHOUT the phase function factor 
     // (cf 'Angular precision') 
-    deltaSRWrite[uint3(id.xy, layer)] = float4(ray, 0);
-    deltaSMWrite[uint3(id.xy, layer)] = float4(mie, 0);
+    deltaSRWrite[uint3(id.xy, layer)] = float4(ray, 0.0);
+    deltaSMWrite[uint3(id.xy, layer)] = float4(mie, 0.0);
 }

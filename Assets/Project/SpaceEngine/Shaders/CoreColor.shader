@@ -58,7 +58,7 @@
 			//float3 color = ColorMapSelena(p, height,  slope);
 			//float3 color = ColorMapTerra(p, height, slope);
 			
-			output = float4(saturate(color), 1);
+			output = float4(saturate(color), 1.0);
 		}
 		ENDCG
 

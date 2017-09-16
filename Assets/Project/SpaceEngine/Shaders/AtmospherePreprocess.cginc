@@ -209,7 +209,7 @@ float4 Texture4D(Texture3D tex, float r, float mu, float muS, float nu)
 	float uNu = floor(_lerp); 
 	_lerp = _lerp - uNu; 
 	
-	float3 size = float3(RES_MU_S*RES_NU,RES_MU,RES_R);
+	float3 size = float3(RES_MU_S * RES_NU, RES_MU, RES_R);
 	
 	return SamplePoint(tex, float3((uNu + uMuS) / float(RES_NU), uMu, uR), size) * (1.0 - _lerp) + 
 		   SamplePoint(tex, float3((uNu + uMuS + 1.0) / float(RES_NU), uMu, uR), size) * _lerp;

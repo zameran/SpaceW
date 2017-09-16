@@ -36,7 +36,7 @@ void Inscatter(float r, float mu, float muS, float nu, out float3 raymie)
 	float sx = v.x == 0.0 ? 0.0 : (nu - muS * mu) / v.x; 
 	float3 s = float3(sx, sqrt(max(0.0, 1.0 - sx * sx - muS * muS)), muS); 
  
-	raymie = float3(0,0,0); 
+	raymie = float3(0.0, 0.0, 0.0); 
  
 	// integral over 4.PI around x with two nested loops over w directions (theta,phi) -- Eq (7) 
 	for (int itheta = 0; itheta < INSCATTER_SPHERICAL_INTEGRAL_SAMPLES; ++itheta) 
@@ -46,7 +46,7 @@ void Inscatter(float r, float mu, float muS, float nu, out float3 raymie)
  
 		float greflectance = 0.0; 
 		float dground = 0.0; 
-		float3 gtransp = float3(0,0,0);
+		float3 gtransp = float3(0.0, 0.0, 0.0);
 		 
 		if (ctheta < cthetamin) 
 		{ 	// if ground visible in direction w 

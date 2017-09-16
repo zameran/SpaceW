@@ -266,7 +266,7 @@ float3 Transmittance(float r, float mu)
 {
 	float2 uv = GetTransmittanceUV(r, mu);
 
-	return tex2Dlod(_Sky_Transmittance, float4(uv, 0, 0)).rgb;
+	return tex2Dlod(_Sky_Transmittance, float4(uv, 0.0, 0.0)).rgb;
 }
 
 // transmittance(=transparency) of atmosphere for ray (r,mu) of length d
@@ -285,7 +285,7 @@ float3 AnalyticTransmittance(float r, float mu, float d)
 // (mu=cos(view zenith angle)), or zero if ray intersects ground
 float3 TransmittanceWithShadow(float r, float mu) 
 {
-	return mu < -sqrt(1.0 - (Rg / r) * (Rg / r)) ? float3(0, 0, 0) : lerp(float3(1.0, 1.0, 1.0), Transmittance(r, mu), density);
+	return mu < -sqrt(1.0 - (Rg / r) * (Rg / r)) ? float3(0.0, 0.0, 0.0) : lerp(float3(1.0, 1.0, 1.0), Transmittance(r, mu), density);
 }
 
 // transmittance(=transparency) of atmosphere between x and x0
@@ -336,7 +336,7 @@ float3 Irradiance(sampler2D samp, float r, float muS)
 {
 	float2 uv = GetIrradianceUV(r, muS);
 
-	return tex2Dlod(samp, float4(uv, 0, 0)).rgb;
+	return tex2Dlod(samp, float4(uv, 0.0, 0.0)).rgb;
 }
 
 // Rayleigh phase function
@@ -380,7 +380,7 @@ float3 SunRadiance(float r, float muS)
 	#elif defined(ATMO_NONE)
 		return _Sun_Intensity.xxx;
 	#else
-		return float3(0, 0, 0);
+		return float3(0.0, 0.0, 0.0);
 	#endif
 }
 
@@ -392,7 +392,7 @@ float3 SkyIrradiance(float r, float muS)
 	#if defined(ATMO_SKY_ONLY) || defined(ATMO_FULL)
 		return Irradiance(_Sky_Irradiance, r, muS) * _Sun_Intensity;
 	#else
-		return float3(0, 0, 0);
+		return float3(0.0, 0.0, 0.0);
 	#endif
 }
 
@@ -404,7 +404,7 @@ float3 SkyIrradiance(float r, float muS)
 float3 SkyRadiance(float3 camera, float3 viewdir, float3 sundir, float shaftWidth)
 {
 	#if defined(ATMO_INSCATTER_ONLY) || defined(ATMO_FULL)
-		float3 result = float3(0, 0, 0);
+		float3 result = float3(0.0, 0.0, 0.0);
 	
 		camera /= scale;
 		camera += viewdir * max(shaftWidth, 0.0);
@@ -454,7 +454,7 @@ float3 SkyRadiance(float3 camera, float3 viewdir, float3 sundir, float shaftWidt
 
 		return result * _Sun_Intensity;
 	#else
-		return float3(0, 0, 0);
+		return float3(0.0, 0.0, 0.0);
 	#endif
 }
 
@@ -466,8 +466,8 @@ float3 SkyRadiance(float3 camera, float3 viewdir, float3 sundir, float shaftWidt
 float3 SkyRadiance(float3 camera, float3 viewdir, float3 sundir, out float3 extinction, float shaftWidth)
 {
 	#if defined(ATMO_INSCATTER_ONLY) || defined(ATMO_FULL)
-		float3 result = float3(0, 0, 0);
-		extinction = float3(1, 1, 1);
+		float3 result = float3(0.0, 0.0, 0.0);
+		extinction = float3(1.0, 1.0, 1.0);
 	
 		camera /= scale;
 		camera += viewdir * max(shaftWidth, 0.0);
@@ -518,15 +518,15 @@ float3 SkyRadiance(float3 camera, float3 viewdir, float3 sundir, out float3 exti
 
 		return result * _Sun_Intensity;
 	#else
-		extinction = float3(1, 1, 1);
+		extinction = float3(1.0, 1.0, 1.0);
 
-		return float3(0, 0, 0);
+		return float3(0.0, 0.0, 0.0);
 	#endif
 }
 
 float3 SkyRadianceSimple(float3 camera, float3 viewdir, float3 sundir)
 {
-	float3 result = float3(0, 0, 0);
+	float3 result = float3(0.0, 0.0, 0.0);
 	
 	Rt = Rg + (Rt - Rg) * 1.0;
 	
@@ -559,7 +559,7 @@ float3 SkyRadianceSimple(float3 camera, float3 viewdir, float3 sundir)
 	}    
 	else
 	{
-		result = float3(0, 0, 0);
+		result = float3(0.0, 0.0, 0.0);
 	} 
 	
 	return result * _Sun_Intensity;
@@ -567,9 +567,9 @@ float3 SkyRadianceSimple(float3 camera, float3 viewdir, float3 sundir)
 
 float3 InScatteringShine(float3 camera, float3 _point, out float3 extinction, float3 sunDir, float shaftWidth, float scaleCoeff, float irradianceFactor) 
 {
-	float3 result = float3(0, 0, 0);
+	float3 result = float3(0.0, 0.0, 0.0);
 
-	extinction = float3(1, 1, 1);
+	extinction = float3(1.0, 1.0, 1.0);
 
 	float3 viewdir = _point - camera;
 	float d = length(viewdir) * scaleCoeff;
@@ -645,7 +645,7 @@ float3 InScatteringShine(float3 camera, float3 _point, out float3 extinction, fl
 	}
 	else
 	{
-		result = float3(0, 0, 0);
+		result = float3(0.0, 0.0, 0.0);
 	}
 
 	return result * _Sun_Intensity;
@@ -813,20 +813,20 @@ float4 InScattering(float3 camera, float3 _point, float3 sundir, out float3 exti
 			// avoids imprecision problems in Mie scattering when sun is below horizon
 			inScatter.w *= smoothstep(0.00, _Sky_MieFadeFix, muS);
 			
-			float4 inScatterM = float4(GetMie(inScatter), 1);
+			float4 inScatterM = float4(GetMie(inScatter), 1.0);
 			float phase = PhaseFunctionR(nu);
 			float phaseM = PhaseFunctionM(nu);
 			result = inScatter * phase + inScatterM * phaseM;
 		}
 		else 
 		{
-			result = float4(0, 0, 0, 0);
-			extinction = float3(1, 1, 1);
+			result = float4(0.0, 0.0, 0.0, 0.0);
+			extinction = float3(1.0, 1.0, 1.0);
 		}
 
 		return result * _Sun_Intensity;
 	#else
-		extinction = float4(1, 1, 1);
-		return float4(0, 0, 0, 0);
+		extinction = float3(1.0, 1.0, 1.0);
+		return float4(0.0, 0.0, 0.0, 0.0);
 	#endif
 }

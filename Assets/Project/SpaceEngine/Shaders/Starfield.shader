@@ -104,7 +104,7 @@ Shader "SpaceEngine/Space/Starfield"
 			{
 				half scale = exp(-dot(i.uv.xy, i.uv.xy));
 
-				color = float4(i.color.xyz * scale + 5 * i.color.w * pow(scale, 10), 1.0);
+				color = float4(i.color.xyz * scale + 5.0 * i.color.w * pow(scale, 10.0), 1.0);
 			}
 			ENDCG
 		}

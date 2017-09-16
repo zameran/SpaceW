@@ -194,7 +194,7 @@ Shader "SpaceEngine/Planet/Ocean"
 
 				// Get coverage
 				// Modulated...
-				//float noiseValue = Noise(float3(u * 0.01, 0)) * _Ocean_WhiteCapStr;
+				//float noiseValue = Noise(float3(u * 0.01, 0.0)) * _Ocean_WhiteCapStr;
 				//float whiteCapStr = clamp((noiseValue + 1.0) * 0.5, 0.0, 1.0);
 				//float W = WhitecapCoverage(whiteCapStr, jm.x, jSigma2);
 

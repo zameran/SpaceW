@@ -152,7 +152,7 @@ float4 texTileLod(sampler2D tile, float2 uv, float3 tileCoords, float3 tileSize)
 {
 	ScaleUVToTile(uv, tileCoords, tileSize);
 
-	return tex2Dlod(tile, float4(uv, 0, 0));
+	return tex2Dlod(tile, float4(uv, 0.0, 0.0));
 }
 
 float4 texTile(sampler2D tile, float2 uv, float3 tileCoords, float3 tileSize) 

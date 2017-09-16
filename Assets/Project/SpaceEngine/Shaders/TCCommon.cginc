@@ -897,10 +897,10 @@ float4 SampleCustomBilinear(sampler2D tex, float2 uv, float resolution)
 	float2 iuv = floor(st);
 	float2 fuv = frac(st);
 
-	float4 a = tex2Dlod(tex, float4((iuv + float2(0.5, 0.5)) / resolution, 0, 0));
-	float4 b = tex2Dlod(tex, float4((iuv + float2(1.5, 0.5)) / resolution, 0, 0));
-	float4 c = tex2Dlod(tex, float4((iuv + float2(0.5, 1.5)) / resolution, 0, 0));
-	float4 d = tex2Dlod(tex, float4((iuv + float2(1.5, 1.5)) / resolution, 0, 0));
+	float4 a = tex2Dlod(tex, float4((iuv + float2(0.5, 0.5)) / resolution, 0.0, 0.0));
+	float4 b = tex2Dlod(tex, float4((iuv + float2(1.5, 0.5)) / resolution, 0.0, 0.0));
+	float4 c = tex2Dlod(tex, float4((iuv + float2(0.5, 1.5)) / resolution, 0.0, 0.0));
+	float4 d = tex2Dlod(tex, float4((iuv + float2(1.5, 1.5)) / resolution, 0.0, 0.0));
 
 	return lerp(lerp(a, b, fuv.x), lerp(c, d, fuv.x), fuv.y);
 }
@@ -959,16 +959,16 @@ float Noise(float3 p)
 	// Hash coordinates of the 8 cube corners
 	// NOTE : I FUCKING DID IT! I FIX DAT FORMULA FOR 3D!
 	// Solution is "+ P.z"
-	float4 AA = tex2Dlod(PermSampler, float4(P.xy, 0, 0)) + P.z;
+	float4 AA = tex2Dlod(PermSampler, float4(P.xy, 0.0, 0.0)) + P.z;
 
 	float a = dot(tex2Dlod(PermGradSampler, AA.x).rgb, p);
-	float b = dot(tex2Dlod(PermGradSampler, AA.z).rgb, p + float3(-1, 0, 0));
-	float c = dot(tex2Dlod(PermGradSampler, AA.y).rgb, p + float3(0, -1, 0));
-	float d = dot(tex2Dlod(PermGradSampler, AA.w).rgb, p + float3(-1, -1, 0));
-	float e = dot(tex2Dlod(PermGradSampler, AA.x + one).rgb, p + float3(0, 0, -1));
-	float f = dot(tex2Dlod(PermGradSampler, AA.z + one).rgb, p + float3(-1, 0, -1));
-	float g = dot(tex2Dlod(PermGradSampler, AA.y + one).rgb, p + float3(0, -1, -1));
-	float h = dot(tex2Dlod(PermGradSampler, AA.w + one).rgb, p + float3(-1, -1, -1));
+	float b = dot(tex2Dlod(PermGradSampler, AA.z).rgb, p + float3(-1.0, 0.0, 0.0));
+	float c = dot(tex2Dlod(PermGradSampler, AA.y).rgb, p + float3(0.0, -1.0, 0.0));
+	float d = dot(tex2Dlod(PermGradSampler, AA.w).rgb, p + float3(-1.0, -1.0, 0.0));
+	float e = dot(tex2Dlod(PermGradSampler, AA.x + one).rgb, p + float3(0.0, 0.0, -1.0));
+	float f = dot(tex2Dlod(PermGradSampler, AA.z + one).rgb, p + float3(-1.0, 0.0, -1.0));
+	float g = dot(tex2Dlod(PermGradSampler, AA.y + one).rgb, p + float3(0.0, -1.0, -1.0));
+	float h = dot(tex2Dlod(PermGradSampler, AA.w + one).rgb, p + float3(-1.0, -1.0, -1.0));
 
 	float k0 = a;
 	float k1 = b - a;
@@ -1001,16 +1001,16 @@ float4 NoiseDeriv(float3 p)
 	// Hash coordinates of the 8 cube corners
 	// NOTE : I FUCKING DID IT! I FIX DAT FORMULA FOR 3D!
 	// Solution is "+ P.z"
-	float4 AA = tex2Dlod(PermSampler, float4(P.xy, 0, 0)) + P.z; // <- Here!
+	float4 AA = tex2Dlod(PermSampler, float4(P.xy, 0.0, 0.0)) + P.z; // <- Here!
 	
 	float a = dot(tex2Dlod(PermGradSampler, AA.x).rgb, p);
-	float b = dot(tex2Dlod(PermGradSampler, AA.z).rgb, p + float3(-1, 0, 0));
-	float c = dot(tex2Dlod(PermGradSampler, AA.y).rgb, p + float3(0, -1, 0));
-	float d = dot(tex2Dlod(PermGradSampler, AA.w).rgb, p + float3(-1, -1, 0));
-	float e = dot(tex2Dlod(PermGradSampler, AA.x + one).rgb, p + float3(0, 0, -1));
-	float f = dot(tex2Dlod(PermGradSampler, AA.z + one).rgb, p + float3(-1, 0, -1));
-	float g = dot(tex2Dlod(PermGradSampler, AA.y + one).rgb, p + float3(0, -1, -1));
-	float h = dot(tex2Dlod(PermGradSampler, AA.w + one).rgb, p + float3(-1, -1, -1));
+	float b = dot(tex2Dlod(PermGradSampler, AA.z).rgb, p + float3(-1.0, 0.0, 0.0));
+	float c = dot(tex2Dlod(PermGradSampler, AA.y).rgb, p + float3(0.0, -1.0, 0.0));
+	float d = dot(tex2Dlod(PermGradSampler, AA.w).rgb, p + float3(-1.0, -1.0, 0.0));
+	float e = dot(tex2Dlod(PermGradSampler, AA.x + one).rgb, p + float3(0.0, 0.0, -1.0));
+	float f = dot(tex2Dlod(PermGradSampler, AA.z + one).rgb, p + float3(-1.0, 0.0, -1.0));
+	float g = dot(tex2Dlod(PermGradSampler, AA.y + one).rgb, p + float3(0.0, -1.0, -1.0));
+	float h = dot(tex2Dlod(PermGradSampler, AA.w + one).rgb, p + float3(-1.0, -1.0, -1.0));
 
 	float k0 =  a;
 	float k1 =  b - a;
@@ -1021,10 +1021,10 @@ float4 NoiseDeriv(float3 p)
 	float k6 =  a - b - e + f;
 	float k7 = -a + b + c - d + e - f - g + h;
 
-	return float4(df.x * (k1 + k4*ff.y + k6*ff.z + k7*ff.y*ff.z),
-				  df.y * (k2 + k5*ff.z + k4*ff.x + k7*ff.z*ff.x),
-				  df.z * (k3 + k6*ff.x + k5*ff.y + k7*ff.x*ff.y),
-				  k0 + k1*ff.x + k2*ff.y + k3*ff.z + k4*ff.x*ff.y + k5*ff.y*ff.z + k6*ff.z*ff.x + k7*ff.x*ff.y*ff.z);
+	return float4(df.x * (k1 + k4 * ff.y + k6 * ff.z + k7 * ff.y * ff.z),
+				  df.y * (k2 + k5 * ff.z + k4 * ff.x + k7 * ff.z * ff.x),
+				  df.z * (k3 + k6 * ff.x + k5 * ff.y + k7 * ff.x * ff.y),
+				  k0 + k1 * ff.x + k2 * ff.y + k3 * ff.z + k4 * ff.x * ff.y + k5 * ff.y * ff.z + k6 * ff.z * ff.x + k7 * ff.x * ff.y * ff.z);
 }
 //-----------------------------------------------------------------------------
 
@@ -1338,20 +1338,20 @@ float Noise2D(float2 p, float seed = 0)
 
 	// Get weights from the coordinate fraction
 	float2 w = p * p * p * (p * (p * 6 - 15) + 10);
-	float4 w4 = float4(1, w.x, w.y, w.x * w.y);
+	float4 w4 = float4(1.0, w.x, w.y, w.x * w.y);
 
 	// Get the four randomly permutated indices from the noise lattice nearest to p and offset these numbers with the seed number.
-	float4 perm = tex2Dlod(PermSamplerGL, float4(P, 0, 0)) + seed;
+	float4 perm = tex2Dlod(PermSamplerGL, float4(P, 0.0, 0.0)) + seed;
 
 	// Permutate the four offseted indices again and get the 2D gradient for each of the four permutated coordinates-seed pairs.
-	float4 g1 = tex2Dlod(PermGradSamplerGL, float4(perm.xy, 0, 0)) * 2 - 1;
-	float4 g2 = tex2Dlod(PermGradSamplerGL, float4(perm.zw, 0, 0)) * 2 - 1;
+	float4 g1 = tex2Dlod(PermGradSamplerGL, float4(perm.xy, 0.0, 0.0)) * 2.0 - 1.0;
+	float4 g2 = tex2Dlod(PermGradSamplerGL, float4(perm.zw, 0.0, 0.0)) * 2.0 - 1.0;
 
 	// Evaluate the four lattice gradients at p
 	float a = dot(g1.xy, p);
-	float b = dot(g2.xy, p + float2(-1,  0));
-	float c = dot(g1.zw, p + float2( 0, -1));
-	float d = dot(g2.zw, p + float2(-1, -1));
+	float b = dot(g2.xy, p + float2(-1.0,  0.0));
+	float c = dot(g1.zw, p + float2( 0.0, -1.0));
+	float d = dot(g2.zw, p + float2(-1.0, -1.0));
 
 	// Bi-linearly blend between the gradients, using w4 as blend factors.
 	float4 grads = float4(a, b - a, c - a, a - b - c + d);
@@ -1364,22 +1364,22 @@ float Noise2D(float2 p, float seed = 0)
 
 float3 Noise2DPseudoDeriv(float2 p, float seed = 0)
 {
-	const float one = 1.0 / 256;
+	const float one = 1.0 / 256.0;
 
-	float2 P = fmod(floor(p), 256) * one;
+	float2 P = fmod(floor(p), 256.0) * one;
 	p -= floor(p);
 
-	float2 f = p * p * p * (p * (p * 6 - 15) + 10);
-	float2 df = p * p * (p * (30 * p - 60) + 30);
+	float2 f = p * p * p * (p * (p * 6.0 - 15.0) + 10.0);
+	float2 df = p * p * (p * (30.0 * p - 60.0) + 30.0);
 
-	float4 AA = tex2Dlod(PermSamplerGL, float4(P, 0, 0)) + seed / 256;
-	float4 G1 = tex2Dlod(PermGradSamplerGL, float4(AA.xy, 0, 0)) * 2 - 1;
-	float4 G2 = tex2Dlod(PermGradSamplerGL, float4(AA.zw, 0, 0)) * 2 - 1;
+	float4 AA = tex2Dlod(PermSamplerGL, float4(P, 0.0, 0.0)) + seed / 256.0;
+	float4 G1 = tex2Dlod(PermGradSamplerGL, float4(AA.xy, 0.0, 0.0)) * 2.0 - 1.0;
+	float4 G2 = tex2Dlod(PermGradSamplerGL, float4(AA.zw, 0.0, 0.0)) * 2.0 - 1.0;
 
 	float a = dot(G1.xy, p);
-	float b = dot(G2.xy, p + float2(-1,  0));
-	float c = dot(G1.zw, p + float2( 0, -1));
-	float d = dot(G2.zw, p + float2(-1, -1));
+	float b = dot(G2.xy, p + float2(-1.0,  0.0));
+	float c = dot(G1.zw, p + float2( 0.0, -1.0));
+	float d = dot(G2.zw, p + float2(-1.0, -1.0));
 
 	float k0 = a;
 	float k1 = b - a;
@@ -1396,18 +1396,18 @@ float3 Noise2DPseudoDeriv(float2 p, float seed = 0)
 
 float3 Noise2DDeriv(float2 p, float seed = 0)
 {
-	const float one = 1.0 / 256;
+	const float one = 1.0 / 256.0;
 
-	float2 P = fmod(floor(p), 256) * one;
+	float2 P = fmod(floor(p), 256.0) * one;
 	p -= floor(p);
 
-	float2 w = p * p * p * (p * (p * 6 - 15) + 10);
-	float2 dw = p * p * (p * (p * 30 - 60) + 30);
-	float2 dwp = p * p * p * (p * (p * 36 - 75) + 40);
+	float2 w = p * p * p * (p * (p * 6.0 - 15.0) + 10.0);
+	float2 dw = p * p * (p * (p * 30.0 - 60.0) + 30.0);
+	float2 dwp = p * p * p * (p * (p * 36.0 - 75.0) + 40.0);
 
-	float4 AA = tex2Dlod(PermSamplerGL, float4(P, 0, 0)) + seed / 256;
-	float4 G1 = tex2Dlod(PermGradSamplerGL, float4(AA.xy, 0, 0)) * 2 - 1;
-	float4 G2 = tex2Dlod(PermGradSamplerGL, float4(AA.zw, 0, 0)) * 2 - 1;
+	float4 AA = tex2Dlod(PermSamplerGL, float4(P, 0.0, 0.0)) + seed / 256.0;
+	float4 G1 = tex2Dlod(PermGradSamplerGL, float4(AA.xy, 0.0, 0.0)) * 2.0 - 1.0;
+	float4 G2 = tex2Dlod(PermGradSamplerGL, float4(AA.zw, 0.0, 0.0)) * 2.0 - 1.0;
 
 	float k0 = G1.x * p.x + G1.y * p.y;
 	float k1 = (G2.x - G1.x) * p.x + (G2.y - G1.y) * p.y - G2.x;
@@ -1429,13 +1429,13 @@ float3 Noise2DAlternativeDeriv(float2 p, float seed = 0)
 	float2 P = fmod(floor(p), 256) * one;
 	p -= floor(p);
 
-	float2 f = p * p * p * (p * (p * 6 - 15) + 10);
-	float2 ddf = p * (p * (p * 120 - 180) + 60);
-	float2 ddfp = p * p * (p * (p * 180 - 300) + 120);
+	float2 f = p * p * p * (p * (p * 6.0 - 15.0) + 10.0);
+	float2 ddf = p * (p * (p * 120.0 - 180.0) + 60.0);
+	float2 ddfp = p * p * (p * (p * 180.0 - 300.0) + 120.0);
 
-	float4 AA = tex2Dlod(PermSamplerGL, float4(P, 0, 0)) + seed / 256;
-	float4 G1 = tex2Dlod(PermGradSamplerGL, float4(AA.xy, 0, 0)) * 2 - 1;
-	float4 G2 = tex2Dlod(PermGradSamplerGL, float4(AA.zw, 0, 0)) * 2 - 1;
+	float4 AA = tex2Dlod(PermSamplerGL, float4(P, 0.0, 0.0)) + seed / 256.0;
+	float4 G1 = tex2Dlod(PermGradSamplerGL, float4(AA.xy, 0.0, 0.0)) * 2.0 - 1.0;
+	float4 G2 = tex2Dlod(PermGradSamplerGL, float4(AA.zw, 0.0, 0.0)) * 2.0 - 1.0;
 
 	float k0 = G1.x * p.x + G1.y * p.y;
 	float k1 = (G2.x - G1.x) * p.x + (G2.y - G1.y) * p.y - G2.x;
@@ -1565,7 +1565,7 @@ float sNoise(float3 v)
 	//vec4 s1 = vec4(lessThan(b1, 0.0)) * 2.0 - 1.0;
 	float4 s0 = floor(b0) * 2.0 + 1.0;
 	float4 s1 = floor(b1) * 2.0 + 1.0;
-	float4 sh = -step(h, float4(0, 0, 0, 0));
+	float4 sh = -step(h, float4(0.0, 0.0, 0.0, 0.0));
 
 	float4 a0 = b0.xzyw + s0.xzyw * sh.xxyy;
 	float4 a1 = b1.xzyw + s1.xzyw * sh.zzww;
@@ -2762,7 +2762,7 @@ float2 inverseSF(float3 p, float n)
 
 	for (uint s = 0; s < 4; ++s) 
 	{
-		float cosTheta = dot(B[1], float2(s % 2, s / 2) + c) + m;
+		float cosTheta = dot(B[1], float2(s % 2.0, s / 2.0) + c) + m;
 
 		cosTheta = clamp(cosTheta, -1.0, 1.0) * 2.0 - cosTheta;
 
@@ -2803,7 +2803,7 @@ float2 inverseSF(float3 p, float n, out float3 NearestPoint)
 
 	for (uint s = 0; s < 4; ++s) 
 	{
-		float cosTheta = dot(B[1], float2(s % 2, s / 2) + c) + m;
+		float cosTheta = dot(B[1], float2(s % 2.0, s / 2.0) + c) + m;
 
 		cosTheta = clamp(cosTheta, -1.0, 1.0) * 2.0 - cosTheta;
 
@@ -2996,7 +2996,7 @@ float RayedCraterNoise(float3 ppoint, float cratMagn, float cratFreq, float crat
 
 float RayedCraterColorNoise(float3 ppoint, float cratFreq, float cratSqrtDensity, float cratOctaves)
 {
-	float3 binormal = normalize(float3(-ppoint.z, 0.0, ppoint.x)); // = normalize(cross(ppoint, float3(0, 1, 0)));
+	float3 binormal = normalize(float3(-ppoint.z, 0.0, ppoint.x)); // = normalize(cross(ppoint, float3(0.0, 1.0, 0.0)));
 	float3 rotVec = normalize(Randomize);
 
 	// Craters roundness distortion
@@ -3118,7 +3118,7 @@ float VolcanoNoise(float3 ppoint, float globalLand, float localLand)
 	float2 cell;
 	float3 cellCenter = float3(0.0, 0.0, 0.0);
 	float3 rotVec   = normalize(Randomize);
-	float3 binormal = normalize(float3(-ppoint.z, 0.0, ppoint.x)); // = normalize(cross(ppoint, float3(0, 1, 0)));
+	float3 binormal = normalize(float3(-ppoint.z, 0.0, ppoint.x)); // = normalize(cross(ppoint, float3(0.0, 1.0, 0.0)));
 	float  distFreq = 18.361 * volcanoFreq;
 	float  distMagn = 0.003;
 
@@ -3172,7 +3172,7 @@ float2 VolcanoGlowNoise(float3 ppoint)
 	float2 cell;
 	float3 cellCenter = float3(0.0, 0.0, 0.0);
 	float3 rotVec   = normalize(Randomize);
-	float3 binormal = normalize(float3(-ppoint.z, 0.0, ppoint.x)); // = normalize(cross(ppoint, float3(0, 1, 0)));
+	float3 binormal = normalize(float3(-ppoint.z, 0.0, ppoint.x)); // = normalize(cross(ppoint, float3(0.0, 1.0, 0.0)));
 	float  distFreq = 18.361 * volcanoFreq;
 	float  distMagn = 0.003;
 

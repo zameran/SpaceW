@@ -84,7 +84,7 @@ Shader "SpaceEngine/Ocean/InitJacobians"
 				float2 h4 = GetSpectrum(_RealTime, w.w, s34.zw, s34c.zw);
 				
 				/// Jacobians
-				float4 IK = float4(IK1,IK2,IK3,IK4);
+				float4 IK = float4(IK1, IK2, IK3, IK4);
 				float2 k1Squared = k1*k1;
 				float2 k2Squared = k2*k2;
 				float2 k3Squared = k3*k3;
