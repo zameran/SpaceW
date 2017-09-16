@@ -34,21 +34,63 @@
 #endregion
 
 using SpaceEngine.Core.Bodies;
+using SpaceEngine.Core.Patterns.Strategy.Eventit;
 using SpaceEngine.Enviroment.Atmospheric;
 
 using System;
+using System.ComponentModel;
 
 using UnityEngine;
 
 namespace SpaceEngine.Debugging
 {
-    public class DebugGUIAtmosphereSetup : DebugGUI
+    // NOTE : Parameters copy stuff with events looks pretty messy. So. I don't give a fuck - this is a developer GUI.
+    public class DebugGUIAtmosphereSetup : DebugGUI, IEventit
     {
+        private readonly AtmosphereBaseProperty AtmosphereBaseProperty = new AtmosphereBaseProperty();
+
+        private AtmosphereBase AtmosphereBase { get { return AtmosphereBaseProperty.Value; } set { AtmosphereBaseProperty.Value = value; } }
+
         public Body Body { get { return GodManager.Instance.ActiveBody; } }
 
         public Atmosphere Atmosphere { get { return Body.Atmosphere; } }
 
         public AtmosphereParameters AtmosphereParameters = AtmosphereParameters.Default;
+
+        public bool PresetChanged = false;
+
+        #region Eventit
+
+        public bool isEventit { get; set; }
+
+        public void Eventit()
+        {
+            if (isEventit) return;
+
+            AtmosphereBaseProperty.PropertyChanged += AtmosphereBasePropertyOnPropertyChanged;
+
+            isEventit = true;
+        }
+
+        public void UnEventit()
+        {
+            if (!isEventit) return;
+
+            AtmosphereBaseProperty.PropertyChanged -= AtmosphereBasePropertyOnPropertyChanged;
+
+            isEventit = false;
+        }
+
+        #endregion
+
+        #region Events
+
+        private void AtmosphereBasePropertyOnPropertyChanged(object sender, PropertyChangedEventArgs e)
+        {
+            PresetChanged = true;
+        }
+
+        #endregion
 
         protected override void Awake()
         {
@@ -58,6 +100,13 @@ namespace SpaceEngine.Debugging
         protected override void Start()
         {
             base.Start();
+
+            Eventit();
+        }
+
+        protected virtual void OnDestroy()
+        {
+            UnEventit();
         }
 
         protected override void OnGUI()
@@ -97,7 +146,7 @@ namespace SpaceEngine.Debugging
                             {
                                 GUILayout.Space(20);
 
-                                Atmosphere.AtmosphereBase = (AtmosphereBase)GUILayout.SelectionGrid((int)Atmosphere.AtmosphereBase, System.Enum.GetNames(typeof(AtmosphereBase)), 2);
+                                Atmosphere.AtmosphereBase = (AtmosphereBase)GUILayout.SelectionGrid((int)Atmosphere.AtmosphereBase, Enum.GetNames(typeof(AtmosphereBase)), 2);
                             });
 
                             GUILayout.Space(10);
@@ -120,14 +169,16 @@ namespace SpaceEngine.Debugging
                         {
                             GUILayout.Space(20);
 
-                            GUILayoutExtensions.HorizontalBoxed("", GUISkin, () =>
+                            GUILayoutExtensions.VerticalBoxed("Copy from preset: ", GUISkin, () =>
                             {
-                                GUILayoutExtensions.LabelWithFlexibleSpace("Preset: ", Atmosphere.AtmosphereBase.ToString());
+                                GUILayout.Space(20);
+
+                                AtmosphereBase = (AtmosphereBase)GUILayout.SelectionGrid((int)AtmosphereBase, Enum.GetNames(typeof(AtmosphereBase)), 2);
                             });
 
                             GUILayout.Space(5);
 
-                            var parameters = new AtmosphereParameters(AtmosphereParameters);
+                            var parameters = PresetChanged ? AtmosphereParameters.Get(AtmosphereBase) : new AtmosphereParameters(AtmosphereParameters);
 
                             var mieG = parameters.MIE_G;
                             var hr = parameters.HR;
@@ -139,6 +190,8 @@ namespace SpaceEngine.Debugging
                             var rg = parameters.Rg;
                             var rt = parameters.Rt;
                             var rl = parameters.Rl;
+
+                            PresetChanged = false;
 
                             GUILayoutExtensions.SliderWithField("Mie G: ", 0.0f, 1.0f, ref mieG, "0.0000", textFieldWidth: 100);
                             GUILayoutExtensions.SliderWithFieldAndControls("Air density (HR At half-height in KM): ", 0.0f, 256.0f, ref hr, "0.00", textFieldWidth: 100, controlStep: 1.0f);
