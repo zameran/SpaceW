@@ -839,7 +839,9 @@ void FAST32_hash_3D(float3 gridcell, out float4 lowz_hash, out float4 highz_hash
 //-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
+inline float2 Interpolation_C2(float2 x) { return x * x * x * (x * (x * 6.0 - 15.0) + 10.0); }
 inline float3 Interpolation_C2(float3 x) { return x * x * x * (x * (x * 6.0 - 15.0) + 10.0); }
+inline float2 Interpolation_C2_Deriv(float2 x) { return x * x * (x * (x * 30.0 - 60.0) + 30.0); }
 inline float3 Interpolation_C2_Deriv(float3 x) { return x * x * (x * (x * 30.0 - 60.0) + 30.0); }
 
 inline float CubicHermite(float A, float B, float C, float D, float t)
@@ -954,7 +956,7 @@ float Noise(float3 p)
 	p -= floor(p);
 
 	// Compute fade curves for each of x,y,z
-	float3 ff = p * p * p * (p * (p * 6.0 - 15.0) + 10.0);
+	float3 ff = Interpolation_C2(p);
 
 	// Hash coordinates of the 8 cube corners
 	// NOTE : I FUCKING DID IT! I FIX DAT FORMULA FOR 3D!
@@ -996,7 +998,7 @@ float4 NoiseDeriv(float3 p)
 
 	// Compute fade curves for each of x,y,z
 	float3 df = 30.0 * p * p * (p * (p - 2.0) + 1.0);
-	float3 ff = p * p * p * (p * (p * 6.0 - 15.0) + 10.0);
+	float3 ff = Interpolation_C2(p);
 
 	// Hash coordinates of the 8 cube corners
 	// NOTE : I FUCKING DID IT! I FIX DAT FORMULA FOR 3D!
@@ -1337,7 +1339,7 @@ float Noise2D(float2 p, float seed = 0)
 	p -= floor(p);
 
 	// Get weights from the coordinate fraction
-	float2 w = p * p * p * (p * (p * 6 - 15) + 10);
+	float2 w = Interpolation_C2(p);
 	float4 w4 = float4(1.0, w.x, w.y, w.x * w.y);
 
 	// Get the four randomly permutated indices from the noise lattice nearest to p and offset these numbers with the seed number.
@@ -1369,8 +1371,8 @@ float3 Noise2DPseudoDeriv(float2 p, float seed = 0)
 	float2 P = fmod(floor(p), 256.0) * one;
 	p -= floor(p);
 
-	float2 f = p * p * p * (p * (p * 6.0 - 15.0) + 10.0);
-	float2 df = p * p * (p * (30.0 * p - 60.0) + 30.0);
+	float2 f = Interpolation_C2(p);
+	float2 df = Interpolation_C2_Deriv(p);
 
 	float4 AA = tex2Dlod(PermSamplerGL, float4(P, 0.0, 0.0)) + seed / 256.0;
 	float4 G1 = tex2Dlod(PermGradSamplerGL, float4(AA.xy, 0.0, 0.0)) * 2.0 - 1.0;
@@ -1401,8 +1403,8 @@ float3 Noise2DDeriv(float2 p, float seed = 0)
 	float2 P = fmod(floor(p), 256.0) * one;
 	p -= floor(p);
 
-	float2 w = p * p * p * (p * (p * 6.0 - 15.0) + 10.0);
-	float2 dw = p * p * (p * (p * 30.0 - 60.0) + 30.0);
+	float2 w = Interpolation_C2(p);
+	float2 dw = Interpolation_C2_Deriv(p);
 	float2 dwp = p * p * p * (p * (p * 36.0 - 75.0) + 40.0);
 
 	float4 AA = tex2Dlod(PermSamplerGL, float4(P, 0.0, 0.0)) + seed / 256.0;
@@ -1429,7 +1431,7 @@ float3 Noise2DAlternativeDeriv(float2 p, float seed = 0)
 	float2 P = fmod(floor(p), 256) * one;
 	p -= floor(p);
 
-	float2 f = p * p * p * (p * (p * 6.0 - 15.0) + 10.0);
+	float2 f = Interpolation_C2(p);
 	float2 ddf = p * (p * (p * 120.0 - 180.0) + 60.0);
 	float2 ddfp = p * p * (p * (p * 180.0 - 300.0) + 120.0);
 
