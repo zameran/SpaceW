@@ -52,6 +52,9 @@ namespace SpaceEngine.Debugging
         public GUIStyle BoldLabelStyle;
 
         [HideInInspector]
+        public GUIStyle ImageLabelStyle;
+
+        [HideInInspector]
         public Vector2 ScrollPosition = Vector2.zero;
 
         public GUISkin GUISkin
@@ -82,11 +85,24 @@ namespace SpaceEngine.Debugging
             GUI.depth = -100;
 
             if (SwitcherComponent != null)
+            {
                 if (SwitcherComponent.GUISkin != null)
-                    if (GUI.skin.FindStyle("label_Bold") != null)
-                        BoldLabelStyle = GUI.skin.FindStyle("label_Bold");
-                    else if (GUI.skin.FindStyle("label") != null)
-                        BoldLabelStyle = GUI.skin.FindStyle("label");
+                {
+                    var labelBoldStyle = GUI.skin.FindStyle("label_Bold");
+                    var labelStyle = GUI.skin.FindStyle("label");
+                    var labelImage = GUI.skin.FindStyle("label_image");
+
+                    if (labelBoldStyle != null)
+                        BoldLabelStyle = labelBoldStyle;
+                    else if (labelStyle != null)
+                        BoldLabelStyle = labelStyle;
+
+                    if (labelImage != null)
+                        ImageLabelStyle = labelImage;
+                    else if (labelStyle != null)
+                        ImageLabelStyle = labelStyle;
+                }
+            }
         }
 
         protected abstract void UI(int id);

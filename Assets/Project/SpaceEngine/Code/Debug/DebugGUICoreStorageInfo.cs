@@ -35,13 +35,31 @@
 
 using SpaceEngine.Core.Storage;
 using SpaceEngine.Core.Tile.Storage;
+
+using System;
 using System.Linq;
+
 using UnityEngine;
 
 namespace SpaceEngine.Debugging
 {
     public class DebugGUICoreStorageInfo : DebugGUI
     {
+        private Vector2 ContentsScrollPosition = Vector2.zero;
+
+        public float ContentsWindowSize = 512.0f;
+
+        private bool ShowContents = false;
+
+        private Rect ContentsInfoBounds
+        {
+            get
+            {
+                return new Rect(debugInfoBounds.x + debugInfoBounds.width + 10, 
+                                debugInfoBounds.y, ContentsWindowSize, ContentsWindowSize);
+            }
+        }
+
         protected override void Awake()
         {
             base.Awake();
@@ -57,10 +75,27 @@ namespace SpaceEngine.Debugging
             base.OnGUI();
 
             GUILayout.Window(0, debugInfoBounds, UI, "Core Cache Info");
+
+            if (ShowContents)
+            {
+                GUILayout.Window(1, ContentsInfoBounds, StorageUI, "Storage Contents");
+            }
         }
 
         protected override void UI(int id)
         {
+            GUILayoutExtensions.VerticalBoxed("Controls: ", GUISkin, () =>
+            {
+                GUILayout.Space(20);
+
+                GUILayoutExtensions.VerticalBoxed("", GUISkin, () =>
+                {
+                    ShowContents = GUILayout.Toggle(ShowContents, " Show Storage Contents?");
+                });
+            });
+
+            GUILayout.Space(5);
+
             ScrollPosition = GUILayout.BeginScrollView(ScrollPosition, false, true);
 
             DrawStorageInfo<GPUTileStorage>("GPU Storage");
@@ -68,6 +103,70 @@ namespace SpaceEngine.Debugging
             DrawStorageInfo<CPUTileStorage>("CPU Storage");
 
             GUILayout.EndScrollView();
+        }
+
+        protected void StorageUI(int id)
+        {
+            ContentsScrollPosition = GUILayout.BeginScrollView(ContentsScrollPosition, false, true);
+
+            DrawStorageContents<GPUTileStorage>("GPU Storage");
+
+            GUILayout.EndScrollView();
+        }
+
+        protected void DrawStorageContents<T>(string prefix = "Storage") where T : TileStorage
+        {
+            GUILayoutExtensions.VerticalBoxed(prefix, GUISkin, () =>
+            {
+                var storages = GodManager.Instance.ActiveBody.transform.GetComponentsInChildren<T>().ToList();
+
+                GUILayout.Space(20);
+
+                GUILayoutExtensions.VerticalBoxed("", GUISkin, () =>
+                {
+                    if (storages.Count == 0)
+                    {
+                        GUILayoutExtensions.LabelWithSpace(string.Format("Active body doesn't have any storages of provided type {0}", typeof(T).Name));
+                    }
+                    else
+                    {
+                        var type = typeof(T);
+
+                        if (type == typeof(GPUTileStorage))
+                        {
+                            for (var storageIndex = 0; storageIndex < storages.Count; storageIndex++)
+                            {
+                                var storage = storages[storageIndex];
+
+                                if (storage != null)
+                                {
+                                    var slotsCount = storage.Slots.Length;
+                                    var slots = ToRectangular(storage.Slots, Mathf.RoundToInt(slotsCount / 32.0f));
+
+                                    GUILayout.BeginVertical();
+
+                                    for (var x = 0; x < slots.GetLength(0); x++)
+                                    {
+                                        GUILayout.BeginHorizontal();
+
+                                        for (var y = 0; y < slots.GetLength(1); y++)
+                                        {
+                                            var slot = slots[x, y] as GPUTileStorage.GPUSlot;
+
+                                            if (slot != null) GUILayout.Label(slot.Texture, ImageLabelStyle, GUILayout.Width(64), GUILayout.Height(64));
+                                        }
+
+                                        GUILayout.EndHorizontal();
+                                    }
+
+                                    GUILayout.EndVertical();
+                                }
+                            }
+                        }
+                    }
+                    GUILayout.Space(5);
+                }, GUILayout.Width(debugInfoBounds.width - 45));
+            }, GUILayout.Width(debugInfoBounds.width - 40));
         }
 
         protected void DrawStorageInfo<T>(string prefix = "Storage") where T : TileStorage
@@ -94,6 +193,22 @@ namespace SpaceEngine.Debugging
                     GUILayout.Space(5);
                 }, GUILayout.Width(debugInfoBounds.width - 45));
             }, GUILayout.Width(debugInfoBounds.width - 40));
+        }
+
+        private static T[,] ToRectangular<T>(T[] flatArray, int width)
+        {
+            var height = (int)Math.Ceiling(flatArray.Length / (double)width);
+            var result = new T[height, width];
+
+            for (var index = 0; index < flatArray.Length; index++)
+            {
+                var rowIndex = index / width;
+                var colIndex = index % width;
+
+                result[rowIndex, colIndex] = flatArray[index];
+            }
+
+            return result;
         }
     }
 }
