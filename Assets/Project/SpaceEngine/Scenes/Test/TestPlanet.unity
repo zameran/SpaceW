@@ -661,10 +661,10 @@ Camera:
   m_TargetTexture: {fileID: 0}
   m_TargetDisplay: 0
   m_TargetEye: 3
-  m_HDR: 0
+  m_HDR: 1
   m_AllowMSAA: 1
   m_ForceIntoRT: 0
-  m_OcclusionCulling: 1
+  m_OcclusionCulling: 0
   m_StereoConvergence: 10
   m_StereoSeparation: 0.022
   m_StereoMirrorMode: 0
@@ -3586,7 +3586,7 @@ MonoBehaviour:
   TerrainEnabled: 1
   Amplitude: 0.8
   Frequency: 6.4
-  ColorShader: {fileID: 4800000, guid: 1d54b9c74a19ad241923cb68b430bf67, type: 3}
+  ColorShader: {fileID: 4800000, guid: 2b0d935ede708d14cb411a6470193fe9, type: 3}
   TerrainNodes: []
   TileSamplers: []
   HeightZ: 0

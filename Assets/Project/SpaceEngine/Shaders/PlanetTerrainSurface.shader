@@ -27,9 +27,9 @@
 		Fog { Mode Off }
 		
 		CGPROGRAM
-		#pragma surface surf Standard vertex:vert exclude_path:prepass noambient novertexlights nolightmap nodynlightmap nodirlightmap nofog nometa nolppv noshadowmask
+		#pragma surface surf Standard vertex:vert exclude_path:prepass noinstancing novertexlights nolightmap nodynlightmap nodirlightmap nofog nometa nolppv noshadowmask
 		#pragma target 5.0
-		#pragma only_renderers d3d11 glcore
+		#pragma only_renderers d3d11
 
 		#define TCCOMMON
 		
@@ -58,13 +58,14 @@
 		{
 			VERTEX_POSITION(v.vertex, v.texcoord.xy, o.pos, o.localPos, o.texcoord);
 
-			float4 normal = texTileLod(_Normals_Tile, o.texcoord, _Normals_TileCoords, _Normals_TileSize);
+			float3 normal = texTileLod(_Normals_Tile, o.texcoord, _Normals_TileCoords, _Normals_TileSize).rgb;		
 
-			normal.xyz = DecodeNormal(normal.xyz);
-			normal.xyz = mul(_Deform_TangentFrameToWorld, normal.xyz);
+			normal = DecodeNormal(normal);
+			normal = mul(_Deform_TangentFrameToWorld, normal);
 
 			v.vertex = float4(o.localPos, o.pos.w);
-			v.normal = -normal.xyz;
+			v.normal = -normal;
+			v.texcoord.xy = o.texcoord;
 
 			o.direction = (_Atmosphere_WorldCameraPos + _Atmosphere_Origin) - (mul(_Globals_CameraToWorld, float4((mul(_Globals_ScreenToCamera, v.vertex)).xyz, 0.0))).xyz;
 		}
@@ -81,13 +82,13 @@
 
 			float4 reflectance = lerp(ortho, color, clamp(length(color.xyz), 0.0, 1.0)); // Just for tests...
 
-			normal = mul(_Deform_TangentFrameToWorld, float4(normal, 0.0));
+			normal = mul(_Deform_TangentFrameToWorld, float4(normal, 1.0)).xyz;
 
-			o.Albedo = reflectance;
+			o.Albedo = reflectance.rgb;
 			o.Metallic = 0.0;
 			o.Smoothness = 1.0;
 			o.Alpha = 1.0;
-			//o.Normal = normal;
+			o.Normal = normal;
 		}
 		ENDCG
 

@@ -166,7 +166,7 @@ PlayerSettings:
   StripUnusedMeshComponents: 0
   VertexChannelCompressionMask:
     serializedVersion: 2
-    m_Bits: 4294967295
+    m_Bits: 0
   iPhoneSdkVersion: 988
   iOSTargetOSVersionString: 6.0
   tvOSSdkVersion: 0
