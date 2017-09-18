@@ -179,7 +179,7 @@ namespace SpaceEngine.Core
             {
                 if (parentTile != null)
                     parentGpuSlot = parentTile.GetSlot(0) as GPUTileStorage.GPUSlot;
-                else { throw new MissingTileException("Find parent tile failed"); }
+                else { throw new MissingTileException(string.Format("Find parent tile failed! {0}:{1}-{2}", level - 1, tx / 2, ty / 2)); }
             }
 
             if (parentGpuSlot == null && upsample) { throw new NullReferenceException("parentGpuSlot"); }
