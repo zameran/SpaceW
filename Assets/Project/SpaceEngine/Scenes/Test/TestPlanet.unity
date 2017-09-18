@@ -657,7 +657,7 @@ Camera:
   m_CullingMask:
     serializedVersion: 2
     m_Bits: 4294967295
-  m_RenderingPath: 1
+  m_RenderingPath: 3
   m_TargetTexture: {fileID: 0}
   m_TargetDisplay: 0
   m_TargetEye: 3
@@ -674,8 +674,8 @@ Transform:
   m_PrefabParentObject: {fileID: 0}
   m_PrefabInternal: {fileID: 0}
   m_GameObject: {fileID: 680484789}
-  m_LocalRotation: {x: 0.16708285, y: 0.57357895, z: 0.24236986, w: 0.7644262}
-  m_LocalPosition: {x: -714.5055, y: 165.33899, z: 206.1859}
+  m_LocalRotation: {x: 0.31934384, y: 0.60580385, z: 0.113055676, w: 0.7198886}
+  m_LocalPosition: {x: -621.9318, y: 134.61267, z: 142.1407}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 0}
@@ -3586,7 +3586,7 @@ MonoBehaviour:
   TerrainEnabled: 1
   Amplitude: 0.8
   Frequency: 6.4
-  ColorShader: {fileID: 4800000, guid: 797ca199aa64b8c41bc1aae3e12f7a1f, type: 3}
+  ColorShader: {fileID: 4800000, guid: 1d54b9c74a19ad241923cb68b430bf67, type: 3}
   TerrainNodes: []
   TileSamplers: []
   HeightZ: 0

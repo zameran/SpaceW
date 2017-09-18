@@ -106,7 +106,7 @@ uniform float4x4 _Sun_Positions_1;
 uniform float _Exposure;
 uniform float _HDRMode;
 
-inline float3 hdrFunction(float c)
+inline float3 hdrFunction(float3 c)
 {
 	if (_HDRMode == 0) { return c; }
 	else if (_HDRMode == 1) { return 1.0 - exp(-c); }
@@ -120,20 +120,14 @@ float3 hdr(float3 L)
 {
 	L *= _Exposure;
 
-	L.r = hdrFunction(L.r);
-	L.g = hdrFunction(L.g);
-	L.b = hdrFunction(L.b);
-
-	return L;
+	return hdrFunction(L);
 }
 
 float4 hdr(float4 L) 
 {
 	L *= _Exposure;
 
-	L.r = hdrFunction(L.r);
-	L.g = hdrFunction(L.g);
-	L.b = hdrFunction(L.b);
+	L.rgb = hdrFunction(L.rgb);
 	L.a = L.a;
 
 	return L;
@@ -376,5 +370,49 @@ float4x4 SampleCoarseLevelHeights(sampler2D coarseLevelSampler, float2 uv, float
 		tex2Dlod(coarseLevelSampler, float4(uv + float2(2.0, 3.0) *  coarseLevelOSL.z, 0.0, 0.0)).x,
 		tex2Dlod(coarseLevelSampler, float4(uv + float2(3.0, 3.0) *  coarseLevelOSL.z, 0.0, 0.0)).x
 	);
+}
+//-----------------------------------------------------------------------------
+
+//-----------------------------------------------------------------------------
+struct a2v_planetTerrain
+{
+	float4 vertex : POSITION;
+	float3 normal : NORMAL;
+	float4 texcoord : TEXCOORD0;
+};
+
+uniform float _Ocean_Sigma;
+uniform float3 _Ocean_Color;
+uniform float _Ocean_DrawBRDF;
+uniform float _Ocean_Level;
+
+void VERTEX_POSITION(in float4 vertex, in float2 texcoord, out float4 position, out float3 localPosition, out float2 uv)
+{
+	float2 zfc = texTileLod(_Elevation_Tile, texcoord, _Elevation_TileCoords, _Elevation_TileSize).xy;
+
+	#if ATMOSPHERE_ON
+		#if OCEAN_ON
+			if (zfc.x <= _Ocean_Level && _Ocean_DrawBRDF == 1.0) { zfc = float2(0.0, 0.0); }
+		#endif
+	#endif
+			
+	float4 vertexUV = float4(vertex.xy, float2(1.0, 1.0) - vertex.xy);
+	float2 vertexToCamera = abs(_Deform_Camera.xy - vertex.xy);
+	float vertexDistance = max(max(vertexToCamera.x, vertexToCamera.y), _Deform_Camera.z);
+	float vertexBlend = clamp((vertexDistance - _Deform_Blending.x) / _Deform_Blending.y, 0.0, 1.0);
+				
+	float4 alpha = vertexUV.zxzx * vertexUV.wwyy;
+	float4 alphaPrime = alpha * _Deform_ScreenQuadCornerNorms / dot(alpha, _Deform_ScreenQuadCornerNorms);
+
+	float3 P = float3(vertex.xy * _Deform_Offset.z + _Deform_Offset.xy, _Deform_Radius);
+				
+	float h = zfc.x * (1.0 - vertexBlend) + zfc.y * vertexBlend;
+	float k = min(length(P) / dot(alpha, _Deform_ScreenQuadCornerNorms) * 1.0000003, 1.0);
+	float hPrime = (h + _Deform_Radius * (1.0 - k)) / k;
+
+	//position = mul(_Deform_LocalToScreen, float4(P + float3(0.0, 0.0, h), 1.0));							//CUBE PROJECTION
+	position = mul(_Deform_ScreenQuadCorners + hPrime * _Deform_ScreenQuadVerticals, alphaPrime);			//SPHERICAL PROJECTION
+	localPosition = (_Deform_Radius + max(h, _Ocean_Level)) * normalize(mul(_Deform_LocalToWorld, P));
+	uv = texcoord;
 }
 //-----------------------------------------------------------------------------

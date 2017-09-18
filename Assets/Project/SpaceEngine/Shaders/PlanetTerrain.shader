@@ -47,105 +47,7 @@ Shader "SpaceEngine/Planet/Terrain"
 	{
 		CGINCLUDE
 		#include "Core.cginc"
-
-		uniform float _Ocean_Sigma;
-		uniform float3 _Ocean_Color;
-		uniform float _Ocean_DrawBRDF;
-		uniform float _Ocean_Level;
-
-		struct a2v_planetTerrain
-		{
-			float4 vertex : POSITION;
-			float3 normal : NORMAL;
-			float4 texcoord : TEXCOORD0;
-		};
-
-		void VERTEX_POSITION(in float4 vertex, in float2 texcoord, out float4 position, out float3 localPosition, out float2 uv)
-		{
-			float2 zfc = texTileLod(_Elevation_Tile, texcoord, _Elevation_TileCoords, _Elevation_TileSize).xy;
-
-			#if ATMOSPHERE_ON
-				#if OCEAN_ON
-					if (zfc.x <= _Ocean_Level && _Ocean_DrawBRDF == 1.0) { zfc = float2(0.0, 0.0); }
-				#endif
-			#endif
-			
-			float4 vertexUV = float4(vertex.xy, float2(1.0, 1.0) - vertex.xy);
-			float2 vertexToCamera = abs(_Deform_Camera.xy - vertex.xy);
-			float vertexDistance = max(max(vertexToCamera.x, vertexToCamera.y), _Deform_Camera.z);
-			float vertexBlend = clamp((vertexDistance - _Deform_Blending.x) / _Deform_Blending.y, 0.0, 1.0);
-				
-			float4 alpha = vertexUV.zxzx * vertexUV.wwyy;
-			float4 alphaPrime = alpha * _Deform_ScreenQuadCornerNorms / dot(alpha, _Deform_ScreenQuadCornerNorms);
-
-			float3 P = float3(vertex.xy * _Deform_Offset.z + _Deform_Offset.xy, _Deform_Radius);
-				
-			float h = zfc.x * (1.0 - vertexBlend) + zfc.y * vertexBlend;
-			float k = min(length(P) / dot(alpha, _Deform_ScreenQuadCornerNorms) * 1.0000003, 1.0);
-			float hPrime = (h + _Deform_Radius * (1.0 - k)) / k;
-
-			//position = mul(_Deform_LocalToScreen, float4(P + float3(0.0, 0.0, h), 1.0));							//CUBE PROJECTION
-			position = mul(_Deform_ScreenQuadCorners + hPrime * _Deform_ScreenQuadVerticals, alphaPrime);			//SPHERICAL PROJECTION
-			localPosition = (_Deform_Radius + max(h, _Ocean_Level)) * normalize(mul(_Deform_LocalToWorld, P));
-			uv = texcoord;
-		}
 		ENDCG
-
-		Pass
-		{
-			Name "ShadowCaster"
-			Tags { "LightMode" = "ShadowCaster" }
-			Cull Off
- 
-			CGPROGRAM
-			#pragma vertex vert
-			#pragma fragment frag
-
-			#pragma target 2.0
-
-			#pragma multi_compile_shadowcaster
-
-			#include "UnityCG.cginc"
-			#include "UnityStandardShadow.cginc"
-
-			#pragma multi_compile ATMOSPHERE_ON ATMOSPHERE_OFF
-			#pragma multi_compile SHINE_ON SHINE_OFF
-			#pragma multi_compile ECLIPSES_ON ECLIPSES_OFF
-			#pragma multi_compile OCEAN_ON OCEAN_OFF
-			#pragma multi_compile SHADOW_0 SHADOW_1 SHADOW_2 SHADOW_3 SHADOW_4
- 
-			struct v2f_shadowCaster
-			{
-				V2F_SHADOW_CASTER;
-			};
- 
-			v2f_shadowCaster vert(VertexInput v)
-			{
-				v2f_shadowCaster o;
-
-				// Let's declare some data holders...
-				float4 outputVertex = 0;
-				float3 outputLocalVertex = 0;
-				float2 outputTexcoord = 0;
-
-				// Dublicate displacement work of main vertex shadeer...
-				VERTEX_POSITION(v.vertex, v.uv0.xy, outputVertex, outputLocalVertex, outputTexcoord);
-
-				// Pass displaced vertex to original data...
-				v.vertex = float4(outputLocalVertex, 1.0);
-
-				// Make the magic...
-				TRANSFER_SHADOW_CASTER(o)
-
-				return o;
-			}
- 
-			float4 frag(v2f_shadowCaster i) : SV_Target
-			{
-				SHADOW_CASTER_FRAGMENT(i)
-			}
-			ENDCG
-		}
 
 		Pass 
 		{
@@ -183,10 +85,6 @@ Shader "SpaceEngine/Planet/Terrain"
 			#include "SpaceEclipses.cginc"
 			#include "SpaceAtmosphere.cginc"
 			#include "Ocean/OceanBRDF.cginc"
-
-			#include "UnityCG.cginc"
-			#include "Lighting.cginc"
-			#include "AutoLight.cginc"
 			
 			struct v2f_planetTerrain
 			{
@@ -194,7 +92,6 @@ Shader "SpaceEngine/Planet/Terrain"
 				float2 texcoord : TEXCOORD0;
 				float3 localVertex : TEXCOORD1;
 				float3 direction : TEXCOORD2;
-				SHADOW_COORDS(3)
 			};
 
 			void vert(in a2v_planetTerrain v, out v2f_planetTerrain o)
@@ -204,8 +101,6 @@ Shader "SpaceEngine/Planet/Terrain"
 				v.vertex = o.pos;
 
 				o.direction = (_Atmosphere_WorldCameraPos + _Atmosphere_Origin) - (mul(_Globals_CameraToWorld, float4((mul(_Globals_ScreenToCamera, v.vertex)).xyz, 0.0))).xyz;
-
-				TRANSFER_SHADOW(o)
 			}
 
 			void frag(in v2f_planetTerrain i, out half4 outDiffuse : SV_Target)
@@ -256,15 +151,13 @@ Shader "SpaceEngine/Planet/Terrain"
 				#if SHADOW_1 || SHADOW_2 || SHADOW_3 || SHADOW_4
 					float shadow = ShadowColor(float4(PO, 1.0));	// Body origin take in to account...
 				#endif
-
-				float unityShadow = SHADOW_ATTENUATION(i);
 				
 				#if ATMOSPHERE_ON
 					float3 sunL = 0.0;
 					float3 skyE = 0.0;
 					SunRadianceAndSkyIrradiance(P, normal.xyz, WSD, sunL, skyE);
 
-					float3 groundColor = 1.5 * RGB2Reflectance(reflectance).rgb * (sunL * max(cTheta, 0) * unityShadow + skyE) / M_PI;
+					float3 groundColor = 1.5 * RGB2Reflectance(reflectance).rgb * (sunL * max(cTheta, 0) + skyE) / M_PI;
 					
 					#if OCEAN_ON
 						if (height <= _Ocean_Level && _Ocean_DrawBRDF == 1.0)
@@ -309,7 +202,7 @@ Shader "SpaceEngine/Planet/Terrain"
 
 					float3 finalColor = hdr(groundColor * extinction + inscatter);
 				#elif ATMOSPHERE_OFF
-					float3 finalColor = 1.5 * reflectance * max(cTheta, 0) * unityShadow;
+					float3 finalColor = 1.5 * reflectance * max(cTheta, 0);
 				#endif
 
 				outDiffuse = float4(finalColor, 1.0);
