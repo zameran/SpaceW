@@ -116,13 +116,13 @@ public sealed class MainRenderer : MonoSingleton<MainRenderer>
         */
 
         //-----------------------------------------------------------------------------
-        GodManager.Instance.Bodies[0].RenderQueueOffset = 10001;
+        GodManager.Instance.Bodies[0].RenderQueueOffset = 5;
         if (GodManager.Instance.Bodies[0].Atmosphere != null)
-            GodManager.Instance.Bodies[0].Atmosphere.RenderQueueOffset = 10002;
+            GodManager.Instance.Bodies[0].Atmosphere.RenderQueueOffset = 6;
         if (GodManager.Instance.Bodies[0].Ocean != null)
-            GodManager.Instance.Bodies[0].Ocean.RenderQueueOffset = 10003;
+            GodManager.Instance.Bodies[0].Ocean.RenderQueueOffset = 6;
         if (GodManager.Instance.Bodies[0].Ring != null)
-            GodManager.Instance.Bodies[0].Ring.RenderQueueOffset = 10000;
+            GodManager.Instance.Bodies[0].Ring.RenderQueueOffset = 4;
 
         for (int i = 1; i < GodManager.Instance.Bodies.Length; i++)
         {
