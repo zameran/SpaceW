@@ -435,7 +435,7 @@ namespace SpaceEngine.Core.Terrain
             // Set the uniforms unique to each quad
             SetPerQuadUniforms(quad, mpb);
 
-            Graphics.DrawMesh(mesh, Matrix4x4.identity, TerrainMaterial, layer, CameraHelper.Main(), 0, mpb, ShadowCastingMode.TwoSided, true);
+            Graphics.DrawMesh(mesh, Matrix4x4.identity, TerrainMaterial, layer, CameraHelper.Main(), 0, mpb, ShadowCastingMode.On, true);
         }
 
         public Queue<TerrainQuad> Traverse(TerrainQuad root)
