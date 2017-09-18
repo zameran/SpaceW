@@ -42,7 +42,10 @@ Shader "SpaceEngine/Planet/Ocean"
 		#include "OceanBRDF.cginc"
 		#include "OceanDisplacement.cginc"
 
+		#if !defined(CORE)
 		uniform float3 _Ocean_Color;
+		#endif
+
 		uniform float _Ocean_Wave_Level;
 
 		struct a2v
@@ -108,6 +111,7 @@ Shader "SpaceEngine/Planet/Ocean"
 		{
 			float3 L = _Ocean_SunDir;
 			float radius = _Ocean_Radius;
+			float waveStrength = _Ocean_Wave_Level; // This value can be modulated...
 			float2 u = i.oceanU;
 			float3 oceanP = i.oceanP;
 			float3 screenP = i.screenP.xyz;
@@ -120,7 +124,7 @@ Shader "SpaceEngine/Planet/Ocean"
 			#else
 				float3 earthP = radius > 0.0 ? normalize(oceanP + float3(0.0, 0.0, radius)) * (radius + 10.0) : oceanP;
 			#endif
-				
+			
 			float3 oceanCamera = float3(0.0, 0.0, _Ocean_CameraPos.z);
 			float3 V = normalize(oceanCamera - oceanP);
 			
@@ -129,10 +133,12 @@ Shader "SpaceEngine/Planet/Ocean"
 			slopes += tex2D(_Ocean_Map1, u / _Ocean_GridSizes.y).zw;
 			slopes += tex2D(_Ocean_Map2, u / _Ocean_GridSizes.z).xy;
 			slopes += tex2D(_Ocean_Map2, u / _Ocean_GridSizes.w).zw;
-							
-			float3 N = normalize(float3(-slopes.x, -slopes.y, 1.0));
 			
 			if (radius > 0.0) { slopes -= oceanP.xy / (radius + oceanP.z); }
+
+			slopes *= waveStrength;
+			
+			float3 N = normalize(float3(-slopes.x, -slopes.y, 1.0));
 
 			// Reflects backfacing normals
 			if (dot(V, N) < 0.0) { N = reflect(N, V); }
@@ -205,7 +211,7 @@ Shader "SpaceEngine/Planet/Ocean"
 				float3 l = (sunL * (max(dot(N, L), 0.0)) + skyE) / M_PI;
 				//float3 l = (sunL * (max(dot(N, L), 0.0)) + skyE + UNITY_LIGHTMODEL_AMBIENT.rgb * 30) / M_PI;
 
-				float3 R_ftot = float3(W * l * 0.4);
+				float3 R_ftot = float3((W * waveStrength) * l * 0.4);
 				
 				surfaceColor = Lsun + Lsky + Lsea + R_ftot;
 				surfaceAlpha = min(max(hdr(Lsun + R_ftot), fresnel + surfaceAlpha), 1.0);
