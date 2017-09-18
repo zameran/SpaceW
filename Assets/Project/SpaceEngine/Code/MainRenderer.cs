@@ -120,7 +120,7 @@ public sealed class MainRenderer : MonoSingleton<MainRenderer>
         if (GodManager.Instance.Bodies[0].Atmosphere != null)
             GodManager.Instance.Bodies[0].Atmosphere.RenderQueueOffset = 6;
         if (GodManager.Instance.Bodies[0].Ocean != null)
-            GodManager.Instance.Bodies[0].Ocean.RenderQueueOffset = 6;
+            GodManager.Instance.Bodies[0].Ocean.RenderQueueOffset = 7;
         if (GodManager.Instance.Bodies[0].Ring != null)
             GodManager.Instance.Bodies[0].Ring.RenderQueueOffset = 4;
 
