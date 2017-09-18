@@ -64,7 +64,7 @@
 			normal.xyz = mul(_Deform_TangentFrameToWorld, normal.xyz);
 
 			v.vertex = float4(o.localPos, o.pos.w);
-			v.normal = -normal;
+			v.normal = -normal.xyz;
 
 			o.direction = (_Atmosphere_WorldCameraPos + _Atmosphere_Origin) - (mul(_Globals_CameraToWorld, float4((mul(_Globals_ScreenToCamera, v.vertex)).xyz, 0.0))).xyz;
 		}
@@ -75,13 +75,19 @@
 
 			float4 ortho = texTile(_Ortho_Tile, texcoord, _Ortho_TileCoords, _Ortho_TileSize);
 			float4 color = texTile(_Color_Tile, texcoord, _Color_TileCoords, _Color_TileSize);
+			float3 normal = texTile(_Normals_Tile, texcoord, _Normals_TileCoords, _Normals_TileSize).rgb;
+
+			normal = DecodeNormal(normal);
 
 			float4 reflectance = lerp(ortho, color, clamp(length(color.xyz), 0.0, 1.0)); // Just for tests...
+
+			normal = mul(_Deform_TangentFrameToWorld, float4(normal, 0.0));
 
 			o.Albedo = reflectance;
 			o.Metallic = 0.0;
 			o.Smoothness = 1.0;
 			o.Alpha = 1.0;
+			//o.Normal = normal;
 		}
 		ENDCG
 
