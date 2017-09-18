@@ -209,11 +209,7 @@ namespace SpaceEngine.Enviroment.Atmospheric
 
             InitMaterials();
 
-            InitUniforms(ParentBody.MPB);
-            SetUniforms(ParentBody.MPB);
-
             ParentBody.InitUniforms(SkyMaterial);
-            ParentBody.SetUniforms(SkyMaterial);
         }
 
         protected override void UpdateNode()

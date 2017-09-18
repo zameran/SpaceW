@@ -216,21 +216,41 @@ namespace SpaceEngine.Core.Terrain.Deformation
             return Frustum.VISIBILITY.PARTIALLY;
         }
 
-        public override void SetUniforms(TerrainNode node, Material mat)
+        /// <inheritdoc />
+        public override Matrix4x4 CalculateDeformedScreenQuadCorners(TerrainNode node, TerrainQuad quad)
         {
-            if (mat == null || node == null) return;
-
-            base.SetUniforms(node, mat);
-
-            mat.SetFloat(uniforms.radius, (float)R);
+            return (node.LocalToScreen * quad.DeformedCorners).ToMatrix4x4();
         }
 
-        protected override void SetScreenUniforms(TerrainNode node, TerrainQuad quad, MaterialPropertyBlock matPropertyBlock)
+        /// <inheritdoc />
+        public override Matrix4x4 CalculateDeformedScreenQuadVerticals(TerrainNode node, TerrainQuad quad)
         {
-            matPropertyBlock.SetMatrix(uniforms.screenQuadCorners, (node.LocalToScreen * quad.DeformedCorners).ToMatrix4x4());
-            matPropertyBlock.SetMatrix(uniforms.screenQuadVerticals, (node.LocalToScreen * quad.DeformedVerticals).ToMatrix4x4());
-            matPropertyBlock.SetVector(uniforms.screenQuadCornerNorms, quad.Lengths.ToVector4());
-            matPropertyBlock.SetMatrix(uniforms.tangentFrameToWorld, quad.TangentFrameToWorld.ToMatrix4x4());
+            return (node.LocalToScreen * quad.DeformedVerticals).ToMatrix4x4();
+        }
+
+        public override void SetUniforms(TerrainNode node, Material target)
+        {
+            if (target == null || node == null) return;
+
+            base.SetUniforms(node, target);
+
+            target.SetFloat(uniforms.radius, (float)R);
+        }
+
+        protected override void SetScreenUniforms(TerrainNode node, TerrainQuad quad, MaterialPropertyBlock target)
+        {
+            base.SetScreenUniforms(node, quad, target);
+
+            target.SetVector(uniforms.screenQuadCornerNorms, quad.Lengths.ToVector4());
+            target.SetMatrix(uniforms.tangentFrameToWorld, quad.TangentFrameToWorld.ToMatrix4x4());
+        }
+
+        protected override void SetScreenUniforms(TerrainNode node, TerrainQuad quad, Material target)
+        {
+            base.SetScreenUniforms(node, quad, target);
+
+            target.SetVector(uniforms.screenQuadCornerNorms, quad.Lengths.ToVector4());
+            target.SetMatrix(uniforms.tangentFrameToWorld, quad.TangentFrameToWorld.ToMatrix4x4());
         }
     }
 }

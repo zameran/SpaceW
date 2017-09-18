@@ -168,18 +168,23 @@ namespace SpaceEngine.Core.Terrain.Deformation
             return Frustum.VISIBILITY.PARTIALLY;
         }
 
-        public override void SetUniforms(TerrainNode node, Material mat)
+        public override void SetUniforms(TerrainNode node, Material target)
         {
-            if (mat == null || node == null) return;
+            if (target == null || node == null) return;
 
-            base.SetUniforms(node, mat);
+            base.SetUniforms(node, target);
 
-            mat.SetFloat(uniforms.radius, (float)R);
+            target.SetFloat(uniforms.radius, (float)R);
         }
 
-        protected override void SetScreenUniforms(TerrainNode node, TerrainQuad quad, MaterialPropertyBlock matPropertyBlock)
+        protected override void SetScreenUniforms(TerrainNode node, TerrainQuad quad, MaterialPropertyBlock target)
         {
-            base.SetScreenUniforms(node, quad, matPropertyBlock);
+            base.SetScreenUniforms(node, quad, target);
+        }
+
+        protected override void SetScreenUniforms(TerrainNode node, TerrainQuad quad, Material target)
+        {
+            base.SetScreenUniforms(node, quad, target);
         }
     }
 }

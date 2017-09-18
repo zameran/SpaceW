@@ -208,7 +208,7 @@ namespace SpaceEngine.Core.Bodies
 
         #region IRenderable
 
-        public override void Render(int layer = 0)
+        public override void Render(int layer = 8)
         {
             base.Render(layer);
         }
@@ -218,11 +218,6 @@ namespace SpaceEngine.Core.Bodies
         protected override void OnApplicationFocus(bool focusStatus)
         {
             base.OnApplicationFocus(focusStatus);
-        }
-
-        protected override void ResetMPB()
-        {
-            base.ResetMPB();
         }
     }
 }

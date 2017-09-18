@@ -324,35 +324,16 @@ namespace SpaceEngine.Core.Terrain
         {
             if (target == null) return;
 
-            ParentBody.InitUniforms(TerrainMaterial);
+            ParentBody.InitUniforms(target);
         }
 
         public virtual void SetUniforms(Material target)
         {
             if (target == null) return;
 
-            ParentBody.SetUniforms(TerrainMaterial);
+            ParentBody.SetUniforms(target);
 
-            if (ParentBody.OceanEnabled)
-            {
-                if (ParentBody.Ocean != null)
-                {
-                    ParentBody.Ocean.SetUniforms(TerrainMaterial);
-                }
-                else
-                {
-                    TerrainMaterial.SetFloat("_Ocean_DrawBRDF", 0.0f);
-                }
-            }
-            else
-            {
-                TerrainMaterial.SetFloat("_Ocean_DrawBRDF", 0.0f);
-            }
-
-            Deformation.SetUniforms(this, TerrainMaterial);
-
-            //if (Manager.GetPlantsNode() != null)
-            //    Manager.GetPlantsNode().SetUniforms(TerrainMaterial);
+            Deformation.SetUniforms(this, target);
         }
 
         #endregion

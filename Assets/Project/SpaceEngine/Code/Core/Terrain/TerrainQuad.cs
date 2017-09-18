@@ -460,8 +460,7 @@ namespace SpaceEngine.Core.Terrain
                 GL.End();
                 GL.PopMatrix();
             }
-
-            if (!IsLeaf)
+            else
             {
                 Children[0].DrawQuadOutline(camera, lineMaterial, lineColor);
                 Children[1].DrawQuadOutline(camera, lineMaterial, lineColor);

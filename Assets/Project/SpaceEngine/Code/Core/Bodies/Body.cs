@@ -198,11 +198,15 @@ namespace SpaceEngine.Core.Bodies
             MaterialTable.GenerateLut();
 
             Keywords = new List<string>();
+
+            InitUniforms(MPB);
         }
 
         protected override void UpdateNode()
         {
             Keywords = GetKeywords();
+
+            SetUniforms(MPB);
 
             // NOTE : Self - rendering!
             Render();
@@ -264,6 +268,19 @@ namespace SpaceEngine.Core.Bodies
 
         public virtual void SetUniforms(MaterialPropertyBlock target)
         {
+            // TODO : How to set these values per quad avoiding material property block and material uniforms?
+            // NOTE : So, only these uniforms are variable per quad, but i don't know how to vary avoiding mpb and material uniforms, maybe instancing?
+            //_Elevation_Tile
+            //_Ortho_Tile
+            //_Color_Tile
+            //_Normals_Tile
+            //_Deform_Offset
+            //_Deform_Camera
+            //_Deform_ScreenQuadCornerNorms
+            //_Deform_ScreenQuadCorners
+            //_Deform_ScreenQuadVericals
+            //_Deform_TangentFrameToWorld
+
             if (target == null) return;
 
             SetEclipses(target);
@@ -277,10 +294,20 @@ namespace SpaceEngine.Core.Bodies
                 Atmosphere.SetUniforms(target);
             }
 
+            target.SetFloat("_Ocean_DrawBRDF", (Ocean != null && OceanEnabled) ? 1.0f : 0.0f);
+
+            if (Ocean != null)
+            {
+                Ocean.SetUniforms(target);
+            }
+
             if (Ring != null)
             {
                 Ring.SetShadows(MPB, ShadowCasters);
             }
+
+            //if (Manager.GetPlantsNode() != null)
+            //    Manager.GetPlantsNode().SetUniforms(target);
         }
 
         #endregion
@@ -374,8 +401,6 @@ namespace SpaceEngine.Core.Bodies
                     }
                 }
             }
-
-            ResetMPB();
         }
 
         #endregion
@@ -597,26 +622,6 @@ namespace SpaceEngine.Core.Bodies
 
             if (Atmosphere != null) Atmosphere.Reanimate();
             if (Ocean != null) Ocean.Reanimate();
-        }
-
-        protected virtual void ResetMPB()
-        {
-            MPB.Clear();
-
-            // TODO : How to set these values per quad avoiding material property block and material uniforms?
-            // NOTE : So, only these uniforms are variable per quad, but i don't know how to vary avoiding mpb and material uniforms, maybe instancing?
-            //_Elevation_Tile
-            //_Ortho_Tile
-            //_Color_Tile
-            //_Normals_Tile
-            //_Deform_Offset
-            //_Deform_Camera
-            //_Deform_ScreenQuadCornerNorms
-            //_Deform_ScreenQuadCorners
-            //_Deform_ScreenQuadVericals
-            //_Deform_TangentFrameToWorld
-
-            InitSetUniforms();
         }
 
         public virtual List<string> GetKeywords()

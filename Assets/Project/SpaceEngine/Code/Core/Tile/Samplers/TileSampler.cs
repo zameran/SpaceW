@@ -15,7 +15,7 @@ namespace SpaceEngine.Core.Tile.Samplers
     /// This class can set the uniforms necessary to access a given texture tile on GPU, stored in a GPUTileStorage. 
     /// This class also manages the creation of new texture tiles when a terrain quadtree is updated, via a TileProducer.
     /// </summary>
-    public class TileSampler : Node<TileSampler>, IUniformed<MaterialPropertyBlock, TerrainQuad>
+    public class TileSampler : Node<TileSampler>, IUniformed<MaterialPropertyBlock, TerrainQuad>, IUniformed<Material, TerrainQuad>
     {
         /// <summary>
         /// Class used to sort a <see cref="TileSampler"/> based on it's priority.
@@ -242,6 +242,40 @@ namespace SpaceEngine.Core.Tile.Samplers
                 }
             }
         }
+
+        #region IUniformed<Material> 
+
+        /// <summary> 
+        /// Init special <see cref="TileProducer"/> uniforms for target <see cref="TerrainQuad"/>. 
+        /// </summary> 
+        /// <param name="target">Target <see cref="Material"/>.</param> 
+        /// <param name="quad">Target quad.</param> 
+        public void InitUniforms(Material target, TerrainQuad quad)
+        {
+            if (target == null) return;
+            if (quad == null) return;
+            if (!Producer.IsGPUProducer) return;
+        }
+
+        /// <summary> 
+        /// Set special <see cref="TileProducer"/> uniforms for target <see cref="TerrainQuad"/>. 
+        /// </summary> 
+        /// <param name="target">Target <see cref="Material"/>.</param> 
+        /// <param name="quad">Target quad.</param> 
+        public void SetUniforms(Material target, TerrainQuad quad)
+        {
+            if (target == null) return;
+            if (quad == null) return;
+            if (!Producer.IsGPUProducer) return;
+
+            CalculateTileGPUCoordinates(ref SamplerTextureBuffer, ref SamplerCoordsBuffer, ref SamplerSizeBuffer, quad.Level, quad.Tx, quad.Ty);
+
+            target.SetTexture(uniforms.tile, SamplerTextureBuffer);
+            target.SetVector(uniforms.tileCoords, SamplerCoordsBuffer);
+            target.SetVector(uniforms.tileSize, SamplerSizeBuffer);
+        }
+
+        #endregion
 
         #region IUniformed<MaterialPropertyBlock>
 
