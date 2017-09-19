@@ -48,8 +48,8 @@ namespace SpaceEngine.Enviroment.Oceanic
         [SerializeField]
         public float ZMin = 20000.0f;
 
-        Matrix4x4d OldLocalToOcean;
-        Matrix4x4d CameraToWorld;
+        Matrix4x4d OldLocalToOcean = Matrix4x4d.identity;
+        Matrix4x4d CameraToWorld = Matrix4x4d.identity;
 
         Vector3d ux = Vector3d.zero;
         Vector3d uy = Vector3d.zero;
@@ -58,7 +58,7 @@ namespace SpaceEngine.Enviroment.Oceanic
 
         protected double H = 0;
 
-        protected Vector4 Offset;
+        protected Vector4 Offset = Vector4.zero;
 
         /// <summary>
         /// If the ocean should be draw. To minimize depth fighting the ocean is not draw when the camera is far away. 
@@ -117,9 +117,6 @@ namespace SpaceEngine.Enviroment.Oceanic
             OceanMaterial = MaterialHelper.CreateTemp(OceanShader, "Ocean");
 
             ParentBody.InitUniforms(OceanMaterial);
-
-            OldLocalToOcean = Matrix4x4d.identity;
-            Offset = Vector4.zero;
         }
 
         protected override void UpdateNode()
@@ -130,13 +127,13 @@ namespace SpaceEngine.Enviroment.Oceanic
 
             // Calculates the required data for the projected grid
             CameraToWorld = GodManager.Instance.CameraToWorld;
+
             var oceanFrame = CameraToWorld * Vector3d.zero; // Camera in local space
 
             var radius = ParentBody.Size;
             var trueAltitude = Vector3d.Distance(GodManager.Instance.WorldCameraPos, Origin) - radius;
 
-            if ((radius > 0.0 && trueAltitude > ZMin) ||
-                (radius < 0.0 && new Vector2d(oceanFrame.y, oceanFrame.z).Magnitude() < -radius - ZMin))
+            if ((radius > 0.0 && trueAltitude > ZMin) || (radius < 0.0 && new Vector2d(oceanFrame.y, oceanFrame.z).Magnitude() < -radius - ZMin))
             {
                 OldLocalToOcean = Matrix4x4d.identity;
                 Offset = Vector4.zero;

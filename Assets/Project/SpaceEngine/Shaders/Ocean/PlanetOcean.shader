@@ -105,15 +105,13 @@ Shader "SpaceEngine/Planet/Ocean"
 				dP.xy += CHOPPYNESS.z * Tex2DGrad(_Ocean_Map4, u / GRID_SIZES.z, dux / GRID_SIZES.z, duy / GRID_SIZES.z, _Ocean_MapSize).xy;
 				dP.xy += CHOPPYNESS.w * Tex2DGrad(_Ocean_Map4, u / GRID_SIZES.w, dux / GRID_SIZES.w, duy / GRID_SIZES.w, _Ocean_MapSize).zw;
 			}
-				
-			float3x3 otoc = _Ocean_OceanToCamera;
 
 			#ifdef OCEAN_ONLY_SPHERICAL
 				float tClamped = clamp(t * 0.25, 0.0, _Ocean_Wave_Level);
 				dP = lerp(float3(0.0, 0.0, -0.1), dP, tClamped);
 			#endif
 
-			float4 screenP = float4(t * cameraDir + mul(otoc, dP), 1.0);
+			float4 screenP = float4(t * cameraDir + mul(_Ocean_OceanToCamera, dP), 1.0);
 			float3 oceanP = t * oceanDir + dP + float3(0.0, 0.0, _Ocean_CameraPos.z);
 			float4 pos = mul(_Globals_CameraToScreen, screenP);
 			float4 computedScreenP = ComputeScreenPos(pos); // UnityObjectToClipPos(v.vertex)
@@ -199,8 +197,8 @@ Shader "SpaceEngine/Planet/Ocean"
 
 				float angleToCameraAxis = dot(i.viewSpaceDirDist.xyz, float3(0.0, 0.0, -1.0));
 				float distanceFadeout = i.viewSpaceDirDist.w * angleToCameraAxis;
-				float fragDepth = max(0, LinearEyeDepth(UNITY_SAMPLE_DEPTH(tex2Dproj(_CameraDepthTexture, UNITY_PROJ_COORD(i.projPos)))) - _ProjectionParams.g);
-				float oceanDepth = max(0, distanceFadeout - _ProjectionParams.g);
+				float fragDepth = max(0, LinearEyeDepth(UNITY_SAMPLE_DEPTH(tex2Dproj(_CameraDepthTexture, UNITY_PROJ_COORD(i.projPos)))) - _ProjectionParams.y);
+				float oceanDepth = max(0, distanceFadeout - _ProjectionParams.y);
 				float depthCoeff = 1.0 - (pow(saturate((fragDepth - oceanDepth) / 100), 0.56) * saturate((fragDepth - oceanDepth) / 0.5));
 
 				#ifdef OCEAN_WHITECAPS
