@@ -53,10 +53,11 @@ public static class CameraHelper
     public static Camera DepthCamera()
     {
         var mainCamera = Main();
+        var depthCameraGameObject = mainCamera.gameObject.transform.Find("CustomDepthCamera");
 
-        if (mainCamera.gameObject.transform.Find("CustomDepthCamera") != null)
-            if (mainCamera.gameObject.transform.Find("CustomDepthCamera").GetComponent<Camera>() != null)
-                return mainCamera.gameObject.transform.Find("CustomDepthCamera").GetComponent<Camera>();
+        if (depthCameraGameObject != null)
+            if (depthCameraGameObject.GetComponent<Camera>() != null)
+                depthCameraGameObject.GetComponent<Camera>();
 
         return null;
     }
