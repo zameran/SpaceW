@@ -201,10 +201,14 @@ Shader "SpaceEngine/Planet/Ocean"
 				float distanceFadeout = i.viewSpaceDirDist.w * angleToCameraAxis;
 				float fragDepth = max(0, LinearEyeDepth(UNITY_SAMPLE_DEPTH(tex2Dproj(_CameraDepthTexture, UNITY_PROJ_COORD(i.projPos)))) - _ProjectionParams.g);
 				float oceanDepth = max(0, distanceFadeout - _ProjectionParams.g);
-				float coeff = 1.0 - (pow(saturate((fragDepth - oceanDepth) / 100), 0.56) * saturate((fragDepth - oceanDepth) / 0.5));
+				float depthCoeff = 1.0 - (pow(saturate((fragDepth - oceanDepth) / 100), 0.56) * saturate((fragDepth - oceanDepth) / 0.5));
 
-				oceanColor = saturate(lerp(_Ocean_Color, _Ocean_Shore_Color, coeff));
-				surfaceAlpha = clamp(1.0 - lerp(0.0, 1.0, coeff), 0.8, 1.0);
+				#ifdef OCEAN_WHITECAPS
+					float depthFoamCoeff = 1.0 - (pow(saturate((fragDepth - oceanDepth) / 25), 0.25) * saturate((fragDepth - oceanDepth) / 0.5));
+				#endif
+
+				oceanColor = saturate(lerp(_Ocean_Color, _Ocean_Shore_Color, depthCoeff));
+				surfaceAlpha = clamp(1.0 - lerp(0.0, 1.0, depthCoeff), 0.8, 1.0);
 			#else
 				oceanColor = _Ocean_Color;
 				surfaceAlpha = 1.0;
@@ -241,8 +245,16 @@ Shader "SpaceEngine/Planet/Ocean"
 				//float whiteCapStr = clamp((noiseValue + 1.0) * 0.5, 0.0, 1.0);
 				//float W = WhitecapCoverage(whiteCapStr, jm.x, jSigma2);
 
+				float whiteCapStr = _Ocean_WhiteCapStr;
+
+				#ifdef OCEAN_DEPTH_ON
+					whiteCapStr = lerp(_Ocean_WhiteCapStr, 1.0, depthFoamCoeff * 2.0);
+				#else
+					whiteCapStr = _Ocean_WhiteCapStr;
+				#endif
+
 				// Simple...
-				float W = WhitecapCoverage(_Ocean_WhiteCapStr, jm.x, jSigma2);
+				float W = WhitecapCoverage(whiteCapStr, jm.x, jSigma2);
 				
 				// Compute and add whitecap radiance
 				float3 l = (sunL * (max(dot(N, L), 0.0)) + skyE) / M_PI;
