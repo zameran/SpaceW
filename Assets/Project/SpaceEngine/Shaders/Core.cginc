@@ -383,6 +383,8 @@ struct a2v_planetTerrain
 
 uniform float _Ocean_Sigma;
 uniform float3 _Ocean_Color;
+uniform float3 _Ocean_Shore_Color;
+
 uniform float _Ocean_DrawBRDF;
 uniform float _Ocean_Level;
 

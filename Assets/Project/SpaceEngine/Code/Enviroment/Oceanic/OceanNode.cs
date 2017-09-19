@@ -12,6 +12,8 @@ using UnityEngine;
 
 namespace SpaceEngine.Enviroment.Oceanic
 {
+    // TODO : Fix depth jumping on camera move...
+
     /// <summary>
     /// An AbstractTask to draw a flat or spherical ocean. This class provides the functions and data to draw a flat projected grid but nothing else.
     /// </summary>
@@ -29,6 +31,8 @@ namespace SpaceEngine.Enviroment.Oceanic
 
         [SerializeField]
         protected Color UpwellingColor = new Color(0.039f, 0.156f, 0.47f);
+        [SerializeField]
+        protected Color ShoreColor = new Color(0, 0.3411765f, 0.6235294f);
 
         /// <summary>
         /// Sea level in meters.
@@ -82,17 +86,23 @@ namespace SpaceEngine.Enviroment.Oceanic
         /// <summary>
         /// Update current ocean state important shader keywords. Call this somewhere per frame.
         /// </summary>
-        protected virtual void UpdateKeywords()
+        protected virtual void UpdateKeywords(Material target)
         {
-            if (GodManager.Instance.OceanSkyReflections)
+            ToggleKeyword(target, GodManager.Instance.OceanSkyReflections, "OCEAN_SKY_REFLECTIONS_ON", "OCEAN_SKY_REFLECTIONS_OFF");
+            ToggleKeyword(target, GodManager.Instance.OceanDepth, "OCEAN_DEPTH_ON", "OCEAN_DEPTH_OFF");
+        }
+
+        public void ToggleKeyword(Material target, bool state, string enabledKeyword = "FEATURE_ON", string disabledKeyword = "FEATURE_OFF")
+        {
+            if (state)
             {
-                if (OceanMaterial.IsKeywordEnabled("OCEAN_SKY_REFLECTIONS_OFF")) OceanMaterial.DisableKeyword("OCEAN_SKY_REFLECTIONS_OFF");
-                if (!OceanMaterial.IsKeywordEnabled("OCEAN_SKY_REFLECTIONS_ON")) OceanMaterial.EnableKeyword("OCEAN_SKY_REFLECTIONS_ON");
+                if (target.IsKeywordEnabled(disabledKeyword)) target.DisableKeyword(disabledKeyword);
+                if (!target.IsKeywordEnabled(enabledKeyword)) target.EnableKeyword(enabledKeyword);
             }
             else
             {
-                if (OceanMaterial.IsKeywordEnabled("OCEAN_SKY_REFLECTIONS_ON")) OceanMaterial.DisableKeyword("OCEAN_SKY_REFLECTIONS_ON");
-                if (!OceanMaterial.IsKeywordEnabled("OCEAN_SKY_REFLECTIONS_OFF")) OceanMaterial.EnableKeyword("OCEAN_SKY_REFLECTIONS_OFF");
+                if (target.IsKeywordEnabled(enabledKeyword)) target.DisableKeyword(enabledKeyword);
+                if (!target.IsKeywordEnabled(disabledKeyword)) target.EnableKeyword(disabledKeyword);
             }
         }
 
@@ -207,8 +217,10 @@ namespace SpaceEngine.Enviroment.Oceanic
             OceanMaterial.SetVector("_Ocean_SunDir", oceanSunDirection.ToVector3());
             OceanMaterial.SetMatrix("_Ocean_CameraToOcean", cameraToOcean.ToMatrix4x4());
             OceanMaterial.SetMatrix("_Ocean_OceanToCamera", cameraToOcean.Inverse().ToMatrix4x4());
+            OceanMaterial.SetMatrix("_Ocean_WorldToLocal", worldToLocal.ToMatrix4x4());
             OceanMaterial.SetVector("_Ocean_CameraPos", offset.ToVector3());
             OceanMaterial.SetVector("_Ocean_Color", UpwellingColor * 0.1f);
+            OceanMaterial.SetVector("_Ocean_Shore_Color", ShoreColor);
             OceanMaterial.SetVector("_Ocean_ScreenGridSize", new Vector2((float)oceanGridResolution / (float)Screen.width, (float)oceanGridResolution / (float)Screen.height));
             OceanMaterial.SetFloat("_Ocean_Radius", radius);
             OceanMaterial.SetFloat("_Ocean_Wave_Level", OceanWaveLevel);
@@ -257,6 +269,7 @@ namespace SpaceEngine.Enviroment.Oceanic
 
             target.SetFloat("_Ocean_Sigma", GetMaxSlopeVariance());
             target.SetVector("_Ocean_Color", UpwellingColor * 0.1f);
+            target.SetVector("_Ocean_Shore_Color", ShoreColor);
             target.SetFloat("_Ocean_DrawBRDF", DrawOcean ? 0.0f : 1.0f);
             target.SetFloat("_Ocean_Level", OceanLevel);
         }
@@ -276,6 +289,7 @@ namespace SpaceEngine.Enviroment.Oceanic
 
             target.SetFloat("_Ocean_Sigma", GetMaxSlopeVariance());
             target.SetVector("_Ocean_Color", UpwellingColor * 0.1f);
+            target.SetVector("_Ocean_Shore_Color", ShoreColor);
             target.SetFloat("_Ocean_DrawBRDF", DrawOcean ? 0.0f : 1.0f);
             target.SetFloat("_Ocean_Level", OceanLevel);
         }

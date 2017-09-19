@@ -1,5 +1,7 @@
 using SpaceEngine.Core.Utilities;
 
+using System;
+
 namespace UnityEngine
 {
     public class FourierGPU
@@ -7,6 +9,7 @@ namespace UnityEngine
         const int PASS_X_1 = 0, PASS_Y_1 = 1;
         const int PASS_X_2 = 2, PASS_Y_2 = 3;
         const int PASS_X_3 = 4, PASS_Y_3 = 5;
+        const int PASS_X_4 = 6, PASS_Y_4 = 7;
 
         public int Size { get; private set; }
         public int Passes { get; private set; }
@@ -108,8 +111,58 @@ namespace UnityEngine
             }
         }
 
+        public int PeformFFT(RenderTexture[] data0)
+        {
+            if (ButterFlyLookupTable == null) return -1;
+
+            var pass0 = new RenderTexture[] { data0[0] };
+            var pass1 = new RenderTexture[] { data0[1] };
+
+            int i;
+            int idx = 0;
+            int idx1;
+            int j = 0;
+
+            for (i = 0; i < Passes; i++, j++)
+            {
+                idx = j % 2;
+                idx1 = (j + 1) % 2;
+
+                FourierMaterial.SetTexture("_ButterFlyLookUp", ButterFlyLookupTable[i]);
+
+                FourierMaterial.SetTexture("_ReadBuffer0", data0[idx1]);
+
+                if (idx == 0)
+                    RTUtility.MultiTargetBlit(pass0, FourierMaterial, PASS_X_1);
+                else
+                    RTUtility.MultiTargetBlit(pass1, FourierMaterial, PASS_X_1);
+            }
+
+            for (i = 0; i < Passes; i++, j++)
+            {
+                idx = j % 2;
+                idx1 = (j + 1) % 2;
+
+                FourierMaterial.SetTexture("_ButterFlyLookUp", ButterFlyLookupTable[i]);
+
+                FourierMaterial.SetTexture("_ReadBuffer0", data0[idx1]);
+
+                if (idx == 0)
+                    RTUtility.MultiTargetBlit(pass0, FourierMaterial, PASS_Y_1);
+                else
+                    RTUtility.MultiTargetBlit(pass1, FourierMaterial, PASS_Y_1);
+            }
+
+            return idx;
+        }
+
         public int PeformFFT(RenderTexture[] data0, RenderTexture[] data1)
         {
+            if (ButterFlyLookupTable == null) return -1;
+
+            if (SystemInfo.supportedRenderTargetCount < 2)
+                throw new InvalidOperationException("System does not support at least 2 render targets");
+
             var pass0 = new RenderTexture[] { data0[0], data1[0] };
             var pass1 = new RenderTexture[] { data0[1], data1[1] };
 
@@ -155,6 +208,11 @@ namespace UnityEngine
 
         public int PeformFFT(RenderTexture[] data0, RenderTexture[] data1, RenderTexture[] data2)
         {
+            if (ButterFlyLookupTable == null) return -1;
+
+            if (SystemInfo.supportedRenderTargetCount < 3)
+                throw new InvalidOperationException("System does not support at least 3 render targets");
+
             var pass0 = new RenderTexture[] { data0[0], data1[0], data2[0] };
             var pass1 = new RenderTexture[] { data0[1], data1[1], data2[1] };
 
@@ -195,6 +253,59 @@ namespace UnityEngine
                     RTUtility.MultiTargetBlit(pass0, FourierMaterial, PASS_Y_3);
                 else
                     RTUtility.MultiTargetBlit(pass1, FourierMaterial, PASS_Y_3);
+            }
+
+            return idx;
+        }
+
+        public int PeformFFT(RenderTexture[] data0, RenderTexture[] data1, RenderTexture[] data2, RenderTexture[] data3)
+        {
+            if (ButterFlyLookupTable == null) return -1;
+
+            if (SystemInfo.supportedRenderTargetCount < 4)
+                throw new InvalidOperationException("System does not support at least 4 render targets");
+
+            var pass0 = new RenderTexture[] { data0[0], data1[0], data2[0], data3[0] };
+            var pass1 = new RenderTexture[] { data0[1], data1[1], data2[1], data3[1] };
+
+            int i;
+            int idx = 0; int idx1;
+            int j = 0;
+
+            for (i = 0; i < Passes; i++, j++)
+            {
+                idx = j % 2;
+                idx1 = (j + 1) % 2;
+
+                FourierMaterial.SetTexture("Ceto_ButterFlyLookUp", ButterFlyLookupTable[i]);
+
+                FourierMaterial.SetTexture("Ceto_ReadBuffer0", data0[idx1]);
+                FourierMaterial.SetTexture("Ceto_ReadBuffer1", data1[idx1]);
+                FourierMaterial.SetTexture("Ceto_ReadBuffer2", data2[idx1]);
+                FourierMaterial.SetTexture("Ceto_ReadBuffer3", data3[idx1]);
+
+                if (idx == 0)
+                	RTUtility.MultiTargetBlit(pass0, FourierMaterial, PASS_X_4);
+                else
+                	RTUtility.MultiTargetBlit(pass1, FourierMaterial, PASS_X_4);
+            }
+
+            for (i = 0; i < Passes; i++, j++)
+            {
+                idx = j % 2;
+                idx1 = (j + 1) % 2;
+
+                FourierMaterial.SetTexture("Ceto_ButterFlyLookUp", ButterFlyLookupTable[i]);
+
+                FourierMaterial.SetTexture("Ceto_ReadBuffer0", data0[idx1]);
+                FourierMaterial.SetTexture("Ceto_ReadBuffer1", data1[idx1]);
+                FourierMaterial.SetTexture("Ceto_ReadBuffer2", data2[idx1]);
+                FourierMaterial.SetTexture("Ceto_ReadBuffer3", data3[idx1]);
+
+                if (idx == 0)
+                	RTUtility.MultiTargetBlit(pass0, FourierMaterial, PASS_Y_4);
+                else
+                	RTUtility.MultiTargetBlit(pass1, FourierMaterial, PASS_Y_4);
             }
 
             return idx;

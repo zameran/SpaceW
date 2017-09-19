@@ -77,6 +77,7 @@ Shader "SpaceEngine/Planet/Terrain"
 			#pragma multi_compile SHINE_ON SHINE_OFF
 			#pragma multi_compile ECLIPSES_ON ECLIPSES_OFF
 			#pragma multi_compile OCEAN_ON OCEAN_OFF
+			#pragma multi_compile OCEAN_DEPTH_ON OCEAN_DEPTH_OFF
 			#pragma multi_compile SHADOW_0 SHADOW_1 SHADOW_2 SHADOW_3 SHADOW_4
 			
 			#pragma multi_compile_fwdbase noambient novertexlights nolightmap nodynlightmap nodirlightmap nofog nometa nolppv noshadowmask
@@ -161,8 +162,20 @@ Shader "SpaceEngine/Planet/Terrain"
 					
 					#if OCEAN_ON
 						if (height <= _Ocean_Level && _Ocean_DrawBRDF == 1.0)
-						{	
-							groundColor = OceanRadiance(WSD, -v, V, _Ocean_Sigma, sunL, skyE, _Ocean_Color, P);
+						{
+							float3 oceanColor = 0;
+
+							#ifdef OCEAN_DEPTH_ON
+								// TODO : Settings to parameters...
+
+								float coeff = 1.0 - (pow(saturate((_Ocean_Level - height) / 100), 0.56) * saturate((_Ocean_Level - height) / 0.5));
+								
+								oceanColor = saturate(lerp(_Ocean_Color, _Ocean_Shore_Color, coeff));
+							#else
+								oceanColor = _Ocean_Color;
+							#endif
+
+							groundColor = OceanRadiance(WSD, -v, V, _Ocean_Sigma, sunL, skyE, oceanColor, P);
 						}
 					#endif
 					
@@ -225,6 +238,8 @@ Shader "SpaceEngine/Planet/Terrain"
 
 			#pragma multi_compile_shadowcaster
 
+			#include "SpaceAtmosphere.cginc"
+
 			#include "UnityCG.cginc"
 			#include "UnityStandardShadow.cginc"
 
@@ -242,6 +257,9 @@ Shader "SpaceEngine/Planet/Terrain"
 
 				// Dublicate displacement work of main vertex shadeer...
 				VERTEX_LOCAL_POSITION(v.vertex, v.uv0.xy, v.vertex);
+
+				// Apply origin...
+				v.vertex -= float4(_Atmosphere_Origin, 1.0);
 
 				// Make the magic...
 				TRANSFER_SHADOW_CASTER(o)

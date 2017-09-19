@@ -7,6 +7,7 @@ Shader "Math/Fourier"
 	uniform sampler2D _ReadBuffer0;
 	uniform sampler2D _ReadBuffer1;
 	uniform sampler2D _ReadBuffer2;
+	uniform sampler2D _ReadBuffer3;
 	uniform sampler2D _ButterFlyLookUp;
 
 	uniform float _Size;
@@ -25,20 +26,28 @@ Shader "Math/Fourier"
 	
 	struct f2a_1
 	{
-		float4 col0 : COLOR0;
+		float4 col0 : SV_Target;
 	};
 	
 	struct f2a_2
 	{
-		float4 col0 : COLOR0;
-		float4 col1 : COLOR1;
+		float4 col0 : SV_Target0;
+		float4 col1 : SV_Target1;
 	};
 	
 	struct f2a_3
 	{
-		float4 col0 : COLOR0;
-		float4 col1 : COLOR1;
-		float4 col2 : COLOR2;
+		float4 col0 : SV_Target0;
+		float4 col1 : SV_Target1;
+		float4 col2 : SV_Target2;
+	};
+	
+	struct f2a_4
+	{
+		float4 col0 : SV_Target0;
+		float4 col1 : SV_Target1;
+		float4 col2 : SV_Target2;
+		float4 col3 : SV_Target3;
 	};
 	
 	//Performs two FFTs on two complex numbers packed in a vector4
@@ -148,6 +157,34 @@ Shader "Math/Fourier"
 		OUT.col1 = FFT(w, tex2D(_ReadBuffer1, uv1), tex2D(_ReadBuffer1, uv2));
 		OUT.col2 = FFT(w, tex2D(_ReadBuffer2, uv1), tex2D(_ReadBuffer2, uv2));
 	}
+
+	void fragX_4(in v2f IN, out f2a_4 OUT)
+	{
+		float2 w = 0;
+		float4 lookUp = CalculateLookUp(IN.uv.x, w);
+		
+		float2 uv1 = float2(lookUp.x, IN.uv.y);
+		float2 uv2 = float2(lookUp.y, IN.uv.y);
+		
+		OUT.col0 = FFT(w, tex2D(_ReadBuffer0, uv1), tex2D(_ReadBuffer0, uv2));
+		OUT.col1 = FFT(w, tex2D(_ReadBuffer1, uv1), tex2D(_ReadBuffer1, uv2));
+		OUT.col2 = FFT(w, tex2D(_ReadBuffer2, uv1), tex2D(_ReadBuffer2, uv2));
+		OUT.col3 = FFT(w, tex2D(_ReadBuffer3, uv1), tex2D(_ReadBuffer3, uv2));
+	}
+
+	void fragY_4(in v2f IN, out f2a_4 OUT)
+	{
+		float2 w = 0;
+		float4 lookUp = CalculateLookUp(IN.uv.y, w);
+		
+		float2 uv1 = float2(IN.uv.x, lookUp.x);
+		float2 uv2 = float2(IN.uv.x, lookUp.y);
+		
+		OUT.col0 = FFT(w, tex2D(_ReadBuffer0, uv1), tex2D(_ReadBuffer0, uv2));
+		OUT.col1 = FFT(w, tex2D(_ReadBuffer1, uv1), tex2D(_ReadBuffer1, uv2));
+		OUT.col2 = FFT(w, tex2D(_ReadBuffer2, uv1), tex2D(_ReadBuffer2, uv2));
+		OUT.col3 = FFT(w, tex2D(_ReadBuffer3, uv1), tex2D(_ReadBuffer3, uv2));
+	}
 	
 	ENDCG
 			
@@ -164,6 +201,7 @@ Shader "Math/Fourier"
 			#pragma target 3.0
 			#pragma vertex vert
 			#pragma fragment fragX_1
+			#pragma fragmentoption ARB_precision_hint_nicest
 			ENDCG
 		}
 		
@@ -178,6 +216,7 @@ Shader "Math/Fourier"
 			#pragma target 3.0
 			#pragma vertex vert
 			#pragma fragment fragY_1
+			#pragma fragmentoption ARB_precision_hint_nicest
 			ENDCG
 		}
 		
@@ -192,6 +231,7 @@ Shader "Math/Fourier"
 			#pragma target 3.0
 			#pragma vertex vert
 			#pragma fragment fragX_2
+			#pragma fragmentoption ARB_precision_hint_nicest
 			ENDCG
 		}
 		
@@ -206,6 +246,7 @@ Shader "Math/Fourier"
 			#pragma target 3.0
 			#pragma vertex vert
 			#pragma fragment fragY_2
+			#pragma fragmentoption ARB_precision_hint_nicest
 			ENDCG
 		}
 		
@@ -220,6 +261,7 @@ Shader "Math/Fourier"
 			#pragma target 3.0
 			#pragma vertex vert
 			#pragma fragment fragX_3
+			#pragma fragmentoption ARB_precision_hint_nicest
 			ENDCG
 		}
 		
@@ -234,6 +276,37 @@ Shader "Math/Fourier"
 			#pragma target 3.0
 			#pragma vertex vert
 			#pragma fragment fragY_3
+			#pragma fragmentoption ARB_precision_hint_nicest
+			ENDCG
+		}
+
+		Pass 
+		{
+			ZTest Always 
+			Cull Off 
+			ZWrite Off
+			Fog { Mode Off }
+			
+			CGPROGRAM
+			#pragma target 3.0
+			#pragma vertex vert
+			#pragma fragment fragX_4
+			#pragma fragmentoption ARB_precision_hint_nicest
+			ENDCG
+		}
+
+		Pass 
+		{
+			ZTest Always 
+			Cull Off 
+			ZWrite Off
+			Fog { Mode Off }
+			
+			CGPROGRAM
+			#pragma target 3.0
+			#pragma vertex vert
+			#pragma fragment fragY_4
+			#pragma fragmentoption ARB_precision_hint_nicest
 			ENDCG
 		}
 	}

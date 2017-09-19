@@ -83,6 +83,7 @@ namespace SpaceEngine.Debugging
                         GodManager.Instance.Planetshadows = GUILayout.Toggle(GodManager.Instance.Planetshadows, " - Planetshadows?");
                         GodManager.Instance.Planetshine = GUILayout.Toggle(GodManager.Instance.Planetshine, " - Planetshine?");
                         GodManager.Instance.OceanSkyReflections = GUILayout.Toggle(GodManager.Instance.OceanSkyReflections, " - Ocean Sky Reflections?");
+                        GodManager.Instance.OceanDepth = GUILayout.Toggle(GodManager.Instance.OceanDepth, " - Ocean Depth?");
                     });
                 });
             });

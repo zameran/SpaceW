@@ -99,10 +99,12 @@ public class GodManager : MonoSingleton<GodManager>
     public int TileSize { get { return GridResolution * 4; } }
 
     // TODO : Make these settings switching event based. To avoid constant every-frame checkings...
+    // TODO : Disable terrain shadow caster pass, if OceanDepth is False...
     public bool Eclipses = true;
     public bool Planetshadows = true;
     public bool Planetshine = true;
     public bool OceanSkyReflections = true;
+    public bool OceanDepth = true;
     public bool DelayedCalculations = false;
     public bool FloatingOrigin = false;
     public bool DebugFBO = false;

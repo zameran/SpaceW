@@ -119,15 +119,18 @@ namespace SpaceEngine.Core.Bodies
                     if (OceanEnabled && AtmosphereEnabled)
                     {
                         keywords.Add("OCEAN_ON");
+                        keywords.Add(GodManager.Instance.OceanDepth ? "OCEAN_DEPTH_ON" : "OCEAN_DEPTH_OFF");
                     }
                     else
                     {
                         keywords.Add("OCEAN_OFF");
+                        keywords.Add("OCEAN_DEPTH_OFF");
                     }
                 }
                 else
                 {
                     keywords.Add("OCEAN_OFF");
+                    keywords.Add("OCEAN_DEPTH_OFF");
                 }
             }
             else
@@ -135,6 +138,7 @@ namespace SpaceEngine.Core.Bodies
                 keywords.Add("LIGHT_0");
                 keywords.Add("ATMOSPHERE_OFF");
                 keywords.Add("OCEAN_OFF");
+                keywords.Add("OCEAN_DEPTH_OFF");
             }
 
             return keywords;

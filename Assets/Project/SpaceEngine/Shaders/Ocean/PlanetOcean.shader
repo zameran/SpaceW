@@ -45,12 +45,18 @@ Shader "SpaceEngine/Planet/Ocean"
 		#include "UnityCG.cginc"
 
 		#if !defined(CORE)
-		uniform float3 _Ocean_Color;
+			uniform float3 _Ocean_Color;
+		#endif
+
+		#ifdef OCEAN_DEPTH_ON
+			#if !defined(CORE)
+				uniform float3 _Ocean_Shore_Color;
+			#endif
+
+			sampler2D _CameraDepthTexture;
 		#endif
 
 		uniform float _Ocean_Wave_Level;
-
-		sampler2D _CameraDepthTexture;
 
 		struct a2v
 		{
@@ -64,8 +70,11 @@ Shader "SpaceEngine/Planet/Ocean"
 			float2 oceanU : TEXCOORD0;
 			float3 oceanP : TEXCOORD1;
 			float4 screenP : TEXCOORD2;
-			float4 viewSpaceDirDist : TEXCOORD3;
-			float2 depthUV : TEXCOORD4;
+
+			#ifdef OCEAN_DEPTH_ON
+				float4 viewSpaceDirDist : TEXCOORD3;
+				float4 projPos : TEXCOORD4;
+			#endif
 		};
 
 		void vert(in a2v v, out v2f o)
@@ -107,14 +116,17 @@ Shader "SpaceEngine/Planet/Ocean"
 			float4 screenP = float4(t * cameraDir + mul(otoc, dP), 1.0);
 			float3 oceanP = t * oceanDir + dP + float3(0.0, 0.0, _Ocean_CameraPos.z);
 			float4 pos = mul(_Globals_CameraToScreen, screenP);
-			float4 computedScreenP = ComputeScreenPos(pos);
-				
+			float4 computedScreenP = ComputeScreenPos(pos); // UnityObjectToClipPos(v.vertex)
+			
 			o.pos = pos;
 			o.oceanU = u;
 			o.oceanP = oceanP;
 			o.screenP = screenP;
-			o.viewSpaceDirDist = float4(cameraDir, t);
-			o.depthUV = computedScreenP.xy / computedScreenP.w;
+
+			#ifdef OCEAN_DEPTH_ON
+				o.viewSpaceDirDist = float4(cameraDir, t);
+				o.projPos = computedScreenP;
+			#endif
 		}
 
 		void frag(in v2f i, out float4 color : SV_Target)
@@ -182,21 +194,21 @@ Shader "SpaceEngine/Planet/Ocean"
 			float3 surfaceColor = 0;
 			float surfaceAlpha = 1;
 
-			//-----------------------------------------------------------------------------
-			float2 depthUV = i.depthUV.xy + N.xy * 0.025;
+			#ifdef OCEAN_DEPTH_ON
+				// TODO : Settings to parameters...
 
-			float fragDepth = LinearEyeDepth(tex2D(_CameraDepthTexture , depthUV).r) / 2;
-			float angleToCameraAxis = dot(i.viewSpaceDirDist.xyz, float3(0.0, 0.0, -1.0));
-			float distanceFadeout = i.viewSpaceDirDist.w * angleToCameraAxis;
-			float depth = fragDepth - distanceFadeout;
+				float angleToCameraAxis = dot(i.viewSpaceDirDist.xyz, float3(0.0, 0.0, -1.0));
+				float distanceFadeout = i.viewSpaceDirDist.w * angleToCameraAxis;
+				float fragDepth = max(0, LinearEyeDepth(UNITY_SAMPLE_DEPTH(tex2Dproj(_CameraDepthTexture, UNITY_PROJ_COORD(i.projPos)))) - _ProjectionParams.g);
+				float oceanDepth = max(0, distanceFadeout - _ProjectionParams.g);
+				float coeff = 1.0 - (pow(saturate((fragDepth - oceanDepth) / 100), 0.56) * saturate((fragDepth - oceanDepth) / 0.5));
 
-			depthUV = (depth < 0) ? i.depthUV.xy : depthUV;
-			fragDepth = LinearEyeDepth(tex2D(_CameraDepthTexture, depthUV).r) / 2;
-			depth = (fragDepth - distanceFadeout) / angleToCameraAxis;
-
-			oceanColor = saturate(lerp(_Ocean_Color, _Ocean_Color + 0.25, depth * 0.0015625));
-			surfaceAlpha = clamp(1.0 - lerp(0.0, 1.0, depth * 0.0015625), 0.8, 1.0);
-			//-----------------------------------------------------------------------------
+				oceanColor = saturate(lerp(_Ocean_Color, _Ocean_Shore_Color, coeff));
+				surfaceAlpha = clamp(1.0 - lerp(0.0, 1.0, coeff), 0.8, 1.0);
+			#else
+				oceanColor = _Ocean_Color;
+				surfaceAlpha = 1.0;
+			#endif
 
 			#ifdef OCEAN_SKY_REFLECTIONS_ON
 				float3 Lsky = fresnel * ReflectedSky(V, N, L, earthP);
@@ -276,6 +288,7 @@ Shader "SpaceEngine/Planet/Ocean"
 			#pragma vertex vert
 			#pragma fragment frag
 
+			#pragma multi_compile OCEAN_DEPTH_ON OCEAN_DEPTH_OFF
 			#pragma multi_compile OCEAN_SKY_REFLECTIONS_ON OCEAN_SKY_REFLECTIONS_OFF
 			#pragma multi_compile OCEAN_NONE OCEAN_FFT OCEAN_WHITECAPS
 			ENDCG

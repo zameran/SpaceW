@@ -45,7 +45,7 @@ namespace SpaceEngine.Enviroment.Oceanic
             if (OceanMaterial.IsKeywordEnabled(FFT_KEYWORD)) OceanMaterial.DisableKeyword(FFT_KEYWORD);
             if (!OceanMaterial.IsKeywordEnabled(WHITECAPS_KEYWORD)) OceanMaterial.EnableKeyword(WHITECAPS_KEYWORD);
 
-            UpdateKeywords();
+            UpdateKeywords(OceanMaterial);
         }
 
         #endregion
