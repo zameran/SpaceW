@@ -42,11 +42,15 @@ Shader "SpaceEngine/Planet/Ocean"
 		#include "OceanBRDF.cginc"
 		#include "OceanDisplacement.cginc"
 
+		#include "UnityCG.cginc"
+
 		#if !defined(CORE)
 		uniform float3 _Ocean_Color;
 		#endif
 
 		uniform float _Ocean_Wave_Level;
+
+		sampler2D _CameraDepthTexture;
 
 		struct a2v
 		{
@@ -60,6 +64,8 @@ Shader "SpaceEngine/Planet/Ocean"
 			float2 oceanU : TEXCOORD0;
 			float3 oceanP : TEXCOORD1;
 			float4 screenP : TEXCOORD2;
+			float4 viewSpaceDirDist : TEXCOORD3;
+			float2 depthUV : TEXCOORD4;
 		};
 
 		void vert(in a2v v, out v2f o)
@@ -100,11 +106,15 @@ Shader "SpaceEngine/Planet/Ocean"
 
 			float4 screenP = float4(t * cameraDir + mul(otoc, dP), 1.0);
 			float3 oceanP = t * oceanDir + dP + float3(0.0, 0.0, _Ocean_CameraPos.z);
+			float4 pos = mul(_Globals_CameraToScreen, screenP);
+			float4 computedScreenP = ComputeScreenPos(pos);
 				
-			o.pos = mul(_Globals_CameraToScreen, screenP);
+			o.pos = pos;
 			o.oceanU = u;
 			o.oceanP = oceanP;
 			o.screenP = screenP;
+			o.viewSpaceDirDist = float4(cameraDir, t);
+			o.depthUV = computedScreenP.xy / computedScreenP.w;
 		}
 
 		void frag(in v2f i, out float4 color : SV_Target)
@@ -168,20 +178,35 @@ Shader "SpaceEngine/Planet/Ocean"
 
 			float fresnel = MeanFresnel(V, N, sigmaSq);
 
-			#ifdef OCEAN_SKY_REFLECTIONS_ON
-				float3 Lsky = fresnel * ReflectedSky(V, N, L, earthP);
-				float3 Lsun = ReflectedSunRadiance(L, V, N, sigmaSq) * sunL;
-				float3 Lsea = 0.98 * (1.0 - fresnel) * _Ocean_Color * (skyE / M_PI);
-			#else
-				float3 Lsky = fresnel * skyE / M_PI;
-				float3 Lsun = ReflectedSunRadiance(L, V, N, sigmaSq) * sunL;
-				float3 Lsea = RefractedSeaRadiance(V, N, sigmaSq) * _Ocean_Color * skyE / M_PI;
-			#endif
-
+			float3 oceanColor = 0;
 			float3 surfaceColor = 0;
 			float surfaceAlpha = 1;
 
-			// TODO : Sample scene depth for ocean transparency...
+			//-----------------------------------------------------------------------------
+			float2 depthUV = i.depthUV.xy + N.xy * 0.025;
+
+			float fragDepth = LinearEyeDepth(tex2D(_CameraDepthTexture , depthUV).r) / 2;
+			float angleToCameraAxis = dot(i.viewSpaceDirDist.xyz, float3(0.0, 0.0, -1.0));
+			float distanceFadeout = i.viewSpaceDirDist.w * angleToCameraAxis;
+			float depth = fragDepth - distanceFadeout;
+
+			depthUV = (depth < 0) ? i.depthUV.xy : depthUV;
+			fragDepth = LinearEyeDepth(tex2D(_CameraDepthTexture, depthUV).r) / 2;
+			depth = (fragDepth - distanceFadeout) / angleToCameraAxis;
+
+			oceanColor = saturate(lerp(_Ocean_Color, _Ocean_Color + 0.25, depth * 0.0015625));
+			surfaceAlpha = clamp(1.0 - lerp(0.0, 1.0, depth * 0.0015625), 0.8, 1.0);
+			//-----------------------------------------------------------------------------
+
+			#ifdef OCEAN_SKY_REFLECTIONS_ON
+				float3 Lsky = fresnel * ReflectedSky(V, N, L, earthP);
+				float3 Lsun = ReflectedSunRadiance(L, V, N, sigmaSq) * sunL;
+				float3 Lsea = 0.98 * (1.0 - fresnel) * oceanColor * (skyE / M_PI);
+			#else
+				float3 Lsky = fresnel * skyE / M_PI;
+				float3 Lsun = ReflectedSunRadiance(L, V, N, sigmaSq) * sunL;
+				float3 Lsea = RefractedSeaRadiance(V, N, sigmaSq) * oceanColor * skyE / M_PI;
+			#endif
 
 			#ifdef OCEAN_FFT
 				surfaceColor = Lsun + Lsky + Lsea;
@@ -230,8 +255,8 @@ Shader "SpaceEngine/Planet/Ocean"
 			Name "Ocean"
 			Tags 
 			{
-				"Queue"					= "Geometry"
-				"RenderType"			= "Geometry"
+				"Queue"					= "Geometry+100"
+				"RenderType"			= "Transparent"
 				"ForceNoShadowCasting"	= "True"
 				"IgnoreProjector"		= "True"
 

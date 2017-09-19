@@ -415,4 +415,16 @@ void VERTEX_POSITION(in float4 vertex, in float2 texcoord, out float4 position, 
 	localPosition = (_Deform_Radius + max(h, _Ocean_Level)) * normalize(mul(_Deform_LocalToWorld, P));
 	uv = texcoord;
 }
+
+void VERTEX_LOCAL_POSITION(in float4 vertex, in float2 texcoord, out float4 position)
+{
+	float2 zfc = texTileLod(_Elevation_Tile, texcoord, _Elevation_TileCoords, _Elevation_TileSize).xy;
+
+	float2 vertexToCamera = abs(_Deform_Camera.xy - vertex.xy);
+	float vertexBlend = clamp((max(max(vertexToCamera.x, vertexToCamera.y), _Deform_Camera.z) - _Deform_Blending.x) / _Deform_Blending.y, 0.0, 1.0);
+
+	float3 P = float3(vertex.xy * _Deform_Offset.z + _Deform_Offset.xy, _Deform_Radius);
+
+	position = (_Deform_Radius + zfc.x * (1.0 - vertexBlend) + zfc.y * vertexBlend) * normalize(mul(_Deform_LocalToWorld, P));
+}
 //-----------------------------------------------------------------------------

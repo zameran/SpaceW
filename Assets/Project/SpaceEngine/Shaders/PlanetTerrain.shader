@@ -210,5 +210,50 @@ Shader "SpaceEngine/Planet/Terrain"
 			
 			ENDCG
 		}
+
+		Pass
+		{
+			Name "ShadowCaster"
+			Tags { "LightMode" = "ShadowCaster" }
+			Cull Off
+ 
+			CGPROGRAM
+			#pragma vertex vert
+			#pragma fragment frag
+
+			#pragma target 2.0
+
+			#pragma multi_compile_shadowcaster
+
+			#include "UnityCG.cginc"
+			#include "UnityStandardShadow.cginc"
+
+			#pragma multi_compile ATMOSPHERE_ON ATMOSPHERE_OFF
+			#pragma multi_compile OCEAN_ON OCEAN_OFF
+ 
+			struct v2f_shadowCaster
+			{
+				V2F_SHADOW_CASTER;
+			};
+ 
+			v2f_shadowCaster vert(VertexInput v)
+			{
+				v2f_shadowCaster o;
+
+				// Dublicate displacement work of main vertex shadeer...
+				VERTEX_LOCAL_POSITION(v.vertex, v.uv0.xy, v.vertex);
+
+				// Make the magic...
+				TRANSFER_SHADOW_CASTER(o)
+
+				return o;
+			}
+ 
+			float4 frag(v2f_shadowCaster i) : SV_Target
+			{
+				SHADOW_CASTER_FRAGMENT(i)
+			}
+			ENDCG
+		}
 	}
 }

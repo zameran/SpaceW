@@ -34,6 +34,7 @@
 #endregion
 
 
+using SpaceEngine.Core.Utilities;
 using SpaceEngine.Enviroment.Atmospheric;
 
 using System;

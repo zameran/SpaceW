@@ -1,3 +1,5 @@
+using SpaceEngine.Core.Utilities;
+
 namespace UnityEngine
 {
     public class FourierGPU
