@@ -76,7 +76,7 @@ Shader "SpaceEngine/Planet/Ocean"
 				float4 projPos : TEXCOORD4;
 			#endif
 		};
-
+		
 		void vert(in a2v v, out v2f o)
 		{
 			float t = 0;
@@ -114,7 +114,7 @@ Shader "SpaceEngine/Planet/Ocean"
 			float4 screenP = float4(t * cameraDir + mul(_Ocean_OceanToCamera, dP), 1.0);
 			float3 oceanP = t * oceanDir + dP + float3(0.0, 0.0, _Ocean_CameraPos.z);
 			float4 pos = mul(_Globals_CameraToScreen, screenP);
-			float4 computedScreenP = ComputeScreenPos(pos); // UnityObjectToClipPos(v.vertex)
+			float4 computedScreenP = ComputeScreenPos(pos);
 			
 			o.pos = pos;
 			o.oceanU = u;

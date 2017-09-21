@@ -79,10 +79,6 @@ namespace SpaceEngine.Enviroment.Oceanic
 
         #region OceanNode
 
-        protected abstract void InitOceanNode();
-
-        protected abstract void UpdateOceanNode();
-
         /// <summary>
         /// Update current ocean state important shader keywords. Call this somewhere per frame.
         /// </summary>
@@ -112,8 +108,6 @@ namespace SpaceEngine.Enviroment.Oceanic
 
         protected override void InitNode()
         {
-            InitOceanNode();
-
             OceanMaterial = MaterialHelper.CreateTemp(OceanShader, "Ocean");
 
             ParentBody.InitUniforms(OceanMaterial);
@@ -121,7 +115,7 @@ namespace SpaceEngine.Enviroment.Oceanic
 
         protected override void UpdateNode()
         {
-            UpdateOceanNode();
+            UpdateKeywords(OceanMaterial);
 
             OceanMaterial.renderQueue = (int)RenderQueue + RenderQueueOffset;
 

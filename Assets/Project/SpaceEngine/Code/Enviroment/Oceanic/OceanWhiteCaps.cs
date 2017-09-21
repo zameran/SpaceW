@@ -35,17 +35,13 @@ namespace SpaceEngine.Enviroment.Oceanic
 
         #region OceanNode
 
-        protected override void InitOceanNode()
+        /// <inheritdoc />
+        protected override void UpdateKeywords(Material target)
         {
-            
-        }
+            base.UpdateKeywords(target);
 
-        protected override void UpdateOceanNode()
-        {
             if (OceanMaterial.IsKeywordEnabled(FFT_KEYWORD)) OceanMaterial.DisableKeyword(FFT_KEYWORD);
             if (!OceanMaterial.IsKeywordEnabled(WHITECAPS_KEYWORD)) OceanMaterial.EnableKeyword(WHITECAPS_KEYWORD);
-
-            UpdateKeywords(OceanMaterial);
         }
 
         #endregion

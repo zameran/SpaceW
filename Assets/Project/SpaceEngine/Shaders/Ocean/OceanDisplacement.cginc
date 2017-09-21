@@ -86,14 +86,13 @@ float2 OceanPos(float4 vert, float4x4 stoc, out float t, out float3 cameraDir, o
 	cameraDir = ((dot(n1, cross(hor, cameraDir)) > 0.0) && (h > 0)) ? hor : cameraDir;	// Checking if view direction is above the horizon
 	oceanDir = mul(_Ocean_CameraToOcean, float4(cameraDir, 0.0)).xyz;
 
-	float cz = _Ocean_CameraPos.z;
 	float dz = oceanDir.z;
 	float radius = _Ocean_Radius;
 	
-	float b = dz * (cz + radius);
-	float c = cz * (cz + 2.0 * radius);
+	float b = dz * (h + radius);
+	float c = h * (h + 2.0 * radius);
 	float tSphere = - b - sqrt(max(b * b - c, 0.0));
-	float tApprox = - cz / dz * (1.0 + cz / (2.0 * radius) * (1.0 - dz * dz));
+	float tApprox = - h / dz * (1.0 + h / (2.0 * radius) * (1.0 - dz * dz));
 
 	t = abs((tApprox - tSphere) * dz) < 1.0 ? tApprox : tSphere;
 
