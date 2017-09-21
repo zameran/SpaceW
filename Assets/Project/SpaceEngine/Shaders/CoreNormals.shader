@@ -38,27 +38,19 @@
 		{
 			uv = uv / (_TileSD.x - 1.0);
 				
-			if (_Deform.w == 0.0) 
-			{
-				return float3(_Deform.xy + _Deform.z * uv, h);
-			} 
-			else 
-			{
-				float R = _Deform.w;
+			// NOTE : Body shape dependent...
+			float R = _Deform.w;
 
-				float4 L = _PatchCornerNorms;
-				float4 uvUV = float4(uv, float2(1.0, 1.0) - uv);
-				float4 aL = uvUV.zxzx * uvUV.wwyy;
-				float4 alphaPrime = aL * L / dot(aL, L);
-				float4 up = mul(_PatchVerticals, alphaPrime);
+			float4 L = _PatchCornerNorms;
+			float4 uvUV = float4(uv, float2(1.0, 1.0) - uv);
+			float4 aL = uvUV.zxzx * uvUV.wwyy;
+			float4 alphaPrime = aL * L / dot(aL, L);
+			float4 up = mul(_PatchVerticals, alphaPrime);
 
-				float k = lerp(length(up.xyz), 1.0, smoothstep(R / 32.0, R / 64.0, _Deform.z));
-				float hPrime = (h + R * (1.0 - k)) / k;
+			float k = lerp(length(up.xyz), 1.0, smoothstep(R / 32.0, R / 64.0, _Deform.z));
+			float hPrime = (h + R * (1.0 - k)) / k;
 				
-				return (mul(_PatchCorners, alphaPrime) + hPrime * up).xyz;
-			}
-
-			return 0;
+			return (mul(_PatchCorners, alphaPrime) + hPrime * up).xyz;
 		}
 
 		inline float4 SampleElevationData(sampler2D elevationSampler, float2 uv)

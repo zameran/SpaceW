@@ -94,6 +94,7 @@ uniform float4x4 _Deform_TangentFrameToWorld;
 uniform float4x4 _Deform_TileToTangent;
 
 #define CORE_SUNS
+
 uniform float4 _Sun_Colors_1;
 
 uniform float4x4 _Sun_WorldDirections_1;

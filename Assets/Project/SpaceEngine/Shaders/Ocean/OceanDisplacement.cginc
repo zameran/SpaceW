@@ -128,19 +128,13 @@ float2 OceanPos(float4 vert, float4x4 stoc, out float t, out float3 cameraDir, o
 	float dz = oceanDir.z;
 	float radius = _Ocean_Radius;
 	
-	if (radius == 0.0) 
-	{
-		t = (_Ocean_HeightOffset + -cz) / dz;
-	} 
-	else 
-	{
-		float b = dz * (cz + radius);
-		float c = cz * (cz + 2.0 * radius);
-		float tSphere = - b - sqrt(max(b * b - c, 0.0));
-		float tApprox = - cz / dz * (1.0 + cz / (2.0 * radius) * (1.0 - dz * dz));
+	// NOTE : Body shape dependent...
+	float b = dz * (cz + radius);
+	float c = cz * (cz + 2.0 * radius);
+	float tSphere = - b - sqrt(max(b * b - c, 0.0));
+	float tApprox = - cz / dz * (1.0 + cz / (2.0 * radius) * (1.0 - dz * dz));
 
-		t = abs((tApprox - tSphere) * dz) < 1.0 ? tApprox : tSphere;
-	}
+	t = abs((tApprox - tSphere) * dz) < 1.0 ? tApprox : tSphere;
 
 	return _Ocean_CameraPos.xy + t * oceanDir.xy;
 }
