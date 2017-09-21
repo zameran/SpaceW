@@ -122,39 +122,18 @@ namespace SpaceEngine.Core
             GPUTileStorage.GPUSlot normalsGpuSlot = null;
 
             if (normalsTile != null)
-            {
                 normalsGpuSlot = normalsTile.GetSlot(0) as GPUTileStorage.GPUSlot;
-            }
-            else
-            {
-                throw new MissingTileException("Find normals tile failed");
-            }
+            else { throw new MissingTileException("Find normals tile failed"); }
 
             GPUTileStorage.GPUSlot elevationGpuSlot = null;
 
             if (elevationTile != null)
-            {
                 elevationGpuSlot = elevationTile.GetSlot(0) as GPUTileStorage.GPUSlot;
-            }
-            else
-            {
-                throw new MissingTileException("Find elevation tile failed");
-            }
+            else { throw new MissingTileException("Find elevation tile failed"); }
 
-            if (gpuSlot == null)
-            {
-                throw new NullReferenceException("gpuSlot");
-            }
-
-            if (elevationGpuSlot == null)
-            {
-                throw new NullReferenceException("elevationGpuSlot");
-            }
-
-            if (normalsGpuSlot == null)
-            {
-                throw new NullReferenceException("normalsGpuSlot");
-            }
+            if (gpuSlot == null) { throw new NullReferenceException("gpuSlot"); }
+            if (elevationGpuSlot == null) { throw new NullReferenceException("elevationGpuSlot"); }
+            if (normalsGpuSlot == null) { throw new NullReferenceException("normalsGpuSlot"); }
 
             var tileWidth = gpuSlot.Owner.TileSize;
             var normalsTex = normalsGpuSlot.Texture;

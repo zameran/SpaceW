@@ -674,8 +674,8 @@ Transform:
   m_PrefabParentObject: {fileID: 0}
   m_PrefabInternal: {fileID: 0}
   m_GameObject: {fileID: 680484789}
-  m_LocalRotation: {x: 0.31934384, y: 0.60580385, z: 0.113055676, w: 0.7198886}
-  m_LocalPosition: {x: -621.9318, y: 134.61267, z: 142.1407}
+  m_LocalRotation: {x: 0.114943154, y: 0.690162, z: -0.11243373, w: 0.7055658}
+  m_LocalPosition: {x: -2853.61, y: 955.33923, z: -62.99477}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 0}
@@ -706,7 +706,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   Speed: 1
   RotationSpeed: 1
-  DynamicClipPlanes: 0
+  DynamicClipPlanes: 1
   Controllable: 1
 --- !u!114 &680484797
 MonoBehaviour:
@@ -904,6 +904,7 @@ MonoBehaviour:
   Planetshadows: 1
   Planetshine: 1
   OceanSkyReflections: 1
+  OceanDepth: 1
   DelayedCalculations: 0
   FloatingOrigin: 0
   DebugFBO: 0

@@ -132,7 +132,7 @@ namespace SpaceEngine.Core
 
             if (fsize > (TileSize + 2 * Border) * (TileSize + 2 * Border) * Channels)
             {
-                throw new InvalidParameterException("file size of tile is larger than actual tile size");
+                throw new InvalidParameterException("File size of tile is larger than actual tile size!");
             }
 
             using (Stream stream = new FileStream(Application.dataPath + FileName, FileMode.Open))

@@ -141,10 +141,7 @@ namespace SpaceEngine.Core
                 else { throw new MissingTileException(string.Format("Find parent tile failed! {0}:{1}-{2}", level - 1, tx / 2, ty / 2)); }
             }
 
-            if (parentGpuSlot == null && level > 0)
-            {
-                throw new NullReferenceException("parentGpuSlot");
-            }
+            if (parentGpuSlot == null && level > 0) { throw new NullReferenceException("parentGpuSlot"); }
 
             UpSampleMaterial.SetVector(uniforms.tileWSD, tileWSD);
 

@@ -70,23 +70,11 @@ namespace SpaceEngine.Core
             GPUTileStorage.GPUSlot elevationGpuSlot = null;
 
             if (elevationTile != null)
-            {
                 elevationGpuSlot = elevationTile.GetSlot(0) as GPUTileStorage.GPUSlot;
-            }
-            else
-            {
-                throw new MissingTileException("Find elevation tile failed");
-            }
+            else { throw new MissingTileException("Find elevation tile failed"); }
 
-            if (gpuSlot == null)
-            {
-                throw new NullReferenceException("gpuSlot");
-            }
-
-            if (elevationGpuSlot == null)
-            {
-                throw new NullReferenceException("elevationGpuSlot");
-            }
+            if (gpuSlot == null) { throw new NullReferenceException("gpuSlot"); }
+            if (elevationGpuSlot == null) { throw new NullReferenceException("elevationGpuSlot"); }
 
             var tileWidth = gpuSlot.Owner.TileSize;
             var elevationTex = elevationGpuSlot.Texture;
