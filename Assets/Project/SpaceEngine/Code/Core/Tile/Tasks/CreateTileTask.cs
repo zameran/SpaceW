@@ -56,30 +56,38 @@ namespace SpaceEngine.Core.Tile.Tasks
                 return;
             }
 
-            if (GodManager.Instance.DelayedCalculations && !Owner.IsLastInSequence)
+            try
             {
-                Owner.StartCoroutine(Owner.DoCreateTileCoroutine(Level, Tx, Ty, Slot, () =>
+                if (GodManager.Instance.DelayedCalculations && !Owner.IsLastInSequence)
                 {
-                    // Manualy finish the particular tile creation task.
-                    this.Finish();
-                }));
+                    Owner.StartCoroutine(Owner.DoCreateTileCoroutine(Level, Tx, Ty, Slot, () =>
+                    {
+                        // Manualy finish the particular tile creation task.
+                        this.Finish();
+                    }));
 
-                // So, task will be finished in the end of coroutine...
+                    // So, task will be finished in the end of coroutine...
+                }
+                else
+                {
+                    Owner.DoCreateTile(Level, Tx, Ty, Slot);
+
+                    // So, finish task NOW! It's done already, yah?
+                    Finish();
+                }
             }
-            else
+            catch
             {
-                Owner.DoCreateTile(Level, Tx, Ty, Slot);
+                // NOTE : Sometimes tile producers can't find parent tile due to parent tile Task uncomplection...
+                Debug.Log("CreateTileTask.Run: There are exception inside the Task while processing!");
 
-                // So, finish task NOW! It's done already, yah?
-                Finish();
+                return;
             }
         }
 
         public override void Finish()
         {
             base.Finish();
-
-            // DEBUG HERE - AHAHAHAHAHAHAHAHAHA!
         }
 
         public override string ToString()
