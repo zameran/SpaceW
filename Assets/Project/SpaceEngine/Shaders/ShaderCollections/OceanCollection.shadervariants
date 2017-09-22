@@ -27,25 +27,73 @@ ShaderVariantCollection:
           passType: 0
         - keywords: OCEAN_DEPTH_ON OCEAN_FFT OCEAN_SKY_REFLECTIONS_ON
           passType: 0
+        - keywords: OCEAN_DEPTH_ON OCEAN_FFT OCEAN_SKY_REFLECTIONS_ON SHINE_ON
+          passType: 0
+        - keywords: OCEAN_DEPTH_ON OCEAN_FFT OCEAN_SKY_REFLECTIONS_ON SHINE_OFF
+          passType: 0
         - keywords: OCEAN_DEPTH_ON OCEAN_SKY_REFLECTIONS_ON OCEAN_WHITECAPS
+          passType: 0
+        - keywords: OCEAN_DEPTH_ON OCEAN_SKY_REFLECTIONS_ON OCEAN_WHITECAPS SHINE_ON
+          passType: 0
+        - keywords: OCEAN_DEPTH_ON OCEAN_SKY_REFLECTIONS_ON OCEAN_WHITECAPS SHINE_OFF
           passType: 0
         - keywords: OCEAN_DEPTH_ON OCEAN_NONE OCEAN_SKY_REFLECTIONS_ON
           passType: 0
+        - keywords: OCEAN_DEPTH_ON OCEAN_NONE OCEAN_SKY_REFLECTIONS_ON SHINE_ON
+          passType: 0
+        - keywords: OCEAN_DEPTH_ON OCEAN_NONE OCEAN_SKY_REFLECTIONS_ON SHINE_OFF
+          passType: 0
         - keywords: OCEAN_DEPTH_ON OCEAN_FFT OCEAN_SKY_REFLECTIONS_OFF
+          passType: 0
+        - keywords: OCEAN_DEPTH_ON OCEAN_FFT OCEAN_SKY_REFLECTIONS_OFF SHINE_ON
+          passType: 0
+        - keywords: OCEAN_DEPTH_ON OCEAN_FFT OCEAN_SKY_REFLECTIONS_OFF SHINE_OFF
           passType: 0
         - keywords: OCEAN_DEPTH_ON OCEAN_SKY_REFLECTIONS_OFF OCEAN_WHITECAPS
           passType: 0
+        - keywords: OCEAN_DEPTH_ON OCEAN_SKY_REFLECTIONS_OFF OCEAN_WHITECAPS SHINE_ON
+          passType: 0
+        - keywords: OCEAN_DEPTH_ON OCEAN_SKY_REFLECTIONS_OFF OCEAN_WHITECAPS SHINE_OFF
+          passType: 0
         - keywords: OCEAN_DEPTH_ON OCEAN_NONE OCEAN_SKY_REFLECTIONS_OFF
+          passType: 0
+        - keywords: OCEAN_DEPTH_ON OCEAN_NONE OCEAN_SKY_REFLECTIONS_OFF SHINE_ON
+          passType: 0
+        - keywords: OCEAN_DEPTH_ON OCEAN_NONE OCEAN_SKY_REFLECTIONS_OFF SHINE_OFF
           passType: 0
         - keywords: OCEAN_DEPTH_OFF OCEAN_FFT OCEAN_SKY_REFLECTIONS_ON
           passType: 0
+        - keywords: OCEAN_DEPTH_OFF OCEAN_FFT OCEAN_SKY_REFLECTIONS_ON SHINE_ON
+          passType: 0
+        - keywords: OCEAN_DEPTH_OFF OCEAN_FFT OCEAN_SKY_REFLECTIONS_ON SHINE_OFF
+          passType: 0
         - keywords: OCEAN_DEPTH_OFF OCEAN_SKY_REFLECTIONS_ON OCEAN_WHITECAPS
+          passType: 0
+        - keywords: OCEAN_DEPTH_OFF OCEAN_SKY_REFLECTIONS_ON OCEAN_WHITECAPS SHINE_ON
+          passType: 0
+        - keywords: OCEAN_DEPTH_OFF OCEAN_SKY_REFLECTIONS_ON OCEAN_WHITECAPS SHINE_OFF
           passType: 0
         - keywords: OCEAN_DEPTH_OFF OCEAN_NONE OCEAN_SKY_REFLECTIONS_ON
           passType: 0
+        - keywords: OCEAN_DEPTH_OFF OCEAN_NONE OCEAN_SKY_REFLECTIONS_ON SHINE_ON
+          passType: 0
+        - keywords: OCEAN_DEPTH_OFF OCEAN_NONE OCEAN_SKY_REFLECTIONS_ON SHINE_OFF
+          passType: 0
         - keywords: OCEAN_DEPTH_OFF OCEAN_FFT OCEAN_SKY_REFLECTIONS_OFF
+          passType: 0
+        - keywords: OCEAN_DEPTH_OFF OCEAN_FFT OCEAN_SKY_REFLECTIONS_OFF SHINE_ON
+          passType: 0
+        - keywords: OCEAN_DEPTH_OFF OCEAN_FFT OCEAN_SKY_REFLECTIONS_OFF SHINE_OFF
           passType: 0
         - keywords: OCEAN_DEPTH_OFF OCEAN_SKY_REFLECTIONS_OFF OCEAN_WHITECAPS
           passType: 0
+        - keywords: OCEAN_DEPTH_OFF OCEAN_SKY_REFLECTIONS_OFF OCEAN_WHITECAPS SHINE_ON
+          passType: 0
+        - keywords: OCEAN_DEPTH_OFF OCEAN_SKY_REFLECTIONS_OFF OCEAN_WHITECAPS SHINE_OFF
+          passType: 0
         - keywords: OCEAN_DEPTH_OFF OCEAN_NONE OCEAN_SKY_REFLECTIONS_OFF
+          passType: 0
+        - keywords: OCEAN_DEPTH_OFF OCEAN_NONE OCEAN_SKY_REFLECTIONS_OFF SHINE_ON
+          passType: 0
+        - keywords: OCEAN_DEPTH_OFF OCEAN_NONE OCEAN_SKY_REFLECTIONS_OFF SHINE_OFF
           passType: 0
