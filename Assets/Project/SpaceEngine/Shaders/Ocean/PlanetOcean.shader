@@ -57,6 +57,7 @@ Shader "SpaceEngine/Planet/Ocean"
 		#endif
 
 		uniform float _Ocean_Wave_Level;
+		uniform float4x4 _Coean_LocalToOcean;
 
 		struct a2v
 		{
@@ -70,13 +71,29 @@ Shader "SpaceEngine/Planet/Ocean"
 			float2 oceanU : TEXCOORD0;
 			float3 oceanP : TEXCOORD1;
 			float4 screenP : TEXCOORD2;
+			float3 direction : TEXOORD3;
 
 			#ifdef OCEAN_DEPTH_ON
-				float4 viewSpaceDirDist : TEXCOORD3;
-				float4 projPos : TEXCOORD4;
+				float4 viewSpaceDirDist : TEXCOORD4;
+				float4 projPos : TEXCOORD5;
 			#endif
 		};
 		
+		void CalculateRadiances(in float3 V, in float3 N, in float3 L, in float3 earthP, in float3 oceanColor, in float3 sunL, in float3 skyE,
+								in float sigmaSq, in float fresnel,
+								out float3 Lsky, out float3 Lsun, out float3 Lsea)
+		{
+			#ifdef OCEAN_SKY_REFLECTIONS_ON
+				Lsky = fresnel * ReflectedSky(V, N, L, earthP);
+				Lsun = ReflectedSunRadiance(L, V, N, sigmaSq) * sunL;
+				Lsea = 0.98 * (1.0 - fresnel) * oceanColor * (skyE / M_PI);
+			#else
+				Lsky = fresnel * skyE / M_PI;
+				Lsun = ReflectedSunRadiance(L, V, N, sigmaSq) * sunL;
+				Lsea = RefractedSeaRadiance(V, N, sigmaSq) * oceanColor * skyE / M_PI;
+			#endif
+		}
+
 		void vert(in a2v v, out v2f o)
 		{
 			float t = 0;
@@ -120,6 +137,7 @@ Shader "SpaceEngine/Planet/Ocean"
 			o.oceanU = u;
 			o.oceanP = oceanP;
 			o.screenP = screenP;
+			o.direction = (_Atmosphere_WorldCameraPos + _Atmosphere_Origin) - (mul(_Globals_CameraToWorld, float4((mul(_Globals_ScreenToCamera, v.vertex)).xyz, 0.0))).xyz;
 
 			#ifdef OCEAN_DEPTH_ON
 				o.viewSpaceDirDist = float4(cameraDir, t);
@@ -212,15 +230,14 @@ Shader "SpaceEngine/Planet/Ocean"
 				surfaceAlpha = 1.0;
 			#endif
 
-			#ifdef OCEAN_SKY_REFLECTIONS_ON
-				float3 Lsky = fresnel * ReflectedSky(V, N, L, earthP);
-				float3 Lsun = ReflectedSunRadiance(L, V, N, sigmaSq) * sunL;
-				float3 Lsea = 0.98 * (1.0 - fresnel) * oceanColor * (skyE / M_PI);
-			#else
-				float3 Lsky = fresnel * skyE / M_PI;
-				float3 Lsun = ReflectedSunRadiance(L, V, N, sigmaSq) * sunL;
-				float3 Lsea = RefractedSeaRadiance(V, N, sigmaSq) * oceanColor * skyE / M_PI;
-			#endif
+			float3 Lsky = 0;
+			float3 Lsun = 0;
+			float3 Lsea = 0;
+
+			CalculateRadiances(V, N, L, earthP, oceanColor, sunL, skyE, sigmaSq, fresnel, Lsky, Lsun, Lsea);
+
+			// Aerial perspective
+			float3 inscatter = InScattering(earthCamera, earthP, L, extinction, 0.0);
 
 			#ifdef OCEAN_FFT
 				surfaceColor = Lsun + Lsky + Lsea;
@@ -259,13 +276,35 @@ Shader "SpaceEngine/Planet/Ocean"
 				//float3 l = (sunL * (max(dot(N, L), 0.0)) + skyE + UNITY_LIGHTMODEL_AMBIENT.rgb * 30) / M_PI;
 
 				float3 R_ftot = float3((W * waveStrength) * l * 0.4);
-				
+
 				surfaceColor = Lsun + Lsky + Lsea + R_ftot;
 				surfaceAlpha = min(max(hdr(Lsun + R_ftot), fresnel + surfaceAlpha), 1.0);
+
+				#ifdef SHINE_ON
+					for (int i = 0; i < 4; ++i)
+					{
+						if (_Sky_ShineColors_1[i].w <= 0) break;
+
+						L = mul(_Coean_LocalToOcean, _Sky_ShineOccluders_1[i].xyz);
+
+						SunRadianceAndSkyIrradiance(earthP, N, L, sunL, skyE);
+						CalculateRadiances(V, N, L, earthP, oceanColor, sunL, skyE, sigmaSq, fresnel, Lsky, Lsun, Lsea);
+
+						l = (sunL * (max(dot(N, L), 0.0)) + skyE) / M_PI;
+						R_ftot = float3((W * waveStrength) * l * 0.4);
+
+						float3 occluderDirection = normalize(mul(_Coean_LocalToOcean, _Sky_ShineOccluders_1[i].xyz) - earthP);			// Occluder direction with origin offset...
+						float3 occluderOppositeDirection = mul(_Coean_LocalToOcean, _Sky_ShineOccluders_2[i].xyz);						// Occluder opposite direction with origin offset...
+						float intensity = 0.57 * max((dot(occluderDirection, occluderOppositeDirection) - _Sky_ShineParameters_1[i].w), 0);
+
+						surfaceColor += (Lsun + Lsky + Lsea + R_ftot) * _Sky_ShineColors_1[i].xyz * _Sky_ShineColors_1[i].w * intensity;
+
+						inscatter = InScattering(earthCamera, earthP, L, extinction, 0.0);
+					}
+				#endif
 			#endif
 
-			// Aerial perspective
-			float3 inscatter = InScattering(earthCamera, earthP, L, extinction, 0.0);
+			// Final color
 			float3 finalColor = surfaceColor * extinction + inscatter;
 
 			color = float4(hdr(finalColor), surfaceAlpha);
@@ -301,6 +340,8 @@ Shader "SpaceEngine/Planet/Ocean"
 			#pragma multi_compile OCEAN_DEPTH_ON OCEAN_DEPTH_OFF
 			#pragma multi_compile OCEAN_SKY_REFLECTIONS_ON OCEAN_SKY_REFLECTIONS_OFF
 			#pragma multi_compile OCEAN_NONE OCEAN_FFT OCEAN_WHITECAPS
+
+			#pragma multi_compile SHINE_ON SHINE_OFF
 			ENDCG
 		}
 	}
