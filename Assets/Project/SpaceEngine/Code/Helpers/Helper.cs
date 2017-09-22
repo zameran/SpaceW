@@ -223,6 +223,25 @@ public static class Helper
         }
     }
 
+    public static bool ArraysEqual<T>(T[] a, List<T> b)
+    {
+        if (a == null || b == null) return false;
+
+        if (a.Length != b.Count) return false;
+
+        var comparer = EqualityComparer<T>.Default;
+
+        for (var i = 0; i < a.Length; i++)
+        {
+            if (comparer.Equals(a[i], b[i]) == false)
+            {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
     public static Material CreateTempMaterial(string shaderName)
     {
         var shader = Shader.Find(shaderName);
@@ -357,23 +376,34 @@ public static class Helper
         }
     }
 
-    public static bool ArraysEqual<T>(T[] a, List<T> b)
+    public static void ToggleKeyword(Material target, bool state, string enabledKeyword = "FEATURE_ON", string disabledKeyword = "FEATURE_OFF")
     {
-        if (a == null || b == null) return false;
-
-        if (a.Length != b.Count) return false;
-
-        var comparer = EqualityComparer<T>.Default;
-
-        for (var i = 0; i < a.Length; i++)
+        if (state)
         {
-            if (comparer.Equals(a[i], b[i]) == false)
-            {
-                return false;
-            }
+            if (target.IsKeywordEnabled(disabledKeyword)) target.DisableKeyword(disabledKeyword);
+            if (!target.IsKeywordEnabled(enabledKeyword)) target.EnableKeyword(enabledKeyword);
         }
+        else
+        {
+            if (target.IsKeywordEnabled(enabledKeyword)) target.DisableKeyword(enabledKeyword);
+            if (!target.IsKeywordEnabled(disabledKeyword)) target.EnableKeyword(disabledKeyword);
+        }
+    }
 
-        return true;
+    public static void ToggleKeyword(Material target, string enableKeyword, string disableKeyword)
+    {
+        EnableKeyword(target, enableKeyword);
+        DisableKeyword(target, disableKeyword);
+    }
+
+    public static void EnableKeyword(Material target, string keyword)
+    {
+        if (!target.IsKeywordEnabled(keyword)) target.EnableKeyword(keyword);
+    }
+
+    public static void DisableKeyword(Material target, string keyword)
+    {
+        if (target.IsKeywordEnabled(keyword)) target.DisableKeyword(keyword);
     }
 
     public static Color Brighten(Color color, float brightness)

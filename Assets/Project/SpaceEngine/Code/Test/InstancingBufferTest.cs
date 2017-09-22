@@ -33,6 +33,7 @@
 // Creator: zameran
 #endregion
 
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace SpaceEngine.Tests
@@ -43,9 +44,34 @@ namespace SpaceEngine.Tests
 
         public Mesh TestMesh;
 
+        public MaterialPropertyBlock MPB;
+
+        public readonly List<Matrix4x4> TRSs = new List<Matrix4x4>();
+
+        protected void CalculateTransforms()
+        {
+            TRSs.Clear();
+
+            for (int i = 0; i < 128; i++)
+            {
+                var position = Random.insideUnitSphere * 100;
+                var rotation = Random.rotationUniform;
+
+                var r = Random.Range(0.0f, 1.0f);
+                var g = Random.Range(0.0f, 1.0f);
+                var b = Random.Range(0.0f, 1.0f);
+
+                MPB.SetColor("_Color", new Color(r, g, b));
+
+                TRSs.Add(Matrix4x4.TRS(position, rotation, Vector3.one));
+            }
+        }
+
         private void Start()
         {
-            TestMaterial.EnableKeyword("INSTANCING_ON"); // NOTE : Force it!
+            MPB = new MaterialPropertyBlock();
+
+            CalculateTransforms();
         }
 
         private void Update()
@@ -54,12 +80,7 @@ namespace SpaceEngine.Tests
             {
                 for (int i = 0; i < 128; i++)
                 {
-                    var position = Random.insideUnitSphere * 100;
-                    var rotation = Random.rotationUniform;
-
-                    var TRS = Matrix4x4.TRS(position, rotation, Vector3.one);
-
-                    Graphics.DrawMesh(TestMesh, TRS, TestMaterial, 0);
+                    Graphics.DrawMesh(TestMesh, TRSs[i], TestMaterial, 0, Camera.main, 0, MPB);
                 }
             }
         }

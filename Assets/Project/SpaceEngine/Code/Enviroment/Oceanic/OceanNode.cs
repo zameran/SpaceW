@@ -84,22 +84,8 @@ namespace SpaceEngine.Enviroment.Oceanic
         /// </summary>
         protected virtual void UpdateKeywords(Material target)
         {
-            ToggleKeyword(target, GodManager.Instance.OceanSkyReflections, "OCEAN_SKY_REFLECTIONS_ON", "OCEAN_SKY_REFLECTIONS_OFF");
-            ToggleKeyword(target, GodManager.Instance.OceanDepth, "OCEAN_DEPTH_ON", "OCEAN_DEPTH_OFF");
-        }
-
-        public void ToggleKeyword(Material target, bool state, string enabledKeyword = "FEATURE_ON", string disabledKeyword = "FEATURE_OFF")
-        {
-            if (state)
-            {
-                if (target.IsKeywordEnabled(disabledKeyword)) target.DisableKeyword(disabledKeyword);
-                if (!target.IsKeywordEnabled(enabledKeyword)) target.EnableKeyword(enabledKeyword);
-            }
-            else
-            {
-                if (target.IsKeywordEnabled(enabledKeyword)) target.DisableKeyword(enabledKeyword);
-                if (!target.IsKeywordEnabled(disabledKeyword)) target.EnableKeyword(disabledKeyword);
-            }
+            Helper.ToggleKeyword(target, GodManager.Instance.OceanSkyReflections, "OCEAN_SKY_REFLECTIONS_ON", "OCEAN_SKY_REFLECTIONS_OFF");
+            Helper.ToggleKeyword(target, GodManager.Instance.OceanDepth, "OCEAN_DEPTH_ON", "OCEAN_DEPTH_OFF");
         }
 
         #endregion
