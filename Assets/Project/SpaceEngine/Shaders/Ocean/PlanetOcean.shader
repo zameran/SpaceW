@@ -280,27 +280,42 @@ Shader "SpaceEngine/Planet/Ocean"
 				surfaceColor = Lsun + Lsky + Lsea + R_ftot;
 				surfaceAlpha = min(max(hdr(Lsun + R_ftot), fresnel + surfaceAlpha), 1.0);
 
-				#ifdef SHINE_ON
+				#ifdef SHINE_ON_TODO
+					// NOTE : Here light direction should be converted to ocean space...
+
+					float3 shineL = 0;
+					//float3 shineInscatter = 0;
+					//float3 shineExtinction = 0;
+
+					float3 occluderDirection = 0;
+					float3 occluderOppositeDirection = 0;
+					float intensity = 1;
+
 					for (int i = 0; i < 4; ++i)
 					{
 						if (_Sky_ShineColors_1[i].w <= 0) break;
 
-						L = mul(_Coean_LocalToOcean, _Sky_ShineOccluders_1[i].xyz);
+						shineL = mul(_Coean_LocalToOcean, _Sky_ShineOccluders_1[i].xyz);
 
-						SunRadianceAndSkyIrradiance(earthP, N, L, sunL, skyE);
-						CalculateRadiances(V, N, L, earthP, oceanColor, sunL, skyE, sigmaSq, fresnel, Lsky, Lsun, Lsea);
+						SunRadianceAndSkyIrradiance(earthP, N, shineL, sunL, skyE);
+						CalculateRadiances(V, N, shineL, earthP, oceanColor, sunL, skyE, sigmaSq, fresnel, Lsky, Lsun, Lsea);
 
-						l = (sunL * (max(dot(N, L), 0.0)) + skyE) / M_PI;
+						l = (sunL * (max(dot(N, shineL), 0.0)) + skyE) / M_PI;
 						R_ftot = float3((W * waveStrength) * l * 0.4);
 
-						float3 occluderDirection = normalize(mul(_Coean_LocalToOcean, _Sky_ShineOccluders_1[i].xyz) - earthP);			// Occluder direction with origin offset...
-						float3 occluderOppositeDirection = mul(_Coean_LocalToOcean, _Sky_ShineOccluders_2[i].xyz);						// Occluder opposite direction with origin offset...
-						float intensity = 0.57 * max((dot(occluderDirection, occluderOppositeDirection) - _Sky_ShineParameters_1[i].w), 0);
+						occluderDirection = normalize(mul(_Coean_LocalToOcean, _Sky_ShineOccluders_1[i].xyz) - earthP);			// Occluder direction with origin offset...
+						occluderOppositeDirection = mul(_Coean_LocalToOcean, _Sky_ShineOccluders_2[i].xyz);						// Occluder opposite direction with origin offset...
+						intensity = 0.57 * max((dot(occluderDirection, occluderOppositeDirection) - _Sky_ShineParameters_1[i].w), 0);
+
+						//shineInscatter = InScattering(earthCamera, earthP, shineL, shineExtinction, 0.0);
+						//shineInscatter = InScatteringShine(earthCamera, earthP, shineL, shineExtinction, 0.0, 1.0);
 
 						surfaceColor += (Lsun + Lsky + Lsea + R_ftot) * _Sky_ShineColors_1[i].xyz * _Sky_ShineColors_1[i].w * intensity;
-
-						inscatter = InScattering(earthCamera, earthP, L, extinction, 0.0);
+						surfaceAlpha = min(max(hdr(Lsun + R_ftot), fresnel + surfaceAlpha), 1.0);
 					}
+
+					//inscatter += shineInscatter;
+					//extinction += shineExtinction;
 				#endif
 			#endif
 

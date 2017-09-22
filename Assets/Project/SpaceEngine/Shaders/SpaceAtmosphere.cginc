@@ -565,7 +565,7 @@ float3 SkyRadianceSimple(float3 camera, float3 viewdir, float3 sundir)
 	return result * _Sun_Intensity;
 }
 
-float3 InScatteringShine(float3 camera, float3 _point, out float3 extinction, float3 sunDir, float shaftWidth, float scaleCoeff, float irradianceFactor) 
+float3 InScatteringShine(float3 camera, float3 _point, float3 sunDir, out float3 extinction, float shaftWidth, float scaleCoeff) 
 {
 	float3 result = float3(0.0, 0.0, 0.0);
 
