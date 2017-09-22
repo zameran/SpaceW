@@ -213,10 +213,8 @@ Shader "SpaceEngine/Planet/Ocean"
 			#ifdef OCEAN_DEPTH_ON
 				// TODO : Settings to parameters...
 
-				float angleToCameraAxis = dot(i.viewSpaceDirDist.xyz, float3(0.0, 0.0, -1.0));
-				float distanceFadeout = i.viewSpaceDirDist.w * angleToCameraAxis;
-				float fragDepth = max(0, LinearEyeDepth(UNITY_SAMPLE_DEPTH(tex2Dproj(_CameraDepthTexture, UNITY_PROJ_COORD(i.projPos)))) - _ProjectionParams.y);
-				float oceanDepth = max(0, distanceFadeout - _ProjectionParams.y);
+				float fragDepth = max(0, LinearEyeDepth(UNITY_SAMPLE_DEPTH(tex2Dproj(_CameraDepthTexture, UNITY_PROJ_COORD(i.projPos))).r) - _ProjectionParams.y);
+				float oceanDepth = max(0, i.projPos.w - _ProjectionParams.y);
 				float depthCoeff = 1.0 - (pow(saturate((fragDepth - oceanDepth) / 100), 0.56) * saturate((fragDepth - oceanDepth) / 0.5));
 
 				#ifdef OCEAN_WHITECAPS

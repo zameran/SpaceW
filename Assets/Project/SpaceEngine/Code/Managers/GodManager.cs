@@ -203,6 +203,9 @@ public class GodManager : MonoSingleton<GodManager>
     {
         UpdateWorldShift();
 
+        // TODO : _Globals_CameraToScreen or UNITY_MATRIX_P must be updated BEFORE ALL to keep the ocean deth working good. 
+        // The problem is in depth calculation priority - The depth buffer created BEFORE other rendering. 
+        // But ocean depth are calculated much later...
         View.UpdateMatrices();
     }
 
