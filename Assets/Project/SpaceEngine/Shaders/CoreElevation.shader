@@ -53,6 +53,7 @@
 			//float noise = sNoise(v);
 			
 			float height = _Amplitude * noise;
+			float preHeight = height;
 
 			float4x4 coarseLevelHeights = SampleCoarseLevelHeights(_CoarseLevelSampler, uv, _CoarseLevelOSL);
 			int i = int(dot(frac(p_uv), float2(2.0, 4.0)));
@@ -60,8 +61,20 @@
 			float slope = length(n.xy) / n.z;
 			//float curvature = mdot(coarseLevelHeights, curvatureMatrix[i]) / _TileWSD.y;
 			//float noiseAmp = max(clamp(4.0 * curvature, 0.0, 1.5), clamp(2.0 * slope - 0.5, 0.1, 4.0));
+
+			if (_CoarseLevelOSL.x != -1.0)
+			{
+				float4 uvc = float4(BORDER + 0.5, BORDER + 0.5, BORDER + 0.5, BORDER + 0.5);
+
+				uvc += _TileWSD.z * floor((floor(IN.uv1 - float2(BORDER, BORDER)) / (2.0 * _TileWSD.z)).xyxy + float4(0.5, 0.0, 0.0, 0.5));
+					
+				float zc1 = tex2Dlod(_CoarseLevelSampler, float4(uvc.xy * _CoarseLevelOSL.z + _CoarseLevelOSL.xy, 0.0, 0.0)).x;
+				float zc3 = tex2Dlod(_CoarseLevelSampler, float4(uvc.zw * _CoarseLevelOSL.z + _CoarseLevelOSL.xy, 0.0, 0.0)).x;
+					
+				preHeight = (zc1 + zc3) * 0.5;
+			}
 							
-			output = float4(height, height, 2.0 * slope - 0.5, noise);		
+			output = float4(height, preHeight, 2.0 * slope - 0.5, noise);		
 		}
 		ENDCG
 
