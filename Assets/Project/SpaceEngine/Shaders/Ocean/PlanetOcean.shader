@@ -71,11 +71,10 @@ Shader "SpaceEngine/Planet/Ocean"
 			float2 oceanU : TEXCOORD0;
 			float3 oceanP : TEXCOORD1;
 			float4 screenP : TEXCOORD2;
-			float3 direction : TEXOORD3;
 
 			#ifdef OCEAN_DEPTH_ON
-				float4 viewSpaceDirDist : TEXCOORD4;
-				float4 projPos : TEXCOORD5;
+				float4 viewSpaceDirDist : TEXCOORD3;
+				float4 projPos : TEXCOORD4;
 			#endif
 		};
 		
@@ -137,7 +136,6 @@ Shader "SpaceEngine/Planet/Ocean"
 			o.oceanU = u;
 			o.oceanP = oceanP;
 			o.screenP = screenP;
-			o.direction = (_Atmosphere_WorldCameraPos + _Atmosphere_Origin) - (mul(_Globals_CameraToWorld, float4((mul(_Globals_ScreenToCamera, v.vertex)).xyz, 0.0))).xyz;
 
 			#ifdef OCEAN_DEPTH_ON
 				o.viewSpaceDirDist = float4(cameraDir, t);

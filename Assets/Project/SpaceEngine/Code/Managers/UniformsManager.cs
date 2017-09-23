@@ -73,11 +73,11 @@ public class UniformsManager : MonoSingleton<UniformsManager>, IUniformed, IUnif
 
     public void SetUniforms()
     {
-        Shader.SetGlobalMatrix("_Globals_WorldToCamera", GodManager.Instance.WorldToCamera.ToMatrix4x4());
-        Shader.SetGlobalMatrix("_Globals_CameraToWorld", GodManager.Instance.CameraToWorld.ToMatrix4x4());
-        Shader.SetGlobalMatrix("_Globals_CameraToScreen", GodManager.Instance.CameraToScreen.ToMatrix4x4());
-        Shader.SetGlobalMatrix("_Globals_ScreenToCamera", GodManager.Instance.ScreenToCamera.ToMatrix4x4());
-        Shader.SetGlobalVector("_Globals_WorldCameraPos", GodManager.Instance.WorldCameraPos);
+        Shader.SetGlobalMatrix("_Globals_WorldToCamera", GodManager.Instance.View.WorldToCameraMatrix.ToMatrix4x4());
+        Shader.SetGlobalMatrix("_Globals_CameraToWorld", GodManager.Instance.View.CameraToWorldMatrix.ToMatrix4x4());
+        Shader.SetGlobalMatrix("_Globals_CameraToScreen", GodManager.Instance.View.CameraToScreenMatrix.ToMatrix4x4());
+        Shader.SetGlobalMatrix("_Globals_ScreenToCamera", GodManager.Instance.View.ScreenToCameraMatrix.ToMatrix4x4());
+        Shader.SetGlobalVector("_Globals_WorldCameraPos", GodManager.Instance.View.WorldCameraPosition);
 
         Shader.SetGlobalFloat("_RealTime", Time.realtimeSinceStartup);
     }
@@ -160,6 +160,8 @@ public class UniformsManager : MonoSingleton<UniformsManager>, IUniformed, IUnif
 
     private void Awake()
     {
+        Instance = this;
+
         LoadAndInit();
 
         InitUniforms();
@@ -170,6 +172,11 @@ public class UniformsManager : MonoSingleton<UniformsManager>, IUniformed, IUnif
         if (Input.GetKey(KeyCode.H)) InitUniforms();
 
         SetUniforms();
+    }
+
+    public void UpdateProjectionMatrix()
+    {
+        Shader.SetGlobalMatrix("_Globals_CameraToScreen", CameraHelper.Main().GetCameraToScreen());
     }
 
     public void UpdateUniforms(Material mat)

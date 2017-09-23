@@ -221,7 +221,7 @@ namespace SpaceEngine.Enviroment.Atmospheric
             AtmosphereParameters.Rl = (Radius + Height * 1.05f) - TerrainRadiusHold;
             AtmosphereParameters.SCALE = Scale;
 
-            var fadeValue = Mathf.Clamp01(VectorHelper.AngularRadius(Origin, GodManager.Instance.WorldCameraPos, Radius));
+            var fadeValue = Mathf.Clamp01(VectorHelper.AngularRadius(Origin, GodManager.Instance.View.WorldCameraPosition, Radius));
 
             Fade = FadeCurve.Evaluate(float.IsNaN(fadeValue) || float.IsInfinity(fadeValue) ? 1.0f : fadeValue);
 
@@ -302,7 +302,7 @@ namespace SpaceEngine.Enviroment.Atmospheric
             if (AtmosphereBaker.inscatterT_Read != null) target.SetTexture("_Sky_Inscatter", AtmosphereBaker.inscatterT_Read);
             if (AtmosphereBaker.irradianceT_Read != null) target.SetTexture("_Sky_Irradiance", AtmosphereBaker.irradianceT_Read);
 
-            target.SetVector("_Atmosphere_WorldCameraPos", GodManager.Instance.WorldCameraPos - Origin);
+            target.SetVector("_Atmosphere_WorldCameraPos", GodManager.Instance.View.WorldCameraPosition - Origin);
             target.SetVector("_Atmosphere_Origin", -Origin);
             target.SetVector("_Atmosphere_GlowColor", GlowColor);
 

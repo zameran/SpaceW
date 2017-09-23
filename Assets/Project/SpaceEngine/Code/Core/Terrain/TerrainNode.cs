@@ -226,8 +226,8 @@ namespace SpaceEngine.Core.Terrain
                                                  LocalToWorld.m[1, 0], LocalToWorld.m[1, 1], LocalToWorld.m[1, 2],
                                                  LocalToWorld.m[2, 0], LocalToWorld.m[2, 1], LocalToWorld.m[2, 2]);
 
-            LocalToCamera = GodManager.Instance.WorldToCamera * LocalToWorld;
-            LocalToScreen = GodManager.Instance.CameraToScreen * LocalToCamera;
+            LocalToCamera = GodManager.Instance.View.WorldToCameraMatrix * LocalToWorld;
+            LocalToScreen = GodManager.Instance.View.CameraToScreenMatrix * LocalToCamera;
 
             var invLocalToCamera = LocalToCamera.Inverse();
 
@@ -236,7 +236,7 @@ namespace SpaceEngine.Core.Terrain
 
             LocalCameraPosition = Deformation.DeformedToLocal(DeformedCameraPosition);
 
-            DeformedLocalToTangent = Deformation.DeformedToTangentFrame(GodManager.Instance.WorldCameraPos) * LocalToWorld * Deformation.LocalToDeformedDifferential(LocalCameraPosition);
+            DeformedLocalToTangent = Deformation.DeformedToTangentFrame(GodManager.Instance.View.WorldCameraPosition) * LocalToWorld * Deformation.LocalToDeformedDifferential(LocalCameraPosition);
 
             var m = Deformation.LocalToDeformedDifferential(LocalCameraPosition, true);
 

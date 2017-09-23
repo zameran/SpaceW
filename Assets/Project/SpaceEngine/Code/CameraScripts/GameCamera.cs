@@ -54,7 +54,7 @@ namespace SpaceEngine.Cameras
         public Matrix4x4d CameraToScreenMatrix { get; protected set; }
         public Matrix4x4d ScreenToCameraMatrix { get; protected set; }
 
-        public Vector3d WorldCameraPosition { get; protected set; }
+        public Vector3 WorldCameraPosition { get; protected set; }
 
         private DebugGUISwitcher DebugGUISwitcherInstance { get { return DebugGUISwitcher.Instance as DebugGUISwitcher; } }
 

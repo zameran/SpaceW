@@ -106,12 +106,12 @@ namespace SpaceEngine.Enviroment.Oceanic
             OceanMaterial.renderQueue = (int)RenderQueue + RenderQueueOffset;
 
             // Calculates the required data for the projected grid
-            CameraToWorld = GodManager.Instance.CameraToWorld;
+            CameraToWorld = GodManager.Instance.View.CameraToWorldMatrix;
 
             var oceanFrame = CameraToWorld * Vector3d.zero; // Camera in local space
 
             var radius = ParentBody.Size;
-            var trueAltitude = Vector3d.Distance(GodManager.Instance.WorldCameraPos, Origin) - radius;
+            var trueAltitude = Vector3d.Distance(GodManager.Instance.View.WorldCameraPosition, Origin) - radius;
 
             if ((radius > 0.0 && trueAltitude > ZMin) || (radius < 0.0 && new Vector2d(oceanFrame.y, oceanFrame.z).Magnitude() < -radius - ZMin))
             {

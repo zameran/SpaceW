@@ -59,7 +59,7 @@ namespace SpaceEngine.Debugging
         {
             var nearCorners = new Vector3[4]; // Approx'd nearplane corners
             var farCorners = new Vector3[4]; // Approx'd farplane corners
-            var frustumPlanes = GeometryUtility.CalculateFrustumPlanes(GodManager.Instance.ScreenToCamera.ToMatrix4x4()); // NOTE : CameraToScreen
+            var frustumPlanes = GeometryUtility.CalculateFrustumPlanes(GodManager.Instance.View.ScreenToCameraMatrix.ToMatrix4x4()); // NOTE : CameraToScreen
 
             var tempFrustumPlane = frustumPlanes[1];
             frustumPlanes[1] = frustumPlanes[2];

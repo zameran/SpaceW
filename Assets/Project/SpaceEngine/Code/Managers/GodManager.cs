@@ -64,12 +64,6 @@ public class GodManager : MonoSingleton<GodManager>
 
     public Body ActiveBody { get { return Bodies.FirstOrDefault(body => Helper.Enabled(body)); } }
 
-    public Matrix4x4d WorldToCamera { get { return View.WorldToCameraMatrix; } }
-    public Matrix4x4d CameraToWorld { get { return View.CameraToWorldMatrix; } }
-    public Matrix4x4d CameraToScreen { get { return View.CameraToScreenMatrix; } }
-    public Matrix4x4d ScreenToCamera { get { return View.ScreenToCameraMatrix; } }
-    public Vector3 WorldCameraPos { get { return View.WorldCameraPosition; } }
-
     public ComputeShader WriteData { get { return GSCS.WriteData; } }
     public ComputeShader ReadData { get { return GSCS.ReadData; } }
 
@@ -203,9 +197,10 @@ public class GodManager : MonoSingleton<GodManager>
     {
         UpdateWorldShift();
 
-        // TODO : _Globals_CameraToScreen or UNITY_MATRIX_P must be updated BEFORE ALL to keep the ocean deth working good. 
+        // NOTE : _Globals_CameraToScreen or UNITY_MATRIX_P must be updated BEFORE ALL to keep the ocean deth working good. 
         // The problem is in depth calculation priority - The depth buffer created BEFORE other rendering. 
         // But ocean depth are calculated much later...
+        // See the UniformsManager.UpdateProjectionMatrix
         View.UpdateMatrices();
     }
 
