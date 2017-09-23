@@ -174,11 +174,6 @@ public class UniformsManager : MonoSingleton<UniformsManager>, IUniformed, IUnif
         SetUniforms();
     }
 
-    public void UpdateProjectionMatrix()
-    {
-        Shader.SetGlobalMatrix("_Globals_CameraToScreen", CameraHelper.Main().GetCameraToScreen());
-    }
-
     public void UpdateUniforms(Material mat)
     {
         SetUniforms(mat);

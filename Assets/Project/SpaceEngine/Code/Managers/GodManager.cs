@@ -201,6 +201,8 @@ public class GodManager : MonoSingleton<GodManager>
         // The problem is in depth calculation priority - The depth buffer created BEFORE other rendering. 
         // But ocean depth are calculated much later...
         // See the UniformsManager.UpdateProjectionMatrix
+        // But looks like _Globals_CameraToWorld only... WTF?!
+        // TODO : Fix a matrices update mess...
         View.UpdateMatrices();
     }
 
