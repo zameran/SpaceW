@@ -891,7 +891,9 @@ float4 SampleCustomBilinear(Texture2D tex, SamplerState texSampler, float2 uv, f
 	return lerp(lerp(a, b, fuv.x), lerp(c, d, fuv.x), fuv.y);
 }
 #endif
+//-----------------------------------------------------------------------------
 
+//-----------------------------------------------------------------------------
 float4 SampleCustomBilinear(sampler2D tex, float2 uv, float resolution)
 {
 	float2 st = uv * resolution + 0.5; 
@@ -905,6 +907,60 @@ float4 SampleCustomBilinear(sampler2D tex, float2 uv, float resolution)
 	float4 d = tex2Dlod(tex, float4((iuv + float2(1.5, 1.5)) / resolution, 0.0, 0.0));
 
 	return lerp(lerp(a, b, fuv.x), lerp(c, d, fuv.x), fuv.y);
+}
+//-----------------------------------------------------------------------------
+
+//-----------------------------------------------------------------------------
+// Bicubic hermite interpolated texture fetch by demofox. https://www.shadertoy.com/view/MllSzX
+float4 CubicHermite (float4 A, float4 B, float4 C, float4 D, float t)
+{
+	const float t2 = t * t;
+	const float t3 = t * t * t;
+	
+	float4 a = -A / 2.0 + (3.0 * B) / 2.0 - (3.0 * C) / 2.0 + D / 2.0;
+	float4 b = A - (5.0 * B) / 2.0 + 2.0 * C - D / 2.0;
+	float4 c = -A / 2.0 + C / 2.0;
+	float4 d = B;
+	
+	return a * t3 + b * t2 + c * t + d;
+}
+
+float4 BicubicHermiteTextureSample(sampler2D tex, float2 uv, float textureSize)
+{
+	const float onePixel = 1.0 / textureSize;
+	const float twoPixels = 2.0 / textureSize;
+
+	float2 st = uv * textureSize + 0.5;
+	
+	float2 fuv = frac(st);
+	st = floor(st) / textureSize - float2(onePixel / 2.0, onePixel / 2.0);
+	
+	float4 C00 = tex2Dlod(tex, float4(st + float2(-onePixel, -onePixel), 0.0, 0.0));
+	float4 C10 = tex2Dlod(tex, float4(st + float2(0.0, -onePixel), 0.0, 0.0));
+	float4 C20 = tex2Dlod(tex, float4(st + float2(onePixel, -onePixel), 0.0, 0.0));
+	float4 C30 = tex2Dlod(tex, float4(st + float2(twoPixels, -onePixel), 0.0, 0.0));
+	
+	float4 C01 = tex2Dlod(tex, float4(st + float2(-onePixel, 0.0), 0.0, 0.0));
+	float4 C11 = tex2Dlod(tex, float4(st + float2(0.0, 0.0), 0.0, 0.0));
+	float4 C21 = tex2Dlod(tex, float4(st + float2(onePixel, 0.0), 0.0, 0.0));
+	float4 C31 = tex2Dlod(tex, float4(st + float2(twoPixels, 0.0), 0.0, 0.0));    
+	
+	float4 C02 = tex2Dlod(tex, float4(st + float2(-onePixel, onePixel), 0.0, 0.0));
+	float4 C12 = tex2Dlod(tex, float4(st + float2(0.0, onePixel), 0.0, 0.0));
+	float4 C22 = tex2Dlod(tex, float4(st + float2(onePixel, onePixel), 0.0, 0.0));
+	float4 C32 = tex2Dlod(tex, float4(st + float2(twoPixels, onePixel), 0.0, 0.0));    
+	
+	float4 C03 = tex2Dlod(tex, float4(st + float2(-onePixel, twoPixels), 0.0, 0.0));
+	float4 C13 = tex2Dlod(tex, float4(st + float2(0.0, twoPixels), 0.0, 0.0));
+	float4 C23 = tex2Dlod(tex, float4(st + float2(onePixel, twoPixels), 0.0, 0.0));
+	float4 C33 = tex2Dlod(tex, float4(st + float2(twoPixels, twoPixels), 0.0, 0.0));    
+	
+	float4 CP0X = CubicHermite(C00, C10, C20, C30, fuv.x);
+	float4 CP1X = CubicHermite(C01, C11, C21, C31, fuv.x);
+	float4 CP2X = CubicHermite(C02, C12, C22, C32, fuv.x);
+	float4 CP3X = CubicHermite(C03, C13, C23, C33, fuv.x);
+	
+	return CubicHermite(CP0X, CP1X, CP2X, CP3X, fuv.y);
 }
 //-----------------------------------------------------------------------------
 
