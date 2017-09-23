@@ -6,8 +6,6 @@
 
 		#include "UnityCG.cginc"
 
-		#include "TCCommon.cginc"
-
 		#define CORE_PORDUCER_ADDITIONAL_UV
 		//#define BORDER 2.0	// Tile border size
 
