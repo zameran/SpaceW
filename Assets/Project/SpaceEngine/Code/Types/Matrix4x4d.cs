@@ -25,13 +25,53 @@
 
 #define MATICES_UNROLL
 
+using System;
+
 using Constants = SpaceEngine.Core.Numerics.Constants;
 
 namespace UnityEngine
 {
-    public struct Matrix4x4d
+    public struct Matrix4x4d : IEquatable<Matrix4x4d>
     {
+        #region Fields
+
         public readonly double[,] m;
+
+        #endregion
+
+        #region Properties
+
+        public static Matrix4x4d identity { get { return new Matrix4x4d(1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0); } }
+
+        public static Matrix4x4d zero { get { return new Matrix4x4d(0.0); } }
+
+        public static Matrix4x4d one { get { return new Matrix4x4d(1.0); } }
+
+        #endregion
+
+        #region Constructors
+
+        public Matrix4x4d(double value)
+        {
+            m = new double[4, 4];
+
+            m[0, 0] = value;
+            m[0, 1] = value;
+            m[0, 2] = value;
+            m[0, 3] = value;
+            m[1, 0] = value;
+            m[1, 1] = value;
+            m[1, 2] = value;
+            m[1, 3] = value;
+            m[2, 0] = value;
+            m[2, 1] = value;
+            m[2, 2] = value;
+            m[2, 3] = value;
+            m[3, 0] = value;
+            m[3, 1] = value;
+            m[3, 2] = value;
+            m[3, 3] = value;
+        }
 
         public Matrix4x4d(double m00,
             double m01,
@@ -92,6 +132,10 @@ namespace UnityEngine
             m[3, 3] = mat.m33;
         }
 
+        #endregion
+
+        #region Overrides
+
         public override int GetHashCode()
         {
             return m[0, 0].GetHashCode() + m[1, 0].GetHashCode() + m[2, 0].GetHashCode() + m[3, 0].GetHashCode() +
@@ -106,10 +150,18 @@ namespace UnityEngine
             return false;
         }
 
+        #endregion
+
+        #region IEquatable<Matrix4x4d>
+
         public bool Equals(Matrix4x4d other)
         {
             return this == other;
         }
+
+        #endregion
+
+        #region Operations
 
         public static Matrix4x4d operator +(Matrix4x4d m1, Matrix4x4d m2)
         {
@@ -335,13 +387,50 @@ namespace UnityEngine
             return new Matrix4x4d(m);
         }
 
+        #endregion
+
+        #region ToString
+
         public override string ToString()
         {
-            return m[0, 0] + "," + m[0, 1] + "," + m[0, 2] + "," + m[0, 3] + "\n" +
-                   m[1, 0] + "," + m[1, 1] + "," + m[1, 2] + "," + m[1, 3] + "\n" +
-                   m[2, 0] + "," + m[2, 1] + "," + m[2, 2] + "," + m[2, 3] + "\n" +
-                   m[3, 0] + "," + m[3, 1] + "," + m[3, 2] + "," + m[3, 3];
+            return string.Format("[({0}, {1}, {2}, {3})({4}, {5}, {6}, {7})({8}, {9}, {10}, {11})({12}, {13}, {14}, {15})]",
+                                 m[0, 0], m[0, 1], m[0, 2], m[0, 3],
+                                 m[1, 0], m[1, 1], m[1, 2], m[1, 3],
+                                 m[2, 0], m[2, 1], m[2, 2], m[2, 3],
+                                 m[3, 0], m[3, 1], m[3, 2], m[3, 3]);
         }
+
+        #endregion
+
+        #region Column/Row
+
+        public Vector4d GetColumn(int iCol)
+        {
+            return new Vector4d(m[0, iCol], m[1, iCol], m[2, iCol], m[3, iCol]);
+        }
+
+        public Vector4d GetRow(int iRow)
+        {
+            return new Vector4d(m[iRow, 0], m[iRow, 1], m[iRow, 2], m[iRow, 3]);
+        }
+
+        public void SetColumn(int iCol, Vector4d v)
+        {
+            m[0, iCol] = v.x;
+            m[1, iCol] = v.y;
+            m[2, iCol] = v.z;
+            m[3, iCol] = v.w;
+        }
+
+        public void SetRow(int iRow, Vector4d v)
+        {
+            m[iRow, 0] = v.x;
+            m[iRow, 1] = v.y;
+            m[iRow, 2] = v.z;
+            m[iRow, 3] = v.w;
+        }
+
+        #endregion
 
         public Matrix4x4d Transpose()
         {
@@ -383,32 +472,6 @@ namespace UnityEngine
             return Adjoint() * (1.0 / Determinant());
         }
 
-        public Vector4d GetColumn(int iCol)
-        {
-            return new Vector4d(m[0, iCol], m[1, iCol], m[2, iCol], m[3, iCol]);
-        }
-
-        public void SetColumn(int iCol, Vector4d v)
-        {
-            m[0, iCol] = v.x;
-            m[1, iCol] = v.y;
-            m[2, iCol] = v.z;
-            m[3, iCol] = v.w;
-        }
-
-        public Vector4d GetRow(int iRow)
-        {
-            return new Vector4d(m[iRow, 0], m[iRow, 1], m[iRow, 2], m[iRow, 3]);
-        }
-
-        public void SetRow(int iRow, Vector4d v)
-        {
-            m[iRow, 0] = v.x;
-            m[iRow, 1] = v.y;
-            m[iRow, 2] = v.z;
-            m[iRow, 3] = v.w;
-        }
-
         public Matrix4x4 ToMatrix4x4()
         {
             var mat = new Matrix4x4
@@ -430,7 +493,6 @@ namespace UnityEngine
                 m32 = (float)m[3, 2],
                 m33 = (float)m[3, 3]
             };
-
 
             return mat;
         }
@@ -498,24 +560,24 @@ namespace UnityEngine
 
         public static Matrix4x4d RotateX(double angle)
         {
-            var ca = System.Math.Cos(angle * Constants.Deg2Rad);
-            var sa = System.Math.Sin(angle * Constants.Deg2Rad);
+            var ca = Math.Cos(angle * Constants.Deg2Rad);
+            var sa = Math.Sin(angle * Constants.Deg2Rad);
 
             return new Matrix4x4d(1, 0, 0, 0, 0, ca, -sa, 0, 0, sa, ca, 0, 0, 0, 0, 1);
         }
 
         public static Matrix4x4d RotateY(double angle)
         {
-            var ca = System.Math.Cos(angle * Constants.Deg2Rad);
-            var sa = System.Math.Sin(angle * Constants.Deg2Rad);
+            var ca = Math.Cos(angle * Constants.Deg2Rad);
+            var sa = Math.Sin(angle * Constants.Deg2Rad);
 
             return new Matrix4x4d(ca, 0, sa, 0, 0, 1, 0, 0, -sa, 0, ca, 0, 0, 0, 0, 1);
         }
 
         public static Matrix4x4d RotateZ(double angle)
         {
-            var ca = System.Math.Cos(angle * Constants.Deg2Rad);
-            var sa = System.Math.Sin(angle * Constants.Deg2Rad);
+            var ca = Math.Cos(angle * Constants.Deg2Rad);
+            var sa = Math.Sin(angle * Constants.Deg2Rad);
 
             return new Matrix4x4d(ca, -sa, 0, 0, sa, ca, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1);
         }
@@ -540,7 +602,7 @@ namespace UnityEngine
 
         public static Matrix4x4d Perspective(double fovy, double aspect, double zNear, double zFar)
         {
-            var f = 1.0 / System.Math.Tan((fovy * Constants.Deg2Rad) / 2.0);
+            var f = 1.0 / Math.Tan((fovy * Constants.Deg2Rad) / 2.0);
 
             return new Matrix4x4d(f / aspect, 0, 0, 0, 0, f, 0, 0, 0, 0, (zFar + zNear) / (zNear - zFar), (2.0 * zFar * zNear) / (zNear - zFar), 0, 0, -1, 0);
         }
@@ -553,9 +615,5 @@ namespace UnityEngine
 
             return new Matrix4x4d(2.0 / (xRight - xLeft), 0, 0, tx, 0, 2.0 / (yTop - yBottom), 0, ty, 0, 0, -2.0 / (zFar - zNear), tz, 0, 0, 0, 1);
         }
-
-        public static Matrix4x4d identity { get { return new Matrix4x4d(1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1); } }
-
-        public static Matrix4x4d one { get { return new Matrix4x4d(1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1); } }
     }
 }

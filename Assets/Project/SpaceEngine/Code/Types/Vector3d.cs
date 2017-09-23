@@ -30,11 +30,17 @@ namespace UnityEngine
     [Serializable]
     public struct Vector3d
     {
-        public double x, y, z;
+        #region Fields
 
-        public static Vector3d zero { get { return new Vector3d(0.0, 0.0, 0.0); } }
+        public double x;
+        public double y;
+        public double z;
 
-        public static Vector3d one { get { return new Vector3d(1.0, 1.0, 1.0); } }
+        #endregion
+
+        public static Vector3d zero { get { return new Vector3d(0.0); } }
+
+        public static Vector3d one { get { return new Vector3d(1.0); } }
 
         public static Vector3d forward { get { return new Vector3d(0.0, 0.0, 1.0); } }
 
@@ -48,17 +54,19 @@ namespace UnityEngine
 
         public static Vector3d right { get { return new Vector3d(1.0, 0.0, 0.0); } }
 
-        public Vector3d xzy { get { return new Vector3d(this.x, this.z, this.y); } }
+        public Vector3d xzy { get { return new Vector3d(x, z, y); } }
 
-        public Vector2d xy { get { return new Vector2d(this.x, this.y); } }
+        public Vector2d xy { get { return new Vector2d(x, y); } }
 
-        public Vector3d xy0 { get { return new Vector3d(this.x, this.y, 0.0); } }
+        public Vector3d xy0 { get { return new Vector3d(x, y, 0.0); } }
 
-        public Vector3d(double v)
+        #region Constructors
+
+        public Vector3d(double value)
         {
-            this.x = v;
-            this.y = v;
-            this.z = v;
+            this.x = value;
+            this.y = value;
+            this.z = value;
         }
 
         public Vector3d(double x, double y, double z)
@@ -96,12 +104,7 @@ namespace UnityEngine
             this.z = z;
         }
 
-        public Vector3d(double[] v)
-        {
-            x = v[0];
-            y = v[1];
-            z = v[2];
-        }
+        #endregion
 
         public static Vector3d operator +(Vector3d v1, Vector3d v2)
         {
@@ -178,10 +181,14 @@ namespace UnityEngine
             return this == vector;
         }
 
+        #region ToString
+
         public override string ToString()
         {
-            return "(" + x + "," + y + "," + z + ")";
+            return string.Format("({0}, {1}, {2})", x, y, z);
         }
+
+        #endregion
 
         public double magnitude { get { return Magnitude(); } }
 

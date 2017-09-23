@@ -25,11 +25,44 @@
 
 #define MATICES_UNROLL
 
+using System;
+
 namespace UnityEngine
 {
-    public struct Matrix3x3d
+    public struct Matrix3x3d : IEquatable<Matrix3x3d>
     {
+        #region Fields
+
         public readonly double[,] m;
+
+        #endregion
+
+        #region Properties
+
+        public static Matrix3x3d identity { get { return new Matrix3x3d(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0); } }
+
+        public static Matrix3x3d zero { get { return new Matrix3x3d(0.0); } }
+
+        public static Matrix3x3d one { get { return new Matrix3x3d(1.0); } }
+
+        #endregion
+
+        #region Constructors
+
+        public Matrix3x3d(double value)
+        {
+            m = new double[3, 3];
+
+            m[0, 0] = value;
+            m[0, 1] = value;
+            m[0, 2] = value;
+            m[1, 0] = value;
+            m[1, 1] = value;
+            m[1, 2] = value;
+            m[2, 0] = value;
+            m[2, 1] = value;
+            m[2, 2] = value;
+        }
 
         public Matrix3x3d(double m00, double m01, double m02, double m10, double m11, double m12, double m20, double m21, double m22)
         {
@@ -46,6 +79,10 @@ namespace UnityEngine
             m[2, 2] = m22;
         }
 
+        #endregion
+
+        #region Overrides
+
         public override int GetHashCode()
         {
             return m[0, 0].GetHashCode() + m[1, 0].GetHashCode() + m[2, 0].GetHashCode() +
@@ -59,10 +96,18 @@ namespace UnityEngine
             return false;
         }
 
+        #endregion
+
+        #region IEquatable<Matrix3x3d>
+
         public bool Equals(Matrix3x3d other)
         {
             return this == other;
         }
+
+        #endregion
+
+        #region Operations
 
         public static Matrix3x3d operator +(Matrix3x3d m1, Matrix3x3d m2)
         {
@@ -216,12 +261,46 @@ namespace UnityEngine
             return false;
         }
 
+        #endregion
+
+        #region ToString
+
         public override string ToString()
         {
-            return m[0, 0] + "," + m[0, 1] + "," + m[0, 2] + "\n" +
-                   m[1, 0] + "," + m[1, 1] + "," + m[1, 2] + "\n" +
-                   m[2, 0] + "," + m[2, 1] + "," + m[2, 2];
+            return string.Format("[({0}, {1}, {2})({3}, {4}, {5})({6}, {7}, {8})]", m[0, 0], m[0, 1], m[0, 2],
+                                                                                    m[1, 0], m[1, 1], m[1, 2],
+                                                                                    m[2, 0], m[2, 1], m[2, 2]);
         }
+
+        #endregion
+
+        #region Column/Row
+
+        public Vector3d GetColumn(int iCol)
+        {
+            return new Vector3d(m[0, iCol], m[1, iCol], m[2, iCol]);
+        }
+
+        public Vector3d GetRow(int iRow)
+        {
+            return new Vector3d(m[iRow, 0], m[iRow, 1], m[iRow, 2]);
+        }
+
+        public void SetColumn(int iCol, Vector3d v)
+        {
+            m[0, iCol] = v.x;
+            m[1, iCol] = v.y;
+            m[2, iCol] = v.z;
+        }
+
+        public void SetRow(int iRow, Vector3d v)
+        {
+            m[iRow, 0] = v.x;
+            m[iRow, 1] = v.y;
+            m[iRow, 2] = v.z;
+        }
+
+        #endregion
 
         public Matrix3x3d Transpose()
         {
@@ -303,30 +382,6 @@ namespace UnityEngine
             return kInverse;
         }
 
-        public Vector3d GetColumn(int iCol)
-        {
-            return new Vector3d(m[0, iCol], m[1, iCol], m[2, iCol]);
-        }
-
-        public void SetColumn(int iCol, Vector3d v)
-        {
-            m[0, iCol] = v.x;
-            m[1, iCol] = v.y;
-            m[2, iCol] = v.z;
-        }
-
-        public Vector3d GetRow(int iRow)
-        {
-            return new Vector3d(m[iRow, 0], m[iRow, 1], m[iRow, 2]);
-        }
-
-        public void SetRow(int iRow, Vector3d v)
-        {
-            m[iRow, 0] = v.x;
-            m[iRow, 1] = v.y;
-            m[iRow, 2] = v.z;
-        }
-
         public Matrix4x4d ToMatrix4x4d()
         {
             return new Matrix4x4d(m[0, 0], m[0, 1], m[0, 2], 0.0, m[1, 0], m[1, 1], m[1, 2], 0.0, m[2, 0], m[2, 1], m[2, 2], 0.0, 0.0, 0.0, 0.0, 0.0);
@@ -349,9 +404,5 @@ namespace UnityEngine
 
             return mat;
         }
-
-        public static Matrix3x3d identity { get { return new Matrix3x3d(1, 0, 0, 0, 1, 0, 0, 0, 1); } }
-
-        public static Matrix3x3d one { get { return new Matrix3x3d(1, 1, 1, 1, 1, 1, 1, 1, 1); } }
     }
 }

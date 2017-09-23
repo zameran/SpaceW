@@ -23,11 +23,46 @@
 // Modified by Denis Ovchinnikov 2015-2017
 #endregion
 
+#define MATICES_UNROLL
+
+using System;
+
 namespace UnityEngine
 {
-    public struct Matrix3x3
+    public struct Matrix3x3 : IEquatable<Matrix3x3>
     {
+        #region Fields
+
         public readonly float[,] m;
+
+        #endregion
+
+        #region Properties
+
+        public static Matrix3x3 identity { get { return new Matrix3x3(1.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 1.0f); } }
+
+        public static Matrix3x3 zero { get { return new Matrix3x3(0.0f); } }
+
+        public static Matrix3x3 one { get { return new Matrix3x3(1.0f); } }
+
+        #endregion
+
+        #region Constructors
+
+        public Matrix3x3(float value)
+        {
+            m = new float[3, 3];
+
+            m[0, 0] = value;
+            m[0, 1] = value;
+            m[0, 2] = value;
+            m[1, 0] = value;
+            m[1, 1] = value;
+            m[1, 2] = value;
+            m[2, 0] = value;
+            m[2, 1] = value;
+            m[2, 2] = value;
+        }
 
         public Matrix3x3(float m00, float m01, float m02, float m10, float m11, float m12, float m20, float m21, float m22)
         {
@@ -44,6 +79,10 @@ namespace UnityEngine
             m[2, 2] = m22;
         }
 
+        #endregion
+
+        #region Overrides
+
         public override int GetHashCode()
         {
             return m[0, 0].GetHashCode() + m[1, 0].GetHashCode() + m[2, 0].GetHashCode() +
@@ -57,10 +96,18 @@ namespace UnityEngine
             return false;
         }
 
+        #endregion
+
+        #region IEquatable<Matrix3x3>
+
         public bool Equals(Matrix3x3 other)
         {
             return this == other;
         }
+
+        #endregion
+
+        #region Operations
 
         public static Matrix3x3 operator +(Matrix3x3 m1, Matrix3x3 m2)
         {
@@ -124,6 +171,19 @@ namespace UnityEngine
         {
             var kProd = Matrix3x3.identity;
 
+#if (MATICES_UNROLL)
+            kProd.m[0, 0] = m1.m[0, 0] * m2.m[0, 0] + m1.m[0, 1] * m2.m[1, 0] + m1.m[0, 2] * m2.m[2, 0];
+            kProd.m[0, 1] = m1.m[0, 0] * m2.m[0, 1] + m1.m[0, 1] * m2.m[1, 1] + m1.m[0, 2] * m2.m[2, 1];
+            kProd.m[0, 2] = m1.m[0, 0] * m2.m[0, 2] + m1.m[0, 1] * m2.m[1, 2] + m1.m[0, 2] * m2.m[2, 2];
+
+            kProd.m[1, 0] = m1.m[1, 0] * m2.m[0, 0] + m1.m[1, 1] * m2.m[1, 0] + m1.m[1, 2] * m2.m[2, 0];
+            kProd.m[1, 1] = m1.m[1, 0] * m2.m[0, 1] + m1.m[1, 1] * m2.m[1, 1] + m1.m[1, 2] * m2.m[2, 1];
+            kProd.m[1, 2] = m1.m[1, 0] * m2.m[0, 2] + m1.m[1, 1] * m2.m[1, 2] + m1.m[1, 2] * m2.m[2, 2];
+
+            kProd.m[2, 0] = m1.m[2, 0] * m2.m[0, 0] + m1.m[2, 1] * m2.m[1, 0] + m1.m[2, 2] * m2.m[2, 0];
+            kProd.m[2, 1] = m1.m[2, 0] * m2.m[0, 1] + m1.m[2, 1] * m2.m[1, 1] + m1.m[2, 2] * m2.m[2, 1];
+            kProd.m[2, 2] = m1.m[2, 0] * m2.m[0, 2] + m1.m[2, 1] * m2.m[1, 2] + m1.m[2, 2] * m2.m[2, 2];
+#else
             for (byte iRow = 0; iRow < 3; iRow++)
             {
                 for (byte iCol = 0; iCol < 3; iCol++)
@@ -131,6 +191,7 @@ namespace UnityEngine
                     kProd.m[iRow, iCol] = m1.m[iRow, 0] * m2.m[0, iCol] + m1.m[iRow, 1] * m2.m[1, iCol] + m1.m[iRow, 2] * m2.m[2, iCol];
                 }
             }
+#endif
 
             return kProd;
         }
@@ -149,13 +210,27 @@ namespace UnityEngine
         {
             var kProd = Matrix3x3.identity;
 
-            for (byte iRow = 0; iRow < 3; iRow++)
+#if (MATICES_UNROLL)
+            kProd.m[0, 0] = m.m[0, 0] * s;
+            kProd.m[0, 1] = m.m[0, 1] * s;
+            kProd.m[0, 2] = m.m[0, 2] * s;
+
+            kProd.m[1, 0] = m.m[1, 0] * s;
+            kProd.m[1, 1] = m.m[1, 1] * s;
+            kProd.m[1, 2] = m.m[1, 2] * s;
+
+            kProd.m[2, 0] = m.m[2, 0] * s;
+            kProd.m[2, 1] = m.m[2, 1] * s;
+            kProd.m[2, 2] = m.m[2, 2] * s;
+#else
+            for (byte iRow = 0; iRow < 4; iRow++)
             {
-                for (byte iCol = 0; iCol < 3; iCol++)
+                for (byte iCol = 0; iCol < 4; iCol++)
                 {
                     kProd.m[iRow, iCol] = m.m[iRow, iCol] * s;
                 }
             }
+#endif
 
             return kProd;
         }
@@ -186,12 +261,46 @@ namespace UnityEngine
             return false;
         }
 
+#endregion
+
+#region ToString
+
         public override string ToString()
         {
-            return m[0, 0] + "," + m[0, 1] + "," + m[0, 2] + "\n" + 
-                   m[1, 0] + "," + m[1, 1] + "," + m[1, 2] + "\n" + 
-                   m[2, 0] + "," + m[2, 1] + "," + m[2, 2];
+            return string.Format("[({0}, {1}, {2})({3}, {4}, {5})({6}, {7}, {8})]", m[0, 0], m[0, 1], m[0, 2],
+                                                                                    m[1, 0], m[1, 1], m[1, 2],
+                                                                                    m[2, 0], m[2, 1], m[2, 2]);
         }
+
+#endregion
+
+#region Column/Row
+
+        public Vector3d GetColumn(int iCol)
+        {
+            return new Vector3d(m[0, iCol], m[1, iCol], m[2, iCol]);
+        }
+
+        public Vector3d GetRow(int iRow)
+        {
+            return new Vector3d(m[iRow, 0], m[iRow, 1], m[iRow, 2]);
+        }
+
+        public void SetColumn(int iCol, Vector3 v)
+        {
+            m[0, iCol] = v.x;
+            m[1, iCol] = v.y;
+            m[2, iCol] = v.z;
+        }
+
+        public void SetRow(int iRow, Vector3 v)
+        {
+            m[iRow, 0] = v.x;
+            m[iRow, 1] = v.y;
+            m[iRow, 2] = v.z;
+        }
+
+#endregion
 
         public Matrix3x3 Transpose()
         {
@@ -271,30 +380,6 @@ namespace UnityEngine
             return kInverse;
         }
 
-        public Vector3d GetColumn(int iCol)
-        {
-            return new Vector3d(m[0, iCol], m[1, iCol], m[2, iCol]);
-        }
-
-        public void SetColumn(int iCol, Vector3 v)
-        {
-            m[0, iCol] = v.x;
-            m[1, iCol] = v.y;
-            m[2, iCol] = v.z;
-        }
-
-        public Vector3d GetRow(int iRow)
-        {
-            return new Vector3d(m[iRow, 0], m[iRow, 1], m[iRow, 2]);
-        }
-
-        public void SetRow(int iRow, Vector3 v)
-        {
-            m[iRow, 0] = v.x;
-            m[iRow, 1] = v.y;
-            m[iRow, 2] = v.z;
-        }
-
         public Matrix4x4 ToMatrix4x4()
         {
             var mat = new Matrix4x4
@@ -312,7 +397,5 @@ namespace UnityEngine
 
             return mat;
         }
-
-        public static Matrix3x3 identity { get { return new Matrix3x3(1, 0, 0, 0, 1, 0, 0, 0, 1); } }
     }
 }

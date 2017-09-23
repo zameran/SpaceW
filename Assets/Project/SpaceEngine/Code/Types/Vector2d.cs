@@ -30,15 +30,23 @@ namespace UnityEngine
     [Serializable]
     public struct Vector2d
     {
-        public double x, y;
+        #region Fields
 
-        public static Vector2d zero { get { return new Vector2d(0.0, 0.0); } }
-        public static Vector2d one { get { return new Vector2d(1.0, 1.0); } }
+        public double x;
+        public double y;
 
-        public Vector2d(double v)
+        #endregion
+
+        public static Vector2d zero { get { return new Vector2d(0.0); } }
+
+        public static Vector2d one { get { return new Vector2d(1.0); } }
+
+        #region Constructors
+
+        public Vector2d(double value)
         {
-            this.x = v;
-            this.y = v;
+            this.x = value;
+            this.y = value;
         }
 
         public Vector2d(double x, double y)
@@ -52,6 +60,8 @@ namespace UnityEngine
             x = v.x;
             y = v.y;
         }
+
+        #endregion
 
         public static Vector2d operator +(Vector2d v1, Vector2d v2)
         {
@@ -88,10 +98,14 @@ namespace UnityEngine
             return new Vector2d(v1.x / v2.x, v1.y / v2.y);
         }
 
+        #region ToString
+
         public override string ToString()
         {
-            return "(" + x + "," + y + ")";
+            return string.Format("({0}, {1})", x, y);
         }
+
+        #endregion
 
         public double Magnitude()
         {

@@ -30,13 +30,22 @@ namespace UnityEngine
     [Serializable]
     public struct Vector4d
     {
-        public double x, y, z, w;
+        #region Fields
 
-        public static Vector4d zero { get { return new Vector4d(0.0, 0.0, 0.0, 0.0); } }
+        public double x;
+        public double y;
+        public double z;
+        public double w;
 
-        public static Vector4d one { get { return new Vector4d(1.0, 1.0, 1.0, 1.0); } }
+        #endregion
 
-        public Vector2d xy { get { return new Vector2d(this.x, this.y); } }
+        public static Vector4d zero { get { return new Vector4d(0.0); } }
+
+        public static Vector4d one { get { return new Vector4d(1.0); } }
+
+        public Vector2d xy { get { return new Vector2d(x, y); } }
+
+        #region Constructors
 
         public Vector4d(double v)
         {
@@ -94,13 +103,7 @@ namespace UnityEngine
             this.w = w;
         }
 
-        public Vector4d(double[] v)
-        {
-            x = v[0];
-            y = v[1];
-            z = v[2];
-            w = v[3];
-        }
+        #endregion
 
         public static Vector4d operator +(Vector4d v1, Vector4d v2)
         {
@@ -147,10 +150,14 @@ namespace UnityEngine
             return new Vector4d((double)v.x, (double)v.y, (double)v.z, (double)v.w);
         }
 
+        #region ToString
+
         public override string ToString()
         {
-            return "(" + x + "," + y + "," + z + "," + w + ")";
+            return string.Format("({0}, {1}, {2}, {3})", x, y, z, w);
         }
+
+        #endregion
 
         public Vector4 ToVector4()
         {
