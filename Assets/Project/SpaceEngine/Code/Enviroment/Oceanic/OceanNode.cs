@@ -48,8 +48,6 @@ using UnityEngine;
 
 namespace SpaceEngine.Enviroment.Oceanic
 {
-    // TODO : Fix depth jumping on camera move...
-
     /// <summary>
     /// An AbstractTask to draw a flat or spherical ocean. This class provides the functions and data to draw a flat projected grid but nothing else.
     /// </summary>

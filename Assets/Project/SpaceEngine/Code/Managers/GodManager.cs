@@ -125,6 +125,8 @@ public class GodManager : MonoSingleton<GodManager>
 
     private void Update()
     {
+        UpdateWorldShift();
+        UpdateViewMatrices();
         UpdateSchedular();
     }
 
@@ -193,16 +195,8 @@ public class GodManager : MonoSingleton<GodManager>
         Schedular.Instance.Run();
     }
 
-    public void UpdateControllerWrapper()
+    private void UpdateViewMatrices()
     {
-        UpdateWorldShift();
-
-        // NOTE : _Globals_CameraToScreen or UNITY_MATRIX_P must be updated BEFORE ALL to keep the ocean deth working good. 
-        // The problem is in depth calculation priority - The depth buffer created BEFORE other rendering. 
-        // But ocean depth are calculated much later...
-        // See the UniformsManager.UpdateProjectionMatrix
-        // But looks like _Globals_CameraToWorld only... WTF?!
-        // TODO : Fix a matrices update mess...
         View.UpdateMatrices();
     }
 

@@ -405,10 +405,6 @@ namespace SpaceEngine.Core.Bodies
                 }
             }
 
-            // NOTE : Update controller and the draw. This can help avoid terrain nodes jitter...
-            if (GodManager.Instance.ActiveBody == this)
-                GodManager.Instance.UpdateControllerWrapper();
-
             if (TerrainEnabled)
             {
                 for (int i = 0; i < TerrainNodes.Count; i++)
