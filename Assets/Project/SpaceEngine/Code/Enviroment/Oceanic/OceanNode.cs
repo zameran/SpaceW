@@ -231,7 +231,7 @@ namespace SpaceEngine.Enviroment.Oceanic
             OceanMaterial.SetMatrix("_Ocean_CameraToOcean", cameraToOcean.ToMatrix4x4());
             OceanMaterial.SetMatrix("_Ocean_OceanToCamera", cameraToOcean.Inverse().ToMatrix4x4());
             OceanMaterial.SetMatrix("_Ocean_WorldToLocal", worldToLocal.ToMatrix4x4());
-            OceanMaterial.SetMatrix("_Coean_LocalToOcean", localToOcean.ToMatrix4x4());
+            OceanMaterial.SetMatrix("_Ocean_LocalToOcean", localToOcean.ToMatrix4x4());
             OceanMaterial.SetVector("_Ocean_CameraPos", offset.ToVector3());
             OceanMaterial.SetVector("_Ocean_Color", UpwellingColor * 0.1f);
             OceanMaterial.SetVector("_Ocean_Shore_Color", ShoreColor);

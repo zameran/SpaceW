@@ -57,7 +57,8 @@ Shader "SpaceEngine/Planet/Ocean"
 		#endif
 
 		uniform float _Ocean_Wave_Level;
-		uniform float4x4 _Coean_LocalToOcean;
+
+		uniform float4x4 _Ocean_LocalToOcean;
 
 		struct a2v
 		{
@@ -291,7 +292,7 @@ Shader "SpaceEngine/Planet/Ocean"
 					{
 						if (_Sky_ShineColors_1[i].w <= 0) break;
 
-						shineL = mul(_Coean_LocalToOcean, _Sky_ShineOccluders_1[i].xyz);
+						shineL = mul(_Ocean_LocalToOcean, _Sky_ShineOccluders_1[i].xyz);
 
 						SunRadianceAndSkyIrradiance(earthP, N, shineL, sunL, skyE);
 						CalculateRadiances(V, N, shineL, earthP, oceanColor, sunL, skyE, sigmaSq, fresnel, Lsky, Lsun, Lsea);
@@ -299,8 +300,8 @@ Shader "SpaceEngine/Planet/Ocean"
 						l = (sunL * (max(dot(N, shineL), 0.0)) + skyE) / M_PI;
 						R_ftot = float3((W * waveStrength) * l * 0.4);
 
-						occluderDirection = normalize(mul(_Coean_LocalToOcean, _Sky_ShineOccluders_1[i].xyz) - earthP);			// Occluder direction with origin offset...
-						occluderOppositeDirection = mul(_Coean_LocalToOcean, _Sky_ShineOccluders_2[i].xyz);						// Occluder opposite direction with origin offset...
+						occluderDirection = normalize(mul(_Ocean_LocalToOcean, _Sky_ShineOccluders_1[i].xyz) - earthP);			// Occluder direction with origin offset...
+						occluderOppositeDirection = mul(_Ocean_LocalToOcean, _Sky_ShineOccluders_2[i].xyz);						// Occluder opposite direction with origin offset...
 						intensity = 0.57 * max((dot(occluderDirection, occluderOppositeDirection) - _Sky_ShineParameters_1[i].w), 0);
 
 						//shineInscatter = InScattering(earthCamera, earthP, shineL, shineExtinction, 0.0);
