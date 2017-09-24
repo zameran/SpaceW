@@ -159,12 +159,12 @@ namespace SpaceEngine.Core.Terrain
 
             Center = (p0 + p3) * 0.5;
 
-            double l0 = 0.0, l1 = 0.0, l2 = 0.0, l3 = 0.0;
+            double l0, l1, l2, l3;
 
-            var v0 = p0.Normalized(ref l0);
-            var v1 = p1.Normalized(ref l1);
-            var v2 = p2.Normalized(ref l2);
-            var v3 = p3.Normalized(ref l3);
+            var v0 = p0.Normalized(out l0);
+            var v1 = p1.Normalized(out l1);
+            var v2 = p2.Normalized(out l2);
+            var v3 = p3.Normalized(out l3);
 
             Lengths = new Vector4d(l0, l1, l2, l3);
 

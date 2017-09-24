@@ -152,7 +152,7 @@ namespace UnityEngine
             double z;
             double w;
 
-            var magnitude = axis.magnitude;
+            var magnitude = axis.Magnitude();
 
             if (magnitude <= 0.0001)
             {

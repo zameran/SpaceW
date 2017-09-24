@@ -28,7 +28,7 @@ using System;
 namespace UnityEngine
 {
     [Serializable]
-    public struct Vector2d
+    public struct Vector2d : IEquatable<Vector2d>
     {
         #region Fields
 
@@ -37,9 +37,13 @@ namespace UnityEngine
 
         #endregion
 
+        #region Properties
+
         public static Vector2d zero { get { return new Vector2d(0.0); } }
 
         public static Vector2d one { get { return new Vector2d(1.0); } }
+
+        #endregion
 
         #region Constructors
 
@@ -63,6 +67,36 @@ namespace UnityEngine
 
         #endregion
 
+        #region Overrides
+
+        public override int GetHashCode()
+        {
+            return x.GetHashCode() << 2 + y.GetHashCode();
+        }
+
+        public override bool Equals(object obj)
+        {
+            if (!(obj is Vector2d))
+                return false;
+
+            var vector = (Vector2d)obj;
+
+            return this == vector;
+        }
+
+        #endregion
+
+        #region IEquatable<Vector2d>
+
+        public bool Equals(Vector2d other)
+        {
+            return this == other;
+        }
+
+        #endregion
+
+        #region Operations
+
         public static Vector2d operator +(Vector2d v1, Vector2d v2)
         {
             return new Vector2d(v1.x + v2.x, v1.y + v2.y);
@@ -71,6 +105,11 @@ namespace UnityEngine
         public static Vector2d operator -(Vector2d v1, Vector2d v2)
         {
             return new Vector2d(v1.x - v2.x, v1.y - v2.y);
+        }
+
+        public static Vector2d operator -(Vector2d v1)
+        {
+            return new Vector2d(-v1.x, -v1.y);
         }
 
         public static Vector2d operator *(Vector2d v1, Vector2d v2)
@@ -98,11 +137,42 @@ namespace UnityEngine
             return new Vector2d(v1.x / v2.x, v1.y / v2.y);
         }
 
+        public static bool operator !=(Vector2d v1, Vector2d v2)
+        {
+            return !BrainFuckMath.NearlyEqual(v1.x, v2.x) || !BrainFuckMath.NearlyEqual(v1.y, v2.y);
+        }
+
+        public static bool operator ==(Vector2d v1, Vector2d v2)
+        {
+            return BrainFuckMath.NearlyEqual(v1.x, v2.x) && BrainFuckMath.NearlyEqual(v1.y, v2.y);
+        }
+
+        public static implicit operator Vector2(Vector2d v)
+        {
+            return new Vector2((float)v.x, (float)v.y);
+        }
+
+        public static implicit operator Vector2d(Vector2 v)
+        {
+            return new Vector2d((double)v.x, (double)v.y);
+        }
+
+        #endregion
+
         #region ToString
 
         public override string ToString()
         {
             return string.Format("({0}, {1})", x, y);
+        }
+
+        #endregion
+
+        #region ConvertTo
+
+        public Vector2 ToVector2()
+        {
+            return new Vector2((float)x, (float)y);
         }
 
         #endregion
@@ -153,11 +223,6 @@ namespace UnityEngine
         public static double Cross(Vector2d u, Vector2d v)
         {
             return u.x * v.y - u.y * v.x;
-        }
-
-        public Vector2 ToVector2()
-        {
-            return new Vector2((float)x, (float)y);
         }
     }
 }

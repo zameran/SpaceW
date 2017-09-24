@@ -240,8 +240,8 @@ namespace SpaceEngine.Core.Terrain
 
             var m = Deformation.LocalToDeformedDifferential(LocalCameraPosition, true);
 
-            var left = DeformedFrustumPlanes[0].XYZ().Normalized();
-            var right = DeformedFrustumPlanes[1].XYZ().Normalized();
+            var left = DeformedFrustumPlanes[0].xyz.Normalized();
+            var right = DeformedFrustumPlanes[1].xyz.Normalized();
 
             var fov = (float)Functions.Safe_Acos(-left.Dot(right));
 

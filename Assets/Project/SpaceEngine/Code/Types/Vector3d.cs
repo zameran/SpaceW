@@ -28,7 +28,7 @@ using System;
 namespace UnityEngine
 {
     [Serializable]
-    public struct Vector3d
+    public struct Vector3d : IEquatable<Vector3d>
     {
         #region Fields
 
@@ -37,6 +37,8 @@ namespace UnityEngine
         public double z;
 
         #endregion
+
+        #region Properties
 
         public static Vector3d zero { get { return new Vector3d(0.0); } }
 
@@ -59,6 +61,8 @@ namespace UnityEngine
         public Vector2d xy { get { return new Vector2d(x, y); } }
 
         public Vector3d xy0 { get { return new Vector3d(x, y, 0.0); } }
+
+        #endregion
 
         #region Constructors
 
@@ -105,6 +109,36 @@ namespace UnityEngine
         }
 
         #endregion
+
+        #region Overrides
+
+        public override int GetHashCode()
+        {
+            return x.GetHashCode() + y.GetHashCode() << 2 + z.GetHashCode();
+        }
+
+        public override bool Equals(object obj)
+        {
+            if (!(obj is Vector3d))
+                return false;
+
+            var vector = (Vector3d)obj;
+
+            return this == vector;
+        }
+
+        #endregion
+
+        #region IEquatable<Vector3d>
+
+        public bool Equals(Vector3d other)
+        {
+            return this == other;
+        }
+
+        #endregion
+
+        #region Operations
 
         public static Vector3d operator +(Vector3d v1, Vector3d v2)
         {
@@ -153,7 +187,7 @@ namespace UnityEngine
 
         public static bool operator ==(Vector3d v1, Vector3d v2)
         {
-            return BrainFuckMath.NearlyEqual(v1.x, v2.x) || BrainFuckMath.NearlyEqual(v1.y, v2.y) || BrainFuckMath.NearlyEqual(v1.z, v2.z);
+            return BrainFuckMath.NearlyEqual(v1.x, v2.x) && BrainFuckMath.NearlyEqual(v1.y, v2.y) && BrainFuckMath.NearlyEqual(v1.z, v2.z);
         }
 
         public static implicit operator Vector3(Vector3d v)
@@ -166,20 +200,7 @@ namespace UnityEngine
             return new Vector3d((double)v.x, (double)v.y, (double)v.z);
         }
 
-        public override int GetHashCode()
-        {
-            return x.GetHashCode() + y.GetHashCode() << 2 + z.GetHashCode();
-        }
-
-        public override bool Equals(object obj)
-        {
-            if (!(obj is Vector3d))
-                return false;
-
-            var vector = (Vector3d)obj;
-
-            return this == vector;
-        }
+        #endregion
 
         #region ToString
 
@@ -190,9 +211,14 @@ namespace UnityEngine
 
         #endregion
 
-        public double magnitude { get { return Magnitude(); } }
+        #region ConvertTo
 
-        public double sqrMagnitude { get { return SqrMagnitude(); } }
+        public Vector3 ToVector3()
+        {
+            return new Vector3((float)x, (float)y, (float)z);
+        }
+
+        #endregion
 
         public double Magnitude()
         {
@@ -214,73 +240,6 @@ namespace UnityEngine
             return lhs.x * rhs.x + lhs.y * rhs.y + lhs.z * rhs.z;
         }
 
-        public Vector3d normalized { get { return Normalize(this); } }
-
-        public static Vector3d Exclude(Vector3d excludeThis, Vector3d fromThat)
-        {
-            return fromThat - Project(fromThat, excludeThis);
-        }
-
-        public static Vector3d Project(Vector3d vector, Vector3d onNormal)
-        {
-            var dot = Dot(onNormal, onNormal);
-
-            return (dot >= 1.40129846432482E-45 ? (onNormal * Dot(vector, onNormal)) / dot : zero);
-        }
-
-        public static Vector3d Normalize(Vector3d value)
-        {
-            var invLength = 1.0 / value.Magnitude();
-
-            return new Vector3d(value.x * invLength, value.y * invLength, value.z * invLength);
-        }
-
-        public static Vector3d Projection(Vector3d a, Vector3d b)
-        {
-            return ((Dot(a, b) / Dot(b, b)) * b);
-        }
-
-        public static double Distance(Vector3d a, Vector3d b)
-        {
-            var v = new Vector3d(a.x - b.x, a.y - b.y, a.z - b.z);
-
-            return Math.Sqrt(v.x * v.x + v.y * v.y + v.z * v.z);
-        }
-
-        public Vector3d Rotate(double pointX, double pointY, double pointZ, double directionX, double directionY, double directionZ, double angle)
-        {
-            double length = 1.0 / Math.Sqrt(((directionX * directionX) + (directionY * directionY)) + (directionZ * directionZ));
-
-            directionX *= length;
-            directionY *= length;
-            directionZ *= length;
-
-            double cosa = Math.Cos(angle);
-            double sina = Math.Sin(angle);
-
-            double x = ((((pointX * ((directionY * directionY) + (directionZ * directionZ))) -
-                          (directionX * (((((pointY * directionY) + (pointZ * directionZ)) - (directionX * this.x)) - (directionY * this.y)) - (directionZ * this.z)))) *
-                         (1.0 - cosa)) + (this.x * cosa)) + (((((-pointZ * directionY) + (pointY * directionZ)) - (directionZ * this.y)) + (directionY * this.z)) * sina);
-            double y = ((((pointY * ((directionX * directionX) + (directionZ * directionZ))) -
-                          (directionY * (((((pointX * directionX) + (pointZ * directionZ)) - (directionX * this.x)) - (directionY * this.y)) - (directionZ * this.z)))) *
-                         (1.0 - cosa)) + (this.y * cosa)) + (((((pointZ * directionX) - (pointX * directionZ)) + (directionZ * this.x)) - (directionX * this.z)) * sina);
-
-            return new Vector3d(x, y,
-                ((((pointZ * ((directionX * directionX) + (directionY * directionY))) -
-                   (directionZ * (((((pointX * directionX) + (pointY * directionY)) - (directionX * this.x)) - (directionY * this.y)) - (directionZ * this.z)))) * (1.0 - cosa)) +
-                 (this.z * cosa)) + (((((-pointY * directionX) + (pointX * directionY)) - (directionY * this.x)) + (directionX * this.y)) * sina));
-        }
-
-        public Vector3d Rotate(Vector3d point, Vector3d direction, double angle)
-        {
-            return Rotate(point.x, point.y, point.z, direction.x, direction.y, direction.z, angle);
-        }
-
-        public static Vector3d Rejection(Vector3d a, Vector3d b)
-        {
-            return (a - Projection(a, b));
-        }
-
         public Vector3d Normalized()
         {
             var invLength = 1.0 / Magnitude();
@@ -295,13 +254,42 @@ namespace UnityEngine
             return new Vector3d(x * invLength, y * invLength, z * invLength);
         }
 
-        public Vector3d Normalized(ref double previousLength)
+        public Vector3d Normalized(out double previousLength)
         {
             previousLength = Magnitude();
 
             var invLength = 1.0 / previousLength;
 
             return new Vector3d(x * invLength, y * invLength, z * invLength);
+        }
+
+        public static Vector3d Exclude(Vector3d excludeThis, Vector3d fromThat)
+        {
+            return fromThat - Project(fromThat, excludeThis);
+        }
+
+        public static Vector3d Project(Vector3d vector, Vector3d onNormal)
+        {
+            var dot = Dot(onNormal, onNormal);
+
+            return (dot >= 1.40129846432482E-45 ? (onNormal * Dot(vector, onNormal)) / dot : zero);
+        }
+
+        public static Vector3d Projection(Vector3d a, Vector3d b)
+        {
+            return ((Dot(a, b) / Dot(b, b)) * b);
+        }
+
+        public static double Distance(Vector3d a, Vector3d b)
+        {
+            var v = new Vector3d(a.x - b.x, a.y - b.y, a.z - b.z);
+
+            return Math.Sqrt(v.x * v.x + v.y * v.y + v.z * v.z);
+        }
+
+        public static Vector3d Rejection(Vector3d a, Vector3d b)
+        {
+            return (a - Projection(a, b));
         }
 
         public Vector3d Cross(Vector3d v)
@@ -314,31 +302,9 @@ namespace UnityEngine
             return new Vector3d(lhs.y * rhs.z - lhs.z * rhs.y, lhs.z * rhs.x - lhs.x * rhs.z, lhs.x * rhs.y - lhs.y * rhs.x);
         }
 
-        /// <summary>
-        /// Linear interpolation between two vectors.
-        /// </summary>
-        /// <param name="from">From.</param>
-        /// <param name="to">To.</param>
-        /// <param name="t">T. WARNING : Only 0 - 1 range!</param>
-        /// <returns>Interpolated vector.</returns>
         public static Vector3d Lerp(Vector3d from, Vector3d to, double t)
         {
             return new Vector3d(from.x + (to.x - from.x) * t, from.y + (to.y - from.y) * t, from.z + (to.z - from.z) * t);
-        }
-
-        public static Vector3d Lerp01t(Vector3d from, Vector3d to, float t)
-        {
-            return Lerp(from, to, Mathf.Clamp01(t));
-        }
-
-        public Vector3 ToVector3()
-        {
-            return new Vector3((float)x, (float)y, (float)z);
-        }
-
-        public Vector3d Unit()
-        {
-            return (this / this.Magnitude());
         }
     }
 }
