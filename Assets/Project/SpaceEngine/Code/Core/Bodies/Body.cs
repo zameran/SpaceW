@@ -149,6 +149,9 @@ namespace SpaceEngine.Core.Bodies
 
         protected override void InitNode()
         {
+            TerrainNodes = new List<TerrainNode>(GetComponentsInChildren<TerrainNode>());
+            TerrainNodes.Sort(new TerrainNode.Sort());
+
             if (Atmosphere != null)
             {
                 if (Atmosphere.ParentBody == null)
@@ -173,18 +176,19 @@ namespace SpaceEngine.Core.Bodies
                 Ring.InitNode();
             }
 
-            TerrainNodes = new List<TerrainNode>(GetComponentsInChildren<TerrainNode>());
-            TerrainNodes.Sort(new TerrainNode.Sort());
-
-            TerrainNodes.ForEach(terrainNode =>
+            for (var terrainNodeIndex = 0; terrainNodeIndex < 6; terrainNodeIndex++)
             {
+                var terrainNode = TerrainNodes[terrainNodeIndex];
+
                 terrainNode.InitNode();
 
-                terrainNode.Samplers.ForEach(sampler =>
+                for (var samplerNodeIndex = 0; samplerNodeIndex < terrainNode.Samplers.Count; samplerNodeIndex++)
                 {
-                    sampler.InitNode();
-                });
-            });
+                    var samplerNode = terrainNode.Samplers[samplerNodeIndex];
+
+                    samplerNode.InitNode();
+                }
+            }
 
             MPB = new MaterialPropertyBlock();
 
@@ -212,15 +216,19 @@ namespace SpaceEngine.Core.Bodies
                 Ring.UpdateNode();
             }
 
-            TerrainNodes.ForEach(terrainNode =>
+            for (var terrainNodeIndex = 0; terrainNodeIndex < 6; terrainNodeIndex++)
             {
+                var terrainNode = TerrainNodes[terrainNodeIndex];
+
                 terrainNode.UpdateNode();
 
-                terrainNode.Samplers.ForEach(sampler =>
+                for (var samplerNodeIndex = 0; samplerNodeIndex < terrainNode.Samplers.Count; samplerNodeIndex++)
                 {
-                    sampler.UpdateNode();
-                });
-            });
+                    var samplerNode = terrainNode.Samplers[samplerNodeIndex];
+
+                    samplerNode.UpdateNode();
+                }
+            }
 
             Keywords = GetKeywords();
 
