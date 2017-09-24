@@ -102,7 +102,7 @@ namespace SpaceEngine
 
             if (FBOExist())
             {
-                FBProcessMaterial.SetTexture("_FrameBuffer", src);
+                FBProcessMaterial.SetTexture("_CameraFrameBufferTexture", src);
 
                 CMDBuffer.Blit(SourceRTI, FBOTextureRTI, FBProcessMaterial);
             }

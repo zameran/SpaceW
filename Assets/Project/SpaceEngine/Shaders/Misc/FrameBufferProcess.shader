@@ -2,7 +2,7 @@
 {
 	Properties
 	{
-		_FrameBuffer("Texture", 2D) = "white" {}
+		_CameraFrameBufferTexture("Texture", 2D) = "white" {}
 	}
 	SubShader
 	{
@@ -30,8 +30,8 @@
 				float4 vertex : SV_POSITION;
 			};
 
-			uniform sampler2D _FrameBuffer;
-			float4 _FrameBuffer_TexelSize;
+			uniform sampler2D _CameraFrameBufferTexture;
+			float4 _CameraFrameBufferTexture_TexelSize;
 
 			void vert(in a2v v, out v2f o)
 			{
@@ -39,14 +39,14 @@
 				o.uv = v.texcoord;
 
 				#if UNITY_UV_STARTS_AT_TOP
-					if (_FrameBuffer_TexelSize.y < 0)
+					if (_CameraFrameBufferTexture_TexelSize.y < 0)
 						o.uv.y = 1 - o.uv.y;
 				#endif
 			}
 
 			void frag(in v2f i, out float4 output : SV_Target)
 			{
-				float4 fboColor = tex2D(_FrameBuffer, i.uv);
+				float4 fboColor = tex2D(_CameraFrameBufferTexture, i.uv);
 
 				fboColor.a = (fboColor.a + 1.0) * 0.5;
 				fboColor.a = saturate(fboColor.a);

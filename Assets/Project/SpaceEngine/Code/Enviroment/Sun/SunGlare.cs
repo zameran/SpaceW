@@ -198,7 +198,7 @@ namespace SpaceEngine.Enviroment.Sun
             target.SetFloat("UseAtmosphereColors", UseAtmosphereColors ? 1.0f : 0.0f);
             target.SetFloat("UseRadiance", UseRadiance ? 1.0f : 0.0f);
             target.SetFloat("Eclipse", Eclipse ? 0.0f : 1.0f);
-            target.SetTexture("_FrameBuffer", FrameBufferCapturer.Instance.FBOTexture);
+            target.SetTexture("_CameraFrameBufferTexture", FrameBufferCapturer.Instance.FBOTexture);
 
             if (Atmosphere != null) Atmosphere.ParentBody.SetUniforms(target);
         }

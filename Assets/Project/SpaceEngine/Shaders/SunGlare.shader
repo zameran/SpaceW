@@ -84,7 +84,7 @@ Shader "SpaceEngine/Other/Sun Glare"
 
 			uniform float AspectRatio;
 
-			uniform sampler2D _FrameBuffer;
+			uniform sampler2D _CameraFrameBufferTexture;
 			
 			struct v2f 
 			{
@@ -195,7 +195,7 @@ Shader "SpaceEngine/Other/Sun Glare"
 				}
 
 				//float3 gray = float3(0.299, 0.587, 0.114);
-				//float4 frameBuffer = tex2D(_FrameBuffer, SunViewPortPosition.xy);
+				//float4 frameBuffer = tex2D(_CameraFrameBufferTexture, SunViewPortPosition.xy);
 
 				//if (dot(frameBuffer, gray) >= 1.0) {  }
 
