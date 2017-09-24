@@ -472,6 +472,8 @@ namespace SpaceEngine.Core.Terrain
             }
             else
             {
+                quad.CalculateOrder(quad.Owner.LocalCameraPosition.x, quad.Owner.LocalCameraPosition.y, quad.Ox + quad.LengthHalf, quad.Oy + quad.LengthHalf);
+
                 // Draw quads in a order based on distance to camera
                 var done = 0;
 

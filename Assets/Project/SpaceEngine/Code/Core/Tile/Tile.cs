@@ -19,9 +19,9 @@ namespace SpaceEngine.Core.Tile
         /// </summary>
         public class Id
         {
-            public int Level { get; set; }
-            public int Tx { get; set; }
-            public int Ty { get; set; }
+            public int Level { get; private set; }
+            public int Tx { get; private set; }
+            public int Ty { get; private set; }
 
             public Id(int level, int tx, int ty)
             {
@@ -52,7 +52,13 @@ namespace SpaceEngine.Core.Tile
 
             public override int GetHashCode()
             {
-                return (Level ^ Tx ^ Ty).GetHashCode();
+                var hashcode = 23;
+
+                hashcode = (hashcode * 37) + Level;
+                hashcode = (hashcode * 37) + Tx;
+                hashcode = (hashcode * 37) + Ty;
+
+                return hashcode;
             }
 
             public override string ToString()
@@ -91,7 +97,12 @@ namespace SpaceEngine.Core.Tile
 
             public override int GetHashCode()
             {
-                return (ProducerId ^ TileId.GetHashCode()).GetHashCode();
+                var hashcode = 23;
+
+                hashcode = (hashcode * 37) + ProducerId;
+                hashcode = (hashcode * 37) + TileId.GetHashCode();
+
+                return hashcode;
             }
 
             public override string ToString()

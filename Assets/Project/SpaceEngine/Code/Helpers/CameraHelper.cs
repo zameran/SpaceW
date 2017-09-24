@@ -33,7 +33,8 @@
 // Creator: zameran
 #endregion
 
-using System;
+#define UNITY_GL_PROJECTION_MATRIX
+
 using System.Collections.Generic;
 using System.Linq;
 
@@ -72,16 +73,23 @@ public static class CameraHelper
         return camera.cameraToWorldMatrix;
     }
 
-    public static Matrix4x4 GetCameraToScreen(this Camera camera, bool useFix = true, bool overrideMatrixY = true)
+    public static Matrix4x4 GetCameraToScreen(this Camera camera, bool useFix = true)
     {
+#if UNITY_GL_PROJECTION_MATRIX
+        var projectionMatrix = camera.projectionMatrix;
+
+        projectionMatrix = GL.GetGPUProjectionMatrix(projectionMatrix, useFix);
+
+        return projectionMatrix;
+#else
         var projectionMatrix = camera.projectionMatrix;
 
         if (!useFix) return projectionMatrix;
 
-        if (SystemInfo.graphicsDeviceVersion.IndexOf("Direct3D", StringComparison.Ordinal) > -1)
+        if (SystemInfo.graphicsDeviceVersion.IndexOf("Direct3D", System.StringComparison.Ordinal) > -1)
         {
             // NOTE : Default unity antialiasing breaks matrices?
-            if (overrideMatrixY || (IsDeferred(camera) || QualitySettings.antiAliasing == 0))
+            if ((IsDeferred(camera) || QualitySettings.antiAliasing == 0))
             {
                 // Invert Y for rendering to a render texture
                 for (byte i = 0; i < 4; i++)
@@ -100,6 +108,7 @@ public static class CameraHelper
         }
 
         return projectionMatrix;
+#endif
     }
 
     public static Matrix4x4 GetScreenToCamera(this Camera camera)
