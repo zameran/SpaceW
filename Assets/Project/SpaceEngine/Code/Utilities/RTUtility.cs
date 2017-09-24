@@ -34,42 +34,28 @@ namespace SpaceEngine.Core.Utilities
 {
     public static class RTUtility
     {
-        public static void Blit(RenderTexture src, RenderTexture des, bool clear = false)
+        public static void Blit(RenderTexture src, RenderTexture des)
         {
-            var oldRT = RenderTexture.active;
-
             Graphics.SetRenderTarget(des);
-
-            if (clear) GL.Clear(true, true, Color.clear);
 
             GL.PushMatrix();
             GL.LoadOrtho();
 
             GL.Begin(GL.QUADS);
-            GL.TexCoord3(0.0f, 0.0f, 0.0f);
-            GL.Vertex3(0.0f, 0.0f, 0.1f);
-            GL.TexCoord3(1.0f, 0.0f, 0.0f);
-            GL.Vertex3(1.0f, 0.0f, 0.1f);
-            GL.TexCoord3(1.0f, 1.0f, 0.0f);
-            GL.Vertex3(1.0f, 1.0f, 0.1f);
-            GL.TexCoord3(0.0f, 1.0f, 0.0f);
-            GL.Vertex3(0.0f, 1.0f, 0.1f);
+            GL.TexCoord2(0.0f, 0.0f); GL.Vertex3(0.0f, 0.0f, 0.1f);
+            GL.TexCoord2(1.0f, 0.0f); GL.Vertex3(1.0f, 0.0f, 0.1f);
+            GL.TexCoord2(1.0f, 1.0f); GL.Vertex3(1.0f, 1.0f, 0.1f);
+            GL.TexCoord2(0.0f, 1.0f); GL.Vertex3(0.0f, 1.0f, 0.1f);
             GL.End();
 
             GL.PopMatrix();
-
-            RenderTexture.active = oldRT;
         }
 
-        public static void Blit(RenderTexture src, RenderTexture des, Material mat, int pass = 0, bool clear = true)
+        public static void Blit(RenderTexture src, RenderTexture des, Material mat, int pass = 0)
         {
             mat.SetTexture("_MainTex", src);
 
-            var oldRT = RenderTexture.active;
-
             Graphics.SetRenderTarget(des);
-
-            if (clear) GL.Clear(true, true, Color.clear);
 
             GL.PushMatrix();
             GL.LoadOrtho();
@@ -77,61 +63,37 @@ namespace SpaceEngine.Core.Utilities
             mat.SetPass(pass);
 
             GL.Begin(GL.QUADS);
-            GL.TexCoord3(0.0f, 0.0f, 0.0f);
-            GL.Vertex3(0.0f, 0.0f, 0.1f);
-            GL.TexCoord3(1.0f, 0.0f, 0.0f);
-            GL.Vertex3(1.0f, 0.0f, 0.1f);
-            GL.TexCoord3(1.0f, 1.0f, 0.0f);
-            GL.Vertex3(1.0f, 1.0f, 0.1f);
-            GL.TexCoord3(0.0f, 1.0f, 0.0f);
-            GL.Vertex3(0.0f, 1.0f, 0.1f);
+            GL.TexCoord2(0.0f, 0.0f); GL.Vertex3(0.0f, 0.0f, 0.1f);
+            GL.TexCoord2(1.0f, 0.0f); GL.Vertex3(1.0f, 0.0f, 0.1f);
+            GL.TexCoord2(1.0f, 1.0f); GL.Vertex3(1.0f, 1.0f, 0.1f);
+            GL.TexCoord2(0.0f, 1.0f); GL.Vertex3(0.0f, 1.0f, 0.1f);
             GL.End();
 
             GL.PopMatrix();
-
-            RenderTexture.active = oldRT;
         }
 
-        public static void Blit(RenderTexture src, RenderTexture des, Rect rect, bool clear = true)
+        public static void Blit(RenderTexture src, RenderTexture des, Rect rect)
         {
-            //rect must have normalized coords, ie 0 - 1
-
-            var oldRT = RenderTexture.active;
-
             Graphics.SetRenderTarget(des);
-
-            if (clear) GL.Clear(true, true, Color.clear);
 
             GL.PushMatrix();
             GL.LoadOrtho();
 
             GL.Begin(GL.QUADS);
-            GL.TexCoord2(rect.x, rect.y);
-            GL.Vertex3(rect.x, rect.y, 0.1f);
-            GL.TexCoord2(rect.x + rect.width, rect.y);
-            GL.Vertex3(rect.x + rect.width, rect.y, 0.1f);
-            GL.TexCoord2(rect.x + rect.width, rect.y + rect.height);
-            GL.Vertex3(rect.x + rect.width, rect.y + rect.height, 0.1f);
-            GL.TexCoord2(rect.x, rect.y + rect.height);
-            GL.Vertex3(rect.x, rect.y + rect.height, 0.1f);
+            GL.TexCoord2(rect.x, rect.y); GL.Vertex3(rect.x, rect.y, 0.1f);
+            GL.TexCoord2(rect.x + rect.width, rect.y); GL.Vertex3(rect.x + rect.width, rect.y, 0.1f);
+            GL.TexCoord2(rect.x + rect.width, rect.y + rect.height); GL.Vertex3(rect.x + rect.width, rect.y + rect.height, 0.1f);
+            GL.TexCoord2(rect.x, rect.y + rect.height); GL.Vertex3(rect.x, rect.y + rect.height, 0.1f);
             GL.End();
 
             GL.PopMatrix();
-
-            RenderTexture.active = oldRT;
         }
 
-        public static void Blit(RenderTexture src, RenderTexture des, Material mat, Rect rect, int pass = 0, bool clear = true)
+        public static void Blit(RenderTexture src, RenderTexture des, Material mat, Rect rect, int pass = 0)
         {
-            //rect must have normalized coords, ie 0 - 1
-
             mat.SetTexture("_MainTex", src);
 
-            var oldRT = RenderTexture.active;
-
             Graphics.SetRenderTarget(des);
-
-            if (clear) GL.Clear(true, true, Color.clear);
 
             GL.PushMatrix();
             GL.LoadOrtho();
@@ -139,35 +101,23 @@ namespace SpaceEngine.Core.Utilities
             mat.SetPass(pass);
 
             GL.Begin(GL.QUADS);
-            GL.TexCoord2(rect.x, rect.y);
-            GL.Vertex3(rect.x, rect.y, 0.1f);
-            GL.TexCoord2(rect.x + rect.width, rect.y);
-            GL.Vertex3(rect.x + rect.width, rect.y, 0.1f);
-            GL.TexCoord2(rect.x + rect.width, rect.y + rect.height);
-            GL.Vertex3(rect.x + rect.width, rect.y + rect.height, 0.1f);
-            GL.TexCoord2(rect.x, rect.y + rect.height);
-            GL.Vertex3(rect.x, rect.y + rect.height, 0.1f);
+            GL.TexCoord2(rect.x, rect.y); GL.Vertex3(rect.x, rect.y, 0.1f);
+            GL.TexCoord2(rect.x + rect.width, rect.y); GL.Vertex3(rect.x + rect.width, rect.y, 0.1f);
+            GL.TexCoord2(rect.x + rect.width, rect.y + rect.height); GL.Vertex3(rect.x + rect.width, rect.y + rect.height, 0.1f);
+            GL.TexCoord2(rect.x, rect.y + rect.height); GL.Vertex3(rect.x, rect.y + rect.height, 0.1f);
             GL.End();
 
             GL.PopMatrix();
-
-            RenderTexture.active = oldRT;
         }
 
         public static void MultiTargetBlit(RenderTexture[] des, Material mat, int pass = 0)
         {
-            //RenderTexture oldRT = RenderTexture.active;
-
             var rb = new RenderBuffer[des.Length];
 
             for (int i = 0; i < des.Length; i++)
-            {
                 rb[i] = des[i].colorBuffer;
-            }
 
             Graphics.SetRenderTarget(rb, des[0].depthBuffer);
-
-            GL.Clear(true, true, Color.clear);
 
             GL.PushMatrix();
             GL.LoadOrtho();
@@ -175,28 +125,18 @@ namespace SpaceEngine.Core.Utilities
             mat.SetPass(pass);
 
             GL.Begin(GL.QUADS);
-            GL.TexCoord2(0.0f, 0.0f);
-            GL.Vertex3(0.0f, 0.0f, 0.1f);
-            GL.TexCoord2(1.0f, 0.0f);
-            GL.Vertex3(1.0f, 0.0f, 0.1f);
-            GL.TexCoord2(1.0f, 1.0f);
-            GL.Vertex3(1.0f, 1.0f, 0.1f);
-            GL.TexCoord2(0.0f, 1.0f);
-            GL.Vertex3(0.0f, 1.0f, 0.1f);
+            GL.TexCoord2(0.0f, 0.0f); GL.Vertex3(0.0f, 0.0f, 0.1f);
+            GL.TexCoord2(1.0f, 0.0f); GL.Vertex3(1.0f, 0.0f, 0.1f);
+            GL.TexCoord2(1.0f, 1.0f); GL.Vertex3(1.0f, 1.0f, 0.1f);
+            GL.TexCoord2(0.0f, 1.0f); GL.Vertex3(0.0f, 1.0f, 0.1f);
             GL.End();
 
             GL.PopMatrix();
-
-            //RenderTexture.active = oldRT;
         }
 
         public static void MultiTargetBlit(RenderBuffer[] des_rb, RenderBuffer des_db, Material mat, int pass = 0)
         {
-            //RenderTexture oldRT = RenderTexture.active;
-
             Graphics.SetRenderTarget(des_rb, des_db);
-
-            GL.Clear(true, true, Color.clear);
 
             GL.PushMatrix();
             GL.LoadOrtho();
@@ -204,19 +144,13 @@ namespace SpaceEngine.Core.Utilities
             mat.SetPass(pass);
 
             GL.Begin(GL.QUADS);
-            GL.TexCoord2(0.0f, 0.0f);
-            GL.Vertex3(0.0f, 0.0f, 0.1f);
-            GL.TexCoord2(1.0f, 0.0f);
-            GL.Vertex3(1.0f, 0.0f, 0.1f);
-            GL.TexCoord2(1.0f, 1.0f);
-            GL.Vertex3(1.0f, 1.0f, 0.1f);
-            GL.TexCoord2(0.0f, 1.0f);
-            GL.Vertex3(0.0f, 1.0f, 0.1f);
+            GL.TexCoord2(0.0f, 0.0f); GL.Vertex3(0.0f, 0.0f, 0.1f);
+            GL.TexCoord2(1.0f, 0.0f); GL.Vertex3(1.0f, 0.0f, 0.1f);
+            GL.TexCoord2(1.0f, 1.0f); GL.Vertex3(1.0f, 1.0f, 0.1f);
+            GL.TexCoord2(0.0f, 1.0f); GL.Vertex3(0.0f, 1.0f, 0.1f);
             GL.End();
 
             GL.PopMatrix();
-
-            //RenderTexture.active = oldRT;
         }
 
         public static void Swap(RenderTexture[] texs)

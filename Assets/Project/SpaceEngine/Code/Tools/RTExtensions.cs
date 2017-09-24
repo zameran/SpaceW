@@ -45,6 +45,8 @@ public static class RTExtensions
             enableRandomWrite = true
         };
 
+        SetName(ref rt);
+
         rt.Create();
 
         return rt;
@@ -56,6 +58,8 @@ public static class RTExtensions
         {
             enableRandomWrite = true
         };
+
+        SetName(ref rt);
 
         rt.Create();
 
@@ -71,6 +75,8 @@ public static class RTExtensions
             hideFlags = flags
         };
 
+        SetName(ref rt);
+
         rt.Create();
 
         return rt;
@@ -82,6 +88,8 @@ public static class RTExtensions
         {
             enableRandomWrite = true
         };
+
+        SetName(ref rt);
 
         rt.Create();
 
@@ -96,6 +104,8 @@ public static class RTExtensions
             filterMode = fm,
             wrapMode = twm
         };
+
+        SetName(ref rt);
 
         rt.Create();
 
@@ -114,6 +124,8 @@ public static class RTExtensions
             volumeDepth = volumeDepth
         };
 
+        SetName(ref rt);
+
         rt.Create();
 
         return rt;
@@ -130,6 +142,8 @@ public static class RTExtensions
             anisoLevel = al
         };
 
+        SetName(ref rt);
+
         rt.Create();
 
         return rt;
@@ -145,6 +159,8 @@ public static class RTExtensions
             useMipMap = usemm,
             anisoLevel = al
         };
+
+        SetName(ref rt);
 
         rt.Create();
 
@@ -163,6 +179,8 @@ public static class RTExtensions
             isPowerOfTwo = pot
         };
 
+        SetName(ref rt);
+
         rt.Create();
 
         return rt;
@@ -174,6 +192,8 @@ public static class RTExtensions
         {
             enableRandomWrite = true
         };
+
+        SetName(ref rt);
 
         rt.Create();
 
@@ -187,6 +207,8 @@ public static class RTExtensions
             enableRandomWrite = true
         };
 
+        SetName(ref rt);
+
         rt.Create();
 
         return rt;
@@ -198,6 +220,8 @@ public static class RTExtensions
         {
             enableRandomWrite = true
         };
+
+        SetName(ref rt);
 
         rt.Create();
 
@@ -212,6 +236,8 @@ public static class RTExtensions
             filterMode = fm,
             wrapMode = twm
         };
+
+        SetName(ref rt);
 
         rt.Create();
 
@@ -230,6 +256,8 @@ public static class RTExtensions
             volumeDepth = volumeDepth
         };
 
+        SetName(ref rt);
+
         rt.Create();
 
         return rt;
@@ -246,6 +274,8 @@ public static class RTExtensions
             anisoLevel = al
         };
 
+        SetName(ref rt);
+
         rt.Create();
 
         return rt;
@@ -261,6 +291,8 @@ public static class RTExtensions
             useMipMap = usemm,
             anisoLevel = al
         };
+
+        SetName(ref rt);
 
         rt.Create();
 
@@ -279,6 +311,8 @@ public static class RTExtensions
             isPowerOfTwo = pot
         };
 
+        SetName(ref rt);
+
         rt.Create();
 
         return rt;
@@ -292,5 +326,15 @@ public static class RTExtensions
         rt.Release();
 
         Object.DestroyImmediate(rt);
+    }
+
+    private static void SetName(ref RenderTexture rt)
+    {
+        rt.name = "Temp GPU RTexture";
+    }
+
+    private static void SetName(ref RenderTexture rt, string name)
+    {
+        rt.name = name;
     }
 }
