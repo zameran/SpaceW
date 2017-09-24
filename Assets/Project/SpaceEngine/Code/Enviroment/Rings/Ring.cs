@@ -33,6 +33,7 @@
 // Creator: zameran
 #endregion
 
+using SpaceEngine.Core;
 using SpaceEngine.Core.Bodies;
 using SpaceEngine.Core.Patterns.Strategy.Renderable;
 using SpaceEngine.Core.Patterns.Strategy.Uniformed;
@@ -44,7 +45,7 @@ using UnityEngine;
 
 namespace SpaceEngine.Enviroment.Rings
 {
-    public class Ring : Node<Ring>, IUniformed<Material>, IRenderable<Ring>
+    public class Ring : NodeSlave<Ring>, IUniformed<Material>, IRenderable<Ring>
     {
         public Body ParentBody;
 
@@ -91,7 +92,7 @@ namespace SpaceEngine.Enviroment.Rings
 
         #region Node
 
-        protected override void InitNode()
+        public override void InitNode()
         {
             InitMesh();
             InitMaterial();
@@ -99,7 +100,7 @@ namespace SpaceEngine.Enviroment.Rings
             InitUniforms(RingMaterial);
         }
 
-        protected override void UpdateNode()
+        public override void UpdateNode()
         {
             RingMaterial.renderQueue = (int)RenderQueue + RenderQueueOffset;
 

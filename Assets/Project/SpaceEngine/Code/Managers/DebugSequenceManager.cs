@@ -49,6 +49,8 @@ namespace SpaceEngine.Managers
         {
             int IComparer<SequenceEntry>.Compare(SequenceEntry a, SequenceEntry b)
             {
+                if (a == null || b == null) return 0;
+
                 if (a.TimeSinceStartup > b.TimeSinceStartup)
                     return 1;
                 if (a.TimeSinceStartup < b.TimeSinceStartup)

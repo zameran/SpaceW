@@ -87,9 +87,11 @@ namespace SpaceEngine.Core.Tile.Samplers
         private ComputeBuffer ElevationsBuffer;
         private ComputeBuffer GroundBuffer;
 
-        protected override void Start()
+        #region Node
+
+        public override void InitNode()
         {
-            base.Start();
+            base.InitNode();
 
             OldLocalCamera = Vector3d.zero;
 
@@ -100,7 +102,11 @@ namespace SpaceEngine.Core.Tile.Samplers
 
             ElevationsBuffer = new ComputeBuffer(size * size, sizeof(float));
             GroundBuffer = new ComputeBuffer(1, 4 * sizeof(float));
+        }
 
+        public override void UpdateNode()
+        {
+            base.UpdateNode();
         }
 
         protected override void OnDestroy()
@@ -110,6 +116,8 @@ namespace SpaceEngine.Core.Tile.Samplers
             ElevationsBuffer.ReleaseAndDisposeBuffer();
             GroundBuffer.ReleaseAndDisposeBuffer();
         }
+
+        #endregion
 
         /// <summary>
         /// Override the default <see cref="TileSampler"/>'s <see cref="TileSampler.NeedTile"/> to retrive the tile, 

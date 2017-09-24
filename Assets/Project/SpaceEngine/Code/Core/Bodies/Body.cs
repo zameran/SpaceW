@@ -38,7 +38,6 @@ using SpaceEngine.Core.Patterns.Strategy.Reanimator;
 using SpaceEngine.Core.Patterns.Strategy.Renderable;
 using SpaceEngine.Core.Patterns.Strategy.Uniformed;
 using SpaceEngine.Core.Terrain;
-using SpaceEngine.Core.Tile.Samplers;
 using SpaceEngine.Core.Utilities.Gradients;
 using SpaceEngine.Enviroment.Atmospheric;
 using SpaceEngine.Enviroment.Oceanic;
@@ -81,7 +80,6 @@ namespace SpaceEngine.Core.Bodies
         public Shader ColorShader;
 
         public List<TerrainNode> TerrainNodes = new List<TerrainNode>(6);
-        public List<TileSampler> TileSamplers = new List<TileSampler>();
 
         [HideInInspector]
         public double HeightZ = 0;
@@ -155,22 +153,38 @@ namespace SpaceEngine.Core.Bodies
             {
                 if (Atmosphere.ParentBody == null)
                     Atmosphere.ParentBody = this;
+
+                Atmosphere.InitNode();
             }
 
             if (Ocean != null)
             {
                 if (Ocean.ParentBody == null)
                     Ocean.ParentBody = this;
+
+                Ocean.InitNode();
             }
 
             if (Ring != null)
             {
                 if (Ring.ParentBody == null)
                     Ring.ParentBody = this;
+
+                Ring.InitNode();
             }
 
-            TileSamplers = new List<TileSampler>(GetComponentsInChildren<TileSampler>());
-            TileSamplers.Sort(new TileSampler.Sort());
+            TerrainNodes = new List<TerrainNode>(GetComponentsInChildren<TerrainNode>());
+            TerrainNodes.Sort(new TerrainNode.Sort());
+
+            TerrainNodes.ForEach(terrainNode =>
+            {
+                terrainNode.InitNode();
+
+                terrainNode.Samplers.ForEach(sampler =>
+                {
+                    sampler.InitNode();
+                });
+            });
 
             MPB = new MaterialPropertyBlock();
 
@@ -183,6 +197,31 @@ namespace SpaceEngine.Core.Bodies
 
         protected override void UpdateNode()
         {
+            if (Atmosphere != null)
+            {
+                Atmosphere.UpdateNode();
+            }
+
+            if (Ocean != null)
+            {
+                Ocean.UpdateNode();
+            }
+
+            if (Ring != null)
+            {
+                Ring.UpdateNode();
+            }
+
+            TerrainNodes.ForEach(terrainNode =>
+            {
+                terrainNode.UpdateNode();
+
+                terrainNode.Samplers.ForEach(sampler =>
+                {
+                    sampler.UpdateNode();
+                });
+            });
+
             Keywords = GetKeywords();
 
             SetUniforms(MPB);
@@ -361,14 +400,6 @@ namespace SpaceEngine.Core.Bodies
             // NOTE : Update controller and the draw. This can help avoid terrain nodes jitter...
             if (GodManager.Instance.ActiveBody == this)
                 GodManager.Instance.UpdateControllerWrapper();
-
-            for (int i = 0; i < TileSamplers.Count; i++)
-            {
-                if (Helper.Enabled(TileSamplers[i]))
-                {
-                    TileSamplers[i].UpdateSampler();
-                }
-            }
 
             if (TerrainEnabled)
             {

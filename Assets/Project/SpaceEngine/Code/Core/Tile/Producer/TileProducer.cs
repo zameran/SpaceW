@@ -18,13 +18,13 @@ namespace SpaceEngine.Core.Tile.Producer
     /// Note that several TileProducer can share the same <see cref="TileCache"/>, and hence the same <see cref="TileStorage"/>.
     /// </summary>
     [RequireComponent(typeof(TileSampler))]
-    public abstract class TileProducer : Node<TileProducer>
+    public abstract class TileProducer : NodeSlave<TileProducer>
     {
         /// <summary>
         /// The tile cache game object that stores the tiles produced by this producer.
         /// </summary>
         [SerializeField]
-        GameObject CacheGameObject;
+        public GameObject CacheGameObject;
 
         public TileCache Cache { get; private set; }
 
@@ -32,7 +32,7 @@ namespace SpaceEngine.Core.Tile.Producer
         /// The name of the uniforms this producers data will be bound if used in a shader.
         /// </summary>
         [SerializeField]
-        string Name;
+        public string Name;
 
         /// <summary>
         /// Does this producer use the GPU?
@@ -63,7 +63,7 @@ namespace SpaceEngine.Core.Tile.Producer
 
         #region Node
 
-        protected override void InitNode()
+        public override void InitNode()
         {
             InitCache();
 
@@ -74,7 +74,7 @@ namespace SpaceEngine.Core.Tile.Producer
             Sampler = GetComponent<TileSampler>();
         }
 
-        protected override void UpdateNode()
+        public override void UpdateNode()
         {
 
         }

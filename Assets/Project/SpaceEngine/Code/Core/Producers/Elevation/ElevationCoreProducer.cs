@@ -33,11 +33,9 @@
 // Creator: zameran
 #endregion
 
-using SpaceEngine.Core.Bodies;
 using SpaceEngine.Core.Exceptions;
 using SpaceEngine.Core.Numerics;
 using SpaceEngine.Core.Storage;
-using SpaceEngine.Core.Terrain;
 using SpaceEngine.Core.Tile.Producer;
 using SpaceEngine.Core.Tile.Storage;
 
@@ -55,12 +53,9 @@ namespace SpaceEngine.Core
     {
         public Material ElevationMaterial;
 
-        protected override void Start()
+        public override void InitNode()
         {
-            base.Start();
-
-            if (TerrainNode == null) { TerrainNode = transform.parent.GetComponent<TerrainNode>(); }
-            if (TerrainNode.ParentBody == null) { TerrainNode.ParentBody = transform.parent.GetComponentInParent<Body>(); }
+            base.InitNode();
 
             var tileSize = GetTileSize(0);
 

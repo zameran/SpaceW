@@ -43,8 +43,23 @@ namespace SpaceEngine.Core.Terrain
     /// The terrain data must be managed by <see cref="Tile.Producer.TileProducer"/>, and stored in TileStorage. 
     /// The link between with the terrain quadtree is provided by the TileSampler class.
     /// </summary>
-    public class TerrainNode : Node<TerrainNode>, IUniformed<Material>
+    public class TerrainNode : NodeSlave<TerrainNode>, IUniformed<Material>
     {
+        public class Sort : IComparer<TerrainNode>
+        {
+            int IComparer<TerrainNode>.Compare(TerrainNode a, TerrainNode b)
+            {
+                if (a == null || b == null) return 0;
+
+                if (a.Face > b.Face)
+                    return 1;
+                if (a.Face < b.Face)
+                    return -1;
+                else
+                    return 0;
+            }
+        }
+
         public Body ParentBody { get; set; }
 
         static readonly byte HORIZON_SIZE = 255;
@@ -170,10 +185,9 @@ namespace SpaceEngine.Core.Terrain
 
         #region Node
 
-        protected override void InitNode()
+        public override void InitNode()
         {
             ParentBody = GetComponentInParent<Body>();
-            ParentBody.TerrainNodes.Add(this);
 
             TerrainMaterial = MaterialHelper.CreateTemp(ParentBody.ColorShader, "TerrainNode");
 
@@ -215,7 +229,7 @@ namespace SpaceEngine.Core.Terrain
             }
         }
 
-        protected override void UpdateNode()
+        public override void UpdateNode()
         {
             TerrainMaterial.renderQueue = (int)ParentBody.RenderQueue + ParentBody.RenderQueueOffset;
 

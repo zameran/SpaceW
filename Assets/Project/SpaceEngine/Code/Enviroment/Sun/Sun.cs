@@ -33,6 +33,8 @@
 // Creator: zameran
 #endregion
 
+using SpaceEngine.Core;
+
 using UnityEngine;
 
 namespace SpaceEngine.Enviroment.Sun

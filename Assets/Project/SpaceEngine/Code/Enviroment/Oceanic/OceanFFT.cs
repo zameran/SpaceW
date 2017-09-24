@@ -112,7 +112,7 @@ namespace SpaceEngine.Enviroment.Oceanic
 
         #region Node
 
-        protected override void InitNode()
+        public override void InitNode()
         {
             base.InitNode();
 
@@ -168,7 +168,7 @@ namespace SpaceEngine.Enviroment.Oceanic
             InitDisplacementMaterial.SetVector("_InverseGridSizes", InverseGridSizes);
         }
 
-        protected override void UpdateNode()
+        public override void UpdateNode()
         {
             if (DrawOcean == true)
             {

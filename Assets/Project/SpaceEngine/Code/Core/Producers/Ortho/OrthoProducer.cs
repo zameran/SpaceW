@@ -70,13 +70,14 @@ namespace SpaceEngine.Core
 
         Texture2D ResidualTexture;
 
-        protected override void Start()
+        public override void InitNode()
         {
-            base.Start();
+            base.InitNode();
 
             if (OrthoCpuProducerGameObject != null)
             {
-                OrthoCPUProducer = OrthoCpuProducerGameObject.GetComponent<OrthoCPUProducer>();
+                if (OrthoCPUProducer == null) { OrthoCPUProducer = OrthoCpuProducerGameObject.GetComponent<OrthoCPUProducer>(); }
+                if (OrthoCPUProducer.Cache == null) { OrthoCPUProducer.InitCache(); }
             }
 
             int tileSize = Cache.GetStorage(0).TileSize;

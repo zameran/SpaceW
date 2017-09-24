@@ -15,7 +15,7 @@ namespace SpaceEngine.Core.Tile.Samplers
     /// This class can set the uniforms necessary to access a given texture tile on GPU, stored in a GPUTileStorage. 
     /// This class also manages the creation of new texture tiles when a terrain quadtree is updated, via a TileProducer.
     /// </summary>
-    public class TileSampler : Node<TileSampler>, IUniformed<MaterialPropertyBlock, TerrainQuad>, IUniformed<Material, TerrainQuad>
+    public class TileSampler : NodeSlave<TileSampler>, IUniformed<MaterialPropertyBlock, TerrainQuad>, IUniformed<Material, TerrainQuad>
     {
         /// <summary>
         /// Class used to sort a <see cref="TileSampler"/> based on it's priority.
@@ -24,6 +24,8 @@ namespace SpaceEngine.Core.Tile.Samplers
         {
             int IComparer<TileSampler>.Compare(TileSampler a, TileSampler b)
             {
+                if (a == null || b == null) return 0;
+
                 if (a.Priority > b.Priority)
                     return 1;
                 if (a.Priority < b.Priority)
@@ -90,17 +92,21 @@ namespace SpaceEngine.Core.Tile.Samplers
 
         #region Node
 
-        protected override void InitNode()
+        public override void InitNode()
         {
             Producer = GetComponent<TileProducer>();
             TerrainNode = GetComponentInParent<TerrainNode>();
             uniforms = new Uniforms(Producer.GetName());
             Filters = GetComponents<TileFilter>();
+
+            Producer.InitNode();
         }
 
-        protected override void UpdateNode()
+        public override void UpdateNode()
         {
+            Producer.UpdateNode();
 
+            UpdateSampler();
         }
 
 

@@ -1,8 +1,6 @@
-﻿using SpaceEngine.Core.Bodies;
-using SpaceEngine.Core.Exceptions;
+﻿using SpaceEngine.Core.Exceptions;
 using SpaceEngine.Core.Numerics;
 using SpaceEngine.Core.Storage;
-using SpaceEngine.Core.Terrain;
 using SpaceEngine.Core.Tile.Producer;
 using SpaceEngine.Core.Tile.Storage;
 using SpaceEngine.Core.Utilities;
@@ -39,12 +37,9 @@ namespace SpaceEngine.Core
         private RenderTexture CPUResidualTexture;
         private ComputeBuffer CPUResidualComputeBuffer;
 
-        protected override void Start()
+        public override void InitNode()
         {
-            base.Start();
-
-            if (TerrainNode == null) { TerrainNode = transform.parent.GetComponent<TerrainNode>(); }
-            if (TerrainNode.ParentBody == null) { TerrainNode.ParentBody = transform.parent.GetComponentInParent<Body>(); }
+            base.InitNode();
 
             if (ResidualProducerGameObject != null)
             {

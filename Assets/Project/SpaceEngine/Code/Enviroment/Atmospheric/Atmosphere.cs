@@ -33,6 +33,7 @@
 // Creator: zameran
 #endregion
 
+using SpaceEngine.Core;
 using SpaceEngine.Core.Bodies;
 using SpaceEngine.Core.Patterns.PropertyNotification;
 using SpaceEngine.Core.Patterns.Strategy.Eventit;
@@ -76,7 +77,7 @@ namespace SpaceEngine.Enviroment.Atmospheric
         }
     }
 
-    public sealed class Atmosphere : Node<Atmosphere>, IEventit, IUniformed<MaterialPropertyBlock>, IReanimateable, IRenderable<Atmosphere>
+    public sealed class Atmosphere : NodeSlave<Atmosphere>, IEventit, IUniformed<MaterialPropertyBlock>, IReanimateable, IRenderable<Atmosphere>
     {
         private readonly AtmosphereBaseProperty AtmosphereBaseProperty = new AtmosphereBaseProperty();
 
@@ -201,7 +202,7 @@ namespace SpaceEngine.Enviroment.Atmospheric
 
         #region Node
 
-        protected override void InitNode()
+        public override void InitNode()
         {
             PushPreset(AtmosphereParameters.Get(AtmosphereBase));
 
@@ -212,7 +213,7 @@ namespace SpaceEngine.Enviroment.Atmospheric
             ParentBody.InitUniforms(SkyMaterial);
         }
 
-        protected override void UpdateNode()
+        public override void UpdateNode()
         {
             SkyMaterial.renderQueue = (int)RenderQueue + RenderQueueOffset;
 
@@ -249,9 +250,9 @@ namespace SpaceEngine.Enviroment.Atmospheric
 
         protected override void OnDestroy()
         {
-            Helper.Destroy(SkyMaterial);
-
             UnEventit();
+
+            Helper.Destroy(SkyMaterial);
 
             base.OnDestroy();
         }

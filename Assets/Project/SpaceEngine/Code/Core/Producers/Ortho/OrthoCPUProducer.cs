@@ -45,9 +45,9 @@ namespace SpaceEngine.Core
         /// </summary>
         long[] Offsets;
 
-        protected override void Start()
+        public override void InitNode()
         {
-            base.Start();
+            base.InitNode();
 
             var storage = Cache.GetStorage(0) as CPUTileStorage;
 

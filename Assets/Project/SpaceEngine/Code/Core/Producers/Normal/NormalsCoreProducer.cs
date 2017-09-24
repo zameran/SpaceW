@@ -1,8 +1,6 @@
-﻿using SpaceEngine.Core.Bodies;
-using SpaceEngine.Core.Exceptions;
+﻿using SpaceEngine.Core.Exceptions;
 using SpaceEngine.Core.Numerics;
 using SpaceEngine.Core.Storage;
-using SpaceEngine.Core.Terrain;
 using SpaceEngine.Core.Tile.Producer;
 using SpaceEngine.Core.Tile.Storage;
 
@@ -24,14 +22,15 @@ namespace SpaceEngine.Core
 
         public Material NormalsMaterial;
 
-        protected override void Start()
+        public override void InitNode()
         {
-            base.Start();
+            base.InitNode();
 
-            if (TerrainNode == null) { TerrainNode = transform.parent.GetComponent<TerrainNode>(); }
-            if (TerrainNode.ParentBody == null) { TerrainNode.ParentBody = transform.parent.GetComponentInParent<Body>(); }
-            if (ElevationProducer == null) { ElevationProducer = ElevationProducerGameObject.GetComponent<TileProducer>(); }
-            if (ElevationProducer.Cache == null) { ElevationProducer.InitCache(); }
+            if (ElevationProducerGameObject != null)
+            {
+                if (ElevationProducer == null) { ElevationProducer = ElevationProducerGameObject.GetComponent<TileProducer>(); }
+                if (ElevationProducer.Cache == null) { ElevationProducer.InitCache(); }
+            }
 
             var tileSize = Cache.GetStorage(0).TileSize;
             var elevationTileSize = ElevationProducer.Cache.GetStorage(0).TileSize;
