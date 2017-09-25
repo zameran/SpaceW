@@ -8,7 +8,7 @@
  
 #pragma kernel CSMain
 
-#include "Assets/Project/SpaceEngine/Shaders/AtmospherePreprocess.cginc"
+#include "SpaceAtmospherePreprocess.cginc"
 
 int layer;
 
@@ -48,7 +48,7 @@ float3 Inscatter(float r, float mu, float muS, float nu)
     return raymie; 
 } 
 
-[numthreads(NUM_THREADS,NUM_THREADS,1)]
+[numthreads(NUM_THREADS, NUM_THREADS, 1)]
 void CSMain (uint3 id : SV_DispatchThreadID)
 {
     float4 dhdH;

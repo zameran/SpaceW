@@ -5,9 +5,10 @@
  */
  
 // adds deltaS into S (line 11 in algorithm 4.1)
+
 #pragma kernel CSMain
 
-#include "Assets/Project/SpaceEngine/Shaders/AtmospherePreprocess.cginc"
+#include "SpaceAtmospherePreprocess.cginc"
 
 int layer;
 
@@ -16,7 +17,7 @@ Texture3D<float4> deltaSRead;
 
 RWTexture3D<float4> inscatterWrite;
 
-[numthreads(NUM_THREADS,NUM_THREADS,1)]
+[numthreads(NUM_THREADS, NUM_THREADS, 1)]
 void CSMain (uint3 id : SV_DispatchThreadID)
 {
     float4 dhdH;

@@ -5,7 +5,8 @@
  */
  
 #pragma kernel CSMain
-#define NUM_THREADS 8
+
+#include "SpaceAtmospherePreprocess.cginc"
 
 float k;
 

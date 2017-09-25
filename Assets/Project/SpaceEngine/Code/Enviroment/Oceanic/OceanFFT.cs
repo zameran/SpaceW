@@ -116,6 +116,11 @@ namespace SpaceEngine.Enviroment.Oceanic
         {
             base.InitNode();
 
+            if (VarianceShader == null)
+            {
+                Debug.Log("OceanFFT: Variance shader is null!");
+            }
+
             if (FourierGridSize > 256)
             {
                 Debug.Log("OceanFFT: Fourier grid size must not be greater than 256, changing to 256...");

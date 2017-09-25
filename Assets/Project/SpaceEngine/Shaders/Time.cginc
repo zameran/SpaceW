@@ -31,6 +31,6 @@
 // Creation Time: 5:30 PM
 // Creator: zameran
 
-#define Time
+#define TIME
 
 uniform float _RealTime;

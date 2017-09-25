@@ -34,7 +34,9 @@
 #endregion
 
 using SpaceEngine.Managers;
+
 using System.Collections;
+
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -66,7 +68,7 @@ namespace SpaceEngine.UI.Panels
 
             var text = "Loading";
 
-            for (int i = 0; i <= Time.time % 3; i++)
+            for (var i = 0; i <= Time.time % 3; i++)
             {
                 text += ".";
             }
@@ -76,7 +78,7 @@ namespace SpaceEngine.UI.Panels
 
         private IEnumerator WatingRoutine()
         {
-            yield return new WaitForSeconds(transitionTime);
+            yield return new WaitForSeconds(TransitionTime);
         }
     }
 }

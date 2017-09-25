@@ -204,7 +204,7 @@ namespace SpaceEngine.Core.Debugging
             {
                 if (string.IsNullOrEmpty(logFileNamePrefixes[i])) return;
 
-                var path = Path.GetFullPath(string.Format("{0}/../{1}_Log.txt", Application.dataPath, logFileNamePrefixes[i]));
+                var path = Path.GetFullPath(string.Format("{0}/../{1}.log", Application.dataPath, logFileNamePrefixes[i]));
                 var dumpContent = string.Format("{0}[{1}] : {2}", timeStamp, typeNameString, str);
 
                 using (var outputStream = File.AppendText(path))

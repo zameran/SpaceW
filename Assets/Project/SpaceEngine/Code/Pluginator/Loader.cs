@@ -45,11 +45,9 @@ using Logger = SpaceEngine.Core.Debugging.Logger;
 namespace SpaceEngine.Pluginator
 {
     [UseLogger(Category.Data)]
-    [UseLoggerFile("Log")]
+    [UseLoggerFile("SpaceWLog")]
     public abstract class Loader : MonoBehaviour
     {
-        public bool ShouldDontDestroyOnLoad = true;
-
         private static Loader instance;
 
         public static Loader Instance
@@ -78,8 +76,6 @@ namespace SpaceEngine.Pluginator
             Instance = this;
 
             Step = 0;
-
-            if (ShouldDontDestroyOnLoad) DontDestroyOnLoad(this);
         }
 
         protected virtual void Update()

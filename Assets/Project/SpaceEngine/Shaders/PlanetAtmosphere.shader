@@ -162,11 +162,11 @@ Shader "SpaceEngine/Planet/Atmosphere"
 					shadow = GroundFade(_ExtinctionGroundFade, shadow);
 				#endif
 
-				#ifdef LIGHT_1
+				#if LIGHT_1
 					float3 extinction1 = 0;
 					float3 glowExtinction1 = 0;
 
-					#ifdef ECLIPSES_ON
+					#if ECLIPSES_ON
 						float4 WSPR0 = _Sun_Positions_1[0];
 
 						float3 invertedLightDistance0 = rsqrt(dot(WSPR0.xyz, WSPR0.xyz));
@@ -183,7 +183,7 @@ Shader "SpaceEngine/Planet/Atmosphere"
 					inscatter += SkyRadiance(WCPG, d, float3(0.0, 0.0, 0.0), glowExtinction1, 0.0) * _Atmosphere_GlowColor;
 					inscatter += SkyRadiance(WCPG, d, _Sun_WorldDirections_1[0], extinction1, 0.0);
 
-					#ifdef ECLIPSES_ON
+					#if ECLIPSES_ON
 						inscatter *= eclipse1;
 					#endif
 
@@ -191,7 +191,7 @@ Shader "SpaceEngine/Planet/Atmosphere"
 						inscatter *= shadow;
 					#endif
 
-					#ifdef SHINE_ON
+					#if SHINE_ON
 						inscatter += SkyShineRadiance(WCPG, d);
 					#endif
 
@@ -208,11 +208,11 @@ Shader "SpaceEngine/Planet/Atmosphere"
 					o.color = float4(finalColor, 1.0) * fade;
 				#endif
 
-				#ifdef LIGHT_2
+				#if LIGHT_2
 					float3 extinction1 = 0;
 					float3 extinction2 = 0;
 
-					#ifdef ECLIPSES_ON
+					#if ECLIPSES_ON
 						float4 WSPR0 = _Sun_Positions_1[0];
 						float4 WSPR1 = _Sun_Positions_1[1];
 
@@ -235,7 +235,7 @@ Shader "SpaceEngine/Planet/Atmosphere"
 					inscatter += SkyRadiance(WCPG, d, _Sun_WorldDirections_1[0], extinction1, 0.0);
 					inscatter += SkyRadiance(WCPG, d, _Sun_WorldDirections_1[1], extinction2, 0.0);
 
-					#ifdef ECLIPSES_ON
+					#if ECLIPSES_ON
 						inscatter *= eclipse1;
 						inscatter *= eclipse2;
 					#endif
@@ -244,7 +244,7 @@ Shader "SpaceEngine/Planet/Atmosphere"
 						inscatter *= shadow;
 					#endif
 
-					#ifdef SHINE_ON
+					#if SHINE_ON
 						inscatter += SkyShineRadiance(WCPG, d);
 					#endif
 
@@ -258,12 +258,12 @@ Shader "SpaceEngine/Planet/Atmosphere"
 					o.color = float4(finalColor, 1.0) * fade;
 				#endif
 
-				#ifdef LIGHT_3
+				#if LIGHT_3
 					float3 extinction1 = 0;
 					float3 extinction2 = 0;
 					float3 extinction3 = 0;
 
-					#ifdef ECLIPSES_ON
+					#if ECLIPSES_ON
 						float4 WSPR0 = _Sun_Positions_1[0];
 						float4 WSPR1 = _Sun_Positions_1[1];
 						float4 WSPR2 = _Sun_Positions_1[2];
@@ -293,7 +293,7 @@ Shader "SpaceEngine/Planet/Atmosphere"
 					inscatter += SkyRadiance(WCPG, d, _Sun_WorldDirections_1[1], extinction2, 0.0);
 					inscatter += SkyRadiance(WCPG, d, _Sun_WorldDirections_1[2], extinction3, 0.0);
 
-					#ifdef ECLIPSES_ON
+					#if ECLIPSES_ON
 						inscatter *= eclipse1;
 						inscatter *= eclipse2;
 						inscatter *= eclipse3;
@@ -303,7 +303,7 @@ Shader "SpaceEngine/Planet/Atmosphere"
 						inscatter *= shadow;
 					#endif
 
-					#ifdef SHINE_ON
+					#if SHINE_ON
 						inscatter += SkyShineRadiance(WCPG, d);
 					#endif
 
@@ -318,13 +318,13 @@ Shader "SpaceEngine/Planet/Atmosphere"
 					o.color = float4(finalColor, 1.0) * fade;
 				#endif
 
-				#ifdef LIGHT_4
+				#if LIGHT_4
 					float3 extinction1 = 0;
 					float3 extinction2 = 0;
 					float3 extinction3 = 0;
 					float3 extinction4 = 0;
 
-					#ifdef ECLIPSES_ON
+					#if ECLIPSES_ON
 						float4 WSPR0 = _Sun_Positions_1[0];
 						float4 WSPR1 = _Sun_Positions_1[1];
 						float4 WSPR2 = _Sun_Positions_1[2];
@@ -361,7 +361,7 @@ Shader "SpaceEngine/Planet/Atmosphere"
 					inscatter += SkyRadiance(WCPG, d, _Sun_WorldDirections_1[2], extinction3, 0.0);
 					inscatter += SkyRadiance(WCPG, d, _Sun_WorldDirections_1[3], extinction4, 0.0);
 
-					#ifdef ECLIPSES_ON
+					#if ECLIPSES_ON
 						inscatter *= eclipse1;
 						inscatter *= eclipse2;
 						inscatter *= eclipse3;
@@ -372,7 +372,7 @@ Shader "SpaceEngine/Planet/Atmosphere"
 						inscatter *= shadow;
 					#endif
 
-					#ifdef SHINE_ON
+					#if SHINE_ON
 						inscatter += SkyShineRadiance(WCPG, d);
 					#endif
 

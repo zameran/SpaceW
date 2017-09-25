@@ -64,6 +64,8 @@
  * Modified by Denis Ovchinnikov 2015-2017
  */
 
+#define SPACE_ATMOSPHERE_PREPROCESS
+
 #define NUM_THREADS 8
  
 // ---------------------------------------------------------------------------- 
@@ -145,7 +147,7 @@ float2 GetTransmittanceUV(float r, float mu)
 { 
 	float uR, uMu; 
 
-	#ifdef TRANSMITTANCE_NON_LINEAR 
+	#if defined(TRANSMITTANCE_NON_LINEAR)
 		uR = sqrt((r - Rg) / (Rt - Rg)); 
 		uMu = atan((mu + 0.15) / (1.0 + 0.15) * tan(1.5)) / 1.5; 
 	#else 
@@ -161,7 +163,7 @@ void GetTransmittanceRMu(float2 coord, out float r, out float muS)
 	r = coord.y / float(TRANSMITTANCE_H); 
 	muS = coord.x / float(TRANSMITTANCE_W); 
 
-	#ifdef TRANSMITTANCE_NON_LINEAR 
+	#if defined(TRANSMITTANCE_NON_LINEAR) 
 		r = Rg + (r * r) * (Rt - Rg); 
 		muS = -0.15 + tan(1.5 * muS) / tan(1.5) * (1.0 + 0.15); 
 	#else 
@@ -189,7 +191,7 @@ float4 Texture4D(Texture3D tex, float r, float mu, float muS, float nu)
 	float H = sqrt(Rt * Rt - Rg * Rg); 
 	float rho = sqrt(r * r - Rg * Rg); 
 
-	#ifdef INSCATTER_NON_LINEAR 
+	#if defined(INSCATTER_NON_LINEAR) 
 		float rmu = r * mu; 
 		float delta = rmu * rmu - r * r + Rg * Rg; 
 		float4 cst = rmu < 0.0 && delta > 0.0 ? float4(1.0, 0.0, 0.0, 0.5 - 0.5 / float(RES_MU)) : float4(-1.0, H * H, H, 0.5 + 0.5 / float(RES_MU)); 
@@ -220,7 +222,7 @@ void GetMuMuSNu(float2 coord, float r, float4 dhdH, out float mu, out float muS,
 	float x = coord.x - 0.5; 
 	float y = coord.y - 0.5; 
 
-	#ifdef INSCATTER_NON_LINEAR 
+	#if defined(INSCATTER_NON_LINEAR) 
 		if (y < float(RES_MU) / 2.0) 
 		{ 
 			float d = 1.0 - y / (float(RES_MU) / 2.0 - 1.0); 
@@ -275,7 +277,8 @@ float Limit(float r, float mu)
 	
 	if (delta2 >= 0.0) 
 	{ 
-		float din = -r * mu - sqrt(delta2); 
+		float din = -r * mu - sqrt(delta2);
+
 		if (din >= 0.0) 
 		{ 
 			dout = min(dout, din); 
@@ -290,6 +293,7 @@ float Limit(float r, float mu)
 float3 Transmittance(float r, float mu) 
 { 
 	float2 uv = GetTransmittanceUV(r, mu);
+
 	return transmittanceRead.SampleLevel(LinearClamp, uv, 0).rgb; 
 } 
 

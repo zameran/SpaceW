@@ -94,23 +94,23 @@ namespace SpaceEngine.Core.Preprocess.Atmospehre
         [SerializeField]
         string DestinationFolder = "/Resources/Preprocess/Textures/Atmosphere";
 
-        private void Start()
+        private void Awake()
         {
             if (BakeMode == AtmosphereBakeMode.TO_HDD || BakeMode == AtmosphereBakeMode.TO_HDD_DEBUG)
             {
-                Bake(AtmosphereParameters.Earth);
+                Bake(AtmosphereParameters.Earth, null);
             }
         }
 
-        public void Bake(AtmosphereParameters AP)
+        public void Bake(AtmosphereParameters AP, Action callback)
         {
             if (UseCoroutine)
-                StartCoroutine(DoWorkCoroutine(AP));
+                StartCoroutine(DoWorkCoroutine(AP, callback));
             else
-                DoWork(AP);
+                DoWork(AP, callback);
         }
 
-        private void Prepeare(AtmosphereParameters AP)
+        private void Prepare(AtmosphereParameters AP)
         {
             CollectGarbage();
             CreateTextures(AP);
@@ -118,13 +118,13 @@ namespace SpaceEngine.Core.Preprocess.Atmospehre
             ClearAll();
         }
 
-        private void DoWork(AtmosphereParameters AP)
+        private void DoWork(AtmosphereParameters AP, Action callback)
         {
             finished = false;
             step = 0;
             order = 2;
 
-            Prepeare(AP);
+            Prepare(AP);
 
             while (!finished)
             {
@@ -132,15 +132,17 @@ namespace SpaceEngine.Core.Preprocess.Atmospehre
             }
 
             if (ClearAfterBake) CollectGarbage(false, true);
+
+            if (callback != null) callback();
         }
 
-        private IEnumerator DoWorkCoroutine(AtmosphereParameters AP)
+        private IEnumerator DoWorkCoroutine(AtmosphereParameters AP, Action callback)
         {
             finished = false;
             step = 0;
             order = 2;
 
-            Prepeare(AP);
+            Prepare(AP);
 
             while (!finished)
             {
@@ -153,6 +155,8 @@ namespace SpaceEngine.Core.Preprocess.Atmospehre
             }
 
             if (ClearAfterBake) CollectGarbage(false, true);
+
+            if (callback != null) callback();
         }
 
         private void OnDestroy()

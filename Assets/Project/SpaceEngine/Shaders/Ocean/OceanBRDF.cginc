@@ -67,7 +67,6 @@
 #include "../Math.cginc"
 #endif
 
-#define OCEAN_ONLY_SPHERICAL
 #define OCEAN_INSCATTER_FIX
 
 uniform float2 _Ocean_MapSize;
@@ -204,7 +203,7 @@ float3 OceanRadianceWithSkyReflection(float3 L, float3 V, float3 N, float sigmaS
 
 float3 OceanRadiance(float3 L, float3 V, float3 N, float sigmaSq, float3 sunL, float3 skyE, float3 seaColor, float3 earthP) 
 {
-	#ifdef OCEAN_SKY_REFLECTIONS_ON
+	#if OCEAN_SKY_REFLECTIONS_ON
 		return OceanRadianceWithSkyReflection(L, V, N, sigmaSq, sunL, skyE, seaColor, earthP);
 	#else
 		return OceanRadianceWithoutSkyReflection(L, V, N, sigmaSq, sunL, skyE, seaColor);

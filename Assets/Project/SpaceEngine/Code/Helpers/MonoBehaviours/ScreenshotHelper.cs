@@ -48,7 +48,7 @@ using Logger = SpaceEngine.Core.Debugging.Logger;
 
 [RequireComponent(typeof(Camera))]
 [UseLogger(Category.Data)]
-[UseLoggerFile("Log")]
+[UseLoggerFile("SpaceWLog")]
 public class ScreenshotHelper : MonoSingleton<ScreenshotHelper>
 {
     public enum ScreenshotFormat

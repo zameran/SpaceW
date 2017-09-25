@@ -35,8 +35,10 @@
 
 using SpaceEngine.Pluginator.Enums;
 using SpaceEngine.UI.Panels;
+
 using System;
 using System.Collections;
+
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
@@ -54,6 +56,8 @@ namespace SpaceEngine.Managers
 
         private void Awake()
         {
+            Instance = this;
+
             SceneManager.sceneLoaded += OnSceneLoaded;
         }
 

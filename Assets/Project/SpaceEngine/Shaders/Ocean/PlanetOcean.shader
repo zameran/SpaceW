@@ -48,7 +48,7 @@ Shader "SpaceEngine/Planet/Ocean"
 			uniform float3 _Ocean_Color;
 		#endif
 
-		#ifdef OCEAN_DEPTH_ON
+		#if OCEAN_DEPTH_ON
 			#if !defined(CORE)
 				uniform float3 _Ocean_Shore_Color;
 			#endif
@@ -73,7 +73,7 @@ Shader "SpaceEngine/Planet/Ocean"
 			float3 oceanP : TEXCOORD1;
 			float4 screenP : TEXCOORD2;
 
-			#ifdef OCEAN_DEPTH_ON
+			#if OCEAN_DEPTH_ON
 				float4 viewSpaceDirDist : TEXCOORD3;
 				float4 projPos : TEXCOORD4;
 			#endif
@@ -83,7 +83,7 @@ Shader "SpaceEngine/Planet/Ocean"
 								in float sigmaSq, in float fresnel,
 								out float3 Lsky, out float3 Lsun, out float3 Lsea)
 		{
-			#ifdef OCEAN_SKY_REFLECTIONS_ON
+			#if OCEAN_SKY_REFLECTIONS_ON
 				Lsky = fresnel * ReflectedSky(V, N, L, earthP);
 				Lsun = ReflectedSunRadiance(L, V, N, sigmaSq) * sunL;
 				Lsea = 0.98 * (1.0 - fresnel) * oceanColor * (skyE / M_PI);
@@ -123,10 +123,8 @@ Shader "SpaceEngine/Planet/Ocean"
 				dP.xy += CHOPPYNESS.w * Tex2DGrad(_Ocean_Map4, u / GRID_SIZES.w, dux / GRID_SIZES.w, duy / GRID_SIZES.w, _Ocean_MapSize).zw;
 			}
 
-			#ifdef OCEAN_ONLY_SPHERICAL
-				float tClamped = clamp(t * 0.25, 0.0, _Ocean_Wave_Level);
-				dP = lerp(float3(0.0, 0.0, -0.1), dP, tClamped);
-			#endif
+			float tClamped = clamp(t * 0.25, 0.0, _Ocean_Wave_Level);
+			dP = lerp(float3(0.0, 0.0, -0.1), dP, tClamped);
 
 			float4 screenP = float4(t * cameraDir + mul(_Ocean_OceanToCamera, dP), 1.0);
 			float3 oceanP = t * oceanDir + dP + float3(0.0, 0.0, _Ocean_CameraPos.z);
@@ -138,7 +136,7 @@ Shader "SpaceEngine/Planet/Ocean"
 			o.oceanP = oceanP;
 			o.screenP = screenP;
 
-			#ifdef OCEAN_DEPTH_ON
+			#if OCEAN_DEPTH_ON
 				o.viewSpaceDirDist = float4(cameraDir, t);
 				o.projPos = computedScreenP;
 			#endif
@@ -209,14 +207,14 @@ Shader "SpaceEngine/Planet/Ocean"
 			float3 surfaceColor = 0;
 			float surfaceAlpha = 1;
 
-			#ifdef OCEAN_DEPTH_ON
+			#if OCEAN_DEPTH_ON
 				// TODO : Settings to parameters...
 
 				float fragDepth = max(0, LinearEyeDepth(UNITY_SAMPLE_DEPTH(tex2Dproj(_CameraDepthTexture, UNITY_PROJ_COORD(i.projPos))).r) - _ProjectionParams.y);
 				float oceanDepth = max(0, i.projPos.w - _ProjectionParams.y);
 				float depthCoeff = 1.0 - (pow(saturate((fragDepth - oceanDepth) / 100), 0.56) * saturate((fragDepth - oceanDepth) / 0.5));
 
-				#ifdef OCEAN_WHITECAPS
+				#if OCEAN_WHITECAPS
 					float depthFoamCoeff = 1.0 - (pow(saturate((fragDepth - oceanDepth) / 25), 0.25) * saturate((fragDepth - oceanDepth) / 0.5));
 				#endif
 
@@ -236,12 +234,12 @@ Shader "SpaceEngine/Planet/Ocean"
 			// Aerial perspective
 			float3 inscatter = InScattering(earthCamera, earthP, L, extinction, 0.0);
 
-			#ifdef OCEAN_FFT
+			#if OCEAN_FFT
 				surfaceColor = Lsun + Lsky + Lsea;
 				surfaceAlpha = min(max(hdr(Lsun), fresnel + surfaceAlpha), 1.0);
 			#endif
 					
-			#ifdef OCEAN_WHITECAPS
+			#if OCEAN_WHITECAPS
 				// Extract mean and variance of the jacobian matrix determinant
 				float2 jm1 = tex2D(_Ocean_Foam0, u / _Ocean_GridSizes.x).xy;
 				float2 jm2 = tex2D(_Ocean_Foam0, u / _Ocean_GridSizes.y).zw;
@@ -259,7 +257,7 @@ Shader "SpaceEngine/Planet/Ocean"
 
 				float whiteCapStr = _Ocean_WhiteCapStr;
 
-				#ifdef OCEAN_DEPTH_ON
+				#if OCEAN_DEPTH_ON
 					whiteCapStr = lerp(_Ocean_WhiteCapStr, 1.0, depthFoamCoeff * 2.0);
 				#else
 					whiteCapStr = _Ocean_WhiteCapStr;
@@ -277,7 +275,7 @@ Shader "SpaceEngine/Planet/Ocean"
 				surfaceColor = Lsun + Lsky + Lsea + R_ftot;
 				surfaceAlpha = min(max(hdr(Lsun + R_ftot), fresnel + surfaceAlpha), 1.0);
 
-				#ifdef SHINE_ON_TODO
+				#if SHINE_ON_TODO
 					// NOTE : Here light direction should be converted to ocean space...
 
 					float3 shineL = 0;

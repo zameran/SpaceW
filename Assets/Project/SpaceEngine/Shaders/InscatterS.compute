@@ -5,9 +5,10 @@
  */
  
 // computes deltaJ (line 7 in algorithm 4.1)
+
 #pragma kernel CSMain
 
-#include "Assets/Project/SpaceEngine/Shaders/AtmospherePreprocess.cginc"
+#include "SpaceAtmospherePreprocess.cginc"
 
 int layer;
 
@@ -107,7 +108,7 @@ void Inscatter(float r, float mu, float muS, float nu, out float3 raymie)
 	// output raymie = J[T.alpha/PI.deltaE + deltaS] (line 7 in algorithm 4.1) 
 } 
 
-[numthreads(NUM_THREADS,NUM_THREADS,1)]
+[numthreads(NUM_THREADS, NUM_THREADS, 1)]
 void CSMain (uint3 id : SV_DispatchThreadID)
 {
 	float3 raymie = 0; 

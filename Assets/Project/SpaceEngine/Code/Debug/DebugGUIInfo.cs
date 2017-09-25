@@ -49,9 +49,12 @@ namespace SpaceEngine.Debugging
             "Left Control for even more speed.",
             "Left Shift + Left Control for speed of God.",
             "Left Alt for less speed.",
+            "Press F while moving for a supercruise.",
             "F5 to switch between debug modes.",
             "F6 to switch between debug visualizations.",
-            "F12 to capture screenshot."
+            "F12 to capture screenshot.",
+            "/ to toggle the wireframe mode.",
+            "ESC to pause."
         };
 
         private readonly string[] InfoAdditional = new string[]

@@ -5,6 +5,12 @@
 /[Ee]xported/
 /[Ee]xported[Oobj]/
 
+# Exclude everything from special folders, but keep folders itself
+Config/*
+!Config/.gitkeep
+Mods/*
+!Mods/.gitkeep
+
 # We should ignore Rider IDE stuff
 /.idea
 

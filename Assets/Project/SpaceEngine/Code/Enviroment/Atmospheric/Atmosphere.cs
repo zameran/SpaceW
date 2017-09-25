@@ -370,14 +370,10 @@ namespace SpaceEngine.Enviroment.Atmospheric
 
         public void Bake()
         {
-            Bake(AtmosphereParameters);
-        }
-
-        public void Bake(AtmosphereParameters ap)
-        {
-            AtmosphereBaker.Bake(AtmosphereParameters);
-
-            EventManager.BodyEvents.OnAtmosphereBaked.Invoke(ParentBody, this);
+            AtmosphereBaker.Bake(AtmosphereParameters, () =>
+            {
+                EventManager.BodyEvents.OnAtmosphereBaked.Invoke(ParentBody, this);
+            });
         }
 
         public void OnApplicationFocus(bool focusStatus)

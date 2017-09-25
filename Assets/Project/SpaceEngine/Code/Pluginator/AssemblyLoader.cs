@@ -51,7 +51,7 @@ using Logger = SpaceEngine.Core.Debugging.Logger;
 namespace SpaceEngine.Pluginator
 {
     [UseLogger(Category.Data)]
-    [UseLoggerFile("Log")]
+    [UseLoggerFile("SpaceWLog")]
     public sealed class AssemblyLoader : Loader, IEventit
     {
         public GUISkin UISkin = null;

@@ -46,7 +46,7 @@ public sealed class MainRenderer : MonoSingleton<MainRenderer>
 {
     public bool ZSort = true;
 
-    private BodySort comparer = null;
+    private BodySort Comparer = null;
 
     public class BodySort : IComparer<Body>
     {
@@ -69,7 +69,7 @@ public sealed class MainRenderer : MonoSingleton<MainRenderer>
     private void Awake()
     {
         Instance = this;
-        comparer = new BodySort();
+        Comparer = new BodySort();
     }
 
     private void Start()
@@ -99,7 +99,7 @@ public sealed class MainRenderer : MonoSingleton<MainRenderer>
 
     public void ComposeOutputRender()
     {
-        Array.Sort(GodManager.Instance.Bodies, comparer);
+        Array.Sort(GodManager.Instance.Bodies, Comparer);
 
         /*
         for (int i = 0; i < GodManager.Instance.Starfields.Length; i++)

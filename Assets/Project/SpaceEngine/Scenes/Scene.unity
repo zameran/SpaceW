@@ -1429,7 +1429,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   IsShownByDefault: 0
-  Immune: 0
+  Immune: 1
   FromThisScene: 1
   Overlay: 0
   OnShow:
@@ -6539,7 +6539,6 @@ MonoBehaviour:
   Frequency: 64
   ColorShader: {fileID: 4800000, guid: 797ca199aa64b8c41bc1aae3e12f7a1f, type: 3}
   TerrainNodes: []
-  TileSamplers: []
   HeightZ: 0
   Size: 6360000
   TCCPS: {fileID: 693596358}
@@ -7304,6 +7303,7 @@ GameObject:
   - component: {fileID: 1641714479}
   - component: {fileID: 1641714478}
   - component: {fileID: 1641714477}
+  - component: {fileID: 1641714480}
   - component: {fileID: 1641714476}
   m_Layer: 5
   m_Name: UI
@@ -7387,6 +7387,22 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0, y: 0}
+--- !u!114 &1641714480
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 1641714475}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 1301386320, guid: f70555f144d8491a825f0804e09c671c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_IgnoreReversedGraphics: 1
+  m_BlockingObjects: 3
+  m_BlockingMask:
+    serializedVersion: 2
+    m_Bits: 4294967295
 --- !u!1 &1654467274
 GameObject:
   m_ObjectHideFlags: 0
@@ -8699,7 +8715,6 @@ MonoBehaviour:
   Frequency: 64
   ColorShader: {fileID: 4800000, guid: 797ca199aa64b8c41bc1aae3e12f7a1f, type: 3}
   TerrainNodes: []
-  TileSamplers: []
   HeightZ: 0
   Size: 636000
   TCCPS: {fileID: 1949857087}

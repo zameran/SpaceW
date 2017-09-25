@@ -147,9 +147,9 @@ float2 GetTransmittanceUV(float r, float mu)
 {
 	float uR, uMu;
 
-	#ifdef TRANSMITTANCE_NON_LINEAR
+	#if defined(INSCATTER_NON_LINEAR)
 		uR = sqrt((r - Rg) / (Rt - Rg));
-		#ifdef OPTIMIZE
+		#if defined(OPTIMIZE)
 			uMu = atan(mu * 11.950355887 + 2.1510640597) * 0.6666666667;
 		#else
 			uMu = atan((mu + 0.15) / (1.0 + 0.15) * tan(1.5)) / 1.5;
@@ -167,7 +167,7 @@ void GetTransmittanceRMu(float2 coord, out float r, out float muS)
 	r = coord.y / TRANSMITTANCE_H;
 	muS = coord.x / TRANSMITTANCE_W;
 
-	#ifdef TRANSMITTANCE_NON_LINEAR
+	#if defined(INSCATTER_NON_LINEAR)
 		r = Rg + (r * r) * (Rt - Rg);
 		muS = -0.15 + tan(1.5 * muS) / tan(1.5) * (1.0 + 0.15);
 	#else
@@ -195,7 +195,7 @@ float4 Texture4D(sampler3D table, float r, float mu, float muS, float nu)
 	float H = sqrt(Rt * Rt - Rg * Rg);
 	float rho = sqrt(r * r - Rg * Rg);
 
-	#ifdef INSCATTER_NON_LINEAR
+	#if defined(INSCATTER_NON_LINEAR)
 		float rmu = r * mu;
 		float delta = rmu * rmu - r * r + Rg * Rg;
 		float4 cst = rmu < 0.0 && delta > 0.0 ? float4(1.0, 0.0, 0.0, 0.5 - 0.5 / RES_MU) : float4(-1.0, H * H, H, 0.5 + 0.5 / RES_MU);
@@ -359,7 +359,7 @@ float3 GetMie(float4 rayMie)
 
 inline float SQRT(float f, float err) 
 {
-	#ifdef OPTIMIZE
+	#if defined(OPTIMIZE)
 		return sqrt(f);
 	#else
 		return f >= 0.0 ? sqrt(f) : err;
@@ -763,14 +763,14 @@ float4 InScattering(float3 camera, float3 _point, float3 sundir, out float3 exti
 			float mu1 = rMu1 / r1;
 			float muS1 = dot(_point, sundir) / r1;
 
-			#ifdef ANALYTIC_TRANSMITTANCE
+			#if defined(ANALYTIC_TRANSMITTANCE)
 				extinction = min(AnalyticTransmittance(r, mu, d), 1.0);
 			#else
 				extinction = (mu > 0) ? min(Transmittance(r, mu) / Transmittance(r1, mu1), 1.0) : 
 										min(Transmittance(r1, -mu1) / Transmittance(r, -mu), 1.0);
 			#endif
 
-			#ifdef HORIZON_HACK
+			#if defined(HORIZON_HACK)
 				float lim = -sqrt(1.0 - (Rg / r) * (Rg / r));
 
 				if (abs(mu - lim) < _Sky_HorizonFixEps) 

@@ -5,16 +5,17 @@
  */
  
 // computes ground irradiance due to skylight E[deltaS] (line 8 in algorithm 4.1)
+
 #pragma kernel CSMain
 
-#include "Assets/Project/SpaceEngine/Shaders/AtmospherePreprocess.cginc"
+#include "SpaceAtmospherePreprocess.cginc"
 
 Texture3D<float4> deltaSRRead; 
 Texture3D<float4> deltaSMRead; 
 
 RWTexture2D<float4> deltaEWrite;
 
-[numthreads(NUM_THREADS,NUM_THREADS,1)]
+[numthreads(NUM_THREADS, NUM_THREADS, 1)]
 void CSMain (uint3 id : SV_DispatchThreadID)
 {
 	float r, muS;
