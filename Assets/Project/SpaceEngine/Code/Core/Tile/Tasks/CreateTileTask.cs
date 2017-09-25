@@ -2,6 +2,7 @@
 using SpaceEngine.Core.Tile.Storage;
 using SpaceEngine.Core.Utilities;
 
+using System;
 using System.Collections.Generic;
 
 using UnityEngine;
@@ -76,10 +77,10 @@ namespace SpaceEngine.Core.Tile.Tasks
                     Finish();
                 }
             }
-            catch
+            catch(Exception ex)
             {
                 // NOTE : Sometimes tile producers can't find parent tile due to parent tile Task uncomplection...
-                Debug.Log("CreateTileTask.Run: There are exception inside the Task while processing!");
+                Debug.LogException(ex);
 
                 return;
             }
