@@ -59,7 +59,8 @@ namespace SpaceEngine.Core.Tile.Tasks
 
             try
             {
-                if (GodManager.Instance.DelayedCalculations && !Owner.IsLastInSequence)
+                // NOTE : Process with default even if tile level is 0 or 1 and delayed calculations is enabled...
+                if (GodManager.Instance.DelayedCalculations && !Owner.IsLastInSequence && Level > 1)
                 {
                     Owner.StartCoroutine(Owner.DoCreateTileCoroutine(Level, Tx, Ty, Slot, () =>
                     {
