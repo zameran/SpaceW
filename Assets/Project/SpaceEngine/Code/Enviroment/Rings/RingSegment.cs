@@ -37,40 +37,43 @@ using SpaceEngine.Core.Patterns.Strategy.Renderable;
 
 using UnityEngine;
 
-public class RingSegment : MonoBehaviour, IRenderable<RingSegment>
+namespace SpaceEngine.Enviroment.Rings
 {
-    public Ring Ring;
-
-    #region IRenderable
-
-    public void Render(int layer = 0)
+    public class RingSegment : MonoBehaviour, IRenderable<RingSegment>
     {
-        if (Ring == null) return;
-        if (Ring.RingSegmentMesh == null) return;
-        if (Ring.RingMaterial == null) return;
+        public Ring Ring;
 
-        var SegmentTRS = Matrix4x4.TRS(Ring.transform.position, transform.rotation, Vector3.one);
+        #region IRenderable
 
-        Graphics.DrawMesh(Ring.RingSegmentMesh, SegmentTRS, Ring.RingMaterial, layer, CameraHelper.Main(), 0);
-    }
-
-    #endregion
-
-    public void UpdateNode(Mesh mesh, Material material, Quaternion rotation)
-    {
-        if (Ring != null)
+        public void Render(int layer = 0)
         {
-            Helper.SetLocalRotation(transform, rotation);
+            if (Ring == null) return;
+            if (Ring.RingSegmentMesh == null) return;
+            if (Ring.RingMaterial == null) return;
+
+            var SegmentTRS = Matrix4x4.TRS(Ring.transform.position, transform.rotation, Vector3.one);
+
+            Graphics.DrawMesh(Ring.RingSegmentMesh, SegmentTRS, Ring.RingMaterial, layer, CameraHelper.Main(), 0);
         }
-    }
 
-    public static RingSegment Create(Ring ring)
-    {
-        var segmentGameObject = Helper.CreateGameObject("Segment", ring.transform);
-        var segment = segmentGameObject.AddComponent<RingSegment>();
+        #endregion
 
-        segment.Ring = ring;
+        public void UpdateNode(Mesh mesh, Material material, Quaternion rotation)
+        {
+            if (Ring != null)
+            {
+                Helper.SetLocalRotation(transform, rotation);
+            }
+        }
 
-        return segment;
+        public static RingSegment Create(Ring ring)
+        {
+            var segmentGameObject = Helper.CreateGameObject("Segment", ring.transform);
+            var segment = segmentGameObject.AddComponent<RingSegment>();
+
+            segment.Ring = ring;
+
+            return segment;
+        }
     }
 }

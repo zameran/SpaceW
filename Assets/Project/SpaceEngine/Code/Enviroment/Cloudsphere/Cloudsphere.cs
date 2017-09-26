@@ -33,6 +33,7 @@
 // Creator: zameran
 #endregion
 
+using SpaceEngine.Core;
 using SpaceEngine.Core.Bodies;
 using SpaceEngine.Core.Patterns.Strategy.Renderable;
 using SpaceEngine.Core.Patterns.Strategy.Uniformed;
@@ -43,7 +44,7 @@ namespace SpaceEngine.AtmosphericScattering.Cloudsphere
 {
     public class Cloudsphere : Node<Cloudsphere>, IUniformed<Material>, IRenderable<Cloudsphere>
     {
-        public CelestialBody ParentBody;
+        public Body ParentBody;
 
         public Mesh CloudsphereMesh;
 
@@ -106,13 +107,7 @@ namespace SpaceEngine.AtmosphericScattering.Cloudsphere
         {
             if (target == null) return;
 
-            if (ParentBody != null)
-            {
-                if (ParentBody.Atmosphere != null)
-                {
-                    ParentBody.Atmosphere.InitUniforms(target);
-                }
-            }
+            ParentBody.InitUniforms(target);
 
             target.SetFloat("_TransmittanceOffset", TransmittanceOffset);
         }
@@ -121,13 +116,7 @@ namespace SpaceEngine.AtmosphericScattering.Cloudsphere
         {
             if (target == null) return;
 
-            if (ParentBody != null)
-            {
-                if (ParentBody.Atmosphere != null)
-                {
-                    ParentBody.Atmosphere.SetUniforms(target);
-                }
-            }
+            ParentBody.SetUniforms(target);
 
             target.SetFloat("_TransmittanceOffset", TransmittanceOffset);
         }

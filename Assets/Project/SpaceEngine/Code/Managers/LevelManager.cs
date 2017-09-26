@@ -34,6 +34,7 @@
 #endregion
 
 using SpaceEngine.Pluginator.Enums;
+using SpaceEngine.UI.Panels;
 
 using System;
 using System.Collections;
@@ -55,6 +56,8 @@ namespace SpaceEngine.Managers
 
         private void Awake()
         {
+            Instance = this;
+
             SceneManager.sceneLoaded += OnSceneLoaded;
         }
 
@@ -67,16 +70,16 @@ namespace SpaceEngine.Managers
 
         private IEnumerator Delay(float delay, Action OnDone = null)
         {
-            yield return new WaitForSeconds(delay);
+            yield return Yielders.Get(delay);
 
             if (InjectedWaiter != null) yield return InjectedWaiter;
 
             if (OnDone != null) OnDone();
         }
 
-        public void UnloadScene(EntryPoint sceneName)
+        public AsyncOperation UnloadScene(EntryPoint sceneName)
         {
-            SceneManager.UnloadScene(sceneName.ToString());
+            return SceneManager.UnloadSceneAsync(sceneName.ToString());
         }
 
         #region SingleScene
@@ -88,8 +91,7 @@ namespace SpaceEngine.Managers
 
         public void LoadSceneDelayed(EntryPoint sceneName, float delay)
         {
-            // TODO : UI
-            //LoadingPanel.Show();
+            LoadingPanel.Show();
 
             StartCoroutine(Delay(delay, () => { LoadScene(sceneName); }));
         }
@@ -101,8 +103,7 @@ namespace SpaceEngine.Managers
 
         public void LoadSceneAsyncDelayed(EntryPoint sceneName, float delay = 2.0f)
         {
-            // TODO : UI
-            //LoadingPanel.Show();
+            LoadingPanel.Show();
 
             EventManager.BaseEvents.OnSceneWillBeLoaded.Invoke(sceneName, LoadSceneMode.Additive);
 
@@ -167,7 +168,7 @@ namespace SpaceEngine.Managers
             }
             catch (Exception ex)
             {
-                Debug.Log("[LevelManager] => LoadScene() Exception!\n" + ex.Message);
+                Debug.LogError("LevelManager.LoadScene: Exception!\n" + ex.Message);
             }
 
             return null;
@@ -181,8 +182,7 @@ namespace SpaceEngine.Managers
         {
             EventManager.BaseEvents.OnSceneLoaded.Invoke((EntryPoint)Enum.Parse(typeof(EntryPoint), loadedScene.name, true), mode);
 
-            // TODO : UI
-            //LoadingPanel.Hide();
+            LoadingPanel.Hide();
         }
 
         #endregion

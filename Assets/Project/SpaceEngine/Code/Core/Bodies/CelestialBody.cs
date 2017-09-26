@@ -42,114 +42,106 @@ using UnityEngine;
 namespace SpaceEngine.Core.Bodies
 {
     public class CelestialBody : Body, ICelestialBody
-    {
-        public Ring Ring;
-
-        public List<Shadow> Shadows = new List<Shadow>();
-
-        public bool RingEnabled = true;
-
-        public Texture2D GroundDiffuse;
-        public Texture2D GroundNormal;
-        public Texture2D DetailedNormal;
-
+    {              
         #region ICelestialBody
 
         public float Radius { get { return Size; } set { Size = value; } }
 
         public override List<string> GetKeywords()
         {
-            var Keywords = new List<string>();
+            var keywords = new List<string>();
+            var shadowsCount = ShadowCasters.Count((shadow) => shadow != null && Helper.Enabled(shadow));
+
+            if (shadowsCount > 0 && GodManager.Instance.Planetshadows)
+            {
+                keywords.Add(string.Format("SHADOW_{0}", shadowsCount));
+            }
+            else
+            {
+                keywords.Add("SHADOW_0");
+            }
+
+            var lightCount = Suns.Count((sun) => sun != null && sun.gameObject.activeInHierarchy);
+
+            if (lightCount != 0)
+            {
+                keywords.Add(string.Format("LIGHT_{0}", lightCount));
+            }
+
+            if (EclipseCasters.Count == 0)
+            {
+                keywords.Add("ECLIPSES_OFF");
+            }
+            else
+            {
+                keywords.Add(GodManager.Instance.Eclipses ? "ECLIPSES_ON" : "ECLIPSES_OFF");
+            }
+
+            if (ShineCasters.Count == 0)
+            {
+                keywords.Add("SHINE_OFF");
+            }
+            else
+            {
+                keywords.Add(GodManager.Instance.Planetshine ? "SHINE_ON" : "SHINE_OFF");
+            }
 
             if (Ring != null)
             {
                 if (RingEnabled)
                 {
-                    Keywords.Add("RING_ON");
-                    Keywords.Add("SCATTERING");
-
-                    var shadowsCount = Shadows.Count((shadow) => shadow != null && Helper.Enabled(shadow));
-
-                    if (shadowsCount > 0 && GodManager.Instance.Eclipses)
-                    {
-                        for (byte i = 0; i < shadowsCount; i++)
-                        {
-                            Keywords.Add("SHADOW_" + (i + 1));
-                        }
-                    }
-                    else
-                    {
-                        Keywords.Add("SHADOW_0");
-                    }
+                    keywords.Add("RING_ON");
+                    keywords.Add("SCATTERING");
                 }
                 else
                 {
-                    Keywords.Add("RING_OFF");
+                    keywords.Add("RING_OFF");
                 }
             }
             else
             {
-                Keywords.Add("RING_OFF");
+                keywords.Add("RING_OFF");
             }
 
             if (Atmosphere != null)
             {
                 if (AtmosphereEnabled)
                 {
-                    var lightCount = Atmosphere.Suns.Count((sun) => sun != null && sun.gameObject.activeInHierarchy);
-
-                    if (lightCount != 0)
-                        Keywords.Add("LIGHT_" + lightCount);
-
-                    if (Atmosphere.EclipseCasters.Count == 0)
-                    {
-                        Keywords.Add("ECLIPSES_OFF");
-                    }
-                    else
-                    {
-                        Keywords.Add(GodManager.Instance.Eclipses ? "ECLIPSES_ON" : "ECLIPSES_OFF");
-                    }
-
-                    if (Atmosphere.ShineCasters.Count == 0)
-                    {
-                        Keywords.Add("SHINE_OFF");
-                    }
-                    else
-                    {
-                        Keywords.Add(GodManager.Instance.Planetshine ? "SHINE_ON" : "SHINE_OFF");
-                    }
-
-                    Keywords.Add("ATMOSPHERE_ON");
+                    keywords.Add("ATMOSPHERE_ON");
                 }
                 else
                 {
-                    Keywords.Add("ATMOSPHERE_OFF");
+                    keywords.Add("ATMOSPHERE_OFF");
                 }
 
                 if (Ocean != null)
                 {
                     if (OceanEnabled && AtmosphereEnabled)
                     {
-                        Keywords.Add("OCEAN_ON");
+                        keywords.Add("OCEAN_ON");
+                        keywords.Add(GodManager.Instance.OceanDepth ? "OCEAN_DEPTH_ON" : "OCEAN_DEPTH_OFF");
                     }
                     else
                     {
-                        Keywords.Add("OCEAN_OFF");
+                        keywords.Add("OCEAN_OFF");
+                        keywords.Add("OCEAN_DEPTH_OFF");
                     }
                 }
                 else
                 {
-                    Keywords.Add("OCEAN_OFF");
+                    keywords.Add("OCEAN_OFF");
+                    keywords.Add("OCEAN_DEPTH_OFF");
                 }
             }
             else
             {
-                Keywords.Add("LIGHT_0");
-                Keywords.Add("ATMOSPHERE_OFF");
-                Keywords.Add("OCEAN_OFF");
+                keywords.Add("LIGHT_0");
+                keywords.Add("ATMOSPHERE_OFF");
+                keywords.Add("OCEAN_OFF");
+                keywords.Add("OCEAN_DEPTH_OFF");
             }
 
-            return Keywords;
+            return keywords;
         }
 
         #endregion
@@ -164,11 +156,6 @@ namespace SpaceEngine.Core.Bodies
         public override void SetUniforms(MaterialPropertyBlock target)
         {
             base.SetUniforms(target);
-
-            if (Ring != null)
-            {
-                Ring.SetShadows(MPB, Shadows);
-            }
         }
 
         public override void InitSetUniforms()
@@ -191,12 +178,6 @@ namespace SpaceEngine.Core.Bodies
 
         protected override void InitNode()
         {
-            if (Ring != null)
-            {
-                if (Ring.ParentBody == null)
-                    Ring.ParentBody = this;
-            }
-
             Offset = new Vector3(0.0f, 0.0f, Radius);
 
             base.InitNode();
@@ -204,14 +185,6 @@ namespace SpaceEngine.Core.Bodies
 
         protected override void UpdateNode()
         {
-            if (Ring != null)
-            {
-                if (RingEnabled)
-                {
-                    Ring.Render();
-                }
-            }
-
             base.UpdateNode();
         }
 
@@ -237,14 +210,18 @@ namespace SpaceEngine.Core.Bodies
 
         #endregion
 
+        #region IRenderable
+
+        public override void Render(int layer = 8)
+        {
+            base.Render(layer);
+        }
+
+        #endregion
+
         protected override void OnApplicationFocus(bool focusStatus)
         {
             base.OnApplicationFocus(focusStatus);
-        }
-
-        protected override void ResetMPB()
-        {
-            base.ResetMPB();
         }
     }
 }

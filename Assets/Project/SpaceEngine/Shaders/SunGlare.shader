@@ -31,11 +31,16 @@
 // Creation Time: Undefined
 // Creator: zameran
 
-Shader "SpaceEngine/Atmosphere/SunGlare"
+Shader "SpaceEngine/Other/Sun Glare"
 {
 	SubShader 
 	{
-		Tags { "Queue" = "Transparent" "IgnoreProjector" = "True" "RenderType" = "Transparent" }
+		Tags 
+		{ 
+			"Queue" = "Transparent"
+			"IgnoreProjector" = "True"
+			"RenderType" = "Transparent"
+		}
 	
 		Pass 
 		{
@@ -47,8 +52,8 @@ Shader "SpaceEngine/Atmosphere/SunGlare"
 
 			CGPROGRAM
 			#include "UnityCG.cginc"
-			#include "Atmosphere.cginc"
-			#include "HDR.cginc"
+
+			#include "SpaceAtmosphere.cginc"
 
 			#pragma target 3.0
 			#pragma vertex vert
@@ -70,16 +75,16 @@ Shader "SpaceEngine/Atmosphere/SunGlare"
 			uniform float4x4 ghost2Settings;
 			uniform float4x4 ghost3Settings;
 			
-			uniform float UseTransmittanceOffset;
 			uniform float UseAtmosphereColors;
 			uniform float UseRadiance;
 			uniform float Eclipse;
 		
-			uniform float3 sunViewPortPos;
+			uniform float SunIndex;
+			uniform float3 SunViewPortPosition;
 
 			uniform float AspectRatio;
-		
-			uniform float3 WCPG;
+
+			uniform sampler2D _CameraFrameBufferTexture;
 			
 			struct v2f 
 			{
@@ -99,29 +104,30 @@ Shader "SpaceEngine/Atmosphere/SunGlare"
 				return OUT;
 			}
 
-			float3 OuterSunGlareRadiance(float3 sunColor)
-			{
-				return pow(max(0, sunColor), 2.2) * 2;
-			}
-
 			float2 GetTransmittanceUV_SunGlare(float r, float mu) 
 			{
-				float uR = sqrt((r - Rg) / (Rt - Rg));
-				float uMu = atan(mu * 11.950355887 + 2.1510640597) * 0.6666666667;
+				float uR, uMu;
 
-				return UseTransmittanceOffset > 0.0 ? float2(uMu, 1.5 - uR) : float2(uMu, uR);
+				uR = sqrt((r - Rg) / (Rt - Rg));
+				uMu = atan((mu + 0.15) / (1.0 + 0.15) * tan(1.5)) / 1.5;
+
+				return float2(uMu, uR);
 			}
 
-			float3 Extinction(float3 camera, float3 viewdir)
+			float3 Transmittance_SunGlare(float r, float mu) 
 			{
-				float3 extinction = float3(1.0, 1.0, 1.0);
+				float2 uv = GetTransmittanceUV_SunGlare(r, mu);
 
+				return tex2D(_Sky_Transmittance, uv).rgb;
+			}
+
+			float3 Extinction_SunGlare(float3 camera, float3 viewdir)
+			{
 				float r = length(camera);
 				float rMu = dot(camera, viewdir);
 				float mu = rMu / r;
 
 				float deltaSq = SQRT(rMu * rMu - r * r + Rt * Rt, 0.000001);
-
 				float din = max(-rMu - deltaSq, 0.0);
 
 				if (din > 0.0)
@@ -132,37 +138,42 @@ Shader "SpaceEngine/Atmosphere/SunGlare"
 					r = Rt;
 				}
 
-				float3 transmittance = tex2D(_Sky_Transmittance, GetTransmittanceUV_SunGlare(r, mu)).rgb;
+				return (r > Rt) ? float3(1.0, 1.0, 1.0) : Transmittance_SunGlare(r, mu);;
+			}
 
-				return (r > Rt) ? float3(1.0, 1.0, 1.0) : transmittance;
+			float3 OuterRadiance_SunGlare(float3 sunColor)
+			{
+				return pow(max(0, sunColor), 2.2) * 2;
 			}
 
 			float4 frag(v2f IN) : COLOR
 			{
 				float3 WCP = _Globals_WorldCameraPos;
-				float3 WSD2C = normalize(WCP - _Sun_Positions_1[0]); //World sun direction to camera.
+				float3 WCPG = WCP + _Atmosphere_Origin; // Current camera position with offset applied...
+				//float3 WSD = _Sun_WorldDirections_1[SunIndex];
+				float3 WSD = normalize(_Sun_Positions_1[SunIndex] - WCPG);
 
-				float2 toScreenCenter = sunViewPortPos.xy - 0.5;
+				float2 toScreenCenter = SunViewPortPosition.xy - 0.5;
 
 				float3 outputColor = 0;
 				float3 sunColor = 0;
 				float3 ghosts = 0;
 
-				sunColor += flareSettings.x * (tex2D(sunFlare, (IN.uv.xy - sunViewPortPos.xy) * float2(AspectRatio * flareSettings.y, 1.0) * flareSettings.z * Scale + 0.5).rgb);
-				sunColor += spikesSettings.x * (tex2D(sunSpikes, (IN.uv.xy - sunViewPortPos.xy) * float2(AspectRatio * spikesSettings.y, 1.0) * spikesSettings.z * Scale + 0.5).rgb); 
+				sunColor += flareSettings.x * (tex2D(sunFlare, (IN.uv.xy - SunViewPortPosition.xy) * float2(AspectRatio * flareSettings.y, 1.0) * flareSettings.z * Scale + 0.5).rgb);
+				sunColor += spikesSettings.x * (tex2D(sunSpikes, (IN.uv.xy - SunViewPortPosition.xy) * float2(AspectRatio * spikesSettings.y, 1.0) * spikesSettings.z * Scale + 0.5).rgb); 
 				
 				for (int i = 0; i < 4; ++i)
 				{			
 					ghosts += ghost1Settings[i].x * 
-							  (tex2D(sunGhost1, (IN.uv.xy - sunViewPortPos.xy + (toScreenCenter * ghost1Settings[i].w)) * 
+							  (tex2D(sunGhost1, (IN.uv.xy - SunViewPortPosition.xy + (toScreenCenter * ghost1Settings[i].w)) * 
 							  float2(AspectRatio * ghost1Settings[i].y, 1.0) * ghost1Settings[i].z + 0.5).rgb);
 
 					ghosts += ghost2Settings[i].x * 
-							  (tex2D(sunGhost2, (IN.uv.xy - sunViewPortPos.xy + (toScreenCenter * ghost2Settings[i].w)) * 
+							  (tex2D(sunGhost2, (IN.uv.xy - SunViewPortPosition.xy + (toScreenCenter * ghost2Settings[i].w)) * 
 							  float2(AspectRatio * ghost2Settings[i].y, 1.0) * ghost2Settings[i].z + 0.5).rgb);
 
 					ghosts += ghost3Settings[i].x *
-							  (tex2D(sunGhost3, (IN.uv.xy - sunViewPortPos.xy + (toScreenCenter * ghost3Settings[i].w)) * 
+							  (tex2D(sunGhost3, (IN.uv.xy - SunViewPortPosition.xy + (toScreenCenter * ghost3Settings[i].w)) * 
 							  float2(AspectRatio * ghost3Settings[i].y, 1.0) * ghost3Settings[i].z + 0.5).rgb);
 				}	
 
@@ -172,18 +183,23 @@ Shader "SpaceEngine/Atmosphere/SunGlare"
 				outputColor += ghosts;
 				outputColor *= Fade;
 				outputColor *= Eclipse;
-						
+				
 				if (UseRadiance > 0.0)
 				{
-					outputColor = OuterSunGlareRadiance(outputColor);
+					outputColor = OuterRadiance_SunGlare(outputColor);
 				}
 
 				if (UseAtmosphereColors > 0.0)
 				{
-					outputColor *= Extinction(WCP, _Globals_Origin - WSD2C);
+					outputColor *= Extinction_SunGlare(WCPG, WSD);
 				}
 
-				return float4(outputColor, 1.0);				
+				//float3 gray = float3(0.299, 0.587, 0.114);
+				//float4 frameBuffer = tex2D(_CameraFrameBufferTexture, SunViewPortPosition.xy);
+
+				//if (dot(frameBuffer, gray) >= 1.0) {  }
+
+				return float4(outputColor, 0.0);				
 			}			
 			ENDCG
 		}

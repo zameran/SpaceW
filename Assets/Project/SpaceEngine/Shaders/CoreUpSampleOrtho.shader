@@ -14,13 +14,18 @@
 
 			#include "TCCommon.cginc"
 
+			#define CORE_PORDUCER_ADDITIONAL_UV
+
 			#include "Core.cginc"
 
 			#pragma target 4.0
 			#pragma vertex vert
 			#pragma fragment frag
 			
-			uniform float _TileWidth;					// Size in pixels of one tile (including borders)
+			//x - size in pixels of one tile (including borders), 
+			//y - size in meters of a pixel of the elevation texture, 
+			//z - (tileWidth - 2 * BORDER) / grid mesh size for display.
+			uniform float4 _TileWSD;
 
 			uniform sampler2D _CoarseLevelSampler;		// Coarse level texture
 			uniform float4 _CoarseLevelOSL;				// Lower left corner of patch to upsample, one over size in pixels of coarse level texture, layer id
@@ -41,12 +46,7 @@
 				float4(9.0, 3.0, 3.0, 1.0)
 			};
 
-			void vert(in VertexProducerInput v, out VertexProducerOutput o)
-			{	
-				o.pos = mul(UNITY_MATRIX_MVP, v.vertex);
-				o.uv0 = v.texcoord.xy;
-				o.uv1 = v.texcoord.xy * _TileWidth;
-			}
+			CORE_PRODUCER_VERTEX_PROGRAM(_TileWSD.x)
 			
 			void frag(in VertexProducerOutput IN, out float4 output : COLOR)
 			{		
@@ -78,7 +78,7 @@
 					result = (result - 128.0) * -1.0 + c;
 				}
 				
-				float2 nuv = (uv + 0.5) / _TileWidth;
+				float2 nuv = (uv + 0.5) / _TileWSD.x;
 				float4 uvs = float4(nuv, 1.0 - nuv);
 				
 				float2 noiseUV = float2(uvs[int(_NoiseUVLH.x)], uvs[int(_NoiseUVLH.y)]);

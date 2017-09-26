@@ -34,6 +34,7 @@
 #endregion
 
 using UnityEngine;
+using UnityEngine.Rendering;
 
 public static class RTExtensions
 {
@@ -43,6 +44,8 @@ public static class RTExtensions
         {
             enableRandomWrite = true
         };
+
+        SetName(ref rt);
 
         rt.Create();
 
@@ -56,6 +59,24 @@ public static class RTExtensions
             enableRandomWrite = true
         };
 
+        SetName(ref rt);
+
+        rt.Create();
+
+        return rt;
+    }
+
+    public static RenderTexture CreateCubeRTexture(int size, int depth, HideFlags flags)
+    {
+        var rt = new RenderTexture(size, size, depth, RenderTextureFormat.ARGB32)
+        {
+            enableRandomWrite = true,
+            dimension = TextureDimension.Cube,
+            hideFlags = flags
+        };
+
+        SetName(ref rt);
+
         rt.Create();
 
         return rt;
@@ -67,6 +88,98 @@ public static class RTExtensions
         {
             enableRandomWrite = true
         };
+
+        SetName(ref rt);
+
+        rt.Create();
+
+        return rt;
+    }
+
+    public static RenderTexture CreateRTexture(int size, int depth, RenderTextureFormat format, FilterMode fm, TextureWrapMode twm)
+    {
+        var rt = new RenderTexture(size, size, depth, format)
+        {
+            enableRandomWrite = true,
+            filterMode = fm,
+            wrapMode = twm
+        };
+
+        SetName(ref rt);
+
+        rt.Create();
+
+        return rt;
+    }
+
+    public static RenderTexture CreateRTexture(int size, int depth, RenderTextureFormat format, FilterMode fm, TextureWrapMode twm, int volumeDepth)
+    {
+        var rt = new RenderTexture(size, size, depth, format)
+        {
+            enableRandomWrite = true,
+            filterMode = fm,
+            wrapMode = twm,
+            useMipMap = false,
+            dimension = UnityEngine.Rendering.TextureDimension.Tex3D,
+            volumeDepth = volumeDepth
+        };
+
+        SetName(ref rt);
+
+        rt.Create();
+
+        return rt;
+    }
+
+    public static RenderTexture CreateRTexture(int size, int depth, RenderTextureFormat format, FilterMode fm, TextureWrapMode twm, bool usemm, int al)
+    {
+        var rt = new RenderTexture(size, size, depth, format)
+        {
+            enableRandomWrite = true,
+            filterMode = fm,
+            wrapMode = twm,
+            useMipMap = usemm,
+            anisoLevel = al
+        };
+
+        SetName(ref rt);
+
+        rt.Create();
+
+        return rt;
+    }
+
+    public static RenderTexture CreateRTexture(int size, int depth, RenderTextureFormat format, FilterMode fm, TextureWrapMode twm, bool usemm, bool erw, int al)
+    {
+        var rt = new RenderTexture(size, size, depth, format)
+        {
+            enableRandomWrite = erw,
+            filterMode = fm,
+            wrapMode = twm,
+            useMipMap = usemm,
+            anisoLevel = al
+        };
+
+        SetName(ref rt);
+
+        rt.Create();
+
+        return rt;
+    }
+
+    public static RenderTexture CreateRTexture(int size, int depth, RenderTextureFormat format, FilterMode fm, TextureWrapMode twm, bool usemm, int al, bool pot)
+    {
+        var rt = new RenderTexture(size, size, depth, format)
+        {
+            enableRandomWrite = true,
+            filterMode = fm,
+            wrapMode = twm,
+            useMipMap = usemm,
+            anisoLevel = al,
+            isPowerOfTwo = pot
+        };
+
+        SetName(ref rt);
 
         rt.Create();
 
@@ -80,6 +193,8 @@ public static class RTExtensions
             enableRandomWrite = true
         };
 
+        SetName(ref rt);
+
         rt.Create();
 
         return rt;
@@ -92,6 +207,8 @@ public static class RTExtensions
             enableRandomWrite = true
         };
 
+        SetName(ref rt);
+
         rt.Create();
 
         return rt;
@@ -103,6 +220,8 @@ public static class RTExtensions
         {
             enableRandomWrite = true
         };
+
+        SetName(ref rt);
 
         rt.Create();
 
@@ -117,6 +236,8 @@ public static class RTExtensions
             filterMode = fm,
             wrapMode = twm
         };
+
+        SetName(ref rt);
 
         rt.Create();
 
@@ -135,6 +256,8 @@ public static class RTExtensions
             volumeDepth = volumeDepth
         };
 
+        SetName(ref rt);
+
         rt.Create();
 
         return rt;
@@ -151,6 +274,8 @@ public static class RTExtensions
             anisoLevel = al
         };
 
+        SetName(ref rt);
+
         rt.Create();
 
         return rt;
@@ -166,6 +291,8 @@ public static class RTExtensions
             useMipMap = usemm,
             anisoLevel = al
         };
+
+        SetName(ref rt);
 
         rt.Create();
 
@@ -184,6 +311,8 @@ public static class RTExtensions
             isPowerOfTwo = pot
         };
 
+        SetName(ref rt);
+
         rt.Create();
 
         return rt;
@@ -197,5 +326,15 @@ public static class RTExtensions
         rt.Release();
 
         Object.DestroyImmediate(rt);
+    }
+
+    private static void SetName(ref RenderTexture rt)
+    {
+        rt.name = "Temp GPU RTexture";
+    }
+
+    private static void SetName(ref RenderTexture rt, string name)
+    {
+        rt.name = name;
     }
 }

@@ -35,28 +35,31 @@
 
 using UnityEngine;
 
-public abstract class Shadow : MonoBehaviour
+namespace SpaceEngine.Enviroment.Shadows
 {
-    public Light Light;
-
-    public Matrix4x4 Matrix;
-
-    public float Ratio;
-
-    public abstract Texture GetTexture();
-
-    protected virtual void Start()
+    public abstract class Shadow : MonoBehaviour
     {
+        public Light Light;
 
-    }
+        public Matrix4x4 Matrix;
 
-    public virtual bool CalculateShadow()
-    {
-        if (Helper.Enabled(Light) == true && Light.intensity > 0.0f)
+        public float Ratio;
+
+        public abstract Texture GetTexture();
+
+        protected virtual void Start()
         {
-            return true;
+
         }
 
-        return false;
+        public virtual bool CalculateShadow()
+        {
+            if (Helper.Enabled(Light) == true && Light.intensity > 0.0f)
+            {
+                return true;
+            }
+
+            return false;
+        }
     }
 }

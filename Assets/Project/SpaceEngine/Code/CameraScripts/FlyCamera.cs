@@ -39,7 +39,7 @@ using UnityEngine;
 
 namespace SpaceEngine.Cameras
 {
-    [ExecutionOrder(-9998)]
+    [ExecutionOrder(-9990)]
     public class FlyCamera : GameCamera
     {
         public Body Body { get { return GodManager.Instance.ActiveBody; } }
@@ -61,33 +61,36 @@ namespace SpaceEngine.Cameras
         public bool Controllable = true;
 
         private bool Aligned = false;
+        private bool Supercruise = false;
 
         private Ray RayScreen;
 
         protected override void Init()
         {
-            if (Body != null)
-            {
-                DistanceToAlign = Body.Size * 1.025f;
-                DistanceToCore = Vector3.Distance(transform.position, Body.transform.position);
-            }
-
             NearClipPlaneCache = CameraComponent.nearClipPlane;
             FarClipPlaneCache = CameraComponent.farClipPlane;
 
             Rotation = new Vector3(transform.eulerAngles.x, transform.eulerAngles.y, 0); // NOTE : Prevent crazy rotation on start...
 
+            UpdateDistances();
             UpdateClipPlanes();
+
+            MainRenderer.Instance.ComposeOutputRender();
         }
 
         protected override void FixedUpdate()
         {
             base.FixedUpdate();
 
+            CameraComponent.depthTextureMode = DepthTextureMode.Depth;
+
+            UpdateDistances();
             UpdateClipPlanes();
 
             if (Controllable)
             {
+                Supercruise = !Aligned && Input.GetKey(KeyCode.F);
+
                 if (Input.GetMouseButton(0) && !MouseOverUI)
                 {
                     Rotation.z = 0;
@@ -124,26 +127,23 @@ namespace SpaceEngine.Cameras
 
                     if (!Aligned)
                         transform.Rotate(new Vector3(0, 0, Rotation.z));
+
+                    if (Input.GetKey(KeyCode.G))
+                    {
+                        transform.rotation = Quaternion.RotateTowards(transform.rotation, Quaternion.LookRotation(Body.Origin - transform.position), Time.fixedDeltaTime * RotationSpeed * 30.0f);
+                    }
                 }
-
-                if (Body.GetBodyDeformationType() == BodyDeformationType.Spherical)
+                
+                // NOTE : Body shape dependent...
+                if (DistanceToCore < DistanceToAlign)
                 {
-                    DistanceToCore = Vector3.Distance(transform.position, Body.transform.position);
+                    Aligned = true;
 
-                    if (DistanceToCore < DistanceToAlign)
-                    {
-                        Aligned = true;
+                    var gravityVector = Body.transform.position - transform.position;
 
-                        var gravityVector = Body.transform.position - transform.position;
+                    TargetRotation = Quaternion.LookRotation(transform.forward, -gravityVector);
 
-                        TargetRotation = Quaternion.LookRotation(transform.forward, -gravityVector);
-
-                        transform.rotation = Quaternion.Slerp(transform.rotation, TargetRotation, Time.fixedDeltaTime * RotationSpeed * 3f);
-                    }
-                    else
-                    {
-                        Aligned = false;
-                    }
+                    transform.rotation = Quaternion.Slerp(transform.rotation, TargetRotation, Time.fixedDeltaTime * RotationSpeed * 3.0f);
                 }
                 else
                 {
@@ -165,31 +165,33 @@ namespace SpaceEngine.Cameras
                     CurrentSpeed = Speed / 10f;
 
                 Speed += Mathf.RoundToInt(Input.GetAxis("Mouse ScrollWheel") * 100.0f);
-                Speed = Mathf.Clamp(Speed, 1.0f, 10000.0f);
+                Speed = Mathf.Clamp(Speed, 1.0f, 100000000.0f);
+
+                if (Supercruise) CurrentSpeed *= 1000.0f;
 
                 transform.Translate(Velocity * CurrentSpeed);
             }
 
             if (Body != null)
             {
-                var worldPosition = (Vector3d)transform.position;
+                var worldPosition = (Vector3d)(transform.position - Body.Origin);
 
-                if (Body.GetBodyDeformationType() == BodyDeformationType.Spherical)
+                // NOTE : Body shape dependent...
+                if (worldPosition.Magnitude() < Body.Size + Body.SizeOffset + Body.HeightZ)
                 {
-                    if (worldPosition.Magnitude() < Body.Size + 10.0 + Body.HeightZ)
-                    {
-                        worldPosition = worldPosition.Normalized(Body.Size + 10.0 + Body.HeightZ);
-                    }
-                }
-                else
-                {
-                    if (worldPosition.z < 10.0 + Body.HeightZ)
-                    {
-                        worldPosition.z = 10.0 + Body.HeightZ;
-                    }
+                    worldPosition = worldPosition.Normalized(Body.Size + Body.SizeOffset + Body.HeightZ);
                 }
 
-                transform.position = worldPosition;
+                transform.position = worldPosition + (Vector3d)Body.Origin;
+            }
+        }
+
+        private void UpdateDistances()
+        {
+            if (Body != null)
+            {
+                DistanceToAlign = Body.Size * 1.025f;
+                DistanceToCore = Vector3.Distance(transform.position, Body.transform.position);
             }
         }
 
@@ -199,30 +201,13 @@ namespace SpaceEngine.Cameras
             {
                 if (Body != null)
                 {
-                    if (Body.GetBodyDeformationType() == BodyDeformationType.Spherical)
-                    {
-                        var h = (DistanceToCore - Body.Size - Body.Amplitude - (float)Body.HeightZ);
+                    // NOTE : Body shape dependent...
+                    var h = (DistanceToCore - Body.Size - (float)Body.HeightZ);
 
-                        // TODO : Take ocean in to account...
-                        //if (Body.Ocean != null && Body.OceanEnabled) h = h - Body.Ocean.OceanLevel;
+                    if (h < 1.0f) { h = 1.0f; }
 
-                        if (h < 1.0f) { h = 1.0f; }
-
-                        CameraComponent.nearClipPlane = Mathf.Clamp(0.1f * h, 0.03f, 1000.0f);
-                        CameraComponent.farClipPlane = Mathf.Clamp(1e6f * h, 1000.0f, 1e12f);
-                    }
-                    else
-                    {
-                        var h = (transform.position.z - Body.Amplitude - (float)Body.HeightZ);
-
-                        // TODO : Take ocean in to account...
-                        //if (Body.Ocean != null && Body.OceanEnabled) h = h - Body.Ocean.OceanLevel;
-
-                        if (h < 1.0f) { h = 1.0f; }
-
-                        CameraComponent.nearClipPlane = Mathf.Clamp(0.1f * h, 0.03f, 1000.0f);
-                        CameraComponent.farClipPlane = Mathf.Clamp(1e6f * h, 1000.0f, 1e12f);
-                    }
+                    CameraComponent.nearClipPlane = Mathf.Clamp(0.1f * h, 0.03f, 1000.0f);
+                    CameraComponent.farClipPlane = Mathf.Clamp(1e6f * h, 1000.0f, 1e12f);
                 }
                 else
                 {

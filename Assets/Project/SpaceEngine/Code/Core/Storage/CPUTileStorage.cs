@@ -46,7 +46,7 @@ namespace SpaceEngine.Core.Storage
             // NOTE : Size is sqaured as the array is 2D (but stored as a 1D array)
             var size = TileSize * TileSize * Channels;
 
-            for (var i = 0; i < Capacity; i++)
+            for (ushort i = 0; i < Capacity; i++)
             {
                 switch ((int)DataType)
                 {
@@ -66,7 +66,7 @@ namespace SpaceEngine.Core.Storage
                         {
                             AddSlot(i, new CPUSlot<float>(this, size));
 
-                            Debug.LogWarning(string.Format("{0} data type isn't supported by {1}! Float type will be used!", DataType.ToString(), GetType().Name));
+                            Debug.LogWarning(string.Format("TileStorage: {0} data type isn't supported by {1}! Float type will be used!", DataType.ToString(), GetType().Name));
 
                             break;
                         }

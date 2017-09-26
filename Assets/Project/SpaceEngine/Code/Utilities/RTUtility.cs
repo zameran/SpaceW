@@ -30,305 +30,244 @@ using UnityEngine;
 
 using Object = UnityEngine.Object;
 
-public static class RTUtility
+namespace SpaceEngine.Core.Utilities
 {
-    public static void Blit(RenderTexture src, RenderTexture des, bool clear = false)
+    public static class RTUtility
     {
-        var oldRT = RenderTexture.active;
-
-        Graphics.SetRenderTarget(des);
-
-        if (clear) GL.Clear(true, true, Color.clear);
-
-        GL.PushMatrix();
-        GL.LoadOrtho();
-
-        GL.Begin(GL.QUADS);
-        GL.TexCoord3(0.0f, 0.0f, 0.0f);
-        GL.Vertex3(0.0f, 0.0f, 0.1f);
-        GL.TexCoord3(1.0f, 0.0f, 0.0f);
-        GL.Vertex3(1.0f, 0.0f, 0.1f);
-        GL.TexCoord3(1.0f, 1.0f, 0.0f);
-        GL.Vertex3(1.0f, 1.0f, 0.1f);
-        GL.TexCoord3(0.0f, 1.0f, 0.0f);
-        GL.Vertex3(0.0f, 1.0f, 0.1f);
-        GL.End();
-
-        GL.PopMatrix();
-
-        RenderTexture.active = oldRT;
-    }
-
-    public static void Blit(RenderTexture src, RenderTexture des, Material mat, int pass = 0, bool clear = true)
-    {
-        mat.SetTexture("_MainTex", src);
-
-        var oldRT = RenderTexture.active;
-
-        Graphics.SetRenderTarget(des);
-
-        if (clear) GL.Clear(true, true, Color.clear);
-
-        GL.PushMatrix();
-        GL.LoadOrtho();
-
-        mat.SetPass(pass);
-
-        GL.Begin(GL.QUADS);
-        GL.TexCoord3(0.0f, 0.0f, 0.0f);
-        GL.Vertex3(0.0f, 0.0f, 0.1f);
-        GL.TexCoord3(1.0f, 0.0f, 0.0f);
-        GL.Vertex3(1.0f, 0.0f, 0.1f);
-        GL.TexCoord3(1.0f, 1.0f, 0.0f);
-        GL.Vertex3(1.0f, 1.0f, 0.1f);
-        GL.TexCoord3(0.0f, 1.0f, 0.0f);
-        GL.Vertex3(0.0f, 1.0f, 0.1f);
-        GL.End();
-
-        GL.PopMatrix();
-
-        RenderTexture.active = oldRT;
-    }
-
-    public static void Blit(RenderTexture src, RenderTexture des, Rect rect, bool clear = true)
-    {
-        //rect must have normalized coords, ie 0 - 1
-
-        var oldRT = RenderTexture.active;
-
-        Graphics.SetRenderTarget(des);
-
-        if (clear) GL.Clear(true, true, Color.clear);
-
-        GL.PushMatrix();
-        GL.LoadOrtho();
-
-        GL.Begin(GL.QUADS);
-        GL.TexCoord2(rect.x, rect.y);
-        GL.Vertex3(rect.x, rect.y, 0.1f);
-        GL.TexCoord2(rect.x + rect.width, rect.y);
-        GL.Vertex3(rect.x + rect.width, rect.y, 0.1f);
-        GL.TexCoord2(rect.x + rect.width, rect.y + rect.height);
-        GL.Vertex3(rect.x + rect.width, rect.y + rect.height, 0.1f);
-        GL.TexCoord2(rect.x, rect.y + rect.height);
-        GL.Vertex3(rect.x, rect.y + rect.height, 0.1f);
-        GL.End();
-
-        GL.PopMatrix();
-
-        RenderTexture.active = oldRT;
-    }
-
-    public static void Blit(RenderTexture src, RenderTexture des, Material mat, Rect rect, int pass = 0, bool clear = true)
-    {
-        //rect must have normalized coords, ie 0 - 1
-
-        mat.SetTexture("_MainTex", src);
-
-        var oldRT = RenderTexture.active;
-
-        Graphics.SetRenderTarget(des);
-
-        if (clear) GL.Clear(true, true, Color.clear);
-
-        GL.PushMatrix();
-        GL.LoadOrtho();
-
-        mat.SetPass(pass);
-
-        GL.Begin(GL.QUADS);
-        GL.TexCoord2(rect.x, rect.y);
-        GL.Vertex3(rect.x, rect.y, 0.1f);
-        GL.TexCoord2(rect.x + rect.width, rect.y);
-        GL.Vertex3(rect.x + rect.width, rect.y, 0.1f);
-        GL.TexCoord2(rect.x + rect.width, rect.y + rect.height);
-        GL.Vertex3(rect.x + rect.width, rect.y + rect.height, 0.1f);
-        GL.TexCoord2(rect.x, rect.y + rect.height);
-        GL.Vertex3(rect.x, rect.y + rect.height, 0.1f);
-        GL.End();
-
-        GL.PopMatrix();
-
-        RenderTexture.active = oldRT;
-    }
-
-    public static void MultiTargetBlit(RenderTexture[] des, Material mat, int pass = 0)
-    {
-        //RenderTexture oldRT = RenderTexture.active;
-
-        var rb = new RenderBuffer[des.Length];
-
-        for (int i = 0; i < des.Length; i++)
+        public static void Blit(RenderTexture src, RenderTexture des)
         {
-            rb[i] = des[i].colorBuffer;
+            Graphics.SetRenderTarget(des);
+
+            GL.PushMatrix();
+            GL.LoadOrtho();
+
+            GL.Begin(GL.QUADS);
+            GL.TexCoord2(0.0f, 0.0f); GL.Vertex3(0.0f, 0.0f, 0.1f);
+            GL.TexCoord2(1.0f, 0.0f); GL.Vertex3(1.0f, 0.0f, 0.1f);
+            GL.TexCoord2(1.0f, 1.0f); GL.Vertex3(1.0f, 1.0f, 0.1f);
+            GL.TexCoord2(0.0f, 1.0f); GL.Vertex3(0.0f, 1.0f, 0.1f);
+            GL.End();
+
+            GL.PopMatrix();
         }
 
-        Graphics.SetRenderTarget(rb, des[0].depthBuffer);
-
-        GL.Clear(true, true, Color.clear);
-
-        GL.PushMatrix();
-        GL.LoadOrtho();
-
-        mat.SetPass(pass);
-
-        GL.Begin(GL.QUADS);
-        GL.TexCoord2(0.0f, 0.0f);
-        GL.Vertex3(0.0f, 0.0f, 0.1f);
-        GL.TexCoord2(1.0f, 0.0f);
-        GL.Vertex3(1.0f, 0.0f, 0.1f);
-        GL.TexCoord2(1.0f, 1.0f);
-        GL.Vertex3(1.0f, 1.0f, 0.1f);
-        GL.TexCoord2(0.0f, 1.0f);
-        GL.Vertex3(0.0f, 1.0f, 0.1f);
-        GL.End();
-
-        GL.PopMatrix();
-
-        //RenderTexture.active = oldRT;
-    }
-
-    public static void MultiTargetBlit(RenderBuffer[] des_rb, RenderBuffer des_db, Material mat, int pass = 0)
-    {
-        //RenderTexture oldRT = RenderTexture.active;
-
-        Graphics.SetRenderTarget(des_rb, des_db);
-
-        GL.Clear(true, true, Color.clear);
-
-        GL.PushMatrix();
-        GL.LoadOrtho();
-
-        mat.SetPass(pass);
-
-        GL.Begin(GL.QUADS);
-        GL.TexCoord2(0.0f, 0.0f);
-        GL.Vertex3(0.0f, 0.0f, 0.1f);
-        GL.TexCoord2(1.0f, 0.0f);
-        GL.Vertex3(1.0f, 0.0f, 0.1f);
-        GL.TexCoord2(1.0f, 1.0f);
-        GL.Vertex3(1.0f, 1.0f, 0.1f);
-        GL.TexCoord2(0.0f, 1.0f);
-        GL.Vertex3(0.0f, 1.0f, 0.1f);
-        GL.End();
-
-        GL.PopMatrix();
-
-        //RenderTexture.active = oldRT;
-    }
-
-    public static void Swap(RenderTexture[] texs)
-    {
-        var temp = texs[0];
-
-        texs[0] = texs[1];
-        texs[1] = temp;
-    }
-
-    public static void Swap(ref RenderTexture tex0, ref RenderTexture tex1)
-    {
-        var temp = tex0;
-
-        tex0 = tex1;
-        tex1 = temp;
-    }
-
-    public static void ClearColor(RenderTexture tex)
-    {
-        Graphics.SetRenderTarget(tex);
-
-        GL.Clear(false, true, Color.clear);
-    }
-
-    public static void ClearColor(RenderTexture[] texs)
-    {
-        for (int i = 0; i < texs.Length; i++)
+        public static void Blit(RenderTexture src, RenderTexture des, Material mat, int pass = 0)
         {
-            Graphics.SetRenderTarget(texs[i]);
+            mat.SetTexture("_MainTex", src);
+
+            Graphics.SetRenderTarget(des);
+
+            GL.PushMatrix();
+            GL.LoadOrtho();
+
+            mat.SetPass(pass);
+
+            GL.Begin(GL.QUADS);
+            GL.TexCoord2(0.0f, 0.0f); GL.Vertex3(0.0f, 0.0f, 0.1f);
+            GL.TexCoord2(1.0f, 0.0f); GL.Vertex3(1.0f, 0.0f, 0.1f);
+            GL.TexCoord2(1.0f, 1.0f); GL.Vertex3(1.0f, 1.0f, 0.1f);
+            GL.TexCoord2(0.0f, 1.0f); GL.Vertex3(0.0f, 1.0f, 0.1f);
+            GL.End();
+
+            GL.PopMatrix();
+        }
+
+        public static void Blit(RenderTexture src, RenderTexture des, Rect rect)
+        {
+            Graphics.SetRenderTarget(des);
+
+            GL.PushMatrix();
+            GL.LoadOrtho();
+
+            GL.Begin(GL.QUADS);
+            GL.TexCoord2(rect.x, rect.y); GL.Vertex3(rect.x, rect.y, 0.1f);
+            GL.TexCoord2(rect.x + rect.width, rect.y); GL.Vertex3(rect.x + rect.width, rect.y, 0.1f);
+            GL.TexCoord2(rect.x + rect.width, rect.y + rect.height); GL.Vertex3(rect.x + rect.width, rect.y + rect.height, 0.1f);
+            GL.TexCoord2(rect.x, rect.y + rect.height); GL.Vertex3(rect.x, rect.y + rect.height, 0.1f);
+            GL.End();
+
+            GL.PopMatrix();
+        }
+
+        public static void Blit(RenderTexture src, RenderTexture des, Material mat, Rect rect, int pass = 0)
+        {
+            mat.SetTexture("_MainTex", src);
+
+            Graphics.SetRenderTarget(des);
+
+            GL.PushMatrix();
+            GL.LoadOrtho();
+
+            mat.SetPass(pass);
+
+            GL.Begin(GL.QUADS);
+            GL.TexCoord2(rect.x, rect.y); GL.Vertex3(rect.x, rect.y, 0.1f);
+            GL.TexCoord2(rect.x + rect.width, rect.y); GL.Vertex3(rect.x + rect.width, rect.y, 0.1f);
+            GL.TexCoord2(rect.x + rect.width, rect.y + rect.height); GL.Vertex3(rect.x + rect.width, rect.y + rect.height, 0.1f);
+            GL.TexCoord2(rect.x, rect.y + rect.height); GL.Vertex3(rect.x, rect.y + rect.height, 0.1f);
+            GL.End();
+
+            GL.PopMatrix();
+        }
+
+        public static void MultiTargetBlit(RenderTexture[] des, Material mat, int pass = 0)
+        {
+            var rb = new RenderBuffer[des.Length];
+
+            for (int i = 0; i < des.Length; i++)
+                rb[i] = des[i].colorBuffer;
+
+            Graphics.SetRenderTarget(rb, des[0].depthBuffer);
+
+            GL.PushMatrix();
+            GL.LoadOrtho();
+
+            mat.SetPass(pass);
+
+            GL.Begin(GL.QUADS);
+            GL.TexCoord2(0.0f, 0.0f); GL.Vertex3(0.0f, 0.0f, 0.1f);
+            GL.TexCoord2(1.0f, 0.0f); GL.Vertex3(1.0f, 0.0f, 0.1f);
+            GL.TexCoord2(1.0f, 1.0f); GL.Vertex3(1.0f, 1.0f, 0.1f);
+            GL.TexCoord2(0.0f, 1.0f); GL.Vertex3(0.0f, 1.0f, 0.1f);
+            GL.End();
+
+            GL.PopMatrix();
+        }
+
+        public static void MultiTargetBlit(RenderBuffer[] des_rb, RenderBuffer des_db, Material mat, int pass = 0)
+        {
+            Graphics.SetRenderTarget(des_rb, des_db);
+
+            GL.PushMatrix();
+            GL.LoadOrtho();
+
+            mat.SetPass(pass);
+
+            GL.Begin(GL.QUADS);
+            GL.TexCoord2(0.0f, 0.0f); GL.Vertex3(0.0f, 0.0f, 0.1f);
+            GL.TexCoord2(1.0f, 0.0f); GL.Vertex3(1.0f, 0.0f, 0.1f);
+            GL.TexCoord2(1.0f, 1.0f); GL.Vertex3(1.0f, 1.0f, 0.1f);
+            GL.TexCoord2(0.0f, 1.0f); GL.Vertex3(0.0f, 1.0f, 0.1f);
+            GL.End();
+
+            GL.PopMatrix();
+        }
+
+        public static void Swap(RenderTexture[] texs)
+        {
+            var temp = texs[0];
+
+            texs[0] = texs[1];
+            texs[1] = temp;
+        }
+
+        public static void Swap(ref RenderTexture tex0, ref RenderTexture tex1)
+        {
+            var temp = tex0;
+
+            tex0 = tex1;
+            tex1 = temp;
+        }
+
+        public static void ClearColor(RenderTexture tex)
+        {
+            Graphics.SetRenderTarget(tex);
+
             GL.Clear(false, true, Color.clear);
         }
-    }
 
-    public static void SetToPoint(RenderTexture[] texs)
-    {
-        for (int i = 0; i < texs.Length; i++)
+        public static void ClearColor(RenderTexture[] texs)
         {
-            texs[i].filterMode = FilterMode.Point;
-        }
-    }
-
-    public static void SetToBilinear(RenderTexture[] texs)
-    {
-        for (int i = 0; i < texs.Length; i++)
-        {
-            texs[i].filterMode = FilterMode.Bilinear;
-        }
-    }
-
-    public static void Destroy(RenderTexture[] texs)
-    {
-        if (texs == null) return;
-
-        for (int i = 0; i < texs.Length; i++)
-        {
-            Object.DestroyImmediate(texs[i]);
-        }
-    }
-
-    public static void SaveAsRaw(int size, int channels, string fileName, string filePath, RenderTexture rtex, ComputeShader readDataComputeShader)
-    {
-        var buffer = new ComputeBuffer(size, sizeof(float) * channels);
-
-        CBUtility.ReadFromRenderTexture(rtex, channels, buffer, readDataComputeShader);
-
-        var data = new float[size * channels];
-
-        buffer.GetData(data);
-
-        var byteArray = new byte[size * 4 * channels];
-
-        Buffer.BlockCopy(data, 0, byteArray, 0, byteArray.Length);
-        File.WriteAllBytes(Application.dataPath + filePath + fileName + ".raw", byteArray);
-
-        buffer.Release();
-    }
-
-    public static void SaveAs8bit(int width, int height, int channels, string fileName, string filePath, RenderTexture rtex, ComputeShader readDataComputeShader, float scale = 1.0f)
-    {
-        var buffer = new ComputeBuffer(width * height, sizeof(float) * channels);
-
-        CBUtility.ReadFromRenderTexture(rtex, channels, buffer, readDataComputeShader);
-
-        var data = new float[width * height * channels];
-
-        buffer.GetData(data);
-
-        var texture = new Texture2D(width, height);
-
-        for (int x = 0; x < width; x++)
-        {
-            for (int y = 0; y < height; y++)
+            for (int i = 0; i < texs.Length; i++)
             {
-                var color = new Color(0, 0, 0, 1);
-
-                color.r = data[(x + y * width) * channels + 0];
-
-                if (channels > 1)
-                    color.g = data[(x + y * width) * channels + 1];
-
-                if (channels > 2)
-                    color.b = data[(x + y * width) * channels + 2];
-
-                texture.SetPixel(x, y, color * scale);
+                Graphics.SetRenderTarget(texs[i]);
+                GL.Clear(false, true, Color.clear);
             }
         }
 
-        texture.Apply();
+        public static void SetToPoint(RenderTexture[] texs)
+        {
+            for (int i = 0; i < texs.Length; i++)
+            {
+                texs[i].filterMode = FilterMode.Point;
+            }
+        }
 
-        var bytes = texture.EncodeToPNG();
+        public static void SetToBilinear(RenderTexture[] texs)
+        {
+            for (int i = 0; i < texs.Length; i++)
+            {
+                texs[i].filterMode = FilterMode.Bilinear;
+            }
+        }
 
-        File.WriteAllBytes(Application.dataPath + filePath + fileName + ".png", bytes);
+        public static void Destroy(RenderTexture[] texs)
+        {
+            if (texs == null) return;
 
-        buffer.Release();
+            for (int i = 0; i < texs.Length; i++)
+            {
+                Object.DestroyImmediate(texs[i]);
+            }
+        }
+
+        public static void SaveAsRaw(int size, CBUtility.Channels channels, string fileName, string filePath, RenderTexture rtex, ComputeShader readDataComputeShader)
+        {
+            var channelsSize = (byte)channels;
+            var buffer = new ComputeBuffer(size, sizeof(float) * channelsSize);
+
+            CBUtility.ReadFromRenderTexture(rtex, channels, buffer, readDataComputeShader);
+
+            var data = new float[size * channelsSize];
+
+            buffer.GetData(data);
+
+            var byteArray = new byte[size * 4 * channelsSize];
+
+            Buffer.BlockCopy(data, 0, byteArray, 0, byteArray.Length);
+            File.WriteAllBytes(Application.dataPath + filePath + fileName + ".raw", byteArray);
+
+            buffer.Release();
+        }
+
+        public static void SaveAs8bit(int width, int height, CBUtility.Channels channels, string fileName, string filePath, RenderTexture rtex, ComputeShader readDataComputeShader, float scale = 1.0f)
+        {
+            var channelsSize = (byte)channels;
+            var buffer = new ComputeBuffer(width * height, sizeof(float) * channelsSize);
+
+            CBUtility.ReadFromRenderTexture(rtex, channels, buffer, readDataComputeShader);
+
+            var data = new float[width * height * channelsSize];
+
+            buffer.GetData(data);
+
+            var texture = new Texture2D(width, height);
+
+            for (int x = 0; x < width; x++)
+            {
+                for (int y = 0; y < height; y++)
+                {
+                    var color = new Color(0, 0, 0, 1);
+
+                    color.r = data[(x + y * width) * channelsSize + 0];
+
+                    if (channelsSize > 1)
+                        color.g = data[(x + y * width) * channelsSize + 1];
+
+                    if (channelsSize > 2)
+                        color.b = data[(x + y * width) * channelsSize + 2];
+
+                    texture.SetPixel(x, y, color * scale);
+                }
+            }
+
+            texture.Apply();
+
+            var bytes = texture.EncodeToPNG();
+
+            File.WriteAllBytes(Application.dataPath + filePath + fileName + ".png", bytes);
+
+            buffer.Release();
+        }
     }
 }

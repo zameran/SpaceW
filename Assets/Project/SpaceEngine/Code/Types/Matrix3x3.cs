@@ -23,11 +23,46 @@
 // Modified by Denis Ovchinnikov 2015-2017
 #endregion
 
+#define MATICES_UNROLL
+
+using System;
+
 namespace UnityEngine
 {
-    public struct Matrix3x3
+    public struct Matrix3x3 : IEquatable<Matrix3x3>
     {
-        public float[,] m;
+        #region Fields
+
+        public readonly float[,] m;
+
+        #endregion
+
+        #region Properties
+
+        public static Matrix3x3 identity { get { return new Matrix3x3(1.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 1.0f); } }
+
+        public static Matrix3x3 zero { get { return new Matrix3x3(0.0f); } }
+
+        public static Matrix3x3 one { get { return new Matrix3x3(1.0f); } }
+
+        #endregion
+
+        #region Constructors
+
+        public Matrix3x3(float value)
+        {
+            m = new float[3, 3];
+
+            m[0, 0] = value;
+            m[0, 1] = value;
+            m[0, 2] = value;
+            m[1, 0] = value;
+            m[1, 1] = value;
+            m[1, 2] = value;
+            m[2, 0] = value;
+            m[2, 1] = value;
+            m[2, 2] = value;
+        }
 
         public Matrix3x3(float m00, float m01, float m02, float m10, float m11, float m12, float m20, float m21, float m22)
         {
@@ -44,10 +79,53 @@ namespace UnityEngine
             m[2, 2] = m22;
         }
 
+        #endregion
+
+        #region Overrides
+
+        public override int GetHashCode()
+        {
+            return m[0, 0].GetHashCode() + m[1, 0].GetHashCode() + m[2, 0].GetHashCode() +
+                   m[0, 1].GetHashCode() + m[1, 1].GetHashCode() + m[2, 1].GetHashCode() +
+                   m[0, 2].GetHashCode() + m[1, 2].GetHashCode() + m[2, 2].GetHashCode();
+        }
+
+        public override bool Equals(object obj)
+        {
+            if (obj is Matrix3x3) { return Equals((Matrix3x3)obj); }
+            return false;
+        }
+
+        #endregion
+
+        #region IEquatable<Matrix3x3>
+
+        public bool Equals(Matrix3x3 other)
+        {
+            return this == other;
+        }
+
+        #endregion
+
+        #region Operations
+
         public static Matrix3x3 operator +(Matrix3x3 m1, Matrix3x3 m2)
         {
             var kSum = Matrix3x3.identity;
 
+#if (MATICES_UNROLL)
+            kSum.m[0, 0] = m1.m[0, 0] + m2.m[0, 0];
+            kSum.m[0, 1] = m1.m[0, 1] + m2.m[0, 1];
+            kSum.m[0, 2] = m1.m[0, 2] + m2.m[0, 2];
+
+            kSum.m[1, 0] = m1.m[1, 0] + m2.m[1, 0];
+            kSum.m[1, 1] = m1.m[1, 1] + m2.m[1, 1];
+            kSum.m[1, 2] = m1.m[1, 2] + m2.m[1, 2];
+
+            kSum.m[2, 0] = m1.m[2, 0] + m2.m[2, 0];
+            kSum.m[2, 1] = m1.m[2, 1] + m2.m[2, 1];
+            kSum.m[2, 2] = m1.m[2, 2] + m2.m[2, 2];
+#else
             for (byte iRow = 0; iRow < 3; iRow++)
             {
                 for (byte iCol = 0; iCol < 3; iCol++)
@@ -55,6 +133,7 @@ namespace UnityEngine
                     kSum.m[iRow, iCol] = m1.m[iRow, iCol] + m2.m[iRow, iCol];
                 }
             }
+#endif
 
             return kSum;
         }
@@ -63,6 +142,19 @@ namespace UnityEngine
         {
             var kSum = Matrix3x3.identity;
 
+#if (MATICES_UNROLL)
+            kSum.m[0, 0] = m1.m[0, 0] - m2.m[0, 0];
+            kSum.m[0, 1] = m1.m[0, 1] - m2.m[0, 1];
+            kSum.m[0, 2] = m1.m[0, 2] - m2.m[0, 2];
+
+            kSum.m[1, 0] = m1.m[1, 0] - m2.m[1, 0];
+            kSum.m[1, 1] = m1.m[1, 1] - m2.m[1, 1];
+            kSum.m[1, 2] = m1.m[1, 2] - m2.m[1, 2];
+
+            kSum.m[2, 0] = m1.m[2, 0] - m2.m[2, 0];
+            kSum.m[2, 1] = m1.m[2, 1] - m2.m[2, 1];
+            kSum.m[2, 2] = m1.m[2, 2] - m2.m[2, 2];
+#else
             for (byte iRow = 0; iRow < 3; iRow++)
             {
                 for (byte iCol = 0; iCol < 3; iCol++)
@@ -70,6 +162,7 @@ namespace UnityEngine
                     kSum.m[iRow, iCol] = m1.m[iRow, iCol] - m2.m[iRow, iCol];
                 }
             }
+#endif
 
             return kSum;
         }
@@ -78,6 +171,19 @@ namespace UnityEngine
         {
             var kProd = Matrix3x3.identity;
 
+#if (MATICES_UNROLL)
+            kProd.m[0, 0] = m1.m[0, 0] * m2.m[0, 0] + m1.m[0, 1] * m2.m[1, 0] + m1.m[0, 2] * m2.m[2, 0];
+            kProd.m[0, 1] = m1.m[0, 0] * m2.m[0, 1] + m1.m[0, 1] * m2.m[1, 1] + m1.m[0, 2] * m2.m[2, 1];
+            kProd.m[0, 2] = m1.m[0, 0] * m2.m[0, 2] + m1.m[0, 1] * m2.m[1, 2] + m1.m[0, 2] * m2.m[2, 2];
+
+            kProd.m[1, 0] = m1.m[1, 0] * m2.m[0, 0] + m1.m[1, 1] * m2.m[1, 0] + m1.m[1, 2] * m2.m[2, 0];
+            kProd.m[1, 1] = m1.m[1, 0] * m2.m[0, 1] + m1.m[1, 1] * m2.m[1, 1] + m1.m[1, 2] * m2.m[2, 1];
+            kProd.m[1, 2] = m1.m[1, 0] * m2.m[0, 2] + m1.m[1, 1] * m2.m[1, 2] + m1.m[1, 2] * m2.m[2, 2];
+
+            kProd.m[2, 0] = m1.m[2, 0] * m2.m[0, 0] + m1.m[2, 1] * m2.m[1, 0] + m1.m[2, 2] * m2.m[2, 0];
+            kProd.m[2, 1] = m1.m[2, 0] * m2.m[0, 1] + m1.m[2, 1] * m2.m[1, 1] + m1.m[2, 2] * m2.m[2, 1];
+            kProd.m[2, 2] = m1.m[2, 0] * m2.m[0, 2] + m1.m[2, 1] * m2.m[1, 2] + m1.m[2, 2] * m2.m[2, 2];
+#else
             for (byte iRow = 0; iRow < 3; iRow++)
             {
                 for (byte iCol = 0; iCol < 3; iCol++)
@@ -85,41 +191,116 @@ namespace UnityEngine
                     kProd.m[iRow, iCol] = m1.m[iRow, 0] * m2.m[0, iCol] + m1.m[iRow, 1] * m2.m[1, iCol] + m1.m[iRow, 2] * m2.m[2, iCol];
                 }
             }
+#endif
 
             return kProd;
         }
 
         public static Vector3 operator *(Matrix3x3 m, Vector3 v)
         {
-            var kProd = new Vector3
+            return new Vector3
             {
                 x = m.m[0, 0] * v.x + m.m[0, 1] * v.y + m.m[0, 2] * v.z,
                 y = m.m[1, 0] * v.x + m.m[1, 1] * v.y + m.m[1, 2] * v.z,
                 z = m.m[2, 0] * v.x + m.m[2, 1] * v.y + m.m[2, 2] * v.z
             };
-
-            return kProd;
         }
 
         public static Matrix3x3 operator *(Matrix3x3 m, float s)
         {
             var kProd = Matrix3x3.identity;
 
-            for (byte iRow = 0; iRow < 3; iRow++)
+#if (MATICES_UNROLL)
+            kProd.m[0, 0] = m.m[0, 0] * s;
+            kProd.m[0, 1] = m.m[0, 1] * s;
+            kProd.m[0, 2] = m.m[0, 2] * s;
+
+            kProd.m[1, 0] = m.m[1, 0] * s;
+            kProd.m[1, 1] = m.m[1, 1] * s;
+            kProd.m[1, 2] = m.m[1, 2] * s;
+
+            kProd.m[2, 0] = m.m[2, 0] * s;
+            kProd.m[2, 1] = m.m[2, 1] * s;
+            kProd.m[2, 2] = m.m[2, 2] * s;
+#else
+            for (byte iRow = 0; iRow < 4; iRow++)
             {
-                for (byte iCol = 0; iCol < 3; iCol++)
+                for (byte iCol = 0; iCol < 4; iCol++)
                 {
                     kProd.m[iRow, iCol] = m.m[iRow, iCol] * s;
                 }
             }
+#endif
 
             return kProd;
         }
 
+        public static bool operator ==(Matrix3x3 m1, Matrix3x3 m2)
+        {
+            for (byte iRow = 0; iRow < 3; iRow++)
+            {
+                for (byte iCol = 0; iCol < 3; iCol++)
+                {
+                    if (!BrainFuckMath.NearlyEqual(m1.m[iRow, iCol], m2.m[iRow, iCol])) return false;
+                }
+            }
+
+            return true;
+        }
+
+        public static bool operator !=(Matrix3x3 m1, Matrix3x3 m2)
+        {
+            for (byte iRow = 0; iRow < 3; iRow++)
+            {
+                for (byte iCol = 0; iCol < 3; iCol++)
+                {
+                    if (!BrainFuckMath.NearlyEqual(m1.m[iRow, iCol], m2.m[iRow, iCol])) return true;
+                }
+            }
+
+            return false;
+        }
+
+#endregion
+
+#region ToString
+
         public override string ToString()
         {
-            return m[0, 0] + "," + m[0, 1] + "," + m[0, 2] + "\n" + m[1, 0] + "," + m[1, 1] + "," + m[1, 2] + "\n" + m[2, 0] + "," + m[2, 1] + "," + m[2, 2];
+            return string.Format("[({0}, {1}, {2})({3}, {4}, {5})({6}, {7}, {8})]", m[0, 0], m[0, 1], m[0, 2],
+                                                                                    m[1, 0], m[1, 1], m[1, 2],
+                                                                                    m[2, 0], m[2, 1], m[2, 2]);
         }
+
+#endregion
+
+#region Column/Row
+
+        public Vector3d GetColumn(int iCol)
+        {
+            return new Vector3d(m[0, iCol], m[1, iCol], m[2, iCol]);
+        }
+
+        public Vector3d GetRow(int iRow)
+        {
+            return new Vector3d(m[iRow, 0], m[iRow, 1], m[iRow, 2]);
+        }
+
+        public void SetColumn(int iCol, Vector3 v)
+        {
+            m[0, iCol] = v.x;
+            m[1, iCol] = v.y;
+            m[2, iCol] = v.z;
+        }
+
+        public void SetRow(int iRow, Vector3 v)
+        {
+            m[iRow, 0] = v.x;
+            m[iRow, 1] = v.y;
+            m[iRow, 2] = v.z;
+        }
+
+#endregion
 
         public Matrix3x3 Transpose()
         {
@@ -136,7 +317,7 @@ namespace UnityEngine
             return kTranspose;
         }
 
-        private float Determinant()
+        public float Determinant()
         {
             var fCofactor00 = m[1, 1] * m[2, 2] - m[1, 2] * m[2, 1];
             var fCofactor10 = m[1, 2] * m[2, 0] - m[1, 0] * m[2, 2];
@@ -147,8 +328,8 @@ namespace UnityEngine
 
         public bool Inverse(ref Matrix3x3 mInv, float tolerance = 1e-06f)
         {
-            // Invert a 3x3 using cofactors.  This is about 8 times faster than
-            // the Numerical Recipes code which uses Gaussian elimination.
+            // Invert a 3x3 using cofactors. 
+            // This is about 8 times faster than the Numerical Recipes code which uses Gaussian elimination.
             mInv.m[0, 0] = m[1, 1] * m[2, 2] - m[1, 2] * m[2, 1];
             mInv.m[0, 1] = m[0, 2] * m[2, 1] - m[0, 1] * m[2, 2];
             mInv.m[0, 2] = m[0, 1] * m[1, 2] - m[0, 2] * m[1, 1];
@@ -161,13 +342,23 @@ namespace UnityEngine
 
             var fDet = m[0, 0] * mInv.m[0, 0] + m[0, 1] * mInv.m[1, 0] + m[0, 2] * mInv.m[2, 0];
 
-            if (System.Math.Abs(fDet) <= tolerance)
-            {
-                return false;
-            }
+            if (System.Math.Abs(fDet) <= tolerance) { return false; }
 
-            float fInvDet = 1.0f / fDet;
+            var fInvDet = 1.0f / fDet;
 
+#if (MATICES_UNROLL)
+            mInv.m[0, 0] *= fInvDet;
+            mInv.m[0, 1] *= fInvDet;
+            mInv.m[0, 2] *= fInvDet;
+
+            mInv.m[1, 0] *= fInvDet;
+            mInv.m[1, 1] *= fInvDet;
+            mInv.m[1, 2] *= fInvDet;
+
+            mInv.m[2, 0] *= fInvDet;
+            mInv.m[2, 1] *= fInvDet;
+            mInv.m[2, 2] *= fInvDet;
+#else
             for (byte iRow = 0; iRow < 3; iRow++)
             {
                 for (byte iCol = 0; iCol < 3; iCol++)
@@ -175,11 +366,11 @@ namespace UnityEngine
                     mInv.m[iRow, iCol] *= fInvDet;
                 }
             }
+#endif
 
             return true;
         }
 
-        //public Matrix3x3 Inverse(float tolerance = 1e-06f)
         public Matrix3x3 Inverse(float tolerance = 1e-06f)
         {
             var kInverse = Matrix3x3.identity;
@@ -187,30 +378,6 @@ namespace UnityEngine
             Inverse(ref kInverse, tolerance);
 
             return kInverse;
-        }
-
-        public Vector3d GetColumn(int iCol)
-        {
-            return new Vector3d(m[0, iCol], m[1, iCol], m[2, iCol]);
-        }
-
-        public void SetColumn(int iCol, Vector3 v)
-        {
-            m[0, iCol] = v.x;
-            m[1, iCol] = v.y;
-            m[2, iCol] = v.z;
-        }
-
-        public Vector3d GetRow(int iRow)
-        {
-            return new Vector3d(m[iRow, 0], m[iRow, 1], m[iRow, 2]);
-        }
-
-        public void SetRow(int iRow, Vector3 v)
-        {
-            m[iRow, 0] = v.x;
-            m[iRow, 1] = v.y;
-            m[iRow, 2] = v.z;
         }
 
         public Matrix4x4 ToMatrix4x4()
@@ -230,16 +397,5 @@ namespace UnityEngine
 
             return mat;
         }
-
-        public static Matrix3x3 Rotate(Vector3 rotation)
-        {
-            var x = new Quat(new Vector3d(1, 0, 0), rotation.x * MathUtility.Deg2Rad);
-            var y = new Quat(new Vector3d(0, 1, 0), rotation.y * MathUtility.Deg2Rad);
-            var z = new Quat(new Vector3d(0, 0, 1), rotation.z * MathUtility.Deg2Rad);
-
-            return (z * y * x).ToMatrix3x3();
-        }
-
-        public static Matrix3x3 identity { get { return new Matrix3x3(1, 0, 0, 0, 1, 0, 0, 0, 1); } }
     }
 }

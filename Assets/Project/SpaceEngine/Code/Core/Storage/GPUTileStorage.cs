@@ -1,4 +1,5 @@
 ﻿using SpaceEngine.Core.Tile.Storage;
+using SpaceEngine.Core.Utilities;
 
 using UnityEngine;
 
@@ -55,7 +56,7 @@ namespace SpaceEngine.Core.Storage
         {
             base.InitSlots();
 
-            for (var i = 0; i < Capacity; i++)
+            for (ushort i = 0; i < Capacity; i++)
             {
                 var texture = RTExtensions.CreateRTexture(new Vector2(TileSize, TileSize), 0, Format, FilterMode, WrapMode, Mipmaps, AnisoLevel, EnableRandomWrite);
                 var slot = new GPUSlot(this, texture);

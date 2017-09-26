@@ -33,10 +33,9 @@
 // Creator: zameran
 #endregion
 
-using SpaceEngine.Core.Bodies;
 using SpaceEngine.Core.Exceptions;
+using SpaceEngine.Core.Numerics;
 using SpaceEngine.Core.Storage;
-using SpaceEngine.Core.Terrain;
 using SpaceEngine.Core.Tile.Producer;
 using SpaceEngine.Core.Tile.Storage;
 
@@ -45,40 +44,24 @@ using System.Collections.Generic;
 
 using UnityEngine;
 
+using Vector2d = SpaceEngine.Core.Numerics.Vector2d;
+using Vector4d = SpaceEngine.Core.Numerics.Vector4d;
+
 namespace SpaceEngine.Core
 {
     public class ElevationCoreProducer : TileProducer
     {
-        public GameObject ResidualProducerGameObject;
-
-        private TileProducer ResidualProducer;
-
         public Material ElevationMaterial;
 
-        protected override void Start()
+        public override void InitNode()
         {
-            base.Start();
-
-            if (TerrainNode == null) { TerrainNode = transform.parent.GetComponent<TerrainNode>(); }
-            if (TerrainNode.ParentBody == null) { TerrainNode.ParentBody = transform.parent.GetComponentInParent<Body>(); }
-
-            if (ResidualProducerGameObject != null)
-            {
-                if (ResidualProducer == null) { ResidualProducer = ResidualProducerGameObject.GetComponent<TileProducer>(); }
-                if (ResidualProducer.Cache == null) { ResidualProducer.InitCache(); }
-            }
+            base.InitNode();
 
             var tileSize = GetTileSize(0);
 
             if ((tileSize - GetBorder() * 2 - 1) % (TerrainNode.ParentBody.GridResolution - 1) != 0)
             {
                 throw new InvalidParameterException("Tile size - border * 2 - 1 must be divisible by grid mesh resolution - 1" + string.Format(": {0}-{1}", tileSize, GetBorder()));
-            }
-
-            if (ResidualProducer != null)
-            {
-                if (ResidualProducer.GetTileSize(0) != tileSize) throw new InvalidParameterException("Residual tile size must match elevation tile size!");
-                if (!(ResidualProducer.Cache.GetStorage(0) is GPUTileStorage)) throw new InvalidStorageException("Residual storage must be a GPUTileStorage");
             }
 
             var storage = Cache.GetStorage(0) as GPUTileStorage;
@@ -105,36 +88,36 @@ namespace SpaceEngine.Core
 
             var rootQuadSize = TerrainNode.TerrainQuadRoot.Length;
 
-            if (ResidualProducer != null)
+            GPUTileStorage.GPUSlot parentGpuSlot = null;
+
+            var upsample = level > 0;
+            var parentTile = FindTile(level - 1, tx / 2, ty / 2, false, true);
+
+            if (upsample)
             {
-                if (ResidualProducer.HasTile(level, tx, ty))
-                {
-                    GPUTileStorage.GPUSlot residualGpuSlot = null;
+                if (parentTile != null)
+                    parentGpuSlot = parentTile.GetSlot(0) as GPUTileStorage.GPUSlot;
+                else { throw new MissingTileException(string.Format("Find parent tile failed! {0}:{1}-{2}", level - 1, tx / 2, ty / 2)); }
+            }
 
-                    var residualTile = ResidualProducer.FindTile(level, tx, ty, false, true);
+            if (parentGpuSlot == null && upsample) { throw new NullReferenceException("parentGpuSlot"); }
 
-                    if (residualTile != null)
-                        residualGpuSlot = residualTile.GetSlot(0) as GPUTileStorage.GPUSlot;
-                    else
-                    { throw new MissingTileException("Find residual tile failed"); }
+            if (upsample)
+            {
+                var parentTexture = parentGpuSlot.Texture;
 
-                    if (residualGpuSlot == null) { throw new MissingTileException("Find parent tile failed"); }
+                var dx = (float)(tx % 2) * (float)(tileSize / 2.0f);
+                var dy = (float)(ty % 2) * (float)(tileSize / 2.0f);
 
-                    ElevationMaterial.SetTexture("_ResidualSampler", residualGpuSlot.Texture);
-                    ElevationMaterial.SetVector("_ResidualOSH", new Vector4(0.25f / (float)tileWidth, 0.25f / (float)tileWidth, 2.0f / (float)tileWidth, 1.0f));
-                }
-                else
-                {
-                    ElevationMaterial.SetTexture("_ResidualSampler", null);
-                    ElevationMaterial.SetVector("_ResidualOSH", new Vector4(0.0f, 0.0f, 1.0f, 0.0f));
+                var coarseLevelOSL = new Vector4(dx / (float)parentTexture.width, dy / (float)parentTexture.height, 1.0f / (float)parentTexture.width, 0.0f);
 
-                    Debug.LogError(string.Format("Residual producer exist, but can't find any suitable tile at {0}:{1}:{2}!", level, tx, ty));
-                }
+                ElevationMaterial.SetTexture("_CoarseLevelSampler", parentTexture);
+                ElevationMaterial.SetVector("_CoarseLevelOSL", coarseLevelOSL);
             }
             else
             {
-                ElevationMaterial.SetTexture("_ResidualSampler", null);
-                ElevationMaterial.SetVector("_ResidualOSH", new Vector4(0.0f, 0.0f, 1.0f, 0.0f));
+                ElevationMaterial.SetTexture("_CoarseLevelSampler", null);
+                ElevationMaterial.SetVector("_CoarseLevelOSL", new Vector4(-1.0f, -1.0f, -1.0f, -1.0f));
             }
 
             var tileWSD = Vector4.zero;
@@ -143,15 +126,13 @@ namespace SpaceEngine.Core
             tileWSD.z = (float)tileSize / (float)(TerrainNode.ParentBody.GridResolution - 1);
             tileWSD.w = 0.0f;
 
-            var tileSD = Vector2d.zero;
-            tileSD.x = (0.5 + GetBorder()) / (tileWidth - 1 - GetBorder() * 2);
-            tileSD.y = (1.0 + tileSD.x * 2.0);
+            var tileScreenSize = (0.5 + (float)GetBorder()) / (tileWSD.x - 1 - (float)GetBorder() * 2);
+            var tileSD = new Vector2d(tileScreenSize, 1.0 + tileScreenSize * 2.0);
 
-            var offset = Vector4d.zero;
-            offset.x = ((double)tx / (1 << level) - 0.5) * rootQuadSize;
-            offset.y = ((double)ty / (1 << level) - 0.5) * rootQuadSize;
-            offset.z = rootQuadSize / (1 << level);
-            offset.w = TerrainNode.ParentBody.Size;
+            var offset = new Vector4d(((double)tx / (1 << level) - 0.5) * rootQuadSize,
+                                      ((double)ty / (1 << level) - 0.5) * rootQuadSize,
+                                      rootQuadSize / (1 << level),
+                                      TerrainNode.ParentBody.Size);
 
             ElevationMaterial.SetVector("_TileWSD", tileWSD);
             ElevationMaterial.SetVector("_TileSD", tileSD.ToVector2());
@@ -160,8 +141,7 @@ namespace SpaceEngine.Core
             ElevationMaterial.SetVector("_Offset", offset.ToVector4());
             ElevationMaterial.SetMatrix("_LocalToWorld", TerrainNode.FaceToLocal.ToMatrix4x4());
 
-            if (TerrainNode.ParentBody.NPS != null) TerrainNode.ParentBody.NPS.SetUniforms(ElevationMaterial);
-            if (TerrainNode.ParentBody.TCCPS != null) TerrainNode.ParentBody.TCCPS.UpdateUniforms(ElevationMaterial);
+            if (TerrainNode.ParentBody.TCCPS != null) TerrainNode.ParentBody.TCCPS.SetUniforms(ElevationMaterial);
 
             Graphics.Blit(null, gpuSlot.Texture, ElevationMaterial);
 

@@ -1,5 +1,6 @@
 ﻿using SpaceEngine.Core.Storage;
 using SpaceEngine.Core.Terrain;
+using SpaceEngine.Core.Utilities;
 using SpaceEngine.Types.Containers;
 
 using System;
@@ -10,15 +11,15 @@ using UnityEngine;
 namespace SpaceEngine.Core.Tile.Samplers
 {
     /// <summary>
-    /// A TileSampler to be used with a ElevationProducer.
-    /// This class reads back the elevation data of newly created elevation tiles in order to update the TerrainQuad.ZMin and TerrainQuad.ZMax fields. 
+    /// A <see cref="TileSampler"/> to be used with a Elevation based <see cref="Producer.TileProducer"/>
+    /// This class reads back the elevation data of newly created elevation tiles in order to update the <see cref="TerrainQuad.ZMin"/> and <see cref="TerrainQuad.ZMax"/> fields. 
     /// It also reads back the elevation value below the current viewer position.
     /// </summary>
     public class TileSamplerZ : TileSampler
     {
         /// <summary>
-        /// An internal quadtree to store the texture tile associated with each
-        /// terrain TerrainQuad, and to keep track of tiles that need to be read back.
+        /// An internal <see cref="QuadTree"/> based class to store the texture tile associated with each <see cref="TerrainQuad"/>, 
+        /// and to keep track of tiles that need to be read back.
         /// </summary>
         [Serializable]
         private class QuadTreeZ : QuadTree
@@ -60,36 +61,37 @@ namespace SpaceEngine.Core.Tile.Samplers
         /// <summary>
         /// The terrain <see cref="TerrainQuad"/> directly below the current viewer position.
         /// </summary>
-        [SerializeField]
-        QuadTreeZ CameraQuad;
+        private QuadTreeZ CameraQuad;
 
         /// <summary>
         /// The relative viewer position in the <see cref="CameraQuad"/> <see cref="TerrainQuad"/>.
         /// </summary>
-        Vector2 CameraQuadCoordinates;
+        public Vector2 CameraQuadCoordinates;
 
         /// <summary>
         /// Last camera position used to perform a readback of the camera elevation above the ground. 
         /// This is used to avoid reading back this value at each frame when the camera does not move.
         /// </summary>
-        Vector3d OldLocalCamera;
+        public Vector3d OldLocalCamera;
 
         /// <summary>
         /// A container for the <see cref="TerrainQuad"/> trees that need to have there elevations read back.
         /// </summary>
-        Dictionary<Tile.Id, QuadTreeZ> NeedsReadBackDictionary;
+        private Dictionary<Tile.Id, QuadTreeZ> NeedsReadBackDictionary;
 
         /// <summary>
         /// A container of all the tiles that have had there elevations read back.
         /// </summary>
-        DictionaryQueue<Tile.Id, ElevationInfo> ElevationsDicionary;
+        private DictionaryQueue<Tile.Id, ElevationInfo> ElevationsDicionary;
 
-        ComputeBuffer ElevationsBuffer;
-        ComputeBuffer GroundBuffer;
+        private ComputeBuffer ElevationsBuffer;
+        private ComputeBuffer GroundBuffer;
 
-        protected override void Start()
+        #region Node
+
+        public override void InitNode()
         {
-            base.Start();
+            base.InitNode();
 
             OldLocalCamera = Vector3d.zero;
 
@@ -100,7 +102,11 @@ namespace SpaceEngine.Core.Tile.Samplers
 
             ElevationsBuffer = new ComputeBuffer(size * size, sizeof(float));
             GroundBuffer = new ComputeBuffer(1, 4 * sizeof(float));
+        }
 
+        public override void UpdateNode()
+        {
+            base.UpdateNode();
         }
 
         protected override void OnDestroy()
@@ -111,8 +117,11 @@ namespace SpaceEngine.Core.Tile.Samplers
             GroundBuffer.ReleaseAndDisposeBuffer();
         }
 
+        #endregion
+
         /// <summary>
-        /// Override the default <see cref="TileSampler"/>'s NeedTile to retrive the tile that is below the camera as well as its default behaviour.
+        /// Override the default <see cref="TileSampler"/>'s <see cref="TileSampler.NeedTile"/> to retrive the tile, 
+        /// that is below the camera as well as it's default behaviour.
         /// </summary>
         /// <param name="quad">Quad.</param>
         /// <returns>Return 'True' if needs tile.</returns>
@@ -144,6 +153,8 @@ namespace SpaceEngine.Core.Tile.Samplers
         /// </summary>
         private void UpdateGroundHeight()
         {
+            if (TerrainNode.LocalCameraPosition.z > TerrainNode.TerrainQuadRoot.ZMax) return;
+
             var localCameraPosition = TerrainNode.LocalCameraPosition;
 
             // If camera has moved update ground height
@@ -183,8 +194,9 @@ namespace SpaceEngine.Core.Tile.Samplers
         }
 
         /// <summary>
-        /// Updates the terrainQuads min and max values. Used to create a better fitting bounding box.
-        /// Is not essental and can be disabled if retriving the heights data from the GPU is causing  performance issues.
+        /// Updates the <see cref="TerrainQuad.ZMin"/> and <see cref="TerrainQuad.ZMax"/> values. 
+        /// Used to create a better fitting bounding box.
+        /// Is not essental and can be disabled if retriving the heights data from the GPU is causing performance issues.
         /// </summary>
         private void UpdateMinMax()
         {
@@ -203,12 +215,12 @@ namespace SpaceEngine.Core.Tile.Samplers
             // Foreach key read back the tiles data until the maxReadBacksPerFrame limit is reached
             foreach (var id in ids)
             {
-                QuadTreeZ treeZ = NeedsReadBackDictionary[id];
+                var treeZ = NeedsReadBackDictionary[id];
 
                 // If elevations container already contains key then data has been read back before so just reapply the [min, max] values to TerranQuad
                 if (ElevationsDicionary.ContainsKey(id))
                 {
-                    ElevationInfo info = ElevationsDicionary.Get(id);
+                    var info = ElevationsDicionary.Get(id);
 
                     treeZ.TerrainQuad.ZMin = info.Min;
                     treeZ.TerrainQuad.ZMax = info.Max;
@@ -242,7 +254,7 @@ namespace SpaceEngine.Core.Tile.Samplers
                     elevationInfo.Elevations = new float[size];
 
                     // Read back heights data from texture
-                    CBUtility.ReadFromRenderTexture(texture, 1, ElevationsBuffer, GodManager.Instance.ReadData);
+                    CBUtility.ReadFromRenderTexture(texture, CBUtility.Channels.R, ElevationsBuffer, GodManager.Instance.ReadData);
 
                     // Copy into elevations info
                     ElevationsBuffer.GetData(elevationInfo.Elevations);
@@ -275,7 +287,6 @@ namespace SpaceEngine.Core.Tile.Samplers
             {
                 ElevationsDicionary.RemoveFirst();
             }
-
         }
 
         protected override void GetTiles(QuadTree parent, ref QuadTree tree, TerrainQuad quad)
@@ -288,13 +299,15 @@ namespace SpaceEngine.Core.Tile.Samplers
 
             var treeZ = tree as QuadTreeZ;
 
+            if (treeZ == null) { Debug.LogError("TileSamplerZ.GetTiles: Can't get provided tree as QuadTreeZ!"); base.GetTiles(parent, ref tree, quad); return; }
+
             // If tile needs elevation data read back add to container
             if (treeZ.Tile != null && treeZ.Tile.Task.IsDone && !treeZ.ReadBack && MaxReadBacksPerFrame > 0)
             {
-                if (!NeedsReadBackDictionary.ContainsKey(treeZ.Tile.GetId()))
+                if (!NeedsReadBackDictionary.ContainsKey(treeZ.Tile.ID))
                 {
                     treeZ.ReadBack = true;
-                    NeedsReadBackDictionary.Add(treeZ.Tile.GetId(), treeZ);
+                    NeedsReadBackDictionary.Add(treeZ.Tile.ID, treeZ);
                 }
             }
 

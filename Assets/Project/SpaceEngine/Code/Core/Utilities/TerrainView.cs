@@ -2,6 +2,8 @@
 
 using UnityEngine;
 
+using Functions = SpaceEngine.Core.Numerics.Functions;
+
 namespace SpaceEngine.Core.Utilities
 {
     /// <summary>
@@ -44,8 +46,8 @@ namespace SpaceEngine.Core.Utilities
             public double Distance;
         };
 
-        private CachedComponent<Camera> CameraCachedComponent = new CachedComponent<Camera>();
-        private CachedComponent<Controller> ControllerCachedComponent = new CachedComponent<Controller>();
+        private readonly CachedComponent<Camera> CameraCachedComponent = new CachedComponent<Camera>();
+        private readonly CachedComponent<Controller> ControllerCachedComponent = new CachedComponent<Controller>();
 
         public Camera CameraComponent { get { return CameraCachedComponent.Component; } }
         public Controller ControllerComponent { get { return ControllerCachedComponent.Component; } }
@@ -246,7 +248,7 @@ namespace SpaceEngine.Core.Utilities
             var e = new Vector3d(Math.Cos(elon) * Math.Cos(elat), Math.Sin(elon) * Math.Cos(elat), Math.Sin(elat));
             var v = (s * (1.0 - t) + e * t).Normalized();
 
-            lat = MathUtility.Safe_Asin(v.z);
+            lat = Functions.Safe_Asin(v.z);
             lon = Math.Atan2(v.y, v.x);
         }
     }

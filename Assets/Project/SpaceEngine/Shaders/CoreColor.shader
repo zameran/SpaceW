@@ -14,9 +14,10 @@
 		#include "TCSun.cginc"
 		#include "TCTerra.cginc"
 
-		#include "Core.cginc"
+		#define CORE_PORDUCER_ADDITIONAL_UV
+		//#define BORDER 2.0
 
-		#define BORDER 2.0 
+		#include "Core.cginc"
 
 		uniform sampler2D _ElevationSampler;
 		uniform float4 _ElevationOSL;
@@ -31,35 +32,33 @@
 		uniform float4 _Offset;
 		uniform float4x4 _LocalToWorld;
 
-		void vert(in VertexProducerInput v, out VertexProducerOutput o)
-		{	
-			o.pos = mul(UNITY_MATRIX_MVP, v.vertex);
-			o.uv0 = v.texcoord.xy;
-			o.uv1 = v.texcoord.xy * _TileWSD.x;
-		}
+		CORE_PRODUCER_VERTEX_PROGRAM(_TileWSD.x)
 
 		void frag(in VertexProducerOutput IN, out float4 output : COLOR)
 		{
-			float u = (0.5 + BORDER) / (_TileWSD.x - 1 - BORDER * 2);
-			float2 vert = (IN.uv0 * (1.0 + u * 2.0) - u) * _Offset.z + _Offset.xy;
-			//float2 vert = (IN.uv0 * _TileSD.y - _TileSD.x) * _Offset.z + _Offset.xy;
+			//float u = (0.5 + BORDER) / (_TileWSD.x - 1 - BORDER * 2);
+			//float2 vert = (IN.uv0 * (1.0 + u * 2.0) - u) * _Offset.z + _Offset.xy;
+			float2 vert = (IN.uv0 * _TileSD.y - _TileSD.x) * _Offset.z + _Offset.xy;
 				
 			float3 P = float3(vert, _Offset.w);
 			float3 p = normalize(mul(_LocalToWorld, P)).xyz;
-			float3 v = p;
 			
-			float slope = tex2D(_NormalsSampler, IN.uv0 + _NormalsOSL.xy).w;
-			float height = tex2D(_ElevationSampler, IN.uv0 + _ElevationOSL.xy).w;
+			float4 elevationData = tex2D(_ElevationSampler, IN.uv0 + _ElevationOSL.xy);
+			float4 normalData = tex2D(_NormalsSampler, IN.uv0 + _NormalsOSL.xy);
 
-			slope = saturate((2.0 * slope - 0.5) * smoothstep(4, 8, _Level)); // NOTE : Limit slope in case of very strong normals on low LOD levels...
+			float slope = elevationData.z;
+			float height = elevationData.w;
+
+			//slope = saturate(((slope + 1.0) * 0.5));
+			slope = saturate(slope);
 			height = saturate(height);
 
-			//float3 color = ColorMapAsteroid(v, height, slope);
-			float3 color = ColorMapPlanet(v, height, slope);
-			//float3 color = ColorMapSelena(v, height,  slope);
-			//float3 color = ColorMapTerra(v, height, slope);
+			//float3 color = ColorMapAsteroid(p, height, slope);
+			float3 color = ColorMapPlanet(p, height, slope);
+			//float3 color = ColorMapSelena(p, height,  slope);
+			//float3 color = ColorMapTerra(p, height, slope);
 			
-			output = float4(saturate(color), 1);
+			output = float4(saturate(color), 1.0);
 		}
 		ENDCG
 

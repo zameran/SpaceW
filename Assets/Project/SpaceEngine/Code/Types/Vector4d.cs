@@ -23,27 +23,44 @@
 // Modified by Denis Ovchinnikov 2015-2017
 #endregion
 
+using System;
+
 namespace UnityEngine
 {
-    using System;
-
     [Serializable]
-    public struct Vector4d
+    public struct Vector4d : IEquatable<Vector4d>
     {
-        public double x, y, z, w;
+        #region Fields
 
-        public static Vector4d zero { get { return new Vector4d(0.0, 0.0, 0.0, 0.0); } }
+        public double x;
+        public double y;
+        public double z;
+        public double w;
 
-        public static Vector4d one { get { return new Vector4d(1.0, 1.0, 1.0, 1.0); } }
+        #endregion
 
-        public Vector2d xy { get { return new Vector2d(this.x, this.y); } }
+        #region Properties
+
+        public static Vector4d zero { get { return new Vector4d(0.0); } }
+
+        public static Vector4d one { get { return new Vector4d(1.0); } }
+
+        public Vector3d xyz { get { return new Vector3d(x, y, z); } }
+
+        public Vector4d xyz0 { get { return new Vector4d(x, y, z, 0.0); } }
+
+        public Vector2d xy { get { return new Vector2d(x, y); } }
+
+        #endregion
+
+        #region Constructors
 
         public Vector4d(double v)
         {
-            this.x = v;
-            this.y = v;
-            this.z = v;
-            this.w = v;
+            x = v;
+            y = v;
+            z = v;
+            w = v;
         }
 
         public Vector4d(double x, double y, double z, double w)
@@ -94,13 +111,37 @@ namespace UnityEngine
             this.w = w;
         }
 
-        public Vector4d(double[] v)
+        #endregion
+
+        #region Overrides
+
+        public override int GetHashCode()
         {
-            x = v[0];
-            y = v[1];
-            z = v[2];
-            w = v[3];
+            return x.GetHashCode() + y.GetHashCode() + z.GetHashCode() << 2 + w.GetHashCode();
         }
+
+        public override bool Equals(object obj)
+        {
+            if (!(obj is Vector4d))
+                return false;
+
+            var vector = (Vector4d)obj;
+
+            return this == vector;
+        }
+
+        #endregion
+
+        #region IEquatable<Vector4d>
+
+        public bool Equals(Vector4d other)
+        {
+            return this == other;
+        }
+
+        #endregion
+
+        #region Operations
 
         public static Vector4d operator +(Vector4d v1, Vector4d v2)
         {
@@ -110,6 +151,11 @@ namespace UnityEngine
         public static Vector4d operator -(Vector4d v1, Vector4d v2)
         {
             return new Vector4d(v1.x - v2.x, v1.y - v2.y, v1.z - v2.z, v1.w - v2.w);
+        }
+
+        public static Vector4d operator -(Vector4d v1)
+        {
+            return new Vector4d(-v1.x, -v1.y, -v1.z, -v1.w);
         }
 
         public static Vector4d operator *(Vector4d v1, Vector4d v2)
@@ -137,6 +183,16 @@ namespace UnityEngine
             return new Vector4d(v1.x / v2.x, v1.y / v2.y, v1.z / v2.z, v1.w / v2.w);
         }
 
+        public static bool operator !=(Vector4d v1, Vector4d v2)
+        {
+            return !BrainFuckMath.NearlyEqual(v1.x, v2.x) || !BrainFuckMath.NearlyEqual(v1.y, v2.y) || !BrainFuckMath.NearlyEqual(v1.z, v2.z) || !BrainFuckMath.NearlyEqual(v1.w, v2.w);
+        }
+
+        public static bool operator ==(Vector4d v1, Vector4d v2)
+        {
+            return BrainFuckMath.NearlyEqual(v1.x, v2.x) && BrainFuckMath.NearlyEqual(v1.y, v2.y) && BrainFuckMath.NearlyEqual(v1.z, v2.z) && BrainFuckMath.NearlyEqual(v1.w, v2.w);
+        }
+
         public static implicit operator Vector4(Vector4d v)
         {
             return new Vector4((float)v.x, (float)v.y, (float)v.z);
@@ -147,29 +203,29 @@ namespace UnityEngine
             return new Vector4d((double)v.x, (double)v.y, (double)v.z, (double)v.w);
         }
 
+        #endregion
+
+        #region ToString
+
         public override string ToString()
         {
-            return "(" + x + "," + y + "," + z + "," + w + ")";
+            return string.Format("({0}, {1}, {2}, {3})", x, y, z, w);
         }
+
+        #endregion
+
+        #region ConvertTo
 
         public Vector4 ToVector4()
         {
             return new Vector4((float)x, (float)y, (float)z, (float)w);
         }
 
-        public Vector3d XYZ()
-        {
-            return new Vector3d(x, y, z);
-        }
-
-        public Vector4d XYZ0()
-        {
-            return new Vector4d(x, y, z, 0);
-        }
+        #endregion
 
         public double Magnitude()
         {
-            return System.Math.Sqrt(x * x + y * y + z * z + w * w);
+            return Math.Sqrt(x * x + y * y + z * z + w * w);
         }
 
         public double SqrMagnitude()
@@ -189,7 +245,7 @@ namespace UnityEngine
 
         public void Normalize()
         {
-            double invLength = 1.0 / System.Math.Sqrt(x * x + y * y + z * z + w * w);
+            var invLength = 1.0 / Math.Sqrt(x * x + y * y + z * z + w * w);
 
             x *= invLength;
             y *= invLength;
@@ -199,7 +255,7 @@ namespace UnityEngine
 
         public Vector4d Normalized()
         {
-            double invLength = 1.0 / System.Math.Sqrt(x * x + y * y + z * z + w * w);
+            var invLength = 1.0 / Math.Sqrt(x * x + y * y + z * z + w * w);
 
             return new Vector4d(x * invLength, y * invLength, z * invLength, w * invLength);
         }

@@ -15,16 +15,16 @@ namespace SpaceEngine.Core.Tile.Producer
 {
     /// <summary>
     /// An abstract producer of tiles. A TileProducer must be inherited from and overide the <see cref="DoCreateTile"/> function to create the tiles data.
-    /// Note that several TileProducer can share the same TileCache, and hence the same TileStorage.
+    /// Note that several TileProducer can share the same <see cref="TileCache"/>, and hence the same <see cref="TileStorage"/>.
     /// </summary>
     [RequireComponent(typeof(TileSampler))]
-    public abstract class TileProducer : Node<TileProducer>
+    public abstract class TileProducer : NodeSlave<TileProducer>
     {
         /// <summary>
         /// The tile cache game object that stores the tiles produced by this producer.
         /// </summary>
         [SerializeField]
-        GameObject CacheGameObject;
+        public GameObject CacheGameObject;
 
         public TileCache Cache { get; private set; }
 
@@ -32,7 +32,7 @@ namespace SpaceEngine.Core.Tile.Producer
         /// The name of the uniforms this producers data will be bound if used in a shader.
         /// </summary>
         [SerializeField]
-        string Name;
+        public string Name;
 
         /// <summary>
         /// Does this producer use the GPU?
@@ -40,17 +40,22 @@ namespace SpaceEngine.Core.Tile.Producer
         public bool IsGPUProducer = true;
 
         /// <summary>
+        /// Does this producer calculaed as last one?
+        /// </summary>
+        public bool IsLastInSequence = false;
+
+        /// <summary>
         /// Layers, that may modify the tile created by this producer and are optional.
         /// </summary>
         public TileLayer[] Layers { get; protected set; }
 
         /// <summary>
-        /// The tile sampler associated with this producer.
+        /// The <see cref="TileSampler"/> associated with this producer.
         /// </summary>
         public TileSampler Sampler { get; protected set; }
 
         /// <summary>
-        /// The id of this producer. This id is local to the TileCache used by this producer, and is used to distinguish all the producers that use this cache.
+        /// The id of this producer. This id is local to the <see cref="TileCache"/> used by this producer, and is used to distinguish all the producers that use this cache.
         /// </summary>
         public int ID { get; protected set; }
 
@@ -58,7 +63,7 @@ namespace SpaceEngine.Core.Tile.Producer
 
         #region Node
 
-        protected override void InitNode()
+        public override void InitNode()
         {
             InitCache();
 
@@ -69,7 +74,7 @@ namespace SpaceEngine.Core.Tile.Producer
             Sampler = GetComponent<TileSampler>();
         }
 
-        protected override void UpdateNode()
+        public override void UpdateNode()
         {
 
         }
@@ -99,16 +104,15 @@ namespace SpaceEngine.Core.Tile.Producer
 
         /// <summary>
         /// It's posible that a producer will have a call to get it's cache before it's start fuction has been called. 
-        /// Call InitCache in the start and get functions to ensure that the cache is always init before being returned.
+        /// Call <see cref="InitCache"/> in the start and get functions to ensure that the cache is always init before being returned.
         /// </summary>
         public void InitCache()
         {
-            if (Cache == null)
-            {
-                Cache = CacheGameObject.GetComponent<TileCache>();
-                ID = Cache.NextProducerId;
-                Cache.InsertProducer(ID, this);
-            }
+            if (Cache != null) return;
+
+            Cache = CacheGameObject.GetComponent<TileCache>();
+            ID = Cache.NextProducerId;
+            Cache.InsertProducer(ID, this);
         }
 
         public string GetName()
@@ -118,7 +122,7 @@ namespace SpaceEngine.Core.Tile.Producer
 
         public int GetTileSize(int i)
         {
-            // TODO : CORE FIX.
+            // NOTE : So, if we already doesn't have any cache initialized - initialize it!
             InitCache();
 
             return Cache.GetStorage(i).TileSize;
@@ -130,9 +134,9 @@ namespace SpaceEngine.Core.Tile.Producer
         }
 
         /// <summary>
-        /// Tiles made of rasster data may have a border that contains the value of the neighboring pixels of the tile. 
-        /// For instance if the tile size (returned by TileStorage.GetTileSize) is 196, and if the tile border is 2, this means that the actual tile data is 192x192 pixels, 
-        /// with a 2 pixel border that contains the value of the neighboring pixels. 
+        /// Tiles made of raster data may have a border that contains the value of the neighboring pixels of the tile. 
+        /// For instance if the tile size (returned by <see cref="TileStorage.TileSize"/>) is 196, and if the tile border is 2, 
+        /// this means that the actual tile data is 192x192 pixels, with a 2 pixel border that contains the value of the neighboring pixels. 
         /// Using a border introduces data redundancy but is usefull to get the value of the neighboring pixels of a tile without needing to load the neighboring tiles.
         /// </summary>
         /// <returns>Returns the size in pixels of the border of each tile.</returns>
@@ -175,11 +179,11 @@ namespace SpaceEngine.Core.Tile.Producer
         }
 
         /// <summary>
-        /// Returns the requested tile, creating it if necessary.If the tile is
-        /// currently in use it is returned directly.If it is in cache but unused,
-        /// it marked as used and returned.Otherwise a new tile is created, marked
-        /// as used and returned.In all cases the number of users of this tile is
-        /// incremented by one.
+        /// Returns the requested tile, creating it if necessary. 
+        /// If the tile is currently in use - it is returned directly.
+        /// If it is in cache but unused - it marked as used and returned.
+        /// Otherwise a new tile is created, marked as used and returned.
+        /// In all cases the number of users of this tile is incremented by one.
         /// </summary>
         /// <param name="level">The tile's quadtree level.</param>
         /// <param name="tx">The tile's quadtree X coordinate.</param>
@@ -191,7 +195,7 @@ namespace SpaceEngine.Core.Tile.Producer
         }
 
         /// <summary>
-        /// Looks for a tile in the TileCache of this TileProducer.
+        /// Looks for a tile in the <see cref="TileCache"/> of this <see cref="TileProducer"/>.
         /// </summary>
         /// <param name="level">The tile's quadtree level.</param>
         /// <param name="tx">The tile's quadtree X coordinate.</param>
@@ -199,7 +203,8 @@ namespace SpaceEngine.Core.Tile.Producer
         /// <param name="includeUnusedCache">Include unused tiles in the search, or not?</param>
         /// <param name="done">Check that tile's creation task is done?</param>
         /// <returns>
-        /// Returns the requsted tile, or null if it's not in the TileCache or if it's not ready. This method doesn't change the number of users of the returned tile.
+        /// Returns the requsted tile, or null if it's not in the <see cref="TileCache"/> or if it's not ready. 
+        /// This method doesn't change the number of users of the returned tile.
         /// </returns>
         public virtual Tile FindTile(int level, int tx, int ty, bool includeUnusedCache, bool done)
         {
@@ -214,7 +219,7 @@ namespace SpaceEngine.Core.Tile.Producer
         }
 
         /// <summary>
-        /// Creates a Task to produce the data of the given tile.
+        /// Creates a <see cref="Utilities.Schedular.Task"/> to produce the data of the given tile.
         /// </summary>
         /// <param name="level">The tile's quadtree level.</param>
         /// <param name="tx">The tile's quadtree X coordinate.</param>
@@ -226,7 +231,9 @@ namespace SpaceEngine.Core.Tile.Producer
         }
 
         /// <summary>
-        /// Creates the given tile. If this task requires tiles produced by other. The default implementation of this method calls DoCreateTile on each Layer of this producer.
+        /// Creates the given tile. 
+        /// If this task requires tiles produced by other. 
+        /// The default implementation of this method calls <see cref="TileLayer.DoCreateTile"/> on each Layer of this producer.
         /// </summary>
         /// <param name="level">The tile's quadtree level.</param>
         /// <param name="tx">The tile's quadtree X coordinate.</param>
@@ -244,7 +251,7 @@ namespace SpaceEngine.Core.Tile.Producer
 
         /// <summary>
         /// Basically, should call <see cref="DoCreateTile"/> and wait some time or frames.
-        /// In the base implementation will wait one frame after each <see cref="TileLayer.DoCreateTile"/> call, and one frame after all.
+        /// In the base implementation will wait one frame after each <see cref="DoCreateTile"/> call, and one frame after all.
         /// <remarks>WARNING! <see cref="CreateTileTask.IsDone"/> field will be changed here, after all work is done! Use this with attention!</remarks> 
         /// </summary>
         /// <param name="level">The tile's quadtree level.</param>
@@ -254,9 +261,21 @@ namespace SpaceEngine.Core.Tile.Producer
         /// <param name="Callback">Callback after all. Finish the task here and do some extra post-calculation work.</param>
         public virtual IEnumerator DoCreateTileCoroutine(int level, int tx, int ty, List<TileStorage.Slot> slot, Action Callback)
         {
-            // TODO : Should wait, until parented producers complete their work...
-            // So, now i have a special order list of sorted samplers.
-            // What i need to do, is determinate current task/tile/sampler priority and wait for all of producers, wich have the lower prior. 
+            var samplersOrder = TerrainNode.SamplersOrder;
+            var currentIndexInSamplerQueue = samplersOrder.OrderList.IndexOf(Sampler);
+            var samplersToWait = samplersOrder.OrderList.GetRange(0, currentIndexInSamplerQueue);
+
+            if (currentIndexInSamplerQueue != 0)
+            {
+                foreach (var samplerToWait in samplersToWait)
+                {
+                    do
+                    {
+                        yield return Yielders.EndOfFrame;
+                    }
+                    while (samplerToWait.Producer.FindTile(level, tx, ty, false, true) == null);
+                }
+            }
 
             this.DoCreateTile(level, tx, ty, slot); // Do our work...
 
@@ -275,80 +294,6 @@ namespace SpaceEngine.Core.Tile.Producer
         private int GetAwaitingFramesCount(int level)
         {
             return 4 * (level + 1);
-        }
-
-        [Obsolete("Not currently used and maybe not working correctly.")]
-        public Vector4 GetGpuTileCoords(int level, int tx, int ty, ref Tile tile)
-        {
-            var s = Cache.GetStorage(0).TileSize;
-            var b = GetBorder();
-
-            var dx = 0.0f;
-            var dy = 0.0f;
-            var dd = 1.0f;
-            var ds0 = ((float)s / 2.0f) * 2.0f - 2.0f * (float)b;
-            var ds = ds0;
-
-            while (!HasTile(level, tx, ty))
-            {
-                dx += (tx % 2) * dd;
-                dy += (ty % 2) * dd;
-                dd *= 2;
-                ds /= 2;
-                level -= 1;
-                tx /= 2;
-                ty /= 2;
-
-                if (level < 0)
-                {
-                    Debug.LogError("Invalid level (A)!");
-                    Debug.Break();
-                }
-            }
-
-            var t = tile == null ? FindTile(level, tx, ty, true, true) : null;
-
-            while (tile == null ? t == null : level != tile.Level)
-            {
-                dx += (tx % 2) * dd;
-                dy += (ty % 2) * dd;
-                dd *= 2;
-                ds /= 2;
-                level -= 1;
-                tx /= 2;
-                ty /= 2;
-
-                if (level < 0)
-                {
-                    Debug.LogError("Invalid level (B)!");
-                    Debug.Break();
-                }
-
-                t = tile == null ? FindTile(level, tx, ty, true, true) : null;
-            }
-
-            dx = dx * ((s / 2.0f) * 2 - 2 * b) / dd;
-            dy = dy * ((s / 2.0f) * 2 - 2 * b) / dd;
-
-            if (tile == null)
-            {
-                tile = t;
-            }
-            else
-            {
-                t = tile;
-            }
-
-            var w = (float)s;
-
-            if (s % 2 == 0)
-            {
-                return new Vector4((dx + b) / w, (dy + b) / w, 0.0f, ds / w);
-            }
-            else
-            {
-                return new Vector4((dx + b + 0.5f) / w, (dy + b + 0.5f) / w, 0.0f, ds / w);
-            }
         }
     }
 }

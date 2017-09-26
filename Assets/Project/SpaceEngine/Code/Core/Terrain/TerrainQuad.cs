@@ -11,8 +11,10 @@ namespace SpaceEngine.Core.Terrain
     /// It can be used in <see cref="Tile.Samplers.TileSampler"/> to decide whether or not data must be produced for invisible tiles  
     /// (we recall that the terrain quadtree itself does not store any terrain data). 
     /// </summary>
-    public class TerrainQuad
+    public class TerrainQuad : IEquatable<TerrainQuad>
     {
+        public SerializableGuid GUID { get; }
+
         /// <summary> 
         /// The <see cref="TerrainNode"/> to which this terrain quadtree belongs. 
         /// </summary> 
@@ -52,6 +54,11 @@ namespace SpaceEngine.Core.Terrain
         /// The physical size of this quad (in local space). 
         /// </summary> 
         public double Length { get; private set; }
+
+        /// <summary>
+        /// The physical size of this quad divided by two (in local space).
+        /// </summary>
+        public double LengthHalf { get; private set; }
 
         /// <summary> 
         /// Local bounding box. 
@@ -105,6 +112,82 @@ namespace SpaceEngine.Core.Terrain
         /// </summary>
         public bool IsLeaf { get { return Children[0] == null || Children == null; } }
 
+        /// <summary>
+        /// Deformed space quad corners.
+        /// </summary>
+        public Matrix4x4d DeformedCorners { get; private set; }
+
+        /// <summary>
+        /// Deformed space quad verticals.
+        /// </summary>
+        public Matrix4x4d DeformedVerticals { get; private set; }
+
+        /// <summary>
+        /// Screen space quad corners.
+        /// </summary>
+        public Matrix4x4d FlatCorners { get; private set; }
+
+        /// <summary>
+        /// Screen space quad veritcals.
+        /// </summary>
+        public Matrix4x4d FlatVerticals { get; private set; }
+
+        /// <summary>
+        /// Tangent frame to world matrix.
+        /// </summary>
+        public Matrix3x3d TangentFrameToWorld { get; private set; }
+
+        public Vector3d Center { get; private set; }
+
+        public Vector4d Lengths { get; private set; }
+
+        public Vector3d[] DeformedBox { get; private set; }
+
+        public byte[] Order { get; private set; }
+
+        /// <summary>
+        /// Vector to handle <see cref="Ox"/>, <see cref="Oy"/>, <see cref="Length"/> and <see cref="Level"/> values.
+        /// </summary>
+        public Vector4 DeformedOffset { get; private set; }
+
+        private void CalculateMatrices(double ox, double oy, double length, double r)
+        {
+            var p0 = new Vector3d(ox, oy, r);
+            var p1 = new Vector3d(ox + length, oy, r);
+            var p2 = new Vector3d(ox, oy + length, r);
+            var p3 = new Vector3d(ox + length, oy + length, r);
+
+            Center = (p0 + p3) * 0.5;
+
+            double l0, l1, l2, l3;
+
+            var v0 = p0.Normalized(out l0);
+            var v1 = p1.Normalized(out l1);
+            var v2 = p2.Normalized(out l2);
+            var v3 = p3.Normalized(out l3);
+
+            Lengths = new Vector4d(l0, l1, l2, l3);
+
+            DeformedCorners = new Matrix4x4d(v0.x * r, v1.x * r, v2.x * r, v3.x * r,
+                                             v0.y * r, v1.y * r, v2.y * r, v3.y * r,
+                                             v0.z * r, v1.z * r, v2.z * r, v3.z * r,
+                                             1.0, 1.0, 1.0, 1.0);
+
+            DeformedVerticals = new Matrix4x4d(v0.x, v1.x, v2.x, v3.x,
+                                               v0.y, v1.y, v2.y, v3.y,
+                                               v0.z, v1.z, v2.z, v3.z,
+                                               0.0, 0.0, 0.0, 0.0);
+
+            FlatCorners = new Matrix4x4d(p0.x, p1.x, p2.x, p3.x, p0.y, p1.y, p2.y, p3.y, 0.0, 0.0, 0.0, 0.0, 1.0, 1.0, 1.0, 1.0);
+            FlatVerticals = new Matrix4x4d(0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0);
+
+            var uz = Center.Normalized();
+            var ux = new Vector3d(0.0, 1.0, 0.0).Cross(uz).Normalized();
+            var uy = uz.Cross(ux);
+
+            TangentFrameToWorld = Owner.TangentFrameToWorld * new Matrix3x3d(ux.x, uy.x, uz.x, ux.y, uy.y, uz.y, ux.z, uy.z, uz.z);
+        }
+
         /// <summary> 
         /// Creates a new <see cref="TerrainQuad"/> 
         /// </summary> 
@@ -119,6 +202,8 @@ namespace SpaceEngine.Core.Terrain
         /// <param name="zmax">The maximum terrain elevation inside this quad.</param> 
         public TerrainQuad(TerrainNode owner, TerrainQuad parent, int tx, int ty, double ox, double oy, double length, float zmin, float zmax)
         {
+            GUID = Guid.NewGuid();
+
             Owner = owner;
             Parent = parent;
             Level = (Parent == null) ? 0 : Parent.Level + 1;
@@ -129,7 +214,23 @@ namespace SpaceEngine.Core.Terrain
             ZMax = zmax;
             ZMin = zmin;
             Length = length;
+            LengthHalf = length / 2.0;
             LocalBox = new Box3d(Ox, Ox + Length, Oy, Oy + Length, ZMin, ZMax);
+            DeformedOffset = new Vector4((float)Ox, (float)Oy, (float)Length, Level);
+
+            DeformedBox = new Vector3d[4];
+            DeformedBox[0] = Owner.Deformation.LocalToDeformed(LocalBox.xmin, LocalBox.ymin, LocalBox.zmin);
+            DeformedBox[1] = Owner.Deformation.LocalToDeformed(LocalBox.xmax, LocalBox.ymin, LocalBox.zmin);
+            DeformedBox[2] = Owner.Deformation.LocalToDeformed(LocalBox.xmax, LocalBox.ymax, LocalBox.zmin);
+            DeformedBox[3] = Owner.Deformation.LocalToDeformed(LocalBox.xmin, LocalBox.ymax, LocalBox.zmin);
+
+            Order = new byte[4];
+            Order[0] = 0;
+            Order[1] = 1;
+            Order[2] = 2;
+            Order[3] = 3;
+
+            CalculateMatrices(ox, oy, length, owner.ParentBody.Size);
         }
 
         /// <summary>
@@ -176,7 +277,7 @@ namespace SpaceEngine.Core.Terrain
             }
         }
 
-        private void Destroy()
+        public void Destroy()
         {
             for (byte i = 0; i < 4; i++)
             {
@@ -194,11 +295,14 @@ namespace SpaceEngine.Core.Terrain
         /// </summary>
         public void UpdateLOD()
         {
+            // TODO : AddOccluder/IsOccluded Threading!!!
+            // TODO : BOTTLENECK!
+
             var visibility = (Parent == null) ? Frustum.VISIBILITY.PARTIALLY : Parent.Visibility;
 
             if (visibility == Frustum.VISIBILITY.PARTIALLY)
             {
-                Visibility = Owner.GetVisibility(LocalBox);
+                Visibility = Owner.Deformation.GetVisibility(Owner, LocalBox, DeformedBox);
             }
             else
             {
@@ -218,7 +322,7 @@ namespace SpaceEngine.Core.Terrain
             }
 
             var ground = Owner.ParentBody.HeightZ;
-            var distance = Owner.GetCameraDist(new Box3d(Ox, Ox + Length, Oy, Oy + Length, Math.Min(0.0, ground), Math.Max(0.0, ground)));
+            var distance = Owner.GetCameraDistance(new Box3d(Ox, Ox + Length, Oy, Oy + Length, Math.Min(0.0, ground), Math.Max(0.0, ground)));
 
             if ((Owner.SplitInvisibleQuads || Visibility != Frustum.VISIBILITY.INVISIBLE) && distance < Length * Owner.SplitDistance && Level < Owner.MaxLevel)
             {
@@ -227,12 +331,12 @@ namespace SpaceEngine.Core.Terrain
                     Subdivide();
                 }
 
-                var order = CalculateOrder(Owner.LocalCameraPosition.x, Owner.LocalCameraPosition.y, Ox + Length / 2.0, Oy + Length / 2.0);
+                CalculateOrder(Owner.LocalCameraPosition.x, Owner.LocalCameraPosition.y, Ox + LengthHalf, Oy + LengthHalf);
 
-                Children[order[0]].UpdateLOD();
-                Children[order[1]].UpdateLOD();
-                Children[order[2]].UpdateLOD();
-                Children[order[3]].UpdateLOD();
+                Children[Order[0]].UpdateLOD();
+                Children[Order[1]].UpdateLOD();
+                Children[Order[2]].UpdateLOD();
+                Children[Order[3]].UpdateLOD();
 
                 // We compute a more precise occlusion for the next frame (see above), by combining the occlusion status of the child nodes.
                 Occluded = (Children[0].Occluded && Children[1].Occluded && Children[2].Occluded && Children[3].Occluded);
@@ -257,46 +361,42 @@ namespace SpaceEngine.Core.Terrain
             }
         }
 
-        public byte[] CalculateOrder(double cameraX, double cameraY, double quadX, double quadY)
+        public void CalculateOrder(double cameraX, double cameraY, double quadX, double quadY)
         {
-            var order = new byte[4];
-
             if (cameraY < quadY)
             {
                 if (cameraX < quadX)
                 {
-                    order[0] = 0;
-                    order[1] = 1;
-                    order[2] = 2;
-                    order[3] = 3;
+                    Order[0] = 0;
+                    Order[1] = 1;
+                    Order[2] = 2;
+                    Order[3] = 3;
                 }
                 else
                 {
-                    order[0] = 1;
-                    order[1] = 0;
-                    order[2] = 3;
-                    order[3] = 2;
+                    Order[0] = 1;
+                    Order[1] = 0;
+                    Order[2] = 3;
+                    Order[3] = 2;
                 }
             }
             else
             {
                 if (cameraX < quadX)
                 {
-                    order[0] = 2;
-                    order[1] = 0;
-                    order[2] = 3;
-                    order[3] = 1;
+                    Order[0] = 2;
+                    Order[1] = 0;
+                    Order[2] = 3;
+                    Order[3] = 1;
                 }
                 else
                 {
-                    order[0] = 3;
-                    order[1] = 1;
-                    order[2] = 2;
-                    order[3] = 0;
+                    Order[0] = 3;
+                    Order[1] = 1;
+                    Order[2] = 2;
+                    Order[3] = 0;
                 }
             }
-
-            return order;
         }
 
         /// <summary>
@@ -304,12 +404,10 @@ namespace SpaceEngine.Core.Terrain
         /// </summary>
         private void Subdivide()
         {
-            var hl = Length / 2.0;
-
-            Children[0] = new TerrainQuad(Owner, this, 2 * Tx, 2 * Ty, Ox, Oy, hl, ZMin, ZMax);
-            Children[1] = new TerrainQuad(Owner, this, 2 * Tx + 1, 2 * Ty, Ox + hl, Oy, hl, ZMin, ZMax);
-            Children[2] = new TerrainQuad(Owner, this, 2 * Tx, 2 * Ty + 1, Ox, Oy + hl, hl, ZMin, ZMax);
-            Children[3] = new TerrainQuad(Owner, this, 2 * Tx + 1, 2 * Ty + 1, Ox + hl, Oy + hl, hl, ZMin, ZMax);
+            Children[0] = new TerrainQuad(Owner, this, 2 * Tx, 2 * Ty, Ox, Oy, LengthHalf, ZMin, ZMax);
+            Children[1] = new TerrainQuad(Owner, this, 2 * Tx + 1, 2 * Ty, Ox + LengthHalf, Oy, LengthHalf, ZMin, ZMax);
+            Children[2] = new TerrainQuad(Owner, this, 2 * Tx, 2 * Ty + 1, Ox, Oy + LengthHalf, LengthHalf, ZMin, ZMax);
+            Children[3] = new TerrainQuad(Owner, this, 2 * Tx + 1, 2 * Ty + 1, Ox + LengthHalf, Oy + LengthHalf, LengthHalf, ZMin, ZMax);
         }
 
         public void DrawQuadOutline(Camera camera, Material lineMaterial, Color lineColor)
@@ -321,16 +419,17 @@ namespace SpaceEngine.Core.Terrain
                 if (Visibility == Frustum.VISIBILITY.INVISIBLE) return;
 
                 var verts = new Vector3[8];
+                var isMaximumLevel = Level == Owner.MaxLevel;
 
-                verts[0] = Owner.Deformation.LocalToDeformed(new Vector3d(Ox, Oy, ZMin)).ToVector3();
-                verts[1] = Owner.Deformation.LocalToDeformed(new Vector3d(Ox + Length, Oy, ZMin)).ToVector3();
-                verts[2] = Owner.Deformation.LocalToDeformed(new Vector3d(Ox, Oy + Length, ZMin)).ToVector3();
-                verts[3] = Owner.Deformation.LocalToDeformed(new Vector3d(Ox + Length, Oy + Length, ZMin)).ToVector3();
+                verts[0] = Owner.Deformation.LocalToDeformed(Ox, Oy, ZMin).ToVector3();
+                verts[1] = Owner.Deformation.LocalToDeformed(Ox + Length, Oy, ZMin).ToVector3();
+                verts[2] = Owner.Deformation.LocalToDeformed(Ox, Oy + Length, ZMin).ToVector3();
+                verts[3] = Owner.Deformation.LocalToDeformed(Ox + Length, Oy + Length, ZMin).ToVector3();
 
-                verts[4] = Owner.Deformation.LocalToDeformed(new Vector3d(Ox, Oy, ZMax)).ToVector3();
-                verts[5] = Owner.Deformation.LocalToDeformed(new Vector3d(Ox + Length, Oy, ZMax)).ToVector3();
-                verts[6] = Owner.Deformation.LocalToDeformed(new Vector3d(Ox, Oy + Length, ZMax)).ToVector3();
-                verts[7] = Owner.Deformation.LocalToDeformed(new Vector3d(Ox + Length, Oy + Length, ZMax)).ToVector3();
+                verts[4] = Owner.Deformation.LocalToDeformed(Ox, Oy, ZMax).ToVector3();
+                verts[5] = Owner.Deformation.LocalToDeformed(Ox + Length, Oy, ZMax).ToVector3();
+                verts[6] = Owner.Deformation.LocalToDeformed(Ox, Oy + Length, ZMax).ToVector3();
+                verts[7] = Owner.Deformation.LocalToDeformed(Ox + Length, Oy + Length, ZMax).ToVector3();
 
                 GL.PushMatrix();
 
@@ -341,7 +440,7 @@ namespace SpaceEngine.Core.Terrain
                 lineMaterial.SetPass(0);
 
                 GL.Begin(GL.LINES);
-                GL.Color(lineColor);
+                GL.Color(isMaximumLevel ? XKCDColors.DarkOrange : lineColor);
 
                 for (byte i = 0; i < 4; i++)
                 {
@@ -361,8 +460,7 @@ namespace SpaceEngine.Core.Terrain
                 GL.End();
                 GL.PopMatrix();
             }
-
-            if (!IsLeaf)
+            else
             {
                 Children[0].DrawQuadOutline(camera, lineMaterial, lineColor);
                 Children[1].DrawQuadOutline(camera, lineMaterial, lineColor);
@@ -370,5 +468,27 @@ namespace SpaceEngine.Core.Terrain
                 Children[3].DrawQuadOutline(camera, lineMaterial, lineColor);
             }
         }
+
+        #region IEquatable<TerrainQuad>
+
+        /// <inheritdoc />
+        public bool Equals(TerrainQuad other)
+        {
+            return other != null && GUID.Equals(other.GUID);
+        }
+
+        /// <inheritdoc />
+        public override bool Equals(object obj)
+        {
+            return obj != null && (obj.GetType() == this.GetType() && Equals(obj as TerrainQuad));
+        }
+
+        /// <inheritdoc />
+        public override int GetHashCode()
+        {
+            return GUID.GetHashCode();
+        }
+
+        #endregion
     }
 }

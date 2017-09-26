@@ -57,10 +57,33 @@
  * Modified by Denis Ovchinnikov 2015-2017
  */
 
-#if !defined (M_PI)
-#define M_PI 3.141592657
+#define OCEAN_BRDF
+
+#if !defined (SPACE_ATMOSPHERE)
+#include "../SpaceAtmosphere.cginc"
 #endif
- 
+
+#if !defined (MATH)
+#include "../Math.cginc"
+#endif
+
+#define OCEAN_INSCATTER_FIX
+
+uniform float2 _Ocean_MapSize;
+uniform float4 _Ocean_Choppyness;
+uniform float3 _Ocean_SunDir;
+uniform float4 _Ocean_GridSizes;
+uniform float2 _Ocean_ScreenGridSize;
+uniform float _Ocean_WhiteCapStr;
+uniform sampler3D _Ocean_Variance;
+uniform sampler2D _Ocean_Map0;
+uniform sampler2D _Ocean_Map1;
+uniform sampler2D _Ocean_Map2;
+uniform sampler2D _Ocean_Map3;
+uniform sampler2D _Ocean_Map4;
+uniform sampler2D _Ocean_Foam0;
+uniform sampler2D _Ocean_Foam1;
+
 float MeanFresnel(float cosThetaV, float sigmaV) 
 {
 	return pow(1.0 - cosThetaV, 5.0 * exp(-2.69 * sigmaV)) / (1.0 + 22.7 * pow(sigmaV, 1.5));
@@ -77,7 +100,7 @@ float ReflectedSunRadiance(float3 L, float3 V, float3 N, float sigmaSq)
 	float3 H = normalize(L + V);
 
 	float hn = dot(H, N);
-	float p = exp(-2.0 * ((1.0 - hn * hn) / sigmaSq) / (1.0 + hn)) / (4.0 * M_PI * sigmaSq);
+	float p = exp(-2.0 * ((1.0 - hn * hn) / sigmaSq) / (1.0 + hn)) / (M_PI4 * sigmaSq);
 
 	float c = 1.0 - dot(V, H);
 	float c2 = c * c;
@@ -103,7 +126,7 @@ float2 U(float2 zeta, float3 V)
 // V, N, sunDir in world space
 float3 ReflectedSkyRadiance(sampler2D skymap, float3 V, float3 N, float sigmaSq, float3 sunDir) 
 {
-	float3 result = float3(0,0,0);
+	float3 result = float3(0.0, 0.0, 0.0);
 
 	float2 zeta0 = -N.xy / N.z;
 	float2 tau0 = U(zeta0, V);
@@ -120,9 +143,14 @@ float3 ReflectedSkyRadiance(sampler2D skymap, float3 V, float3 N, float sigmaSq,
 	return result;
 }
 
+float RefractedSeaRadiance(float fresnel) 
+{
+	return 0.98 * (1.0 - fresnel);
+}
+
 float RefractedSeaRadiance(float3 V, float3 N, float sigmaSq) 
 {
-	return 0.98 * (1.0 - MeanFresnel(V, N, sigmaSq));
+	return RefractedSeaRadiance(MeanFresnel(V, N, sigmaSq));
 }
 
 float erf(float x) 
@@ -132,7 +160,7 @@ float erf(float x)
 	float x2 = x * x;
 	float ax2 = a * x2;
 
-	return sign(x) * sqrt( 1.0 - exp(-x2*(4.0 / M_PI + ax2)/(1.0 + ax2)) );
+	return sign(x) * sqrt(1.0 - exp(-x2 * (4.0 / M_PI + ax2) / (1.0 + ax2)));
 }
 
 float WhitecapCoverage(float epsilon, float mu, float sigma2) 
@@ -140,13 +168,46 @@ float WhitecapCoverage(float epsilon, float mu, float sigma2)
 	return 0.5 * erf((0.5 * sqrt(2.0) * (epsilon - mu) * (1.0 / sqrt(sigma2)))) + 0.5;
 }
 
-float3 OceanRadiance(float3 L, float3 V, float3 N, float sigmaSq, float3 sunL, float3 skyE, float3 seaColor) 
+float3 ReflectedSky(float3 V, float3 N, float3 sunDir, float3 earthP) 
 {
-	float F = MeanFresnel(V, N, sigmaSq);
+	float3 result = float3(0.0, 0.0, 0.0);
+	float3 reflectedAngle = reflect(-V, N);
 
+	reflectedAngle.z = max(reflectedAngle.z, 0.0);	// Hack to avoid unsightly black pixels from downwards reflections
+	result = SkyRadianceSimple(earthP, reflectedAngle, sunDir);
+
+	return result;
+}
+
+float3 OceanRadianceWithoutSkyReflection(float3 L, float3 V, float3 N, float sigmaSq, float3 sunL, float3 skyE, float3 seaColor) 
+{
+	float fresnel = MeanFresnel(V, N, sigmaSq);
+
+	float3 Lsky = skyE * fresnel / M_PI;
 	float3 Lsun = ReflectedSunRadiance(L, V, N, sigmaSq) * sunL;
-	float3 Lsky = skyE * F / M_PI;
-	float3 Lsea = (1.0 - F) * seaColor * skyE / M_PI;
+	float3 Lsea = (1.0 - fresnel) * seaColor * skyE / M_PI;
 
 	return Lsun + Lsky + Lsea;
+}
+
+float3 OceanRadianceWithSkyReflection(float3 L, float3 V, float3 N, float sigmaSq, float3 sunL, float3 skyE, float3 seaColor, float3 earthP) 
+{
+	float fresnel = MeanFresnel(V, N, sigmaSq);
+
+	float3 Lsky = fresnel * ReflectedSky(V, N, L, earthP);
+	float3 Lsun = ReflectedSunRadiance(L, V, N, sigmaSq) * sunL;
+	float3 Lsea = RefractedSeaRadiance(fresnel) * seaColor * (skyE / M_PI);
+
+	return Lsun + Lsky + Lsea;
+}
+
+float3 OceanRadiance(float3 L, float3 V, float3 N, float sigmaSq, float3 sunL, float3 skyE, float3 seaColor, float3 earthP) 
+{
+	#if OCEAN_SKY_REFLECTIONS_ON
+		return OceanRadianceWithSkyReflection(L, V, N, sigmaSq, sunL, skyE, seaColor, earthP);
+	#else
+		return OceanRadianceWithoutSkyReflection(L, V, N, sigmaSq, sunL, skyE, seaColor);
+	#endif
+
+	return 0;
 }

@@ -33,313 +33,318 @@
 // Creator: zameran
 #endregion
 
+using SpaceEngine.Core;
 using SpaceEngine.Core.Bodies;
 using SpaceEngine.Core.Patterns.Strategy.Renderable;
 using SpaceEngine.Core.Patterns.Strategy.Uniformed;
+using SpaceEngine.Enviroment.Shadows;
 
 using System.Collections.Generic;
 
 using UnityEngine;
 
-public class Ring : Node<Ring>, IUniformed<Material>, IRenderable<Ring>
+namespace SpaceEngine.Enviroment.Rings
 {
-    public CelestialBody ParentBody;
-
-    public List<Light> Lights = new List<Light>();
-    public List<Shadow> Shadows = new List<Shadow>();
-
-    public Texture MainTex;
-    public Texture NoiseTex;
-
-    public Color Color = Color.white;
-
-    public float Brightness = 1.0f;
-    public float InnerRadius = 1.0f;
-    public float OuterRadius = 2.0f;
-
-    public EngineRenderQueue RenderQueue = EngineRenderQueue.Transparent;
-    public int RenderQueueOffset;
-
-    public int SegmentCount = 8;
-    public int SegmentDetail = 8;
-
-    public float BoundsShift;
-
-    [Range(-1.0f, 1.0f)]
-    public float LightingBias = 0.5f;
-
-    [Range(0.0f, 1.0f)]
-    public float LightingSharpness = 0.5f;
-
-    [Range(0.0f, 5.0f)]
-    public float MieSharpness = 2.0f;
-
-    [Range(0.0f, 10.0f)]
-    public float MieStrength = 1.0f;
-
-    public List<RingSegment> Segments = new List<RingSegment>();
-
-    public static List<string> keywords = new List<string>();
-
-    public Shader RingShader;
-    public Material RingMaterial;
-
-    public Mesh RingSegmentMesh;
-
-    #region Node
-
-    protected override void InitNode()
+    public class Ring : NodeSlave<Ring>, IUniformed<Material>, IRenderable<Ring>
     {
-        InitMesh();
-        InitMaterial();
+        public Body ParentBody;
 
-        InitUniforms(RingMaterial);
-    }
+        public List<Light> Lights = new List<Light>();
+        public List<Shadow> Shadows = new List<Shadow>();
 
-    protected override void UpdateNode()
-    {
-        RingMaterial.renderQueue = (int)RenderQueue + RenderQueueOffset;
+        public Texture DiffuseTexture;
+        public Texture NoiseTexture;
 
-        Segments.RemoveAll(m => m == null);
+        public Color Color = Color.white;
 
-        if (SegmentCount != Segments.Count)
+        public float Brightness = 1.0f;
+        public float InnerRadius = 1.0f;
+        public float OuterRadius = 2.0f;
+
+        public EngineRenderQueue RenderQueue = EngineRenderQueue.Transparent;
+        public int RenderQueueOffset;
+
+        public int SegmentCount = 8;
+        public int SegmentDetail = 8;
+
+        public float BoundsShift;
+
+        [Range(-1.0f, 1.0f)]
+        public float LightingBias = 0.5f;
+
+        [Range(0.0f, 1.0f)]
+        public float LightingSharpness = 0.5f;
+
+        [Range(0.0f, 5.0f)]
+        public float MieSharpness = 2.0f;
+
+        [Range(0.0f, 10.0f)]
+        public float MieStrength = 1.0f;
+
+        public List<RingSegment> Segments = new List<RingSegment>();
+
+        public static List<string> keywords = new List<string>();
+
+        public Shader RingShader;
+        public Material RingMaterial;
+
+        public Mesh RingSegmentMesh;
+
+        #region Node
+
+        public override void InitNode()
         {
-            Helper.ResizeArrayTo(ref Segments, SegmentCount, i => RingSegment.Create(this), null);
+            InitMesh();
+            InitMaterial();
+
+            InitUniforms(RingMaterial);
         }
 
-        var angleStep = Helper.Divide(360.0f, SegmentCount);
-
-        for (var i = SegmentCount - 1; i >= 0; i--)
+        public override void UpdateNode()
         {
-            var angle = angleStep * i;
-            var rotation = Quaternion.Euler(0.0f, angle, 0.0f);
+            RingMaterial.renderQueue = (int)RenderQueue + RenderQueueOffset;
 
-            Segments[i].UpdateNode(RingSegmentMesh, RingMaterial, rotation);
-        }
+            Segments.RemoveAll(m => m == null);
 
-        SetUniforms(RingMaterial);
-    }
-
-    protected override void Awake()
-    {
-        base.Awake();
-    }
-
-    protected override void Start()
-    {
-        base.Start();
-    }
-
-    protected override void Update()
-    {
-        base.Update();
-    }
-
-    protected override void OnDestroy()
-    {
-        Helper.Destroy(RingMaterial);
-        Helper.Destroy(RingSegmentMesh);
-
-        for (var i = Segments.Count - 1; i >= 0; i--)
-        {
-            Helper.Destroy(Segments[i]);
-        }
-
-        Segments.Clear();
-
-        base.OnDestroy();
-    }
-
-    #endregion
-
-    #region IUniformed
-
-    public void InitUniforms(Material target)
-    {
-        if (target == null) return;
-    }
-
-    public void SetUniforms(Material target)
-    {
-        if (target == null) return;
-
-        SetLightsAndShadows(target);
-
-        target.SetTexture("_DiffuseTexture", MainTex);
-        target.SetTexture("_NoiseTex", NoiseTex);
-        target.SetColor("_DiffuseColor", Helper.Brighten(Color, Brightness));
-        target.SetFloat("_LightingBias", LightingBias);
-        target.SetFloat("_LightingSharpness", LightingSharpness);
-
-        WriteMie(MieSharpness, MieStrength, target);
-
-        keywords.Clear();
-    }
-
-    public void InitSetUniforms()
-    {
-        InitUniforms(RingMaterial);
-        SetUniforms(RingMaterial);
-    }
-
-    #endregion
-
-    #region IRenderable
-
-    public void Render(int layer = 0)
-    {
-        if (Segments == null) return;
-        if (Segments.Count == 0) return;
-
-        for (int i = 0; i < Segments.Count; i++)
-        {
-            if (Segments[i] != null)
+            if (SegmentCount != Segments.Count)
             {
-                Segments[i].Render(layer);
+                Helper.ResizeArrayTo(ref Segments, SegmentCount, i => RingSegment.Create(this), null);
             }
-        }
-    }
 
-    #endregion
+            var angleStep = Helper.Divide(360.0f, SegmentCount);
 
-    private void OnEnable()
-    {
-        for (var i = Segments.Count - 1; i >= 0; i--)
-        {
-            var segment = Segments[i];
-
-            if (segment != null)
+            for (var i = SegmentCount - 1; i >= 0; i--)
             {
-                segment.gameObject.SetActive(true);
+                var angle = angleStep * i;
+                var rotation = Quaternion.Euler(0.0f, angle, 0.0f);
+
+                Segments[i].UpdateNode(RingSegmentMesh, RingMaterial, rotation);
             }
+
+            SetUniforms(RingMaterial);
         }
-    }
 
-    private void OnDisable()
-    {
-        for (var i = Segments.Count - 1; i >= 0; i--)
+        protected override void Awake()
         {
-            var segment = Segments[i];
+            base.Awake();
+        }
 
-            if (segment != null)
+        protected override void Start()
+        {
+            base.Start();
+        }
+
+        protected override void Update()
+        {
+            base.Update();
+        }
+
+        protected override void OnDestroy()
+        {
+            Helper.Destroy(RingMaterial);
+            Helper.Destroy(RingSegmentMesh);
+
+            for (var i = Segments.Count - 1; i >= 0; i--)
             {
-                segment.gameObject.SetActive(false);
+                Helper.Destroy(Segments[i]);
             }
+
+            Segments.Clear();
+
+            base.OnDestroy();
         }
-    }
 
-    #region Gizmos
+        #endregion
 
-#if UNITY_EDITOR
-    protected virtual void OnDrawGizmosSelected()
-    {
-        Gizmos.matrix = transform.localToWorldMatrix;
+        #region IUniformed
 
-        Helper.DrawCircle(Vector3.zero, Vector3.up, InnerRadius);
-        Helper.DrawCircle(Vector3.zero, Vector3.up, OuterRadius);
-    }
-#endif
-
-    #endregion
-
-    public void SetLightsAndShadows(Material mat)
-    {
-        if (mat == null) return;
-
-        var lightCount = Helper.WriteLights(Lights, 4, transform.position, null, null, mat);
-        var shadowCount = Helper.WriteShadows(Shadows, 4, mat);
-
-        WriteLightKeywords(lightCount, keywords);
-        WriteShadowKeywords(shadowCount, keywords);
-
-        keywords.Add("SCATTERING");
-
-        Helper.SetKeywords(mat, keywords);
-    }
-
-    public void SetShadows(Material mat, List<Shadow> shadows)
-    {
-        if (mat == null) return;
-
-        Helper.WriteShadows(shadows, 4, mat);
-    }
-
-    public void SetShadows(MaterialPropertyBlock block, List<Shadow> shadows)
-    {
-        if (block == null) return;
-
-        Helper.WriteShadows(shadows, 4, block);
-    }
-
-    private void InitMaterial()
-    {
-        RingMaterial = MaterialHelper.CreateTemp(RingShader, "Ring", (int)RenderQueue);
-    }
-
-    private void InitMesh()
-    {
-        RingSegmentMesh = MeshFactory.SetupRingSegmentMesh(SegmentCount, SegmentDetail, InnerRadius, OuterRadius, BoundsShift);
-    }
-
-    #region Special Stuff
-
-    public static void WriteLightKeywords(int lightCount, params List<string>[] keywordLists)
-    {
-        if (lightCount > 0)
+        public void InitUniforms(Material target)
         {
-            var keyword = "LIGHT_" + lightCount;
+            if (target == null) return;
+        }
 
-            for (var i = keywordLists.Length - 1; i >= 0; i--)
+        public void SetUniforms(Material target)
+        {
+            if (target == null) return;
+
+            SetLightsAndShadows(target);
+
+            target.SetTexture("_DiffuseTexture", DiffuseTexture);
+            target.SetTexture("_NoiseTexture", NoiseTexture);
+            target.SetColor("_DiffuseColor", Helper.Brighten(Color, Brightness));
+            target.SetFloat("_LightingBias", LightingBias);
+            target.SetFloat("_LightingSharpness", LightingSharpness);
+
+            WriteMie(MieSharpness, MieStrength, target);
+
+            keywords.Clear();
+        }
+
+        public void InitSetUniforms()
+        {
+            InitUniforms(RingMaterial);
+            SetUniforms(RingMaterial);
+        }
+
+        #endregion
+
+        #region IRenderable
+
+        public void Render(int layer = 11)
+        {
+            if (Segments == null) return;
+            if (Segments.Count == 0) return;
+
+            for (int i = 0; i < Segments.Count; i++)
             {
-                var keywordList = keywordLists[i];
-
-                if (keywordList != null)
+                if (Segments[i] != null)
                 {
-                    keywordList.Add(keyword);
+                    Segments[i].Render(layer);
                 }
             }
         }
-    }
 
-    public static void WriteShadowKeywords(int shadowCount, params List<string>[] keywordLists)
-    {
-        if (shadowCount > 0)
+        #endregion
+
+        private void OnEnable()
         {
-            var keyword = "SHADOW_" + shadowCount;
-
-            for (var i = keywordLists.Length - 1; i >= 0; i--)
+            for (var i = Segments.Count - 1; i >= 0; i--)
             {
-                var keywordList = keywordLists[i];
+                var segment = Segments[i];
 
-                if (keywordList != null)
+                if (segment != null)
                 {
-                    keywordList.Add(keyword);
+                    segment.gameObject.SetActive(true);
                 }
             }
         }
-    }
 
-    public static void WriteMie(float sharpness, float strength, params Material[] materials)
-    {
-        sharpness = Mathf.Pow(10.0f, sharpness);
-        strength *= (Mathf.Log10(sharpness) + 1) * 0.75f;
-
-        //var mie  = -(1.0f - 1.0f / Mathf.Pow(10.0f, sharpness));
-        //var mie4 = new Vector4(mie * 2.0f, 1.0f - mie * mie, 1.0f + mie * mie, mie / strength);
-
-        var mie = -(1.0f - 1.0f / sharpness);
-        var mie4 = new Vector4(mie * 2.0f, 1.0f - mie * mie, 1.0f + mie * mie, strength);
-
-        for (var j = materials.Length - 1; j >= 0; j--)
+        private void OnDisable()
         {
-            var material = materials[j];
-
-            if (material != null)
+            for (var i = Segments.Count - 1; i >= 0; i--)
             {
-                material.SetVector("_Mie", mie4);
+                var segment = Segments[i];
+
+                if (segment != null)
+                {
+                    segment.gameObject.SetActive(false);
+                }
             }
         }
-    }
 
-    #endregion
+        #region Gizmos
+
+    #if UNITY_EDITOR
+        protected virtual void OnDrawGizmosSelected()
+        {
+            Gizmos.matrix = transform.localToWorldMatrix;
+
+            Helper.DrawCircle(Vector3.zero, Vector3.up, InnerRadius);
+            Helper.DrawCircle(Vector3.zero, Vector3.up, OuterRadius);
+        }
+    #endif
+
+        #endregion
+
+        public void SetLightsAndShadows(Material mat)
+        {
+            if (mat == null) return;
+
+            var lightCount = Helper.WriteLights(Lights, 4, transform.position, null, null, mat);
+            var shadowCount = Helper.WriteShadows(Shadows, 4, mat);
+
+            WriteLightKeywords(lightCount, keywords);
+            WriteShadowKeywords(shadowCount, keywords);
+
+            keywords.Add("SCATTERING");
+
+            Helper.SetKeywords(mat, keywords);
+        }
+
+        public void SetShadows(Material mat, List<Shadow> shadows)
+        {
+            if (mat == null) return;
+
+            Helper.WriteShadows(shadows, 4, mat);
+        }
+
+        public void SetShadows(MaterialPropertyBlock block, List<Shadow> shadows)
+        {
+            if (block == null) return;
+
+            Helper.WriteShadows(shadows, 4, block);
+        }
+
+        private void InitMaterial()
+        {
+            RingMaterial = MaterialHelper.CreateTemp(RingShader, "Ring", (int)RenderQueue);
+        }
+
+        private void InitMesh()
+        {
+            RingSegmentMesh = MeshFactory.SetupRingSegmentMesh(SegmentCount, SegmentDetail, InnerRadius, OuterRadius, BoundsShift);
+        }
+
+        #region Special Stuff
+
+        public static void WriteLightKeywords(int lightCount, params List<string>[] keywordLists)
+        {
+            if (lightCount > 0)
+            {
+                var keyword = "LIGHT_" + lightCount;
+
+                for (var i = keywordLists.Length - 1; i >= 0; i--)
+                {
+                    var keywordList = keywordLists[i];
+
+                    if (keywordList != null)
+                    {
+                        keywordList.Add(keyword);
+                    }
+                }
+            }
+        }
+
+        public static void WriteShadowKeywords(int shadowCount, params List<string>[] keywordLists)
+        {
+            if (shadowCount > 0)
+            {
+                var keyword = "SHADOW_" + shadowCount;
+
+                for (var i = keywordLists.Length - 1; i >= 0; i--)
+                {
+                    var keywordList = keywordLists[i];
+
+                    if (keywordList != null)
+                    {
+                        keywordList.Add(keyword);
+                    }
+                }
+            }
+        }
+
+        public static void WriteMie(float sharpness, float strength, params Material[] materials)
+        {
+            sharpness = Mathf.Pow(10.0f, sharpness);
+            strength *= (Mathf.Log10(sharpness) + 1) * 0.75f;
+
+            //var mie  = -(1.0f - 1.0f / Mathf.Pow(10.0f, sharpness));
+            //var mie4 = new Vector4(mie * 2.0f, 1.0f - mie * mie, 1.0f + mie * mie, mie / strength);
+
+            var mie = -(1.0f - 1.0f / sharpness);
+            var mie4 = new Vector4(mie * 2.0f, 1.0f - mie * mie, 1.0f + mie * mie, strength);
+
+            for (var j = materials.Length - 1; j >= 0; j--)
+            {
+                var material = materials[j];
+
+                if (material != null)
+                {
+                    material.SetVector("_Mie", mie4);
+                }
+            }
+        }
+
+        #endregion
+    }
 }

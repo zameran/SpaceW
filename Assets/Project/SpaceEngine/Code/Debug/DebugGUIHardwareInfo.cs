@@ -47,7 +47,7 @@ namespace SpaceEngine.Debugging
         {
             base.Awake();
 
-            SI.Get();
+            HardwareInfo.Get();
         }
 
         protected override void Start()
@@ -64,41 +64,82 @@ namespace SpaceEngine.Debugging
 
         protected override void UI(int id)
         {
-            scrollPosition = GUILayout.BeginScrollView(scrollPosition, false, true);
+            GUILayoutExtensions.VerticalBoxed("Controls: ", GUISkin, () =>
+            {
+                GUILayout.Space(20);
 
-            GUILayout.BeginVertical();
+                GUILayoutExtensions.VerticalBoxed("", GUISkin, () =>
+                {
+                    if (GUILayout.Button("Update")) HardwareInfo.Get();
+                });
+            });
 
-            if (GUILayout.Button("Update")) SI.Get();
+            GUILayout.Space(5);
 
-            GUILayoutExtensions.LabelWithSpace("Device Type: " + SI.deviceType, -8);
-            GUILayoutExtensions.LabelWithSpace("Operation System: " + SI.operatingSystem, -8);
-            GUILayoutExtensions.LabelWithSpace("Unity Version: " + SI.unityVersion, -8);
-            GUILayoutExtensions.LabelWithSpace("Graphics Device: " + SI.graphicsDeviceName, -8);
-            GUILayoutExtensions.LabelWithSpace("Graphics Device API: " + SI.graphicsDeviceVersion, -8);
-            GUILayoutExtensions.LabelWithSpace("Graphics Device ID: " + SI.graphicsDeviceID, -8);
-            GUILayoutExtensions.LabelWithSpace("Graphics Memory Size: " + SI.graphicsMemorySize, -8);
-            GUILayoutExtensions.LabelWithSpace("Supported Shader Level: " + SI.graphicsShaderLevel, -8);
+            ScrollPosition = GUILayout.BeginScrollView(ScrollPosition, false, true);
 
-            GUILayoutExtensions.LabelWithSpace("CPU: " + SI.processorType, -8);
-            GUILayoutExtensions.LabelWithSpace("CPU Cores Count (Threads Count): " + SI.processorCount, -8);
-            GUILayoutExtensions.LabelWithSpace("CPU Current Frequency: " + SI.processorFrequency + "Hz", -8);
+            GUILayoutExtensions.VerticalBoxed("Overall summary: ", GUISkin, () =>
+            {
+                GUILayout.Space(20);
 
-            GUILayoutExtensions.LabelWithSpace("RAM: " + SI.systemMemorySize, -8);
+                GUILayoutExtensions.VerticalBoxed("", GUISkin, () =>
+                {
+                    GUILayoutExtensions.LabelWithSpace("Device Type: " + HardwareInfo.deviceType, -8);
+                    GUILayoutExtensions.LabelWithSpace("Operation System: " + HardwareInfo.operatingSystem, -8);
+                    GUILayoutExtensions.LabelWithSpace("Unity Version: " + HardwareInfo.unityVersion, -8);
+                    GUILayoutExtensions.LabelWithSpace("Graphics Device: " + HardwareInfo.graphicsDeviceName, -8);
+                    GUILayoutExtensions.LabelWithSpace("Graphics Device API: " + HardwareInfo.graphicsDeviceVersion, -8);
+                    GUILayoutExtensions.LabelWithSpace("Graphics Device ID: " + HardwareInfo.graphicsDeviceID, -8);
+                    GUILayoutExtensions.LabelWithSpace("Graphics Memory Size: " + HardwareInfo.graphicsMemorySize, -8);
+                    GUILayoutExtensions.LabelWithSpace("Supported Shader Level: " + HardwareInfo.graphicsShaderLevel, -8);
 
-            GUILayoutExtensions.LabelWithSpace("Maximum Texture Size: " + SI.maxTextureSize, -8);
-            GUILayoutExtensions.LabelWithSpace("Non-Power-Of-Two Texture Support: " + SI.npotSupport, -8);
+                    GUILayoutExtensions.LabelWithSpace("CPU: " + HardwareInfo.processorType, -8);
+                    GUILayoutExtensions.LabelWithSpace("CPU Cores Count (Threads Count): " + HardwareInfo.processorCount, -8);
+                    GUILayoutExtensions.LabelWithSpace("CPU Current Frequency: " + HardwareInfo.processorFrequency + "Hz", -8);
 
-            GUILayoutExtensions.LabelWithSpace("ComputeShaders: " + SI.supportsComputeShaders, -8);
-            GUILayoutExtensions.LabelWithSpace("RenderTextures: " + true, -8);
-            GUILayoutExtensions.LabelWithSpace("3DTextures: " + SI.supports3DTextures, -8);
-            GUILayoutExtensions.LabelWithSpace("Graphics Multithreading: " + SI.graphicsMultiThreaded, -8);
+                    GUILayoutExtensions.LabelWithSpace("RAM: " + HardwareInfo.systemMemorySize, -8);
 
-            DrawSupportedFormats<RenderTextureFormat>(SI.RenderTextureFormats, "RenderTexture");
-            DrawSupportedFormats<TextureFormat>(SI.TextureFormats, "Texture");
+                    GUILayoutExtensions.LabelWithSpace("Maximum Texture Size: " + HardwareInfo.maxTextureSize, -8);
+                    GUILayoutExtensions.LabelWithSpace("Non-Power-Of-Two Texture Support: " + HardwareInfo.npotSupport, -8);
 
-            GUILayout.Space(10);
+                    GUILayoutExtensions.LabelWithSpace("ComputeShaders: " + HardwareInfo.supportsComputeShaders, -8);
+                    GUILayoutExtensions.LabelWithSpace("RenderTextures: " + true, -8);
+                    GUILayoutExtensions.LabelWithSpace("3DTextures: " + HardwareInfo.supports3DTextures, -8);
+                    GUILayoutExtensions.LabelWithSpace("Graphics Multithreading: " + HardwareInfo.graphicsMultiThreaded, -8);
 
-            GUILayout.EndVertical();
+                    GUILayout.Space(5);
+                });
+            });
+
+            GUILayout.Space(5);
+
+            GUILayoutExtensions.VerticalBoxed("Render Texture support summary: ", GUISkin, () =>
+            {
+                GUILayout.Space(20);
+
+                GUILayoutExtensions.VerticalBoxed("", GUISkin, () =>
+                {
+                    DrawSupportedFormats<RenderTextureFormat>(HardwareInfo.RenderTextureFormats, "RenderTexture");
+
+                    GUILayout.Space(5);
+                });
+            });
+
+            GUILayout.Space(5);
+
+            GUILayoutExtensions.VerticalBoxed("Texture support summary: ", GUISkin, () =>
+            {
+                GUILayout.Space(20);
+
+                GUILayoutExtensions.VerticalBoxed("", GUISkin, () =>
+                {
+                    DrawSupportedFormats<TextureFormat>(HardwareInfo.TextureFormats, "Texture");
+
+                    GUILayout.Space(5);
+                });
+            });
+
+            GUILayout.Space(5);
 
             GUILayout.EndScrollView();
         }
@@ -130,30 +171,32 @@ namespace SpaceEngine.Debugging
 
                         supports = SystemInfo.SupportsTextureFormat(f);
                     }
-                    else
-                    {
-                        throw new NotImplementedException("Unsupported format!");
-                    }
 
-                    supportState = SI.Supports(supports);
+                    supportState = HardwareInfo.Supports(supports);
                 }
                 catch (Exception ex)
                 {
                     supports = false;
-                    supportState = ex.GetType().Name;
+                    supportState = string.Format("ERROR: {0}", ex.GetType().Name);
                 }
 
-                GUILayoutExtensions.LabelWithSpace(string.Format("{0}.{1}: {2}", prefix, format, supportState), -8);
-            }
-        }
+                var tempColor = GUI.color;
 
-        private bool Check(Func<bool> assert)
-        {
-            return assert.Invoke();
+                GUILayoutExtensions.DrawWithColor(() =>
+                {
+                    GUILayoutExtensions.HorizontalBoxed("", GUISkin, () =>
+                    {
+                        GUILayoutExtensions.DrawWithColor(() =>
+                        {
+                            GUILayoutExtensions.LabelWithFlexibleSpace(string.Format("{0}.{1}", prefix, format), supportState);
+                        }, tempColor);
+                    });
+                }, supports ? Color.green : Color.red);
+            }
         }
     }
 
-    public static class SI
+    public static class HardwareInfo
     {
         public static string deviceType;
         public static string operatingSystem;

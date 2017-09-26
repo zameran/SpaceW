@@ -1,4 +1,5 @@
-﻿using SpaceEngine.Core.Storage;
+﻿using SpaceEngine.Core.Patterns.Strategy.Uniformed;
+using SpaceEngine.Core.Storage;
 using SpaceEngine.Core.Terrain;
 using SpaceEngine.Core.Tile.Filter;
 using SpaceEngine.Core.Tile.Producer;
@@ -14,7 +15,7 @@ namespace SpaceEngine.Core.Tile.Samplers
     /// This class can set the uniforms necessary to access a given texture tile on GPU, stored in a GPUTileStorage. 
     /// This class also manages the creation of new texture tiles when a terrain quadtree is updated, via a TileProducer.
     /// </summary>
-    public class TileSampler : Node<TileSampler>
+    public class TileSampler : NodeSlave<TileSampler>, IUniformed<MaterialPropertyBlock, TerrainQuad>, IUniformed<Material, TerrainQuad>
     {
         /// <summary>
         /// Class used to sort a <see cref="TileSampler"/> based on it's priority.
@@ -23,6 +24,8 @@ namespace SpaceEngine.Core.Tile.Samplers
         {
             int IComparer<TileSampler>.Compare(TileSampler a, TileSampler b)
             {
+                if (a == null || b == null) return 0;
+
                 if (a.Priority > b.Priority)
                     return 1;
                 if (a.Priority < b.Priority)
@@ -71,7 +74,7 @@ namespace SpaceEngine.Core.Tile.Samplers
         /// </summary>
         public QuadTree QuadTreeRoot = null;
 
-        Uniforms uniforms;
+        private Uniforms uniforms;
 
         /// <summary>
         /// The producer to be used to create texture tiles for newly created quads.
@@ -83,19 +86,27 @@ namespace SpaceEngine.Core.Tile.Samplers
         /// </summary>
         public TileFilter[] Filters { get; private set; }
 
+        private RenderTexture SamplerTextureBuffer;
+        private Vector3 SamplerCoordsBuffer;
+        private Vector3 SamplerSizeBuffer;
+
         #region Node
 
-        protected override void InitNode()
+        public override void InitNode()
         {
             Producer = GetComponent<TileProducer>();
             TerrainNode = GetComponentInParent<TerrainNode>();
             uniforms = new Uniforms(Producer.GetName());
             Filters = GetComponents<TileFilter>();
+
+            Producer.InitNode();
         }
 
-        protected override void UpdateNode()
+        public override void UpdateNode()
         {
+            Producer.UpdateNode();
 
+            UpdateSampler();
         }
 
 
@@ -202,7 +213,7 @@ namespace SpaceEngine.Core.Tile.Samplers
         }
 
         /// <summary>
-        /// Updates the internal quadtree to make it identical to the given terrain quadtree. 
+        /// Updates the internal <see cref="QuadTree"/> to make it identical to the given terrain <see cref="QuadTree"/>. 
         /// Collects the tasks necessary to create the missing texture tiles, corresponding to newly created quads.
         /// </summary>
         /// <param name="parent">Parent quadtree.</param>
@@ -238,72 +249,110 @@ namespace SpaceEngine.Core.Tile.Samplers
             }
         }
 
+        #region IUniformed<Material> 
+
+        /// <summary> 
+        /// Init special <see cref="TileProducer"/> uniforms for target <see cref="TerrainQuad"/>. 
+        /// </summary> 
+        /// <param name="target">Target <see cref="Material"/>.</param> 
+        /// <param name="quad">Target quad.</param> 
+        public void InitUniforms(Material target, TerrainQuad quad)
+        {
+            if (target == null) return;
+            if (quad == null) return;
+            if (!Producer.IsGPUProducer) return;
+        }
+
+        /// <summary> 
+        /// Set special <see cref="TileProducer"/> uniforms for target <see cref="TerrainQuad"/>. 
+        /// </summary> 
+        /// <param name="target">Target <see cref="Material"/>.</param> 
+        /// <param name="quad">Target quad.</param> 
+        public void SetUniforms(Material target, TerrainQuad quad)
+        {
+            if (target == null) return;
+            if (quad == null) return;
+            if (!Producer.IsGPUProducer) return;
+
+            CalculateTileGPUCoordinates(ref SamplerTextureBuffer, ref SamplerCoordsBuffer, ref SamplerSizeBuffer, quad.Level, quad.Tx, quad.Ty);
+
+            target.SetTexture(uniforms.tile, SamplerTextureBuffer);
+            target.SetVector(uniforms.tileCoords, SamplerCoordsBuffer);
+            target.SetVector(uniforms.tileSize, SamplerSizeBuffer);
+        }
+
+        #endregion
+
+        #region IUniformed<MaterialPropertyBlock>
+
         /// <summary>
-        /// Sets special <see cref="TileProducer"/> uniforms for given quad.
+        /// Init special <see cref="TileProducer"/> uniforms for target <see cref="TerrainQuad"/>.
         /// </summary>
         /// <param name="target">Target <see cref="MaterialPropertyBlock"/>.</param>
-        /// <param name="level">Quad level.</param>
-        /// <param name="tx">Quad tx.</param>
-        /// <param name="ty">Quad ty</param>
-        public void SetTile(MaterialPropertyBlock target, int level, int tx, int ty)
+        /// <param name="quad">Target quad.</param>
+        public void InitUniforms(MaterialPropertyBlock target, TerrainQuad quad)
         {
+            if (target == null) return;
+            if (quad == null) return;
             if (!Producer.IsGPUProducer) return;
-
-            RenderTexture tex = null;
-            Vector3 coords = Vector3.zero, size = Vector3.zero;
-
-            SetTile(ref tex, ref coords, ref size, level, tx, ty);
-
-            target.SetTexture(uniforms.tile, tex);
-            target.SetVector(uniforms.tileCoords, coords);
-            target.SetVector(uniforms.tileSize, size);
         }
 
         /// <summary>
-        /// Sets special <see cref="TileProducer"/> uniforms for given quad.
+        /// Set special <see cref="TileProducer"/> uniforms for target <see cref="TerrainQuad"/>.
         /// </summary>
-        /// <param name="target">Target <see cref="Material"/>.</param>
-        /// <param name="level">Quad level.</param>
-        /// <param name="tx">Quad tx.</param>
-        /// <param name="ty">Quad ty</param>
-        public void SetTile(Material target, int level, int tx, int ty)
+        /// <param name="target">Target <see cref="MaterialPropertyBlock"/>.</param>
+        /// <param name="quad">Target quad.</param>
+        public void SetUniforms(MaterialPropertyBlock target, TerrainQuad quad)
         {
+            if (target == null) return;
+            if (quad == null) return;
             if (!Producer.IsGPUProducer) return;
 
-            RenderTexture tex = null;
-            Vector3 coords = Vector3.zero, size = Vector3.zero;
+            CalculateTileGPUCoordinates(ref SamplerTextureBuffer, ref SamplerCoordsBuffer, ref SamplerSizeBuffer, quad.Level, quad.Tx, quad.Ty);
 
-            SetTile(ref tex, ref coords, ref size, level, tx, ty);
-
-            target.SetTexture(uniforms.tile, tex);
-            target.SetVector(uniforms.tileCoords, coords);
-            target.SetVector(uniforms.tileSize, size);
+            target.SetTexture(uniforms.tile, SamplerTextureBuffer);
+            target.SetVector(uniforms.tileCoords, SamplerCoordsBuffer);
+            target.SetVector(uniforms.tileSize, SamplerSizeBuffer);
         }
 
+        #endregion
+
+        #region IUniformed
+
+        public void InitSetUniforms()
+        {
+
+        }
+
+        #endregion
+
         /// <summary>
-        /// Sets the uniforms necessary to access the texture tile for the given quad. 
+        /// Calculates the uniforms necessary to access the texture tile for the given quad. 
         /// The samplers producer must be using a <see cref="GPUTileStorage"/> at the first slot for this function to work.
         /// </summary>
-        /// <param name="tex"></param>
-        /// <param name="coord"></param>
+        /// <param name="tileTexture"></param>
+        /// <param name="coordinates"></param>
         /// <param name="size"></param>
         /// <param name="level"></param>
         /// <param name="tx"></param>
         /// <param name="ty"></param>
-        void SetTile(ref RenderTexture tex, ref Vector3 coord, ref Vector3 size, int level, int tx, int ty)
+        private void CalculateTileGPUCoordinates(ref RenderTexture tileTexture, ref Vector3 coordinates, ref Vector3 size, int level, int tx, int ty)
         {
+            // TODO : BOTTLENECK
+
             if (!Producer.IsGPUProducer) return;
 
             Tile t = null;
 
-            var b = Producer.GetBorder();
-            var s = Producer.Cache.GetStorage(0).TileSize;
-            var sDivTwo = s / 2;
+            var border = Producer.GetBorder();
+            var tileSize = Producer.Cache.GetStorage(0).TileSize;
+            var tileSizeHalf = tileSize / 2;
+            var tileSizeCentered = tileSizeHalf * 2.0f - 2.0f * border;
 
             var dx = 0.0f;
             var dy = 0.0f;
             var dd = 1.0f;
-            var ds0 = sDivTwo * 2.0f - 2.0f * b;
+            var ds0 = tileSizeCentered;
             var ds = ds0;
 
             while (!Producer.HasTile(level, tx, ty))
@@ -318,7 +367,7 @@ namespace SpaceEngine.Core.Tile.Samplers
 
                 if (level < 0)
                 {
-                    Debug.Log("Invalid level!");
+                    Debug.Log("TileSampler.SetTile: Invalid level!");
                     return;
                 }
             }
@@ -360,27 +409,27 @@ namespace SpaceEngine.Core.Tile.Samplers
 
                 if (tt == null)
                 {
-                    Debug.Log("Null tile!");
+                    Debug.Log("TileSampler.SetTile: Null tile!");
                     return;
                 }
 
                 t = tt.Tile;
             }
 
-            dx = dx * (sDivTwo * 2 - 2 * b) / dd;
-            dy = dy * (sDivTwo * 2 - 2 * b) / dd;
+            dx = dx * (tileSizeHalf * 2 - 2 * border) / dd;
+            dy = dy * (tileSizeHalf * 2 - 2 * border) / dd;
 
             var gpuSlot = t.GetSlot(0) as GPUTileStorage.GPUSlot;
 
             if (gpuSlot == null)
             {
-                Debug.Log("Null gpuSlot!");
+                Debug.Log("TileSampler.SetTile: Null gpuSlot!");
                 return;
             }
 
             if (gpuSlot.Texture == null)
             {
-                Debug.Log("Null gpuSlot.Texture!");
+                Debug.Log("TileSampler.SetTile: Null gpuSlot.Texture!");
                 return;
             }
 
@@ -389,18 +438,18 @@ namespace SpaceEngine.Core.Tile.Samplers
 
             var coords = Vector4.zero;
 
-            if (s % 2 == 0)
+            if (tileSize % 2 == 0)
             {
-                coords = new Vector4((dx + b) / w, (dy + b) / h, 0.0f, ds / w);
+                coords = new Vector4((dx + border) / w, (dy + border) / h, 0.0f, ds / w);
             }
             else
             {
-                coords = new Vector4((dx + b + 0.5f) / w, (dy + b + 0.5f) / h, 0.0f, ds / w);
+                coords = new Vector4((dx + border + 0.5f) / w, (dy + border + 0.5f) / h, 0.0f, ds / w);
             }
 
-            tex = gpuSlot.Texture;
-            coord = new Vector3(coords.x, coords.y, coords.z);
-            size = new Vector3(coords.w, coords.w, sDivTwo * 2.0f - 2.0f * b);
+            tileTexture = gpuSlot.Texture;
+            coordinates = new Vector3(coords.x, coords.y, coords.z);
+            size = new Vector3(coords.w, coords.w, tileSizeCentered);
         }
     }
 }

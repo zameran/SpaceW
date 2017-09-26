@@ -5,9 +5,10 @@
  */
 
 // computes transmittance table T using Eq (5)
+
 #pragma kernel CSMain
 
-#include "Assets/Project/SpaceEngine/Shaders/AtmospherePreprocess.cginc"
+#include "SpaceAtmospherePreprocess.cginc"
 
 RWTexture2D<float4> transmittanceWrite;
 
@@ -32,7 +33,7 @@ float OpticalDepth(float H, float r, float mu)
 	return mu < -sqrt(1.0 - (Rg / r) * (Rg / r)) ? 1e9 : result; 
 } 
 
-[numthreads(NUM_THREADS, NUM_THREADS,1)]
+[numthreads(NUM_THREADS, NUM_THREADS, 1)]
 void CSMain (uint3 id : SV_DispatchThreadID)
 {
 	float r, muS; 

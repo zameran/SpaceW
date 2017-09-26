@@ -23,6 +23,8 @@
 // Modified by Denis Ovchinnikov 2015-2017
 #endregion
 
+using System;
+
 namespace UnityEngine
 {
     public class Box2d
@@ -47,12 +49,16 @@ namespace UnityEngine
 
         public Box2d(Vector2d p, Vector2d q)
         {
-            xmin = System.Math.Min(p.x, q.x);
-            xmax = System.Math.Max(p.x, q.x);
-            ymin = System.Math.Min(p.y, q.y);
-            ymax = System.Math.Max(p.y, q.y);
+            xmin = Math.Min(p.x, q.x);
+            xmax = Math.Max(p.x, q.x);
+            ymin = Math.Min(p.y, q.y);
+            ymax = Math.Max(p.y, q.y);
         }
 
+        /// <summary>
+        /// Calculate the center of this bounding box.
+        /// </summary>
+        /// <returns>Returns the center point of this bounding box.</returns>
         public Vector2d Center()
         {
             return new Vector2d((xmin + xmax) / 2.0, (ymin + ymax) / 2.0);
@@ -73,64 +79,80 @@ namespace UnityEngine
             return (xmax - xmin) * (ymax - ymin);
         }
 
-        //Returns the bounding box containing this box and the given border.
+        /// <summary>
+        /// Enlarge the bounding box.
+        /// </summary>
+        /// <param name="w">The border.</param>
+        /// <returns>Returns the bounding box containing this box and the given border.</returns>
         public Box2d Enlarge(double w)
         {
             return new Box2d(xmin - w, xmax + w, ymin - w, ymax + w);
         }
 
-        //Returns the bounding box containing this box and the given point.
+        /// <summary>
+        /// Enlarge the bounding box.
+        /// </summary>
+        /// <param name="p">The point.</param>
+        /// <returns>Returns the bounding box containing this box and the given point.</returns>
         public Box2d Enlarge(Vector2d p)
         {
-            return new Box2d(System.Math.Min(xmin, p.x), System.Math.Max(xmax, p.x), System.Math.Min(ymin, p.y), System.Math.Max(ymax, p.y));
+            return new Box2d(Math.Min(xmin, p.x), Math.Max(xmax, p.x), Math.Min(ymin, p.y), Math.Max(ymax, p.y));
         }
 
-        //Returns the bounding box containing this box and the given box.
-        public Box2d Enlarge(Box2d r)
+        /// <summary>
+        /// Enlarge the bounding box.
+        /// </summary>
+        /// <param name="bb">The bounding box.</param>
+        /// <returns>Returns the bounding box containing this box and the given box.</returns>
+        public Box2d Enlarge(Box2d bb)
         {
-            return new Box2d(System.Math.Min(xmin, r.xmin), System.Math.Max(xmax, r.xmax), System.Math.Min(ymin, r.ymin), System.Math.Max(ymax, r.ymax));
+            return new Box2d(Math.Min(xmin, bb.xmin), Math.Max(xmax, bb.xmax), Math.Min(ymin, bb.ymin), Math.Max(ymax, bb.ymax));
         }
 
-        //Returns true if this bounding box contains the given point.
+        /// <summary>
+        /// Is the bounding box contains the giveen point?
+        /// </summary>
+        /// <param name="p">The point.</param>
+        /// <returns>Returns true if this bounding box contains the given point.</returns>
         public bool Contains(Vector2d p)
         {
             return (p.x >= xmin && p.x <= xmax && p.y >= ymin && p.y <= ymax);
         }
 
-        //Returns true if this bounding box contains the given bounding box.
+        /// <summary>
+        /// Is the bounding box contains the giveen bounding box?
+        /// </summary>
+        /// <param name="bb">The bounding box.</param>
+        /// <returns>Returns true if this bounding box contains the given bounding box.</returns>
         public bool Contains(Box2d bb)
         {
             return (bb.xmin >= xmin && bb.xmax <= xmax && bb.ymin >= ymin && bb.ymax <= ymax);
         }
 
-        //Alias for clipRectangle.
-        public bool Intersects(Box2d a)
+        /// <summary>
+        /// Is the bounding box intersects the given box?
+        /// </summary>
+        /// <param name="bb">The bounding box.</param>
+        /// <returns>Returns true if this bounding box intersects the given bounding box.</returns>
+        public bool Intersects(Box2d bb)
         {
-            return (a.xmax >= xmin && a.xmin <= xmax && a.ymax >= ymin && a.ymin <= ymax);
+            return (bb.xmax >= xmin && bb.xmin <= xmax && bb.ymax >= ymin && bb.ymin <= ymax);
         }
 
-        //Returns the nearest point to a contained in the box.
-        public Vector2d NearestInnerPoint(Vector2d a)
+        /// <summary>
+        /// Calculate the nearest point to a contained in the bounding box.
+        /// </summary>
+        /// <param name="p">The point.</param>
+        /// <returns>Returns the nearest point to a contained in the bounding box.</returns>
+        public Vector2d NearestInnerPoint(Vector2d p)
         {
-            var nearest = new Vector2d(a);
+            var nearest = new Vector2d(p);
 
-            if (a.x < xmin)
-            {
-                nearest.x = xmin;
-            }
-            else if (a.x > xmax)
-            {
-                nearest.x = xmax;
-            }
+            if (p.x < xmin) { nearest.x = xmin; }
+            else if (p.x > xmax) { nearest.x = xmax; }
 
-            if (a.y < ymin)
-            {
-                nearest.y = ymin;
-            }
-            else if (a.y > ymax)
-            {
-                nearest.y = ymax;
-            }
+            if (p.y < ymin) { nearest.y = ymin; }
+            else if (p.y > ymax) { nearest.y = ymax; }
 
             return nearest;
         }

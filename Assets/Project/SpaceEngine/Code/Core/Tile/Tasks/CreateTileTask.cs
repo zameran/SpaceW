@@ -2,6 +2,7 @@
 using SpaceEngine.Core.Tile.Storage;
 using SpaceEngine.Core.Utilities;
 
+using System;
 using System.Collections.Generic;
 
 using UnityEngine;
@@ -51,40 +52,48 @@ namespace SpaceEngine.Core.Tile.Tasks
         {
             if (IsDone)
             {
-                Debug.Log("Task has already been run, task will not run!");
+                Debug.Log(string.Format("CreateTileTask.Run: Task for {0} at {1}:{2}:{3} has already been run. This task will not proceed!", Owner.GetType().Name, Level, Tx, Ty));
 
                 return;
             }
 
-            if (GodManager.Instance.DelayedCalculations)
+            try
             {
-                Owner.StartCoroutine(Owner.DoCreateTileCoroutine(Level, Tx, Ty, Slot, () =>
+                if (GodManager.Instance.DelayedCalculations && !Owner.IsLastInSequence)
                 {
-                    // Manualy finish the particular tile creation task.
-                    this.Finish();
-                }));
+                    Owner.StartCoroutine(Owner.DoCreateTileCoroutine(Level, Tx, Ty, Slot, () =>
+                    {
+                        // Manualy finish the particular tile creation task.
+                        this.Finish();
+                    }));
 
-                // So, task will be finished in the end of coroutine...
+                    // So, task will be finished in the end of coroutine...
+                }
+                else
+                {
+                    Owner.DoCreateTile(Level, Tx, Ty, Slot);
+
+                    // So, finish task NOW! It's done already, yah?
+                    Finish();
+                }
             }
-            else
+            catch(Exception ex)
             {
-                Owner.DoCreateTile(Level, Tx, Ty, Slot);
+                // NOTE : Sometimes tile producers can't find parent tile due to parent tile Task uncomplection...
+                Debug.LogException(ex);
 
-                // So, finish task NOW! It's done already, yah?
-                Finish();
+                return;
             }
         }
 
         public override void Finish()
         {
             base.Finish();
-
-            // DEBUG HERE - AHAHAHAHAHAHAHAHAHA!
         }
 
         public override string ToString()
         {
-            return string.Format("[CreateTileTask] {0}:{1}:{2}:{3}", Owner.name, Level, Tx, Ty);
+            return string.Format("({0},{1},{2},{3})", Owner.name, Level, Tx, Ty);
         }
     }
 }

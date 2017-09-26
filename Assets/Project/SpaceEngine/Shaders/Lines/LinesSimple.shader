@@ -37,6 +37,8 @@ Shader "SpaceEngine/Lines/Colored Blended Simple"
 	{ 
 		Pass 
 		{
+			Name "Line"
+
 			Blend SrcAlpha OneMinusSrcAlpha
 			ZWrite Off 
 			Cull Off 

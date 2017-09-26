@@ -10,8 +10,8 @@ Shader "SpaceEngine/Ocean/InitSpectrum"
 			Fog { Mode Off }
 			
 			CGPROGRAM
-			#include "UnityCG.cginc"
 			#include "../Math.cginc"
+			#include "../Time.cginc"
 
 			#pragma target 3.0
 			#pragma vertex vert
@@ -22,7 +22,12 @@ Shader "SpaceEngine/Ocean/InitSpectrum"
 			uniform sampler2D _WTable;
 			uniform float4 _Offset;
 			uniform float4 _InverseGridSizes;
-			uniform float _T;
+
+			struct a2v
+			{
+				float4 vertex : POSITION;
+				float2 texcoord : TEXCOORD0;
+			};
 
 			struct v2f 
 			{
@@ -37,17 +42,13 @@ Shader "SpaceEngine/Ocean/InitSpectrum"
 				float4 col2 : COLOR2;
 			};
 
-			v2f vert(appdata_base v)
+			void vert(in a2v i, out v2f o)
 			{
-				v2f OUT;
-
-				OUT.pos = mul(UNITY_MATRIX_MVP, v.vertex);
-				OUT.uv = v.texcoord;
-
-				return OUT;
+				o.pos = UnityObjectToClipPos(i.vertex);
+				o.uv = i.texcoord;
 			}
 			
-			f2a frag(v2f IN)
+			void frag(in v2f IN, out f2a OUT)
 			{ 
 				float2 uv = IN.uv.xy;
 			
@@ -67,10 +68,10 @@ Shader "SpaceEngine/Ocean/InitSpectrum"
 				
 				float4 w = tex2D(_WTable, uv);
 				
-				float2 h1 = GetSpectrum(_T, w.x, s12.xy, s12c.xy);
-				float2 h2 = GetSpectrum(_T, w.y, s12.zw, s12c.zw);
-				float2 h3 = GetSpectrum(_T, w.z, s34.xy, s34c.xy);
-				float2 h4 = GetSpectrum(_T, w.w, s34.zw, s34c.zw);
+				float2 h1 = GetSpectrum(_RealTime, w.x, s12.xy, s12c.xy);
+				float2 h2 = GetSpectrum(_RealTime, w.y, s12.zw, s12c.zw);
+				float2 h3 = GetSpectrum(_RealTime, w.z, s34.xy, s34c.xy);
+				float2 h4 = GetSpectrum(_RealTime, w.w, s34.zw, s34c.zw);
 				
 				float2 h12 = h1 + Complex(h2);
 				float2 h34 = h3 + Complex(h4);
@@ -80,13 +81,9 @@ Shader "SpaceEngine/Ocean/InitSpectrum"
 				float2 n3 = Complex(k3.x * h3) - k3.y * h3;
 				float2 n4 = Complex(k4.x * h4) - k4.y * h4;
 				
-				f2a OUT;
-				
 				OUT.col0 = float4(h12, h34);
 				OUT.col1 = float4(n1, n2);
 				OUT.col2 = float4(n3, n4);
-				
-				return OUT;
 			}
 			
 			ENDCG

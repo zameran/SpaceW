@@ -47,7 +47,7 @@ namespace SpaceEngine.Core.Storage
         {
             base.InitSlots();
 
-            for (var i = 0; i < Capacity; i++)
+            for (ushort i = 0; i < Capacity; i++)
             {
                 ComputeBuffer buffer;
 
@@ -66,7 +66,7 @@ namespace SpaceEngine.Core.Storage
                         {
                             buffer = new ComputeBuffer(TileSize, sizeof(float) * Channels, ComputeBufferType);
 
-                            Debug.LogWarning(string.Format("{0} data type isn't supported by {1}! Float type will be used!", DataType.ToString(), GetType().Name));
+                            Debug.LogWarning(string.Format("TileStorage: {0} data type isn't supported by {1}! Float type will be used!", DataType.ToString(), GetType().Name));
 
                             break;
                         }

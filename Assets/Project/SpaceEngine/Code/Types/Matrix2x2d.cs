@@ -23,11 +23,41 @@
 // Modified by Denis Ovchinnikov 2015-2017
 #endregion
 
+#define MATICES_UNROLL
+
+using System;
+
 namespace UnityEngine
 {
-    public struct Matrix2x2d
+    public struct Matrix2x2d : IEquatable<Matrix2x2d>
     {
-        public double[,] m;
+        #region Fields
+
+        public readonly double[,] m;
+
+        #endregion
+
+        #region Properties
+
+        public static Matrix2x2d identity { get { return new Matrix2x2d(1.0, 0.0, 0.0, 1.0); } }
+
+        public static Matrix2x2d zero { get { return new Matrix2x2d(0.0); } }
+
+        public static Matrix2x2d one { get { return new Matrix2x2d(1.0); } }
+
+        #endregion
+
+        #region Constructors
+
+        public Matrix2x2d(double value)
+        {
+            m = new double[2, 2];
+
+            m[0, 0] = value;
+            m[0, 1] = value;
+            m[1, 0] = value;
+            m[1, 1] = value;
+        }
 
         public Matrix2x2d(double m00, double m01, double m10, double m11)
         {
@@ -39,10 +69,46 @@ namespace UnityEngine
             m[1, 1] = m11;
         }
 
+        #endregion
+
+        #region Overrides
+
+        public override int GetHashCode()
+        {
+            return m[0, 0].GetHashCode() + m[1, 0].GetHashCode() +
+                   m[0, 1].GetHashCode() + m[1, 1].GetHashCode();
+        }
+
+        public override bool Equals(object obj)
+        {
+            if (obj is Matrix2x2d) { return Equals((Matrix2x2d)obj); }
+            return false;
+        }
+
+        #endregion
+
+        #region IEquatable<Matrix2x2d>
+
+        public bool Equals(Matrix2x2d other)
+        {
+            return this == other;
+        }
+
+        #endregion
+
+        #region Operations
+
         public static Matrix2x2d operator +(Matrix2x2d m1, Matrix2x2d m2)
         {
             var kSum = Matrix2x2d.identity;
 
+#if (MATICES_UNROLL)
+            kSum.m[0, 0] = m1.m[0, 0] + m2.m[0, 0];
+            kSum.m[0, 1] = m1.m[0, 1] + m2.m[0, 1];
+
+            kSum.m[1, 0] = m1.m[1, 0] + m2.m[1, 0];
+            kSum.m[1, 1] = m1.m[1, 1] + m2.m[1, 1];
+#else
             for (byte iRow = 0; iRow < 2; iRow++)
             {
                 for (byte iCol = 0; iCol < 2; iCol++)
@@ -50,6 +116,7 @@ namespace UnityEngine
                     kSum.m[iRow, iCol] = m1.m[iRow, iCol] + m2.m[iRow, iCol];
                 }
             }
+#endif
 
             return kSum;
         }
@@ -58,6 +125,13 @@ namespace UnityEngine
         {
             var kSum = Matrix2x2d.identity;
 
+#if (MATICES_UNROLL)
+            kSum.m[0, 0] = m1.m[0, 0] - m2.m[0, 0];
+            kSum.m[0, 1] = m1.m[0, 1] - m2.m[0, 1];
+
+            kSum.m[1, 0] = m1.m[1, 0] - m2.m[1, 0];
+            kSum.m[1, 1] = m1.m[1, 1] - m2.m[1, 1];
+#else
             for (byte iRow = 0; iRow < 2; iRow++)
             {
                 for (byte iCol = 0; iCol < 2; iCol++)
@@ -65,6 +139,7 @@ namespace UnityEngine
                     kSum.m[iRow, iCol] = m1.m[iRow, iCol] - m2.m[iRow, iCol];
                 }
             }
+#endif
 
             return kSum;
         }
@@ -73,6 +148,13 @@ namespace UnityEngine
         {
             var kProd = Matrix2x2d.identity;
 
+#if (MATICES_UNROLL)
+            kProd.m[0, 0] = m1.m[0, 0] * m2.m[0, 0] + m1.m[0, 1] * m2.m[1, 0];
+            kProd.m[0, 1] = m1.m[0, 0] * m2.m[0, 1] + m1.m[0, 1] * m2.m[1, 1];
+
+            kProd.m[1, 0] = m1.m[1, 0] * m2.m[0, 0] + m1.m[1, 1] * m2.m[1, 0];
+            kProd.m[1, 1] = m1.m[1, 0] * m2.m[0, 1] + m1.m[1, 1] * m2.m[1, 1];
+#else
             for (byte iRow = 0; iRow < 2; iRow++)
             {
                 for (byte iCol = 0; iCol < 2; iCol++)
@@ -80,24 +162,31 @@ namespace UnityEngine
                     kProd.m[iRow, iCol] = m1.m[iRow, 0] * m2.m[0, iCol] + m1.m[iRow, 1] * m2.m[1, iCol];
                 }
             }
+#endif
 
             return kProd;
         }
 
         public static Vector2d operator *(Matrix2x2d m, Vector2d v)
         {
-            var kProd = Vector2d.zero;
-
-            kProd.x = m.m[0, 0] * v.x + m.m[0, 1] * v.y;
-            kProd.y = m.m[1, 0] * v.x + m.m[1, 1] * v.y;
-
-            return kProd;
+            return new Vector2d
+            {
+                x = m.m[0, 0] * v.x + m.m[0, 1] * v.y,
+                y = m.m[1, 0] * v.x + m.m[1, 1] * v.y
+            };
         }
 
         public static Matrix2x2d operator *(Matrix2x2d m, double s)
         {
             var kProd = Matrix2x2d.identity;
 
+#if (MATICES_UNROLL)
+            kProd.m[0, 0] = m.m[0, 0] * s;
+            kProd.m[0, 1] = m.m[0, 1] * s;
+
+            kProd.m[1, 0] = m.m[1, 0] * s;
+            kProd.m[1, 1] = m.m[1, 1] * s;
+#else
             for (byte iRow = 0; iRow < 2; iRow++)
             {
                 for (byte iCol = 0; iCol < 2; iCol++)
@@ -105,14 +194,74 @@ namespace UnityEngine
                     kProd.m[iRow, iCol] = m.m[iRow, iCol] * s;
                 }
             }
+#endif
 
             return kProd;
         }
 
+        public static bool operator ==(Matrix2x2d m1, Matrix2x2d m2)
+        {
+            for (byte iRow = 0; iRow < 2; iRow++)
+            {
+                for (byte iCol = 0; iCol < 2; iCol++)
+                {
+                    if (!BrainFuckMath.NearlyEqual(m1.m[iRow, iCol], m2.m[iRow, iCol])) return false;
+                }
+            }
+
+            return true;
+        }
+
+        public static bool operator !=(Matrix2x2d m1, Matrix2x2d m2)
+        {
+            for (byte iRow = 0; iRow < 2; iRow++)
+            {
+                for (byte iCol = 0; iCol < 2; iCol++)
+                {
+                    if (!BrainFuckMath.NearlyEqual(m1.m[iRow, iCol], m2.m[iRow, iCol])) return true;
+                }
+            }
+
+            return false;
+        }
+
+        #endregion
+
+        #region ToString
+
         public override string ToString()
         {
-            return m[0, 0] + "," + m[0, 1] + "\n" + m[1, 0] + "," + m[1, 1];
+            return string.Format("[({0}, {1})({2}, {3})]", m[0, 0], m[0, 1],
+                                                           m[1, 0], m[1, 1]);
         }
+
+        #endregion
+
+        #region Column/Row
+
+        public Vector2d GetColumn(int iCol)
+        {
+            return new Vector2d(m[0, iCol], m[1, iCol]);
+        }
+
+        public Vector2d GetRow(int iRow)
+        {
+            return new Vector2d(m[iRow, 0], m[iRow, 1]);
+        }
+
+        public void SetColumn(int iCol, Vector2 v)
+        {
+            m[0, iCol] = v.x;
+            m[1, iCol] = v.y;
+        }
+
+        public void SetRow(int iRow, Vector3 v)
+        {
+            m[iRow, 0] = v.x;
+            m[iRow, 1] = v.y;
+        }
+
+        #endregion
 
         public Matrix2x2d Transpose()
         {
@@ -129,7 +278,7 @@ namespace UnityEngine
             return kTranspose;
         }
 
-        private double Determinant()
+        public double Determinant()
         {
             return m[0, 0] * m[1, 1] - m[1, 0] * m[0, 1];
         }
@@ -138,10 +287,7 @@ namespace UnityEngine
         {
             var det = Determinant();
 
-            if (System.Math.Abs(det) <= tolerance)
-            {
-                return false;
-            }
+            if (System.Math.Abs(det) <= tolerance) { return false; }
 
             var invDet = 1.0 / det;
 
@@ -161,7 +307,5 @@ namespace UnityEngine
 
             return kInverse;
         }
-
-        public static Matrix2x2d identity { get { return new Matrix2x2d(1, 0, 0, 1); } }
     }
 }

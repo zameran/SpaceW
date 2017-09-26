@@ -42,29 +42,31 @@ namespace SpaceEngine.Debugging
     /// </summary>
     public abstract class DebugGUI : MonoBehaviour, IDebug
     {
-        private CachedComponent<DebugGUISwitcher> SwitcherCachedComponent = new CachedComponent<DebugGUISwitcher>();
+        private readonly CachedComponent<DebugGUISwitcher> SwitcherCachedComponent = new CachedComponent<DebugGUISwitcher>();
 
         public DebugGUISwitcher SwitcherComponent { get { return SwitcherCachedComponent.Component; } }
 
         public Rect debugInfoBounds = new Rect(10, 10, 500, 500);
 
         [HideInInspector]
-        public GUIStyle boldLabel;
+        public GUIStyle BoldLabelStyle;
 
         [HideInInspector]
-        public Vector2 scrollPosition = Vector2.zero;
+        public GUIStyle ImageLabelStyle;
 
-        public GUISkin skin
+        [HideInInspector]
+        public Vector2 ScrollPosition = Vector2.zero;
+
+        public GUISkin GUISkin
         {
             get
             {
                 if (SwitcherComponent != null)
-                    if (SwitcherComponent.skin != null)
-                        return SwitcherComponent.skin;
+                    if (SwitcherComponent.GUISkin != null)
+                        return SwitcherComponent.GUISkin;
 
                 return GUI.skin;
             }
-            private set { }
         }
 
         protected virtual void Awake()
@@ -79,15 +81,28 @@ namespace SpaceEngine.Debugging
 
         protected virtual void OnGUI()
         {
-            GUI.skin = skin;
+            GUI.skin = GUISkin;
             GUI.depth = -100;
 
             if (SwitcherComponent != null)
-                if (SwitcherComponent.skin != null)
-                    if (GUI.skin.FindStyle("label_Bold") != null)
-                        boldLabel = GUI.skin.FindStyle("label_Bold");
-                    else if (GUI.skin.FindStyle("label") != null)
-                        boldLabel = GUI.skin.FindStyle("label");
+            {
+                if (SwitcherComponent.GUISkin != null)
+                {
+                    var labelBoldStyle = GUI.skin.FindStyle("label_Bold");
+                    var labelStyle = GUI.skin.FindStyle("label");
+                    var labelImage = GUI.skin.FindStyle("label_image");
+
+                    if (labelBoldStyle != null)
+                        BoldLabelStyle = labelBoldStyle;
+                    else if (labelStyle != null)
+                        BoldLabelStyle = labelStyle;
+
+                    if (labelImage != null)
+                        ImageLabelStyle = labelImage;
+                    else if (labelStyle != null)
+                        ImageLabelStyle = labelStyle;
+                }
+            }
         }
 
         protected abstract void UI(int id);

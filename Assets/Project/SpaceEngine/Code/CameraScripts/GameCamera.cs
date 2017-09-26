@@ -33,6 +33,8 @@
 // Creator: zameran
 #endregion
 
+using SpaceEngine.Debugging;
+
 using UnityEngine;
 
 namespace SpaceEngine.Cameras
@@ -40,18 +42,23 @@ namespace SpaceEngine.Cameras
     [RequireComponent(typeof(Camera))]
     public abstract class GameCamera : MonoBehaviour, ICamera
     {
-        private CachedComponent<Camera> CameraCachedComponent = new CachedComponent<Camera>();
+        private readonly CachedComponent<Camera> CameraCachedComponent = new CachedComponent<Camera>();
 
         public Camera CameraComponent { get { return CameraCachedComponent.Component; } }
+
+        // NOTE : A big problem can be here with a float precision, because matrices provided as is.
+        // NOTE : If matrices calculation will be provided, i.e from spherical coordinates around the body (Somesort of 'Body Space').
 
         public Matrix4x4d WorldToCameraMatrix { get; protected set; }
         public Matrix4x4d CameraToWorldMatrix { get; protected set; }
         public Matrix4x4d CameraToScreenMatrix { get; protected set; }
         public Matrix4x4d ScreenToCameraMatrix { get; protected set; }
 
-        public Vector3d WorldCameraPosition { get; protected set; }
+        public Vector3 WorldCameraPosition { get; protected set; }
 
-        public bool MouseOverUI { get { return GUIUtility.hotControl != 0; } }
+        private DebugGUISwitcher DebugGUISwitcherInstance { get { return DebugGUISwitcher.Instance as DebugGUISwitcher; } }
+
+        public bool MouseOverUI { get { if (DebugGUISwitcherInstance != null) return DebugGUISwitcherInstance.MouseOverGUI; else return false; } }
 
         protected virtual void Start()
         {

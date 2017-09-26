@@ -1,14 +1,17 @@
-﻿using SpaceEngine.Core.Bodies;
-using SpaceEngine.Core.Exceptions;
+﻿using SpaceEngine.Core.Exceptions;
+using SpaceEngine.Core.Numerics;
 using SpaceEngine.Core.Storage;
-using SpaceEngine.Core.Terrain;
 using SpaceEngine.Core.Tile.Producer;
 using SpaceEngine.Core.Tile.Storage;
+using SpaceEngine.Core.Utilities;
 
 using System;
 using System.Collections.Generic;
 
 using UnityEngine;
+
+using Vector2d = SpaceEngine.Core.Numerics.Vector2d;
+using Vector4d = SpaceEngine.Core.Numerics.Vector4d;
 
 namespace SpaceEngine.Core
 {
@@ -31,12 +34,12 @@ namespace SpaceEngine.Core
 
         public float AmplitudeDiviner = 1.0f;
 
-        protected override void Start()
-        {
-            base.Start();
+        private RenderTexture CPUResidualTexture;
+        private ComputeBuffer CPUResidualComputeBuffer;
 
-            if (TerrainNode == null) { TerrainNode = transform.parent.GetComponent<TerrainNode>(); }
-            if (TerrainNode.ParentBody == null) { TerrainNode.ParentBody = transform.parent.GetComponentInParent<Body>(); }
+        public override void InitNode()
+        {
+            base.InitNode();
 
             if (ResidualProducerGameObject != null)
             {
@@ -54,7 +57,18 @@ namespace SpaceEngine.Core
             if (ResidualProducer != null)
             {
                 if (ResidualProducer.GetTileSize(0) != tileSize) throw new InvalidParameterException("Residual tile size must match elevation tile size!");
-                if (!(ResidualProducer.Cache.GetStorage(0) is GPUTileStorage)) throw new InvalidStorageException("Residual storage must be a GPUTileStorage");
+
+                if (ResidualProducer.IsGPUProducer)
+                {
+                    if (!(ResidualProducer.Cache.GetStorage(0) is GPUTileStorage)) throw new InvalidStorageException("Residual storage must be a GPUTileStorage");
+                }
+                else
+                {
+                    if (!(ResidualProducer.Cache.GetStorage(0) is CPUTileStorage)) throw new InvalidStorageException("Residual storage must be a CPUTileStorage");
+
+                    CPUResidualTexture = RTExtensions.CreateRTexture(new Vector2(tileSize, tileSize), 0, RenderTextureFormat.RFloat, FilterMode.Point, TextureWrapMode.Clamp, false, false, 0);
+                    CPUResidualComputeBuffer = new ComputeBuffer(tileSize * tileSize, sizeof(float));
+                }
             }
 
             var storage = Cache.GetStorage(0) as GPUTileStorage;
@@ -106,26 +120,49 @@ namespace SpaceEngine.Core
             {
                 if (ResidualProducer.HasTile(level, tx, ty))
                 {
-                    GPUTileStorage.GPUSlot residualGpuSlot = null;
+                    if (ResidualProducer.IsGPUProducer)
+                    {
+                        GPUTileStorage.GPUSlot residualGpuSlot = null;
 
-                    var residualTile = ResidualProducer.FindTile(level, tx, ty, false, true);
+                        var residualTile = ResidualProducer.FindTile(level, tx, ty, false, true);
 
-                    if (residualTile != null)
-                        residualGpuSlot = residualTile.GetSlot(0) as GPUTileStorage.GPUSlot;
+                        if (residualTile != null)
+                            residualGpuSlot = residualTile.GetSlot(0) as GPUTileStorage.GPUSlot;
+                        else { throw new MissingTileException("Find residual tile failed"); }
+
+                        if (residualGpuSlot == null) { throw new MissingTileException("Find parent tile failed"); }
+
+                        UpSampleMaterial.SetTexture("_ResidualSampler", residualGpuSlot.Texture);
+                        UpSampleMaterial.SetVector("_ResidualOSH", new Vector4(0.25f / (float)tileWidth, 0.25f / (float)tileWidth, 2.0f / (float)tileWidth, 1.0f));
+                    }
                     else
-                    { throw new MissingTileException("Find residual tile failed"); }
+                    {
+                        CPUTileStorage.CPUSlot<float> residualCPUSlot = null;
 
-                    if (residualGpuSlot == null) { throw new MissingTileException("Find parent tile failed"); }
+                        var residualTile = ResidualProducer.FindTile(level, tx, ty, false, true);
+                        
+                        if (residualTile != null)
+                            residualCPUSlot = residualTile.GetSlot(0) as CPUTileStorage.CPUSlot<float>;
+                        else { throw new MissingTileException("Find residual tile failed"); }
 
-                    UpSampleMaterial.SetTexture("_ResidualSampler", residualGpuSlot.Texture);
-                    UpSampleMaterial.SetVector("_ResidualOSH", new Vector4(0.25f / (float)tileWidth, 0.25f / (float)tileWidth, 2.0f / (float)tileWidth, 1.0f));
+                        if (residualCPUSlot == null) { throw new MissingTileException("Find parent tile failed"); }
+
+                        RTUtility.ClearColor(CPUResidualTexture);
+
+                        CPUResidualComputeBuffer.SetData(residualCPUSlot.Data);
+
+                        CBUtility.WriteIntoRenderTexture(CPUResidualTexture, CBUtility.Channels.R, CPUResidualComputeBuffer, GodManager.Instance.WriteData);
+
+                        UpSampleMaterial.SetTexture("_ResidualSampler", CPUResidualTexture);
+                        UpSampleMaterial.SetVector("_ResidualOSH", new Vector4(0.25f / (float)tileWidth, 0.25f / (float)tileWidth, 2.0f / (float)tileWidth, 1.0f));
+                    }
                 }
                 else
                 {
                     UpSampleMaterial.SetTexture("_ResidualSampler", null);
                     UpSampleMaterial.SetVector("_ResidualOSH", new Vector4(0.0f, 0.0f, 1.0f, 0.0f));
 
-                    Debug.LogError(string.Format("Residual producer exist, but can't find any suitable tile at {0}:{1}:{2}!", level, tx, ty));
+                    Debug.LogError(string.Format("ElevationProducer.DoCreateTile: Residual producer exist, but can't find any suitable tile at {0}:{1}:{2}!", level, tx, ty));
                 }
             }
             else
@@ -138,7 +175,7 @@ namespace SpaceEngine.Core
             {
                 if (parentTile != null)
                     parentGpuSlot = parentTile.GetSlot(0) as GPUTileStorage.GPUSlot;
-                else { throw new MissingTileException("Find parent tile failed"); }
+                else { throw new MissingTileException(string.Format("Find parent tile failed! {0}:{1}-{2}", level - 1, tx / 2, ty / 2)); }
             }
 
             if (parentGpuSlot == null && upsample) { throw new NullReferenceException("parentGpuSlot"); }
@@ -151,10 +188,8 @@ namespace SpaceEngine.Core
             tileWSD.z = (float)tileSize / (float)(TerrainNode.ParentBody.GridResolution - 1);
             tileWSD.w = 0.0f;
 
-            var tileSD = Vector2d.zero;
-
-            tileSD.x = (0.5 + GetBorder()) / (tileWidth - 1 - GetBorder() * 2);
-            tileSD.y = (1.0 + tileSD.x * 2.0);
+            var tileScreenSize = (0.5 + (float)GetBorder()) / (tileWSD.x - 1 - (float)GetBorder() * 2);
+            var tileSD = new Vector2d(tileScreenSize, 1.0 + tileScreenSize * 2.0);
 
             UpSampleMaterial.SetVector("_TileWSD", tileWSD);
             UpSampleMaterial.SetVector("_TileSD", tileSD.ToVector2());
@@ -181,20 +216,17 @@ namespace SpaceEngine.Core
 
             rs = rs / AmplitudeDiviner;
 
-            var offset = Vector4d.zero;
+            var offset = new Vector4d(((double)tx / (1 << level) - 0.5) * rootQuadSize,
+                                      ((double)ty / (1 << level) - 0.5) * rootQuadSize,
+                                      rootQuadSize / (1 << level),
+                                      TerrainNode.ParentBody.Size);
 
-            offset.x = ((double)tx / (1 << level) - 0.5) * rootQuadSize;
-            offset.y = ((double)ty / (1 << level) - 0.5) * rootQuadSize;
-            offset.z = rootQuadSize / (1 << level);
-            offset.w = TerrainNode.ParentBody.Size;
-
-            UpSampleMaterial.SetFloat("_Amplitude", rs * 1);
+            UpSampleMaterial.SetFloat("_Amplitude", rs * 1.0f);
             UpSampleMaterial.SetFloat("_Frequency", TerrainNode.ParentBody.Frequency * (1 << level));
             UpSampleMaterial.SetVector("_Offset", offset.ToVector4());
             UpSampleMaterial.SetMatrix("_LocalToWorld", TerrainNode.FaceToLocal.ToMatrix4x4());
 
-            if (TerrainNode.ParentBody.NPS != null) TerrainNode.ParentBody.NPS.SetUniforms(UpSampleMaterial);
-            if (TerrainNode.ParentBody.TCCPS != null) TerrainNode.ParentBody.TCCPS.UpdateUniforms(UpSampleMaterial);
+            if (TerrainNode.ParentBody.TCCPS != null) TerrainNode.ParentBody.TCCPS.SetUniforms(UpSampleMaterial);
 
             Graphics.Blit(null, gpuSlot.Texture, UpSampleMaterial);
 

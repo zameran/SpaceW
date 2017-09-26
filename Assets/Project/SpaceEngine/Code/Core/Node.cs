@@ -37,45 +37,48 @@ using SpaceEngine.Managers;
 
 using UnityEngine;
 
-/// <summary>
-/// Class-wrapper around default <see cref="MonoBehaviour"/> for special purposes of space engine.
-/// <remarks>
-/// Various stuff should be destroyed in <see cref="OnDestroy"/>!
-/// </remarks>
-/// </summary>
-/// <typeparam name="T">Generic.</typeparam>
-public abstract class Node<T> : MonoBehaviour where T : class
+namespace SpaceEngine.Core
 {
-    protected virtual void Awake()
-    {
-
-    }
-
-    protected virtual void Start()
-    {
-        InitNode();
-
-        if (DebugSequenceManager.Instance != null) DebugSequenceManager.Instance.Debug(this);
-    }
-
-    protected virtual void Update()
-    {
-        UpdateNode();
-    }
-
-    protected virtual void OnDestroy()
-    {
-
-    }
-
     /// <summary>
-    /// This method will be automatically called in <see cref="Start"/>.
-    /// Use this for initialization.
+    /// Class-wrapper around default <see cref="MonoBehaviour"/> for special purposes of space engine.
+    /// <remarks>
+    /// Various stuff should be destroyed in <see cref="OnDestroy"/>!
+    /// </remarks>
     /// </summary>
-    protected abstract void InitNode();
+    /// <typeparam name="T">Generic.</typeparam>
+    public abstract class Node<T> : MonoBehaviour where T : class
+    {
+        protected virtual void Awake()
+        {
 
-    /// <summary>
-    /// This method will be automatically called in <see cref="Update"/>.
-    /// </summary>
-    protected abstract void UpdateNode();
+        }
+
+        protected virtual void Start()
+        {
+            InitNode();
+
+            if (DebugSequenceManager.Instance != null) DebugSequenceManager.Instance.Debug(this);
+        }
+
+        protected virtual void Update()
+        {
+            UpdateNode();
+        }
+
+        protected virtual void OnDestroy()
+        {
+
+        }
+
+        /// <summary>
+        /// This method will be automatically called in <see cref="Start"/>.
+        /// Use this for initialization.
+        /// </summary>
+        protected abstract void InitNode();
+
+        /// <summary>
+        /// This method will be automatically called in <see cref="Update"/>.
+        /// </summary>
+        protected abstract void UpdateNode();
+    }
 }

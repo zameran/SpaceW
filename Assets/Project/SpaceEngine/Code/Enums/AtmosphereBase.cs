@@ -33,15 +33,20 @@
 // Creator: zameran
 #endregion
 
-public enum AtmosphereBase : byte
+namespace SpaceEngine.Enviroment.Atmospheric
 {
-    Default = 0,
-    Earth = 1,
-    Venus = 2,
-    Mars = 3,
-    Jupiter = 4,
-    Titan = 5,
-    Neptune = 6,
-    Sun = 7,
-    Pluto = 8
+    public enum AtmosphereBase : byte
+    {
+        Default = 0,
+        Earth = 1,
+        Venus = 2,
+        Mars = 3,
+        Jupiter = 4,
+        Titan = 5,
+        Neptune = 6,
+        Sun = 7,
+        Pluto = 8,
+
+        Custom = 9
+    }
 }

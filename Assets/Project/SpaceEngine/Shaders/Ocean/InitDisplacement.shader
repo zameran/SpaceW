@@ -10,8 +10,6 @@ Shader "SpaceEngine/Ocean/InitDisplacement"
 			Fog { Mode Off }
 			
 			CGPROGRAM
-			#include "UnityCG.cginc"
-
 			#pragma target 3.0
 
 			#pragma vertex vert
@@ -21,10 +19,16 @@ Shader "SpaceEngine/Ocean/InitDisplacement"
 			uniform sampler2D _Buffer2;
 			uniform float4 _InverseGridSizes;
 
+			struct a2v
+			{
+				float4 vertex : POSITION;
+				float2 texcoord : TEXCOORD0;
+			};
+
 			struct v2f 
 			{
-				float4  pos : SV_POSITION;
-				float2  uv : TEXCOORD0;
+				float4 pos : SV_POSITION;
+				float2 uv : TEXCOORD0;
 			};
 			
 			struct f2a
@@ -32,18 +36,14 @@ Shader "SpaceEngine/Ocean/InitDisplacement"
 				float4 col0 : COLOR0;
 				float4 col1 : COLOR1;
 			};
-
-			v2f vert(appdata_base v)
-			{
-				v2f OUT;
-
-				OUT.pos = mul(UNITY_MATRIX_MVP, v.vertex);
-				OUT.uv = v.texcoord;
-
-				return OUT;
-			}
 			
-			f2a frag(v2f IN)
+			void vert(in a2v i, out v2f o)
+			{
+				o.pos = UnityObjectToClipPos(i.vertex);
+				o.uv = i.texcoord;
+			}
+
+			void frag(in v2f IN, out f2a OUT)
 			{ 
 				float2 uv = IN.uv.xy;
 			
@@ -66,12 +66,8 @@ Shader "SpaceEngine/Ocean/InitDisplacement"
 				float IK3 = K3 == 0.0 ? 0.0 : 1.0 / K3;
 				float IK4 = K4 == 0.0 ? 0.0 : 1.0 / K4;
 				
-				f2a OUT;
-				
 				OUT.col0 = tex2D(_Buffer1, IN.uv) * float4(IK1, IK1, IK2, IK2);
 				OUT.col1 = tex2D(_Buffer2, IN.uv) * float4(IK3, IK3, IK4, IK4);
-				
-				return OUT;
 			}
 			
 			ENDCG

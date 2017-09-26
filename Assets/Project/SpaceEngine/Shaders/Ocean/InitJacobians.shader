@@ -10,8 +10,8 @@ Shader "SpaceEngine/Ocean/InitJacobians"
 			Fog { Mode Off }
 			
 			CGPROGRAM
-			#include "UnityCG.cginc"
 			#include "../Math.cginc"
+			#include "../Time.cginc"
 
 			#pragma target 3.0
 			#pragma vertex vert
@@ -22,7 +22,12 @@ Shader "SpaceEngine/Ocean/InitJacobians"
 			uniform sampler2D _WTable;
 			uniform float4 _Offset;
 			uniform float4 _InverseGridSizes;
-			uniform float _T;
+
+			struct a2v
+			{
+				float4 vertex : POSITION;
+				float2 texcoord : TEXCOORD0;
+			};
 
 			struct v2f 
 			{
@@ -37,17 +42,13 @@ Shader "SpaceEngine/Ocean/InitJacobians"
 				float4 col2 : COLOR2;
 			};
 
-			v2f vert(appdata_base v)
+			void vert(in a2v i, out v2f o)
 			{
-				v2f OUT;
-
-				OUT.pos = mul(UNITY_MATRIX_MVP, v.vertex);
-				OUT.uv = v.texcoord;
-
-				return OUT;
+				o.pos = UnityObjectToClipPos(i.vertex);
+				o.uv = i.texcoord;
 			}
 
-			f2a frag(v2f IN)
+			void frag(in v2f IN, out f2a OUT)
 			{ 
 				float2 uv = IN.uv.xy;
 			
@@ -77,13 +78,13 @@ Shader "SpaceEngine/Ocean/InitJacobians"
 				
 				float4 w = tex2D(_WTable, uv);
 				
-				float2 h1 = GetSpectrum(_T, w.x, s12.xy, s12c.xy);
-				float2 h2 = GetSpectrum(_T, w.y, s12.zw, s12c.zw);
-				float2 h3 = GetSpectrum(_T, w.z, s34.xy, s34c.xy);
-				float2 h4 = GetSpectrum(_T, w.w, s34.zw, s34c.zw);
+				float2 h1 = GetSpectrum(_RealTime, w.x, s12.xy, s12c.xy);
+				float2 h2 = GetSpectrum(_RealTime, w.y, s12.zw, s12c.zw);
+				float2 h3 = GetSpectrum(_RealTime, w.z, s34.xy, s34c.xy);
+				float2 h4 = GetSpectrum(_RealTime, w.w, s34.zw, s34c.zw);
 				
 				/// Jacobians
-				float4 IK = float4(IK1,IK2,IK3,IK4);
+				float4 IK = float4(IK1, IK2, IK3, IK4);
 				float2 k1Squared = k1*k1;
 				float2 k2Squared = k2*k2;
 				float2 k3Squared = k3*k3;
@@ -93,14 +94,10 @@ Shader "SpaceEngine/Ocean/InitJacobians"
 				// 6: d(Dy(X,t))/dy 	Tes01 eq30
 				// 7: d(Dx(X,t))/dy 	Tes01 eq30
 				float4 tmp = float4(h1.x, h2.x, h3.x, h4.x);
-				
-				f2a OUT;
 			
 				OUT.col0 = -tmp * (float4(k1Squared.x, k2Squared.x, k3Squared.x, k4Squared.x) * IK);
 				OUT.col1 = -tmp * (float4(k1Squared.y, k2Squared.y, k3Squared.y, k4Squared.y) * IK);
 				OUT.col2 = -tmp * (float4(k1.x*k1.y, k2.x*k2.y, k3.x*k3.y, k4.x*k4.y) * IK);
-				
-				return OUT;
 			}
 			
 			ENDCG

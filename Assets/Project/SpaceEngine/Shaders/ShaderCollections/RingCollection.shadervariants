@@ -1,0 +1,115 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!200 &20000000
+ShaderVariantCollection:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_Name: RingCollection
+  m_Shaders:
+    data:
+      first: {fileID: 4800000, guid: 037054e50f7e8ca4da17716625122887, type: 3}
+      second:
+        variants:
+        - keywords: 
+          passType: 0
+        - keywords: DUMMY
+          passType: 0
+        - keywords: DUMMY LIGHT_1
+          passType: 0
+        - keywords: DUMMY LIGHT_2
+          passType: 0
+        - keywords: DUMMY LIGHT_3
+          passType: 0
+        - keywords: DUMMY LIGHT_4
+          passType: 0
+        - keywords: DUMMY SHADOW_1
+          passType: 0
+        - keywords: DUMMY LIGHT_1 SHADOW_1
+          passType: 0
+        - keywords: DUMMY LIGHT_2 SHADOW_1
+          passType: 0
+        - keywords: DUMMY LIGHT_3 SHADOW_1
+          passType: 0
+        - keywords: DUMMY LIGHT_4 SHADOW_1
+          passType: 0
+        - keywords: DUMMY SHADOW_2
+          passType: 0
+        - keywords: DUMMY LIGHT_1 SHADOW_2
+          passType: 0
+        - keywords: DUMMY LIGHT_2 SHADOW_2
+          passType: 0
+        - keywords: DUMMY LIGHT_3 SHADOW_2
+          passType: 0
+        - keywords: DUMMY LIGHT_4 SHADOW_2
+          passType: 0
+        - keywords: DUMMY SHADOW_3
+          passType: 0
+        - keywords: DUMMY LIGHT_1 SHADOW_3
+          passType: 0
+        - keywords: DUMMY LIGHT_2 SHADOW_3
+          passType: 0
+        - keywords: DUMMY LIGHT_3 SHADOW_3
+          passType: 0
+        - keywords: DUMMY LIGHT_4 SHADOW_3
+          passType: 0
+        - keywords: DUMMY SHADOW_4
+          passType: 0
+        - keywords: DUMMY LIGHT_1 SHADOW_4
+          passType: 0
+        - keywords: DUMMY LIGHT_2 SHADOW_4
+          passType: 0
+        - keywords: DUMMY LIGHT_3 SHADOW_4
+          passType: 0
+        - keywords: DUMMY LIGHT_4 SHADOW_4
+          passType: 0
+        - keywords: LIGHT_1 SCATTERING SHADOW_1
+          passType: 0
+        - keywords: LIGHT_2 SCATTERING SHADOW_1
+          passType: 0
+        - keywords: LIGHT_3 SCATTERING SHADOW_1
+          passType: 0
+        - keywords: LIGHT_4 SCATTERING SHADOW_1
+          passType: 0
+        - keywords: LIGHT_1 SCATTERING SHADOW_2
+          passType: 0
+        - keywords: LIGHT_2 SCATTERING SHADOW_2
+          passType: 0
+        - keywords: LIGHT_3 SCATTERING SHADOW_2
+          passType: 0
+        - keywords: LIGHT_4 SCATTERING SHADOW_2
+          passType: 0
+        - keywords: LIGHT_1 SCATTERING SHADOW_3
+          passType: 0
+        - keywords: LIGHT_2 SCATTERING SHADOW_3
+          passType: 0
+        - keywords: LIGHT_3 SCATTERING SHADOW_3
+          passType: 0
+        - keywords: LIGHT_4 SCATTERING SHADOW_3
+          passType: 0
+        - keywords: LIGHT_1 SCATTERING SHADOW_4
+          passType: 0
+        - keywords: LIGHT_2 SCATTERING SHADOW_4
+          passType: 0
+        - keywords: LIGHT_3 SCATTERING SHADOW_4
+          passType: 0
+        - keywords: LIGHT_4 SCATTERING SHADOW_4
+          passType: 0
+        - keywords: DUMMY SCATTERING
+          passType: 0
+        - keywords: DUMMY LIGHT_1 SCATTERING
+          passType: 0
+        - keywords: DUMMY LIGHT_2 SCATTERING
+          passType: 0
+        - keywords: DUMMY LIGHT_3 SCATTERING
+          passType: 0
+        - keywords: DUMMY LIGHT_4 SCATTERING
+          passType: 0
+        - keywords: DUMMY SCATTERING SHADOW_1
+          passType: 0
+        - keywords: DUMMY SCATTERING SHADOW_2
+          passType: 0
+        - keywords: DUMMY SCATTERING SHADOW_3
+          passType: 0
+        - keywords: DUMMY SCATTERING SHADOW_4
+          passType: 0

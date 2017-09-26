@@ -1,14 +1,22 @@
 Shader "Math/Fourier" 
 {
 	CGINCLUDE
-	
-	#include "UnityCG.cginc"
 
 	#include "../Math.cginc"
 			
-	uniform sampler2D _ReadBuffer0, _ReadBuffer1, _ReadBuffer2;
+	uniform sampler2D _ReadBuffer0;
+	uniform sampler2D _ReadBuffer1;
+	uniform sampler2D _ReadBuffer2;
+	uniform sampler2D _ReadBuffer3;
 	uniform sampler2D _ButterFlyLookUp;
+
 	uniform float _Size;
+
+	struct a2v
+	{
+		float4 vertex : POSITION;
+		float2 texcoord : TEXCOORD0;
+	};
 
 	struct v2f 
 	{
@@ -18,31 +26,29 @@ Shader "Math/Fourier"
 	
 	struct f2a_1
 	{
-		float4 col0 : COLOR0;
+		float4 col0 : SV_Target;
 	};
 	
 	struct f2a_2
 	{
-		float4 col0 : COLOR0;
-		float4 col1 : COLOR1;
+		float4 col0 : SV_Target0;
+		float4 col1 : SV_Target1;
 	};
 	
 	struct f2a_3
 	{
-		float4 col0 : COLOR0;
-		float4 col1 : COLOR1;
-		float4 col2 : COLOR2;
+		float4 col0 : SV_Target0;
+		float4 col1 : SV_Target1;
+		float4 col2 : SV_Target2;
 	};
-
-	v2f vert(appdata_base v)
+	
+	struct f2a_4
 	{
-		v2f OUT;
-
-		OUT.pos = mul(UNITY_MATRIX_MVP, v.vertex);
-		OUT.uv = v.texcoord;
-
-		return OUT;
-	}
+		float4 col0 : SV_Target0;
+		float4 col1 : SV_Target1;
+		float4 col2 : SV_Target2;
+		float4 col3 : SV_Target3;
+	};
 	
 	//Performs two FFTs on two complex numbers packed in a vector4
 	float4 FFT(float2 w, float4 input1, float4 input2) 
@@ -52,112 +58,84 @@ Shader "Math/Fourier"
 		float rz = w.x * input2.z - w.y * input2.w;
 		float rw = w.y * input2.z + w.x * input2.w;
 
-		return input1 + float4(rx,ry,rz,rw);
+		return input1 + float4(rx, ry, rz, rw);
 	}
 
-	float2 CalculateW(float4 lookUp)
+	inline float2 CalculateW(float4 lookUp)
 	{
 		return float2(cos(M_PI2 * lookUp.z / _Size), sin(M_PI2 * lookUp.z / _Size));
 	}
-	
-	f2a_1 fragX_1(v2f IN)
+
+	inline float4 CalculateLookUp(float uv, out float2 w)
 	{
-		float4 lookUp = tex2D(_ButterFlyLookUp, float2(IN.uv.x, 0));
+		float4 lookUp = tex2D(_ButterFlyLookUp, float2(uv, 0.0));
 		
 		lookUp.xyz *= 255.0;
 		lookUp.xy /= _Size - 1.0;
 		
-		float2 w = CalculateW(lookUp);
+		w = CalculateW(lookUp);
 		
 		if(lookUp.w > 0.5) w *= -1.0;
-		
-		f2a_1 OUT;
+
+		return lookUp;
+	}
+	
+	void vert(in a2v i, out v2f o)
+	{
+		o.pos = UnityObjectToClipPos(i.vertex);
+		o.uv = i.texcoord;
+	}
+
+	void fragX_1(in v2f IN, out f2a_1 OUT)
+	{
+		float2 w = 0;
+		float4 lookUp = CalculateLookUp(IN.uv.x, w);
 		
 		float2 uv1 = float2(lookUp.x, IN.uv.y);
 		float2 uv2 = float2(lookUp.y, IN.uv.y);
 		
 		OUT.col0 = FFT(w, tex2D(_ReadBuffer0, uv1), tex2D(_ReadBuffer0, uv2));
-
-		return OUT;
 	}
 	
-	f2a_1 fragY_1(v2f IN)
+	void fragY_1(in v2f IN, out f2a_1 OUT)
 	{
-		float4 lookUp = tex2D(_ButterFlyLookUp, float2(IN.uv.y, 0));
-		
-		lookUp.xyz *= 255.0;
-		lookUp.xy /= _Size - 1.0;
-		
-		float2 w = CalculateW(lookUp);
-		
-		if(lookUp.w > 0.5) w *= -1.0;
-		
-		f2a_1 OUT;
+		float2 w = 0;
+		float4 lookUp = CalculateLookUp(IN.uv.y, w);
 		
 		float2 uv1 = float2(IN.uv.x, lookUp.x);
 		float2 uv2 = float2(IN.uv.x, lookUp.y);
 		
 		OUT.col0 = FFT(w, tex2D(_ReadBuffer0, uv1), tex2D(_ReadBuffer0, uv2));
-
-		return OUT;
 	}
 	
-	f2a_2 fragX_2(v2f IN)
+	void fragX_2(in v2f IN, out f2a_2 OUT)
 	{
-		float4 lookUp = tex2D(_ButterFlyLookUp, float2(IN.uv.x, 0));
-		
-		lookUp.xyz *= 255.0;
-		lookUp.xy /= _Size - 1.0;
-		
-		float2 w = CalculateW(lookUp);
-		
-		if(lookUp.w > 0.5) w *= -1.0;
-		
-		f2a_2 OUT;
+		float2 w = 0;
+		float4 lookUp = CalculateLookUp(IN.uv.x, w);
 		
 		float2 uv1 = float2(lookUp.x, IN.uv.y);
 		float2 uv2 = float2(lookUp.y, IN.uv.y);
 		
 		OUT.col0 = FFT(w, tex2D(_ReadBuffer0, uv1), tex2D(_ReadBuffer0, uv2));
 		OUT.col1 = FFT(w, tex2D(_ReadBuffer1, uv1), tex2D(_ReadBuffer1, uv2));
-
-		return OUT;
 	}
 	
-	f2a_2 fragY_2(v2f IN)
+	void fragY_2(in v2f IN, out f2a_2 OUT)
 	{
-		float4 lookUp = tex2D(_ButterFlyLookUp, float2(IN.uv.y, 0));
-		
-		lookUp.xyz *= 255.0;
-		lookUp.xy /= _Size - 1.0;
-		
-		float2 w = CalculateW(lookUp);
-		
-		if(lookUp.w > 0.5) w *= -1.0;
-		
-		f2a_2 OUT;
+		float2 w = 0;
+		float4 lookUp = CalculateLookUp(IN.uv.y, w);
 		
 		float2 uv1 = float2(IN.uv.x, lookUp.x);
 		float2 uv2 = float2(IN.uv.x, lookUp.y);
 		
 		OUT.col0 = FFT(w, tex2D(_ReadBuffer0, uv1), tex2D(_ReadBuffer0, uv2));
 		OUT.col1 = FFT(w, tex2D(_ReadBuffer1, uv1), tex2D(_ReadBuffer1, uv2));
-
-		return OUT;
 	}
 	
-	f2a_3 fragX_3(v2f IN)
+	void fragX_3(in v2f IN, out f2a_3 OUT)
 	{
-		float4 lookUp = tex2D(_ButterFlyLookUp, float2(IN.uv.x, 0));
-		
-		lookUp.xyz *= 255.0;
-		lookUp.xy /= _Size - 1.0;
-		
-		float2 w = CalculateW(lookUp);
-		
-		if(lookUp.w > 0.5) w *= -1.0;
-		
-		f2a_3 OUT;
+		float2 w = 0;
+		float4 lookUp = CalculateLookUp(IN.uv.x, w);
 		
 		float2 uv1 = float2(lookUp.x, IN.uv.y);
 		float2 uv2 = float2(lookUp.y, IN.uv.y);
@@ -165,22 +143,12 @@ Shader "Math/Fourier"
 		OUT.col0 = FFT(w, tex2D(_ReadBuffer0, uv1), tex2D(_ReadBuffer0, uv2));
 		OUT.col1 = FFT(w, tex2D(_ReadBuffer1, uv1), tex2D(_ReadBuffer1, uv2));
 		OUT.col2 = FFT(w, tex2D(_ReadBuffer2, uv1), tex2D(_ReadBuffer2, uv2));
-		
-		return OUT;
 	}
 	
-	f2a_3 fragY_3(v2f IN)
+	void fragY_3(in v2f IN, out f2a_3 OUT)
 	{
-		float4 lookUp = tex2D(_ButterFlyLookUp, float2(IN.uv.y, 0));
-		
-		lookUp.xyz *= 255.0;
-		lookUp.xy /= _Size - 1.0;
-		
-		float2 w = CalculateW(lookUp);
-		
-		if(lookUp.w > 0.5) w *= -1.0;
-		
-		f2a_3 OUT;
+		float2 w = 0;
+		float4 lookUp = CalculateLookUp(IN.uv.y, w);
 		
 		float2 uv1 = float2(IN.uv.x, lookUp.x);
 		float2 uv2 = float2(IN.uv.x, lookUp.y);
@@ -188,8 +156,34 @@ Shader "Math/Fourier"
 		OUT.col0 = FFT(w, tex2D(_ReadBuffer0, uv1), tex2D(_ReadBuffer0, uv2));
 		OUT.col1 = FFT(w, tex2D(_ReadBuffer1, uv1), tex2D(_ReadBuffer1, uv2));
 		OUT.col2 = FFT(w, tex2D(_ReadBuffer2, uv1), tex2D(_ReadBuffer2, uv2));
+	}
 
-		return OUT;
+	void fragX_4(in v2f IN, out f2a_4 OUT)
+	{
+		float2 w = 0;
+		float4 lookUp = CalculateLookUp(IN.uv.x, w);
+		
+		float2 uv1 = float2(lookUp.x, IN.uv.y);
+		float2 uv2 = float2(lookUp.y, IN.uv.y);
+		
+		OUT.col0 = FFT(w, tex2D(_ReadBuffer0, uv1), tex2D(_ReadBuffer0, uv2));
+		OUT.col1 = FFT(w, tex2D(_ReadBuffer1, uv1), tex2D(_ReadBuffer1, uv2));
+		OUT.col2 = FFT(w, tex2D(_ReadBuffer2, uv1), tex2D(_ReadBuffer2, uv2));
+		OUT.col3 = FFT(w, tex2D(_ReadBuffer3, uv1), tex2D(_ReadBuffer3, uv2));
+	}
+
+	void fragY_4(in v2f IN, out f2a_4 OUT)
+	{
+		float2 w = 0;
+		float4 lookUp = CalculateLookUp(IN.uv.y, w);
+		
+		float2 uv1 = float2(IN.uv.x, lookUp.x);
+		float2 uv2 = float2(IN.uv.x, lookUp.y);
+		
+		OUT.col0 = FFT(w, tex2D(_ReadBuffer0, uv1), tex2D(_ReadBuffer0, uv2));
+		OUT.col1 = FFT(w, tex2D(_ReadBuffer1, uv1), tex2D(_ReadBuffer1, uv2));
+		OUT.col2 = FFT(w, tex2D(_ReadBuffer2, uv1), tex2D(_ReadBuffer2, uv2));
+		OUT.col3 = FFT(w, tex2D(_ReadBuffer3, uv1), tex2D(_ReadBuffer3, uv2));
 	}
 	
 	ENDCG
@@ -207,6 +201,7 @@ Shader "Math/Fourier"
 			#pragma target 3.0
 			#pragma vertex vert
 			#pragma fragment fragX_1
+			#pragma fragmentoption ARB_precision_hint_nicest
 			ENDCG
 		}
 		
@@ -221,6 +216,7 @@ Shader "Math/Fourier"
 			#pragma target 3.0
 			#pragma vertex vert
 			#pragma fragment fragY_1
+			#pragma fragmentoption ARB_precision_hint_nicest
 			ENDCG
 		}
 		
@@ -235,6 +231,7 @@ Shader "Math/Fourier"
 			#pragma target 3.0
 			#pragma vertex vert
 			#pragma fragment fragX_2
+			#pragma fragmentoption ARB_precision_hint_nicest
 			ENDCG
 		}
 		
@@ -249,6 +246,7 @@ Shader "Math/Fourier"
 			#pragma target 3.0
 			#pragma vertex vert
 			#pragma fragment fragY_2
+			#pragma fragmentoption ARB_precision_hint_nicest
 			ENDCG
 		}
 		
@@ -263,6 +261,7 @@ Shader "Math/Fourier"
 			#pragma target 3.0
 			#pragma vertex vert
 			#pragma fragment fragX_3
+			#pragma fragmentoption ARB_precision_hint_nicest
 			ENDCG
 		}
 		
@@ -277,6 +276,37 @@ Shader "Math/Fourier"
 			#pragma target 3.0
 			#pragma vertex vert
 			#pragma fragment fragY_3
+			#pragma fragmentoption ARB_precision_hint_nicest
+			ENDCG
+		}
+
+		Pass 
+		{
+			ZTest Always 
+			Cull Off 
+			ZWrite Off
+			Fog { Mode Off }
+			
+			CGPROGRAM
+			#pragma target 3.0
+			#pragma vertex vert
+			#pragma fragment fragX_4
+			#pragma fragmentoption ARB_precision_hint_nicest
+			ENDCG
+		}
+
+		Pass 
+		{
+			ZTest Always 
+			Cull Off 
+			ZWrite Off
+			Fog { Mode Off }
+			
+			CGPROGRAM
+			#pragma target 3.0
+			#pragma vertex vert
+			#pragma fragment fragY_4
+			#pragma fragmentoption ARB_precision_hint_nicest
 			ENDCG
 		}
 	}

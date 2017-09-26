@@ -35,6 +35,15 @@
 
 namespace SpaceEngine.Core.Patterns.Strategy.Uniformed
 {
+    public interface IUniformed
+    {
+        void InitUniforms();
+
+        void SetUniforms();
+
+        void InitSetUniforms();
+    }
+
     /// <summary>
     /// This interface should be implemented in all things, that's gonna manipulate with 
     /// <see cref="UnityEngine.Material"/> and <see cref="UnityEngine.Shader"/>, or <see cref="UnityEngine.MaterialPropertyBlock"/> uniforms.
@@ -62,7 +71,7 @@ namespace SpaceEngine.Core.Patterns.Strategy.Uniformed
     /// </summary>
     /// <typeparam name="T">Generic. <example><see cref="UnityEngine.Material"/> or <see cref="UnityEngine.Shader"/>.</example></typeparam>
     /// <typeparam name="U">Generic. <example><see cref="UnityEngine.Material"/> or <see cref="UnityEngine.Shader"/>.</example></typeparam>
-    public interface IUniformed<T, U> where T : class where U : class
+    public interface IUniformed<in T, in U> where T : class where U : class
     {
         void InitUniforms(T target0, U target1);
 

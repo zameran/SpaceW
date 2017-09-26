@@ -1,4 +1,5 @@
-﻿using SpaceEngine.Core.Patterns.Strategy.Eventit;
+﻿using SpaceEngine.Core.Debugging;
+using SpaceEngine.Core.Patterns.Strategy.Eventit;
 using SpaceEngine.Pluginator.Enums;
 
 using System.Collections.Generic;
@@ -7,8 +8,12 @@ using System.Linq;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
+using Logger = SpaceEngine.Core.Debugging.Logger;
+
 namespace SpaceEngine.UI
 {
+    [UseLogger(Category.InGameUI)]
+    [UseLoggerFile("SpaceWLog")]
     public class UICore : MonoBehaviour, IEventit
     {
         public GameObject Root { get { return this.gameObject; } }
@@ -109,7 +114,7 @@ namespace SpaceEngine.UI
 
         private void OnAllAdditiveUILoaded()
         {
-            var loadingScreenPanel = Panels.Find((panel) => panel.gameObject.name == "Loading Screen Panel");
+            var loadingScreenPanel = Panels.Find((panel) => panel.gameObject.name == "Loading Panel");
 
             if (loadingScreenPanel != null)
             {
@@ -119,7 +124,7 @@ namespace SpaceEngine.UI
 
         private void OnUIRemixed(UICore obj)
         {
-            Debug.Log("UICore.OnUIRemixed: UI remixed!");
+            Logger.Log("UICore.OnUIRemixed: UI remixed!");
 
             obj.Panels.ForEach((panel) => { panel.FromThisScene = false; });
             obj.RemixUI(true);
@@ -127,7 +132,7 @@ namespace SpaceEngine.UI
 
         private void OnSceneWillBeLoadedNow(EntryPoint sceneName, LoadSceneMode loadSceneMode)
         {
-            Debug.Log("[UICore.OnSceneWillBeLoadedNow: OnSceneWillBeLoadedNow!");
+            Logger.Log("UICore.OnSceneWillBeLoadedNow: OnSceneWillBeLoadedNow!");
 
             Panels.ForEach((panel) => { panel.FromThisScene = false; });
 

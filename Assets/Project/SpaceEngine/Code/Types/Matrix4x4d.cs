@@ -23,13 +23,55 @@
 // Modified by Denis Ovchinnikov 2015-2017
 #endregion
 
+#define MATICES_UNROLL
+
+using System;
+
+using Constants = SpaceEngine.Core.Numerics.Constants;
+
 namespace UnityEngine
 {
-#pragma warning disable 660, 661
-
-    public struct Matrix4x4d
+    public struct Matrix4x4d : IEquatable<Matrix4x4d>
     {
-        public double[,] m;
+        #region Fields
+
+        public readonly double[,] m;
+
+        #endregion
+
+        #region Properties
+
+        public static Matrix4x4d identity { get { return new Matrix4x4d(1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0); } }
+
+        public static Matrix4x4d zero { get { return new Matrix4x4d(0.0); } }
+
+        public static Matrix4x4d one { get { return new Matrix4x4d(1.0); } }
+
+        #endregion
+
+        #region Constructors
+
+        public Matrix4x4d(double value)
+        {
+            m = new double[4, 4];
+
+            m[0, 0] = value;
+            m[0, 1] = value;
+            m[0, 2] = value;
+            m[0, 3] = value;
+            m[1, 0] = value;
+            m[1, 1] = value;
+            m[1, 2] = value;
+            m[1, 3] = value;
+            m[2, 0] = value;
+            m[2, 1] = value;
+            m[2, 2] = value;
+            m[2, 3] = value;
+            m[3, 0] = value;
+            m[3, 1] = value;
+            m[3, 2] = value;
+            m[3, 3] = value;
+        }
 
         public Matrix4x4d(double m00,
             double m01,
@@ -90,10 +132,62 @@ namespace UnityEngine
             m[3, 3] = mat.m33;
         }
 
+        #endregion
+
+        #region Overrides
+
+        public override int GetHashCode()
+        {
+            return m[0, 0].GetHashCode() + m[1, 0].GetHashCode() + m[2, 0].GetHashCode() + m[3, 0].GetHashCode() +
+                   m[0, 1].GetHashCode() + m[1, 1].GetHashCode() + m[2, 1].GetHashCode() + m[3, 1].GetHashCode() +
+                   m[0, 2].GetHashCode() + m[1, 2].GetHashCode() + m[2, 2].GetHashCode() + m[3, 2].GetHashCode() +
+                   m[0, 3].GetHashCode() + m[1, 3].GetHashCode() + m[2, 3].GetHashCode() + m[3, 3].GetHashCode();
+        }
+
+        public override bool Equals(object obj)
+        {
+            if (obj is Matrix4x4d) { return Equals((Matrix4x4d)obj); }
+            return false;
+        }
+
+        #endregion
+
+        #region IEquatable<Matrix4x4d>
+
+        public bool Equals(Matrix4x4d other)
+        {
+            return this == other;
+        }
+
+        #endregion
+
+        #region Operations
+
         public static Matrix4x4d operator +(Matrix4x4d m1, Matrix4x4d m2)
         {
             var kSum = Matrix4x4d.identity;
 
+#if (MATICES_UNROLL)
+            kSum.m[0, 0] = m1.m[0, 0] + m2.m[0, 0];
+            kSum.m[0, 1] = m1.m[0, 1] + m2.m[0, 1];
+            kSum.m[0, 2] = m1.m[0, 2] + m2.m[0, 2];
+            kSum.m[0, 3] = m1.m[0, 3] + m2.m[0, 3];
+
+            kSum.m[1, 0] = m1.m[1, 0] + m2.m[1, 0];
+            kSum.m[1, 1] = m1.m[1, 1] + m2.m[1, 1];
+            kSum.m[1, 2] = m1.m[1, 2] + m2.m[1, 2];
+            kSum.m[1, 3] = m1.m[1, 3] + m2.m[1, 3];
+
+            kSum.m[2, 0] = m1.m[2, 0] + m2.m[2, 0];
+            kSum.m[2, 1] = m1.m[2, 1] + m2.m[2, 1];
+            kSum.m[2, 2] = m1.m[2, 2] + m2.m[2, 2];
+            kSum.m[2, 3] = m1.m[2, 3] + m2.m[2, 3];
+
+            kSum.m[3, 0] = m1.m[3, 0] + m2.m[3, 0];
+            kSum.m[3, 1] = m1.m[3, 1] + m2.m[3, 1];
+            kSum.m[3, 2] = m1.m[3, 2] + m2.m[3, 2];
+            kSum.m[3, 3] = m1.m[3, 3] + m2.m[3, 3];
+#else
             for (byte iRow = 0; iRow < 4; iRow++)
             {
                 for (byte iCol = 0; iCol < 4; iCol++)
@@ -101,6 +195,7 @@ namespace UnityEngine
                     kSum.m[iRow, iCol] = m1.m[iRow, iCol] + m2.m[iRow, iCol];
                 }
             }
+#endif
 
             return kSum;
         }
@@ -109,6 +204,27 @@ namespace UnityEngine
         {
             var kSum = Matrix4x4d.identity;
 
+#if (MATICES_UNROLL)
+            kSum.m[0, 0] = m1.m[0, 0] - m2.m[0, 0];
+            kSum.m[0, 1] = m1.m[0, 1] - m2.m[0, 1];
+            kSum.m[0, 2] = m1.m[0, 2] - m2.m[0, 2];
+            kSum.m[0, 3] = m1.m[0, 3] - m2.m[0, 3];
+
+            kSum.m[1, 0] = m1.m[1, 0] - m2.m[1, 0];
+            kSum.m[1, 1] = m1.m[1, 1] - m2.m[1, 1];
+            kSum.m[1, 2] = m1.m[1, 2] - m2.m[1, 2];
+            kSum.m[1, 3] = m1.m[1, 3] - m2.m[1, 3];
+
+            kSum.m[2, 0] = m1.m[2, 0] - m2.m[2, 0];
+            kSum.m[2, 1] = m1.m[2, 1] - m2.m[2, 1];
+            kSum.m[2, 2] = m1.m[2, 2] - m2.m[2, 2];
+            kSum.m[2, 3] = m1.m[2, 3] - m2.m[2, 3];
+
+            kSum.m[3, 0] = m1.m[3, 0] - m2.m[3, 0];
+            kSum.m[3, 1] = m1.m[3, 1] - m2.m[3, 1];
+            kSum.m[3, 2] = m1.m[3, 2] - m2.m[3, 2];
+            kSum.m[3, 3] = m1.m[3, 3] - m2.m[3, 3];
+#else
             for (byte iRow = 0; iRow < 4; iRow++)
             {
                 for (byte iCol = 0; iCol < 4; iCol++)
@@ -116,6 +232,7 @@ namespace UnityEngine
                     kSum.m[iRow, iCol] = m1.m[iRow, iCol] - m2.m[iRow, iCol];
                 }
             }
+#endif
 
             return kSum;
         }
@@ -124,6 +241,27 @@ namespace UnityEngine
         {
             var kProd = Matrix4x4d.identity;
 
+#if (MATICES_UNROLL)
+            kProd.m[0, 0] = m1.m[0, 0] * m2.m[0, 0] + m1.m[0, 1] * m2.m[1, 0] + m1.m[0, 2] * m2.m[2, 0] + m1.m[0, 3] * m2.m[3, 0];
+            kProd.m[0, 1] = m1.m[0, 0] * m2.m[0, 1] + m1.m[0, 1] * m2.m[1, 1] + m1.m[0, 2] * m2.m[2, 1] + m1.m[0, 3] * m2.m[3, 1];
+            kProd.m[0, 2] = m1.m[0, 0] * m2.m[0, 2] + m1.m[0, 1] * m2.m[1, 2] + m1.m[0, 2] * m2.m[2, 2] + m1.m[0, 3] * m2.m[3, 2];
+            kProd.m[0, 3] = m1.m[0, 0] * m2.m[0, 3] + m1.m[0, 1] * m2.m[1, 3] + m1.m[0, 2] * m2.m[2, 3] + m1.m[0, 3] * m2.m[3, 3];
+
+            kProd.m[1, 0] = m1.m[1, 0] * m2.m[0, 0] + m1.m[1, 1] * m2.m[1, 0] + m1.m[1, 2] * m2.m[2, 0] + m1.m[1, 3] * m2.m[3, 0];
+            kProd.m[1, 1] = m1.m[1, 0] * m2.m[0, 1] + m1.m[1, 1] * m2.m[1, 1] + m1.m[1, 2] * m2.m[2, 1] + m1.m[1, 3] * m2.m[3, 1];
+            kProd.m[1, 2] = m1.m[1, 0] * m2.m[0, 2] + m1.m[1, 1] * m2.m[1, 2] + m1.m[1, 2] * m2.m[2, 2] + m1.m[1, 3] * m2.m[3, 2];
+            kProd.m[1, 3] = m1.m[1, 0] * m2.m[0, 3] + m1.m[1, 1] * m2.m[1, 3] + m1.m[1, 2] * m2.m[2, 3] + m1.m[1, 3] * m2.m[3, 3];
+
+            kProd.m[2, 0] = m1.m[2, 0] * m2.m[0, 0] + m1.m[2, 1] * m2.m[1, 0] + m1.m[2, 2] * m2.m[2, 0] + m1.m[2, 3] * m2.m[3, 0];
+            kProd.m[2, 1] = m1.m[2, 0] * m2.m[0, 1] + m1.m[2, 1] * m2.m[1, 1] + m1.m[2, 2] * m2.m[2, 1] + m1.m[2, 3] * m2.m[3, 1];
+            kProd.m[2, 2] = m1.m[2, 0] * m2.m[0, 2] + m1.m[2, 1] * m2.m[1, 2] + m1.m[2, 2] * m2.m[2, 2] + m1.m[2, 3] * m2.m[3, 2];
+            kProd.m[2, 3] = m1.m[2, 0] * m2.m[0, 3] + m1.m[2, 1] * m2.m[1, 3] + m1.m[2, 2] * m2.m[2, 3] + m1.m[2, 3] * m2.m[3, 3];
+
+            kProd.m[3, 0] = m1.m[3, 0] * m2.m[0, 0] + m1.m[3, 1] * m2.m[1, 0] + m1.m[3, 2] * m2.m[2, 0] + m1.m[3, 3] * m2.m[3, 0];
+            kProd.m[3, 1] = m1.m[3, 0] * m2.m[0, 1] + m1.m[3, 1] * m2.m[1, 1] + m1.m[3, 2] * m2.m[2, 1] + m1.m[3, 3] * m2.m[3, 1];
+            kProd.m[3, 2] = m1.m[3, 0] * m2.m[0, 2] + m1.m[3, 1] * m2.m[1, 2] + m1.m[3, 2] * m2.m[2, 2] + m1.m[3, 3] * m2.m[3, 2];
+            kProd.m[3, 3] = m1.m[3, 0] * m2.m[0, 3] + m1.m[3, 1] * m2.m[1, 3] + m1.m[3, 2] * m2.m[2, 3] + m1.m[3, 3] * m2.m[3, 3];
+#else
             for (byte iRow = 0; iRow < 4; iRow++)
             {
                 for (byte iCol = 0; iCol < 4; iCol++)
@@ -131,39 +269,58 @@ namespace UnityEngine
                     kProd.m[iRow, iCol] = m1.m[iRow, 0] * m2.m[0, iCol] + m1.m[iRow, 1] * m2.m[1, iCol] + m1.m[iRow, 2] * m2.m[2, iCol] + m1.m[iRow, 3] * m2.m[3, iCol];
                 }
             }
+#endif
 
             return kProd;
         }
 
         public static Vector3d operator *(Matrix4x4d m, Vector3d v)
         {
-            var kProd = Vector3d.zero;
             var fInvW = 1.0 / (m.m[3, 0] * v.x + m.m[3, 1] * v.y + m.m[3, 2] * v.z + m.m[3, 3]);
 
-            kProd.x = (m.m[0, 0] * v.x + m.m[0, 1] * v.y + m.m[0, 2] * v.z + m.m[0, 3]) * fInvW;
-            kProd.y = (m.m[1, 0] * v.x + m.m[1, 1] * v.y + m.m[1, 2] * v.z + m.m[1, 3]) * fInvW;
-            kProd.z = (m.m[2, 0] * v.x + m.m[2, 1] * v.y + m.m[2, 2] * v.z + m.m[2, 3]) * fInvW;
-
-            return kProd;
+            return new Vector3d
+            {
+                x = (m.m[0, 0] * v.x + m.m[0, 1] * v.y + m.m[0, 2] * v.z + m.m[0, 3]) * fInvW,
+                y = (m.m[1, 0] * v.x + m.m[1, 1] * v.y + m.m[1, 2] * v.z + m.m[1, 3]) * fInvW,
+                z = (m.m[2, 0] * v.x + m.m[2, 1] * v.y + m.m[2, 2] * v.z + m.m[2, 3]) * fInvW
+            };
         }
 
         public static Vector4d operator *(Matrix4x4d m, Vector4d v)
         {
-            var kProd = new Vector4d
+            return new Vector4d
             {
                 x = m.m[0, 0] * v.x + m.m[0, 1] * v.y + m.m[0, 2] * v.z + m.m[0, 3] * v.w,
                 y = m.m[1, 0] * v.x + m.m[1, 1] * v.y + m.m[1, 2] * v.z + m.m[1, 3] * v.w,
                 z = m.m[2, 0] * v.x + m.m[2, 1] * v.y + m.m[2, 2] * v.z + m.m[2, 3] * v.w
             };
-
-
-            return kProd;
         }
 
         public static Matrix4x4d operator *(Matrix4x4d m, double s)
         {
             var kProd = Matrix4x4d.identity;
 
+#if (MATICES_UNROLL)
+            kProd.m[0, 0] = m.m[0, 0] * s;
+            kProd.m[0, 1] = m.m[0, 1] * s;
+            kProd.m[0, 2] = m.m[0, 2] * s;
+            kProd.m[0, 3] = m.m[0, 3] * s;
+
+            kProd.m[1, 0] = m.m[1, 0] * s;
+            kProd.m[1, 1] = m.m[1, 1] * s;
+            kProd.m[1, 2] = m.m[1, 2] * s;
+            kProd.m[1, 3] = m.m[1, 3] * s;
+
+            kProd.m[2, 0] = m.m[2, 0] * s;
+            kProd.m[2, 1] = m.m[2, 1] * s;
+            kProd.m[2, 2] = m.m[2, 2] * s;
+            kProd.m[2, 3] = m.m[2, 3] * s;
+
+            kProd.m[3, 0] = m.m[3, 0] * s;
+            kProd.m[3, 1] = m.m[3, 1] * s;
+            kProd.m[3, 2] = m.m[3, 2] * s;
+            kProd.m[3, 3] = m.m[3, 3] * s;
+#else
             for (byte iRow = 0; iRow < 4; iRow++)
             {
                 for (byte iCol = 0; iCol < 4; iCol++)
@@ -171,6 +328,7 @@ namespace UnityEngine
                     kProd.m[iRow, iCol] = m.m[iRow, iCol] * s;
                 }
             }
+#endif
 
             return kProd;
         }
@@ -203,36 +361,76 @@ namespace UnityEngine
 
         public static implicit operator Matrix4x4(Matrix4x4d m)
         {
-            var matrix = Matrix4x4.identity;
-
-            matrix.SetRow(0, m.GetRow(0));
-            matrix.SetRow(1, m.GetRow(1));
-            matrix.SetRow(2, m.GetRow(2));
-            matrix.SetRow(3, m.GetRow(3));
-
-            return matrix;
+            return new Matrix4x4
+            {
+                m00 = (float)m.m[0, 0],
+                m01 = (float)m.m[0, 1],
+                m02 = (float)m.m[0, 2],
+                m03 = (float)m.m[0, 3],
+                m10 = (float)m.m[1, 0],
+                m11 = (float)m.m[1, 1],
+                m12 = (float)m.m[1, 2],
+                m13 = (float)m.m[1, 3],
+                m20 = (float)m.m[2, 0],
+                m21 = (float)m.m[2, 1],
+                m22 = (float)m.m[2, 2],
+                m23 = (float)m.m[2, 3],
+                m30 = (float)m.m[3, 0],
+                m31 = (float)m.m[3, 1],
+                m32 = (float)m.m[3, 2],
+                m33 = (float)m.m[3, 3],
+            };
         }
 
         public static implicit operator Matrix4x4d(Matrix4x4 m)
         {
-            var matrix = Matrix4x4d.identity;
-
-            matrix.SetRow(0, m.GetRow(0));
-            matrix.SetRow(1, m.GetRow(1));
-            matrix.SetRow(2, m.GetRow(2));
-            matrix.SetRow(3, m.GetRow(3));
-
-            return matrix;
+            return new Matrix4x4d(m);
         }
 
+        #endregion
+
+        #region ToString
 
         public override string ToString()
         {
-            return m[0, 0] + "," + m[0, 1] + "," + m[0, 2] + "," + m[0, 3] + "\n" +
-                   m[1, 0] + "," + m[1, 1] + "," + m[1, 2] + "," + m[1, 3] + "\n" +
-                   m[2, 0] + "," + m[2, 1] + "," + m[2, 2] + "," + m[2, 3] + "\n" +
-                   m[3, 0] + "," + m[3, 1] + "," + m[3, 2] + "," + m[3, 3];
+            return string.Format("[({0}, {1}, {2}, {3})({4}, {5}, {6}, {7})({8}, {9}, {10}, {11})({12}, {13}, {14}, {15})]",
+                                 m[0, 0], m[0, 1], m[0, 2], m[0, 3],
+                                 m[1, 0], m[1, 1], m[1, 2], m[1, 3],
+                                 m[2, 0], m[2, 1], m[2, 2], m[2, 3],
+                                 m[3, 0], m[3, 1], m[3, 2], m[3, 3]);
         }
+
+        #endregion
+
+        #region Column/Row
+
+        public Vector4d GetColumn(int iCol)
+        {
+            return new Vector4d(m[0, iCol], m[1, iCol], m[2, iCol], m[3, iCol]);
+        }
+
+        public Vector4d GetRow(int iRow)
+        {
+            return new Vector4d(m[iRow, 0], m[iRow, 1], m[iRow, 2], m[iRow, 3]);
+        }
+
+        public void SetColumn(int iCol, Vector4d v)
+        {
+            m[0, iCol] = v.x;
+            m[1, iCol] = v.y;
+            m[2, iCol] = v.z;
+            m[3, iCol] = v.w;
+        }
+
+        public void SetRow(int iRow, Vector4d v)
+        {
+            m[iRow, 0] = v.x;
+            m[iRow, 1] = v.y;
+            m[iRow, 2] = v.z;
+            m[iRow, 3] = v.w;
+        }
+
+        #endregion
 
         public Matrix4x4d Transpose()
         {
@@ -249,19 +447,19 @@ namespace UnityEngine
             return kTranspose;
         }
 
-        private double Minor(int r0, int r1, int r2, int c0, int c1, int c2)
+        public double Minor(int r0, int r1, int r2, int c0, int c1, int c2)
         {
             return m[r0, c0] * (m[r1, c1] * m[r2, c2] - m[r2, c1] * m[r1, c2]) -
                    m[r0, c1] * (m[r1, c0] * m[r2, c2] - m[r2, c0] * m[r1, c2]) +
                    m[r0, c2] * (m[r1, c0] * m[r2, c1] - m[r2, c0] * m[r1, c1]);
         }
 
-        private double Determinant()
+        public double Determinant()
         {
             return m[0, 0] * Minor(1, 2, 3, 1, 2, 3) - m[0, 1] * Minor(1, 2, 3, 0, 2, 3) + m[0, 2] * Minor(1, 2, 3, 0, 1, 3) - m[0, 3] * Minor(1, 2, 3, 0, 1, 2);
         }
 
-        private Matrix4x4d Adjoint()
+        public Matrix4x4d Adjoint()
         {
             return new Matrix4x4d(Minor(1, 2, 3, 1, 2, 3), -Minor(0, 2, 3, 1, 2, 3), Minor(0, 1, 3, 1, 2, 3), -Minor(0, 1, 2, 1, 2, 3),
                                   -Minor(1, 2, 3, 0, 2, 3), Minor(0, 2, 3, 0, 2, 3), -Minor(0, 1, 3, 0, 2, 3), Minor(0, 1, 2, 0, 2, 3),
@@ -271,33 +469,7 @@ namespace UnityEngine
 
         public Matrix4x4d Inverse()
         {
-            return Adjoint() * (1.0f / Determinant());
-        }
-
-        public Vector4d GetColumn(int iCol)
-        {
-            return new Vector4d(m[0, iCol], m[1, iCol], m[2, iCol], m[3, iCol]);
-        }
-
-        public void SetColumn(int iCol, Vector4d v)
-        {
-            m[0, iCol] = v.x;
-            m[1, iCol] = v.y;
-            m[2, iCol] = v.z;
-            m[3, iCol] = v.w;
-        }
-
-        public Vector4d GetRow(int iRow)
-        {
-            return new Vector4d(m[iRow, 0], m[iRow, 1], m[iRow, 2], m[iRow, 3]);
-        }
-
-        public void SetRow(int iRow, Vector4d v)
-        {
-            m[iRow, 0] = v.x;
-            m[iRow, 1] = v.y;
-            m[iRow, 2] = v.z;
-            m[iRow, 3] = v.w;
+            return Adjoint() * (1.0 / Determinant());
         }
 
         public Matrix4x4 ToMatrix4x4()
@@ -321,7 +493,6 @@ namespace UnityEngine
                 m32 = (float)m[3, 2],
                 m33 = (float)m[3, 3]
             };
-
 
             return mat;
         }
@@ -389,49 +560,49 @@ namespace UnityEngine
 
         public static Matrix4x4d RotateX(double angle)
         {
-            var ca = System.Math.Cos(angle * MathUtility.Deg2Rad);
-            var sa = System.Math.Sin(angle * MathUtility.Deg2Rad);
+            var ca = Math.Cos(angle * Constants.Deg2Rad);
+            var sa = Math.Sin(angle * Constants.Deg2Rad);
 
             return new Matrix4x4d(1, 0, 0, 0, 0, ca, -sa, 0, 0, sa, ca, 0, 0, 0, 0, 1);
         }
 
         public static Matrix4x4d RotateY(double angle)
         {
-            var ca = System.Math.Cos(angle * MathUtility.Deg2Rad);
-            var sa = System.Math.Sin(angle * MathUtility.Deg2Rad);
+            var ca = Math.Cos(angle * Constants.Deg2Rad);
+            var sa = Math.Sin(angle * Constants.Deg2Rad);
 
             return new Matrix4x4d(ca, 0, sa, 0, 0, 1, 0, 0, -sa, 0, ca, 0, 0, 0, 0, 1);
         }
 
         public static Matrix4x4d RotateZ(double angle)
         {
-            var ca = System.Math.Cos(angle * MathUtility.Deg2Rad);
-            var sa = System.Math.Sin(angle * MathUtility.Deg2Rad);
+            var ca = Math.Cos(angle * Constants.Deg2Rad);
+            var sa = Math.Sin(angle * Constants.Deg2Rad);
 
             return new Matrix4x4d(ca, -sa, 0, 0, sa, ca, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1);
         }
 
         public static Matrix4x4d Rotate(Vector3 rotation)
         {
-            var x = new Quat(new Vector3d(1, 0, 0), rotation.x * MathUtility.Deg2Rad);
-            var y = new Quat(new Vector3d(0, 1, 0), rotation.y * MathUtility.Deg2Rad);
-            var z = new Quat(new Vector3d(0, 0, 1), rotation.z * MathUtility.Deg2Rad);
+            var x = new Quaternion4d(new Vector3d(1, 0, 0), rotation.x * Constants.Deg2Rad);
+            var y = new Quaternion4d(new Vector3d(0, 1, 0), rotation.y * Constants.Deg2Rad);
+            var z = new Quaternion4d(new Vector3d(0, 0, 1), rotation.z * Constants.Deg2Rad);
 
             return (z * y * x).ToMatrix4x4d();
         }
 
         public static Matrix4x4d Rotate(Vector3d rotation)
         {
-            var x = new Quat(new Vector3d(1, 0, 0), rotation.x * MathUtility.Deg2Rad);
-            var y = new Quat(new Vector3d(0, 1, 0), rotation.y * MathUtility.Deg2Rad);
-            var z = new Quat(new Vector3d(0, 0, 1), rotation.z * MathUtility.Deg2Rad);
+            var x = new Quaternion4d(new Vector3d(1, 0, 0), rotation.x * Constants.Deg2Rad);
+            var y = new Quaternion4d(new Vector3d(0, 1, 0), rotation.y * Constants.Deg2Rad);
+            var z = new Quaternion4d(new Vector3d(0, 0, 1), rotation.z * Constants.Deg2Rad);
 
             return (z * y * x).ToMatrix4x4d();
         }
 
         public static Matrix4x4d Perspective(double fovy, double aspect, double zNear, double zFar)
         {
-            var f = 1.0 / System.Math.Tan((fovy * MathUtility.Deg2Rad) / 2.0);
+            var f = 1.0 / Math.Tan((fovy * Constants.Deg2Rad) / 2.0);
 
             return new Matrix4x4d(f / aspect, 0, 0, 0, 0, f, 0, 0, 0, 0, (zFar + zNear) / (zNear - zFar), (2.0 * zFar * zNear) / (zNear - zFar), 0, 0, -1, 0);
         }
@@ -444,7 +615,5 @@ namespace UnityEngine
 
             return new Matrix4x4d(2.0 / (xRight - xLeft), 0, 0, tx, 0, 2.0 / (yTop - yBottom), 0, ty, 0, 0, -2.0 / (zFar - zNear), tz, 0, 0, 0, 1);
         }
-
-        public static Matrix4x4d identity { get { return new Matrix4x4d(1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1); } }
     }
 }

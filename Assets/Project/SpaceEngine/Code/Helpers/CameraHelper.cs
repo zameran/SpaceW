@@ -33,7 +33,13 @@
 // Creator: zameran
 #endregion
 
+#define UNITY_GL_PROJECTION_MATRIX
+
+using System.Collections.Generic;
+using System.Linq;
+
 using UnityEngine;
+using UnityEngine.Rendering;
 
 /// <summary>
 /// Class - extensions holder for a <see cref="Camera"/>.
@@ -48,10 +54,11 @@ public static class CameraHelper
     public static Camera DepthCamera()
     {
         var mainCamera = Main();
+        var depthCameraGameObject = mainCamera.gameObject.transform.Find("CustomDepthCamera");
 
-        if (mainCamera.gameObject.transform.FindChild("CustomDepthCamera") != null)
-            if (mainCamera.gameObject.transform.FindChild("CustomDepthCamera").GetComponent<Camera>() != null)
-                return mainCamera.gameObject.transform.FindChild("CustomDepthCamera").GetComponent<Camera>();
+        if (depthCameraGameObject != null)
+            if (depthCameraGameObject.GetComponent<Camera>() != null)
+                depthCameraGameObject.GetComponent<Camera>();
 
         return null;
     }
@@ -68,14 +75,21 @@ public static class CameraHelper
 
     public static Matrix4x4 GetCameraToScreen(this Camera camera, bool useFix = true)
     {
+#if UNITY_GL_PROJECTION_MATRIX
+        var projectionMatrix = camera.projectionMatrix;
+
+        projectionMatrix = GL.GetGPUProjectionMatrix(projectionMatrix, useFix);
+
+        return projectionMatrix;
+#else
         var projectionMatrix = camera.projectionMatrix;
 
         if (!useFix) return projectionMatrix;
 
-        if (SystemInfo.graphicsDeviceVersion.IndexOf("Direct3D") > -1)
+        if (SystemInfo.graphicsDeviceVersion.IndexOf("Direct3D", System.StringComparison.Ordinal) > -1)
         {
             // NOTE : Default unity antialiasing breaks matrices?
-            if (IsDeferred(camera) || QualitySettings.antiAliasing == 0)
+            if ((IsDeferred(camera) || QualitySettings.antiAliasing == 0))
             {
                 // Invert Y for rendering to a render texture
                 for (byte i = 0; i < 4; i++)
@@ -87,21 +101,19 @@ public static class CameraHelper
             // Scale and bias depth range
             for (byte i = 0; i < 4; i++)
             {
-                projectionMatrix[2, i] = projectionMatrix[2, i] * 0.5f + projectionMatrix[3, i] * 0.5f;
+                // NOTE : Hm. I saw something about reverse depth buffer in release notes...
+                projectionMatrix[2, i] = -(projectionMatrix[2, i] * 0.5f + projectionMatrix[3, i] * -0.5f);
+                //projectionMatrix[2, i] = projectionMatrix[2, i] * 0.5f + projectionMatrix[3, i] * 0.5f;
             }
         }
 
         return projectionMatrix;
+#endif
     }
 
     public static Matrix4x4 GetScreenToCamera(this Camera camera)
     {
         return camera.GetCameraToScreen().inverse;
-    }
-
-    public static Matrix4x4 GetScreenToCamera(this Camera camera, bool useFix)
-    {
-        return camera.GetCameraToScreen(useFix).inverse;
     }
 
     public static Vector3 GetProjectedDirection(this Vector3 v)
@@ -120,5 +132,37 @@ public static class CameraHelper
     public static bool IsDeferred(this Camera camera)
     {
         return camera.actualRenderingPath == (RenderingPath.DeferredLighting | RenderingPath.DeferredShading);
+    }
+
+    public static int GetAntiAliasing(this Camera camera)
+    {
+        var antiAliasing = QualitySettings.antiAliasing;
+
+        if (antiAliasing == 0) { antiAliasing = 1; }
+
+        // Reset aa value to 1 in case camera is in DeferredLighting or DeferredShading Rendering Path
+        if (camera.IsDeferred()) { antiAliasing = 1; }
+
+        return antiAliasing;
+    }
+
+    public static bool CommandBufferExistByName(this Camera camera, CameraEvent evt, string name)
+    {
+        return camera.GetCommandBuffers(evt).ToList().Any((buffer) => buffer.name == name);
+    }
+
+    public static IEnumerable<CommandBuffer> GetCommandBuffersByName(this Camera camera, CameraEvent evt, string name)
+    {
+        return camera.GetCommandBuffers(evt).ToList().Where((buffer) => buffer.name == name);
+    }
+
+    public static void RemoveAllCommandBuffersByName(this Camera camera, CameraEvent evt, string name)
+    {
+        var commandBuffersToRemove = camera.GetCommandBuffersByName(evt, name);
+
+        foreach (var commandBufferToRemove in commandBuffersToRemove)
+        {
+            camera.RemoveCommandBuffer(evt, commandBufferToRemove);
+        }
     }
 }

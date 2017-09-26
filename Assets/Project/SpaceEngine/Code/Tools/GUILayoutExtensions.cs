@@ -39,6 +39,34 @@ using UnityEngine;
 
 public static class GUILayoutExtensions
 {
+    public static void SliderWithField(object caption, float leftValue, float rightValue, ref float value, string pattern = "0.0", int textFieldWidth = 75)
+    {
+        GUILayout.Label(caption.ToString());
+
+        GUILayout.BeginHorizontal();
+
+        GUILayout.TextField(value.ToString(pattern), GUILayout.MaxWidth(textFieldWidth));
+        value = GUILayout.HorizontalSlider(value, leftValue, rightValue);
+
+        GUILayout.EndHorizontal();
+    }
+
+    public static void SliderWithFieldAndControls(object caption, float leftValue, float rightValue, ref float value, string pattern = "0.0", int textFieldWidth = 75, float controlStep = 1.0f)
+    {
+        GUILayout.Label(caption.ToString());
+
+        GUILayout.BeginHorizontal();
+
+        GUILayout.TextField(value.ToString(pattern), GUILayout.MaxWidth(textFieldWidth));
+
+        if (GUILayout.Button("+", GUILayout.Width(20))) { value += controlStep; }
+        if (GUILayout.Button("-", GUILayout.Width(20))) { value -= controlStep; }
+
+        value = GUILayout.HorizontalSlider(value, leftValue, rightValue);
+
+        GUILayout.EndHorizontal();
+    }
+
     public static void LabelWithFlexibleSpace(object text1, object text2)
     {
         GUILayout.Label(text1.ToString());
@@ -70,5 +98,51 @@ public static class GUILayoutExtensions
         GUILayout.BeginVertical();
         if (body != null) body();
         GUILayout.EndVertical();
+    }
+
+    public static void VerticalBoxed(string caption, GUISkin skin, Action body, params GUILayoutOption[] options)
+    {
+        GUILayout.BeginVertical(caption, skin.box, options);
+        {
+            if (body != null) body();
+        }
+        GUILayout.EndVertical();
+    }
+
+    public static void HorizontalBoxed(string caption, GUISkin skin, Action body, params GUILayoutOption[] options)
+    {
+        GUILayout.BeginHorizontal(caption, skin.box, options);
+        {
+            if (body != null) body();
+        }
+        GUILayout.EndHorizontal();
+    }
+
+    public static void DrawWithColor(Action body, Color color)
+    {
+        var tempColor = GUI.color;
+
+        GUI.color = color;
+
+        if (body != null) body();
+        
+        GUI.color = tempColor;
+    }
+
+    public static void DrawBadHolder(string caption, string message, GUISkin skin)
+    {
+        VerticalBoxed(caption, skin, () =>
+        {
+            GUILayout.Space(20);
+
+            VerticalBoxed("", skin, () =>
+            {
+                LabelWithSpace(message, -8);
+
+                GUILayout.Space(5);
+            });
+        });
+
+        GUILayout.Space(5);
     }
 }

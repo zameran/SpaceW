@@ -63,7 +63,7 @@ namespace SpaceEngine.Core.Preprocess.Terrain
                         PreprocessOrtho(Source, Application.dataPath + TempFolder, Application.dataPath + DestinationFolder);
                         break;
                     default:
-                        Debug.LogWarning("Nothing to produce/precompute!");
+                        Debug.LogWarning("PreProcessTerrain.Start: Nothing to produce/precompute!");
                         break;
                 }
             }

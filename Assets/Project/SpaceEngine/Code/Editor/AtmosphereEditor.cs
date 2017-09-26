@@ -1,7 +1,6 @@
-﻿using UnityEngine;
-using UnityEditor;
+﻿using SpaceEngine.Enviroment.Atmospheric;
 
-using SpaceEngine.AtmosphericScattering;
+using UnityEditor;
 
 [CustomEditor(typeof(Atmosphere))]
 public class AtmosphereEditor : Editor

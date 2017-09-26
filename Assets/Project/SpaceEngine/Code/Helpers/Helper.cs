@@ -33,6 +33,8 @@
 // Creator: zameran
 #endregion
 
+using SpaceEngine.Enviroment.Shadows;
+
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -74,6 +76,11 @@ public static class Helper
     public static bool Enabled<T>(T b) where T : Behaviour
     {
         return b != null && b.enabled == true && b.gameObject.activeInHierarchy == true;
+    }
+
+    public static bool Enabled(GameObject b)
+    {
+        return b != null && b.activeInHierarchy;
     }
 
     public static T Destroy<T>(T o) where T : Object
@@ -216,13 +223,32 @@ public static class Helper
         }
     }
 
+    public static bool ArraysEqual<T>(T[] a, List<T> b)
+    {
+        if (a == null || b == null) return false;
+
+        if (a.Length != b.Count) return false;
+
+        var comparer = EqualityComparer<T>.Default;
+
+        for (var i = 0; i < a.Length; i++)
+        {
+            if (comparer.Equals(a[i], b[i]) == false)
+            {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
     public static Material CreateTempMaterial(string shaderName)
     {
         var shader = Shader.Find(shaderName);
 
         if (shader == null)
         {
-            Debug.LogError("Failed to find shader: " + shaderName);
+            Debug.LogError("Helper.CreateTempMaterial: Failed to find shader: " + shaderName);
             return null;
         }
 
@@ -335,6 +361,8 @@ public static class Helper
 
     public static void SetKeywords(Material m, List<string> keywords, bool checkShaderKeywords = false)
     {
+        if (keywords == null) return;
+
         if (checkShaderKeywords)
         {
             if (m != null && ArraysEqual(m.shaderKeywords, keywords) == false)
@@ -348,23 +376,34 @@ public static class Helper
         }
     }
 
-    public static bool ArraysEqual<T>(T[] a, List<T> b)
+    public static void ToggleKeyword(Material target, bool state, string enabledKeyword = "FEATURE_ON", string disabledKeyword = "FEATURE_OFF")
     {
-        if (a == null || b == null) return false;
-
-        if (a.Length != b.Count) return false;
-
-        var comparer = EqualityComparer<T>.Default;
-
-        for (var i = 0; i < a.Length; i++)
+        if (state)
         {
-            if (comparer.Equals(a[i], b[i]) == false)
-            {
-                return false;
-            }
+            if (target.IsKeywordEnabled(disabledKeyword)) target.DisableKeyword(disabledKeyword);
+            if (!target.IsKeywordEnabled(enabledKeyword)) target.EnableKeyword(enabledKeyword);
         }
+        else
+        {
+            if (target.IsKeywordEnabled(enabledKeyword)) target.DisableKeyword(enabledKeyword);
+            if (!target.IsKeywordEnabled(disabledKeyword)) target.EnableKeyword(disabledKeyword);
+        }
+    }
 
-        return true;
+    public static void ToggleKeyword(Material target, string enableKeyword, string disableKeyword)
+    {
+        EnableKeyword(target, enableKeyword);
+        DisableKeyword(target, disableKeyword);
+    }
+
+    public static void EnableKeyword(Material target, string keyword)
+    {
+        if (!target.IsKeywordEnabled(keyword)) target.EnableKeyword(keyword);
+    }
+
+    public static void DisableKeyword(Material target, string keyword)
+    {
+        if (target.IsKeywordEnabled(keyword)) target.DisableKeyword(keyword);
     }
 
     public static Color Brighten(Color color, float brightness)
@@ -385,10 +424,7 @@ public static class Helper
         return color;
     }
 
-    public static void CalculateLight(Light light,
-        Vector3 center,
-        Transform directionTransform,
-        Transform positionTransform,
+    public static void CalculateLight(Light light, Vector3 center, Transform directionTransform, Transform positionTransform,
         ref Vector3 position,
         ref Vector3 direction,
         ref Color color)
@@ -404,9 +440,9 @@ public static class Helper
                 case LightType.Point:
                     direction = Vector3.Normalize(position - center);
                     break;
-
-                    //distances fix.
-                    //case LightType.Directional: position = center + direction * (position - center).magnitude; break;
+                case LightType.Directional: // NOTE : Fix directions for directional light...
+                    position = center + direction * (position - center).magnitude;
+                    break;
             }
 
             // Transform into local space?
@@ -430,12 +466,11 @@ public static class Helper
         {
             for (var i = 1; i <= lights.Count; i++)
             {
-                var index = i - 1;
-                var light = lights[index];
+                var light = lights[i - 1];
 
                 if (Enabled(light) == true && light.intensity > 0.0f && lightCount < maxLights)
                 {
-                    var prefix = "_Light" + (++lightCount);
+                    var prefix = string.Format("_Light{0}", ++lightCount);
                     var direction = default(Vector3);
                     var position = default(Vector3);
                     var color = default(Color);
@@ -448,9 +483,9 @@ public static class Helper
 
                         if (material != null)
                         {
-                            material.SetVector(prefix + "Direction", direction);
-                            material.SetVector(prefix + "Position", VectorHelper.MakeFrom(position, 1.0f));
-                            material.SetColor(prefix + "Color", color);
+                            material.SetVector(string.Format("{0}Direction", prefix), direction);
+                            material.SetVector(string.Format("{0}Position", prefix), VectorHelper.MakeFrom(position, 1.0f));
+                            material.SetColor(string.Format("{0}Color", prefix), color);
                         }
                     }
                 }
@@ -468,12 +503,11 @@ public static class Helper
         {
             for (var i = 1; i <= shadows.Count; i++)
             {
-                var index = i - 1;
-                var shadow = shadows[index];
+                var shadow = shadows[i - 1];
 
                 if (Enabled(shadow) == true && shadow.CalculateShadow() == true && shadowCount < maxShadows)
                 {
-                    var prefix = "_Shadow" + (++shadowCount);
+                    var prefix = string.Format("_Shadow{0}", ++shadowCount);
 
                     for (var j = materials.Length - 1; j >= 0; j--)
                     {
@@ -481,9 +515,9 @@ public static class Helper
 
                         if (material != null)
                         {
-                            material.SetTexture(prefix + "Texture", shadow.GetTexture());
-                            material.SetMatrix(prefix + "Matrix", shadow.Matrix);
-                            material.SetFloat(prefix + "Ratio", shadow.Ratio);
+                            material.SetTexture(string.Format("{0}Texture", prefix), shadow.GetTexture());
+                            material.SetMatrix(string.Format("{0}Matrix", prefix), shadow.Matrix);
+                            material.SetFloat(string.Format("{0}Ratio", prefix), shadow.Ratio);
                         }
                     }
                 }
@@ -501,12 +535,11 @@ public static class Helper
         {
             for (var i = 1; i <= shadows.Count; i++)
             {
-                var index = i - 1;
-                var shadow = shadows[index];
+                var shadow = shadows[i - 1];
 
                 if (Enabled(shadow) == true && shadow.CalculateShadow() == true && shadowCount < maxShadows)
                 {
-                    var prefix = "_Shadow" + (++shadowCount);
+                    var prefix = string.Format("_Shadow{0}", ++shadowCount);
 
                     for (var j = blocks.Length - 1; j >= 0; j--)
                     {
@@ -514,9 +547,9 @@ public static class Helper
 
                         if (block != null)
                         {
-                            block.SetTexture(prefix + "Texture", shadow.GetTexture());
-                            block.SetMatrix(prefix + "Matrix", shadow.Matrix);
-                            block.SetFloat(prefix + "Ratio", shadow.Ratio);
+                            block.SetTexture(string.Format("{0}Texture", prefix), shadow.GetTexture());
+                            block.SetMatrix(string.Format("{0}Matrix", prefix), shadow.Matrix);
+                            block.SetFloat(string.Format("{0}Ratio", prefix), shadow.Ratio);
                         }
                     }
                 }

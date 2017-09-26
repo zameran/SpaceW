@@ -195,7 +195,7 @@ namespace SpaceEngine.Core
             tx = tx - (RootTx << level);
             ty = ty - (RootTy << level);
 
-            CPUTileStorage.CPUSlot<float> cpuSlot = slot[0] as CPUTileStorage.CPUSlot<float>;
+            var cpuSlot = slot[0] as CPUTileStorage.CPUSlot<float>;
 
             if (cpuSlot == null) { throw new NullReferenceException("cpuSlot"); }
 

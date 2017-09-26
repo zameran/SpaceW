@@ -41,7 +41,7 @@ namespace SpaceEngine.Debugging
 {
     public sealed class DebugGUIBodyInfo : DebugGUI
     {
-        public Body Body;
+        public Body Body { get { return GodManager.Instance.ActiveBody; } }
 
         protected override void Awake()
         {
@@ -62,53 +62,55 @@ namespace SpaceEngine.Debugging
 
         protected override void UI(int id)
         {
-            scrollPosition = GUILayout.BeginScrollView(scrollPosition, false, true);
+            ScrollPosition = GUILayout.BeginScrollView(ScrollPosition, false, true);
 
             if (Body != null && Helper.Enabled(Body))
             {
-                GUILayout.BeginVertical();
-
-                GUILayout.Label("Body parameters: ", boldLabel);
-
-                GUILayout.Label("Nothing here!");
-
-                GUILayout.EndVertical();
-
-                if (Body.Atmosphere != null && Helper.Enabled(Body.Atmosphere))
+                GUILayoutExtensions.VerticalBoxed("Body parameters: ", GUISkin, () =>
                 {
-                    GUILayout.BeginVertical();
+                    GUILayout.Space(20);
 
-                    GUILayout.Label("Atmosphere parameters: ", boldLabel);
+                    GUILayoutExtensions.VerticalBoxed("", GUISkin, () =>
+                    {
+                        if (Body.MaterialTable != null && Body.MaterialTable.Lut != null)
+                        {
+                            GUILayout.Label("Material Table: ");
+                            GUILayoutExtensions.VerticalBoxed("", GUISkin, () =>
+                            {
+                                GUILayoutExtensions.Horizontal(() =>
+                                {
+                                    GUILayout.Label(Body.MaterialTable.Lut);
+                                });
+                            });
+                        }
+                    });
+                });
 
-                    GUILayout.Label("Preset: ");
-                    Body.Atmosphere.AtmosphereBase = (AtmosphereBase)GUILayout.SelectionGrid((int)Body.Atmosphere.AtmosphereBase, System.Enum.GetNames(typeof(AtmosphereBase)), 2);
+                GUILayout.Space(5);
 
-                    GUILayout.Space(10);
+                if (Body.Ocean != null && Body.OceanEnabled && Helper.Enabled(Body.Ocean))
+                {
+                    GUILayoutExtensions.VerticalBoxed("Ocean parameters: ", GUISkin, () =>
+                    {
+                        GUILayout.Space(20);
 
-                    GUILayout.Label("Density: ");
-                    float.TryParse(GUILayout.TextField(Body.Atmosphere.Density.ToString("0.0")), out Body.Atmosphere.Density);
+                        GUILayoutExtensions.VerticalBoxed("", GUISkin, () =>
+                        {
+                            GUILayoutExtensions.SliderWithField("Level: ", 0.0f, 5.0f, ref Body.Ocean.OceanLevel);
+                            GUILayoutExtensions.SliderWithField("Z Min: ", 0.0f, 50000.0f, ref Body.Ocean.ZMin);
+                        });
+                    });
 
-                    GUILayout.Label("Height: ");
-                    float.TryParse(GUILayout.TextField(Body.Atmosphere.Height.ToString("0.0")), out Body.Atmosphere.Height);
-
-                    GUILayout.EndVertical();
+                    GUILayout.Space(5);
                 }
                 else
                 {
-                    GUILayout.BeginVertical();
-
-                    GUILayoutExtensions.LabelWithSpace("No Atmosphere!?", -8);
-
-                    GUILayout.EndVertical();
+                    GUILayoutExtensions.DrawBadHolder("Ocean parameters: ", "No Ocean!?", GUISkin);
                 }
             }
             else
             {
-                GUILayout.BeginVertical();
-
-                GUILayoutExtensions.LabelWithSpace("No Body!?", -8);
-
-                GUILayout.EndVertical();
+                GUILayoutExtensions.DrawBadHolder("Body parameters: ", "No Body!?", GUISkin);
             }
 
             GUILayout.EndScrollView();

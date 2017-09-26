@@ -33,6 +33,7 @@
 // Creator: zameran
 #endregion
 
+using SpaceEngine.Core;
 using SpaceEngine.Core.Patterns.Strategy.Renderable;
 using SpaceEngine.Core.Patterns.Strategy.Uniformed;
 
@@ -82,6 +83,9 @@ namespace SpaceEngine.Startfield
             StarfieldMaterial.renderQueue = (int)RenderQueue + RenderQueueOffset;
 
             SetUniforms(StarfieldMaterial);
+
+            // NOTE : Self - rendering!
+            Render();
         }
 
         protected override void Awake()
@@ -147,7 +151,7 @@ namespace SpaceEngine.Startfield
 
         public void InitMesh()
         {
-            StarfieldMesh = CreateStarfieldMesh(StarsDistance);
+            StarfieldMesh = CreateStarfieldMesh();
         }
 
         public void InitMaterials()
@@ -158,7 +162,7 @@ namespace SpaceEngine.Startfield
             }
         }
 
-        private Mesh CreateStarfieldMesh(float starDistance)
+        private Mesh CreateStarfieldMesh()
         {
             const int numberOfStars = 9110;
 
@@ -192,7 +196,7 @@ namespace SpaceEngine.Startfield
                     var ci = new CombineInstance
                     {
                         mesh = MeshFactory.MakeBillboardQuad(starSize),
-                        transform = MatrixHelper.BillboardMatrix(star.Position * starDistance)
+                        transform = MatrixHelper.BillboardMatrix(star.Position * StarsDistance)
                     };
 
                     ci.mesh.colors = new Color[] { star.Color, star.Color, star.Color, star.Color };

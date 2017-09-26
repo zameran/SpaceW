@@ -33,22 +33,15 @@
 // Creator: zameran
 #endregion
 
-using System.Collections.Generic;
 using System.Linq;
 
 using UnityEngine;
 
 namespace SpaceEngine.Debugging
 {
-    public sealed class DebugGUISwitcher : MonoSingleton<DebugGUISwitcher>, IDebugSwitcher
+    public sealed class DebugGUISwitcher : DebugSwitcher<DebugGUI>
     {
-        public GUISkin skin;
-
-        public List<DebugGUI> DebugComponents;
-
-        public int state = 0;
-
-        public KeyCode SwitchKey = KeyCode.F5;
+        public GUISkin GUISkin;
 
         public bool ShowAdditionalInfo = true;
 
@@ -59,38 +52,6 @@ namespace SpaceEngine.Debugging
         public bool MouseOverGUIRect { get { return DebugComponents.Any((gui) => gui.isActiveAndEnabled && gui.debugInfoBounds.Contains(new Vector2(Input.mousePosition.x, Screen.height - Input.mousePosition.y))); } }
 
         public bool MouseOverGUI { get { return MouseOverGUIHotControl || MouseOverGUIRect; } }
-
-        private void Awake()
-        {
-            Instance = this;
-        }
-
-        private void Start()
-        {
-            if (DebugComponents == null || DebugComponents.Count == 0)
-            {
-                DebugComponents = GetComponents<DebugGUI>().ToList();
-            }
-
-            ToogleAll(DebugComponents, false);
-        }
-
-        private void Update()
-        {
-            if (Input.GetKeyDown(SwitchKey))
-            {
-                if (state == DebugComponents.Count)
-                {
-                    state = 0;
-                    ToogleAll(DebugComponents, false);
-                    return;
-                }
-
-                ToogleAll(DebugComponents, false);
-                state++;
-                ToogleAt(DebugComponents, true, state);
-            }
-        }
 
         private void OnGUI()
         {
@@ -103,22 +64,6 @@ namespace SpaceEngine.Debugging
             }
         }
 
-        public void Toogle(DebugGUI GUI, bool state)
-        {
-            GUI.enabled = state;
-        }
-
-        public void ToogleAt(List<DebugGUI> GUIs, bool state, int index)
-        {
-            GUIs[index - 1].enabled = state;
-        }
-
-        public void ToogleAll(List<DebugGUI> GUIs, bool state = false)
-        {
-            for (int i = 0; i < GUIs.Count; i++)
-            {
-                GUIs[i].enabled = state;
-            }
-        }
+        protected override KeyCode SwitchKey { get { return KeyCode.F5; } }
     }
 }

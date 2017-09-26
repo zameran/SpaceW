@@ -33,24 +33,48 @@
 // Creator: zameran
 #endregion
 
+using SpaceEngine.Core.Debugging;
+
 using System;
-using System.Collections;
 using System.IO;
+
+#if UNITY_EDITOR
+using UnityEditor;
+#endif
 
 using UnityEngine;
 
+using Logger = SpaceEngine.Core.Debugging.Logger;
+
 [RequireComponent(typeof(Camera))]
-public class ScreenshotHelper : MonoBehaviour
+[UseLogger(Category.Data)]
+[UseLoggerFile("SpaceWLog")]
+public class ScreenshotHelper : MonoSingleton<ScreenshotHelper>
 {
+    public enum ScreenshotFormat
+    {
+        PNG,
+        JPG
+    }
+
     [Range(1, 8)]
     public int SuperSize = 3;
-
-    public bool IncludeAlpha = true;
 
     public KeyCode Key = KeyCode.F12;
     public ScreenshotFormat Format = ScreenshotFormat.PNG;
 
-    private bool keyPressed = false;
+    [HideInInspector]
+    public bool KeyPressed = false;
+
+    public Vector2 ScreenSize { get { return new Vector2(Screen.width, Screen.height); } }
+    public Vector2 ScreenShotSize { get { return ScreenSize * SuperSize; } }
+
+    private RenderTexture Buffer;
+
+    private void Awake()
+    {
+        Instance = this;
+    }
 
     private void Start()
     {
@@ -64,92 +88,69 @@ public class ScreenshotHelper : MonoBehaviour
 
     private void LateUpdate()
     {
-        keyPressed |= Input.GetKeyDown(Key);
+        KeyPressed |= Input.GetKeyDown(Key);
     }
 
-    private IEnumerator WaitOneFrame(Action OnDone = null)
+    private static Texture2D GetRTPixels(RenderTexture rt)
     {
-        yield return Yielders.EndOfFrame;
-
-        if (OnDone != null)
-            OnDone();
-    }
-
-    private void TakeScreenShot(out Texture2D ScreenShot, RenderTexture src, int SuperSize = 1, bool IncludeAlpha = true, Action OnDone = null)
-    {
-        ScreenShot = TakeScreenShot(src, SuperSize, IncludeAlpha, OnDone);
-    }
-
-    private Texture2D TakeScreenShot(RenderTexture src, int SuperSize = 1, bool IncludeAlpha = true, Action OnDone = null)
-    {
-        var size = new Vector2(Screen.width * SuperSize, Screen.height * SuperSize);
-        var rt = RTExtensions.CreateRTexture(size, 0, RenderTextureFormat.ARGB32, FilterMode.Trilinear, TextureWrapMode.Clamp, false, 6);
-        var screenShot = new Texture2D((int)size.x, (int)size.y, TextureFormat.ARGB32, false);
-
-        Graphics.Blit(src, rt);
+        var currentActiveRT = RenderTexture.active;
 
         RenderTexture.active = rt;
-        screenShot.ReadPixels(new Rect(0, 0, size.x, size.y), 0, 0);
-        RenderTexture.active = null;
 
-        if (!IncludeAlpha)
-        {
-            for (int i = 0; i < screenShot.width; i++)
-            {
-                for (int j = 0; j < screenShot.height; j++)
-                {
-                    Color color = screenShot.GetPixel(i, j);
-                    color.a = 1.0f;
+        var texture = new Texture2D(rt.width, rt.height);
 
-                    screenShot.SetPixel(i, j, color);
-                }
-            }
-        }
+        texture.ReadPixels(new Rect(0, 0, texture.width, texture.height), 0, 0);
 
-        //Just make sure that we don't eating memory...
-        rt.ReleaseAndDestroy();
+        RenderTexture.active = currentActiveRT;
 
-        if (OnDone != null)
-            OnDone();
-
-        return screenShot;
+        return texture;
     }
 
-    private void SaveScreenshot(Texture2D ScreenShotTexture, string name = "Screenshot")
+    private void SaveScreenshot(Texture2D screenShotTexture, string fileName = "Screenshot")
     {
-        if (ScreenShotTexture != null)
+        if (screenShotTexture != null)
         {
-            string file = string.Format("{0}/{1}_{2}", Application.dataPath, name, DateTime.Now.ToString("yy.MM.dd-hh.mm.ss"));
+            var filePath = string.Format("{0}/{1}_{2:yy.MM.dd-hh.mm.ss}_{3}", Application.dataPath, fileName, DateTime.Now, (int)UnityEngine.Random.Range(0.0f, 100.0f));
 
             switch (Format)
             {
                 case ScreenshotFormat.JPG:
-                    File.WriteAllBytes(file + ".jpg", ScreenShotTexture.EncodeToJPG(100));
+                    File.WriteAllBytes(filePath + ".jpg", screenShotTexture.EncodeToJPG(100));
                     break;
                 case ScreenshotFormat.PNG:
-                    File.WriteAllBytes(file + ".png", ScreenShotTexture.EncodeToPNG());
+                    File.WriteAllBytes(filePath + ".png", screenShotTexture.EncodeToPNG());
                     break;
+                default:
+                    throw new ArgumentOutOfRangeException();
             }
+
+            Logger.Log(string.Format("ScreenshotHelper: Screenshot Saved. {0}", filePath));
+
+#if UNITY_EDITOR
+            AssetDatabase.Refresh();
+#endif
         }
         else
-            Debug.Log("ScreenshotHelper: ScreenShotTexture is null!");
+            Logger.LogError("ScreenshotHelper: screenShotTexture is null!");
     }
 
     private void OnRenderImage(RenderTexture source, RenderTexture destination)
     {
         //May cause driver crash on big SuperSize values, lol.
-        if (keyPressed)
+        if (KeyPressed)
         {
-            StartCoroutine(WaitOneFrame(() =>
-            {
-                var ScreenShotTexture = TakeScreenShot(source, SuperSize, IncludeAlpha);
+            Buffer = RTExtensions.CreateRTexture(ScreenShotSize, 0, RenderTextureFormat.ARGB32, FilterMode.Trilinear, TextureWrapMode.Clamp, false, 6);
 
-                SaveScreenshot(ScreenShotTexture);
+            Graphics.Blit(source, Buffer);
 
-                Destroy(ScreenShotTexture);
+            var screenShotTexture = GetRTPixels(Buffer);
 
-                keyPressed = false;
-            }));
+            SaveScreenshot(screenShotTexture);
+
+            Destroy(screenShotTexture);
+            Destroy(Buffer);
+
+            KeyPressed = false;
         }
 
         Graphics.Blit(source, destination);

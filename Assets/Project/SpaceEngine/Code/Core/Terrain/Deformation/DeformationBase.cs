@@ -37,26 +37,22 @@ namespace SpaceEngine.Core.Terrain.Deformation
         }
 
         protected Uniforms uniforms;
-        protected Matrix4x4d localToCamera;
-        protected Matrix4x4d localToScreen;
-        protected Matrix3x3d localToTangent;
 
         public DeformationBase()
         {
             uniforms = new Uniforms();
-            localToCamera = Matrix4x4d.identity;
-            localToScreen = Matrix4x4d.identity;
-            localToTangent = Matrix3x3d.identity;
         }
 
         /// <summary>
         /// The corresponding point in the deformed (destination) space.
         /// </summary>
-        /// <param name="localPoint">A point in the local (source) space.</param>
+        /// <param name="x">A X coordinate of point in the local (source) space.</param>
+        /// <param name="y">A Y coordinate of point in the local (source) space.</param>
+        /// <param name="z">A Z coordinate of point in the local (source) space.</param>
         /// <returns>Returns the deformed point corresponding to the given source point.</returns>
-        public virtual Vector3d LocalToDeformed(Vector3d localPoint)
+        public virtual Vector3d LocalToDeformed(double x, double y, double z)
         {
-            return localPoint;
+            return new Vector3d(x, y, z);
         }
 
         /// <summary>
@@ -110,12 +106,12 @@ namespace SpaceEngine.Core.Terrain.Deformation
         }
 
         /// <summary>
-        /// The distance in local (source) space between 'a' point and a bounding box.
+        /// The distance in local (source) space between a point and a bounding box.
         /// </summary>
         /// <param name="localPoint">A point in local space.</param>
         /// <param name="localBox">A bounding box in local space.</param>
         /// <returns>Returns the distance in local (source) space between 'a' point and a bounding box.</returns>
-        public virtual double GetLocalDist(Vector3d localPoint, Box3d localBox)
+        public virtual double GetLocalDistance(Vector3d localPoint, Box3d localBox)
         {
             return Math.Max(Math.Abs(localPoint.z - localBox.zmax),
                    Math.Max(Math.Min(Math.Abs(localPoint.x - localBox.xmin),
@@ -132,60 +128,89 @@ namespace SpaceEngine.Core.Terrain.Deformation
         /// <code>TerrainNode.GetLocalCamera</code> and <code>TerrainNode.GetDeformedCamera</code>,
         /// as well as the view frustum planes in deformed space with <code>TerrainNode.GetDeformedFrustumPlanes</code>.
         /// </param>
-        /// <param name="localBox">a bounding box in local space.</param>
+        /// <param name="localBox">A bounding box in local space.</param>
+        /// <param name="deformedBox">A bounding box in deformation space. Should be precalculated.</param>
         /// <returns>Returns the visibility of a bounding box in local space, in a view frustum defined in deformed space.</returns>
-        public virtual Frustum.VISIBILITY GetVisibility(TerrainNode node, Box3d localBox)
+        public virtual Frustum.VISIBILITY GetVisibility(TerrainNode node, Box3d localBox, Vector3d[] deformedBox)
         {
             // localBox = deformedBox, so we can compare the deformed frustum with it
             return Frustum.GetVisibility(node.DeformedFrustumPlanes, localBox);
         }
 
-        public virtual void SetUniforms(TerrainNode node, Material mat)
+        public virtual void SetUniforms(TerrainNode node, Material target)
         {
-            if (mat == null || node == null) return;
+            if (target == null || node == null) return;
 
-            var d1 = node.SplitDistance + 1.0f;
-            var d2 = 2.0f * node.SplitDistance;
-
-            localToCamera = GodManager.Instance.WorldToCamera * node.LocalToWorld;
-            localToScreen = GodManager.Instance.CameraToScreen * localToCamera;
-
-            var ltot = DeformedToTangentFrame((Vector3d)GodManager.Instance.WorldCameraPos) * node.LocalToWorld * LocalToDeformedDifferential(node.LocalCameraPosition);
-
-            localToTangent = new Matrix3x3d(ltot.m[0, 0], ltot.m[0, 1], ltot.m[0, 3], ltot.m[1, 0], ltot.m[1, 1], ltot.m[1, 3], ltot.m[3, 0], ltot.m[3, 1], ltot.m[3, 3]);
-
-            mat.SetVector(uniforms.blending, new Vector2(d1, d2 - d1));
-            mat.SetMatrix(uniforms.localToScreen, localToScreen.ToMatrix4x4());
-            mat.SetMatrix(uniforms.localToWorld, node.LocalToWorld.ToMatrix4x4());
-
+            target.SetVector(uniforms.blending, node.DistanceBlending);
+            target.SetMatrix(uniforms.localToScreen, node.LocalToScreen.ToMatrix4x4());
+            target.SetMatrix(uniforms.localToWorld, node.LocalToWorld.ToMatrix4x4());
         }
 
-        public virtual void SetUniforms(TerrainNode node, TerrainQuad quad, MaterialPropertyBlock matPropertyBlock)
+        public virtual Vector4 CalculateDeformedOffset(TerrainQuad quad)
         {
-            if (matPropertyBlock == null || node == null || quad == null) return;
-
-            matPropertyBlock.SetVector(uniforms.offset, new Vector4((float)quad.Ox, (float)quad.Oy, (float)quad.Length, (float)quad.Level));
-            matPropertyBlock.SetVector(uniforms.camera, new Vector4((float)((node.LocalCameraPosition.x - quad.Ox) / quad.Length),
-                                                                    (float)((node.LocalCameraPosition.y - quad.Oy) / quad.Length),
-                                                                    (float)((node.LocalCameraPosition.z - node.ParentBody.HeightZ) / (quad.Length * (double)node.DistanceFactor)),
-                                                                    (float)node.LocalCameraPosition.z));
-
-            matPropertyBlock.SetMatrix(uniforms.tileToTangent, (localToTangent * new Matrix3x3d(quad.Length, 0.0, quad.Ox - node.LocalCameraPosition.x,
-                                                                                                0.0, quad.Length, quad.Oy - node.LocalCameraPosition.y,
-                                                                                                0.0, 0.0, 1.0)).ToMatrix4x4());
-
-            SetScreenUniforms(node, quad, matPropertyBlock);
+            return quad.DeformedOffset;
         }
 
-        protected virtual void SetScreenUniforms(TerrainNode node, TerrainQuad quad, MaterialPropertyBlock matPropertyBlock)
+        public virtual Vector4 CalculateDeformedCameraPosition(TerrainNode node, TerrainQuad quad)
         {
-            var p0 = new Vector3d(quad.Ox, quad.Oy, 0.0);
-            var p1 = new Vector3d(quad.Ox + quad.Length, quad.Oy, 0.0);
-            var p2 = new Vector3d(quad.Ox, quad.Oy + quad.Length, 0.0);
-            var p3 = new Vector3d(quad.Ox + quad.Length, quad.Oy + quad.Length, 0.0);
+            return new Vector4((float)((node.LocalCameraPosition.x - quad.Ox) / quad.Length),
+                               (float)((node.LocalCameraPosition.y - quad.Oy) / quad.Length),
+                               (float)((node.LocalCameraPosition.z - node.ParentBody.HeightZ) / (quad.Length * (double)node.DistanceFactor)),
+                               (float)node.LocalCameraPosition.z);
+        }
 
-            matPropertyBlock.SetMatrix(uniforms.screenQuadCorners, (localToScreen * new Matrix4x4d(p0.x, p1.x, p2.x, p3.x, p0.y, p1.y, p2.y, p3.y, p0.z, p1.z, p2.z, p3.z, 1.0, 1.0, 1.0, 1.0)).ToMatrix4x4());
-            matPropertyBlock.SetMatrix(uniforms.screenQuadVerticals, (localToScreen * new Matrix4x4d(0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0)).ToMatrix4x4());
+        public virtual Matrix4x4 CalculateDeformedLocalToTangent(TerrainNode node, TerrainQuad quad)
+        {
+            return (node.DeformedLocalToTangent * new Matrix4x4d(quad.Length, 0.0, quad.Ox - node.LocalCameraPosition.x, 0.0,
+                                                                 0.0, quad.Length, quad.Oy - node.LocalCameraPosition.y, 0.0,
+                                                                 0.0, 0.0, 1.0, 0.0,
+                                                                 0.0, 0.0, 0.0, 1.0)).ToMatrix4x4();
+        }
+
+        public virtual Matrix4x4 CalculateDeformedScreenQuadCorners(TerrainNode node, TerrainQuad quad)
+        {
+            return (node.LocalToScreen * quad.FlatCorners).ToMatrix4x4();
+        }
+
+        public virtual Matrix4x4 CalculateDeformedScreenQuadVerticals(TerrainNode node, TerrainQuad quad)
+        {
+            return (node.LocalToScreen * quad.FlatVerticals).ToMatrix4x4();
+        }
+
+        public virtual void SetUniforms(TerrainNode node, TerrainQuad quad, MaterialPropertyBlock target)
+        {
+            if (target == null || node == null || quad == null) return;
+
+            target.SetVector(uniforms.offset, CalculateDeformedOffset(quad));
+            target.SetVector(uniforms.camera, CalculateDeformedCameraPosition(node, quad));
+
+            target.SetMatrix(uniforms.tileToTangent, CalculateDeformedLocalToTangent(node, quad));
+
+            SetScreenUniforms(node, quad, target);
+        }
+
+        public virtual void SetUniforms(TerrainNode node, TerrainQuad quad, Material target)
+        {
+            if (target == null || node == null || quad == null) return;
+
+            target.SetVector(uniforms.offset, CalculateDeformedOffset(quad));
+            target.SetVector(uniforms.camera, CalculateDeformedCameraPosition(node, quad));
+
+            target.SetMatrix(uniforms.tileToTangent, CalculateDeformedLocalToTangent(node, quad));
+
+            SetScreenUniforms(node, quad, target);
+        }
+
+        protected virtual void SetScreenUniforms(TerrainNode node, TerrainQuad quad, MaterialPropertyBlock target)
+        {
+            target.SetMatrix(uniforms.screenQuadCorners, CalculateDeformedScreenQuadCorners(node, quad));
+            target.SetMatrix(uniforms.screenQuadVerticals, CalculateDeformedScreenQuadVerticals(node, quad));
+        }
+
+        protected virtual void SetScreenUniforms(TerrainNode node, TerrainQuad quad, Material target)
+        {
+            target.SetMatrix(uniforms.screenQuadCorners, CalculateDeformedScreenQuadCorners(node, quad));
+            target.SetMatrix(uniforms.screenQuadVerticals, CalculateDeformedScreenQuadVerticals(node, quad));
         }
     }
 }

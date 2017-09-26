@@ -33,6 +33,8 @@
 // Creator: zameran
 #endregion
 
+using SpaceEngine.Core.Numerics;
+
 using System;
 
 using UnityEngine;
@@ -99,6 +101,16 @@ public static class BrainFuckMath
     public static bool AlmostEquals(this float a, float b, float precision = 0.00001f) // Use 5 digits after dot.
     {
         return Mathf.Abs(a - b) <= precision;
+    }
+
+    public static double Wrap(double value, double min, double max)
+    {
+        if (NearlyEqual(min, max)) return min;
+        if (min > max) throw new ArgumentException(string.Format("Argument min {0} should be less or equal to argument max {1}", min, max), "min");
+
+        var rangeSize = max - min;
+
+        return (min + (value - min) - (rangeSize * Math.Floor((value - min) / rangeSize)));
     }
 
     [Obsolete("Was used in old core...")]
@@ -178,7 +190,7 @@ public static class BrainFuckMath
     [Obsolete("Was used in old core...")]
     public static Vector3 Multiply(Vector3 v, double d)
     {
-        Vector3d vd = v; //Cast vector to double typed.
+        var vd = v.ToVector3d(); //Cast vector to double typed.
 
         var result = vd * d; //Multiply in doubles.
 
@@ -188,10 +200,10 @@ public static class BrainFuckMath
     [Obsolete("Was used in old core...")]
     public static Vector3 LinearInterpolate(Vector3 a, Vector3 b, double t)
     {
-        Vector3d ad = a; //Cast first vector to double typed.
-        Vector3d bd = b; //Cast second vector to double typed.
+        var ad = a.ToVector3d(); //Cast first vector to double typed.
+        var bd = b.ToVector3d(); //Cast second vector to double typed.
 
-        var result = Vector3d.Lerp(ad, bd, t); //Lerp it.
+        var result = Vector.Lerp(ad, bd, t); //Lerp it.
 
         return result.ToVector3(); //Cast it back to float typed.
     }

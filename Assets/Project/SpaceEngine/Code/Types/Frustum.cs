@@ -27,16 +27,20 @@ namespace UnityEngine
 {
     public class Frustum
     {
-        public enum VISIBILITY
+        public enum VISIBILITY : byte
         {
             FULLY = 0,
             PARTIALLY = 1,
             INVISIBLE = 3
         };
 
+        /// <summary>
+        /// Extract the frustum planes from a projection matrix.
+        /// </summary>
+        /// <param name="mat">The projection matrix.</param>
+        /// <returns>Returns frustum planes extracted from specified projection matrix.</returns>
         public static Vector4d[] GetFrustumPlanes(Matrix4x4d mat)
         {
-            //extract frustum planes from a projection matrix
             var frustumPlanes = new Vector4d[6];
 
             // Extract the LEFT plane
@@ -84,9 +88,13 @@ namespace UnityEngine
             return frustumPlanes;
         }
 
+        /// <summary>
+        /// Extract the frustum planes from a projection matrix.
+        /// </summary>
+        /// <param name="mat">The projection matrix.</param>
+        /// <returns>Returns frustum planes extracted from specified projection matrix.</returns>
         public static Vector4d[] GetFrustumPlanes(Matrix4x4 mat)
         {
-            //extract frustum planes from a projection matrix 
             var frustumPlanes = new Vector4d[6];
 
             // Extract the LEFT plane 
@@ -136,37 +144,24 @@ namespace UnityEngine
 
         public static VISIBILITY GetVisibility(Vector4d[] frustumPlanes, Box3d box)
         {
-            var v0 = GetVisibility(frustumPlanes[0], box);
-            if (v0 == VISIBILITY.INVISIBLE)
-            {
-                return VISIBILITY.INVISIBLE;
-            }
+            var v0 = GetClipVisibility(frustumPlanes[0], box);
+            if (v0 == VISIBILITY.INVISIBLE) { return VISIBILITY.INVISIBLE; }
 
-            var v1 = GetVisibility(frustumPlanes[1], box);
-            if (v1 == VISIBILITY.INVISIBLE)
-            {
-                return VISIBILITY.INVISIBLE;
-            }
+            var v1 = GetClipVisibility(frustumPlanes[1], box);
+            if (v1 == VISIBILITY.INVISIBLE) { return VISIBILITY.INVISIBLE; }
 
-            var v2 = GetVisibility(frustumPlanes[2], box);
-            if (v2 == VISIBILITY.INVISIBLE)
-            {
-                return VISIBILITY.INVISIBLE;
-            }
+            var v2 = GetClipVisibility(frustumPlanes[2], box);
+            if (v2 == VISIBILITY.INVISIBLE) { return VISIBILITY.INVISIBLE; }
 
-            var v3 = GetVisibility(frustumPlanes[3], box);
-            if (v3 == VISIBILITY.INVISIBLE)
-            {
-                return VISIBILITY.INVISIBLE;
-            }
+            var v3 = GetClipVisibility(frustumPlanes[3], box);
+            if (v3 == VISIBILITY.INVISIBLE) { return VISIBILITY.INVISIBLE; }
 
-            var v4 = GetVisibility(frustumPlanes[4], box);
-            if (v4 == VISIBILITY.INVISIBLE)
-            {
-                return VISIBILITY.INVISIBLE;
-            }
+            var v4 = GetClipVisibility(frustumPlanes[4], box);
+            if (v4 == VISIBILITY.INVISIBLE) { return VISIBILITY.INVISIBLE; }
 
-            if (v0 == VISIBILITY.FULLY && v1 == VISIBILITY.FULLY && v2 == VISIBILITY.FULLY && v3 == VISIBILITY.FULLY && v4 == VISIBILITY.FULLY)
+            if (v0 == VISIBILITY.FULLY && v1 == VISIBILITY.FULLY && 
+                v2 == VISIBILITY.FULLY && v3 == VISIBILITY.FULLY && 
+                v4 == VISIBILITY.FULLY)
             {
                 return VISIBILITY.FULLY;
             }
@@ -174,7 +169,7 @@ namespace UnityEngine
             return VISIBILITY.PARTIALLY;
         }
 
-        static VISIBILITY GetVisibility(Vector4d clip, Box3d box)
+        private static VISIBILITY GetClipVisibility(Vector4d clip, Box3d box)
         {
             double x0 = box.xmin * clip.x;
             double x1 = box.xmax * clip.x;

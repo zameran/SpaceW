@@ -44,11 +44,11 @@ namespace UnityEngine
 
         public float Distance;
 
-        public FrustumPlane(Vector3d Normal, float Distance)
+        public FrustumPlane(Vector3d normal, float distance)
         {
-            this.Normal = Normal;
+            this.Normal = normal;
 
-            this.Distance = Distance;
+            this.Distance = distance;
         }
 
         public static implicit operator FrustumPlane(Plane p)

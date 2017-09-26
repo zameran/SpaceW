@@ -33,11 +33,10 @@
 // Creator: zameran
 #endregion
 
-using System.Collections.Generic;
-
 namespace SpaceEngine.Core.Debugging
 {
     using System;
+    using System.Collections.Generic;
     using System.IO;
     using System.Threading;
 
@@ -58,14 +57,15 @@ namespace SpaceEngine.Core.Debugging
         Gameplay = 10,
         External = 11,
         Other = 12,
-        Graphics = 13
+        Graphics = 13,
+        Error = 14
     };
 
     public sealed class LoggerPalette
     {
         private Dictionary<Category, Color> Palette = new Dictionary<Category, Color>()
         {
-            {Category.Important, XKCDColors.Red},
+            {Category.Important, XKCDColors.Amber},
             {Category.Triggers, XKCDColors.Orange},
             {Category.InGameUI, XKCDColors.DullGreen},
             {Category.Camera, XKCDColors.Green},
@@ -79,6 +79,7 @@ namespace SpaceEngine.Core.Debugging
             {Category.External, XKCDColors.Brownish},
             {Category.Other, XKCDColors.DirtyGreen},
             {Category.Graphics, XKCDColors.BrightRed},
+            {Category.Error, XKCDColors.Red}
         };
 
         public Color GetColorFromCategory(Category category)
@@ -111,28 +112,26 @@ namespace SpaceEngine.Core.Debugging
 
     public static class Logger
     {
-        private static ReaderWriterLockSlim IOLock = new ReaderWriterLockSlim();
+        private static readonly ReaderWriterLockSlim IOLock = new ReaderWriterLockSlim();
+        private static readonly LoggerPalette Palette = new LoggerPalette();
+        private static readonly Category DefaultDebugCategory = Category.Other;
 
-        private static bool DebuggerActive = false;
+        private static bool DebuggerActive;
 
-        private static Category DebugCategory = 0;
+        private static Category DebugCategory;
 
-        private static LoggerPalette Palette = new LoggerPalette();
-
-        //TODO: DoWork cashing in to temp array. Infinite cycle will save (write to file) cache.
-        public static void Log(object obj)
+        private static void Detect(out bool shouldDump, out string[] logFileNamePrefixes)
         {
-            var shouldDump = false;
-            var logFileNamePrefixes = new string[0];
+            shouldDump = false;
+            logFileNamePrefixes = new string[0];
 
-            var frame = new System.Diagnostics.StackFrame(1, true);
+            // NOTE : Be careful with skipFrames parameter!
+            var frame = new System.Diagnostics.StackFrame(2, true);
             var declaringType = frame.GetMethod().DeclaringType;
 
             if (declaringType == null)
             {
-                shouldDump = false;
-
-                Debug.Log("Logger: Declaring type is null!");
+                Debug.LogWarning("Logger: Declaring type is null!");
 
                 return;
             }
@@ -163,8 +162,36 @@ namespace SpaceEngine.Core.Debugging
                     DebuggerActive = true;
                 }
                 else
-                { DebuggerActive = false; }
+                {
+                    DebugCategory = DefaultDebugCategory;
+                    DebuggerActive = false;
+                }
             }
+        }
+
+        public static void LogError(object obj)
+        {
+            bool shouldDump;
+            string[] logFileNamePrefixes;
+
+            Detect(out shouldDump, out logFileNamePrefixes);
+
+            // Override our stuff for errors only...
+            DebugCategory = Category.Error;
+            DebuggerActive = true;
+
+            DoWork(obj, shouldDump, logFileNamePrefixes);
+        }
+
+        public static void LogException(object obj)
+        { }
+
+        public static void Log(object obj)
+        {
+            bool shouldDump;
+            string[] logFileNamePrefixes;
+
+            Detect(out shouldDump, out logFileNamePrefixes);
 
             DoWork(obj, shouldDump, logFileNamePrefixes);
         }
@@ -177,8 +204,8 @@ namespace SpaceEngine.Core.Debugging
             {
                 if (string.IsNullOrEmpty(logFileNamePrefixes[i])) return;
 
-                var path = Path.GetFullPath(string.Format("{0}/../{1}_Log.txt", Application.dataPath, logFileNamePrefixes[i]));
-                var dumpContent = string.Format("{0}[{1}] : {2}", timeStamp, typeNameString, str.ToString());
+                var path = Path.GetFullPath(string.Format("{0}/../{1}.log", Application.dataPath, logFileNamePrefixes[i]));
+                var dumpContent = string.Format("{0}[{1}] : {2}", timeStamp, typeNameString, str);
 
                 using (var outputStream = File.AppendText(path))
                 {
@@ -207,7 +234,7 @@ namespace SpaceEngine.Core.Debugging
             }
 
             var colorString = XKCDColors.ColorTranslator.ToRGBHex(Palette.GetColorFromCategory(DebugCategory));
-            var categoryString = ((Category)DebugCategory).ToString();
+            var categoryString = DebugCategory.ToString();
             var timeStampString = string.Format("[{0:H:mm:ss}]", DateTime.Now);
 
             if (!Application.isEditor)
@@ -220,11 +247,11 @@ namespace SpaceEngine.Core.Debugging
                     }
                 }
 
-                obj = string.Format("{0}[{1}] : {2}", timeStampString, categoryString, obj.ToString());
+                obj = string.Format("{0}[{1}] : {2}", timeStampString, categoryString, obj);
             }
             else
             {
-                obj = string.Format("<color={0}>[{1}] <b>{2}</b> </color>", colorString, categoryString, obj.ToString());
+                obj = string.Format("<color={0}>[{1}] <b>{2}</b> </color>", colorString, categoryString, obj);
             }
 
             Debug.Log(obj);

@@ -43,6 +43,8 @@ Shader "SpaceEngine/Lines/Colored Blended"
 	{ 
 		Pass 
 		{
+			Name "Line"
+
 			Blend SrcAlpha OneMinusSrcAlpha
 			ColorMask RGB
 			ZWrite On 

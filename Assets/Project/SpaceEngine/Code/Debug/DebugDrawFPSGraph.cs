@@ -129,7 +129,7 @@ namespace SpaceEngine.Debugging
         void Awake()
         {
             if (gameObject.GetComponent<Camera>() == null)
-                Debug.LogWarning("FPS Graph needs to be attached to a Camera object!");
+                Debug.LogWarning("DebugDrawFPSGraph: FPS Graph needs to be attached to a Camera object!");
 
             CreateLineMaterial();
 

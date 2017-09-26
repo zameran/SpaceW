@@ -5,10 +5,12 @@ using UnityEngine;
 namespace SpaceEngine.UI
 {
     [RequireComponent(typeof(CanvasGroup))]
-    public abstract class UIOverlay : MonoSingleton<UIOverlay>
+    public abstract class UIOverlay : MonoBehaviour
     {
         [SerializeField]
-        protected float transitionTime = .5f;
+        private float transitionTime = .5f;
+
+        protected float TransitionTime { get { return transitionTime; } }
 
         protected CanvasGroup canvasGroup;
 
@@ -21,12 +23,12 @@ namespace SpaceEngine.UI
         {
             overlay.canvasGroup.blocksRaycasts = true;
 
-            DOTween.To(() => overlay.canvasGroup.alpha, value => overlay.canvasGroup.alpha = value, 1, overlay.transitionTime);
+            DOTween.To(() => overlay.canvasGroup.alpha, value => overlay.canvasGroup.alpha = value, 1, overlay.TransitionTime);
         }
 
         protected static void HideInternal(UIOverlay overlay)
         {
-            DOTween.To(() => overlay.canvasGroup.alpha, value => overlay.canvasGroup.alpha = value, 0, overlay.transitionTime).OnComplete(() =>
+            DOTween.To(() => overlay.canvasGroup.alpha, value => overlay.canvasGroup.alpha = value, 0, overlay.TransitionTime).OnComplete(() =>
             {
                 overlay.canvasGroup.blocksRaycasts = false;
             });
@@ -36,6 +38,8 @@ namespace SpaceEngine.UI
     [RequireComponent(typeof(CanvasGroup))]
     public abstract class UIOverlay<T> : UIOverlay where T : UIOverlay
     {
+        protected static T Instance;
+
         protected override void Awake()
         {
             Instance = GetComponent<T>();

@@ -463,8 +463,7 @@ namespace SpaceEngine.Core.Preprocess.Terrain
 
                     if (maxR > levelMaxR) levelMaxR = maxR;
 
-                    Debug.Log(string.Format("HeightMipmap::BuildResiduals: {0}-{1}-{2}; Max Residual: {3}; Max Error: {4}", level, tx, ty, maxR.ToString("F6"),
-                                                                                                                                           maxErr.ToString("F6")));
+                    Debug.Log(string.Format("HeightMipmap.BuildResiduals: {0}-{1}-{2}; Max Residual: {3:F6}; Max Error: {4:F6}", level, tx, ty, maxR, maxErr));
                 }
             }
 

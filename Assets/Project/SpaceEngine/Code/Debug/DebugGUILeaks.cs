@@ -75,7 +75,7 @@ namespace SpaceEngine.Debugging
 
         protected override void UI(int id)
         {
-            scrollPosition = GUILayout.BeginScrollView(scrollPosition, false, true, GUILayout.Width(debugInfoBounds.width), GUILayout.Height(debugInfoBounds.height));
+            ScrollPosition = GUILayout.BeginScrollView(ScrollPosition, false, true, GUILayout.Width(debugInfoBounds.width), GUILayout.Height(debugInfoBounds.height));
             {
                 #region Do Magic
 
@@ -110,9 +110,10 @@ namespace SpaceEngine.Debugging
                 {
                     var entry = entryies[i];
 
-                    GUILayout.BeginHorizontal("box");
-                    GUILayoutExtensions.LabelWithFlexibleSpace(entry.Key.FullName, entry.Value.ToString());
-                    GUILayout.EndHorizontal();
+                    GUILayoutExtensions.HorizontalBoxed("", GUISkin, () =>
+                    {
+                        GUILayoutExtensions.LabelWithFlexibleSpace(entry.Key.FullName, entry.Value.ToString());
+                    });
                 }
 
                 GUILayout.Space(10);

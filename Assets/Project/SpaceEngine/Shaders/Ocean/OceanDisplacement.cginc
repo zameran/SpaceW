@@ -57,42 +57,42 @@
  * Modified by Denis Ovchinnikov 2015-2017
  */
 
+#define OCEAN_DISPLACEMENT
+
 uniform float _Ocean_Radius;
-uniform float3 _Ocean_Horizon1;
-uniform float3 _Ocean_Horizon2;
 uniform float _Ocean_HeightOffset;
 uniform float3 _Ocean_CameraPos;
 uniform float4x4 _Ocean_OceanToCamera;
 uniform float4x4 _Ocean_CameraToOcean;
- 
+
+uniform float3 _SphereDirection;
+uniform float _CosTheta;
+uniform float _SinTheta;
+
 float2 OceanPos(float4 vert, float4x4 stoc, out float t, out float3 cameraDir, out float3 oceanDir) 
 {
-	float horizon = _Ocean_Horizon1.x + _Ocean_Horizon1.y * vert.x;
-	
-	horizon -= sqrt(_Ocean_Horizon2.x + (_Ocean_Horizon2.y + _Ocean_Horizon2.z * vert.x) * vert.x);
-	
-	float4 v = float4(vert.x, min(vert.y, horizon), 0.0, 1.0);
+	float h = _Ocean_CameraPos.z;
+	float4 v = float4(vert.x, vert.y, 0.0, 1.0);
 
-	cameraDir = normalize(mul(stoc, v).xyz);
-	oceanDir = mul(_Ocean_CameraToOcean, float4(cameraDir, 0.0)).xyz;
+	cameraDir = normalize(mul(stoc, v).xyz);											// Direction in camera space
 	
-	float cz = _Ocean_CameraPos.z;
+	float3 n1 = cross(_SphereDirection, cameraDir);										// Normal to plane containing direction to planet and vertex view direction
+	float3 n2 = normalize(cross(n1, _SphereDirection));									// Upwards vector in plane space, plane containing CamO and cameraDir
+
+	float3 hor = _CosTheta * _SphereDirection + _SinTheta * n2;
+ 
+	cameraDir = ((dot(n1, cross(hor, cameraDir)) > 0.0) && (h > 0)) ? hor : cameraDir;	// Checking if view direction is above the horizon
+	oceanDir = mul(_Ocean_CameraToOcean, float4(cameraDir, 0.0)).xyz;
+
 	float dz = oceanDir.z;
 	float radius = _Ocean_Radius;
 	
-	if (radius == 0.0) 
-	{
-		t = (_Ocean_HeightOffset + -cz) / dz;
-	} 
-	else 
-	{
-		float b = dz * (cz + radius);
-		float c = cz * (cz + 2.0 * radius);
-		float tSphere = - b - sqrt(max(b * b - c, 0.0));
-		float tApprox = - cz / dz * (1.0 + cz / (2.0 * radius) * (1.0 - dz * dz));
+	float b = dz * (h + radius);
+	float c = h * (h + 2.0 * radius);
+	float tSphere = - b - sqrt(max(b * b - c, 0.0));
+	float tApprox = - h / dz * (1.0 + h / (2.0 * radius) * (1.0 - dz * dz));
 
-		t = abs((tApprox - tSphere) * dz) < 1.0 ? tApprox : tSphere;
-	}
+	t = abs((tApprox - tSphere) * dz) < 1.0 ? tApprox : tSphere;
 
 	return _Ocean_CameraPos.xy + t * oceanDir.xy;
 }
@@ -115,5 +115,5 @@ float4 Tex2DGrad(sampler2D tex, float2 uv, float2 dx, float2 dy, float2 texSize)
 
 	float lod = 0.5 * log2(max(dot(px, px), dot(py, py)));
 
-	return tex2Dlod(tex, float4(uv, 0, lod));
+	return tex2Dlod(tex, float4(uv, 0.0, lod));
 }

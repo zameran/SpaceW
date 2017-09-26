@@ -58,21 +58,37 @@ namespace SpaceEngine.Debugging
 
         protected override void UI(int id)
         {
-            scrollPosition = GUILayout.BeginScrollView(scrollPosition, false, true);
+            ScrollPosition = GUILayout.BeginScrollView(ScrollPosition, false, true);
 
-            GUILayout.BeginVertical();
+            GUILayoutExtensions.VerticalBoxed("Rendering parameters: ", GUISkin, () =>
+            {
+                GUILayout.Space(20);
 
-            GUILayout.Label("Rendering: ", boldLabel);
+                GUILayoutExtensions.VerticalBoxed("", GUISkin, () =>
+                {
+                    GUILayoutExtensions.VerticalBoxed("Fragment HDR Mode: ", GUISkin, () =>
+                    {
+                        GUILayout.Space(20);
 
-            GUILayout.Label("HDR: ");
-            GodManager.Instance.HDRMode = (AtmosphereHDR)GUILayout.SelectionGrid((int)GodManager.Instance.HDRMode, System.Enum.GetNames(typeof(AtmosphereHDR)), 2);
+                        GodManager.Instance.HDRMode = (AtmosphereHDR)GUILayout.SelectionGrid((int)GodManager.Instance.HDRMode, System.Enum.GetNames(typeof(AtmosphereHDR)), 2);
+                    });
 
-            GUILayout.Space(10);
+                    GUILayout.Space(10);
 
-            GodManager.Instance.Eclipses = GUILayout.Toggle(GodManager.Instance.Eclipses, " - Eclipses?");
-            GodManager.Instance.Planetshine = GUILayout.Toggle(GodManager.Instance.Planetshine, " - Planetshine?");
+                    GUILayoutExtensions.VerticalBoxed("Features: ", GUISkin, () =>
+                    {
+                        GUILayout.Space(20);
 
-            GUILayout.EndVertical();
+                        GodManager.Instance.Eclipses = GUILayout.Toggle(GodManager.Instance.Eclipses, " - Eclipses?");
+                        GodManager.Instance.Planetshadows = GUILayout.Toggle(GodManager.Instance.Planetshadows, " - Planetshadows?");
+                        GodManager.Instance.Planetshine = GUILayout.Toggle(GodManager.Instance.Planetshine, " - Planetshine?");
+                        GodManager.Instance.OceanSkyReflections = GUILayout.Toggle(GodManager.Instance.OceanSkyReflections, " - Ocean Sky Reflections?");
+                        GodManager.Instance.OceanDepth = GUILayout.Toggle(GodManager.Instance.OceanDepth, " - Ocean Depth?");
+                    });
+                });
+            });
+
+            GUILayout.Space(5);
 
             GUILayout.EndScrollView();
         }

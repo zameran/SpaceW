@@ -48,7 +48,13 @@ namespace SpaceEngine.Debugging
             "Left Shift for more speed.",
             "Left Control for even more speed.",
             "Left Shift + Left Control for speed of God.",
-            "Left Alt for less speed."
+            "Left Alt for less speed.",
+            "Press F while moving for a supercruise.",
+            "F5 to switch between debug modes.",
+            "F6 to switch between debug visualizations.",
+            "F12 to capture screenshot.",
+            "/ to toggle the wireframe mode.",
+            "ESC to pause."
         };
 
         private readonly string[] InfoAdditional = new string[]
@@ -65,17 +71,29 @@ namespace SpaceEngine.Debugging
 
         protected override void UI(int id)
         {
-            scrollPosition = GUILayout.BeginScrollView(scrollPosition, false, true, GUILayout.Width(debugInfoBounds.width), GUILayout.Height(debugInfoBounds.height));
+            ScrollPosition = GUILayout.BeginScrollView(ScrollPosition, false, true, GUILayout.Width(debugInfoBounds.width), GUILayout.Height(debugInfoBounds.height));
             {
-                GUILayout.Label("Input info: ", boldLabel);
+                GUILayoutExtensions.VerticalBoxed("Input info: ", GUISkin, () =>
+                {
+                    GUILayout.Space(20);
 
-                DrawLabelLines(Info);
+                    GUILayoutExtensions.VerticalBoxed("", GUISkin, () =>
+                    {
+                        DrawLabelLines(Info);
+                    });
+                });
 
-                GUILayout.Space(10);
+                GUILayout.Space(5);
 
-                GUILayout.Label("Additional info: ", boldLabel);
+                GUILayoutExtensions.VerticalBoxed("Additional info: ", GUISkin, () =>
+                {
+                    GUILayout.Space(20);
 
-                DrawLabelLines(InfoAdditional);
+                    GUILayoutExtensions.VerticalBoxed("", GUISkin, () =>
+                    {
+                        DrawLabelLines(InfoAdditional);
+                    });
+                });
             }
 
             GUILayout.EndScrollView();
@@ -90,6 +108,8 @@ namespace SpaceEngine.Debugging
                     GUILayoutExtensions.LabelWithSpace(lines[i]);
                 }
             });
+
+            GUILayout.Space(8);
         }
     }
 }

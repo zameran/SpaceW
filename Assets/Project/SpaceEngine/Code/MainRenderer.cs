@@ -33,12 +33,45 @@
 // Creator: zameran
 #endregion
 
+using SpaceEngine.Core.Bodies;
+
+using System;
+using System.Collections.Generic;
 
 using UnityEngine;
 
+[ExecutionOrder(-9996)]
 [RequireComponent(typeof(Camera))]
-public sealed class MainRenderer : MonoBehaviour
+public sealed class MainRenderer : MonoSingleton<MainRenderer>
 {
+    public bool ZSort = true;
+
+    private BodySort Comparer = null;
+
+    public class BodySort : IComparer<Body>
+    {
+        int IComparer<Body>.Compare(Body a, Body b)
+        {
+            if (a == null || b == null) return 0;
+
+            var D2A = Vector3.Distance(GodManager.Instance.View.WorldCameraPosition, a.Origin) - a.Size;
+            var D2B = Vector3.Distance(GodManager.Instance.View.WorldCameraPosition, b.Origin) - b.Size;
+
+            if (D2A > D2B)
+                return 1;
+            if (D2A < D2B)
+                return -1;
+            else
+                return 0;
+        }
+    }
+
+    private void Awake()
+    {
+        Instance = this;
+        Comparer = new BodySort();
+    }
+
     private void Start()
     {
 
@@ -46,7 +79,7 @@ public sealed class MainRenderer : MonoBehaviour
 
     private void Update()
     {
-        Render();
+        if (Input.GetKey(KeyCode.J) || ZSort) ComposeOutputRender();
     }
 
     private void OnEnable()
@@ -59,13 +92,16 @@ public sealed class MainRenderer : MonoBehaviour
 
     }
 
-    public void Render()
+    private void OnPostRender()
     {
+
+    }
+
+    public void ComposeOutputRender()
+    {
+        Array.Sort(GodManager.Instance.Bodies, Comparer);
+
         /*
-        if (GodManager.Instance == null) return;
-
-        Array.Sort(GodManager.Instance.Bodies, pdtltc);
-
         for (int i = 0; i < GodManager.Instance.Starfields.Length; i++)
         {
             if (GodManager.Instance.Starfields[i] != null)
@@ -77,15 +113,16 @@ public sealed class MainRenderer : MonoBehaviour
             if (GodManager.Instance.Bodies[i] != null)
                 GodManager.Instance.Bodies[i].Render();
         }
+        */
 
         //-----------------------------------------------------------------------------
-        GodManager.Instance.Bodies[0].RenderQueueOffset = 10001;
+        GodManager.Instance.Bodies[0].RenderQueueOffset = 5;
         if (GodManager.Instance.Bodies[0].Atmosphere != null)
-            GodManager.Instance.Bodies[0].Atmosphere.RenderQueueOffset = 10002;
+            GodManager.Instance.Bodies[0].Atmosphere.RenderQueueOffset = 6;
         if (GodManager.Instance.Bodies[0].Ocean != null)
-            GodManager.Instance.Bodies[0].Ocean.RenderQueueOffset = 10003;
+            GodManager.Instance.Bodies[0].Ocean.RenderQueueOffset = 7;
         if (GodManager.Instance.Bodies[0].Ring != null)
-            GodManager.Instance.Bodies[0].Ring.RenderQueueOffset = 10000;
+            GodManager.Instance.Bodies[0].Ring.RenderQueueOffset = 4;
 
         for (int i = 1; i < GodManager.Instance.Bodies.Length; i++)
         {
@@ -98,6 +135,5 @@ public sealed class MainRenderer : MonoBehaviour
                 GodManager.Instance.Bodies[i].Ring.RenderQueueOffset = 0;
         }
         //-----------------------------------------------------------------------------
-        */
     }
 }

@@ -51,7 +51,7 @@ using Logger = SpaceEngine.Core.Debugging.Logger;
 namespace SpaceEngine.Pluginator
 {
     [UseLogger(Category.Data)]
-    [UseLoggerFile("Log")]
+    [UseLoggerFile("SpaceWLog")]
     public sealed class AssemblyLoader : Loader, IEventit
     {
         public GUISkin UISkin = null;
@@ -162,7 +162,8 @@ namespace SpaceEngine.Pluginator
 
             if (SceneManager.GetActiveScene().buildIndex == 0 && Loaded)
             {
-                Delay((TotalDetected + 1) * 2, () => { SceneManager.LoadScene(1); });
+                //Delay((TotalDetected + 1) * 2, () => { SceneManager.LoadScene(1); });
+                SceneManager.LoadScene(1);
             }
 
             base.Pass();
@@ -182,7 +183,7 @@ namespace SpaceEngine.Pluginator
             }
             catch (Exception ex)
             {
-                Logger.Log(string.Format("DetectAssembies Exception: {0}", ex.Message));
+                Logger.LogError(string.Format("DetectAssembies Exception: {0}", ex.Message));
             }
 
             TotalDetected = allPaths.Count;
@@ -208,7 +209,7 @@ namespace SpaceEngine.Pluginator
 
                 if (attrbutes == null || attrbutes.Length == 0)
                 {
-                    Logger.Log(string.Format("This is not an adddon assembly! {0}", path));
+                    Logger.LogError(string.Format("This is not an adddon assembly! {0}", path));
                 }
                 else
                 {
@@ -226,7 +227,7 @@ namespace SpaceEngine.Pluginator
             }
             catch (Exception ex)
             {
-                Logger.Log(string.Format("LoadAssembly Exception: {0}", ex.Message));
+                Logger.LogError(string.Format("LoadAssembly Exception: {0}", ex.Message));
             }
         }
 
@@ -235,14 +236,15 @@ namespace SpaceEngine.Pluginator
             if (allPaths == null)
             {
                 DetectAssembies(out allPaths);
-                Logger.Log("Something wrong with path's array! Detecting assemblies again!");
+                Logger.LogError("Something wrong with path's array! Detecting assemblies again!");
             }
 
             for (int i = 0; i < allPaths.Count; i++)
             {
                 string path = allPaths[i];
 
-                Delay(0.5f, () => { LoadAssembly(path); });
+                //Delay(0.5f, () => { LoadAssembly(path); });
+                LoadAssembly(path);
             }
         }
 
