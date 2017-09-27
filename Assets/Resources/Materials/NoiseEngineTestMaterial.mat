@@ -59,7 +59,7 @@ Material:
     - _Cutoff: 0.5
     - _DetailNormalMapScale: 1
     - _DstBlend: 0
-    - _Freq: 16
+    - _Freq: 1
     - _Frequency: 14.51
     - _Glossiness: 0.5
     - _Metallic: 0

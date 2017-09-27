@@ -41,7 +41,8 @@ Shader "SpaceEngine/Test/NoiseEngineTest"
 	{
 		Pass
 		{
-			ZTest Always
+			ZWrite On
+			ZTest On
 
 			CGPROGRAM
 			#pragma target 3.0
@@ -49,6 +50,7 @@ Shader "SpaceEngine/Test/NoiseEngineTest"
 			#pragma fragment frag
 
 			#include "UnityCG.cginc"
+
 			#include "../TCCommon.cginc"
 			
 			struct data
@@ -60,20 +62,11 @@ Shader "SpaceEngine/Test/NoiseEngineTest"
 			struct v2f
 			{
 				float4 vertex : SV_POSITION;
-				float3 uv : TEXCOORD0;
+				float3 position : TEXCOORD0;
+				float3 uv : TEXCOORD1;
 			};
 
 			uniform float _Freq;
-
-			v2f vert (data v)
-			{
-			    v2f o;
-
-			    o.vertex = UnityObjectToClipPos(v.vertex);
-			    o.uv = v.uv * _Freq;
-
-			    return o;
-			}
 
 			float NoiseFunction(float3 pos)
 			{
@@ -103,12 +96,19 @@ Shader "SpaceEngine/Test/NoiseEngineTest"
 				return cross(va, vb); //you may not need to swizzle the normal
 			}
 
-			float4 frag(v2f i) : COLOR
+			void vert(in data v, out v2f o)
 			{
-				float v = NoiseFunction(i.uv);
+				o.vertex = UnityObjectToClipPos(v.vertex);
+				o.position = v.vertex.xyz * _Freq;
+				o.uv = v.uv * _Freq;
+			}
+
+			void frag(in v2f i, out float4 outputColor : SV_Target)
+			{
+				float v = NoiseFunction(i.position);
 				
-				return float4(v, v, v, 1.0);
-				//return float4(FindNormal(i.uv, 1.0), 1.0);
+				outputColor = float4(v.xxx, 1.0);
+				//outputColor = float4(FindNormal(i.position, 1.0), 1.0);
 			}
 			ENDCG
 		}
