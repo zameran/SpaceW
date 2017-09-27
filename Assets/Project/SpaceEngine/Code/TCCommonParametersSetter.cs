@@ -73,10 +73,7 @@ public sealed class TCCommonParametersSetter : MonoBehaviour, IUniformed<Materia
     public Vector4 cloudsParams2;
     public Vector4 cycloneParams;
 
-    public Vector2 texturingUVAtlasOffset;
     public Vector2 InvSize;
-
-    public Color PlanetGlobalColor = Color.white;
 
     public bool AutoUpdate = false;
 
@@ -143,10 +140,7 @@ public sealed class TCCommonParametersSetter : MonoBehaviour, IUniformed<Materia
         target.SetVector("cloudsParams2", cloudsParams2);
         target.SetVector("cycloneParams", cycloneParams);
 
-        target.SetVector("texturingUVAtlasOffset", texturingUVAtlasOffset);
         target.SetVector("InvSize", InvSize);
-
-        target.SetVector("planetGlobalColor", new Vector4(PlanetGlobalColor.r, PlanetGlobalColor.g, PlanetGlobalColor.b, PlanetGlobalColor.a));
     }
 
     #endregion

@@ -31,7 +31,7 @@ namespace SpaceEngine.Core.Tile.Cache
     /// multiple types of data associated with the same tile. For example the PlantsProducer uses a cache with 2 CBTileStorages,
     /// one slot for the plants position and one for the plants other parameters.
     /// </summary>
-    public class TileCache : MonoBehaviour
+    public class TileCache : NodeSlave<TileCache>
     {
         private static int nextProducerId;
 
@@ -86,7 +86,9 @@ namespace SpaceEngine.Core.Tile.Cache
         [HideInInspector]
         public int MaximumUsedTiles;
 
-        private void Awake()
+        #region Node
+
+        public override void InitNode()
         {
             TileStorage = GetComponents<TileStorage>();
             Producers = new Dictionary<int, TileProducer>();
@@ -94,6 +96,34 @@ namespace SpaceEngine.Core.Tile.Cache
             UnusedTiles = new DictionaryQueue<Tile.TId, Tile>(new Tile.EqualityComparerTID());
             TileTIDBuffer = new Tile.TId(-1, -1, 0, 0);
         }
+
+        public override void UpdateNode()
+        {
+
+        }
+
+
+        protected override void Awake()
+        {
+            base.Awake();
+        }
+
+        protected override void Start()
+        {
+            base.Start();
+        }
+
+        protected override void Update()
+        {
+            base.Update();
+        }
+
+        protected override void OnDestroy()
+        {
+            base.OnDestroy();
+        }
+
+        #endregion
 
         public void InsertProducer(int id, TileProducer producer)
         {

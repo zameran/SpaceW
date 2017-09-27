@@ -32,8 +32,6 @@ namespace SpaceEngine.Core
 
         public float[] NoiseAmplitudes = new float[] { -3250.0f, -1590.0f, -1125.0f, -795.0f, -561.0f, -397.0f, -140.0f, -100.0f, 15.0f, 8.0f, 5.0f, 2.5f, 1.5f, 1.0f };
 
-        public float AmplitudeDiviner = 1.0f;
-
         private RenderTexture CPUResidualTexture;
         private ComputeBuffer CPUResidualComputeBuffer;
 
@@ -214,14 +212,12 @@ namespace SpaceEngine.Core
 
             var rs = level < NoiseAmplitudes.Length ? NoiseAmplitudes[level] : 0.0f;
 
-            rs = rs / AmplitudeDiviner;
-
             var offset = new Vector4d(((double)tx / (1 << level) - 0.5) * rootQuadSize,
                                       ((double)ty / (1 << level) - 0.5) * rootQuadSize,
                                       rootQuadSize / (1 << level),
                                       TerrainNode.ParentBody.Size);
 
-            UpSampleMaterial.SetFloat("_Amplitude", rs * 1.0f);
+            UpSampleMaterial.SetFloat("_Amplitude", rs / (TerrainNode.ParentBody.Amplitude / 10.0f));
             UpSampleMaterial.SetFloat("_Frequency", TerrainNode.ParentBody.Frequency * (1 << level));
             UpSampleMaterial.SetVector("_Offset", offset.ToVector4());
             UpSampleMaterial.SetMatrix("_LocalToWorld", TerrainNode.FaceToLocal.ToMatrix4x4());

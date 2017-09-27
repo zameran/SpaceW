@@ -83,9 +83,14 @@ namespace SpaceEngine.Core.Tile.Storage
 
         public int FreeSlotsCount { get { return SlotsFree.Count; } }
 
+        public TileCache Cache { get; protected set; }
+
         protected virtual void Awake()
         {
-            Capacity = GetComponent<TileCache>().Capacity;
+            Cache = GetComponent<TileCache>();
+            Cache.InitNode();
+
+            Capacity = Cache.Capacity;
 
             InitSlots();
         }

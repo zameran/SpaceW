@@ -113,10 +113,8 @@ uniform float4    textureParams;  // (texScale,       texColorConv,   venusMagn,
 uniform float4    cloudsParams1;  // (cloudsFreq,     cloudsOctaves,  stripeZones,         stripeTwist)
 uniform float4    cloudsParams2;  // (cloudsLayer,    cloudsNLayers,  stripeFluct,         cloudsCoverage)
 uniform float4    cycloneParams;  // (cycloneMagn,    cycloneFreq,    cycloneDensity,      cycloneOctaves)
-uniform float4	  planetGlobalColor;	 // ()
 uniform float	  texturingHeightOffset; // ()
 uniform float	  texturingSlopeOffset;  // ()
-uniform float2	  texturingUVAtlasOffset;// ()
 uniform float2	  InvSize;				 // ()
 //-----------------------------------------------------------------------------
 

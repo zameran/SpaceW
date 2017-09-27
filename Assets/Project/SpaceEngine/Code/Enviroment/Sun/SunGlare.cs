@@ -111,7 +111,8 @@ namespace SpaceEngine.Enviroment.Sun
 
             SunGlareMaterial.renderQueue = (int)RenderQueue + RenderQueueOffset;
 
-            var distance = (CameraHelper.Main().transform.position.normalized - SunComponent.transform.position.normalized).magnitude;
+            //var distance = (CameraHelper.Main().transform.position.normalized - SunComponent.transform.position.normalized).sqrMagnitude;
+            var distance = (GodManager.Instance.View.WorldCameraPosition - SunComponent.transform.position).sqrMagnitude;
 
             SunViewPortPosition = CameraHelper.Main().WorldToViewportPoint(SunComponent.transform.position);
             SunViewPortPosition.y = 1.0f - SunViewPortPosition.y;

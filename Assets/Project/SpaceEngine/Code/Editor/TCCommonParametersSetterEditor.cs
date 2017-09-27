@@ -86,13 +86,8 @@ public sealed class TCCommonParametersSetterEditor : Editor
 
     private void DrawGUIForTexturing(TCCommonParametersSetter setter)
     {
-        setter.PlanetGlobalColor = EditorGUILayout.ColorField("Global Color ", setter.PlanetGlobalColor);
-
-        setter.InvSize.x = EditorGUILayout.Slider("InvSize x ", setter.InvSize.x, 0.0f, 64.0f);
-        setter.InvSize.y = EditorGUILayout.Slider("InvSize y ", setter.InvSize.y, 0.0f, 64.0f);
-
-        setter.texturingUVAtlasOffset.x = EditorGUILayout.Slider("UV offset x ", setter.texturingUVAtlasOffset.x, 0.0f, 2.0f);
-        setter.texturingUVAtlasOffset.y = EditorGUILayout.Slider("UV offset y ", setter.texturingUVAtlasOffset.y, 0.0f, 2.0f);
+        setter.InvSize.x = EditorGUILayout.Slider("InvSize x ", setter.InvSize.x, -64.0f, 64.0f);
+        setter.InvSize.y = EditorGUILayout.Slider("InvSize y ", setter.InvSize.y, -64.0f, 64.0f);
 
         setter.faceParams.x = EditorGUILayout.Slider("x0 ", setter.faceParams.x, -10.0f, 10.0f);
         setter.faceParams.y = EditorGUILayout.Slider("y0 ", setter.faceParams.y, -10.0f, 10.0f);
