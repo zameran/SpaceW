@@ -93,26 +93,26 @@
 
 //-----------------------------------------------------------------------------
 uniform float3    Randomize;      // Randomize
-uniform float4    faceParams;     // (x0,             y0,             size,                   face)
-uniform float4    scaleParams;    // (offsU,          offsV,          scale,                  tidalLock)
-uniform float4    mainParams;     // (mainFreq,       terraceProb,    surfClass,              snowLevel)
-uniform float4    colorParams;    // (colorDistMagn,  colorDistFreq,  latIceCaps,             latTropic)
-uniform float4    climateParams;  // (climatePole,    climateTropic,  climateEquator,         tropicWidth)
-uniform float4    mareParams;     // (seaLevel,       mareFreq,       sqrt(mareDensity),      icecapHeight)
-uniform float4    montesParams;   // (montesMagn,     montesFreq,     montesFraction,         montesSpiky)
-uniform float4    dunesParams;    // (dunesMagn,      dunesFreq,      dunesDensity,           drivenDarkening)
-uniform float4    hillsParams;    // (hillsMagn,      hillsFreq,      hillsDensity,           hills2Density)
-uniform float4    canyonsParams;  // (canyonsMagn,    canyonsFreq,    canyonsFraction,        erosion)
-uniform float4    riversParams;   // (riversMagn,     riversFreq,     riversSin,              riversOctaves)
-uniform float4    cracksParams;   // (cracksMagn,     cracksFreq,     cracksOctaves,          craterRayedFactor)
-uniform float4    craterParams;   // (craterMagn,     craterFreq,     sqrt(craterDensity),    craterOctaves)
-uniform float4    volcanoParams1; // (volcanoMagn,    volcanoFreq,    sqrt(volcanoDensity),   volcanoOctaves)
-uniform float4    volcanoParams2; // (volcanoActivity,volcanoFlows,   volcanoRadius,          volcanoTemp)
-uniform float4    lavaParams;	  // (lavaCoverage,   lavaTemperature,surfTemperature,        heightTempGrad)
-uniform float4    textureParams;  // (texScale,       texColorConv,   venusMagn,              venusFreq)
-uniform float4    cloudsParams1;  // (cloudsFreq,     cloudsOctaves,  stripeZones,		      stripeTwist)
-uniform float4    cloudsParams2;  // (cloudsLayer,    cloudsNLayers,  stripeFluct,            cloudsCoverage)
-uniform float4    cycloneParams;  // (cycloneMagn,    cycloneFreq,    cycloneDensity,		  cycloneOctaves)
+uniform float4    faceParams;     // (x0,             y0,             size,                face)
+uniform float4    scaleParams;    // (offsU,          offsV,          scale,               0.0)
+uniform float4    mainParams;     // (mainFreq,       terraceProb,    surfClass,           tidalLock)
+uniform float4    colorParams;    // (colorDistMagn,  colorDistFreq,  latIceCaps,          latTropic)
+uniform float4    climateParams;  // (climatePole,    climateTropic,  climateEquator,      tropicWidth)
+uniform float4    mareParams;     // (seaLevel,       mareFreq,       sqrt(mareDensity),   icecapHeight)
+uniform float4    montesParams;   // (montesMagn,     montesFreq,     montesFraction,      montesSpiky)
+uniform float4    dunesParams;    // (dunesMagn,      dunesFreq,      dunesDensity,        drivenDarkening)
+uniform float4    hillsParams;    // (hillsMagn,      hillsFreq,      hillsDensity,        hills2Density)
+uniform float4    canyonsParams;  // (canyonsMagn,    canyonsFreq,    canyonsFraction,     erosion)
+uniform float4    riversParams;   // (riversMagn,     riversFreq,     riversSin,           riversOctaves)
+uniform float4    cracksParams;   // (cracksMagn,     cracksFreq,     cracksOctaves,       craterRayedFactor)
+uniform float4    craterParams;   // (craterMagn,     craterFreq,     sqrt(craterDensity), craterOctaves)
+uniform float4    volcanoParams1; // (volcanoMagn,    volcanoFreq,    volcanoDensity,      volcanoOctaves)
+uniform float4    volcanoParams2; // (volcanoActivity,volcanoFlows,   volcanoRadius,       volcanoTemp)
+uniform float4    lavaParams;	  // (lavaCoverage,   snowLevel,      surfTemperature,     heightTempGrad)
+uniform float4    textureParams;  // (texScale,       texColorConv,   venusMagn,           venusFreq)
+uniform float4    cloudsParams1;  // (cloudsFreq,     cloudsOctaves,  stripeZones,         stripeTwist)
+uniform float4    cloudsParams2;  // (cloudsLayer,    cloudsNLayers,  stripeFluct,         cloudsCoverage)
+uniform float4    cycloneParams;  // (cycloneMagn,    cycloneFreq,    cycloneDensity,      cycloneOctaves)
 uniform float4	  planetGlobalColor;	 // ()
 uniform float	  texturingHeightOffset; // ()
 uniform float	  texturingSlopeOffset;  // ()
@@ -147,11 +147,10 @@ uniform float noiseRidgeSmooth;// = 0.0001;
 //-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
-#define     tidalLock           scaleParams.w
-#define		mainFreq			mainParams.x
+#define     mainFreq            mainParams.x
 #define     terraceProb         mainParams.y
 #define     surfClass           mainParams.z
-#define     snowLevel           mainParams.w
+#define     tidalLock           mainParams.w
 #define     colorDistMagn       colorParams.x
 #define     colorDistFreq       colorParams.y
 #define     latIceCaps          colorParams.z
@@ -194,14 +193,14 @@ uniform float noiseRidgeSmooth;// = 0.0001;
 #define     craterOctaves       craterParams.w
 #define     volcanoMagn         volcanoParams1.x
 #define     volcanoFreq         volcanoParams1.y
-#define     volcanoDensity		volcanoParams1.z
+#define     volcanoDensity      volcanoParams1.z
 #define     volcanoOctaves      volcanoParams1.w
 #define     volcanoActivity     volcanoParams2.x
 #define     volcanoFlows        volcanoParams2.y
 #define     volcanoRadius       volcanoParams2.z
 #define     volcanoTemp         volcanoParams2.w
 #define     lavaCoverage        lavaParams.x
-#define     lavaTemperature     lavaParams.y
+#define     snowLevel           lavaParams.y
 #define     surfTemperature     lavaParams.z
 #define     heightTempGrad      lavaParams.w
 #define     texScale            textureParams.x
@@ -218,7 +217,7 @@ uniform float noiseRidgeSmooth;// = 0.0001;
 #define     cloudsCoverage      cloudsParams2.w
 #define     cycloneMagn         cycloneParams.x
 #define     cycloneFreq         cycloneParams.y
-#define     cycloneDensity		cycloneParams.z
+#define     cycloneDensity      cycloneParams.z
 #define     cycloneOctaves      cycloneParams.w
 //-----------------------------------------------------------------------------
 
@@ -354,6 +353,7 @@ float3 SphericalToCartesian(float2 spherical)
 
 float3 GetPlanetPoint(float3 pos, float face)
 {
+	UNITY_BRANCH 
 	if (face == 6.0)	// global
 	{
 		float2 spherical;
@@ -367,6 +367,7 @@ float3 GetPlanetPoint(float3 pos, float face)
 	{
 		float3 p = normalize(pos);
 
+		UNITY_BRANCH
 		if (face == 0.0)
 			return float3( p.z, -p.y, -p.x);  // neg_x
 		else if (face == 1.0)
@@ -643,6 +644,7 @@ inline float4 ruvy(float4 uv)
 Surface GetSurfaceColorAtlas(float height, float slope, float vary)
 {
 	const float4  PackFactors = float4(1.0 / ATLAS_RES_X, 1.0 / ATLAS_RES_Y, ATLAS_TILE_RES, ATLAS_TILE_RES_LOG2);
+
 	slope = saturate(slope * 0.5);
 
 	float4 IdScale = tex2D(MaterialTable, float2(height + texturingHeightOffset, slope + 0.5));
@@ -1534,8 +1536,10 @@ float2 iNoise(float3 P, float jitter)
 	float3 p, ox, oy, oz, dx, dy, dz;
 	float2 F = 1e6;
 
+	UNITY_UNROLL
 	for(int i = 0; i < 3; i++)
 	{
+		UNITY_UNROLL
 		for(int j = 0; j < 3; j++)
 		{
 			p = Permutation(px[i] + py[j] + Pi.z + oi); // pij1, pij2, pij3
@@ -1554,8 +1558,10 @@ float2 iNoise(float3 P, float jitter)
 			float3 d = dx * dx + dy * dy + dz * dz; // dij1, dij2 and dij3, squared
 			
 			// Find lowest and second lowest distances
+			UNITY_UNROLL
 			for(int n = 0; n < 3; n++)
 			{
+				UNITY_BRANCH
 				if(d[n] < F[0])
 				{
 					F[1] = F[0];
@@ -2221,10 +2227,13 @@ float Cell2Noise(float3 p)
 	float dist;
 	float distMin = 1.0e38;
 
+	UNITY_UNROLL
 	for (d.z = -1.0; d.z <= 1.0; d.z += 1.0)
 	{
+		UNITY_UNROLL
 		for (d.y = -1.0; d.y <= 1.0; d.y += 1.0)
 		{
+			UNITY_UNROLL
 			for (d.x = -1.0; d.x <= 1.0; d.x += 1.0)
 			{
 				rnd = NoiseRandomUVec3((cell + d)).xyz + d;
@@ -2250,16 +2259,20 @@ float2 Cell2Noise2(float3 p)
 	float distMin1 = 1.0e38;
 	float distMin2 = 1.0e38;
 
+	UNITY_UNROLL
 	for (d.z = -1.0; d.z <= 1.0; d.z += 1.0)
 	{
+		UNITY_UNROLL
 		for (d.y = -1.0; d.y <= 1.0; d.y += 1.0)
 		{
+			UNITY_UNROLL
 			for (d.x = -1.0; d.x <= 1.0; d.x += 1.0)
 			{
 				rnd = NoiseRandomUVec3((cell + d)).xyz + d;
 				pos = rnd - offs;
 				dist = dot(pos, pos);
 
+				UNITY_BRANCH
 				if (dist < distMin1)
 				{
 					distMin2 = distMin1;
@@ -2285,16 +2298,20 @@ float4 Cell2NoiseVec(float3 p)
 	float distMin = 1.0e38;
 	float dist;
 
+	UNITY_UNROLL
 	for (d.z = -1.0; d.z <= 1.0; d.z += 1.0)
 	{
+		UNITY_UNROLL
 		for (d.y = -1.0; d.y <= 1.0; d.y += 1.0)
 		{
+			UNITY_UNROLL
 			for (d.x = -1.0; d.x <= 1.0; d.x += 1.0)
 			{
 				rnd = NoiseRandomUVec3((cell + d)).xyz + d;
 				pos = rnd - offs;
 				dist = dot(pos, pos);
 
+				UNITY_BRANCH
 				if (distMin > dist)
 				{
 					distMin = dist;
@@ -2320,16 +2337,20 @@ float Cell2NoiseColor(float3 p, out float4 color)
 	float distMin = 1.0e38;
 	float dist;
 
+	UNITY_UNROLL
 	for (d.z = -1.0; d.z <= 1.0; d.z += 1.0)
 	{
+		UNITY_UNROLL
 		for (d.y = -1.0; d.y <= 1.0; d.y += 1.0)
-		{
+		{		
+			UNITY_UNROLL
 			for (d.x = -1.0; d.x <= 1.0; d.x += 1.0)
 			{
 				rnd = float4(NoiseRandomUVec3((cell + d)), 0.0);
 				pos = rnd.xyz + d - offs;
 				dist = dot(pos, pos);
 
+				UNITY_BRANCH
 				if (distMin > dist)
 				{
 					distMin = dist;
@@ -2357,16 +2378,20 @@ float4 Cell2NoiseSphere(float3 p, float Radius)
 	float distMin = 1.0e38;
 	float dist;
 
+	UNITY_UNROLL
 	for (d.z = -1.0; d.z <= 1.0; d.z += 1.0)
 	{
+		UNITY_UNROLL
 		for (d.y = -1.0; d.y <= 1.0; d.y += 1.0)
 		{
+			UNITY_UNROLL
 			for (d.x = -1.0; d.x <= 1.0; d.x += 1.0)
 			{
 				rnd = NoiseRandomUVec3((cell + d)).xyz + d;
 				pos = rnd - offs;
 				dist = dot(pos, pos);
 
+				UNITY_BRANCH
 				if (distMin > dist)
 				{
 					distMin = dist;
@@ -2394,16 +2419,20 @@ void Cell2Noise2Sphere(float3 p, float Radius, out float4 point1, out float4 poi
 	float distMin2 = 1.0e38;
 	float dist;
 
+	UNITY_UNROLL
 	for (d.z = -1.0; d.z <= 1.0; d.z += 1.0)
 	{
+		UNITY_UNROLL
 		for (d.y = -1.0; d.y <= 1.0; d.y += 1.0)
 		{
+			UNITY_UNROLL
 			for (d.x = -1.0; d.x <= 1.0; d.x += 1.0)
 			{
 				rnd = NoiseRandomUVec3((cell + d)).xyz + d;
 				pos = rnd - offs;
 				dist = dot(pos, pos);
 
+				UNITY_BRANCH
 				if (dist < distMin1)
 				{
 					distMin2 = distMin1;
@@ -2439,16 +2468,20 @@ float4 Cell2NoiseVecSphere(float3 p, float Radius)
 	float distMin = 1.0e38;
 	float dist;
 
+	UNITY_UNROLL
 	for (d.z = -1.0; d.z <= 1.0; d.z += 1.0)
 	{
+		UNITY_UNROLL
 		for (d.y = -1.0; d.y <= 1.0; d.y += 1.0)
 		{
+			UNITY_UNROLL
 			for (d.x = -1.0; d.x <= 1.0; d.x += 1.0)
 			{
 				rnd = NoiseRandomUVec3((cell + d)).xyz + d;
 				pos = rnd - offs;
 				dist = dot(pos, pos);
 
+				UNITY_BRANCH
 				if (distMin > dist)
 				{
 					distMin = dist;
@@ -2473,10 +2506,13 @@ float Cell3Noise(float3 p)
 	float dist;
 	float distMin = 1.0e38;
 
+	UNITY_UNROLL
 	for (d.z = -1.0; d.z <= 2.0; d.z += 1.0)
 	{
+		UNITY_UNROLL
 		for (d.y = -1.0; d.y <= 2.0; d.y += 1.0)
 		{
+			UNITY_UNROLL
 			for (d.x = -1.0; d.x <= 2.0; d.x += 1.0)
 			{
 				rnd = NoiseRandomUVec4((cell + d)).xyz + d;
@@ -2500,10 +2536,13 @@ float Cell3NoiseSmooth(float3 p, float falloff)
 	float dist;
 	float res = 0.0;
 
+	UNITY_UNROLL
 	for (d.z = -1.0; d.z <= 2.0; d.z += 1.0)
 	{
+		UNITY_UNROLL
 		for (d.y = -1.0; d.y <= 2.0; d.y += 1.0)
 		{
+			UNITY_UNROLL
 			for (d.x = -1.0; d.x <= 2.0; d.x += 1.0)
 			{
 				rnd = NoiseRandomUVec4((cell + d));
@@ -2528,16 +2567,20 @@ float2 Cell3Noise2(float3 p)
 	float distMin1 = 1.0e38;
 	float distMin2 = 1.0e38;
 
+	UNITY_UNROLL
 	for (d.z = -1.0; d.z <= 2.0; d.z += 1.0)
 	{
+		UNITY_UNROLL
 		for (d.y = -1.0; d.y <= 2.0; d.y += 1.0)
 		{
+			UNITY_UNROLL
 			for (d.x = -1.0; d.x <= 2.0; d.x += 1.0)
 			{
 				rnd = NoiseRandomUVec3((cell + d)).xyz + d;
 				pos = rnd - offs;
 				dist = dot(pos, pos);
 
+				UNITY_BRANCH
 				if (dist < distMin1)
 				{
 					distMin2 = distMin1;
@@ -2563,16 +2606,20 @@ float4 Cell3NoiseVec(float3 p)
 	float dist;
 	float distMin = 1.0e38;
 
+	UNITY_UNROLL
 	for (d.z = -1.0; d.z <= 2.0; d.z += 1.0)
 	{
+		UNITY_UNROLL
 		for (d.y = -1.0; d.y <= 2.0; d.y += 1.0)
 		{
+			UNITY_UNROLL
 			for (d.x = -1.0; d.x <= 2.0; d.x += 1.0)
 			{
 				rnd = NoiseRandomUVec3((cell + d)).xyz + d;
 				pos = rnd - offs;
 				dist = dot(pos, pos);
 
+				UNITY_BRANCH
 				if (distMin > dist)
 				{
 					distMin = dist;
@@ -2598,16 +2645,20 @@ float4 Cell3NoiseNormalizedVec(float3 p)
 	float dist;
 	float distMin = 1.0e38;
 
+	UNITY_UNROLL
 	for (d.z = -1.0; d.z <= 2.0; d.z += 1.0)
 	{
+		UNITY_UNROLL
 		for (d.y = -1.0; d.y <= 2.0; d.y += 1.0)
 		{
+			UNITY_UNROLL
 			for (d.x = -1.0; d.x <= 2.0; d.x += 1.0)
 			{
 				rnd = NoiseRandomUVec3((cell + d)).xyz + d;
 				pos = rnd - offs;
 				dist = dot(pos, pos);
 
+				UNITY_BRANCH
 				if (distMin > dist)
 				{
 					distMin = dist;
@@ -2633,16 +2684,20 @@ float Cell3NoiseColor(float3 p, out float4 color)
 	float dist;
 	float distMin = 1.0e38;
 
+	UNITY_UNROLL
 	for (d.z = -1.0; d.z <= 2.0; d.z += 1.0)
 	{
+		UNITY_UNROLL
 		for (d.y = -1.0; d.y <= 2.0; d.y += 1.0)
 		{
+			UNITY_UNROLL
 			for (d.x = -1.0; d.x <= 2.0; d.x += 1.0)
 			{
 				rnd = float4(NoiseRandomUVec3((cell + d)), 0.0);
 				pos = rnd.xyz + d - offs;
 				dist = dot(pos, pos);
 
+				UNITY_BRANCH
 				if (dist < distMin)
 				{
 					distMin = dist;
@@ -2669,16 +2724,20 @@ float2 Cell3Noise2Color(float3 p, out float4 color)
 	float distMin1 = 1.0e38;
 	float distMin2 = 1.0e38;
 
+	UNITY_UNROLL
 	for (d.z = -1.0; d.z <= 2.0; d.z += 1.0)
 	{
+		UNITY_UNROLL
 		for (d.y = -1.0; d.y <= 2.0; d.y += 1.0)
 		{
+			UNITY_UNROLL
 			for (d.x = -1.0; d.x <= 2.0; d.x += 1.0)
 			{
 				rnd = float4(NoiseRandomUVec3((cell + d)), 0.0);
 				pos = rnd.xyz + d - offs;
 				dist = dot(pos, pos);
 
+				UNITY_BRANCH
 				if (dist < distMin1)
 				{
 					distMin2 = distMin1;
@@ -2708,16 +2767,20 @@ float Cell3NoiseSmoothColor(float3 p, float falloff, out float4 color)
 	float distMin = 1.0e38;
 	float res = 0.0;
 
+	UNITY_UNROLL
 	for (d.z = -1.0; d.z <= 2.0; d.z += 1.0)
 	{
+		UNITY_UNROLL
 		for (d.y = -1.0; d.y <= 2.0; d.y += 1.0)
 		{
+			UNITY_UNROLL
 			for (d.x = -1.0; d.x <= 2.0; d.x += 1.0)
 			{
 				rnd = float4(NoiseRandomUVec3((cell + d)), 0.0);
 				pos = rnd.xyz + d - offs;
 				dist = dot(pos, pos);
 
+				UNITY_BRANCH
 				if (dist < distMin)
 				{
 					distMin = dist;
@@ -2818,6 +2881,7 @@ float2 inverseSF(float3 p, float n)
 	float d = 8.0; 
 	float j = 0;
 
+	UNITY_UNROLL
 	for (uint s = 0; s < 4; ++s) 
 	{
 		float cosTheta = dot(B[1], float2(s % 2.0, s / 2.0) + c) + m;
@@ -2833,6 +2897,7 @@ float2 inverseSF(float3 p, float n)
 		float3 q = float3(cos(phi) * sinTheta, sin(phi) * sinTheta, cosTheta);
 		float squaredDistance = dot(q - p, q - p);
 
+		UNITY_BRANCH
 		if (squaredDistance < d) 
 		{
 			d = squaredDistance;
@@ -2845,6 +2910,8 @@ float2 inverseSF(float3 p, float n)
 
 float2 inverseSF(float3 p, float n, out float3 NearestPoint) 
 {
+	NearestPoint = float3(0.0, 0.0, 0.0);
+
 	float m = 1.0 - 1.0 / n;
 	float phi = min(atan2(p.y, p.x), M_PI), cosTheta = p.z;
 	float k = max(2, floor(log(n * M_PI * M_SQRT5 * (1 - cosTheta * cosTheta)) / log(M_PHI * M_PHI)));
@@ -2859,6 +2926,7 @@ float2 inverseSF(float3 p, float n, out float3 NearestPoint)
 	float d = 8.0; 
 	float j = 0;
 
+	UNITY_UNROLL
 	for (uint s = 0; s < 4; ++s) 
 	{
 		float cosTheta = dot(B[1], float2(s % 2.0, s / 2.0) + c) + m;
@@ -2874,6 +2942,7 @@ float2 inverseSF(float3 p, float n, out float3 NearestPoint)
 		float3 q = float3(cos(phi) * sinTheta, sin(phi) * sinTheta, cosTheta);
 		float squaredDistance = dot(q - p, q - p);
 
+		UNITY_BRANCH
 		if (squaredDistance < d) 
 		{
 			NearestPoint = q;
@@ -2964,6 +3033,7 @@ float CraterNoise(float3 ppoint, float cratMagn, float cratFreq, float cratSqrtD
 		//fibFreq   *= 1.81818182;
 		//radFactor *= 1.3483997256; // = sqrt(1.81818182)
 
+		UNITY_BRANCH
 		if (cratOctaves > 1)
 		{
 			ppoint       *= 1.81818182;
@@ -3021,7 +3091,7 @@ float RayedCraterNoise(float3 ppoint, float cratMagn, float cratFreq, float crat
 	float radFactor = shapeDist / cratSqrtDensity;
 	float fibFreq = 2.0 * cratFreq;
 
-	for (int i=0; i<cratOctaves; i++)
+	for (int i = 0; i < cratOctaves; i++)
 	{
 		lastlastlastLand = lastlastLand;
 		lastlastLand = lastLand;
@@ -3035,6 +3105,7 @@ float RayedCraterNoise(float3 ppoint, float cratMagn, float cratFreq, float crat
 		rad     = hash1(cell.x * 743.1) * 0.9 + 0.1;
 		newLand = CraterHeightFunc(lastlastlastLand, lastLand, amplitude, cell.y * radFactor / rad);
 
+		UNITY_BRANCH
 		if (cratOctaves > 1)
 		{
 			ppoint = Rotate(M_PI2 * hash1(float(i)), rotVec, ppoint);
@@ -3097,6 +3168,7 @@ float RayedCraterColorNoise(float3 ppoint, float cratFreq, float cratSqrtDensity
 		fi   = acos(dot(binormal, normalize(cellCenter - ppoint))) / (M_PI2 * 2.0);
 		color += RayedCraterColorFunc(cell.y * radFactor / rad, fi, 48.3 * dot(cellCenter, Randomize));
 
+		UNITY_BRANCH
 		if (cratOctaves > 1)
 		{
 			ppoint = Rotate(M_PI2 * hash1(float(i)), rotVec, ppoint);
@@ -3189,6 +3261,7 @@ float VolcanoNoise(float3 ppoint, float globalLand, float localLand)
 		float h = hash1(cell.x);
 		float r = 40.0 * cell.y;
 
+		UNITY_BRANCH
 		if ((h < density) && (r < 1.0))
 		{
 			float rnd = 48.3 * dot(cellCenter, Randomize);
@@ -3202,6 +3275,7 @@ float VolcanoNoise(float3 ppoint, float globalLand, float localLand)
 			newLand = softExpMaxMin(newLand, volcano, 32);
 		}
 
+		UNITY_BRANCH
 		if (volcanoOctaves > 1)
 		{
 			ppoint = Rotate(M_PI2 * hash1(float(i)), rotVec, ppoint);
@@ -3234,7 +3308,7 @@ float2 VolcanoGlowNoise(float3 ppoint)
 	float  distFreq = 18.361 * volcanoFreq;
 	float  distMagn = 0.003;
 
-	for (int i=0; i<volcanoOctaves; i++)
+	for (int i = 0; i < volcanoOctaves; i++)
 	{
 		float3 p = ppoint + distMagn * Fbm3D(ppoint * distFreq, 4);
 
@@ -3243,6 +3317,7 @@ float2 VolcanoGlowNoise(float3 ppoint)
 		float h = hash1(cell.x);
 		float r = 40.0 * cell.y;
 
+		UNITY_BRANCH
 		if ((h < density) && (r < 1.0))
 		{
 			float rnd = 48.3 * dot(cellCenter, Randomize);
@@ -3255,6 +3330,7 @@ float2 VolcanoGlowNoise(float3 ppoint)
 			volcTempMask = max(volcTempMask, float2(1.2 * VolcanoGlowFunc(r, fi1, fi2, rnd, size), 1.0 - 2.0 * r));
 		}
 
+		UNITY_BRANCH
 		if (volcanoOctaves > 1)
 		{
 			ppoint = Rotate(M_PI2 * hash1(float(i)), rotVec, ppoint);
@@ -3272,6 +3348,7 @@ float MareHeightFunc(float lastLand, float lastlastLand, float height, float r, 
 {
 	float t;
 
+	UNITY_BRANCH
 	if (r < radInner) // Crater bottom
 	{  
 		mareFloor = 1.0;
@@ -3320,6 +3397,7 @@ float MareNoise(float3 ppoint, float globalLand, float bottomLand, out float mar
 	heightFloor = 0.0;
 	heightRim = 0.2;
 
+	UNITY_UNROLL
 	for (int i = 0; i < 3; i++)
 	{
 		cell = Cell2Noise(ppoint + 0.07 * Fbm3D(ppoint));
@@ -3464,8 +3542,9 @@ void SolarSpotsHeightNoise(float3 ppoint, out float botMask, out float filMask, 
 
 	float3 dist = 0.01 * Fbm3D(ppoint * 7.6);
 	ppoint += dist * 0.5;
-
-	//for (int i=0; i<3; i++)
+	
+	//UNITY_UNROLL
+	//for (int i = 0; i < 3; i++)
 	{
 		cell = Cell2NoiseSphere(ppoint, craterSphereRadius);
 		//cell = Cell2NoiseVec(ppoint * craterSphereRadius);
@@ -3507,7 +3586,8 @@ void SolarSpotsTempNoise(float3 ppoint, out float botMask, out float filMask, ou
 	float3 dist = 0.01 * Fbm3D(ppoint * 7.6);
 	ppoint += dist * 0.5;
 
-	//for (int i=0; i<3; i++)
+	//UNITY_UNROLL
+	//for (int i = 0; i < 3; i++)
 	//{
 		cell = Cell2NoiseSphere(ppoint, craterSphereRadius);
 		//cell = Cell2NoiseVec(ppoint * craterSphereRadius);
@@ -3624,6 +3704,7 @@ float3 TurbulenceTerra(float3 ppoint)
 	float size = 4.0 * scale;
 	float dens = 0.3;
 
+	UNITY_UNROLL
 	for (int i = 0; i < 2; i++)
 	{
 		cell = inverseSF(ppoint, freq, cellCenter);
@@ -3700,12 +3781,14 @@ float HeightMapCloudsTerra(float3 ppoint)
 	float offset = 0.0;
 
 	// Compute the cyclons
+	UNITY_BRANCH
 	if (tidalLock > 0.0)
 	{
 		float3 cycloneCenter = float3(0.0, 1.0, 0.0);
 		float r = length(cycloneCenter - ppoint);
 		float mag = -tidalLock * cycloneMagn;
 
+		UNITY_BRANCH
 		if (r < 1.0)
 		{
 			float dist = 1.0 - r;
@@ -3754,12 +3837,14 @@ float3 TurbulenceGasGiant(float3 ppoint)
 	float size = 15.0 * scale;
 	float dens = 0.8;
 
+	UNITY_UNROLL
 	for (int i = 0; i < 5; i++)
 	{
 		cell = inverseSF(ppoint, freq, cellCenter);
 		rnd = hash1(cell.x);
 		r = size * cell.y;
 
+		UNITY_BRANCH
 		if ((rnd < dens) && (r < 1.0))
 		{
 			dir = sign(0.5 * dens - rnd);
@@ -3798,6 +3883,7 @@ float3 CycloneNoiseGasGiant(float3 ppoint, inout float offset)
 		rnd = hash1(cell.x);
 		r = size * cell.y;
 
+		UNITY_BRANCH
 		if ((rnd < dens) && (r < 1.0))
 		{
 			dir = sign(0.7 * dens - rnd);
@@ -3829,6 +3915,7 @@ float HeightMapCloudsGasGiantCore(float3 ppoint)
 	float offset = 0.0;
 
 	// Compute cyclons
+	UNITY_BRANCH
 	if (cycloneOctaves > 0.0)
 		twistedPoint = CycloneNoiseGasGiant(twistedPoint, offset);
 

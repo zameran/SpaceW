@@ -109,6 +109,7 @@ uniform float _HDRMode;
 
 inline float3 hdrFunction(float3 c)
 {
+	UNITY_BRANCH 
 	if (_HDRMode == 0) { return c; }
 	else if (_HDRMode == 1) { return 1.0 - exp(-c); }
 	else if (_HDRMode == 2) { return c < 1.0 ? pow(c * 0.47, 0.6073) : 1.0 - exp(-c); }
@@ -395,7 +396,7 @@ void VERTEX_POSITION(in float4 vertex, in float2 texcoord, out float4 position, 
 
 	#if ATMOSPHERE_ON
 		#if OCEAN_ON
-			if (zfc.x <= _Ocean_Level && _Ocean_DrawBRDF == 1.0) { zfc = float2(0.0, 0.0); }
+			UNITY_BRANCH if (zfc.x <= _Ocean_Level && _Ocean_DrawBRDF == 1.0) { zfc = float2(0.0, 0.0); }
 		#endif
 	#endif
 			

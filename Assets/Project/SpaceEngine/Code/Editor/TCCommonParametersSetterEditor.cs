@@ -71,7 +71,7 @@ public sealed class TCCommonParametersSetterEditor : Editor
         setter.RidgeSmooth = EditorGUILayout.Slider("Ridge Smooth ", setter.RidgeSmooth, 0.0000001f, 0.01f);
         EditorGUILayout.Separator();
 
-        setter.scaleParams.w = EditorGUILayout.Slider("tidalLock ", setter.scaleParams.w, -1.0f, 1.0f);
+        setter.mainParams.w = EditorGUILayout.Slider("tidalLock ", setter.mainParams.w, -1.0f, 1.0f);
 
         setter.Randomize.x = EditorGUILayout.Slider("Randomize.x ", setter.Randomize.x, -2.0f, 2.0f);
         setter.Randomize.y = EditorGUILayout.Slider("Randomize.y ", setter.Randomize.y, -2.0f, 2.0f);
@@ -109,7 +109,6 @@ public sealed class TCCommonParametersSetterEditor : Editor
         setter.colorParams.y = EditorGUILayout.Slider("colorDistFreq ", setter.colorParams.y, 0.0f, 10000.0f);
 
         setter.lavaParams.x = EditorGUILayout.Slider("lavaCoverage ", setter.lavaParams.x, -10.0f, 1.0f);
-        setter.lavaParams.y = EditorGUILayout.Slider("lavaTemperature ", setter.lavaParams.y, 0.0f, 373.0f);
         setter.lavaParams.z = EditorGUILayout.Slider("surfTemperature ", setter.lavaParams.z, 0.0f, 373.0f);
         setter.lavaParams.w = EditorGUILayout.Slider("heightTempGrad ", setter.lavaParams.w, 0.0f, 1.0f);
 
@@ -120,8 +119,8 @@ public sealed class TCCommonParametersSetterEditor : Editor
     {
         setter.cloudsParams2.x = EditorGUILayout.Slider("cloudsLayer ", setter.cloudsParams2.x, 0.0f, 1.0f);
         setter.cloudsParams2.y = EditorGUILayout.Slider("cloudsNLayers ", setter.cloudsParams2.y, 0.0f, 4.0f);
-        setter.cloudsParams2.z = EditorGUILayout.Slider("cloudsCoverage ", setter.cloudsParams2.z, 0.0f, 1.0f);
-        setter.cloudsParams2.w = EditorGUILayout.Slider("stripeFluct ", setter.cloudsParams2.w, -1.0f, 1.0f);
+        setter.cloudsParams2.z = EditorGUILayout.Slider("stripeFluct ", setter.cloudsParams2.z, -1.0f, 1.0f);
+        setter.cloudsParams2.w = EditorGUILayout.Slider("cloudsCoverage ", setter.cloudsParams2.w, 0.0f, 1.0f);
 
 
         setter.cloudsParams1.x = EditorGUILayout.Slider("cloudsFreq ", setter.cloudsParams1.x, 0.0f, 1000.0f);
@@ -131,21 +130,19 @@ public sealed class TCCommonParametersSetterEditor : Editor
 
         setter.cycloneParams.x = EditorGUILayout.Slider("cycloneMagn ", setter.cycloneParams.x, 0.0f, 100.0f);
         setter.cycloneParams.y = EditorGUILayout.Slider("cycloneFreq ", setter.cycloneParams.y, 0.0f, 1000.0f);
-        setter.cycloneParams.z = EditorGUILayout.Slider("cycloneDensity ", setter.cycloneParams.z, 0.0f, 1.0f);
+        setter.cycloneParams.z = EditorGUILayout.Slider("cycloneDensity ", setter.cycloneParams.z, 0.0f, 2.0f);
         setter.cycloneParams.w = (float)Mathf.RoundToInt(EditorGUILayout.Slider("cycloneOctaves ", setter.cycloneParams.w, 0.0f, 6.0f));
     }
 
     private void DrawGUIForNature(TCCommonParametersSetter setter)
     {
         setter.mareParams.x = EditorGUILayout.Slider("seaLevel ", setter.mareParams.x, -1.0f, 1.0f);
-        setter.mainParams.w = EditorGUILayout.Slider("snowLevel ", setter.mainParams.w, 0.0f, 10.0f);
-
-        setter.mainParams.z = EditorGUILayout.Slider("surfType ", setter.mainParams.z, 0.0f, 6.0f);
+        setter.lavaParams.y = EditorGUILayout.Slider("snowLevel ", setter.lavaParams.y, -1.0f, 1.0f);
+        setter.mainParams.z = EditorGUILayout.Slider("surfClass ", setter.mainParams.z, 0.0f, 6.0f);
 
         setter.climateParams.x = EditorGUILayout.Slider("climatePole ", setter.climateParams.x, 0.0f, 1.0f);
         setter.climateParams.y = EditorGUILayout.Slider("climateTropic ", setter.climateParams.y, 0.0f, 1.0f);
         setter.climateParams.z = EditorGUILayout.Slider("climateEquator ", setter.climateParams.z, 0.0f, 1.0f);
-
         setter.climateParams.w = EditorGUILayout.Slider("tropicWidth ", setter.climateParams.w, 0.0f, 1.0f);
 
         setter.colorParams.w = EditorGUILayout.Slider("latTropic ", setter.colorParams.w, 0.0f, 1.0f);
@@ -203,7 +200,7 @@ public sealed class TCCommonParametersSetterEditor : Editor
     {
         setter.craterParams.x = EditorGUILayout.Slider("craterMagn ", setter.craterParams.x, 0.0f, 10000.0f);
         setter.craterParams.y = EditorGUILayout.Slider("craterFreq ", setter.craterParams.y, 0.0f, 1000.0f);
-        setter.craterParams.z = EditorGUILayout.Slider("craterDensity ", setter.craterParams.z, 0.0f, 2.0f);
+        setter.craterParams.z = EditorGUILayout.Slider("craterSqrtDensity ", setter.craterParams.z, 0.0f, 2.0f);
         setter.craterParams.w = (float)Mathf.RoundToInt(EditorGUILayout.Slider("craterOctaves ", setter.craterParams.w, 0.0f, 20.0f));
         setter.cracksParams.w = EditorGUILayout.Slider("craterRayedFactor ", setter.cracksParams.w, 0.0f, 1.0f);
     }
@@ -212,19 +209,19 @@ public sealed class TCCommonParametersSetterEditor : Editor
     {
         setter.volcanoParams1.x = EditorGUILayout.Slider("volcanoMagn ", setter.volcanoParams1.x, 0.0f, 100.0f);
         setter.volcanoParams1.y = EditorGUILayout.Slider("volcanoFreq ", setter.volcanoParams1.y, 0.0f, 1000.0f);
-        setter.volcanoParams1.z = EditorGUILayout.Slider("volcanoDensity ", setter.volcanoParams1.z, 0.0f, 1.0f);
+        setter.volcanoParams1.z = EditorGUILayout.Slider("volcanoDensity ", setter.volcanoParams1.z, 0.0f, 2.0f);
         setter.volcanoParams1.w = (float)Mathf.RoundToInt(EditorGUILayout.Slider("volcanoOctaves ", setter.volcanoParams1.w, 0.0f, 5.0f));
 
-        setter.volcanoParams2.z = EditorGUILayout.Slider("volcanoRadius ", setter.volcanoParams2.z, 0.0f, 5.0f);
-        setter.volcanoParams2.y = EditorGUILayout.Slider("volcanoFlows ", setter.volcanoParams2.y, -1.0f, 1.0f);
-        setter.volcanoParams2.w = EditorGUILayout.Slider("volcanoTemp ", setter.volcanoParams2.w, 0.0f, 3000.0f);
         setter.volcanoParams2.x = EditorGUILayout.Slider("volcanoActivity ", setter.volcanoParams2.x, 0.0f, 2.0f);
+        setter.volcanoParams2.y = EditorGUILayout.Slider("volcanoFlows ", setter.volcanoParams2.y, -1.0f, 1.0f);
+        setter.volcanoParams2.z = EditorGUILayout.Slider("volcanoRadius ", setter.volcanoParams2.z, 0.0f, 5.0f);
+        setter.volcanoParams2.w = EditorGUILayout.Slider("volcanoTemp ", setter.volcanoParams2.w, 0.0f, 3000.0f);
     }
 
     private void DrawGUIForMare(TCCommonParametersSetter setter)
     {
         setter.mareParams.y = EditorGUILayout.Slider("mareFreq ", setter.mareParams.y, 0.0f, 1000.0f);
-        setter.mareParams.z = EditorGUILayout.Slider("mareDensity ", setter.mareParams.z, 0.0f, 1.0f);
+        setter.mareParams.z = EditorGUILayout.Slider("mareSqrtDensity ", setter.mareParams.z, 0.0f, 2.0f);
     }
 
     private void DrawGUIForVenus(TCCommonParametersSetter setter)
