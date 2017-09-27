@@ -1326,7 +1326,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   OnePixelBorder: 1
-  Format: 11
+  Format: 0
   WrapMode: 1
   FilterMode: 1
   ReadWrite: 0
@@ -8159,7 +8159,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   OnePixelBorder: 1
-  Format: 11
+  Format: 0
   WrapMode: 1
   FilterMode: 1
   ReadWrite: 0
