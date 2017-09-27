@@ -46,16 +46,19 @@ uniform float _ExtinctionGroundFade;
 //-----------------------------------------------------------------------------
 #if (ECLIPSES_METHOD == 0)
 
-float EclipseValue(float lightRadius, float casterRadius, float Dist)
+float EclipseValue(float lightRadius, float casterRadius, float dist)
 {
 	float sumRadius = lightRadius + casterRadius;
 
 	// No intersection
-	if (Dist >= sumRadius) return 0.0;
+	//UNITY_BRANCH
+	// TODO : 'use of potentially uninitialized variable (EclipseValue)'
+	if (dist >= sumRadius) return 0.0;
 
 	float minRadius;
 	float maxPhase;
 
+	UNITY_BRANCH
 	if (lightRadius < casterRadius)
 	{
 		minRadius = lightRadius;
@@ -65,6 +68,7 @@ float EclipseValue(float lightRadius, float casterRadius, float Dist)
 	{
 		minRadius = casterRadius;
 
+		UNITY_BRANCH
 		if (lightRadius < 0.001)
 			maxPhase = (casterRadius * casterRadius) / (lightRadius * lightRadius);
 		else
@@ -72,12 +76,13 @@ float EclipseValue(float lightRadius, float casterRadius, float Dist)
 	}
 
 	// Full intersection
-	if (Dist <= max(lightRadius, casterRadius) - minRadius) return maxPhase;
+	UNITY_BRANCH
+	if (dist <= max(lightRadius, casterRadius) - minRadius) return maxPhase;
 
-	float Diff = abs(lightRadius - casterRadius);
+	float diff = abs(lightRadius - casterRadius);
 
 	// Partial intersection
-	return maxPhase * smoothstep(0.0, 1.0, 1.0 - clamp((Dist-Diff)/(sumRadius-Diff), 0.0, 1.0));
+	return maxPhase * smoothstep(0.0, 1.0, 1.0 - clamp((dist - diff) / (sumRadius - diff), 0.0, 1.0));
 }
 
 float EclipseShadow(float3 worldPos, float3 lightVec, float lightAngularRadius)
@@ -90,6 +95,7 @@ float EclipseShadow(float3 worldPos, float3 lightVec, float lightAngularRadius)
 	float lightToCasterAngle = 0;
 	float shadow = 1.0;
 
+	UNITY_UNROLL
 	for (int i = 0; i < 4; ++i)
 	{
 		if (_Sky_LightOccluders_1[i].w <= 0.0) { break; }
@@ -147,6 +153,7 @@ float EclipseShadow(float3 worldPos, float3 worldLightPos, float lightRadius)
 
 	float shadow = 1;
 
+	UNITY_UNROLL
 	for (int i = 0; i < 4; ++i)
 	{
 		if (_Sky_LightOccluders_1[i].w <= 0.0) { break; }

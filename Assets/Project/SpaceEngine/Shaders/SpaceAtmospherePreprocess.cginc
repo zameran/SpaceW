@@ -121,8 +121,8 @@ int INSCATTER_SPHERICAL_INTEGRAL_SAMPLES;
 // PARAMETERIZATION OPTIONS 
 // ---------------------------------------------------------------------------- 
  
-#define TRANSMITTANCE_NON_LINEAR 
-#define INSCATTER_NON_LINEAR 
+#define TRANSMITTANCE_NON_LINEAR
+#define INSCATTER_NON_LINEAR
  
 // ---------------------------------------------------------------------------- 
 // PARAMETERIZATION FUNCTIONS 
@@ -222,7 +222,7 @@ void GetMuMuSNu(float2 coord, float r, float4 dhdH, out float mu, out float muS,
 	float x = coord.x - 0.5; 
 	float y = coord.y - 0.5; 
 
-	#if defined(INSCATTER_NON_LINEAR) 
+	#if defined(INSCATTER_NON_LINEAR)
 		if (y < float(RES_MU) / 2.0) 
 		{ 
 			float d = 1.0 - y / (float(RES_MU) / 2.0 - 1.0); 
@@ -236,6 +236,7 @@ void GetMuMuSNu(float2 coord, float r, float4 dhdH, out float mu, out float muS,
 			d = min(max(dhdH.x, d * dhdH.y), dhdH.y * 0.999); 
 			mu = (Rt * Rt - r * r - d * d) / (2.0 * r * d); 
 		} 
+
 		muS = mod(x, float(RES_MU_S)) / (float(RES_MU_S) - 1.0); 
 		// paper formula 
 		//muS = -(0.6 + log(1.0 - muS * (1.0 -  exp(-3.6)))) / 3.0; 

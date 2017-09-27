@@ -232,10 +232,12 @@ float Limit(float r, float mu)
 	float dout = -r * mu + sqrt(r * r * (mu * mu - 1.0) + RL * RL);
 	float delta2 = r * r * (mu * mu - 1.0) + Rg * Rg;
 
+	UNITY_BRANCH
 	if (delta2 >= 0.0) 
 	{
 		float din = -r * mu - sqrt(delta2);
 
+		UNITY_BRANCH
 		if (din >= 0.0) 
 		{
 			dout = min(dout, din);
@@ -276,6 +278,7 @@ float3 AnalyticTransmittance(float r, float mu, float d)
 {
 	float3 tr = exp(- betaR * OpticalDepth(HR, r, mu, d) - betaMEx * OpticalDepth(HM, r, mu, d)); //using default eq.
 
+	UNITY_BRANCH
 	if (isnan(tr.x)) tr = float3(1.0, 1.0, 1.0);
 
 	return lerp(float3(1.0, 1.0, 1.0), tr, density);
@@ -298,6 +301,7 @@ float3 Transmittance(float r, float mu, float3 v, float3 x0)
 	float r1 = length(x0);
 	float mu1 = dot(x0, v) / r;
 
+	UNITY_BRANCH
 	if (mu > 0.0) 
 	{
 		result = min(Transmittance(r, mu) / Transmittance(r1, mu1), 1.0);
@@ -320,6 +324,7 @@ float3 Transmittance(float r, float mu, float d)
 	float r1 = sqrt(r * r + d * d + 2.0 * r * mu * d);
 	float mu1 = (r * mu + d) / r1;
 
+	UNITY_BRANCH
 	if (mu > 0.0) 
 	{
 		result = min(Transmittance(r, mu) / Transmittance(r1, mu1), 1.0);
@@ -418,6 +423,7 @@ float3 SkyRadiance(float3 camera, float3 viewdir, float3 sundir, float shaftWidt
 		float deltaSq = SQRT(rMu * rMu - r * r + Rt * Rt, 1e30);
 		float din = max(-rMu - deltaSq, 0.0);
 
+		UNITY_BRANCH
 		if (din > 0.0) 
 		{
 			camera += din * viewdir;
@@ -426,6 +432,7 @@ float3 SkyRadiance(float3 camera, float3 viewdir, float3 sundir, float shaftWidt
 			r = Rt;
 		}
 
+		UNITY_BRANCH
 		if (r <= Rt) 
 		{
 			float nu = dot(viewdir, sundir);
@@ -433,8 +440,10 @@ float3 SkyRadiance(float3 camera, float3 viewdir, float3 sundir, float shaftWidt
 
 			float4 inScatter = Texture4D(_Sky_Inscatter, r, rMu / r, muS, nu);
 
+			UNITY_BRANCH
 			if (shaftWidth > 0.0) 
 			{
+				UNITY_BRANCH
 				if (mu > 0.0) 
 				{
 					inScatter *= min(Transmittance(r0, mu0) / Transmittance(r, mu), 1.0).rgbr;
@@ -481,6 +490,7 @@ float3 SkyRadiance(float3 camera, float3 viewdir, float3 sundir, out float3 exti
 		float deltaSq = SQRT(rMu * rMu - r * r + Rt * Rt, 1e30);
 		float din = max(-rMu - deltaSq, 0.0);
 
+		UNITY_BRANCH
 		if (din > 0.0) 
 		{
 			camera += din * viewdir;
@@ -489,6 +499,7 @@ float3 SkyRadiance(float3 camera, float3 viewdir, float3 sundir, out float3 exti
 			r = Rt;
 		}
 
+		UNITY_BRANCH
 		if (r <= Rt) 
 		{
 			float nu = dot(viewdir, sundir);
@@ -496,8 +507,10 @@ float3 SkyRadiance(float3 camera, float3 viewdir, float3 sundir, out float3 exti
 
 			float4 inScatter = Texture4D(_Sky_Inscatter, r, rMu / r, muS, nu);
 
+			UNITY_BRANCH
 			if (shaftWidth > 0.0) 
 			{
+				UNITY_BRANCH
 				if (mu > 0.0) 
 				{
 					inScatter *= min(Transmittance(r0, mu0) / Transmittance(r, mu), 1.0).rgbr;
@@ -537,6 +550,7 @@ float3 SkyRadianceSimple(float3 camera, float3 viewdir, float3 sundir)
 	float deltaSq = SQRT(rMu * rMu - r * r + Rt * Rt, 0.000001);
 	float din = max(-rMu - deltaSq, 0.0);
 
+	UNITY_BRANCH
 	if (din > 0.0)
 	{
 		camera += din * viewdir;
@@ -549,6 +563,7 @@ float3 SkyRadianceSimple(float3 camera, float3 viewdir, float3 sundir)
 	
 	float4 inScatter = Texture4D(_Sky_Inscatter, r, rMu / r, muS, nu);
 	
+	UNITY_BRANCH
 	if (r <= Rt) 
 	{
 		float3 inScatterM = GetMie(inScatter);
@@ -565,13 +580,13 @@ float3 SkyRadianceSimple(float3 camera, float3 viewdir, float3 sundir)
 	return result * _Sun_Intensity;
 }
 
-float3 InScatteringShine(float3 camera, float3 _point, float3 sunDir, out float3 extinction, float shaftWidth, float scaleCoeff) 
+float3 InScatteringShine(float3 camera, float3 ppoint, float3 sunDir, out float3 extinction, float shaftWidth, float scaleCoeff) 
 {
 	float3 result = float3(0.0, 0.0, 0.0);
 
 	extinction = float3(1.0, 1.0, 1.0);
 
-	float3 viewdir = _point - camera;
+	float3 viewdir = ppoint - camera;
 	float d = length(viewdir) * scaleCoeff;
 
 	viewdir = viewdir / d;
@@ -581,10 +596,11 @@ float3 InScatteringShine(float3 camera, float3 _point, float3 sunDir, out float3
 
 	float r = length(camera) * scaleCoeff;
 
+	UNITY_BRANCH
 	if (r < 0.9 * Rg) 
 	{
 		camera.y += Rg;
-		_point.y += Rg;
+		ppoint.y += Rg;
 		r = length(camera) * scaleCoeff;
 	}
 
@@ -594,12 +610,13 @@ float3 InScatteringShine(float3 camera, float3 _point, float3 sunDir, out float3
 	float mu0 = mu;
 	float muExtinction=mu;
 
-	_point -= viewdir * clamp(shaftWidth, 0.0, d);
+	ppoint -= viewdir * clamp(shaftWidth, 0.0, d);
 
 	float deltaSq = SQRT(rMu * rMu - r * r + Rt * Rt, 0.000001);
 
 	float din = max(-rMu - deltaSq, 0.0);
 
+	UNITY_BRANCH
 	if (din > 0.0 && din < d)
 	{
 		camera += din * viewdir;
@@ -609,25 +626,27 @@ float3 InScatteringShine(float3 camera, float3 _point, float3 sunDir, out float3
 		d -= din;
 	}
 	
+	UNITY_BRANCH
 	if (r <= Rt)
 	{ 
 		float nu = dot(viewdir, sunDir);
 		float muS = dot(camera, sunDir) / r;
 		float4 inScatter;
 
+		UNITY_BRANCH
 		if (r < Rg + 1600.0) 
 		{
 			float f = (Rg + 1600.0) / r;
 
 			r = r * f;
 			rMu = rMu * f;
-			_point = _point * f;
+			ppoint = ppoint * f;
 		}
 
-		float r1 = length(_point);
-		float rMu1 = dot(_point, viewdir);
+		float r1 = length(ppoint);
+		float rMu1 = dot(ppoint, viewdir);
 		float mu1 = rMu1 / r1;
-		float muS1 = dot(_point, sunDir) / r1;
+		float muS1 = dot(ppoint, sunDir) / r1;
 
 		extinction = min(AnalyticTransmittance(r, mu, d), 1.0);
 
@@ -659,6 +678,7 @@ float3 SkyShineRadiance(float3 worldPosition, float3 viewdir)
 
 	float intensity = 1;
 
+	UNITY_UNROLL
 	for (int i = 0; i < 4; ++i)
 	{
 		if (_Sky_ShineColors_1[i].w <= 0) break;
@@ -680,6 +700,7 @@ void SunRadianceAndSkyIrradiance(float3 worldP, float3 worldN, float3 worldS, ou
 
 	float r = length(worldP);
 
+	UNITY_BRANCH
 	if (r < 0.9 * Rg) 
 	{
 		worldP.z += Rg;
@@ -701,26 +722,27 @@ void SunRadianceAndSkyIrradiance(float3 worldP, float3 worldN, float3 worldS, ou
 
 // single scattered sunlight between two points
 // camera=observer
-// point=point on the ground
+// ppoint=point on the ground
 // sundir=unit vector towards the sun
 // return scattered light and extinction coefficient
-float4 InScattering(float3 camera, float3 _point, float3 sundir, out float3 extinction, float shaftWidth) 
+float4 InScattering(float3 camera, float3 ppoint, float3 sundir, out float3 extinction, float shaftWidth) 
 {
 	#if defined(ATMO_INSCATTER_ONLY) || defined(ATMO_FULL)
 		camera /= scale;
-		_point /= scale;
+		ppoint /= scale;
 
 		float4 result;
-		float3 viewdir = _point - camera;
+		float3 viewdir = ppoint - camera;
 		float d = length(viewdir);
 		viewdir = viewdir / d;
 	
 		float r = length(camera);
 
+		UNITY_BRANCH
 		if (r < 0.9 * Rg) 
 		{
 			camera.z += Rg;
-			_point.z += Rg;
+			ppoint.z += Rg;
 			r = length(camera);
 		}
 	
@@ -728,11 +750,12 @@ float4 InScattering(float3 camera, float3 _point, float3 sundir, out float3 exti
 		float mu = rMu / r;
 		float r0 = r;
 		float mu0 = mu;
-		_point -= viewdir * clamp(shaftWidth, 0.0, d);
+		ppoint -= viewdir * clamp(shaftWidth, 0.0, d);
 
 		float deltaSq = SQRT(rMu * rMu - r * r + Rt * Rt, 1e30);
 		float din = max(-rMu - deltaSq, 0.0);
 
+		UNITY_BRANCH
 		if (din > 0.0 && din < d) 
 		{
 			camera += din * viewdir;
@@ -742,6 +765,7 @@ float4 InScattering(float3 camera, float3 _point, float3 sundir, out float3 exti
 			d -= din;
 		}
 
+		UNITY_BRANCH
 		if (r <= Rt) 
 		{
 			float nu = dot(viewdir, sundir);
@@ -749,19 +773,20 @@ float4 InScattering(float3 camera, float3 _point, float3 sundir, out float3 exti
 			float muR = 1 - abs(dot(normalize(cross(camera, sundir)), viewdir)); 
 			float4 inScatter;
 
+			UNITY_BRANCH
 			if (r < Rg + _Aerial_Perspective_Offset) 
 			{
 				// avoids imprecision problems in aerial perspective near ground
 				float f = (Rg + _Aerial_Perspective_Offset) / r;
 				r = r * f;
 				rMu = rMu * f;
-				_point = _point * f;
+				ppoint = ppoint * f;
 			}
 
-			float r1 = length(_point);
-			float rMu1 = dot(_point, viewdir);
+			float r1 = length(ppoint);
+			float rMu1 = dot(ppoint, viewdir);
 			float mu1 = rMu1 / r1;
-			float muS1 = dot(_point, sundir) / r1;
+			float muS1 = dot(ppoint, sundir) / r1;
 
 			#if defined(ANALYTIC_TRANSMITTANCE)
 				extinction = min(AnalyticTransmittance(r, mu, d), 1.0);
@@ -773,6 +798,7 @@ float4 InScattering(float3 camera, float3 _point, float3 sundir, out float3 exti
 			#if defined(HORIZON_HACK)
 				float lim = -sqrt(1.0 - (Rg / r) * (Rg / r));
 
+				UNITY_BRANCH
 				if (abs(mu - lim) < _Sky_HorizonFixEps) 
 				{
 					// avoids imprecision problems near horizon by interpolating between two points above and below horizon

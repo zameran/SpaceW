@@ -277,27 +277,27 @@ inline float Repeat(float t, float l)
 	return t - floor(t / l) * l;
 }
 
-float3 Rotate(float Angle, float3 Axis, float3 Vector)
+float3 Rotate(float angle, float3 axis, float3 v)
 {
-	float cosa = cos(Angle);
-	float sina = sin(Angle);
+	float cosa = cos(angle);
+	float sina = sin(angle);
 
 	float t = 1.0 - cosa;
 
 	float3x3 M = float3x3
 	(
-		t * Axis.x * Axis.x + cosa,
-		t * Axis.x * Axis.y - sina * Axis.z,
-		t * Axis.x * Axis.z + sina * Axis.y,
-		t * Axis.x * Axis.y + sina * Axis.z,
-		t * Axis.y * Axis.y + cosa,
-		t * Axis.y * Axis.z - sina * Axis.x,
-		t * Axis.x * Axis.z - sina * Axis.y,
-		t * Axis.y * Axis.z + sina * Axis.x,
-		t * Axis.z * Axis.z + cosa
+		t * axis.x * axis.x + cosa,
+		t * axis.x * axis.y - sina * axis.z,
+		t * axis.x * axis.z + sina * axis.y,
+		t * axis.x * axis.y + sina * axis.z,
+		t * axis.y * axis.y + cosa,
+		t * axis.y * axis.z - sina * axis.x,
+		t * axis.x * axis.z - sina * axis.y,
+		t * axis.y * axis.z + sina * axis.x,
+		t * axis.z * axis.z + cosa
 	);
 
-	return mul(M, Vector);
+	return mul(M, v);
 }
 
 float2x2 Inverse(float2x2 m) 
@@ -496,12 +496,12 @@ float3 rgb2hsl(float3 rgb)
 	*/
 	
 	const float4 K = float4(0.0, -1.0 / 3.0, 2.0 / 3.0, -1.0);
+	const float e = 1.0e-10;
+
 	float4 p = lerp(float4(rgb.bg, K.wz), float4(rgb.gb, K.xy), step(rgb.b, rgb.g));
 	float4 q = lerp(float4(p.xyw, rgb.r), float4(rgb.r, p.yzx), step(p.x, rgb.r));
 
 	float d = q.x - min(q.w, q.y);
-
-	const float e = 1.0e-10;
 
 	return float3(abs(q.z + (q.w - q.y) / (6.0 * d + e)), d / (q.x + e), q.x);
 }
@@ -549,11 +549,11 @@ float3 hsl2rgb(float3 hsl)
 	return hsl.z * lerp(K.xxx, clamp(p - K.xxx, 0.0, 1.0), hsl.y);
 }
 
-float3 hue2rgb(in float H)
+float3 hue2rgb(in float h)
 {
-	float R = abs(H * 6 - 3) - 1;
-	float G = 2 - abs(H * 6 - 2);
-	float B = 2 - abs(H * 6 - 4);
+	float R = abs(h * 6 - 3) - 1;
+	float G = 2 - abs(h * 6 - 2);
+	float B = 2 - abs(h * 6 - 4);
 
 	return saturate(float3(R, G, B));
 }
@@ -845,16 +845,6 @@ inline float2 Interpolation_C2(float2 x) { return x * x * x * (x * (x * 6.0 - 15
 inline float3 Interpolation_C2(float3 x) { return x * x * x * (x * (x * 6.0 - 15.0) + 10.0); }
 inline float2 Interpolation_C2_Deriv(float2 x) { return x * x * (x * (x * 30.0 - 60.0) + 30.0); }
 inline float3 Interpolation_C2_Deriv(float3 x) { return x * x * (x * (x * 30.0 - 60.0) + 30.0); }
-
-inline float CubicHermite(float A, float B, float C, float D, float t)
-{
-	return (-A / 2.0 + (3.0 * B) / 2.0 - (3.0 * C) / 2.0 + D / 2.0) * t * t * t + (A - (5.0 * B) / 2.0 + 2.0 * C - D / 2.0) * t * t + (-A / 2.0 + C / 2.0) * t + B;
-}
-
-inline float CubicHermite(float4 V, float t)
-{
-	return CubicHermite(V.x, V.y, V.z, V.w, t);
-}
 //-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
@@ -913,18 +903,31 @@ float4 SampleCustomBilinear(sampler2D tex, float2 uv, float resolution)
 //-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
+inline float CubicHermite(float a, float b, float c, float d, float t)
+{
+	const float t2 = t * t;
+	const float t3 = t * t * t;
+
+	return (-a / 2.0 + (3.0 * b) / 2.0 - (3.0 * c) / 2.0 + d / 2.0) * t3 + (a - (5.0 * b) / 2.0 + 2.0 * c - d / 2.0) * t2 + (-a / 2.0 + c / 2.0) * t + b;
+}
+
+inline float CubicHermite(float4 v, float t)
+{
+	return CubicHermite(v.x, v.y, v.z, v.w, t);
+}
+
 // Bicubic hermite interpolated texture fetch by demofox. https://www.shadertoy.com/view/MllSzX
-float4 CubicHermite (float4 A, float4 B, float4 C, float4 D, float t)
+float4 CubicHermite(float4 a, float4 b, float4 c, float4 d, float t)
 {
 	const float t2 = t * t;
 	const float t3 = t * t * t;
 	
-	float4 a = -A / 2.0 + (3.0 * B) / 2.0 - (3.0 * C) / 2.0 + D / 2.0;
-	float4 b = A - (5.0 * B) / 2.0 + 2.0 * C - D / 2.0;
-	float4 c = -A / 2.0 + C / 2.0;
-	float4 d = B;
+	float4 A = -a / 2.0 + (3.0 * b) / 2.0 - (3.0 * c) / 2.0 + d / 2.0;
+	float4 B = a - (5.0 * b) / 2.0 + 2.0 * c - d / 2.0;
+	float4 C = -a / 2.0 + c / 2.0;
+	float4 D = b;
 	
-	return a * t3 + b * t2 + c * t + d;
+	return A * t3 + B * t2 + C * t + D;
 }
 
 float4 BicubicHermiteTextureSample(sampler2D tex, float2 uv, float textureSize)
@@ -1524,10 +1527,10 @@ inline float4 TaylorInvSqrt(float4 r) { return 1.79284291400159 - 0.853734720953
 #define K 0.142857142857
 #define Ko 0.428571428571
 
-float2 iNoise(float3 P, float jitter)
+float2 iNoise(float3 ppoint, float jitter)
 {			
-	float3 Pi = modi(floor(P), 289.0);
-	float3 Pf = frac(P);
+	float3 Pi = modi(floor(ppoint), 289.0);
+	float3 Pf = frac(ppoint);
 	const float3 oi = float3(-1.0, 0.0, 1.0);
 	const float3 of = float3(-0.5, 0.5, 1.5);
 	float3 px = Permutation(Pi.x + oi);
@@ -2365,9 +2368,9 @@ float Cell2NoiseColor(float3 p, out float4 color)
 	return sqrt(distMin);
 }
 
-float4 Cell2NoiseSphere(float3 p, float Radius)
+float4 Cell2NoiseSphere(float3 p, float radius)
 {
-	p *= Radius;
+	p *= radius;
 
 	float3 cell = floor(p);
 	float3 offs = p - cell - NOISE_OFFSET;
@@ -2403,12 +2406,12 @@ float4 Cell2NoiseSphere(float3 p, float Radius)
 
 	ppoint = normalize(ppoint + cell + NOISE_OFFSETOUT);
 
-	return float4(ppoint, length(ppoint * Radius - p));
+	return float4(ppoint, length(ppoint * radius - p));
 }
 
-void Cell2Noise2Sphere(float3 p, float Radius, out float4 point1, out float4 point2)
+void Cell2Noise2Sphere(float3 p, float radius, out float4 point1, out float4 point2)
 {
-	p *= Radius;
+	p *= radius;
 
 	float3 cell = floor(p);
 	float3 offs = p - cell - NOISE_OFFSET;
@@ -2455,9 +2458,9 @@ void Cell2Noise2Sphere(float3 p, float Radius, out float4 point1, out float4 poi
 	point2.w = distMin2;
 }
 
-float4 Cell2NoiseVecSphere(float3 p, float Radius)
+float4 Cell2NoiseVecSphere(float3 p, float radius)
 {
-	p *= Radius;
+	p *= radius;
 
 	float3 cell = floor(p);
 	float3 offs = p - cell - NOISE_OFFSET;
@@ -2493,7 +2496,7 @@ float4 Cell2NoiseVecSphere(float3 p, float Radius)
 
 	ppoint = normalize(ppoint + cell + NOISE_OFFSETOUT);
 
-	return float4(ppoint, length(ppoint * Radius - p));
+	return float4(ppoint, length(ppoint * radius - p));
 }
 
 float Cell3Noise(float3 p)
