@@ -197,6 +197,8 @@ public class GodManager : MonoSingleton<GodManager>
 
     private void UpdateViewMatrices()
     {
+        if (View == null) return;
+
         View.UpdateMatrices();
     }
 

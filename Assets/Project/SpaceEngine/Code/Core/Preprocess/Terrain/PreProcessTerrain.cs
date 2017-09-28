@@ -15,10 +15,21 @@ namespace SpaceEngine.Core.Preprocess.Terrain
             NONE,
             HEIGHT,
             COLOR
-        };
+        }
+
+        [Serializable]
+        public enum TYPE
+        {
+            NONE,
+            PLANE,
+            SPHERICAL
+        }
 
         [SerializeField]
         MODE Mode = MODE.NONE;
+        
+        [SerializeField]
+        TYPE Type = TYPE.NONE;
 
         [SerializeField]
         string TempFolder = "/Resources/Preprocess/Textures/Terrain/Tmp";
@@ -57,10 +68,10 @@ namespace SpaceEngine.Core.Preprocess.Terrain
                 switch ((int)Mode)
                 {
                     case (int)MODE.HEIGHT:
-                        PreprocessDem(Source, Application.dataPath + TempFolder, Application.dataPath + DestinationFolder);
+                        PreprocessDem();
                         break;
                     case (int)MODE.COLOR:
-                        PreprocessOrtho(Source, Application.dataPath + TempFolder, Application.dataPath + DestinationFolder);
+                        PreprocessOrtho();
                         break;
                     default:
                         Debug.LogWarning("PreProcessTerrain.Start: Nothing to produce/precompute!");
@@ -81,13 +92,44 @@ namespace SpaceEngine.Core.Preprocess.Terrain
             }
         }
 
+        void PreprocessDem()
+        {
+            switch ((int)Type)
+            {
+                case (int)TYPE.PLANE:
+                    PreprocessPlaneDem(Source, Application.dataPath + TempFolder, Application.dataPath + DestinationFolder);
+                    break;
+                case (int)TYPE.SPHERICAL:
+                    PreprocessSphericalDem(Source, Application.dataPath + TempFolder, Application.dataPath + DestinationFolder);
+                    break;
+                default:
+                    Debug.LogWarning("PreProcessTerrain.Preprocess: Nothing to produce/precompute!");
+                    break;
+            }
+        }
+
+        void PreprocessOrtho()
+        {
+            switch ((int)Type)
+            {
+                case (int)TYPE.PLANE:
+                    PreprocessPlaneOrtho(Source, Application.dataPath + TempFolder, Application.dataPath + DestinationFolder);
+                    break;
+                case (int)TYPE.SPHERICAL:
+                    throw new NotImplementedException();
+                default:
+                    Debug.LogWarning("PreProcessTerrain.Preprocess: Nothing to produce/precompute!");
+                    break;
+            }
+        }
+
         /// <summary>
         /// Preprocess a map into files that can be used with a <see cref="ResidualProducer"/>.
         /// </summary>
         /// <param name="source">The map to be preprocessed.</param>
         /// <param name="tempFolder">Where temporary files must be saved.</param>
         /// <param name="destinationFolder">Where the precomputed file must be saved.</param>
-        void PreprocessDem(InputMap source, string tempFolder, string destinationFolder)
+        void PreprocessPlaneDem(InputMap source, string tempFolder, string destinationFolder)
         {
             if (DestinationTileSize % DestinationMinTileSize != 0) { throw new InvalidParameterException("DestinationTileSize must be a multiple of DestinationMinTileSize!"); }
 
@@ -100,6 +142,46 @@ namespace SpaceEngine.Core.Preprocess.Terrain
             mipmap.Compute();
             mipmap.Generate(0, 0, 0, destinationFolder + "/" + FileName + ".proland");
 
+            Debug.Log(string.Format("PreProcessTerrain.PreprocessPlaneDem: Computation time: {0} s", (Time.realtimeSinceStartup - startTime)));
+        }
+
+        void PreprocessSphericalDem(InputMap source, string tempFolder, string destinationFolder)
+        {
+            if (DestinationTileSize % DestinationMinTileSize != 0) { throw new InvalidParameterException("DestinationTileSize must be a multiple of DestinationMinTileSize!"); }
+
+            var startTime = Time.realtimeSinceStartup;
+            var destinationSize = DestinationTileSize << DestinationMaxLevel;
+
+            IHeightFunction2D function1 = new SphericalHeightFunction(source, ProjectionHelper.Projection1, destinationSize);
+            IHeightFunction2D function2 = new SphericalHeightFunction(source, ProjectionHelper.Projection2, destinationSize);
+            IHeightFunction2D function3 = new SphericalHeightFunction(source, ProjectionHelper.Projection3, destinationSize);
+            IHeightFunction2D function4 = new SphericalHeightFunction(source, ProjectionHelper.Projection4, destinationSize);
+            IHeightFunction2D function5 = new SphericalHeightFunction(source, ProjectionHelper.Projection5, destinationSize);
+            IHeightFunction2D function6 = new SphericalHeightFunction(source, ProjectionHelper.Projection6, destinationSize);
+
+            HeightMipmap mipmap1 = new HeightMipmap(function1, DestinationMinTileSize, destinationSize, DestinationTileSize, tempFolder + "1");
+            HeightMipmap mipmap2 = new HeightMipmap(function2, DestinationMinTileSize, destinationSize, DestinationTileSize, tempFolder + "2");
+            HeightMipmap mipmap3 = new HeightMipmap(function3, DestinationMinTileSize, destinationSize, DestinationTileSize, tempFolder + "3");
+            HeightMipmap mipmap4 = new HeightMipmap(function4, DestinationMinTileSize, destinationSize, DestinationTileSize, tempFolder + "4");
+            HeightMipmap mipmap5 = new HeightMipmap(function5, DestinationMinTileSize, destinationSize, DestinationTileSize, tempFolder + "5");
+            HeightMipmap mipmap6 = new HeightMipmap(function6, DestinationMinTileSize, destinationSize, DestinationTileSize, tempFolder + "6");
+
+            HeightMipmap.SetCube(mipmap1, mipmap2, mipmap3, mipmap4, mipmap5, mipmap6);
+
+            mipmap1.Compute();
+            mipmap2.Compute();
+            mipmap3.Compute();
+            mipmap4.Compute();
+            mipmap5.Compute();
+            mipmap6.Compute();
+
+            mipmap1.Generate(0, 0, 0, destinationFolder + "/" + FileName + "1" + ".proland");
+            mipmap2.Generate(0, 0, 0, destinationFolder + "/" + FileName + "2" + ".proland");
+            mipmap3.Generate(0, 0, 0, destinationFolder + "/" + FileName + "3" + ".proland");
+            mipmap4.Generate(0, 0, 0, destinationFolder + "/" + FileName + "4" + ".proland");
+            mipmap5.Generate(0, 0, 0, destinationFolder + "/" + FileName + "5" + ".proland");
+            mipmap6.Generate(0, 0, 0, destinationFolder + "/" + FileName + "6" + ".proland");
+
             Debug.Log(string.Format("PreProcessTerrain.PreprocessDem: Computation time: {0} s", (Time.realtimeSinceStartup - startTime)));
         }
 
@@ -109,7 +191,7 @@ namespace SpaceEngine.Core.Preprocess.Terrain
         /// <param name="source">The map to be preprocessed.</param>
         /// <param name="tempFolder">Where temporary files must be saved.</param>
         /// <param name="destinationFolder">Where the precomputed file must be saved.</param>
-        void PreprocessOrtho(InputMap source, string tempFolder, string destinationFolder)
+        void PreprocessPlaneOrtho(InputMap source, string tempFolder, string destinationFolder)
         {
             var startTime = Time.realtimeSinceStartup;
             var destinationSize = DestinationTileSize << DestinationMaxLevel;
@@ -120,7 +202,7 @@ namespace SpaceEngine.Core.Preprocess.Terrain
             mipmap.Compute();
             mipmap.Generate(0, 0, 0, destinationFolder + "/" + FileName + ".proland");
 
-            Debug.Log(string.Format("PreProcessTerrain.PreprocessOrtho: Computation time: {0} s", (Time.realtimeSinceStartup - startTime)));
+            Debug.Log(string.Format("PreProcessTerrain.PreprocessPlaneOrtho: Computation time: {0} s", (Time.realtimeSinceStartup - startTime)));
         }
     }
 }

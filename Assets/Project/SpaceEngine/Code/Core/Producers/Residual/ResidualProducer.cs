@@ -73,9 +73,9 @@ namespace SpaceEngine.Core
 
         float[] MaxR;
 
-        protected override void Start()
+        public override void InitNode()
         {
-            base.Start();
+            base.InitNode();
 
             var storage = Cache.GetStorage(0) as CPUTileStorage;
 
@@ -212,8 +212,12 @@ namespace SpaceEngine.Core
             var tileId = GetTileId(level, tx, ty);
 
             long fileTileSize = Offsets[2 * tileId + 1] - Offsets[2 * tileId];
+            long actualTileSize = (ResidualTileSize + 5) * (ResidualTileSize + 5) * 2;
 
-            if (fileTileSize > (ResidualTileSize + 5) * (ResidualTileSize + 5) * 2) { throw new InvalidParameterException("File size of tile is larger than actual tile size!"); }
+            if (fileTileSize > actualTileSize)
+            {
+                throw new InvalidParameterException(string.Format("File size of tile is larger than actual tile size! {0}:{1}", fileTileSize, actualTileSize));
+            }
 
             var data = new byte[fileTileSize];
 

@@ -4813,7 +4813,7 @@ MonoBehaviour:
   ParentBody: {fileID: 1497659642}
   GlowColor: {r: 0, g: 0, b: 0, a: 1}
   Density: 1
-  TerrainRadiusHold: 0
+  RadiusHold: 0
   Height: 10000
   Scale: 1
   Fade: 1
@@ -8018,7 +8018,7 @@ MonoBehaviour:
   ParentBody: {fileID: 1912963789}
   GlowColor: {r: 0, g: 0, b: 0, a: 1}
   Density: 1
-  TerrainRadiusHold: 0
+  RadiusHold: 0
   Height: 3000
   Scale: 1
   Fade: 1

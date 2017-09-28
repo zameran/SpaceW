@@ -148,13 +148,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 488d5751afda187409ecadd6af5d760e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  Mode: 0
+  Mode: 1
+  Type: 2
   TempFolder: /Resources/Preprocess/Textures/Terrain/Tmp
   DestinationFolder: /Resources/Preprocess/Textures/Terrain
   FileName: DEM
-  DestinationTileSize: 96
-  DestinationMinTileSize: 96
-  DestinationMaxLevel: 2
+  DestinationTileSize: 124
+  DestinationMinTileSize: 124
+  DestinationMaxLevel: 1
   DestinationChannels: 3
   DeleteTempOnFinish: 1
 --- !u!1 &279384779
@@ -198,17 +199,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   View: {fileID: 0}
-  WriteData: {fileID: 7200000, guid: 9cf8284180848cf40a2e80294b128a0c, type: 3}
-  ReadData: {fileID: 7200000, guid: 0d5f05c38659f984aa0dbd6afbe5de96, type: 3}
-  CopyInscatter1: {fileID: 0}
-  CopyInscatterN: {fileID: 0}
-  CopyIrradiance: {fileID: 0}
-  Inscatter1: {fileID: 0}
-  InscatterN: {fileID: 0}
-  InscatterS: {fileID: 0}
-  Irradiance1: {fileID: 0}
-  IrradianceN: {fileID: 0}
-  Transmittance: {fileID: 0}
   AtmosphereMesh: {fileID: 0}
   OceanScreenMeshGrids: []
   QuadMesh: {fileID: 0}
@@ -216,12 +206,14 @@ MonoBehaviour:
   Starfields: []
   Sunglares: []
   HDRMode: 4
+  GSCS: {fileID: 0}
   GridResolution: 25
   OceanGridResolution: 4
   Eclipses: 1
   Planetshadows: 1
   Planetshine: 1
   OceanSkyReflections: 1
+  OceanDepth: 1
   DelayedCalculations: 0
   FloatingOrigin: 0
   DebugFBO: 0

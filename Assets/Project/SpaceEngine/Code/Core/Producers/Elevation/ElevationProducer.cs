@@ -85,6 +85,10 @@ namespace SpaceEngine.Core
         protected override void OnDestroy()
         {
             base.OnDestroy();
+
+            if (CPUResidualTexture != null) CPUResidualTexture.Release();
+
+            CPUResidualComputeBuffer.ReleaseAndDisposeBuffer();
         }
 
         public override int GetBorder()

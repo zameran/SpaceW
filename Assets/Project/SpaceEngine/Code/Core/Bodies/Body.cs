@@ -149,7 +149,7 @@ namespace SpaceEngine.Core.Bodies
 
         protected override void InitNode()
         {
-            TerrainNodes = new List<TerrainNode>(GetComponentsInChildren<TerrainNode>());
+            TerrainNodes = new List<TerrainNode>(GetComponentsInChildren<TerrainNode>(true));
             TerrainNodes.Sort(new TerrainNode.Sort());
 
             if (Atmosphere != null)
@@ -176,7 +176,7 @@ namespace SpaceEngine.Core.Bodies
                 Ring.InitNode();
             }
 
-            for (var terrainNodeIndex = 0; terrainNodeIndex < 6; terrainNodeIndex++)
+            for (var terrainNodeIndex = 0; terrainNodeIndex < TerrainNodes.Count; terrainNodeIndex++)
             {
                 var terrainNode = TerrainNodes[terrainNodeIndex];
 
@@ -216,7 +216,7 @@ namespace SpaceEngine.Core.Bodies
                 Ring.UpdateNode();
             }
 
-            for (var terrainNodeIndex = 0; terrainNodeIndex < 6; terrainNodeIndex++)
+            for (var terrainNodeIndex = 0; terrainNodeIndex < TerrainNodes.Count; terrainNodeIndex++)
             {
                 var terrainNode = TerrainNodes[terrainNodeIndex];
 
