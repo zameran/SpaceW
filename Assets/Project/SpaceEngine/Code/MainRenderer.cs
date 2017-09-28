@@ -115,14 +115,19 @@ public sealed class MainRenderer : MonoSingleton<MainRenderer>
         }
         */
 
+        // NOTE : So. I can't figure out how to sort rendering properly...
+        // All blend modes on Terrain And Atmosphere and crossouts are tested - no result...
+        // The only way is to resort render queues by hard way (just by set a big values to it)...
+        // TODO : Find another way to do that render sorting...
+
         //-----------------------------------------------------------------------------
-        GodManager.Instance.Bodies[0].RenderQueueOffset = 5;
+        GodManager.Instance.Bodies[0].RenderQueueOffset = 5000;
         if (GodManager.Instance.Bodies[0].Atmosphere != null)
-            GodManager.Instance.Bodies[0].Atmosphere.RenderQueueOffset = 6;
+            GodManager.Instance.Bodies[0].Atmosphere.RenderQueueOffset = 6000;
         if (GodManager.Instance.Bodies[0].Ocean != null)
-            GodManager.Instance.Bodies[0].Ocean.RenderQueueOffset = 7;
+            GodManager.Instance.Bodies[0].Ocean.RenderQueueOffset = 7000;
         if (GodManager.Instance.Bodies[0].Ring != null)
-            GodManager.Instance.Bodies[0].Ring.RenderQueueOffset = 4;
+            GodManager.Instance.Bodies[0].Ring.RenderQueueOffset = 4000;
 
         for (int i = 1; i < GodManager.Instance.Bodies.Length; i++)
         {
