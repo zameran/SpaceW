@@ -240,10 +240,8 @@ Shader "SpaceEngine/Planet/Ring"
 
 			Blend One OneMinusSrcColor
 			Cull Off
-			Lighting Off
 			ZWrite On
 			ZTest LEqual 
-			Fog { Mode Off }
 			
 			CGPROGRAM
 			#pragma target 5.0

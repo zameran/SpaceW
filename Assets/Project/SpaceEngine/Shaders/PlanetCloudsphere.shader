@@ -96,23 +96,21 @@ Shader "SpaceEngine/Planet/Cloudsphere"
 		Pass 
 		{
 			Name "Cloudsphere"
-			Tags
-			{ 
-				"Queue" = "Transparent"
-				"RenderType" = "Transparent"
-				"IgnoreProjector" = "True"
+			Tags 
+			{
+				"Queue"					= "Transparent"
+				"RenderType"			= "Transparent"
+				"ForceNoShadowCasting"	= "True"
+				"IgnoreProjector"		= "True"
+
+				"LightMode"				= "Always"
 			}
 
 			Blend SrcAlpha OneMinusSrcAlpha
 			Cull Off
-			Lighting Off
 			ZWrite Off
 			ZTest LEqual
 			Offset -1, -1
-			Fog 
-			{ 
-				Mode Off 
-			}
 
 			CGPROGRAM
 

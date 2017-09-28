@@ -111,7 +111,7 @@ namespace SpaceEngine.Enviroment.Atmospheric
         public Shader SkyShader;
         public Material SkyMaterial;
 
-        public EngineRenderQueue RenderQueue = EngineRenderQueue.Background;
+        public EngineRenderQueue RenderQueue = EngineRenderQueue.Transparent;
         public int RenderQueueOffset = 0;
 
         public Mesh AtmosphereMesh { get { return GodManager.Instance.AtmosphereMesh; } }

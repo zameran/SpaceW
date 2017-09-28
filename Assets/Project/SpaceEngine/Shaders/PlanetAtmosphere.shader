@@ -85,13 +85,10 @@ Shader "SpaceEngine/Planet/Atmosphere"
 				"LightMode"				= "Always"
 			}
 
-			Blend SrcAlpha OneMinusSrcColor
+			Blend One OneMinusSrcColor
 			Cull Front
-			Lighting Off
-			ZWrite Off
+			ZWrite On
 			ZTest LEqual
-			Offset -1, -1
-			Fog { Mode Off }
 
 			CGPROGRAM
 			#include "SpaceStuff.cginc"

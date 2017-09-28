@@ -54,18 +54,18 @@ Shader "SpaceEngine/Planet/Terrain"
 			Name "Planet"
 			Tags 
 			{
-				"Queue"					= "Geometry"	// "Opaque"
+				"Queue"					= "Geometry"
 				"RenderType"			= "Geometry"
 				"ForceNoShadowCasting"	= "False"
 				"IgnoreProjector"		= "True"
 
-				"LightMode"				= "ForwardBase"		// "Deferred" 
+				"LightMode"				= "Always"
 			}
 
+			//Blend SrcAlpha OneMinusSrcColor
 			Cull Back
 			ZWrite On
-			ZTest On
-			Fog { Mode Off }
+			ZTest LEqual
 
 			CGPROGRAM
 			#pragma target 4.0

@@ -336,10 +336,8 @@ Shader "SpaceEngine/Planet/Ocean"
 
 			Blend SrcAlpha OneMinusSrcAlpha
 			Cull Front
-			Lighting Off
 			ZWrite Off
 			ZTest LEqual
-			Fog { Mode Off }
 
 			CGPROGRAM
 			#pragma target 5.0
