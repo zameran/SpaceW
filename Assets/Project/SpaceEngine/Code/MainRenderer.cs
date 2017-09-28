@@ -121,13 +121,13 @@ public sealed class MainRenderer : MonoSingleton<MainRenderer>
         // TODO : Find another way to do that render sorting...
 
         //-----------------------------------------------------------------------------
-        GodManager.Instance.Bodies[0].RenderQueueOffset = 5000;
+        GodManager.Instance.Bodies[0].RenderQueueOffset = 5;
         if (GodManager.Instance.Bodies[0].Atmosphere != null)
-            GodManager.Instance.Bodies[0].Atmosphere.RenderQueueOffset = 6000;
+            GodManager.Instance.Bodies[0].Atmosphere.RenderQueueOffset = 6;
         if (GodManager.Instance.Bodies[0].Ocean != null)
-            GodManager.Instance.Bodies[0].Ocean.RenderQueueOffset = 7000;
+            GodManager.Instance.Bodies[0].Ocean.RenderQueueOffset = 7;
         if (GodManager.Instance.Bodies[0].Ring != null)
-            GodManager.Instance.Bodies[0].Ring.RenderQueueOffset = 4000;
+            GodManager.Instance.Bodies[0].Ring.RenderQueueOffset = 4;
 
         for (int i = 1; i < GodManager.Instance.Bodies.Length; i++)
         {
