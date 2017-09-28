@@ -77,25 +77,26 @@ namespace SpaceEngine.Debugging
 
                     GUILayoutExtensions.VerticalBoxed(string.Format("{0}", counter.Name), GUISkin, () =>
                     {
-                        GUILayout.Space(20);
-
                         GUILayoutExtensions.VerticalBoxed("", GUISkin, () =>
                         {
-                            GUILayout.BeginHorizontal();
-                            GUILayoutExtensions.LabelWithSpace(string.Format("Total: {0}", counter.Time / 1000.0f), -8);
-                            GUILayoutExtensions.LabelWithSpace(string.Format("Average: {0}", counter.Average / 1000.0f),-8);
-                            GUILayoutExtensions.LabelWithSpace(string.Format("Last: {0}", counter.Last / 1000.0f), -8);
-                            GUILayoutExtensions.LabelWithSpace(string.Format("Max: {0}", counter.Max / 1000.0f), -8);
-                            GUILayoutExtensions.LabelWithSpace(string.Format("Count: {0}", counter.Count), -8);
-                            GUILayout.EndHorizontal();
+                            GUILayoutExtensions.Horizontal(() =>
+                            {
+                                GUILayoutExtensions.LabelWithSpace(string.Format("Total: {0}", counter.Time / 1000.0f), -8);
+                                GUILayoutExtensions.LabelWithSpace(string.Format("Average: {0}", counter.Average / 1000.0f), -8);
+                                GUILayoutExtensions.LabelWithSpace(string.Format("Last: {0}", counter.Last / 1000.0f), -8);
+                                GUILayoutExtensions.LabelWithSpace(string.Format("Max: {0}", counter.Max / 1000.0f), -8);
+                                GUILayoutExtensions.LabelWithSpace(string.Format("Count: {0}", counter.Count), -8);
+                            });
                         }, GUILayout.Width(debugInfoBounds.width - 45));
                     }, GUILayout.Width(debugInfoBounds.width - 40));
                 }
 
-                GUILayout.Space(10);
+                GUILayoutExtensions.SpacingSeparator();
 
                 GUILayout.EndVertical();
             }
+
+            GUILayoutExtensions.SpacingSeparator();
 
             GUILayout.EndScrollView();
         }

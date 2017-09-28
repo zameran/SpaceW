@@ -78,8 +78,6 @@ namespace SpaceEngine.Debugging
 
                         GUILayoutExtensions.VerticalBoxed(string.Format("{0}", entry.Name), GUISkin, () =>
                         {
-                            GUILayout.Space(20);
-
                             if (true)
                             {
                                 GUILayoutExtensions.VerticalBoxed("", GUISkin, () =>
@@ -106,10 +104,12 @@ namespace SpaceEngine.Debugging
                         }, GUILayout.Width(debugInfoBounds.width - 40));
                     }
 
-                    GUILayout.Space(10);
+                    GUILayoutExtensions.SpacingSeparator();
 
                     GUILayout.EndVertical();
                 }
+
+                GUILayoutExtensions.SpacingSeparator();
 
                 GUILayout.EndScrollView();
             }

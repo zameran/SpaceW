@@ -75,26 +75,24 @@ namespace SpaceEngine.Debugging
             {
                 GUILayoutExtensions.VerticalBoxed("Input info: ", GUISkin, () =>
                 {
-                    GUILayout.Space(20);
-
                     GUILayoutExtensions.VerticalBoxed("", GUISkin, () =>
                     {
                         DrawLabelLines(Info);
                     });
                 });
 
-                GUILayout.Space(5);
+                GUILayoutExtensions.SpacingSeparator();
 
                 GUILayoutExtensions.VerticalBoxed("Additional info: ", GUISkin, () =>
                 {
-                    GUILayout.Space(20);
-
                     GUILayoutExtensions.VerticalBoxed("", GUISkin, () =>
                     {
                         DrawLabelLines(InfoAdditional);
                     });
                 });
             }
+
+            GUILayoutExtensions.SpacingSeparator();
 
             GUILayout.EndScrollView();
         }

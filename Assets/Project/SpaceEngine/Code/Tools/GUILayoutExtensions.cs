@@ -39,14 +39,30 @@ using UnityEngine;
 
 public static class GUILayoutExtensions
 {
+    public static void Space(int spacing)
+    {
+        GUILayout.Space(spacing);
+    }
+
+    public static void BoxedPreHeader(int spacing = 20)
+    {
+        Space(spacing);
+    }
+
+    public static void SpacingSeparator(int spacing = 5)
+    {
+        Space(spacing);
+    }
+
     public static void SliderWithField(object caption, float leftValue, float rightValue, ref float value, string pattern = "0.0", int textFieldWidth = 75)
     {
         GUILayout.Label(caption.ToString());
 
         GUILayout.BeginHorizontal();
 
-        GUILayout.TextField(value.ToString(pattern), GUILayout.MaxWidth(textFieldWidth));
+        value = float.Parse(GUILayout.TextField(value.ToString(pattern), GUILayout.MaxWidth(textFieldWidth)));
         value = GUILayout.HorizontalSlider(value, leftValue, rightValue);
+        value = Mathf.Clamp(value, leftValue, rightValue);
 
         GUILayout.EndHorizontal();
     }
@@ -57,12 +73,13 @@ public static class GUILayoutExtensions
 
         GUILayout.BeginHorizontal();
 
-        GUILayout.TextField(value.ToString(pattern), GUILayout.MaxWidth(textFieldWidth));
+        value = float.Parse(GUILayout.TextField(value.ToString(pattern), GUILayout.MaxWidth(textFieldWidth)));
 
         if (GUILayout.Button("+", GUILayout.Width(20))) { value += controlStep; }
         if (GUILayout.Button("-", GUILayout.Width(20))) { value -= controlStep; }
 
         value = GUILayout.HorizontalSlider(value, leftValue, rightValue);
+        value = Mathf.Clamp(value, leftValue, rightValue);
 
         GUILayout.EndHorizontal();
     }
@@ -104,6 +121,8 @@ public static class GUILayoutExtensions
     {
         GUILayout.BeginVertical(caption, skin.box, options);
         {
+            if (!string.IsNullOrWhiteSpace(caption)) { BoxedPreHeader(); }
+
             if (body != null) body();
         }
         GUILayout.EndVertical();

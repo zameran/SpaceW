@@ -95,7 +95,7 @@ namespace SpaceEngine.Enviroment.Atmospheric
         public float Density = 1.0f;
 
         [Tooltip("1/3 or 1/2 from Planet.TerrainMaxHeight")]
-        public float TerrainRadiusHold = 0.0f;
+        public float RadiusHold = 0.0f;
         public float Height = 100.0f;
         public float Scale = 1.0f;
         public float Fade = 1.0f;
@@ -217,9 +217,9 @@ namespace SpaceEngine.Enviroment.Atmospheric
         {
             SkyMaterial.renderQueue = (int)RenderQueue + RenderQueueOffset;
 
-            AtmosphereParameters.Rg = Radius - TerrainRadiusHold;
-            AtmosphereParameters.Rt = (Radius + Height) - TerrainRadiusHold;
-            AtmosphereParameters.Rl = (Radius + Height * 1.05f) - TerrainRadiusHold;
+            AtmosphereParameters.Rg = Radius - RadiusHold;
+            AtmosphereParameters.Rt = (Radius + Height) - RadiusHold;
+            AtmosphereParameters.Rl = (Radius + Height * 1.05f) - RadiusHold;
             AtmosphereParameters.SCALE = Scale;
 
             var fadeValue = Mathf.Clamp01(VectorHelper.AngularRadius(Origin, GodManager.Instance.View.WorldCameraPosition, Radius));
@@ -362,9 +362,9 @@ namespace SpaceEngine.Enviroment.Atmospheric
         {
             AtmosphereParameters = new AtmosphereParameters(ap);
 
-            AtmosphereParameters.Rg = Radius - TerrainRadiusHold;
-            AtmosphereParameters.Rt = (Radius + Height) - TerrainRadiusHold;
-            AtmosphereParameters.Rl = (Radius + Height * 1.05f) - TerrainRadiusHold;
+            AtmosphereParameters.Rg = Radius - RadiusHold;
+            AtmosphereParameters.Rt = (Radius + Height) - RadiusHold;
+            AtmosphereParameters.Rl = (Radius + Height * 1.05f) - RadiusHold;
             AtmosphereParameters.SCALE = Scale;
         }
 

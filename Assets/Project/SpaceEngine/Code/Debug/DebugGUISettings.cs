@@ -62,23 +62,17 @@ namespace SpaceEngine.Debugging
 
             GUILayoutExtensions.VerticalBoxed("Rendering parameters: ", GUISkin, () =>
             {
-                GUILayout.Space(20);
-
                 GUILayoutExtensions.VerticalBoxed("", GUISkin, () =>
                 {
                     GUILayoutExtensions.VerticalBoxed("Fragment HDR Mode: ", GUISkin, () =>
                     {
-                        GUILayout.Space(20);
-
                         GodManager.Instance.HDRMode = (AtmosphereHDR)GUILayout.SelectionGrid((int)GodManager.Instance.HDRMode, System.Enum.GetNames(typeof(AtmosphereHDR)), 2);
                     });
 
-                    GUILayout.Space(10);
+                    GUILayoutExtensions.SpacingSeparator();
 
                     GUILayoutExtensions.VerticalBoxed("Features: ", GUISkin, () =>
                     {
-                        GUILayout.Space(20);
-
                         GodManager.Instance.Eclipses = GUILayout.Toggle(GodManager.Instance.Eclipses, " - Eclipses?");
                         GodManager.Instance.Planetshadows = GUILayout.Toggle(GodManager.Instance.Planetshadows, " - Planetshadows?");
                         GodManager.Instance.Planetshine = GUILayout.Toggle(GodManager.Instance.Planetshine, " - Planetshine?");
@@ -88,7 +82,7 @@ namespace SpaceEngine.Debugging
                 });
             });
 
-            GUILayout.Space(5);
+            GUILayoutExtensions.SpacingSeparator();
 
             GUILayout.EndScrollView();
         }

@@ -68,8 +68,6 @@ namespace SpaceEngine.Debugging
             {
                 GUILayoutExtensions.VerticalBoxed("Body parameters: ", GUISkin, () =>
                 {
-                    GUILayout.Space(20);
-
                     GUILayoutExtensions.VerticalBoxed("", GUISkin, () =>
                     {
                         if (Body.MaterialTable != null && Body.MaterialTable.Lut != null)
@@ -86,14 +84,12 @@ namespace SpaceEngine.Debugging
                     });
                 });
 
-                GUILayout.Space(5);
+                GUILayoutExtensions.SpacingSeparator();
 
                 if (Body.Ocean != null && Body.OceanEnabled && Helper.Enabled(Body.Ocean))
                 {
                     GUILayoutExtensions.VerticalBoxed("Ocean parameters: ", GUISkin, () =>
                     {
-                        GUILayout.Space(20);
-
                         GUILayoutExtensions.VerticalBoxed("", GUISkin, () =>
                         {
                             GUILayoutExtensions.SliderWithField("Level: ", 0.0f, 5.0f, ref Body.Ocean.OceanLevel);
@@ -101,7 +97,7 @@ namespace SpaceEngine.Debugging
                         });
                     });
 
-                    GUILayout.Space(5);
+                    GUILayoutExtensions.SpacingSeparator();
                 }
                 else
                 {

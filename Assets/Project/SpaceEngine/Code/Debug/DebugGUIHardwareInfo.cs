@@ -66,22 +66,18 @@ namespace SpaceEngine.Debugging
         {
             GUILayoutExtensions.VerticalBoxed("Controls: ", GUISkin, () =>
             {
-                GUILayout.Space(20);
-
                 GUILayoutExtensions.VerticalBoxed("", GUISkin, () =>
                 {
                     if (GUILayout.Button("Update")) HardwareInfo.Get();
                 });
             });
 
-            GUILayout.Space(5);
+            GUILayoutExtensions.SpacingSeparator();
 
             ScrollPosition = GUILayout.BeginScrollView(ScrollPosition, false, true);
 
             GUILayoutExtensions.VerticalBoxed("Overall summary: ", GUISkin, () =>
             {
-                GUILayout.Space(20);
-
                 GUILayoutExtensions.VerticalBoxed("", GUISkin, () =>
                 {
                     GUILayoutExtensions.LabelWithSpace("Device Type: " + HardwareInfo.deviceType, -8);
@@ -107,39 +103,35 @@ namespace SpaceEngine.Debugging
                     GUILayoutExtensions.LabelWithSpace("3DTextures: " + HardwareInfo.supports3DTextures, -8);
                     GUILayoutExtensions.LabelWithSpace("Graphics Multithreading: " + HardwareInfo.graphicsMultiThreaded, -8);
 
-                    GUILayout.Space(5);
+                    GUILayoutExtensions.SpacingSeparator();
                 });
             });
 
-            GUILayout.Space(5);
+            GUILayoutExtensions.SpacingSeparator();
 
             GUILayoutExtensions.VerticalBoxed("Render Texture support summary: ", GUISkin, () =>
             {
-                GUILayout.Space(20);
-
                 GUILayoutExtensions.VerticalBoxed("", GUISkin, () =>
                 {
                     DrawSupportedFormats<RenderTextureFormat>(HardwareInfo.RenderTextureFormats, "RenderTexture");
 
-                    GUILayout.Space(5);
+                    GUILayoutExtensions.SpacingSeparator();
                 });
             });
 
-            GUILayout.Space(5);
+            GUILayoutExtensions.SpacingSeparator();
 
             GUILayoutExtensions.VerticalBoxed("Texture support summary: ", GUISkin, () =>
             {
-                GUILayout.Space(20);
-
                 GUILayoutExtensions.VerticalBoxed("", GUISkin, () =>
                 {
                     DrawSupportedFormats<TextureFormat>(HardwareInfo.TextureFormats, "Texture");
 
-                    GUILayout.Space(5);
+                    GUILayoutExtensions.SpacingSeparator();
                 });
             });
 
-            GUILayout.Space(5);
+            GUILayoutExtensions.SpacingSeparator();
 
             GUILayout.EndScrollView();
         }

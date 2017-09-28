@@ -86,21 +86,21 @@ namespace SpaceEngine.Debugging
         {
             GUILayoutExtensions.VerticalBoxed("Controls: ", GUISkin, () =>
             {
-                GUILayout.Space(20);
-
                 GUILayoutExtensions.VerticalBoxed("", GUISkin, () =>
                 {
                     ShowContents = GUILayout.Toggle(ShowContents, " Show Storage Contents?");
                 });
             });
 
-            GUILayout.Space(5);
+            GUILayoutExtensions.SpacingSeparator();
 
             ScrollPosition = GUILayout.BeginScrollView(ScrollPosition, false, true);
 
             DrawStorageInfo<GPUTileStorage>("GPU Storage");
             DrawStorageInfo<CBTileStorage>("CB Storage");
             DrawStorageInfo<CPUTileStorage>("CPU Storage");
+
+            GUILayoutExtensions.SpacingSeparator();
 
             GUILayout.EndScrollView();
         }
@@ -119,8 +119,6 @@ namespace SpaceEngine.Debugging
             GUILayoutExtensions.VerticalBoxed(prefix, GUISkin, () =>
             {
                 var storages = GodManager.Instance.ActiveBody.transform.GetComponentsInChildren<T>().ToList();
-
-                GUILayout.Space(20);
 
                 GUILayoutExtensions.VerticalBoxed("", GUISkin, () =>
                 {
@@ -164,7 +162,7 @@ namespace SpaceEngine.Debugging
                             }
                         }
                     }
-                    GUILayout.Space(5);
+                    GUILayoutExtensions.SpacingSeparator();
                 }, GUILayout.Width(debugInfoBounds.width - 45));
             }, GUILayout.Width(debugInfoBounds.width - 40));
         }
@@ -174,8 +172,6 @@ namespace SpaceEngine.Debugging
             GUILayoutExtensions.VerticalBoxed(prefix, GUISkin, () =>
             {
                 var storages = GodManager.Instance.ActiveBody.transform.GetComponentsInChildren<T>().ToList();
-
-                GUILayout.Space(20);
 
                 GUILayoutExtensions.VerticalBoxed("", GUISkin, () =>
                 {
@@ -190,7 +186,7 @@ namespace SpaceEngine.Debugging
                         GUILayoutExtensions.LabelWithSpace(string.Format("{0} Total Free: {1}", prefix, storages.Sum((storage) => storage.FreeSlotsCount)));
                     }
 
-                    GUILayout.Space(5);
+                    GUILayoutExtensions.SpacingSeparator();
                 }, GUILayout.Width(debugInfoBounds.width - 45));
             }, GUILayout.Width(debugInfoBounds.width - 40));
         }

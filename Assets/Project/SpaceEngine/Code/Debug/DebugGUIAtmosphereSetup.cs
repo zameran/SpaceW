@@ -120,15 +120,13 @@ namespace SpaceEngine.Debugging
         {
             GUILayoutExtensions.VerticalBoxed("Controls: ", GUISkin, () =>
             {
-                GUILayout.Space(20);
-
                 GUILayoutExtensions.VerticalBoxed("", GUISkin, () =>
                 {
                     DrawApplyButton(() => { if (Body != null && Atmosphere != null) Atmosphere.Bake(); });
                 });
             });
 
-            GUILayout.Space(5);
+            GUILayoutExtensions.SpacingSeparator();
 
             ScrollPosition = GUILayout.BeginScrollView(ScrollPosition, false, true);
 
@@ -138,45 +136,45 @@ namespace SpaceEngine.Debugging
                 {
                     GUILayoutExtensions.VerticalBoxed("Realtime parameters: ", GUISkin, () =>
                     {
-                        GUILayout.Space(20);
-
                         GUILayoutExtensions.VerticalBoxed("", GUISkin, () =>
                         {
                             GUILayoutExtensions.VerticalBoxed("Preset: ", GUISkin, () =>
                             {
-                                GUILayout.Space(20);
-
                                 Atmosphere.AtmosphereBase = (AtmosphereBase)GUILayout.SelectionGrid((int)Atmosphere.AtmosphereBase, Enum.GetNames(typeof(AtmosphereBase)), 2);
                             });
 
-                            GUILayout.Space(10);
+                            GUILayoutExtensions.SpacingSeparator();
+
+                            GUILayoutExtensions.VerticalBoxed("Artifact fixers: ", GUISkin, () =>
+                            {
+                                GUILayoutExtensions.SliderWithField("Radius Hold (Terrain Radius)", 0.0f, 2048.0f, ref Atmosphere.RadiusHold, "0.00", 75);
+                                GUILayoutExtensions.SliderWithField("Aerial Radius (Perspective Offset)", 0.0f, 4096.0f, ref Atmosphere.AerialPerspectiveOffset, "0.00", 75);
+                                GUILayoutExtensions.SliderWithFieldAndControls("Horizon Fix Eps", 0.0f, 1.0f, ref Atmosphere.HorizonFixEps, "0.00000", 75, 0.00025f);
+                                GUILayoutExtensions.SliderWithFieldAndControls("Mie Fade Fix", 0.0f, 1.0f, ref Atmosphere.MieFadeFix, "0.0000", 75, 0.0025f);
+                            });
+
+                            GUILayoutExtensions.SpacingSeparator();
 
                             GUILayoutExtensions.SliderWithField("Density: ", 0.0f, 1.0f, ref Atmosphere.Density);
-                            GUILayoutExtensions.SliderWithField("Radius Hold (Terrain Radius)", 0.0f, 2048.0f, ref Atmosphere.TerrainRadiusHold, "0.00");
                             GUILayoutExtensions.SliderWithField("Scale", 0.01f, 16.0f, ref Atmosphere.Scale, "0.000");
                             GUILayoutExtensions.SliderWithField("Height: ", 0.0f, Body.Size / 512.0f, ref Atmosphere.Height);
-                            GUILayoutExtensions.SliderWithField("Aerial Perspective Offset", 0.0f, 4096.0f, ref Atmosphere.AerialPerspectiveOffset, "0.00");
                             GUILayoutExtensions.SliderWithField("Extinction Ground Fade", 0.000025f, 0.1f, ref Atmosphere.ExtinctionGroundFade, "0.000000");
                             GUILayoutExtensions.SliderWithField("HDR Exposure", 0.0f, 1.0f, ref Atmosphere.HDRExposure, "0.00");
                         });
                     });
 
-                    GUILayout.Space(5);
+                    GUILayoutExtensions.SpacingSeparator();
 
                     if (Atmosphere.AtmosphereBase == AtmosphereBase.Custom)
                     {
                         GUILayoutExtensions.VerticalBoxed("Bake parameters: ", GUISkin, () =>
                         {
-                            GUILayout.Space(20);
-
                             GUILayoutExtensions.VerticalBoxed("Copy from preset: ", GUISkin, () =>
                             {
-                                GUILayout.Space(20);
-
                                 AtmosphereBase = (AtmosphereBase)GUILayout.SelectionGrid((int)AtmosphereBase, Enum.GetNames(typeof(AtmosphereBase)), 2);
                             });
 
-                            GUILayout.Space(5);
+                            GUILayoutExtensions.SpacingSeparator();
 
                             var parameters = PresetChanged ? AtmosphereParameters.Get(AtmosphereBase) : new AtmosphereParameters(AtmosphereParameters);
 
@@ -238,15 +236,13 @@ namespace SpaceEngine.Debugging
 
             GUILayoutExtensions.VerticalBoxed(caption, GUISkin, () =>
             {
-                GUILayout.Space(20);
-
                 GUILayoutExtensions.SliderWithField("X: ", leftValue, rightValue, ref x, pattern, textFieldWidth);
                 GUILayoutExtensions.SliderWithField("Y: ", leftValue, rightValue, ref y, pattern, textFieldWidth);
                 GUILayoutExtensions.SliderWithField("Z: ", leftValue, rightValue, ref z, pattern, textFieldWidth);
                 GUILayoutExtensions.SliderWithField("W: ", leftValue, rightValue, ref w, pattern, textFieldWidth);
             });
 
-            GUILayout.Space(5);
+            GUILayoutExtensions.SpacingSeparator();
 
             value = new Vector4(x, y, z, w);
         }
