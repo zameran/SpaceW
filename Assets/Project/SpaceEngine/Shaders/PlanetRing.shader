@@ -130,37 +130,25 @@ Shader "SpaceEngine/Planet/Ring"
 		{
 			float4 mainTex = tex2D(_DiffuseTexture, i.uv);
 			float4 mainColor = mainTex * _DiffuseColor;
+			float3 detailParameters = float3(0.01, 512, 0.000001); // [2D Frequency, Radial Frequency, 1 / Cameran.PixelSize]
 					
 			color = i.color * mainColor;
 
-			float cameraDistance = length(i.relativeDirection);
-			float rotationAngle = 0.0000125 * _Time.y;
-			float sina = sin(rotationAngle);
-			float cosa = cos(rotationAngle);
-			float2x2 rotationMatrix = float2x2(cosa, -sina, sina, cosa);
-
-			// TODO : Fix fading magic. Now fading obly works properly in 'center' of the ring...
-			// NOTE : This happends, because of edge stripes exist only at ring border. Can be fixed via adding extra 'stripe' at center.
-			// |-----|		|--|--|
-			// |-----|		|--|--|
-			// |-----|		|--|--|
-			// |-----|		|--|--|
-
-			float2 position = i.worldPosition.xz * 0.01;
-			float2 deltaPosition = mul(float2(position.x, position.y), rotationMatrix);
-			float radial = i.uv * 512;
-			float noiseValue = 1;
-			float fadeIn = 1.0 - cameraDistance * 32;
-			float fadeOut = smoothstep(0.0, 1.0, (cameraDistance * 128) - 0.25);
+			float cameraDistance = length(_WorldSpaceCameraPos - i.worldPosition.xyz);
+			float noiseValue = 1.0;
+			float fadeIn = 1.0 - cameraDistance * detailParameters.z;
+			float fadeOut = smoothstep(0.0, 1.0, (cameraDistance * 0.000225) - 0.25);
 					
 			if(fadeIn > 0.0)
 			{
+				float2 deltaPosition = i.worldPosition.xz * detailParameters.x;
+				float radial = i.uv.x * detailParameters.y;
+
 				noiseValue = tex2D(_NoiseTexture, deltaPosition).r *
 							 tex2D(_NoiseTexture, deltaPosition * 0.3).g *
 							 tex2D(_NoiseTexture, float2(radial, 0.5)).b *
 							 tex2D(_NoiseTexture, float2(radial * 0.3, 0.5)).a * 16.0;
 
-				noiseValue = saturate(noiseValue);
 				noiseValue = lerp(1.0, noiseValue, clamp(fadeIn, 0.0, 1.0));
 			}
 
@@ -249,9 +237,9 @@ Shader "SpaceEngine/Planet/Ring"
 			#pragma vertex vert
 			#pragma fragment frag
 
-			#pragma multi_compile DUMMY LIGHT_1 LIGHT_2 LIGHT_3 LIGHT_4
-			#pragma multi_compile DUMMY SHADOW_1 SHADOW_2 SHADOW_3 SHADOW_4
-			#pragma multi_compile DUMMY SCATTERING			
+			#pragma multi_compile LIGHT_1 LIGHT_2 LIGHT_3 LIGHT_4
+			#pragma multi_compile SHADOW_1 SHADOW_2 SHADOW_3 SHADOW_4
+			#pragma multi_compile SCATTERING			
 			ENDCG
 		}
 	}
