@@ -147,6 +147,7 @@ namespace UnityEngine
         public override bool Equals(object obj)
         {
             if (obj is Matrix4x4d) { return Equals((Matrix4x4d)obj); }
+
             return false;
         }
 
@@ -402,6 +403,82 @@ namespace UnityEngine
 
         #endregion
 
+        #region ConvertTo
+
+        public Matrix4x4 ToMatrix4x4()
+        {
+            return new Matrix4x4
+            {
+                m00 = (float)m[0, 0],
+                m01 = (float)m[0, 1],
+                m02 = (float)m[0, 2],
+                m03 = (float)m[0, 3],
+
+                m10 = (float)m[1, 0],
+                m11 = (float)m[1, 1],
+                m12 = (float)m[1, 2],
+                m13 = (float)m[1, 3],
+
+                m20 = (float)m[2, 0],
+                m21 = (float)m[2, 1],
+                m22 = (float)m[2, 2],
+                m23 = (float)m[2, 3],
+
+                m30 = (float)m[3, 0],
+                m31 = (float)m[3, 1],
+                m32 = (float)m[3, 2],
+                m33 = (float)m[3, 3]
+            };
+        }
+
+        public static Matrix4x4d ToMatrix4x4d(Matrix4x4 matf)
+        {
+            var mat = Matrix4x4d.identity;
+
+            mat.m[0, 0] = matf.m00;
+            mat.m[0, 1] = matf.m01;
+            mat.m[0, 2] = matf.m02;
+            mat.m[0, 3] = matf.m03;
+
+            mat.m[1, 0] = matf.m10;
+            mat.m[1, 1] = matf.m11;
+            mat.m[1, 2] = matf.m12;
+            mat.m[1, 3] = matf.m13;
+
+            mat.m[2, 0] = matf.m20;
+            mat.m[2, 1] = matf.m21;
+            mat.m[2, 2] = matf.m22;
+            mat.m[2, 3] = matf.m23;
+
+            mat.m[3, 0] = matf.m30;
+            mat.m[3, 1] = matf.m31;
+            mat.m[3, 2] = matf.m32;
+            mat.m[3, 3] = matf.m33;
+
+            return mat;
+        }
+
+        public Matrix3x3d ToMatrix3x3d()
+        {
+            var mat = Matrix3x3d.identity;
+
+            mat.m[0, 0] = m[0, 0];
+            mat.m[0, 1] = m[0, 1];
+            mat.m[0, 2] = m[0, 2];
+
+            mat.m[1, 0] = m[1, 0];
+            mat.m[1, 1] = m[1, 1];
+            mat.m[1, 2] = m[1, 2];
+
+            mat.m[2, 0] = m[2, 0];
+            mat.m[2, 1] = m[2, 1];
+            mat.m[2, 2] = m[2, 2];
+
+            return mat;
+        }
+
+        #endregion
+
         #region Column/Row
 
         public Vector4d GetColumn(int iCol)
@@ -470,72 +547,6 @@ namespace UnityEngine
         public Matrix4x4d Inverse()
         {
             return Adjoint() * (1.0 / Determinant());
-        }
-
-        public Matrix4x4 ToMatrix4x4()
-        {
-            var mat = new Matrix4x4
-            {
-                m00 = (float)m[0, 0],
-                m01 = (float)m[0, 1],
-                m02 = (float)m[0, 2],
-                m03 = (float)m[0, 3],
-                m10 = (float)m[1, 0],
-                m11 = (float)m[1, 1],
-                m12 = (float)m[1, 2],
-                m13 = (float)m[1, 3],
-                m20 = (float)m[2, 0],
-                m21 = (float)m[2, 1],
-                m22 = (float)m[2, 2],
-                m23 = (float)m[2, 3],
-                m30 = (float)m[3, 0],
-                m31 = (float)m[3, 1],
-                m32 = (float)m[3, 2],
-                m33 = (float)m[3, 3]
-            };
-
-            return mat;
-        }
-
-        public Matrix3x3d ToMatrix3x3d()
-        {
-            var mat = Matrix3x3d.identity;
-
-            mat.m[0, 0] = m[0, 0];
-            mat.m[0, 1] = m[0, 1];
-            mat.m[0, 2] = m[0, 2];
-            mat.m[1, 0] = m[1, 0];
-            mat.m[1, 1] = m[1, 1];
-            mat.m[1, 2] = m[1, 2];
-            mat.m[2, 0] = m[2, 0];
-            mat.m[2, 1] = m[2, 1];
-            mat.m[2, 2] = m[2, 2];
-
-            return mat;
-        }
-
-        public static Matrix4x4d ToMatrix4x4d(Matrix4x4 matf)
-        {
-            var mat = Matrix4x4d.identity;
-
-            mat.m[0, 0] = matf.m00;
-            mat.m[0, 1] = matf.m01;
-            mat.m[0, 2] = matf.m02;
-            mat.m[0, 3] = matf.m03;
-            mat.m[1, 0] = matf.m10;
-            mat.m[1, 1] = matf.m11;
-            mat.m[1, 2] = matf.m12;
-            mat.m[1, 3] = matf.m13;
-            mat.m[2, 0] = matf.m20;
-            mat.m[2, 1] = matf.m21;
-            mat.m[2, 2] = matf.m22;
-            mat.m[2, 3] = matf.m23;
-            mat.m[3, 0] = matf.m30;
-            mat.m[3, 1] = matf.m31;
-            mat.m[3, 2] = matf.m32;
-            mat.m[3, 3] = matf.m33;
-
-            return mat;
         }
 
         public static Matrix4x4d Translate(Vector3d v)

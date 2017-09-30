@@ -107,36 +107,36 @@ namespace SpaceEngine.Core.Terrain.Deformation
                                   0.0, 0.0, 0.0, 1.0);
         }
 
-        public override Frustum.VISIBILITY GetVisibility(TerrainNode node, Box3d localBox, Vector3d[] deformedBox)
+        public override Frustum3d.VISIBILITY GetVisibility(TerrainNode node, Box3d localBox, Vector3d[] deformedBox)
         {
             var f = (float)((R - localBox.zmin) / ((R - localBox.zmax) * Math.Cos((localBox.ymax - localBox.ymin) / (2.0 * R))));
 
             var v0 = GetClipVisibility(node.DeformedFrustumPlanes[0], deformedBox, f);
-            if (v0 == Frustum.VISIBILITY.INVISIBLE) { return Frustum.VISIBILITY.INVISIBLE; }
+            if (v0 == Frustum3d.VISIBILITY.INVISIBLE) { return Frustum3d.VISIBILITY.INVISIBLE; }
 
             var v1 = GetClipVisibility(node.DeformedFrustumPlanes[1], deformedBox, f);
-            if (v1 == Frustum.VISIBILITY.INVISIBLE) { return Frustum.VISIBILITY.INVISIBLE; }
+            if (v1 == Frustum3d.VISIBILITY.INVISIBLE) { return Frustum3d.VISIBILITY.INVISIBLE; }
 
             var v2 = GetClipVisibility(node.DeformedFrustumPlanes[2], deformedBox, f);
-            if (v2 == Frustum.VISIBILITY.INVISIBLE) { return Frustum.VISIBILITY.INVISIBLE; }
+            if (v2 == Frustum3d.VISIBILITY.INVISIBLE) { return Frustum3d.VISIBILITY.INVISIBLE; }
 
             var v3 = GetClipVisibility(node.DeformedFrustumPlanes[3], deformedBox, f);
-            if (v3 == Frustum.VISIBILITY.INVISIBLE) { return Frustum.VISIBILITY.INVISIBLE; }
+            if (v3 == Frustum3d.VISIBILITY.INVISIBLE) { return Frustum3d.VISIBILITY.INVISIBLE; }
 
             var v4 = GetClipVisibility(node.DeformedFrustumPlanes[4], deformedBox, f);
-            if (v4 == Frustum.VISIBILITY.INVISIBLE) { return Frustum.VISIBILITY.INVISIBLE; }
+            if (v4 == Frustum3d.VISIBILITY.INVISIBLE) { return Frustum3d.VISIBILITY.INVISIBLE; }
 
-            if (v0 == Frustum.VISIBILITY.FULLY && v1 == Frustum.VISIBILITY.FULLY &&
-                v2 == Frustum.VISIBILITY.FULLY && v3 == Frustum.VISIBILITY.FULLY &&
-                v4 == Frustum.VISIBILITY.FULLY)
+            if (v0 == Frustum3d.VISIBILITY.FULLY && v1 == Frustum3d.VISIBILITY.FULLY &&
+                v2 == Frustum3d.VISIBILITY.FULLY && v3 == Frustum3d.VISIBILITY.FULLY &&
+                v4 == Frustum3d.VISIBILITY.FULLY)
             {
-                return Frustum.VISIBILITY.FULLY;
+                return Frustum3d.VISIBILITY.FULLY;
             }
 
-            return Frustum.VISIBILITY.PARTIALLY;
+            return Frustum3d.VISIBILITY.PARTIALLY;
         }
 
-        public static Frustum.VISIBILITY GetClipVisibility(Vector4d clip, Vector3d[] b, double f)
+        public static Frustum3d.VISIBILITY GetClipVisibility(Vector4d clip, Vector3d[] b, double f)
         {
             double c1 = b[0].x * clip.x + clip.w;
             double c2 = b[1].x * clip.x + clip.w;
@@ -157,15 +157,15 @@ namespace SpaceEngine.Core.Terrain.Deformation
 
             if (p1 <= 0 && p2 <= 0 && p3 <= 0 && p4 <= 0 && p5 <= 0 && p6 <= 0 && p7 <= 0 && p8 <= 0)
             {
-                return Frustum.VISIBILITY.INVISIBLE;
+                return Frustum3d.VISIBILITY.INVISIBLE;
             }
 
             if (p1 > 0 && p2 > 0 && p3 > 0 && p4 > 0 && p5 > 0 && p6 > 0 && p7 > 0 && p8 > 0)
             {
-                return Frustum.VISIBILITY.FULLY;
+                return Frustum3d.VISIBILITY.FULLY;
             }
 
-            return Frustum.VISIBILITY.PARTIALLY;
+            return Frustum3d.VISIBILITY.PARTIALLY;
         }
 
         public override void SetUniforms(TerrainNode node, Material target)

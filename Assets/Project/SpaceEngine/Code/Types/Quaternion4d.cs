@@ -33,9 +33,28 @@ namespace UnityEngine
 #pragma warning disable 660, 661
 
     [Serializable]
-    public struct Quaternion4d
+    public struct Quaternion4d : IEquatable<Quaternion4d>
     {
-        public double x, y, z, w;
+        #region Fields
+
+        public double x;
+        public double y;
+        public double z;
+        public double w;
+
+        #endregion
+
+        #region Properties
+
+        public static Quaternion4d identity { get { return new Quaternion4d(0.0, 0.0, 0.0, 1.0); } }
+
+        public static Quaternion4d zero { get { return new Quaternion4d(0.0, 0.0, 0.0, 0.0); } }
+
+        public static Quaternion4d one { get { return new Quaternion4d(1.0, 1.0, 1.0, 1.0); } }
+
+        #endregion
+
+        #region Constructors
 
         public Quaternion4d(double x, double y, double z, double w)
         {
@@ -47,26 +66,26 @@ namespace UnityEngine
 
         public Quaternion4d(double[] v)
         {
-            this.x = v[0];
-            this.y = v[1];
-            this.z = v[2];
-            this.w = v[3];
+            x = v[0];
+            y = v[1];
+            z = v[2];
+            w = v[3];
         }
 
         public Quaternion4d(Quaternion4d q)
         {
-            this.x = q.x;
-            this.y = q.y;
-            this.z = q.z;
-            this.w = q.w;
+            x = q.x;
+            y = q.y;
+            z = q.z;
+            w = q.w;
         }
 
         public Quaternion4d(Quaternion q)
         {
-            this.x = (double)q.x;
-            this.y = (double)q.y;
-            this.z = (double)q.z;
-            this.w = (double)q.w;
+            x = q.x;
+            y = q.y;
+            z = q.z;
+            w = q.w;
         }
 
         public Quaternion4d(Vector3d axis, double angle)
@@ -91,10 +110,10 @@ namespace UnityEngine
             var sina = Mathf.Sin(a);
             var cosa = Mathf.Cos(a);
 
-            x = (double)(axisN.x * sina);
-            y = (double)(axisN.y * sina);
-            z = (double)(axisN.z * sina);
-            w = (double)cosa;
+            x = axisN.x * sina;
+            y = axisN.y * sina;
+            z = axisN.z * sina;
+            w = cosa;
         }
 
         public Quaternion4d(Vector3d to, Vector3d from)
@@ -145,6 +164,168 @@ namespace UnityEngine
             }
         }
 
+        #endregion
+
+        #region Overrides
+
+        public override bool Equals(object obj)
+        {
+            if (obj is Quaternion4d) { return Equals((Quaternion4d)obj); }
+
+            return false;
+        }
+
+        public override int GetHashCode()
+        {
+            double hashcode = 23;
+
+            hashcode = (hashcode * 37) + x;
+            hashcode = (hashcode * 37) + y;
+            hashcode = (hashcode * 37) + z;
+            hashcode = (hashcode * 37) + w;
+
+            return (int)hashcode;
+        }
+
+        #endregion
+
+        #region IEquatable<Quaternion4d>
+
+        public bool Equals(Quaternion4d other)
+        {
+            return this == other;
+        }
+
+        #endregion
+
+        #region Operations
+
+        public static Quaternion4d operator *(Quaternion4d q1, Quaternion4d q2)
+        {
+            return new Quaternion4d(q2.w * q1.x + q2.x * q1.w + q2.y * q1.z - q2.z * q1.y, q2.w * q1.y - q2.x * q1.z + q2.y * q1.w + q2.z * q1.x,
+                                    q2.w * q1.z + q2.x * q1.y - q2.y * q1.x + q2.z * q1.w, q2.w * q1.w - q2.x * q1.x - q2.y * q1.y - q2.z * q1.z);
+        }
+
+        public static Vector3d operator *(Quaternion4d q, Vector3d v)
+        {
+            return q.ToMatrix3x3d() * v;
+        }
+
+        public static bool operator ==(Quaternion4d lhs, Quaternion4d rhs)
+        {
+            return Dot(lhs, rhs) > 0.999999f;
+        }
+
+        public static bool operator !=(Quaternion4d lhs, Quaternion4d rhs)
+        {
+            return !(lhs == rhs);
+        }
+
+        public static implicit operator Quaternion(Quaternion4d q)
+        {
+            return new Quaternion((float)q.x, (float)q.y, (float)q.z, (float)q.w);
+        }
+
+        public static implicit operator Quaternion4d(Quaternion q)
+        {
+            return new Quaternion4d(q.x, q.y, q.z, q.w);
+        }
+
+        #endregion
+
+        #region ToString
+
+        public override string ToString()
+        {
+            return string.Format("({0}, {1}, {2}, {3})", x, y, z, w);
+        }
+
+        #endregion
+
+        #region CovertTo
+
+        public Matrix3x3d ToMatrix3x3d()
+        {
+            double xx = x * x,
+                   xy = x * y,
+                   xz = x * z,
+                   xw = x * w,
+                   yy = y * y,
+                   yz = y * z,
+                   yw = y * w,
+                   zz = z * z,
+                   zw = z * w;
+
+            return new Matrix3x3d(1.0 - 2.0 * (yy + zz),
+                                  2.0 * (xy - zw), 2.0 * (xz + yw),
+                                  2.0 * (xy + zw), 1.0 - 2.0 * (xx + zz),
+                                  2.0 * (yz - xw), 2.0 * (xz - yw),
+                                  2.0 * (yz + xw), 1.0 - 2.0 * (xx + yy));
+        }
+
+        public Matrix3x3 ToMatrix3x3()
+        {
+            float xx = (float)(x * x),
+                  xy = (float)(x * y),
+                  xz = (float)(x * z),
+                  xw = (float)(x * w),
+                  yy = (float)(y * y),
+                  yz = (float)(y * z),
+                  yw = (float)(y * w),
+                  zz = (float)(z * z),
+                  zw = (float)(z * w);
+
+            return new Matrix3x3(1.0f - 2.0f * (yy + zz),
+                                 2.0f * (xy - zw), 2.0f * (xz + yw),
+                                 2.0f * (xy + zw), 1.0f - 2.0f * (xx + zz),
+                                 2.0f * (yz - xw), 2.0f * (xz - yw),
+                                 2.0f * (yz + xw), 1.0f - 2.0f * (xx + yy));
+        }
+
+        public Matrix4x4d ToMatrix4x4d()
+        {
+            double xx = x * x,
+                   xy = x * y,
+                   xz = x * z,
+                   xw = x * w,
+                   yy = y * y,
+                   yz = y * z,
+                   yw = y * w,
+                   zz = z * z,
+                   zw = z * w;
+
+            return new Matrix4x4d(1.0 - 2.0 * (yy + zz),
+                                  2.0 * (xy - zw), 2.0 * (xz + yw),
+                                  0.0, 2.0 * (xy + zw),
+                                  1.0 - 2.0 * (xx + zz), 2.0 * (yz - xw),
+                                  0.0, 2.0 * (xz - yw),
+                                  2.0 * (yz + xw), 1.0 - 2.0 * (xx + yy),
+                                  0.0, 0.0, 0.0, 0.0, 1.0);
+        }
+
+        public Matrix4x4d ToMatrix4x4()
+        {
+            float xx = (float)(x * x),
+                  xy = (float)(x * y),
+                  xz = (float)(x * z),
+                  xw = (float)(x * w),
+                  yy = (float)(y * y),
+                  yz = (float)(y * z),
+                  yw = (float)(y * w),
+                  zz = (float)(z * z),
+                  zw = (float)(z * w);
+
+            return new Matrix4x4d(1.0 - 2.0 * (yy + zz),
+                                  2.0 * (xy - zw), 2.0 * (xz + yw),
+                                  0.0, 2.0 * (xy + zw),
+                                  1.0 - 2.0 * (xx + zz), 2.0 * (yz - xw),
+                                  0.0, 2.0 * (xz - yw),
+                                  2.0 * (yz + xw), 1.0 - 2.0 * (xx + yy),
+                                  0.0, 0.0, 0.0, 0.0, 1.0);
+        }
+
+        #endregion
+
         public static Quaternion4d AngleAxis(double angle, Vector3d axis)
         {
             double x;
@@ -175,99 +356,9 @@ namespace UnityEngine
             return new Quaternion4d(x, y, z, w);
         }
 
-        public static Quaternion4d operator *(Quaternion4d q1, Quaternion4d q2)
-        {
-            return new Quaternion4d(q2.w * q1.x + q2.x * q1.w + q2.y * q1.z - q2.z * q1.y, q2.w * q1.y - q2.x * q1.z + q2.y * q1.w + q2.z * q1.x,
-                                    q2.w * q1.z + q2.x * q1.y - q2.y * q1.x + q2.z * q1.w, q2.w * q1.w - q2.x * q1.x - q2.y * q1.y - q2.z * q1.z);
-        }
-
-        public static Vector3d operator *(Quaternion4d q, Vector3d v)
-        {
-            return q.ToMatrix3x3d() * v;
-        }
-
-        public static bool operator ==(Quaternion4d lhs, Quaternion4d rhs)
-        {
-            return Quaternion4d.Dot(lhs, rhs) > 0.999999f;
-        }
-
-        public static bool operator !=(Quaternion4d lhs, Quaternion4d rhs)
-        {
-            return !(lhs == rhs);
-        }
-
-        public static implicit operator Quaternion(Quaternion4d q)
-        {
-            return new Quaternion((float)q.x, (float)q.y, (float)q.z, (float)q.w);
-        }
-
-        public static implicit operator Quaternion4d(Quaternion q)
-        {
-            return new Quaternion4d(q.x, q.y, q.z, q.w);
-        }
-
         public static double Dot(Quaternion4d a, Quaternion4d b)
         {
             return a.x * b.x + a.y * b.y + a.z * b.z + a.w * b.w;
-        }
-
-        public Matrix3x3 ToMatrix3x3()
-        {
-            float xx = (float)(x * x),
-                  xy = (float)(x * y),
-                  xz = (float)(x * z),
-                  xw = (float)(x * w),
-                  yy = (float)(y * y),
-                  yz = (float)(y * z),
-                  yw = (float)(y * w),
-                  zz = (float)(z * z),
-                  zw = (float)(z * w);
-
-            return new Matrix3x3(1.0f - 2.0f * (yy + zz), 
-                                 2.0f * (xy - zw), 2.0f * (xz + yw), 
-                                 2.0f * (xy + zw), 1.0f - 2.0f * (xx + zz), 
-                                 2.0f * (yz - xw), 2.0f * (xz - yw),
-                                 2.0f * (yz + xw), 1.0f - 2.0f * (xx + yy));
-        }
-
-        public Matrix3x3d ToMatrix3x3d()
-        {
-            double xx = x * x, 
-                   xy = x * y, 
-                   xz = x * z, 
-                   xw = x * w, 
-                   yy = y * y, 
-                   yz = y * z, 
-                   yw = y * w, 
-                   zz = z * z, 
-                   zw = z * w;
-
-            return new Matrix3x3d(1.0 - 2.0 * (yy + zz), 
-                                  2.0 * (xy - zw), 2.0 * (xz + yw), 
-                                  2.0 * (xy + zw), 1.0 - 2.0 * (xx + zz), 
-                                  2.0 * (yz - xw), 2.0 * (xz - yw),
-                                  2.0 * (yz + xw), 1.0 - 2.0 * (xx + yy));
-        }
-
-        public Matrix4x4d ToMatrix4x4d()
-        {
-            double xx = x * x, 
-                   xy = x * y, 
-                   xz = x * z, 
-                   xw = x * w,
-                   yy = y * y, 
-                   yz = y * z, 
-                   yw = y * w,
-                   zz = z * z,
-                   zw = z * w;
-
-            return new Matrix4x4d(1.0 - 2.0 * (yy + zz), 
-                                  2.0 * (xy - zw), 2.0 * (xz + yw), 
-                                  0.0, 2.0 * (xy + zw), 
-                                  1.0 - 2.0 * (xx + zz), 2.0 * (yz - xw), 
-                                  0.0, 2.0 * (xz - yw),
-                                  2.0 * (yz + xw), 1.0 - 2.0 * (xx + yy), 
-                                  0.0, 0.0, 0.0, 0.0, 1.0);
         }
 
         public Quaternion4d Inverse()
@@ -335,7 +426,5 @@ namespace UnityEngine
                                         scale0 * @from.w + scale1 * to.w).Normalized();
             }
         }
-
-        public static Quaternion4d identity { get { return new Quaternion4d(0.0, 0.0, 0.0, 1.0); } }
     }
 }

@@ -131,10 +131,10 @@ namespace SpaceEngine.Core.Terrain.Deformation
         /// <param name="localBox">A bounding box in local space.</param>
         /// <param name="deformedBox">A bounding box in deformation space. Should be precalculated.</param>
         /// <returns>Returns the visibility of a bounding box in local space, in a view frustum defined in deformed space.</returns>
-        public virtual Frustum.VISIBILITY GetVisibility(TerrainNode node, Box3d localBox, Vector3d[] deformedBox)
+        public virtual Frustum3d.VISIBILITY GetVisibility(TerrainNode node, Box3d localBox, Vector3d[] deformedBox)
         {
             // localBox = deformedBox, so we can compare the deformed frustum with it
-            return Frustum.GetVisibility(node.DeformedFrustumPlanes, localBox);
+            return Frustum3d.GetVisibility(node.DeformedFrustumPlanes, localBox);
         }
 
         public virtual void SetUniforms(TerrainNode node, Material target)

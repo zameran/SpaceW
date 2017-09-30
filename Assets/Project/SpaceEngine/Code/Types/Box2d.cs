@@ -24,20 +24,31 @@
 #endregion
 
 using System;
+using System.Runtime.InteropServices;
 
 namespace UnityEngine
 {
-    public class Box2d
+    [StructLayout(LayoutKind.Sequential)]
+    public struct Box2d
     {
-        public double xmin, xmax, ymin, ymax;
+        #region Fields
 
-        public Box2d()
-        {
-            xmin = double.PositiveInfinity;
-            xmax = double.NegativeInfinity;
-            ymin = double.PositiveInfinity;
-            ymax = double.NegativeInfinity;
-        }
+        public double xmin;
+        public double xmax;
+        public double ymin;
+        public double ymax;
+
+        #endregion
+
+        #region Properties
+
+        public static Box2d zero { get { return new Box2d(0.0, 0.0, 0.0, 0.0); } }
+
+        public static Box2d infinity { get { return new Box2d(double.PositiveInfinity, double.NegativeInfinity, double.PositiveInfinity, double.NegativeInfinity); } }
+
+        #endregion
+
+        #region Constructors
 
         public Box2d(double xmin, double xmax, double ymin, double ymax)
         {
@@ -54,6 +65,8 @@ namespace UnityEngine
             ymin = Math.Min(p.y, q.y);
             ymax = Math.Max(p.y, q.y);
         }
+
+        #endregion
 
         /// <summary>
         /// Calculate the center of this bounding box.

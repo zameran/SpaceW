@@ -24,22 +24,33 @@
 #endregion
 
 using System;
+using System.Runtime.InteropServices;
 
 namespace UnityEngine
 {
-    public class Box3d
+    [StructLayout(LayoutKind.Sequential)]
+    public struct Box3d
     {
-        public double xmin, xmax, ymin, ymax, zmin, zmax;
+        #region Fields
 
-        public Box3d()
-        {
-            xmin = double.PositiveInfinity;
-            xmax = double.NegativeInfinity;
-            ymin = double.PositiveInfinity;
-            ymax = double.NegativeInfinity;
-            zmin = double.PositiveInfinity;
-            zmax = double.NegativeInfinity;
-        }
+        public double xmin;
+        public double xmax;
+        public double ymin;
+        public double ymax;
+        public double zmin;
+        public double zmax;
+
+        #endregion
+
+        #region Properties
+
+        public static Box3d zero { get { return new Box3d(0.0, 0.0, 0.0, 0.0, 0.0, 0.0); } }
+
+        public static Box3d infinity { get { return new Box3d(double.PositiveInfinity, double.NegativeInfinity, double.PositiveInfinity, double.NegativeInfinity, double.PositiveInfinity, double.NegativeInfinity); } }
+
+        #endregion
+
+        #region Constructors
 
         public Box3d(double xmin, double xmax, double ymin, double ymax, double zmin, double zmax)
         {
@@ -70,6 +81,8 @@ namespace UnityEngine
             zmin = min.z;
             zmax = max.z;
         }
+
+        #endregion
 
         /// <summary>
         /// Calculate the center of this bounding box.

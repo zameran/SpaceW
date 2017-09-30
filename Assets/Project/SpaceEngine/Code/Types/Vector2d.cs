@@ -65,11 +65,24 @@ namespace UnityEngine
             y = v.y;
         }
 
+        public Vector2d(Vector2 v)
+        {
+            x = v.x;
+            y = v.y;
+        }
+
         public Vector2d(Vector3d v)
         {
             x = v.x;
             y = v.y;
         }
+
+        public Vector2d(Vector3 v)
+        {
+            x = v.x;
+            y = v.y;
+        }
+
 
         #endregion
 
@@ -77,17 +90,19 @@ namespace UnityEngine
 
         public override int GetHashCode()
         {
-            return x.GetHashCode() << 2 + y.GetHashCode();
+            double hashcode = 23;
+
+            hashcode = (hashcode * 37) + x;
+            hashcode = (hashcode * 37) + y;
+
+            return (int)hashcode;
         }
 
         public override bool Equals(object obj)
         {
-            if (!(obj is Vector2d))
-                return false;
+            if (obj is Vector2d) { return Equals((Vector2d)obj); }
 
-            var vector = (Vector2d)obj;
-
-            return this == vector;
+            return false;
         }
 
         #endregion

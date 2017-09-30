@@ -55,12 +55,28 @@ namespace UnityEngine
 
         #region Constructors
 
-        public Vector4d(double v)
+        public Vector4d(double value)
         {
-            x = v;
-            y = v;
-            z = v;
-            w = v;
+            x = value;
+            y = value;
+            z = value;
+            w = value;
+        }
+
+        public Vector4d(double x, double y)
+        {
+            this.x = x;
+            this.y = y;
+            z = 0.0;
+            w = 0.0;
+        }
+
+        public Vector4d(double x, double y, double z)
+        {
+            this.x = x;
+            this.y = y;
+            this.z = z;
+            w = 0.0;
         }
 
         public Vector4d(double x, double y, double z, double w)
@@ -79,7 +95,23 @@ namespace UnityEngine
             this.w = w;
         }
 
+        public Vector4d(Vector2 v, double z, double w)
+        {
+            x = v.x;
+            y = v.y;
+            this.z = z;
+            this.w = w;
+        }
+
         public Vector4d(Vector3d v, double w)
+        {
+            x = v.x;
+            y = v.y;
+            z = v.z;
+            this.w = w;
+        }
+
+        public Vector4d(Vector3 v, double w)
         {
             x = v.x;
             y = v.y;
@@ -97,18 +129,10 @@ namespace UnityEngine
 
         public Vector4d(Vector4 v)
         {
-            x = (double)v.x;
-            y = (double)v.y;
-            z = (double)v.z;
-            w = (double)v.w;
-        }
-
-        public Vector4d(Vector3 v, double w)
-        {
-            x = (double)v.x;
-            y = (double)v.y;
-            z = (double)v.z;
-            this.w = w;
+            x = v.x;
+            y = v.y;
+            z = v.z;
+            w = v.w;
         }
 
         #endregion
@@ -117,17 +141,21 @@ namespace UnityEngine
 
         public override int GetHashCode()
         {
-            return x.GetHashCode() + y.GetHashCode() + z.GetHashCode() << 2 + w.GetHashCode();
+            double hashcode = 23;
+
+            hashcode = (hashcode * 37) + x;
+            hashcode = (hashcode * 37) + y;
+            hashcode = (hashcode * 37) + z;
+            hashcode = (hashcode * 37) + w;
+
+            return (int)hashcode;
         }
 
         public override bool Equals(object obj)
         {
-            if (!(obj is Vector4d))
-                return false;
+            if (obj is Vector4d) { return Equals((Vector4d)obj); }
 
-            var vector = (Vector4d)obj;
-
-            return this == vector;
+            return false;
         }
 
         #endregion

@@ -1,5 +1,4 @@
 ﻿using System;
-
 using UnityEngine;
 
 namespace SpaceEngine.Core.Terrain
@@ -95,7 +94,7 @@ namespace SpaceEngine.Core.Terrain
         /// which must therefore be up to date to get a correct culling of quads out of the view frustum. 
         /// This visibility only takes frustum culling into account.
         /// </summary>
-        public Frustum.VISIBILITY Visibility { get; private set; }
+        public Frustum3d.VISIBILITY Visibility { get; private set; }
 
         /// <summary> 
         /// The bounding box of this quad is occluded by the bounding boxes of the quads in front of it? 
@@ -105,7 +104,7 @@ namespace SpaceEngine.Core.Terrain
         /// <summary>
         /// This quad is visible?
         /// </summary>
-        public bool IsVisible { get { return Visibility != Frustum.VISIBILITY.INVISIBLE; } }
+        public bool IsVisible { get { return Visibility != Frustum3d.VISIBILITY.INVISIBLE; } }
 
         /// <summary>
         /// This quad is not subdivided?
@@ -298,9 +297,9 @@ namespace SpaceEngine.Core.Terrain
             // TODO : AddOccluder/IsOccluded Threading!!!
             // TODO : BOTTLENECK!
 
-            var visibility = (Parent == null) ? Frustum.VISIBILITY.PARTIALLY : Parent.Visibility;
+            var visibility = (Parent == null) ? Frustum3d.VISIBILITY.PARTIALLY : Parent.Visibility;
 
-            if (visibility == Frustum.VISIBILITY.PARTIALLY)
+            if (visibility == Frustum3d.VISIBILITY.PARTIALLY)
             {
                 Visibility = Owner.Deformation.GetVisibility(Owner, LocalBox, DeformedBox);
             }
@@ -311,20 +310,20 @@ namespace SpaceEngine.Core.Terrain
 
             // Here we reuse the occlusion test from the previous frame: if the quad was found unoccluded in the previous frame, we suppose it is
             // still unoccluded at this frame. If it was found occluded, we perform an occlusion test to check if it is still occluded.
-            if (Visibility != Frustum.VISIBILITY.INVISIBLE && Occluded)
+            if (Visibility != Frustum3d.VISIBILITY.INVISIBLE && Occluded)
             {
                 Occluded = Owner.IsOccluded(LocalBox);
 
                 if (Occluded)
                 {
-                    Visibility = Frustum.VISIBILITY.INVISIBLE;
+                    Visibility = Frustum3d.VISIBILITY.INVISIBLE;
                 }
             }
 
             var ground = Owner.ParentBody.HeightZ;
             var distance = Owner.GetCameraDistance(new Box3d(Ox, Ox + Length, Oy, Oy + Length, Math.Min(0.0, ground), Math.Max(0.0, ground)));
 
-            if ((Owner.SplitInvisibleQuads || Visibility != Frustum.VISIBILITY.INVISIBLE) && distance < Length * Owner.SplitDistance && Level < Owner.MaxLevel)
+            if ((Owner.SplitInvisibleQuads || Visibility != Frustum3d.VISIBILITY.INVISIBLE) && distance < Length * Owner.SplitDistance && Level < Owner.MaxLevel)
             {
                 if (IsLeaf)
                 {
@@ -343,14 +342,14 @@ namespace SpaceEngine.Core.Terrain
             }
             else
             {
-                if (Visibility != Frustum.VISIBILITY.INVISIBLE)
+                if (Visibility != Frustum3d.VISIBILITY.INVISIBLE)
                 {
                     // We add the bounding box of this quad to the occluders list.
                     Occluded = Owner.AddOccluder(LocalBox);
 
                     if (Occluded)
                     {
-                        Visibility = Frustum.VISIBILITY.INVISIBLE;
+                        Visibility = Frustum3d.VISIBILITY.INVISIBLE;
                     }
                 }
 
@@ -416,7 +415,7 @@ namespace SpaceEngine.Core.Terrain
             {
                 int[,] ORDER = new int[,] { { 1, 0 }, { 2, 3 }, { 0, 2 }, { 3, 1 } };
 
-                if (Visibility == Frustum.VISIBILITY.INVISIBLE) return;
+                if (Visibility == Frustum3d.VISIBILITY.INVISIBLE) return;
 
                 var verts = new Vector3[8];
                 var isMaximumLevel = Level == Owner.MaxLevel;

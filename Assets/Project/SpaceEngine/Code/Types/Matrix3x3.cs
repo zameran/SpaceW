@@ -93,6 +93,7 @@ namespace UnityEngine
         public override bool Equals(object obj)
         {
             if (obj is Matrix3x3) { return Equals((Matrix3x3)obj); }
+
             return false;
         }
 
@@ -263,7 +264,7 @@ namespace UnityEngine
 
 #endregion
 
-#region ToString
+        #region ToString
 
         public override string ToString()
         {
@@ -272,9 +273,85 @@ namespace UnityEngine
                                                                                     m[2, 0], m[2, 1], m[2, 2]);
         }
 
-#endregion
+        #endregion
 
-#region Column/Row
+        #region ConvertTo
+
+        public Matrix3x3d ToMatrix3x3d()
+        {
+            var mat = Matrix3x3d.identity;
+
+            mat.m[0, 0] = m[0, 0];
+            mat.m[0, 1] = m[0, 1];
+            mat.m[0, 2] = m[0, 2];
+
+            mat.m[1, 0] = m[1, 0];
+            mat.m[1, 1] = m[1, 1];
+            mat.m[1, 2] = m[1, 2];
+
+            mat.m[2, 0] = m[2, 0];
+            mat.m[2, 1] = m[2, 1];
+            mat.m[2, 2] = m[2, 2];
+
+            return mat;
+        }
+
+        public Matrix4x4 ToMatrix4x4()
+        {
+            return new Matrix4x4
+            {
+                m00 = m[0, 0],
+                m01 = m[0, 1],
+                m02 = m[0, 2],
+                m03 = 0.0f,
+
+                m10 = m[1, 0],
+                m11 = m[1, 1],
+                m12 = m[1, 2],
+                m13 = 0.0f,
+
+                m20 = m[2, 0],
+                m21 = m[2, 1],
+                m22 = m[2, 2],
+                m23 = 0.0f,
+
+                m30 = 0.0f,
+                m31 = 0.0f,
+                m32 = 0.0f,
+                m33 = 0.0f
+            };
+        }
+
+        public Matrix4x4d ToMatrix4x4d()
+        {
+            var mat = Matrix4x4d.identity;
+
+            mat.m[0, 0] = m[0, 0];
+            mat.m[0, 1] = m[0, 1];
+            mat.m[0, 2] = m[0, 2];
+            mat.m[0, 3] = 0.0;
+
+            mat.m[1, 0] = m[1, 0];
+            mat.m[1, 1] = m[1, 1];
+            mat.m[1, 2] = m[1, 2];
+            mat.m[1, 3] = 0.0;
+
+            mat.m[2, 0] = m[2, 0];
+            mat.m[2, 1] = m[2, 1];
+            mat.m[2, 2] = m[2, 2];
+            mat.m[2, 3] = 0.0;
+
+            mat.m[3, 0] = 0.0;
+            mat.m[3, 1] = 0.0;
+            mat.m[3, 2] = 0.0;
+            mat.m[3, 3] = 0.0;
+
+            return mat;
+        }
+
+        #endregion
+
+        #region Column/Row
 
         public Vector3d GetColumn(int iCol)
         {
@@ -300,7 +377,7 @@ namespace UnityEngine
             m[iRow, 2] = v.z;
         }
 
-#endregion
+        #endregion
 
         public Matrix3x3 Transpose()
         {
@@ -342,7 +419,7 @@ namespace UnityEngine
 
             var fDet = m[0, 0] * mInv.m[0, 0] + m[0, 1] * mInv.m[1, 0] + m[0, 2] * mInv.m[2, 0];
 
-            if (System.Math.Abs(fDet) <= tolerance) { return false; }
+            if (Math.Abs(fDet) <= tolerance) { return false; }
 
             var fInvDet = 1.0f / fDet;
 
@@ -378,24 +455,6 @@ namespace UnityEngine
             Inverse(ref kInverse, tolerance);
 
             return kInverse;
-        }
-
-        public Matrix4x4 ToMatrix4x4()
-        {
-            var mat = new Matrix4x4
-            {
-                m00 = m[0, 0],
-                m01 = m[0, 1],
-                m02 = m[0, 2],
-                m10 = m[1, 0],
-                m11 = m[1, 1],
-                m12 = m[1, 2],
-                m20 = m[2, 0],
-                m21 = m[2, 1],
-                m22 = m[2, 2]
-            };
-
-            return mat;
         }
     }
 }

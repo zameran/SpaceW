@@ -68,9 +68,16 @@ namespace UnityEngine
 
         public Vector3d(double value)
         {
-            this.x = value;
-            this.y = value;
-            this.z = value;
+            x = value;
+            y = value;
+            z = value;
+        }
+
+        public Vector3d(double x, double y)
+        {
+            this.x = x;
+            this.y = y;
+            z = 0.0;
         }
 
         public Vector3d(double x, double y, double z)
@@ -81,6 +88,13 @@ namespace UnityEngine
         }
 
         public Vector3d(Vector2d v, double z)
+        {
+            x = v.x;
+            y = v.y;
+            this.z = z;
+        }
+
+        public Vector3d(Vector2 v, double z)
         {
             x = v.x;
             y = v.y;
@@ -101,30 +115,26 @@ namespace UnityEngine
             z = v.z;
         }
 
-        public Vector3d(Vector2 v, double z)
-        {
-            x = v.x;
-            y = v.y;
-            this.z = z;
-        }
-
         #endregion
 
         #region Overrides
 
         public override int GetHashCode()
         {
-            return x.GetHashCode() + y.GetHashCode() << 2 + z.GetHashCode();
+            double hashcode = 23;
+
+            hashcode = (hashcode * 37) + x;
+            hashcode = (hashcode * 37) + y;
+            hashcode = (hashcode * 37) + z;
+
+            return (int)hashcode;
         }
 
         public override bool Equals(object obj)
         {
-            if (!(obj is Vector3d))
-                return false;
+            if (obj is Vector3d) { return Equals((Vector3d)obj); }
 
-            var vector = (Vector3d)obj;
-
-            return this == vector;
+            return false;
         }
 
         #endregion

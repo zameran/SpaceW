@@ -25,7 +25,7 @@
 
 namespace UnityEngine
 {
-    public class Frustum
+    public class Frustum3d
     {
         public enum VISIBILITY : byte
         {

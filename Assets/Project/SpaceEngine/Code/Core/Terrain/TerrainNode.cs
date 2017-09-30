@@ -246,7 +246,7 @@ namespace SpaceEngine.Core.Terrain
             var invLocalToCamera = LocalToCamera.Inverse();
 
             DeformedCameraPosition = invLocalToCamera * Vector3d.zero;
-            DeformedFrustumPlanes = Frustum.GetFrustumPlanes(LocalToScreen); // NOTE : Extract frustum planes from LocalToScreen matrix...
+            DeformedFrustumPlanes = Frustum3d.GetFrustumPlanes(LocalToScreen); // NOTE : Extract frustum planes from LocalToScreen matrix...
 
             LocalCameraPosition = Deformation.DeformedToLocal(DeformedCameraPosition);
 
@@ -481,7 +481,7 @@ namespace SpaceEngine.Core.Terrain
                 {
                     var targetQuad = quad.GetChild(quad.Order[i]);
 
-                    if (targetQuad.Visibility == Frustum.VISIBILITY.INVISIBLE)
+                    if (targetQuad.Visibility == Frustum3d.VISIBILITY.INVISIBLE)
                     {
                         done |= 1 << quad.Order[i];
                     }
