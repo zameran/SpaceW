@@ -344,10 +344,10 @@ namespace SpaceEngine.Core.Terrain
 
         #endregion
 
-        public void SetPerQuadUniforms(TerrainQuad quad, MaterialPropertyBlock matPropertyBlock)
+        public void SetPerQuadUniforms(TerrainQuad quad, MaterialPropertyBlock target)
         {
             // TODO : BOTTLENECK!
-            Deformation.SetUniforms(this, quad, matPropertyBlock);
+            Deformation.SetUniforms(this, quad, target);
         }
 
         #region Rendering

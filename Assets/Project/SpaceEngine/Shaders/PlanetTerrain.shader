@@ -134,6 +134,13 @@ Shader "SpaceEngine/Planet/Terrain"
 				
 				normal.xyz = mul(_Deform_TangentFrameToWorld, normal.xyz);
 
+				/*
+				float2 vert = (texcoord * _TileSD.y - _TileSD.x) * _Offset.z + _Offset.xy;
+				float4 scaledUV = float4(vert / _Offset.w, 0.0, 0.0);
+				float4 realUV = frac(scaledUV);
+				float4 planetUVColor = tex2D(_PlanetUV, realUV.xy);
+				*/
+
 				float4 reflectance = lerp(ortho, color, clamp(length(color.xyz), 0.0, 1.0)); // Just for tests...
 
 				float cTheta = dot(normal.xyz, WSD);
