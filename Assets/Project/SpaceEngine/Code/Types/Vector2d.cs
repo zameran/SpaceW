@@ -65,6 +65,12 @@ namespace UnityEngine
             y = v.y;
         }
 
+        public Vector2d(Vector3d v)
+        {
+            x = v.x;
+            y = v.y;
+        }
+
         #endregion
 
         #region Overrides

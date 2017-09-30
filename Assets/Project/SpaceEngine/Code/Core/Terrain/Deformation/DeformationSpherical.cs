@@ -43,7 +43,7 @@ namespace SpaceEngine.Core.Terrain.Deformation
                 return Matrix4x4d.identity;
             }
 
-            var point = new Vector3d(localPoint);
+            var point = new Vector2d(localPoint);
 
             if (clamp)
             {
@@ -51,13 +51,14 @@ namespace SpaceEngine.Core.Terrain.Deformation
                 point.y = point.y - Math.Floor((point.y + R) / (2.0 * R)) * 2.0 * R;
             }
 
-            var l = point.x * point.x + point.y * point.y + R * R;
+            var r2 = R * R;
+            var l = point.x * point.x + point.y * point.y + r2;
             var c0 = 1.0 / Math.Sqrt(l);
             var c1 = c0 * R / l;
 
-            return new Matrix4x4d((point.y * point.y + R * R) * c1, -point.x * point.y * c1, point.x * c0, R * point.x * c0,
-                                   -point.x * point.y * c1, (point.x * point.x + R * R) * c1, point.y * c0, R * point.y * c0,
-                                   -point.x * R * c1, -point.y * R * c1, R * c0, (R * R) * c0, 0.0, 0.0, 0.0, 1.0);
+            return new Matrix4x4d((point.y * point.y + r2) * c1, -point.x * point.y * c1, point.x * c0, R * point.x * c0,
+                                   -point.x * point.y * c1, (point.x * point.x + r2) * c1, point.y * c0, R * point.y * c0,
+                                   -point.x * R * c1, -point.y * R * c1, R * c0, (r2) * c0, 0.0, 0.0, 0.0, 1.0);
         }
 
         public override Vector3d DeformedToLocal(Vector3d deformedPoint)

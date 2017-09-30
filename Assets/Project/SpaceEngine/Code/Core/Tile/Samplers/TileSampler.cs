@@ -436,7 +436,7 @@ namespace SpaceEngine.Core.Tile.Samplers
             float w = gpuSlot.Texture.width;
             float h = gpuSlot.Texture.height;
 
-            var coords = Vector4.zero;
+            Vector4 coords;
 
             if (tileSize % 2 == 0)
             {
