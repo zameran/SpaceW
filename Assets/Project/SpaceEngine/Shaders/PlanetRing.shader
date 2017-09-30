@@ -189,6 +189,11 @@ Shader "SpaceEngine/Planet/Ring"
 					#endif
 
 					scattering *= mainTex.w * (1.0f - mainTex.w); // Only scatter at the edges
+
+					if(fadeIn > 0.0)
+					{
+						scattering *= noiseValue;
+					}
 				
 					lighting += scattering;
 				#endif
@@ -202,11 +207,6 @@ Shader "SpaceEngine/Planet/Ring"
 
 			#if !LIGHT_1 && !LIGHT_2 && !LIGHT_3 && !LIGHT_4
 				color = mainColor;
-
-				// Shadows with no lights?
-				//#if SHADOW_1 || SHADOW_2 || SHADOW_3 || SHADOW_4
-				//	color.xyz *= ShadowColor(i.worldPosition).xyz;
-				//#endif
 			#endif
 
 			color *= fadeOut;
