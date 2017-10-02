@@ -108,6 +108,7 @@ namespace SpaceEngine.Enviroment.Sun
         protected override void UpdateNode()
         {
             if (Settings == null) return;
+            if (GodManager.Instance.View == null) return;
 
             SunGlareMaterial.renderQueue = (int)RenderQueue + RenderQueueOffset;
 

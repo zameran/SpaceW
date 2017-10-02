@@ -73,13 +73,15 @@ public class UniformsManager : MonoSingleton<UniformsManager>, IUniformed, IUnif
 
     public void SetUniforms()
     {
+        Shader.SetGlobalFloat("_RealTime", Time.realtimeSinceStartup);
+
+        if (GodManager.Instance.View == null) return;
+
         Shader.SetGlobalMatrix("_Globals_WorldToCamera", GodManager.Instance.View.WorldToCameraMatrix.ToMatrix4x4());
         Shader.SetGlobalMatrix("_Globals_CameraToWorld", GodManager.Instance.View.CameraToWorldMatrix.ToMatrix4x4());
         Shader.SetGlobalMatrix("_Globals_CameraToScreen", GodManager.Instance.View.CameraToScreenMatrix.ToMatrix4x4());
         Shader.SetGlobalMatrix("_Globals_ScreenToCamera", GodManager.Instance.View.ScreenToCameraMatrix.ToMatrix4x4());
         Shader.SetGlobalVector("_Globals_WorldCameraPos", GodManager.Instance.View.WorldCameraPosition);
-
-        Shader.SetGlobalFloat("_RealTime", Time.realtimeSinceStartup);
     }
 
     #endregion
