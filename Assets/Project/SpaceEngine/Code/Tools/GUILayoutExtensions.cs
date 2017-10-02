@@ -94,13 +94,15 @@ public static class GUILayoutExtensions
     public static void LabelWithSpace(string text, int space = -8)
     {
         GUILayout.Label(text);
-        GUILayout.Space(space);
+
+        Space(space);
     }
 
     public static void LabelWithSpace(GUIContent content, int space = -8)
     {
         GUILayout.Label(content);
-        GUILayout.Space(space);
+
+        Space(space);
     }
 
     public static void Horizontal(Action body)
@@ -152,16 +154,14 @@ public static class GUILayoutExtensions
     {
         VerticalBoxed(caption, skin, () =>
         {
-            GUILayout.Space(20);
-
             VerticalBoxed("", skin, () =>
             {
                 LabelWithSpace(message, -8);
 
-                GUILayout.Space(5);
+                SpacingSeparator();
             });
         });
 
-        GUILayout.Space(5);
+        SpacingSeparator();
     }
 }

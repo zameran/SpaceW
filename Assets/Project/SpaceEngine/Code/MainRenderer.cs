@@ -101,43 +101,27 @@ public sealed class MainRenderer : MonoSingleton<MainRenderer>
     {
         Array.Sort(GodManager.Instance.Bodies, Comparer);
 
-        /*
-        for (int i = 0; i < GodManager.Instance.Starfields.Length; i++)
-        {
-            if (GodManager.Instance.Starfields[i] != null)
-                GodManager.Instance.Starfields[i].Render();
-        }
-
-        for (int i = 0; i < GodManager.Instance.Bodies.Length; i++)
-        {
-            if (GodManager.Instance.Bodies[i] != null)
-                GodManager.Instance.Bodies[i].Render();
-        }
-        */
-
-        // NOTE : So. I can't figure out how to sort rendering properly...
-        // All blend modes on Terrain And Atmosphere and crossouts are tested - no result...
-        // The only way is to resort render queues by hard way (just by set a big values to it)...
-        // TODO : Find another way to do that render sorting...
-
+        // TODO : Find a way to properly sort the space bodies...
+        // NOTE : Maybe several near hi-priority bodies can be exist or something another. This is space - all is possible...
         //-----------------------------------------------------------------------------
-        GodManager.Instance.Bodies[0].RenderQueueOffset = 5;
-        if (GodManager.Instance.Bodies[0].Atmosphere != null)
-            GodManager.Instance.Bodies[0].Atmosphere.RenderQueueOffset = 6;
-        if (GodManager.Instance.Bodies[0].Ocean != null)
-            GodManager.Instance.Bodies[0].Ocean.RenderQueueOffset = 7;
-        if (GodManager.Instance.Bodies[0].Ring != null)
-            GodManager.Instance.Bodies[0].Ring.RenderQueueOffset = 4;
+        var highPriorityBody = GodManager.Instance.ActiveBody;
+        var bodyies = GodManager.Instance.Bodies;
 
-        for (int i = 1; i < GodManager.Instance.Bodies.Length; i++)
+        if (highPriorityBody == null || bodyies == null) return;
+
+        highPriorityBody.RenderQueueOffset = 5;
+        if (highPriorityBody.Atmosphere != null) highPriorityBody.Atmosphere.RenderQueueOffset = 6;
+        if (highPriorityBody.Ocean != null) highPriorityBody.Ocean.RenderQueueOffset = 7;
+        if (highPriorityBody.Ring != null) highPriorityBody.Ring.RenderQueueOffset = 4;
+
+        for (var i = 1; i < bodyies.Length; i++)
         {
-            GodManager.Instance.Bodies[i].RenderQueueOffset = 1;
-            if (GodManager.Instance.Bodies[i].Atmosphere != null)
-                GodManager.Instance.Bodies[i].Atmosphere.RenderQueueOffset = 2;
-            if (GodManager.Instance.Bodies[i].Ocean != null)
-                GodManager.Instance.Bodies[i].Ocean.RenderQueueOffset = 3;
-            if (GodManager.Instance.Bodies[i].Ring != null)
-                GodManager.Instance.Bodies[i].Ring.RenderQueueOffset = 0;
+            var lowPriorityBody = bodyies[i];
+
+            lowPriorityBody.RenderQueueOffset = 1;
+            if (lowPriorityBody.Atmosphere != null) lowPriorityBody.Atmosphere.RenderQueueOffset = 2;
+            if (lowPriorityBody.Ocean != null) lowPriorityBody.Ocean.RenderQueueOffset = 3;
+            if (lowPriorityBody.Ring != null) lowPriorityBody.Ring.RenderQueueOffset = 0;
         }
         //-----------------------------------------------------------------------------
     }

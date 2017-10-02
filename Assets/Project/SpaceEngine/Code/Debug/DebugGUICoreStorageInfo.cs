@@ -116,10 +116,16 @@ namespace SpaceEngine.Debugging
 
         protected void DrawStorageContents<T>(string prefix = "Storage") where T : TileStorage
         {
+            var body = GodManager.Instance.ActiveBody;
+            if (body == null) { GUILayoutExtensions.DrawBadHolder(prefix, "No Body!?", GUISkin); return; }
+
+            var storagesArray = body.transform.GetComponentsInChildren<T>();
+            if (storagesArray == null) { GUILayoutExtensions.DrawBadHolder(prefix, "No Storages!?", GUISkin); return; }
+
+            var storages = storagesArray.ToList();
+
             GUILayoutExtensions.VerticalBoxed(prefix, GUISkin, () =>
             {
-                var storages = GodManager.Instance.ActiveBody.transform.GetComponentsInChildren<T>().ToList();
-
                 GUILayoutExtensions.VerticalBoxed("", GUISkin, () =>
                 {
                     if (storages.Count == 0)
@@ -169,10 +175,16 @@ namespace SpaceEngine.Debugging
 
         protected void DrawStorageInfo<T>(string prefix = "Storage") where T : TileStorage
         {
+            var body = GodManager.Instance.ActiveBody;
+            if (body == null) { GUILayoutExtensions.DrawBadHolder(prefix, "No Body!?", GUISkin); return; }
+
+            var storagesArray = body.transform.GetComponentsInChildren<T>();
+            if (storagesArray == null) { GUILayoutExtensions.DrawBadHolder(prefix, "No Storages!?", GUISkin); return; }
+
+            var storages = storagesArray.ToList();
+
             GUILayoutExtensions.VerticalBoxed(prefix, GUISkin, () =>
             {
-                var storages = GodManager.Instance.ActiveBody.transform.GetComponentsInChildren<T>().ToList();
-
                 GUILayoutExtensions.VerticalBoxed("", GUISkin, () =>
                 {
                     if (storages.Count == 0)

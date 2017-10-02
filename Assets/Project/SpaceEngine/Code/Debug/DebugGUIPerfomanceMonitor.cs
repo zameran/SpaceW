@@ -64,6 +64,7 @@ namespace SpaceEngine.Debugging
         protected override void UI(int id)
         {
             var counters = PerformanceMonitor.Counters;
+            if (counters == null || counters.Count == 0) { GUILayoutExtensions.DrawBadHolder("Perfomance stats: ", "No Data!?", GUISkin); return; }
 
             debugInfoBounds.width = Screen.width - 20;
 

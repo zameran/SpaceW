@@ -115,7 +115,7 @@ namespace SpaceEngine.Debugging
             }
             else
             {
-                GUILayout.Label("No sequence!", BoldLabelStyle);
+                GUILayoutExtensions.DrawBadHolder("Sequence stats: ", "No Debug Sequence!?", GUISkin);
             }
         }
     }
