@@ -81,6 +81,18 @@ namespace SpaceEngine.Enviroment.Rings
         [Range(0.0f, 10.0f)]
         public float MieStrength = 1.0f;
 
+        [Range(0.0f, 1.0f)]
+        public float UVCutout = 0.0064f;
+
+        [Range(0.0f, 1.0f)]
+        public float Detail2DFrequency = 0.01f;
+
+        [Range(1.0f, 2048f)]
+        public float DetailRadialFrequency = 512.0f;
+
+        [Range(0.0f, 0.1f)]
+        public float DetailInversedCameraPixelSize = 0.000001f;
+
         public List<RingSegment> Segments = new List<RingSegment>();
 
         public static List<string> keywords = new List<string>();
@@ -174,6 +186,8 @@ namespace SpaceEngine.Enviroment.Rings
             target.SetColor("_DiffuseColor", Helper.Brighten(Color, Brightness));
             target.SetFloat("_LightingBias", LightingBias);
             target.SetFloat("_LightingSharpness", LightingSharpness);
+            target.SetFloat("_UVCutout", UVCutout);
+            target.SetVector("_DetailParameters", new Vector3(Detail2DFrequency, DetailRadialFrequency, DetailInversedCameraPixelSize));
 
             WriteMie(MieSharpness, MieStrength, target);
 

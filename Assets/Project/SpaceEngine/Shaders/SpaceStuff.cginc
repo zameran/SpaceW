@@ -64,12 +64,12 @@ float4 _Light4Position;
 float3 _Light4Direction;
 #endif
 
-float ComputeMiePhase(float _CosTheta, float _MiePhaseAnisotropy)
+float ComputeMiePhase(float cosTheta, float miePhaseAnisotropy)
 {
-	float squareAniso = _MiePhaseAnisotropy * _MiePhaseAnisotropy;
+	float squareAniso = miePhaseAnisotropy * miePhaseAnisotropy;
 
-	float Num = 1.5 * (1.0 + _CosTheta * _CosTheta) * (1.0 - squareAniso);
-	float Den = (8.0 + squareAniso) * pow( abs(1.0 + squareAniso - 2.0 * _MiePhaseAnisotropy * _CosTheta), 1.5 );
+	float Num = 1.5 * (1.0 + cosTheta * cosTheta) * (1.0 - squareAniso);
+	float Den = (8.0 + squareAniso) * pow(abs(1.0 + squareAniso - 2.0 * miePhaseAnisotropy * cosTheta), 1.5);
 	
 	return Num / Den;
 }

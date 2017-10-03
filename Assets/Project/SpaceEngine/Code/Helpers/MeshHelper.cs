@@ -8,7 +8,7 @@ using UnityEngine;
 public static class MeshHelper
 {
     /// <summary>
-    /// Taken from wiki. Provides some <see cref="Mesh">'s subdivision API.
+    /// Taken from wiki. Provides some <see cref="Mesh"/>'s subdivision API.
     /// </summary>
     public static class SubdivisionHelper
     {

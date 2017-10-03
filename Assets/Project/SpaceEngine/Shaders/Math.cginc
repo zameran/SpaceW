@@ -144,3 +144,28 @@ float4 Blur(sampler2D inputTexture, float2 inputUV, float inputStep = 0.00015f)
 
 	return bluredColor;
 }
+
+//-----------------------------------------------------------------------------
+// Curves by iq. http://www.iquilezles.org/www/articles/functions/functions.htm
+inline float impulse(float k, float x)
+{
+	float h = k * x;
+
+	return h * exp(1.0 - h);
+}
+
+inline float expstep(float x, float k, float n)
+{
+	return exp(-k * pow(x, n));
+}
+
+inline float parabola(float x, float k)
+{
+	return pow(4.0 * x * (1.0 - x), k);
+}
+	
+inline float powercurve(float x, float a, float b)
+{
+	return (pow(a + b, a + b) / (pow(a, a) * pow(b, b))) * pow(x, a) * pow(1.0 - x, b);
+}
+//-----------------------------------------------------------------------------

@@ -968,31 +968,6 @@ float4 BicubicHermiteTextureSample(sampler2D tex, float2 uv, float textureSize)
 //-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
-// Curves by iq. http://www.iquilezles.org/www/articles/functions/functions.htm
-inline float impulse(float k, float x)
-{
-	float h = k * x;
-
-	return h * exp(1.0 - h);
-}
-
-inline float expstep(float x, float k, float n)
-{
-	return exp(-k * pow(x, n));
-}
-
-inline float parabola(float x, float k)
-{
-	return pow(4.0 * x * (1.0 - x), k);
-}
-	
-inline float powercurve(float x, float a, float b)
-{
-	return (pow(a + b, a + b) / (pow(a, a) * pow(b, b))) * pow(x, a) * pow(1.0 - x, b);
-}
-//-----------------------------------------------------------------------------
-
-//-----------------------------------------------------------------------------
 const float4 NOISE_RND_M = float4(1.0, 1.0, 1.0, 1.0);
 const float3 NOISE_OFFSET = float3(0.5, 0.5, 0.5);
 const float3 NOISE_OFFSETOUT = float3(1.5, 1.5, 1.5);
