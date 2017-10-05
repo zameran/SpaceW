@@ -79,21 +79,6 @@ Shader "SpaceEngine/Planet/Ocean"
 				float4 projPos : TEXCOORD4;
 			#endif
 		};
-		
-		void CalculateRadiances(in float3 V, in float3 N, in float3 L, in float3 earthP, in float3 oceanColor, in float3 sunL, in float3 skyE,
-								in float sigmaSq, in float fresnel,
-								out float3 Lsky, out float3 Lsun, out float3 Lsea)
-		{
-			#if OCEAN_SKY_REFLECTIONS_ON
-				Lsky = fresnel * ReflectedSky(V, N, L, earthP);
-				Lsun = ReflectedSunRadiance(L, V, N, sigmaSq) * sunL;
-				Lsea = 0.98 * (1.0 - fresnel) * oceanColor * (skyE / M_PI);
-			#else
-				Lsky = fresnel * skyE / M_PI;
-				Lsun = ReflectedSunRadiance(L, V, N, sigmaSq) * sunL;
-				Lsea = RefractedSeaRadiance(V, N, sigmaSq) * oceanColor * skyE / M_PI;
-			#endif
-		}
 
 		void vert(in a2v v, out v2f o)
 		{

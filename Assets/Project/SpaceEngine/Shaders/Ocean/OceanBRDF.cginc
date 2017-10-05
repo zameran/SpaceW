@@ -179,37 +179,33 @@ float3 ReflectedSky(float3 V, float3 N, float3 sunDir, float3 earthP)
 	return result;
 }
 
-float3 OceanRadianceWithoutSkyReflection(float3 L, float3 V, float3 N, float sigmaSq, float3 sunL, float3 skyE, float3 seaColor) 
+void CalculateRadiances(in float3 V, in float3 N, in float3 L, 
+						in float3 earthP, in float3 seaColor, in float3 sunL, in float3 skyE, 
+						in float sigmaSq, in float fresnel,
+						out float3 Lsky, out float3 Lsun, out float3 Lsea)
 {
-	float fresnel = MeanFresnel(V, N, sigmaSq);
-
-	float3 Lsky = skyE * fresnel / M_PI;
-	float3 Lsun = ReflectedSunRadiance(L, V, N, sigmaSq) * sunL;
-	float3 Lsea = (1.0 - fresnel) * seaColor * skyE / M_PI;
-
-	return Lsun + Lsky + Lsea;
-}
-
-float3 OceanRadianceWithSkyReflection(float3 L, float3 V, float3 N, float sigmaSq, float3 sunL, float3 skyE, float3 seaColor, float3 earthP) 
-{
-	float fresnel = MeanFresnel(V, N, sigmaSq);
-
-	float3 Lsky = fresnel * ReflectedSky(V, N, L, earthP);
-	float3 Lsun = ReflectedSunRadiance(L, V, N, sigmaSq) * sunL;
-	float3 Lsea = RefractedSeaRadiance(fresnel) * seaColor * (skyE / M_PI);
-
-	return Lsun + Lsky + Lsea;
+	#if OCEAN_SKY_REFLECTIONS_ON
+		Lsky = fresnel * ReflectedSky(V, N, L, earthP);
+		Lsun = ReflectedSunRadiance(L, V, N, sigmaSq) * sunL;
+		Lsea = RefractedSeaRadiance(fresnel) * seaColor * (skyE / M_PI);
+	#else
+		Lsky = skyE * fresnel / M_PI;
+		Lsun = ReflectedSunRadiance(L, V, N, sigmaSq) * sunL;
+		Lsea = (1.0 - fresnel) * seaColor * skyE / M_PI;
+	#endif
 }
 
 float3 OceanRadiance(float3 L, float3 V, float3 N, float sigmaSq, float3 sunL, float3 skyE, float3 seaColor, float3 earthP) 
 {
-	#if OCEAN_SKY_REFLECTIONS_ON
-		return OceanRadianceWithSkyReflection(L, V, N, sigmaSq, sunL, skyE, seaColor, earthP);
-	#else
-		return OceanRadianceWithoutSkyReflection(L, V, N, sigmaSq, sunL, skyE, seaColor);
-	#endif
+	float fresnel = MeanFresnel(V, N, sigmaSq);
 
-	return 0;
+	float3 Lsky = 0;
+	float3 Lsun = 0;
+	float3 Lsea = 0;
+
+	CalculateRadiances(V, N, L, earthP, seaColor, sunL, skyE, sigmaSq, fresnel, Lsky, Lsun, Lsea);
+
+	return Lsun + Lsky + Lsea;
 }
 
 float3 AbsorbtionColor(float4 absorbtion, float3 tint, float depthCoeff)
