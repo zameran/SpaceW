@@ -43,6 +43,7 @@ using SpaceEngine.Enviroment.Atmospheric;
 
 using System;
 using System.Collections;
+using System.Linq;
 
 using UnityEngine;
 
@@ -213,7 +214,8 @@ namespace SpaceEngine.Enviroment.Oceanic
             var offset = new Vector3d(-Offset.x, -Offset.y, H);
 
             // TODO : Up to four light sources support...
-            var sunDirection = ParentBody.GetSunDirection(ParentBody.Suns[0]);
+            var sun = ParentBody.Suns.FirstOrDefault();
+            var sunDirection = sun != null ? ParentBody.GetSunDirection(sun) : Vector3.zero;
             var oceanSunDirection = localToOcean.ToMatrix3x3d() * sunDirection;
 
             var sphereDirection = (localToCamera * Vector3d.zero).Normalized();   // Direction to center of planet			

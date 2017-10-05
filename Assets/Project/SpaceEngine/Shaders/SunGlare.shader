@@ -79,7 +79,7 @@ Shader "SpaceEngine/Other/Sun Glare"
 			uniform float UseRadiance;
 			uniform float Eclipse;
 		
-			uniform float SunIndex;
+			uniform float3 SunPosition;
 			uniform float3 SunViewPortPosition;
 
 			uniform float AspectRatio;
@@ -150,8 +150,8 @@ Shader "SpaceEngine/Other/Sun Glare"
 			{
 				float3 WCP = _Globals_WorldCameraPos;
 				float3 WCPG = WCP + _Atmosphere_Origin; // Current camera position with offset applied...
-				//float3 WSD = _Sun_WorldDirections_1[SunIndex];
-				float3 WSD = normalize(_Sun_Positions_1[SunIndex] - WCPG);
+				//float3 WSD = SunPosition;
+				float3 WSD = normalize(SunPosition - WCPG);
 
 				float2 toScreenCenter = SunViewPortPosition.xy - 0.5;
 

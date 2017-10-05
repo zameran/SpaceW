@@ -50,22 +50,29 @@ namespace SpaceEngine.Core.Bodies
         public override List<string> GetKeywords()
         {
             var keywords = new List<string>();
-            var shadowsCount = ShadowCasters.Count((shadow) => shadow != null && Helper.Enabled(shadow));
 
-            if (shadowsCount > 0 && GodManager.Instance.Planetshadows)
+            var lightCount = Suns.Count((sun) => sun != null && sun.gameObject.activeInHierarchy);
+            var alteastOneLight = lightCount != 0;
+
+            if (alteastOneLight)
             {
-                keywords.Add(string.Format("SHADOW_{0}", shadowsCount));
+                keywords.Add(string.Format("LIGHT_{0}", lightCount));
+
+                var shadowsCount = ShadowCasters.Count((shadow) => shadow != null && Helper.Enabled(shadow));
+
+                if (shadowsCount > 0 && GodManager.Instance.Planetshadows)
+                {
+                    keywords.Add(string.Format("SHADOW_{0}", shadowsCount));
+                }
+                else
+                {
+                    keywords.Add("SHADOW_0");
+                }
             }
             else
             {
+                keywords.Add("LIGHT_0");
                 keywords.Add("SHADOW_0");
-            }
-
-            var lightCount = Suns.Count((sun) => sun != null && sun.gameObject.activeInHierarchy);
-
-            if (lightCount != 0)
-            {
-                keywords.Add(string.Format("LIGHT_{0}", lightCount));
             }
 
             if (EclipseCasters.Count == 0)
@@ -74,7 +81,7 @@ namespace SpaceEngine.Core.Bodies
             }
             else
             {
-                keywords.Add(GodManager.Instance.Eclipses ? "ECLIPSES_ON" : "ECLIPSES_OFF");
+                keywords.Add(GodManager.Instance.Eclipses && alteastOneLight ? "ECLIPSES_ON" : "ECLIPSES_OFF");
             }
 
             if (ShineCasters.Count == 0)
@@ -83,7 +90,7 @@ namespace SpaceEngine.Core.Bodies
             }
             else
             {
-                keywords.Add(GodManager.Instance.Planetshine ? "SHINE_ON" : "SHINE_OFF");
+                keywords.Add(GodManager.Instance.Planetshine && alteastOneLight ? "SHINE_ON" : "SHINE_OFF");
             }
 
             if (Ring != null)
@@ -135,7 +142,6 @@ namespace SpaceEngine.Core.Bodies
             }
             else
             {
-                keywords.Add("LIGHT_0");
                 keywords.Add("ATMOSPHERE_OFF");
                 keywords.Add("OCEAN_OFF");
                 keywords.Add("OCEAN_DEPTH_OFF");

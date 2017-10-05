@@ -191,7 +191,7 @@ namespace SpaceEngine.Enviroment.Sun
         {
             if (target == null) return;
 
-            target.SetFloat("SunIndex", Mathf.Clamp(SunComponent.Index - 1, 0.0f, 3.0f));
+            target.SetVector("SunPosition", SunComponent.transform.position);
             target.SetVector("SunViewPortPosition", SunViewPortPosition);
 
             target.SetFloat("AspectRatio", CameraHelper.Main().aspect);
@@ -219,13 +219,12 @@ namespace SpaceEngine.Enviroment.Sun
         {
             if (SunGlareMesh == null) return;
             if (GodManager.Instance.ActiveBody == null) return;
+            if (GodManager.Instance.ActiveBody.Atmosphere == null) return;
 
             Atmosphere = GodManager.Instance.ActiveBody.Atmosphere;
 
             if (SunViewPortPosition.z > 0)
             {
-                if (Atmosphere == null) return;
-
                 SunGlareMaterial.renderQueue = (int)RenderQueue + RenderQueueOffset;
 
                 Graphics.DrawMesh(SunGlareMesh, Vector3.zero, Quaternion.identity, SunGlareMaterial, layer, CameraHelper.Main(), 0, Atmosphere.ParentBody.MPB, false, false);

@@ -99,7 +99,7 @@ namespace SpaceEngine.Core.Bodies
         public List<Sun> Suns = new List<Sun>(4);
         public List<Shadow> ShadowCasters = new List<Shadow>(4);
         public List<Body> EclipseCasters = new List<Body>(4);
-        public List<Body> ShineCasters = new List<Body>(8);
+        public List<Body> ShineCasters = new List<Body>(4);
         public List<Color> ShineColors = new List<Color>(4) { XKCDColors.Bluish, XKCDColors.Bluish, XKCDColors.Bluish, XKCDColors.Bluish };
 
         private Matrix4x4 shineColorsMatrix1 = Matrix4x4.zero;
@@ -352,7 +352,7 @@ namespace SpaceEngine.Core.Bodies
 
         public virtual void Reanimate()
         {
-            for (byte i = 0; i < Suns.Count; i++)
+            for (byte i = 0; i < Mathf.Min(4, Suns.Count); i++)
             {
                 if (Suns[i] != null)
                 {
