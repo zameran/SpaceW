@@ -385,7 +385,8 @@ struct a2v_planetTerrain
 
 uniform float _Ocean_Sigma;
 uniform float3 _Ocean_Color;
-uniform float3 _Ocean_Shore_Color;
+uniform float3 _Ocean_AbsorbtionTint;
+uniform float4 _Ocean_AbsorbtionRGBA;
 
 uniform float _Ocean_DrawBRDF;
 uniform float _Ocean_Level;
@@ -413,10 +414,17 @@ void VERTEX_POSITION(in float4 vertex, in float2 texcoord, out float4 position, 
 	float h = zfc.x * (1.0 - vertexBlend) + zfc.y * vertexBlend;
 	float k = min(length(P) / dot(alpha, _Deform_ScreenQuadCornerNorms) * 1.0000003, 1.0);
 	float hPrime = (h + _Deform_Radius * (1.0 - k)) / k;
+	float hPre = _Deform_Radius + h;
+
+	#if ATMOSPHERE_ON
+		#if OCEAN_ON
+			hPre = (_Deform_Radius + max(h, _Ocean_Level));
+		#endif
+	#endif
 
 	//position = mul(_Deform_LocalToScreen, float4(P + float3(0.0, 0.0, h), 1.0));							//CUBE PROJECTION
 	position = mul(_Deform_ScreenQuadCorners + hPrime * _Deform_ScreenQuadVerticals, alphaPrime);			//SPHERICAL PROJECTION
-	localPosition = (_Deform_Radius + max(h, _Ocean_Level)) * normalize(mul(_Deform_LocalToWorld, P));
+	localPosition = hPre * normalize(mul(_Deform_LocalToWorld, P));
 	uv = texcoord;
 }
 

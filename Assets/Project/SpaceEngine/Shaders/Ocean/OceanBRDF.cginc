@@ -211,3 +211,8 @@ float3 OceanRadiance(float3 L, float3 V, float3 N, float sigmaSq, float3 sunL, f
 
 	return 0;
 }
+
+float3 AbsorbtionColor(float4 absorbtion, float3 tint, float depthCoeff)
+{
+	return tint * exp(-absorbtion.rgb * depthCoeff * 25.0 * absorbtion.w);
+}

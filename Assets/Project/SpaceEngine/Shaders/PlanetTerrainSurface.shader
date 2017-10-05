@@ -73,7 +73,7 @@
 		void surf(Input IN, inout SurfaceOutputStandard o) 
 		{
 			float2 texcoord = IN.texcoord;
-
+			
 			float4 ortho = texTile(_Ortho_Tile, texcoord, _Ortho_TileCoords, _Ortho_TileSize);
 			float4 color = texTile(_Color_Tile, texcoord, _Color_TileCoords, _Color_TileSize);
 			float3 normal = texTile(_Normals_Tile, texcoord, _Normals_TileCoords, _Normals_TileSize).rgb;

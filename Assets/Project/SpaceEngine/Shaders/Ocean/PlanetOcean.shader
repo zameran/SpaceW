@@ -50,7 +50,8 @@ Shader "SpaceEngine/Planet/Ocean"
 
 		#if OCEAN_DEPTH_ON
 			#if !defined(CORE)
-				uniform float3 _Ocean_Shore_Color;
+				uniform float3 _Ocean_AbsorbtionTint;
+				uniform float4 _Ocean_AbsorbtionRGBA;
 			#endif
 
 			sampler2D _CameraDepthTexture;
@@ -218,7 +219,9 @@ Shader "SpaceEngine/Planet/Ocean"
 					float depthFoamCoeff = 1.0 - (pow(saturate((fragDepth - oceanDepth) / 25), 0.25) * saturate((fragDepth - oceanDepth) / 0.5));
 				#endif
 
-				oceanColor = saturate(lerp(_Ocean_Color, _Ocean_Shore_Color, depthCoeff));
+				float3 shoreColor = AbsorbtionColor(_Ocean_AbsorbtionRGBA, _Ocean_AbsorbtionTint, depthCoeff);
+
+				oceanColor = saturate(lerp(_Ocean_Color, shoreColor, depthCoeff));
 				surfaceAlpha = clamp(1.0 - lerp(0.0, 1.0, depthCoeff), 0.8, 1.0);
 			#else
 				oceanColor = _Ocean_Color;

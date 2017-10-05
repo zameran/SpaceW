@@ -177,9 +177,11 @@ Shader "SpaceEngine/Planet/Terrain"
 
 								float coeff = 1.0 - (pow(saturate((_Ocean_Level - height) / 100), 0.56) * saturate((_Ocean_Level - height) / 0.5));
 								
-								float3 oceanShoreColor = lerp(reflectance.rgb, _Ocean_Shore_Color, 0.5);
+								float3 shoreColor = AbsorbtionColor(_Ocean_AbsorbtionRGBA, _Ocean_AbsorbtionTint, coeff);
 
-								oceanColor = saturate(lerp(_Ocean_Color, oceanShoreColor, coeff));
+								shoreColor = lerp(reflectance.rgb * coeff, shoreColor, 0.5);
+
+								oceanColor = lerp(_Ocean_Color, shoreColor, coeff);
 							#else
 								oceanColor = _Ocean_Color;
 							#endif

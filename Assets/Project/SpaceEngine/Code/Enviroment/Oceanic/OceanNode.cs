@@ -65,8 +65,12 @@ namespace SpaceEngine.Enviroment.Oceanic
 
         [SerializeField]
         protected Color UpwellingColor = new Color(0.039f, 0.156f, 0.47f);
+
         [SerializeField]
-        protected Color ShoreColor = new Color(0, 0.3411765f, 0.6235294f);
+        protected Color AbsorbtionTint = new Color(1.0f, 1.0f, 1.0f);
+
+        [SerializeField]
+        protected Vector4 AbsorbtionRGBA = new Vector4(0.45f, 0.029f, 0.018f, 2.0f); // NOTE : W component here is scale...
 
         /// <summary>
         /// Sea level in meters.
@@ -232,7 +236,8 @@ namespace SpaceEngine.Enviroment.Oceanic
             OceanMaterial.SetMatrix("_Ocean_LocalToOcean", localToOcean.ToMatrix4x4());
             OceanMaterial.SetVector("_Ocean_CameraPos", offset.ToVector3());
             OceanMaterial.SetVector("_Ocean_Color", UpwellingColor * 0.1f);
-            OceanMaterial.SetVector("_Ocean_Shore_Color", ShoreColor);
+            OceanMaterial.SetVector("_Ocean_AbsorbtionTint", AbsorbtionTint);
+            OceanMaterial.SetVector("_Ocean_AbsorbtionRGBA", AbsorbtionRGBA);
             OceanMaterial.SetVector("_Ocean_ScreenGridSize", new Vector2((float)oceanGridResolution / (float)Screen.width, (float)oceanGridResolution / (float)Screen.height));
             OceanMaterial.SetFloat("_Ocean_Radius", radius);
             OceanMaterial.SetFloat("_Ocean_Wave_Level", OceanWaveLevel);
@@ -281,7 +286,8 @@ namespace SpaceEngine.Enviroment.Oceanic
 
             target.SetFloat("_Ocean_Sigma", GetMaxSlopeVariance());
             target.SetVector("_Ocean_Color", UpwellingColor * 0.1f);
-            target.SetVector("_Ocean_Shore_Color", ShoreColor);
+            target.SetVector("_Ocean_AbsorbtionTint", AbsorbtionTint);
+            target.SetVector("_Ocean_AbsorbtionRGBA", AbsorbtionRGBA);
             target.SetFloat("_Ocean_DrawBRDF", DrawOcean ? 0.0f : 1.0f);
             target.SetFloat("_Ocean_Level", OceanLevel);
         }
@@ -301,7 +307,8 @@ namespace SpaceEngine.Enviroment.Oceanic
 
             target.SetFloat("_Ocean_Sigma", GetMaxSlopeVariance());
             target.SetVector("_Ocean_Color", UpwellingColor * 0.1f);
-            target.SetVector("_Ocean_Shore_Color", ShoreColor);
+            target.SetVector("_Ocean_AbsorbtionTint", AbsorbtionTint);
+            target.SetVector("_Ocean_AbsorbtionRGBA", AbsorbtionRGBA);
             target.SetFloat("_Ocean_DrawBRDF", DrawOcean ? 0.0f : 1.0f);
             target.SetFloat("_Ocean_Level", OceanLevel);
         }

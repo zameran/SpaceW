@@ -1274,7 +1274,8 @@ MonoBehaviour:
   RenderQueueOffset: 0
   OceanMaterial: {fileID: 0}
   UpwellingColor: {r: 0.039, g: 0.156, b: 0.47, a: 1}
-  ShoreColor: {r: 0, g: 0.3411765, b: 0.6235294, a: 1}
+  AbsorbtionTint: {r: 1, g: 1, b: 1, a: 1}
+  AbsorbtionRGBA: {x: 0.45, y: 0.029, z: 0.018, w: 2}
   OceanLevel: 5
   OceanWaveLevel: 1
   ZMin: 20000
@@ -4652,7 +4653,8 @@ MonoBehaviour:
   RenderQueueOffset: 0
   OceanMaterial: {fileID: 0}
   UpwellingColor: {r: 0.039, g: 0.156, b: 0.47, a: 1}
-  ShoreColor: {r: 0, g: 0.3411765, b: 0.6235294, a: 1}
+  AbsorbtionTint: {r: 1, g: 1, b: 1, a: 1}
+  AbsorbtionRGBA: {x: 0.45, y: 0.029, z: 0.018, w: 2}
   OceanLevel: 0.5
   OceanWaveLevel: 1
   ZMin: 20000
@@ -7393,6 +7395,10 @@ MonoBehaviour:
   LightingSharpness: 0.79
   MieSharpness: 0.56
   MieStrength: 1.39
+  UVCutout: 0.0064
+  Detail2DFrequency: 0.01
+  DetailRadialFrequency: 512
+  DetailInversedCameraPixelSize: 0.000001
   Segments:
   - {fileID: 0}
   - {fileID: 0}
@@ -8825,7 +8831,7 @@ MonoBehaviour:
   PermSamplerGL: {fileID: 0}
   PermGradSamplerGL: {fileID: 0}
   PlanetAtlas: {fileID: 0}
-  PlanetUVSampler: {fileID: 0}
+  PlanetUV: {fileID: 0}
   QuadTexture1: {fileID: 0}
   QuadTexture2: {fileID: 0}
   QuadTexture3: {fileID: 0}
