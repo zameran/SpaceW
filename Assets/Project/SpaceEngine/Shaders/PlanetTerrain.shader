@@ -270,8 +270,8 @@ Shader "SpaceEngine/Planet/Terrain"
 				VERTEX_LOCAL_POSITION(v.vertex, v.uv0.xy, v.vertex);
 
 				// Apply origin...
-				v.vertex -= float4(_Atmosphere_Origin, 1.0);
-
+				v.vertex -= float4(_Atmosphere_Origin, 0.0);
+				
 				// Make the magic...
 				TRANSFER_SHADOW_CASTER(o)
 
