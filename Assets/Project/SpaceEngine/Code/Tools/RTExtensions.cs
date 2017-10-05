@@ -330,7 +330,7 @@ public static class RTExtensions
 
     private static void SetName(ref RenderTexture rt)
     {
-        rt.name = "Temp GPU RTexture";
+        SetName(ref rt, "Temp GPU RTexture");
     }
 
     private static void SetName(ref RenderTexture rt, string name)

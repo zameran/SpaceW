@@ -243,11 +243,11 @@ namespace SpaceEngine.Enviroment.Oceanic
 
             for (byte i = 0; i < 2; i++)
             {
-                if (FourierBuffer0 != null) if (FourierBuffer0[i] != null) FourierBuffer0[i].Release();
-                if (FourierBuffer1 != null) if (FourierBuffer1[i] != null) FourierBuffer1[i].Release();
-                if (FourierBuffer2 != null) if (FourierBuffer2[i] != null) FourierBuffer2[i].Release();
-                if (FourierBuffer3 != null) if (FourierBuffer3[i] != null) FourierBuffer3[i].Release();
-                if (FourierBuffer4 != null) if (FourierBuffer4[i] != null) FourierBuffer4[i].Release();
+                if (FourierBuffer0 != null) if (FourierBuffer0[i] != null) RenderTexture.ReleaseTemporary(FourierBuffer0[i]);
+                if (FourierBuffer1 != null) if (FourierBuffer1[i] != null) RenderTexture.ReleaseTemporary(FourierBuffer1[i]);
+                if (FourierBuffer2 != null) if (FourierBuffer2[i] != null) RenderTexture.ReleaseTemporary(FourierBuffer2[i]);
+                if (FourierBuffer3 != null) if (FourierBuffer3[i] != null) RenderTexture.ReleaseTemporary(FourierBuffer3[i]);
+                if (FourierBuffer4 != null) if (FourierBuffer4[i] != null) RenderTexture.ReleaseTemporary(FourierBuffer4[i]);
             }
         }
 
@@ -308,11 +308,11 @@ namespace SpaceEngine.Enviroment.Oceanic
             Map4 = RTExtensions.CreateRTexture(FourierGridSize, 0, mapFormat, FilterMode.Trilinear, TextureWrapMode.Repeat, true, true, Aniso);
 
             // These textures are used to perform the fourier transform
-            CreateBuffer(out FourierBuffer0, format); // heights
-            CreateBuffer(out FourierBuffer1, format); // slopes X
-            CreateBuffer(out FourierBuffer2, format); // slopes Y
-            CreateBuffer(out FourierBuffer3, format); // displacement X
-            CreateBuffer(out FourierBuffer4, format); // displacement Y
+            CreateBuffer(out FourierBuffer0, format, "FourierHeights"); // heights
+            CreateBuffer(out FourierBuffer1, format, "FourierSlopesX"); // slopes X
+            CreateBuffer(out FourierBuffer2, format, "FourierSlopesY"); // slopes Y
+            CreateBuffer(out FourierBuffer3, format, "FourierDisplacementX"); // displacement X
+            CreateBuffer(out FourierBuffer4, format, "FourierDisplacementY"); // displacement Y
 
             // These textures hold the specturm the fourier transform is performed on
             Spectrum01 = RTExtensions.CreateRTexture(FourierGridSize, 0, format, FilterMode.Point, TextureWrapMode.Repeat);
@@ -323,13 +323,20 @@ namespace SpaceEngine.Enviroment.Oceanic
             Variance = RTExtensions.CreateRTexture(VarianceSize, 0, RenderTextureFormat.RHalf, FilterMode.Bilinear, TextureWrapMode.Clamp, VarianceSize);
         }
 
-        protected void CreateBuffer(out RenderTexture[] textures, RenderTextureFormat format)
+        protected void CreateBuffer(out RenderTexture[] textures, RenderTextureFormat format, string bufferName)
         {
             textures = new RenderTexture[2];
 
             for (byte i = 0; i < 2; i++)
             {
-                textures[i] = RTExtensions.CreateRTexture(FourierGridSize, 0, format, FilterMode.Point, TextureWrapMode.Clamp);
+                var temporaryRT = RenderTexture.GetTemporary(FourierGridSize, FourierGridSize, 0, RenderTextureFormat.ARGBFloat, RenderTextureReadWrite.Linear);
+                temporaryRT.filterMode = FilterMode.Point;
+                temporaryRT.wrapMode = TextureWrapMode.Clamp;
+                temporaryRT.name = string.Format("{0}_{1}_{2}", bufferName, i, Random.Range(float.MinValue, float.MaxValue));
+                temporaryRT.anisoLevel = 0;
+                temporaryRT.Create();
+
+                textures[i] = temporaryRT;
             }
         }
 

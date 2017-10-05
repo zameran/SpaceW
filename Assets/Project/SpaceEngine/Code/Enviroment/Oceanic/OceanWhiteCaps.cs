@@ -117,9 +117,9 @@ namespace SpaceEngine.Enviroment.Oceanic
 
             for (byte i = 0; i < 2; i++)
             {
-                if (FourierBuffer5 != null) if (FourierBuffer5[i] != null) FourierBuffer5[i].Release();
-                if (FourierBuffer6 != null) if (FourierBuffer6[i] != null) FourierBuffer6[i].Release();
-                if (FourierBuffer7 != null) if (FourierBuffer7[i] != null) FourierBuffer7[i].Release();
+                if (FourierBuffer5 != null) if (FourierBuffer5[i] != null) RenderTexture.ReleaseTemporary(FourierBuffer5[i]);
+                if (FourierBuffer6 != null) if (FourierBuffer6[i] != null) RenderTexture.ReleaseTemporary(FourierBuffer6[i]);
+                if (FourierBuffer7 != null) if (FourierBuffer7[i] != null) RenderTexture.ReleaseTemporary(FourierBuffer7[i]);
             }
         }
 
@@ -161,9 +161,9 @@ namespace SpaceEngine.Enviroment.Oceanic
             Foam1.mipMapBias = FoamMipmapBias;
 
             // These textures are used to perform the fourier transform
-            CreateBuffer(out FourierBuffer5, format);// Jacobians XX
-            CreateBuffer(out FourierBuffer6, format);// Jacobians YY
-            CreateBuffer(out FourierBuffer7, format);// Jacobians XY
+            CreateBuffer(out FourierBuffer5, format, "Jacobians XX");// Jacobians XX
+            CreateBuffer(out FourierBuffer6, format, "Jacobians YY");// Jacobians YY
+            CreateBuffer(out FourierBuffer7, format, "Jacobians XY");// Jacobians XY
 
             // Make sure the base textures are also created
             base.CreateRenderTextures();
