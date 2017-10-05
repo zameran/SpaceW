@@ -1,0 +1,96 @@
+﻿// NOTE : Based on https://dexyfex.com/2016/09/09/galaxy-rendering-revisited/
+
+Texture2D PermutationTable;
+SamplerState sampler_point_repeat_PermutationTable;
+
+Texture2D MaterialTable;
+SamplerState sampler_point_repeat_MaterialTable;
+
+static const float TextureSize = 256.0f;
+static const uint TextureSizeUint = 256;
+static const uint TextureSizeSquared = 65536;
+static const float InversedTextureSize = 1.0f / TextureSize;
+static const float HalfTexel = InversedTextureSize * 0.5f;
+
+float GetPermutation(float2 texcoord)
+{
+	return PermutationTable.SampleLevel(sampler_point_repeat_PermutationTable, texcoord, 0).r;
+}
+
+float4 GetMaterial(float value)
+{
+	return MaterialTable.SampleLevel(sampler_point_repeat_MaterialTable, float2(value, 0.0), 0);
+}
+
+float4 RandVec4(uint i)
+{
+	uint i4 = i * 4;
+	uint nx = (i4 + 0) % TextureSizeSquared;
+	uint ny = (i4 + 1) % TextureSizeSquared;
+	uint nz = (i4 + 2) % TextureSizeSquared;
+	uint nw = (i4 + 3) % TextureSizeSquared;
+
+	float x = GetPermutation(float2((float)(nx % TextureSizeUint) * InversedTextureSize, (float)(nx / TextureSizeUint) * InversedTextureSize) + HalfTexel);
+	float y = GetPermutation(float2((float)(ny % TextureSizeUint) * InversedTextureSize, (float)(ny / TextureSizeUint) * InversedTextureSize) + HalfTexel);
+	float z = GetPermutation(float2((float)(nz % TextureSizeUint) * InversedTextureSize, (float)(nz / TextureSizeUint) * InversedTextureSize) + HalfTexel);
+	float w = GetPermutation(float2((float)(nw % TextureSizeUint) * InversedTextureSize, (float)(nw / TextureSizeUint) * InversedTextureSize) + HalfTexel);
+
+	return float4(x, y, z, w);
+}
+
+#include "Galaxy.cginc"
+
+#pragma kernel Core
+
+GalaxyStar GenerateStar(uint id)
+{
+	float4 rnd = RandVec4(id) + float4(0.0, Randomize);						// Get the random value...
+
+	float size = radius * 0.025 * (rnd.w * rnd.w + 0.5);					// Randomize the particle size...
+	float offsetZ = 0.03;													// Linear z offset for ellipses - asymmetry factor...
+	
+	float eRadius = rnd.x * ellipseRadius;									// Size of the galactic ellipse...
+	float theta = rnd.y * M_PI2;											// Angle around the ellipse...
+	float height = rnd.z;													// Distance from the galactic plane...
+	
+	float2 pxy = float2(cos(theta), sin(theta)) * radius * eRadius;			// Make a circle...
+	float3 pos = float3(pxy.x, height * depth * 0.1, pxy.y);				// Place the circle...
+	float3 galaxyAxis = float3(0.0, 1.0, 0.0);								// Rotation axis for ellipses...
+
+	galaxyAxis.xz += eRadius * warp1;										// Warp the rotation axis...
+	
+	float angle = saturate(eRadius - barSize) * spiralRotation;				// Angle to rotate the ellipse...
+	
+	galaxyAxis.xz += eRadius * angle * warp2;								// Warp the axis by the angle amount...
+	
+	float4 q = qaxang(galaxyAxis, angle);									// Orient by quaternion...
+	float4 qi = qaxang(galaxyAxis, -angle);									// Orient by quaternion...
+
+	pos = mulvq(pos, q);
+
+	pos.x *= inverseEccentricity;											// Turn the circle into an ellipse...
+	pos.z += eRadius * radius * offsetZ;									// Offset ellipses to make some asymmetry...
+
+	pos = mulvq(pos, qi);													// Rotate the ellipse to where it should be to make spirals...
+
+	pos.y *= expstep(length(pos) / (eRadius + radius), 3, 1);
+
+	GalaxyStar star;
+	star.position = pos;
+	star.color = GetMaterial(length(pos) / radius * rnd.w * 1.7212);
+	star.size = size;
+
+	return star;
+}
+
+RWStructuredBuffer<GalaxyStar> output;
+
+[numthreads(1024, 1, 1)]
+void Core(uint3 gtid : SV_GroupThreadID, uint3 gid : SV_GroupID)
+{
+	uint id = gid.x * 1024 + gtid.x;
+
+	GalaxyStar star = GenerateStar(id);
+
+	output[id] = star;
+}

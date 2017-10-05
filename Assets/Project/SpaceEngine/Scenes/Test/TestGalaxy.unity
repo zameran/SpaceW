@@ -127,6 +127,7 @@ GameObject:
   - component: {fileID: 680484799}
   - component: {fileID: 680484801}
   - component: {fileID: 680484800}
+  - component: {fileID: 680484802}
   m_Layer: 0
   m_Name: Main Camera
   m_TagString: MainCamera
@@ -197,13 +198,13 @@ Transform:
   m_PrefabParentObject: {fileID: 0}
   m_PrefabInternal: {fileID: 0}
   m_GameObject: {fileID: 680484789}
-  m_LocalRotation: {x: 0.114943154, y: 0.690162, z: -0.11243373, w: 0.7055658}
-  m_LocalPosition: {x: -2853.61, y: 955.33923, z: -62.99477}
+  m_LocalRotation: {x: 0.7071068, y: 0, z: 0, w: 0.7071068}
+  m_LocalPosition: {x: 0, y: 128, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 0}
   m_RootOrder: 4
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_LocalEulerAnglesHint: {x: 90, y: 0, z: 0}
 --- !u!114 &680484795
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -250,7 +251,7 @@ MonoBehaviour:
   m_PrefabParentObject: {fileID: 0}
   m_PrefabInternal: {fileID: 0}
   m_GameObject: {fileID: 680484789}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: bfdb5c75203d70c469a60304a0204944, type: 3}
   m_Name: 
@@ -263,7 +264,7 @@ MonoBehaviour:
   m_PrefabParentObject: {fileID: 0}
   m_PrefabInternal: {fileID: 0}
   m_GameObject: {fileID: 680484789}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 25a8890d8030e8c428b50601adc44575, type: 3}
   m_Name: 
@@ -279,7 +280,7 @@ MonoBehaviour:
   m_PrefabParentObject: {fileID: 0}
   m_PrefabInternal: {fileID: 0}
   m_GameObject: {fileID: 680484789}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: e8a201e6a2156c642937896cd5c50047, type: 3}
   m_Name: 
@@ -291,7 +292,7 @@ MonoBehaviour:
   m_PrefabParentObject: {fileID: 0}
   m_PrefabInternal: {fileID: 0}
   m_GameObject: {fileID: 680484789}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 15566ced503e5f04ca5d05d0640603c9, type: 3}
   m_Name: 
@@ -300,6 +301,64 @@ MonoBehaviour:
   Key: 293
   Format: 0
   KeyPressed: 0
+--- !u!114 &680484802
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 680484789}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7a1e8983c28444c46a0cea0f972c1f15, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  PermutationTableTexture: {fileID: 2800000, guid: ba08024e455e81f46b973e5e6bd3ed4e,
+    type: 3}
+  Core: {fileID: 7200000, guid: 4b65a98af0eefea4a84f53bd8d3baf38, type: 3}
+  CoreShader: {fileID: 4800000, guid: 02a604af630bf304b8ac84d9c132a420, type: 3}
+  Count: 128000
+  DrawCount: 128000
+  Radius: 128
+  RadiusEllipse: 0.7
+  SizeBar: -0.25
+  Depth: 128
+  InverseSpiralEccentricity: 0.75
+  SpiralRotation: 7.5
+  Randomize: {x: 0, y: 0, z: 0}
+  Warp1: {x: 0.3, y: 0.15}
+  Warp2: {x: 0.025, y: 0.01}
+  ColorDistribution:
+    Gradient:
+      serializedVersion: 2
+      key0: {r: 0.9607843, g: 0.92941177, b: 0.9254902, a: 1}
+      key1: {r: 0.92941177, g: 0.6666667, b: 0.35686275, a: 1}
+      key2: {r: 0.5803922, g: 0.6862745, b: 0.9254902, a: 0}
+      key3: {r: 0.53333336, g: 0.6901961, b: 0.99607843, a: 0}
+      key4: {r: 0.42344293, g: 0.56642365, b: 0.6544118, a: 0}
+      key5: {r: 0.45711565, g: 0.59174585, b: 0.67459524, a: 0}
+      key6: {r: 1, g: 1, b: 1, a: 0}
+      key7: {r: 0, g: 0, b: 0, a: 0}
+      ctime0: 0
+      ctime1: 12976
+      ctime2: 39780
+      ctime3: 65535
+      ctime4: 52428
+      ctime5: 58982
+      ctime6: 65535
+      ctime7: 0
+      atime0: 0
+      atime1: 65535
+      atime2: 0
+      atime3: 0
+      atime4: 0
+      atime5: 0
+      atime6: 0
+      atime7: 0
+      m_Mode: 0
+      m_NumColorKeys: 4
+      m_NumAlphaKeys: 2
+    ReverseX: 0
+    ReverseY: 0
 --- !u!1 &702279121
 GameObject:
   m_ObjectHideFlags: 0
@@ -340,7 +399,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 915faae617c327548a128c0d0c21570f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  View: {fileID: 680484796}
+  View: {fileID: 0}
   AtmosphereMesh: {fileID: 0}
   OceanScreenMeshGrids: []
   QuadMesh: {fileID: 0}
