@@ -1433,7 +1433,7 @@ MonoBehaviour:
   OnShow:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 680484796}
+      - m_Target: {fileID: 0}
         m_MethodName: set_enabled
         m_Mode: 6
         m_Arguments:
@@ -1449,7 +1449,7 @@ MonoBehaviour:
   OnHide:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 680484796}
+      - m_Target: {fileID: 0}
         m_MethodName: set_enabled
         m_Mode: 6
         m_Arguments:
@@ -6488,6 +6488,7 @@ MonoBehaviour:
   Amplitude: 768
   Frequency: 64
   ColorShader: {fileID: 4800000, guid: 797ca199aa64b8c41bc1aae3e12f7a1f, type: 3}
+  Storages: []
   TerrainNodes: []
   HeightZ: 0
   Size: 6360000
@@ -8608,6 +8609,7 @@ MonoBehaviour:
   Amplitude: 25.6
   Frequency: 32
   ColorShader: {fileID: 4800000, guid: 797ca199aa64b8c41bc1aae3e12f7a1f, type: 3}
+  Storages: []
   TerrainNodes: []
   HeightZ: 0
   Size: 636000

@@ -183,7 +183,7 @@ namespace SpaceEngine.Core.Terrain
 
         public TileSamplerOrder SamplersOrder;
 
-        #region Node
+        #region NodeSlave<TerrainNode>
 
         public override void InitNode()
         {
@@ -288,21 +288,6 @@ namespace SpaceEngine.Core.Terrain
             }
 
             SetUniforms(TerrainMaterial);
-        }
-
-        protected override void Awake()
-        {
-            base.Awake();
-        }
-
-        protected override void Start()
-        {
-            base.Start();
-        }
-
-        protected override void Update()
-        {
-            base.Update();
         }
 
         protected override void OnDestroy()
@@ -415,6 +400,61 @@ namespace SpaceEngine.Core.Terrain
             Graphics.DrawMesh(mesh, Matrix4x4.identity, TerrainMaterial, layer, CameraHelper.Main(), 0, mpb, ShadowCastingMode.On, true);
         }
 
+        public void DrawQuads(TerrainQuad quad, Mesh mesh, MaterialPropertyBlock mpb, int layer)
+        {
+            if (!quad.IsVisible) return;
+            if (!quad.Drawable) return;
+
+            if (quad.IsLeaf)
+            {
+                for (byte i = 0; i < SamplersSuitable.Count; ++i)
+                {
+                    // Set the unifroms needed to draw the texture for this sampler
+                    SamplersSuitable[i].SetUniforms(mpb, quad);
+                }
+
+                DrawMesh(quad, mesh, mpb, layer);
+            }
+            else
+            {
+                quad.CalculateOrder(quad.Owner.LocalCameraPosition.x, quad.Owner.LocalCameraPosition.y, quad.Ox + quad.LengthHalf, quad.Oy + quad.LengthHalf);
+
+                // Draw quads in a order based on distance to camera
+                var done = 0;
+
+                for (byte i = 0; i < 4; ++i)
+                {
+                    var targetQuad = quad.GetChild(quad.Order[i]);
+
+                    if (targetQuad.Visibility == Frustum3d.VISIBILITY.INVISIBLE)
+                    {
+                        done |= 1 << quad.Order[i];
+                    }
+                    else if (targetQuad.Drawable)
+                    {
+                        DrawQuads(targetQuad, mesh, mpb, layer);
+
+                        done |= 1 << quad.Order[i];
+                    }
+                }
+
+                if (done < 15)
+                {
+                    // If the a leaf quad needs to be drawn but its tiles are not ready, then this will draw the next parent tile instead that is ready.
+                    // Because of the current set up all tiles always have there tasks run on the frame they are generated, so this section of code is never reached.
+                    Debug.LogWarning(string.Format("Looks like rendering false start! {0}:{1}:{2}", quad.Level, quad.Tx, quad.Ty));
+
+                    for (byte i = 0; i < SamplersSuitable.Count; ++i)
+                    {
+                        // Set the unifroms needed to draw the texture for this sampler
+                        SamplersSuitable[i].SetUniforms(mpb, quad);
+                    }
+
+                    DrawMesh(quad, mesh, mpb, layer);
+                }
+            }
+        }
+
         public Queue<TerrainQuad> Traverse(TerrainQuad root)
         {
             if (!root.IsVisible) return null;
@@ -453,60 +493,6 @@ namespace SpaceEngine.Core.Terrain
             }
 
             return traverse;
-        }
-
-        public void DrawQuad(TerrainQuad quad, Mesh mesh, MaterialPropertyBlock mpb, int layer)
-        {
-            if (!quad.IsVisible) return;
-            if (!quad.Drawable) return;
-
-            if (quad.IsLeaf)
-            {
-                for (byte i = 0; i < SamplersSuitable.Count; ++i)
-                {
-                    // Set the unifroms needed to draw the texture for this sampler
-                    SamplersSuitable[i].SetUniforms(mpb, quad);
-                }
-
-                DrawMesh(quad, mesh, mpb, layer);
-            }
-            else
-            {
-                quad.CalculateOrder(quad.Owner.LocalCameraPosition.x, quad.Owner.LocalCameraPosition.y, quad.Ox + quad.LengthHalf, quad.Oy + quad.LengthHalf);
-
-                // Draw quads in a order based on distance to camera
-                var done = 0;
-
-                for (byte i = 0; i < 4; ++i)
-                {
-                    var targetQuad = quad.GetChild(quad.Order[i]);
-
-                    if (targetQuad.Visibility == Frustum3d.VISIBILITY.INVISIBLE)
-                    {
-                        done |= 1 << quad.Order[i];
-                    }
-                    else if (targetQuad.Drawable)
-                    {
-                        DrawQuad(targetQuad, mesh, mpb, layer);
-
-                        done |= 1 << quad.Order[i];
-                    }
-                }
-
-                if (done < 15)
-                {
-                    // If the a leaf quad needs to be drawn but its tiles are not ready, then this will draw the next parent tile instead that is ready.
-                    // Because of the current set up all tiles always have there tasks run on the frame they are generated, so this section of code is never reached.
-
-                    for (byte i = 0; i < SamplersSuitable.Count; ++i)
-                    {
-                        // Set the unifroms needed to draw the texture for this sampler
-                        SamplersSuitable[i].SetUniforms(mpb, quad);
-                    }
-
-                    DrawMesh(quad, mesh, mpb, layer);
-                }
-            }
         }
 
         #endregion

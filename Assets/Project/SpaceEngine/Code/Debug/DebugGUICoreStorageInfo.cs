@@ -118,17 +118,15 @@ namespace SpaceEngine.Debugging
         {
             var body = GodManager.Instance.ActiveBody;
             if (body == null) { GUILayoutExtensions.DrawBadHolder(prefix, "No Body!?", GUISkin); return; }
+            if (body.Storages == null) { GUILayoutExtensions.DrawBadHolder(prefix, "No Storages!?", GUISkin); return; }
 
-            var storagesArray = body.transform.GetComponentsInChildren<T>();
-            if (storagesArray == null) { GUILayoutExtensions.DrawBadHolder(prefix, "No Storages!?", GUISkin); return; }
-
-            var storages = storagesArray.ToList();
+            var tileStorages = body.Storages.Where(storage => storage is T).ToList();
 
             GUILayoutExtensions.VerticalBoxed(prefix, GUISkin, () =>
             {
                 GUILayoutExtensions.VerticalBoxed("", GUISkin, () =>
                 {
-                    if (storages.Count == 0)
+                    if (tileStorages.Count == 0)
                     {
                         GUILayoutExtensions.LabelWithSpace(string.Format("Active body doesn't have any storages of provided type {0}", typeof(T).Name));
                     }
@@ -138,9 +136,9 @@ namespace SpaceEngine.Debugging
 
                         if (type == typeof(GPUTileStorage))
                         {
-                            for (var storageIndex = 0; storageIndex < storages.Count; storageIndex++)
+                            for (var storageIndex = 0; storageIndex < tileStorages.Count; storageIndex++)
                             {
-                                var storage = storages[storageIndex];
+                                var storage = tileStorages[storageIndex];
 
                                 if (storage != null)
                                 {
@@ -177,25 +175,23 @@ namespace SpaceEngine.Debugging
         {
             var body = GodManager.Instance.ActiveBody;
             if (body == null) { GUILayoutExtensions.DrawBadHolder(prefix, "No Body!?", GUISkin); return; }
+            if (body.Storages == null) { GUILayoutExtensions.DrawBadHolder(prefix, "No Storages!?", GUISkin); return; }
 
-            var storagesArray = body.transform.GetComponentsInChildren<T>();
-            if (storagesArray == null) { GUILayoutExtensions.DrawBadHolder(prefix, "No Storages!?", GUISkin); return; }
-
-            var storages = storagesArray.ToList();
+            var tileStorages = body.Storages.Where(storage => storage is T).ToList();
 
             GUILayoutExtensions.VerticalBoxed(prefix, GUISkin, () =>
             {
                 GUILayoutExtensions.VerticalBoxed("", GUISkin, () =>
                 {
-                    if (storages.Count == 0)
+                    if (tileStorages.Count == 0)
                     {
                         GUILayoutExtensions.LabelWithSpace(string.Format("Active body doesn't have any storages of provided type {0}", typeof(T).Name));
                     }
                     else
                     {
-                        GUILayoutExtensions.LabelWithSpace(string.Format("{0} Count: {1}", prefix, storages.Count));
-                        GUILayoutExtensions.LabelWithSpace(string.Format("{0} Total Capacity: {1}", prefix, storages.Sum((storage) => storage.Capacity)));
-                        GUILayoutExtensions.LabelWithSpace(string.Format("{0} Total Free: {1}", prefix, storages.Sum((storage) => storage.FreeSlotsCount)));
+                        GUILayoutExtensions.LabelWithSpace(string.Format("{0} Count: {1}", prefix, tileStorages.Count));
+                        GUILayoutExtensions.LabelWithSpace(string.Format("{0} Total Capacity: {1}", prefix, tileStorages.Sum((storage) => storage.Capacity)));
+                        GUILayoutExtensions.LabelWithSpace(string.Format("{0} Total Free: {1}", prefix, tileStorages.Sum((storage) => storage.FreeSlotsCount)));
                     }
 
                     GUILayoutExtensions.SpacingSeparator();

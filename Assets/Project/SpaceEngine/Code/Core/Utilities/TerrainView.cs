@@ -1,4 +1,6 @@
-﻿using System;
+﻿using SpaceEngine.Cameras;
+
+using System;
 
 using UnityEngine;
 
@@ -13,7 +15,7 @@ namespace SpaceEngine.Core.Utilities
     /// </summary>
     [RequireComponent(typeof(Camera))]
     [RequireComponent(typeof(Controller))]
-    public class TerrainView : MonoBehaviour
+    public class TerrainView : GameCamera
     {
         [Serializable]
         public class Position
@@ -46,21 +48,13 @@ namespace SpaceEngine.Core.Utilities
             public double Distance;
         };
 
-        private readonly CachedComponent<Camera> CameraCachedComponent = new CachedComponent<Camera>();
         private readonly CachedComponent<Controller> ControllerCachedComponent = new CachedComponent<Controller>();
 
-        public Camera CameraComponent { get { return CameraCachedComponent.Component; } }
         public Controller ControllerComponent { get { return ControllerCachedComponent.Component; } }
 
         [SerializeField]
         public Position position;
 
-        public Matrix4x4d WorldToCameraMatrix { get; protected set; }
-        public Matrix4x4d CameraToWorldMatrix { get; protected set; }
-        public Matrix4x4d CameraToScreenMatrix { get; protected set; }
-        public Matrix4x4d ScreenToCameraMatrix { get; protected set; }
-
-        public Vector3d WorldCameraPosition { get; protected set; }
         public Vector3d CameraDirection { get; protected set; }
 
         public double GroundHeight { get; set; }
@@ -87,10 +81,11 @@ namespace SpaceEngine.Core.Utilities
             position.Distance = Math.Max(0.1, position.Distance);
         }
 
-        protected virtual void Start()
+        protected override void Init()
         {
-            CameraCachedComponent.TryInit(this);
             ControllerCachedComponent.TryInit(this);
+
+            ControllerComponent.InitNode();
 
             WorldToCameraMatrix = Matrix4x4d.identity;
             CameraToWorldMatrix = Matrix4x4d.identity;
@@ -103,8 +98,10 @@ namespace SpaceEngine.Core.Utilities
             Constrain();
         }
 
-        public virtual void UpdateView()
+        public override void UpdateMatrices()
         {
+            ControllerComponent.UpdateNode();
+
             Constrain();
 
             SetWorldToCameraMatrix();
@@ -160,28 +157,7 @@ namespace SpaceEngine.Core.Utilities
 
             CameraComponent.ResetProjectionMatrix();
 
-            var projectionMatrix = CameraComponent.projectionMatrix;
-
-            if (SystemInfo.graphicsDeviceVersion.IndexOf("Direct3D") > -1)
-            {
-                // NOTE : Default unity antialiasing breaks matrices?
-                if (CameraHelper.IsDeferred(CameraComponent) || QualitySettings.antiAliasing == 0)
-                {
-                    // Invert Y for rendering to a render texture
-                    for (byte i = 0; i < 4; i++)
-                    {
-                        projectionMatrix[1, i] = -projectionMatrix[1, i];
-                    }
-                }
-
-                // Scale and bias depth range
-                for (byte i = 0; i < 4; i++)
-                {
-                    projectionMatrix[2, i] = projectionMatrix[2, i] * 0.5f + projectionMatrix[3, i] * 0.5f;
-                }
-            }
-
-            CameraToScreenMatrix = new Matrix4x4d(projectionMatrix);
+            CameraToScreenMatrix = CameraHelper.Main().GetCameraToScreen();
             ScreenToCameraMatrix = CameraToScreenMatrix.Inverse();
         }
 

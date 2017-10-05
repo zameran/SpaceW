@@ -74,7 +74,7 @@ namespace SpaceEngine.Core.Tile.Cache
         public int UnusedTilesCount { get { return UnusedTiles.Count(); } }
 
         /// <summary>
-        /// The producers that use this TileCache. Maps local producer identifiers to actual producers.
+        /// The producers that use this <see cref="TileCache"/>. Maps local producer identifiers to actual producers.
         /// </summary>
         private Dictionary<int, TileProducer> Producers;
 
@@ -86,7 +86,7 @@ namespace SpaceEngine.Core.Tile.Cache
         [HideInInspector]
         public int MaximumUsedTiles;
 
-        #region Node
+        #region NodeSlave<TileCache>
 
         public override void InitNode()
         {
@@ -100,27 +100,6 @@ namespace SpaceEngine.Core.Tile.Cache
         public override void UpdateNode()
         {
 
-        }
-
-
-        protected override void Awake()
-        {
-            base.Awake();
-        }
-
-        protected override void Start()
-        {
-            base.Start();
-        }
-
-        protected override void Update()
-        {
-            base.Update();
-        }
-
-        protected override void OnDestroy()
-        {
-            base.OnDestroy();
         }
 
         #endregion

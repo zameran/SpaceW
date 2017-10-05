@@ -325,10 +325,7 @@ namespace SpaceEngine.Core.Terrain
 
             if ((Owner.SplitInvisibleQuads || Visibility != Frustum3d.VISIBILITY.INVISIBLE) && distance < Length * Owner.SplitDistance && Level < Owner.MaxLevel)
             {
-                if (IsLeaf)
-                {
-                    Subdivide();
-                }
+                if (IsLeaf) { Subdivide(); }
 
                 CalculateOrder(Owner.LocalCameraPosition.x, Owner.LocalCameraPosition.y, Ox + LengthHalf, Oy + LengthHalf);
 

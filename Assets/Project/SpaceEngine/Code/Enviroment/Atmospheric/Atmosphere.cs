@@ -200,7 +200,7 @@ namespace SpaceEngine.Enviroment.Atmospheric
 
         #endregion
 
-        #region Node
+        #region NodeSlave<Atmosphere>
 
         public override void InitNode()
         {

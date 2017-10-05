@@ -61,7 +61,7 @@ namespace SpaceEngine.Core.Tile.Producer
 
         public TerrainNode TerrainNode { get { return Sampler.TerrainNode; } set { Sampler.TerrainNode = value; } }
 
-        #region Node
+        #region NodeSlave<TileProducer>
 
         public override void InitNode()
         {
@@ -77,27 +77,6 @@ namespace SpaceEngine.Core.Tile.Producer
         public override void UpdateNode()
         {
 
-        }
-
-
-        protected override void Awake()
-        {
-            base.Awake();
-        }
-
-        protected override void Start()
-        {
-            base.Start();
-        }
-
-        protected override void Update()
-        {
-            base.Update();
-        }
-
-        protected override void OnDestroy()
-        {
-            base.OnDestroy();
         }
 
         #endregion

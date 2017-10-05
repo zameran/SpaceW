@@ -38,6 +38,7 @@ using SpaceEngine.Core.Patterns.Strategy.Reanimator;
 using SpaceEngine.Core.Patterns.Strategy.Renderable;
 using SpaceEngine.Core.Patterns.Strategy.Uniformed;
 using SpaceEngine.Core.Terrain;
+using SpaceEngine.Core.Tile.Storage;
 using SpaceEngine.Core.Utilities.Gradients;
 using SpaceEngine.Enviroment.Atmospheric;
 using SpaceEngine.Enviroment.Oceanic;
@@ -79,6 +80,7 @@ namespace SpaceEngine.Core.Bodies
 
         public Shader ColorShader;
 
+        public List<TileStorage> Storages = new List<TileStorage>();
         public List<TerrainNode> TerrainNodes = new List<TerrainNode>(6);
 
         [HideInInspector]
@@ -149,6 +151,15 @@ namespace SpaceEngine.Core.Bodies
 
         protected override void InitNode()
         {
+            Storages = new List<TileStorage>(GetComponentsInChildren<TileStorage>(true));
+
+            for (var storageIndex = 0; storageIndex < Storages.Count; storageIndex++)
+            {
+                var storage = Storages[storageIndex];
+
+                storage.InitNode();
+            }
+
             TerrainNodes = new List<TerrainNode>(GetComponentsInChildren<TerrainNode>(true));
             TerrainNodes.Sort(new TerrainNode.Sort());
 
@@ -229,6 +240,10 @@ namespace SpaceEngine.Core.Bodies
                     samplerNode.UpdateNode();
                 }
             }
+
+            // NOTE : Force to update tile creation tasks BEFORE rendering. Yeah. Until good multithreading is implemented...
+            // As generation done in one frame with rendering, if schedular isn't updated - rendering will result the bad state...
+            GodManager.Instance.UpdateSchedularWrapper();
 
             Keywords = GetKeywords();
 
@@ -654,7 +669,7 @@ namespace SpaceEngine.Core.Bodies
             node.FindDrawableQuads(node.TerrainQuadRoot);
 
             // The draw them
-            node.DrawQuad(node.TerrainQuadRoot, QuadMesh, MPB, layer);
+            node.DrawQuads(node.TerrainQuadRoot, QuadMesh, MPB, layer);
         }
     }
 }

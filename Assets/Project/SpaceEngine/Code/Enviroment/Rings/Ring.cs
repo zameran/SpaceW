@@ -102,7 +102,7 @@ namespace SpaceEngine.Enviroment.Rings
 
         public Mesh RingSegmentMesh;
 
-        #region Node
+        #region NodeSlave<Ring>
 
         public override void InitNode()
         {
@@ -134,21 +134,6 @@ namespace SpaceEngine.Enviroment.Rings
             }
 
             SetUniforms(RingMaterial);
-        }
-
-        protected override void Awake()
-        {
-            base.Awake();
-        }
-
-        protected override void Start()
-        {
-            base.Start();
-        }
-
-        protected override void Update()
-        {
-            base.Update();
         }
 
         protected override void OnDestroy()

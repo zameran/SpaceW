@@ -17,7 +17,7 @@ namespace SpaceEngine.Core.Tile.Storage
     /// The first ones are called allocated <see cref="Slot"/>'s, the others free <see cref="Slot"/>'s.
     /// </summary>
     [RequireComponent(typeof(TileCache))]
-    public abstract class TileStorage : MonoBehaviour
+    public abstract class TileStorage : NodeSlave<TileStorage>
     {
         [Serializable]
         public enum DATA_TYPE
@@ -57,7 +57,8 @@ namespace SpaceEngine.Core.Tile.Storage
             }
         }
 
-        [SerializeField] private bool OnePixelBorder = false;
+        [SerializeField]
+        private bool OnePixelBorder = false;
 
         /// <summary>
         /// The size of each tile. For tiles made of raster data, this size is the tile width in pixels (the tile height is supposed equal to the tile width).
@@ -85,7 +86,9 @@ namespace SpaceEngine.Core.Tile.Storage
 
         public TileCache Cache { get; protected set; }
 
-        protected virtual void Awake()
+        #region NodeSlave<TileStorage>
+
+        public override void InitNode()
         {
             Cache = GetComponent<TileCache>();
             Cache.InitNode();
@@ -95,10 +98,19 @@ namespace SpaceEngine.Core.Tile.Storage
             InitSlots();
         }
 
-        public void OnDestroy()
+        public override void UpdateNode()
+        {
+
+        }
+
+        protected override void OnDestroy()
         {
             Release();
+
+            base.OnDestroy();
         }
+
+        #endregion
 
         protected void AddSlot(int i, Slot slot)
         {

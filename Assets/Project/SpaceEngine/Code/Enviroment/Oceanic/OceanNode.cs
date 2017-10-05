@@ -129,7 +129,7 @@ namespace SpaceEngine.Enviroment.Oceanic
 
         #endregion
 
-        #region Node
+        #region NodeSlave<OceanNode>
 
         public override void InitNode()
         {
@@ -162,89 +162,6 @@ namespace SpaceEngine.Enviroment.Oceanic
             }
 
             DrawOcean = true;
-        }
-
-        public void UpdateMatrices()
-        {
-            var worldToLocal = new Matrix4x4d(1.0, 0.0, 0.0, -Origin.x,
-                                              0.0, 1.0, 0.0, -Origin.y,
-                                              0.0, 0.0, 1.0, -Origin.z,
-                                              0.0, 0.0, 0.0, 1.0);
-            var cameraToLocal = worldToLocal * CameraToWorld;
-            var localToCamera = cameraToLocal.Inverse();
-            var oceanFrame = cameraToLocal * Vector3d.zero;
-            var radius = ParentBody.Size;
-
-            uz = oceanFrame.Normalized();
-
-            ux = OldLocalToOcean != Matrix4x4d.identity ? new Vector3d(OldLocalToOcean.m[1, 0], OldLocalToOcean.m[1, 1], OldLocalToOcean.m[1, 2]).Cross(uz).Normalized() : 
-                                                              Vector3d.forward.Cross(uz).Normalized();
-
-            uy = uz.Cross(ux);
-            oo = (uz * radius);
-
-            var localToOcean = new Matrix4x4d(ux.x, ux.y, ux.z, -ux.Dot(oo),
-                                              uy.x, uy.y, uy.z, -uy.Dot(oo),
-                                              uz.x, uz.y, uz.z, -uz.Dot(oo),
-                                              0.0, 0.0, 0.0, 1.0);
-            var cameraToOcean = localToOcean * cameraToLocal;
-            //var worldToOcean = localToOcean * worldToLocal;
-
-            if (OldLocalToOcean != Matrix4x4d.identity)
-            {
-                var delta = localToOcean * (OldLocalToOcean.Inverse() * Vector3d.zero);
-
-                Offset += VectorHelper.MakeFrom(delta, 0.0f);
-            }
-
-            if (Mathf.Max(Mathf.Abs(Offset.x), Mathf.Abs(Offset.y)) > 20000.0f)
-            {
-                Offset.x = 0.0f;
-                Offset.y = 0.0f;
-            }
-
-            OldLocalToOcean = localToOcean;
-
-            var oc = cameraToOcean * Vector3d.zero;
-
-            H = oc.z;
-
-            if (double.IsNaN(H)) { H = 1.0; }
-
-            var offset = new Vector3d(-Offset.x, -Offset.y, H);
-
-            // TODO : Up to four light sources support...
-            var sun = ParentBody.Suns.FirstOrDefault();
-            var sunDirection = sun != null ? ParentBody.GetSunDirection(sun) : Vector3.zero;
-            var oceanSunDirection = localToOcean.ToMatrix3x3d() * sunDirection;
-
-            var sphereDirection = (localToCamera * Vector3d.zero).Normalized();   // Direction to center of planet			
-            var OHL = (localToCamera * Vector3d.zero).Magnitude();                // Distance to center of planet
-            var rHorizon = Math.Sqrt(OHL * OHL - radius * radius);                // Distance to the horizon, i.e distance to ocean sphere tangent
-
-            // Theta equals angle to horizon, now all that is left to do is check the view direction against this angle
-            var cosTheta = rHorizon / OHL;
-            var sinTheta = Math.Sqrt(1.0 - cosTheta * cosTheta);
-            var oceanGridResolution = GodManager.Instance.OceanGridResolution;
-
-            OceanMaterial.SetVector("_SphereDirection", sphereDirection.ToVector3());
-            OceanMaterial.SetFloat("_CosTheta", (float)cosTheta);
-            OceanMaterial.SetFloat("_SinTheta", (float)sinTheta);
-
-            OceanMaterial.SetVector("_Ocean_SunDir", oceanSunDirection.ToVector3());
-            OceanMaterial.SetMatrix("_Ocean_CameraToOcean", cameraToOcean.ToMatrix4x4());
-            OceanMaterial.SetMatrix("_Ocean_OceanToCamera", cameraToOcean.Inverse().ToMatrix4x4());
-            OceanMaterial.SetMatrix("_Ocean_WorldToLocal", worldToLocal.ToMatrix4x4());
-            OceanMaterial.SetMatrix("_Ocean_LocalToOcean", localToOcean.ToMatrix4x4());
-            OceanMaterial.SetVector("_Ocean_CameraPos", offset.ToVector3());
-            OceanMaterial.SetVector("_Ocean_Color", UpwellingColor * 0.1f);
-            OceanMaterial.SetVector("_Ocean_AbsorbtionTint", AbsorbtionTint);
-            OceanMaterial.SetVector("_Ocean_AbsorbtionRGBA", AbsorbtionRGBA);
-            OceanMaterial.SetVector("_Ocean_ScreenGridSize", new Vector2((float)oceanGridResolution / (float)Screen.width, (float)oceanGridResolution / (float)Screen.height));
-            OceanMaterial.SetFloat("_Ocean_Radius", radius);
-            OceanMaterial.SetFloat("_Ocean_Wave_Level", OceanWaveLevel);
-
-            // TODO : Complete ocean matrices calculation for a cyllindrical worlds...
         }
 
         protected override void Awake()
@@ -391,6 +308,89 @@ namespace SpaceEngine.Enviroment.Oceanic
         }
 
         #endregion
+
+        public void UpdateMatrices()
+        {
+            var worldToLocal = new Matrix4x4d(1.0, 0.0, 0.0, -Origin.x,
+                                              0.0, 1.0, 0.0, -Origin.y,
+                                              0.0, 0.0, 1.0, -Origin.z,
+                                              0.0, 0.0, 0.0, 1.0);
+            var cameraToLocal = worldToLocal * CameraToWorld;
+            var localToCamera = cameraToLocal.Inverse();
+            var oceanFrame = cameraToLocal * Vector3d.zero;
+            var radius = ParentBody.Size;
+
+            uz = oceanFrame.Normalized();
+
+            ux = OldLocalToOcean != Matrix4x4d.identity ? new Vector3d(OldLocalToOcean.m[1, 0], OldLocalToOcean.m[1, 1], OldLocalToOcean.m[1, 2]).Cross(uz).Normalized() :
+                                                              Vector3d.forward.Cross(uz).Normalized();
+
+            uy = uz.Cross(ux);
+            oo = (uz * radius);
+
+            var localToOcean = new Matrix4x4d(ux.x, ux.y, ux.z, -ux.Dot(oo),
+                                              uy.x, uy.y, uy.z, -uy.Dot(oo),
+                                              uz.x, uz.y, uz.z, -uz.Dot(oo),
+                                              0.0, 0.0, 0.0, 1.0);
+            var cameraToOcean = localToOcean * cameraToLocal;
+            //var worldToOcean = localToOcean * worldToLocal;
+
+            if (OldLocalToOcean != Matrix4x4d.identity)
+            {
+                var delta = localToOcean * (OldLocalToOcean.Inverse() * Vector3d.zero);
+
+                Offset += VectorHelper.MakeFrom(delta, 0.0f);
+            }
+
+            if (Mathf.Max(Mathf.Abs(Offset.x), Mathf.Abs(Offset.y)) > 20000.0f)
+            {
+                Offset.x = 0.0f;
+                Offset.y = 0.0f;
+            }
+
+            OldLocalToOcean = localToOcean;
+
+            var oc = cameraToOcean * Vector3d.zero;
+
+            H = oc.z;
+
+            if (double.IsNaN(H)) { H = 1.0; }
+
+            var offset = new Vector3d(-Offset.x, -Offset.y, H);
+
+            // TODO : Up to four light sources support...
+            var sun = ParentBody.Suns.FirstOrDefault();
+            var sunDirection = sun != null ? ParentBody.GetSunDirection(sun) : Vector3.zero;
+            var oceanSunDirection = localToOcean.ToMatrix3x3d() * sunDirection;
+
+            var sphereDirection = (localToCamera * Vector3d.zero).Normalized();   // Direction to center of planet			
+            var OHL = (localToCamera * Vector3d.zero).Magnitude();                // Distance to center of planet
+            var rHorizon = Math.Sqrt(OHL * OHL - radius * radius);                // Distance to the horizon, i.e distance to ocean sphere tangent
+
+            // Theta equals angle to horizon, now all that is left to do is check the view direction against this angle
+            var cosTheta = rHorizon / OHL;
+            var sinTheta = Math.Sqrt(1.0 - cosTheta * cosTheta);
+            var oceanGridResolution = GodManager.Instance.OceanGridResolution;
+
+            OceanMaterial.SetVector("_SphereDirection", sphereDirection.ToVector3());
+            OceanMaterial.SetFloat("_CosTheta", (float)cosTheta);
+            OceanMaterial.SetFloat("_SinTheta", (float)sinTheta);
+
+            OceanMaterial.SetVector("_Ocean_SunDir", oceanSunDirection.ToVector3());
+            OceanMaterial.SetMatrix("_Ocean_CameraToOcean", cameraToOcean.ToMatrix4x4());
+            OceanMaterial.SetMatrix("_Ocean_OceanToCamera", cameraToOcean.Inverse().ToMatrix4x4());
+            OceanMaterial.SetMatrix("_Ocean_WorldToLocal", worldToLocal.ToMatrix4x4());
+            OceanMaterial.SetMatrix("_Ocean_LocalToOcean", localToOcean.ToMatrix4x4());
+            OceanMaterial.SetVector("_Ocean_CameraPos", offset.ToVector3());
+            OceanMaterial.SetVector("_Ocean_Color", UpwellingColor * 0.1f);
+            OceanMaterial.SetVector("_Ocean_AbsorbtionTint", AbsorbtionTint);
+            OceanMaterial.SetVector("_Ocean_AbsorbtionRGBA", AbsorbtionRGBA);
+            OceanMaterial.SetVector("_Ocean_ScreenGridSize", new Vector2((float)oceanGridResolution / (float)Screen.width, (float)oceanGridResolution / (float)Screen.height));
+            OceanMaterial.SetFloat("_Ocean_Radius", radius);
+            OceanMaterial.SetFloat("_Ocean_Wave_Level", OceanWaveLevel);
+
+            // TODO : Complete ocean matrices calculation for a cyllindrical worlds...
+        }
 
         /// <summary>
         /// Inverting <see cref="ZMin"/> with interval to switch the matrices for rendering.

@@ -10,7 +10,7 @@ namespace SpaceEngine.Core.Utilities
     /// Controller used to collect user input and move the view (<see cref="TerrainView"/> or <see cref="PlanetView"/>)
     /// Provides smooth interpolation from the views current to new position.
     /// </summary>
-    public class Controller : MonoBehaviour
+    public class Controller : NodeSlave<Controller>
     {
         [SerializeField]
         double MoveSpeed = 1e-3;
@@ -73,7 +73,9 @@ namespace SpaceEngine.Core.Utilities
 
         private DebugGUISwitcher DebugGUISwitcherInstance { get { return DebugGUISwitcher.Instance as DebugGUISwitcher; } }
 
-        private void Start()
+        #region NodeSlave<Controller>
+
+        public override void InitNode()
         {
             View = GetComponent<TerrainView>();
 
@@ -83,7 +85,7 @@ namespace SpaceEngine.Core.Utilities
             PreviousMousePos = new Vector3d(Input.mousePosition);
         }
 
-        public void UpdateController()
+        public override void UpdateNode()
         {
             if (!Initialized)
             {
@@ -116,10 +118,9 @@ namespace SpaceEngine.Core.Utilities
             {
                 UpdateController(dt);
             }
-
-            // Update the view so the new positions are relected in the matrices
-            View.UpdateView();
         }
+
+        #endregion
 
         private void UpdateController(double dt)
         {

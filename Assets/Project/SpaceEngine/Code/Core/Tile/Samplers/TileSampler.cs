@@ -5,6 +5,7 @@ using SpaceEngine.Core.Tile.Filter;
 using SpaceEngine.Core.Tile.Producer;
 using SpaceEngine.Core.Utilities;
 
+using System;
 using System.Collections.Generic;
 
 using UnityEngine;
@@ -90,7 +91,7 @@ namespace SpaceEngine.Core.Tile.Samplers
         private Vector3 SamplerCoordsBuffer;
         private Vector3 SamplerSizeBuffer;
 
-        #region Node
+        #region NodeSlave<TileSampler>
 
         public override void InitNode()
         {
@@ -107,27 +108,6 @@ namespace SpaceEngine.Core.Tile.Samplers
             Producer.UpdateNode();
 
             UpdateSampler();
-        }
-
-
-        protected override void Awake()
-        {
-            base.Awake();
-        }
-
-        protected override void Start()
-        {
-            base.Start();
-        }
-
-        protected override void Update()
-        {
-            base.Update();
-        }
-
-        protected override void OnDestroy()
-        {
-            base.OnDestroy();
         }
 
         #endregion
@@ -338,7 +318,88 @@ namespace SpaceEngine.Core.Tile.Samplers
         /// <param name="ty"></param>
         private void CalculateTileGPUCoordinates(ref RenderTexture tileTexture, ref Vector3 coordinates, ref Vector3 size, int level, int tx, int ty)
         {
-            // TODO : BOTTLENECK
+            if (!Producer.IsGPUProducer) return;
+
+            Tile t = null;
+
+            var border = Producer.GetBorder();
+            var tileSize = Producer.Cache.GetStorage(0).TileSize;
+
+            var dx = 0.0f;
+            var dy = 0.0f;
+            var tileSizeHalf = tileSize / 2;
+            var tileSizeCentered = tileSizeHalf * 2.0f - 2.0f * border;
+            var ds = tileSizeCentered;
+
+            if (!Producer.HasTile(level, tx, ty))
+            {
+                Debug.Log("TileSampler.SetTile: Invalid level!");
+                return;
+            }
+
+            QuadTree tt = QuadTreeRoot;
+            QuadTree tc;
+
+            var tl = 0;
+
+            while (tl != level && (tc = tt.Children[((tx >> (level - tl - 1)) & 1) | ((ty >> (level - tl - 1)) & 1) << 1]) != null)
+            {
+                tl += 1;
+                tt = tc;
+            }
+
+            t = tt.Tile;
+
+            dx = dx * (tileSizeHalf * 2 - 2 * border) / 1.0f;
+            dy = dy * (tileSizeHalf * 2 - 2 * border) / 1.0f;
+
+            if (t == null)
+            {
+                Debug.Log("TileSampler.SetTile: Null tile!");
+                return;
+            }
+
+            var gpuSlot = t.GetSlot(0) as GPUTileStorage.GPUSlot;
+
+            if (gpuSlot == null)
+            {
+                Debug.Log("TileSampler.SetTile: Null gpuSlot!");
+                return;
+            }
+
+            float w = gpuSlot.Texture.width;
+            float h = gpuSlot.Texture.height;
+
+            Vector4 coords;
+
+            if (tileSize % 2 == 0)
+            {
+                coords = new Vector4((dx + border) / w, (dy + border) / h, 0.0f, ds / w);
+            }
+            else
+            {
+                coords = new Vector4((dx + border + 0.5f) / w, (dy + border + 0.5f) / h, 0.0f, ds / w);
+            }
+
+            tileTexture = gpuSlot.Texture;
+            coordinates = new Vector3(coords.x, coords.y, coords.z);
+            size = new Vector3(coords.w, coords.w, tileSizeCentered);
+        }
+
+        /// <summary>
+        /// Calculates the uniforms necessary to access the texture tile for the given quad. 
+        /// The samplers producer must be using a <see cref="GPUTileStorage"/> at the first slot for this function to work.
+        /// </summary>
+        /// <param name="tileTexture"></param>
+        /// <param name="coordinates"></param>
+        /// <param name="size"></param>
+        /// <param name="level"></param>
+        /// <param name="tx"></param>
+        /// <param name="ty"></param>
+        [Obsolete("Use CalculateTileGPUCoordinates method instead, it's much faster.")]
+        private void TileGPUCoordinates(ref RenderTexture tileTexture, ref Vector3 coordinates, ref Vector3 size, int level, int tx, int ty)
+        {
+            // NOTE : BOTTLENECK!
 
             if (!Producer.IsGPUProducer) return;
 
