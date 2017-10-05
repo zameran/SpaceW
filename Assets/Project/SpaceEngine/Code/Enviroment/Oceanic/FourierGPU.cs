@@ -17,13 +17,6 @@ namespace UnityEngine
         readonly Texture2D[] ButterFlyLookupTable = null;
         readonly Material FourierMaterial;
 
-        /// <summary>
-        /// Arrays to hold the buffers to blit into for MRT.
-        /// </summary>
-        RenderBuffer[] m_pass0RT2, m_pass1RT2;
-        RenderBuffer[] m_pass0RT3, m_pass1RT3;
-        RenderBuffer[] m_pass0RT4, m_pass1RT4;
-
         public FourierGPU(int size, Shader shader)
         {
             if (size > 256)
@@ -48,15 +41,6 @@ namespace UnityEngine
             ComputeButterflyLookupTable();
 
             FourierMaterial.SetFloat("_Size", (float)size);
-
-            m_pass0RT2 = new RenderBuffer[2];
-            m_pass1RT2 = new RenderBuffer[2];
-
-            m_pass0RT3 = new RenderBuffer[3];
-            m_pass1RT3 = new RenderBuffer[3];
-
-            m_pass0RT4 = new RenderBuffer[4];
-            m_pass1RT4 = new RenderBuffer[4];
         }
 
         private int BitReverse(int i)
@@ -132,8 +116,8 @@ namespace UnityEngine
         {
             if (ButterFlyLookupTable == null) return -1;
 
-            var pass0 = data0[0];
-            var pass1 = data0[1];
+            var pass0 = new RenderTexture[] { data0[0] };
+            var pass1 = new RenderTexture[] { data0[1] };
 
             int i;
             int idx = 0;
@@ -150,9 +134,9 @@ namespace UnityEngine
                 FourierMaterial.SetTexture("_ReadBuffer0", data0[idx1]);
 
                 if (idx == 0)
-                    Graphics.Blit(null, pass0, FourierMaterial, PASS_X_1);
+                    RTUtility.MultiTargetBlit(pass0, FourierMaterial, PASS_X_1);
                 else
-                    Graphics.Blit(null, pass1, FourierMaterial, PASS_X_1);
+                    RTUtility.MultiTargetBlit(pass1, FourierMaterial, PASS_X_1);
             }
 
             for (i = 0; i < Passes; i++, j++)
@@ -165,9 +149,9 @@ namespace UnityEngine
                 FourierMaterial.SetTexture("_ReadBuffer0", data0[idx1]);
 
                 if (idx == 0)
-                    Graphics.Blit(null, pass0, FourierMaterial, PASS_Y_1);
+                    RTUtility.MultiTargetBlit(pass0, FourierMaterial, PASS_Y_1);
                 else
-                    Graphics.Blit(null, pass1, FourierMaterial, PASS_Y_1);
+                    RTUtility.MultiTargetBlit(pass1, FourierMaterial, PASS_Y_1);
             }
 
             return idx;
@@ -180,14 +164,8 @@ namespace UnityEngine
             if (SystemInfo.supportedRenderTargetCount < 2)
                 throw new InvalidOperationException("System does not support at least 2 render targets");
 
-            m_pass0RT2[0] = data0[0].colorBuffer;
-            m_pass0RT2[1] = data1[0].colorBuffer;
-
-            m_pass1RT2[0] = data0[1].colorBuffer;
-            m_pass1RT2[1] = data1[1].colorBuffer;
-
-            var depth0 = data0[0].depthBuffer;
-            var depth1 = data0[1].depthBuffer;
+            var pass0 = new RenderTexture[] { data0[0], data1[0] };
+            var pass1 = new RenderTexture[] { data0[1], data1[1] };
 
             int i;
             int idx = 0;
@@ -205,9 +183,9 @@ namespace UnityEngine
                 FourierMaterial.SetTexture("_ReadBuffer1", data1[idx1]);
 
                 if (idx == 0)
-                    RTUtility.MultiTargetBlit(m_pass0RT2, depth0, FourierMaterial, PASS_X_2);
+                    RTUtility.MultiTargetBlit(pass0, FourierMaterial, PASS_X_2);
                 else
-                    RTUtility.MultiTargetBlit(m_pass1RT2, depth1, FourierMaterial, PASS_X_2);
+                    RTUtility.MultiTargetBlit(pass1, FourierMaterial, PASS_X_2);
             }
 
             for (i = 0; i < Passes; i++, j++)
@@ -221,9 +199,9 @@ namespace UnityEngine
                 FourierMaterial.SetTexture("_ReadBuffer1", data1[idx1]);
 
                 if (idx == 0)
-                    RTUtility.MultiTargetBlit(m_pass0RT2, depth0, FourierMaterial, PASS_Y_2);
+                    RTUtility.MultiTargetBlit(pass0, FourierMaterial, PASS_Y_2);
                 else
-                    RTUtility.MultiTargetBlit(m_pass1RT2, depth1, FourierMaterial, PASS_Y_2);
+                    RTUtility.MultiTargetBlit(pass1, FourierMaterial, PASS_Y_2);
             }
 
             return idx;
@@ -236,13 +214,8 @@ namespace UnityEngine
             if (SystemInfo.supportedRenderTargetCount < 3)
                 throw new InvalidOperationException("System does not support at least 3 render targets");
 
-            m_pass0RT3[0] = data0[0].colorBuffer;
-            m_pass0RT3[1] = data1[0].colorBuffer;
-            m_pass0RT3[2] = data2[0].colorBuffer;
-
-            m_pass1RT3[0] = data0[1].colorBuffer;
-            m_pass1RT3[1] = data1[1].colorBuffer;
-            m_pass1RT3[2] = data2[1].colorBuffer;
+            var pass0 = new RenderTexture[] { data0[0], data1[0], data2[0] };
+            var pass1 = new RenderTexture[] { data0[1], data1[1], data2[1] };
 
             var depth0 = data0[0].depthBuffer;
             var depth1 = data0[1].depthBuffer;
@@ -264,9 +237,9 @@ namespace UnityEngine
                 FourierMaterial.SetTexture("_ReadBuffer2", data2[idx1]);
 
                 if (idx == 0)
-                    RTUtility.MultiTargetBlit(m_pass0RT3, depth0, FourierMaterial, PASS_X_3);
+                    RTUtility.MultiTargetBlit(pass0, FourierMaterial, PASS_X_3);
                 else
-                    RTUtility.MultiTargetBlit(m_pass1RT3, depth1, FourierMaterial, PASS_X_3);
+                    RTUtility.MultiTargetBlit(pass1, FourierMaterial, PASS_X_3);
             }
 
             for (i = 0; i < Passes; i++, j++)
@@ -281,9 +254,9 @@ namespace UnityEngine
                 FourierMaterial.SetTexture("_ReadBuffer2", data2[idx1]);
 
                 if (idx == 0)
-                    RTUtility.MultiTargetBlit(m_pass0RT3, depth0, FourierMaterial, PASS_Y_3);
+                    RTUtility.MultiTargetBlit(pass0, FourierMaterial, PASS_Y_3);
                 else
-                    RTUtility.MultiTargetBlit(m_pass1RT3, depth1, FourierMaterial, PASS_Y_3);
+                    RTUtility.MultiTargetBlit(pass1, FourierMaterial, PASS_Y_3);
             }
 
             return idx;
@@ -296,18 +269,8 @@ namespace UnityEngine
             if (SystemInfo.supportedRenderTargetCount < 4)
                 throw new InvalidOperationException("System does not support at least 4 render targets");
 
-            m_pass0RT4[0] = data0[0].colorBuffer;
-            m_pass0RT4[1] = data1[0].colorBuffer;
-            m_pass0RT4[2] = data2[0].colorBuffer;
-            m_pass0RT4[3] = data3[0].colorBuffer;
-
-            m_pass1RT4[0] = data0[1].colorBuffer;
-            m_pass1RT4[1] = data1[1].colorBuffer;
-            m_pass1RT4[2] = data2[1].colorBuffer;
-            m_pass1RT4[3] = data3[1].colorBuffer;
-
-            var depth0 = data0[0].depthBuffer;
-            var depth1 = data0[1].depthBuffer;
+            var pass0 = new RenderTexture[] { data0[0], data1[0], data2[0], data3[0] };
+            var pass1 = new RenderTexture[] { data0[1], data1[1], data2[1], data3[1] };
 
             int i;
             int idx = 0; int idx1;
@@ -326,9 +289,9 @@ namespace UnityEngine
                 FourierMaterial.SetTexture("_ReadBuffer3", data3[idx1]);
 
                 if (idx == 0)
-                    RTUtility.MultiTargetBlit(m_pass0RT4, depth0, FourierMaterial, PASS_X_4);
+                    RTUtility.MultiTargetBlit(pass0, FourierMaterial, PASS_X_4);
                 else
-                    RTUtility.MultiTargetBlit(m_pass1RT4, depth1, FourierMaterial, PASS_X_4);
+                    RTUtility.MultiTargetBlit(pass1, FourierMaterial, PASS_X_4);
             }
 
             for (i = 0; i < Passes; i++, j++)
@@ -344,9 +307,9 @@ namespace UnityEngine
                 FourierMaterial.SetTexture("_ReadBuffer3", data3[idx1]);
 
                 if (idx == 0)
-                    RTUtility.MultiTargetBlit(m_pass0RT4, depth0, FourierMaterial, PASS_Y_4);
+                    RTUtility.MultiTargetBlit(pass0, FourierMaterial, PASS_Y_4);
                 else
-                    RTUtility.MultiTargetBlit(m_pass1RT4, depth1, FourierMaterial, PASS_Y_4);
+                    RTUtility.MultiTargetBlit(pass1, FourierMaterial, PASS_Y_4);
             }
 
             return idx;

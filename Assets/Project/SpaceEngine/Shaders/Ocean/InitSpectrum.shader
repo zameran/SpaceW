@@ -57,9 +57,9 @@ Shader "SpaceEngine/Ocean/InitSpectrum"
 				st.y = uv.y > 0.5f ? uv.y - 1.0f : uv.y;
 				
 				float4 s12 = tex2D(_Spectrum01, uv);
-				float4 s12c = tex2D(_Spectrum01, _Offset.xy-uv);
+				float4 s12c = tex2D(_Spectrum01, _Offset.xy - uv);
 				float4 s34 = tex2D(_Spectrum23, uv);
-				float4 s34c = tex2D(_Spectrum23, _Offset.xy-uv);
+				float4 s34c = tex2D(_Spectrum23, _Offset.xy - uv);
 				
 				float2 k1 = st * _InverseGridSizes.x;
 				float2 k2 = st * _InverseGridSizes.y;

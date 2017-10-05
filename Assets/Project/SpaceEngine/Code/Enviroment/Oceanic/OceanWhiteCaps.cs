@@ -117,9 +117,9 @@ namespace SpaceEngine.Enviroment.Oceanic
 
             for (byte i = 0; i < 2; i++)
             {
-                if (FourierBuffer5 != null) if (FourierBuffer5[i] != null) RenderTexture.ReleaseTemporary(FourierBuffer5[i]);
-                if (FourierBuffer6 != null) if (FourierBuffer6[i] != null) RenderTexture.ReleaseTemporary(FourierBuffer6[i]);
-                if (FourierBuffer7 != null) if (FourierBuffer7[i] != null) RenderTexture.ReleaseTemporary(FourierBuffer7[i]);
+                if (FourierBuffer5 != null) if (FourierBuffer5[i] != null) FourierBuffer5[i].Release();
+                if (FourierBuffer6 != null) if (FourierBuffer6[i] != null) FourierBuffer6[i].Release();
+                if (FourierBuffer7 != null) if (FourierBuffer7[i] != null) FourierBuffer7[i].Release();
             }
         }
 
@@ -169,9 +169,9 @@ namespace SpaceEngine.Enviroment.Oceanic
             base.CreateRenderTextures();
         }
 
-        protected override void InitWaveSpectrum(float t)
+        protected override void InitWaveSpectrum()
         {
-            base.InitWaveSpectrum(t);
+            base.InitWaveSpectrum();
 
             // Init jacobians (5,6,7)
             var buffers567 = new RenderTexture[] { FourierBuffer5[1], FourierBuffer6[1], FourierBuffer7[1] };

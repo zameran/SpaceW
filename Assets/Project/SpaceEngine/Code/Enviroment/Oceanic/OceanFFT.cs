@@ -29,9 +29,6 @@ namespace SpaceEngine.Enviroment.Oceanic
         ComputeShader VarianceShader;
 
         [SerializeField]
-        Shader FourierShader;
-
-        [SerializeField]
         protected int Aniso = 2;
 
         /// <summary>
@@ -58,11 +55,9 @@ namespace SpaceEngine.Enviroment.Oceanic
         [SerializeField]
         protected Vector4 Choppyness = new Vector4(2.3f, 2.1f, 1.3f, 0.9f);
 
-        /// <summary>
-        /// This is the fourier transform size, must pow2 number. Recommend no higher or lower than 64, 128 or 256.
-        /// </summary>
-        [SerializeField]
-        protected int FourierGridSize = 64;
+        protected int FourierGridSize { get { return GodManager.Instance.FourierGridSize; } }
+
+        protected Shader FourierShader { get { return GodManager.Instance.FourierShader; } }
 
         int VarianceSize = 16;
 
@@ -121,24 +116,6 @@ namespace SpaceEngine.Enviroment.Oceanic
                 Debug.Log("OceanFFT: Variance shader is null!");
             }
 
-            if (FourierGridSize > 256)
-            {
-                Debug.Log("OceanFFT: Fourier grid size must not be greater than 256, changing to 256...");
-                FourierGridSize = 256;
-            }
-
-            if (!Mathf.IsPowerOfTwo(FourierGridSize))
-            {
-                Debug.Log("OceanFFT: Fourier grid size must be pow2 number, changing to nearest pow2 number...");
-                FourierGridSize = Mathf.NextPowerOfTwo(FourierGridSize);
-            }
-
-            if (FourierShader == null)
-            {
-                Debug.Log("OceanFFT: Fourier shader is null!");
-                FourierShader = Shader.Find("Math/Fourier");
-            }
-
             if (InitSpectrumMaterial == null)
             {
                 Debug.Log("OceanFFT: Init spectrum material is null! Trying to find it out...");
@@ -177,7 +154,7 @@ namespace SpaceEngine.Enviroment.Oceanic
         {
             if (DrawOcean == true)
             {
-                InitWaveSpectrum(Time.realtimeSinceStartup);
+                InitWaveSpectrum();
 
                 // Perform fourier transform and record what is the current index
                 IDX = Fourier.PeformFFT(FourierBuffer0, FourierBuffer1, FourierBuffer2);
@@ -243,11 +220,11 @@ namespace SpaceEngine.Enviroment.Oceanic
 
             for (byte i = 0; i < 2; i++)
             {
-                if (FourierBuffer0 != null) if (FourierBuffer0[i] != null) RenderTexture.ReleaseTemporary(FourierBuffer0[i]);
-                if (FourierBuffer1 != null) if (FourierBuffer1[i] != null) RenderTexture.ReleaseTemporary(FourierBuffer1[i]);
-                if (FourierBuffer2 != null) if (FourierBuffer2[i] != null) RenderTexture.ReleaseTemporary(FourierBuffer2[i]);
-                if (FourierBuffer3 != null) if (FourierBuffer3[i] != null) RenderTexture.ReleaseTemporary(FourierBuffer3[i]);
-                if (FourierBuffer4 != null) if (FourierBuffer4[i] != null) RenderTexture.ReleaseTemporary(FourierBuffer4[i]);
+                if (FourierBuffer0 != null) if (FourierBuffer0[i] != null) FourierBuffer0[i].Release();
+                if (FourierBuffer1 != null) if (FourierBuffer1[i] != null) FourierBuffer1[i].Release();
+                if (FourierBuffer2 != null) if (FourierBuffer2[i] != null) FourierBuffer2[i].Release();
+                if (FourierBuffer3 != null) if (FourierBuffer3[i] != null) FourierBuffer3[i].Release();
+                if (FourierBuffer4 != null) if (FourierBuffer4[i] != null) FourierBuffer4[i].Release();
             }
         }
 
@@ -278,8 +255,7 @@ namespace SpaceEngine.Enviroment.Oceanic
         /// <summary>
         /// Initializes the data to the shader that needs to have the fourier transform applied to it this frame.
         /// </summary>
-        /// <param name="t">Time.</param>
-        protected virtual void InitWaveSpectrum(float t)
+        protected virtual void InitWaveSpectrum()
         {
             // Init heights (0) and slopes (1,2)
             var buffers012 = new RenderTexture[] { FourierBuffer0[1], FourierBuffer1[1], FourierBuffer2[1] };
@@ -329,14 +305,8 @@ namespace SpaceEngine.Enviroment.Oceanic
 
             for (byte i = 0; i < 2; i++)
             {
-                var temporaryRT = RenderTexture.GetTemporary(FourierGridSize, FourierGridSize, 0, RenderTextureFormat.ARGBFloat, RenderTextureReadWrite.Linear);
-                temporaryRT.filterMode = FilterMode.Point;
-                temporaryRT.wrapMode = TextureWrapMode.Clamp;
-                temporaryRT.name = string.Format("{0}_{1}_{2}", bufferName, i, Random.Range(float.MinValue, float.MaxValue));
-                temporaryRT.anisoLevel = 0;
-                temporaryRT.Create();
-
-                textures[i] = temporaryRT;
+                textures[i] = RTExtensions.CreateRTexture(FourierGridSize, 0, format, FilterMode.Point, TextureWrapMode.Clamp);
+                textures[i].SetName(bufferName);
             }
         }
 

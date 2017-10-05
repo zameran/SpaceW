@@ -196,8 +196,8 @@ public class UniformsManager : MonoSingleton<UniformsManager>, IUniformed, IUnif
         if (PlanetUV == null) PlanetUV = LoadTextureFromResources("UV");
     }
 
-    public Texture2D LoadTextureFromResources(string name)
+    public Texture2D LoadTextureFromResources(string textureName)
     {
-        return Resources.Load("Textures/" + name, typeof(Texture2D)) as Texture2D;
+        return Resources.Load("Textures/" + textureName, typeof(Texture2D)) as Texture2D;
     }
 }

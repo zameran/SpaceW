@@ -1284,13 +1284,11 @@ MonoBehaviour:
   InitDisplacementMaterial: {fileID: 2100000, guid: d71731534f4f7a349a0d1af0b86336aa,
     type: 2}
   VarianceShader: {fileID: 7200000, guid: c7da59439bff364449d9db4c50cee439, type: 3}
-  FourierShader: {fileID: 4800000, guid: 1cca648048bb4614ba000d825b451fde, type: 3}
   Aniso: 2
   WindSpeed: 5
   WavesOmega: 0.84
   GridSizes: {x: 5488, y: 392, z: 28, w: 2}
   Choppyness: {x: 2.3, y: 2.1, z: 1.3, w: 0.9}
-  FourierGridSize: 64
   InitJacobiansMaterial: {fileID: 2100000, guid: 3fb2adcb831e928459999d4736573f21,
     type: 2}
   WhiteCapsPrecomputeMaterial: {fileID: 2100000, guid: 2653e30a6ed623d4d94880f44f44a935,
@@ -2532,6 +2530,8 @@ MonoBehaviour:
   Sunglares: []
   HDRMode: 4
   GSCS: {fileID: 11400000, guid: 1df83c97158884340af77d277fcca4bf, type: 2}
+  FourierShader: {fileID: 4800000, guid: 1cca648048bb4614ba000d825b451fde, type: 3}
+  FourierGridSize: 64
   GridResolution: 32
   OceanGridResolution: 32
   Eclipses: 1
@@ -4663,13 +4663,11 @@ MonoBehaviour:
   InitDisplacementMaterial: {fileID: 2100000, guid: d71731534f4f7a349a0d1af0b86336aa,
     type: 2}
   VarianceShader: {fileID: 7200000, guid: c7da59439bff364449d9db4c50cee439, type: 3}
-  FourierShader: {fileID: 4800000, guid: 1cca648048bb4614ba000d825b451fde, type: 3}
   Aniso: 2
   WindSpeed: 5
   WavesOmega: 0.84
   GridSizes: {x: 5488, y: 392, z: 28, w: 2}
   Choppyness: {x: 2.3, y: 2.1, z: 1.3, w: 0.9}
-  FourierGridSize: 64
   InitJacobiansMaterial: {fileID: 2100000, guid: 3fb2adcb831e928459999d4736573f21,
     type: 2}
   WhiteCapsPrecomputeMaterial: {fileID: 2100000, guid: 2653e30a6ed623d4d94880f44f44a935,

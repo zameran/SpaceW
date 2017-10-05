@@ -77,6 +77,13 @@ public class GodManager : MonoSingleton<GodManager>
     public ComputeShader IrradianceN { get { return GSCS.IrradianceN; } }
     public ComputeShader Transmittance { get { return GSCS.Transmittance; } }
 
+    public Shader FourierShader;
+
+    /// <summary>
+    /// This is the fourier transform size, must pow2 number. Recommend no higher or lower than 64, 128 or 256.
+    /// </summary>
+    public int FourierGridSize = 64;
+
     /// <summary>
     /// Quad mesh resolution in vertices.
     /// </summary>
@@ -111,6 +118,8 @@ public class GodManager : MonoSingleton<GodManager>
     {
         UnsaveSingleton = true;
         Instance = this;
+
+        InitOceanFourier();
 
         InitAtmosphereMesh();
         InitQuadMesh();
@@ -186,6 +195,27 @@ public class GodManager : MonoSingleton<GodManager>
 
             OceanScreenMeshGrids[i] = MeshFactory.MakeOceanPlane(NX, NY, (float)i / (float)gridsCount, 1.0f / (float)gridsCount);
             OceanScreenMeshGrids[i].bounds = new Bounds(Vector3.zero, new Vector3(1e8f, 1e8f, 1e8f));
+        }
+    }
+
+    private void InitOceanFourier()
+    {
+        if (FourierGridSize > 256)
+        {
+            Debug.Log("GodManager.InitOceanFourier: Fourier grid size must not be greater than 256, changing to 256...");
+            FourierGridSize = 256;
+        }
+
+        if (!Mathf.IsPowerOfTwo(FourierGridSize))
+        {
+            Debug.Log("GodManager.InitOceanFourier: Fourier grid size must be pow2 number, changing to nearest pow2 number...");
+            FourierGridSize = Mathf.NextPowerOfTwo(FourierGridSize);
+        }
+
+        if (FourierShader == null)
+        {
+            Debug.Log("GodManager.InitOceanFourier: Fourier shader is null!");
+            FourierShader = Shader.Find("Math/Fourier");
         }
     }
 
