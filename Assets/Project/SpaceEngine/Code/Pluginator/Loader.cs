@@ -44,8 +44,7 @@ using Logger = SpaceEngine.Core.Debugging.Logger;
 
 namespace SpaceEngine.Pluginator
 {
-    [UseLogger(Category.Data)]
-    [UseLoggerFile("SpaceWLog")]
+    [UseLogger(LoggerCategory.Data)]
     public abstract class Loader : MonoBehaviour
     {
         private static Loader instance;
@@ -54,13 +53,13 @@ namespace SpaceEngine.Pluginator
         {
             get
             {
-                if (instance == null) { Logger.LogError("Loader Instance get fail!"); }
+                if (instance == null) { Logger.LogError("Loader.Instance.get: Loader Instance get fail!"); }
                 return instance;
             }
             private set
             {
                 if (value != null) instance = value;
-                else Logger.LogError("Loader Instance set fail!");
+                else Logger.LogError("Loader.Instance.set: Loader Instance set fail!");
             }
         }
 
@@ -95,7 +94,7 @@ namespace SpaceEngine.Pluginator
 
         public void Delay(float waitTime, Action action)
         {
-            Logger.Log(string.Format("Delay method invoked! Will wait for {0} seconds...", waitTime));
+            Logger.Log(string.Format("Loader.Delay: Delay method invoked! Will wait for {0} seconds...", waitTime));
 
             StartCoroutine(DelayImpl(waitTime, action));
         }

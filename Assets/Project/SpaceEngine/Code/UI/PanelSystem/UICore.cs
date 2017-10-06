@@ -12,8 +12,7 @@ using Logger = SpaceEngine.Core.Debugging.Logger;
 
 namespace SpaceEngine.UI
 {
-    [UseLogger(Category.InGameUI)]
-    [UseLoggerFile("SpaceWLog")]
+    [UseLogger(LoggerCategory.InGameUI)]
     public class UICore : MonoBehaviour, IEventit
     {
         public GameObject Root { get { return this.gameObject; } }

@@ -50,14 +50,10 @@ using Logger = SpaceEngine.Core.Debugging.Logger;
 
 namespace SpaceEngine.Pluginator
 {
-    [UseLogger(Category.Data)]
-    [UseLoggerFile("SpaceWLog")]
+    [UseLogger(LoggerCategory.Data)]
     public sealed class AssemblyLoader : Loader, IEventit
     {
-        public GUISkin UISkin = null;
-
         private bool Loaded = false;
-        private bool ShowGUI = true;
 
         public int TotalDetected = 0;
         public int TotalLoaded = 0;
@@ -84,16 +80,6 @@ namespace SpaceEngine.Pluginator
         protected override void OnGUI()
         {
             base.OnGUI();
-
-            if (ShowGUI)
-            {
-                if (UISkin != null) GUI.skin = UISkin;
-
-                GUI.Box(new Rect(Screen.width / 2.0f - (Screen.width / 1.25f) / 2.0f, Screen.height / 1.25f, Screen.width / 1.25f, 15.0f), "");
-
-                GUI.Label(new Rect(Screen.width / 2.0f - 50.0f, Screen.height / 1.25f, Screen.width / 1.25f, 25.0f),
-                    string.Format("Loading {0}/{1} dll's...", TotalLoaded, TotalDetected));
-            }
         }
 
         #region Subscribtion/Unsubscription
@@ -143,8 +129,6 @@ namespace SpaceEngine.Pluginator
 
         private void OnActiveSceneChanged(Scene arg0, Scene arg1)
         {
-            ShowGUI = false;
-
             if (SceneManager.GetActiveScene().buildIndex != 0 && Loaded) FirePlugins(ExternalAssemblies);
         }
 
@@ -152,7 +136,7 @@ namespace SpaceEngine.Pluginator
 
         protected override void Pass()
         {
-            Logger.Log(string.Format("AssemblyLoader Initiated at scene №: {0}", SceneManager.GetActiveScene().buildIndex));
+            Logger.Log(string.Format("AssemblyLoader.Pass: AssemblyLoader Initiated at scene №: {0}", SceneManager.GetActiveScene().buildIndex));
 
             if (!Loaded)
             {
@@ -173,7 +157,7 @@ namespace SpaceEngine.Pluginator
 
         private void DetectAssembies(out List<string> allPaths)
         {
-            string path = PathGlobals.GlobalModFolderPath;
+            var path = PathGlobals.GlobalModFolderPath;
 
             allPaths = new List<string>();
 
@@ -183,19 +167,19 @@ namespace SpaceEngine.Pluginator
             }
             catch (Exception ex)
             {
-                Logger.LogError(string.Format("DetectAssembies Exception: {0}", ex.Message));
+                Logger.LogError(string.Format("AssemblyLoader.DetectAssembies: Exception: {0}", ex.Message));
             }
 
             TotalDetected = allPaths.Count;
 
-            Logger.Log(string.Format("Assembies Detected: {0}", allPaths.Count));
+            Logger.Log(string.Format("AssemblyLoader.DetectAssembies: Assembies Detected: {0}", allPaths.Count));
         }
 
         private void DetectAndLoadAssemblies()
         {
             List<string> allPaths;
-            DetectAssembies(out allPaths);
 
+            DetectAssembies(out allPaths);
             LoadDetectedAssemblies(allPaths);
         }
 
@@ -203,20 +187,19 @@ namespace SpaceEngine.Pluginator
         {
             try
             {
-                Assembly assembly = Assembly.LoadFile(path);
-
-                SpaceAddonAssembly[] attrbutes = assembly.GetCustomAttributes(typeof(SpaceAddonAssembly), false) as SpaceAddonAssembly[];
+                var assembly = Assembly.LoadFile(path);
+                var attrbutes = assembly.GetCustomAttributes(typeof(SpaceAddonAssembly), false) as SpaceAddonAssembly[];
 
                 if (attrbutes == null || attrbutes.Length == 0)
                 {
-                    Logger.LogError(string.Format("This is not an adddon assembly! {0}", path));
+                    Logger.LogError(string.Format("AssemblyLoader.LoadAssembly: This is not an adddon assembly! {0}", path));
                 }
                 else
                 {
-                    SpaceAddonAssembly ea = attrbutes[0];
-                    List<Type> mb = GetAllSubclassesOf<Type, SpaceAddonMonoBehaviour, MonoBehaviour>(assembly);
-                    AssemblyExternalTypes aet = new AssemblyExternalTypes(typeof(MonoBehaviour), mb);
-                    AssemblyExternal ae = new AssemblyExternal(path, ea.Name, ea.Version, assembly, aet);
+                    var addonAssembly = attrbutes[0];
+                    var mb = GetAllSubclassesOf<Type, SpaceAddonMonoBehaviour, MonoBehaviour>(assembly);
+                    var aet = new AssemblyExternalTypes(typeof(MonoBehaviour), mb);
+                    var ae = new AssemblyExternal(path, addonAssembly.Name, addonAssembly.Version, assembly, aet);
 
                     ExternalAssemblies.Add(ae);
 
@@ -227,7 +210,7 @@ namespace SpaceEngine.Pluginator
             }
             catch (Exception ex)
             {
-                Logger.LogError(string.Format("LoadAssembly Exception: {0}", ex.Message));
+                Logger.LogError(string.Format("AssemblyLoader.LoadAssembly: LoadAssembly Exception: {0}", ex.Message));
             }
         }
 
@@ -236,52 +219,43 @@ namespace SpaceEngine.Pluginator
             if (allPaths == null)
             {
                 DetectAssembies(out allPaths);
-                Logger.LogError("Something wrong with path's array! Detecting assemblies again!");
+
+                Logger.LogError("AssemblyLoader.LoadDetectedAssemblies: Something wrong with path's array! Detecting assemblies again!");
             }
 
-            for (int i = 0; i < allPaths.Count; i++)
+            for (var i = 0; i < allPaths.Count; i++)
             {
-                string path = allPaths[i];
+                var path = allPaths[i];
 
                 //Delay(0.5f, () => { LoadAssembly(path); });
                 LoadAssembly(path);
             }
         }
 
-        private void FirePlugins(List<AssemblyExternal> ExternalAssemblies, int level)
+        private void FirePlugins(List<AssemblyExternal> externalAssemblies, int level)
         {
-            int counter = 0;
+            var counter = externalAssemblies.Sum(assembly => assembly.Types.SelectMany(kvp => kvp.Value).Count(v => FirePlugin(v, level)));
 
-            foreach (AssemblyExternal assembly in ExternalAssemblies)
-            {
-                counter += assembly.Types.SelectMany(kvp => kvp.Value).Count(v => FirePlugin(v, level));
-            }
-
-            Logger.Log(string.Format("{0} plugins fired at scene №: {1}", counter, level));
+            Logger.Log(string.Format("AssemblyLoader.FirePlugins: {0} plugins fired at scene №: {1}", counter, level));
         }
 
-        private void FirePlugins(List<AssemblyExternal> ExternalAssemblies)
+        private void FirePlugins(List<AssemblyExternal> externalAssemblies)
         {
-            int counter = 0;
+            var counter = externalAssemblies.Sum(assembly => assembly.Types.SelectMany(kvp => kvp.Value).Count(v => FirePlugin(v)));
 
-            foreach (AssemblyExternal assembly in ExternalAssemblies)
-            {
-                counter += assembly.Types.SelectMany(kvp => kvp.Value).Count(v => FirePlugin(v));
-            }
-
-            Logger.Log(string.Format("{0} plugins fired at scene №: {1}", counter, SceneManager.GetActiveScene().buildIndex));
+            Logger.Log(string.Format("AssemblyLoader.FirePlugins: {0} plugins fired at scene №: {1}", counter, SceneManager.GetActiveScene().buildIndex));
         }
 
-        private void FireHotPlugin(AssemblyExternal Addon)
+        private void FireHotPlugin(AssemblyExternal assembly)
         {
-            int counter = Addon.Types.SelectMany(kvp => kvp.Value).Count(v => FirePlugin(v, 0));
+            var counter = assembly.Types.SelectMany(kvp => kvp.Value).Count(v => FirePlugin(v, 0));
 
-            Logger.Log(string.Format("{0} plugins fired at scene №: {1}", counter, SceneManager.GetActiveScene().buildIndex));
+            Logger.Log(string.Format("AssemblyLoader.FirePlugins: {0} plugins fired at scene №: {1}", counter, SceneManager.GetActiveScene().buildIndex));
         }
 
         private bool FirePlugin(Type type, int level)
         {
-            SpaceAddonMonoBehaviour atr = AttributeHelper.GetTypeAttribute<SpaceAddonMonoBehaviour>(type);
+            var atr = AttributeHelper.GetTypeAttribute<SpaceAddonMonoBehaviour>(type);
 
             if (atr != null)
             {
@@ -301,9 +275,8 @@ namespace SpaceEngine.Pluginator
 
         private bool FirePlugin(Type type)
         {
-            int currentScene = SceneManager.GetActiveScene().buildIndex;
-
-            SpaceAddonMonoBehaviour atr = AttributeHelper.GetTypeAttribute<SpaceAddonMonoBehaviour>(type);
+            var currentScene = SceneManager.GetActiveScene().buildIndex;
+            var atr = AttributeHelper.GetTypeAttribute<SpaceAddonMonoBehaviour>(type);
 
             if (atr != null)
             {
@@ -323,15 +296,14 @@ namespace SpaceEngine.Pluginator
 
         public List<T> GetAllSubclassesOf<T, U, Y>(Assembly assembly) where T : Type where U : Attribute
         {
-            Type[] types = assembly.GetTypes();
+            var types = assembly.GetTypes();
+            var output = new List<T>();
 
-            List<T> output = new List<T>();
-
-            foreach (Type type in types)
+            foreach (var type in types)
             {
                 if (type.IsSubclassOf(typeof(Y)))
                 {
-                    U atr = AttributeHelper.GetTypeAttribute<U>(type);
+                    var atr = AttributeHelper.GetTypeAttribute<U>(type);
 
                     if (atr != null)
                         output.Add(type as T);

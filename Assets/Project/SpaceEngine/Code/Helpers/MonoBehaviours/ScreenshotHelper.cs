@@ -47,8 +47,7 @@ using UnityEngine;
 using Logger = SpaceEngine.Core.Debugging.Logger;
 
 [RequireComponent(typeof(Camera))]
-[UseLogger(Category.Data)]
-[UseLoggerFile("SpaceWLog")]
+[UseLogger(LoggerCategory.Data)]
 public class ScreenshotHelper : MonoSingleton<ScreenshotHelper>
 {
     public enum ScreenshotFormat
@@ -124,14 +123,14 @@ public class ScreenshotHelper : MonoSingleton<ScreenshotHelper>
                     throw new ArgumentOutOfRangeException();
             }
 
-            Logger.Log(string.Format("ScreenshotHelper: Screenshot Saved. {0}", filePath));
+            Logger.Log(string.Format("ScreenshotHelper.SaveScreenshot: Screenshot Saved. {0}", filePath));
 
 #if UNITY_EDITOR
             AssetDatabase.Refresh();
 #endif
         }
         else
-            Logger.LogError("ScreenshotHelper: screenShotTexture is null!");
+            Logger.LogError("ScreenshotHelper.SaveScreenshot: screenShotTexture is null!");
     }
 
     private void OnRenderImage(RenderTexture source, RenderTexture destination)

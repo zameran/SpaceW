@@ -41,7 +41,7 @@ public sealed class Cleaner : MonoBehaviour
 {
     private void Awake()
     {
-        foreach (var file in Directory.GetFiles(PathGlobals.GlobalRootPath, "*Log*.txt"))
+        foreach (var file in Directory.GetFiles(PathGlobals.GlobalRootPath, "*Log*.log"))
         {
             if (File.Exists(file))
                 File.Delete(file);
