@@ -105,7 +105,7 @@ namespace SpaceEngine.Core.Terrain
         /// <summary>
         /// Perform horizon occlusion culling tests?
         /// </summary>
-        public bool UseHorizonCulling = true;
+        public bool UseHorizonCulling = false;
 
         /// <summary>
         /// Subdivide invisible quads based on distance, like visible ones?

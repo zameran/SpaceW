@@ -223,7 +223,7 @@ MonoBehaviour:
   ZMin: -5
   ZMax: 5
   Face: 6
-  UseHorizonCulling: 1
+  UseHorizonCulling: 0
   SplitInvisibleQuads: 1
   Samplers: []
   SamplersSuitable: []
@@ -578,7 +578,7 @@ MonoBehaviour:
   ZMin: -5
   ZMax: 5
   Face: 5
-  UseHorizonCulling: 1
+  UseHorizonCulling: 0
   SplitInvisibleQuads: 1
   Samplers: []
   SamplersSuitable: []
@@ -893,6 +893,8 @@ MonoBehaviour:
   Sunglares: []
   HDRMode: 4
   GSCS: {fileID: 11400000, guid: 1df83c97158884340af77d277fcca4bf, type: 2}
+  FourierShader: {fileID: 0}
+  FourierGridSize: 64
   GridResolution: 32
   OceanGridResolution: 32
   Eclipses: 1
@@ -2521,7 +2523,7 @@ MonoBehaviour:
   ZMin: -5
   ZMax: 5
   Face: 1
-  UseHorizonCulling: 1
+  UseHorizonCulling: 0
   SplitInvisibleQuads: 1
   Samplers: []
   SamplersSuitable: []
@@ -2748,7 +2750,7 @@ MonoBehaviour:
   ZMin: -5
   ZMax: 5
   Face: 2
-  UseHorizonCulling: 1
+  UseHorizonCulling: 0
   SplitInvisibleQuads: 1
   Samplers: []
   SamplersSuitable: []
@@ -3578,6 +3580,7 @@ MonoBehaviour:
   Amplitude: 0.8
   Frequency: 6.4
   ColorShader: {fileID: 4800000, guid: 2b0d935ede708d14cb411a6470193fe9, type: 3}
+  Storages: []
   TerrainNodes: []
   HeightZ: 0
   Size: 636
@@ -3767,7 +3770,7 @@ MonoBehaviour:
   ZMin: -5
   ZMax: 5
   Face: 3
-  UseHorizonCulling: 1
+  UseHorizonCulling: 0
   SplitInvisibleQuads: 1
   Samplers: []
   SamplersSuitable: []
@@ -4502,7 +4505,7 @@ MonoBehaviour:
   PermSamplerGL: {fileID: 0}
   PermGradSamplerGL: {fileID: 0}
   PlanetAtlas: {fileID: 0}
-  PlanetUVSampler: {fileID: 0}
+  PlanetUV: {fileID: 0}
   QuadTexture1: {fileID: 0}
   QuadTexture2: {fileID: 0}
   QuadTexture3: {fileID: 0}
@@ -4570,7 +4573,7 @@ MonoBehaviour:
   ZMin: -5
   ZMax: 5
   Face: 4
-  UseHorizonCulling: 1
+  UseHorizonCulling: 0
   SplitInvisibleQuads: 1
   Samplers: []
   SamplersSuitable: []
