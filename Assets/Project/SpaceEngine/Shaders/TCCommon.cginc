@@ -592,53 +592,6 @@ inline float4 hash4(float2 p) { return frac(sin(float4(dot(p, float2(127.1, 311.
 //-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
-inline Surface Blend(Surface s0, Surface s1, float t)
-{
-	Surface output;
-
-	output.color = lerp(s0.color, s1.color, t);
-	output.height = lerp(s0.height, s1.height, t);
-
-	return output;
-}
-
-inline Surface BlendSmart(Surface s0, Surface s1, float t)
-{
-	float a0 = s0.height + 1.0 - t;
-	float a1 = s1.height + t;
-	float ma = max(a0, a1) - 0.5;
-	float b0 = max(a0 - ma, 0);
-	float b1 = max(a1 - ma, 0);
-
-	ma = 1.0 / (b0 + b1);
-	b0 *= ma;
-	b1 *= ma;
-
-	Surface res;
-
-	res.color  = s0.color  * b0 + s1.color  * b1;
-	res.height = s0.height * b0 + s1.height * b1;
-
-	return res;
-}
-
-inline float2 ruvy(float2 uv)
-{
-	return float2(uv.x, 1.0 - uv.y);
-}
-
-inline float3 ruvy(float3 uv)
-{
-	return float3(uv.x, 1.0 - uv.y, uv.z);
-}
-
-inline float4 ruvy(float4 uv)
-{
-	return float4(uv.x, 1.0 - uv.y, uv.z, uv.w);
-}
-//-----------------------------------------------------------------------------
-
-//-----------------------------------------------------------------------------
 Surface GetSurfaceColorAtlas(float height, float slope, float vary)
 {
 	const float4  PackFactors = float4(1.0 / ATLAS_RES_X, 1.0 / ATLAS_RES_Y, ATLAS_TILE_RES, ATLAS_TILE_RES_LOG2);
@@ -656,10 +609,10 @@ Surface GetSurfaceColorAtlas(float height, float slope, float vary)
 	float2 uv = tileOffs + frac(tileUV) * (PackFactors.xy - invSize) + 0.5 * invSize;
 
 	#if (TILING_FIX_MODE == 0)
-		res.color = tex2D(AtlasDiffSampler, ruvy(uv));
+		res.color = tex2D(AtlasDiffSampler, uv);
 	#elif (TILING_FIX_MODE == 1)
 		float2 uv2 = tileOffs + frac(-0.173 * tileUV) * (PackFactors.xy - invSize) + 0.5 * invSize;
-		res.color = lerp(tex2D(AtlasDiffSampler, ruvy(uv)), tex2D(AtlasDiffSampler, ruvy(uv2)), 0.5);
+		res.color = lerp(tex2D(AtlasDiffSampler, uv), tex2D(AtlasDiffSampler, uv2), 0.5);
 	#endif
 
 	res.height = res.color.a;
@@ -690,6 +643,16 @@ Surface GetSurfaceColor(float height, float slope, float vary)
 }
 
 #elif (TILE_BLEND_MODE == 1)
+
+inline Surface Blend(Surface s0, Surface s1, float t)
+{
+	Surface output;
+
+	output.color = lerp(s0.color, s1.color, t);
+	output.height = lerp(s0.height, s1.height, t);
+
+	return output;
+}
 
 Surface GetSurfaceColor(float height, float slope, float vary)
 {
@@ -734,6 +697,26 @@ Surface GetSurfaceColor(float height, float slope, float vary)
 }
 
 #elif (TILE_BLEND_MODE == 2)
+
+inline Surface BlendSmart(Surface s0, Surface s1, float t)
+{
+	float a0 = s0.height + 1.0 - t;
+	float a1 = s1.height + t;
+	float ma = max(a0, a1) - 0.5;
+	float b0 = max(a0 - ma, 0);
+	float b1 = max(a1 - ma, 0);
+
+	ma = 1.0 / (b0 + b1);
+	b0 *= ma;
+	b1 *= ma;
+
+	Surface res;
+
+	res.color  = s0.color  * b0 + s1.color  * b1;
+	res.height = s0.height * b0 + s1.height * b1;
+
+	return res;
+}
 
 Surface GetSurfaceColor(float height, float slope, float vary)
 {
