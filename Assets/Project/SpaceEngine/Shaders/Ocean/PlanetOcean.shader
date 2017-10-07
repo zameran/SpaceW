@@ -324,7 +324,7 @@ Shader "SpaceEngine/Planet/Ocean"
 
 			Blend SrcAlpha OneMinusSrcAlpha
 			Cull Front
-			ZWrite Off
+			ZWrite On
 			ZTest LEqual
 
 			CGPROGRAM
