@@ -176,7 +176,7 @@ namespace SpaceEngine.Core.Preprocess.Atmospehre
             if (irradianceT_Write != null) irradianceT_Write.ReleaseAndDestroy();
             if (inscatterT_Write != null) inscatterT_Write.ReleaseAndDestroy();
 
-            //if (deltaET != null) deltaET.ReleaseAndDestroy();
+            if (deltaET != null) deltaET.ReleaseAndDestroy();
             if (deltaSRT != null) deltaSRT.ReleaseAndDestroy();
             if (deltaSMT != null) deltaSMT.ReleaseAndDestroy();
             if (deltaJT != null) deltaJT.ReleaseAndDestroy();

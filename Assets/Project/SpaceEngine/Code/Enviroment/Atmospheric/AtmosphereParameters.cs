@@ -150,7 +150,7 @@ namespace SpaceEngine.Enviroment.Atmospheric
                                                                    new Vector4(0.0040f, 0.0040f, 0.0040f, 0.0f),
                                                                    6360.0f, 6420.0f, 6421.0f,
                                                                    6360.0f, 6420.0f, 6421.0f,
-                                                                   6360.0f);
+                                                                   1.0f);
 
                 return ap;
             }
@@ -166,7 +166,7 @@ namespace SpaceEngine.Enviroment.Atmospheric
                                                                    new Vector4(0.0040f, 0.0040f, 0.0040f, 0.0f),
                                                                    6000.0f, 6056.6f, 6057.5f,
                                                                    6000.0f, 6056.6f, 6057.5f,
-                                                                   0.0f);
+                                                                   1.0f);
 
                 return ap;
             }
@@ -182,7 +182,7 @@ namespace SpaceEngine.Enviroment.Atmospheric
                                                                    new Vector4(0.005f, 0.004f, 0.002f, 0.0f),
                                                                    6052.0f, 6132.0f, 6133.0f,
                                                                    6052.0f, 6132.0f, 6133.0f,
-                                                                   6052.0f);
+                                                                   1.0f);
 
                 return ap;
             }
@@ -198,7 +198,7 @@ namespace SpaceEngine.Enviroment.Atmospheric
                                                                    new Vector4(0.0040f, 0.0040f, 0.0040f, 0.0f),
                                                                    3387.792f, 3487.792f, 3488.792f,
                                                                    3387.792f, 3487.792f, 3488.792f,
-                                                                   3387.792f);
+                                                                   1.0f);
 
                 return ap;
             }
@@ -214,7 +214,7 @@ namespace SpaceEngine.Enviroment.Atmospheric
                                                                    new Vector4(0.0040f, 0.0040f, 0.0040f, 0.0f),
                                                                    7149.2f, 7209.2f, 7210.2f,
                                                                    7149.2f, 7209.2f, 7210.2f,
-                                                                   7149.2f);
+                                                                   1.0f);
 
                 return ap;
             }
@@ -230,7 +230,7 @@ namespace SpaceEngine.Enviroment.Atmospheric
                                                                    new Vector4(0.0010f, 0.0100f, 0.0600f, 0.0f),
                                                                    2574.91f, 2634.91f, 2635.91f,
                                                                    2574.91f, 2634.91f, 2635.91f,
-                                                                   2574.91f);
+                                                                   1.0f);
 
                 return ap;
             }
@@ -246,7 +246,7 @@ namespace SpaceEngine.Enviroment.Atmospheric
                                                                    new Vector4(0.00058f, 0.00027f, 0.005f, 0.0f),
                                                                    6371.0f, 6431.0f, 6432.0f,
                                                                    6371.0f, 6431.0f, 6432.0f,
-                                                                   6371.0f);
+                                                                   1.0f);
 
                 return ap;
             }
@@ -262,7 +262,7 @@ namespace SpaceEngine.Enviroment.Atmospheric
                                                                    new Vector4(0.004f, 0.004f, 0.004f, 0.0f),
                                                                    3387.792f, 3487.792f, 3488.792f,
                                                                    3387.792f, 3487.792f, 3488.792f,
-                                                                   3387.792f);
+                                                                   1.0f);
 
                 return ap;
             }
@@ -278,7 +278,7 @@ namespace SpaceEngine.Enviroment.Atmospheric
                                                                    new Vector4(0.001f, 0.001f, 0.001f),
                                                                    2400.0f, 2460.0f, 2470.0f,
                                                                    2400.0f, 2460.0f, 2470.0f,
-                                                                   2400.0f);
+                                                                   1.0f);
                 return ap;
             }
         }

@@ -461,7 +461,7 @@ Transform:
   - {fileID: 854225616}
   - {fileID: 1615898638}
   m_Father: {fileID: 1912963790}
-  m_RootOrder: 12
+  m_RootOrder: 8
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &78635959
 MonoBehaviour:
@@ -767,7 +767,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 05216d3e989e4794386b6087d793e6ff, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  Body: {fileID: 1497659642}
   Lacunarity: 2.2182817
   H: 0.5
   Offset: 0.8
@@ -1111,7 +1110,7 @@ Transform:
   - {fileID: 1023485667}
   - {fileID: 231861863}
   m_Father: {fileID: 1912963790}
-  m_RootOrder: 9
+  m_RootOrder: 5
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &273582521
 MonoBehaviour:
@@ -1562,7 +1561,7 @@ Transform:
   - {fileID: 770655422}
   - {fileID: 1697813990}
   m_Father: {fileID: 1912963790}
-  m_RootOrder: 11
+  m_RootOrder: 7
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &400162877
 MonoBehaviour:
@@ -1615,7 +1614,7 @@ Transform:
   - {fileID: 349779806}
   - {fileID: 1544861079}
   m_Father: {fileID: 1912963790}
-  m_RootOrder: 7
+  m_RootOrder: 3
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &503305956
 GameObject:
@@ -2312,109 +2311,6 @@ MonoBehaviour:
   Key: 293
   Format: 0
   KeyPressed: 0
---- !u!1 &683643901
-GameObject:
-  m_ObjectHideFlags: 0
-  m_PrefabParentObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 0}
-  serializedVersion: 5
-  m_Component:
-  - component: {fileID: 683643902}
-  - component: {fileID: 683643903}
-  m_Layer: 0
-  m_Name: TCCPS_Gasgiant
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!4 &683643902
-Transform:
-  m_ObjectHideFlags: 0
-  m_PrefabParentObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 0}
-  m_GameObject: {fileID: 683643901}
-  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_Children: []
-  m_Father: {fileID: 1912963790}
-  m_RootOrder: 4
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &683643903
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_PrefabParentObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 0}
-  m_GameObject: {fileID: 683643901}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 05216d3e989e4794386b6087d793e6ff, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  Body: {fileID: 1912963789}
-  Lacunarity: 2.2182817
-  H: 0.5
-  Offset: 0.8
-  RidgeSmooth: 0.0001
-  texturingHeightOffset: -1
-  texturingSlopeOffset: 0
-  Randomize: {x: 0, y: 0, z: 0}
-  faceParams: {x: 0, y: 0, z: 1, w: 0}
-  scaleParams: {x: 0, y: 0, z: 0, w: -1}
-  mainParams: {x: 0.02, y: 0.704, z: 0, w: 0}
-  colorParams: {x: 0.1, y: 10, z: 0.63, w: 0.211}
-  climateParams: {x: 0.179, y: 0.158, z: 0.153, w: 0.157}
-  mareParams: {x: 0.55, y: 227, z: 0.233, w: 0.481}
-  montesParams: {x: 0.106, y: 2, z: 0.153, w: 0.954}
-  dunesParams: {x: 0.121, y: 6.9, z: 0.143, w: -1}
-  hillsParams: {x: 1.4142, y: 2, z: 0.266, w: 0.545}
-  canyonsParams: {x: 3, y: 15.4, z: 0.375, w: 1}
-  riversParams: {x: 13.1, y: 2.69, z: 2.49, w: 1}
-  cracksParams: {x: 0.407, y: 1.71, z: 5, w: 0.209}
-  craterParams: {x: 0.32, y: 0.6, z: 1.89, w: 4}
-  volcanoParams1: {x: 2, y: 0.64, z: 0.81, w: 5}
-  volcanoParams2: {x: 1.24, y: 0.423, z: 2.12, w: 1507}
-  lavaParams: {x: -10, y: 0, z: 0, w: 0}
-  textureParams: {x: 0, y: 0, z: 0, w: 0}
-  cloudsParams1: {x: 0, y: 0, z: 10, w: 0.86}
-  cloudsParams2: {x: 0, y: 0, z: 0, w: 0}
-  cycloneParams: {x: 20, y: 0, z: 0.467, w: 1}
-  InvSize: {x: 64, y: 64}
-  AutoUpdate: 1
-  MaterialTable:
-    Gradient:
-      serializedVersion: 2
-      key0: {r: 0.40392157, g: 0.40392157, b: 0.40392157, a: 1}
-      key1: {r: 0.654902, g: 0.654902, b: 0.654902, a: 1}
-      key2: {r: 0, g: 0, b: 0, a: 0}
-      key3: {r: 0, g: 0, b: 0, a: 0}
-      key4: {r: 0, g: 0, b: 0, a: 0}
-      key5: {r: 0, g: 0, b: 0, a: 0}
-      key6: {r: 0, g: 0, b: 0, a: 0}
-      key7: {r: 0, g: 0, b: 0, a: 0}
-      ctime0: 0
-      ctime1: 65535
-      ctime2: 0
-      ctime3: 0
-      ctime4: 0
-      ctime5: 0
-      ctime6: 0
-      ctime7: 0
-      atime0: 0
-      atime1: 65535
-      atime2: 0
-      atime3: 0
-      atime4: 0
-      atime5: 0
-      atime6: 0
-      atime7: 0
-      m_Mode: 0
-      m_NumColorKeys: 2
-      m_NumAlphaKeys: 2
-    ReverseX: 0
-    ReverseY: 0
-    NonLinear: 1
 --- !u!1 &688788024
 GameObject:
   m_ObjectHideFlags: 0
@@ -2517,7 +2413,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 05216d3e989e4794386b6087d793e6ff, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  Body: {fileID: 1497659642}
   Lacunarity: 2.2182817
   H: 0.5
   Offset: 0.8
@@ -4785,7 +4680,7 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 1912963790}
-  m_RootOrder: 6
+  m_RootOrder: 2
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &918735063
 GameObject:
@@ -4916,7 +4811,7 @@ MonoBehaviour:
   Height: 10000
   Scale: 1
   Fade: 1
-  AerialPerspectiveOffset: 200
+  AerialPerspectiveOffset: 333.33334
   HorizonFixEps: 0.004
   MieFadeFix: 0.02
   ExtinctionGroundFade: 0.000025
@@ -4958,7 +4853,7 @@ Transform:
   - {fileID: 1112289089}
   - {fileID: 1926184548}
   m_Father: {fileID: 1912963790}
-  m_RootOrder: 13
+  m_RootOrder: 9
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &966189783
 MonoBehaviour:
@@ -5111,7 +5006,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 05216d3e989e4794386b6087d793e6ff, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  Body: {fileID: 1497659642}
   Lacunarity: 2.2182817
   H: 0.5
   Offset: 0.8
@@ -5408,7 +5302,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 05216d3e989e4794386b6087d793e6ff, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  Body: {fileID: 1497659642}
   Lacunarity: 2.2182817
   H: 0.5
   Offset: 0.8
@@ -5437,109 +5330,6 @@ MonoBehaviour:
   cloudsParams2: {x: 0, y: 0, z: 1, w: 0}
   cycloneParams: {x: 0, y: 0, z: 0, w: 0}
   InvSize: {x: 64, y: 32}
-  AutoUpdate: 1
-  MaterialTable:
-    Gradient:
-      serializedVersion: 2
-      key0: {r: 0.40392157, g: 0.40392157, b: 0.40392157, a: 1}
-      key1: {r: 0.654902, g: 0.654902, b: 0.654902, a: 1}
-      key2: {r: 0, g: 0, b: 0, a: 0}
-      key3: {r: 0, g: 0, b: 0, a: 0}
-      key4: {r: 0, g: 0, b: 0, a: 0}
-      key5: {r: 0, g: 0, b: 0, a: 0}
-      key6: {r: 0, g: 0, b: 0, a: 0}
-      key7: {r: 0, g: 0, b: 0, a: 0}
-      ctime0: 0
-      ctime1: 65535
-      ctime2: 0
-      ctime3: 0
-      ctime4: 0
-      ctime5: 0
-      ctime6: 0
-      ctime7: 0
-      atime0: 0
-      atime1: 65535
-      atime2: 0
-      atime3: 0
-      atime4: 0
-      atime5: 0
-      atime6: 0
-      atime7: 0
-      m_Mode: 0
-      m_NumColorKeys: 2
-      m_NumAlphaKeys: 2
-    ReverseX: 0
-    ReverseY: 0
-    NonLinear: 1
---- !u!1 &1076784619
-GameObject:
-  m_ObjectHideFlags: 0
-  m_PrefabParentObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 0}
-  serializedVersion: 5
-  m_Component:
-  - component: {fileID: 1076784620}
-  - component: {fileID: 1076784621}
-  m_Layer: 0
-  m_Name: TCCPS_Terra
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!4 &1076784620
-Transform:
-  m_ObjectHideFlags: 0
-  m_PrefabParentObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 0}
-  m_GameObject: {fileID: 1076784619}
-  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_Children: []
-  m_Father: {fileID: 1912963790}
-  m_RootOrder: 3
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &1076784621
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_PrefabParentObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 0}
-  m_GameObject: {fileID: 1076784619}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 05216d3e989e4794386b6087d793e6ff, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  Body: {fileID: 1912963789}
-  Lacunarity: 2.218282
-  H: 0.5
-  Offset: 0.8
-  RidgeSmooth: 0.0001
-  texturingHeightOffset: -0.2125
-  texturingSlopeOffset: 1
-  Randomize: {x: -0.304, y: 0.5, z: -0.912}
-  faceParams: {x: 0, y: 0, z: 1, w: 0}
-  scaleParams: {x: 0, y: 0, z: 0, w: -1}
-  mainParams: {x: 0.865461, y: 0.691191, z: 3, w: 2}
-  colorParams: {x: 0.0502472, y: 1, z: 0.611, w: 0.548}
-  climateParams: {x: 0.428, y: 0.22, z: 0.055, w: 0.289}
-  mareParams: {x: 0.1, y: 1, z: 0.083, w: 0.33}
-  montesParams: {x: 0.412455, y: 1, z: 0.845, w: 0.430004}
-  dunesParams: {x: 0.04637, y: 4.5771, z: 0.0937857, w: -1}
-  hillsParams: {x: 0.91235, y: 2.208, z: 0.894509, w: 0.540188}
-  canyonsParams: {x: 0.252623, y: 1.145, z: 0.865429, w: 1}
-  riversParams: {x: 5.6, y: 4.34576, z: 6.94059, w: 2}
-  cracksParams: {x: 0.03066, y: 1.13444, z: 1, w: 0.0849724}
-  craterParams: {x: 1.45125, y: 2.42152, z: 0.45, w: 4}
-  volcanoParams1: {x: 1.513, y: 5.2523, z: 0.164144, w: 3}
-  volcanoParams2: {x: 0, y: -1, z: 0.638988, w: 1783.18}
-  lavaParams: {x: 0, y: 0, z: 207, w: 0.625}
-  textureParams: {x: 1, y: 0, z: -1, w: 0}
-  cloudsParams1: {x: 0.5, y: 4, z: 1.18, w: 1.28}
-  cloudsParams2: {x: 0, y: 0, z: 0.696, w: 0}
-  cycloneParams: {x: 2.92106, y: 1.03022, z: 0.367564, w: 3}
-  InvSize: {x: 64, y: 36}
   AutoUpdate: 1
   MaterialTable:
     Gradient:
@@ -5691,7 +5481,7 @@ Transform:
   - {fileID: 33261335}
   - {fileID: 608996203}
   m_Father: {fileID: 1912963790}
-  m_RootOrder: 8
+  m_RootOrder: 4
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &1081792041
 MonoBehaviour:
@@ -5853,7 +5643,7 @@ Transform:
   - {fileID: 602723020}
   - {fileID: 1078420690}
   m_Father: {fileID: 1912963790}
-  m_RootOrder: 10
+  m_RootOrder: 6
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &1215170348
 MonoBehaviour:
@@ -6459,109 +6249,6 @@ MonoBehaviour:
   StoreParent: 1
   StoreInvisible: 0
   Priority: 2
---- !u!1 &1458782247
-GameObject:
-  m_ObjectHideFlags: 0
-  m_PrefabParentObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 0}
-  serializedVersion: 5
-  m_Component:
-  - component: {fileID: 1458782248}
-  - component: {fileID: 1458782249}
-  m_Layer: 0
-  m_Name: TCCPS_Selena
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!4 &1458782248
-Transform:
-  m_ObjectHideFlags: 0
-  m_PrefabParentObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 0}
-  m_GameObject: {fileID: 1458782247}
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_Children: []
-  m_Father: {fileID: 1912963790}
-  m_RootOrder: 2
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &1458782249
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_PrefabParentObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 0}
-  m_GameObject: {fileID: 1458782247}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 05216d3e989e4794386b6087d793e6ff, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  Body: {fileID: 1912963789}
-  Lacunarity: 2.2182817
-  H: 0.5
-  Offset: 0.8
-  RidgeSmooth: 0.0001
-  texturingHeightOffset: 0
-  texturingSlopeOffset: 1
-  Randomize: {x: -0.11, y: 0.04, z: 0.13}
-  faceParams: {x: 0, y: 0, z: 1, w: 0}
-  scaleParams: {x: 0, y: 0, z: 0, w: -1}
-  mainParams: {x: 1, y: 0.704, z: 0, w: 0}
-  colorParams: {x: 1, y: 8, z: 0.497, w: 0.211}
-  climateParams: {x: 0.179, y: 0.158, z: 0.153, w: 0.157}
-  mareParams: {x: 0.55, y: 0.754, z: 0.24, w: 0.826}
-  montesParams: {x: 0.106, y: 2, z: 0.153, w: 0.222}
-  dunesParams: {x: 0.121, y: 6.9, z: 0.143, w: 1}
-  hillsParams: {x: 1, y: 4, z: 0.772, w: 0.898}
-  canyonsParams: {x: 0.031, y: 15.4, z: 0.375, w: 1}
-  riversParams: {x: 13.1, y: 2.69, z: 2.49, w: 1}
-  cracksParams: {x: 0.2451, y: 0.71, z: 1, w: 1}
-  craterParams: {x: 2.1245, y: 1, z: 1.16, w: 2}
-  volcanoParams1: {x: 1, y: 0.64, z: 0.151, w: 0}
-  volcanoParams2: {x: 1.43, y: 0.61, z: 0.04, w: 1507}
-  lavaParams: {x: -10, y: 0, z: 207, w: 0.625}
-  textureParams: {x: 1, y: 0, z: 0, w: 0}
-  cloudsParams1: {x: 0, y: 0, z: 0, w: 0}
-  cloudsParams2: {x: 0, y: 0, z: 1, w: 0}
-  cycloneParams: {x: 0, y: 0, z: 0, w: 0}
-  InvSize: {x: 64, y: 32}
-  AutoUpdate: 1
-  MaterialTable:
-    Gradient:
-      serializedVersion: 2
-      key0: {r: 0.40392157, g: 0.40392157, b: 0.40392157, a: 1}
-      key1: {r: 0.654902, g: 0.654902, b: 0.654902, a: 1}
-      key2: {r: 0, g: 0, b: 0, a: 0}
-      key3: {r: 0, g: 0, b: 0, a: 0}
-      key4: {r: 0, g: 0, b: 0, a: 0}
-      key5: {r: 0, g: 0, b: 0, a: 0}
-      key6: {r: 0, g: 0, b: 0, a: 0}
-      key7: {r: 0, g: 0, b: 0, a: 0}
-      ctime0: 0
-      ctime1: 65535
-      ctime2: 0
-      ctime3: 0
-      ctime4: 0
-      ctime5: 0
-      ctime6: 0
-      ctime7: 0
-      atime0: 0
-      atime1: 65535
-      atime2: 0
-      atime3: 0
-      atime4: 0
-      atime5: 0
-      atime6: 0
-      atime7: 0
-      m_Mode: 0
-      m_NumColorKeys: 2
-      m_NumAlphaKeys: 2
-    ReverseX: 0
-    ReverseY: 0
-    NonLinear: 1
 --- !u!1 &1478112654
 GameObject:
   m_ObjectHideFlags: 0
@@ -6711,8 +6398,8 @@ MonoBehaviour:
   DrawGizmos: 0
   UpdateLOD: 1
   AtmosphereEnabled: 1
-  OceanEnabled: 1
-  RingEnabled: 1
+  OceanEnabled: 0
+  RingEnabled: 0
   TerrainEnabled: 1
   Amplitude: 768
   Frequency: 64
@@ -8225,9 +7912,9 @@ MonoBehaviour:
   Height: 3000
   Scale: 1
   Fade: 1
-  AerialPerspectiveOffset: 275
-  HorizonFixEps: 0.004
-  MieFadeFix: 0.02
+  AerialPerspectiveOffset: 166.6667
+  HorizonFixEps: 0.0008
+  MieFadeFix: 0.004
   ExtinctionGroundFade: 0.000025
   HDRExposure: 0.2
   SkyShader: {fileID: 4800000, guid: e591e3c9700c3b243a782b059c2d6d0b, type: 3}
@@ -8248,111 +7935,8 @@ Transform:
   m_Children:
   - {fileID: 1595463358}
   m_Father: {fileID: 1912963790}
-  m_RootOrder: 5
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!1 &1786481794
-GameObject:
-  m_ObjectHideFlags: 0
-  m_PrefabParentObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 0}
-  serializedVersion: 5
-  m_Component:
-  - component: {fileID: 1786481795}
-  - component: {fileID: 1786481796}
-  m_Layer: 0
-  m_Name: TCCPS_Asteroid
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!4 &1786481795
-Transform:
-  m_ObjectHideFlags: 0
-  m_PrefabParentObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 0}
-  m_GameObject: {fileID: 1786481794}
-  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_Children: []
-  m_Father: {fileID: 1912963790}
   m_RootOrder: 1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &1786481796
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_PrefabParentObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 0}
-  m_GameObject: {fileID: 1786481794}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 05216d3e989e4794386b6087d793e6ff, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  Body: {fileID: 1912963789}
-  Lacunarity: 2.2182817
-  H: 0.5
-  Offset: 0.8
-  RidgeSmooth: 0.0001
-  texturingHeightOffset: 0
-  texturingSlopeOffset: 1
-  Randomize: {x: 0, y: 0, z: 0}
-  faceParams: {x: 0, y: 0, z: 1, w: 0}
-  scaleParams: {x: 0, y: 0, z: 0, w: -1}
-  mainParams: {x: 0.1, y: 0.704, z: 0, w: 0}
-  colorParams: {x: 1, y: 8, z: 0.497, w: 0.211}
-  climateParams: {x: 0.179, y: 0.158, z: 0.153, w: 0.157}
-  mareParams: {x: 0.55, y: 227, z: 0.233, w: 0}
-  montesParams: {x: 0.106, y: 2, z: 0.153, w: 0.222}
-  dunesParams: {x: 0.121, y: 6.9, z: 0.143, w: -1}
-  hillsParams: {x: 0.863, y: 3.231, z: 0.477, w: 0.72}
-  canyonsParams: {x: 0.031, y: 15.4, z: 0.375, w: 1}
-  riversParams: {x: 13.1, y: 2.69, z: 2.49, w: 1}
-  cracksParams: {x: 0.407, y: 1.71, z: 5, w: 1}
-  craterParams: {x: 0.7523, y: 1, z: 0.9, w: 6}
-  volcanoParams1: {x: 2, y: 0.64, z: 0.81, w: 5}
-  volcanoParams2: {x: 1.24, y: 0.423, z: 2.12, w: 1507}
-  lavaParams: {x: -10, y: 0, z: 207, w: 0.625}
-  textureParams: {x: 1, y: 0, z: 0, w: 0}
-  cloudsParams1: {x: 0, y: 0, z: 0, w: 0}
-  cloudsParams2: {x: 0, y: 0, z: 1, w: 0}
-  cycloneParams: {x: 0, y: 0, z: 0, w: 0}
-  InvSize: {x: 64, y: 32}
-  AutoUpdate: 1
-  MaterialTable:
-    Gradient:
-      serializedVersion: 2
-      key0: {r: 0.40392157, g: 0.40392157, b: 0.40392157, a: 1}
-      key1: {r: 0.654902, g: 0.654902, b: 0.654902, a: 1}
-      key2: {r: 0.6691177, g: 0.5284509, b: 0.33455884, a: 0}
-      key3: {r: 0.44117647, g: 0.43262425, b: 0.34710208, a: 0}
-      key4: {r: 0.42344293, g: 0.56642365, b: 0.6544118, a: 0}
-      key5: {r: 1, g: 1, b: 1, a: 0}
-      key6: {r: 0, g: 0, b: 0, a: 0}
-      key7: {r: 0, g: 0, b: 0, a: 0}
-      ctime0: 0
-      ctime1: 65535
-      ctime2: 12914
-      ctime3: 21588
-      ctime4: 39128
-      ctime5: 65535
-      ctime6: 0
-      ctime7: 0
-      atime0: 0
-      atime1: 65535
-      atime2: 0
-      atime3: 0
-      atime4: 0
-      atime5: 0
-      atime6: 0
-      atime7: 0
-      m_Mode: 0
-      m_NumColorKeys: 2
-      m_NumAlphaKeys: 2
-    ReverseX: 0
-    ReverseY: 0
-    NonLinear: 1
 --- !u!1 &1792673909
 GameObject:
   m_ObjectHideFlags: 0
@@ -8865,10 +8449,6 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
   - {fileID: 1949857088}
-  - {fileID: 1786481795}
-  - {fileID: 1458782248}
-  - {fileID: 1076784620}
-  - {fileID: 683643902}
   - {fileID: 1757335315}
   - {fileID: 913510608}
   - {fileID: 493107722}
@@ -9074,7 +8654,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 05216d3e989e4794386b6087d793e6ff, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  Body: {fileID: 1912963789}
   Lacunarity: 2.2182817
   H: 0.5
   Offset: 0.8
@@ -9476,7 +9055,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 05216d3e989e4794386b6087d793e6ff, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  Body: {fileID: 1497659642}
   Lacunarity: 2.218282
   H: 0.5
   Offset: 0.8

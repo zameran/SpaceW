@@ -219,7 +219,7 @@ namespace SpaceEngine.Enviroment.Atmospheric
 
             AtmosphereParameters.Rg = Radius - RadiusHold;
             AtmosphereParameters.Rt = (Radius + Height) - RadiusHold;
-            AtmosphereParameters.Rl = (Radius + Height * 1.05f) - RadiusHold;
+            AtmosphereParameters.Rl = (Radius + Height * 1.01666667f) - RadiusHold;
             AtmosphereParameters.SCALE = Scale;
 
             var fadeValue = Mathf.Clamp01(VectorHelper.AngularRadius(Origin, GodManager.Instance.View.WorldCameraPosition, Radius));

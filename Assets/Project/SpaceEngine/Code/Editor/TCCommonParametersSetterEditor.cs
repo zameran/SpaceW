@@ -30,8 +30,6 @@
  */
 #endregion
 
-using SpaceEngine.Core.Bodies;
-
 using System;
 
 using UnityEditor;
@@ -54,11 +52,6 @@ public sealed class TCCommonParametersSetterEditor : Editor
     {
         EditorGUILayout.LabelField("Auto update: ", EditorStyles.boldLabel);
         setter.AutoUpdate = EditorGUILayout.Toggle(setter.AutoUpdate);
-
-        EditorGUILayout.Space();
-
-        EditorGUILayout.LabelField("Body to setup: ", EditorStyles.boldLabel);
-        setter.Body = EditorGUILayout.ObjectField(setter.Body, typeof(Body), true) as Body;
 
         EditorGUILayout.Space();
 

@@ -33,7 +33,6 @@
 // Creator: zameran
 #endregion
 
-using SpaceEngine.Core.Bodies;
 using SpaceEngine.Core.Patterns.Strategy.Uniformed;
 using SpaceEngine.Core.Utilities.Gradients;
 
@@ -41,8 +40,6 @@ using UnityEngine;
 
 public sealed class TCCommonParametersSetter : MonoBehaviour, IUniformed<Material>
 {
-    public Body Body;
-
     public float Lacunarity = 2.218281828459f;
     public float H = 0.5f;
     public float Offset = 0.8f;
@@ -82,8 +79,6 @@ public sealed class TCCommonParametersSetter : MonoBehaviour, IUniformed<Materia
 
     private void Awake()
     {
-        if (Body == null) Body = GetComponentInParent<Body>();
-
         MaterialTable.GenerateLut();
     }
 

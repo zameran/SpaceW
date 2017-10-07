@@ -149,11 +149,7 @@ float2 GetTransmittanceUV(float r, float mu)
 
 	#if defined(INSCATTER_NON_LINEAR)
 		uR = sqrt((r - Rg) / (Rt - Rg));
-		#if defined(OPTIMIZE)
-			uMu = atan(mu * 11.950355887 + 2.1510640597) * 0.6666666667;
-		#else
-			uMu = atan((mu + 0.15) / (1.0 + 0.15) * tan(1.5)) / 1.5;
-		#endif
+		uMu = atan((mu + 0.15) / (1.0 + 0.15) * tan(1.5)) / 1.5;
 	#else
 		uR = (r - Rg) / (Rt - Rg);
 		uMu = (mu + 0.15) / (1.0 + 0.15);
@@ -201,8 +197,6 @@ float4 Texture4D(sampler3D table, float r, float mu, float muS, float nu)
 		float4 cst = rmu < 0.0 && delta > 0.0 ? float4(1.0, 0.0, 0.0, 0.5 - 0.5 / RES_MU) : float4(-1.0, H * H, H, 0.5 + 0.5 / RES_MU);
 		float uR = 0.5 / RES_R + rho / H * (1.0 - 1.0 / float(RES_R));
 		float uMu = cst.w + (rmu * cst.x + sqrt(delta + cst.y)) / (rho + cst.z) * (0.5 - 1.0 / RES_MU);
-		//float uMu = cst.w;
-		//if (rho + cst.z > 0.0) uMu += (rmu * cst.x + sqrt(delta + cst.y)) / (rho + cst.z) * (0.5 - 1.0 / RES_MU));
 		// paper formula
 		//float uMuS = 0.5 / float(RES_MU_S) + max((1.0 - exp(-3.0 * muS - 0.6)) / (1.0 - exp(-3.6)), 0.0) * (1.0 - 1.0 / float(RES_MU_S));
 		// better formula
@@ -276,12 +270,7 @@ float3 Transmittance(float r, float mu)
 // uses analytic formula instead of transmittance texture
 float3 AnalyticTransmittance(float r, float mu, float d) 
 {
-	float3 tr = exp(- betaR * OpticalDepth(HR, r, mu, d) - betaMEx * OpticalDepth(HM, r, mu, d)); //using default eq.
-
-	UNITY_BRANCH
-	if (isnan(tr.x)) tr = float3(1.0, 1.0, 1.0);
-
-	return lerp(float3(1.0, 1.0, 1.0), tr, density);
+	return exp(- betaR * OpticalDepth(HR, r, mu, d) - betaMEx * OpticalDepth(HM, r, mu, d));
 }
 
 // transmittance(=transparency) of atmosphere for infinite ray (r,mu)
@@ -520,6 +509,7 @@ float3 SkyRadiance(float3 camera, float3 viewdir, float3 sundir, out float3 exti
 					inScatter *= min(Transmittance(r, -mu) / Transmittance(r0, -mu0), 1.0).rgbr;
 				}
 			}
+
 			extinction = Transmittance(r, mu);
 
 			float3 inScatterM = GetMie(inScatter);
@@ -770,11 +760,11 @@ float4 InScattering(float3 camera, float3 ppoint, float3 sundir, out float3 exti
 		{
 			float nu = dot(viewdir, sundir);
 			float muS = dot(camera, sundir) / r;
-			float muR = 1 - abs(dot(normalize(cross(camera, sundir)), viewdir)); 
+
 			float4 inScatter;
 
 			UNITY_BRANCH
-			if (r < Rg + _Aerial_Perspective_Offset) 
+			if (r < Rg + _Aerial_Perspective_Offset) // 2000.0
 			{
 				// avoids imprecision problems in aerial perspective near ground
 				float f = (Rg + _Aerial_Perspective_Offset) / r;
@@ -799,7 +789,7 @@ float4 InScattering(float3 camera, float3 ppoint, float3 sundir, out float3 exti
 				float lim = -sqrt(1.0 - (Rg / r) * (Rg / r));
 
 				UNITY_BRANCH
-				if (abs(mu - lim) < _Sky_HorizonFixEps) 
+				if (abs(mu - lim) < _Sky_HorizonFixEps) // 0.004
 				{
 					// avoids imprecision problems near horizon by interpolating between two points above and below horizon
 					float a = ((mu - lim) + _Sky_HorizonFixEps) / (2.0 * _Sky_HorizonFixEps);
@@ -837,7 +827,7 @@ float4 InScattering(float3 camera, float3 ppoint, float3 sundir, out float3 exti
 			//inScatter.w *= smoothstep(0.035, 0.07, muS);
 
 			// avoids imprecision problems in Mie scattering when sun is below horizon
-			inScatter.w *= smoothstep(0.00, _Sky_MieFadeFix, muS);
+			inScatter.w *= smoothstep(0.00, _Sky_MieFadeFix, muS); // 0.02
 			
 			float4 inScatterM = float4(GetMie(inScatter), 1.0);
 			float phase = PhaseFunctionR(nu);
