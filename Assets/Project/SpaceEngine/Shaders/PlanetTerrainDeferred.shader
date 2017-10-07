@@ -31,7 +31,7 @@
 // Creation Time: Undefined
 // Creator: zameran
 
-Shader "SpaceEngine/Planet/Terrain"
+Shader "SpaceEngine/Planet/Terrain (Deferred)"
 {
 	Properties
 	{
@@ -48,9 +48,13 @@ Shader "SpaceEngine/Planet/Terrain"
 		CGINCLUDE
 		#include "Core.cginc"
 
-		struct ForwardOutput
+		struct GBufferOutput
 		{
-			float4 diffuse	: SV_Target; // rgb: diffuse,  a: unused
+			float4 diffuse  : SV_Target0; // rgb: diffuse,  a: occlusion
+			float4 specular : SV_Target1; // rgb: specular, a: smoothness
+			float4 normal   : SV_Target2; // rgb: normal,   a: unused
+			float4 emission : SV_Target3; // rgb: emission, a: unused
+			//float depth		: SV_Depth;
 		};
 
 		ENDCG
@@ -65,7 +69,7 @@ Shader "SpaceEngine/Planet/Terrain"
 				"ForceNoShadowCasting"	= "False"
 				"IgnoreProjector"		= "True"
 
-				"LightMode"				= "Always"
+				"LightMode"				= "Deferred"
 			}
 
 			//Blend SrcAlpha OneMinusSrcColor
@@ -80,14 +84,10 @@ Shader "SpaceEngine/Planet/Terrain"
 			#pragma fragment frag
 
 			#pragma multi_compile ATMOSPHERE_ON ATMOSPHERE_OFF
-			#pragma multi_compile SHINE_ON SHINE_OFF
-			#pragma multi_compile ECLIPSES_ON ECLIPSES_OFF
-			#pragma multi_compile OCEAN_ON OCEAN_OFF
 			#pragma multi_compile OCEAN_DEPTH_ON OCEAN_DEPTH_OFF
-			#pragma multi_compile SHADOW_0 SHADOW_1 SHADOW_2 SHADOW_3 SHADOW_4
 			
 			#pragma multi_compile_fwdbase noambient novertexlights nolightmap nodynlightmap nodirlightmap nofog nometa nolppv noshadowmask
-			
+
 			#include "SpaceStuff.cginc"
 			#include "SpaceEclipses.cginc"
 			#include "SpaceAtmosphere.cginc"
@@ -110,7 +110,7 @@ Shader "SpaceEngine/Planet/Terrain"
 				o.direction = (_Atmosphere_WorldCameraPos + _Atmosphere_Origin) - (mul(_Globals_CameraToWorld, float4((mul(_Globals_ScreenToCamera, v.vertex)).xyz, 0.0))).xyz;
 			}
 
-			void frag(in v2f_planetTerrain i, out ForwardOutput o)
+			void frag(in v2f_planetTerrain i, out GBufferOutput o)
 			{
 				float3 WCP = _Globals_WorldCameraPos;
 				float3 WCPO = _Atmosphere_WorldCameraPos;
@@ -139,155 +139,23 @@ Shader "SpaceEngine/Planet/Terrain"
 				#endif
 				
 				normal.xyz = mul(_Deform_TangentFrameToWorld, normal.xyz);
+				normal.xyz = -normal.xyz * 0.5 + 0.5; // Encode normal... (Using inversed normal)
 
-				/*
-				float2 vert = (texcoord * _TileSD.y - _TileSD.x) * _Offset.z + _Offset.xy;
-				float4 scaledUV = float4(vert / _Offset.w, 0.0, 0.0);
-				float4 realUV = frac(scaledUV);
-				float4 planetUVColor = tex2D(_PlanetUV, realUV.xy);
-				*/
-
-				float4 reflectance = lerp(ortho, color, clamp(length(color.xyz), 0.0, 1.0)); // Just for tests...
-
-				float cTheta = dot(normal.xyz, WSD);
-
-				#if  ECLIPSES_ON
-					float eclipse = 1;
-
-					float3 invertedLightDistance = rsqrt(dot(WSPR.xyz, WSPR.xyz));
-					float3 lightPosition = WSPR.xyz * invertedLightDistance;
-
-					float lightAngularRadius = asin(WSPR.w * invertedLightDistance);
-
-					eclipse *= EclipseShadow(P, lightPosition, lightAngularRadius);
-				#endif
-
-				#if SHADOW_1 || SHADOW_2 || SHADOW_3 || SHADOW_4
-					float shadow = ShadowColor(float4(PO, 1.0));	// Body origin take in to account...
-				#endif
+				float4 reflectance = ortho;
 				
 				#if ATMOSPHERE_ON
-					float3 sunL = 0.0;
-					float3 skyE = 0.0;
-					SunRadianceAndSkyIrradiance(P, normal.xyz, WSD, sunL, skyE);
-
-					float3 groundColor = 1.5 * RGB2Reflectance(reflectance).rgb * (sunL * max(cTheta, 0) + skyE) / M_PI;
-					
-					#if OCEAN_ON
-						if (height <= _Ocean_Level && _Ocean_DrawBRDF == 1.0)
-						{
-							float3 oceanColor = 0;
-
-							#if OCEAN_DEPTH_ON
-								// TODO : Settings to parameters...
-
-								float coeff = 1.0 - (pow(saturate((_Ocean_Level - height) / 100), 0.56) * saturate((_Ocean_Level - height) / 0.5));
-								
-								float3 shoreColor = AbsorbtionColor(_Ocean_AbsorbtionRGBA, _Ocean_AbsorbtionTint, coeff);
-
-								shoreColor = lerp(reflectance.rgb * coeff, shoreColor, 0.5);
-
-								oceanColor = lerp(_Ocean_Color, shoreColor, coeff);
-							#else
-								oceanColor = _Ocean_Color;
-							#endif
-
-							groundColor = OceanRadiance(WSD, -v, V, _Ocean_Sigma, sunL, skyE, oceanColor, P);
-						}
-					#endif
-					
-					float darknessAccumulation = 1.0;
-					float3 extinction;
-					float3 glowExtinction;
-					float3 inscatter = 0;
-
-					inscatter += InScattering(WCPO, P, float3(0.0, 0.0, 0.0), glowExtinction, 0.0) * _Atmosphere_GlowColor;
-					inscatter += InScattering(WCPO, P, WSD, extinction, 0.0);
-
-					#if ECLIPSES_ON
-						inscatter *= eclipse;
-					#endif
-
-					#if SHADOW_1 || SHADOW_2 || SHADOW_3 || SHADOW_4
-						inscatter *= shadow;
-					#endif
-
-					#if SHINE_ON
-						inscatter += SkyShineRadiance(P, d);
-					#endif
-
-					#if ECLIPSES_ON
-						#if SHADOW_1 || SHADOW_2 || SHADOW_3 || SHADOW_4
-							darknessAccumulation = eclipse * shadow;
-						#else
-							darknessAccumulation = eclipse;
-						#endif
-					#else
-						#if SHADOW_1 || SHADOW_2 || SHADOW_3 || SHADOW_4
-							darknessAccumulation = shadow;
-						#endif
-					#endif
-
-					extinction = GroundFade(_ExtinctionGroundFade, extinction, darknessAccumulation);
-
-					float3 finalColor = hdr(groundColor * extinction + inscatter);
+					// TODO : Make atmosphere in deferred as post effect...
+					float3 finalColor = 1.5 * reflectance;
 				#elif ATMOSPHERE_OFF
-					float3 finalColor = 1.5 * reflectance * max(cTheta, 0);
+					float3 finalColor = 1.5 * reflectance;
 				#endif
 
 				o.diffuse = float4(finalColor, 1.0);
+				o.specular = float4(0.0, 0.0, 0.0, 1.0);
+				o.normal = normal;
+				o.emission = 0.0;
 			}
 			
-			ENDCG
-		}
-
-		Pass
-		{
-			Name "ShadowCaster"
-			Tags { "LightMode" = "ShadowCaster" }
-			Cull Off
- 
-			CGPROGRAM
-			#pragma vertex vert
-			#pragma fragment frag
-
-			#pragma target 2.0
-
-			#pragma multi_compile_shadowcaster
-
-			#include "SpaceAtmosphere.cginc"
-
-			#include "UnityCG.cginc"
-			#include "UnityStandardShadow.cginc"
-
-			#pragma multi_compile ATMOSPHERE_ON ATMOSPHERE_OFF
-			#pragma multi_compile OCEAN_ON OCEAN_OFF
- 
-			struct v2f_shadowCaster
-			{
-				V2F_SHADOW_CASTER;
-			};
- 
-			v2f_shadowCaster vert(VertexInput v)
-			{
-				v2f_shadowCaster o;
-
-				// Dublicate displacement work of main vertex shadeer...
-				VERTEX_LOCAL_POSITION(v.vertex, v.uv0.xy, v.vertex);
-
-				// Apply origin...
-				v.vertex -= float4(_Atmosphere_Origin, 0.0);
-				
-				// Make the magic...
-				TRANSFER_SHADOW_CASTER(o)
-
-				return o;
-			}
- 
-			float4 frag(v2f_shadowCaster i) : SV_Target
-			{
-				SHADOW_CASTER_FRAGMENT(i)
-			}
 			ENDCG
 		}
 	}
