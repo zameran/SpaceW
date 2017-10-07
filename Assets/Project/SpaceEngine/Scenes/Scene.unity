@@ -6398,8 +6398,8 @@ MonoBehaviour:
   DrawGizmos: 0
   UpdateLOD: 1
   AtmosphereEnabled: 1
-  OceanEnabled: 0
-  RingEnabled: 0
+  OceanEnabled: 1
+  RingEnabled: 1
   TerrainEnabled: 1
   Amplitude: 768
   Frequency: 64

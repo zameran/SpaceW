@@ -84,9 +84,11 @@ Shader "SpaceEngine/Planet/Terrain (Deferred)"
 			#pragma fragment frag
 
 			#pragma multi_compile ATMOSPHERE_ON ATMOSPHERE_OFF
+			#pragma multi_compile SHINE_ON SHINE_OFF
+			#pragma multi_compile ECLIPSES_ON ECLIPSES_OFF
+			#pragma multi_compile OCEAN_ON OCEAN_OFF
 			#pragma multi_compile OCEAN_DEPTH_ON OCEAN_DEPTH_OFF
-			
-			#pragma multi_compile_fwdbase noambient novertexlights nolightmap nodynlightmap nodirlightmap nofog nometa nolppv noshadowmask
+			#pragma multi_compile SHADOW_0 SHADOW_1 SHADOW_2 SHADOW_3 SHADOW_4
 
 			#include "SpaceStuff.cginc"
 			#include "SpaceEclipses.cginc"
@@ -134,26 +136,115 @@ Shader "SpaceEngine/Planet/Terrain (Deferred)"
 
 				#if ATMOSPHERE_ON
 					#if OCEAN_ON
-						if (height <= _Ocean_Level && _Ocean_DrawBRDF == 1.0) {	normal = float4(0.0, 0.0, 1.0, 0.0); }
+						if (height <= _Ocean_Level && _Ocean_DrawBRDF == 1.0) {	normal = float4(0.0, 0.0, 1.0, 1.0); }
 					#endif
 				#endif
 				
 				normal.xyz = mul(_Deform_TangentFrameToWorld, normal.xyz);
-				normal.xyz = -normal.xyz * 0.5 + 0.5; // Encode normal... (Using inversed normal)
 
-				float4 reflectance = ortho;
-				
+				float4 reflectance = lerp(ortho, color, clamp(length(color.xyz), 0.0, 1.0)); // Just for tests...
+				float atmosphereMask = 0.0;
+
+				#if ECLIPSES_ON
+					float eclipse = 1.0;
+
+					float3 invertedLightDistance = rsqrt(dot(WSPR.xyz, WSPR.xyz));
+					float3 lightPosition = WSPR.xyz * invertedLightDistance;
+
+					float lightAngularRadius = asin(WSPR.w * invertedLightDistance);
+
+					eclipse *= EclipseShadow(P, lightPosition, lightAngularRadius);
+				#endif
+
+				#if SHADOW_1 || SHADOW_2 || SHADOW_3 || SHADOW_4
+					float shadow = ShadowColor(float4(PO, 1.0));	// Body origin take in to account...
+				#endif
+
+				// NOTE : Deferred rendering works with atmosphere only in HDR...
+				// NOTE : atmosphereMask used in Internal-DeferredShading shader to prevent Unity to apply magic to my planets...
+				// NOTE : All this looks like one big bicycle...
+
 				#if ATMOSPHERE_ON
-					// TODO : Make atmosphere in deferred as post effect...
-					float3 finalColor = 1.5 * reflectance;
+					atmosphereMask = 1.0;
+
+					float cTheta = dot(normal.xyz, WSD);
+
+					float3 sunL = 0.0;
+					float3 skyE = 0.0;
+					SunRadianceAndSkyIrradiance(P, normal.xyz, WSD, sunL, skyE);
+
+					float3 groundColor = 1.5 * RGB2Reflectance(reflectance).rgb * (sunL * max(cTheta, 0) + skyE) / M_PI;
+					
+					#if OCEAN_ON
+						if (height <= _Ocean_Level && _Ocean_DrawBRDF == 1.0)
+						{
+							float3 oceanColor = 0.0;
+
+							#if OCEAN_DEPTH_ON
+								// TODO : Settings to parameters...
+
+								float coeff = 1.0 - (pow(saturate((_Ocean_Level - height) / 100), 0.56) * saturate((_Ocean_Level - height) / 0.5));
+								
+								float3 shoreColor = AbsorbtionColor(_Ocean_AbsorbtionRGBA, _Ocean_AbsorbtionTint, coeff);
+
+								shoreColor = lerp(reflectance.rgb * coeff, shoreColor, 0.5);
+
+								oceanColor = lerp(_Ocean_Color, shoreColor, coeff);
+							#else
+								oceanColor = _Ocean_Color;
+							#endif
+
+							groundColor = OceanRadiance(WSD, -v, V, _Ocean_Sigma, sunL, skyE, oceanColor, P);
+						}
+					#endif
+					
+					float darknessAccumulation = 1.0;
+					float3 extinction;
+					float3 glowExtinction;
+					float3 inscatter = 0.0;
+
+					inscatter += InScattering(WCPO, P, float3(0.0, 0.0, 0.0), glowExtinction, 0.0) * _Atmosphere_GlowColor;
+					inscatter += InScattering(WCPO, P, WSD, extinction, 0.0);
+
+					#if ECLIPSES_ON
+						inscatter *= eclipse;
+					#endif
+
+					#if SHADOW_1 || SHADOW_2 || SHADOW_3 || SHADOW_4
+						inscatter *= shadow;
+					#endif
+
+					#if SHINE_ON
+						inscatter += SkyShineRadiance(P, d);
+					#endif
+
+					#if ECLIPSES_ON
+						#if SHADOW_1 || SHADOW_2 || SHADOW_3 || SHADOW_4
+							darknessAccumulation = eclipse * shadow;
+						#else
+							darknessAccumulation = eclipse;
+						#endif
+					#else
+						#if SHADOW_1 || SHADOW_2 || SHADOW_3 || SHADOW_4
+							darknessAccumulation = shadow;
+						#endif
+					#endif
+
+					extinction = GroundFade(_ExtinctionGroundFade, extinction, darknessAccumulation);
+
+					float3 finalColor = hdr(groundColor * extinction + inscatter);
 				#elif ATMOSPHERE_OFF
+					atmosphereMask = 0.0;
+					
+					normal.xyz = -normal.xyz * 0.5 + 0.5; // Encode normal... (Using inversed normal)
+
 					float3 finalColor = 1.5 * reflectance;
 				#endif
 
 				o.diffuse = float4(finalColor, 1.0);
 				o.specular = float4(0.0, 0.0, 0.0, 1.0);
-				o.normal = normal;
-				o.emission = 0.0;
+				o.normal = float4(normal.xyz, atmosphereMask);
+				o.emission = float4(0.0, 0.0, 0.0, 1.0);
 			}
 			
 			ENDCG

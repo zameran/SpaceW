@@ -151,8 +151,8 @@ Shader "SpaceEngine/Planet/Terrain"
 
 				float cTheta = dot(normal.xyz, WSD);
 
-				#if  ECLIPSES_ON
-					float eclipse = 1;
+				#if ECLIPSES_ON
+					float eclipse = 1.0;
 
 					float3 invertedLightDistance = rsqrt(dot(WSPR.xyz, WSPR.xyz));
 					float3 lightPosition = WSPR.xyz * invertedLightDistance;
@@ -176,7 +176,7 @@ Shader "SpaceEngine/Planet/Terrain"
 					#if OCEAN_ON
 						if (height <= _Ocean_Level && _Ocean_DrawBRDF == 1.0)
 						{
-							float3 oceanColor = 0;
+							float3 oceanColor = 0.0;
 
 							#if OCEAN_DEPTH_ON
 								// TODO : Settings to parameters...
@@ -199,7 +199,7 @@ Shader "SpaceEngine/Planet/Terrain"
 					float darknessAccumulation = 1.0;
 					float3 extinction;
 					float3 glowExtinction;
-					float3 inscatter = 0;
+					float3 inscatter = 0.0;
 
 					inscatter += InScattering(WCPO, P, float3(0.0, 0.0, 0.0), glowExtinction, 0.0) * _Atmosphere_GlowColor;
 					inscatter += InScattering(WCPO, P, WSD, extinction, 0.0);
