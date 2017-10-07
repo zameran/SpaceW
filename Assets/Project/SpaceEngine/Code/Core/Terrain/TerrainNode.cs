@@ -1,4 +1,7 @@
 ﻿using SpaceEngine.Core.Bodies;
+using SpaceEngine.Core.Numerics.Matrices;
+using SpaceEngine.Core.Numerics.Shapes;
+using SpaceEngine.Core.Numerics.Vectors;
 using SpaceEngine.Core.Patterns.Strategy.Uniformed;
 using SpaceEngine.Core.Terrain.Deformation;
 using SpaceEngine.Core.Tile.Producer;
@@ -569,17 +572,17 @@ namespace SpaceEngine.Core.Terrain
 
             var plane = LocalCameraPosition.xy;
 
-            OccluderCorners[0] = LocalCameraDirection * (new Vector2d(occluder.xmin, occluder.ymin) - plane);
-            OccluderCorners[1] = LocalCameraDirection * (new Vector2d(occluder.xmin, occluder.ymax) - plane);
-            OccluderCorners[2] = LocalCameraDirection * (new Vector2d(occluder.xmax, occluder.ymin) - plane);
-            OccluderCorners[3] = LocalCameraDirection * (new Vector2d(occluder.xmax, occluder.ymax) - plane);
+            OccluderCorners[0] = LocalCameraDirection * (new Vector2d(occluder.Min.x, occluder.Min.y) - plane);
+            OccluderCorners[1] = LocalCameraDirection * (new Vector2d(occluder.Min.x, occluder.Max.y) - plane);
+            OccluderCorners[2] = LocalCameraDirection * (new Vector2d(occluder.Max.x, occluder.Min.y) - plane);
+            OccluderCorners[3] = LocalCameraDirection * (new Vector2d(occluder.Max.x, occluder.Max.y) - plane);
 
             if (OccluderCorners[0].y <= 0.0 || OccluderCorners[1].y <= 0.0 || OccluderCorners[2].y <= 0.0 || OccluderCorners[3].y <= 0.0)
             {
                 return false;
             }
 
-            var dzmax = occluder.zmax - LocalCameraPosition.z;
+            var dzmax = occluder.Max.z - LocalCameraPosition.z;
 
             OccluderCorners[0] = new Vector2d(OccluderCorners[0].x, dzmax) / OccluderCorners[0].y;
             OccluderCorners[1] = new Vector2d(OccluderCorners[1].x, dzmax) / OccluderCorners[1].y;
@@ -619,10 +622,10 @@ namespace SpaceEngine.Core.Terrain
 
             var plane = LocalCameraPosition.xy;
 
-            OccluderCorners[0] = LocalCameraDirection * (new Vector2d(occluder.xmin, occluder.ymin) - plane);
-            OccluderCorners[1] = LocalCameraDirection * (new Vector2d(occluder.xmin, occluder.ymax) - plane);
-            OccluderCorners[2] = LocalCameraDirection * (new Vector2d(occluder.xmax, occluder.ymin) - plane);
-            OccluderCorners[3] = LocalCameraDirection * (new Vector2d(occluder.xmax, occluder.ymax) - plane);
+            OccluderCorners[0] = LocalCameraDirection * (new Vector2d(occluder.Min.x, occluder.Min.y) - plane);
+            OccluderCorners[1] = LocalCameraDirection * (new Vector2d(occluder.Min.x, occluder.Max.y) - plane);
+            OccluderCorners[2] = LocalCameraDirection * (new Vector2d(occluder.Max.x, occluder.Min.y) - plane);
+            OccluderCorners[3] = LocalCameraDirection * (new Vector2d(occluder.Max.x, occluder.Max.y) - plane);
 
             if (OccluderCorners[0].y <= 0.0 || OccluderCorners[1].y <= 0.0 || OccluderCorners[2].y <= 0.0 || OccluderCorners[3].y <= 0.0)
             {
@@ -630,8 +633,8 @@ namespace SpaceEngine.Core.Terrain
                 return false;
             }
 
-            var dzmin = occluder.zmin - LocalCameraPosition.z;
-            var dzmax = occluder.zmax - LocalCameraPosition.z;
+            var dzmin = occluder.Min.z - LocalCameraPosition.z;
+            var dzmax = occluder.Max.z - LocalCameraPosition.z;
 
             OccluderBounds[0] = new Vector3d(OccluderCorners[0].x, dzmin, dzmax) / OccluderCorners[0].y;
             OccluderBounds[1] = new Vector3d(OccluderCorners[1].x, dzmin, dzmax) / OccluderCorners[1].y;
@@ -684,9 +687,9 @@ namespace SpaceEngine.Core.Terrain
         /// <returns>Returns the distance between the current viewer position and the given bounding box.</returns>
         public double GetCameraDistance(Box3d localBox)
         {
-            return Math.Max(Math.Abs(LocalCameraPosition.z - localBox.zmax) / DistanceFactor,
-                   Math.Max(Math.Min(Math.Abs(LocalCameraPosition.x - localBox.xmin), Math.Abs(LocalCameraPosition.x - localBox.xmax)),
-                   Math.Min(Math.Abs(LocalCameraPosition.y - localBox.ymin), Math.Abs(LocalCameraPosition.y - localBox.ymax))));
+            return Math.Max(Math.Abs(LocalCameraPosition.z - localBox.Max.z) / DistanceFactor,
+                   Math.Max(Math.Min(Math.Abs(LocalCameraPosition.x - localBox.Min.x), Math.Abs(LocalCameraPosition.x - localBox.Max.x)),
+                   Math.Min(Math.Abs(LocalCameraPosition.y - localBox.Min.y), Math.Abs(LocalCameraPosition.y - localBox.Max.y))));
         }
     }
 }

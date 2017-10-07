@@ -34,7 +34,7 @@
 #endregion
 
 using SpaceEngine.Core.Exceptions;
-using SpaceEngine.Core.Numerics;
+using SpaceEngine.Core.Numerics.Vectors;
 using SpaceEngine.Core.Storage;
 using SpaceEngine.Core.Tile.Producer;
 using SpaceEngine.Core.Tile.Storage;
@@ -43,9 +43,6 @@ using System;
 using System.Collections.Generic;
 
 using UnityEngine;
-
-using Vector2d = SpaceEngine.Core.Numerics.Vector2d;
-using Vector4d = SpaceEngine.Core.Numerics.Vector4d;
 
 namespace SpaceEngine.Core
 {

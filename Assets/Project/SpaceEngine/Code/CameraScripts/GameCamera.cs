@@ -33,6 +33,7 @@
 // Creator: zameran
 #endregion
 
+using SpaceEngine.Core.Numerics.Matrices;
 using SpaceEngine.Debugging;
 
 using UnityEngine;

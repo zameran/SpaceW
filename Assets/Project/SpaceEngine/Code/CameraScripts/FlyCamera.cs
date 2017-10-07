@@ -34,6 +34,7 @@
 #endregion
 
 using SpaceEngine.Core.Bodies;
+using SpaceEngine.Core.Numerics.Vectors;
 
 using UnityEngine;
 

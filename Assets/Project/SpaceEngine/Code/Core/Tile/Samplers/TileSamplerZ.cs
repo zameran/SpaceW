@@ -1,7 +1,8 @@
-﻿using SpaceEngine.Core.Storage;
+﻿using SpaceEngine.Core.Containers;
+using SpaceEngine.Core.Numerics.Vectors;
+using SpaceEngine.Core.Storage;
 using SpaceEngine.Core.Terrain;
 using SpaceEngine.Core.Utilities;
-using SpaceEngine.Types.Containers;
 
 using System;
 using System.Collections.Generic;

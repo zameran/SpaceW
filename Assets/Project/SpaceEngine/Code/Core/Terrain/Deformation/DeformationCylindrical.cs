@@ -33,6 +33,10 @@
 // Creator: zameran
 #endregion
 
+using SpaceEngine.Core.Numerics.Matrices;
+using SpaceEngine.Core.Numerics.Shapes;
+using SpaceEngine.Core.Numerics.Vectors;
+
 using System;
 
 using UnityEngine;
@@ -109,7 +113,7 @@ namespace SpaceEngine.Core.Terrain.Deformation
 
         public override Frustum3d.VISIBILITY GetVisibility(TerrainNode node, Box3d localBox, Vector3d[] deformedBox)
         {
-            var f = (float)((R - localBox.zmin) / ((R - localBox.zmax) * Math.Cos((localBox.ymax - localBox.ymin) / (2.0 * R))));
+            var f = (float)((R - localBox.Min.z) / ((R - localBox.Max.z) * Math.Cos((localBox.Max.y - localBox.Min.y) / (2.0 * R))));
 
             var v0 = GetClipVisibility(node.DeformedFrustumPlanes[0], deformedBox, f);
             if (v0 == Frustum3d.VISIBILITY.INVISIBLE) { return Frustum3d.VISIBILITY.INVISIBLE; }

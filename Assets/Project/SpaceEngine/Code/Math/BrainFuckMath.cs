@@ -33,10 +33,9 @@
 // Creator: zameran
 #endregion
 
-using SpaceEngine.Core.Numerics;
 
+using SpaceEngine.Core.Numerics.Vectors;
 using System;
-
 using UnityEngine;
 
 /// <summary>
@@ -190,7 +189,7 @@ public static class BrainFuckMath
     [Obsolete("Was used in old core...")]
     public static Vector3 Multiply(Vector3 v, double d)
     {
-        var vd = v.ToVector3d(); //Cast vector to double typed.
+        var vd = new Vector3d(v); //Cast vector to double typed.
 
         var result = vd * d; //Multiply in doubles.
 
@@ -200,10 +199,10 @@ public static class BrainFuckMath
     [Obsolete("Was used in old core...")]
     public static Vector3 LinearInterpolate(Vector3 a, Vector3 b, double t)
     {
-        var ad = a.ToVector3d(); //Cast first vector to double typed.
-        var bd = b.ToVector3d(); //Cast second vector to double typed.
+        var ad = new Vector3d(a); //Cast first vector to double typed.
+        var bd = new Vector3d(b); //Cast second vector to double typed.
 
-        var result = Vector.Lerp(ad, bd, t); //Lerp it.
+        var result = Vector3d.Lerp(ad, bd, t); //Lerp it.
 
         return result.ToVector3(); //Cast it back to float typed.
     }

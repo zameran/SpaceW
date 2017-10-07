@@ -33,9 +33,9 @@
 // Creator: zameran
 #endregion
 
+using SpaceEngine.Core.Numerics.Vectors;
 using System;
 using System.Linq;
-
 using UnityEngine;
 
 /// <summary>
@@ -82,7 +82,6 @@ public static class VectorHelper
     {
         return new Vector4d(Math.Abs(v.x), Math.Abs(v.y), Math.Abs(v.z), Math.Abs(v.w));
     }
-
 
     public static Vector3 RotatePointAroundPivot(this Vector3 point, Vector3 pivot, Vector3 angles)
     {

@@ -1,4 +1,9 @@
-﻿using System;
+﻿using SpaceEngine.Core.Numerics.Matrices;
+using SpaceEngine.Core.Numerics.Shapes;
+using SpaceEngine.Core.Numerics.Vectors;
+
+using System;
+
 using UnityEngine;
 
 namespace SpaceEngine.Core.Terrain
@@ -218,10 +223,10 @@ namespace SpaceEngine.Core.Terrain
             DeformedOffset = new Vector4((float)Ox, (float)Oy, (float)Length, Level);
 
             DeformedBox = new Vector3d[4];
-            DeformedBox[0] = Owner.Deformation.LocalToDeformed(LocalBox.xmin, LocalBox.ymin, LocalBox.zmin);
-            DeformedBox[1] = Owner.Deformation.LocalToDeformed(LocalBox.xmax, LocalBox.ymin, LocalBox.zmin);
-            DeformedBox[2] = Owner.Deformation.LocalToDeformed(LocalBox.xmax, LocalBox.ymax, LocalBox.zmin);
-            DeformedBox[3] = Owner.Deformation.LocalToDeformed(LocalBox.xmin, LocalBox.ymax, LocalBox.zmin);
+            DeformedBox[0] = Owner.Deformation.LocalToDeformed(LocalBox.Min.x, LocalBox.Min.y, LocalBox.Min.z);
+            DeformedBox[1] = Owner.Deformation.LocalToDeformed(LocalBox.Max.x, LocalBox.Min.y, LocalBox.Min.z);
+            DeformedBox[2] = Owner.Deformation.LocalToDeformed(LocalBox.Max.x, LocalBox.Max.y, LocalBox.Min.z);
+            DeformedBox[3] = Owner.Deformation.LocalToDeformed(LocalBox.Min.x, LocalBox.Max.y, LocalBox.Min.z);
 
             Order = new byte[4];
             Order[0] = 0;

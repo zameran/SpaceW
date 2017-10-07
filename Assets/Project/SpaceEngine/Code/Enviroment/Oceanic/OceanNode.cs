@@ -35,6 +35,8 @@
 
 using SpaceEngine.Core;
 using SpaceEngine.Core.Bodies;
+using SpaceEngine.Core.Numerics.Matrices;
+using SpaceEngine.Core.Numerics.Vectors;
 using SpaceEngine.Core.Patterns.Strategy.Eventit;
 using SpaceEngine.Core.Patterns.Strategy.Reanimator;
 using SpaceEngine.Core.Patterns.Strategy.Renderable;

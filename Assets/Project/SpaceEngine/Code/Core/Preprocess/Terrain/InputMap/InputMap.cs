@@ -1,10 +1,10 @@
+using SpaceEngine.Core.Containers;
 using SpaceEngine.Core.Exceptions;
-using SpaceEngine.Types.Containers;
 
 using UnityEngine;
 
-using Id = SpaceEngine.Core.Tile.Tile.Id;
 using EqualityComparerID = SpaceEngine.Core.Tile.Tile.EqualityComparerID;
+using Id = SpaceEngine.Core.Tile.Tile.Id;
 
 namespace SpaceEngine.Core.Preprocess.Terrain
 {

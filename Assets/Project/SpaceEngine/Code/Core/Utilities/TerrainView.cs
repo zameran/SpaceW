@@ -1,4 +1,6 @@
 ﻿using SpaceEngine.Cameras;
+using SpaceEngine.Core.Numerics.Matrices;
+using SpaceEngine.Core.Numerics.Vectors;
 
 using System;
 

@@ -1,4 +1,8 @@
-﻿using System;
+﻿using SpaceEngine.Core.Numerics.Matrices;
+using SpaceEngine.Core.Numerics.Shapes;
+using SpaceEngine.Core.Numerics.Vectors;
+
+using System;
 
 using UnityEngine;
 
@@ -113,11 +117,11 @@ namespace SpaceEngine.Core.Terrain.Deformation
         /// <returns>Returns the distance in local (source) space between 'a' point and a bounding box.</returns>
         public virtual double GetLocalDistance(Vector3d localPoint, Box3d localBox)
         {
-            return Math.Max(Math.Abs(localPoint.z - localBox.zmax),
-                   Math.Max(Math.Min(Math.Abs(localPoint.x - localBox.xmin),
-                   Math.Abs(localPoint.x - localBox.xmax)),
-                   Math.Min(Math.Abs(localPoint.y - localBox.ymin),
-                   Math.Abs(localPoint.y - localBox.ymax))));
+            return Math.Max(Math.Abs(localPoint.z - localBox.Max.z),
+                   Math.Max(Math.Min(Math.Abs(localPoint.x - localBox.Min.x),
+                   Math.Abs(localPoint.x - localBox.Max.x)),
+                   Math.Min(Math.Abs(localPoint.y - localBox.Min.y),
+                   Math.Abs(localPoint.y - localBox.Max.y))));
         }
 
         /// <summary>

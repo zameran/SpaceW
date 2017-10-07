@@ -1,4 +1,8 @@
-﻿using System;
+﻿using SpaceEngine.Core.Numerics.Matrices;
+using SpaceEngine.Core.Numerics.Shapes;
+using SpaceEngine.Core.Numerics.Vectors;
+
+using System;
 
 using UnityEngine;
 
@@ -148,11 +152,11 @@ namespace SpaceEngine.Core.Terrain.Deformation
 
         public override Frustum3d.VISIBILITY GetVisibility(TerrainNode node, Box3d localBox, Vector3d[] deformedBox)
         {
-            var a = (localBox.zmax + R) / (localBox.zmin + R);
-            var dx = (localBox.xmax - localBox.xmin) / 2 * a;
-            var dy = (localBox.ymax - localBox.ymin) / 2 * a;
-            var dz = localBox.zmax + R;
-            var f = Math.Sqrt(dx * dx + dy * dy + dz * dz) / (localBox.zmin + R);
+            var a = (localBox.Max.z + R) / (localBox.Min.z + R);
+            var dx = (localBox.Max.x - localBox.Min.x) / 2 * a;
+            var dy = (localBox.Max.y - localBox.Min.y) / 2 * a;
+            var dz = localBox.Max.z + R;
+            var f = Math.Sqrt(dx * dx + dy * dy + dz * dz) / (localBox.Min.z + R);
 
             var v0 = GetClipVisibility(node.DeformedFrustumPlanes[0], deformedBox, f);
             if (v0 == Frustum3d.VISIBILITY.INVISIBLE) { return Frustum3d.VISIBILITY.INVISIBLE; }
@@ -170,8 +174,8 @@ namespace SpaceEngine.Core.Terrain.Deformation
             if (v4 == Frustum3d.VISIBILITY.INVISIBLE) { return Frustum3d.VISIBILITY.INVISIBLE; }
 
             var lSq = node.DeformedCameraPosition.SqrMagnitude();
-            var rm = R + Math.Min(0.0, localBox.zmin);
-            var rM = R + localBox.zmax;
+            var rm = R + Math.Min(0.0, localBox.Min.z);
+            var rM = R + localBox.Max.z;
             var rmSq = rm * rm;
             var rMSq = rM * rM;
 
