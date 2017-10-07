@@ -61,6 +61,17 @@ public sealed class TCCommonParametersSetterEditor : Editor
         setter.Body = EditorGUILayout.ObjectField(setter.Body, typeof(Body), true) as Body;
 
         EditorGUILayout.Space();
+
+        EditorGUI.BeginChangeCheck();
+
+        var serializedMaterialTable = new SerializedObject(target);
+        var materialTable = serializedMaterialTable.FindProperty("MaterialTable");
+
+        EditorGUILayout.PropertyField(materialTable, true, null);
+
+        if (EditorGUI.EndChangeCheck()) serializedMaterialTable.ApplyModifiedProperties();
+
+        EditorGUILayout.Space();
     }
 
     private void DrawGUIForNoise(TCCommonParametersSetter setter)

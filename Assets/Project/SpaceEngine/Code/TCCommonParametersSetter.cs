@@ -35,6 +35,7 @@
 
 using SpaceEngine.Core.Bodies;
 using SpaceEngine.Core.Patterns.Strategy.Uniformed;
+using SpaceEngine.Core.Utilities.Gradients;
 
 using UnityEngine;
 
@@ -77,23 +78,40 @@ public sealed class TCCommonParametersSetter : MonoBehaviour, IUniformed<Materia
 
     public bool AutoUpdate = false;
 
+    public MaterialTableGradientLut MaterialTable = new MaterialTableGradientLut();
+
     private void Awake()
     {
         if (Body == null) Body = GetComponentInParent<Body>();
+
+        MaterialTable.GenerateLut();
+    }
+
+    private void OnDestroy()
+    {
+        MaterialTable.DestroyLut();
     }
 
     public void UpdateMaterialTable<T>(T target) where T : Material
     {
-        if (Body.MaterialTable != null)
+        if (MaterialTable == null)
         {
-            if (Body.MaterialTable.Lut == null)
-            {
-                Debug.LogWarning("TCCommonParametersSetter: Trying to set lut texture, which is not generated! So, generating...");
+            Debug.LogWarning("TCCommonParametersSetter.UpdateMaterialTable: Trying to update lut texture, which is null! So, created...");
 
-                Body.MaterialTable.GenerateLut();
+            MaterialTable = new MaterialTableGradientLut();
+
+            UpdateMaterialTable<T>(target);
+        }
+        else
+        {
+            if (MaterialTable.Lut == null)
+            {
+                Debug.LogWarning("TCCommonParametersSetter.UpdateMaterialTable: Trying to set lut texture, which is not generated! So, generating...");
+
+                MaterialTable.GenerateLut();
             }
 
-            target.SetTexture("MaterialTable", Body.MaterialTable.Lut);
+            target.SetTexture("MaterialTable", MaterialTable.Lut);
         }
     }
 

@@ -698,6 +698,39 @@ MonoBehaviour:
   cycloneParams: {x: 0, y: 0, z: 0, w: 0}
   InvSize: {x: 64, y: 32}
   AutoUpdate: 1
+  MaterialTable:
+    Gradient:
+      serializedVersion: 2
+      key0: {r: 0.74264705, g: 0.4249603, b: 0.28941393, a: 1}
+      key1: {r: 0.7205882, g: 0.49909255, b: 0.2861159, a: 1}
+      key2: {r: 0.6691177, g: 0.5284509, b: 0.33455884, a: 0}
+      key3: {r: 0.44117647, g: 0.43262425, b: 0.34710208, a: 0}
+      key4: {r: 0.42344293, g: 0.56642365, b: 0.6544118, a: 0}
+      key5: {r: 1, g: 1, b: 1, a: 0}
+      key6: {r: 0, g: 0, b: 0, a: 0}
+      key7: {r: 0, g: 0, b: 0, a: 0}
+      ctime0: 0
+      ctime1: 6168
+      ctime2: 12914
+      ctime3: 21588
+      ctime4: 39128
+      ctime5: 65535
+      ctime6: 0
+      ctime7: 0
+      atime0: 0
+      atime1: 65535
+      atime2: 0
+      atime3: 0
+      atime4: 0
+      atime5: 0
+      atime6: 0
+      atime7: 0
+      m_Mode: 0
+      m_NumColorKeys: 6
+      m_NumAlphaKeys: 2
+    ReverseX: 0
+    ReverseY: 0
+    NonLinear: 1
 --- !u!1 &702279121
 GameObject:
   m_ObjectHideFlags: 0
@@ -3255,39 +3288,6 @@ MonoBehaviour:
   HeightZ: 0
   Size: 636
   TCCPS: {fileID: 693596358}
-  MaterialTable:
-    Gradient:
-      serializedVersion: 2
-      key0: {r: 0.40392157, g: 0.40392157, b: 0.40392157, a: 1}
-      key1: {r: 0.654902, g: 0.654902, b: 0.654902, a: 1}
-      key2: {r: 0.31617647, g: 0.31617647, b: 0.31617647, a: 0}
-      key3: {r: 0.46323532, g: 0.46323532, b: 0.46323532, a: 0}
-      key4: {r: 0.43382353, g: 0.43382353, b: 0.43382353, a: 0}
-      key5: {r: 0.6397059, g: 0.6397059, b: 0.6397059, a: 0}
-      key6: {r: 0, g: 0, b: 0, a: 0}
-      key7: {r: 0, g: 0, b: 0, a: 0}
-      ctime0: 0
-      ctime1: 65535
-      ctime2: 31997
-      ctime3: 48766
-      ctime4: 58789
-      ctime5: 65535
-      ctime6: 0
-      ctime7: 0
-      atime0: 0
-      atime1: 65535
-      atime2: 0
-      atime3: 0
-      atime4: 0
-      atime5: 0
-      atime6: 0
-      atime7: 0
-      m_Mode: 0
-      m_NumColorKeys: 2
-      m_NumAlphaKeys: 2
-    ReverseX: 0
-    ReverseY: 0
-    NonLinear: 1
   Suns:
   - {fileID: 1370843065}
   ShadowCasters: []

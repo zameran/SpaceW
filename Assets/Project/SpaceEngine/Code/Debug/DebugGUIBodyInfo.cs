@@ -70,16 +70,21 @@ namespace SpaceEngine.Debugging
                 {
                     GUILayoutExtensions.VerticalBoxed("", GUISkin, () =>
                     {
-                        if (Body.MaterialTable != null && Body.MaterialTable.Lut != null)
+                        if (Body.TCCPS != null)
                         {
-                            GUILayout.Label("Material Table: ");
-                            GUILayoutExtensions.VerticalBoxed("", GUISkin, () =>
+                            var materialTable = Body.TCCPS.MaterialTable;
+
+                            if (materialTable != null && materialTable.Lut != null)
                             {
-                                GUILayoutExtensions.Horizontal(() =>
+                                GUILayout.Label("Material Table: ");
+                                GUILayoutExtensions.VerticalBoxed("", GUISkin, () =>
                                 {
-                                    GUILayout.Label(Body.MaterialTable.Lut);
+                                    GUILayoutExtensions.Horizontal(() =>
+                                    {
+                                        GUILayout.Label(materialTable.Lut);
+                                    });
                                 });
-                            });
+                            }
                         }
                     });
                 });

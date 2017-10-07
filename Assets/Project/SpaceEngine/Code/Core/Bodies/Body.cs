@@ -39,7 +39,6 @@ using SpaceEngine.Core.Patterns.Strategy.Renderable;
 using SpaceEngine.Core.Patterns.Strategy.Uniformed;
 using SpaceEngine.Core.Terrain;
 using SpaceEngine.Core.Tile.Storage;
-using SpaceEngine.Core.Utilities.Gradients;
 using SpaceEngine.Enviroment.Atmospheric;
 using SpaceEngine.Enviroment.Oceanic;
 using SpaceEngine.Enviroment.Rings;
@@ -94,8 +93,6 @@ namespace SpaceEngine.Core.Bodies
         public TCCommonParametersSetter TCCPS = null;
 
         public MaterialPropertyBlock MPB { get; set; }
-
-        public MaterialTableGradientLut MaterialTable = new MaterialTableGradientLut();
 
         public List<string> Keywords { get; set; }
         public List<Sun> Suns = new List<Sun>(4);
@@ -203,8 +200,6 @@ namespace SpaceEngine.Core.Bodies
 
             MPB = new MaterialPropertyBlock();
 
-            MaterialTable.GenerateLut();
-
             Keywords = new List<string>();
 
             InitUniforms(MPB);
@@ -271,8 +266,6 @@ namespace SpaceEngine.Core.Bodies
         protected override void OnDestroy()
         {
             base.OnDestroy();
-
-            MaterialTable.DestroyLut();
         }
 
         #endregion
