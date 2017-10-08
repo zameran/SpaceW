@@ -388,7 +388,7 @@ struct ForwardOutput
 	float4 diffuse	: SV_Target; // rgb: diffuse,  a: unused
 };
 
-struct GBufferOutput
+struct DeferredOutput
 {
 	float4 diffuse  : SV_Target0; // rgb: diffuse,  a: occlusion
 	float4 specular : SV_Target1; // rgb: specular, a: smoothness

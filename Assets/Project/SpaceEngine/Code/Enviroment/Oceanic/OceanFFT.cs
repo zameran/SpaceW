@@ -26,9 +26,6 @@ namespace SpaceEngine.Enviroment.Oceanic
         Material InitDisplacementMaterial;
 
         [SerializeField]
-        ComputeShader VarianceShader;
-
-        [SerializeField]
         protected int Aniso = 2;
 
         /// <summary>
@@ -110,11 +107,6 @@ namespace SpaceEngine.Enviroment.Oceanic
         public override void InitNode()
         {
             base.InitNode();
-
-            if (VarianceShader == null)
-            {
-                Debug.Log("OceanFFT: Variance shader is null!");
-            }
 
             if (InitSpectrumMaterial == null)
             {
@@ -482,15 +474,17 @@ namespace SpaceEngine.Enviroment.Oceanic
 
             buffer.Release();
 
-            VarianceShader.SetFloat("_SlopeVarianceDelta", 0.5f * (theoreticSlopeVariance - totalSlopeVariance));
-            VarianceShader.SetFloat("_VarianceSize", (float)VarianceSize);
-            VarianceShader.SetFloat("_Size", FloatSize);
-            VarianceShader.SetVector("_GridSizes", GridSizes);
-            VarianceShader.SetTexture(0, "_Spectrum01", Spectrum01);
-            VarianceShader.SetTexture(0, "_Spectrum23", Spectrum23);
-            VarianceShader.SetTexture(0, "des", Variance);
+            var varianceShader = GodManager.Instance.Variance;
 
-            VarianceShader.Dispatch(0, VarianceSize / 4, VarianceSize / 4, VarianceSize / 4);
+            varianceShader.SetFloat("_SlopeVarianceDelta", 0.5f * (theoreticSlopeVariance - totalSlopeVariance));
+            varianceShader.SetFloat("_VarianceSize", (float)VarianceSize);
+            varianceShader.SetFloat("_Size", FloatSize);
+            varianceShader.SetVector("_GridSizes", GridSizes);
+            varianceShader.SetTexture(0, "_Spectrum01", Spectrum01);
+            varianceShader.SetTexture(0, "_Spectrum23", Spectrum23);
+            varianceShader.SetTexture(0, "des", Variance);
+
+            varianceShader.Dispatch(0, VarianceSize / 4, VarianceSize / 4, VarianceSize / 4);
 
             // Find the maximum value for slope variance
 

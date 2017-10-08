@@ -42,6 +42,7 @@ using System.Collections.Generic;
 using System.IO;
 
 using UnityEngine;
+using UnityEngine.Rendering;
 
 using Random = UnityEngine.Random;
 
@@ -144,7 +145,9 @@ namespace SpaceEngine.Startfield
         {
             if (StarfieldMesh == null) return;
 
-            Graphics.DrawMesh(StarfieldMesh, transform.localToWorldMatrix, StarfieldMaterial, layer, CameraHelper.Main(), 0, null, false, false);
+            var starfieldTRS = transform.localToWorldMatrix;
+
+            Graphics.DrawMesh(StarfieldMesh, starfieldTRS, StarfieldMaterial, layer, CameraHelper.Main(), 0, null, ShadowCastingMode.Off, false);
         }
 
         #endregion

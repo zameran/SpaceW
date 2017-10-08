@@ -45,6 +45,7 @@ using SpaceEngine.Core.Preprocess.Atmospehre;
 using System.ComponentModel;
 
 using UnityEngine;
+using UnityEngine.Rendering;
 
 namespace SpaceEngine.Enviroment.Atmospheric
 {
@@ -348,7 +349,7 @@ namespace SpaceEngine.Enviroment.Atmospheric
 
             var atmosphereTRS = Matrix4x4.TRS(ParentBody.transform.position, transform.rotation, Vector3.one * (Radius + Height));
 
-            Graphics.DrawMesh(AtmosphereMesh, atmosphereTRS, SkyMaterial, layer, CameraHelper.Main(), 0, ParentBody.MPB);
+            Graphics.DrawMesh(AtmosphereMesh, atmosphereTRS, SkyMaterial, layer, CameraHelper.Main(), 0, ParentBody.MPB, ShadowCastingMode.Off, false);
         }
 
         #endregion

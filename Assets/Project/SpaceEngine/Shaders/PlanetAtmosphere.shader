@@ -77,8 +77,8 @@ Shader "SpaceEngine/Planet/Atmosphere"
 			Name "Atmosphere"
 			Tags 
 			{
-				"Queue"					= "Transparent"
-				"RenderType"			= "Transparent"
+				"Queue"					= "Geometry"
+				"RenderType"			= "Geometry"
 				"ForceNoShadowCasting"	= "True"
 				"IgnoreProjector"		= "True"
 
@@ -189,15 +189,9 @@ Shader "SpaceEngine/Planet/Atmosphere"
 
 					extinction += extinction1;
 
-					float3 finalColor = sunColor * extinction + inscatter;
+					float3 finalColor = hdr(sunColor * extinction + inscatter) * fade;
 
-					finalColor = hdr(finalColor);
-
-					// NOTE : Hm, if i pass this value to w component of return state - looks like cutoff. Maybe thi is a fix for a Unity 5.5.
-					// TODO : Test Opacity cutout in newer versions of Unity!
-					//float opacity = dot(normalize(finalColor), float3(1.0, 1.0, 1.0));
-
-					o.diffuse = float4(finalColor, 1.0) * fade;
+					o.diffuse = float4(finalColor, 1.0);
 				#endif
 
 				#if LIGHT_2
@@ -243,11 +237,9 @@ Shader "SpaceEngine/Planet/Atmosphere"
 					extinction += extinction1;
 					extinction += extinction2;
 
-					float3 finalColor = sunColor * extinction + inscatter;
+					float3 finalColor = hdr(sunColor * extinction + inscatter) * fade;
 
-					finalColor = hdr(finalColor);
-
-					o.diffuse = float4(finalColor, 1.0) * fade;
+					o.diffuse = float4(finalColor, 1.0);
 				#endif
 
 				#if LIGHT_3
@@ -303,11 +295,9 @@ Shader "SpaceEngine/Planet/Atmosphere"
 					extinction += extinction2;
 					extinction += extinction3;
 
-					float3 finalColor = sunColor * extinction + inscatter;
+					float3 finalColor = hdr(sunColor * extinction + inscatter) * fade;
 
-					finalColor = hdr(finalColor);
-
-					o.diffuse = float4(finalColor, 1.0) * fade;
+					o.diffuse = float4(finalColor, 1.0);
 				#endif
 
 				#if LIGHT_4
@@ -373,11 +363,9 @@ Shader "SpaceEngine/Planet/Atmosphere"
 					extinction += extinction3;
 					extinction += extinction4;
 
-					float3 finalColor = sunColor * extinction + inscatter;
+					float3 finalColor = hdr(sunColor * extinction + inscatter) * fade;
 
-					finalColor = hdr(finalColor);
-
-					o.diffuse = float4(finalColor, 1.0) * fade;
+					o.diffuse = float4(finalColor, 1.0);
 				#endif
 			}
 			ENDCG

@@ -33,7 +33,6 @@
 // Creator: zameran
 #endregion
 
-using SpaceEngine;
 using SpaceEngine.Cameras;
 using SpaceEngine.Core.Bodies;
 using SpaceEngine.Core.Utilities;
@@ -76,8 +75,9 @@ public class GodManager : MonoSingleton<GodManager>
     public ComputeShader Irradiance1 { get { return GSCS.Irradiance1; } }
     public ComputeShader IrradianceN { get { return GSCS.IrradianceN; } }
     public ComputeShader Transmittance { get { return GSCS.Transmittance; } }
+    public ComputeShader Variance { get { return GSCS.Variance; } }
 
-    public Shader FourierShader;
+    public Shader FourierShader { get { return GSCS.Fourier; } }
 
     /// <summary>
     /// This is the fourier transform size, must pow2 number. Recommend no higher or lower than 64, 128 or 256.
@@ -100,7 +100,6 @@ public class GodManager : MonoSingleton<GodManager>
     public int TileSize { get { return GridResolution * 4; } }
 
     // TODO : Make these settings switching event based. To avoid constant every-frame checkings...
-    // TODO : Disable terrain shadow caster pass, if OceanDepth is False...
     public bool Eclipses = true;
     public bool Planetshadows = true;
     public bool Planetshine = true;
@@ -108,7 +107,6 @@ public class GodManager : MonoSingleton<GodManager>
     public bool OceanDepth = true;
     public bool DelayedCalculations = false;
     public bool FloatingOrigin = false;
-    public bool DebugFBO = false;
 
     public Texture2D[] NoiseTextures;
 
@@ -144,16 +142,6 @@ public class GodManager : MonoSingleton<GodManager>
         Helper.Destroy(QuadMesh);
 
         base.OnDestroy();
-    }
-
-    private void OnGUI()
-    {
-        if (FrameBufferCapturer.Instance.FBOExist() && DebugFBO)
-        {
-            var fboDebugDrawSize = FrameBufferCapturer.Instance.DebugDrawSize;
-
-            GUI.DrawTexture(new Rect(new Vector2(Screen.width - fboDebugDrawSize.x, 0), fboDebugDrawSize), FrameBufferCapturer.Instance.FBOTexture, ScaleMode.StretchToFill, false);
-        }
     }
 
     private void InitAtmosphereMesh()
@@ -210,12 +198,6 @@ public class GodManager : MonoSingleton<GodManager>
         {
             Debug.Log("GodManager.InitOceanFourier: Fourier grid size must be pow2 number, changing to nearest pow2 number...");
             FourierGridSize = Mathf.NextPowerOfTwo(FourierGridSize);
-        }
-
-        if (FourierShader == null)
-        {
-            Debug.Log("GodManager.InitOceanFourier: Fourier shader is null!");
-            FourierShader = Shader.Find("Math/Fourier");
         }
     }
 

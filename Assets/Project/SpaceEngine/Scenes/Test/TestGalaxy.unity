@@ -121,13 +121,10 @@ GameObject:
   - component: {fileID: 680484791}
   - component: {fileID: 680484790}
   - component: {fileID: 680484796}
-  - component: {fileID: 680484795}
-  - component: {fileID: 680484798}
-  - component: {fileID: 680484797}
   - component: {fileID: 680484799}
-  - component: {fileID: 680484801}
   - component: {fileID: 680484800}
   - component: {fileID: 680484802}
+  - component: {fileID: 680484795}
   m_Layer: 0
   m_Name: Main Camera
   m_TagString: MainCamera
@@ -232,32 +229,6 @@ MonoBehaviour:
   RotationSpeed: 1
   DynamicClipPlanes: 1
   Controllable: 1
---- !u!114 &680484797
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_PrefabParentObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 0}
-  m_GameObject: {fileID: 680484789}
-  m_Enabled: 0
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 84af3a7a7db104042a6cedd4013b39b4, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  lineShader: {fileID: 4800000, guid: 5e9dda34ed552324387413e27a1ee202, type: 3}
-  lineMaterial: {fileID: 0}
---- !u!114 &680484798
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_PrefabParentObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 0}
-  m_GameObject: {fileID: 680484789}
-  m_Enabled: 0
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: bfdb5c75203d70c469a60304a0204944, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  DebugComponents: []
-  DisableAllOnStart: 1
 --- !u!114 &680484799
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -286,21 +257,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   ZSort: 1
---- !u!114 &680484801
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_PrefabParentObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 0}
-  m_GameObject: {fileID: 680484789}
-  m_Enabled: 0
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 15566ced503e5f04ca5d05d0640603c9, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  SuperSize: 3
-  Key: 293
-  Format: 0
-  KeyPressed: 0
 --- !u!114 &680484802
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -419,7 +375,6 @@ MonoBehaviour:
   OceanDepth: 1
   DelayedCalculations: 0
   FloatingOrigin: 0
-  DebugFBO: 0
   NoiseTextures: []
 --- !u!1 &829586936
 GameObject:

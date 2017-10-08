@@ -194,16 +194,14 @@ Shader "SpaceEngine/Planet/Ocean"
 			float surfaceAlpha = 1;
 
 			#if OCEAN_DEPTH_ON
-				// TODO : Settings to parameters...
-
 				float fragDepth = max(0, LinearEyeDepth(UNITY_SAMPLE_DEPTH(tex2Dproj(_CameraDepthTexture, UNITY_PROJ_COORD(i.projPos))).r) - _ProjectionParams.y);
 				float oceanDepth = max(0, i.projPos.w - _ProjectionParams.y);
-				float depthCoeff = 1.0 - (pow(saturate((fragDepth - oceanDepth) / 100), 0.56) * saturate((fragDepth - oceanDepth) / 0.5));
+				float depthCoeff = ShoreCoefficient(fragDepth, oceanDepth);
 
 				#if OCEAN_WHITECAPS
-					float depthFoamCoeff = 1.0 - (pow(saturate((fragDepth - oceanDepth) / 25), 0.25) * saturate((fragDepth - oceanDepth) / 0.5));
+					float depthFoamCoeff = ShoreFoamCoefficient(fragDepth, oceanDepth);
 				#endif
-
+				
 				float3 shoreColor = AbsorbtionColor(_Ocean_AbsorbtionRGBA, _Ocean_AbsorbtionTint, depthCoeff);
 
 				oceanColor = saturate(lerp(_Ocean_Color, shoreColor, depthCoeff));

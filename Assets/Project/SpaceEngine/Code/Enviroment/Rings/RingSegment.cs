@@ -36,6 +36,7 @@
 using SpaceEngine.Core.Patterns.Strategy.Renderable;
 
 using UnityEngine;
+using UnityEngine.Rendering;
 
 namespace SpaceEngine.Enviroment.Rings
 {
@@ -51,9 +52,9 @@ namespace SpaceEngine.Enviroment.Rings
             if (Ring.RingSegmentMesh == null) return;
             if (Ring.RingMaterial == null) return;
 
-            var SegmentTRS = Matrix4x4.TRS(Ring.transform.position, transform.rotation, Vector3.one);
+            var segmentTRS = Matrix4x4.TRS(Ring.transform.position, transform.rotation, Vector3.one);
 
-            Graphics.DrawMesh(Ring.RingSegmentMesh, SegmentTRS, Ring.RingMaterial, layer, CameraHelper.Main(), 0);
+            Graphics.DrawMesh(Ring.RingSegmentMesh, segmentTRS, Ring.RingMaterial, layer, CameraHelper.Main(), 0, null, ShadowCastingMode.Off, false);
         }
 
         #endregion

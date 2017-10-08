@@ -57,5 +57,9 @@ namespace SpaceEngine.SciptableObjects
         public ComputeShader Irradiance1;
         public ComputeShader IrradianceN;
         public ComputeShader Transmittance;
+
+        [Header("Ocean Precomputation")]
+        public Shader Fourier;
+        public ComputeShader Variance;
     }
 }

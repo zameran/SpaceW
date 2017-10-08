@@ -22,3 +22,5 @@ MonoBehaviour:
   Irradiance1: {fileID: 7200000, guid: 2068255f3c90cba4483b4e02c8a3eb6c, type: 3}
   IrradianceN: {fileID: 7200000, guid: 53a0acd5feb59ae41955641aea3283b0, type: 3}
   Transmittance: {fileID: 7200000, guid: ab8db4d0ea52821488a53f0c42875089, type: 3}
+  Fourier: {fileID: 4800000, guid: 1cca648048bb4614ba000d825b451fde, type: 3}
+  Variance: {fileID: 7200000, guid: c7da59439bff364449d9db4c50cee439, type: 3}

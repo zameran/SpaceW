@@ -39,6 +39,7 @@ using SpaceEngine.Core.Patterns.Strategy.Renderable;
 using SpaceEngine.Core.Patterns.Strategy.Uniformed;
 
 using UnityEngine;
+using UnityEngine.Rendering;
 
 namespace SpaceEngine.AtmosphericScattering.Cloudsphere
 {
@@ -135,9 +136,9 @@ namespace SpaceEngine.AtmosphericScattering.Cloudsphere
         {
             if (CloudsphereMesh == null) return;
 
-            var CloudsTRS = Matrix4x4.TRS(ParentBody.transform.position, transform.rotation, Vector3.one * (Radius + Height));
+            var cloudsTRS = Matrix4x4.TRS(ParentBody.transform.position, transform.rotation, Vector3.one * (Radius + Height));
 
-            Graphics.DrawMesh(CloudsphereMesh, CloudsTRS, CloudMaterial, layer, CameraHelper.Main(), 0, ParentBody.MPB);
+            Graphics.DrawMesh(CloudsphereMesh, cloudsTRS, CloudMaterial, layer, CameraHelper.Main(), 0, ParentBody.MPB, ShadowCastingMode.Off, false);
         }
 
         #endregion

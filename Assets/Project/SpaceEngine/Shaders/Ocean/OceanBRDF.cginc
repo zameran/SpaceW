@@ -208,7 +208,31 @@ float3 OceanRadiance(float3 L, float3 V, float3 N, float sigmaSq, float3 sunL, f
 	return Lsun + Lsky + Lsea;
 }
 
+#if OCEAN_DEPTH_ON
+
+uniform float3 _Ocean_ShoreParameters;
+uniform float3 _Ocean_ShoreFoamParameters;
+
+#define		shoreScale			_Ocean_ShoreParameters.x
+#define		shoreStrength		_Ocean_ShoreParameters.y
+#define		shoreSmooth			_Ocean_ShoreParameters.z
+#define		shoreFoamScale		_Ocean_ShoreFoamParameters.x
+#define		shoreFoamStrength	_Ocean_ShoreFoamParameters.y
+#define		shoreFoamSmooth		_Ocean_ShoreFoamParameters.z
+
+float ShoreCoefficient(float fragDepth, float oceanDepth)
+{
+	return 1.0 - (pow(saturate((fragDepth - oceanDepth) / shoreScale), shoreStrength) * saturate((fragDepth - oceanDepth) / shoreSmooth));
+}
+
+float ShoreFoamCoefficient(float fragDepth, float oceanDepth)
+{
+	return 1.0 - (pow(saturate((fragDepth - oceanDepth) / shoreFoamScale), shoreFoamStrength) * saturate((fragDepth - oceanDepth) / shoreFoamSmooth));
+}
+
 float3 AbsorbtionColor(float4 absorbtion, float3 tint, float depthCoeff)
 {
 	return tint * exp(-absorbtion.rgb * depthCoeff * 25.0 * absorbtion.w);
 }
+
+#endif

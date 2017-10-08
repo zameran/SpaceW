@@ -83,8 +83,6 @@ Shader "SpaceEngine/Space/Sun Glare"
 			uniform float3 SunViewPortPosition;
 
 			uniform float AspectRatio;
-
-			uniform sampler2D _CameraFrameBufferTexture;
 			
 			struct v2f 
 			{
@@ -193,11 +191,6 @@ Shader "SpaceEngine/Space/Sun Glare"
 				{
 					outputColor *= Extinction_SunGlare(WCPG, WSD);
 				}
-
-				//float3 gray = float3(0.299, 0.587, 0.114);
-				//float4 frameBuffer = tex2D(_CameraFrameBufferTexture, SunViewPortPosition.xy);
-
-				//if (dot(frameBuffer, gray) >= 1.0) {  }
 
 				return float4(outputColor, 0.0);				
 			}			

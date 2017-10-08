@@ -135,7 +135,7 @@ public class ScreenshotHelper : MonoSingleton<ScreenshotHelper>
 
     private void OnRenderImage(RenderTexture source, RenderTexture destination)
     {
-        //May cause driver crash on big SuperSize values, lol.
+        // NOTE : May cause driver crash on big SuperSize values, lol.
         if (KeyPressed)
         {
             Buffer = RTExtensions.CreateRTexture(ScreenShotSize, 0, RenderTextureFormat.ARGB32, FilterMode.Trilinear, TextureWrapMode.Clamp, false, 6);

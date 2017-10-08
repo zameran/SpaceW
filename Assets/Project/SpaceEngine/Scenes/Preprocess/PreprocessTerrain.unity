@@ -206,7 +206,9 @@ MonoBehaviour:
   Starfields: []
   Sunglares: []
   HDRMode: 4
-  GSCS: {fileID: 0}
+  GSCS: {fileID: 11400000, guid: 1df83c97158884340af77d277fcca4bf, type: 2}
+  FourierShader: {fileID: 4800000, guid: 1cca648048bb4614ba000d825b451fde, type: 3}
+  FourierGridSize: 64
   GridResolution: 25
   OceanGridResolution: 4
   Eclipses: 1
@@ -231,9 +233,8 @@ GameObject:
   - component: {fileID: 680484791}
   - component: {fileID: 680484790}
   - component: {fileID: 680484797}
-  - component: {fileID: 680484798}
-  - component: {fileID: 680484795}
   - component: {fileID: 680484796}
+  - component: {fileID: 680484795}
   m_Layer: 0
   m_Name: Main Camera
   m_TagString: MainCamera
@@ -351,19 +352,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   mesh: {fileID: 10206, guid: 0000000000000000e000000000000000, type: 0}
   material: {fileID: 2100000, guid: fea45caef88f1684dbf79294b9cfb43c, type: 2}
---- !u!114 &680484798
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_PrefabParentObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 0}
-  m_GameObject: {fileID: 680484789}
-  m_Enabled: 0
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: da4cad45e114ff84aa9ef69e217e2853, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  DepthShader: {fileID: 4800000, guid: b438eeefd04dd1240b8adfa5265e89f0, type: 3}
-  DepthTexture: {fileID: 0}
 --- !u!1 &688823124
 GameObject:
   m_ObjectHideFlags: 0
