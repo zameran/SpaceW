@@ -7,7 +7,6 @@ using SpaceEngine.Core.Utilities;
 
 using System;
 using System.Collections.Generic;
-
 using UnityEngine;
 
 namespace SpaceEngine.Core
@@ -28,9 +27,6 @@ namespace SpaceEngine.Core
         public Material UpSampleMaterial;
 
         public float[] NoiseAmplitudes = new float[] { -3250.0f, -1590.0f, -1125.0f, -795.0f, -561.0f, -397.0f, -140.0f, -100.0f, 15.0f, 8.0f, 5.0f, 2.5f, 1.5f, 1.0f };
-
-        private RenderTexture CPUResidualTexture;
-        private ComputeBuffer CPUResidualComputeBuffer;
 
         public override void InitNode()
         {
@@ -60,9 +56,6 @@ namespace SpaceEngine.Core
                 else
                 {
                     if (!(ResidualProducer.Cache.GetStorage(0) is CPUTileStorage)) throw new InvalidStorageException("Residual storage must be a CPUTileStorage");
-
-                    CPUResidualTexture = RTExtensions.CreateRTexture(new Vector2(tileSize, tileSize), 0, RenderTextureFormat.RFloat, FilterMode.Point, TextureWrapMode.Clamp, false, false, 0);
-                    CPUResidualComputeBuffer = new ComputeBuffer(tileSize * tileSize, sizeof(float));
                 }
             }
 
@@ -82,10 +75,6 @@ namespace SpaceEngine.Core
         protected override void OnDestroy()
         {
             base.OnDestroy();
-
-            if (CPUResidualTexture != null) CPUResidualTexture.Release();
-
-            CPUResidualComputeBuffer.ReleaseAndDisposeBuffer();
         }
 
         public override int GetBorder()
@@ -115,6 +104,10 @@ namespace SpaceEngine.Core
             var upsample = level > 0;
             var parentTile = FindTile(level - 1, tx / 2, ty / 2, false, true);
 
+            var residualTileSize = GetTileSize(0);
+            var residualTexture = RTExtensions.CreateRTexture(residualTileSize, 0, RenderTextureFormat.RFloat);
+            var residualBuffer = new ComputeBuffer(residualTileSize * residualTileSize, sizeof(float));
+            
             if (ResidualProducer != null)
             {
                 if (ResidualProducer.HasTile(level, tx, ty))
@@ -146,13 +139,13 @@ namespace SpaceEngine.Core
 
                         if (residualCPUSlot == null) { throw new MissingTileException("Find parent tile failed"); }
 
-                        RTUtility.ClearColor(CPUResidualTexture);
+                        residualBuffer.SetData(residualCPUSlot.Data);
 
-                        CPUResidualComputeBuffer.SetData(residualCPUSlot.Data);
+                        RTUtility.ClearColor(residualTexture);
+                        CBUtility.WriteIntoRenderTexture(residualTexture, CBUtility.Channels.R, residualBuffer, GodManager.Instance.WriteData);
+                        //RTUtility.SaveAs8bit(residualTileSize, residualTileSize, CBUtility.Channels.R, string.Format("Residual_{0}_{1}-{2}-{3}", TerrainNode.name, level, tx, ty), "/Resources/Preprocess/Textures/Debug/", residualCPUSlot.Data);
 
-                        CBUtility.WriteIntoRenderTexture(CPUResidualTexture, CBUtility.Channels.R, CPUResidualComputeBuffer, GodManager.Instance.WriteData);
-
-                        UpSampleMaterial.SetTexture("_ResidualSampler", CPUResidualTexture);
+                        UpSampleMaterial.SetTexture("_ResidualSampler", residualTexture);
                         UpSampleMaterial.SetVector("_ResidualOSH", new Vector4(0.25f / (float)tileWidth, 0.25f / (float)tileWidth, 2.0f / (float)tileWidth, 1.0f));
                     }
                 }
@@ -226,6 +219,9 @@ namespace SpaceEngine.Core
             if (TerrainNode.ParentBody.TCCPS != null) TerrainNode.ParentBody.TCCPS.SetUniforms(UpSampleMaterial);
 
             Graphics.Blit(null, gpuSlot.Texture, UpSampleMaterial);
+
+            residualTexture.ReleaseAndDestroy();
+            residualBuffer.ReleaseAndDisposeBuffer();
 
             base.DoCreateTile(level, tx, ty, slot);
         }

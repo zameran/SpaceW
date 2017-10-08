@@ -48,8 +48,7 @@
 				float2 uv = (p_uv - frac(p_uv) + float2(0.5, 0.5)) * _CoarseLevelOSL.z + _CoarseLevelOSL.xy;
 				
 				float2 residual_uv = p_uv * _ResidualOSH.z + _ResidualOSH.xy;
-				float rf = _ResidualOSH.w * tex2Dlod(_ResidualSampler, float4(residual_uv, 0.0, 0.0)).x;
-				float zf = rf;
+				float zf = _ResidualOSH.w * tex2Dlod(_ResidualSampler, float4(residual_uv, 0.0, 0.0)).x;
 				
 				float4x4 coarseLevelHeights = SampleCoarseLevelHeights(_CoarseLevelSampler, uv, _CoarseLevelOSL);
 
@@ -68,7 +67,7 @@
 				float3 v = p * _Frequency;
 
 				float noise = Noise(v);
-				
+
 				if (_Amplitude < 0.0) 
 				{
 					zf -= _Amplitude * noise;

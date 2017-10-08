@@ -84,9 +84,12 @@ namespace SpaceEngine.Core.Preprocess.Terrain
                 {
                     var directory = new DirectoryInfo(Application.dataPath + TempFolder);
 
-                    foreach (var file in directory.GetFiles())
+                    if (directory.Exists)
                     {
-                        file.Delete();
+                        foreach (var file in directory.GetFiles())
+                        {
+                            file.Delete();
+                        }
                     }
                 }
             }
@@ -140,7 +143,7 @@ namespace SpaceEngine.Core.Preprocess.Terrain
             HeightMipmap mipmap = new HeightMipmap(function, DestinationMinTileSize, destinationSize, DestinationTileSize, tempFolder);
 
             mipmap.Compute();
-            mipmap.Generate(0, 0, 0, destinationFolder + "/" + FileName + ".proland");
+            mipmap.Generate(0, 0, 0, destinationFolder + "/" + FileName + ".dat");
 
             Debug.Log(string.Format("PreProcessTerrain.PreprocessPlaneDem: Computation time: {0} s", (Time.realtimeSinceStartup - startTime)));
         }
@@ -159,28 +162,21 @@ namespace SpaceEngine.Core.Preprocess.Terrain
             IHeightFunction2D function5 = new SphericalHeightFunction(source, ProjectionHelper.Projection5, destinationSize);
             IHeightFunction2D function6 = new SphericalHeightFunction(source, ProjectionHelper.Projection6, destinationSize);
 
-            HeightMipmap mipmap1 = new HeightMipmap(function1, DestinationMinTileSize, destinationSize, DestinationTileSize, tempFolder + "1");
-            HeightMipmap mipmap2 = new HeightMipmap(function2, DestinationMinTileSize, destinationSize, DestinationTileSize, tempFolder + "2");
-            HeightMipmap mipmap3 = new HeightMipmap(function3, DestinationMinTileSize, destinationSize, DestinationTileSize, tempFolder + "3");
-            HeightMipmap mipmap4 = new HeightMipmap(function4, DestinationMinTileSize, destinationSize, DestinationTileSize, tempFolder + "4");
-            HeightMipmap mipmap5 = new HeightMipmap(function5, DestinationMinTileSize, destinationSize, DestinationTileSize, tempFolder + "5");
-            HeightMipmap mipmap6 = new HeightMipmap(function6, DestinationMinTileSize, destinationSize, DestinationTileSize, tempFolder + "6");
+            HeightMipmap mipmap1 = new HeightMipmap(function1, DestinationMinTileSize, destinationSize, DestinationTileSize, tempFolder);
+            HeightMipmap mipmap2 = new HeightMipmap(function2, DestinationMinTileSize, destinationSize, DestinationTileSize, tempFolder);
+            HeightMipmap mipmap3 = new HeightMipmap(function3, DestinationMinTileSize, destinationSize, DestinationTileSize, tempFolder);
+            HeightMipmap mipmap4 = new HeightMipmap(function4, DestinationMinTileSize, destinationSize, DestinationTileSize, tempFolder);
+            HeightMipmap mipmap5 = new HeightMipmap(function5, DestinationMinTileSize, destinationSize, DestinationTileSize, tempFolder);
+            HeightMipmap mipmap6 = new HeightMipmap(function6, DestinationMinTileSize, destinationSize, DestinationTileSize, tempFolder);
 
             HeightMipmap.SetCube(mipmap1, mipmap2, mipmap3, mipmap4, mipmap5, mipmap6);
 
-            mipmap1.Compute();
-            mipmap2.Compute();
-            mipmap3.Compute();
-            mipmap4.Compute();
-            mipmap5.Compute();
-            mipmap6.Compute();
-
-            mipmap1.Generate(0, 0, 0, destinationFolder + "/" + FileName + "1" + ".proland");
-            mipmap2.Generate(0, 0, 0, destinationFolder + "/" + FileName + "2" + ".proland");
-            mipmap3.Generate(0, 0, 0, destinationFolder + "/" + FileName + "3" + ".proland");
-            mipmap4.Generate(0, 0, 0, destinationFolder + "/" + FileName + "4" + ".proland");
-            mipmap5.Generate(0, 0, 0, destinationFolder + "/" + FileName + "5" + ".proland");
-            mipmap6.Generate(0, 0, 0, destinationFolder + "/" + FileName + "6" + ".proland");
+            mipmap1.Compute(); mipmap1.Generate(0, 0, 0, destinationFolder + "/" + FileName + "1" + ".dat");
+            mipmap2.Compute(); mipmap2.Generate(0, 0, 0, destinationFolder + "/" + FileName + "2" + ".dat");
+            mipmap3.Compute(); mipmap3.Generate(0, 0, 0, destinationFolder + "/" + FileName + "3" + ".dat");
+            mipmap4.Compute(); mipmap4.Generate(0, 0, 0, destinationFolder + "/" + FileName + "4" + ".dat");
+            mipmap5.Compute(); mipmap5.Generate(0, 0, 0, destinationFolder + "/" + FileName + "5" + ".dat");
+            mipmap6.Compute(); mipmap6.Generate(0, 0, 0, destinationFolder + "/" + FileName + "6" + ".dat");
 
             Debug.Log(string.Format("PreProcessTerrain.PreprocessDem: Computation time: {0} s", (Time.realtimeSinceStartup - startTime)));
         }
@@ -200,7 +196,7 @@ namespace SpaceEngine.Core.Preprocess.Terrain
             ColorMipmap mipmap = new ColorMipmap(function, destinationSize, DestinationTileSize, 2, DestinationChannels, tempFolder);
 
             mipmap.Compute();
-            mipmap.Generate(0, 0, 0, destinationFolder + "/" + FileName + ".proland");
+            mipmap.Generate(0, 0, 0, destinationFolder + "/" + FileName + ".dat");
 
             Debug.Log(string.Format("PreProcessTerrain.PreprocessPlaneOrtho: Computation time: {0} s", (Time.realtimeSinceStartup - startTime)));
         }

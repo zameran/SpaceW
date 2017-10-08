@@ -29,6 +29,9 @@ namespace SpaceEngine.Core.Preprocess.Terrain
         [SerializeField]
         private int TileSize;
 
+        [SerializeField]
+        private bool IgnoreSizeRatio = true;
+
         public abstract int Width { get; }
         public abstract int Height { get; }
         public abstract int Channels { get; }
@@ -41,8 +44,12 @@ namespace SpaceEngine.Core.Preprocess.Terrain
         protected virtual void Start()
         {
             if (TileSize <= 0) { throw new InvalidParameterException("Tile size must be greater than 0!"); }
-            if (Width % TileSize != 0) { throw new InvalidParameterException("Tile size must be divisable by width!"); }
-            if (Height % TileSize != 0) { throw new InvalidParameterException("Tile size must be divisable by height!"); }
+
+            if (!IgnoreSizeRatio)
+            {
+                if (Width % TileSize != 0) { throw new InvalidParameterException(string.Format("Tile size must be divisable by width! W:{0}; S:{1}; W%S:{2}", Width, TileSize, Width % TileSize)); }
+                if (Height % TileSize != 0) { throw new InvalidParameterException(string.Format("Tile size must be divisable by height! H:{0}; S:{1}; H%S:{2}", Height, TileSize, Height % TileSize)); }
+            }
 
             Cache = new DictionaryQueue<Id, Tile>(new EqualityComparerID());
         }
@@ -99,6 +106,9 @@ namespace SpaceEngine.Core.Preprocess.Terrain
         private float[] GetTile(int tx, int ty)
         {
             var key = new Id(tx, ty);
+
+            // TODO : Cache initialization...
+            if (Cache == null) Cache = new DictionaryQueue<Id, Tile>(new EqualityComparerID());
 
             if (!Cache.ContainsKey(key))
             {

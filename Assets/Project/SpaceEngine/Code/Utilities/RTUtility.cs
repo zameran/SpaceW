@@ -230,6 +230,40 @@ namespace SpaceEngine.Core.Utilities
             buffer.Release();
         }
 
+        public static void SaveAs8bit(int width, int height, CBUtility.Channels channels, string fileName, string filePath, float[] data, float scale = 1.0f)
+        {
+            var channelsSize = (byte)channels;
+            var buffer = new ComputeBuffer(width * height, sizeof(float) * channelsSize);
+
+            var texture = new Texture2D(width, height);
+
+            for (int x = 0; x < width; x++)
+            {
+                for (int y = 0; y < height; y++)
+                {
+                    var color = new Color(0, 0, 0, 1);
+
+                    color.r = data[(x + y * width) * channelsSize + 0];
+
+                    if (channelsSize > 1)
+                        color.g = data[(x + y * width) * channelsSize + 1];
+
+                    if (channelsSize > 2)
+                        color.b = data[(x + y * width) * channelsSize + 2];
+
+                    texture.SetPixel(x, y, color * scale);
+                }
+            }
+
+            texture.Apply();
+
+            var bytes = texture.EncodeToPNG();
+
+            File.WriteAllBytes(Application.dataPath + filePath + fileName + ".png", bytes);
+
+            buffer.Release();
+        }
+
         public static void SaveAs8bit(int width, int height, CBUtility.Channels channels, string fileName, string filePath, RenderTexture rtex, ComputeShader readDataComputeShader, float scale = 1.0f)
         {
             var channelsSize = (byte)channels;

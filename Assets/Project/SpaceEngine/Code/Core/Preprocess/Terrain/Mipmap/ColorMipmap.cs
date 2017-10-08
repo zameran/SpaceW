@@ -129,6 +129,8 @@ namespace SpaceEngine.Core.Preprocess.Terrain
 
         private void SaveTile(string name, int level, int tx, int ty, byte[] tile)
         {
+            if (!Directory.Exists(TempFolder)) { Directory.CreateDirectory(TempFolder); }
+
             File.WriteAllBytes(FilePath(TempFolder, name, level, tx, ty), tile);
         }
 

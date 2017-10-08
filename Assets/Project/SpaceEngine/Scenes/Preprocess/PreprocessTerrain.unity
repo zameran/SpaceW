@@ -117,6 +117,7 @@ GameObject:
   m_Component:
   - component: {fileID: 14608927}
   - component: {fileID: 14608928}
+  - component: {fileID: 14608929}
   m_Layer: 0
   m_Name: Preprocess
   m_TagString: Untagged
@@ -155,9 +156,26 @@ MonoBehaviour:
   FileName: DEM
   DestinationTileSize: 124
   DestinationMinTileSize: 124
-  DestinationMaxLevel: 1
-  DestinationChannels: 3
+  DestinationMaxLevel: 2
+  DestinationChannels: 1
   DeleteTempOnFinish: 1
+--- !u!114 &14608929
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 14608926}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 82eb67cdc8ece2e409815467d8edb7c5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  Capacity: 2048
+  TileSize: 1024
+  IgnoreSizeRatio: 1
+  Texture: {fileID: 2800000, guid: 95b13d211bcaca043884189fdbbfe5e8, type: 3}
+  FlipX: 0
+  FlipY: 0
 --- !u!1 &279384779
 GameObject:
   m_ObjectHideFlags: 0
@@ -207,7 +225,6 @@ MonoBehaviour:
   Sunglares: []
   HDRMode: 4
   GSCS: {fileID: 11400000, guid: 1df83c97158884340af77d277fcca4bf, type: 2}
-  FourierShader: {fileID: 4800000, guid: 1cca648048bb4614ba000d825b451fde, type: 3}
   FourierGridSize: 64
   GridResolution: 25
   OceanGridResolution: 4
@@ -218,7 +235,6 @@ MonoBehaviour:
   OceanDepth: 1
   DelayedCalculations: 0
   FloatingOrigin: 0
-  DebugFBO: 0
   NoiseTextures: []
 --- !u!1 &680484789
 GameObject:
