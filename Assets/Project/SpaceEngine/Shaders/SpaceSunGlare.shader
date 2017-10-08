@@ -31,7 +31,7 @@
 // Creation Time: Undefined
 // Creator: zameran
 
-Shader "SpaceEngine/Other/Sun Glare"
+Shader "SpaceEngine/Space/Sun Glare"
 {
 	SubShader 
 	{

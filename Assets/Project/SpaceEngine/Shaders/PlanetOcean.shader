@@ -37,10 +37,10 @@ Shader "SpaceEngine/Planet/Ocean"
 	{
 		CGINCLUDE
 
-		#include "../SpaceAtmosphere.cginc"
+		#include "SpaceAtmosphere.cginc"
 
-		#include "OceanBRDF.cginc"
-		#include "OceanDisplacement.cginc"
+		#include "Ocean/OceanBRDF.cginc"
+		#include "Ocean/OceanDisplacement.cginc"
 
 		#include "UnityCG.cginc"
 
@@ -61,13 +61,13 @@ Shader "SpaceEngine/Planet/Ocean"
 
 		uniform float4x4 _Ocean_LocalToOcean;
 
-		struct a2v
+		struct a2v_planetOcean
 		{
 			float4 vertex : POSITION;
 			float2 uv : TEXCOORD0;
 		};
 
-		struct v2f 
+		struct v2f_planetOcean
 		{
 			float4 pos : SV_POSITION;
 			float2 oceanU : TEXCOORD0;
@@ -80,7 +80,7 @@ Shader "SpaceEngine/Planet/Ocean"
 			#endif
 		};
 
-		void vert(in a2v v, out v2f o)
+		void vert(in a2v_planetOcean v, out v2f_planetOcean o)
 		{
 			float t = 0;
 			float3 cameraDir = 0;
@@ -128,7 +128,7 @@ Shader "SpaceEngine/Planet/Ocean"
 			#endif
 		}
 
-		void frag(in v2f i, out float4 color : SV_Target)
+		void frag(in v2f_planetOcean i, out ForwardOutput o)
 		{
 			float3 L = _Ocean_SunDir;
 			float radius = _Ocean_Radius;
@@ -305,7 +305,7 @@ Shader "SpaceEngine/Planet/Ocean"
 			// Final color
 			float3 finalColor = surfaceColor * extinction + inscatter;
 
-			color = float4(hdr(finalColor), surfaceAlpha);
+			o.diffuse = float4(hdr(finalColor), surfaceAlpha);
 		}
 		ENDCG
 

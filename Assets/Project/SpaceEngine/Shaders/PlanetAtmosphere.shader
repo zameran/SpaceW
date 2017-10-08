@@ -105,25 +105,20 @@ Shader "SpaceEngine/Planet/Atmosphere"
 			#pragma multi_compile ECLIPSES_ON ECLIPSES_OFF
 			#pragma multi_compile SHADOW_0 SHADOW_1 SHADOW_2 SHADOW_3 SHADOW_4
 
-			struct a2v
+			struct a2v_planetAtmosphere
 			{
 				float4 vertex : POSITION;
 				float2 uv : TEXCOORD0;
 			};
 
-			struct v2f 
+			struct v2f_planetAtmosphere
 			{
 				float4 position : SV_POSITION;
 				float2 uv : TEXCOORD0;
 				float3 direction : TEXCOORD1;
 			};
 
-			struct f2g
-			{
-				float4 color : COLOR;
-			};
-
-			void vert(in a2v i, out v2f o)
+			void vert(in a2v_planetAtmosphere i, out v2f_planetAtmosphere o)
 			{
 				//o.position = UnityObjectToClipPos(float4(i.vertex.xy, 1.0, 1.0));
 				o.position = UnityObjectToClipPos(i.vertex);
@@ -132,7 +127,7 @@ Shader "SpaceEngine/Planet/Atmosphere"
 				o.direction = (mul(_Globals_CameraToWorld, float4((mul(_Globals_ScreenToCamera, o.position)).xyz, 0.0))).xyz;
 			}
 			
-			void frag(in v2f i, out f2g o)
+			void frag(in v2f_planetAtmosphere i, out ForwardOutput o)
 			{
 				float3 WCP = _Globals_WorldCameraPos;
 				float3 WCPG = WCP + _Atmosphere_Origin; // Current camera position with offset applied...
@@ -202,7 +197,7 @@ Shader "SpaceEngine/Planet/Atmosphere"
 					// TODO : Test Opacity cutout in newer versions of Unity!
 					//float opacity = dot(normalize(finalColor), float3(1.0, 1.0, 1.0));
 
-					o.color = float4(finalColor, 1.0) * fade;
+					o.diffuse = float4(finalColor, 1.0) * fade;
 				#endif
 
 				#if LIGHT_2
@@ -252,7 +247,7 @@ Shader "SpaceEngine/Planet/Atmosphere"
 
 					finalColor = hdr(finalColor);
 
-					o.color = float4(finalColor, 1.0) * fade;
+					o.diffuse = float4(finalColor, 1.0) * fade;
 				#endif
 
 				#if LIGHT_3
@@ -312,7 +307,7 @@ Shader "SpaceEngine/Planet/Atmosphere"
 
 					finalColor = hdr(finalColor);
 
-					o.color = float4(finalColor, 1.0) * fade;
+					o.diffuse = float4(finalColor, 1.0) * fade;
 				#endif
 
 				#if LIGHT_4
@@ -382,7 +377,7 @@ Shader "SpaceEngine/Planet/Atmosphere"
 
 					finalColor = hdr(finalColor);
 
-					o.color = float4(finalColor, 1.0) * fade;
+					o.diffuse = float4(finalColor, 1.0) * fade;
 				#endif
 			}
 			ENDCG

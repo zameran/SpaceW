@@ -47,16 +47,6 @@ Shader "SpaceEngine/Planet/Terrain (Deferred)"
 	{
 		CGINCLUDE
 		#include "Core.cginc"
-
-		struct GBufferOutput
-		{
-			float4 diffuse  : SV_Target0; // rgb: diffuse,  a: occlusion
-			float4 specular : SV_Target1; // rgb: specular, a: smoothness
-			float4 normal   : SV_Target2; // rgb: normal,   a: unused
-			float4 emission : SV_Target3; // rgb: emission, a: unused
-			//float depth		: SV_Depth;
-		};
-
 		ENDCG
 
 		Pass 

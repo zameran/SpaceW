@@ -45,19 +45,20 @@ Shader "SpaceEngine/Planet/Cloudsphere"
 
 		#include "TCCommon.cginc"
 
+		#include "Core.cginc"
 		#include "SpaceAtmosphere.cginc"
 					
 		uniform float _TransmittanceOffset;
 		uniform float4 _DiffuseColor;
 
-		struct a2v
+		struct a2v_planetCloudsphere
 		{
 			float4 vertex : POSITION;
 			float3 normal : NORMAL0;
 			float2 uv : TEXCOORD0;
 		};
 
-		struct v2f
+		struct v2f_planetCloudsphere
 		{
 			float4 vertex0 : POSITION0;
 			float4 vertex1 : POSITION1;
@@ -66,7 +67,7 @@ Shader "SpaceEngine/Planet/Cloudsphere"
 			float3 direction : TEXCOORD1;
 		};
 
-		void main_Vertex(a2v i, out v2f o)
+		void vert(a2v_planetCloudsphere i, out v2f_planetCloudsphere o)
 		{
 			o.vertex0 = UnityObjectToClipPos(i.vertex);
 			o.vertex1 = i.vertex;
@@ -75,20 +76,18 @@ Shader "SpaceEngine/Planet/Cloudsphere"
 			o.direction = dot(normalize(i.normal), normalize(_Sun_Positions_1[0] - i.vertex));
 		}
 			
-		float4 main_Fragment(v2f IN) : COLOR
+		void frag(in v2f_planetCloudsphere i, out ForwardOutput o)
 		{			
-			float noise = Noise(IN.vertex1.xyz * 16) + Noise(IN.vertex1.xyz * 32) + Noise(IN.vertex1.xyz * 64);
+			float noise = Noise(i.vertex1.xyz * 16) + Noise(i.vertex1.xyz * 32) + Noise(i.vertex1.xyz * 64);
 			float4 clouds = float4(noise, noise, noise, noise);
-			float4 transmittance = tex2D(_Sky_Transmittance, IN.direction + _TransmittanceOffset);
+			float4 transmittance = tex2D(_Sky_Transmittance, i.direction + _TransmittanceOffset);
 
 			float cloudsAlpha = clouds.w;
 
 			clouds *= _DiffuseColor;
 			clouds += float4(transmittance.rgb, 1.0);
 
-			float4 output = float4(clouds.xyz, cloudsAlpha);
-
-			return output;
+			o.diffuse = float4(clouds.xyz, cloudsAlpha);;
 		}	
 
 		ENDCG
@@ -113,12 +112,10 @@ Shader "SpaceEngine/Planet/Cloudsphere"
 			Offset -1, -1
 
 			CGPROGRAM
-
 			#pragma target 5.0
 			#pragma only_renderers d3d11 glcore
-			#pragma vertex main_Vertex
-			#pragma fragment main_Fragment
-
+			#pragma vertex vert
+			#pragma fragment frag
 			ENDCG
 		}
 	}

@@ -51,6 +51,9 @@ Shader "SpaceEngine/Space/Starfield"
 		Pass
 		{	
 			CGPROGRAM
+			
+			#include "Core.cginc"
+
 			#pragma vertex vert
 			#pragma fragment frag
 
@@ -100,11 +103,11 @@ Shader "SpaceEngine/Space/Starfield"
 				o.uv = 6.5 * i.texcoord.xy - 6.5 * float2(0.5, 0.5);
 			}
 
-			void frag(in v2f i, out float4 color : SV_Target)
+			void frag(in v2f i, out ForwardOutput o)
 			{
 				half scale = exp(-dot(i.uv.xy, i.uv.xy));
 
-				color = float4(i.color.xyz * scale + 5.0 * i.color.w * pow(scale, 10.0), 1.0);
+				o.diffuse = float4(i.color.xyz * scale + 5.0 * i.color.w * pow(scale, 10.0), 1.0);
 			}
 			ENDCG
 		}

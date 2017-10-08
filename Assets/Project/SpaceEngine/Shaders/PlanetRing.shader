@@ -46,7 +46,8 @@ Shader "SpaceEngine/Planet/Ring"
 	SubShader
 	{
 		CGINCLUDE
-			
+		
+		#include "Core.cginc"
 		#include "SpaceStuff.cginc"
 
 		uniform sampler2D _NoiseTexture;
@@ -58,26 +59,21 @@ Shader "SpaceEngine/Planet/Ring"
 		uniform float     _LightingSharpness;
 		uniform float	  _UVCutout;
 				
-		struct a2v
+		struct a2v_planetRing
 		{
 			float4 vertex : POSITION;
 			float2 uv : TEXCOORD0;
 		};
 				
-		struct v2f
+		struct v2f_planetRing
 		{
 			float4 vertex : SV_POSITION;
 			float4 color : COLOR0;
 			float2 uv : TEXCOORD0;
 			float4 worldPosition : TEXCOORD1;
 		};
-				
-		struct f2g
-		{
-			float4 color : COLOR;
-		};
-			
-		void vert(in a2v i, out v2f o)
+		
+		void vert(in a2v_planetRing i, out v2f_planetRing o)
 		{
 			float4 worldPosition = mul(unity_ObjectToWorld, i.vertex);
 			
@@ -92,12 +88,12 @@ Shader "SpaceEngine/Planet/Ring"
 			o.worldPosition = worldPosition;
 		}
 				
-		void frag(in v2f i, out float4 color : SV_Target)
+		void frag(in v2f_planetRing i, out ForwardOutput o)
 		{
 			float4 mainTex = tex2D(_DiffuseTexture, i.uv);
 			float4 mainColor = mainTex * _DiffuseColor;
-					
-			color = i.color * mainColor;
+			
+			o.diffuse = i.color * mainColor;
 
 			float cameraDistance = length(_WorldSpaceCameraPos - i.worldPosition.xyz);
 			float noiseValue = 1.0;
@@ -182,14 +178,14 @@ Shader "SpaceEngine/Planet/Ring"
 					lighting *= ShadowColor(i.worldPosition);
 				#endif
 
-				color += lighting * mainColor;
+				o.diffuse += lighting * mainColor;
 			#endif
 
 			#if !LIGHT_1 && !LIGHT_2 && !LIGHT_3 && !LIGHT_4
-				color = mainColor;
+				o.diffuse = mainColor;
 			#endif
 
-			color *= fadeOut;
+			o.diffuse *= fadeOut;
 		}
 		ENDCG
 

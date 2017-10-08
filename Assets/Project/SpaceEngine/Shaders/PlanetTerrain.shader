@@ -47,12 +47,6 @@ Shader "SpaceEngine/Planet/Terrain"
 	{
 		CGINCLUDE
 		#include "Core.cginc"
-
-		struct ForwardOutput
-		{
-			float4 diffuse	: SV_Target; // rgb: diffuse,  a: unused
-		};
-
 		ENDCG
 
 		Pass 

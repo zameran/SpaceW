@@ -383,6 +383,22 @@ struct a2v_planetTerrain
 	float4 texcoord : TEXCOORD0;
 };
 
+struct ForwardOutput
+{
+	float4 diffuse	: SV_Target; // rgb: diffuse,  a: unused
+};
+
+struct GBufferOutput
+{
+	float4 diffuse  : SV_Target0; // rgb: diffuse,  a: occlusion
+	float4 specular : SV_Target1; // rgb: specular, a: smoothness
+	float4 normal   : SV_Target2; // rgb: normal,   a: unused
+	float4 emission : SV_Target3; // rgb: emission, a: unused
+	//float depth		: SV_Depth;
+};
+//-----------------------------------------------------------------------------
+
+//-----------------------------------------------------------------------------
 uniform float _Ocean_Sigma;
 uniform float3 _Ocean_Color;
 uniform float3 _Ocean_AbsorbtionTint;
