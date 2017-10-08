@@ -218,7 +218,7 @@ namespace SpaceEngine.Enviroment.Oceanic
             target.SetVector("_Ocean_AbsorbtionRGBA", AbsorbtionRGBA);
             target.SetVector("_Ocean_ShoreParameters", ShoreParameters);
             target.SetVector("_Ocean_ShoreFoamParameters", ShoreFoamParameters);
-            target.SetFloat("_Ocean_DrawBRDF", DrawOcean ? 0.0f : 1.0f);
+            target.SetFloat("_Ocean_DrawBRDF", ParentBody.OceanEnabled && DrawOcean ? 0.0f : 1.0f);
             target.SetFloat("_Ocean_Level", OceanLevel);
         }
 
@@ -241,7 +241,7 @@ namespace SpaceEngine.Enviroment.Oceanic
             target.SetVector("_Ocean_AbsorbtionRGBA", AbsorbtionRGBA);
             target.SetVector("_Ocean_ShoreParameters", ShoreParameters);
             target.SetVector("_Ocean_ShoreFoamParameters", ShoreFoamParameters);
-            target.SetFloat("_Ocean_DrawBRDF", DrawOcean ? 0.0f : 1.0f);
+            target.SetFloat("_Ocean_DrawBRDF", ParentBody.OceanEnabled && DrawOcean ? 0.0f : 1.0f);
             target.SetFloat("_Ocean_Level", OceanLevel);
         }
 

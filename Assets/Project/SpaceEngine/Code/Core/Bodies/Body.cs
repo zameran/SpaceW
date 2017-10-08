@@ -328,8 +328,6 @@ namespace SpaceEngine.Core.Bodies
                 Atmosphere.SetUniforms(target);
             }
 
-            target.SetFloat("_Ocean_DrawBRDF", (Ocean != null && OceanEnabled) ? 1.0f : 0.0f);
-
             if (Ocean != null)
             {
                 Ocean.SetUniforms(target);

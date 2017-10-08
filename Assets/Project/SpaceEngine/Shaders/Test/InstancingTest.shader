@@ -64,27 +64,27 @@ Shader "SpaceEngine/Test/InstancingTest"
                 UNITY_VERTEX_INPUT_INSTANCE_ID
             };
 
-            UNITY_INSTANCING_CBUFFER_START (DrawProperties)
-                UNITY_DEFINE_INSTANCED_PROP (float4, _Color)
+            UNITY_INSTANCING_CBUFFER_START(DrawProperties)
+                UNITY_DEFINE_INSTANCED_PROP(float4, _Color)
             UNITY_INSTANCING_CBUFFER_END
             
             v2f vert (appdata v)
             {
                 v2f o;
 
-                UNITY_SETUP_INSTANCE_ID (v);
-                UNITY_TRANSFER_INSTANCE_ID (v, o);
+                UNITY_SETUP_INSTANCE_ID(v);
+                UNITY_TRANSFER_INSTANCE_ID(v, o);
 
-                o.vertex = UnityObjectToClipPos (v.vertex);
+                o.vertex = UnityObjectToClipPos(v.vertex);
 
                 return o;
             }
             
             fixed4 frag (v2f i) : SV_Target
             {
-                UNITY_SETUP_INSTANCE_ID (i);
+                UNITY_SETUP_INSTANCE_ID(i);
 
-                return UNITY_ACCESS_INSTANCED_PROP (_Color);
+                return UNITY_ACCESS_INSTANCED_PROP(_Color);
             }
             ENDCG
         }
