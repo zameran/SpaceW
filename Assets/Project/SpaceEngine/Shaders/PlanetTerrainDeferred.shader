@@ -143,7 +143,6 @@ Shader "SpaceEngine/Planet/Terrain (Deferred)"
 				normal.xyz = mul(_Deform_TangentFrameToWorld, normal.xyz);
 
 				float4 reflectance = lerp(ortho, color, clamp(length(color.xyz), 0.0, 1.0)); // Just for tests...
-				float atmosphereMask = 0.0;
 
 				#if ECLIPSES_ON
 					float eclipse = 1.0;
@@ -160,15 +159,9 @@ Shader "SpaceEngine/Planet/Terrain (Deferred)"
 					float shadow = ShadowColor(float4(PO, 1.0));	// Body origin take in to account...
 				#endif
 
-				// NOTE : Deferred rendering works with atmosphere only in HDR...
-				// NOTE : atmosphereMask used in Internal-DeferredShading shader to prevent Unity to apply magic to my planets...
-				// NOTE : All this looks like one big bicycle...
+				float cTheta = dot(normal.xyz, WSD);
 
 				#if ATMOSPHERE_ON
-					atmosphereMask = 1.0;
-
-					float cTheta = dot(normal.xyz, WSD);
-
 					float3 sunL = 0.0;
 					float3 skyE = 0.0;
 					SunRadianceAndSkyIrradiance(P, normal.xyz, WSD, sunL, skyE);
@@ -233,17 +226,15 @@ Shader "SpaceEngine/Planet/Terrain (Deferred)"
 					extinction = GroundFade(_ExtinctionGroundFade, extinction, darknessAccumulation);
 
 					float3 finalColor = hdr(groundColor * extinction + inscatter);
-				#elif ATMOSPHERE_OFF
-					atmosphereMask = 0.0;
-					
+				#elif ATMOSPHERE_OFF			
 					normal.xyz = -normal.xyz * 0.5 + 0.5; // Encode normal... (Using inversed normal)
 
-					float3 finalColor = 1.5 * reflectance;
+					float3 finalColor = 1.5 * reflectance * max(cTheta, 0);
 				#endif
 
 				o.diffuse = float4(finalColor, 1.0);
 				o.specular = float4(0.0, 0.0, 0.0, 1.0);
-				o.normal = float4(normal.xyz, atmosphereMask);
+				o.normal = float4(normal.xyz, 1.0);
 				o.emission = float4(0.0, 0.0, 0.0, 1.0);
 			}
 			
