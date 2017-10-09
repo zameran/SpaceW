@@ -1,4 +1,4 @@
-﻿Shader "SpaceEngine/Terrain/CoreUpSampleOrtho" 
+﻿Shader "SpaceEngine/Producers/CoreUpSampleOrtho" 
 {
 	SubShader 
 	{
@@ -12,11 +12,11 @@
 			CGPROGRAM
 			#include "UnityCG.cginc"
 
-			#include "TCCommon.cginc"
+			#include "../../TCCommon.cginc"
 
 			#define CORE_PORDUCER_ADDITIONAL_UV
 
-			#include "Core.cginc"
+			#include "../../Core.cginc"
 
 			#pragma target 4.0
 			#pragma vertex vert

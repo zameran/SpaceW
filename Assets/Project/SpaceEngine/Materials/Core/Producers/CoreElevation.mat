@@ -7,7 +7,7 @@ Material:
   m_PrefabParentObject: {fileID: 0}
   m_PrefabInternal: {fileID: 0}
   m_Name: CoreElevation
-  m_Shader: {fileID: 4800000, guid: 8995f7d28b9bc4d4dbe98ae20a0a50f5, type: 3}
+  m_Shader: {fileID: 4800000, guid: bca14839ab077f247895a5d4a083f40a, type: 3}
   m_ShaderKeywords: _EMISSION
   m_LightmapFlags: 1
   m_EnableInstancingVariants: 0

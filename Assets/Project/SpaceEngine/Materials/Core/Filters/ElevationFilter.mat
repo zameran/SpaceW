@@ -6,8 +6,8 @@ Material:
   m_ObjectHideFlags: 0
   m_PrefabParentObject: {fileID: 0}
   m_PrefabInternal: {fileID: 0}
-  m_Name: CoreUpSampleOrtho
-  m_Shader: {fileID: 4800000, guid: 4cb0b971fadfd4f43a00fe4b5e42c0c8, type: 3}
+  m_Name: ElevationFilter
+  m_Shader: {fileID: 4800000, guid: fdb91477208404244923f9ecccc50ea2, type: 3}
   m_ShaderKeywords: _EMISSION
   m_LightmapFlags: 1
   m_EnableInstancingVariants: 0

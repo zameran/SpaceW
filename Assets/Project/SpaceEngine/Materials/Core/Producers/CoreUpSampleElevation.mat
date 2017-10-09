@@ -6,8 +6,8 @@ Material:
   m_ObjectHideFlags: 0
   m_PrefabParentObject: {fileID: 0}
   m_PrefabInternal: {fileID: 0}
-  m_Name: CoreColor
-  m_Shader: {fileID: 4800000, guid: a8e800fd45482b448806cddd15e4873e, type: 3}
+  m_Name: CoreUpSampleElevation
+  m_Shader: {fileID: 4800000, guid: 68aa10a87f6a2b748b46411d707b0413, type: 3}
   m_ShaderKeywords: _EMISSION
   m_LightmapFlags: 1
   m_EnableInstancingVariants: 0

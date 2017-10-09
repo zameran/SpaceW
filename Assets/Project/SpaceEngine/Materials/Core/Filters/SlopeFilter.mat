@@ -6,8 +6,8 @@ Material:
   m_ObjectHideFlags: 0
   m_PrefabParentObject: {fileID: 0}
   m_PrefabInternal: {fileID: 0}
-  m_Name: CoreUpSampleElevation
-  m_Shader: {fileID: 4800000, guid: df535c6c711455245a5d641f849d719a, type: 3}
+  m_Name: SlopeFilter
+  m_Shader: {fileID: 4800000, guid: 8db87ff2346169945acb20612d579324, type: 3}
   m_ShaderKeywords: _EMISSION
   m_LightmapFlags: 1
   m_EnableInstancingVariants: 0

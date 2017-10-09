@@ -1,4 +1,4 @@
-﻿Shader "SpaceEngine/Terrain/CoreElevation" 
+﻿Shader "SpaceEngine/Producers/CoreElevation" 
 {
 	SubShader 
 	{
@@ -6,18 +6,18 @@
 
 		#include "UnityCG.cginc"
 
-		#include "TCCommon.cginc"
-		#include "TCAsteroid.cginc"
-		#include "TCGasgiant.cginc"
-		#include "TCPlanet.cginc"
-		#include "TCSelena.cginc"
-		#include "TCSun.cginc"
-		#include "TCTerra.cginc"
+		#include "../../TCCommon.cginc"
+		#include "../../TCAsteroid.cginc"
+		#include "../../TCGasgiant.cginc"
+		#include "../../TCPlanet.cginc"
+		#include "../../TCSelena.cginc"
+		#include "../../TCSun.cginc"
+		#include "../../TCTerra.cginc"
 
 		#define CORE_PORDUCER_ADDITIONAL_UV
 		#define BORDER 2.0
 
-		#include "Core.cginc"
+		#include "../../Core.cginc"
 
 		uniform sampler2D _CoarseLevelSampler;		// Coarse level texture
 		uniform float4 _CoarseLevelOSL;				// Lower left corner of patch to upsample, one over size in pixels of coarse level texture, layer id

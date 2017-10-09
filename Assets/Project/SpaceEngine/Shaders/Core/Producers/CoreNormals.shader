@@ -1,4 +1,4 @@
-﻿Shader "SpaceEngine/Terrain/CoreNormals" 
+﻿Shader "SpaceEngine/Producers/CoreNormals" 
 {
 	SubShader 
 	{
@@ -9,7 +9,7 @@
 		#define CORE_PORDUCER_ADDITIONAL_UV
 		//#define BORDER 2.0	// Tile border size
 
-		#include "Core.cginc"
+		#include "../../Core.cginc"
 
 		uniform sampler2D _ElevationSampler; 
 

@@ -6,8 +6,8 @@ Material:
   m_ObjectHideFlags: 0
   m_PrefabParentObject: {fileID: 0}
   m_PrefabInternal: {fileID: 0}
-  m_Name: CoreNormals
-  m_Shader: {fileID: 4800000, guid: 5b62effe83c749d43ba4cad313753d77, type: 3}
+  m_Name: CoreColor
+  m_Shader: {fileID: 4800000, guid: def3614aa0d9dd44885f31160d5d49d6, type: 3}
   m_ShaderKeywords: _EMISSION
   m_LightmapFlags: 1
   m_EnableInstancingVariants: 0

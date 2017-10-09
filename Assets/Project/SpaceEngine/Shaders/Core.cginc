@@ -218,19 +218,43 @@ struct VertexProducerOutput
 	o.uv1 = v.texcoord.xy * scale; \
 
 #if defined(CORE_PORDUCER_ADDITIONAL_UV)
-#define CORE_PRODUCER_VERTEX_PROGRAM(scale) \
-	void vert(in VertexProducerInput v, out VertexProducerOutput o) \
-	{ \
-		CORE_PRODUCER_VERTEX_PROGRAM_BODY; \
-		CORE_PRODUCER_VERTEX_PROGRAM_BODY_ADDITIONAL_UV(scale); \
-	}
+	#define CORE_PRODUCER_VERTEX_PROGRAM(scale) \
+		void vert(in VertexProducerInput v, out VertexProducerOutput o) \
+		{ \
+			CORE_PRODUCER_VERTEX_PROGRAM_BODY; \
+			CORE_PRODUCER_VERTEX_PROGRAM_BODY_ADDITIONAL_UV(scale); \
+		}
 #else
-#define CORE_PRODUCER_VERTEX_PROGRAM \
-	void vert(in VertexProducerInput v, out VertexProducerOutput o) \
-	{ \
-		CORE_PRODUCER_VERTEX_PROGRAM_BODY; \
-	}
+	#define CORE_PRODUCER_VERTEX_PROGRAM \
+		void vert(in VertexProducerInput v, out VertexProducerOutput o) \
+		{ \
+			CORE_PRODUCER_VERTEX_PROGRAM_BODY; \
+		}
 #endif
+//-----------------------------------------------------------------------------
+
+//-----------------------------------------------------------------------------
+struct VertexFilterInput
+{
+	float4 vertex : POSITION;
+	float4 texcoord : TEXCOORD0;
+};
+
+struct VertexFilterOutput
+{
+	float4 pos : SV_POSITION;
+	float2 uv : TEXCOORD0;
+};
+
+#define CORE_FILTER_VERTEX_PROGRAM_BODY \
+	o.pos = UnityObjectToClipPos(v.vertex); \
+	o.uv = v.texcoord.xy; \
+
+#define CORE_FILTER_VERTEX_PROGRAM \
+	void vert(in VertexFilterInput v, out VertexFilterOutput o) \
+	{ \
+		CORE_FILTER_VERTEX_PROGRAM_BODY; \
+	}
 //-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------

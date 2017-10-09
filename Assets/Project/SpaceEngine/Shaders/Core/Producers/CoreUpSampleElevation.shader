@@ -1,4 +1,4 @@
-﻿Shader "SpaceEngine/Terrain/CoreUpSampleElevation" 
+﻿Shader "SpaceEngine/Producers/CoreUpSampleElevation" 
 {
 	SubShader 
 	{
@@ -12,12 +12,12 @@
 			CGPROGRAM
 			#include "UnityCG.cginc"
 
-			#include "TCCommon.cginc"
+			#include "../../TCCommon.cginc"
 
 			#define CORE_PORDUCER_ADDITIONAL_UV
 			#define BORDER 2.0	// Tile border size
 
-			#include "Core.cginc"
+			#include "../../Core.cginc"
 
 			#pragma target 4.0
 			#pragma vertex vert
