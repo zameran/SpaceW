@@ -65,8 +65,6 @@ namespace SpaceEngine.Enviroment.Sun
         public bool UseAtmosphereColors = false;
         public bool UseRadiance = true;
 
-        private bool Eclipse = false;
-
         private Vector3 SunViewPortPosition = Vector3.zero;
 
         private float Scale = 1;
@@ -122,14 +120,6 @@ namespace SpaceEngine.Enviroment.Sun
             Scale = distance / Magnitude;
             Fade = FadeCurve.Evaluate(Mathf.Clamp(Scale, 0.0f, 100.0f));
             //Fade = FadeCurve.Evaluate(Mathf.Clamp01(VectorHelper.AngularRadius(SunComponent.transform.position, CameraHelper.Main().transform.position, 250000.0f)));
-
-            //RaycastHit hit;
-
-            Eclipse = false;
-
-            //Eclipse = Physics.Raycast(CameraHelper.Main().transform.position, (SunComponent.transform.position - CameraHelper.Main().transform.position).normalized, out hit, Mathf.Infinity);
-            //if (!Eclipse)
-            //    Eclipse = Physics.Raycast(CameraHelper.Main().transform.position, (SunComponent.transform.position - CameraHelper.Main().transform.position).normalized, out hit, Mathf.Infinity);
 
             if (InitUniformsInUpdate) InitUniforms(SunGlareMaterial);
 
@@ -191,15 +181,16 @@ namespace SpaceEngine.Enviroment.Sun
         {
             if (target == null) return;
 
-            target.SetVector("SunPosition", SunComponent.transform.position);
-            target.SetVector("SunViewPortPosition", SunViewPortPosition);
+            target.SetFloat("useRadiance", UseRadiance ? 1.0f : 0.0f);
+            target.SetFloat("useAtmosphereColors", UseAtmosphereColors ? 1.0f : 0.0f);
 
-            target.SetFloat("AspectRatio", CameraHelper.Main().aspect);
-            target.SetFloat("Scale", Scale);
-            target.SetFloat("Fade", Fade);
-            target.SetFloat("UseAtmosphereColors", UseAtmosphereColors ? 1.0f : 0.0f);
-            target.SetFloat("UseRadiance", UseRadiance ? 1.0f : 0.0f);
-            target.SetFloat("Eclipse", Eclipse ? 0.0f : 1.0f);
+            target.SetVector("sunPosition", SunComponent.transform.position);
+            target.SetVector("sunViewPortPosition", SunViewPortPosition);
+            target.SetVector("sunViewPortPositionInversed", SunViewPortPosition.InverseY());
+
+            target.SetFloat("aspectRatio", CameraHelper.Main().aspect);
+            target.SetFloat("sunGlareScale", Scale);
+            target.SetFloat("sunGlareFade", Fade);
 
             if (Atmosphere != null) Atmosphere.ParentBody.SetUniforms(target);
         }

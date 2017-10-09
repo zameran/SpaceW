@@ -58,10 +58,7 @@ Shader "SpaceEngine/Space/Sun Glare"
 			#pragma target 3.0
 			#pragma vertex vert
 			#pragma fragment frag
-
-			uniform float Scale;
-			uniform float Fade;
-			
+		
 			uniform sampler2D sunSpikes;
 			uniform sampler2D sunFlare;
 			uniform sampler2D sunGhost1;
@@ -75,14 +72,16 @@ Shader "SpaceEngine/Space/Sun Glare"
 			uniform float4x4 ghost2Settings;
 			uniform float4x4 ghost3Settings;
 			
-			uniform float UseAtmosphereColors;
-			uniform float UseRadiance;
-			uniform float Eclipse;
-		
-			uniform float3 SunPosition;
-			uniform float3 SunViewPortPosition;
+			uniform float useRadiance;
+			uniform float useAtmosphereColors;
+							
+			uniform float3 sunPosition;
+			uniform float3 sunViewPortPosition;
+			uniform float3 sunViewPortPositionInversed;
 
-			uniform float AspectRatio;
+			uniform float aspectRatio;
+			uniform float sunGlareScale;
+			uniform float sunGlareFade;
 			
 			struct v2f 
 			{
@@ -144,54 +143,62 @@ Shader "SpaceEngine/Space/Sun Glare"
 				return pow(max(0, sunColor), 2.2) * 2;
 			}
 
+			sampler2D _CameraGBufferTexture2;
+
 			float4 frag(v2f IN) : COLOR
 			{
+				// NOTE : Sample W component from GBuffer normals data. Unity's Standart shader using it as 1.0, and my planets too!
+				float obstacle = 1.0 - tex2D(_CameraGBufferTexture2, sunViewPortPositionInversed.xy).a;
+
+				// Perform obstacle test...
+				if (obstacle < 1.0) discard;
+
 				float3 WCP = _Globals_WorldCameraPos;
 				float3 WCPG = WCP + _Atmosphere_Origin; // Current camera position with offset applied...
-				//float3 WSD = SunPosition;
-				float3 WSD = normalize(SunPosition - WCPG);
+				float3 WSD = normalize(sunPosition - WCPG);
 
-				float2 toScreenCenter = SunViewPortPosition.xy - 0.5;
+				float2 toScreenCenter = sunViewPortPosition.xy - 0.5;
 
 				float3 outputColor = 0;
 				float3 sunColor = 0;
 				float3 ghosts = 0;
 
-				sunColor += flareSettings.x * (tex2D(sunFlare, (IN.uv.xy - SunViewPortPosition.xy) * float2(AspectRatio * flareSettings.y, 1.0) * flareSettings.z * Scale + 0.5).rgb);
-				sunColor += spikesSettings.x * (tex2D(sunSpikes, (IN.uv.xy - SunViewPortPosition.xy) * float2(AspectRatio * spikesSettings.y, 1.0) * spikesSettings.z * Scale + 0.5).rgb); 
+				sunColor += flareSettings.x * (tex2D(sunFlare, (IN.uv.xy - sunViewPortPosition.xy) * float2(aspectRatio * flareSettings.y, 1.0) * flareSettings.z * sunGlareScale + 0.5).rgb);
+				sunColor += spikesSettings.x * (tex2D(sunSpikes, (IN.uv.xy - sunViewPortPosition.xy) * float2(aspectRatio * spikesSettings.y, 1.0) * spikesSettings.z * sunGlareScale + 0.5).rgb); 
 				
 				for (int i = 0; i < 4; ++i)
 				{			
 					ghosts += ghost1Settings[i].x * 
-							  (tex2D(sunGhost1, (IN.uv.xy - SunViewPortPosition.xy + (toScreenCenter * ghost1Settings[i].w)) * 
-							  float2(AspectRatio * ghost1Settings[i].y, 1.0) * ghost1Settings[i].z + 0.5).rgb);
+							  (tex2D(sunGhost1, (IN.uv.xy - sunViewPortPosition.xy + (toScreenCenter * ghost1Settings[i].w)) * 
+							  float2(aspectRatio * ghost1Settings[i].y, 1.0) * ghost1Settings[i].z + 0.5).rgb);
 
 					ghosts += ghost2Settings[i].x * 
-							  (tex2D(sunGhost2, (IN.uv.xy - SunViewPortPosition.xy + (toScreenCenter * ghost2Settings[i].w)) * 
-							  float2(AspectRatio * ghost2Settings[i].y, 1.0) * ghost2Settings[i].z + 0.5).rgb);
+							  (tex2D(sunGhost2, (IN.uv.xy - sunViewPortPosition.xy + (toScreenCenter * ghost2Settings[i].w)) * 
+							  float2(aspectRatio * ghost2Settings[i].y, 1.0) * ghost2Settings[i].z + 0.5).rgb);
 
 					ghosts += ghost3Settings[i].x *
-							  (tex2D(sunGhost3, (IN.uv.xy - SunViewPortPosition.xy + (toScreenCenter * ghost3Settings[i].w)) * 
-							  float2(AspectRatio * ghost3Settings[i].y, 1.0) * ghost3Settings[i].z + 0.5).rgb);
+							  (tex2D(sunGhost3, (IN.uv.xy - sunViewPortPosition.xy + (toScreenCenter * ghost3Settings[i].w)) * 
+							  float2(aspectRatio * ghost3Settings[i].y, 1.0) * ghost3Settings[i].z + 0.5).rgb);
 				}	
 
 				ghosts = ghosts * smoothstep(0.0, 1.0, 1.0 - length(toScreenCenter));	
 
 				outputColor += sunColor;
 				outputColor += ghosts;
-				outputColor *= Fade;
-				outputColor *= Eclipse;
+				outputColor *= sunGlareFade;
 				
-				if (UseRadiance > 0.0)
+				// TODO : Use keywords for that kind of settings...
+
+				if (useRadiance > 0.0)
 				{
 					outputColor = OuterRadiance_SunGlare(outputColor);
 				}
 
-				if (UseAtmosphereColors > 0.0)
+				if (useAtmosphereColors > 0.0)
 				{
 					outputColor *= Extinction_SunGlare(WCPG, WSD);
 				}
-
+				
 				return float4(outputColor, 0.0);				
 			}			
 			ENDCG

@@ -58,6 +58,26 @@ public static class VectorHelper
         return new Vector2(v.x, v.y);
     }
 
+    /// <summary>
+    /// Inverse of Y component of normalized target vector.
+    /// </summary>
+    /// <param name="v">Target.</param>
+    /// <returns>Vector with inversed Y component.</returns>
+    public static Vector2 InverseY(this Vector2 v)
+    {
+        return new Vector2(v.x, 1.0f - v.y);
+    }
+
+    /// <summary>
+    /// Inverse of Y component of normalized target vector.
+    /// </summary>
+    /// <param name="v">Target.</param>
+    /// <returns>Vector with inversed Y component.</returns>
+    public static Vector3 InverseY(this Vector3 v)
+    {
+        return new Vector3(v.x, 1.0f - v.y, v.z);
+    }
+
     public static Vector3 Summ(params Vector3[] vectors)
     {
         return vectors.Aggregate(Vector3.zero, (current, t) => current + t);
