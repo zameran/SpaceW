@@ -87,7 +87,7 @@ namespace SpaceEngine.Enviroment.Oceanic
         /// </summary>
         public float OceanLevel = 5.0f;
 
-        [Range(0.0f, 1.0f)]
+        [Range(0.0f, 4.0f)]
         public float OceanWaveLevel = 1.0f;
 
         /// <summary>

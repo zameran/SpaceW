@@ -167,7 +167,7 @@ namespace SpaceEngine.Enviroment.Oceanic
                 OceanMaterial.SetVector("_Ocean_MapSize", new Vector2(FloatSize, FloatSize));
                 OceanMaterial.SetVector("_Ocean_Choppyness", Choppyness);
                 OceanMaterial.SetVector("_Ocean_GridSizes", GridSizes);
-                OceanMaterial.SetFloat("_Ocean_HeightOffset", OceanLevel);
+                OceanMaterial.SetFloat("_Ocean_HeightOffset", OceanLevel - OceanWaveLevel);
                 OceanMaterial.SetTexture("_Ocean_Variance", Variance);
                 OceanMaterial.SetTexture("_Ocean_Map0", Map0);
                 OceanMaterial.SetTexture("_Ocean_Map1", Map1);
