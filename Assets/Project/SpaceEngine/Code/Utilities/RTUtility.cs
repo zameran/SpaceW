@@ -251,6 +251,9 @@ namespace SpaceEngine.Core.Utilities
                     if (channelsSize > 2)
                         color.b = data[(x + y * width) * channelsSize + 2];
 
+                    if (channelsSize > 3)
+                        color.a = data[(x + y * width) * channelsSize + 3];
+
                     texture.SetPixel(x, y, color * scale);
                 }
             }
