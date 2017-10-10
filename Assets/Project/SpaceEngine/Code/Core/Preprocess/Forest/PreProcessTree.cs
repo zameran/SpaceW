@@ -5,6 +5,7 @@ using SpaceEngine.Core.Numerics.Vectors;
 using SpaceEngine.Core.Utilities;
 
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
@@ -15,30 +16,51 @@ using UnityEngine;
 
 namespace SpaceEngine.Core.Preprocess.Forest
 {
-    // TODO : Finish him...
+    // TODO : Make all this stuff in Houdini...
     public class PreProcessTree : MonoBehaviour
     {
-        public int AO_GRIDRES = 128;
-        public int AO_N = 2;
+        public int GRIDRES_VIEWS = 256;
+        public int N_VIEWS = 9;
 
-        private int n = 9;
-        private int w = 256;
+        public Mesh[] TreeMeshes;
 
-        public Mesh[] treeMeshes;
+        public Shader ViewShader;
+        public Material ViewMaterial;
 
-        public Material material;
-        public Texture2D treeTexture;
+        public Texture2D TreeSampler;
 
-        public Vector3 AOMeshScale = Vector3.one;
-        
+        public string DestinationFolder = "/Resources/Preprocess/Forest/";
+
+        public double Z = 1.0;
+        public double S = 1.0;
+
+        private Mesh PreProcessMesh;
+        private RenderTexture PreProcessAORT;
+
         private void Start()
         {
             var startTime = Time.realtimeSinceStartup;
 
-            //CalculateViews();
-            CalculateAO();
+            ViewMaterial = MaterialHelper.CreateTemp(ViewShader, "TreeView");
+
+            CalculateMesh();
+            //CalculateAO();
+            CalculateViews();
 
             Debug.Log(string.Format("PreProcessTree.Start: Computation time: {0} s", (Time.realtimeSinceStartup - startTime)));
+        }
+
+        private void Update()
+        {
+
+        }
+
+        private void OnDestroy()
+        {
+            Helper.Destroy(ViewMaterial);
+            Helper.Destroy(PreProcessMesh);
+
+            if (PreProcessAORT != null) PreProcessAORT.ReleaseAndDestroy();
         }
 
         private void Swap(ref int a, ref int b)
@@ -65,33 +87,11 @@ namespace SpaceEngine.Core.Preprocess.Forest
             b = c;
         }
 
-        private void CalculateAO()
+        private void CalculateMesh()
         {
-            Debug.Log("Precomputing AO Started...");
-
-            var options = new ParallelOptions { MaxDegreeOfParallelism = 4 };
-
-            float[] buf = new float[AO_GRIDRES * AO_GRIDRES * AO_GRIDRES * 4];
-
-            for (int i = 0; i < AO_GRIDRES; ++i)
-            {
-                for (int j = 0; j < AO_GRIDRES; ++j)
-                {
-                    for (int k = 0; k < AO_GRIDRES; ++k)
-                    {
-                        int off = i + j * AO_GRIDRES + k * AO_GRIDRES * AO_GRIDRES;
-
-                        buf[4 * off] = 0;
-                        buf[4 * off + 1] = 0;
-                        buf[4 * off + 2] = 0;
-                        buf[4 * off + 3] = 0;
-                    }
-                }
-            }
-
             var CIs = new List<CombineInstance>();
 
-            foreach (var treeMesh in treeMeshes)
+            foreach (var treeMesh in TreeMeshes)
             {
                 var ci = new CombineInstance()
                 {
@@ -102,13 +102,46 @@ namespace SpaceEngine.Core.Preprocess.Forest
                 CIs.Add(ci);
             }
 
-            var m = new Mesh();
+            PreProcessMesh = new Mesh();
+            PreProcessMesh.CombineMeshes(CIs.ToArray());
+            PreProcessMesh.RecalculateBounds();
+            PreProcessMesh.RecalculateNormals();
+            PreProcessMesh.RecalculateTangents();
+            PreProcessMesh.hideFlags = HideFlags.DontSave;
 
-            m.CombineMeshes(CIs.ToArray());
-            m.bounds = new Bounds(Vector3.zero, new Vector3(1e8f, 1e8f, 1e8f));
+            CIs.Clear();
+        }
 
-            var indices = m.GetIndices(0);
-            var vertices = m.vertices;
+        [Obsolete("Use vertex baked AO instead!")]
+        private void CalculateAO()
+        {
+            Debug.Log("Precomputing AO Started...");
+
+            int GRIDRES_AO = 128;
+            int N_AO = 2;
+
+            var options = new ParallelOptions { MaxDegreeOfParallelism = 4 };
+
+            float[] buf = new float[GRIDRES_AO * GRIDRES_AO * GRIDRES_AO * 4];
+
+            for (int i = 0; i < GRIDRES_AO; ++i)
+            {
+                for (int j = 0; j < GRIDRES_AO; ++j)
+                {
+                    for (int k = 0; k < GRIDRES_AO; ++k)
+                    {
+                        int off = i + j * GRIDRES_AO + k * GRIDRES_AO * GRIDRES_AO;
+
+                        buf[4 * off] = 0;
+                        buf[4 * off + 1] = 0;
+                        buf[4 * off + 2] = 0;
+                        buf[4 * off + 3] = 0;
+                    }
+                }
+            }
+
+            var indices = PreProcessMesh.GetIndices(0);
+            var vertices = PreProcessMesh.vertices;
 
             for (int ni = 0; ni < indices.Length; ni += 3)
             {
@@ -116,9 +149,9 @@ namespace SpaceEngine.Core.Preprocess.Forest
                 int b = indices[ni + 1];
                 int c = indices[ni + 2];
 
-                float x1 = vertices[a].x * AOMeshScale.x, y1 = vertices[a].y * AOMeshScale.y, z1 = vertices[a].z * AOMeshScale.z;
-                float x2 = vertices[b].x * AOMeshScale.x, y2 = vertices[b].y * AOMeshScale.y, z2 = vertices[b].z * AOMeshScale.z;
-                float x3 = vertices[c].x * AOMeshScale.x, y3 = vertices[c].y * AOMeshScale.y, z3 = vertices[c].z * AOMeshScale.z;
+                float x1 = vertices[a].x, y1 = vertices[a].y, z1 = vertices[a].z;
+                float x2 = vertices[b].x, y2 = vertices[b].y, z2 = vertices[b].z;
+                float x3 = vertices[c].x, y3 = vertices[c].y, z3 = vertices[c].z;
 
                 x1 = (x1 + 1.0f) / 2.0f;
                 x2 = (x2 + 1.0f) / 2.0f;
@@ -147,8 +180,8 @@ namespace SpaceEngine.Core.Preprocess.Forest
                     Swap(ref l31, ref l23);
                 }
 
-                int n12 = (int)(Math.Ceiling(l12 * AO_GRIDRES) * 2.0);
-                int n13 = (int)(Math.Ceiling(l31 * AO_GRIDRES) * 2.0);
+                int n12 = (int)(Math.Ceiling(l12 * GRIDRES_AO) * 2.0);
+                int n13 = (int)(Math.Ceiling(l31 * GRIDRES_AO) * 2.0);
 
                 Parallel.For(0, n12 - 1, i =>
                 {
@@ -164,13 +197,13 @@ namespace SpaceEngine.Core.Preprocess.Forest
                             var y = y1 + u * (y2 - y1) + v * (y3 - y1);
                             var z = z1 + u * (z2 - z1) + v * (z3 - z1);
 
-                            int ix = (int)(x * AO_GRIDRES);
-                            int iy = (int)(y * AO_GRIDRES);
-                            int iz = (int)(z * AO_GRIDRES);
+                            int ix = (int)(x * GRIDRES_AO);
+                            int iy = (int)(y * GRIDRES_AO);
+                            int iz = (int)(z * GRIDRES_AO);
 
-                            if (ix >= 0 && ix < AO_GRIDRES && iy >= 0 && iy < AO_GRIDRES && iz >= 0 && iz < AO_GRIDRES)
+                            if (ix >= 0 && ix < GRIDRES_AO && iy >= 0 && iy < GRIDRES_AO && iz >= 0 && iz < GRIDRES_AO)
                             {
-                                int off = 4 * (ix + iy * AO_GRIDRES + iz * AO_GRIDRES * AO_GRIDRES);
+                                int off = 4 * (ix + iy * GRIDRES_AO + iz * GRIDRES_AO * GRIDRES_AO);
 
                                 buf[off] = 255;
                                 buf[off + 1] = 255;
@@ -184,25 +217,28 @@ namespace SpaceEngine.Core.Preprocess.Forest
 
             Debug.Log("Precomputing AO Mesh Passed...");
 
-            double[] vocc = new double[AO_GRIDRES * AO_GRIDRES * AO_GRIDRES];
+            double[] vocc = new double[GRIDRES_AO * GRIDRES_AO * GRIDRES_AO];
 
-            for (int i = 0; i < AO_GRIDRES * AO_GRIDRES * AO_GRIDRES; ++i)
+            for (int i = 0; i < GRIDRES_AO * GRIDRES_AO * GRIDRES_AO; ++i)
             {
                 vocc[i] = 1.0;
             }
 
-            Parallel.For(0, AO_N - 1, options, i =>
-            {
-                var theta = (i + 0.5) / AO_N * Math.PI / 2.0;
-                var dtheta = 1.0 / AO_N * Math.PI / 2.0;
+            double zmax = Math.Abs(Z);
+            double zmin = -Math.Abs(Z);
 
-                Parallel.For(0, (4 * AO_N) - 1, options, j =>
+            Parallel.For(0, N_AO - 1, options, i =>
+            {
+                var theta = (i + 0.5) / N_AO * Math.PI / 2.0;
+                var dtheta = 1.0 / N_AO * Math.PI / 2.0;
+
+                Parallel.For(0, (4 * N_AO) - 1, options, j =>
                 {
-                    var phi = (j + 0.5) / (4 * AO_N) * 2.0 * Math.PI;
-                    var dphi = 1.0 / (4 * AO_N) * 2.0 * Math.PI;
+                    var phi = (j + 0.5) / (4 * N_AO) * 2.0 * Math.PI;
+                    var dphi = 1.0 / (4 * N_AO) * 2.0 * Math.PI;
                     var docc = Math.Cos(theta) * Math.Sin(theta) * dtheta * dphi / Math.PI;
 
-                    if ((i * 4 * AO_N + j) % 4 == 0) Debug.Log(string.Format("Precomputing AO Step {0} of {1}", i * 4 * AO_N + j, 4 * AO_N * AO_N));
+                    if ((i * 4 * N_AO + j) % 4 == 0) Debug.Log(string.Format("Precomputing AO Step {0} of {1}", i * 4 * N_AO + j, 4 * N_AO * N_AO));
 
                     Vector3d uz = new Vector3d(Math.Cos(phi) * Math.Sin(theta), Math.Sin(phi) * Math.Sin(theta), Math.Cos(theta));
                     Vector3d ux = uz.z.EpsilonEquals(1.0, 0.0000001) ? new Vector3d(1.0, 0.0, 0.0) : new Vector3d(-uz.y, uz.x, 0.0).Normalized();
@@ -212,18 +248,18 @@ namespace SpaceEngine.Core.Preprocess.Forest
                     Matrix3x3d toVol = new Matrix3x3d(ux.x, uy.x, uz.x, ux.y, uy.y, uz.y, ux.z, uy.z, uz.z);
 
                     Box3d b = new Box3d();
-                    b = b.Enlarge(toView * new Vector3d(-1.0, -1.0, -1.0));
-                    b = b.Enlarge(toView * new Vector3d(+1.0, -1.0, -1.0));
-                    b = b.Enlarge(toView * new Vector3d(-1.0, +1.0, -1.0));
-                    b = b.Enlarge(toView * new Vector3d(+1.0, +1.0, -1.0));
-                    b = b.Enlarge(toView * new Vector3d(-1.0, -1.0, +1.0));
-                    b = b.Enlarge(toView * new Vector3d(+1.0, -1.0, +1.0));
-                    b = b.Enlarge(toView * new Vector3d(-1.0, +1.0, +1.0));
-                    b = b.Enlarge(toView * new Vector3d(+1.0, +1.0, +1.0));
+                    b = b.Enlarge(toView * new Vector3d(-1.0, -1.0, zmin));
+                    b = b.Enlarge(toView * new Vector3d(+1.0, -1.0, zmin));
+                    b = b.Enlarge(toView * new Vector3d(-1.0, +1.0, zmin));
+                    b = b.Enlarge(toView * new Vector3d(+1.0, +1.0, zmin));
+                    b = b.Enlarge(toView * new Vector3d(-1.0, -1.0, zmax));
+                    b = b.Enlarge(toView * new Vector3d(+1.0, -1.0, zmax));
+                    b = b.Enlarge(toView * new Vector3d(-1.0, +1.0, zmax));
+                    b = b.Enlarge(toView * new Vector3d(+1.0, +1.0, zmax));
 
-                    int nx = (int)((b.Max.x - b.Min.x) * AO_GRIDRES / 2);
-                    int ny = (int)((b.Max.y - b.Min.y) * AO_GRIDRES / 2);
-                    int nz = (int)((b.Max.z - b.Min.z) * AO_GRIDRES / 2);
+                    int nx = (int)((b.Max.x - b.Min.x) * GRIDRES_AO / 2);
+                    int ny = (int)((b.Max.y - b.Min.y) * GRIDRES_AO / 2);
+                    int nz = (int)((b.Max.z - b.Min.z) * GRIDRES_AO / 2);
 
                     int[] occ = new int[nx * ny * nz];
                     for (int v = 0; v < nx * ny * nz; ++v) { occ[v] = 0; }
@@ -243,13 +279,13 @@ namespace SpaceEngine.Core.Preprocess.Forest
                                 Vector3d p = toVol * new Vector3d(x, y, z);
 
                                 int val = 0;
-                                int vx = (int)((p.x + 1.0) / 2.0 * AO_GRIDRES);
-                                int vy = (int)((p.y + 1.0) / 2.0 * AO_GRIDRES);
-                                int vz = (int)((p.z + 1.0) / 2.0 * AO_GRIDRES);
+                                int vx = (int)((p.x + 1.0) / 2.0 * GRIDRES_AO);
+                                int vy = (int)((p.y + 1.0) / 2.0 * GRIDRES_AO);
+                                int vz = (int)((p.z + 1.0) / 2.0 * GRIDRES_AO);
 
-                                if (vx >= 0 && vx < AO_GRIDRES && vy >= 0 && vy < AO_GRIDRES && vz >= 0 && vz < AO_GRIDRES)
+                                if (vx >= 0 && vx < GRIDRES_AO && vy >= 0 && vy < GRIDRES_AO && vz >= 0 && vz < GRIDRES_AO)
                                 {
-                                    val = buf[4 * (vx + vy * AO_GRIDRES + vz * AO_GRIDRES * AO_GRIDRES) + 3].EpsilonEquals(255.0f) ? 1 : 0;
+                                    val = buf[4 * (vx + vy * GRIDRES_AO + vz * GRIDRES_AO * GRIDRES_AO) + 3].EpsilonEquals(255.0f) ? 1 : 0;
                                 }
 
                                 occ[ix + iy * nx + iz * nx * ny] = val;
@@ -262,17 +298,17 @@ namespace SpaceEngine.Core.Preprocess.Forest
                         }
                     }
 
-                    Parallel.For(0, AO_GRIDRES - 1, options, ix =>
+                    Parallel.For(0, GRIDRES_AO - 1, options, ix =>
                     {
-                        var x = -1.0 + (ix + 0.5) / AO_GRIDRES * 2.0;
+                        var x = -1.0 + (ix + 0.5) / GRIDRES_AO * 2.0;
 
-                        Parallel.For(0, AO_GRIDRES - 1, options, iy =>
+                        Parallel.For(0, GRIDRES_AO - 1, options, iy =>
                         {
-                            var y = -1.0 + (iy + 0.5) / AO_GRIDRES * 2.0;
+                            var y = -1.0 + (iy + 0.5) / GRIDRES_AO * 2.0;
 
-                            Parallel.For(0, AO_GRIDRES - 1, options, iz =>
+                            Parallel.For(0, GRIDRES_AO - 1, options, iz =>
                             {
-                                var z = -1.0 + (iz + 0.5) / AO_GRIDRES * 2.0;
+                                var z = -1.0 + (iz + 0.5) / GRIDRES_AO * 2.0;
 
                                 Vector3d p = toView * new Vector3d(x, y, z);
 
@@ -286,7 +322,7 @@ namespace SpaceEngine.Core.Preprocess.Forest
 
                                     if (occN > 6)
                                     {
-                                        vocc[ix + iy * AO_GRIDRES + iz * AO_GRIDRES * AO_GRIDRES] -= docc;
+                                        vocc[ix + iy * GRIDRES_AO + iz * GRIDRES_AO * GRIDRES_AO] -= docc;
                                     }
                                 }
                             });
@@ -295,13 +331,13 @@ namespace SpaceEngine.Core.Preprocess.Forest
                 });
             });
 
-            for (int i = 0; i < AO_GRIDRES; ++i)
+            for (int i = 0; i < GRIDRES_AO; ++i)
             {
-                for (int j = 0; j < AO_GRIDRES; ++j)
+                for (int j = 0; j < GRIDRES_AO; ++j)
                 {
-                    for (int k = 0; k < AO_GRIDRES; ++k)
+                    for (int k = 0; k < GRIDRES_AO; ++k)
                     {
-                        int off = i + j * AO_GRIDRES + k * AO_GRIDRES * AO_GRIDRES;
+                        int off = i + j * GRIDRES_AO + k * GRIDRES_AO * GRIDRES_AO;
 
                         if (buf[4 * off + 3].EpsilonEquals(255.0f))
                         {
@@ -315,37 +351,43 @@ namespace SpaceEngine.Core.Preprocess.Forest
                 }
             }
 
-            Helper.Destroy(m);
-            CIs.Clear();
             GC.Collect();
 
-            RTUtility.SaveAs8bit(AO_GRIDRES, AO_GRIDRES * AO_GRIDRES, CBUtility.Channels.RGBA, "/TreeAO", "/Resources/Preprocess/Forest", buf, 0.00392156863f);
+            var cb = new ComputeBuffer(GRIDRES_AO * GRIDRES_AO * GRIDRES_AO, sizeof(float) * 4);
+
+            PreProcessAORT = RTExtensions.CreateRTexture(GRIDRES_AO, 0, RenderTextureFormat.ARGBFloat, FilterMode.Bilinear, TextureWrapMode.Clamp, GRIDRES_AO);
+
+            CBUtility.WriteIntoRenderTexture(PreProcessAORT, CBUtility.Channels.RGBA, cb, GodManager.Instance.WriteData);
+            RTUtility.SaveAs8bit(GRIDRES_AO, GRIDRES_AO * GRIDRES_AO, CBUtility.Channels.RGBA, "TreeAO", DestinationFolder, buf, 0.00392156863f);
+
+            cb.ReleaseAndDisposeBuffer();
 
             Debug.Log("Precomputing AO Completed!");
         }
 
-        private void CalculateViews()
+        private IEnumerator CalculateViewsRoutine(Action<List<string>, Dictionary<int, Texture2D>> callback)
         {
-            Debug.Log("Precomputing Views Started...");
+            yield return Yielders.EndOfFrame; // Finish previous frame...
 
-            StreamWriter file = new StreamWriter(Application.dataPath + "/Resources/Preprocess/Forest/Views.txt");
+            List<string> viewsLines = new List<string>();
+            Dictionary<int, Texture2D> viewsBilboards = new Dictionary<int, Texture2D>();
 
-            int total = 2 * (n * n + n) + 1;
+            int total = 2 * (N_VIEWS * N_VIEWS + N_VIEWS) + 1;
             int current = 0;
 
-            double zmax = 1.0f;
-            double zmin = -1.0f;
+            double zmax = Math.Abs(Z);
+            double zmin = -Math.Abs(Z);
 
-            for (int i = -n; i <= n; i++)
+            for (int i = -N_VIEWS; i <= N_VIEWS; i++)
             {
-                for (int j = -n + Math.Abs(i); j <= n - Math.Abs(i); ++j)
+                for (int j = -N_VIEWS + Math.Abs(i); j <= N_VIEWS - Math.Abs(i); ++j)
                 {
-                    double x = (i + j) / (double)n;
-                    double y = (j - i) / (double)n;
-                    double angle = 90.0f - Math.Max(Math.Abs(x), Math.Abs(y)) * 90.0;
-                    double alpha = x.EpsilonEquals(0.0, 0.1) && y.EpsilonEquals(0.0, 0.1) ? 0.0f : Math.Atan2(y, x) / Math.PI * 180.0;
+                    double x = (i + j) / (double)N_VIEWS;
+                    double y = (j - i) / (double)N_VIEWS;
+                    double angle = 90.0 - Math.Max(Math.Abs(x), Math.Abs(y)) * 90.0;
+                    double alpha = x.EpsilonEquals(0.0, 0.00000001) && y.EpsilonEquals(0.0, 0.00000001) ? 0.0f : Math.Atan2(y, x) / Math.PI * 180.0;
 
-                    Matrix4x4d cameraToWorld = Matrix4x4d.RotateX(90) * Matrix4x4d.RotateX(-angle);
+                    Matrix4x4d cameraToWorld = Matrix4x4d.RotateX(90) * Matrix4x4d.RotateX(angle);
                     Matrix4x4d worldToCamera = cameraToWorld.Inverse();
 
                     Box3d b = new Box3d();
@@ -358,31 +400,72 @@ namespace SpaceEngine.Core.Preprocess.Forest
                     b = b.Enlarge((worldToCamera * new Vector4d(-1.0, +1.0, zmax, 1.0)).xyz);
                     b = b.Enlarge((worldToCamera * new Vector4d(+1.0, +1.0, zmax, 1.0)).xyz);
 
-                    Matrix4x4d c2s = Matrix4x4d.Ortho(b.Max.x, b.Min.x, b.Max.y, b.Min.y, -2.0 * b.Max.z, -2.0 * b.Min.z);
+                    Matrix4x4d c2s = Matrix4x4d.Ortho(b.Max.x, b.Min.x, b.Max.y, b.Min.y, -2.0 * b.Max.z, -2.0 * b.Min.z + S);
                     Matrix4x4d w2s = c2s * worldToCamera * Matrix4x4d.RotateZ(-90 - alpha);
 
                     Vector3d dir = ((Matrix4x4d.RotateZ(90 + alpha) * cameraToWorld) * new Vector4d(0.0, 0.0, 1.0, 0.0)).xyz;
 
-                    //material.SetMatrix("worldToScreen", w2s.ToMatrix4x4());
-                    //material.SetVector("dir", dir.ToVector3());
-                    //material.SetTexture("colorSampler", treeTexture);
+                    ViewMaterial.SetTexture("colorSampler", TreeSampler);
+                    ViewMaterial.SetVector("dir", dir.ToVector3());
+                    ViewMaterial.SetMatrix("worldToScreen", w2s.ToMatrix4x4());
 
-                    // Render...
+                    Camera.main.projectionMatrix = w2s.ToMatrix4x4();
 
-                    int view = i * (1 - Math.Abs(i)) + j + 2 * n * i + n * (n + 1);
+                    ViewMaterial.SetPass(0);
+                    Graphics.DrawMeshNow(PreProcessMesh, Matrix4x4.TRS(Vector3.zero, Quaternion.identity, Vector3.one));
+
+                    ViewMaterial.SetPass(1);
+                    Graphics.DrawMeshNow(PreProcessMesh, Matrix4x4.TRS(Vector3.zero, Quaternion.identity, Vector3.one));
+
+                    yield return Yielders.EndOfFrame; // Finish this frame...
+
+                    var texture = new Texture2D(GRIDRES_VIEWS, GRIDRES_VIEWS, TextureFormat.RGBAFloat, false, true);
+
+                    texture.ReadPixels(new Rect(0, 0, GRIDRES_VIEWS, GRIDRES_VIEWS), 0, 0, false);
+                    texture.Apply(false);
+
+                    viewsBilboards.Add(current, texture);
+
+                    var view = i * (1 - Math.Abs(i)) + j + 2 * N_VIEWS * i + N_VIEWS * (N_VIEWS + 1);
+
+                    RTUtility.ClearColor(RenderTexture.active);
 
                     current++;
 
-                    file.WriteLine(string.Format("{0}f,{1}f,{2}f,{3}f,{4}f,{5}f,{6}f,{7}f,{8}f,", (float)w2s.m[0, 0], (float)w2s.m[0, 1], (float)w2s.m[0, 2],
+                    Debug.Log(string.Format("Precomputing Views Step {0} of {1} : View {2}", current, total, view));
+
+                    viewsLines.Add(string.Format("{0}f,{1}f,{2}f,{3}f,{4}f,{5}f,{6}f,{7}f,{8}f,", (float)w2s.m[0, 0], (float)w2s.m[0, 1], (float)w2s.m[0, 2],
                                                                                                   (float)w2s.m[1, 0], (float)w2s.m[1, 1], (float)w2s.m[1, 2],
                                                                                                   (float)w2s.m[2, 0], (float)w2s.m[2, 1], (float)w2s.m[2, 2]));
                 }
             }
 
-            file.Flush();
-            file.Close();
+            if (callback != null) callback(viewsLines, viewsBilboards);
+        }
 
-            Debug.Log("Precomputing Views Completed!");
+        private void CalculateViews()
+        {
+            Debug.Log("Precomputing Views Started...");
+
+            StreamWriter file = new StreamWriter(Application.dataPath + "/Resources/Preprocess/Forest/Views.txt");
+
+            StartCoroutine(CalculateViewsRoutine((lines, billboards) =>
+            {
+                foreach (var line in lines)
+                {
+                    file.WriteLine(line);
+                }
+
+                foreach (var billboard in billboards)
+                {
+                    File.WriteAllBytes(Application.dataPath + DestinationFolder + string.Format("TestTree/{0}-{1}", "Trees3D", billboard.Key) + ".png", billboard.Value.EncodeToPNG());
+                }
+
+                file.Flush();
+                file.Close();
+
+                Debug.Log("Precomputing Views Completed!");
+            }));
         }
     }
 }
