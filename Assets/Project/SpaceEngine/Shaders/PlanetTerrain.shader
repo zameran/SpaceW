@@ -105,7 +105,6 @@ Shader "SpaceEngine/Planet/Terrain (Deferred)"
 			void frag(in v2f_planetTerrain i, out DeferredOutput o)
 			{
 				float3 WCP = _Globals_WorldCameraPos;
-				float3 WCPO = _Atmosphere_WorldCameraPos;
 				float3 WSD = _Sun_WorldDirections_1[0];
 				float4 WSPR = _Sun_Positions_1[0];
 				float3 position = i.localVertex;
@@ -127,8 +126,6 @@ Shader "SpaceEngine/Planet/Terrain (Deferred)"
 
 				float3 V = normalize(position);
 				float3 P = V * max(length(position), _Deform_Radius + _Globals_RadiusOffset);
-				float3 PO = P - _Atmosphere_Origin;
-				float3 v = normalize(P - WCP - _Atmosphere_Origin); // Body origin take in to account...
 				float3 d = normalize(i.direction);
 
 				#if ATMOSPHERE_ON
@@ -154,10 +151,14 @@ Shader "SpaceEngine/Planet/Terrain (Deferred)"
 				#endif
 
 				#if SHADOW_1 || SHADOW_2 || SHADOW_3 || SHADOW_4
-					float shadow = ShadowColor(float4(PO, 1.0));	// Body origin take in to account...
+					// TODO : Use planet origin instead...
+					float3 P_A = P - _Atmosphere_Origin;
+					float shadow = ShadowColor(float4(P_A, 1.0));	// Body origin take in to account...
 				#endif
 
 				#if ATMOSPHERE_ON
+					float3 WCP_A = _Atmosphere_WorldCameraPos;
+
 					float3 sunL = 0.0;
 					float3 skyE = 0.0;
 					SunRadianceAndSkyIrradiance(P, normal.xyz, WSD, sunL, skyE);
@@ -180,6 +181,8 @@ Shader "SpaceEngine/Planet/Terrain (Deferred)"
 								oceanColor = _Ocean_Color;
 							#endif
 
+							float3 v = normalize(P - WCP - _Atmosphere_Origin); // Body origin take in to account...
+
 							groundColor = OceanRadiance(WSD, -v, V, _Ocean_Sigma, sunL, skyE, oceanColor, P);
 						}
 					#endif
@@ -189,8 +192,8 @@ Shader "SpaceEngine/Planet/Terrain (Deferred)"
 					float3 glowExtinction;
 					float3 inscatter = 0.0;
 
-					inscatter += InScattering(WCPO, P, float3(0.0, 0.0, 0.0), glowExtinction, 0.0) * _Atmosphere_GlowColor;
-					inscatter += InScattering(WCPO, P, WSD, extinction, 0.0);
+					inscatter += InScattering(WCP_A, P, float3(0.0, 0.0, 0.0), glowExtinction, 0.0) * _Atmosphere_GlowColor;
+					inscatter += InScattering(WCP_A, P, WSD, extinction, 0.0);
 
 					#if ECLIPSES_ON
 						inscatter *= eclipse;

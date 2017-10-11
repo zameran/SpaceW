@@ -130,8 +130,8 @@ Shader "SpaceEngine/Planet/Atmosphere"
 			void frag(in v2f_planetAtmosphere i, out ForwardOutput o)
 			{
 				float3 WCP = _Globals_WorldCameraPos;
-				float3 WCPG = WCP + _Atmosphere_Origin; // Current camera position with offset applied...
-				float3 WCPGG = WCPG + _Atmosphere_Origin; // I HAVE NO IDEA HOW, BUT IT WORKS!
+				float3 WCP_A = WCP + _Atmosphere_Origin; // Current camera position with offset applied...
+				float3 WCPG_A = WCP_A + _Atmosphere_Origin; // I HAVE NO IDEA HOW, BUT IT WORKS!
 
 				// ORIGIN = Planet center, but inverted, aka -Planet.transform.position...
 				// CAMERA + ORIGIN = Current true position for atmosphere and shadows stuff...
@@ -145,6 +145,7 @@ Shader "SpaceEngine/Planet/Atmosphere"
 
 				float sunColor = 0;
 				float3 extinction = 0;
+				float3 glowExtinction = 0;
 				float3 inscatter = 0;
 
 				#if SHADOW_1 || SHADOW_2 || SHADOW_3 || SHADOW_4
@@ -156,7 +157,6 @@ Shader "SpaceEngine/Planet/Atmosphere"
 
 				#if LIGHT_1
 					float3 extinction1 = 0;
-					float3 glowExtinction1 = 0;
 
 					#if ECLIPSES_ON
 						float4 WSPR0 = _Sun_Positions_1[0];
@@ -167,13 +167,13 @@ Shader "SpaceEngine/Planet/Atmosphere"
 						float lightAngularRadius = 0;
 
 						lightAngularRadius = asin(WSPR0.w * invertedLightDistance0);
-						float eclipse1 = EclipseOuterShadow(lightPosition0, lightAngularRadius, d, WCPGG, _Atmosphere_Origin, Rt);
+						float eclipse1 = EclipseOuterShadow(lightPosition0, lightAngularRadius, d, WCPG_A, _Atmosphere_Origin, Rt);
 
 						eclipse1 = GroundFade(_ExtinctionGroundFade, eclipse1);
 					#endif
 
-					inscatter += SkyRadiance(WCPG, d, float3(0.0, 0.0, 0.0), glowExtinction1, 0.0) * _Atmosphere_GlowColor;
-					inscatter += SkyRadiance(WCPG, d, _Sun_WorldDirections_1[0], extinction1, 0.0);
+					inscatter += SkyRadiance(WCP_A, d, float3(0.0, 0.0, 0.0), glowExtinction, 0.0) * _Atmosphere_GlowColor;
+					inscatter += SkyRadiance(WCP_A, d, _Sun_WorldDirections_1[0], extinction1, 0.0);
 
 					#if ECLIPSES_ON
 						inscatter *= eclipse1;
@@ -184,7 +184,7 @@ Shader "SpaceEngine/Planet/Atmosphere"
 					#endif
 
 					#if SHINE_ON
-						inscatter += SkyShineRadiance(WCPG, d);
+						inscatter += SkyShineRadiance(WCP_A, d);
 					#endif
 
 					extinction += extinction1;
@@ -210,16 +210,17 @@ Shader "SpaceEngine/Planet/Atmosphere"
 						float lightAngularRadius = 0;
 
 						lightAngularRadius = asin(WSPR0.w * invertedLightDistance0);
-						float eclipse1 = EclipseOuterShadow(lightPosition0, lightAngularRadius, d, WCPGG, _Atmosphere_Origin, Rt);
+						float eclipse1 = EclipseOuterShadow(lightPosition0, lightAngularRadius, d, WCPG_A, _Atmosphere_Origin, Rt);
 						lightAngularRadius = asin(WSPR1.w * invertedLightDistance1);
-						float eclipse2 = EclipseOuterShadow(lightPosition1, lightAngularRadius, d, WCPGG, _Atmosphere_Origin, Rt);
+						float eclipse2 = EclipseOuterShadow(lightPosition1, lightAngularRadius, d, WCPG_A, _Atmosphere_Origin, Rt);
 
 						eclipse1 = GroundFade(_ExtinctionGroundFade, eclipse1);
 						eclipse2 = GroundFade(_ExtinctionGroundFade, eclipse2);
 					#endif
 
-					inscatter += SkyRadiance(WCPG, d, _Sun_WorldDirections_1[0], extinction1, 0.0);
-					inscatter += SkyRadiance(WCPG, d, _Sun_WorldDirections_1[1], extinction2, 0.0);
+					inscatter += SkyRadiance(WCP_A, d, float3(0.0, 0.0, 0.0), glowExtinction, 0.0) * _Atmosphere_GlowColor;
+					inscatter += SkyRadiance(WCP_A, d, _Sun_WorldDirections_1[0], extinction1, 0.0);
+					inscatter += SkyRadiance(WCP_A, d, _Sun_WorldDirections_1[1], extinction2, 0.0);
 
 					#if ECLIPSES_ON
 						inscatter *= eclipse1;
@@ -231,7 +232,7 @@ Shader "SpaceEngine/Planet/Atmosphere"
 					#endif
 
 					#if SHINE_ON
-						inscatter += SkyShineRadiance(WCPG, d);
+						inscatter += SkyShineRadiance(WCP_A, d);
 					#endif
 
 					extinction += extinction1;
@@ -262,20 +263,21 @@ Shader "SpaceEngine/Planet/Atmosphere"
 						float lightAngularRadius = 0;
 
 						lightAngularRadius = asin(WSPR0.w * invertedLightDistance0);
-						float eclipse1 = EclipseOuterShadow(lightPosition0, lightAngularRadius, d, WCPGG, _Atmosphere_Origin, Rt);
+						float eclipse1 = EclipseOuterShadow(lightPosition0, lightAngularRadius, d, WCPG_A, _Atmosphere_Origin, Rt);
 						lightAngularRadius = asin(WSPR1.w * invertedLightDistance1);
-						float eclipse2 = EclipseOuterShadow(lightPosition1, lightAngularRadius, d, WCPGG, _Atmosphere_Origin, Rt);
+						float eclipse2 = EclipseOuterShadow(lightPosition1, lightAngularRadius, d, WCPG_A, _Atmosphere_Origin, Rt);
 						lightAngularRadius = asin(WSPR2.w * invertedLightDistance2);
-						float eclipse3 = EclipseOuterShadow(lightPosition2, lightAngularRadius, d, WCPGG, _Atmosphere_Origin, Rt);
+						float eclipse3 = EclipseOuterShadow(lightPosition2, lightAngularRadius, d, WCPG_A, _Atmosphere_Origin, Rt);
 
 						eclipse1 = GroundFade(_ExtinctionGroundFade, eclipse1);
 						eclipse2 = GroundFade(_ExtinctionGroundFade, eclipse2);
 						eclipse3 = GroundFade(_ExtinctionGroundFade, eclipse3);
 					#endif
 
-					inscatter += SkyRadiance(WCPG, d, _Sun_WorldDirections_1[0], extinction1, 0.0);
-					inscatter += SkyRadiance(WCPG, d, _Sun_WorldDirections_1[1], extinction2, 0.0);
-					inscatter += SkyRadiance(WCPG, d, _Sun_WorldDirections_1[2], extinction3, 0.0);
+					inscatter += SkyRadiance(WCP_A, d, float3(0.0, 0.0, 0.0), glowExtinction, 0.0) * _Atmosphere_GlowColor;
+					inscatter += SkyRadiance(WCP_A, d, _Sun_WorldDirections_1[0], extinction1, 0.0);
+					inscatter += SkyRadiance(WCP_A, d, _Sun_WorldDirections_1[1], extinction2, 0.0);
+					inscatter += SkyRadiance(WCP_A, d, _Sun_WorldDirections_1[2], extinction3, 0.0);
 
 					#if ECLIPSES_ON
 						inscatter *= eclipse1;
@@ -288,7 +290,7 @@ Shader "SpaceEngine/Planet/Atmosphere"
 					#endif
 
 					#if SHINE_ON
-						inscatter += SkyShineRadiance(WCPG, d);
+						inscatter += SkyShineRadiance(WCP_A, d);
 					#endif
 
 					extinction += extinction1;
@@ -324,13 +326,13 @@ Shader "SpaceEngine/Planet/Atmosphere"
 						float lightAngularRadius = 0;
 
 						lightAngularRadius = asin(WSPR0.w * invertedLightDistance0);
-						float eclipse1 = EclipseOuterShadow(lightPosition0, lightAngularRadius, d, WCPGG, _Atmosphere_Origin, Rt);
+						float eclipse1 = EclipseOuterShadow(lightPosition0, lightAngularRadius, d, WCPG_A, _Atmosphere_Origin, Rt);
 						lightAngularRadius = asin(WSPR1.w * invertedLightDistance1);
-						float eclipse2 = EclipseOuterShadow(lightPosition1, lightAngularRadius, d, WCPGG, _Atmosphere_Origin, Rt);
+						float eclipse2 = EclipseOuterShadow(lightPosition1, lightAngularRadius, d, WCPG_A, _Atmosphere_Origin, Rt);
 						lightAngularRadius = asin(WSPR2.w * invertedLightDistance2);
-						float eclipse3 = EclipseOuterShadow(lightPosition2, lightAngularRadius, d, WCPGG, _Atmosphere_Origin, Rt);
+						float eclipse3 = EclipseOuterShadow(lightPosition2, lightAngularRadius, d, WCPG_A, _Atmosphere_Origin, Rt);
 						lightAngularRadius = asin(WSPR3.w * invertedLightDistance3);
-						float eclipse4 = EclipseOuterShadow(lightPosition3, lightAngularRadius, d, WCPGG, _Atmosphere_Origin, Rt);
+						float eclipse4 = EclipseOuterShadow(lightPosition3, lightAngularRadius, d, WCPG_A, _Atmosphere_Origin, Rt);
 
 						eclipse1 = GroundFade(_ExtinctionGroundFade, eclipse1);
 						eclipse2 = GroundFade(_ExtinctionGroundFade, eclipse2);
@@ -338,10 +340,11 @@ Shader "SpaceEngine/Planet/Atmosphere"
 						eclipse4 = GroundFade(_ExtinctionGroundFade, eclipse4);
 					#endif
 
-					inscatter += SkyRadiance(WCPG, d, _Sun_WorldDirections_1[0], extinction1, 0.0);
-					inscatter += SkyRadiance(WCPG, d, _Sun_WorldDirections_1[1], extinction2, 0.0);
-					inscatter += SkyRadiance(WCPG, d, _Sun_WorldDirections_1[2], extinction3, 0.0);
-					inscatter += SkyRadiance(WCPG, d, _Sun_WorldDirections_1[3], extinction4, 0.0);
+					inscatter += SkyRadiance(WCP_A, d, float3(0.0, 0.0, 0.0), glowExtinction, 0.0) * _Atmosphere_GlowColor;
+					inscatter += SkyRadiance(WCP_A, d, _Sun_WorldDirections_1[0], extinction1, 0.0);
+					inscatter += SkyRadiance(WCP_A, d, _Sun_WorldDirections_1[1], extinction2, 0.0);
+					inscatter += SkyRadiance(WCP_A, d, _Sun_WorldDirections_1[2], extinction3, 0.0);
+					inscatter += SkyRadiance(WCP_A, d, _Sun_WorldDirections_1[3], extinction4, 0.0);
 
 					#if ECLIPSES_ON
 						inscatter *= eclipse1;
@@ -355,7 +358,7 @@ Shader "SpaceEngine/Planet/Atmosphere"
 					#endif
 
 					#if SHINE_ON
-						inscatter += SkyShineRadiance(WCPG, d);
+						inscatter += SkyShineRadiance(WCP_A, d);
 					#endif
 
 					extinction += extinction1;

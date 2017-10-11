@@ -71,20 +71,21 @@ namespace SpaceEngine.Enviroment.Oceanic
         protected Color UpwellingColor = new Color(0.039f, 0.156f, 0.47f);
 
         [SerializeField]
-        public Color AbsorbtionTint = new Color(1.0f, 1.0f, 1.0f);
+        protected Color AbsorbtionTint = new Color(1.0f, 1.0f, 1.0f);
 
         [SerializeField]
-        public Vector4 AbsorbtionRGBA = new Vector4(0.45f, 0.029f, 0.018f, 2.0f); // NOTE : W component here is scale...
+        protected Vector4 AbsorbtionRGBA = new Vector4(0.45f, 0.029f, 0.018f, 2.0f); // NOTE : W component here is scale...
 
         [SerializeField]
-        public Vector3 ShoreParameters = new Vector3(100.0f, 0.56f, 0.5f);
+        protected Vector3 ShoreParameters = new Vector3(100.0f, 0.56f, 0.5f);
 
         [SerializeField]
-        public Vector3 ShoreFoamParameters = new Vector3(25.0f, 0.25f, 0.5f);
+        protected Vector3 ShoreFoamParameters = new Vector3(25.0f, 0.25f, 0.5f);
 
         /// <summary>
         /// Sea level in meters.
         /// </summary>
+        [Range(0.0f, 8.0f)]
         public float OceanLevel = 5.0f;
 
         [Range(0.0f, 4.0f)]

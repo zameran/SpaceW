@@ -1322,6 +1322,7 @@ MonoBehaviour:
   WavesOmega: 0.84
   GridSizes: {x: 5488, y: 392, z: 28, w: 2}
   Choppyness: {x: 2.3, y: 2.1, z: 1.3, w: 0.9}
+  VarianceSize: 16
   InitJacobiansMaterial: {fileID: 2100000, guid: 3fb2adcb831e928459999d4736573f21,
     type: 2}
   WhiteCapsPrecomputeMaterial: {fileID: 2100000, guid: 2653e30a6ed623d4d94880f44f44a935,
@@ -4645,6 +4646,7 @@ MonoBehaviour:
   WavesOmega: 0.84
   GridSizes: {x: 5488, y: 392, z: 28, w: 2}
   Choppyness: {x: 2.3, y: 2.1, z: 1.3, w: 0.9}
+  VarianceSize: 16
   InitJacobiansMaterial: {fileID: 2100000, guid: 3fb2adcb831e928459999d4736573f21,
     type: 2}
   WhiteCapsPrecomputeMaterial: {fileID: 2100000, guid: 2653e30a6ed623d4d94880f44f44a935,

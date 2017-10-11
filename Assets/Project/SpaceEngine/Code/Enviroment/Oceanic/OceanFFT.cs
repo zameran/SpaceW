@@ -15,15 +15,15 @@ namespace SpaceEngine.Enviroment.Oceanic
     /// </summary>
     public class OceanFFT : OceanNode
     {
-        const float WAVE_CM = 0.23f; // Eq 59
-        const float WAVE_KM = 370.0f; // Eq 59
-        const float AMP = 1.0f;
+        private const float WAVE_CM = 0.23f; // Eq 59
+        private const float WAVE_KM = 370.0f; // Eq 59
+        private const float AMP = 1.0f;
 
         [SerializeField]
-        Material InitSpectrumMaterial;
+        protected Material InitSpectrumMaterial;
 
         [SerializeField]
-        Material InitDisplacementMaterial;
+        protected Material InitDisplacementMaterial;
 
         [SerializeField]
         protected int Aniso = 2;
@@ -32,19 +32,19 @@ namespace SpaceEngine.Enviroment.Oceanic
         /// A higher wind speed gives greater swell to the waves.
         /// </summary>
         [SerializeField]
-        float WindSpeed = 5.0f;
+        private float WindSpeed = 5.0f;
 
         /// <summary>
         /// A lower number means the waves last longer and will build up larger waves.
         /// </summary>
         [SerializeField]
-        float WavesOmega = 0.84f;
+        private float WavesOmega = 0.84f;
 
         /// <summary>
         /// Size in meters (i.e. in spatial domain) of each grid.
         /// </summary>
         [SerializeField]
-        Vector4 GridSizes = new Vector4(5488, 392, 28, 2);
+        private Vector4 GridSizes = new Vector4(5488, 392, 28, 2);
 
         /// <summary>
         /// Strenght of sideways displacement for each grid.
@@ -56,10 +56,12 @@ namespace SpaceEngine.Enviroment.Oceanic
 
         protected Shader FourierShader { get { return GodManager.Instance.FourierShader; } }
 
-        int VarianceSize = 16;
+        [SerializeField]
+        [Range(16.0f, 128.0f)]
+        protected int VarianceSize = 16;
 
-        float FloatSize;
-        float MaxSlopeVariance;
+        protected float MapSize;
+        protected float MaxSlopeVariance;
 
         protected int IDX = 0;
 
@@ -69,19 +71,19 @@ namespace SpaceEngine.Enviroment.Oceanic
         protected RenderTexture Spectrum23;
         protected RenderTexture WTable;
 
-        RenderTexture[] FourierBuffer0;
-        RenderTexture[] FourierBuffer1;
-        RenderTexture[] FourierBuffer2;
-        RenderTexture[] FourierBuffer3;
-        RenderTexture[] FourierBuffer4;
+        private RenderTexture[] FourierBuffer0;
+        private RenderTexture[] FourierBuffer1;
+        private RenderTexture[] FourierBuffer2;
+        private RenderTexture[] FourierBuffer3;
+        private RenderTexture[] FourierBuffer4;
 
-        RenderTexture Map0;
-        RenderTexture Map1;
-        RenderTexture Map2;
-        RenderTexture Map3;
-        RenderTexture Map4;
+        private RenderTexture Map0;
+        private RenderTexture Map1;
+        private RenderTexture Map2;
+        private RenderTexture Map3;
+        private RenderTexture Map4;
 
-        RenderTexture Variance;
+        private RenderTexture Variance;
 
         protected FourierGPU Fourier;
 
@@ -120,10 +122,10 @@ namespace SpaceEngine.Enviroment.Oceanic
                 InitDisplacementMaterial = MaterialHelper.CreateTemp(Shader.Find("SpaceEngine/Ocean/InitDisplacement"), "InitDisplacement");
             }
 
-            FloatSize = (float)FourierGridSize;
-            Offset = new Vector4(1.0f + 0.5f / FloatSize, 1.0f + 0.5f / FloatSize, 0, 0);
+            MapSize = (float)FourierGridSize;
+            Offset = new Vector4(1.0f + 0.5f / MapSize, 1.0f + 0.5f / MapSize, 0, 0);
 
-            float factor = 2.0f * Mathf.PI * FloatSize;
+            float factor = 2.0f * Mathf.PI * MapSize;
             InverseGridSizes = new Vector4(factor / GridSizes.x, factor / GridSizes.y, factor / GridSizes.z, factor / GridSizes.w);
 
             Fourier = new FourierGPU(FourierGridSize, FourierShader);
@@ -164,7 +166,7 @@ namespace SpaceEngine.Enviroment.Oceanic
                 Graphics.Blit(FourierBuffer3[IDX], Map3);
                 Graphics.Blit(FourierBuffer4[IDX], Map4);
 
-                OceanMaterial.SetVector("_Ocean_MapSize", new Vector2(FloatSize, FloatSize));
+                OceanMaterial.SetVector("_Ocean_MapSize", new Vector2(MapSize, MapSize));
                 OceanMaterial.SetVector("_Ocean_Choppyness", Choppyness);
                 OceanMaterial.SetVector("_Ocean_GridSizes", GridSizes);
                 OceanMaterial.SetFloat("_Ocean_HeightOffset", OceanLevel - OceanWaveLevel);
@@ -439,9 +441,9 @@ namespace SpaceEngine.Enviroment.Oceanic
                     j = (y >= FourierGridSize / 2) ? (float)(y - FourierGridSize) : (float)y;
 
                     sample12XY = GetSpectrumSample(i, j, GridSizes.x, Mathf.PI / GridSizes.x);
-                    sample12ZW = GetSpectrumSample(i, j, GridSizes.y, Mathf.PI * FloatSize / GridSizes.x);
-                    sample34XY = GetSpectrumSample(i, j, GridSizes.z, Mathf.PI * FloatSize / GridSizes.y);
-                    sample34ZW = GetSpectrumSample(i, j, GridSizes.w, Mathf.PI * FloatSize / GridSizes.z);
+                    sample12ZW = GetSpectrumSample(i, j, GridSizes.y, Mathf.PI * MapSize / GridSizes.x);
+                    sample34XY = GetSpectrumSample(i, j, GridSizes.z, Mathf.PI * MapSize / GridSizes.y);
+                    sample34ZW = GetSpectrumSample(i, j, GridSizes.w, Mathf.PI * MapSize / GridSizes.z);
 
                     spectrum01[idx * 4 + 0] = sample12XY.x;
                     spectrum01[idx * 4 + 1] = sample12XY.y;
@@ -478,7 +480,7 @@ namespace SpaceEngine.Enviroment.Oceanic
 
             varianceShader.SetFloat("_SlopeVarianceDelta", 0.5f * (theoreticSlopeVariance - totalSlopeVariance));
             varianceShader.SetFloat("_VarianceSize", (float)VarianceSize);
-            varianceShader.SetFloat("_Size", FloatSize);
+            varianceShader.SetFloat("_Size", MapSize);
             varianceShader.SetVector("_GridSizes", GridSizes);
             varianceShader.SetTexture(0, "_Spectrum01", Spectrum01);
             varianceShader.SetTexture(0, "_Spectrum23", Spectrum23);
@@ -520,7 +522,7 @@ namespace SpaceEngine.Enviroment.Oceanic
             {
                 for (int y = 0; y < FourierGridSize; y++)
                 {
-                    uv = new Vector2(x, y) / FloatSize;
+                    uv = new Vector2(x, y) / MapSize;
 
                     st.x = uv.x > 0.5f ? uv.x - 1.0f : uv.x;
                     st.y = uv.y > 0.5f ? uv.y - 1.0f : uv.y;

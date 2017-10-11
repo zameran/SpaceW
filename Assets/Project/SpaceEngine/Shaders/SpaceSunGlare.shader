@@ -82,24 +82,14 @@ Shader "SpaceEngine/Space/Sun Glare"
 			uniform float aspectRatio;
 			uniform float sunGlareScale;
 			uniform float sunGlareFade;
+
+			sampler2D _CameraGBufferTexture2;
 			
 			struct v2f 
 			{
 				float4 pos : SV_POSITION;
-				float3 dir : TEXCOORD0;
-				float2 uv : TEXCOORD2;
+				float2 uv : TEXCOORD0;
 			};
-
-			v2f vert(appdata_base v)
-			{
-				v2f OUT;
-
-				OUT.pos = float4(v.vertex.xyz, 1.0);
-				OUT.dir = (mul(_Globals_CameraToWorld, float4((mul(_Globals_ScreenToCamera, v.vertex)).xyz, 0.0))).xyz;
-				OUT.uv = v.texcoord.xy;
-
-				return OUT;
-			}
 
 			float2 GetTransmittanceUV_SunGlare(float r, float mu) 
 			{
@@ -143,9 +133,13 @@ Shader "SpaceEngine/Space/Sun Glare"
 				return pow(max(0, sunColor), 2.2) * 2;
 			}
 
-			sampler2D _CameraGBufferTexture2;
+			void vert(in appdata_base i, out v2f o)
+			{
+				o.pos = float4(i.vertex.xyz, 1.0);
+				o.uv = i.texcoord.xy;
+			}
 
-			float4 frag(v2f IN) : COLOR
+			void frag(in v2f i, out float4 diffuse : COLOR)
 			{
 				// NOTE : Sample W component from GBuffer normals data. Unity's Standart shader using it as 1.0, and my planets too!
 				float obstacle = 1.0 - tex2D(_CameraGBufferTexture2, sunViewPortPositionInversed.xy).a;
@@ -153,32 +147,26 @@ Shader "SpaceEngine/Space/Sun Glare"
 				// Perform obstacle test...
 				if (obstacle < 1.0) discard;
 
-				float3 WCP = _Globals_WorldCameraPos;
-				float3 WCPG = WCP + _Atmosphere_Origin; // Current camera position with offset applied...
-				float3 WSD = normalize(sunPosition - WCPG);
-
 				float2 toScreenCenter = sunViewPortPosition.xy - 0.5;
+				float2 sceenCenterUV = i.uv.xy - sunViewPortPosition.xy;
 
 				float3 outputColor = 0;
 				float3 sunColor = 0;
 				float3 ghosts = 0;
 
-				sunColor += flareSettings.x * (tex2D(sunFlare, (IN.uv.xy - sunViewPortPosition.xy) * float2(aspectRatio * flareSettings.y, 1.0) * flareSettings.z * sunGlareScale + 0.5).rgb);
-				sunColor += spikesSettings.x * (tex2D(sunSpikes, (IN.uv.xy - sunViewPortPosition.xy) * float2(aspectRatio * spikesSettings.y, 1.0) * spikesSettings.z * sunGlareScale + 0.5).rgb); 
+				sunColor += flareSettings.x * (tex2D(sunFlare, sceenCenterUV * float2(aspectRatio * flareSettings.y, 1.0) * flareSettings.z * sunGlareScale + 0.5).rgb);
+				sunColor += spikesSettings.x * (tex2D(sunSpikes, sceenCenterUV * float2(aspectRatio * spikesSettings.y, 1.0) * spikesSettings.z * sunGlareScale + 0.5).rgb); 
 				
-				for (int i = 0; i < 4; ++i)
+				for (int j = 0; j < 4; ++j)
 				{			
-					ghosts += ghost1Settings[i].x * 
-							  (tex2D(sunGhost1, (IN.uv.xy - sunViewPortPosition.xy + (toScreenCenter * ghost1Settings[i].w)) * 
-							  float2(aspectRatio * ghost1Settings[i].y, 1.0) * ghost1Settings[i].z + 0.5).rgb);
+					ghosts += ghost1Settings[j].x * (tex2D(sunGhost1, (sceenCenterUV + (toScreenCenter * ghost1Settings[j].w)) * 
+							  float2(aspectRatio * ghost1Settings[j].y, 1.0) * ghost1Settings[j].z + 0.5).rgb);
 
-					ghosts += ghost2Settings[i].x * 
-							  (tex2D(sunGhost2, (IN.uv.xy - sunViewPortPosition.xy + (toScreenCenter * ghost2Settings[i].w)) * 
-							  float2(aspectRatio * ghost2Settings[i].y, 1.0) * ghost2Settings[i].z + 0.5).rgb);
+					ghosts += ghost2Settings[j].x * (tex2D(sunGhost2, (sceenCenterUV + (toScreenCenter * ghost2Settings[j].w)) * 
+							  float2(aspectRatio * ghost2Settings[j].y, 1.0) * ghost2Settings[j].z + 0.5).rgb);
 
-					ghosts += ghost3Settings[i].x *
-							  (tex2D(sunGhost3, (IN.uv.xy - sunViewPortPosition.xy + (toScreenCenter * ghost3Settings[i].w)) * 
-							  float2(aspectRatio * ghost3Settings[i].y, 1.0) * ghost3Settings[i].z + 0.5).rgb);
+					ghosts += ghost3Settings[j].x * (tex2D(sunGhost3, (sceenCenterUV + (toScreenCenter * ghost3Settings[j].w)) * 
+							  float2(aspectRatio * ghost3Settings[j].y, 1.0) * ghost3Settings[j].z + 0.5).rgb);
 				}	
 
 				ghosts = ghosts * smoothstep(0.0, 1.0, 1.0 - length(toScreenCenter));	
@@ -188,6 +176,7 @@ Shader "SpaceEngine/Space/Sun Glare"
 				outputColor *= sunGlareFade;
 				
 				// TODO : Use keywords for that kind of settings...
+				// TODO : Perform atmosphere coloring BEFORE obstacle test, if atmosphere is exist and atmosphere coloring is enabled...
 
 				if (useRadiance > 0.0)
 				{
@@ -196,10 +185,14 @@ Shader "SpaceEngine/Space/Sun Glare"
 
 				if (useAtmosphereColors > 0.0)
 				{
-					outputColor *= Extinction_SunGlare(WCPG, WSD);
+					float3 WCP = _Globals_WorldCameraPos;
+					float3 WCP_A = WCP + _Atmosphere_Origin; // Current camera position with offset applied...
+					float3 WSD = normalize(sunPosition - WCP_A);
+
+					outputColor *= Extinction_SunGlare(WCP_A, WSD);
 				}
 				
-				return float4(outputColor, 0.0);				
+				diffuse = float4(outputColor, 0.0);				
 			}			
 			ENDCG
 		}

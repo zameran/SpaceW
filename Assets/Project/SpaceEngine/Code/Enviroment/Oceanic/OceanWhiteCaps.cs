@@ -12,26 +12,29 @@ namespace SpaceEngine.Enviroment.Oceanic
     public class OceanWhiteCaps : OceanFFT
     {
         [SerializeField]
-        Material InitJacobiansMaterial;
+        protected Material InitJacobiansMaterial;
 
         [SerializeField]
-        Material WhiteCapsPrecomputeMaterial;
+        protected Material WhiteCapsPrecomputeMaterial;
 
         [SerializeField]
-        int FoamAniso = 9;
+        [Range(0, 16)]
+        protected int FoamAniso = 9;
 
         [SerializeField]
-        float FoamMipmapBias = -2.0f;
+        [Range(-2.0f, 2.0f)]
+        protected float FoamMipmapBias = -2.0f;
 
         [SerializeField]
-        float WhiteCapStrength = 0.1f;
+        [Range(0.0f, 1.0f)]
+        protected float WhiteCapStrength = 0.1f;
 
-        RenderTexture[] FourierBuffer5;
-        RenderTexture[] FourierBuffer6;
-        RenderTexture[] FourierBuffer7;
+        protected RenderTexture[] FourierBuffer5;
+        protected RenderTexture[] FourierBuffer6;
+        protected RenderTexture[] FourierBuffer7;
 
-        RenderTexture Foam0;
-        RenderTexture Foam1;
+        protected RenderTexture Foam0;
+        protected RenderTexture Foam1;
 
         #region OceanNode
 

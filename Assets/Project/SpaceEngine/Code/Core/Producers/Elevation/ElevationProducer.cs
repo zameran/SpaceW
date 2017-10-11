@@ -7,6 +7,7 @@ using SpaceEngine.Core.Utilities;
 
 using System;
 using System.Collections.Generic;
+
 using UnityEngine;
 
 namespace SpaceEngine.Core
