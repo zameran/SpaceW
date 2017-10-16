@@ -400,13 +400,6 @@ float4x4 SampleCoarseLevelHeights(sampler2D coarseLevelSampler, float2 uv, float
 //-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
-struct a2v_planetTerrain
-{
-	float4 vertex : POSITION;
-	float3 normal : NORMAL;
-	float4 texcoord : TEXCOORD0;
-};
-
 struct ForwardOutput
 {
 	float4 diffuse	: SV_Target; // rgb: diffuse,  a: unused

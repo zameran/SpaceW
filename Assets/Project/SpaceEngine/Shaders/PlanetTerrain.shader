@@ -85,6 +85,13 @@ Shader "SpaceEngine/Planet/Terrain (Deferred)"
 			#include "SpaceAtmosphere.cginc"
 			#include "Ocean/OceanBRDF.cginc"
 			
+			struct a2v_planetTerrain
+			{
+				float4 vertex : POSITION;
+				float3 normal : NORMAL;
+				float4 texcoord : TEXCOORD0;
+			};
+
 			struct v2f_planetTerrain
 			{
 				float4 pos : POSITION;

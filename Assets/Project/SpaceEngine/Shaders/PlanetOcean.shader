@@ -75,8 +75,7 @@ Shader "SpaceEngine/Planet/Ocean"
 			float4 screenP : TEXCOORD2;
 
 			#if OCEAN_DEPTH_ON
-				float4 viewSpaceDirDist : TEXCOORD3;
-				float4 projPos : TEXCOORD4;
+				float4 projPos : TEXCOORD3;
 			#endif
 		};
 
@@ -123,7 +122,6 @@ Shader "SpaceEngine/Planet/Ocean"
 			o.screenP = screenP;
 
 			#if OCEAN_DEPTH_ON
-				o.viewSpaceDirDist = float4(cameraDir, t);
 				o.projPos = computedScreenP;
 			#endif
 		}
