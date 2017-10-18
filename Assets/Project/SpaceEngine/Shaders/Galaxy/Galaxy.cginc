@@ -38,11 +38,14 @@
 #endif
 
 uniform float3	Randomize;
+uniform float4  offsetParams1;	// (offsetX,	offsetY,		offsetZ,	 UNUSED)
 uniform float4	sizeParams1;	// (radius,		ellipseRadius,	barSize,	 depth)
 uniform float4	warpParams1;	// (warp1.x,	warp1.y,		warp2.x,	 warp2.y)
-uniform float4	spiralParams1;	// (inverseEccentricity, spiralRotation, UNUSED, UNUSED)
+uniform float4	spiralParams1;	// (inverseEccentricity, spiralRotation, passRotation, UNUSED)
 
-
+#define		offsetX					offsetParams1.x;
+#define		offsetY					offsetParams1.y;
+#define		offsetZ					offsetParams1.z;
 #define		radius					sizeParams1.x
 #define		ellipseRadius			sizeParams1.y
 #define		barSize					sizeParams1.z
@@ -51,6 +54,7 @@ uniform float4	spiralParams1;	// (inverseEccentricity, spiralRotation, UNUSED, U
 #define		warp2					warpParams1.zw
 #define		inverseEccentricity		spiralParams1.x
 #define		spiralRotation			spiralParams1.y
+#define		passRotation			spiralParams1.z
 
 struct GalaxyStar
 {
@@ -89,4 +93,35 @@ float4 qaxang(float3 axis, float angle)
 	float sha = sin(ha);
 
 	return float4(axis.x * sha, axis.y * sha, axis.z * sha, cos(ha));
+}
+
+float Hash(uint s)
+{
+	s ^= 2747636419u;
+	s *= 2654435769u;
+	s ^= s >> 16;
+	s *= 2654435769u;
+	s ^= s >> 16;
+	s *= 2654435769u;
+	return s;
+}
+
+float Random1(uint seed)
+{
+	return float(Hash(seed)) / 4294967295.0;
+}
+
+float2 Random2(uint seed)
+{
+	return float2(Random1(seed + 0), Random1(seed + 1));
+}
+
+float3 Random3(uint seed)
+{
+	return float3(Random2(seed), Random1(seed + 2));
+}
+
+float4 Random4(uint seed)
+{
+	return float4(Random3(seed), Random1(seed + 3));
 }

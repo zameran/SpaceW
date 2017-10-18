@@ -673,7 +673,10 @@ float3 SkyShineRadiance(float3 worldPosition, float3 viewdir)
 	{
 		if (_Sky_ShineColors_1[i].w <= 0) break;
 
+		// NOTE : Hm... oppisite direction without origin offset looks better... Test case.
+
 		occluderDirection = normalize(_Sky_ShineOccluders_1[i].xyz - worldPosition);			// Occluder direction with origin offset...
+		//occluderOppositeDirection = normalize(_Sky_ShineOccluders_2[i].xyz - worldPosition);	// Occluder opposite direction...
 		occluderOppositeDirection = _Sky_ShineOccluders_2[i].xyz;								// Occluder opposite direction with origin offset...
 		intensity = 0.57 * max((dot(occluderDirection, occluderOppositeDirection) - _Sky_ShineParameters_1[i].w), 0);
 

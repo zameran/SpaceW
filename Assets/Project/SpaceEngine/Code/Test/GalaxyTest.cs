@@ -34,13 +34,18 @@
 #endregion
 
 using SpaceEngine.Core;
+using SpaceEngine.Core.Patterns.Strategy.Renderable;
 using SpaceEngine.Core.Utilities.Gradients;
+
 using System;
+using System.Collections.Generic;
 using System.Runtime.InteropServices;
+
 using UnityEngine;
 
 namespace SpaceEngine.Tests
 {
+    [Serializable]
     public struct GalaxyStar
     {
         public Vector3 position;
@@ -48,31 +53,109 @@ namespace SpaceEngine.Tests
         public Vector4 color;
     }
 
-    public class GalaxyTest : Node<GalaxyTest>
+    [Serializable]
+    [StructLayout(LayoutKind.Sequential)]
+    public struct GalaxyGenerationParameters
     {
-        public Texture2D PermutationTableTexture;
+        public Vector3 Randomize;                   // Randomation vector...
+        public Vector3 Offset;                      // Linear offset for ellipses - asymmetry factor...
 
+        public Vector4 Warp;                        // Pre/Pos-rotation warp 2D vector packed...
+
+        public float Radius;                        // Galaxy radius...
+        public float RadiusEllipse;
+        public float SizeBar;
+        public float Depth;
+        public float InverseSpiralEccentricity;
+        public float SpiralRotation;
+
+        public GalaxyGenerationParameters(GalaxyGenerationParameters from)
+        {
+            Randomize = from.Randomize;
+            Offset = from.Offset;
+
+            Warp = from.Warp;
+
+            Radius = from.Radius;
+            RadiusEllipse = from.RadiusEllipse;
+            SizeBar = from.SizeBar;
+            Depth = from.Depth;
+            InverseSpiralEccentricity = from.InverseSpiralEccentricity;
+            SpiralRotation = from.SpiralRotation;
+        }
+
+        public GalaxyGenerationParameters(Vector3 randomize, Vector3 offset, Vector4 warp,
+                                          float radius, float radiusEllipse, float sizeBar, float depth, float inverseSpiralEccentricity,
+                                          float spiralRotation)
+        {
+            Randomize = randomize;
+            Offset = offset;
+
+            Warp = warp;
+
+            Radius = radius;
+            RadiusEllipse = radiusEllipse;
+            SizeBar = sizeBar;
+            Depth = depth;
+            InverseSpiralEccentricity = inverseSpiralEccentricity;
+            SpiralRotation = spiralRotation;
+        }
+
+        public static GalaxyGenerationParameters Default
+        {
+            get
+            {
+                return new GalaxyGenerationParameters(Vector3.zero, 
+                                                      new Vector3(0.0f, 0.0f, 0.03f), 
+                                                      new Vector4(0.3f, 0.15f, 0.025f, 0.01f),
+                                                      128.0f, 0.7f, -0.25f, 128.0f, 0.75f, 7.5f);
+            }
+        }
+    }
+
+    [Serializable]
+    [StructLayout(LayoutKind.Sequential)]
+    public struct GalaxyGenerationPerPassParameters
+    {
+        public float PassRotation;
+
+        public GalaxyGenerationPerPassParameters(GalaxyGenerationPerPassParameters from)
+        {
+            PassRotation = from.PassRotation;
+        }
+
+        public GalaxyGenerationPerPassParameters(float passRotation)
+        {
+            PassRotation = passRotation;
+        }
+
+        public static GalaxyGenerationPerPassParameters Default
+        {
+            get
+            {
+                GalaxyGenerationPerPassParameters ggppp = new GalaxyGenerationPerPassParameters(Mathf.PI / 2.0f);
+
+                return ggppp;
+            }
+        }
+    }
+
+    public class GalaxyTest : Node<GalaxyTest>, IRenderable<GalaxyTest>
+    {
         public ComputeShader Core;
 
         public Shader CoreShader;
-        
+
+        public int PassCount = 1;
         public int Count = 128;
         public int DrawCount = 128;
 
         private Material StarsMaterial;
-        private ComputeBuffer StarsBuffer;
 
-        public float Radius = 128.0f;
-        public float RadiusEllipse = 1.0f;
-        public float SizeBar = 0.3f;
-        public float Depth = 128.0f;
-        public float InverseSpiralEccentricity = 0.7f;
-        public float SpiralRotation = 23.5f;
+        private List<ComputeBuffer> StarsBuffers = new List<ComputeBuffer>();
 
-        public Vector3 Randomize = Vector3.zero;
-
-        public Vector2 Warp1 = new Vector2(0.3f, 0.3f);     // Pre-rotation warp vector...
-        public Vector2 Warp2 = new Vector2(0.01f, 0.01f);   // Post-rotation warp vector...
+        public GalaxyGenerationParameters Parameters = GalaxyGenerationParameters.Default;
+        public GalaxyGenerationPerPassParameters ParametersPerPass = GalaxyGenerationPerPassParameters.Default;
 
         public ColorMaterialTableGradientLut ColorDistribution = new ColorMaterialTableGradientLut();
 
@@ -80,30 +163,49 @@ namespace SpaceEngine.Tests
         {
             StarsMaterial = MaterialHelper.CreateTemp(CoreShader, "Stars");
 
-            StarsBuffer = new ComputeBuffer(Count, Marshal.SizeOf<GalaxyStar>(), ComputeBufferType.Default);
-            StarsBuffer.SetData(new GalaxyStar[Count]);
+            StarsBuffers = new List<ComputeBuffer>(PassCount);
+
+            for (var bufferIndex = 0; bufferIndex < StarsBuffers.Capacity; bufferIndex++)
+            {
+                var buffer = new ComputeBuffer(Count, Marshal.SizeOf<GalaxyStar>(), ComputeBufferType.Default);
+
+                buffer.SetData(new GalaxyStar[Count]);
+
+                StarsBuffers.Add(buffer);
+            }
 
             ColorDistribution.GenerateLut();
         }
 
         protected override void UpdateNode()
         {
-            Core.SetTexture(0, "PermutationTable", PermutationTableTexture);
             Core.SetTexture(0, "MaterialTable", ColorDistribution.Lut);
 
-            Core.SetVector("Randomize", Randomize);
-            Core.SetVector("sizeParams1", new Vector4(Radius, RadiusEllipse, SizeBar, Depth));
-            Core.SetVector("warpParams1", new Vector4(Warp1.x, Warp1.y, Warp2.x, Warp2.y));
-            Core.SetVector("spiralParams1", new Vector4(InverseSpiralEccentricity, SpiralRotation, 0.0f, 0.0f));
+            for (var bufferIndex = 0; bufferIndex < StarsBuffers.Count; bufferIndex++)
+            {
+                var buffer = StarsBuffers[bufferIndex];
+                var perPassRotation = bufferIndex % 2 == 0 ? ParametersPerPass.PassRotation * bufferIndex : ParametersPerPass.PassRotation;
 
-            Core.SetBuffer(0, "output", StarsBuffer);
-            Core.Dispatch(0, (int)(Count / 1024.0f), 1, 1);
+                Core.SetVector("Randomize", (Parameters.Randomize + new Vector3(1.0f, 0.0f, 1.0f)) * ((bufferIndex + 1) / 10.0f));
+                Core.SetVector("offsetParams1", new Vector4(Parameters.Offset.x, Parameters.Offset.y, Parameters.Offset.z, 0.0f));
+                Core.SetVector("sizeParams1", new Vector4(Parameters.Radius, Parameters.RadiusEllipse, Parameters.SizeBar, Parameters.Depth));
+                Core.SetVector("warpParams1", Parameters.Warp);
+                Core.SetVector("spiralParams1", new Vector4(Parameters.InverseSpiralEccentricity, Parameters.SpiralRotation, perPassRotation, 0.0f));
+
+                Core.SetBuffer(0, "output", buffer);
+                Core.Dispatch(0, (int)(Count / 1024.0f), 1, 1);
+            }
         }
 
         /// <inheritdoc />
         protected override void OnDestroy()
         {
-            StarsBuffer.ReleaseAndDisposeBuffer();
+            for (var bufferIndex = 0; bufferIndex < StarsBuffers.Count; bufferIndex++)
+            {
+                var buffer = StarsBuffers[bufferIndex];
+
+                buffer.ReleaseAndDisposeBuffer();
+            }
 
             Helper.Destroy(StarsMaterial);
 
@@ -112,10 +214,26 @@ namespace SpaceEngine.Tests
 
         protected void OnPostRender()
         {
-            StarsMaterial.SetPass(0);
-            StarsMaterial.SetBuffer("stars", StarsBuffer);
 
-            Graphics.DrawProcedural(MeshTopology.Points, Math.Abs(DrawCount));
         }
+
+        #region IRenderable
+
+        public virtual void Render(int layer = 8)
+        {
+            // NOTE : Render all galaxy stuff here...
+
+            for (var bufferIndex = 0; bufferIndex < StarsBuffers.Count; bufferIndex++)
+            {
+                var buffer = StarsBuffers[bufferIndex];
+
+                StarsMaterial.SetPass(0);
+                StarsMaterial.SetBuffer("stars", buffer);
+
+                Graphics.DrawProcedural(MeshTopology.Points, Math.Abs(DrawCount));
+            }
+        }
+
+        #endregion
     }
 }

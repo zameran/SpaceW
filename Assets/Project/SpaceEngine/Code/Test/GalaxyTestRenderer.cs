@@ -1,21 +1,21 @@
 ﻿#region License
 // Procedural planet generator.
-// 
+//  
 // Copyright (C) 2015-2017 Denis Ovchinnikov [zameran] 
 // All rights reserved.
-// 
+//  
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions
 // are met:
 // 1. Redistributions of source code must retain the above copyright
-//    notice, this list of conditions and the following disclaimer.
+//     notice, this list of conditions and the following disclaimer.
 // 2. Redistributions in binary form must reproduce the above copyright
-//    notice, this list of conditions and the following disclaimer in the
-//    documentation and/or other materials provided with the distribution.
+//     notice, this list of conditions and the following disclaimer in the
+//     documentation and/or other materials provided with the distribution.
 // 3. Neither the name of the copyright holders nor the names of its
-//    contributors may be used to endorse or promote products derived from
-//    this software without specific prior written permission.
-// 
+//     contributors may be used to endorse or promote products derived from
+//     this software without specific prior written permission.
+//  
 // THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
 // AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
 // IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -27,32 +27,41 @@
 // CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
 // ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF
 // THE POSSIBILITY OF SUCH DAMAGE.
-// 
-// Creation Date: Undefined
-// Creation Time: Undefined
+//  
+// Creation Date: 2017.10.21
+// Creation Time: 12:21 PM
 // Creator: zameran
 #endregion
 
-using System;
-using System.Runtime.InteropServices;
-
 using UnityEngine;
 
-namespace SpaceEngine.Startfield
+namespace SpaceEngine.Tests
 {
-    [Serializable]
-    [StructLayout(LayoutKind.Sequential)]
-    public struct StarfieldStar
+    [RequireComponent(typeof(Camera))]
+    public class GalaxyTestRenderer : MonoSingleton<GalaxyTestRenderer>
     {
-        public Vector3 Position;
+        public GalaxyTest Galaxy;
 
-        public Vector4 Color;
-
-        public StarfieldStar(Vector3 Position, Vector4 Color)
+        private void Awake()
         {
-            this.Position = Position;
+            Instance = this;
+        }
 
-            this.Color = Color;
+        private void Start()
+        {
+            
+        }
+
+        private void Update()
+        {
+            
+        }
+
+        private void OnPostRender()
+        {
+            if (Galaxy == null) return;
+
+            Galaxy.Render();
         }
     }
 }

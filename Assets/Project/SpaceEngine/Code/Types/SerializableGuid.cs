@@ -1,8 +1,10 @@
 ﻿using System;
+using System.Runtime.InteropServices;
 
 namespace UnityEngine
 {
     [Serializable]
+    [StructLayout(LayoutKind.Sequential)]
     public struct SerializableGuid : IComparable, IComparable<SerializableGuid>, IEquatable<SerializableGuid>
     {
         private readonly string Value;

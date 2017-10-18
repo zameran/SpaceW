@@ -94,7 +94,7 @@ public sealed class MainRenderer : MonoSingleton<MainRenderer>
 
     private void OnPostRender()
     {
-
+        
     }
 
     public void ComposeOutputRender()

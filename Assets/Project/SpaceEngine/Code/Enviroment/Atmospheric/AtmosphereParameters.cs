@@ -34,24 +34,37 @@
 #endregion
 
 using System;
+using System.Runtime.InteropServices;
 
 using UnityEngine;
 
 namespace SpaceEngine.Enviroment.Atmospheric
 {
     [Serializable]
+    [StructLayout(LayoutKind.Sequential)]
     public struct AtmosphereParameters
     {
-        //Asymmetry factor for the mie phase function
-        //A higher number meands more light is scattered in the forward direction
+        /// <summary>
+        /// Asymmetry factor for the mie phase function.
+        /// A higher number meands more light is scattered in the forward direction.
+        /// </summary>
         public float MIE_G;
 
-        //Half heights for the atmosphere air density (HR) and particle density (HM)
-        //This is the height in km that half the particles are found below
+        /// <summary>
+        /// Half height for the atmosphere air density.
+        /// This is the height in km that half the particles are found below.
+        /// </summary>
         public float HR;
+
+        /// <summary>
+        /// Half height for the atmosphere particle density.
+        /// This is the height in km that half the particles are found below.
+        /// </summary>
         public float HM;
 
-        //Physical settings, Mie and Rayliegh values
+        /// <summary>
+        /// Average ground reflecrance.
+        /// </summary>
         public float AVERAGE_GROUND_REFLECTANCE;
 
         public Vector4 BETA_R;
@@ -66,6 +79,9 @@ namespace SpaceEngine.Enviroment.Atmospheric
         public float bRt;
         public float bRl;
 
+        /// <summary>
+        /// Scale factor of atmosphere.
+        /// </summary>
         public float SCALE;
 
         public AtmosphereParameters(AtmosphereParameters from)
@@ -144,15 +160,13 @@ namespace SpaceEngine.Enviroment.Atmospheric
         {
             get
             {
-                AtmosphereParameters ap = new AtmosphereParameters(0.8f, 8.0f, 2.0f, 0.1f,
-                                                                   new Vector4(0.0058f, 0.0135f, 0.0331f, 0.0f),
-                                                                   new Vector4(0.0040f, 0.0040f, 0.0040f, 0.0f),
-                                                                   new Vector4(0.0040f, 0.0040f, 0.0040f, 0.0f),
-                                                                   6360.0f, 6420.0f, 6421.0f,
-                                                                   6360.0f, 6420.0f, 6421.0f,
-                                                                   1.0f);
-
-                return ap;
+                return new AtmosphereParameters(0.8f, 8.0f, 2.0f, 0.1f,
+                                                new Vector4(0.0058f, 0.0135f, 0.0331f, 0.0f),
+                                                new Vector4(0.0040f, 0.0040f, 0.0040f, 0.0f),
+                                                new Vector4(0.0040f, 0.0040f, 0.0040f, 0.0f),
+                                                6360.0f, 6420.0f, 6421.0f,
+                                                6360.0f, 6420.0f, 6421.0f,
+                                                1.0f);
             }
         }
 
@@ -160,15 +174,13 @@ namespace SpaceEngine.Enviroment.Atmospheric
         {
             get
             {
-                AtmosphereParameters ap = new AtmosphereParameters(0.85f, 8.0f, 1.0f, 0.1f,
-                                                                   new Vector4(0.0128f, 0.0305f, 0.0731f, 0.0f),
-                                                                   new Vector4(0.0040f, 0.0040f, 0.0040f, 0.0f),
-                                                                   new Vector4(0.0040f, 0.0040f, 0.0040f, 0.0f),
-                                                                   6000.0f, 6056.6f, 6057.5f,
-                                                                   6000.0f, 6056.6f, 6057.5f,
-                                                                   1.0f);
-
-                return ap;
+                return new AtmosphereParameters(0.85f, 8.0f, 1.0f, 0.1f,
+                                                new Vector4(0.0128f, 0.0305f, 0.0731f, 0.0f),
+                                                new Vector4(0.0040f, 0.0040f, 0.0040f, 0.0f),
+                                                new Vector4(0.0040f, 0.0040f, 0.0040f, 0.0f),
+                                                6000.0f, 6056.6f, 6057.5f,
+                                                6000.0f, 6056.6f, 6057.5f,
+                                                1.0f);
             }
         }
 
@@ -176,15 +188,13 @@ namespace SpaceEngine.Enviroment.Atmospheric
         {
             get
             {
-                AtmosphereParameters ap = new AtmosphereParameters(0.6f, 12.0f, 8.0f, 0.1f,
-                                                                   new Vector4(0.010f, 0.008f, 0.004f, 0.0f),
-                                                                   new Vector4(0.005f, 0.004f, 0.002f, 0.0f),
-                                                                   new Vector4(0.005f, 0.004f, 0.002f, 0.0f),
-                                                                   6052.0f, 6132.0f, 6133.0f,
-                                                                   6052.0f, 6132.0f, 6133.0f,
-                                                                   1.0f);
-
-                return ap;
+                return new AtmosphereParameters(0.6f, 12.0f, 8.0f, 0.1f,
+                                                new Vector4(0.010f, 0.008f, 0.004f, 0.0f),
+                                                new Vector4(0.005f, 0.004f, 0.002f, 0.0f),
+                                                new Vector4(0.005f, 0.004f, 0.002f, 0.0f),
+                                                6052.0f, 6132.0f, 6133.0f,
+                                                6052.0f, 6132.0f, 6133.0f,
+                                                1.0f);
             }
         }
 
@@ -192,15 +202,13 @@ namespace SpaceEngine.Enviroment.Atmospheric
         {
             get
             {
-                AtmosphereParameters ap = new AtmosphereParameters(0.4f, 8.0f, 2.0f, 0.1f,
-                                                                   new Vector4(0.0213f, 0.0168f, 0.0113f, 0.0f),
-                                                                   new Vector4(0.0085f, 0.0067f, 0.0045f, 0.0f),
-                                                                   new Vector4(0.0040f, 0.0040f, 0.0040f, 0.0f),
-                                                                   3387.792f, 3487.792f, 3488.792f,
-                                                                   3387.792f, 3487.792f, 3488.792f,
-                                                                   1.0f);
-
-                return ap;
+                return new AtmosphereParameters(0.4f, 8.0f, 2.0f, 0.1f,
+                                                new Vector4(0.0213f, 0.0168f, 0.0113f, 0.0f),
+                                                new Vector4(0.0085f, 0.0067f, 0.0045f, 0.0f),
+                                                new Vector4(0.0040f, 0.0040f, 0.0040f, 0.0f),
+                                                3387.792f, 3487.792f, 3488.792f,
+                                                3387.792f, 3487.792f, 3488.792f,
+                                                1.0f);
             }
         }
 
@@ -208,15 +216,13 @@ namespace SpaceEngine.Enviroment.Atmospheric
         {
             get
             {
-                AtmosphereParameters ap = new AtmosphereParameters(0.8f, 12.0f, 2.0f, 0.1f,
-                                                                   new Vector4(0.0117f, 0.0135f, 0.0180f, 0.0f),
-                                                                   new Vector4(0.0040f, 0.0040f, 0.0040f, 0.0f),
-                                                                   new Vector4(0.0040f, 0.0040f, 0.0040f, 0.0f),
-                                                                   7149.2f, 7209.2f, 7210.2f,
-                                                                   7149.2f, 7209.2f, 7210.2f,
-                                                                   1.0f);
-
-                return ap;
+                return new AtmosphereParameters(0.8f, 12.0f, 2.0f, 0.1f,
+                                                new Vector4(0.0117f, 0.0135f, 0.0180f, 0.0f),
+                                                new Vector4(0.0040f, 0.0040f, 0.0040f, 0.0f),
+                                                new Vector4(0.0040f, 0.0040f, 0.0040f, 0.0f),
+                                                7149.2f, 7209.2f, 7210.2f,
+                                                7149.2f, 7209.2f, 7210.2f,
+                                                1.0f);
             }
         }
 
@@ -224,15 +230,13 @@ namespace SpaceEngine.Enviroment.Atmospheric
         {
             get
             {
-                AtmosphereParameters ap = new AtmosphereParameters(0.0f, 10.0f, 8.0f, 0.1f,
-                                                                   new Vector4(0.0040f, 0.0040f, 0.0100f, 0.0f),
-                                                                   new Vector4(0.0010f, 0.0100f, 0.0600f, 0.0f),
-                                                                   new Vector4(0.0010f, 0.0100f, 0.0600f, 0.0f),
-                                                                   2574.91f, 2634.91f, 2635.91f,
-                                                                   2574.91f, 2634.91f, 2635.91f,
-                                                                   1.0f);
-
-                return ap;
+                return new AtmosphereParameters(0.0f, 10.0f, 8.0f, 0.1f,
+                                                new Vector4(0.0040f, 0.0040f, 0.0100f, 0.0f),
+                                                new Vector4(0.0010f, 0.0100f, 0.0600f, 0.0f),
+                                                new Vector4(0.0010f, 0.0100f, 0.0600f, 0.0f),
+                                                2574.91f, 2634.91f, 2635.91f,
+                                                2574.91f, 2634.91f, 2635.91f,
+                                                1.0f);
             }
         }
 
@@ -240,15 +244,13 @@ namespace SpaceEngine.Enviroment.Atmospheric
         {
             get
             {
-                AtmosphereParameters ap = new AtmosphereParameters(0.6f, 8.0f, 4.5f, 0.1f,
-                                                                   new Vector4(0.0058f, 0.0135f, 0.0331f, 0.0f),
-                                                                   new Vector4(0.00058f, 0.0027f, 0.1f, 0.0f),
-                                                                   new Vector4(0.00058f, 0.00027f, 0.005f, 0.0f),
-                                                                   6371.0f, 6431.0f, 6432.0f,
-                                                                   6371.0f, 6431.0f, 6432.0f,
-                                                                   1.0f);
-
-                return ap;
+                return new AtmosphereParameters(0.6f, 8.0f, 4.5f, 0.1f,
+                                                new Vector4(0.0058f, 0.0135f, 0.0331f, 0.0f),
+                                                new Vector4(0.00058f, 0.0027f, 0.1f, 0.0f),
+                                                new Vector4(0.00058f, 0.00027f, 0.005f, 0.0f),
+                                                6371.0f, 6431.0f, 6432.0f,
+                                                6371.0f, 6431.0f, 6432.0f,
+                                                1.0f);
             }
         }
 
@@ -256,15 +258,13 @@ namespace SpaceEngine.Enviroment.Atmospheric
         {
             get
             {
-                AtmosphereParameters ap = new AtmosphereParameters(0.6f, 10.0f, 2.0f, 0.1f,
-                                                                   new Vector4(0.004f, 0.004f, 0.004f, 0.0f),
-                                                                   new Vector4(0.004f, 0.004f, 0.004f, 0.0f),
-                                                                   new Vector4(0.004f, 0.004f, 0.004f, 0.0f),
-                                                                   3387.792f, 3487.792f, 3488.792f,
-                                                                   3387.792f, 3487.792f, 3488.792f,
-                                                                   1.0f);
-
-                return ap;
+                return new AtmosphereParameters(0.6f, 10.0f, 2.0f, 0.1f,
+                                                new Vector4(0.004f, 0.004f, 0.004f, 0.0f),
+                                                new Vector4(0.004f, 0.004f, 0.004f, 0.0f),
+                                                new Vector4(0.004f, 0.004f, 0.004f, 0.0f),
+                                                3387.792f, 3487.792f, 3488.792f,
+                                                3387.792f, 3487.792f, 3488.792f,
+                                                1.0f);
             }
         }
 
@@ -272,14 +272,13 @@ namespace SpaceEngine.Enviroment.Atmospheric
         {
             get
             {
-                AtmosphereParameters ap = new AtmosphereParameters(0.6f, 12.0f, 8.0f, 0.1f,
-                                                                   new Vector4(0.001f, 0.001f, 0.001f),
-                                                                   new Vector4(0.004f, 0.0045f, 0.006f),
-                                                                   new Vector4(0.001f, 0.001f, 0.001f),
-                                                                   2400.0f, 2460.0f, 2470.0f,
-                                                                   2400.0f, 2460.0f, 2470.0f,
-                                                                   1.0f);
-                return ap;
+                return new AtmosphereParameters(0.6f, 12.0f, 8.0f, 0.1f,
+                                                new Vector4(0.001f, 0.001f, 0.001f),
+                                                new Vector4(0.004f, 0.0045f, 0.006f),
+                                                new Vector4(0.001f, 0.001f, 0.001f),
+                                                2400.0f, 2460.0f, 2470.0f,
+                                                2400.0f, 2460.0f, 2470.0f,
+                                                1.0f);
             }
         }
     }
