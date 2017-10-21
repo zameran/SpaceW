@@ -1,0 +1,23 @@
+// Outerra approach...
+
+// TODO : DirectX/OpenGL switch...
+// TODO : Test...
+
+inline float FCoefficient()
+{
+	return (2.0 / log2(_ProjectionParams.z + 1.0));
+}
+
+void LogarithmicInPosition(inout float4 position, out float depth)
+{
+	position.z = log2(max(1e-6, 1.0 + position.w)) * FCoefficient() - 1.0;
+	position.z *= position.w;
+	
+	depth = 1.0 + position.w;
+}
+
+void LogarithmicOutDepth(in float logDepth, out float depth)
+{
+	depth = 1.0 - (log2(logDepth) * (0.5 * FCoefficient()));	// DirectX
+	//depth = log2(logDepth) * (0.5 * FCoefficient());			// OpenGL
+}

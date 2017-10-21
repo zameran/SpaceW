@@ -505,7 +505,6 @@ namespace SpaceEngine.Enviroment.Oceanic
             }
 
             buffer.Release();
-
         }
 
         private void CreateWTable()

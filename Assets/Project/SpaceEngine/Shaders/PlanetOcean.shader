@@ -328,11 +328,11 @@ Shader "SpaceEngine/Planet/Ocean"
 			#pragma only_renderers d3d11 glcore
 			#pragma vertex vert
 			#pragma fragment frag
-
+			
 			#pragma multi_compile OCEAN_DEPTH_ON OCEAN_DEPTH_OFF
 			#pragma multi_compile OCEAN_SKY_REFLECTIONS_ON OCEAN_SKY_REFLECTIONS_OFF
 			#pragma multi_compile OCEAN_NONE OCEAN_FFT OCEAN_WHITECAPS
-
+			
 			#pragma multi_compile SHINE_ON SHINE_OFF
 			ENDCG
 		}

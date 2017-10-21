@@ -217,9 +217,6 @@ namespace UnityEngine
             var pass0 = new RenderTexture[] { data0[0], data1[0], data2[0] };
             var pass1 = new RenderTexture[] { data0[1], data1[1], data2[1] };
 
-            var depth0 = data0[0].depthBuffer;
-            var depth1 = data0[1].depthBuffer;
-
             int i;
             int idx = 0;
             int idx1;
