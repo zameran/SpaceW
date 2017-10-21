@@ -53,12 +53,31 @@ public static class CameraHelper
 
     public static Camera DepthCamera()
     {
-        var mainCamera = Main();
-        var depthCameraGameObject = mainCamera.gameObject.transform.Find("CustomDepthCamera");
+        return FindCamera("CustomDepthCamera");
+    }
 
-        if (depthCameraGameObject != null)
-            if (depthCameraGameObject.GetComponent<Camera>() != null)
-                depthCameraGameObject.GetComponent<Camera>();
+    public static Camera NearCamera()
+    {
+        return FindCamera("NearCamera");
+    }
+
+    /// <summary>
+    /// Find a <see cref="Camera"/> in <see cref="GameObject"/>'s components with specified name.
+    /// </summary>
+    /// <param name="gameObjectName">Target <see cref="GameObject"/> name to search in.</param>
+    /// <returns>Returns a <see cref="Camera"/> component from existing <see cref="GameObject"/>'s components.</returns>
+    public static Camera FindCamera(string gameObjectName = "Camera")
+    {
+        var mainCamera = Main();
+        var resultCameraGameObject = mainCamera.transform.Find(gameObjectName);
+
+        if (resultCameraGameObject != null)
+        {
+            var resultCameraComponent = resultCameraGameObject.GetComponent<Camera>();
+
+            if (resultCameraComponent != null)
+                return resultCameraComponent;
+        }
 
         return null;
     }
