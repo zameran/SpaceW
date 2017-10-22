@@ -28,41 +28,15 @@
 // ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF
 // THE POSSIBILITY OF SUCH DAMAGE.
 //  
-// Creation Date: 2017.10.21
-// Creation Time: 12:21 PM
+// Creation Date: 2017.10.22
+// Creation Time: 3:11 PM
 // Creator: zameran
 #endregion
 
-using UnityEngine;
-
-namespace SpaceEngine.Tests
+namespace SpaceEngine.Debugging
 {
-    [RequireComponent(typeof(Camera))]
-    public class GalaxyTestRenderer : MonoSingleton<GalaxyTestRenderer>
+    public interface IDebugAlwaysVisible
     {
-        [SerializeField]
-        internal GalaxyTest Galaxy;
-
-        private void Awake()
-        {
-            Instance = this;
-        }
-
-        private void Start()
-        {
-            
-        }
-
-        private void Update()
-        {
-            
-        }
-
-        private void OnPostRender()
-        {
-            if (Galaxy == null) return;
-
-            Galaxy.Render();
-        }
+        
     }
 }

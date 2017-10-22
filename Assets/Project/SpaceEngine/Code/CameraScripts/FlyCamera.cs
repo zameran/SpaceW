@@ -163,8 +163,11 @@ namespace SpaceEngine.Cameras
                 if (Input.GetKey(KeyCode.LeftAlt))
                     CurrentSpeed = Speed / 10f;
 
-                Speed += Mathf.RoundToInt(Input.GetAxis("Mouse ScrollWheel") * 100.0f);
-                Speed = Mathf.Clamp(Speed, 1.0f, 100000000.0f);
+                if (!MouseOverUI)
+                {
+                    Speed += Mathf.RoundToInt(Input.GetAxis("Mouse ScrollWheel") * 100.0f);
+                    Speed = Mathf.Clamp(Speed, 1.0f, 100000000.0f);
+                }
 
                 if (Supercruise) CurrentSpeed *= 1000.0f;
 

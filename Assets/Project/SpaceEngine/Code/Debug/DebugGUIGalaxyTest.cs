@@ -34,13 +34,14 @@
 #endregion
 
 using SpaceEngine.Tests;
+
 using UnityEngine;
 
 namespace SpaceEngine.Debugging
 {
     public sealed class DebugGUIGalaxyTest : DebugGUI
     {
-        public GalaxyTest Galaxy { get; private set; }
+        internal GalaxyTest Galaxy { get; private set; }
 
         protected override void Awake()
         {
@@ -67,6 +68,51 @@ namespace SpaceEngine.Debugging
 
             if (Galaxy != null && Helper.Enabled(Galaxy))
             {
+                GUILayoutExtensions.VerticalBoxed("Controls: ", GUISkin, () =>
+                {
+                    GUILayoutExtensions.VerticalBoxed("", GUISkin, () =>
+                    {
+                        if (GUILayout.Button("Save Preset")) Galaxy.SaveSettings();
+
+                        GUILayoutExtensions.SpacingSeparator();
+
+                        #region Preset Manipulation
+
+                        // NOTE : MVC Fuckup... Patterns? Ahahahaha...
+
+                        var presets = Galaxy.FindSettings();
+
+                        if (presets != null && presets.Count != 0)
+                        {
+                            GUILayoutExtensions.VerticalBoxed("Available Presets: ", GUISkin, () =>
+                            {
+                                for (var presetIndex = 0; presetIndex < presets.Count; presetIndex++)
+                                {
+                                    var preset = presets[presetIndex];
+
+                                    if (preset == null) break;
+
+                                    GUILayoutExtensions.HorizontalBoxed("", GUISkin, () =>
+                                    {
+                                        GUILayout.Label(System.IO.Path.GetFileName(preset));
+
+                                        if (GUILayout.Button("Load")) { Galaxy.LoadSettings(preset); }
+                                        if (GUILayout.Button("Delete")) { Galaxy.DeleteSettings(preset); }
+                                    });
+                                }
+                            });
+                        }
+                        else
+                        {
+                            GUILayoutExtensions.DrawBadHolder("Available Presets: ", "No Presets!?", GUISkin);
+                        }
+
+                        #endregion
+                    });
+                });
+
+                GUILayoutExtensions.SpacingSeparator();
+
                 GUILayoutExtensions.VerticalBoxed("Galaxy parameters: ", GUISkin, () =>
                 {
                     GUILayoutExtensions.VerticalBoxed("", GUISkin, () =>
@@ -92,7 +138,7 @@ namespace SpaceEngine.Debugging
                     {
                         GUILayoutExtensions.VerticalBoxed("", GUISkin, () =>
                         {
-                            GUILayoutExtensions.SliderWithFieldAndControls("Pass Count: ", 1, 8, ref Galaxy.PassCount, "0", 75, 1);
+                            GUILayoutExtensions.SliderWithFieldAndControls("Pass Count: ", 1, 8, ref Galaxy.Parameters.PassCount, "0", 75, 1);
 
                             if (GUI.changed)
                             {
@@ -108,16 +154,16 @@ namespace SpaceEngine.Debugging
                     {
                         GUILayoutExtensions.VerticalBoxed("", GUISkin, () =>
                         {
-                            GUILayoutExtensions.DrawVectorSlidersWithField(ref Galaxy.Parameters.Randomize, -1.0f, 1.0f, GUISkin, "Randomize (Randomize Vector)", "0.0000", textFieldWidth: 100);
-                            GUILayoutExtensions.DrawVectorSlidersWithField(ref Galaxy.Parameters.Offset, -1.0f, 1.0f, GUISkin, "Offset (Linear, Assymetry Factor)", "0.0000", textFieldWidth: 100);
-                            GUILayoutExtensions.DrawVectorSlidersWithField(ref Galaxy.Parameters.Warp, -1.0f, 1.0f, GUISkin, "Warp (Pre [XY] and Post [ZW] Rotation Warp)", "0.0000", textFieldWidth: 100);
+                            GUILayoutExtensions.DrawVectorSlidersWithField(ref Galaxy.GenerationParameters.Randomize, -1.0f, 1.0f, GUISkin, "Randomize (Randomize Vector)", "0.0000", textFieldWidth: 100);
+                            GUILayoutExtensions.DrawVectorSlidersWithField(ref Galaxy.GenerationParameters.Offset, -1.0f, 1.0f, GUISkin, "Offset (Linear, Assymetry Factor)", "0.0000", textFieldWidth: 100);
+                            GUILayoutExtensions.DrawVectorSlidersWithField(ref Galaxy.GenerationParameters.Warp, -1.0f, 1.0f, GUISkin, "Warp (Pre [XY] and Post [ZW] Rotation Warp)", "0.0000", textFieldWidth: 100);
 
-                            GUILayoutExtensions.SliderWithFieldAndControls("Radius (kLy): ", 1.0f, 256.0f, ref Galaxy.Parameters.Radius, "0.0000", 75, 1.0f);
-                            GUILayoutExtensions.SliderWithFieldAndControls("Ellipse Radius (Proportion): ", -1.0f, 1.0f, ref Galaxy.Parameters.RadiusEllipse, "0.0000", 75, 0.25f);
-                            GUILayoutExtensions.SliderWithFieldAndControls("Size Bar (Proportion): ", -1.0f, 1.0f, ref Galaxy.Parameters.SizeBar, "0.0000", 75, 0.25f);
-                            GUILayoutExtensions.SliderWithFieldAndControls("Depth (kLy): ", 1.0f, 256.0f, ref Galaxy.Parameters.Depth, "0.0000", 75, 1.0f);
-                            GUILayoutExtensions.SliderWithFieldAndControls("Spiral Eccentricity (Inverse Proportion): ", -1.0f, 1.0f, ref Galaxy.Parameters.InverseSpiralEccentricity, "0.0000", 75, 0.25f);
-                            GUILayoutExtensions.SliderWithFieldAndControls("Spiral Rotation (Rad): ", -Mathf.PI * 4.0f, Mathf.PI * 4.0f, ref Galaxy.Parameters.SpiralRotation, "0.0000", 75, Mathf.PI / 4.0f);
+                            GUILayoutExtensions.SliderWithFieldAndControls("Radius (kLy): ", 1.0f, 256.0f, ref Galaxy.GenerationParameters.Radius, "0.0000", 75, 1.0f);
+                            GUILayoutExtensions.SliderWithFieldAndControls("Ellipse Radius (Proportion): ", -1.0f, 1.0f, ref Galaxy.GenerationParameters.RadiusEllipse, "0.0000", 75, 0.25f);
+                            GUILayoutExtensions.SliderWithFieldAndControls("Size Bar (Proportion): ", -1.0f, 1.0f, ref Galaxy.GenerationParameters.SizeBar, "0.0000", 75, 0.25f);
+                            GUILayoutExtensions.SliderWithFieldAndControls("Depth (kLy): ", 1.0f, 256.0f, ref Galaxy.GenerationParameters.Depth, "0.0000", 75, 1.0f);
+                            GUILayoutExtensions.SliderWithFieldAndControls("Spiral Eccentricity (Inverse Proportion): ", -1.0f, 1.0f, ref Galaxy.GenerationParameters.InverseSpiralEccentricity, "0.0000", 75, 0.25f);
+                            GUILayoutExtensions.SliderWithFieldAndControls("Spiral Rotation (Rad): ", -Mathf.PI * 4.0f, Mathf.PI * 4.0f, ref Galaxy.GenerationParameters.SpiralRotation, "0.0000", 75, Mathf.PI / 4.0f);
                         });
                     });
 
@@ -127,7 +173,7 @@ namespace SpaceEngine.Debugging
                     {
                         GUILayoutExtensions.VerticalBoxed("", GUISkin, () =>
                         {
-                            GUILayoutExtensions.SliderWithFieldAndControls("Rotation (Rad): ", -Mathf.PI * 2.0f, Mathf.PI * 2.0f, ref Galaxy.ParametersPerPass.PassRotation, "0.0000", 75, Mathf.PI / 4.0f);
+                            GUILayoutExtensions.SliderWithFieldAndControls("Rotation (Rad): ", -Mathf.PI * 2.0f, Mathf.PI * 2.0f, ref Galaxy.GenerationParametersPerPass.PassRotation, "0.0000", 75, Mathf.PI / 4.0f);
                         });
                     });
                 });

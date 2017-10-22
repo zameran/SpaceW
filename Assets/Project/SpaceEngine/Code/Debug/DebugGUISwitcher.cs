@@ -45,13 +45,22 @@ namespace SpaceEngine.Debugging
 
         public bool ShowAdditionalInfo = true;
 
-        public bool AtLeastOneEnabled { get { return DebugComponents.Any((gui) => gui.enabled == true); } }
+        public Vector2 MousePosition { get; private set; }
+
+        public bool AtLeastOneEnabled { get { return SwitchableComponents.Any((gui) => gui.enabled == true); } }
 
         public bool MouseOverGUIHotControl { get { return GUIUtility.hotControl != 0; } }
 
-        public bool MouseOverGUIRect { get { return DebugComponents.Any((gui) => gui.isActiveAndEnabled && gui.debugInfoBounds.Contains(new Vector2(Input.mousePosition.x, Screen.height - Input.mousePosition.y))); } }
+        public bool MouseOverGUIRect { get { return DrawAbleComponents.Any(gui => gui.isActiveAndEnabled && (gui.debugInfoBounds.Contains(MousePosition) || gui.debugInfoDrawBounds.Contains(MousePosition))); } }
 
         public bool MouseOverGUI { get { return MouseOverGUIHotControl || MouseOverGUIRect; } }
+
+        protected override void Update()
+        {
+            base.Update();
+
+            MousePosition = new Vector2(Input.mousePosition.x, Screen.height - Input.mousePosition.y);
+        }
 
         private void OnGUI()
         {
@@ -60,6 +69,7 @@ namespace SpaceEngine.Debugging
                 GUILayoutExtensions.Vertical(() =>
                 {
                     GUILayoutExtensions.LabelWithSpace(string.Format("Press {0} key to switch between debug GUI's...", SwitchKey.ToString()));
+                    GUILayoutExtensions.LabelWithSpace(string.Format("Mouse Position: {0}", Input.mousePosition));
                 });
             }
         }

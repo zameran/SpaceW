@@ -28,41 +28,60 @@
 // ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF
 // THE POSSIBILITY OF SUCH DAMAGE.
 //  
-// Creation Date: 2017.10.21
-// Creation Time: 12:21 PM
+// Creation Date: 2017.10.22
+// Creation Time: 3:14 PM
 // Creator: zameran
 #endregion
 
+#if UNITY_EDITOR
+using UnityEditor;
+#endif
+
 using UnityEngine;
 
-namespace SpaceEngine.Tests
+namespace SpaceEngine.Debugging
 {
-    [RequireComponent(typeof(Camera))]
-    public class GalaxyTestRenderer : MonoSingleton<GalaxyTestRenderer>
+    public sealed class DebugGUIDeveloperPanel : DebugGUI, IDebugAlwaysVisible
     {
-        [SerializeField]
-        internal GalaxyTest Galaxy;
-
-        private void Awake()
+        protected override void Awake()
         {
-            Instance = this;
+            base.Awake();
         }
 
-        private void Start()
+        protected override void Start()
         {
-            
+            base.Start();
         }
 
-        private void Update()
+        protected override void OnGUI()
         {
-            
+            base.OnGUI();
+
+            debugInfoDrawBounds = new Rect(Screen.width - debugInfoBounds.x - debugInfoBounds.width,
+                                           Screen.height - debugInfoBounds.y - debugInfoBounds.height, debugInfoBounds.width, debugInfoBounds.height);
+
+            GUILayout.Window(9999, debugInfoDrawBounds, UI, "Developer Panel");
         }
 
-        private void OnPostRender()
+        protected override void UI(int id)
         {
-            if (Galaxy == null) return;
-
-            Galaxy.Render();
+            GUILayoutExtensions.VerticalBoxed("Actions: ", GUISkin, () =>
+            {
+                if (GUILayout.Button("Quit")) { Quit(); }
+            });
         }
+
+        #region API
+
+        private void Quit()
+        {
+            Application.Quit();
+
+#if UNITY_EDITOR
+            EditorApplication.isPlaying = false;
+#endif
+        }
+
+        #endregion
     }
 }

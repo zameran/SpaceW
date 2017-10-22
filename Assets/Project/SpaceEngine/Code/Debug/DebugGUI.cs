@@ -48,6 +48,10 @@ namespace SpaceEngine.Debugging
 
         public Rect debugInfoBounds = new Rect(10, 10, 500, 500);
 
+        // NOTE : Use this variable for runtime 'debugInfoBounds' manipulation...
+        [HideInInspector]
+        public Rect debugInfoDrawBounds = new Rect(10, 10, 500, 500);
+
         [HideInInspector]
         public GUIStyle BoldLabelStyle;
 

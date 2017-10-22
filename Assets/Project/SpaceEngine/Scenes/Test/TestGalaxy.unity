@@ -184,6 +184,7 @@ GameObject:
   - component: {fileID: 829586937}
   - component: {fileID: 829586941}
   - component: {fileID: 829586942}
+  - component: {fileID: 829586943}
   m_Layer: 0
   m_Name: GUI
   m_TagString: Untagged
@@ -693,6 +694,158 @@ MonoBehaviour:
     y: 10
     width: 500
     height: 500
+  BoldLabelStyle:
+    m_Name: 
+    m_Normal:
+      m_Background: {fileID: 0}
+      m_ScaledBackgrounds: []
+      m_TextColor: {r: 0, g: 0, b: 0, a: 1}
+    m_Hover:
+      m_Background: {fileID: 0}
+      m_ScaledBackgrounds: []
+      m_TextColor: {r: 0, g: 0, b: 0, a: 1}
+    m_Active:
+      m_Background: {fileID: 0}
+      m_ScaledBackgrounds: []
+      m_TextColor: {r: 0, g: 0, b: 0, a: 1}
+    m_Focused:
+      m_Background: {fileID: 0}
+      m_ScaledBackgrounds: []
+      m_TextColor: {r: 0, g: 0, b: 0, a: 1}
+    m_OnNormal:
+      m_Background: {fileID: 0}
+      m_ScaledBackgrounds: []
+      m_TextColor: {r: 0, g: 0, b: 0, a: 1}
+    m_OnHover:
+      m_Background: {fileID: 0}
+      m_ScaledBackgrounds: []
+      m_TextColor: {r: 0, g: 0, b: 0, a: 1}
+    m_OnActive:
+      m_Background: {fileID: 0}
+      m_ScaledBackgrounds: []
+      m_TextColor: {r: 0, g: 0, b: 0, a: 1}
+    m_OnFocused:
+      m_Background: {fileID: 0}
+      m_ScaledBackgrounds: []
+      m_TextColor: {r: 0, g: 0, b: 0, a: 1}
+    m_Border:
+      m_Left: 0
+      m_Right: 0
+      m_Top: 0
+      m_Bottom: 0
+    m_Margin:
+      m_Left: 0
+      m_Right: 0
+      m_Top: 0
+      m_Bottom: 0
+    m_Padding:
+      m_Left: 0
+      m_Right: 0
+      m_Top: 0
+      m_Bottom: 0
+    m_Overflow:
+      m_Left: 0
+      m_Right: 0
+      m_Top: 0
+      m_Bottom: 0
+    m_Font: {fileID: 0}
+    m_FontSize: 0
+    m_FontStyle: 0
+    m_Alignment: 0
+    m_WordWrap: 0
+    m_RichText: 1
+    m_TextClipping: 0
+    m_ImagePosition: 0
+    m_ContentOffset: {x: 0, y: 0}
+    m_FixedWidth: 0
+    m_FixedHeight: 0
+    m_StretchWidth: 1
+    m_StretchHeight: 0
+  ImageLabelStyle:
+    m_Name: 
+    m_Normal:
+      m_Background: {fileID: 0}
+      m_ScaledBackgrounds: []
+      m_TextColor: {r: 0, g: 0, b: 0, a: 1}
+    m_Hover:
+      m_Background: {fileID: 0}
+      m_ScaledBackgrounds: []
+      m_TextColor: {r: 0, g: 0, b: 0, a: 1}
+    m_Active:
+      m_Background: {fileID: 0}
+      m_ScaledBackgrounds: []
+      m_TextColor: {r: 0, g: 0, b: 0, a: 1}
+    m_Focused:
+      m_Background: {fileID: 0}
+      m_ScaledBackgrounds: []
+      m_TextColor: {r: 0, g: 0, b: 0, a: 1}
+    m_OnNormal:
+      m_Background: {fileID: 0}
+      m_ScaledBackgrounds: []
+      m_TextColor: {r: 0, g: 0, b: 0, a: 1}
+    m_OnHover:
+      m_Background: {fileID: 0}
+      m_ScaledBackgrounds: []
+      m_TextColor: {r: 0, g: 0, b: 0, a: 1}
+    m_OnActive:
+      m_Background: {fileID: 0}
+      m_ScaledBackgrounds: []
+      m_TextColor: {r: 0, g: 0, b: 0, a: 1}
+    m_OnFocused:
+      m_Background: {fileID: 0}
+      m_ScaledBackgrounds: []
+      m_TextColor: {r: 0, g: 0, b: 0, a: 1}
+    m_Border:
+      m_Left: 0
+      m_Right: 0
+      m_Top: 0
+      m_Bottom: 0
+    m_Margin:
+      m_Left: 0
+      m_Right: 0
+      m_Top: 0
+      m_Bottom: 0
+    m_Padding:
+      m_Left: 0
+      m_Right: 0
+      m_Top: 0
+      m_Bottom: 0
+    m_Overflow:
+      m_Left: 0
+      m_Right: 0
+      m_Top: 0
+      m_Bottom: 0
+    m_Font: {fileID: 0}
+    m_FontSize: 0
+    m_FontStyle: 0
+    m_Alignment: 0
+    m_WordWrap: 0
+    m_RichText: 1
+    m_TextClipping: 0
+    m_ImagePosition: 0
+    m_ContentOffset: {x: 0, y: 0}
+    m_FixedWidth: 0
+    m_FixedHeight: 0
+    m_StretchWidth: 1
+    m_StretchHeight: 0
+  ScrollPosition: {x: 0, y: 0}
+--- !u!114 &829586943
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 829586936}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 41cb93f2fe20dee44bfe4fed9f75ba31, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  debugInfoBounds:
+    serializedVersion: 2
+    x: 10
+    y: 10
+    width: 128
+    height: 70
   BoldLabelStyle:
     m_Name: 
     m_Normal:
@@ -1355,10 +1508,11 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   Core: {fileID: 7200000, guid: 4b65a98af0eefea4a84f53bd8d3baf38, type: 3}
   CoreShader: {fileID: 4800000, guid: 02a604af630bf304b8ac84d9c132a420, type: 3}
-  PassCount: 2
-  Count: 128000
-  DrawCount: 128000
   Parameters:
+    PassCount: 2
+    Count: 128000
+    DrawCount: 128000
+  GenerationParameters:
     Randomize: {x: 0, y: 0, z: 0}
     Offset: {x: 0, y: 0, z: 0.03}
     Warp: {x: 0.3, y: 0.15, z: 0.025, w: 0.01}
@@ -1368,7 +1522,7 @@ MonoBehaviour:
     Depth: 32
     InverseSpiralEccentricity: 0.75
     SpiralRotation: 6.2832
-  ParametersPerPass:
+  GenerationParametersPerPass:
     PassRotation: 1.5707964
   ColorDistribution:
     Gradient:
@@ -1378,16 +1532,16 @@ MonoBehaviour:
       key2: {r: 0.5803922, g: 0.6862745, b: 0.9254902, a: 0}
       key3: {r: 0.53333336, g: 0.6901961, b: 0.99607843, a: 0}
       key4: {r: 0.42344293, g: 0.56642365, b: 0.6544118, a: 0}
-      key5: {r: 0.45711565, g: 0.59174585, b: 0.67459524, a: 0}
-      key6: {r: 1, g: 1, b: 1, a: 0}
+      key5: {r: 1, g: 1, b: 1, a: 0}
+      key6: {r: 0, g: 0, b: 0, a: 0}
       key7: {r: 0, g: 0, b: 0, a: 0}
       ctime0: 0
       ctime1: 12976
       ctime2: 39780
       ctime3: 65535
-      ctime4: 52428
-      ctime5: 58982
-      ctime6: 65535
+      ctime4: 39128
+      ctime5: 65535
+      ctime6: 0
       ctime7: 0
       atime0: 0
       atime1: 65535
@@ -1402,6 +1556,7 @@ MonoBehaviour:
       m_NumAlphaKeys: 2
     ReverseX: 0
     ReverseY: 0
+  AutoUpdate: 1
 --- !u!4 &1257223185
 Transform:
   m_ObjectHideFlags: 0

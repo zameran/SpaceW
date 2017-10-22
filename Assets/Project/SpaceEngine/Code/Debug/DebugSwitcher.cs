@@ -42,7 +42,8 @@ namespace SpaceEngine.Debugging
 {
     public abstract class DebugSwitcher<T> : MonoSingleton<DebugSwitcher<T>>, IDebugSwitcher where T : MonoBehaviour
     {
-        public List<T> DebugComponents = new List<T>(255);
+        public List<T> SwitchableComponents = new List<T>(255);
+        public List<T> DrawAbleComponents = new List<T>(255);
 
         public bool DisableAllOnStart = true;
 
@@ -57,28 +58,36 @@ namespace SpaceEngine.Debugging
 
         protected void Start()
         {
-            if (DebugComponents == null || DebugComponents.Count == 0)
+            if (SwitchableComponents == null || SwitchableComponents.Count == 0)
             {
-                DebugComponents = GetComponents<T>().ToList();
+                SwitchableComponents = GetComponents<T>().ToList();
             }
 
-            if (DisableAllOnStart) ToogleAll(DebugComponents, false);
+            if (DrawAbleComponents == null || DrawAbleComponents.Count == 0)
+            {
+                DrawAbleComponents = GetComponents<T>().ToList();
+            }
+
+            // NOTE : If GUI element implements IDebugAlwaysVisible interface - remove it from switchables...
+            SwitchableComponents.RemoveAll(x => typeof(IDebugAlwaysVisible).IsInstanceOfType(x));
+
+            if (DisableAllOnStart) ToogleAll(SwitchableComponents, false);
         }
 
-        protected void Update()
+        protected virtual void Update()
         {
             if (Input.GetKeyDown(SwitchKey))
             {
-                if (State == DebugComponents.Count)
+                if (State == SwitchableComponents.Count)
                 {
                     State = 0;
-                    ToogleAll(DebugComponents, false);
+                    ToogleAll(SwitchableComponents, false);
                     return;
                 }
 
-                ToogleAll(DebugComponents, false);
+                ToogleAll(SwitchableComponents, false);
                 State++;
-                ToogleAt(DebugComponents, true, State);
+                ToogleAt(SwitchableComponents, true, State);
             }
         }
 
