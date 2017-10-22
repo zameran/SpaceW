@@ -88,6 +88,22 @@ namespace SpaceEngine.Debugging
 
                     GUILayoutExtensions.SpacingSeparator();
 
+                    GUILayoutExtensions.VerticalBoxed("Generation methodics: ", GUISkin, () =>
+                    {
+                        GUILayoutExtensions.VerticalBoxed("", GUISkin, () =>
+                        {
+                            GUILayoutExtensions.SliderWithFieldAndControls("Pass Count: ", 1, 8, ref Galaxy.PassCount, "0", 75, 1);
+
+                            if (GUI.changed)
+                            {
+                                Galaxy.InitBuffers();
+                                Galaxy.GenerateBuffers();
+                            }
+                        });
+                    });
+
+                    GUILayoutExtensions.SpacingSeparator();
+
                     GUILayoutExtensions.VerticalBoxed("Generation parameters: ", GUISkin, () =>
                     {
                         GUILayoutExtensions.VerticalBoxed("", GUISkin, () =>
@@ -115,6 +131,11 @@ namespace SpaceEngine.Debugging
                         });
                     });
                 });
+
+                if (GUI.changed)
+                {
+                    Galaxy.GenerateBuffers();
+                }
             }
             else
             {

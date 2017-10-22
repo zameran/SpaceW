@@ -84,6 +84,23 @@ public static class GUILayoutExtensions
         GUILayout.EndHorizontal();
     }
 
+    public static void SliderWithFieldAndControls(object caption, int leftValue, int rightValue, ref int value, string pattern = "0", int textFieldWidth = 75, int controlStep = 1)
+    {
+        GUILayout.Label(caption.ToString());
+
+        GUILayout.BeginHorizontal();
+
+        value = int.Parse(GUILayout.TextField(value.ToString(pattern), GUILayout.MaxWidth(textFieldWidth)));
+
+        if (GUILayout.Button("+", GUILayout.Width(20))) { value += controlStep; }
+        if (GUILayout.Button("-", GUILayout.Width(20))) { value -= controlStep; }
+
+        value = Mathf.FloorToInt(GUILayout.HorizontalSlider(value, leftValue, rightValue));
+        value = Mathf.Clamp(value, leftValue, rightValue);
+
+        GUILayout.EndHorizontal();
+    }
+
     public static void LabelWithFlexibleSpace(object text1, object text2)
     {
         GUILayout.Label(text1.ToString());

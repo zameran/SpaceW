@@ -108,7 +108,7 @@ namespace SpaceEngine.Tests
                 return new GalaxyGenerationParameters(Vector3.zero, 
                                                       new Vector3(0.0f, 0.0f, 0.03f), 
                                                       new Vector4(0.3f, 0.15f, 0.025f, 0.01f),
-                                                      128.0f, 0.7f, -0.25f, 32.0f, 0.75f, 7.5f);
+                                                      128.0f, 0.7f, -0.25f, 32.0f, 0.75f, 6.2832f);
             }
         }
     }
@@ -159,9 +159,16 @@ namespace SpaceEngine.Tests
 
         public ColorMaterialTableGradientLut ColorDistribution = new ColorMaterialTableGradientLut();
 
-        protected override void InitNode()
+        public bool AutoUpdate = false;
+
+        #region Galaxy
+
+        public void InitBuffers()
         {
-            StarsMaterial = MaterialHelper.CreateTemp(CoreShader, "Stars");
+            if (StarsBuffers != null)
+            {
+                if (StarsBuffers.Count > 0) DestroyBuffers();
+            }
 
             StarsBuffers = new List<ComputeBuffer>(PassCount);
 
@@ -173,11 +180,9 @@ namespace SpaceEngine.Tests
 
                 StarsBuffers.Add(buffer);
             }
-
-            ColorDistribution.GenerateLut();
         }
 
-        protected override void UpdateNode()
+        public void GenerateBuffers()
         {
             Core.SetTexture(0, "MaterialTable", ColorDistribution.Lut);
 
@@ -197,8 +202,7 @@ namespace SpaceEngine.Tests
             }
         }
 
-        /// <inheritdoc />
-        protected override void OnDestroy()
+        protected void DestroyBuffers()
         {
             for (var bufferIndex = 0; bufferIndex < StarsBuffers.Count; bufferIndex++)
             {
@@ -206,16 +210,54 @@ namespace SpaceEngine.Tests
 
                 buffer.ReleaseAndDisposeBuffer();
             }
+        }
+
+        #endregion
+
+        #region Node
+
+        protected override void InitNode()
+        {
+            StarsMaterial = MaterialHelper.CreateTemp(CoreShader, "Stars");
+
+            ColorDistribution.GenerateLut();
+
+            InitBuffers();
+            GenerateBuffers();
+        }
+
+        protected override void UpdateNode()
+        {
+            if (AutoUpdate) GenerateBuffers();
+        }
+
+        protected override void Awake()
+        {
+            base.Awake();
+        }
+
+        protected override void Start()
+        {
+            base.Start();
+        }
+
+        protected override void Update()
+        {
+            base.Update();
+        }
+
+        protected override void OnDestroy()
+        {
+            base.OnDestroy();
+
+            DestroyBuffers();
 
             Helper.Destroy(StarsMaterial);
 
             ColorDistribution.DestroyLut();
         }
 
-        protected void OnPostRender()
-        {
-
-        }
+        #endregion
 
         #region IRenderable
 

@@ -1367,7 +1367,7 @@ MonoBehaviour:
     SizeBar: -0.25
     Depth: 32
     InverseSpiralEccentricity: 0.75
-    SpiralRotation: 7.5
+    SpiralRotation: 6.2832
   ParametersPerPass:
     PassRotation: 1.5707964
   ColorDistribution:
