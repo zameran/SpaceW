@@ -199,9 +199,9 @@ namespace SpaceEngine.Debugging
                             GUILayoutExtensions.SliderWithField("Rt (Atmosphere Top Radius in KM): ", rg, 63600.0f, ref rt, "0.00000", textFieldWidth: 100);
                             GUILayoutExtensions.SliderWithField("Rl (Planet Bottom Radius in KM): ", rt, 63600.0f, ref rl, "0.00000", textFieldWidth: 100);
 
-                            DrawVectorSlidersWithField(ref betaR, 0.0f, 1.0f, "Beta R (Rayliegh Scattering)", "0.0000", textFieldWidth: 100);
-                            DrawVectorSlidersWithField(ref betaM, 0.0f, 1.0f, "Beta M (Mie Scattering)", "0.0000", textFieldWidth: 100);
-                            DrawVectorSlidersWithField(ref betaE, 0.0f, 1.0f, "Beta E (Extinction Scattering)", "0.0000", textFieldWidth: 100);
+                            GUILayoutExtensions.DrawVectorSlidersWithField(ref betaR, 0.0f, 1.0f, GUISkin, "Beta R (Rayliegh Scattering)", "0.0000", textFieldWidth: 100);
+                            GUILayoutExtensions.DrawVectorSlidersWithField(ref betaM, 0.0f, 1.0f, GUISkin, "Beta M (Mie Scattering)", "0.0000", textFieldWidth: 100);
+                            GUILayoutExtensions.DrawVectorSlidersWithField(ref betaE, 0.0f, 1.0f, GUISkin, "Beta E (Extinction Scattering)", "0.0000", textFieldWidth: 100);
 
                             parameters = new AtmosphereParameters(mieG, hr, hm, agr, betaR, betaM, betaE, rg, rt, rl, rg, rt, rl, SCALE: 1.0f);
 
@@ -225,26 +225,6 @@ namespace SpaceEngine.Debugging
             }
 
             GUILayout.EndScrollView();
-        }
-
-        protected void DrawVectorSlidersWithField(ref Vector4 value, float leftValue, float rightValue, string caption = "Vector", string pattern = "0.0", int textFieldWidth = 100)
-        {
-            var x = value.x;
-            var y = value.y;
-            var z = value.z;
-            var w = value.w;
-
-            GUILayoutExtensions.VerticalBoxed(caption, GUISkin, () =>
-            {
-                GUILayoutExtensions.SliderWithField("X: ", leftValue, rightValue, ref x, pattern, textFieldWidth);
-                GUILayoutExtensions.SliderWithField("Y: ", leftValue, rightValue, ref y, pattern, textFieldWidth);
-                GUILayoutExtensions.SliderWithField("Z: ", leftValue, rightValue, ref z, pattern, textFieldWidth);
-                GUILayoutExtensions.SliderWithField("W: ", leftValue, rightValue, ref w, pattern, textFieldWidth);
-            });
-
-            GUILayoutExtensions.SpacingSeparator();
-
-            value = new Vector4(x, y, z, w);
         }
 
         protected void DrawApplyButton(Action action, params GUILayoutOption[] options)

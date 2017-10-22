@@ -1,6 +1,7 @@
-﻿using UnityEngine;
+﻿using System.IO;
+
 using UnityEditor;
-using System.IO;
+using UnityEngine;
 
 public class Reimporter
 {

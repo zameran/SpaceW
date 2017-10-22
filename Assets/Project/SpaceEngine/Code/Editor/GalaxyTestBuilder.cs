@@ -28,62 +28,30 @@
 // ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF
 // THE POSSIBILITY OF SUCH DAMAGE.
 //  
-// Creation Date: 2017.05.17
-// Creation Time: 2:03 AM
+// Creation Date: 2017.10.22
+// Creation Time: 12:29 PM
 // Creator: zameran
 #endregion
 
-using System;
+using System.Diagnostics;
 
-using UnityEngine;
+using UnityEditor;
 
-namespace SpaceEngine.Core.Utilities.Gradients
+namespace SpaceEngine.Code.Editor
 {
-    [Serializable]
-    public class ColorMaterialTableGradientLut : GradientLut
+    internal class GalaxyTestBuilder
     {
-        /// <summary>
-        /// Should <see cref="GradientLut.Lut"/> be inverted along X axis?
-        /// </summary>
-        public bool ReverseX = false;
-
-        /// <summary>
-        /// Should <see cref="GradientLut.Lut"/> be inverted along X axis?
-        /// </summary>
-        public bool ReverseY = false;
-
-        /// <inheritdoc />
-        protected override Vector2 Size { get { return new Vector2(256, 32); } }
-
-        /// <inheritdoc />
-        public override void GenerateLut()
+        [MenuItem("SpaceEngine/Build Galaxy _%#G")]
+        internal static void Build()
         {
-            if (Lut == null || Lut.width != (int)Size.x || Lut.height != (int)Size.y)
-            {
-                DestroyLut();
+            var path = EditorUtility.SaveFolderPanel("Choose Location of Built Game", "", "");
+            var levels = new string[] { "Assets/Project/SpaceEngine/Scenes/Test/TestGalaxy.unity" };
+            var proc = new Process();
 
-                Lut = Helper.CreateTempTeture2D((int)Size.x, (int)Size.y, TextureFormat.ARGB32, false, false, false);
-                Lut.wrapMode = TextureWrapMode.Repeat;
-            }
+            BuildPipeline.BuildPlayer(levels, path + "/SpaceW.Galaxy.exe", BuildTarget.StandaloneWindows64, BuildOptions.None);
 
-            for (ushort x = 0; x < Lut.width; x++)
-            {
-                for (ushort y = 0; y < Lut.height; y++)
-                {
-                    var t = (x / Size.x);
-                    var gradientColor = Gradient.Evaluate(ReverseX ? (1.0f - t) : t);
-
-                    Lut.SetPixel(x, y, gradientColor);
-                }
-            }
-
-            Lut.Apply();
-        }
-
-        /// <inheritdoc />
-        public override void DestroyLut()
-        {
-            if (Lut != null) Helper.Destroy(Lut);
+            proc.StartInfo.FileName = path + "/SpaceW.Galaxy.exe";
+            proc.Start();
         }
     }
 }

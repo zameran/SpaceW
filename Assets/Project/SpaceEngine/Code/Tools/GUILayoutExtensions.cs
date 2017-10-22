@@ -164,4 +164,42 @@ public static class GUILayoutExtensions
 
         SpacingSeparator();
     }
+
+    public static void DrawVectorSlidersWithField(ref Vector3 value, float leftValue, float rightValue, GUISkin skin, string caption = "Vector", string pattern = "0.0", int textFieldWidth = 100)
+    {
+        var x = value.x;
+        var y = value.y;
+        var z = value.z;
+
+        VerticalBoxed(caption, skin, () =>
+        {
+            SliderWithField("X: ", leftValue, rightValue, ref x, pattern, textFieldWidth);
+            SliderWithField("Y: ", leftValue, rightValue, ref y, pattern, textFieldWidth);
+            SliderWithField("Z: ", leftValue, rightValue, ref z, pattern, textFieldWidth);
+        });
+
+        SpacingSeparator();
+
+        value = new Vector3(x, y, z);
+    }
+
+    public static void DrawVectorSlidersWithField(ref Vector4 value, float leftValue, float rightValue, GUISkin skin, string caption = "Vector", string pattern = "0.0", int textFieldWidth = 100)
+    {
+        var x = value.x;
+        var y = value.y;
+        var z = value.z;
+        var w = value.w;
+
+        VerticalBoxed(caption, skin, () =>
+        {
+            SliderWithField("X: ", leftValue, rightValue, ref x, pattern, textFieldWidth);
+            SliderWithField("Y: ", leftValue, rightValue, ref y, pattern, textFieldWidth);
+            SliderWithField("Z: ", leftValue, rightValue, ref z, pattern, textFieldWidth);
+            SliderWithField("W: ", leftValue, rightValue, ref w, pattern, textFieldWidth);
+        });
+
+        SpacingSeparator();
+
+        value = new Vector4(x, y, z, w);
+    }
 }

@@ -108,7 +108,7 @@ namespace SpaceEngine.Tests
                 return new GalaxyGenerationParameters(Vector3.zero, 
                                                       new Vector3(0.0f, 0.0f, 0.03f), 
                                                       new Vector4(0.3f, 0.15f, 0.025f, 0.01f),
-                                                      128.0f, 0.7f, -0.25f, 128.0f, 0.75f, 7.5f);
+                                                      128.0f, 0.7f, -0.25f, 32.0f, 0.75f, 7.5f);
             }
         }
     }
