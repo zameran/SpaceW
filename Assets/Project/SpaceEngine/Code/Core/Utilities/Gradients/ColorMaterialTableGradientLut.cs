@@ -56,16 +56,8 @@ namespace SpaceEngine.Core.Utilities.Gradients
         protected override Vector2 Size { get { return new Vector2(256, 32); } }
 
         /// <inheritdoc />
-        public override void GenerateLut()
+        public override void CalculateLut()
         {
-            if (Lut == null || Lut.width != (int)Size.x || Lut.height != (int)Size.y)
-            {
-                DestroyLut();
-
-                Lut = Helper.CreateTempTeture2D((int)Size.x, (int)Size.y, TextureFormat.ARGB32, false, false, false);
-                Lut.wrapMode = TextureWrapMode.Repeat;
-            }
-
             for (ushort x = 0; x < Lut.width; x++)
             {
                 for (ushort y = 0; y < Lut.height; y++)

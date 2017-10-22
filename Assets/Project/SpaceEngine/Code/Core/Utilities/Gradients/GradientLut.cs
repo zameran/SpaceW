@@ -59,7 +59,23 @@ namespace SpaceEngine.Core.Utilities.Gradients
         /// <summary>
         /// Generates the <see cref="Lut"/>.
         /// </summary>
-        public abstract void GenerateLut();
+        public virtual void GenerateLut()
+        {
+            if (Lut == null || Lut.width != (int)Size.x || Lut.height != (int)Size.y)
+            {
+                DestroyLut();
+
+                Lut = Helper.CreateTempTeture2D((int)Size.x, (int)Size.y, TextureFormat.ARGB32, false, false, false);
+                Lut.wrapMode = TextureWrapMode.Repeat;
+            }
+
+            CalculateLut();
+        }
+
+        /// <summary>
+        /// Calculates the <see cref="Gradient"/> data in to the <see cref="Lut"/>.
+        /// </summary>
+        public abstract void CalculateLut();
 
         /// <summary>
         /// Destroy the <see cref="Lut"/>.

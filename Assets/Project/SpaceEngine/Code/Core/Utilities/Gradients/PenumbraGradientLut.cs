@@ -53,15 +53,8 @@ namespace SpaceEngine.Core.Utilities.Gradients
         protected override Vector2 Size { get { return new Vector2(1, 64); } }
 
         /// <inheritdoc />
-        public override void GenerateLut()
+        public override void CalculateLut()
         {
-            if (Lut == null || Lut.width != (int)Size.x || Lut.height != (int)Size.y)
-            {
-                DestroyLut();
-
-                Lut = Helper.CreateTempTeture2D((int)Size.x, (int)Size.y, TextureFormat.ARGB32, false, false, false);
-            }
-
             for (var y = 0; y < Lut.height; y++)
             {
                 var t = y / (float)Lut.height;
@@ -74,9 +67,10 @@ namespace SpaceEngine.Core.Utilities.Gradients
                 Lut.SetPixel(0, y, c);
             }
 
-            // Make sure the last pixel is white
+            // Make sure the last pixel is white...
             Lut.SetPixel(0, Lut.height - 1, Color.white);
 
+            // Make sure the wrapMode is good for penumbra...
             Lut.wrapMode = TextureWrapMode.Clamp;
 
             Lut.Apply();
