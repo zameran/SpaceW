@@ -34,6 +34,7 @@
 #endregion
 
 using System.Diagnostics;
+using System.IO;
 
 using UnityEditor;
 
@@ -47,10 +48,13 @@ namespace SpaceEngine.Code.Editor
             var path = EditorUtility.SaveFolderPanel("Choose Location of Built Game", "", "");
             var levels = new string[] { "Assets/Project/SpaceEngine/Scenes/Test/TestGalaxy.unity" };
             var proc = new Process();
+            var exePath = path + "/SpaceW.Galaxy.exe";
 
-            BuildPipeline.BuildPlayer(levels, path + "/SpaceW.Galaxy.exe", BuildTarget.StandaloneWindows64, BuildOptions.None);
+            BuildPipeline.BuildPlayer(levels, exePath, BuildTarget.StandaloneWindows64, BuildOptions.None);
 
-            proc.StartInfo.FileName = path + "/SpaceW.Galaxy.exe";
+            if (!File.Exists(exePath)) return;
+
+            proc.StartInfo.FileName = exePath;
             proc.Start();
         }
     }
