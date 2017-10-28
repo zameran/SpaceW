@@ -177,13 +177,16 @@ namespace SpaceEngine.Debugging
 
                     GUILayoutExtensions.SpacingSeparator();
 
-                    GUILayoutExtensions.VerticalBoxed("Generation per pass parameters: ", GUISkin, () =>
+                    if (Galaxy.Settings.Type == GenerationSettings.GenerationType.Double)
                     {
-                        GUILayoutExtensions.VerticalBoxed("", GUISkin, () =>
+                        GUILayoutExtensions.VerticalBoxed("Generation per pass parameters: ", GUISkin, () =>
                         {
-                            GUILayoutExtensions.SliderWithFieldAndControls("Rotation (Rad): ", -Mathf.PI * 2.0f, Mathf.PI * 2.0f, ref Galaxy.Settings.GalaxyGenerationPerPassParameters.PassRotation, "0.0000", 75, Mathf.PI / 4.0f);
+                            GUILayoutExtensions.VerticalBoxed("", GUISkin, () =>
+                            {
+                                GUILayoutExtensions.SliderWithFieldAndControls("Rotation (Rad): ", -Mathf.PI * 2.0f, Mathf.PI * 2.0f, ref Galaxy.Settings.GalaxyGenerationPerPassParameters.PassRotation, "0.0000", 75, Mathf.PI / 4.0f);
+                            });
                         });
-                    });
+                    }
                 });
 
                 if (GUI.changed)
