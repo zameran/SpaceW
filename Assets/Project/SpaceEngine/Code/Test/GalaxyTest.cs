@@ -41,7 +41,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.InteropServices;
-
 #if UNITY_EDITOR
 using UnityEditor;
 #endif
@@ -75,6 +74,8 @@ namespace SpaceEngine.Tests
         public float InverseSpiralEccentricity;
         public float SpiralRotation;
 
+        public ColorMaterialTableGradientLut ColorDistribution;
+
         public GalaxyGenerationParameters(GalaxyGenerationParameters from)
         {
             Randomize = from.Randomize;
@@ -88,6 +89,8 @@ namespace SpaceEngine.Tests
             Depth = from.Depth;
             InverseSpiralEccentricity = from.InverseSpiralEccentricity;
             SpiralRotation = from.SpiralRotation;
+
+            ColorDistribution = new ColorMaterialTableGradientLut();
         }
 
         public GalaxyGenerationParameters(Vector3 randomize, Vector3 offset, Vector4 warp,
@@ -105,6 +108,8 @@ namespace SpaceEngine.Tests
             Depth = depth;
             InverseSpiralEccentricity = inverseSpiralEccentricity;
             SpiralRotation = spiralRotation;
+
+            ColorDistribution = new ColorMaterialTableGradientLut();
         }
 
         public static GalaxyGenerationParameters Default
@@ -150,27 +155,25 @@ namespace SpaceEngine.Tests
     {
         public int PassCount;
         public int Count;
-        public int DrawCount;
+
 
         public GalaxyParameters(GalaxyParameters from)
         {
             PassCount = from.PassCount;
             Count = from.Count;
-            DrawCount = from.DrawCount;
         }
 
-        public GalaxyParameters(int passCount, int count, int drawCount)
+        public GalaxyParameters(int passCount, int count)
         {
             PassCount = passCount;
             Count = count;
-            DrawCount = drawCount;
         }
 
         public static GalaxyParameters Default
         {
             get
             {
-                return new GalaxyParameters(2, 128000, 128000);
+                return new GalaxyParameters(2, 128000);
             }
         }
     }
@@ -179,34 +182,56 @@ namespace SpaceEngine.Tests
     [StructLayout(LayoutKind.Sequential)]
     internal struct GalaxyRenderingParameters
     {
-        // TODO : Finish him...
+        [Range(0.0f, 1.0f)]
         public float DustStrength;
+
+        [Range(0.0f, 4.0f)]
         public float DustSize;
+
+        [Range(1.0f, 4.0f)]
+        public int DustPassCount;
+
+        [Range(0.0f, 1.0f)]
+        public float DrawPercent;
+
+        public ColorMaterialTableGradientLut ColorDistribution;
 
         public GalaxyRenderingParameters(GalaxyRenderingParameters from)
         {
             DustStrength = from.DustStrength;
             DustSize = from.DustSize;
+
+            DustPassCount = from.DustPassCount;
+
+            DrawPercent = from.DrawPercent;
+
+            ColorDistribution = new ColorMaterialTableGradientLut();
         }
 
-        public GalaxyRenderingParameters(float dustStrength, float dustSize)
+        public GalaxyRenderingParameters(float dustStrength, float dustSize, int dustPassCount, float drawPercent)
         {
             DustStrength = dustStrength;
             DustSize = dustSize;
+
+            DustPassCount = dustPassCount;
+
+            DrawPercent = drawPercent;
+
+            ColorDistribution = new ColorMaterialTableGradientLut();
         }
 
         public static GalaxyRenderingParameters Default
         {
             get
             {
-                return new GalaxyRenderingParameters(0.025f, 1.0f);
+                return new GalaxyRenderingParameters(0.0075f, 1.0f, 1, 0.1f);
             }
         }
     }
 
     [Serializable]
     [StructLayout(LayoutKind.Sequential)]
-    internal struct GenerationSettings
+    internal struct GalaxySettings
     {
         internal enum GenerationType : byte
         {
@@ -217,35 +242,42 @@ namespace SpaceEngine.Tests
 
         public GenerationType Type;
 
+        public GalaxyRenderingParameters GalaxyRenderingParameters;
+
         public GalaxyParameters GalaxyParameters;
         public GalaxyGenerationParameters GalaxyGenerationParameters;
         public GalaxyGenerationPerPassParameters GalaxyGenerationPerPassParameters;
 
-        public GenerationSettings(GenerationType type, GalaxyParameters gp, GalaxyGenerationParameters ggp, GalaxyGenerationPerPassParameters ggppp)
+        public GalaxySettings(GenerationType type, GalaxyRenderingParameters grp, GalaxyParameters gp, GalaxyGenerationParameters ggp, GalaxyGenerationPerPassParameters ggppp)
         {
             Type = type;
+
+            GalaxyRenderingParameters = new GalaxyRenderingParameters(grp);
 
             GalaxyParameters = new GalaxyParameters(gp);
             GalaxyGenerationParameters = new GalaxyGenerationParameters(ggp);
             GalaxyGenerationPerPassParameters = new GalaxyGenerationPerPassParameters(ggppp);
         }
 
-        public GenerationSettings(GenerationSettings from)
+        public GalaxySettings(GalaxySettings from)
         {
             Type = from.Type;
+
+            GalaxyRenderingParameters = new GalaxyRenderingParameters(from.GalaxyRenderingParameters);
 
             GalaxyParameters = new GalaxyParameters(from.GalaxyParameters);
             GalaxyGenerationParameters = new GalaxyGenerationParameters(from.GalaxyGenerationParameters);
             GalaxyGenerationPerPassParameters = new GalaxyGenerationPerPassParameters(from.GalaxyGenerationPerPassParameters);
         }
 
-        public static GenerationSettings Default
+        public static GalaxySettings Default
         {
             get
             {
-                return new GenerationSettings(GenerationType.Single, GalaxyParameters.Default, 
-                                                                     GalaxyGenerationParameters.Default, 
-                                                                     GalaxyGenerationPerPassParameters.Default);
+                return new GalaxySettings(GenerationType.Single, GalaxyRenderingParameters.Default,
+                                                                 GalaxyParameters.Default, 
+                                                                 GalaxyGenerationParameters.Default, 
+                                                                 GalaxyGenerationPerPassParameters.Default);
             }
         }
 
@@ -261,8 +293,8 @@ namespace SpaceEngine.Tests
 
         internal List<string> FindSettings()
         {
-            var folderPath = GenerationSettings.ContainingFolder;
-            var filePathPattern = string.Format("{0}_*.{1}", GenerationSettings.FilePrefix, GenerationSettings.FileExtension);
+            var folderPath = GalaxySettings.ContainingFolder;
+            var filePathPattern = string.Format("{0}_*.{1}", GalaxySettings.FilePrefix, GalaxySettings.FileExtension);
 
             if (!System.IO.Directory.Exists(folderPath)) return null;
 
@@ -271,10 +303,10 @@ namespace SpaceEngine.Tests
 
         internal void SaveSettings()
         {
-            var settings = new GenerationSettings(this);
+            var settings = new GalaxySettings(this);
             var jsonString = JsonUtility.ToJson(settings, true);
-            var folderPath = GenerationSettings.ContainingFolder;
-            var filePath = string.Format("{0}/{1}_{2}.{3}", folderPath, GenerationSettings.FilePrefix, GenerationSettings.FilePostfix, GenerationSettings.FileExtension);
+            var folderPath = GalaxySettings.ContainingFolder;
+            var filePath = string.Format("{0}/{1}_{2}.{3}", folderPath, GalaxySettings.FilePrefix, GalaxySettings.FilePostfix, GalaxySettings.FileExtension);
 
             if (!System.IO.Directory.Exists(folderPath)) System.IO.Directory.CreateDirectory(folderPath);
 
@@ -285,12 +317,12 @@ namespace SpaceEngine.Tests
 #endif
         }
 
-        internal void LoadSettings(string filePath, Action<GenerationSettings> callback)
+        internal void LoadSettings(string filePath, Action<GalaxySettings> callback)
         {
             if (!System.IO.File.Exists(filePath)) return;
 
             var fileContent = System.IO.File.ReadAllText(filePath);
-            var settings = JsonUtility.FromJson<GenerationSettings>(fileContent);
+            var settings = JsonUtility.FromJson<GalaxySettings>(fileContent);
 
             if (callback != null) callback(settings);
         }
@@ -301,11 +333,27 @@ namespace SpaceEngine.Tests
 
             System.IO.File.Delete(filePath);
 
-            // TODO : Delete folder, if last file deleted...
+            var fileInfo = new System.IO.FileInfo(filePath);
 
 #if UNITY_EDITOR
             AssetDatabase.Refresh();
 #endif
+
+            #region Delete Parent Folder
+
+            if (fileInfo.Directory != null)
+            {
+                if (fileInfo.Directory.GetFiles().Length == 0)
+                {
+                    if (fileInfo.DirectoryName != null) System.IO.Directory.Delete(fileInfo.DirectoryName);
+                }
+            }
+
+#if UNITY_EDITOR
+            AssetDatabase.Refresh();
+#endif
+
+            #endregion
         }
 
         #endregion
@@ -317,8 +365,10 @@ namespace SpaceEngine.Tests
 
         public Shader StarsShader;
         public Shader DustShader;
+        public Shader ParticlesShader;
 
         private Material StarsMaterial;
+        private Material ParticlesMaterial;
 
         private List<List<ComputeBuffer>> StarsBuffers = new List<List<ComputeBuffer>>();
         private List<Material> DustMaterials = new List<Material>();
@@ -326,28 +376,29 @@ namespace SpaceEngine.Tests
 
         private Bounds GalaxyBounds;
 
-        public GenerationSettings Settings = GenerationSettings.Default;
+        public GalaxySettings Settings = GalaxySettings.Default;
 
-        public ColorMaterialTableGradientLut ColorDistribution = new ColorMaterialTableGradientLut();
+        public Mesh DustMesh = null;
 
         public bool AutoUpdate = false;
 
-        public Mesh DustMesh = null;
+        public List<ParticleSystem> ParticleSystems = new List<ParticleSystem>();
+
+        public int DrawCount { get { return (int)(Settings.GalaxyParameters.Count * Settings.GalaxyRenderingParameters.DrawPercent); } }
 
         #region Galaxy
 
         #region Settings
 
-        internal void ApplyPreset(GenerationSettings gs)
+        internal void ApplyPreset(GalaxySettings gs)
         {
-            Settings = new GenerationSettings(gs);
+            Settings = new GalaxySettings(gs);
 
             InitAndGenerateBuffers();
             InitDustMaterials();
         }
 
         #endregion
-
 
         #region Dust
 
@@ -418,19 +469,19 @@ namespace SpaceEngine.Tests
 
         public void GenerateBuffers()
         {
-            Core.SetTexture(0, "MaterialTable", ColorDistribution.Lut);
+            Core.SetTexture(0, "ColorDistributionTable", Settings.GalaxyGenerationParameters.ColorDistribution.Lut);
 
             for (byte generationType = 0; generationType < StarsBuffers.Capacity; generationType++)
             {
                 var buffers = StarsBuffers[generationType];
                 var perPassRotation = (generationType % 2 == 0 ? Settings.GalaxyGenerationPerPassParameters.PassRotation * generationType :
-                    Settings.GalaxyGenerationPerPassParameters.PassRotation);
+                                                                 Settings.GalaxyGenerationPerPassParameters.PassRotation);
 
                 for (var bufferIndex = 0; bufferIndex < buffers.Capacity; bufferIndex++)
                 {
                     var buffer = buffers[bufferIndex];
 
-                    Core.SetVector("Randomize", (Settings.GalaxyGenerationParameters.Randomize + new Vector3(1.0f, 0.0f, 1.0f)) * ((bufferIndex + 1 + generationType + 1) / 10.0f));
+                    Core.SetVector("randomParams1", (Settings.GalaxyGenerationParameters.Randomize + new Vector3(1.0f, 0.0f, 1.0f)) * ((bufferIndex + 1 + generationType + 1) / 10.0f));
                     Core.SetVector("offsetParams1", new Vector4(Settings.GalaxyGenerationParameters.Offset.x, Settings.GalaxyGenerationParameters.Offset.y, Settings.GalaxyGenerationParameters.Offset.z, 0.0f));
                     Core.SetVector("sizeParams1", new Vector4(Settings.GalaxyGenerationParameters.Radius, Settings.GalaxyGenerationParameters.RadiusEllipse, Settings.GalaxyGenerationParameters.SizeBar, Settings.GalaxyGenerationParameters.Depth));
                     Core.SetVector("warpParams1", Settings.GalaxyGenerationParameters.Warp);
@@ -440,6 +491,11 @@ namespace SpaceEngine.Tests
                     Core.Dispatch(0, (int)(Settings.GalaxyParameters.Count / 1024.0f), 1, 1);
                 }
             }
+
+            //GenerateParticles(StarsBuffers[0][0], 0);
+            //GenerateParticles(StarsBuffers[0][1], 1);
+            //GenerateParticles(StarsBuffers[1][0], 2);
+            //GenerateParticles(StarsBuffers[1][1], 3);
         }
 
         protected void DestroyBuffers()
@@ -469,6 +525,35 @@ namespace SpaceEngine.Tests
 
         #region Node
 
+        private void GenerateParticles(ComputeBuffer source, int index)
+        {
+            if (ParticleSystems == null) return;
+
+            // TODO : Finish with particles...
+
+            var system = ParticleSystems[index];
+            var rendererModule = system.GetComponent<Renderer>();
+
+            var buffer = source;
+            var bufferSize = buffer.count;
+            var stars = new GalaxyStar[bufferSize];
+            var points = new ParticleSystem.Particle[bufferSize];
+
+            buffer.GetData(stars);
+
+            for (var i = 0; i < bufferSize; i++)
+            {
+                points[i].position = stars[i].position;
+                points[i].startSize = stars[i].size / 64;
+                points[i].startColor = stars[i].color.ToColor();
+            }
+
+            system.SetParticles(points, bufferSize);
+
+            rendererModule.material = ParticlesMaterial;
+            rendererModule.material.SetTexture("_MainTex", Resources.Load("Textures/Galaxy/StarParticle", typeof(Texture2D)) as Texture2D);
+        }
+
         protected override void InitNode()
         {
             GalaxyBounds = new Bounds(Vector3.zero, new Vector3(1e8f, 1e8f, 1e8f));
@@ -479,9 +564,13 @@ namespace SpaceEngine.Tests
             if (DustShader == null) DustShader = Shader.Find("SpaceEngine/Galaxy/DustTest");
             InitDustMaterials();
 
+            if (ParticlesShader == null) ParticlesShader = Shader.Find("Particles/Alpha Blended Premultiply");
+            ParticlesMaterial = MaterialHelper.CreateTemp(ParticlesShader, "Particles");
+            
             if (DustMesh == null) Debug.LogWarning("GalaxyTest.InitNode: DustMesh is null! Impossible to render dust!");
 
-            ColorDistribution.GenerateLut();
+            Settings.GalaxyRenderingParameters.ColorDistribution.GenerateLut();
+            Settings.GalaxyGenerationParameters.ColorDistribution.GenerateLut();
 
             InitBuffers();
             GenerateBuffers();
@@ -515,8 +604,10 @@ namespace SpaceEngine.Tests
             DestroyDustMaterials();
 
             Helper.Destroy(StarsMaterial);
+            Helper.Destroy(ParticlesMaterial);
 
-            ColorDistribution.DestroyLut();
+            Settings.GalaxyRenderingParameters.ColorDistribution.DestroyLut();
+            Settings.GalaxyGenerationParameters.ColorDistribution.DestroyLut();
         }
 
         #endregion
@@ -536,7 +627,7 @@ namespace SpaceEngine.Tests
                     StarsMaterial.SetPass(0);
                     StarsMaterial.SetBuffer("stars", buffer);
                     
-                    Graphics.DrawProcedural(MeshTopology.Points, Settings.GalaxyParameters.DrawCount);
+                    Graphics.DrawProcedural(MeshTopology.Points, DrawCount);
                 }
             }
         }
@@ -547,28 +638,33 @@ namespace SpaceEngine.Tests
 
             var args = new uint[5];
             args[0] = (uint)DustMesh.GetIndexCount(0);              // Index count per instance...
-            args[1] = (uint)Settings.GalaxyParameters.DrawCount;    // Instance count...
+            args[1] = (uint)DrawCount;                              // Instance count...
             args[2] = 0;                                            // Start index location...
             args[3] = 0;                                            // Base vertex location...
             args[4] = 0;                                            // Start instance location...
 
             DustArgsBuffer.SetData(args);
 
+            // TODO : Calculate _Galaxy_Orientation and _Galaxy_OrientationInverse relative to camera, for a better visualization...
+            var galaxyOrientation = new Vector4(transform.rotation.x, transform.rotation.y, transform.rotation.z, transform.rotation.w);
+            var galaxyOrientationInversed = -galaxyOrientation;
+
             for (byte generationType = 0; generationType < StarsBuffers.Capacity; generationType++)
             {
                 var buffers = StarsBuffers[generationType];
                 var material = DustMaterials[generationType];
 
-                for (var bufferIndex = 0; bufferIndex < buffers.Capacity; bufferIndex++)
+                for (var bufferIndex = 0; bufferIndex < Mathf.Min(Settings.GalaxyRenderingParameters.DustPassCount, buffers.Capacity); bufferIndex++)
                 {
                     var buffer = buffers[bufferIndex];
 
                     material.SetPass(0);
                     material.SetBuffer("stars", buffer);
-                    // TODO : Calculate _Galaxy_Orientation and _Galaxy_OrientationInverse relative to camera, for a better visualization...
+                    material.SetTexture("ColorDistributionTable", Settings.GalaxyRenderingParameters.ColorDistribution.Lut);
+                    material.SetVector("dustParams1", new Vector2(Settings.GalaxyRenderingParameters.DustStrength, Settings.GalaxyRenderingParameters.DustSize));
                     material.SetVector("_Galaxy_Position", transform.position - GodManager.Instance.View.WorldCameraPosition);
-                    material.SetVector("_Galaxy_Orientation", transform.rotation.eulerAngles);
-                    material.SetVector("_Galaxy_OrientationInverse", -transform.rotation.eulerAngles);
+                    material.SetVector("_Galaxy_Orientation", galaxyOrientation);
+                    material.SetVector("_Galaxy_OrientationInverse", galaxyOrientationInversed);
 
                     Graphics.DrawMeshInstancedIndirect(DustMesh, 0, material, GalaxyBounds, DustArgsBuffer, 0);
                 }

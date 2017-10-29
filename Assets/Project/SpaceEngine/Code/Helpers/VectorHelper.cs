@@ -221,6 +221,16 @@ public static class VectorHelper
         return new Vector4(color.r, color.g, color.b, customAlpha);
     }
 
+    public static Color ToColor(this Vector4 vector)
+    {
+        return new Color(vector.x, vector.y, vector.z, vector.w);
+    }
+
+    public static Color ToColor(this Vector3 vector, float a)
+    {
+        return new Color(vector.x, vector.y, vector.z, a);
+    }
+
     public static bool OneOfIsBiggerThan(this Vector3 v, float value)
     {
         return (v.x >= value || v.y >= value || v.z >= value);

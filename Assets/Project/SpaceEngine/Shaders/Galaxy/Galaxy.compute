@@ -1,13 +1,5 @@
 ﻿// NOTE : Based on https://dexyfex.com/2016/09/09/galaxy-rendering-revisited/
 
-Texture2D MaterialTable;
-SamplerState sampler_point_repeat_MaterialTable;
-
-float4 GetMaterial(float value)
-{
-	return MaterialTable.SampleLevel(sampler_point_repeat_MaterialTable, float2(value, 0.0), 0);
-}
-
 #define COMPUTE_SHADER
 
 #include "Galaxy.cginc"
@@ -16,7 +8,7 @@ float4 GetMaterial(float value)
 
 GalaxyStar GenerateStar(uint id)
 {
-	float4 rnd = Random4(id) + float4(0.0, Randomize);
+	float4 rnd = Random4(id) + float4(0.0, randomParams1);
 
 	float size = radius * 0.025 * (rnd.w * rnd.w + 0.5);					// Randomize the particle size...
 	
@@ -52,13 +44,13 @@ GalaxyStar GenerateStar(uint id)
 	pos = mulvq(pos, qa);													// Fake-arm rotation...
 
 	float distribution = length(pos) / radius * M_PHI * (size / 2.0);
-	float temperature = distribution * rnd.w;								// Fake temperature distribution...
+	float temperature = ((distribution * (rnd.w * M_PHI)) - 0.08f) / 2.92f;	// Fake temperature distribution...
 
 	GalaxyStar star;
 	star.position = pos;
 	star.color = GetMaterial(temperature);
 	star.size = size;
-	star.temperature = distribution;
+	star.temperature = temperature;
 
 	return star;
 }

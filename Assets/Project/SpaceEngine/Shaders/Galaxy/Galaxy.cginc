@@ -37,11 +37,12 @@
 #include "../Math.cginc"
 #endif
 
-uniform float3	Randomize;
+uniform float3	randomParams1;	// Randomize
 uniform float4  offsetParams1;	// (offsetX,	offsetY,		offsetZ,	 UNUSED)
 uniform float4	sizeParams1;	// (radius,		ellipseRadius,	barSize,	 depth)
 uniform float4	warpParams1;	// (warp1.x,	warp1.y,		warp2.x,	 warp2.y)
 uniform float4	spiralParams1;	// (inverseEccentricity, spiralRotation, passRotation, UNUSED)
+uniform float2	dustParams1;	// (dustStrength,	dustSize,	UNUSED,		UNUSED)
 
 #define		offsetX					offsetParams1.x;
 #define		offsetY					offsetParams1.y;
@@ -55,6 +56,8 @@ uniform float4	spiralParams1;	// (inverseEccentricity, spiralRotation, passRotat
 #define		inverseEccentricity		spiralParams1.x
 #define		spiralRotation			spiralParams1.y
 #define		passRotation			spiralParams1.z
+#define		dustStrength			dustParams1.x
+#define		dustSize				dustParams1.y
 
 struct GalaxyStar
 {
@@ -163,3 +166,11 @@ bool RaySphereIntersect(float3 s, float3 d, float r, out float ts, out float te)
 	return te > ts && ts > 0;
 }
 #endif
+
+uniform Texture2D ColorDistributionTable;
+SamplerState sampler_point_clamp_MaterialTable;
+
+float4 GetMaterial(float value)
+{
+	return ColorDistributionTable.SampleLevel(sampler_point_clamp_MaterialTable, float2(value, 0.0), 0);
+}

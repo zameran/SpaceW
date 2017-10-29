@@ -119,19 +119,48 @@ namespace SpaceEngine.Debugging
                 {
                     GUILayoutExtensions.VerticalBoxed("", GUISkin, () =>
                     {
-                        var materialTable = Galaxy.ColorDistribution;
+                        var renderingColorDistributionTable = Galaxy.Settings.GalaxyRenderingParameters.ColorDistribution;
+                        var generationColorDistributionTable = Galaxy.Settings.GalaxyGenerationParameters.ColorDistribution;
 
-                        if (materialTable != null && materialTable.Lut != null)
+                        if (renderingColorDistributionTable != null && renderingColorDistributionTable.Lut != null)
                         {
-                            GUILayout.Label("Material Table (Color distribution): ");
+                            GUILayout.Label("Color Distribution Table (Dust): ");
                             GUILayoutExtensions.VerticalBoxed("", GUISkin, () =>
                             {
                                 GUILayoutExtensions.Horizontal(() =>
                                 {
-                                    GUILayout.Label(materialTable.Lut);
+                                    GUILayout.Label(renderingColorDistributionTable.Lut);
                                 });
                             });
                         }
+
+                        GUILayoutExtensions.SpacingSeparator();
+
+                        if (generationColorDistributionTable != null && generationColorDistributionTable.Lut != null)
+                        {
+                            GUILayout.Label("Color Distribution Table (Generator): ");
+                            GUILayoutExtensions.VerticalBoxed("", GUISkin, () =>
+                            {
+                                GUILayoutExtensions.Horizontal(() =>
+                                {
+                                    GUILayout.Label(generationColorDistributionTable.Lut);
+                                });
+                            });
+                        }
+                    });
+
+                    GUILayoutExtensions.SpacingSeparator();
+
+                    GUILayoutExtensions.VerticalBoxed("Rendering parameters: ", GUISkin, () =>
+                    {
+                        GUILayoutExtensions.VerticalBoxed("", GUISkin, () =>
+                        {
+                            GUILayoutExtensions.SliderWithFieldAndControls("Dust Strength (Proportion): ", 0.0f, 1.0f, ref Galaxy.Settings.GalaxyRenderingParameters.DustStrength, "0.0000", 75, 0.0025f);
+                            GUILayoutExtensions.SliderWithFieldAndControls("Dust Size (Ly): ", 0.0f, 4.0f, ref Galaxy.Settings.GalaxyRenderingParameters.DustSize, "0.0000", 75, 0.25f);
+                            GUILayoutExtensions.SliderWithFieldAndControls("Dust Pass Count: ", 1, Galaxy.Settings.GalaxyParameters.PassCount, ref Galaxy.Settings.GalaxyRenderingParameters.DustPassCount, "0", 75, 1);
+
+                            GUILayoutExtensions.SliderWithFieldAndControls("Draw Percent (%)", 0.0f, 1.0f, ref Galaxy.Settings.GalaxyRenderingParameters.DrawPercent, "0.0000", 75, 0.01f);
+                        });
                     });
 
                     GUILayoutExtensions.SpacingSeparator();
@@ -144,7 +173,7 @@ namespace SpaceEngine.Debugging
 
                             GUILayoutExtensions.VerticalBoxed("Preset: ", GUISkin, () =>
                             {
-                                Galaxy.Settings.Type = (GenerationSettings.GenerationType)GUILayout.SelectionGrid((byte)Galaxy.Settings.Type, Enum.GetNames(typeof(GenerationSettings.GenerationType)), 2);
+                                Galaxy.Settings.Type = (GalaxySettings.GenerationType)GUILayout.SelectionGrid((byte)Galaxy.Settings.Type, Enum.GetNames(typeof(GalaxySettings.GenerationType)), 2);
                             });
 
                             GUILayoutExtensions.SpacingSeparator();
@@ -178,7 +207,7 @@ namespace SpaceEngine.Debugging
 
                     GUILayoutExtensions.SpacingSeparator();
 
-                    if (Galaxy.Settings.Type == GenerationSettings.GenerationType.Double)
+                    if (Galaxy.Settings.Type == GalaxySettings.GenerationType.Double)
                     {
                         GUILayoutExtensions.VerticalBoxed("Generation per pass parameters: ", GUISkin, () =>
                         {

@@ -19,7 +19,7 @@
 				"LightMode"				= "Always"
 			}
 
-			Blend One OneMinusSrcColor
+			Blend OneMinusDstColor One
 			Cull Front
 			ZWrite On
 			ZTest Always
@@ -30,9 +30,9 @@
 			#pragma fragment frag
 			
 			#include "UnityCG.cginc"
-
+						
 			#include "../Galaxy.cginc"
-
+			
 			uniform StructuredBuffer<GalaxyStar> stars;
 
 			uniform float3 _Galaxy_Position;
@@ -66,6 +66,8 @@
 				float starTemperature = stars[id].temperature;
 				float starFade = 1.0;
 				float starShine = 2.0;
+				
+				starSize *= dustSize;
 
 				float3 localPosition = v.vertex.xyz * starSize;
 				float3 worldPosition = starPosition + localPosition;
@@ -74,7 +76,7 @@
 
 				o.vertex = UnityObjectToClipPos(float4(worldPosition, 1.0));
 				o.vertex.z = o.vertex.z * o.vertex.w * 0.0000000000001;
-				o.color = starColor;
+				o.color = lerp(starColor, GetMaterial(starTemperature), 0.5);
 				o.data = float4(starSize / 2.0, 0.0, starFade, starShine);
 				o.direction = direction;
 				o.rayEnd = localPosition;
@@ -111,7 +113,7 @@
 				float rlenn = 0.5 * rlen / starSize;
 
 				starColor *= saturate(rlenn * rlenn);
-				starColor *= 0.025;
+				starColor *= dustStrength;
 				starColor = clamp(starColor, 0.0, 1.0);
 
 				color = starColor;
