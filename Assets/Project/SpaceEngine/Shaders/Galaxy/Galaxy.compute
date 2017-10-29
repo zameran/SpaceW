@@ -8,6 +8,8 @@ float4 GetMaterial(float value)
 	return MaterialTable.SampleLevel(sampler_point_repeat_MaterialTable, float2(value, 0.0), 0);
 }
 
+#define COMPUTE_SHADER
+
 #include "Galaxy.cginc"
 
 #pragma kernel Core
@@ -49,10 +51,14 @@ GalaxyStar GenerateStar(uint id)
 	pos = mulvq(pos, qi);													// Rotate the ellipse to where it should be to make spirals...
 	pos = mulvq(pos, qa);													// Fake-arm rotation...
 
+	float distribution = length(pos) / radius * M_PHI * (size / 2.0);
+	float temperature = distribution * rnd.w;								// Fake temperature distribution...
+
 	GalaxyStar star;
 	star.position = pos;
-	star.color = GetMaterial(length(pos) / radius * rnd.w * M_PHI);			// Hardcoded...
+	star.color = GetMaterial(temperature);
 	star.size = size;
+	star.temperature = distribution;
 
 	return star;
 }

@@ -148,7 +148,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 915faae617c327548a128c0d0c21570f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  View: {fileID: 0}
+  View: {fileID: 2106011889}
   AtmosphereMesh: {fileID: 0}
   OceanScreenMeshGrids: []
   QuadMesh: {fileID: 0}
@@ -1556,13 +1556,14 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   Core: {fileID: 7200000, guid: 4b65a98af0eefea4a84f53bd8d3baf38, type: 3}
-  CoreShader: {fileID: 4800000, guid: 02a604af630bf304b8ac84d9c132a420, type: 3}
+  StarsShader: {fileID: 4800000, guid: 02a604af630bf304b8ac84d9c132a420, type: 3}
+  DustShader: {fileID: 4800000, guid: 5c27b04b8de7fa74a8e1e9216b170be6, type: 3}
   Settings:
-    Type: 1
+    Type: 2
     GalaxyParameters:
       PassCount: 2
       Count: 128000
-      DrawCount: 128000
+      DrawCount: 12800
     GalaxyGenerationParameters:
       Randomize: {x: 0, y: 0, z: 0}
       Offset: {x: 0, y: 0, z: 0.03}
@@ -1578,18 +1579,18 @@ MonoBehaviour:
   ColorDistribution:
     Gradient:
       serializedVersion: 2
-      key0: {r: 0.9607843, g: 0.92941177, b: 0.9254902, a: 1}
-      key1: {r: 0.92941177, g: 0.6666667, b: 0.35686275, a: 1}
-      key2: {r: 0.5803922, g: 0.6862745, b: 0.9254902, a: 0}
-      key3: {r: 0.53333336, g: 0.6901961, b: 0.99607843, a: 0}
+      key0: {r: 0.74264705, g: 0.4249603, b: 0.28941393, a: 1}
+      key1: {r: 0.7205882, g: 0.49909255, b: 0.2861159, a: 1}
+      key2: {r: 0.6691177, g: 0.5284509, b: 0.33455884, a: 0}
+      key3: {r: 0.44117647, g: 0.43262425, b: 0.34710208, a: 0}
       key4: {r: 0.42344293, g: 0.56642365, b: 0.6544118, a: 0}
       key5: {r: 1, g: 1, b: 1, a: 0}
       key6: {r: 0, g: 0, b: 0, a: 0}
       key7: {r: 0, g: 0, b: 0, a: 0}
       ctime0: 0
-      ctime1: 12976
-      ctime2: 39780
-      ctime3: 65535
+      ctime1: 6168
+      ctime2: 12914
+      ctime3: 21588
       ctime4: 39128
       ctime5: 65535
       ctime6: 0
@@ -1603,11 +1604,12 @@ MonoBehaviour:
       atime6: 0
       atime7: 0
       m_Mode: 0
-      m_NumColorKeys: 4
+      m_NumColorKeys: 6
       m_NumAlphaKeys: 2
     ReverseX: 0
     ReverseY: 0
   AutoUpdate: 1
+  DustMesh: {fileID: 10202, guid: 0000000000000000e000000000000000, type: 0}
 --- !u!4 &1257223185
 Transform:
   m_ObjectHideFlags: 0
@@ -1981,6 +1983,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   Galaxy: {fileID: 1257223184}
+  RenderDust: 0
+  RenderStars: 1
 --- !u!114 &2106011889
 MonoBehaviour:
   m_ObjectHideFlags: 0

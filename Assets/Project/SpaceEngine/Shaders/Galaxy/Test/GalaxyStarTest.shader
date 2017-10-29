@@ -37,6 +37,7 @@
 				float3 starPosition = stars[v.id].position;
 				float4 starColor = stars[v.id].color;
 				float starSize = stars[v.id].size;
+				float starTemperature = stars[v.id].temperature;
 
 				o.vertex = UnityObjectToClipPos(float4(starPosition, 1.0));
 				o.color = starColor;

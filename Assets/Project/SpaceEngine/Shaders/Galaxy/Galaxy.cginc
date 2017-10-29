@@ -61,6 +61,7 @@ struct GalaxyStar
 	float3 position;
 	float4 color;
 	float size;
+	float temperature;
 };
 
 float3 mulvq(float3 v, float4 q)
@@ -125,3 +126,40 @@ float4 Random4(uint seed)
 {
 	return float4(Random3(seed), Random1(seed + 3));
 }
+
+#ifndef COMPUTE_SHADER
+inline float NearIntersection(float3 pos, float3 ray, float distance2, float radius2)
+{
+	float B = 2.0 * dot(pos, ray);
+	float det = max(0.0, B * B - 4.0 * (distance2 - radius2));
+
+	return 0.5 * (-B - sqrt(det));
+}
+
+inline float FarIntersection(float3 pos, float3 ray, float distance2, float radius2)
+{
+	float B = 2.0 * dot(pos, ray);
+	float det = max(0.0, B * B - 4.0 * (distance2 - radius2));
+
+	return 0.5 * (-B + sqrt(det));
+}
+
+bool RaySphereIntersect(float3 s, float3 d, float r, out float ts, out float te)
+{
+	float r2 = r * r;
+	float s2 = dot(s, s);
+
+	if(s2 <= r2)
+	{
+		ts = 0.0;
+		te = FarIntersection(s, d, s2, r2);
+	
+		return true;
+	}
+	
+	ts = NearIntersection(s, d, s2, r2);
+	te = FarIntersection(s, d, s2, r2);
+	
+	return te > ts && ts > 0;
+}
+#endif

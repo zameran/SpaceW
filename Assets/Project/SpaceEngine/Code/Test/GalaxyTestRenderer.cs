@@ -43,6 +43,9 @@ namespace SpaceEngine.Tests
         [SerializeField]
         internal GalaxyTest Galaxy;
 
+        public bool RenderDust = true;
+        public bool RenderStars = true;
+
         private void Awake()
         {
             Instance = this;
@@ -55,12 +58,14 @@ namespace SpaceEngine.Tests
 
         private void Update()
         {
-            
+            if (Galaxy == null || !RenderDust) return;
+
+            Galaxy.RenderDust();
         }
 
         private void OnPostRender()
         {
-            if (Galaxy == null) return;
+            if (Galaxy == null || !RenderStars) return;
 
             Galaxy.Render();
         }

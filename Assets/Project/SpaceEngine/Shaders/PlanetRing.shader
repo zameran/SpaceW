@@ -205,7 +205,7 @@ Shader "SpaceEngine/Planet/Ring"
 			Blend One OneMinusSrcColor
 			Cull Off
 			ZWrite On
-			ZTest LEqual 
+			ZTest LEqual
 			
 			CGPROGRAM
 			#pragma target 5.0

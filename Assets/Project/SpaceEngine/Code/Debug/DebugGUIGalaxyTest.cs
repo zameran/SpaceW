@@ -152,6 +152,7 @@ namespace SpaceEngine.Debugging
                             if (GUI.changed)
                             {
                                 Galaxy.InitAndGenerateBuffers();
+                                Galaxy.InitDustMaterials();
                             }
                         });
                     });
