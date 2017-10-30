@@ -33,17 +33,22 @@
 
 #define GALAXY
 
+//-----------------------------------------------------------------------------
 #if !defined (MATH)
 #include "../Math.cginc"
 #endif
+//-----------------------------------------------------------------------------
 
+//-----------------------------------------------------------------------------
 uniform float3	randomParams1;	// Randomize
 uniform float4  offsetParams1;	// (offsetX,	offsetY,		offsetZ,	 UNUSED)
 uniform float4	sizeParams1;	// (radius,		ellipseRadius,	barSize,	 depth)
 uniform float4	warpParams1;	// (warp1.x,	warp1.y,		warp2.x,	 warp2.y)
 uniform float4	spiralParams1;	// (inverseEccentricity, spiralRotation, passRotation, UNUSED)
 uniform float2	dustParams1;	// (dustStrength,	dustSize,	UNUSED,		UNUSED)
+//-----------------------------------------------------------------------------
 
+//-----------------------------------------------------------------------------
 #define		offsetX					offsetParams1.x;
 #define		offsetY					offsetParams1.y;
 #define		offsetZ					offsetParams1.z;
@@ -58,7 +63,9 @@ uniform float2	dustParams1;	// (dustStrength,	dustSize,	UNUSED,		UNUSED)
 #define		passRotation			spiralParams1.z
 #define		dustStrength			dustParams1.x
 #define		dustSize				dustParams1.y
+//-----------------------------------------------------------------------------
 
+//-----------------------------------------------------------------------------
 struct GalaxyStar
 {
 	float3 position;
@@ -66,7 +73,19 @@ struct GalaxyStar
 	float size;
 	float temperature;
 };
+//-----------------------------------------------------------------------------
 
+//-----------------------------------------------------------------------------
+float3 ToneMapFilmicALU(float3 color)
+{
+	color = max(0, color - 0.004);
+	color = (color * (6.2 * color + 0.5)) / (color * (6.2 * color + 1.7) + 0.06);
+
+	return color;
+}
+//-----------------------------------------------------------------------------
+
+//-----------------------------------------------------------------------------
 float3 mulvq(float3 v, float4 q)
 {
 	float axx = q.x * 2.0;
@@ -98,7 +117,9 @@ float4 qaxang(float3 axis, float angle)
 
 	return float4(axis.x * sha, axis.y * sha, axis.z * sha, cos(ha));
 }
+//-----------------------------------------------------------------------------
 
+//-----------------------------------------------------------------------------
 float Hash(uint s)
 {
 	s ^= 2747636419u;
@@ -129,7 +150,9 @@ float4 Random4(uint seed)
 {
 	return float4(Random3(seed), Random1(seed + 3));
 }
+//-----------------------------------------------------------------------------
 
+//-----------------------------------------------------------------------------
 #ifndef COMPUTE_SHADER
 inline float NearIntersection(float3 pos, float3 ray, float distance2, float radius2)
 {
@@ -166,7 +189,9 @@ bool RaySphereIntersect(float3 s, float3 d, float r, out float ts, out float te)
 	return te > ts && ts > 0;
 }
 #endif
+//-----------------------------------------------------------------------------
 
+//-----------------------------------------------------------------------------
 uniform Texture2D ColorDistributionTable;
 SamplerState sampler_point_clamp_MaterialTable;
 
@@ -174,3 +199,4 @@ float4 GetMaterial(float value)
 {
 	return ColorDistributionTable.SampleLevel(sampler_point_clamp_MaterialTable, float2(value, 0.0), 0);
 }
+//-----------------------------------------------------------------------------

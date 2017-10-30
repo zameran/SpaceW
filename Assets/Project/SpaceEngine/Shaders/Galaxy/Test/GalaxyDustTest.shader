@@ -115,6 +115,7 @@
 				starColor *= saturate(rlenn * rlenn);
 				starColor *= dustStrength;
 				starColor = clamp(starColor, 0.0, 1.0);
+				//starColor = float4(ToneMapFilmicALU(starColor.xyz * 2.2), starColor.w);
 
 				color = starColor;
 			}

@@ -382,8 +382,6 @@ namespace SpaceEngine.Tests
 
         public bool AutoUpdate = false;
 
-        public List<ParticleSystem> ParticleSystems = new List<ParticleSystem>();
-
         public int DrawCount { get { return (int)(Settings.GalaxyParameters.Count * Settings.GalaxyRenderingParameters.DrawPercent); } }
 
         #region Galaxy
@@ -427,6 +425,38 @@ namespace SpaceEngine.Tests
             }
 
             DustMaterials.Clear();
+        }
+
+        #endregion
+
+        #region Particles
+
+        private void GenerateParticles(ParticleSystem system, ComputeBuffer source)
+        {
+            if (system == null) return;
+
+            // TODO : Finish with particles...
+
+            var rendererModule = system.GetComponent<Renderer>();
+
+            var buffer = source;
+            var bufferSize = buffer.count;
+            var stars = new GalaxyStar[bufferSize];
+            var points = new ParticleSystem.Particle[bufferSize];
+
+            buffer.GetData(stars);
+
+            for (var i = 0; i < bufferSize; i++)
+            {
+                points[i].position = stars[i].position;
+                points[i].startSize = stars[i].size / 64;
+                points[i].startColor = stars[i].color.ToColor();
+            }
+
+            system.SetParticles(points, bufferSize);
+
+            rendererModule.material = ParticlesMaterial;
+            rendererModule.material.SetTexture("_MainTex", Resources.Load("Textures/Galaxy/StarParticle", typeof(Texture2D)) as Texture2D);
         }
 
         #endregion
@@ -491,11 +521,6 @@ namespace SpaceEngine.Tests
                     Core.Dispatch(0, (int)(Settings.GalaxyParameters.Count / 1024.0f), 1, 1);
                 }
             }
-
-            //GenerateParticles(StarsBuffers[0][0], 0);
-            //GenerateParticles(StarsBuffers[0][1], 1);
-            //GenerateParticles(StarsBuffers[1][0], 2);
-            //GenerateParticles(StarsBuffers[1][1], 3);
         }
 
         protected void DestroyBuffers()
@@ -524,35 +549,6 @@ namespace SpaceEngine.Tests
         #endregion
 
         #region Node
-
-        private void GenerateParticles(ComputeBuffer source, int index)
-        {
-            if (ParticleSystems == null) return;
-
-            // TODO : Finish with particles...
-
-            var system = ParticleSystems[index];
-            var rendererModule = system.GetComponent<Renderer>();
-
-            var buffer = source;
-            var bufferSize = buffer.count;
-            var stars = new GalaxyStar[bufferSize];
-            var points = new ParticleSystem.Particle[bufferSize];
-
-            buffer.GetData(stars);
-
-            for (var i = 0; i < bufferSize; i++)
-            {
-                points[i].position = stars[i].position;
-                points[i].startSize = stars[i].size / 64;
-                points[i].startColor = stars[i].color.ToColor();
-            }
-
-            system.SetParticles(points, bufferSize);
-
-            rendererModule.material = ParticlesMaterial;
-            rendererModule.material.SetTexture("_MainTex", Resources.Load("Textures/Galaxy/StarParticle", typeof(Texture2D)) as Texture2D);
-        }
 
         protected override void InitNode()
         {
@@ -646,6 +642,7 @@ namespace SpaceEngine.Tests
             DustArgsBuffer.SetData(args);
 
             // TODO : Calculate _Galaxy_Orientation and _Galaxy_OrientationInverse relative to camera, for a better visualization...
+            // TODO : Render dust in to texture to save per-pixel calculations count...
             var galaxyOrientation = new Vector4(transform.rotation.x, transform.rotation.y, transform.rotation.z, transform.rotation.w);
             var galaxyOrientationInversed = -galaxyOrientation;
 
