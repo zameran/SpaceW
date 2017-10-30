@@ -88,7 +88,7 @@ namespace SpaceEngine.Cameras
 
             if (Controllable)
             {
-                Supercruise = !Aligned && Input.GetKey(KeyCode.F);
+                Supercruise = !Aligned && Input.GetKey(KeyCode.T);
 
                 if (Input.GetMouseButton(0) && !MouseOverUI)
                 {
@@ -125,11 +125,26 @@ namespace SpaceEngine.Cameras
                     Rotation.z = Mathf.Clamp(Rotation.z, -100.0f, 100.0f);
 
                     if (!Aligned)
+                    {
                         transform.Rotate(new Vector3(0, 0, Rotation.z));
+
+                        if (Input.GetKey(KeyCode.R))
+                        {
+                            transform.position = Vector3.MoveTowards(transform.position, transform.position + transform.up, Time.fixedDeltaTime * 30.0f);
+                        }
+
+                        if (Input.GetKey(KeyCode.F))
+                        {
+                            transform.position = Vector3.MoveTowards(transform.position, transform.position - transform.up, Time.fixedDeltaTime * 30.0f);
+                        }
+                    }
 
                     if (Input.GetKey(KeyCode.G))
                     {
-                        transform.rotation = Quaternion.RotateTowards(transform.rotation, Quaternion.LookRotation(Body.Origin - transform.position), Time.fixedDeltaTime * RotationSpeed * 30.0f);
+                        if (Body != null)
+                            transform.rotation = Quaternion.RotateTowards(transform.rotation, Quaternion.LookRotation(Body.Origin - transform.position), Time.fixedDeltaTime * RotationSpeed * 30.0f);
+                        else
+                            transform.rotation = Quaternion.RotateTowards(transform.rotation, Quaternion.LookRotation(Vector3.zero - transform.position), Time.fixedDeltaTime * RotationSpeed * 30.0f);
                     }
                 }
                 
@@ -138,7 +153,7 @@ namespace SpaceEngine.Cameras
                 {
                     Aligned = true;
 
-                    var gravityVector = Body.transform.position - transform.position;
+                    var gravityVector = Body != null ? Body.transform.position : Vector3.zero - transform.position;
 
                     TargetRotation = Quaternion.LookRotation(transform.forward, -gravityVector);
 
