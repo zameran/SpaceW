@@ -155,6 +155,14 @@ namespace SpaceEngine.Debugging
                     {
                         GUILayoutExtensions.VerticalBoxed("", GUISkin, () =>
                         {
+                            GalaxyTestRenderer.Instance.RenderDust = GUILayout.Toggle(GalaxyTestRenderer.Instance.RenderDust, "Render Dust? (Actual Rendering)");
+                            GalaxyTestRenderer.Instance.RenderStars = GUILayout.Toggle(GalaxyTestRenderer.Instance.RenderStars, "Render Stars? (Debug)");
+                        });
+
+                        GUILayoutExtensions.SpacingSeparator();
+
+                        GUILayoutExtensions.VerticalBoxed("", GUISkin, () =>
+                        {
                             GUILayoutExtensions.SliderWithFieldAndControls("Dust Strength (Proportion): ", 0.0f, 1.0f, ref Galaxy.Settings.GalaxyRenderingParameters.DustStrength, "0.0000", 75, 0.0025f);
                             GUILayoutExtensions.SliderWithFieldAndControls("Dust Size (Ly): ", 0.0f, 4.0f, ref Galaxy.Settings.GalaxyRenderingParameters.DustSize, "0.0000", 75, 0.25f);
                             GUILayoutExtensions.SliderWithFieldAndControls("Dust Pass Count: ", 1, Galaxy.Settings.GalaxyParameters.PassCount, ref Galaxy.Settings.GalaxyRenderingParameters.DustPassCount, "0", 75, 1);
