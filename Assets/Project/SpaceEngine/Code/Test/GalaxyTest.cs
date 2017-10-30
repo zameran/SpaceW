@@ -41,11 +41,13 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.InteropServices;
+
 #if UNITY_EDITOR
 using UnityEditor;
 #endif
 
 using UnityEngine;
+using UnityEngine.Rendering;
 
 namespace SpaceEngine.Tests
 {
@@ -374,15 +376,17 @@ namespace SpaceEngine.Tests
         private List<Material> DustMaterials = new List<Material>();
         private ComputeBuffer DustArgsBuffer;
 
-        private Bounds GalaxyBounds;
-
         public GalaxySettings Settings = GalaxySettings.Default;
 
         public Mesh DustMesh = null;
 
         public bool AutoUpdate = false;
+        public bool Resample = false;
 
         public int DrawCount { get { return (int)(Settings.GalaxyParameters.Count * Settings.GalaxyRenderingParameters.DrawPercent); } }
+
+        public RenderTexture FrameBuffer;
+        public CommandBuffer DustCommandBuffer;
 
         #region Galaxy
 
@@ -552,8 +556,6 @@ namespace SpaceEngine.Tests
 
         protected override void InitNode()
         {
-            GalaxyBounds = new Bounds(Vector3.zero, new Vector3(1e8f, 1e8f, 1e8f));
-
             if (StarsShader == null) StarsShader = Shader.Find("SpaceEngine/Galaxy/StarTest");
             StarsMaterial = MaterialHelper.CreateTemp(StarsShader, "Stars");
 
@@ -567,6 +569,11 @@ namespace SpaceEngine.Tests
 
             Settings.GalaxyRenderingParameters.ColorDistribution.GenerateLut();
             Settings.GalaxyGenerationParameters.ColorDistribution.GenerateLut();
+
+            FrameBuffer = RTExtensions.CreateRTexture(new Vector2(Screen.width / 8.0f, Screen.height / 8.0f), 0, RenderTextureFormat.ARGBFloat, FilterMode.Bilinear, TextureWrapMode.Clamp);
+
+            DustCommandBuffer = new CommandBuffer();
+            DustCommandBuffer.name = "Dust";
 
             InitBuffers();
             GenerateBuffers();
@@ -599,6 +606,9 @@ namespace SpaceEngine.Tests
             DestroyBuffers();
             DestroyDustMaterials();
 
+            if (FrameBuffer != null) FrameBuffer.ReleaseAndDestroy();
+            if (DustCommandBuffer != null) DustCommandBuffer.Release();
+
             Helper.Destroy(StarsMaterial);
             Helper.Destroy(ParticlesMaterial);
 
@@ -628,9 +638,24 @@ namespace SpaceEngine.Tests
             }
         }
 
+        private void OnGUI()
+        {
+            if (FrameBuffer != null && Resample)
+            {
+                GUI.DrawTexture(new Rect(Screen.width - FrameBuffer.width * 4 - 10, 10, FrameBuffer.width * 4, FrameBuffer.height * 4), FrameBuffer, ScaleMode.ScaleToFit, false);
+            }
+        }
+
         public void RenderDust()
         {
             if (DustMesh == null) return;
+
+            if (Resample)
+            {
+                DustCommandBuffer.Clear();
+                DustCommandBuffer.SetRenderTarget(FrameBuffer);
+                DustCommandBuffer.ClearRenderTarget(true, true, Color.black);
+            }
 
             var args = new uint[5];
             args[0] = (uint)DustMesh.GetIndexCount(0);              // Index count per instance...
@@ -642,9 +667,11 @@ namespace SpaceEngine.Tests
             DustArgsBuffer.SetData(args);
 
             // TODO : Calculate _Galaxy_Orientation and _Galaxy_OrientationInverse relative to camera, for a better visualization...
-            // TODO : Render dust in to texture to save per-pixel calculations count...
+            // TODO : Render 2 times, one for normal, second for negative colors, and additive blend later to get good dark gas...
+            // TOOD : Finish resampling...
             var galaxyOrientation = new Vector4(transform.rotation.x, transform.rotation.y, transform.rotation.z, transform.rotation.w);
             var galaxyOrientationInversed = -galaxyOrientation;
+            var bounds = new Bounds(Vector3.zero, new Vector3(1e8f, 1e8f, 1e8f));
 
             for (byte generationType = 0; generationType < StarsBuffers.Capacity; generationType++)
             {
@@ -655,17 +682,27 @@ namespace SpaceEngine.Tests
                 {
                     var buffer = buffers[bufferIndex];
 
-                    material.SetPass(0);
                     material.SetBuffer("stars", buffer);
-                    material.SetTexture("ColorDistributionTable", Settings.GalaxyRenderingParameters.ColorDistribution.Lut);
                     material.SetVector("dustParams1", new Vector2(Settings.GalaxyRenderingParameters.DustStrength, Settings.GalaxyRenderingParameters.DustSize));
+                    material.SetTexture("ColorDistributionTable", Settings.GalaxyRenderingParameters.ColorDistribution.Lut);
                     material.SetVector("_Galaxy_Position", transform.position - GodManager.Instance.View.WorldCameraPosition);
                     material.SetVector("_Galaxy_Orientation", galaxyOrientation);
                     material.SetVector("_Galaxy_OrientationInverse", galaxyOrientationInversed);
 
-                    Graphics.DrawMeshInstancedIndirect(DustMesh, 0, material, GalaxyBounds, DustArgsBuffer, 0);
+                    if (Resample)
+                    {
+                        DustCommandBuffer.DrawMeshInstancedIndirect(DustMesh, 0, material, 0, DustArgsBuffer);
+                    }
+                    else
+                    {
+                        material.SetPass(0);
+
+                        Graphics.DrawMeshInstancedIndirect(DustMesh, 0, material, bounds, DustArgsBuffer);
+                    }
                 }
             }
+
+            if (Resample) { Graphics.ExecuteCommandBuffer(DustCommandBuffer); }
         }
 
         #endregion
