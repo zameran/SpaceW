@@ -2809,7 +2809,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: bfdb5c75203d70c469a60304a0204944, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  DebugComponents: []
+  SwitchableComponents: []
+  DrawAbleComponents: []
   DisableAllOnStart: 1
 --- !u!114 &812990983
 MonoBehaviour:
@@ -2914,6 +2915,7 @@ GameObject:
   - component: {fileID: 829586937}
   - component: {fileID: 829586941}
   - component: {fileID: 829586942}
+  - component: {fileID: 829586948}
   m_Layer: 0
   m_Name: GUI
   m_TagString: Untagged
@@ -2933,6 +2935,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   debugInfoBounds:
+    serializedVersion: 2
+    x: 10
+    y: 10
+    width: 500
+    height: 500
+  debugInfoDrawBounds:
     serializedVersion: 2
     x: 10
     y: 10
@@ -3085,7 +3093,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e522203d72c03574ca5be629b3872bd6, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  DebugComponents: []
+  SwitchableComponents: []
+  DrawAbleComponents: []
   DisableAllOnStart: 0
   GUISkin: {fileID: 11400000, guid: 5f9307978351f0d4fbb973b4fe3f1b0e, type: 2}
   ShowAdditionalInfo: 1
@@ -3114,6 +3123,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   debugInfoBounds:
+    serializedVersion: 2
+    x: 10
+    y: 10
+    width: 500
+    height: 500
+  debugInfoDrawBounds:
     serializedVersion: 2
     x: 10
     y: 10
@@ -3271,6 +3286,12 @@ MonoBehaviour:
     y: 10
     width: 500
     height: 500
+  debugInfoDrawBounds:
+    serializedVersion: 2
+    x: 10
+    y: 10
+    width: 500
+    height: 500
   BoldLabelStyle:
     m_Name: 
     m_Normal:
@@ -3418,6 +3439,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   debugInfoBounds:
+    serializedVersion: 2
+    x: 10
+    y: 10
+    width: 500
+    height: 500
+  debugInfoDrawBounds:
     serializedVersion: 2
     x: 10
     y: 10
@@ -3574,7 +3601,13 @@ MonoBehaviour:
     x: 10
     y: 10
     width: 500
-    height: 510
+    height: 500
+  debugInfoDrawBounds:
+    serializedVersion: 2
+    x: 10
+    y: 10
+    width: 500
+    height: 500
   BoldLabelStyle:
     m_Name: 
     m_Normal:
@@ -3726,7 +3759,13 @@ MonoBehaviour:
     x: 10
     y: 10
     width: 500
-    height: 400
+    height: 500
+  debugInfoDrawBounds:
+    serializedVersion: 2
+    x: 10
+    y: 10
+    width: 500
+    height: 500
   BoldLabelStyle:
     m_Name: 
     m_Normal:
@@ -3875,6 +3914,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   debugInfoBounds:
+    serializedVersion: 2
+    x: 10
+    y: 10
+    width: 500
+    height: 500
+  debugInfoDrawBounds:
     serializedVersion: 2
     x: 10
     y: 10
@@ -4030,8 +4075,14 @@ MonoBehaviour:
     serializedVersion: 2
     x: 10
     y: 10
-    width: 600
-    height: 250
+    width: 500
+    height: 500
+  debugInfoDrawBounds:
+    serializedVersion: 2
+    x: 10
+    y: 10
+    width: 500
+    height: 500
   BoldLabelStyle:
     m_Name: 
     m_Normal:
@@ -4179,6 +4230,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   debugInfoBounds:
+    serializedVersion: 2
+    x: 10
+    y: 10
+    width: 500
+    height: 500
+  debugInfoDrawBounds:
     serializedVersion: 2
     x: 10
     y: 10
@@ -4335,6 +4392,164 @@ MonoBehaviour:
     bRl: 6421
     SCALE: 6360
   PresetChanged: 0
+--- !u!114 &829586948
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 829586936}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 41cb93f2fe20dee44bfe4fed9f75ba31, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  debugInfoBounds:
+    serializedVersion: 2
+    x: 10
+    y: 10
+    width: 128
+    height: 70
+  debugInfoDrawBounds:
+    serializedVersion: 2
+    x: 10
+    y: 10
+    width: 500
+    height: 500
+  BoldLabelStyle:
+    m_Name: 
+    m_Normal:
+      m_Background: {fileID: 0}
+      m_ScaledBackgrounds: []
+      m_TextColor: {r: 0, g: 0, b: 0, a: 1}
+    m_Hover:
+      m_Background: {fileID: 0}
+      m_ScaledBackgrounds: []
+      m_TextColor: {r: 0, g: 0, b: 0, a: 1}
+    m_Active:
+      m_Background: {fileID: 0}
+      m_ScaledBackgrounds: []
+      m_TextColor: {r: 0, g: 0, b: 0, a: 1}
+    m_Focused:
+      m_Background: {fileID: 0}
+      m_ScaledBackgrounds: []
+      m_TextColor: {r: 0, g: 0, b: 0, a: 1}
+    m_OnNormal:
+      m_Background: {fileID: 0}
+      m_ScaledBackgrounds: []
+      m_TextColor: {r: 0, g: 0, b: 0, a: 1}
+    m_OnHover:
+      m_Background: {fileID: 0}
+      m_ScaledBackgrounds: []
+      m_TextColor: {r: 0, g: 0, b: 0, a: 1}
+    m_OnActive:
+      m_Background: {fileID: 0}
+      m_ScaledBackgrounds: []
+      m_TextColor: {r: 0, g: 0, b: 0, a: 1}
+    m_OnFocused:
+      m_Background: {fileID: 0}
+      m_ScaledBackgrounds: []
+      m_TextColor: {r: 0, g: 0, b: 0, a: 1}
+    m_Border:
+      m_Left: 0
+      m_Right: 0
+      m_Top: 0
+      m_Bottom: 0
+    m_Margin:
+      m_Left: 0
+      m_Right: 0
+      m_Top: 0
+      m_Bottom: 0
+    m_Padding:
+      m_Left: 0
+      m_Right: 0
+      m_Top: 0
+      m_Bottom: 0
+    m_Overflow:
+      m_Left: 0
+      m_Right: 0
+      m_Top: 0
+      m_Bottom: 0
+    m_Font: {fileID: 0}
+    m_FontSize: 0
+    m_FontStyle: 0
+    m_Alignment: 0
+    m_WordWrap: 0
+    m_RichText: 1
+    m_TextClipping: 0
+    m_ImagePosition: 0
+    m_ContentOffset: {x: 0, y: 0}
+    m_FixedWidth: 0
+    m_FixedHeight: 0
+    m_StretchWidth: 1
+    m_StretchHeight: 0
+  ImageLabelStyle:
+    m_Name: 
+    m_Normal:
+      m_Background: {fileID: 0}
+      m_ScaledBackgrounds: []
+      m_TextColor: {r: 0, g: 0, b: 0, a: 1}
+    m_Hover:
+      m_Background: {fileID: 0}
+      m_ScaledBackgrounds: []
+      m_TextColor: {r: 0, g: 0, b: 0, a: 1}
+    m_Active:
+      m_Background: {fileID: 0}
+      m_ScaledBackgrounds: []
+      m_TextColor: {r: 0, g: 0, b: 0, a: 1}
+    m_Focused:
+      m_Background: {fileID: 0}
+      m_ScaledBackgrounds: []
+      m_TextColor: {r: 0, g: 0, b: 0, a: 1}
+    m_OnNormal:
+      m_Background: {fileID: 0}
+      m_ScaledBackgrounds: []
+      m_TextColor: {r: 0, g: 0, b: 0, a: 1}
+    m_OnHover:
+      m_Background: {fileID: 0}
+      m_ScaledBackgrounds: []
+      m_TextColor: {r: 0, g: 0, b: 0, a: 1}
+    m_OnActive:
+      m_Background: {fileID: 0}
+      m_ScaledBackgrounds: []
+      m_TextColor: {r: 0, g: 0, b: 0, a: 1}
+    m_OnFocused:
+      m_Background: {fileID: 0}
+      m_ScaledBackgrounds: []
+      m_TextColor: {r: 0, g: 0, b: 0, a: 1}
+    m_Border:
+      m_Left: 0
+      m_Right: 0
+      m_Top: 0
+      m_Bottom: 0
+    m_Margin:
+      m_Left: 0
+      m_Right: 0
+      m_Top: 0
+      m_Bottom: 0
+    m_Padding:
+      m_Left: 0
+      m_Right: 0
+      m_Top: 0
+      m_Bottom: 0
+    m_Overflow:
+      m_Left: 0
+      m_Right: 0
+      m_Top: 0
+      m_Bottom: 0
+    m_Font: {fileID: 0}
+    m_FontSize: 0
+    m_FontStyle: 0
+    m_Alignment: 0
+    m_WordWrap: 0
+    m_RichText: 1
+    m_TextClipping: 0
+    m_ImagePosition: 0
+    m_ContentOffset: {x: 0, y: 0}
+    m_FixedWidth: 0
+    m_FixedHeight: 0
+    m_StretchWidth: 1
+    m_StretchHeight: 0
+  ScrollPosition: {x: 0, y: 0}
 --- !u!1 &839125405
 GameObject:
   m_ObjectHideFlags: 0

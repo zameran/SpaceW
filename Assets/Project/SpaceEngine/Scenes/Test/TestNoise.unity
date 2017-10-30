@@ -497,8 +497,8 @@ GameObject:
   serializedVersion: 5
   m_Component:
   - component: {fileID: 1955046399}
-  - component: {fileID: 1955046401}
   - component: {fileID: 1955046400}
+  - component: {fileID: 1955046401}
   m_Layer: 0
   m_Name: GUI
   m_TagString: Untagged
@@ -530,7 +530,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e522203d72c03574ca5be629b3872bd6, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  DebugComponents: []
+  SwitchableComponents: []
+  DrawAbleComponents: []
   DisableAllOnStart: 1
   GUISkin: {fileID: 11400000, guid: 5f9307978351f0d4fbb973b4fe3f1b0e, type: 2}
   ShowAdditionalInfo: 1
@@ -546,6 +547,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   debugInfoBounds:
+    serializedVersion: 2
+    x: 10
+    y: 10
+    width: 500
+    height: 500
+  debugInfoDrawBounds:
     serializedVersion: 2
     x: 10
     y: 10

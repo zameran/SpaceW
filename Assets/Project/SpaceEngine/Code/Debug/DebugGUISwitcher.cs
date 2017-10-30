@@ -44,6 +44,7 @@ namespace SpaceEngine.Debugging
         public GUISkin GUISkin;
 
         public bool ShowAdditionalInfo = true;
+        public bool ShowDebugGUIBounds = false;
 
         public Vector2 MousePosition { get; private set; }
 
@@ -51,7 +52,7 @@ namespace SpaceEngine.Debugging
 
         public bool MouseOverGUIHotControl { get { return GUIUtility.hotControl != 0; } }
 
-        public bool MouseOverGUIRect { get { return DrawAbleComponents.Any(gui => gui.isActiveAndEnabled && (gui.debugInfoBounds.Contains(MousePosition) || gui.debugInfoDrawBounds.Contains(MousePosition))); } }
+        public bool MouseOverGUIRect { get { return DrawAbleComponents.Any(gui => gui.isActiveAndEnabled && gui.debugInfoDrawBounds.Contains(MousePosition)); } }
 
         public bool MouseOverGUI { get { return MouseOverGUIHotControl || MouseOverGUIRect; } }
 

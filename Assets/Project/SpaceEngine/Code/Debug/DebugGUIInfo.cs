@@ -71,33 +71,32 @@ namespace SpaceEngine.Debugging
 
         protected override void UI(int id)
         {
-            ScrollPosition = GUILayout.BeginScrollView(ScrollPosition, false, true, GUILayout.Width(debugInfoBounds.width), GUILayout.Height(debugInfoBounds.height));
+            ScrollPosition = GUILayout.BeginScrollView(ScrollPosition, false, true);
+
+            GUILayoutExtensions.VerticalBoxed("Input info: ", GUISkin, () =>
             {
-                GUILayoutExtensions.VerticalBoxed("Input info: ", GUISkin, () =>
+                GUILayoutExtensions.VerticalBoxed("", GUISkin, () =>
                 {
-                    GUILayoutExtensions.VerticalBoxed("", GUISkin, () =>
-                    {
-                        DrawLabelLines(Info);
-                    });
+                    DrawLabelLines(Info);
                 });
+            });
 
-                GUILayoutExtensions.SpacingSeparator();
+            GUILayoutExtensions.SpacingSeparator();
 
-                GUILayoutExtensions.VerticalBoxed("Additional info: ", GUISkin, () =>
+            GUILayoutExtensions.VerticalBoxed("Additional info: ", GUISkin, () =>
+            {
+                GUILayoutExtensions.VerticalBoxed("", GUISkin, () =>
                 {
-                    GUILayoutExtensions.VerticalBoxed("", GUISkin, () =>
-                    {
-                        DrawLabelLines(InfoAdditional);
-                    });
+                    DrawLabelLines(InfoAdditional);
                 });
-            }
+            });
 
             GUILayoutExtensions.SpacingSeparator();
 
             GUILayout.EndScrollView();
         }
 
-        private void DrawLabelLines(string[] lines)
+        private void DrawLabelLines(params string[] lines)
         {
             GUILayoutExtensions.Vertical(() =>
             {

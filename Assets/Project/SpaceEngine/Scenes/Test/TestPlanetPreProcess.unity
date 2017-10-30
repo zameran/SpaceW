@@ -1937,7 +1937,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: bfdb5c75203d70c469a60304a0204944, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  DebugComponents: []
+  SwitchableComponents: []
+  DrawAbleComponents: []
   DisableAllOnStart: 1
 --- !u!114 &812990983
 MonoBehaviour:
@@ -2061,6 +2062,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   debugInfoBounds:
+    serializedVersion: 2
+    x: 10
+    y: 10
+    width: 500
+    height: 500
+  debugInfoDrawBounds:
     serializedVersion: 2
     x: 10
     y: 10
@@ -2213,7 +2220,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e522203d72c03574ca5be629b3872bd6, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  DebugComponents: []
+  SwitchableComponents: []
+  DrawAbleComponents: []
   DisableAllOnStart: 0
   GUISkin: {fileID: 11400000, guid: 5f9307978351f0d4fbb973b4fe3f1b0e, type: 2}
   ShowAdditionalInfo: 1
@@ -2242,6 +2250,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   debugInfoBounds:
+    serializedVersion: 2
+    x: 10
+    y: 10
+    width: 500
+    height: 500
+  debugInfoDrawBounds:
     serializedVersion: 2
     x: 10
     y: 10
@@ -2399,6 +2413,12 @@ MonoBehaviour:
     y: 10
     width: 500
     height: 500
+  debugInfoDrawBounds:
+    serializedVersion: 2
+    x: 10
+    y: 10
+    width: 500
+    height: 500
   BoldLabelStyle:
     m_Name: 
     m_Normal:
@@ -2546,6 +2566,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   debugInfoBounds:
+    serializedVersion: 2
+    x: 10
+    y: 10
+    width: 500
+    height: 500
+  debugInfoDrawBounds:
     serializedVersion: 2
     x: 10
     y: 10
@@ -2702,7 +2728,13 @@ MonoBehaviour:
     x: 10
     y: 10
     width: 500
-    height: 510
+    height: 500
+  debugInfoDrawBounds:
+    serializedVersion: 2
+    x: 10
+    y: 10
+    width: 500
+    height: 500
   BoldLabelStyle:
     m_Name: 
     m_Normal:
@@ -2854,7 +2886,13 @@ MonoBehaviour:
     x: 10
     y: 10
     width: 500
-    height: 400
+    height: 500
+  debugInfoDrawBounds:
+    serializedVersion: 2
+    x: 10
+    y: 10
+    width: 500
+    height: 500
   BoldLabelStyle:
     m_Name: 
     m_Normal:
@@ -3003,6 +3041,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   debugInfoBounds:
+    serializedVersion: 2
+    x: 10
+    y: 10
+    width: 500
+    height: 500
+  debugInfoDrawBounds:
     serializedVersion: 2
     x: 10
     y: 10
@@ -3158,8 +3202,14 @@ MonoBehaviour:
     serializedVersion: 2
     x: 10
     y: 10
-    width: 600
-    height: 250
+    width: 500
+    height: 500
+  debugInfoDrawBounds:
+    serializedVersion: 2
+    x: 10
+    y: 10
+    width: 500
+    height: 500
   BoldLabelStyle:
     m_Name: 
     m_Normal:
@@ -3307,6 +3357,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   debugInfoBounds:
+    serializedVersion: 2
+    x: 10
+    y: 10
+    width: 500
+    height: 500
+  debugInfoDrawBounds:
     serializedVersion: 2
     x: 10
     y: 10

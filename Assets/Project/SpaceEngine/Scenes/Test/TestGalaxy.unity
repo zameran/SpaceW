@@ -7873,8 +7873,8 @@ MonoBehaviour:
     serializedVersion: 2
     x: 10
     y: 10
-    width: 600
-    height: 250
+    width: 500
+    height: 500
   debugInfoDrawBounds:
     serializedVersion: 2
     x: 10
@@ -11679,11 +11679,6 @@ MonoBehaviour:
       PassRotation: 1.5707964
   DustMesh: {fileID: 10202, guid: 0000000000000000e000000000000000, type: 0}
   AutoUpdate: 1
-  ParticleSystems:
-  - {fileID: 1725917397}
-  - {fileID: 308708629}
-  - {fileID: 183814712}
-  - {fileID: 1175205910}
 --- !u!4 &1257223185
 Transform:
   m_ObjectHideFlags: 0

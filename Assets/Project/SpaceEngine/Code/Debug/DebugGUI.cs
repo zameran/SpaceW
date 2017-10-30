@@ -106,6 +106,19 @@ namespace SpaceEngine.Debugging
                     else if (labelStyle != null)
                         ImageLabelStyle = labelStyle;
                 }
+
+                if (SwitcherComponent.ShowDebugGUIBounds)
+                {
+                    var guiColor = GUI.color;
+
+                    GUI.color = Color.red;
+                    GUI.Box(debugInfoBounds, "");
+
+                    GUI.color = Color.green;
+                    GUI.Box(debugInfoDrawBounds, "");
+
+                    GUI.color = guiColor;
+                }
             }
         }
 
