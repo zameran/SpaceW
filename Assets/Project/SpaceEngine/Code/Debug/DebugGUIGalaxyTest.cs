@@ -167,7 +167,9 @@ namespace SpaceEngine.Debugging
                             GUILayoutExtensions.SliderWithFieldAndControls("Dust Size (Ly): ", 0.0f, 4.0f, ref Galaxy.Settings.GalaxyRenderingParameters.DustSize, "0.0000", 75, 0.25f);
                             GUILayoutExtensions.SliderWithFieldAndControls("Dust Pass Count: ", 1, Galaxy.Settings.GalaxyParameters.PassCount, ref Galaxy.Settings.GalaxyRenderingParameters.DustPassCount, "0", 75, 1);
 
-                            GUILayoutExtensions.SliderWithFieldAndControls("Draw Percent (%)", 0.0f, 1.0f, ref Galaxy.Settings.GalaxyRenderingParameters.DrawPercent, "0.0000", 75, 0.01f);
+                            GUILayoutExtensions.SliderWithFieldAndControls("Dust Draw Percent (%)", 0.0f, 1.0f, ref Galaxy.Settings.GalaxyRenderingParameters.DustDrawPercent, "0.0000", 75, 0.01f);
+
+                            GUILayoutExtensions.SliderWithFieldAndControls("Stars Draw Percent (%)", 0.0f, 1.0f, ref Galaxy.Settings.GalaxyRenderingParameters.StarDrawPercent, "0.0000", 75, 0.01f);
                         });
                     });
 

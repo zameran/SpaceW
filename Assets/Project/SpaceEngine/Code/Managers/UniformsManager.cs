@@ -52,6 +52,8 @@ public class UniformsManager : MonoSingleton<UniformsManager>, IUniformed, IUnif
     public Texture2D QuadTexture3 = null;
     public Texture2D QuadTexture4 = null;
 
+    public bool OverrideDefaultNoiseParameters = false;
+
     #region IUniformed
 
     public void InitUniforms()
@@ -69,6 +71,15 @@ public class UniformsManager : MonoSingleton<UniformsManager>, IUniformed, IUnif
         Shader.SetGlobalTexture("_QuadTexture2", QuadTexture2);
         Shader.SetGlobalTexture("_QuadTexture3", QuadTexture3);
         Shader.SetGlobalTexture("_QuadTexture4", QuadTexture4);
+
+        if (OverrideDefaultNoiseParameters)
+        {
+            Shader.SetGlobalFloat("noiseOctaves", 4);
+            Shader.SetGlobalFloat("noiseLacunarity", 2.218281828459f);
+            Shader.SetGlobalFloat("noiseH", 0.5f);
+            Shader.SetGlobalFloat("noiseOffset", 0.8f);
+            Shader.SetGlobalFloat("noiseRidgeSmooth", 0.0001f);
+        }
     }
 
     public void SetUniforms()

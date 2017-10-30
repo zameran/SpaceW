@@ -11597,8 +11597,9 @@ MonoBehaviour:
     GalaxyRenderingParameters:
       DustStrength: 0.0075
       DustSize: 1
+      DustDrawPercent: 0.1
+      StarDrawPercent: 1
       DustPassCount: 1
-      DrawPercent: 0.1
       ColorDistribution:
         Gradient:
           serializedVersion: 2
@@ -15342,6 +15343,7 @@ MonoBehaviour:
   QuadTexture2: {fileID: 0}
   QuadTexture3: {fileID: 0}
   QuadTexture4: {fileID: 0}
+  OverrideDefaultNoiseParameters: 1
 --- !u!4 &1947387574
 Transform:
   m_ObjectHideFlags: 0
@@ -15458,7 +15460,7 @@ Camera:
     width: 1
     height: 1
   near clip plane: 0.3
-  far clip plane: 1000
+  far clip plane: 100000
   field of view: 60
   orthographic: 0
   orthographic size: 5

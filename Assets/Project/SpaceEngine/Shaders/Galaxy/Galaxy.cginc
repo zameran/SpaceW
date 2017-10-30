@@ -40,6 +40,12 @@
 //-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
+#if !defined (TCCOMMON)
+#include "../TCCommon.cginc"
+#endif
+//-----------------------------------------------------------------------------
+
+//-----------------------------------------------------------------------------
 uniform float3	randomParams1;	// Randomize
 uniform float4  offsetParams1;	// (offsetX,	offsetY,		offsetZ,	 UNUSED)
 uniform float4	sizeParams1;	// (radius,		ellipseRadius,	barSize,	 depth)
@@ -200,3 +206,68 @@ float4 GetMaterial(float value)
 	return ColorDistributionTable.SampleLevel(sampler_point_clamp_MaterialTable, float2(value, 0.0), 0);
 }
 //-----------------------------------------------------------------------------
+
+float ArmProfile(float fi, float r)
+{
+	const float fi0 = 0.2;
+
+	//fi = floor(fi / M_PI);
+	//fi = max(sin(floor(fi / M_PI)), 0.0);
+	fi = (fi < fi0) ? fi / fi0 : (1.0 - fi) / (1.0 - fi0);
+
+	return SavePow(fi, 15.0 * r + 1.0);
+}
+
+float RayFunc(float fi, float r)
+{
+	const float r0 = 0.15;
+
+	float t = (r < r0) ? r / r0 : (1.0 - r) / (1.0 - r0);
+	float d = ArmProfile(fi, r);
+
+	return SavePow(t, 1.8) * d;
+}
+
+float SpiralDensity(float3 ppoint)
+{
+	// Compute cyclons
+	float cycloneRadius = length(ppoint);
+	float cycloneAmpl   = 2.3;
+	float weight        = 1.0;
+	float3 twistedPoint = ppoint;
+	float global = 0;
+	float distort = 0;
+	float turbulence = 0;
+
+	//twistedPoint += 0.15 * Fbm3D(twistedPoint * 1.5);
+	
+	if (cycloneRadius < 1.0)
+	{
+		float dist = 1.0 - cycloneRadius;
+		float fi = log(cycloneRadius);
+
+		twistedPoint = Rotate2d(cycloneAmpl * fi, twistedPoint);
+	}
+
+	noiseLacunarity = 3.0;
+	distort = Fbm(ppoint * 0.7 + Randomize, 4) * 0.2;
+
+	//twistedPoint.x *= 0.2;
+	//twistedPoint.y *= 5.0;
+	//global = (Fbm(twistedPoint) + 1.0, 2) * 0.7;
+	//global = abs(sin(M_PI2 * twistedPoint.x));
+
+	float r = length(twistedPoint.xy);
+	float fi = atan2(twistedPoint.x, twistedPoint.y);
+	fi = frac(3 * ((fi / M_PI) * 0.5 + 0.5));
+	global = RayFunc(fi + distort, r) * weight;
+
+	// Compute flow-like distortion
+	//global = (Fbm(twistedPoint + distort) + 1.0, 6) * 0.7;
+	//global = (global + offset) * weight;
+
+	// Compute turbilence features
+	turbulence = Fbm(ppoint * 100.0 + Randomize, 5) * 0.1;
+
+	return global + turbulence * step(0.1, global);
+}

@@ -145,6 +145,14 @@ uniform float noiseRidgeSmooth;// = 0.0001;
 //-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
+// NOTE : Compute shaders doesn't support these macro...
+#if defined (COMPUTE_SHADER)
+#define UNITY_BRANCH
+#define UNITY_UNROLL
+#endif
+//-----------------------------------------------------------------------------
+
+//-----------------------------------------------------------------------------
 #define     mainFreq            mainParams.x
 #define     terraceProb         mainParams.y
 #define     surfClass           mainParams.z
@@ -273,6 +281,14 @@ inline float AngleBetween(float3 a, float3 b)
 inline float Repeat(float t, float l)
 {
 	return t - floor(t / l) * l;
+}
+
+float3 Rotate2d(float a, float3 v)
+{
+	float cosa = cos(a);
+	float sina = sin(a);
+
+	return mul(v, float3x3(cosa, sina, 0.0, -sina, cosa, 0.0, 0.0, 0.0, 1.0));
 }
 
 float3 Rotate(float angle, float3 axis, float3 v)

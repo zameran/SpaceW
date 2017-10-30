@@ -190,11 +190,14 @@ namespace SpaceEngine.Tests
         [Range(0.0f, 4.0f)]
         public float DustSize;
 
-        [Range(1.0f, 4.0f)]
-        public int DustPassCount;
+        [Range(0.0f, 1.0f)]
+        public float DustDrawPercent;
 
         [Range(0.0f, 1.0f)]
-        public float DrawPercent;
+        public float StarDrawPercent;
+
+        [Range(1.0f, 4.0f)]
+        public int DustPassCount;
 
         public ColorMaterialTableGradientLut ColorDistribution;
 
@@ -202,22 +205,22 @@ namespace SpaceEngine.Tests
         {
             DustStrength = from.DustStrength;
             DustSize = from.DustSize;
+            DustDrawPercent = from.DustDrawPercent;
+            StarDrawPercent = from.StarDrawPercent;
 
             DustPassCount = from.DustPassCount;
-
-            DrawPercent = from.DrawPercent;
 
             ColorDistribution = new ColorMaterialTableGradientLut();
         }
 
-        public GalaxyRenderingParameters(float dustStrength, float dustSize, int dustPassCount, float drawPercent)
+        public GalaxyRenderingParameters(float dustStrength, float dustSize, float dustDrawPercent, float starDrawPercent, int dustPassCount)
         {
             DustStrength = dustStrength;
             DustSize = dustSize;
+            DustDrawPercent = dustDrawPercent;
+            StarDrawPercent = starDrawPercent;
 
             DustPassCount = dustPassCount;
-
-            DrawPercent = drawPercent;
 
             ColorDistribution = new ColorMaterialTableGradientLut();
         }
@@ -226,7 +229,7 @@ namespace SpaceEngine.Tests
         {
             get
             {
-                return new GalaxyRenderingParameters(0.0075f, 1.0f, 1, 0.1f);
+                return new GalaxyRenderingParameters(0.0075f, 1.0f, 0.1f, 1.0f, 1);
             }
         }
     }
@@ -383,9 +386,11 @@ namespace SpaceEngine.Tests
         public bool AutoUpdate = false;
         public bool Resample = false;
 
-        public int DrawCount { get { return (int)(Settings.GalaxyParameters.Count * Settings.GalaxyRenderingParameters.DrawPercent); } }
+        public int StarDrawCount { get { return (int)(Settings.GalaxyParameters.Count * Settings.GalaxyRenderingParameters.StarDrawPercent); } }
+        public int DustDrawCount { get { return (int)(Settings.GalaxyParameters.Count * Settings.GalaxyRenderingParameters.DustDrawPercent); } }
 
         public RenderTexture FrameBuffer;
+
         public CommandBuffer DustCommandBuffer;
 
         #region Galaxy
@@ -573,7 +578,7 @@ namespace SpaceEngine.Tests
             FrameBuffer = RTExtensions.CreateRTexture(new Vector2(Screen.width / 8.0f, Screen.height / 8.0f), 0, RenderTextureFormat.ARGBFloat, FilterMode.Bilinear, TextureWrapMode.Clamp);
 
             DustCommandBuffer = new CommandBuffer();
-            DustCommandBuffer.name = "Dust";
+            DustCommandBuffer.name = "Galaxy Dust Rendering";
 
             InitBuffers();
             GenerateBuffers();
@@ -633,7 +638,7 @@ namespace SpaceEngine.Tests
                     StarsMaterial.SetPass(0);
                     StarsMaterial.SetBuffer("stars", buffer);
                     
-                    Graphics.DrawProcedural(MeshTopology.Points, DrawCount);
+                    Graphics.DrawProcedural(MeshTopology.Points, StarDrawCount);
                 }
             }
         }
@@ -659,7 +664,7 @@ namespace SpaceEngine.Tests
 
             var args = new uint[5];
             args[0] = (uint)DustMesh.GetIndexCount(0);              // Index count per instance...
-            args[1] = (uint)DrawCount;                              // Instance count...
+            args[1] = (uint)DustDrawCount;                              // Instance count...
             args[2] = 0;                                            // Start index location...
             args[3] = 0;                                            // Base vertex location...
             args[4] = 0;                                            // Start instance location...
