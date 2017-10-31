@@ -35,9 +35,10 @@
 			float3 direction : TEXCOORD2;
 			float3 rayEnd : TEXCOORD3;
 			float3 rayStart : TEXCOORD4;
+			float3 position : TEXCOORD5;
 		};
 		
-		void vert(in appdata v, out v2f o)
+		void PackStar(in appdata v, out v2f o)
 		{
 			uint id = v.instanceId;
 		
@@ -62,9 +63,10 @@
 			o.direction = direction;
 			o.rayEnd = localPosition;
 			o.rayStart = relativePosition;
+			o.position = starPosition;
 		}
-		
-		void frag(in v2f i, out float4 color : SV_Target)
+
+		void UnpackStar(in v2f i, out float4 outputColor)
 		{
 			float4 starColor = i.color;
 			float starSize = i.data.x;
@@ -92,14 +94,40 @@
 			
 			float rlen = hte - hts;
 			float rlenn = 0.5 * rlen / starSize;
+
+			float alpha = saturate(rlenn * rlenn);
 			
-			starColor *= saturate(rlenn * rlenn);
+			starColor *= alpha;
 			starColor *= dustStrength;
-			starColor *= 1;
 			starColor = clamp(starColor, -1.0, 1.0);
 			//starColor = float4(ToneMapFilmicALU(starColor.xyz * 2.2), starColor.w);
+
+			outputColor = float4(starColor.xyz, alpha);
+		}
+
+		void vert(in appdata v, out v2f o)
+		{
+			PackStar(v, o);
+		}
+		
+		void frag_dust(in v2f i, out float4 color : SV_Target)
+		{
+			float4 starColor;
+
+			UnpackStar(i, starColor);
 			
-			color = starColor;
+			color = float4(starColor.rgb, starColor.a);
+		}
+
+		void frag_gas(in v2f i, out float4 color : SV_Target)
+		{
+			float4 starColor;
+
+			UnpackStar(i, starColor);
+			
+			starColor.a *= smoothstep(-1.0, gasCenterFalloff, length(i.position) - gasCenterFalloff);
+
+			color = float4(-starColor.rgb * M_PI, starColor.a);
 		}
 		ENDCG
 
@@ -124,7 +152,32 @@
 			CGPROGRAM
 			#pragma target 5.0
 			#pragma vertex vert
-			#pragma fragment frag
+			#pragma fragment frag_dust
+			ENDCG
+		}
+
+		Pass
+		{
+			Name "Dust (Gas)"
+			Tags 
+			{
+				"Queue"					= "Transparent"
+				"RenderType"			= "Transparent"
+				"ForceNoShadowCasting"	= "True"
+				"IgnoreProjector"		= "True"
+
+				"LightMode"				= "Always"
+			}
+
+			Blend SrcAlpha One
+			Cull Front
+			ZWrite On
+			ZTest Always
+
+			CGPROGRAM
+			#pragma target 5.0
+			#pragma vertex vert
+			#pragma fragment frag_gas
 			ENDCG
 		}
 	}

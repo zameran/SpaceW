@@ -52,6 +52,7 @@ uniform float4	sizeParams1;	// (radius,		ellipseRadius,	barSize,	 depth)
 uniform float4	warpParams1;	// (warp1.x,	warp1.y,		warp2.x,	 warp2.y)
 uniform float4	spiralParams1;	// (inverseEccentricity, spiralRotation, passRotation, UNUSED)
 uniform float2	dustParams1;	// (dustStrength,	dustSize,	UNUSED,		UNUSED)
+uniform float2	gasParams1;		// (gasCenterFalloff,	UNUSED,	UNUSED,		UNUSED)
 //-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
@@ -69,6 +70,7 @@ uniform float2	dustParams1;	// (dustStrength,	dustSize,	UNUSED,		UNUSED)
 #define		passRotation			spiralParams1.z
 #define		dustStrength			dustParams1.x
 #define		dustSize				dustParams1.y
+#define		gasCenterFalloff		gasParams1.x
 //-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------

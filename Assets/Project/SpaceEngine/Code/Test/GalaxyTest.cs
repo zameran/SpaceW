@@ -199,6 +199,8 @@ namespace SpaceEngine.Tests
         [Range(1.0f, 4.0f)]
         public int DustPassCount;
 
+        public float GasCenterFalloff;
+
         public ColorMaterialTableGradientLut ColorDistribution;
 
         public GalaxyRenderingParameters(GalaxyRenderingParameters from)
@@ -210,10 +212,12 @@ namespace SpaceEngine.Tests
 
             DustPassCount = from.DustPassCount;
 
+            GasCenterFalloff = from.GasCenterFalloff;
+
             ColorDistribution = new ColorMaterialTableGradientLut();
         }
 
-        public GalaxyRenderingParameters(float dustStrength, float dustSize, float dustDrawPercent, float starDrawPercent, int dustPassCount)
+        public GalaxyRenderingParameters(float dustStrength, float dustSize, float dustDrawPercent, float starDrawPercent, int dustPassCount, float gasCenterFalloff)
         {
             DustStrength = dustStrength;
             DustSize = dustSize;
@@ -222,6 +226,8 @@ namespace SpaceEngine.Tests
 
             DustPassCount = dustPassCount;
 
+            GasCenterFalloff = gasCenterFalloff;
+
             ColorDistribution = new ColorMaterialTableGradientLut();
         }
 
@@ -229,7 +235,7 @@ namespace SpaceEngine.Tests
         {
             get
             {
-                return new GalaxyRenderingParameters(0.0075f, 1.0f, 0.1f, 1.0f, 1);
+                return new GalaxyRenderingParameters(0.0075f, 1.0f, 0.1f, 1.0f, 1, 16.0f);
             }
         }
     }
@@ -378,6 +384,7 @@ namespace SpaceEngine.Tests
         private List<List<ComputeBuffer>> StarsBuffers = new List<List<ComputeBuffer>>();
         private List<Material> DustMaterials = new List<Material>();
         private ComputeBuffer DustArgsBuffer;
+        private ComputeBuffer GasArgsBuffer;
 
         public GalaxySettings Settings = GalaxySettings.Default;
 
@@ -388,6 +395,9 @@ namespace SpaceEngine.Tests
 
         public int StarDrawCount { get { return (int)(Settings.GalaxyParameters.Count * Settings.GalaxyRenderingParameters.StarDrawPercent); } }
         public int DustDrawCount { get { return (int)(Settings.GalaxyParameters.Count * Settings.GalaxyRenderingParameters.DustDrawPercent); } }
+        public int StarDrawCountInversed { get { return (int)(Settings.GalaxyParameters.Count * (1.0f - Settings.GalaxyRenderingParameters.StarDrawPercent)); } }
+
+        public int DustDrawCountInversed { get { return (int)(Settings.GalaxyParameters.Count * (1.0f - Settings.GalaxyRenderingParameters.DustDrawPercent)); } }
 
         public RenderTexture FrameBuffer;
 
@@ -480,7 +490,7 @@ namespace SpaceEngine.Tests
 
         public void InitBuffers()
         {
-            if (StarsBuffers != null || DustArgsBuffer != null)
+            if (StarsBuffers != null || DustArgsBuffer != null || GasArgsBuffer != null)
             {
                 DestroyBuffers();
             }
@@ -504,6 +514,7 @@ namespace SpaceEngine.Tests
             }
 
             DustArgsBuffer = new ComputeBuffer(1, 5 * sizeof(uint), ComputeBufferType.IndirectArguments);
+            GasArgsBuffer = new ComputeBuffer(1, 5 * sizeof(uint), ComputeBufferType.IndirectArguments);
         }
 
         public void GenerateBuffers()
@@ -551,6 +562,7 @@ namespace SpaceEngine.Tests
             StarsBuffers.Clear();
 
             DustArgsBuffer.ReleaseAndDisposeBuffer();
+            GasArgsBuffer.ReleaseAndDisposeBuffer();
         }
 
         #endregion
@@ -662,18 +674,25 @@ namespace SpaceEngine.Tests
                 DustCommandBuffer.ClearRenderTarget(true, true, Color.black);
             }
 
-            var args = new uint[5];
-            args[0] = (uint)DustMesh.GetIndexCount(0);              // Index count per instance...
-            args[1] = (uint)DustDrawCount;                              // Instance count...
-            args[2] = 0;                                            // Start index location...
-            args[3] = 0;                                            // Base vertex location...
-            args[4] = 0;                                            // Start instance location...
+            var dustArgs = new uint[5];
+            dustArgs[0] = (uint)DustMesh.GetIndexCount(0);              // Index count per instance...
+            dustArgs[1] = (uint)DustDrawCount;                          // Instance count...
+            dustArgs[2] = 0;                                            // Start index location...
+            dustArgs[3] = 0;                                            // Base vertex location...
+            dustArgs[4] = 0;                                            // Start instance location...
 
-            DustArgsBuffer.SetData(args);
+            var gasArgs = new uint[5];
+            gasArgs[0] = (uint)DustMesh.GetIndexCount(0);
+            gasArgs[1] = (uint)DustDrawCount / 10;                      // TODO : Accurate dust count...
+            gasArgs[2] = 0;
+            gasArgs[3] = 0;
+            gasArgs[4] = 0;
+
+            DustArgsBuffer.SetData(dustArgs);
+            GasArgsBuffer.SetData(gasArgs);
 
             // TODO : Calculate _Galaxy_Orientation and _Galaxy_OrientationInverse relative to camera, for a better visualization...
-            // TODO : Render 2 times, one for normal, second for negative colors, and additive blend later to get good dark gas...
-            // TOOD : Finish resampling...
+            // TODO : Finish resampling...
             var galaxyOrientation = new Vector4(transform.rotation.x, transform.rotation.y, transform.rotation.z, transform.rotation.w);
             var galaxyOrientationInversed = -galaxyOrientation;
             var bounds = new Bounds(Vector3.zero, new Vector3(1e8f, 1e8f, 1e8f));
@@ -689,6 +708,7 @@ namespace SpaceEngine.Tests
 
                     material.SetBuffer("stars", buffer);
                     material.SetVector("dustParams1", new Vector2(Settings.GalaxyRenderingParameters.DustStrength, Settings.GalaxyRenderingParameters.DustSize));
+                    material.SetVector("gasParams1", new Vector2(Settings.GalaxyRenderingParameters.GasCenterFalloff, 0.0f));
                     material.SetTexture("ColorDistributionTable", Settings.GalaxyRenderingParameters.ColorDistribution.Lut);
                     material.SetVector("_Galaxy_Position", transform.position - GodManager.Instance.View.WorldCameraPosition);
                     material.SetVector("_Galaxy_Orientation", galaxyOrientation);
@@ -697,6 +717,7 @@ namespace SpaceEngine.Tests
                     if (Resample)
                     {
                         DustCommandBuffer.DrawMeshInstancedIndirect(DustMesh, 0, material, 0, DustArgsBuffer);
+                        DustCommandBuffer.DrawMeshInstancedIndirect(DustMesh, 0, material, 1, GasArgsBuffer);
                     }
                     else
                     {

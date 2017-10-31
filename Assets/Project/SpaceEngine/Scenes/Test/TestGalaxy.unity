@@ -11681,7 +11681,7 @@ MonoBehaviour:
       PassRotation: 1.5707964
   DustMesh: {fileID: 10202, guid: 0000000000000000e000000000000000, type: 0}
   AutoUpdate: 1
-  Resample: 0
+  Resample: 1
   FrameBuffer: {fileID: 0}
 --- !u!4 &1257223185
 Transform:
