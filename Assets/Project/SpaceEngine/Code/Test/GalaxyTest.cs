@@ -403,7 +403,10 @@ namespace SpaceEngine.Tests
 
         public int DustDrawCountInversed { get { return (int)(Settings.GalaxyParameters.Count * (1.0f - Settings.GalaxyRenderingParameters.DustDrawPercent)); } }
 
-        public RenderTexture FrameBuffer;
+        public RenderTexture FrameBuffer1;
+        public RenderTexture FrameBuffer2;
+
+        public float BlendFactor = 0.0f;
 
         public CommandBuffer DustCommandBuffer;
 
@@ -600,18 +603,28 @@ namespace SpaceEngine.Tests
             Settings.GalaxyRenderingParameters.ColorDistribution.GenerateLut();
             Settings.GalaxyGenerationParameters.ColorDistribution.GenerateLut();
 
-            FrameBuffer = RTExtensions.CreateRTexture(new Vector2(Screen.width / 2.0f, Screen.height / 2.0f), 0, RenderTextureFormat.ARGBFloat, FilterMode.Bilinear, TextureWrapMode.Clamp);
+            FrameBuffer1 = RTExtensions.CreateRTexture(new Vector2(Screen.width / 2.0f, Screen.height / 2.0f), 0, RenderTextureFormat.ARGBFloat, FilterMode.Bilinear, TextureWrapMode.Clamp);
+            FrameBuffer2 = RTExtensions.CreateRTexture(new Vector2(Screen.width / 4.0f, Screen.height / 4.0f), 0, RenderTextureFormat.ARGBFloat, FilterMode.Bilinear, TextureWrapMode.Clamp);
 
             DustCommandBuffer = new CommandBuffer();
             DustCommandBuffer.name = "Galaxy Dust Rendering";
 
             InitBuffers();
             GenerateBuffers();
+
+            //GenerateParticles(transform.GetComponentInChildren<ParticleSystem>(), StarsBuffers[0][0]);
         }
 
         protected override void UpdateNode()
         {
             if (AutoUpdate) GenerateBuffers();
+
+            var diameter = Settings.GalaxyGenerationParameters.Radius * 2.0f;
+            var plane = new Plane(Vector3.up, diameter);
+            var distance = plane.GetDistanceToPoint(CameraHelper.Main().transform.position);
+            var screenSize = DistanceAndDiameterToPixelSize(distance, diameter);
+
+            BlendFactor = screenSize / (diameter * 2.0f);
         }
 
         protected override void Awake()
@@ -636,7 +649,9 @@ namespace SpaceEngine.Tests
             DestroyBuffers();
             DestroyDustMaterials();
 
-            if (FrameBuffer != null) FrameBuffer.ReleaseAndDestroy();
+            if (FrameBuffer1 != null) FrameBuffer1.ReleaseAndDestroy();
+            if (FrameBuffer2 != null) FrameBuffer2.ReleaseAndDestroy();
+
             if (DustCommandBuffer != null) DustCommandBuffer.Release();
 
             Helper.Destroy(StarsMaterial);
@@ -650,6 +665,11 @@ namespace SpaceEngine.Tests
         }
 
         #endregion
+
+        private float DistanceAndDiameterToPixelSize(float distance, float diameter)
+        {
+            return (diameter * Mathf.Rad2Deg * Screen.height) / (distance * CameraHelper.Main().fieldOfView);
+        }
 
         #region IRenderable
 
@@ -675,7 +695,9 @@ namespace SpaceEngine.Tests
         {
             if (ScreenMesh == null) return;
 
-            ScreenMaterial.SetTexture("_FrameBuffer", FrameBuffer);
+            ScreenMaterial.SetTexture("_FrameBuffer1", FrameBuffer1);
+            ScreenMaterial.SetTexture("_FrameBuffer2", FrameBuffer2);
+            ScreenMaterial.SetFloat("_Mix", BlendFactor);
             
             Graphics.DrawMesh(ScreenMesh, Matrix4x4.TRS(Vector3.zero, Quaternion.identity, Vector3.one), ScreenMaterial, 8);
         }
@@ -685,7 +707,14 @@ namespace SpaceEngine.Tests
             if (DustMesh == null) return;
 
             DustCommandBuffer.Clear();
-            DustCommandBuffer.SetRenderTarget(FrameBuffer);
+
+            if (BlendFactor < 1.0f)
+            {
+                DustCommandBuffer.SetRenderTarget(FrameBuffer1);
+                DustCommandBuffer.ClearRenderTarget(true, true, Color.black);
+            }
+
+            DustCommandBuffer.SetRenderTarget(FrameBuffer2);
             DustCommandBuffer.ClearRenderTarget(true, true, Color.black);
 
             var dustArgs = new uint[5];
@@ -706,7 +735,7 @@ namespace SpaceEngine.Tests
             GasArgsBuffer.SetData(gasArgs);
 
             // TODO : Calculate _Galaxy_Orientation and _Galaxy_OrientationInverse relative to camera, for a better visualization...
-            // TODO : Blending between high and low downsamples...
+            // TODO : Better blending handling...
             var galaxyOrientation = new Vector4(transform.rotation.x, transform.rotation.y, transform.rotation.z, transform.rotation.w);
             var galaxyOrientationInversed = -galaxyOrientation;
 
@@ -727,6 +756,14 @@ namespace SpaceEngine.Tests
                     material.SetVector("_Galaxy_Orientation", galaxyOrientation);
                     material.SetVector("_Galaxy_OrientationInverse", galaxyOrientationInversed);
 
+                    if (BlendFactor < 1.0f)
+                    {
+                        DustCommandBuffer.SetRenderTarget(FrameBuffer1);
+                        DustCommandBuffer.DrawMeshInstancedIndirect(DustMesh, 0, material, 0, DustArgsBuffer);
+                        DustCommandBuffer.DrawMeshInstancedIndirect(DustMesh, 0, material, 1, GasArgsBuffer);
+                    }
+
+                    DustCommandBuffer.SetRenderTarget(FrameBuffer2);
                     DustCommandBuffer.DrawMeshInstancedIndirect(DustMesh, 0, material, 0, DustArgsBuffer);
                     DustCommandBuffer.DrawMeshInstancedIndirect(DustMesh, 0, material, 1, GasArgsBuffer);
                 }

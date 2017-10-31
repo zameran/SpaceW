@@ -20,7 +20,10 @@
 			
 			#include "UnityCG.cginc"
 
-			uniform sampler2D _FrameBuffer;
+			uniform sampler2D _FrameBuffer1;
+			uniform sampler2D _FrameBuffer2;
+
+			uniform float _Mix;
 
 			struct appdata
 			{
@@ -46,7 +49,10 @@
 			
 			void frag(in v2f i, out float4 color : SV_Target)
 			{
-				color = tex2D(_FrameBuffer, i.texcoord);
+				float4 hiBuffer = tex2D(_FrameBuffer1, i.texcoord);
+				float4 loBuffer = tex2D(_FrameBuffer2, i.texcoord);
+
+				color = lerp(hiBuffer, loBuffer, clamp(_Mix, 0.0, 1.0));
 			}
 			ENDCG
 		}
