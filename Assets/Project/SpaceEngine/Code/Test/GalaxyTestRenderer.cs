@@ -40,11 +40,18 @@ namespace SpaceEngine.Tests
     [RequireComponent(typeof(Camera))]
     public class GalaxyTestRenderer : MonoSingleton<GalaxyTestRenderer>
     {
+        internal enum RenderType : byte
+        {
+            Stars,
+            Dust,
+            None
+        }
+
         [SerializeField]
         internal GalaxyTest Galaxy;
 
-        public bool RenderDust = true;
-        public bool RenderStars = true;
+        [SerializeField]
+        internal RenderType RenderMethod = RenderType.Dust;
 
         private void Awake()
         {
@@ -58,14 +65,21 @@ namespace SpaceEngine.Tests
 
         private void Update()
         {
-            if (Galaxy == null || !RenderDust) return;
+            if (Galaxy == null || RenderMethod != RenderType.Dust) return;
+
+            Galaxy.RenderDustScreen();
+        }
+
+        private void OnPreRender()
+        {
+            if (Galaxy == null || RenderMethod != RenderType.Dust) return;
 
             Galaxy.RenderDust();
         }
 
         private void OnPostRender()
         {
-            if (Galaxy == null || !RenderStars) return;
+            if (Galaxy == null || RenderMethod != RenderType.Stars) return;
 
             Galaxy.Render();
         }

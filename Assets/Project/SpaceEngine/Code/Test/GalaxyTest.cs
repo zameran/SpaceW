@@ -377,9 +377,11 @@ namespace SpaceEngine.Tests
         public Shader StarsShader;
         public Shader DustShader;
         public Shader ParticlesShader;
+        public Shader ScreenShader;
 
         private Material StarsMaterial;
         private Material ParticlesMaterial;
+        private Material ScreenMaterial;
 
         private List<List<ComputeBuffer>> StarsBuffers = new List<List<ComputeBuffer>>();
         private List<Material> DustMaterials = new List<Material>();
@@ -390,8 +392,10 @@ namespace SpaceEngine.Tests
 
         public Mesh DustMesh = null;
 
+        [HideInInspector]
+        public Mesh ScreenMesh = null;
+
         public bool AutoUpdate = false;
-        public bool Resample = false;
 
         public int StarDrawCount { get { return (int)(Settings.GalaxyParameters.Count * Settings.GalaxyRenderingParameters.StarDrawPercent); } }
         public int DustDrawCount { get { return (int)(Settings.GalaxyParameters.Count * Settings.GalaxyRenderingParameters.DustDrawPercent); } }
@@ -574,20 +578,29 @@ namespace SpaceEngine.Tests
         protected override void InitNode()
         {
             if (StarsShader == null) StarsShader = Shader.Find("SpaceEngine/Galaxy/StarTest");
-            StarsMaterial = MaterialHelper.CreateTemp(StarsShader, "Stars");
+            StarsMaterial = MaterialHelper.CreateTemp(StarsShader, "Galaxy Stars");
 
             if (DustShader == null) DustShader = Shader.Find("SpaceEngine/Galaxy/DustTest");
             InitDustMaterials();
 
             if (ParticlesShader == null) ParticlesShader = Shader.Find("Particles/Alpha Blended Premultiply");
-            ParticlesMaterial = MaterialHelper.CreateTemp(ParticlesShader, "Particles");
-            
+            ParticlesMaterial = MaterialHelper.CreateTemp(ParticlesShader, "Galaxy Particles");
+
+            if (ScreenShader == null) ScreenShader = Shader.Find("SpaceEngine/Galaxy/ScreenCompose");
+            ScreenMaterial = MaterialHelper.CreateTemp(ScreenShader, "Galaxy Screen Compose");
+
             if (DustMesh == null) Debug.LogWarning("GalaxyTest.InitNode: DustMesh is null! Impossible to render dust!");
+
+            if (ScreenMesh == null)
+            {
+                ScreenMesh = MeshFactory.MakePlane(8, MeshFactory.PLANE.XY, false, false);
+                ScreenMesh.bounds = new Bounds(Vector3.zero, new Vector3(1e8f, 1e8f, 1e8f));
+            }
 
             Settings.GalaxyRenderingParameters.ColorDistribution.GenerateLut();
             Settings.GalaxyGenerationParameters.ColorDistribution.GenerateLut();
 
-            FrameBuffer = RTExtensions.CreateRTexture(new Vector2(Screen.width / 8.0f, Screen.height / 8.0f), 0, RenderTextureFormat.ARGBFloat, FilterMode.Bilinear, TextureWrapMode.Clamp);
+            FrameBuffer = RTExtensions.CreateRTexture(new Vector2(Screen.width / 2.0f, Screen.height / 2.0f), 0, RenderTextureFormat.ARGBFloat, FilterMode.Bilinear, TextureWrapMode.Clamp);
 
             DustCommandBuffer = new CommandBuffer();
             DustCommandBuffer.name = "Galaxy Dust Rendering";
@@ -628,6 +641,9 @@ namespace SpaceEngine.Tests
 
             Helper.Destroy(StarsMaterial);
             Helper.Destroy(ParticlesMaterial);
+            Helper.Destroy(ScreenMaterial);
+
+            Helper.Destroy(ScreenMesh);
 
             Settings.GalaxyRenderingParameters.ColorDistribution.DestroyLut();
             Settings.GalaxyGenerationParameters.ColorDistribution.DestroyLut();
@@ -655,24 +671,22 @@ namespace SpaceEngine.Tests
             }
         }
 
-        private void OnGUI()
+        public void RenderDustScreen()
         {
-            if (FrameBuffer != null && Resample)
-            {
-                GUI.DrawTexture(new Rect(Screen.width - FrameBuffer.width * 4 - 10, 10, FrameBuffer.width * 4, FrameBuffer.height * 4), FrameBuffer, ScaleMode.ScaleToFit, false);
-            }
+            if (ScreenMesh == null) return;
+
+            ScreenMaterial.SetTexture("_FrameBuffer", FrameBuffer);
+            
+            Graphics.DrawMesh(ScreenMesh, Matrix4x4.TRS(Vector3.zero, Quaternion.identity, Vector3.one), ScreenMaterial, 8);
         }
 
         public void RenderDust()
         {
             if (DustMesh == null) return;
 
-            if (Resample)
-            {
-                DustCommandBuffer.Clear();
-                DustCommandBuffer.SetRenderTarget(FrameBuffer);
-                DustCommandBuffer.ClearRenderTarget(true, true, Color.black);
-            }
+            DustCommandBuffer.Clear();
+            DustCommandBuffer.SetRenderTarget(FrameBuffer);
+            DustCommandBuffer.ClearRenderTarget(true, true, Color.black);
 
             var dustArgs = new uint[5];
             dustArgs[0] = (uint)DustMesh.GetIndexCount(0);              // Index count per instance...
@@ -692,10 +706,9 @@ namespace SpaceEngine.Tests
             GasArgsBuffer.SetData(gasArgs);
 
             // TODO : Calculate _Galaxy_Orientation and _Galaxy_OrientationInverse relative to camera, for a better visualization...
-            // TODO : Finish resampling...
+            // TODO : Blending between high and low downsamples...
             var galaxyOrientation = new Vector4(transform.rotation.x, transform.rotation.y, transform.rotation.z, transform.rotation.w);
             var galaxyOrientationInversed = -galaxyOrientation;
-            var bounds = new Bounds(Vector3.zero, new Vector3(1e8f, 1e8f, 1e8f));
 
             for (byte generationType = 0; generationType < StarsBuffers.Capacity; generationType++)
             {
@@ -714,21 +727,12 @@ namespace SpaceEngine.Tests
                     material.SetVector("_Galaxy_Orientation", galaxyOrientation);
                     material.SetVector("_Galaxy_OrientationInverse", galaxyOrientationInversed);
 
-                    if (Resample)
-                    {
-                        DustCommandBuffer.DrawMeshInstancedIndirect(DustMesh, 0, material, 0, DustArgsBuffer);
-                        DustCommandBuffer.DrawMeshInstancedIndirect(DustMesh, 0, material, 1, GasArgsBuffer);
-                    }
-                    else
-                    {
-                        material.SetPass(0);
-
-                        Graphics.DrawMeshInstancedIndirect(DustMesh, 0, material, bounds, DustArgsBuffer);
-                    }
+                    DustCommandBuffer.DrawMeshInstancedIndirect(DustMesh, 0, material, 0, DustArgsBuffer);
+                    DustCommandBuffer.DrawMeshInstancedIndirect(DustMesh, 0, material, 1, GasArgsBuffer);
                 }
             }
 
-            if (Resample) { Graphics.ExecuteCommandBuffer(DustCommandBuffer); }
+            Graphics.ExecuteCommandBuffer(DustCommandBuffer);
         }
 
         #endregion

@@ -36,6 +36,8 @@
 			float3 rayEnd : TEXCOORD3;
 			float3 rayStart : TEXCOORD4;
 			float3 position : TEXCOORD5;
+
+			uint instanceId : SV_InstanceID;
 		};
 		
 		void PackStar(in appdata v, out v2f o)
@@ -64,6 +66,7 @@
 			o.rayEnd = localPosition;
 			o.rayStart = relativePosition;
 			o.position = starPosition;
+			o.instanceId = id;
 		}
 
 		void UnpackStar(in v2f i, out float4 outputColor)

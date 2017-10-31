@@ -153,10 +153,9 @@ namespace SpaceEngine.Debugging
 
                     GUILayoutExtensions.VerticalBoxed("Rendering parameters: ", GUISkin, () =>
                     {
-                        GUILayoutExtensions.VerticalBoxed("", GUISkin, () =>
+                        GUILayoutExtensions.VerticalBoxed("Method: ", GUISkin, () =>
                         {
-                            GalaxyTestRenderer.Instance.RenderDust = GUILayout.Toggle(GalaxyTestRenderer.Instance.RenderDust, "Render Dust? (Actual Rendering)");
-                            GalaxyTestRenderer.Instance.RenderStars = GUILayout.Toggle(GalaxyTestRenderer.Instance.RenderStars, "Render Stars? (Debug)");
+                            GalaxyTestRenderer.Instance.RenderMethod = (GalaxyTestRenderer.RenderType)GUILayout.SelectionGrid((int)GalaxyTestRenderer.Instance.RenderMethod, Enum.GetNames(typeof(GalaxyTestRenderer.RenderType)), 2);
                         });
 
                         GUILayoutExtensions.SpacingSeparator();

@@ -181,6 +181,7 @@ namespace SpaceEngine.Core.Utilities
             for (int i = 0; i < texs.Length; i++)
             {
                 Graphics.SetRenderTarget(texs[i]);
+
                 GL.Clear(false, true, Color.clear);
             }
         }
