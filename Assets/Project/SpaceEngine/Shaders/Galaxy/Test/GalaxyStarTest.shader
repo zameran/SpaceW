@@ -6,13 +6,11 @@
 	}
 	SubShader
 	{
-		Tags { "RenderType" = "Opaque" }
-
 		Pass
 		{
-			Blend One One
-			ZWrite Off
+			Blend SrcAlpha One
 			Cull Front
+			ZWrite Off
 
 			CGPROGRAM
 			#pragma target 5.0

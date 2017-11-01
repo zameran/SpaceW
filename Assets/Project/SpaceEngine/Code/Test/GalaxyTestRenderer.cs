@@ -42,8 +42,7 @@ namespace SpaceEngine.Tests
     {
         internal enum RenderType : byte
         {
-            Stars,
-            Dust,
+            Realistic,
             None
         }
 
@@ -51,7 +50,7 @@ namespace SpaceEngine.Tests
         internal GalaxyTest Galaxy;
 
         [SerializeField]
-        internal RenderType RenderMethod = RenderType.Dust;
+        internal RenderType RenderMethod = RenderType.Realistic;
 
         private void Awake()
         {
@@ -65,22 +64,21 @@ namespace SpaceEngine.Tests
 
         private void Update()
         {
-            if (Galaxy == null || RenderMethod != RenderType.Dust) return;
 
-            Galaxy.RenderDustScreen();
         }
 
         private void OnPreRender()
         {
-            if (Galaxy == null || RenderMethod != RenderType.Dust) return;
+            if (Galaxy == null || RenderMethod != RenderType.Realistic) return;
 
-            Galaxy.RenderDust();
+            Galaxy.RenderDustToFrameBuffer();
         }
 
         private void OnPostRender()
         {
-            if (Galaxy == null || RenderMethod != RenderType.Stars) return;
+            if (Galaxy == null || RenderMethod != RenderType.Realistic) return;
 
+            Galaxy.RenderDustToScreenBuffer();
             Galaxy.Render();
         }
     }

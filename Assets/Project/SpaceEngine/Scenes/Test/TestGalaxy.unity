@@ -11683,7 +11683,7 @@ MonoBehaviour:
       PassRotation: 1.5707964
   DustMesh: {fileID: 10202, guid: 0000000000000000e000000000000000, type: 0}
   ScreenMesh: {fileID: 0}
-  AutoUpdate: 1
+  AutoUpdate: 0
   FrameBuffer1: {fileID: 0}
   FrameBuffer2: {fileID: 0}
   BlendFactor: 0
@@ -15409,7 +15409,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   Galaxy: {fileID: 1257223184}
-  RenderMethod: 1
+  RenderMethod: 0
 --- !u!114 &2106011889
 MonoBehaviour:
   m_ObjectHideFlags: 0

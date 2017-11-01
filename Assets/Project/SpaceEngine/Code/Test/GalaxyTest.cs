@@ -611,8 +611,6 @@ namespace SpaceEngine.Tests
 
             InitBuffers();
             GenerateBuffers();
-
-            //GenerateParticles(transform.GetComponentInChildren<ParticleSystem>(), StarsBuffers[0][0]);
         }
 
         protected override void UpdateNode()
@@ -692,18 +690,19 @@ namespace SpaceEngine.Tests
             }
         }
 
-        public void RenderDustScreen()
+        public void RenderDustToScreenBuffer()
         {
             if (ScreenMesh == null) return;
 
             ScreenMaterial.SetTexture("_FrameBuffer1", FrameBuffer1);
             ScreenMaterial.SetTexture("_FrameBuffer2", FrameBuffer2);
             ScreenMaterial.SetFloat("_Mix", BlendFactor);
-            
-            Graphics.DrawMesh(ScreenMesh, Matrix4x4.TRS(Vector3.zero, Quaternion.identity, Vector3.one), ScreenMaterial, 8);
+            ScreenMaterial.SetPass(0);
+
+            Graphics.DrawMeshNow(ScreenMesh, Matrix4x4.TRS(Vector3.zero, Quaternion.identity, Vector3.one), 8);
         }
 
-        public void RenderDust()
+        public void RenderDustToFrameBuffer()
         {
             if (DustMesh == null) return;
 

@@ -8,10 +8,20 @@
 	{
 		Pass
 		{
-			Blend One Zero
+			Name "Dust&Gas"
+			Tags 
+			{
+				"Queue"					= "Transparent"
+				"RenderType"			= "Transparent"
+				"ForceNoShadowCasting"	= "True"
+				"IgnoreProjector"		= "True"
+
+				"LightMode"				= "Always"
+			}
+
+			Blend SrcAlpha One
 			Cull Off
-			ZWrite On
-			ZTest Always
+			ZWrite Off
 
 			CGPROGRAM
 			#pragma target 3.0
@@ -53,6 +63,7 @@
 				float4 loBuffer = tex2D(_FrameBuffer2, i.texcoord);
 
 				color = lerp(hiBuffer, loBuffer, clamp(_Mix, 0.0, 1.0));
+				color.a = 1.0 - color.a / 16;
 			}
 			ENDCG
 		}
