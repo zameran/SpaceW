@@ -124,27 +124,12 @@ namespace SpaceEngine.Cameras
 
                     Rotation.z = Mathf.Clamp(Rotation.z, -100.0f, 100.0f);
 
-                    if (!Aligned)
-                    {
-                        transform.Rotate(new Vector3(0, 0, Rotation.z));
-
-                        if (Input.GetKey(KeyCode.R))
-                        {
-                            transform.position = Vector3.MoveTowards(transform.position, transform.position + transform.up, Time.fixedDeltaTime * 30.0f);
-                        }
-
-                        if (Input.GetKey(KeyCode.F))
-                        {
-                            transform.position = Vector3.MoveTowards(transform.position, transform.position - transform.up, Time.fixedDeltaTime * 30.0f);
-                        }
-                    }
+                    if (!Aligned) transform.Rotate(new Vector3(0, 0, Rotation.z));
 
                     if (Input.GetKey(KeyCode.G))
                     {
-                        if (Body != null)
-                            transform.rotation = Quaternion.RotateTowards(transform.rotation, Quaternion.LookRotation(Body.Origin - transform.position), Time.fixedDeltaTime * RotationSpeed * 30.0f);
-                        else
-                            transform.rotation = Quaternion.RotateTowards(transform.rotation, Quaternion.LookRotation(Vector3.zero - transform.position), Time.fixedDeltaTime * RotationSpeed * 30.0f);
+                        transform.rotation = Quaternion.RotateTowards(transform.rotation, 
+                                             Quaternion.LookRotation((Body != null ? Body.Origin : Vector3.zero) - transform.position), Time.fixedDeltaTime * RotationSpeed * 30.0f);
                     }
                 }
                 
@@ -153,7 +138,7 @@ namespace SpaceEngine.Cameras
                 {
                     Aligned = true;
 
-                    var gravityVector = Body != null ? Body.transform.position : Vector3.zero - transform.position;
+                    var gravityVector = (Body != null ? Body.transform.position : Vector3.zero) - transform.position;
 
                     TargetRotation = Quaternion.LookRotation(transform.forward, -gravityVector);
 
@@ -165,6 +150,7 @@ namespace SpaceEngine.Cameras
                 }
 
                 Velocity.z = Input.GetAxis("Vertical");
+                Velocity.y = Input.GetAxis("Diagonal");
                 Velocity.x = Input.GetAxis("Horizontal");
 
                 CurrentSpeed = Speed;
