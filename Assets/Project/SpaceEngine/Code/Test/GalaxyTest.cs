@@ -685,7 +685,8 @@ namespace SpaceEngine.Tests
 
                     StarsMaterial.SetPass(0);
                     StarsMaterial.SetBuffer("stars", buffer);
-                    
+                    StarsMaterial.SetTexture("_Star_Particle", Resources.Load("Textures/Galaxy/StarParticle", typeof(Texture2D)) as Texture2D);
+
                     Graphics.DrawProcedural(MeshTopology.Points, StarDrawCount);
                 }
             }
