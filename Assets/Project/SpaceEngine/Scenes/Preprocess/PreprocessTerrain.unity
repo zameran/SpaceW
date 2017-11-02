@@ -156,7 +156,7 @@ MonoBehaviour:
   FileName: DEM
   DestinationTileSize: 124
   DestinationMinTileSize: 124
-  DestinationMaxLevel: 2
+  DestinationMaxLevel: 4
   DestinationChannels: 1
   DeleteTempOnFinish: 1
 --- !u!114 &14608929
@@ -171,7 +171,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   Capacity: 2048
-  TileSize: 1024
+  TileSize: 4096
   IgnoreSizeRatio: 1
   Texture: {fileID: 2800000, guid: 95b13d211bcaca043884189fdbbfe5e8, type: 3}
   FlipX: 0

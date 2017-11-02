@@ -145,10 +145,10 @@ MonoBehaviour:
   ResidualProducerGameObject: {fileID: 1482411437}
   UpSampleMaterial: {fileID: 2100000, guid: 3f506953395c459478ac6f2ba12b6eb1, type: 2}
   NoiseAmplitudes:
-  - -3250
-  - -1590
-  - -1125
-  - -795
+  - 1
+  - 1
+  - 1
+  - 1
   - -561
   - -397
   - -140
@@ -1346,10 +1346,10 @@ MonoBehaviour:
   ResidualProducerGameObject: {fileID: 743798011}
   UpSampleMaterial: {fileID: 2100000, guid: 3f506953395c459478ac6f2ba12b6eb1, type: 2}
   NoiseAmplitudes:
-  - -3250
-  - -1590
-  - -1125
-  - -795
+  - 1
+  - 1
+  - 1
+  - 1
   - -561
   - -397
   - -140
@@ -1745,7 +1745,7 @@ MonoBehaviour:
   IsGPUProducer: 0
   IsLastInSequence: 0
   FileName: /Resources/Preprocess/Textures/Terrain/DEM6.dat
-  ZScale: 0.0005
+  ZScale: 0.001
 --- !u!114 &743798014
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2225,6 +2225,7 @@ MonoBehaviour:
   DisableAllOnStart: 0
   GUISkin: {fileID: 11400000, guid: 5f9307978351f0d4fbb973b4fe3f1b0e, type: 2}
   ShowAdditionalInfo: 1
+  ShowDebugGUIBounds: 0
 --- !u!4 &829586939
 Transform:
   m_ObjectHideFlags: 0
@@ -3745,7 +3746,7 @@ MonoBehaviour:
   IsGPUProducer: 0
   IsLastInSequence: 0
   FileName: /Resources/Preprocess/Textures/Terrain/DEM2.dat
-  ZScale: 0.0005
+  ZScale: 0.001
 --- !u!114 &975822359
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -4158,7 +4159,7 @@ MonoBehaviour:
   IsGPUProducer: 0
   IsLastInSequence: 0
   FileName: /Resources/Preprocess/Textures/Terrain/DEM4.dat
-  ZScale: 0.0005
+  ZScale: 0.001
 --- !u!114 &1260644405
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -4410,7 +4411,7 @@ MonoBehaviour:
   IsGPUProducer: 0
   IsLastInSequence: 0
   FileName: /Resources/Preprocess/Textures/Terrain/DEM3.dat
-  ZScale: 0.0005
+  ZScale: 0.001
 --- !u!114 &1280753412
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -4809,10 +4810,10 @@ MonoBehaviour:
   ResidualProducerGameObject: {fileID: 975822357}
   UpSampleMaterial: {fileID: 2100000, guid: 3f506953395c459478ac6f2ba12b6eb1, type: 2}
   NoiseAmplitudes:
-  - -3250
-  - -1590
-  - -1125
-  - -795
+  - 1
+  - 1
+  - 1
+  - 1
   - -561
   - -397
   - -140
@@ -4949,7 +4950,7 @@ MonoBehaviour:
   IsGPUProducer: 0
   IsLastInSequence: 0
   FileName: /Resources/Preprocess/Textures/Terrain/DEM1.dat
-  ZScale: 0.0005
+  ZScale: 0.001
 --- !u!114 &1482411439
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -5027,7 +5028,7 @@ MonoBehaviour:
   IsGPUProducer: 0
   IsLastInSequence: 0
   FileName: /Resources/Preprocess/Textures/Terrain/DEM5.dat
-  ZScale: 0.0005
+  ZScale: 0.001
 --- !u!114 &1492606188
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -5217,7 +5218,7 @@ MeshRenderer:
   m_LightProbeUsage: 1
   m_ReflectionProbeUsage: 1
   m_Materials:
-  - {fileID: 10303, guid: 0000000000000000f000000000000000, type: 0}
+  - {fileID: 2100000, guid: fea45caef88f1684dbf79294b9cfb43c, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -5400,10 +5401,10 @@ MonoBehaviour:
   ResidualProducerGameObject: {fileID: 1280753409}
   UpSampleMaterial: {fileID: 2100000, guid: 3f506953395c459478ac6f2ba12b6eb1, type: 2}
   NoiseAmplitudes:
-  - -3250
-  - -1590
-  - -1125
-  - -795
+  - 1
+  - 1
+  - 1
+  - 1
   - -561
   - -397
   - -140
@@ -5841,10 +5842,10 @@ MonoBehaviour:
   ResidualProducerGameObject: {fileID: 1260644402}
   UpSampleMaterial: {fileID: 2100000, guid: 3f506953395c459478ac6f2ba12b6eb1, type: 2}
   NoiseAmplitudes:
-  - -3250
-  - -1590
-  - -1125
-  - -795
+  - 1
+  - 1
+  - 1
+  - 1
   - -561
   - -397
   - -140
@@ -6115,6 +6116,7 @@ MonoBehaviour:
   QuadTexture2: {fileID: 0}
   QuadTexture3: {fileID: 0}
   QuadTexture4: {fileID: 0}
+  OverrideDefaultNoiseParameters: 0
 --- !u!4 &1947387574
 Transform:
   m_ObjectHideFlags: 0
@@ -6390,10 +6392,10 @@ MonoBehaviour:
   ResidualProducerGameObject: {fileID: 1492606185}
   UpSampleMaterial: {fileID: 2100000, guid: 3f506953395c459478ac6f2ba12b6eb1, type: 2}
   NoiseAmplitudes:
-  - -3250
-  - -1590
-  - -1125
-  - -795
+  - 1
+  - 1
+  - 1
+  - 1
   - -561
   - -397
   - -140

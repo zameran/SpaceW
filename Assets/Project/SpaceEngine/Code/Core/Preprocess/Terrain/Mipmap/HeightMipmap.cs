@@ -1,6 +1,5 @@
 using System;
 using System.IO;
-
 using UnityEngine;
 
 namespace SpaceEngine.Core.Preprocess.Terrain
@@ -208,12 +207,16 @@ namespace SpaceEngine.Core.Preprocess.Terrain
                 y = levelSize - 1;
             }
 
+            // NOTE : Looks like rotation stuff should not be applied to heightmaps...
+            /*
             if (x < 0 && Left != null)
             {
                 int xp;
                 int yp;
 
                 Rotation(LeftR, levelSize, levelSize - 1 + x, y, out xp, out yp);
+
+                Debug.Assert(Left.CurrentLevel == CurrentLevel);
 
                 return Left.GetTileHeight(xp, yp);
             }
@@ -225,6 +228,8 @@ namespace SpaceEngine.Core.Preprocess.Terrain
 
                 Rotation(RightR, levelSize, x - levelSize + 1, y, out xp, out yp);
 
+                Debug.Assert(Right.CurrentLevel == CurrentLevel);
+
                 return Right.GetTileHeight(xp, yp);
             }
 
@@ -234,6 +239,8 @@ namespace SpaceEngine.Core.Preprocess.Terrain
                 int yp;
 
                 Rotation(BottomR, levelSize, x, levelSize - 1 + y, out xp, out yp);
+
+                Debug.Assert(Bottom.CurrentLevel == CurrentLevel);
 
                 return Bottom.GetTileHeight(xp, yp);
             }
@@ -245,11 +252,13 @@ namespace SpaceEngine.Core.Preprocess.Terrain
 
                 Rotation(TopR, levelSize, x, y - levelSize + 1, out xp, out yp);
 
+                Debug.Assert(Top.CurrentLevel == CurrentLevel);
+
                 return Top.GetTileHeight(xp, yp);
             }
+            */
 
             return base.GetTileHeight(x, y);
-
         }
 
         public override void Reset(int width, int height, int tileSize)
@@ -563,7 +572,6 @@ namespace SpaceEngine.Core.Preprocess.Terrain
                     residual[offset] = diff;
                     maxR = Mathf.Max(diff < 0.0f ? -diff : diff, maxR);
                     meanR += diff < 0.0f ? -diff : diff;
-
                 }
             }
 
@@ -730,7 +738,6 @@ namespace SpaceEngine.Core.Preprocess.Terrain
                 ConstantTile = tileid;
             }
         }
-
 
         private void ProduceTilesLebeguesOrder(int l, int level, int tx, int ty, ref long offset, long[] offsets, string file)
         {
