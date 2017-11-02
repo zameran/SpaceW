@@ -58,9 +58,12 @@ GalaxyStar GenerateStar(uint id)
 RWStructuredBuffer<GalaxyStar> output;
 
 [numthreads(1024, 1, 1)]
-void Core(uint3 gtid : SV_GroupThreadID, uint3 gid : SV_GroupID)
+void Core(uint3 groupThreadID : SV_GroupThreadID, 
+		  uint3 groupID : SV_GroupID, 
+		  uint3 dispatchThreadID : SV_DispatchThreadID, 
+		  uint groupIndex : SV_GroupIndex)
 {
-	uint id = gid.x * 1024 + gtid.x;
+	uint id = groupID.x * 1024 + groupThreadID.x;
 	
 	GalaxyStar star = GenerateStar(id);
 	

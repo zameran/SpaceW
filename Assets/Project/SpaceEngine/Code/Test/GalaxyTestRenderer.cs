@@ -69,14 +69,14 @@ namespace SpaceEngine.Tests
 
         private void OnPreRender()
         {
-            if (Galaxy == null || RenderMethod != RenderType.Realistic) return;
+            if (Galaxy == null || !Helper.Enabled(Galaxy) || RenderMethod != RenderType.Realistic) return;
 
             Galaxy.RenderDustToFrameBuffer();
         }
 
         private void OnPostRender()
         {
-            if (Galaxy == null || RenderMethod != RenderType.Realistic) return;
+            if (Galaxy == null || !Helper.Enabled(Galaxy) || RenderMethod != RenderType.Realistic) return;
 
             Galaxy.RenderDustToScreenBuffer();
             Galaxy.Render();
