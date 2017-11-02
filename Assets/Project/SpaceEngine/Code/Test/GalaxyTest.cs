@@ -196,6 +196,8 @@ namespace SpaceEngine.Tests
         [Range(0.0f, 1.0f)]
         public float StarDrawPercent;
 
+        public float StarAbsoluteSize;
+
         [Range(1.0f, 4.0f)]
         public int DustPassCount;
 
@@ -209,6 +211,7 @@ namespace SpaceEngine.Tests
             DustSize = from.DustSize;
             DustDrawPercent = from.DustDrawPercent;
             StarDrawPercent = from.StarDrawPercent;
+            StarAbsoluteSize = from.StarAbsoluteSize;
 
             DustPassCount = from.DustPassCount;
 
@@ -217,12 +220,13 @@ namespace SpaceEngine.Tests
             ColorDistribution = new ColorMaterialTableGradientLut();
         }
 
-        public GalaxyRenderingParameters(float dustStrength, float dustSize, float dustDrawPercent, float starDrawPercent, int dustPassCount, float gasCenterFalloff)
+        public GalaxyRenderingParameters(float dustStrength, float dustSize, float dustDrawPercent, float starDrawPercent, float starAbsoluteSize, int dustPassCount, float gasCenterFalloff)
         {
             DustStrength = dustStrength;
             DustSize = dustSize;
             DustDrawPercent = dustDrawPercent;
             StarDrawPercent = starDrawPercent;
+            StarAbsoluteSize = starAbsoluteSize;
 
             DustPassCount = dustPassCount;
 
@@ -235,7 +239,7 @@ namespace SpaceEngine.Tests
         {
             get
             {
-                return new GalaxyRenderingParameters(0.0075f, 1.0f, 0.1f, 1.0f, 1, 16.0f);
+                return new GalaxyRenderingParameters(0.0075f, 1.0f, 0.1f, 1.0f, 64.0f, 1, 16.0f);
             }
         }
     }
@@ -376,11 +380,11 @@ namespace SpaceEngine.Tests
 
         public Shader StarsShader;
         public Shader DustShader;
-        public Shader ParticlesShader;
         public Shader ScreenShader;
 
+        public Texture2D StarParticle;
+
         private Material StarsMaterial;
-        private Material ParticlesMaterial;
         private Material ScreenMaterial;
 
         private List<List<ComputeBuffer>> StarsBuffers = new List<List<ComputeBuffer>>();
@@ -481,7 +485,6 @@ namespace SpaceEngine.Tests
 
             system.SetParticles(points, bufferSize);
 
-            rendererModule.material = ParticlesMaterial;
             rendererModule.material.SetTexture("_MainTex", Resources.Load("Textures/Galaxy/StarParticle", typeof(Texture2D)) as Texture2D);
         }
 
@@ -586,11 +589,15 @@ namespace SpaceEngine.Tests
             if (DustShader == null) DustShader = Shader.Find("SpaceEngine/Galaxy/DustTest");
             InitDustMaterials();
 
-            if (ParticlesShader == null) ParticlesShader = Shader.Find("Particles/Alpha Blended Premultiply");
-            ParticlesMaterial = MaterialHelper.CreateTemp(ParticlesShader, "Galaxy Particles");
-
             if (ScreenShader == null) ScreenShader = Shader.Find("SpaceEngine/Galaxy/ScreenCompose");
             ScreenMaterial = MaterialHelper.CreateTemp(ScreenShader, "Galaxy Screen Compose");
+
+            if (StarParticle == null)
+            {
+                Debug.LogWarning("GalaxyTest.InitNode: StarParticle texture is null! Trying to load from Resources the default one! Impossible to render stars, if fail!");
+
+                StarParticle = Resources.Load("Textures/Galaxy/StarParticle", typeof(Texture2D)) as Texture2D;
+            }
 
             if (DustMesh == null) Debug.LogWarning("GalaxyTest.InitNode: DustMesh is null! Impossible to render dust!");
 
@@ -653,7 +660,6 @@ namespace SpaceEngine.Tests
             if (DustCommandBuffer != null) DustCommandBuffer.Release();
 
             Helper.Destroy(StarsMaterial);
-            Helper.Destroy(ParticlesMaterial);
             Helper.Destroy(ScreenMaterial);
 
             Helper.Destroy(ScreenMesh);
@@ -683,7 +689,8 @@ namespace SpaceEngine.Tests
 
                     StarsMaterial.SetPass(0);
                     StarsMaterial.SetBuffer("stars", buffer);
-                    StarsMaterial.SetTexture("_Star_Particle", Resources.Load("Textures/Galaxy/StarParticle", typeof(Texture2D)) as Texture2D);
+                    StarsMaterial.SetTexture("_Star_Particle", StarParticle);
+                    StarsMaterial.SetFloat("_Star_Absolute_Size", Settings.GalaxyRenderingParameters.StarAbsoluteSize);
 
                     Graphics.DrawProcedural(MeshTopology.Points, StarDrawCount);
                 }

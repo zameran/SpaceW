@@ -23,6 +23,7 @@
 			#include "../Galaxy.cginc"
 
 			sampler2D _Star_Particle;
+			float _Star_Absolute_Size;
 
 			StructuredBuffer<GalaxyStar> stars;
 
@@ -55,43 +56,46 @@
 
 				o.vertex = UnityObjectToClipPos(float4(starPosition, 1.0));
 				o.uv = float2(0.25, 0.25);
-				o.size = starSize / 128; // NOTE : Harcoded...
+				o.size = starSize / _Star_Absolute_Size;
 				o.color = starColor;
 			}
 
 			[maxvertexcount(4)]
 			void geom(point v2g p[1], inout TriangleStream<v2f> triStream)
 			{
-				float4 mvPos = p[0].vertex;
+				float4 starPosition = p[0].vertex;
+				float2 starUV = p[0].uv;
+				float4 starColor = p[0].color;
 
-				float4 up = float4(0, 1, 0, 0) * UNITY_MATRIX_P._22;
-				float4 right = float4(1, 0, 0, 0) * UNITY_MATRIX_P._11;
-				float halfS = p[0].size;
+				float4 up = float4(0.0, 1.0, 0.0, 0.0) * UNITY_MATRIX_P._22;
+				float4 right = float4(1.0, 0.0, 0.0, 0.0) * UNITY_MATRIX_P._11;
+				float halfSize = p[0].size / 2.0;
 
 				float4 v[4];
-				v[0] = mvPos - halfS * up;
-				v[1] = mvPos + halfS * right;
-				v[2] = mvPos - halfS * right;
-				v[3] = mvPos + halfS * up;
+				v[0] = starPosition - halfSize * up;
+				v[1] = starPosition + halfSize * right;
+				v[2] = starPosition - halfSize * right;
+				v[3] = starPosition + halfSize * up;
 
-				v2f pIn;
-				pIn.color = p[0].color;
+				v2f o;
 
-				pIn.vertex = v[0];
-				pIn.uv = float2(1.0f, 0.0f) * 0.5 + p[0].uv;
-				triStream.Append(pIn);
+				o.color = starColor;
 
-				pIn.vertex = v[1];
-				pIn.uv = float2(1.0f, 1.0f) * 0.5 + p[0].uv;
-				triStream.Append(pIn);
+				o.vertex = v[0];
+				o.uv = float2(1.0, 0.0) * 0.5 + starUV;
+				triStream.Append(o);
 
-				pIn.vertex = v[2];
-				pIn.uv = float2(0.0f, 0.0f) * 0.5 + p[0].uv;
-				triStream.Append(pIn);
+				o.vertex = v[1];
+				o.uv = float2(1.0, 1.0) * 0.5 + starUV;
+				triStream.Append(o);
 
-				pIn.vertex = v[3];
-				pIn.uv = float2(0.0f, 1.0f) * 0.5 + p[0].uv;
-				triStream.Append(pIn);
+				o.vertex = v[2];
+				o.uv = float2(0.0, 0.0) * 0.5 + starUV;
+				triStream.Append(o);
+
+				o.vertex = v[3];
+				o.uv = float2(0.0, 1.0) * 0.5 + starUV;
+				triStream.Append(o);
 
 				triStream.RestartStrip();
 			}

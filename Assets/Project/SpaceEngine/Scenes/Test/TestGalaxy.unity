@@ -11591,8 +11591,8 @@ MonoBehaviour:
   Core: {fileID: 7200000, guid: 4b65a98af0eefea4a84f53bd8d3baf38, type: 3}
   StarsShader: {fileID: 4800000, guid: 02a604af630bf304b8ac84d9c132a420, type: 3}
   DustShader: {fileID: 4800000, guid: 5c27b04b8de7fa74a8e1e9216b170be6, type: 3}
-  ParticlesShader: {fileID: 207, guid: 0000000000000000f000000000000000, type: 0}
   ScreenShader: {fileID: 4800000, guid: 7e61934dc5ba7884fa88d044fa1e8c61, type: 3}
+  StarParticle: {fileID: 2800000, guid: 7b7fe3a11b6bb4145aaac89be034cc36, type: 3}
   Settings:
     Type: 2
     GalaxyRenderingParameters:
@@ -11600,6 +11600,7 @@ MonoBehaviour:
       DustSize: 1
       DustDrawPercent: 0.1
       StarDrawPercent: 1
+      StarAbsoluteSize: 64
       DustPassCount: 1
       GasCenterFalloff: 16
       ColorDistribution:
