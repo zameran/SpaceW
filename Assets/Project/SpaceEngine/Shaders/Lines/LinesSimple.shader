@@ -39,7 +39,8 @@ Shader "SpaceEngine/Lines/Colored Blended Simple"
 		{
 			Name "Line"
 
-			Blend SrcAlpha OneMinusSrcAlpha
+			//Blend SrcAlpha OneMinusSrcAlpha			// Other...
+			Blend One SrcColor							// Deferred...
 			ZWrite Off 
 			Cull Off 
 			Fog { Mode Off }

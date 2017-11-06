@@ -91,6 +91,7 @@ Shader "SpaceEngine/Space/Sun Glare"
 				float2 uv : TEXCOORD0;
 			};
 
+			// TODO : Use built in atmosphere's stuff... From SpaceAtmosphere.cginc...
 			float2 GetTransmittanceUV_SunGlare(float r, float mu) 
 			{
 				float uR, uMu;
@@ -133,6 +134,23 @@ Shader "SpaceEngine/Space/Sun Glare"
 				return pow(max(0, sunColor), 2.2) * 2;
 			}
 
+			float ObstacleSample(float2 uv, float u)
+			{
+				float2 offsets[4];
+				offsets[0] = uv + float2(-u, 0);
+				offsets[1] = uv + float2(u, 0);
+				offsets[2] = uv + float2(0, -u);
+				offsets[3] = uv + float2(0, u);
+			   
+				float value = 0.0;
+				for(int i = 0; i < 4; i++)
+				{
+					value += tex2D(_CameraGBufferTexture2, offsets[i]).a;
+				}
+
+				return lerp(0.0, 1.0, clamp(1.0 - (value / 4.0), 0.0, 1.0));
+			}
+
 			void vert(in appdata_base i, out v2f o)
 			{
 				o.pos = float4(i.vertex.xyz, 1.0);
@@ -142,10 +160,11 @@ Shader "SpaceEngine/Space/Sun Glare"
 			void frag(in v2f i, out float4 diffuse : COLOR)
 			{
 				// NOTE : Sample W component from GBuffer normals data. Unity's Standart shader using it as 1.0, and my planets too!
-				float obstacle = 1.0 - tex2D(_CameraGBufferTexture2, sunViewPortPositionInversed.xy).a;
+				float obstacle = ObstacleSample(sunViewPortPositionInversed, 1.0 / 512);					// Sample 4 points...
+				//float obstacle = 1.0 - tex2D(_CameraGBufferTexture2, sunViewPortPositionInversed.xy).a;	// Sample 1 point...
 
 				// Perform obstacle test...
-				if (obstacle < 1.0) discard;
+				if (obstacle <= 0.015) discard;
 
 				float2 toScreenCenter = sunViewPortPosition.xy - 0.5;
 				float2 sceenCenterUV = i.uv.xy - sunViewPortPosition.xy;
@@ -174,10 +193,9 @@ Shader "SpaceEngine/Space/Sun Glare"
 				outputColor += sunColor;
 				outputColor += ghosts;
 				outputColor *= sunGlareFade;
-				
-				// TODO : Use keywords for that kind of settings...
-				// TODO : Perform atmosphere coloring BEFORE obstacle test, if atmosphere is exist and atmosphere coloring is enabled...
+				outputColor *= obstacle;
 
+				// TODO : Use keywords for that kind of settings...
 				if (useRadiance > 0.0)
 				{
 					outputColor = OuterRadiance_SunGlare(outputColor);

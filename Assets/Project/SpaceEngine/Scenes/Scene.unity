@@ -3098,6 +3098,7 @@ MonoBehaviour:
   DisableAllOnStart: 0
   GUISkin: {fileID: 11400000, guid: 5f9307978351f0d4fbb973b4fe3f1b0e, type: 2}
   ShowAdditionalInfo: 1
+  ShowDebugGUIBounds: 0
 --- !u!4 &829586939
 Transform:
   m_ObjectHideFlags: 0
@@ -8814,6 +8815,7 @@ MonoBehaviour:
   QuadTexture2: {fileID: 0}
   QuadTexture3: {fileID: 0}
   QuadTexture4: {fileID: 0}
+  OverrideDefaultNoiseParameters: 0
 --- !u!4 &1947387574
 Transform:
   m_ObjectHideFlags: 0
