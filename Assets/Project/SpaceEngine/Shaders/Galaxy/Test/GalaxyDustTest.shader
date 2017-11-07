@@ -6,9 +6,7 @@
 	}
 	SubShader
 	{
-		CGINCLUDE
-		#include "UnityCG.cginc"
-		
+		CGINCLUDE	
 		#include "../Galaxy.cginc"
 		
 		uniform StructuredBuffer<GalaxyStar> stars;

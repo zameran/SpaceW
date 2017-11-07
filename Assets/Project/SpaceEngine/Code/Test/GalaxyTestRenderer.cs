@@ -43,6 +43,7 @@ namespace SpaceEngine.Tests
         internal enum RenderType : byte
         {
             Realistic,
+            Debug,
             None
         }
 
@@ -69,17 +70,31 @@ namespace SpaceEngine.Tests
 
         private void OnPreRender()
         {
-            if (Galaxy == null || !Helper.Enabled(Galaxy) || RenderMethod != RenderType.Realistic) return;
+            if (Galaxy == null || !Helper.Enabled(Galaxy)) return;
 
-            Galaxy.RenderDustToFrameBuffer();
+            if (RenderMethod == RenderType.Realistic)
+            {
+                Galaxy.RenderDustToFrameBuffer();
+            }
+            else if (RenderMethod == RenderType.Debug)
+            {
+                // NOTE : Nothing to draw...
+            }
         }
 
         private void OnPostRender()
         {
-            if (Galaxy == null || !Helper.Enabled(Galaxy) || RenderMethod != RenderType.Realistic) return;
+            if (Galaxy == null || !Helper.Enabled(Galaxy)) return;
 
-            Galaxy.RenderDustToScreenBuffer();
-            Galaxy.Render();
+            if (RenderMethod == RenderType.Realistic)
+            {
+                Galaxy.RenderDustToScreenBuffer();
+                Galaxy.RenderStars(0); // NOTE : Render stars with billboards...
+            }
+            else if (RenderMethod == RenderType.Debug)
+            {
+                Galaxy.RenderStars(1); // NOTE : Render stars as dots...
+            }
         }
     }
 }

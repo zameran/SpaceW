@@ -202,6 +202,7 @@ namespace SpaceEngine.Tests
         public int DustPassCount;
 
         public float GasCenterFalloff;
+        public float HDRExposure;
 
         public ColorMaterialTableGradientLut ColorDistribution;
 
@@ -216,11 +217,12 @@ namespace SpaceEngine.Tests
             DustPassCount = from.DustPassCount;
 
             GasCenterFalloff = from.GasCenterFalloff;
+            HDRExposure = from.HDRExposure;
 
             ColorDistribution = new ColorMaterialTableGradientLut();
         }
 
-        public GalaxyRenderingParameters(float dustStrength, float dustSize, float dustDrawPercent, float starDrawPercent, float starAbsoluteSize, int dustPassCount, float gasCenterFalloff)
+        public GalaxyRenderingParameters(float dustStrength, float dustSize, float dustDrawPercent, float starDrawPercent, float starAbsoluteSize, int dustPassCount, float gasCenterFalloff, float hdrExposure)
         {
             DustStrength = dustStrength;
             DustSize = dustSize;
@@ -231,6 +233,7 @@ namespace SpaceEngine.Tests
             DustPassCount = dustPassCount;
 
             GasCenterFalloff = gasCenterFalloff;
+            HDRExposure = hdrExposure;
 
             ColorDistribution = new ColorMaterialTableGradientLut();
         }
@@ -239,7 +242,7 @@ namespace SpaceEngine.Tests
         {
             get
             {
-                return new GalaxyRenderingParameters(0.0075f, 1.0f, 0.1f, 1.0f, 64.0f, 1, 16.0f);
+                return new GalaxyRenderingParameters(0.0075f, 1.0f, 0.1f, 1.0f, 64.0f, 1, 16.0f, 1.2f);
             }
         }
     }
@@ -679,6 +682,11 @@ namespace SpaceEngine.Tests
 
         public virtual void Render(int layer = 8)
         {           
+            // NOTE : Nothing to draw...
+        }
+
+        public void RenderStars(int pass)
+        {
             for (byte generationType = 0; generationType < StarsBuffers.Capacity; generationType++)
             {
                 var buffers = StarsBuffers[generationType];
@@ -687,10 +695,13 @@ namespace SpaceEngine.Tests
                 {
                     var buffer = buffers[bufferIndex];
 
-                    StarsMaterial.SetPass(0);
+                    StarsMaterial.SetPass(pass);
                     StarsMaterial.SetBuffer("stars", buffer);
                     StarsMaterial.SetTexture("_Star_Particle", StarParticle);
                     StarsMaterial.SetFloat("_Star_Absolute_Size", Settings.GalaxyRenderingParameters.StarAbsoluteSize);
+
+                    StarsMaterial.SetFloat("_HDRExposure", Settings.GalaxyRenderingParameters.HDRExposure);
+                    StarsMaterial.SetFloat("_HDRMode", (int)GodManager.Instance.HDRMode);
 
                     Graphics.DrawProcedural(MeshTopology.Points, StarDrawCount);
                 }

@@ -308,7 +308,7 @@ namespace SpaceEngine.Enviroment.Atmospheric
             target.SetVector("_Atmosphere_Origin", -Origin);
             target.SetVector("_Atmosphere_GlowColor", GlowColor);
 
-            target.SetFloat("_Exposure", HDRExposure);
+            target.SetFloat("_HDRExposure", HDRExposure);
             target.SetFloat("_HDRMode", (int)GodManager.Instance.HDRMode);
         }
 

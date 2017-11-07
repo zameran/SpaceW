@@ -104,7 +104,7 @@ uniform float4x4 _Sun_Positions_1;
 //-----------------------------------------------------------------------------
 #define CORE_HDR
 
-uniform float _Exposure;
+uniform float _HDRExposure;
 uniform float _HDRMode;
 
 inline float3 hdrFunction(float3 c)
@@ -120,14 +120,14 @@ inline float3 hdrFunction(float3 c)
 
 float3 hdr(float3 L) 
 {
-	L *= _Exposure;
+	L *= _HDRExposure;
 
 	return hdrFunction(L);
 }
 
 float4 hdr(float4 L) 
 {
-	L *= _Exposure;
+	L *= _HDRExposure;
 
 	L.rgb = hdrFunction(L.rgb);
 	L.a = L.a;
