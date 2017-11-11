@@ -63,16 +63,13 @@ namespace SpaceEngine.Core.Preprocess.Terrain
         [SerializeField]
         bool DeleteTempOnFinish = true;
 
-        IInputMap Source;
+        InputMap Source;
 
         private void Start()
         {
-            Source = GetComponent<IInputMap>();
+            Source = GetComponent<InputMap>();
 
             if (Source == null) { throw new NullReferenceException("Input map is null. Have you added a Input map component to PreProcess game object?"); }
-
-            if ((!(Source is InputMap) && Type == TYPE.PLANE) ||
-                (!(Source is TextureInputMapSpherical) && Type == TYPE.SPHERICAL)) { throw new NullReferenceException("Input map have invalid type for that kind of preprocess!"); }
 
             try
             {
@@ -115,10 +112,10 @@ namespace SpaceEngine.Core.Preprocess.Terrain
             switch ((int)Type)
             {
                 case (int)TYPE.PLANE:
-                    PreprocessPlaneDem((InputMap)Source, Application.dataPath + TempFolder, Application.dataPath + DestinationFolder);
+                    PreprocessPlaneDem(Source, Application.dataPath + TempFolder, Application.dataPath + DestinationFolder);
                     break;
                 case (int)TYPE.SPHERICAL:
-                    PreprocessSphericalDem((TextureInputMapSpherical)Source, Application.dataPath + TempFolder, Application.dataPath + DestinationFolder);
+                    PreprocessSphericalDem(Source, Application.dataPath + TempFolder, Application.dataPath + DestinationFolder);
                     break;
                 default:
                     Logger.LogWarning("PreProcessTerrain.Preprocess: Nothing to produce/precompute!");
@@ -131,7 +128,7 @@ namespace SpaceEngine.Core.Preprocess.Terrain
             switch ((int)Type)
             {
                 case (int)TYPE.PLANE:
-                    PreprocessPlaneOrtho((InputMap)Source, Application.dataPath + TempFolder, Application.dataPath + DestinationFolder);
+                    PreprocessPlaneOrtho(Source, Application.dataPath + TempFolder, Application.dataPath + DestinationFolder);
                     break;
                 case (int)TYPE.SPHERICAL:
                     throw new NotImplementedException();
@@ -163,7 +160,7 @@ namespace SpaceEngine.Core.Preprocess.Terrain
             Logger.Log(string.Format("PreProcessTerrain.PreprocessPlaneDem: Computation time: {0} s", (Time.realtimeSinceStartup - startTime)));
         }
 
-        void PreprocessSphericalDem(TextureInputMapSpherical source, string tempFolder, string destinationFolder)
+        void PreprocessSphericalDem(InputMap source, string tempFolder, string destinationFolder)
         {
             if (DestinationTileSize % DestinationMinTileSize != 0) { throw new InvalidParameterException("DestinationTileSize must be a multiple of DestinationMinTileSize!"); }
 

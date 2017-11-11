@@ -234,7 +234,7 @@ namespace SpaceEngine.Core
                     var offset = 2 * (i + j * tileSize);
                     var value = (short)((short)data[offset + 1] << 8 | data[offset]);
 
-                    result[i + j * (ResidualTileSize + 5)] = (float)value / (float)(short.MaxValue * MaxR[level] * Scale);
+                    result[i + j * (ResidualTileSize + 5)] = (float)value / (float)short.MaxValue * MaxR[level] * Scale;
                 }
             }
         }

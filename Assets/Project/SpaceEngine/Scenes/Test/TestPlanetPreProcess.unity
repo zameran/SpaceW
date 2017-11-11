@@ -145,20 +145,14 @@ MonoBehaviour:
   ResidualProducerGameObject: {fileID: 1482411437}
   UpSampleMaterial: {fileID: 2100000, guid: 3f506953395c459478ac6f2ba12b6eb1, type: 2}
   NoiseAmplitudes:
+  - 0
+  - 0
+  - 0
+  - 0
+  - 4
+  - 2
   - 1
-  - 1
-  - 1
-  - 1
-  - -561
-  - -397
-  - -140
-  - -100
-  - 15
-  - 8
-  - 5
-  - 2.5
-  - 1.5
-  - 1
+  - 0.5
 --- !u!114 &23957849
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1077,9 +1071,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   TerrainMaterial: {fileID: 0}
   SplitFactor: 2
-  MaxLevel: 4
-  ZMin: -10000
-  ZMax: 10000
+  MaxLevel: 16
+  ZMin: -200000
+  ZMax: 200000
   Face: 3
   UseHorizonCulling: 0
   SplitInvisibleQuads: 1
@@ -1346,20 +1340,14 @@ MonoBehaviour:
   ResidualProducerGameObject: {fileID: 743798011}
   UpSampleMaterial: {fileID: 2100000, guid: 3f506953395c459478ac6f2ba12b6eb1, type: 2}
   NoiseAmplitudes:
+  - 0
+  - 0
+  - 0
+  - 0
+  - 4
+  - 2
   - 1
-  - 1
-  - 1
-  - 1
-  - -561
-  - -397
-  - -140
-  - -100
-  - 15
-  - 8
-  - 5
-  - 2.5
-  - 1.5
-  - 1
+  - 0.5
 --- !u!114 &665760958
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1745,7 +1733,7 @@ MonoBehaviour:
   IsGPUProducer: 0
   IsLastInSequence: 0
   FileName: /Resources/Preprocess/Textures/Terrain/DEM6.dat
-  ZScale: 0.001
+  ZScale: 330000
 --- !u!114 &743798014
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1808,9 +1796,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   TerrainMaterial: {fileID: 0}
   SplitFactor: 2
-  MaxLevel: 4
-  ZMin: -10000
-  ZMax: 10000
+  MaxLevel: 16
+  ZMin: -200000
+  ZMax: 200000
   Face: 2
   UseHorizonCulling: 0
   SplitInvisibleQuads: 1
@@ -2018,8 +2006,8 @@ Transform:
   m_PrefabParentObject: {fileID: 0}
   m_PrefabInternal: {fileID: 0}
   m_GameObject: {fileID: 812990977}
-  m_LocalRotation: {x: -0.71165824, y: -0.5646663, z: 0.31422046, w: -0.27560863}
-  m_LocalPosition: {x: 402735.66, y: 616366.56, z: 597950.56}
+  m_LocalRotation: {x: -0.7102346, y: -0.5664559, z: 0.31491306, w: -0.27481696}
+  m_LocalPosition: {x: 3307761.5, y: 7469136.5, z: 6914626.5}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 0}
@@ -3704,9 +3692,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   TerrainMaterial: {fileID: 0}
   SplitFactor: 2
-  MaxLevel: 4
-  ZMin: -10000
-  ZMax: 10000
+  MaxLevel: 16
+  ZMin: -200000
+  ZMax: 200000
   Face: 1
   UseHorizonCulling: 0
   SplitInvisibleQuads: 1
@@ -3746,7 +3734,7 @@ MonoBehaviour:
   IsGPUProducer: 0
   IsLastInSequence: 0
   FileName: /Resources/Preprocess/Textures/Terrain/DEM2.dat
-  ZScale: 0.001
+  ZScale: 330000
 --- !u!114 &975822359
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -3950,7 +3938,7 @@ GameObject:
   - component: {fileID: 1208658434}
   - component: {fileID: 1208658433}
   m_Layer: 0
-  m_Name: CelestialBody Moon
+  m_Name: CelestialBody (Preprocessed)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -4071,13 +4059,13 @@ MonoBehaviour:
   OceanEnabled: 0
   RingEnabled: 0
   TerrainEnabled: 1
-  Amplitude: 25.6
-  Frequency: 32
+  Amplitude: 768
+  Frequency: 64
   ColorShader: {fileID: 4800000, guid: 9fbb9ce0af9a53e4f8d563b22096cea7, type: 3}
   Storages: []
   TerrainNodes: []
   HeightZ: 0
-  Size: 636000
+  Size: 6360000
   TCCPS: {fileID: 337998236}
   Suns:
   - {fileID: 1370843065}
@@ -4159,7 +4147,7 @@ MonoBehaviour:
   IsGPUProducer: 0
   IsLastInSequence: 0
   FileName: /Resources/Preprocess/Textures/Terrain/DEM4.dat
-  ZScale: 0.001
+  ZScale: 330000
 --- !u!114 &1260644405
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -4278,9 +4266,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   TerrainMaterial: {fileID: 0}
   SplitFactor: 2
-  MaxLevel: 4
-  ZMin: -10000
-  ZMax: 10000
+  MaxLevel: 16
+  ZMin: -200000
+  ZMax: 200000
   Face: 4
   UseHorizonCulling: 0
   SplitInvisibleQuads: 1
@@ -4411,7 +4399,7 @@ MonoBehaviour:
   IsGPUProducer: 0
   IsLastInSequence: 0
   FileName: /Resources/Preprocess/Textures/Terrain/DEM3.dat
-  ZScale: 0.001
+  ZScale: 330000
 --- !u!114 &1280753412
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -4744,15 +4732,15 @@ MonoBehaviour:
     m_PostInfinity: 2
     m_RotationOrder: 4
   ParentBody: {fileID: 1208658434}
-  GlowColor: {r: 1, g: 1, b: 1, a: 1}
+  GlowColor: {r: 1, g: 1, b: 1, a: 0}
   Density: 1
   RadiusHold: 0
-  Height: 3000
+  Height: 10000
   Scale: 1
   Fade: 1
-  AerialPerspectiveOffset: 166.6667
-  HorizonFixEps: 0.0008
-  MieFadeFix: 0.004
+  AerialPerspectiveOffset: 333.33334
+  HorizonFixEps: 0.004
+  MieFadeFix: 0.02
   ExtinctionGroundFade: 0.000025
   HDRExposure: 0.2
   SkyShader: {fileID: 4800000, guid: e591e3c9700c3b243a782b059c2d6d0b, type: 3}
@@ -4810,20 +4798,14 @@ MonoBehaviour:
   ResidualProducerGameObject: {fileID: 975822357}
   UpSampleMaterial: {fileID: 2100000, guid: 3f506953395c459478ac6f2ba12b6eb1, type: 2}
   NoiseAmplitudes:
+  - 0
+  - 0
+  - 0
+  - 0
+  - 4
+  - 2
   - 1
-  - 1
-  - 1
-  - 1
-  - -561
-  - -397
-  - -140
-  - -100
-  - 15
-  - 8
-  - 5
-  - 2.5
-  - 1.5
-  - 1
+  - 0.5
 --- !u!114 &1466346000
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -4908,9 +4890,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   TerrainMaterial: {fileID: 0}
   SplitFactor: 2
-  MaxLevel: 4
-  ZMin: -10000
-  ZMax: 10000
+  MaxLevel: 16
+  ZMin: -200000
+  ZMax: 200000
   Face: 6
   UseHorizonCulling: 0
   SplitInvisibleQuads: 1
@@ -4950,7 +4932,7 @@ MonoBehaviour:
   IsGPUProducer: 0
   IsLastInSequence: 0
   FileName: /Resources/Preprocess/Textures/Terrain/DEM1.dat
-  ZScale: 0.001
+  ZScale: 330000
 --- !u!114 &1482411439
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -5028,7 +5010,7 @@ MonoBehaviour:
   IsGPUProducer: 0
   IsLastInSequence: 0
   FileName: /Resources/Preprocess/Textures/Terrain/DEM5.dat
-  ZScale: 0.001
+  ZScale: 330000
 --- !u!114 &1492606188
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -5401,20 +5383,14 @@ MonoBehaviour:
   ResidualProducerGameObject: {fileID: 1280753409}
   UpSampleMaterial: {fileID: 2100000, guid: 3f506953395c459478ac6f2ba12b6eb1, type: 2}
   NoiseAmplitudes:
+  - 0
+  - 0
+  - 0
+  - 0
+  - 4
+  - 2
   - 1
-  - 1
-  - 1
-  - 1
-  - -561
-  - -397
-  - -140
-  - -100
-  - 15
-  - 8
-  - 5
-  - 2.5
-  - 1.5
-  - 1
+  - 0.5
 --- !u!114 &1658030199
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -5842,20 +5818,14 @@ MonoBehaviour:
   ResidualProducerGameObject: {fileID: 1260644402}
   UpSampleMaterial: {fileID: 2100000, guid: 3f506953395c459478ac6f2ba12b6eb1, type: 2}
   NoiseAmplitudes:
+  - 0
+  - 0
+  - 0
+  - 0
+  - 4
+  - 2
   - 1
-  - 1
-  - 1
-  - 1
-  - -561
-  - -397
-  - -140
-  - -100
-  - 15
-  - 8
-  - 5
-  - 2.5
-  - 1.5
-  - 1
+  - 0.5
 --- !u!114 &1861605692
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -6261,9 +6231,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   TerrainMaterial: {fileID: 0}
   SplitFactor: 2
-  MaxLevel: 4
-  ZMin: -10000
-  ZMax: 10000
+  MaxLevel: 16
+  ZMin: -200000
+  ZMax: 200000
   Face: 5
   UseHorizonCulling: 0
   SplitInvisibleQuads: 1
@@ -6392,20 +6362,14 @@ MonoBehaviour:
   ResidualProducerGameObject: {fileID: 1492606185}
   UpSampleMaterial: {fileID: 2100000, guid: 3f506953395c459478ac6f2ba12b6eb1, type: 2}
   NoiseAmplitudes:
+  - 0
+  - 0
+  - 0
+  - 0
+  - 4
+  - 2
   - 1
-  - 1
-  - 1
-  - 1
-  - -561
-  - -397
-  - -140
-  - -100
-  - 15
-  - 8
-  - 5
-  - 2.5
-  - 1.5
-  - 1
+  - 0.5
 --- !u!114 &2088696516
 MonoBehaviour:
   m_ObjectHideFlags: 0

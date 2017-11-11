@@ -117,7 +117,7 @@ GameObject:
   m_Component:
   - component: {fileID: 14608927}
   - component: {fileID: 14608928}
-  - component: {fileID: 14608929}
+  - component: {fileID: 14608930}
   m_Layer: 0
   m_Name: Preprocess
   m_TagString: Untagged
@@ -159,7 +159,7 @@ MonoBehaviour:
   DestinationMaxLevel: 4
   DestinationChannels: 1
   DeleteTempOnFinish: 1
---- !u!114 &14608929
+--- !u!114 &14608930
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_PrefabParentObject: {fileID: 0}
@@ -167,11 +167,19 @@ MonoBehaviour:
   m_GameObject: {fileID: 14608926}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 04464c9fd305c5b408426e5c195ea75d, type: 3}
+  m_Script: {fileID: 11500000, guid: 8d667f61bd5ff96479ed1a0e2e423a66, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  Texture: {fileID: 2800000, guid: 95b13d211bcaca043884189fdbbfe5e8, type: 3}
-  BilinearSample: 0
+  Capacity: 2048
+  TileSize: 96
+  IgnoreSizeRatio: 1
+  width: 7200
+  height: 3600
+  channels: 1
+  FileName: /Resources/Preprocess/Terrain/MoonElevation.raw
+  ByteOrder: 1
+  Bytes: 1
+  UseCaching: 1
 --- !u!1 &279384779
 GameObject:
   m_ObjectHideFlags: 0
