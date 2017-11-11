@@ -10,6 +10,7 @@
 		#include "../Galaxy.cginc"
 		
 		uniform StructuredBuffer<GalaxyStar> stars;
+		uniform StructuredBuffer<GalaxyStar> bulge;
 		
 		uniform float3 _Galaxy_Position;
 		uniform float4 _Galaxy_Orientation;
@@ -38,14 +39,14 @@
 			uint instanceId : SV_InstanceID;
 		};
 		
-		void PackStar(in appdata v, out v2f o)
+		void PackStar(in appdata v, inout StructuredBuffer<GalaxyStar> buffer, out v2f o)
 		{
 			uint id = v.instanceId;
 		
-			float3 starPosition = stars[id].position;
-			float4 starColor = stars[id].color;
-			float starSize = stars[id].size;
-			float starTemperature = stars[id].temperature;
+			float3 starPosition = buffer[id].position;
+			float4 starColor = buffer[id].color;
+			float starSize = buffer[id].size;
+			float starTemperature = buffer[id].temperature;
 			float starFade = 1.0;
 			float starShine = 2.0;
 		
@@ -108,7 +109,12 @@
 
 		void vert(in appdata v, out v2f o)
 		{
-			PackStar(v, o);
+			PackStar(v, stars, o);
+		}
+
+		void vert_bulge(in appdata v, out v2f o)
+		{
+			PackStar(v, bulge, o);
 		}
 		
 		void frag_dust(in v2f i, out float4 color : SV_Target)
@@ -129,6 +135,15 @@
 			starColor.a *= smoothstep(-1.0, gasCenterFalloff, length(i.position) - gasCenterFalloff);
 
 			color = float4(-starColor.rgb * M_PI, starColor.a);
+		}
+
+		void frag_bulge(in v2f i, out float4 color : SV_Target)
+		{
+			float4 starColor;
+
+			UnpackStar(i, starColor);
+			
+			color = float4(starColor.rgb, starColor.a);
 		}
 		ENDCG
 
@@ -179,6 +194,31 @@
 			#pragma target 5.0
 			#pragma vertex vert
 			#pragma fragment frag_gas
+			ENDCG
+		}
+
+		Pass
+		{
+			Name "Bulge"
+			Tags 
+			{
+				"Queue"					= "Transparent"
+				"RenderType"			= "Transparent"
+				"ForceNoShadowCasting"	= "True"
+				"IgnoreProjector"		= "True"
+
+				"LightMode"				= "Always"
+			}
+
+			Blend SrcAlpha One
+			Cull Front
+			ZWrite On
+			ZTest Always
+
+			CGPROGRAM
+			#pragma target 5.0
+			#pragma vertex vert_bulge
+			#pragma fragment frag_bulge
 			ENDCG
 		}
 	}

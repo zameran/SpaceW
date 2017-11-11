@@ -11598,6 +11598,7 @@ MonoBehaviour:
     GalaxyRenderingParameters:
       DustStrength: 0.0075
       DustSize: 1
+      GasDrawPercent: 0.01
       DustDrawPercent: 0.1
       StarDrawPercent: 1
       StarAbsoluteSize: 64
@@ -11683,7 +11684,7 @@ MonoBehaviour:
         ReverseY: 0
     GalaxyGenerationPerPassParameters:
       PassRotation: 1.5707964
-  DustMesh: {fileID: 10202, guid: 0000000000000000e000000000000000, type: 0}
+  VolumeMesh: {fileID: 10202, guid: 0000000000000000e000000000000000, type: 0}
   ScreenMesh: {fileID: 0}
   AutoUpdate: 0
   FrameBuffer1: {fileID: 0}

@@ -64,6 +64,8 @@
 
 				color = lerp(hiBuffer, loBuffer, clamp(_Mix, 0.0, 1.0));
 				color.a = 1.0 - color.a / 16;
+
+				color = clamp(color, 0.0, 65536.0); // Avoid negative colors...
 			}
 			ENDCG
 		}

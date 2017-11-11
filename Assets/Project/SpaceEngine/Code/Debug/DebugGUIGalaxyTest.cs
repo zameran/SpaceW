@@ -168,8 +168,10 @@ namespace SpaceEngine.Debugging
 
                             GUILayoutExtensions.SliderWithFieldAndControls("Dust Draw Percent (%)", 0.0f, 1.0f, ref Galaxy.Settings.GalaxyRenderingParameters.DustDrawPercent, "0.0000", 75, 0.01f);
 
-                            GUILayoutExtensions.SliderWithFieldAndControls("Stars Absolute Size (Mm)", 0.0f, 256.0f, ref Galaxy.Settings.GalaxyRenderingParameters.StarAbsoluteSize, "0.0", 75, 1.0f);
+                            GUILayoutExtensions.SliderWithFieldAndControls("Stars Absolute Size (Mm)", 0.0f, 1024.0f, ref Galaxy.Settings.GalaxyRenderingParameters.StarAbsoluteSize, "0.0", 75, 32.0f);
                             GUILayoutExtensions.SliderWithFieldAndControls("Stars Draw Percent (%)", 0.0f, 1.0f, ref Galaxy.Settings.GalaxyRenderingParameters.StarDrawPercent, "0.0000", 75, 0.01f);
+
+                            GUILayoutExtensions.SliderWithFieldAndControls("Gas Draw Percent (%)", 0.0f, 1.0f, ref Galaxy.Settings.GalaxyRenderingParameters.GasDrawPercent, "0.0000", 75, 0.01f);
                         });
                     });
 

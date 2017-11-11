@@ -102,8 +102,8 @@
 		{
 			float4 starColor = i.color;
 				
-			color = starColor / M_PI;
-			color.a = dot(color.xyz, 1.0);
+			color = starColor;
+			color.a = dot(color.xyz / M_PI, 1.0);
 		}
 		ENDCG
 
