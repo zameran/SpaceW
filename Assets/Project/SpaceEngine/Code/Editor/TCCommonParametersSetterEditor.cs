@@ -57,12 +57,14 @@ public sealed class TCCommonParametersSetterEditor : Editor
 
         EditorGUI.BeginChangeCheck();
 
-        var serializedMaterialTable = new SerializedObject(target);
-        var materialTable = serializedMaterialTable.FindProperty("MaterialTable");
+        var serializedTarget = new SerializedObject(target);
+        var materialTableProperty = serializedTarget.FindProperty("MaterialTable");
+        var engineProperty = serializedTarget.FindProperty("Engine");
 
-        EditorGUILayout.PropertyField(materialTable, true, null);
+        EditorGUILayout.PropertyField(materialTableProperty, true, null);
+        EditorGUILayout.PropertyField(engineProperty, true, null);
 
-        if (EditorGUI.EndChangeCheck()) serializedMaterialTable.ApplyModifiedProperties();
+        if (EditorGUI.EndChangeCheck()) serializedTarget.ApplyModifiedProperties();
 
         EditorGUILayout.Space();
     }

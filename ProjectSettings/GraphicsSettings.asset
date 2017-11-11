@@ -41,6 +41,7 @@ GraphicsSettings:
   - {fileID: 20000000, guid: 688df5052dced8942ba2ec1b2501abad, type: 2}
   - {fileID: 20000000, guid: a877adee66156844f86483169e3039cc, type: 2}
   - {fileID: 20000000, guid: b66f826c1080f77498b27660a3f0c2c2, type: 2}
+  - {fileID: 20000000, guid: 6f22e66b5786f8e42a000a9823c5ecae, type: 2}
   m_SpritesDefaultMaterial: {fileID: 10754, guid: 0000000000000000f000000000000000,
     type: 0}
   m_CustomRenderPipeline: {fileID: 0}

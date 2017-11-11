@@ -829,6 +829,7 @@ MonoBehaviour:
     ReverseX: 0
     ReverseY: 0
     NonLinear: 1
+  Engine: 5
 --- !u!1 &196657992
 GameObject:
   m_ObjectHideFlags: 0
@@ -2285,6 +2286,7 @@ MonoBehaviour:
     ReverseX: 0
     ReverseY: 0
     NonLinear: 1
+  Engine: 2
 --- !u!1 &702279121
 GameObject:
   m_ObjectHideFlags: 0
@@ -5269,6 +5271,7 @@ MonoBehaviour:
     ReverseX: 0
     ReverseY: 0
     NonLinear: 1
+  Engine: 3
 --- !u!4 &1014796141
 Transform:
   m_ObjectHideFlags: 0
@@ -5565,6 +5568,7 @@ MonoBehaviour:
     ReverseX: 0
     ReverseY: 0
     NonLinear: 1
+  Engine: 1
 --- !u!1 &1078420689
 GameObject:
   m_ObjectHideFlags: 0
@@ -8918,6 +8922,7 @@ MonoBehaviour:
     ReverseX: 0
     ReverseY: 0
     NonLinear: 1
+  Engine: 2
 --- !u!4 &1949857088
 Transform:
   m_ObjectHideFlags: 0
@@ -9319,6 +9324,7 @@ MonoBehaviour:
     ReverseX: 0
     ReverseY: 0
     NonLinear: 1
+  Engine: 4
 --- !u!1 &2014868081
 GameObject:
   m_ObjectHideFlags: 0

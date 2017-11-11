@@ -32,6 +32,37 @@
 		uniform float4 _Offset;
 		uniform float4x4 _LocalToWorld;
 
+		float3 ColorFunction(float3 ppoint, float height, float slope)
+		{
+			#if TC_NONE
+				return 0;
+			#endif
+
+			#if TC_ASTEROID
+				return ColorMapAsteroid(ppoint, height, slope);
+			#endif
+
+			#if TC_PLANET
+				return ColorMapPlanet(ppoint, height, slope);
+			#endif
+
+			#if TC_SELENA
+				return 0;	// TODO : Finish it!
+			#endif
+
+			#if TC_TERRA
+				return 0;	// TODO : Finish it!
+			#endif
+
+			#if TC_GASGIANT
+				return 0;	// TODO : Finish it!
+			#endif
+
+			#if TC_TEST
+				return float3(height, slope, 1.0);
+			#endif
+		}
+
 		CORE_PRODUCER_VERTEX_PROGRAM(_TileWSD.x)
 
 		void frag(in VertexProducerOutput IN, out float4 output : COLOR)
@@ -54,9 +85,11 @@
 			height = saturate(height);
 
 			//float3 color = ColorMapAsteroid(p, height, slope);
-			float3 color = ColorMapPlanet(p, height, slope);
+			//float3 color = ColorMapPlanet(p, height, slope);
 			//float3 color = ColorMapSelena(p, height,  slope);
 			//float3 color = ColorMapTerra(p, height, slope);
+
+			float3 color = ColorFunction(p, height, slope);
 			
 			output = float4(saturate(color), 1.0);
 		}
@@ -72,7 +105,9 @@
 			CGPROGRAM
 			#pragma target 4.0
 			#pragma vertex vert
-			#pragma fragment frag	
+			#pragma fragment frag
+
+			#pragma multi_compile TC_NONE TC_ASTEROID TC_PLANET TC_SELENA TC_TERRA  TC_GASGIANT TC_TEST
 			ENDCG
 		}
 	}

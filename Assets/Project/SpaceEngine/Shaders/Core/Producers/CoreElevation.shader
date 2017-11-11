@@ -30,6 +30,37 @@
 		uniform float4 _Offset;
 		uniform float4x4 _LocalToWorld;
 
+		float NoiseFunction(float3 ppoint)
+		{
+			#if TC_NONE
+				return 0;
+			#endif
+
+			#if TC_ASTEROID
+				return HeightMapAsteroid(ppoint);
+			#endif
+
+			#if TC_PLANET
+				return HeightMapPlanet(ppoint);
+			#endif
+
+			#if TC_SELENA
+				return 0;	// TODO : Finish it!
+			#endif
+
+			#if TC_TERRA
+				return 0;	// TODO : Finish it!
+			#endif
+
+			#if TC_GASGIANT
+				return 0;	// TODO : Finish it!
+			#endif
+
+			#if TC_TEST
+				return sNoise(ppoint);
+			#endif
+		}
+
 		CORE_PRODUCER_VERTEX_PROGRAM(_TileWSD.x)
 
 		void frag(in VertexProducerOutput IN, out float4 output : COLOR)
@@ -46,12 +77,14 @@
 			float3 v = p * _Frequency;
 			
 			//float noise = HeightMapAsteroid(v);
-			float noise = HeightMapPlanet(v);
+			//float noise = HeightMapPlanet(v);
 			//float noise = HeightMapSelena(v);
 			//float noise = HeightMapTerra(v);
 
 			//float noise = sNoise(v);
 			
+			float noise = NoiseFunction(v);
+
 			float height = _Amplitude * noise;
 			float preHeight = height;
 
@@ -88,7 +121,9 @@
 			CGPROGRAM
 			#pragma target 4.0
 			#pragma vertex vert
-			#pragma fragment frag	
+			#pragma fragment frag
+
+			#pragma multi_compile TC_NONE TC_ASTEROID TC_PLANET TC_SELENA TC_TERRA TC_GASGIANT TC_TEST
 			ENDCG
 		}
 	}

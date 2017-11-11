@@ -170,6 +170,7 @@ namespace SpaceEngine.Core
             ColorMaterial.SetMatrix("_LocalToWorld", TerrainNode.FaceToLocal.ToMatrix4x4());
 
             if (TerrainNode.ParentBody.TCCPS != null) TerrainNode.ParentBody.TCCPS.SetUniforms(ColorMaterial);
+            if (TerrainNode.ParentBody.TCCPS != null) TerrainNode.ParentBody.TCCPS.ToggleKeywords(ColorMaterial);
 
             Graphics.Blit(null, gpuSlot.Texture, ColorMaterial);
 

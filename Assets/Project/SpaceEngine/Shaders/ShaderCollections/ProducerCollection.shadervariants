@@ -1,0 +1,49 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!200 &20000000
+ShaderVariantCollection:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_Name: ProducerCollection
+  m_Shaders:
+    data:
+      first: {fileID: 4800000, guid: bca14839ab077f247895a5d4a083f40a, type: 3}
+      second:
+        variants:
+        - keywords: 
+          passType: 0
+        - keywords: TC_ASTEROID
+          passType: 0
+        - keywords: TC_NONE
+          passType: 0
+        - keywords: TC_PLANET
+          passType: 0
+        - keywords: TC_SELENA
+          passType: 0
+        - keywords: TC_TERRA
+          passType: 0
+        - keywords: TC_TEST
+          passType: 0
+        - keywords: TC_GASGIANT
+          passType: 0
+    data:
+      first: {fileID: 4800000, guid: def3614aa0d9dd44885f31160d5d49d6, type: 3}
+      second:
+        variants:
+        - keywords: 
+          passType: 0
+        - keywords: TC_ASTEROID
+          passType: 0
+        - keywords: TC_NONE
+          passType: 0
+        - keywords: TC_PLANET
+          passType: 0
+        - keywords: TC_SELENA
+          passType: 0
+        - keywords: TC_TERRA
+          passType: 0
+        - keywords: TC_TEST
+          passType: 0
+        - keywords: TC_GASGIANT
+          passType: 0

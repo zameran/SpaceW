@@ -36,10 +36,23 @@
 using SpaceEngine.Core.Patterns.Strategy.Uniformed;
 using SpaceEngine.Core.Utilities.Gradients;
 
+using System.Collections.Generic;
+
 using UnityEngine;
 
 public sealed class TCCommonParametersSetter : MonoBehaviour, IUniformed<Material>
 {
+    public enum TCEngine : byte
+    {
+        TC_NONE = 0,
+        TC_ASTEROID = 1,
+        TC_PLANET = 2,
+        TC_SELENA = 3,
+        TC_TERRA = 4,
+        TC_GASGIANT = 5,
+        TC_TEST = 6
+    }
+
     public float Lacunarity = 2.218281828459f;
     public float H = 0.5f;
     public float Offset = 0.8f;
@@ -77,6 +90,8 @@ public sealed class TCCommonParametersSetter : MonoBehaviour, IUniformed<Materia
 
     public MaterialTableGradientLut MaterialTable = new MaterialTableGradientLut();
 
+    public TCEngine Engine = TCEngine.TC_PLANET;
+
     private void Awake()
     {
         MaterialTable.GenerateLut();
@@ -108,6 +123,11 @@ public sealed class TCCommonParametersSetter : MonoBehaviour, IUniformed<Materia
 
             target.SetTexture("MaterialTable", MaterialTable.Lut);
         }
+    }
+
+    public void ToggleKeywords<T>(T target) where T : Material
+    {
+        Helper.SetKeywords(target, new List<string>() { Engine.ToString() }, false);
     }
 
     #region IUniformed<Material>

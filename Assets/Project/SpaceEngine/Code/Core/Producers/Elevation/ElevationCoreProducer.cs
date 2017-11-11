@@ -139,6 +139,7 @@ namespace SpaceEngine.Core
             ElevationMaterial.SetMatrix("_LocalToWorld", TerrainNode.FaceToLocal.ToMatrix4x4());
 
             if (TerrainNode.ParentBody.TCCPS != null) TerrainNode.ParentBody.TCCPS.SetUniforms(ElevationMaterial);
+            if (TerrainNode.ParentBody.TCCPS != null) TerrainNode.ParentBody.TCCPS.ToggleKeywords(ElevationMaterial);
 
             Graphics.Blit(null, gpuSlot.Texture, ElevationMaterial);
 
