@@ -1,7 +1,11 @@
-﻿using System;
+﻿using SpaceEngine.Core.Debugging;
+
+using System;
 using System.IO;
 
 using UnityEngine;
+
+using Logger = SpaceEngine.Core.Debugging.Logger;
 
 namespace SpaceEngine.Core.Preprocess.Terrain
 {
@@ -11,6 +15,7 @@ namespace SpaceEngine.Core.Preprocess.Terrain
     /// If the file is large the option of caching maybe enabed so only the tiles that are need are loaded from the file. 
     /// This is slower but will allow files that are larger than the maximum memory of the system to be processed.
     /// </summary>
+    [UseLogger(LoggerCategory.Core)]
     public class RawInputMap : InputMap
     {
         [Serializable]
@@ -46,7 +51,7 @@ namespace SpaceEngine.Core.Preprocess.Terrain
         private int channels;
 
         [SerializeField]
-        private string FileName = "/Proland/Textures/Terrain/Source/HeightMap.raw";
+        private string FileName = "/Resources/Preprocess/Terrain/HeightMap.raw";
 
         [SerializeField]
         private BYTE_ORDER ByteOrder = BYTE_ORDER.MAC;
@@ -81,7 +86,7 @@ namespace SpaceEngine.Core.Preprocess.Terrain
                     LoadRawFile16(Application.dataPath + FileName, ByteOrder == BYTE_ORDER.MAC);
                 }
 
-                Debug.Log(string.Format("RawInputMap.Start: {0} loaded!", FileName));
+                Logger.Log(string.Format("RawInputMap.Start: {0} loaded!", FileName));
             }
         }
 

@@ -12,7 +12,7 @@ namespace SpaceEngine.Core.Preprocess.Terrain
     /// An abstract raster data map. A map is a 2D array of pixels, whose values can come from anywhere (this depends on how you implement the <see cref="GetValue"/> method). 
     /// A map can be read pixel by pixel, or tile by tile. The tiles are cached for better efficiency.
     /// </summary>
-    public abstract class InputMap : MonoBehaviour
+    public abstract class InputMap : MonoBehaviour, IInputMap
     {
         DictionaryQueue<Id, Tile> Cache;
 

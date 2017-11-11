@@ -51,13 +51,13 @@ namespace SpaceEngine.Core.Preprocess.Terrain
 
     public class SphericalColorFunction : IColorFunction2D
     {
-        InputMap Source;
+        TextureInputMapSpherical Source;
 
         Projection Projection;
 
         int DestinationSize;
 
-        public SphericalColorFunction(InputMap source, Projection projection, int destinationSize)
+        public SphericalColorFunction(TextureInputMapSpherical source, Projection projection, int destinationSize)
         {
             this.Source = source;
             this.Projection = projection;

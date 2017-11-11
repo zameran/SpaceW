@@ -17,7 +17,7 @@ namespace SpaceEngine.Core
         /// The name of the file containing the tiles to load.
         /// </summary>
         [SerializeField]
-        string FileName = "/SpaceEngine/Textures/Terrain/Final/Color.proland";
+        string FileName = "/Resources/Preprocess/Textures/Terrain/Color.dat";
 
         /// <summary>
         /// The number of components per pixel in the tiles to load.

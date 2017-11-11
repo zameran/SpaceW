@@ -1,12 +1,20 @@
+using SpaceEngine.Core.Debugging;
 using SpaceEngine.Core.Exceptions;
 
 using System;
 using System.IO;
 
+#if UNITY_EDITOR
+using UnityEditor;
+#endif
+
 using UnityEngine;
+
+using Logger = SpaceEngine.Core.Debugging.Logger;
 
 namespace SpaceEngine.Core.Preprocess.Terrain
 {
+    [UseLogger(LoggerCategory.Core)]
     public class PreProcessTerrain : MonoBehaviour
     {
         [Serializable]
@@ -55,13 +63,16 @@ namespace SpaceEngine.Core.Preprocess.Terrain
         [SerializeField]
         bool DeleteTempOnFinish = true;
 
-        InputMap Source;
+        IInputMap Source;
 
         private void Start()
         {
-            Source = GetComponent<InputMap>();
+            Source = GetComponent<IInputMap>();
 
             if (Source == null) { throw new NullReferenceException("Input map is null. Have you added a Input map component to PreProcess game object?"); }
+
+            if ((!(Source is InputMap) && Type == TYPE.PLANE) ||
+                (!(Source is TextureInputMapSpherical) && Type == TYPE.SPHERICAL)) { throw new NullReferenceException("Input map have invalid type for that kind of preprocess!"); }
 
             try
             {
@@ -74,7 +85,7 @@ namespace SpaceEngine.Core.Preprocess.Terrain
                         PreprocessOrtho();
                         break;
                     default:
-                        Debug.LogWarning("PreProcessTerrain.Start: Nothing to produce/precompute!");
+                        Logger.LogWarning("PreProcessTerrain.Start: Nothing to produce/precompute!");
                         break;
                 }
             }
@@ -92,6 +103,10 @@ namespace SpaceEngine.Core.Preprocess.Terrain
                         }
                     }
                 }
+
+#if UNITY_EDITOR
+                AssetDatabase.Refresh();
+#endif
             }
         }
 
@@ -100,13 +115,13 @@ namespace SpaceEngine.Core.Preprocess.Terrain
             switch ((int)Type)
             {
                 case (int)TYPE.PLANE:
-                    PreprocessPlaneDem(Source, Application.dataPath + TempFolder, Application.dataPath + DestinationFolder);
+                    PreprocessPlaneDem((InputMap)Source, Application.dataPath + TempFolder, Application.dataPath + DestinationFolder);
                     break;
                 case (int)TYPE.SPHERICAL:
-                    PreprocessSphericalDem(Source, Application.dataPath + TempFolder, Application.dataPath + DestinationFolder);
+                    PreprocessSphericalDem((TextureInputMapSpherical)Source, Application.dataPath + TempFolder, Application.dataPath + DestinationFolder);
                     break;
                 default:
-                    Debug.LogWarning("PreProcessTerrain.Preprocess: Nothing to produce/precompute!");
+                    Logger.LogWarning("PreProcessTerrain.Preprocess: Nothing to produce/precompute!");
                     break;
             }
         }
@@ -116,12 +131,12 @@ namespace SpaceEngine.Core.Preprocess.Terrain
             switch ((int)Type)
             {
                 case (int)TYPE.PLANE:
-                    PreprocessPlaneOrtho(Source, Application.dataPath + TempFolder, Application.dataPath + DestinationFolder);
+                    PreprocessPlaneOrtho((InputMap)Source, Application.dataPath + TempFolder, Application.dataPath + DestinationFolder);
                     break;
                 case (int)TYPE.SPHERICAL:
                     throw new NotImplementedException();
                 default:
-                    Debug.LogWarning("PreProcessTerrain.Preprocess: Nothing to produce/precompute!");
+                    Logger.LogWarning("PreProcessTerrain.Preprocess: Nothing to produce/precompute!");
                     break;
             }
         }
@@ -145,10 +160,10 @@ namespace SpaceEngine.Core.Preprocess.Terrain
             mipmap.Compute();
             mipmap.Generate(0, 0, 0, destinationFolder + "/" + FileName + ".dat");
 
-            Debug.Log(string.Format("PreProcessTerrain.PreprocessPlaneDem: Computation time: {0} s", (Time.realtimeSinceStartup - startTime)));
+            Logger.Log(string.Format("PreProcessTerrain.PreprocessPlaneDem: Computation time: {0} s", (Time.realtimeSinceStartup - startTime)));
         }
 
-        void PreprocessSphericalDem(InputMap source, string tempFolder, string destinationFolder)
+        void PreprocessSphericalDem(TextureInputMapSpherical source, string tempFolder, string destinationFolder)
         {
             if (DestinationTileSize % DestinationMinTileSize != 0) { throw new InvalidParameterException("DestinationTileSize must be a multiple of DestinationMinTileSize!"); }
 
@@ -178,7 +193,7 @@ namespace SpaceEngine.Core.Preprocess.Terrain
             mipmap5.Compute(); mipmap5.Generate(0, 0, 0, destinationFolder + "/" + FileName + "5" + ".dat");
             mipmap6.Compute(); mipmap6.Generate(0, 0, 0, destinationFolder + "/" + FileName + "6" + ".dat");
 
-            Debug.Log(string.Format("PreProcessTerrain.PreprocessDem: Computation time: {0} s", (Time.realtimeSinceStartup - startTime)));
+            Logger.Log(string.Format("PreProcessTerrain.PreprocessDem: Computation time: {0} s", (Time.realtimeSinceStartup - startTime)));
         }
 
         /// <summary>
@@ -198,7 +213,7 @@ namespace SpaceEngine.Core.Preprocess.Terrain
             mipmap.Compute();
             mipmap.Generate(0, 0, 0, destinationFolder + "/" + FileName + ".dat");
 
-            Debug.Log(string.Format("PreProcessTerrain.PreprocessPlaneOrtho: Computation time: {0} s", (Time.realtimeSinceStartup - startTime)));
+            Logger.Log(string.Format("PreProcessTerrain.PreprocessPlaneOrtho: Computation time: {0} s", (Time.realtimeSinceStartup - startTime)));
         }
     }
 }

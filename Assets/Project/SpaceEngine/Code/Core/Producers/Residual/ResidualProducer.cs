@@ -20,7 +20,7 @@ namespace SpaceEngine.Core
         /// The name of the file containing the residual tiles to load.
         /// </summary>
         [SerializeField]
-        string FileName = "/Resources/Preprocess/Textures/Terrain/Height.proland";
+        string FileName = "/Resources/Preprocess/Textures/Terrain/Height.dat";
 
         [SerializeField]
         float ZScale = 1.0f;

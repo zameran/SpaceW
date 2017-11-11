@@ -1524,7 +1524,7 @@ MonoBehaviour:
   HDRMode: 4
   GSCS: {fileID: 11400000, guid: 1df83c97158884340af77d277fcca4bf, type: 2}
   FourierGridSize: 64
-  GridResolution: 32
+  GridResolution: 25
   OceanGridResolution: 32
   Eclipses: 1
   Planetshadows: 1

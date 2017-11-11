@@ -1,11 +1,16 @@
+using SpaceEngine.Core.Debugging;
+
 using System;
 using System.Collections.Generic;
 using System.IO;
 
 using UnityEngine;
 
+using Logger = SpaceEngine.Core.Debugging.Logger;
+
 namespace SpaceEngine.Core.Preprocess.Terrain
 {
+    [UseLogger(LoggerCategory.Core)]
     public class ColorMipmap : AbstractTileCache
     {
         public const int RESIDUAL_STEPS = 2;
@@ -62,11 +67,11 @@ namespace SpaceEngine.Core.Preprocess.Terrain
             Bottom = null;
             Top = null;
 
-            Debug.Log(string.Format("ColorMipmap.ctor: BaseLevelSize: {0}; TileSize: {1}; Border: {2}; MaxLevel: {3}; Channels: {4}", BaseLevelSize,
-                                                                                                                                      this.Size,
-                                                                                                                                      this.Border,
-                                                                                                                                      MaxLevel,
-                                                                                                                                      Channels));
+            Logger.Log(string.Format("ColorMipmap.ctor: BaseLevelSize: {0}; TileSize: {1}; Border: {2}; MaxLevel: {3}; Channels: {4}", BaseLevelSize,
+                                                                                                                                       this.Size,
+                                                                                                                                       this.Border,
+                                                                                                                                       MaxLevel,
+                                                                                                                                       Channels));
         }
 
         public void Compute()
@@ -85,7 +90,7 @@ namespace SpaceEngine.Core.Preprocess.Terrain
 
             var tilesCount = ((1 << (MaxLevel * 2 + 2)) - 1) / 3;
 
-            Debug.Log(string.Format("ColorMipmap.Generate: tiles count: {0}", tilesCount));
+            Logger.Log(string.Format("ColorMipmap.Generate: tiles count: {0}", tilesCount));
 
             long[] offsets = new long[tilesCount * 2];
             byte[] byteArray = new byte[(7 * 4) + (offsets.Length * 8)];
@@ -119,7 +124,7 @@ namespace SpaceEngine.Core.Preprocess.Terrain
 
             ConstantTileIDs.Clear();
 
-            Debug.Log(string.Format("ColorMipmap.Generate: Saved file path: {0} ", file));
+            Logger.Log(string.Format("ColorMipmap.Generate: Saved file path: {0} ", file));
         }
 
         private string FilePath(string tempFolder, string name, int level, int tx, int ty)
@@ -168,7 +173,7 @@ namespace SpaceEngine.Core.Preprocess.Terrain
         {
             int tilesCount = BaseLevelSize / Size;
 
-            Debug.Log(string.Format("ColorMipmap.BuildBaseLevelTiles: Build mipmap level: {0}!", MaxLevel));
+            Logger.Log(string.Format("ColorMipmap.BuildBaseLevelTiles: Build mipmap level: {0}!", MaxLevel));
 
             for (int ty = 0; ty < tilesCount; ++ty)
             {
@@ -211,7 +216,7 @@ namespace SpaceEngine.Core.Preprocess.Terrain
         {
             var tilesCount = 1 << level;
 
-            Debug.Log(string.Format("ColorMipmap.BuildMipmapLevel: Build mipmap level: {0}!", level));
+            Logger.Log(string.Format("ColorMipmap.BuildMipmapLevel: Build mipmap level: {0}!", level));
 
             CurrentLevel = level + 1;
 
@@ -296,7 +301,7 @@ namespace SpaceEngine.Core.Preprocess.Terrain
                     xp = 0;
                     yp = 0;
 
-                    Debug.LogError("ColorMipmap.Rotation: Something goes wrong!");
+                    Logger.LogError("ColorMipmap.Rotation: Something goes wrong!");
                     Debug.Break();
 
                     break;
@@ -530,7 +535,7 @@ namespace SpaceEngine.Core.Preprocess.Terrain
 
         private void ProduceTile(int level, int tx, int ty, ref long offset, long[] offsets, string file)
         {
-            Debug.Log(string.Format("ColorMipmap.ProduceTile: Producing tile {0}:{1}:{2}!", level, tx, ty));
+            Logger.Log(string.Format("ColorMipmap.ProduceTile: Producing tile {0}:{1}:{2}!", level, tx, ty));
 
             ProduceTile(level, tx, ty);
 
@@ -550,7 +555,7 @@ namespace SpaceEngine.Core.Preprocess.Terrain
 
             if (isConstant && ConstantTileIDs.ContainsKey(constantValue))
             {
-                Debug.Log("ColorMipmap.ProduceTile: tile is const (All same value)!");
+                Logger.Log("ColorMipmap.ProduceTile: tile is const (All same value)!");
 
                 var constantId = ConstantTileIDs[constantValue];
 

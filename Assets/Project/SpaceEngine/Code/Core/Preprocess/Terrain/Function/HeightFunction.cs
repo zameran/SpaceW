@@ -42,13 +42,13 @@ namespace SpaceEngine.Core.Preprocess.Terrain
 
     public class SphericalHeightFunction : IHeightFunction2D
     {
-        InputMap Source;
+        TextureInputMapSpherical Source;
 
         Projection Projection;
 
         int DestinationSize;
 
-        public SphericalHeightFunction(InputMap source, Projection projection, int destinationSize)
+        public SphericalHeightFunction(TextureInputMapSpherical source, Projection projection, int destinationSize)
         {
             this.Source = source;
             this.Projection = projection;

@@ -1,4 +1,6 @@
-﻿using UnityEngine;
+﻿using System;
+
+using UnityEngine;
 
 namespace SpaceEngine.Core.Preprocess.Terrain
 {
@@ -18,8 +20,11 @@ namespace SpaceEngine.Core.Preprocess.Terrain
 
         public override int Channels { get { return 4; } }
 
+        /// <inheritdoc />
         protected override void Start()
         {
+            if (Texture == null) { throw new NullReferenceException("Please, provide an input map! Current input is null!"); }
+
             base.Start();
         }
 
