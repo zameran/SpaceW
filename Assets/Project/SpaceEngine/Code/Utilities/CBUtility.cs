@@ -118,7 +118,7 @@ namespace SpaceEngine.Core.Utilities
 
             kernel = manipulationShader.FindKernel(string.Format("{0}{1}", M, dimensionAndChannel));
 
-            if (kernel == -1) { Debug.Log(string.Format("CBUtility.Execute: Could not find kernel read{0}", dimensionAndChannel)); return; }
+            if (kernel == -1) { Debug.Log(string.Format("CBUtility.Execute: Could not find kernel {1}{0}", dimensionAndChannel, M)); return; }
 
             switch (manipulation)
             {

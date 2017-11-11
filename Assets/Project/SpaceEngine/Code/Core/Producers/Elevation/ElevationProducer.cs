@@ -105,6 +105,7 @@ namespace SpaceEngine.Core
             var upsample = level > 0;
             var parentTile = FindTile(level - 1, tx / 2, ty / 2, false, true);
 
+            // TODO : Make it classwide...
             var residualTileSize = GetTileSize(0);
             var residualTexture = RTExtensions.CreateRTexture(residualTileSize, 0, RenderTextureFormat.RFloat);
             var residualBuffer = new ComputeBuffer(residualTileSize * residualTileSize, sizeof(float));
