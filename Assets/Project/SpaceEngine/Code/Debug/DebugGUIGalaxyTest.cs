@@ -119,31 +119,46 @@ namespace SpaceEngine.Debugging
                 {
                     GUILayoutExtensions.VerticalBoxed("", GUISkin, () =>
                     {
-                        var renderingColorDistributionTable = Galaxy.Settings.GalaxyRenderingParameters.ColorDistribution;
-                        var generationColorDistributionTable = Galaxy.Settings.GalaxyGenerationParameters.ColorDistribution;
+                        var renderingCDTable = Galaxy.Settings.GalaxyRenderingParameters.DustColorDistribution;
+                        var starGenerationCDTable = Galaxy.Settings.GalaxyGenerationParameters.StarsColorDistribution;
+                        var dustGenerationCDTable = Galaxy.Settings.GalaxyGenerationParameters.DustColorDistribution;
 
-                        if (renderingColorDistributionTable != null && renderingColorDistributionTable.Lut != null)
+                        if (renderingCDTable != null && renderingCDTable.Lut != null)
                         {
-                            GUILayout.Label("Color Distribution Table (Dust): ");
+                            GUILayout.Label("Dust Color Distribution Table (Render): ");
                             GUILayoutExtensions.VerticalBoxed("", GUISkin, () =>
                             {
                                 GUILayoutExtensions.Horizontal(() =>
                                 {
-                                    GUILayout.Label(renderingColorDistributionTable.Lut);
+                                    GUILayout.Label(renderingCDTable.Lut);
                                 });
                             });
                         }
 
                         GUILayoutExtensions.SpacingSeparator();
 
-                        if (generationColorDistributionTable != null && generationColorDistributionTable.Lut != null)
+                        if (starGenerationCDTable != null && starGenerationCDTable.Lut != null)
                         {
-                            GUILayout.Label("Color Distribution Table (Generator): ");
+                            GUILayout.Label("Stars Color Distribution Table (Generator): ");
                             GUILayoutExtensions.VerticalBoxed("", GUISkin, () =>
                             {
                                 GUILayoutExtensions.Horizontal(() =>
                                 {
-                                    GUILayout.Label(generationColorDistributionTable.Lut);
+                                    GUILayout.Label(starGenerationCDTable.Lut);
+                                });
+                            });
+                        }
+
+                        GUILayoutExtensions.SpacingSeparator();
+
+                        if (dustGenerationCDTable != null && dustGenerationCDTable.Lut != null)
+                        {
+                            GUILayout.Label("Dust Color Distribution Table (Generator): ");
+                            GUILayoutExtensions.VerticalBoxed("", GUISkin, () =>
+                            {
+                                GUILayoutExtensions.Horizontal(() =>
+                                {
+                                    GUILayout.Label(dustGenerationCDTable.Lut);
                                 });
                             });
                         }
@@ -168,10 +183,10 @@ namespace SpaceEngine.Debugging
 
                             GUILayoutExtensions.SliderWithFieldAndControls("Dust Draw Percent (%)", 0.0f, 1.0f, ref Galaxy.Settings.GalaxyRenderingParameters.DustDrawPercent, "0.0000", 75, 0.01f);
 
+                            GUILayoutExtensions.SliderWithFieldAndControls("Gas Draw Percent (%)", 0.0f, 1.0f, ref Galaxy.Settings.GalaxyRenderingParameters.GasDrawPercent, "0.0000", 75, 0.01f);
+
                             GUILayoutExtensions.SliderWithFieldAndControls("Stars Absolute Size (Mm)", 0.0f, 1024.0f, ref Galaxy.Settings.GalaxyRenderingParameters.StarAbsoluteSize, "0.0", 75, 32.0f);
                             GUILayoutExtensions.SliderWithFieldAndControls("Stars Draw Percent (%)", 0.0f, 1.0f, ref Galaxy.Settings.GalaxyRenderingParameters.StarDrawPercent, "0.0000", 75, 0.01f);
-
-                            GUILayoutExtensions.SliderWithFieldAndControls("Gas Draw Percent (%)", 0.0f, 1.0f, ref Galaxy.Settings.GalaxyRenderingParameters.GasDrawPercent, "0.0000", 75, 0.01f);
                         });
                     });
 

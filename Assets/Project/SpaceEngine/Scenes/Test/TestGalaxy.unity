@@ -6843,7 +6843,7 @@ MonoBehaviour:
   Bodies: []
   Starfields: []
   Sunglares: []
-  HDRMode: 4
+  HDRMode: 0
   GSCS: {fileID: 11400000, guid: 1df83c97158884340af77d277fcca4bf, type: 2}
   FourierGridSize: 64
   GridResolution: 32
@@ -11592,7 +11592,7 @@ MonoBehaviour:
   StarsShader: {fileID: 4800000, guid: 02a604af630bf304b8ac84d9c132a420, type: 3}
   DustShader: {fileID: 4800000, guid: 5c27b04b8de7fa74a8e1e9216b170be6, type: 3}
   ScreenShader: {fileID: 4800000, guid: 7e61934dc5ba7884fa88d044fa1e8c61, type: 3}
-  StarParticle: {fileID: 2800000, guid: 7b7fe3a11b6bb4145aaac89be034cc36, type: 3}
+  StarParticle: {fileID: 2800000, guid: 636b03c5c7635864288d1e9ee1093984, type: 3}
   Settings:
     Type: 2
     GalaxyRenderingParameters:
@@ -11605,7 +11605,7 @@ MonoBehaviour:
       DustPassCount: 1
       GasCenterFalloff: 16
       HDRExposure: 1.2
-      ColorDistribution:
+      DustColorDistribution:
         Gradient:
           serializedVersion: 2
           key0: {r: 0.9607843, g: 0.92941177, b: 0.9254902, a: 1}
@@ -11636,9 +11636,10 @@ MonoBehaviour:
           m_NumColorKeys: 4
           m_NumAlphaKeys: 2
         ReverseX: 0
-        ReverseY: 0
     GalaxyParameters:
       PassCount: 2
+      DustCount: 128000
+      BulgeCount: 4
       Count: 128000
     GalaxyGenerationParameters:
       Randomize: {x: 0, y: 0, z: 0}
@@ -11650,7 +11651,38 @@ MonoBehaviour:
       Depth: 32
       InverseSpiralEccentricity: 0.75
       SpiralRotation: 6.2832
-      ColorDistribution:
+      StarsColorDistribution:
+        Gradient:
+          serializedVersion: 2
+          key0: {r: 0.53333336, g: 0.6901961, b: 0.99607843, a: 1}
+          key1: {r: 1, g: 1, b: 1, a: 1}
+          key2: {r: 1, g: 0.6524799, b: 0.32352942, a: 0}
+          key3: {r: 1, g: 0.2703287, b: 0.22794116, a: 0}
+          key4: {r: 0, g: 0, b: 0, a: 0}
+          key5: {r: 0, g: 0, b: 0, a: 0}
+          key6: {r: 0, g: 0, b: 0, a: 0}
+          key7: {r: 0, g: 0, b: 0, a: 0}
+          ctime0: 0
+          ctime1: 13107
+          ctime2: 32768
+          ctime3: 65535
+          ctime4: 0
+          ctime5: 0
+          ctime6: 0
+          ctime7: 0
+          atime0: 0
+          atime1: 65535
+          atime2: 0
+          atime3: 0
+          atime4: 0
+          atime5: 0
+          atime6: 0
+          atime7: 0
+          m_Mode: 0
+          m_NumColorKeys: 4
+          m_NumAlphaKeys: 2
+        ReverseX: 0
+      DustColorDistribution:
         Gradient:
           serializedVersion: 2
           key0: {r: 1, g: 0.2703287, b: 0.22794116, a: 1}
@@ -11681,15 +11713,11 @@ MonoBehaviour:
           m_NumColorKeys: 4
           m_NumAlphaKeys: 2
         ReverseX: 0
-        ReverseY: 0
     GalaxyGenerationPerPassParameters:
       PassRotation: 1.5707964
   VolumeMesh: {fileID: 10202, guid: 0000000000000000e000000000000000, type: 0}
   ScreenMesh: {fileID: 0}
   AutoUpdate: 0
-  FrameBuffer1: {fileID: 0}
-  FrameBuffer2: {fileID: 0}
-  BlendFactor: 0
 --- !u!4 &1257223185
 Transform:
   m_ObjectHideFlags: 0

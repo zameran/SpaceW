@@ -4,12 +4,8 @@
 
 #include "Galaxy.cginc"
 
-#pragma kernel Core
-
-GalaxyStar GenerateStar(uint id)
+GalaxyStar GenerateStar(uint id, float4 rnd)
 {
-	float4 rnd = Random4(id) + float4(0.0, randomParams1);
-
 	float size = radius * 0.025 * (rnd.w * rnd.w + 0.5);					// Randomize the particle size...
 	
 	float eRadius = rnd.x * ellipseRadius;									// Size of the galactic ellipse...
@@ -55,17 +51,40 @@ GalaxyStar GenerateStar(uint id)
 	return star;
 }
 
-RWStructuredBuffer<GalaxyStar> output;
+#pragma kernel Stars
+
+RWStructuredBuffer<GalaxyStar> stars_output;
 
 [numthreads(1024, 1, 1)]
-void Core(uint3 groupThreadID : SV_GroupThreadID, 
+void Stars(uint3 groupThreadID : SV_GroupThreadID, 
+		   uint3 groupID : SV_GroupID, 
+		   uint3 dispatchThreadID : SV_DispatchThreadID, 
+		   uint groupIndex : SV_GroupIndex)
+{
+	uint id = groupID.x * 1024 + groupThreadID.x;
+	
+	float4 rnd = frac(Random4(id) + float4(0.0, randomParams1));
+
+	GalaxyStar star = GenerateStar(id, rnd);
+	
+	stars_output[id] = star;
+}
+
+#pragma kernel Dust
+
+RWStructuredBuffer<GalaxyStar> dust_output;
+
+[numthreads(1024, 1, 1)]
+void Dust(uint3 groupThreadID : SV_GroupThreadID, 
 		  uint3 groupID : SV_GroupID, 
 		  uint3 dispatchThreadID : SV_DispatchThreadID, 
 		  uint groupIndex : SV_GroupIndex)
 {
 	uint id = groupID.x * 1024 + groupThreadID.x;
 	
-	GalaxyStar star = GenerateStar(id);
+	float4 rnd = Random4(id) + float4(0.0, randomParams1);
+
+	GalaxyStar star = GenerateStar(id, rnd);
 	
-	output[id] = star;
+	dust_output[id] = star;
 }

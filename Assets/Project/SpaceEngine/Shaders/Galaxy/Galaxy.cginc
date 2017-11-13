@@ -91,6 +91,11 @@ float3 ToneMapFilmicALU(float3 color)
 
 	return color;
 }
+
+float4 ToneMapFilmicALU(float4 color)
+{
+	return float4(ToneMapFilmicALU(color.xyz), color.w);
+}
 //-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------

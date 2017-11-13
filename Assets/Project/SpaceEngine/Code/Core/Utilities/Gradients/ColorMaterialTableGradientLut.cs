@@ -47,11 +47,6 @@ namespace SpaceEngine.Core.Utilities.Gradients
         /// </summary>
         public bool ReverseX = false;
 
-        /// <summary>
-        /// Should <see cref="GradientLut.Lut"/> be inverted along X axis?
-        /// </summary>
-        public bool ReverseY = false;
-
         /// <inheritdoc />
         protected override Vector2 Size { get { return new Vector2(256, 32); } }
 

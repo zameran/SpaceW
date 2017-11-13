@@ -10,10 +10,10 @@
 		#include "../../Core.cginc"
 		#include "../Galaxy.cginc"
 		
-		uniform sampler2D _Star_Particle;
-		uniform float _Star_Absolute_Size;
+		uniform sampler2D _Particle;
+		uniform float _Particle_Absolute_Size;
 		
-		uniform StructuredBuffer<GalaxyStar> stars;
+		uniform StructuredBuffer<GalaxyStar> data;
 		
 		struct appdata
 		{
@@ -37,14 +37,23 @@
 		
 		void vert(in appdata v, out v2g o)
 		{
-			float3 starPosition = stars[v.id].position;
-			float4 starColor = stars[v.id].color;
-			float starSize = stars[v.id].size;
-			float starTemperature = stars[v.id].temperature;
-			
+			float3 starPosition = data[v.id].position;
+			float4 starColor = data[v.id].color;
+			float starSize = data[v.id].size;
+			float starTemperature = data[v.id].temperature;
+
 			o.vertex = UnityObjectToClipPos(float4(starPosition, 1.0));
 			o.uv = float2(0.25, 0.25);
-			o.size = starSize / _Star_Absolute_Size;
+			o.size = starSize / _Particle_Absolute_Size;
+
+			// TODO : Do i need the fake-up-to-real appraoch?
+			// TODO : Do i need flickering?
+			/*
+			float magnitude = 6.5 + length(starColor) * (-1.44 - 1.5);
+			float brightness = 1.0 * pow(5.0, (-magnitude - 1.44) / 2.5);
+			o.color = 4 * brightness * starColor * 3;
+			*/
+
 			o.color = starColor;
 		}
 		
@@ -91,9 +100,15 @@
 		void frag(in v2f i, out float4 color : SV_Target)
 		{
 			float4 starColor = i.color;
-			float4 starSampler = tex2D(_Star_Particle, i.uv).a;
+			float4 starSampler = tex2D(_Particle, i.uv).a;
 			float2 starUv = i.uv;
-				
+			
+			// TODO : Do i need the fake-up-to-real appraoch?
+			/*
+			half scale = exp(-dot(i.uv.xy, i.uv.xy));
+			starColor = float4(i.color.xyz * scale + 5.0 * i.color.w * pow(scale, 10.0), 1.0);
+			*/
+
 			color = hdr(starSampler * starColor);
 			color.a = dot(color.xyz, 1.0);
 		}
@@ -101,7 +116,7 @@
 		void frag_debug(in v2f i, out float4 color : SV_Target)
 		{
 			float4 starColor = i.color;
-				
+			
 			color = starColor;
 			color.a = dot(color.xyz / M_PI, 1.0);
 		}
