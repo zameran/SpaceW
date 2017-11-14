@@ -37,9 +37,13 @@ namespace SpaceEngine.Core.Preprocess.Forest
         private Mesh PreProcessMesh;
         private RenderTexture PreProcessAORT;
 
+        private string ApplicationDataPath = "";
+
         private void Start()
         {
             var startTime = Time.realtimeSinceStartup;
+
+            ApplicationDataPath = Application.dataPath;
 
             ViewMaterial = MaterialHelper.CreateTemp(ViewShader, "TreeView");
 
@@ -447,7 +451,7 @@ namespace SpaceEngine.Core.Preprocess.Forest
         {
             Debug.Log("Precomputing Views Started...");
 
-            StreamWriter file = new StreamWriter(Application.dataPath + "/Resources/Preprocess/Forest/Views.txt");
+            StreamWriter file = new StreamWriter(ApplicationDataPath + "/Resources/Preprocess/Forest/Views.txt");
 
             StartCoroutine(CalculateViewsRoutine((lines, billboards) =>
             {
@@ -458,7 +462,7 @@ namespace SpaceEngine.Core.Preprocess.Forest
 
                 foreach (var billboard in billboards)
                 {
-                    File.WriteAllBytes(Application.dataPath + DestinationFolder + string.Format("TestTree/{0}-{1}", "Trees3D", billboard.Key) + ".png", billboard.Value.EncodeToPNG());
+                    File.WriteAllBytes(ApplicationDataPath + DestinationFolder + string.Format("TestTree/{0}-{1}", "Trees3D", billboard.Key) + ".png", billboard.Value.EncodeToPNG());
                 }
 
                 file.Flush();

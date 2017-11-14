@@ -53,9 +53,11 @@ namespace SpaceEngine.Core.Preprocess.Terrain
             HeightFunction = heightFunction;
             TopLevelSize = topLevelSize;
             BaseLevelSize = baseLevelSize;
+
+            TempFolder = tempFolder;
+
             Size = tileSize;
             Scale = 1.0f;
-            TempFolder = tempFolder;
             MinLevel = 0;
             MaxLevel = 0;
 
@@ -84,8 +86,14 @@ namespace SpaceEngine.Core.Preprocess.Terrain
             Bottom = null;
             Top = null;
 
-            Logger.Log(string.Format("HeightMipmap.ctor: TopLevelSize: {0}; BaseLevelSize: {1}; TileSize: {2}; Scale: {3}; MinLevel: {4}; MaxLevel: {5}",
-                                     TopLevelSize, BaseLevelSize, this.Size, Scale, MinLevel, MaxLevel));
+            if (!Directory.Exists(TempFolder)) { Directory.CreateDirectory(TempFolder); }
+
+            Logger.Log(string.Format("HeightMipmap.ctor: TopLevelSize: {0}; BaseLevelSize: {1}; TileSize: {2}; Scale: {3}; MinLevel: {4}; MaxLevel: {5}", TopLevelSize, 
+                                                                                                                                                          BaseLevelSize, 
+                                                                                                                                                          Size, 
+                                                                                                                                                          Scale, 
+                                                                                                                                                          MinLevel, 
+                                                                                                                                                          MaxLevel));
         }
 
         public void Compute()
@@ -333,8 +341,6 @@ namespace SpaceEngine.Core.Preprocess.Terrain
             var fileName = FilePath(TempFolder, name, level, tx, ty);
             var dataBuffer = new byte[tile.Length * 4];
 
-            if (!Directory.Exists(TempFolder)) { Directory.CreateDirectory(TempFolder); }
-
             Buffer.BlockCopy(tile, 0, dataBuffer, 0, dataBuffer.Length);
             File.WriteAllBytes(fileName, dataBuffer);
         }
@@ -346,11 +352,12 @@ namespace SpaceEngine.Core.Preprocess.Terrain
             var fileInfo = new FileInfo(fileName);
             if (fileInfo == null) throw new FileNotFoundException("Could not read tile " + fileName);
 
-            var stream = fileInfo.OpenRead();
             var data = new byte[fileInfo.Length];
 
-            stream.Read(data, 0, (int)fileInfo.Length);
-            stream.Close();
+            using (Stream stream = fileInfo.OpenRead())
+            {
+                stream.Read(data, 0, (int)fileInfo.Length);
+            }
 
             for (int x = 0, i = 0; x < fileInfo.Length / 4; x++, i += 4)
             {

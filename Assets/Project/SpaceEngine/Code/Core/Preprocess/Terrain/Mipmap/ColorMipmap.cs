@@ -42,13 +42,13 @@ namespace SpaceEngine.Core.Preprocess.Terrain
         public ColorMipmap(IColorFunction2D colorFunction, int baseLevelSize, int tileSize, int border, int channels, string tempFolder) : base(baseLevelSize, baseLevelSize, tileSize, channels, 200)
         {
             ColorFunction = colorFunction;
+            BaseLevelSize = baseLevelSize;
+            Size = tileSize;
+            Border = Mathf.Max(0, border);
 
-            this.BaseLevelSize = baseLevelSize;
-            this.Size = tileSize;
-            this.Border = Mathf.Max(0, border);
-            this.MaxLevel = 0;
+            TempFolder = tempFolder;
 
-            this.TempFolder = tempFolder;
+            MaxLevel = 0;
 
             var size = BaseLevelSize;
 
@@ -67,9 +67,11 @@ namespace SpaceEngine.Core.Preprocess.Terrain
             Bottom = null;
             Top = null;
 
+            if (!Directory.Exists(TempFolder)) { Directory.CreateDirectory(TempFolder); }
+
             Logger.Log(string.Format("ColorMipmap.ctor: BaseLevelSize: {0}; TileSize: {1}; Border: {2}; MaxLevel: {3}; Channels: {4}", BaseLevelSize,
-                                                                                                                                       this.Size,
-                                                                                                                                       this.Border,
+                                                                                                                                       Size,
+                                                                                                                                       Border,
                                                                                                                                        MaxLevel,
                                                                                                                                        Channels));
         }
@@ -134,8 +136,6 @@ namespace SpaceEngine.Core.Preprocess.Terrain
 
         private void SaveTile(string name, int level, int tx, int ty, byte[] tile)
         {
-            if (!Directory.Exists(TempFolder)) { Directory.CreateDirectory(TempFolder); }
-
             File.WriteAllBytes(FilePath(TempFolder, name, level, tx, ty), tile);
         }
 
@@ -146,11 +146,10 @@ namespace SpaceEngine.Core.Preprocess.Terrain
             var fileInfo = new FileInfo(fileName);
             if (fileInfo == null) throw new FileNotFoundException(string.Format("Could not read tile: {0}", fileName));
 
-            var stream = fileInfo.OpenRead();
-
-            stream.Read(tile, 0, (int)fileInfo.Length);
-            stream.Close();
-            stream.Dispose();
+            using (Stream stream = fileInfo.OpenRead())
+            {
+                stream.Read(tile, 0, (int)fileInfo.Length);
+            }
         }
 
         protected override float[] ReadTile(int tx, int ty)

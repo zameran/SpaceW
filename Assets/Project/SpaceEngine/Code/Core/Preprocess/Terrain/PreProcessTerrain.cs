@@ -3,7 +3,6 @@ using SpaceEngine.Core.Exceptions;
 
 using System;
 using System.IO;
-
 #if UNITY_EDITOR
 using UnityEditor;
 #endif
@@ -65,11 +64,15 @@ namespace SpaceEngine.Core.Preprocess.Terrain
 
         InputMap Source;
 
+        private string ApplicationDataPath = "";
+
         private void Start()
         {
             Source = GetComponent<InputMap>();
 
             if (Source == null) { throw new NullReferenceException("Input map is null. Have you added a Input map component to PreProcess game object?"); }
+
+            ApplicationDataPath = Application.dataPath;
 
             try
             {
@@ -90,7 +93,7 @@ namespace SpaceEngine.Core.Preprocess.Terrain
             {
                 if (DeleteTempOnFinish)
                 {
-                    var directory = new DirectoryInfo(Application.dataPath + TempFolder);
+                    var directory = new DirectoryInfo(ApplicationDataPath + TempFolder);
 
                     if (directory.Exists)
                     {
@@ -112,10 +115,10 @@ namespace SpaceEngine.Core.Preprocess.Terrain
             switch ((int)Type)
             {
                 case (int)TYPE.PLANE:
-                    PreprocessPlaneDem(Source, Application.dataPath + TempFolder, Application.dataPath + DestinationFolder);
+                    PreprocessPlaneDem(Source, ApplicationDataPath + TempFolder, ApplicationDataPath + DestinationFolder);
                     break;
                 case (int)TYPE.SPHERICAL:
-                    PreprocessSphericalDem(Source, Application.dataPath + TempFolder, Application.dataPath + DestinationFolder);
+                    PreprocessSphericalDem(Source, ApplicationDataPath + TempFolder, ApplicationDataPath + DestinationFolder);
                     break;
                 default:
                     Logger.LogWarning("PreProcessTerrain.Preprocess: Nothing to produce/precompute!");
@@ -128,7 +131,7 @@ namespace SpaceEngine.Core.Preprocess.Terrain
             switch ((int)Type)
             {
                 case (int)TYPE.PLANE:
-                    PreprocessPlaneOrtho(Source, Application.dataPath + TempFolder, Application.dataPath + DestinationFolder);
+                    PreprocessPlaneOrtho(Source, ApplicationDataPath + TempFolder, ApplicationDataPath + DestinationFolder);
                     break;
                 case (int)TYPE.SPHERICAL:
                     throw new NotImplementedException();

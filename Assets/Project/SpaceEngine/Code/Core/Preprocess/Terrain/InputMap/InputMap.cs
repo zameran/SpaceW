@@ -41,7 +41,7 @@ namespace SpaceEngine.Core.Preprocess.Terrain
             return TileSize;
         }
 
-        protected virtual void Start()
+        protected virtual void Awake()
         {
             if (TileSize <= 0) { throw new InvalidParameterException("Tile size must be greater than 0!"); }
 
@@ -52,6 +52,11 @@ namespace SpaceEngine.Core.Preprocess.Terrain
             }
 
             Cache = new DictionaryQueue<Id, Tile>(new EqualityComparerID());
+        }
+
+        protected virtual void Update()
+        {
+            
         }
 
         /// <summary>

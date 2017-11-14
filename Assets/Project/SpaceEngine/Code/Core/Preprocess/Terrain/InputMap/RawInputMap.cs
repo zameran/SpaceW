@@ -70,23 +70,27 @@ namespace SpaceEngine.Core.Preprocess.Terrain
 
         public override int Channels { get { return channels; } }
 
-        protected override void Start()
+        private string ApplicationDataPath = "";
+
+        protected override void Awake()
         {
-            base.Start();
+            base.Awake();
+
+            ApplicationDataPath = Application.dataPath;
 
             if (!UseCaching)
             {
                 // If caching not used load all data into memory.
                 if (Bytes == BYTES.BIT8)
                 {
-                    LoadRawFile8(Application.dataPath + FileName);
+                    LoadRawFile8(ApplicationDataPath + FileName);
                 }
                 else if (Bytes == BYTES.BIT16)
                 {
-                    LoadRawFile16(Application.dataPath + FileName, ByteOrder == BYTE_ORDER.MAC);
+                    LoadRawFile16(ApplicationDataPath + FileName, ByteOrder == BYTE_ORDER.MAC);
                 }
 
-                Logger.Log(string.Format("RawInputMap.Start: {0} loaded!", FileName));
+                Logger.Log(string.Format("RawInputMap.Awake: {0} loaded!", FileName));
             }
         }
 
@@ -129,11 +133,11 @@ namespace SpaceEngine.Core.Preprocess.Terrain
                     // The data for a 2D map can be accessed in the file in contiguous strips
                     if (Bytes == BYTES.BIT8)
                     {
-                        LoadStrip8(Application.dataPath + FileName, idx, strip);
+                        LoadStrip8(ApplicationDataPath + FileName, idx, strip);
                     }
                     else if (Bytes == BYTES.BIT16)
                     {
-                        LoadStrip16(Application.dataPath + FileName, (tx + (ty + j) * width) * Channels * 2, strip, ByteOrder == BYTE_ORDER.MAC);
+                        LoadStrip16(ApplicationDataPath + FileName, (tx + (ty + j) * width) * Channels * 2, strip, ByteOrder == BYTE_ORDER.MAC);
                     }
 
                     for (int i = 0; i < tileSize; ++i)
