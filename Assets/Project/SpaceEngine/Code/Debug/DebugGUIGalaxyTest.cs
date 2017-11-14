@@ -36,6 +36,7 @@
 using SpaceEngine.Tests;
 
 using System;
+using System.Runtime.InteropServices;
 
 using UnityEngine;
 
@@ -44,6 +45,19 @@ namespace SpaceEngine.Debugging
     public sealed class DebugGUIGalaxyTest : DebugGUI
     {
         internal GalaxyTest Galaxy { get; private set; }
+
+        private Vector2 StatisticsScrollPosition = Vector2.zero;
+
+        private bool ShowStatistics = false;
+
+        private Rect StatisticsInfoBounds
+        {
+            get
+            {
+                return new Rect(debugInfoBounds.x + debugInfoBounds.width + 10,
+                                debugInfoBounds.y, debugInfoBounds.width, debugInfoBounds.height / 2.0f);
+            }
+        }
 
         protected override void Awake()
         {
@@ -62,6 +76,11 @@ namespace SpaceEngine.Debugging
             base.OnGUI();
 
             GUILayout.Window(0, debugInfoBounds, UI, "Galaxy Info");
+
+            if (ShowStatistics)
+            {
+                GUILayout.Window(1, StatisticsInfoBounds, StatisticsUI, "Galaxy Statistics");
+            }
         }
 
         protected override void UI(int id)
@@ -74,6 +93,13 @@ namespace SpaceEngine.Debugging
                 {
                     GUILayoutExtensions.VerticalBoxed("", GUISkin, () =>
                     {
+                        GUILayoutExtensions.VerticalBoxed("", GUISkin, () =>
+                        {
+                            ShowStatistics = GUILayout.Toggle(ShowStatistics, " Show Storage Contents?");
+                        });
+
+                        GUILayoutExtensions.SpacingSeparator();
+
                         if (GUILayout.Button("Save Preset")) Galaxy.Settings.SaveSettings();
 
                         GUILayoutExtensions.SpacingSeparator();
@@ -254,6 +280,55 @@ namespace SpaceEngine.Debugging
             else
             {
                 GUILayoutExtensions.DrawBadHolder("Galaxy parameters: ", "No Galaxy!?", GUISkin);
+            }
+
+            GUILayout.EndScrollView();
+        }
+
+        private void StatisticsUI(int id)
+        {
+            StatisticsScrollPosition = GUILayout.BeginScrollView(StatisticsScrollPosition, false, false);
+
+            if (Galaxy != null && Helper.Enabled(Galaxy))
+            {
+                var starsCount = Galaxy.Settings.TotalStarsCount;
+                var starsDrawCount = Galaxy.StarDrawCount;
+                var dustCount = Galaxy.Settings.TotalDustCount;
+                var dustDrawCount = Galaxy.DustDrawCount;
+                var gasDrawCount = Galaxy.GasDrawCount;
+                var octree = Galaxy.Octree;
+
+                GUILayoutExtensions.VerticalBoxed("Render Statistics: ", GUISkin, () =>
+                {
+                    GUILayoutExtensions.VerticalBoxed("", GUISkin, () =>
+                    {
+                        GUILayoutExtensions.LabelWithSpace(string.Format("Stars Count (Total): {0:N}", starsCount));
+                        GUILayoutExtensions.LabelWithSpace(string.Format("Dust Count (Total): {0:N}", dustCount));
+
+                        GUILayoutExtensions.LabelWithSpace(string.Format("Stars Draw Count (Render): {0:N}", starsDrawCount));
+                        GUILayoutExtensions.LabelWithSpace(string.Format("Dust Draw Count (Render): {0:N}", dustDrawCount));
+                        GUILayoutExtensions.LabelWithSpace(string.Format("Gas Draw Count (Render): {0:N}", gasDrawCount));
+
+                        GUILayoutExtensions.LabelWithSpace(string.Format("Star Struct Stride (Generator, bytes): {0}", Marshal.SizeOf<GalaxyStar>()));
+                        GUILayoutExtensions.LabelWithSpace(string.Format("Generation Parameters Struct Stride (Generator, bytes): {0}", Marshal.SizeOf<GalaxyGenerationParameters>()));
+                        GUILayoutExtensions.LabelWithSpace(string.Format("Generation Per Pass Parameters Struct Stride (Generator, bytes): {0}", Marshal.SizeOf<GalaxyGenerationPerPassParameters>()));
+                        GUILayoutExtensions.LabelWithSpace(string.Format("Parameters Struct Stride (Generator, bytes): {0}", Marshal.SizeOf<GalaxyParameters>()));
+                        GUILayoutExtensions.LabelWithSpace(string.Format("Rendering Parameters Struct Stride (Generator, bytes): {0}", Marshal.SizeOf<GalaxyRenderingParameters>()));
+                        GUILayoutExtensions.LabelWithSpace(string.Format("Settings Struct Stride (Generator, bytes): {0}", Marshal.SizeOf<GalaxySettings>()));
+
+                        if (octree != null)
+                        {
+                            GUILayoutExtensions.LabelWithSpace(string.Format("Octree Count (Total): {0:N}", octree.Count));
+                            GUILayoutExtensions.LabelWithSpace(string.Format("Octree Nodes Count (Total): {0:N}", octree.NodesCount()));
+                        }
+
+                        GUILayoutExtensions.SpacingSeparator();
+                    });
+                });
+            }
+            else
+            {
+                GUILayoutExtensions.DrawBadHolder("Galaxy statistics: ", "No Galaxy!?", GUISkin);
             }
 
             GUILayout.EndScrollView();

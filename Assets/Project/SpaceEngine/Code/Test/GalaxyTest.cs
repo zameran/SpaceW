@@ -36,6 +36,7 @@
 using SpaceEngine.Core;
 using SpaceEngine.Core.Patterns.Strategy.Renderable;
 using SpaceEngine.Core.Utilities.Gradients;
+using SpaceEngine.Core.Octree;
 
 using System;
 using System.Collections.Generic;
@@ -58,6 +59,48 @@ namespace SpaceEngine.Tests
         public Vector4 color;
         public float size;
         public float temperature;
+    }
+
+    [Serializable]
+    public class GalaxyRenderStar
+    {
+        public Vector3 Position { get; }
+
+        public GalaxyRenderStar()
+        {
+            Position = Vector3.zero;
+        }
+
+        public GalaxyRenderStar(Vector3 position)
+        {
+            Position = position;
+        }
+
+        #region Overrides
+
+        /// <inheritdoc />
+        public override string ToString()
+        {
+            return string.Format("({0})", Position);
+        }
+
+        /// <inheritdoc />
+        public override bool Equals(object obj)
+        {
+            var item = obj as GalaxyRenderStar;
+
+            if (item == null) { return false; }
+
+            return Position.Equals(item.Position);
+        }
+
+        /// <inheritdoc />
+        public override int GetHashCode()
+        {
+            return Position.GetHashCode();
+        }
+
+        #endregion
     }
 
     [Serializable]
@@ -279,6 +322,16 @@ namespace SpaceEngine.Tests
         public GalaxyGenerationParameters GalaxyGenerationParameters;
         public GalaxyGenerationPerPassParameters GalaxyGenerationPerPassParameters;
 
+        /// <summary>
+        /// Returns total count of stars in the whole Galaxy.
+        /// </summary>
+        public long TotalStarsCount { get { return GalaxyParameters.Count * GalaxyParameters.PassCount * (int)Type; } }
+
+        /// <summary>
+        /// Returns total count of dust points in the whole Galaxy.
+        /// </summary>
+        public long TotalDustCount { get { return GalaxyParameters.DustCount * GalaxyParameters.PassCount * (int)Type; } }
+
         public GalaxySettings(GenerationType type, GalaxyRenderingParameters grp, GalaxyParameters gp, GalaxyGenerationParameters ggp, GalaxyGenerationPerPassParameters ggppp)
         {
             Type = type;
@@ -422,6 +475,7 @@ namespace SpaceEngine.Tests
 
         public bool AutoUpdate = false;
 
+        // TODO : Maybe bigger data type? Leave it, if you are ok to overflows :)
         public int StarDrawCount { get { return (int)(Settings.GalaxyParameters.Count * Settings.GalaxyRenderingParameters.StarDrawPercent); } }
         public int DustDrawCount { get { return (int)(Settings.GalaxyParameters.DustCount * Settings.GalaxyRenderingParameters.DustDrawPercent); } }
         public int GasDrawCount { get { return (int)(Settings.GalaxyParameters.DustCount * Settings.GalaxyRenderingParameters.GasDrawPercent); } }
@@ -433,6 +487,8 @@ namespace SpaceEngine.Tests
         private RenderTexture FrameBuffer2;
 
         private float BlendFactor = 0.0f;
+
+        public PointOctree<GalaxyRenderStar> Octree;
 
         #region Galaxy
 
@@ -697,9 +753,54 @@ namespace SpaceEngine.Tests
 
         #endregion
 
+        #region Octree
+
+        public void InitOctree()
+        {
+            Octree = new PointOctree<GalaxyRenderStar>(512, Vector3.zero, 4);
+        }
+
+        [ContextMenu("Generate Octree")]
+        public void GenerateOctree()
+        {
+            // NOTE : WIP
+            // TODO : Regenerate octree on buffers change...
+            if (Octree == null) return;
+
+            for (byte generationType = 0; generationType < StarsBuffers.Capacity; generationType++)
+            {
+                var buffers = StarsBuffers[generationType];
+
+                for (var bufferIndex = 0; bufferIndex < buffers.Capacity; bufferIndex++)
+                {
+                    var buffer = buffers[bufferIndex];
+                    var data = new GalaxyStar[buffer.count];
+
+                    buffer.GetData(data);
+
+                    for (var starIndex = 0; starIndex < data.Length; starIndex++)
+                    {
+                        var star = data[starIndex];
+                        var starPosition = star.position;
+
+                        Octree.Add(new GalaxyRenderStar(starPosition), starPosition);
+                    }
+                }
+            }
+        }
+
+        #endregion
+
         #endregion
 
         #region Node
+
+        private void OnDrawGizmos()
+        {
+            if (Octree == null) return;
+
+            Octree.DrawAllBounds();
+        }
 
         protected override void InitNode()
         {
@@ -739,6 +840,9 @@ namespace SpaceEngine.Tests
 
             InitBuffers();
             GenerateBuffers();
+
+            InitOctree();
+            GenerateOctree();
         }
 
         protected override void UpdateNode()
