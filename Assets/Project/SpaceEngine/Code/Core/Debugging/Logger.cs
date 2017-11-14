@@ -205,7 +205,11 @@ namespace SpaceEngine.Core.Debugging
 
         public static void LogWarning(object obj)
         {
-            throw new NotImplementedException();
+            LoggerCategory loggerCategory;
+
+            Detect(out loggerCategory);
+
+            PrintToLog(obj, LogType.Warning, loggerCategory);
         }
 
         public static void LogException(object obj)
