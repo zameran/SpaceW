@@ -214,6 +214,11 @@ namespace SpaceEngine.Core.Octree
             RootNode = RootNode.ShrinkIfPossible(InitialSize);
         }
 
+        public int NodesCount()
+        {
+            return RootNode.NodesCount();
+        }
+
         /// <summary>
         /// Used when growing the octree. 
         /// Works out where the old root node would fit inside a new, larger root node.

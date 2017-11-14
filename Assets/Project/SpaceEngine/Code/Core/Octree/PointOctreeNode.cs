@@ -34,7 +34,7 @@
 #endregion
 
 using System.Collections.Generic;
-
+using System.Linq;
 using UnityEngine;
 
 namespace SpaceEngine.Core.Octree
@@ -86,7 +86,14 @@ namespace SpaceEngine.Core.Octree
         /// </summary>
         private Vector3 actualBoundsSize;
 
-        // An object in the octree
+        /// <summary>
+        /// This node is not splitted?
+        /// </summary>
+        public bool IsLeaf { get { return Children == null; } }
+
+        /// <summary>
+        /// An object in the octree.
+        /// </summary>
         protected class OctreeObject
         {
             public T Obj;
@@ -138,7 +145,7 @@ namespace SpaceEngine.Core.Octree
                 }
             }
 
-            if (!removed && Children != null)
+            if (!removed && !IsLeaf)
             {
                 for (byte i = 0; i < 8; i++)
                 {
@@ -148,7 +155,7 @@ namespace SpaceEngine.Core.Octree
                 }
             }
 
-            if (removed && Children != null)
+            if (removed && !IsLeaf)
             {
                 // Check if we should merge nodes now that we've removed an item...
                 if (ShouldMerge())
@@ -189,7 +196,7 @@ namespace SpaceEngine.Core.Octree
             }
 
             // Check children...
-            if (Children != null)
+            if (!IsLeaf)
             {
                 for (byte i = 0; i < 8; i++)
                 {
@@ -228,7 +235,7 @@ namespace SpaceEngine.Core.Octree
 
             Gizmos.DrawWireCube(thisBounds.center, thisBounds.size);
 
-            if (Children != null)
+            if (!IsLeaf)
             {
                 depth++;
 
@@ -255,7 +262,7 @@ namespace SpaceEngine.Core.Octree
                 Gizmos.DrawCube(obj.Position, Vector3.one * tintVal);
             }
 
-            if (Children != null)
+            if (!IsLeaf)
             {
                 for (byte i = 0; i < 8; i++)
                 {
@@ -302,7 +309,7 @@ namespace SpaceEngine.Core.Octree
             }
 
             // Check objects in children if there are any...
-            if (Children != null)
+            if (!IsLeaf)
             {
                 var childHadContent = false;
 
@@ -325,9 +332,7 @@ namespace SpaceEngine.Core.Octree
                     }
                 }
             }
-
-            // Can reduce...
-            if (Children == null)
+            else // Can reduce...
             {
                 // We don't have any children, so just shrink this node to the new size. We already know that everything will still fit in it...
                 SetValues(SideLength / 2, MinSize, ChildBounds[bestFit].center);
@@ -337,6 +342,20 @@ namespace SpaceEngine.Core.Octree
 
             // We have children. Use the appropriate child as the new root node...
             return Children[bestFit];
+        }
+
+        public int NodesCount()
+        {
+            var totalCount = 1;
+
+            if (IsLeaf)
+            {
+                return totalCount;
+            }
+            else
+            {
+                return totalCount + Children.Sum(child => child.NodesCount());
+            }
         }
 
         /// <summary>
@@ -490,11 +509,11 @@ namespace SpaceEngine.Core.Octree
         {
             var totalObjects = Objects.Count;
 
-            if (Children != null)
+            if (!IsLeaf)
             {
                 foreach (var child in Children)
                 {
-                    if (child.Children != null)
+                    if (!child.IsLeaf)
                     {
                         // If any of the *children* have children, there are definitely too many to merge, or the child woudl have been merged already...
                         return false;
@@ -511,7 +530,7 @@ namespace SpaceEngine.Core.Octree
         {
             if (Objects.Count > 0) return true;
 
-            if (Children != null)
+            if (!IsLeaf)
             {
                 for (byte i = 0; i < 8; i++)
                 {
