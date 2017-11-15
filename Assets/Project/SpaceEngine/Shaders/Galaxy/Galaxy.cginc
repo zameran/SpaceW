@@ -210,7 +210,7 @@ SamplerState sampler_point_clamp_MaterialTable;
 
 float4 GetMaterial(float value)
 {
-	return ColorDistributionTable.SampleLevel(sampler_point_clamp_MaterialTable, float2(value, 0.0), 0);
+	return normalize(ColorDistributionTable.SampleLevel(sampler_point_clamp_MaterialTable, float2(value, 0.0), 0));
 }
 //-----------------------------------------------------------------------------
 

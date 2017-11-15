@@ -210,7 +210,7 @@
 				"LightMode"				= "Always"
 			}
 
-			Blend SrcAlpha One
+			Blend OneMinusDstColor One
 			Cull Front
 			ZWrite On
 			ZTest Always

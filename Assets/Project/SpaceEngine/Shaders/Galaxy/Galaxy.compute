@@ -8,9 +8,10 @@
 
 #include "Galaxy.cginc"
 
-GalaxyStar GenerateStar(uint id, float4 rnd)
+GalaxyStar GenerateStar(uint id, float pertrub, float4 rnd)
 {
 	float size = radius * 0.025 * (rnd.w * rnd.w + 0.5);					// Randomize the particle size...
+	float halfSize = size / 2.0;
 	
 	float eRadius = rnd.x * ellipseRadius;									// Size of the galactic ellipse...
 	float theta = rnd.y * M_PI2;											// Angle around the ellipse...
@@ -43,7 +44,7 @@ GalaxyStar GenerateStar(uint id, float4 rnd)
 	pos = mulvq(pos, qi);													// Rotate the ellipse to where it should be to make spirals...
 	pos = mulvq(pos, qa);													// Fake-arm rotation...
 
-	float distribution = length(pos) / radius * M_PHI * (size / 2.0);
+	float distribution = (length(pos) / pertrub) / radius * M_PHI * halfSize;
 	float temperature = ((distribution * (rnd.w * M_PHI)) - 0.08f) / 2.92f;	// Fake temperature distribution...
 
 	GalaxyStar star;
@@ -69,7 +70,7 @@ void Stars(uint3 groupThreadID : SV_GroupThreadID,
 	
 	float4 rnd = frac(Random4(id) + float4(0.0, randomParams1));
 
-	GalaxyStar star = GenerateStar(id, rnd);
+	GalaxyStar star = GenerateStar(id, rnd.x, rnd);
 	
 	stars_output[id] = star;
 }
@@ -88,7 +89,7 @@ void Dust(uint3 groupThreadID : SV_GroupThreadID,
 	
 	float4 rnd = Random4(id) + float4(0.0, randomParams1);
 
-	GalaxyStar star = GenerateStar(id, rnd);
+	GalaxyStar star = GenerateStar(id, 1.0, rnd);
 	
 	dust_output[id] = star;
 }

@@ -51,7 +51,7 @@
 			/*
 			float magnitude = 6.5 + length(starColor) * (-1.44 - 1.5);
 			float brightness = 1.0 * pow(5.0, (-magnitude - 1.44) / 2.5);
-			o.color = 4 * brightness * starColor * 3;
+			o.color = 4 * brightness * starColor;
 			*/
 
 			o.color = starColor;
@@ -100,13 +100,13 @@
 		void frag(in v2f i, out float4 color : SV_Target)
 		{
 			float4 starColor = i.color;
-			float4 starSampler = tex2D(_Particle, i.uv).a;
+			float4 starSampler = tex2D(_Particle, i.uv / 0.5 - 0.5).a;
 			float2 starUv = i.uv;
 			
 			// TODO : Do i need the fake-up-to-real appraoch?
 			/*
-			half scale = exp(-dot(i.uv.xy, i.uv.xy));
-			starColor = float4(i.color.xyz * scale + 5.0 * i.color.w * pow(scale, 10.0), 1.0);
+			half scale = exp(-dot(starUv, starUv));
+			starColor = float4(i.color.xyz * scale + 0.25 * i.color.w * pow(scale, 10.0), 1.0);
 			*/
 
 			color = hdr(starSampler * starColor);
