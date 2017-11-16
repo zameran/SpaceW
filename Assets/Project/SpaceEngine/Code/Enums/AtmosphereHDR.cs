@@ -38,6 +38,7 @@ public enum AtmosphereHDR : byte
     None = 0,
     Simple = 1,
     SpaceEngine = 2,
-    Proland = 3,
-    ProlandOptimized = 4
+    SpaceEngineOptimized = 3,
+    Proland = 4,
+    ProlandOptimized = 5,
 }
