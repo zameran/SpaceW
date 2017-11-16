@@ -62,8 +62,9 @@ namespace SpaceEngine.Enviroment.Sun
         public float Magnitude = 1;
 
         public bool InitUniformsInUpdate = true;
-        public bool UseAtmosphereColors = false;
         public bool UseRadiance = true;
+
+        private bool UseAtmosphereColors = false;
 
         private Vector3 SunViewPortPosition = Vector3.zero;
 
@@ -122,6 +123,8 @@ namespace SpaceEngine.Enviroment.Sun
             //Fade = FadeCurve.Evaluate(Mathf.Clamp01(VectorHelper.AngularRadius(SunComponent.transform.position, CameraHelper.Main().transform.position, 250000.0f)));
 
             if (InitUniformsInUpdate) InitUniforms(SunGlareMaterial);
+
+            UseAtmosphereColors = Atmosphere != null;
 
             SetUniforms(SunGlareMaterial);
 
@@ -208,16 +211,21 @@ namespace SpaceEngine.Enviroment.Sun
         public void Render(int layer = 12)
         {
             if (SunGlareMesh == null) return;
-            if (GodManager.Instance.ActiveBody == null) return;
-            if (GodManager.Instance.ActiveBody.Atmosphere == null) return;
 
-            Atmosphere = GodManager.Instance.ActiveBody.Atmosphere;
+            var activeBody = GodManager.Instance.ActiveBody;
+
+            if (activeBody == null) return;
+            if (activeBody.Atmosphere == null) return;
+
+            Atmosphere = activeBody.AtmosphereEnabled ? GodManager.Instance.ActiveBody.Atmosphere : null;
+
+            var mpb = GodManager.Instance.ActiveBody.MPB;
 
             if (SunViewPortPosition.z > 0)
             {
                 SunGlareMaterial.renderQueue = (int)RenderQueue + RenderQueueOffset;
 
-                Graphics.DrawMesh(SunGlareMesh, Vector3.zero, Quaternion.identity, SunGlareMaterial, layer, CameraHelper.Main(), 0, Atmosphere.ParentBody.MPB, false, false);
+                Graphics.DrawMesh(SunGlareMesh, Vector3.zero, Quaternion.identity, SunGlareMaterial, layer, CameraHelper.Main(), 0, mpb, false, false);
             }
         }
 
