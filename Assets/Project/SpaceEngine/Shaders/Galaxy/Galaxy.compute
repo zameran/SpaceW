@@ -71,7 +71,7 @@ void Stars(uint3 groupThreadID : SV_GroupThreadID,
 	float4 rnd = frac(Random4(id) + float4(0.0, randomParams1));
 
 	GalaxyStar star = GenerateStar(id, rnd.x, rnd);
-	
+
 	stars_output[id] = star;
 }
 

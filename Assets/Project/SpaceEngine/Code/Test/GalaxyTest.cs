@@ -931,6 +931,10 @@ namespace SpaceEngine.Tests
 
         public void RenderBuffers(List<List<ComputeBuffer>> collection, int pass, int count)
         {
+            // TODO : Render fake stars maybe?
+            // NOTE : Pass number is hardcoded to draw anyway in debug mode.
+            if (BlendFactor < 1.0 && pass != 1) return;
+
             for (byte generationType = 0; generationType < collection.Capacity; generationType++)
             {
                 var buffers = collection[generationType];
@@ -968,9 +972,7 @@ namespace SpaceEngine.Tests
         {
             if (ScreenMesh == null) return;
 
-            ScreenMaterial.SetTexture("_FrameBuffer1", FrameBuffer1);
-            ScreenMaterial.SetTexture("_FrameBuffer2", FrameBuffer2);
-            ScreenMaterial.SetFloat("_Mix", BlendFactor);
+            ScreenMaterial.SetTexture("_FrameBuffer", BlendFactor < 1.0f ? FrameBuffer1 : FrameBuffer2);
             ScreenMaterial.SetPass(0);
 
             Graphics.DrawMeshNow(ScreenMesh, Matrix4x4.TRS(Vector3.zero, Quaternion.identity, Vector3.one), 8);
@@ -987,9 +989,11 @@ namespace SpaceEngine.Tests
                 DustCommandBuffer.SetRenderTarget(FrameBuffer1);
                 DustCommandBuffer.ClearRenderTarget(true, true, Color.black);
             }
-
-            DustCommandBuffer.SetRenderTarget(FrameBuffer2);
-            DustCommandBuffer.ClearRenderTarget(true, true, Color.black);
+            else
+            {
+                DustCommandBuffer.SetRenderTarget(FrameBuffer2);
+                DustCommandBuffer.ClearRenderTarget(true, true, Color.black);
+            }
 
             var dustArgs = new uint[5];
             dustArgs[0] = (uint)VolumeMesh.GetIndexCount(0);            // Index count per instance...
@@ -1017,7 +1021,6 @@ namespace SpaceEngine.Tests
             BulgeArgsBuffer.SetData(bulgeArgs);
 
             // TODO : Calculate _Galaxy_Orientation and _Galaxy_OrientationInverse relative to camera, for a better visualization...
-            // TODO : Better blending handling...
             var galaxyOrientation = new Vector4(transform.rotation.x, transform.rotation.y, transform.rotation.z, transform.rotation.w);
             var galaxyOrientationInversed = -galaxyOrientation;
 
@@ -1045,9 +1048,11 @@ namespace SpaceEngine.Tests
                         DustCommandBuffer.SetRenderTarget(FrameBuffer1);
                         DustCommandBuffer.DrawMeshInstancedIndirect(VolumeMesh, 0, material, 2, BulgeArgsBuffer);
                     }
-
-                    DustCommandBuffer.SetRenderTarget(FrameBuffer2);
-                    DustCommandBuffer.DrawMeshInstancedIndirect(VolumeMesh, 0, material, 2, BulgeArgsBuffer);
+                    else
+                    {
+                        DustCommandBuffer.SetRenderTarget(FrameBuffer2);
+                        DustCommandBuffer.DrawMeshInstancedIndirect(VolumeMesh, 0, material, 2, BulgeArgsBuffer);
+                    }
                 }
 
                 // NOTE : Render galaxy dust and gas...
@@ -1063,10 +1068,12 @@ namespace SpaceEngine.Tests
                         DustCommandBuffer.DrawMeshInstancedIndirect(VolumeMesh, 0, material, 0, DustArgsBuffer);
                         DustCommandBuffer.DrawMeshInstancedIndirect(VolumeMesh, 0, material, 1, GasArgsBuffer);
                     }
-
-                    DustCommandBuffer.SetRenderTarget(FrameBuffer2);
-                    DustCommandBuffer.DrawMeshInstancedIndirect(VolumeMesh, 0, material, 0, DustArgsBuffer);
-                    DustCommandBuffer.DrawMeshInstancedIndirect(VolumeMesh, 0, material, 1, GasArgsBuffer);
+                    else
+                    {
+                        DustCommandBuffer.SetRenderTarget(FrameBuffer2);
+                        DustCommandBuffer.DrawMeshInstancedIndirect(VolumeMesh, 0, material, 0, DustArgsBuffer);
+                        DustCommandBuffer.DrawMeshInstancedIndirect(VolumeMesh, 0, material, 1, GasArgsBuffer);
+                    }
                 }
             }
 
