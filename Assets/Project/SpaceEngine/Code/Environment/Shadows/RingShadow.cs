@@ -33,11 +33,10 @@
 // Creator: zameran
 #endregion
 
-using SpaceEngine.Enviroment.Rings;
-
+using SpaceEngine.Environment.Rings;
 using UnityEngine;
 
-namespace SpaceEngine.Enviroment.Shadows
+namespace SpaceEngine.Environment.Shadows
 {
     [ExecuteInEditMode]
     public class RingShadow : Shadow

@@ -47,7 +47,7 @@ using System.ComponentModel;
 using UnityEngine;
 using UnityEngine.Rendering;
 
-namespace SpaceEngine.Enviroment.Atmospheric
+namespace SpaceEngine.Environment.Atmospheric
 {
     public sealed class AtmosphereBaseProperty : PropertyNotificationObject
     {

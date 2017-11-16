@@ -33,48 +33,62 @@
 // Creator: zameran
 #endregion
 
-using SpaceEngine.Core.Patterns.Strategy.Renderable;
+using SpaceEngine.Core;
 
 using UnityEngine;
-using UnityEngine.Rendering;
 
-namespace SpaceEngine.Enviroment.Rings
+namespace SpaceEngine.Environment.Sun
 {
-    public class RingSegment : MonoBehaviour, IRenderable<RingSegment>
+    public sealed class Sun : Node<Sun>
     {
-        public Ring Ring;
+        [Range(1, 4)]
+        public int Index = 1;
 
-        #region IRenderable
+        public float Radius = 250000;
+        public float Intensity = 100.0f;
 
-        public void Render(int layer = 0)
+        #region Node
+
+        protected override void InitNode()
         {
-            if (Ring == null) return;
-            if (Ring.RingSegmentMesh == null) return;
-            if (Ring.RingMaterial == null) return;
 
-            var segmentTRS = Matrix4x4.TRS(Ring.transform.position, transform.rotation, Vector3.one);
-
-            Graphics.DrawMesh(Ring.RingSegmentMesh, segmentTRS, Ring.RingMaterial, layer, CameraHelper.Main(), 0, null, ShadowCastingMode.Off, false);
         }
 
-        #endregion
-
-        public void UpdateNode(Mesh mesh, Material material, Quaternion rotation)
+        protected override void UpdateNode()
         {
-            if (Ring != null)
+            if ((Index == 1 && Input.GetKey(KeyCode.RightControl)) ||
+                (Index == 2 && Input.GetKey(KeyCode.RightShift)) ||
+                (Index == 3 && Input.GetKey(KeyCode.LeftControl)) ||
+                (Index == 4 && Input.GetKey(KeyCode.LeftShift)))
             {
-                Helper.SetLocalRotation(transform, rotation);
+                var h = Input.GetAxis("HorizontalArrows") * 0.75f;
+                var v = Input.GetAxis("VerticalArrows") * 0.75f;
+
+                transform.RotateAround(new Vector3(0, 0, 0), new Vector3(0, 1, 0), h);
+                transform.RotateAround(new Vector3(0, 0, 0), new Vector3(1, 0, 0), v);
             }
         }
 
-        public static RingSegment Create(Ring ring)
+        protected override void Awake()
         {
-            var segmentGameObject = Helper.CreateGameObject("Segment", ring.transform);
-            var segment = segmentGameObject.AddComponent<RingSegment>();
-
-            segment.Ring = ring;
-
-            return segment;
+            base.Awake();
         }
+
+        protected override void Start()
+        {
+            base.Start();
+        }
+
+        protected override void Update()
+        {
+            base.Update();
+        }
+
+        protected override void OnDestroy()
+        {
+            base.OnDestroy();
+        }
+
+        #endregion
     }
 }

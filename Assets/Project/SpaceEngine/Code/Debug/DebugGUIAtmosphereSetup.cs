@@ -35,7 +35,7 @@
 
 using SpaceEngine.Core.Bodies;
 using SpaceEngine.Core.Patterns.Strategy.Eventit;
-using SpaceEngine.Enviroment.Atmospheric;
+using SpaceEngine.Environment.Atmospheric;
 
 using System;
 using System.ComponentModel;

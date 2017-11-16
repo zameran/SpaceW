@@ -36,7 +36,7 @@
 using SpaceEngine.Cameras;
 using SpaceEngine.Core.Bodies;
 using SpaceEngine.Core.Utilities;
-using SpaceEngine.Enviroment.Sun;
+using SpaceEngine.Environment.Sun;
 using SpaceEngine.SciptableObjects;
 using SpaceEngine.Startfield;
 

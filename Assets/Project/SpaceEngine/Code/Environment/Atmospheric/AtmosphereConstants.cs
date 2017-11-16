@@ -33,7 +33,7 @@
 // Creator: zameran
 #endregion
 
-namespace SpaceEngine.Enviroment.Atmospheric
+namespace SpaceEngine.Environment.Atmospheric
 {
     public static class AtmosphereConstants
     {

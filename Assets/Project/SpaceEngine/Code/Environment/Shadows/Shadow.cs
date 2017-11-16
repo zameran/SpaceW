@@ -35,7 +35,7 @@
 
 using UnityEngine;
 
-namespace SpaceEngine.Enviroment.Shadows
+namespace SpaceEngine.Environment.Shadows
 {
     public abstract class Shadow : MonoBehaviour
     {

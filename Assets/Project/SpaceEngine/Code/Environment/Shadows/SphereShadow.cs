@@ -37,7 +37,7 @@ using SpaceEngine.Core.Utilities.Gradients;
 
 using UnityEngine;
 
-namespace SpaceEngine.Enviroment.Shadows
+namespace SpaceEngine.Environment.Shadows
 {
     public class SphereShadow : Shadow
     {

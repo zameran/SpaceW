@@ -1,6 +1,6 @@
 ﻿using SpaceEngine.Core.Bodies;
 using SpaceEngine.Core.Terrain;
-using SpaceEngine.Enviroment.Atmospheric;
+using SpaceEngine.Environment.Atmospheric;
 using SpaceEngine.Pluginator.Enums;
 using SpaceEngine.UI;
 

@@ -35,7 +35,7 @@
 
 
 using SpaceEngine.Core.Utilities;
-using SpaceEngine.Enviroment.Atmospheric;
+using SpaceEngine.Environment.Atmospheric;
 
 using System;
 using System.Collections;

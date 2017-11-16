@@ -37,13 +37,13 @@ using SpaceEngine.Core;
 using SpaceEngine.Core.Bodies;
 using SpaceEngine.Core.Patterns.Strategy.Renderable;
 using SpaceEngine.Core.Patterns.Strategy.Uniformed;
-using SpaceEngine.Enviroment.Shadows;
+using SpaceEngine.Environment.Shadows;
 
 using System.Collections.Generic;
 
 using UnityEngine;
 
-namespace SpaceEngine.Enviroment.Rings
+namespace SpaceEngine.Environment.Rings
 {
     public class Ring : NodeSlave<Ring>, IUniformed<Material>, IRenderable<Ring>
     {

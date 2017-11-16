@@ -33,62 +33,48 @@
 // Creator: zameran
 #endregion
 
-using SpaceEngine.Core;
+using SpaceEngine.Core.Patterns.Strategy.Renderable;
 
 using UnityEngine;
+using UnityEngine.Rendering;
 
-namespace SpaceEngine.Enviroment.Sun
+namespace SpaceEngine.Environment.Rings
 {
-    public sealed class Sun : Node<Sun>
+    public class RingSegment : MonoBehaviour, IRenderable<RingSegment>
     {
-        [Range(1, 4)]
-        public int Index = 1;
+        public Ring Ring;
 
-        public float Radius = 250000;
-        public float Intensity = 100.0f;
+        #region IRenderable
 
-        #region Node
-
-        protected override void InitNode()
+        public void Render(int layer = 0)
         {
+            if (Ring == null) return;
+            if (Ring.RingSegmentMesh == null) return;
+            if (Ring.RingMaterial == null) return;
 
-        }
+            var segmentTRS = Matrix4x4.TRS(Ring.transform.position, transform.rotation, Vector3.one);
 
-        protected override void UpdateNode()
-        {
-            if ((Index == 1 && Input.GetKey(KeyCode.RightControl)) ||
-                (Index == 2 && Input.GetKey(KeyCode.RightShift)) ||
-                (Index == 3 && Input.GetKey(KeyCode.LeftControl)) ||
-                (Index == 4 && Input.GetKey(KeyCode.LeftShift)))
-            {
-                var h = Input.GetAxis("HorizontalArrows") * 0.75f;
-                var v = Input.GetAxis("VerticalArrows") * 0.75f;
-
-                transform.RotateAround(new Vector3(0, 0, 0), new Vector3(0, 1, 0), h);
-                transform.RotateAround(new Vector3(0, 0, 0), new Vector3(1, 0, 0), v);
-            }
-        }
-
-        protected override void Awake()
-        {
-            base.Awake();
-        }
-
-        protected override void Start()
-        {
-            base.Start();
-        }
-
-        protected override void Update()
-        {
-            base.Update();
-        }
-
-        protected override void OnDestroy()
-        {
-            base.OnDestroy();
+            Graphics.DrawMesh(Ring.RingSegmentMesh, segmentTRS, Ring.RingMaterial, layer, CameraHelper.Main(), 0, null, ShadowCastingMode.Off, false);
         }
 
         #endregion
+
+        public void UpdateNode(Mesh mesh, Material material, Quaternion rotation)
+        {
+            if (Ring != null)
+            {
+                Helper.SetLocalRotation(transform, rotation);
+            }
+        }
+
+        public static RingSegment Create(Ring ring)
+        {
+            var segmentGameObject = Helper.CreateGameObject("Segment", ring.transform);
+            var segment = segmentGameObject.AddComponent<RingSegment>();
+
+            segment.Ring = ring;
+
+            return segment;
+        }
     }
 }

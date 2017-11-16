@@ -38,7 +38,7 @@ using System.Runtime.InteropServices;
 
 using UnityEngine;
 
-namespace SpaceEngine.Enviroment.Atmospheric
+namespace SpaceEngine.Environment.Atmospheric
 {
     [Serializable]
     [StructLayout(LayoutKind.Sequential)]

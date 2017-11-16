@@ -36,12 +36,12 @@
 using SpaceEngine.Core;
 using SpaceEngine.Core.Patterns.Strategy.Renderable;
 using SpaceEngine.Core.Patterns.Strategy.Uniformed;
-using SpaceEngine.Enviroment.Atmospheric;
+using SpaceEngine.Environment.Atmospheric;
 using SpaceEngine.SciptableObjects;
 
 using UnityEngine;
 
-namespace SpaceEngine.Enviroment.Sun
+namespace SpaceEngine.Environment.Sun
 {
     public sealed class SunGlare : Node<SunGlare>, IUniformed<Material>, IRenderable<SunGlare>
     {

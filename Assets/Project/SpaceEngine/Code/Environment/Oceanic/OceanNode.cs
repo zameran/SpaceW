@@ -41,16 +41,14 @@ using SpaceEngine.Core.Patterns.Strategy.Eventit;
 using SpaceEngine.Core.Patterns.Strategy.Reanimator;
 using SpaceEngine.Core.Patterns.Strategy.Renderable;
 using SpaceEngine.Core.Patterns.Strategy.Uniformed;
-using SpaceEngine.Enviroment.Atmospheric;
-
 using System;
 using System.Collections;
 using System.Linq;
-
+using SpaceEngine.Environment.Atmospheric;
 using UnityEngine;
 using UnityEngine.Rendering;
 
-namespace SpaceEngine.Enviroment.Oceanic
+namespace SpaceEngine.Environment.Oceanic
 {
     /// <summary>
     /// An AbstractTask to draw a flat or spherical ocean. This class provides the functions and data to draw a flat projected grid but nothing else.

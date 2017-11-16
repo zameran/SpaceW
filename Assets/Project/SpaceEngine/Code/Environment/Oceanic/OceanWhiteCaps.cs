@@ -1,10 +1,9 @@
 ﻿using SpaceEngine.Core.Bodies;
 using SpaceEngine.Core.Utilities;
-using SpaceEngine.Enviroment.Atmospheric;
-
+using SpaceEngine.Environment.Atmospheric;
 using UnityEngine;
 
-namespace SpaceEngine.Enviroment.Oceanic
+namespace SpaceEngine.Environment.Oceanic
 {
     /// <summary>
     /// Extend the OceanFFT node to also generate ocean white caps.

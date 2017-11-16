@@ -33,7 +33,7 @@
 // Creator: zameran
 #endregion
 
-using SpaceEngine.Enviroment.Shadows;
+using SpaceEngine.Environment.Shadows;
 
 using System;
 using System.Collections.Generic;

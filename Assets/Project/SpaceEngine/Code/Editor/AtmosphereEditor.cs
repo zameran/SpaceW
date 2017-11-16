@@ -1,4 +1,4 @@
-﻿using SpaceEngine.Enviroment.Atmospheric;
+﻿using SpaceEngine.Environment.Atmospheric;
 
 using UnityEditor;
 

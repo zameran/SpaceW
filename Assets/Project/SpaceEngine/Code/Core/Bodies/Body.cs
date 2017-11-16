@@ -39,11 +39,11 @@ using SpaceEngine.Core.Patterns.Strategy.Renderable;
 using SpaceEngine.Core.Patterns.Strategy.Uniformed;
 using SpaceEngine.Core.Terrain;
 using SpaceEngine.Core.Tile.Storage;
-using SpaceEngine.Enviroment.Atmospheric;
-using SpaceEngine.Enviroment.Oceanic;
-using SpaceEngine.Enviroment.Rings;
-using SpaceEngine.Enviroment.Shadows;
-using SpaceEngine.Enviroment.Sun;
+using SpaceEngine.Environment.Atmospheric;
+using SpaceEngine.Environment.Oceanic;
+using SpaceEngine.Environment.Rings;
+using SpaceEngine.Environment.Shadows;
+using SpaceEngine.Environment.Sun;
 
 using System.Collections.Generic;
 
