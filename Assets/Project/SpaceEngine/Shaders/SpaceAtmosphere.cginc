@@ -83,7 +83,7 @@
 
 uniform float _Aerial_Perspective_Offset;
 
-uniform float3 _Atmosphere_WorldCameraPos;
+uniform float3 _Atmosphere_WorldCameraPosition;
 uniform float3 _Atmosphere_Origin;
 uniform float3 _Atmosphere_GlowColor;
 

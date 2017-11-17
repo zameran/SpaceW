@@ -2,9 +2,9 @@
 
 #define COMPUTE_SHADER
 
-#define THREADS_X 1024
-#define THREADS_Y 1
-#define THREADS_Z 1
+#define NUM_THREADS_X 1024
+#define NUM_THREADS_Y 1
+#define NUM_THREADS_Z 1
 
 #include "Galaxy.cginc"
 
@@ -60,13 +60,13 @@ GalaxyStar GenerateStar(uint id, float pertrub, float4 rnd)
 
 RWStructuredBuffer<GalaxyStar> stars_output;
 
-[numthreads(THREADS_X, THREADS_Y, THREADS_Z)]
+[numthreads(NUM_THREADS_X, NUM_THREADS_Y, NUM_THREADS_Z)]
 void Stars(uint3 groupThreadID : SV_GroupThreadID, 
 		   uint3 groupID : SV_GroupID, 
 		   uint3 dispatchThreadID : SV_DispatchThreadID, 
 		   uint groupIndex : SV_GroupIndex)
 {
-	uint id = groupID.x * THREADS_X + groupThreadID.x;
+	uint id = groupID.x * NUM_THREADS_X + groupThreadID.x;
 	
 	float4 rnd = frac(Random4(id) + float4(0.0, randomParams1));
 
@@ -79,13 +79,13 @@ void Stars(uint3 groupThreadID : SV_GroupThreadID,
 
 RWStructuredBuffer<GalaxyStar> dust_output;
 
-[numthreads(THREADS_X, THREADS_Y, THREADS_Z)]
+[numthreads(NUM_THREADS_X, NUM_THREADS_Y, NUM_THREADS_Z)]
 void Dust(uint3 groupThreadID : SV_GroupThreadID, 
 		  uint3 groupID : SV_GroupID, 
 		  uint3 dispatchThreadID : SV_DispatchThreadID, 
 		  uint groupIndex : SV_GroupIndex)
 {
-	uint id = groupID.x * THREADS_X + groupThreadID.x;
+	uint id = groupID.x * NUM_THREADS_X + groupThreadID.x;
 	
 	float4 rnd = Random4(id) + float4(0.0, randomParams1);
 

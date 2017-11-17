@@ -106,7 +106,7 @@ Shader "SpaceEngine/Planet/Terrain (Deferred)"
 
 				v.vertex = o.pos;
 
-				o.direction = (_Atmosphere_WorldCameraPos + _Atmosphere_Origin) - (mul(_Globals_CameraToWorld, float4((mul(_Globals_ScreenToCamera, v.vertex)).xyz, 0.0))).xyz;
+				o.direction = (_Body_WorldCameraPosition + _Body_Origin) - (mul(_Globals_CameraToWorld, float4((mul(_Globals_ScreenToCamera, v.vertex)).xyz, 0.0))).xyz;
 			}
 
 			void frag(in v2f_planetTerrain i, out DeferredOutput o)
@@ -158,13 +158,12 @@ Shader "SpaceEngine/Planet/Terrain (Deferred)"
 				#endif
 
 				#if SHADOW_1 || SHADOW_2 || SHADOW_3 || SHADOW_4
-					// TODO : Use planet origin instead...
-					float3 P_A = P - _Atmosphere_Origin;
+					float3 P_A = P - _Body_Origin;
 					float shadow = ShadowColor(float4(P_A, 1.0));	// Body origin take in to account...
 				#endif
 
 				#if ATMOSPHERE_ON
-					float3 WCP_A = _Atmosphere_WorldCameraPos;
+					float3 WCP_A = _Atmosphere_WorldCameraPosition;
 
 					float3 sunL = 0.0;
 					float3 skyE = 0.0;

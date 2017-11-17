@@ -323,6 +323,9 @@ namespace SpaceEngine.Core.Bodies
 
             target.SetFloat("_Globals_RadiusOffset", SizeOffset);
 
+            target.SetVector("_Body_WorldCameraPosition", GodManager.Instance.View.WorldCameraPosition - Origin);
+            target.SetVector("_Body_Origin", -Origin);
+
             if (Atmosphere != null)
             {
                 Atmosphere.SetUniforms(target);

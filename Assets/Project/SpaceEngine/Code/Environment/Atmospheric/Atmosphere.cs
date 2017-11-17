@@ -304,7 +304,7 @@ namespace SpaceEngine.Environment.Atmospheric
             if (AtmosphereBaker.inscatterT_Read != null) target.SetTexture("_Sky_Inscatter", AtmosphereBaker.inscatterT_Read);
             if (AtmosphereBaker.irradianceT_Read != null) target.SetTexture("_Sky_Irradiance", AtmosphereBaker.irradianceT_Read);
 
-            target.SetVector("_Atmosphere_WorldCameraPos", GodManager.Instance.View.WorldCameraPosition - Origin);
+            target.SetVector("_Atmosphere_WorldCameraPosition", GodManager.Instance.View.WorldCameraPosition - Origin);
             target.SetVector("_Atmosphere_Origin", -Origin);
             target.SetVector("_Atmosphere_GlowColor", GlowColor);
 

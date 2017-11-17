@@ -99,6 +99,11 @@ uniform float4 _Sun_Colors_1;
 
 uniform float4x4 _Sun_WorldDirections_1;
 uniform float4x4 _Sun_Positions_1;
+
+#define CORE_BODY
+
+uniform float3 _Body_WorldCameraPosition;		// World camera position relative to body origin
+uniform float3 _Body_Origin;					// World body origin
 //-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
