@@ -157,7 +157,7 @@ namespace SpaceEngine.Debugging
 
                             GUILayoutExtensions.SliderWithField("Density: ", 0.0f, 1.0f, ref Atmosphere.Density);
                             GUILayoutExtensions.SliderWithField("Scale", 0.01f, 16.0f, ref Atmosphere.Scale, "0.000");
-                            GUILayoutExtensions.SliderWithField("Height: ", 0.0f, Body.Size / 64.0f, ref Atmosphere.Height);
+                            GUILayoutExtensions.SliderWithField("Height: ", 0.0f, Body.Size, ref Atmosphere.Height);
                             GUILayoutExtensions.SliderWithField("Extinction Ground Fade", 0.000025f, 0.1f, ref Atmosphere.ExtinctionGroundFade, "0.000000");
                             GUILayoutExtensions.SliderWithField("HDR Exposure", 0.0f, 1.0f, ref Atmosphere.HDRExposure, "0.00");
                         });
