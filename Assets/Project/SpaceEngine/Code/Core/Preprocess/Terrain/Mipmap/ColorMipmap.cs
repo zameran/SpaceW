@@ -597,56 +597,18 @@ namespace SpaceEngine.Core.Preprocess.Terrain
 
         public void SetCube(ColorMipmap hm1, ColorMipmap hm2, ColorMipmap hm3, ColorMipmap hm4, ColorMipmap hm5, ColorMipmap hm6)
         {
-            // NOTE : Ffffffffrrrrrrraaaaaacccccttttaaalls!
-
-            hm1.Left = hm5;
-            hm1.Right = hm3;
-            hm1.Bottom = hm2;
-            hm1.Top = hm4;
-            hm2.Left = hm5;
-            hm2.Right = hm3;
-            hm2.Bottom = hm6;
-            hm2.Top = hm1;
-            hm3.Left = hm2;
-            hm3.Right = hm4;
-            hm3.Bottom = hm6;
-            hm3.Top = hm1;
-            hm4.Left = hm3;
-            hm4.Right = hm5;
-            hm4.Bottom = hm6;
-            hm4.Top = hm1;
-            hm5.Left = hm4;
-            hm5.Right = hm2;
-            hm5.Bottom = hm6;
-            hm5.Top = hm1;
-            hm6.Left = hm5;
-            hm6.Right = hm3;
-            hm6.Bottom = hm4;
-            hm6.Top = hm2;
-            hm1.LeftR = 3;
-            hm1.RightR = 1;
-            hm1.BottomR = 0;
-            hm1.TopR = 2;
-            hm2.LeftR = 0;
-            hm2.RightR = 0;
-            hm2.BottomR = 0;
-            hm2.TopR = 0;
-            hm3.LeftR = 0;
-            hm3.RightR = 0;
-            hm3.BottomR = 1;
-            hm3.TopR = 3;
-            hm4.LeftR = 0;
-            hm4.RightR = 0;
-            hm4.BottomR = 2;
-            hm4.TopR = 2;
-            hm5.LeftR = 0;
-            hm5.RightR = 0;
-            hm5.BottomR = 3;
-            hm5.TopR = 1;
-            hm6.LeftR = 1;
-            hm6.RightR = 3;
-            hm6.BottomR = 2;
-            hm6.TopR = 0;
+            hm1.Left = hm5; hm1.Right = hm3; hm1.Bottom = hm2; hm1.Top = hm4;
+            hm2.Left = hm5; hm2.Right = hm3; hm2.Bottom = hm6; hm2.Top = hm1;
+            hm3.Left = hm2; hm3.Right = hm4; hm3.Bottom = hm6; hm3.Top = hm1;
+            hm4.Left = hm3; hm4.Right = hm5; hm4.Bottom = hm6; hm4.Top = hm1;
+            hm5.Left = hm4; hm5.Right = hm2; hm5.Bottom = hm6; hm5.Top = hm1;
+            hm6.Left = hm5; hm6.Right = hm3; hm6.Bottom = hm4; hm6.Top = hm2;
+            hm1.LeftR = 3; hm1.RightR = 1; hm1.BottomR = 0; hm1.TopR = 2;
+            hm2.LeftR = 0; hm2.RightR = 0; hm2.BottomR = 0; hm2.TopR = 0;
+            hm3.LeftR = 0; hm3.RightR = 0; hm3.BottomR = 1; hm3.TopR = 3;
+            hm4.LeftR = 0; hm4.RightR = 0; hm4.BottomR = 2; hm4.TopR = 2;
+            hm5.LeftR = 0; hm5.RightR = 0; hm5.BottomR = 3; hm5.TopR = 1;
+            hm6.LeftR = 1; hm6.RightR = 3; hm6.BottomR = 2; hm6.TopR = 0;
         }
     }
 }
