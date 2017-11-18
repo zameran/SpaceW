@@ -1,8 +1,6 @@
 ﻿using SpaceEngine.Core.Tile.Producer;
 using SpaceEngine.Core.Tile.Storage;
 using SpaceEngine.Core.Utilities;
-
-using System;
 using System.Collections.Generic;
 
 using UnityEngine;
@@ -57,33 +55,23 @@ namespace SpaceEngine.Core.Tile.Tasks
                 return;
             }
 
-            try
+            // NOTE : Process with default even if tile level is 0 or 1 and delayed calculations is enabled...
+            if (GodManager.Instance.DelayedCalculations && !Owner.IsLastInSequence && Level > 1)
             {
-                // NOTE : Process with default even if tile level is 0 or 1 and delayed calculations is enabled...
-                if (GodManager.Instance.DelayedCalculations && !Owner.IsLastInSequence && Level > 1)
+                Owner.StartCoroutine(Owner.DoCreateTileCoroutine(Level, Tx, Ty, Slot, () =>
                 {
-                    Owner.StartCoroutine(Owner.DoCreateTileCoroutine(Level, Tx, Ty, Slot, () =>
-                    {
-                        // Manualy finish the particular tile creation task.
-                        this.Finish();
-                    }));
+                    // Manualy finish the particular tile creation task.
+                    this.Finish();
+                }));
 
-                    // So, task will be finished in the end of coroutine...
-                }
-                else
-                {
-                    Owner.DoCreateTile(Level, Tx, Ty, Slot);
-
-                    // So, finish task NOW! It's done already, yah?
-                    Finish();
-                }
+                // So, task will be finished in the end of coroutine...
             }
-            catch(Exception ex)
+            else
             {
-                // NOTE : Sometimes tile producers can't find parent tile due to parent tile Task uncomplection...
-                Debug.LogException(ex);
+                Owner.DoCreateTile(Level, Tx, Ty, Slot);
 
-                return;
+                // So, finish task NOW! It's done already, yah?
+                Finish();
             }
         }
 
