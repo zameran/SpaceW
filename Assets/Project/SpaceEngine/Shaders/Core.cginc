@@ -191,6 +191,37 @@ float4 texTile(sampler2D tile, float2 uv, float3 tileCoords, float3 tileSize)
 //-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
+// Source: http://www.iquilezles.org/www/articles/texturerepetition/texturerepetition.htm
+float4 texNoTile(sampler2D samp, float k, in float2 uv)
+{
+	// k variable describes variation pattern
+
+	// compute index
+	float index = k * 8.0;
+	float i = floor(index);
+	float f = frac(index);
+
+	// offsets for the different virtual patterns
+	float2 offa = sin(float2(3.0, 7.0) * (i + 0.0)); // can replace with any other hash
+	float2 offb = sin(float2(3.0, 7.0) * (i + 1.0)); // can replace with any other hash
+
+	// compute derivatives for mip-mapping
+	float2 dx = ddx(uv), dy = ddy(uv);
+	
+	// sample the two closest virtual patterns
+	float4 cola = tex2Dgrad(samp, uv + offa, dx, dy);
+	float4 colb = tex2Dgrad(samp, uv + offb, dx, dy);
+	float4 diff = cola - colb;
+
+	float summ = diff.x + diff.y + diff.z;
+
+	// interpolate between the two virtual patterns
+	return lerp(cola, colb, smoothstep(0.2, 0.8, f - 0.1 * summ));
+
+}
+//-----------------------------------------------------------------------------
+
+//-----------------------------------------------------------------------------
 float4 Triplanar(sampler2D topAndButtomSampler, sampler2D leftAndRightSampler, sampler2D frontAndBackSampler, float3 worldPosition, float3 worldNormal, float2 settings)
 {
 	half3 YSampler = tex2D(topAndButtomSampler, worldPosition.xz / settings.x);

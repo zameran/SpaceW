@@ -295,14 +295,14 @@ public static class MeshFactory
         var uvs = new List<Vector2>();
         var indices = new List<int>();
 
-        var angleTotal = Helper.Divide(Mathf.PI * 2.0f, segmentCount);
-        var angleStep = Helper.Divide(angleTotal, segmentDetail);
-        var coordStep = Helper.Reciprocal(segmentDetail);
+        var angleTotal = (Mathf.PI * 2.0f) / segmentCount;
+        var angleStep = angleTotal / segmentDetail;
+        var coordStep = 1.0f / segmentDetail;
 
-        for (var i = 0; i <= segmentDetail; i++)
+        for (var sliceIndex = 0; sliceIndex <= segmentDetail; sliceIndex++)
         {
-            var coord = coordStep * i;
-            var angle = angleStep * i;
+            var coord = coordStep * sliceIndex;
+            var angle = angleStep * sliceIndex;
             var sin = Mathf.Sin(angle);
             var cos = Mathf.Cos(angle);
 
@@ -320,16 +320,16 @@ public static class MeshFactory
 
         var steps = positions.Count / 2 - 1;
 
-        for (var j = 0; j < steps; j++)
+        for (var sliceIndex = 0; sliceIndex < steps; sliceIndex++)
         {
-            var index = j * 2;
+            var sliceVertex = sliceIndex * 2;
 
-            indices.Add(index + 0);
-            indices.Add(index + 1);
-            indices.Add(index + 2);
-            indices.Add(index + 3);
-            indices.Add(index + 2);
-            indices.Add(index + 1);
+            indices.Add(sliceVertex + 0);
+            indices.Add(sliceVertex + 1);
+            indices.Add(sliceVertex + 2);
+            indices.Add(sliceVertex + 3);
+            indices.Add(sliceVertex + 2);
+            indices.Add(sliceVertex + 1);
         }
 
         #endregion
@@ -350,6 +350,89 @@ public static class MeshFactory
         positions.Clear();
         normals.Clear();
         uvs.Clear();
+        indices.Clear();
+
+        mesh.name = string.Format("RingSegmentMesh_({0})", Random.Range(float.MinValue, float.MaxValue));
+        mesh.hideFlags = HideFlags.DontSave;
+
+        return mesh;
+    }
+
+    public static Mesh SetupRingSegmentMesh(int segmentCount, int segmentDetail, int radiusDetail, float innerRadius, float outerRadius, float boundsShift)
+    {
+        var mesh = new Mesh();
+
+        var positions = new List<Vector3>();
+        var normals = new List<Vector3>();
+        var uvs1 = new List<Vector2>();
+        var uvs2 = new List<Vector2>();
+        var indices = new List<int>();
+
+        var slices = segmentDetail + 1;
+        var rings = radiusDetail + 1;
+        var yawStep = (Mathf.PI * 2.0f) / segmentCount / segmentDetail;
+        var sliceStep = 1.0f / segmentDetail;
+        var ringStep = 1.0f / radiusDetail;
+
+        for (var sliceIndex = 0; sliceIndex < slices; sliceIndex++)
+        {
+            var angle = yawStep * sliceIndex;
+            var sin = Mathf.Sin(angle);
+            var cos = Mathf.Cos(angle);
+
+            for (var ringIndex = 0; ringIndex < rings; ringIndex++)
+            {
+                var currentSlice = sliceStep * sliceIndex;
+                var currentRing = ringStep * ringIndex;
+                var radius = Mathf.Lerp(innerRadius, outerRadius, currentRing);
+
+                positions.Add(new Vector3(sin * radius, 0.0f, cos * radius));
+
+                normals.Add(Vector3.up);
+
+                uvs1.Add(new Vector2(currentRing, currentSlice));
+                uvs2.Add(new Vector2(radius, currentSlice * radius));
+            }
+        }
+
+        #region Indices
+
+        for (var sliceIndex = 0; sliceIndex < segmentDetail; sliceIndex++)
+        {
+            for (var ringIndex = 0; ringIndex < radiusDetail; ringIndex++)
+            {
+                var sliceVertex = sliceIndex * rings + ringIndex;
+                var ringVertex = sliceVertex + rings;
+
+                indices.Add(sliceVertex + 0);
+                indices.Add(sliceVertex + 1);
+                indices.Add(ringVertex + 0);
+                indices.Add(ringVertex + 1);
+                indices.Add(ringVertex + 0);
+                indices.Add(sliceVertex + 1);
+            }
+        }
+
+        #endregion
+
+        #region Bounds
+
+        var bounds = mesh.bounds;
+
+        mesh.bounds = Helper.NewBoundsCenter(bounds, bounds.center + bounds.center.normalized * boundsShift);
+
+        #endregion
+
+        mesh.SetVertices(positions);
+        mesh.SetUVs(0, uvs1);
+        mesh.SetUVs(1, uvs2);
+        mesh.SetTriangles(indices, 0);
+        mesh.SetNormals(normals);
+
+        positions.Clear();
+        normals.Clear();
+        uvs1.Clear();
+        uvs2.Clear();
         indices.Clear();
 
         mesh.name = string.Format("RingSegmentMesh_({0})", Random.Range(float.MinValue, float.MaxValue));
@@ -406,44 +489,44 @@ public static class MeshFactory
 
     public static void SolveTangents(this Mesh theMesh, ref int[] indices, ref List<Vector3> vertices, ref List<Vector3> normals, ref List<Vector2> uvs)
     {
-        int vertexCount = vertices.Count;
-        int triangleCount = indices.Length / 3;
+        var vertexCount = vertices.Count;
+        var triangleCount = indices.Length / 3;
 
-        List<Vector4> tangents = new List<Vector4>(vertexCount);
-        Vector3[] tan1 = new Vector3[vertexCount];
-        Vector3[] tan2 = new Vector3[vertexCount];
+        var tangents = new List<Vector4>(vertexCount);
+        var tan1 = new Vector3[vertexCount];
+        var tan2 = new Vector3[vertexCount];
 
-        int triangle = 0;
+        var triangle = 0;
 
-        for (int i = 0; i < triangleCount; i++)
+        for (var triangleIndex = 0; triangleIndex < triangleCount; triangleIndex++)
         {
-            int i1 = indices[triangle];
-            int i2 = indices[triangle + 1];
-            int i3 = indices[triangle + 2];
+            var i1 = indices[triangle];
+            var i2 = indices[triangle + 1];
+            var i3 = indices[triangle + 2];
 
-            Vector3 v1 = vertices[i1];
-            Vector3 v2 = vertices[i2];
-            Vector3 v3 = vertices[i3];
-            Vector2 w1 = uvs[i1];
-            Vector2 w2 = uvs[i2];
-            Vector2 w3 = uvs[i3];
+            var v1 = vertices[i1];
+            var v2 = vertices[i2];
+            var v3 = vertices[i3];
+            var w1 = uvs[i1];
+            var w2 = uvs[i2];
+            var w3 = uvs[i3];
 
-            float x1 = v2.x - v1.x;
-            float x2 = v3.x - v1.x;
-            float y1 = v2.y - v1.y;
-            float y2 = v3.y - v1.y;
-            float z1 = v2.z - v1.z;
-            float z2 = v3.z - v1.z;
+            var x1 = v2.x - v1.x;
+            var x2 = v3.x - v1.x;
+            var y1 = v2.y - v1.y;
+            var y2 = v3.y - v1.y;
+            var z1 = v2.z - v1.z;
+            var z2 = v3.z - v1.z;
 
-            float s1 = w2.x - w1.x;
-            float s2 = w3.x - w1.x;
-            float t1 = w2.y - w1.y;
-            float t2 = w3.y - w1.y;
+            var s1 = w2.x - w1.x;
+            var s2 = w3.x - w1.x;
+            var t1 = w2.y - w1.y;
+            var t2 = w3.y - w1.y;
 
-            float r = 1.0f / (s1 * t2 - s2 * t1);
+            var r = 1.0f / (s1 * t2 - s2 * t1);
 
-            Vector3 sdir = new Vector3((t2 * x1 - t1 * x2) * r, (t2 * y1 - t1 * y2) * r, (t2 * z1 - t1 * z2) * r);
-            Vector3 tdir = new Vector3((s1 * x2 - s2 * x1) * r, (s1 * y2 - s2 * y1) * r, (s1 * z2 - s2 * z1) * r);
+            var sdir = new Vector3((t2 * x1 - t1 * x2) * r, (t2 * y1 - t1 * y2) * r, (t2 * z1 - t1 * z2) * r);
+            var tdir = new Vector3((s1 * x2 - s2 * x1) * r, (s1 * y2 - s2 * y1) * r, (s1 * z2 - s2 * z1) * r);
 
             tan1[i1] += sdir;
             tan1[i2] += sdir;
@@ -456,15 +539,14 @@ public static class MeshFactory
             triangle += 3;
         }
 
-        for (int i = 0; i < (vertexCount); i++)
+        for (var vertexIndex = 0; vertexIndex < vertexCount; vertexIndex++)
         {
-            Vector3 n = normals[i];
-            Vector3 t = tan1[i];
+            var n = normals[vertexIndex];
+            var t = tan1[vertexIndex];
 
-            //Gram-Schmidt orthogonalize
             Vector3.OrthoNormalize(ref n, ref t);
 
-            tangents.Add(VectorHelper.MakeFrom(t, (Vector3.Dot(Vector3.Cross(n, t), tan2[i]) < 0.0f) ? -1.0f : 1.0f));
+            tangents.Add(VectorHelper.MakeFrom(t, (Vector3.Dot(Vector3.Cross(n, t), tan2[vertexIndex]) < 0.0f) ? -1.0f : 1.0f));
         }
 
         theMesh.SetTangents(tangents);
@@ -545,28 +627,28 @@ public static class MeshFactory
 
             var faces = new List<TriangleIndices>();
 
-            // 5 faces around point 0
+            // 5 faces around point 0...
             faces.Add(new TriangleIndices(0, 11, 5));
             faces.Add(new TriangleIndices(0, 5, 1));
             faces.Add(new TriangleIndices(0, 1, 7));
             faces.Add(new TriangleIndices(0, 7, 10));
             faces.Add(new TriangleIndices(0, 10, 11));
 
-            // 5 adjacent faces
+            // 5 adjacent faces...
             faces.Add(new TriangleIndices(1, 5, 9));
             faces.Add(new TriangleIndices(5, 11, 4));
             faces.Add(new TriangleIndices(11, 10, 2));
             faces.Add(new TriangleIndices(10, 7, 6));
             faces.Add(new TriangleIndices(7, 1, 8));
 
-            // 5 faces around point 3
+            // 5 faces around point 3...
             faces.Add(new TriangleIndices(3, 9, 4));
             faces.Add(new TriangleIndices(3, 4, 2));
             faces.Add(new TriangleIndices(3, 2, 6));
             faces.Add(new TriangleIndices(3, 6, 8));
             faces.Add(new TriangleIndices(3, 8, 9));
 
-            // 5 adjacent faces
+            // 5 adjacent faces...
             faces.Add(new TriangleIndices(4, 9, 5));
             faces.Add(new TriangleIndices(2, 4, 11));
             faces.Add(new TriangleIndices(6, 2, 10));
@@ -579,7 +661,7 @@ public static class MeshFactory
 
                 foreach (var tri in faces)
                 {
-                    // Replace triangle by 4 triangles
+                    // Replace triangle by 4 triangles...
                     var a = GetMiddlePoint(tri.v1, tri.v2, ref vertices, ref middlePointIndexCache, radius);
                     var b = GetMiddlePoint(tri.v2, tri.v3, ref vertices, ref middlePointIndexCache, radius);
                     var c = GetMiddlePoint(tri.v3, tri.v1, ref vertices, ref middlePointIndexCache, radius);

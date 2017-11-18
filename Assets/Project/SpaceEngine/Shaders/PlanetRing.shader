@@ -104,9 +104,10 @@ Shader "SpaceEngine/Planet/Ring"
 			{
 				float2 deltaPosition = i.worldPosition.xz * _DetailParameters.x;
 				float radial = i.uv.x * _DetailParameters.y;
+				float noiseFirst = tex2D(_NoiseTexture, 64 * i.uv).r;
 
-				noiseValue = tex2D(_NoiseTexture, deltaPosition).r *
-							 tex2D(_NoiseTexture, deltaPosition * 0.3).g *
+				noiseValue = texNoTile(_NoiseTexture, noiseFirst, deltaPosition * 0.25).r *
+							 texNoTile(_NoiseTexture, noiseFirst, deltaPosition * 0.15).b *
 							 tex2D(_NoiseTexture, float2(radial, 0.5)).b *
 							 tex2D(_NoiseTexture, float2(radial * 0.3, 0.5)).a * 16.0;
 

@@ -66,6 +66,7 @@ namespace SpaceEngine.Environment.Rings
 
         public int SegmentCount = 8;
         public int SegmentDetail = 8;
+        public int RadiusDetail = 2;
 
         public float BoundsShift;
 
@@ -281,7 +282,7 @@ namespace SpaceEngine.Environment.Rings
 
         private void InitMesh()
         {
-            RingSegmentMesh = MeshFactory.SetupRingSegmentMesh(SegmentCount, SegmentDetail, InnerRadius, OuterRadius, BoundsShift);
+            RingSegmentMesh = MeshFactory.SetupRingSegmentMesh(SegmentCount, SegmentDetail, RadiusDetail, InnerRadius, OuterRadius, BoundsShift);
         }
 
         #region Special Stuff
