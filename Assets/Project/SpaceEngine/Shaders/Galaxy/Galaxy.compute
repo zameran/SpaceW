@@ -59,7 +59,13 @@ float GenerateParticleDistribution(in float3 position, in float size, in float s
 
 float GenerateParticleTemperature(in float4 rnd, in float distribution)
 {
-	return ((distribution * (rnd.w * M_PHI)) - 0.08f) / 2.92f;				// Fake temperature distribution...
+	temperatureMin /= 10000;
+	temperatureMax /= 10000;
+	temperatureShift /= 10000;
+
+	float temperature = distribution * (rnd.w * M_PHI);
+
+	return ((temperature + temperatureShift) - temperatureMin) / temperatureMax;
 }
 
 GalaxyStar GenerateParticle(uint id, float pertrub, float4 rnd)

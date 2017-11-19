@@ -53,6 +53,7 @@ uniform float4	warpParams1;	// (warp1.x,	warp1.y,		warp2.x,	 warp2.y)
 uniform float4	spiralParams1;	// (inverseEccentricity, spiralRotation, passRotation, UNUSED)
 uniform float2	dustParams1;	// (dustStrength,	dustSize,	UNUSED,		UNUSED)
 uniform float2	gasParams1;		// (gasCenterFalloff,	UNUSED,	UNUSED,		UNUSED)
+uniform float3	temperatureParams1;	// (temperature min, temperature max, temperature shift)
 //-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
@@ -71,6 +72,9 @@ uniform float2	gasParams1;		// (gasCenterFalloff,	UNUSED,	UNUSED,		UNUSED)
 #define		dustStrength			dustParams1.x
 #define		dustSize				dustParams1.y
 #define		gasCenterFalloff		gasParams1.x
+#define		temperatureMin			temperatureParams1.x
+#define		temperatureMax			temperatureParams1.y
+#define		temperatureShift		temperatureParams1.z
 //-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------

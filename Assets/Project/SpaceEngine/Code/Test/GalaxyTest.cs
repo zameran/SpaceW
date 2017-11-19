@@ -122,6 +122,7 @@ namespace SpaceEngine.Tests
     [StructLayout(LayoutKind.Sequential)]
     internal struct GalaxyGenerationParameters
     {
+        public Vector3 TemperatureRange;            // Temperature range... (Z component for shift)
         public Vector3 Randomize;                   // Randomation vector...
         public Vector3 Offset;                      // Linear offset for ellipses - asymmetry factor...
 
@@ -139,6 +140,8 @@ namespace SpaceEngine.Tests
 
         public GalaxyGenerationParameters(GalaxyGenerationParameters from)
         {
+            TemperatureRange = from.TemperatureRange;
+
             Randomize = from.Randomize;
             Offset = from.Offset;
 
@@ -155,10 +158,12 @@ namespace SpaceEngine.Tests
             DustColorDistribution = new ColorMaterialTableGradientLut();
         }
 
-        public GalaxyGenerationParameters(Vector3 randomize, Vector3 offset, Vector4 warp,
+        public GalaxyGenerationParameters(Vector3 temperatureRange, Vector3 randomize, Vector3 offset, Vector4 warp,
                                           float radius, float radiusEllipse, float sizeBar, float depth, float inverseSpiralEccentricity,
                                           float spiralRotation)
         {
+            TemperatureRange = temperatureRange;
+
             Randomize = randomize;
             Offset = offset;
 
@@ -179,7 +184,8 @@ namespace SpaceEngine.Tests
         {
             get
             {
-                return new GalaxyGenerationParameters(Vector3.zero, 
+                return new GalaxyGenerationParameters(new Vector3(800.0f, 29200.0f, 0.0f),
+                                                      new Vector3(0.0f, 0.0f, 0.0f), 
                                                       new Vector3(0.0f, 0.0f, 0.03f), 
                                                       new Vector4(0.3f, 0.15f, 0.025f, 0.01f),
                                                       128.0f, 0.7f, -0.25f, 32.0f, 0.75f, 6.2832f);
@@ -671,6 +677,7 @@ namespace SpaceEngine.Tests
                     Core.SetVector("sizeParams1", new Vector4(Settings.GalaxyGenerationParameters.Radius, Settings.GalaxyGenerationParameters.RadiusEllipse, Settings.GalaxyGenerationParameters.SizeBar, Settings.GalaxyGenerationParameters.Depth));
                     Core.SetVector("warpParams1", Settings.GalaxyGenerationParameters.Warp);
                     Core.SetVector("spiralParams1", new Vector4(Settings.GalaxyGenerationParameters.InverseSpiralEccentricity, Settings.GalaxyGenerationParameters.SpiralRotation, perPassRotation, 0.0f));
+                    Core.SetVector("temperatureParams1", Settings.GalaxyGenerationParameters.TemperatureRange);
 
                     Core.SetBuffer(starsKernel, "stars_output", buffer);
                     Core.Dispatch(starsKernel, (int)(Settings.GalaxyParameters.Count / 1024.0f), 1, 1);
