@@ -134,13 +134,45 @@ namespace SpaceEngine.Core.Octree
         /// <param name="ray">The ray. Passing as ref to improve performance since it won't have to be copied.</param>
         /// <param name="maxDistance">Maximum distance from the ray to consider.</param>
         /// <returns>Objects within range.</returns>
-        public T[] GetNearby(Ray ray, float maxDistance)
+        public List<T> GetNearby(Ray ray, float maxDistance)
         {
             var collidingWith = new List<T>();
 
             RootNode.GetNearby(ref ray, ref maxDistance, collidingWith);
 
-            return collidingWith.ToArray();
+            return collidingWith;
+        }
+
+        /// <summary>
+        /// Return objects that are within maxDistance of the specified position.
+        /// If none, returns an empty array (not null).
+        /// </summary>
+        /// <param name="position">Position.</param>
+        /// <param name="maxDistance">Maximum distance from the ray to consider.</param>
+        /// <returns>Objects within range.</returns>
+        public List<T> GetNearby(Vector3 position, float maxDistance)
+        {
+            var collidingWith = new List<T>();
+
+            RootNode.GetNearby(ref position, ref maxDistance, collidingWith);
+
+            return collidingWith;
+        }
+
+        /// <summary>
+        /// Return nodes that are within maxDistance of the specified position.
+        /// If none, returns an empty array (not null).
+        /// </summary>
+        /// <param name="position">Position.</param>
+        /// <param name="maxDistance">Maximum distance from the ray to consider.</param>
+        /// <returns>Nodes within range.</returns>
+        public List<PointOctreeNode<T>> GetNearbyNodes(Vector3 position, float maxDistance)
+        {
+            var collidingWith = new List<PointOctreeNode<T>>();
+
+            RootNode.GetNearbyNodes(ref position, ref maxDistance, collidingWith);
+
+            return collidingWith;
         }
 
         /// <summary>

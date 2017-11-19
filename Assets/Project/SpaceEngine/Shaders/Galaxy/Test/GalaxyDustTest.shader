@@ -6,7 +6,9 @@
 	}
 	SubShader
 	{
-		CGINCLUDE	
+		Tags { "PreviewType" = "Plane" }
+
+		CGINCLUDE
 		#include "../Galaxy.cginc"
 		
 		uniform StructuredBuffer<GalaxyStar> stars;

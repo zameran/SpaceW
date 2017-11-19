@@ -46,6 +46,7 @@ namespace SpaceEngine.Tests
             DebugStars,
             DebugDust,
             OnlyDust,
+            Gizmos,
             None
         }
 
@@ -68,6 +69,28 @@ namespace SpaceEngine.Tests
         private void Update()
         {
 
+        }
+
+        private void OnDrawGizmos()
+        {
+            if (Galaxy == null || !Helper.Enabled(Galaxy)) return;
+
+            if (RenderMethod == RenderType.Gizmos)
+            {
+                if (Galaxy.Octree == null) return;
+
+                Galaxy.Octree.DrawAllBounds();
+
+                var chunks = Galaxy.Octree.GetNearbyNodes(transform.position, 32);
+
+                for (var chunkIndex = 0; chunkIndex < chunks.Count; chunkIndex++)
+                {
+                    Gizmos.color = Color.green;
+                    Gizmos.DrawWireCube(chunks[chunkIndex].Center, Vector3.one * chunks[chunkIndex].SideLength);
+                }
+            }
+
+            Gizmos.color = Color.white;
         }
 
         private void OnPreRender()

@@ -8,11 +8,8 @@
 
 #include "Galaxy.cginc"
 
-GalaxyStar GenerateStar(uint id, float pertrub, float4 rnd)
+float3 GenerateParticlePosition(in uint id, in float4 rnd)
 {
-	float size = radius * 0.025 * (rnd.w * rnd.w + 0.5);					// Randomize the particle size...
-	float halfSize = size / 2.0;
-	
 	float eRadius = rnd.x * ellipseRadius;									// Size of the galactic ellipse...
 	float theta = rnd.y * M_PI2;											// Angle around the ellipse...
 	float height = rnd.z;													// Distance from the galactic plane...
@@ -44,12 +41,38 @@ GalaxyStar GenerateStar(uint id, float pertrub, float4 rnd)
 	pos = mulvq(pos, qi);													// Rotate the ellipse to where it should be to make spirals...
 	pos = mulvq(pos, qa);													// Fake-arm rotation...
 
-	float distribution = (length(pos) / pertrub) / radius * M_PHI * halfSize;
-	float temperature = ((distribution * (rnd.w * M_PHI)) - 0.08f) / 2.92f;	// Fake temperature distribution...
+	float3 rp = Random3(id) / 2.0;
+
+	// NOTE : Branches...
+	return id % 2 == 0 ? pos + rp : pos - rp;
+}
+
+float GenerateParticleSize(in float4 rnd)
+{
+	return radius * 0.025 * (rnd.w * rnd.w + 0.5);							// Randomize the particle size...
+}
+
+float GenerateParticleDistribution(in float3 position, in float size, in float scale)
+{
+	return (length(position) / scale) / radius * M_PHI * (size / 2.0);		// Randomize distribution on position...
+}
+
+float GenerateParticleTemperature(in float4 rnd, in float distribution)
+{
+	return ((distribution * (rnd.w * M_PHI)) - 0.08f) / 2.92f;				// Fake temperature distribution...
+}
+
+GalaxyStar GenerateParticle(uint id, float pertrub, float4 rnd)
+{
+	float3 position = GenerateParticlePosition(id, rnd);
+	float size = GenerateParticleSize(rnd);
+	float distribution = GenerateParticleDistribution(position, size, pertrub);
+	float temperature = GenerateParticleTemperature(rnd, distribution);
+	float4 color = GetMaterial(temperature);
 
 	GalaxyStar star;
-	star.position = pos;
-	star.color = GetMaterial(temperature);
+	star.position = position;
+	star.color = color;
 	star.size = size;
 	star.temperature = temperature;
 
@@ -70,7 +93,7 @@ void Stars(uint3 groupThreadID : SV_GroupThreadID,
 	
 	float4 rnd = frac(Random4(id) + float4(0.0, randomParams1));
 
-	GalaxyStar star = GenerateStar(id, rnd.x, rnd);
+	GalaxyStar star = GenerateParticle(id, rnd.x, rnd);
 
 	stars_output[id] = star;
 }
@@ -89,7 +112,7 @@ void Dust(uint3 groupThreadID : SV_GroupThreadID,
 	
 	float4 rnd = Random4(id) + float4(0.0, randomParams1);
 
-	GalaxyStar star = GenerateStar(id, 1.0, rnd);
+	GalaxyStar star = GenerateParticle(id, 1.0, rnd);
 	
 	dust_output[id] = star;
 }

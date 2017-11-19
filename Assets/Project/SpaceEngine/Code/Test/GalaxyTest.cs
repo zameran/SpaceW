@@ -68,14 +68,27 @@ namespace SpaceEngine.Tests
     {
         public Vector3 Position { get; }
 
+        public float Size { get; }
+
         public GalaxyRenderStar()
         {
             Position = Vector3.zero;
+
+            Size = 1.0f;
         }
 
         public GalaxyRenderStar(Vector3 position)
         {
             Position = position;
+
+            Size = 1.0f;
+        }
+
+        public GalaxyRenderStar(Vector3 position, float size)
+        {
+            Position = position;
+
+            Size = size;
         }
 
         #region Overrides
@@ -83,7 +96,7 @@ namespace SpaceEngine.Tests
         /// <inheritdoc />
         public override string ToString()
         {
-            return string.Format("({0})", Position);
+            return string.Format("({0}, {1})", Position, Size);
         }
 
         /// <inheritdoc />
@@ -93,13 +106,13 @@ namespace SpaceEngine.Tests
 
             if (item == null) { return false; }
 
-            return Position.Equals(item.Position);
+            return Position.Equals(item.Position) && Size.AlmostEquals(item.Size);
         }
 
         /// <inheritdoc />
         public override int GetHashCode()
         {
-            return Position.GetHashCode();
+            return Position.GetHashCode() ^ Position.GetHashCode();
         }
 
         #endregion
@@ -790,8 +803,9 @@ namespace SpaceEngine.Tests
                     {
                         var star = data[starIndex];
                         var starPosition = star.position;
+                        var starSize = star.size;
 
-                        Octree.Add(new GalaxyRenderStar(starPosition), starPosition);
+                        Octree.Add(new GalaxyRenderStar(starPosition, starSize), starPosition);
                     }
                 }
             }
@@ -802,13 +816,6 @@ namespace SpaceEngine.Tests
         #endregion
 
         #region Node
-
-        private void OnDrawGizmos()
-        {
-            if (Octree == null) return;
-
-            Octree.DrawAllBounds();
-        }
 
         protected override void InitNode()
         {

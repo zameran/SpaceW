@@ -6,6 +6,8 @@
 	}
 	SubShader
 	{
+		Tags { "PreviewType" = "Plane" }
+
 		Pass
 		{
 			Name "Dust&Gas"

@@ -35,6 +35,7 @@
 
 using System.Collections.Generic;
 using System.Linq;
+
 using UnityEngine;
 
 namespace SpaceEngine.Core.Octree
@@ -201,6 +202,56 @@ namespace SpaceEngine.Core.Octree
                 for (byte i = 0; i < 8; i++)
                 {
                     Children[i].GetNearby(ref ray, ref maxDistance, result);
+                }
+            }
+        }
+
+        /// <summary>
+        /// Return objects that are within maxDistance of the specified position.
+        /// </summary>
+        /// <param name="position">Position.</param>
+        /// <param name="maxDistance">Maximum distance from the position to consider.</param>
+        /// <param name="result">List result.</param>
+        public void GetNearby(ref Vector3 position, ref float maxDistance, List<T> result)
+        {
+            // Check against any objects in this node...
+            for (int i = 0; i < Objects.Count; i++)
+            {
+                if (Vector3.Distance(position, Objects[i].Position) <= maxDistance)
+                {
+                    result.Add(Objects[i].Obj);
+                }
+            }
+
+            // Check children...
+            if (!IsLeaf)
+            {
+                for (byte i = 0; i < 8; i++)
+                {
+                    Children[i].GetNearby(ref position, ref maxDistance, result);
+                }
+            }
+        }
+
+        /// <summary>
+        /// Return nodes that are within maxDistance of the specified position.
+        /// </summary>
+        /// <param name="position">Position.</param>
+        /// <param name="maxDistance">Maximum distance from the position to consider.</param>
+        /// <param name="result">List result.</param>
+        public void GetNearbyNodes(ref Vector3 position, ref float maxDistance, List<PointOctreeNode<T>> result)
+        {
+            if (Vector3.Distance(position, Center) <= maxDistance)
+            {
+                result.Add(this);
+            }
+
+            // Check children...
+            if (!IsLeaf)
+            {
+                for (byte i = 0; i < 8; i++)
+                {
+                    Children[i].GetNearbyNodes(ref position, ref maxDistance, result);
                 }
             }
         }

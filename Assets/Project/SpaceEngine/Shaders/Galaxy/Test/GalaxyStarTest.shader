@@ -6,6 +6,8 @@
 	}
 	SubShader
 	{
+		Tags { "PreviewType" = "Plane" }
+
 		CGINCLUDE
 		#include "../../Core.cginc"
 		#include "../Galaxy.cginc"
@@ -58,7 +60,7 @@
 			int i = (int)index;
 			
 			return tab[i].x + f * tab[i].y;
-		}	
+		}
 
 		void vert(in appdata v, out v2g o)
 		{
@@ -74,7 +76,19 @@
 			o.uv = float2(0.25, 0.25);
 			o.size = starSize / _Particle_Absolute_Size;
 			o.color = 8 * brightness * starColor * 3;
-			//o.color = starColor;
+		}
+
+		void vert_debug(in appdata v, out v2g o)
+		{
+			float3 starPosition = data[v.id].position;
+			float4 starColor = data[v.id].color;
+			float starSize = data[v.id].size;
+			float starTemperature = data[v.id].temperature;
+
+			o.vertex = UnityObjectToClipPos(float4(starPosition, 1.0));
+			o.uv = float2(0.25, 0.25);
+			o.size = starSize / _Particle_Absolute_Size;
+			o.color = starColor;
 		}
 		
 		[maxvertexcount(4)]
@@ -166,7 +180,7 @@
 			
 			CGPROGRAM
 			#pragma target 5.0
-			#pragma vertex vert
+			#pragma vertex vert_debug
 			#pragma fragment frag_debug
 			ENDCG
 		}
