@@ -109,6 +109,13 @@ Shader "SpaceEngine/Planet/Terrain (Deferred)"
 				o.direction = (_Body_WorldCameraPosition + _Body_Origin) - (mul(_Globals_CameraToWorld, float4((mul(_Globals_ScreenToCamera, v.vertex)).xyz, 0.0))).xyz;
 			}
 
+			// TODO : Planet texturing...
+			/*
+			uniform sampler2D _PlanetUV;
+			uniform float2 _TileSD;
+			uniform float4 _Offset;
+			*/
+
 			void frag(in v2f_planetTerrain i, out DeferredOutput o)
 			{
 				float3 WCP = _Globals_WorldCameraPos;
@@ -124,6 +131,7 @@ Shader "SpaceEngine/Planet/Terrain (Deferred)"
 
 				normal.xyz = DecodeNormal(normal.xyz);
 
+				// TODO : Planet texturing...
 				/*
 				float2 vert = (texcoord * _TileSD.y - _TileSD.x) * _Offset.z + _Offset.xy;
 				float4 scaledUV = float4(vert / _Offset.w, 0.0, 0.0);
