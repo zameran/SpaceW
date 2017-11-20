@@ -691,5 +691,36 @@ namespace SpaceEngine.Core.Terrain
                    Math.Max(Math.Min(Math.Abs(LocalCameraPosition.x - localBox.Min.x), Math.Abs(LocalCameraPosition.x - localBox.Max.x)),
                    Math.Min(Math.Abs(LocalCameraPosition.y - localBox.Min.y), Math.Abs(LocalCameraPosition.y - localBox.Max.y))));
         }
+
+        /// <summary>
+        /// Distance between the current viewer position and the given bounding box.
+        /// This distance is measured in the local terrain space. Deformations taken in to account.
+        /// </summary>
+        /// <param name="localBox">Target bounding box.</param>
+        /// <param name="z">Target bounding box Z.</param>
+        /// <returns>Returns the distance between the current viewer position and the given bounding box.</returns>
+        public double GetCameraDistance(Box3d localBox, double z)
+        {
+            return Math.Max(Math.Abs(LocalCameraPosition.z - z) / DistanceFactor,
+                   Math.Max(Math.Min(Math.Abs(LocalCameraPosition.x - localBox.Min.x), Math.Abs(LocalCameraPosition.x - localBox.Max.x)),
+                   Math.Min(Math.Abs(LocalCameraPosition.y - localBox.Min.y), Math.Abs(LocalCameraPosition.y - localBox.Max.y))));
+        }
+
+        /// <summary>
+        /// Distance between the current viewer position and the given bounding box, described as Min/Max values.
+        /// This distance is measured in the local terrain space. Deformations taken in to account.
+        /// </summary>
+        /// <param name="minX">Target Bounding box X minimum.</param>
+        /// <param name="maxX">Target Bounding box X maximum.</param>
+        /// <param name="minY">Target Bounding box Y minimum.</param>
+        /// <param name="maxY">Target Bounding box Y maximum.</param>
+        /// <param name="z">Target Bounding box Z.</param>
+        /// <returns></returns>
+        public double GetCameraDistance(double minX, double maxX, double minY, double maxY, double z)
+        {
+            return Math.Max(Math.Abs(LocalCameraPosition.z - z) / DistanceFactor,
+                   Math.Max(Math.Min(Math.Abs(LocalCameraPosition.x - minX), Math.Abs(LocalCameraPosition.x - maxX)),
+                   Math.Min(Math.Abs(LocalCameraPosition.y - minY), Math.Abs(LocalCameraPosition.y - maxY))));
+        }
     }
 }

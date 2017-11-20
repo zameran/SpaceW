@@ -326,7 +326,7 @@ namespace SpaceEngine.Core.Terrain
             }
 
             var ground = Owner.ParentBody.HeightZ;
-            var distance = Owner.GetCameraDistance(new Box3d(Ox, Ox + Length, Oy, Oy + Length, Math.Min(0.0, ground), Math.Max(0.0, ground)));
+            var distance = Owner.GetCameraDistance(LocalBox, Math.Max(0.0, ground));
 
             if ((Owner.SplitInvisibleQuads || Visibility != Frustum3d.VISIBILITY.INVISIBLE) && distance < Length * Owner.SplitDistance && Level < Owner.MaxLevel)
             {

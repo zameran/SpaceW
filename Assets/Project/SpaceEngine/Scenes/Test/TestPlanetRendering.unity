@@ -406,8 +406,8 @@ MonoBehaviour:
   TerrainMaterial: {fileID: 0}
   SplitFactor: 2
   MaxLevel: 16
-  ZMin: -5000
-  ZMax: 5000
+  ZMin: -10000
+  ZMax: 10000
   Face: 6
   UseHorizonCulling: 0
   SplitInvisibleQuads: 1
@@ -920,8 +920,8 @@ MonoBehaviour:
   TerrainMaterial: {fileID: 0}
   SplitFactor: 2
   MaxLevel: 16
-  ZMin: -5000
-  ZMax: 5000
+  ZMin: -10000
+  ZMax: 10000
   Face: 5
   UseHorizonCulling: 0
   SplitInvisibleQuads: 1
@@ -3380,8 +3380,8 @@ MonoBehaviour:
   TerrainMaterial: {fileID: 0}
   SplitFactor: 2
   MaxLevel: 16
-  ZMin: -5000
-  ZMax: 5000
+  ZMin: -10000
+  ZMax: 10000
   Face: 1
   UseHorizonCulling: 0
   SplitInvisibleQuads: 1
@@ -3705,8 +3705,8 @@ MonoBehaviour:
   TerrainMaterial: {fileID: 0}
   SplitFactor: 2
   MaxLevel: 16
-  ZMin: -5000
-  ZMax: 5000
+  ZMin: -10000
+  ZMax: 10000
   Face: 2
   UseHorizonCulling: 0
   SplitInvisibleQuads: 1
@@ -4282,7 +4282,6 @@ MonoBehaviour:
   RenderQueueOffset: 1000000
   Magnitude: 2.25e+22
   InitUniformsInUpdate: 1
-  UseAtmosphereColors: 1
   UseRadiance: 1
   FadeCurve:
     serializedVersion: 2
@@ -4683,8 +4682,8 @@ MonoBehaviour:
   TerrainMaterial: {fileID: 0}
   SplitFactor: 2
   MaxLevel: 16
-  ZMin: -5000
-  ZMax: 5000
+  ZMin: -10000
+  ZMax: 10000
   Face: 3
   UseHorizonCulling: 0
   SplitInvisibleQuads: 1
@@ -5028,6 +5027,7 @@ MonoBehaviour:
   RenderQueueOffset: 0
   SegmentCount: 16
   SegmentDetail: 32
+  RadiusDetail: 2
   BoundsShift: 0
   LightingBias: 0.82
   LightingSharpness: 0.79
@@ -5667,8 +5667,8 @@ MonoBehaviour:
   TerrainMaterial: {fileID: 0}
   SplitFactor: 2
   MaxLevel: 16
-  ZMin: -5000
-  ZMax: 5000
+  ZMin: -10000
+  ZMax: 10000
   Face: 4
   UseHorizonCulling: 0
   SplitInvisibleQuads: 1
