@@ -1,6 +1,6 @@
 ﻿#region License
 // Procedural planet generator.
-// 
+//  
 // Copyright (C) 2015-2017 Denis Ovchinnikov [zameran] 
 // All rights reserved.
 // 
@@ -8,7 +8,7 @@
 // modification, are permitted provided that the following conditions
 // are met:
 // 1. Redistributions of source code must retain the above copyright
-//    notice, this list of conditions and the following disclaimer.
+//     notice, this list of conditions and the following disclaimer.
 // 2. Redistributions in binary form must reproduce the above copyright
 //    notice, this list of conditions and the following disclaimer in the
 //    documentation and/or other materials provided with the distribution.
@@ -28,53 +28,19 @@
 // ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF
 // THE POSSIBILITY OF SUCH DAMAGE.
 // 
-// Creation Date: Undefined
-// Creation Time: Undefined
+// Creation Date: 2017.03.23
+// Creation Time: 5:14 PM
 // Creator: zameran
 #endregion
 
-namespace SpaceEngine.Core.Patterns.Strategy.Eventit
+namespace SpaceEngine.Core.Patterns.Strategy.Renderable
 {
     /// <summary>
-    /// Interface provides some strategy methods for a subscription/unsubscription to particular events.
-    /// Use this to work with <see cref="EventManager"/>.
+    /// This interface should be implemented in all things, that's gonna be rendered with <see cref="UnityEngine.Graphics"/> class methods.
     /// </summary>
-    public interface IEventit
+    /// <typeparam name="T">Generic class type.</typeparam>
+    public interface IRenderable<T> where T : class
     {
-        bool isEventit { get; set; }
-
-        void Eventit();
-
-        void UnEventit();
-    }
-
-    /// <summary>
-    /// Interface provides some generic strategy methods for a subscription/unsubscription to particular events.
-    /// Use this to work with <see cref="EventManager"/>.
-    /// </summary>
-    /// <typeparam name="T">Generic.</typeparam>
-    public interface IEventit<T> where T : class
-    {
-        bool isEventit { get; set; }
-
-        void Eventit(T obj);
-
-        void UnEventit(T obj);
-    }
-
-    /// <summary>
-    /// Interface provides some several strategy generic methods for a subscription/unsubscription to particular events.
-    /// Use this to work with <see cref="EventManager"/>.
-    /// </summary>
-    /// <typeparam name="T">Generic.</typeparam>
-    /// <typeparam name="U"></typeparam>
-    public interface IEventit<T, U> where T : class
-        where U : class
-    {
-        bool isEventit { get; set; }
-
-        void Eventit(T obj1, U obj2);
-
-        void UnEventit(T obj1, U obj2);
+        void Render(int layer = 0);
     }
 }

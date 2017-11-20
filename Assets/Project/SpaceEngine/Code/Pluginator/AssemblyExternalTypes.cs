@@ -38,6 +38,9 @@ using System.Collections.Generic;
 
 namespace SpaceEngine.Pluginator
 {
+    /// <summary>
+    /// Dictionary wrapper, contains <see cref="Type"/> as key and <see cref="List{T}"/> with generic type of <see cref="Type"/>
+    /// </summary>
     public sealed class AssemblyExternalTypes : Dictionary<Type, List<Type>>
     {
         public AssemblyExternalTypes(Type type, List<Type> value)

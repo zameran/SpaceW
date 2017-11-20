@@ -11,7 +11,7 @@ using Logger = SpaceEngine.Core.Debugging.Logger;
 namespace SpaceEngine.Core.Preprocess.Terrain
 {
     [UseLogger(LoggerCategory.Core)]
-    public class ColorMipmap : AbstractTileCache
+    public class ColorMipmap : TileCache
     {
         public const int RESIDUAL_STEPS = 2;
 

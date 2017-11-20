@@ -38,8 +38,7 @@ namespace SpaceEngine.Core.Patterns.Strategy.Renderable
     /// <summary>
     /// This interface should be implemented in all things, that's gonna be rendered with <see cref="UnityEngine.Graphics"/> class methods.
     /// </summary>
-    /// <typeparam name="T">Generic class type.</typeparam>
-    public interface IRenderable<T> where T : class
+    public interface IRenderable
     {
         void Render(int layer = 0);
     }

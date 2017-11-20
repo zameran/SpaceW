@@ -1,6 +1,6 @@
 ﻿#region License
 // Procedural planet generator.
-// 
+//  
 // Copyright (C) 2015-2017 Denis Ovchinnikov [zameran] 
 // All rights reserved.
 // 
@@ -8,7 +8,7 @@
 // modification, are permitted provided that the following conditions
 // are met:
 // 1. Redistributions of source code must retain the above copyright
-//    notice, this list of conditions and the following disclaimer.
+//     notice, this list of conditions and the following disclaimer.
 // 2. Redistributions in binary form must reproduce the above copyright
 //    notice, this list of conditions and the following disclaimer in the
 //    documentation and/or other materials provided with the distribution.
@@ -28,20 +28,17 @@
 // ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF
 // THE POSSIBILITY OF SUCH DAMAGE.
 // 
-// Creation Date: Undefined
-// Creation Time: Undefined
+// Creation Date: 2017.03.26
+// Creation Time: 9:05 AM
 // Creator: zameran
 #endregion
 
-namespace SpaceEngine.Environment.Atmospheric
+using UnityEngine;
+
+namespace SpaceEngine.Core.Preprocess.Terrain
 {
-    public enum AtmosphereHDR : byte
+    public interface IColorFunction2D : IFunction2D<Vector4>
     {
-        None = 0,
-        Simple = 1,
-        SpaceEngine = 2,
-        SpaceEngineOptimized = 3,
-        Proland = 4,
-        ProlandOptimized = 5,
+
     }
 }

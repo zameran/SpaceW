@@ -33,15 +33,24 @@
 // Creator: zameran
 #endregion
 
-namespace SpaceEngine.Environment.Atmospheric
+namespace SpaceEngine.Core.Patterns.Strategy.Uniformed
 {
-    public enum AtmosphereHDR : byte
+    /// <summary>
+    /// This interface should be implemented in all things, that's gonna manipulate with 
+    /// <see cref="UnityEngine.Material"/> and <see cref="UnityEngine.Shader"/>, or <see cref="UnityEngine.MaterialPropertyBlock"/> uniforms.
+    /// Targets for manipulations is a generic type.
+    /// Two targets at the same time!
+    /// <remarks>
+    /// This interface slightly different: <see cref="IUniformed{T}.InitSetUniforms"/>. It's done, 
+    /// because class can implement sequence of <see cref="IUniformed{T}"/> and <see cref="IUniformed{T, U}"/>
+    /// </remarks>
+    /// </summary>
+    /// <typeparam name="T">Generic. <example><see cref="UnityEngine.Material"/> or <see cref="UnityEngine.Shader"/>.</example></typeparam>
+    /// <typeparam name="U">Generic. <example><see cref="UnityEngine.Material"/> or <see cref="UnityEngine.Shader"/>.</example></typeparam>
+    public interface IUniformed<in T, in U> where T : class where U : class
     {
-        None = 0,
-        Simple = 1,
-        SpaceEngine = 2,
-        SpaceEngineOptimized = 3,
-        Proland = 4,
-        ProlandOptimized = 5,
+        void InitUniforms(T target0, U target1);
+
+        void SetUniforms(T target0, U target1);
     }
 }

@@ -7,7 +7,7 @@ namespace SpaceEngine.Core.Preprocess.Terrain
     /// <summary>
     /// Abstract tile cache for working with special <see cref="Tile"/> class in preprocessing.
     /// </summary>
-    public abstract class AbstractTileCache
+    public abstract class TileCache
     {
         public int Width { get; protected set; }
         public int Height { get; protected set; }
@@ -17,7 +17,7 @@ namespace SpaceEngine.Core.Preprocess.Terrain
 
         private DictionaryQueue<int, Tile> Cache;
 
-        public AbstractTileCache(int width, int height, int tileSize, int channels, int capacity = 20)
+        public TileCache(int width, int height, int tileSize, int channels, int capacity = 20)
         {
             Width = width;
             Height = height;

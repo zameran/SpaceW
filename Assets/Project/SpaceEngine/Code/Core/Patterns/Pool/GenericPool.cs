@@ -40,7 +40,8 @@ namespace SpaceEngine.Core.Patterns.Pool
 {
     public class GenericPool<TKey, TValue> where TValue : IGenericPoolObject<TKey>
     {
-        public virtual int MaxInstances { get; protected set; }
+        public int MaxInstances { get; protected set; }
+
         public virtual int InctanceCount { get { return Vault.Count; } }
         public virtual int CacheCount { get { return Cache.Count; } }
 

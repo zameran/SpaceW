@@ -28,32 +28,21 @@
 // ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF
 // THE POSSIBILITY OF SUCH DAMAGE.
 // 
-// Creation Date: 2017.03.26
-// Creation Time: 9:05 AM
+// Creation Date: 2017.02.22
+// Creation Time: 6:27 PM
 // Creator: zameran
 #endregion
 
-using UnityEngine;
 
-namespace SpaceEngine.Core.Preprocess.Terrain
+namespace SpaceEngine.Core.Patterns.Strategy.Reanimator
 {
-    public interface IFunction2D<T>
+    /// <summary>
+    /// Interface provides some generic strategy methods for a special 
+    /// <see cref="UnityEngine.Material"/> and <see cref="UnityEngine.Shader"/>, or <see cref="UnityEngine.MaterialPropertyBlock"/> uniforms behaviour.
+    /// </summary>
+    /// <typeparam name="T">Generic.</typeparam>
+    public interface IReanimateable<T> : IReanimateable
     {
-        T GetValue(int x, int y);
-    }
-
-    public interface IFunction3D<T>
-    {
-        T GetValue(int x, int y, int z);
-    }
-
-    public interface IColorFunction2D : IFunction2D<Vector4>
-    {
-
-    }
-
-    public interface IHeightFunction2D : IFunction2D<float>
-    {
-
+        void Reanimate(T state);
     }
 }

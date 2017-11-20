@@ -33,15 +33,20 @@
 // Creator: zameran
 #endregion
 
-namespace SpaceEngine.Environment.Atmospheric
+namespace SpaceEngine.Core.Patterns.Strategy.Uniformed
 {
-    public enum AtmosphereHDR : byte
+    /// <summary>
+    /// This interface should be implemented in all things, that's gonna manipulate with 
+    /// <see cref="UnityEngine.Material"/> and <see cref="UnityEngine.Shader"/>, or <see cref="UnityEngine.MaterialPropertyBlock"/> uniforms.
+    /// Target for manipulations is a generic type.
+    /// </summary>
+    /// <typeparam name="T">Generic. <example><see cref="UnityEngine.Material"/> or <see cref="UnityEngine.Shader"/>.</example></typeparam>
+    public interface IUniformed<in T> where T : class
     {
-        None = 0,
-        Simple = 1,
-        SpaceEngine = 2,
-        SpaceEngineOptimized = 3,
-        Proland = 4,
-        ProlandOptimized = 5,
+        void InitUniforms(T target);
+
+        void SetUniforms(T target);
+
+        void InitSetUniforms();
     }
 }

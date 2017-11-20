@@ -10,7 +10,7 @@ using Logger = SpaceEngine.Core.Debugging.Logger;
 namespace SpaceEngine.Core.Preprocess.Terrain
 {
     [UseLogger(LoggerCategory.Core)]
-    public class HeightMipmap : AbstractTileCache
+    public class HeightMipmap : TileCache
     {
         public HeightMipmap Left;
         public HeightMipmap Right;

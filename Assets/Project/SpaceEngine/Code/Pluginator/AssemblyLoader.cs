@@ -294,19 +294,27 @@ namespace SpaceEngine.Pluginator
             return false;
         }
 
-        public List<T> GetAllSubclassesOf<T, U, Y>(Assembly assembly) where T : Type where U : Attribute
+        /// <summary>
+        /// Search for spectial type classes, contains special attribute in target assembly.
+        /// </summary>
+        /// <typeparam name="TReturn">Generic type. Return type.</typeparam>
+        /// <typeparam name="TAttribute">Generic type. Attribute type.</typeparam>
+        /// <typeparam name="TBaseClass">Generic type. Base type.</typeparam>
+        /// <param name="assembly">Target assembly.</param>
+        /// <returns>Returns all subclasses of specified base type, with speciefied attribute type in return type list.</returns>
+        public List<TReturn> GetAllSubclassesOf<TReturn, TAttribute, TBaseClass>(Assembly assembly) where TReturn : Type where TAttribute : Attribute
         {
             var types = assembly.GetTypes();
-            var output = new List<T>();
+            var output = new List<TReturn>();
 
             foreach (var type in types)
             {
-                if (type.IsSubclassOf(typeof(Y)))
+                if (type.IsSubclassOf(typeof(TBaseClass)))
                 {
-                    var atr = AttributeHelper.GetTypeAttribute<U>(type);
+                    var atr = AttributeHelper.GetTypeAttribute<TAttribute>(type);
 
                     if (atr != null)
-                        output.Add(type as T);
+                        output.Add(type as TReturn);
                 }
             }
 

@@ -58,10 +58,8 @@ namespace SpaceEngine.Core.Patterns.PropertyNotification
 
         protected void OnPropertyChanged(PropertyChangedEventArgs e)
         {
-            var temp = this.PropertyChanged;
-
-            if (temp != null)
-                temp(this, e);
+            if (PropertyChanged != null)
+                PropertyChanged(this, e);
         }
 
         #endregion
