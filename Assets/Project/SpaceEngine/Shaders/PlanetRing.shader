@@ -35,13 +35,7 @@ Shader "SpaceEngine/Planet/Ring"
 {
 	Properties
 	{
-		_NoiseTexture("Noise Texture", 2D) = "white" {}
-		_DiffuseTexture("Diffuse Texture", 2D) = "white" {}
-		_DiffuseColor("Diffuse Color", Color) = (1, 1, 1, 1)
-		_Mie("Mie", Vector) = (0, 0, 0)
-		_LightingBias("Lighting Bias", Float) = 0
-		_LightingSharpness("Lighting Sharpness", Float) = 0
-		_UVCutout("UV Cutout", Float) = 0
+		
 	}
 	SubShader
 	{
@@ -49,16 +43,26 @@ Shader "SpaceEngine/Planet/Ring"
 		
 		#include "Core.cginc"
 		#include "SpaceStuff.cginc"
+		
+		uniform sampler2D DiffuseMap;
+		uniform sampler2D NoiseMap;
+		
+		uniform float2 RingsParams;		// (Rings Width, 1 / Ring.Thickness)
+		uniform float3 AmbientColor;	// (Ambient Color)
+		uniform float3 LightingParams;	// (Front Bright, Back Bright, Exposure)
+		uniform float4 DetailParams;	// (2D Frequency, Radial Frequency, 1 / Camera.PixelSize, Rings Density)
 
-		uniform sampler2D _NoiseTexture;
-		uniform sampler2D _DiffuseTexture;
-		uniform float4    _DiffuseColor;
-		uniform float4    _Mie;
-		uniform float3	  _DetailParameters;	// (2D Frequency, Radial Frequency, 1 / Camera.PixelSize)
-		uniform float     _LightingBias;
-		uniform float     _LightingSharpness;
-		uniform float	  _UVCutout;
-				
+		#define		ringsWidth                  RingsParams.x
+		#define		inversedRingsThickness      RingsParams.y
+		#define		ambientColor                AmbientColor.rgb
+		#define		frontBright                 LightingParams.x
+		#define		backBright                  LightingParams.y
+		#define		exposure                    LightingParams.z
+		#define		detail2DFrequency           DetailParams.x
+		#define		detailRadialFrequency       DetailParams.y
+		#define		inversedCameraPixelSize     DetailParams.z
+		#define		detailRingsDensity          DetailParams.w
+
 		struct a2v_planetRing
 		{
 			float4 vertex : POSITION;
@@ -68,9 +72,25 @@ Shader "SpaceEngine/Planet/Ring"
 		struct v2f_planetRing
 		{
 			float4 vertex : SV_POSITION;
-			float4 color : COLOR0;
-			float2 uv : TEXCOORD0;
-			float4 worldPosition : TEXCOORD1;
+			float4 worldPosition : TEXCOORD0;
+			float3 relativeCameraPosition : TEXCOORD1;
+			
+			#if LIGHT_1 || LIGHT_2 || LIGHT_3 || LIGHT_4
+				#if LIGHT_1
+					float3 light1RelativePosition : TEXCOORD2;
+				#endif
+				#if LIGHT_2
+					float3 light2RelativePosition : TEXCOORD3;
+				#endif
+				#if LIGHT_3
+					float3 light3RelativePosition : TEXCOORD4;
+				#endif
+				#if LIGHT_4
+					float3 light4RelativePosition : TEXCOORD5;
+				#endif
+			#endif
+
+			float2 uv : TEXCOORD6;
 		};
 		
 		void vert(in a2v_planetRing i, out v2f_planetRing o)
@@ -78,115 +98,122 @@ Shader "SpaceEngine/Planet/Ring"
 			float4 worldPosition = mul(unity_ObjectToWorld, i.vertex);
 			
 			o.vertex = UnityObjectToClipPos(i.vertex);
-			o.color = 1.0f;
+			o.worldPosition = worldPosition;
+			o.relativeCameraPosition = _WorldSpaceCameraPos - worldPosition.xyz;
 
 			#if LIGHT_1 || LIGHT_2 || LIGHT_3 || LIGHT_4
-				o.color *= UNITY_LIGHTMODEL_AMBIENT * 2.0f;
+				#if LIGHT_1
+					o.light1RelativePosition = _Light1Position.xyz - worldPosition.xyz;
+				#endif
+				#if LIGHT_2
+					o.light2RelativePosition = _Light2Position.xyz - worldPosition.xyz;
+				#endif
+				#if LIGHT_3
+					o.light3RelativePosition = _Light3Position.xyz - worldPosition.xyz;
+				#endif
+				#if LIGHT_4
+					o.light4RelativePosition = _Light4Position.xyz - worldPosition.xyz;
+				#endif
 			#endif
 
-			o.uv = float2(clamp(i.uv.x, _UVCutout, 1.0 - _UVCutout), i.uv.y); //NOTE : Oh shit...
-			o.worldPosition = worldPosition;
+			o.uv = i.uv;
 		}
-				
+		
+		float3 RingLighting(float3 lightPosition, 
+							float3 cameraDirection, 
+							float4 frontColor, 
+							float4 backColor, 
+							float3 frontColorMod)
+		{
+			const float g = -0.95;
+			const float g2 = g * g;
+			const float k = 1.5 / 806.202 * ((1.0 - g2) / (2.0 + g2));
+
+			float lightDistance = length(lightPosition);
+			float3 lightDirection = lightPosition / lightDistance;
+			
+			float theta = dot(lightDirection, cameraDirection);
+			float frontLit = frontBright * (theta + 1.0) * 0.5;
+			
+			frontLit *= smoothstep(0.0, 1.0, abs(lightDirection.y) * M_PI); // * 100.0
+			if (lightDirection.y * cameraDirection.y < 0) frontLit *= 1.0 - frontColor.a;
+			
+			float backLit = backBright * k * (1.0 + theta * theta) * pow(1.0 + g2 - 2.0 * g * theta, -1.5);
+			
+			return (frontLit * frontColorMod + backLit * backColor.rgb);
+		}
+
 		void frag(in v2f_planetRing i, out ForwardOutput o)
 		{
-			float4 mainTex = tex2D(_DiffuseTexture, i.uv);
-			float4 mainColor = mainTex * _DiffuseColor;
-			
-			o.diffuse = i.color * mainColor;
+			o.diffuse = 1.0;
 
-			float cameraDistance = length(_WorldSpaceCameraPos - i.worldPosition.xyz);
+			float cameraDistance = length(i.relativeCameraPosition);
+			float3 cameraDirection = i.relativeCameraPosition / cameraDistance;
+
+			float fade = smoothstep(0.0, 1.0, cameraDistance * inversedRingsThickness - 0.25);
+
+			float pixelDistance = length(i.worldPosition.xyz);
+			float3 pixelDirection = i.worldPosition.xyz / (-pixelDistance);
+
+			float uvRadialU = (pixelDistance - 1.0) / ringsWidth;
+			float2 uv = i.uv;
+
 			float noiseValue = 1.0;
-			float fadeIn = 1.0 - cameraDistance * _DetailParameters.z;
-			float fadeOut = smoothstep(0.0, 1.0, (cameraDistance * 0.000225) - 0.25);
-					
-			if(fadeIn > 0.0)
-			{
-				float2 deltaPosition = i.worldPosition.xz * _DetailParameters.x;
-				float radial = i.uv.x * _DetailParameters.y;
-				float noiseFirst = tex2D(_NoiseTexture, 64 * i.uv).r;
+			float fadeIn = 1.0 - cameraDistance * inversedCameraPixelSize;
 
-				noiseValue = texNoTile(_NoiseTexture, noiseFirst, deltaPosition * 0.25).r *
-							 texNoTile(_NoiseTexture, noiseFirst, deltaPosition * 0.15).b *
-							 tex2D(_NoiseTexture, float2(radial, 0.5)).b *
-							 tex2D(_NoiseTexture, float2(radial * 0.3, 0.5)).a * 16.0;
+			if (fadeIn > 0.0)
+			{
+				float2 deltaPosition = i.worldPosition.xz * detail2DFrequency;
+				float radial = uvRadialU * detailRadialFrequency;
+				float noiseFirst = tex2D(NoiseMap, 64 * i.uv).r;
+
+				noiseValue = texNoTile(NoiseMap, noiseFirst, deltaPosition * 0.25).r * 
+							 texNoTile(NoiseMap, noiseFirst, deltaPosition * 0.15).b * 
+							 tex2D(NoiseMap, float2(radial, 0.5)).b * 
+							 tex2D(NoiseMap, float2(radial * 0.3, 0.5)).a * 16.0;
 
 				noiseValue = lerp(1.0, noiseValue, clamp(fadeIn, 0.0, 1.0));
 			}
 
-			mainColor *= noiseValue;
+			float4 frontColor = tex2D(DiffuseMap, uv);//float2(uvRadialU, 0.25));
+			frontColor *= noiseValue;
 
-			float3 relativeDirection = normalize(_WorldSpaceCameraPos - i.worldPosition.xyz);
-			
-			#if LIGHT_1 || LIGHT_2 || LIGHT_3 || LIGHT_4
-					float3 sunRelDirection_1 = normalize(_Light1Position.xyz - i.worldPosition.xyz);
-					#if LIGHT_2
-						float3 sunRelDirection_2 = normalize(_Light2Position.xyz - i.worldPosition.xyz);
-					#endif
-					#if LIGHT_3
-						float3 sunRelDirection_3 = normalize(_Light3Position.xyz - i.worldPosition.xyz);
-					#endif
-					#if LIGHT_4
-						float3 sunRelDirection_4 = normalize(_Light4Position.xyz - i.worldPosition.xyz);
-					#endif
-			#endif
+			float4 backColor = tex2D(DiffuseMap, uv);//float2(uvRadialU, 0.75));
+			backColor *= noiseValue;
+
+			float3 frontColorMod = frontColor.rgb * frontColor.a;
+
+			o.diffuse.a = clamp(frontColor.a + detailRingsDensity, 0.0, 1.0);
+			o.diffuse.rgb = frontColor.a * ambientColor;
 
 			#if LIGHT_1 || LIGHT_2 || LIGHT_3 || LIGHT_4
-				float3 shapened = relativeDirection * _LightingSharpness;
+				float Shadow = 1.0;
 
-				float4 lighting = 0;
+				#if SHADOW_1 || SHADOW_2 || SHADOW_3 || SHADOW_4
+					Shadow = ShadowColor(i.worldPosition);
+				#endif
 
-				lighting.xyz += saturate(dot(sunRelDirection_1, shapened) + _LightingBias) * _Light1Color;
-
+				#if LIGHT_1
+					o.diffuse.rgb += RingLighting(i.light1RelativePosition, cameraDirection, frontColor, backColor, frontColorMod) * _Light1Color;
+				#endif
 				#if LIGHT_2
-					lighting.xyz += (saturate(dot(sunRelDirection_2, shapened) + _LightingBias) * _Light2Color).xyz;
+					o.diffuse.rgb += RingLighting(i.light2RelativePosition, cameraDirection, frontColor, backColor, frontColorMod) * _Light2Color;
 				#endif
-
 				#if LIGHT_3
-					lighting.xyz += (saturate(dot(sunRelDirection_3, shapened) + _LightingBias) * _Light3Color).xyz;
+					o.diffuse.rgb += RingLighting(i.light3RelativePosition, cameraDirection, frontColor, backColor, frontColorMod) * _Light3Color;
 				#endif
-
 				#if LIGHT_4
-					lighting.xyz += (saturate(dot(sunRelDirection_4, shapened) + _LightingBias) * _Light4Color).xyz;
-				#endif
-
-				#if SCATTERING
-					float4 scattering = MiePhase(dot(relativeDirection, sunRelDirection_1), _Mie) * _Light1Color;
-
-					#if LIGHT_2
-						scattering += MiePhase(dot(relativeDirection, sunRelDirection_2), _Mie) * _Light2Color;
-					#endif
-
-					#if LIGHT_3
-						scattering += MiePhase(dot(relativeDirection, sunRelDirection_3), _Mie) * _Light3Color;
-					#endif
-
-					#if LIGHT_4
-						scattering += MiePhase(dot(relativeDirection, sunRelDirection_4), _Mie) * _Light4Color;
-					#endif
-
-					scattering *= mainTex.w * (1.0f - mainTex.w); // Only scatter at the edges
-
-					if(fadeIn > 0.0)
-					{
-						scattering *= noiseValue;
-					}
-				
-					lighting += scattering;
+					o.diffuse.rgb += RingLighting(i.light4RelativePosition, cameraDirection, frontColor, backColor, frontColorMod) * _Light4Color;
 				#endif
 
 				#if SHADOW_1 || SHADOW_2 || SHADOW_3 || SHADOW_4
-					lighting *= ShadowColor(i.worldPosition);
+					o.diffuse.rgb *= Shadow;
 				#endif
-
-				o.diffuse += lighting * mainColor;
 			#endif
 
-			#if !LIGHT_1 && !LIGHT_2 && !LIGHT_3 && !LIGHT_4
-				o.diffuse = mainColor;
-			#endif
-
-			o.diffuse *= fadeOut;
+			o.diffuse.rgb *= exposure;
+			o.diffuse *= fade;
+			o.diffuse = clamp(o.diffuse, 0.0, 1.0);
 		}
 		ENDCG
 
@@ -203,7 +230,7 @@ Shader "SpaceEngine/Planet/Ring"
 				"LightMode"				= "Always"
 			}
 
-			Blend One OneMinusSrcColor
+			Blend SrcAlpha OneMinusSrcColor
 			Cull Off
 			ZWrite On
 			ZTest LEqual
@@ -216,7 +243,6 @@ Shader "SpaceEngine/Planet/Ring"
 
 			#pragma multi_compile LIGHT_1 LIGHT_2 LIGHT_3 LIGHT_4
 			#pragma multi_compile SHADOW_1 SHADOW_2 SHADOW_3 SHADOW_4
-			#pragma multi_compile SCATTERING			
 			ENDCG
 		}
 	}

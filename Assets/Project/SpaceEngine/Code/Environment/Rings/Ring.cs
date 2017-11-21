@@ -55,9 +55,6 @@ namespace SpaceEngine.Environment.Rings
         public Texture DiffuseTexture;
         public Texture NoiseTexture;
 
-        public Color Color = Color.white;
-
-        public float Brightness = 1.0f;
         public float InnerRadius = 1.0f;
         public float OuterRadius = 2.0f;
 
@@ -70,33 +67,20 @@ namespace SpaceEngine.Environment.Rings
 
         public float BoundsShift;
 
-        [Range(-1.0f, 1.0f)]
-        public float LightingBias = 0.5f;
+        public Color AmbientColor = Color.white;
 
-        [Range(0.0f, 1.0f)]
-        public float LightingSharpness = 0.5f;
-
-        [Range(0.0f, 5.0f)]
-        public float MieSharpness = 2.0f;
-
-        [Range(0.0f, 10.0f)]
-        public float MieStrength = 1.0f;
-
-        [Range(0.0f, 1.0f)]
-        public float UVCutout = 0.0064f;
-
-        [Range(0.0f, 1.0f)]
-        public float Detail2DFrequency = 0.01f;
-
-        [Range(1.0f, 2048f)]
-        public float DetailRadialFrequency = 512.0f;
-
-        [Range(0.0f, 0.1f)]
-        public float DetailInversedCameraPixelSize = 0.000001f;
+        public float Thickness = 5000.0f;
+        public float FrontBright = 12.8f;
+        public float BackBright = 128.0f;
+        public float Exposure = 0.2f;
+        public float DetailFrequency = 0.01f;
+        public float DetailRadialFrequency = 128.0f;
+        public float InversedCameraPixelSize = 0.0000001f;
+        public float Density = 1.0f;
 
         public List<RingSegment> Segments = new List<RingSegment>();
 
-        public static List<string> keywords = new List<string>();
+        public static List<string> Keywords = new List<string>();
 
         public Shader RingShader;
         public Material RingMaterial;
@@ -159,6 +143,9 @@ namespace SpaceEngine.Environment.Rings
         public void InitUniforms(Material target)
         {
             if (target == null) return;
+
+            target.SetTexture("DiffuseMap", DiffuseTexture);
+            target.SetTexture("NoiseMap", NoiseTexture);
         }
 
         public void SetUniforms(Material target)
@@ -167,17 +154,14 @@ namespace SpaceEngine.Environment.Rings
 
             SetLightsAndShadows(target);
 
-            target.SetTexture("_DiffuseTexture", DiffuseTexture);
-            target.SetTexture("_NoiseTexture", NoiseTexture);
-            target.SetColor("_DiffuseColor", Helper.Brighten(Color, Brightness));
-            target.SetFloat("_LightingBias", LightingBias);
-            target.SetFloat("_LightingSharpness", LightingSharpness);
-            target.SetFloat("_UVCutout", UVCutout);
-            target.SetVector("_DetailParameters", new Vector3(Detail2DFrequency, DetailRadialFrequency, DetailInversedCameraPixelSize));
+            target.SetVector("RingsParams", new Vector2((OuterRadius - InnerRadius), 1.0f / Thickness));
 
-            WriteMie(MieSharpness, MieStrength, target);
+            target.SetColor("AmbientColor", AmbientColor);
 
-            keywords.Clear();
+            target.SetVector("LightingParams", new Vector3(FrontBright, BackBright, Exposure));
+            target.SetVector("DetailParams", new Vector4(DetailFrequency, DetailRadialFrequency, InversedCameraPixelSize, Density));
+
+            Keywords.Clear();
         }
 
         public void InitSetUniforms()
@@ -253,12 +237,10 @@ namespace SpaceEngine.Environment.Rings
             var lightCount = Helper.WriteLights(Lights, 4, transform.position, null, null, mat);
             var shadowCount = Helper.WriteShadows(Shadows, 4, mat);
 
-            WriteLightKeywords(lightCount, keywords);
-            WriteShadowKeywords(shadowCount, keywords);
+            WriteLightKeywords(lightCount, Keywords);
+            WriteShadowKeywords(shadowCount, Keywords);
 
-            keywords.Add("SCATTERING");
-
-            Helper.SetKeywords(mat, keywords);
+            Helper.SetKeywords(mat, Keywords);
         }
 
         public void SetShadows(Material mat, List<Shadow> shadows)
@@ -319,28 +301,6 @@ namespace SpaceEngine.Environment.Rings
                     {
                         keywordList.Add(keyword);
                     }
-                }
-            }
-        }
-
-        public static void WriteMie(float sharpness, float strength, params Material[] materials)
-        {
-            sharpness = Mathf.Pow(10.0f, sharpness);
-            strength *= (Mathf.Log10(sharpness) + 1) * 0.75f;
-
-            //var mie  = -(1.0f - 1.0f / Mathf.Pow(10.0f, sharpness));
-            //var mie4 = new Vector4(mie * 2.0f, 1.0f - mie * mie, 1.0f + mie * mie, mie / strength);
-
-            var mie = -(1.0f - 1.0f / sharpness);
-            var mie4 = new Vector4(mie * 2.0f, 1.0f - mie * mie, 1.0f + mie * mie, strength);
-
-            for (var j = materials.Length - 1; j >= 0; j--)
-            {
-                var material = materials[j];
-
-                if (material != null)
-                {
-                    material.SetVector("_Mie", mie4);
                 }
             }
         }

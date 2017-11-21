@@ -123,11 +123,11 @@ uniform sampler2D	PermSampler;		// 3d
 uniform sampler2D	PermGradSampler;	// 3d
 uniform sampler2D	PermSamplerGL;		// 2d
 uniform sampler2D	PermGradSamplerGL;	// 2d
-uniform sampler1D   CloudsColorTable;   // clouds color table
+uniform sampler1D	CloudsColorTable;   // clouds color table
 
-uniform sampler2D   MaterialTable;      // material parameters table
+uniform sampler2D	MaterialTable;      // material parameters table
 
-uniform sampler2D   AtlasDiffSampler;   // detail texture diffuse atlas
+uniform sampler2D	AtlasDiffSampler;   // detail texture diffuse atlas
 //-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
@@ -153,88 +153,88 @@ uniform float noiseRidgeSmooth;// = 0.0001;
 //-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
-#define     mainFreq            mainParams.x
-#define     terraceProb         mainParams.y
-#define     surfClass           mainParams.z
-#define     tidalLock           mainParams.w
-#define     colorDistMagn       colorParams.x
-#define     colorDistFreq       colorParams.y
-#define     latIceCaps          colorParams.z
-#define     latTropic           colorParams.w
-#define     climatePole         climateParams.x
-#define     climateTropic       climateParams.y
-#define     climateEquator      climateParams.z
-#define     tropicWidth         climateParams.w
-#define     seaLevel            mareParams.x
-#define     mareFreq            mareParams.y
-#define     mareSqrtDensity     mareParams.z
-#define     icecapHeight        mareParams.w
-#define     montesMagn          montesParams.x
-#define     montesFreq          montesParams.y
-#define     montesFraction      montesParams.z
-#define     montesSpiky         montesParams.w
-#define     dunesMagn           dunesParams.x
-#define     dunesFreq           dunesParams.y
-#define     dunesFraction       dunesParams.z
-#define     drivenDarkening     dunesParams.w
-#define     hillsMagn           hillsParams.x
-#define     hillsFreq           hillsParams.y
-#define     hillsFraction       hillsParams.z
-#define     hills2Fraction      hillsParams.w
-#define     canyonsMagn         canyonsParams.x
-#define     canyonsFreq         canyonsParams.y
-#define     canyonsFraction     canyonsParams.z
-#define     erosion             canyonsParams.w
-#define     riversMagn          riversParams.x
-#define     riversFreq          riversParams.y
-#define     riversSin           riversParams.z
-#define     riversOctaves       riversParams.w
-#define     cracksMagn          cracksParams.x
-#define     cracksFreq          cracksParams.y
-#define     cracksOctaves       cracksParams.z
-#define     craterRayedFactor   cracksParams.w
-#define     craterMagn          craterParams.x
-#define     craterFreq          craterParams.y
-#define     craterSqrtDensity   craterParams.z
-#define     craterOctaves       craterParams.w
-#define     volcanoMagn         volcanoParams1.x
-#define     volcanoFreq         volcanoParams1.y
-#define     volcanoDensity      volcanoParams1.z
-#define     volcanoOctaves      volcanoParams1.w
-#define     volcanoActivity     volcanoParams2.x
-#define     volcanoFlows        volcanoParams2.y
-#define     volcanoRadius       volcanoParams2.z
-#define     volcanoTemp         volcanoParams2.w
-#define     lavaCoverage        lavaParams.x
-#define     snowLevel           lavaParams.y
-#define     surfTemperature     lavaParams.z
-#define     heightTempGrad      lavaParams.w
-#define     texScale            textureParams.x
-#define     texColorConv        textureParams.y
-#define     venusMagn           textureParams.z
-#define     venusFreq           textureParams.w
-#define     cloudsFreq          cloudsParams1.x
-#define     cloudsOctaves       cloudsParams1.y
-#define     stripeZones         cloudsParams1.z
-#define     stripeTwist         cloudsParams1.w
-#define     cloudsLayer         cloudsParams2.x
-#define     cloudsNLayers       cloudsParams2.y
-#define     stripeFluct         cloudsParams2.z
-#define     cloudsCoverage      cloudsParams2.w
-#define     cycloneMagn         cycloneParams.x
-#define     cycloneFreq         cycloneParams.y
-#define     cycloneDensity      cycloneParams.z
-#define     cycloneOctaves      cycloneParams.w
+#define		mainFreq            mainParams.x
+#define		terraceProb         mainParams.y
+#define		surfClass           mainParams.z
+#define		tidalLock           mainParams.w
+#define		colorDistMagn       colorParams.x
+#define		colorDistFreq       colorParams.y
+#define		latIceCaps          colorParams.z
+#define		latTropic           colorParams.w
+#define		climatePole         climateParams.x
+#define		climateTropic       climateParams.y
+#define		climateEquator      climateParams.z
+#define		tropicWidth         climateParams.w
+#define		seaLevel            mareParams.x
+#define		mareFreq            mareParams.y
+#define		mareSqrtDensity     mareParams.z
+#define		icecapHeight        mareParams.w
+#define		montesMagn          montesParams.x
+#define		montesFreq          montesParams.y
+#define		montesFraction      montesParams.z
+#define		montesSpiky         montesParams.w
+#define		dunesMagn           dunesParams.x
+#define		dunesFreq           dunesParams.y
+#define		dunesFraction       dunesParams.z
+#define		drivenDarkening     dunesParams.w
+#define		hillsMagn           hillsParams.x
+#define		hillsFreq           hillsParams.y
+#define		hillsFraction       hillsParams.z
+#define		hills2Fraction      hillsParams.w
+#define		canyonsMagn         canyonsParams.x
+#define		canyonsFreq         canyonsParams.y
+#define		canyonsFraction     canyonsParams.z
+#define		erosion             canyonsParams.w
+#define		riversMagn          riversParams.x
+#define		riversFreq          riversParams.y
+#define		riversSin           riversParams.z
+#define		riversOctaves       riversParams.w
+#define		cracksMagn          cracksParams.x
+#define		cracksFreq          cracksParams.y
+#define		cracksOctaves       cracksParams.z
+#define		craterRayedFactor   cracksParams.w
+#define		craterMagn          craterParams.x
+#define		craterFreq          craterParams.y
+#define		craterSqrtDensity   craterParams.z
+#define		craterOctaves       craterParams.w
+#define		volcanoMagn         volcanoParams1.x
+#define		volcanoFreq         volcanoParams1.y
+#define		volcanoDensity      volcanoParams1.z
+#define		volcanoOctaves      volcanoParams1.w
+#define		volcanoActivity     volcanoParams2.x
+#define		volcanoFlows        volcanoParams2.y
+#define		volcanoRadius       volcanoParams2.z
+#define		volcanoTemp         volcanoParams2.w
+#define		lavaCoverage        lavaParams.x
+#define		snowLevel           lavaParams.y
+#define		surfTemperature     lavaParams.z
+#define		heightTempGrad      lavaParams.w
+#define		texScale            textureParams.x
+#define		texColorConv        textureParams.y
+#define		venusMagn           textureParams.z
+#define		venusFreq           textureParams.w
+#define		cloudsFreq          cloudsParams1.x
+#define		cloudsOctaves       cloudsParams1.y
+#define		stripeZones         cloudsParams1.z
+#define		stripeTwist         cloudsParams1.w
+#define		cloudsLayer         cloudsParams2.x
+#define		cloudsNLayers       cloudsParams2.y
+#define		stripeFluct         cloudsParams2.z
+#define		cloudsCoverage      cloudsParams2.w
+#define		cycloneMagn         cycloneParams.x
+#define		cycloneFreq         cycloneParams.y
+#define		cycloneDensity      cycloneParams.z
+#define		cycloneOctaves      cycloneParams.w
 //-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
-#define			saturate(x) clamp(x, 0.0, 1.0)
-#define			madfrac(A, B) mad((A), (B), -floor((A) * (B)))
+#define		saturate(x) clamp(x, 0.0, 1.0)
+#define		madfrac(A, B) mad((A), (B), -floor((A) * (B)))
 //-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
-#define     GetCloudsColor(height)           tex2Dlod(CloudsColorTable, float2(height, 0.0)
-#define     GetGasGiantCloudsColor(height)   tex2Dlod(MaterialTable, float4(height, 0.0, 0.0, 0.0))
+#define		GetCloudsColor(height)           tex2Dlod(CloudsColorTable, float2(height, 0.0)
+#define		GetGasGiantCloudsColor(height)   tex2Dlod(MaterialTable, float4(height, 0.0, 0.0, 0.0))
 //-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------

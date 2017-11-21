@@ -57,24 +57,24 @@ uniform float3	temperatureParams1;	// (temperature min, temperature max, tempera
 //-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
-#define		offsetX					offsetParams1.x;
-#define		offsetY					offsetParams1.y;
-#define		offsetZ					offsetParams1.z;
-#define		radius					sizeParams1.x
-#define		ellipseRadius			sizeParams1.y
-#define		barSize					sizeParams1.z
-#define		depth					sizeParams1.w
-#define		warp1					warpParams1.xy
-#define		warp2					warpParams1.zw
-#define		inverseEccentricity		spiralParams1.x
-#define		spiralRotation			spiralParams1.y
-#define		passRotation			spiralParams1.z
-#define		dustStrength			dustParams1.x
-#define		dustSize				dustParams1.y
-#define		gasCenterFalloff		gasParams1.x
-#define		temperatureMin			temperatureParams1.x
-#define		temperatureMax			temperatureParams1.y
-#define		temperatureShift		temperatureParams1.z
+#define		offsetX                 offsetParams1.x
+#define		offsetY                 offsetParams1.y
+#define		offsetZ                 offsetParams1.z
+#define		radius                  sizeParams1.x
+#define		ellipseRadius           sizeParams1.y
+#define		barSize                 sizeParams1.z
+#define		depth                   sizeParams1.w
+#define		warp1                   warpParams1.xy
+#define		warp2                   warpParams1.zw
+#define		inverseEccentricity     spiralParams1.x
+#define		spiralRotation          spiralParams1.y
+#define		passRotation            spiralParams1.z
+#define		dustStrength            dustParams1.x
+#define		dustSize                dustParams1.y
+#define		gasCenterFalloff        gasParams1.x
+#define		temperatureMin          temperatureParams1.x
+#define		temperatureMax          temperatureParams1.y
+#define		temperatureShift        temperatureParams1.z
 //-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------

@@ -1047,7 +1047,6 @@ MonoBehaviour:
   NoiseColor: {r: 0.09803922, g: 0.047058824, b: 0.39215687, a: 1}
   MaxLevel: -1
   HSV: 1
-  Seed: 0
   NoiseAmplitudes:
   - 0
   - 255
@@ -1934,7 +1933,6 @@ MonoBehaviour:
   NoiseColor: {r: 0.09803922, g: 0.047058824, b: 0.39215687, a: 1}
   MaxLevel: -1
   HSV: 1
-  Seed: 0
   NoiseAmplitudes:
   - 0
   - 255
@@ -5620,7 +5618,6 @@ MonoBehaviour:
   NoiseColor: {r: 0.09803922, g: 0.047058824, b: 0.39215687, a: 1}
   MaxLevel: -1
   HSV: 1
-  Seed: 0
   NoiseAmplitudes:
   - 0
   - 255
@@ -5925,7 +5922,6 @@ MonoBehaviour:
   NoiseColor: {r: 0.09803922, g: 0.047058824, b: 0.39215687, a: 1}
   MaxLevel: -1
   HSV: 1
-  Seed: 0
   NoiseAmplitudes:
   - 0
   - 255
@@ -6010,7 +6006,6 @@ MonoBehaviour:
   NoiseColor: {r: 0.09803922, g: 0.047058824, b: 0.39215687, a: 1}
   MaxLevel: -1
   HSV: 1
-  Seed: 0
   NoiseAmplitudes:
   - 0
   - 255
@@ -6297,7 +6292,6 @@ MonoBehaviour:
   RenderQueueOffset: 1000000
   Magnitude: 2.25e+22
   InitUniformsInUpdate: 1
-  UseAtmosphereColors: 1
   UseRadiance: 1
   FadeCurve:
     serializedVersion: 2
@@ -6505,7 +6499,6 @@ MonoBehaviour:
   NoiseColor: {r: 0.09803922, g: 0.047058824, b: 0.39215687, a: 1}
   MaxLevel: -1
   HSV: 1
-  Seed: 0
   NoiseAmplitudes:
   - 0
   - 255
@@ -7028,7 +7021,6 @@ MonoBehaviour:
   NoiseColor: {r: 0.09803922, g: 0.047058824, b: 0.39215687, a: 1}
   MaxLevel: -1
   HSV: 1
-  Seed: 0
   NoiseAmplitudes:
   - 0
   - 255
@@ -7471,23 +7463,27 @@ MonoBehaviour:
   - {fileID: 1497659645}
   DiffuseTexture: {fileID: 2800000, guid: cf6e94f062c87d94bb5b583e03b7a0c0, type: 3}
   NoiseTexture: {fileID: 2800000, guid: dca74e922f4e406409234d20e9dd416e, type: 3}
-  Color: {r: 1, g: 1, b: 1, a: 1}
-  Brightness: 1
   InnerRadius: 10000000
   OuterRadius: 17000000
   RenderQueue: 3000
   RenderQueueOffset: 0
   SegmentCount: 16
   SegmentDetail: 32
+  RadiusDetail: 2
   BoundsShift: 0
-  LightingBias: 0.82
-  LightingSharpness: 0.79
-  MieSharpness: 0.56
-  MieStrength: 1.39
-  UVCutout: 0.0064
-  Detail2DFrequency: 0.01
-  DetailRadialFrequency: 512
-  DetailInversedCameraPixelSize: 0.000001
+  Light0Color: {r: 1, g: 1, b: 1, a: 1}
+  Light1Color: {r: 1, g: 1, b: 1, a: 1}
+  Light2Color: {r: 1, g: 1, b: 1, a: 1}
+  Light3Color: {r: 1, g: 1, b: 1, a: 1}
+  AmbientColor: {r: 1, g: 1, b: 1, a: 1}
+  Thickness: 5000
+  FrontBright: 12.8
+  BackBright: 128
+  Exposure: 0.2
+  DetailFrequency: 0.01
+  DetailRadialFrequency: 128
+  InversedCameraPixelSize: 0.000001
+  Density: 1
   Segments:
   - {fileID: 0}
   - {fileID: 0}
@@ -7497,7 +7493,7 @@ MonoBehaviour:
   - {fileID: 0}
   - {fileID: 0}
   - {fileID: 0}
-  RingShader: {fileID: 4800000, guid: 037054e50f7e8ca4da17716625122887, type: 3}
+  RingShader: {fileID: 4800000, guid: a9feb9e63be258140b2cf47712937820, type: 3}
   RingMaterial: {fileID: 0}
   RingSegmentMesh: {fileID: 0}
 --- !u!114 &1654467277
@@ -7777,7 +7773,6 @@ MonoBehaviour:
   NoiseColor: {r: 0.09803922, g: 0.047058824, b: 0.39215687, a: 1}
   MaxLevel: -1
   HSV: 1
-  Seed: 0
   NoiseAmplitudes:
   - 0
   - 255
@@ -8026,7 +8021,6 @@ MonoBehaviour:
   NoiseColor: {r: 0.09803922, g: 0.047058824, b: 0.39215687, a: 1}
   MaxLevel: -1
   HSV: 1
-  Seed: 0
   NoiseAmplitudes:
   - 0
   - 255
@@ -8333,7 +8327,6 @@ MonoBehaviour:
   NoiseColor: {r: 0.09803922, g: 0.047058824, b: 0.39215687, a: 1}
   MaxLevel: -1
   HSV: 1
-  Seed: 0
   NoiseAmplitudes:
   - 0
   - 255
@@ -8717,7 +8710,6 @@ MonoBehaviour:
   NoiseColor: {r: 0.09803922, g: 0.047058824, b: 0.39215687, a: 1}
   MaxLevel: -1
   HSV: 1
-  Seed: 0
   NoiseAmplitudes:
   - 0
   - 255
@@ -9127,7 +9119,6 @@ MonoBehaviour:
   NoiseColor: {r: 0.09803922, g: 0.047058824, b: 0.39215687, a: 1}
   MaxLevel: -1
   HSV: 1
-  Seed: 0
   NoiseAmplitudes:
   - 0
   - 255
