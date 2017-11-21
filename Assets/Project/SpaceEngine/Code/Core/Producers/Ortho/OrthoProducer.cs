@@ -59,14 +59,11 @@ namespace SpaceEngine.Core
         bool HSV = true;
 
         [SerializeField]
-        int Seed = 0;
-
-        [SerializeField]
         float[] NoiseAmplitudes = new float[] { 0, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255 };
 
         Uniforms uniforms;
 
-        PerlinNoiseSimple Noise;
+        PerlinNoise Noise;
 
         Texture2D ResidualTexture;
 
@@ -94,7 +91,7 @@ namespace SpaceEngine.Core
 
             uniforms = new Uniforms();
 
-            Noise = new PerlinNoiseSimple(Seed);
+            Noise = new PerlinNoise();
 
             ResidualTexture = new Texture2D(tileSize, tileSize, TextureFormat.ARGB32, false);
             ResidualTexture.wrapMode = TextureWrapMode.Clamp;
@@ -222,28 +219,28 @@ namespace SpaceEngine.Core
                 if (TerrainNode.Face == 1)
                 {
                     int offset = 1 << level;
-                    int bottomB = Noise.Noise2D(tx + 0.5f, ty + offset) > 0.0f ? 1 : 0;
-                    int rightB = (tx == offset - 1 ? Noise.Noise2D(ty + offset + 0.5f, offset) : Noise.Noise2D(tx + 1.0f, ty + offset + 0.5f)) > 0.0f ? 2 : 0;
-                    int topB = (ty == offset - 1 ? Noise.Noise2D((3.0f * offset - 1.0f - tx) + 0.5f, offset) : Noise.Noise2D(tx + 0.5f, ty + offset + 1.0f)) > 0.0f ? 4 : 0;
-                    int leftB = (tx == 0 ? Noise.Noise2D((4.0f * offset - 1.0f - ty) + 0.5f, offset) : Noise.Noise2D(tx, ty + offset + 0.5f)) > 0.0f ? 8 : 0;
+                    int bottomB = Noise.Noise(tx + 0.5f, ty + offset) > 0.0f ? 1 : 0;
+                    int rightB = (tx == offset - 1 ? Noise.Noise(ty + offset + 0.5f, offset) : Noise.Noise(tx + 1.0f, ty + offset + 0.5f)) > 0.0f ? 2 : 0;
+                    int topB = (ty == offset - 1 ? Noise.Noise((3.0f * offset - 1.0f - tx) + 0.5f, offset) : Noise.Noise(tx + 0.5f, ty + offset + 1.0f)) > 0.0f ? 4 : 0;
+                    int leftB = (tx == 0 ? Noise.Noise((4.0f * offset - 1.0f - ty) + 0.5f, offset) : Noise.Noise(tx, ty + offset + 0.5f)) > 0.0f ? 8 : 0;
                     noiseL = bottomB + rightB + topB + leftB;
                 }
                 else if (TerrainNode.Face == 6)
                 {
                     int offset = 1 << level;
-                    int bottomB = (ty == 0 ? Noise.Noise2D((3.0f * offset - 1.0f - tx) + 0.5f, 0) : Noise.Noise2D(tx + 0.5f, ty - offset)) > 0.0f ? 1 : 0;
-                    int rightB = (tx == offset - 1.0f ? Noise.Noise2D((2.0f * offset - 1.0f - ty) + 0.5f, 0) : Noise.Noise2D(tx + 1.0f, ty - offset + 0.5f)) > 0.0f ? 2 : 0;
-                    int topB = Noise.Noise2D(tx + 0.5f, ty - offset + 1.0f) > 0.0f ? 4 : 0;
-                    int leftB = (tx == 0 ? Noise.Noise2D(3.0f * offset + ty + 0.5f, 0) : Noise.Noise2D(tx, ty - offset + 0.5f)) > 0.0f ? 8 : 0;
+                    int bottomB = (ty == 0 ? Noise.Noise((3.0f * offset - 1.0f - tx) + 0.5f, 0) : Noise.Noise(tx + 0.5f, ty - offset)) > 0.0f ? 1 : 0;
+                    int rightB = (tx == offset - 1.0f ? Noise.Noise((2.0f * offset - 1.0f - ty) + 0.5f, 0) : Noise.Noise(tx + 1.0f, ty - offset + 0.5f)) > 0.0f ? 2 : 0;
+                    int topB = Noise.Noise(tx + 0.5f, ty - offset + 1.0f) > 0.0f ? 4 : 0;
+                    int leftB = (tx == 0 ? Noise.Noise(3.0f * offset + ty + 0.5f, 0) : Noise.Noise(tx, ty - offset + 0.5f)) > 0.0f ? 8 : 0;
                     noiseL = bottomB + rightB + topB + leftB;
                 }
                 else
                 {
                     int offset = (1 << level) * (TerrainNode.Face - 2);
-                    int bottomB = Noise.Noise2D(tx + offset + 0.5f, ty) > 0.0f ? 1 : 0;
-                    int rightB = Noise.Noise2D((tx + offset + 1) % (4 << level), ty + 0.5f) > 0.0f ? 2 : 0;
-                    int topB = Noise.Noise2D(tx + offset + 0.5f, ty + 1.0f) > 0.0f ? 4 : 0;
-                    int leftB = Noise.Noise2D(tx + offset, ty + 0.5f) > 0.0f ? 8 : 0;
+                    int bottomB = Noise.Noise(tx + offset + 0.5f, ty) > 0.0f ? 1 : 0;
+                    int rightB = Noise.Noise((tx + offset + 1) % (4 << level), ty + 0.5f) > 0.0f ? 2 : 0;
+                    int topB = Noise.Noise(tx + offset + 0.5f, ty + 1.0f) > 0.0f ? 4 : 0;
+                    int leftB = Noise.Noise(tx + offset, ty + 0.5f) > 0.0f ? 8 : 0;
                     noiseL = bottomB + rightB + topB + leftB;
                 }
             }
