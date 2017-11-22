@@ -19,14 +19,14 @@
 
 		static const float2 tab[8] = 
 		{
-			float2(0.897907815, -0.347608525),
-			float2(0.550299290, 0.273586675),
-			float2(0.823885965, 0.098853070),
-			float2(0.922739035, -0.122108860),
-			float2(0.800630175, -0.088956800),
-			float2(0.711673375, 0.158864420),
-			float2(0.870537795, 0.085484560),
-			float2(0.956022355, -0.058114540),
+			float2(0.897907815f, -0.347608525f),
+			float2(0.550299290f, 0.273586675f),
+			float2(0.823885965f, 0.098853070f),
+			float2(0.922739035f, -0.122108860f),
+			float2(0.800630175f, -0.088956800f),
+			float2(0.711673375f, 0.158864420f),
+			float2(0.870537795f, 0.085484560f),
+			float2(0.956022355f, -0.058114540f),
 		};
 		
 		struct appdata
@@ -49,14 +49,14 @@
 			float4 color : TEXCOORD1;
 		};
 
-		float GetFlickerAmount(in float2 pos)
+		inline float GetFlickerAmount(in float2 pos)
 		{
-			float2 hash = frac(pos.xy * 256);
-			float index = frac(hash.x + (hash.y + 1) * (_Time.x * 2 + unity_DeltaTime.z));
+			float2 hash = frac(pos.xy * 256.0f);
+			float index = frac(hash.x + (hash.y + 1.0f) * (_Time.x * 2.0f + unity_DeltaTime.z));
 			
-			index *= 8;
+			index *= 8.0f;
 			
-			float f = frac(index) * 2.5;
+			float f = frac(index) * 2.5f;
 			int i = (int)index;
 			
 			return tab[i].x + f * tab[i].y;
@@ -69,13 +69,13 @@
 			float starSize = data[v.id].size;
 			float starTemperature = data[v.id].temperature;
 
-			float magnitude = 6.5 + length(starColor) * (-1.44 - 1.5);
-			float brightness = GetFlickerAmount(starPosition.xy * starSize) * pow(5.0, (-magnitude - 1.44) / 2.5);
+			float magnitude = 6.5 + length(starColor) * (-1.44f - 1.5f);
+			float brightness = GetFlickerAmount(starPosition.xy * starSize) * pow(5.0f, (-magnitude - 1.44f) / 2.5f);
 
-			o.vertex = UnityObjectToClipPos(float4(starPosition, 1.0));
-			o.uv = float2(0.25, 0.25);
+			o.vertex = UnityObjectToClipPos(float4(starPosition, 1.0f));
+			o.uv = float2(0.25f, 0.25f);
 			o.size = starSize / _Particle_Absolute_Size;
-			o.color = 8 * brightness * starColor * 3;
+			o.color = 8.0f * brightness * starColor * 3.0f;
 		}
 
 		void vert_debug(in appdata v, out v2g o)
@@ -85,8 +85,8 @@
 			float starSize = data[v.id].size;
 			float starTemperature = data[v.id].temperature;
 
-			o.vertex = UnityObjectToClipPos(float4(starPosition, 1.0));
-			o.uv = float2(0.25, 0.25);
+			o.vertex = UnityObjectToClipPos(float4(starPosition, 1.0f));
+			o.uv = float2(0.25f, 0.25f);
 			o.size = starSize / _Particle_Absolute_Size;
 			o.color = starColor;
 		}
@@ -96,36 +96,30 @@
 		{
 			float4 starPosition = p[0].vertex;
 			float2 starUV = p[0].uv;
-			float4 starColor = p[0].color;
 			
-			float4 up = float4(0.0, 1.0, 0.0, 0.0) * UNITY_MATRIX_P._22;
-			float4 right = float4(1.0, 0.0, 0.0, 0.0) * UNITY_MATRIX_P._11;
-			float halfSize = p[0].size / 2.0;
-			
-			float4 v[4];
-			v[0] = starPosition - halfSize * up;
-			v[1] = starPosition + halfSize * right;
-			v[2] = starPosition - halfSize * right;
-			v[3] = starPosition + halfSize * up;
+			static const float4 up = float4(0.0f, 1.0f, 0.0f, 0.0f) * UNITY_MATRIX_P._22;
+			static const float4 right = float4(1.0f, 0.0f, 0.0f, 0.0f) * UNITY_MATRIX_P._11;
+
+			float halfSize = p[0].size / 2.0f;
 			
 			v2f o;
 			
-			o.color = starColor;
+			o.color = p[0].color;
 			
-			o.vertex = v[0];
-			o.uv = float2(1.0, 0.0) * 0.5 + starUV;
+			o.vertex = starPosition - halfSize * up;
+			o.uv = float2(1.0f, 0.0f) * 0.5f + starUV;
 			triStream.Append(o);
 			
-			o.vertex = v[1];
-			o.uv = float2(1.0, 1.0) * 0.5 + starUV;
+			o.vertex = starPosition + halfSize * right;
+			o.uv = float2(1.0f, 1.0f) * 0.5f + starUV;
 			triStream.Append(o);
 			
-			o.vertex = v[2];
-			o.uv = float2(0.0, 0.0) * 0.5 + starUV;
+			o.vertex = starPosition - halfSize * right;
+			o.uv = float2(0.0f, 0.0f) * 0.5f + starUV;
 			triStream.Append(o);
 			
-			o.vertex = v[3];
-			o.uv = float2(0.0, 1.0) * 0.5 + starUV;
+			o.vertex = starPosition + halfSize * up;
+			o.uv = float2(0.0f, 1.0f) * 0.5f + starUV;
 			triStream.Append(o);
 			
 			triStream.RestartStrip();
@@ -134,15 +128,15 @@
 		void frag(in v2f i, out float4 color : SV_Target)
 		{
 			float4 starColor = i.color;
-			float4 starSampler = tex2D(_Particle, i.uv / 0.5 - 0.5).a;
-			float2 starUv = 6.5 * i.uv - 6.5 * float2(0.5, 0.5);
+			float4 starSampler = tex2D(_Particle, i.uv / 0.5f - 0.5f).a;
+			float2 starUv = 6.5f * i.uv - 6.5f * float2(0.5f, 0.5f);
 			
 			half scale = exp(-dot(starUv, starUv));
 
-			starColor = float4(i.color.xyz * scale + 0.25 * i.color.w * pow(scale, 10.0), 1.0);
+			starColor = float4(i.color.xyz * scale + 0.25f * i.color.w * pow(scale, 10.0f), 1.0f);
 
 			color = hdr(starSampler + starColor);
-			color.a = dot(color.xyz, 1.0);
+			color.a = dot(color.xyz, 1.0f);
 		}
 
 		void frag_debug(in v2f i, out float4 color : SV_Target)
@@ -150,7 +144,7 @@
 			float4 starColor = i.color;
 			
 			color = starColor;
-			color.a = dot(color.xyz / M_PI, 1.0);
+			color.a = dot(color.xyz / M_PI, 1.0f);
 		}
 		ENDCG
 
@@ -164,6 +158,7 @@
 			
 			CGPROGRAM
 			#pragma target 5.0
+			#pragma fragmentoption arb_precision_hint_fastest
 			#pragma vertex vert
 			#pragma geometry geom
 			#pragma fragment frag
@@ -180,6 +175,7 @@
 			
 			CGPROGRAM
 			#pragma target 5.0
+			#pragma fragmentoption arb_precision_hint_fastest
 			#pragma vertex vert_debug
 			#pragma fragment frag_debug
 			ENDCG

@@ -52,7 +52,7 @@ uniform float4	sizeParams1;	// (radius,		ellipseRadius,	barSize,	 depth)
 uniform float4	warpParams1;	// (warp1.x,	warp1.y,		warp2.x,	 warp2.y)
 uniform float4	spiralParams1;	// (inverseEccentricity, spiralRotation, passRotation, UNUSED)
 uniform float2	dustParams1;	// (dustStrength,	dustSize,	UNUSED,		UNUSED)
-uniform float2	gasParams1;		// (gasCenterFalloff,	UNUSED,	UNUSED,		UNUSED)
+uniform float3	gasParams1;		// (gasStrength,	gasSize,	gasCenterFalloff,		UNUSED)
 uniform float3	temperatureParams1;	// (temperature min, temperature max, temperature shift)
 //-----------------------------------------------------------------------------
 
@@ -71,7 +71,9 @@ uniform float3	temperatureParams1;	// (temperature min, temperature max, tempera
 #define		passRotation            spiralParams1.z
 #define		dustStrength            dustParams1.x
 #define		dustSize                dustParams1.y
-#define		gasCenterFalloff        gasParams1.x
+#define		gasStrength		        gasParams1.x
+#define		gasSize					gasParams1.y
+#define		gasCenterFalloff        gasParams1.z
 #define		temperatureMin          temperatureParams1.x
 #define		temperatureMax          temperatureParams1.y
 #define		temperatureShift        temperatureParams1.z
@@ -171,39 +173,27 @@ float4 Random4(uint seed)
 
 //-----------------------------------------------------------------------------
 #ifndef COMPUTE_SHADER
-inline float NearIntersection(float3 pos, float3 ray, float distance2, float radius2)
-{
-	float B = 2.0 * dot(pos, ray);
-	float det = max(0.0, B * B - 4.0 * (distance2 - radius2));
-
-	return 0.5 * (-B - sqrt(det));
-}
-
-inline float FarIntersection(float3 pos, float3 ray, float distance2, float radius2)
-{
-	float B = 2.0 * dot(pos, ray);
-	float det = max(0.0, B * B - 4.0 * (distance2 - radius2));
-
-	return 0.5 * (-B + sqrt(det));
-}
-
 bool RaySphereIntersect(float3 s, float3 d, float r, out float ts, out float te)
 {
 	float r2 = r * r;
 	float s2 = dot(s, s);
+	float rs2 = s2 - r2;
 
+	float B = 2.0f * dot(s, d);
+	float det = max(0.0f, B * B - 4.0f * rs2);
+	
 	if(s2 <= r2)
 	{
 		ts = 0.0;
-		te = FarIntersection(s, d, s2, r2);
+		te = 0.5f * (-B + sqrt(det));
 	
 		return true;
 	}
 	
-	ts = NearIntersection(s, d, s2, r2);
-	te = FarIntersection(s, d, s2, r2);
+	ts = 0.5f * (-B - sqrt(det));
+	te = 0.5f * (-B + sqrt(det));
 	
-	return te > ts && ts > 0;
+	return te > ts && ts > 0.0f;
 }
 #endif
 //-----------------------------------------------------------------------------
