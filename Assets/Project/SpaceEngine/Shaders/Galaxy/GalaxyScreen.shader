@@ -29,7 +29,7 @@
 			#pragma target 3.0
 			#pragma vertex vert
 			#pragma fragment frag
-			
+
 			#include "UnityCG.cginc"
 
 			uniform sampler2D _FrameBuffer;
@@ -48,22 +48,22 @@
 			
 			void vert(in appdata v, out v2f o)
 			{
-				o.vertex = float4(v.vertex.x, v.vertex.y, 1.0, v.vertex.w);
+				o.vertex = float4(v.vertex.x, v.vertex.y, 1.0f, v.vertex.w);
 				o.texcoord = v.texcoord.xy;
 
 				#if UNITY_UV_STARTS_AT_TOP
-					o.texcoord.y = 1.0 - o.texcoord.y;
+					o.texcoord.y = 1.0f - o.texcoord.y;
 				#endif
 			}
-			
+
 			void frag(in v2f i, out float4 color : SV_Target)
 			{
 				float4 frameBuffer = tex2D(_FrameBuffer, i.texcoord);
 
 				color = frameBuffer;
-				color.a = 1.0 - color.a / 16;
+				color.a = 1.0f - color.a / 16.0f;
 
-				color = clamp(color, 0.0, 65536.0); // Avoid negative colors...
+				color = clamp(color, 0.0f, 65536.0f); // Avoid negative colors...
 			}
 			ENDCG
 		}

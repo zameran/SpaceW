@@ -11589,9 +11589,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   Core: {fileID: 7200000, guid: 4b65a98af0eefea4a84f53bd8d3baf38, type: 3}
-  StarsShader: {fileID: 4800000, guid: 02a604af630bf304b8ac84d9c132a420, type: 3}
-  DustShader: {fileID: 4800000, guid: 5c27b04b8de7fa74a8e1e9216b170be6, type: 3}
-  ScreenShader: {fileID: 4800000, guid: 7e61934dc5ba7884fa88d044fa1e8c61, type: 3}
+  StarsShader: {fileID: 4800000, guid: 43da5f6eb24190c49aa3bf6459324400, type: 3}
+  DustShader: {fileID: 4800000, guid: 095b3645e4835d3479aa0077a0d87c3a, type: 3}
+  ScreenShader: {fileID: 4800000, guid: b276bdd369d92454888194a25c03467b, type: 3}
   StarParticle: {fileID: 2800000, guid: 636b03c5c7635864288d1e9ee1093984, type: 3}
   Settings:
     Type: 2
@@ -11600,12 +11600,8 @@ MonoBehaviour:
       DustSize: 1
       GasStength: 0.005
       GasSize: 0.5
-      GasDrawPercent: 0.01
-      DustDrawPercent: 0.1
-      StarDrawPercent: 1
       StarAbsoluteSize: 64
       DustPassCount: 1
-      GasCenterFalloff: 16
       HDRExposure: 1.2
       DustColorDistribution:
         Gradient:
@@ -11719,7 +11715,7 @@ MonoBehaviour:
       PassRotation: 1.5707964
   VolumeMesh: {fileID: 10202, guid: 0000000000000000e000000000000000, type: 0}
   ScreenMesh: {fileID: 0}
-  AutoUpdate: 1
+  AutoUpdate: 0
 --- !u!4 &1257223185
 Transform:
   m_ObjectHideFlags: 0

@@ -1,4 +1,4 @@
-﻿Shader "SpaceEngine/Galaxy/StarTest"
+﻿Shader "SpaceEngine/Galaxy/Star"
 {
 	Properties
 	{
@@ -9,15 +9,14 @@
 		Tags { "PreviewType" = "Plane" }
 
 		CGINCLUDE
-		#include "../../Core.cginc"
-		#include "../Galaxy.cginc"
+		#include "Galaxy.cginc"
 		
 		uniform sampler2D _Particle;
 		uniform float _Particle_Absolute_Size;
 
-		uniform StructuredBuffer<GalaxyStar> data;
+		uniform StructuredBuffer<GalaxyParticle> data;
 
-		static const float2 tab[8] = 
+		static const float2 FlickerTable[8] = 
 		{
 			float2(0.897907815f, -0.347608525f),
 			float2(0.550299290f, 0.273586675f),
@@ -59,45 +58,43 @@
 			float f = frac(index) * 2.5f;
 			int i = (int)index;
 			
-			return tab[i].x + f * tab[i].y;
+			return FlickerTable[i].x + f * FlickerTable[i].y;
 		}
 
 		void vert(in appdata v, out v2g o)
 		{
-			float3 starPosition = data[v.id].position;
-			float4 starColor = data[v.id].color;
-			float starSize = data[v.id].size;
-			float starTemperature = data[v.id].temperature;
+			float3 particlePosition = data[v.id].position;
+			float4 particleColor = data[v.id].color;
+			float particleSize = data[v.id].size;
 
-			float magnitude = 6.5 + length(starColor) * (-1.44f - 1.5f);
-			float brightness = GetFlickerAmount(starPosition.xy * starSize) * pow(5.0f, (-magnitude - 1.44f) / 2.5f);
+			float magnitude = 6.5 + length(particleColor) * (-1.44f - 1.5f);
+			float brightness = GetFlickerAmount(particlePosition.xy * particleSize) * pow(5.0f, (-magnitude - 1.44f) / 2.5f);
 
-			o.vertex = UnityObjectToClipPos(float4(starPosition, 1.0f));
+			o.vertex = UnityObjectToClipPos(float4(particlePosition, 1.0f));
 			o.uv = float2(0.25f, 0.25f);
-			o.size = starSize / _Particle_Absolute_Size;
-			o.color = 8.0f * brightness * starColor * 3.0f;
+			o.size = particleSize / _Particle_Absolute_Size;
+			o.color = 8.0f * brightness * particleColor * 3.0f;
 		}
 
 		void vert_debug(in appdata v, out v2g o)
 		{
-			float3 starPosition = data[v.id].position;
-			float4 starColor = data[v.id].color;
-			float starSize = data[v.id].size;
-			float starTemperature = data[v.id].temperature;
+			float3 particlePosition = data[v.id].position;
+			float4 particleColor = data[v.id].color;
+			float particleSize = data[v.id].size;
 
-			o.vertex = UnityObjectToClipPos(float4(starPosition, 1.0f));
+			o.vertex = UnityObjectToClipPos(float4(particlePosition, 1.0f));
 			o.uv = float2(0.25f, 0.25f);
-			o.size = starSize / _Particle_Absolute_Size;
-			o.color = starColor;
+			o.size = particleSize / _Particle_Absolute_Size;
+			o.color = particleColor;
 		}
 		
 		[maxvertexcount(4)]
 		void geom(point v2g p[1], inout TriangleStream<v2f> triStream)
 		{
-			float4 starPosition = p[0].vertex;
+			float4 particlePosition = p[0].vertex;
 			float2 starUV = p[0].uv;
 			
-			static const float4 up = float4(0.0f, 1.0f, 0.0f, 0.0f) * UNITY_MATRIX_P._22;
+			static const float4 up = float4(0.0f, 1.0f, 0.0f, 0.0f) * -UNITY_MATRIX_P._22;
 			static const float4 right = float4(1.0f, 0.0f, 0.0f, 0.0f) * UNITY_MATRIX_P._11;
 
 			float halfSize = p[0].size / 2.0f;
@@ -106,19 +103,19 @@
 			
 			o.color = p[0].color;
 			
-			o.vertex = starPosition - halfSize * up;
+			o.vertex = particlePosition - halfSize * up;
 			o.uv = float2(1.0f, 0.0f) * 0.5f + starUV;
 			triStream.Append(o);
 			
-			o.vertex = starPosition + halfSize * right;
+			o.vertex = particlePosition + halfSize * right;
 			o.uv = float2(1.0f, 1.0f) * 0.5f + starUV;
 			triStream.Append(o);
 			
-			o.vertex = starPosition - halfSize * right;
+			o.vertex = particlePosition - halfSize * right;
 			o.uv = float2(0.0f, 0.0f) * 0.5f + starUV;
 			triStream.Append(o);
 			
-			o.vertex = starPosition + halfSize * up;
+			o.vertex = particlePosition + halfSize * up;
 			o.uv = float2(0.0f, 1.0f) * 0.5f + starUV;
 			triStream.Append(o);
 			
@@ -127,23 +124,23 @@
 		
 		void frag(in v2f i, out float4 color : SV_Target)
 		{
-			float4 starColor = i.color;
-			float4 starSampler = tex2D(_Particle, i.uv / 0.5f - 0.5f).a;
-			float2 starUv = 6.5f * i.uv - 6.5f * float2(0.5f, 0.5f);
+			float4 particleColor = i.color;
+			float4 particleSampler = tex2D(_Particle, i.uv / 0.5f - 0.5f).a;
+			float2 particleUV = 6.5f * i.uv - 6.5f * float2(0.5f, 0.5f);
 			
-			half scale = exp(-dot(starUv, starUv));
+			half scale = exp(-dot(particleUV, particleUV));
 
-			starColor = float4(i.color.xyz * scale + 0.25f * i.color.w * pow(scale, 10.0f), 1.0f);
+			particleColor = float4(i.color.xyz * scale + 0.25f * i.color.w * pow(scale, 10.0f), 1.0f);
 
-			color = hdr(starSampler + starColor);
+			color = particleSampler + particleColor;
 			color.a = dot(color.xyz, 1.0f);
 		}
 
 		void frag_debug(in v2f i, out float4 color : SV_Target)
 		{
-			float4 starColor = i.color;
+			float4 particleColor = i.color;
 			
-			color = starColor;
+			color = particleColor;
 			color.a = dot(color.xyz / M_PI, 1.0f);
 		}
 		ENDCG
@@ -153,7 +150,7 @@
 			Name "Star"
 
 			Blend SrcAlpha One
-			Cull Front
+			Cull Back
 			ZWrite Off
 			
 			CGPROGRAM
@@ -170,7 +167,7 @@
 			Name "Star (Debug)"
 
 			Blend One One
-			Cull Front
+			Cull Back
 			ZWrite On
 			
 			CGPROGRAM

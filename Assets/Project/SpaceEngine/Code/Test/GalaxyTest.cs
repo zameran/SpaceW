@@ -55,36 +55,37 @@ using Random = UnityEngine.Random;
 namespace SpaceEngine.Tests
 {
     [Serializable]
-    public struct GalaxyStar
+    public struct GalaxyParticle
     {
         public Vector3 position;
         public Vector4 color;
         public float size;
         public float temperature;
+        public Vector3 id;
     }
 
     [Serializable]
-    public class GalaxyRenderStar
+    public class GalaxyStar
     {
         public Vector3 Position { get; }
 
         public float Size { get; }
 
-        public GalaxyRenderStar()
+        public GalaxyStar()
         {
             Position = Vector3.zero;
 
             Size = 1.0f;
         }
 
-        public GalaxyRenderStar(Vector3 position)
+        public GalaxyStar(Vector3 position)
         {
             Position = position;
 
             Size = 1.0f;
         }
 
-        public GalaxyRenderStar(Vector3 position, float size)
+        public GalaxyStar(Vector3 position, float size)
         {
             Position = position;
 
@@ -102,7 +103,7 @@ namespace SpaceEngine.Tests
         /// <inheritdoc />
         public override bool Equals(object obj)
         {
-            var item = obj as GalaxyRenderStar;
+            var item = obj as GalaxyStar;
 
             if (item == null) { return false; }
 
@@ -265,22 +266,11 @@ namespace SpaceEngine.Tests
         [Range(0.0f, 4.0f)]
         public float GasSize;
 
-        [Range(0.0f, 1.0f)]
-        public float GasDrawPercent;
-
-        [Range(0.0f, 1.0f)]
-        public float DustDrawPercent;
-
-        [Range(0.0f, 1.0f)]
-        public float StarDrawPercent;
-
+        [Range(1.0f, 1024.0f)]
         public float StarAbsoluteSize;
 
         [Range(1.0f, 4.0f)]
         public int DustPassCount;
-
-        public float GasCenterFalloff;
-        public float HDRExposure;
 
         public ColorMaterialTableGradientLut DustColorDistribution;
 
@@ -290,34 +280,22 @@ namespace SpaceEngine.Tests
             DustSize = from.DustSize;
             GasStength = from.GasStength;
             GasSize = from.GasSize;
-            GasDrawPercent = from.GasDrawPercent;
-            DustDrawPercent = from.DustDrawPercent;
-            StarDrawPercent = from.StarDrawPercent;
             StarAbsoluteSize = from.StarAbsoluteSize;
 
             DustPassCount = from.DustPassCount;
 
-            GasCenterFalloff = from.GasCenterFalloff;
-            HDRExposure = from.HDRExposure;
-
             DustColorDistribution = new ColorMaterialTableGradientLut();
         }
 
-        public GalaxyRenderingParameters(float dustStrength, float dustSize, float gasStrength, float gasSize, float gasDrawPercent, float dustDrawPercent, float starDrawPercent, float starAbsoluteSize, int dustPassCount, float gasCenterFalloff, float hdrExposure)
+        public GalaxyRenderingParameters(float dustStrength, float dustSize, float gasStrength, float gasSize, float starAbsoluteSize, int dustPassCount)
         {
             DustStrength = dustStrength;
             DustSize = dustSize;
             GasStength = gasStrength;
             GasSize = gasSize;
-            GasDrawPercent = gasDrawPercent;
-            DustDrawPercent = dustDrawPercent;
-            StarDrawPercent = starDrawPercent;
             StarAbsoluteSize = starAbsoluteSize;
 
             DustPassCount = dustPassCount;
-
-            GasCenterFalloff = gasCenterFalloff;
-            HDRExposure = hdrExposure;
 
             DustColorDistribution = new ColorMaterialTableGradientLut();
         }
@@ -326,7 +304,7 @@ namespace SpaceEngine.Tests
         {
             get
             {
-                return new GalaxyRenderingParameters(0.0075f, 1.0f, 0.0050f, 0.5f, 0.1f, 0.1f, 1.0f, 64.0f, 1, 16.0f, 1.2f);
+                return new GalaxyRenderingParameters(0.0075f, 1.0f, 0.0050f, 0.5f, 64.0f, 1);
             }
         }
     }
@@ -486,6 +464,8 @@ namespace SpaceEngine.Tests
 
         private List<List<ComputeBuffer>> StarsBuffers = new List<List<ComputeBuffer>>();
         private List<List<ComputeBuffer>> DustBuffers = new List<List<ComputeBuffer>>();
+        private List<List<ComputeBuffer>> DustAppendBuffers = new List<List<ComputeBuffer>>();
+        private List<List<ComputeBuffer>> GasAppendBuffers = new List<List<ComputeBuffer>>();
         private List<Material> DustMaterials = new List<Material>();
         private ComputeBuffer DustArgsBuffer;
         private ComputeBuffer GasArgsBuffer;
@@ -501,20 +481,12 @@ namespace SpaceEngine.Tests
 
         public bool AutoUpdate = false;
 
-        // TODO : Maybe bigger data type? Leave it, if you are ok to overflows :)
-        public int StarDrawCount { get { return (int)(Settings.GalaxyParameters.Count * Settings.GalaxyRenderingParameters.StarDrawPercent); } }
-        public int DustDrawCount { get { return (int)(Settings.GalaxyParameters.DustCount * Settings.GalaxyRenderingParameters.DustDrawPercent); } }
-        public int GasDrawCount { get { return (int)(Settings.GalaxyParameters.DustCount * Settings.GalaxyRenderingParameters.GasDrawPercent); } }
-        public int StarDrawCountInversed { get { return (int)(Settings.GalaxyParameters.Count * (1.0f - Settings.GalaxyRenderingParameters.StarDrawPercent)); } }
-        public int DustDrawCountInversed { get { return (int)(Settings.GalaxyParameters.DustCount * (1.0f - Settings.GalaxyRenderingParameters.DustDrawPercent)); } }
-        public int GasDrawCountInversed { get { return (int)(Settings.GalaxyParameters.DustCount * (1.0f - Settings.GalaxyRenderingParameters.GasDrawPercent)); } }
-
         private RenderTexture FrameBuffer1;
         private RenderTexture FrameBuffer2;
 
         private float BlendFactor = 0.0f;
 
-        public PointOctree<GalaxyRenderStar> Octree;
+        public PointOctree<GalaxyStar> Octree;
 
         #region Galaxy
 
@@ -573,7 +545,7 @@ namespace SpaceEngine.Tests
 
             var buffer = source;
             var bufferSize = buffer.count;
-            var stars = new GalaxyStar[bufferSize];
+            var stars = new GalaxyParticle[bufferSize];
             var points = new ParticleSystem.Particle[bufferSize];
 
             buffer.GetData(stars);
@@ -602,13 +574,17 @@ namespace SpaceEngine.Tests
 
         public void InitBuffers()
         {
-            if (StarsBuffers != null || DustBuffers != null || DustArgsBuffer != null || GasArgsBuffer != null)
+            if (StarsBuffers != null || DustBuffers != null || 
+                DustAppendBuffers != null || GasAppendBuffers != null || 
+                DustArgsBuffer != null || GasArgsBuffer != null)
             {
                 DestroyBuffers();
             }
 
             StarsBuffers = new List<List<ComputeBuffer>>((int)Settings.Type);
             DustBuffers = new List<List<ComputeBuffer>>((int)Settings.Type);
+            DustAppendBuffers = new List<List<ComputeBuffer>>((int)Settings.Type);
+            GasAppendBuffers = new List<List<ComputeBuffer>>((int)Settings.Type);
 
             for (byte generationType = 0; generationType < StarsBuffers.Capacity; generationType++)
             {
@@ -616,9 +592,9 @@ namespace SpaceEngine.Tests
 
                 for (var bufferIndex = 0; bufferIndex < buffers.Capacity; bufferIndex++)
                 {
-                    var buffer = new ComputeBuffer(Settings.GalaxyParameters.Count, Marshal.SizeOf<GalaxyStar>(), ComputeBufferType.Default);
+                    var buffer = new ComputeBuffer(Settings.GalaxyParameters.Count, Marshal.SizeOf<GalaxyParticle>(), ComputeBufferType.Default);
 
-                    buffer.SetData(new GalaxyStar[Settings.GalaxyParameters.Count]);
+                    buffer.SetData(new GalaxyParticle[Settings.GalaxyParameters.Count]);
 
                     buffers.Add(buffer);
                 }
@@ -632,14 +608,46 @@ namespace SpaceEngine.Tests
 
                 for (var bufferIndex = 0; bufferIndex < buffers.Capacity; bufferIndex++)
                 {
-                    var buffer = new ComputeBuffer(Settings.GalaxyParameters.DustCount, Marshal.SizeOf<GalaxyStar>(), ComputeBufferType.Default);
+                    var buffer = new ComputeBuffer(Settings.GalaxyParameters.DustCount, Marshal.SizeOf<GalaxyParticle>(), ComputeBufferType.Default);
 
-                    buffer.SetData(new GalaxyStar[Settings.GalaxyParameters.DustCount]);
+                    buffer.SetData(new GalaxyParticle[Settings.GalaxyParameters.DustCount]);
 
                     buffers.Add(buffer);
                 }
 
                 DustBuffers.Add(buffers);
+            }
+
+            for (byte generationType = 0; generationType < DustAppendBuffers.Capacity; generationType++)
+            {
+                var buffers = new List<ComputeBuffer>(Settings.GalaxyParameters.PassCount);
+
+                for (var bufferIndex = 0; bufferIndex < buffers.Capacity; bufferIndex++)
+                {
+                    var buffer = new ComputeBuffer(Settings.GalaxyParameters.Count, Marshal.SizeOf<GalaxyParticle>(), ComputeBufferType.Append);
+
+                    buffer.SetCounterValue(0);
+
+                    buffers.Add(buffer);
+                }
+
+                DustAppendBuffers.Add(buffers);
+            }
+
+            for (byte generationType = 0; generationType < GasAppendBuffers.Capacity; generationType++)
+            {
+                var buffers = new List<ComputeBuffer>(Settings.GalaxyParameters.PassCount);
+
+                for (var bufferIndex = 0; bufferIndex < buffers.Capacity; bufferIndex++)
+                {
+                    var buffer = new ComputeBuffer(Settings.GalaxyParameters.Count, Marshal.SizeOf<GalaxyParticle>(), ComputeBufferType.Append);
+
+                    buffer.SetCounterValue(0);
+
+                    buffers.Add(buffer);
+                }
+
+                GasAppendBuffers.Add(buffers);
             }
 
             DustArgsBuffer = new ComputeBuffer(1, 5 * sizeof(uint), ComputeBufferType.IndirectArguments);
@@ -648,8 +656,34 @@ namespace SpaceEngine.Tests
 
         public void GenerateBuffers()
         {
+            for (byte generationType = 0; generationType < DustAppendBuffers.Capacity; generationType++)
+            {
+                var buffers = DustAppendBuffers[generationType];
+
+                for (var bufferIndex = 0; bufferIndex < buffers.Capacity; bufferIndex++)
+                {
+                    var buffer = buffers[bufferIndex];
+
+                    buffer.SetCounterValue(0);
+                }
+            }
+
+            for (byte generationType = 0; generationType < GasAppendBuffers.Capacity; generationType++)
+            {
+                var buffers = GasAppendBuffers[generationType];
+
+                for (var bufferIndex = 0; bufferIndex < buffers.Capacity; bufferIndex++)
+                {
+                    var buffer = buffers[bufferIndex];
+
+                    buffer.SetCounterValue(0);
+                }
+            }
+
             var starsKernel = Core.FindKernel("Stars");
             var dustKernel = Core.FindKernel("Dust");
+            var filterDustKernel = Core.FindKernel("FilterDust");
+            var filterGasKernel = Core.FindKernel("FilterGas");
 
             Core.SetTexture(starsKernel, "ColorDistributionTable", Settings.GalaxyGenerationParameters.StarsColorDistribution.Lut);
             Core.SetTexture(dustKernel, "ColorDistributionTable", Settings.GalaxyGenerationParameters.DustColorDistribution.Lut);
@@ -696,6 +730,38 @@ namespace SpaceEngine.Tests
                     Core.Dispatch(dustKernel, (int)(Settings.GalaxyParameters.DustCount / 1024.0f), 1, 1);
                 }
             }
+
+            for (byte generationType = 0; generationType < DustAppendBuffers.Capacity; generationType++)
+            {
+                var buffers = DustBuffers[generationType];
+                var appendBuffers = DustAppendBuffers[generationType];
+
+                for (var bufferIndex = 0; bufferIndex < buffers.Capacity; bufferIndex++)
+                {
+                    var buffer = buffers[bufferIndex];
+                    var appendBuffer = appendBuffers[bufferIndex];
+
+                    Core.SetBuffer(filterDustKernel, "filter_input", buffer);
+                    Core.SetBuffer(filterDustKernel, "filter_output", appendBuffer);
+                    Core.Dispatch(filterDustKernel, (int)(Settings.GalaxyParameters.DustCount / 1024.0f), 1, 1);
+                }
+            }
+
+            for (byte generationType = 0; generationType < GasAppendBuffers.Capacity; generationType++)
+            {
+                var buffers = DustBuffers[generationType];
+                var appendBuffers = GasAppendBuffers[generationType];
+
+                for (var bufferIndex = 0; bufferIndex < buffers.Capacity; bufferIndex++)
+                {
+                    var buffer = buffers[bufferIndex];
+                    var appendBuffer = appendBuffers[bufferIndex];
+
+                    Core.SetBuffer(filterGasKernel, "filter_input", buffer);
+                    Core.SetBuffer(filterGasKernel, "filter_output", appendBuffer);
+                    Core.Dispatch(filterGasKernel, (int)(Settings.GalaxyParameters.DustCount / 1024.0f), 1, 1);
+                }
+            }
         }
 
         protected void DestroyBuffers()
@@ -732,6 +798,38 @@ namespace SpaceEngine.Tests
 
             DustBuffers.Clear();
 
+            for (byte generationType = 0; generationType < DustAppendBuffers.Capacity; generationType++)
+            {
+                var buffers = DustAppendBuffers[generationType];
+
+                for (var bufferIndex = 0; bufferIndex < buffers.Capacity; bufferIndex++)
+                {
+                    var buffer = buffers[bufferIndex];
+
+                    buffer.ReleaseAndDisposeBuffer();
+                }
+
+                buffers.Clear();
+            }
+
+            DustAppendBuffers.Clear();
+
+            for (byte generationType = 0; generationType < GasAppendBuffers.Capacity; generationType++)
+            {
+                var buffers = GasAppendBuffers[generationType];
+
+                for (var bufferIndex = 0; bufferIndex < buffers.Capacity; bufferIndex++)
+                {
+                    var buffer = buffers[bufferIndex];
+
+                    buffer.ReleaseAndDisposeBuffer();
+                }
+
+                buffers.Clear();
+            }
+
+            GasAppendBuffers.Clear();
+
             DustArgsBuffer.ReleaseAndDisposeBuffer();
             GasArgsBuffer.ReleaseAndDisposeBuffer();
         }
@@ -742,7 +840,7 @@ namespace SpaceEngine.Tests
 
         public void InitOctree()
         {
-            Octree = new PointOctree<GalaxyRenderStar>(512, Vector3.zero, 4);
+            Octree = new PointOctree<GalaxyStar>(512, Vector3.zero, 4);
         }
 
         [ContextMenu("Generate Octree")]
@@ -759,7 +857,7 @@ namespace SpaceEngine.Tests
                 for (var bufferIndex = 0; bufferIndex < buffers.Capacity; bufferIndex++)
                 {
                     var buffer = buffers[bufferIndex];
-                    var data = new GalaxyStar[buffer.count];
+                    var data = new GalaxyParticle[buffer.count];
 
                     buffer.GetData(data);
 
@@ -769,7 +867,7 @@ namespace SpaceEngine.Tests
                         var starPosition = star.position;
                         var starSize = star.size;
 
-                        Octree.Add(new GalaxyRenderStar(starPosition, starSize), starPosition);
+                        Octree.Add(new GalaxyStar(starPosition, starSize), starPosition);
                     }
                 }
             }
@@ -783,13 +881,13 @@ namespace SpaceEngine.Tests
 
         protected override void InitNode()
         {
-            if (StarsShader == null) StarsShader = Shader.Find("SpaceEngine/Galaxy/StarTest");
+            if (StarsShader == null) StarsShader = Shader.Find("SpaceEngine/Galaxy/Star");
             StarsMaterial = MaterialHelper.CreateTemp(StarsShader, "Galaxy Stars");
 
-            if (DustShader == null) DustShader = Shader.Find("SpaceEngine/Galaxy/DustTest");
+            if (DustShader == null) DustShader = Shader.Find("SpaceEngine/Galaxy/Dust");
             InitDustMaterials();
 
-            if (ScreenShader == null) ScreenShader = Shader.Find("SpaceEngine/Galaxy/ScreenCompose");
+            if (ScreenShader == null) ScreenShader = Shader.Find("SpaceEngine/Galaxy/Screen");
             ScreenMaterial = MaterialHelper.CreateTemp(ScreenShader, "Galaxy Screen Compose");
 
             if (StarParticle == null)
@@ -900,11 +998,11 @@ namespace SpaceEngine.Tests
             // NOTE : Nothing to draw...
         }
 
-        public void RenderBuffers(List<List<ComputeBuffer>> collection, int pass, int count)
+        public void RenderAppendBuffers(ref List<List<ComputeBuffer>> collection, ref ComputeBuffer argsBuffer, int pass)
         {
-            // TODO : Render fake stars maybe?
-            // NOTE : Pass number is hardcoded to draw anyway in debug mode.
-            if (BlendFactor < 1.0 && pass != 1) return;
+            var args = new uint[] { 0, 1, 0, 0, 0 };
+
+            argsBuffer.SetData(args);
 
             for (byte generationType = 0; generationType < collection.Capacity; generationType++)
             {
@@ -921,8 +1019,41 @@ namespace SpaceEngine.Tests
                     StarsMaterial.SetTexture("_Particle", StarParticle);
                     StarsMaterial.SetFloat("_Particle_Absolute_Size", Settings.GalaxyRenderingParameters.StarAbsoluteSize);
 
-                    StarsMaterial.SetFloat("_HDRExposure", Settings.GalaxyRenderingParameters.HDRExposure);
-                    StarsMaterial.SetFloat("_HDRMode", (int)GodManager.Instance.HDRMode); // NOTE : Maybe own HDR mode? I don't know...
+                    ComputeBuffer.CopyCount(buffer, argsBuffer, 0);
+
+                    Graphics.DrawProceduralIndirect(MeshTopology.Points, argsBuffer);
+                }
+            }
+        }
+
+        public void RenderAppendDust(int pass)
+        {
+            RenderAppendBuffers(ref DustAppendBuffers, ref DustArgsBuffer, pass);
+        }
+
+        public void RenderAppendGas(int pass)
+        {
+            RenderAppendBuffers(ref GasAppendBuffers, ref GasArgsBuffer, pass);
+        }
+
+        public void RenderBuffers(ref List<List<ComputeBuffer>> collection, int pass, int count)
+        {
+            // TODO : Render fake stars maybe?
+
+            for (byte generationType = 0; generationType < collection.Capacity; generationType++)
+            {
+                var buffers = collection[generationType];
+
+                for (var bufferIndex = 0; bufferIndex < buffers.Capacity; bufferIndex++)
+                {
+                    var buffer = buffers[bufferIndex];
+
+                    StarsMaterial.SetPass(pass);
+
+                    StarsMaterial.SetBuffer("data", buffer);
+
+                    StarsMaterial.SetTexture("_Particle", StarParticle);
+                    StarsMaterial.SetFloat("_Particle_Absolute_Size", Settings.GalaxyRenderingParameters.StarAbsoluteSize);
 
                     Graphics.DrawProcedural(MeshTopology.Points, count);
                 }
@@ -931,12 +1062,19 @@ namespace SpaceEngine.Tests
 
         public void RenderStars(int pass)
         {
-            RenderBuffers(StarsBuffers, pass, StarDrawCount);
+            // NOTE : Pass number is hardcoded to draw anyway in debug mode.
+            if (BlendFactor < 1.0 && pass != 1) return;
+
+            RenderBuffers(ref StarsBuffers, pass, Settings.GalaxyParameters.Count);
         }
 
-        public void RenderDustPoints()
+        // NOTE : Debug dust...
+        public void RenderDust(int pass = 1)
         {
-            RenderBuffers(DustBuffers, 1, DustDrawCount);
+            // NOTE : Pass number is hardcoded to draw anyway in debug mode.
+            if (BlendFactor < 1.0 && pass != 1) return;
+
+            RenderBuffers(ref DustBuffers, pass, Settings.GalaxyParameters.Count);
         }
 
         public void RenderDustToScreenBuffer()
@@ -944,6 +1082,7 @@ namespace SpaceEngine.Tests
             if (ScreenMesh == null) return;
 
             ScreenMaterial.SetTexture("_FrameBuffer", BlendFactor < 1.0f ? FrameBuffer1 : FrameBuffer2);
+
             ScreenMaterial.SetPass(0);
 
             Graphics.DrawMeshNow(ScreenMesh, Matrix4x4.TRS(Vector3.zero, Quaternion.identity, Vector3.one), 8);
@@ -966,50 +1105,69 @@ namespace SpaceEngine.Tests
                 DustCommandBuffer.ClearRenderTarget(true, true, Color.black);
             }
 
-            var dustArgs = new uint[5];
-            dustArgs[0] = (uint)VolumeMesh.GetIndexCount(0);            // Index count per instance...
-            dustArgs[1] = (uint)DustDrawCount;                          // Instance count...
-            dustArgs[2] = 0;                                            // Start index location...
-            dustArgs[3] = 0;                                            // Base vertex location...
-            dustArgs[4] = 0;                                            // Start instance location...
+            // 0 - Index count per instance...
+            // 1 - Instance count...
+            // 2 - Start index location...
+            // 3 - Base vertex location...
+            // 4 - Start instance location...
 
-            var gasArgs = new uint[5];
-            gasArgs[0] = (uint)VolumeMesh.GetIndexCount(0);
-            gasArgs[1] = (uint)GasDrawCount;
-            gasArgs[2] = 0;
-            gasArgs[3] = 0;
-            gasArgs[4] = 0;
+            //var dustArgs = new uint[] { (uint)VolumeMesh.GetIndexCount(0), (uint)DustDrawCount, 0, 0, 0 };
+            //var gasArgs = new uint[] { (uint)VolumeMesh.GetIndexCount(0), (uint)GasDrawCount, 0, 0, 0 };
+            var dustArgs = new uint[] { (uint)VolumeMesh.GetIndexCount(0), 1, 0, 0, 0 };
+            var gasArgs = new uint[] { (uint)VolumeMesh.GetIndexCount(0), 1, 0, 0, 0 };
 
             DustArgsBuffer.SetData(dustArgs);
             GasArgsBuffer.SetData(gasArgs);
 
             for (byte generationType = 0; generationType < DustBuffers.Capacity; generationType++)
             {
-                var buffers = DustBuffers[generationType];
+                var dustBuffers = DustAppendBuffers[generationType];
+                var gasBuffers = GasAppendBuffers[generationType];
                 var material = DustMaterials[generationType];
 
                 material.SetVector("dustParams1", new Vector2(Settings.GalaxyRenderingParameters.DustStrength, Settings.GalaxyRenderingParameters.DustSize));
-                material.SetVector("gasParams1", new Vector3(Settings.GalaxyRenderingParameters.GasStength, Settings.GalaxyRenderingParameters.GasSize, Settings.GalaxyRenderingParameters.GasCenterFalloff));
+                material.SetVector("gasParams1", new Vector2(Settings.GalaxyRenderingParameters.GasStength, Settings.GalaxyRenderingParameters.GasSize));
                 material.SetTexture("ColorDistributionTable", Settings.GalaxyRenderingParameters.DustColorDistribution.Lut);
                 material.SetVector("_Galaxy_Position", transform.position - GodManager.Instance.View.WorldCameraPosition);
 
-                // NOTE : Render galaxy dust and gas...
-                for (var bufferIndex = 0; bufferIndex < Mathf.Min(Settings.GalaxyRenderingParameters.DustPassCount, buffers.Capacity); bufferIndex++)
+                // NOTE : Render galaxy dust...
+                for (var bufferIndex = 0; bufferIndex < Mathf.Min(Settings.GalaxyRenderingParameters.DustPassCount, dustBuffers.Capacity); bufferIndex++)
                 {
-                    var buffer = buffers[bufferIndex];
+                    var dustBuffer = dustBuffers[bufferIndex];
 
-                    material.SetBuffer("stars", buffer);
+                    ComputeBuffer.CopyCount(dustBuffer, DustArgsBuffer, 4);
+
+                    material.SetBuffer("dust", dustBuffer);
 
                     if (BlendFactor < 1.0f)
                     {
                         DustCommandBuffer.SetRenderTarget(FrameBuffer1);
                         DustCommandBuffer.DrawMeshInstancedIndirect(VolumeMesh, 0, material, 0, DustArgsBuffer);
-                        DustCommandBuffer.DrawMeshInstancedIndirect(VolumeMesh, 0, material, 1, GasArgsBuffer);
                     }
                     else
                     {
                         DustCommandBuffer.SetRenderTarget(FrameBuffer2);
                         DustCommandBuffer.DrawMeshInstancedIndirect(VolumeMesh, 0, material, 0, DustArgsBuffer);
+                    }
+                }
+
+                // NOTE : Render galaxy gas...
+                for (var bufferIndex = 0; bufferIndex < Mathf.Min(Settings.GalaxyRenderingParameters.DustPassCount, gasBuffers.Capacity); bufferIndex++)
+                {
+                    var gasBuffer = gasBuffers[bufferIndex];
+
+                    ComputeBuffer.CopyCount(gasBuffer, GasArgsBuffer, 4);
+
+                    material.SetBuffer("gas", gasBuffer);
+
+                    if (BlendFactor < 1.0f)
+                    {
+                        DustCommandBuffer.SetRenderTarget(FrameBuffer1);
+                        DustCommandBuffer.DrawMeshInstancedIndirect(VolumeMesh, 0, material, 1, GasArgsBuffer);
+                    }
+                    else
+                    {
+                        DustCommandBuffer.SetRenderTarget(FrameBuffer2);
                         DustCommandBuffer.DrawMeshInstancedIndirect(VolumeMesh, 0, material, 1, GasArgsBuffer);
                     }
                 }

@@ -52,7 +52,7 @@ uniform float4	sizeParams1;	// (radius,		ellipseRadius,	barSize,	 depth)
 uniform float4	warpParams1;	// (warp1.x,	warp1.y,		warp2.x,	 warp2.y)
 uniform float4	spiralParams1;	// (inverseEccentricity, spiralRotation, passRotation, UNUSED)
 uniform float2	dustParams1;	// (dustStrength,	dustSize,	UNUSED,		UNUSED)
-uniform float3	gasParams1;		// (gasStrength,	gasSize,	gasCenterFalloff,		UNUSED)
+uniform float3	gasParams1;		// (gasStrength,	gasSize,	UNUSED,		UNUSED)
 uniform float3	temperatureParams1;	// (temperature min, temperature max, temperature shift)
 //-----------------------------------------------------------------------------
 
@@ -73,27 +73,27 @@ uniform float3	temperatureParams1;	// (temperature min, temperature max, tempera
 #define		dustSize                dustParams1.y
 #define		gasStrength		        gasParams1.x
 #define		gasSize					gasParams1.y
-#define		gasCenterFalloff        gasParams1.z
 #define		temperatureMin          temperatureParams1.x
 #define		temperatureMax          temperatureParams1.y
 #define		temperatureShift        temperatureParams1.z
 //-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
-struct GalaxyStar
+struct GalaxyParticle
 {
 	float3 position;
 	float4 color;
 	float size;
 	float temperature;
+	float3 id;
 };
 //-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
 float3 ToneMapFilmicALU(float3 color)
 {
-	color = max(0, color - 0.004);
-	color = (color * (6.2 * color + 0.5)) / (color * (6.2 * color + 1.7) + 0.06);
+	color = max(0.0f, color - 0.004f);
+	color = (color * (6.2f * color + 0.5f)) / (color * (6.2f * color + 1.7f) + 0.06f);
 
 	return color;
 }
@@ -107,9 +107,9 @@ float4 ToneMapFilmicALU(float4 color)
 //-----------------------------------------------------------------------------
 float3 mulvq(float3 v, float4 q)
 {
-	float axx = q.x * 2.0;
-	float ayy = q.y * 2.0;
-	float azz = q.z * 2.0;
+	float axx = q.x * 2.0f;
+	float ayy = q.y * 2.0f;
+	float azz = q.z * 2.0f;
 	float awxx = q.a * axx;
 	float awyy = q.a * ayy;
 	float awzz = q.a * azz;
@@ -122,9 +122,9 @@ float3 mulvq(float3 v, float4 q)
 
 	float3 result;
 
-	result.x = ((v.x * ((1.0 - ayyy) - azzz)) + (v.y * (axyy - awzz))) + (v.z * (axzz + awyy));
-	result.y = ((v.x * (axyy + awzz)) + (v.y * ((1.0 - axxx) - azzz))) + (v.z * (ayzz - awxx));
-	result.z = ((v.x * (axzz - awyy)) + (v.y * (ayzz + awxx))) + (v.z * ((1.0 - axxx) - ayyy));
+	result.x = ((v.x * ((1.0f - ayyy) - azzz)) + (v.y * (axyy - awzz))) + (v.z * (axzz + awyy));
+	result.y = ((v.x * (axyy + awzz)) + (v.y * ((1.0f - axxx) - azzz))) + (v.z * (ayzz - awxx));
+	result.z = ((v.x * (axzz - awyy)) + (v.y * (ayzz + awxx))) + (v.z * ((1.0f - axxx) - ayyy));
 
 	return result;
 }
@@ -152,7 +152,7 @@ float Hash(uint s)
 
 float Random1(uint seed)
 {
-	return float(Hash(seed)) / 4294967295.0;
+	return float(Hash(seed)) / 4294967295.0f;
 }
 
 float2 Random2(uint seed)
@@ -204,7 +204,7 @@ SamplerState sampler_point_clamp_MaterialTable;
 
 float4 GetMaterial(float value)
 {
-	return normalize(ColorDistributionTable.SampleLevel(sampler_point_clamp_MaterialTable, float2(value, 0.0), 0));
+	return normalize(ColorDistributionTable.SampleLevel(sampler_point_clamp_MaterialTable, float2(value, 0.0f), 0));
 }
 //-----------------------------------------------------------------------------
 

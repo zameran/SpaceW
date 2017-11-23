@@ -207,12 +207,7 @@ namespace SpaceEngine.Debugging
                             GUILayoutExtensions.SliderWithFieldAndControls("Dust Size (Ly): ", 0.0f, 4.0f, ref Galaxy.Settings.GalaxyRenderingParameters.DustSize, "0.0000", 75, 0.25f);
                             GUILayoutExtensions.SliderWithFieldAndControls("Dust Pass Count: ", 1, Galaxy.Settings.GalaxyParameters.PassCount, ref Galaxy.Settings.GalaxyRenderingParameters.DustPassCount, "0", 75, 1);
 
-                            GUILayoutExtensions.SliderWithFieldAndControls("Dust Draw Percent (%)", 0.0f, 1.0f, ref Galaxy.Settings.GalaxyRenderingParameters.DustDrawPercent, "0.0000", 75, 0.01f);
-
-                            GUILayoutExtensions.SliderWithFieldAndControls("Gas Draw Percent (%)", 0.0f, 1.0f, ref Galaxy.Settings.GalaxyRenderingParameters.GasDrawPercent, "0.0000", 75, 0.01f);
-
-                            GUILayoutExtensions.SliderWithFieldAndControls("Stars Absolute Size (Mm)", 0.0f, 1024.0f, ref Galaxy.Settings.GalaxyRenderingParameters.StarAbsoluteSize, "0.0", 75, 32.0f);
-                            GUILayoutExtensions.SliderWithFieldAndControls("Stars Draw Percent (%)", 0.0f, 1.0f, ref Galaxy.Settings.GalaxyRenderingParameters.StarDrawPercent, "0.0000", 75, 0.01f);
+                            GUILayoutExtensions.SliderWithFieldAndControls("Stars Absolute Size (Mm)", 1.0f, 1024.0f, ref Galaxy.Settings.GalaxyRenderingParameters.StarAbsoluteSize, "0.0", 75, 32.0f);
                         });
                     });
 
@@ -246,6 +241,7 @@ namespace SpaceEngine.Debugging
                         GUILayoutExtensions.VerticalBoxed("", GUISkin, () =>
                         {
                             GUILayoutExtensions.DrawVectorSlidersWithField(ref Galaxy.Settings.GalaxyGenerationParameters.Randomize, -1.0f, 1.0f, GUISkin, "Randomize (Randomize Vector)", "0.0000", textFieldWidth: 100);
+                            GUILayoutExtensions.DrawVectorSlidersWithField(ref Galaxy.Settings.GalaxyGenerationParameters.TemperatureRange, 0.0f, 30000.0f, GUISkin, "Temperature Range (Range)", "0.0000", textFieldWidth: 100);
                             GUILayoutExtensions.DrawVectorSlidersWithField(ref Galaxy.Settings.GalaxyGenerationParameters.Offset, -1.0f, 1.0f, GUISkin, "Offset (Linear, Assymetry Factor)", "0.0000", textFieldWidth: 100);
                             GUILayoutExtensions.DrawVectorSlidersWithField(ref Galaxy.Settings.GalaxyGenerationParameters.Warp, -1.0f, 1.0f, GUISkin, "Warp (Pre [XY] and Post [ZW] Rotation Warp)", "0.0000", textFieldWidth: 100);
 
@@ -292,10 +288,7 @@ namespace SpaceEngine.Debugging
             if (Galaxy != null && Helper.Enabled(Galaxy))
             {
                 var starsCount = Galaxy.Settings.TotalStarsCount;
-                var starsDrawCount = Galaxy.StarDrawCount;
                 var dustCount = Galaxy.Settings.TotalDustCount;
-                var dustDrawCount = Galaxy.DustDrawCount;
-                var gasDrawCount = Galaxy.GasDrawCount;
                 var octree = Galaxy.Octree;
 
                 GUILayoutExtensions.VerticalBoxed("Render Statistics: ", GUISkin, () =>
@@ -305,11 +298,7 @@ namespace SpaceEngine.Debugging
                         GUILayoutExtensions.LabelWithSpace(string.Format("Stars Count (Total): {0:N}", starsCount));
                         GUILayoutExtensions.LabelWithSpace(string.Format("Dust Count (Total): {0:N}", dustCount));
 
-                        GUILayoutExtensions.LabelWithSpace(string.Format("Stars Draw Count (Render): {0:N}", starsDrawCount));
-                        GUILayoutExtensions.LabelWithSpace(string.Format("Dust Draw Count (Render): {0:N}", dustDrawCount));
-                        GUILayoutExtensions.LabelWithSpace(string.Format("Gas Draw Count (Render): {0:N}", gasDrawCount));
-
-                        GUILayoutExtensions.LabelWithSpace(string.Format("Star Struct Stride (Generator, bytes): {0}", Marshal.SizeOf<GalaxyStar>()));
+                        GUILayoutExtensions.LabelWithSpace(string.Format("Star Struct Stride (Generator, bytes): {0}", Marshal.SizeOf<GalaxyParticle>()));
                         GUILayoutExtensions.LabelWithSpace(string.Format("Generation Parameters Struct Stride (Generator, bytes): {0}", Marshal.SizeOf<GalaxyGenerationParameters>()));
                         GUILayoutExtensions.LabelWithSpace(string.Format("Generation Per Pass Parameters Struct Stride (Generator, bytes): {0}", Marshal.SizeOf<GalaxyGenerationPerPassParameters>()));
                         GUILayoutExtensions.LabelWithSpace(string.Format("Parameters Struct Stride (Generator, bytes): {0}", Marshal.SizeOf<GalaxyParameters>()));

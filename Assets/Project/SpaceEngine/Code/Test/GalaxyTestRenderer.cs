@@ -45,6 +45,8 @@ namespace SpaceEngine.Tests
             Realistic,
             DebugStars,
             DebugDust,
+            DebugFilterDust,
+            DebugFilterGas,
             OnlyDust,
             Gizmos,
             None
@@ -130,7 +132,15 @@ namespace SpaceEngine.Tests
             }
             else if (RenderMethod == RenderType.DebugDust)
             {
-                Galaxy.RenderDustPoints();
+                Galaxy.RenderDust();   // NOTE : Render dust as dots...
+            }
+            else if (RenderMethod == RenderType.DebugFilterDust)
+            {
+                Galaxy.RenderAppendDust(1);
+            }
+            else if (RenderMethod == RenderType.DebugFilterGas)
+            {
+                Galaxy.RenderAppendGas(1);
             }
             else if (RenderMethod == RenderType.OnlyDust)
             {

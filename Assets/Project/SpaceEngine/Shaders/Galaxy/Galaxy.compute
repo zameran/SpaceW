@@ -15,19 +15,19 @@ float3 GenerateParticlePosition(in uint id, in float4 rnd)
 	float height = rnd.z;													// Distance from the galactic plane...
 	
 	float2 pxy = float2(cos(theta), sin(theta)) * radius * eRadius;			// Make a circle...
-	float3 pos = float3(pxy.x, height * depth * 0.1, pxy.y);				// Place the circle...
-	float3 galaxyAxis = float3(0.0, 1.0, 0.0);								// Rotation axis for ellipses...
-	float3 armAxis = float3(0.0, 1.0, 0.0);
+	float3 pos = float3(pxy.x, height * depth * 0.1f, pxy.y);				// Place the circle...
+	float3 galaxyAxis = float3(0.0f, 1.0f, 0.0f);							// Rotation axis for ellipses...
+	float3 passAxis = float3(0.0f, 1.0f, 0.0f);
 
 	galaxyAxis.xz += eRadius * warp1;										// Warp the rotation axis...
 	
 	float angle = saturate(eRadius - barSize) * spiralRotation;				// Angle to rotate the ellipse...
 	
 	galaxyAxis.xz += eRadius * angle * warp2;								// Warp the axis by the angle amount...
-	
+
 	float4 q = qaxang(galaxyAxis, angle);									// Positive orientation...
 	float4 qi = qaxang(galaxyAxis, -angle);									// Negative orientation...
-	float4 qa = qaxang(armAxis, passRotation);								// Arm orientation...
+	float4 qa = qaxang(passAxis, passRotation);								// Pass orientation...
 
 	pos = mulvq(pos, q);
 
@@ -41,7 +41,7 @@ float3 GenerateParticlePosition(in uint id, in float4 rnd)
 	pos = mulvq(pos, qi);													// Rotate the ellipse to where it should be to make spirals...
 	pos = mulvq(pos, qa);													// Fake-arm rotation...
 
-	float3 rp = Random3(id) / 2.0;
+	float3 rp = Random3(id) / 2.0f;
 
 	// NOTE : Branches...
 	return id % 2 == 0 ? pos + rp : pos - rp;
@@ -49,26 +49,26 @@ float3 GenerateParticlePosition(in uint id, in float4 rnd)
 
 float GenerateParticleSize(in float4 rnd)
 {
-	return radius * 0.025 * (rnd.w * rnd.w + 0.5);							// Randomize the particle size...
+	return radius * 0.025f * (rnd.w * rnd.w + 0.5f);						// Randomize the particle size...
 }
 
 float GenerateParticleDistribution(in float3 position, in float size, in float scale)
 {
-	return (length(position) / scale) / radius * M_PHI * (size / 2.0);		// Randomize distribution on position...
+	return (length(position) / scale) / radius * M_PHI * (size / 2.0f);		// Randomize distribution on position...
 }
 
 float GenerateParticleTemperature(in float4 rnd, in float distribution)
 {
-	temperatureMin /= 10000;
-	temperatureMax /= 10000;
-	temperatureShift /= 10000;
+	temperatureMin /= 10000.0f;
+	temperatureMax /= 10000.0f;
+	temperatureShift /= 10000.0f;
 
 	float temperature = distribution * (rnd.w * M_PHI);
 
 	return ((temperature + temperatureShift) - temperatureMin) / temperatureMax;
 }
 
-GalaxyStar GenerateParticle(uint id, float pertrub, float4 rnd)
+GalaxyParticle GenerateParticle(uint id, float pertrub, float4 rnd)
 {
 	float3 position = GenerateParticlePosition(id, rnd);
 	float size = GenerateParticleSize(rnd);
@@ -76,18 +76,19 @@ GalaxyStar GenerateParticle(uint id, float pertrub, float4 rnd)
 	float temperature = GenerateParticleTemperature(rnd, distribution);
 	float4 color = GetMaterial(temperature);
 
-	GalaxyStar star;
+	GalaxyParticle star;
 	star.position = position;
 	star.color = color;
 	star.size = size;
 	star.temperature = temperature;
+	star.id = (float3)id;
 
 	return star;
 }
 
 #pragma kernel Stars
 
-RWStructuredBuffer<GalaxyStar> stars_output;
+RWStructuredBuffer<GalaxyParticle> stars_output;
 
 [numthreads(NUM_THREADS_X, NUM_THREADS_Y, NUM_THREADS_Z)]
 void Stars(uint3 groupThreadID : SV_GroupThreadID, 
@@ -97,16 +98,16 @@ void Stars(uint3 groupThreadID : SV_GroupThreadID,
 {
 	uint id = groupID.x * NUM_THREADS_X + groupThreadID.x;
 	
-	float4 rnd = frac(Random4(id) + float4(0.0, randomParams1));
+	float4 rnd = frac(Random4(id) + float4(0.0f, randomParams1));
 
-	GalaxyStar star = GenerateParticle(id, rnd.x, rnd);
+	GalaxyParticle particle = GenerateParticle(id, rnd.x, rnd);
 
-	stars_output[id] = star;
+	stars_output[id] = particle;
 }
 
 #pragma kernel Dust
 
-RWStructuredBuffer<GalaxyStar> dust_output;
+RWStructuredBuffer<GalaxyParticle> dust_output;
 
 [numthreads(NUM_THREADS_X, NUM_THREADS_Y, NUM_THREADS_Z)]
 void Dust(uint3 groupThreadID : SV_GroupThreadID, 
@@ -118,7 +119,62 @@ void Dust(uint3 groupThreadID : SV_GroupThreadID,
 	
 	float4 rnd = Random4(id) + float4(0.0, randomParams1);
 
-	GalaxyStar star = GenerateParticle(id, 1.0, rnd);
+	GalaxyParticle particle = GenerateParticle(id, 1.0, rnd);
 	
-	dust_output[id] = star;
+	dust_output[id] = particle;
+}
+
+RWStructuredBuffer<GalaxyParticle> filter_input;
+AppendStructuredBuffer<GalaxyParticle> filter_output;
+
+#pragma kernel FilterDust
+
+[numthreads(NUM_THREADS_X, NUM_THREADS_Y, NUM_THREADS_Z)]
+void FilterDust(uint3 groupThreadID : SV_GroupThreadID, 
+				uint3 groupID : SV_GroupID, 
+				uint3 dispatchThreadID : SV_DispatchThreadID, 
+				uint groupIndex : SV_GroupIndex)
+{
+	uint id = groupID.x * NUM_THREADS_X + groupThreadID.x;
+	uint id_x = (groupID.x + groupThreadID.x / 4) * NUM_THREADS_X - groupThreadID.x;
+	uint id_y = (groupID.x + groupThreadID.x / 4) * NUM_THREADS_X + groupThreadID.x;
+
+	GalaxyParticle currentParticle = filter_input[id];
+
+	float distanceFilter = radius / M_PHI;
+
+	if (dot(filter_input[id_x].position, currentParticle.position) > distanceFilter ||
+		dot(filter_input[id_y].position, currentParticle.position) > distanceFilter)
+	{
+		if (currentParticle.size > 0)
+		{
+			filter_output.Append(currentParticle);
+		}
+	}
+}
+
+#pragma kernel FilterGas
+
+[numthreads(NUM_THREADS_X, NUM_THREADS_Y, NUM_THREADS_Z)]
+void FilterGas(uint3 groupThreadID : SV_GroupThreadID, 
+			   uint3 groupID : SV_GroupID, 
+			   uint3 dispatchThreadID : SV_DispatchThreadID, 
+			   uint groupIndex : SV_GroupIndex)
+{
+	uint id = groupID.x * NUM_THREADS_X + groupThreadID.x;
+	uint id_x = (groupID.x + groupThreadID.x) * NUM_THREADS_X - groupThreadID.x;
+	uint id_y = (groupID.x - groupThreadID.x) * NUM_THREADS_X + groupThreadID.x;
+
+	GalaxyParticle currentParticle = filter_input[id];
+
+	float distanceFilter = radius * (25.0f / 32.0f);
+
+	if (distance(filter_input[id_x].position, currentParticle.position) > distanceFilter ||
+		distance(filter_input[id_y].position, currentParticle.position) > distanceFilter)
+	{
+		if (currentParticle.size > 0)
+		{
+			filter_output.Append(currentParticle);
+		}
+	}
 }
