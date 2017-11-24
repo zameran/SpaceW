@@ -67,11 +67,16 @@
 			float4 particleColor = i.color;
 			float particleSize = i.data.y;
 			float3 direction = normalize(i.direction);
-			
-			float tx = (direction.x > 0.0f ? particleSize + i.rayEnd.x : particleSize - i.rayEnd.x) / abs(direction.x);
-			float ty = (direction.y > 0.0f ? particleSize + i.rayEnd.y : particleSize - i.rayEnd.y) / abs(direction.y);
-			float tz = (direction.z > 0.0f ? particleSize + i.rayEnd.z : particleSize - i.rayEnd.z) / abs(direction.z);
-			float t = min(min(tx, ty), tz);
+
+			// NOTE : The old one was: 
+			// (direction.x > 0.0f ? particleSize + i.rayEnd.x : particleSize - i.rayEnd.x) / abs(direction.x);
+			// ...
+			// etc
+			float3 directionSign = sign(direction);
+			float3 txyz = particleSize + (i.rayEnd * directionSign) / abs(direction);
+
+			// NOTE : length(txyz) can be used maybe...
+			float t = max(max(txyz.x, txyz.y), txyz.z);
 			float rayDistance = length(i.rayStart);
 			float dt = (rayDistance < t ? rayDistance : t);
 			
@@ -120,7 +125,7 @@
 
 			UnpackParticle(i, gasStrength, particleColor);
 
-			color = float4(-particleColor.rgb * float3(0.52312f, 1.01415f, 1.94122f), particleColor.a);
+			color = float4(-particleColor.rgb * float3(0.52312f, 0.99695f, 0.94122f), particleColor.a);
 		}
 		ENDCG
 

@@ -1004,6 +1004,9 @@ namespace SpaceEngine.Tests
 
             argsBuffer.SetData(args);
 
+            StarsMaterial.SetTexture("_Particle", StarParticle);
+            StarsMaterial.SetFloat("_Particle_Absolute_Size", Settings.GalaxyRenderingParameters.StarAbsoluteSize);
+
             for (byte generationType = 0; generationType < collection.Capacity; generationType++)
             {
                 var buffers = collection[generationType];
@@ -1015,9 +1018,6 @@ namespace SpaceEngine.Tests
                     StarsMaterial.SetPass(pass);
 
                     StarsMaterial.SetBuffer("data", buffer);
-
-                    StarsMaterial.SetTexture("_Particle", StarParticle);
-                    StarsMaterial.SetFloat("_Particle_Absolute_Size", Settings.GalaxyRenderingParameters.StarAbsoluteSize);
 
                     ComputeBuffer.CopyCount(buffer, argsBuffer, 0);
 
@@ -1040,6 +1040,9 @@ namespace SpaceEngine.Tests
         {
             // TODO : Render fake stars maybe?
 
+            StarsMaterial.SetTexture("_Particle", StarParticle);
+            StarsMaterial.SetFloat("_Particle_Absolute_Size", Settings.GalaxyRenderingParameters.StarAbsoluteSize);
+
             for (byte generationType = 0; generationType < collection.Capacity; generationType++)
             {
                 var buffers = collection[generationType];
@@ -1051,9 +1054,6 @@ namespace SpaceEngine.Tests
                     StarsMaterial.SetPass(pass);
 
                     StarsMaterial.SetBuffer("data", buffer);
-
-                    StarsMaterial.SetTexture("_Particle", StarParticle);
-                    StarsMaterial.SetFloat("_Particle_Absolute_Size", Settings.GalaxyRenderingParameters.StarAbsoluteSize);
 
                     Graphics.DrawProcedural(MeshTopology.Points, count);
                 }
