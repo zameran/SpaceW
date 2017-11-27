@@ -92,16 +92,14 @@ namespace SpaceEngine.Cameras
 
                 if (Input.GetMouseButton(0) && !MouseOverUI)
                 {
-                    Rotation.z = 0;
-
                     RayScreen = CameraComponent.ScreenPointToRay(Input.mousePosition);
 
                     TargetRotation = Quaternion.LookRotation((RayScreen.origin + RayScreen.direction * 10.0f) - transform.position, transform.up);
-
+                    
                     transform.rotation = Quaternion.Slerp(transform.rotation, TargetRotation, Time.fixedDeltaTime * RotationSpeed);
 
-                    if (!Aligned)
-                        transform.Rotate(new Vector3(0.0f, 0.0f, Rotation.z));
+                    Rotation.z = 0;
+                    //if (!Aligned) transform.Rotate(new Vector3(0.0f, 0.0f, Rotation.z));
                 }
                 else if (Input.GetMouseButton(1) && !MouseOverUI)
                 {
@@ -268,11 +266,11 @@ namespace SpaceEngine.Cameras
         {
             if (Body != null)
             {
-                RotateAroundOrigin(rotationVector, Body.Origin);
+                RotateAroundOrigin(rotationVector, Body.Origin, RotationSpeed);
             }
             else
             {
-                RotateAroundOrigin(rotationVector, Vector3.zero);
+                RotateAroundOrigin(rotationVector, Vector3.zero, RotationSpeed);
             }
         }
 
@@ -280,27 +278,27 @@ namespace SpaceEngine.Cameras
         {
             if (Body != null)
             {
-                RotateAroundOrigin(rotationVector, distanceVector, Body.Origin);
+                RotateAroundOrigin(rotationVector, distanceVector, Body.Origin, RotationSpeed);
             }
             else
             {
-                RotateAroundOrigin(rotationVector, distanceVector, Vector3.zero);
+                RotateAroundOrigin(rotationVector, distanceVector, Vector3.zero, RotationSpeed);
             }
         }
 
-        private void RotateAroundOrigin(Vector3 rotationVector, Vector3 origin)
+        private void RotateAroundOrigin(Vector3 rotationVector, Vector3 origin, float rotationSpeed)
         {
-            transform.RotateAround(origin, Vector3.up, rotationVector.x * (Time.fixedDeltaTime * RotationSpeed) * 10.0f);
-            transform.RotateAround(origin, Vector3.up, rotationVector.y * (Time.fixedDeltaTime * RotationSpeed) * 10.0f);
+            transform.RotateAround(origin, Vector3.up, rotationVector.x * (Time.fixedDeltaTime * rotationSpeed) * 10.0f);
+            transform.RotateAround(origin, Vector3.up, rotationVector.y * (Time.fixedDeltaTime * rotationSpeed) * 10.0f);
         }
 
-        private void RotateAroundOrigin(Vector3 rotationVector, Vector3 distanceVector, Vector3 origin)
+        private void RotateAroundOrigin(Vector3 rotationVector, Vector3 distanceVector, Vector3 origin, float rotationSpeed)
         {
             var currentRotation = Quaternion.Euler(rotationVector + TargetRotation.eulerAngles);
             var currentPosition = currentRotation * distanceVector + origin;
 
-            transform.rotation = Quaternion.Slerp(transform.rotation, currentRotation, (Time.fixedDeltaTime * RotationSpeed) * 10.0f);
-            transform.position = Vector3.Slerp(transform.position, currentPosition, (Time.deltaTime * RotationSpeed) * 5.0f);
+            transform.rotation = Quaternion.Slerp(transform.rotation, currentRotation, (Time.fixedDeltaTime * rotationSpeed) * 10.0f);
+            transform.position = Vector3.Slerp(transform.position, currentPosition, (Time.deltaTime * rotationSpeed) * 5.0f);
         }
     }
 }

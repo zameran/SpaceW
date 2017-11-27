@@ -115,7 +115,7 @@ namespace SpaceEngine.Core.Utilities
 
         protected virtual void SetWorldToCameraMatrix()
         {
-            var po = new Vector3d(position.X, position.Y, 0.0);
+            var po = GetLookAtPosition();
             var px = Vector3d.right;
             var py = Vector3d.up;
             var pz = Vector3d.forward;
