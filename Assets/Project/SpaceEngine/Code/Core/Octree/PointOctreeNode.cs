@@ -60,7 +60,7 @@ namespace SpaceEngine.Core.Octree
         /// <summary>
         /// Bounding box that represents this node.
         /// </summary>
-        private Bounds bounds = default(Bounds);
+        private Bounds Bounds = default(Bounds);
 
         /// <summary>
         /// Objects in this node.
@@ -85,7 +85,7 @@ namespace SpaceEngine.Core.Octree
         /// <summary>
         /// For reverting the bounds size after temporary changes.
         /// </summary>
-        private Vector3 actualBoundsSize;
+        private Vector3 ActualBoundsSize;
 
         /// <summary>
         /// This node is not splitted?
@@ -97,7 +97,7 @@ namespace SpaceEngine.Core.Octree
         /// </summary>
         protected class OctreeObject
         {
-            public T Obj;
+            public T Object;
             public Vector3 Position;
         }
 
@@ -120,7 +120,7 @@ namespace SpaceEngine.Core.Octree
         /// <returns></returns>
         public bool Add(T obj, Vector3 position)
         {
-            if (!Encapsulates(bounds, position)) { return false; }
+            if (!Encapsulates(Bounds, position)) { return false; }
 
             SubAdd(obj, position);
 
@@ -138,7 +138,7 @@ namespace SpaceEngine.Core.Octree
 
             for (int i = 0; i < Objects.Count; i++)
             {
-                if (Objects[i].Obj.Equals(obj))
+                if (Objects[i].Object.Equals(obj))
                 {
                     removed = Objects.Remove(Objects[i]);
 
@@ -179,11 +179,11 @@ namespace SpaceEngine.Core.Octree
         {
             // Does the ray hit this node at all?
             // NOTE : Expanding the bounds is not exactly the same as a real distance check, but it's fast...
-            bounds.Expand(new Vector3(maxDistance * 2, maxDistance * 2, maxDistance * 2));
+            Bounds.Expand(new Vector3(maxDistance * 2, maxDistance * 2, maxDistance * 2));
 
-            var intersected = bounds.IntersectRay(ray);
+            var intersected = Bounds.IntersectRay(ray);
 
-            bounds.size = actualBoundsSize;
+            Bounds.size = ActualBoundsSize;
 
             if (!intersected) return;
 
@@ -192,7 +192,7 @@ namespace SpaceEngine.Core.Octree
             {
                 if (DistanceToRay(ray, Objects[i].Position) <= maxDistance)
                 {
-                    result.Add(Objects[i].Obj);
+                    result.Add(Objects[i].Object);
                 }
             }
 
@@ -219,7 +219,7 @@ namespace SpaceEngine.Core.Octree
             {
                 if (Vector3.Distance(position, Objects[i].Position) <= maxDistance)
                 {
-                    result.Add(Objects[i].Obj);
+                    result.Add(Objects[i].Object);
                 }
             }
 
@@ -421,8 +421,8 @@ namespace SpaceEngine.Core.Octree
             MinSize = minSizeVal;
             Center = centerVal;
 
-            actualBoundsSize = new Vector3(SideLength, SideLength, SideLength);
-            bounds = new Bounds(Center, actualBoundsSize);
+            ActualBoundsSize = new Vector3(SideLength, SideLength, SideLength);
+            Bounds = new Bounds(Center, ActualBoundsSize);
 
             var quarter = SideLength / 4.0f;
             var childActualLength = SideLength / 2.0f;
@@ -449,7 +449,7 @@ namespace SpaceEngine.Core.Octree
             // We know it fits at this level if we've got this far. Just add if few objects are here, or children would be below min size.
             if (Objects.Count < NUM_OBJECTS_ALLOWED || (SideLength / 2) < MinSize)
             {
-                Objects.Add(new OctreeObject { Obj = obj, Position = objPos });
+                Objects.Add(new OctreeObject { Object = obj, Position = objPos });
             }
             else
             {
@@ -475,7 +475,7 @@ namespace SpaceEngine.Core.Octree
                         // Find which child the object is closest to based on where the object's center is located in relation to the octree's center.
                         bestFitChild = BestFitChild(existingObj.Position);
 
-                        Children[bestFitChild].SubAdd(existingObj.Obj, existingObj.Position); // Go a level deeper...			
+                        Children[bestFitChild].SubAdd(existingObj.Object, existingObj.Position); // Go a level deeper...			
                         Objects.Remove(existingObj); // Remove from here...
                     }
                 }
