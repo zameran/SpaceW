@@ -645,6 +645,7 @@ namespace SpaceEngine.Core.Bodies
 
             if (Atmosphere != null) Atmosphere.Reanimate();
             if (Ocean != null) Ocean.Reanimate();
+            if (Ring != null) Ring.Reanimate();
         }
 
         public virtual List<string> GetKeywords()

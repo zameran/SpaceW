@@ -35,6 +35,7 @@
 
 using SpaceEngine.Core;
 using SpaceEngine.Core.Bodies;
+using SpaceEngine.Core.Patterns.Strategy.Reanimator;
 using SpaceEngine.Core.Patterns.Strategy.Renderable;
 using SpaceEngine.Core.Patterns.Strategy.Uniformed;
 using SpaceEngine.Environment.Shadows;
@@ -45,7 +46,7 @@ using UnityEngine;
 
 namespace SpaceEngine.Environment.Rings
 {
-    public class Ring : NodeSlave<Ring>, IUniformed<Material>, IRenderable<Ring>
+    public class Ring : NodeSlave<Ring>, IUniformed<Material>, IReanimateable, IRenderable<Ring>
     {
         public Body ParentBody;
 
@@ -138,7 +139,7 @@ namespace SpaceEngine.Environment.Rings
 
         #endregion
 
-        #region IUniformed
+        #region IUniformed<Material>
 
         public void InitUniforms(Material target)
         {
@@ -168,6 +169,15 @@ namespace SpaceEngine.Environment.Rings
         {
             InitUniforms(RingMaterial);
             SetUniforms(RingMaterial);
+        }
+
+        #endregion
+
+        #region IReanimateable
+
+        public void Reanimate()
+        {
+            InitUniforms(RingMaterial);
         }
 
         #endregion
