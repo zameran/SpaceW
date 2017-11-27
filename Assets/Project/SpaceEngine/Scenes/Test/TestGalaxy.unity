@@ -124,7 +124,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!198 &183814712
 ParticleSystem:
   m_ObjectHideFlags: 0
@@ -184,7 +184,7 @@ ParticleSystem:
   moveWithTransform: 0
   moveWithCustomTransform: {fileID: 0}
   scalingMode: 1
-  randomSeed: 1985118962
+  randomSeed: 745512074
   InitialModule:
     serializedVersion: 3
     enabled: 1
@@ -3468,7 +3468,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!198 &308708629
 ParticleSystem:
   m_ObjectHideFlags: 0
@@ -3528,7 +3528,7 @@ ParticleSystem:
   moveWithTransform: 0
   moveWithCustomTransform: {fileID: 0}
   scalingMode: 1
-  randomSeed: 784200479
+  randomSeed: 1848448692
   InitialModule:
     serializedVersion: 3
     enabled: 1
@@ -8233,7 +8233,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!198 &1175205910
 ParticleSystem:
   m_ObjectHideFlags: 0
@@ -8293,7 +8293,7 @@ ParticleSystem:
   moveWithTransform: 0
   moveWithCustomTransform: {fileID: 0}
   scalingMode: 1
-  randomSeed: -1563034241
+  randomSeed: -327368223
   InitialModule:
     serializedVersion: 3
     enabled: 1
@@ -11602,7 +11602,6 @@ MonoBehaviour:
       GasSize: 0.5
       StarAbsoluteSize: 64
       DustPassCount: 1
-      HDRExposure: 1.2
       DustColorDistribution:
         Gradient:
           serializedVersion: 2
@@ -11749,7 +11748,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!199 &1725917396
 ParticleSystemRenderer:
   serializedVersion: 4
@@ -11861,7 +11860,7 @@ ParticleSystem:
   moveWithTransform: 0
   moveWithCustomTransform: {fileID: 0}
   scalingMode: 1
-  randomSeed: 1775698061
+  randomSeed: -92462199
   InitialModule:
     serializedVersion: 3
     enabled: 1

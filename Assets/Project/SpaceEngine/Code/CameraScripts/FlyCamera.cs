@@ -194,6 +194,11 @@ namespace SpaceEngine.Cameras
                 DistanceToAlign = Body.Size * 1.025f;
                 DistanceToCore = Vector3.Distance(transform.position, Body.transform.position);
             }
+            else
+            {
+                DistanceToAlign = 0.0f;
+                DistanceToCore = Vector3.Distance(transform.position, Vector3.zero);
+            }
         }
 
         private void UpdateClipPlanes()
