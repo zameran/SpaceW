@@ -60,8 +60,11 @@
 			{
 				float4 frameBuffer = tex2D(_FrameBuffer, i.texcoord);
 
-				color = frameBuffer;
-				color.a = 1.0f - color.a / 16.0f;
+				float3 outputColor = frameBuffer.rgb;
+				float outputAlpha = 1.0f - frameBuffer.a / 16.0f;
+
+				color.rgb = outputColor;
+				color.a = outputAlpha;
 
 				color = clamp(color, 0.0f, 65536.0f); // Avoid negative colors...
 			}

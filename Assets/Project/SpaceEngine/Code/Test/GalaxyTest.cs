@@ -909,8 +909,11 @@ namespace SpaceEngine.Tests
             Settings.GalaxyGenerationParameters.DustColorDistribution.GenerateLut();
             Settings.GalaxyRenderingParameters.DustColorDistribution.GenerateLut();
 
-            FrameBuffer1 = RTExtensions.CreateRTexture(new Vector2(Screen.width / 2.0f, Screen.height / 2.0f), 0, RenderTextureFormat.ARGBFloat, FilterMode.Bilinear, TextureWrapMode.Clamp);
-            FrameBuffer2 = RTExtensions.CreateRTexture(new Vector2(Screen.width / 4.0f, Screen.height / 4.0f), 0, RenderTextureFormat.ARGBFloat, FilterMode.Bilinear, TextureWrapMode.Clamp);
+            var hightResolution = new Vector2(Screen.width / 2.0f, Screen.height / 2.0f);
+            var lowResolution = new Vector2(Screen.width / 4.0f, Screen.height / 4.0f);
+
+            FrameBuffer1 = RTExtensions.CreateRTexture(hightResolution, 0, RenderTextureFormat.ARGBFloat, FilterMode.Bilinear, TextureWrapMode.Clamp);
+            FrameBuffer2 = RTExtensions.CreateRTexture(lowResolution, 0, RenderTextureFormat.ARGBFloat, FilterMode.Bilinear, TextureWrapMode.Clamp);
 
             DustCommandBuffer = new CommandBuffer();
             DustCommandBuffer.name = "Galaxy Dust Rendering";
