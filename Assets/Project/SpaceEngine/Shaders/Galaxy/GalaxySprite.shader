@@ -56,7 +56,7 @@
 			o.uv = float2(0.25f, 0.25f);
 			o.size = particleSize / _Particle_Absolute_Size;
 			o.color = particleColor;
-			o.id = id;
+			o.id = id;	// NOTE : Can be particles's ID.
 		}
 		
 		[maxvertexcount(4)]

@@ -483,6 +483,7 @@ namespace SpaceEngine.Tests
         public Mesh ScreenMesh = null;
 
         public bool AutoUpdate = false;
+        public bool AutoLutUpdate = false;
 
         private RenderTexture FrameBuffer1;
         private RenderTexture FrameBuffer2;
@@ -860,6 +861,24 @@ namespace SpaceEngine.Tests
 
         #endregion
 
+        #region Luts
+
+        public void GenerateLuts()
+        {
+            Settings.GalaxyGenerationParameters.StarsColorDistribution.GenerateLut();
+            Settings.GalaxyGenerationParameters.DustColorDistribution.GenerateLut();
+            Settings.GalaxyRenderingParameters.DustColorDistribution.GenerateLut();
+        }
+
+        public void DestroyLuts()
+        {
+            Settings.GalaxyGenerationParameters.StarsColorDistribution.DestroyLut();
+            Settings.GalaxyGenerationParameters.DustColorDistribution.DestroyLut();
+            Settings.GalaxyRenderingParameters.DustColorDistribution.DestroyLut();
+        }
+
+        #endregion
+
         #region Octree
 
         public void InitOctree()
@@ -938,10 +957,6 @@ namespace SpaceEngine.Tests
                 ScreenMesh.bounds = new Bounds(Vector3.zero, new Vector3(1e8f, 1e8f, 1e8f));
             }
 
-            Settings.GalaxyGenerationParameters.StarsColorDistribution.GenerateLut();
-            Settings.GalaxyGenerationParameters.DustColorDistribution.GenerateLut();
-            Settings.GalaxyRenderingParameters.DustColorDistribution.GenerateLut();
-
             var hightResolution = new Vector2(Screen.width / 2.0f, Screen.height / 2.0f);
             var lowResolution = new Vector2(Screen.width / 4.0f, Screen.height / 4.0f);
 
@@ -950,6 +965,8 @@ namespace SpaceEngine.Tests
 
             DustCommandBuffer = new CommandBuffer();
             DustCommandBuffer.name = "Galaxy Dust Rendering";
+
+            GenerateLuts();
 
             InitBuffers();
             GenerateBuffers();
@@ -961,6 +978,7 @@ namespace SpaceEngine.Tests
         protected override void UpdateNode()
         {
             if (AutoUpdate) GenerateBuffers();
+            if (AutoLutUpdate) GenerateLuts();
 
             var diameter = Settings.GalaxyGenerationParameters.Radius * 2.0f;
             var plane = new Plane(Vector3.up, diameter);
@@ -991,6 +1009,7 @@ namespace SpaceEngine.Tests
 
             DestroyBuffers();
             DestroyDustMaterials();
+            DestroyLuts();
 
             if (FrameBuffer1 != null) FrameBuffer1.ReleaseAndDestroy();
             if (FrameBuffer2 != null) FrameBuffer2.ReleaseAndDestroy();
@@ -1001,10 +1020,6 @@ namespace SpaceEngine.Tests
             Helper.Destroy(ScreenMaterial);
 
             Helper.Destroy(ScreenMesh);
-
-            Settings.GalaxyGenerationParameters.StarsColorDistribution.DestroyLut();
-            Settings.GalaxyGenerationParameters.DustColorDistribution.DestroyLut();
-            Settings.GalaxyRenderingParameters.DustColorDistribution.DestroyLut();
         }
 
         #endregion
