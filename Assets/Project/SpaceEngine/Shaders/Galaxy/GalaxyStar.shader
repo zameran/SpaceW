@@ -63,9 +63,10 @@
 
 		void vert(in appdata v, out v2g o)
 		{
-			float3 particlePosition = data[v.id].position;
-			float4 particleColor = data[v.id].color;
-			float particleSize = data[v.id].size;
+			uint id = v.id;
+			float3 particlePosition = data[id].position;
+			float4 particleColor = data[id].color;
+			float particleSize = data[id].size;
 
 			float magnitude = 6.5 + length(particleColor) * (-1.44f - 1.5f);
 			float brightness = GetFlickerAmount(particlePosition.xy * particleSize) * pow(5.0f, (-magnitude - 1.44f) / 2.5f);
@@ -78,9 +79,10 @@
 
 		void vert_debug(in appdata v, out v2g o)
 		{
-			float3 particlePosition = data[v.id].position;
-			float4 particleColor = data[v.id].color;
-			float particleSize = data[v.id].size;
+			uint id = v.id;
+			float3 particlePosition = data[id].position;
+			float4 particleColor = data[id].color;
+			float particleSize = data[id].size;
 
 			o.vertex = UnityObjectToClipPos(float4(particlePosition, 1.0f));
 			o.uv = float2(0.25f, 0.25f);

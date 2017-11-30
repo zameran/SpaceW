@@ -11592,7 +11592,9 @@ MonoBehaviour:
   StarsShader: {fileID: 4800000, guid: 43da5f6eb24190c49aa3bf6459324400, type: 3}
   DustShader: {fileID: 4800000, guid: 095b3645e4835d3479aa0077a0d87c3a, type: 3}
   ScreenShader: {fileID: 4800000, guid: b276bdd369d92454888194a25c03467b, type: 3}
+  SpriteShader: {fileID: 4800000, guid: 24a2711bd4b5d56448d6ee02b03f882d, type: 3}
   StarParticle: {fileID: 2800000, guid: 636b03c5c7635864288d1e9ee1093984, type: 3}
+  GasParticle: {fileID: 2800000, guid: dfc67d01d9a8de74092c8d31994bc904, type: 3}
   Settings:
     Type: 2
     GalaxyRenderingParameters:

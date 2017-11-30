@@ -42,7 +42,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.InteropServices;
-
 #if UNITY_EDITOR
 using UnityEditor;
 #endif
@@ -456,8 +455,10 @@ namespace SpaceEngine.Tests
         public Shader StarsShader;
         public Shader DustShader;
         public Shader ScreenShader;
+        public Shader SpriteShader;
 
         public Texture2D StarParticle;
+        public Texture2D GasParticle;
 
         private Material StarsMaterial;
         private Material ScreenMaterial;
@@ -467,8 +468,10 @@ namespace SpaceEngine.Tests
         private List<List<ComputeBuffer>> DustAppendBuffers = new List<List<ComputeBuffer>>();
         private List<List<ComputeBuffer>> GasAppendBuffers = new List<List<ComputeBuffer>>();
         private List<Material> DustMaterials = new List<Material>();
+        private List<Material> DustSpriteMaterials = new List<Material>();
         private ComputeBuffer DustArgsBuffer;
         private ComputeBuffer GasArgsBuffer;
+        private ComputeBuffer SpriteArgsBuffer;
 
         private CommandBuffer DustCommandBuffer;
 
@@ -506,18 +509,26 @@ namespace SpaceEngine.Tests
 
         public void InitDustMaterials()
         {
-            if (DustMaterials != null)
+            if (DustMaterials != null || DustSpriteMaterials != null)
             {
                 DestroyDustMaterials();
             }
 
             DustMaterials = new List<Material>((int)Settings.Type);
+            DustSpriteMaterials = new List<Material>((int)Settings.Type);
 
             for (byte materialIndex = 0; materialIndex < DustMaterials.Capacity; materialIndex++)
             {
                 var material = MaterialHelper.CreateTemp(DustShader, string.Format("Dust-{0}", materialIndex));
 
                 DustMaterials.Add(material);
+            }
+
+            for (byte materialIndex = 0; materialIndex < DustSpriteMaterials.Capacity; materialIndex++)
+            {
+                var material = MaterialHelper.CreateTemp(SpriteShader, string.Format("Dust-Sprite-{0}", materialIndex));
+
+                DustSpriteMaterials.Add(material);
             }
         }
 
@@ -529,6 +540,13 @@ namespace SpaceEngine.Tests
             }
 
             DustMaterials.Clear();
+
+            for (byte materialIndex = 0; materialIndex < DustSpriteMaterials.Capacity; materialIndex++)
+            {
+                Helper.Destroy(DustSpriteMaterials[materialIndex]);
+            }
+
+            DustSpriteMaterials.Clear();
         }
 
         #endregion
@@ -576,7 +594,7 @@ namespace SpaceEngine.Tests
         {
             if (StarsBuffers != null || DustBuffers != null || 
                 DustAppendBuffers != null || GasAppendBuffers != null || 
-                DustArgsBuffer != null || GasArgsBuffer != null)
+                DustArgsBuffer != null || GasArgsBuffer != null || SpriteArgsBuffer != null)
             {
                 DestroyBuffers();
             }
@@ -652,6 +670,7 @@ namespace SpaceEngine.Tests
 
             DustArgsBuffer = new ComputeBuffer(1, 5 * sizeof(uint), ComputeBufferType.IndirectArguments);
             GasArgsBuffer = new ComputeBuffer(1, 5 * sizeof(uint), ComputeBufferType.IndirectArguments);
+            SpriteArgsBuffer = new ComputeBuffer(1, 5 * sizeof(uint), ComputeBufferType.IndirectArguments);
         }
 
         public void GenerateBuffers()
@@ -836,6 +855,7 @@ namespace SpaceEngine.Tests
 
             DustArgsBuffer.ReleaseAndDisposeBuffer();
             GasArgsBuffer.ReleaseAndDisposeBuffer();
+            SpriteArgsBuffer.ReleaseAndDisposeBuffer();
         }
 
         #endregion
@@ -889,6 +909,8 @@ namespace SpaceEngine.Tests
             StarsMaterial = MaterialHelper.CreateTemp(StarsShader, "Galaxy Stars");
 
             if (DustShader == null) DustShader = Shader.Find("SpaceEngine/Galaxy/Dust");
+            if (SpriteShader == null) SpriteShader = Shader.Find("SpaceEngine/Galaxy/Sprite");
+
             InitDustMaterials();
 
             if (ScreenShader == null) ScreenShader = Shader.Find("SpaceEngine/Galaxy/Screen");
@@ -898,7 +920,14 @@ namespace SpaceEngine.Tests
             {
                 Debug.LogWarning("GalaxyTest.InitNode: StarParticle texture is null! Trying to load from Resources the default one! Impossible to render stars, if fail!");
 
-                StarParticle = Resources.Load("Textures/Galaxy/StarParticle", typeof(Texture2D)) as Texture2D;
+                StarParticle = Resources.Load("Textures/Galaxy/StarParticle2", typeof(Texture2D)) as Texture2D;
+            }
+
+            if (GasParticle == null)
+            {
+                Debug.LogWarning("GalaxyTest.InitNode: GasParticle texture is null! Trying to load from Resources the default one! Impossible to render gas sprites, if fail!");
+
+                GasParticle = Resources.Load("Textures/Galaxy/StarParticle1", typeof(Texture2D)) as Texture2D;
             }
 
             if (VolumeMesh == null) Debug.LogWarning("GalaxyTest.InitNode: VolumeMesh is null! Impossible to render volumetric stuff!");
@@ -1117,34 +1146,38 @@ namespace SpaceEngine.Tests
             // 2 - Start index location...
             // 3 - Base vertex location...
             // 4 - Start instance location...
-
-            //var dustArgs = new uint[] { (uint)VolumeMesh.GetIndexCount(0), (uint)DustDrawCount, 0, 0, 0 };
-            //var gasArgs = new uint[] { (uint)VolumeMesh.GetIndexCount(0), (uint)GasDrawCount, 0, 0, 0 };
             var dustArgs = new uint[] { (uint)VolumeMesh.GetIndexCount(0), 1, 0, 0, 0 };
             var gasArgs = new uint[] { (uint)VolumeMesh.GetIndexCount(0), 1, 0, 0, 0 };
+            var spriteArgs = new uint[] { 0, 1, 0, 0, 0 };
 
             DustArgsBuffer.SetData(dustArgs);
             GasArgsBuffer.SetData(gasArgs);
+            SpriteArgsBuffer.SetData(spriteArgs);
+
+            var dustParams1 = new Vector2(Settings.GalaxyRenderingParameters.DustStrength, Settings.GalaxyRenderingParameters.DustSize);
+            var gasParams1 = new Vector2(Settings.GalaxyRenderingParameters.GasStength, Settings.GalaxyRenderingParameters.GasSize);
+            var galaxyPosition = transform.position - GodManager.Instance.View.WorldCameraPosition;
 
             for (byte generationType = 0; generationType < DustBuffers.Capacity; generationType++)
             {
                 var dustBuffers = DustAppendBuffers[generationType];
                 var gasBuffers = GasAppendBuffers[generationType];
                 var material = DustMaterials[generationType];
+                var spriteMaterial = DustSpriteMaterials[generationType];
 
-                material.SetVector("dustParams1", new Vector2(Settings.GalaxyRenderingParameters.DustStrength, Settings.GalaxyRenderingParameters.DustSize));
-                material.SetVector("gasParams1", new Vector2(Settings.GalaxyRenderingParameters.GasStength, Settings.GalaxyRenderingParameters.GasSize));
+                material.SetVector("dustParams1", dustParams1);
+                material.SetVector("gasParams1", gasParams1);
                 material.SetTexture("ColorDistributionTable", Settings.GalaxyRenderingParameters.DustColorDistribution.Lut);
-                material.SetVector("_Galaxy_Position", transform.position - GodManager.Instance.View.WorldCameraPosition);
+                material.SetVector("_Galaxy_Position", galaxyPosition);
 
                 // NOTE : Render galaxy dust...
                 for (var bufferIndex = 0; bufferIndex < Mathf.Min(Settings.GalaxyRenderingParameters.DustPassCount, dustBuffers.Capacity); bufferIndex++)
                 {
                     var dustBuffer = dustBuffers[bufferIndex];
 
-                    ComputeBuffer.CopyCount(dustBuffer, DustArgsBuffer, 4);
-
                     material.SetBuffer("dust", dustBuffer);
+
+                    ComputeBuffer.CopyCount(dustBuffer, DustArgsBuffer, 4);
 
                     if (BlendFactor < 1.0f)
                     {
@@ -1163,9 +1196,9 @@ namespace SpaceEngine.Tests
                 {
                     var gasBuffer = gasBuffers[bufferIndex];
 
-                    ComputeBuffer.CopyCount(gasBuffer, GasArgsBuffer, 4);
-
                     material.SetBuffer("gas", gasBuffer);
+
+                    ComputeBuffer.CopyCount(gasBuffer, GasArgsBuffer, 4);
 
                     if (BlendFactor < 1.0f)
                     {
@@ -1176,6 +1209,34 @@ namespace SpaceEngine.Tests
                     {
                         DustCommandBuffer.SetRenderTarget(FrameBuffer2);
                         DustCommandBuffer.DrawMeshInstancedIndirect(VolumeMesh, 0, material, 1, GasArgsBuffer);
+                    }
+                }
+
+                spriteMaterial.SetTexture("_Particle", GasParticle);
+                spriteMaterial.SetFloat("_Particle_Absolute_Size", 1.0f);
+                spriteMaterial.SetVector("dustParams1", dustParams1);
+                spriteMaterial.SetVector("gasParams1", gasParams1);
+                spriteMaterial.SetTexture("ColorDistributionTable", Settings.GalaxyRenderingParameters.DustColorDistribution.Lut);
+                spriteMaterial.SetVector("_Galaxy_Position", galaxyPosition);
+
+                for (var bufferIndex = 0; bufferIndex < Mathf.Min(Settings.GalaxyRenderingParameters.DustPassCount, gasBuffers.Capacity); bufferIndex++)
+                {
+                    var gasBuffer = gasBuffers[bufferIndex];
+                    var trs = Matrix4x4.identity;
+
+                    spriteMaterial.SetBuffer("data", gasBuffer);
+
+                    ComputeBuffer.CopyCount(gasBuffer, SpriteArgsBuffer, 0);
+
+                    if (BlendFactor < 1.0f)
+                    {
+                        DustCommandBuffer.SetRenderTarget(FrameBuffer1);
+                        DustCommandBuffer.DrawProceduralIndirect(trs, spriteMaterial, 0, MeshTopology.Points, SpriteArgsBuffer);
+                    }
+                    else
+                    {
+                        DustCommandBuffer.SetRenderTarget(FrameBuffer2);
+                        DustCommandBuffer.DrawProceduralIndirect(trs, spriteMaterial, 0, MeshTopology.Points, SpriteArgsBuffer);
                     }
                 }
             }
