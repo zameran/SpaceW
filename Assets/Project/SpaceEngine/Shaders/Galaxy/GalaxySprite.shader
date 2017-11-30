@@ -99,7 +99,6 @@
 			float2 samplerUV = i.uv / 0.5f - 0.5f;
 			float4 particleColor = i.color;
 			float4 particleSampler = tex2D(_Particle, Rotate2d(i.id, float3(samplerUV - 0.5f, 0.0f)).xy + 0.5f).a;
-			float2 particleUV = 6.5f * i.uv - 6.5f * float2(0.5f, 0.5f);
 
 			particleColor = float4(i.color.xyz * float3(0.52312f, 0.99695f, 0.94122f), 1.0f);
 

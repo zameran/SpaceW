@@ -282,12 +282,12 @@ namespace SpaceEngine.Core.Tile.Cache
         {
             TileTIDBuffer.Set(producerId, level, tx, ty);
 
-            Tile usedTileTemp = null;
+            Tile tile = null;
 
             // Looks for the requested tile in the used tiles list
-            if (UsedTiles.TryGetValue(TileTIDBuffer, out usedTileTemp))
+            if (UsedTiles.TryGetValue(TileTIDBuffer, out tile))
             {
-                return usedTileTemp;
+                return tile;
             }
             else
             {

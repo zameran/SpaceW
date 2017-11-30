@@ -23,6 +23,13 @@ namespace SpaceEngine.Core.Tile
             public int Tx { get; private set; }
             public int Ty { get; private set; }
 
+            public Id(Id from)
+            {
+                Level = from.Level;
+                Tx = from.Tx;
+                Ty = from.Ty;
+            }
+
             public Id(int level, int tx, int ty)
             {
                 Set(level, tx, ty);
@@ -75,6 +82,13 @@ namespace SpaceEngine.Core.Tile
             public int ProducerId { get; set; }
 
             public Id TileId { get; set; }
+
+            public TId(TId from)
+            {
+                ProducerId = from.ProducerId;
+
+                TileId = new Id(from.TileId);
+            }
 
             public TId(int producerId, int level, int tx, int ty)
             {
