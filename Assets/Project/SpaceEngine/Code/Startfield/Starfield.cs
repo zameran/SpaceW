@@ -209,8 +209,8 @@ namespace SpaceEngine.Startfield
             }
 
             var mesh = new Mesh();
-            mesh.name = string.Format("StarfieldMesh_({0})", Random.Range(float.MinValue, float.MaxValue));
             mesh.CombineMeshes(starsCIs.ToArray());
+            mesh.name = string.Format("StarfieldMesh_({0})", Random.Range(float.MinValue, float.MaxValue));
             mesh.bounds = new Bounds(Vector3.zero, new Vector3(1e8f, 1e8f, 1e8f));
             mesh.hideFlags = HideFlags.DontSave;
 

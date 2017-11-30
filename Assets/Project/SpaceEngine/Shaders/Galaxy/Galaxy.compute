@@ -8,6 +8,9 @@
 
 #include "Galaxy.cginc"
 
+// Used to identify current pass...
+uniform int currentPassIndex;
+
 float3 GenerateParticlePosition(in uint id, in float4 rnd)
 {
 	float eRadius = rnd.x * ellipseRadius;									// Size of the galactic ellipse...
@@ -81,7 +84,7 @@ GalaxyParticle GenerateParticle(uint id, float pertrub, float4 rnd)
 	star.color = color;
 	star.size = size;
 	star.temperature = temperature;
-	star.id = (float3)id;
+	star.id = float3((float)id, (float)currentPassIndex, length(rnd));
 
 	return star;
 }

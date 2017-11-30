@@ -698,6 +698,8 @@ namespace SpaceEngine.Tests
                 {
                     var buffer = buffers[bufferIndex];
 
+                    Core.SetInt("currentPassIndex", (generationType + 1) + (bufferIndex + 1));
+
                     Core.SetVector("randomParams1", (Settings.GalaxyGenerationParameters.Randomize + new Vector3(1.0f, 0.0f, 1.0f)) * ((bufferIndex + 1 + generationType + 1) / 10.0f));
                     Core.SetVector("offsetParams1", new Vector4(Settings.GalaxyGenerationParameters.Offset.x, Settings.GalaxyGenerationParameters.Offset.y, Settings.GalaxyGenerationParameters.Offset.z, 0.0f));
                     Core.SetVector("sizeParams1", new Vector4(Settings.GalaxyGenerationParameters.Radius, Settings.GalaxyGenerationParameters.RadiusEllipse, Settings.GalaxyGenerationParameters.SizeBar, Settings.GalaxyGenerationParameters.Depth));
@@ -719,6 +721,8 @@ namespace SpaceEngine.Tests
                 for (var bufferIndex = 0; bufferIndex < buffers.Capacity; bufferIndex++)
                 {
                     var buffer = buffers[bufferIndex];
+
+                    Core.SetInt("passNumber", (generationType + 1) + (bufferIndex + 1));
 
                     Core.SetVector("randomParams1", (Settings.GalaxyGenerationParameters.Randomize + new Vector3(1.0f, 0.0f, 1.0f)) * ((bufferIndex + 1 + generationType + 1) / 10.0f));
                     Core.SetVector("offsetParams1", new Vector4(Settings.GalaxyGenerationParameters.Offset.x, Settings.GalaxyGenerationParameters.Offset.y, Settings.GalaxyGenerationParameters.Offset.z, 0.0f));
