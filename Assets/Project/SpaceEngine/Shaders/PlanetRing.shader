@@ -232,7 +232,7 @@ Shader "SpaceEngine/Planet/Ring"
 
 			Blend SrcAlpha OneMinusSrcColor
 			Cull Off
-			ZWrite On
+			ZWrite Off // NOTE : Was 'On'. Disable to prevent atmosphere overcast by rings...
 			ZTest LEqual
 			
 			CGPROGRAM
