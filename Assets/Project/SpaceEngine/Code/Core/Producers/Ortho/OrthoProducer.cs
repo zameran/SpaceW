@@ -98,6 +98,15 @@ namespace SpaceEngine.Core
             ResidualTexture.filterMode = FilterMode.Point;
         }
 
+        protected override void OnDestroy()
+        {
+            base.OnDestroy();
+
+            if (ResidualTexture != null) Helper.Destroy(ResidualTexture);
+
+            if (TerrainNode.ParentBody.TCCPS != null) TerrainNode.ParentBody.TCCPS.ClearKeywords(UpSampleMaterial);
+        }
+
         public override int GetBorder()
         {
             return 2;

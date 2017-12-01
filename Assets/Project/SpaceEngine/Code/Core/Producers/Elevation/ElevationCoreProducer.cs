@@ -69,6 +69,13 @@ namespace SpaceEngine.Core
             }
         }
 
+        protected override void OnDestroy()
+        {
+            base.OnDestroy();
+
+            if (TerrainNode.ParentBody.TCCPS != null) TerrainNode.ParentBody.TCCPS.ClearKeywords(ElevationMaterial);
+        }
+
         public override int GetBorder()
         {
             return 2;

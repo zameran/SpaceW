@@ -130,6 +130,11 @@ public sealed class TCCommonParametersSetter : MonoBehaviour, IUniformed<Materia
         Helper.SetKeywords(target, new List<string>() { Engine.ToString() }, false);
     }
 
+    public void ClearKeywords<T>(T target) where T : Material
+    {
+        Helper.SetKeywords(target, new List<string>() { }, false);
+    }
+
     #region IUniformed<Material>
 
     public void InitUniforms(Material target)
