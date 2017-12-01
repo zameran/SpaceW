@@ -103,8 +103,6 @@ namespace SpaceEngine.Core
             base.OnDestroy();
 
             if (ResidualTexture != null) Helper.Destroy(ResidualTexture);
-
-            if (TerrainNode.ParentBody.TCCPS != null) TerrainNode.ParentBody.TCCPS.ClearKeywords(UpSampleMaterial);
         }
 
         public override int GetBorder()

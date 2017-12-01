@@ -103,13 +103,6 @@ namespace SpaceEngine.Core
 
         }
 
-        protected override void OnDestroy()
-        {
-            base.OnDestroy();
-
-            if (TerrainNode.ParentBody.TCCPS != null) TerrainNode.ParentBody.TCCPS.ClearKeywords(ColorMaterial);
-        }
-
         public override bool HasTile(int level, int tx, int ty)
         {
             return ElevationProducer.HasTile(level, tx, ty) && NormalsProducer.HasTile(level, tx, ty);
