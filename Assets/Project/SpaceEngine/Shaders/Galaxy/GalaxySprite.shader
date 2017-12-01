@@ -51,12 +51,13 @@
 			float3 particlePosition = data[id].position;
 			float4 particleColor = data[id].color;
 			float particleSize = data[id].size * (gasSize * 2.0f);
+			float3 particleId = data[id].id;
 
 			o.vertex = mul(mul(_Globals_CameraToScreen, _Globals_WorldToCamera), float4(particlePosition, 1.0f));
 			o.uv = float2(0.25f, 0.25f);
 			o.size = particleSize / _Particle_Absolute_Size;
 			o.color = particleColor;
-			o.id = id;	// NOTE : Can be particles's ID.
+			o.id = particleId.x * particleId.y;
 		}
 		
 		[maxvertexcount(4)]
@@ -100,7 +101,7 @@
 			float4 particleColor = i.color;
 			float4 particleSampler = tex2D(_Particle, Rotate2d(i.id, float3(samplerUV - 0.5f, 0.0f)).xy + 0.5f).a;
 
-			particleColor = float4(i.color.xyz * float3(0.52312f, 0.99695f, 0.94122f), 1.0f);
+			particleColor = float4(i.color.xyz * gasMultiplicationColor, 1.0f);
 
 			color = -((particleSampler * particleColor) * (gasStrength * 32.0f));
 			color.a = dot(color.xyz, 1.0f);

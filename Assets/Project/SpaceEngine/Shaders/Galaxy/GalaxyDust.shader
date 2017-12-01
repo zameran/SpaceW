@@ -125,7 +125,7 @@
 
 			UnpackParticle(i, gasStrength, particleColor);
 
-			color = float4(-particleColor.rgb * float3(0.52312f, 0.99695f, 0.94122f), particleColor.a);
+			color = float4(-particleColor.rgb * gasMultiplicationColor, particleColor.a);
 		}
 		ENDCG
 

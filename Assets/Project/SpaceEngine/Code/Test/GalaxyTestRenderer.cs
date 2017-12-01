@@ -128,11 +128,11 @@ namespace SpaceEngine.Tests
             }
             else if (RenderMethod == RenderType.DebugStars)
             {
-                Galaxy.RenderStars(1); // NOTE : Render stars as dots...
+                Galaxy.RenderDebugStars();  // NOTE : Render stars as dots...
             }
             else if (RenderMethod == RenderType.DebugDust)
             {
-                Galaxy.RenderDust();   // NOTE : Render dust as dots...
+                Galaxy.RenderDustDebug();   // NOTE : Render dust as dots...
             }
             else if (RenderMethod == RenderType.DebugFilterDust)
             {

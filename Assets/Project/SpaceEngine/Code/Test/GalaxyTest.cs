@@ -42,6 +42,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.InteropServices;
+
 #if UNITY_EDITOR
 using UnityEditor;
 #endif
@@ -605,69 +606,10 @@ namespace SpaceEngine.Tests
             DustAppendBuffers = new List<List<ComputeBuffer>>((int)Settings.Type);
             GasAppendBuffers = new List<List<ComputeBuffer>>((int)Settings.Type);
 
-            for (byte generationType = 0; generationType < StarsBuffers.Capacity; generationType++)
-            {
-                var buffers = new List<ComputeBuffer>(Settings.GalaxyParameters.PassCount);
-
-                for (var bufferIndex = 0; bufferIndex < buffers.Capacity; bufferIndex++)
-                {
-                    var buffer = new ComputeBuffer(Settings.GalaxyParameters.Count, Marshal.SizeOf<GalaxyParticle>(), ComputeBufferType.Default);
-
-                    buffer.SetData(new GalaxyParticle[Settings.GalaxyParameters.Count]);
-
-                    buffers.Add(buffer);
-                }
-
-                StarsBuffers.Add(buffers);
-            }
-
-            for (byte generationType = 0; generationType < DustBuffers.Capacity; generationType++)
-            {
-                var buffers = new List<ComputeBuffer>(Settings.GalaxyParameters.PassCount);
-
-                for (var bufferIndex = 0; bufferIndex < buffers.Capacity; bufferIndex++)
-                {
-                    var buffer = new ComputeBuffer(Settings.GalaxyParameters.DustCount, Marshal.SizeOf<GalaxyParticle>(), ComputeBufferType.Default);
-
-                    buffer.SetData(new GalaxyParticle[Settings.GalaxyParameters.DustCount]);
-
-                    buffers.Add(buffer);
-                }
-
-                DustBuffers.Add(buffers);
-            }
-
-            for (byte generationType = 0; generationType < DustAppendBuffers.Capacity; generationType++)
-            {
-                var buffers = new List<ComputeBuffer>(Settings.GalaxyParameters.PassCount);
-
-                for (var bufferIndex = 0; bufferIndex < buffers.Capacity; bufferIndex++)
-                {
-                    var buffer = new ComputeBuffer(Settings.GalaxyParameters.Count, Marshal.SizeOf<GalaxyParticle>(), ComputeBufferType.Append);
-
-                    buffer.SetCounterValue(0);
-
-                    buffers.Add(buffer);
-                }
-
-                DustAppendBuffers.Add(buffers);
-            }
-
-            for (byte generationType = 0; generationType < GasAppendBuffers.Capacity; generationType++)
-            {
-                var buffers = new List<ComputeBuffer>(Settings.GalaxyParameters.PassCount);
-
-                for (var bufferIndex = 0; bufferIndex < buffers.Capacity; bufferIndex++)
-                {
-                    var buffer = new ComputeBuffer(Settings.GalaxyParameters.Count, Marshal.SizeOf<GalaxyParticle>(), ComputeBufferType.Append);
-
-                    buffer.SetCounterValue(0);
-
-                    buffers.Add(buffer);
-                }
-
-                GasAppendBuffers.Add(buffers);
-            }
+            InitParticleBuffers<GalaxyParticle>(ref StarsBuffers, Settings.GalaxyParameters.PassCount, Settings.GalaxyParameters.Count);
+            InitParticleBuffers<GalaxyParticle>(ref DustBuffers, Settings.GalaxyParameters.PassCount, Settings.GalaxyParameters.DustCount);
+            InitParticleBuffers<GalaxyParticle>(ref DustAppendBuffers, Settings.GalaxyParameters.PassCount, Settings.GalaxyParameters.Count, ComputeBufferType.Append);
+            InitParticleBuffers<GalaxyParticle>(ref GasAppendBuffers, Settings.GalaxyParameters.PassCount, Settings.GalaxyParameters.Count, ComputeBufferType.Append);
 
             DustArgsBuffer = new ComputeBuffer(1, 5 * sizeof(uint), ComputeBufferType.IndirectArguments);
             GasArgsBuffer = new ComputeBuffer(1, 5 * sizeof(uint), ComputeBufferType.IndirectArguments);
@@ -676,29 +618,8 @@ namespace SpaceEngine.Tests
 
         public void GenerateBuffers()
         {
-            for (byte generationType = 0; generationType < DustAppendBuffers.Capacity; generationType++)
-            {
-                var buffers = DustAppendBuffers[generationType];
-
-                for (var bufferIndex = 0; bufferIndex < buffers.Capacity; bufferIndex++)
-                {
-                    var buffer = buffers[bufferIndex];
-
-                    buffer.SetCounterValue(0);
-                }
-            }
-
-            for (byte generationType = 0; generationType < GasAppendBuffers.Capacity; generationType++)
-            {
-                var buffers = GasAppendBuffers[generationType];
-
-                for (var bufferIndex = 0; bufferIndex < buffers.Capacity; bufferIndex++)
-                {
-                    var buffer = buffers[bufferIndex];
-
-                    buffer.SetCounterValue(0);
-                }
-            }
+            SetAppendCounters(ref DustAppendBuffers);
+            SetAppendCounters(ref GasAppendBuffers);
 
             var starsKernel = Core.FindKernel("Stars");
             var dustKernel = Core.FindKernel("Dust");
@@ -708,15 +629,51 @@ namespace SpaceEngine.Tests
             Core.SetTexture(starsKernel, "ColorDistributionTable", Settings.GalaxyGenerationParameters.StarsColorDistribution.Lut);
             Core.SetTexture(dustKernel, "ColorDistributionTable", Settings.GalaxyGenerationParameters.DustColorDistribution.Lut);
 
-            for (byte generationType = 0; generationType < StarsBuffers.Capacity; generationType++)
+            ExecuteParticleGenerator(starsKernel, ref StarsBuffers, (int)(Settings.GalaxyParameters.DustCount / 1024.0f), 1, 1);
+            ExecuteParticleGenerator(dustKernel, ref DustBuffers, (int)(Settings.GalaxyParameters.DustCount / 1024.0f), 1, 1);
+
+            ExecuteParticleFilter(filterDustKernel, ref DustBuffers, ref DustAppendBuffers, (int)(Settings.GalaxyParameters.DustCount / 1024.0f), 1, 1);
+            ExecuteParticleFilter(filterGasKernel, ref DustBuffers, ref GasAppendBuffers, (int)(Settings.GalaxyParameters.DustCount / 1024.0f), 1, 1);
+        }
+
+        protected void DestroyBuffers()
+        {
+            DestroyParticleBuffers(ref StarsBuffers);
+            DestroyParticleBuffers(ref DustBuffers);
+            DestroyParticleBuffers(ref DustAppendBuffers);
+            DestroyParticleBuffers(ref GasAppendBuffers);
+
+            DustArgsBuffer.ReleaseAndDisposeBuffer();
+            GasArgsBuffer.ReleaseAndDisposeBuffer();
+            SpriteArgsBuffer.ReleaseAndDisposeBuffer();
+        }
+
+        public void SetAppendCounters(ref List<List<ComputeBuffer>> input, uint value = 0)
+        {
+            for (byte generationType = 0; generationType < input.Capacity; generationType++)
             {
-                var buffers = StarsBuffers[generationType];
+                var inputBuffers = input[generationType];
+
+                for (var bufferIndex = 0; bufferIndex < inputBuffers.Capacity; bufferIndex++)
+                {
+                    var inputBuffer = inputBuffers[bufferIndex];
+
+                    inputBuffer.SetCounterValue(value);
+                }
+            }
+        }
+
+        public void ExecuteParticleGenerator(int kernel, ref List<List<ComputeBuffer>> input, int tgX, int tgY, int tgZ)
+        {
+            for (byte generationType = 0; generationType < input.Capacity; generationType++)
+            {
+                var inputBuffers = input[generationType];
                 var perPassRotation = (generationType % 2 == 0 ? Settings.GalaxyGenerationPerPassParameters.PassRotation * generationType :
                                                                  Settings.GalaxyGenerationPerPassParameters.PassRotation);
 
-                for (var bufferIndex = 0; bufferIndex < buffers.Capacity; bufferIndex++)
+                for (var bufferIndex = 0; bufferIndex < inputBuffers.Capacity; bufferIndex++)
                 {
-                    var buffer = buffers[bufferIndex];
+                    var inputBuffer = inputBuffers[bufferIndex];
 
                     Core.SetInt("currentPassIndex", (generationType + 1) + (bufferIndex + 1));
 
@@ -727,136 +684,67 @@ namespace SpaceEngine.Tests
                     Core.SetVector("spiralParams1", new Vector4(Settings.GalaxyGenerationParameters.InverseSpiralEccentricity, Settings.GalaxyGenerationParameters.SpiralRotation, perPassRotation, 0.0f));
                     Core.SetVector("temperatureParams1", Settings.GalaxyGenerationParameters.TemperatureRange);
 
-                    Core.SetBuffer(starsKernel, "stars_output", buffer);
-                    Core.Dispatch(starsKernel, (int)(Settings.GalaxyParameters.Count / 1024.0f), 1, 1);
-                }
-            }
-
-            for (byte generationType = 0; generationType < DustBuffers.Capacity; generationType++)
-            {
-                var buffers = DustBuffers[generationType];
-                var perPassRotation = (generationType % 2 == 0 ? Settings.GalaxyGenerationPerPassParameters.PassRotation * generationType :
-                                                                 Settings.GalaxyGenerationPerPassParameters.PassRotation);
-
-                for (var bufferIndex = 0; bufferIndex < buffers.Capacity; bufferIndex++)
-                {
-                    var buffer = buffers[bufferIndex];
-
-                    Core.SetInt("passNumber", (generationType + 1) + (bufferIndex + 1));
-
-                    Core.SetVector("randomParams1", (Settings.GalaxyGenerationParameters.Randomize + new Vector3(1.0f, 0.0f, 1.0f)) * ((bufferIndex + 1 + generationType + 1) / 10.0f));
-                    Core.SetVector("offsetParams1", new Vector4(Settings.GalaxyGenerationParameters.Offset.x, Settings.GalaxyGenerationParameters.Offset.y, Settings.GalaxyGenerationParameters.Offset.z, 0.0f));
-                    Core.SetVector("sizeParams1", new Vector4(Settings.GalaxyGenerationParameters.Radius, Settings.GalaxyGenerationParameters.RadiusEllipse, Settings.GalaxyGenerationParameters.SizeBar, Settings.GalaxyGenerationParameters.Depth));
-                    Core.SetVector("warpParams1", Settings.GalaxyGenerationParameters.Warp);
-                    Core.SetVector("spiralParams1", new Vector4(Settings.GalaxyGenerationParameters.InverseSpiralEccentricity, Settings.GalaxyGenerationParameters.SpiralRotation, perPassRotation, 0.0f));
-
-                    Core.SetBuffer(dustKernel, "dust_output", buffer);
-                    Core.Dispatch(dustKernel, (int)(Settings.GalaxyParameters.DustCount / 1024.0f), 1, 1);
-                }
-            }
-
-            for (byte generationType = 0; generationType < DustAppendBuffers.Capacity; generationType++)
-            {
-                var buffers = DustBuffers[generationType];
-                var appendBuffers = DustAppendBuffers[generationType];
-
-                for (var bufferIndex = 0; bufferIndex < buffers.Capacity; bufferIndex++)
-                {
-                    var buffer = buffers[bufferIndex];
-                    var appendBuffer = appendBuffers[bufferIndex];
-
-                    Core.SetBuffer(filterDustKernel, "filter_input", buffer);
-                    Core.SetBuffer(filterDustKernel, "filter_output", appendBuffer);
-                    Core.Dispatch(filterDustKernel, (int)(Settings.GalaxyParameters.DustCount / 1024.0f), 1, 1);
-                }
-            }
-
-            for (byte generationType = 0; generationType < GasAppendBuffers.Capacity; generationType++)
-            {
-                var buffers = DustBuffers[generationType];
-                var appendBuffers = GasAppendBuffers[generationType];
-
-                for (var bufferIndex = 0; bufferIndex < buffers.Capacity; bufferIndex++)
-                {
-                    var buffer = buffers[bufferIndex];
-                    var appendBuffer = appendBuffers[bufferIndex];
-
-                    Core.SetBuffer(filterGasKernel, "filter_input", buffer);
-                    Core.SetBuffer(filterGasKernel, "filter_output", appendBuffer);
-                    Core.Dispatch(filterGasKernel, (int)(Settings.GalaxyParameters.DustCount / 1024.0f), 1, 1);
+                    Core.SetBuffer(kernel, "particles_output", inputBuffer);
+                    Core.Dispatch(kernel, tgX, tgY, tgZ);
                 }
             }
         }
 
-        protected void DestroyBuffers()
+        public void ExecuteParticleFilter(int kernel, ref List<List<ComputeBuffer>> input, ref List<List<ComputeBuffer>> output, int tgX, int tgY, int tgZ)
         {
-            for (byte generationType = 0; generationType < StarsBuffers.Capacity; generationType++)
+            for (byte generationType = 0; generationType < output.Capacity; generationType++)
             {
-                var buffers = StarsBuffers[generationType];
+                var inputBuffers = input[generationType];
+                var outputBuffers = output[generationType];
 
-                for (var bufferIndex = 0; bufferIndex < buffers.Capacity; bufferIndex++)
+                for (var bufferIndex = 0; bufferIndex < inputBuffers.Capacity; bufferIndex++)
                 {
-                    var buffer = buffers[bufferIndex];
+                    var inputBuffer = inputBuffers[bufferIndex];
+                    var outputBuffer = outputBuffers[bufferIndex];
 
-                    buffer.ReleaseAndDisposeBuffer();
+                    Core.SetBuffer(kernel, "filter_input", inputBuffer);
+                    Core.SetBuffer(kernel, "filter_output", outputBuffer);
+                    Core.Dispatch(kernel, tgX, tgY, tgZ);
+                }
+            }
+        }
+
+        public void InitParticleBuffers<T>(ref List<List<ComputeBuffer>> input, int width, int height, ComputeBufferType type = ComputeBufferType.Default) where T : struct
+        {
+            for (byte generationType = 0; generationType < input.Capacity; generationType++)
+            {
+                var inputBuffers = new List<ComputeBuffer>(width);
+
+                for (var bufferIndex = 0; bufferIndex < inputBuffers.Capacity; bufferIndex++)
+                {
+                    var inputBuffer = new ComputeBuffer(height, Marshal.SizeOf<T>(), type);
+
+                    inputBuffer.SetData(new T[height]);
+
+                    inputBuffers.Add(inputBuffer);
                 }
 
-                buffers.Clear();
+                input.Add(inputBuffers);
             }
+        }
 
-            StarsBuffers.Clear();
-
-            for (byte generationType = 0; generationType < DustBuffers.Capacity; generationType++)
+        public void DestroyParticleBuffers(ref List<List<ComputeBuffer>> input)
+        {
+            for (byte generationType = 0; generationType < input.Capacity; generationType++)
             {
-                var buffers = DustBuffers[generationType];
+                var inputBuffers = input[generationType];
 
-                for (var bufferIndex = 0; bufferIndex < buffers.Capacity; bufferIndex++)
+                for (var bufferIndex = 0; bufferIndex < inputBuffers.Capacity; bufferIndex++)
                 {
-                    var buffer = buffers[bufferIndex];
+                    var inputBuffer = inputBuffers[bufferIndex];
 
-                    buffer.ReleaseAndDisposeBuffer();
+                    inputBuffer.ReleaseAndDisposeBuffer();
                 }
 
-                buffers.Clear();
+                inputBuffers.Clear();
             }
 
-            DustBuffers.Clear();
-
-            for (byte generationType = 0; generationType < DustAppendBuffers.Capacity; generationType++)
-            {
-                var buffers = DustAppendBuffers[generationType];
-
-                for (var bufferIndex = 0; bufferIndex < buffers.Capacity; bufferIndex++)
-                {
-                    var buffer = buffers[bufferIndex];
-
-                    buffer.ReleaseAndDisposeBuffer();
-                }
-
-                buffers.Clear();
-            }
-
-            DustAppendBuffers.Clear();
-
-            for (byte generationType = 0; generationType < GasAppendBuffers.Capacity; generationType++)
-            {
-                var buffers = GasAppendBuffers[generationType];
-
-                for (var bufferIndex = 0; bufferIndex < buffers.Capacity; bufferIndex++)
-                {
-                    var buffer = buffers[bufferIndex];
-
-                    buffer.ReleaseAndDisposeBuffer();
-                }
-
-                buffers.Clear();
-            }
-
-            GasAppendBuffers.Clear();
-
-            DustArgsBuffer.ReleaseAndDisposeBuffer();
-            GasArgsBuffer.ReleaseAndDisposeBuffer();
-            SpriteArgsBuffer.ReleaseAndDisposeBuffer();
+            input.Clear();
         }
 
         #endregion
@@ -1119,13 +1007,17 @@ namespace SpaceEngine.Tests
             RenderBuffers(ref StarsBuffers, pass, Settings.GalaxyParameters.Count);
         }
 
-        // NOTE : Debug dust...
-        public void RenderDust(int pass = 1)
+        public void RenderDebugStars()
+        {
+            RenderStars(1);
+        }
+
+        public void RenderDustDebug()
         {
             // NOTE : Pass number is hardcoded to draw anyway in debug mode.
-            if (BlendFactor < 1.0 && pass != 1) return;
+            if (BlendFactor < 1.0) return;
 
-            RenderBuffers(ref DustBuffers, pass, Settings.GalaxyParameters.Count);
+            RenderBuffers(ref DustBuffers, 1, Settings.GalaxyParameters.Count);
         }
 
         public void RenderDustToScreenBuffer()
@@ -1172,6 +1064,8 @@ namespace SpaceEngine.Tests
             var dustParams1 = new Vector2(Settings.GalaxyRenderingParameters.DustStrength, Settings.GalaxyRenderingParameters.DustSize);
             var gasParams1 = new Vector2(Settings.GalaxyRenderingParameters.GasStength, Settings.GalaxyRenderingParameters.GasSize);
             var galaxyPosition = transform.position - GodManager.Instance.View.WorldCameraPosition;
+
+            var trs = Matrix4x4.identity;
 
             for (byte generationType = 0; generationType < DustBuffers.Capacity; generationType++)
             {
@@ -1237,7 +1131,6 @@ namespace SpaceEngine.Tests
                 for (var bufferIndex = 0; bufferIndex < Mathf.Min(Settings.GalaxyRenderingParameters.DustPassCount, gasBuffers.Capacity); bufferIndex++)
                 {
                     var gasBuffer = gasBuffers[bufferIndex];
-                    var trs = Matrix4x4.identity;
 
                     spriteMaterial.SetBuffer("data", gasBuffer);
 

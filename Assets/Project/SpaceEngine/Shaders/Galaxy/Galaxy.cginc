@@ -45,6 +45,8 @@
 #endif
 //-----------------------------------------------------------------------------
 
+static const float3 gasMultiplicationColor = float3(0.52312f, 0.99695f, 0.94122f);
+
 //-----------------------------------------------------------------------------
 uniform float3	randomParams1;	// Randomize
 uniform float4  offsetParams1;	// (offsetX,	offsetY,		offsetZ,	 UNUSED)

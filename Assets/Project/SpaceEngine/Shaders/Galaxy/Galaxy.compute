@@ -91,7 +91,7 @@ GalaxyParticle GenerateParticle(uint id, float pertrub, float4 rnd)
 
 #pragma kernel Stars
 
-RWStructuredBuffer<GalaxyParticle> stars_output;
+RWStructuredBuffer<GalaxyParticle> particles_output;
 
 [numthreads(NUM_THREADS_X, NUM_THREADS_Y, NUM_THREADS_Z)]
 void Stars(uint3 groupThreadID : SV_GroupThreadID, 
@@ -105,12 +105,10 @@ void Stars(uint3 groupThreadID : SV_GroupThreadID,
 
 	GalaxyParticle particle = GenerateParticle(id, rnd.x, rnd);
 
-	stars_output[id] = particle;
+	particles_output[id] = particle;
 }
 
 #pragma kernel Dust
-
-RWStructuredBuffer<GalaxyParticle> dust_output;
 
 [numthreads(NUM_THREADS_X, NUM_THREADS_Y, NUM_THREADS_Z)]
 void Dust(uint3 groupThreadID : SV_GroupThreadID, 
@@ -124,7 +122,7 @@ void Dust(uint3 groupThreadID : SV_GroupThreadID,
 
 	GalaxyParticle particle = GenerateParticle(id, 1.0, rnd);
 	
-	dust_output[id] = particle;
+	particles_output[id] = particle;
 }
 
 RWStructuredBuffer<GalaxyParticle> filter_input;
