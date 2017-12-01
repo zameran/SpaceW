@@ -1,4 +1,4 @@
-﻿Shader "SpaceEngine/Filters/ElevationFilter" 
+﻿Shader "SpaceEngine/Layers/Elevation" 
 {
 	SubShader 
 	{
@@ -13,14 +13,14 @@
 		uniform float3 _Coords;
 		uniform float _Height;
 		
-		CORE_FILTER_VERTEX_PROGRAM
+		CORE_LAYER_VERTEX_PROGRAM
 			
-		void frag(in VertexFilterOutput IN, out float4 output : COLOR) 
+		void frag(in VertexLayerOutput IN, out float4 output : COLOR) 
 		{
 			float2 uv = _Coords.xy + IN.uv * _Coords.z;
-			float z = tex2Dlod(_Source, float4(uv, 0.0, 0.0)).x - _Height;
+			float z = tex2Dlod(_Source, float4(uv, 0.0f, 0.0f)).x - _Height;
 
-			float4 mask = float4(1.0, 1.0, 1.0, smoothstep(4.0, 5.0, z));
+			float4 mask = float4(1.0f, 1.0f, 1.0f, smoothstep(4.0f, 5.0f, z));
 			
 			output = tex2D(_Target, IN.uv) * mask;
 		}

@@ -70,13 +70,15 @@ namespace SpaceEngine.Core.Tile.Producer
             // Get any layers attached to same GameObject. May have 0 to many attached.
             Layers = GetComponents<TileLayer>();
 
+            if (Layers != null) { foreach (var layer in Layers) { layer.InitNode(); } }
+
             // Get the samplers attached to GameObject. Must have one sampler attahed.
             Sampler = GetComponent<TileSampler>();
         }
 
         public override void UpdateNode()
         {
-
+            if (Layers != null) { foreach (var layer in Layers) { layer.UpdateNode(); } }
         }
 
         #endregion

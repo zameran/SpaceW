@@ -296,26 +296,26 @@ struct VertexProducerOutput
 //-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
-struct VertexFilterInput
+struct VertexLayerInput
 {
 	float4 vertex : POSITION;
 	float4 texcoord : TEXCOORD0;
 };
 
-struct VertexFilterOutput
+struct VertexLayerOutput
 {
 	float4 pos : SV_POSITION;
 	float2 uv : TEXCOORD0;
 };
 
-#define CORE_FILTER_VERTEX_PROGRAM_BODY \
+#define CORE_LAYER_VERTEX_PROGRAM_BODY \
 	o.pos = UnityObjectToClipPos(v.vertex); \
 	o.uv = v.texcoord.xy; \
 
-#define CORE_FILTER_VERTEX_PROGRAM \
-	void vert(in VertexFilterInput v, out VertexFilterOutput o) \
+#define CORE_LAYER_VERTEX_PROGRAM \
+	void vert(in VertexLayerInput v, out VertexLayerOutput o) \
 	{ \
-		CORE_FILTER_VERTEX_PROGRAM_BODY; \
+		CORE_LAYER_VERTEX_PROGRAM_BODY; \
 	}
 //-----------------------------------------------------------------------------
 

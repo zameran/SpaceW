@@ -29,9 +29,9 @@ namespace SpaceEngine.Core.Layers
 
         private RenderTexture TargetTextureBuffer;
 
-        #region Node
+        #region NodeSlave<TileLayer>
 
-        protected override void InitNode()
+        public override void InitNode()
         {
             base.InitNode();
 
@@ -77,7 +77,12 @@ namespace SpaceEngine.Core.Layers
                 throw new InvalidStorageException("Source storage must be a GPUTileStorage");
             }
         }
-        
+
+        public override void UpdateNode()
+        {
+            base.UpdateNode();
+        }
+
         protected override void OnDestroy()
         {
             base.OnDestroy();

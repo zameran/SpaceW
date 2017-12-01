@@ -3638,11 +3638,11 @@ MonoBehaviour:
   mareParams: {x: 0.55, y: 227, z: 0.233, w: 0}
   montesParams: {x: 0.106, y: 2, z: 0.153, w: 0.222}
   dunesParams: {x: 0.121, y: 6.9, z: 0.143, w: -1}
-  hillsParams: {x: 1.4241863, y: 3.231, z: 0.817, w: 0.713}
+  hillsParams: {x: 1.124186, y: 12.231, z: 0.817, w: 0.713}
   canyonsParams: {x: 0.031, y: 15.4, z: 0.375, w: 1}
   riversParams: {x: 13.1, y: 2.69, z: 2.49, w: 1}
   cracksParams: {x: 0.407, y: 1.71, z: 5, w: 0.75}
-  craterParams: {x: 1.095125, y: 0.25, z: 0.8874, w: 8}
+  craterParams: {x: 1.195125, y: 0.225, z: 1.58874, w: 8}
   volcanoParams1: {x: 2, y: 0.64, z: 0.81, w: 5}
   volcanoParams2: {x: 1.24, y: 0.423, z: 2.12, w: 1507}
   lavaParams: {x: -10, y: 0, z: 207, w: 0.625}
@@ -3655,8 +3655,8 @@ MonoBehaviour:
   MaterialTable:
     Gradient:
       serializedVersion: 2
-      key0: {r: 0.40392157, g: 0.40392157, b: 0.40392157, a: 1}
-      key1: {r: 0.654902, g: 0.654902, b: 0.654902, a: 1}
+      key0: {r: 0.39215687, g: 0.39215687, b: 0.39215687, a: 1}
+      key1: {r: 0.5882353, g: 0.5882353, b: 0.5882353, a: 1}
       key2: {r: 0, g: 0, b: 0, a: 0}
       key3: {r: 0, g: 0, b: 0, a: 0}
       key4: {r: 0, g: 0, b: 0, a: 0}
@@ -3782,7 +3782,6 @@ MonoBehaviour:
   NoiseColor: {r: 0.09803922, g: 0.047058824, b: 0.39215687, a: 1}
   MaxLevel: -1
   HSV: 1
-  Seed: 0
   NoiseAmplitudes:
   - 0
   - 255
@@ -3867,7 +3866,6 @@ MonoBehaviour:
   NoiseColor: {r: 0.09803922, g: 0.047058824, b: 0.39215687, a: 1}
   MaxLevel: -1
   HSV: 1
-  Seed: 0
   NoiseAmplitudes:
   - 0
   - 255
@@ -4091,7 +4089,6 @@ MonoBehaviour:
   RenderQueueOffset: 1000000
   Magnitude: 2.25e+22
   InitUniformsInUpdate: 1
-  UseAtmosphereColors: 1
   UseRadiance: 1
   FadeCurve:
     serializedVersion: 2
@@ -4299,7 +4296,6 @@ MonoBehaviour:
   NoiseColor: {r: 0.09803922, g: 0.047058824, b: 0.39215687, a: 1}
   MaxLevel: -1
   HSV: 1
-  Seed: 0
   NoiseAmplitudes:
   - 0
   - 255
@@ -5114,7 +5110,6 @@ MonoBehaviour:
   NoiseColor: {r: 0.09803922, g: 0.047058824, b: 0.39215687, a: 1}
   MaxLevel: -1
   HSV: 1
-  Seed: 0
   NoiseAmplitudes:
   - 0
   - 255
@@ -5338,7 +5333,6 @@ MonoBehaviour:
   NoiseColor: {r: 0.09803922, g: 0.047058824, b: 0.39215687, a: 1}
   MaxLevel: -1
   HSV: 1
-  Seed: 0
   NoiseAmplitudes:
   - 0
   - 255
@@ -5599,7 +5593,6 @@ MonoBehaviour:
   NoiseColor: {r: 0.09803922, g: 0.047058824, b: 0.39215687, a: 1}
   MaxLevel: -1
   HSV: 1
-  Seed: 0
   NoiseAmplitudes:
   - 0
   - 255
