@@ -1,5 +1,6 @@
 using SpaceEngine.Core.Terrain;
 using SpaceEngine.Core.Tile.Cache;
+using SpaceEngine.Core.Tile.Filter;
 using SpaceEngine.Core.Tile.Layer;
 using SpaceEngine.Core.Tile.Samplers;
 using SpaceEngine.Core.Tile.Storage;
@@ -14,7 +15,8 @@ using UnityEngine;
 namespace SpaceEngine.Core.Tile.Producer
 {
     /// <summary>
-    /// An abstract producer of tiles. A TileProducer must be inherited from and overide the <see cref="DoCreateTile"/> function to create the tiles data.
+    /// An abstract producer of tiles. 
+    /// A TileProducer must be inherited from and overide the <see cref="DoCreateTile"/> function to create the tiles data.
     /// Note that several TileProducer can share the same <see cref="TileCache"/>, and hence the same <see cref="TileStorage"/>.
     /// </summary>
     [RequireComponent(typeof(TileSampler))]
@@ -50,12 +52,18 @@ namespace SpaceEngine.Core.Tile.Producer
         public TileLayer[] Layers { get; protected set; }
 
         /// <summary>
+        /// The <see cref="TileFilter"/>'s array to be used.
+        /// </summary>
+        public TileFilter[] Filters { get; private set; }
+
+        /// <summary>
         /// The <see cref="TileSampler"/> associated with this producer.
         /// </summary>
         public TileSampler Sampler { get; protected set; }
 
         /// <summary>
-        /// The id of this producer. This id is local to the <see cref="TileCache"/> used by this producer, and is used to distinguish all the producers that use this cache.
+        /// The id of this producer. 
+        /// This id is local to the <see cref="TileCache"/> used by this producer, and is used to distinguish all the producers that use this cache.
         /// </summary>
         public int ID { get; protected set; }
 
@@ -75,6 +83,8 @@ namespace SpaceEngine.Core.Tile.Producer
             Layers = GetComponents<TileLayer>();
 
             if (Layers != null) { foreach (var layer in Layers) { layer.InitNode(); } }
+
+            Filters = GetComponents<TileFilter>();
 
             // Get the samplers attached to GameObject. Must have one sampler attahed.
             Sampler = GetComponent<TileSampler>();
@@ -101,7 +111,8 @@ namespace SpaceEngine.Core.Tile.Producer
         /// Tiles made of raster data may have a border that contains the value of the neighboring pixels of the tile. 
         /// For instance if the tile size (returned by <see cref="TileStorage.TileSize"/>) is 196, and if the tile border is 2, 
         /// this means that the actual tile data is 192x192 pixels, with a 2 pixel border that contains the value of the neighboring pixels. 
-        /// Using a border introduces data redundancy but is usefull to get the value of the neighboring pixels of a tile without needing to load the neighboring tiles.
+        /// Using a border introduces data redundancy, 
+        /// but is usefull to get the value of the neighboring pixels of a tile without needing to load the neighboring tiles.
         /// </summary>
         /// <returns>Returns the size in pixels of the border of each tile.</returns>
         public virtual int GetBorder()
@@ -134,7 +145,8 @@ namespace SpaceEngine.Core.Tile.Producer
         }
 
         /// <summary>
-        /// Decrements the number of users of this tile by one. If this number becomes 0 the tile is marked as unused, and so can be evicted from the cache at any moment.
+        /// Decrements the number of users of this tile by one. 
+        /// If this number becomes 0 the tile is marked as unused, and so can be evicted from the cache at any moment.
         /// </summary>
         /// <param name="tile">Tile to put.</param>
         public virtual void PutTile(Tile tile)
@@ -255,7 +267,7 @@ namespace SpaceEngine.Core.Tile.Producer
             if (Callback != null) Callback();
         }
 
-        private int GetAwaitingFramesCount(int level)
+        private static int GetAwaitingFramesCount(int level)
         {
             return 4 * (level + 1);
         }

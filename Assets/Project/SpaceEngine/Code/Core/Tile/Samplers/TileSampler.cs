@@ -1,7 +1,6 @@
 ﻿using SpaceEngine.Core.Patterns.Strategy.Uniformed;
 using SpaceEngine.Core.Storage;
 using SpaceEngine.Core.Terrain;
-using SpaceEngine.Core.Tile.Filter;
 using SpaceEngine.Core.Tile.Producer;
 using SpaceEngine.Core.Utilities;
 
@@ -13,8 +12,8 @@ using UnityEngine;
 namespace SpaceEngine.Core.Tile.Samplers
 {
     /// <summary>
-    /// This class can set the uniforms necessary to access a given texture tile on GPU, stored in a GPUTileStorage. 
-    /// This class also manages the creation of new texture tiles when a terrain quadtree is updated, via a TileProducer.
+    /// This class can set the uniforms necessary to access a given texture tile on GPU, stored in a <see cref="GPUTileStorage"/>. 
+    /// This class also manages the creation of new texture tiles when a terrain <see cref="QuadTree"/> is updated, via a <see cref="TileProducer"/>.
     /// </summary>
     public class TileSampler : NodeSlave<TileSampler>, IUniformed<MaterialPropertyBlock, TerrainQuad>, IUniformed<Material, TerrainQuad>
     {
@@ -82,11 +81,6 @@ namespace SpaceEngine.Core.Tile.Samplers
         /// </summary>
         public TileProducer Producer { get; private set; }
 
-        /// <summary>
-        /// The <see cref="TileFilter"/>'s array to be used.
-        /// </summary>
-        public TileFilter[] Filters { get; private set; }
-
         private RenderTexture SamplerTextureBuffer;
         private Vector3 SamplerCoordsBuffer;
         private Vector3 SamplerSizeBuffer;
@@ -98,7 +92,6 @@ namespace SpaceEngine.Core.Tile.Samplers
             Producer = GetComponent<TileProducer>();
             TerrainNode = GetComponentInParent<TerrainNode>();
             uniforms = new Uniforms(Producer.Name);
-            Filters = GetComponents<TileFilter>();
 
             Producer.InitNode();
         }
@@ -136,8 +129,10 @@ namespace SpaceEngine.Core.Tile.Samplers
             }
 
             // Check if any of the filters have determined that this tile is not needed
-            foreach (var filter in Filters)
+            for (var filterIndex = 0; filterIndex < Producer.Filters.Length; filterIndex++)
             {
+                var filter = Producer.Filters[filterIndex];
+
                 if (filter.DiscardTile(quad))
                 {
                     needTile = false;
@@ -156,7 +151,7 @@ namespace SpaceEngine.Core.Tile.Samplers
         }
 
         /// <summary>
-        /// Updates the internal quadtree to make it identical to the given terrain quadtree.
+        /// Updates the internal <see cref="QuadTree"/> to make it identical to the given terrain <see cref="QuadTree"/>.
         /// This method releases the texture tiles corresponding to deleted quads.
         /// </summary>
         /// <param name="tree">Internal quadtree.</param>

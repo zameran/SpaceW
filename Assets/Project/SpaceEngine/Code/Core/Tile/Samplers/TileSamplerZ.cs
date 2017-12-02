@@ -32,6 +32,7 @@ namespace SpaceEngine.Core.Tile.Samplers
             public QuadTreeZ(QuadTree parent, TerrainQuad terrainQuad) : base(parent)
             {
                 this.TerrainQuad = terrainQuad;
+
                 ReadBack = false;
             }
         }

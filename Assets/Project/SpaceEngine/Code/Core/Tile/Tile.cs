@@ -8,14 +8,16 @@ using UnityEngine;
 namespace SpaceEngine.Core.Tile
 {
     /// <summary>
-    /// A tile described by its level,tx,ty coordinates. 
-    /// A Tile describes where the tile is stored in the TileStorage, how its data can be produced, and how many users currently use it.
-    /// Contains the keys (Id, Tid) commonly used to store the tiles in data structures like dictionaries
+    /// A tile described by its level and tx, ty coordinates. 
+    /// A <see cref="Tile"/> describes where the tile is stored in the <see cref="TileStorage"/>, 
+    /// how its data can be produced, and how many users currently use it.
+    /// Contains the keys (<see cref="Id"/>, <see cref="TId"/>) commonly used to store the tiles in data structures like dictionaries.
     /// </summary>
     public class Tile
     {
         /// <summary>
-        /// A tile identifier for a given <see cref="Producer.TileProducer"/>. Contains the tile's <see cref="Tile.Level"/>, <see cref="Tile.Tx"/>, <see cref="Ty"/>.
+        /// A tile identifier for a given <see cref="Producer.TileProducer"/>. 
+        /// Contains the tile's <see cref="Tile.Level"/>, <see cref="Tile.Tx"/>, <see cref="Tile.Ty"/>.
         /// </summary>
         public class Id
         {
@@ -75,7 +77,8 @@ namespace SpaceEngine.Core.Tile
         }
 
         /// <summary>
-        /// A tile identifier. Contains a <see cref="Producer.TileProducer"/>'s id and <see cref="Id"/>.
+        /// A tile identifier. 
+        /// Contains a <see cref="Producer.TileProducer"/>'s id and <see cref="Id"/>.
         /// </summary>
         public class TId
         {
@@ -126,7 +129,8 @@ namespace SpaceEngine.Core.Tile
         }
 
         /// <summary>
-        /// A <see cref="Id"/> is sorted based as it's level. Sorts from lowest level to highest.
+        /// A <see cref="Id"/> is sorted based as it's level. 
+        /// Sorts from lowest level to highest.
         /// </summary>
         public class ComparerID : IComparer<Id>
         {
@@ -137,7 +141,7 @@ namespace SpaceEngine.Core.Tile
         }
 
         /// <summary>
-        /// A A <see cref="Id"/> is compared based on it's <see cref="Tile.Level"/>, <see cref="Tile.Tx"/>, <see cref="Ty"/>.
+        /// A A <see cref="Id"/> is compared based on it's <see cref="Tile.Level"/>, <see cref="Tile.Tx"/>, <see cref="Tile.Ty"/>.
         /// </summary>
         public class EqualityComparerID : IEqualityComparer<Id>
         {
@@ -153,7 +157,7 @@ namespace SpaceEngine.Core.Tile
         }
 
         /// <summary>
-        /// A Tid is compared based on it's producer, <see cref="Tile.Level"/>, <see cref="Tile.Tx"/>, <see cref="Ty"/>.
+        /// A Tid is compared based on it's producer, <see cref="Tile.Level"/>, <see cref="Tile.Tx"/>, <see cref="Tile.Ty"/>.
         /// </summary>
         public class EqualityComparerTID : IEqualityComparer<TId>
         {

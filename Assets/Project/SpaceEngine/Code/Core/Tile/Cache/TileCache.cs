@@ -10,26 +10,22 @@ using UnityEngine;
 namespace SpaceEngine.Core.Tile.Cache
 {
     /// <summary>
-    /// A cache of tiles to avoid recomputing recently produced tiles. A tile cache
-    /// keeps track of which tiles (identified by their level,tx,ty coordinates) are
-    /// currently stored in an associated TileStorage. It also keeps track of which
-    /// tiles are in use, and which are not. Unused tiles are kept in the TileStorage
-    /// as long as possible, in order to avoid re creating them if they become needed
-    /// again. But the storage associated with unused tiles can be reused to store
-    /// other tiles at any moment (in this case we say that a tile is evicted from
-    /// the cache of unused tiles).
-    /// Conversely, the storage associated with tiles currently in use cannot be
-    /// reaffected until these tiles become unused. A tile is in use when it is
-    /// returned by GetTile, and becomes unused when PutTile is called (more
+    /// A cache of tiles to avoid recomputing recently produced tiles. 
+    /// A tile cache keeps track of which tiles (identified by their <see cref="Tile.Id"/>) are
+    /// currently stored in an associated <see cref="Storage.TileStorage"/>. 
+    /// It also keeps track of which tiles are in use, and which are not. 
+    /// Unused tiles are kept in the <see cref="TileStorage"/> as long as possible, in order to avoid re-creating them, if they become needed again. 
+    /// But the storage associated with unused tiles can be reused to store
+    /// other tiles at any moment (in this case we say that a tile is evicted from the cache of unused tiles).
+    /// Conversely, the storage associated with tiles currently in use cannot be reaffected until these tiles become unused. 
+    /// A tile is in use when it is returned by <see cref="GetTile"/>, and becomes unused when <see cref="PutTile"/> is called (more
     /// precisely when the number of users of this tile becomes 0, this number being
-    /// incremented and decremented by GetTile and PutTile, respectively). The
-    /// tiles that are needed to render the current frame should be declared in use,
-    /// so that they are not evicted between their creation and their actual
-    /// rendering.
-    /// A cache can have multiple TileStorages attached to it and the slot created is made up
-    /// of a slot from each of the TileStorages. This is so producer can generate tiles that contain 
-    /// multiple types of data associated with the same tile. For example the PlantsProducer uses a cache with 2 CBTileStorages,
-    /// one slot for the plants position and one for the plants other parameters.
+    /// incremented and decremented by <see cref="GetTile"/> and <see cref="PutTile"/>, respectively). 
+    /// The tiles that are needed to render the current frame should be declared in use, so that they are not evicted between their creation and 
+    /// their actual rendering.
+    /// A cache can have multiple <see cref="Storage.TileStorage"/>'s attached to it and the slot created is made up
+    /// of a slot from each of the <see cref="Storage.TileStorage"/>'s. 
+    /// This is so <see cref="TileProducer"/> can generate tiles that contain multiple types of data associated with the same tile. 
     /// </summary>
     public class TileCache : NodeSlave<TileCache>
     {
@@ -57,7 +53,8 @@ namespace SpaceEngine.Core.Tile.Cache
         public int TileStorageLength { get { return TileStorage.Length; } }
 
         /// <summary>
-        /// The tiles currently in use. These tiles cannot be evicted from the cache and from the TileStorage, until they become unused. 
+        /// The tiles currently in use. 
+        /// These tiles cannot be evicted from the cache and from the <see cref="Storage.TileStorage"/>, until they become unused. 
         /// Maps tile identifiers to actual tiles.
         /// </summary>
         private Dictionary<Tile.TId, Tile> UsedTiles;
@@ -65,9 +62,11 @@ namespace SpaceEngine.Core.Tile.Cache
         public int UsedTilesCount { get { return UsedTiles.Count; } }
 
         /// <summary>
-        /// The unused tiles. These tiles can be evicted from the cache at any moment.
-        /// Uses a custom container (DictionaryQueue) that can store tiles by there Tid for fast look up
-        /// and also keeps track of the order the tiles were inserted so it can also act as a queue.
+        /// The unused tiles. 
+        /// These tiles can be evicted from the cache at any moment.
+        /// Uses a custom container (<see cref="DictionaryQueue{TKey,TValue}"/>), 
+        /// that can store tiles by there <see cref="Tile.TId"/> for fast look up and also keeps track of the order the tiles were inserted,
+        /// so it can also act as a queue.
         /// </summary>
         public DictionaryQueue<Tile.TId, Tile> UnusedTiles;
 
@@ -83,8 +82,10 @@ namespace SpaceEngine.Core.Tile.Cache
         /// </summary>
         protected Tile.TId TileTIDBuffer { get; private set; }
 
-        [HideInInspector]
-        public int MaximumUsedTiles;
+        /// <summary>
+        /// Maximum tiles ever used.
+        /// </summary>
+        public int MaximumUsedTiles { get; private set; }
 
         #region NodeSlave<TileCache>
 
@@ -119,7 +120,7 @@ namespace SpaceEngine.Core.Tile.Cache
         /// <summary>
         /// The storage used to store the actual tiles data.
         /// </summary>
-        /// <param name="i">Index.</param>
+        /// <param name="i">Index of the storage.</param>
         /// <returns>Returns the storage used to store the actual tiles data.</returns>
         public TileStorage GetStorage(int i)
         {
@@ -133,7 +134,7 @@ namespace SpaceEngine.Core.Tile.Cache
 
         /// <summary>
         /// Call this when a tile is no longer needed.
-        /// If the number of users of the tile is 0 then the tile will be moved from the used to the unused cache.
+        /// If the number of users of the tile is 0, then the tile will be moved from the used to the unused cache.
         /// </summary>
         /// <param name="tile">Tile.</param>
         public void PutTile(Tile tile)
@@ -161,7 +162,8 @@ namespace SpaceEngine.Core.Tile.Cache
         }
 
         /// <summary>
-        /// Creates a new slot for a tile. A slot is made up of a slot from each of the TileStorages attached to the TileCache.
+        /// Creates a new slot for a tile. 
+        /// A slot is made up of a slot from each of the <see cref="Storage.TileStorage"/>s attached to the <see cref="TileCache"/>.
         /// If anyone of the storages runs out of slots then null will be returned and the program should abort if this happens.
         /// </summary>
         /// <returns>New <see cref="Storage.TileStorage.Slot"/> instance.</returns>
@@ -182,9 +184,10 @@ namespace SpaceEngine.Core.Tile.Cache
         }
 
         /// <summary>
-        /// Call this if a tile is needed. Will move the tile from the unused to the used cache if its is found there.
-        /// If the tile is not found then a new tile will be created with a new slot. If there are no more free
-        /// slots then the cache capacity has not been set to a high enough value and the program must abort.
+        /// Call this if a tile is needed. 
+        /// Will move the tile from the unused to the used cache if its is found there.
+        /// If the tile is not found then a new tile will be created with a new slot. 
+        /// If there are no more free slots then the cache capacity has not been set to a high enough value and the program must abort.
         /// </summary>
         /// <param name="producerId">Producer id.</param>
         /// <param name="level">Tile level.</param>
@@ -269,8 +272,9 @@ namespace SpaceEngine.Core.Tile.Cache
         }
 
         /// <summary>
-        /// Finds a tile based on its Tid. If includeUnusedCache is true then will also look in
-        /// the unused cache but be warned that tiles in the unused cache maybe evicted and have there slot recylced as any time
+        /// Finds a tile based on its Tid. 
+        /// If <paramref name="includeUnusedCache"/> is true,
+        /// then will also look in the unused cache but be warned that tiles in the unused cache maybe evicted and have there slot recylced as any time.
         /// </summary>
         /// <param name="producerId">Producer id.</param>
         /// <param name="level">Tile level.</param>

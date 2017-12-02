@@ -10,10 +10,9 @@ namespace SpaceEngine.Core.Tile.Storage
     /// <summary>
     /// A shared storage to store tiles of the same kind.This abstract class defines the behavior of tile storages but does not provide any storage itself.
     /// The slots managed by a tile storage can be used to store any tile identified by it's coordinates.
-    /// This means that a <see cref="Slot"/> can store the data of some tile at some moment, and then be reused to store the data of
-    /// tile some time later.The mapping between tiles and <see cref="Slot"/> is not managed by the <see cref="TileStorage"/> itself, but by a <see cref="TileCache"/>. 
-    /// A <see cref="TileStorage"/> just keeps track of which slots in the pool are currently associated with a tile (i.e., store the data of a tile), 
-    /// and which are not. 
+    /// This means that a <see cref="Slot"/> can store the data of some tile at some moment, and then be reused to store the data of tile some time later.
+    /// The mapping between tiles and <see cref="Slot"/> is not managed by the <see cref="TileStorage"/> itself, but by a <see cref="TileCache"/>. 
+    /// A <see cref="TileStorage"/> just keeps track of which slots in the pool are currently associated with a tile (i.e., store the data of a tile), and which are not. 
     /// The first ones are called allocated <see cref="Slot"/>'s, the others free <see cref="Slot"/>'s.
     /// </summary>
     [RequireComponent(typeof(TileCache))]
@@ -29,7 +28,8 @@ namespace SpaceEngine.Core.Tile.Storage
         }
 
         /// <summary>
-        /// A slot managed by a <see cref="TileStorage"/>. Concrete sub classes of this class must provide a reference to the actual tile data.
+        /// A slot managed by a <see cref="TileStorage"/>. 
+        /// Concrete sub classes of this class must provide a reference to the actual tile data.
         /// </summary>
         public abstract class Slot
         {
@@ -61,12 +61,14 @@ namespace SpaceEngine.Core.Tile.Storage
         private bool OnePixelBorder = false;
 
         /// <summary>
-        /// The size of each tile. For tiles made of raster data, this size is the tile width in pixels (the tile height is supposed equal to the tile width).
+        /// The size of each tile. 
+        /// For tiles made of raster data, this size is the tile width in pixels (the tile height is supposed equal to the tile width).
         /// </summary>
         public int TileSize { get { var size = GodManager.Instance.TileSize; return OnePixelBorder ? size + 1 : size; } }
 
         /// <summary>
-        /// The total number of slots managed by this <see cref="TileStorage"/>. This includes both unused and used tiles.
+        /// The total number of slots managed by this <see cref="TileStorage"/>. 
+        /// This includes both unused and used tiles.
         /// </summary>
         public ushort Capacity { get; protected set; }
 
@@ -78,10 +80,13 @@ namespace SpaceEngine.Core.Tile.Storage
         protected LinkedList<Slot> SlotsFree;
 
         /// <summary>
-        /// The used slots counts;
+        /// The used slots count.
         /// </summary>
         public int SlotsCount { get { return Slots.Length; } }
 
+        /// <summary>
+        /// The free slots count.
+        /// </summary>
         public int FreeSlotsCount { get { return SlotsFree.Count; } }
 
         public TileCache Cache { get; protected set; }
@@ -160,6 +165,9 @@ namespace SpaceEngine.Core.Tile.Storage
             }
         }
 
+        /// <summary>
+        /// Calls <see cref="Slot.Clear"/> method on every <see cref="Slot"/>.
+        /// </summary>
         public void Clear()
         {
             for (ushort i = 0; i < Capacity; i++)

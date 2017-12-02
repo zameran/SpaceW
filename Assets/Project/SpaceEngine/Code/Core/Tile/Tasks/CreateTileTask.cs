@@ -1,6 +1,7 @@
 ﻿using SpaceEngine.Core.Tile.Producer;
 using SpaceEngine.Core.Tile.Storage;
 using SpaceEngine.Core.Utilities;
+
 using System.Collections.Generic;
 
 using UnityEngine;
@@ -8,12 +9,13 @@ using UnityEngine;
 namespace SpaceEngine.Core.Tile.Tasks
 {
     /// <summary>
-    /// The task that creates the tiles. The task calles the producers <see cref="TileProducer.DoCreateTile"/> function and the data created is stored in the slot.
+    /// The task that creates the tiles. 
+    /// The task calles the producers <see cref="TileProducer.DoCreateTile"/> function and the data created is stored in the slot.
     /// </summary>
     public class CreateTileTask : Schedular.Task
     {
         /// <summary>
-        /// The TileProducer that created this task.
+        /// The <see cref="TileProducer"/> that created this task.
         /// </summary>
         public TileProducer Owner { get; protected set; }
 
