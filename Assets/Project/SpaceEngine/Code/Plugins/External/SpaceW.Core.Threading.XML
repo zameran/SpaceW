@@ -106,7 +106,7 @@
                 Scheduler.
             </summary>
         </member>
-        <member name="F:SpaceEngine.Core.Threading.Scheduling.Scheduler.m_lock">
+        <member name="F:SpaceEngine.Core.Threading.Scheduling.Scheduler.Lock">
             <summary>
                 Lock for functions that maybe accessed by task running on another thread.
             </summary>
