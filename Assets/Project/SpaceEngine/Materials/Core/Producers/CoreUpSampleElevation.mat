@@ -8,7 +8,7 @@ Material:
   m_PrefabInternal: {fileID: 0}
   m_Name: CoreUpSampleElevation
   m_Shader: {fileID: 4800000, guid: 68aa10a87f6a2b748b46411d707b0413, type: 3}
-  m_ShaderKeywords: _EMISSION
+  m_ShaderKeywords: 
   m_LightmapFlags: 1
   m_EnableInstancingVariants: 0
   m_DoubleSidedGI: 0
