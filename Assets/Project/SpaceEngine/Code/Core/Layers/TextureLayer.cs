@@ -38,13 +38,11 @@ namespace SpaceEngine.Core.Layers
             if (SourceProducerGameObject != null)
             {
                 if (SourceProducer == null) { SourceProducer = SourceProducerGameObject.GetComponent<TileProducer>(); }
-                if (SourceProducer.Cache == null) { SourceProducer.InitCache(); }
             }
 
             if (TargetProducerGameObject != null)
             {
                 if (TargetProducer == null) { TargetProducer = TargetProducerGameObject.GetComponent<TileProducer>(); }
-                if (TargetProducer.Cache == null) { TargetProducer.InitCache(); }
             }
 
             if (SourceProducer == null) { throw new NullReferenceException("Source producer is null!"); }

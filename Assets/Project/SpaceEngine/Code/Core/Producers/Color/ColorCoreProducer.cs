@@ -63,13 +63,11 @@ namespace SpaceEngine.Core
             if (NormalsProducerGameObject != null)
             {
                 if (NormalsProducer == null) { NormalsProducer = NormalsProducerGameObject.GetComponent<TileProducer>(); }
-                if (NormalsProducer.Cache == null) { NormalsProducer.InitCache(); }
             }
 
             if (ElevationProducerGameObject != null)
             {
                 if (ElevationProducer == null) { ElevationProducer = ElevationProducerGameObject.GetComponent<TileProducer>(); }
-                if (ElevationProducer.Cache == null) { ElevationProducer.InitCache(); }
             }
 
             var tileSize = Cache.GetStorage(0).TileSize;

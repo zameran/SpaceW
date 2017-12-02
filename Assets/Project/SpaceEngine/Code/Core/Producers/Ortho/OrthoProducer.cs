@@ -74,7 +74,6 @@ namespace SpaceEngine.Core
             if (OrthoCpuProducerGameObject != null)
             {
                 if (OrthoCPUProducer == null) { OrthoCPUProducer = OrthoCpuProducerGameObject.GetComponent<OrthoCPUProducer>(); }
-                if (OrthoCPUProducer.Cache == null) { OrthoCPUProducer.InitCache(); }
             }
 
             int tileSize = Cache.GetStorage(0).TileSize;

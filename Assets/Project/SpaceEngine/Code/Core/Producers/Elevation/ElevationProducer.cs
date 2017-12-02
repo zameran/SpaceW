@@ -36,7 +36,6 @@ namespace SpaceEngine.Core
             if (ResidualProducerGameObject != null)
             {
                 if (ResidualProducer == null) { ResidualProducer = ResidualProducerGameObject.GetComponent<TileProducer>(); }
-                if (ResidualProducer.Cache == null) { ResidualProducer.InitCache(); }
             }
 
             var tileSize = GetTileSize(0);

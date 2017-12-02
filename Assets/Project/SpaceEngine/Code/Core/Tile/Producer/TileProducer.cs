@@ -65,7 +65,11 @@ namespace SpaceEngine.Core.Tile.Producer
 
         public override void InitNode()
         {
-            InitCache();
+            if (Cache != null) return;
+
+            Cache = CacheGameObject.GetComponent<TileCache>();
+            ID = Cache.NextProducerId;
+            Cache.InsertProducer(ID, this);
 
             // Get any layers attached to same GameObject. May have 0 to many attached.
             Layers = GetComponents<TileLayer>();
@@ -82,24 +86,6 @@ namespace SpaceEngine.Core.Tile.Producer
         }
 
         #endregion
-
-        /// <summary>
-        /// It's posible that a producer will have a call to get it's cache before it's start fuction has been called. 
-        /// Call <see cref="InitCache"/> in the start and get functions to ensure that the cache is always init before being returned.
-        /// </summary>
-        public void InitCache()
-        {
-            if (Cache != null) return;
-
-            Cache = CacheGameObject.GetComponent<TileCache>();
-            ID = Cache.NextProducerId;
-            Cache.InsertProducer(ID, this);
-        }
-
-        public string GetName()
-        {
-            return Name;
-        }
 
         public int GetTileSize(int i)
         {

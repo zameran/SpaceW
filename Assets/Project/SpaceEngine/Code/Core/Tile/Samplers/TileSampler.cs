@@ -97,7 +97,7 @@ namespace SpaceEngine.Core.Tile.Samplers
         {
             Producer = GetComponent<TileProducer>();
             TerrainNode = GetComponentInParent<TerrainNode>();
-            uniforms = new Uniforms(Producer.GetName());
+            uniforms = new Uniforms(Producer.Name);
             Filters = GetComponents<TileFilter>();
 
             Producer.InitNode();

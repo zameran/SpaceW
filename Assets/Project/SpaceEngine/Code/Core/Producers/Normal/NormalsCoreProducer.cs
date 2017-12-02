@@ -27,7 +27,6 @@ namespace SpaceEngine.Core
             if (ElevationProducerGameObject != null)
             {
                 if (ElevationProducer == null) { ElevationProducer = ElevationProducerGameObject.GetComponent<TileProducer>(); }
-                if (ElevationProducer.Cache == null) { ElevationProducer.InitCache(); }
             }
 
             var tileSize = Cache.GetStorage(0).TileSize;
