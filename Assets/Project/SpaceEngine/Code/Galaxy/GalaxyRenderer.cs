@@ -35,10 +35,10 @@
 
 using UnityEngine;
 
-namespace SpaceEngine.Tests
+namespace SpaceEngine.Galaxy
 {
     [RequireComponent(typeof(Camera))]
-    public class GalaxyTestRenderer : MonoSingleton<GalaxyTestRenderer>
+    public class GalaxyRenderer : MonoSingleton<GalaxyRenderer>
     {
         internal enum RenderType : byte
         {
@@ -53,7 +53,7 @@ namespace SpaceEngine.Tests
         }
 
         [SerializeField]
-        internal GalaxyTest Galaxy;
+        internal GalaxyGenerator Galaxy;
 
         [SerializeField]
         internal RenderType RenderMethod = RenderType.Realistic;

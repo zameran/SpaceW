@@ -33,7 +33,7 @@
 // Creator: zameran
 #endregion
 
-using SpaceEngine.Tests;
+using SpaceEngine.Galaxy;
 
 using System;
 using System.Runtime.InteropServices;
@@ -42,9 +42,9 @@ using UnityEngine;
 
 namespace SpaceEngine.Debugging
 {
-    public sealed class DebugGUIGalaxyTest : DebugGUI
+    public sealed class DebugGUIGalaxyGenerator : DebugGUI
     {
-        internal GalaxyTest Galaxy { get; private set; }
+        internal GalaxyGenerator Galaxy { get; private set; }
 
         private Vector2 StatisticsScrollPosition = Vector2.zero;
 
@@ -63,7 +63,7 @@ namespace SpaceEngine.Debugging
         {
             base.Awake();
 
-            Galaxy = FindObjectOfType<GalaxyTest>();
+            Galaxy = FindObjectOfType<GalaxyGenerator>();
         }
 
         protected override void Start()
@@ -196,7 +196,7 @@ namespace SpaceEngine.Debugging
                     {
                         GUILayoutExtensions.VerticalBoxed("Method: ", GUISkin, () =>
                         {
-                            GalaxyTestRenderer.Instance.RenderMethod = (GalaxyTestRenderer.RenderType)GUILayout.SelectionGrid((int)GalaxyTestRenderer.Instance.RenderMethod, Enum.GetNames(typeof(GalaxyTestRenderer.RenderType)), 2);
+                            GalaxyRenderer.Instance.RenderMethod = (GalaxyRenderer.RenderType)GUILayout.SelectionGrid((int)GalaxyRenderer.Instance.RenderMethod, Enum.GetNames(typeof(GalaxyRenderer.RenderType)), 2);
                         });
 
                         GUILayoutExtensions.SpacingSeparator();

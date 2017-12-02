@@ -52,7 +52,7 @@ using UnityEngine.Rendering;
 
 using Random = UnityEngine.Random;
 
-namespace SpaceEngine.Tests
+namespace SpaceEngine.Galaxy
 {
     [Serializable]
     public struct GalaxyParticle
@@ -449,7 +449,7 @@ namespace SpaceEngine.Tests
         #endregion
     }
 
-    internal class GalaxyTest : Node<GalaxyTest>, IRenderable<GalaxyTest>
+    internal class GalaxyGenerator : Node<GalaxyGenerator>, IRenderable<GalaxyGenerator>
     {
         public ComputeShader Core;
 
@@ -825,19 +825,19 @@ namespace SpaceEngine.Tests
 
             if (StarParticle == null)
             {
-                Debug.LogWarning("GalaxyTest.InitNode: StarParticle texture is null! Trying to load from Resources the default one! Impossible to render stars, if fail!");
+                Debug.LogWarning("GalaxyGenerator.InitNode: StarParticle texture is null! Trying to load from Resources the default one! Impossible to render stars, if fail!");
 
                 StarParticle = Resources.Load("Textures/Galaxy/StarParticle2", typeof(Texture2D)) as Texture2D;
             }
 
             if (GasParticle == null)
             {
-                Debug.LogWarning("GalaxyTest.InitNode: GasParticle texture is null! Trying to load from Resources the default one! Impossible to render gas sprites, if fail!");
+                Debug.LogWarning("GalaxyGenerator.InitNode: GasParticle texture is null! Trying to load from Resources the default one! Impossible to render gas sprites, if fail!");
 
                 GasParticle = Resources.Load("Textures/Galaxy/StarParticle1", typeof(Texture2D)) as Texture2D;
             }
 
-            if (VolumeMesh == null) Debug.LogWarning("GalaxyTest.InitNode: VolumeMesh is null! Impossible to render volumetric stuff!");
+            if (VolumeMesh == null) Debug.LogWarning("GalaxyGenerator.InitNode: VolumeMesh is null! Impossible to render volumetric stuff!");
 
             if (ScreenMesh == null)
             {
