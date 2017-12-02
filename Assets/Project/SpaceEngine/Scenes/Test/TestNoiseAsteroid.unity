@@ -625,7 +625,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   Capacity: 1296
   TileStorage: []
-  MaximumUsedTiles: 0
 --- !u!114 &230248930
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -3287,7 +3286,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   Capacity: 1296
   TileStorage: []
-  MaximumUsedTiles: 0
 --- !u!114 &853442840
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -5204,7 +5202,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   Capacity: 1296
   TileStorage: []
-  MaximumUsedTiles: 0
 --- !u!1 &1853357347
 GameObject:
   m_ObjectHideFlags: 0
@@ -6087,7 +6084,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   Capacity: 1296
   TileStorage: []
-  MaximumUsedTiles: 0
 --- !u!114 &2107464339
 MonoBehaviour:
   m_ObjectHideFlags: 0

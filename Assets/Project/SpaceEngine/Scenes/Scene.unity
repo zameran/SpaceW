@@ -659,7 +659,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   Capacity: 1296
   TileStorage: []
-  MaximumUsedTiles: 0
 --- !u!4 &169545337
 Transform:
   m_ObjectHideFlags: 0
@@ -976,7 +975,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   Capacity: 1296
   TileStorage: []
-  MaximumUsedTiles: 0
 --- !u!114 &230248930
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1379,7 +1377,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   Capacity: 1296
   TileStorage: []
-  MaximumUsedTiles: 0
 --- !u!4 &349779806
 Transform:
   m_ObjectHideFlags: 0
@@ -4666,7 +4663,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   Capacity: 1296
   TileStorage: []
-  MaximumUsedTiles: 0
 --- !u!114 &853442840
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -6164,7 +6160,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   Capacity: 1296
   TileStorage: []
-  MaximumUsedTiles: 0
 --- !u!4 &1355789731
 Transform:
   m_ObjectHideFlags: 0
@@ -6846,7 +6841,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   Capacity: 1296
   TileStorage: []
-  MaximumUsedTiles: 0
 --- !u!4 &1544861079
 Transform:
   m_ObjectHideFlags: 0
@@ -7471,10 +7465,6 @@ MonoBehaviour:
   SegmentDetail: 32
   RadiusDetail: 2
   BoundsShift: 0
-  Light0Color: {r: 1, g: 1, b: 1, a: 1}
-  Light1Color: {r: 1, g: 1, b: 1, a: 1}
-  Light2Color: {r: 1, g: 1, b: 1, a: 1}
-  Light3Color: {r: 1, g: 1, b: 1, a: 1}
   AmbientColor: {r: 1, g: 1, b: 1, a: 1}
   Thickness: 5000
   FrontBright: 12.8
@@ -8198,7 +8188,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   Capacity: 1296
   TileStorage: []
-  MaximumUsedTiles: 0
 --- !u!1 &1853357347
 GameObject:
   m_ObjectHideFlags: 0
@@ -9716,7 +9705,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   Capacity: 1296
   TileStorage: []
-  MaximumUsedTiles: 0
 --- !u!114 &2107464339
 MonoBehaviour:
   m_ObjectHideFlags: 0
