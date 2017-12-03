@@ -40,21 +40,14 @@ namespace SpaceEngine.Debugging
     [RequireComponent(typeof(Camera))]
     public class DebugDrawDepth : MonoBehaviour
     {
-        public Shader DepthShader;
-
-        public RenderTexture DepthTexture;
+        private void Awake()
+        {
+            
+        }
 
         private void Start()
         {
-            var customDepthCameraGameObject = new GameObject("CustomDepthCamera");
-            var customDepthCamera = customDepthCameraGameObject.AddComponent<Camera>();
 
-            customDepthCamera.CopyFrom(CameraHelper.Main());
-            customDepthCamera.transform.parent = CameraHelper.Main().transform;
-            customDepthCamera.depthTextureMode = DepthTextureMode.Depth;
-            customDepthCamera.enabled = false;
-
-            DepthTexture = RTExtensions.CreateRTexture(new Vector2(Screen.width, Screen.height), 16, RenderTextureFormat.ARGB32, FilterMode.Point, TextureWrapMode.Clamp);
         }
 
         private void Update()
@@ -64,24 +57,7 @@ namespace SpaceEngine.Debugging
 
         private void OnGUI()
         {
-            if (DepthTexture != null)
-                GUI.DrawTexture(new Rect(5, 5, Screen.width * 0.35f, Screen.height * 0.35f), DepthTexture, ScaleMode.ScaleAndCrop, false);
-        }
 
-        private void OnPreRender()
-        {
-            var customDepthCamera = CameraHelper.DepthCamera();
-
-            customDepthCamera.CopyFrom(CameraHelper.Main());
-            customDepthCamera.targetTexture = DepthTexture;
-            customDepthCamera.depthTextureMode = DepthTextureMode.Depth;
-            customDepthCamera.RenderWithShader(DepthShader, "RenderType");
-            customDepthCamera.enabled = false;
-        }
-
-        private void OnRenderImage(RenderTexture source, RenderTexture destination)
-        {
-            Graphics.Blit(source, destination);
         }
     }
 }

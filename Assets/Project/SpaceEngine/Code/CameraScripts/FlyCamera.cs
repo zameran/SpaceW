@@ -35,7 +35,7 @@
 
 using SpaceEngine.Core.Bodies;
 using SpaceEngine.Core.Numerics.Vectors;
-
+using System.ComponentModel;
 using UnityEngine;
 
 namespace SpaceEngine.Cameras
@@ -43,7 +43,21 @@ namespace SpaceEngine.Cameras
     [ExecutionOrder(-9990)]
     public class FlyCamera : GameCamera
     {
+        public enum ClipPlanesControl : byte
+        {
+            None,
+            Constant,
+            NearFar,
+            Near,
+            Far
+        }
+
         public Body Body { get { return GodManager.Instance.ActiveBody; } }
+
+        public float NearClipPlane { get { return CameraComponent.nearClipPlane; } set { CameraComponent.nearClipPlane = value; } }
+        public float FarClipPlane { get { return CameraComponent.farClipPlane; } set { CameraComponent.farClipPlane = value; } }
+
+        public ClipPlanesControl ClipPlanesControlType = ClipPlanesControl.NearFar;
 
         public float Speed = 1.0f;
         public float RotationSpeed = 1.0f;
@@ -58,7 +72,6 @@ namespace SpaceEngine.Cameras
         private float NearClipPlaneCache;
         private float FarClipPlaneCache;
 
-        public bool DynamicClipPlanes = true;
         public bool Controllable = true;
 
         private bool Aligned = false;
@@ -68,8 +81,8 @@ namespace SpaceEngine.Cameras
 
         protected override void Init()
         {
-            NearClipPlaneCache = CameraComponent.nearClipPlane;
-            FarClipPlaneCache = CameraComponent.farClipPlane;
+            NearClipPlaneCache = NearClipPlane;
+            FarClipPlaneCache = FarClipPlane;
 
             Rotation = new Vector3(transform.eulerAngles.x, transform.eulerAngles.y, 0); // NOTE : Prevent crazy rotation on start...
 
@@ -201,30 +214,51 @@ namespace SpaceEngine.Cameras
             }
         }
 
+        private float CalculateNearClipPlane(float h)
+        {
+            return Mathf.Clamp(0.1f * h, 0.03f, 1000.0f);
+        }
+
+        private float CalculateFarClipPlane(float h)
+        {
+            return Mathf.Clamp(1e6f * h, 1000.0f, 1e12f);
+        }
+
         private void UpdateClipPlanes()
         {
-            if (DynamicClipPlanes)
-            {
-                if (Body != null)
-                {
-                    // NOTE : Body shape dependent...
-                    var h = (DistanceToCore - Body.Size - (float)Body.HeightZ);
+            // NOTE : Body's shape dependent...
+            var h = (DistanceToCore - Body.Size - (float)Body.HeightZ);
 
-                    if (h < 1.0f) { h = 1.0f; }
+            if (h < 1.0f) { h = 1.0f; }
 
-                    CameraComponent.nearClipPlane = Mathf.Clamp(0.1f * h, 0.03f, 1000.0f);
-                    CameraComponent.farClipPlane = Mathf.Clamp(1e6f * h, 1000.0f, 1e12f);
-                }
-                else
-                {
-                    CameraComponent.nearClipPlane = NearClipPlaneCache;
-                    CameraComponent.farClipPlane = FarClipPlaneCache;
-                }
-            }
-            else
+            var calculatedNearClipPlane = Body != null ? CalculateNearClipPlane(h) : NearClipPlaneCache;
+            var calculatedFarClipPlane = Body != null ? CalculateFarClipPlane(h) : FarClipPlaneCache;
+
+            switch (ClipPlanesControlType)
             {
-                CameraComponent.nearClipPlane = NearClipPlaneCache;
-                CameraComponent.farClipPlane = FarClipPlaneCache;
+                case ClipPlanesControl.None:
+                {
+                    // NOTE : What?!
+                } break;
+                case ClipPlanesControl.Constant:
+                {
+                    NearClipPlane = NearClipPlaneCache;
+                    FarClipPlane = FarClipPlaneCache;
+                } break;
+                case ClipPlanesControl.NearFar:
+                {
+                    NearClipPlane = calculatedNearClipPlane;
+                    FarClipPlane = calculatedFarClipPlane;
+                } break;
+                case ClipPlanesControl.Near:
+                {
+                    NearClipPlane = calculatedNearClipPlane;
+                } break;
+                case ClipPlanesControl.Far:
+                {
+                    FarClipPlane = calculatedFarClipPlane;
+                } break;
+                default: { throw new InvalidEnumArgumentException(); }
             }
         }
 

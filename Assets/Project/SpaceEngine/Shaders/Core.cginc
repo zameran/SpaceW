@@ -473,7 +473,10 @@ struct DeferredOutput
 	float4 specular : SV_Target1; // rgb: specular, a: smoothness
 	float4 normal   : SV_Target2; // rgb: normal,   a: unused
 	float4 emission : SV_Target3; // rgb: emission, a: unused
-	//float depth		: SV_Depth;
+
+	#ifdef CORE_WRITE_TO_DEFFERED_DEPTH
+		float depth		: SV_Depth;
+	#endif
 };
 //-----------------------------------------------------------------------------
 
