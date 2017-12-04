@@ -50,6 +50,10 @@ namespace SpaceEngine.Core.Utilities.Gradients
         /// <inheritdoc />
         protected override Vector2 Size { get { return new Vector2(256, 32); } }
 
+        public ColorMaterialTableGradientLut() : base() { }
+
+        public ColorMaterialTableGradientLut(Gradient gradient) : base(gradient) { }
+
         /// <inheritdoc />
         public override void CalculateLut()
         {

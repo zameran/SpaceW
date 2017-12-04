@@ -56,6 +56,16 @@ namespace SpaceEngine.Core.Utilities.Gradients
         /// </summary>
         protected abstract Vector2 Size { get; }
 
+        public GradientLut()
+        {
+            
+        }
+
+        public GradientLut(Gradient gradient)
+        {
+            Gradient.SetKeys(gradient.colorKeys, gradient.alphaKeys);
+        }
+
         /// <summary>
         /// Generates the <see cref="Lut"/>.
         /// </summary>

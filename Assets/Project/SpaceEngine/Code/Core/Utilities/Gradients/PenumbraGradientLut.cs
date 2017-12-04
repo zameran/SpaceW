@@ -52,6 +52,10 @@ namespace SpaceEngine.Core.Utilities.Gradients
         /// <inheritdoc />
         protected override Vector2 Size { get { return new Vector2(1, 64); } }
 
+        public PenumbraGradientLut() : base() { }
+
+        public PenumbraGradientLut(Gradient gradient) : base(gradient) { }
+
         /// <inheritdoc />
         public override void CalculateLut()
         {
