@@ -227,7 +227,7 @@ namespace SpaceEngine.Cameras
         private void UpdateClipPlanes()
         {
             // NOTE : Body's shape dependent...
-            var h = (DistanceToCore - Body.Size - (float)Body.HeightZ);
+            var h = Body != null ? (DistanceToCore - Body.Size - (float)Body.HeightZ) : 1.0f;
 
             if (h < 1.0f) { h = 1.0f; }
 
