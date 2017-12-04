@@ -187,7 +187,7 @@ Shader "SpaceEngine/Planet/Ring"
 			o.diffuse.rgb = frontColor.a * ambientColor;
 
 			#if LIGHT_1 || LIGHT_2 || LIGHT_3 || LIGHT_4
-				float Shadow = 1.0;
+				float4 Shadow = 1.0;
 
 				#if SHADOW_1 || SHADOW_2 || SHADOW_3 || SHADOW_4
 					Shadow = ShadowColor(i.worldPosition);
@@ -207,7 +207,7 @@ Shader "SpaceEngine/Planet/Ring"
 				#endif
 
 				#if SHADOW_1 || SHADOW_2 || SHADOW_3 || SHADOW_4
-					o.diffuse.rgb *= Shadow;
+					o.diffuse.rgb *= Shadow.rgb;
 				#endif
 			#endif
 
