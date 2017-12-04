@@ -155,8 +155,8 @@ namespace SpaceEngine.Galaxy
             InverseSpiralEccentricity = from.InverseSpiralEccentricity;
             SpiralRotation = from.SpiralRotation;
 
-            StarsColorDistribution = new ColorMaterialTableGradientLut();
-            DustColorDistribution = new ColorMaterialTableGradientLut();
+            StarsColorDistribution = new ColorMaterialTableGradientLut(from.StarsColorDistribution.Gradient);
+            DustColorDistribution = new ColorMaterialTableGradientLut(from.DustColorDistribution.Gradient);
         }
 
         public GalaxyGenerationParameters(Vector3 temperatureRange, Vector3 randomize, Vector3 offset, Vector4 warp,
@@ -284,7 +284,7 @@ namespace SpaceEngine.Galaxy
 
             DustPassCount = from.DustPassCount;
 
-            DustColorDistribution = new ColorMaterialTableGradientLut();
+            DustColorDistribution = new ColorMaterialTableGradientLut(from.DustColorDistribution.Gradient);
         }
 
         public GalaxyRenderingParameters(float dustStrength, float dustSize, float gasStrength, float gasSize, float starAbsoluteSize, int dustPassCount)
@@ -501,6 +501,7 @@ namespace SpaceEngine.Galaxy
         {
             Settings = new GalaxySettings(gs);
 
+            InitAndGenerateLuts();
             InitAndGenerateBuffers();
             InitDustMaterials();
         }
@@ -750,6 +751,12 @@ namespace SpaceEngine.Galaxy
         #endregion
 
         #region Luts
+
+        public void InitAndGenerateLuts()
+        {
+            DestroyLuts();
+            GenerateLuts();
+        }
 
         public void GenerateLuts()
         {
@@ -1014,9 +1021,6 @@ namespace SpaceEngine.Galaxy
 
         public void RenderDustDebug()
         {
-            // NOTE : Pass number is hardcoded to draw anyway in debug mode.
-            if (BlendFactor < 1.0) return;
-
             RenderBuffers(ref DustBuffers, 1, Settings.GalaxyParameters.Count);
         }
 

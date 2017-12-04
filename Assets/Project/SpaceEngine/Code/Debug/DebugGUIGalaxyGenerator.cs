@@ -207,6 +207,9 @@ namespace SpaceEngine.Debugging
                             GUILayoutExtensions.SliderWithFieldAndControls("Dust Size (Ly): ", 0.0f, 4.0f, ref Galaxy.Settings.GalaxyRenderingParameters.DustSize, "0.0000", 75, 0.25f);
                             GUILayoutExtensions.SliderWithFieldAndControls("Dust Pass Count: ", 1, Galaxy.Settings.GalaxyParameters.PassCount, ref Galaxy.Settings.GalaxyRenderingParameters.DustPassCount, "0", 75, 1);
 
+                            GUILayoutExtensions.SliderWithFieldAndControls("Gas Strength (Proportion): ", 0.0f, 1.0f, ref Galaxy.Settings.GalaxyRenderingParameters.GasStength, "0.0000", 75, 0.0025f);
+                            GUILayoutExtensions.SliderWithFieldAndControls("Gas Size (Ly): ", 0.0f, 4.0f, ref Galaxy.Settings.GalaxyRenderingParameters.GasSize, "0.0000", 75, 0.25f);
+
                             GUILayoutExtensions.SliderWithFieldAndControls("Stars Absolute Size (Mm)", 1.0f, 1024.0f, ref Galaxy.Settings.GalaxyRenderingParameters.StarAbsoluteSize, "0.0", 75, 32.0f);
                         });
                     });

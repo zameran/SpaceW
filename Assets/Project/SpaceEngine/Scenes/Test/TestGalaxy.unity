@@ -11717,6 +11717,7 @@ MonoBehaviour:
   VolumeMesh: {fileID: 10202, guid: 0000000000000000e000000000000000, type: 0}
   ScreenMesh: {fileID: 0}
   AutoUpdate: 0
+  AutoLutUpdate: 0
 --- !u!4 &1257223185
 Transform:
   m_ObjectHideFlags: 0
@@ -15229,9 +15230,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6b1295d14b8ba62458a6963583074ce9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  ClipPlanesControlType: 2
   Speed: 1
   RotationSpeed: 1
-  DynamicClipPlanes: 1
   Controllable: 1
 --- !u!81 &2106011890
 AudioListener:
@@ -15271,7 +15272,7 @@ Camera:
     width: 1
     height: 1
   near clip plane: 0.3
-  far clip plane: 100000
+  far clip plane: 100000000
   field of view: 60
   orthographic: 0
   orthographic size: 5

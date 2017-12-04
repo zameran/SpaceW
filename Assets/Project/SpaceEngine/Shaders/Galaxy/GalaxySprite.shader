@@ -121,7 +121,7 @@
 				"LightMode"				= "Always"
 			}
 
-			Blend OneMinusDstColor One
+			Blend OneMinusSrcColor One
 			Cull Back
 			ZWrite Off
 			ZTest Off
