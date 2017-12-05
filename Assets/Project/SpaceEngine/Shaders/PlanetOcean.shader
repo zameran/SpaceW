@@ -73,7 +73,7 @@ Shader "SpaceEngine/Planet/Ocean"
 
 		struct v2f_planetOcean
 		{
-			float4 pos : SV_POSITION;
+			float4 position : SV_POSITION;
 			float2 oceanU : TEXCOORD0;
 			float3 oceanP : TEXCOORD1;
 			float4 screenP : TEXCOORD2;
@@ -117,10 +117,10 @@ Shader "SpaceEngine/Planet/Ocean"
 
 			float4 screenP = float4(t * cameraDir + mul(_Ocean_OceanToCamera, dP), 1.0);
 			float3 oceanP = t * oceanDir + dP + float3(0.0, 0.0, _Ocean_CameraPos.z);
-			float4 pos = mul(_Globals_CameraToScreen, screenP);
-			float4 computedScreenP = ComputeScreenPos(pos);
+			float4 position = mul(_Globals_CameraToScreen, screenP);
+			float4 computedScreenP = ComputeScreenPos(position);
 			
-			o.pos = pos;
+			o.position = position;
 			o.oceanU = u;
 			o.oceanP = oceanP;
 			o.screenP = screenP;

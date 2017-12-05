@@ -46,6 +46,7 @@ public class UniformsManager : MonoSingleton<UniformsManager>, IUniformed, IUnif
     public Texture2D PermGradSamplerGL = null;
     public Texture2D PlanetAtlas = null;
     public Texture2D PlanetUV = null;
+    public Texture2D PlanetColorMap = null;
 
     public Texture2D QuadTexture1 = null;
     public Texture2D QuadTexture2 = null;
@@ -64,6 +65,7 @@ public class UniformsManager : MonoSingleton<UniformsManager>, IUniformed, IUnif
         Shader.SetGlobalTexture("PermGradSamplerGL", PermSamplerGL);
 
         Shader.SetGlobalTexture("AtlasDiffSampler", PlanetAtlas);
+        Shader.SetGlobalTexture("PlanetColorMap", PlanetColorMap);
 
         Shader.SetGlobalTexture("_PlanetUV", PlanetUV);
 
@@ -114,6 +116,7 @@ public class UniformsManager : MonoSingleton<UniformsManager>, IUniformed, IUnif
         target.SetTexture("PermGradSamplerGL", PermSamplerGL);
 
         target.SetTexture("AtlasDiffSampler", PlanetAtlas);
+        target.SetTexture("PlanetColorMap", PlanetColorMap);
 
         target.SetTexture("_PlanetUV", PlanetUV);
 
@@ -158,6 +161,7 @@ public class UniformsManager : MonoSingleton<UniformsManager>, IUniformed, IUnif
         target.SetTexture(kernel, "PermGradSamplerGL", PermSamplerGL);
 
         target.SetTexture(kernel, "AtlasDiffSampler", PlanetAtlas);
+        target.SetTexture(kernel, "PlanetColorMap", PlanetColorMap);
     }
 
     #endregion
@@ -204,6 +208,7 @@ public class UniformsManager : MonoSingleton<UniformsManager>, IUniformed, IUnif
         if (PermSamplerGL == null) PermSamplerGL = LoadTextureFromResources("Noise/PerlinPerm2D_GL");
         if (PermGradSamplerGL == null) PermGradSamplerGL = LoadTextureFromResources("Noise/PerlinGrad2D_GL");
         if (PlanetAtlas == null) PlanetAtlas = LoadTextureFromResources("PlanetAtlas");
+        if (PlanetColorMap == null) PlanetColorMap = LoadTextureFromResources("PlanetColorHumanityToTemp");
         if (PlanetUV == null) PlanetUV = LoadTextureFromResources("UV");
     }
 

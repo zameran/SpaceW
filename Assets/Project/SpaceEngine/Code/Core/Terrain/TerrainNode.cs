@@ -349,6 +349,12 @@ namespace SpaceEngine.Core.Terrain
             
             target.SetVector("_TileSD", tileSD.ToVector2());
             target.SetVector("_Offset", offset.ToVector4());
+
+            if (ParentBody.TCCPS != null) ParentBody.TCCPS.SetUniforms(target);
+            */
+
+            /*
+            if (ParentBody.TCCPS != null) ParentBody.TCCPS.SetUniforms(target);
             */
         }
 

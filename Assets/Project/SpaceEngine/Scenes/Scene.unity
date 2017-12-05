@@ -2229,9 +2229,9 @@ MonoBehaviour:
   faceParams: {x: 0, y: 0, z: 1, w: 0}
   scaleParams: {x: 0, y: 0, z: 0, w: -1}
   mainParams: {x: 1, y: 0.704, z: 0, w: 0}
-  colorParams: {x: 1, y: 8, z: 0.497, w: 0.211}
-  climateParams: {x: 0.179, y: 0.158, z: 0.153, w: 0.157}
-  mareParams: {x: 0.55, y: 0, z: 0, w: 0.751}
+  colorParams: {x: 1, y: 0.0001, z: 0.497, w: 0.799}
+  climateParams: {x: 0.719, y: 0.311, z: 0.164, w: 0.142}
+  mareParams: {x: 0.155, y: 0, z: 0, w: 0.751}
   montesParams: {x: 0.106, y: 2, z: 0.153, w: 0.222}
   dunesParams: {x: 0.121, y: 6.9, z: 0.143, w: -1}
   hillsParams: {x: 1, y: 4, z: 0.772, w: 0.898}
@@ -2241,7 +2241,7 @@ MonoBehaviour:
   craterParams: {x: 2.1245, y: 1, z: 1.59, w: 4}
   volcanoParams1: {x: 2, y: 0.64, z: 0.81, w: 5}
   volcanoParams2: {x: 1.24, y: 0.423, z: 2.12, w: 1507}
-  lavaParams: {x: -10, y: 0, z: 207, w: 0.625}
+  lavaParams: {x: -10, y: 0, z: 207, w: 1}
   textureParams: {x: 1, y: 0, z: 0, w: 0}
   cloudsParams1: {x: 0, y: 0, z: 0, w: 0}
   cloudsParams2: {x: 0, y: 0, z: 1, w: 0}
@@ -8796,6 +8796,7 @@ MonoBehaviour:
   PermGradSamplerGL: {fileID: 0}
   PlanetAtlas: {fileID: 0}
   PlanetUV: {fileID: 0}
+  PlanetColorMap: {fileID: 0}
   QuadTexture1: {fileID: 0}
   QuadTexture2: {fileID: 0}
   QuadTexture3: {fileID: 0}

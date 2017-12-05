@@ -128,6 +128,7 @@ uniform sampler1D	CloudsColorTable;   // clouds color table
 uniform sampler2D	MaterialTable;      // material parameters table
 
 uniform sampler2D	AtlasDiffSampler;   // detail texture diffuse atlas
+uniform sampler2D	PlanetColorMap;
 //-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
@@ -645,6 +646,47 @@ Surface GetSurfaceColorAtlas(float height, float slope, float vary)
 
 	return res;
 }
+
+Surface GetSurfaceColorAtlas(float2 texcoord, float height, float slope, float vary)
+{
+	const float4  PackFactors = float4(1.0 / ATLAS_RES_X, 1.0 / ATLAS_RES_Y, ATLAS_TILE_RES, ATLAS_TILE_RES_LOG2);
+
+	slope = saturate(slope * 0.5);
+
+	float4 IdScale = tex2D(MaterialTable, float2(height + 0.015, slope + 0.5));
+	uint materialID = min(uint(IdScale.x) + uint(vary), uint(ATLAS_RES_X * ATLAS_RES_Y - 1));
+	float2 tileOffs = float2(materialID % ATLAS_RES_X, materialID / ATLAS_RES_X) * PackFactors.xy;
+
+	Surface res;
+
+	float2 tileUV = (texcoord * faceParams.z + faceParams.xy) * texScale * IdScale.y;
+	float2 dx = ddx(tileUV * PackFactors.z);
+	float2 dy = ddy(tileUV * PackFactors.z);
+	float lod = clamp(0.5 * log2(max(dot(dx, dx), dot(dy, dy))), 0.0, PackFactors.w);
+	float2 invSize = pow(2.0, lod - PackFactors.w) * PackFactors.xy;
+	float2 uv = tileOffs + frac(tileUV) * (PackFactors.xy - invSize) + 0.5 * invSize;
+
+	#if (TILING_FIX_MODE == 0)
+		res.color = tex2D(AtlasDiffSampler, uv);
+	#elif (TILING_FIX_MODE == 1)
+		float2 uv2 = tileOffs + frac(-0.173 * tileUV) * (PackFactors.xy - invSize) + 0.5 * invSize;
+		res.color = lerp(tex2D(AtlasDiffSampler, uv), tex2D(AtlasDiffSampler, uv2), 0.5);
+	#endif
+
+	res.height = res.color.a;
+
+	float4 adjust = tex2D(MaterialTable, float2(height, slope));
+	adjust.xyz *= texColorConv;
+
+	float3 hsl = rgb2hsl(res.color.rgb);
+	hsl.x  = frac(hsl.x  + adjust.x);
+	hsl.yz = clamp(hsl.yz + adjust.yz, 0.0, 1.0);
+
+	res.color.rgb = hsl2rgb(hsl);
+	res.color.a = adjust.a;
+
+	return res;
+}
 //-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
@@ -656,6 +698,11 @@ Surface GetSurfaceColorAtlas(float height, float slope, float vary)
 Surface GetSurfaceColor(float height, float slope, float vary)
 {
 	return GetSurfaceColorAtlas(height, slope, vary * 4.0);
+}
+
+Surface GetSurfaceColor(float2 texcoord, float height, float slope, float vary)
+{
+	return GetSurfaceColorAtlas(texcoord, height, slope, vary * 4.0);
 }
 
 #elif (TILE_BLEND_MODE == 1)

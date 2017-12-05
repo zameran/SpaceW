@@ -32,6 +32,70 @@
 		uniform float4 _Offset;
 		uniform float4x4 _LocalToWorld;
 
+		float4 ColorMapTempHum(float3 ppoint, float height, float slope)
+		{
+			noiseOctaves    = 6.0;
+			noiseH          = 0.5;
+			noiseLacunarity = 2.218281828459;
+			noiseOffset     = 0.8;
+			float climate, latitude, dist;
+			float vary;
+			if (tidalLock <= 0.0)
+			{
+				latitude = abs(normalize(ppoint).y);
+				latitude += 0.15 * (Fbm(ppoint * 0.007 + Randomize) - 1.0);
+				latitude = saturate(latitude);
+				if (latitude < latTropic - tropicWidth)
+					climate = lerp(climateTropic, climateEquator, (latTropic - tropicWidth - latitude) / latTropic);
+				else if (latitude > latTropic + tropicWidth)
+					climate = lerp(climateTropic, climatePole, (latitude - latTropic - tropicWidth) / (1.0 - latTropic));
+				else
+					climate = climateTropic;
+			}
+			else
+			{
+				latitude = 1.0 - normalize(ppoint).x;
+				latitude += 0.15 * (Fbm(ppoint * 0.7 + Randomize) - 1.0);
+				climate = lerp(climateTropic, climatePole, saturate(latitude));
+			}
+
+			noiseOctaves    = 5.0;
+			noiseLacunarity = 3.5;
+			vary = Fbm(ppoint * 17000 + Randomize);
+			float snowLine   = height + 0.25 * vary * slope;
+			float montHeight = saturate((height - seaLevel) / (snowLevel - seaLevel));
+			climate = min(climate + 0.5 * heightTempGrad * montHeight, climatePole - 0.125);
+			climate = lerp(climate, climatePole, saturate((snowLine - (1.0 - snowLevel)) * 100.0));
+
+			float beach = saturate((height / seaLevel - 1.0) * 50.0);
+			climate = lerp(0.375, climate, beach);
+
+			float iceCap = saturate((latitude / latIceCaps - 1.0) * 50.0);
+			climate = lerp(climate, climatePole, iceCap);
+
+			float3 p = ppoint * mainFreq + Randomize;
+
+			noiseOctaves    = 4.0;
+			noiseLacunarity = 2.218281828459;
+			float3  pp = (ppoint + Randomize) * (0.0005 * hillsFreq / (hillsMagn * hillsMagn));
+			float fr = 0.20 * (1.5 - RidgedMultifractal(pp,         2.0)) +
+					   0.05 * (1.5 - RidgedMultifractal(pp * 10.0,  2.0)) +
+					   0.02 * (1.5 - RidgedMultifractal(pp * 100.0, 2.0));
+			p = ppoint * (colorDistFreq * 0.005) + float3(fr, fr, fr);
+			p += Fbm3D(p * 0.38) * 1.2;
+			vary = Fbm(p) * 0.35 + 0.245;
+			climate += vary * beach * saturate(1.0 - 3.0 * slope) * saturate(1.0 - 1.333 * climate);
+
+			float humidity = 1.0 - climate;
+			float temperature = 1.0 - (latitude + (vary * 0.75));
+
+			temperature -= slope * 0.5;
+
+			float4 color = tex2D(PlanetColorMap, float2(humidity, temperature));
+
+			return color;
+		}
+
 		float3 ColorFunction(float3 ppoint, float height, float slope)
 		{
 			#if TC_NONE
@@ -44,6 +108,7 @@
 
 			#if TC_PLANET
 				return ColorMapPlanet(ppoint, height, slope);
+				//return ColorMapTempHum(ppoint, height, slope);
 			#endif
 
 			#if TC_SELENA

@@ -125,6 +125,29 @@ public sealed class TCCommonParametersSetter : MonoBehaviour, IUniformed<Materia
         }
     }
 
+    public void UpdateMaterialTable1(MaterialPropertyBlock target)
+    {
+        if (MaterialTable == null)
+        {
+            Debug.LogWarning("TCCommonParametersSetter.UpdateMaterialTable: Trying to update lut texture, which is null! So, created...");
+
+            MaterialTable = new MaterialTableGradientLut();
+
+            UpdateMaterialTable1(target);
+        }
+        else
+        {
+            if (MaterialTable.Lut == null)
+            {
+                Debug.LogWarning("TCCommonParametersSetter.UpdateMaterialTable: Trying to set lut texture, which is not generated! So, generating...");
+
+                MaterialTable.GenerateLut();
+            }
+
+            target.SetTexture("MaterialTable", MaterialTable.Lut);
+        }
+    }
+
     public void ToggleKeywords<T>(T target) where T : Material
     {
         Helper.SetKeywords(target, new List<string>() { Engine.ToString() }, false);
@@ -140,6 +163,45 @@ public sealed class TCCommonParametersSetter : MonoBehaviour, IUniformed<Materia
     public void InitUniforms(Material target)
     {
         if (target == null) return;
+    }
+
+    public void SetUniforms(MaterialPropertyBlock target)
+    {
+        if (target == null) return;
+
+        UpdateMaterialTable1(target);
+
+        target.SetFloat("noiseLacunarity", Lacunarity);
+        target.SetFloat("noiseH", H);
+        target.SetFloat("noiseOffset", Offset);
+        target.SetFloat("noiseRidgeSmooth", RidgeSmooth);
+
+        target.SetFloat("texturingHeightOffset", texturingHeightOffset);
+        target.SetFloat("texturingSlopeOffset", texturingSlopeOffset);
+
+        target.SetVector("Randomize", Randomize);
+        target.SetVector("faceParams", faceParams); //(WIP) For SE Coloring in fragment shader work...
+        target.SetVector("scaleParams", scaleParams);
+        target.SetVector("mainParams", mainParams);
+        target.SetVector("colorParams", colorParams);
+        target.SetVector("climateParams", climateParams);
+        target.SetVector("mareParams", mareParams);
+        target.SetVector("montesParams", montesParams);
+        target.SetVector("dunesParams", dunesParams);
+        target.SetVector("hillsParams", hillsParams);
+        target.SetVector("canyonsParams", canyonsParams);
+        target.SetVector("riversParams", riversParams);
+        target.SetVector("cracksParams", cracksParams);
+        target.SetVector("craterParams", craterParams);
+        target.SetVector("volcanoParams1", volcanoParams1);
+        target.SetVector("volcanoParams2", volcanoParams2);
+        target.SetVector("lavaParams", lavaParams);
+        target.SetVector("textureParams", textureParams);
+        target.SetVector("cloudsParams1", cloudsParams1);
+        target.SetVector("cloudsParams2", cloudsParams2);
+        target.SetVector("cycloneParams", cycloneParams);
+
+        target.SetVector("InvSize", InvSize);
     }
 
     public void SetUniforms(Material target)

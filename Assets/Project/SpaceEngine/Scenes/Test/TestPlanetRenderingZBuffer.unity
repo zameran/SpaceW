@@ -576,7 +576,7 @@ Transform:
   - {fileID: 2104141348}
   - {fileID: 1478112655}
   m_Father: {fileID: 1497659641}
-  m_RootOrder: 12
+  m_RootOrder: 13
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &192751369
 MonoBehaviour:
@@ -1422,7 +1422,7 @@ Transform:
   - {fileID: 725861331}
   - {fileID: 1252424865}
   m_Father: {fileID: 1497659641}
-  m_RootOrder: 11
+  m_RootOrder: 12
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &529703806
 MonoBehaviour:
@@ -4501,7 +4501,7 @@ Transform:
   - {fileID: 1381954838}
   - {fileID: 1247820812}
   m_Father: {fileID: 1497659641}
-  m_RootOrder: 7
+  m_RootOrder: 8
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &918735065
 MonoBehaviour:
@@ -4744,7 +4744,7 @@ Transform:
   - {fileID: 1995852966}
   - {fileID: 1860669608}
   m_Father: {fileID: 1497659641}
-  m_RootOrder: 8
+  m_RootOrder: 9
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &1019286898
 MonoBehaviour:
@@ -6108,6 +6108,7 @@ Transform:
   - {fileID: 2014628592}
   - {fileID: 193674315}
   - {fileID: 1079699445}
+  - {fileID: 2139094780}
   - {fileID: 1940098943}
   - {fileID: 918735064}
   - {fileID: 1019286897}
@@ -6130,7 +6131,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   Atmosphere: {fileID: 1079699446}
-  Ocean: {fileID: 0}
+  Ocean: {fileID: 2139094779}
   Ring: {fileID: 0}
   RenderQueue: 2000
   RenderQueueOffset: 0
@@ -6507,7 +6508,7 @@ Transform:
   - {fileID: 2089371356}
   - {fileID: 1733853064}
   m_Father: {fileID: 1497659641}
-  m_RootOrder: 9
+  m_RootOrder: 10
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &1592153270
 MonoBehaviour:
@@ -7819,7 +7820,7 @@ Transform:
   - {fileID: 230248928}
   - {fileID: 853442838}
   m_Father: {fileID: 1497659641}
-  m_RootOrder: 6
+  m_RootOrder: 7
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1947387572
 GameObject:
@@ -7854,6 +7855,7 @@ MonoBehaviour:
   PermGradSamplerGL: {fileID: 0}
   PlanetAtlas: {fileID: 0}
   PlanetUV: {fileID: 0}
+  PlanetColorMap: {fileID: 0}
   QuadTexture1: {fileID: 0}
   QuadTexture2: {fileID: 0}
   QuadTexture3: {fileID: 0}
@@ -7902,7 +7904,7 @@ Transform:
   - {fileID: 1045187562}
   - {fileID: 1986989071}
   m_Father: {fileID: 1497659641}
-  m_RootOrder: 10
+  m_RootOrder: 11
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &1957876121
 MonoBehaviour:
@@ -8631,3 +8633,73 @@ MonoBehaviour:
   StoreParent: 1
   StoreInvisible: 0
   Priority: 2
+--- !u!1 &2139094778
+GameObject:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  serializedVersion: 5
+  m_Component:
+  - component: {fileID: 2139094780}
+  - component: {fileID: 2139094779}
+  m_Layer: 0
+  m_Name: Ocean
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &2139094779
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 2139094778}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f477e58ac3f5f05428b64847189be289, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  ParentBody: {fileID: 1497659642}
+  OceanShader: {fileID: 4800000, guid: 09255663507ef1b478367ecae635e5f7, type: 3}
+  RenderQueue: 2000
+  RenderQueueOffset: 0
+  OceanMaterial: {fileID: 0}
+  UpwellingColor: {r: 0.039, g: 0.156, b: 0.47, a: 1}
+  AbsorbtionTint: {r: 1, g: 1, b: 1, a: 1}
+  AbsorbtionRGBA: {x: 0.45, y: 0.029, z: 0.018, w: 2}
+  ShoreParameters: {x: 100, y: 0.56, z: 0.5}
+  ShoreFoamParameters: {x: 25, y: 0.25, z: 0.5}
+  OceanLevel: 5
+  OceanWaveLevel: 1
+  ZMin: 20000
+  InitSpectrumMaterial: {fileID: 2100000, guid: 5031b12fb29d9994c8308cb7a1e0c160,
+    type: 2}
+  InitDisplacementMaterial: {fileID: 2100000, guid: d71731534f4f7a349a0d1af0b86336aa,
+    type: 2}
+  Aniso: 2
+  WindSpeed: 5
+  WavesOmega: 0.84
+  GridSizes: {x: 5488, y: 392, z: 28, w: 2}
+  Choppyness: {x: 2.3, y: 2.1, z: 1.3, w: 0.9}
+  VarianceSize: 16
+  InitJacobiansMaterial: {fileID: 2100000, guid: 3fb2adcb831e928459999d4736573f21,
+    type: 2}
+  WhiteCapsPrecomputeMaterial: {fileID: 2100000, guid: 2653e30a6ed623d4d94880f44f44a935,
+    type: 2}
+  FoamAniso: 9
+  FoamMipmapBias: -2
+  WhiteCapStrength: 0.75
+--- !u!4 &2139094780
+Transform:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 2139094778}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children: []
+  m_Father: {fileID: 1497659641}
+  m_RootOrder: 6
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
