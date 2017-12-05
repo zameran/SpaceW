@@ -2820,9 +2820,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6b1295d14b8ba62458a6963583074ce9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  ClipPlanesControlType: 2
   Speed: 100
   RotationSpeed: 1
-  DynamicClipPlanes: 1
   Controllable: 1
 --- !u!81 &812990984
 AudioListener:
