@@ -46,8 +46,6 @@ Shader "SpaceEngine/Planet/Terrain (Deferred)"
 	SubShader 
 	{
 		CGINCLUDE
-		//#define CORE_WRITE_TO_DEFFERED_DEPTH
-
 		#include "Core.cginc"
 		ENDCG
 
@@ -86,10 +84,6 @@ Shader "SpaceEngine/Planet/Terrain (Deferred)"
 			#include "SpaceEclipses.cginc"
 			#include "SpaceAtmosphere.cginc"
 			#include "Ocean/OceanBRDF.cginc"
-
-			#ifdef CORE_WRITE_TO_DEFFERED_DEPTH
-				#include "ZBuffer.cginc"
-			#endif
 			
 			struct a2v_planetTerrain
 			{
@@ -105,9 +99,7 @@ Shader "SpaceEngine/Planet/Terrain (Deferred)"
 				float3 localVertex : TEXCOORD1;
 				float3 direction : TEXCOORD2;
 
-				#ifdef CORE_WRITE_TO_DEFFERED_DEPTH
-					float logDepth : TEXCOORD3;
-				#endif
+				LOG_DEPTH(3)
 			};
 
 			void vert(in a2v_planetTerrain v, out v2f_planetTerrain o)
@@ -118,9 +110,7 @@ Shader "SpaceEngine/Planet/Terrain (Deferred)"
 
 				o.direction = (_Body_WorldCameraPosition + _Body_Origin) - (mul(_Globals_CameraToWorld, float4((mul(_Globals_ScreenToCamera, v.vertex)).xyz, 0.0))).xyz;
 
-				#ifdef CORE_WRITE_TO_DEFFERED_DEPTH
-					LogarithmicInPosition(v.vertex, o.logDepth);
-				#endif
+				TRANSFER_LOG_DEPTH(v, o)
 			}
 
 			// TODO : Planet texturing...
@@ -261,9 +251,7 @@ Shader "SpaceEngine/Planet/Terrain (Deferred)"
 				o.normal = float4(normal.xyz, 1.0);
 				o.emission = float4(0.0, 0.0, 0.0, 1.0);
 
-				#ifdef CORE_WRITE_TO_DEFFERED_DEPTH
-					LogarithmicOutDepth(i.logDepth, o.depth);
-				#endif
+				OUTPUT_LOG_DEPTH(i, o)
 			}
 			
 			ENDCG

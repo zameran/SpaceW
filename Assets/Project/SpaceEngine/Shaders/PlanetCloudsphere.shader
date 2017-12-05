@@ -47,7 +47,11 @@ Shader "SpaceEngine/Planet/Cloudsphere"
 
 		#include "Core.cginc"
 		#include "SpaceAtmosphere.cginc"
-					
+		
+		#if defined(CORE_WRITE_TO_DEPTH)
+			#undef CORE_WRITE_TO_DEPTH	// TODO : Add support for custom depth buffer...
+		#endif
+
 		uniform float _TransmittanceOffset;
 		uniform float4 _DiffuseColor;
 

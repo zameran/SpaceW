@@ -54,6 +54,10 @@ Shader "SpaceEngine/Space/Starfield"
 			
 			#include "Core.cginc"
 
+			#if defined(CORE_WRITE_TO_DEPTH)
+				#undef CORE_WRITE_TO_DEPTH	// TODO : Add support for custom depth buffer...
+			#endif
+
 			#pragma vertex vert
 			#pragma fragment frag
 

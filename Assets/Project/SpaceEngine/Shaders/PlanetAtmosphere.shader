@@ -73,7 +73,7 @@ Shader "SpaceEngine/Planet/Atmosphere"
 	SubShader 
 	{
 		CGINCLUDE
-		//#define CORE_WRITE_TO_DEFFERED_DEPTH
+		#include "Core.cginc"
 		ENDCG
 
 		Pass 
@@ -99,10 +99,6 @@ Shader "SpaceEngine/Planet/Atmosphere"
 			#include "SpaceEclipses.cginc"
 			#include "SpaceAtmosphere.cginc"
 
-			#ifdef CORE_WRITE_TO_DEFFERED_DEPTH
-				#include "ZBuffer.cginc"
-			#endif
-
 			#pragma target 5.0
 			#pragma only_renderers d3d11 glcore
 			#pragma vertex vert
@@ -125,9 +121,7 @@ Shader "SpaceEngine/Planet/Atmosphere"
 				float2 uv : TEXCOORD0;
 				float3 direction : TEXCOORD1;
 
-				#ifdef CORE_WRITE_TO_DEFFERED_DEPTH
-					float logDepth : TEXCOORD2;
-				#endif
+				LOG_DEPTH(2)
 			};
 
 			void vert(in a2v_planetAtmosphere v, out v2f_planetAtmosphere o)
@@ -141,9 +135,7 @@ Shader "SpaceEngine/Planet/Atmosphere"
 				//o.direction = (mul(_Globals_CameraToWorld, float4((mul(_Globals_ScreenToCamera, v.vertex)).xyz, 0.0))).xyz;
 				o.direction = (mul(_Globals_CameraToWorld, float4((mul(_Globals_ScreenToCamera, o.position)).xyz, 0.0))).xyz;
 
-				#ifdef CORE_WRITE_TO_DEFFERED_DEPTH
-					LogarithmicInPosition(v.vertex, o.logDepth);
-				#endif
+				TRANSFER_LOG_DEPTH(v, o)
 			}
 			
 			void frag(in v2f_planetAtmosphere i, out ForwardOutput o)
@@ -390,9 +382,7 @@ Shader "SpaceEngine/Planet/Atmosphere"
 					o.diffuse = float4(finalColor, 1.0);
 				#endif
 
-				#ifdef CORE_WRITE_TO_DEFFERED_DEPTH
-					LogarithmicOutDepth(i.logDepth, o.depth);
-				#endif
+				OUTPUT_LOG_DEPTH(i, o)
 			}
 			ENDCG
 		}

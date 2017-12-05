@@ -265,15 +265,16 @@ struct VertexProducerInput
 
 struct VertexProducerOutput
 {
-	float4 pos : SV_POSITION;
+	float4 position : SV_POSITION;
 	float2 uv0 : TEXCOORD0;
-#if defined(CORE_PORDUCER_ADDITIONAL_UV)
-	float2 uv1 : TEXCOORD1;
-#endif
+
+	#if defined(CORE_PORDUCER_ADDITIONAL_UV)
+		float2 uv1 : TEXCOORD1;
+	#endif
 };
 
 #define CORE_PRODUCER_VERTEX_PROGRAM_BODY \
-	o.pos = UnityObjectToClipPos(v.vertex); \
+	o.position = UnityObjectToClipPos(v.vertex); \
 	o.uv0 = v.texcoord.xy; \
 
 #define CORE_PRODUCER_VERTEX_PROGRAM_BODY_ADDITIONAL_UV(scale) \
@@ -304,12 +305,12 @@ struct VertexLayerInput
 
 struct VertexLayerOutput
 {
-	float4 pos : SV_POSITION;
+	float4 position : SV_POSITION;
 	float2 uv : TEXCOORD0;
 };
 
 #define CORE_LAYER_VERTEX_PROGRAM_BODY \
-	o.pos = UnityObjectToClipPos(v.vertex); \
+	o.position = UnityObjectToClipPos(v.vertex); \
 	o.uv = v.texcoord.xy; \
 
 #define CORE_LAYER_VERTEX_PROGRAM \
@@ -462,11 +463,51 @@ float4x4 SampleCoarseLevelHeights(sampler2D coarseLevelSampler, float2 uv, float
 //-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
+#define CORE_LOG_DEPTH
+
+//#define CORE_WRITE_TO_DEPTH	// NOTE : Control switch...
+// Outerra approach...
+// TODO : DirectX/OpenGL switch...
+// TODO : Finish it...
+
+#if defined(CORE_WRITE_TO_DEPTH)
+	#define LOG_DEPTH(idx)						float logDepth : TEXCOORD##idx;
+	#define TRANSFER_LOG_DEPTH(input, output)	LogarithmicInPosition(input.vertex, output.logDepth);
+	#define OUTPUT_LOG_DEPTH(input, output)		LogarithmicOutDepth(input.logDepth, output.depth);
+#else
+	#define LOG_DEPTH(idx)
+	#define TRANSFER_LOG_DEPTH(input, output)
+	#define OUTPUT_LOG_DEPTH(input, output)
+#endif
+
+#if defined(CORE_WRITE_TO_DEPTH)
+	inline float FCoefficient()
+	{
+		return (2.0 / log2(_ProjectionParams.z + 1.0));
+	}
+
+	void LogarithmicInPosition(inout float4 position, out float depth)
+	{
+		position.z = log2(max(1e-6, 1.0 + position.w)) * FCoefficient() - 1.0;
+		position.z *= position.w;
+	
+		depth = 1.0 + position.w;
+	}
+
+	void LogarithmicOutDepth(in float logDepth, out float depth)
+	{
+		depth = 1.0 - (log2(logDepth) * (0.5 * FCoefficient()));	// DirectX
+		//depth = log2(logDepth) * (0.5 * FCoefficient());			// OpenGL
+	}
+#endif
+//-----------------------------------------------------------------------------
+
+//-----------------------------------------------------------------------------
 struct ForwardOutput
 {
 	float4 diffuse	: SV_Target; // rgb: diffuse,  a: unused
 
-	#ifdef CORE_WRITE_TO_DEFFERED_DEPTH
+	#if defined(CORE_WRITE_TO_DEPTH)
 		float depth	: SV_Depth;
 	#endif
 };
@@ -478,7 +519,7 @@ struct DeferredOutput
 	float4 normal   : SV_Target2; // rgb: normal,   a: unused
 	float4 emission : SV_Target3; // rgb: emission, a: unused
 
-	#ifdef CORE_WRITE_TO_DEFFERED_DEPTH
+	#if defined(CORE_WRITE_TO_DEPTH)
 		float depth	: SV_Depth;
 	#endif
 };

@@ -44,6 +44,10 @@ Shader "SpaceEngine/Planet/Ring"
 		#include "Core.cginc"
 		#include "SpaceStuff.cginc"
 		
+		#if defined(CORE_WRITE_TO_DEPTH)
+			#undef CORE_WRITE_TO_DEPTH	// TODO : Add support for custom depth buffer...
+		#endif
+
 		uniform sampler2D DiffuseMap;
 		uniform sampler2D NoiseMap;
 		

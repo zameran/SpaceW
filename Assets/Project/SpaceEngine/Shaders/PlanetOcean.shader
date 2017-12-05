@@ -57,6 +57,10 @@ Shader "SpaceEngine/Planet/Ocean"
 			sampler2D _CameraDepthTexture;
 		#endif
 
+		#if defined(CORE_WRITE_TO_DEPTH)
+			#undef CORE_WRITE_TO_DEPTH	// TODO : Add support for custom depth buffer...
+		#endif
+
 		uniform float _Ocean_Wave_Level;
 
 		uniform float4x4 _Ocean_LocalToOcean;
