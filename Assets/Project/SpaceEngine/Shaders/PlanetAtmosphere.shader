@@ -71,7 +71,11 @@ Shader "SpaceEngine/Planet/Atmosphere"
 
 	}
 	SubShader 
-	{	
+	{
+		CGINCLUDE
+		//#define CORE_WRITE_TO_DEFFERED_DEPTH
+		ENDCG
+
 		Pass 
 		{
 			Name "Atmosphere"
@@ -95,6 +99,10 @@ Shader "SpaceEngine/Planet/Atmosphere"
 			#include "SpaceEclipses.cginc"
 			#include "SpaceAtmosphere.cginc"
 
+			#ifdef CORE_WRITE_TO_DEFFERED_DEPTH
+				#include "ZBuffer.cginc"
+			#endif
+
 			#pragma target 5.0
 			#pragma only_renderers d3d11 glcore
 			#pragma vertex vert
@@ -116,15 +124,26 @@ Shader "SpaceEngine/Planet/Atmosphere"
 				float4 position : SV_POSITION;
 				float2 uv : TEXCOORD0;
 				float3 direction : TEXCOORD1;
+
+				#ifdef CORE_WRITE_TO_DEFFERED_DEPTH
+					float logDepth : TEXCOORD2;
+				#endif
 			};
 
-			void vert(in a2v_planetAtmosphere i, out v2f_planetAtmosphere o)
+			void vert(in a2v_planetAtmosphere v, out v2f_planetAtmosphere o)
 			{
-				//o.position = UnityObjectToClipPos(float4(i.vertex.xy, 1.0, 1.0));
-				o.position = UnityObjectToClipPos(i.vertex);
-				o.uv = i.uv.xy;
-				//o.direction = (mul(_Globals_CameraToWorld, float4((mul(_Globals_ScreenToCamera, i.vertex)).xyz, 0.0))).xyz;
+				//o.position = UnityObjectToClipPos(float4(v.vertex.xy, 1.0, 1.0));
+				o.position = UnityObjectToClipPos(v.vertex);
+
+				v.vertex = o.position; // NOTE : Important for a log depth buffer...
+
+				o.uv = v.uv.xy;
+				//o.direction = (mul(_Globals_CameraToWorld, float4((mul(_Globals_ScreenToCamera, v.vertex)).xyz, 0.0))).xyz;
 				o.direction = (mul(_Globals_CameraToWorld, float4((mul(_Globals_ScreenToCamera, o.position)).xyz, 0.0))).xyz;
+
+				#ifdef CORE_WRITE_TO_DEFFERED_DEPTH
+					LogarithmicInPosition(v.vertex, o.logDepth);
+				#endif
 			}
 			
 			void frag(in v2f_planetAtmosphere i, out ForwardOutput o)
@@ -369,6 +388,10 @@ Shader "SpaceEngine/Planet/Atmosphere"
 					float3 finalColor = hdr(sunColor * extinction + inscatter) * fade;
 
 					o.diffuse = float4(finalColor, 1.0);
+				#endif
+
+				#ifdef CORE_WRITE_TO_DEFFERED_DEPTH
+					LogarithmicOutDepth(i.logDepth, o.depth);
 				#endif
 			}
 			ENDCG

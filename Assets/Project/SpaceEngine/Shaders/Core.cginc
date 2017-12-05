@@ -465,6 +465,10 @@ float4x4 SampleCoarseLevelHeights(sampler2D coarseLevelSampler, float2 uv, float
 struct ForwardOutput
 {
 	float4 diffuse	: SV_Target; // rgb: diffuse,  a: unused
+
+	#ifdef CORE_WRITE_TO_DEFFERED_DEPTH
+		float depth	: SV_Depth;
+	#endif
 };
 
 struct DeferredOutput
@@ -475,7 +479,7 @@ struct DeferredOutput
 	float4 emission : SV_Target3; // rgb: emission, a: unused
 
 	#ifdef CORE_WRITE_TO_DEFFERED_DEPTH
-		float depth		: SV_Depth;
+		float depth	: SV_Depth;
 	#endif
 };
 //-----------------------------------------------------------------------------

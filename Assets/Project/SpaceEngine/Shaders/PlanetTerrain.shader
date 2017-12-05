@@ -100,7 +100,7 @@ Shader "SpaceEngine/Planet/Terrain (Deferred)"
 
 			struct v2f_planetTerrain
 			{
-				float4 pos : POSITION;
+				float4 position : POSITION;
 				float2 texcoord : TEXCOORD0;
 				float3 localVertex : TEXCOORD1;
 				float3 direction : TEXCOORD2;
@@ -112,9 +112,9 @@ Shader "SpaceEngine/Planet/Terrain (Deferred)"
 
 			void vert(in a2v_planetTerrain v, out v2f_planetTerrain o)
 			{	
-				VERTEX_POSITION(v.vertex, v.texcoord.xy, o.pos, o.localVertex, o.texcoord);
+				VERTEX_POSITION(v.vertex, v.texcoord.xy, o.position, o.localVertex, o.texcoord);
 
-				v.vertex = o.pos;
+				v.vertex = o.position; // NOTE : Important for a log depth buffer too...
 
 				o.direction = (_Body_WorldCameraPosition + _Body_Origin) - (mul(_Globals_CameraToWorld, float4((mul(_Globals_ScreenToCamera, v.vertex)).xyz, 0.0))).xyz;
 

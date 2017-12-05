@@ -576,7 +576,7 @@ Transform:
   - {fileID: 2104141348}
   - {fileID: 1478112655}
   m_Father: {fileID: 1497659641}
-  m_RootOrder: 11
+  m_RootOrder: 12
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &192751369
 MonoBehaviour:
@@ -1422,7 +1422,7 @@ Transform:
   - {fileID: 725861331}
   - {fileID: 1252424865}
   m_Father: {fileID: 1497659641}
-  m_RootOrder: 10
+  m_RootOrder: 11
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &529703806
 MonoBehaviour:
@@ -4501,7 +4501,7 @@ Transform:
   - {fileID: 1381954838}
   - {fileID: 1247820812}
   m_Father: {fileID: 1497659641}
-  m_RootOrder: 6
+  m_RootOrder: 7
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &918735065
 MonoBehaviour:
@@ -4744,7 +4744,7 @@ Transform:
   - {fileID: 1995852966}
   - {fileID: 1860669608}
   m_Father: {fileID: 1497659641}
-  m_RootOrder: 7
+  m_RootOrder: 8
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &1019286898
 MonoBehaviour:
@@ -4994,6 +4994,89 @@ Transform:
   m_Father: {fileID: 787492934}
   m_RootOrder: 1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &1079699444
+GameObject:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  serializedVersion: 5
+  m_Component:
+  - component: {fileID: 1079699445}
+  - component: {fileID: 1079699446}
+  m_Layer: 0
+  m_Name: Atmosphere
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1079699445
+Transform:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 1079699444}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children:
+  - {fileID: 1581710989}
+  m_Father: {fileID: 1497659641}
+  m_RootOrder: 5
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1079699446
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 1079699444}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: adc9289bf13771341a0fb0e8c69cb0d7, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  FadeCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 2
+      time: 0
+      value: 0
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+    - serializedVersion: 2
+      time: 0.25
+      value: 1
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+    - serializedVersion: 2
+      time: 1
+      value: 1
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  ParentBody: {fileID: 1497659642}
+  GlowColor: {r: 0, g: 0, b: 0, a: 1}
+  Density: 1
+  RadiusHold: 0
+  Height: 10000
+  Scale: 1
+  Fade: 1
+  AerialPerspectiveOffset: 333.33334
+  HorizonFixEps: 0.004
+  MieFadeFix: 0.02
+  ExtinctionGroundFade: 0.000025
+  HDRExposure: 0.2
+  SkyShader: {fileID: 4800000, guid: e591e3c9700c3b243a782b059c2d6d0b, type: 3}
+  SkyMaterial: {fileID: 0}
+  RenderQueue: 3000
+  RenderQueueOffset: 0
+  LostFocusForceRebake: 0
+  AtmosphereBaker: {fileID: 0}
 --- !u!1 &1107475781
 GameObject:
   m_ObjectHideFlags: 0
@@ -6024,6 +6107,7 @@ Transform:
   - {fileID: 1014796141}
   - {fileID: 2014628592}
   - {fileID: 193674315}
+  - {fileID: 1079699445}
   - {fileID: 1940098943}
   - {fileID: 918735064}
   - {fileID: 1019286897}
@@ -6045,7 +6129,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0af905fdcf6c2884c85cb53ec60160b2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  Atmosphere: {fileID: 0}
+  Atmosphere: {fileID: 1079699446}
   Ocean: {fileID: 0}
   Ring: {fileID: 0}
   RenderQueue: 2000
@@ -6053,7 +6137,7 @@ MonoBehaviour:
   SizeOffset: 10
   DrawGizmos: 0
   UpdateLOD: 1
-  AtmosphereEnabled: 0
+  AtmosphereEnabled: 1
   OceanEnabled: 0
   RingEnabled: 0
   TerrainEnabled: 1
@@ -6337,6 +6421,62 @@ MonoBehaviour:
   StoreParent: 1
   StoreInvisible: 0
   Priority: 2
+--- !u!1 &1581710988
+GameObject:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  serializedVersion: 5
+  m_Component:
+  - component: {fileID: 1581710989}
+  - component: {fileID: 1581710990}
+  m_Layer: 0
+  m_Name: PPA
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1581710989
+Transform:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 1581710988}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children: []
+  m_Father: {fileID: 1079699445}
+  m_RootOrder: 0
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1581710990
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 1581710988}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1344506e8a088054e9ea9ddc58661de0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  BakeMode: 1
+  Format: 11
+  WrapMode: 1
+  ClearAfterBake: 1
+  UseCoroutine: 1
+  transmittanceT: {fileID: 0}
+  irradianceT_Read: {fileID: 0}
+  irradianceT_Write: {fileID: 0}
+  inscatterT_Read: {fileID: 0}
+  inscatterT_Write: {fileID: 0}
+  deltaET: {fileID: 0}
+  deltaSRT: {fileID: 0}
+  deltaSMT: {fileID: 0}
+  deltaJT: {fileID: 0}
+  finished: 0
+  DestinationFolder: /Resources/Preprocess/Textures/Atmosphere
 --- !u!1 &1592153268
 GameObject:
   m_ObjectHideFlags: 0
@@ -6367,7 +6507,7 @@ Transform:
   - {fileID: 2089371356}
   - {fileID: 1733853064}
   m_Father: {fileID: 1497659641}
-  m_RootOrder: 8
+  m_RootOrder: 9
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &1592153270
 MonoBehaviour:
@@ -7679,7 +7819,7 @@ Transform:
   - {fileID: 230248928}
   - {fileID: 853442838}
   m_Father: {fileID: 1497659641}
-  m_RootOrder: 5
+  m_RootOrder: 6
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1947387572
 GameObject:
@@ -7762,7 +7902,7 @@ Transform:
   - {fileID: 1045187562}
   - {fileID: 1986989071}
   m_Father: {fileID: 1497659641}
-  m_RootOrder: 9
+  m_RootOrder: 10
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &1957876121
 MonoBehaviour:
