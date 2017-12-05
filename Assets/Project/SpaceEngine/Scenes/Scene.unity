@@ -7468,7 +7468,7 @@ MonoBehaviour:
   AmbientColor: {r: 1, g: 1, b: 1, a: 1}
   Thickness: 5000
   FrontBright: 12.8
-  BackBright: 128
+  BackBright: 12.8
   Exposure: 0.2
   DetailFrequency: 0.01
   DetailRadialFrequency: 128

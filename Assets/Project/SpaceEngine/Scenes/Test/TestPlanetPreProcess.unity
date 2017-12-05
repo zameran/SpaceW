@@ -438,7 +438,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   Capacity: 1296
   TileStorage: []
-  MaximumUsedTiles: 0
 --- !u!4 &93872560
 Transform:
   m_ObjectHideFlags: 0
@@ -629,7 +628,6 @@ MonoBehaviour:
   NoiseColor: {r: 0.09803922, g: 0.047058824, b: 0.39215687, a: 1}
   MaxLevel: -1
   HSV: 1
-  Seed: 0
   NoiseAmplitudes:
   - 0
   - 255
@@ -1202,7 +1200,6 @@ MonoBehaviour:
   NoiseColor: {r: 0.09803922, g: 0.047058824, b: 0.39215687, a: 1}
   MaxLevel: -1
   HSV: 1
-  Seed: 0
   NoiseAmplitudes:
   - 0
   - 255
@@ -1952,9 +1949,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6b1295d14b8ba62458a6963583074ce9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  ClipPlanesControlType: 2
   Speed: 100
   RotationSpeed: 1
-  DynamicClipPlanes: 1
   Controllable: 1
 --- !u!81 &812990984
 AudioListener:
@@ -3826,7 +3823,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   Capacity: 1296
   TileStorage: []
-  MaximumUsedTiles: 0
 --- !u!4 &1041470280
 Transform:
   m_ObjectHideFlags: 0
@@ -3926,7 +3922,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   Capacity: 256
   TileStorage: []
-  MaximumUsedTiles: 0
 --- !u!4 &1178995186
 Transform:
   m_ObjectHideFlags: 0
@@ -4604,7 +4599,6 @@ MonoBehaviour:
   RenderQueueOffset: 1000000
   Magnitude: 2.25e+22
   InitUniformsInUpdate: 1
-  UseAtmosphereColors: 1
   UseRadiance: 1
   FadeCurve:
     serializedVersion: 2
@@ -4679,7 +4673,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   Capacity: 1296
   TileStorage: []
-  MaximumUsedTiles: 0
 --- !u!4 &1404521724
 Transform:
   m_ObjectHideFlags: 0
@@ -5569,7 +5562,6 @@ MonoBehaviour:
   NoiseColor: {r: 0.09803922, g: 0.047058824, b: 0.39215687, a: 1}
   MaxLevel: -1
   HSV: 1
-  Seed: 0
   NoiseAmplitudes:
   - 0
   - 255
@@ -5717,7 +5709,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   Capacity: 1296
   TileStorage: []
-  MaximumUsedTiles: 0
 --- !u!4 &1816838439
 Transform:
   m_ObjectHideFlags: 0
@@ -5945,7 +5936,6 @@ MonoBehaviour:
   NoiseColor: {r: 0.09803922, g: 0.047058824, b: 0.39215687, a: 1}
   MaxLevel: -1
   HSV: 1
-  Seed: 0
   NoiseAmplitudes:
   - 0
   - 255
@@ -6182,7 +6172,6 @@ MonoBehaviour:
   NoiseColor: {r: 0.09803922, g: 0.047058824, b: 0.39215687, a: 1}
   MaxLevel: -1
   HSV: 1
-  Seed: 0
   NoiseAmplitudes:
   - 0
   - 255
@@ -6324,7 +6313,6 @@ MonoBehaviour:
   NoiseColor: {r: 0.09803922, g: 0.047058824, b: 0.39215687, a: 1}
   MaxLevel: -1
   HSV: 1
-  Seed: 0
   NoiseAmplitudes:
   - 0
   - 255
