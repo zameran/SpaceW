@@ -5594,7 +5594,8 @@ MonoBehaviour:
   PermSamplerGL: {fileID: 0}
   PermGradSamplerGL: {fileID: 0}
   PlanetAtlas: {fileID: 0}
-  PlanetUV: {fileID: 0}
+  PlanetNoiseMap: {fileID: 0}
+  PlanetColorMap: {fileID: 0}
   QuadTexture1: {fileID: 0}
   QuadTexture2: {fileID: 0}
   QuadTexture3: {fileID: 0}

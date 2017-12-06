@@ -438,7 +438,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 24ad05f3232d56d42b6dd485a729ac19, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  Capacity: 1296
+  Capacity: 2592
   TileStorage: []
 --- !u!4 &93872560
 Transform:
@@ -1063,7 +1063,7 @@ Transform:
   - {fileID: 1664306499}
   - {fileID: 592411673}
   m_Father: {fileID: 1208658435}
-  m_RootOrder: 5
+  m_RootOrder: 6
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &391514456
 MonoBehaviour:
@@ -1699,6 +1699,109 @@ CanvasRenderer:
     type: 2}
   m_PrefabInternal: {fileID: 0}
   m_GameObject: {fileID: 723449398}
+--- !u!1 &741653083
+GameObject:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  serializedVersion: 5
+  m_Component:
+  - component: {fileID: 741653084}
+  - component: {fileID: 741653085}
+  m_Layer: 0
+  m_Name: TCCPS_Planet_TEST
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &741653084
+Transform:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 741653083}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children: []
+  m_Father: {fileID: 1208658435}
+  m_RootOrder: 1
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &741653085
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 741653083}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 05216d3e989e4794386b6087d793e6ff, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  Lacunarity: 2.2182817
+  H: 0.5
+  Offset: 0.8
+  RidgeSmooth: 0.0001
+  texturingHeightOffset: 0.1275
+  texturingSlopeOffset: -0.0125
+  Randomize: {x: 0, y: 0, z: 0}
+  faceParams: {x: 0, y: 0, z: 32, w: 0}
+  scaleParams: {x: 0, y: 0, z: 0, w: -1}
+  mainParams: {x: 1, y: 0.704, z: 0, w: 0}
+  colorParams: {x: 4, y: 2, z: 0.497, w: 0.211}
+  climateParams: {x: 0.179, y: 0.158, z: 0.153, w: 0.157}
+  mareParams: {x: 0.55, y: 0, z: 0, w: 0.751}
+  montesParams: {x: 0.106, y: 2, z: 0.153, w: 0.222}
+  dunesParams: {x: 0.121, y: 6.9, z: 0.143, w: -1}
+  hillsParams: {x: 1, y: 4, z: 0.772, w: 0.898}
+  canyonsParams: {x: 0.031, y: 15.4, z: 0.375, w: 1}
+  riversParams: {x: 13.1, y: 2.69, z: 2.49, w: 1}
+  cracksParams: {x: 0.407, y: 0.71, z: 2, w: 1}
+  craterParams: {x: 2.1245, y: 1, z: 1.59, w: 4}
+  volcanoParams1: {x: 2, y: 0.64, z: 0.81, w: 5}
+  volcanoParams2: {x: 1.24, y: 0.423, z: 2.12, w: 1507}
+  lavaParams: {x: -10, y: 0, z: 207, w: 0.625}
+  textureParams: {x: 1024, y: 0, z: 0, w: 0}
+  cloudsParams1: {x: 0, y: 0, z: 0, w: 0}
+  cloudsParams2: {x: 0, y: 0, z: 1, w: 0}
+  cycloneParams: {x: 0, y: 0, z: 0, w: 0}
+  InvSize: {x: 0, y: 0}
+  AutoUpdate: 1
+  MaterialTable:
+    Gradient:
+      serializedVersion: 2
+      key0: {r: 0.74264705, g: 0.4249603, b: 0.28941393, a: 1}
+      key1: {r: 0.7205882, g: 0.49909255, b: 0.2861159, a: 1}
+      key2: {r: 0.6691177, g: 0.5284509, b: 0.33455884, a: 0}
+      key3: {r: 0.44117647, g: 0.43262425, b: 0.34710208, a: 0}
+      key4: {r: 0.42344293, g: 0.56642365, b: 0.6544118, a: 0}
+      key5: {r: 1, g: 1, b: 1, a: 0}
+      key6: {r: 0, g: 0, b: 0, a: 0}
+      key7: {r: 0, g: 0, b: 0, a: 0}
+      ctime0: 0
+      ctime1: 6168
+      ctime2: 12914
+      ctime3: 21588
+      ctime4: 39128
+      ctime5: 65535
+      ctime6: 0
+      ctime7: 0
+      atime0: 0
+      atime1: 65535
+      atime2: 0
+      atime3: 0
+      atime4: 0
+      atime5: 0
+      atime6: 0
+      atime7: 0
+      m_Mode: 0
+      m_NumColorKeys: 6
+      m_NumAlphaKeys: 2
+    ReverseX: 0
+    ReverseY: 0
+    NonLinear: 1
+  Engine: 2
 --- !u!1 &743798011
 GameObject:
   m_ObjectHideFlags: 0
@@ -1795,7 +1898,7 @@ Transform:
   - {fileID: 270049833}
   - {fileID: 1861619620}
   m_Father: {fileID: 1208658435}
-  m_RootOrder: 4
+  m_RootOrder: 5
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &772310948
 MonoBehaviour:
@@ -1849,7 +1952,7 @@ Transform:
   - {fileID: 1041470280}
   - {fileID: 93872560}
   m_Father: {fileID: 1208658435}
-  m_RootOrder: 2
+  m_RootOrder: 3
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &812990977
 GameObject:
@@ -3690,7 +3793,7 @@ Transform:
   - {fileID: 427854360}
   - {fileID: 2069129642}
   m_Father: {fileID: 1208658435}
-  m_RootOrder: 3
+  m_RootOrder: 4
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &871564963
 MonoBehaviour:
@@ -3825,7 +3928,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 24ad05f3232d56d42b6dd485a729ac19, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  Capacity: 1296
+  Capacity: 2592
   TileStorage: []
 --- !u!4 &1041470280
 Transform:
@@ -3924,7 +4027,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 24ad05f3232d56d42b6dd485a729ac19, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  Capacity: 256
+  Capacity: 1296
   TileStorage: []
 --- !u!4 &1178995186
 Transform:
@@ -4100,6 +4203,7 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
   - {fileID: 337998237}
+  - {fileID: 741653084}
   - {fileID: 1458698883}
   - {fileID: 784265979}
   - {fileID: 871564962}
@@ -4263,7 +4367,7 @@ Transform:
   - {fileID: 26033885}
   - {fileID: 179203490}
   m_Father: {fileID: 1208658435}
-  m_RootOrder: 6
+  m_RootOrder: 7
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &1264373875
 MonoBehaviour:
@@ -4675,7 +4779,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 24ad05f3232d56d42b6dd485a729ac19, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  Capacity: 1296
+  Capacity: 2592
   TileStorage: []
 --- !u!4 &1404521724
 Transform:
@@ -4771,7 +4875,7 @@ Transform:
   m_Children:
   - {fileID: 1261834486}
   m_Father: {fileID: 1208658435}
-  m_RootOrder: 1
+  m_RootOrder: 2
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1466345998
 GameObject:
@@ -4893,7 +4997,7 @@ Transform:
   - {fileID: 1558488686}
   - {fileID: 1948260770}
   m_Father: {fileID: 1208658435}
-  m_RootOrder: 8
+  m_RootOrder: 9
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &1470808316
 MonoBehaviour:
@@ -5715,7 +5819,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 24ad05f3232d56d42b6dd485a729ac19, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  Capacity: 1296
+  Capacity: 2592
   TileStorage: []
 --- !u!4 &1816838439
 Transform:
@@ -6112,7 +6216,7 @@ MonoBehaviour:
   PermSamplerGL: {fileID: 0}
   PermGradSamplerGL: {fileID: 0}
   PlanetAtlas: {fileID: 0}
-  PlanetUV: {fileID: 0}
+  PlanetNoiseMap: {fileID: 2800000, guid: ea2fb6b7ac2e9854cb93878ea2cea7f0, type: 3}
   PlanetColorMap: {fileID: 0}
   QuadTexture1: {fileID: 0}
   QuadTexture2: {fileID: 0}
@@ -6247,7 +6351,7 @@ Transform:
   - {fileID: 1582683127}
   - {fileID: 1680633271}
   m_Father: {fileID: 1208658435}
-  m_RootOrder: 7
+  m_RootOrder: 8
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &2048187256
 MonoBehaviour:
