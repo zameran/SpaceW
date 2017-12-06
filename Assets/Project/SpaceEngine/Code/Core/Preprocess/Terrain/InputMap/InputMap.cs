@@ -27,7 +27,7 @@ namespace SpaceEngine.Core.Preprocess.Terrain
         /// The width and height must be multiples of this size.
         /// </summary>
         [SerializeField]
-        private int TileSize;
+        private Vector2 TileSize { get { return new Vector2(Width, Height); } }
 
         [SerializeField]
         private bool IgnoreSizeRatio = true;
@@ -36,19 +36,19 @@ namespace SpaceEngine.Core.Preprocess.Terrain
         public abstract int Height { get; }
         public abstract int Channels { get; }
 
-        public int GetTileSize()
+        public Vector2 GetTileSize()
         {
             return TileSize;
         }
 
         protected virtual void Awake()
         {
-            if (TileSize <= 0) { throw new InvalidParameterException("Tile size must be greater than 0!"); }
+            if (TileSize.x <= 0 || TileSize.y <= 0) { throw new InvalidParameterException("Tile size must be greater than 0!"); }
 
             if (!IgnoreSizeRatio)
             {
-                if (Width % TileSize != 0) { throw new InvalidParameterException(string.Format("Tile size must be divisable by width! W:{0}; S:{1}; W%S:{2}", Width, TileSize, Width % TileSize)); }
-                if (Height % TileSize != 0) { throw new InvalidParameterException(string.Format("Tile size must be divisable by height! H:{0}; S:{1}; H%S:{2}", Height, TileSize, Height % TileSize)); }
+                if (Width % (int)TileSize.x != 0) { throw new InvalidParameterException(string.Format("Tile size must be divisable by width! W:{0}; S:{1}; W%S:{2}", Width, TileSize, Width % TileSize.x)); }
+                if (Height % (int)TileSize.y != 0) { throw new InvalidParameterException(string.Format("Tile size must be divisable by height! H:{0}; S:{1}; H%S:{2}", Height, TileSize, Height % TileSize.y)); }
             }
 
             Cache = new DictionaryQueue<Id, Tile>(new EqualityComparerID());
@@ -77,14 +77,14 @@ namespace SpaceEngine.Core.Preprocess.Terrain
         /// <returns>Returns the values of the pixels of the given tile.</returns>
         public virtual float[] GetValues(int tx, int ty)
         {
-            var values = new float[TileSize * TileSize * Channels];
+            var values = new float[(int)TileSize.x * (int)TileSize.y * Channels];
 
-            for (int j = 0; j < TileSize; ++j)
+            for (int j = 0; j < (int)TileSize.y; ++j)
             {
-                for (int i = 0; i < TileSize; ++i)
+                for (int i = 0; i < (int)TileSize.x; ++i)
                 {
                     var value = GetValue(tx + i, ty + j);
-                    var offset = (i + j * TileSize) * Channels;
+                    var offset = (i + j * (int)TileSize.x) * Channels;
 
                     values[offset] = value.x;
 
@@ -117,7 +117,7 @@ namespace SpaceEngine.Core.Preprocess.Terrain
 
             if (!Cache.ContainsKey(key))
             {
-                var data = GetValues(tx * TileSize, ty * TileSize);
+                var data = GetValues(tx * (int)TileSize.x, ty * (int)TileSize.y);
 
                 if (Cache.Count() == Capacity)
                 {
@@ -155,13 +155,13 @@ namespace SpaceEngine.Core.Preprocess.Terrain
             x = Mathf.Max(Mathf.Min(x, Width - 1), 0);
             y = Mathf.Max(Mathf.Min(y, Height - 1), 0);
 
-            int tx = x / TileSize;
-            int ty = y / TileSize;
+            int tx = x / (int)TileSize.x;
+            int ty = y / (int)TileSize.y;
 
-            x = x % TileSize;
-            y = y % TileSize;
+            x = x % (int)TileSize.x;
+            y = y % (int)TileSize.y;
 
-            var offset = (x + y * TileSize) * Channels;
+            var offset = (x + y * (int)TileSize.x) * Channels;
             var data = GetTile(tx, ty);
             var color = Vector4.zero;
 

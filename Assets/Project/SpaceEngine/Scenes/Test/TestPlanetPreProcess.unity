@@ -153,12 +153,14 @@ MonoBehaviour:
   - -397
   - -140
   - -100
-  - 15
+  - 64
+  - 32
+  - 16
   - 8
-  - 5
-  - 2.5
-  - 1.5
+  - 4
+  - 2
   - 1
+  - 0.5
 --- !u!114 &23957849
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1352,12 +1354,14 @@ MonoBehaviour:
   - -397
   - -140
   - -100
-  - 15
+  - 64
+  - 32
+  - 16
   - 8
-  - 5
-  - 2.5
-  - 1.5
+  - 4
+  - 2
   - 1
+  - 0.5
 --- !u!114 &665760958
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -4812,12 +4816,14 @@ MonoBehaviour:
   - -397
   - -140
   - -100
-  - 15
+  - 64
+  - 32
+  - 16
   - 8
-  - 5
-  - 2.5
-  - 1.5
+  - 4
+  - 2
   - 1
+  - 0.5
 --- !u!114 &1466346000
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -5403,12 +5409,14 @@ MonoBehaviour:
   - -397
   - -140
   - -100
-  - 15
+  - 64
+  - 32
+  - 16
   - 8
-  - 5
-  - 2.5
-  - 1.5
+  - 4
+  - 2
   - 1
+  - 0.5
 --- !u!114 &1658030199
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -5842,12 +5850,14 @@ MonoBehaviour:
   - -397
   - -140
   - -100
-  - 15
+  - 64
+  - 32
+  - 16
   - 8
-  - 5
-  - 2.5
-  - 1.5
+  - 4
+  - 2
   - 1
+  - 0.5
 --- !u!114 &1861605692
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -6103,6 +6113,7 @@ MonoBehaviour:
   PermGradSamplerGL: {fileID: 0}
   PlanetAtlas: {fileID: 0}
   PlanetUV: {fileID: 0}
+  PlanetColorMap: {fileID: 0}
   QuadTexture1: {fileID: 0}
   QuadTexture2: {fileID: 0}
   QuadTexture3: {fileID: 0}
@@ -6389,12 +6400,14 @@ MonoBehaviour:
   - -397
   - -140
   - -100
-  - 15
+  - 64
+  - 32
+  - 16
   - 8
-  - 5
-  - 2.5
-  - 1.5
+  - 4
+  - 2
   - 1
+  - 0.5
 --- !u!114 &2088696516
 MonoBehaviour:
   m_ObjectHideFlags: 0

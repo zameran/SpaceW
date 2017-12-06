@@ -122,10 +122,10 @@ namespace SpaceEngine.Core.Preprocess.Terrain
                 // If caching is used load only the tile needed into memory.
                 var tileSize = GetTileSize();
 
-                var values = new float[tileSize * tileSize * Channels];
-                var strip = new float[tileSize * Channels];
+                var values = new float[(int)tileSize.x * (int)tileSize.y * Channels];
+                var strip = new float[(int)tileSize.x * Channels];
 
-                for (int j = 0; j < tileSize; ++j)
+                for (int j = 0; j < (int)tileSize.y; ++j)
                 {
                     // The index into the file that the current strip can be found at
                     var idx = (long)((long)tx + (long)(ty + j) * (long)width) * (long)Channels;
@@ -140,9 +140,9 @@ namespace SpaceEngine.Core.Preprocess.Terrain
                         LoadStrip16(ApplicationDataPath + FileName, (tx + (ty + j) * width) * Channels * 2, strip, ByteOrder == BYTE_ORDER.MAC);
                     }
 
-                    for (int i = 0; i < tileSize; ++i)
+                    for (int i = 0; i < (int)tileSize.x; ++i)
                     {
-                        var offset = (i + j * tileSize) * Channels;
+                        var offset = (i + j * (int)tileSize.x) * Channels;
 
                         values[offset] = strip[i * Channels + 0];
 

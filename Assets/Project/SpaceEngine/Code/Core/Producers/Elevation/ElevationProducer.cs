@@ -101,7 +101,7 @@ namespace SpaceEngine.Core
 
             // TODO : Make it classwide...
             var residualTileSize = GetTileSize(0);
-            var residualTexture = RTExtensions.CreateRTexture(residualTileSize, 0, RenderTextureFormat.RFloat);
+            var residualTexture = RTExtensions.CreateRTexture(residualTileSize, 0, RenderTextureFormat.RFloat, FilterMode.Point, TextureWrapMode.Clamp);
             var residualBuffer = new ComputeBuffer(residualTileSize * residualTileSize, sizeof(float));
             
             if (ResidualProducer != null)
