@@ -115,8 +115,6 @@ Shader "SpaceEngine/Planet/Terrain (Deferred)"
 
 			// TODO : Planet texturing...
 			/*
-			uniform sampler2D _PlanetUV;
-			uniform float2 _TileSD;
 			uniform float4 _Offset;
 			*/
 
@@ -139,47 +137,17 @@ Shader "SpaceEngine/Planet/Terrain (Deferred)"
 				float3 P = V * max(length(position), _Deform_Radius + _Globals_RadiusOffset);
 				float3 d = normalize(i.direction);
 
-				/*
-				//float slopeZ = saturate(texTile(_Elevation_Tile, texcoord, _Elevation_TileCoords, _Elevation_TileSize).z);
-				//float heightZ = saturate(texTile(_Elevation_Tile, texcoord, _Elevation_TileCoords, _Elevation_TileSize).w);
-				//float4 color = ColorMapTempHum(P, heightZ, slopeZ);
-				*/
-
 				// TODO : Planet texturing...
 				/*
-				float2 vert = (texcoord * _TileSD.y - _TileSD.x) * _Offset.z + _Offset.xy;
-				float2 scaledUV = vert / _Offset.w;
-				float2 realUV = frac(scaledUV * 8192);
-				float slopeZ = saturate(texTile(_Elevation_Tile, texcoord, _Elevation_TileCoords, _Elevation_TileSize).z);
-				float heightZ = saturate(texTile(_Elevation_Tile, texcoord, _Elevation_TileCoords, _Elevation_TileSize).w);
-				float4 color = GetSurfaceColorAtlas(realUV, heightZ, slopeZ, sNoise(P * 0.000025) * 128).color;
-				*/
-
-				/*
-				float2 vert = (texcoord * _TileSD.y - _TileSD.x) * _Offset.z + _Offset.xy;
+				float2 vert = texcoord * _Offset.z + _Offset.xy;
 				float2 scaledUV = vert / _Offset.w;
 				float2 realUV = frac(scaledUV);
-				float4 color = tex2D(_PlanetUV, realUV);
+				float slopeZ = saturate(texTile(_Elevation_Tile, texcoord, _Elevation_TileCoords, _Elevation_TileSize).z);
+				float heightZ = saturate(texTile(_Elevation_Tile, texcoord, _Elevation_TileCoords, _Elevation_TileSize).w);
+				float4 color = GetSurfaceColorAtlas(realUV, heightZ, slopeZ, sNoise(P * 0.00015) * 128).color;
 				*/
 
 				normal.xyz = mul(_Deform_TangentFrameToWorld, normal.xyz);
-
-				/*
-				float2 YUV = position.xz / 16;
-				float2 XUV = position.zy / 16;
-				float2 ZUV = position.xy / 16;
-				float3 blendWeights = pow(abs(normal.xyz), 16);
-
-				blendWeights = blendWeights / (blendWeights.x + blendWeights.y + blendWeights.z);
-
-				float slopeA = saturate(texTile(_Elevation_Tile, texcoord, _Elevation_TileCoords, _Elevation_TileSize).z);
-				float heightA = saturate(texTile(_Elevation_Tile, texcoord, _Elevation_TileCoords, _Elevation_TileSize).w);
-				float varyA = sNoise(P * 0.000025) * 128;
-				float4 colorY = GetSurfaceColorAtlas(YUV, heightA, slopeA, varyA).color;
-				float4 colorX = GetSurfaceColorAtlas(XUV, heightA, slopeA, varyA).color;
-				float4 colorZ = GetSurfaceColorAtlas(ZUV, heightA, slopeA, varyA).color;
-				float4 color = saturate(float4(colorX * blendWeights.x + colorY * blendWeights.y + colorZ * blendWeights.z));
-				*/
 
 				#if ATMOSPHERE_ON
 					#if OCEAN_ON

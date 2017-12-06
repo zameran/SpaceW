@@ -339,15 +339,12 @@ namespace SpaceEngine.Core.Terrain
 
             // TODO : Planet texturing...
             /*
-            var tileScreenSize = 0.5 / GodManager.Instance.TileSize;
-            var tileSD = new Vector2d(tileScreenSize, 1.0 + tileScreenSize * 2.0);
-            var rootQuadSize = TerrainQuadRoot.Length; // NOTE : Shoud begin from the middle level of all levels...
+            var rootQuadSize = TerrainQuadRoot.Length;
             var offset = new Vector4d(((double)quad.Tx / (1 << quad.Level) - 0.5) * rootQuadSize,
                                       ((double)quad.Ty / (1 << quad.Level) - 0.5) * rootQuadSize,
                                       rootQuadSize / (1 << quad.Level),
                                       ParentBody.Size);
             
-            target.SetVector("_TileSD", tileSD.ToVector2());
             target.SetVector("_Offset", offset.ToVector4());
 
             if (ParentBody.TCCPS != null) ParentBody.TCCPS.SetUniforms(target);
