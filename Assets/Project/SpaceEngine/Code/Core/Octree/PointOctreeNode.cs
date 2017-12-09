@@ -33,6 +33,7 @@
 // Creator: zameran
 #endregion
 
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -40,7 +41,7 @@ using UnityEngine;
 
 namespace SpaceEngine.Core.Octree
 {
-    public class PointOctreeNode<T> where T : class
+    public class PointOctreeNode<T> where T : class, IEquatable<T>
     {
         /// <summary>
         /// Center of this node.
@@ -169,7 +170,7 @@ namespace SpaceEngine.Core.Octree
         }
 
         /// <summary>
-        /// Return objects that are within maxDistance of the specified ray.
+        /// Return objects that are within <paramref name="maxDistance"/> of the specified ray.
         /// </summary>
         /// <param name="ray">The ray.</param>
         /// <param name="maxDistance">Maximum distance from the ray to consider.</param>
@@ -207,7 +208,7 @@ namespace SpaceEngine.Core.Octree
         }
 
         /// <summary>
-        /// Return objects that are within maxDistance of the specified position.
+        /// Return objects that are within <paramref name="maxDistance"/> of the specified <paramref name="position"/>.
         /// </summary>
         /// <param name="position">Position.</param>
         /// <param name="maxDistance">Maximum distance from the position to consider.</param>
@@ -234,7 +235,7 @@ namespace SpaceEngine.Core.Octree
         }
 
         /// <summary>
-        /// Return nodes that are within maxDistance of the specified position.
+        /// Return nodes that are within <paramref name="maxDistance"/> of the specified <paramref name="position"/>.
         /// </summary>
         /// <param name="position">Position.</param>
         /// <param name="maxDistance">Maximum distance from the position to consider.</param>
@@ -252,6 +253,23 @@ namespace SpaceEngine.Core.Octree
                 for (byte i = 0; i < 8; i++)
                 {
                     Children[i].GetNearbyNodes(ref position, ref maxDistance, ref result);
+                }
+            }
+        }
+
+        /// <summary>
+        /// Return all nodes recursively.
+        /// </summary>
+        /// <param name="result">List of all nodes in <see cref="PointOctree{T}"/></param>
+        public void GetNodes(ref List<PointOctreeNode<T>> result)
+        {
+            result.Add(this);
+
+            if (!IsLeaf)
+            {
+                for (byte i = 0; i < 8; i++)
+                {
+                    Children[i].GetNodes(ref result);
                 }
             }
         }

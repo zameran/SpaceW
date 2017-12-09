@@ -33,13 +33,14 @@
 // Creator: zameran
 #endregion
 
+using System;
 using System.Collections.Generic;
 
 using UnityEngine;
 
 namespace SpaceEngine.Core.Octree
 {
-    public class PointOctree<T> where T : class
+    public class PointOctree<T> where T : class, IEquatable<T>
     {
         /// <summary>
         /// The total amount of objects currently in the tree.
@@ -108,7 +109,8 @@ namespace SpaceEngine.Core.Octree
         }
 
         /// <summary>
-        /// Remove an object. Makes the assumption that the object only exists once in the tree.
+        /// Remove an object. 
+        /// Makes the assumption that the object only exists once in the tree.
         /// </summary>
         /// <param name="obj">Object to remove.</param>
         /// <returns>True if the object was removed successfully.</returns>
@@ -128,7 +130,7 @@ namespace SpaceEngine.Core.Octree
         }
 
         /// <summary>
-        /// Return objects that are within maxDistance of the specified ray.
+        /// Return objects that are within <paramref name="maxDistance"/> of the specified <paramref name="ray"/>.
         /// If none, returns an empty array (not null).
         /// </summary>
         /// <param name="ray">The ray. Passing as ref to improve performance since it won't have to be copied.</param>
@@ -144,7 +146,7 @@ namespace SpaceEngine.Core.Octree
         }
 
         /// <summary>
-        /// Return objects that are within maxDistance of the specified position.
+        /// Return objects that are within <paramref name="maxDistance"/> of the specified <paramref name="position"/>.
         /// If none, returns an empty array (not null).
         /// </summary>
         /// <param name="position">Position.</param>
@@ -160,7 +162,7 @@ namespace SpaceEngine.Core.Octree
         }
 
         /// <summary>
-        /// Return nodes that are within maxDistance of the specified position.
+        /// Return nodes that are within <paramref name="maxDistance"/> of the specified <paramref name="position"/>.
         /// If none, returns an empty array (not null).
         /// </summary>
         /// <param name="position">Position.</param>
@@ -173,6 +175,19 @@ namespace SpaceEngine.Core.Octree
             RootNode.GetNearbyNodes(ref position, ref maxDistance, ref collidingWith);
 
             return collidingWith;
+        }
+
+        /// <summary>
+        /// Return all nodes recursively.
+        /// </summary>
+        /// <returns>All nodes in list.</returns>
+        public List<PointOctreeNode<T>> GetNodes()
+        {
+            var result = new List<PointOctreeNode<T>>();
+
+            RootNode.GetNodes(ref result);
+
+            return result;
         }
 
         /// <summary>
