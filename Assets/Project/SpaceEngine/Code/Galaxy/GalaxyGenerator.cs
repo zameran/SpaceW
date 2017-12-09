@@ -65,11 +65,15 @@ namespace SpaceEngine.Galaxy
     }
 
     [Serializable]
-    public class GalaxyStar
+    public class GalaxyStar : IEquatable<GalaxyStar>
     {
-        public Vector3 Position { get; }
+        [SerializeField]
+        private Vector3 position;
+        public Vector3 Position { get { return position; } set { position = value; } }
 
-        public float Size { get; }
+        [SerializeField]
+        private float size;
+        public float Size { get { return size; } set { size = value; } }
 
         public GalaxyStar()
         {
@@ -103,20 +107,78 @@ namespace SpaceEngine.Galaxy
         /// <inheritdoc />
         public override bool Equals(object obj)
         {
-            var item = obj as GalaxyStar;
+            if (ReferenceEquals(null, obj)) return false;
+            if (ReferenceEquals(this, obj)) return true;
 
-            if (item == null) { return false; }
+            if (obj.GetType() != this.GetType()) return false;
 
-            return Position.Equals(item.Position) && Size.AlmostEquals(item.Size);
+            return Equals((GalaxyStar)obj);
         }
 
         /// <inheritdoc />
         public override int GetHashCode()
         {
-            return Position.GetHashCode() ^ Position.GetHashCode();
+            unchecked
+            {
+                return (Position.GetHashCode() * 397) ^ Size.GetHashCode();
+            }
         }
 
         #endregion
+
+        /// <inheritdoc />
+        public bool Equals(GalaxyStar other)
+        {
+            if (ReferenceEquals(null, other)) return false;
+            if (ReferenceEquals(this, other)) return true;
+
+            return Position.Equals(other.Position) && Size.Equals(other.Size);
+        }
+
+        /// <inheritdoc />
+        public static bool operator ==(GalaxyStar left, GalaxyStar right)
+        {
+            return Equals(left, right);
+        }
+
+        /// <inheritdoc />
+        public static bool operator !=(GalaxyStar left, GalaxyStar right)
+        {
+            return !Equals(left, right);
+        }
+    }
+
+    [Serializable]
+    public class GalaxyCluster
+    {
+        [SerializeField]
+        private Vector3 center;
+        public Vector3 Center { get { return center; } set { center = value; } }
+
+        [SerializeField]
+        private float length;
+        public float Length { get { return length; } set { length = value; } }
+
+        public GalaxyCluster()
+        {
+            Center = Vector3.zero;
+
+            Length = 1.0f;
+        }
+
+        public GalaxyCluster(Vector3 center)
+        {
+            Center = center;
+
+            Length = 1.0f;
+        }
+
+        public GalaxyCluster(Vector3 center, float length)
+        {
+            Center = center;
+
+            Length = length;
+        }
     }
 
     [Serializable]
@@ -504,6 +566,7 @@ namespace SpaceEngine.Galaxy
             InitAndGenerateLuts();
             InitAndGenerateBuffers();
             InitDustMaterials();
+            InitAndGenerateOctree();
         }
 
         #endregion
@@ -776,6 +839,12 @@ namespace SpaceEngine.Galaxy
 
         #region Octree
 
+        public void InitAndGenerateOctree()
+        {
+            InitOctree();
+            GenerateOctree();
+        }
+
         public void InitOctree()
         {
             Octree = new PointOctree<GalaxyStar>(512, Vector3.zero, 4);
@@ -809,6 +878,39 @@ namespace SpaceEngine.Galaxy
                     }
                 }
             }
+        }
+
+        [ContextMenu("Destroy Octree")]
+        public void DestroyOctree()
+        {
+            Octree = null;
+
+            GC.Collect();
+        }
+
+        #endregion
+
+        #region Data
+
+        [ContextMenu("Generate Data")]
+        public void GenerateData()
+        {
+            if (Octree == null) return;
+
+            var nodes = Octree.GetNodes();
+            var clusters = new List<GalaxyCluster>();
+
+            for (int nodeIndex = 0; nodeIndex < nodes.Count; nodeIndex++)
+            {
+                var currentNode = nodes[nodeIndex];
+                var cluster = new GalaxyCluster(currentNode.Center, currentNode.SideLength);
+
+                clusters.Add(cluster);
+            }
+
+            Debug.Log("GalaxyGenerator.GenerateData: Clusters count: " + clusters.Count);
+
+            clusters.Clear();
         }
 
         #endregion
@@ -861,13 +963,9 @@ namespace SpaceEngine.Galaxy
             DustCommandBuffer = new CommandBuffer();
             DustCommandBuffer.name = "Galaxy Dust Rendering";
 
-            GenerateLuts();
-
-            InitBuffers();
-            GenerateBuffers();
-
-            InitOctree();
-            GenerateOctree();
+            InitAndGenerateLuts();
+            InitAndGenerateBuffers();
+            InitAndGenerateOctree();
         }
 
         protected override void UpdateNode()
