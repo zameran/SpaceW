@@ -411,12 +411,12 @@ namespace SpaceEngine.Core.Terrain
             Children[3] = new TerrainQuad(Owner, this, 2 * Tx + 1, 2 * Ty + 1, Ox + LengthHalf, Oy + LengthHalf, LengthHalf, ZMin, ZMax);
         }
 
-        public void DrawQuadOutline(Camera camera, Material lineMaterial, Color lineColor)
+        public void DrawQuadOutline(Camera camera, Material lineMaterial, Color lineColor, int [,] order = null)
         {
+            if (order == null) return;
+
             if (IsLeaf)
             {
-                int[,] ORDER = new int[,] { { 1, 0 }, { 2, 3 }, { 0, 2 }, { 3, 1 } };
-
                 if (Visibility == Frustum3d.VISIBILITY.INVISIBLE) return;
 
                 var verts = new Vector3[8];
@@ -446,16 +446,16 @@ namespace SpaceEngine.Core.Terrain
                 for (byte i = 0; i < 4; i++)
                 {
                     // Draw bottom quad
-                    GL.Vertex3(verts[ORDER[i, 0]].x, verts[ORDER[i, 0]].y, verts[ORDER[i, 0]].z);
-                    GL.Vertex3(verts[ORDER[i, 1]].x, verts[ORDER[i, 1]].y, verts[ORDER[i, 1]].z);
+                    GL.Vertex3(verts[order[i, 0]].x, verts[order[i, 0]].y, verts[order[i, 0]].z);
+                    GL.Vertex3(verts[order[i, 1]].x, verts[order[i, 1]].y, verts[order[i, 1]].z);
 
                     // Draw top quad
-                    GL.Vertex3(verts[ORDER[i, 0] + 4].x, verts[ORDER[i, 0] + 4].y, verts[ORDER[i, 0] + 4].z);
-                    GL.Vertex3(verts[ORDER[i, 1] + 4].x, verts[ORDER[i, 1] + 4].y, verts[ORDER[i, 1] + 4].z);
+                    GL.Vertex3(verts[order[i, 0] + 4].x, verts[order[i, 0] + 4].y, verts[order[i, 0] + 4].z);
+                    GL.Vertex3(verts[order[i, 1] + 4].x, verts[order[i, 1] + 4].y, verts[order[i, 1] + 4].z);
 
                     // Draw verticals
-                    GL.Vertex3(verts[ORDER[i, 0]].x, verts[ORDER[i, 0]].y, verts[ORDER[i, 0]].z);
-                    GL.Vertex3(verts[ORDER[i, 0] + 4].x, verts[ORDER[i, 0] + 4].y, verts[ORDER[i, 0] + 4].z);
+                    GL.Vertex3(verts[order[i, 0]].x, verts[order[i, 0]].y, verts[order[i, 0]].z);
+                    GL.Vertex3(verts[order[i, 0] + 4].x, verts[order[i, 0] + 4].y, verts[order[i, 0] + 4].z);
                 }
 
                 GL.End();

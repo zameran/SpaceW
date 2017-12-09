@@ -138,7 +138,7 @@ namespace SpaceEngine.Core.Octree
         {
             var collidingWith = new List<T>();
 
-            RootNode.GetNearby(ref ray, ref maxDistance, collidingWith);
+            RootNode.GetNearby(ref ray, ref maxDistance, ref collidingWith);
 
             return collidingWith;
         }
@@ -154,7 +154,7 @@ namespace SpaceEngine.Core.Octree
         {
             var collidingWith = new List<T>();
 
-            RootNode.GetNearby(ref position, ref maxDistance, collidingWith);
+            RootNode.GetNearby(ref position, ref maxDistance, ref collidingWith);
 
             return collidingWith;
         }
@@ -170,7 +170,7 @@ namespace SpaceEngine.Core.Octree
         {
             var collidingWith = new List<PointOctreeNode<T>>();
 
-            RootNode.GetNearbyNodes(ref position, ref maxDistance, collidingWith);
+            RootNode.GetNearbyNodes(ref position, ref maxDistance, ref collidingWith);
 
             return collidingWith;
         }
@@ -191,6 +191,11 @@ namespace SpaceEngine.Core.Octree
         public void DrawAllObjects()
         {
             RootNode.DrawAllObjects();
+        }
+
+        public void DrawOutline(Camera camera, Material lineMaterial, int[][] order = null)
+        {
+            RootNode.DrawNodeOutline(camera, lineMaterial, order);
         }
 
         /// <summary>
@@ -235,7 +240,7 @@ namespace SpaceEngine.Core.Octree
                 }
             }
 
-            RootNode.SetChildren(children);
+            RootNode.SetChildren(ref children);
         }
 
         /// <summary>

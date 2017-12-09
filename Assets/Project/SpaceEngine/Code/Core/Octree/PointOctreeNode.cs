@@ -175,7 +175,7 @@ namespace SpaceEngine.Core.Octree
         /// <param name="maxDistance">Maximum distance from the ray to consider.</param>
         /// <param name="result">List result.</param>
         /// <returns>Objects within range.</returns>
-        public void GetNearby(ref Ray ray, ref float maxDistance, List<T> result)
+        public void GetNearby(ref Ray ray, ref float maxDistance, ref List<T> result)
         {
             // Does the ray hit this node at all?
             // NOTE : Expanding the bounds is not exactly the same as a real distance check, but it's fast...
@@ -201,7 +201,7 @@ namespace SpaceEngine.Core.Octree
             {
                 for (byte i = 0; i < 8; i++)
                 {
-                    Children[i].GetNearby(ref ray, ref maxDistance, result);
+                    Children[i].GetNearby(ref ray, ref maxDistance, ref result);
                 }
             }
         }
@@ -212,7 +212,7 @@ namespace SpaceEngine.Core.Octree
         /// <param name="position">Position.</param>
         /// <param name="maxDistance">Maximum distance from the position to consider.</param>
         /// <param name="result">List result.</param>
-        public void GetNearby(ref Vector3 position, ref float maxDistance, List<T> result)
+        public void GetNearby(ref Vector3 position, ref float maxDistance, ref List<T> result)
         {
             // Check against any objects in this node...
             for (int i = 0; i < Objects.Count; i++)
@@ -228,7 +228,7 @@ namespace SpaceEngine.Core.Octree
             {
                 for (byte i = 0; i < 8; i++)
                 {
-                    Children[i].GetNearby(ref position, ref maxDistance, result);
+                    Children[i].GetNearby(ref position, ref maxDistance, ref result);
                 }
             }
         }
@@ -239,7 +239,7 @@ namespace SpaceEngine.Core.Octree
         /// <param name="position">Position.</param>
         /// <param name="maxDistance">Maximum distance from the position to consider.</param>
         /// <param name="result">List result.</param>
-        public void GetNearbyNodes(ref Vector3 position, ref float maxDistance, List<PointOctreeNode<T>> result)
+        public void GetNearbyNodes(ref Vector3 position, ref float maxDistance, ref List<PointOctreeNode<T>> result)
         {
             if (Vector3.Distance(position, Center) <= maxDistance)
             {
@@ -251,16 +251,25 @@ namespace SpaceEngine.Core.Octree
             {
                 for (byte i = 0; i < 8; i++)
                 {
-                    Children[i].GetNearbyNodes(ref position, ref maxDistance, result);
+                    Children[i].GetNearbyNodes(ref position, ref maxDistance, ref result);
                 }
             }
+        }
+
+        /// <summary>
+        /// Return node containing objects.
+        /// </summary>
+        /// <returns>Containing objects.</returns>
+        public IEnumerable<T> GetNodeObjects()
+        {
+            return Objects.Select(octreeObject => octreeObject.Object);
         }
 
         /// <summary>
         /// Set the 8 children of this octree.
         /// </summary>
         /// <param name="childOctrees">The 8 new child nodes.</param>
-        public void SetChildren(PointOctreeNode<T>[] childOctrees)
+        public void SetChildren(ref PointOctreeNode<T>[] childOctrees)
         {
             if (childOctrees.Length != 8)
             {
@@ -322,6 +331,63 @@ namespace SpaceEngine.Core.Octree
             }
 
             Gizmos.color = Color.white;
+        }
+
+        public void DrawNodeOutline(Camera camera, Material lineMaterial, int[][] order = null)
+        {
+            if (order == null) return;
+
+            if (IsLeaf)
+            {
+                var verts = new Vector3[8];
+                var min = Bounds.min;
+                var max = Bounds.max;
+
+                verts[0] = min;
+                verts[1] = max;
+                verts[2] = new Vector3(min.x, min.y, max.z);
+                verts[3] = new Vector3(min.x, max.y, min.z);
+                verts[4] = new Vector3(max.x, min.y, min.z);
+                verts[5] = new Vector3(min.x, max.y, max.z);
+                verts[6] = new Vector3(max.x, min.y, max.z);
+                verts[7] = new Vector3(max.x, max.y, min.z);
+
+                GL.PushMatrix();
+
+                GL.LoadIdentity();
+                GL.MultMatrix(camera.worldToCameraMatrix);
+                GL.LoadProjectionMatrix(camera.projectionMatrix);
+
+                lineMaterial.SetPass(0);
+
+                GL.Begin(GL.LINES);
+                GL.Color(Color.blue);
+
+                for (byte i = 0; i < 3; i++)
+                {
+                    GL.Vertex(verts[order[i][0]]);
+                    GL.Vertex(verts[order[i][1]]);
+
+                    GL.Vertex(verts[order[i][2]]);
+                    GL.Vertex(verts[order[i][3]]);
+
+                    GL.Vertex(verts[order[i][4]]);
+                    GL.Vertex(verts[order[i][5]]);
+
+                    GL.Vertex(verts[order[i][6]]);
+                    GL.Vertex(verts[order[i][7]]);
+                }
+
+                GL.End();
+                GL.PopMatrix();
+            }
+            else
+            {
+                for (byte i = 0; i < 8; i++)
+                {
+                    Children[i].DrawNodeOutline(camera, lineMaterial, order);
+                }
+            }
         }
 
         /// <summary>

@@ -15151,7 +15151,8 @@ MonoBehaviour:
   PermSamplerGL: {fileID: 0}
   PermGradSamplerGL: {fileID: 0}
   PlanetAtlas: {fileID: 0}
-  PlanetUV: {fileID: 0}
+  PlanetNoiseMap: {fileID: 0}
+  PlanetColorMap: {fileID: 0}
   QuadTexture1: {fileID: 0}
   QuadTexture2: {fileID: 0}
   QuadTexture3: {fileID: 0}
@@ -15187,6 +15188,8 @@ GameObject:
   - component: {fileID: 2106011895}
   - component: {fileID: 2106011888}
   - component: {fileID: 2106011896}
+  - component: {fileID: 2106011898}
+  - component: {fileID: 2106011897}
   m_Layer: 0
   m_Name: Main Camera
   m_TagString: MainCamera
@@ -15331,3 +15334,30 @@ MonoBehaviour:
   Key: 293
   Format: 0
   KeyPressed: 0
+--- !u!114 &2106011897
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 2106011886}
+  m_Enabled: 0
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 15a6474f102a0dc4bbef7e73a85df303, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  lineShader: {fileID: 4800000, guid: 5e9dda34ed552324387413e27a1ee202, type: 3}
+  lineMaterial: {fileID: 0}
+--- !u!114 &2106011898
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 2106011886}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bfdb5c75203d70c469a60304a0204944, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  SwitchableComponents: []
+  DrawAbleComponents: []
+  DisableAllOnStart: 1
