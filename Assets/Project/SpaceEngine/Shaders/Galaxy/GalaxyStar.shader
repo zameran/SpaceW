@@ -60,91 +60,6 @@
 			
 			return FlickerTable[i].x + f * FlickerTable[i].y;
 		}
-
-		void vert(in appdata v, out v2g o)
-		{
-			uint id = v.id;
-			float3 particlePosition = data[id].position;
-			float4 particleColor = data[id].color;
-			float particleSize = data[id].size;
-
-			float magnitude = 6.5 + length(particleColor) * (-1.44f - 1.5f);
-			float brightness = GetFlickerAmount(particlePosition.xy * particleSize) * pow(5.0f, (-magnitude - 1.44f) / 2.5f);
-
-			o.vertex = UnityObjectToClipPos(float4(particlePosition, 1.0f));
-			o.uv = float2(0.25f, 0.25f);
-			o.size = particleSize / _Particle_Absolute_Size;
-			o.color = 8.0f * brightness * particleColor * 3.0f;
-		}
-
-		void vert_debug(in appdata v, out v2g o)
-		{
-			uint id = v.id;
-			float3 particlePosition = data[id].position;
-			float4 particleColor = data[id].color;
-			float particleSize = data[id].size;
-
-			o.vertex = UnityObjectToClipPos(float4(particlePosition, 1.0f));
-			o.uv = float2(0.25f, 0.25f);
-			o.size = particleSize / _Particle_Absolute_Size;
-			o.color = particleColor;
-		}
-		
-		[maxvertexcount(4)]
-		void geom(point v2g p[1], inout TriangleStream<v2f> triStream)
-		{
-			float4 particlePosition = p[0].vertex;
-			float2 starUV = p[0].uv;
-			
-			static const float4 up = float4(0.0f, 1.0f, 0.0f, 0.0f) * -UNITY_MATRIX_P._22;
-			static const float4 right = float4(1.0f, 0.0f, 0.0f, 0.0f) * UNITY_MATRIX_P._11;
-
-			float halfSize = p[0].size / 2.0f;
-			
-			v2f o;
-			
-			o.color = p[0].color;
-			
-			o.vertex = particlePosition - halfSize * up;
-			o.uv = float2(1.0f, 0.0f) * 0.5f + starUV;
-			triStream.Append(o);
-			
-			o.vertex = particlePosition + halfSize * right;
-			o.uv = float2(1.0f, 1.0f) * 0.5f + starUV;
-			triStream.Append(o);
-			
-			o.vertex = particlePosition - halfSize * right;
-			o.uv = float2(0.0f, 0.0f) * 0.5f + starUV;
-			triStream.Append(o);
-			
-			o.vertex = particlePosition + halfSize * up;
-			o.uv = float2(0.0f, 1.0f) * 0.5f + starUV;
-			triStream.Append(o);
-			
-			triStream.RestartStrip();
-		}
-		
-		void frag(in v2f i, out float4 color : SV_Target)
-		{
-			float4 particleColor = i.color;
-			float4 particleSampler = tex2D(_Particle, i.uv / 0.5f - 0.5f).a;
-			float2 particleUV = 6.5f * i.uv - 6.5f * float2(0.5f, 0.5f);
-			
-			half scale = exp(-dot(particleUV, particleUV));
-
-			particleColor = float4(i.color.xyz * scale + 0.25f * i.color.w * pow(scale, 10.0f), 1.0f);
-
-			color = particleSampler + particleColor;
-			color.a = dot(color.xyz, 1.0f);
-		}
-
-		void frag_debug(in v2f i, out float4 color : SV_Target)
-		{
-			float4 particleColor = i.color;
-			
-			color = particleColor;
-			color.a = dot(color.xyz / M_PI, 1.0f);
-		}
 		ENDCG
 
 		Pass
@@ -161,6 +76,70 @@
 			#pragma vertex vert
 			#pragma geometry geom
 			#pragma fragment frag
+
+			void vert(in appdata v, out v2g o)
+			{
+				uint id = v.id;
+				float3 particlePosition = data[id].position;
+				float4 particleColor = data[id].color;
+				float particleSize = data[id].size;
+
+				float magnitude = 6.5 + length(particleColor) * (-1.44f - 1.5f);
+				float brightness = GetFlickerAmount(particlePosition.xy * particleSize) * pow(5.0f, (-magnitude - 1.44f) / 2.5f);
+
+				o.vertex = UnityObjectToClipPos(float4(particlePosition, 1.0f));
+				o.uv = float2(0.25f, 0.25f);
+				o.size = particleSize / _Particle_Absolute_Size;
+				o.color = 8.0f * brightness * particleColor * 3.0f;
+			}
+			
+			[maxvertexcount(4)]
+			void geom(point v2g p[1], inout TriangleStream<v2f> triStream)
+			{
+				float4 particlePosition = p[0].vertex;
+				float2 starUV = p[0].uv;
+			
+				static const float4 up = float4(0.0f, 1.0f, 0.0f, 0.0f) * -UNITY_MATRIX_P._22;
+				static const float4 right = float4(1.0f, 0.0f, 0.0f, 0.0f) * UNITY_MATRIX_P._11;
+
+				float halfSize = p[0].size / 2.0f;
+			
+				v2f o;
+			
+				o.color = p[0].color;
+			
+				o.vertex = particlePosition - halfSize * up;
+				o.uv = float2(1.0f, 0.0f) * 0.5f + starUV;
+				triStream.Append(o);
+			
+				o.vertex = particlePosition + halfSize * right;
+				o.uv = float2(1.0f, 1.0f) * 0.5f + starUV;
+				triStream.Append(o);
+			
+				o.vertex = particlePosition - halfSize * right;
+				o.uv = float2(0.0f, 0.0f) * 0.5f + starUV;
+				triStream.Append(o);
+			
+				o.vertex = particlePosition + halfSize * up;
+				o.uv = float2(0.0f, 1.0f) * 0.5f + starUV;
+				triStream.Append(o);
+			
+				triStream.RestartStrip();
+			}
+		
+			void frag(in v2f i, out float4 color : SV_Target)
+			{
+				float4 particleColor = i.color;
+				float4 particleSampler = tex2D(_Particle, i.uv / 0.5f - 0.5f).a;
+				float2 particleUV = 6.5f * i.uv - 6.5f * float2(0.5f, 0.5f);
+			
+				half scale = exp(-dot(particleUV, particleUV));
+
+				particleColor = float4(i.color.xyz * scale + 0.25f * i.color.w * pow(scale, 10.0f), 1.0f);
+
+				color = particleSampler + particleColor;
+				color.a = dot(color.xyz, 1.0f);
+			}
 			ENDCG
 		}
 
@@ -175,8 +154,29 @@
 			CGPROGRAM
 			#pragma target 5.0
 			#pragma fragmentoption arb_precision_hint_fastest
-			#pragma vertex vert_debug
-			#pragma fragment frag_debug
+			#pragma vertex vert
+			#pragma fragment frag
+			
+			void vert(in appdata v, out v2g o)
+			{
+				uint id = v.id;
+				float3 particlePosition = data[id].position;
+				float4 particleColor = data[id].color;
+				float particleSize = data[id].size;
+
+				o.vertex = UnityObjectToClipPos(float4(particlePosition, 1.0f));
+				o.uv = float2(0.25f, 0.25f);
+				o.size = particleSize / _Particle_Absolute_Size;
+				o.color = particleColor;
+			}
+
+			void frag(in v2f i, out float4 color : SV_Target)
+			{
+				float4 particleColor = i.color;
+			
+				color = particleColor;
+				color.a = dot(color.xyz / M_PI, 1.0f);
+			}
 			ENDCG
 		}
 	}

@@ -27,6 +27,7 @@ using System;
 using System.IO;
 
 using UnityEngine;
+using UnityEngine.Rendering;
 
 using Object = UnityEngine.Object;
 
@@ -174,6 +175,25 @@ namespace SpaceEngine.Core.Utilities
             Graphics.SetRenderTarget(tex);
 
             GL.Clear(false, true, Color.clear);
+        }
+
+        public static void ClearColor(RenderTexture tex, bool clearDepth, bool clearColor)
+        {
+            Graphics.SetRenderTarget(tex);
+
+            GL.Clear(clearDepth, clearColor, Color.clear);
+        }
+
+        public static void ClearColor(this CommandBuffer cb, RenderTexture tex)
+        {
+            cb.SetRenderTarget(tex);
+            cb.ClearRenderTarget(false, true, Color.clear);
+        }
+
+        public static void ClearColor(this CommandBuffer cb, RenderTexture tex, bool clearDepth, bool clearColor)
+        {
+            cb.SetRenderTarget(tex);
+            cb.ClearRenderTarget(clearDepth, clearColor, Color.clear);
         }
 
         public static void ClearColor(RenderTexture[] texs)

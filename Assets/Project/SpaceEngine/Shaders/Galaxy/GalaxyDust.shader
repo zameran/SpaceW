@@ -14,12 +14,9 @@
 		uniform StructuredBuffer<GalaxyParticle> dust;
 		uniform StructuredBuffer<GalaxyParticle> gas;
 		
-		uniform float3 _Galaxy_Position;
-				
 		uniform float4x4 _Globals_WorldToCamera;
 		uniform float4x4 _Globals_CameraToScreen;
-
-		uniform sampler2D _Particle;
+		uniform float3 _Globals_WorldCameraPos;
 
 		struct appdata
 		{
@@ -50,7 +47,7 @@
 			
 			float3 localPosition = v.vertex.xyz * particleSize;
 			float3 worldPosition = particlePosition + localPosition;
-			float3 relativePosition = _Galaxy_Position + worldPosition;
+			float3 relativePosition = -_Globals_WorldCameraPos + worldPosition;
 			
 			o.vertex = mul(mul(_Globals_CameraToScreen, _Globals_WorldToCamera), float4(worldPosition, 1.0f));
 			o.vertex.z = o.vertex.z * o.vertex.w * 0.0000000000001;
@@ -99,34 +96,6 @@
 
 			outputColor = float4(particleColor.xyz, alpha);
 		}
-
-		void vert_dust(in appdata v, out v2f o)
-		{
-			PackParticle(v, dust, dustSize, o);
-		}
-
-		void vert_gas(in appdata v, out v2f o)
-		{
-			PackParticle(v, gas, gasSize, o);
-		}
-		
-		void frag_dust(in v2f i, out float4 color : SV_Target)
-		{
-			float4 particleColor;
-
-			UnpackParticle(i, dustStrength, particleColor);
-			
-			color = float4(particleColor.rgb, particleColor.a);
-		}
-
-		void frag_gas(in v2f i, out float4 color : SV_Target)
-		{
-			float4 particleColor;
-
-			UnpackParticle(i, gasStrength, particleColor);
-
-			color = float4(-particleColor.rgb * gasMultiplicationColor, particleColor.a);
-		}
 		ENDCG
 
 		Pass
@@ -150,8 +119,22 @@
 			CGPROGRAM
 			#pragma target 5.0
 			#pragma fragmentoption arb_precision_hint_fastest
-			#pragma vertex vert_dust
-			#pragma fragment frag_dust
+			#pragma vertex vert
+			#pragma fragment frag
+
+			void vert(in appdata v, out v2f o)
+			{
+				PackParticle(v, dust, dustSize, o);
+			}
+
+			void frag(in v2f i, out float4 color : SV_Target)
+			{
+				float4 particleColor;
+
+				UnpackParticle(i, dustStrength, particleColor);
+			
+				color = float4(particleColor.rgb, particleColor.a);
+			}
 			ENDCG
 		}
 
@@ -176,8 +159,22 @@
 			CGPROGRAM
 			#pragma target 5.0
 			#pragma fragmentoption arb_precision_hint_fastest
-			#pragma vertex vert_gas
-			#pragma fragment frag_gas
+			#pragma vertex vert
+			#pragma fragment frag
+
+			void vert(in appdata v, out v2f o)
+			{
+				PackParticle(v, gas, gasSize, o);
+			}
+
+			void frag(in v2f i, out float4 color : SV_Target)
+			{
+				float4 particleColor;
+
+				UnpackParticle(i, gasStrength, particleColor);
+
+				color = float4(-particleColor.rgb * gasMultiplicationColor, particleColor.a);
+			}
 			ENDCG
 		}
 	}

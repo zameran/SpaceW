@@ -35,6 +35,7 @@
 
 using SpaceEngine.Core;
 using SpaceEngine.Core.Patterns.Strategy.Renderable;
+using SpaceEngine.Core.Utilities;
 using SpaceEngine.Core.Utilities.Gradients;
 using SpaceEngine.Core.Octree;
 
@@ -159,11 +160,17 @@ namespace SpaceEngine.Galaxy
         private float length;
         public float Length { get { return length; } set { length = value; } }
 
+        [SerializeField]
+        private int id;
+        public int ID { get { return id; } set { id = value; } }
+
         public GalaxyCluster()
         {
             Center = Vector3.zero;
 
             Length = 1.0f;
+
+            ID = 0;
         }
 
         public GalaxyCluster(Vector3 center)
@@ -171,6 +178,8 @@ namespace SpaceEngine.Galaxy
             Center = center;
 
             Length = 1.0f;
+
+            ID = 0;
         }
 
         public GalaxyCluster(Vector3 center, float length)
@@ -178,6 +187,17 @@ namespace SpaceEngine.Galaxy
             Center = center;
 
             Length = length;
+
+            ID = 0;
+        }
+
+        public GalaxyCluster(Vector3 center, float length, int id)
+        {
+            Center = center;
+
+            Length = length;
+
+            ID = id;
         }
     }
 
@@ -903,7 +923,7 @@ namespace SpaceEngine.Galaxy
             for (int nodeIndex = 0; nodeIndex < nodes.Count; nodeIndex++)
             {
                 var currentNode = nodes[nodeIndex];
-                var cluster = new GalaxyCluster(currentNode.Center, currentNode.SideLength);
+                var cluster = new GalaxyCluster(currentNode.Center, currentNode.SideLength, nodeIndex + 1);
 
                 clusters.Add(cluster);
             }
@@ -1139,16 +1159,8 @@ namespace SpaceEngine.Galaxy
 
             DustCommandBuffer.Clear();
 
-            if (BlendFactor < 1.0f)
-            {
-                DustCommandBuffer.SetRenderTarget(FrameBuffer1);
-                DustCommandBuffer.ClearRenderTarget(true, true, Color.black);
-            }
-            else
-            {
-                DustCommandBuffer.SetRenderTarget(FrameBuffer2);
-                DustCommandBuffer.ClearRenderTarget(true, true, Color.black);
-            }
+            DustCommandBuffer.ClearColor(FrameBuffer1);
+            DustCommandBuffer.ClearColor(FrameBuffer2);
 
             // 0 - Index count per instance...
             // 1 - Instance count...
@@ -1165,7 +1177,6 @@ namespace SpaceEngine.Galaxy
 
             var dustParams1 = new Vector2(Settings.GalaxyRenderingParameters.DustStrength, Settings.GalaxyRenderingParameters.DustSize);
             var gasParams1 = new Vector2(Settings.GalaxyRenderingParameters.GasStength, Settings.GalaxyRenderingParameters.GasSize);
-            var galaxyPosition = transform.position - GodManager.Instance.View.WorldCameraPosition;
 
             var trs = Matrix4x4.identity;
 
@@ -1179,7 +1190,6 @@ namespace SpaceEngine.Galaxy
                 material.SetVector("dustParams1", dustParams1);
                 material.SetVector("gasParams1", gasParams1);
                 material.SetTexture("ColorDistributionTable", Settings.GalaxyRenderingParameters.DustColorDistribution.Lut);
-                material.SetVector("_Galaxy_Position", galaxyPosition);
 
                 // NOTE : Render galaxy dust...
                 for (var bufferIndex = 0; bufferIndex < Mathf.Min(Settings.GalaxyRenderingParameters.DustPassCount, dustBuffers.Capacity); bufferIndex++)
@@ -1228,8 +1238,8 @@ namespace SpaceEngine.Galaxy
                 spriteMaterial.SetVector("dustParams1", dustParams1);
                 spriteMaterial.SetVector("gasParams1", gasParams1);
                 spriteMaterial.SetTexture("ColorDistributionTable", Settings.GalaxyRenderingParameters.DustColorDistribution.Lut);
-                spriteMaterial.SetVector("_Galaxy_Position", galaxyPosition);
 
+                // NOTE : Render galaxy gas sprites...
                 for (var bufferIndex = 0; bufferIndex < Mathf.Min(Settings.GalaxyRenderingParameters.DustPassCount, gasBuffers.Capacity); bufferIndex++)
                 {
                     var gasBuffer = gasBuffers[bufferIndex];
