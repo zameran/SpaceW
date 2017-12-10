@@ -35,18 +35,22 @@ Shader "SpaceEngine/Space/Starfield"
 {
 	SubShader 
 	{
+		Name "Starfield"
 		Tags 
-		{ 
-			"Queue" = "Geometry"
-			"IgnoreProjector" = "True"
-			"RenderType" = "Background"
+		{
+			"Queue"					= "Transparent"
+			"RenderType"			= "Transparent"
+			"ForceNoShadowCasting"	= "True"
+			"IgnoreProjector"		= "True"
+			"DisableBatching"		= "True"
+			
+			"LightMode"				= "Always"
 		}
-		//Blend OneMinusDstColor OneMinusSrcAlpha
-		//Blend OneMinusDstAlpha SrcAlpha
-		Blend OneMinusDstAlpha OneMinusSrcAlpha
-		ZWrite Off
+		// TODO : Stars visible through planet...
+		Blend SrcAlpha OneMinusSrcColor
 		Cull Back
-		Fog { Mode Off }
+		ZWrite Off
+		ZTest LEqual
 
 		Pass
 		{	
