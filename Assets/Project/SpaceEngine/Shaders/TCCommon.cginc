@@ -3281,7 +3281,7 @@ float RayedCraterColorNoise(float3 ppoint, float cratFreq, float cratSqrtDensity
 
 		cell = inverseSF(ppoint, fibFreq, cellCenter);
 		rad  = hash1(cell.x * 743.1) * 0.9 + 0.1;
-		fi   = acos(dot(binormal, normalize(cellCenter - ppoint))) / (M_PI2 * 2.0);
+		fi   = acos(dot(binormal, normalize(cellCenter - ppoint))) / M_PI2;
 		color += RayedCraterColorFunc(cell.y * radFactor / rad, fi, 48.3 * dot(cellCenter, Randomize));
 
 		UNITY_BRANCH
