@@ -33,7 +33,6 @@
 // Creator: zameran
 #endregion
 
-
 namespace SpaceEngine.Core.Patterns.Strategy.Reanimator
 {
     /// <summary>

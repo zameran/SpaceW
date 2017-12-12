@@ -242,23 +242,6 @@ public static class Helper
         return true;
     }
 
-    public static Material CreateTempMaterial(string shaderName)
-    {
-        var shader = Shader.Find(shaderName);
-
-        if (shader == null)
-        {
-            Debug.LogError("Helper.CreateTempMaterial: Failed to find shader: " + shaderName);
-            return null;
-        }
-
-        var material = new Material(shader);
-
-        material.hideFlags = HideFlags.DontSave | HideFlags.HideInInspector;
-
-        return material;
-    }
-
     public static GameObject CloneGameObject(GameObject source, Transform parent, bool keepName = false)
     {
         return CloneGameObject(source, parent, source.transform.localPosition, source.transform.localRotation, keepName);
@@ -272,7 +255,7 @@ public static class Helper
 
             if (parent != null)
             {
-                clone = (GameObject)GameObject.Instantiate(source);
+                clone = Object.Instantiate(source);
 
                 clone.transform.parent = parent;
                 clone.transform.localPosition = localPosition;
@@ -281,7 +264,7 @@ public static class Helper
             }
             else
             {
-                clone = (GameObject)GameObject.Instantiate(source, localPosition, localRotation);
+                clone = Object.Instantiate(source, localPosition, localRotation);
             }
 
             if (keepName == true) clone.name = source.name;

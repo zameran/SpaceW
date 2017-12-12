@@ -213,7 +213,6 @@ MonoBehaviour:
   Sunglares: []
   HDRMode: 4
   GSCS: {fileID: 11400000, guid: 1df83c97158884340af77d277fcca4bf, type: 2}
-  FourierShader: {fileID: 4800000, guid: 1cca648048bb4614ba000d825b451fde, type: 3}
   FourierGridSize: 64
   GridResolution: 25
   OceanGridResolution: 4
@@ -224,7 +223,6 @@ MonoBehaviour:
   OceanDepth: 1
   DelayedCalculations: 0
   FloatingOrigin: 0
-  DebugFBO: 0
   NoiseTextures: []
 --- !u!1 &680484789
 GameObject:
@@ -341,9 +339,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6b1295d14b8ba62458a6963583074ce9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  ClipPlanesControlType: 2
   Speed: 1
   RotationSpeed: 1
-  DynamicClipPlanes: 1
   Controllable: 1
 --- !u!114 &680484797
 MonoBehaviour:

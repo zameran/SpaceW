@@ -535,6 +535,7 @@ MonoBehaviour:
   DisableAllOnStart: 1
   GUISkin: {fileID: 11400000, guid: 5f9307978351f0d4fbb973b4fe3f1b0e, type: 2}
   ShowAdditionalInfo: 1
+  ShowDebugGUIBounds: 0
 --- !u!114 &1955046401
 MonoBehaviour:
   m_ObjectHideFlags: 0

@@ -570,7 +570,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a6a825159602d264cb1a6da46508d73e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  UISkin: {fileID: 11400000, guid: 5f9307978351f0d4fbb973b4fe3f1b0e, type: 2}
   TotalDetected: 0
   TotalLoaded: 0
 --- !u!4 &1256074429
