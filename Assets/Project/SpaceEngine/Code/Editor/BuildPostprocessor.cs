@@ -35,6 +35,8 @@ using System.IO;
 using UnityEditor;
 using UnityEditor.Callbacks;
 
+using Debug = UnityEngine.Debug;
+
 public sealed class BuildPostprocessor
 {
     [PostProcessBuild(1)]
@@ -43,17 +45,16 @@ public sealed class BuildPostprocessor
         var exeName = Path.GetFileName(pathToBuiltProject);
         var exeNameWE = Path.GetFileNameWithoutExtension(pathToBuiltProject);
 
+        if (string.IsNullOrEmpty(exeName)) { Debug.Log("BuildPostprocessor.OnPostprocessBuild: Can't find exe!"); return; }
+
         var dataPath = pathToBuiltProject.Remove(pathToBuiltProject.Length - exeName.Length, exeName.Length) + exeNameWE + "_Data";
 
+        // TODO : Other platforms support...
         if (target == BuildTarget.StandaloneWindows || target == BuildTarget.StandaloneWindows64)
         {
             var pureBuildPath = Path.GetDirectoryName(pathToBuiltProject);
 
-            foreach (string file in Directory.GetFiles(pureBuildPath, "*.pdb"))
-            {
-                if (File.Exists(file))
-                    File.Delete(file);
-            }
+            if (string.IsNullOrEmpty(pureBuildPath)) { Debug.Log("BuildPostprocessor.OnPostprocessBuild: Can't find pure build path!"); return; }
 
             foreach (string file in Directory.GetFiles(pureBuildPath, "*Log*.txt"))
             {

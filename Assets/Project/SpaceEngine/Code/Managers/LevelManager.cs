@@ -139,6 +139,7 @@ namespace SpaceEngine.Managers
         /// <param name="sceneName">Special scene.</param>
         /// <param name="sceneLoadType">Load Type.</param>
         /// <param name="loadSceneMode">Load Mode.</param>
+        /// <param name="fireEvent">Should <see cref="EventManager.BaseEvents"/> event be called during loading?</param>
         /// <returns>Returns AsyncOperation, if Load Type is Async.</returns>
         private AsyncOperation LoadSceneInternal(EntryPoint sceneName, SceneLoadType sceneLoadType, LoadSceneMode loadSceneMode, bool fireEvent = true)
         {

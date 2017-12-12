@@ -73,6 +73,6 @@ public sealed class InGamePauseMenuUI : UserInterface, IUserInterface
 
         GetComponent<UIPanel>().Hide(0.5f);
 
-        DOTween.To(() => CameraHelper.Main().backgroundColor, value => CameraHelper.Main().backgroundColor = value, XKCDColors.ColorTranslator.FromHtml("#222C3705"), 1.0f);
+        DOTween.To(() => CameraHelper.Main().backgroundColor, value => CameraHelper.Main().backgroundColor = value, XKCDColors.ColorTranslator.FromHtml("#00000005"), 1.0f);
     }
 }

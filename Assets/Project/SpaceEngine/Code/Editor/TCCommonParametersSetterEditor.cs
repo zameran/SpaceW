@@ -36,6 +36,7 @@ using UnityEditor;
 using UnityEditor.SceneManagement;
 
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 [CustomEditor(typeof(TCCommonParametersSetter))]
 public sealed class TCCommonParametersSetterEditor : Editor
@@ -317,7 +318,7 @@ public sealed class TCCommonParametersSetterEditor : Editor
 
         if (EditorGUI.EndChangeCheck() && !Application.isPlaying)
         {
-            var currentScene = EditorSceneManager.GetActiveScene();
+            var currentScene = SceneManager.GetActiveScene();
 
             EditorSceneManager.MarkSceneDirty(currentScene);
         }

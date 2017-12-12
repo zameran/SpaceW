@@ -35,6 +35,7 @@
 
 using SpaceEngine.Core.Debugging;
 using SpaceEngine.Core.Patterns.Strategy.Eventit;
+using SpaceEngine.Enums;
 using SpaceEngine.Pluginator.Attributes;
 
 using System;
@@ -129,14 +130,14 @@ namespace SpaceEngine.Pluginator
 
         private void OnActiveSceneChanged(Scene arg0, Scene arg1)
         {
-            if (SceneManager.GetActiveScene().buildIndex != 0 && Loaded) FirePlugins(ExternalAssemblies);
+            if (SceneManager.GetActiveScene().buildIndex != (int)EntryPoint.Init && Loaded) FirePlugins(ExternalAssemblies);
         }
 
         #endregion
 
         protected override void Pass()
         {
-            Logger.Log(string.Format("AssemblyLoader.Pass: AssemblyLoader Initiated at scene №: {0}", SceneManager.GetActiveScene().buildIndex));
+            Logger.Log(string.Format("AssemblyLoader.Pass: AssemblyLoader Initiated at scene: {0}", (EntryPoint)SceneManager.GetActiveScene().buildIndex));
 
             if (!Loaded)
             {
@@ -144,10 +145,10 @@ namespace SpaceEngine.Pluginator
                 Loaded = true;
             }
 
-            if (SceneManager.GetActiveScene().buildIndex == 0 && Loaded)
+            if (SceneManager.GetActiveScene().buildIndex == (int)EntryPoint.Init && Loaded)
             {
-                //Delay((TotalDetected + 1) * 2, () => { SceneManager.LoadScene(1); });
-                SceneManager.LoadScene(1);
+                //Delay((TotalDetected + 1) * 2, () => { SceneManager.LoadScene((int)EntryPoint.MainMenu); });
+                SceneManager.LoadScene((int)EntryPoint.MainMenu);
             }
 
             base.Pass();
@@ -236,21 +237,21 @@ namespace SpaceEngine.Pluginator
         {
             var counter = externalAssemblies.Sum(assembly => assembly.Types.SelectMany(kvp => kvp.Value).Count(v => FirePlugin(v, level)));
 
-            Logger.Log(string.Format("AssemblyLoader.FirePlugins: {0} plugins fired at scene №: {1}", counter, level));
+            Logger.Log(string.Format("AssemblyLoader.FirePlugins: {0} plugins fired at scene: {1}", counter, level));
         }
 
         private void FirePlugins(List<AssemblyExternal> externalAssemblies)
         {
             var counter = externalAssemblies.Sum(assembly => assembly.Types.SelectMany(kvp => kvp.Value).Count(v => FirePlugin(v)));
 
-            Logger.Log(string.Format("AssemblyLoader.FirePlugins: {0} plugins fired at scene №: {1}", counter, SceneManager.GetActiveScene().buildIndex));
+            Logger.Log(string.Format("AssemblyLoader.FirePlugins: {0} plugins fired at scene: {1}", counter, (EntryPoint)SceneManager.GetActiveScene().buildIndex));
         }
 
         private void FireHotPlugin(AssemblyExternal assembly)
         {
             var counter = assembly.Types.SelectMany(kvp => kvp.Value).Count(v => FirePlugin(v, 0));
 
-            Logger.Log(string.Format("AssemblyLoader.FirePlugins: {0} plugins fired at scene №: {1}", counter, SceneManager.GetActiveScene().buildIndex));
+            Logger.Log(string.Format("AssemblyLoader.FirePlugins: {0} plugins fired at scene: {1}", counter, (EntryPoint)SceneManager.GetActiveScene().buildIndex));
         }
 
         private bool FirePlugin(Type type, int level)
@@ -275,12 +276,12 @@ namespace SpaceEngine.Pluginator
 
         private bool FirePlugin(Type type)
         {
-            var currentScene = SceneManager.GetActiveScene().buildIndex;
+            var currentScene = (EntryPoint)SceneManager.GetActiveScene().buildIndex;
             var atr = AttributeHelper.GetTypeAttribute<SpaceAddonMonoBehaviour>(type);
 
             if (atr != null)
             {
-                if ((int)atr.EntryPoint == currentScene)
+                if (atr.EntryPoint == currentScene)
                 {
                     GameObject go = new GameObject(type.Name);
                     go.transform.position = Vector3.zero;
