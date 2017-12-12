@@ -117,21 +117,19 @@ inline float3 hdrFunction(float3 c)
 	UNITY_BRANCH 
 	if (_HDRMode == 0)					// None
 	{
-		c *= _HDRExposure;
-
-		return c; 
+		return c;
 	}
 	else if (_HDRMode == 1)				// Simple
 	{
 		c *= _HDRExposure;
 
-		return 1.0 - exp(-c); 
+		return 1.0 - exp(-c);
 	}
 	else if (_HDRMode == 2)				// SpaceEngine
 	{
 		c *= _HDRExposure;
 
-		return c < 1.0 ? pow(c * 0.47, 0.6073) : 1.0 - exp(-c); 
+		return c < 1.0 ? pow(c * 0.47, 0.6073) : 1.0 - exp(-c);
 	}
 	else if (_HDRMode == 3)				// SpaceEngineOptimized
 	{
@@ -141,13 +139,13 @@ inline float3 hdrFunction(float3 c)
 	{
 		c *= _HDRExposure;
 
-		return c < 1.413 ? pow(c * 0.38317, 1.0 / 2.2) : 1.0 - exp(-c); 
+		return c < 1.413 ? pow(c * 0.38317, 1.0 / 2.2) : 1.0 - exp(-c);
 	}
 	else if (_HDRMode == 5)				// ProlandOptimized
 	{
 		c *= _HDRExposure;
 
-		return c < 1.413 ? pow(c * 0.38317, 0.454545455) : 1.0 - exp(-c); 
+		return c < 1.413 ? pow(c * 0.38317, 0.454545455) : 1.0 - exp(-c);
 	}
 	else return c;
 }
@@ -160,8 +158,12 @@ float3 hdr(float3 L)
 float4 hdr(float4 L) 
 {
 	L.rgb = hdrFunction(L.rgb);
-	L.a = L.a;
-	//L.a = dot(L.rgb, float3(0.299, 0.587, 0.114));
+
+	#if defined(CORE_HDR_LUMA)
+		L.a = dot(L.rgb, float3(0.299, 0.587, 0.114));
+	#else
+		L.a = L.a;
+	#endif
 
 	return L;
 }
