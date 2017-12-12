@@ -36,7 +36,7 @@
 using SpaceEngine.Cameras;
 using SpaceEngine.Core.Bodies;
 using SpaceEngine.Core.Utilities;
-using SpaceEngine.Environment.Atmospheric;
+using SpaceEngine.Enums;
 using SpaceEngine.Environment.Sun;
 using SpaceEngine.SciptableObjects;
 using SpaceEngine.Startfield;
@@ -58,7 +58,7 @@ public class GodManager : MonoSingleton<GodManager>
     public Starfield[] Starfields;
     public SunGlare[] Sunglares;
 
-    public AtmosphereHDR HDRMode = AtmosphereHDR.ProlandOptimized;
+    public FragmentHDR HDRMode = FragmentHDR.ProlandOptimized;
 
     public GenerationShadersCoreSettings GSCS;
 
@@ -141,6 +141,16 @@ public class GodManager : MonoSingleton<GodManager>
     {
         Helper.Destroy(AtmosphereMesh);
         Helper.Destroy(QuadMesh);
+
+        if (NoiseTextures != null)
+        {
+            for (byte noiseTextureIndex = 0; noiseTextureIndex < NoiseTextures.Length; noiseTextureIndex++)
+            {
+                var noiseTexture = NoiseTextures[noiseTextureIndex];
+
+                if (noiseTexture != null) Helper.Destroy(noiseTexture);
+            }
+        }
 
         base.OnDestroy();
     }

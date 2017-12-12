@@ -1,7 +1,7 @@
 ﻿using SpaceEngine.Core.Bodies;
 using SpaceEngine.Core.Terrain;
+using SpaceEngine.Enums;
 using SpaceEngine.Environment.Atmospheric;
-using SpaceEngine.Pluginator.Enums;
 using SpaceEngine.UI;
 
 using System;

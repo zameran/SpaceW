@@ -33,7 +33,7 @@
 // Creator: zameran
 #endregion
 
-using SpaceEngine.Environment.Atmospheric;
+using SpaceEngine.Enums;
 
 using UnityEngine;
 
@@ -68,7 +68,7 @@ namespace SpaceEngine.Debugging
                 {
                     GUILayoutExtensions.VerticalBoxed("Fragment HDR Mode: ", GUISkin, () =>
                     {
-                        GodManager.Instance.HDRMode = (AtmosphereHDR)GUILayout.SelectionGrid((int)GodManager.Instance.HDRMode, System.Enum.GetNames(typeof(AtmosphereHDR)), 2);
+                        GodManager.Instance.HDRMode = (FragmentHDR)GUILayout.SelectionGrid((int)GodManager.Instance.HDRMode, System.Enum.GetNames(typeof(FragmentHDR)), 2);
                     });
 
                     GUILayoutExtensions.SpacingSeparator();

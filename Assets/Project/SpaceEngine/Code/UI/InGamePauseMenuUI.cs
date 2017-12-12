@@ -35,8 +35,8 @@
 
 using DG.Tweening;
 
+using SpaceEngine.Enums;
 using SpaceEngine.Managers;
-using SpaceEngine.Pluginator.Enums;
 using SpaceEngine.UI;
 
 using UnityEngine;
@@ -62,9 +62,14 @@ public sealed class InGamePauseMenuUI : UserInterface, IUserInterface
         }
     }
 
-    public void LoadScene()
+    public void LoadMainMenuScene()
     {
-        LevelManager.Instance.LoadSceneDelayed(EntryPoint.MainMenu, 0.5f);
+        LoadScene(EntryPoint.MainMenu);
+    }
+
+    public void LoadScene(EntryPoint ep)
+    {
+        LevelManager.Instance.LoadSceneDelayed(ep, 0.5f);
 
         GetComponent<UIPanel>().Hide(0.5f);
 

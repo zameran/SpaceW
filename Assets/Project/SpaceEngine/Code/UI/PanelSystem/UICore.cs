@@ -1,6 +1,6 @@
 ﻿using SpaceEngine.Core.Debugging;
 using SpaceEngine.Core.Patterns.Strategy.Eventit;
-using SpaceEngine.Pluginator.Enums;
+using SpaceEngine.Enums;
 
 using System.Collections.Generic;
 using System.Linq;

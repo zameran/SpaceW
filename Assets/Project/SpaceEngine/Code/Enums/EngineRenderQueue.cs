@@ -33,11 +33,14 @@
 // Creator: zameran
 #endregion
 
-public enum EngineRenderQueue : int
+namespace SpaceEngine.Enums
 {
-    Background = 1000,
-    Geometry = 2000,
-    AlphaTest = 2450,
-    Transparent = 3000,
-    Overlay = 4000
+    public enum EngineRenderQueue : int
+    {
+        Background = 1000,
+        Geometry = 2000,
+        AlphaTest = 2450,
+        Transparent = 3000,
+        Overlay = 4000
+    }
 }

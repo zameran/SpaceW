@@ -1,6 +1,7 @@
 ﻿using SpaceEngine.Core.Numerics.Matrices;
 using SpaceEngine.Core.Numerics.Shapes;
 using SpaceEngine.Core.Numerics.Vectors;
+using SpaceEngine.Core.Types;
 
 using System;
 

@@ -34,8 +34,8 @@
 #endregion
 
 using SpaceEngine.Core.Patterns.Strategy.Eventit;
+using SpaceEngine.Enums;
 using SpaceEngine.Managers;
-using SpaceEngine.Pluginator.Enums;
 
 using System;
 

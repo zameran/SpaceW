@@ -42,6 +42,8 @@ using SpaceEngine.Core.Patterns.Strategy.Renderable;
 using SpaceEngine.Core.Patterns.Strategy.Uniformed;
 using SpaceEngine.Core.Preprocess.Atmospehre;
 
+using SpaceEngine.Enums;
+
 using System.ComponentModel;
 
 using UnityEngine;

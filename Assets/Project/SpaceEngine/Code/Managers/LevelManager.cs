@@ -33,7 +33,7 @@
 // Creator: zameran
 #endregion
 
-using SpaceEngine.Pluginator.Enums;
+using SpaceEngine.Enums;
 using SpaceEngine.UI.Panels;
 
 using System;

@@ -41,10 +41,13 @@ using SpaceEngine.Core.Patterns.Strategy.Eventit;
 using SpaceEngine.Core.Patterns.Strategy.Reanimator;
 using SpaceEngine.Core.Patterns.Strategy.Renderable;
 using SpaceEngine.Core.Patterns.Strategy.Uniformed;
+using SpaceEngine.Enums;
+using SpaceEngine.Environment.Atmospheric;
+
 using System;
 using System.Collections;
 using System.Linq;
-using SpaceEngine.Environment.Atmospheric;
+
 using UnityEngine;
 using UnityEngine.Rendering;
 

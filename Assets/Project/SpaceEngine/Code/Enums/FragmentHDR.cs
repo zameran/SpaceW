@@ -33,9 +33,9 @@
 // Creator: zameran
 #endregion
 
-namespace SpaceEngine.Environment.Atmospheric
+namespace SpaceEngine.Enums
 {
-    public enum AtmosphereHDR : byte
+    public enum FragmentHDR : byte
     {
         None = 0,
         Simple = 1,

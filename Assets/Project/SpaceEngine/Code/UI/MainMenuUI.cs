@@ -35,9 +35,9 @@
 
 using DG.Tweening;
 
+using SpaceEngine.Enums;
 using SpaceEngine.Managers;
 using SpaceEngine.Pluginator;
-using SpaceEngine.Pluginator.Enums;
 using SpaceEngine.UI;
 
 using UnityEngine;
