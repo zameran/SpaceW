@@ -104,6 +104,8 @@ public sealed class TCCommonParametersSetter : MonoBehaviour, IUniformed<Materia
 
     public void UpdateMaterialTable<T>(T target) where T : Material
     {
+        if (!Application.isPlaying) return;
+
         if (MaterialTable == null)
         {
             Debug.LogWarning("TCCommonParametersSetter.UpdateMaterialTable: Trying to update lut texture, which is null! So, created...");
@@ -125,15 +127,17 @@ public sealed class TCCommonParametersSetter : MonoBehaviour, IUniformed<Materia
         }
     }
 
-    public void UpdateMaterialTable1(MaterialPropertyBlock target)
+    public void UpdateMaterialTable(MaterialPropertyBlock target)
     {
+        if (!Application.isPlaying) return;
+
         if (MaterialTable == null)
         {
             Debug.LogWarning("TCCommonParametersSetter.UpdateMaterialTable: Trying to update lut texture, which is null! So, created...");
 
             MaterialTable = new MaterialTableGradientLut();
 
-            UpdateMaterialTable1(target);
+            UpdateMaterialTable(target);
         }
         else
         {
@@ -169,7 +173,7 @@ public sealed class TCCommonParametersSetter : MonoBehaviour, IUniformed<Materia
     {
         if (target == null) return;
 
-        UpdateMaterialTable1(target);
+        UpdateMaterialTable(target);
 
         target.SetFloat("noiseLacunarity", Lacunarity);
         target.SetFloat("noiseH", H);

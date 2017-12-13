@@ -71,6 +71,7 @@ Shader "SpaceEngine/Test/NoiseEngineTest"
 			float NoiseFunction(float3 pos)
 			{
 				return iNoise(pos, 1);
+				//return SpiralDensity(float3(pos.x, pos.z, 0));
 			}
 
 			float3 FindNormal(float3 pos, float u)
