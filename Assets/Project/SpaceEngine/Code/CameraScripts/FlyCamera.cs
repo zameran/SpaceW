@@ -92,12 +92,9 @@ namespace SpaceEngine.Cameras
             MainRenderer.Instance.ComposeOutputRender();
         }
 
-        protected override void FixedUpdate()
+        protected override void Update()
         {
-            base.FixedUpdate();
-
-            UpdateDistances();
-            UpdateClipPlanes();
+            base.Update();
 
             if (Controllable)
             {
@@ -107,12 +104,12 @@ namespace SpaceEngine.Cameras
                 {
                     RayScreen = CameraComponent.ScreenPointToRay(Input.mousePosition);
 
-                    TargetRotation = Quaternion.LookRotation((RayScreen.origin + RayScreen.direction * 10.0f) - transform.position, transform.up);
-                    
-                    transform.rotation = Quaternion.Slerp(transform.rotation, TargetRotation, Time.fixedDeltaTime * RotationSpeed);
+                    var gravityVector = (RayScreen.origin + RayScreen.direction * 10.0f) - transform.position;
 
+                    TargetRotation = Quaternion.LookRotation(gravityVector, transform.up);
                     Rotation.z = 0;
-                    //if (!Aligned) transform.Rotate(new Vector3(0.0f, 0.0f, Rotation.z));
+
+                    RotateSlerp(Time.deltaTime * RotationSpeed);
                 }
                 else if (Input.GetMouseButton(1) && !MouseOverUI)
                 {
@@ -120,44 +117,44 @@ namespace SpaceEngine.Cameras
                 }
                 else
                 {
-                    if (Input.GetKey(KeyCode.E))
+                    if (!Aligned)
                     {
-                        Rotation.z -= 1.0f * Time.deltaTime;
-                    }
-                    else if (Input.GetKey(KeyCode.Q))
-                    {
-                        Rotation.z += 1.0f * Time.deltaTime;
-                    }
-                    else
-                    {
-                        Rotation.z = Mathf.Lerp(Rotation.z, 0, Time.deltaTime * 2.0f);
-                    }
+                        if (Input.GetKey(KeyCode.E))
+                        {
+                            Rotation.z -= 0.20f * Time.deltaTime;
+                        }
+                        else if (Input.GetKey(KeyCode.Q))
+                        {
+                            Rotation.z += 0.20f * Time.deltaTime;
+                        }
+                        else
+                        {
+                            Rotation.z = Mathf.Lerp(Rotation.z, 0, Time.deltaTime * 1.25f);
+                        }
 
-                    Rotation.z = Mathf.Clamp(Rotation.z, -100.0f, 100.0f);
+                        Rotation.z = Mathf.Clamp(Rotation.z, -100.0f, 100.0f);
 
-                    if (!Aligned) transform.Rotate(new Vector3(0, 0, Rotation.z));
+                        transform.Rotate(new Vector3(0, 0, Rotation.z));
 
-                    if (Input.GetKey(KeyCode.G))
-                    {
-                        transform.rotation = Quaternion.RotateTowards(transform.rotation, 
-                                             Quaternion.LookRotation((Body != null ? Body.Origin : Vector3.zero) - transform.position), Time.fixedDeltaTime * RotationSpeed * 30.0f);
+                        if (Input.GetKey(KeyCode.G))
+                        {
+                            var gravityVector = (Body != null ? Body.Origin : Vector3.zero) - transform.position;
+
+                            TargetRotation = Quaternion.LookRotation(gravityVector, transform.up);
+
+                            RotateSlerp(Time.deltaTime * RotationSpeed * 1.57f);
+                        }
                     }
                 }
-                
-                // NOTE : Body shape dependent...
-                if (DistanceToCore < DistanceToAlign)
-                {
-                    Aligned = true;
 
-                    var gravityVector = (Body != null ? Body.transform.position : Vector3.zero) - transform.position;
+                // NOTE : Body shape dependent...
+                if (Aligned)
+                {
+                    var gravityVector = (Body != null ? Body.Origin : Vector3.zero) - transform.position;
 
                     TargetRotation = Quaternion.LookRotation(transform.forward, -gravityVector);
 
-                    transform.rotation = Quaternion.Slerp(transform.rotation, TargetRotation, Time.fixedDeltaTime * RotationSpeed * 3.0f);
-                }
-                else
-                {
-                    Aligned = false;
+                    RotateSlerp(Time.deltaTime * RotationSpeed * 3.0f);
                 }
 
                 Velocity.z = Input.GetAxis("Vertical");
@@ -185,7 +182,19 @@ namespace SpaceEngine.Cameras
 
                 transform.Translate(Velocity * CurrentSpeed);
             }
+        }
 
+        protected override void FixedUpdate()
+        {
+            base.FixedUpdate();
+
+            UpdateDistances();
+            UpdateClipPlanes();
+            UpdatePseudoCollision();
+        }
+
+        private void UpdatePseudoCollision()
+        {
             if (Body != null)
             {
                 var worldPosition = (Vector3d)(transform.position - Body.Origin);
@@ -205,13 +214,15 @@ namespace SpaceEngine.Cameras
             if (Body != null)
             {
                 DistanceToAlign = Body.Size * 1.025f;
-                DistanceToCore = Vector3.Distance(transform.position, Body.transform.position);
+                DistanceToCore = Vector3.Distance(transform.position, Body.Origin);
             }
             else
             {
                 DistanceToAlign = 0.0f;
                 DistanceToCore = Vector3.Distance(transform.position, Vector3.zero);
             }
+
+            Aligned = DistanceToCore < DistanceToAlign;
         }
 
         private float CalculateNearClipPlane(float h)
@@ -272,6 +283,21 @@ namespace SpaceEngine.Cameras
             WorldCameraPosition = transform.position;
         }
 
+        private void RotateSlerp(float speed)
+        {
+            RotateSlerp(transform.rotation, TargetRotation, speed);
+        }
+
+        private void RotateSlerp(Quaternion targetRotation, float speed)
+        {
+            RotateSlerp(transform.rotation, targetRotation, speed);
+        }
+
+        private void RotateSlerp(Quaternion currentRotation, Quaternion targetRotation, float speed)
+        {
+            transform.rotation = Quaternion.Slerp(currentRotation, targetRotation, speed);
+        }
+
         private void RotateAround(bool staticRotation = false)
         {
             var mouseX = (Input.GetAxis("Mouse Y") * 480.0f) / CameraComponent.pixelWidth;
@@ -327,8 +353,8 @@ namespace SpaceEngine.Cameras
 
         private void RotateAroundOrigin(Vector3 rotationVector, Vector3 origin, float rotationSpeed)
         {
-            transform.RotateAround(origin, Vector3.up, rotationVector.x * (Time.fixedDeltaTime * rotationSpeed) * 10.0f);
-            transform.RotateAround(origin, Vector3.up, rotationVector.y * (Time.fixedDeltaTime * rotationSpeed) * 10.0f);
+            transform.RotateAround(origin, Vector3.up, rotationVector.x * (Time.deltaTime * rotationSpeed) * 10.0f);
+            transform.RotateAround(origin, Vector3.up, rotationVector.y * (Time.deltaTime * rotationSpeed) * 10.0f);
         }
 
         private void RotateAroundOrigin(Vector3 rotationVector, Vector3 distanceVector, Vector3 origin, float rotationSpeed)
@@ -336,7 +362,7 @@ namespace SpaceEngine.Cameras
             var currentRotation = Quaternion.Euler(rotationVector + TargetRotation.eulerAngles);
             var currentPosition = currentRotation * distanceVector + origin;
 
-            transform.rotation = Quaternion.Slerp(transform.rotation, currentRotation, (Time.fixedDeltaTime * rotationSpeed) * 10.0f);
+            transform.rotation = Quaternion.Slerp(transform.rotation, currentRotation, (Time.deltaTime * rotationSpeed) * 10.0f);
             transform.position = Vector3.Slerp(transform.position, currentPosition, (Time.deltaTime * rotationSpeed) * 5.0f);
         }
     }
