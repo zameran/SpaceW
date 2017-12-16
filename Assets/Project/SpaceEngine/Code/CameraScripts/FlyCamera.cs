@@ -35,7 +35,9 @@
 
 using SpaceEngine.Core.Bodies;
 using SpaceEngine.Core.Numerics.Vectors;
+
 using System.ComponentModel;
+
 using UnityEngine;
 
 namespace SpaceEngine.Cameras
