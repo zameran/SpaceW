@@ -55,9 +55,11 @@ namespace SpaceEngine.Debugging
         {
             base.OnGUI();
 
+            debugInfoDrawBounds.width = Screen.width - 20;
+
             using (new PerformanceMonitor.Timer("Repfomance Monitor OnGUI"))
             {
-                GUI.Window(0, debugInfoBounds, UI, "Perfomance Monitor (in milliseconds)");
+                GUI.Window(0, debugInfoDrawBounds, UI, "Perfomance Monitor (in milliseconds)");
             }
         }
 
@@ -65,8 +67,6 @@ namespace SpaceEngine.Debugging
         {
             var counters = PerformanceMonitor.Counters;
             if (counters == null || counters.Count == 0) { GUILayoutExtensions.DrawBadHolder("Perfomance stats: ", "No Data!?", GUISkin); return; }
-
-            debugInfoBounds.width = Screen.width - 20;
 
             ScrollPosition = GUILayout.BeginScrollView(ScrollPosition, false, true);
             {
@@ -88,8 +88,8 @@ namespace SpaceEngine.Debugging
                                 GUILayoutExtensions.LabelWithSpace(string.Format("Max: {0}", counter.Max / 1000.0f), -8);
                                 GUILayoutExtensions.LabelWithSpace(string.Format("Count: {0}", counter.Count), -8);
                             });
-                        }, GUILayout.Width(debugInfoBounds.width - 45));
-                    }, GUILayout.Width(debugInfoBounds.width - 40));
+                        }, GUILayout.Width(debugInfoDrawBounds.width - 45));
+                    }, GUILayout.Width(debugInfoDrawBounds.width - 40));
                 }
 
                 GUILayoutExtensions.SpacingSeparator();

@@ -53,12 +53,6 @@ namespace SpaceEngine.Debugging
         public Rect debugInfoDrawBounds = new Rect(10, 10, 500, 500);
 
         [HideInInspector]
-        public GUIStyle BoldLabelStyle;
-
-        [HideInInspector]
-        public GUIStyle ImageLabelStyle;
-
-        [HideInInspector]
         public Vector2 ScrollPosition = Vector2.zero;
 
         public GUISkin GUISkin
@@ -70,6 +64,28 @@ namespace SpaceEngine.Debugging
                         return SwitcherComponent.GUISkin;
 
                 return GUI.skin;
+            }
+        }
+
+        public GUIStyle BoldLabelStyle
+        {
+            get
+            {
+                if (SwitcherComponent != null)
+                    return SwitcherComponent.BoldLabelStyle;
+
+                return null;
+            }
+        }
+
+        public GUIStyle ImageLabelStyle
+        {
+            get
+            {
+                if (SwitcherComponent != null)
+                    return SwitcherComponent.ImageLabelStyle;
+
+                return null;
             }
         }
 
@@ -90,23 +106,6 @@ namespace SpaceEngine.Debugging
 
             if (SwitcherComponent != null)
             {
-                if (SwitcherComponent.GUISkin != null)
-                {
-                    var labelBoldStyle = GUI.skin.FindStyle("label_Bold");
-                    var labelStyle = GUI.skin.FindStyle("label");
-                    var labelImage = GUI.skin.FindStyle("label_image");
-
-                    if (labelBoldStyle != null)
-                        BoldLabelStyle = labelBoldStyle;
-                    else if (labelStyle != null)
-                        BoldLabelStyle = labelStyle;
-
-                    if (labelImage != null)
-                        ImageLabelStyle = labelImage;
-                    else if (labelStyle != null)
-                        ImageLabelStyle = labelStyle;
-                }
-
                 if (SwitcherComponent.ShowDebugGUIBounds)
                 {
                     var guiColor = GUI.color;

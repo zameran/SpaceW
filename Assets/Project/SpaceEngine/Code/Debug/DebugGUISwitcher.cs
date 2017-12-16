@@ -43,6 +43,9 @@ namespace SpaceEngine.Debugging
     {
         public GUISkin GUISkin;
 
+        public GUIStyle BoldLabelStyle { get; private set; }
+        public GUIStyle ImageLabelStyle { get; private set; }
+
         public bool ShowAdditionalInfo = true;
         public bool ShowDebugGUIBounds = false;
 
@@ -65,6 +68,19 @@ namespace SpaceEngine.Debugging
 
         private void OnGUI()
         {
+            if (GUISkin != null)
+            {
+                var labelBoldStyle = GUI.skin.FindStyle("label_bold");
+                var labelStyle = GUI.skin.FindStyle("label");
+                var labelImage = GUI.skin.FindStyle("label_image");
+
+                if (labelBoldStyle != null) BoldLabelStyle = labelBoldStyle;
+                else if (labelStyle != null) BoldLabelStyle = labelStyle;
+
+                if (labelImage != null) ImageLabelStyle = labelImage;
+                else if (labelStyle != null) ImageLabelStyle = labelStyle;
+            }
+
             if (ShowAdditionalInfo && !AtLeastOneEnabled)
             {
                 GUILayoutExtensions.Vertical(() =>
