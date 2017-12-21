@@ -43,9 +43,9 @@ Shader "SpaceEngine/Planet/Ring"
 		
 		#include "Core.cginc"
 		#include "SpaceStuff.cginc"
-		
+
 		#if defined(CORE_WRITE_TO_DEPTH)
-			#undef CORE_WRITE_TO_DEPTH	// TODO : Add support for custom depth buffer...
+			#undef CORE_WRITE_TO_DEPTH
 		#endif
 
 		uniform sampler2D DiffuseMap;
@@ -75,7 +75,7 @@ Shader "SpaceEngine/Planet/Ring"
 				
 		struct v2f_planetRing
 		{
-			float4 vertex : SV_POSITION;
+			float4 position : SV_POSITION;
 			float4 worldPosition : TEXCOORD0;
 			float3 relativeCameraPosition : TEXCOORD1;
 			
@@ -97,11 +97,14 @@ Shader "SpaceEngine/Planet/Ring"
 			float2 uv : TEXCOORD6;
 		};
 		
-		void vert(in a2v_planetRing i, out v2f_planetRing o)
+		void vert(in a2v_planetRing v, out v2f_planetRing o)
 		{
-			float4 worldPosition = mul(unity_ObjectToWorld, i.vertex);
+			float4 worldPosition = mul(unity_ObjectToWorld, v.vertex);
 			
-			o.vertex = UnityObjectToClipPos(i.vertex);
+			o.position = UnityObjectToClipPos(v.vertex);
+
+			v.vertex = o.position; // NOTE : Important for a log depth buffer...
+
 			o.worldPosition = worldPosition;
 			o.relativeCameraPosition = _WorldSpaceCameraPos - worldPosition.xyz;
 
@@ -120,7 +123,7 @@ Shader "SpaceEngine/Planet/Ring"
 				#endif
 			#endif
 
-			o.uv = i.uv;
+			o.uv = v.uv;
 		}
 		
 		float3 RingLighting(float3 lightPosition, 

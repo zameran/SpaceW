@@ -273,7 +273,7 @@ Shader "SpaceEngine/Planet/Ocean"
 					float3 occluderDirection = 0;
 					float3 occluderOppositeDirection = 0;
 					float intensity = 1;
-
+					
 					for (int i = 0; i < 4; ++i)
 					{
 						if (_Sky_ShineColors_1[i].w <= 0) break;
