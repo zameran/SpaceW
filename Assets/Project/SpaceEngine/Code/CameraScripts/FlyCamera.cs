@@ -74,8 +74,6 @@ namespace SpaceEngine.Cameras
         private float NearClipPlaneCache;
         private float FarClipPlaneCache;
 
-        public bool Controllable = true;
-
         private bool Aligned = false;
         private bool Supercruise = false;
 

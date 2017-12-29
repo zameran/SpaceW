@@ -47,6 +47,8 @@ namespace SpaceEngine.Cameras
 
         public Camera CameraComponent { get { return CameraCachedComponent.Component; } }
 
+        public bool Controllable = true;
+
         // NOTE : A big problem can be here with a float precision, because matrices provided as is.
         // NOTE : If matrices calculation will be provided, i.e from spherical coordinates around the body (Somesort of 'Body Space').
 
