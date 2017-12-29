@@ -465,10 +465,10 @@ namespace SpaceEngine.Core.Terrain
             }
             else
             {
-                Children[0].DrawQuadOutline(camera, lineMaterial, lineColor);
-                Children[1].DrawQuadOutline(camera, lineMaterial, lineColor);
-                Children[2].DrawQuadOutline(camera, lineMaterial, lineColor);
-                Children[3].DrawQuadOutline(camera, lineMaterial, lineColor);
+                Children[0].DrawQuadOutline(camera, lineMaterial, lineColor, order);
+                Children[1].DrawQuadOutline(camera, lineMaterial, lineColor, order);
+                Children[2].DrawQuadOutline(camera, lineMaterial, lineColor, order);
+                Children[3].DrawQuadOutline(camera, lineMaterial, lineColor, order);
             }
         }
 
