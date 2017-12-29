@@ -329,6 +329,7 @@ namespace SpaceEngine.Core.Terrain
             var ground = Owner.ParentBody.HeightZ;
             var distance = Owner.GetCameraDistance(LocalBox, Math.Max(0.0, ground));
 
+            //if ((Owner.SplitInvisibleQuads || Visibility != Frustum3d.VISIBILITY.INVISIBLE) && (distance < Length * Owner.SplitDistance && Level < Owner.MaxLevel) || (Level < 2))
             if ((Owner.SplitInvisibleQuads || Visibility != Frustum3d.VISIBILITY.INVISIBLE) && distance < Length * Owner.SplitDistance && Level < Owner.MaxLevel)
             {
                 if (IsLeaf) { Subdivide(); }
