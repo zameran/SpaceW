@@ -105,7 +105,6 @@ public class GodManager : MonoSingleton<GodManager>
     public bool Planetshadows = true;
     public bool Planetshine = true;
     public bool OceanSkyReflections = true;
-    public bool OceanDepth = true;
     public bool DelayedCalculations = false;
     public bool FloatingOrigin = false;
 

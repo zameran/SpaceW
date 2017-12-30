@@ -71,18 +71,6 @@ namespace SpaceEngine.Environment.Oceanic
         [SerializeField]
         protected Color UpwellingColor = new Color(0.039f, 0.156f, 0.47f);
 
-        [SerializeField]
-        protected Color AbsorbtionTint = new Color(1.0f, 1.0f, 1.0f);
-
-        [SerializeField]
-        protected Vector4 AbsorbtionRGBA = new Vector4(0.45f, 0.029f, 0.018f, 2.0f); // NOTE : W component here is scale...
-
-        [SerializeField]
-        protected Vector3 ShoreParameters = new Vector3(100.0f, 0.56f, 0.5f);
-
-        [SerializeField]
-        protected Vector3 ShoreFoamParameters = new Vector3(25.0f, 0.25f, 0.5f);
-
         /// <summary>
         /// Sea level in meters.
         /// </summary>
@@ -135,7 +123,6 @@ namespace SpaceEngine.Environment.Oceanic
         protected virtual void UpdateKeywords(Material target)
         {
             Helper.ToggleKeyword(target, GodManager.Instance.OceanSkyReflections, "OCEAN_SKY_REFLECTIONS_ON", "OCEAN_SKY_REFLECTIONS_OFF");
-            Helper.ToggleKeyword(target, GodManager.Instance.OceanDepth, "OCEAN_DEPTH_ON", "OCEAN_DEPTH_OFF");
         }
 
         #endregion
@@ -216,10 +203,6 @@ namespace SpaceEngine.Environment.Oceanic
 
             target.SetFloat("_Ocean_Sigma", GetMaxSlopeVariance());
             target.SetVector("_Ocean_Color", UpwellingColor * 0.1f);
-            target.SetVector("_Ocean_AbsorbtionTint", AbsorbtionTint);
-            target.SetVector("_Ocean_AbsorbtionRGBA", AbsorbtionRGBA);
-            target.SetVector("_Ocean_ShoreParameters", ShoreParameters);
-            target.SetVector("_Ocean_ShoreFoamParameters", ShoreFoamParameters);
             target.SetFloat("_Ocean_DrawBRDF", ParentBody.OceanEnabled && DrawOcean ? 0.0f : 1.0f);
             target.SetFloat("_Ocean_Level", OceanLevel);
         }
@@ -239,10 +222,6 @@ namespace SpaceEngine.Environment.Oceanic
 
             target.SetFloat("_Ocean_Sigma", GetMaxSlopeVariance());
             target.SetVector("_Ocean_Color", UpwellingColor * 0.1f);
-            target.SetVector("_Ocean_AbsorbtionTint", AbsorbtionTint);
-            target.SetVector("_Ocean_AbsorbtionRGBA", AbsorbtionRGBA);
-            target.SetVector("_Ocean_ShoreParameters", ShoreParameters);
-            target.SetVector("_Ocean_ShoreFoamParameters", ShoreFoamParameters);
             target.SetFloat("_Ocean_DrawBRDF", ParentBody.OceanEnabled && DrawOcean ? 0.0f : 1.0f);
             target.SetFloat("_Ocean_Level", OceanLevel);
         }
@@ -398,10 +377,6 @@ namespace SpaceEngine.Environment.Oceanic
             OceanMaterial.SetMatrix("_Ocean_LocalToOcean", localToOcean.ToMatrix4x4());
             OceanMaterial.SetVector("_Ocean_CameraPos", offset.ToVector3());
             OceanMaterial.SetVector("_Ocean_Color", UpwellingColor * 0.1f);
-            OceanMaterial.SetVector("_Ocean_AbsorbtionTint", AbsorbtionTint);
-            OceanMaterial.SetVector("_Ocean_AbsorbtionRGBA", AbsorbtionRGBA);
-            OceanMaterial.SetVector("_Ocean_ShoreParameters", ShoreParameters);
-            OceanMaterial.SetVector("_Ocean_ShoreFoamParameters", ShoreFoamParameters);
             OceanMaterial.SetVector("_Ocean_ScreenGridSize", new Vector2((float)oceanGridResolution / (float)Screen.width, (float)oceanGridResolution / (float)Screen.height));
             OceanMaterial.SetFloat("_Ocean_Radius", radius);
             OceanMaterial.SetFloat("_Ocean_Wave_Level", OceanWaveLevel);

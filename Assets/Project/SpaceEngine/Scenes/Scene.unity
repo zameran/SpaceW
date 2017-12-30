@@ -1052,10 +1052,6 @@ MonoBehaviour:
   RenderQueueOffset: 0
   OceanMaterial: {fileID: 0}
   UpwellingColor: {r: 0.039, g: 0.156, b: 0.47, a: 1}
-  AbsorbtionTint: {r: 1, g: 1, b: 1, a: 1}
-  AbsorbtionRGBA: {x: 0.45, y: 0.029, z: 0.018, w: 2}
-  ShoreParameters: {x: 100, y: 0.56, z: 0.5}
-  ShoreFoamParameters: {x: 25, y: 0.25, z: 0.5}
   OceanLevel: 5
   OceanWaveLevel: 1
   ZMin: 20000
@@ -1793,7 +1789,6 @@ MonoBehaviour:
   Planetshadows: 1
   Planetshine: 1
   OceanSkyReflections: 1
-  OceanDepth: 1
   DelayedCalculations: 0
   FloatingOrigin: 0
   NoiseTextures: []
@@ -2874,10 +2869,6 @@ MonoBehaviour:
   RenderQueueOffset: 0
   OceanMaterial: {fileID: 0}
   UpwellingColor: {r: 0.039, g: 0.156, b: 0.47, a: 1}
-  AbsorbtionTint: {r: 1, g: 1, b: 1, a: 1}
-  AbsorbtionRGBA: {x: 0.45, y: 0.029, z: 0.018, w: 2}
-  ShoreParameters: {x: 100, y: 0.56, z: 0.5}
-  ShoreFoamParameters: {x: 25, y: 0.25, z: 0.5}
   OceanLevel: 0.5
   OceanWaveLevel: 1
   ZMin: 20000

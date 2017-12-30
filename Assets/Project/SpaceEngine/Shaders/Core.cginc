@@ -528,11 +528,9 @@ struct DeferredOutput
 //-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
-uniform float _Ocean_Sigma;
 uniform float3 _Ocean_Color;
-uniform float3 _Ocean_AbsorbtionTint;
-uniform float4 _Ocean_AbsorbtionRGBA;
 
+uniform float _Ocean_Sigma;
 uniform float _Ocean_DrawBRDF;
 uniform float _Ocean_Level;
 

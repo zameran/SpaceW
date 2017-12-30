@@ -48,19 +48,6 @@ Shader "SpaceEngine/Planet/Ocean"
 			uniform float3 _Ocean_Color;
 		#endif
 
-		#if OCEAN_DEPTH_ON
-			#if !defined(CORE)
-				uniform float3 _Ocean_AbsorbtionTint;
-				uniform float4 _Ocean_AbsorbtionRGBA;
-			#endif
-
-			sampler2D _CameraDepthTexture;
-		#endif
-
-		#if defined(CORE_WRITE_TO_DEPTH)
-			#undef CORE_WRITE_TO_DEPTH	// TODO : Add support for custom depth buffer...
-		#endif
-
 		uniform float _Ocean_Wave_Level;
 
 		uniform float4x4 _Ocean_LocalToOcean;
@@ -78,9 +65,7 @@ Shader "SpaceEngine/Planet/Ocean"
 			float3 oceanP : TEXCOORD1;
 			float4 screenP : TEXCOORD2;
 
-			#if OCEAN_DEPTH_ON
-				float4 projPos : TEXCOORD3;
-			#endif
+			LOG_DEPTH(3)
 		};
 
 		void vert(in a2v_planetOcean v, out v2f_planetOcean o)
@@ -118,16 +103,15 @@ Shader "SpaceEngine/Planet/Ocean"
 			float4 screenP = float4(t * cameraDir + mul(_Ocean_OceanToCamera, dP), 1.0);
 			float3 oceanP = t * oceanDir + dP + float3(0.0, 0.0, _Ocean_CameraPos.z);
 			float4 position = mul(_Globals_CameraToScreen, screenP);
-			float4 computedScreenP = ComputeScreenPos(position);
 			
 			o.position = position;
 			o.oceanU = u;
 			o.oceanP = oceanP;
 			o.screenP = screenP;
 
-			#if OCEAN_DEPTH_ON
-				o.projPos = computedScreenP;
-			#endif
+			v.vertex = o.position; // NOTE : Important for a log depth buffer too...
+
+			TRANSFER_LOG_DEPTH(v, o)
 		}
 
 		void frag(in v2f_planetOcean i, out ForwardOutput o)
@@ -191,33 +175,14 @@ Shader "SpaceEngine/Planet/Ocean"
 
 			float fresnel = MeanFresnel(V, N, sigmaSq);
 
-			float3 oceanColor = 0;
 			float3 surfaceColor = 0;
 			float surfaceAlpha = 1;
-
-			#if OCEAN_DEPTH_ON
-				float fragDepth = max(0, LinearEyeDepth(UNITY_SAMPLE_DEPTH(tex2Dproj(_CameraDepthTexture, UNITY_PROJ_COORD(i.projPos))).r) - _ProjectionParams.y);
-				float oceanDepth = max(0, i.projPos.w - _ProjectionParams.y);
-				float depthCoeff = ShoreCoefficient(fragDepth, oceanDepth);
-
-				#if OCEAN_WHITECAPS
-					float depthFoamCoeff = ShoreFoamCoefficient(fragDepth, oceanDepth);
-				#endif
-				
-				float3 shoreColor = AbsorbtionColor(_Ocean_AbsorbtionRGBA, _Ocean_AbsorbtionTint, depthCoeff);
-
-				oceanColor = saturate(lerp(_Ocean_Color, shoreColor, depthCoeff));
-				surfaceAlpha = clamp(1.0 - lerp(0.0, 1.0, depthCoeff), 0.8, 1.0);
-			#else
-				oceanColor = _Ocean_Color;
-				surfaceAlpha = 1.0;
-			#endif
 
 			float3 Lsky = 0;
 			float3 Lsun = 0;
 			float3 Lsea = 0;
 
-			CalculateRadiances(V, N, L, earthP, oceanColor, sunL, skyE, sigmaSq, fresnel, Lsky, Lsun, Lsea);
+			CalculateRadiances(V, N, L, earthP, _Ocean_Color, sunL, skyE, sigmaSq, fresnel, Lsky, Lsun, Lsea);
 
 			// Aerial perspective
 			float3 inscatter = InScattering(earthCamera, earthP, L, extinction, 0.0);
@@ -244,12 +209,6 @@ Shader "SpaceEngine/Planet/Ocean"
 				//float W = WhitecapCoverage(whiteCapStr, jm.x, jSigma2);
 
 				float whiteCapStr = _Ocean_WhiteCapStr;
-
-				#if OCEAN_DEPTH_ON
-					whiteCapStr = lerp(_Ocean_WhiteCapStr, 1.0, depthFoamCoeff * 2.0);
-				#else
-					whiteCapStr = _Ocean_WhiteCapStr;
-				#endif
 
 				// Simple...
 				float W = WhitecapCoverage(whiteCapStr, jm.x, jSigma2);
@@ -281,7 +240,7 @@ Shader "SpaceEngine/Planet/Ocean"
 						shineL = mul(_Ocean_LocalToOcean, _Sky_ShineOccluders_1[i].xyz);
 
 						SunRadianceAndSkyIrradiance(earthP, N, shineL, sunL, skyE);
-						CalculateRadiances(V, N, shineL, earthP, oceanColor, sunL, skyE, sigmaSq, fresnel, Lsky, Lsun, Lsea);
+						CalculateRadiances(V, N, shineL, earthP, _Ocean_Color, sunL, skyE, sigmaSq, fresnel, Lsky, Lsun, Lsea);
 
 						l = (sunL * (max(dot(N, shineL), 0.0)) + skyE) / M_PI;
 						R_ftot = float3((W * waveStrength) * l * 0.4);
@@ -306,6 +265,8 @@ Shader "SpaceEngine/Planet/Ocean"
 			float3 finalColor = surfaceColor * extinction + inscatter;
 
 			o.diffuse = float4(hdr(finalColor), surfaceAlpha);
+
+			OUTPUT_LOG_DEPTH(i, o)
 		}
 		ENDCG
 
@@ -332,8 +293,7 @@ Shader "SpaceEngine/Planet/Ocean"
 			#pragma only_renderers d3d11 glcore
 			#pragma vertex vert
 			#pragma fragment frag
-			
-			#pragma multi_compile OCEAN_DEPTH_ON OCEAN_DEPTH_OFF
+
 			#pragma multi_compile OCEAN_SKY_REFLECTIONS_ON OCEAN_SKY_REFLECTIONS_OFF
 			#pragma multi_compile OCEAN_NONE OCEAN_FFT OCEAN_WHITECAPS
 			

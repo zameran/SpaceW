@@ -77,7 +77,6 @@ Shader "SpaceEngine/Planet/Terrain (Deferred)"
 			#pragma multi_compile SHINE_ON SHINE_OFF
 			#pragma multi_compile ECLIPSES_ON ECLIPSES_OFF
 			#pragma multi_compile OCEAN_ON OCEAN_OFF
-			#pragma multi_compile OCEAN_DEPTH_ON OCEAN_DEPTH_OFF
 			#pragma multi_compile SHADOW_0 SHADOW_1 SHADOW_2 SHADOW_3 SHADOW_4
 
 			#include "SpaceStuff.cginc"
@@ -186,22 +185,9 @@ Shader "SpaceEngine/Planet/Terrain (Deferred)"
 					#if OCEAN_ON
 						if (height <= _Ocean_Level && _Ocean_DrawBRDF == 1.0)
 						{
-							float3 oceanColor = 0.0;
-
-							#if OCEAN_DEPTH_ON
-								float depthCoeff = ShoreCoefficient(_Ocean_Level, height);
-								
-								float3 shoreColor = AbsorbtionColor(_Ocean_AbsorbtionRGBA, _Ocean_AbsorbtionTint, depthCoeff);
-
-								shoreColor = lerp(reflectance.rgb * depthCoeff, shoreColor, 0.5);
-								oceanColor = lerp(_Ocean_Color, shoreColor, depthCoeff);
-							#else
-								oceanColor = _Ocean_Color;
-							#endif
-
 							float3 v = normalize(P - WCP - _Atmosphere_Origin); // Body origin take in to account...
 
-							groundColor = OceanRadiance(WSD, -v, V, _Ocean_Sigma, sunL, skyE, oceanColor, P);
+							groundColor = OceanRadiance(WSD, -v, V, _Ocean_Sigma, sunL, skyE, _Ocean_Color, P);
 						}
 					#endif
 					
