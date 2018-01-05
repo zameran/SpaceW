@@ -704,9 +704,7 @@ namespace SpaceEngine.Core.Terrain
         /// <returns>Returns the distance between the current viewer position and the given bounding box.</returns>
         public double GetCameraDistance(Box3d localBox)
         {
-            return Math.Max(Math.Abs(LocalCameraPosition.z - localBox.Max.z) / DistanceFactor,
-                   Math.Max(Math.Min(Math.Abs(LocalCameraPosition.x - localBox.Min.x), Math.Abs(LocalCameraPosition.x - localBox.Max.x)),
-                   Math.Min(Math.Abs(LocalCameraPosition.y - localBox.Min.y), Math.Abs(LocalCameraPosition.y - localBox.Max.y))));
+            return GetCameraDistance(localBox.Min.x, localBox.Max.x, localBox.Min.y, localBox.Max.y, localBox.Max.z);
         }
 
         /// <summary>
@@ -718,9 +716,7 @@ namespace SpaceEngine.Core.Terrain
         /// <returns>Returns the distance between the current viewer position and the given bounding box.</returns>
         public double GetCameraDistance(Box3d localBox, double z)
         {
-            return Math.Max(Math.Abs(LocalCameraPosition.z - z) / DistanceFactor,
-                   Math.Max(Math.Min(Math.Abs(LocalCameraPosition.x - localBox.Min.x), Math.Abs(LocalCameraPosition.x - localBox.Max.x)),
-                   Math.Min(Math.Abs(LocalCameraPosition.y - localBox.Min.y), Math.Abs(LocalCameraPosition.y - localBox.Max.y))));
+            return GetCameraDistance(localBox.Min.x, localBox.Max.x, localBox.Min.y, localBox.Max.y, z);
         }
 
         /// <summary>
