@@ -44,10 +44,6 @@ Shader "SpaceEngine/Planet/Ring"
 		#include "Core.cginc"
 		#include "SpaceStuff.cginc"
 
-		#if defined(CORE_WRITE_TO_DEPTH)
-			#undef CORE_WRITE_TO_DEPTH
-		#endif
-
 		uniform sampler2D DiffuseMap;
 		uniform sampler2D NoiseMap;
 		
@@ -95,6 +91,8 @@ Shader "SpaceEngine/Planet/Ring"
 			#endif
 
 			float2 uv : TEXCOORD6;
+
+			LOG_DEPTH(7)
 		};
 		
 		void vert(in a2v_planetRing v, out v2f_planetRing o)
@@ -124,6 +122,8 @@ Shader "SpaceEngine/Planet/Ring"
 			#endif
 
 			o.uv = v.uv;
+
+			TRANSFER_LOG_DEPTH(v, o)
 		}
 		
 		float3 RingLighting(float3 lightPosition, 
@@ -221,6 +221,8 @@ Shader "SpaceEngine/Planet/Ring"
 			o.diffuse.rgb *= exposure;
 			o.diffuse *= fade;
 			o.diffuse = clamp(o.diffuse, 0.0, 1.0);
+
+			OUTPUT_LOG_DEPTH(i, o)
 		}
 		ENDCG
 
