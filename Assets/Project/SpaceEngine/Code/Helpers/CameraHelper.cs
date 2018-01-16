@@ -111,14 +111,14 @@ public static class CameraHelper
             if ((IsDeferred(camera) || QualitySettings.antiAliasing == 0))
             {
                 // Invert Y for rendering to a render texture
-                for (byte i = 0; i < 4; i++)
+                for (var i = 0; i < 4; i++)
                 {
                     projectionMatrix[1, i] = -projectionMatrix[1, i];
                 }
             }
 
             // Scale and bias depth range
-            for (byte i = 0; i < 4; i++)
+            for (var i = 0; i < 4; i++)
             {
                 // NOTE : Hm. I saw something about reverse depth buffer in release notes...
                 projectionMatrix[2, i] = -(projectionMatrix[2, i] * 0.5f + projectionMatrix[3, i] * -0.5f);

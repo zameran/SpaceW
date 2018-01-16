@@ -101,7 +101,7 @@ namespace SpaceEngine.Debugging
         {
             GUILayoutExtensions.Vertical(() =>
             {
-                for (byte i = 0; i < lines.Length; i++)
+                for (var i = 0; i < lines.Length; i++)
                 {
                     GUILayoutExtensions.LabelWithSpace(lines[i]);
                 }

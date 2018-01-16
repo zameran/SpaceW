@@ -117,7 +117,7 @@ namespace SpaceEngine.Environment.Oceanic
             if (Foam0 != null) Foam0.Release();
             if (Foam1 != null) Foam1.Release();
 
-            for (byte i = 0; i < 2; i++)
+            for (var i = 0; i < 2; i++)
             {
                 if (FourierBuffer5 != null) if (FourierBuffer5[i] != null) FourierBuffer5[i].Release();
                 if (FourierBuffer6 != null) if (FourierBuffer6[i] != null) FourierBuffer6[i].Release();

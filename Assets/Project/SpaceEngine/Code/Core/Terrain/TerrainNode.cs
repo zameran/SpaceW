@@ -285,7 +285,7 @@ namespace SpaceEngine.Core.Terrain
 
                 LocalCameraDirection = new Matrix2x2d(localDirection.y, -localDirection.x, -localDirection.x, -localDirection.y);
 
-                for (byte i = 0; i < HORIZON_SIZE; ++i)
+                for (var i = 0; i < HORIZON_SIZE; ++i)
                 {
                     Horizon[i] = float.NegativeInfinity;
                 }
@@ -397,7 +397,7 @@ namespace SpaceEngine.Core.Terrain
             {
                 byte drawableCount = 0;
 
-                for (byte i = 0; i < 4; ++i)
+                for (var i = 0; i < 4; ++i)
                 {
                     var targetQuad = quad.GetChild(i);
 
@@ -433,7 +433,7 @@ namespace SpaceEngine.Core.Terrain
 
             if (quad.IsLeaf)
             {
-                for (byte i = 0; i < SamplersSuitable.Count; ++i)
+                for (var i = 0; i < SamplersSuitable.Count; ++i)
                 {
                     // Set the unifroms needed to draw the texture for this sampler
                     SamplersSuitable[i].SetUniforms(mpb, quad);
@@ -448,7 +448,7 @@ namespace SpaceEngine.Core.Terrain
                 // Draw quads in a order based on distance to camera
                 var done = 0;
 
-                for (byte i = 0; i < 4; ++i)
+                for (var i = 0; i < 4; ++i)
                 {
                     var targetQuad = quad.GetChild(quad.Order[i]);
 
@@ -470,7 +470,7 @@ namespace SpaceEngine.Core.Terrain
                     // Because of the current set up all tiles always have there tasks run on the frame they are generated, so this section of code is never reached.
                     Debug.LogWarning(string.Format("Looks like rendering false start! {0}:{1}:{2}", quad.Level, quad.Tx, quad.Ty));
 
-                    for (byte i = 0; i < SamplersSuitable.Count; ++i)
+                    for (var i = 0; i < SamplersSuitable.Count; ++i)
                     {
                         // Set the unifroms needed to draw the texture for this sampler
                         SamplersSuitable[i].SetUniforms(mpb, quad);
@@ -505,7 +505,7 @@ namespace SpaceEngine.Core.Terrain
                 }
                 else
                 {
-                    for (byte i = 0; i < 4; ++i)
+                    for (var i = 0; i < 4; ++i)
                     {
                         var currentQuadChild = currentQuad.GetChild(currentQuad.Order[i]);
 
@@ -620,7 +620,7 @@ namespace SpaceEngine.Core.Terrain
             var imax = Math.Min((int)Math.Ceiling(xmax * HORIZON_SIZE), HORIZON_SIZE - 1);
 
             // NOTE : Looks like horizon culling isn't working properly. Maybe should be debugged or something...
-            for (byte i = (byte)imin; i <= imax; ++i)
+            for (var i = imin; i <= imax; ++i)
             {
                 if (zmax > Horizon[i])
                 {
@@ -675,7 +675,7 @@ namespace SpaceEngine.Core.Terrain
             // First checks if the bounding box projection is below the current horizon line
             var occluded = (imax >= imin);
 
-            for (byte i = (byte)imin; i <= imax; ++i)
+            for (var i = imin; i <= imax; ++i)
             {
                 if (zmax > Horizon[i])
                 {
@@ -691,7 +691,7 @@ namespace SpaceEngine.Core.Terrain
                 imin = Math.Max((int)Math.Ceiling(xmin * HORIZON_SIZE), 0);
                 imax = Math.Min((int)Math.Floor(xmax * HORIZON_SIZE), HORIZON_SIZE - 1);
 
-                for (byte i = (byte)imin; i <= imax; ++i)
+                for (var i = imin; i <= imax; ++i)
                 {
                     Horizon[i] = (float)Math.Max(Horizon[i], zmin);
                 }

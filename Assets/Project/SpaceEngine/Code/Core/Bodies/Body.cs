@@ -362,7 +362,7 @@ namespace SpaceEngine.Core.Bodies
 
         public virtual void Reanimate()
         {
-            for (byte i = 0; i < Mathf.Min(4, Suns.Count); i++)
+            for (var i = 0; i < Mathf.Min(4, Suns.Count); i++)
             {
                 if (Suns[i] != null)
                 {
@@ -505,7 +505,7 @@ namespace SpaceEngine.Core.Bodies
 
         public void CalculateShine(ref Matrix4x4 soc1, ref Matrix4x4 soc2, ref Matrix4x4 sc1, ref Matrix4x4 sp1)
         {
-            for (byte i = 0; i < Mathf.Min(4, ShineCasters.Count); i++)
+            for (var i = 0; i < Mathf.Min(4, ShineCasters.Count); i++)
             {
                 if (ShineCasters[i] == null) { Debug.Log("Atmosphere: Shine problem!"); break; }
 
@@ -527,7 +527,7 @@ namespace SpaceEngine.Core.Bodies
 
         public void CalculateEclipses(ref Matrix4x4 occludersMatrix)
         {
-            for (byte i = 0; i < Mathf.Min(4, EclipseCasters.Count); i++)
+            for (var i = 0; i < Mathf.Min(4, EclipseCasters.Count); i++)
             {
                 if (EclipseCasters[i] == null) { Debug.Log("Atmosphere: Eclipse caster problem!"); break; }
                 if ((EclipseCasters[i] as CelestialBody) == null) { Debug.Log("Atmosphere: Eclipse caster should be a planet!"); break; }
@@ -540,7 +540,7 @@ namespace SpaceEngine.Core.Bodies
 
         public void CalculateSuns(ref Matrix4x4 sunColorsMatrix, ref Matrix4x4 sunDirectionsMatrix, ref Matrix4x4 sunPositionsMatrix)
         {
-            for (byte i = 0; i < Mathf.Min(4, Suns.Count); i++)
+            for (var i = 0; i < Mathf.Min(4, Suns.Count); i++)
             {
                 if (Suns[i] == null) { Debug.Log("Atmosphere: Sun calculation problem!"); break; }
 
@@ -581,7 +581,7 @@ namespace SpaceEngine.Core.Bodies
         {
             if (DrawGizmos == false) return;
 
-            for (byte i = 0; i < Mathf.Min(4, Suns.Count); i++)
+            for (var i = 0; i < Mathf.Min(4, Suns.Count); i++)
             {
                 var distanceToSun = Vector3.Distance(Suns[i].transform.position, Origin);
                 var sunDirection = (Suns[i].transform.position - Origin) * distanceToSun;
@@ -589,7 +589,7 @@ namespace SpaceEngine.Core.Bodies
                 Gizmos.color = XKCDColors.Red;
                 Gizmos.DrawRay(Origin, sunDirection);
 
-                for (byte j = 0; j < Mathf.Min(4, EclipseCasters.Count); j++)
+                for (var j = 0; j < Mathf.Min(4, EclipseCasters.Count); j++)
                 {
                     var distanceToEclipseCaster = Vector3.Distance(EclipseCasters[i].Origin, Origin);
                     var eclipseCasterDirection = (EclipseCasters[j].Origin - Origin) * distanceToEclipseCaster;
@@ -606,7 +606,7 @@ namespace SpaceEngine.Core.Bodies
 
             var radius = Size;
 
-            for (byte i = 0; i < Mathf.Min(4, Suns.Count); i++)
+            for (var i = 0; i < Mathf.Min(4, Suns.Count); i++)
             {
                 var sunRadius = Suns[i].Radius;
                 var sunToPlanetDistance = Vector3.Distance(Origin, Suns[i].transform.position);

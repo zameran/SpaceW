@@ -105,7 +105,7 @@ namespace SpaceEngine.Debugging
 
         public void ToogleAll(List<T> components, bool state)
         {
-            for (byte i = 0; i < components.Count; i++)
+            for (var i = 0; i < components.Count; i++)
             {
                 components[i].enabled = state;
             }

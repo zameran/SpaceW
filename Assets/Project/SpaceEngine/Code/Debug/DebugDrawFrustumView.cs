@@ -74,13 +74,13 @@ namespace SpaceEngine.Debugging
 
             GL.Begin(GL.LINES);
 
-            for (byte i = 0; i < 4; i++)
+            for (var i = 0; i < 4; i++)
             {
                 nearCorners[i] = VectorHelper.Plane3Intersect(frustumPlanes[4], frustumPlanes[i], frustumPlanes[(i + 1) % 4]); // Near corners on the created projection matrix
                 farCorners[i] = VectorHelper.Plane3Intersect(frustumPlanes[5], frustumPlanes[i], frustumPlanes[(i + 1) % 4]); // Far corners on the created projection matrix
             }
 
-            for (byte i = 0; i < 4; i++)
+            for (var i = 0; i < 4; i++)
             {
                 GL.Color(Color.red);
                 GL.Vertex3(nearCorners[i].x, nearCorners[i].y, nearCorners[i].z);

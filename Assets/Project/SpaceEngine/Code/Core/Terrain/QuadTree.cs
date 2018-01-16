@@ -43,7 +43,7 @@ namespace SpaceEngine.Core.Terrain
         {
             if (!IsLeaf)
             {
-                for (byte i = 0; i < 4; i++)
+                for (var i = 0; i < 4; i++)
                 {
                     Children[i].RecursiveDelete(ref owner);
                     Children[i] = null;
@@ -67,7 +67,7 @@ namespace SpaceEngine.Core.Terrain
 
             if (!IsLeaf)
             {
-                for (byte i = 0; i < 4; i++)
+                for (var i = 0; i < 4; i++)
                 {
                     Children[i].RecursiveDelete(ref owner);
                     Children[i] = null;

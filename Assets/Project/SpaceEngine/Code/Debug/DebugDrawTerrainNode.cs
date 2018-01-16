@@ -63,7 +63,7 @@ namespace SpaceEngine.Debugging
 
             if (target == null) return;
 
-            for (byte i = 0; i < target.TerrainNodes.Count; i++)
+            for (var i = 0; i < target.TerrainNodes.Count; i++)
             {
                 var q = target.TerrainNodes[i];
                 var root = q.TerrainQuadRoot;

@@ -93,13 +93,13 @@ namespace SpaceEngine.Environment.Sun
             SunGlareMesh = MeshFactory.MakePlane(8, MeshFactory.PLANE.XY, false, false, false);
             SunGlareMesh.bounds = new Bounds(Vector4.zero, new Vector3(9e37f, 9e37f, 9e37f));
 
-            for (byte i = 0; i < Settings.Ghost1SettingsList.Count; i++)
+            for (var i = 0; i < Settings.Ghost1SettingsList.Count; i++)
                 Ghost1Settings.SetRow(i, Settings.Ghost1SettingsList[i]);
 
-            for (byte i = 0; i < Settings.Ghost2SettingsList.Count; i++)
+            for (var i = 0; i < Settings.Ghost2SettingsList.Count; i++)
                 Ghost2Settings.SetRow(i, Settings.Ghost2SettingsList[i]);
 
-            for (byte i = 0; i < Settings.Ghost3SettingsList.Count; i++)
+            for (var i = 0; i < Settings.Ghost3SettingsList.Count; i++)
                 Ghost3Settings.SetRow(i, Settings.Ghost3SettingsList[i]);
 
             InitUniforms(SunGlareMaterial);

@@ -103,9 +103,9 @@ public static class MeshFactory
         var normals = new List<Vector3>(detail * detail + borders);
         var indices = new List<int>(detail * detail * 6);
 
-        for (byte x = 0; x < detail; x++)
+        for (var x = 0; x < detail; x++)
         {
-            for (byte y = 0; y < detail; y++)
+            for (var y = 0; y < detail; y++)
             {
                 var texcoord = new Vector2(x / (detail - 1.0f), y / (detail - 1.0f));
                 var vertex = Vector3.zero;
@@ -134,9 +134,9 @@ public static class MeshFactory
             }
         }
 
-        for (byte x = 0; x < detail - 1; x++)
+        for (var x = 0; x < detail - 1; x++)
         {
-            for (byte y = 0; y < detail - 1; y++)
+            for (var y = 0; y < detail - 1; y++)
             {
                 if (reversedIndices)
                 {
@@ -172,9 +172,9 @@ public static class MeshFactory
             var borderDepth = -0.625f;
             var startTriangle = detail * detail;
 
-            for (byte col = 0; col < detail; col++)
+            for (var col = 0; col < detail; col++)
             {
-                int row = 0;
+                var row = 0;
 
                 Shift(ref vertices, ref normals, ref texcoords, startTriangle, borderDepth);
 
@@ -192,9 +192,9 @@ public static class MeshFactory
                 startTriangle++;
             }
 
-            for (byte row = 0; row < detail; row++)
+            for (var row = 0; row < detail; row++)
             {
-                int col = 0;
+                var col = 0;
 
                 Shift(ref vertices, ref normals, ref texcoords, startTriangle, borderDepth);
 
@@ -212,9 +212,9 @@ public static class MeshFactory
                 startTriangle++;
             }
 
-            for (byte col = 0; col < detail; col++)
+            for (var col = 0; col < detail; col++)
             {
-                int row = detail - 1;
+                var row = detail - 1;
 
                 Shift(ref vertices, ref normals, ref texcoords, startTriangle, borderDepth);
 
@@ -232,9 +232,9 @@ public static class MeshFactory
                 startTriangle++;
             }
 
-            for (byte row = 0; row < detail; row++)
+            for (var row = 0; row < detail; row++)
             {
-                int col = detail - 1;
+                var col = detail - 1;
 
                 Shift(ref vertices, ref normals, ref texcoords, startTriangle, borderDepth);
 
@@ -655,7 +655,7 @@ public static class MeshFactory
             faces.Add(new TriangleIndices(8, 6, 7));
             faces.Add(new TriangleIndices(9, 8, 1));
 
-            for (byte i = 0; i < recursionLevel; i++)
+            for (var i = 0; i < recursionLevel; i++)
             {
                 var innerFaces = new List<TriangleIndices>();
 

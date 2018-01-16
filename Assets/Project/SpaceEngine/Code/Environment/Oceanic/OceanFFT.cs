@@ -211,7 +211,7 @@ namespace SpaceEngine.Environment.Oceanic
             if (WTable != null) WTable.Release();
             if (Variance != null) Variance.Release();
 
-            for (byte i = 0; i < 2; i++)
+            for (var i = 0; i < 2; i++)
             {
                 if (FourierBuffer0 != null) if (FourierBuffer0[i] != null) FourierBuffer0[i].Release();
                 if (FourierBuffer1 != null) if (FourierBuffer1[i] != null) FourierBuffer1[i].Release();
@@ -296,7 +296,7 @@ namespace SpaceEngine.Environment.Oceanic
         {
             textures = new RenderTexture[2];
 
-            for (byte i = 0; i < 2; i++)
+            for (var i = 0; i < 2; i++)
             {
                 textures[i] = RTExtensions.CreateRTexture(FourierGridSize, 0, format, FilterMode.Point, TextureWrapMode.Clamp);
                 textures[i].SetName(bufferName);

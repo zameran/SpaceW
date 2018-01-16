@@ -237,7 +237,7 @@ namespace SpaceEngine.Core.Octree
 
             PointOctreeNode<T>[] children = new PointOctreeNode<T>[8];
 
-            for (byte i = 0; i < 8; i++)
+            for (var i = 0; i < 8; i++)
             {
                 if (i == rootPos)
                 {

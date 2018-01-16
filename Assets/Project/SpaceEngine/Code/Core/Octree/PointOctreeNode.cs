@@ -137,7 +137,7 @@ namespace SpaceEngine.Core.Octree
         {
             var removed = false;
 
-            for (int i = 0; i < Objects.Count; i++)
+            for (var i = 0; i < Objects.Count; i++)
             {
                 if (Objects[i].Object.Equals(obj))
                 {
@@ -149,7 +149,7 @@ namespace SpaceEngine.Core.Octree
 
             if (!removed && !IsLeaf)
             {
-                for (byte i = 0; i < 8; i++)
+                for (var i = 0; i < 8; i++)
                 {
                     removed = Children[i].Remove(obj);
 
@@ -189,7 +189,7 @@ namespace SpaceEngine.Core.Octree
             if (!intersected) return;
 
             // Check against any objects in this node...
-            for (int i = 0; i < Objects.Count; i++)
+            for (var i = 0; i < Objects.Count; i++)
             {
                 if (DistanceToRay(ray, Objects[i].Position) <= maxDistance)
                 {
@@ -200,7 +200,7 @@ namespace SpaceEngine.Core.Octree
             // Check children...
             if (!IsLeaf)
             {
-                for (byte i = 0; i < 8; i++)
+                for (var i = 0; i < 8; i++)
                 {
                     Children[i].GetNearby(ref ray, ref maxDistance, ref result);
                 }
@@ -227,7 +227,7 @@ namespace SpaceEngine.Core.Octree
             // Check children...
             if (!IsLeaf)
             {
-                for (byte i = 0; i < 8; i++)
+                for (var i = 0; i < 8; i++)
                 {
                     Children[i].GetNearby(ref position, ref maxDistance, ref result);
                 }
@@ -250,7 +250,7 @@ namespace SpaceEngine.Core.Octree
             // Check children...
             if (!IsLeaf)
             {
-                for (byte i = 0; i < 8; i++)
+                for (var i = 0; i < 8; i++)
                 {
                     Children[i].GetNearbyNodes(ref position, ref maxDistance, ref result);
                 }
@@ -267,7 +267,7 @@ namespace SpaceEngine.Core.Octree
 
             if (!IsLeaf)
             {
-                for (byte i = 0; i < 8; i++)
+                for (var i = 0; i < 8; i++)
                 {
                     Children[i].GetNodes(ref result);
                 }
@@ -317,7 +317,7 @@ namespace SpaceEngine.Core.Octree
             {
                 depth++;
 
-                for (byte i = 0; i < 8; i++)
+                for (var i = 0; i < 8; i++)
                 {
                     Children[i].DrawAllBounds(depth);
                 }
@@ -342,7 +342,7 @@ namespace SpaceEngine.Core.Octree
 
             if (!IsLeaf)
             {
-                for (byte i = 0; i < 8; i++)
+                for (var i = 0; i < 8; i++)
                 {
                     Children[i].DrawAllObjects();
                 }
@@ -381,7 +381,7 @@ namespace SpaceEngine.Core.Octree
                 GL.Begin(GL.LINES);
                 GL.Color(Color.blue);
 
-                for (byte i = 0; i < 3; i++)
+                for (var i = 0; i < 3; i++)
                 {
                     GL.Vertex(verts[order[i][0]]);
                     GL.Vertex(verts[order[i][1]]);
@@ -401,7 +401,7 @@ namespace SpaceEngine.Core.Octree
             }
             else
             {
-                for (byte i = 0; i < 8; i++)
+                for (var i = 0; i < 8; i++)
                 {
                     Children[i].DrawNodeOutline(camera, lineMaterial, order);
                 }
@@ -425,7 +425,7 @@ namespace SpaceEngine.Core.Octree
             // Check objects in root...
             int bestFit = -1;
 
-            for (int i = 0; i < Objects.Count; i++)
+            for (var i = 0; i < Objects.Count; i++)
             {
                 var obj = Objects[i];
                 var newBestFit = BestFitChild(obj.Position);
@@ -448,7 +448,7 @@ namespace SpaceEngine.Core.Octree
             {
                 var childHadContent = false;
 
-                for (int i = 0; i < Children.Length; i++)
+                for (var i = 0; i < Children.Length; i++)
                 {
                     if (Children[i].HasAnyObjects())
                     {
@@ -552,7 +552,7 @@ namespace SpaceEngine.Core.Octree
                     }
 
                     // Now that we have the new children, see if this node's existing objects would fit there
-                    for (int i = Objects.Count - 1; i >= 0; i--)
+                    for (var i = Objects.Count - 1; i >= 0; i--)
                     {
                         var existingObj = Objects[i];
 
@@ -598,7 +598,7 @@ namespace SpaceEngine.Core.Octree
         private void Merge()
         {
             // NOTE : We know children != null or we wouldn't be merging...
-            for (byte i = 0; i < 8; i++)
+            for (var i = 0; i < 8; i++)
             {
                 var currentChild = Children[i];
                 var objectsCount = currentChild.Objects.Count;
@@ -667,7 +667,7 @@ namespace SpaceEngine.Core.Octree
 
             if (!IsLeaf)
             {
-                for (byte i = 0; i < 8; i++)
+                for (var i = 0; i < 8; i++)
                 {
                     if (Children[i].HasAnyObjects()) return true;
                 }

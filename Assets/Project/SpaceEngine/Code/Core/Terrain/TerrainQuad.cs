@@ -284,7 +284,7 @@ namespace SpaceEngine.Core.Terrain
 
         public void Destroy()
         {
-            for (byte i = 0; i < 4; i++)
+            for (var i = 0; i < 4; i++)
             {
                 if (Children[i] != null)
                 {
@@ -445,7 +445,7 @@ namespace SpaceEngine.Core.Terrain
                 GL.Begin(GL.LINES);
                 GL.Color(isMaximumLevel ? XKCDColors.DarkOrange : lineColor);
 
-                for (byte i = 0; i < 4; i++)
+                for (var i = 0; i < 4; i++)
                 {
                     // Draw bottom quad
                     GL.Vertex3(verts[order[i, 0]].x, verts[order[i, 0]].y, verts[order[i, 0]].z);

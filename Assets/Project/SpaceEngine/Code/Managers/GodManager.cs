@@ -143,7 +143,7 @@ public class GodManager : MonoSingleton<GodManager>
 
         if (NoiseTextures != null)
         {
-            for (byte noiseTextureIndex = 0; noiseTextureIndex < NoiseTextures.Length; noiseTextureIndex++)
+            for (var noiseTextureIndex = 0; noiseTextureIndex < NoiseTextures.Length; noiseTextureIndex++)
             {
                 var noiseTexture = NoiseTextures[noiseTextureIndex];
 
@@ -187,7 +187,7 @@ public class GodManager : MonoSingleton<GodManager>
 
         // Make the meshes. The end product will be a grid of verts that cover the screen on the x and y axis with the z depth at 0. 
         // This grid is then projected as the ocean by the shader
-        for (byte i = 0; i < gridsCount; i++)
+        for (var i = 0; i < gridsCount; i++)
         {
             NY = Screen.height / gridsCount / OceanGridResolution;
 
@@ -270,16 +270,16 @@ public class GodManager : MonoSingleton<GodManager>
 
         Random.InitState(0);
 
-        for (byte nl = 0; nl < 6; ++nl)
+        for (var nl = 0; nl < 6; ++nl)
         {
             var layer = layers[nl];
 
             NoiseTextures[nl] = new Texture2D(tileWidth, tileWidth, TextureFormat.ARGB32, false, true);
 
             // Corners
-            for (int j = 0; j < tileWidth; ++j)
+            for (var j = 0; j < tileWidth; ++j)
             {
-                for (int i = 0; i < tileWidth; ++i)
+                for (var i = 0; i < tileWidth; ++i)
                 {
                     NoiseTextures[nl].SetPixel(i, j, new Color(0.5f, 0.5f, 0.5f, 0.5f));
                 }
@@ -288,11 +288,11 @@ public class GodManager : MonoSingleton<GodManager>
             // Bottom border
             Random.InitState((layer & 1) == 0 ? 7654321 : 5647381);
 
-            for (int v = 2; v < 4; ++v)
+            for (var v = 2; v < 4; ++v)
             {
-                for (int h = 4; h < tileWidth - 4; ++h)
+                for (var h = 4; h < tileWidth - 4; ++h)
                 {
-                    for (byte c = 0; c < 4; ++c)
+                    for (var c = 0; c < 4; ++c)
                     {
                         color[c] = Random.value;
                     }
@@ -305,11 +305,11 @@ public class GodManager : MonoSingleton<GodManager>
             // Right border
             Random.InitState((layer & 2) == 0 ? 7654321 : 5647381);
 
-            for (int h = tileWidth - 3; h >= tileWidth - 4; --h)
+            for (var h = tileWidth - 3; h >= tileWidth - 4; --h)
             {
-                for (int v = 4; v < tileWidth - 4; ++v)
+                for (var v = 4; v < tileWidth - 4; ++v)
                 {
-                    for (byte c = 0; c < 4; ++c)
+                    for (var c = 0; c < 4; ++c)
                     {
                         color[c] = Random.value;
                     }
@@ -322,11 +322,11 @@ public class GodManager : MonoSingleton<GodManager>
             // Top border
             Random.InitState((layer & 4) == 0 ? 7654321 : 5647381);
 
-            for (int v = tileWidth - 2; v < tileWidth; ++v)
+            for (var v = tileWidth - 2; v < tileWidth; ++v)
             {
-                for (int h = 4; h < tileWidth - 4; ++h)
+                for (var h = 4; h < tileWidth - 4; ++h)
                 {
-                    for (byte c = 0; c < 4; ++c)
+                    for (var c = 0; c < 4; ++c)
                     {
                         color[c] = Random.value;
                     }
@@ -339,11 +339,11 @@ public class GodManager : MonoSingleton<GodManager>
             // Left border
             Random.InitState((layer & 8) == 0 ? 7654321 : 5647381);
 
-            for (int h = 1; h >= 0; --h)
+            for (var h = 1; h >= 0; --h)
             {
-                for (int v = 4; v < tileWidth - 4; ++v)
+                for (var v = 4; v < tileWidth - 4; ++v)
                 {
-                    for (byte c = 0; c < 4; ++c)
+                    for (var c = 0; c < 4; ++c)
                     {
                         color[c] = Random.value;
                     }
@@ -356,11 +356,11 @@ public class GodManager : MonoSingleton<GodManager>
             // Center
             Random.InitState(rand);
 
-            for (int v = 4; v < tileWidth - 4; ++v)
+            for (var v = 4; v < tileWidth - 4; ++v)
             {
-                for (int h = 4; h < tileWidth - 4; ++h)
+                for (var h = 4; h < tileWidth - 4; ++h)
                 {
-                    for (byte c = 0; c < 4; ++c)
+                    for (var c = 0; c < 4; ++c)
                     {
                         color[c] = Random.value;
                     }

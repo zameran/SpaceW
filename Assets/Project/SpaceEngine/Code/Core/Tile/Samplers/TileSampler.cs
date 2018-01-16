@@ -180,7 +180,7 @@ namespace SpaceEngine.Core.Tile.Samplers
             }
             else if (Producer.HasChildren(quad.Level, quad.Tx, quad.Ty))
             {
-                for (byte i = 0; i < 4; ++i)
+                for (var i = 0; i < 4; ++i)
                 {
                     PutTiles(tree.Children[i], quad.GetChild(i));
                 }
@@ -217,7 +217,7 @@ namespace SpaceEngine.Core.Tile.Samplers
 
             if (!quad.IsLeaf && Producer.HasChildren(quad.Level, quad.Tx, quad.Ty))
             {
-                for (byte i = 0; i < 4; ++i)
+                for (var i = 0; i < 4; ++i)
                 {
                     GetTiles(tree, ref tree.Children[i], quad.GetChild(i));
                 }
