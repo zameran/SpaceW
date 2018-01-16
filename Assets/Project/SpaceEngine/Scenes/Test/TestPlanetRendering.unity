@@ -154,6 +154,7 @@ MonoBehaviour:
   TerrainMaterial: {fileID: 0}
   SplitFactor: 2
   MaxLevel: 16
+  MinLevel: 0
   ZMin: -10000
   ZMax: 10000
   Face: 6
@@ -628,6 +629,7 @@ MonoBehaviour:
   TerrainMaterial: {fileID: 0}
   SplitFactor: 2
   MaxLevel: 16
+  MinLevel: 0
   ZMin: -10000
   ZMax: 10000
   Face: 5
@@ -1539,6 +1541,7 @@ MonoBehaviour:
   TerrainMaterial: {fileID: 0}
   SplitFactor: 2
   MaxLevel: 16
+  MinLevel: 0
   ZMin: -10000
   ZMax: 10000
   Face: 1
@@ -1864,6 +1867,7 @@ MonoBehaviour:
   TerrainMaterial: {fileID: 0}
   SplitFactor: 2
   MaxLevel: 16
+  MinLevel: 0
   ZMin: -10000
   ZMax: 10000
   Face: 2
@@ -2761,6 +2765,7 @@ MonoBehaviour:
   TerrainMaterial: {fileID: 0}
   SplitFactor: 2
   MaxLevel: 16
+  MinLevel: 0
   ZMin: -10000
   ZMax: 10000
   Face: 3
@@ -3557,6 +3562,7 @@ MonoBehaviour:
   TerrainMaterial: {fileID: 0}
   SplitFactor: 2
   MaxLevel: 16
+  MinLevel: 0
   ZMin: -10000
   ZMax: 10000
   Face: 4

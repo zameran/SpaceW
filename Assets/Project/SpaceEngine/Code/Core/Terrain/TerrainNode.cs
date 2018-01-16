@@ -88,6 +88,12 @@ namespace SpaceEngine.Core.Terrain
         public int MaxLevel = 16;
 
         /// <summary>
+        /// The minimum level at which the terrain quadtree must be subdivided (exclusive).
+        /// The terrain quadtree will never reach beyond this level, even if the viewer comes very far to the terrain.
+        /// </summary>
+        public int MinLevel = 0;
+
+        /// <summary>
         /// The terrain quad zmin (only use on start up).
         /// </summary>
         public float ZMin = -5000.0f;

@@ -220,6 +220,7 @@ MonoBehaviour:
   TerrainMaterial: {fileID: 0}
   SplitFactor: 2
   MaxLevel: 16
+  MinLevel: 1
   ZMin: -250
   ZMax: 250
   Face: 6
@@ -608,6 +609,7 @@ MonoBehaviour:
   TerrainMaterial: {fileID: 0}
   SplitFactor: 2
   MaxLevel: 16
+  MinLevel: 1
   ZMin: -250
   ZMax: 250
   Face: 5
@@ -671,7 +673,6 @@ MonoBehaviour:
   Planetshadows: 1
   Planetshine: 1
   OceanSkyReflections: 1
-  OceanDepth: 1
   DelayedCalculations: 0
   FloatingOrigin: 0
   NoiseTextures: []
@@ -1387,6 +1388,7 @@ MonoBehaviour:
   TerrainMaterial: {fileID: 0}
   SplitFactor: 2
   MaxLevel: 16
+  MinLevel: 1
   ZMin: -250
   ZMax: 250
   Face: 1
@@ -1544,6 +1546,7 @@ MonoBehaviour:
   TerrainMaterial: {fileID: 0}
   SplitFactor: 2
   MaxLevel: 16
+  MinLevel: 1
   ZMin: -250
   ZMax: 250
   Face: 2
@@ -2499,6 +2502,7 @@ MonoBehaviour:
   TerrainMaterial: {fileID: 0}
   SplitFactor: 2
   MaxLevel: 16
+  MinLevel: 1
   ZMin: -250
   ZMax: 250
   Face: 3
@@ -3301,6 +3305,7 @@ MonoBehaviour:
   TerrainMaterial: {fileID: 0}
   SplitFactor: 2
   MaxLevel: 16
+  MinLevel: 1
   ZMin: -250
   ZMax: 250
   Face: 4

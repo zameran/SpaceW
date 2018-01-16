@@ -131,24 +131,19 @@ Shader "SpaceEngine/Space/Sun Glare"
 
 			float3 OuterRadiance_SunGlare(float3 sunColor)
 			{
-				return pow(max(0, sunColor), 2.2) * 2;
+				return pow(max(0.0f, sunColor), 2.2f) * 2.0f;
 			}
 
 			float ObstacleSample(float2 uv, float u)
 			{
-				float2 offsets[4];
-				offsets[0] = uv + float2(-u, 0);
-				offsets[1] = uv + float2(u, 0);
-				offsets[2] = uv + float2(0, -u);
-				offsets[3] = uv + float2(0, u);
-			   
-				float value = 0.0;
-				for(int i = 0; i < 4; i++)
-				{
-					value += tex2D(_CameraGBufferTexture2, offsets[i]).a;
-				}
+				float value = 0.0f;
 
-				return lerp(0.0, 1.0, clamp(1.0 - (value / 4.0), 0.0, 1.0));
+				value += tex2D(_CameraGBufferTexture2, uv + float2(u, 0.0f)).a;
+				value += tex2D(_CameraGBufferTexture2, uv - float2(u, 0.0f)).a;
+				value += tex2D(_CameraGBufferTexture2, uv - float2(0.0f, u)).a;
+				value += tex2D(_CameraGBufferTexture2, uv + float2(0.0f, u)).a;
+
+				return smoothstep(0.0f, 1.0f, 1.0f - clamp(value / 4.0f, 0.0f, 1.0f));
 			}
 
 			void vert(in appdata_base i, out v2f o)
@@ -164,7 +159,7 @@ Shader "SpaceEngine/Space/Sun Glare"
 				//float obstacle = 1.0 - tex2D(_CameraGBufferTexture2, sunViewPortPositionInversed.xy).a;	// Sample 1 point...
 
 				// Perform obstacle test...
-				if (obstacle <= 0.015) discard;
+				if (sign(obstacle) == 0.0f) discard;
 
 				float2 toScreenCenter = sunViewPortPosition.xy - 0.5;
 				float2 sceenCenterUV = i.uv.xy - sunViewPortPosition.xy;
@@ -210,7 +205,7 @@ Shader "SpaceEngine/Space/Sun Glare"
 					outputColor *= Extinction_SunGlare(WCP_A, WSD);
 				}
 				
-				diffuse = float4(outputColor, 0.0);				
+				diffuse = float4(outputColor, 1.0);				
 			}			
 			ENDCG
 		}
