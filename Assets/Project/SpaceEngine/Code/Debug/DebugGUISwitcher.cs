@@ -55,7 +55,7 @@ namespace SpaceEngine.Debugging
 
         public bool MouseOverGUIHotControl { get { return GUIUtility.hotControl != 0; } }
 
-        public bool MouseOverGUIRect { get { return DrawAbleComponents.Any(gui => gui.isActiveAndEnabled && gui.debugInfoDrawBounds.Contains(MousePosition)); } }
+        public bool MouseOverGUIRect { get { return DrawAbleComponents.Any(gui => gui.isActiveAndEnabled && gui.debugInfoDrawBounds.Contains(MousePosition) && !ClickableThroughComponents.Contains(gui)); } }
 
         public bool MouseOverGUI { get { return MouseOverGUIHotControl || MouseOverGUIRect; } }
 

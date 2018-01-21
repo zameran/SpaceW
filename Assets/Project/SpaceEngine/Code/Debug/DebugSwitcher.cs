@@ -44,6 +44,7 @@ namespace SpaceEngine.Debugging
     {
         public List<T> SwitchableComponents = new List<T>(255);
         public List<T> DrawAbleComponents = new List<T>(255);
+        public List<T> ClickableThroughComponents = new List<T>(255);
 
         public bool DisableAllOnStart = true;
 
@@ -68,8 +69,16 @@ namespace SpaceEngine.Debugging
                 DrawAbleComponents = GetComponents<T>().ToList();
             }
 
+            if (ClickableThroughComponents == null || ClickableThroughComponents.Count == 0)
+            {
+                ClickableThroughComponents = GetComponents<T>().ToList();
+            }
+
             // NOTE : If GUI element implements IDebugAlwaysVisible interface - remove it from switchables...
             SwitchableComponents.RemoveAll(x => typeof(IDebugAlwaysVisible).IsInstanceOfType(x));
+
+            // NOTE : If GUI element implements IDebugClickableThrough interface - leave it here, in special list... 
+            ClickableThroughComponents.RemoveAll(x => !typeof(IDebugClickableThrough).IsInstanceOfType(x));
 
             if (DisableAllOnStart) ToogleAll(SwitchableComponents, false);
         }

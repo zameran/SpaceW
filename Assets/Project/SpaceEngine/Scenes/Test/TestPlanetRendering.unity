@@ -1055,6 +1055,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   SwitchableComponents: []
   DrawAbleComponents: []
+  ClickableThroughComponents: []
   DisableAllOnStart: 1
 --- !u!114 &812990983
 MonoBehaviour:
@@ -1204,6 +1205,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   SwitchableComponents: []
   DrawAbleComponents: []
+  ClickableThroughComponents: []
   DisableAllOnStart: 0
   GUISkin: {fileID: 11400000, guid: 5f9307978351f0d4fbb973b4fe3f1b0e, type: 2}
   ShowAdditionalInfo: 1
