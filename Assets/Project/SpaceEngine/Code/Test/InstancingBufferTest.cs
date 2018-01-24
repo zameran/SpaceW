@@ -34,6 +34,7 @@
 #endregion
 
 using System.Collections.Generic;
+
 using UnityEngine;
 
 namespace SpaceEngine.Tests
@@ -46,13 +47,19 @@ namespace SpaceEngine.Tests
 
         public MaterialPropertyBlock MPB;
 
+        [Range(1, 1024)]
+        public int Count = 128;
+
+        public bool PerFrameInstancesUpdate = true;
+
         public readonly List<Matrix4x4> TRSs = new List<Matrix4x4>();
 
-        protected void CalculateTransforms()
+        protected void CalculateInstancesData()
         {
             TRSs.Clear();
+            MPB.Clear();
 
-            for (int i = 0; i < 128; i++)
+            for (var i = 0; i < Count; i++)
             {
                 var position = Random.insideUnitSphere * 100;
                 var rotation = Random.rotationUniform;
@@ -71,14 +78,16 @@ namespace SpaceEngine.Tests
         {
             MPB = new MaterialPropertyBlock();
 
-            CalculateTransforms();
+            CalculateInstancesData();
         }
 
         private void Update()
         {
             if (TestMesh != null && TestMaterial != null)
             {
-                for (int i = 0; i < 128; i++)
+                if (PerFrameInstancesUpdate == true) CalculateInstancesData();
+
+                for (var i = 0; i < Count; i++)
                 {
                     Graphics.DrawMesh(TestMesh, TRSs[i], TestMaterial, 0, Camera.main, 0, MPB);
                 }

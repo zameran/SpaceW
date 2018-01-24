@@ -113,7 +113,8 @@ namespace SpaceEngine.Debugging
             {
                 GUILayoutExtensions.VerticalBoxed("", GUISkin, () =>
                 {
-                    DrawSupportedFormats<RenderTextureFormat>(HardwareInfo.RenderTextureFormats, "RenderTexture");
+                    //DrawSupportedFormats<RenderTextureFormat>(HardwareInfo.RenderTextureFormats, "RenderTexture");
+                    DrawSupportedFormats<RenderTextureFormat>(null, "Texture");
 
                     GUILayoutExtensions.SpacingSeparator();
                 });
@@ -125,7 +126,8 @@ namespace SpaceEngine.Debugging
             {
                 GUILayoutExtensions.VerticalBoxed("", GUISkin, () =>
                 {
-                    DrawSupportedFormats<TextureFormat>(HardwareInfo.TextureFormats, "Texture");
+                    //DrawSupportedFormats<TextureFormat>(HardwareInfo.TextureFormats, "Texture");
+                    DrawSupportedFormats<TextureFormat>(null, "Texture");
 
                     GUILayoutExtensions.SpacingSeparator();
                 });
@@ -138,13 +140,21 @@ namespace SpaceEngine.Debugging
 
         private void DrawSupportedFormats<T>(List<T> formats, string prefix = "null") where T : struct, IConvertible
         {
-            if (!typeof(T).IsEnum)
+            if (!typeof(T).IsEnum) { throw new ArgumentException("Only 'enum' types as T allowed!"); }
+            if (formats == null)
             {
-                throw new ArgumentException("Only 'enum' types as T allowed!");
+                GUILayoutExtensions.HorizontalBoxed("", GUISkin, () =>
+                {
+                    GUILayoutExtensions.LabelWithFlexibleSpace("No Data!", "No Info!");
+                });
+
+                return;
             }
 
-            foreach (var format in formats)
+            for (var formatIndex = 0; formatIndex < formats.Count; formatIndex++)
             {
+                var format = formats[formatIndex];
+
                 var supports = false;
                 var supportState = "NULL";
 
@@ -153,15 +163,15 @@ namespace SpaceEngine.Debugging
                     // NOTE : So, that's why i hate "bruteforce" solutions...
                     if (typeof(T) == typeof(RenderTextureFormat))
                     {
-                        var f = (RenderTextureFormat)Enum.ToObject(typeof(RenderTextureFormat), format);
+                        var renderTextureFormat = (RenderTextureFormat)Enum.ToObject(typeof(RenderTextureFormat), format);
 
-                        supports = SystemInfo.SupportsRenderTextureFormat(f);
+                        supports = SystemInfo.SupportsRenderTextureFormat(renderTextureFormat);
                     }
                     else if (typeof(T) == typeof(TextureFormat))
                     {
-                        var f = (TextureFormat)Enum.ToObject(typeof(TextureFormat), format);
+                        var textureFormat = (TextureFormat)Enum.ToObject(typeof(TextureFormat), format);
 
-                        supports = SystemInfo.SupportsTextureFormat(f);
+                        supports = SystemInfo.SupportsTextureFormat(textureFormat);
                     }
 
                     supportState = HardwareInfo.Supports(supports);
