@@ -98,10 +98,24 @@ namespace SpaceEngine.Debugging
                     GUILayoutExtensions.LabelWithSpace("Maximum Texture Size: " + HardwareInfo.maxTextureSize, -8);
                     GUILayoutExtensions.LabelWithSpace("Non-Power-Of-Two Texture Support: " + HardwareInfo.npotSupport, -8);
 
-                    GUILayoutExtensions.LabelWithSpace("ComputeShaders: " + HardwareInfo.supportsComputeShaders, -8);
                     GUILayoutExtensions.LabelWithSpace("RenderTextures: " + true, -8);
-                    GUILayoutExtensions.LabelWithSpace("3DTextures: " + HardwareInfo.supports3DTextures, -8);
                     GUILayoutExtensions.LabelWithSpace("Graphics Multithreading: " + HardwareInfo.graphicsMultiThreaded, -8);
+
+                    GUILayoutExtensions.LabelWithSpace("Supports ComputeShaders: " + HardwareInfo.supportsComputeShaders, -8);
+                    GUILayoutExtensions.LabelWithSpace("Supports 3DTextures: " + HardwareInfo.supports3DTextures, -8);
+                    GUILayoutExtensions.LabelWithSpace("Supports 2DArrayTextures: " + HardwareInfo.supports2DArrayTextures, -8);
+                    GUILayoutExtensions.LabelWithSpace("Supports 3DRenderTextures: " + HardwareInfo.supports3DRenderTextures, -8);
+                    GUILayoutExtensions.LabelWithSpace("Supports CubemapArrayTextures: " + HardwareInfo.supportsCubemapArrayTextures, -8);
+                    GUILayoutExtensions.LabelWithSpace("Supports RawShadowDepthSampling: " + HardwareInfo.supportsRawShadowDepthSampling, -8);
+                    GUILayoutExtensions.LabelWithSpace("Supports MotionVectors: " + HardwareInfo.supportsMotionVectors, -8);
+                    GUILayoutExtensions.LabelWithSpace("Supports RenderToCubemap: " + HardwareInfo.supportsRenderToCubemap, -8);
+                    GUILayoutExtensions.LabelWithSpace("Supports ImageEffects: " + HardwareInfo.supportsImageEffects, -8);
+                    GUILayoutExtensions.LabelWithSpace("Supports HardwareQuadTopology: " + HardwareInfo.supportsHardwareQuadTopology, -8);
+                    GUILayoutExtensions.LabelWithSpace("Supports 32bitsIndexBuffer: " + HardwareInfo.supports32bitsIndexBuffer, -8);
+                    GUILayoutExtensions.LabelWithSpace("Supports SparseTextures: " + HardwareInfo.supportsSparseTextures, -8);
+                    GUILayoutExtensions.LabelWithSpace("Supports AsyncCompute: " + HardwareInfo.supportsAsyncCompute, -8);
+                    GUILayoutExtensions.LabelWithSpace("Supports GPUFence: " + HardwareInfo.supportsGPUFence, -8);
+                    GUILayoutExtensions.LabelWithSpace("Supports AsyncGPUReadback: " + HardwareInfo.supportsAsyncGPUReadback, -8);
 
                     GUILayoutExtensions.SpacingSeparator();
                 });
@@ -113,8 +127,7 @@ namespace SpaceEngine.Debugging
             {
                 GUILayoutExtensions.VerticalBoxed("", GUISkin, () =>
                 {
-                    //DrawSupportedFormats<RenderTextureFormat>(HardwareInfo.RenderTextureFormats, "RenderTexture");
-                    DrawSupportedFormats<RenderTextureFormat>(null, "Texture");
+                    DrawSupportedFormats<RenderTextureFormat>(HardwareInfo.RenderTextureFormats, "RenderTexture");
 
                     GUILayoutExtensions.SpacingSeparator();
                 });
@@ -126,8 +139,7 @@ namespace SpaceEngine.Debugging
             {
                 GUILayoutExtensions.VerticalBoxed("", GUISkin, () =>
                 {
-                    //DrawSupportedFormats<TextureFormat>(HardwareInfo.TextureFormats, "Texture");
-                    DrawSupportedFormats<TextureFormat>(null, "Texture");
+                    DrawSupportedFormats<TextureFormat>(HardwareInfo.TextureFormats, "Texture");
 
                     GUILayoutExtensions.SpacingSeparator();
                 });
@@ -138,10 +150,10 @@ namespace SpaceEngine.Debugging
             GUILayout.EndScrollView();
         }
 
-        private void DrawSupportedFormats<T>(List<T> formats, string prefix = "null") where T : struct, IConvertible
+        private void DrawSupportedFormats<TFormatType>(Dictionary<TFormatType, HardwareInfo.SupportState> formats, string prefix = "null") where TFormatType : struct, IConvertible
         {
-            if (!typeof(T).IsEnum) { throw new ArgumentException("Only 'enum' types as T allowed!"); }
-            if (formats == null)
+            if (!typeof(TFormatType).IsEnum) { throw new ArgumentException("Only 'enum' types as T allowed!"); }
+            if (formats == null || formats.Count == 0)
             {
                 GUILayoutExtensions.HorizontalBoxed("", GUISkin, () =>
                 {
@@ -151,38 +163,13 @@ namespace SpaceEngine.Debugging
                 return;
             }
 
-            for (var formatIndex = 0; formatIndex < formats.Count; formatIndex++)
+            foreach (var kvp in formats)
             {
-                var format = formats[formatIndex];
-
-                var supports = false;
-                var supportState = "NULL";
-
-                try
-                {
-                    // NOTE : So, that's why i hate "bruteforce" solutions...
-                    if (typeof(T) == typeof(RenderTextureFormat))
-                    {
-                        var renderTextureFormat = (RenderTextureFormat)Enum.ToObject(typeof(RenderTextureFormat), format);
-
-                        supports = SystemInfo.SupportsRenderTextureFormat(renderTextureFormat);
-                    }
-                    else if (typeof(T) == typeof(TextureFormat))
-                    {
-                        var textureFormat = (TextureFormat)Enum.ToObject(typeof(TextureFormat), format);
-
-                        supports = SystemInfo.SupportsTextureFormat(textureFormat);
-                    }
-
-                    supportState = HardwareInfo.Supports(supports);
-                }
-                catch (Exception ex)
-                {
-                    supports = false;
-                    supportState = string.Format("ERROR: {0}", ex.GetType().Name);
-                }
+                var format = kvp.Key;
+                var supportState = kvp.Value;
 
                 var tempColor = GUI.color;
+                var actualColor = HardwareInfo.SupportStateToColor(supportState);
 
                 GUILayoutExtensions.DrawWithColor(() =>
                 {
@@ -190,16 +177,24 @@ namespace SpaceEngine.Debugging
                     {
                         GUILayoutExtensions.DrawWithColor(() =>
                         {
-                            GUILayoutExtensions.LabelWithFlexibleSpace(string.Format("{0}.{1}", prefix, format), supportState);
+                            GUILayoutExtensions.LabelWithFlexibleSpace(string.Format("{0}.{1}", prefix, format), supportState.ToString());
                         }, tempColor);
                     });
-                }, supports ? Color.green : Color.red);
+                }, actualColor);
             }
         }
     }
 
     public static class HardwareInfo
     {
+        public enum SupportState
+        {
+            None,
+            Supported,
+            Unsupported,
+            Obsolete,
+        }
+
         public static string deviceType;
         public static string operatingSystem;
         public static string unityVersion;
@@ -219,12 +214,27 @@ namespace SpaceEngine.Debugging
         public static string maxTextureSize;
         public static string npotSupport;
 
-        public static string supportsComputeShaders;
-        public static string supports3DTextures;
-        public static string graphicsMultiThreaded;
+        public static SupportState supportsComputeShaders;
+        public static SupportState supports3DTextures;
+        public static SupportState supports2DArrayTextures;
+        public static SupportState supports3DRenderTextures;
+        public static SupportState supportsCubemapArrayTextures;
+        public static SupportState supportsRawShadowDepthSampling;
+        public static SupportState supportsMotionVectors;
+        public static SupportState supportsRenderToCubemap;
+        public static SupportState supportsImageEffects;
+        public static SupportState supportsHardwareQuadTopology;
+        public static SupportState supports32bitsIndexBuffer;
+        public static SupportState supportsSparseTextures;
+        public static SupportState supportsAsyncCompute;
+        public static SupportState supportsGPUFence;
+        public static SupportState supportsAsyncGPUReadback;
 
-        public static List<RenderTextureFormat> RenderTextureFormats;
-        public static List<TextureFormat> TextureFormats;
+        public static bool graphicsMultiThreaded;
+        public static bool usesReversedZBuffer;
+
+        public static Dictionary<RenderTextureFormat, SupportState> RenderTextureFormats;
+        public static Dictionary<TextureFormat, SupportState> TextureFormats;
 
         public static void Get()
         {
@@ -246,23 +256,92 @@ namespace SpaceEngine.Debugging
             maxTextureSize = SystemInfo.maxTextureSize.ToString();
             npotSupport = SystemInfo.npotSupport.ToString();
 
-            supportsComputeShaders = Supports(SystemInfo.supportsComputeShaders);
-            supports3DTextures = Supports(SystemInfo.supports3DTextures);
-            graphicsMultiThreaded = Supports(SystemInfo.graphicsMultiThreaded);
+            supportsComputeShaders = GetSupportState(SystemInfo.supportsComputeShaders);
+            supports3DTextures = GetSupportState(SystemInfo.supports3DTextures);
+            supports2DArrayTextures = GetSupportState(SystemInfo.supports2DArrayTextures);
+            supports3DRenderTextures = GetSupportState(SystemInfo.supports3DRenderTextures);
+            supportsCubemapArrayTextures = GetSupportState(SystemInfo.supportsCubemapArrayTextures);
+            supportsRawShadowDepthSampling = GetSupportState(SystemInfo.supportsRawShadowDepthSampling);
+            supportsMotionVectors = GetSupportState(SystemInfo.supportsMotionVectors);
+            supportsRenderToCubemap = GetSupportState(SystemInfo.supportsRenderToCubemap);
+            supportsImageEffects = GetSupportState(SystemInfo.supportsImageEffects);
+            supportsHardwareQuadTopology = GetSupportState(SystemInfo.supportsHardwareQuadTopology);
+            supports32bitsIndexBuffer = GetSupportState(SystemInfo.supports32bitsIndexBuffer);
+            supportsSparseTextures = GetSupportState(SystemInfo.supportsSparseTextures);
+            supportsAsyncCompute = GetSupportState(SystemInfo.supportsAsyncCompute);
+            supportsGPUFence = GetSupportState(SystemInfo.supportsGPUFence);
+            supportsAsyncGPUReadback = GetSupportState(SystemInfo.supportsAsyncGPUReadback);
 
-            RenderTextureFormats = Enum.GetValues(typeof(RenderTextureFormat)).OfType<RenderTextureFormat>().ToList();
-            TextureFormats = Enum.GetValues(typeof(TextureFormat)).OfType<TextureFormat>().ToList();
+            graphicsMultiThreaded = SystemInfo.graphicsMultiThreaded;
+            usesReversedZBuffer = SystemInfo.usesReversedZBuffer;
+
+            graphicsMultiThreaded = SystemInfo.graphicsMultiThreaded;
+
+            RenderTextureFormats = new Dictionary<RenderTextureFormat, SupportState>();
+            TextureFormats = new Dictionary<TextureFormat, SupportState>();
+
+            var renderTextureFormats = Enum.GetValues(typeof(RenderTextureFormat)).OfType<RenderTextureFormat>().ToList();
+            var texuteFormats = Enum.GetValues(typeof(TextureFormat)).OfType<TextureFormat>().ToList();
+
+            foreach (var format in renderTextureFormats)
+            {
+                var supports = SystemInfo.SupportsRenderTextureFormat(format);
+
+                RenderTextureFormats.Add(format, GetSupportState(supports));
+            }
+
+            foreach (var format in texuteFormats)
+            {
+                // NOTE : Some elements of TextureFormat enum marked with ObsoleteAttribute, but Enum.GetValues returns it all...
+                if (GetAttributeOfType<ObsoleteAttribute>(format) == null)
+                {
+                    var supports = SystemInfo.SupportsTextureFormat(format);
+
+                    TextureFormats.Add(format, GetSupportState(supports));
+                }
+                else
+                {
+                    // NOTE : Double check it for a PVRTC_2BPP_RGB...
+                    if (!TextureFormats.ContainsKey(format))
+                    {
+                        TextureFormats.Add(format, GetSupportState(null));
+                    }
+                }
+            }
         }
 
-        public static string Supports(bool supported)
+        public static T GetAttributeOfType<T>(this Enum enumVal) where T : Attribute
         {
-            if (supported)
+            var type = enumVal.GetType();
+            var memberInfos = type.GetMember(enumVal.ToString());
+            var customAttributes = memberInfos[0].GetCustomAttributes(typeof(T), false);
+
+            return (customAttributes.Length > 0) ? (T)customAttributes[0] : null;
+        }
+
+        public static SupportState GetSupportState(bool? supported)
+        {
+            if (supported == null) return SupportState.Obsolete;
+
+            if (supported.Value)
             {
-                return "Supported";
+                return SupportState.Supported;
             }
             else
             {
-                return "Not Supported";
+                return SupportState.Unsupported;
+            }
+        }
+
+        public static Color SupportStateToColor(SupportState value)
+        {
+            switch (value)
+            {
+                case SupportState.None: return Color.black;
+                case SupportState.Supported: return Color.green;
+                case SupportState.Unsupported: return Color.red;
+                case SupportState.Obsolete: return Color.magenta;
+                default: return Color.white;
             }
         }
     }
