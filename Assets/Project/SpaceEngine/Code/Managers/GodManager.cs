@@ -80,6 +80,8 @@ public class GodManager : MonoSingleton<GodManager>
 
     public Shader FourierShader { get { return GSCS.Fourier; } }
 
+    public bool UsesReversedZBuffer { get { return SystemInfo.usesReversedZBuffer; } }
+
     /// <summary>
     /// This is the fourier transform size, must pow2 number. Recommend no higher or lower than 64, 128 or 256.
     /// </summary>

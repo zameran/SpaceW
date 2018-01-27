@@ -13,7 +13,7 @@ OcclusionCullingSettings:
 --- !u!104 &2
 RenderSettings:
   m_ObjectHideFlags: 0
-  serializedVersion: 8
+  serializedVersion: 9
   m_Fog: 0
   m_FogColor: {r: 0.5, g: 0.5, b: 0.5, a: 1}
   m_FogMode: 3
@@ -39,6 +39,7 @@ RenderSettings:
   m_CustomReflection: {fileID: 0}
   m_Sun: {fileID: 0}
   m_IndirectSpecularColor: {r: 0, g: 0, b: 0, a: 1}
+  m_UseRadianceAmbientProbe: 0
 --- !u!157 &3
 LightmapSettings:
   m_ObjectHideFlags: 0
@@ -54,11 +55,10 @@ LightmapSettings:
     m_EnableBakedLightmaps: 0
     m_EnableRealtimeLightmaps: 0
   m_LightmapEditorSettings:
-    serializedVersion: 9
+    serializedVersion: 10
     m_Resolution: 2
     m_BakeResolution: 40
-    m_TextureWidth: 1024
-    m_TextureHeight: 1024
+    m_AtlasSize: 1024
     m_AO: 0
     m_AOMaxDistance: 1
     m_CompAOExponent: 0
@@ -77,15 +77,18 @@ LightmapSettings:
     m_PVRDirectSampleCount: 32
     m_PVRSampleCount: 500
     m_PVRBounces: 2
-    m_PVRFiltering: 0
+    m_PVRFilterTypeDirect: 0
+    m_PVRFilterTypeIndirect: 0
+    m_PVRFilterTypeAO: 0
     m_PVRFilteringMode: 1
     m_PVRCulling: 1
     m_PVRFilteringGaussRadiusDirect: 1
     m_PVRFilteringGaussRadiusIndirect: 5
     m_PVRFilteringGaussRadiusAO: 2
-    m_PVRFilteringAtrousColorSigma: 1
-    m_PVRFilteringAtrousNormalSigma: 1
-    m_PVRFilteringAtrousPositionSigma: 1
+    m_PVRFilteringAtrousPositionSigmaDirect: 0.5
+    m_PVRFilteringAtrousPositionSigmaIndirect: 2
+    m_PVRFilteringAtrousPositionSigmaAO: 1
+    m_ShowResolutionOverlay: 1
   m_LightingDataAsset: {fileID: 0}
   m_UseShadowmask: 0
 --- !u!196 &4
@@ -107,6 +110,8 @@ NavMeshSettings:
     manualTileSize: 0
     tileSize: 256
     accuratePlacement: 0
+    debug:
+      m_Flags: 0
   m_NavMeshData: {fileID: 0}
 --- !u!1 &14608926
 GameObject:
@@ -199,7 +204,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 915faae617c327548a128c0d0c21570f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  View: {fileID: 0}
+  View: {fileID: 680484796}
   AtmosphereMesh: {fileID: 0}
   OceanScreenMeshGrids: []
   QuadMesh: {fileID: 0}
@@ -215,10 +220,81 @@ MonoBehaviour:
   Planetshadows: 1
   Planetshine: 1
   OceanSkyReflections: 1
-  OceanDepth: 1
   DelayedCalculations: 0
   FloatingOrigin: 0
   NoiseTextures: []
+--- !u!1 &647484460
+GameObject:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  serializedVersion: 5
+  m_Component:
+  - component: {fileID: 647484463}
+  - component: {fileID: 647484462}
+  - component: {fileID: 647484461}
+  m_Layer: 0
+  m_Name: GUI
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &647484461
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 647484460}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e45f2fe68a017a64da5eb7fcd97f98db, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  debugInfoBounds:
+    serializedVersion: 2
+    x: 10
+    y: 10
+    width: 500
+    height: 500
+  debugInfoDrawBounds:
+    serializedVersion: 2
+    x: 10
+    y: 10
+    width: 500
+    height: 500
+  ScrollPosition: {x: 0, y: 0}
+--- !u!114 &647484462
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 647484460}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e522203d72c03574ca5be629b3872bd6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  SwitchableComponents: []
+  DrawAbleComponents: []
+  ClickableThroughComponents: []
+  DisableAllOnStart: 1
+  GUISkin: {fileID: 11400000, guid: 5f9307978351f0d4fbb973b4fe3f1b0e, type: 2}
+  ShowAdditionalInfo: 1
+  ShowDebugGUIBounds: 0
+--- !u!4 &647484463
+Transform:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 647484460}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_RootOrder: 4
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &680484789
 GameObject:
   m_ObjectHideFlags: 0
@@ -233,6 +309,7 @@ GameObject:
   - component: {fileID: 680484790}
   - component: {fileID: 680484797}
   - component: {fileID: 680484796}
+  - component: {fileID: 680484798}
   - component: {fileID: 680484795}
   m_Layer: 0
   m_Name: Main Camera
@@ -293,11 +370,11 @@ Camera:
   m_TargetEye: 3
   m_HDR: 0
   m_AllowMSAA: 0
+  m_AllowDynamicResolution: 0
   m_ForceIntoRT: 0
   m_OcclusionCulling: 0
   m_StereoConvergence: 10
   m_StereoSeparation: 0.022
-  m_StereoMirrorMode: 0
 --- !u!4 &680484794
 Transform:
   m_ObjectHideFlags: 0
@@ -351,6 +428,18 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   mesh: {fileID: 10206, guid: 0000000000000000e000000000000000, type: 0}
   material: {fileID: 2100000, guid: fea45caef88f1684dbf79294b9cfb43c, type: 2}
+--- !u!114 &680484798
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 680484789}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e8a201e6a2156c642937896cd5c50047, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  ZSort: 1
 --- !u!1 &688823124
 GameObject:
   m_ObjectHideFlags: 0

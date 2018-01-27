@@ -116,8 +116,9 @@ namespace SpaceEngine.Environment.Sun
             var distance = (GodManager.Instance.View.WorldCameraPosition - SunComponent.transform.position).sqrMagnitude;
 
             SunViewPortPosition = CameraHelper.Main().WorldToViewportPoint(SunComponent.transform.position);
-            SunViewPortPosition.y = 1.0f - SunViewPortPosition.y;
-            // NOTE : So, looks like i should invert it... REALY?!
+
+            // NOTE : So, looks like i should invert it here...
+            if (GodManager.Instance.UsesReversedZBuffer) SunViewPortPosition.y = 1.0f - SunViewPortPosition.y;
 
             Scale = distance / Magnitude;
             Fade = FadeCurve.Evaluate(Mathf.Clamp(Scale, 0.0f, 100.0f));

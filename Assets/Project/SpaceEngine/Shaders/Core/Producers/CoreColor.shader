@@ -172,7 +172,7 @@
 			#pragma vertex vert
 			#pragma fragment frag
 
-			#pragma multi_compile TC_NONE TC_ASTEROID TC_PLANET TC_SELENA TC_TERRA  TC_GASGIANT TC_TEST
+			#pragma multi_compile TC_NONE TC_ASTEROID TC_PLANET TC_SELENA TC_TERRA TC_GASGIANT TC_TEST
 			ENDCG
 		}
 	}
