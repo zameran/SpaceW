@@ -93,7 +93,7 @@ Shader "SpaceEngine/Planet/Terrain (Deferred)"
 
 			struct v2f_planetTerrain
 			{
-				float4 position : POSITION;
+				float4 position : SV_POSITION;
 				float2 texcoord : TEXCOORD0;
 				float3 localVertex : TEXCOORD1;
 				float3 direction : TEXCOORD2;

@@ -58,32 +58,33 @@ Shader "SpaceEngine/Planet/Cloudsphere"
 		struct a2v_planetCloudsphere
 		{
 			float4 vertex : POSITION;
-			float3 normal : NORMAL0;
+			float3 normal : NORMAL;
 			float2 uv : TEXCOORD0;
 		};
 
 		struct v2f_planetCloudsphere
 		{
-			float4 vertex0 : POSITION0;
-			float4 vertex1 : POSITION1;
+			float4 vertex : SV_POSITION;
 			float3 normal : NORMAL;
 			float3 uv : TEXCOORD0;
-			float3 direction : TEXCOORD1;
+			float3 worldPosition : TEXCOORD1;
+			float3 direction : TEXCOORD2;
 		};
 
 		void vert(a2v_planetCloudsphere i, out v2f_planetCloudsphere o)
 		{
-			o.vertex0 = UnityObjectToClipPos(i.vertex);
-			o.vertex1 = i.vertex;
+			o.vertex = UnityObjectToClipPos(i.vertex);
 			o.normal = i.normal;
 			o.uv = i.normal;
+			o.worldPosition = i.vertex.xyz;
 			o.direction = dot(normalize(i.normal), normalize(_Sun_Positions_1[0] - i.vertex));
 		}
 			
 		void frag(in v2f_planetCloudsphere i, out ForwardOutput o)
 		{			
-			float noise = Noise(i.vertex1.xyz * 16) + Noise(i.vertex1.xyz * 32) + Noise(i.vertex1.xyz * 64);
-			float4 clouds = float4(noise, noise, noise, noise);
+			float noiseValue = Noise(i.worldPosition * 16) + Noise(i.worldPosition * 32) + Noise(i.worldPosition * 64);
+
+			float4 clouds = noiseValue;
 			float4 transmittance = tex2D(_Sky_Transmittance, i.direction + _TransmittanceOffset);
 
 			float cloudsAlpha = clouds.w;
