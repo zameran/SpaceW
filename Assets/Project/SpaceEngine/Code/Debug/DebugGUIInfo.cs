@@ -39,7 +39,7 @@ namespace SpaceEngine.Debugging
 {
     public class DebugGUIInfo : DebugGUI
     {
-        private readonly string[] Info = new string[]
+        private readonly string[] InputInfo = new string[]
         {
             "Mouse Scrollwheel to control speed.",
             "Left mouse button to orientation.",
@@ -51,6 +51,7 @@ namespace SpaceEngine.Debugging
             "Left Shift + Left Control for speed of God.",
             "Left Alt for less speed.",
             "Press T while moving for a supercruise.",
+            "Hold G to center camera on current target.",
             "F5 to switch between debug modes.",
             "F6 to switch between debug visualizations.",
             "F12 to capture screenshot.",
@@ -78,7 +79,7 @@ namespace SpaceEngine.Debugging
             {
                 GUILayoutExtensions.VerticalBoxed("", GUISkin, () =>
                 {
-                    DrawLabelLines(Info);
+                    DrawLabelLines(InputInfo);
                 });
             });
 
