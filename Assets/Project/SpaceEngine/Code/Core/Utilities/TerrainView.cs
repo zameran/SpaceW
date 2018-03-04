@@ -108,7 +108,10 @@ namespace SpaceEngine.Core.Utilities
 
             SetWorldToCameraMatrix();
             SetProjectionMatrix();
+        }
 
+        public override void UpdateVectors()
+        {
             WorldCameraPosition = worldPosition;
             CameraDirection = (worldPosition - GetLookAtPosition()).Normalized();
         }

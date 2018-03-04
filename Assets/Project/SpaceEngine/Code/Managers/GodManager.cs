@@ -135,7 +135,7 @@ public class GodManager : MonoSingleton<GodManager>
     private void Update()
     {
         UpdateWorldShift();
-        UpdateViewMatrices();
+        UpdateView();
     }
 
     protected override void OnDestroy()
@@ -218,11 +218,12 @@ public class GodManager : MonoSingleton<GodManager>
         Schedular.Instance.Run();
     }
 
-    private void UpdateViewMatrices()
+    private void UpdateView()
     {
         if (View == null) return;
 
         View.UpdateMatrices();
+        View.UpdateVectors();
     }
 
     private void UpdateWorldShift()

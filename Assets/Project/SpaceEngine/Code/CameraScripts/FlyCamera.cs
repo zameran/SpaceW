@@ -279,7 +279,10 @@ namespace SpaceEngine.Cameras
             CameraToWorldMatrix = CameraComponent.GetCameraToWorld();
             CameraToScreenMatrix = CameraComponent.GetCameraToScreen();
             ScreenToCameraMatrix = CameraComponent.GetScreenToCamera();
+        }
 
+        public override void UpdateVectors()
+        {
             WorldCameraPosition = transform.position;
         }
 

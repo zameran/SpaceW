@@ -86,6 +86,8 @@ namespace SpaceEngine.Cameras
 
         public abstract void UpdateMatrices();
 
+        public abstract void UpdateVectors();
+
         protected float ClampAngle(float angle, float min, float max)
         {
             if (angle < -360)
