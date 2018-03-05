@@ -37,33 +37,36 @@ using UnityEditor.Callbacks;
 
 using Debug = UnityEngine.Debug;
 
-public sealed class BuildPostprocessor
+namespace SpaceEngine.Postprocessors
 {
-    [PostProcessBuild(1)]
-    public static void OnPostprocessBuild(BuildTarget target, string pathToBuiltProject)
+    public sealed class BuildPostprocessor
     {
-        var exeName = Path.GetFileName(pathToBuiltProject);
-        var exeNameWE = Path.GetFileNameWithoutExtension(pathToBuiltProject);
-
-        if (string.IsNullOrEmpty(exeName)) { Debug.Log("BuildPostprocessor.OnPostprocessBuild: Can't find exe!"); return; }
-
-        var dataPath = pathToBuiltProject.Remove(pathToBuiltProject.Length - exeName.Length, exeName.Length) + exeNameWE + "_Data";
-
-        // TODO : Other platforms support...
-        if (target == BuildTarget.StandaloneWindows || target == BuildTarget.StandaloneWindows64)
+        [PostProcessBuild(1)]
+        public static void OnPostprocessBuild(BuildTarget target, string pathToBuiltProject)
         {
-            var pureBuildPath = Path.GetDirectoryName(pathToBuiltProject);
+            var fileName = Path.GetFileName(pathToBuiltProject);
+            var fileNameWithoutExtension = Path.GetFileNameWithoutExtension(pathToBuiltProject);
 
-            if (string.IsNullOrEmpty(pureBuildPath)) { Debug.Log("BuildPostprocessor.OnPostprocessBuild: Can't find pure build path!"); return; }
+            if (string.IsNullOrEmpty(fileName)) { Debug.Log("BuildPostprocessor.OnPostprocessBuild: Can't find exe!"); return; }
 
-            foreach (string file in Directory.GetFiles(pureBuildPath, "*Log*.txt"))
+            var dataPath = pathToBuiltProject.Remove(pathToBuiltProject.Length - fileName.Length, fileName.Length) + fileNameWithoutExtension + "_Data";
+
+            // TODO : Other platforms support...
+            if (target == BuildTarget.StandaloneWindows || target == BuildTarget.StandaloneWindows64)
             {
-                if (File.Exists(file))
-                    File.Delete(file);
-            }
-        }
+                var pureBuildPath = Path.GetDirectoryName(pathToBuiltProject);
 
-        Directory.CreateDirectory(PathGlobals.GlobalModFolderPathEditor(dataPath));
-        Directory.CreateDirectory(PathGlobals.GlobalConfigFolderPathEditor(dataPath));
+                if (string.IsNullOrEmpty(pureBuildPath)) { Debug.Log("BuildPostprocessor.OnPostprocessBuild: Can't find pure build path!"); return; }
+
+                foreach (var path in Directory.GetFiles(pureBuildPath, "*Log*.txt"))
+                {
+                    if (File.Exists(path))
+                        File.Delete(path);
+                }
+            }
+
+            Directory.CreateDirectory(PathGlobals.GlobalModFolderPathEditor(dataPath));
+            Directory.CreateDirectory(PathGlobals.GlobalConfigFolderPathEditor(dataPath));
+        }
     }
 }
