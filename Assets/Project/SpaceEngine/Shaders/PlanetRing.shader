@@ -52,6 +52,8 @@ Shader "SpaceEngine/Planet/Ring"
 		uniform float3 LightingParams;	// (Front Bright, Back Bright, Exposure)
 		uniform float4 DetailParams;	// (2D Frequency, Radial Frequency, 1 / Camera.PixelSize, Rings Density)
 
+		uniform float4x4 _Globals_WorldToCamera;
+
 		#define		ringsWidth                  RingsParams.x
 		#define		inversedRingsThickness      RingsParams.y
 		#define		ambientColor                AmbientColor.rgb
@@ -94,12 +96,19 @@ Shader "SpaceEngine/Planet/Ring"
 
 			LOG_DEPTH(7)
 		};
+
+		// TODO : Make it global...
+		inline float4 SpaceEngineObjectToClipPos(float4 p)
+		{
+			return mul(mul(_Globals_CameraToScreen, _Globals_WorldToCamera), p);
+		}
 		
 		void vert(in a2v_planetRing v, out v2f_planetRing o)
 		{
 			float4 worldPosition = mul(unity_ObjectToWorld, v.vertex);
 			
-			o.position = UnityObjectToClipPos(v.vertex);
+			//o.position = UnityObjectToClipPos(v.vertex);
+			o.position = SpaceEngineObjectToClipPos(v.vertex);
 
 			v.vertex = o.position; // NOTE : Important for a log depth buffer...
 

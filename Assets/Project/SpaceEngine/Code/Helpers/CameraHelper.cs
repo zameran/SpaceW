@@ -92,6 +92,12 @@ public static class CameraHelper
         return camera.cameraToWorldMatrix;
     }
 
+    /// <summary>
+    /// Get <see cref="Camera"/>'s projection <see cref="Matrix4x4"/>.
+    /// </summary>
+    /// <param name="camera">Target <see cref="Camera"/>.</param>
+    /// <param name="useFix">Render in to texture?</param>
+    /// <returns>Returns the <see cref="Camera"/>'s projection <see cref="Matrix4x4"/>.</returns>
     public static Matrix4x4 GetCameraToScreen(this Camera camera, bool useFix = true)
     {
 #if UNITY_GL_PROJECTION_MATRIX
