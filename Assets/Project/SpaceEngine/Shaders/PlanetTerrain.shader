@@ -162,9 +162,9 @@ Shader "SpaceEngine/Planet/Terrain (Deferred)"
 
 					float3 invertedLightDistance = rsqrt(dot(WSPR.xyz, WSPR.xyz));
 					float3 lightPosition = WSPR.xyz * invertedLightDistance;
-
+					
 					float lightAngularRadius = asin(WSPR.w * invertedLightDistance);
-
+					
 					eclipse *= EclipseShadow(P, lightPosition, lightAngularRadius);
 				#endif
 
