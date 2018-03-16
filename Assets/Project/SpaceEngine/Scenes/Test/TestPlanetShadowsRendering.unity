@@ -113,6 +113,71 @@ NavMeshSettings:
     debug:
       m_Flags: 0
   m_NavMeshData: {fileID: 0}
+--- !u!1 &63776630
+GameObject:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 1000013265289394, guid: 7f9c72583485a2647b645e4576290b12,
+    type: 2}
+  m_PrefabInternal: {fileID: 0}
+  serializedVersion: 5
+  m_Component:
+  - component: {fileID: 63776631}
+  - component: {fileID: 63776633}
+  - component: {fileID: 63776632}
+  m_Layer: 0
+  m_Name: ColorProducer2
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &63776631
+Transform:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 4000012456322590, guid: 7f9c72583485a2647b645e4576290b12,
+    type: 2}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 63776630}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children: []
+  m_Father: {fileID: 1019286897}
+  m_RootOrder: 2
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &63776632
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 63776630}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c2b7101e6e7b55949a6bce83baeecff6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  CacheGameObject: {fileID: 1792673909}
+  Name: Color
+  IsGPUProducer: 1
+  IsLastInSequence: 0
+  NormalsProducerGameObject: {fileID: 1995852965}
+  ElevationProducerGameObject: {fileID: 1690022664}
+  ColorMaterial: {fileID: 2100000, guid: 7fbfb50a063edba46b021f070cb7d6b0, type: 2}
+--- !u!114 &63776633
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 63776630}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f84ae864f4a27bd4694c212c269ea086, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  StoreLeaf: 1
+  StoreParent: 1
+  StoreInvisible: 0
+  Priority: 2
 --- !u!1 &192751367
 GameObject:
   m_ObjectHideFlags: 0
@@ -141,9 +206,10 @@ Transform:
   m_Children:
   - {fileID: 2073327467}
   - {fileID: 2104141348}
+  - {fileID: 2136489734}
   - {fileID: 1478112655}
   m_Father: {fileID: 1497659641}
-  m_RootOrder: 14
+  m_RootOrder: 7
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &192751369
 MonoBehaviour:
@@ -159,117 +225,14 @@ MonoBehaviour:
   TerrainMaterial: {fileID: 0}
   SplitFactor: 2
   MaxLevel: 16
-  MinLevel: 0
-  ZMin: -10000
-  ZMax: 10000
+  MinLevel: 1
+  ZMin: -250
+  ZMax: 250
   Face: 6
   UseHorizonCulling: 0
   SplitInvisibleQuads: 1
   Samplers: []
   SamplersSuitable: []
---- !u!1 &193674314
-GameObject:
-  m_ObjectHideFlags: 0
-  m_PrefabParentObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 0}
-  serializedVersion: 5
-  m_Component:
-  - component: {fileID: 193674315}
-  - component: {fileID: 193674316}
-  m_Layer: 0
-  m_Name: TCCPS_Gasgiant
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!4 &193674315
-Transform:
-  m_ObjectHideFlags: 0
-  m_PrefabParentObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 0}
-  m_GameObject: {fileID: 193674314}
-  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_Children: []
-  m_Father: {fileID: 1497659641}
-  m_RootOrder: 4
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &193674316
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_PrefabParentObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 0}
-  m_GameObject: {fileID: 193674314}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 05216d3e989e4794386b6087d793e6ff, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  Lacunarity: 2.2182817
-  H: 0.5
-  Offset: 0.8
-  RidgeSmooth: 0.0001
-  texturingHeightOffset: -1
-  texturingSlopeOffset: 0
-  Randomize: {x: 0, y: 0, z: 0}
-  faceParams: {x: 0, y: 0, z: 1, w: 0}
-  scaleParams: {x: 0, y: 0, z: 0, w: -1}
-  mainParams: {x: 0.02, y: 0.704, z: 0, w: 0}
-  colorParams: {x: 0.1, y: 10, z: 0.63, w: 0.211}
-  climateParams: {x: 0.179, y: 0.158, z: 0.153, w: 0.157}
-  mareParams: {x: 0.55, y: 227, z: 0.233, w: 0.481}
-  montesParams: {x: 0.106, y: 2, z: 0.153, w: 0.954}
-  dunesParams: {x: 0.121, y: 6.9, z: 0.143, w: -1}
-  hillsParams: {x: 1.4142, y: 2, z: 0.266, w: 0.545}
-  canyonsParams: {x: 3, y: 15.4, z: 0.375, w: 1}
-  riversParams: {x: 13.1, y: 2.69, z: 2.49, w: 1}
-  cracksParams: {x: 0.407, y: 1.71, z: 5, w: 0.209}
-  craterParams: {x: 0.32, y: 0.6, z: 1.89, w: 4}
-  volcanoParams1: {x: 2, y: 0.64, z: 0.81, w: 5}
-  volcanoParams2: {x: 1.24, y: 0.423, z: 2.12, w: 1507}
-  lavaParams: {x: -10, y: 0, z: 0, w: 0}
-  textureParams: {x: 0, y: 0, z: 0, w: 0}
-  cloudsParams1: {x: 0, y: 0, z: 10, w: 0.86}
-  cloudsParams2: {x: 0, y: 0, z: 0, w: 0}
-  cycloneParams: {x: 20, y: 0, z: 0.467, w: 1}
-  InvSize: {x: 64, y: 64}
-  AutoUpdate: 1
-  MaterialTable:
-    Gradient:
-      serializedVersion: 2
-      key0: {r: 0.40392157, g: 0.40392157, b: 0.40392157, a: 1}
-      key1: {r: 0.654902, g: 0.654902, b: 0.654902, a: 1}
-      key2: {r: 0, g: 0, b: 0, a: 0}
-      key3: {r: 0, g: 0, b: 0, a: 0}
-      key4: {r: 0, g: 0, b: 0, a: 0}
-      key5: {r: 0, g: 0, b: 0, a: 0}
-      key6: {r: 0, g: 0, b: 0, a: 0}
-      key7: {r: 0, g: 0, b: 0, a: 0}
-      ctime0: 0
-      ctime1: 65535
-      ctime2: 0
-      ctime3: 0
-      ctime4: 0
-      ctime5: 0
-      ctime6: 0
-      ctime7: 0
-      atime0: 0
-      atime1: 65535
-      atime2: 0
-      atime3: 0
-      atime4: 0
-      atime5: 0
-      atime6: 0
-      atime7: 0
-      m_Mode: 0
-      m_NumColorKeys: 2
-      m_NumAlphaKeys: 2
-    ReverseX: 0
-    ReverseY: 0
-    NonLinear: 1
-  Engine: 5
 --- !u!1 &196657992
 GameObject:
   m_ObjectHideFlags: 0
@@ -279,6 +242,7 @@ GameObject:
   m_Component:
   - component: {fileID: 196657993}
   - component: {fileID: 196657994}
+  - component: {fileID: 196657997}
   - component: {fileID: 196657996}
   m_Layer: 0
   m_Name: ElevationProducer4
@@ -330,7 +294,7 @@ MonoBehaviour:
   m_PrefabParentObject: {fileID: 0}
   m_PrefabInternal: {fileID: 0}
   m_GameObject: {fileID: 196657992}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 7b5687e3b074ec14088d1516efe48188, type: 3}
   m_Name: 
@@ -356,6 +320,22 @@ MonoBehaviour:
   - 2.5
   - 1.5
   - 1
+--- !u!114 &196657997
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 196657992}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5ec53317c6476564cb831abd3ffde3f0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  CacheGameObject: {fileID: 2107464336}
+  Name: Elevation
+  IsGPUProducer: 1
+  IsLastInSequence: 0
+  ElevationMaterial: {fileID: 2100000, guid: 10e30e69c04a2894b98bb57ee19eb190, type: 2}
 --- !u!1 &230248927
 GameObject:
   m_ObjectHideFlags: 0
@@ -418,73 +398,72 @@ MonoBehaviour:
   Mipmaps: 0
   EnableRandomWrite: 0
   AnisoLevel: 0
---- !u!1 &340912833
+--- !u!1 &306036675
 GameObject:
   m_ObjectHideFlags: 0
-  m_PrefabParentObject: {fileID: 0}
+  m_PrefabParentObject: {fileID: 1000013265289394, guid: 7f9c72583485a2647b645e4576290b12,
+    type: 2}
   m_PrefabInternal: {fileID: 0}
   serializedVersion: 5
   m_Component:
-  - component: {fileID: 340912834}
-  - component: {fileID: 340912835}
+  - component: {fileID: 306036676}
+  - component: {fileID: 306036678}
+  - component: {fileID: 306036677}
   m_Layer: 0
-  m_Name: Ocean
+  m_Name: ColorProducer1
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!4 &340912834
+--- !u!4 &306036676
 Transform:
   m_ObjectHideFlags: 0
-  m_PrefabParentObject: {fileID: 0}
+  m_PrefabParentObject: {fileID: 4000012456322590, guid: 7f9c72583485a2647b645e4576290b12,
+    type: 2}
   m_PrefabInternal: {fileID: 0}
-  m_GameObject: {fileID: 340912833}
+  m_GameObject: {fileID: 306036675}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
-  m_Father: {fileID: 1497659641}
-  m_RootOrder: 6
+  m_Father: {fileID: 918735064}
+  m_RootOrder: 2
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &340912835
+--- !u!114 &306036677
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_PrefabParentObject: {fileID: 0}
   m_PrefabInternal: {fileID: 0}
-  m_GameObject: {fileID: 340912833}
+  m_GameObject: {fileID: 306036675}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: f477e58ac3f5f05428b64847189be289, type: 3}
+  m_Script: {fileID: 11500000, guid: c2b7101e6e7b55949a6bce83baeecff6, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  ParentBody: {fileID: 1497659642}
-  OceanShader: {fileID: 4800000, guid: 09255663507ef1b478367ecae635e5f7, type: 3}
-  RenderQueue: 2000
-  RenderQueueOffset: 0
-  OceanMaterial: {fileID: 0}
-  UpwellingColor: {r: 0.039, g: 0.156, b: 0.47, a: 1}
-  OceanLevel: 5
-  OceanWaveLevel: 2.5
-  ZMin: 20000
-  InitSpectrumMaterial: {fileID: 2100000, guid: 5031b12fb29d9994c8308cb7a1e0c160,
-    type: 2}
-  InitDisplacementMaterial: {fileID: 2100000, guid: d71731534f4f7a349a0d1af0b86336aa,
-    type: 2}
-  Aniso: 2
-  WindSpeed: 5
-  WavesOmega: 0.84
-  GridSizes: {x: 5488, y: 392, z: 28, w: 2}
-  Choppyness: {x: 2.3, y: 2.1, z: 1.3, w: 0.9}
-  VarianceSize: 16
-  InitJacobiansMaterial: {fileID: 2100000, guid: 3fb2adcb831e928459999d4736573f21,
-    type: 2}
-  WhiteCapsPrecomputeMaterial: {fileID: 2100000, guid: 2653e30a6ed623d4d94880f44f44a935,
-    type: 2}
-  FoamAniso: 9
-  FoamMipmapBias: -2
-  WhiteCapStrength: 0.75
---- !u!1001 &470984914
+  CacheGameObject: {fileID: 1792673909}
+  Name: Color
+  IsGPUProducer: 1
+  IsLastInSequence: 0
+  NormalsProducerGameObject: {fileID: 1381954837}
+  ElevationProducerGameObject: {fileID: 1620219852}
+  ColorMaterial: {fileID: 2100000, guid: 7fbfb50a063edba46b021f070cb7d6b0, type: 2}
+--- !u!114 &306036678
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 306036675}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f84ae864f4a27bd4694c212c269ea086, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  StoreLeaf: 1
+  StoreParent: 1
+  StoreInvisible: 0
+  Priority: 2
+--- !u!1001 &483793218
 Prefab:
   m_ObjectHideFlags: 0
   serializedVersion: 2
@@ -616,9 +595,10 @@ Transform:
   m_Children:
   - {fileID: 1725033211}
   - {fileID: 725861331}
+  - {fileID: 1407734070}
   - {fileID: 1252424865}
   m_Father: {fileID: 1497659641}
-  m_RootOrder: 13
+  m_RootOrder: 6
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &529703806
 MonoBehaviour:
@@ -634,173 +614,14 @@ MonoBehaviour:
   TerrainMaterial: {fileID: 0}
   SplitFactor: 2
   MaxLevel: 16
-  MinLevel: 0
-  ZMin: -10000
-  ZMax: 10000
+  MinLevel: 1
+  ZMin: -250
+  ZMax: 250
   Face: 5
   UseHorizonCulling: 0
   SplitInvisibleQuads: 1
   Samplers: []
   SamplersSuitable: []
---- !u!1 &575453037
-GameObject:
-  m_ObjectHideFlags: 0
-  m_PrefabParentObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 0}
-  serializedVersion: 5
-  m_Component:
-  - component: {fileID: 575453038}
-  - component: {fileID: 575453039}
-  m_Layer: 0
-  m_Name: PPA
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!4 &575453038
-Transform:
-  m_ObjectHideFlags: 0
-  m_PrefabParentObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 0}
-  m_GameObject: {fileID: 575453037}
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_Children: []
-  m_Father: {fileID: 956119343}
-  m_RootOrder: 0
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &575453039
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_PrefabParentObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 0}
-  m_GameObject: {fileID: 575453037}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 1344506e8a088054e9ea9ddc58661de0, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  BakeMode: 1
-  Format: 11
-  WrapMode: 1
-  ClearAfterBake: 1
-  UseCoroutine: 1
-  transmittanceT: {fileID: 0}
-  irradianceT_Read: {fileID: 0}
-  irradianceT_Write: {fileID: 0}
-  inscatterT_Read: {fileID: 0}
-  inscatterT_Write: {fileID: 0}
-  deltaET: {fileID: 0}
-  deltaSRT: {fileID: 0}
-  deltaSMT: {fileID: 0}
-  deltaJT: {fileID: 0}
-  finished: 0
-  DestinationFolder: /Resources/Preprocess/Textures/Atmosphere
---- !u!1 &693596356
-GameObject:
-  m_ObjectHideFlags: 0
-  m_PrefabParentObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 0}
-  serializedVersion: 5
-  m_Component:
-  - component: {fileID: 693596357}
-  - component: {fileID: 693596358}
-  m_Layer: 0
-  m_Name: TCCPS_Planet
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!4 &693596357
-Transform:
-  m_ObjectHideFlags: 0
-  m_PrefabParentObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 0}
-  m_GameObject: {fileID: 693596356}
-  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_Children: []
-  m_Father: {fileID: 1497659641}
-  m_RootOrder: 0
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &693596358
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_PrefabParentObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 0}
-  m_GameObject: {fileID: 693596356}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 05216d3e989e4794386b6087d793e6ff, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  Lacunarity: 2.2182817
-  H: 0.5
-  Offset: 0.8
-  RidgeSmooth: 0.0001
-  texturingHeightOffset: 0
-  texturingSlopeOffset: 0
-  Randomize: {x: 0, y: 0, z: 0}
-  faceParams: {x: 0, y: 0, z: 1, w: 0}
-  scaleParams: {x: 0, y: 0, z: 0, w: -1}
-  mainParams: {x: 1, y: 0.704, z: 0, w: 0}
-  colorParams: {x: 1, y: 8, z: 0.497, w: 0.211}
-  climateParams: {x: 0.179, y: 0.158, z: 0.153, w: 0.157}
-  mareParams: {x: 0.55, y: 0, z: 0, w: 0.751}
-  montesParams: {x: 0.106, y: 2, z: 0.153, w: 0.222}
-  dunesParams: {x: 0.121, y: 6.9, z: 0.143, w: -1}
-  hillsParams: {x: 1, y: 4, z: 0.772, w: 0.898}
-  canyonsParams: {x: 0.031, y: 15.4, z: 0.375, w: 1}
-  riversParams: {x: 13.1, y: 2.69, z: 2.49, w: 1}
-  cracksParams: {x: 0.407, y: 0.71, z: 2, w: 1}
-  craterParams: {x: 2.1245, y: 1, z: 1.59, w: 4}
-  volcanoParams1: {x: 2, y: 0.64, z: 0.81, w: 5}
-  volcanoParams2: {x: 1.24, y: 0.423, z: 2.12, w: 1507}
-  lavaParams: {x: -10, y: 0, z: 207, w: 0.625}
-  textureParams: {x: 1, y: 0, z: 0, w: 0}
-  cloudsParams1: {x: 0, y: 0, z: 0, w: 0}
-  cloudsParams2: {x: 0, y: 0, z: 1, w: 0}
-  cycloneParams: {x: 0, y: 0, z: 0, w: 0}
-  InvSize: {x: 64, y: 32}
-  AutoUpdate: 1
-  MaterialTable:
-    Gradient:
-      serializedVersion: 2
-      key0: {r: 0.74264705, g: 0.4249603, b: 0.28941393, a: 1}
-      key1: {r: 0.7205882, g: 0.49909255, b: 0.2861159, a: 1}
-      key2: {r: 0.6691177, g: 0.5284509, b: 0.33455884, a: 0}
-      key3: {r: 0.44117647, g: 0.43262425, b: 0.34710208, a: 0}
-      key4: {r: 0.42344293, g: 0.56642365, b: 0.6544118, a: 0}
-      key5: {r: 1, g: 1, b: 1, a: 0}
-      key6: {r: 0, g: 0, b: 0, a: 0}
-      key7: {r: 0, g: 0, b: 0, a: 0}
-      ctime0: 0
-      ctime1: 6168
-      ctime2: 12914
-      ctime3: 21588
-      ctime4: 39128
-      ctime5: 65535
-      ctime6: 0
-      ctime7: 0
-      atime0: 0
-      atime1: 65535
-      atime2: 0
-      atime3: 0
-      atime4: 0
-      atime5: 0
-      atime6: 0
-      atime7: 0
-      m_Mode: 0
-      m_NumColorKeys: 6
-      m_NumAlphaKeys: 2
-    ReverseX: 0
-    ReverseY: 0
-    NonLinear: 1
-  Engine: 2
 --- !u!1 &702279121
 GameObject:
   m_ObjectHideFlags: 0
@@ -852,7 +673,7 @@ MonoBehaviour:
   GSCS: {fileID: 11400000, guid: 1df83c97158884340af77d277fcca4bf, type: 2}
   FourierGridSize: 64
   GridResolution: 32
-  OceanGridResolution: 16
+  OceanGridResolution: 32
   Eclipses: 1
   Planetshadows: 1
   Planetshine: 1
@@ -1141,7 +962,7 @@ Transform:
   m_PrefabInternal: {fileID: 0}
   m_GameObject: {fileID: 812990977}
   m_LocalRotation: {x: -0.035228934, y: -0.016183248, z: -0.5203495, w: 0.85307294}
-  m_LocalPosition: {x: -5534219, y: 7903179, z: -4012687.5}
+  m_LocalPosition: {x: -553.4219, y: 790.3179, z: -401.2688}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 0}
@@ -1165,6 +986,7 @@ GameObject:
   - component: {fileID: 829586937}
   - component: {fileID: 829586941}
   - component: {fileID: 829586942}
+  - component: {fileID: 829586948}
   m_Layer: 0
   m_Name: GUI
   m_TagString: Untagged
@@ -1437,6 +1259,30 @@ MonoBehaviour:
     bRl: 6421
     SCALE: 6360
   PresetChanged: 0
+--- !u!114 &829586948
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 829586936}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 41cb93f2fe20dee44bfe4fed9f75ba31, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  debugInfoBounds:
+    serializedVersion: 2
+    x: 10
+    y: 10
+    width: 128
+    height: 70
+  debugInfoDrawBounds:
+    serializedVersion: 2
+    x: 10
+    y: 10
+    width: 500
+    height: 500
+  ScrollPosition: {x: 0, y: 0}
 --- !u!1 &853442837
 GameObject:
   m_ObjectHideFlags: 0
@@ -1465,7 +1311,7 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 1940098943}
-  m_RootOrder: 2
+  m_RootOrder: 3
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &853442839
 MonoBehaviour:
@@ -1529,9 +1375,10 @@ Transform:
   m_Children:
   - {fileID: 1620219853}
   - {fileID: 1381954838}
+  - {fileID: 306036676}
   - {fileID: 1247820812}
   m_Father: {fileID: 1497659641}
-  m_RootOrder: 9
+  m_RootOrder: 2
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &918735065
 MonoBehaviour:
@@ -1548,106 +1395,14 @@ MonoBehaviour:
   TerrainMaterial: {fileID: 0}
   SplitFactor: 2
   MaxLevel: 16
-  MinLevel: 0
-  ZMin: -10000
-  ZMax: 10000
+  MinLevel: 1
+  ZMin: -250
+  ZMax: 250
   Face: 1
   UseHorizonCulling: 0
   SplitInvisibleQuads: 1
   Samplers: []
   SamplersSuitable: []
---- !u!1 &956119342
-GameObject:
-  m_ObjectHideFlags: 0
-  m_PrefabParentObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 0}
-  serializedVersion: 5
-  m_Component:
-  - component: {fileID: 956119343}
-  - component: {fileID: 956119344}
-  m_Layer: 0
-  m_Name: Atmosphere
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!4 &956119343
-Transform:
-  m_ObjectHideFlags: 0
-  m_PrefabParentObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 0}
-  m_GameObject: {fileID: 956119342}
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_Children:
-  - {fileID: 575453038}
-  m_Father: {fileID: 1497659641}
-  m_RootOrder: 5
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &956119344
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_PrefabParentObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 0}
-  m_GameObject: {fileID: 956119342}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: adc9289bf13771341a0fb0e8c69cb0d7, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  FadeCurve:
-    serializedVersion: 2
-    m_Curve:
-    - serializedVersion: 3
-      time: 0
-      value: 0
-      inSlope: 0
-      outSlope: 0
-      tangentMode: 0
-      weightedMode: 0
-      inWeight: 0.33333334
-      outWeight: 0.33333334
-    - serializedVersion: 3
-      time: 0.25
-      value: 1
-      inSlope: 0
-      outSlope: 0
-      tangentMode: 0
-      weightedMode: 0
-      inWeight: 0.33333334
-      outWeight: 0.33333334
-    - serializedVersion: 3
-      time: 1
-      value: 1
-      inSlope: 0
-      outSlope: 0
-      tangentMode: 0
-      weightedMode: 0
-      inWeight: 0.33333334
-      outWeight: 0.33333334
-    m_PreInfinity: 2
-    m_PostInfinity: 2
-    m_RotationOrder: 4
-  ParentBody: {fileID: 1497659642}
-  GlowColor: {r: 0, g: 0, b: 0, a: 1}
-  Density: 1
-  RadiusHold: 0
-  Height: 60000
-  Scale: 1
-  Fade: 1
-  AerialPerspectiveOffset: 2000
-  HorizonFixEps: 0.004
-  MieFadeFix: 0.02
-  ExtinctionGroundFade: 0.000025
-  HDRExposure: 0.2
-  SkyShader: {fileID: 4800000, guid: e591e3c9700c3b243a782b059c2d6d0b, type: 3}
-  SkyMaterial: {fileID: 0}
-  RenderQueue: 3000
-  RenderQueueOffset: 0
-  LostFocusForceRebake: 0
-  AtmosphereBaker: {fileID: 0}
 --- !u!1 &1011657932
 GameObject:
   m_ObjectHideFlags: 0
@@ -1657,6 +1412,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1011657933}
   - component: {fileID: 1011657934}
+  - component: {fileID: 1011657937}
   - component: {fileID: 1011657936}
   m_Layer: 0
   m_Name: ElevationProducer3
@@ -1708,7 +1464,7 @@ MonoBehaviour:
   m_PrefabParentObject: {fileID: 0}
   m_PrefabInternal: {fileID: 0}
   m_GameObject: {fileID: 1011657932}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 7b5687e3b074ec14088d1516efe48188, type: 3}
   m_Name: 
@@ -1734,109 +1490,22 @@ MonoBehaviour:
   - 2.5
   - 1.5
   - 1
---- !u!1 &1014796139
-GameObject:
-  m_ObjectHideFlags: 0
-  m_PrefabParentObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 0}
-  serializedVersion: 5
-  m_Component:
-  - component: {fileID: 1014796141}
-  - component: {fileID: 1014796140}
-  m_Layer: 0
-  m_Name: TCCPS_Selena
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!114 &1014796140
+--- !u!114 &1011657937
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_PrefabParentObject: {fileID: 0}
   m_PrefabInternal: {fileID: 0}
-  m_GameObject: {fileID: 1014796139}
+  m_GameObject: {fileID: 1011657932}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 05216d3e989e4794386b6087d793e6ff, type: 3}
+  m_Script: {fileID: 11500000, guid: 5ec53317c6476564cb831abd3ffde3f0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  Lacunarity: 2.2182817
-  H: 0.5
-  Offset: 0.8
-  RidgeSmooth: 0.0001
-  texturingHeightOffset: 0
-  texturingSlopeOffset: 0
-  Randomize: {x: -0.11, y: 0.04, z: 0.13}
-  faceParams: {x: 0, y: 0, z: 1, w: 0}
-  scaleParams: {x: 0, y: 0, z: 0, w: -1}
-  mainParams: {x: 1, y: 0.704, z: 0, w: 0}
-  colorParams: {x: 1, y: 8, z: 0.497, w: 0.211}
-  climateParams: {x: 0.179, y: 0.158, z: 0.153, w: 0.157}
-  mareParams: {x: 0.55, y: 0.754, z: 0.24, w: 0.826}
-  montesParams: {x: 0.106, y: 2, z: 0.153, w: 0.222}
-  dunesParams: {x: 0.121, y: 6.9, z: 0.143, w: 1}
-  hillsParams: {x: 1, y: 4, z: 0.772, w: 0.898}
-  canyonsParams: {x: 0.031, y: 15.4, z: 0.375, w: 1}
-  riversParams: {x: 13.1, y: 2.69, z: 2.49, w: 1}
-  cracksParams: {x: 0.2451, y: 0.71, z: 1, w: 1}
-  craterParams: {x: 2.1245, y: 1, z: 1.16, w: 2}
-  volcanoParams1: {x: 1, y: 0.64, z: 0.151, w: 0}
-  volcanoParams2: {x: 1.43, y: 0.61, z: 0.04, w: 1507}
-  lavaParams: {x: -10, y: 0, z: 207, w: 0.625}
-  textureParams: {x: 1, y: 0, z: 0, w: 0}
-  cloudsParams1: {x: 0, y: 0, z: 0, w: 0}
-  cloudsParams2: {x: 0, y: 0, z: 1, w: 0}
-  cycloneParams: {x: 0, y: 0, z: 0, w: 0}
-  InvSize: {x: 64, y: 32}
-  AutoUpdate: 1
-  MaterialTable:
-    Gradient:
-      serializedVersion: 2
-      key0: {r: 0.40392157, g: 0.40392157, b: 0.40392157, a: 1}
-      key1: {r: 0.654902, g: 0.654902, b: 0.654902, a: 1}
-      key2: {r: 0, g: 0, b: 0, a: 0}
-      key3: {r: 0, g: 0, b: 0, a: 0}
-      key4: {r: 0, g: 0, b: 0, a: 0}
-      key5: {r: 0, g: 0, b: 0, a: 0}
-      key6: {r: 0, g: 0, b: 0, a: 0}
-      key7: {r: 0, g: 0, b: 0, a: 0}
-      ctime0: 0
-      ctime1: 65535
-      ctime2: 0
-      ctime3: 0
-      ctime4: 0
-      ctime5: 0
-      ctime6: 0
-      ctime7: 0
-      atime0: 0
-      atime1: 65535
-      atime2: 0
-      atime3: 0
-      atime4: 0
-      atime5: 0
-      atime6: 0
-      atime7: 0
-      m_Mode: 0
-      m_NumColorKeys: 2
-      m_NumAlphaKeys: 2
-    ReverseX: 0
-    ReverseY: 0
-    NonLinear: 1
-  Engine: 3
---- !u!4 &1014796141
-Transform:
-  m_ObjectHideFlags: 0
-  m_PrefabParentObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 0}
-  m_GameObject: {fileID: 1014796139}
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_Children: []
-  m_Father: {fileID: 1497659641}
-  m_RootOrder: 2
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  CacheGameObject: {fileID: 2107464336}
+  Name: Elevation
+  IsGPUProducer: 1
+  IsLastInSequence: 0
+  ElevationMaterial: {fileID: 2100000, guid: 10e30e69c04a2894b98bb57ee19eb190, type: 2}
 --- !u!1 &1019286896
 GameObject:
   m_ObjectHideFlags: 0
@@ -1865,9 +1534,10 @@ Transform:
   m_Children:
   - {fileID: 1690022665}
   - {fileID: 1995852966}
+  - {fileID: 63776631}
   - {fileID: 1860669608}
   m_Father: {fileID: 1497659641}
-  m_RootOrder: 10
+  m_RootOrder: 3
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &1019286898
 MonoBehaviour:
@@ -1883,9 +1553,9 @@ MonoBehaviour:
   TerrainMaterial: {fileID: 0}
   SplitFactor: 2
   MaxLevel: 16
-  MinLevel: 0
-  ZMin: -10000
-  ZMax: 10000
+  MinLevel: 1
+  ZMin: -250
+  ZMax: 250
   Face: 2
   UseHorizonCulling: 0
   SplitInvisibleQuads: 1
@@ -1963,7 +1633,7 @@ GameObject:
   - component: {fileID: 1071466540}
   - component: {fileID: 1071466541}
   m_Layer: 0
-  m_Name: TCCPS_Asteroid
+  m_Name: TCCPS_Planet
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1980,7 +1650,7 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 1497659641}
-  m_RootOrder: 1
+  m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &1071466541
 MonoBehaviour:
@@ -1997,22 +1667,22 @@ MonoBehaviour:
   H: 0.5
   Offset: 0.8
   RidgeSmooth: 0.0001
-  texturingHeightOffset: 0
+  texturingHeightOffset: 1
   texturingSlopeOffset: 1
   Randomize: {x: 0, y: 0, z: 0}
   faceParams: {x: 0, y: 0, z: 1, w: 0}
   scaleParams: {x: 0, y: 0, z: 0, w: -1}
-  mainParams: {x: 0.1, y: 0.704, z: 0, w: 0}
+  mainParams: {x: 0.33, y: 0.704, z: 0, w: 0}
   colorParams: {x: 1, y: 8, z: 0.497, w: 0.211}
   climateParams: {x: 0.179, y: 0.158, z: 0.153, w: 0.157}
   mareParams: {x: 0.55, y: 227, z: 0.233, w: 0}
   montesParams: {x: 0.106, y: 2, z: 0.153, w: 0.222}
   dunesParams: {x: 0.121, y: 6.9, z: 0.143, w: -1}
-  hillsParams: {x: 0.863, y: 3.231, z: 0.477, w: 0.72}
+  hillsParams: {x: 1.124186, y: 12.231, z: 0.817, w: 0.713}
   canyonsParams: {x: 0.031, y: 15.4, z: 0.375, w: 1}
   riversParams: {x: 13.1, y: 2.69, z: 2.49, w: 1}
-  cracksParams: {x: 0.407, y: 1.71, z: 5, w: 1}
-  craterParams: {x: 0.7523, y: 1, z: 0.9, w: 6}
+  cracksParams: {x: 0.407, y: 1.71, z: 5, w: 0.75}
+  craterParams: {x: 1.195125, y: 0.225, z: 1.58874, w: 8}
   volcanoParams1: {x: 2, y: 0.64, z: 0.81, w: 5}
   volcanoParams2: {x: 1.24, y: 0.423, z: 2.12, w: 1507}
   lavaParams: {x: -10, y: 0, z: 207, w: 0.625}
@@ -2020,13 +1690,13 @@ MonoBehaviour:
   cloudsParams1: {x: 0, y: 0, z: 0, w: 0}
   cloudsParams2: {x: 0, y: 0, z: 1, w: 0}
   cycloneParams: {x: 0, y: 0, z: 0, w: 0}
-  InvSize: {x: 64, y: 32}
+  InvSize: {x: -21.9, y: -10.5}
   AutoUpdate: 1
   MaterialTable:
     Gradient:
       serializedVersion: 2
-      key0: {r: 0.40392157, g: 0.40392157, b: 0.40392157, a: 1}
-      key1: {r: 0.654902, g: 0.654902, b: 0.654902, a: 1}
+      key0: {r: 0.39215687, g: 0.39215687, b: 0.39215687, a: 1}
+      key1: {r: 0.5882353, g: 0.5882353, b: 0.5882353, a: 1}
       key2: {r: 0, g: 0, b: 0, a: 0}
       key3: {r: 0, g: 0, b: 0, a: 0}
       key4: {r: 0, g: 0, b: 0, a: 0}
@@ -2055,7 +1725,7 @@ MonoBehaviour:
     ReverseX: 0
     ReverseY: 0
     NonLinear: 1
-  Engine: 1
+  Engine: 2
 --- !u!1 &1107475781
 GameObject:
   m_ObjectHideFlags: 0
@@ -2128,7 +1798,7 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 918735064}
-  m_RootOrder: 2
+  m_RootOrder: 3
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &1247820813
 MonoBehaviour:
@@ -2148,7 +1818,7 @@ MonoBehaviour:
   IsLastInSequence: 1
   OrthoCpuProducerGameObject: {fileID: 0}
   UpSampleMaterial: {fileID: 2100000, guid: 190662040420ec24ea4e11512d6b98cf, type: 2}
-  RootNoiseColor: {r: 0.34509805, g: 0.49411765, b: 0.101960786, a: 0}
+  RootNoiseColor: {r: 0.48886022, g: 0.49411762, b: 0.48028234, a: 0}
   NoiseColor: {r: 0.09803922, g: 0.047058824, b: 0.39215687, a: 1}
   MaxLevel: -1
   HSV: 1
@@ -2184,7 +1854,7 @@ MonoBehaviour:
   StoreLeaf: 1
   StoreParent: 1
   StoreInvisible: 0
-  Priority: 2
+  Priority: 3
 --- !u!1 &1252424864
 GameObject:
   m_ObjectHideFlags: 0
@@ -2213,7 +1883,7 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 529703805}
-  m_RootOrder: 2
+  m_RootOrder: 3
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &1252424866
 MonoBehaviour:
@@ -2232,7 +1902,7 @@ MonoBehaviour:
   IsLastInSequence: 1
   OrthoCpuProducerGameObject: {fileID: 0}
   UpSampleMaterial: {fileID: 2100000, guid: 190662040420ec24ea4e11512d6b98cf, type: 2}
-  RootNoiseColor: {r: 0.34509805, g: 0.49411765, b: 0.101960786, a: 0}
+  RootNoiseColor: {r: 0.48886022, g: 0.49411762, b: 0.48028234, a: 0}
   NoiseColor: {r: 0.09803922, g: 0.047058824, b: 0.39215687, a: 1}
   MaxLevel: -1
   HSV: 1
@@ -2267,7 +1937,7 @@ MonoBehaviour:
   StoreLeaf: 1
   StoreParent: 1
   StoreInvisible: 0
-  Priority: 2
+  Priority: 3
 --- !u!1 &1370843062
 GameObject:
   m_ObjectHideFlags: 0
@@ -2329,7 +1999,7 @@ Transform:
   m_PrefabInternal: {fileID: 0}
   m_GameObject: {fileID: 1370843062}
   m_LocalRotation: {x: -1, y: 0, z: 0, w: 0}
-  m_LocalPosition: {x: 0, y: 0, z: 1.4959786e+11}
+  m_LocalPosition: {x: 0, y: 0, z: 1272}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
   - {fileID: 1633447862}
@@ -2468,6 +2138,71 @@ MonoBehaviour:
   StoreParent: 1
   StoreInvisible: 0
   Priority: 1
+--- !u!1 &1407734069
+GameObject:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 1000013265289394, guid: 7f9c72583485a2647b645e4576290b12,
+    type: 2}
+  m_PrefabInternal: {fileID: 0}
+  serializedVersion: 5
+  m_Component:
+  - component: {fileID: 1407734070}
+  - component: {fileID: 1407734072}
+  - component: {fileID: 1407734071}
+  m_Layer: 0
+  m_Name: ColorProducer5
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1407734070
+Transform:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 4000012456322590, guid: 7f9c72583485a2647b645e4576290b12,
+    type: 2}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 1407734069}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children: []
+  m_Father: {fileID: 529703805}
+  m_RootOrder: 2
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1407734071
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 1407734069}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c2b7101e6e7b55949a6bce83baeecff6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  CacheGameObject: {fileID: 1792673909}
+  Name: Color
+  IsGPUProducer: 1
+  IsLastInSequence: 0
+  NormalsProducerGameObject: {fileID: 725861330}
+  ElevationProducerGameObject: {fileID: 1725033210}
+  ColorMaterial: {fileID: 2100000, guid: 7fbfb50a063edba46b021f070cb7d6b0, type: 2}
+--- !u!114 &1407734072
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 1407734069}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f84ae864f4a27bd4694c212c269ea086, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  StoreLeaf: 1
+  StoreParent: 1
+  StoreInvisible: 0
+  Priority: 2
 --- !u!1 &1478112654
 GameObject:
   m_ObjectHideFlags: 0
@@ -2496,7 +2231,7 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 192751368}
-  m_RootOrder: 2
+  m_RootOrder: 3
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &1478112656
 MonoBehaviour:
@@ -2515,7 +2250,7 @@ MonoBehaviour:
   IsLastInSequence: 1
   OrthoCpuProducerGameObject: {fileID: 0}
   UpSampleMaterial: {fileID: 2100000, guid: 190662040420ec24ea4e11512d6b98cf, type: 2}
-  RootNoiseColor: {r: 0.34509805, g: 0.49411765, b: 0.101960786, a: 0}
+  RootNoiseColor: {r: 0.48886022, g: 0.49411762, b: 0.48028234, a: 0}
   NoiseColor: {r: 0.09803922, g: 0.047058824, b: 0.39215687, a: 1}
   MaxLevel: -1
   HSV: 1
@@ -2550,7 +2285,7 @@ MonoBehaviour:
   StoreLeaf: 1
   StoreParent: 1
   StoreInvisible: 0
-  Priority: 2
+  Priority: 3
 --- !u!1 &1497659640
 GameObject:
   m_ObjectHideFlags: 0
@@ -2578,14 +2313,7 @@ Transform:
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
-  - {fileID: 693596357}
   - {fileID: 1071466540}
-  - {fileID: 1014796141}
-  - {fileID: 2014628592}
-  - {fileID: 193674315}
-  - {fileID: 956119343}
-  - {fileID: 340912834}
-  - {fileID: 1654467275}
   - {fileID: 1940098943}
   - {fileID: 918735064}
   - {fileID: 1019286897}
@@ -2607,30 +2335,29 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0af905fdcf6c2884c85cb53ec60160b2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  Atmosphere: {fileID: 956119344}
-  Ocean: {fileID: 340912835}
-  Ring: {fileID: 1654467276}
+  Atmosphere: {fileID: 0}
+  Ocean: {fileID: 0}
+  Ring: {fileID: 0}
   RenderQueue: 2000
   RenderQueueOffset: 0
-  SizeOffset: 10
+  SizeOffset: 1
   DrawGizmos: 0
   UpdateLOD: 1
-  AtmosphereEnabled: 1
-  OceanEnabled: 1
-  RingEnabled: 1
+  AtmosphereEnabled: 0
+  OceanEnabled: 0
+  RingEnabled: 0
   TerrainEnabled: 1
-  Amplitude: 2.56
-  Frequency: 40
+  Amplitude: 5.12
+  Frequency: 5.12
   ColorShader: {fileID: 4800000, guid: 9fbb9ce0af9a53e4f8d563b22096cea7, type: 3}
   Storages: []
   TerrainNodes: []
   HeightZ: 0
-  Size: 6360000
-  TCCPS: {fileID: 693596358}
+  Size: 636
+  TCCPS: {fileID: 1071466541}
   Suns:
   - {fileID: 1370843065}
-  ShadowCasters:
-  - {fileID: 1654467277}
+  ShadowCasters: []
   EclipseCasters: []
   ShineCasters: []
   ShineColors:
@@ -2758,9 +2485,10 @@ Transform:
   m_Children:
   - {fileID: 1011657933}
   - {fileID: 2089371356}
+  - {fileID: 2021108018}
   - {fileID: 1733853064}
   m_Father: {fileID: 1497659641}
-  m_RootOrder: 11
+  m_RootOrder: 4
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &1592153270
 MonoBehaviour:
@@ -2776,9 +2504,9 @@ MonoBehaviour:
   TerrainMaterial: {fileID: 0}
   SplitFactor: 2
   MaxLevel: 16
-  MinLevel: 0
-  ZMin: -10000
-  ZMax: 10000
+  MinLevel: 1
+  ZMin: -250
+  ZMax: 250
   Face: 3
   UseHorizonCulling: 0
   SplitInvisibleQuads: 1
@@ -2794,6 +2522,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1620219853}
   - component: {fileID: 1620219854}
+  - component: {fileID: 1620219857}
   - component: {fileID: 1620219856}
   m_Layer: 0
   m_Name: ElevationProducer1
@@ -2848,7 +2577,7 @@ MonoBehaviour:
     type: 2}
   m_PrefabInternal: {fileID: 0}
   m_GameObject: {fileID: 1620219852}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 7b5687e3b074ec14088d1516efe48188, type: 3}
   m_Name: 
@@ -2874,6 +2603,23 @@ MonoBehaviour:
   - 2.5
   - 1.5
   - 1
+--- !u!114 &1620219857
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 114000012538519660, guid: 7f9c72583485a2647b645e4576290b12,
+    type: 2}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 1620219852}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5ec53317c6476564cb831abd3ffde3f0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  CacheGameObject: {fileID: 2107464336}
+  Name: Elevation
+  IsGPUProducer: 1
+  IsLastInSequence: 0
+  ElevationMaterial: {fileID: 2100000, guid: 10e30e69c04a2894b98bb57ee19eb190, type: 2}
 --- !u!1 &1633447861
 GameObject:
   m_ObjectHideFlags: 0
@@ -2959,116 +2705,6 @@ MeshFilter:
   m_PrefabInternal: {fileID: 0}
   m_GameObject: {fileID: 1633447861}
   m_Mesh: {fileID: 10207, guid: 0000000000000000e000000000000000, type: 0}
---- !u!1 &1654467274
-GameObject:
-  m_ObjectHideFlags: 0
-  m_PrefabParentObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 0}
-  serializedVersion: 5
-  m_Component:
-  - component: {fileID: 1654467275}
-  - component: {fileID: 1654467276}
-  - component: {fileID: 1654467277}
-  m_Layer: 0
-  m_Name: Ring
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!4 &1654467275
-Transform:
-  m_ObjectHideFlags: 0
-  m_PrefabParentObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 0}
-  m_GameObject: {fileID: 1654467274}
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_Children: []
-  m_Father: {fileID: 1497659641}
-  m_RootOrder: 7
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &1654467276
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_PrefabParentObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 0}
-  m_GameObject: {fileID: 1654467274}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 4867034d46be1b841af677130adfb3d0, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  ParentBody: {fileID: 1497659642}
-  Lights:
-  - {fileID: 1370843063}
-  Shadows:
-  - {fileID: 1497659645}
-  DiffuseTexture: {fileID: 2800000, guid: cf6e94f062c87d94bb5b583e03b7a0c0, type: 3}
-  NoiseTexture: {fileID: 2800000, guid: dca74e922f4e406409234d20e9dd416e, type: 3}
-  InnerRadius: 10000000
-  OuterRadius: 17000000
-  RenderQueue: 3000
-  RenderQueueOffset: 0
-  SegmentCount: 16
-  SegmentDetail: 32
-  RadiusDetail: 2
-  BoundsShift: 0
-  AmbientColor: {r: 1, g: 1, b: 1, a: 1}
-  Thickness: 5000
-  FrontBright: 12.8
-  BackBright: 12.8
-  Exposure: 0.2
-  DetailFrequency: 0.01
-  DetailRadialFrequency: 128
-  InversedCameraPixelSize: 0.000001
-  Density: 1
-  Segments:
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  RingShader: {fileID: 4800000, guid: a9feb9e63be258140b2cf47712937820, type: 3}
-  RingMaterial: {fileID: 0}
-  RingSegmentMesh: {fileID: 0}
---- !u!114 &1654467277
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_PrefabParentObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 0}
-  m_GameObject: {fileID: 1654467274}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: eee01d10ee2cf2f49863e51a14761171, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  Light: {fileID: 1370843063}
-  Matrix:
-    e00: -0.00000005882353
-    e01: 0
-    e02: 0
-    e03: 0
-    e10: 0
-    e11: 0
-    e12: 0
-    e13: 0
-    e20: 0
-    e21: -22877332
-    e22: -1
-    e23: 0
-    e30: 0
-    e31: 0
-    e32: 0
-    e33: 1
-  Ratio: 2.4285715
-  Texture: {fileID: 0}
-  InnerRadius: 10000000
-  OuterRadius: 17000000
 --- !u!1 &1690022664
 GameObject:
   m_ObjectHideFlags: 0
@@ -3078,6 +2714,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1690022665}
   - component: {fileID: 1690022666}
+  - component: {fileID: 1690022669}
   - component: {fileID: 1690022668}
   m_Layer: 0
   m_Name: ElevationProducer2
@@ -3129,7 +2766,7 @@ MonoBehaviour:
   m_PrefabParentObject: {fileID: 0}
   m_PrefabInternal: {fileID: 0}
   m_GameObject: {fileID: 1690022664}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 7b5687e3b074ec14088d1516efe48188, type: 3}
   m_Name: 
@@ -3155,6 +2792,22 @@ MonoBehaviour:
   - 2.5
   - 1.5
   - 1
+--- !u!114 &1690022669
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 1690022664}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5ec53317c6476564cb831abd3ffde3f0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  CacheGameObject: {fileID: 2107464336}
+  Name: Elevation
+  IsGPUProducer: 1
+  IsLastInSequence: 0
+  ElevationMaterial: {fileID: 2100000, guid: 10e30e69c04a2894b98bb57ee19eb190, type: 2}
 --- !u!1 &1725033210
 GameObject:
   m_ObjectHideFlags: 0
@@ -3164,6 +2817,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1725033211}
   - component: {fileID: 1725033212}
+  - component: {fileID: 1725033215}
   - component: {fileID: 1725033214}
   m_Layer: 0
   m_Name: ElevationProducer5
@@ -3215,7 +2869,7 @@ MonoBehaviour:
   m_PrefabParentObject: {fileID: 0}
   m_PrefabInternal: {fileID: 0}
   m_GameObject: {fileID: 1725033210}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 7b5687e3b074ec14088d1516efe48188, type: 3}
   m_Name: 
@@ -3241,6 +2895,22 @@ MonoBehaviour:
   - 2.5
   - 1.5
   - 1
+--- !u!114 &1725033215
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 1725033210}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5ec53317c6476564cb831abd3ffde3f0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  CacheGameObject: {fileID: 2107464336}
+  Name: Elevation
+  IsGPUProducer: 1
+  IsLastInSequence: 0
+  ElevationMaterial: {fileID: 2100000, guid: 10e30e69c04a2894b98bb57ee19eb190, type: 2}
 --- !u!1 &1733853063
 GameObject:
   m_ObjectHideFlags: 0
@@ -3269,7 +2939,7 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 1592153269}
-  m_RootOrder: 2
+  m_RootOrder: 3
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &1733853065
 MonoBehaviour:
@@ -3288,7 +2958,7 @@ MonoBehaviour:
   IsLastInSequence: 1
   OrthoCpuProducerGameObject: {fileID: 0}
   UpSampleMaterial: {fileID: 2100000, guid: 190662040420ec24ea4e11512d6b98cf, type: 2}
-  RootNoiseColor: {r: 0.34509805, g: 0.49411765, b: 0.101960786, a: 0}
+  RootNoiseColor: {r: 0.48886022, g: 0.49411762, b: 0.48028234, a: 0}
   NoiseColor: {r: 0.09803922, g: 0.047058824, b: 0.39215687, a: 1}
   MaxLevel: -1
   HSV: 1
@@ -3323,7 +2993,69 @@ MonoBehaviour:
   StoreLeaf: 1
   StoreParent: 1
   StoreInvisible: 0
-  Priority: 2
+  Priority: 3
+--- !u!1 &1792673909
+GameObject:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  serializedVersion: 5
+  m_Component:
+  - component: {fileID: 1792673910}
+  - component: {fileID: 1792673912}
+  - component: {fileID: 1792673911}
+  m_Layer: 0
+  m_Name: ColorCache
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1792673910
+Transform:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 1792673909}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children: []
+  m_Father: {fileID: 1940098943}
+  m_RootOrder: 2
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1792673911
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 1792673909}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4f35c3735d842784e9e5145526c4ce80, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  OnePixelBorder: 1
+  Format: 0
+  WrapMode: 1
+  FilterMode: 1
+  ReadWrite: 0
+  Mipmaps: 0
+  EnableRandomWrite: 0
+  AnisoLevel: 9
+--- !u!114 &1792673912
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 1792673909}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 24ad05f3232d56d42b6dd485a729ac19, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  Capacity: 1296
+  TileStorage: []
 --- !u!1 &1860669607
 GameObject:
   m_ObjectHideFlags: 0
@@ -3352,7 +3084,7 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 1019286897}
-  m_RootOrder: 2
+  m_RootOrder: 3
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &1860669609
 MonoBehaviour:
@@ -3371,7 +3103,7 @@ MonoBehaviour:
   IsLastInSequence: 1
   OrthoCpuProducerGameObject: {fileID: 0}
   UpSampleMaterial: {fileID: 2100000, guid: 190662040420ec24ea4e11512d6b98cf, type: 2}
-  RootNoiseColor: {r: 0.34509805, g: 0.49411765, b: 0.101960786, a: 0}
+  RootNoiseColor: {r: 0.48886022, g: 0.49411762, b: 0.48028234, a: 0}
   NoiseColor: {r: 0.09803922, g: 0.047058824, b: 0.39215687, a: 1}
   MaxLevel: -1
   HSV: 1
@@ -3406,7 +3138,7 @@ MonoBehaviour:
   StoreLeaf: 1
   StoreParent: 1
   StoreInvisible: 0
-  Priority: 2
+  Priority: 3
 --- !u!1 &1869490909
 GameObject:
   m_ObjectHideFlags: 0
@@ -3474,9 +3206,10 @@ Transform:
   m_Children:
   - {fileID: 2107464337}
   - {fileID: 230248928}
+  - {fileID: 1792673910}
   - {fileID: 853442838}
   m_Father: {fileID: 1497659641}
-  m_RootOrder: 8
+  m_RootOrder: 1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1947387572
 GameObject:
@@ -3558,9 +3291,10 @@ Transform:
   m_Children:
   - {fileID: 196657993}
   - {fileID: 1045187562}
+  - {fileID: 2014868082}
   - {fileID: 1986989071}
   m_Father: {fileID: 1497659641}
-  m_RootOrder: 12
+  m_RootOrder: 5
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &1957876121
 MonoBehaviour:
@@ -3576,9 +3310,9 @@ MonoBehaviour:
   TerrainMaterial: {fileID: 0}
   SplitFactor: 2
   MaxLevel: 16
-  MinLevel: 0
-  ZMin: -10000
-  ZMax: 10000
+  MinLevel: 1
+  ZMin: -250
+  ZMax: 250
   Face: 4
   UseHorizonCulling: 0
   SplitInvisibleQuads: 1
@@ -3612,7 +3346,7 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 1957876120}
-  m_RootOrder: 2
+  m_RootOrder: 3
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &1986989072
 MonoBehaviour:
@@ -3631,7 +3365,7 @@ MonoBehaviour:
   IsLastInSequence: 1
   OrthoCpuProducerGameObject: {fileID: 0}
   UpSampleMaterial: {fileID: 2100000, guid: 190662040420ec24ea4e11512d6b98cf, type: 2}
-  RootNoiseColor: {r: 0.34509805, g: 0.49411765, b: 0.101960786, a: 0}
+  RootNoiseColor: {r: 0.48886022, g: 0.49411762, b: 0.48028234, a: 0}
   NoiseColor: {r: 0.09803922, g: 0.047058824, b: 0.39215687, a: 1}
   MaxLevel: -1
   HSV: 1
@@ -3666,7 +3400,7 @@ MonoBehaviour:
   StoreLeaf: 1
   StoreParent: 1
   StoreInvisible: 0
-  Priority: 2
+  Priority: 3
 --- !u!1 &1995852965
 GameObject:
   m_ObjectHideFlags: 0
@@ -3729,109 +3463,136 @@ MonoBehaviour:
   StoreParent: 1
   StoreInvisible: 0
   Priority: 1
---- !u!1 &2014628591
+--- !u!1 &2014868081
 GameObject:
   m_ObjectHideFlags: 0
-  m_PrefabParentObject: {fileID: 0}
+  m_PrefabParentObject: {fileID: 1000013265289394, guid: 7f9c72583485a2647b645e4576290b12,
+    type: 2}
   m_PrefabInternal: {fileID: 0}
   serializedVersion: 5
   m_Component:
-  - component: {fileID: 2014628592}
-  - component: {fileID: 2014628593}
+  - component: {fileID: 2014868082}
+  - component: {fileID: 2014868084}
+  - component: {fileID: 2014868083}
   m_Layer: 0
-  m_Name: TCCPS_Terra
+  m_Name: ColorProducer4
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!4 &2014628592
+--- !u!4 &2014868082
 Transform:
   m_ObjectHideFlags: 0
-  m_PrefabParentObject: {fileID: 0}
+  m_PrefabParentObject: {fileID: 4000012456322590, guid: 7f9c72583485a2647b645e4576290b12,
+    type: 2}
   m_PrefabInternal: {fileID: 0}
-  m_GameObject: {fileID: 2014628591}
+  m_GameObject: {fileID: 2014868081}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
-  m_Father: {fileID: 1497659641}
-  m_RootOrder: 3
+  m_Father: {fileID: 1957876120}
+  m_RootOrder: 2
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &2014628593
+--- !u!114 &2014868083
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_PrefabParentObject: {fileID: 0}
   m_PrefabInternal: {fileID: 0}
-  m_GameObject: {fileID: 2014628591}
+  m_GameObject: {fileID: 2014868081}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 05216d3e989e4794386b6087d793e6ff, type: 3}
+  m_Script: {fileID: 11500000, guid: c2b7101e6e7b55949a6bce83baeecff6, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  Lacunarity: 2.218282
-  H: 0.5
-  Offset: 0.8
-  RidgeSmooth: 0.0001
-  texturingHeightOffset: -0.2125
-  texturingSlopeOffset: 1
-  Randomize: {x: -0.304, y: 0.5, z: -0.912}
-  faceParams: {x: 0, y: 0, z: 1, w: 0}
-  scaleParams: {x: 0, y: 0, z: 0, w: -1}
-  mainParams: {x: 0.865461, y: 0.691191, z: 3, w: 2}
-  colorParams: {x: 0.0502472, y: 1, z: 0.611, w: 0.548}
-  climateParams: {x: 0.428, y: 0.22, z: 0.055, w: 0.289}
-  mareParams: {x: 0.1, y: 1, z: 0.083, w: 0.33}
-  montesParams: {x: 0.412455, y: 1, z: 0.845, w: 0.430004}
-  dunesParams: {x: 0.04637, y: 4.5771, z: 0.0937857, w: -1}
-  hillsParams: {x: 0.91235, y: 2.208, z: 0.894509, w: 0.540188}
-  canyonsParams: {x: 0.252623, y: 1.145, z: 0.865429, w: 1}
-  riversParams: {x: 5.6, y: 4.34576, z: 6.94059, w: 2}
-  cracksParams: {x: 0.03066, y: 1.13444, z: 1, w: 0.0849724}
-  craterParams: {x: 1.45125, y: 2.42152, z: 0.45, w: 4}
-  volcanoParams1: {x: 1.513, y: 5.2523, z: 0.164144, w: 3}
-  volcanoParams2: {x: 0, y: -1, z: 0.638988, w: 1783.18}
-  lavaParams: {x: 0, y: 0, z: 207, w: 0.625}
-  textureParams: {x: 1, y: 0, z: -1, w: 0}
-  cloudsParams1: {x: 0.5, y: 4, z: 1.18, w: 1.28}
-  cloudsParams2: {x: 0, y: 0, z: 0.696, w: 0}
-  cycloneParams: {x: 2.92106, y: 1.03022, z: 0.367564, w: 3}
-  InvSize: {x: 64, y: 36}
-  AutoUpdate: 1
-  MaterialTable:
-    Gradient:
-      serializedVersion: 2
-      key0: {r: 0.40392157, g: 0.40392157, b: 0.40392157, a: 1}
-      key1: {r: 0.654902, g: 0.654902, b: 0.654902, a: 1}
-      key2: {r: 0, g: 0, b: 0, a: 0}
-      key3: {r: 0, g: 0, b: 0, a: 0}
-      key4: {r: 0, g: 0, b: 0, a: 0}
-      key5: {r: 0, g: 0, b: 0, a: 0}
-      key6: {r: 0, g: 0, b: 0, a: 0}
-      key7: {r: 0, g: 0, b: 0, a: 0}
-      ctime0: 0
-      ctime1: 65535
-      ctime2: 0
-      ctime3: 0
-      ctime4: 0
-      ctime5: 0
-      ctime6: 0
-      ctime7: 0
-      atime0: 0
-      atime1: 65535
-      atime2: 0
-      atime3: 0
-      atime4: 0
-      atime5: 0
-      atime6: 0
-      atime7: 0
-      m_Mode: 0
-      m_NumColorKeys: 2
-      m_NumAlphaKeys: 2
-    ReverseX: 0
-    ReverseY: 0
-    NonLinear: 1
-  Engine: 4
+  CacheGameObject: {fileID: 1792673909}
+  Name: Color
+  IsGPUProducer: 1
+  IsLastInSequence: 0
+  NormalsProducerGameObject: {fileID: 1045187561}
+  ElevationProducerGameObject: {fileID: 196657992}
+  ColorMaterial: {fileID: 2100000, guid: 7fbfb50a063edba46b021f070cb7d6b0, type: 2}
+--- !u!114 &2014868084
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 2014868081}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f84ae864f4a27bd4694c212c269ea086, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  StoreLeaf: 1
+  StoreParent: 1
+  StoreInvisible: 0
+  Priority: 2
+--- !u!1 &2021108017
+GameObject:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 1000013265289394, guid: 7f9c72583485a2647b645e4576290b12,
+    type: 2}
+  m_PrefabInternal: {fileID: 0}
+  serializedVersion: 5
+  m_Component:
+  - component: {fileID: 2021108018}
+  - component: {fileID: 2021108020}
+  - component: {fileID: 2021108019}
+  m_Layer: 0
+  m_Name: ColorProducer3
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &2021108018
+Transform:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 4000012456322590, guid: 7f9c72583485a2647b645e4576290b12,
+    type: 2}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 2021108017}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children: []
+  m_Father: {fileID: 1592153269}
+  m_RootOrder: 2
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &2021108019
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 2021108017}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c2b7101e6e7b55949a6bce83baeecff6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  CacheGameObject: {fileID: 1792673909}
+  Name: Color
+  IsGPUProducer: 1
+  IsLastInSequence: 0
+  NormalsProducerGameObject: {fileID: 2089371355}
+  ElevationProducerGameObject: {fileID: 1011657932}
+  ColorMaterial: {fileID: 2100000, guid: 7fbfb50a063edba46b021f070cb7d6b0, type: 2}
+--- !u!114 &2021108020
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 2021108017}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f84ae864f4a27bd4694c212c269ea086, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  StoreLeaf: 1
+  StoreParent: 1
+  StoreInvisible: 0
+  Priority: 2
 --- !u!1 &2073327466
 GameObject:
   m_ObjectHideFlags: 0
@@ -3841,6 +3602,7 @@ GameObject:
   m_Component:
   - component: {fileID: 2073327467}
   - component: {fileID: 2073327468}
+  - component: {fileID: 2073327471}
   - component: {fileID: 2073327470}
   m_Layer: 0
   m_Name: ElevationProducer6
@@ -3892,7 +3654,7 @@ MonoBehaviour:
   m_PrefabParentObject: {fileID: 0}
   m_PrefabInternal: {fileID: 0}
   m_GameObject: {fileID: 2073327466}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 7b5687e3b074ec14088d1516efe48188, type: 3}
   m_Name: 
@@ -3918,6 +3680,22 @@ MonoBehaviour:
   - 2.5
   - 1.5
   - 1
+--- !u!114 &2073327471
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 2073327466}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5ec53317c6476564cb831abd3ffde3f0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  CacheGameObject: {fileID: 2107464336}
+  Name: Elevation
+  IsGPUProducer: 1
+  IsLastInSequence: 0
+  ElevationMaterial: {fileID: 2100000, guid: 10e30e69c04a2894b98bb57ee19eb190, type: 2}
 --- !u!1 &2089371355
 GameObject:
   m_ObjectHideFlags: 0
@@ -4104,3 +3882,68 @@ MonoBehaviour:
   Mipmaps: 0
   EnableRandomWrite: 0
   AnisoLevel: 0
+--- !u!1 &2136489733
+GameObject:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 1000013265289394, guid: 7f9c72583485a2647b645e4576290b12,
+    type: 2}
+  m_PrefabInternal: {fileID: 0}
+  serializedVersion: 5
+  m_Component:
+  - component: {fileID: 2136489734}
+  - component: {fileID: 2136489736}
+  - component: {fileID: 2136489735}
+  m_Layer: 0
+  m_Name: ColorProducer6
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &2136489734
+Transform:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 4000012456322590, guid: 7f9c72583485a2647b645e4576290b12,
+    type: 2}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 2136489733}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children: []
+  m_Father: {fileID: 192751368}
+  m_RootOrder: 2
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &2136489735
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 2136489733}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c2b7101e6e7b55949a6bce83baeecff6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  CacheGameObject: {fileID: 1792673909}
+  Name: Color
+  IsGPUProducer: 1
+  IsLastInSequence: 0
+  NormalsProducerGameObject: {fileID: 2104141347}
+  ElevationProducerGameObject: {fileID: 2073327466}
+  ColorMaterial: {fileID: 2100000, guid: 7fbfb50a063edba46b021f070cb7d6b0, type: 2}
+--- !u!114 &2136489736
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 2136489733}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f84ae864f4a27bd4694c212c269ea086, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  StoreLeaf: 1
+  StoreParent: 1
+  StoreInvisible: 0
+  Priority: 2
