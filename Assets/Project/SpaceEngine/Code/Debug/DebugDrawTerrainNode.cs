@@ -1,7 +1,7 @@
 ﻿#region License
 // Procedural planet generator.
 // 
-// Copyright (C) 2015-2017 Denis Ovchinnikov [zameran] 
+// Copyright (C) 2015-2018 Denis Ovchinnikov [zameran] 
 // All rights reserved.
 // 
 // Redistribution and use in source and binary forms, with or without
@@ -33,13 +33,13 @@
 // Creator: zameran
 #endregion
 
-
 using UnityEngine;
 
 namespace SpaceEngine.Debugging
 {
     public sealed class DebugDrawTerrainNode : DebugDraw
     {
+        private readonly int[,] ORDER = new int[,] { { 1, 0 }, { 2, 3 }, { 0, 2 }, { 3, 1 } };
         private readonly Color[] Colors = new Color[] { Color.blue, Color.red, Color.yellow, Color.green, Color.magenta, Color.cyan };
 
         protected override void Start()
@@ -59,22 +59,18 @@ namespace SpaceEngine.Debugging
 
         protected override void Draw()
         {
-#if UNITY_EDITOR
-            if (UnityEditor.SceneView.currentDrawingSceneView != null) return; //Do not draw at Scene tab in editor.
-#endif
-
             var target = GodManager.Instance.ActiveBody;
 
             if (target == null) return;
 
-            for (byte i = 0; i < target.TerrainNodes.Count; i++)
+            for (var i = 0; i < target.TerrainNodes.Count; i++)
             {
                 var q = target.TerrainNodes[i];
                 var root = q.TerrainQuadRoot;
 
                 if (root == null) continue;
 
-                root.DrawQuadOutline(CameraHelper.Main(), lineMaterial, Colors[q.Face % 6]);
+                root.DrawQuadOutline(CameraHelper.Main(), lineMaterial, Colors[q.Face % 6], ORDER);
             }
         }
     }

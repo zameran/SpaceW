@@ -32,7 +32,7 @@
 
 /*
  * Author: Vladimir Romanyuk
- * Modified and ported to Unity by Denis Ovchinnikov 2015-2017
+ * Modified and ported to Unity by Denis Ovchinnikov 2015-2018
  */
 
 // NOTE:
@@ -93,30 +93,28 @@
 
 //-----------------------------------------------------------------------------
 uniform float3    Randomize;      // Randomize
-uniform float4    faceParams;     // (x0,             y0,             size,                   face)
-uniform float4    scaleParams;    // (offsU,          offsV,          scale,                  tidalLock)
-uniform float4    mainParams;     // (mainFreq,       terraceProb,    surfClass,              snowLevel)
-uniform float4    colorParams;    // (colorDistMagn,  colorDistFreq,  latIceCaps,             latTropic)
-uniform float4    climateParams;  // (climatePole,    climateTropic,  climateEquator,         tropicWidth)
-uniform float4    mareParams;     // (seaLevel,       mareFreq,       sqrt(mareDensity),      icecapHeight)
-uniform float4    montesParams;   // (montesMagn,     montesFreq,     montesFraction,         montesSpiky)
-uniform float4    dunesParams;    // (dunesMagn,      dunesFreq,      dunesDensity,           drivenDarkening)
-uniform float4    hillsParams;    // (hillsMagn,      hillsFreq,      hillsDensity,           hills2Density)
-uniform float4    canyonsParams;  // (canyonsMagn,    canyonsFreq,    canyonsFraction,        erosion)
-uniform float4    riversParams;   // (riversMagn,     riversFreq,     riversSin,              riversOctaves)
-uniform float4    cracksParams;   // (cracksMagn,     cracksFreq,     cracksOctaves,          craterRayedFactor)
-uniform float4    craterParams;   // (craterMagn,     craterFreq,     sqrt(craterDensity),    craterOctaves)
-uniform float4    volcanoParams1; // (volcanoMagn,    volcanoFreq,    sqrt(volcanoDensity),   volcanoOctaves)
-uniform float4    volcanoParams2; // (volcanoActivity,volcanoFlows,   volcanoRadius,          volcanoTemp)
-uniform float4    lavaParams;	  // (lavaCoverage,   lavaTemperature,surfTemperature,        heightTempGrad)
-uniform float4    textureParams;  // (texScale,       texColorConv,   venusMagn,              venusFreq)
-uniform float4    cloudsParams1;  // (cloudsFreq,     cloudsOctaves,  stripeZones,		      stripeTwist)
-uniform float4    cloudsParams2;  // (cloudsLayer,    cloudsNLayers,  stripeFluct,            cloudsCoverage)
-uniform float4    cycloneParams;  // (cycloneMagn,    cycloneFreq,    cycloneDensity,		  cycloneOctaves)
-uniform float4	  planetGlobalColor;	 // ()
+uniform float4    faceParams;     // (x0,             y0,             size,                face)
+uniform float4    scaleParams;    // (offsU,          offsV,          scale,               0.0)
+uniform float4    mainParams;     // (mainFreq,       terraceProb,    surfClass,           tidalLock)
+uniform float4    colorParams;    // (colorDistMagn,  colorDistFreq,  latIceCaps,          latTropic)
+uniform float4    climateParams;  // (climatePole,    climateTropic,  climateEquator,      tropicWidth)
+uniform float4    mareParams;     // (seaLevel,       mareFreq,       sqrt(mareDensity),   icecapHeight)
+uniform float4    montesParams;   // (montesMagn,     montesFreq,     montesFraction,      montesSpiky)
+uniform float4    dunesParams;    // (dunesMagn,      dunesFreq,      dunesDensity,        drivenDarkening)
+uniform float4    hillsParams;    // (hillsMagn,      hillsFreq,      hillsDensity,        hills2Density)
+uniform float4    canyonsParams;  // (canyonsMagn,    canyonsFreq,    canyonsFraction,     erosion)
+uniform float4    riversParams;   // (riversMagn,     riversFreq,     riversSin,           riversOctaves)
+uniform float4    cracksParams;   // (cracksMagn,     cracksFreq,     cracksOctaves,       craterRayedFactor)
+uniform float4    craterParams;   // (craterMagn,     craterFreq,     sqrt(craterDensity), craterOctaves)
+uniform float4    volcanoParams1; // (volcanoMagn,    volcanoFreq,    volcanoDensity,      volcanoOctaves)
+uniform float4    volcanoParams2; // (volcanoActivity,volcanoFlows,   volcanoRadius,       volcanoTemp)
+uniform float4    lavaParams;	  // (lavaCoverage,   snowLevel,      surfTemperature,     heightTempGrad)
+uniform float4    textureParams;  // (texScale,       texColorConv,   venusMagn,           venusFreq)
+uniform float4    cloudsParams1;  // (cloudsFreq,     cloudsOctaves,  stripeZones,         stripeTwist)
+uniform float4    cloudsParams2;  // (cloudsLayer,    cloudsNLayers,  stripeFluct,         cloudsCoverage)
+uniform float4    cycloneParams;  // (cycloneMagn,    cycloneFreq,    cycloneDensity,      cycloneOctaves)
 uniform float	  texturingHeightOffset; // ()
 uniform float	  texturingSlopeOffset;  // ()
-uniform float2	  texturingUVAtlasOffset;// ()
 uniform float2	  InvSize;				 // ()
 //-----------------------------------------------------------------------------
 
@@ -125,11 +123,12 @@ uniform sampler2D	PermSampler;		// 3d
 uniform sampler2D	PermGradSampler;	// 3d
 uniform sampler2D	PermSamplerGL;		// 2d
 uniform sampler2D	PermGradSamplerGL;	// 2d
-uniform sampler1D   CloudsColorTable;   // clouds color table
+uniform sampler1D	CloudsColorTable;   // clouds color table
 
-uniform sampler2D   MaterialTable;      // material parameters table
+uniform sampler2D	MaterialTable;      // material parameters table
 
-uniform sampler2D   AtlasDiffSampler;   // detail texture diffuse atlas
+uniform sampler2D	AtlasDiffSampler;   // detail texture diffuse atlas
+uniform sampler2D	PlanetColorMap;
 //-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
@@ -147,89 +146,96 @@ uniform float noiseRidgeSmooth;// = 0.0001;
 //-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
-#define     tidalLock           scaleParams.w
-#define		mainFreq			mainParams.x
-#define     terraceProb         mainParams.y
-#define     surfClass           mainParams.z
-#define     snowLevel           mainParams.w
-#define     colorDistMagn       colorParams.x
-#define     colorDistFreq       colorParams.y
-#define     latIceCaps          colorParams.z
-#define     latTropic           colorParams.w
-#define     climatePole         climateParams.x
-#define     climateTropic       climateParams.y
-#define     climateEquator      climateParams.z
-#define     tropicWidth         climateParams.w
-#define     seaLevel            mareParams.x
-#define     mareFreq            mareParams.y
-#define     mareSqrtDensity     mareParams.z
-#define     icecapHeight        mareParams.w
-#define     montesMagn          montesParams.x
-#define     montesFreq          montesParams.y
-#define     montesFraction      montesParams.z
-#define     montesSpiky         montesParams.w
-#define     dunesMagn           dunesParams.x
-#define     dunesFreq           dunesParams.y
-#define     dunesFraction       dunesParams.z
-#define     drivenDarkening     dunesParams.w
-#define     hillsMagn           hillsParams.x
-#define     hillsFreq           hillsParams.y
-#define     hillsFraction       hillsParams.z
-#define     hills2Fraction      hillsParams.w
-#define     canyonsMagn         canyonsParams.x
-#define     canyonsFreq         canyonsParams.y
-#define     canyonsFraction     canyonsParams.z
-#define     erosion             canyonsParams.w
-#define     riversMagn          riversParams.x
-#define     riversFreq          riversParams.y
-#define     riversSin           riversParams.z
-#define     riversOctaves       riversParams.w
-#define     cracksMagn          cracksParams.x
-#define     cracksFreq          cracksParams.y
-#define     cracksOctaves       cracksParams.z
-#define     craterRayedFactor   cracksParams.w
-#define     craterMagn          craterParams.x
-#define     craterFreq          craterParams.y
-#define     craterSqrtDensity   craterParams.z
-#define     craterOctaves       craterParams.w
-#define     volcanoMagn         volcanoParams1.x
-#define     volcanoFreq         volcanoParams1.y
-#define     volcanoDensity		volcanoParams1.z
-#define     volcanoOctaves      volcanoParams1.w
-#define     volcanoActivity     volcanoParams2.x
-#define     volcanoFlows        volcanoParams2.y
-#define     volcanoRadius       volcanoParams2.z
-#define     volcanoTemp         volcanoParams2.w
-#define     lavaCoverage        lavaParams.x
-#define     lavaTemperature     lavaParams.y
-#define     surfTemperature     lavaParams.z
-#define     heightTempGrad      lavaParams.w
-#define     texScale            textureParams.x
-#define     texColorConv        textureParams.y
-#define     venusMagn           textureParams.z
-#define     venusFreq           textureParams.w
-#define     cloudsFreq          cloudsParams1.x
-#define     cloudsOctaves       cloudsParams1.y
-#define     stripeZones         cloudsParams1.z
-#define     stripeTwist         cloudsParams1.w
-#define     cloudsLayer         cloudsParams2.x
-#define     cloudsNLayers       cloudsParams2.y
-#define     stripeFluct         cloudsParams2.z
-#define     cloudsCoverage      cloudsParams2.w
-#define     cycloneMagn         cycloneParams.x
-#define     cycloneFreq         cycloneParams.y
-#define     cycloneDensity		cycloneParams.z
-#define     cycloneOctaves      cycloneParams.w
+// NOTE : Compute shaders doesn't support these macro...
+#if defined (COMPUTE_SHADER)
+#define UNITY_BRANCH
+#define UNITY_UNROLL
+#endif
 //-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
-#define			saturate(x) clamp(x, 0.0, 1.0)
-#define			madfrac(A, B) mad((A), (B), -floor((A) * (B)))
+#define		mainFreq            mainParams.x
+#define		terraceProb         mainParams.y
+#define		surfClass           mainParams.z
+#define		tidalLock           mainParams.w
+#define		colorDistMagn       colorParams.x
+#define		colorDistFreq       colorParams.y
+#define		latIceCaps          colorParams.z
+#define		latTropic           colorParams.w
+#define		climatePole         climateParams.x
+#define		climateTropic       climateParams.y
+#define		climateEquator      climateParams.z
+#define		tropicWidth         climateParams.w
+#define		seaLevel            mareParams.x
+#define		mareFreq            mareParams.y
+#define		mareSqrtDensity     mareParams.z
+#define		icecapHeight        mareParams.w
+#define		montesMagn          montesParams.x
+#define		montesFreq          montesParams.y
+#define		montesFraction      montesParams.z
+#define		montesSpiky         montesParams.w
+#define		dunesMagn           dunesParams.x
+#define		dunesFreq           dunesParams.y
+#define		dunesFraction       dunesParams.z
+#define		drivenDarkening     dunesParams.w
+#define		hillsMagn           hillsParams.x
+#define		hillsFreq           hillsParams.y
+#define		hillsFraction       hillsParams.z
+#define		hills2Fraction      hillsParams.w
+#define		canyonsMagn         canyonsParams.x
+#define		canyonsFreq         canyonsParams.y
+#define		canyonsFraction     canyonsParams.z
+#define		erosion             canyonsParams.w
+#define		riversMagn          riversParams.x
+#define		riversFreq          riversParams.y
+#define		riversSin           riversParams.z
+#define		riversOctaves       riversParams.w
+#define		cracksMagn          cracksParams.x
+#define		cracksFreq          cracksParams.y
+#define		cracksOctaves       cracksParams.z
+#define		craterRayedFactor   cracksParams.w
+#define		craterMagn          craterParams.x
+#define		craterFreq          craterParams.y
+#define		craterSqrtDensity   craterParams.z
+#define		craterOctaves       craterParams.w
+#define		volcanoMagn         volcanoParams1.x
+#define		volcanoFreq         volcanoParams1.y
+#define		volcanoDensity      volcanoParams1.z
+#define		volcanoOctaves      volcanoParams1.w
+#define		volcanoActivity     volcanoParams2.x
+#define		volcanoFlows        volcanoParams2.y
+#define		volcanoRadius       volcanoParams2.z
+#define		volcanoTemp         volcanoParams2.w
+#define		lavaCoverage        lavaParams.x
+#define		snowLevel           lavaParams.y
+#define		surfTemperature     lavaParams.z
+#define		heightTempGrad      lavaParams.w
+#define		texScale            textureParams.x
+#define		texColorConv        textureParams.y
+#define		venusMagn           textureParams.z
+#define		venusFreq           textureParams.w
+#define		cloudsFreq          cloudsParams1.x
+#define		cloudsOctaves       cloudsParams1.y
+#define		stripeZones         cloudsParams1.z
+#define		stripeTwist         cloudsParams1.w
+#define		cloudsLayer         cloudsParams2.x
+#define		cloudsNLayers       cloudsParams2.y
+#define		stripeFluct         cloudsParams2.z
+#define		cloudsCoverage      cloudsParams2.w
+#define		cycloneMagn         cycloneParams.x
+#define		cycloneFreq         cycloneParams.y
+#define		cycloneDensity      cycloneParams.z
+#define		cycloneOctaves      cycloneParams.w
 //-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
-#define     GetCloudsColor(height)           tex2Dlod(CloudsColorTable, float2(height, 0.0)
-#define     GetGasGiantCloudsColor(height)   tex2Dlod(MaterialTable, float4(height, 0.0, 0.0, 0.0))
+#define		saturate(x) clamp(x, 0.0, 1.0)
+#define		madfrac(A, B) mad((A), (B), -floor((A) * (B)))
+//-----------------------------------------------------------------------------
+
+//-----------------------------------------------------------------------------
+#define		GetCloudsColor(height)           tex2Dlod(CloudsColorTable, float2(height, 0.0)
+#define		GetGasGiantCloudsColor(height)   tex2Dlod(MaterialTable, float4(height, 0.0, 0.0, 0.0))
 //-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
@@ -241,6 +247,18 @@ inline float SavePow(float f, float p)
 		return pow(f, p);
 	#endif
 }
+//-----------------------------------------------------------------------------
+
+//-----------------------------------------------------------------------------
+float Wrap(float value, float minimum, float maximum)
+{
+	float rangeSize = maximum - minimum;
+
+	return (minimum + (value - minimum) - (rangeSize * floor((value - minimum) / rangeSize)));
+}
+
+float Wrap01(float value) { return Wrap(value, 0.0, 1.0); }
+float Wrap101(float value) { return Wrap(value, -1.0, 1.0); }
 //-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
@@ -266,32 +284,58 @@ inline float Repeat(float t, float l)
 	return t - floor(t / l) * l;
 }
 
-float3 Rotate(float Angle, float3 Axis, float3 Vector)
+float3 Rotate2d(float a, float3 v)
 {
-	float cosa = cos(Angle);
-	float sina = sin(Angle);
+	float cosa = cos(a);
+	float sina = sin(a);
+
+	return mul(v, float3x3(cosa, sina, 0.0, -sina, cosa, 0.0, 0.0, 0.0, 1.0));
+}
+
+float3 Rotate(float angle, float3 axis, float3 v)
+{
+	float cosa = cos(angle);
+	float sina = sin(angle);
 
 	float t = 1.0 - cosa;
 
 	float3x3 M = float3x3
 	(
-		t * Axis.x * Axis.x + cosa,
-		t * Axis.x * Axis.y - sina * Axis.z,
-		t * Axis.x * Axis.z + sina * Axis.y,
-		t * Axis.x * Axis.y + sina * Axis.z,
-		t * Axis.y * Axis.y + cosa,
-		t * Axis.y * Axis.z - sina * Axis.x,
-		t * Axis.x * Axis.z - sina * Axis.y,
-		t * Axis.y * Axis.z + sina * Axis.x,
-		t * Axis.z * Axis.z + cosa
+		t * axis.x * axis.x + cosa,
+		t * axis.x * axis.y - sina * axis.z,
+		t * axis.x * axis.z + sina * axis.y,
+		t * axis.x * axis.y + sina * axis.z,
+		t * axis.y * axis.y + cosa,
+		t * axis.y * axis.z - sina * axis.x,
+		t * axis.x * axis.z - sina * axis.y,
+		t * axis.y * axis.z + sina * axis.x,
+		t * axis.z * axis.z + cosa
 	);
 
-	return mul(M, Vector);
+	return mul(M, v);
 }
 
 float2x2 Inverse(float2x2 m) 
 {
   return float2x2(m[1][1], -m[0][1], -m[1][0], m[0][0]) / (m[0][0] * m[1][1] - m[0][1] * m[1][0]);
+}
+//-----------------------------------------------------------------------------
+
+//-----------------------------------------------------------------------------
+// Normal vector blending. Source: http://blog.selfshadow.com/publications/blending-in-detail/
+float3 BlendNormalUnity(float4 n1, float4 n2)
+{
+	const float4 size = float4(2.0, 2.0, 2.0, -2.0);
+	const float4 offset = float4(-1.0, -1.0, -1.0, 1.0);
+
+	n1 = n1.xyzz * size + offset;
+	n2 = n2 * 2.0 - 1.0;
+
+	float3 r = float3(dot(n1.zxx, n2.xyz),
+					  dot(n1.yzy, n2.xyz),
+					  dot(n1.xyw, -n2.xyz));
+
+	return normalize(r);
 }
 //-----------------------------------------------------------------------------
 
@@ -324,6 +368,7 @@ float3 SphericalToCartesian(float2 spherical)
 
 float3 GetPlanetPoint(float3 pos, float face)
 {
+	UNITY_BRANCH 
 	if (face == 6.0)	// global
 	{
 		float2 spherical;
@@ -337,6 +382,7 @@ float3 GetPlanetPoint(float3 pos, float face)
 	{
 		float3 p = normalize(pos);
 
+		UNITY_BRANCH
 		if (face == 0.0)
 			return float3( p.z, -p.y, -p.x);  // neg_x
 		else if (face == 1.0)
@@ -409,7 +455,7 @@ inline float2 dFdx(float2 p)
 
 inline float2 dFdy(float2 p)
 {
-	return float2(p.y * p.y - p.x, p.y);
+	return float2(p.y * p.y - p.x, p.x);
 }
 
 float2 Fwidth(float2 texCoord, float2 size)
@@ -464,15 +510,15 @@ float3 rgb2hsl(float3 rgb)
 	return hsl;
 	*/
 	
-	const float4 K = float4(0.0, -1.0 / 3.0, 2.0 / 3.0, -1.0);
+	const float4 K = float4(0.0f, -1.0f / 3.0f, 2.0f / 3.0f, -1.0f);
+	const float e = 1.0e-10f;
+
 	float4 p = lerp(float4(rgb.bg, K.wz), float4(rgb.gb, K.xy), step(rgb.b, rgb.g));
 	float4 q = lerp(float4(p.xyw, rgb.r), float4(rgb.r, p.yzx), step(p.x, rgb.r));
 
 	float d = q.x - min(q.w, q.y);
 
-	const float e = 1.0e-10;
-
-	return float3(abs(q.z + (q.w - q.y) / (6.0 * d + e)), d / (q.x + e), q.x);
+	return float3(abs(q.z + (q.w - q.y) / (6.0f * d + e)), d / (q.x + e), q.x);
 }
 
 float3 hsl2rgb(float3 hsl)
@@ -511,18 +557,18 @@ float3 hsl2rgb(float3 hsl)
 	return rgb;
 	*/
 
-	const float4 K = float4(1.0, 2.0 / 3.0, 1.0 / 3.0, 3.0);
+	const float4 K = float4(1.0f, 2.0f / 3.0f, 1.0f / 3.0f, 3.0f);
 
-	float3 p = abs(frac(hsl.xxx + K.xyz) * 6.0 - K.www);
+	float3 p = abs(frac(hsl.xxx + K.xyz) * 6.0f - K.www);
 
-	return hsl.z * lerp(K.xxx, clamp(p - K.xxx, 0.0, 1.0), hsl.y);
+	return hsl.z * lerp(K.xxx, clamp(p - K.xxx, 0.0f, 1.0f), hsl.y);
 }
 
-float3 hue2rgb(in float H)
+float3 hue2rgb(in float h)
 {
-	float R = abs(H * 6 - 3) - 1;
-	float G = 2 - abs(H * 6 - 2);
-	float B = 2 - abs(H * 6 - 4);
+	float R = abs(h * 6.0f - 3.0f) - 1.0f;
+	float G = 2.0f - abs(h * 6.0f - 2.0f);
+	float B = 2.0f - abs(h * 6.0f - 4.0f);
 
 	return saturate(float3(R, G, B));
 }
@@ -530,11 +576,11 @@ float3 hue2rgb(in float H)
 float3 rgb2hcv(in float3 rgb)
 {
 	// Based on work by Sam Hocevar and Emil Persson
-	float4 P = (rgb.g < rgb.b) ? float4(rgb.bg, -1.0, 2.0 / 3.0) : float4(rgb.gb, 0.0, -1.0 / 3.0);
+	float4 P = (rgb.g < rgb.b) ? float4(rgb.bg, -1.0f, 2.0f / 3.0f) : float4(rgb.gb, 0.0f, -1.0f / 3.0f);
 	float4 Q = (rgb.r < P.x) ? float4(P.xyw, rgb.r) : float4(rgb.r, P.yzx);
 
 	float C = Q.x - min(Q.w, Q.y);
-	float H = abs((Q.w - Q.y) / (6 * C + EPSILON) + Q.z);
+	float H = abs((Q.w - Q.y) / (6.0f * C + EPSILON) + Q.z);
 
 	return float3(H, C, Q.x);
 }
@@ -552,7 +598,7 @@ float3 hsv2rgb(in float3 hsv)
 {
 	float3 rgb = hue2rgb(hsv.x);
 
-	return ((rgb - 1) * hsv.y + 1) * hsv.z;
+	return ((rgb - 1.0f) * hsv.y + 1.0f) * hsv.z;
 }
 //-----------------------------------------------------------------------------
 
@@ -563,73 +609,27 @@ inline float4 hash4(float2 p) { return frac(sin(float4(dot(p, float2(127.1, 311.
 //-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
-inline Surface Blend(Surface s0, Surface s1, float t)
-{
-	Surface output;
-
-	output.color = lerp(s0.color, s1.color, t);
-	output.height = lerp(s0.height, s1.height, t);
-
-	return output;
-}
-
-inline Surface BlendSmart(Surface s0, Surface s1, float t)
-{
-	float a0 = s0.height + 1.0 - t;
-	float a1 = s1.height + t;
-	float ma = max(a0, a1) - 0.5;
-	float b0 = max(a0 - ma, 0);
-	float b1 = max(a1 - ma, 0);
-
-	ma = 1.0 / (b0 + b1);
-	b0 *= ma;
-	b1 *= ma;
-
-	Surface res;
-
-	res.color  = s0.color  * b0 + s1.color  * b1;
-	res.height = s0.height * b0 + s1.height * b1;
-
-	return res;
-}
-
-inline float2 ruvy(float2 uv)
-{
-	return float2(uv.x, 1.0 - uv.y);
-}
-
-inline float3 ruvy(float3 uv)
-{
-	return float3(uv.x, 1.0 - uv.y, uv.z);
-}
-
-inline float4 ruvy(float4 uv)
-{
-	return float4(uv.x, 1.0 - uv.y, uv.z, uv.w);
-}
-//-----------------------------------------------------------------------------
-
-//-----------------------------------------------------------------------------
 Surface GetSurfaceColorAtlas(float height, float slope, float vary)
 {
-	const float4  PackFactors = float4(1.0 / ATLAS_RES_X, 1.0 / ATLAS_RES_Y, ATLAS_TILE_RES, ATLAS_TILE_RES_LOG2);
-	slope = saturate(slope * 0.5);
+	const float4 PackFactors = float4(1.0f / ATLAS_RES_X, 1.0f / ATLAS_RES_Y, ATLAS_TILE_RES, ATLAS_TILE_RES_LOG2);
 
-	float4 IdScale = tex2D(MaterialTable, float2(height + texturingHeightOffset, slope + 0.5));
+	slope = saturate(slope * 0.5f);
+
+	float4 IdScale = tex2D(MaterialTable, float2(height + texturingHeightOffset, slope + 0.5f));
 	uint materialID = min(uint(IdScale.x) + uint(vary), uint(ATLAS_RES_X * ATLAS_RES_Y - 1));
 	float2 tileOffs = float2(materialID % ATLAS_RES_X, materialID / ATLAS_RES_X) * PackFactors.xy;
 
 	Surface res;
 
-	float2 tileUV = (float2(1.0, 1.0) * faceParams.z + faceParams.xy) * texScale * IdScale.y;
+	float2 tileUV = (float2(1.0f, 1.0f) * faceParams.z + faceParams.xy) * texScale * IdScale.y;
 	float2 invSize = InvSize * PackFactors.xy;
-	float2 uv = float2(materialID % ATLAS_RES_X, materialID / ATLAS_RES_X) * PackFactors.xy + frac(tileUV) * (PackFactors.xy - invSize) + 0.5 * invSize;
+	float2 uv = tileOffs + frac(tileUV) * (PackFactors.xy - invSize) + 0.5f * invSize;
 
 	#if (TILING_FIX_MODE == 0)
-		res.color = tex2D(AtlasDiffSampler, ruvy(uv));
+		res.color = tex2D(AtlasDiffSampler, uv);
 	#elif (TILING_FIX_MODE == 1)
-		float2 uv2 = tileOffs + frac(-0.173 * tileUV) * (PackFactors.xy - invSize) + 0.5 * invSize;
-		res.color = lerp(tex2D(AtlasDiffSampler, ruvy(uv)), tex2D(AtlasDiffSampler, ruvy(uv2)), 0.5);
+		float2 uv2 = tileOffs + frac(-0.173f * tileUV) * (PackFactors.xy - invSize) + 0.5f * invSize;
+		res.color = lerp(tex2D(AtlasDiffSampler, uv), tex2D(AtlasDiffSampler, uv2), 0.5f);
 	#endif
 
 	res.height = res.color.a;
@@ -639,7 +639,48 @@ Surface GetSurfaceColorAtlas(float height, float slope, float vary)
 
 	float3 hsl = rgb2hsl(res.color.rgb);
 	hsl.x  = frac(hsl.x  + adjust.x);
-	hsl.yz = clamp(hsl.yz + adjust.yz, 0.0, 1.0);
+	hsl.yz = clamp(hsl.yz + adjust.yz, 0.0f, 1.0f);
+
+	res.color.rgb = hsl2rgb(hsl);
+	res.color.a = adjust.a;
+
+	return res;
+}
+
+Surface GetSurfaceColorAtlas(float2 texcoord, float height, float slope, float vary)
+{
+	const float4 PackFactors = float4(1.0f / ATLAS_RES_X, 1.0f / ATLAS_RES_Y, ATLAS_TILE_RES, ATLAS_TILE_RES_LOG2);
+
+	slope = saturate(slope * 0.5f);
+
+	float4 IdScale = tex2D(MaterialTable, float2(height, slope + 0.5f));
+	uint materialID = min(uint(IdScale.r) + uint(vary), uint(ATLAS_RES_X * ATLAS_RES_Y - 1));
+	float2 tileOffs = float2(materialID % ATLAS_RES_X, materialID / ATLAS_RES_X) * PackFactors.xy;
+
+	Surface res;
+
+	float2 tileUV = (texcoord * faceParams.z + faceParams.xy) * texScale * IdScale.g;
+	float2 dx = ddx(tileUV * PackFactors.z);
+	float2 dy = ddy(tileUV * PackFactors.z);
+	float lod = clamp(0.5f * log2(max(dot(dx, dx), dot(dy, dy))), 0.0f, PackFactors.w);
+	float2 invSize = pow(2.0f, lod - PackFactors.w) * PackFactors.xy;
+	float2 uv = tileOffs + frac(tileUV) * (PackFactors.xy - invSize) + 0.5f * invSize;
+
+	#if (TILING_FIX_MODE == 0)
+		res.color = tex2Dlod(AtlasDiffSampler, float4(uv, lod, 0.0));
+	#elif (TILING_FIX_MODE == 1)
+		float2 uv2 = tileOffs + frac(-0.173f * tileUV) * (PackFactors.xy - invSize) + 0.5f * invSize;
+		res.color = lerp(tex2D(AtlasDiffSampler, float4(uv, lod, 0.0f)), tex2D(AtlasDiffSampler, float4(uv2, lod, 0.0f)), 0.5f);
+	#endif
+
+	res.height = res.color.a;
+
+	float4 adjust = tex2D(MaterialTable, float2(height, slope));
+	adjust.rgb *= texColorConv;
+
+	float3 hsl = rgb2hsl(res.color.rgb);
+	hsl.x  = frac(hsl.x  + adjust.r);
+	hsl.yz = clamp(hsl.yz + adjust.gb, 0.0f, 1.0f);
 
 	res.color.rgb = hsl2rgb(hsl);
 	res.color.a = adjust.a;
@@ -656,25 +697,40 @@ Surface GetSurfaceColorAtlas(float height, float slope, float vary)
 
 Surface GetSurfaceColor(float height, float slope, float vary)
 {
-	return GetSurfaceColorAtlas(height, slope, vary * 4.0);
+	return GetSurfaceColorAtlas(height, slope, vary * 4.0f);
+}
+
+Surface GetSurfaceColor(float2 texcoord, float height, float slope, float vary)
+{
+	return GetSurfaceColorAtlas(texcoord, height, slope, vary * 4.0f);
 }
 
 #elif (TILE_BLEND_MODE == 1)
 
+inline Surface Blend(in Surface s0, in Surface s1, float t)
+{
+	Surface output;
+
+	output.color = lerp(s0.color, s1.color, t);
+	output.height = lerp(s0.height, s1.height, t);
+
+	return output;
+}
+
 Surface GetSurfaceColor(float height, float slope, float vary)
 {
-	height = clamp(height - 0.0625, 0.0, 1.0);
-	slope  = clamp(slope  + 0.1250, 0.0, 1.0);
+	height = clamp(height - 0.0625f, 0.0f, 1.0f);
+	slope  = clamp(slope  + 0.1250f, 0.0f, 1.0f);
 
-	float h0 = floor(height * 8.0) * 0.125;
-	float h1 = h0 + 0.125;
-	float dh = (height - h0) * 8.0;
-	float s0 = floor(slope  * 4.0) * 0.25;
-	float s1 = s0 - 0.25;
-	float ds = 1.0 - (slope - s0) * 4.0;
-	float v0 = floor(vary * 16.0) * 0.25;
-	float v1 = v0 - 0.25;
-	float dv = 1.0 - (vary * 4.0 - v0) * 4.0;
+	float h0 = floor(height * 8.0f) * 0.125f;
+	float h1 = h0 + 0.125f;
+	float dh = (height - h0) * 8.0f;
+	float s0 = floor(slope  * 4.0f) * 0.25f;
+	float s1 = s0 - 0.25f;
+	float ds = 1.0f - (slope - s0) * 4.0f;
+	float v0 = floor(vary * 16.0f) * 0.25f;
+	float v1 = v0 - 0.25f;
+	float dv = 1.0f - (vary * 4.0f - v0) * 4.0f;
 
 	Surface surfH0, surfH1;
 	Surface surfS0, surfS1;
@@ -703,22 +759,84 @@ Surface GetSurfaceColor(float height, float slope, float vary)
 	return   Blend(surfV0, surfV1, dv);
 }
 
+Surface GetSurfaceColor(float2 texcoord, float height, float slope, float vary)
+{
+	height = clamp(height - 0.0625f, 0.0f, 1.0f);
+	slope  = clamp(slope  + 0.1250f, 0.0f, 1.0f);
+
+	float h0 = floor(height * 8.0f) * 0.125f;
+	float h1 = h0 + 0.125f;
+	float dh = (height - h0) * 8.0f;
+	float s0 = floor(slope  * 4.0f) * 0.25f;
+	float s1 = s0 - 0.25f;
+	float ds = 1.0f - (slope - s0) * 4.0f;
+	float v0 = floor(vary * 16.0f) * 0.25f;
+	float v1 = v0 - 0.25f;
+	float dv = 1.0f - (vary * 4.0f - v0) * 4.0f;
+
+	Surface surfH0, surfH1;
+	Surface surfS0, surfS1;
+	Surface surfV0, surfV1;
+
+	surfH0 = GetSurfaceColorAtlas(texcoord, h0, s0, v0);
+	surfH1 = GetSurfaceColorAtlas(texcoord, h1, s0, v0);
+	surfS0 = Blend(surfH0, surfH1, dh);
+
+	surfH0 = GetSurfaceColorAtlas(texcoord, h0, s1, v0);
+	surfH1 = GetSurfaceColorAtlas(texcoord, h1, s1, v0);
+	surfS1 = Blend(surfH0, surfH1, dh);
+
+	surfV0 = Blend(surfS0, surfS1, ds);
+
+	surfH0 = GetSurfaceColorAtlas(texcoord, h0, s0, v1);
+	surfH1 = GetSurfaceColorAtlas(texcoord, h1, s0, v1);
+	surfS0 = Blend(surfH0, surfH1, dh);
+
+	surfH0 = GetSurfaceColorAtlas(texcoord, h0, s1, v1);
+	surfH1 = GetSurfaceColorAtlas(texcoord, h1, s1, v1);
+	surfS1 = Blend(surfH0, surfH1, dh);
+
+	surfV1 = Blend(surfS0, surfS1, ds);
+
+	return   Blend(surfV0, surfV1, dv);
+}
+
 #elif (TILE_BLEND_MODE == 2)
+
+inline Surface BlendSmart(in Surface s0, in Surface s1, in float t)
+{
+	float a0 = s0.height + 1.0f - t;
+	float a1 = s1.height + t;
+	float ma = max(a0, a1) - 0.5f;
+	float b0 = max(a0 - ma, 0.0f);
+	float b1 = max(a1 - ma, 0.0f);
+
+	ma = 1.0f / (b0 + b1);
+	b0 *= ma;
+	b1 *= ma;
+
+	Surface res;
+
+	res.color  = s0.color  * b0 + s1.color  * b1;
+	res.height = s0.height * b0 + s1.height * b1;
+
+	return res;
+}
 
 Surface GetSurfaceColor(float height, float slope, float vary)
 {
-	height = clamp(height - 0.0625, 0.0, 1.0);
-	slope  = clamp(slope  + 0.1250, 0.0, 1.0);
+	height = clamp(height - 0.0625f, 0.0f, 1.0f);
+	slope  = clamp(slope  + 0.1250f, 0.0f, 1.0f);
 
-	float h0 = floor(height * 8.0) * 0.125;
-	float h1 = h0 + 0.125;
-	float dh = (height - h0) * 8.0;
-	float s0 = floor(slope  * 4.0) * 0.25;
-	float s1 = s0 - 0.25;
-	float ds = 1.0 - (slope - s0) * 4.0;
-	float v0 = floor(vary * 16.0) * 0.25;
-	float v1 = v0 - 0.25;
-	float dv = 1.0 - (vary * 4.0 - v0) * 4.0;
+	float h0 = floor(height * 8.0f) * 0.125f;
+	float h1 = h0 + 0.125f;
+	float dh = (height - h0) * 8.0f;
+	float s0 = floor(slope  * 4.0f) * 0.25f;
+	float s1 = s0 - 0.25f;
+	float ds = 1.0f - (slope - s0) * 4.0f;
+	float v0 = floor(vary * 16.0f) * 0.25f;
+	float v1 = v0 - 0.25f;
+	float dv = 1.0f - (vary * 4.0f - v0) * 4.0f;
 
 	Surface surfH0, surfH1;
 	Surface surfS0, surfS1;
@@ -740,6 +858,48 @@ Surface GetSurfaceColor(float height, float slope, float vary)
 
 	surfH0 = GetSurfaceColorAtlas(h0, s1, v1);
 	surfH1 = GetSurfaceColorAtlas(h1, s1, v1);
+	surfS1 = BlendSmart(surfH0, surfH1, dh);
+
+	surfV1 = BlendSmart(surfS0, surfS1, ds);
+
+	return   BlendSmart(surfV0, surfV1, dv);
+}
+
+Surface GetSurfaceColor(float2 texcoord, float height, float slope, float vary)
+{
+	height = clamp(height - 0.0625f, 0.0f, 1.0f);
+	slope  = clamp(slope  + 0.1250f, 0.0f, 1.0f);
+
+	float h0 = floor(height * 8.0f) * 0.125f;
+	float h1 = h0 + 0.125f;
+	float dh = (height - h0) * 8.0f;
+	float s0 = floor(slope  * 4.0f) * 0.25f;
+	float s1 = s0 - 0.25f;
+	float ds = 1.0f - (slope - s0) * 4.0f;
+	float v0 = floor(vary * 16.0f) * 0.25f;
+	float v1 = v0 - 0.25f;
+	float dv = 1.0f - (vary * 4.0f - v0) * 4.0f;
+
+	Surface surfH0, surfH1;
+	Surface surfS0, surfS1;
+	Surface surfV0, surfV1;
+
+	surfH0 = GetSurfaceColorAtlas(texcoord, h0, s0, v0);
+	surfH1 = GetSurfaceColorAtlas(texcoord, h1, s0, v0);
+	surfS0 = BlendSmart(surfH0, surfH1, dh);
+
+	surfH0 = GetSurfaceColorAtlas(texcoord, h0, s1, v0);
+	surfH1 = GetSurfaceColorAtlas(texcoord, h1, s1, v0);
+	surfS1 = BlendSmart(surfH0, surfH1, dh);
+
+	surfV0 = BlendSmart(surfS0, surfS1, ds);
+
+	surfH0 = GetSurfaceColorAtlas(texcoord, h0, s0, v1);
+	surfH1 = GetSurfaceColorAtlas(texcoord, h1, s0, v1);
+	surfS0 = BlendSmart(surfH0, surfH1, dh);
+
+	surfH0 = GetSurfaceColorAtlas(texcoord, h0, s1, v1);
+	surfH1 = GetSurfaceColorAtlas(texcoord, h1, s1, v1);
 	surfS1 = BlendSmart(surfH0, surfH1, dh);
 
 	surfV1 = BlendSmart(surfS0, surfS1, ds);
@@ -809,35 +969,28 @@ void FAST32_hash_3D(float3 gridcell, out float4 lowz_hash, out float4 highz_hash
 //-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
+inline float2 Interpolation_C2(float2 x) { return x * x * x * (x * (x * 6.0 - 15.0) + 10.0); }
 inline float3 Interpolation_C2(float3 x) { return x * x * x * (x * (x * 6.0 - 15.0) + 10.0); }
+inline float2 Interpolation_C2_Deriv(float2 x) { return x * x * (x * (x * 30.0 - 60.0) + 30.0); }
 inline float3 Interpolation_C2_Deriv(float3 x) { return x * x * (x * (x * 30.0 - 60.0) + 30.0); }
-
-inline float CubicHermite(float A, float B, float C, float D, float t)
-{
-	return (-A / 2.0 + (3.0 * B) / 2.0 - (3.0 * C) / 2.0 + D / 2.0) * t * t * t + (A - (5.0 * B) / 2.0 + 2.0 * C - D / 2.0) * t * t + (-A / 2.0 + C / 2.0) * t + B;
-}
-
-inline float CubicHermite(float4 V, float t)
-{
-	return CubicHermite(V.x, V.y, V.z, V.w, t);
-}
 //-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
+#ifdef COMPUTE_SHADER
 // Improved texture interpolation by iq. http://www.iquilezles.org/www/articles/texture/texture.htm
-float4 SampleCustom(Texture2D tex, SamplerState texSampler, float2 p, float resolution)
+float4 SampleCustom(Texture2D tex, SamplerState texSampler, float2 uv, float resolution)
 {
-	p = p * resolution + 0.5;
+	uv = uv * resolution + 0.5;
 
-	float2 i = floor(p);
-	float2 f = p - i;
+	float2 i = floor(uv);
+	float2 f = uv - i;
 
 	f = f * f * f * (f * (f * 6.0 - 15.0) + 10.0);
 
-	p = i + f;
-	p = (p - 0.5) / resolution;
+	uv = i + f;
+	uv = (uv - 0.5) / resolution;
 
-	return tex.Sample(texSampler, p);
+	return tex.Sample(texSampler, uv);
 }
 //-----------------------------------------------------------------------------
 
@@ -857,30 +1010,90 @@ float4 SampleCustomBilinear(Texture2D tex, SamplerState texSampler, float2 uv, f
 
 	return lerp(lerp(a, b, fuv.x), lerp(c, d, fuv.x), fuv.y);
 }
+#endif
 //-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
-// Curves by iq. http://www.iquilezles.org/www/articles/functions/functions.htm
-inline float impulse(float k, float x)
+float4 SampleCustomBilinear(sampler2D tex, float2 uv, float resolution)
 {
-	float h = k * x;
+	float2 st = uv * resolution + 0.5; 
 
-	return h * exp(1.0 - h);
+	float2 iuv = floor(st);
+	float2 fuv = frac(st);
+
+	float4 a = tex2Dlod(tex, float4((iuv + float2(0.5, 0.5)) / resolution, 0.0, 0.0));
+	float4 b = tex2Dlod(tex, float4((iuv + float2(1.5, 0.5)) / resolution, 0.0, 0.0));
+	float4 c = tex2Dlod(tex, float4((iuv + float2(0.5, 1.5)) / resolution, 0.0, 0.0));
+	float4 d = tex2Dlod(tex, float4((iuv + float2(1.5, 1.5)) / resolution, 0.0, 0.0));
+
+	return lerp(lerp(a, b, fuv.x), lerp(c, d, fuv.x), fuv.y);
+}
+//-----------------------------------------------------------------------------
+
+//-----------------------------------------------------------------------------
+inline float CubicHermite(float a, float b, float c, float d, float t)
+{
+	const float t2 = t * t;
+	const float t3 = t * t * t;
+
+	return (-a / 2.0 + (3.0 * b) / 2.0 - (3.0 * c) / 2.0 + d / 2.0) * t3 + (a - (5.0 * b) / 2.0 + 2.0 * c - d / 2.0) * t2 + (-a / 2.0 + c / 2.0) * t + b;
 }
 
-inline float expstep(float x, float k, float n)
+inline float CubicHermite(float4 v, float t)
 {
-	return exp(-k * pow(x, n));
+	return CubicHermite(v.x, v.y, v.z, v.w, t);
 }
 
-inline float parabola(float x, float k)
+// Bicubic hermite interpolated texture fetch by demofox. https://www.shadertoy.com/view/MllSzX
+float4 CubicHermite(float4 a, float4 b, float4 c, float4 d, float t)
 {
-	return pow(4.0 * x * (1.0 - x), k);
-}
+	const float t2 = t * t;
+	const float t3 = t * t * t;
 	
-inline float powercurve(float x, float a, float b)
+	float4 A = -a / 2.0 + (3.0 * b) / 2.0 - (3.0 * c) / 2.0 + d / 2.0;
+	float4 B = a - (5.0 * b) / 2.0 + 2.0 * c - d / 2.0;
+	float4 C = -a / 2.0 + c / 2.0;
+	float4 D = b;
+	
+	return A * t3 + B * t2 + C * t + D;
+}
+
+float4 BicubicHermiteTextureSample(sampler2D tex, float2 uv, float textureSize)
 {
-	return (pow(a + b, a + b) / (pow(a, a) * pow(b, b))) * pow(x, a) * pow(1.0 - x, b);
+	const float onePixel = 1.0 / textureSize;
+	const float twoPixels = 2.0 / textureSize;
+
+	float2 st = uv * textureSize + 0.5;
+	
+	float2 fuv = frac(st);
+	st = floor(st) / textureSize - float2(onePixel / 2.0, onePixel / 2.0);
+	
+	float4 C00 = tex2Dlod(tex, float4(st + float2(-onePixel, -onePixel), 0.0, 0.0));
+	float4 C10 = tex2Dlod(tex, float4(st + float2(0.0, -onePixel), 0.0, 0.0));
+	float4 C20 = tex2Dlod(tex, float4(st + float2(onePixel, -onePixel), 0.0, 0.0));
+	float4 C30 = tex2Dlod(tex, float4(st + float2(twoPixels, -onePixel), 0.0, 0.0));
+	
+	float4 C01 = tex2Dlod(tex, float4(st + float2(-onePixel, 0.0), 0.0, 0.0));
+	float4 C11 = tex2Dlod(tex, float4(st + float2(0.0, 0.0), 0.0, 0.0));
+	float4 C21 = tex2Dlod(tex, float4(st + float2(onePixel, 0.0), 0.0, 0.0));
+	float4 C31 = tex2Dlod(tex, float4(st + float2(twoPixels, 0.0), 0.0, 0.0));    
+	
+	float4 C02 = tex2Dlod(tex, float4(st + float2(-onePixel, onePixel), 0.0, 0.0));
+	float4 C12 = tex2Dlod(tex, float4(st + float2(0.0, onePixel), 0.0, 0.0));
+	float4 C22 = tex2Dlod(tex, float4(st + float2(onePixel, onePixel), 0.0, 0.0));
+	float4 C32 = tex2Dlod(tex, float4(st + float2(twoPixels, onePixel), 0.0, 0.0));    
+	
+	float4 C03 = tex2Dlod(tex, float4(st + float2(-onePixel, twoPixels), 0.0, 0.0));
+	float4 C13 = tex2Dlod(tex, float4(st + float2(0.0, twoPixels), 0.0, 0.0));
+	float4 C23 = tex2Dlod(tex, float4(st + float2(onePixel, twoPixels), 0.0, 0.0));
+	float4 C33 = tex2Dlod(tex, float4(st + float2(twoPixels, twoPixels), 0.0, 0.0));    
+	
+	float4 CP0X = CubicHermite(C00, C10, C20, C30, fuv.x);
+	float4 CP1X = CubicHermite(C01, C11, C21, C31, fuv.x);
+	float4 CP2X = CubicHermite(C02, C12, C22, C32, fuv.x);
+	float4 CP3X = CubicHermite(C03, C13, C23, C33, fuv.x);
+	
+	return CubicHermite(CP0X, CP1X, CP2X, CP3X, fuv.y);
 }
 //-----------------------------------------------------------------------------
 
@@ -907,21 +1120,21 @@ float Noise(float3 p)
 	p -= floor(p);
 
 	// Compute fade curves for each of x,y,z
-	float3 ff = p * p * p * (p * (p * 6.0 - 15.0) + 10.0);
+	float3 ff = Interpolation_C2(p);
 
 	// Hash coordinates of the 8 cube corners
 	// NOTE : I FUCKING DID IT! I FIX DAT FORMULA FOR 3D!
 	// Solution is "+ P.z"
-	float4 AA = tex2Dlod(PermSampler, float4(P.xy, 0, 0)) + P.z;
+	float4 AA = tex2Dlod(PermSampler, float4(P.xy, 0.0, 0.0)) + P.z;
 
 	float a = dot(tex2Dlod(PermGradSampler, AA.x).rgb, p);
-	float b = dot(tex2Dlod(PermGradSampler, AA.z).rgb, p + float3(-1, 0, 0));
-	float c = dot(tex2Dlod(PermGradSampler, AA.y).rgb, p + float3(0, -1, 0));
-	float d = dot(tex2Dlod(PermGradSampler, AA.w).rgb, p + float3(-1, -1, 0));
-	float e = dot(tex2Dlod(PermGradSampler, AA.x + one).rgb, p + float3(0, 0, -1));
-	float f = dot(tex2Dlod(PermGradSampler, AA.z + one).rgb, p + float3(-1, 0, -1));
-	float g = dot(tex2Dlod(PermGradSampler, AA.y + one).rgb, p + float3(0, -1, -1));
-	float h = dot(tex2Dlod(PermGradSampler, AA.w + one).rgb, p + float3(-1, -1, -1));
+	float b = dot(tex2Dlod(PermGradSampler, AA.z).rgb, p + float3(-1.0, 0.0, 0.0));
+	float c = dot(tex2Dlod(PermGradSampler, AA.y).rgb, p + float3(0.0, -1.0, 0.0));
+	float d = dot(tex2Dlod(PermGradSampler, AA.w).rgb, p + float3(-1.0, -1.0, 0.0));
+	float e = dot(tex2Dlod(PermGradSampler, AA.x + one).rgb, p + float3(0.0, 0.0, -1.0));
+	float f = dot(tex2Dlod(PermGradSampler, AA.z + one).rgb, p + float3(-1.0, 0.0, -1.0));
+	float g = dot(tex2Dlod(PermGradSampler, AA.y + one).rgb, p + float3(0.0, -1.0, -1.0));
+	float h = dot(tex2Dlod(PermGradSampler, AA.w + one).rgb, p + float3(-1.0, -1.0, -1.0));
 
 	float k0 = a;
 	float k1 = b - a;
@@ -949,21 +1162,21 @@ float4 NoiseDeriv(float3 p)
 
 	// Compute fade curves for each of x,y,z
 	float3 df = 30.0 * p * p * (p * (p - 2.0) + 1.0);
-	float3 ff = p * p * p * (p * (p * 6.0 - 15.0) + 10.0);
+	float3 ff = Interpolation_C2(p);
 
 	// Hash coordinates of the 8 cube corners
 	// NOTE : I FUCKING DID IT! I FIX DAT FORMULA FOR 3D!
 	// Solution is "+ P.z"
-	float4 AA = tex2Dlod(PermSampler, float4(P.xy, 0, 0)) + P.z; // <- Here!
+	float4 AA = tex2Dlod(PermSampler, float4(P.xy, 0.0, 0.0)) + P.z; // <- Here!
 	
 	float a = dot(tex2Dlod(PermGradSampler, AA.x).rgb, p);
-	float b = dot(tex2Dlod(PermGradSampler, AA.z).rgb, p + float3(-1, 0, 0));
-	float c = dot(tex2Dlod(PermGradSampler, AA.y).rgb, p + float3(0, -1, 0));
-	float d = dot(tex2Dlod(PermGradSampler, AA.w).rgb, p + float3(-1, -1, 0));
-	float e = dot(tex2Dlod(PermGradSampler, AA.x + one).rgb, p + float3(0, 0, -1));
-	float f = dot(tex2Dlod(PermGradSampler, AA.z + one).rgb, p + float3(-1, 0, -1));
-	float g = dot(tex2Dlod(PermGradSampler, AA.y + one).rgb, p + float3(0, -1, -1));
-	float h = dot(tex2Dlod(PermGradSampler, AA.w + one).rgb, p + float3(-1, -1, -1));
+	float b = dot(tex2Dlod(PermGradSampler, AA.z).rgb, p + float3(-1.0, 0.0, 0.0));
+	float c = dot(tex2Dlod(PermGradSampler, AA.y).rgb, p + float3(0.0, -1.0, 0.0));
+	float d = dot(tex2Dlod(PermGradSampler, AA.w).rgb, p + float3(-1.0, -1.0, 0.0));
+	float e = dot(tex2Dlod(PermGradSampler, AA.x + one).rgb, p + float3(0.0, 0.0, -1.0));
+	float f = dot(tex2Dlod(PermGradSampler, AA.z + one).rgb, p + float3(-1.0, 0.0, -1.0));
+	float g = dot(tex2Dlod(PermGradSampler, AA.y + one).rgb, p + float3(0.0, -1.0, -1.0));
+	float h = dot(tex2Dlod(PermGradSampler, AA.w + one).rgb, p + float3(-1.0, -1.0, -1.0));
 
 	float k0 =  a;
 	float k1 =  b - a;
@@ -974,10 +1187,10 @@ float4 NoiseDeriv(float3 p)
 	float k6 =  a - b - e + f;
 	float k7 = -a + b + c - d + e - f - g + h;
 
-	return float4(df.x * (k1 + k4*ff.y + k6*ff.z + k7*ff.y*ff.z),
-				  df.y * (k2 + k5*ff.z + k4*ff.x + k7*ff.z*ff.x),
-				  df.z * (k3 + k6*ff.x + k5*ff.y + k7*ff.x*ff.y),
-				  k0 + k1*ff.x + k2*ff.y + k3*ff.z + k4*ff.x*ff.y + k5*ff.y*ff.z + k6*ff.z*ff.x + k7*ff.x*ff.y*ff.z);
+	return float4(df.x * (k1 + k4 * ff.y + k6 * ff.z + k7 * ff.y * ff.z),
+				  df.y * (k2 + k5 * ff.z + k4 * ff.x + k7 * ff.z * ff.x),
+				  df.z * (k3 + k6 * ff.x + k5 * ff.y + k7 * ff.x * ff.y),
+				  k0 + k1 * ff.x + k2 * ff.y + k3 * ff.z + k4 * ff.x * ff.y + k5 * ff.y * ff.z + k6 * ff.z * ff.x + k7 * ff.x * ff.y * ff.z);
 }
 //-----------------------------------------------------------------------------
 
@@ -1290,21 +1503,21 @@ float Noise2D(float2 p, float seed = 0)
 	p -= floor(p);
 
 	// Get weights from the coordinate fraction
-	float2 w = p * p * p * (p * (p * 6 - 15) + 10);
-	float4 w4 = float4(1, w.x, w.y, w.x * w.y);
+	float2 w = Interpolation_C2(p);
+	float4 w4 = float4(1.0, w.x, w.y, w.x * w.y);
 
 	// Get the four randomly permutated indices from the noise lattice nearest to p and offset these numbers with the seed number.
-	float4 perm = tex2Dlod(PermSamplerGL, float4(P, 0, 0)) + seed;
+	float4 perm = tex2Dlod(PermSamplerGL, float4(P, 0.0, 0.0)) + seed;
 
 	// Permutate the four offseted indices again and get the 2D gradient for each of the four permutated coordinates-seed pairs.
-	float4 g1 = tex2Dlod(PermGradSamplerGL, float4(perm.xy, 0, 0)) * 2 - 1;
-	float4 g2 = tex2Dlod(PermGradSamplerGL, float4(perm.zw, 0, 0)) * 2 - 1;
+	float4 g1 = tex2Dlod(PermGradSamplerGL, float4(perm.xy, 0.0, 0.0)) * 2.0 - 1.0;
+	float4 g2 = tex2Dlod(PermGradSamplerGL, float4(perm.zw, 0.0, 0.0)) * 2.0 - 1.0;
 
 	// Evaluate the four lattice gradients at p
 	float a = dot(g1.xy, p);
-	float b = dot(g2.xy, p + float2(-1,  0));
-	float c = dot(g1.zw, p + float2( 0, -1));
-	float d = dot(g2.zw, p + float2(-1, -1));
+	float b = dot(g2.xy, p + float2(-1.0,  0.0));
+	float c = dot(g1.zw, p + float2( 0.0, -1.0));
+	float d = dot(g2.zw, p + float2(-1.0, -1.0));
 
 	// Bi-linearly blend between the gradients, using w4 as blend factors.
 	float4 grads = float4(a, b - a, c - a, a - b - c + d);
@@ -1317,22 +1530,22 @@ float Noise2D(float2 p, float seed = 0)
 
 float3 Noise2DPseudoDeriv(float2 p, float seed = 0)
 {
-	const float one = 1.0 / 256;
+	const float one = 1.0 / 256.0;
 
-	float2 P = fmod(floor(p), 256) * one;
+	float2 P = fmod(floor(p), 256.0) * one;
 	p -= floor(p);
 
-	float2 f = p * p * p * (p * (p * 6 - 15) + 10);
-	float2 df = p * p * (p * (30 * p - 60) + 30);
+	float2 f = Interpolation_C2(p);
+	float2 df = Interpolation_C2_Deriv(p);
 
-	float4 AA = tex2Dlod(PermSamplerGL, float4(P, 0, 0)) + seed / 256;
-	float4 G1 = tex2Dlod(PermGradSamplerGL, float4(AA.xy, 0, 0)) * 2 - 1;
-	float4 G2 = tex2Dlod(PermGradSamplerGL, float4(AA.zw, 0, 0)) * 2 - 1;
+	float4 AA = tex2Dlod(PermSamplerGL, float4(P, 0.0, 0.0)) + seed / 256.0;
+	float4 G1 = tex2Dlod(PermGradSamplerGL, float4(AA.xy, 0.0, 0.0)) * 2.0 - 1.0;
+	float4 G2 = tex2Dlod(PermGradSamplerGL, float4(AA.zw, 0.0, 0.0)) * 2.0 - 1.0;
 
 	float a = dot(G1.xy, p);
-	float b = dot(G2.xy, p + float2(-1,  0));
-	float c = dot(G1.zw, p + float2( 0, -1));
-	float d = dot(G2.zw, p + float2(-1, -1));
+	float b = dot(G2.xy, p + float2(-1.0,  0.0));
+	float c = dot(G1.zw, p + float2( 0.0, -1.0));
+	float d = dot(G2.zw, p + float2(-1.0, -1.0));
 
 	float k0 = a;
 	float k1 = b - a;
@@ -1349,18 +1562,18 @@ float3 Noise2DPseudoDeriv(float2 p, float seed = 0)
 
 float3 Noise2DDeriv(float2 p, float seed = 0)
 {
-	const float one = 1.0 / 256;
+	const float one = 1.0 / 256.0;
 
-	float2 P = fmod(floor(p), 256) * one;
+	float2 P = fmod(floor(p), 256.0) * one;
 	p -= floor(p);
 
-	float2 w = p * p * p * (p * (p * 6 - 15) + 10);
-	float2 dw = p * p * (p * (p * 30 - 60) + 30);
-	float2 dwp = p * p * p * (p * (p * 36 - 75) + 40);
+	float2 w = Interpolation_C2(p);
+	float2 dw = Interpolation_C2_Deriv(p);
+	float2 dwp = p * p * p * (p * (p * 36.0 - 75.0) + 40.0);
 
-	float4 AA = tex2Dlod(PermSamplerGL, float4(P, 0, 0)) + seed / 256;
-	float4 G1 = tex2Dlod(PermGradSamplerGL, float4(AA.xy, 0, 0)) * 2 - 1;
-	float4 G2 = tex2Dlod(PermGradSamplerGL, float4(AA.zw, 0, 0)) * 2 - 1;
+	float4 AA = tex2Dlod(PermSamplerGL, float4(P, 0.0, 0.0)) + seed / 256.0;
+	float4 G1 = tex2Dlod(PermGradSamplerGL, float4(AA.xy, 0.0, 0.0)) * 2.0 - 1.0;
+	float4 G2 = tex2Dlod(PermGradSamplerGL, float4(AA.zw, 0.0, 0.0)) * 2.0 - 1.0;
 
 	float k0 = G1.x * p.x + G1.y * p.y;
 	float k1 = (G2.x - G1.x) * p.x + (G2.y - G1.y) * p.y - G2.x;
@@ -1382,13 +1595,13 @@ float3 Noise2DAlternativeDeriv(float2 p, float seed = 0)
 	float2 P = fmod(floor(p), 256) * one;
 	p -= floor(p);
 
-	float2 f = p * p * p * (p * (p * 6 - 15) + 10);
-	float2 ddf = p * (p * (p * 120 - 180) + 60);
-	float2 ddfp = p * p * (p * (p * 180 - 300) + 120);
+	float2 f = Interpolation_C2(p);
+	float2 ddf = p * (p * (p * 120.0 - 180.0) + 60.0);
+	float2 ddfp = p * p * (p * (p * 180.0 - 300.0) + 120.0);
 
-	float4 AA = tex2Dlod(PermSamplerGL, float4(P, 0, 0)) + seed / 256;
-	float4 G1 = tex2Dlod(PermGradSamplerGL, float4(AA.xy, 0, 0)) * 2 - 1;
-	float4 G2 = tex2Dlod(PermGradSamplerGL, float4(AA.zw, 0, 0)) * 2 - 1;
+	float4 AA = tex2Dlod(PermSamplerGL, float4(P, 0.0, 0.0)) + seed / 256.0;
+	float4 G1 = tex2Dlod(PermGradSamplerGL, float4(AA.xy, 0.0, 0.0)) * 2.0 - 1.0;
+	float4 G2 = tex2Dlod(PermGradSamplerGL, float4(AA.zw, 0.0, 0.0)) * 2.0 - 1.0;
 
 	float k0 = G1.x * p.x + G1.y * p.y;
 	float k1 = (G2.x - G1.x) * p.x + (G2.y - G1.y) * p.y - G2.x;
@@ -1417,10 +1630,10 @@ inline float4 TaylorInvSqrt(float4 r) { return 1.79284291400159 - 0.853734720953
 #define K 0.142857142857
 #define Ko 0.428571428571
 
-float2 iNoise(float3 P, float jitter)
+float2 iNoise(float3 ppoint, float jitter)
 {			
-	float3 Pi = modi(floor(P), 289.0);
-	float3 Pf = frac(P);
+	float3 Pi = modi(floor(ppoint), 289.0);
+	float3 Pf = frac(ppoint);
 	const float3 oi = float3(-1.0, 0.0, 1.0);
 	const float3 of = float3(-0.5, 0.5, 1.5);
 	float3 px = Permutation(Pi.x + oi);
@@ -1429,8 +1642,10 @@ float2 iNoise(float3 P, float jitter)
 	float3 p, ox, oy, oz, dx, dy, dz;
 	float2 F = 1e6;
 
+	UNITY_UNROLL
 	for(int i = 0; i < 3; i++)
 	{
+		UNITY_UNROLL
 		for(int j = 0; j < 3; j++)
 		{
 			p = Permutation(px[i] + py[j] + Pi.z + oi); // pij1, pij2, pij3
@@ -1449,8 +1664,10 @@ float2 iNoise(float3 P, float jitter)
 			float3 d = dx * dx + dy * dy + dz * dz; // dij1, dij2 and dij3, squared
 			
 			// Find lowest and second lowest distances
+			UNITY_UNROLL
 			for(int n = 0; n < 3; n++)
 			{
+				UNITY_BRANCH
 				if(d[n] < F[0])
 				{
 					F[1] = F[0];
@@ -1518,7 +1735,7 @@ float sNoise(float3 v)
 	//vec4 s1 = vec4(lessThan(b1, 0.0)) * 2.0 - 1.0;
 	float4 s0 = floor(b0) * 2.0 + 1.0;
 	float4 s1 = floor(b1) * 2.0 + 1.0;
-	float4 sh = -step(h, float4(0, 0, 0, 0));
+	float4 sh = -step(h, float4(0.0, 0.0, 0.0, 0.0));
 
 	float4 a0 = b0.xzyw + s0.xzyw * sh.xxyy;
 	float4 a1 = b1.xzyw + s1.xzyw * sh.zzww;
@@ -2116,10 +2333,13 @@ float Cell2Noise(float3 p)
 	float dist;
 	float distMin = 1.0e38;
 
+	UNITY_UNROLL
 	for (d.z = -1.0; d.z <= 1.0; d.z += 1.0)
 	{
+		UNITY_UNROLL
 		for (d.y = -1.0; d.y <= 1.0; d.y += 1.0)
 		{
+			UNITY_UNROLL
 			for (d.x = -1.0; d.x <= 1.0; d.x += 1.0)
 			{
 				rnd = NoiseRandomUVec3((cell + d)).xyz + d;
@@ -2145,16 +2365,20 @@ float2 Cell2Noise2(float3 p)
 	float distMin1 = 1.0e38;
 	float distMin2 = 1.0e38;
 
+	UNITY_UNROLL
 	for (d.z = -1.0; d.z <= 1.0; d.z += 1.0)
 	{
+		UNITY_UNROLL
 		for (d.y = -1.0; d.y <= 1.0; d.y += 1.0)
 		{
+			UNITY_UNROLL
 			for (d.x = -1.0; d.x <= 1.0; d.x += 1.0)
 			{
 				rnd = NoiseRandomUVec3((cell + d)).xyz + d;
 				pos = rnd - offs;
 				dist = dot(pos, pos);
 
+				UNITY_BRANCH
 				if (dist < distMin1)
 				{
 					distMin2 = distMin1;
@@ -2180,16 +2404,20 @@ float4 Cell2NoiseVec(float3 p)
 	float distMin = 1.0e38;
 	float dist;
 
+	UNITY_UNROLL
 	for (d.z = -1.0; d.z <= 1.0; d.z += 1.0)
 	{
+		UNITY_UNROLL
 		for (d.y = -1.0; d.y <= 1.0; d.y += 1.0)
 		{
+			UNITY_UNROLL
 			for (d.x = -1.0; d.x <= 1.0; d.x += 1.0)
 			{
 				rnd = NoiseRandomUVec3((cell + d)).xyz + d;
 				pos = rnd - offs;
 				dist = dot(pos, pos);
 
+				UNITY_BRANCH
 				if (distMin > dist)
 				{
 					distMin = dist;
@@ -2215,16 +2443,20 @@ float Cell2NoiseColor(float3 p, out float4 color)
 	float distMin = 1.0e38;
 	float dist;
 
+	UNITY_UNROLL
 	for (d.z = -1.0; d.z <= 1.0; d.z += 1.0)
 	{
+		UNITY_UNROLL
 		for (d.y = -1.0; d.y <= 1.0; d.y += 1.0)
-		{
+		{		
+			UNITY_UNROLL
 			for (d.x = -1.0; d.x <= 1.0; d.x += 1.0)
 			{
 				rnd = float4(NoiseRandomUVec3((cell + d)), 0.0);
 				pos = rnd.xyz + d - offs;
 				dist = dot(pos, pos);
 
+				UNITY_BRANCH
 				if (distMin > dist)
 				{
 					distMin = dist;
@@ -2239,9 +2471,9 @@ float Cell2NoiseColor(float3 p, out float4 color)
 	return sqrt(distMin);
 }
 
-float4 Cell2NoiseSphere(float3 p, float Radius)
+float4 Cell2NoiseSphere(float3 p, float radius)
 {
-	p *= Radius;
+	p *= radius;
 
 	float3 cell = floor(p);
 	float3 offs = p - cell - NOISE_OFFSET;
@@ -2252,16 +2484,20 @@ float4 Cell2NoiseSphere(float3 p, float Radius)
 	float distMin = 1.0e38;
 	float dist;
 
+	UNITY_UNROLL
 	for (d.z = -1.0; d.z <= 1.0; d.z += 1.0)
 	{
+		UNITY_UNROLL
 		for (d.y = -1.0; d.y <= 1.0; d.y += 1.0)
 		{
+			UNITY_UNROLL
 			for (d.x = -1.0; d.x <= 1.0; d.x += 1.0)
 			{
 				rnd = NoiseRandomUVec3((cell + d)).xyz + d;
 				pos = rnd - offs;
 				dist = dot(pos, pos);
 
+				UNITY_BRANCH
 				if (distMin > dist)
 				{
 					distMin = dist;
@@ -2273,12 +2509,12 @@ float4 Cell2NoiseSphere(float3 p, float Radius)
 
 	ppoint = normalize(ppoint + cell + NOISE_OFFSETOUT);
 
-	return float4(ppoint, length(ppoint * Radius - p));
+	return float4(ppoint, length(ppoint * radius - p));
 }
 
-void Cell2Noise2Sphere(float3 p, float Radius, out float4 point1, out float4 point2)
+void Cell2Noise2Sphere(float3 p, float radius, out float4 point1, out float4 point2)
 {
-	p *= Radius;
+	p *= radius;
 
 	float3 cell = floor(p);
 	float3 offs = p - cell - NOISE_OFFSET;
@@ -2289,16 +2525,20 @@ void Cell2Noise2Sphere(float3 p, float Radius, out float4 point1, out float4 poi
 	float distMin2 = 1.0e38;
 	float dist;
 
+	UNITY_UNROLL
 	for (d.z = -1.0; d.z <= 1.0; d.z += 1.0)
 	{
+		UNITY_UNROLL
 		for (d.y = -1.0; d.y <= 1.0; d.y += 1.0)
 		{
+			UNITY_UNROLL
 			for (d.x = -1.0; d.x <= 1.0; d.x += 1.0)
 			{
 				rnd = NoiseRandomUVec3((cell + d)).xyz + d;
 				pos = rnd - offs;
 				dist = dot(pos, pos);
 
+				UNITY_BRANCH
 				if (dist < distMin1)
 				{
 					distMin2 = distMin1;
@@ -2321,9 +2561,9 @@ void Cell2Noise2Sphere(float3 p, float Radius, out float4 point1, out float4 poi
 	point2.w = distMin2;
 }
 
-float4 Cell2NoiseVecSphere(float3 p, float Radius)
+float4 Cell2NoiseVecSphere(float3 p, float radius)
 {
-	p *= Radius;
+	p *= radius;
 
 	float3 cell = floor(p);
 	float3 offs = p - cell - NOISE_OFFSET;
@@ -2334,16 +2574,20 @@ float4 Cell2NoiseVecSphere(float3 p, float Radius)
 	float distMin = 1.0e38;
 	float dist;
 
+	UNITY_UNROLL
 	for (d.z = -1.0; d.z <= 1.0; d.z += 1.0)
 	{
+		UNITY_UNROLL
 		for (d.y = -1.0; d.y <= 1.0; d.y += 1.0)
 		{
+			UNITY_UNROLL
 			for (d.x = -1.0; d.x <= 1.0; d.x += 1.0)
 			{
 				rnd = NoiseRandomUVec3((cell + d)).xyz + d;
 				pos = rnd - offs;
 				dist = dot(pos, pos);
 
+				UNITY_BRANCH
 				if (distMin > dist)
 				{
 					distMin = dist;
@@ -2355,7 +2599,7 @@ float4 Cell2NoiseVecSphere(float3 p, float Radius)
 
 	ppoint = normalize(ppoint + cell + NOISE_OFFSETOUT);
 
-	return float4(ppoint, length(ppoint * Radius - p));
+	return float4(ppoint, length(ppoint * radius - p));
 }
 
 float Cell3Noise(float3 p)
@@ -2368,10 +2612,13 @@ float Cell3Noise(float3 p)
 	float dist;
 	float distMin = 1.0e38;
 
+	UNITY_UNROLL
 	for (d.z = -1.0; d.z <= 2.0; d.z += 1.0)
 	{
+		UNITY_UNROLL
 		for (d.y = -1.0; d.y <= 2.0; d.y += 1.0)
 		{
+			UNITY_UNROLL
 			for (d.x = -1.0; d.x <= 2.0; d.x += 1.0)
 			{
 				rnd = NoiseRandomUVec4((cell + d)).xyz + d;
@@ -2395,10 +2642,13 @@ float Cell3NoiseSmooth(float3 p, float falloff)
 	float dist;
 	float res = 0.0;
 
+	UNITY_UNROLL
 	for (d.z = -1.0; d.z <= 2.0; d.z += 1.0)
 	{
+		UNITY_UNROLL
 		for (d.y = -1.0; d.y <= 2.0; d.y += 1.0)
 		{
+			UNITY_UNROLL
 			for (d.x = -1.0; d.x <= 2.0; d.x += 1.0)
 			{
 				rnd = NoiseRandomUVec4((cell + d));
@@ -2423,16 +2673,20 @@ float2 Cell3Noise2(float3 p)
 	float distMin1 = 1.0e38;
 	float distMin2 = 1.0e38;
 
+	UNITY_UNROLL
 	for (d.z = -1.0; d.z <= 2.0; d.z += 1.0)
 	{
+		UNITY_UNROLL
 		for (d.y = -1.0; d.y <= 2.0; d.y += 1.0)
 		{
+			UNITY_UNROLL
 			for (d.x = -1.0; d.x <= 2.0; d.x += 1.0)
 			{
 				rnd = NoiseRandomUVec3((cell + d)).xyz + d;
 				pos = rnd - offs;
 				dist = dot(pos, pos);
 
+				UNITY_BRANCH
 				if (dist < distMin1)
 				{
 					distMin2 = distMin1;
@@ -2458,16 +2712,20 @@ float4 Cell3NoiseVec(float3 p)
 	float dist;
 	float distMin = 1.0e38;
 
+	UNITY_UNROLL
 	for (d.z = -1.0; d.z <= 2.0; d.z += 1.0)
 	{
+		UNITY_UNROLL
 		for (d.y = -1.0; d.y <= 2.0; d.y += 1.0)
 		{
+			UNITY_UNROLL
 			for (d.x = -1.0; d.x <= 2.0; d.x += 1.0)
 			{
 				rnd = NoiseRandomUVec3((cell + d)).xyz + d;
 				pos = rnd - offs;
 				dist = dot(pos, pos);
 
+				UNITY_BRANCH
 				if (distMin > dist)
 				{
 					distMin = dist;
@@ -2493,16 +2751,20 @@ float4 Cell3NoiseNormalizedVec(float3 p)
 	float dist;
 	float distMin = 1.0e38;
 
+	UNITY_UNROLL
 	for (d.z = -1.0; d.z <= 2.0; d.z += 1.0)
 	{
+		UNITY_UNROLL
 		for (d.y = -1.0; d.y <= 2.0; d.y += 1.0)
 		{
+			UNITY_UNROLL
 			for (d.x = -1.0; d.x <= 2.0; d.x += 1.0)
 			{
 				rnd = NoiseRandomUVec3((cell + d)).xyz + d;
 				pos = rnd - offs;
 				dist = dot(pos, pos);
 
+				UNITY_BRANCH
 				if (distMin > dist)
 				{
 					distMin = dist;
@@ -2528,16 +2790,20 @@ float Cell3NoiseColor(float3 p, out float4 color)
 	float dist;
 	float distMin = 1.0e38;
 
+	UNITY_UNROLL
 	for (d.z = -1.0; d.z <= 2.0; d.z += 1.0)
 	{
+		UNITY_UNROLL
 		for (d.y = -1.0; d.y <= 2.0; d.y += 1.0)
 		{
+			UNITY_UNROLL
 			for (d.x = -1.0; d.x <= 2.0; d.x += 1.0)
 			{
 				rnd = float4(NoiseRandomUVec3((cell + d)), 0.0);
 				pos = rnd.xyz + d - offs;
 				dist = dot(pos, pos);
 
+				UNITY_BRANCH
 				if (dist < distMin)
 				{
 					distMin = dist;
@@ -2564,16 +2830,20 @@ float2 Cell3Noise2Color(float3 p, out float4 color)
 	float distMin1 = 1.0e38;
 	float distMin2 = 1.0e38;
 
+	UNITY_UNROLL
 	for (d.z = -1.0; d.z <= 2.0; d.z += 1.0)
 	{
+		UNITY_UNROLL
 		for (d.y = -1.0; d.y <= 2.0; d.y += 1.0)
 		{
+			UNITY_UNROLL
 			for (d.x = -1.0; d.x <= 2.0; d.x += 1.0)
 			{
 				rnd = float4(NoiseRandomUVec3((cell + d)), 0.0);
 				pos = rnd.xyz + d - offs;
 				dist = dot(pos, pos);
 
+				UNITY_BRANCH
 				if (dist < distMin1)
 				{
 					distMin2 = distMin1;
@@ -2603,16 +2873,20 @@ float Cell3NoiseSmoothColor(float3 p, float falloff, out float4 color)
 	float distMin = 1.0e38;
 	float res = 0.0;
 
+	UNITY_UNROLL
 	for (d.z = -1.0; d.z <= 2.0; d.z += 1.0)
 	{
+		UNITY_UNROLL
 		for (d.y = -1.0; d.y <= 2.0; d.y += 1.0)
 		{
+			UNITY_UNROLL
 			for (d.x = -1.0; d.x <= 2.0; d.x += 1.0)
 			{
 				rnd = float4(NoiseRandomUVec3((cell + d)), 0.0);
 				pos = rnd.xyz + d - offs;
 				dist = dot(pos, pos);
 
+				UNITY_BRANCH
 				if (dist < distMin)
 				{
 					distMin = dist;
@@ -2697,40 +2971,47 @@ float Cell3NoiseF1F0(float3 p, int octaves, float amp)
 // Spherical Fibonacci Mapping
 // http://lgdv.cs.fau.de/uploads/publications/spherical_fibonacci_mapping.pdf
 // Optimized [WIP] by zameran.
-float2 inverseSF(float3 p, float n) 
+float2 inverseSF(float3 p, float n)
 {
 	float m = 1.0 - 1.0 / n;
-	float phi = min(atan2(p.y, p.x), M_PI), cosTheta = p.z;
-	float k = max(2, floor(log(n * M_PI * M_SQRT5 * (1 - cosTheta * cosTheta)) / log(M_PHI * M_PHI)));
+
+	float fi = min(atan2(p.y, p.x), M_PI);
+	float cosTheta = p.z;
+	float k = max(2.0, floor(log(n * M_PI * M_SQRT5 * (1.0 - cosTheta * cosTheta)) / log(M_PHI + 1.0)));
 	float Fk = pow(M_PHI, k) / M_SQRT5;
+
 	float2 F = float2(round(Fk), round(Fk * M_PHI));
 
-	float2x2 B = float2x2(M_PI2 * madfrac(F.x + 1, M_PHI - 1) - M_PI2 * (M_PHI - 1), M_PI2 * madfrac(F.y + 1, M_PHI - 1) - M_PI2 * (M_PHI - 1), -2 * F.x / n, -2 * F.y / n);
-	float2x2 invB = Inverse(B);
+	float2 ka = 2.0 * F / n;
+	float2 kb = M_PI2 * (frac((F + 1.0) * M_PHI) - (M_PHI- 1.0));
 
-	float2 c = floor(mul(invB, float2(phi, cosTheta - m)));
+	float2x2 iB = float2x2(ka.y, -ka.x, kb.y, -kb.x ) / (ka.y * kb.x - ka.x * kb.y);
 
-	float d = 8.0; 
-	float j = 0;
+	float2 c = floor(mul(float2(fi, cosTheta - m), iB));
 
-	for (uint s = 0; s < 4; ++s) 
+	float d = 8.0;
+	float j = 0.0;
+
+	UNITY_UNROLL
+	for (uint s = 0; s < 4; s++)
 	{
-		float cosTheta = dot(B[1], float2(s % 2, s / 2) + c) + m;
+		float2 uv = float2(float(s - 2 * (s / 2)), float(s / 2));
 
-		cosTheta = clamp(cosTheta, -1.0, 1.0) * 2.0 - cosTheta;
+		float i = dot(F, uv + c);
 
-		float i = floor(n * 0.5 - cosTheta * n * 0.5);
-		float phi = M_PI2 * madfrac(i, M_PHI - 1.0);
-
-		cosTheta = 1.0 - (2.0 * i + 1.0) * rcp(n);
-
+		float fi = M_PI2 * frac(i * M_PHI);
+		float cosTheta = m - 2.0 * i / n;
 		float sinTheta = sqrt(1.0 - cosTheta * cosTheta);
-		float3 q = float3(cos(phi) * sinTheta, sin(phi) * sinTheta, cosTheta);
-		float squaredDistance = dot(q - p, q - p);
 
-		if (squaredDistance < d) 
+		float3 q  = float3(cos(fi) * sinTheta, sin(fi) * sinTheta, cosTheta);
+		float3 r  = q - p;
+
+		float d2 = dot(r, r);
+
+		UNITY_BRANCH
+		if (d2 < d) 
 		{
-			d = squaredDistance;
+			d = d2;
 			j = i;
 		}
 	}
@@ -2738,41 +3019,50 @@ float2 inverseSF(float3 p, float n)
 	return float2(j, sqrt(d));
 }
 
-float2 inverseSF(float3 p, float n, out float3 NearestPoint) 
+float2 inverseSF(float3 p, float n, out float3 nearestPoint)
 {
+	nearestPoint = float3(0.0, 0.0, 0.0);
+
 	float m = 1.0 - 1.0 / n;
-	float phi = min(atan2(p.y, p.x), M_PI), cosTheta = p.z;
-	float k = max(2, floor(log(n * M_PI * M_SQRT5 * (1 - cosTheta * cosTheta)) / log(M_PHI * M_PHI)));
+
+	float fi = min(atan2(p.y, p.x), M_PI);
+	float cosTheta = p.z;
+	float k = max(2.0, floor(log(n * M_PI * M_SQRT5 * (1.0 - cosTheta * cosTheta)) / log(M_PHI + 1.0)));
 	float Fk = pow(M_PHI, k) / M_SQRT5;
+
 	float2 F = float2(round(Fk), round(Fk * M_PHI));
 
-	float2x2 B = float2x2(M_PI2 * madfrac(F.x + 1, M_PHI - 1) - M_PI2 * (M_PHI - 1), M_PI2 * madfrac(F.y + 1, M_PHI - 1) - M_PI2 * (M_PHI - 1), -2 * F.x / n, -2 * F.y / n);
-	float2x2 invB = Inverse(B);
+	float2 ka = 2.0 * F / n;
+	float2 kb = M_PI2 * (frac((F + 1.0) * M_PHI) - (M_PHI- 1.0));
 
-	float2 c = floor(mul(invB, float2(phi, cosTheta - m)));
+	float2x2 iB = float2x2(ka.y, -ka.x, kb.y, -kb.x ) / (ka.y * kb.x - ka.x * kb.y);
 
-	float d = 8.0; 
-	float j = 0;
+	float2 c = floor(mul(float2(fi, cosTheta - m), iB));
 
-	for (uint s = 0; s < 4; ++s) 
+	float d = 8.0;
+	float j = 0.0;
+
+	UNITY_UNROLL
+	for (uint s = 0; s < 4; s++)
 	{
-		float cosTheta = dot(B[1], float2(s % 2, s / 2) + c) + m;
+		float2 uv = float2(float(s - 2 * (s / 2)), float(s / 2));
 
-		cosTheta = clamp(cosTheta, -1.0, 1.0) * 2.0 - cosTheta;
+		float i = dot(F, uv + c);
 
-		float i = floor(n * 0.5 - cosTheta * n * 0.5);
-		float phi = M_PI2 * madfrac(i, M_PHI - 1.0);
-
-		cosTheta = 1.0 - (2.0 * i + 1.0) * rcp(n);
-
+		float fi = M_PI2 * frac(i * M_PHI);
+		float cosTheta = m - 2.0 * i / n;
 		float sinTheta = sqrt(1.0 - cosTheta * cosTheta);
-		float3 q = float3(cos(phi) * sinTheta, sin(phi) * sinTheta, cosTheta);
-		float squaredDistance = dot(q - p, q - p);
 
-		if (squaredDistance < d) 
+		float3 q  = float3(cos(fi) * sinTheta, sin(fi) * sinTheta, cosTheta);
+		float3 r  = q - p;
+
+		float d2 = dot(r, r);
+
+		UNITY_BRANCH
+		if (d2 < d)
 		{
-			NearestPoint = q;
-			d = squaredDistance;
+			nearestPoint = q;
+			d = d2;
 			j = i;
 		}
 	}
@@ -2859,6 +3149,7 @@ float CraterNoise(float3 ppoint, float cratMagn, float cratFreq, float cratSqrtD
 		//fibFreq   *= 1.81818182;
 		//radFactor *= 1.3483997256; // = sqrt(1.81818182)
 
+		UNITY_BRANCH
 		if (cratOctaves > 1)
 		{
 			ppoint       *= 1.81818182;
@@ -2916,7 +3207,7 @@ float RayedCraterNoise(float3 ppoint, float cratMagn, float cratFreq, float crat
 	float radFactor = shapeDist / cratSqrtDensity;
 	float fibFreq = 2.0 * cratFreq;
 
-	for (int i=0; i<cratOctaves; i++)
+	for (int i = 0; i < cratOctaves; i++)
 	{
 		lastlastlastLand = lastlastLand;
 		lastlastLand = lastLand;
@@ -2930,6 +3221,7 @@ float RayedCraterNoise(float3 ppoint, float cratMagn, float cratFreq, float crat
 		rad     = hash1(cell.x * 743.1) * 0.9 + 0.1;
 		newLand = CraterHeightFunc(lastlastlastLand, lastLand, amplitude, cell.y * radFactor / rad);
 
+		UNITY_BRANCH
 		if (cratOctaves > 1)
 		{
 			ppoint = Rotate(M_PI2 * hash1(float(i)), rotVec, ppoint);
@@ -2949,7 +3241,7 @@ float RayedCraterNoise(float3 ppoint, float cratMagn, float cratFreq, float crat
 
 float RayedCraterColorNoise(float3 ppoint, float cratFreq, float cratSqrtDensity, float cratOctaves)
 {
-	float3 binormal = normalize(float3(-ppoint.z, 0.0, ppoint.x)); // = normalize(cross(ppoint, float3(0, 1, 0)));
+	float3 binormal = normalize(float3(-ppoint.z, 0.0, ppoint.x)); // = normalize(cross(ppoint, float3(0.0, 1.0, 0.0)));
 	float3 rotVec = normalize(Randomize);
 
 	// Craters roundness distortion
@@ -2989,9 +3281,10 @@ float RayedCraterColorNoise(float3 ppoint, float cratFreq, float cratSqrtDensity
 
 		cell = inverseSF(ppoint, fibFreq, cellCenter);
 		rad  = hash1(cell.x * 743.1) * 0.9 + 0.1;
-		fi   = acos(dot(binormal, normalize(cellCenter - ppoint))) / (M_PI2 * 2.0);
+		fi   = acos(dot(binormal, normalize(cellCenter - ppoint))) / M_PI2;
 		color += RayedCraterColorFunc(cell.y * radFactor / rad, fi, 48.3 * dot(cellCenter, Randomize));
 
+		UNITY_BRANCH
 		if (cratOctaves > 1)
 		{
 			ppoint = Rotate(M_PI2 * hash1(float(i)), rotVec, ppoint);
@@ -3071,7 +3364,7 @@ float VolcanoNoise(float3 ppoint, float globalLand, float localLand)
 	float2 cell;
 	float3 cellCenter = float3(0.0, 0.0, 0.0);
 	float3 rotVec   = normalize(Randomize);
-	float3 binormal = normalize(float3(-ppoint.z, 0.0, ppoint.x)); // = normalize(cross(ppoint, float3(0, 1, 0)));
+	float3 binormal = normalize(float3(-ppoint.z, 0.0, ppoint.x)); // = normalize(cross(ppoint, float3(0.0, 1.0, 0.0)));
 	float  distFreq = 18.361 * volcanoFreq;
 	float  distMagn = 0.003;
 
@@ -3084,6 +3377,7 @@ float VolcanoNoise(float3 ppoint, float globalLand, float localLand)
 		float h = hash1(cell.x);
 		float r = 40.0 * cell.y;
 
+		UNITY_BRANCH
 		if ((h < density) && (r < 1.0))
 		{
 			float rnd = 48.3 * dot(cellCenter, Randomize);
@@ -3097,6 +3391,7 @@ float VolcanoNoise(float3 ppoint, float globalLand, float localLand)
 			newLand = softExpMaxMin(newLand, volcano, 32);
 		}
 
+		UNITY_BRANCH
 		if (volcanoOctaves > 1)
 		{
 			ppoint = Rotate(M_PI2 * hash1(float(i)), rotVec, ppoint);
@@ -3125,11 +3420,11 @@ float2 VolcanoGlowNoise(float3 ppoint)
 	float2 cell;
 	float3 cellCenter = float3(0.0, 0.0, 0.0);
 	float3 rotVec   = normalize(Randomize);
-	float3 binormal = normalize(float3(-ppoint.z, 0.0, ppoint.x)); // = normalize(cross(ppoint, float3(0, 1, 0)));
+	float3 binormal = normalize(float3(-ppoint.z, 0.0, ppoint.x)); // = normalize(cross(ppoint, float3(0.0, 1.0, 0.0)));
 	float  distFreq = 18.361 * volcanoFreq;
 	float  distMagn = 0.003;
 
-	for (int i=0; i<volcanoOctaves; i++)
+	for (int i = 0; i < volcanoOctaves; i++)
 	{
 		float3 p = ppoint + distMagn * Fbm3D(ppoint * distFreq, 4);
 
@@ -3138,6 +3433,7 @@ float2 VolcanoGlowNoise(float3 ppoint)
 		float h = hash1(cell.x);
 		float r = 40.0 * cell.y;
 
+		UNITY_BRANCH
 		if ((h < density) && (r < 1.0))
 		{
 			float rnd = 48.3 * dot(cellCenter, Randomize);
@@ -3150,6 +3446,7 @@ float2 VolcanoGlowNoise(float3 ppoint)
 			volcTempMask = max(volcTempMask, float2(1.2 * VolcanoGlowFunc(r, fi1, fi2, rnd, size), 1.0 - 2.0 * r));
 		}
 
+		UNITY_BRANCH
 		if (volcanoOctaves > 1)
 		{
 			ppoint = Rotate(M_PI2 * hash1(float(i)), rotVec, ppoint);
@@ -3167,6 +3464,7 @@ float MareHeightFunc(float lastLand, float lastlastLand, float height, float r, 
 {
 	float t;
 
+	UNITY_BRANCH
 	if (r < radInner) // Crater bottom
 	{  
 		mareFloor = 1.0;
@@ -3215,6 +3513,7 @@ float MareNoise(float3 ppoint, float globalLand, float bottomLand, out float mar
 	heightFloor = 0.0;
 	heightRim = 0.2;
 
+	UNITY_UNROLL
 	for (int i = 0; i < 3; i++)
 	{
 		cell = Cell2Noise(ppoint + 0.07 * Fbm3D(ppoint));
@@ -3359,8 +3658,9 @@ void SolarSpotsHeightNoise(float3 ppoint, out float botMask, out float filMask, 
 
 	float3 dist = 0.01 * Fbm3D(ppoint * 7.6);
 	ppoint += dist * 0.5;
-
-	//for (int i=0; i<3; i++)
+	
+	//UNITY_UNROLL
+	//for (int i = 0; i < 3; i++)
 	{
 		cell = Cell2NoiseSphere(ppoint, craterSphereRadius);
 		//cell = Cell2NoiseVec(ppoint * craterSphereRadius);
@@ -3402,7 +3702,8 @@ void SolarSpotsTempNoise(float3 ppoint, out float botMask, out float filMask, ou
 	float3 dist = 0.01 * Fbm3D(ppoint * 7.6);
 	ppoint += dist * 0.5;
 
-	//for (int i=0; i<3; i++)
+	//UNITY_UNROLL
+	//for (int i = 0; i < 3; i++)
 	//{
 		cell = Cell2NoiseSphere(ppoint, craterSphereRadius);
 		//cell = Cell2NoiseVec(ppoint * craterSphereRadius);
@@ -3426,6 +3727,28 @@ void SolarSpotsTempNoise(float3 ppoint, out float botMask, out float filMask, ou
 //-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
+float GetTerraced(float value)
+{
+	const float W = 0.4;
+
+	float k = floor(value / W);
+	float f = (value - k * W) / W;
+	float s = min(2.0 * f, 1.0);
+
+	return (k + s) * W;
+}
+
+float GetTerraced(float value, float terraceLayers)
+{
+	float height = value;
+	float h = height * terraceLayers;
+
+	height = (floor(h) + smoothstep(0.0, 1.0, frac(h))) / terraceLayers;
+	height *= 0.75;
+
+	return height;
+}
+
 float GetTerraced(float value, float n, float power)
 {
 	float dValue = value * n;
@@ -3433,6 +3756,15 @@ float GetTerraced(float value, float n, float power)
 	float i = floor(dValue);
 
 	return (i + pow(f, power)) / n;
+}
+
+float GetTerraced(float value, float detail, float n, float power)
+{
+	float dValue = value * n;
+	float f = frac(dValue);
+	float i = floor(dValue);
+
+	return (i + pow(f, power)) / (n / detail);
 }
 
 float RidgedMultifractalTerraced(float3 ppoint, float n, float power)
@@ -3488,6 +3820,7 @@ float3 TurbulenceTerra(float3 ppoint)
 	float size = 4.0 * scale;
 	float dens = 0.3;
 
+	UNITY_UNROLL
 	for (int i = 0; i < 2; i++)
 	{
 		cell = inverseSF(ppoint, freq, cellCenter);
@@ -3564,12 +3897,14 @@ float HeightMapCloudsTerra(float3 ppoint)
 	float offset = 0.0;
 
 	// Compute the cyclons
+	UNITY_BRANCH
 	if (tidalLock > 0.0)
 	{
 		float3 cycloneCenter = float3(0.0, 1.0, 0.0);
 		float r = length(cycloneCenter - ppoint);
 		float mag = -tidalLock * cycloneMagn;
 
+		UNITY_BRANCH
 		if (r < 1.0)
 		{
 			float dist = 1.0 - r;
@@ -3618,12 +3953,14 @@ float3 TurbulenceGasGiant(float3 ppoint)
 	float size = 15.0 * scale;
 	float dens = 0.8;
 
+	UNITY_UNROLL
 	for (int i = 0; i < 5; i++)
 	{
 		cell = inverseSF(ppoint, freq, cellCenter);
 		rnd = hash1(cell.x);
 		r = size * cell.y;
 
+		UNITY_BRANCH
 		if ((rnd < dens) && (r < 1.0))
 		{
 			dir = sign(0.5 * dens - rnd);
@@ -3662,6 +3999,7 @@ float3 CycloneNoiseGasGiant(float3 ppoint, inout float offset)
 		rnd = hash1(cell.x);
 		r = size * cell.y;
 
+		UNITY_BRANCH
 		if ((rnd < dens) && (r < 1.0))
 		{
 			dir = sign(0.7 * dens - rnd);
@@ -3693,6 +4031,7 @@ float HeightMapCloudsGasGiantCore(float3 ppoint)
 	float offset = 0.0;
 
 	// Compute cyclons
+	UNITY_BRANCH
 	if (cycloneOctaves > 0.0)
 		twistedPoint = CycloneNoiseGasGiant(twistedPoint, offset);
 
@@ -3707,5 +4046,72 @@ float HeightMapCloudsGasGiantCore(float3 ppoint)
 	float height = stripeFluct * (Fbm(twistedPoint) * 0.7 + 0.5);
 
 	return zones + height + offset;
+}
+//-----------------------------------------------------------------------------
+
+//-----------------------------------------------------------------------------
+float ArmProfile(float fi, float r) 
+{ 
+	const float fi0 = 0.2; 
+ 
+	//fi = floor(fi / M_PI); 
+	//fi = max(sin(floor(fi / M_PI)), 0.0); 
+	fi = (fi < fi0) ? fi / fi0 : (1.0 - fi) / (1.0 - fi0); 
+ 
+	return SavePow(fi, 15.0 * r + 1.0); 
+} 
+ 
+float RayFunc(float fi, float r) 
+{ 
+	const float r0 = 0.15; 
+ 
+	float t = (r < r0) ? r / r0 : (1.0 - r) / (1.0 - r0); 
+	float d = ArmProfile(fi, r); 
+ 
+	return SavePow(t, 1.8) * d; 
+} 
+ 
+float SpiralDensity(float3 ppoint) 
+{ 
+	// Compute cyclons 
+	float cycloneRadius = length(ppoint); 
+	float cycloneAmpl   = 2.3; 
+	float weight        = 1.0; 
+	float3 twistedPoint = ppoint; 
+	float global = 0; 
+	float distort = 0; 
+	float turbulence = 0; 
+ 
+	//twistedPoint += 0.15 * Fbm3D(twistedPoint * 1.5); 
+	UNITY_BRANCH
+	if (cycloneRadius < 1.0) 
+	{ 
+		float dist = 1.0 - cycloneRadius; 
+		float fi = log(cycloneRadius); 
+ 
+		twistedPoint = Rotate2d(cycloneAmpl * fi, twistedPoint); 
+	} 
+ 
+	noiseLacunarity = 3.0; 
+	distort = Fbm(ppoint * 0.7 + Randomize, 4) * 0.2; 
+ 
+	//twistedPoint.x *= 0.2; 
+	//twistedPoint.y *= 5.0; 
+	//global = (Fbm(twistedPoint) + 1.0, 2) * 0.7; 
+	//global = abs(sin(M_PI2 * twistedPoint.x)); 
+ 
+	float r = length(twistedPoint.xy); 
+	float fi = atan2(twistedPoint.x, twistedPoint.y); 
+	fi = frac(3 * ((fi / M_PI) * 0.5 + 0.5)); 
+	global = RayFunc(fi + distort, r) * weight; 
+ 
+	// Compute flow-like distortion 
+	//global = (Fbm(twistedPoint + distort) + 1.0, 6) * 0.7; 
+	//global = (global + offset) * weight; 
+ 
+	// Compute turbilence features 
+	turbulence = Fbm(ppoint * 100.0 + Randomize, 5) * 0.1; 
+ 
+	return global + turbulence * step(0.1, global); 
 }
 //-----------------------------------------------------------------------------

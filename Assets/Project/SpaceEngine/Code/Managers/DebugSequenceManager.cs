@@ -1,14 +1,14 @@
 ﻿#region License
 // Procedural planet generator.
 //  
-// Copyright (C) 2015-2017 Denis Ovchinnikov [zameran] 
+// Copyright (C) 2015-2018 Denis Ovchinnikov [zameran] 
 // All rights reserved.
 // 
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions
 // are met:
 // 1. Redistributions of source code must retain the above copyright
-//     notice, this list of conditions and the following disclaimer.
+//    notice, this list of conditions and the following disclaimer.
 // 2. Redistributions in binary form must reproduce the above copyright
 //    notice, this list of conditions and the following disclaimer in the
 //    documentation and/or other materials provided with the distribution.
@@ -36,6 +36,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Text;
 
 using UnityEngine;
 
@@ -48,6 +49,8 @@ namespace SpaceEngine.Managers
         {
             int IComparer<SequenceEntry>.Compare(SequenceEntry a, SequenceEntry b)
             {
+                if (a == null || b == null) return 0;
+
                 if (a.TimeSinceStartup > b.TimeSinceStartup)
                     return 1;
                 if (a.TimeSinceStartup < b.TimeSinceStartup)
@@ -76,8 +79,6 @@ namespace SpaceEngine.Managers
 
         public override bool Equals(object obj)
         {
-            if (obj == null) return false;
-
             var p = obj as SequenceEntry;
 
             if (p == null) return false;
@@ -106,6 +107,27 @@ namespace SpaceEngine.Managers
             Instance = this;
         }
 
+        private void Update()
+        {
+            #region DEBUG
+
+            if (Input.GetKeyDown(KeyCode.F8))
+            {
+                var stringBuilder = new StringBuilder();
+
+                for (short i = 0; i < Sequence.Count; i++)
+                {
+                    var sequenceEntry = Sequence[i];
+
+                    stringBuilder.AppendLine(string.Format("{0}:{1}", sequenceEntry.Name, sequenceEntry.TimeSinceStartup));
+                }
+
+                UnityEngine.Debug.Log(stringBuilder.ToString());
+            }
+
+            #endregion
+        }
+
         /// <summary>
         /// Add a <see cref="MonoBehaviour"/> to the debug sequence.
         /// </summary>
@@ -113,7 +135,9 @@ namespace SpaceEngine.Managers
         /// <param name="stackFrameOffset">Stack fram offset for a method, wich will be added.</param>
         public void Debug(MonoBehaviour owner, int stackFrameOffset = 1)
         {
-            var entry = new SequenceEntry(string.Format("{0} [{1}.{2}]", owner.name, owner.GetType().Name, new StackTrace().GetFrame(stackFrameOffset).GetMethod().Name));
+            var entry = new SequenceEntry(string.Format("{0} [{1}:{2}.{3}]", owner.gameObject.name, 
+                                                                             owner.name, 
+                                                                             owner.GetType().Name, new StackTrace().GetFrame(stackFrameOffset).GetMethod().Name));
 
             if (Sequence.Contains(entry)) { NestedSequence.Add(entry); }
             else Sequence.Add(entry);

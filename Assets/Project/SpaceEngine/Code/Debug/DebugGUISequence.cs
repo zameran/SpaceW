@@ -1,14 +1,14 @@
 ﻿#region License
 // Procedural planet generator.
 //  
-// Copyright (C) 2015-2017 Denis Ovchinnikov [zameran] 
+// Copyright (C) 2015-2018 Denis Ovchinnikov [zameran] 
 // All rights reserved.
 // 
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions
 // are met:
 // 1. Redistributions of source code must retain the above copyright
-//     notice, this list of conditions and the following disclaimer.
+//    notice, this list of conditions and the following disclaimer.
 // 2. Redistributions in binary form must reproduce the above copyright
 //    notice, this list of conditions and the following disclaimer in the
 //    documentation and/or other materials provided with the distribution.
@@ -76,13 +76,11 @@ namespace SpaceEngine.Debugging
                     {
                         var entry = sequence[i];
 
-                        GUILayout.BeginVertical(string.Format("{0}", entry.Name), GUISkin.box, GUILayout.Width(debugInfoBounds.width - 40));
+                        GUILayoutExtensions.VerticalBoxed(string.Format("{0}", entry.Name), GUISkin, () =>
                         {
-                            GUILayout.Space(20);
-
                             if (true)
                             {
-                                GUILayout.BeginVertical("", GUISkin.box, GUILayout.Width(debugInfoBounds.width - 45));
+                                GUILayoutExtensions.VerticalBoxed("", GUISkin, () =>
                                 {
                                     GUILayoutExtensions.Vertical(() =>
                                     {
@@ -101,23 +99,23 @@ namespace SpaceEngine.Debugging
                                             GUILayoutExtensions.LabelWithFlexibleSpace("Frame: ", entry.Frame);
                                         });
                                     });
-                                }
-                                GUILayout.EndVertical();
+                                }, GUILayout.Width(debugInfoBounds.width - 45));
                             }
-                        }
-                        GUILayout.EndVertical();
+                        }, GUILayout.Width(debugInfoBounds.width - 40));
                     }
 
-                    GUILayout.Space(10);
+                    GUILayoutExtensions.SpacingSeparator();
 
                     GUILayout.EndVertical();
                 }
+
+                GUILayoutExtensions.SpacingSeparator();
 
                 GUILayout.EndScrollView();
             }
             else
             {
-                GUILayout.Label("No sequence!", BoldLabelStyle);
+                GUILayoutExtensions.DrawBadHolder("Sequence stats: ", "No Debug Sequence!?", GUISkin);
             }
         }
     }

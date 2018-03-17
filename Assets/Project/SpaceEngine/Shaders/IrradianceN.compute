@@ -1,20 +1,21 @@
 ﻿/*
  * Author: Eric Bruneton
  * Modified and ported to Unity by Justin Hawkins 2014
- * Modified by Denis Ovchinnikov 2015-2017
+ * Modified by Denis Ovchinnikov 2015-2018
  */
  
 // computes ground irradiance due to skylight E[deltaS] (line 8 in algorithm 4.1)
+
 #pragma kernel CSMain
 
-#include "Assets/Project/SpaceEngine/Shaders/AtmospherePreprocess.cginc"
+#include "SpaceAtmospherePreprocess.cginc"
 
 Texture3D<float4> deltaSRRead; 
 Texture3D<float4> deltaSMRead; 
 
 RWTexture2D<float4> deltaEWrite;
 
-[numthreads(NUM_THREADS,NUM_THREADS,1)]
+[numthreads(NUM_THREADS, NUM_THREADS, 1)]
 void CSMain (uint3 id : SV_DispatchThreadID)
 {
 	float r, muS;
@@ -25,7 +26,7 @@ void CSMain (uint3 id : SV_DispatchThreadID)
 	
 	float3 s = float3(sqrt(max(1.0 - muS * muS, 0.0)), 0.0, muS); 
  
-	float3 result = float3(0, 0, 0); 
+	float3 result = float3(0.0, 0.0, 0.0); 
 
 	// integral over 2.PI around x with two nested loops over w directions (theta,phi) -- Eq (15) 
 

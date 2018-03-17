@@ -1,7 +1,7 @@
 ﻿#region License
 // Procedural planet generator.
 // 
-// Copyright (C) 2015-2017 Denis Ovchinnikov [zameran] 
+// Copyright (C) 2015-2018 Denis Ovchinnikov [zameran] 
 // All rights reserved.
 // 
 // Redistribution and use in source and binary forms, with or without
@@ -93,18 +93,15 @@ public class CubemapCapturer : MonoBehaviour
 
         if (cubeRenderTexture == null)
         {
-            cubeRenderTexture = new RenderTexture(cubemapSize, cubemapSize, 16);
-            cubeRenderTexture.isPowerOfTwo = true;
-            cubeRenderTexture.dimension = UnityEngine.Rendering.TextureDimension.Cube;
-            cubeRenderTexture.hideFlags = HideFlags.HideAndDontSave;
+            cubeRenderTexture = RTExtensions.CreateCubeRTexture(cubemapSize, 16, HideFlags.HideAndDontSave);
 
-            foreach (Renderer r in GetComponentsInChildren<Renderer>())
+            foreach (var renderer in GetComponentsInChildren<Renderer>())
             {
-                foreach (Material m in r.sharedMaterials)
+                foreach (var material in renderer.sharedMaterials)
                 {
-                    if (m.HasProperty("_Cube"))
+                    if (material.HasProperty("_Cube"))
                     {
-                        m.SetTexture("_Cube", cubeRenderTexture);
+                        material.SetTexture("_Cube", cubeRenderTexture);
                     }
                 }
             }

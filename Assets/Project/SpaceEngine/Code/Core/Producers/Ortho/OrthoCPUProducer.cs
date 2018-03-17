@@ -17,7 +17,7 @@ namespace SpaceEngine.Core
         /// The name of the file containing the tiles to load.
         /// </summary>
         [SerializeField]
-        string FileName = "/SpaceEngine/Textures/Terrain/Final/Color.proland";
+        string FileName = "/Resources/Preprocess/Textures/Terrain/Color.dat";
 
         /// <summary>
         /// The number of components per pixel in the tiles to load.
@@ -45,9 +45,9 @@ namespace SpaceEngine.Core
         /// </summary>
         long[] Offsets;
 
-        protected override void Start()
+        public override void InitNode()
         {
-            base.Start();
+            base.InitNode();
 
             var storage = Cache.GetStorage(0) as CPUTileStorage;
 
@@ -132,7 +132,7 @@ namespace SpaceEngine.Core
 
             if (fsize > (TileSize + 2 * Border) * (TileSize + 2 * Border) * Channels)
             {
-                throw new InvalidParameterException("file size of tile is larger than actual tile size");
+                throw new InvalidParameterException("File size of tile is larger than actual tile size!");
             }
 
             using (Stream stream = new FileStream(Application.dataPath + FileName, FileMode.Open))

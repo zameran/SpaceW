@@ -1,14 +1,14 @@
 ﻿#region License
 // Procedural planet generator.
 //  
-// Copyright (C) 2015-2017 Denis Ovchinnikov [zameran] 
+// Copyright (C) 2015-2018 Denis Ovchinnikov [zameran] 
 // All rights reserved.
 // 
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions
 // are met:
 // 1. Redistributions of source code must retain the above copyright
-//     notice, this list of conditions and the following disclaimer.
+//    notice, this list of conditions and the following disclaimer.
 // 2. Redistributions in binary form must reproduce the above copyright
 //    notice, this list of conditions and the following disclaimer in the
 //    documentation and/or other materials provided with the distribution.
@@ -33,18 +33,19 @@
 // Creator: zameran
 #endregion
 
+using System;
 using System.Collections.Generic;
+using System.Diagnostics;
+
+using UnityEngine;
+
+using Debug = UnityEngine.Debug;
 
 namespace SpaceEngine.Core.Debugging
 {
-    using System;
-    using System.IO;
-    using System.Threading;
-
-    using UnityEngine;
-
-    public enum Category
+    public enum LoggerCategory
     {
+        None = -1,
         Important = 0,
         Triggers = 1,
         InGameUI = 2,
@@ -58,171 +59,177 @@ namespace SpaceEngine.Core.Debugging
         Gameplay = 10,
         External = 11,
         Other = 12,
-        Graphics = 13,
-        Error = 14
-    };
+        Graphics = 13
+    }
+
+    public enum LogType
+    {
+        Log = 0,
+
+        Warning = 1,
+        Exception = 2,
+        Error= 3
+    }
 
     public sealed class LoggerPalette
     {
-        private Dictionary<Category, Color> Palette = new Dictionary<Category, Color>()
+        private readonly Dictionary<LoggerCategory, Color> CategoryPalette = new Dictionary<LoggerCategory, Color>
         {
-            {Category.Important, XKCDColors.Amber},
-            {Category.Triggers, XKCDColors.Orange},
-            {Category.InGameUI, XKCDColors.DullGreen},
-            {Category.Camera, XKCDColors.Green},
-            {Category.Data, XKCDColors.BrightSkyBlue},
-            {Category.Input, XKCDColors.Yellow},
-            {Category.Core, XKCDColors.DullRed},
-            {Category.Animation, XKCDColors.Purple},
-            {Category.Player, XKCDColors.Greenish},
-            {Category.Editor, XKCDColors.White},
-            {Category.Gameplay, XKCDColors.DarkPurple},
-            {Category.External, XKCDColors.Brownish},
-            {Category.Other, XKCDColors.DirtyGreen},
-            {Category.Graphics, XKCDColors.BrightRed},
-            {Category.Error, XKCDColors.Red}
+            { LoggerCategory.None, XKCDColors.Grey },
+            { LoggerCategory.Important, XKCDColors.Amber },
+            { LoggerCategory.Triggers, XKCDColors.Orange },
+            { LoggerCategory.InGameUI, XKCDColors.DullGreen },
+            { LoggerCategory.Camera, XKCDColors.Green },
+            { LoggerCategory.Data, XKCDColors.BrightSkyBlue },
+            { LoggerCategory.Input, XKCDColors.Yellow },
+            { LoggerCategory.Core, XKCDColors.DullRed },
+            { LoggerCategory.Animation, XKCDColors.Purple },
+            { LoggerCategory.Player, XKCDColors.Greenish },
+            { LoggerCategory.Editor, XKCDColors.White },
+            { LoggerCategory.Gameplay, XKCDColors.DarkPurple },
+            { LoggerCategory.External, XKCDColors.Brownish },
+            { LoggerCategory.Other, XKCDColors.DirtyGreen },
+            { LoggerCategory.Graphics, XKCDColors.BrightRed }
         };
 
-        public Color GetColorFromCategory(Category category)
+        private readonly Dictionary<LogType, Color> TypePalette = new Dictionary<LogType, Color>
         {
-            return Palette[category];
+            { LogType.Log, XKCDColors.Greyish },
+            { LogType.Warning, XKCDColors.Yellow },
+            { LogType.Exception, XKCDColors.Red },
+            { LogType.Error, XKCDColors.Red }
+        };
+
+        public Color GetColorFromCategory(LoggerCategory loggerCategory)
+        {
+            return CategoryPalette[loggerCategory];
+        }
+
+        public Color GetColorFromType(LogType logType)
+        {
+            return TypePalette[logType];
         }
     }
 
-    [AttributeUsage(AttributeTargets.Method | AttributeTargets.Class, AllowMultiple = false, Inherited = false)]
+    [AttributeUsage(AttributeTargets.Method | AttributeTargets.Class, Inherited = false)]
     public class UseLogger : Attribute
     {
-        public Category Category;
+        public LoggerCategory LoggerCategory;
 
-        public UseLogger(Category category)
+        public UseLogger(LoggerCategory loggerCategory)
         {
-            this.Category = category;
+            LoggerCategory = loggerCategory;
         }
     }
 
-    [AttributeUsage(AttributeTargets.Class, AllowMultiple = false, Inherited = false)]
-    public class UseLoggerFile : Attribute
-    {
-        public string[] LogFileNamePrefixes;
-
-        public UseLoggerFile(params string[] logFileNamePrefixes)
-        {
-            this.LogFileNamePrefixes = logFileNamePrefixes;
-        }
-    }
-
+    // NOTE : Do not use in threading!
     public static class Logger
     {
-        private static readonly ReaderWriterLockSlim IOLock = new ReaderWriterLockSlim();
+#if UNITY_EDITOR
         private static readonly LoggerPalette Palette = new LoggerPalette();
-        private static readonly Category DefaultDebugCategory = Category.Other;
+#endif
+        private static readonly LoggerCategory DefaultLoggerCategory = LoggerCategory.Other;
 
         private static bool DebuggerActive;
 
-        private static Category DebugCategory;
+        #region API
 
-        private static void Detect(out bool shouldDump, out string[] logFileNamePrefixes)
+        public static string Colored(this string message, string colorCode)
         {
-            shouldDump = false;
-            logFileNamePrefixes = new string[0];
+            return string.Format("<color={0}>{1}</color>", colorCode, message);
+        }
 
-            // NOTE : Be careful with skipFrames parameter!
-            var frame = new System.Diagnostics.StackFrame(2, true);
-            var declaringType = frame.GetMethod().DeclaringType;
+        public static string Bold(this string message)
+        {
+            return string.Format("<b>{0}</b>", message);
+        }
 
-            if (declaringType == null)
+        public static string Italic(this string message)
+        {
+            return string.Format("<i>{0}</i>", message);
+        }
+
+        public static string ToRGBHex(Color color)
+        {
+            return XKCDColors.ColorTranslator.ToRGBHex(color);
+        }
+
+        public static string FormatForConsole(string categoryColorCode, string typeColorCode, string categoryString, string typeString, object obj)
+        {
+            return string.Format("{0} : {1} : {2}", Colored(string.Format("[{0}]", typeString.ToUpper()), typeColorCode), Colored(string.Format("[{0}]", categoryString.ToUpper()), categoryColorCode), obj);
+        }
+
+        public static string FormatForFile(DateTime timeStamp, string categoryString, string typeString, object obj)
+        {
+            return string.Format("[{0:H:mm:ss}] : [{1}] : [{2}] : {3}", timeStamp, typeString.ToUpper(), categoryString.ToUpper(), obj);
+        }
+
+        #endregion
+
+        private static void Detect(out LoggerCategory loggerCategory)
+        {
+            var frame = new StackFrame(2, true);
+            var frameMethod = frame.GetMethod();
+            var frameType = frameMethod.DeclaringType;
+
+            if (frameType != null)
             {
-                Debug.LogWarning("Logger: Declaring type is null!");
+                var loggerClassAttributes = frameType.GetCustomAttributes(typeof(UseLogger), true) as UseLogger[];
 
-                return;
-            }
-
-            var loggerFileClassAttributes = declaringType.GetCustomAttributes(typeof(UseLoggerFile), true) as UseLoggerFile[];
-            var loggerClassAttributes = declaringType.GetCustomAttributes(typeof(UseLogger), true) as UseLogger[];
-            var loggerMethodAttributes = frame.GetMethod().GetCustomAttributes(typeof(UseLogger), false) as UseLogger[];
-
-            if (loggerFileClassAttributes != null && loggerFileClassAttributes.Length != 0)
-            {
-                logFileNamePrefixes = loggerFileClassAttributes[0].LogFileNamePrefixes;
-
-                shouldDump = true;
-            }
-            else
-            { shouldDump = false; }
-
-            if (loggerMethodAttributes != null && loggerMethodAttributes.Length != 0)
-            {
-                DebugCategory = loggerMethodAttributes[0].Category;
-                DebuggerActive = true;
-            }
-            else
-            {
                 if (loggerClassAttributes != null && loggerClassAttributes.Length != 0)
                 {
-                    DebugCategory = loggerClassAttributes[0].Category;
+                    loggerCategory = loggerClassAttributes[0].LoggerCategory;
                     DebuggerActive = true;
                 }
                 else
                 {
-                    DebugCategory = DefaultDebugCategory;
+                    loggerCategory = DefaultLoggerCategory;
                     DebuggerActive = false;
                 }
             }
-        }
-
-        public static void LogError(object obj)
-        {
-            bool shouldDump;
-            string[] logFileNamePrefixes;
-
-            Detect(out shouldDump, out logFileNamePrefixes);
-
-            // Override our stuff for errors only...
-            DebugCategory = Category.Error;
-            DebuggerActive = true;
-
-            DoWork(obj, shouldDump, logFileNamePrefixes);
+            else
+            {
+                loggerCategory = DefaultLoggerCategory;
+                DebuggerActive = false;
+            }
         }
 
         public static void Log(object obj)
         {
-            bool shouldDump;
-            string[] logFileNamePrefixes;
+            LoggerCategory loggerCategory;
 
-            Detect(out shouldDump, out logFileNamePrefixes);
+            Detect(out loggerCategory);
 
-            DoWork(obj, shouldDump, logFileNamePrefixes);
+            PrintToLog(obj, LogType.Log, loggerCategory);
         }
 
-        private static void WriteToFile(ref string[] logFileNamePrefixes, string timeStamp, string typeNameString, object str, int i)
+        public static void LogWarning(object obj)
         {
-            IOLock.EnterWriteLock();
+            LoggerCategory loggerCategory;
 
-            try
-            {
-                if (string.IsNullOrEmpty(logFileNamePrefixes[i])) return;
+            Detect(out loggerCategory);
 
-                var path = Path.GetFullPath(string.Format("{0}/../{1}_Log.txt", Application.dataPath, logFileNamePrefixes[i]));
-                var dumpContent = string.Format("{0}[{1}] : {2}", timeStamp, typeNameString, str);
-
-                using (var outputStream = File.AppendText(path))
-                {
-                    outputStream.WriteLine(dumpContent);
-                    outputStream.Flush();
-                    outputStream.Close();
-                }
-            }
-            catch (Exception ex)
-            {
-                Debug.Log(string.Format("Logger: WriteToFile Exception! {0}", ex.Message));
-            }
-            finally
-            {
-                IOLock.ExitWriteLock();
-            }
+            PrintToLog(obj, LogType.Warning, loggerCategory);
         }
 
-        private static void DoWork(object obj, bool shouldDump, string[] logFileNamePrefixes)
+        public static void LogException(object obj)
+        {
+            throw new NotImplementedException();
+        }
+
+        public static void LogError(object obj)
+        {
+            LoggerCategory loggerCategory;
+
+            Detect(out loggerCategory);
+
+            // NOTE : Override...
+            DebuggerActive = true;
+
+            PrintToLog(obj, LogType.Error, loggerCategory);
+        }
+
+        private static void PrintToLog(object obj, LogType logType, LoggerCategory loggerCategory)
         {
             if (!DebuggerActive)
             {
@@ -231,27 +238,32 @@ namespace SpaceEngine.Core.Debugging
                 return;
             }
 
-            var colorString = XKCDColors.ColorTranslator.ToRGBHex(Palette.GetColorFromCategory(DebugCategory));
-            var categoryString = DebugCategory.ToString();
-            var timeStampString = string.Format("[{0:H:mm:ss}]", DateTime.Now);
+            var typeString = logType.ToString();
+            var categoryString = loggerCategory.ToString();
 
-            if (!Application.isEditor)
+#if UNITY_EDITOR
+            obj = FormatForConsole(ToRGBHex(Palette.GetColorFromCategory(loggerCategory)), ToRGBHex(Palette.GetColorFromType(logType)), categoryString, typeString, obj);
+#elif UNITY_STANDALONE
+            obj = FormatForFile(DateTime.Now, categoryString, typeString, obj);
+
+            try
             {
-                if (shouldDump)
+                using (var outputStream = System.IO.File.AppendText(System.IO.Path.GetFullPath(string.Format("{0}/../Log.log", Application.dataPath))))
                 {
-                    for (byte i = 0; i < logFileNamePrefixes.Length; i++)
-                    {
-                        WriteToFile(ref logFileNamePrefixes, timeStampString, categoryString, obj, i);
-                    }
+                    outputStream.WriteLine(obj);
+                    outputStream.Flush();
+                    outputStream.Close();
                 }
-
-                obj = string.Format("{0}[{1}] : {2}", timeStampString, categoryString, obj);
             }
-            else
+            catch (Exception ex)
             {
-                obj = string.Format("<color={0}>[{1}] <b>{2}</b> </color>", colorString, categoryString, obj);
+                Debug.LogException(ex);
             }
-
+            finally
+            {
+                
+            }
+#endif
             Debug.Log(obj);
         }
     }

@@ -1,20 +1,20 @@
 ﻿#region License
 // Procedural planet generator.
 //  
-// Copyright (C) 2015-2017 Denis Ovchinnikov [zameran] 
+// Copyright (C) 2015-2018 Denis Ovchinnikov [zameran] 
 // All rights reserved.
 //  
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions
 // are met:
 // 1. Redistributions of source code must retain the above copyright
-//     notice, this list of conditions and the following disclaimer.
+//    notice, this list of conditions and the following disclaimer.
 // 2. Redistributions in binary form must reproduce the above copyright
-//     notice, this list of conditions and the following disclaimer in the
-//     documentation and/or other materials provided with the distribution.
+//    notice, this list of conditions and the following disclaimer in the
+//    documentation and/or other materials provided with the distribution.
 // 3. Neither the name of the copyright holders nor the names of its
-//     contributors may be used to endorse or promote products derived from
-//     this software without specific prior written permission.
+//    contributors may be used to endorse or promote products derived from
+//    this software without specific prior written permission.
 //  
 // THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
 // AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
@@ -52,16 +52,13 @@ namespace SpaceEngine.Core.Utilities.Gradients
         /// <inheritdoc />
         protected override Vector2 Size { get { return new Vector2(1, 64); } }
 
+        public PenumbraGradientLut() : base() { }
+
+        public PenumbraGradientLut(Gradient gradient) : base(gradient) { }
+
         /// <inheritdoc />
-        public override void GenerateLut()
+        public override void CalculateLut()
         {
-            if (Lut == null || Lut.width != (int)Size.x || Lut.height != (int)Size.y)
-            {
-                DestroyLut();
-
-                Lut = Helper.CreateTempTeture2D((int)Size.x, (int)Size.y, TextureFormat.ARGB32, false, false, false);
-            }
-
             for (var y = 0; y < Lut.height; y++)
             {
                 var t = y / (float)Lut.height;
@@ -74,9 +71,10 @@ namespace SpaceEngine.Core.Utilities.Gradients
                 Lut.SetPixel(0, y, c);
             }
 
-            // Make sure the last pixel is white
+            // Make sure the last pixel is white...
             Lut.SetPixel(0, Lut.height - 1, Color.white);
 
+            // Make sure the wrapMode is good for penumbra...
             Lut.wrapMode = TextureWrapMode.Clamp;
 
             Lut.Apply();

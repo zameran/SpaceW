@@ -1,6 +1,6 @@
 ﻿// Procedural planet generator.
 // 
-// Copyright (C) 2015-2017 Denis Ovchinnikov [zameran] 
+// Copyright (C) 2015-2018 Denis Ovchinnikov [zameran] 
 // All rights reserved.
 // 
 // Redistribution and use in source and binary forms, with or without
@@ -41,7 +41,8 @@ Shader "SpaceEngine/Test/NoiseEngineTest"
 	{
 		Pass
 		{
-			ZTest Always
+			ZWrite On
+			ZTest On
 
 			CGPROGRAM
 			#pragma target 3.0
@@ -49,6 +50,7 @@ Shader "SpaceEngine/Test/NoiseEngineTest"
 			#pragma fragment frag
 
 			#include "UnityCG.cginc"
+
 			#include "../TCCommon.cginc"
 			
 			struct data
@@ -60,24 +62,16 @@ Shader "SpaceEngine/Test/NoiseEngineTest"
 			struct v2f
 			{
 				float4 vertex : SV_POSITION;
-				float3 uv : TEXCOORD0;
+				float3 position : TEXCOORD0;
+				float3 uv : TEXCOORD1;
 			};
 
 			uniform float _Freq;
 
-			v2f vert (data v)
-			{
-			    v2f o;
-
-			    o.vertex = UnityObjectToClipPos(v.vertex);
-			    o.uv = v.uv * _Freq;
-
-			    return o;
-			}
-
 			float NoiseFunction(float3 pos)
 			{
 				return iNoise(pos, 1);
+				//return SpiralDensity(float3(pos.x, pos.z, 0));
 			}
 
 			float3 FindNormal(float3 pos, float u)
@@ -85,17 +79,17 @@ Shader "SpaceEngine/Test/NoiseEngineTest"
 				float3 offsets[4];
 				float hts[4];
 
-				offsets[0] = pos + float3(-u, 0, 0);
-				offsets[1] = pos + float3(u, 0, 0);
-				offsets[2] = pos + float3(0, -u, 0);
-				offsets[3] = pos + float3(0, u, 0);
+				offsets[0] = pos + float3(-u, 0.0, 0.0);
+				offsets[1] = pos + float3(u, 0.0, 0.0);
+				offsets[2] = pos + float3(0.0, -u, 0.0);
+				offsets[3] = pos + float3(0.0, u, 0.0);
 
 				for(int i = 0; i < 4; i++)
 				{
 					hts[i] = NoiseFunction(offsets[i]);
 				}
 
-				float3 _step = float3(1, 0, 1);
+				float3 _step = float3(1.0, 0.0, 1.0);
 			   
 				float3 va = normalize(float3(_step.xy, hts[1] - hts[0]));
 				float3 vb = normalize(float3(_step.yx, hts[3] - hts[2]));
@@ -103,12 +97,19 @@ Shader "SpaceEngine/Test/NoiseEngineTest"
 				return cross(va, vb); //you may not need to swizzle the normal
 			}
 
-			float4 frag(v2f i) : COLOR
+			void vert(in data v, out v2f o)
 			{
-				float v = NoiseFunction(i.uv);
+				o.vertex = UnityObjectToClipPos(v.vertex);
+				o.position = v.vertex.xyz * _Freq;
+				o.uv = v.uv * _Freq;
+			}
+
+			void frag(in v2f i, out float4 outputColor : SV_Target)
+			{
+				float v = NoiseFunction(i.position);
 				
-				return float4(v, v, v, 1);
-				//return float4(FindNormal(i.uv, 1), 1);
+				outputColor = float4(v.xxx, 1.0);
+				//outputColor = float4(FindNormal(i.position, 1.0), 1.0);
 			}
 			ENDCG
 		}

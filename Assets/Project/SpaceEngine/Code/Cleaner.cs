@@ -1,7 +1,7 @@
 ﻿#region License
 // Procedural planet generator.
 // 
-// Copyright (C) 2015-2017 Denis Ovchinnikov [zameran] 
+// Copyright (C) 2015-2018 Denis Ovchinnikov [zameran] 
 // All rights reserved.
 // 
 // Redistribution and use in source and binary forms, with or without
@@ -41,7 +41,7 @@ public sealed class Cleaner : MonoBehaviour
 {
     private void Awake()
     {
-        foreach (var file in Directory.GetFiles(PathGlobals.GlobalRootPath, "*Log*.txt"))
+        foreach (var file in Directory.GetFiles(PathGlobals.GlobalRootPath, "*Log*.log"))
         {
             if (File.Exists(file))
                 File.Delete(file);

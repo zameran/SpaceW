@@ -1,7 +1,11 @@
-﻿using System;
+﻿using SpaceEngine.Core.Debugging;
+
+using System;
 using System.IO;
 
 using UnityEngine;
+
+using Logger = SpaceEngine.Core.Debugging.Logger;
 
 namespace SpaceEngine.Core.Preprocess.Terrain
 {
@@ -11,6 +15,7 @@ namespace SpaceEngine.Core.Preprocess.Terrain
     /// If the file is large the option of caching maybe enabed so only the tiles that are need are loaded from the file. 
     /// This is slower but will allow files that are larger than the maximum memory of the system to be processed.
     /// </summary>
+    [UseLogger(LoggerCategory.Core)]
     public class RawInputMap : InputMap
     {
         [Serializable]
@@ -46,7 +51,7 @@ namespace SpaceEngine.Core.Preprocess.Terrain
         private int channels;
 
         [SerializeField]
-        private string FileName = "/Proland/Textures/Terrain/Source/HeightMap.raw";
+        private string FileName = "/Resources/Preprocess/Terrain/HeightMap.raw";
 
         [SerializeField]
         private BYTE_ORDER ByteOrder = BYTE_ORDER.MAC;
@@ -65,23 +70,27 @@ namespace SpaceEngine.Core.Preprocess.Terrain
 
         public override int Channels { get { return channels; } }
 
-        protected override void Start()
+        private string ApplicationDataPath = "";
+
+        protected override void Awake()
         {
-            base.Start();
+            base.Awake();
+
+            ApplicationDataPath = Application.dataPath;
 
             if (!UseCaching)
             {
                 // If caching not used load all data into memory.
                 if (Bytes == BYTES.BIT8)
                 {
-                    LoadRawFile8(Application.dataPath + FileName);
+                    LoadRawFile8(ApplicationDataPath + FileName);
                 }
                 else if (Bytes == BYTES.BIT16)
                 {
-                    LoadRawFile16(Application.dataPath + FileName, ByteOrder == BYTE_ORDER.MAC);
+                    LoadRawFile16(ApplicationDataPath + FileName, ByteOrder == BYTE_ORDER.MAC);
                 }
 
-                Debug.Log(string.Format("RawInputMap.Start: {0} loaded!", FileName));
+                Logger.Log(string.Format("RawInputMap.Awake: {0} loaded!", FileName));
             }
         }
 
@@ -113,10 +122,10 @@ namespace SpaceEngine.Core.Preprocess.Terrain
                 // If caching is used load only the tile needed into memory.
                 var tileSize = GetTileSize();
 
-                var values = new float[tileSize * tileSize * Channels];
-                var strip = new float[tileSize * Channels];
+                var values = new float[(int)tileSize.x * (int)tileSize.y * Channels];
+                var strip = new float[(int)tileSize.x * Channels];
 
-                for (int j = 0; j < tileSize; ++j)
+                for (int j = 0; j < (int)tileSize.y; ++j)
                 {
                     // The index into the file that the current strip can be found at
                     var idx = (long)((long)tx + (long)(ty + j) * (long)width) * (long)Channels;
@@ -124,16 +133,16 @@ namespace SpaceEngine.Core.Preprocess.Terrain
                     // The data for a 2D map can be accessed in the file in contiguous strips
                     if (Bytes == BYTES.BIT8)
                     {
-                        LoadStrip8(Application.dataPath + FileName, idx, strip);
+                        LoadStrip8(ApplicationDataPath + FileName, idx, strip);
                     }
                     else if (Bytes == BYTES.BIT16)
                     {
-                        LoadStrip16(Application.dataPath + FileName, (tx + (ty + j) * width) * Channels * 2, strip, ByteOrder == BYTE_ORDER.MAC);
+                        LoadStrip16(ApplicationDataPath + FileName, (tx + (ty + j) * width) * Channels * 2, strip, ByteOrder == BYTE_ORDER.MAC);
                     }
 
-                    for (int i = 0; i < tileSize; ++i)
+                    for (int i = 0; i < (int)tileSize.x; ++i)
                     {
-                        var offset = (i + j * tileSize) * Channels;
+                        var offset = (i + j * (int)tileSize.x) * Channels;
 
                         values[offset] = strip[i * Channels + 0];
 

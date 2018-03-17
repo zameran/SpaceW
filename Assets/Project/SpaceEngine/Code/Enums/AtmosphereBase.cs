@@ -1,7 +1,7 @@
 ﻿#region License
 // Procedural planet generator.
 // 
-// Copyright (C) 2015-2017 Denis Ovchinnikov [zameran] 
+// Copyright (C) 2015-2018 Denis Ovchinnikov [zameran] 
 // All rights reserved.
 // 
 // Redistribution and use in source and binary forms, with or without
@@ -33,15 +33,20 @@
 // Creator: zameran
 #endregion
 
-public enum AtmosphereBase : byte
+namespace SpaceEngine.Environment.Atmospheric
 {
-    Default = 0,
-    Earth = 1,
-    Venus = 2,
-    Mars = 3,
-    Jupiter = 4,
-    Titan = 5,
-    Neptune = 6,
-    Sun = 7,
-    Pluto = 8
+    public enum AtmosphereBase : byte
+    {
+        Default = 0,
+        Earth = 1,
+        Venus = 2,
+        Mars = 3,
+        Jupiter = 4,
+        Titan = 5,
+        Neptune = 6,
+        Sun = 7,
+        Pluto = 8,
+
+        Custom = 9
+    }
 }

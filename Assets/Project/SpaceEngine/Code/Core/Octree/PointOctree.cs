@@ -1,20 +1,20 @@
 ﻿#region License
 // Procedural planet generator.
 //  
-// Copyright (C) 2015-2017 Denis Ovchinnikov [zameran] 
+// Copyright (C) 2015-2018 Denis Ovchinnikov [zameran] 
 // All rights reserved.
 //  
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions
 // are met:
 // 1. Redistributions of source code must retain the above copyright
-//     notice, this list of conditions and the following disclaimer.
+//    notice, this list of conditions and the following disclaimer.
 // 2. Redistributions in binary form must reproduce the above copyright
-//     notice, this list of conditions and the following disclaimer in the
-//     documentation and/or other materials provided with the distribution.
+//    notice, this list of conditions and the following disclaimer in the
+//    documentation and/or other materials provided with the distribution.
 // 3. Neither the name of the copyright holders nor the names of its
-//     contributors may be used to endorse or promote products derived from
-//     this software without specific prior written permission.
+//    contributors may be used to endorse or promote products derived from
+//    this software without specific prior written permission.
 //  
 // THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
 // AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
@@ -33,13 +33,14 @@
 // Creator: zameran
 #endregion
 
+using System;
 using System.Collections.Generic;
 
 using UnityEngine;
 
 namespace SpaceEngine.Core.Octree
 {
-    public class PointOctree<T> where T : class
+    public class PointOctree<T> where T : class, IEquatable<T>
     {
         /// <summary>
         /// The total amount of objects currently in the tree.
@@ -71,7 +72,7 @@ namespace SpaceEngine.Core.Octree
         {
             if (minNodeSize > initialWorldSize)
             {
-                Debug.LogWarning(string.Format("Minimum node size must be at least as big as the initial world size. Was: {0} Adjusted to: {1}", minNodeSize, initialWorldSize));
+                Debug.LogWarning(string.Format("PointOctree: Minimum node size must be at least as big as the initial world size. Was: {0} Adjusted to: {1}", minNodeSize, initialWorldSize));
 
                 minNodeSize = initialWorldSize;
             }
@@ -98,7 +99,7 @@ namespace SpaceEngine.Core.Octree
 
                 if (++count > 32)
                 {
-                    Debug.LogError(string.Format("Aborted Add operation as it seemed to be going on forever ({0}) attempts at growing the octree.", count - 1));
+                    Debug.LogError(string.Format("PointOctree: Aborted Add operation as it seemed to be going on forever ({0}) attempts at growing the octree.", count - 1));
 
                     return;
                 }
@@ -108,7 +109,8 @@ namespace SpaceEngine.Core.Octree
         }
 
         /// <summary>
-        /// Remove an object. Makes the assumption that the object only exists once in the tree.
+        /// Remove an object. 
+        /// Makes the assumption that the object only exists once in the tree.
         /// </summary>
         /// <param name="obj">Object to remove.</param>
         /// <returns>True if the object was removed successfully.</returns>
@@ -128,19 +130,64 @@ namespace SpaceEngine.Core.Octree
         }
 
         /// <summary>
-        /// Return objects that are within maxDistance of the specified ray.
+        /// Return objects that are within <paramref name="maxDistance"/> of the specified <paramref name="ray"/>.
         /// If none, returns an empty array (not null).
         /// </summary>
         /// <param name="ray">The ray. Passing as ref to improve performance since it won't have to be copied.</param>
         /// <param name="maxDistance">Maximum distance from the ray to consider.</param>
         /// <returns>Objects within range.</returns>
-        public T[] GetNearby(Ray ray, float maxDistance)
+        public List<T> GetNearby(Ray ray, float maxDistance)
         {
             var collidingWith = new List<T>();
 
-            RootNode.GetNearby(ref ray, ref maxDistance, collidingWith);
+            RootNode.GetNearby(ref ray, ref maxDistance, ref collidingWith);
 
-            return collidingWith.ToArray();
+            return collidingWith;
+        }
+
+        /// <summary>
+        /// Return objects that are within <paramref name="maxDistance"/> of the specified <paramref name="position"/>.
+        /// If none, returns an empty array (not null).
+        /// </summary>
+        /// <param name="position">Position.</param>
+        /// <param name="maxDistance">Maximum distance from the ray to consider.</param>
+        /// <returns>Objects within range.</returns>
+        public List<T> GetNearby(Vector3 position, float maxDistance)
+        {
+            var collidingWith = new List<T>();
+
+            RootNode.GetNearby(ref position, ref maxDistance, ref collidingWith);
+
+            return collidingWith;
+        }
+
+        /// <summary>
+        /// Return nodes that are within <paramref name="maxDistance"/> of the specified <paramref name="position"/>.
+        /// If none, returns an empty array (not null).
+        /// </summary>
+        /// <param name="position">Position.</param>
+        /// <param name="maxDistance">Maximum distance from the ray to consider.</param>
+        /// <returns>Nodes within range.</returns>
+        public List<PointOctreeNode<T>> GetNearbyNodes(Vector3 position, float maxDistance)
+        {
+            var collidingWith = new List<PointOctreeNode<T>>();
+
+            RootNode.GetNearbyNodes(ref position, ref maxDistance, ref collidingWith);
+
+            return collidingWith;
+        }
+
+        /// <summary>
+        /// Return all nodes recursively.
+        /// </summary>
+        /// <returns>All nodes in list.</returns>
+        public List<PointOctreeNode<T>> GetNodes()
+        {
+            var result = new List<PointOctreeNode<T>>();
+
+            RootNode.GetNodes(ref result);
+
+            return result;
         }
 
         /// <summary>
@@ -159,6 +206,11 @@ namespace SpaceEngine.Core.Octree
         public void DrawAllObjects()
         {
             RootNode.DrawAllObjects();
+        }
+
+        public void DrawOutline(Camera camera, Material lineMaterial, int[][] order = null)
+        {
+            RootNode.DrawNodeOutline(camera, lineMaterial, order);
         }
 
         /// <summary>
@@ -185,7 +237,7 @@ namespace SpaceEngine.Core.Octree
 
             PointOctreeNode<T>[] children = new PointOctreeNode<T>[8];
 
-            for (byte i = 0; i < 8; i++)
+            for (var i = 0; i < 8; i++)
             {
                 if (i == rootPos)
                 {
@@ -203,7 +255,7 @@ namespace SpaceEngine.Core.Octree
                 }
             }
 
-            RootNode.SetChildren(children);
+            RootNode.SetChildren(ref children);
         }
 
         /// <summary>
@@ -212,6 +264,11 @@ namespace SpaceEngine.Core.Octree
         public void Shrink()
         {
             RootNode = RootNode.ShrinkIfPossible(InitialSize);
+        }
+
+        public int NodesCount()
+        {
+            return RootNode.NodesCount();
         }
 
         /// <summary>

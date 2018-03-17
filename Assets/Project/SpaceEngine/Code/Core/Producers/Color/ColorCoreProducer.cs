@@ -1,14 +1,14 @@
 ﻿#region License
 // Procedural planet generator.
 //  
-// Copyright (C) 2015-2017 Denis Ovchinnikov [zameran] 
+// Copyright (C) 2015-2018 Denis Ovchinnikov [zameran] 
 // All rights reserved.
 // 
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions
 // are met:
 // 1. Redistributions of source code must retain the above copyright
-//     notice, this list of conditions and the following disclaimer.
+//    notice, this list of conditions and the following disclaimer.
 // 2. Redistributions in binary form must reproduce the above copyright
 //    notice, this list of conditions and the following disclaimer in the
 //    documentation and/or other materials provided with the distribution.
@@ -33,10 +33,9 @@
 // Creator: zameran
 #endregion
 
-using SpaceEngine.Core.Bodies;
 using SpaceEngine.Core.Exceptions;
+using SpaceEngine.Core.Numerics.Vectors;
 using SpaceEngine.Core.Storage;
-using SpaceEngine.Core.Terrain;
 using SpaceEngine.Core.Tile.Producer;
 using SpaceEngine.Core.Tile.Storage;
 
@@ -57,16 +56,19 @@ namespace SpaceEngine.Core
 
         public Material ColorMaterial;
 
-        protected override void Start()
+        public override void InitNode()
         {
-            base.Start();
+            base.InitNode();
 
-            if (TerrainNode == null) { TerrainNode = transform.parent.GetComponent<TerrainNode>(); }
-            if (TerrainNode.ParentBody == null) { TerrainNode.ParentBody = transform.parent.GetComponentInParent<Body>(); }
-            if (NormalsProducer == null) { NormalsProducer = NormalsProducerGameObject.GetComponent<TileProducer>(); }
-            if (NormalsProducer.Cache == null) { NormalsProducer.InitCache(); }
-            if (ElevationProducer == null) { ElevationProducer = ElevationProducerGameObject.GetComponent<TileProducer>(); }
-            if (ElevationProducer.Cache == null) { ElevationProducer.InitCache(); }
+            if (NormalsProducerGameObject != null)
+            {
+                if (NormalsProducer == null) { NormalsProducer = NormalsProducerGameObject.GetComponent<TileProducer>(); }
+            }
+
+            if (ElevationProducerGameObject != null)
+            {
+                if (ElevationProducer == null) { ElevationProducer = ElevationProducerGameObject.GetComponent<TileProducer>(); }
+            }
 
             var tileSize = Cache.GetStorage(0).TileSize;
             var normalsTileSize = NormalsProducer.Cache.GetStorage(0).TileSize;
@@ -118,39 +120,18 @@ namespace SpaceEngine.Core
             GPUTileStorage.GPUSlot normalsGpuSlot = null;
 
             if (normalsTile != null)
-            {
                 normalsGpuSlot = normalsTile.GetSlot(0) as GPUTileStorage.GPUSlot;
-            }
-            else
-            {
-                throw new MissingTileException("Find normals tile failed");
-            }
+            else { throw new MissingTileException("Find normals tile failed"); }
 
             GPUTileStorage.GPUSlot elevationGpuSlot = null;
 
             if (elevationTile != null)
-            {
                 elevationGpuSlot = elevationTile.GetSlot(0) as GPUTileStorage.GPUSlot;
-            }
-            else
-            {
-                throw new MissingTileException("Find elevation tile failed");
-            }
+            else { throw new MissingTileException("Find elevation tile failed"); }
 
-            if (gpuSlot == null)
-            {
-                throw new NullReferenceException("gpuSlot");
-            }
-
-            if (elevationGpuSlot == null)
-            {
-                throw new NullReferenceException("elevationGpuSlot");
-            }
-
-            if (normalsGpuSlot == null)
-            {
-                throw new NullReferenceException("normalsGpuSlot");
-            }
+            if (gpuSlot == null) { throw new NullReferenceException("gpuSlot"); }
+            if (elevationGpuSlot == null) { throw new NullReferenceException("elevationGpuSlot"); }
+            if (normalsGpuSlot == null) { throw new NullReferenceException("normalsGpuSlot"); }
 
             var tileWidth = gpuSlot.Owner.TileSize;
             var normalsTex = normalsGpuSlot.Texture;
@@ -167,15 +148,13 @@ namespace SpaceEngine.Core
             tileWSD.z = (float)tileSize / (float)(TerrainNode.ParentBody.GridResolution - 1);
             tileWSD.w = 0.0f;
 
-            var tileSD = Vector2d.zero;
-            tileSD.x = (0.5 + (float)GetBorder()) / (tileWSD.x - 1 - (float)GetBorder() * 2);
-            tileSD.y = (1.0 + tileSD.x * 2.0);
+            var tileScreenSize = (0.5 + (float)GetBorder()) / (tileWSD.x - 1 - (float)GetBorder() * 2);
+            var tileSD = new Vector2d(tileScreenSize, 1.0 + tileScreenSize * 2.0);
 
-            var offset = Vector4d.zero;
-            offset.x = ((double)tx / (1 << level) - 0.5) * rootQuadSize;
-            offset.y = ((double)ty / (1 << level) - 0.5) * rootQuadSize;
-            offset.z = rootQuadSize / (1 << level);
-            offset.w = TerrainNode.ParentBody.Size;
+            var offset = new Vector4d(((double)tx / (1 << level) - 0.5) * rootQuadSize,
+                                      ((double)ty / (1 << level) - 0.5) * rootQuadSize,
+                                      rootQuadSize / (1 << level),
+                                      TerrainNode.ParentBody.Size);
 
             ColorMaterial.SetTexture("_NormalsSampler", normalsTex);
             ColorMaterial.SetVector("_NormalsOSL", normalsOSL);
@@ -189,6 +168,7 @@ namespace SpaceEngine.Core
             ColorMaterial.SetMatrix("_LocalToWorld", TerrainNode.FaceToLocal.ToMatrix4x4());
 
             if (TerrainNode.ParentBody.TCCPS != null) TerrainNode.ParentBody.TCCPS.SetUniforms(ColorMaterial);
+            if (TerrainNode.ParentBody.TCCPS != null) TerrainNode.ParentBody.TCCPS.ToggleKeywords(ColorMaterial);
 
             Graphics.Blit(null, gpuSlot.Texture, ColorMaterial);
 

@@ -1,12 +1,17 @@
+using SpaceEngine.Core.Debugging;
+
 using System;
 using System.Collections.Generic;
 using System.IO;
 
 using UnityEngine;
 
+using Logger = SpaceEngine.Core.Debugging.Logger;
+
 namespace SpaceEngine.Core.Preprocess.Terrain
 {
-    public class ColorMipmap : AbstractTileCache
+    [UseLogger(LoggerCategory.Core)]
+    public class ColorMipmap : TileCache
     {
         public const int RESIDUAL_STEPS = 2;
 
@@ -37,13 +42,13 @@ namespace SpaceEngine.Core.Preprocess.Terrain
         public ColorMipmap(IColorFunction2D colorFunction, int baseLevelSize, int tileSize, int border, int channels, string tempFolder) : base(baseLevelSize, baseLevelSize, tileSize, channels, 200)
         {
             ColorFunction = colorFunction;
+            BaseLevelSize = baseLevelSize;
+            Size = tileSize;
+            Border = Mathf.Max(0, border);
 
-            this.BaseLevelSize = baseLevelSize;
-            this.Size = tileSize;
-            this.Border = Mathf.Max(0, border);
-            this.MaxLevel = 0;
+            TempFolder = tempFolder;
 
-            this.TempFolder = tempFolder;
+            MaxLevel = 0;
 
             var size = BaseLevelSize;
 
@@ -62,11 +67,13 @@ namespace SpaceEngine.Core.Preprocess.Terrain
             Bottom = null;
             Top = null;
 
-            Debug.Log(string.Format("ColorMipmap.ctor: BaseLevelSize: {0}; TileSize: {1}; Border: {2}; MaxLevel: {3}; Channels: {4}", BaseLevelSize,
-                                                                                                                                      this.Size,
-                                                                                                                                      this.Border,
-                                                                                                                                      MaxLevel,
-                                                                                                                                      Channels));
+            if (!Directory.Exists(TempFolder)) { Directory.CreateDirectory(TempFolder); }
+
+            Logger.Log(string.Format("ColorMipmap.ctor: BaseLevelSize: {0}; TileSize: {1}; Border: {2}; MaxLevel: {3}; Channels: {4}", BaseLevelSize,
+                                                                                                                                       Size,
+                                                                                                                                       Border,
+                                                                                                                                       MaxLevel,
+                                                                                                                                       Channels));
         }
 
         public void Compute()
@@ -85,7 +92,7 @@ namespace SpaceEngine.Core.Preprocess.Terrain
 
             var tilesCount = ((1 << (MaxLevel * 2 + 2)) - 1) / 3;
 
-            Debug.Log(string.Format("ColorMipmap.Generate: tiles count: {0}", tilesCount));
+            Logger.Log(string.Format("ColorMipmap.Generate: tiles count: {0}", tilesCount));
 
             long[] offsets = new long[tilesCount * 2];
             byte[] byteArray = new byte[(7 * 4) + (offsets.Length * 8)];
@@ -119,7 +126,7 @@ namespace SpaceEngine.Core.Preprocess.Terrain
 
             ConstantTileIDs.Clear();
 
-            Debug.Log(string.Format("ColorMipmap.Generate: Saved file path: {0} ", file));
+            Logger.Log(string.Format("ColorMipmap.Generate: Saved file path: {0} ", file));
         }
 
         private string FilePath(string tempFolder, string name, int level, int tx, int ty)
@@ -139,11 +146,10 @@ namespace SpaceEngine.Core.Preprocess.Terrain
             var fileInfo = new FileInfo(fileName);
             if (fileInfo == null) throw new FileNotFoundException(string.Format("Could not read tile: {0}", fileName));
 
-            var stream = fileInfo.OpenRead();
-
-            stream.Read(tile, 0, (int)fileInfo.Length);
-            stream.Close();
-            stream.Dispose();
+            using (Stream stream = fileInfo.OpenRead())
+            {
+                stream.Read(tile, 0, (int)fileInfo.Length);
+            }
         }
 
         protected override float[] ReadTile(int tx, int ty)
@@ -166,7 +172,7 @@ namespace SpaceEngine.Core.Preprocess.Terrain
         {
             int tilesCount = BaseLevelSize / Size;
 
-            Debug.Log(string.Format("ColorMipmap.BuildBaseLevelTiles: Build mipmap level: {0}!", MaxLevel));
+            Logger.Log(string.Format("ColorMipmap.BuildBaseLevelTiles: Build mipmap level: {0}!", MaxLevel));
 
             for (int ty = 0; ty < tilesCount; ++ty)
             {
@@ -209,7 +215,7 @@ namespace SpaceEngine.Core.Preprocess.Terrain
         {
             var tilesCount = 1 << level;
 
-            Debug.Log(string.Format("ColorMipmap.BuildMipmapLevel: Build mipmap level: {0}!", level));
+            Logger.Log(string.Format("ColorMipmap.BuildMipmapLevel: Build mipmap level: {0}!", level));
 
             CurrentLevel = level + 1;
 
@@ -294,7 +300,7 @@ namespace SpaceEngine.Core.Preprocess.Terrain
                     xp = 0;
                     yp = 0;
 
-                    Debug.LogError("ColorMipmap.Rotation: Something goes wrong!");
+                    Logger.LogError("ColorMipmap.Rotation: Something goes wrong!");
                     Debug.Break();
 
                     break;
@@ -528,7 +534,7 @@ namespace SpaceEngine.Core.Preprocess.Terrain
 
         private void ProduceTile(int level, int tx, int ty, ref long offset, long[] offsets, string file)
         {
-            Debug.Log(string.Format("ColorMipmap.ProduceTile: Producing tile {0}:{1}:{2}!", level, tx, ty));
+            Logger.Log(string.Format("ColorMipmap.ProduceTile: Producing tile {0}:{1}:{2}!", level, tx, ty));
 
             ProduceTile(level, tx, ty);
 
@@ -548,7 +554,7 @@ namespace SpaceEngine.Core.Preprocess.Terrain
 
             if (isConstant && ConstantTileIDs.ContainsKey(constantValue))
             {
-                Debug.Log("ColorMipmap.ProduceTile: tile is const (All same value)!");
+                Logger.Log("ColorMipmap.ProduceTile: tile is const (All same value)!");
 
                 var constantId = ConstantTileIDs[constantValue];
 
@@ -591,56 +597,18 @@ namespace SpaceEngine.Core.Preprocess.Terrain
 
         public void SetCube(ColorMipmap hm1, ColorMipmap hm2, ColorMipmap hm3, ColorMipmap hm4, ColorMipmap hm5, ColorMipmap hm6)
         {
-            // NOTE : Ffffffffrrrrrrraaaaaacccccttttaaalls!
-
-            hm1.Left = hm5;
-            hm1.Right = hm3;
-            hm1.Bottom = hm2;
-            hm1.Top = hm4;
-            hm2.Left = hm5;
-            hm2.Right = hm3;
-            hm2.Bottom = hm6;
-            hm2.Top = hm1;
-            hm3.Left = hm2;
-            hm3.Right = hm4;
-            hm3.Bottom = hm6;
-            hm3.Top = hm1;
-            hm4.Left = hm3;
-            hm4.Right = hm5;
-            hm4.Bottom = hm6;
-            hm4.Top = hm1;
-            hm5.Left = hm4;
-            hm5.Right = hm2;
-            hm5.Bottom = hm6;
-            hm5.Top = hm1;
-            hm6.Left = hm5;
-            hm6.Right = hm3;
-            hm6.Bottom = hm4;
-            hm6.Top = hm2;
-            hm1.LeftR = 3;
-            hm1.RightR = 1;
-            hm1.BottomR = 0;
-            hm1.TopR = 2;
-            hm2.LeftR = 0;
-            hm2.RightR = 0;
-            hm2.BottomR = 0;
-            hm2.TopR = 0;
-            hm3.LeftR = 0;
-            hm3.RightR = 0;
-            hm3.BottomR = 1;
-            hm3.TopR = 3;
-            hm4.LeftR = 0;
-            hm4.RightR = 0;
-            hm4.BottomR = 2;
-            hm4.TopR = 2;
-            hm5.LeftR = 0;
-            hm5.RightR = 0;
-            hm5.BottomR = 3;
-            hm5.TopR = 1;
-            hm6.LeftR = 1;
-            hm6.RightR = 3;
-            hm6.BottomR = 2;
-            hm6.TopR = 0;
+            hm1.Left = hm5; hm1.Right = hm3; hm1.Bottom = hm2; hm1.Top = hm4;
+            hm2.Left = hm5; hm2.Right = hm3; hm2.Bottom = hm6; hm2.Top = hm1;
+            hm3.Left = hm2; hm3.Right = hm4; hm3.Bottom = hm6; hm3.Top = hm1;
+            hm4.Left = hm3; hm4.Right = hm5; hm4.Bottom = hm6; hm4.Top = hm1;
+            hm5.Left = hm4; hm5.Right = hm2; hm5.Bottom = hm6; hm5.Top = hm1;
+            hm6.Left = hm5; hm6.Right = hm3; hm6.Bottom = hm4; hm6.Top = hm2;
+            hm1.LeftR = 3; hm1.RightR = 1; hm1.BottomR = 0; hm1.TopR = 2;
+            hm2.LeftR = 0; hm2.RightR = 0; hm2.BottomR = 0; hm2.TopR = 0;
+            hm3.LeftR = 0; hm3.RightR = 0; hm3.BottomR = 1; hm3.TopR = 3;
+            hm4.LeftR = 0; hm4.RightR = 0; hm4.BottomR = 2; hm4.TopR = 2;
+            hm5.LeftR = 0; hm5.RightR = 0; hm5.BottomR = 3; hm5.TopR = 1;
+            hm6.LeftR = 1; hm6.RightR = 3; hm6.BottomR = 2; hm6.TopR = 0;
         }
     }
 }

@@ -1,7 +1,7 @@
 ﻿#region License
 // Procedural planet generator.
 // 
-// Copyright (C) 2015-2017 Denis Ovchinnikov [zameran] 
+// Copyright (C) 2015-2018 Denis Ovchinnikov [zameran] 
 // All rights reserved.
 // 
 // Redistribution and use in source and binary forms, with or without
@@ -33,8 +33,6 @@
 // Creator: zameran
 #endregion
 
-using SpaceEngine.Core.Debugging;
-
 using UnityEngine;
 
 namespace SpaceEngine.Tests
@@ -42,116 +40,20 @@ namespace SpaceEngine.Tests
     [ExecuteInEditMode]
     public sealed class NoiseEngineParametersTest : MonoBehaviour
     {
-        public class Uniforms
-        {
-            public int PermSampler;
-            public int PermGradSampler;
-            public int PermSamplerGL;
-            public int PermGradSamplerGL;
-            public int AtlasDiffSampler;
-            public int MaterialTable;
-            public int ColorMap;
-
-            public int noiseLacunarity;
-            public int noiseH;
-            public int noiseOffset;
-            public int noiseRidgeSmooth;
-
-            public Uniforms()
-            {
-                PermSampler = Shader.PropertyToID("PermSampler");
-                PermGradSampler = Shader.PropertyToID("PermGradSampler");
-                PermSamplerGL = Shader.PropertyToID("PermSamplerGL");
-                PermGradSamplerGL = Shader.PropertyToID("PermGradSamplerGL");
-                AtlasDiffSampler = Shader.PropertyToID("AtlasDiffSampler");
-                MaterialTable = Shader.PropertyToID("MaterialTable");
-                ColorMap = Shader.PropertyToID("ColorMap");
-
-                noiseLacunarity = Shader.PropertyToID("noiseLacunarity");
-                noiseH = Shader.PropertyToID("noiseH");
-                noiseOffset = Shader.PropertyToID("noiseOffset");
-                noiseRidgeSmooth = Shader.PropertyToID("noiseRidgeSmooth");
-            }
-        }
-
-        public float Lacunarity = 2.218281828459f;
-        public float H = 0.5f;
-        public float Offset = 0.8f;
-        public float RidgeSmooth = 0.0001f;
-
-        public Texture2D PermSampler = null;
-        public Texture2D PermGradSampler = null;
-        public Texture2D PermSamplerGL = null;
-        public Texture2D PermGradSamplerGL = null;
-        public Texture2D PlanetAtlas = null;
-        public Texture2D PlanetColor = null;
-        public Texture2D PlanetColorMap = null;
+        public TCCommonParametersSetter TCCPS;
 
         public Material material;
 
-        public Uniforms uniforms;
-
-        private void Awake()
-        {
-            uniforms = new Uniforms();
-        }
-
         private void Update()
         {
-            using (new PerformanceMonitor.Timer("NoiseEngineParametersTest.Update.UpdateUniforms()"))
-            {
-                UpdateUniforms(material);
-            }
+            if (TCCPS == null) return;
 
-            using (new PerformanceMonitor.Timer("NoiseEngineParametersTest.Update.UpdateUniformsWithIDs()"))
-            {
-                UpdateUniformsWithIDs(material, uniforms);
-            }
+            TCCPS.SetUniforms(material);
         }
 
         private void OnDestroy()
         {
             //Helper.Destroy(material);
-        }
-
-        public void UpdateUniforms(Material mat)
-        {
-            if (mat == null) return;
-
-            mat.SetTexture("PermSampler", PermSampler);
-            mat.SetTexture("PermGradSampler", PermGradSampler);
-            mat.SetTexture("PermSamplerGL", PermSamplerGL);
-            mat.SetTexture("PermGradSamplerGL", PermGradSamplerGL);
-            mat.SetTexture("AtlasDiffSampler", PlanetAtlas);
-            mat.SetTexture("MaterialTable", PlanetColor);
-            mat.SetTexture("ColorMap", PlanetColorMap);
-
-            mat.SetFloat("noiseLacunarity", Lacunarity);
-            mat.SetFloat("noiseH", H);
-            mat.SetFloat("noiseOffset", Offset);
-            mat.SetFloat("noiseRidgeSmooth", RidgeSmooth);
-
-            mat.SetPass(0);
-        }
-
-        public void UpdateUniformsWithIDs(Material mat, Uniforms u)
-        {
-            if (mat == null || u == null) return;
-
-            mat.SetTexture(u.PermSampler, PermSampler);
-            mat.SetTexture(u.PermGradSampler, PermGradSampler);
-            mat.SetTexture(u.PermSamplerGL, PermSamplerGL);
-            mat.SetTexture(u.PermGradSamplerGL, PermGradSamplerGL);
-            mat.SetTexture(u.AtlasDiffSampler, PlanetAtlas);
-            mat.SetTexture(u.MaterialTable, PlanetColor);
-            mat.SetTexture(u.ColorMap, PlanetColorMap);
-
-            mat.SetFloat(u.noiseLacunarity, Lacunarity);
-            mat.SetFloat(u.noiseH, H);
-            mat.SetFloat(u.noiseOffset, Offset);
-            mat.SetFloat(u.noiseRidgeSmooth, RidgeSmooth);
-
-            mat.SetPass(0);
         }
     }
 }

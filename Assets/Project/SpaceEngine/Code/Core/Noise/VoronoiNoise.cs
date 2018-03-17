@@ -48,7 +48,7 @@ namespace SpaceEngine.Core.Noise
 
             var distanceArray = new float[3];
 
-            for (byte i = 0; i < distanceArray.Length; i++)
+            for (var i = 0; i < distanceArray.Length; i++)
             {
                 distanceArray[i] = Mathf.Infinity;
             }
@@ -147,7 +147,7 @@ namespace SpaceEngine.Core.Noise
         {
             var value = 0.0f;
 
-            for (byte i = 0; i < arr.Length; i++)
+            for (var i = 0; i < arr.Length; i++)
             {
                 value += arr[i];
             }

@@ -9,12 +9,13 @@ using UnityEngine;
 namespace SpaceEngine.Core.Tile.Tasks
 {
     /// <summary>
-    /// The task that creates the tiles. The task calles the producers <see cref="TileProducer.DoCreateTile"/> function and the data created is stored in the slot.
+    /// The task that creates the tiles. 
+    /// The task calles the producers <see cref="TileProducer.DoCreateTile"/> function and the data created is stored in the slot.
     /// </summary>
     public class CreateTileTask : Schedular.Task
     {
         /// <summary>
-        /// The TileProducer that created this task.
+        /// The <see cref="TileProducer"/> that created this task.
         /// </summary>
         public TileProducer Owner { get; protected set; }
 
@@ -51,12 +52,13 @@ namespace SpaceEngine.Core.Tile.Tasks
         {
             if (IsDone)
             {
-                Debug.Log(string.Format("Task for {0} at {1}:{2}:{3} has already been run. This task will not proceed!", Owner.GetType().Name, Level, Tx, Ty));
+                Debug.Log(string.Format("CreateTileTask.Run: Task for {0} at {1}:{2}:{3} has already been run. This task will not proceed!", Owner.GetType().Name, Level, Tx, Ty));
 
                 return;
             }
 
-            if (GodManager.Instance.DelayedCalculations && !Owner.IsLastInSequence)
+            // NOTE : Process with default even if tile level is 0 or 1 and delayed calculations is enabled...
+            if (GodManager.Instance.DelayedCalculations && !Owner.IsLastInSequence && Level > 1)
             {
                 Owner.StartCoroutine(Owner.DoCreateTileCoroutine(Level, Tx, Ty, Slot, () =>
                 {
@@ -78,13 +80,11 @@ namespace SpaceEngine.Core.Tile.Tasks
         public override void Finish()
         {
             base.Finish();
-
-            // DEBUG HERE - AHAHAHAHAHAHAHAHAHA!
         }
 
         public override string ToString()
         {
-            return string.Format("[CreateTileTask] {0}:{1}:{2}:{3}", Owner.name, Level, Tx, Ty);
+            return string.Format("({0},{1},{2},{3})", Owner.name, Level, Tx, Ty);
         }
     }
 }

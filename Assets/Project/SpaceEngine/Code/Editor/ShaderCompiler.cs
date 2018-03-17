@@ -33,11 +33,10 @@
 // Creator: zameran
 #endregion
 
-using UnityEngine;
-using UnityEditor;
-
 using System.Reflection;
-using System;
+
+using UnityEditor;
+using UnityEngine;
 
 public class ShaderCompiler : EditorWindow
 {

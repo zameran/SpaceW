@@ -1,4 +1,7 @@
 ﻿using SpaceEngine.Core.Bodies;
+using SpaceEngine.Core.Numerics.Matrices;
+using SpaceEngine.Core.Numerics.Shapes;
+using SpaceEngine.Core.Numerics.Vectors;
 using SpaceEngine.Core.Patterns.Strategy.Uniformed;
 using SpaceEngine.Core.Terrain.Deformation;
 using SpaceEngine.Core.Tile.Producer;
@@ -9,6 +12,9 @@ using System.Collections.Generic;
 using System.Linq;
 
 using UnityEngine;
+using UnityEngine.Rendering;
+
+using Functions = SpaceEngine.Core.Numerics.Functions;
 
 namespace SpaceEngine.Core.Terrain
 {
@@ -40,11 +46,26 @@ namespace SpaceEngine.Core.Terrain
     /// The terrain data must be managed by <see cref="Tile.Producer.TileProducer"/>, and stored in TileStorage. 
     /// The link between with the terrain quadtree is provided by the TileSampler class.
     /// </summary>
-    public class TerrainNode : Node<TerrainNode>, IUniformed<Material>
+    public class TerrainNode : NodeSlave<TerrainNode>, IUniformed<Material>
     {
+        public class Sort : IComparer<TerrainNode>
+        {
+            int IComparer<TerrainNode>.Compare(TerrainNode a, TerrainNode b)
+            {
+                if (a == null || b == null) return 0;
+
+                if (a.Face > b.Face)
+                    return 1;
+                if (a.Face < b.Face)
+                    return -1;
+                else
+                    return 0;
+            }
+        }
+
         public Body ParentBody { get; set; }
 
-        readonly static byte HORIZON_SIZE = 255;
+        static readonly byte HORIZON_SIZE = 255;
 
         /// <summary>
         /// The material used by this terrain node.
@@ -67,6 +88,12 @@ namespace SpaceEngine.Core.Terrain
         public int MaxLevel = 16;
 
         /// <summary>
+        /// The minimum level at which the terrain quadtree must be subdivided (exclusive).
+        /// The terrain quadtree will never reach beyond this level, even if the viewer comes very far to the terrain.
+        /// </summary>
+        public int MinLevel = 0;
+
+        /// <summary>
         /// The terrain quad zmin (only use on start up).
         /// </summary>
         public float ZMin = -5000.0f;
@@ -84,7 +111,7 @@ namespace SpaceEngine.Core.Terrain
         /// <summary>
         /// Perform horizon occlusion culling tests?
         /// </summary>
-        public bool UseHorizonCulling = true;
+        public bool UseHorizonCulling = false;
 
         /// <summary>
         /// Subdivide invisible quads based on distance, like visible ones?
@@ -103,19 +130,21 @@ namespace SpaceEngine.Core.Terrain
         public TerrainQuad TerrainQuadRoot { get; set; }
 
         /// <summary>
-        /// The current viewer position in the deformed terrain space.
-        /// </summary>
-        public Vector3d DeformedCameraPosition { get; private set; }
-
-        /// <summary>
         /// The current viewer frustum planes in the deformed terrain space.
         /// </summary>
         public Vector4d[] DeformedFrustumPlanes { get; private set; }
 
         /// <summary>
+        /// The current viewer position in the deformed terrain space.
+        /// </summary>
+        public Vector3d DeformedCameraPosition { get; private set; }
+
+        /// <summary>
         /// The current viewer position in the local terrain space.
         /// </summary>
         public Vector3d LocalCameraPosition { get; private set; }
+
+        public Vector2 DistanceBlending { get; private set; }
 
         /// <summary>
         /// The viewer distance at which a quad is subdivided, relatively to the quad size.
@@ -137,6 +166,10 @@ namespace SpaceEngine.Core.Terrain
         /// </summary>
         public Matrix4x4d LocalToWorld { get; private set; }
 
+        public Matrix4x4d LocalToCamera { get; private set; }
+
+        public Matrix4x4d LocalToScreen { get; private set; }
+
         /// <summary>
         /// The rotation of the face to object space.
         /// </summary>
@@ -147,63 +180,50 @@ namespace SpaceEngine.Core.Terrain
         /// </summary>
         public Matrix3x3d TangentFrameToWorld { get; private set; }
 
+        public Matrix4x4d DeformedLocalToTangent { get; private set; }
+
         /// <summary>
         /// Rasterized horizon elevation angle for each azimuth angle.
         /// </summary>
         float[] Horizon = new float[HORIZON_SIZE];
 
         public List<TileSampler> Samplers = new List<TileSampler>(255);
+        public List<TileSampler> SamplersSuitable = new List<TileSampler>(255);
+
         public TileSamplerOrder SamplersOrder;
 
-        #region Node
+        #region NodeSlave<TerrainNode>
 
-        protected override void InitNode()
+        public override void InitNode()
         {
             ParentBody = GetComponentInParent<Body>();
-            ParentBody.TerrainNodes.Add(this);
 
             TerrainMaterial = MaterialHelper.CreateTemp(ParentBody.ColorShader, "TerrainNode");
 
             FaceToLocal = Matrix4x4d.identity;
 
-            if (ParentBody.GetBodyDeformationType() == BodyDeformationType.Spherical)
-            {
-                var celestialBody = ParentBody as CelestialBody;
+            // NOTE : Body shape dependent...
+            var celestialBody = ParentBody as CelestialBody;
+            var faces = new Vector3d[] { new Vector3d(0, 0, 0), new Vector3d(90, 0, 0), new Vector3d(90, 90, 0), new Vector3d(90, 180, 0), new Vector3d(90, 270, 0), new Vector3d(0, 180, 180) };
 
-                if (celestialBody == null) { throw new Exception("Wow! Celestial body isn't Celestial?!"); }
+            // If this terrain is deformed into a sphere the face matrix is the rotation of the 
+            // terrain needed to make up the spherical planet. In this case there should be 6 terrains, each with a unique face number
+            if (Face - 1 >= 0 && Face - 1 < 6) { FaceToLocal = Matrix4x4d.Rotate(faces[Face - 1]); }
+            if (celestialBody == null) { throw new Exception("Wow! Celestial body isn't Celestial?!"); }
 
-                var faces = new Vector3d[] { new Vector3d(0, 0, 0), new Vector3d(90, 0, 0), new Vector3d(90, 90, 0), new Vector3d(90, 180, 0), new Vector3d(90, 270, 0), new Vector3d(0, 180, 180) };
-
-                // If this terrain is deformed into a sphere the face matrix is the rotation of the 
-                // terrain needed to make up the spherical planet. In this case there should be 6 terrains, each with a unique face number
-                if (Face - 1 >= 0 && Face - 1 < 6)
-                {
-                    FaceToLocal = Matrix4x4d.Rotate(faces[Face - 1]);
-                }
-
-                LocalToWorld = Matrix4x4d.ToMatrix4x4d(celestialBody.transform.localToWorldMatrix) * FaceToLocal;
-                Deformation = new DeformationSpherical(celestialBody.Size);
-
-                InitUniforms(TerrainMaterial);
-
-                if (celestialBody.Atmosphere != null)
-                {
-                    celestialBody.Atmosphere.InitUniforms(TerrainMaterial);
-                }
-            }
-            else
-            {
-                LocalToWorld = FaceToLocal;
-                Deformation = new DeformationBase();
-            }
+            LocalToWorld = Matrix4x4d.ToMatrix4x4d(celestialBody.transform.localToWorldMatrix) * FaceToLocal;
+            Deformation = new DeformationSpherical(celestialBody.Size);
 
             TangentFrameToWorld = new Matrix3x3d(LocalToWorld.m[0, 0], LocalToWorld.m[0, 1], LocalToWorld.m[0, 2],
                                                  LocalToWorld.m[1, 0], LocalToWorld.m[1, 1], LocalToWorld.m[1, 2],
                                                  LocalToWorld.m[2, 0], LocalToWorld.m[2, 1], LocalToWorld.m[2, 2]);
 
+            InitUniforms(TerrainMaterial);
+
             CreateTerrainQuadRoot(ParentBody.Size);
 
             CollectSamplers();
+            CollectSamplersSuitable();
 
             SamplersOrder = new TileSamplerOrder(Samplers);
 
@@ -214,110 +234,69 @@ namespace SpaceEngine.Core.Terrain
             {
                 lastProducer.IsLastInSequence = true;
 
-                Debug.Log(string.Format("{0} probably last in generation sequence, but maybe accidentally not marked as. Fixed!", lastProducer.name));
+                Debug.Log(string.Format("TerrainNode: {0} probably last in generation sequence, but maybe accidentally not marked as. Fixed!", lastProducer.name));
             }
         }
 
-        protected override void UpdateNode()
+        public override void UpdateNode()
         {
             TerrainMaterial.renderQueue = (int)ParentBody.RenderQueue + ParentBody.RenderQueueOffset;
 
-            if (ParentBody.GetBodyDeformationType() == BodyDeformationType.Spherical)
-            {
-                LocalToWorld = Matrix4x4d.ToMatrix4x4d(ParentBody.transform.localToWorldMatrix) * FaceToLocal;
-            }
-            else
-            {
-                LocalToWorld = FaceToLocal;
-            }
+            // NOTE : Body shape dependent...
+            LocalToWorld = Matrix4x4d.ToMatrix4x4d(ParentBody.transform.localToWorldMatrix) * FaceToLocal;
 
             TangentFrameToWorld = new Matrix3x3d(LocalToWorld.m[0, 0], LocalToWorld.m[0, 1], LocalToWorld.m[0, 2],
                                                  LocalToWorld.m[1, 0], LocalToWorld.m[1, 1], LocalToWorld.m[1, 2],
                                                  LocalToWorld.m[2, 0], LocalToWorld.m[2, 1], LocalToWorld.m[2, 2]);
 
-            var localToCamera = GodManager.Instance.WorldToCamera * LocalToWorld;
-            var invLocalToCamera = localToCamera.Inverse();
+            LocalToCamera = GodManager.Instance.View.WorldToCameraMatrix * LocalToWorld;
+            LocalToScreen = GodManager.Instance.View.CameraToScreenMatrix * LocalToCamera;
+
+            var invLocalToCamera = LocalToCamera.Inverse();
 
             DeformedCameraPosition = invLocalToCamera * Vector3d.zero;
-            DeformedFrustumPlanes = Frustum.GetFrustumPlanes(GodManager.Instance.CameraToScreen * localToCamera); // NOTE : Extract frustum planes from LocalToScreen matrix...
+            DeformedFrustumPlanes = Frustum3d.GetFrustumPlanes(LocalToScreen); // NOTE : Extract frustum planes from LocalToScreen matrix...
+
             LocalCameraPosition = Deformation.DeformedToLocal(DeformedCameraPosition);
+
+            DeformedLocalToTangent = Deformation.DeformedToTangentFrame(GodManager.Instance.View.WorldCameraPosition) * LocalToWorld * Deformation.LocalToDeformedDifferential(LocalCameraPosition);
 
             var m = Deformation.LocalToDeformedDifferential(LocalCameraPosition, true);
 
-            var left = DeformedFrustumPlanes[0].XYZ().Normalized();
-            var right = DeformedFrustumPlanes[1].XYZ().Normalized();
+            var left = DeformedFrustumPlanes[0].xyz.Normalized();
+            var right = DeformedFrustumPlanes[1].xyz.Normalized();
 
-            var fov = (float)MathUtility.Safe_Acos(-left.Dot(right));
+            var fov = (float)Functions.Safe_Acos(-left.Dot(right));
 
             SplitDistance = SplitFactor * Screen.width / 1024.0f * Mathf.Tan(40.0f * Mathf.Deg2Rad) / Mathf.Tan(fov / 2.0f);
-            DistanceFactor = (float)Math.Max((new Vector3d(m.m[0, 0], m.m[1, 0], m.m[2, 0])).Magnitude(), (new Vector3d(m.m[0, 1], m.m[1, 1], m.m[2, 1])).Magnitude());
+            DistanceFactor = (float)Math.Max(new Vector3d(m.m[0, 0], m.m[1, 0], m.m[2, 0]).Magnitude(), new Vector3d(m.m[0, 1], m.m[1, 1], m.m[2, 1]).Magnitude());
 
-            if (SplitDistance < 1.1f || !MathUtility.IsFinite(SplitDistance))
-            {
-                SplitDistance = 1.1f;
-            }
+            if (SplitDistance < 1.1f || SplitDistance > 128.0f || !Functions.IsFinite(SplitDistance)) { SplitDistance = 1.1f; }
 
-            // initializes data structures for horizon occlusion culling
+            var splitDistanceBlending = SplitDistance + 1.0f;
+
+            DistanceBlending = new Vector2(splitDistanceBlending, 2.0f * SplitDistance - splitDistanceBlending);
+
+            // Initializes data structures for horizon occlusion culling
             if (UseHorizonCulling && LocalCameraPosition.z <= TerrainQuadRoot.ZMax)
             {
                 var deformedDirection = invLocalToCamera * Vector3d.forward;
-                var localDirection = (Deformation.DeformedToLocal(deformedDirection) - LocalCameraPosition).xy.Normalized();
+                var localDirection = (Deformation.DeformedToLocal(deformedDirection) - LocalCameraPosition).Normalized();
 
                 LocalCameraDirection = new Matrix2x2d(localDirection.y, -localDirection.x, -localDirection.x, -localDirection.y);
 
-                for (byte i = 0; i < HORIZON_SIZE; ++i)
+                for (var i = 0; i < HORIZON_SIZE; ++i)
                 {
                     Horizon[i] = float.NegativeInfinity;
                 }
             }
 
-            TerrainQuadRoot.UpdateLOD();
+            if (ParentBody.UpdateLOD)
+            {
+                TerrainQuadRoot.UpdateLOD();
+            }
 
             SetUniforms(TerrainMaterial);
-
-            if (ParentBody.AtmosphereEnabled)
-            {
-                if (ParentBody.Atmosphere != null)
-                {
-                    ParentBody.Atmosphere.SetUniforms(TerrainMaterial);
-                }
-            }
-
-            if (ParentBody.OceanEnabled)
-            {
-                if (ParentBody.Ocean != null)
-                {
-                    ParentBody.Ocean.SetUniforms(TerrainMaterial);
-                }
-                else
-                {
-                    TerrainMaterial.SetFloat("_Ocean_DrawBRDF", 0.0f);
-                }
-            }
-            else
-            {
-                TerrainMaterial.SetFloat("_Ocean_DrawBRDF", 0.0f);
-            }
-
-            Deformation.SetUniforms(this, TerrainMaterial);
-
-            //if (Manager.GetPlantsNode() != null)
-            //    Manager.GetPlantsNode().SetUniforms(TerrainMaterial);
-        }
-
-        protected override void Awake()
-        {
-            base.Awake();
-        }
-
-        protected override void Start()
-        {
-            base.Start();
-        }
-
-        protected override void Update()
-        {
-            base.Update();
         }
 
         protected override void OnDestroy()
@@ -331,32 +310,27 @@ namespace SpaceEngine.Core.Terrain
 
         #region IUniformed<Material>
 
-        public void InitUniforms(Material target)
+        public virtual void InitUniforms(Material target)
         {
             if (target == null) return;
+
+            ParentBody.InitUniforms(target);
         }
 
-        public void SetUniforms(Material target)
+        public virtual void SetUniforms(Material target)
         {
             if (target == null) return;
 
-            if (ParentBody.GetBodyDeformationType() == BodyDeformationType.Spherical)
-            {
-                var celestialBody = ParentBody as CelestialBody;
+            ParentBody.SetUniforms(target);
 
-                if (celestialBody == null) { throw new Exception("Wow! Celestial body isn't Celestial?!"); }
-
-                target.SetTexture("_Ground_Diffuse", celestialBody.GroundDiffuse);
-                target.SetTexture("_Ground_Normal", celestialBody.GroundNormal);
-                target.SetTexture("_DetailedNormal", celestialBody.DetailedNormal);
-            }
+            Deformation.SetUniforms(this, target);
         }
 
         #endregion
 
         #region IUniformed
 
-        public void InitSetUniforms()
+        public virtual void InitSetUniforms()
         {
             InitUniforms(TerrainMaterial);
             SetUniforms(TerrainMaterial);
@@ -364,13 +338,36 @@ namespace SpaceEngine.Core.Terrain
 
         #endregion
 
+        public void SetPerQuadUniforms(TerrainQuad quad, MaterialPropertyBlock target)
+        {
+            // TODO : BOTTLENECK!
+            Deformation.SetUniforms(this, quad, target);
+
+            // TODO : Planet texturing...
+            /*
+            var rootQuadSize = TerrainQuadRoot.Length;
+            var offset = new Vector4d(((double)quad.Tx / (1 << quad.Level) - 0.5) * rootQuadSize,
+                                      ((double)quad.Ty / (1 << quad.Level) - 0.5) * rootQuadSize,
+                                      rootQuadSize / (1 << quad.Level),
+                                      ParentBody.Size);
+            
+            target.SetVector("_Offset", offset.ToVector4());
+
+            if (ParentBody.TCCPS != null) ParentBody.TCCPS.SetUniforms(target);
+            */
+
+            /*
+            if (ParentBody.TCCPS != null) ParentBody.TCCPS.SetUniforms(target);
+            */
+        }
+
         #region Rendering
 
-        private bool FindDrawableSamplers(TerrainQuad quad, List<TileSampler> samplers)
+        private bool FindDrawableSamplers(TerrainQuad quad)
         {
-            for (short i = 0; i < samplers.Count; ++i)
+            for (short i = 0; i < SamplersSuitable.Count; ++i)
             {
-                var producer = samplers[i].Producer;
+                var producer = SamplersSuitable[i].Producer;
 
                 if (producer.HasTile(quad.Level, quad.Tx, quad.Ty) && producer.FindTile(quad.Level, quad.Tx, quad.Ty, false, true) == null)
                 {
@@ -381,7 +378,7 @@ namespace SpaceEngine.Core.Terrain
             return false;
         }
 
-        public void FindDrawableQuads(TerrainQuad quad, List<TileSampler> samplers)
+        public void FindDrawableQuads(TerrainQuad quad)
         {
             quad.Drawable = false;
 
@@ -394,17 +391,19 @@ namespace SpaceEngine.Core.Terrain
 
             if (quad.IsLeaf)
             {
-                if (FindDrawableSamplers(quad, samplers)) return;
+                if (FindDrawableSamplers(quad)) return;
             }
             else
             {
                 byte drawableCount = 0;
 
-                for (byte i = 0; i < 4; ++i)
+                for (var i = 0; i < 4; ++i)
                 {
-                    FindDrawableQuads(quad.GetChild(i), samplers);
+                    var targetQuad = quad.GetChild(i);
 
-                    if (quad.GetChild(i).Drawable)
+                    FindDrawableQuads(targetQuad);
+
+                    if (targetQuad.Drawable)
                     {
                         ++drawableCount;
                     }
@@ -412,71 +411,114 @@ namespace SpaceEngine.Core.Terrain
 
                 if (drawableCount < 4)
                 {
-                    if (FindDrawableSamplers(quad, samplers)) return;
+                    if (FindDrawableSamplers(quad)) return;
                 }
             }
 
             quad.Drawable = true;
         }
 
-        private void DrawMesh(TerrainQuad quad, Mesh mesh, MaterialPropertyBlock mpb)
+        private void DrawMesh(TerrainQuad quad, Mesh mesh, MaterialPropertyBlock mpb, int layer)
         {
             // Set the uniforms unique to each quad
             SetPerQuadUniforms(quad, mpb);
 
-            Graphics.DrawMesh(mesh, Matrix4x4.identity, TerrainMaterial, 0, CameraHelper.Main(), 0, mpb);
+            Graphics.DrawMesh(mesh, Matrix4x4.identity, TerrainMaterial, layer, CameraHelper.Main(), 0, mpb, ShadowCastingMode.On, true);
         }
 
-        public void DrawQuad(TerrainQuad quad, List<TileSampler> samplers, Mesh mesh, MaterialPropertyBlock mpb)
+        public void DrawQuads(TerrainQuad quad, Mesh mesh, MaterialPropertyBlock mpb, int layer)
         {
             if (!quad.IsVisible) return;
             if (!quad.Drawable) return;
 
             if (quad.IsLeaf)
             {
-                for (byte i = 0; i < samplers.Count; ++i)
+                for (var i = 0; i < SamplersSuitable.Count; ++i)
                 {
                     // Set the unifroms needed to draw the texture for this sampler
-                    samplers[i].SetTile(mpb, quad.Level, quad.Tx, quad.Ty);
+                    SamplersSuitable[i].SetUniforms(mpb, quad);
                 }
 
-                DrawMesh(quad, mesh, mpb);
+                DrawMesh(quad, mesh, mpb, layer);
             }
             else
             {
+                quad.CalculateOrder(quad.Owner.LocalCameraPosition.x, quad.Owner.LocalCameraPosition.y, quad.Ox + quad.LengthHalf, quad.Oy + quad.LengthHalf);
+
                 // Draw quads in a order based on distance to camera
                 var done = 0;
 
-                var order = quad.CalculateOrder(LocalCameraPosition.x, LocalCameraPosition.y, quad.Ox + quad.LengthHalf, quad.Oy + quad.LengthHalf);
-
-                for (byte i = 0; i < 4; ++i)
+                for (var i = 0; i < 4; ++i)
                 {
-                    if (quad.GetChild(order[i]).Visibility == Frustum.VISIBILITY.INVISIBLE)
-                    {
-                        done |= (1 << order[i]);
-                    }
-                    else if (quad.GetChild(order[i]).Drawable)
-                    {
-                        DrawQuad(quad.GetChild(order[i]), samplers, mesh, mpb);
+                    var targetQuad = quad.GetChild(quad.Order[i]);
 
-                        done |= (1 << order[i]);
+                    if (targetQuad.Visibility == Frustum3d.VISIBILITY.INVISIBLE)
+                    {
+                        done |= 1 << quad.Order[i];
+                    }
+                    else if (targetQuad.Drawable)
+                    {
+                        DrawQuads(targetQuad, mesh, mpb, layer);
+
+                        done |= 1 << quad.Order[i];
                     }
                 }
 
                 if (done < 15)
                 {
-                    // If the a leaf quad needs to be drawn but its tiles are not ready then this will draw the next parent tile instead that is ready.
-                    // Because of the current set up all tiles always have there tasks run on the frame they are generated so this section of code is never reached.
+                    // If the a leaf quad needs to be drawn but its tiles are not ready, then this will draw the next parent tile instead that is ready.
+                    // Because of the current set up all tiles always have there tasks run on the frame they are generated, so this section of code is never reached.
+                    Debug.LogWarning(string.Format("Looks like rendering false start! {0}:{1}:{2}", quad.Level, quad.Tx, quad.Ty));
 
-                    for (byte i = 0; i < samplers.Count; ++i)
+                    for (var i = 0; i < SamplersSuitable.Count; ++i)
                     {
                         // Set the unifroms needed to draw the texture for this sampler
-                        samplers[i].SetTile(mpb, quad.Level, quad.Tx, quad.Ty);
+                        SamplersSuitable[i].SetUniforms(mpb, quad);
                     }
 
-                    DrawMesh(quad, mesh, mpb);
+                    DrawMesh(quad, mesh, mpb, layer);
                 }
             }
+        }
+
+        public Queue<TerrainQuad> Traverse(TerrainQuad root)
+        {
+            if (!root.IsVisible) return null;
+            if (!root.Drawable) return null;
+
+            var traverse = new Queue<TerrainQuad>();
+            var quadsQueue = new Queue<TerrainQuad>();
+            var quadsSet = new HashSet<TerrainQuad>();
+
+            quadsQueue.Enqueue(root);
+            quadsSet.Add(root);
+
+            while (quadsQueue.Count > 0)
+            {
+                var currentQuad = quadsQueue.Dequeue();
+
+                traverse.Enqueue(currentQuad);
+
+                if (currentQuad.IsLeaf)
+                {
+                    quadsSet.Add(currentQuad);
+                }
+                else
+                {
+                    for (var i = 0; i < 4; ++i)
+                    {
+                        var currentQuadChild = currentQuad.GetChild(currentQuad.Order[i]);
+
+                        if (!quadsSet.Contains(currentQuadChild) && (currentQuadChild.IsVisible && currentQuadChild.Drawable))
+                        {
+                            quadsQueue.Enqueue(currentQuadChild);
+                            quadsSet.Add(currentQuadChild);
+                        }
+                    }
+                }
+            }
+
+            return traverse;
         }
 
         #endregion
@@ -488,12 +530,43 @@ namespace SpaceEngine.Core.Terrain
         public virtual void CollectSamplers()
         {
             Samplers.Clear();
-
+            
             var samplers = GetComponentsInChildren<TileSampler>().ToList();
 
-            if (samplers.Count > 255) { Debug.Log(string.Format("TerrainNode: Toomuch samplers! {0}", samplers.Count)); return; }
+            if (samplers.Count > 255)
+            {
+                Debug.LogWarning(string.Format("TerrainNode: Toomuch samplers! {0}; Only first 255 will be taken!", samplers.Count));
 
-            Samplers = samplers;
+                Samplers = samplers.GetRange(0, 255);
+
+                return;
+            }
+
+            Samplers = samplers;      
+        }
+
+        /// <summary>
+        /// This mehod will collect all child <see cref="TileSampler"/>s, wich will be used by rendering pipeline in to <see cref="SamplersSuitable"/> collection.
+        /// Don't forget to call this method after Add/Remove operations on <see cref="TileSampler"/>.
+        /// </summary>
+        public virtual void CollectSamplersSuitable()
+        {
+            // NOTE : Should i check for Samplers list before? I SAY - NOPE!
+
+            SamplersSuitable.Clear();
+
+            var samplersSuitable = Samplers.Where(sampler => sampler.enabled && sampler.StoreLeaf).ToList();
+
+            if (samplersSuitable.Count > 255)
+            {
+                Debug.LogWarning(string.Format("TerrainNode: Toomuch suitable samplers! {0}; Only first 255 will be taken!", samplersSuitable.Count));
+
+                Samplers = samplersSuitable.GetRange(0, 255);
+
+                return;
+            }
+
+            SamplersSuitable = samplersSuitable;
         }
 
         private void CreateTerrainQuadRoot(float size)
@@ -503,52 +576,51 @@ namespace SpaceEngine.Core.Terrain
             TerrainQuadRoot = new TerrainQuad(this, null, 0, 0, -size, -size, 2.0 * size, ZMin, ZMax);
         }
 
-        public void SetPerQuadUniforms(TerrainQuad quad, MaterialPropertyBlock matPropertyBlock)
-        {
-            // TODO : BOTTLENECK!
-            Deformation.SetUniforms(this, quad, matPropertyBlock);
-        }
+        #region Occluding
+
+        private readonly Vector2d[] OccluderCorners = new Vector2d[4];
+        private readonly Vector3d[] OccluderBounds = new Vector3d[4];
 
         /// <summary>
         /// Check if the given bounding box is occluded.
         /// </summary>
-        /// <param name="box">A bounding box in local (non deformed) coordinates.</param>
+        /// <param name="occluder">A bounding box in local (non deformed) coordinates.</param>
         /// <returns>Returns 'True' if the given bounding box is occluded by the bounding boxes previously added as occluders by <see cref="AddOccluder"/></returns>
-        public bool IsOccluded(Box3d box)
+        public bool IsOccluded(Box3d occluder)
         {
             if (!UseHorizonCulling || LocalCameraPosition.z > TerrainQuadRoot.ZMax)
             {
                 return false;
             }
 
-            var corners = new Vector2d[4];
             var plane = LocalCameraPosition.xy;
 
-            corners[0] = LocalCameraDirection * (new Vector2d(box.xmin, box.ymin) - plane);
-            corners[1] = LocalCameraDirection * (new Vector2d(box.xmin, box.ymax) - plane);
-            corners[2] = LocalCameraDirection * (new Vector2d(box.xmax, box.ymin) - plane);
-            corners[3] = LocalCameraDirection * (new Vector2d(box.xmax, box.ymax) - plane);
+            OccluderCorners[0] = LocalCameraDirection * (new Vector2d(occluder.Min.x, occluder.Min.y) - plane);
+            OccluderCorners[1] = LocalCameraDirection * (new Vector2d(occluder.Min.x, occluder.Max.y) - plane);
+            OccluderCorners[2] = LocalCameraDirection * (new Vector2d(occluder.Max.x, occluder.Min.y) - plane);
+            OccluderCorners[3] = LocalCameraDirection * (new Vector2d(occluder.Max.x, occluder.Max.y) - plane);
 
-            if (corners[0].y <= 0.0 || corners[1].y <= 0.0 || corners[2].y <= 0.0 || corners[3].y <= 0.0)
+            if (OccluderCorners[0].y <= 0.0 || OccluderCorners[1].y <= 0.0 || OccluderCorners[2].y <= 0.0 || OccluderCorners[3].y <= 0.0)
             {
                 return false;
             }
 
-            var dz = box.zmax - LocalCameraPosition.z;
+            var dzmax = occluder.Max.z - LocalCameraPosition.z;
 
-            corners[0] = new Vector2d(corners[0].x, dz) / corners[0].y;
-            corners[1] = new Vector2d(corners[1].x, dz) / corners[1].y;
-            corners[2] = new Vector2d(corners[2].x, dz) / corners[2].y;
-            corners[3] = new Vector2d(corners[3].x, dz) / corners[3].y;
+            OccluderCorners[0] = new Vector2d(OccluderCorners[0].x, dzmax) / OccluderCorners[0].y;
+            OccluderCorners[1] = new Vector2d(OccluderCorners[1].x, dzmax) / OccluderCorners[1].y;
+            OccluderCorners[2] = new Vector2d(OccluderCorners[2].x, dzmax) / OccluderCorners[2].y;
+            OccluderCorners[3] = new Vector2d(OccluderCorners[3].x, dzmax) / OccluderCorners[3].y;
 
-            var xmin = Math.Min(Math.Min(corners[0].x, corners[1].x), Math.Min(corners[2].x, corners[3].x)) * 0.33 + 0.5;
-            var xmax = Math.Max(Math.Max(corners[0].x, corners[1].x), Math.Max(corners[2].x, corners[3].x)) * 0.33 + 0.5;
-            var zmax = Math.Max(Math.Max(corners[0].y, corners[1].y), Math.Max(corners[2].y, corners[3].y));
+            var xmin = Math.Min(Math.Min(OccluderCorners[0].x, OccluderCorners[1].x), Math.Min(OccluderCorners[2].x, OccluderCorners[3].x)) * 0.33 + 0.5;
+            var xmax = Math.Max(Math.Max(OccluderCorners[0].x, OccluderCorners[1].x), Math.Max(OccluderCorners[2].x, OccluderCorners[3].x)) * 0.33 + 0.5;
+            var zmax = Math.Max(Math.Max(OccluderCorners[0].y, OccluderCorners[1].y), Math.Max(OccluderCorners[2].y, OccluderCorners[3].y));
 
             var imin = Math.Max((int)Math.Floor(xmin * HORIZON_SIZE), 0);
             var imax = Math.Min((int)Math.Ceiling(xmax * HORIZON_SIZE), HORIZON_SIZE - 1);
 
-            for (int i = imin; i <= imax; ++i)
+            // NOTE : Looks like horizon culling isn't working properly. Maybe should be debugged or something...
+            for (var i = imin; i <= imax; ++i)
             {
                 if (zmax > Horizon[i])
                 {
@@ -571,34 +643,31 @@ namespace SpaceEngine.Core.Terrain
                 return false;
             }
 
-            var corners = new Vector2d[4];
             var plane = LocalCameraPosition.xy;
 
-            corners[0] = LocalCameraDirection * (new Vector2d(occluder.xmin, occluder.ymin) - plane);
-            corners[1] = LocalCameraDirection * (new Vector2d(occluder.xmin, occluder.ymax) - plane);
-            corners[2] = LocalCameraDirection * (new Vector2d(occluder.xmax, occluder.ymin) - plane);
-            corners[3] = LocalCameraDirection * (new Vector2d(occluder.xmax, occluder.ymax) - plane);
+            OccluderCorners[0] = LocalCameraDirection * (new Vector2d(occluder.Min.x, occluder.Min.y) - plane);
+            OccluderCorners[1] = LocalCameraDirection * (new Vector2d(occluder.Min.x, occluder.Max.y) - plane);
+            OccluderCorners[2] = LocalCameraDirection * (new Vector2d(occluder.Max.x, occluder.Min.y) - plane);
+            OccluderCorners[3] = LocalCameraDirection * (new Vector2d(occluder.Max.x, occluder.Max.y) - plane);
 
-            if (corners[0].y <= 0.0 || corners[1].y <= 0.0 || corners[2].y <= 0.0 || corners[3].y <= 0.0)
+            if (OccluderCorners[0].y <= 0.0 || OccluderCorners[1].y <= 0.0 || OccluderCorners[2].y <= 0.0 || OccluderCorners[3].y <= 0.0)
             {
                 // Skips bounding boxes that are not fully behind the "near plane" of the reference frame used for horizon occlusion culling
                 return false;
             }
 
-            var dzmin = occluder.zmin - LocalCameraPosition.z;
-            var dzmax = occluder.zmax - LocalCameraPosition.z;
+            var dzmin = occluder.Min.z - LocalCameraPosition.z;
+            var dzmax = occluder.Max.z - LocalCameraPosition.z;
 
-            var bounds = new Vector3d[4];
+            OccluderBounds[0] = new Vector3d(OccluderCorners[0].x, dzmin, dzmax) / OccluderCorners[0].y;
+            OccluderBounds[1] = new Vector3d(OccluderCorners[1].x, dzmin, dzmax) / OccluderCorners[1].y;
+            OccluderBounds[2] = new Vector3d(OccluderCorners[2].x, dzmin, dzmax) / OccluderCorners[2].y;
+            OccluderBounds[3] = new Vector3d(OccluderCorners[3].x, dzmin, dzmax) / OccluderCorners[3].y;
 
-            bounds[0] = new Vector3d(corners[0].x, dzmin, dzmax) / corners[0].y;
-            bounds[1] = new Vector3d(corners[1].x, dzmin, dzmax) / corners[1].y;
-            bounds[2] = new Vector3d(corners[2].x, dzmin, dzmax) / corners[2].y;
-            bounds[3] = new Vector3d(corners[3].x, dzmin, dzmax) / corners[3].y;
-
-            var xmin = Math.Min(Math.Min(bounds[0].x, bounds[1].x), Math.Min(bounds[2].x, bounds[3].x)) * 0.33 + 0.5;
-            var xmax = Math.Max(Math.Max(bounds[0].x, bounds[1].x), Math.Max(bounds[2].x, bounds[3].x)) * 0.33 + 0.5;
-            var zmin = Math.Min(Math.Min(bounds[0].y, bounds[1].y), Math.Min(bounds[2].y, bounds[3].y));
-            var zmax = Math.Max(Math.Max(bounds[0].z, bounds[1].z), Math.Max(bounds[2].z, bounds[3].z));
+            var xmin = Math.Min(Math.Min(OccluderBounds[0].x, OccluderBounds[1].x), Math.Min(OccluderBounds[2].x, OccluderBounds[3].x)) * 0.33 + 0.5;
+            var xmax = Math.Max(Math.Max(OccluderBounds[0].x, OccluderBounds[1].x), Math.Max(OccluderBounds[2].x, OccluderBounds[3].x)) * 0.33 + 0.5;
+            var zmin = Math.Min(Math.Min(OccluderBounds[0].y, OccluderBounds[1].y), Math.Min(OccluderBounds[2].y, OccluderBounds[3].y));
+            var zmax = Math.Max(Math.Max(OccluderBounds[0].z, OccluderBounds[1].z), Math.Max(OccluderBounds[2].z, OccluderBounds[3].z));
 
             var imin = Math.Max((int)Math.Floor(xmin * HORIZON_SIZE), 0);
             var imax = Math.Min((int)Math.Ceiling(xmax * HORIZON_SIZE), HORIZON_SIZE - 1);
@@ -606,7 +675,7 @@ namespace SpaceEngine.Core.Terrain
             // First checks if the bounding box projection is below the current horizon line
             var occluded = (imax >= imin);
 
-            for (int i = imin; i <= imax; ++i)
+            for (var i = imin; i <= imax; ++i)
             {
                 if (zmax > Horizon[i])
                 {
@@ -622,7 +691,7 @@ namespace SpaceEngine.Core.Terrain
                 imin = Math.Max((int)Math.Ceiling(xmin * HORIZON_SIZE), 0);
                 imax = Math.Min((int)Math.Floor(xmax * HORIZON_SIZE), HORIZON_SIZE - 1);
 
-                for (int i = imin; i <= imax; ++i)
+                for (var i = imin; i <= imax; ++i)
                 {
                     Horizon[i] = (float)Math.Max(Horizon[i], zmin);
                 }
@@ -631,17 +700,46 @@ namespace SpaceEngine.Core.Terrain
             return occluded;
         }
 
+        #endregion
+
         /// <summary>
         /// Distance between the current viewer position and the given bounding box.
         /// This distance is measured in the local terrain space. Deformations taken in to account.
         /// </summary>
-        /// <param name="localBox"></param>
+        /// <param name="localBox">Target bounding box.</param>
         /// <returns>Returns the distance between the current viewer position and the given bounding box.</returns>
         public double GetCameraDistance(Box3d localBox)
         {
-            return Math.Max(Math.Abs(LocalCameraPosition.z - localBox.zmax) / DistanceFactor,
-                   Math.Max(Math.Min(Math.Abs(LocalCameraPosition.x - localBox.xmin), Math.Abs(LocalCameraPosition.x - localBox.xmax)),
-                   Math.Min(Math.Abs(LocalCameraPosition.y - localBox.ymin), Math.Abs(LocalCameraPosition.y - localBox.ymax))));
+            return GetCameraDistance(localBox.Min.x, localBox.Max.x, localBox.Min.y, localBox.Max.y, localBox.Max.z);
+        }
+
+        /// <summary>
+        /// Distance between the current viewer position and the given bounding box.
+        /// This distance is measured in the local terrain space. Deformations taken in to account.
+        /// </summary>
+        /// <param name="localBox">Target bounding box.</param>
+        /// <param name="z">Target bounding box Z.</param>
+        /// <returns>Returns the distance between the current viewer position and the given bounding box.</returns>
+        public double GetCameraDistance(Box3d localBox, double z)
+        {
+            return GetCameraDistance(localBox.Min.x, localBox.Max.x, localBox.Min.y, localBox.Max.y, z);
+        }
+
+        /// <summary>
+        /// Distance between the current viewer position and the given bounding box, described as Min/Max values.
+        /// This distance is measured in the local terrain space. Deformations taken in to account.
+        /// </summary>
+        /// <param name="minX">Target Bounding box X minimum.</param>
+        /// <param name="maxX">Target Bounding box X maximum.</param>
+        /// <param name="minY">Target Bounding box Y minimum.</param>
+        /// <param name="maxY">Target Bounding box Y maximum.</param>
+        /// <param name="z">Target Bounding box Z.</param>
+        /// <returns></returns>
+        public double GetCameraDistance(double minX, double maxX, double minY, double maxY, double z)
+        {
+            return Math.Max(Math.Abs(LocalCameraPosition.z - z) / DistanceFactor,
+                   Math.Max(Math.Min(Math.Abs(LocalCameraPosition.x - minX), Math.Abs(LocalCameraPosition.x - maxX)),
+                   Math.Min(Math.Abs(LocalCameraPosition.y - minY), Math.Abs(LocalCameraPosition.y - maxY))));
         }
     }
 }

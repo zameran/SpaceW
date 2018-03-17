@@ -1,7 +1,7 @@
 ﻿#region License
 // Procedural planet generator.
 // 
-// Copyright (C) 2015-2017 Denis Ovchinnikov [zameran] 
+// Copyright (C) 2015-2018 Denis Ovchinnikov [zameran] 
 // All rights reserved.
 // 
 // Redistribution and use in source and binary forms, with or without
@@ -33,6 +33,7 @@
 // Creator: zameran
 #endregion
 
+using SpaceEngine.Core.Numerics.Matrices;
 using SpaceEngine.Debugging;
 
 using UnityEngine;
@@ -46,6 +47,8 @@ namespace SpaceEngine.Cameras
 
         public Camera CameraComponent { get { return CameraCachedComponent.Component; } }
 
+        public bool Controllable = true;
+
         // NOTE : A big problem can be here with a float precision, because matrices provided as is.
         // NOTE : If matrices calculation will be provided, i.e from spherical coordinates around the body (Somesort of 'Body Space').
 
@@ -54,7 +57,7 @@ namespace SpaceEngine.Cameras
         public Matrix4x4d CameraToScreenMatrix { get; protected set; }
         public Matrix4x4d ScreenToCameraMatrix { get; protected set; }
 
-        public Vector3d WorldCameraPosition { get; protected set; }
+        public Vector3 WorldCameraPosition { get; protected set; }
 
         private DebugGUISwitcher DebugGUISwitcherInstance { get { return DebugGUISwitcher.Instance as DebugGUISwitcher; } }
 
@@ -82,6 +85,8 @@ namespace SpaceEngine.Cameras
         protected abstract void Init();
 
         public abstract void UpdateMatrices();
+
+        public abstract void UpdateVectors();
 
         protected float ClampAngle(float angle, float min, float max)
         {

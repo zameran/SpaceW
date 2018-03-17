@@ -1,7 +1,7 @@
 ﻿#region License
 // Procedural planet generator.
 // 
-// Copyright (C) 2015-2017 Denis Ovchinnikov [zameran] 
+// Copyright (C) 2015-2018 Denis Ovchinnikov [zameran] 
 // All rights reserved.
 // 
 // Redistribution and use in source and binary forms, with or without
@@ -33,6 +33,8 @@
 // Creator: zameran
 #endregion
 
+using SpaceEngine.Enums;
+
 using UnityEngine;
 
 namespace SpaceEngine.Debugging
@@ -60,19 +62,28 @@ namespace SpaceEngine.Debugging
         {
             ScrollPosition = GUILayout.BeginScrollView(ScrollPosition, false, true);
 
-            GUILayout.BeginVertical();
+            GUILayoutExtensions.VerticalBoxed("Rendering parameters: ", GUISkin, () =>
+            {
+                GUILayoutExtensions.VerticalBoxed("", GUISkin, () =>
+                {
+                    GUILayoutExtensions.VerticalBoxed("Fragment HDR Mode: ", GUISkin, () =>
+                    {
+                        GodManager.Instance.HDRMode = (FragmentHDR)GUILayout.SelectionGrid((int)GodManager.Instance.HDRMode, System.Enum.GetNames(typeof(FragmentHDR)), 2);
+                    });
 
-            GUILayout.Label("Rendering: ", BoldLabelStyle);
+                    GUILayoutExtensions.SpacingSeparator();
 
-            GUILayout.Label("HDR: ");
-            GodManager.Instance.HDRMode = (AtmosphereHDR)GUILayout.SelectionGrid((int)GodManager.Instance.HDRMode, System.Enum.GetNames(typeof(AtmosphereHDR)), 2);
+                    GUILayoutExtensions.VerticalBoxed("Features: ", GUISkin, () =>
+                    {
+                        GodManager.Instance.Eclipses = GUILayout.Toggle(GodManager.Instance.Eclipses, " - Eclipses?");
+                        GodManager.Instance.Planetshadows = GUILayout.Toggle(GodManager.Instance.Planetshadows, " - Planetshadows?");
+                        GodManager.Instance.Planetshine = GUILayout.Toggle(GodManager.Instance.Planetshine, " - Planetshine?");
+                        GodManager.Instance.OceanSkyReflections = GUILayout.Toggle(GodManager.Instance.OceanSkyReflections, " - Ocean Sky Reflections?");
+                    });
+                });
+            });
 
-            GUILayout.Space(10);
-
-            GodManager.Instance.Eclipses = GUILayout.Toggle(GodManager.Instance.Eclipses, " - Eclipses?");
-            GodManager.Instance.Planetshine = GUILayout.Toggle(GodManager.Instance.Planetshine, " - Planetshine?");
-
-            GUILayout.EndVertical();
+            GUILayoutExtensions.SpacingSeparator();
 
             GUILayout.EndScrollView();
         }

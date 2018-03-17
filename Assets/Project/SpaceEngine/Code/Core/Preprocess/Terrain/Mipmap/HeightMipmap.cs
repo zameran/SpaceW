@@ -1,11 +1,16 @@
+using SpaceEngine.Core.Debugging;
+
 using System;
 using System.IO;
 
 using UnityEngine;
 
+using Logger = SpaceEngine.Core.Debugging.Logger;
+
 namespace SpaceEngine.Core.Preprocess.Terrain
 {
-    public class HeightMipmap : AbstractTileCache
+    [UseLogger(LoggerCategory.Core)]
+    public class HeightMipmap : TileCache
     {
         public HeightMipmap Left;
         public HeightMipmap Right;
@@ -48,9 +53,11 @@ namespace SpaceEngine.Core.Preprocess.Terrain
             HeightFunction = heightFunction;
             TopLevelSize = topLevelSize;
             BaseLevelSize = baseLevelSize;
+
+            TempFolder = tempFolder;
+
             Size = tileSize;
             Scale = 1.0f;
-            TempFolder = tempFolder;
             MinLevel = 0;
             MaxLevel = 0;
 
@@ -79,8 +86,14 @@ namespace SpaceEngine.Core.Preprocess.Terrain
             Bottom = null;
             Top = null;
 
-            Debug.Log(string.Format("HeightMipmap.ctor: TopLevelSize: {0}; BaseLevelSize: {1}; TileSize: {2}; Scale: {3}; MinLevel: {4}; MaxLevel: {5}",
-                                    TopLevelSize, BaseLevelSize, this.Size, Scale, MinLevel, MaxLevel));
+            if (!Directory.Exists(TempFolder)) { Directory.CreateDirectory(TempFolder); }
+
+            Logger.Log(string.Format("HeightMipmap.ctor: TopLevelSize: {0}; BaseLevelSize: {1}; TileSize: {2}; Scale: {3}; MinLevel: {4}; MaxLevel: {5}", TopLevelSize, 
+                                                                                                                                                          BaseLevelSize, 
+                                                                                                                                                          Size, 
+                                                                                                                                                          Scale, 
+                                                                                                                                                          MinLevel, 
+                                                                                                                                                          MaxLevel));
         }
 
         public void Compute()
@@ -106,7 +119,7 @@ namespace SpaceEngine.Core.Preprocess.Terrain
 
             var tilesCount = MinLevel + ((1 << (Mathf.Max(MaxLevel - MinLevel, 0) * 2 + 2)) - 1) / 3;
 
-            Debug.Log(string.Format("HeightMipmap.Generate: tiles count: {0}", tilesCount));
+            Logger.Log(string.Format("HeightMipmap.Generate: tiles count: {0}", tilesCount));
 
             long[] offsets = new long[tilesCount * 2];
             byte[] byteArray = new byte[(7 * 4) + (+MaxR.Length * 4) + (offsets.Length * 8)];
@@ -146,10 +159,10 @@ namespace SpaceEngine.Core.Preprocess.Terrain
 
             for (int i = 0; i < MaxR.Length; i++)
             {
-                Debug.Log(string.Format("HeightMipmap.Generate: Level: {0}; MaxResidual: {1}", i, MaxR[i].ToString("F6")));
+                Logger.Log(string.Format("HeightMipmap.Generate: Level: {0}; MaxResidual: {1}", i, MaxR[i].ToString("F6")));
             }
 
-            Debug.Log(string.Format("HeightMipmap.Generate: Saved file path: {0} ", file));
+            Logger.Log(string.Format("HeightMipmap.Generate: Saved file path: {0} ", file));
         }
 
         private void Rotation(int r, int n, int x, int y, out int xp, out int yp)
@@ -176,7 +189,7 @@ namespace SpaceEngine.Core.Preprocess.Terrain
                     xp = 0;
                     yp = 0;
 
-                    Debug.LogError("HeightMipmap.Rotation: Something goes wrong!");
+                    Logger.LogError("HeightMipmap.Rotation: Something goes wrong!");
                     Debug.Break();
 
                     break;
@@ -208,12 +221,16 @@ namespace SpaceEngine.Core.Preprocess.Terrain
                 y = levelSize - 1;
             }
 
+            // NOTE : Looks like rotation stuff should not be applied to heightmaps...
+            /*
             if (x < 0 && Left != null)
             {
                 int xp;
                 int yp;
 
                 Rotation(LeftR, levelSize, levelSize - 1 + x, y, out xp, out yp);
+
+                Debug.Assert(Left.CurrentLevel == CurrentLevel);
 
                 return Left.GetTileHeight(xp, yp);
             }
@@ -225,6 +242,8 @@ namespace SpaceEngine.Core.Preprocess.Terrain
 
                 Rotation(RightR, levelSize, x - levelSize + 1, y, out xp, out yp);
 
+                Debug.Assert(Right.CurrentLevel == CurrentLevel);
+
                 return Right.GetTileHeight(xp, yp);
             }
 
@@ -234,6 +253,8 @@ namespace SpaceEngine.Core.Preprocess.Terrain
                 int yp;
 
                 Rotation(BottomR, levelSize, x, levelSize - 1 + y, out xp, out yp);
+
+                Debug.Assert(Bottom.CurrentLevel == CurrentLevel);
 
                 return Bottom.GetTileHeight(xp, yp);
             }
@@ -245,18 +266,20 @@ namespace SpaceEngine.Core.Preprocess.Terrain
 
                 Rotation(TopR, levelSize, x, y - levelSize + 1, out xp, out yp);
 
+                Debug.Assert(Top.CurrentLevel == CurrentLevel);
+
                 return Top.GetTileHeight(xp, yp);
             }
+            */
 
             return base.GetTileHeight(x, y);
-
         }
 
         public override void Reset(int width, int height, int tileSize)
         {
             if (Width != width || Height != height)
             {
-                Debug.Log(string.Format("HeightMipmap.Reset: Resetting to width {0} and height {1}; TileSize: {2}", height, width, tileSize));
+                Logger.Log(string.Format("HeightMipmap.Reset: Resetting to width {0} and height {1}; TileSize: {2}", height, width, tileSize));
 
                 base.Reset(width, height, tileSize);
 
@@ -329,11 +352,12 @@ namespace SpaceEngine.Core.Preprocess.Terrain
             var fileInfo = new FileInfo(fileName);
             if (fileInfo == null) throw new FileNotFoundException("Could not read tile " + fileName);
 
-            var stream = fileInfo.OpenRead();
             var data = new byte[fileInfo.Length];
 
-            stream.Read(data, 0, (int)fileInfo.Length);
-            stream.Close();
+            using (Stream stream = fileInfo.OpenRead())
+            {
+                stream.Read(data, 0, (int)fileInfo.Length);
+            }
 
             for (int x = 0, i = 0; x < fileInfo.Length / 4; x++, i += 4)
             {
@@ -367,7 +391,7 @@ namespace SpaceEngine.Core.Preprocess.Terrain
         {
             var tilesCount = BaseLevelSize / Size;
 
-            Debug.Log(string.Format("HeightMipmap.BuildBaseLevelTiles: Build mipmap level: {0}", MaxLevel));
+            Logger.Log(string.Format("HeightMipmap.BuildBaseLevelTiles: Build mipmap level: {0}", MaxLevel));
 
             var maxR = float.NegativeInfinity;
 
@@ -393,7 +417,7 @@ namespace SpaceEngine.Core.Preprocess.Terrain
                 }
             }
 
-            Debug.Log(string.Format("HeightMipmap.BuildBaseLevelTiles: Max Residual:  {0}", maxR.ToString("F6")));
+            Logger.Log(string.Format("HeightMipmap.BuildBaseLevelTiles: Max Residual:  {0}", maxR.ToString("F6")));
 
             MaxR[0] = maxR / Scale;
         }
@@ -402,7 +426,7 @@ namespace SpaceEngine.Core.Preprocess.Terrain
         {
             var tilesCount = Mathf.Max(1, (BaseLevelSize / Size) >> (MaxLevel - level));
 
-            Debug.Log(string.Format("HeightMipmap.BuildMipmapLevel: Build mipmap level: {0}", level));
+            Logger.Log(string.Format("HeightMipmap.BuildMipmapLevel: Build mipmap level: {0}", level));
 
             CurrentLevel = level + 1;
 
@@ -432,7 +456,7 @@ namespace SpaceEngine.Core.Preprocess.Terrain
         {
             var tilesCount = Mathf.Max(1, (BaseLevelSize / Size) >> (MaxLevel - level));
 
-            Debug.Log(string.Format("HeightMipmap.BuildResiduals: Build residuals level: {0}", level));
+            Logger.Log(string.Format("HeightMipmap.BuildResiduals: Build residuals level: {0}", level));
 
             CurrentLevel = level;
 
@@ -463,8 +487,7 @@ namespace SpaceEngine.Core.Preprocess.Terrain
 
                     if (maxR > levelMaxR) levelMaxR = maxR;
 
-                    Debug.Log(string.Format("HeightMipmap::BuildResiduals: {0}-{1}-{2}; Max Residual: {3}; Max Error: {4}", level, tx, ty, maxR.ToString("F6"),
-                                                                                                                                           maxErr.ToString("F6")));
+                    Logger.Log(string.Format("HeightMipmap.BuildResiduals: {0}-{1}-{2}; Max Residual: {3:F6}; Max Error: {4:F6}", level, tx, ty, maxR, maxErr));
                 }
             }
 
@@ -562,7 +585,6 @@ namespace SpaceEngine.Core.Preprocess.Terrain
                     residual[offset] = diff;
                     maxR = Mathf.Max(diff < 0.0f ? -diff : diff, maxR);
                     meanR += diff < 0.0f ? -diff : diff;
-
                 }
             }
 
@@ -646,7 +668,7 @@ namespace SpaceEngine.Core.Preprocess.Terrain
         {
             var tileSize = Mathf.Min(TopLevelSize << level, this.Size);
 
-            Debug.Log(string.Format("HeightMipmap.ProduceTile: Producing tile {0}:{1}:{2}!", level, tx, ty));
+            Logger.Log(string.Format("HeightMipmap.ProduceTile: Producing tile {0}:{1}:{2}!", level, tx, ty));
 
             if (level == 0)
             {
@@ -696,7 +718,7 @@ namespace SpaceEngine.Core.Preprocess.Terrain
 
             if (isConstant && ConstantTile != -1)
             {
-                Debug.Log("HeightMipmap.ProduceTile: tile is const (All zeros)!");
+                Logger.Log("HeightMipmap.ProduceTile: tile is const (All zeros)!");
 
                 offsets[2 * tileid] = offsets[2 * ConstantTile];
                 offsets[2 * tileid + 1] = offsets[2 * ConstantTile + 1];
@@ -730,7 +752,6 @@ namespace SpaceEngine.Core.Preprocess.Terrain
             }
         }
 
-
         private void ProduceTilesLebeguesOrder(int l, int level, int tx, int ty, ref long offset, long[] offsets, string file)
         {
             if (level < l)
@@ -748,56 +769,18 @@ namespace SpaceEngine.Core.Preprocess.Terrain
 
         public static void SetCube(HeightMipmap hm1, HeightMipmap hm2, HeightMipmap hm3, HeightMipmap hm4, HeightMipmap hm5, HeightMipmap hm6)
         {
-            // NOTE : Ffffffffrrrrrrraaaaaacccccttttaaalls!
-
-            hm1.Left = hm5;
-            hm1.Right = hm3;
-            hm1.Bottom = hm2;
-            hm1.Top = hm4;
-            hm2.Left = hm5;
-            hm2.Right = hm3;
-            hm2.Bottom = hm6;
-            hm2.Top = hm1;
-            hm3.Left = hm2;
-            hm3.Right = hm4;
-            hm3.Bottom = hm6;
-            hm3.Top = hm1;
-            hm4.Left = hm3;
-            hm4.Right = hm5;
-            hm4.Bottom = hm6;
-            hm4.Top = hm1;
-            hm5.Left = hm4;
-            hm5.Right = hm2;
-            hm5.Bottom = hm6;
-            hm5.Top = hm1;
-            hm6.Left = hm5;
-            hm6.Right = hm3;
-            hm6.Bottom = hm4;
-            hm6.Top = hm2;
-            hm1.LeftR = 3;
-            hm1.RightR = 1;
-            hm1.BottomR = 0;
-            hm1.TopR = 2;
-            hm2.LeftR = 0;
-            hm2.RightR = 0;
-            hm2.BottomR = 0;
-            hm2.TopR = 0;
-            hm3.LeftR = 0;
-            hm3.RightR = 0;
-            hm3.BottomR = 1;
-            hm3.TopR = 3;
-            hm4.LeftR = 0;
-            hm4.RightR = 0;
-            hm4.BottomR = 2;
-            hm4.TopR = 2;
-            hm5.LeftR = 0;
-            hm5.RightR = 0;
-            hm5.BottomR = 3;
-            hm5.TopR = 1;
-            hm6.LeftR = 1;
-            hm6.RightR = 3;
-            hm6.BottomR = 2;
-            hm6.TopR = 0;
+            hm1.Left = hm5; hm1.Right = hm3; hm1.Bottom = hm2; hm1.Top = hm4;
+            hm2.Left = hm5; hm2.Right = hm3; hm2.Bottom = hm6; hm2.Top = hm1;
+            hm3.Left = hm2; hm3.Right = hm4; hm3.Bottom = hm6; hm3.Top = hm1;
+            hm4.Left = hm3; hm4.Right = hm5; hm4.Bottom = hm6; hm4.Top = hm1;
+            hm5.Left = hm4; hm5.Right = hm2; hm5.Bottom = hm6; hm5.Top = hm1;
+            hm6.Left = hm5; hm6.Right = hm3; hm6.Bottom = hm4; hm6.Top = hm2;
+            hm1.LeftR = 3; hm1.RightR = 1; hm1.BottomR = 0; hm1.TopR = 2;
+            hm2.LeftR = 0; hm2.RightR = 0; hm2.BottomR = 0; hm2.TopR = 0;
+            hm3.LeftR = 0; hm3.RightR = 0; hm3.BottomR = 1; hm3.TopR = 3;
+            hm4.LeftR = 0; hm4.RightR = 0; hm4.BottomR = 2; hm4.TopR = 2;
+            hm5.LeftR = 0; hm5.RightR = 0; hm5.BottomR = 3; hm5.TopR = 1;
+            hm6.LeftR = 1; hm6.RightR = 3; hm6.BottomR = 2; hm6.TopR = 0;
         }
     }
 }

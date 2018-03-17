@@ -1,6 +1,7 @@
-﻿using SpaceEngine.AtmosphericScattering;
-using SpaceEngine.Core.Bodies;
-using SpaceEngine.Pluginator.Enums;
+﻿using SpaceEngine.Core.Bodies;
+using SpaceEngine.Core.Terrain;
+using SpaceEngine.Enums;
+using SpaceEngine.Environment.Atmospheric;
 using SpaceEngine.UI;
 
 using System;
@@ -28,6 +29,8 @@ public sealed class BodyEvents
 {
     public EventHolder<Body, Atmosphere> OnAtmosphereBaked = new EventHolder<Body, Atmosphere>();
     public EventHolder<Body, Atmosphere, AtmosphereBase> OnAtmospherePresetChanged = new EventHolder<Body, Atmosphere, AtmosphereBase>();
+
+    public EventHolder<Body, TerrainNode> OnSamplersChanged = new EventHolder<Body, TerrainNode>();
 }
 
 public sealed class UIEvents

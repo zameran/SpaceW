@@ -1,7 +1,7 @@
 ﻿#region License
 // Procedural planet generator.
 // 
-// Copyright (C) 2015-2017 Denis Ovchinnikov [zameran] 
+// Copyright (C) 2015-2018 Denis Ovchinnikov [zameran] 
 // All rights reserved.
 // 
 // Redistribution and use in source and binary forms, with or without
@@ -33,7 +33,8 @@
 // Creator: zameran
 #endregion
 
-using System;
+#define UNITY_GL_PROJECTION_MATRIX
+
 using System.Collections.Generic;
 using System.Linq;
 
@@ -52,11 +53,31 @@ public static class CameraHelper
 
     public static Camera DepthCamera()
     {
-        var mainCamera = Main();
+        return FindCamera("CustomDepthCamera");
+    }
 
-        if (mainCamera.gameObject.transform.Find("CustomDepthCamera") != null)
-            if (mainCamera.gameObject.transform.Find("CustomDepthCamera").GetComponent<Camera>() != null)
-                return mainCamera.gameObject.transform.Find("CustomDepthCamera").GetComponent<Camera>();
+    public static Camera NearCamera()
+    {
+        return FindCamera("NearCamera");
+    }
+
+    /// <summary>
+    /// Find a <see cref="Camera"/> in <see cref="GameObject"/>'s components with specified name.
+    /// </summary>
+    /// <param name="gameObjectName">Target <see cref="GameObject"/> name to search in.</param>
+    /// <returns>Returns a <see cref="Camera"/> component from existing <see cref="GameObject"/>'s components.</returns>
+    public static Camera FindCamera(string gameObjectName = "Camera")
+    {
+        var mainCamera = Main();
+        var resultCameraGameObject = mainCamera.transform.Find(gameObjectName);
+
+        if (resultCameraGameObject != null)
+        {
+            var resultCameraComponent = resultCameraGameObject.GetComponent<Camera>();
+
+            if (resultCameraComponent != null)
+                return resultCameraComponent;
+        }
 
         return null;
     }
@@ -71,26 +92,39 @@ public static class CameraHelper
         return camera.cameraToWorldMatrix;
     }
 
-    public static Matrix4x4 GetCameraToScreen(this Camera camera, bool useFix = true, bool overrideMatrixY = true)
+    /// <summary>
+    /// Get <see cref="Camera"/>'s projection <see cref="Matrix4x4"/>.
+    /// </summary>
+    /// <param name="camera">Target <see cref="Camera"/>.</param>
+    /// <param name="useFix">Render in to texture?</param>
+    /// <returns>Returns the <see cref="Camera"/>'s projection <see cref="Matrix4x4"/>.</returns>
+    public static Matrix4x4 GetCameraToScreen(this Camera camera, bool useFix = true)
     {
+#if UNITY_GL_PROJECTION_MATRIX
+        var projectionMatrix = camera.projectionMatrix;
+
+        projectionMatrix = GL.GetGPUProjectionMatrix(projectionMatrix, useFix);
+
+        return projectionMatrix;
+#else
         var projectionMatrix = camera.projectionMatrix;
 
         if (!useFix) return projectionMatrix;
 
-        if (SystemInfo.graphicsDeviceVersion.IndexOf("Direct3D", StringComparison.Ordinal) > -1)
+        if (SystemInfo.graphicsDeviceVersion.IndexOf("Direct3D", System.StringComparison.Ordinal) > -1)
         {
             // NOTE : Default unity antialiasing breaks matrices?
-            if (overrideMatrixY || (IsDeferred(camera) || QualitySettings.antiAliasing == 0))
+            if ((IsDeferred(camera) || QualitySettings.antiAliasing == 0))
             {
                 // Invert Y for rendering to a render texture
-                for (byte i = 0; i < 4; i++)
+                for (var i = 0; i < 4; i++)
                 {
                     projectionMatrix[1, i] = -projectionMatrix[1, i];
                 }
             }
 
             // Scale and bias depth range
-            for (byte i = 0; i < 4; i++)
+            for (var i = 0; i < 4; i++)
             {
                 // NOTE : Hm. I saw something about reverse depth buffer in release notes...
                 projectionMatrix[2, i] = -(projectionMatrix[2, i] * 0.5f + projectionMatrix[3, i] * -0.5f);
@@ -99,6 +133,7 @@ public static class CameraHelper
         }
 
         return projectionMatrix;
+#endif
     }
 
     public static Matrix4x4 GetScreenToCamera(this Camera camera)

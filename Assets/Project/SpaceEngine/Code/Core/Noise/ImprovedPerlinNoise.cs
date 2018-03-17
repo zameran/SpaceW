@@ -1,7 +1,7 @@
 #region License
 // Procedural planet generator.
 // 
-// Copyright (C) 2015-2017 Denis Ovchinnikov [zameran] 
+// Copyright (C) 2015-2018 Denis Ovchinnikov [zameran] 
 // All rights reserved.
 // 
 // Redistribution and use in source and binary forms, with or without
@@ -36,6 +36,7 @@
 using System;
 
 using UnityEngine;
+
 using Random = UnityEngine.Random;
 
 namespace SpaceEngine.Core.Noise
@@ -95,7 +96,7 @@ namespace SpaceEngine.Core.Noise
         {
             if (PermutationTable1D) return;
 
-            PermutationTable1D = new Texture2D(SIZE, 1, TextureFormat.Alpha8, false, true);
+            PermutationTable1D = Helper.CreateTempTeture2D(SIZE, 1, TextureFormat.Alpha8, false, true, false);
             PermutationTable1D.filterMode = FilterMode.Point;
             PermutationTable1D.wrapMode = TextureWrapMode.Repeat;
 
@@ -111,7 +112,7 @@ namespace SpaceEngine.Core.Noise
         {
             if (PermutationTable2D) return;
 
-            PermutationTable2D = new Texture2D(SIZE, SIZE, TextureFormat.ARGB32, false, true);
+            PermutationTable2D = Helper.CreateTempTeture2D(SIZE, SIZE, TextureFormat.ARGB32, false, true, false);
             PermutationTable2D.filterMode = FilterMode.Point;
             PermutationTable2D.wrapMode = TextureWrapMode.Repeat;
 
@@ -119,13 +120,13 @@ namespace SpaceEngine.Core.Noise
             {
                 for (short y = 0; y < SIZE; y++)
                 {
-                    int A = Permutation[x] + y;
-                    int AA = Permutation[A];
-                    int AB = Permutation[A + 1];
+                    var A = Permutation[x] + y;
+                    var AA = Permutation[A];
+                    var AB = Permutation[A + 1];
 
-                    int B = Permutation[x + 1] + y;
-                    int BA = Permutation[B];
-                    int BB = Permutation[B + 1];
+                    var B = Permutation[x + 1] + y;
+                    var BA = Permutation[B];
+                    var BB = Permutation[B + 1];
 
                     PermutationTable2D.SetPixel(x, y, new Color((float)AA / 255.0f, (float)AB / 255.0f, (float)BA / 255.0f, (float)BB / 255.0f));
                 }
@@ -138,14 +139,14 @@ namespace SpaceEngine.Core.Noise
         {
             if (Gradient2D) return;
 
-            Gradient2D = new Texture2D(8, 1, TextureFormat.RGB24, false, true);
+            Gradient2D = Helper.CreateTempTeture2D(8, 1, TextureFormat.RGB24, false, true, false);
             Gradient2D.filterMode = FilterMode.Point;
             Gradient2D.wrapMode = TextureWrapMode.Repeat;
 
             for (short i = 0; i < 8; i++)
             {
-                float R = (GRADIENT2[i * 2 + 0] + 1.0f) * 0.5f;
-                float G = (GRADIENT2[i * 2 + 1] + 1.0f) * 0.5f;
+                var R = (GRADIENT2[i * 2 + 0] + 1.0f) * 0.5f;
+                var G = (GRADIENT2[i * 2 + 1] + 1.0f) * 0.5f;
 
                 Gradient2D.SetPixel(i, 0, new Color(R, G, 0, 1));
             }
@@ -158,7 +159,7 @@ namespace SpaceEngine.Core.Noise
         {
             if (Gradient3D) return;
 
-            Gradient3D = new Texture2D(SIZE, 1, TextureFormat.RGB24, false, true);
+            Gradient3D = Helper.CreateTempTeture2D(SIZE, 1, TextureFormat.RGB24, false, true, false);
             Gradient3D.filterMode = FilterMode.Point;
             Gradient3D.wrapMode = TextureWrapMode.Repeat;
 
@@ -166,9 +167,9 @@ namespace SpaceEngine.Core.Noise
             {
                 var idx = Permutation[i] % 16;
 
-                float R = (GRADIENT3[idx * 3 + 0] + 1.0f) * 0.5f;
-                float G = (GRADIENT3[idx * 3 + 1] + 1.0f) * 0.5f;
-                float B = (GRADIENT3[idx * 3 + 2] + 1.0f) * 0.5f;
+                var R = (GRADIENT3[idx * 3 + 0] + 1.0f) * 0.5f;
+                var G = (GRADIENT3[idx * 3 + 1] + 1.0f) * 0.5f;
+                var B = (GRADIENT3[idx * 3 + 2] + 1.0f) * 0.5f;
 
                 Gradient3D.SetPixel(i, 0, new Color(R, G, B, 1));
             }

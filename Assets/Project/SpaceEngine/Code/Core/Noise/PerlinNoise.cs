@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 
 namespace SpaceEngine.Core.Noise
@@ -27,33 +28,98 @@ namespace SpaceEngine.Core.Noise
             }
         }
 
-        public static double Noise(double x, double y, double z)
+        public double Noise(double x)
         {
-            var X = FastFloor(x) & 255;
-            var Y = FastFloor(y) & 255;
-            var Z = FastFloor(z) & 255;
+            var ix0 = (int)Math.Floor(x);          // Integer part of x
+            var fx0 = x - ix0;                     // Fractional part of x
+            var fx1 = fx0 - 1.0f;
+            var ix1 = (ix0 + 1) & 0xff;
 
-            x -= FastFloor(x);
-            y -= FastFloor(y);
-            z -= FastFloor(z);
+            ix0 = ix0 & 0xff;                      // Wrap to 0..255
 
-            var A = Permutation[X] + Y;
-            var AA = Permutation[A] + Z;
-            var AB = Permutation[A + 1] + Z;
-            var B = Permutation[X + 1] + Y;
-            var BA = Permutation[B] + Z;
-            var BB = Permutation[B + 1] + Z;
+            var s = Fade(fx0);
 
-            var u = Fade(x);
-            var v = Fade(y);
-            var w = Fade(z);
+            var n0 = Gradient(Permutation[ix0], fx0);
+            var n1 = Gradient(Permutation[ix1], fx1);
 
-            var g1 = Lerp(v, Lerp(u, Gradient(Permutation[AA], x, y, z), Gradient(Permutation[BA], x - 1, y, z)),
-                     Lerp(u, Gradient(Permutation[AB], x, y - 1, z), Gradient(Permutation[BB], x - 1, y - 1, z)));
-            var g2 = Lerp(v, Lerp(u, Gradient(Permutation[AA + 1], x, y, z - 1), Gradient(Permutation[BA + 1], x - 1, y, z - 1)),
-                     Lerp(u, Gradient(Permutation[AB + 1], x, y - 1, z - 1), Gradient(Permutation[BB + 1], x - 1, y - 1, z - 1)));
+            return 0.188 * Lerp(s, n0, n1);
+        }
 
-            return Lerp(w, g1, g2);
+        public double Noise(double x, double y)
+        {
+            var ix0 = (int)Math.Floor(x);          // Integer part of x
+            var iy0 = (int)Math.Floor(y);          // Integer part of y
+            var fx0 = x - ix0;                     // Fractional part of x
+            var fy0 = y - iy0;                     // Fractional part of y
+            var fx1 = fx0 - 1.0f;
+            var fy1 = fy0 - 1.0f;
+            var ix1 = (ix0 + 1) & 0xff;             // Wrap to 0..255
+            var iy1 = (iy0 + 1) & 0xff;
+
+            ix0 = ix0 & 0xff;
+            iy0 = iy0 & 0xff;
+
+            var t = Fade(fy0);
+            var s = Fade(fx0);
+
+            var nx0 = Gradient(Permutation[ix0 + Permutation[iy0]], fx0, fy0);
+            var nx1 = Gradient(Permutation[ix0 + Permutation[iy1]], fx0, fy1);
+
+            var n0 = Lerp(t, nx0, nx1);
+
+            nx0 = Gradient(Permutation[ix1 + Permutation[iy0]], fx1, fy0);
+            nx1 = Gradient(Permutation[ix1 + Permutation[iy1]], fx1, fy1);
+
+            var n1 = Lerp(t, nx0, nx1);
+
+            return 0.507 * Lerp(s, n0, n1);
+        }
+
+        public double Noise(double x, double y, double z)
+        {
+            var ix0 = (int)Math.Floor(x);          // Integer part of x
+            var iy0 = (int)Math.Floor(y);          // Integer part of y
+            var iz0 = (int)Math.Floor(z);          // Integer part of z
+            var fx0 = x - ix0;                      // Fractional part of x
+            var fy0 = y - iy0;                      // Fractional part of y
+            var fz0 = z - iz0;                      // Fractional part of z
+            var fx1 = fx0 - 1.0f;
+            var fy1 = fy0 - 1.0f;
+            var fz1 = fz0 - 1.0f;
+            var ix1 = (ix0 + 1) & 0xff;             // Wrap to 0..255
+            var iy1 = (iy0 + 1) & 0xff;
+            var iz1 = (iz0 + 1) & 0xff;
+
+            ix0 = ix0 & 0xff;
+            iy0 = iy0 & 0xff;
+            iz0 = iz0 & 0xff;
+
+            var r = Fade(fz0);
+            var t = Fade(fy0);
+            var s = Fade(fx0);
+
+            var nxy0 = Gradient(Permutation[ix0 + Permutation[iy0 + Permutation[iz0]]], fx0, fy0, fz0);
+            var nxy1 = Gradient(Permutation[ix0 + Permutation[iy0 + Permutation[iz1]]], fx0, fy0, fz1);
+            var nx0 = Lerp(r, nxy0, nxy1);
+
+            nxy0 = Gradient(Permutation[ix0 + Permutation[iy1 + Permutation[iz0]]], fx0, fy1, fz0);
+            nxy1 = Gradient(Permutation[ix0 + Permutation[iy1 + Permutation[iz1]]], fx0, fy1, fz1);
+
+            var nx1 = Lerp(r, nxy0, nxy1);
+
+            var n0 = Lerp(t, nx0, nx1);
+
+            nxy0 = Gradient(Permutation[ix1 + Permutation[iy0 + Permutation[iz0]]], fx1, fy0, fz0);
+            nxy1 = Gradient(Permutation[ix1 + Permutation[iy0 + Permutation[iz1]]], fx1, fy0, fz1);
+            nx0 = Lerp(r, nxy0, nxy1);
+
+            nxy0 = Gradient(Permutation[ix1 + Permutation[iy1 + Permutation[iz0]]], fx1, fy1, fz0);
+            nxy1 = Gradient(Permutation[ix1 + Permutation[iy1 + Permutation[iz1]]], fx1, fy1, fz1);
+            nx1 = Lerp(r, nxy0, nxy1);
+
+            var n1 = Lerp(t, nx0, nx1);
+
+            return 0.936 * Lerp(s, n0, n1);
         }
 
         public static Vector4 dNoise(double x, double y, double z)
@@ -70,13 +136,9 @@ namespace SpaceEngine.Core.Noise
             var v = y;
             var w = z;
 
-            //double u = 3*x*x - 2*x*x*x;
-            //double v = 3*y*y - 2*y*y*y;
-            //double w = 3*z*z - 2*z*z*z;
-
-            var du = 30 * u * u * u * u - 60 * u * u * u + 30 * u * u; //30.0*u*u*(u*(u-2.0)+1.0);
-            var dv = 30 * v * v * v * v - 60 * v * v * v + 30 * v * v; //30.0*v*v*(v*(v-2.0)+1.0);
-            var dw = 30 * w * w * w * w - 60 * w * w * w + 30 * w * w; //30.0*w*w*(w*(w-2.0)+1.0);
+            var du = 30 * u * u * u * u - 60 * u * u * u + 30 * u * u;
+            var dv = 30 * v * v * v * v - 60 * v * v * v + 30 * v * v;
+            var dw = 30 * w * w * w * w - 60 * w * w * w + 30 * w * w;
 
             u = Fade(x);
             v = Fade(y);
@@ -126,8 +188,28 @@ namespace SpaceEngine.Core.Noise
 
         private static double Fade(double t)
         {
-            return t * t * t * (t * (t * 6 - 15) + 10);
+            return t * t * t * (t * (t * 6.0 - 15.0) + 10.0);
         }
+
+        private static double Gradient(int hash, double x)
+        {
+            var h = hash & 15;
+            var grad = 1.0 + (h & 7);
+
+            if ((h & 8) != 0) grad = -grad;
+
+            return grad * x;
+        }
+
+        private static double Gradient(int hash, double x, double y)
+        {
+            var h = hash & 7;
+            var u = h < 4 ? x : y;
+            var v = h < 4 ? y : x;
+
+            return ((h & 1) != 0 ? -u : u) + ((h & 2) != 0 ? -2.0 * v : 2.0 * v);
+        }
+
 
         private static double Gradient(int hash, double x, double y, double z)
         {
@@ -135,7 +217,7 @@ namespace SpaceEngine.Core.Noise
             var u = h < 8 ? x : y;
             var v = h < 4 ? y : h == 12 || h == 14 ? x : z;
 
-            return ((h & 1) == 0 ? u : -u) + ((h & 2) == 0 ? v : -v);
+            return ((h & 1) != 0 ? -u : u) + ((h & 2) != 0 ? -v : v);
         }
     }
 }

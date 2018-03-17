@@ -1,7 +1,7 @@
 ﻿#region License
 // Procedural planet generator.
 // 
-// Copyright (C) 2015-2017 Denis Ovchinnikov [zameran] 
+// Copyright (C) 2015-2018 Denis Ovchinnikov [zameran] 
 // All rights reserved.
 // 
 // Redistribution and use in source and binary forms, with or without
@@ -33,14 +33,25 @@
 // Creator: zameran
 #endregion
 
-using SpaceEngine.Core.Bodies;
 using SpaceEngine.Core.Patterns.Strategy.Uniformed;
+using SpaceEngine.Core.Utilities.Gradients;
+
+using System.Collections.Generic;
 
 using UnityEngine;
 
 public sealed class TCCommonParametersSetter : MonoBehaviour, IUniformed<Material>
 {
-    public Body Body;
+    public enum TCEngine : byte
+    {
+        TC_NONE = 0,
+        TC_ASTEROID = 1,
+        TC_PLANET = 2,
+        TC_SELENA = 3,
+        TC_TERRA = 4,
+        TC_GASGIANT = 5,
+        TC_TEST = 6
+    }
 
     public float Lacunarity = 2.218281828459f;
     public float H = 0.5f;
@@ -73,31 +84,82 @@ public sealed class TCCommonParametersSetter : MonoBehaviour, IUniformed<Materia
     public Vector4 cloudsParams2;
     public Vector4 cycloneParams;
 
-    public Vector2 texturingUVAtlasOffset;
     public Vector2 InvSize;
-
-    public Color PlanetGlobalColor = Color.white;
 
     public bool AutoUpdate = false;
 
+    public MaterialTableGradientLut MaterialTable = new MaterialTableGradientLut();
+
+    public TCEngine Engine = TCEngine.TC_PLANET;
+
     private void Awake()
     {
-        if (Body == null) Body = GetComponentInParent<Body>();
+        MaterialTable.GenerateLut();
+    }
+
+    private void OnDestroy()
+    {
+        MaterialTable.DestroyLut();
     }
 
     public void UpdateMaterialTable<T>(T target) where T : Material
     {
-        if (Body.MaterialTable != null)
-        {
-            if (Body.MaterialTable.Lut == null)
-            {
-                Debug.LogWarning("TCCommonParametersSetter: Trying to set lut texture, which is not generated! So, generating...");
+        if (!Application.isPlaying) return;
 
-                Body.MaterialTable.GenerateLut();
+        if (MaterialTable == null)
+        {
+            Debug.LogWarning("TCCommonParametersSetter.UpdateMaterialTable: Trying to update lut texture, which is null! So, created...");
+
+            MaterialTable = new MaterialTableGradientLut();
+
+            UpdateMaterialTable<T>(target);
+        }
+        else
+        {
+            if (MaterialTable.Lut == null)
+            {
+                Debug.LogWarning("TCCommonParametersSetter.UpdateMaterialTable: Trying to set lut texture, which is not generated! So, generating...");
+
+                MaterialTable.GenerateLut();
             }
 
-            target.SetTexture("MaterialTable", Body.MaterialTable.Lut);
+            target.SetTexture("MaterialTable", MaterialTable.Lut);
         }
+    }
+
+    public void UpdateMaterialTable(MaterialPropertyBlock target)
+    {
+        if (!Application.isPlaying) return;
+
+        if (MaterialTable == null)
+        {
+            Debug.LogWarning("TCCommonParametersSetter.UpdateMaterialTable: Trying to update lut texture, which is null! So, created...");
+
+            MaterialTable = new MaterialTableGradientLut();
+
+            UpdateMaterialTable(target);
+        }
+        else
+        {
+            if (MaterialTable.Lut == null)
+            {
+                Debug.LogWarning("TCCommonParametersSetter.UpdateMaterialTable: Trying to set lut texture, which is not generated! So, generating...");
+
+                MaterialTable.GenerateLut();
+            }
+
+            target.SetTexture("MaterialTable", MaterialTable.Lut);
+        }
+    }
+
+    public void ToggleKeywords<T>(T target) where T : Material
+    {
+        Helper.SetKeywords(target, new List<string>() { Engine.ToString() }, false);
+    }
+
+    public void ClearKeywords<T>(T target) where T : Material
+    {
+        Helper.SetKeywords(target, new List<string>() { }, false);
     }
 
     #region IUniformed<Material>
@@ -105,6 +167,45 @@ public sealed class TCCommonParametersSetter : MonoBehaviour, IUniformed<Materia
     public void InitUniforms(Material target)
     {
         if (target == null) return;
+    }
+
+    public void SetUniforms(MaterialPropertyBlock target)
+    {
+        if (target == null) return;
+
+        UpdateMaterialTable(target);
+
+        target.SetFloat("noiseLacunarity", Lacunarity);
+        target.SetFloat("noiseH", H);
+        target.SetFloat("noiseOffset", Offset);
+        target.SetFloat("noiseRidgeSmooth", RidgeSmooth);
+
+        target.SetFloat("texturingHeightOffset", texturingHeightOffset);
+        target.SetFloat("texturingSlopeOffset", texturingSlopeOffset);
+
+        target.SetVector("Randomize", Randomize);
+        target.SetVector("faceParams", faceParams); //(WIP) For SE Coloring in fragment shader work...
+        target.SetVector("scaleParams", scaleParams);
+        target.SetVector("mainParams", mainParams);
+        target.SetVector("colorParams", colorParams);
+        target.SetVector("climateParams", climateParams);
+        target.SetVector("mareParams", mareParams);
+        target.SetVector("montesParams", montesParams);
+        target.SetVector("dunesParams", dunesParams);
+        target.SetVector("hillsParams", hillsParams);
+        target.SetVector("canyonsParams", canyonsParams);
+        target.SetVector("riversParams", riversParams);
+        target.SetVector("cracksParams", cracksParams);
+        target.SetVector("craterParams", craterParams);
+        target.SetVector("volcanoParams1", volcanoParams1);
+        target.SetVector("volcanoParams2", volcanoParams2);
+        target.SetVector("lavaParams", lavaParams);
+        target.SetVector("textureParams", textureParams);
+        target.SetVector("cloudsParams1", cloudsParams1);
+        target.SetVector("cloudsParams2", cloudsParams2);
+        target.SetVector("cycloneParams", cycloneParams);
+
+        target.SetVector("InvSize", InvSize);
     }
 
     public void SetUniforms(Material target)
@@ -143,10 +244,7 @@ public sealed class TCCommonParametersSetter : MonoBehaviour, IUniformed<Materia
         target.SetVector("cloudsParams2", cloudsParams2);
         target.SetVector("cycloneParams", cycloneParams);
 
-        target.SetVector("texturingUVAtlasOffset", texturingUVAtlasOffset);
         target.SetVector("InvSize", InvSize);
-
-        target.SetVector("planetGlobalColor", new Vector4(PlanetGlobalColor.r, PlanetGlobalColor.g, PlanetGlobalColor.b, PlanetGlobalColor.a));
     }
 
     #endregion

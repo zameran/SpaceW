@@ -1,7 +1,7 @@
 ﻿#region License
 // Procedural planet generator.
 // 
-// Copyright (C) 2015-2017 Denis Ovchinnikov [zameran] 
+// Copyright (C) 2015-2018 Denis Ovchinnikov [zameran] 
 // All rights reserved.
 // 
 // Redistribution and use in source and binary forms, with or without
@@ -40,25 +40,14 @@ namespace SpaceEngine.Debugging
     [RequireComponent(typeof(Camera))]
     public class DebugDrawDepth : MonoBehaviour
     {
-        public Shader DepthShader;
-
-        public RenderTexture DepthTexture;
+        private void Awake()
+        {
+            
+        }
 
         private void Start()
         {
-            var customDepthCameraGameObject = new GameObject("CustomDepthCamera");
-            var customDepthCamera = customDepthCameraGameObject.AddComponent<Camera>();
 
-            customDepthCamera.CopyFrom(CameraHelper.Main());
-            customDepthCamera.transform.parent = CameraHelper.Main().transform;
-            customDepthCamera.depthTextureMode = DepthTextureMode.Depth;
-            customDepthCamera.enabled = false;
-
-            DepthTexture = new RenderTexture(Screen.width, Screen.height, 16, RenderTextureFormat.ARGB32);
-
-            DepthTexture.filterMode = FilterMode.Point;
-            DepthTexture.useMipMap = false;
-            DepthTexture.Create();
         }
 
         private void Update()
@@ -68,24 +57,7 @@ namespace SpaceEngine.Debugging
 
         private void OnGUI()
         {
-            if (DepthTexture != null)
-                GUI.DrawTexture(new Rect(5, 5, Screen.width * 0.35f, Screen.height * 0.35f), DepthTexture, ScaleMode.ScaleAndCrop, false);
-        }
 
-        private void OnPreRender()
-        {
-            var customDepthCamera = CameraHelper.DepthCamera();
-
-            customDepthCamera.CopyFrom(CameraHelper.Main());
-            customDepthCamera.targetTexture = DepthTexture;
-            customDepthCamera.depthTextureMode = DepthTextureMode.Depth;
-            customDepthCamera.RenderWithShader(DepthShader, "RenderType");
-            customDepthCamera.enabled = false;
-        }
-
-        private void OnRenderImage(RenderTexture source, RenderTexture destination)
-        {
-            Graphics.Blit(source, destination);
         }
     }
 }

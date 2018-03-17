@@ -1,7 +1,7 @@
 ﻿#region License
 // Procedural planet generator.
 // 
-// Copyright (C) 2015-2017 Denis Ovchinnikov [zameran] 
+// Copyright (C) 2015-2018 Denis Ovchinnikov [zameran] 
 // All rights reserved.
 // 
 // Redistribution and use in source and binary forms, with or without
@@ -47,8 +47,7 @@ using UnityEngine;
 using Logger = SpaceEngine.Core.Debugging.Logger;
 
 [RequireComponent(typeof(Camera))]
-[UseLogger(Category.Data)]
-[UseLoggerFile("Log")]
+[UseLogger(LoggerCategory.Data)]
 public class ScreenshotHelper : MonoSingleton<ScreenshotHelper>
 {
     public enum ScreenshotFormat
@@ -124,19 +123,19 @@ public class ScreenshotHelper : MonoSingleton<ScreenshotHelper>
                     throw new ArgumentOutOfRangeException();
             }
 
-            Logger.Log(string.Format("ScreenshotHelper: Screenshot Saved. {0}", filePath));
+            Logger.Log(string.Format("ScreenshotHelper.SaveScreenshot: Screenshot Saved. {0}", filePath));
 
 #if UNITY_EDITOR
             AssetDatabase.Refresh();
 #endif
         }
         else
-            Logger.LogError("ScreenshotHelper: screenShotTexture is null!");
+            Logger.LogError("ScreenshotHelper.SaveScreenshot: screenShotTexture is null!");
     }
 
     private void OnRenderImage(RenderTexture source, RenderTexture destination)
     {
-        //May cause driver crash on big SuperSize values, lol.
+        // NOTE : May cause driver crash on big SuperSize values, lol.
         if (KeyPressed)
         {
             Buffer = RTExtensions.CreateRTexture(ScreenShotSize, 0, RenderTextureFormat.ARGB32, FilterMode.Trilinear, TextureWrapMode.Clamp, false, 6);

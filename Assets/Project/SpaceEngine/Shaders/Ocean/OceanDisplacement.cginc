@@ -1,6 +1,6 @@
 /* Procedural planet generator.
  *
- * Copyright (C) 2015-2017 Denis Ovchinnikov
+ * Copyright (C) 2015-2018 Denis Ovchinnikov
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -54,16 +54,16 @@
  /*
  * Authors: Eric Bruneton, Antoine Begault, Guillaume Piolat.
  * Modified and ported to Unity by Justin Hawkins 2014
- * Modified by Denis Ovchinnikov 2015-2017
+ * Modified by Denis Ovchinnikov 2015-2018
  */
+
+#define OCEAN_DISPLACEMENT
 
 uniform float _Ocean_Radius;
 uniform float _Ocean_HeightOffset;
 uniform float3 _Ocean_CameraPos;
 uniform float4x4 _Ocean_OceanToCamera;
 uniform float4x4 _Ocean_CameraToOcean;
-
-#ifdef OCEAN_ONLY_SPHERICAL
 
 uniform float3 _SphereDirection;
 uniform float _CosTheta;
@@ -84,14 +84,13 @@ float2 OceanPos(float4 vert, float4x4 stoc, out float t, out float3 cameraDir, o
 	cameraDir = ((dot(n1, cross(hor, cameraDir)) > 0.0) && (h > 0)) ? hor : cameraDir;	// Checking if view direction is above the horizon
 	oceanDir = mul(_Ocean_CameraToOcean, float4(cameraDir, 0.0)).xyz;
 
-	float cz = _Ocean_CameraPos.z;
 	float dz = oceanDir.z;
 	float radius = _Ocean_Radius;
 	
-	float b = dz * (cz + radius);
-	float c = cz * (cz + 2.0 * radius);
+	float b = dz * (h + radius);
+	float c = h * (h + 2.0 * radius);
 	float tSphere = - b - sqrt(max(b * b - c, 0.0));
-	float tApprox = - cz / dz * (1.0 + cz / (2.0 * radius) * (1.0 - dz * dz));
+	float tApprox = - h / dz * (1.0 + h / (2.0 * radius) * (1.0 - dz * dz));
 
 	t = abs((tApprox - tSphere) * dz) < 1.0 ? tApprox : tSphere;
 
@@ -107,54 +106,6 @@ float2 OceanPos(float4 vert, float4x4 stoc)
 	return OceanPos(vert, stoc, t, cameraDir, oceanDir);
 }
 
-#else
-
-uniform float3 _Ocean_Horizon1;
-uniform float3 _Ocean_Horizon2;
-
-float2 OceanPos(float4 vert, float4x4 stoc, out float t, out float3 cameraDir, out float3 oceanDir) 
-{
-	float horizon = _Ocean_Horizon1.x + _Ocean_Horizon1.y * vert.x;
-	
-	horizon -= sqrt(_Ocean_Horizon2.x + (_Ocean_Horizon2.y + _Ocean_Horizon2.z * vert.x) * vert.x);
-	
-	float4 v = float4(vert.x, min(vert.y, horizon), 0.0, 1.0);
-
-	cameraDir = normalize(mul(stoc, v).xyz);
-	oceanDir = mul(_Ocean_CameraToOcean, float4(cameraDir, 0.0)).xyz;
-	
-	float cz = _Ocean_CameraPos.z;
-	float dz = oceanDir.z;
-	float radius = _Ocean_Radius;
-	
-	if (radius == 0.0) 
-	{
-		t = (_Ocean_HeightOffset + -cz) / dz;
-	} 
-	else 
-	{
-		float b = dz * (cz + radius);
-		float c = cz * (cz + 2.0 * radius);
-		float tSphere = - b - sqrt(max(b * b - c, 0.0));
-		float tApprox = - cz / dz * (1.0 + cz / (2.0 * radius) * (1.0 - dz * dz));
-
-		t = abs((tApprox - tSphere) * dz) < 1.0 ? tApprox : tSphere;
-	}
-
-	return _Ocean_CameraPos.xy + t * oceanDir.xy;
-}
-
-float2 OceanPos(float4 vert, float4x4 stoc) 
-{
-	float t;
-	float3 cameraDir;
-	float3 oceanDir;
-
-	return OceanPos(vert, stoc, t, cameraDir, oceanDir);
-}
-
-#endif
-
 float4 Tex2DGrad(sampler2D tex, float2 uv, float2 dx, float2 dy, float2 texSize)
 {
 	//Sampling a texture by derivatives is unsupported in vert shaders in Unity but if you
@@ -164,5 +115,5 @@ float4 Tex2DGrad(sampler2D tex, float2 uv, float2 dx, float2 dy, float2 texSize)
 
 	float lod = 0.5 * log2(max(dot(px, px), dot(py, py)));
 
-	return tex2Dlod(tex, float4(uv, 0, lod));
+	return tex2Dlod(tex, float4(uv, 0.0, lod));
 }

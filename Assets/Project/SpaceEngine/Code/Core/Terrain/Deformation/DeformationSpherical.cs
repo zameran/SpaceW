@@ -1,6 +1,12 @@
-﻿using System;
+﻿using SpaceEngine.Core.Numerics.Matrices;
+using SpaceEngine.Core.Numerics.Shapes;
+using SpaceEngine.Core.Numerics.Vectors;
+
+using System;
 
 using UnityEngine;
+
+using Functions = SpaceEngine.Core.Numerics.Functions;
 
 namespace SpaceEngine.Core.Terrain.Deformation
 {
@@ -24,19 +30,24 @@ namespace SpaceEngine.Core.Terrain.Deformation
             this.R = R;
         }
 
-        public override Vector3d LocalToDeformed(Vector3d localPoint)
+        public override Vector3d LocalToDeformed(double x, double y, double z)
         {
-            return (new Vector3d(localPoint.x, localPoint.y, R)).Normalized(localPoint.z + R);
+            return new Vector3d(x, y, R).Normalized(z + R);
+        }
+
+        public Vector3d LocalToDeformed(Vector3d localPoint)
+        {
+            return LocalToDeformed(localPoint.x, localPoint.y, localPoint.z);
         }
 
         public override Matrix4x4d LocalToDeformedDifferential(Vector3d localPoint, bool clamp = false)
         {
-            if (!MathUtility.IsFinite(localPoint.x) || !MathUtility.IsFinite(localPoint.y) || !MathUtility.IsFinite(localPoint.z))
+            if (!Functions.IsFinite(localPoint.x) || !Functions.IsFinite(localPoint.y) || !Functions.IsFinite(localPoint.z))
             {
                 return Matrix4x4d.identity;
             }
 
-            var point = new Vector3d(localPoint);
+            var point = new Vector2d(localPoint);
 
             if (clamp)
             {
@@ -44,13 +55,14 @@ namespace SpaceEngine.Core.Terrain.Deformation
                 point.y = point.y - Math.Floor((point.y + R) / (2.0 * R)) * 2.0 * R;
             }
 
-            var l = point.x * point.x + point.y * point.y + R * R;
+            var r2 = R * R;
+            var l = point.x * point.x + point.y * point.y + r2;
             var c0 = 1.0 / Math.Sqrt(l);
             var c1 = c0 * R / l;
 
-            return new Matrix4x4d((point.y * point.y + R * R) * c1, -point.x * point.y * c1, point.x * c0, R * point.x * c0,
-                                   -point.x * point.y * c1, (point.x * point.x + R * R) * c1, point.y * c0, R * point.y * c0,
-                                   -point.x * R * c1, -point.y * R * c1, R * c0, (R * R) * c0, 0.0, 0.0, 0.0, 1.0);
+            return new Matrix4x4d((point.y * point.y + r2) * c1, -point.x * point.y * c1, point.x * c0, R * point.x * c0,
+                                   -point.x * point.y * c1, (point.x * point.x + r2) * c1, point.y * c0, R * point.y * c0,
+                                   -point.x * R * c1, -point.y * R * c1, R * c0, (r2) * c0, 0.0, 0.0, 0.0, 1.0);
         }
 
         public override Vector3d DeformedToLocal(Vector3d deformedPoint)
@@ -98,7 +110,7 @@ namespace SpaceEngine.Core.Terrain.Deformation
 
             if (double.IsInfinity(point.x) || double.IsInfinity(point.y))
             {
-                return new Box2d();
+                return Box2d.infinity;
             }
 
             var k = (1.0 - deformedRadius * deformedRadius / (2.0 * R * R)) * (new Vector3d(point.x, point.y, R)).Magnitude();
@@ -138,38 +150,32 @@ namespace SpaceEngine.Core.Terrain.Deformation
                                   0.0, 0.0, 0.0, 1.0);
         }
 
-        public override Frustum.VISIBILITY GetVisibility(TerrainNode node, Box3d localBox)
+        public override Frustum3d.VISIBILITY GetVisibility(TerrainNode node, Box3d localBox, Vector3d[] deformedBox)
         {
-            var deformedBox = new Vector3d[4];
-            deformedBox[0] = LocalToDeformed(new Vector3d(localBox.xmin, localBox.ymin, localBox.zmin));
-            deformedBox[1] = LocalToDeformed(new Vector3d(localBox.xmax, localBox.ymin, localBox.zmin));
-            deformedBox[2] = LocalToDeformed(new Vector3d(localBox.xmax, localBox.ymax, localBox.zmin));
-            deformedBox[3] = LocalToDeformed(new Vector3d(localBox.xmin, localBox.ymax, localBox.zmin));
-
-            var a = (localBox.zmax + R) / (localBox.zmin + R);
-            var dx = (localBox.xmax - localBox.xmin) / 2 * a;
-            var dy = (localBox.ymax - localBox.ymin) / 2 * a;
-            var dz = localBox.zmax + R;
-            var f = Math.Sqrt(dx * dx + dy * dy + dz * dz) / (localBox.zmin + R);
+            var a = (localBox.Max.z + R) / (localBox.Min.z + R);
+            var dx = (localBox.Max.x - localBox.Min.x) / 2 * a;
+            var dy = (localBox.Max.y - localBox.Min.y) / 2 * a;
+            var dz = localBox.Max.z + R;
+            var f = Math.Sqrt(dx * dx + dy * dy + dz * dz) / (localBox.Min.z + R);
 
             var v0 = GetClipVisibility(node.DeformedFrustumPlanes[0], deformedBox, f);
-            if (v0 == Frustum.VISIBILITY.INVISIBLE) { return Frustum.VISIBILITY.INVISIBLE; }
+            if (v0 == Frustum3d.VISIBILITY.INVISIBLE) { return Frustum3d.VISIBILITY.INVISIBLE; }
 
             var v1 = GetClipVisibility(node.DeformedFrustumPlanes[1], deformedBox, f);
-            if (v1 == Frustum.VISIBILITY.INVISIBLE) { return Frustum.VISIBILITY.INVISIBLE; }
+            if (v1 == Frustum3d.VISIBILITY.INVISIBLE) { return Frustum3d.VISIBILITY.INVISIBLE; }
 
             var v2 = GetClipVisibility(node.DeformedFrustumPlanes[2], deformedBox, f);
-            if (v2 == Frustum.VISIBILITY.INVISIBLE) { return Frustum.VISIBILITY.INVISIBLE; }
+            if (v2 == Frustum3d.VISIBILITY.INVISIBLE) { return Frustum3d.VISIBILITY.INVISIBLE; }
 
             var v3 = GetClipVisibility(node.DeformedFrustumPlanes[3], deformedBox, f);
-            if (v3 == Frustum.VISIBILITY.INVISIBLE) { return Frustum.VISIBILITY.INVISIBLE; }
+            if (v3 == Frustum3d.VISIBILITY.INVISIBLE) { return Frustum3d.VISIBILITY.INVISIBLE; }
 
             var v4 = GetClipVisibility(node.DeformedFrustumPlanes[4], deformedBox, f);
-            if (v4 == Frustum.VISIBILITY.INVISIBLE) { return Frustum.VISIBILITY.INVISIBLE; }
+            if (v4 == Frustum3d.VISIBILITY.INVISIBLE) { return Frustum3d.VISIBILITY.INVISIBLE; }
 
             var lSq = node.DeformedCameraPosition.SqrMagnitude();
-            var rm = R + Math.Min(0.0, localBox.zmin);
-            var rM = R + localBox.zmax;
+            var rm = R + Math.Min(0.0, localBox.Min.z);
+            var rM = R + localBox.Max.z;
             var rmSq = rm * rm;
             var rMSq = rM * rM;
 
@@ -178,19 +184,19 @@ namespace SpaceEngine.Core.Terrain.Deformation
                                         node.DeformedCameraPosition.z, Math.Sqrt((lSq - rmSq) * (rMSq - rmSq)) - rmSq);
 
             var v5 = GetClipVisibility(farPlane, deformedBox, f);
-            if (v5 == Frustum.VISIBILITY.INVISIBLE) { return Frustum.VISIBILITY.INVISIBLE; }
+            if (v5 == Frustum3d.VISIBILITY.INVISIBLE) { return Frustum3d.VISIBILITY.INVISIBLE; }
 
-            if (v0 == Frustum.VISIBILITY.FULLY && v1 == Frustum.VISIBILITY.FULLY &&
-                v2 == Frustum.VISIBILITY.FULLY && v3 == Frustum.VISIBILITY.FULLY &&
-                v4 == Frustum.VISIBILITY.FULLY && v5 == Frustum.VISIBILITY.FULLY)
+            if (v0 == Frustum3d.VISIBILITY.FULLY && v1 == Frustum3d.VISIBILITY.FULLY &&
+                v2 == Frustum3d.VISIBILITY.FULLY && v3 == Frustum3d.VISIBILITY.FULLY &&
+                v4 == Frustum3d.VISIBILITY.FULLY && v5 == Frustum3d.VISIBILITY.FULLY)
             {
-                return Frustum.VISIBILITY.FULLY;
+                return Frustum3d.VISIBILITY.FULLY;
             }
 
-            return Frustum.VISIBILITY.PARTIALLY;
+            return Frustum3d.VISIBILITY.PARTIALLY;
         }
 
-        public static Frustum.VISIBILITY GetClipVisibility(Vector4d clip, Vector3d[] b, double f)
+        public static Frustum3d.VISIBILITY GetClipVisibility(Vector4d clip, Vector3d[] b, double f)
         {
             var o = b[0].x * clip.x + b[0].y * clip.y + b[0].z * clip.z;
             var p = o + clip.w > 0.0;
@@ -207,29 +213,49 @@ namespace SpaceEngine.Core.Terrain.Deformation
                     {
                         o = b[3].x * clip.x + b[3].y * clip.y + b[3].z * clip.z;
 
-                        return (o + clip.w > 0.0) == p && (o * f + clip.w > 0.0) == p ? (p ? Frustum.VISIBILITY.FULLY : Frustum.VISIBILITY.INVISIBLE) : Frustum.VISIBILITY.PARTIALLY;
+                        return (o + clip.w > 0.0) == p && (o * f + clip.w > 0.0) == p ? (p ? Frustum3d.VISIBILITY.FULLY : Frustum3d.VISIBILITY.INVISIBLE) : Frustum3d.VISIBILITY.PARTIALLY;
                     }
                 }
             }
 
-            return Frustum.VISIBILITY.PARTIALLY;
+            return Frustum3d.VISIBILITY.PARTIALLY;
         }
 
-        public override void SetUniforms(TerrainNode node, Material mat)
+        /// <inheritdoc />
+        public override Matrix4x4 CalculateDeformedScreenQuadCorners(TerrainNode node, TerrainQuad quad)
         {
-            if (mat == null || node == null) return;
-
-            base.SetUniforms(node, mat);
-
-            mat.SetFloat(uniforms.radius, (float)R);
+            return (node.LocalToScreen * quad.DeformedCorners).ToMatrix4x4();
         }
 
-        protected override void SetScreenUniforms(TerrainNode node, TerrainQuad quad, MaterialPropertyBlock matPropertyBlock)
+        /// <inheritdoc />
+        public override Matrix4x4 CalculateDeformedScreenQuadVerticals(TerrainNode node, TerrainQuad quad)
         {
-            matPropertyBlock.SetMatrix(uniforms.screenQuadCorners, (localToScreen * quad.DeformedCorners).ToMatrix4x4());
-            matPropertyBlock.SetMatrix(uniforms.screenQuadVerticals, (localToScreen * quad.DeformedVerticals).ToMatrix4x4());
-            matPropertyBlock.SetVector(uniforms.screenQuadCornerNorms, quad.Lengths.ToVector4());
-            matPropertyBlock.SetMatrix(uniforms.tangentFrameToWorld, quad.TangentFrameToWorld.ToMatrix4x4());
+            return (node.LocalToScreen * quad.DeformedVerticals).ToMatrix4x4();
+        }
+
+        public override void SetUniforms(TerrainNode node, Material target)
+        {
+            if (target == null || node == null) return;
+
+            base.SetUniforms(node, target);
+
+            target.SetFloat(uniforms.radius, (float)R);
+        }
+
+        protected override void SetScreenUniforms(TerrainNode node, TerrainQuad quad, MaterialPropertyBlock target)
+        {
+            base.SetScreenUniforms(node, quad, target);
+
+            target.SetVector(uniforms.screenQuadCornerNorms, quad.Lengths.ToVector4());
+            target.SetMatrix(uniforms.tangentFrameToWorld, quad.TangentFrameToWorld.ToMatrix4x4());
+        }
+
+        protected override void SetScreenUniforms(TerrainNode node, TerrainQuad quad, Material target)
+        {
+            base.SetScreenUniforms(node, quad, target);
+
+            target.SetVector(uniforms.screenQuadCornerNorms, quad.Lengths.ToVector4());
+            target.SetMatrix(uniforms.tangentFrameToWorld, quad.TangentFrameToWorld.ToMatrix4x4());
         }
     }
 }

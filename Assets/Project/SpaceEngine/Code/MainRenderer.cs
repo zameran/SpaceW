@@ -1,7 +1,7 @@
 ﻿#region License
 // Procedural planet generator.
 // 
-// Copyright (C) 2015-2017 Denis Ovchinnikov [zameran] 
+// Copyright (C) 2015-2018 Denis Ovchinnikov [zameran] 
 // All rights reserved.
 // 
 // Redistribution and use in source and binary forms, with or without
@@ -40,18 +40,22 @@ using System.Collections.Generic;
 
 using UnityEngine;
 
-[ExecutionOrder(-9997)]
+[ExecutionOrder(-9996)]
 [RequireComponent(typeof(Camera))]
-public sealed class MainRenderer : MonoBehaviour
+public sealed class MainRenderer : MonoSingleton<MainRenderer>
 {
+    public bool ZSort = true;
+
+    private BodySort Comparer = null;
+
     public class BodySort : IComparer<Body>
     {
         int IComparer<Body>.Compare(Body a, Body b)
         {
             if (a == null || b == null) return 0;
 
-            var D2A = Vector3.Distance(GodManager.Instance.WorldCameraPos, a.Origin) - a.Size;
-            var D2B = Vector3.Distance(GodManager.Instance.WorldCameraPos, b.Origin) - b.Size;
+            var D2A = Vector3.Distance(GodManager.Instance.View.WorldCameraPosition, a.Origin) - a.Size;
+            var D2B = Vector3.Distance(GodManager.Instance.View.WorldCameraPosition, b.Origin) - b.Size;
 
             if (D2A > D2B)
                 return 1;
@@ -62,6 +66,12 @@ public sealed class MainRenderer : MonoBehaviour
         }
     }
 
+    private void Awake()
+    {
+        Instance = this;
+        Comparer = new BodySort();
+    }
+
     private void Start()
     {
 
@@ -69,7 +79,7 @@ public sealed class MainRenderer : MonoBehaviour
 
     private void Update()
     {
-        if (Input.GetKey(KeyCode.J)) ComposeOutputRender();
+        if (Input.GetKey(KeyCode.J) || ZSort) ComposeOutputRender();
     }
 
     private void OnEnable()
@@ -84,45 +94,34 @@ public sealed class MainRenderer : MonoBehaviour
 
     private void OnPostRender()
     {
-
+        
     }
 
     public void ComposeOutputRender()
     {
-        if (GodManager.Instance == null) return;
+        Array.Sort(GodManager.Instance.Bodies, Comparer);
 
-        Array.Sort(GodManager.Instance.Bodies, new BodySort());
-
-        for (int i = 0; i < GodManager.Instance.Starfields.Length; i++)
-        {
-            if (GodManager.Instance.Starfields[i] != null)
-                GodManager.Instance.Starfields[i].Render();
-        }
-
-        for (int i = 0; i < GodManager.Instance.Bodies.Length; i++)
-        {
-            if (GodManager.Instance.Bodies[i] != null)
-                GodManager.Instance.Bodies[i].Render();
-        }
-
+        // TODO : Find a way to properly sort the space bodies...
+        // NOTE : Maybe several near hi-priority bodies can be exist or something another. This is space - all is possible...
         //-----------------------------------------------------------------------------
-        GodManager.Instance.Bodies[0].RenderQueueOffset = 10001;
-        if (GodManager.Instance.Bodies[0].Atmosphere != null)
-            GodManager.Instance.Bodies[0].Atmosphere.RenderQueueOffset = 10002;
-        if (GodManager.Instance.Bodies[0].Ocean != null)
-            GodManager.Instance.Bodies[0].Ocean.RenderQueueOffset = 10003;
-        if (GodManager.Instance.Bodies[0].Ring != null)
-            GodManager.Instance.Bodies[0].Ring.RenderQueueOffset = 10000;
+        var highPriorityBody = GodManager.Instance.ActiveBody;
+        var bodyies = GodManager.Instance.Bodies;
 
-        for (int i = 1; i < GodManager.Instance.Bodies.Length; i++)
+        if (highPriorityBody == null || bodyies == null) return;
+
+        highPriorityBody.RenderQueueOffset = 5;
+        if (highPriorityBody.Atmosphere != null) highPriorityBody.Atmosphere.RenderQueueOffset = 6;
+        if (highPriorityBody.Ocean != null) highPriorityBody.Ocean.RenderQueueOffset = 7;
+        if (highPriorityBody.Ring != null) highPriorityBody.Ring.RenderQueueOffset = 4;
+
+        for (var i = 1; i < bodyies.Length; i++)
         {
-            GodManager.Instance.Bodies[i].RenderQueueOffset = 1;
-            if (GodManager.Instance.Bodies[i].Atmosphere != null)
-                GodManager.Instance.Bodies[i].Atmosphere.RenderQueueOffset = 2;
-            if (GodManager.Instance.Bodies[i].Ocean != null)
-                GodManager.Instance.Bodies[i].Ocean.RenderQueueOffset = 3;
-            if (GodManager.Instance.Bodies[i].Ring != null)
-                GodManager.Instance.Bodies[i].Ring.RenderQueueOffset = 0;
+            var lowPriorityBody = bodyies[i];
+
+            lowPriorityBody.RenderQueueOffset = 1;
+            if (lowPriorityBody.Atmosphere != null) lowPriorityBody.Atmosphere.RenderQueueOffset = 2;
+            if (lowPriorityBody.Ocean != null) lowPriorityBody.Ocean.RenderQueueOffset = 3;
+            if (lowPriorityBody.Ring != null) lowPriorityBody.Ring.RenderQueueOffset = 0;
         }
         //-----------------------------------------------------------------------------
     }

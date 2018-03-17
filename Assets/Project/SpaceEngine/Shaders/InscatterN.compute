@@ -1,14 +1,14 @@
 ﻿/*
  * Author: Eric Bruneton
  * Modified and ported to Unity by Justin Hawkins 2014
- * Modified by Denis Ovchinnikov 2015-2017
+ * Modified by Denis Ovchinnikov 2015-2018
  */
 
 // computes higher order scattering (line 9 in algorithm 4.1)
  
 #pragma kernel CSMain
 
-#include "Assets/Project/SpaceEngine/Shaders/AtmospherePreprocess.cginc"
+#include "SpaceAtmospherePreprocess.cginc"
 
 int layer;
 
@@ -27,7 +27,7 @@ float3 Integrand(float r, float mu, float muS, float nu, float t)
  
 float3 Inscatter(float r, float mu, float muS, float nu) 
 { 
-    float3 raymie = float3(0, 0, 0); 
+    float3 raymie = float3(0.0, 0.0, 0.0); 
 
     float dx = Limit(r, mu) / float(INSCATTER_INTEGRAL_SAMPLES); 
     float xi = 0.0; 
@@ -48,7 +48,7 @@ float3 Inscatter(float r, float mu, float muS, float nu)
     return raymie; 
 } 
 
-[numthreads(NUM_THREADS,NUM_THREADS,1)]
+[numthreads(NUM_THREADS, NUM_THREADS, 1)]
 void CSMain (uint3 id : SV_DispatchThreadID)
 {
     float4 dhdH;
@@ -58,5 +58,5 @@ void CSMain (uint3 id : SV_DispatchThreadID)
     GetLayer(layer, r, dhdH); 
     GetMuMuSNu(coords, r, dhdH, mu, muS, nu); 
 
-    deltaSRWrite[uint3(id.xy,layer)] = float4(Inscatter(r, mu, muS, nu), 0);
+    deltaSRWrite[uint3(id.xy,layer)] = float4(Inscatter(r, mu, muS, nu), 0.0);
 }

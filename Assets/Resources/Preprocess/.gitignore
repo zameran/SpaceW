@@ -1,10 +1,9 @@
 # Ignore preprocessed textures
 *.raw
 *.png
-*.proland
+*.dat
 
 # Ignore preprocessed textures meta files
 *.raw.meta
 *.png.meta
-*.proland.meta
-
+*.dat.meta

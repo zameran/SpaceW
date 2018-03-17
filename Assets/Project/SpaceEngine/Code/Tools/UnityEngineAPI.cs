@@ -1,7 +1,7 @@
 ﻿#region License
 // Procedural planet generator.
 // 
-// Copyright (C) 2015-2017 Denis Ovchinnikov [zameran] 
+// Copyright (C) 2015-2018 Denis Ovchinnikov [zameran] 
 // All rights reserved.
 // 
 // Redistribution and use in source and binary forms, with or without
@@ -49,7 +49,7 @@ public class UnityEngineAPI
 
             method.Invoke(obj, MethodParams);
         }
-        catch (Exception ex) { Debug.LogError("[InvokeAPI] Exception!" + "\n" + ex.Message + "\n" + ex.StackTrace); }
+        catch (Exception ex) { Debug.LogError("UnityEngineAPI.InvokeAPI: Exception!" + "\n" + ex.Message + "\n" + ex.StackTrace); }
         finally { }
     }
 }

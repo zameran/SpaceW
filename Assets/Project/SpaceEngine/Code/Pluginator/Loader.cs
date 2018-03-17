@@ -1,7 +1,7 @@
 ﻿#region License
 // Procedural planet generator.
 // 
-// Copyright (C) 2015-2017 Denis Ovchinnikov [zameran] 
+// Copyright (C) 2015-2018 Denis Ovchinnikov [zameran] 
 // All rights reserved.
 // 
 // Redistribution and use in source and binary forms, with or without
@@ -44,25 +44,22 @@ using Logger = SpaceEngine.Core.Debugging.Logger;
 
 namespace SpaceEngine.Pluginator
 {
-    [UseLogger(Category.Data)]
-    [UseLoggerFile("Log")]
+    [UseLogger(LoggerCategory.Data)]
     public abstract class Loader : MonoBehaviour
     {
-        public bool ShouldDontDestroyOnLoad = true;
-
         private static Loader instance;
 
         public static Loader Instance
         {
             get
             {
-                if (instance == null) { Logger.LogError("Loader Instance get fail!"); }
+                if (instance == null) { Logger.LogError("Loader.Instance.get: Loader Instance get fail!"); }
                 return instance;
             }
             private set
             {
                 if (value != null) instance = value;
-                else Logger.LogError("Loader Instance set fail!");
+                else Logger.LogError("Loader.Instance.set: Loader Instance set fail!");
             }
         }
 
@@ -78,8 +75,6 @@ namespace SpaceEngine.Pluginator
             Instance = this;
 
             Step = 0;
-
-            if (ShouldDontDestroyOnLoad) DontDestroyOnLoad(this);
         }
 
         protected virtual void Update()
@@ -99,7 +94,7 @@ namespace SpaceEngine.Pluginator
 
         public void Delay(float waitTime, Action action)
         {
-            Logger.Log(string.Format("Delay method invoked! Will wait for {0} seconds...", waitTime));
+            Logger.Log(string.Format("Loader.Delay: Delay method invoked! Will wait for {0} seconds...", waitTime));
 
             StartCoroutine(DelayImpl(waitTime, action));
         }

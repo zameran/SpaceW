@@ -1,7 +1,7 @@
 ﻿#region License
 // Procedural planet generator.
 // 
-// Copyright (C) 2015-2017 Denis Ovchinnikov [zameran] 
+// Copyright (C) 2015-2018 Denis Ovchinnikov [zameran] 
 // All rights reserved.
 // 
 // Redistribution and use in source and binary forms, with or without
@@ -66,77 +66,52 @@ namespace SpaceEngine.Debugging
 
             if (Body != null && Helper.Enabled(Body))
             {
-                GUILayout.BeginVertical();
-
-                GUILayout.Label("Body parameters: ", BoldLabelStyle);
-
-                if (Body.MaterialTable != null && Body.MaterialTable.Lut != null)
+                GUILayoutExtensions.VerticalBoxed("Body parameters: ", GUISkin, () =>
                 {
-                    GUILayout.Label("Material Table: ");
-                    GUILayout.BeginVertical("", GUISkin.box);
+                    GUILayoutExtensions.VerticalBoxed("", GUISkin, () =>
                     {
-                        GUILayoutExtensions.Horizontal(() =>
+                        if (Body.TCCPS != null)
                         {
-                            GUILayout.Label(Body.MaterialTable.Lut);
+                            var materialTable = Body.TCCPS.MaterialTable;
+
+                            if (materialTable != null && materialTable.Lut != null)
+                            {
+                                GUILayout.Label("Material Table: ");
+                                GUILayoutExtensions.VerticalBoxed("", GUISkin, () =>
+                                {
+                                    GUILayoutExtensions.Horizontal(() =>
+                                    {
+                                        GUILayout.Label(materialTable.Lut);
+                                    });
+                                });
+                            }
+                        }
+                    });
+                });
+
+                GUILayoutExtensions.SpacingSeparator();
+
+                if (Body.Ocean != null && Body.OceanEnabled && Helper.Enabled(Body.Ocean))
+                {
+                    GUILayoutExtensions.VerticalBoxed("Ocean parameters: ", GUISkin, () =>
+                    {
+                        GUILayoutExtensions.VerticalBoxed("", GUISkin, () =>
+                        {
+                            GUILayoutExtensions.SliderWithField("Level: ", 0.0f, 5.0f, ref Body.Ocean.OceanLevel);
+                            GUILayoutExtensions.SliderWithField("Z Min: ", 0.0f, 50000.0f, ref Body.Ocean.ZMin);
                         });
-                    }
-                    GUILayout.EndVertical();
-                }
+                    });
 
-                GUILayout.EndVertical();
-
-                if (Body.Atmosphere != null && Helper.Enabled(Body.Atmosphere))
-                {
-                    GUILayout.BeginVertical();
-
-                    GUILayout.Label("Atmosphere parameters: ", BoldLabelStyle);
-
-                    GUILayout.Label("Preset: ");
-                    Body.Atmosphere.AtmosphereBase = (AtmosphereBase)GUILayout.SelectionGrid((int)Body.Atmosphere.AtmosphereBase, System.Enum.GetNames(typeof(AtmosphereBase)), 2);
-
-                    GUILayout.Space(10);
-
-                    GUILayoutExtensions.SliderWithField("Density: ", 0.0f, 1.0f, ref Body.Atmosphere.Density);
-                    GUILayoutExtensions.SliderWithField("Height: ", 0.0f, Body.Size / 1000.0f, ref Body.Atmosphere.Height);
-
-                    GUILayout.EndVertical();
+                    GUILayoutExtensions.SpacingSeparator();
                 }
                 else
                 {
-                    GUILayout.BeginVertical();
-
-                    GUILayoutExtensions.LabelWithSpace("No Atmosphere!?", -8);
-
-                    GUILayout.EndVertical();
-                }
-
-                if (Body.Ocean != null && Helper.Enabled(Body.Ocean))
-                {
-                    GUILayout.BeginVertical();
-
-                    GUILayout.Label("Ocean parameters: ", BoldLabelStyle);
-
-                    GUILayoutExtensions.SliderWithField("Level: ", 0.0f, 5.0f, ref Body.Ocean.OceanLevel);
-                    GUILayoutExtensions.SliderWithField("Z Min: ", 0.0f, 50000.0f, ref Body.Ocean.ZMin);
-
-                    GUILayout.EndVertical();
-                }
-                else
-                {
-                    GUILayout.BeginVertical();
-
-                    GUILayoutExtensions.LabelWithSpace("No Ocean!?", -8);
-
-                    GUILayout.EndVertical();
+                    GUILayoutExtensions.DrawBadHolder("Ocean parameters: ", "No Ocean!?", GUISkin);
                 }
             }
             else
             {
-                GUILayout.BeginVertical();
-
-                GUILayoutExtensions.LabelWithSpace("No Body!?", -8);
-
-                GUILayout.EndVertical();
+                GUILayoutExtensions.DrawBadHolder("Body parameters: ", "No Body!?", GUISkin);
             }
 
             GUILayout.EndScrollView();

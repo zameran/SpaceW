@@ -1,6 +1,11 @@
-﻿using System;
+﻿using SpaceEngine.Core.Numerics.Matrices;
+using SpaceEngine.Core.Numerics.Vectors;
+
+using System;
 
 using UnityEngine;
+
+using Functions = SpaceEngine.Core.Numerics.Functions;
 
 namespace SpaceEngine.Core.Utilities
 {
@@ -90,9 +95,9 @@ namespace SpaceEngine.Core.Utilities
             var oldPosition = oldp.Normalized();
             var position = p.Normalized();
 
-            var oldlat = MathUtility.Safe_Asin(oldPosition.z);
+            var oldlat = Functions.Safe_Asin(oldPosition.z);
             var oldlon = Math.Atan2(oldPosition.y, oldPosition.x);
-            var lat = MathUtility.Safe_Asin(position.z);
+            var lat = Functions.Safe_Asin(position.z);
             var lon = Math.Atan2(position.y, position.x);
 
             base.position.X -= (lon - oldlon) * speed * Math.Max(1.0, worldPosition.Magnitude() - Radius);
@@ -110,7 +115,7 @@ namespace SpaceEngine.Core.Utilities
             var pd = (po - px * Math.Sin(position.Phi) * distance + py * Math.Cos(position.Phi) * distance).Normalized();
 
             position.X = Math.Atan2(pd.y, pd.x);
-            position.Y = MathUtility.Safe_Asin(pd.z);
+            position.Y = Functions.Safe_Asin(pd.z);
         }
 
         public override void Turn(double angle)
@@ -122,7 +127,7 @@ namespace SpaceEngine.Core.Utilities
         {
             var s = new Vector3d(Math.Cos(from.X) * Math.Cos(from.Y), Math.Sin(from.X) * Math.Cos(from.Y), Math.Sin(from.Y));
             var e = new Vector3d(Math.Cos(to.X) * Math.Cos(to.Y), Math.Sin(to.X) * Math.Cos(to.Y), Math.Sin(to.Y));
-            var distance = Math.Max(MathUtility.Safe_Acos(s.Dot(e)) * Radius, 1e-3);
+            var distance = Math.Max(Functions.Safe_Acos(s.Dot(e)) * Radius, 1e-3);
 
             t = Math.Min(t + Math.Min(0.1, 5000.0 / distance), 1.0);
 

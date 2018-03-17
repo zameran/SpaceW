@@ -1,6 +1,6 @@
 ﻿using SpaceEngine.Core.Debugging;
 using SpaceEngine.Core.Patterns.Strategy.Eventit;
-using SpaceEngine.Pluginator.Enums;
+using SpaceEngine.Enums;
 
 using System.Collections.Generic;
 using System.Linq;
@@ -12,8 +12,7 @@ using Logger = SpaceEngine.Core.Debugging.Logger;
 
 namespace SpaceEngine.UI
 {
-    [UseLogger(Category.InGameUI)]
-    [UseLoggerFile("Log")]
+    [UseLogger(LoggerCategory.InGameUI)]
     public class UICore : MonoBehaviour, IEventit
     {
         public GameObject Root { get { return this.gameObject; } }

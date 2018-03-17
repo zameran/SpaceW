@@ -1,7 +1,7 @@
 #region License
 // Procedural planet generator.
 // 
-// Copyright (C) 2015-2017 Denis Ovchinnikov [zameran] 
+// Copyright (C) 2015-2018 Denis Ovchinnikov [zameran] 
 // All rights reserved.
 // 
 // Redistribution and use in source and binary forms, with or without
@@ -129,7 +129,7 @@ namespace SpaceEngine.Debugging
         void Awake()
         {
             if (gameObject.GetComponent<Camera>() == null)
-                Debug.LogWarning("FPS Graph needs to be attached to a Camera object!");
+                Debug.LogWarning("DebugDrawFPSGraph: FPS Graph needs to be attached to a Camera object!");
 
             CreateLineMaterial();
 

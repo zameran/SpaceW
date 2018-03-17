@@ -1,14 +1,14 @@
 ﻿#region License
 // Procedural planet generator.
 //  
-// Copyright (C) 2015-2017 Denis Ovchinnikov [zameran] 
+// Copyright (C) 2015-2018 Denis Ovchinnikov [zameran] 
 // All rights reserved.
 // 
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions
 // are met:
 // 1. Redistributions of source code must retain the above copyright
-//     notice, this list of conditions and the following disclaimer.
+//    notice, this list of conditions and the following disclaimer.
 // 2. Redistributions in binary form must reproduce the above copyright
 //    notice, this list of conditions and the following disclaimer in the
 //    documentation and/or other materials provided with the distribution.
@@ -43,107 +43,109 @@ namespace SpaceEngine.Core.Bodies
 {
     public class CelestialBody : Body, ICelestialBody
     {              
-        public Texture2D GroundDiffuse;
-        public Texture2D GroundNormal;
-        public Texture2D DetailedNormal;
-
         #region ICelestialBody
 
         public float Radius { get { return Size; } set { Size = value; } }
 
         public override List<string> GetKeywords()
         {
-            var Keywords = new List<string>();
+            var keywords = new List<string>();
+
+            var lightCount = Suns.Count((sun) => sun != null && sun.gameObject.activeInHierarchy);
+            var alteastOneLight = lightCount != 0;
+
+            if (alteastOneLight)
+            {
+                keywords.Add(string.Format("LIGHT_{0}", lightCount));
+
+                var shadowsCount = ShadowCasters.Count((shadow) => shadow != null && Helper.Enabled(shadow));
+
+                if (shadowsCount > 0 && GodManager.Instance.Planetshadows)
+                {
+                    keywords.Add(string.Format("SHADOW_{0}", shadowsCount));
+                }
+                else
+                {
+                    keywords.Add("SHADOW_0");
+                }
+            }
+            else
+            {
+                keywords.Add("LIGHT_0");
+                keywords.Add("SHADOW_0");
+            }
+
+            if (EclipseCasters.Count == 0)
+            {
+                keywords.Add("ECLIPSES_OFF");
+            }
+            else
+            {
+                keywords.Add(GodManager.Instance.Eclipses && alteastOneLight ? "ECLIPSES_ON" : "ECLIPSES_OFF");
+            }
+
+            if (ShineCasters.Count == 0)
+            {
+                keywords.Add("SHINE_OFF");
+            }
+            else
+            {
+                keywords.Add(GodManager.Instance.Planetshine && alteastOneLight ? "SHINE_ON" : "SHINE_OFF");
+            }
 
             if (Ring != null)
             {
                 if (RingEnabled)
                 {
-                    Keywords.Add("RING_ON");
-                    Keywords.Add("SCATTERING");
-
-                    var shadowsCount = Shadows.Count((shadow) => shadow != null && Helper.Enabled(shadow));
-
-                    if (shadowsCount > 0 && GodManager.Instance.Eclipses)
-                    {
-                        for (byte i = 0; i < shadowsCount; i++)
-                        {
-                            Keywords.Add("SHADOW_" + (i + 1));
-                        }
-                    }
-                    else
-                    {
-                        Keywords.Add("SHADOW_0");
-                    }
+                    keywords.Add("RING_ON");
+                    keywords.Add("SCATTERING");
                 }
                 else
                 {
-                    Keywords.Add("RING_OFF");
+                    keywords.Add("RING_OFF");
                 }
             }
             else
             {
-                Keywords.Add("RING_OFF");
+                keywords.Add("RING_OFF");
             }
 
             if (Atmosphere != null)
             {
                 if (AtmosphereEnabled)
                 {
-                    var lightCount = Atmosphere.Suns.Count((sun) => sun != null && sun.gameObject.activeInHierarchy);
-
-                    if (lightCount != 0)
-                        Keywords.Add("LIGHT_" + lightCount);
-
-                    if (Atmosphere.EclipseCasters.Count == 0)
-                    {
-                        Keywords.Add("ECLIPSES_OFF");
-                    }
-                    else
-                    {
-                        Keywords.Add(GodManager.Instance.Eclipses ? "ECLIPSES_ON" : "ECLIPSES_OFF");
-                    }
-
-                    if (Atmosphere.ShineCasters.Count == 0)
-                    {
-                        Keywords.Add("SHINE_OFF");
-                    }
-                    else
-                    {
-                        Keywords.Add(GodManager.Instance.Planetshine ? "SHINE_ON" : "SHINE_OFF");
-                    }
-
-                    Keywords.Add("ATMOSPHERE_ON");
+                    keywords.Add("ATMOSPHERE_ON");
                 }
                 else
                 {
-                    Keywords.Add("ATMOSPHERE_OFF");
+                    keywords.Add("ATMOSPHERE_OFF");
                 }
 
                 if (Ocean != null)
                 {
                     if (OceanEnabled && AtmosphereEnabled)
                     {
-                        Keywords.Add("OCEAN_ON");
+                        keywords.Add("OCEAN_ON");
                     }
                     else
                     {
-                        Keywords.Add("OCEAN_OFF");
+                        keywords.Add("OCEAN_OFF");
                     }
                 }
                 else
                 {
-                    Keywords.Add("OCEAN_OFF");
+                    keywords.Add("OCEAN_OFF");
+                    keywords.Add("OCEAN_DEPTH_OFF");
                 }
             }
             else
             {
-                Keywords.Add("LIGHT_0");
-                Keywords.Add("ATMOSPHERE_OFF");
-                Keywords.Add("OCEAN_OFF");
+                keywords.Add("ATMOSPHERE_OFF");
+                keywords.Add("OCEAN_OFF");
+                keywords.Add("OCEAN_DEPTH_OFF");
             }
 
-            return Keywords;
+            return keywords;
         }
 
         #endregion
@@ -214,7 +216,7 @@ namespace SpaceEngine.Core.Bodies
 
         #region IRenderable
 
-        public override void Render(int layer = 0)
+        public override void Render(int layer = 8)
         {
             base.Render(layer);
         }
@@ -224,11 +226,6 @@ namespace SpaceEngine.Core.Bodies
         protected override void OnApplicationFocus(bool focusStatus)
         {
             base.OnApplicationFocus(focusStatus);
-        }
-
-        protected override void ResetMPB()
-        {
-            base.ResetMPB();
         }
     }
 }

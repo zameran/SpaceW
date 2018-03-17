@@ -1,7 +1,7 @@
 ﻿#region License
 // Procedural planet generator.
 // 
-// Copyright (C) 2015-2017 Denis Ovchinnikov [zameran] 
+// Copyright (C) 2015-2018 Denis Ovchinnikov [zameran] 
 // All rights reserved.
 // 
 // Redistribution and use in source and binary forms, with or without
@@ -56,13 +56,9 @@ namespace SpaceEngine.Debugging
 
         protected override void Draw()
         {
-#if UNITY_EDITOR
-            if (UnityEditor.SceneView.currentDrawingSceneView != null) return; // Do not draw at Scene tab in editor.
-#endif
-
             var nearCorners = new Vector3[4]; // Approx'd nearplane corners
             var farCorners = new Vector3[4]; // Approx'd farplane corners
-            var frustumPlanes = GeometryUtility.CalculateFrustumPlanes(GodManager.Instance.ScreenToCamera); // NOTE : CameraToScreen
+            var frustumPlanes = GeometryUtility.CalculateFrustumPlanes(GodManager.Instance.View.ScreenToCameraMatrix.ToMatrix4x4()); // NOTE : CameraToScreen
 
             var tempFrustumPlane = frustumPlanes[1];
             frustumPlanes[1] = frustumPlanes[2];
@@ -78,13 +74,13 @@ namespace SpaceEngine.Debugging
 
             GL.Begin(GL.LINES);
 
-            for (byte i = 0; i < 4; i++)
+            for (var i = 0; i < 4; i++)
             {
                 nearCorners[i] = VectorHelper.Plane3Intersect(frustumPlanes[4], frustumPlanes[i], frustumPlanes[(i + 1) % 4]); // Near corners on the created projection matrix
                 farCorners[i] = VectorHelper.Plane3Intersect(frustumPlanes[5], frustumPlanes[i], frustumPlanes[(i + 1) % 4]); // Far corners on the created projection matrix
             }
 
-            for (byte i = 0; i < 4; i++)
+            for (var i = 0; i < 4; i++)
             {
                 GL.Color(Color.red);
                 GL.Vertex3(nearCorners[i].x, nearCorners[i].y, nearCorners[i].z);

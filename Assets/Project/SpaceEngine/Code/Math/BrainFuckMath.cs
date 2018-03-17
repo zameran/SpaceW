@@ -1,7 +1,7 @@
 ﻿#region License
 // Procedural planet generator.
 // 
-// Copyright (C) 2015-2017 Denis Ovchinnikov [zameran] 
+// Copyright (C) 2015-2018 Denis Ovchinnikov [zameran] 
 // All rights reserved.
 // 
 // Redistribution and use in source and binary forms, with or without
@@ -33,8 +33,9 @@
 // Creator: zameran
 #endregion
 
-using System;
 
+using SpaceEngine.Core.Numerics.Vectors;
+using System;
 using UnityEngine;
 
 /// <summary>
@@ -99,6 +100,16 @@ public static class BrainFuckMath
     public static bool AlmostEquals(this float a, float b, float precision = 0.00001f) // Use 5 digits after dot.
     {
         return Mathf.Abs(a - b) <= precision;
+    }
+
+    public static double Wrap(double value, double min, double max)
+    {
+        if (NearlyEqual(min, max)) return min;
+        if (min > max) throw new ArgumentException(string.Format("Argument min {0} should be less or equal to argument max {1}", min, max), "min");
+
+        var rangeSize = max - min;
+
+        return (min + (value - min) - (rangeSize * Math.Floor((value - min) / rangeSize)));
     }
 
     [Obsolete("Was used in old core...")]
@@ -178,7 +189,7 @@ public static class BrainFuckMath
     [Obsolete("Was used in old core...")]
     public static Vector3 Multiply(Vector3 v, double d)
     {
-        Vector3d vd = v; //Cast vector to double typed.
+        var vd = new Vector3d(v); //Cast vector to double typed.
 
         var result = vd * d; //Multiply in doubles.
 
@@ -188,8 +199,8 @@ public static class BrainFuckMath
     [Obsolete("Was used in old core...")]
     public static Vector3 LinearInterpolate(Vector3 a, Vector3 b, double t)
     {
-        Vector3d ad = a; //Cast first vector to double typed.
-        Vector3d bd = b; //Cast second vector to double typed.
+        var ad = new Vector3d(a); //Cast first vector to double typed.
+        var bd = new Vector3d(b); //Cast second vector to double typed.
 
         var result = Vector3d.Lerp(ad, bd, t); //Lerp it.
 

@@ -1,24 +1,31 @@
 # SpaceW - Procedural Universe [Planetarium] #
 
-SpaceW is procedural universe generator - simulator.
-
 ![alt tag](https://github.com/zameran/SpaceW/blob/develop/Logo.png?raw=true)
 
-[Discord Server](https://discord.gg/kmkKbra)
-[gitter channel placeholder]
-[telegram channel placeholder]
-[other placeholder]
+## Important NOTE From Maintainer ##
+### 
+Dear programmers and developers please note, that project have several years long rich history,
+so a lot of provided components, such as code, shaders, architecture or parts of it are morally obsolete.
+Knowledge and time doesn't stand still and so many virtue were invested.
+If there enough people willing, then, perhaps, i will compose a comprehensive wiki.
+###
 
 ## Disclaimer ##
 * Strong language. So you don't give me crap about it.
 * Strange code. This is like a nuclear test site.
 * Black dirty magic. Like in 15th century, yay.
-* That's a project of life.
-* Under active development forever.
-* Take it easy...
+* That's was a project of life.
+* That's not a game-ready solution.
+* Some shader code was ported to Unity from Space Engine and Proland.
+* Some stuff may not work or very experimental.
+* Some small artifacts are normal due to engine version migrations and unexistance of testers.
+* Some components using own inverted axis space.
+* Some components could be without any license header.
+* Currently there are a lot of trash.
+* Low Unity's internals integration.
 
 ## Current Engine version support ##
-* Unity 5.6.1f1 (Windows)
+* Unity 2018.1.0b7 (Windows)
 * Unity 5.6.0b3 (Linux)
 
 ## Current OS/API support ##
@@ -38,10 +45,6 @@ SpaceW is procedural universe generator - simulator.
 * Make your changes in separate branch [Git Flow].
 * Create a pull request.
 
-### Core guidelines ###
-* Currently there are a lot of trash, but something is marked as [Obsolete] or */ //Commented */
-* All core features and API's are well documented.
-
 ### Troubleshooting ###
 * Assets -> Reimport All.
 * Asset -> Reimport.
@@ -50,13 +53,8 @@ SpaceW is procedural universe generator - simulator.
 
 ### License ###
 * The 3-Clause BSD License [Mixed-license scheme].
-
-### Extra ###
-* Some shader code was ported to Unity from Space Engine and Proland.
-* Some stuff may not work or very experimental.
-* Some small artifacts are normal due to engine version migrations and unexistance of testers.
-* Sphecial thanks goes to @dotBunny and @JetBrains for a special support IDE's plugins!
-* New builds will be available via Unity Cloud Build in special channel inside the discord.
+* Space Engine's ported shaders have it's own license.
+* Proland's ported stuff have it's own license and personal port provider license.
 
 ### References ###
 * [Space Engine](http://spaceengine.org/)
@@ -68,5 +66,5 @@ SpaceW is procedural universe generator - simulator.
 
 ### Contacts ###
 * [Protonmail](zameran@protonmail.com)
-* [GMail](zameran9@gmail.com)
 * [Telegram](https://t.me/zameran)
+* [Discord Server](https://discord.gg/kmkKbra)

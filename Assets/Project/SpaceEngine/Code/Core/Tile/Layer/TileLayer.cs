@@ -5,20 +5,21 @@ using System.Collections.Generic;
 namespace SpaceEngine.Core.Tile.Layer
 {
     /// <summary>
-    /// An abstract layer for a TileProducer. Some tile producers can be customized with layers modifying the default tile production algorithm.
-    /// For these kind of producers, each method of this class is called during the corresponding method in the TileProducer. 
+    /// An abstract layer for a <see cref="Producer.TileProducer"/>. 
+    /// Some tile producers can be customized with layers modifying the default tile production algorithm.
+    /// For these kind of producers, each method of this class is called during the corresponding method in the <see cref="Producer.TileProducer"/>. 
     /// The default implementation of these methods in this class is empty.
     /// </summary>
-    public abstract class TileLayer : Node<TileLayer>
+    public abstract class TileLayer : NodeSlave<TileLayer>
     {
-        #region Node
+        #region NodeSlave<TileLayer>
 
-        protected override void InitNode()
+        public override void InitNode()
         {
 
         }
 
-        protected override void UpdateNode()
+        public override void UpdateNode()
         {
 
         }

@@ -1,7 +1,7 @@
 ﻿#region License
 // Procedural planet generator.
 // 
-// Copyright (C) 2015-2017 Denis Ovchinnikov [zameran] 
+// Copyright (C) 2015-2018 Denis Ovchinnikov [zameran] 
 // All rights reserved.
 // 
 // Redistribution and use in source and binary forms, with or without
@@ -35,8 +35,8 @@
 
 using DG.Tweening;
 
+using SpaceEngine.Enums;
 using SpaceEngine.Managers;
-using SpaceEngine.Pluginator.Enums;
 using SpaceEngine.UI;
 
 using UnityEngine;
@@ -62,12 +62,17 @@ public sealed class InGamePauseMenuUI : UserInterface, IUserInterface
         }
     }
 
-    public void LoadScene()
+    public void LoadMainMenuScene()
     {
-        LevelManager.Instance.LoadSceneDelayed(EntryPoint.MainMenu, 0.5f);
+        LoadScene(EntryPoint.MainMenu);
+    }
+
+    public void LoadScene(EntryPoint ep)
+    {
+        LevelManager.Instance.LoadSceneDelayed(ep, 0.5f);
 
         GetComponent<UIPanel>().Hide(0.5f);
 
-        DOTween.To(() => CameraHelper.Main().backgroundColor, value => CameraHelper.Main().backgroundColor = value, XKCDColors.ColorTranslator.FromHtml("#222C3705"), 1.0f);
+        DOTween.To(() => CameraHelper.Main().backgroundColor, value => CameraHelper.Main().backgroundColor = value, XKCDColors.ColorTranslator.FromHtml("#00000005"), 1.0f);
     }
 }

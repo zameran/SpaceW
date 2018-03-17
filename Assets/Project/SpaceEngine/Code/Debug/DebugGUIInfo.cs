@@ -1,14 +1,14 @@
 ﻿#region License
 // Procedural planet generator.
 //  
-// Copyright (C) 2015-2017 Denis Ovchinnikov [zameran] 
+// Copyright (C) 2015-2018 Denis Ovchinnikov [zameran] 
 // All rights reserved.
 // 
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions
 // are met:
 // 1. Redistributions of source code must retain the above copyright
-//     notice, this list of conditions and the following disclaimer.
+//    notice, this list of conditions and the following disclaimer.
 // 2. Redistributions in binary form must reproduce the above copyright
 //    notice, this list of conditions and the following disclaimer in the
 //    documentation and/or other materials provided with the distribution.
@@ -39,17 +39,24 @@ namespace SpaceEngine.Debugging
 {
     public class DebugGUIInfo : DebugGUI
     {
-        private readonly string[] Info = new string[]
+        private readonly string[] InputInfo = new string[]
         {
             "Mouse Scrollwheel to control speed.",
             "Left mouse button to orientation.",
             "Right mouse button to rotate around target.",
             "E/Q to roll axis.",
+            "R/T to up'n'down swing.",
             "Left Shift for more speed.",
             "Left Control for even more speed.",
             "Left Shift + Left Control for speed of God.",
             "Left Alt for less speed.",
-            "F12 to capture screenshot."
+            "Press T while moving for a supercruise.",
+            "Hold G to center camera on current target.",
+            "F5 to switch between debug modes.",
+            "F6 to switch between debug visualizations.",
+            "F12 to capture screenshot.",
+            "/ to toggle the wireframe mode.",
+            "ESC to pause."
         };
 
         private readonly string[] InfoAdditional = new string[]
@@ -66,31 +73,42 @@ namespace SpaceEngine.Debugging
 
         protected override void UI(int id)
         {
-            ScrollPosition = GUILayout.BeginScrollView(ScrollPosition, false, true, GUILayout.Width(debugInfoBounds.width), GUILayout.Height(debugInfoBounds.height));
+            ScrollPosition = GUILayout.BeginScrollView(ScrollPosition, false, true);
+
+            GUILayoutExtensions.VerticalBoxed("Input info: ", GUISkin, () =>
             {
-                GUILayout.Label("Input info: ", BoldLabelStyle);
+                GUILayoutExtensions.VerticalBoxed("", GUISkin, () =>
+                {
+                    DrawLabelLines(InputInfo);
+                });
+            });
 
-                DrawLabelLines(Info);
+            GUILayoutExtensions.SpacingSeparator();
 
-                GUILayout.Space(10);
+            GUILayoutExtensions.VerticalBoxed("Additional info: ", GUISkin, () =>
+            {
+                GUILayoutExtensions.VerticalBoxed("", GUISkin, () =>
+                {
+                    DrawLabelLines(InfoAdditional);
+                });
+            });
 
-                GUILayout.Label("Additional info: ", BoldLabelStyle);
-
-                DrawLabelLines(InfoAdditional);
-            }
+            GUILayoutExtensions.SpacingSeparator();
 
             GUILayout.EndScrollView();
         }
 
-        private void DrawLabelLines(string[] lines)
+        private void DrawLabelLines(params string[] lines)
         {
             GUILayoutExtensions.Vertical(() =>
             {
-                for (byte i = 0; i < lines.Length; i++)
+                for (var i = 0; i < lines.Length; i++)
                 {
                     GUILayoutExtensions.LabelWithSpace(lines[i]);
                 }
             });
+
+            GUILayout.Space(8);
         }
     }
 }

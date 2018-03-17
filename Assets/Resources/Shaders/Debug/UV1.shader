@@ -25,7 +25,7 @@
 				v2f o;
 
 				o.pos = UnityObjectToClipPos(v.vertex);
-				o.uv = float4(v.texcoord.xy, 0, 0);
+				o.uv = float4(v.texcoord.xy, 0.0, 0.0);
 
 				return o;
 			}

@@ -1,7 +1,7 @@
 ﻿#region License
 // Procedural planet generator.
 // 
-// Copyright (C) 2015-2017 Denis Ovchinnikov [zameran] 
+// Copyright (C) 2015-2018 Denis Ovchinnikov [zameran] 
 // All rights reserved.
 // 
 // Redistribution and use in source and binary forms, with or without
@@ -33,9 +33,9 @@
 // Creator: zameran
 #endregion
 
+using SpaceEngine.Core.Numerics.Vectors;
 using System;
 using System.Linq;
-
 using UnityEngine;
 
 /// <summary>
@@ -56,6 +56,26 @@ public static class VectorHelper
     public static Vector2 xy(this Vector3 v)
     {
         return new Vector2(v.x, v.y);
+    }
+
+    /// <summary>
+    /// Inverse of Y component of normalized target vector.
+    /// </summary>
+    /// <param name="v">Target.</param>
+    /// <returns>Vector with inversed Y component.</returns>
+    public static Vector2 InverseY(this Vector2 v)
+    {
+        return new Vector2(v.x, 1.0f - v.y);
+    }
+
+    /// <summary>
+    /// Inverse of Y component of normalized target vector.
+    /// </summary>
+    /// <param name="v">Target.</param>
+    /// <returns>Vector with inversed Y component.</returns>
+    public static Vector3 InverseY(this Vector3 v)
+    {
+        return new Vector3(v.x, 1.0f - v.y, v.z);
     }
 
     public static Vector3 Summ(params Vector3[] vectors)
@@ -82,7 +102,6 @@ public static class VectorHelper
     {
         return new Vector4d(Math.Abs(v.x), Math.Abs(v.y), Math.Abs(v.z), Math.Abs(v.w));
     }
-
 
     public static Vector3 RotatePointAroundPivot(this Vector3 point, Vector3 pivot, Vector3 angles)
     {
@@ -200,6 +219,16 @@ public static class VectorHelper
     public static Vector4 FromColor(this Color color, float customAlpha)
     {
         return new Vector4(color.r, color.g, color.b, customAlpha);
+    }
+
+    public static Color ToColor(this Vector4 vector)
+    {
+        return new Color(vector.x, vector.y, vector.z, vector.w);
+    }
+
+    public static Color ToColor(this Vector3 vector, float a)
+    {
+        return new Color(vector.x, vector.y, vector.z, a);
     }
 
     public static bool OneOfIsBiggerThan(this Vector3 v, float value)

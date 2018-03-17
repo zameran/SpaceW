@@ -1,14 +1,14 @@
 ﻿#region License
 // Procedural planet generator.
 //  
-// Copyright (C) 2015-2017 Denis Ovchinnikov [zameran] 
+// Copyright (C) 2015-2018 Denis Ovchinnikov [zameran] 
 // All rights reserved.
 // 
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions
 // are met:
 // 1. Redistributions of source code must retain the above copyright
-//     notice, this list of conditions and the following disclaimer.
+//    notice, this list of conditions and the following disclaimer.
 // 2. Redistributions in binary form must reproduce the above copyright
 //    notice, this list of conditions and the following disclaimer in the
 //    documentation and/or other materials provided with the distribution.
@@ -38,8 +38,7 @@ namespace SpaceEngine.Core.Patterns.Strategy.Renderable
     /// <summary>
     /// This interface should be implemented in all things, that's gonna be rendered with <see cref="UnityEngine.Graphics"/> class methods.
     /// </summary>
-    /// <typeparam name="T">Generic class type.</typeparam>
-    public interface IRenderable<T> where T : class
+    public interface IRenderable
     {
         void Render(int layer = 0);
     }

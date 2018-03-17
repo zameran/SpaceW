@@ -1,7 +1,7 @@
 ﻿#region License
 // Procedural planet generator.
 // 
-// Copyright (C) 2015-2017 Denis Ovchinnikov [zameran] 
+// Copyright (C) 2015-2018 Denis Ovchinnikov [zameran] 
 // All rights reserved.
 // 
 // Redistribution and use in source and binary forms, with or without
@@ -35,6 +35,10 @@
 
 namespace SpaceEngine.Core.Patterns.Strategy.Uniformed
 {
+    /// <summary>
+    /// This interface should be implemented in all things, that's gonna manipulate with 
+    /// <see cref="UnityEngine.Material"/> and <see cref="UnityEngine.Shader"/>, or <see cref="UnityEngine.MaterialPropertyBlock"/> uniforms.
+    /// </summary>
     public interface IUniformed
     {
         void InitUniforms();
@@ -42,39 +46,5 @@ namespace SpaceEngine.Core.Patterns.Strategy.Uniformed
         void SetUniforms();
 
         void InitSetUniforms();
-    }
-
-    /// <summary>
-    /// This interface should be implemented in all things, that's gonna manipulate with 
-    /// <see cref="UnityEngine.Material"/> and <see cref="UnityEngine.Shader"/>, or <see cref="UnityEngine.MaterialPropertyBlock"/> uniforms.
-    /// Target for manipulations is a generic type.
-    /// </summary>
-    /// <typeparam name="T">Generic. <example><see cref="UnityEngine.Material"/> or <see cref="UnityEngine.Shader"/>.</example></typeparam>
-    public interface IUniformed<in T> where T : class
-    {
-        void InitUniforms(T target);
-
-        void SetUniforms(T target);
-
-        void InitSetUniforms();
-    }
-
-    /// <summary>
-    /// This interface should be implemented in all things, that's gonna manipulate with 
-    /// <see cref="UnityEngine.Material"/> and <see cref="UnityEngine.Shader"/>, or <see cref="UnityEngine.MaterialPropertyBlock"/> uniforms.
-    /// Targets for manipulations is a generic type.
-    /// Two targets at the same time!
-    /// <remarks>
-    /// This interface slightly different: <see cref="IUniformed{T}.InitSetUniforms"/>. It's done, 
-    /// because class can implement sequence of <see cref="IUniformed{T}"/> and <see cref="IUniformed{T, U}"/>
-    /// </remarks>
-    /// </summary>
-    /// <typeparam name="T">Generic. <example><see cref="UnityEngine.Material"/> or <see cref="UnityEngine.Shader"/>.</example></typeparam>
-    /// <typeparam name="U">Generic. <example><see cref="UnityEngine.Material"/> or <see cref="UnityEngine.Shader"/>.</example></typeparam>
-    public interface IUniformed<T, U> where T : class where U : class
-    {
-        void InitUniforms(T target0, U target1);
-
-        void SetUniforms(T target0, U target1);
     }
 }

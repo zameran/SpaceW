@@ -1,6 +1,6 @@
 ﻿// Procedural planet generator.
 // 
-// Copyright (C) 2015-2017 Denis Ovchinnikov [zameran] 
+// Copyright (C) 2015-2018 Denis Ovchinnikov [zameran] 
 // All rights reserved.
 // 
 // Redistribution and use in source and binary forms, with or without
@@ -45,9 +45,10 @@ Shader "SpaceEngine/Lines/Colored Blended"
 		{
 			Name "Line"
 
-			Blend SrcAlpha OneMinusSrcAlpha
+			//Blend SrcAlpha OneMinusSrcAlpha			// Other...
+			Blend One SrcColor							// Deferred...
 			ColorMask RGB
-			ZWrite On 
+			ZWrite Off 
 			Lighting Off
 			Cull Off 
 			Fog { Mode Off }

@@ -1,7 +1,7 @@
 #region License
 // Procedural planet generator.
 // 
-// Copyright (C) 2015-2017 Denis Ovchinnikov [zameran] 
+// Copyright (C) 2015-2018 Denis Ovchinnikov [zameran] 
 // All rights reserved.
 // 
 // Redistribution and use in source and binary forms, with or without
@@ -34,6 +34,9 @@
 #endregion
 
 using SpaceEngine.Core.Bodies;
+using SpaceEngine.Core.Numerics.Vectors;
+
+using System.ComponentModel;
 
 using UnityEngine;
 
@@ -42,7 +45,21 @@ namespace SpaceEngine.Cameras
     [ExecutionOrder(-9990)]
     public class FlyCamera : GameCamera
     {
+        public enum ClipPlanesControl : byte
+        {
+            None,
+            Constant,
+            NearFar,
+            Near,
+            Far
+        }
+
         public Body Body { get { return GodManager.Instance.ActiveBody; } }
+
+        public float NearClipPlane { get { return CameraComponent.nearClipPlane; } set { CameraComponent.nearClipPlane = value; } }
+        public float FarClipPlane { get { return CameraComponent.farClipPlane; } set { CameraComponent.farClipPlane = value; } }
+
+        public ClipPlanesControl ClipPlanesControlType = ClipPlanesControl.NearFar;
 
         public float Speed = 1.0f;
         public float RotationSpeed = 1.0f;
@@ -57,9 +74,6 @@ namespace SpaceEngine.Cameras
         private float NearClipPlaneCache;
         private float FarClipPlaneCache;
 
-        public bool DynamicClipPlanes = true;
-        public bool Controllable = true;
-
         private bool Aligned = false;
         private bool Supercruise = false;
 
@@ -67,38 +81,35 @@ namespace SpaceEngine.Cameras
 
         protected override void Init()
         {
-            NearClipPlaneCache = CameraComponent.nearClipPlane;
-            FarClipPlaneCache = CameraComponent.farClipPlane;
+            NearClipPlaneCache = NearClipPlane;
+            FarClipPlaneCache = FarClipPlane;
 
             Rotation = new Vector3(transform.eulerAngles.x, transform.eulerAngles.y, 0); // NOTE : Prevent crazy rotation on start...
 
             UpdateDistances();
             UpdateClipPlanes();
+
+            MainRenderer.Instance.ComposeOutputRender();
         }
 
-        protected override void FixedUpdate()
+        protected override void Update()
         {
-            base.FixedUpdate();
-
-            UpdateDistances();
-            UpdateClipPlanes();
+            base.Update();
 
             if (Controllable)
             {
-                Supercruise = !Aligned && Input.GetKey(KeyCode.F);
+                Supercruise = !Aligned && Input.GetKey(KeyCode.T);
 
                 if (Input.GetMouseButton(0) && !MouseOverUI)
                 {
-                    Rotation.z = 0;
-
                     RayScreen = CameraComponent.ScreenPointToRay(Input.mousePosition);
 
-                    TargetRotation = Quaternion.LookRotation((RayScreen.origin + RayScreen.direction * 10.0f) - transform.position, transform.up);
+                    var gravityVector = (RayScreen.origin + RayScreen.direction * 10.0f) - transform.position;
 
-                    transform.rotation = Quaternion.Slerp(transform.rotation, TargetRotation, Time.fixedDeltaTime * RotationSpeed);
+                    TargetRotation = Quaternion.LookRotation(gravityVector, transform.up);
+                    Rotation.z = 0;
 
-                    if (!Aligned)
-                        transform.Rotate(new Vector3(0.0f, 0.0f, Rotation.z));
+                    RotateSlerp(Time.deltaTime * RotationSpeed);
                 }
                 else if (Input.GetMouseButton(1) && !MouseOverUI)
                 {
@@ -106,48 +117,48 @@ namespace SpaceEngine.Cameras
                 }
                 else
                 {
-                    if (Input.GetKey(KeyCode.E))
-                    {
-                        Rotation.z -= 1.0f * Time.deltaTime;
-                    }
-                    else if (Input.GetKey(KeyCode.Q))
-                    {
-                        Rotation.z += 1.0f * Time.deltaTime;
-                    }
-                    else
-                    {
-                        Rotation.z = Mathf.Lerp(Rotation.z, 0, Time.deltaTime * 2.0f);
-                    }
-
-                    Rotation.z = Mathf.Clamp(Rotation.z, -100.0f, 100.0f);
-
                     if (!Aligned)
+                    {
+                        if (Input.GetKey(KeyCode.E))
+                        {
+                            Rotation.z -= 0.20f * Time.deltaTime;
+                        }
+                        else if (Input.GetKey(KeyCode.Q))
+                        {
+                            Rotation.z += 0.20f * Time.deltaTime;
+                        }
+                        else
+                        {
+                            Rotation.z = Mathf.Lerp(Rotation.z, 0, Time.deltaTime * 1.25f);
+                        }
+
+                        Rotation.z = Mathf.Clamp(Rotation.z, -100.0f, 100.0f);
+
                         transform.Rotate(new Vector3(0, 0, Rotation.z));
-                }
 
-                if (Body.GetBodyDeformationType() == BodyDeformationType.Spherical)
-                {
-                    if (DistanceToCore < DistanceToAlign)
-                    {
-                        Aligned = true;
+                        if (Input.GetKey(KeyCode.G))
+                        {
+                            var gravityVector = (Body != null ? Body.Origin : Vector3.zero) - transform.position;
 
-                        var gravityVector = Body.transform.position - transform.position;
+                            TargetRotation = Quaternion.LookRotation(gravityVector, transform.up);
 
-                        TargetRotation = Quaternion.LookRotation(transform.forward, -gravityVector);
-
-                        transform.rotation = Quaternion.Slerp(transform.rotation, TargetRotation, Time.fixedDeltaTime * RotationSpeed * 3f);
-                    }
-                    else
-                    {
-                        Aligned = false;
+                            RotateSlerp(Time.deltaTime * RotationSpeed * 1.57f);
+                        }
                     }
                 }
-                else
+
+                // NOTE : Body shape dependent...
+                if (Aligned)
                 {
-                    Aligned = false;
+                    var gravityVector = (Body != null ? Body.Origin : Vector3.zero) - transform.position;
+
+                    TargetRotation = Quaternion.LookRotation(transform.forward, -gravityVector);
+
+                    RotateSlerp(Time.deltaTime * RotationSpeed * 3.0f);
                 }
 
                 Velocity.z = Input.GetAxis("Vertical");
+                Velocity.y = Input.GetAxis("Diagonal");
                 Velocity.x = Input.GetAxis("Horizontal");
 
                 CurrentSpeed = Speed;
@@ -161,31 +172,37 @@ namespace SpaceEngine.Cameras
                 if (Input.GetKey(KeyCode.LeftAlt))
                     CurrentSpeed = Speed / 10f;
 
-                Speed += Mathf.RoundToInt(Input.GetAxis("Mouse ScrollWheel") * 100.0f);
-                Speed = Mathf.Clamp(Speed, 1.0f, 100000000.0f);
+                if (!MouseOverUI)
+                {
+                    Speed += Mathf.RoundToInt(Input.GetAxis("Mouse ScrollWheel") * 100.0f);
+                    Speed = Mathf.Clamp(Speed, 1.0f, 100000000.0f);
+                }
 
                 if (Supercruise) CurrentSpeed *= 1000.0f;
 
                 transform.Translate(Velocity * CurrentSpeed);
             }
+        }
 
+        protected override void FixedUpdate()
+        {
+            base.FixedUpdate();
+
+            UpdateDistances();
+            UpdateClipPlanes();
+            UpdatePseudoCollision();
+        }
+
+        private void UpdatePseudoCollision()
+        {
             if (Body != null)
             {
                 var worldPosition = (Vector3d)(transform.position - Body.Origin);
 
-                if (Body.GetBodyDeformationType() == BodyDeformationType.Spherical)
+                // NOTE : Body shape dependent...
+                if (worldPosition.Magnitude() < Body.Size + Body.SizeOffset + Body.HeightZ)
                 {
-                    if (worldPosition.Magnitude() < Body.Size + 10.0 + Body.HeightZ)
-                    {
-                        worldPosition = worldPosition.Normalized(Body.Size + 10.0 + Body.HeightZ);
-                    }
-                }
-                else
-                {
-                    if (worldPosition.z < 10.0 + Body.HeightZ)
-                    {
-                        worldPosition.z = 10.0 + Body.HeightZ;
-                    }
+                    worldPosition = worldPosition.Normalized(Body.Size + Body.SizeOffset + Body.HeightZ);
                 }
 
                 transform.position = worldPosition + (Vector3d)Body.Origin;
@@ -197,51 +214,62 @@ namespace SpaceEngine.Cameras
             if (Body != null)
             {
                 DistanceToAlign = Body.Size * 1.025f;
-                DistanceToCore = Vector3.Distance(transform.position, Body.transform.position);
+                DistanceToCore = Vector3.Distance(transform.position, Body.Origin);
             }
+            else
+            {
+                DistanceToAlign = 0.0f;
+                DistanceToCore = Vector3.Distance(transform.position, Vector3.zero);
+            }
+
+            Aligned = DistanceToCore < DistanceToAlign;
+        }
+
+        private float CalculateNearClipPlane(float h)
+        {
+            return Mathf.Clamp(0.1f * h, 0.03f, 1000.0f);
+        }
+
+        private float CalculateFarClipPlane(float h)
+        {
+            return Mathf.Clamp(1e6f * h, 1000.0f, 1e12f);
         }
 
         private void UpdateClipPlanes()
         {
-            if (DynamicClipPlanes)
+            // NOTE : Body's shape dependent...
+            var h = Body != null ? (DistanceToCore - Body.Size - (float)Body.HeightZ) : 1.0f;
+
+            if (h < 1.0f) { h = 1.0f; }
+
+            var calculatedNearClipPlane = Body != null ? CalculateNearClipPlane(h) : NearClipPlaneCache;
+            var calculatedFarClipPlane = Body != null ? CalculateFarClipPlane(h) : FarClipPlaneCache;
+
+            switch (ClipPlanesControlType)
             {
-                if (Body != null)
+                case ClipPlanesControl.None:
                 {
-                    if (Body.GetBodyDeformationType() == BodyDeformationType.Spherical)
-                    {
-                        var h = (DistanceToCore - Body.Size - (float)Body.HeightZ);
-
-                        // TODO : Take ocean in to account...
-                        //if (Body.Ocean != null && Body.OceanEnabled) h = h - Body.Ocean.OceanLevel;
-
-                        if (h < 1.0f) { h = 1.0f; }
-
-                        CameraComponent.nearClipPlane = Mathf.Clamp(0.1f * h, 0.03f, 1000.0f);
-                        CameraComponent.farClipPlane = Mathf.Clamp(1e6f * h, 1000.0f, 1e12f);
-                    }
-                    else
-                    {
-                        var h = (transform.position.z - (float)Body.HeightZ);
-
-                        // TODO : Take ocean in to account...
-                        //if (Body.Ocean != null && Body.OceanEnabled) h = h - Body.Ocean.OceanLevel;
-
-                        if (h < 1.0f) { h = 1.0f; }
-
-                        CameraComponent.nearClipPlane = Mathf.Clamp(0.1f * h, 0.03f, 1000.0f);
-                        CameraComponent.farClipPlane = Mathf.Clamp(1e6f * h, 1000.0f, 1e12f);
-                    }
-                }
-                else
+                    // NOTE : What?!
+                } break;
+                case ClipPlanesControl.Constant:
                 {
-                    CameraComponent.nearClipPlane = NearClipPlaneCache;
-                    CameraComponent.farClipPlane = FarClipPlaneCache;
-                }
-            }
-            else
-            {
-                CameraComponent.nearClipPlane = NearClipPlaneCache;
-                CameraComponent.farClipPlane = FarClipPlaneCache;
+                    NearClipPlane = NearClipPlaneCache;
+                    FarClipPlane = FarClipPlaneCache;
+                } break;
+                case ClipPlanesControl.NearFar:
+                {
+                    NearClipPlane = calculatedNearClipPlane;
+                    FarClipPlane = calculatedFarClipPlane;
+                } break;
+                case ClipPlanesControl.Near:
+                {
+                    NearClipPlane = calculatedNearClipPlane;
+                } break;
+                case ClipPlanesControl.Far:
+                {
+                    FarClipPlane = calculatedFarClipPlane;
+                } break;
+                default: { throw new InvalidEnumArgumentException(); }
             }
         }
 
@@ -251,8 +279,26 @@ namespace SpaceEngine.Cameras
             CameraToWorldMatrix = CameraComponent.GetCameraToWorld();
             CameraToScreenMatrix = CameraComponent.GetCameraToScreen();
             ScreenToCameraMatrix = CameraComponent.GetScreenToCamera();
+        }
 
+        public override void UpdateVectors()
+        {
             WorldCameraPosition = transform.position;
+        }
+
+        private void RotateSlerp(float speed)
+        {
+            RotateSlerp(transform.rotation, TargetRotation, speed);
+        }
+
+        private void RotateSlerp(Quaternion targetRotation, float speed)
+        {
+            RotateSlerp(transform.rotation, targetRotation, speed);
+        }
+
+        private void RotateSlerp(Quaternion currentRotation, Quaternion targetRotation, float speed)
+        {
+            transform.rotation = Quaternion.Slerp(currentRotation, targetRotation, speed);
         }
 
         private void RotateAround(bool staticRotation = false)
@@ -288,11 +334,11 @@ namespace SpaceEngine.Cameras
         {
             if (Body != null)
             {
-                RotateAroundOrigin(rotationVector, Body.Origin);
+                RotateAroundOrigin(rotationVector, Body.Origin, RotationSpeed);
             }
             else
             {
-                RotateAroundOrigin(rotationVector, Vector3.zero);
+                RotateAroundOrigin(rotationVector, Vector3.zero, RotationSpeed);
             }
         }
 
@@ -300,27 +346,27 @@ namespace SpaceEngine.Cameras
         {
             if (Body != null)
             {
-                RotateAroundOrigin(rotationVector, distanceVector, Body.Origin);
+                RotateAroundOrigin(rotationVector, distanceVector, Body.Origin, RotationSpeed);
             }
             else
             {
-                RotateAroundOrigin(rotationVector, distanceVector, Vector3.zero);
+                RotateAroundOrigin(rotationVector, distanceVector, Vector3.zero, RotationSpeed);
             }
         }
 
-        private void RotateAroundOrigin(Vector3 rotationVector, Vector3 origin)
+        private void RotateAroundOrigin(Vector3 rotationVector, Vector3 origin, float rotationSpeed)
         {
-            transform.RotateAround(origin, Vector3.up, rotationVector.x * (Time.fixedDeltaTime * RotationSpeed) * 10.0f);
-            transform.RotateAround(origin, Vector3.up, rotationVector.y * (Time.fixedDeltaTime * RotationSpeed) * 10.0f);
+            transform.RotateAround(origin, Vector3.up, rotationVector.x * (Time.deltaTime * rotationSpeed) * 10.0f);
+            transform.RotateAround(origin, Vector3.up, rotationVector.y * (Time.deltaTime * rotationSpeed) * 10.0f);
         }
 
-        private void RotateAroundOrigin(Vector3 rotationVector, Vector3 distanceVector, Vector3 origin)
+        private void RotateAroundOrigin(Vector3 rotationVector, Vector3 distanceVector, Vector3 origin, float rotationSpeed)
         {
             var currentRotation = Quaternion.Euler(rotationVector + TargetRotation.eulerAngles);
             var currentPosition = currentRotation * distanceVector + origin;
 
-            transform.rotation = Quaternion.Slerp(transform.rotation, currentRotation, (Time.fixedDeltaTime * RotationSpeed) * 10.0f);
-            transform.position = Vector3.Slerp(transform.position, currentPosition, (Time.deltaTime * RotationSpeed) * 5.0f);
+            transform.rotation = Quaternion.Slerp(transform.rotation, currentRotation, (Time.deltaTime * rotationSpeed) * 10.0f);
+            transform.position = Vector3.Slerp(transform.position, currentPosition, (Time.deltaTime * rotationSpeed) * 5.0f);
         }
     }
 }

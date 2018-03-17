@@ -1,0 +1,175 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!200 &20000000
+ShaderVariantCollection:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_Name: TerrainCollection
+  m_Shaders:
+    data:
+      first: {fileID: 4800000, guid: 9fbb9ce0af9a53e4f8d563b22096cea7, type: 3}
+      second:
+        variants:
+        - keywords: 
+          passType: 10
+        - keywords: ATMOSPHERE_ON ECLIPSES_ON OCEAN_ON SHADOW_1 SHINE_ON
+          passType: 10
+        - keywords: ATMOSPHERE_ON ECLIPSES_OFF OCEAN_ON SHADOW_1 SHINE_ON
+          passType: 10
+        - keywords: ATMOSPHERE_ON ECLIPSES_ON OCEAN_ON SHADOW_1 SHINE_OFF
+          passType: 10
+        - keywords: ATMOSPHERE_ON ECLIPSES_OFF OCEAN_ON SHADOW_1 SHINE_OFF
+          passType: 10
+        - keywords: ATMOSPHERE_ON ECLIPSES_ON OCEAN_ON SHADOW_2 SHINE_ON
+          passType: 10
+        - keywords: ATMOSPHERE_ON ECLIPSES_OFF OCEAN_ON SHADOW_2 SHINE_ON
+          passType: 10
+        - keywords: ATMOSPHERE_ON ECLIPSES_ON OCEAN_ON SHADOW_2 SHINE_OFF
+          passType: 10
+        - keywords: ATMOSPHERE_ON ECLIPSES_OFF OCEAN_ON SHADOW_2 SHINE_OFF
+          passType: 10
+        - keywords: ATMOSPHERE_ON ECLIPSES_ON OCEAN_ON SHADOW_3 SHINE_ON
+          passType: 10
+        - keywords: ATMOSPHERE_ON ECLIPSES_OFF OCEAN_ON SHADOW_3 SHINE_ON
+          passType: 10
+        - keywords: ATMOSPHERE_ON ECLIPSES_ON OCEAN_ON SHADOW_3 SHINE_OFF
+          passType: 10
+        - keywords: ATMOSPHERE_ON ECLIPSES_OFF OCEAN_ON SHADOW_3 SHINE_OFF
+          passType: 10
+        - keywords: ATMOSPHERE_ON ECLIPSES_ON OCEAN_ON SHADOW_4 SHINE_ON
+          passType: 10
+        - keywords: ATMOSPHERE_ON ECLIPSES_OFF OCEAN_ON SHADOW_4 SHINE_ON
+          passType: 10
+        - keywords: ATMOSPHERE_ON ECLIPSES_ON OCEAN_ON SHADOW_4 SHINE_OFF
+          passType: 10
+        - keywords: ATMOSPHERE_ON ECLIPSES_OFF OCEAN_ON SHADOW_4 SHINE_OFF
+          passType: 10
+        - keywords: ATMOSPHERE_ON ECLIPSES_ON OCEAN_ON SHADOW_0 SHINE_ON
+          passType: 10
+        - keywords: ATMOSPHERE_ON ECLIPSES_OFF OCEAN_ON SHADOW_0 SHINE_ON
+          passType: 10
+        - keywords: ATMOSPHERE_ON ECLIPSES_ON OCEAN_ON SHADOW_0 SHINE_OFF
+          passType: 10
+        - keywords: ATMOSPHERE_ON ECLIPSES_OFF OCEAN_ON SHADOW_0 SHINE_OFF
+          passType: 10
+        - keywords: ATMOSPHERE_OFF ECLIPSES_ON OCEAN_ON SHADOW_1 SHINE_ON
+          passType: 10
+        - keywords: ATMOSPHERE_OFF ECLIPSES_OFF OCEAN_ON SHADOW_1 SHINE_ON
+          passType: 10
+        - keywords: ATMOSPHERE_OFF ECLIPSES_ON OCEAN_ON SHADOW_1 SHINE_OFF
+          passType: 10
+        - keywords: ATMOSPHERE_OFF ECLIPSES_OFF OCEAN_ON SHADOW_1 SHINE_OFF
+          passType: 10
+        - keywords: ATMOSPHERE_OFF ECLIPSES_ON OCEAN_ON SHADOW_2 SHINE_ON
+          passType: 10
+        - keywords: ATMOSPHERE_OFF ECLIPSES_OFF OCEAN_ON SHADOW_2 SHINE_ON
+          passType: 10
+        - keywords: ATMOSPHERE_OFF ECLIPSES_ON OCEAN_ON SHADOW_2 SHINE_OFF
+          passType: 10
+        - keywords: ATMOSPHERE_OFF ECLIPSES_OFF OCEAN_ON SHADOW_2 SHINE_OFF
+          passType: 10
+        - keywords: ATMOSPHERE_OFF ECLIPSES_ON OCEAN_ON SHADOW_3 SHINE_ON
+          passType: 10
+        - keywords: ATMOSPHERE_OFF ECLIPSES_OFF OCEAN_ON SHADOW_3 SHINE_ON
+          passType: 10
+        - keywords: ATMOSPHERE_OFF ECLIPSES_ON OCEAN_ON SHADOW_3 SHINE_OFF
+          passType: 10
+        - keywords: ATMOSPHERE_OFF ECLIPSES_OFF OCEAN_ON SHADOW_3 SHINE_OFF
+          passType: 10
+        - keywords: ATMOSPHERE_OFF ECLIPSES_ON OCEAN_ON SHADOW_4 SHINE_ON
+          passType: 10
+        - keywords: ATMOSPHERE_OFF ECLIPSES_OFF OCEAN_ON SHADOW_4 SHINE_ON
+          passType: 10
+        - keywords: ATMOSPHERE_OFF ECLIPSES_ON OCEAN_ON SHADOW_4 SHINE_OFF
+          passType: 10
+        - keywords: ATMOSPHERE_OFF ECLIPSES_OFF OCEAN_ON SHADOW_4 SHINE_OFF
+          passType: 10
+        - keywords: ATMOSPHERE_OFF ECLIPSES_ON OCEAN_ON SHADOW_0 SHINE_ON
+          passType: 10
+        - keywords: ATMOSPHERE_OFF ECLIPSES_OFF OCEAN_ON SHADOW_0 SHINE_ON
+          passType: 10
+        - keywords: ATMOSPHERE_OFF ECLIPSES_ON OCEAN_ON SHADOW_0 SHINE_OFF
+          passType: 10
+        - keywords: ATMOSPHERE_OFF ECLIPSES_OFF OCEAN_ON SHADOW_0 SHINE_OFF
+          passType: 10
+        - keywords: ATMOSPHERE_ON ECLIPSES_ON OCEAN_OFF SHADOW_1 SHINE_ON
+          passType: 10
+        - keywords: ATMOSPHERE_ON ECLIPSES_OFF OCEAN_OFF SHADOW_1 SHINE_ON
+          passType: 10
+        - keywords: ATMOSPHERE_ON ECLIPSES_ON OCEAN_OFF SHADOW_1 SHINE_OFF
+          passType: 10
+        - keywords: ATMOSPHERE_ON ECLIPSES_OFF OCEAN_OFF SHADOW_1 SHINE_OFF
+          passType: 10
+        - keywords: ATMOSPHERE_ON ECLIPSES_ON OCEAN_OFF SHADOW_2 SHINE_ON
+          passType: 10
+        - keywords: ATMOSPHERE_ON ECLIPSES_OFF OCEAN_OFF SHADOW_2 SHINE_ON
+          passType: 10
+        - keywords: ATMOSPHERE_ON ECLIPSES_ON OCEAN_OFF SHADOW_2 SHINE_OFF
+          passType: 10
+        - keywords: ATMOSPHERE_ON ECLIPSES_OFF OCEAN_OFF SHADOW_2 SHINE_OFF
+          passType: 10
+        - keywords: ATMOSPHERE_ON ECLIPSES_ON OCEAN_OFF SHADOW_3 SHINE_ON
+          passType: 10
+        - keywords: ATMOSPHERE_ON ECLIPSES_OFF OCEAN_OFF SHADOW_3 SHINE_ON
+          passType: 10
+        - keywords: ATMOSPHERE_ON ECLIPSES_ON OCEAN_OFF SHADOW_3 SHINE_OFF
+          passType: 10
+        - keywords: ATMOSPHERE_ON ECLIPSES_OFF OCEAN_OFF SHADOW_3 SHINE_OFF
+          passType: 10
+        - keywords: ATMOSPHERE_ON ECLIPSES_ON OCEAN_OFF SHADOW_4 SHINE_ON
+          passType: 10
+        - keywords: ATMOSPHERE_ON ECLIPSES_OFF OCEAN_OFF SHADOW_4 SHINE_ON
+          passType: 10
+        - keywords: ATMOSPHERE_ON ECLIPSES_ON OCEAN_OFF SHADOW_4 SHINE_OFF
+          passType: 10
+        - keywords: ATMOSPHERE_ON ECLIPSES_OFF OCEAN_OFF SHADOW_4 SHINE_OFF
+          passType: 10
+        - keywords: ATMOSPHERE_ON ECLIPSES_ON OCEAN_OFF SHADOW_0 SHINE_ON
+          passType: 10
+        - keywords: ATMOSPHERE_ON ECLIPSES_OFF OCEAN_OFF SHADOW_0 SHINE_ON
+          passType: 10
+        - keywords: ATMOSPHERE_ON ECLIPSES_ON OCEAN_OFF SHADOW_0 SHINE_OFF
+          passType: 10
+        - keywords: ATMOSPHERE_ON ECLIPSES_OFF OCEAN_OFF SHADOW_0 SHINE_OFF
+          passType: 10
+        - keywords: ATMOSPHERE_OFF ECLIPSES_ON OCEAN_OFF SHADOW_1 SHINE_ON
+          passType: 10
+        - keywords: ATMOSPHERE_OFF ECLIPSES_OFF OCEAN_OFF SHADOW_1 SHINE_ON
+          passType: 10
+        - keywords: ATMOSPHERE_OFF ECLIPSES_ON OCEAN_OFF SHADOW_1 SHINE_OFF
+          passType: 10
+        - keywords: ATMOSPHERE_OFF ECLIPSES_OFF OCEAN_OFF SHADOW_1 SHINE_OFF
+          passType: 10
+        - keywords: ATMOSPHERE_OFF ECLIPSES_ON OCEAN_OFF SHADOW_2 SHINE_ON
+          passType: 10
+        - keywords: ATMOSPHERE_OFF ECLIPSES_OFF OCEAN_OFF SHADOW_2 SHINE_ON
+          passType: 10
+        - keywords: ATMOSPHERE_OFF ECLIPSES_ON OCEAN_OFF SHADOW_2 SHINE_OFF
+          passType: 10
+        - keywords: ATMOSPHERE_OFF ECLIPSES_OFF OCEAN_OFF SHADOW_2 SHINE_OFF
+          passType: 10
+        - keywords: ATMOSPHERE_OFF ECLIPSES_ON OCEAN_OFF SHADOW_3 SHINE_ON
+          passType: 10
+        - keywords: ATMOSPHERE_OFF ECLIPSES_OFF OCEAN_OFF SHADOW_3 SHINE_ON
+          passType: 10
+        - keywords: ATMOSPHERE_OFF ECLIPSES_ON OCEAN_OFF SHADOW_3 SHINE_OFF
+          passType: 10
+        - keywords: ATMOSPHERE_OFF ECLIPSES_OFF OCEAN_OFF SHADOW_3 SHINE_OFF
+          passType: 10
+        - keywords: ATMOSPHERE_OFF ECLIPSES_ON OCEAN_OFF SHADOW_4 SHINE_ON
+          passType: 10
+        - keywords: ATMOSPHERE_OFF ECLIPSES_OFF OCEAN_OFF SHADOW_4 SHINE_ON
+          passType: 10
+        - keywords: ATMOSPHERE_OFF ECLIPSES_ON OCEAN_OFF SHADOW_4 SHINE_OFF
+          passType: 10
+        - keywords: ATMOSPHERE_OFF ECLIPSES_OFF OCEAN_OFF SHADOW_4 SHINE_OFF
+          passType: 10
+        - keywords: ATMOSPHERE_OFF ECLIPSES_ON OCEAN_OFF SHADOW_0 SHINE_ON
+          passType: 10
+        - keywords: ATMOSPHERE_OFF ECLIPSES_OFF OCEAN_OFF SHADOW_0 SHINE_ON
+          passType: 10
+        - keywords: ATMOSPHERE_OFF ECLIPSES_ON OCEAN_OFF SHADOW_0 SHINE_OFF
+          passType: 10
+        - keywords: ATMOSPHERE_OFF ECLIPSES_OFF OCEAN_OFF SHADOW_0 SHINE_OFF
+          passType: 10

@@ -1,14 +1,14 @@
 ﻿#region License
 // Procedural planet generator.
 //  
-// Copyright (C) 2015-2017 Denis Ovchinnikov [zameran] 
+// Copyright (C) 2015-2018 Denis Ovchinnikov [zameran] 
 // All rights reserved.
 // 
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions
 // are met:
 // 1. Redistributions of source code must retain the above copyright
-//     notice, this list of conditions and the following disclaimer.
+//    notice, this list of conditions and the following disclaimer.
 // 2. Redistributions in binary form must reproduce the above copyright
 //    notice, this list of conditions and the following disclaimer in the
 //    documentation and/or other materials provided with the distribution.
@@ -33,10 +33,12 @@
 // Creator: zameran
 #endregion
 
-using SpaceEngine.Pluginator.Enums;
+using SpaceEngine.Enums;
 using SpaceEngine.UI.Panels;
+
 using System;
 using System.Collections;
+
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
@@ -54,6 +56,8 @@ namespace SpaceEngine.Managers
 
         private void Awake()
         {
+            Instance = this;
+
             SceneManager.sceneLoaded += OnSceneLoaded;
         }
 
@@ -135,6 +139,7 @@ namespace SpaceEngine.Managers
         /// <param name="sceneName">Special scene.</param>
         /// <param name="sceneLoadType">Load Type.</param>
         /// <param name="loadSceneMode">Load Mode.</param>
+        /// <param name="fireEvent">Should <see cref="EventManager.BaseEvents"/> event be called during loading?</param>
         /// <returns>Returns AsyncOperation, if Load Type is Async.</returns>
         private AsyncOperation LoadSceneInternal(EntryPoint sceneName, SceneLoadType sceneLoadType, LoadSceneMode loadSceneMode, bool fireEvent = true)
         {
@@ -164,7 +169,7 @@ namespace SpaceEngine.Managers
             }
             catch (Exception ex)
             {
-                Debug.Log("[LevelManager] => LoadScene() Exception!\n" + ex.Message);
+                Debug.LogError("LevelManager.LoadScene: Exception!\n" + ex.Message);
             }
 
             return null;

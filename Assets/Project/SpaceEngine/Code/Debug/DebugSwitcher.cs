@@ -1,14 +1,14 @@
 ﻿#region License
 // Procedural planet generator.
 //  
-// Copyright (C) 2015-2017 Denis Ovchinnikov [zameran] 
+// Copyright (C) 2015-2018 Denis Ovchinnikov [zameran] 
 // All rights reserved.
 // 
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions
 // are met:
 // 1. Redistributions of source code must retain the above copyright
-//     notice, this list of conditions and the following disclaimer.
+//    notice, this list of conditions and the following disclaimer.
 // 2. Redistributions in binary form must reproduce the above copyright
 //    notice, this list of conditions and the following disclaimer in the
 //    documentation and/or other materials provided with the distribution.
@@ -42,7 +42,11 @@ namespace SpaceEngine.Debugging
 {
     public abstract class DebugSwitcher<T> : MonoSingleton<DebugSwitcher<T>>, IDebugSwitcher where T : MonoBehaviour
     {
-        public List<T> DebugComponents = new List<T>(255);
+        public List<T> SwitchableComponents = new List<T>(255);
+        public List<T> DrawAbleComponents = new List<T>(255);
+        public List<T> ClickableThroughComponents = new List<T>(255);
+
+        public bool DisableAllOnStart = true;
 
         private int State;
 
@@ -55,28 +59,44 @@ namespace SpaceEngine.Debugging
 
         protected void Start()
         {
-            if (DebugComponents == null || DebugComponents.Count == 0)
+            if (SwitchableComponents == null || SwitchableComponents.Count == 0)
             {
-                DebugComponents = GetComponents<T>().ToList();
+                SwitchableComponents = GetComponents<T>().ToList();
             }
 
-            ToogleAll(DebugComponents, false);
+            if (DrawAbleComponents == null || DrawAbleComponents.Count == 0)
+            {
+                DrawAbleComponents = GetComponents<T>().ToList();
+            }
+
+            if (ClickableThroughComponents == null || ClickableThroughComponents.Count == 0)
+            {
+                ClickableThroughComponents = GetComponents<T>().ToList();
+            }
+
+            // NOTE : If GUI element implements IDebugAlwaysVisible interface - remove it from switchables...
+            SwitchableComponents.RemoveAll(x => typeof(IDebugAlwaysVisible).IsInstanceOfType(x));
+
+            // NOTE : If GUI element implements IDebugClickableThrough interface - leave it here, in special list... 
+            ClickableThroughComponents.RemoveAll(x => !typeof(IDebugClickableThrough).IsInstanceOfType(x));
+
+            if (DisableAllOnStart) ToogleAll(SwitchableComponents, false);
         }
 
-        protected void Update()
+        protected virtual void Update()
         {
             if (Input.GetKeyDown(SwitchKey))
             {
-                if (State == DebugComponents.Count)
+                if (State == SwitchableComponents.Count)
                 {
                     State = 0;
-                    ToogleAll(DebugComponents, false);
+                    ToogleAll(SwitchableComponents, false);
                     return;
                 }
 
-                ToogleAll(DebugComponents, false);
+                ToogleAll(SwitchableComponents, false);
                 State++;
-                ToogleAt(DebugComponents, true, State);
+                ToogleAt(SwitchableComponents, true, State);
             }
         }
 
@@ -94,7 +114,7 @@ namespace SpaceEngine.Debugging
 
         public void ToogleAll(List<T> components, bool state)
         {
-            for (byte i = 0; i < components.Count; i++)
+            for (var i = 0; i < components.Count; i++)
             {
                 components[i].enabled = state;
             }

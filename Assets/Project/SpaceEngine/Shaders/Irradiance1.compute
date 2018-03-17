@@ -1,17 +1,18 @@
 ﻿/*
  * Author: Eric Bruneton
  * Modified and ported to Unity by Justin Hawkins 2014
- * Modified by Denis Ovchinnikov 2015-2017
+ * Modified by Denis Ovchinnikov 2015-2018
  */
  
 // computes ground irradiance due to direct sunlight E[L0] (line 2 in algorithm 4.1)
+
 #pragma kernel CSMain
 
-#include "Assets/Project/SpaceEngine/Shaders/AtmospherePreprocess.cginc"
+#include "SpaceAtmospherePreprocess.cginc"
 
 RWTexture2D<float4> deltaEWrite;
 
-[numthreads(NUM_THREADS,NUM_THREADS,1)]
+[numthreads(NUM_THREADS, NUM_THREADS, 1)]
 void CSMain (uint3 id : SV_DispatchThreadID)
 {
     float r, muS; 

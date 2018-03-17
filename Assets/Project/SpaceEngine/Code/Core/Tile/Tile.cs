@@ -8,33 +8,45 @@ using UnityEngine;
 namespace SpaceEngine.Core.Tile
 {
     /// <summary>
-    /// A tile described by its level,tx,ty coordinates. 
-    /// A Tile describes where the tile is stored in the TileStorage, how its data can be produced, and how many users currently use it.
-    /// Contains the keys (Id, Tid) commonly used to store the tiles in data structures like dictionaries
+    /// A tile described by its level and tx, ty coordinates. 
+    /// A <see cref="Tile"/> describes where the tile is stored in the <see cref="TileStorage"/>, 
+    /// how its data can be produced, and how many users currently use it.
+    /// Contains the keys (<see cref="Id"/>, <see cref="TId"/>) commonly used to store the tiles in data structures like dictionaries.
     /// </summary>
     public class Tile
     {
         /// <summary>
-        /// A tile identifier for a given <see cref="Producer.TileProducer"/>. Contains the tile's <see cref="Tile.Level"/>, <see cref="Tile.Tx"/>, <see cref="Ty"/>.
+        /// A tile identifier for a given <see cref="Producer.TileProducer"/>. 
+        /// Contains the tile's <see cref="Tile.Level"/>, <see cref="Tile.Tx"/>, <see cref="Tile.Ty"/>.
         /// </summary>
         public class Id
         {
-            public int Level { get; set; }
-            public int Tx { get; set; }
-            public int Ty { get; set; }
+            public int Level { get; private set; }
+            public int Tx { get; private set; }
+            public int Ty { get; private set; }
+
+            public Id(Id from)
+            {
+                Level = from.Level;
+                Tx = from.Tx;
+                Ty = from.Ty;
+            }
 
             public Id(int level, int tx, int ty)
             {
-                this.Level = level;
-                this.Tx = tx;
-                this.Ty = ty;
+                Set(level, tx, ty);
             }
 
             public Id(int tx, int ty)
             {
-                this.Level = 0;
-                this.Tx = tx;
-                this.Ty = ty;
+                Set(0, tx, ty);
+            }
+
+            public void Set(int level, int tx, int ty)
+            {
+                Level = level;
+                Tx = tx;
+                Ty = ty;
             }
 
             public int Compare(Id id)
@@ -49,17 +61,24 @@ namespace SpaceEngine.Core.Tile
 
             public override int GetHashCode()
             {
-                return (Level ^ Tx ^ Ty).GetHashCode();
+                var hashcode = 23;
+
+                hashcode = (hashcode * 37) + Level;
+                hashcode = (hashcode * 37) + Tx;
+                hashcode = (hashcode * 37) + Ty;
+
+                return hashcode;
             }
 
             public override string ToString()
             {
-                return Level.ToString() + "," + Tx.ToString() + "," + Ty.ToString();
+                return string.Format("({0}, {1}, {2})", Level, Tx, Ty);
             }
         }
 
         /// <summary>
-        /// A tile identifier. Contains a <see cref="Producer.TileProducer"/>'s id and <see cref="Id"/>.
+        /// A tile identifier. 
+        /// Contains a <see cref="Producer.TileProducer"/>'s id and <see cref="Id"/>.
         /// </summary>
         public class TId
         {
@@ -67,11 +86,25 @@ namespace SpaceEngine.Core.Tile
 
             public Id TileId { get; set; }
 
+            public TId(TId from)
+            {
+                ProducerId = from.ProducerId;
+
+                TileId = new Id(from.TileId);
+            }
+
             public TId(int producerId, int level, int tx, int ty)
             {
-                this.ProducerId = producerId;
+                ProducerId = producerId;
 
-                this.TileId = new Id(level, tx, ty);
+                TileId = new Id(level, tx, ty);
+            }
+
+            public void Set(int producerId, int level, int tx, int ty)
+            {
+                ProducerId = producerId;
+
+                TileId.Set(level, tx, ty);
             }
 
             public bool Equals(TId id)
@@ -81,17 +114,23 @@ namespace SpaceEngine.Core.Tile
 
             public override int GetHashCode()
             {
-                return (ProducerId ^ TileId.GetHashCode()).GetHashCode();
+                var hashcode = 23;
+
+                hashcode = (hashcode * 37) + ProducerId;
+                hashcode = (hashcode * 37) + TileId.GetHashCode();
+
+                return hashcode;
             }
 
             public override string ToString()
             {
-                return ProducerId.ToString() + "," + TileId.ToString();
+                return string.Format("({0}, {1})", ProducerId, TileId);
             }
         }
 
         /// <summary>
-        /// A <see cref="Id"/> is sorted based as it's level. Sorts from lowest level to highest.
+        /// A <see cref="Id"/> is sorted based as it's level. 
+        /// Sorts from lowest level to highest.
         /// </summary>
         public class ComparerID : IComparer<Id>
         {
@@ -102,7 +141,7 @@ namespace SpaceEngine.Core.Tile
         }
 
         /// <summary>
-        /// A A <see cref="Id"/> is compared based on it's <see cref="Tile.Level"/>, <see cref="Tile.Tx"/>, <see cref="Ty"/>.
+        /// A A <see cref="Id"/> is compared based on it's <see cref="Tile.Level"/>, <see cref="Tile.Tx"/>, <see cref="Tile.Ty"/>.
         /// </summary>
         public class EqualityComparerID : IEqualityComparer<Id>
         {
@@ -118,7 +157,7 @@ namespace SpaceEngine.Core.Tile
         }
 
         /// <summary>
-        /// A Tid is compared based on it's producer, <see cref="Tile.Level"/>, <see cref="Tile.Tx"/>, <see cref="Ty"/>.
+        /// A Tid is compared based on it's producer, <see cref="Tile.Level"/>, <see cref="Tile.Tx"/>, <see cref="Tile.Ty"/>.
         /// </summary>
         public class EqualityComparerTID : IEqualityComparer<TId>
         {
@@ -165,6 +204,10 @@ namespace SpaceEngine.Core.Tile
 
         public List<TileStorage.Slot> Slot { get { return Task.Slot; } }
 
+        public Id ID { get; private set; }
+
+        public TId TID { get; private set; }
+
         public Tile(int producerId, int level, int tx, int ty, CreateTileTask task)
         {
             ProducerId = producerId;
@@ -174,9 +217,12 @@ namespace SpaceEngine.Core.Tile
             Task = task;
             Users = 0;
 
+            ID = GetId(level, tx, ty);
+            TID = GetTId(producerId, ID);
+
             if (Task == null)
             {
-                Debug.Log("Task can't be null!");
+                Debug.Log("Tile.ctor: Task can't be null!");
             }
         }
 
@@ -184,7 +230,7 @@ namespace SpaceEngine.Core.Tile
         {
             if (i >= Task.Slot.Count)
             {
-                Debug.Log(string.Format("Slot at location {0} does not exist!", i));
+                Debug.Log(string.Format("Tile: Slot at location {0} does not exist!", i));
             }
 
             return Task.Slot[i];
@@ -198,24 +244,6 @@ namespace SpaceEngine.Core.Tile
         public void DecrementUsers()
         {
             Users--;
-        }
-
-        /// <summary>
-        /// The identifier of this tile.
-        /// </summary>
-        /// <returns>Returns the identifier of this tile.</returns>
-        public Id GetId()
-        {
-            return GetId(Level, Tx, Ty);
-        }
-
-        /// <summary>
-        /// The identifier of this tile.
-        /// </summary>
-        /// <returns>Returns the identifier of this tile.</returns>
-        public TId GetTId()
-        {
-            return GetTId(ProducerId, Level, Tx, Ty);
         }
 
         /// <summary>
@@ -241,6 +269,17 @@ namespace SpaceEngine.Core.Tile
         public static TId GetTId(int producerId, int level, int tx, int ty)
         {
             return new TId(producerId, level, tx, ty);
+        }
+
+        /// <summary>
+        /// The identifier of this tile.
+        /// </summary>
+        /// <param name="producerId">The <see cref="Id"/> of the <see cref="Tile"/>'s producer.</param>
+        /// <param name="id">The identifier of this tile.</param>
+        /// <returns></returns>
+        public static TId GetTId(int producerId, Id id)
+        {
+            return new TId(producerId, id.Level, id.Tx, id.Ty);
         }
     }
 }

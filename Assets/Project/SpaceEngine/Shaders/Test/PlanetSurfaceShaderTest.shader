@@ -2,110 +2,90 @@
 {
 	Properties 
 	{
-		_Color("Color", Color) = (1,1,1,1)
 		_MainTex("Albedo (RGB)", 2D) = "white" {}
-		_Glossiness("Smoothness", Range(0,1)) = 0.5
-		_Metallic("Metallic", Range(0,1)) = 0.0
 	}
 
 	SubShader 
 	{
-		Pass 
+		Tags 
 		{
-			Name "ShadowCaster"
-			Tags { "LightMode" = "ShadowCaster" }
-
-			ZWrite On ZTest LEqual
-
-			CGPROGRAM
-			#pragma target 3.0
-
-			#pragma shader_feature _ _ALPHATEST_ON _ALPHABLEND_ON _ALPHAPREMULTIPLY_ON
-			#pragma multi_compile_shadowcaster
-
-			#include "UnityStandardShadow.cginc"
-
-			#pragma vertex vertShadowCasterModified
-			#pragma fragment fragShadowCasterModified
-
-			void vertShadowCasterModified(VertexInput v,
-				#ifdef UNITY_STANDARD_USE_SHADOW_OUTPUT_STRUCT
-				out VertexOutputShadowCaster o,
-				#endif
-				out float4 opos : SV_POSITION)
-			{
-				v.vertex.xyz += v.normal * 0.05f;
-
-				UNITY_SETUP_INSTANCE_ID(v);
-				TRANSFER_SHADOW_CASTER_NOPOS(o,opos)
-				#if defined(UNITY_STANDARD_USE_SHADOW_UVS)
-					o.tex = TRANSFORM_TEX(v.uv0, _MainTex);
-				#endif
-			}
-
-			half4 fragShadowCasterModified(
-				#ifdef UNITY_STANDARD_USE_SHADOW_OUTPUT_STRUCT
-				VertexOutputShadowCaster i
-				#endif
-				#ifdef UNITY_STANDARD_USE_DITHER_MASK
-				, UNITY_VPOS_TYPE vpos : VPOS
-				#endif
-				) : SV_Target
-			{
-				#if defined(UNITY_STANDARD_USE_SHADOW_UVS)
-					half alpha = tex2D(_MainTex, i.tex).a * _Color.a;
-					#if defined(_ALPHATEST_ON)
-						clip (alpha - _Cutoff);
-					#endif
-					#if defined(_ALPHABLEND_ON) || defined(_ALPHAPREMULTIPLY_ON)
-						#if defined(UNITY_STANDARD_USE_DITHER_MASK)
-							half alphaRef = tex3D(_DitherMaskLOD, float3(vpos.xy * 0.25, alpha * 0.9375)).a;
-							clip(alphaRef - 0.01);
-						#else
-							clip(alpha - _Cutoff);
-						#endif
-					#endif
-				#endif
-
-				SHADOW_CASTER_FRAGMENT(i)
-			}	
-
-			ENDCG
+			"Queue"					= "Geometry"
+			"RenderType"			= "Geometry"
+			"ForceNoShadowCasting"	= "False"
+			"IgnoreProjector"		= "True"
 		}
 
-		Tags { "RenderType" = "Opaque" }
-		LOD 200
+		Cull Back
+		ZWrite On
+		ZTest On
+		Fog { Mode Off }
 		
 		CGPROGRAM
-		#pragma surface surf Standard fullforwardshadows vertex:vert
-
-		#pragma target 3.0
+		#pragma surface surf Standard fullforwardshadows vertex:vert exclude_path:deferred exclude_path:prepass noambient novertexlights nolightmap nodynlightmap nodirlightmap nofog nometa nolppv noshadowmask
+		#pragma target 5.0
+		#pragma only_renderers d3d11 glcore
 
 		struct Input 
 		{
 			float2 uv_MainTex;
 		};
 
-		fixed4 _Color;
 		sampler2D _MainTex;
-		half _Glossiness;
-		half _Metallic;
 
-		void vert(inout appdata_full v) 
+		void vert(inout appdata_full v, out Input o) 
 		{
-			v.vertex.xyz += v.normal * 0.05f;
+			//v.vertex.xyz += v.normal * 0.05f;
+
+			o.uv_MainTex = v.texcoord;
 		}
 
 		void surf(Input IN, inout SurfaceOutputStandard o) 
 		{
-			fixed4 color = tex2D(_MainTex, IN.uv_MainTex) * _Color;
+			fixed4 color = tex2D(_MainTex, IN.uv_MainTex);
 
 			o.Albedo = color.rgb;
-			o.Metallic = _Metallic;
-			o.Smoothness = _Glossiness;
-			o.Alpha = color.a;
+			o.Metallic = 0.0;
+			o.Smoothness = 1.0;
+			o.Alpha = 1.0;
 		}
 		ENDCG
+	
+		Pass 
+		{
+			Name "ShadowCaster"
+			Tags { "LightMode" = "ShadowCaster" }
+		
+			CGPROGRAM
+			#pragma vertex vert
+			#pragma fragment frag
+
+			#pragma target 2.0
+
+			#pragma multi_compile_shadowcaster
+
+			#include "UnityCG.cginc"
+
+			struct v2f 
+			{ 
+				V2F_SHADOW_CASTER;
+			};
+
+			v2f vert(appdata_base v)
+			{
+				v2f o;
+
+				//v.vertex.xyz += v.normal * 0.05f;
+
+				TRANSFER_SHADOW_CASTER_NORMALOFFSET(o)
+
+				return o;
+			}
+
+			float4 frag(v2f i) : SV_Target
+			{
+				SHADOW_CASTER_FRAGMENT(i)
+			}
+			ENDCG
+		}
 	}
-	//FallBack "Diffuse"
 }

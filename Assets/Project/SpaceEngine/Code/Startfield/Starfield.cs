@@ -1,7 +1,7 @@
 ﻿#region License
 // Procedural planet generator.
 // 
-// Copyright (C) 2015-2017 Denis Ovchinnikov [zameran] 
+// Copyright (C) 2015-2018 Denis Ovchinnikov [zameran] 
 // All rights reserved.
 // 
 // Redistribution and use in source and binary forms, with or without
@@ -33,14 +33,17 @@
 // Creator: zameran
 #endregion
 
+using SpaceEngine.Core;
 using SpaceEngine.Core.Patterns.Strategy.Renderable;
 using SpaceEngine.Core.Patterns.Strategy.Uniformed;
+using SpaceEngine.Enums;
 
 using System;
 using System.Collections.Generic;
 using System.IO;
 
 using UnityEngine;
+using UnityEngine.Rendering;
 
 using Random = UnityEngine.Random;
 
@@ -143,14 +146,16 @@ namespace SpaceEngine.Startfield
         {
             if (StarfieldMesh == null) return;
 
-            Graphics.DrawMesh(StarfieldMesh, transform.localToWorldMatrix, StarfieldMaterial, layer, CameraHelper.Main(), 0, null, false, false);
+            var starfieldTRS = transform.localToWorldMatrix;
+
+            Graphics.DrawMesh(StarfieldMesh, starfieldTRS, StarfieldMaterial, layer, CameraHelper.Main(), 0, null, ShadowCastingMode.Off, false);
         }
 
         #endregion
 
         public void InitMesh()
         {
-            StarfieldMesh = CreateStarfieldMesh(StarsDistance);
+            StarfieldMesh = CreateStarfieldMesh();
         }
 
         public void InitMaterials()
@@ -161,7 +166,7 @@ namespace SpaceEngine.Startfield
             }
         }
 
-        private Mesh CreateStarfieldMesh(float starDistance)
+        private Mesh CreateStarfieldMesh()
         {
             const int numberOfStars = 9110;
 
@@ -195,7 +200,7 @@ namespace SpaceEngine.Startfield
                     var ci = new CombineInstance
                     {
                         mesh = MeshFactory.MakeBillboardQuad(starSize),
-                        transform = MatrixHelper.BillboardMatrix(star.Position * starDistance)
+                        transform = MatrixHelper.BillboardMatrix(star.Position * StarsDistance)
                     };
 
                     ci.mesh.colors = new Color[] { star.Color, star.Color, star.Color, star.Color };
@@ -205,8 +210,8 @@ namespace SpaceEngine.Startfield
             }
 
             var mesh = new Mesh();
-            mesh.name = string.Format("StarfieldMesh_({0})", Random.Range(float.MinValue, float.MaxValue));
             mesh.CombineMeshes(starsCIs.ToArray());
+            mesh.name = string.Format("StarfieldMesh_({0})", Random.Range(float.MinValue, float.MaxValue));
             mesh.bounds = new Bounds(Vector3.zero, new Vector3(1e8f, 1e8f, 1e8f));
             mesh.hideFlags = HideFlags.DontSave;
 

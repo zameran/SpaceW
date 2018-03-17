@@ -2,8 +2,11 @@
 
 RWTexture2D<float4> Result;
 
-[numthreads(8,8,1)]
-void CSMain (uint3 id : SV_DispatchThreadID)
+[numthreads(8, 8, 1)]
+void CSMain(uint3 groupThreadID : SV_GroupThreadID, 
+			uint3 groupID : SV_GroupID, 
+			uint3 dispatchThreadID : SV_DispatchThreadID, 
+			uint groupIndex : SV_GroupIndex)
 {
-	Result[id.xy] = float4(id.x & id.y, (id.x & 15)/15.0, (id.y & 15)/15.0, 0.0);
+	Result[dispatchThreadID.xy] = float4(dispatchThreadID.x & dispatchThreadID.y, (dispatchThreadID.x & 15) / 15.0, (dispatchThreadID.y & 15) / 15.0, 0.0);
 }

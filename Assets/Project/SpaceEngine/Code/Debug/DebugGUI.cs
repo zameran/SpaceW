@@ -1,7 +1,7 @@
 ﻿#region License
 // Procedural planet generator.
 // 
-// Copyright (C) 2015-2017 Denis Ovchinnikov [zameran] 
+// Copyright (C) 2015-2018 Denis Ovchinnikov [zameran] 
 // All rights reserved.
 // 
 // Redistribution and use in source and binary forms, with or without
@@ -48,8 +48,9 @@ namespace SpaceEngine.Debugging
 
         public Rect debugInfoBounds = new Rect(10, 10, 500, 500);
 
+        // NOTE : Use this variable for runtime 'debugInfoBounds' manipulation...
         [HideInInspector]
-        public GUIStyle BoldLabelStyle;
+        public Rect debugInfoDrawBounds = new Rect(10, 10, 500, 500);
 
         [HideInInspector]
         public Vector2 ScrollPosition = Vector2.zero;
@@ -63,6 +64,28 @@ namespace SpaceEngine.Debugging
                         return SwitcherComponent.GUISkin;
 
                 return GUI.skin;
+            }
+        }
+
+        public GUIStyle BoldLabelStyle
+        {
+            get
+            {
+                if (SwitcherComponent != null)
+                    return SwitcherComponent.BoldLabelStyle;
+
+                return null;
+            }
+        }
+
+        public GUIStyle ImageLabelStyle
+        {
+            get
+            {
+                if (SwitcherComponent != null)
+                    return SwitcherComponent.ImageLabelStyle;
+
+                return null;
             }
         }
 
@@ -82,11 +105,20 @@ namespace SpaceEngine.Debugging
             GUI.depth = -100;
 
             if (SwitcherComponent != null)
-                if (SwitcherComponent.GUISkin != null)
-                    if (GUI.skin.FindStyle("label_Bold") != null)
-                        BoldLabelStyle = GUI.skin.FindStyle("label_Bold");
-                    else if (GUI.skin.FindStyle("label") != null)
-                        BoldLabelStyle = GUI.skin.FindStyle("label");
+            {
+                if (SwitcherComponent.ShowDebugGUIBounds)
+                {
+                    var guiColor = GUI.color;
+
+                    GUI.color = Color.red;
+                    GUI.Box(debugInfoBounds, "");
+
+                    GUI.color = Color.green;
+                    GUI.Box(debugInfoDrawBounds, "");
+
+                    GUI.color = guiColor;
+                }
+            }
         }
 
         protected abstract void UI(int id);

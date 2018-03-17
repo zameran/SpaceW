@@ -1,14 +1,14 @@
 ﻿#region License
 // Procedural planet generator.
 //  
-// Copyright (C) 2015-2017 Denis Ovchinnikov [zameran] 
+// Copyright (C) 2015-2018 Denis Ovchinnikov [zameran] 
 // All rights reserved.
 // 
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions
 // are met:
 // 1. Redistributions of source code must retain the above copyright
-//     notice, this list of conditions and the following disclaimer.
+//    notice, this list of conditions and the following disclaimer.
 // 2. Redistributions in binary form must reproduce the above copyright
 //    notice, this list of conditions and the following disclaimer in the
 //    documentation and/or other materials provided with the distribution.
@@ -33,6 +33,8 @@
 // Creator: zameran
 #endregion
 
+using System.Collections.Generic;
+
 using UnityEngine;
 
 namespace SpaceEngine.Tests
@@ -43,23 +45,51 @@ namespace SpaceEngine.Tests
 
         public Mesh TestMesh;
 
+        public MaterialPropertyBlock MPB;
+
+        [Range(1, 1024)]
+        public int Count = 128;
+
+        public bool PerFrameInstancesUpdate = true;
+
+        public readonly List<Matrix4x4> TRSs = new List<Matrix4x4>();
+
+        protected void CalculateInstancesData()
+        {
+            TRSs.Clear();
+            MPB.Clear();
+
+            for (var i = 0; i < Count; i++)
+            {
+                var position = Random.insideUnitSphere * 100;
+                var rotation = Random.rotationUniform;
+
+                var r = Random.Range(0.0f, 1.0f);
+                var g = Random.Range(0.0f, 1.0f);
+                var b = Random.Range(0.0f, 1.0f);
+
+                MPB.SetColor("_Color", new Color(r, g, b));
+
+                TRSs.Add(Matrix4x4.TRS(position, rotation, Vector3.one));
+            }
+        }
+
         private void Start()
         {
-            TestMaterial.EnableKeyword("INSTANCING_ON"); // NOTE : Force it!
+            MPB = new MaterialPropertyBlock();
+
+            CalculateInstancesData();
         }
 
         private void Update()
         {
             if (TestMesh != null && TestMaterial != null)
             {
-                for (int i = 0; i < 128; i++)
+                if (PerFrameInstancesUpdate == true) CalculateInstancesData();
+
+                for (var i = 0; i < Count; i++)
                 {
-                    var position = Random.insideUnitSphere * 100;
-                    var rotation = Random.rotationUniform;
-
-                    var TRS = Matrix4x4.TRS(position, rotation, Vector3.one);
-
-                    Graphics.DrawMesh(TestMesh, TRS, TestMaterial, 0);
+                    Graphics.DrawMesh(TestMesh, TRSs[i], TestMaterial, 0, Camera.main, 0, MPB);
                 }
             }
         }

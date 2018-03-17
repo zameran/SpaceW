@@ -10,8 +10,6 @@ using System.Collections.Generic;
 
 using UnityEngine;
 
-using Random = UnityEngine.Random;
-
 namespace SpaceEngine.Core
 {
     public class OrthoProducer : TileProducer
@@ -61,26 +59,21 @@ namespace SpaceEngine.Core
         bool HSV = true;
 
         [SerializeField]
-        int Seed = 0;
-
-        [SerializeField]
         float[] NoiseAmplitudes = new float[] { 0, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255 };
 
         Uniforms uniforms;
 
-        PerlinNoiseSimple Noise;
-
-        Texture2D[] NoiseTextures;
+        PerlinNoise Noise;
 
         Texture2D ResidualTexture;
 
-        protected override void Start()
+        public override void InitNode()
         {
-            base.Start();
+            base.InitNode();
 
             if (OrthoCpuProducerGameObject != null)
             {
-                OrthoCPUProducer = OrthoCpuProducerGameObject.GetComponent<OrthoCPUProducer>();
+                if (OrthoCPUProducer == null) { OrthoCPUProducer = OrthoCpuProducerGameObject.GetComponent<OrthoCPUProducer>(); }
             }
 
             int tileSize = Cache.GetStorage(0).TileSize;
@@ -97,13 +90,18 @@ namespace SpaceEngine.Core
 
             uniforms = new Uniforms();
 
-            Noise = new PerlinNoiseSimple(Seed);
+            Noise = new PerlinNoise();
 
             ResidualTexture = new Texture2D(tileSize, tileSize, TextureFormat.ARGB32, false);
             ResidualTexture.wrapMode = TextureWrapMode.Clamp;
             ResidualTexture.filterMode = FilterMode.Point;
+        }
 
-            CreateOrthoNoise();
+        protected override void OnDestroy()
+        {
+            base.OnDestroy();
+
+            if (ResidualTexture != null) Helper.Destroy(ResidualTexture);
         }
 
         public override int GetBorder()
@@ -144,16 +142,10 @@ namespace SpaceEngine.Core
 
                 if (parentTile != null)
                     parentGpuSlot = parentTile.GetSlot(0) as GPUTileStorage.GPUSlot;
-                else
-                {
-                    throw new MissingTileException("Find parent tile failed");
-                }
+                else { throw new MissingTileException(string.Format("Find parent tile failed! {0}:{1}-{2}", level - 1, tx / 2, ty / 2)); }
             }
 
-            if (parentGpuSlot == null && level > 0)
-            {
-                throw new NullReferenceException("parentGpuSlot");
-            }
+            if (parentGpuSlot == null && level > 0) { throw new NullReferenceException("parentGpuSlot"); }
 
             UpSampleMaterial.SetVector(uniforms.tileWSD, tileWSD);
 
@@ -233,28 +225,28 @@ namespace SpaceEngine.Core
                 if (TerrainNode.Face == 1)
                 {
                     int offset = 1 << level;
-                    int bottomB = Noise.Noise2D(tx + 0.5f, ty + offset) > 0.0f ? 1 : 0;
-                    int rightB = (tx == offset - 1 ? Noise.Noise2D(ty + offset + 0.5f, offset) : Noise.Noise2D(tx + 1.0f, ty + offset + 0.5f)) > 0.0f ? 2 : 0;
-                    int topB = (ty == offset - 1 ? Noise.Noise2D((3.0f * offset - 1.0f - tx) + 0.5f, offset) : Noise.Noise2D(tx + 0.5f, ty + offset + 1.0f)) > 0.0f ? 4 : 0;
-                    int leftB = (tx == 0 ? Noise.Noise2D((4.0f * offset - 1.0f - ty) + 0.5f, offset) : Noise.Noise2D(tx, ty + offset + 0.5f)) > 0.0f ? 8 : 0;
+                    int bottomB = Noise.Noise(tx + 0.5f, ty + offset) > 0.0f ? 1 : 0;
+                    int rightB = (tx == offset - 1 ? Noise.Noise(ty + offset + 0.5f, offset) : Noise.Noise(tx + 1.0f, ty + offset + 0.5f)) > 0.0f ? 2 : 0;
+                    int topB = (ty == offset - 1 ? Noise.Noise((3.0f * offset - 1.0f - tx) + 0.5f, offset) : Noise.Noise(tx + 0.5f, ty + offset + 1.0f)) > 0.0f ? 4 : 0;
+                    int leftB = (tx == 0 ? Noise.Noise((4.0f * offset - 1.0f - ty) + 0.5f, offset) : Noise.Noise(tx, ty + offset + 0.5f)) > 0.0f ? 8 : 0;
                     noiseL = bottomB + rightB + topB + leftB;
                 }
                 else if (TerrainNode.Face == 6)
                 {
                     int offset = 1 << level;
-                    int bottomB = (ty == 0 ? Noise.Noise2D((3.0f * offset - 1.0f - tx) + 0.5f, 0) : Noise.Noise2D(tx + 0.5f, ty - offset)) > 0.0f ? 1 : 0;
-                    int rightB = (tx == offset - 1.0f ? Noise.Noise2D((2.0f * offset - 1.0f - ty) + 0.5f, 0) : Noise.Noise2D(tx + 1.0f, ty - offset + 0.5f)) > 0.0f ? 2 : 0;
-                    int topB = Noise.Noise2D(tx + 0.5f, ty - offset + 1.0f) > 0.0f ? 4 : 0;
-                    int leftB = (tx == 0 ? Noise.Noise2D(3.0f * offset + ty + 0.5f, 0) : Noise.Noise2D(tx, ty - offset + 0.5f)) > 0.0f ? 8 : 0;
+                    int bottomB = (ty == 0 ? Noise.Noise((3.0f * offset - 1.0f - tx) + 0.5f, 0) : Noise.Noise(tx + 0.5f, ty - offset)) > 0.0f ? 1 : 0;
+                    int rightB = (tx == offset - 1.0f ? Noise.Noise((2.0f * offset - 1.0f - ty) + 0.5f, 0) : Noise.Noise(tx + 1.0f, ty - offset + 0.5f)) > 0.0f ? 2 : 0;
+                    int topB = Noise.Noise(tx + 0.5f, ty - offset + 1.0f) > 0.0f ? 4 : 0;
+                    int leftB = (tx == 0 ? Noise.Noise(3.0f * offset + ty + 0.5f, 0) : Noise.Noise(tx, ty - offset + 0.5f)) > 0.0f ? 8 : 0;
                     noiseL = bottomB + rightB + topB + leftB;
                 }
                 else
                 {
                     int offset = (1 << level) * (TerrainNode.Face - 2);
-                    int bottomB = Noise.Noise2D(tx + offset + 0.5f, ty) > 0.0f ? 1 : 0;
-                    int rightB = Noise.Noise2D((tx + offset + 1) % (4 << level), ty + 0.5f) > 0.0f ? 2 : 0;
-                    int topB = Noise.Noise2D(tx + offset + 0.5f, ty + 1.0f) > 0.0f ? 4 : 0;
-                    int leftB = Noise.Noise2D(tx + offset, ty + 0.5f) > 0.0f ? 8 : 0;
+                    int bottomB = Noise.Noise(tx + offset + 0.5f, ty) > 0.0f ? 1 : 0;
+                    int rightB = Noise.Noise((tx + offset + 1) % (4 << level), ty + 0.5f) > 0.0f ? 2 : 0;
+                    int topB = Noise.Noise(tx + offset + 0.5f, ty + 1.0f) > 0.0f ? 4 : 0;
+                    int leftB = Noise.Noise(tx + offset, ty + 0.5f) > 0.0f ? 8 : 0;
                     noiseL = bottomB + rightB + topB + leftB;
                 }
             }
@@ -265,24 +257,13 @@ namespace SpaceEngine.Core
             var noiseLs = new int[] { 0, 1, 1, 2, 1, 3, 2, 4, 1, 2, 3, 4, 2, 4, 4, 5 };
             noiseL = noiseLs[noiseL];
 
-            UpSampleMaterial.SetTexture(uniforms.noiseSampler, NoiseTextures[noiseL]);
+            UpSampleMaterial.SetTexture(uniforms.noiseSampler, GodManager.Instance.NoiseTextures[noiseL]);
             UpSampleMaterial.SetVector(uniforms.noiseUVLH, new Vector4(noiseR, (noiseR + 1) % 4, 0.0f, HSV ? 1.0f : 0.0f));
 
-            if (HSV)
-            {
-                Vector4 col = NoiseColor * rs / 255.0f;
-                col.w *= 2.0f;
+            Vector4 noiseColor = NoiseColor * rs * (HSV ? 1.0f : 2.0f) / 255.0f;
+            noiseColor.w *= 2.0f;
 
-                UpSampleMaterial.SetVector(uniforms.noiseColor, col);
-            }
-            else
-            {
-                Vector4 col = NoiseColor * rs * 2.0f / 255.0f;
-                col.w *= 2.0f;
-
-                UpSampleMaterial.SetVector(uniforms.noiseColor, col);
-            }
-
+            UpSampleMaterial.SetVector(uniforms.noiseColor, noiseColor);
             UpSampleMaterial.SetVector(uniforms.noiseRootColor, RootNoiseColor);
 
             Graphics.Blit(null, gpuSlot.Texture, UpSampleMaterial);
@@ -302,122 +283,6 @@ namespace SpaceEngine.Core
             }
 
             yield return base.DoCreateTileCoroutine(level, tx, ty, slot, Callback);
-        }
-
-        private void CreateOrthoNoise()
-        {
-            var tileWidth = Cache.GetStorage(0).TileSize;
-            var color = new Color();
-
-            NoiseTextures = new Texture2D[6];
-
-            var layers = new int[] { 0, 1, 3, 5, 7, 15 };
-            var rand = 1234567;
-
-            for (byte nl = 0; nl < 6; ++nl)
-            {
-                var layer = layers[nl];
-
-                NoiseTextures[nl] = new Texture2D(tileWidth, tileWidth, TextureFormat.ARGB32, false, true);
-
-                // Corners
-                for (int j = 0; j < tileWidth; ++j)
-                {
-                    for (int i = 0; i < tileWidth; ++i)
-                    {
-                        NoiseTextures[nl].SetPixel(i, j, new Color(0.5f, 0.5f, 0.5f, 0.5f));
-                    }
-                }
-
-                // Bottom border
-                Random.InitState((layer & 1) == 0 ? 7654321 : 5647381);
-
-                for (int v = 2; v < 4; ++v)
-                {
-                    for (int h = 4; h < tileWidth - 4; ++h)
-                    {
-                        for (byte c = 0; c < 4; ++c)
-                        {
-                            color[c] = Random.value;
-                        }
-
-                        NoiseTextures[nl].SetPixel(h, v, color);
-                        NoiseTextures[nl].SetPixel(tileWidth - 1 - h, 3 - v, color);
-                    }
-                }
-
-                // Right border
-                Random.InitState((layer & 2) == 0 ? 7654321 : 5647381);
-
-                for (int h = tileWidth - 3; h >= tileWidth - 4; --h)
-                {
-                    for (int v = 4; v < tileWidth - 4; ++v)
-                    {
-                        for (byte c = 0; c < 4; ++c)
-                        {
-                            color[c] = Random.value;
-                        }
-
-                        NoiseTextures[nl].SetPixel(h, v, color);
-                        NoiseTextures[nl].SetPixel(2 * tileWidth - 5 - h, tileWidth - 1 - v, color);
-                    }
-                }
-
-                // Top border
-                Random.InitState((layer & 4) == 0 ? 7654321 : 5647381);
-
-                for (int v = tileWidth - 2; v < tileWidth; ++v)
-                {
-                    for (int h = 4; h < tileWidth - 4; ++h)
-                    {
-                        for (byte c = 0; c < 4; ++c)
-                        {
-                            color[c] = Random.value;
-                        }
-
-                        NoiseTextures[nl].SetPixel(h, v, color);
-                        NoiseTextures[nl].SetPixel(tileWidth - 1 - h, 2 * tileWidth - 5 - v, color);
-                    }
-                }
-
-                // Left border
-                Random.InitState((layer & 8) == 0 ? 7654321 : 5647381);
-
-                for (int h = 1; h >= 0; --h)
-                {
-                    for (int v = 4; v < tileWidth - 4; ++v)
-                    {
-                        for (byte c = 0; c < 4; ++c)
-                        {
-                            color[c] = Random.value;
-                        }
-
-                        NoiseTextures[nl].SetPixel(h, v, color);
-                        NoiseTextures[nl].SetPixel(3 - h, tileWidth - 1 - v, color);
-                    }
-                }
-
-                // Center
-                Random.InitState(rand);
-
-                for (int v = 4; v < tileWidth - 4; ++v)
-                {
-                    for (int h = 4; h < tileWidth - 4; ++h)
-                    {
-                        for (byte c = 0; c < 4; ++c)
-                        {
-                            color[c] = Random.value;
-                        }
-
-                        NoiseTextures[nl].SetPixel(h, v, color);
-                    }
-                }
-
-                //randomize for next texture
-                rand = (rand * 1103515245 + 12345) & 0x7FFFFFFF;
-
-                NoiseTextures[nl].Apply();
-            }
         }
     }
 }

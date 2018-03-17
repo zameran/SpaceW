@@ -1,6 +1,6 @@
 // Procedural planet generator.
 // 
-// Copyright (C) 2015-2017 Denis Ovchinnikov [zameran] 
+// Copyright (C) 2015-2018 Denis Ovchinnikov [zameran] 
 // All rights reserved.
 // 
 // Redistribution and use in source and binary forms, with or without
@@ -134,13 +134,38 @@ float4 Blur(sampler2D inputTexture, float2 inputUV, float inputStep = 0.00015f)
 	blurCoordinates[3] = inputUV.xy + inputStep * 3.294215;
 	blurCoordinates[4] = inputUV.xy - inputStep * 3.294215;
 
-	float4 bluredColor = float4(0, 0, 0, 0);
+	float4 bluredColor = float4(0.0, 0.0, 0.0, 0.0);
 
-	bluredColor += tex2D(inputTexture, blurCoordinates[0]) * 0.204164;
-	bluredColor += tex2D(inputTexture, blurCoordinates[1]) * 0.304005;
-	bluredColor += tex2D(inputTexture, blurCoordinates[2]) * 0.304005;
-	bluredColor += tex2D(inputTexture, blurCoordinates[3]) * 0.093913;
-	bluredColor += tex2D(inputTexture, blurCoordinates[4]) * 0.093913;
+	bluredColor += tex2Dlod(inputTexture, float4(blurCoordinates[0], 0.0, 0.0)) * 0.204164;
+	bluredColor += tex2Dlod(inputTexture, float4(blurCoordinates[1], 0.0, 0.0)) * 0.304005;
+	bluredColor += tex2Dlod(inputTexture, float4(blurCoordinates[2], 0.0, 0.0)) * 0.304005;
+	bluredColor += tex2Dlod(inputTexture, float4(blurCoordinates[3], 0.0, 0.0)) * 0.093913;
+	bluredColor += tex2Dlod(inputTexture, float4(blurCoordinates[4], 0.0, 0.0)) * 0.093913;
 
 	return bluredColor;
 }
+
+//-----------------------------------------------------------------------------
+// Curves by iq. http://www.iquilezles.org/www/articles/functions/functions.htm
+inline float impulse(float k, float x)
+{
+	float h = k * x;
+
+	return h * exp(1.0 - h);
+}
+
+inline float expstep(float x, float k, float n)
+{
+	return exp(-k * pow(x, n));
+}
+
+inline float parabola(float x, float k)
+{
+	return pow(4.0 * x * (1.0 - x), k);
+}
+	
+inline float powercurve(float x, float a, float b)
+{
+	return (pow(a + b, a + b) / (pow(a, a) * pow(b, b))) * pow(x, a) * pow(1.0 - x, b);
+}
+//-----------------------------------------------------------------------------

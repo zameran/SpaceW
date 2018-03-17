@@ -1,7 +1,7 @@
 #region License
 // Procedural planet generator.
 // 
-// Copyright (C) 2015-2017 Denis Ovchinnikov [zameran] 
+// Copyright (C) 2015-2018 Denis Ovchinnikov [zameran] 
 // All rights reserved.
 // 
 // Redistribution and use in source and binary forms, with or without
@@ -32,6 +32,8 @@
 // Creation Time: Undefined
 // Creator: zameran
 #endregion
+
+using SpaceEngine.Environment.Shadows;
 
 using System;
 using System.Collections.Generic;
@@ -74,6 +76,11 @@ public static class Helper
     public static bool Enabled<T>(T b) where T : Behaviour
     {
         return b != null && b.enabled == true && b.gameObject.activeInHierarchy == true;
+    }
+
+    public static bool Enabled(GameObject b)
+    {
+        return b != null && b.activeInHierarchy;
     }
 
     public static T Destroy<T>(T o) where T : Object
@@ -216,21 +223,23 @@ public static class Helper
         }
     }
 
-    public static Material CreateTempMaterial(string shaderName)
+    public static bool ArraysEqual<T>(T[] a, List<T> b)
     {
-        var shader = Shader.Find(shaderName);
+        if (a == null || b == null) return false;
 
-        if (shader == null)
+        if (a.Length != b.Count) return false;
+
+        var comparer = EqualityComparer<T>.Default;
+
+        for (var i = 0; i < a.Length; i++)
         {
-            Debug.LogError("Failed to find shader: " + shaderName);
-            return null;
+            if (comparer.Equals(a[i], b[i]) == false)
+            {
+                return false;
+            }
         }
 
-        var material = new Material(shader);
-
-        material.hideFlags = HideFlags.DontSave | HideFlags.HideInInspector;
-
-        return material;
+        return true;
     }
 
     public static GameObject CloneGameObject(GameObject source, Transform parent, bool keepName = false)
@@ -246,7 +255,7 @@ public static class Helper
 
             if (parent != null)
             {
-                clone = (GameObject)GameObject.Instantiate(source);
+                clone = Object.Instantiate(source);
 
                 clone.transform.parent = parent;
                 clone.transform.localPosition = localPosition;
@@ -255,7 +264,7 @@ public static class Helper
             }
             else
             {
-                clone = (GameObject)GameObject.Instantiate(source, localPosition, localRotation);
+                clone = Object.Instantiate(source, localPosition, localRotation);
             }
 
             if (keepName == true) clone.name = source.name;
@@ -335,6 +344,8 @@ public static class Helper
 
     public static void SetKeywords(Material m, List<string> keywords, bool checkShaderKeywords = false)
     {
+        if (keywords == null) return;
+
         if (checkShaderKeywords)
         {
             if (m != null && ArraysEqual(m.shaderKeywords, keywords) == false)
@@ -348,23 +359,34 @@ public static class Helper
         }
     }
 
-    public static bool ArraysEqual<T>(T[] a, List<T> b)
+    public static void ToggleKeyword(Material target, bool state, string enabledKeyword = "FEATURE_ON", string disabledKeyword = "FEATURE_OFF")
     {
-        if (a == null || b == null) return false;
-
-        if (a.Length != b.Count) return false;
-
-        var comparer = EqualityComparer<T>.Default;
-
-        for (var i = 0; i < a.Length; i++)
+        if (state)
         {
-            if (comparer.Equals(a[i], b[i]) == false)
-            {
-                return false;
-            }
+            if (target.IsKeywordEnabled(disabledKeyword)) target.DisableKeyword(disabledKeyword);
+            if (!target.IsKeywordEnabled(enabledKeyword)) target.EnableKeyword(enabledKeyword);
         }
+        else
+        {
+            if (target.IsKeywordEnabled(enabledKeyword)) target.DisableKeyword(enabledKeyword);
+            if (!target.IsKeywordEnabled(disabledKeyword)) target.EnableKeyword(disabledKeyword);
+        }
+    }
 
-        return true;
+    public static void ToggleKeyword(Material target, string enableKeyword, string disableKeyword)
+    {
+        EnableKeyword(target, enableKeyword);
+        DisableKeyword(target, disableKeyword);
+    }
+
+    public static void EnableKeyword(Material target, string keyword)
+    {
+        if (!target.IsKeywordEnabled(keyword)) target.EnableKeyword(keyword);
+    }
+
+    public static void DisableKeyword(Material target, string keyword)
+    {
+        if (target.IsKeywordEnabled(keyword)) target.DisableKeyword(keyword);
     }
 
     public static Color Brighten(Color color, float brightness)

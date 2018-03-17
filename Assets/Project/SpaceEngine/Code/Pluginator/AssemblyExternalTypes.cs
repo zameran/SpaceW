@@ -1,7 +1,7 @@
 ﻿#region License
 // Procedural planet generator.
 // 
-// Copyright (C) 2015-2017 Denis Ovchinnikov [zameran] 
+// Copyright (C) 2015-2018 Denis Ovchinnikov [zameran] 
 // All rights reserved.
 // 
 // Redistribution and use in source and binary forms, with or without
@@ -38,6 +38,9 @@ using System.Collections.Generic;
 
 namespace SpaceEngine.Pluginator
 {
+    /// <summary>
+    /// Dictionary wrapper, contains <see cref="Type"/> as key and <see cref="List{T}"/> with generic type of <see cref="Type"/>
+    /// </summary>
     public sealed class AssemblyExternalTypes : Dictionary<Type, List<Type>>
     {
         public AssemblyExternalTypes(Type type, List<Type> value)

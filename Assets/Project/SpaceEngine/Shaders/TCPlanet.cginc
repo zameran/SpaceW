@@ -32,7 +32,7 @@
 
 /*
  * Author: Vladimir Romanyuk
- * Modified and ported to Unity by Denis Ovchinnikov 2015-2017
+ * Modified and ported to Unity by Denis Ovchinnikov 2015-2018
  */
 
 #if !defined (TCCOMMON)
@@ -61,15 +61,24 @@ float HeightMapPlanet(float3 ppoint)
 	}
 
 	float t0 = Fbm(p * 0.75, 4);
-	//float v0 = t0 + pow(2.0, RidgedMultifractalExtra(p, 18, 1, 1.75, 0.6));
-	float v0 = t0 + pow(2.0, SimplexRidgedMultifractal(p, 18, 2, 0.5));
+	//float height = t0 + pow(2.0, RidgedMultifractalExtra(p, 18, 1, 1.75, 0.6));
+	//float height = t0 + pow(2.0, SimplexRidgedMultifractal(p, 18, 2, 0.5));
+	float height = t0 + pow(4.0, SimplexRidgedMultifractal(p, 18, 2, 0.5));
+	//float height = t0 + SimplexRidgedMultifractal(p, 18, 2, 0.5);
 
-	total = GetTerraced(v0, 4, 2);
+	height = height + height * saturate(Cell2Noise(p * 0.5 * FiltNoise3D(p * 1.25, 1.0)));
+
+	float terraceLayers = max(iNoise(p, 1.0) * 4.0, 3.0);
+	terraceLayers += Fbm(p * 5.41, 4);
+
+	height = GetTerraced(height, terraceLayers);
+
+	total = height;
 
 	float iceCap = saturate((latitude / latIceCaps - 1.0) * 50.0 * 1);
 	total = total * 1 + icecapHeight * smoothstep(0.0, 1.0, iceCap);
 
-	return total;
+	return total - 1.5;
 }
 //-----------------------------------------------------------------------------
 

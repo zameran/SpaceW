@@ -1,7 +1,7 @@
 ﻿#region License
 // Procedural planet generator.
 // 
-// Copyright (C) 2015-2017 Denis Ovchinnikov [zameran] 
+// Copyright (C) 2015-2018 Denis Ovchinnikov [zameran] 
 // All rights reserved.
 // 
 // Redistribution and use in source and binary forms, with or without
@@ -44,7 +44,7 @@ public class HideFlagSetterHelper : MonoBehaviour
     [ContextMenu("Set Flag")]
     public void SetFlag()
     {
-        if (obj == null) { Debug.LogError("Obj is null!"); return; }
+        if (obj == null) { Debug.LogError("HideFlagSetterHelper.SetFlag: Obj is null!"); return; }
 
         obj.hideFlags = flag;
     }

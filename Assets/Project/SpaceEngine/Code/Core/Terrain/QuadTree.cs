@@ -43,9 +43,9 @@ namespace SpaceEngine.Core.Terrain
         {
             if (!IsLeaf)
             {
-                for (byte i = 0; i < 4; i++)
+                for (var i = 0; i < 4; i++)
                 {
-                    Children[i].RecursiveDelete(owner);
+                    Children[i].RecursiveDelete(ref owner);
                     Children[i] = null;
                 }
             }
@@ -56,7 +56,7 @@ namespace SpaceEngine.Core.Terrain
         /// Releases all the corresponding texture tiles.
         /// </summary>
         /// <param name="owner"></param>
-        public void RecursiveDelete(TileSampler owner)
+        public void RecursiveDelete(ref TileSampler owner)
         {
             if (Tile != null && owner != null)
             {
@@ -67,9 +67,9 @@ namespace SpaceEngine.Core.Terrain
 
             if (!IsLeaf)
             {
-                for (byte i = 0; i < 4; i++)
+                for (var i = 0; i < 4; i++)
                 {
-                    Children[i].RecursiveDelete(owner);
+                    Children[i].RecursiveDelete(ref owner);
                     Children[i] = null;
                 }
             }

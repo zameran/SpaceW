@@ -1,7 +1,7 @@
 ﻿#region License
 // Procedural planet generator.
 // 
-// Copyright (C) 2015-2017 Denis Ovchinnikov [zameran] 
+// Copyright (C) 2015-2018 Denis Ovchinnikov [zameran] 
 // All rights reserved.
 // 
 // Redistribution and use in source and binary forms, with or without
@@ -33,7 +33,9 @@
 // Creator: zameran
 #endregion
 
-using SpaceEngine.AtmosphericScattering;
+
+using SpaceEngine.Core.Utilities;
+using SpaceEngine.Environment.Atmospheric;
 
 using System;
 using System.Collections;
@@ -67,7 +69,8 @@ namespace SpaceEngine.Core.Preprocess.Atmospehre
         public bool ClearAfterBake = true;
         public bool UseCoroutine = true;
 
-        const int NUM_THREADS = 8;
+        private const int NUM_THREADS = 8;
+        private const int WAIT_FRAMES = 4;
 
         public RenderTexture transmittanceT;
         public RenderTexture irradianceT_Read, irradianceT_Write, inscatterT_Read, inscatterT_Write;
@@ -91,23 +94,23 @@ namespace SpaceEngine.Core.Preprocess.Atmospehre
         [SerializeField]
         string DestinationFolder = "/Resources/Preprocess/Textures/Atmosphere";
 
-        private void Start()
+        private void Awake()
         {
             if (BakeMode == AtmosphereBakeMode.TO_HDD || BakeMode == AtmosphereBakeMode.TO_HDD_DEBUG)
             {
-                Bake(AtmosphereParameters.Earth);
+                Bake(AtmosphereParameters.Earth, null);
             }
         }
 
-        public void Bake(AtmosphereParameters AP)
+        public void Bake(AtmosphereParameters AP, Action callback)
         {
             if (UseCoroutine)
-                StartCoroutine(DoWorkCoroutine(AP));
+                StartCoroutine(DoWorkCoroutine(AP, callback));
             else
-                DoWork(AP);
+                DoWork(AP, callback);
         }
 
-        private void Prepeare(AtmosphereParameters AP)
+        private void Prepare(AtmosphereParameters AP)
         {
             CollectGarbage();
             CreateTextures(AP);
@@ -115,13 +118,13 @@ namespace SpaceEngine.Core.Preprocess.Atmospehre
             ClearAll();
         }
 
-        private void DoWork(AtmosphereParameters AP)
+        private void DoWork(AtmosphereParameters AP, Action callback)
         {
             finished = false;
             step = 0;
             order = 2;
 
-            Prepeare(AP);
+            Prepare(AP);
 
             while (!finished)
             {
@@ -129,27 +132,31 @@ namespace SpaceEngine.Core.Preprocess.Atmospehre
             }
 
             if (ClearAfterBake) CollectGarbage(false, true);
+
+            if (callback != null) callback();
         }
 
-        private IEnumerator DoWorkCoroutine(AtmosphereParameters AP)
+        private IEnumerator DoWorkCoroutine(AtmosphereParameters AP, Action callback)
         {
             finished = false;
             step = 0;
             order = 2;
 
-            Prepeare(AP);
+            Prepare(AP);
 
             while (!finished)
             {
                 Calculate(AP);
 
-                for (byte i = 0; i < 8; i++)
+                for (byte i = 0; i < WAIT_FRAMES; i++)
                 {
                     yield return Yielders.EndOfFrame;
                 }
             }
 
             if (ClearAfterBake) CollectGarbage(false, true);
+
+            if (callback != null) callback();
         }
 
         private void OnDestroy()
@@ -169,7 +176,7 @@ namespace SpaceEngine.Core.Preprocess.Atmospehre
             if (irradianceT_Write != null) irradianceT_Write.ReleaseAndDestroy();
             if (inscatterT_Write != null) inscatterT_Write.ReleaseAndDestroy();
 
-            //if (deltaET != null) deltaET.ReleaseAndDestroy();
+            if (deltaET != null) deltaET.ReleaseAndDestroy();
             if (deltaSRT != null) deltaSRT.ReleaseAndDestroy();
             if (deltaSMT != null) deltaSMT.ReleaseAndDestroy();
             if (deltaJT != null) deltaJT.ReleaseAndDestroy();
