@@ -61,8 +61,6 @@ If there enough people willing, then, perhaps, i will compose a comprehensive wi
 * [Proland](http://proland.imag.fr/)
 * [Eric Bruneton](http://www-evasion.imag.fr/Membres/Eric.Bruneton/)
 * [Google](https://www.google.com)
-* [JetBrains Rider Support Plugin](https://github.com/JetBrains/Unity3dRider)
-* [VSCode Support Plugin](https://github.com/dotBunny/VSCode)
 
 ### Contacts ###
 * [Protonmail](zameran@protonmail.com)
