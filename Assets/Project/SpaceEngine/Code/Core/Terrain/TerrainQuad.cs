@@ -159,6 +159,7 @@ namespace SpaceEngine.Core.Terrain
 
         public void CalculateTangetFrameToWorld(Vector3d center)
         {
+            // TODO : To provide good rotation manipulation, center vector should be updated too... Rotated...
             var uz = Center.Normalized();
             var ux = new Vector3d(0.0, 1.0, 0.0).Cross(uz).Normalized();
             var uy = uz.Cross(ux);
@@ -357,7 +358,10 @@ namespace SpaceEngine.Core.Terrain
             //if ((Owner.SplitInvisibleQuads || Visibility != Frustum3d.VISIBILITY.INVISIBLE) && distance < Length * Owner.SplitDistance && Level < Owner.MaxLevel)
             if ((Owner.SplitInvisibleQuads || Visibility != Frustum3d.VISIBILITY.INVISIBLE) && (distance < Length * Owner.SplitDistance && Level < Owner.MaxLevel) || (Level < Owner.MinLevel))
             {
-                if (IsLeaf) { Subdivide(); }
+                if (IsLeaf)
+                {
+                    Subdivide();
+                }
 
                 CalculateOrder(Owner.LocalCameraPosition.x, Owner.LocalCameraPosition.y, Ox + LengthHalf, Oy + LengthHalf);
 

@@ -40,6 +40,7 @@ using UnityEngine;
 namespace SpaceEngine
 {
     // TODO : Make it generic. See TerrainQuad per class TODO's...
+    [RequireComponent(typeof(Body))]
     public class BodyRotator : MonoBehaviour
     {
         private readonly CachedComponent<Body> BodyCachedComponent = new CachedComponent<Body>();
