@@ -160,7 +160,11 @@ namespace SpaceEngine.Core.Terrain
         public void CalculateTangetFrameToWorld(Vector3d center)
         {
             // TODO : To provide good rotation manipulation, center vector should be updated too... Rotated...
-            var uz = Center.Normalized();
+            // TODO : Introduce LocalToWorld matrix for each quad?! Maybe simply transform normals in shader?
+            // NOTE : Owner.LocalToWorld.Inverse() * Center                         - Node space.
+            // NOTE : Owner.transform.localToWorld * Center                         - Node space.
+            // NOTE : Quaternion.Inverse(Owner.transform.rotation) * Center         - Node space.
+            var uz = center.Normalized();
             var ux = new Vector3d(0.0, 1.0, 0.0).Cross(uz).Normalized();
             var uy = uz.Cross(ux);
 
