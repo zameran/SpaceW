@@ -211,7 +211,7 @@ namespace SpaceEngine.Core.Terrain
             if (Face - 1 >= 0 && Face - 1 < 6) { FaceToLocal = Matrix4x4d.Rotate(faces[Face - 1]); }
             if (celestialBody == null) { throw new Exception("Wow! Celestial body isn't Celestial?!"); }
 
-            LocalToWorld = Matrix4x4d.ToMatrix4x4d(celestialBody.transform.localToWorldMatrix) * FaceToLocal;
+            LocalToWorld = Matrix4x4d.ToMatrix4x4d(transform.localToWorldMatrix) * FaceToLocal;
             Deformation = new DeformationSpherical(celestialBody.Size);
 
             TangentFrameToWorld = new Matrix3x3d(LocalToWorld.m[0, 0], LocalToWorld.m[0, 1], LocalToWorld.m[0, 2],
@@ -243,7 +243,7 @@ namespace SpaceEngine.Core.Terrain
             TerrainMaterial.renderQueue = (int)ParentBody.RenderQueue + ParentBody.RenderQueueOffset;
 
             // NOTE : Body shape dependent...
-            LocalToWorld = Matrix4x4d.ToMatrix4x4d(ParentBody.transform.localToWorldMatrix) * FaceToLocal;
+            LocalToWorld = Matrix4x4d.ToMatrix4x4d(transform.localToWorldMatrix) * FaceToLocal;
 
             TangentFrameToWorld = new Matrix3x3d(LocalToWorld.m[0, 0], LocalToWorld.m[0, 1], LocalToWorld.m[0, 2],
                                                  LocalToWorld.m[1, 0], LocalToWorld.m[1, 1], LocalToWorld.m[1, 2],

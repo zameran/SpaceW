@@ -7,6 +7,8 @@ using System;
 
 using UnityEngine;
 
+// TODO : Create a special interface for transformation manipulations. This interface should oblige objects to recalculate critical variables, required for proper rendering.
+// NOTE : Maybe some sort of Strategy pattern.
 namespace SpaceEngine.Core.Terrain
 {
     /// <summary> 
@@ -155,7 +157,16 @@ namespace SpaceEngine.Core.Terrain
         /// </summary>
         public Vector4 DeformedOffset { get; private set; }
 
-        private void CalculateMatrices(double ox, double oy, double length, double r)
+        public void CalculateTangetFrameToWorld(Vector3d center)
+        {
+            var uz = Center.Normalized();
+            var ux = new Vector3d(0.0, 1.0, 0.0).Cross(uz).Normalized();
+            var uy = uz.Cross(ux);
+
+            TangentFrameToWorld = Owner.TangentFrameToWorld * new Matrix3x3d(ux.x, uy.x, uz.x, ux.y, uy.y, uz.y, ux.z, uy.z, uz.z);
+        }
+
+        public void CalculateMatrices(double ox, double oy, double length, double r)
         {
             var p0 = new Vector3d(ox, oy, r);
             var p1 = new Vector3d(ox + length, oy, r);
@@ -186,11 +197,7 @@ namespace SpaceEngine.Core.Terrain
             FlatCorners = new Matrix4x4d(p0.x, p1.x, p2.x, p3.x, p0.y, p1.y, p2.y, p3.y, 0.0, 0.0, 0.0, 0.0, 1.0, 1.0, 1.0, 1.0);
             FlatVerticals = new Matrix4x4d(0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0);
 
-            var uz = Center.Normalized();
-            var ux = new Vector3d(0.0, 1.0, 0.0).Cross(uz).Normalized();
-            var uy = uz.Cross(ux);
-
-            TangentFrameToWorld = Owner.TangentFrameToWorld * new Matrix3x3d(ux.x, uy.x, uz.x, ux.y, uy.y, uz.y, ux.z, uy.z, uz.z);
+            CalculateTangetFrameToWorld(Center);
         }
 
         /// <summary> 
@@ -291,6 +298,24 @@ namespace SpaceEngine.Core.Terrain
                     Children[i].Destroy();
                     Children[i] = null;
                 }
+            }
+        }
+
+        /// <summary>
+        /// Recalculates and updates critical variables, required for proper rendering.
+        /// </summary>
+        public void UpdateMatrices()
+        {
+            if (IsLeaf)
+            {
+                CalculateTangetFrameToWorld(Center);
+            }
+            else
+            {
+                Children[0].CalculateTangetFrameToWorld(Children[0].Center);
+                Children[1].CalculateTangetFrameToWorld(Children[1].Center);
+                Children[2].CalculateTangetFrameToWorld(Children[2].Center);
+                Children[3].CalculateTangetFrameToWorld(Children[3].Center);
             }
         }
 
