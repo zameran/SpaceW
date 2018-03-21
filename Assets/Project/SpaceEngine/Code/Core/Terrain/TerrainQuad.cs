@@ -456,6 +456,7 @@ namespace SpaceEngine.Core.Terrain
 
                 var verts = new Vector3[8];
                 var isMaximumLevel = Level == Owner.MaxLevel;
+                var color = isMaximumLevel ? XKCDColors.DarkOrange : lineColor;
 
                 verts[0] = Owner.Deformation.LocalToDeformed(Ox, Oy, ZMin).ToVector3();
                 verts[1] = Owner.Deformation.LocalToDeformed(Ox + Length, Oy, ZMin).ToVector3();
@@ -476,7 +477,7 @@ namespace SpaceEngine.Core.Terrain
                 lineMaterial.SetPass(0);
 
                 GL.Begin(GL.LINES);
-                GL.Color(isMaximumLevel ? XKCDColors.DarkOrange : lineColor);
+                GL.Color(color);
 
                 for (var i = 0; i < 4; i++)
                 {
@@ -492,6 +493,15 @@ namespace SpaceEngine.Core.Terrain
                     GL.Vertex3(verts[order[i, 0]].x, verts[order[i, 0]].y, verts[order[i, 0]].z);
                     GL.Vertex3(verts[order[i, 0] + 4].x, verts[order[i, 0] + 4].y, verts[order[i, 0] + 4].z);
                 }
+
+                /*
+                var center = Center.ToVector3();
+                var centerDirection = Owner.ParentBody.Origin - center;
+
+                GL.Color(color * 0.75f);
+                GL.Vertex(center);
+                GL.Vertex(center + centerDirection * 0.25f);
+                */
 
                 GL.End();
                 GL.PopMatrix();

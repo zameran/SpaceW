@@ -201,7 +201,7 @@ namespace SpaceEngine.Core.Terrain
             TerrainMaterial = MaterialHelper.CreateTemp(ParentBody.ColorShader, "TerrainNode");
 
             FaceToLocal = Matrix4x4d.identity;
-
+            
             // NOTE : Body shape dependent...
             var celestialBody = ParentBody as CelestialBody;
             var faces = new Vector3d[] { new Vector3d(0, 0, 0), new Vector3d(90, 0, 0), new Vector3d(90, 90, 0), new Vector3d(90, 180, 0), new Vector3d(90, 270, 0), new Vector3d(0, 180, 180) };
@@ -212,6 +212,7 @@ namespace SpaceEngine.Core.Terrain
             if (celestialBody == null) { throw new Exception("Wow! Celestial body isn't Celestial?!"); }
 
             LocalToWorld = Matrix4x4d.ToMatrix4x4d(transform.localToWorldMatrix) * FaceToLocal;
+
             Deformation = new DeformationSpherical(celestialBody.Size);
 
             TangentFrameToWorld = LocalToWorld.ToMatrix3x3d();
