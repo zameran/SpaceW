@@ -51,6 +51,8 @@ namespace SpaceEngine
 
         public float RotationSpeed = 0.25f;
 
+        public Transform Rotator = null;
+
         private void Start()
         {
             BodyCachedComponent.TryInit(this);
@@ -60,13 +62,27 @@ namespace SpaceEngine
         {
             var terrainNodes = BodyComponent.TerrainNodes;
 
-            for (var terrainNodeIndex = 0; terrainNodeIndex < terrainNodes.Count; terrainNodeIndex++)
+            if (Rotator == null)
             {
-                var terrainNode = terrainNodes[terrainNodeIndex];
+                for (var terrainNodeIndex = 0; terrainNodeIndex < terrainNodes.Count; terrainNodeIndex++)
+                {
+                    var terrainNode = terrainNodes[terrainNodeIndex];
 
-                // NOTE : Maybe full matrices recalculations needed via TerrainQuadRoot.CalculateMatrices(...)
-                terrainNode.transform.Rotate(RotationAxis * RotationSpeed * Time.deltaTime);   // NOTE : Perform our transformation action...
-                terrainNode.TerrainQuadRoot.UpdateMatrices();                                  // NOTE : Recalculate and update critical variables, required for proper rendering.
+                    // NOTE : Maybe full matrices recalculations needed via TerrainQuadRoot.CalculateMatrices(...)
+                    terrainNode.transform.Rotate(RotationAxis * RotationSpeed * Time.deltaTime);   // NOTE : Perform our transformation action...
+                    terrainNode.TerrainQuadRoot.UpdateMatrices();                                  // NOTE : Recalculate and update critical variables, required for proper rendering.
+                }
+            }
+            else
+            {
+                Rotator.transform.Rotate(RotationAxis * RotationSpeed * Time.deltaTime);           // NOTE : Perform our transformation action...
+
+                for (var terrainNodeIndex = 0; terrainNodeIndex < terrainNodes.Count; terrainNodeIndex++)
+                {
+                    var terrainNode = terrainNodes[terrainNodeIndex];
+
+                    terrainNode.TerrainQuadRoot.UpdateMatrices();                                  // NOTE : Recalculate and update critical variables, required for proper rendering.
+                }
             }
         }
     }

@@ -214,9 +214,7 @@ namespace SpaceEngine.Core.Terrain
             LocalToWorld = Matrix4x4d.ToMatrix4x4d(transform.localToWorldMatrix) * FaceToLocal;
             Deformation = new DeformationSpherical(celestialBody.Size);
 
-            TangentFrameToWorld = new Matrix3x3d(LocalToWorld.m[0, 0], LocalToWorld.m[0, 1], LocalToWorld.m[0, 2],
-                                                 LocalToWorld.m[1, 0], LocalToWorld.m[1, 1], LocalToWorld.m[1, 2],
-                                                 LocalToWorld.m[2, 0], LocalToWorld.m[2, 1], LocalToWorld.m[2, 2]);
+            TangentFrameToWorld = LocalToWorld.ToMatrix3x3d();
 
             InitUniforms(TerrainMaterial);
 
@@ -245,9 +243,7 @@ namespace SpaceEngine.Core.Terrain
             // NOTE : Body shape dependent...
             LocalToWorld = Matrix4x4d.ToMatrix4x4d(transform.localToWorldMatrix) * FaceToLocal;
 
-            TangentFrameToWorld = new Matrix3x3d(LocalToWorld.m[0, 0], LocalToWorld.m[0, 1], LocalToWorld.m[0, 2],
-                                                 LocalToWorld.m[1, 0], LocalToWorld.m[1, 1], LocalToWorld.m[1, 2],
-                                                 LocalToWorld.m[2, 0], LocalToWorld.m[2, 1], LocalToWorld.m[2, 2]);
+            TangentFrameToWorld = LocalToWorld.ToMatrix3x3d();
 
             LocalToCamera = GodManager.Instance.View.WorldToCameraMatrix * LocalToWorld;
             LocalToScreen = GodManager.Instance.View.CameraToScreenMatrix * LocalToCamera;
