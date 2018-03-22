@@ -58,4 +58,16 @@ public class CachedComponent<T> where T : Component
 
         Component = mb.transform.parent.GetComponent<T>();
     }
+	
+	public void TryInitAdd(MonoBehaviour mb)
+    {
+        var component = mb.GetComponent<T>();
+
+        if (component == null)
+        {
+            component = mb.gameObject.AddComponent<T>();
+        }
+
+        Component = component;
+    }
 }
