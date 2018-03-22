@@ -227,14 +227,14 @@ Shader "SpaceEngine/Planet/Terrain (Deferred)"
 
 					float3 finalColor = hdr(groundColor * extinction + inscatter);
 				#elif ATMOSPHERE_OFF			
-					normal.xyz = -normal.xyz * 0.5 + 0.5; // Encode normal... (Using inversed normal)
+					normal.xyz = normal.xyz * 0.5 + 0.5; // Encode normal...
 
 					float3 finalColor = 1.5 * reflectance * max(cTheta, 0);
 				#endif
 
 				o.diffuse = float4(finalColor, 1.0);
 				o.specular = float4(0.0, 0.0, 0.0, 1.0);
-				o.normal = float4(normal.xyz, 1.0);
+				o.normal = float4(normal.xyz, 0.0);
 				o.emission = float4(0.0, 0.0, 0.0, 1.0);
 
 				OUTPUT_LOG_DEPTH(i, o)
@@ -242,5 +242,60 @@ Shader "SpaceEngine/Planet/Terrain (Deferred)"
 			
 			ENDCG
 		}
+
+		/*Pass 
+		{
+			Name "ShadowCaster"
+			Tags { "LightMode" = "ShadowCaster" }
+		
+			CGPROGRAM
+			#pragma vertex vert
+			#pragma fragment frag
+
+			#pragma target 2.0
+
+			#include "UnityStandardShadow.cginc" 
+
+			#pragma multi_compile_shadowcaster
+
+			#pragma multi_compile ATMOSPHERE_ON ATMOSPHERE_OFF 
+			#pragma multi_compile SHINE_ON SHINE_OFF 
+			#pragma multi_compile ECLIPSES_ON ECLIPSES_OFF 
+			#pragma multi_compile OCEAN_ON OCEAN_OFF 
+			#pragma multi_compile SHADOW_0 SHADOW_1 SHADOW_2 SHADOW_3 SHADOW_4 
+
+			#include "UnityCG.cginc"
+
+			struct v2f 
+			{ 
+				V2F_SHADOW_CASTER;
+			};
+
+			v2f vert(VertexInput v)
+			{
+				v2f o;
+
+				//----------------------------------------------------------------------------- 
+				float4 outputVertex = 0; 
+				float3 outputLocalVertex = 0; 
+				float2 outputTexcoord = 0; 
+ 
+				VERTEX_POSITION(v.vertex, v.uv0.xy, outputVertex, outputLocalVertex, outputTexcoord); 
+ 
+				v.vertex = float4(outputLocalVertex, 1.0); 
+				
+				//----------------------------------------------------------------------------- 
+
+				TRANSFER_SHADOW_CASTER_NORMALOFFSET(o)
+
+				return o;
+			}
+
+			float4 frag(v2f i) : SV_Target
+			{
+				SHADOW_CASTER_FRAGMENT(i)
+			}
+			ENDCG
+		}*/
 	}
 }

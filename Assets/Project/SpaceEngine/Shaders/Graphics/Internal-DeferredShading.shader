@@ -65,10 +65,11 @@ Shader "SpaceEngine/Graphics/Internal-DeferredShading"
 				ind.diffuse = 0;
 				ind.specular = 0;
 
-				// NOTE : If this pixel is my planet - get a fuck out, Unity!
+				//return UNITY_BRDF_PBS(data.diffuseColor, data.specularColor, oneMinusReflectivity, data.smoothness, data.normalWorld, -eyeVec, light, ind);
 
+				// NOTE : If this pixel is my planet - get a fuck out, Unity!
 				UNITY_BRANCH
-				if (gbuffer2.w > 0.0) 
+				if (gbuffer2.w == 0.0) 
 				{ 
 					return gbuffer0; 
 				}

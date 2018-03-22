@@ -895,7 +895,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   Controllable: 1
-  ClipPlanesControlType: 2
+  ClipPlanesControlType: 0
   Speed: 100
   RotationSpeed: 1
 --- !u!81 &812990984
@@ -936,7 +936,7 @@ Camera:
     width: 1
     height: 1
   near clip plane: 0.3
-  far clip plane: 1000000
+  far clip plane: 10000
   field of view: 60
   orthographic: 0
   orthographic size: 5
@@ -961,8 +961,8 @@ Transform:
   m_PrefabParentObject: {fileID: 0}
   m_PrefabInternal: {fileID: 0}
   m_GameObject: {fileID: 812990977}
-  m_LocalRotation: {x: -0.035228934, y: -0.016183248, z: -0.5203495, w: 0.85307294}
-  m_LocalPosition: {x: -553.4219, y: 790.3179, z: -401.2688}
+  m_LocalRotation: {x: -0.26714808, y: 0.23510289, z: 0.7655603, w: -0.53598136}
+  m_LocalPosition: {x: 449.6011, y: -202.01906, z: 407.96875}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 0}
