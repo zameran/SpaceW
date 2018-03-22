@@ -4,7 +4,6 @@ using SpaceEngine.Core.Numerics.Vectors;
 using SpaceEngine.Core.Types;
 
 using System;
-
 using UnityEngine;
 
 // TODO : Create a special interface for transformation manipulations. This interface should oblige objects to recalculate critical variables, required for proper rendering.
@@ -355,7 +354,7 @@ namespace SpaceEngine.Core.Terrain
                     Visibility = Frustum3d.VISIBILITY.INVISIBLE;
                 }
             }
-
+            
             var ground = Owner.ParentBody.HeightZ;
             var distance = Owner.GetCameraDistance(LocalBox, Math.Max(0.0, ground));
 

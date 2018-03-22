@@ -234,7 +234,7 @@ Shader "SpaceEngine/Planet/Terrain (Deferred)"
 
 				o.diffuse = float4(finalColor, 1.0);
 				o.specular = float4(0.0, 0.0, 0.0, 1.0);
-				o.normal = float4(normal.xyz, 0.0);
+				o.normal = float4(normal.xyz, 1.0);
 				o.emission = float4(0.0, 0.0, 0.0, 1.0);
 
 				OUTPUT_LOG_DEPTH(i, o)

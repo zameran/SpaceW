@@ -69,7 +69,7 @@ Shader "SpaceEngine/Graphics/Internal-DeferredShading"
 
 				// NOTE : If this pixel is my planet - get a fuck out, Unity!
 				UNITY_BRANCH
-				if (gbuffer2.w == 0.0) 
+				if (gbuffer2.w > 0.0) 
 				{ 
 					return gbuffer0; 
 				}
