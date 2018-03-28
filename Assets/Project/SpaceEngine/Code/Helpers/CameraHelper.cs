@@ -34,6 +34,7 @@
 #endregion
 
 #define UNITY_GL_PROJECTION_MATRIX
+//#define SE_PROJECTION_MATRIX
 
 using System.Collections.Generic;
 using System.Linq;
@@ -106,7 +107,7 @@ public static class CameraHelper
         projectionMatrix = GL.GetGPUProjectionMatrix(projectionMatrix, useFix);
 
         return projectionMatrix;
-#else
+#elif SE_PROJECTION_MATRIX
         var projectionMatrix = camera.projectionMatrix;
 
         if (!useFix) return projectionMatrix;
@@ -133,6 +134,8 @@ public static class CameraHelper
         }
 
         return projectionMatrix;
+#else
+        return camera.projectionMatrix;
 #endif
     }
 
