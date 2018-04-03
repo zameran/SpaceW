@@ -37,6 +37,8 @@ using SpaceEngine.Core;
 using SpaceEngine.Core.Patterns.Strategy.Renderable;
 using SpaceEngine.Core.Patterns.Strategy.Uniformed;
 using SpaceEngine.Enums;
+using SpaceEngine.Helpers;
+using SpaceEngine.Tools;
 
 using System;
 using System.Collections.Generic;
@@ -47,7 +49,7 @@ using UnityEngine.Rendering;
 
 using Random = UnityEngine.Random;
 
-namespace SpaceEngine.Startfield
+namespace SpaceEngine.Environment.Startfield
 {
     public class Starfield : Node<Starfield>, IUniformed<Material>, IRenderable<Starfield>
     {

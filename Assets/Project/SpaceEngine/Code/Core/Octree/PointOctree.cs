@@ -40,7 +40,7 @@ using UnityEngine;
 
 namespace SpaceEngine.Core.Octree
 {
-    public class PointOctree<T> where T : class, IEquatable<T>
+    public class PointOctree<TType> where TType : struct, IEquatable<TType>
     {
         /// <summary>
         /// The total amount of objects currently in the tree.
@@ -50,7 +50,7 @@ namespace SpaceEngine.Core.Octree
         /// <summary>
         /// Root node of the octree.
         /// </summary>
-        PointOctreeNode<T> RootNode;
+        PointOctreeNode<TType> RootNode;
 
         /// <summary>
         /// Size that the octree was on creation.
@@ -80,7 +80,7 @@ namespace SpaceEngine.Core.Octree
             Count = 0;
             InitialSize = initialWorldSize;
             MinSize = minNodeSize;
-            RootNode = new PointOctreeNode<T>(InitialSize, MinSize, initialWorldPos);
+            RootNode = new PointOctreeNode<TType>(InitialSize, MinSize, initialWorldPos);
         }
 
         /// <summary>
@@ -88,7 +88,7 @@ namespace SpaceEngine.Core.Octree
         /// </summary>
         /// <param name="obj">Object to add.</param>
         /// <param name="position">Position of the object.</param>
-        public void Add(T obj, Vector3 position)
+        public void Add(TType obj, Vector3 position)
         {
             // Safety check against infinite/excessive growth
             byte count = 0;
@@ -114,7 +114,7 @@ namespace SpaceEngine.Core.Octree
         /// </summary>
         /// <param name="obj">Object to remove.</param>
         /// <returns>True if the object was removed successfully.</returns>
-        public bool Remove(T obj)
+        public bool Remove(TType obj)
         {
             var removed = RootNode.Remove(obj);
 
@@ -136,9 +136,9 @@ namespace SpaceEngine.Core.Octree
         /// <param name="ray">The ray. Passing as ref to improve performance since it won't have to be copied.</param>
         /// <param name="maxDistance">Maximum distance from the ray to consider.</param>
         /// <returns>Objects within range.</returns>
-        public List<T> GetNearby(Ray ray, float maxDistance)
+        public List<TType> GetNearby(Ray ray, float maxDistance)
         {
-            var collidingWith = new List<T>();
+            var collidingWith = new List<TType>();
 
             RootNode.GetNearby(ref ray, ref maxDistance, ref collidingWith);
 
@@ -152,9 +152,9 @@ namespace SpaceEngine.Core.Octree
         /// <param name="position">Position.</param>
         /// <param name="maxDistance">Maximum distance from the ray to consider.</param>
         /// <returns>Objects within range.</returns>
-        public List<T> GetNearby(Vector3 position, float maxDistance)
+        public List<TType> GetNearby(Vector3 position, float maxDistance)
         {
-            var collidingWith = new List<T>();
+            var collidingWith = new List<TType>();
 
             RootNode.GetNearby(ref position, ref maxDistance, ref collidingWith);
 
@@ -168,9 +168,9 @@ namespace SpaceEngine.Core.Octree
         /// <param name="position">Position.</param>
         /// <param name="maxDistance">Maximum distance from the ray to consider.</param>
         /// <returns>Nodes within range.</returns>
-        public List<PointOctreeNode<T>> GetNearbyNodes(Vector3 position, float maxDistance)
+        public List<PointOctreeNode<TType>> GetNearbyNodes(Vector3 position, float maxDistance)
         {
-            var collidingWith = new List<PointOctreeNode<T>>();
+            var collidingWith = new List<PointOctreeNode<TType>>();
 
             RootNode.GetNearbyNodes(ref position, ref maxDistance, ref collidingWith);
 
@@ -181,9 +181,9 @@ namespace SpaceEngine.Core.Octree
         /// Return all nodes recursively.
         /// </summary>
         /// <returns>All nodes in list.</returns>
-        public List<PointOctreeNode<T>> GetNodes()
+        public List<PointOctreeNode<TType>> GetNodes()
         {
-            var result = new List<PointOctreeNode<T>>();
+            var result = new List<PointOctreeNode<TType>>();
 
             RootNode.GetNodes(ref result);
 
@@ -223,21 +223,21 @@ namespace SpaceEngine.Core.Octree
             sbyte yDirection = direction.y >= 0 ? (sbyte)1 : (sbyte)-1;
             sbyte zDirection = direction.z >= 0 ? (sbyte)1 : (sbyte)-1;
 
-            PointOctreeNode<T> oldRoot = RootNode;
+            PointOctreeNode<TType> oldRoot = RootNode;
 
             var half = RootNode.SideLength / 2;
             var newLength = RootNode.SideLength * 2;
 
             var newCenter = RootNode.Center + new Vector3(xDirection * half, yDirection * half, zDirection * half);
 
-            RootNode = new PointOctreeNode<T>(newLength, MinSize, newCenter);
+            RootNode = new PointOctreeNode<TType>(newLength, MinSize, newCenter);
 
             // Create 7 new octree children to go with the old root as children of the new root...
             var rootPos = GetRootPosIndex(xDirection, yDirection, zDirection);
 
-            PointOctreeNode<T>[] children = new PointOctreeNode<T>[8];
+            PointOctreeNode<TType>[] children = new PointOctreeNode<TType>[8];
 
-            for (var i = 0; i < 8; i++)
+            for (byte i = 0; i < 8; i++)
             {
                 if (i == rootPos)
                 {
@@ -249,9 +249,9 @@ namespace SpaceEngine.Core.Octree
                     yDirection = i > 3 ? (sbyte)-1 : (sbyte)1;
                     zDirection = (i < 2 || (i > 3 && i < 6)) ? (sbyte)-1 : (sbyte)1;
 
-                    children[i] = new PointOctreeNode<T>(RootNode.SideLength, MinSize, newCenter + new Vector3(xDirection * half, 
-                                                                                                               yDirection * half, 
-                                                                                                               zDirection * half));
+                    children[i] = new PointOctreeNode<TType>(RootNode.SideLength, MinSize, newCenter + new Vector3(xDirection * half,
+                                                                                               yDirection * half,
+                                                                                               zDirection * half));
                 }
             }
 

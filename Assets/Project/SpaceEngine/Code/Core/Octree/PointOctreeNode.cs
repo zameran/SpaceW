@@ -41,7 +41,7 @@ using UnityEngine;
 
 namespace SpaceEngine.Core.Octree
 {
-    public class PointOctreeNode<T> where T : class, IEquatable<T>
+    public class PointOctreeNode<TType> where TType : struct, IEquatable<TType>
     {
         /// <summary>
         /// Center of this node.
@@ -71,7 +71,7 @@ namespace SpaceEngine.Core.Octree
         /// <summary>
         /// Child nodes.
         /// </summary>
-        private PointOctreeNode<T>[] Children = null;
+        private PointOctreeNode<TType>[] Children = null;
 
         /// <summary>
         /// Bounds of potential children to this node.
@@ -98,7 +98,7 @@ namespace SpaceEngine.Core.Octree
         /// </summary>
         protected class OctreeObject
         {
-            public T Object;
+            public TType Object;
             public Vector3 Position;
         }
 
@@ -119,7 +119,7 @@ namespace SpaceEngine.Core.Octree
         /// <param name="obj">Object to add.</param>
         /// <param name="position">Position of the object.</param>
         /// <returns></returns>
-        public bool Add(T obj, Vector3 position)
+        public bool Add(TType obj, Vector3 position)
         {
             if (!Encapsulates(Bounds, position)) { return false; }
 
@@ -133,11 +133,11 @@ namespace SpaceEngine.Core.Octree
         /// </summary>
         /// <param name="obj">Object to remove.</param>
         /// <returns>True if the object was removed successfully.</returns>
-        public bool Remove(T obj)
+        public bool Remove(TType obj)
         {
             var removed = false;
 
-            for (var i = 0; i < Objects.Count; i++)
+            for (int i = 0; i < Objects.Count; i++)
             {
                 if (Objects[i].Object.Equals(obj))
                 {
@@ -149,7 +149,7 @@ namespace SpaceEngine.Core.Octree
 
             if (!removed && !IsLeaf)
             {
-                for (var i = 0; i < 8; i++)
+                for (byte i = 0; i < 8; i++)
                 {
                     removed = Children[i].Remove(obj);
 
@@ -176,7 +176,7 @@ namespace SpaceEngine.Core.Octree
         /// <param name="maxDistance">Maximum distance from the ray to consider.</param>
         /// <param name="result">List result.</param>
         /// <returns>Objects within range.</returns>
-        public void GetNearby(ref Ray ray, ref float maxDistance, ref List<T> result)
+        public void GetNearby(ref Ray ray, ref float maxDistance, ref List<TType> result)
         {
             // Does the ray hit this node at all?
             // NOTE : Expanding the bounds is not exactly the same as a real distance check, but it's fast...
@@ -189,7 +189,7 @@ namespace SpaceEngine.Core.Octree
             if (!intersected) return;
 
             // Check against any objects in this node...
-            for (var i = 0; i < Objects.Count; i++)
+            for (int i = 0; i < Objects.Count; i++)
             {
                 if (DistanceToRay(ray, Objects[i].Position) <= maxDistance)
                 {
@@ -200,7 +200,7 @@ namespace SpaceEngine.Core.Octree
             // Check children...
             if (!IsLeaf)
             {
-                for (var i = 0; i < 8; i++)
+                for (byte i = 0; i < 8; i++)
                 {
                     Children[i].GetNearby(ref ray, ref maxDistance, ref result);
                 }
@@ -213,7 +213,7 @@ namespace SpaceEngine.Core.Octree
         /// <param name="position">Position.</param>
         /// <param name="maxDistance">Maximum distance from the position to consider.</param>
         /// <param name="result">List result.</param>
-        public void GetNearby(ref Vector3 position, ref float maxDistance, ref List<T> result)
+        public void GetNearby(ref Vector3 position, ref float maxDistance, ref List<TType> result)
         {
             // Check against any objects in this node...
             for (int i = 0; i < Objects.Count; i++)
@@ -227,7 +227,7 @@ namespace SpaceEngine.Core.Octree
             // Check children...
             if (!IsLeaf)
             {
-                for (var i = 0; i < 8; i++)
+                for (byte i = 0; i < 8; i++)
                 {
                     Children[i].GetNearby(ref position, ref maxDistance, ref result);
                 }
@@ -240,7 +240,7 @@ namespace SpaceEngine.Core.Octree
         /// <param name="position">Position.</param>
         /// <param name="maxDistance">Maximum distance from the position to consider.</param>
         /// <param name="result">List result.</param>
-        public void GetNearbyNodes(ref Vector3 position, ref float maxDistance, ref List<PointOctreeNode<T>> result)
+        public void GetNearbyNodes(ref Vector3 position, ref float maxDistance, ref List<PointOctreeNode<TType>> result)
         {
             if (Vector3.Distance(position, Center) <= maxDistance)
             {
@@ -250,7 +250,7 @@ namespace SpaceEngine.Core.Octree
             // Check children...
             if (!IsLeaf)
             {
-                for (var i = 0; i < 8; i++)
+                for (byte i = 0; i < 8; i++)
                 {
                     Children[i].GetNearbyNodes(ref position, ref maxDistance, ref result);
                 }
@@ -261,13 +261,13 @@ namespace SpaceEngine.Core.Octree
         /// Return all nodes recursively.
         /// </summary>
         /// <param name="result">List of all nodes in <see cref="PointOctree{T}"/></param>
-        public void GetNodes(ref List<PointOctreeNode<T>> result)
+        public void GetNodes(ref List<PointOctreeNode<TType>> result)
         {
             result.Add(this);
 
             if (!IsLeaf)
             {
-                for (var i = 0; i < 8; i++)
+                for (byte i = 0; i < 8; i++)
                 {
                     Children[i].GetNodes(ref result);
                 }
@@ -278,7 +278,7 @@ namespace SpaceEngine.Core.Octree
         /// Return node containing objects.
         /// </summary>
         /// <returns>Containing objects.</returns>
-        public IEnumerable<T> GetNodeObjects()
+        public IEnumerable<TType> GetNodeObjects()
         {
             return Objects.Select(octreeObject => octreeObject.Object);
         }
@@ -287,7 +287,7 @@ namespace SpaceEngine.Core.Octree
         /// Set the 8 children of this octree.
         /// </summary>
         /// <param name="childOctrees">The 8 new child nodes.</param>
-        public void SetChildren(ref PointOctreeNode<T>[] childOctrees)
+        public void SetChildren(ref PointOctreeNode<TType>[] childOctrees)
         {
             if (childOctrees.Length != 8)
             {
@@ -317,7 +317,7 @@ namespace SpaceEngine.Core.Octree
             {
                 depth++;
 
-                for (var i = 0; i < 8; i++)
+                for (byte i = 0; i < 8; i++)
                 {
                     Children[i].DrawAllBounds(depth);
                 }
@@ -342,7 +342,7 @@ namespace SpaceEngine.Core.Octree
 
             if (!IsLeaf)
             {
-                for (var i = 0; i < 8; i++)
+                for (byte i = 0; i < 8; i++)
                 {
                     Children[i].DrawAllObjects();
                 }
@@ -381,7 +381,7 @@ namespace SpaceEngine.Core.Octree
                 GL.Begin(GL.LINES);
                 GL.Color(Color.blue);
 
-                for (var i = 0; i < 3; i++)
+                for (byte i = 0; i < 3; i++)
                 {
                     GL.Vertex(verts[order[i][0]]);
                     GL.Vertex(verts[order[i][1]]);
@@ -401,7 +401,7 @@ namespace SpaceEngine.Core.Octree
             }
             else
             {
-                for (var i = 0; i < 8; i++)
+                for (byte i = 0; i < 8; i++)
                 {
                     Children[i].DrawNodeOutline(camera, lineMaterial, order);
                 }
@@ -417,7 +417,7 @@ namespace SpaceEngine.Core.Octree
         /// </summary>
         /// <param name="minLength">Minimum dimensions of a node in this octree.</param>
         /// <returns>The new root, or the existing one if we didn't shrink.</returns>
-        public PointOctreeNode<T> ShrinkIfPossible(float minLength)
+        public PointOctreeNode<TType> ShrinkIfPossible(float minLength)
         {
             if (SideLength < (2 * minLength)) { return this; }
             if (Objects.Count == 0 && Children.Length == 0) { return this; }
@@ -425,7 +425,7 @@ namespace SpaceEngine.Core.Octree
             // Check objects in root...
             int bestFit = -1;
 
-            for (var i = 0; i < Objects.Count; i++)
+            for (int i = 0; i < Objects.Count; i++)
             {
                 var obj = Objects[i];
                 var newBestFit = BestFitChild(obj.Position);
@@ -448,7 +448,7 @@ namespace SpaceEngine.Core.Octree
             {
                 var childHadContent = false;
 
-                for (var i = 0; i < Children.Length; i++)
+                for (int i = 0; i < Children.Length; i++)
                 {
                     if (Children[i].HasAnyObjects())
                     {
@@ -528,7 +528,7 @@ namespace SpaceEngine.Core.Octree
         /// </summary>
         /// <param name="obj">Object to add.</param>
         /// <param name="objPos">Position of the object.</param>
-        private void SubAdd(T obj, Vector3 objPos)
+        private void SubAdd(TType obj, Vector3 objPos)
         {
             // We know it fits at this level if we've got this far. Just add if few objects are here, or children would be below min size.
             if (Objects.Count < NUM_OBJECTS_ALLOWED || (SideLength / 2) < MinSize)
@@ -552,7 +552,7 @@ namespace SpaceEngine.Core.Octree
                     }
 
                     // Now that we have the new children, see if this node's existing objects would fit there
-                    for (var i = Objects.Count - 1; i >= 0; i--)
+                    for (int i = Objects.Count - 1; i >= 0; i--)
                     {
                         var existingObj = Objects[i];
 
@@ -579,15 +579,15 @@ namespace SpaceEngine.Core.Octree
             var quarter = SideLength / 4.0f;
             var newLength = SideLength / 2.0f;
 
-            Children = new PointOctreeNode<T>[8];
-            Children[0] = new PointOctreeNode<T>(newLength, MinSize, Center + new Vector3(-quarter, quarter, -quarter));
-            Children[1] = new PointOctreeNode<T>(newLength, MinSize, Center + new Vector3(quarter, quarter, -quarter));
-            Children[2] = new PointOctreeNode<T>(newLength, MinSize, Center + new Vector3(-quarter, quarter, quarter));
-            Children[3] = new PointOctreeNode<T>(newLength, MinSize, Center + new Vector3(quarter, quarter, quarter));
-            Children[4] = new PointOctreeNode<T>(newLength, MinSize, Center + new Vector3(-quarter, -quarter, -quarter));
-            Children[5] = new PointOctreeNode<T>(newLength, MinSize, Center + new Vector3(quarter, -quarter, -quarter));
-            Children[6] = new PointOctreeNode<T>(newLength, MinSize, Center + new Vector3(-quarter, -quarter, quarter));
-            Children[7] = new PointOctreeNode<T>(newLength, MinSize, Center + new Vector3(quarter, -quarter, quarter));
+            Children = new PointOctreeNode<TType>[8];
+            Children[0] = new PointOctreeNode<TType>(newLength, MinSize, Center + new Vector3(-quarter, quarter, -quarter));
+            Children[1] = new PointOctreeNode<TType>(newLength, MinSize, Center + new Vector3(quarter, quarter, -quarter));
+            Children[2] = new PointOctreeNode<TType>(newLength, MinSize, Center + new Vector3(-quarter, quarter, quarter));
+            Children[3] = new PointOctreeNode<TType>(newLength, MinSize, Center + new Vector3(quarter, quarter, quarter));
+            Children[4] = new PointOctreeNode<TType>(newLength, MinSize, Center + new Vector3(-quarter, -quarter, -quarter));
+            Children[5] = new PointOctreeNode<TType>(newLength, MinSize, Center + new Vector3(quarter, -quarter, -quarter));
+            Children[6] = new PointOctreeNode<TType>(newLength, MinSize, Center + new Vector3(-quarter, -quarter, quarter));
+            Children[7] = new PointOctreeNode<TType>(newLength, MinSize, Center + new Vector3(quarter, -quarter, quarter));
         }
 
         /// <summary>
@@ -598,7 +598,7 @@ namespace SpaceEngine.Core.Octree
         private void Merge()
         {
             // NOTE : We know children != null or we wouldn't be merging...
-            for (var i = 0; i < 8; i++)
+            for (byte i = 0; i < 8; i++)
             {
                 var currentChild = Children[i];
                 var objectsCount = currentChild.Objects.Count;
@@ -661,13 +661,13 @@ namespace SpaceEngine.Core.Octree
             return totalObjects <= NUM_OBJECTS_ALLOWED;
         }
 
-        private bool HasAnyObjects()
+        public bool HasAnyObjects()
         {
             if (Objects.Count > 0) return true;
 
             if (!IsLeaf)
             {
-                for (var i = 0; i < 8; i++)
+                for (byte i = 0; i < 8; i++)
                 {
                     if (Children[i].HasAnyObjects()) return true;
                 }

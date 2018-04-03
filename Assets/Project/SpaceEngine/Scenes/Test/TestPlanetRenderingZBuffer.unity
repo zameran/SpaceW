@@ -1766,12 +1766,12 @@ MonoBehaviour:
   m_GameObject: {fileID: 711368264}
   m_Enabled: 0
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 68653af105089ee46a810407cf512fba, type: 3}
+  m_Script: {fileID: 11500000, guid: 152972b69a70d4a4f8255a90caf2d23b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  StarIntensity: 10
+  StarIntensity: 1
   StarsScale: 1
-  StarsDistance: 10000
+  StarsDistance: 1000
   StarfieldShader: {fileID: 4800000, guid: ece832e0047eda44d9e40d94f8df8fda, type: 3}
   StarfieldMaterial: {fileID: 0}
   StarfieldMesh: {fileID: 0}

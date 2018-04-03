@@ -33,6 +33,8 @@
 // Creator: zameran
 #endregion
 
+using SpaceEngine.Tools;
+
 #if UNITY_EDITOR
 using UnityEditor;
 #endif

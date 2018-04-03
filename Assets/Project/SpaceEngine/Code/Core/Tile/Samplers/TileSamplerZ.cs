@@ -2,7 +2,8 @@
 using SpaceEngine.Core.Numerics.Vectors;
 using SpaceEngine.Core.Storage;
 using SpaceEngine.Core.Terrain;
-using SpaceEngine.Core.Utilities;
+using SpaceEngine.Helpers;
+using SpaceEngine.Utilities;
 
 using System;
 using System.Collections.Generic;

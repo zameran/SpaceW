@@ -2,7 +2,9 @@
 using SpaceEngine.Core.Numerics.Matrices;
 using SpaceEngine.Core.Numerics.Shapes;
 using SpaceEngine.Core.Numerics.Vectors;
-using SpaceEngine.Core.Utilities;
+using SpaceEngine.Helpers;
+using SpaceEngine.Tools;
+using SpaceEngine.Utilities;
 
 using System;
 using System.Collections;

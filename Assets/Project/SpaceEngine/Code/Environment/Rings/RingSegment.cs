@@ -34,6 +34,7 @@
 #endregion
 
 using SpaceEngine.Core.Patterns.Strategy.Renderable;
+using SpaceEngine.Helpers;
 
 using UnityEngine;
 using UnityEngine.Rendering;

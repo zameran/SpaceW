@@ -1,4 +1,5 @@
 ﻿using SpaceEngine.Core.Containers;
+using SpaceEngine.Core.Patterns.Singleton;
 
 using System;
 using System.Collections.Generic;

@@ -35,6 +35,7 @@
 
 using SpaceEngine.Core.Patterns.Strategy.Uniformed;
 using SpaceEngine.Core.Utilities.Gradients;
+using SpaceEngine.Helpers;
 
 using System.Collections.Generic;
 

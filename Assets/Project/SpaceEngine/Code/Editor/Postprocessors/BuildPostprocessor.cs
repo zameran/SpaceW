@@ -30,6 +30,8 @@
  */
 #endregion
 
+using SpaceEngine.Tools;
+
 using System.IO;
 
 using UnityEditor;

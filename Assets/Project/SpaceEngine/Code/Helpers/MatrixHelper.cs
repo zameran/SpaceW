@@ -35,81 +35,84 @@
 
 using UnityEngine;
 
-/// <summary>
-/// Class - extensions holder for a matrices.
-/// </summary>
-public static class MatrixHelper
+namespace SpaceEngine.Helpers
 {
-    public static Matrix4x4 Rotation(Quaternion q)
+    /// <summary>
+    /// Class - extensions holder for a matrices.
+    /// </summary>
+    public static class MatrixHelper
     {
-        return Matrix4x4.TRS(Vector3.zero, q, Vector3.one);
-    }
+        public static Matrix4x4 Rotation(Quaternion q)
+        {
+            return Matrix4x4.TRS(Vector3.zero, q, Vector3.one);
+        }
 
-    public static Matrix4x4 Translation(Vector3 xyz)
-    {
-        var matrix = Matrix4x4.identity;
+        public static Matrix4x4 Translation(Vector3 xyz)
+        {
+            var matrix = Matrix4x4.identity;
 
-        matrix.m03 = xyz.x;
-        matrix.m13 = xyz.y;
-        matrix.m23 = xyz.z;
+            matrix.m03 = xyz.x;
+            matrix.m13 = xyz.y;
+            matrix.m23 = xyz.z;
 
-        return matrix;
-    }
+            return matrix;
+        }
 
-    public static Matrix4x4 Scaling(Vector3 xyz)
-    {
-        var matrix = Matrix4x4.identity;
+        public static Matrix4x4 Scaling(Vector3 xyz)
+        {
+            var matrix = Matrix4x4.identity;
 
-        matrix.m00 = xyz.x;
-        matrix.m11 = xyz.y;
-        matrix.m22 = xyz.z;
+            matrix.m00 = xyz.x;
+            matrix.m11 = xyz.y;
+            matrix.m22 = xyz.z;
 
-        return matrix;
-    }
+            return matrix;
+        }
 
-    public static Matrix4x4 ShearingX(Vector2 yz)
-    {
-        var matrix = Matrix4x4.identity;
+        public static Matrix4x4 ShearingX(Vector2 yz)
+        {
+            var matrix = Matrix4x4.identity;
 
-        matrix.m01 = yz.x;
-        matrix.m02 = yz.y;
+            matrix.m01 = yz.x;
+            matrix.m02 = yz.y;
 
-        return matrix;
-    }
+            return matrix;
+        }
 
-    public static Matrix4x4 ShearingY(Vector2 xz)
-    {
-        var matrix = Matrix4x4.identity;
+        public static Matrix4x4 ShearingY(Vector2 xz)
+        {
+            var matrix = Matrix4x4.identity;
 
-        matrix.m10 = xz.x;
-        matrix.m12 = xz.y;
+            matrix.m10 = xz.x;
+            matrix.m12 = xz.y;
 
-        return matrix;
-    }
+            return matrix;
+        }
 
-    public static Matrix4x4 ShearingZ(Vector2 xy)
-    {
-        var matrix = Matrix4x4.identity;
+        public static Matrix4x4 ShearingZ(Vector2 xy)
+        {
+            var matrix = Matrix4x4.identity;
 
-        matrix.m20 = xy.x;
-        matrix.m21 = xy.y;
+            matrix.m20 = xy.x;
+            matrix.m21 = xy.y;
 
-        return matrix;
-    }
+            return matrix;
+        }
 
-    public static Matrix4x4 BillboardMatrix(Vector3 position)
-    {
-        var direction = (position - Vector3.zero).normalized;
-        var particleRight = Vector3.Cross(direction, Vector3.up).normalized;
-        var particleUp = Vector3.Cross(particleRight, direction).normalized;
+        public static Matrix4x4 BillboardMatrix(Vector3 position)
+        {
+            var direction = (position - Vector3.zero).normalized;
+            var particleRight = Vector3.Cross(direction, Vector3.up).normalized;
+            var particleUp = Vector3.Cross(particleRight, direction).normalized;
 
-        var matrix = new Matrix4x4();
+            var matrix = new Matrix4x4();
 
-        matrix.SetColumn(0, particleRight); // right
-        matrix.SetColumn(1, particleUp); // up
-        matrix.SetColumn(2, direction); // forward
-        matrix.SetColumn(3, position); // position
+            matrix.SetColumn(0, particleRight); // right
+            matrix.SetColumn(1, particleUp); // up
+            matrix.SetColumn(2, direction); // forward
+            matrix.SetColumn(3, position); // position
 
-        return matrix;
+            return matrix;
+        }
     }
 }

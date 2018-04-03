@@ -6,6 +6,7 @@ using SpaceEngine.Core.Patterns.Strategy.Uniformed;
 using SpaceEngine.Core.Terrain.Deformation;
 using SpaceEngine.Core.Tile.Producer;
 using SpaceEngine.Core.Tile.Samplers;
+using SpaceEngine.Helpers;
 
 using System;
 using System.Collections.Generic;

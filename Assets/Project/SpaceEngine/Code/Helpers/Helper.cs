@@ -44,578 +44,581 @@ using UnityEngine;
 using Debug = UnityEngine.Debug;
 using Object = UnityEngine.Object;
 
-/// <summary>
-/// Class - extensions holder for a various stuff, such as 
-/// <see cref="Object"/>, <see cref="Vector3"/>, <see cref="Material"/>, <see cref="GameObject"/> and special math.
-/// </summary>
-public static class Helper
+namespace SpaceEngine.Helpers
 {
-    public static void Measure(string label = "Method", Action ToMeasure = null)
+    /// <summary>
+    /// Class - extensions holder for a various stuff, such as 
+    /// <see cref="Object"/>, <see cref="Vector3"/>, <see cref="Material"/>, <see cref="GameObject"/> and special math.
+    /// </summary>
+    public static class Helper
     {
-        var time = Time.realtimeSinceStartup;
-
-        if (ToMeasure != null) ToMeasure();
-
-        var executionTime = Time.realtimeSinceStartup - time;
-
-        Debug.Log(string.Format("[Benchmark.{0}] : Execution time: {1}ms", label, executionTime.ToString("f6")));
-    }
-
-    public static void MeasureNative(string label = "Method", Action ToMeasure = null)
-    {
-        var watch = new Stopwatch();
-        watch.Start();
-
-        if (ToMeasure != null) ToMeasure();
-
-        watch.Stop();
-
-        Debug.Log(string.Format("[Benchmark.{0}] : Execution time: {1}ms", label, watch.Elapsed.TotalMilliseconds.ToString("f6")));
-    }
-
-    public static bool Enabled<T>(T b) where T : Behaviour
-    {
-        return b != null && b.enabled == true && b.gameObject.activeInHierarchy == true;
-    }
-
-    public static bool Enabled(GameObject b)
-    {
-        return b != null && b.activeInHierarchy;
-    }
-
-    public static T Destroy<T>(T o) where T : Object
-    {
-        if (o != null)
+        public static void Measure(string label = "Method", Action ToMeasure = null)
         {
-            Object.DestroyImmediate(o);
+            var time = Time.realtimeSinceStartup;
+
+            if (ToMeasure != null) ToMeasure();
+
+            var executionTime = Time.realtimeSinceStartup - time;
+
+            Debug.Log(string.Format("[Benchmark.{0}] : Execution time: {1}ms", label, executionTime.ToString("f6")));
         }
 
-        return null;
-    }
-
-    public static bool Zero(float v)
-    {
-        return Mathf.Approximately(v, 0.0f);
-    }
-
-    public static float Reciprocal(float v)
-    {
-        return Zero(v) == false ? 1.0f / v : 0.0f;
-    }
-
-    public static float Acos(float v)
-    {
-        if (v >= -1.0f && v <= 1.0f)
+        public static void MeasureNative(string label = "Method", Action ToMeasure = null)
         {
-            return Mathf.Acos(v);
+            var watch = new Stopwatch();
+            watch.Start();
+
+            if (ToMeasure != null) ToMeasure();
+
+            watch.Stop();
+
+            Debug.Log(string.Format("[Benchmark.{0}] : Execution time: {1}ms", label, watch.Elapsed.TotalMilliseconds.ToString("f6")));
         }
 
-        return 0.0f;
-    }
-
-    public static Vector3 Reciprocal3(Vector3 xyz)
-    {
-        return new Vector3(Reciprocal(xyz.x), Reciprocal(xyz.y), Reciprocal(xyz.z));
-    }
-
-    public static float Divide(float a, float b)
-    {
-        return !BrainFuckMath.AlmostEquals(b, 0.0f) ? a / b : 0.0f;
-    }
-
-    public static float DampenFactor(float dampening, float elapsed)
-    {
-        return 1.0f - Mathf.Pow((float)Math.E, -dampening * elapsed);
-    }
-
-    public static float Dampen(float current, float target, float dampening, float elapsed, float minStep = 0.0f)
-    {
-        var factor = DampenFactor(dampening, elapsed);
-        var maxDelta = Mathf.Abs(target - current) * factor + minStep * elapsed;
-
-        return MoveTowards(current, target, maxDelta);
-    }
-
-    public static Quaternion Dampen(Quaternion current, Quaternion target, float dampening, float elapsed, float minStep = 0.0f)
-    {
-        var factor = DampenFactor(dampening, elapsed);
-        var maxDelta = Quaternion.Angle(current, target) * factor + minStep * elapsed;
-
-        return MoveTowards(current, target, maxDelta);
-    }
-
-    public static Vector3 Dampen3(Vector3 current, Vector3 target, float dampening, float elapsed, float minStep = 0.0f)
-    {
-        var factor = DampenFactor(dampening, elapsed);
-        var maxDelta = Mathf.Abs((target - current).magnitude) * factor + minStep * elapsed;
-
-        return Vector3.MoveTowards(current, target, maxDelta);
-    }
-
-    public static Quaternion MoveTowards(Quaternion current, Quaternion target, float maxDelta)
-    {
-        var delta = Quaternion.Angle(current, target);
-
-        return Quaternion.Slerp(current, target, Divide(maxDelta, delta));
-    }
-
-    public static float MoveTowards(float current, float target, float maxDelta)
-    {
-        if (target > current)
+        public static bool Enabled<T>(T b) where T : Behaviour
         {
-            current = Math.Min(target, current + maxDelta);
-        }
-        else
-        {
-            current = Math.Max(target, current - maxDelta);
+            return b != null && b.enabled == true && b.gameObject.activeInHierarchy == true;
         }
 
-        return current;
-    }
-
-    public static void SetLocalRotation(Transform t, Quaternion q)
-    {
-        if (t != null)
+        public static bool Enabled(GameObject b)
         {
-#if UNITY_EDITOR
-            if (Application.isPlaying == false && t.localRotation == q) return;
-#endif
-            t.localRotation = q;
+            return b != null && b.activeInHierarchy;
         }
-    }
 
-    public static Bounds NewBoundsFromMinMax(Vector3 min, Vector3 max)
-    {
-        var bounds = default(Bounds);
-
-        bounds.SetMinMax(min, max);
-
-        return bounds;
-    }
-
-    public static Bounds NewBoundsCenter(Bounds b, Vector3 c)
-    {
-        var x = Mathf.Max(Mathf.Abs(c.x - b.min.x), Mathf.Abs(c.x - b.max.x));
-        var y = Mathf.Max(Mathf.Abs(c.y - b.min.z), Mathf.Abs(c.y - b.max.y));
-        var z = Mathf.Max(Mathf.Abs(c.z - b.min.z), Mathf.Abs(c.z - b.max.z));
-
-        return new Bounds(c, new Vector3(x, y, z) * 2.0f);
-    }
-
-    public static void ResizeArrayTo<T>(ref List<T> array, int size, Func<int, T> newT, Action<T> removeT)
-    {
-        if (array != null)
+        public static T Destroy<T>(T o) where T : Object
         {
-            while (array.Count < size)
+            if (o != null)
             {
-                array.Add(newT != null ? newT(array.Count) : default(T));
+                Object.DestroyImmediate(o);
             }
 
-            while (array.Count > size)
-            {
-                if (removeT != null)
-                {
-                    removeT(array[array.Count - 1]);
-                }
-
-                array.RemoveAt(array.Count - 1);
-            }
-        }
-    }
-
-    public static bool ArraysEqual<T>(T[] a, List<T> b)
-    {
-        if (a == null || b == null) return false;
-
-        if (a.Length != b.Count) return false;
-
-        var comparer = EqualityComparer<T>.Default;
-
-        for (var i = 0; i < a.Length; i++)
-        {
-            if (comparer.Equals(a[i], b[i]) == false)
-            {
-                return false;
-            }
+            return null;
         }
 
-        return true;
-    }
-
-    public static GameObject CloneGameObject(GameObject source, Transform parent, bool keepName = false)
-    {
-        return CloneGameObject(source, parent, source.transform.localPosition, source.transform.localRotation, keepName);
-    }
-
-    public static GameObject CloneGameObject(GameObject source, Transform parent, Vector3 localPosition, Quaternion localRotation, bool keepName = false)
-    {
-        if (source != null)
+        public static bool Zero(float v)
         {
-            var clone = default(GameObject);
+            return Mathf.Approximately(v, 0.0f);
+        }
 
-            if (parent != null)
+        public static float Reciprocal(float v)
+        {
+            return Zero(v) == false ? 1.0f / v : 0.0f;
+        }
+
+        public static float Acos(float v)
+        {
+            if (v >= -1.0f && v <= 1.0f)
             {
-                clone = Object.Instantiate(source);
+                return Mathf.Acos(v);
+            }
 
-                clone.transform.parent = parent;
-                clone.transform.localPosition = localPosition;
-                clone.transform.localRotation = localRotation;
-                clone.transform.localScale = source.transform.localScale;
+            return 0.0f;
+        }
+
+        public static Vector3 Reciprocal3(Vector3 xyz)
+        {
+            return new Vector3(Reciprocal(xyz.x), Reciprocal(xyz.y), Reciprocal(xyz.z));
+        }
+
+        public static float Divide(float a, float b)
+        {
+            return !BrainFuckMath.AlmostEquals(b, 0.0f) ? a / b : 0.0f;
+        }
+
+        public static float DampenFactor(float dampening, float elapsed)
+        {
+            return 1.0f - Mathf.Pow((float)Math.E, -dampening * elapsed);
+        }
+
+        public static float Dampen(float current, float target, float dampening, float elapsed, float minStep = 0.0f)
+        {
+            var factor = DampenFactor(dampening, elapsed);
+            var maxDelta = Mathf.Abs(target - current) * factor + minStep * elapsed;
+
+            return MoveTowards(current, target, maxDelta);
+        }
+
+        public static Quaternion Dampen(Quaternion current, Quaternion target, float dampening, float elapsed, float minStep = 0.0f)
+        {
+            var factor = DampenFactor(dampening, elapsed);
+            var maxDelta = Quaternion.Angle(current, target) * factor + minStep * elapsed;
+
+            return MoveTowards(current, target, maxDelta);
+        }
+
+        public static Vector3 Dampen3(Vector3 current, Vector3 target, float dampening, float elapsed, float minStep = 0.0f)
+        {
+            var factor = DampenFactor(dampening, elapsed);
+            var maxDelta = Mathf.Abs((target - current).magnitude) * factor + minStep * elapsed;
+
+            return Vector3.MoveTowards(current, target, maxDelta);
+        }
+
+        public static Quaternion MoveTowards(Quaternion current, Quaternion target, float maxDelta)
+        {
+            var delta = Quaternion.Angle(current, target);
+
+            return Quaternion.Slerp(current, target, Divide(maxDelta, delta));
+        }
+
+        public static float MoveTowards(float current, float target, float maxDelta)
+        {
+            if (target > current)
+            {
+                current = Math.Min(target, current + maxDelta);
             }
             else
             {
-                clone = Object.Instantiate(source, localPosition, localRotation);
+                current = Math.Max(target, current - maxDelta);
             }
 
-            if (keepName == true) clone.name = source.name;
-
-            return clone;
+            return current;
         }
 
-        return source;
-    }
-
-    public static GameObject CreateGameObject(string name = "", Transform parent = null)
-    {
-        return CreateGameObject(name, parent, Vector3.zero, Quaternion.identity, Vector3.one);
-    }
-
-    public static GameObject CreateGameObject(string name, Transform parent, Vector3 localPosition, Quaternion localRotation, Vector3 localScale)
-    {
-        var gameObject = new GameObject(name);
-
-        gameObject.transform.parent = parent;
-        gameObject.transform.localPosition = localPosition;
-        gameObject.transform.localRotation = localRotation;
-        gameObject.transform.localScale = localScale;
-
-        return gameObject;
-    }
-
-    public static float DistanceToHorizon(float radius, float distanceToCenter)
-    {
-        if (distanceToCenter > radius)
+        public static void SetLocalRotation(Transform t, Quaternion q)
         {
-            return Mathf.Sqrt(distanceToCenter * distanceToCenter - radius * radius);
+            if (t != null)
+            {
+#if UNITY_EDITOR
+                if (Application.isPlaying == false && t.localRotation == q) return;
+#endif
+                t.localRotation = q;
+            }
         }
 
-        return 0.0f;
-    }
-
-    // return.x = -PI   .. +PI
-    // return.y = -PI/2 .. +PI/2
-    public static Vector2 CartesianToPolar(Vector3 xyz)
-    {
-        var longitude = Mathf.Atan2(xyz.x, xyz.z);
-        var latitude = Mathf.Asin(xyz.y / xyz.magnitude);
-
-        return new Vector2(longitude, latitude);
-    }
-
-    // return.x = 0 .. 1
-    // return.y = 0 .. 1
-    public static Vector2 CartesianToPolarUV(Vector3 xyz)
-    {
-        var uv = CartesianToPolar(xyz);
-
-        uv.x = Mathf.Repeat(0.5f - uv.x / (Mathf.PI * 2.0f), 1.0f);
-        uv.y = 0.5f + uv.y / Mathf.PI;
-
-        return uv;
-    }
-
-    public static Vector4 CalculateSpriteUV(Sprite s)
-    {
-        var uv = default(Vector4);
-
-        if (s != null)
+        public static Bounds NewBoundsFromMinMax(Vector3 min, Vector3 max)
         {
-            var r = s.textureRect;
-            var t = s.texture;
+            var bounds = default(Bounds);
 
-            uv.x = Divide(r.xMin, t.width);
-            uv.y = Divide(r.yMin, t.height);
-            uv.z = Divide(r.xMax, t.width);
-            uv.w = Divide(r.yMax, t.height);
+            bounds.SetMinMax(min, max);
+
+            return bounds;
         }
 
-        return uv;
-    }
-
-    public static void SetKeywords(Material m, List<string> keywords, bool checkShaderKeywords = false)
-    {
-        if (keywords == null) return;
-
-        if (checkShaderKeywords)
+        public static Bounds NewBoundsCenter(Bounds b, Vector3 c)
         {
-            if (m != null && ArraysEqual(m.shaderKeywords, keywords) == false)
+            var x = Mathf.Max(Mathf.Abs(c.x - b.min.x), Mathf.Abs(c.x - b.max.x));
+            var y = Mathf.Max(Mathf.Abs(c.y - b.min.z), Mathf.Abs(c.y - b.max.y));
+            var z = Mathf.Max(Mathf.Abs(c.z - b.min.z), Mathf.Abs(c.z - b.max.z));
+
+            return new Bounds(c, new Vector3(x, y, z) * 2.0f);
+        }
+
+        public static void ResizeArrayTo<T>(ref List<T> array, int size, Func<int, T> newT, Action<T> removeT)
+        {
+            if (array != null)
+            {
+                while (array.Count < size)
+                {
+                    array.Add(newT != null ? newT(array.Count) : default(T));
+                }
+
+                while (array.Count > size)
+                {
+                    if (removeT != null)
+                    {
+                        removeT(array[array.Count - 1]);
+                    }
+
+                    array.RemoveAt(array.Count - 1);
+                }
+            }
+        }
+
+        public static bool ArraysEqual<T>(T[] a, List<T> b)
+        {
+            if (a == null || b == null) return false;
+
+            if (a.Length != b.Count) return false;
+
+            var comparer = EqualityComparer<T>.Default;
+
+            for (var i = 0; i < a.Length; i++)
+            {
+                if (comparer.Equals(a[i], b[i]) == false)
+                {
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
+        public static GameObject CloneGameObject(GameObject source, Transform parent, bool keepName = false)
+        {
+            return CloneGameObject(source, parent, source.transform.localPosition, source.transform.localRotation, keepName);
+        }
+
+        public static GameObject CloneGameObject(GameObject source, Transform parent, Vector3 localPosition, Quaternion localRotation, bool keepName = false)
+        {
+            if (source != null)
+            {
+                var clone = default(GameObject);
+
+                if (parent != null)
+                {
+                    clone = Object.Instantiate(source);
+
+                    clone.transform.parent = parent;
+                    clone.transform.localPosition = localPosition;
+                    clone.transform.localRotation = localRotation;
+                    clone.transform.localScale = source.transform.localScale;
+                }
+                else
+                {
+                    clone = Object.Instantiate(source, localPosition, localRotation);
+                }
+
+                if (keepName == true) clone.name = source.name;
+
+                return clone;
+            }
+
+            return source;
+        }
+
+        public static GameObject CreateGameObject(string name = "", Transform parent = null)
+        {
+            return CreateGameObject(name, parent, Vector3.zero, Quaternion.identity, Vector3.one);
+        }
+
+        public static GameObject CreateGameObject(string name, Transform parent, Vector3 localPosition, Quaternion localRotation, Vector3 localScale)
+        {
+            var gameObject = new GameObject(name);
+
+            gameObject.transform.parent = parent;
+            gameObject.transform.localPosition = localPosition;
+            gameObject.transform.localRotation = localRotation;
+            gameObject.transform.localScale = localScale;
+
+            return gameObject;
+        }
+
+        public static float DistanceToHorizon(float radius, float distanceToCenter)
+        {
+            if (distanceToCenter > radius)
+            {
+                return Mathf.Sqrt(distanceToCenter * distanceToCenter - radius * radius);
+            }
+
+            return 0.0f;
+        }
+
+        // return.x = -PI   .. +PI
+        // return.y = -PI/2 .. +PI/2
+        public static Vector2 CartesianToPolar(Vector3 xyz)
+        {
+            var longitude = Mathf.Atan2(xyz.x, xyz.z);
+            var latitude = Mathf.Asin(xyz.y / xyz.magnitude);
+
+            return new Vector2(longitude, latitude);
+        }
+
+        // return.x = 0 .. 1
+        // return.y = 0 .. 1
+        public static Vector2 CartesianToPolarUV(Vector3 xyz)
+        {
+            var uv = CartesianToPolar(xyz);
+
+            uv.x = Mathf.Repeat(0.5f - uv.x / (Mathf.PI * 2.0f), 1.0f);
+            uv.y = 0.5f + uv.y / Mathf.PI;
+
+            return uv;
+        }
+
+        public static Vector4 CalculateSpriteUV(Sprite s)
+        {
+            var uv = default(Vector4);
+
+            if (s != null)
+            {
+                var r = s.textureRect;
+                var t = s.texture;
+
+                uv.x = Divide(r.xMin, t.width);
+                uv.y = Divide(r.yMin, t.height);
+                uv.z = Divide(r.xMax, t.width);
+                uv.w = Divide(r.yMax, t.height);
+            }
+
+            return uv;
+        }
+
+        public static void SetKeywords(Material m, List<string> keywords, bool checkShaderKeywords = false)
+        {
+            if (keywords == null) return;
+
+            if (checkShaderKeywords)
+            {
+                if (m != null && ArraysEqual(m.shaderKeywords, keywords) == false)
+                {
+                    m.shaderKeywords = keywords.ToArray();
+                }
+            }
+            else
             {
                 m.shaderKeywords = keywords.ToArray();
             }
         }
-        else
+
+        public static void ToggleKeyword(Material target, bool state, string enabledKeyword = "FEATURE_ON", string disabledKeyword = "FEATURE_OFF")
         {
-            m.shaderKeywords = keywords.ToArray();
-        }
-    }
-
-    public static void ToggleKeyword(Material target, bool state, string enabledKeyword = "FEATURE_ON", string disabledKeyword = "FEATURE_OFF")
-    {
-        if (state)
-        {
-            if (target.IsKeywordEnabled(disabledKeyword)) target.DisableKeyword(disabledKeyword);
-            if (!target.IsKeywordEnabled(enabledKeyword)) target.EnableKeyword(enabledKeyword);
-        }
-        else
-        {
-            if (target.IsKeywordEnabled(enabledKeyword)) target.DisableKeyword(enabledKeyword);
-            if (!target.IsKeywordEnabled(disabledKeyword)) target.EnableKeyword(disabledKeyword);
-        }
-    }
-
-    public static void ToggleKeyword(Material target, string enableKeyword, string disableKeyword)
-    {
-        EnableKeyword(target, enableKeyword);
-        DisableKeyword(target, disableKeyword);
-    }
-
-    public static void EnableKeyword(Material target, string keyword)
-    {
-        if (!target.IsKeywordEnabled(keyword)) target.EnableKeyword(keyword);
-    }
-
-    public static void DisableKeyword(Material target, string keyword)
-    {
-        if (target.IsKeywordEnabled(keyword)) target.DisableKeyword(keyword);
-    }
-
-    public static Color Brighten(Color color, float brightness)
-    {
-        color.r *= brightness;
-        color.g *= brightness;
-        color.b *= brightness;
-
-        return color;
-    }
-
-    public static Color Premultiply(Color color)
-    {
-        color.r *= color.a;
-        color.g *= color.a;
-        color.b *= color.a;
-
-        return color;
-    }
-
-    public static void CalculateLight(Light light, Vector3 center, Transform directionTransform, Transform positionTransform,
-        ref Vector3 position,
-        ref Vector3 direction,
-        ref Color color)
-    {
-        if (light != null)
-        {
-            position = light.transform.position;
-            direction = Vector3.Normalize(position - center);
-            color = Brighten(light.color, light.intensity * 2.0f);
-
-            switch (light.type)
+            if (state)
             {
-                case LightType.Point:
-                    direction = Vector3.Normalize(position - center);
-                    break;
-                case LightType.Directional: // NOTE : Fix directions for directional light...
-                    position = center + direction * (position - center).magnitude;
-                    break;
+                if (target.IsKeywordEnabled(disabledKeyword)) target.DisableKeyword(disabledKeyword);
+                if (!target.IsKeywordEnabled(enabledKeyword)) target.EnableKeyword(enabledKeyword);
             }
-
-            // Transform into local space?
-            if (directionTransform != null)
+            else
             {
-                direction = directionTransform.InverseTransformDirection(direction);
-            }
-
-            if (positionTransform != null)
-            {
-                position = positionTransform.InverseTransformPoint(position);
+                if (target.IsKeywordEnabled(enabledKeyword)) target.DisableKeyword(enabledKeyword);
+                if (!target.IsKeywordEnabled(disabledKeyword)) target.EnableKeyword(disabledKeyword);
             }
         }
-    }
 
-    public static int WriteLights(List<Light> lights, int maxLights, Vector3 center, Transform directionTransform, Transform positionTransform, params Material[] materials)
-    {
-        var lightCount = 0;
-
-        if (lights != null)
+        public static void ToggleKeyword(Material target, string enableKeyword, string disableKeyword)
         {
-            for (var i = 1; i <= lights.Count; i++)
-            {
-                var light = lights[i - 1];
+            EnableKeyword(target, enableKeyword);
+            DisableKeyword(target, disableKeyword);
+        }
 
-                if (Enabled(light) == true && light.intensity > 0.0f && lightCount < maxLights)
+        public static void EnableKeyword(Material target, string keyword)
+        {
+            if (!target.IsKeywordEnabled(keyword)) target.EnableKeyword(keyword);
+        }
+
+        public static void DisableKeyword(Material target, string keyword)
+        {
+            if (target.IsKeywordEnabled(keyword)) target.DisableKeyword(keyword);
+        }
+
+        public static Color Brighten(Color color, float brightness)
+        {
+            color.r *= brightness;
+            color.g *= brightness;
+            color.b *= brightness;
+
+            return color;
+        }
+
+        public static Color Premultiply(Color color)
+        {
+            color.r *= color.a;
+            color.g *= color.a;
+            color.b *= color.a;
+
+            return color;
+        }
+
+        public static void CalculateLight(Light light, Vector3 center, Transform directionTransform, Transform positionTransform,
+            ref Vector3 position,
+            ref Vector3 direction,
+            ref Color color)
+        {
+            if (light != null)
+            {
+                position = light.transform.position;
+                direction = Vector3.Normalize(position - center);
+                color = Brighten(light.color, light.intensity * 2.0f);
+
+                switch (light.type)
                 {
-                    var prefix = string.Format("_Light{0}", ++lightCount);
-                    var direction = default(Vector3);
-                    var position = default(Vector3);
-                    var color = default(Color);
+                    case LightType.Point:
+                        direction = Vector3.Normalize(position - center);
+                        break;
+                    case LightType.Directional: // NOTE : Fix directions for directional light...
+                        position = center + direction * (position - center).magnitude;
+                        break;
+                }
 
-                    CalculateLight(light, center, directionTransform, positionTransform, ref position, ref direction, ref color);
+                // Transform into local space?
+                if (directionTransform != null)
+                {
+                    direction = directionTransform.InverseTransformDirection(direction);
+                }
 
-                    for (var j = materials.Length - 1; j >= 0; j--)
-                    {
-                        var material = materials[j];
-
-                        if (material != null)
-                        {
-                            material.SetVector(string.Format("{0}Direction", prefix), direction);
-                            material.SetVector(string.Format("{0}Position", prefix), VectorHelper.MakeFrom(position, 1.0f));
-                            material.SetColor(string.Format("{0}Color", prefix), color);
-                        }
-                    }
+                if (positionTransform != null)
+                {
+                    position = positionTransform.InverseTransformPoint(position);
                 }
             }
         }
 
-        return lightCount;
-    }
-
-    public static int WriteShadows(List<Shadow> shadows, int maxShadows, params Material[] materials)
-    {
-        var shadowCount = 0;
-
-        if (shadows != null)
+        public static int WriteLights(List<Light> lights, int maxLights, Vector3 center, Transform directionTransform, Transform positionTransform, params Material[] materials)
         {
-            for (var i = 1; i <= shadows.Count; i++)
+            var lightCount = 0;
+
+            if (lights != null)
             {
-                var shadow = shadows[i - 1];
-
-                if (Enabled(shadow) == true && shadow.CalculateShadow() == true && shadowCount < maxShadows)
+                for (var i = 1; i <= lights.Count; i++)
                 {
-                    var prefix = string.Format("_Shadow{0}", ++shadowCount);
+                    var light = lights[i - 1];
 
-                    for (var j = materials.Length - 1; j >= 0; j--)
+                    if (Enabled(light) == true && light.intensity > 0.0f && lightCount < maxLights)
                     {
-                        var material = materials[j];
+                        var prefix = string.Format("_Light{0}", ++lightCount);
+                        var direction = default(Vector3);
+                        var position = default(Vector3);
+                        var color = default(Color);
 
-                        if (material != null)
+                        CalculateLight(light, center, directionTransform, positionTransform, ref position, ref direction, ref color);
+
+                        for (var j = materials.Length - 1; j >= 0; j--)
                         {
-                            material.SetTexture(string.Format("{0}Texture", prefix), shadow.GetTexture());
-                            material.SetMatrix(string.Format("{0}Matrix", prefix), shadow.Matrix);
-                            material.SetFloat(string.Format("{0}Ratio", prefix), shadow.Ratio);
+                            var material = materials[j];
+
+                            if (material != null)
+                            {
+                                material.SetVector(string.Format("{0}Direction", prefix), direction);
+                                material.SetVector(string.Format("{0}Position", prefix), VectorHelper.MakeFrom(position, 1.0f));
+                                material.SetColor(string.Format("{0}Color", prefix), color);
+                            }
                         }
                     }
                 }
             }
+
+            return lightCount;
         }
 
-        return shadowCount;
-    }
-
-    public static int WriteShadows(List<Shadow> shadows, int maxShadows, params MaterialPropertyBlock[] blocks)
-    {
-        var shadowCount = 0;
-
-        if (shadows != null)
+        public static int WriteShadows(List<Shadow> shadows, int maxShadows, params Material[] materials)
         {
-            for (var i = 1; i <= shadows.Count; i++)
+            var shadowCount = 0;
+
+            if (shadows != null)
             {
-                var shadow = shadows[i - 1];
-
-                if (Enabled(shadow) == true && shadow.CalculateShadow() == true && shadowCount < maxShadows)
+                for (var i = 1; i <= shadows.Count; i++)
                 {
-                    var prefix = string.Format("_Shadow{0}", ++shadowCount);
+                    var shadow = shadows[i - 1];
 
-                    for (var j = blocks.Length - 1; j >= 0; j--)
+                    if (Enabled(shadow) == true && shadow.CalculateShadow() == true && shadowCount < maxShadows)
                     {
-                        var block = blocks[j];
+                        var prefix = string.Format("_Shadow{0}", ++shadowCount);
 
-                        if (block != null)
+                        for (var j = materials.Length - 1; j >= 0; j--)
                         {
-                            block.SetTexture(string.Format("{0}Texture", prefix), shadow.GetTexture());
-                            block.SetMatrix(string.Format("{0}Matrix", prefix), shadow.Matrix);
-                            block.SetFloat(string.Format("{0}Ratio", prefix), shadow.Ratio);
+                            var material = materials[j];
+
+                            if (material != null)
+                            {
+                                material.SetTexture(string.Format("{0}Texture", prefix), shadow.GetTexture());
+                                material.SetMatrix(string.Format("{0}Matrix", prefix), shadow.Matrix);
+                                material.SetFloat(string.Format("{0}Ratio", prefix), shadow.Ratio);
+                            }
                         }
                     }
                 }
             }
+
+            return shadowCount;
         }
 
-        return shadowCount;
-    }
+        public static int WriteShadows(List<Shadow> shadows, int maxShadows, params MaterialPropertyBlock[] blocks)
+        {
+            var shadowCount = 0;
 
-    public static Matrix4x4 Scaling(Vector3 xyz)
-    {
-        var matrix = Matrix4x4.identity;
+            if (shadows != null)
+            {
+                for (var i = 1; i <= shadows.Count; i++)
+                {
+                    var shadow = shadows[i - 1];
 
-        matrix.m00 = xyz.x;
-        matrix.m11 = xyz.y;
-        matrix.m22 = xyz.z;
+                    if (Enabled(shadow) == true && shadow.CalculateShadow() == true && shadowCount < maxShadows)
+                    {
+                        var prefix = string.Format("_Shadow{0}", ++shadowCount);
 
-        return matrix;
-    }
+                        for (var j = blocks.Length - 1; j >= 0; j--)
+                        {
+                            var block = blocks[j];
 
-    public static Matrix4x4 Rotation(Quaternion q)
-    {
-        var matrix = Matrix4x4.TRS(Vector3.zero, q, Vector3.one);
+                            if (block != null)
+                            {
+                                block.SetTexture(string.Format("{0}Texture", prefix), shadow.GetTexture());
+                                block.SetMatrix(string.Format("{0}Matrix", prefix), shadow.Matrix);
+                                block.SetFloat(string.Format("{0}Ratio", prefix), shadow.Ratio);
+                            }
+                        }
+                    }
+                }
+            }
 
-        return matrix;
-    }
+            return shadowCount;
+        }
 
-    public static Matrix4x4 Translation(Vector3 xyz)
-    {
-        var matrix = Matrix4x4.identity;
+        public static Matrix4x4 Scaling(Vector3 xyz)
+        {
+            var matrix = Matrix4x4.identity;
 
-        matrix.m03 = xyz.x;
-        matrix.m13 = xyz.y;
-        matrix.m23 = xyz.z;
+            matrix.m00 = xyz.x;
+            matrix.m11 = xyz.y;
+            matrix.m22 = xyz.z;
 
-        return matrix;
-    }
+            return matrix;
+        }
 
-    public static Texture2D CreateTempTeture2D(int width,
-        int height,
-        TextureFormat format = TextureFormat.ARGB32,
-        bool mips = false,
-        bool linear = false,
-        bool recordUndo = true)
-    {
-        var texture2D = new Texture2D(width, height, format, mips, linear);
+        public static Matrix4x4 Rotation(Quaternion q)
+        {
+            var matrix = Matrix4x4.TRS(Vector3.zero, q, Vector3.one);
 
-        texture2D.hideFlags = HideFlags.DontSave;
+            return matrix;
+        }
 
-        return texture2D;
-    }
+        public static Matrix4x4 Translation(Vector3 xyz)
+        {
+            var matrix = Matrix4x4.identity;
+
+            matrix.m03 = xyz.x;
+            matrix.m13 = xyz.y;
+            matrix.m23 = xyz.z;
+
+            return matrix;
+        }
+
+        public static Texture2D CreateTempTeture2D(int width,
+            int height,
+            TextureFormat format = TextureFormat.ARGB32,
+            bool mips = false,
+            bool linear = false,
+            bool recordUndo = true)
+        {
+            var texture2D = new Texture2D(width, height, format, mips, linear);
+
+            texture2D.hideFlags = HideFlags.DontSave;
+
+            return texture2D;
+        }
 
 #if UNITY_EDITOR
-    public static void DrawSphere(Vector3 center, Vector3 right, Vector3 up, Vector3 forward, int resolution = 32)
-    {
-        DrawCircle(center, right, up, resolution);
-        DrawCircle(center, right, forward, resolution);
-        DrawCircle(center, forward, up, resolution);
-    }
-
-    public static void DrawCircle(Vector3 center, Vector3 right, Vector3 up, int resolution = 32)
-    {
-        var step = Reciprocal(resolution);
-
-        for (var i = 0; i < resolution; i++)
+        public static void DrawSphere(Vector3 center, Vector3 right, Vector3 up, Vector3 forward, int resolution = 32)
         {
-            var a = i * step;
-            var b = a + step;
-
-            a = a * Mathf.PI * 2.0f;
-            b = b * Mathf.PI * 2.0f;
-
-            Gizmos.DrawLine(center + right * Mathf.Sin(a) + up * Mathf.Cos(a), center + right * Mathf.Sin(b) + up * Mathf.Cos(b));
+            DrawCircle(center, right, up, resolution);
+            DrawCircle(center, right, forward, resolution);
+            DrawCircle(center, forward, up, resolution);
         }
-    }
 
-    public static void DrawCircle(Vector3 center, Vector3 axis, float radius, int resolution = 32)
-    {
-        var rotation = Quaternion.FromToRotation(Vector3.up, axis);
-        var right = rotation * Vector3.right * radius;
-        var forward = rotation * Vector3.forward * radius;
+        public static void DrawCircle(Vector3 center, Vector3 right, Vector3 up, int resolution = 32)
+        {
+            var step = Reciprocal(resolution);
 
-        DrawCircle(center, right, forward, resolution);
-    }
+            for (var i = 0; i < resolution; i++)
+            {
+                var a = i * step;
+                var b = a + step;
+
+                a = a * Mathf.PI * 2.0f;
+                b = b * Mathf.PI * 2.0f;
+
+                Gizmos.DrawLine(center + right * Mathf.Sin(a) + up * Mathf.Cos(a), center + right * Mathf.Sin(b) + up * Mathf.Cos(b));
+            }
+        }
+
+        public static void DrawCircle(Vector3 center, Vector3 axis, float radius, int resolution = 32)
+        {
+            var rotation = Quaternion.FromToRotation(Vector3.up, axis);
+            var right = rotation * Vector3.right * radius;
+            var forward = rotation * Vector3.forward * radius;
+
+            DrawCircle(center, right, forward, resolution);
+        }
 #endif
+    }
 }

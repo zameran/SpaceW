@@ -45,6 +45,8 @@ using SpaceEngine.Environment.Oceanic;
 using SpaceEngine.Environment.Rings;
 using SpaceEngine.Environment.Shadows;
 using SpaceEngine.Environment.Sun;
+using SpaceEngine.Helpers;
+using SpaceEngine.Tools;
 
 using System.Collections.Generic;
 

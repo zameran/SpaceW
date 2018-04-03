@@ -36,7 +36,9 @@
 using SpaceEngine.Core.Debugging;
 using SpaceEngine.Core.Patterns.Strategy.Eventit;
 using SpaceEngine.Enums;
+using SpaceEngine.Helpers;
 using SpaceEngine.Pluginator.Attributes;
+using SpaceEngine.Tools;
 
 using System;
 using System.Collections.Generic;
@@ -56,8 +58,8 @@ namespace SpaceEngine.Pluginator
     {
         private bool Loaded = false;
 
-        public int TotalDetected = 0;
-        public int TotalLoaded = 0;
+        [HideInInspector] public int TotalDetected = 0;
+        [HideInInspector] public int TotalLoaded = 0;
 
         public List<AssemblyExternal> ExternalAssemblies = new List<AssemblyExternal>();
 

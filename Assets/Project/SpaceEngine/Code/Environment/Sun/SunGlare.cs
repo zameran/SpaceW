@@ -38,7 +38,9 @@ using SpaceEngine.Core.Patterns.Strategy.Renderable;
 using SpaceEngine.Core.Patterns.Strategy.Uniformed;
 using SpaceEngine.Enums;
 using SpaceEngine.Environment.Atmospheric;
+using SpaceEngine.Helpers;
 using SpaceEngine.SciptableObjects;
+using SpaceEngine.Tools;
 
 using UnityEngine;
 

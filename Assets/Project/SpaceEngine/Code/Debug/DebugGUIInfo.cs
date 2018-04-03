@@ -33,6 +33,8 @@
 // Creator: zameran
 #endregion
 
+using SpaceEngine.Tools;
+
 using UnityEngine;
 
 namespace SpaceEngine.Debugging

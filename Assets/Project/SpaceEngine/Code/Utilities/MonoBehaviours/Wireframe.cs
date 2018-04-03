@@ -1,7 +1,7 @@
 ﻿#region License
 // Procedural planet generator.
 // 
-// Copyright (C) 2015-2018 Denis Ovchinnikov [zameran] 
+// Copyright (C) 2015-2017 Denis Ovchinnikov [zameran] 
 // All rights reserved.
 // 
 // Redistribution and use in source and binary forms, with or without
@@ -33,26 +33,31 @@
 // Creator: zameran
 #endregion
 
-using System;
-using System.Runtime.InteropServices;
-
 using UnityEngine;
 
-namespace SpaceEngine.Startfield
+namespace SpaceEngine.Utilities.MonoBehaviours
 {
-    [Serializable]
-    [StructLayout(LayoutKind.Sequential)]
-    public struct StarfieldStar
+    // NOTE : Wireframe mode will not work in build with 'Graphics Jobs' option enabled. [Unity 5.4.1f1 Windows x86/x64]
+    // NOTE : Looks like works good even with 'Graphics Jobs' option enabled after [Unity 2017 Windows x86/x64]
+    public class Wireframe : MonoBehaviour
     {
-        public Vector3 Position;
+        public bool Enabled = false;
 
-        public Vector4 Color;
-
-        public StarfieldStar(Vector3 Position, Vector4 Color)
+        private void LateUpdate()
         {
-            this.Position = Position;
+            if (Input.GetKeyDown(KeyCode.Slash))
+                Enabled = !Enabled;
+        }
 
-            this.Color = Color;
+        private void OnPreRender()
+        {
+            if (Enabled)
+                GL.wireframe = true;
+        }
+
+        private void OnPostRender()
+        {
+            GL.wireframe = false;
         }
     }
 }

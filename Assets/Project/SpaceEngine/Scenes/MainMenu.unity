@@ -309,6 +309,11 @@ Prefab:
       propertyPath: m_AnchorMax.y
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 224239574057842052, guid: cfb9f9098ab9681478c8e8bf96f53310,
+        type: 2}
+      propertyPath: m_SizeDelta.y
+      value: 0
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_ParentPrefab: {fileID: 100100000, guid: cfb9f9098ab9681478c8e8bf96f53310, type: 2}
   m_IsPrefabParent: 0

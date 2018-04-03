@@ -35,11 +35,14 @@
 
 using SpaceEngine.Cameras;
 using SpaceEngine.Core.Bodies;
+using SpaceEngine.Core.Patterns.Singleton;
 using SpaceEngine.Core.Utilities;
 using SpaceEngine.Enums;
+using SpaceEngine.Environment.Startfield;
 using SpaceEngine.Environment.Sun;
+using SpaceEngine.Helpers;
 using SpaceEngine.SciptableObjects;
-using SpaceEngine.Startfield;
+using SpaceEngine.Tools;
 
 using System.Linq;
 

@@ -34,6 +34,7 @@
 #endregion
 
 using SpaceEngine.Core.Debugging;
+using SpaceEngine.Core.Patterns.Singleton;
 using SpaceEngine.Core.Patterns.Strategy.Uniformed;
 
 using UnityEngine;

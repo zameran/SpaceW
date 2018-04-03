@@ -41,8 +41,8 @@ using SpaceEngine.Core.Patterns.Strategy.Reanimator;
 using SpaceEngine.Core.Patterns.Strategy.Renderable;
 using SpaceEngine.Core.Patterns.Strategy.Uniformed;
 using SpaceEngine.Core.Preprocess.Atmospehre;
-
 using SpaceEngine.Enums;
+using SpaceEngine.Helpers;
 
 using System.ComponentModel;
 

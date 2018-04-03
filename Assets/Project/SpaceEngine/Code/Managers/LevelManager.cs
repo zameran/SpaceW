@@ -33,7 +33,9 @@
 // Creator: zameran
 #endregion
 
+using SpaceEngine.Core.Patterns.Singleton;
 using SpaceEngine.Enums;
+using SpaceEngine.Tools;
 using SpaceEngine.UI.Panels;
 
 using System;

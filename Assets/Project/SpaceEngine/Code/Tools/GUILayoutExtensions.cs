@@ -37,351 +37,354 @@ using System;
 
 using UnityEngine;
 
-public static class GUILayoutExtensions
+namespace SpaceEngine.Tools
 {
-    public static void Space(int spacing)
+    public static class GUILayoutExtensions
     {
-        GUILayout.Space(spacing);
-    }
-
-    public static void BoxedPreHeader(int spacing = 20)
-    {
-        Space(spacing);
-    }
-
-    public static void SpacingSeparator(int spacing = 5)
-    {
-        Space(spacing);
-    }
-
-    public static string Field(ref float value, string pattern = "0.0", int textFieldWidth = 75)
-    {
-        return GUILayout.TextField(value.ToString(pattern), GUILayout.MaxWidth(textFieldWidth));
-    }
-
-    public static string Field(ref int value, string pattern = "0", int textFieldWidth = 75)
-    {
-        return GUILayout.TextField(value.ToString(pattern), GUILayout.MaxWidth(textFieldWidth));
-    }
-
-    public static void DrawFieldValue(ref float value, string caption = "Float Value: ", string pattern = "0.0", int textFieldWidth = 75)
-    {
-        GUILayout.Label(caption);
-        value = float.Parse(Field(ref value, pattern, textFieldWidth));
-    }
-
-    public static void DrawFieldValue(ref int value, string caption = "Int Value: ", string pattern = "0", int textFieldWidth = 75)
-    {
-        GUILayout.Label(caption);
-        value = int.Parse(Field(ref value, pattern, textFieldWidth));
-    }
-
-    public static void SliderWithField(object caption, float leftValue, float rightValue, ref float value, string pattern = "0.0", int textFieldWidth = 75, bool inline = false)
-    {
-        if (!inline) GUILayout.Label(caption.ToString());
-
-        GUILayout.BeginHorizontal();
-
-        if (inline) GUILayout.Label(caption.ToString(), GUILayout.ExpandWidth(false));
-
-        value = float.Parse(Field(ref value, pattern, textFieldWidth));
-        value = GUILayout.HorizontalSlider(value, leftValue, rightValue);
-        value = Mathf.Clamp(value, leftValue, rightValue);
-
-        GUILayout.EndHorizontal();
-    }
-
-    public static void SliderWithField(object caption, int leftValue, int rightValue, ref int value, string pattern = "0", int textFieldWidth = 75, bool inline = false)
-    {
-        if (!inline) GUILayout.Label(caption.ToString());
-
-        GUILayout.BeginHorizontal();
-
-        if (inline) GUILayout.Label(caption.ToString(), GUILayout.ExpandWidth(false));
-
-        value = int.Parse(Field(ref value, pattern, textFieldWidth));
-        value = Mathf.FloorToInt(GUILayout.HorizontalSlider(value, leftValue, rightValue));
-        value = Mathf.Clamp(value, leftValue, rightValue);
-
-        GUILayout.EndHorizontal();
-    }
-
-    public static void SliderWithFieldAndControls(object caption, float leftValue, float rightValue, ref float value, string pattern = "0.0", int textFieldWidth = 75, float controlStep = 1.0f)
-    {
-        GUILayout.Label(caption.ToString());
-
-        GUILayout.BeginHorizontal();
-
-        value = float.Parse(Field(ref value, pattern, textFieldWidth));
-
-        if (GUILayout.Button("+", GUILayout.Width(20))) { value += controlStep; }
-        if (GUILayout.Button("-", GUILayout.Width(20))) { value -= controlStep; }
-
-        value = GUILayout.HorizontalSlider(value, leftValue, rightValue);
-        value = Mathf.Clamp(value, leftValue, rightValue);
-
-        GUILayout.EndHorizontal();
-    }
-
-    public static void SliderWithFieldAndControls(object caption, int leftValue, int rightValue, ref int value, string pattern = "0", int textFieldWidth = 75, int controlStep = 1)
-    {
-        GUILayout.Label(caption.ToString());
-
-        GUILayout.BeginHorizontal();
-
-        value = int.Parse(Field(ref value, pattern, textFieldWidth));
-
-        if (GUILayout.Button("+", GUILayout.Width(20))) { value += controlStep; }
-        if (GUILayout.Button("-", GUILayout.Width(20))) { value -= controlStep; }
-
-        value = Mathf.FloorToInt(GUILayout.HorizontalSlider(value, leftValue, rightValue));
-        value = Mathf.Clamp(value, leftValue, rightValue);
-
-        GUILayout.EndHorizontal();
-    }
-
-    public static void LabelWithFlexibleSpace(object text1, object text2)
-    {
-        GUILayout.Label(text1.ToString());
-        GUILayout.FlexibleSpace();
-        GUILayout.Label(text2.ToString());
-    }
-
-    public static void LabelWithSpace(string text, int space = -8)
-    {
-        GUILayout.Label(text);
-
-        Space(space);
-    }
-
-    public static void LabelWithSpace(GUIContent content, int space = -8)
-    {
-        GUILayout.Label(content);
-
-        Space(space);
-    }
-
-    public static void Horizontal(Action body)
-    {
-        GUILayout.BeginHorizontal();
-        if (body != null) body();
-        GUILayout.EndHorizontal();
-    }
-
-    public static void Vertical(Action body)
-    {
-        GUILayout.BeginVertical();
-        if (body != null) body();
-        GUILayout.EndVertical();
-    }
-
-    public static void VerticalBoxed(string caption, GUISkin skin, Action body, params GUILayoutOption[] options)
-    {
-        GUILayout.BeginVertical(caption, skin.box, options);
+        public static void Space(int spacing)
         {
-            if (!string.IsNullOrWhiteSpace(caption)) { BoxedPreHeader(); }
+            GUILayout.Space(spacing);
+        }
+
+        public static void BoxedPreHeader(int spacing = 20)
+        {
+            Space(spacing);
+        }
+
+        public static void SpacingSeparator(int spacing = 5)
+        {
+            Space(spacing);
+        }
+
+        public static string Field(ref float value, string pattern = "0.0", int textFieldWidth = 75)
+        {
+            return GUILayout.TextField(value.ToString(pattern), GUILayout.MaxWidth(textFieldWidth));
+        }
+
+        public static string Field(ref int value, string pattern = "0", int textFieldWidth = 75)
+        {
+            return GUILayout.TextField(value.ToString(pattern), GUILayout.MaxWidth(textFieldWidth));
+        }
+
+        public static void DrawFieldValue(ref float value, string caption = "Float Value: ", string pattern = "0.0", int textFieldWidth = 75)
+        {
+            GUILayout.Label(caption);
+            value = float.Parse(Field(ref value, pattern, textFieldWidth));
+        }
+
+        public static void DrawFieldValue(ref int value, string caption = "Int Value: ", string pattern = "0", int textFieldWidth = 75)
+        {
+            GUILayout.Label(caption);
+            value = int.Parse(Field(ref value, pattern, textFieldWidth));
+        }
+
+        public static void SliderWithField(object caption, float leftValue, float rightValue, ref float value, string pattern = "0.0", int textFieldWidth = 75, bool inline = false)
+        {
+            if (!inline) GUILayout.Label(caption.ToString());
+
+            GUILayout.BeginHorizontal();
+
+            if (inline) GUILayout.Label(caption.ToString(), GUILayout.ExpandWidth(false));
+
+            value = float.Parse(Field(ref value, pattern, textFieldWidth));
+            value = GUILayout.HorizontalSlider(value, leftValue, rightValue);
+            value = Mathf.Clamp(value, leftValue, rightValue);
+
+            GUILayout.EndHorizontal();
+        }
+
+        public static void SliderWithField(object caption, int leftValue, int rightValue, ref int value, string pattern = "0", int textFieldWidth = 75, bool inline = false)
+        {
+            if (!inline) GUILayout.Label(caption.ToString());
+
+            GUILayout.BeginHorizontal();
+
+            if (inline) GUILayout.Label(caption.ToString(), GUILayout.ExpandWidth(false));
+
+            value = int.Parse(Field(ref value, pattern, textFieldWidth));
+            value = Mathf.FloorToInt(GUILayout.HorizontalSlider(value, leftValue, rightValue));
+            value = Mathf.Clamp(value, leftValue, rightValue);
+
+            GUILayout.EndHorizontal();
+        }
+
+        public static void SliderWithFieldAndControls(object caption, float leftValue, float rightValue, ref float value, string pattern = "0.0", int textFieldWidth = 75, float controlStep = 1.0f)
+        {
+            GUILayout.Label(caption.ToString());
+
+            GUILayout.BeginHorizontal();
+
+            value = float.Parse(Field(ref value, pattern, textFieldWidth));
+
+            if (GUILayout.Button("+", GUILayout.Width(20))) { value += controlStep; }
+            if (GUILayout.Button("-", GUILayout.Width(20))) { value -= controlStep; }
+
+            value = GUILayout.HorizontalSlider(value, leftValue, rightValue);
+            value = Mathf.Clamp(value, leftValue, rightValue);
+
+            GUILayout.EndHorizontal();
+        }
+
+        public static void SliderWithFieldAndControls(object caption, int leftValue, int rightValue, ref int value, string pattern = "0", int textFieldWidth = 75, int controlStep = 1)
+        {
+            GUILayout.Label(caption.ToString());
+
+            GUILayout.BeginHorizontal();
+
+            value = int.Parse(Field(ref value, pattern, textFieldWidth));
+
+            if (GUILayout.Button("+", GUILayout.Width(20))) { value += controlStep; }
+            if (GUILayout.Button("-", GUILayout.Width(20))) { value -= controlStep; }
+
+            value = Mathf.FloorToInt(GUILayout.HorizontalSlider(value, leftValue, rightValue));
+            value = Mathf.Clamp(value, leftValue, rightValue);
+
+            GUILayout.EndHorizontal();
+        }
+
+        public static void LabelWithFlexibleSpace(object text1, object text2)
+        {
+            GUILayout.Label(text1.ToString());
+            GUILayout.FlexibleSpace();
+            GUILayout.Label(text2.ToString());
+        }
+
+        public static void LabelWithSpace(string text, int space = -8)
+        {
+            GUILayout.Label(text);
+
+            Space(space);
+        }
+
+        public static void LabelWithSpace(GUIContent content, int space = -8)
+        {
+            GUILayout.Label(content);
+
+            Space(space);
+        }
+
+        public static void Horizontal(Action body)
+        {
+            GUILayout.BeginHorizontal();
+            if (body != null) body();
+            GUILayout.EndHorizontal();
+        }
+
+        public static void Vertical(Action body)
+        {
+            GUILayout.BeginVertical();
+            if (body != null) body();
+            GUILayout.EndVertical();
+        }
+
+        public static void VerticalBoxed(string caption, GUISkin skin, Action body, params GUILayoutOption[] options)
+        {
+            GUILayout.BeginVertical(caption, skin.box, options);
+            {
+                if (!string.IsNullOrWhiteSpace(caption)) { BoxedPreHeader(); }
+
+                if (body != null) body();
+            }
+            GUILayout.EndVertical();
+        }
+
+        public static void HorizontalBoxed(string caption, GUISkin skin, Action body, params GUILayoutOption[] options)
+        {
+            GUILayout.BeginHorizontal(caption, skin.box, options);
+            {
+                if (body != null) body();
+            }
+            GUILayout.EndHorizontal();
+        }
+
+        public static void DrawWithColor(Action body, Color color)
+        {
+            var tempColor = GUI.color;
+
+            GUI.color = color;
 
             if (body != null) body();
+
+            GUI.color = tempColor;
         }
-        GUILayout.EndVertical();
-    }
 
-    public static void HorizontalBoxed(string caption, GUISkin skin, Action body, params GUILayoutOption[] options)
-    {
-        GUILayout.BeginHorizontal(caption, skin.box, options);
+        public static void DrawBadHolder(string caption, string message, GUISkin skin)
         {
-            if (body != null) body();
+            VerticalBoxed(caption, skin, () =>
+            {
+                VerticalBoxed("", skin, () =>
+                {
+                    LabelWithSpace(message, -8);
+
+                    SpacingSeparator();
+                });
+            });
+
+            SpacingSeparator();
         }
-        GUILayout.EndHorizontal();
-    }
 
-    public static void DrawWithColor(Action body, Color color)
-    {
-        var tempColor = GUI.color;
-
-        GUI.color = color;
-
-        if (body != null) body();
-
-        GUI.color = tempColor;
-    }
-
-    public static void DrawBadHolder(string caption, string message, GUISkin skin)
-    {
-        VerticalBoxed(caption, skin, () =>
+        public static void DrawRGBWithSlidersAndFields(ref Color value, float leftValue, float rightValue, GUISkin skin, string caption = "Color (RGB)", string pattern = "0.0000", int textFieldWidth = 100)
         {
-            VerticalBoxed("", skin, () =>
+            var r = value.r;
+            var g = value.g;
+            var b = value.b;
+
+            VerticalBoxed(caption, skin, () =>
             {
-                LabelWithSpace(message, -8);
-
-                SpacingSeparator();
+                SliderWithField("R: ", leftValue, rightValue, ref r, pattern, textFieldWidth, true);
+                SliderWithField("G: ", leftValue, rightValue, ref g, pattern, textFieldWidth, true);
+                SliderWithField("B: ", leftValue, rightValue, ref b, pattern, textFieldWidth, true);
             });
-        });
 
-        SpacingSeparator();
-    }
+            SpacingSeparator();
 
-    public static void DrawRGBWithSlidersAndFields(ref Color value, float leftValue, float rightValue, GUISkin skin, string caption = "Color (RGB)", string pattern = "0.0000", int textFieldWidth = 100)
-    {
-        var r = value.r;
-        var g = value.g;
-        var b = value.b;
+            value = new Color(r, g, b);
+        }
 
-        VerticalBoxed(caption, skin, () =>
+        public static void DrawRGBWithFields(ref Color value, float leftValue, float rightValue, GUISkin skin, string caption = "Color (RGB)", string pattern = "0.0000", int textFieldWidth = 100)
         {
-            SliderWithField("R: ", leftValue, rightValue, ref r, pattern, textFieldWidth, true);
-            SliderWithField("G: ", leftValue, rightValue, ref g, pattern, textFieldWidth, true);
-            SliderWithField("B: ", leftValue, rightValue, ref b, pattern, textFieldWidth, true);
-        });
+            var r = value.r;
+            var g = value.g;
+            var b = value.b;
 
-        SpacingSeparator();
-
-        value = new Color(r, g, b);
-    }
-
-    public static void DrawRGBWithFields(ref Color value, float leftValue, float rightValue, GUISkin skin, string caption = "Color (RGB)", string pattern = "0.0000", int textFieldWidth = 100)
-    {
-        var r = value.r;
-        var g = value.g;
-        var b = value.b;
-
-        VerticalBoxed(caption, skin, () =>
-        {
-            HorizontalBoxed("", skin, () =>
+            VerticalBoxed(caption, skin, () =>
             {
-                DrawFieldValue(ref r, "R: ", pattern, textFieldWidth);
-                DrawFieldValue(ref g, "G: ", pattern, textFieldWidth);
-                DrawFieldValue(ref b, "B: ", pattern, textFieldWidth);
+                HorizontalBoxed("", skin, () =>
+                {
+                    DrawFieldValue(ref r, "R: ", pattern, textFieldWidth);
+                    DrawFieldValue(ref g, "G: ", pattern, textFieldWidth);
+                    DrawFieldValue(ref b, "B: ", pattern, textFieldWidth);
+                });
             });
-        });
 
-        SpacingSeparator();
+            SpacingSeparator();
 
-        value = new Color(r, g, b);
-    }
+            value = new Color(r, g, b);
+        }
 
-    public static void DrawRGBAWithSlidersAndFields(ref Color value, float leftValue, float rightValue, GUISkin skin, string caption = "Color (RGBA)", string pattern = "0.0000", int textFieldWidth = 100)
-    {
-        var r = value.r;
-        var g = value.g;
-        var b = value.b;
-        var a = value.a;
-
-        VerticalBoxed(caption, skin, () =>
+        public static void DrawRGBAWithSlidersAndFields(ref Color value, float leftValue, float rightValue, GUISkin skin, string caption = "Color (RGBA)", string pattern = "0.0000", int textFieldWidth = 100)
         {
-            SliderWithField("R: ", leftValue, rightValue, ref r, pattern, textFieldWidth, true);
-            SliderWithField("G: ", leftValue, rightValue, ref g, pattern, textFieldWidth, true);
-            SliderWithField("B: ", leftValue, rightValue, ref b, pattern, textFieldWidth, true);
-            SliderWithField("A: ", leftValue, rightValue, ref a, pattern, textFieldWidth, true);
-        });
+            var r = value.r;
+            var g = value.g;
+            var b = value.b;
+            var a = value.a;
 
-        SpacingSeparator();
-
-        value = new Vector4(r, g, b, a);
-    }
-
-    public static void DrawRGBAWithFields(ref Color value, float leftValue, float rightValue, GUISkin skin, string caption = "Color (RGB)", string pattern = "0.0000", int textFieldWidth = 100)
-    {
-        var r = value.r;
-        var g = value.g;
-        var b = value.b;
-        var a = value.a;
-
-        VerticalBoxed(caption, skin, () =>
-        {
-            HorizontalBoxed("", skin, () =>
+            VerticalBoxed(caption, skin, () =>
             {
-                DrawFieldValue(ref r, "R: ", pattern, textFieldWidth);
-                DrawFieldValue(ref g, "G: ", pattern, textFieldWidth);
-                DrawFieldValue(ref b, "B: ", pattern, textFieldWidth);
-                DrawFieldValue(ref a, "A: ", pattern, textFieldWidth);
+                SliderWithField("R: ", leftValue, rightValue, ref r, pattern, textFieldWidth, true);
+                SliderWithField("G: ", leftValue, rightValue, ref g, pattern, textFieldWidth, true);
+                SliderWithField("B: ", leftValue, rightValue, ref b, pattern, textFieldWidth, true);
+                SliderWithField("A: ", leftValue, rightValue, ref a, pattern, textFieldWidth, true);
             });
-        });
 
-        SpacingSeparator();
+            SpacingSeparator();
 
-        value = new Color(r, g, b, a);
-    }
+            value = new Vector4(r, g, b, a);
+        }
 
-    public static void DrawVectorWithFields(ref Vector3 value, float leftValue, float rightValue, GUISkin skin, string caption = "Vector", string pattern = "0.0", int textFieldWidth = 100)
-    {
-        var x = value.x;
-        var y = value.y;
-        var z = value.z;
-
-        VerticalBoxed(caption, skin, () =>
+        public static void DrawRGBAWithFields(ref Color value, float leftValue, float rightValue, GUISkin skin, string caption = "Color (RGB)", string pattern = "0.0000", int textFieldWidth = 100)
         {
-            HorizontalBoxed("", skin, () =>
+            var r = value.r;
+            var g = value.g;
+            var b = value.b;
+            var a = value.a;
+
+            VerticalBoxed(caption, skin, () =>
             {
-                DrawFieldValue(ref x, "X: ", pattern, textFieldWidth);
-                DrawFieldValue(ref y, "Y: ", pattern, textFieldWidth);
-                DrawFieldValue(ref z, "Z: ", pattern, textFieldWidth);
+                HorizontalBoxed("", skin, () =>
+                {
+                    DrawFieldValue(ref r, "R: ", pattern, textFieldWidth);
+                    DrawFieldValue(ref g, "G: ", pattern, textFieldWidth);
+                    DrawFieldValue(ref b, "B: ", pattern, textFieldWidth);
+                    DrawFieldValue(ref a, "A: ", pattern, textFieldWidth);
+                });
             });
-        });
 
-        SpacingSeparator();
+            SpacingSeparator();
 
-        value = new Vector3(x, y, z);
-    }
+            value = new Color(r, g, b, a);
+        }
 
-    public static void DrawVectorWithFields(ref Vector4 value, float leftValue, float rightValue, GUISkin skin, string caption = "Vector", string pattern = "0.0", int textFieldWidth = 100)
-    {
-        var x = value.x;
-        var y = value.y;
-        var z = value.z;
-        var w = value.w;
-
-        VerticalBoxed(caption, skin, () =>
+        public static void DrawVectorWithFields(ref Vector3 value, float leftValue, float rightValue, GUISkin skin, string caption = "Vector", string pattern = "0.0", int textFieldWidth = 100)
         {
-            HorizontalBoxed("", skin, () =>
+            var x = value.x;
+            var y = value.y;
+            var z = value.z;
+
+            VerticalBoxed(caption, skin, () =>
             {
-                DrawFieldValue(ref x, "X: ", pattern, textFieldWidth);
-                DrawFieldValue(ref y, "Y: ", pattern, textFieldWidth);
-                DrawFieldValue(ref z, "Z: ", pattern, textFieldWidth);
-                DrawFieldValue(ref w, "W: ", pattern, textFieldWidth);
+                HorizontalBoxed("", skin, () =>
+                {
+                    DrawFieldValue(ref x, "X: ", pattern, textFieldWidth);
+                    DrawFieldValue(ref y, "Y: ", pattern, textFieldWidth);
+                    DrawFieldValue(ref z, "Z: ", pattern, textFieldWidth);
+                });
             });
-        });
 
-        SpacingSeparator();
+            SpacingSeparator();
 
-        value = new Vector4(x, y, z, w);
-    }
+            value = new Vector3(x, y, z);
+        }
 
-    public static void DrawVectorWithSlidersAndFields(ref Vector3 value, float leftValue, float rightValue, GUISkin skin, string caption = "Vector", string pattern = "0.0", int textFieldWidth = 100)
-    {
-        var x = value.x;
-        var y = value.y;
-        var z = value.z;
-
-        VerticalBoxed(caption, skin, () =>
+        public static void DrawVectorWithFields(ref Vector4 value, float leftValue, float rightValue, GUISkin skin, string caption = "Vector", string pattern = "0.0", int textFieldWidth = 100)
         {
-            SliderWithField("X: ", leftValue, rightValue, ref x, pattern, textFieldWidth, true);
-            SliderWithField("Y: ", leftValue, rightValue, ref y, pattern, textFieldWidth, true);
-            SliderWithField("Z: ", leftValue, rightValue, ref z, pattern, textFieldWidth, true);
-        });
+            var x = value.x;
+            var y = value.y;
+            var z = value.z;
+            var w = value.w;
 
-        SpacingSeparator();
+            VerticalBoxed(caption, skin, () =>
+            {
+                HorizontalBoxed("", skin, () =>
+                {
+                    DrawFieldValue(ref x, "X: ", pattern, textFieldWidth);
+                    DrawFieldValue(ref y, "Y: ", pattern, textFieldWidth);
+                    DrawFieldValue(ref z, "Z: ", pattern, textFieldWidth);
+                    DrawFieldValue(ref w, "W: ", pattern, textFieldWidth);
+                });
+            });
 
-        value = new Vector3(x, y, z);
-    }
+            SpacingSeparator();
 
-    public static void DrawVectorWithSlidersAndFields(ref Vector4 value, float leftValue, float rightValue, GUISkin skin, string caption = "Vector", string pattern = "0.0", int textFieldWidth = 100)
-    {
-        var x = value.x;
-        var y = value.y;
-        var z = value.z;
-        var w = value.w;
+            value = new Vector4(x, y, z, w);
+        }
 
-        VerticalBoxed(caption, skin, () =>
+        public static void DrawVectorWithSlidersAndFields(ref Vector3 value, float leftValue, float rightValue, GUISkin skin, string caption = "Vector", string pattern = "0.0", int textFieldWidth = 100)
         {
-            SliderWithField("X: ", leftValue, rightValue, ref x, pattern, textFieldWidth, true);
-            SliderWithField("Y: ", leftValue, rightValue, ref y, pattern, textFieldWidth, true);
-            SliderWithField("Z: ", leftValue, rightValue, ref z, pattern, textFieldWidth, true);
-            SliderWithField("W: ", leftValue, rightValue, ref w, pattern, textFieldWidth, true);
-        });
+            var x = value.x;
+            var y = value.y;
+            var z = value.z;
 
-        SpacingSeparator();
+            VerticalBoxed(caption, skin, () =>
+            {
+                SliderWithField("X: ", leftValue, rightValue, ref x, pattern, textFieldWidth, true);
+                SliderWithField("Y: ", leftValue, rightValue, ref y, pattern, textFieldWidth, true);
+                SliderWithField("Z: ", leftValue, rightValue, ref z, pattern, textFieldWidth, true);
+            });
 
-        value = new Vector4(x, y, z, w);
+            SpacingSeparator();
+
+            value = new Vector3(x, y, z);
+        }
+
+        public static void DrawVectorWithSlidersAndFields(ref Vector4 value, float leftValue, float rightValue, GUISkin skin, string caption = "Vector", string pattern = "0.0", int textFieldWidth = 100)
+        {
+            var x = value.x;
+            var y = value.y;
+            var z = value.z;
+            var w = value.w;
+
+            VerticalBoxed(caption, skin, () =>
+            {
+                SliderWithField("X: ", leftValue, rightValue, ref x, pattern, textFieldWidth, true);
+                SliderWithField("Y: ", leftValue, rightValue, ref y, pattern, textFieldWidth, true);
+                SliderWithField("Z: ", leftValue, rightValue, ref z, pattern, textFieldWidth, true);
+                SliderWithField("W: ", leftValue, rightValue, ref w, pattern, textFieldWidth, true);
+            });
+
+            SpacingSeparator();
+
+            value = new Vector4(x, y, z, w);
+        }
     }
 }

@@ -28,7 +28,7 @@ using System.IO;
 
 using UnityEngine;
 
-namespace SpaceEngine.Core.Utilities
+namespace SpaceEngine.Utilities
 {
     public static class CBUtility
     {

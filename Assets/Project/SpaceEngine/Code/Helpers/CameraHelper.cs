@@ -42,155 +42,158 @@ using System.Linq;
 using UnityEngine;
 using UnityEngine.Rendering;
 
-/// <summary>
-/// Class - extensions holder for a <see cref="Camera"/>.
-/// </summary>
-public static class CameraHelper
+namespace SpaceEngine.Helpers
 {
-    public static Camera Main()
-    {
-        return Camera.main;
-    }
-
-    public static Camera DepthCamera()
-    {
-        return FindCamera("CustomDepthCamera");
-    }
-
-    public static Camera NearCamera()
-    {
-        return FindCamera("NearCamera");
-    }
-
     /// <summary>
-    /// Find a <see cref="Camera"/> in <see cref="GameObject"/>'s components with specified name.
+    /// Class - extensions holder for a <see cref="Camera"/>.
     /// </summary>
-    /// <param name="gameObjectName">Target <see cref="GameObject"/> name to search in.</param>
-    /// <returns>Returns a <see cref="Camera"/> component from existing <see cref="GameObject"/>'s components.</returns>
-    public static Camera FindCamera(string gameObjectName = "Camera")
+    public static class CameraHelper
     {
-        var mainCamera = Main();
-        var resultCameraGameObject = mainCamera.transform.Find(gameObjectName);
-
-        if (resultCameraGameObject != null)
+        public static Camera Main()
         {
-            var resultCameraComponent = resultCameraGameObject.GetComponent<Camera>();
-
-            if (resultCameraComponent != null)
-                return resultCameraComponent;
+            return Camera.main;
         }
 
-        return null;
-    }
-
-    public static Matrix4x4 GetWorldToCamera(this Camera camera)
-    {
-        return camera.worldToCameraMatrix;
-    }
-
-    public static Matrix4x4 GetCameraToWorld(this Camera camera)
-    {
-        return camera.cameraToWorldMatrix;
-    }
-
-    /// <summary>
-    /// Get <see cref="Camera"/>'s projection <see cref="Matrix4x4"/>.
-    /// </summary>
-    /// <param name="camera">Target <see cref="Camera"/>.</param>
-    /// <param name="useFix">Render in to texture?</param>
-    /// <returns>Returns the <see cref="Camera"/>'s projection <see cref="Matrix4x4"/>.</returns>
-    public static Matrix4x4 GetCameraToScreen(this Camera camera, bool useFix = true)
-    {
-#if UNITY_GL_PROJECTION_MATRIX
-        var projectionMatrix = camera.projectionMatrix;
-
-        projectionMatrix = GL.GetGPUProjectionMatrix(projectionMatrix, useFix);
-
-        return projectionMatrix;
-#elif SE_PROJECTION_MATRIX
-        var projectionMatrix = camera.projectionMatrix;
-
-        if (!useFix) return projectionMatrix;
-
-        if (SystemInfo.graphicsDeviceVersion.IndexOf("Direct3D", System.StringComparison.Ordinal) > -1)
+        public static Camera DepthCamera()
         {
-            // NOTE : Default unity antialiasing breaks matrices?
-            if ((IsDeferred(camera) || QualitySettings.antiAliasing == 0))
+            return FindCamera("CustomDepthCamera");
+        }
+
+        public static Camera NearCamera()
+        {
+            return FindCamera("NearCamera");
+        }
+
+        /// <summary>
+        /// Find a <see cref="Camera"/> in <see cref="GameObject"/>'s components with specified name.
+        /// </summary>
+        /// <param name="gameObjectName">Target <see cref="GameObject"/> name to search in.</param>
+        /// <returns>Returns a <see cref="Camera"/> component from existing <see cref="GameObject"/>'s components.</returns>
+        public static Camera FindCamera(string gameObjectName = "Camera")
+        {
+            var mainCamera = Main();
+            var resultCameraGameObject = mainCamera.transform.Find(gameObjectName);
+
+            if (resultCameraGameObject != null)
             {
-                // Invert Y for rendering to a render texture
+                var resultCameraComponent = resultCameraGameObject.GetComponent<Camera>();
+
+                if (resultCameraComponent != null)
+                    return resultCameraComponent;
+            }
+
+            return null;
+        }
+
+        public static Matrix4x4 GetWorldToCamera(this Camera camera)
+        {
+            return camera.worldToCameraMatrix;
+        }
+
+        public static Matrix4x4 GetCameraToWorld(this Camera camera)
+        {
+            return camera.cameraToWorldMatrix;
+        }
+
+        /// <summary>
+        /// Get <see cref="Camera"/>'s projection <see cref="Matrix4x4"/>.
+        /// </summary>
+        /// <param name="camera">Target <see cref="Camera"/>.</param>
+        /// <param name="useFix">Render in to texture?</param>
+        /// <returns>Returns the <see cref="Camera"/>'s projection <see cref="Matrix4x4"/>.</returns>
+        public static Matrix4x4 GetCameraToScreen(this Camera camera, bool useFix = true)
+        {
+#if UNITY_GL_PROJECTION_MATRIX
+            var projectionMatrix = camera.projectionMatrix;
+
+            projectionMatrix = GL.GetGPUProjectionMatrix(projectionMatrix, useFix);
+
+            return projectionMatrix;
+#elif SE_PROJECTION_MATRIX
+            var projectionMatrix = camera.projectionMatrix;
+
+            if (!useFix) return projectionMatrix;
+
+            if (SystemInfo.graphicsDeviceVersion.IndexOf("Direct3D", System.StringComparison.Ordinal) > -1)
+            {
+                // NOTE : Default unity antialiasing breaks matrices?
+                if ((IsDeferred(camera) || QualitySettings.antiAliasing == 0))
+                {
+                    // Invert Y for rendering to a render texture
+                    for (var i = 0; i < 4; i++)
+                    {
+                        projectionMatrix[1, i] = -projectionMatrix[1, i];
+                    }
+                }
+
+                // Scale and bias depth range
                 for (var i = 0; i < 4; i++)
                 {
-                    projectionMatrix[1, i] = -projectionMatrix[1, i];
+                    // NOTE : Hm. I saw something about reverse depth buffer in release notes...
+                    projectionMatrix[2, i] = -(projectionMatrix[2, i] * 0.5f + projectionMatrix[3, i] * -0.5f);
+                    //projectionMatrix[2, i] = projectionMatrix[2, i] * 0.5f + projectionMatrix[3, i] * 0.5f;
                 }
             }
 
-            // Scale and bias depth range
-            for (var i = 0; i < 4; i++)
-            {
-                // NOTE : Hm. I saw something about reverse depth buffer in release notes...
-                projectionMatrix[2, i] = -(projectionMatrix[2, i] * 0.5f + projectionMatrix[3, i] * -0.5f);
-                //projectionMatrix[2, i] = projectionMatrix[2, i] * 0.5f + projectionMatrix[3, i] * 0.5f;
-            }
+            return projectionMatrix;
+#else
+            return camera.projectionMatrix;
+#endif
         }
 
-        return projectionMatrix;
-#else
-        return camera.projectionMatrix;
-#endif
-    }
-
-    public static Matrix4x4 GetScreenToCamera(this Camera camera)
-    {
-        return camera.GetCameraToScreen().inverse;
-    }
-
-    public static Vector3 GetProjectedDirection(this Vector3 v)
-    {
-        var cameraToWorld = Main().GetCameraToWorld();
-        var screenToCamera = Main().GetScreenToCamera();
-
-        return cameraToWorld.MultiplyPoint(screenToCamera.MultiplyPoint(v));
-    }
-
-    public static Vector3 GetRelativeProjectedDirection(this Vector3 v, Matrix4x4 worldToLocal)
-    {
-        return worldToLocal.MultiplyPoint(v.GetProjectedDirection());
-    }
-
-    public static bool IsDeferred(this Camera camera)
-    {
-        return camera.actualRenderingPath == (RenderingPath.DeferredLighting | RenderingPath.DeferredShading);
-    }
-
-    public static int GetAntiAliasing(this Camera camera)
-    {
-        var antiAliasing = QualitySettings.antiAliasing;
-
-        if (antiAliasing == 0) { antiAliasing = 1; }
-
-        // Reset aa value to 1 in case camera is in DeferredLighting or DeferredShading Rendering Path
-        if (camera.IsDeferred()) { antiAliasing = 1; }
-
-        return antiAliasing;
-    }
-
-    public static bool CommandBufferExistByName(this Camera camera, CameraEvent evt, string name)
-    {
-        return camera.GetCommandBuffers(evt).ToList().Any((buffer) => buffer.name == name);
-    }
-
-    public static IEnumerable<CommandBuffer> GetCommandBuffersByName(this Camera camera, CameraEvent evt, string name)
-    {
-        return camera.GetCommandBuffers(evt).ToList().Where((buffer) => buffer.name == name);
-    }
-
-    public static void RemoveAllCommandBuffersByName(this Camera camera, CameraEvent evt, string name)
-    {
-        var commandBuffersToRemove = camera.GetCommandBuffersByName(evt, name);
-
-        foreach (var commandBufferToRemove in commandBuffersToRemove)
+        public static Matrix4x4 GetScreenToCamera(this Camera camera)
         {
-            camera.RemoveCommandBuffer(evt, commandBufferToRemove);
+            return camera.GetCameraToScreen().inverse;
+        }
+
+        public static Vector3 GetProjectedDirection(this Vector3 v)
+        {
+            var cameraToWorld = Main().GetCameraToWorld();
+            var screenToCamera = Main().GetScreenToCamera();
+
+            return cameraToWorld.MultiplyPoint(screenToCamera.MultiplyPoint(v));
+        }
+
+        public static Vector3 GetRelativeProjectedDirection(this Vector3 v, Matrix4x4 worldToLocal)
+        {
+            return worldToLocal.MultiplyPoint(v.GetProjectedDirection());
+        }
+
+        public static bool IsDeferred(this Camera camera)
+        {
+            return camera.actualRenderingPath == (RenderingPath.DeferredLighting | RenderingPath.DeferredShading);
+        }
+
+        public static int GetAntiAliasing(this Camera camera)
+        {
+            var antiAliasing = QualitySettings.antiAliasing;
+
+            if (antiAliasing == 0) { antiAliasing = 1; }
+
+            // Reset aa value to 1 in case camera is in DeferredLighting or DeferredShading Rendering Path
+            if (camera.IsDeferred()) { antiAliasing = 1; }
+
+            return antiAliasing;
+        }
+
+        public static bool CommandBufferExistByName(this Camera camera, CameraEvent evt, string name)
+        {
+            return camera.GetCommandBuffers(evt).ToList().Any((buffer) => buffer.name == name);
+        }
+
+        public static IEnumerable<CommandBuffer> GetCommandBuffersByName(this Camera camera, CameraEvent evt, string name)
+        {
+            return camera.GetCommandBuffers(evt).ToList().Where((buffer) => buffer.name == name);
+        }
+
+        public static void RemoveAllCommandBuffersByName(this Camera camera, CameraEvent evt, string name)
+        {
+            var commandBuffersToRemove = camera.GetCommandBuffersByName(evt, name);
+
+            foreach (var commandBufferToRemove in commandBuffersToRemove)
+            {
+                camera.RemoveCommandBuffer(evt, commandBufferToRemove);
+            }
         }
     }
 }

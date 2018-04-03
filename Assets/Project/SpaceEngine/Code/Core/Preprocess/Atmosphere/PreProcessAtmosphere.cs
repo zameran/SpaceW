@@ -33,9 +33,9 @@
 // Creator: zameran
 #endregion
 
-
-using SpaceEngine.Core.Utilities;
 using SpaceEngine.Environment.Atmospheric;
+using SpaceEngine.Tools;
+using SpaceEngine.Utilities;
 
 using System;
 using System.Collections;

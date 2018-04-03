@@ -38,18 +38,22 @@ using System.Reflection;
 
 using UnityEngine;
 
-public class UnityEngineAPI
+namespace SpaceEngine.Tools
 {
-    public static void InvokeAPI<T>(string MethodName, BindingFlags BillingAtr, object obj = null, params object[] MethodParams) where T : class
+    public class UnityEngineAPI
     {
-        try
+        public static void InvokeAPI<T>(string MethodName, BindingFlags BillingAtr, object obj = null, params object[] MethodParams) where T : class
         {
-            Type type = typeof(T);
-            MethodInfo method = type.GetMethod(MethodName, BillingAtr);
+            try
+            {
+                var type = typeof(T);
+                var method = type.GetMethod(MethodName, BillingAtr);
 
-            method.Invoke(obj, MethodParams);
+                if (method != null) method.Invoke(obj, MethodParams);
+                else Debug.LogWarning("UnityEngineAPI.InvokeAPI: Unable to find target method! Aborting!...");
+            }
+            catch (Exception ex) { Debug.LogError("UnityEngineAPI.InvokeAPI: Exception!" + "\n" + ex.Message + "\n" + ex.StackTrace); }
+            finally { }
         }
-        catch (Exception ex) { Debug.LogError("UnityEngineAPI.InvokeAPI: Exception!" + "\n" + ex.Message + "\n" + ex.StackTrace); }
-        finally { }
     }
 }

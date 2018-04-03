@@ -31,7 +31,7 @@ using UnityEngine.Rendering;
 
 using Object = UnityEngine.Object;
 
-namespace SpaceEngine.Core.Utilities
+namespace SpaceEngine.Utilities
 {
     public static class RTUtility
     {

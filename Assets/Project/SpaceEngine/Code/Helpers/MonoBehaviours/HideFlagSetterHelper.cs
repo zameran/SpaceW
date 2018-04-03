@@ -35,17 +35,24 @@
 
 using UnityEngine;
 
-public class HideFlagSetterHelper : MonoBehaviour
+namespace SpaceEngine.Helpers.MonoBehaviours
 {
-    public HideFlags flag;
-
-    public Object obj;
-
-    [ContextMenu("Set Flag")]
-    public void SetFlag()
+    public class HideFlagSetterHelper : MonoBehaviour
     {
-        if (obj == null) { Debug.LogError("HideFlagSetterHelper.SetFlag: Obj is null!"); return; }
+        public HideFlags flag;
 
-        obj.hideFlags = flag;
+        public Object obj;
+
+        [ContextMenu("Set Flag")]
+        public void SetFlag()
+        {
+            if (obj == null)
+            {
+                Debug.LogError("HideFlagSetterHelper.SetFlag: Obj is null!");
+                return;
+            }
+
+            obj.hideFlags = flag;
+        }
     }
 }

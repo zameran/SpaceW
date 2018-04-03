@@ -34,6 +34,7 @@
 #endregion
 
 using SpaceEngine.Core.Bodies;
+using SpaceEngine.Core.Patterns.Singleton;
 
 using System;
 using System.Collections.Generic;

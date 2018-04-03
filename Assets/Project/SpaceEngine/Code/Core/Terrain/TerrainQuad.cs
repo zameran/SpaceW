@@ -2,8 +2,10 @@
 using SpaceEngine.Core.Numerics.Shapes;
 using SpaceEngine.Core.Numerics.Vectors;
 using SpaceEngine.Core.Types;
+using SpaceEngine.Tools;
 
 using System;
+
 using UnityEngine;
 
 // TODO : Create a special interface for transformation manipulations. This interface should oblige objects to recalculate critical variables, required for proper rendering.
