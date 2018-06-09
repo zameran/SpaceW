@@ -2,10 +2,11 @@
   "dependencies": {
     "com.unity.ads": "exclude",
     "com.unity.analytics": "exclude",
-    "com.unity.entities": "0.0.11",
-    "com.unity.package-manager-ui": "1.9.5",
+    "com.unity.package-manager-ui": "1.9.3",
     "com.unity.purchasing": "exclude",
-    "com.unity.standardevents": "exclude"
+    "com.unity.standardevents": "exclude",
+    "com.unity.entities": "0.0.12-preview.5",
+    "com.unity.mathematics": "0.0.12-preview.5"
   },
   "registry": "https://staging-packages.unity.com"
 }
