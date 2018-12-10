@@ -4,6 +4,7 @@
 /[Bb]uild/
 /[Ee]xported/
 /[Ee]xported[Oobj]/
+/[Ll]ogs/
 
 # Exclude everything from special folders, but keep folders itself
 Config/*

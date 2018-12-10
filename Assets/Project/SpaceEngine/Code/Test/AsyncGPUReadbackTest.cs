@@ -35,9 +35,8 @@
 
 using SpaceEngine.Managers;
 
-using Unity.Collections;
-
 using UnityEngine;
+using UnityEngine.Rendering;
 
 namespace SpaceEngine.Tests
 {
@@ -56,19 +55,23 @@ namespace SpaceEngine.Tests
             CameraCachedComponent.TryInit(this);
         }
 
-        private void OnRenderImage(RenderTexture source, RenderTexture destination)
+        private void OnRenderImage(Texture source, RenderTexture destination)
         {
             for (var callIndex = 0; callIndex < ReadbackCountPerFrame; callIndex++)
             {
-                AsyncGPUManager.Instance.Enqueue(source, 0, 0, ReadbackCallback);
+                AsyncGPUManager.Instance.Enqueue(source, 0, ReadbackCallback);
             }
 
             Graphics.Blit(source, destination);
         }
 
-        private void ReadbackCallback(NativeArray<Color32> data)
+        private void ReadbackCallback(AsyncGPUReadbackRequest callback)
         {
             // NOTE : Manipulation here!
+
+            var data = callback.GetData<Color32>();
+
+            Debug.Log(data.Length);
         }
     }
 }

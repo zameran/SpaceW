@@ -4,6 +4,7 @@
 /[Bb]uild/
 /[Ee]xported/
 /[Ee]xported[Oobj]/
+/[Ll]ogs/
 
 # We should ignore Rider IDE stuff
 /.idea

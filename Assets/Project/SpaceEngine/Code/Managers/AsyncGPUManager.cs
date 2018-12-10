@@ -41,7 +41,7 @@ using System.Collections.Generic;
 using Unity.Collections;
 
 using UnityEngine;
-using UnityEngine.Experimental.Rendering;
+using UnityEngine.Rendering;
 
 namespace SpaceEngine.Managers
 {
@@ -65,15 +65,15 @@ namespace SpaceEngine.Managers
             }
         }
 
-        private Queue<AsyncGPUReadbackRequestEntry<Color32>> Entries;
+        private Queue<AsyncGPUReadbackRequest> Entries;
 
-        public bool CanEnqueue { get { return Entries.Count < 8; } }
+        public bool CanEnqueue { get { return Entries.Count < 32; } }
 
         private void Awake()
         {
             Instance = this;
 
-            Entries = new Queue<AsyncGPUReadbackRequestEntry<Color32>>();
+            Entries = new Queue<AsyncGPUReadbackRequest>();
         }
 
         private void Update()
@@ -81,7 +81,7 @@ namespace SpaceEngine.Managers
             while (Entries.Count > 0)
             {
                 var currentEntry = Entries.Peek();
-                var currentRequest = currentEntry.Request;
+                var currentRequest = currentEntry;
 
                 if (currentRequest.hasError)
                 {
@@ -91,10 +91,6 @@ namespace SpaceEngine.Managers
                 }
                 else if (currentRequest.done)
                 {
-                    var data = currentRequest.GetData<Color32>(currentEntry.Layer);
-
-                    if (currentEntry.Callback != null) currentEntry.Callback(data);
-
                     Entries.Dequeue();
                 }
                 else
@@ -122,19 +118,29 @@ namespace SpaceEngine.Managers
             return canEnqueue;
         }
 
-        public void Enqueue(Texture source, int mipIndex = 0, int layer = 0, Action<NativeArray<Color32>> callback = null)
+        public void Enqueue(ComputeBuffer src, Action<AsyncGPUReadbackRequest> callback = null)
         {
-            if (EnqueueCheck()) Entries.Enqueue(new AsyncGPUReadbackRequestEntry<Color32>(AsyncGPUReadback.Request(source, mipIndex), layer, callback));
+            if (EnqueueCheck()) Entries.Enqueue(AsyncGPUReadback.Request(src, callback));
         }
 
-        public void Enqueue(Texture source, int mipIndex, TextureFormat dstFormat, int layer = 0, Action<NativeArray<Color32>> callback = null)
+        public void Enqueue(ComputeBuffer src, int size, int offset, Action<AsyncGPUReadbackRequest> callback = null)
         {
-            if (EnqueueCheck()) Entries.Enqueue(new AsyncGPUReadbackRequestEntry<Color32>(AsyncGPUReadback.Request(source, mipIndex, dstFormat), layer, callback));
+            if (EnqueueCheck()) Entries.Enqueue(AsyncGPUReadback.Request(src, size, offset, callback));
         }
 
-        public void Enqueue(Texture source, int mipIndex, int x, int width, int y, int height, int z, int depth, int layer = 0, Action<NativeArray<Color32>> callback = null)
+        public void Enqueue(Texture src, int mipIndex = 0, Action<AsyncGPUReadbackRequest> callback = null)
         {
-            if (EnqueueCheck()) Entries.Enqueue(new AsyncGPUReadbackRequestEntry<Color32>(AsyncGPUReadback.Request(source, mipIndex, x, width, y, height, z, depth), layer, callback));
+            if (EnqueueCheck()) Entries.Enqueue(AsyncGPUReadback.Request(src, mipIndex, callback));
+        }
+
+        public void Enqueue(Texture src, int mipIndex, TextureFormat dstFormat, Action<AsyncGPUReadbackRequest> callback = null)
+        {
+            if (EnqueueCheck()) Entries.Enqueue(AsyncGPUReadback.Request(src, mipIndex, dstFormat, callback));
+        }
+
+        public void Enqueue(Texture src, int mipIndex, int x, int width, int y, int height, int z, int depth, Action<AsyncGPUReadbackRequest> callback = null)
+        {
+            if (EnqueueCheck()) Entries.Enqueue(AsyncGPUReadback.Request(src, mipIndex, x, width, y, height, z, depth, callback));
         }
 
         #endregion
