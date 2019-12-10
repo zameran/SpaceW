@@ -271,7 +271,7 @@ namespace SpaceEngine.Debugging
             supports32bitsIndexBuffer = GetSupportState(SystemInfo.supports32bitsIndexBuffer);
             supportsSparseTextures = GetSupportState(SystemInfo.supportsSparseTextures);
             supportsAsyncCompute = GetSupportState(SystemInfo.supportsAsyncCompute);
-            supportsGPUFence = GetSupportState(SystemInfo.supportsGPUFence);
+            supportsGPUFence = GetSupportState(SystemInfo.supportsGraphicsFence);
             supportsAsyncGPUReadback = GetSupportState(SystemInfo.supportsAsyncGPUReadback);
 
             graphicsMultiThreaded = SystemInfo.graphicsMultiThreaded;
@@ -298,8 +298,21 @@ namespace SpaceEngine.Debugging
                 if (GetAttributeOfType<ObsoleteAttribute>(format) == null)
                 {
                     var supports = SystemInfo.SupportsTextureFormat(format);
-
-                    TextureFormats.Add(format, GetSupportState(supports));
+                    
+                    // NOTE : Workaround around unity's shit...
+                    if ((format == TextureFormat.ASTC_RGB_4x4 || 
+                         format == TextureFormat.ASTC_RGB_5x5 ||
+                         format == TextureFormat.ASTC_RGB_6x6 ||
+                         format == TextureFormat.ASTC_RGB_8x8 ||
+                         format == TextureFormat.ASTC_10x10 ||
+                         format == TextureFormat.ASTC_RGB_12x12) && TextureFormats.ContainsKey(format))
+                    {
+                        
+                    }
+                    else
+                    {
+                        TextureFormats.Add(format, GetSupportState(supports));
+                    }
                 }
                 else
                 {

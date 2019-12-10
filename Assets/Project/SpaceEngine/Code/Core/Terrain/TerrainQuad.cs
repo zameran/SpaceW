@@ -21,7 +21,7 @@ namespace SpaceEngine.Core.Terrain
     /// </summary>
     public class TerrainQuad : IEquatable<TerrainQuad>
     {
-        public SerializableGuid GUID { get; }
+        public SerializableGuid GUID { get; private set; }
 
         /// <summary> 
         /// The <see cref="TerrainNode"/> to which this terrain quadtree belongs. 

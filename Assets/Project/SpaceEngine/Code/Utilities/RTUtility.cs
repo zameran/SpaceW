@@ -280,10 +280,8 @@ namespace SpaceEngine.Utilities
             }
 
             texture.Apply();
-
-            var bytes = texture.EncodeToPNG();
-
-            File.WriteAllBytes(Application.dataPath + filePath + fileName + ".png", bytes);
+            
+            File.WriteAllBytes(Application.dataPath + filePath + fileName + ".png", texture.EncodeToPNG());
 
             buffer.Release();
         }
@@ -320,10 +318,8 @@ namespace SpaceEngine.Utilities
             }
 
             texture.Apply();
-
-            var bytes = texture.EncodeToPNG();
-
-            File.WriteAllBytes(Application.dataPath + filePath + fileName + ".png", bytes);
+            
+            File.WriteAllBytes(Application.dataPath + filePath + fileName + ".png", texture.EncodeToPNG());
 
             buffer.Release();
         }
