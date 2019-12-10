@@ -50,6 +50,7 @@ using Logger = SpaceEngine.Core.Debugging.Logger;
 
 namespace SpaceEngine.Helpers.MonoBehaviours
 {
+    // TODO : Migrate to Unity's built-in ScreenCaptureModule...
     [RequireComponent(typeof(Camera))]
     [UseLogger(LoggerCategory.Data)]
     public class ScreenshotHelper : MonoSingleton<ScreenshotHelper>
@@ -57,7 +58,8 @@ namespace SpaceEngine.Helpers.MonoBehaviours
         public enum ScreenshotFormat
         {
             PNG,
-            JPG
+            JPG,
+            TGA
         }
 
         [Range(1, 8)]
@@ -114,14 +116,19 @@ namespace SpaceEngine.Helpers.MonoBehaviours
             if (screenShotTexture != null)
             {
                 var filePath = string.Format("{0}/{1}_{2:yy.MM.dd-hh.mm.ss}_{3}", Application.dataPath, fileName, DateTime.Now, (int)UnityEngine.Random.Range(0.0f, 100.0f));
-
+                var fileExtension = Format.ToString().ToLower();
+                var outputFileName = string.Format("{0}.{1}", filePath, fileExtension);
+                
                 switch (Format)
                 {
                     case ScreenshotFormat.JPG:
-                        File.WriteAllBytes(filePath + ".jpg", screenShotTexture.EncodeToJPG(100));
+                        File.WriteAllBytes(outputFileName, screenShotTexture.EncodeToJPG(100));
                         break;
                     case ScreenshotFormat.PNG:
-                        File.WriteAllBytes(filePath + ".png", screenShotTexture.EncodeToPNG());
+                        File.WriteAllBytes(outputFileName, screenShotTexture.EncodeToPNG());
+                        break;
+                    case ScreenshotFormat.TGA:
+                        File.WriteAllBytes(outputFileName, screenShotTexture.EncodeToTGA());
                         break;
                     default:
                         throw new ArgumentOutOfRangeException();

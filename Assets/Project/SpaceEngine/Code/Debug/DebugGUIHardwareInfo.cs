@@ -110,15 +110,18 @@ namespace SpaceEngine.Debugging
                     GUILayoutExtensions.LabelWithSpace("Supports CubemapArrayTextures: " + HardwareInfo.supportsCubemapArrayTextures, -8);
                     GUILayoutExtensions.LabelWithSpace("Supports RawShadowDepthSampling: " + HardwareInfo.supportsRawShadowDepthSampling, -8);
                     GUILayoutExtensions.LabelWithSpace("Supports MotionVectors: " + HardwareInfo.supportsMotionVectors, -8);
-                    GUILayoutExtensions.LabelWithSpace("Supports RenderToCubemap: " + HardwareInfo.supportsRenderToCubemap, -8);
-                    GUILayoutExtensions.LabelWithSpace("Supports ImageEffects: " + HardwareInfo.supportsImageEffects, -8);
                     GUILayoutExtensions.LabelWithSpace("Supports HardwareQuadTopology: " + HardwareInfo.supportsHardwareQuadTopology, -8);
                     GUILayoutExtensions.LabelWithSpace("Supports 32bitsIndexBuffer: " + HardwareInfo.supports32bitsIndexBuffer, -8);
                     GUILayoutExtensions.LabelWithSpace("Supports SparseTextures: " + HardwareInfo.supportsSparseTextures, -8);
                     GUILayoutExtensions.LabelWithSpace("Supports AsyncCompute: " + HardwareInfo.supportsAsyncCompute, -8);
                     GUILayoutExtensions.LabelWithSpace("Supports GPUFence: " + HardwareInfo.supportsGPUFence, -8);
                     GUILayoutExtensions.LabelWithSpace("Supports AsyncGPUReadback: " + HardwareInfo.supportsAsyncGPUReadback, -8);
-
+                    
+                    GUILayoutExtensions.LabelWithSpace("Supports Audio: " + HardwareInfo.supportsAudio, -8);
+                    GUILayoutExtensions.LabelWithSpace("Supports Shadows: " + HardwareInfo.supportsShadows, -8);
+                    GUILayoutExtensions.LabelWithSpace("Supports Instancing: " + HardwareInfo.supportsInstancing, -8);
+                    GUILayoutExtensions.LabelWithSpace("Supports Graphics Fence: " + HardwareInfo.supportsGraphicsFence, -8);
+                    
                     GUILayoutExtensions.SpacingSeparator();
                 });
             });
@@ -223,14 +226,16 @@ namespace SpaceEngine.Debugging
         public static SupportState supportsCubemapArrayTextures;
         public static SupportState supportsRawShadowDepthSampling;
         public static SupportState supportsMotionVectors;
-        public static SupportState supportsRenderToCubemap;
-        public static SupportState supportsImageEffects;
         public static SupportState supportsHardwareQuadTopology;
         public static SupportState supports32bitsIndexBuffer;
         public static SupportState supportsSparseTextures;
         public static SupportState supportsAsyncCompute;
         public static SupportState supportsGPUFence;
         public static SupportState supportsAsyncGPUReadback;
+        public static SupportState supportsAudio;
+        public static SupportState supportsShadows;
+        public static SupportState supportsInstancing;
+        public static SupportState supportsGraphicsFence;
 
         public static bool graphicsMultiThreaded;
         public static bool usesReversedZBuffer;
@@ -265,15 +270,17 @@ namespace SpaceEngine.Debugging
             supportsCubemapArrayTextures = GetSupportState(SystemInfo.supportsCubemapArrayTextures);
             supportsRawShadowDepthSampling = GetSupportState(SystemInfo.supportsRawShadowDepthSampling);
             supportsMotionVectors = GetSupportState(SystemInfo.supportsMotionVectors);
-            supportsRenderToCubemap = GetSupportState(SystemInfo.supportsRenderToCubemap);
-            supportsImageEffects = GetSupportState(SystemInfo.supportsImageEffects);
             supportsHardwareQuadTopology = GetSupportState(SystemInfo.supportsHardwareQuadTopology);
             supports32bitsIndexBuffer = GetSupportState(SystemInfo.supports32bitsIndexBuffer);
             supportsSparseTextures = GetSupportState(SystemInfo.supportsSparseTextures);
             supportsAsyncCompute = GetSupportState(SystemInfo.supportsAsyncCompute);
             supportsGPUFence = GetSupportState(SystemInfo.supportsGraphicsFence);
-            supportsAsyncGPUReadback = GetSupportState(SystemInfo.supportsAsyncGPUReadback);
-
+            supportsAsyncGPUReadback = GetSupportState(SystemInfo.supportsAsyncGPUReadback);       
+            supportsAudio = GetSupportState(SystemInfo.supportsAudio);
+            supportsShadows = GetSupportState(SystemInfo.supportsShadows);
+            supportsInstancing = GetSupportState(SystemInfo.supportsInstancing);
+            supportsGraphicsFence = GetSupportState(SystemInfo.supportsGraphicsFence);
+            
             graphicsMultiThreaded = SystemInfo.graphicsMultiThreaded;
             usesReversedZBuffer = SystemInfo.usesReversedZBuffer;
 
