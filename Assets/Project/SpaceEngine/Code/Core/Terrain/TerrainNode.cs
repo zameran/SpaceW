@@ -238,6 +238,23 @@ namespace SpaceEngine.Core.Terrain
             }
         }
 
+        public void RotateNode(Vector3d euler)
+        {
+            var faces = new Vector3d[]
+            {
+                new Vector3d(0, 0, 0), 
+                new Vector3d(90, 0, 0), 
+                new Vector3d(90, 90, 0), 
+                new Vector3d(90, 180, 0), 
+                new Vector3d(90, 270, 0), 
+                new Vector3d(0, 180, 180)
+            };
+            
+            if (Face - 1 >= 0 && Face - 1 < 6) { FaceToLocal = Matrix4x4d.Rotate(faces[Face - 1] + euler); }
+
+            UpdateNode();
+        }
+        
         public override void UpdateNode()
         {
             TerrainMaterial.renderQueue = (int)ParentBody.RenderQueue + ParentBody.RenderQueueOffset;

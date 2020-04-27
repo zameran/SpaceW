@@ -61,7 +61,8 @@ namespace SpaceEngine
         private void Update()
         {
             var terrainNodes = BodyComponent.TerrainNodes;
-
+            var euler = RotationAxis * (RotationSpeed * Time.deltaTime);
+            
             if (Rotator == null)
             {
                 for (var terrainNodeIndex = 0; terrainNodeIndex < terrainNodes.Count; terrainNodeIndex++)
@@ -69,19 +70,25 @@ namespace SpaceEngine
                     var terrainNode = terrainNodes[terrainNodeIndex];
 
                     // NOTE : Maybe full matrices recalculations needed via TerrainQuadRoot.CalculateMatrices(...)
-                    terrainNode.transform.Rotate(RotationAxis * RotationSpeed * Time.deltaTime);   // NOTE : Perform our transformation action...
-                    terrainNode.TerrainQuadRoot.UpdateMatrices();                                  // NOTE : Recalculate and update critical variables, required for proper rendering.
+                    terrainNode.transform.Rotate(euler);
+                    terrainNode.RotateNode(euler);
+                    // NOTE : Perform our transformation action...
+                    terrainNode.TerrainQuadRoot.UpdateMatrices();                                 
+                    // NOTE : Recalculate and update critical variables, required for proper rendering.
                 }
             }
             else
             {
-                Rotator.transform.Rotate(RotationAxis * RotationSpeed * Time.deltaTime);           // NOTE : Perform our transformation action...
+                Rotator.transform.Rotate(euler);           
+                // NOTE : Perform our transformation action...
 
                 for (var terrainNodeIndex = 0; terrainNodeIndex < terrainNodes.Count; terrainNodeIndex++)
                 {
                     var terrainNode = terrainNodes[terrainNodeIndex];
 
-                    terrainNode.TerrainQuadRoot.UpdateMatrices();                                  // NOTE : Recalculate and update critical variables, required for proper rendering.
+                    terrainNode.RotateNode(euler);
+                    terrainNode.TerrainQuadRoot.UpdateMatrices();                                  
+                    // NOTE : Recalculate and update critical variables, required for proper rendering.
                 }
             }
         }
