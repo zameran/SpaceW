@@ -483,8 +483,10 @@ namespace SpaceEngine.Core.Terrain
                 {
                     // If the a leaf quad needs to be drawn but its tiles are not ready, then this will draw the next parent tile instead that is ready.
                     // Because of the current set up all tiles always have there tasks run on the frame they are generated, so this section of code is never reached.
+                    #if SPACEW_DEBUG
                     Debug.LogWarning(string.Format("Looks like rendering false start! {0}:{1}:{2}", quad.Level, quad.Tx, quad.Ty));
-
+                    #endif
+                    
                     for (var i = 0; i < SamplersSuitable.Count; ++i)
                     {
                         // Set the unifroms needed to draw the texture for this sampler

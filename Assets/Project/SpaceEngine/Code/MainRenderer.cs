@@ -106,18 +106,18 @@ public sealed class MainRenderer : MonoSingleton<MainRenderer>
         // NOTE : Maybe several near hi-priority bodies can be exist or something another. This is space - all is possible...
         //-----------------------------------------------------------------------------
         var highPriorityBody = GodManager.Instance.ActiveBody;
-        var bodyies = GodManager.Instance.Bodies;
+        var bodies = GodManager.Instance.Bodies;
 
-        if (highPriorityBody == null || bodyies == null) return;
+        if (highPriorityBody == null || bodies == null) return;
 
         highPriorityBody.RenderQueueOffset = 5;
         if (highPriorityBody.Atmosphere != null) highPriorityBody.Atmosphere.RenderQueueOffset = 6;
         if (highPriorityBody.Ocean != null) highPriorityBody.Ocean.RenderQueueOffset = 7;
         if (highPriorityBody.Ring != null) highPriorityBody.Ring.RenderQueueOffset = 4;
 
-        for (var i = 1; i < bodyies.Length; i++)
+        for (var i = 1; i < bodies.Length; i++)
         {
-            var lowPriorityBody = bodyies[i];
+            var lowPriorityBody = bodies[i];
 
             lowPriorityBody.RenderQueueOffset = 1;
             if (lowPriorityBody.Atmosphere != null) lowPriorityBody.Atmosphere.RenderQueueOffset = 2;

@@ -207,6 +207,8 @@ namespace SpaceEngine.Environment.Atmospheric
 
         public override void InitNode()
         {
+            if (AtmosphereBaker == null) AtmosphereBaker = GetComponentInChildren<PreProcessAtmosphere>();
+            
             PushPreset(AtmosphereParameters.Get(AtmosphereBase));
 
             Bake();
@@ -235,8 +237,6 @@ namespace SpaceEngine.Environment.Atmospheric
         protected override void Awake()
         {
             base.Awake();
-
-            if (AtmosphereBaker == null) AtmosphereBaker = GetComponentInChildren<PreProcessAtmosphere>();
         }
 
         protected override void Start()

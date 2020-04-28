@@ -107,6 +107,15 @@ namespace SpaceEngine.Core.Tile.Cache
 
         public void InsertProducer(int id, TileProducer producer)
         {
+            //Debug.Log(string.Format("TileCache: Producer {0} inserted in to cache with ID: {1}", producer.name, id));
+            
+            if (Producers == null)
+            {
+                Debug.LogWarning(string.Format("TileCache: Still not Initialized, but used! {0}", producer.name));
+                
+                return;
+            }
+            
             if (Producers.ContainsKey(id))
             {
                 Debug.Log(string.Format("TileCache: Producer with {0} already inserted!", id));
@@ -199,7 +208,7 @@ namespace SpaceEngine.Core.Tile.Cache
             // If this producer id does not exist can not create tile.
             if (!Producers.ContainsKey(producerId))
             {
-                Debug.Log(string.Format("TileCache.GetTile: Producer {0} not been inserted into cache!", producerId));
+                Debug.Log(string.Format("TileCache.GetTile: Producer with ID: {0} not been inserted into cache!", producerId));
                 return null;
             }
 
