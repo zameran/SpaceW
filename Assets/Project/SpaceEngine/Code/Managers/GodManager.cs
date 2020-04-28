@@ -70,15 +70,7 @@ public class GodManager : MonoSingleton<GodManager>
     public ComputeShader WriteData { get { return GSCS.WriteData; } }
     public ComputeShader ReadData { get { return GSCS.ReadData; } }
 
-    public ComputeShader CopyInscatter1 { get { return GSCS.CopyInscatter1; } }
-    public ComputeShader CopyInscatterN { get { return GSCS.CopyInscatterN; } }
-    public ComputeShader CopyIrradiance { get { return GSCS.CopyIrradiance; } }
-    public ComputeShader Inscatter1 { get { return GSCS.Inscatter1; } }
-    public ComputeShader InscatterN { get { return GSCS.InscatterN; } }
-    public ComputeShader InscatterS { get { return GSCS.InscatterS; } }
-    public ComputeShader Irradiance1 { get { return GSCS.Irradiance1; } }
-    public ComputeShader IrradianceN { get { return GSCS.IrradianceN; } }
-    public ComputeShader Transmittance { get { return GSCS.Transmittance; } }
+    public ComputeShader Precompute { get { return GSCS.Precompute; } }
     public ComputeShader Variance { get { return GSCS.Variance; } }
 
     public Shader FourierShader { get { return GSCS.Fourier; } }

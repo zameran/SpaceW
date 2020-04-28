@@ -48,15 +48,7 @@ namespace SpaceEngine.SciptableObjects
         public ComputeShader ReadData;
 
         [Header("Atmosphere Precomputation")]
-        public ComputeShader CopyInscatter1;
-        public ComputeShader CopyInscatterN;
-        public ComputeShader CopyIrradiance;
-        public ComputeShader Inscatter1;
-        public ComputeShader InscatterN;
-        public ComputeShader InscatterS;
-        public ComputeShader Irradiance1;
-        public ComputeShader IrradianceN;
-        public ComputeShader Transmittance;
+        public ComputeShader Precompute;
 
         [Header("Ocean Precomputation")]
         public Shader Fourier;
