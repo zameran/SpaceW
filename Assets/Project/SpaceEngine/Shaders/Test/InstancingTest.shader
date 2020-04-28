@@ -1,6 +1,4 @@
-﻿// Upgrade NOTE: upgraded instancing buffer 'DrawProperties' to new syntax.
-
-// Procedural planet generator.
+﻿// Procedural planet generator.
 // 
 // Copyright (C) 2015-2018 Denis Ovchinnikov [zameran] 
 // All rights reserved.
