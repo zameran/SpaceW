@@ -80,7 +80,7 @@ public sealed class MainRenderer : MonoSingleton<MainRenderer>
 
     private void Update()
     {
-        if (Input.GetKey(KeyCode.J) || ZSort) ComposeOutputRender();
+        if (Input.GetKey(KeyCode.J) || ZSort) SortBodies();
     }
 
     private void OnEnable()
@@ -98,7 +98,7 @@ public sealed class MainRenderer : MonoSingleton<MainRenderer>
         
     }
 
-    public void ComposeOutputRender()
+    public void SortBodies()
     {
         Array.Sort(GodManager.Instance.Bodies, Comparer);
 

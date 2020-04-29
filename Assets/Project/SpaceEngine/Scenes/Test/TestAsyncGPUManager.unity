@@ -333,7 +333,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7e84203720ecedd45a10025ea06e87c9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  ReadbackCountPerFrame: 1
+  ComputationDone: 1
+  TestTexture: {fileID: 0}
+  TestComputeShader: {fileID: 7200000, guid: 1c944143119e9e0419280323d118b51f, type: 3}
 --- !u!1 &1208275201
 GameObject:
   m_ObjectHideFlags: 0

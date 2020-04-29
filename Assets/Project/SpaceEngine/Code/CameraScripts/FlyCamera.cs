@@ -90,7 +90,7 @@ namespace SpaceEngine.Cameras
             UpdateDistances();
             UpdateClipPlanes();
 
-            MainRenderer.Instance.ComposeOutputRender();
+            MainRenderer.Instance.SortBodies();
         }
 
         protected override void Update()

@@ -33,7 +33,11 @@
 // Creator: zameran
 #endregion
 
+using System;
+
 using SpaceEngine.Managers;
+using SpaceEngine.Tools;
+using SpaceEngine.Utilities;
 
 using UnityEngine;
 using UnityEngine.Rendering;
@@ -47,31 +51,69 @@ namespace SpaceEngine.Tests
 
         public Camera CameraComponent { get { return CameraCachedComponent.Component; } }
 
-        [Range(1.0f, 16.0f)]
-        public int ReadbackCountPerFrame = 1;
+        #region Test Stuff
+
+        public bool ComputationDone = true;
+        public RenderTexture TestTexture;
+        public ComputeShader TestComputeShader;
+
+        #endregion
 
         private void Start()
         {
             CameraCachedComponent.TryInit(this);
+
+            TestTexture = RTExtensions.CreateRTexture(new Vector2(1024, 1024), 0, RenderTextureFormat.ARGBFloat, FilterMode.Point, TextureWrapMode.Clamp, false, true, 0);
         }
 
-        private void OnRenderImage(Texture source, RenderTexture destination)
+        private void OnDestroy()
         {
-            for (var callIndex = 0; callIndex < ReadbackCountPerFrame; callIndex++)
+            if (TestTexture != null) TestTexture.ReleaseAndDestroy();
+        }
+
+        private void OnRenderImage(RenderTexture source, RenderTexture destination)
+        {
+            if (ComputationDone)
             {
-                AsyncGPUManager.Instance.Enqueue(source, 0, ReadbackCallback);
+                ComputationDone = !ComputationDone;
+                
+                uint x, y, z = 0;
+                
+                RTUtility.ClearColor(TestTexture, true, true);
+
+                TestComputeShader.GetKernelThreadGroupSizes(0, out x, out y, out z);
+                TestComputeShader.SetTexture(0, "Result", TestTexture);
+                TestComputeShader.Dispatch(0,
+                    (int)(TestTexture.width / x),
+                    (int)(TestTexture.height / y),
+                    (int)z);
+
+
+                AsyncGPUManager.Instance.Enqueue(TestTexture, 0, request => { ComputationDone = true; });
             }
 
             Graphics.Blit(source, destination);
         }
 
-        private void ReadbackCallback(AsyncGPUReadbackRequest callback)
+        private void OnGUI()
         {
-            // NOTE : Manipulation here!
-
-            var data = callback.GetData<Color32>();
-
-            Debug.Log(data.Length);
+            if (TestTexture == null || !TestTexture.IsCreated()) return;
+            
+            GUI.DrawTexture(new Rect(0, 0, 512, 512), TestTexture, ScaleMode.ScaleToFit, false);
         }
     }
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+

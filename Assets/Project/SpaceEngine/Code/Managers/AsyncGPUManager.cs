@@ -41,6 +41,7 @@ using System.Collections.Generic;
 using Unity.Collections;
 
 using UnityEngine;
+using UnityEngine.Experimental.Rendering;
 using UnityEngine.Rendering;
 
 namespace SpaceEngine.Managers
@@ -132,10 +133,15 @@ namespace SpaceEngine.Managers
         {
             if (EnqueueCheck()) Entries.Enqueue(AsyncGPUReadback.Request(src, mipIndex, callback));
         }
-
-        public void Enqueue(Texture src, int mipIndex, TextureFormat dstFormat, Action<AsyncGPUReadbackRequest> callback = null)
+        
+        public void Enqueue(Texture src, int mipIndex, GraphicsFormat destinationFormat, Action<AsyncGPUReadbackRequest> callback = null)
         {
-            if (EnqueueCheck()) Entries.Enqueue(AsyncGPUReadback.Request(src, mipIndex, dstFormat, callback));
+            if (EnqueueCheck()) Entries.Enqueue(AsyncGPUReadback.Request(src, mipIndex, destinationFormat, callback));
+        }
+        
+        public void Enqueue(Texture src, int mipIndex, TextureFormat destinationFormat, Action<AsyncGPUReadbackRequest> callback = null)
+        {
+            if (EnqueueCheck()) Entries.Enqueue(AsyncGPUReadback.Request(src, mipIndex, destinationFormat, callback));
         }
 
         public void Enqueue(Texture src, int mipIndex, int x, int width, int y, int height, int z, int depth, Action<AsyncGPUReadbackRequest> callback = null)
@@ -143,6 +149,16 @@ namespace SpaceEngine.Managers
             if (EnqueueCheck()) Entries.Enqueue(AsyncGPUReadback.Request(src, mipIndex, x, width, y, height, z, depth, callback));
         }
 
+        public void Enqueue(Texture src, int mipIndex, int x, int width, int y, int height, int z, int depth, GraphicsFormat destinationFormat, Action<AsyncGPUReadbackRequest> callback = null)
+        {
+            if (EnqueueCheck()) Entries.Enqueue(AsyncGPUReadback.Request(src, mipIndex, x, width, y, height, z, depth, destinationFormat, callback));
+        }
+        
+        public void Enqueue(Texture src, int mipIndex, int x, int width, int y, int height, int z, int depth, TextureFormat destinationFormat, Action<AsyncGPUReadbackRequest> callback = null)
+        {
+            if (EnqueueCheck()) Entries.Enqueue(AsyncGPUReadback.Request(src, mipIndex, x, width, y, height, z, depth, destinationFormat, callback));
+        }
+        
         #endregion
     }
 }

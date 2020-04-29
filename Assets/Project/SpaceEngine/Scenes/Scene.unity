@@ -437,7 +437,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 24ad05f3232d56d42b6dd485a729ac19, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  Capacity: 1296
+  Capacity: 648
   TileStorage: []
 --- !u!4 &169545337
 Transform:
@@ -769,7 +769,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 24ad05f3232d56d42b6dd485a729ac19, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  Capacity: 1296
+  Capacity: 648
   TileStorage: []
 --- !u!114 &230248930
 MonoBehaviour:
@@ -1190,7 +1190,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 24ad05f3232d56d42b6dd485a729ac19, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  Capacity: 1296
+  Capacity: 648
   TileStorage: []
 --- !u!4 &349779806
 Transform:
@@ -2733,7 +2733,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 24ad05f3232d56d42b6dd485a729ac19, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  Capacity: 1296
+  Capacity: 648
   TileStorage: []
 --- !u!114 &853442840
 MonoBehaviour:
@@ -4337,7 +4337,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 24ad05f3232d56d42b6dd485a729ac19, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  Capacity: 1296
+  Capacity: 648
   TileStorage: []
 --- !u!4 &1355789731
 Transform:
@@ -5066,7 +5066,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 24ad05f3232d56d42b6dd485a729ac19, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  Capacity: 1296
+  Capacity: 648
   TileStorage: []
 --- !u!4 &1544861079
 Transform:
@@ -6381,7 +6381,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 24ad05f3232d56d42b6dd485a729ac19, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  Capacity: 1296
+  Capacity: 648
   TileStorage: []
 --- !u!1 &1860669607
 GameObject:
@@ -7892,7 +7892,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 24ad05f3232d56d42b6dd485a729ac19, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  Capacity: 1296
+  Capacity: 648
   TileStorage: []
 --- !u!114 &2107464339
 MonoBehaviour:
