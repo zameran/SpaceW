@@ -1,6 +1,8 @@
-﻿#pragma kernel ExampleTextureWrite
+﻿float textureSize;
 
 RWTexture2D<float4> Result;
+
+#pragma kernel ExampleTextureWrite
 
 [numthreads(4, 4, 1)]
 void ExampleTextureWrite (uint3 id : SV_DispatchThreadID)
@@ -11,4 +13,14 @@ void ExampleTextureWrite (uint3 id : SV_DispatchThreadID)
 	{
         Result[id.xy] += float4(id.x & id.y, (id.x & 15) / 15.0, (id.y & 15) / 15.0, 1.0) / exp(i);
     }
+}
+
+#pragma kernel ExampleTextureUVWrite
+
+[numthreads(4, 4, 1)]
+void ExampleTextureUVWrite (uint3 id : SV_DispatchThreadID)
+{
+    float2 uv = float2(id.xy) / float2(textureSize.xx) + 0.5f / float2(textureSize.xx); 
+    
+    Result[id.xy] = float4(uv, 0.0f, 1.0f);
 }

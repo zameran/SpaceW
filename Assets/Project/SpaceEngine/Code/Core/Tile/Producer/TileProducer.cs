@@ -256,13 +256,6 @@ namespace SpaceEngine.Core.Tile.Producer
 
             this.DoCreateTile(level, tx, ty, slot); // Do our work...
 
-            var afterWorkAwaitFramesCount = GetAwaitingFramesCount(level); // Calculate idle frames count per particular tile LOD level...
-
-            for (var i = 0; i < afterWorkAwaitFramesCount; i++) // Wait it...
-            {
-                yield return Yielders.EndOfFrame;
-            }
-
             yield return Yielders.EndOfFrame;
 
             if (Callback != null) Callback();

@@ -53,6 +53,7 @@ namespace SpaceEngine.Tests
 
         #region Test Stuff
 
+        public int TestTextureSize = 1024;
         public bool ComputationDone = true;
         public RenderTexture TestTexture;
         public ComputeShader TestComputeShader;
@@ -63,7 +64,7 @@ namespace SpaceEngine.Tests
         {
             CameraCachedComponent.TryInit(this);
 
-            TestTexture = RTExtensions.CreateRTexture(new Vector2(1024, 1024), 0, RenderTextureFormat.ARGBFloat, FilterMode.Point, TextureWrapMode.Clamp, false, true, 0);
+            TestTexture = RTExtensions.CreateRTexture(new Vector2(TestTextureSize, TestTextureSize), 0, RenderTextureFormat.ARGBFloat, FilterMode.Point, TextureWrapMode.Clamp, false, true, 0);
         }
 
         private void OnDestroy()
@@ -73,6 +74,8 @@ namespace SpaceEngine.Tests
 
         private void OnRenderImage(RenderTexture source, RenderTexture destination)
         {
+            var kernel = TestComputeShader.FindKernel("ExampleTextureUVWrite");
+            
             if (ComputationDone)
             {
                 ComputationDone = !ComputationDone;
@@ -81,11 +84,12 @@ namespace SpaceEngine.Tests
                 
                 RTUtility.ClearColor(TestTexture, true, true);
 
-                TestComputeShader.GetKernelThreadGroupSizes(0, out x, out y, out z);
-                TestComputeShader.SetTexture(0, "Result", TestTexture);
-                TestComputeShader.Dispatch(0,
-                    (int)(TestTexture.width / x),
-                    (int)(TestTexture.height / y),
+                TestComputeShader.GetKernelThreadGroupSizes(kernel, out x, out y, out z);
+                TestComputeShader.SetFloat("textureSize", TestTextureSize);
+                TestComputeShader.SetTexture(kernel, "Result", TestTexture);
+                TestComputeShader.Dispatch(kernel,
+                    (int)(TestTextureSize / x),
+                    (int)(TestTextureSize / y),
                     (int)z);
 
 
