@@ -33,14 +33,11 @@
 // Creator: zameran
 #endregion
 
-using System;
-
 using SpaceEngine.Managers;
 using SpaceEngine.Tools;
 using SpaceEngine.Utilities;
 
 using UnityEngine;
-using UnityEngine.Rendering;
 
 namespace SpaceEngine.Tests
 {
@@ -107,17 +104,3 @@ namespace SpaceEngine.Tests
         }
     }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-

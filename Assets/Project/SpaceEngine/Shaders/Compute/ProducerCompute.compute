@@ -7,12 +7,12 @@ RWTexture2D<float4> Result;
 [numthreads(4, 4, 1)]
 void ExampleTextureWrite (uint3 id : SV_DispatchThreadID)
 {
-    const int SAMPLES = 1024;
-    
+	const int SAMPLES = 1024;
+	
 	for (int i = 1; i <= SAMPLES; ++i) 
 	{
-        Result[id.xy] += float4(id.x & id.y, (id.x & 15) / 15.0, (id.y & 15) / 15.0, 1.0) / exp(i);
-    }
+		Result[id.xy] += float4(id.x & id.y, (id.x & 15) / 15.0, (id.y & 15) / 15.0, 1.0) / exp(i);
+	}
 }
 
 #pragma kernel ExampleTextureUVWrite
@@ -20,7 +20,7 @@ void ExampleTextureWrite (uint3 id : SV_DispatchThreadID)
 [numthreads(4, 4, 1)]
 void ExampleTextureUVWrite (uint3 id : SV_DispatchThreadID)
 {
-    float2 uv = float2(id.xy) / float2(textureSize.xx) + 0.5f / float2(textureSize.xx); 
-    
-    Result[id.xy] = float4(uv, 0.0f, 1.0f);
+	float2 uv = float2(id.xy) / float2(textureSize.xx) + 0.5f / float2(textureSize.xx); 
+	
+	Result[id.xy] = float4(uv, 0.0f, 1.0f);
 }
