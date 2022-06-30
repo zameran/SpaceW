@@ -45,7 +45,7 @@ public class CachedComponent<T> where T : Component
         Component = null;
     }
 
-    public T Component { get; set; }
+    public T Component { get; protected set; }
 
     public void TryInit(MonoBehaviour mb)
     {
