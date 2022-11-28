@@ -51,17 +51,13 @@ namespace SpaceEngine.Managers
         public struct AsyncGPUReadbackRequestEntry<TType> where TType : struct
         {
             public AsyncGPUReadbackRequest Request;
-
             public int Layer;
-
             public Action<NativeArray<TType>> Callback;
 
             public AsyncGPUReadbackRequestEntry(AsyncGPUReadbackRequest request, int layer, Action<NativeArray<TType>> callback)
             {
                 Request = request;
-
                 Callback = callback;
-
                 Layer = layer;
             }
         }
@@ -133,12 +129,12 @@ namespace SpaceEngine.Managers
         {
             if (EnqueueCheck()) Entries.Enqueue(AsyncGPUReadback.Request(src, mipIndex, callback));
         }
-        
+
         public void Enqueue(Texture src, int mipIndex, GraphicsFormat destinationFormat, Action<AsyncGPUReadbackRequest> callback = null)
         {
             if (EnqueueCheck()) Entries.Enqueue(AsyncGPUReadback.Request(src, mipIndex, destinationFormat, callback));
         }
-        
+
         public void Enqueue(Texture src, int mipIndex, TextureFormat destinationFormat, Action<AsyncGPUReadbackRequest> callback = null)
         {
             if (EnqueueCheck()) Entries.Enqueue(AsyncGPUReadback.Request(src, mipIndex, destinationFormat, callback));
@@ -153,12 +149,12 @@ namespace SpaceEngine.Managers
         {
             if (EnqueueCheck()) Entries.Enqueue(AsyncGPUReadback.Request(src, mipIndex, x, width, y, height, z, depth, destinationFormat, callback));
         }
-        
+
         public void Enqueue(Texture src, int mipIndex, int x, int width, int y, int height, int z, int depth, TextureFormat destinationFormat, Action<AsyncGPUReadbackRequest> callback = null)
         {
             if (EnqueueCheck()) Entries.Enqueue(AsyncGPUReadback.Request(src, mipIndex, x, width, y, height, z, depth, destinationFormat, callback));
         }
-        
+
         #endregion
     }
 }

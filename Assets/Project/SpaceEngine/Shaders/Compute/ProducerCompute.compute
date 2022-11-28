@@ -1,13 +1,38 @@
-﻿float textureSize;
+﻿#include "ProducerCompute.Core.cginc"
+#include "../Time.cginc"
 
+float textureSize;
 RWTexture2D<float4> Result;
 
 #pragma kernel ExampleTextureUVWrite
 
-[numthreads(4, 4, 1)]
+[numthreads(16, 16, 1)]
 void ExampleTextureUVWrite (uint3 id : SV_DispatchThreadID)
 {
-	float2 uv = float2(id.xy) / float2(textureSize.xx) + 0.5f / float2(textureSize.xx); 
-	
-	Result[id.xy] = float4(uv, 0.0f, 1.0f);
+	float2 uv = float2(id.xy) / float2(textureSize.xx) + 0.5f / float2(textureSize.xx);
+
+	// const float3 ppoint = float3(uv * 4, 0.0f);
+	// const float noiseLacunarity = 2.218281828459f;
+	// const float noiseH = 0.5f;
+	// const float noiseOffset = 0.8f;
+	// const float noiseRidgeSmooth = 0.0001f;
+	// const float noiseGain = 0.5f;
+	// const int noiseOctaves = 4;
+	//
+	// float noise = Noise(ppoint);
+	// float4 deriv = NoiseDeriv(ppoint + noise + _RealTime);
+	// float fbm = Fbm(ppoint, noiseLacunarity, noiseH, noiseOctaves);
+	// float ridged = RidgedMultifractal(ppoint, noiseGain, noiseOffset, noiseRidgeSmooth, noiseLacunarity, noiseH, noiseOctaves);
+	// float ridgedEroded = RidgedMultifractalEroded(ppoint, noiseGain, noise, noiseOffset, noiseRidgeSmooth, noiseLacunarity, noiseH, noiseOctaves);
+	// float ridgedSimple = RidgedNoise(ppoint);
+	// float swiss = SwissFbm(ppoint, noiseGain, noise, noiseLacunarity, noiseOctaves);
+
+	Result[id.xy] = float4(uv.xy, 0.0f, 1.0f);
+	// Result[id.xy] = float4(noise.xxx, 1.0f);
+	// Result[id.xy] = float4(deriv.xyz + 0.5, 1.0f);
+	// Result[id.xy] = float4(fbm.xxx, 1.0f);
+	// Result[id.xy] = float4(ridged.xxx, 1.0f);
+	// Result[id.xy] = float4(ridgedEroded.xxx, 1.0f);
+	// Result[id.xy] = float4(ridgedSimple.xxx, 1.0f);
+	// Result[id.xy] = float4(swiss.xxx, 1.0f);
 }

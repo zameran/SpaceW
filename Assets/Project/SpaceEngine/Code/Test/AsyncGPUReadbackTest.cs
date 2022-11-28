@@ -72,23 +72,17 @@ namespace SpaceEngine.Tests
         private void OnRenderImage(RenderTexture source, RenderTexture destination)
         {
             var kernel = TestComputeShader.FindKernel("ExampleTextureUVWrite");
-            
+
             if (ComputationDone)
             {
                 ComputationDone = !ComputationDone;
-                
-                uint x, y, z = 0;
-                
+
                 RTUtility.ClearColor(TestTexture, true, true);
 
-                TestComputeShader.GetKernelThreadGroupSizes(kernel, out x, out y, out z);
+                TestComputeShader.GetKernelThreadGroupSizes(kernel, out var x, out var y, out var z);
                 TestComputeShader.SetFloat("textureSize", TestTextureSize);
                 TestComputeShader.SetTexture(kernel, "Result", TestTexture);
-                TestComputeShader.Dispatch(kernel,
-                    (int)(TestTextureSize / x),
-                    (int)(TestTextureSize / y),
-                    (int)z);
-
+                TestComputeShader.Dispatch(kernel, (int)(TestTextureSize / x), (int)(TestTextureSize / y), (int)z);
 
                 AsyncGPUManager.Instance.Enqueue(TestTexture, 0, request => { ComputationDone = true; });
             }
@@ -99,7 +93,7 @@ namespace SpaceEngine.Tests
         private void OnGUI()
         {
             if (TestTexture == null || !TestTexture.IsCreated()) return;
-            
+
             GUI.DrawTexture(new Rect(0, 0, 512, 512), TestTexture, ScaleMode.ScaleToFit, false);
         }
     }
