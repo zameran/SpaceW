@@ -118,7 +118,7 @@ Shader "SpaceEngine/Planet/Cloudsphere"
 
 			CGPROGRAM
 			#pragma target 5.0
-			#pragma only_renderers d3d11 glcore
+			#pragma only_renderers d3d11 glcore metal
 			#pragma vertex vert
 			#pragma fragment frag
 			ENDCG

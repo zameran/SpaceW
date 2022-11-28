@@ -51,11 +51,13 @@ namespace SpaceEngine.Debugging
     {
         private readonly AtmosphereBaseProperty AtmosphereBaseProperty = new AtmosphereBaseProperty();
 
-        private AtmosphereBase AtmosphereBase { get { return AtmosphereBaseProperty.Value; } set { AtmosphereBaseProperty.Value = value; } }
+        private AtmosphereBase AtmosphereBase { get => AtmosphereBaseProperty.Value;
+            set => AtmosphereBaseProperty.Value = value;
+        }
 
-        public Body Body { get { return GodManager.Instance.ActiveBody; } }
+        public Body Body => GodManager.Instance.ActiveBody;
 
-        public Atmosphere Atmosphere { get { return Body.Atmosphere; } }
+        public Atmosphere Atmosphere => Body.Atmosphere;
 
         public AtmosphereParameters AtmosphereParameters = AtmosphereParameters.Default;
 
@@ -63,24 +65,24 @@ namespace SpaceEngine.Debugging
 
         #region Eventit
 
-        public bool isEventit { get; set; }
+        public bool IsEventit { get; set; }
 
         public void Eventit()
         {
-            if (isEventit) return;
+            if (IsEventit) return;
 
             AtmosphereBaseProperty.PropertyChanged += AtmosphereBasePropertyOnPropertyChanged;
 
-            isEventit = true;
+            IsEventit = true;
         }
 
         public void UnEventit()
         {
-            if (!isEventit) return;
+            if (!IsEventit) return;
 
             AtmosphereBaseProperty.PropertyChanged -= AtmosphereBasePropertyOnPropertyChanged;
 
-            isEventit = false;
+            IsEventit = false;
         }
 
         #endregion
@@ -233,7 +235,7 @@ namespace SpaceEngine.Debugging
         {
             if (GUILayout.Button("Apply", options))
             {
-                if (action != null) action();
+                action?.Invoke();
             }
         }
     }

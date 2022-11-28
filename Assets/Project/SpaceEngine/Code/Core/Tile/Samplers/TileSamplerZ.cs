@@ -263,7 +263,7 @@ namespace SpaceEngine.Core.Tile.Samplers
                     ElevationsBuffer.GetData(elevationInfo.Elevations);
 
                     // Find the min/max values
-                    for (int i = 0; i < size; i++)
+                    for (var i = 0; i < size; i++)
                     {
                         if (elevationInfo.Elevations[i] < elevationInfo.Min) elevationInfo.Min = elevationInfo.Elevations[i];
                         if (elevationInfo.Elevations[i] > elevationInfo.Max) elevationInfo.Max = elevationInfo.Elevations[i];

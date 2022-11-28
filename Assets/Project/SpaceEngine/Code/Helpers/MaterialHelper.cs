@@ -46,7 +46,7 @@ namespace SpaceEngine.Helpers
         {
             var material = new Material(shader)
             {
-                name = string.Format("{0}(Instance){1}", name, Random.Range(float.MinValue, float.MaxValue)),
+                name = $"{name}(Instance){Random.Range(float.MinValue, float.MaxValue)}",
                 hideFlags = HideFlags.HideAndDontSave
             };
 

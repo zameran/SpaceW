@@ -23,18 +23,18 @@ namespace SpaceEngine.Core.Preprocess.Terrain
 
         private float SampleHeight(float x, float y)
         {
-            int ix = (int)Mathf.Floor(x);
-            int iy = (int)Mathf.Floor(y);
+            var ix = (int)Mathf.Floor(x);
+            var iy = (int)Mathf.Floor(y);
 
             x -= ix;
             y -= iy;
 
-            float cx = 1.0f - x;
-            float cy = 1.0f - y;
-            float h1 = Source.Get(ix, iy).x;
-            float h2 = Source.Get(ix + 1, iy).x;
-            float h3 = Source.Get(ix, iy + 1).x;
-            float h4 = Source.Get(ix + 1, iy + 1).x;
+            var cx = 1.0f - x;
+            var cy = 1.0f - y;
+            var h1 = Source.Get(ix, iy).x;
+            var h2 = Source.Get(ix + 1, iy).x;
+            var h3 = Source.Get(ix, iy + 1).x;
+            var h4 = Source.Get(ix + 1, iy + 1).x;
 
             return (h1 * cx + h2 * x) * cy + (h3 * cx + h4 * x) * y;
         }
@@ -61,8 +61,8 @@ namespace SpaceEngine.Core.Preprocess.Terrain
 
             Projection(x, y, DestinationSize, out sx, out sy, out sz);
 
-            double lon = Math.Atan2(sy, sx) + Math.PI;
-            double lat = Math.Acos(sz);
+            var lon = Math.Atan2(sy, sx) + Math.PI;
+            var lat = Math.Acos(sz);
 
             return SampleHeight(lon, lat);
         }
@@ -72,19 +72,19 @@ namespace SpaceEngine.Core.Preprocess.Terrain
             lon = lon / Math.PI * (Source.Width / 2.0);
             lat = lat / Math.PI * Source.Height;
 
-            int ilon = (int)Math.Floor(lon);
-            int ilat = (int)Math.Floor(lat);
+            var ilon = (int)Math.Floor(lon);
+            var ilat = (int)Math.Floor(lat);
 
             lon -= ilon;
             lat -= ilat;
 
-            double clon = 1.0 - lon;
-            double clat = 1.0 - lat;
+            var clon = 1.0 - lon;
+            var clat = 1.0 - lat;
 
-            float h1 = Source.Get((ilon + Source.Width) % Source.Width, ilat).x;
-            float h2 = Source.Get((ilon + Source.Width + 1) % Source.Width, ilat).x;
-            float h3 = Source.Get((ilon + Source.Width) % Source.Width, ilat + 1).x;
-            float h4 = Source.Get((ilon + Source.Width + 1) % Source.Width, ilat + 1).x;
+            var h1 = Source.Get((ilon + Source.Width) % Source.Width, ilat).x;
+            var h2 = Source.Get((ilon + Source.Width + 1) % Source.Width, ilat).x;
+            var h3 = Source.Get((ilon + Source.Width) % Source.Width, ilat + 1).x;
+            var h4 = Source.Get((ilon + Source.Width + 1) % Source.Width, ilat + 1).x;
 
             return (float)((h1 * clon + h2 * lon) * clat + (h3 * clon + h4 * lon) * lat);
         }

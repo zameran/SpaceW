@@ -73,12 +73,12 @@ namespace SpaceEngine.Core.Bodies
         public bool RingEnabled = true;
         public bool TerrainEnabled = true;
 
-        public int GridResolution { get { return GodManager.Instance.GridResolution; } }
+        public int GridResolution => GodManager.Instance.GridResolution;
 
         public float Amplitude = 32.0f;
         public float Frequency = 64.0f;
 
-        public Mesh QuadMesh { get { return GodManager.Instance.QuadMesh; } }
+        public Mesh QuadMesh => GodManager.Instance.QuadMesh;
 
         public Shader ColorShader;
 
@@ -91,7 +91,12 @@ namespace SpaceEngine.Core.Bodies
         public float Size = 6360000.0f;
 
         public Vector3 Offset { get; set; }
-        public Vector3 Origin { get { return transform.position; } set { transform.position = value; } }
+
+        public Vector3 Origin
+        {
+            get => transform.position;
+            set => transform.position = value;
+        }
 
         public TCCommonParametersSetter TCCPS = null;
 
@@ -115,24 +120,24 @@ namespace SpaceEngine.Core.Bodies
 
         #region Eventit
 
-        public bool isEventit { get; set; }
+        public bool IsEventit { get; set; }
 
         public void Eventit()
         {
-            if (isEventit) return;
+            if (IsEventit) return;
 
             EventManager.BodyEvents.OnSamplersChanged.OnEvent += OnSamplersChanged;
 
-            isEventit = true;
+            IsEventit = true;
         }
 
         public void UnEventit()
         {
-            if (!isEventit) return;
+            if (!IsEventit) return;
 
             EventManager.BodyEvents.OnSamplersChanged.OnEvent -= OnSamplersChanged;
 
-            isEventit = false;
+            IsEventit = false;
         }
 
         #endregion
@@ -419,7 +424,7 @@ namespace SpaceEngine.Core.Bodies
 
             if (TerrainEnabled)
             {
-                for (int i = 0; i < TerrainNodes.Count; i++)
+                for (var i = 0; i < TerrainNodes.Count; i++)
                 {
                     if (Helper.Enabled(TerrainNodes[i]))
                     {
@@ -615,6 +620,7 @@ namespace SpaceEngine.Core.Bodies
                 var umbraLength = CalculateUmbraLength(radius * 2, sunRadius, sunToPlanetDistance);
                 var umbraAngle = CalculateUmbraSubtendedAngle(radius * 2, umbraLength);
                 var direction = GetSunDirection(Suns[i]) * umbraLength;
+                var currentPosition = transform.position;
 
                 Gizmos.color = Color.yellow;
                 Gizmos.DrawWireSphere(Suns[i].transform.position, sunRadius);
@@ -630,10 +636,10 @@ namespace SpaceEngine.Core.Bodies
                 Gizmos.DrawRay(transform.InverseTransformVector(Origin + direction), -(Quaternion.Euler(0, -umbraAngle, 0) * direction));
 
                 Gizmos.color = Color.cyan;
-                Gizmos.DrawLine(transform.position + Vector3.up * radius, transform.InverseTransformVector(Origin + direction) + Vector3.up * radius);
-                Gizmos.DrawLine(transform.position + Vector3.down * radius, transform.InverseTransformVector(Origin + direction) + Vector3.down * radius);
-                Gizmos.DrawLine(transform.position + Vector3.left * radius, transform.InverseTransformVector(Origin + direction) + Vector3.left * radius);
-                Gizmos.DrawLine(transform.position + Vector3.right * radius, transform.InverseTransformVector(Origin + direction) + Vector3.right * radius);
+                Gizmos.DrawLine(currentPosition + Vector3.up * radius, transform.InverseTransformVector(Origin + direction) + Vector3.up * radius);
+                Gizmos.DrawLine(currentPosition + Vector3.down * radius, transform.InverseTransformVector(Origin + direction) + Vector3.down * radius);
+                Gizmos.DrawLine(currentPosition + Vector3.left * radius, transform.InverseTransformVector(Origin + direction) + Vector3.left * radius);
+                Gizmos.DrawLine(currentPosition + Vector3.right * radius, transform.InverseTransformVector(Origin + direction) + Vector3.right * radius);
             }
         }
 #endif

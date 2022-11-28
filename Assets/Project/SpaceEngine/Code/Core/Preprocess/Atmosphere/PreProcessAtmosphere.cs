@@ -42,7 +42,7 @@ using System.Collections;
 
 using UnityEngine;
 
-namespace SpaceEngine.Core.Preprocess.Atmospehre
+namespace SpaceEngine.Core.Preprocess.Atmosphere
 {
     public sealed class PreProcessAtmosphere : MonoBehaviour
     {
@@ -76,7 +76,7 @@ namespace SpaceEngine.Core.Preprocess.Atmospehre
         public RenderTexture irradianceT_Read, irradianceT_Write, inscatterT_Read, inscatterT_Write;
         public RenderTexture deltaET, deltaSRT, deltaSMT, deltaJT;
 
-        public ComputeShader Precompute { get { return GodManager.Instance.Precompute; } }
+        public ComputeShader Precompute => GodManager.Instance.Precompute;
 
         int step, order;
 
@@ -125,7 +125,7 @@ namespace SpaceEngine.Core.Preprocess.Atmospehre
 
             if (ClearAfterBake) CollectGarbage(false, true);
 
-            if (callback != null) callback();
+            callback?.Invoke();
         }
 
         private IEnumerator DoWorkCoroutine(AtmosphereParameters AP, Action callback)
@@ -148,7 +148,7 @@ namespace SpaceEngine.Core.Preprocess.Atmospehre
 
             if (ClearAfterBake) CollectGarbage(false, true);
 
-            if (callback != null) callback();
+            callback?.Invoke();
         }
 
         private void OnDestroy()

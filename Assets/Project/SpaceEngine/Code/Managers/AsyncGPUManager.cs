@@ -68,7 +68,7 @@ namespace SpaceEngine.Managers
 
         private Queue<AsyncGPUReadbackRequest> Entries;
 
-        public bool CanEnqueue { get { return Entries.Count < 32; } }
+        public bool CanEnqueue => Entries.Count < 32;
 
         private void Awake()
         {

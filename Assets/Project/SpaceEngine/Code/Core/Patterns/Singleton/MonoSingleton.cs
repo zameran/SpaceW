@@ -22,7 +22,7 @@ namespace SpaceEngine.Core.Patterns.Singleton
             {
                 if (ApplicationIsQuitting)
                 {
-                    Debug.LogWarning(string.Format("Singleton: Instance '{0}' already destroyed on application quit. Won't create again - returning null.", typeof(T).Name));
+                    Debug.LogWarning($"Singleton: Instance '{typeof(T).Name}' already destroyed on application quit. Won't create again - returning null.");
 
                     return null;
                 }
@@ -39,7 +39,7 @@ namespace SpaceEngine.Core.Patterns.Singleton
 
                         if (instances.Count > 1)
                         {
-                            Debug.LogError(string.Format("Singleton: Something went really wrong - there should never be more than 1 singleton! Found count: {0}", instances.Count));
+                            Debug.LogError($"Singleton: Something went really wrong - there should never be more than 1 singleton! Found count: {instances.Count}");
 
                             return instance;
                         }
@@ -48,22 +48,22 @@ namespace SpaceEngine.Core.Patterns.Singleton
                         {
                             var singleton = new GameObject();
                             instance = singleton.AddComponent<T>();
-                            singleton.name = typeof(T).Name + "_(MonoSingleton)";
+                            singleton.name = $"{typeof(T).Name}_(MonoSingleton)";
 
                             DontDestroyOnLoad(singleton);
 
-                            Debug.Log(string.Format("Singleton: An instance of '{0}' is needed in the scene, so '{1}' was created with DontDestroyOnLoad.", typeof(T).Name, singleton.name));
+                            Debug.Log($"Singleton: An instance of '{typeof(T).Name}' is needed in the scene, so '{singleton.name}' was created with DontDestroyOnLoad.");
                         }
                         else
                         {
-                            Debug.Log(string.Format("Singleton: Using instance already created: {0}", instance.gameObject.name));
+                            Debug.Log($"Singleton: Using instance already created: {instance.gameObject.name}");
                         }
                     }
 
                     return instance;
                 }
             }
-            protected set { instance = value; }
+            protected set => instance = value;
         }
 
         public static bool ApplicationIsQuitting { get; private set; }

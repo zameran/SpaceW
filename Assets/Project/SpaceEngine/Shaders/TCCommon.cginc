@@ -146,6 +146,12 @@ uniform float noiseRidgeSmooth;// = 0.0001;
 //-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
+#if !defined (HLSL_SUPPORT_INCLUDED)
+#include <HLSLSupport.cginc>
+#endif
+//-----------------------------------------------------------------------------
+
+//-----------------------------------------------------------------------------
 // NOTE : Compute shaders doesn't support these macro...
 #if defined (COMPUTE_SHADER)
 #define UNITY_BRANCH

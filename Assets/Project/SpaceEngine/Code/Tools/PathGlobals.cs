@@ -44,20 +44,20 @@ namespace SpaceEngine.Tools
         public const string GlobalConfigFolderName = "Config";
         public const string GlobalModFolderName = "Mods";
 
-        public static string GlobalConfigFolderPath { get { return Path.GetFullPath(GlobalRootPath + GlobalConfigFolderName); } }
+        public static string GlobalConfigFolderPath => Path.GetFullPath(GlobalRootPath + GlobalConfigFolderName);
 
-        public static string GlobalModFolderPath { get { return Path.GetFullPath(GlobalRootPath + GlobalModFolderName); } }
+        public static string GlobalModFolderPath => Path.GetFullPath(GlobalRootPath + GlobalModFolderName);
 
-        public static string GlobalRootPath { get { return Path.GetFullPath(Application.dataPath + "/../"); } }
+        public static string GlobalRootPath => Path.GetFullPath($"{Application.dataPath}/../");
 
         public static string GlobalConfigFolderPathEditor(string dataPath)
         {
-            return Path.GetFullPath(dataPath + "/../" + GlobalConfigFolderName);
+            return Path.GetFullPath($"{dataPath}/../{GlobalConfigFolderName}");
         }
 
         public static string GlobalModFolderPathEditor(string dataPath)
         {
-            return Path.GetFullPath(dataPath + "/../" + GlobalModFolderName);
+            return Path.GetFullPath($"{dataPath}/../{GlobalModFolderName}");
         }
     }
 }

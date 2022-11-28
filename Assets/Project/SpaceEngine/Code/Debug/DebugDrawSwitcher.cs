@@ -39,6 +39,6 @@ namespace SpaceEngine.Debugging
 {
     public sealed class DebugDrawSwitcher : DebugSwitcher<DebugDraw>
     {
-        protected override KeyCode SwitchKey { get { return KeyCode.F6; } }
+        protected override KeyCode SwitchKey => KeyCode.F6;
     }
 }

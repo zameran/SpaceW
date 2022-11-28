@@ -53,7 +53,7 @@ namespace SpaceEngine.Core.Utilities
 
         private readonly CachedComponent<Controller> ControllerCachedComponent = new CachedComponent<Controller>();
 
-        public Controller ControllerComponent { get { return ControllerCachedComponent.Component; } }
+        public Controller ControllerComponent => ControllerCachedComponent.Component;
 
         [SerializeField]
         public Position position;
@@ -127,9 +127,9 @@ namespace SpaceEngine.Core.Utilities
             // NOTE : ct - x; st - y; cp - z; sp - w;
             var tp = CalculatelongitudeLatitudeVector(position.Theta, position.Phi);
 
-            Vector3d cx = px * tp.z + py * tp.w;
-            Vector3d cy = (px * -1.0) * tp.w * tp.x + py * tp.z * tp.x + pz * tp.y;
-            Vector3d cz = px * tp.w * tp.y - py * tp.z * tp.y + pz * tp.x;
+            var cx = px * tp.z + py * tp.w;
+            var cy = (px * -1.0) * tp.w * tp.x + py * tp.z * tp.x + pz * tp.y;
+            var cz = px * tp.w * tp.y - py * tp.z * tp.y + pz * tp.x;
 
             worldPosition = po + cz * position.Distance;
 
@@ -138,7 +138,7 @@ namespace SpaceEngine.Core.Utilities
                 worldPosition.z = GroundHeight + 10.0;
             }
 
-            Matrix4x4d view = new Matrix4x4d(cx.x, cx.y, cx.z, 0.0, cy.x, cy.y, cy.z, 0.0, cz.x, cz.y, cz.z, 0.0, 0.0, 0.0, 0.0, 1.0);
+            var view = new Matrix4x4d(cx.x, cx.y, cx.z, 0.0, cy.x, cy.y, cy.z, 0.0, cz.x, cz.y, cz.z, 0.0, 0.0, 0.0, 0.0, 1.0);
 
             WorldToCameraMatrix = view * Matrix4x4d.Translate(worldPosition * -1.0);
 

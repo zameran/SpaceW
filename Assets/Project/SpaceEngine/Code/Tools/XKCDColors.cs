@@ -17,7 +17,7 @@ namespace SpaceEngine.Tools
 
             public static string ToRGBHex(Color color)
             {
-                return string.Format("#{0:X2}{1:X2}{2:X2}", ToByte(color.r), ToByte(color.g), ToByte(color.b));
+                return $"#{ToByte(color.r):X2}{ToByte(color.g):X2}{ToByte(color.b):X2}";
             }
 
             private static byte ToByte(float value)

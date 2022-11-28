@@ -47,8 +47,7 @@ public class EventHolder
 
     public void Invoke()
     {
-        if (OnEvent != null)
-            OnEvent();
+        OnEvent?.Invoke();
     }
 
     public void SafeInvoke()
@@ -59,7 +58,7 @@ public class EventHolder
         }
         catch (Exception ex)
         {
-            Debug.LogError(string.Format("EventManager: {0}:{1}", ex.GetType().Name, ex.Message));
+            Debug.LogError($"EventManager: {ex.GetType().Name}:{ex.Message}");
         }
     }
 }
@@ -70,8 +69,7 @@ public class EventHolder<T>
 
     public void Invoke(T arg1)
     {
-        if (OnEvent != null)
-            OnEvent(arg1);
+        OnEvent?.Invoke(arg1);
     }
 
     public void SafeInvoke(T arg1)
@@ -82,7 +80,7 @@ public class EventHolder<T>
         }
         catch (Exception ex)
         {
-            Debug.LogError(string.Format("EventManager: {0}:{1}", ex.GetType().Name, ex.Message));
+            Debug.LogError($"EventManager: {ex.GetType().Name}:{ex.Message}");
         }
     }
 }
@@ -93,8 +91,7 @@ public class EventHolder<T1, T2>
 
     public void Invoke(T1 arg1, T2 arg2)
     {
-        if (OnEvent != null)
-            OnEvent(arg1, arg2);
+        OnEvent?.Invoke(arg1, arg2);
     }
 
     public void SafeInvoke(T1 arg1, T2 arg2)
@@ -105,7 +102,7 @@ public class EventHolder<T1, T2>
         }
         catch (Exception ex)
         {
-            Debug.LogError(string.Format("EventManager: {0}:{1}", ex.GetType().Name, ex.Message));
+            Debug.LogError($"EventManager: {ex.GetType().Name}:{ex.Message}");
         }
     }
 }
@@ -116,8 +113,7 @@ public class EventHolder<T1, T2, T3>
 
     public void Invoke(T1 arg1, T2 arg2, T3 arg3)
     {
-        if (OnEvent != null)
-            OnEvent(arg1, arg2, arg3);
+        OnEvent?.Invoke(arg1, arg2, arg3);
     }
 
     public void SafeInvoke(T1 arg1, T2 arg2, T3 arg3)
@@ -128,7 +124,7 @@ public class EventHolder<T1, T2, T3>
         }
         catch (Exception ex)
         {
-            Debug.LogError(string.Format("EventManager: {0}:{1}", ex.GetType().Name, ex.Message));
+            Debug.LogError($"EventManager: {ex.GetType().Name}:{ex.Message}");
         }
     }
 }
@@ -139,8 +135,7 @@ public class EventHolder<T1, T2, T3, T4>
 
     public void Invoke(T1 arg1, T2 arg2, T3 arg3, T4 arg4)
     {
-        if (OnEvent != null)
-            OnEvent(arg1, arg2, arg3, arg4);
+        OnEvent?.Invoke(arg1, arg2, arg3, arg4);
     }
 
     public void SafeInvoke(T1 arg1, T2 arg2, T3 arg3, T4 arg4)
@@ -151,7 +146,7 @@ public class EventHolder<T1, T2, T3, T4>
         }
         catch (Exception ex)
         {
-            Debug.LogError(string.Format("EventManager: {0}:{1}", ex.GetType().Name, ex.Message));
+            Debug.LogError($"EventManager: {ex.GetType().Name}:{ex.Message}");
         }
     }
 }

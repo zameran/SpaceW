@@ -166,14 +166,14 @@ namespace SpaceEngine.Tools
         public static void Horizontal(Action body)
         {
             GUILayout.BeginHorizontal();
-            if (body != null) body();
+            body?.Invoke();
             GUILayout.EndHorizontal();
         }
 
         public static void Vertical(Action body)
         {
             GUILayout.BeginVertical();
-            if (body != null) body();
+            body?.Invoke();
             GUILayout.EndVertical();
         }
 
@@ -183,7 +183,7 @@ namespace SpaceEngine.Tools
             {
                 if (!string.IsNullOrWhiteSpace(caption)) { BoxedPreHeader(); }
 
-                if (body != null) body();
+                body?.Invoke();
             }
             GUILayout.EndVertical();
         }
@@ -192,7 +192,7 @@ namespace SpaceEngine.Tools
         {
             GUILayout.BeginHorizontal(caption, skin.box, options);
             {
-                if (body != null) body();
+                body?.Invoke();
             }
             GUILayout.EndHorizontal();
         }
@@ -203,7 +203,7 @@ namespace SpaceEngine.Tools
 
             GUI.color = color;
 
-            if (body != null) body();
+            body?.Invoke();
 
             GUI.color = tempColor;
         }

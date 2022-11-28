@@ -17,7 +17,7 @@ namespace SpaceEngine.Core.Tile.Producer
 {
     /// <summary>
     /// An abstract producer of tiles. 
-    /// A TileProducer must be inherited from and overide the <see cref="DoCreateTile"/> function to create the tiles data.
+    /// A TileProducer must be inherited from and override the <see cref="DoCreateTile"/> function to create the tiles data.
     /// Note that several TileProducer can share the same <see cref="TileCache"/>, and hence the same <see cref="TileStorage"/>.
     /// </summary>
     [RequireComponent(typeof(TileSampler))]
@@ -43,7 +43,7 @@ namespace SpaceEngine.Core.Tile.Producer
         public bool IsGPUProducer = true;
 
         /// <summary>
-        /// Does this producer calculaed as last one?
+        /// Does this producer calculated as last one?
         /// </summary>
         public bool IsLastInSequence = false;
 
@@ -68,7 +68,9 @@ namespace SpaceEngine.Core.Tile.Producer
         /// </summary>
         public int ID { get; protected set; }
 
-        public TerrainNode TerrainNode { get { return Sampler.TerrainNode; } set { Sampler.TerrainNode = value; } }
+        public TerrainNode TerrainNode { get => Sampler.TerrainNode;
+            set => Sampler.TerrainNode = value;
+        }
 
         #region NodeSlave<TileProducer>
 
@@ -113,7 +115,7 @@ namespace SpaceEngine.Core.Tile.Producer
         /// For instance if the tile size (returned by <see cref="TileStorage.TileSize"/>) is 196, and if the tile border is 2, 
         /// this means that the actual tile data is 192x192 pixels, with a 2 pixel border that contains the value of the neighboring pixels. 
         /// Using a border introduces data redundancy, 
-        /// but is usefull to get the value of the neighboring pixels of a tile without needing to load the neighboring tiles.
+        /// but is useful to get the value of the neighboring pixels of a tile without needing to load the neighboring tiles.
         /// </summary>
         /// <returns>Returns the size in pixels of the border of each tile.</returns>
         public virtual int GetBorder()
@@ -180,7 +182,7 @@ namespace SpaceEngine.Core.Tile.Producer
         /// <param name="includeUnusedCache">Include unused tiles in the search, or not?</param>
         /// <param name="done">Check that tile's creation task is done?</param>
         /// <returns>
-        /// Returns the requsted tile, or null if it's not in the <see cref="TileCache"/> or if it's not ready. 
+        /// Returns the requested tile, or null if it's not in the <see cref="TileCache"/> or if it's not ready. 
         /// This method doesn't change the number of users of the returned tile.
         /// </returns>
         public virtual Tile FindTile(int level, int tx, int ty, bool includeUnusedCache, bool done)
@@ -235,8 +237,8 @@ namespace SpaceEngine.Core.Tile.Producer
         /// <param name="tx">The tile's quadtree X coordinate.</param>
         /// <param name="ty">The tile's quadtree Y coordinate.</param>
         /// <param name="slot">Slot, where the crated tile data must be stored.</param>
-        /// <param name="Callback">Callback after all. Finish the task here and do some extra post-calculation work.</param>
-        public virtual IEnumerator DoCreateTileCoroutine(int level, int tx, int ty, List<TileStorage.Slot> slot, Action Callback)
+        /// <param name="callback">Callback after all. Finish the task here and do some extra post-calculation work.</param>
+        public virtual IEnumerator DoCreateTileCoroutine(int level, int tx, int ty, List<TileStorage.Slot> slot, Action callback)
         {
             var samplersOrder = TerrainNode.SamplersOrder;
             var currentIndexInSamplerQueue = samplersOrder.OrderList.IndexOf(Sampler);
@@ -258,7 +260,7 @@ namespace SpaceEngine.Core.Tile.Producer
 
             yield return Yielders.EndOfFrame;
 
-            if (Callback != null) Callback();
+            callback?.Invoke();
         }
 
         private static int GetAwaitingFramesCount(int level)

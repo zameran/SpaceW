@@ -57,7 +57,7 @@ namespace SpaceEngine.Helpers
         /// <summary>
         /// <see cref="Attribute"/> cache. Readonly.
         /// </summary>
-        public static Dictionary<object, List<Attribute>> AttributeCache { get { return _attributeCache; } }
+        public static Dictionary<object, List<Attribute>> AttributeCache => _attributeCache;
 
         /// <summary>
         /// Gets all attributes of type.

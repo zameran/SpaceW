@@ -73,11 +73,11 @@ namespace SpaceEngine.Debugging
                 {
                     GUILayout.BeginVertical();
 
-                    for (int i = 0; i < sequence.Count; i++)
+                    for (var i = 0; i < sequence.Count; i++)
                     {
                         var entry = sequence[i];
 
-                        GUILayoutExtensions.VerticalBoxed(string.Format("{0}", entry.Name), GUISkin, () =>
+                        GUILayoutExtensions.VerticalBoxed($"{entry.Name}", GUISkin, () =>
                         {
                             if (true)
                             {

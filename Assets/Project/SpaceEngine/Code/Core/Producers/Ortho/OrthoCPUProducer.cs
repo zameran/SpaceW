@@ -76,7 +76,7 @@ namespace SpaceEngine.Core
 
             if (storage.Channels != Channels)
             {
-                throw new InvalidStorageException("Storage channels must be " + Channels);
+                throw new InvalidStorageException($"Storage channels must be {Channels}");
             }
 
             var tilesCount = ((1 << (MaxLevel * 2 + 2)) - 1) / 3;
@@ -90,7 +90,7 @@ namespace SpaceEngine.Core
                 stream.Read(data, 0, data.Length);
             }
 
-            for (int i = 0; i < tilesCount * 2; i++)
+            for (var i = 0; i < tilesCount * 2; i++)
             {
                 Offsets[i] = BitConverter.ToInt64(data, 8 * i);
             }

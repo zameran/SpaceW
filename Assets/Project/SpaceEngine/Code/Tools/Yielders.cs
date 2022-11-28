@@ -24,11 +24,11 @@ namespace SpaceEngine.Tools
 
         private static readonly WaitForEndOfFrame endOfFrame = new WaitForEndOfFrame();
 
-        public static WaitForEndOfFrame EndOfFrame { get { return endOfFrame; } }
+        public static WaitForEndOfFrame EndOfFrame => endOfFrame;
 
         private static readonly WaitForFixedUpdate fixedUpdate = new WaitForFixedUpdate();
 
-        public static WaitForFixedUpdate FixedUpdate { get { return fixedUpdate; } }
+        public static WaitForFixedUpdate FixedUpdate => fixedUpdate;
 
         public static WaitForSeconds Get(float seconds)
         {

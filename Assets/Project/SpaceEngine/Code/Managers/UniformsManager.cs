@@ -150,7 +150,7 @@ public class UniformsManager : MonoSingleton<UniformsManager>, IUniformed, IUnif
         if (target == null) return;
         if (kernels == null || kernels.Length == 0) { Debug.Log("UniformsManager: Kernels array problem!"); return; }
 
-        for (int i = 0; i < kernels.Length; i++)
+        for (var i = 0; i < kernels.Length; i++)
         {
             SetUniforms(target, i);
         }
@@ -219,10 +219,10 @@ public class UniformsManager : MonoSingleton<UniformsManager>, IUniformed, IUnif
 
     public Texture2D LoadTextureFromResources(string textureName)
     {
-        var path = "Textures/" + textureName;
+        var path = $"Textures/{textureName}";
         var textureResource = Resources.Load(path, typeof(Texture2D)) as Texture2D;
 
-        if (textureResource == null) { Logger.Log(string.Format("UniformsManager.LoadTextureFromResources: Failed to load texture from {0}", path)); }
+        if (textureResource == null) { Logger.Log($"UniformsManager.LoadTextureFromResources: Failed to load texture from {path}"); }
 
         return textureResource;
     }

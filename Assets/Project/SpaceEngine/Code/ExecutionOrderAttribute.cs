@@ -43,7 +43,7 @@ internal sealed class ExecutionOrderAttribute : Attribute
             var attribute = attributes[0] as ExecutionOrderAttribute;
 
             var asset = "";
-            var guids = AssetDatabase.FindAssets(string.Format("{0} t:script", item.Name));
+            var guids = AssetDatabase.FindAssets($"{item.Name} t:script");
 
             if (guids.Length > 1)
             {

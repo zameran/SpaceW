@@ -50,7 +50,7 @@ namespace SpaceEngine.Core.Utilities.Gradients
         public bool ReverseX = false;
 
         /// <inheritdoc />
-        protected override Vector2 Size { get { return new Vector2(256, 32); } }
+        protected override Vector2 Size => new Vector2(256, 32);
 
         public ColorMaterialTableGradientLut() : base() { }
 

@@ -50,10 +50,10 @@ namespace SpaceEngine.Helpers
 
             static int GetNewVertex4(int i1, int i2)
             {
-                int newIndex = vertices.Count;
+                var newIndex = vertices.Count;
 
-                uint t1 = ((uint)i1 << 16) | (uint)i2;
-                uint t2 = ((uint)i2 << 16) | (uint)i1;
+                var t1 = ((uint)i1 << 16) | (uint)i2;
+                var t2 = ((uint)i2 << 16) | (uint)i1;
 
                 if (newVectices.ContainsKey(t2)) return newVectices[t2];
                 if (newVectices.ContainsKey(t1)) return newVectices[t1];
@@ -81,16 +81,16 @@ namespace SpaceEngine.Helpers
 
                 InitArrays(mesh);
 
-                int[] triangles = mesh.triangles;
-                for (int i = 0; i < triangles.Length; i += 3)
+                var triangles = mesh.triangles;
+                for (var i = 0; i < triangles.Length; i += 3)
                 {
-                    int i1 = triangles[i + 0];
-                    int i2 = triangles[i + 1];
-                    int i3 = triangles[i + 2];
+                    var i1 = triangles[i + 0];
+                    var i2 = triangles[i + 1];
+                    var i3 = triangles[i + 2];
 
-                    int a = GetNewVertex4(i1, i2);
-                    int b = GetNewVertex4(i2, i3);
-                    int c = GetNewVertex4(i3, i1);
+                    var a = GetNewVertex4(i1, i2);
+                    var b = GetNewVertex4(i2, i3);
+                    var c = GetNewVertex4(i3, i1);
 
                     indices.Add(i1); indices.Add(a); indices.Add(c);
                     indices.Add(i2); indices.Add(b); indices.Add(a);
@@ -117,11 +117,11 @@ namespace SpaceEngine.Helpers
 
             static int GetNewVertex9(int i1, int i2, int i3)
             {
-                int newIndex = vertices.Count;
+                var newIndex = vertices.Count;
 
                 if (i3 == i1 || i3 == i2)
                 {
-                    uint t1 = ((uint)i1 << 16) | (uint)i2;
+                    var t1 = ((uint)i1 << 16) | (uint)i2;
 
                     if (newVectices.ContainsKey(t1)) return newVectices[t1];
 
@@ -150,21 +150,21 @@ namespace SpaceEngine.Helpers
 
                 InitArrays(mesh);
 
-                int[] triangles = mesh.triangles;
-                for (int i = 0; i < triangles.Length; i += 3)
+                var triangles = mesh.triangles;
+                for (var i = 0; i < triangles.Length; i += 3)
                 {
-                    int i1 = triangles[i + 0];
-                    int i2 = triangles[i + 1];
-                    int i3 = triangles[i + 2];
+                    var i1 = triangles[i + 0];
+                    var i2 = triangles[i + 1];
+                    var i3 = triangles[i + 2];
 
-                    int a1 = GetNewVertex9(i1, i2, i1);
-                    int a2 = GetNewVertex9(i2, i1, i2);
-                    int b1 = GetNewVertex9(i2, i3, i2);
-                    int b2 = GetNewVertex9(i3, i2, i3);
-                    int c1 = GetNewVertex9(i3, i1, i3);
-                    int c2 = GetNewVertex9(i1, i3, i1);
+                    var a1 = GetNewVertex9(i1, i2, i1);
+                    var a2 = GetNewVertex9(i2, i1, i2);
+                    var b1 = GetNewVertex9(i2, i3, i2);
+                    var b2 = GetNewVertex9(i3, i2, i3);
+                    var c1 = GetNewVertex9(i3, i1, i3);
+                    var c2 = GetNewVertex9(i1, i3, i1);
 
-                    int d = GetNewVertex9(i1, i2, i3);
+                    var d = GetNewVertex9(i1, i2, i3);
 
                     indices.Add(i1); indices.Add(a1); indices.Add(c2);
                     indices.Add(i2); indices.Add(b1); indices.Add(a2);

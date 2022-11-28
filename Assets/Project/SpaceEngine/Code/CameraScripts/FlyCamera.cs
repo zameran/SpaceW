@@ -55,10 +55,14 @@ namespace SpaceEngine.Cameras
             Far
         }
 
-        public Body Body { get { return GodManager.Instance.ActiveBody; } }
+        public Body Body => GodManager.Instance.ActiveBody;
 
-        public float NearClipPlane { get { return CameraComponent.nearClipPlane; } set { CameraComponent.nearClipPlane = value; } }
-        public float FarClipPlane { get { return CameraComponent.farClipPlane; } set { CameraComponent.farClipPlane = value; } }
+        public float NearClipPlane { get => CameraComponent.nearClipPlane;
+            set => CameraComponent.nearClipPlane = value;
+        }
+        public float FarClipPlane { get => CameraComponent.farClipPlane;
+            set => CameraComponent.farClipPlane = value;
+        }
 
         public ClipPlanesControl ClipPlanesControlType = ClipPlanesControl.NearFar;
 

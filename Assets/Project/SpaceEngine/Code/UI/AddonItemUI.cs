@@ -49,7 +49,7 @@ public sealed class AddonItemUI : MonoBehaviour
         }
         else
         {
-            Debug.LogError(string.Format("AddonItemUI.SetCaption: Can't set caption to [{0}]! Provided texHandler is null!", caption));
+            Debug.LogError($"AddonItemUI.SetCaption: Can't set caption to [{caption}]! Provided texHandler is null!");
         }
     }
 }

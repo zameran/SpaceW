@@ -43,9 +43,9 @@ namespace SpaceEngine.Core.Preprocess.Terrain
     {
         public static void Projection1(int x, int y, int w, out double sx, out double sy, out double sz)
         {
-            double xl = (Math.Max((double)Math.Min(x, w), 0.0)) / w * 2.0 - 1.0;
-            double yl = (Math.Max((double)Math.Min(y, w), 0.0)) / w * 2.0 - 1.0;
-            double l = Math.Sqrt(xl * xl + yl * yl + 1.0);
+            var xl = (Math.Max((double)Math.Min(x, w), 0.0)) / w * 2.0 - 1.0;
+            var yl = (Math.Max((double)Math.Min(y, w), 0.0)) / w * 2.0 - 1.0;
+            var l = Math.Sqrt(xl * xl + yl * yl + 1.0);
 
             sx = xl / l;
             sy = yl / l;
@@ -54,9 +54,9 @@ namespace SpaceEngine.Core.Preprocess.Terrain
 
         public static void Projection2(int x, int y, int w, out double sx, out double sy, out double sz)
         {
-            double xl = (Math.Max((double)Math.Min(x, w), 0.0)) / w * 2.0 - 1.0;
-            double yl = (Math.Max((double)Math.Min(y, w), 0.0)) / w * 2.0 - 1.0;
-            double l = Math.Sqrt(xl * xl + yl * yl + 1.0);
+            var xl = (Math.Max((double)Math.Min(x, w), 0.0)) / w * 2.0 - 1.0;
+            var yl = (Math.Max((double)Math.Min(y, w), 0.0)) / w * 2.0 - 1.0;
+            var l = Math.Sqrt(xl * xl + yl * yl + 1.0);
 
             sx = xl / l;
             sy = -1.0 / l;
@@ -65,9 +65,9 @@ namespace SpaceEngine.Core.Preprocess.Terrain
 
         public static void Projection3(int x, int y, int w, out double sx, out double sy, out double sz)
         {
-            double xl = (Math.Max((double)Math.Min(x, w), 0.0)) / w * 2.0 - 1.0;
-            double yl = (Math.Max((double)Math.Min(y, w), 0.0)) / w * 2.0 - 1.0;
-            double l = Math.Sqrt(xl * xl + yl * yl + 1.0);
+            var xl = (Math.Max((double)Math.Min(x, w), 0.0)) / w * 2.0 - 1.0;
+            var yl = (Math.Max((double)Math.Min(y, w), 0.0)) / w * 2.0 - 1.0;
+            var l = Math.Sqrt(xl * xl + yl * yl + 1.0);
 
             sx = 1.0 / l;
             sy = xl / l;
@@ -76,9 +76,9 @@ namespace SpaceEngine.Core.Preprocess.Terrain
 
         public static void Projection4(int x, int y, int w, out double sx, out double sy, out double sz)
         {
-            double xl = (Math.Max((double)Math.Min(x, w), 0.0)) / w * 2.0 - 1.0;
-            double yl = (Math.Max((double)Math.Min(y, w), 0.0)) / w * 2.0 - 1.0;
-            double l = Math.Sqrt(xl * xl + yl * yl + 1.0);
+            var xl = (Math.Max((double)Math.Min(x, w), 0.0)) / w * 2.0 - 1.0;
+            var yl = (Math.Max((double)Math.Min(y, w), 0.0)) / w * 2.0 - 1.0;
+            var l = Math.Sqrt(xl * xl + yl * yl + 1.0);
 
             sx = -xl / l;
             sy = 1.0 / l;
@@ -87,9 +87,9 @@ namespace SpaceEngine.Core.Preprocess.Terrain
 
         public static void Projection5(int x, int y, int w, out double sx, out double sy, out double sz)
         {
-            double xl = (Math.Max((double)Math.Min(x, w), 0.0)) / w * 2.0 - 1.0;
-            double yl = (Math.Max((double)Math.Min(y, w), 0.0)) / w * 2.0 - 1.0;
-            double l = Math.Sqrt(xl * xl + yl * yl + 1.0);
+            var xl = (Math.Max((double)Math.Min(x, w), 0.0)) / w * 2.0 - 1.0;
+            var yl = (Math.Max((double)Math.Min(y, w), 0.0)) / w * 2.0 - 1.0;
+            var l = Math.Sqrt(xl * xl + yl * yl + 1.0);
 
             sx = -1.0 / l;
             sy = -xl / l;
@@ -98,9 +98,9 @@ namespace SpaceEngine.Core.Preprocess.Terrain
 
         public static void Projection6(int x, int y, int w, out double sx, out double sy, out double sz)
         {
-            double xl = (Math.Max((double)Math.Min(x, w), 0.0)) / w * 2.0 - 1.0;
-            double yl = (Math.Max((double)Math.Min(y, w), 0.0)) / w * 2.0 - 1.0;
-            double l = Math.Sqrt(xl * xl + yl * yl + 1.0);
+            var xl = (Math.Max((double)Math.Min(x, w), 0.0)) / w * 2.0 - 1.0;
+            var yl = (Math.Max((double)Math.Min(y, w), 0.0)) / w * 2.0 - 1.0;
+            var l = Math.Sqrt(xl * xl + yl * yl + 1.0);
 
             sx = xl / l;
             sy = -yl / l;
@@ -109,9 +109,9 @@ namespace SpaceEngine.Core.Preprocess.Terrain
 
         public static void Projection1f(int x, int y, int w, out double sx, out double sy, out double sz)
         {
-            double xl = ((double)x / (double)w) * 2.0 - 1.0;
-            double yl = ((double)y / (double)w) * 2.0 - 1.0;
-            double l = Math.Sqrt(xl * xl + yl * yl + 1.0);
+            var xl = ((double)x / (double)w) * 2.0 - 1.0;
+            var yl = ((double)y / (double)w) * 2.0 - 1.0;
+            var l = Math.Sqrt(xl * xl + yl * yl + 1.0);
 
             sx = xl / l;
             sy = yl / l;
@@ -120,9 +120,9 @@ namespace SpaceEngine.Core.Preprocess.Terrain
 
         public static void Projection2f(int x, int y, int w, out double sx, out double sy, out double sz)
         {
-            double xl = ((double)x / (double)w) * 2.0 - 1.0;
-            double yl = ((double)y / (double)w) * 2.0 - 1.0;
-            double l = Math.Sqrt(xl * xl + yl * yl + 1.0);
+            var xl = ((double)x / (double)w) * 2.0 - 1.0;
+            var yl = ((double)y / (double)w) * 2.0 - 1.0;
+            var l = Math.Sqrt(xl * xl + yl * yl + 1.0);
 
             sx = xl / l;
             sy = -1.0 / l;
@@ -131,9 +131,9 @@ namespace SpaceEngine.Core.Preprocess.Terrain
 
         public static void Projection3f(int x, int y, int w, out double sx, out double sy, out double sz)
         {
-            double xl = ((double)x / (double)w) * 2.0 - 1.0;
-            double yl = ((double)y / (double)w) * 2.0 - 1.0;
-            double l = Math.Sqrt(xl * xl + yl * yl + 1.0);
+            var xl = ((double)x / (double)w) * 2.0 - 1.0;
+            var yl = ((double)y / (double)w) * 2.0 - 1.0;
+            var l = Math.Sqrt(xl * xl + yl * yl + 1.0);
 
             sx = 1.0 / l;
             sy = xl / l;
@@ -142,9 +142,9 @@ namespace SpaceEngine.Core.Preprocess.Terrain
 
         public static void Projection4f(int x, int y, int w, out double sx, out double sy, out double sz)
         {
-            double xl = ((double)x / (double)w) * 2.0 - 1.0;
-            double yl = ((double)y / (double)w) * 2.0 - 1.0;
-            double l = Math.Sqrt(xl * xl + yl * yl + 1.0);
+            var xl = ((double)x / (double)w) * 2.0 - 1.0;
+            var yl = ((double)y / (double)w) * 2.0 - 1.0;
+            var l = Math.Sqrt(xl * xl + yl * yl + 1.0);
 
             sx = -xl / l;
             sy = 1.0 / l;
@@ -153,9 +153,9 @@ namespace SpaceEngine.Core.Preprocess.Terrain
 
         public static void Projection5f(int x, int y, int w, out double sx, out double sy, out double sz)
         {
-            double xl = ((double)x / (double)w) * 2.0 - 1.0;
-            double yl = ((double)y / (double)w) * 2.0 - 1.0;
-            double l = Math.Sqrt(xl * xl + yl * yl + 1.0);
+            var xl = ((double)x / (double)w) * 2.0 - 1.0;
+            var yl = ((double)y / (double)w) * 2.0 - 1.0;
+            var l = Math.Sqrt(xl * xl + yl * yl + 1.0);
 
             sx = -1.0 / l;
             sy = -xl / l;
@@ -164,9 +164,9 @@ namespace SpaceEngine.Core.Preprocess.Terrain
 
         public static void Projection6f(int x, int y, int w, out double sx, out double sy, out double sz)
         {
-            double xl = ((double)x / (double)w) * 2.0 - 1.0;
-            double yl = ((double)y / (double)w) * 2.0 - 1.0;
-            double l = Math.Sqrt(xl * xl + yl * yl + 1.0);
+            var xl = ((double)x / (double)w) * 2.0 - 1.0;
+            var yl = ((double)y / (double)w) * 2.0 - 1.0;
+            var l = Math.Sqrt(xl * xl + yl * yl + 1.0);
 
             sx = xl / l;
             sy = -yl / l;
@@ -175,9 +175,9 @@ namespace SpaceEngine.Core.Preprocess.Terrain
 
         public static void Projection1h(int x, int y, int w, out double sx, out double sy, out double sz)
         {
-            double xl = (Math.Max(Math.Min(x, w - 1), 0) + 0.5) / w * 2.0 - 1.0;
-            double yl = (Math.Max(Math.Min(y, w - 1), 0) + 0.5) / w * 2.0 - 1.0;
-            double l = Math.Sqrt(xl * xl + yl * yl + 1.0);
+            var xl = (Math.Max(Math.Min(x, w - 1), 0) + 0.5) / w * 2.0 - 1.0;
+            var yl = (Math.Max(Math.Min(y, w - 1), 0) + 0.5) / w * 2.0 - 1.0;
+            var l = Math.Sqrt(xl * xl + yl * yl + 1.0);
 
             sx = xl / l;
             sy = yl / l;
@@ -186,9 +186,9 @@ namespace SpaceEngine.Core.Preprocess.Terrain
 
         public static void Projection2h(int x, int y, int w, out double sx, out double sy, out double sz)
         {
-            double xl = (Math.Max(Math.Min(x, w - 1), 0) + 0.5) / w * 2.0 - 1.0;
-            double yl = (Math.Max(Math.Min(y, w - 1), 0) + 0.5) / w * 2.0 - 1.0;
-            double l = Math.Sqrt(xl * xl + yl * yl + 1.0);
+            var xl = (Math.Max(Math.Min(x, w - 1), 0) + 0.5) / w * 2.0 - 1.0;
+            var yl = (Math.Max(Math.Min(y, w - 1), 0) + 0.5) / w * 2.0 - 1.0;
+            var l = Math.Sqrt(xl * xl + yl * yl + 1.0);
 
             sx = xl / l;
             sy = -1.0 / l;
@@ -197,9 +197,9 @@ namespace SpaceEngine.Core.Preprocess.Terrain
 
         public static void Projection3h(int x, int y, int w, out double sx, out double sy, out double sz)
         {
-            double xl = (Math.Max(Math.Min(x, w - 1), 0) + 0.5) / w * 2.0 - 1.0;
-            double yl = (Math.Max(Math.Min(y, w - 1), 0) + 0.5) / w * 2.0 - 1.0;
-            double l = Math.Sqrt(xl * xl + yl * yl + 1.0);
+            var xl = (Math.Max(Math.Min(x, w - 1), 0) + 0.5) / w * 2.0 - 1.0;
+            var yl = (Math.Max(Math.Min(y, w - 1), 0) + 0.5) / w * 2.0 - 1.0;
+            var l = Math.Sqrt(xl * xl + yl * yl + 1.0);
 
             sx = 1.0 / l;
             sy = xl / l;
@@ -208,9 +208,9 @@ namespace SpaceEngine.Core.Preprocess.Terrain
 
         public static void Projection4h(int x, int y, int w, out double sx, out double sy, out double sz)
         {
-            double xl = (Math.Max(Math.Min(x, w - 1), 0) + 0.5) / w * 2.0 - 1.0;
-            double yl = (Math.Max(Math.Min(y, w - 1), 0) + 0.5) / w * 2.0 - 1.0;
-            double l = Math.Sqrt(xl * xl + yl * yl + 1.0);
+            var xl = (Math.Max(Math.Min(x, w - 1), 0) + 0.5) / w * 2.0 - 1.0;
+            var yl = (Math.Max(Math.Min(y, w - 1), 0) + 0.5) / w * 2.0 - 1.0;
+            var l = Math.Sqrt(xl * xl + yl * yl + 1.0);
 
             sx = -xl / l;
             sy = 1.0 / l;
@@ -219,9 +219,9 @@ namespace SpaceEngine.Core.Preprocess.Terrain
 
         public static void Projection5h(int x, int y, int w, out double sx, out double sy, out double sz)
         {
-            double xl = (Math.Max(Math.Min(x, w - 1), 0) + 0.5) / w * 2.0 - 1.0;
-            double yl = (Math.Max(Math.Min(y, w - 1), 0) + 0.5) / w * 2.0 - 1.0;
-            double l = Math.Sqrt(xl * xl + yl * yl + 1.0);
+            var xl = (Math.Max(Math.Min(x, w - 1), 0) + 0.5) / w * 2.0 - 1.0;
+            var yl = (Math.Max(Math.Min(y, w - 1), 0) + 0.5) / w * 2.0 - 1.0;
+            var l = Math.Sqrt(xl * xl + yl * yl + 1.0);
 
             sx = -1.0 / l;
             sy = -xl / l;
@@ -230,9 +230,9 @@ namespace SpaceEngine.Core.Preprocess.Terrain
 
         public static void Projection6h(int x, int y, int w, out double sx, out double sy, out double sz)
         {
-            double xl = (Math.Max(Math.Min(x, w - 1), 0) + 0.5) / w * 2.0 - 1.0;
-            double yl = (Math.Max(Math.Min(y, w - 1), 0) + 0.5) / w * 2.0 - 1.0;
-            double l = Math.Sqrt(xl * xl + yl * yl + 1.0);
+            var xl = (Math.Max(Math.Min(x, w - 1), 0) + 0.5) / w * 2.0 - 1.0;
+            var yl = (Math.Max(Math.Min(y, w - 1), 0) + 0.5) / w * 2.0 - 1.0;
+            var l = Math.Sqrt(xl * xl + yl * yl + 1.0);
 
             sx = xl / l;
             sy = -yl / l;

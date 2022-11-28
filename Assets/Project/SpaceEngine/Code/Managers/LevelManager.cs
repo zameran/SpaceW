@@ -76,7 +76,7 @@ namespace SpaceEngine.Managers
 
             if (InjectedWaiter != null) yield return InjectedWaiter;
 
-            if (OnDone != null) OnDone();
+            OnDone?.Invoke();
         }
 
         public AsyncOperation UnloadScene(EntryPoint sceneName)
@@ -171,7 +171,7 @@ namespace SpaceEngine.Managers
             }
             catch (Exception ex)
             {
-                Debug.LogError("LevelManager.LoadScene: Exception!\n" + ex.Message);
+                Debug.LogError($"LevelManager.LoadScene: Exception!\n{ex.Message}");
             }
 
             return null;

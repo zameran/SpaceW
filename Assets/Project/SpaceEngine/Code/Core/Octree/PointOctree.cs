@@ -72,7 +72,7 @@ namespace SpaceEngine.Core.Octree
         {
             if (minNodeSize > initialWorldSize)
             {
-                Debug.LogWarning(string.Format("PointOctree: Minimum node size must be at least as big as the initial world size. Was: {0} Adjusted to: {1}", minNodeSize, initialWorldSize));
+                Debug.LogWarning($"PointOctree: Minimum node size must be at least as big as the initial world size. Was: {minNodeSize} Adjusted to: {initialWorldSize}");
 
                 minNodeSize = initialWorldSize;
             }
@@ -99,7 +99,7 @@ namespace SpaceEngine.Core.Octree
 
                 if (++count > 32)
                 {
-                    Debug.LogError(string.Format("PointOctree: Aborted Add operation as it seemed to be going on forever ({0}) attempts at growing the octree.", count - 1));
+                    Debug.LogError($"PointOctree: Aborted Add operation as it seemed to be going on forever ({count - 1}) attempts at growing the octree.");
 
                     return;
                 }
@@ -219,11 +219,11 @@ namespace SpaceEngine.Core.Octree
         /// <param name="direction">Direction to grow.</param>
         public void Grow(Vector3 direction)
         {
-            sbyte xDirection = direction.x >= 0 ? (sbyte)1 : (sbyte)-1;
-            sbyte yDirection = direction.y >= 0 ? (sbyte)1 : (sbyte)-1;
-            sbyte zDirection = direction.z >= 0 ? (sbyte)1 : (sbyte)-1;
+            var xDirection = direction.x >= 0 ? (sbyte)1 : (sbyte)-1;
+            var yDirection = direction.y >= 0 ? (sbyte)1 : (sbyte)-1;
+            var zDirection = direction.z >= 0 ? (sbyte)1 : (sbyte)-1;
 
-            PointOctreeNode<TType> oldRoot = RootNode;
+            var oldRoot = RootNode;
 
             var half = RootNode.SideLength / 2;
             var newLength = RootNode.SideLength * 2;
@@ -235,7 +235,7 @@ namespace SpaceEngine.Core.Octree
             // Create 7 new octree children to go with the old root as children of the new root...
             var rootPos = GetRootPosIndex(xDirection, yDirection, zDirection);
 
-            PointOctreeNode<TType>[] children = new PointOctreeNode<TType>[8];
+            var children = new PointOctreeNode<TType>[8];
 
             for (byte i = 0; i < 8; i++)
             {
@@ -281,7 +281,7 @@ namespace SpaceEngine.Core.Octree
         /// <returns>Octant, where the root node should be.</returns>
         private static byte GetRootPosIndex(sbyte xDir, sbyte yDir, sbyte zDir)
         {
-            byte result = xDir > 0 ? (byte)1 : (byte)0;
+            var result = xDir > 0 ? (byte)1 : (byte)0;
 
             if (yDir < 0) result += 4;
             if (zDir > 0) result += 2;

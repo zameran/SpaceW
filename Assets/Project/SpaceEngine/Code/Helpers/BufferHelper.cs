@@ -44,7 +44,7 @@ namespace SpaceEngine.Helpers
     {
         public static void ReleaseBuffers(params ComputeBuffer[] buffers)
         {
-            for (int i = 0; i < buffers.Length; i++)
+            for (var i = 0; i < buffers.Length; i++)
             {
                 if (buffers[i] != null)
                 {
@@ -55,7 +55,7 @@ namespace SpaceEngine.Helpers
 
         public static void DisposeBuffers(params ComputeBuffer[] buffers)
         {
-            for (int i = 0; i < buffers.Length; i++)
+            for (var i = 0; i < buffers.Length; i++)
             {
                 if (buffers[i] != null)
                 {
@@ -75,7 +75,7 @@ namespace SpaceEngine.Helpers
 
         public static void ReleaseAndDisposeBuffers(params ComputeBuffer[] buffers)
         {
-            for (int i = 0; i < buffers.Length; i++)
+            for (var i = 0; i < buffers.Length; i++)
             {
                 if (buffers[i] != null)
                 {

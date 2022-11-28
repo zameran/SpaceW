@@ -32,12 +32,16 @@
 // Creator: zameran
 
 // NOTE : If you wanna use this file as include, please provide special defines before (defines, that provided after include doesn't taken in to the account) :
-// CORE_PORDUCER_ADDITIONAL_UV
+// CORE_PRODUCER_ADDITIONAL_UV
 
 #define CORE
 
 #if !defined (TCCOMMON)
 #include "TCCommon.cginc"
+#endif
+
+#if !defined (HLSL_SUPPORT_INCLUDED)
+#include <HLSLSupport.cginc>
 #endif
 
 //-----------------------------------------------------------------------------
@@ -270,7 +274,7 @@ struct VertexProducerOutput
 	float4 position : SV_POSITION;
 	float2 uv0 : TEXCOORD0;
 
-	#if defined(CORE_PORDUCER_ADDITIONAL_UV)
+	#if defined(CORE_PRODUCER_ADDITIONAL_UV)
 		float2 uv1 : TEXCOORD1;
 	#endif
 };
@@ -282,7 +286,7 @@ struct VertexProducerOutput
 #define CORE_PRODUCER_VERTEX_PROGRAM_BODY_ADDITIONAL_UV(scale) \
 	o.uv1 = v.texcoord.xy * scale; \
 
-#if defined(CORE_PORDUCER_ADDITIONAL_UV)
+#if defined(CORE_PRODUCER_ADDITIONAL_UV)
 	#define CORE_PRODUCER_VERTEX_PROGRAM(scale) \
 		void vert(in VertexProducerInput v, out VertexProducerOutput o) \
 		{ \

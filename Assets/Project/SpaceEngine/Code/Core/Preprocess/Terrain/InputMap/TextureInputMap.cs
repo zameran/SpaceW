@@ -14,11 +14,11 @@ namespace SpaceEngine.Core.Preprocess.Terrain
         [SerializeField]
         private bool FlipY = false;
 
-        public override int Width { get { return Texture.width; } }
+        public override int Width => Texture.width;
 
-        public override int Height { get { return Texture.height; } }
+        public override int Height => Texture.height;
 
-        public override int Channels { get { return 4; } }
+        public override int Channels => 4;
 
         /// <inheritdoc />
         protected override void Awake()

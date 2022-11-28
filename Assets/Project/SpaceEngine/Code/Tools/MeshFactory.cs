@@ -90,7 +90,7 @@ namespace SpaceEngine.Tools
             mesh.uv = texcoords;
             mesh.triangles = indices;
             mesh.normals = normals;
-            mesh.name = string.Format("OceanMesh_({0})", Random.Range(float.MinValue, float.MaxValue));
+            mesh.name = $"OceanMesh_({Random.Range(float.MinValue, float.MaxValue)})";
             mesh.hideFlags = HideFlags.DontSave;
 
             return mesh;
@@ -171,7 +171,7 @@ namespace SpaceEngine.Tools
 
             if (generateBorders)
             {
-                List<int> borderIndices = new List<int>((borders - 4) * 6);
+                var borderIndices = new List<int>((borders - 4) * 6);
 
                 var borderDepth = -0.625f;
                 var startTriangle = detail * detail;
@@ -356,7 +356,7 @@ namespace SpaceEngine.Tools
             uvs.Clear();
             indices.Clear();
 
-            mesh.name = string.Format("RingSegmentMesh_({0})", Random.Range(float.MinValue, float.MaxValue));
+            mesh.name = $"RingSegmentMesh_({Random.Range(float.MinValue, float.MaxValue)})";
             mesh.hideFlags = HideFlags.DontSave;
 
             return mesh;
@@ -439,7 +439,7 @@ namespace SpaceEngine.Tools
             uvs2.Clear();
             indices.Clear();
 
-            mesh.name = string.Format("RingSegmentMesh_({0})", Random.Range(float.MinValue, float.MaxValue));
+            mesh.name = $"RingSegmentMesh_({Random.Range(float.MinValue, float.MaxValue)})";
             mesh.hideFlags = HideFlags.DontSave;
 
             return mesh;
@@ -477,7 +477,7 @@ namespace SpaceEngine.Tools
 
             mesh.RecalculateNormals();
 
-            mesh.name = string.Format("BillboardMesh_({0})", Random.Range(float.MinValue, float.MaxValue));
+            mesh.name = $"BillboardMesh_({Random.Range(float.MinValue, float.MaxValue)})";
             mesh.hideFlags = HideFlags.DontSave;
 
             return mesh;
@@ -703,7 +703,7 @@ namespace SpaceEngine.Tools
                 triangles.Clear();
                 normals.Clear();
 
-                mesh.name = string.Format("IcoSphereMesh_({0})", Random.Range(float.MinValue, float.MaxValue));
+                mesh.name = $"IcoSphereMesh_({Random.Range(float.MinValue, float.MaxValue)})";
                 mesh.hideFlags = HideFlags.DontSave;
 
                 return mesh;

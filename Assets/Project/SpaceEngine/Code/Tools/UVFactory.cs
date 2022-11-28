@@ -59,7 +59,7 @@ namespace SpaceEngine.Tools
 
         public static Vector2 GetSphericalUV(int detail, int col, int row, Vector3 vertex, bool staticX, bool staticY)
         {
-            Vector2 uv = new Vector2();
+            var uv = new Vector2();
 
             uv.x = -(Mathf.Atan2(vertex.x, vertex.z) / (2f * Mathf.PI) + 0.5f);
             uv.y = (Mathf.Asin(vertex.y) / Mathf.PI + .5f);

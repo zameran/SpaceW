@@ -63,14 +63,15 @@ namespace SpaceEngine.Core.Storage
                     case DATA_TYPE.BYTE:
                         buffer = new ComputeBuffer(TileSize, sizeof(byte) * Channels, ComputeBufferType);
                         break;
+                    case DATA_TYPE.SHORT:
                     default:
-                        {
-                            buffer = new ComputeBuffer(TileSize, sizeof(float) * Channels, ComputeBufferType);
+                    {
+                        buffer = new ComputeBuffer(TileSize, sizeof(float) * Channels, ComputeBufferType);
 
-                            Debug.LogWarning(string.Format("TileStorage: {0} data type isn't supported by {1}! Float type will be used!", DataType.ToString(), GetType().Name));
+                        Debug.LogWarning($"TileStorage: {DataType.ToString()} data type isn't supported by {GetType().Name}! Float type will be used!");
 
-                            break;
-                        }
+                        break;
+                    }
                 }
 
                 var slot = new CBSlot(this, buffer);

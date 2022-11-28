@@ -69,7 +69,7 @@ Shader "SpaceEngine/Planet/Terrain (Deferred)"
 
 			CGPROGRAM
 			#pragma target 4.0
-			#pragma only_renderers d3d11 glcore
+			#pragma only_renderers d3d11 glcore metal
 			#pragma vertex vert
 			#pragma fragment frag
 

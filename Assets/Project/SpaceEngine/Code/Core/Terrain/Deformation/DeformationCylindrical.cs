@@ -142,22 +142,22 @@ namespace SpaceEngine.Core.Terrain.Deformation
 
         public static Frustum3d.VISIBILITY GetClipVisibility(Vector4d clip, Vector3d[] b, double f)
         {
-            double c1 = b[0].x * clip.x + clip.w;
-            double c2 = b[1].x * clip.x + clip.w;
-            double c3 = b[2].x * clip.x + clip.w;
-            double c4 = b[3].x * clip.x + clip.w;
-            double o1 = b[0].y * clip.y + b[0].z * clip.z;
-            double o2 = b[1].y * clip.y + b[1].z * clip.z;
-            double o3 = b[2].y * clip.y + b[2].z * clip.z;
-            double o4 = b[3].y * clip.y + b[3].z * clip.z;
-            double p1 = o1 + c1;
-            double p2 = o2 + c2;
-            double p3 = o3 + c3;
-            double p4 = o4 + c4;
-            double p5 = o1 * f + c1;
-            double p6 = o2 * f + c2;
-            double p7 = o3 * f + c3;
-            double p8 = o4 * f + c4;
+            var c1 = b[0].x * clip.x + clip.w;
+            var c2 = b[1].x * clip.x + clip.w;
+            var c3 = b[2].x * clip.x + clip.w;
+            var c4 = b[3].x * clip.x + clip.w;
+            var o1 = b[0].y * clip.y + b[0].z * clip.z;
+            var o2 = b[1].y * clip.y + b[1].z * clip.z;
+            var o3 = b[2].y * clip.y + b[2].z * clip.z;
+            var o4 = b[3].y * clip.y + b[3].z * clip.z;
+            var p1 = o1 + c1;
+            var p2 = o2 + c2;
+            var p3 = o3 + c3;
+            var p4 = o4 + c4;
+            var p5 = o1 * f + c1;
+            var p6 = o2 * f + c2;
+            var p7 = o3 * f + c3;
+            var p8 = o4 * f + c4;
 
             if (p1 <= 0 && p2 <= 0 && p3 <= 0 && p4 <= 0 && p5 <= 0 && p6 <= 0 && p7 <= 0 && p8 <= 0)
             {

@@ -23,14 +23,14 @@ namespace SpaceEngine.Core.Preprocess.Terrain
 
         private Vector4 SampleColor(float x, float y)
         {
-            int ix = (int)Mathf.Floor(x);
-            int iy = (int)Mathf.Floor(y);
+            var ix = (int)Mathf.Floor(x);
+            var iy = (int)Mathf.Floor(y);
 
             x -= ix;
             y -= iy;
 
-            float cx = 1.0f - x;
-            float cy = 1.0f - y;
+            var cx = 1.0f - x;
+            var cy = 1.0f - y;
 
             var c1 = Source.Get(ix, iy);
             var c2 = Source.Get(ix + 1, iy);
@@ -70,8 +70,8 @@ namespace SpaceEngine.Core.Preprocess.Terrain
 
             Projection(x, y, DestinationSize, out sx, out sy, out sz);
 
-            double lon = Math.Atan2(sy, sx) + Math.PI;
-            double lat = Math.Acos(sz);
+            var lon = Math.Atan2(sy, sx) + Math.PI;
+            var lat = Math.Acos(sz);
 
             return SampleColor(lon, lat);
         }
@@ -81,14 +81,14 @@ namespace SpaceEngine.Core.Preprocess.Terrain
             lon = lon / Math.PI * (Source.Width / 2.0);
             lat = lat / Math.PI * Source.Height;
 
-            int ilon = (int)Math.Floor(lon);
-            int ilat = (int)Math.Floor(lat);
+            var ilon = (int)Math.Floor(lon);
+            var ilat = (int)Math.Floor(lat);
 
             lon -= ilon;
             lat -= ilat;
 
-            double clon = 1.0 - lon;
-            double clat = 1.0 - lat;
+            var clon = 1.0 - lon;
+            var clat = 1.0 - lat;
 
             var c1 = Source.Get((ilon + Source.Width) % Source.Width, ilat);
             var c2 = Source.Get((ilon + Source.Width + 1) % Source.Width, ilat);

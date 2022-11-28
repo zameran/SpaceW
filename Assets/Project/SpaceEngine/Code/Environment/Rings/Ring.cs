@@ -192,7 +192,7 @@ namespace SpaceEngine.Environment.Rings
             if (Segments == null) return;
             if (Segments.Count == 0) return;
 
-            for (int i = 0; i < Segments.Count; i++)
+            for (var i = 0; i < Segments.Count; i++)
             {
                 if (Segments[i] != null)
                 {
@@ -286,16 +286,13 @@ namespace SpaceEngine.Environment.Rings
         {
             if (lightCount > 0)
             {
-                var keyword = "LIGHT_" + lightCount;
+                var keyword = $"LIGHT_{lightCount}";
 
                 for (var i = keywordLists.Length - 1; i >= 0; i--)
                 {
                     var keywordList = keywordLists[i];
 
-                    if (keywordList != null)
-                    {
-                        keywordList.Add(keyword);
-                    }
+                    keywordList?.Add(keyword);
                 }
             }
         }
@@ -304,16 +301,13 @@ namespace SpaceEngine.Environment.Rings
         {
             if (shadowCount > 0)
             {
-                var keyword = "SHADOW_" + shadowCount;
+                var keyword = $"SHADOW_{shadowCount}";
 
                 for (var i = keywordLists.Length - 1; i >= 0; i--)
                 {
                     var keywordList = keywordLists[i];
 
-                    if (keywordList != null)
-                    {
-                        keywordList.Add(keyword);
-                    }
+                    keywordList?.Add(keyword);
                 }
             }
         }

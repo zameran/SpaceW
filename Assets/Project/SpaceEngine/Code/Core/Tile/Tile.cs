@@ -72,7 +72,7 @@ namespace SpaceEngine.Core.Tile
 
             public override string ToString()
             {
-                return string.Format("({0}, {1}, {2})", Level, Tx, Ty);
+                return $"({Level}, {Tx}, {Ty})";
             }
         }
 
@@ -124,7 +124,7 @@ namespace SpaceEngine.Core.Tile
 
             public override string ToString()
             {
-                return string.Format("({0}, {1})", ProducerId, TileId);
+                return $"({ProducerId}, {TileId})";
             }
         }
 
@@ -202,7 +202,7 @@ namespace SpaceEngine.Core.Tile
         /// </summary>
         public CreateTileTask Task { get; private set; }
 
-        public List<TileStorage.Slot> Slot { get { return Task.Slot; } }
+        public List<TileStorage.Slot> Slot => Task.Slot;
 
         public Id ID { get; private set; }
 
@@ -230,7 +230,7 @@ namespace SpaceEngine.Core.Tile
         {
             if (i >= Task.Slot.Count)
             {
-                Debug.Log(string.Format("Tile: Slot at location {0} does not exist!", i));
+                Debug.Log($"Tile: Slot at location {i} does not exist!");
             }
 
             return Task.Slot[i];

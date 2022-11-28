@@ -41,9 +41,9 @@ namespace SpaceEngine.Core.Tile.Samplers
 
             public Uniforms(string name)
             {
-                tile = Shader.PropertyToID("_" + name + "_Tile");
-                tileSize = Shader.PropertyToID("_" + name + "_TileSize");
-                tileCoords = Shader.PropertyToID("_" + name + "_TileCoords");
+                tile = Shader.PropertyToID($"_{name}_Tile");
+                tileSize = Shader.PropertyToID($"_{name}_TileSize");
+                tileCoords = Shader.PropertyToID($"_{name}_TileCoords");
             }
         }
 
@@ -141,7 +141,7 @@ namespace SpaceEngine.Core.Tile.Samplers
                 }
             }
 
-            // If this quad is not visilbe and have not been asked to store invisilbe quads dont need tile
+            // If this quad is not visible and have not been asked to store invisible quads don't need tile
             if (!StoreInvisible && !quad.IsVisible)
             {
                 needTile = false;
@@ -170,7 +170,7 @@ namespace SpaceEngine.Core.Tile.Samplers
                 tree.Tile = null;
             }
 
-            // If this qiad is a leaf then all children of the tree are not needed
+            // If this quad is a leaf then all children of the tree are not needed
             if (quad.IsLeaf)
             {
                 if (!tree.IsLeaf)
@@ -203,7 +203,7 @@ namespace SpaceEngine.Core.Tile.Samplers
                 tree.IsNeedTile = NeedTile(quad);
             }
 
-            // If this trees tile is needed get a tile and add its task to the schedular if the task is not already done
+            // If this trees tile is needed get a tile and add its task to the scheduler if the task is not already done
             if (tree.IsNeedTile && tree.Tile == null)
             {
                 tree.Tile = Producer.GetTile(quad.Level, quad.Tx, quad.Ty);
@@ -224,7 +224,7 @@ namespace SpaceEngine.Core.Tile.Samplers
             }
         }
 
-        #region IUniformed<Material> 
+        #region IUniformed<Material>
 
         /// <summary> 
         /// Init special <see cref="TileProducer"/> uniforms for target <see cref="TerrainQuad"/>. 
@@ -332,7 +332,7 @@ namespace SpaceEngine.Core.Tile.Samplers
                 return;
             }
 
-            QuadTree tt = QuadTreeRoot;
+            var tt = QuadTreeRoot;
             QuadTree tc;
 
             var tl = 0;
@@ -428,7 +428,7 @@ namespace SpaceEngine.Core.Tile.Samplers
                 }
             }
 
-            QuadTree tt = QuadTreeRoot;
+            var tt = QuadTreeRoot;
             QuadTree tc;
 
             var tl = 0;

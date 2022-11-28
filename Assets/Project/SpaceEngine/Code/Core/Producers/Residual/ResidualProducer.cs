@@ -120,7 +120,7 @@ namespace SpaceEngine.Core
                 stream.Read(data, 0, data.Length);
             }
 
-            for (int i = 0; i < MaxR.Length; i++)
+            for (var i = 0; i < MaxR.Length; i++)
             {
                 MaxR[i] = BitConverter.ToSingle(data, 4 * i);
             }
@@ -142,7 +142,7 @@ namespace SpaceEngine.Core
                 stream.Read(data, 0, data.Length);
             }
 
-            for (int i = 0; i < tilesCount * 2; i++)
+            for (var i = 0; i < tilesCount * 2; i++)
             {
                 Offsets[i] = BitConverter.ToInt64(data, 8 * i);
             }
@@ -211,12 +211,12 @@ namespace SpaceEngine.Core
             var tileSize = GetResidualTileSize(level) + 5;
             var tileId = GetTileId(level, tx, ty);
 
-            long fileTileSize = Offsets[2 * tileId + 1] - Offsets[2 * tileId];
+            var fileTileSize = Offsets[2 * tileId + 1] - Offsets[2 * tileId];
             long actualTileSize = (ResidualTileSize + 5) * (ResidualTileSize + 5) * 2;
 
             if (fileTileSize > actualTileSize)
             {
-                throw new InvalidParameterException(string.Format("File size of tile is larger than actual tile size! {0}:{1}", fileTileSize, actualTileSize));
+                throw new InvalidParameterException($"File size of tile is larger than actual tile size! {fileTileSize}:{actualTileSize}");
             }
 
             var data = new byte[fileTileSize];
@@ -227,9 +227,9 @@ namespace SpaceEngine.Core
                 stream.Read(data, 0, data.Length);
             }
 
-            for (int j = 0; j < tileSize; ++j)
+            for (var j = 0; j < tileSize; ++j)
             {
-                for (int i = 0; i < tileSize; ++i)
+                for (var i = 0; i < tileSize; ++i)
                 {
                     var offset = 2 * (i + j * tileSize);
                     var value = (short)((short)data[offset + 1] << 8 | data[offset]);

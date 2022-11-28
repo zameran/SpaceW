@@ -115,7 +115,7 @@ namespace SpaceEngine.Utilities
         {
             var rb = new RenderBuffer[des.Length];
 
-            for (int i = 0; i < des.Length; i++)
+            for (var i = 0; i < des.Length; i++)
                 rb[i] = des[i].colorBuffer;
 
             Graphics.SetRenderTarget(rb, des[0].depthBuffer);
@@ -198,7 +198,7 @@ namespace SpaceEngine.Utilities
 
         public static void ClearColor(RenderTexture[] texs)
         {
-            for (int i = 0; i < texs.Length; i++)
+            for (var i = 0; i < texs.Length; i++)
             {
                 Graphics.SetRenderTarget(texs[i]);
 
@@ -208,7 +208,7 @@ namespace SpaceEngine.Utilities
 
         public static void SetToPoint(RenderTexture[] texs)
         {
-            for (int i = 0; i < texs.Length; i++)
+            for (var i = 0; i < texs.Length; i++)
             {
                 texs[i].filterMode = FilterMode.Point;
             }
@@ -216,7 +216,7 @@ namespace SpaceEngine.Utilities
 
         public static void SetToBilinear(RenderTexture[] texs)
         {
-            for (int i = 0; i < texs.Length; i++)
+            for (var i = 0; i < texs.Length; i++)
             {
                 texs[i].filterMode = FilterMode.Bilinear;
             }
@@ -226,7 +226,7 @@ namespace SpaceEngine.Utilities
         {
             if (texs == null) return;
 
-            for (int i = 0; i < texs.Length; i++)
+            for (var i = 0; i < texs.Length; i++)
             {
                 Object.DestroyImmediate(texs[i]);
             }
@@ -246,7 +246,7 @@ namespace SpaceEngine.Utilities
             var byteArray = new byte[size * 4 * channelsSize];
 
             Buffer.BlockCopy(data, 0, byteArray, 0, byteArray.Length);
-            File.WriteAllBytes(Application.dataPath + filePath + fileName + ".raw", byteArray);
+            File.WriteAllBytes($"{Application.dataPath}{filePath}{fileName}.raw", byteArray);
 
             buffer.Release();
         }
@@ -258,9 +258,9 @@ namespace SpaceEngine.Utilities
 
             var texture = new Texture2D(width, height);
 
-            for (int x = 0; x < width; x++)
+            for (var x = 0; x < width; x++)
             {
-                for (int y = 0; y < height; y++)
+                for (var y = 0; y < height; y++)
                 {
                     var color = new Color(0, 0, 0, 1);
 
@@ -281,7 +281,7 @@ namespace SpaceEngine.Utilities
 
             texture.Apply();
             
-            File.WriteAllBytes(Application.dataPath + filePath + fileName + ".png", texture.EncodeToPNG());
+            File.WriteAllBytes($"{Application.dataPath}{filePath}{fileName}.png", texture.EncodeToPNG());
 
             buffer.Release();
         }
@@ -299,9 +299,9 @@ namespace SpaceEngine.Utilities
 
             var texture = new Texture2D(width, height);
 
-            for (int x = 0; x < width; x++)
+            for (var x = 0; x < width; x++)
             {
-                for (int y = 0; y < height; y++)
+                for (var y = 0; y < height; y++)
                 {
                     var color = new Color(0, 0, 0, 1);
 
@@ -319,7 +319,7 @@ namespace SpaceEngine.Utilities
 
             texture.Apply();
             
-            File.WriteAllBytes(Application.dataPath + filePath + fileName + ".png", texture.EncodeToPNG());
+            File.WriteAllBytes($"{Application.dataPath}{filePath}{fileName}.png", texture.EncodeToPNG());
 
             buffer.Release();
         }

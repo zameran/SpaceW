@@ -95,24 +95,24 @@ public class UserInterface : MonoBehaviour, IEventit
 
     #region Eventit
 
-    public bool isEventit { get; set; }
+    public bool IsEventit { get; set; }
 
     public void Eventit()
     {
-        if (isEventit) return;
+        if (IsEventit) return;
 
         SceneManager.activeSceneChanged += OnActiveSceneChanged;
 
-        isEventit = true;
+        IsEventit = true;
     }
 
     public void UnEventit()
     {
-        if (!isEventit) return;
+        if (!IsEventit) return;
 
         SceneManager.activeSceneChanged -= OnActiveSceneChanged;
 
-        isEventit = false;
+        IsEventit = false;
     }
 
     #endregion

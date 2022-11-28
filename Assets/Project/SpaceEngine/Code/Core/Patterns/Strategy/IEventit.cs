@@ -36,12 +36,12 @@
 namespace SpaceEngine.Core.Patterns.Strategy.Eventit
 {
     /// <summary>
-    /// Interface provides some strategy methods for a subscription/unsubscription to particular events.
+    /// Interface provides some strategy methods for a subscription/un-subscription to particular events.
     /// Use this to work with <see cref="EventManager"/>.
     /// </summary>
     public interface IEventit
     {
-        bool isEventit { get; set; }
+        bool IsEventit { get; set; }
 
         void Eventit();
 

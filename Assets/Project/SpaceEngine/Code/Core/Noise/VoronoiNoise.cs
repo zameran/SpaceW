@@ -169,7 +169,7 @@ namespace SpaceEngine.Core.Noise
         {
             var temp = 0.0f;
 
-            for (int i = arr.Length - 1; i >= 0; i--)
+            for (var i = arr.Length - 1; i >= 0; i--)
             {
                 if (value > arr[i]) break;
 

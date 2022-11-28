@@ -40,20 +40,25 @@ using UnityEngine;
 
 namespace SpaceEngine.Tools
 {
-    public class UnityEngineAPI
+    public static class UnityEngineAPI
     {
-        public static void InvokeAPI<T>(string MethodName, BindingFlags BillingAtr, object obj = null, params object[] MethodParams) where T : class
+        public static void InvokeAPI<T>(string methodName, BindingFlags billingAtr, object obj = null, params object[] methodParams) where T : class
         {
             try
             {
                 var type = typeof(T);
-                var method = type.GetMethod(MethodName, BillingAtr);
+                var method = type.GetMethod(methodName, billingAtr);
 
-                if (method != null) method.Invoke(obj, MethodParams);
+                if (method != null) method.Invoke(obj, methodParams);
                 else Debug.LogWarning("UnityEngineAPI.InvokeAPI: Unable to find target method! Aborting!...");
             }
-            catch (Exception ex) { Debug.LogError("UnityEngineAPI.InvokeAPI: Exception!" + "\n" + ex.Message + "\n" + ex.StackTrace); }
-            finally { }
+            catch (Exception ex)
+            {
+                Debug.LogException(ex, null);
+            }
+            finally
+            {
+            }
         }
     }
 }

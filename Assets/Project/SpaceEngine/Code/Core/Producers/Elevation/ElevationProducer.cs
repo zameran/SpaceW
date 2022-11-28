@@ -48,7 +48,7 @@ namespace SpaceEngine.Core
 
             if ((tileSize - GetBorder() * 2 - 1) % (TerrainNode.ParentBody.GridResolution - 1) != 0)
             {
-                throw new InvalidParameterException("Tile size - border * 2 - 1 must be divisible by grid mesh resolution - 1" + string.Format(": {0}-{1}", tileSize, GetBorder()));
+                throw new InvalidParameterException($"Tile size - border * 2 - 1 must be divisible by grid mesh resolution - 1: {tileSize}-{GetBorder()}");
             }
 
             if (ResidualProducer != null)
@@ -89,7 +89,7 @@ namespace SpaceEngine.Core
             base.OnDestroy();
             
             if (ResidualTileTexture != null) ResidualTileTexture.ReleaseAndDestroy();
-            if (ResidualTileDataComputeBuffer != null) ResidualTileDataComputeBuffer.ReleaseAndDisposeBuffer();
+            ResidualTileDataComputeBuffer?.ReleaseAndDisposeBuffer();
         }
 
         public override int GetBorder()
@@ -176,7 +176,7 @@ namespace SpaceEngine.Core
             {
                 if (parentTile != null)
                     parentGpuSlot = parentTile.GetSlot(0) as GPUTileStorage.GPUSlot;
-                else { throw new MissingTileException(string.Format("Find parent tile failed! {0}:{1}-{2}", level - 1, tx / 2, ty / 2)); }
+                else { throw new MissingTileException($"Find parent tile failed! {level - 1}:{tx / 2}-{ty / 2}"); }
             }
 
             if (parentGpuSlot == null && upsample) { throw new NullReferenceException("parentGpuSlot"); }

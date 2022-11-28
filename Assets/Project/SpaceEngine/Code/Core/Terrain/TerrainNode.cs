@@ -234,7 +234,7 @@ namespace SpaceEngine.Core.Terrain
             {
                 lastProducer.IsLastInSequence = true;
 
-                Debug.Log(string.Format("TerrainNode: {0} probably last in generation sequence, but maybe accidentally not marked as. Fixed!", lastProducer.name));
+                Debug.Log($"TerrainNode: {lastProducer.name} probably last in generation sequence, but maybe accidentally not marked as. Fixed!");
             }
         }
 
@@ -552,7 +552,7 @@ namespace SpaceEngine.Core.Terrain
 
             if (samplers.Count > 255)
             {
-                Debug.LogWarning(string.Format("TerrainNode: Toomuch samplers! {0}; Only first 255 will be taken!", samplers.Count));
+                Debug.LogWarning($"TerrainNode: Toomuch samplers! {samplers.Count}; Only first 255 will be taken!");
 
                 Samplers = samplers.GetRange(0, 255);
 
@@ -576,7 +576,7 @@ namespace SpaceEngine.Core.Terrain
 
             if (samplersSuitable.Count > 255)
             {
-                Debug.LogWarning(string.Format("TerrainNode: Toomuch suitable samplers! {0}; Only first 255 will be taken!", samplersSuitable.Count));
+                Debug.LogWarning($"TerrainNode: Toomuch suitable samplers! {samplersSuitable.Count}; Only first 255 will be taken!");
 
                 Samplers = samplersSuitable.GetRange(0, 255);
 

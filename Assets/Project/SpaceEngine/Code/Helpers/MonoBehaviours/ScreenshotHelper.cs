@@ -71,8 +71,8 @@ namespace SpaceEngine.Helpers.MonoBehaviours
         [HideInInspector]
         public bool KeyPressed = false;
 
-        public Vector2 ScreenSize { get { return new Vector2(Screen.width, Screen.height); } }
-        public Vector2 ScreenShotSize { get { return ScreenSize * SuperSize; } }
+        public Vector2 ScreenSize => new Vector2(Screen.width, Screen.height);
+        public Vector2 ScreenShotSize => ScreenSize * SuperSize;
 
         private RenderTexture Buffer;
 
@@ -115,9 +115,9 @@ namespace SpaceEngine.Helpers.MonoBehaviours
         {
             if (screenShotTexture != null)
             {
-                var filePath = string.Format("{0}/{1}_{2:yy.MM.dd-hh.mm.ss}_{3}", Application.dataPath, fileName, DateTime.Now, (int)UnityEngine.Random.Range(0.0f, 100.0f));
+                var filePath = $"{Application.dataPath}/{fileName}_{DateTime.Now:yy.MM.dd-hh.mm.ss}_{(int)UnityEngine.Random.Range(0.0f, 100.0f)}";
                 var fileExtension = Format.ToString().ToLower();
-                var outputFileName = string.Format("{0}.{1}", filePath, fileExtension);
+                var outputFileName = $"{filePath}.{fileExtension}";
                 
                 switch (Format)
                 {
@@ -134,7 +134,7 @@ namespace SpaceEngine.Helpers.MonoBehaviours
                         throw new ArgumentOutOfRangeException();
                 }
 
-                Logger.Log(string.Format("ScreenshotHelper.SaveScreenshot: Screenshot Saved. {0}", filePath));
+                Logger.Log($"ScreenshotHelper.SaveScreenshot: Screenshot Saved. {filePath}");
 
     #if UNITY_EDITOR
                 AssetDatabase.Refresh();

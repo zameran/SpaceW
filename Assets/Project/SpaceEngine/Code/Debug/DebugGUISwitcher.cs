@@ -53,13 +53,13 @@ namespace SpaceEngine.Debugging
 
         public Vector2 MousePosition { get; private set; }
 
-        public bool AtLeastOneEnabled { get { return SwitchableComponents.Any((gui) => gui.enabled == true); } }
+        public bool AtLeastOneEnabled { get { return SwitchableComponents.Any(gui => gui.enabled == true); } }
 
-        public bool MouseOverGUIHotControl { get { return GUIUtility.hotControl != 0; } }
+        public bool MouseOverGUIHotControl => GUIUtility.hotControl != 0;
 
         public bool MouseOverGUIRect { get { return DrawAbleComponents.Any(gui => gui.isActiveAndEnabled && gui.debugInfoDrawBounds.Contains(MousePosition) && !ClickableThroughComponents.Contains(gui)); } }
 
-        public bool MouseOverGUI { get { return MouseOverGUIHotControl || MouseOverGUIRect; } }
+        public bool MouseOverGUI => MouseOverGUIHotControl || MouseOverGUIRect;
 
         protected override void Update()
         {
@@ -87,12 +87,12 @@ namespace SpaceEngine.Debugging
             {
                 GUILayoutExtensions.Vertical(() =>
                 {
-                    GUILayoutExtensions.LabelWithSpace(string.Format("Press {0} key to switch between debug GUI's...", SwitchKey.ToString()));
-                    GUILayoutExtensions.LabelWithSpace(string.Format("Mouse Position: {0}", Input.mousePosition));
+                    GUILayoutExtensions.LabelWithSpace($"Press {SwitchKey.ToString()} key to switch between debug GUI's...");
+                    GUILayoutExtensions.LabelWithSpace($"Mouse Position: {Input.mousePosition}");
                 });
             }
         }
 
-        protected override KeyCode SwitchKey { get { return KeyCode.F5; } }
+        protected override KeyCode SwitchKey => KeyCode.F5;
     }
 }

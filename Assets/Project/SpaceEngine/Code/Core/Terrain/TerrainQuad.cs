@@ -113,12 +113,12 @@ namespace SpaceEngine.Core.Terrain
         /// <summary>
         /// This quad is visible?
         /// </summary>
-        public bool IsVisible { get { return Visibility != Frustum3d.VISIBILITY.INVISIBLE; } }
+        public bool IsVisible => Visibility != Frustum3d.VISIBILITY.INVISIBLE;
 
         /// <summary>
         /// This quad is not subdivided?
         /// </summary>
-        public bool IsLeaf { get { return Children[0] == null || Children == null; } }
+        public bool IsLeaf => Children[0] == null || Children == null;
 
         /// <summary>
         /// Deformed space quad corners.

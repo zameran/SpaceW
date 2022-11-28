@@ -14,7 +14,7 @@
 		#include "../../TCSun.cginc"
 		#include "../../TCTerra.cginc"
 
-		#define CORE_PORDUCER_ADDITIONAL_UV
+		#define CORE_PRODUCER_ADDITIONAL_UV
 		#define BORDER 2.0
 
 		#include "../../Core.cginc"

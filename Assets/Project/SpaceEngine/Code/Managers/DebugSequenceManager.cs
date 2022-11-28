@@ -121,7 +121,7 @@ namespace SpaceEngine.Managers
                 {
                     var sequenceEntry = Sequence[i];
 
-                    stringBuilder.AppendLine(string.Format("{0}:{1}", sequenceEntry.Name, sequenceEntry.TimeSinceStartup));
+                    stringBuilder.AppendLine($"{sequenceEntry.Name}:{sequenceEntry.TimeSinceStartup}");
                 }
 
                 UnityEngine.Debug.Log(stringBuilder.ToString());

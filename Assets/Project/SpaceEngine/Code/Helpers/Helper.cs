@@ -56,11 +56,11 @@ namespace SpaceEngine.Helpers
         {
             var time = Time.realtimeSinceStartup;
 
-            if (ToMeasure != null) ToMeasure();
+            ToMeasure?.Invoke();
 
             var executionTime = Time.realtimeSinceStartup - time;
 
-            Debug.Log(string.Format("[Benchmark.{0}] : Execution time: {1}ms", label, executionTime.ToString("f6")));
+            Debug.Log($"[Benchmark.{label}] : Execution time: {executionTime.ToString("f6")}ms");
         }
 
         public static void MeasureNative(string label = "Method", Action ToMeasure = null)
@@ -68,11 +68,11 @@ namespace SpaceEngine.Helpers
             var watch = new Stopwatch();
             watch.Start();
 
-            if (ToMeasure != null) ToMeasure();
+            ToMeasure?.Invoke();
 
             watch.Stop();
 
-            Debug.Log(string.Format("[Benchmark.{0}] : Execution time: {1}ms", label, watch.Elapsed.TotalMilliseconds.ToString("f6")));
+            Debug.Log($"[Benchmark.{label}] : Execution time: {watch.Elapsed.TotalMilliseconds.ToString("f6")}ms");
         }
 
         public static bool Enabled<T>(T b) where T : Behaviour
@@ -215,10 +215,7 @@ namespace SpaceEngine.Helpers
 
                 while (array.Count > size)
                 {
-                    if (removeT != null)
-                    {
-                        removeT(array[array.Count - 1]);
-                    }
+                    removeT?.Invoke(array[array.Count - 1]);
 
                     array.RemoveAt(array.Count - 1);
                 }
@@ -455,7 +452,7 @@ namespace SpaceEngine.Helpers
 
                     if (Enabled(light) == true && light.intensity > 0.0f && lightCount < maxLights)
                     {
-                        var prefix = string.Format("_Light{0}", ++lightCount);
+                        var prefix = $"_Light{++lightCount}";
                         var direction = default(Vector3);
                         var position = default(Vector3);
                         var color = default(Color);
@@ -468,9 +465,9 @@ namespace SpaceEngine.Helpers
 
                             if (material != null)
                             {
-                                material.SetVector(string.Format("{0}Direction", prefix), direction);
-                                material.SetVector(string.Format("{0}Position", prefix), VectorHelper.MakeFrom(position, 1.0f));
-                                material.SetColor(string.Format("{0}Color", prefix), color);
+                                material.SetVector($"{prefix}Direction", direction);
+                                material.SetVector($"{prefix}Position", VectorHelper.MakeFrom(position, 1.0f));
+                                material.SetColor($"{prefix}Color", color);
                             }
                         }
                     }
@@ -492,7 +489,7 @@ namespace SpaceEngine.Helpers
 
                     if (Enabled(shadow) == true && shadow.CalculateShadow() == true && shadowCount < maxShadows)
                     {
-                        var prefix = string.Format("_Shadow{0}", ++shadowCount);
+                        var prefix = $"_Shadow{++shadowCount}";
 
                         for (var j = materials.Length - 1; j >= 0; j--)
                         {
@@ -500,9 +497,9 @@ namespace SpaceEngine.Helpers
 
                             if (material != null)
                             {
-                                material.SetTexture(string.Format("{0}Texture", prefix), shadow.GetTexture());
-                                material.SetMatrix(string.Format("{0}Matrix", prefix), shadow.Matrix);
-                                material.SetFloat(string.Format("{0}Ratio", prefix), shadow.Ratio);
+                                material.SetTexture($"{prefix}Texture", shadow.GetTexture());
+                                material.SetMatrix($"{prefix}Matrix", shadow.Matrix);
+                                material.SetFloat($"{prefix}Ratio", shadow.Ratio);
                             }
                         }
                     }
@@ -524,7 +521,7 @@ namespace SpaceEngine.Helpers
 
                     if (Enabled(shadow) == true && shadow.CalculateShadow() == true && shadowCount < maxShadows)
                     {
-                        var prefix = string.Format("_Shadow{0}", ++shadowCount);
+                        var prefix = $"_Shadow{++shadowCount}";
 
                         for (var j = blocks.Length - 1; j >= 0; j--)
                         {
@@ -532,9 +529,9 @@ namespace SpaceEngine.Helpers
 
                             if (block != null)
                             {
-                                block.SetTexture(string.Format("{0}Texture", prefix), shadow.GetTexture());
-                                block.SetMatrix(string.Format("{0}Matrix", prefix), shadow.Matrix);
-                                block.SetFloat(string.Format("{0}Ratio", prefix), shadow.Ratio);
+                                block.SetTexture($"{prefix}Texture", shadow.GetTexture());
+                                block.SetMatrix($"{prefix}Matrix", shadow.Matrix);
+                                block.SetFloat($"{prefix}Ratio", shadow.Ratio);
                             }
                         }
                     }

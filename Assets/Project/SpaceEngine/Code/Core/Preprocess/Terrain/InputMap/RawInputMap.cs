@@ -64,11 +64,11 @@ namespace SpaceEngine.Core.Preprocess.Terrain
 
         float[] Data;
 
-        public override int Width { get { return width; } }
+        public override int Width => width;
 
-        public override int Height { get { return height; } }
+        public override int Height => height;
 
-        public override int Channels { get { return channels; } }
+        public override int Channels => channels;
 
         private string ApplicationDataPath = "";
 
@@ -90,7 +90,7 @@ namespace SpaceEngine.Core.Preprocess.Terrain
                     LoadRawFile16(ApplicationDataPath + FileName, ByteOrder == BYTE_ORDER.MAC);
                 }
 
-                Logger.Log(string.Format("RawInputMap.Awake: {0} loaded!", FileName));
+                Logger.Log($"RawInputMap.Awake: {FileName} loaded!");
             }
         }
 
@@ -125,7 +125,7 @@ namespace SpaceEngine.Core.Preprocess.Terrain
                 var values = new float[(int)tileSize.x * (int)tileSize.y * Channels];
                 var strip = new float[(int)tileSize.x * Channels];
 
-                for (int j = 0; j < (int)tileSize.y; ++j)
+                for (var j = 0; j < (int)tileSize.y; ++j)
                 {
                     // The index into the file that the current strip can be found at
                     var idx = (long)((long)tx + (long)(ty + j) * (long)width) * (long)Channels;
@@ -140,7 +140,7 @@ namespace SpaceEngine.Core.Preprocess.Terrain
                         LoadStrip16(ApplicationDataPath + FileName, (tx + (ty + j) * width) * Channels * 2, strip, ByteOrder == BYTE_ORDER.MAC);
                     }
 
-                    for (int i = 0; i < (int)tileSize.x; ++i)
+                    for (var i = 0; i < (int)tileSize.x; ++i)
                     {
                         var offset = (i + j * (int)tileSize.x) * Channels;
 
@@ -219,7 +219,7 @@ namespace SpaceEngine.Core.Preprocess.Terrain
                 stream.Read(data, 0, data.Length);
             }
 
-            for (int x = 0; x < strip.Length; x++)
+            for (var x = 0; x < strip.Length; x++)
             {
                 strip[x] = (float)data[x] / 255.0f;
             }

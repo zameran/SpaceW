@@ -78,7 +78,7 @@ namespace SpaceEngine.Core
                 if (OrthoCPUProducer == null) { OrthoCPUProducer = OrthoCpuProducerGameObject.GetComponent<OrthoCPUProducer>(); }
             }
 
-            int tileSize = Cache.GetStorage(0).TileSize;
+            var tileSize = Cache.GetStorage(0).TileSize;
 
             if (OrthoCPUProducer != null && OrthoCPUProducer.GetTileSize(0) != tileSize)
             {
@@ -142,9 +142,8 @@ namespace SpaceEngine.Core
             {
                 var parentTile = FindTile(level - 1, tx / 2, ty / 2, false, true);
 
-                if (parentTile != null)
-                    parentGpuSlot = parentTile.GetSlot(0) as GPUTileStorage.GPUSlot;
-                else { throw new MissingTileException(string.Format("Find parent tile failed! {0}:{1}-{2}", level - 1, tx / 2, ty / 2)); }
+                if (parentTile != null) parentGpuSlot = parentTile.GetSlot(0) as GPUTileStorage.GPUSlot;
+                else { throw new MissingTileException($"Find parent tile failed! {level - 1}:{tx / 2}-{ty / 2}"); }
             }
 
             if (parentGpuSlot == null && level > 0) { throw new NullReferenceException("parentGpuSlot"); }
@@ -193,9 +192,9 @@ namespace SpaceEngine.Core
                 var color = new Color32();
                 var data = orthoCPUSlot.Data;
 
-                for (int x = 0; x < tileWidth; x++)
+                for (var x = 0; x < tileWidth; x++)
                 {
-                    for (int y = 0; y < tileWidth; y++)
+                    for (var y = 0; y < tileWidth; y++)
                     {
                         color.r = data[(x + y * tileWidth) * channels];
 
@@ -226,29 +225,29 @@ namespace SpaceEngine.Core
             {
                 if (TerrainNode.Face == 1)
                 {
-                    int offset = 1 << level;
-                    int bottomB = Noise.Noise(tx + 0.5f, ty + offset) > 0.0f ? 1 : 0;
-                    int rightB = (tx == offset - 1 ? Noise.Noise(ty + offset + 0.5f, offset) : Noise.Noise(tx + 1.0f, ty + offset + 0.5f)) > 0.0f ? 2 : 0;
-                    int topB = (ty == offset - 1 ? Noise.Noise((3.0f * offset - 1.0f - tx) + 0.5f, offset) : Noise.Noise(tx + 0.5f, ty + offset + 1.0f)) > 0.0f ? 4 : 0;
-                    int leftB = (tx == 0 ? Noise.Noise((4.0f * offset - 1.0f - ty) + 0.5f, offset) : Noise.Noise(tx, ty + offset + 0.5f)) > 0.0f ? 8 : 0;
+                    var offset = 1 << level;
+                    var bottomB = Noise.Noise(tx + 0.5f, ty + offset) > 0.0f ? 1 : 0;
+                    var rightB = (tx == offset - 1 ? Noise.Noise(ty + offset + 0.5f, offset) : Noise.Noise(tx + 1.0f, ty + offset + 0.5f)) > 0.0f ? 2 : 0;
+                    var topB = (ty == offset - 1 ? Noise.Noise((3.0f * offset - 1.0f - tx) + 0.5f, offset) : Noise.Noise(tx + 0.5f, ty + offset + 1.0f)) > 0.0f ? 4 : 0;
+                    var leftB = (tx == 0 ? Noise.Noise((4.0f * offset - 1.0f - ty) + 0.5f, offset) : Noise.Noise(tx, ty + offset + 0.5f)) > 0.0f ? 8 : 0;
                     noiseL = bottomB + rightB + topB + leftB;
                 }
                 else if (TerrainNode.Face == 6)
                 {
-                    int offset = 1 << level;
-                    int bottomB = (ty == 0 ? Noise.Noise((3.0f * offset - 1.0f - tx) + 0.5f, 0) : Noise.Noise(tx + 0.5f, ty - offset)) > 0.0f ? 1 : 0;
-                    int rightB = (tx == offset - 1.0f ? Noise.Noise((2.0f * offset - 1.0f - ty) + 0.5f, 0) : Noise.Noise(tx + 1.0f, ty - offset + 0.5f)) > 0.0f ? 2 : 0;
-                    int topB = Noise.Noise(tx + 0.5f, ty - offset + 1.0f) > 0.0f ? 4 : 0;
-                    int leftB = (tx == 0 ? Noise.Noise(3.0f * offset + ty + 0.5f, 0) : Noise.Noise(tx, ty - offset + 0.5f)) > 0.0f ? 8 : 0;
+                    var offset = 1 << level;
+                    var bottomB = (ty == 0 ? Noise.Noise((3.0f * offset - 1.0f - tx) + 0.5f, 0) : Noise.Noise(tx + 0.5f, ty - offset)) > 0.0f ? 1 : 0;
+                    var rightB = (tx == offset - 1.0f ? Noise.Noise((2.0f * offset - 1.0f - ty) + 0.5f, 0) : Noise.Noise(tx + 1.0f, ty - offset + 0.5f)) > 0.0f ? 2 : 0;
+                    var topB = Noise.Noise(tx + 0.5f, ty - offset + 1.0f) > 0.0f ? 4 : 0;
+                    var leftB = (tx == 0 ? Noise.Noise(3.0f * offset + ty + 0.5f, 0) : Noise.Noise(tx, ty - offset + 0.5f)) > 0.0f ? 8 : 0;
                     noiseL = bottomB + rightB + topB + leftB;
                 }
                 else
                 {
-                    int offset = (1 << level) * (TerrainNode.Face - 2);
-                    int bottomB = Noise.Noise(tx + offset + 0.5f, ty) > 0.0f ? 1 : 0;
-                    int rightB = Noise.Noise((tx + offset + 1) % (4 << level), ty + 0.5f) > 0.0f ? 2 : 0;
-                    int topB = Noise.Noise(tx + offset + 0.5f, ty + 1.0f) > 0.0f ? 4 : 0;
-                    int leftB = Noise.Noise(tx + offset, ty + 0.5f) > 0.0f ? 8 : 0;
+                    var offset = (1 << level) * (TerrainNode.Face - 2);
+                    var bottomB = Noise.Noise(tx + offset + 0.5f, ty) > 0.0f ? 1 : 0;
+                    var rightB = Noise.Noise((tx + offset + 1) % (4 << level), ty + 0.5f) > 0.0f ? 2 : 0;
+                    var topB = Noise.Noise(tx + offset + 0.5f, ty + 1.0f) > 0.0f ? 4 : 0;
+                    var leftB = Noise.Noise(tx + offset, ty + 0.5f) > 0.0f ? 8 : 0;
                     noiseL = bottomB + rightB + topB + leftB;
                 }
             }
@@ -273,7 +272,7 @@ namespace SpaceEngine.Core
             base.DoCreateTile(level, tx, ty, slot);
         }
 
-        public override IEnumerator DoCreateTileCoroutine(int level, int tx, int ty, List<TileStorage.Slot> slot, Action Callback)
+        public override IEnumerator DoCreateTileCoroutine(int level, int tx, int ty, List<TileStorage.Slot> slot, Action callback)
         {
             if (level > 0)
             {
@@ -284,7 +283,7 @@ namespace SpaceEngine.Core
                 while (FindTile(level - 1, tx / 2, ty / 2, false, true) == null);
             }
 
-            yield return base.DoCreateTileCoroutine(level, tx, ty, slot, Callback);
+            yield return base.DoCreateTileCoroutine(level, tx, ty, slot, callback);
         }
     }
 }

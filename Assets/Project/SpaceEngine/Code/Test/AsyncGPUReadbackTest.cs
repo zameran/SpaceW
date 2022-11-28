@@ -46,7 +46,7 @@ namespace SpaceEngine.Tests
     {
         private readonly CachedComponent<Camera> CameraCachedComponent = new CachedComponent<Camera>();
 
-        public Camera CameraComponent { get { return CameraCachedComponent.Component; } }
+        public Camera CameraComponent => CameraCachedComponent.Component;
 
         #region Test Stuff
 

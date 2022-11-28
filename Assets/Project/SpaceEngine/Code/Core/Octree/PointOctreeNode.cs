@@ -91,7 +91,7 @@ namespace SpaceEngine.Core.Octree
         /// <summary>
         /// This node is not splitted?
         /// </summary>
-        public bool IsLeaf { get { return Children == null; } }
+        public bool IsLeaf => Children == null;
 
         /// <summary>
         /// An object in the octree.
@@ -137,7 +137,7 @@ namespace SpaceEngine.Core.Octree
         {
             var removed = false;
 
-            for (int i = 0; i < Objects.Count; i++)
+            for (var i = 0; i < Objects.Count; i++)
             {
                 if (Objects[i].Object.Equals(obj))
                 {
@@ -189,7 +189,7 @@ namespace SpaceEngine.Core.Octree
             if (!intersected) return;
 
             // Check against any objects in this node...
-            for (int i = 0; i < Objects.Count; i++)
+            for (var i = 0; i < Objects.Count; i++)
             {
                 if (DistanceToRay(ray, Objects[i].Position) <= maxDistance)
                 {
@@ -216,7 +216,7 @@ namespace SpaceEngine.Core.Octree
         public void GetNearby(ref Vector3 position, ref float maxDistance, ref List<TType> result)
         {
             // Check against any objects in this node...
-            for (int i = 0; i < Objects.Count; i++)
+            for (var i = 0; i < Objects.Count; i++)
             {
                 if (Vector3.Distance(position, Objects[i].Position) <= maxDistance)
                 {
@@ -291,7 +291,7 @@ namespace SpaceEngine.Core.Octree
         {
             if (childOctrees.Length != 8)
             {
-                Debug.LogError(string.Format("PointOctreeNode: Child octree array must be length 8. Was length: {0}", childOctrees.Length));
+                Debug.LogError($"PointOctreeNode: Child octree array must be length 8. Was length: {childOctrees.Length}");
 
                 return;
             }
@@ -423,9 +423,9 @@ namespace SpaceEngine.Core.Octree
             if (Objects.Count == 0 && Children.Length == 0) { return this; }
 
             // Check objects in root...
-            int bestFit = -1;
+            var bestFit = -1;
 
-            for (int i = 0; i < Objects.Count; i++)
+            for (var i = 0; i < Objects.Count; i++)
             {
                 var obj = Objects[i];
                 var newBestFit = BestFitChild(obj.Position);
@@ -448,7 +448,7 @@ namespace SpaceEngine.Core.Octree
             {
                 var childHadContent = false;
 
-                for (int i = 0; i < Children.Length; i++)
+                for (var i = 0; i < Children.Length; i++)
                 {
                     if (Children[i].HasAnyObjects())
                     {
@@ -552,7 +552,7 @@ namespace SpaceEngine.Core.Octree
                     }
 
                     // Now that we have the new children, see if this node's existing objects would fit there
-                    for (int i = Objects.Count - 1; i >= 0; i--)
+                    for (var i = Objects.Count - 1; i >= 0; i--)
                     {
                         var existingObj = Objects[i];
 
@@ -603,7 +603,7 @@ namespace SpaceEngine.Core.Octree
                 var currentChild = Children[i];
                 var objectsCount = currentChild.Objects.Count;
 
-                for (int j = objectsCount - 1; j >= 0; j--)
+                for (var j = objectsCount - 1; j >= 0; j--)
                 {
                     var currentObj = currentChild.Objects[j];
 

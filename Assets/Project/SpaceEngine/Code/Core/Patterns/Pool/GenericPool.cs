@@ -42,8 +42,8 @@ namespace SpaceEngine.Core.Patterns.Pool
     {
         public int MaxInstances { get; protected set; }
 
-        public virtual int InctanceCount { get { return Vault.Count; } }
-        public virtual int CacheCount { get { return Cache.Count; } }
+        public virtual int InctanceCount => Vault.Count;
+        public virtual int CacheCount => Cache.Count;
 
         public delegate bool Compare<in T>(T value) where T : TValue;
 

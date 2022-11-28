@@ -73,16 +73,16 @@ namespace UnityEngine
 
         private void ComputeButterflyLookupTable()
         {
-            for (int i = 0; i < Passes; i++)
+            for (var i = 0; i < Passes; i++)
             {
                 var nBlocks = (int)Mathf.Pow(2, Passes - 1 - i);
                 var nHInputs = (int)Mathf.Pow(2, i);
 
                 ButterFlyLookupTable[i] = Make1DTex(i);
 
-                for (int j = 0; j < nBlocks; j++)
+                for (var j = 0; j < nBlocks; j++)
                 {
-                    for (int k = 0; k < nHInputs; k++)
+                    for (var k = 0; k < nHInputs; k++)
                     {
                         int i1, i2, j1, j2;
 
@@ -107,7 +107,7 @@ namespace UnityEngine
                     }
                 }
 
-                ButterFlyLookupTable[i].name = string.Format("ButterFlyLookupTable_{0}_{1}", i, Random.Range(float.MinValue, float.MaxValue));
+                ButterFlyLookupTable[i].name = $"ButterFlyLookupTable_{i}_{Random.Range(float.MinValue, float.MaxValue)}";
                 ButterFlyLookupTable[i].Apply();
             }
         }
@@ -120,9 +120,9 @@ namespace UnityEngine
             var pass1 = new RenderTexture[] { data0[1] };
 
             int i;
-            int idx = 0;
+            var idx = 0;
             int idx1;
-            int j = 0;
+            var j = 0;
 
             for (i = 0; i < Passes; i++, j++)
             {
@@ -168,9 +168,9 @@ namespace UnityEngine
             var pass1 = new RenderTexture[] { data0[1], data1[1] };
 
             int i;
-            int idx = 0;
+            var idx = 0;
             int idx1;
-            int j = 0;
+            var j = 0;
 
             for (i = 0; i < Passes; i++, j++)
             {
@@ -218,9 +218,9 @@ namespace UnityEngine
             var pass1 = new RenderTexture[] { data0[1], data1[1], data2[1] };
 
             int i;
-            int idx = 0;
+            var idx = 0;
             int idx1;
-            int j = 0;
+            var j = 0;
 
             for (i = 0; i < Passes; i++, j++)
             {
@@ -270,8 +270,8 @@ namespace UnityEngine
             var pass1 = new RenderTexture[] { data0[1], data1[1], data2[1], data3[1] };
 
             int i;
-            int idx = 0; int idx1;
-            int j = 0;
+            var idx = 0; int idx1;
+            var j = 0;
 
             for (i = 0; i < Passes; i++, j++)
             {

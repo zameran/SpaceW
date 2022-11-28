@@ -54,9 +54,9 @@ namespace SpaceEngine.Environment.Oceanic
         [SerializeField]
         protected Vector4 Choppyness = new Vector4(2.3f, 2.1f, 1.3f, 0.9f);
 
-        protected int FourierGridSize { get { return GodManager.Instance.FourierGridSize; } }
+        protected int FourierGridSize => GodManager.Instance.FourierGridSize;
 
-        protected Shader FourierShader { get { return GodManager.Instance.FourierShader; } }
+        protected Shader FourierShader => GodManager.Instance.FourierShader;
 
         [SerializeField]
         [Range(16.0f, 128.0f)]
@@ -127,7 +127,7 @@ namespace SpaceEngine.Environment.Oceanic
             MapSize = (float)FourierGridSize;
             Offset = new Vector4(1.0f + 0.5f / MapSize, 1.0f + 0.5f / MapSize, 0, 0);
 
-            float factor = 2.0f * Mathf.PI * MapSize;
+            var factor = 2.0f * Mathf.PI * MapSize;
             InverseGridSizes = new Vector4(factor / GridSizes.x, factor / GridSizes.y, factor / GridSizes.z, factor / GridSizes.w);
 
             Fourier = new FourierGPU(FourierGridSize, FourierShader);
@@ -321,43 +321,43 @@ namespace SpaceEngine.Environment.Oceanic
             // I know this is a big chunk of ugly math but dont worry to much about what it all means
             // It recreates a statistcally representative model of a wave spectrum in the frequency domain.
 
-            float U10 = WindSpeed;
+            var U10 = WindSpeed;
 
             // phase speed
-            float k = Mathf.Sqrt(kx * kx + ky * ky);
-            float c = Omega(k) / k;
+            var k = Mathf.Sqrt(kx * kx + ky * ky);
+            var c = Omega(k) / k;
 
             // spectral peak
-            float kp = 9.81f * Sqr(WavesOmega / U10); // after Eq 3
-            float cp = Omega(kp) / kp;
+            var kp = 9.81f * Sqr(WavesOmega / U10); // after Eq 3
+            var cp = Omega(kp) / kp;
 
             // Friction velocity
-            float z0 = 3.7e-5f * Sqr(U10) / 9.81f * Mathf.Pow(U10 / cp, 0.9f); // Eq 66
-            float u_star = 0.41f * U10 / Mathf.Log(10.0f / z0); // Eq 60
+            var z0 = 3.7e-5f * Sqr(U10) / 9.81f * Mathf.Pow(U10 / cp, 0.9f); // Eq 66
+            var u_star = 0.41f * U10 / Mathf.Log(10.0f / z0); // Eq 60
 
-            float Lpm = Mathf.Exp(-5.0f / 4.0f * Sqr(kp / k)); // after Eq 3
-            float gamma = (WavesOmega < 1.0f) ? 1.7f : 1.7f + 6.0f * Mathf.Log(WavesOmega); // after Eq 3 // log10 or log?
-            float sigma = 0.08f * (1.0f + 4.0f / Mathf.Pow(WavesOmega, 3.0f)); // after Eq 3
-            float Gamma = Mathf.Exp(-1.0f / (2.0f * Sqr(sigma)) * Sqr(Mathf.Sqrt(k / kp) - 1.0f));
-            float Jp = Mathf.Pow(gamma, Gamma); // Eq 3
-            float Fp = Lpm * Jp * Mathf.Exp(-WavesOmega / Mathf.Sqrt(10.0f) * (Mathf.Sqrt(k / kp) - 1.0f)); // Eq 32
-            float alphap = 0.006f * Mathf.Sqrt(WavesOmega); // Eq 34
-            float Bl = 0.5f * alphap * cp / c * Fp; // Eq 31
+            var Lpm = Mathf.Exp(-5.0f / 4.0f * Sqr(kp / k)); // after Eq 3
+            var gamma = (WavesOmega < 1.0f) ? 1.7f : 1.7f + 6.0f * Mathf.Log(WavesOmega); // after Eq 3 // log10 or log?
+            var sigma = 0.08f * (1.0f + 4.0f / Mathf.Pow(WavesOmega, 3.0f)); // after Eq 3
+            var Gamma = Mathf.Exp(-1.0f / (2.0f * Sqr(sigma)) * Sqr(Mathf.Sqrt(k / kp) - 1.0f));
+            var Jp = Mathf.Pow(gamma, Gamma); // Eq 3
+            var Fp = Lpm * Jp * Mathf.Exp(-WavesOmega / Mathf.Sqrt(10.0f) * (Mathf.Sqrt(k / kp) - 1.0f)); // Eq 32
+            var alphap = 0.006f * Mathf.Sqrt(WavesOmega); // Eq 34
+            var Bl = 0.5f * alphap * cp / c * Fp; // Eq 31
 
-            float alpham = 0.01f * (u_star < WAVE_CM ? 1.0f + Mathf.Log(u_star / WAVE_CM) : 1.0f + 3.0f * Mathf.Log(u_star / WAVE_CM)); // Eq 44
-            float Fm = Mathf.Exp(-0.25f * Sqr(k / WAVE_KM - 1.0f)); // Eq 41
-            float Bh = 0.5f * alpham * WAVE_CM / c * Fm * Lpm; // Eq 40 (fixed)
+            var alpham = 0.01f * (u_star < WAVE_CM ? 1.0f + Mathf.Log(u_star / WAVE_CM) : 1.0f + 3.0f * Mathf.Log(u_star / WAVE_CM)); // Eq 44
+            var Fm = Mathf.Exp(-0.25f * Sqr(k / WAVE_KM - 1.0f)); // Eq 41
+            var Bh = 0.5f * alpham * WAVE_CM / c * Fm * Lpm; // Eq 40 (fixed)
 
             Bh *= Lpm;
 
             if (omnispectrum) return AMP * (Bl + Bh) / (k * Sqr(k)); // Eq 30
 
-            float a0 = Mathf.Log(2.0f) / 4.0f;
-            float ap = 4.0f;
-            float am = 0.13f * u_star / WAVE_CM; // Eq 59
-            float Delta = (float)System.Math.Tanh(a0 + ap * Mathf.Pow(c / cp, 2.5f) + am * Mathf.Pow(WAVE_CM / c, 2.5f)); // Eq 57
+            var a0 = Mathf.Log(2.0f) / 4.0f;
+            var ap = 4.0f;
+            var am = 0.13f * u_star / WAVE_CM; // Eq 59
+            var Delta = (float)System.Math.Tanh(a0 + ap * Mathf.Pow(c / cp, 2.5f) + am * Mathf.Pow(WAVE_CM / c, 2.5f)); // Eq 57
 
-            float phi = Mathf.Atan2(ky, kx);
+            var phi = Mathf.Atan2(ky, kx);
 
             if (kx < 0.0f) return 0.0f;
 
@@ -365,26 +365,26 @@ namespace SpaceEngine.Environment.Oceanic
             Bh *= 2.0f;
 
             // Remove waves perpendicular to wind dir
-            float tweak = Mathf.Sqrt(Mathf.Max(kx / Mathf.Sqrt(kx * kx + ky * ky), 0.0f));
+            var tweak = Mathf.Sqrt(Mathf.Max(kx / Mathf.Sqrt(kx * kx + ky * ky), 0.0f));
 
             return AMP * (Bl + Bh) * (1.0f + Delta * Mathf.Cos(2.0f * phi)) / (2.0f * Mathf.PI * Sqr(Sqr(k))) * tweak; // Eq 67
         }
 
         private Vector2 GetSpectrumSample(float i, float j, float lengthScale, float kMin)
         {
-            float dk = 2.0f * Mathf.PI / lengthScale;
-            float kx = i * dk;
-            float ky = j * dk;
+            var dk = 2.0f * Mathf.PI / lengthScale;
+            var kx = i * dk;
+            var ky = j * dk;
 
             var result = Vector2.zero;
             var rnd = Random.value;
 
             if (Mathf.Abs(kx) >= kMin || Mathf.Abs(ky) >= kMin)
             {
-                float S = Spectrum(kx, ky, false);
-                float h = Mathf.Sqrt(S / 2.0f) * dk;
+                var S = Spectrum(kx, ky, false);
+                var h = Mathf.Sqrt(S / 2.0f) * dk;
 
-                float phi = rnd * 2.0f * Mathf.PI;
+                var phi = rnd * 2.0f * Mathf.PI;
                 result.x = h * Mathf.Cos(phi);
                 result.y = h * Mathf.Sin(phi);
             }
@@ -425,18 +425,18 @@ namespace SpaceEngine.Environment.Oceanic
             int idx;
             float i;
             float j;
-            float totalSlopeVariance = 0.0f;
+            var totalSlopeVariance = 0.0f;
 
-            Vector2 sample12XY = Vector2.zero;
-            Vector2 sample12ZW = Vector2.zero;
-            Vector2 sample34XY = Vector2.zero;
-            Vector2 sample34ZW = Vector2.zero;
+            var sample12XY = Vector2.zero;
+            var sample12ZW = Vector2.zero;
+            var sample34XY = Vector2.zero;
+            var sample34ZW = Vector2.zero;
 
             Random.InitState(0);
 
-            for (int x = 0; x < FourierGridSize; x++)
+            for (var x = 0; x < FourierGridSize; x++)
             {
-                for (int y = 0; y < FourierGridSize; y++)
+                for (var y = 0; y < FourierGridSize; y++)
                 {
                     idx = x + y * FourierGridSize;
                     i = (x >= FourierGridSize / 2) ? (float)(x - FourierGridSize) : (float)x;
@@ -501,7 +501,7 @@ namespace SpaceEngine.Environment.Oceanic
 
             MaxSlopeVariance = 0.0f;
 
-            for (int v = 0; v < VarianceSize * VarianceSize * VarianceSize; v++)
+            for (var v = 0; v < VarianceSize * VarianceSize * VarianceSize; v++)
             {
                 MaxSlopeVariance = Mathf.Max(MaxSlopeVariance, varianceData[v]);
             }
@@ -519,9 +519,9 @@ namespace SpaceEngine.Environment.Oceanic
 
             var table = new float[FourierGridSize * FourierGridSize * 4];
 
-            for (int x = 0; x < FourierGridSize; x++)
+            for (var x = 0; x < FourierGridSize; x++)
             {
-                for (int y = 0; y < FourierGridSize; y++)
+                for (var y = 0; y < FourierGridSize; y++)
                 {
                     uv = new Vector2(x, y) / MapSize;
 

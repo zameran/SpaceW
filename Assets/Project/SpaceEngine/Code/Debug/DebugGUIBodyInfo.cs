@@ -43,7 +43,7 @@ namespace SpaceEngine.Debugging
 {
     public sealed class DebugGUIBodyInfo : DebugGUI
     {
-        public Body Body { get { return GodManager.Instance.ActiveBody; } }
+        public Body Body => GodManager.Instance.ActiveBody;
 
         protected override void Awake()
         {

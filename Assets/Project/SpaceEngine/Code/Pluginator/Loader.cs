@@ -95,7 +95,7 @@ namespace SpaceEngine.Pluginator
 
         public void Delay(float waitTime, Action action)
         {
-            Logger.Log(string.Format("Loader.Delay: Delay method invoked! Will wait for {0} seconds...", waitTime));
+            Logger.Log($"Loader.Delay: Delay method invoked! Will wait for {waitTime} seconds...");
 
             StartCoroutine(DelayImpl(waitTime, action));
         }
@@ -104,7 +104,7 @@ namespace SpaceEngine.Pluginator
         {
             yield return Yielders.Get(waitTime);
 
-            if (action != null) action();
+            action?.Invoke();
         }
     }
 }

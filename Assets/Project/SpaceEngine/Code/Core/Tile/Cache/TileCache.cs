@@ -34,7 +34,7 @@ namespace SpaceEngine.Core.Tile.Cache
         /// <summary>
         /// Next local identifier to be used for a <see cref="TileProducer"/> using this cache.
         /// </summary>
-        public int NextProducerId { get { return nextProducerId++; } }
+        public int NextProducerId => nextProducerId++;
 
         /// <summary>
         /// The total number of slots managed by the <see cref="Storage.TileStorage"/> attached to the cache.
@@ -50,7 +50,7 @@ namespace SpaceEngine.Core.Tile.Cache
         /// <summary>
         /// The length of tiles data storage.
         /// </summary>
-        public int TileStorageLength { get { return TileStorage.Length; } }
+        public int TileStorageLength => TileStorage.Length;
 
         /// <summary>
         /// The tiles currently in use. 
@@ -59,7 +59,7 @@ namespace SpaceEngine.Core.Tile.Cache
         /// </summary>
         private Dictionary<Tile.TId, Tile> UsedTiles;
 
-        public int UsedTilesCount { get { return UsedTiles.Count; } }
+        public int UsedTilesCount => UsedTiles.Count;
 
         /// <summary>
         /// The unused tiles. 
@@ -70,7 +70,7 @@ namespace SpaceEngine.Core.Tile.Cache
         /// </summary>
         public DictionaryQueue<Tile.TId, Tile> UnusedTiles;
 
-        public int UnusedTilesCount { get { return UnusedTiles.Count(); } }
+        public int UnusedTilesCount => UnusedTiles.Count();
 
         /// <summary>
         /// The producers that use this <see cref="TileCache"/>. Maps local producer identifiers to actual producers.
@@ -111,14 +111,14 @@ namespace SpaceEngine.Core.Tile.Cache
             
             if (Producers == null)
             {
-                Debug.LogWarning(string.Format("TileCache: Still not Initialized, but used! {0}", producer.name));
+                Debug.LogWarning($"TileCache: Still not Initialized, but used! {producer.name}");
                 
                 return;
             }
             
             if (Producers.ContainsKey(id))
             {
-                Debug.Log(string.Format("TileCache: Producer with {0} already inserted!", id));
+                Debug.Log($"TileCache: Producer with {id} already inserted!");
             }
             else
             {
@@ -135,7 +135,7 @@ namespace SpaceEngine.Core.Tile.Cache
         {
             if (i >= TileStorageLength)
             {
-                Debug.Log(string.Format("TileCache: Tile storage at location {0} does not exist!", i));
+                Debug.Log($"TileCache: Tile storage at location {i} does not exist!");
             }
 
             return TileStorage[i];
@@ -208,7 +208,7 @@ namespace SpaceEngine.Core.Tile.Cache
             // If this producer id does not exist can not create tile.
             if (!Producers.ContainsKey(producerId))
             {
-                Debug.Log(string.Format("TileCache.GetTile: Producer with ID: {0} not been inserted into cache!", producerId));
+                Debug.Log($"TileCache.GetTile: Producer with ID: {producerId} not been inserted into cache!");
                 return null;
             }
 
@@ -242,7 +242,7 @@ namespace SpaceEngine.Core.Tile.Cache
                     // If a free slot is not found then program has must abort. Try setting the cache capacity to higher value.
                     if (slot == null)
                     {
-                        throw new CacheCapacityException("No more free slots found. Insufficient storage capacity for cache " + name);
+                        throw new CacheCapacityException($"No more free slots found. Insufficient storage capacity for cache {name}");
                     }
                 }
                 else

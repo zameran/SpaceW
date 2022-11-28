@@ -45,7 +45,7 @@ namespace SpaceEngine
     {
         private readonly CachedComponent<Body> BodyCachedComponent = new CachedComponent<Body>();
 
-        public Body BodyComponent { get { return BodyCachedComponent.Component; } }
+        public Body BodyComponent => BodyCachedComponent.Component;
 
         public Vector3 RotationAxis = Vector3.up;
 

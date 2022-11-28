@@ -67,15 +67,15 @@ public class GodManager : MonoSingleton<GodManager>
 
     public Body ActiveBody { get { return Bodies.FirstOrDefault(body => Helper.Enabled(body)); } }
 
-    public ComputeShader WriteData { get { return GSCS.WriteData; } }
-    public ComputeShader ReadData { get { return GSCS.ReadData; } }
+    public ComputeShader WriteData => GSCS.WriteData;
+    public ComputeShader ReadData => GSCS.ReadData;
 
-    public ComputeShader Precompute { get { return GSCS.Precompute; } }
-    public ComputeShader Variance { get { return GSCS.Variance; } }
+    public ComputeShader Precompute => GSCS.Precompute;
+    public ComputeShader Variance => GSCS.Variance;
 
-    public Shader FourierShader { get { return GSCS.Fourier; } }
+    public Shader FourierShader => GSCS.Fourier;
 
-    public bool UsesReversedZBuffer { get { return SystemInfo.usesReversedZBuffer; } }
+    public bool UsesReversedZBuffer => SystemInfo.usesReversedZBuffer;
 
     /// <summary>
     /// This is the fourier transform size, must pow2 number. Recommend no higher or lower than 64, 128 or 256.
@@ -95,7 +95,7 @@ public class GodManager : MonoSingleton<GodManager>
     /// <summary>
     /// The size of each tile. For tiles made of raster data, this size is the tile width in pixels (the tile height is supposed equal to the tile width).
     /// </summary>
-    public int TileSize { get { return GridResolution * 4; } }
+    public int TileSize => GridResolution * 4;
 
     // TODO : Make these settings switching event based. To avoid constant every-frame checkings...
     public bool Eclipses = true;

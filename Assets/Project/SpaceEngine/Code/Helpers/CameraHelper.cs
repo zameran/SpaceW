@@ -178,12 +178,12 @@ namespace SpaceEngine.Helpers
 
         public static bool CommandBufferExistByName(this Camera camera, CameraEvent evt, string name)
         {
-            return camera.GetCommandBuffers(evt).ToList().Any((buffer) => buffer.name == name);
+            return camera.GetCommandBuffers(evt).ToList().Any(buffer => buffer.name == name);
         }
 
         public static IEnumerable<CommandBuffer> GetCommandBuffersByName(this Camera camera, CameraEvent evt, string name)
         {
-            return camera.GetCommandBuffers(evt).ToList().Where((buffer) => buffer.name == name);
+            return camera.GetCommandBuffers(evt).ToList().Where(buffer => buffer.name == name);
         }
 
         public static void RemoveAllCommandBuffersByName(this Camera camera, CameraEvent evt, string name)

@@ -52,7 +52,7 @@ namespace SpaceEngine.Core.Utilities.Gradients
         public bool ReverseX = false;
 
         /// <inheritdoc />
-        protected override Vector2 Size { get { return new Vector2(1, 64); } }
+        protected override Vector2 Size => new Vector2(1, 64);
 
         public PenumbraGradientLut() : base() { }
 

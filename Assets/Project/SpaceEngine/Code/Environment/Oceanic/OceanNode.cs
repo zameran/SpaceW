@@ -106,7 +106,7 @@ namespace SpaceEngine.Environment.Oceanic
         /// </summary>
         public bool DrawOcean { get; protected set; }
 
-        public Vector3d Origin { get { return ParentBody != null ? ParentBody.Origin : transform.position; } }
+        public Vector3d Origin => ParentBody != null ? ParentBody.Origin : transform.position;
 
         protected const string FFT_KEYWORD = "OCEAN_FFT";
         protected const string WHITECAPS_KEYWORD = "OCEAN_WHITECAPS";
@@ -251,24 +251,24 @@ namespace SpaceEngine.Environment.Oceanic
 
         #region Eventit
 
-        public bool isEventit { get; set; }
+        public bool IsEventit { get; set; }
 
         public void Eventit()
         {
-            if (isEventit) return;
+            if (IsEventit) return;
 
             EventManager.BodyEvents.OnAtmosphereBaked.OnEvent += OnAtmosphereBaked;
 
-            isEventit = true;
+            IsEventit = true;
         }
 
         public void UnEventit()
         {
-            if (!isEventit) return;
+            if (!IsEventit) return;
 
             EventManager.BodyEvents.OnAtmosphereBaked.OnEvent -= OnAtmosphereBaked;
 
-            isEventit = false;
+            IsEventit = false;
         }
 
         #endregion

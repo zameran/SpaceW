@@ -70,9 +70,7 @@ namespace SpaceEngine.Debugging
                 var q = target.TerrainNodes[i];
                 var root = q.TerrainQuadRoot;
 
-                if (root == null) continue;
-
-                root.DrawQuadOutline(CameraHelper.Main(), lineMaterial, Colors[q.Face % 6], ORDER);
+                root?.DrawQuadOutline(CameraHelper.Main(), lineMaterial, Colors[q.Face % 6], ORDER);
             }
         }
     }

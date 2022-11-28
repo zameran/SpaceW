@@ -14,7 +14,7 @@
 
 			#include "../../TCCommon.cginc"
 
-			#define CORE_PORDUCER_ADDITIONAL_UV
+			#define CORE_PRODUCER_ADDITIONAL_UV
 			#define BORDER 2.0	// Tile border size
 
 			#include "../../Core.cginc"

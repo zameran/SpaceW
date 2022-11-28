@@ -108,7 +108,7 @@ namespace SpaceEngine.Debugging
 
                 GUILayout.BeginVertical();
 
-                for (int i = 0; i < entryies.Count; i++)
+                for (var i = 0; i < entryies.Count; i++)
                 {
                     var entry = entryies[i];
 

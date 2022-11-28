@@ -52,7 +52,7 @@ namespace SpaceEngine.Core.Tile.Tasks
         {
             if (IsDone)
             {
-                Debug.Log(string.Format("CreateTileTask.Run: Task for {0} at {1}:{2}:{3} has already been run. This task will not proceed!", Owner.GetType().Name, Level, Tx, Ty));
+                Debug.Log($"CreateTileTask.Run: Task for {Owner.GetType().Name} at {Level}:{Tx}:{Ty} has already been run. This task will not proceed!");
 
                 return;
             }
@@ -84,7 +84,7 @@ namespace SpaceEngine.Core.Tile.Tasks
 
         public override string ToString()
         {
-            return string.Format("({0},{1},{2},{3})", Owner.name, Level, Tx, Ty);
+            return $"({Owner.name},{Level},{Tx},{Ty})";
         }
     }
 }

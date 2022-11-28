@@ -82,12 +82,12 @@ namespace SpaceEngine.Core.Tile.Storage
         /// <summary>
         /// The used slots count.
         /// </summary>
-        public int SlotsCount { get { return Slots.Length; } }
+        public int SlotsCount => Slots.Length;
 
         /// <summary>
         /// The free slots count.
         /// </summary>
-        public int FreeSlotsCount { get { return SlotsFree.Count; } }
+        public int FreeSlotsCount => SlotsFree.Count;
 
         public TileCache Cache { get; protected set; }
 

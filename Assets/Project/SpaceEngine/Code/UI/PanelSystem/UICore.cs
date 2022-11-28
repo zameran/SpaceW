@@ -15,7 +15,7 @@ namespace SpaceEngine.UI
     [UseLogger(LoggerCategory.InGameUI)]
     public class UICore : MonoBehaviour, IEventit
     {
-        public GameObject Root { get { return this.gameObject; } }
+        public GameObject Root => this.gameObject;
 
         public List<UIPanel> Panels { get { return this.GetComponentsInChildren<UIPanel>().Where(x => x.transform.parent == transform).ToList(); } }
 
@@ -35,7 +35,7 @@ namespace SpaceEngine.UI
             }
             else
             {
-                Panels.ForEach((panel) =>
+                Panels.ForEach(panel =>
                 {
                     panel.transform.SetParent(Instance.gameObject.transform);
 
@@ -59,7 +59,7 @@ namespace SpaceEngine.UI
         {
             if (forceDestroyAllPanels)
             {
-                Panels.ForEach((panel) =>
+                Panels.ForEach(panel =>
                 {
                     if (!panel.Immune && !panel.FromThisScene)
                     {
@@ -73,11 +73,11 @@ namespace SpaceEngine.UI
 
         #region IEventit
 
-        public bool isEventit { get; set; }
+        public bool IsEventit { get; set; }
 
         public void Eventit()
         {
-            if (isEventit) return;
+            if (IsEventit) return;
 
             EventManager.UIEvents.AllAdditiveUILoaded.OnEvent += OnAllAdditiveUILoaded;
             EventManager.UIEvents.UIRemixed.OnEvent += OnUIRemixed;
@@ -85,12 +85,12 @@ namespace SpaceEngine.UI
             EventManager.BaseEvents.OnSceneLoaded.OnEvent += OnLevelLoaded;
             EventManager.BaseEvents.OnSceneWillBeLoadedNow.OnEvent += OnSceneWillBeLoadedNow;
 
-            isEventit = true;
+            IsEventit = true;
         }
 
         public void UnEventit()
         {
-            if (!isEventit) return;
+            if (!IsEventit) return;
 
             EventManager.UIEvents.AllAdditiveUILoaded.OnEvent -= OnAllAdditiveUILoaded;
             EventManager.UIEvents.UIRemixed.OnEvent -= OnUIRemixed;
@@ -98,7 +98,7 @@ namespace SpaceEngine.UI
             EventManager.BaseEvents.OnSceneLoaded.OnEvent -= OnLevelLoaded;
             EventManager.BaseEvents.OnSceneWillBeLoadedNow.OnEvent -= OnSceneWillBeLoadedNow;
 
-            isEventit = false;
+            IsEventit = false;
         }
 
         #endregion
@@ -113,7 +113,7 @@ namespace SpaceEngine.UI
 
         private void OnAllAdditiveUILoaded()
         {
-            var loadingScreenPanel = Panels.Find((panel) => panel.gameObject.name == "Loading Panel");
+            var loadingScreenPanel = Panels.Find(panel => panel.gameObject.name == "Loading Panel");
 
             if (loadingScreenPanel != null)
             {
@@ -125,7 +125,7 @@ namespace SpaceEngine.UI
         {
             Logger.Log("UICore.OnUIRemixed: UI remixed!");
 
-            obj.Panels.ForEach((panel) => { panel.FromThisScene = false; });
+            obj.Panels.ForEach(panel => { panel.FromThisScene = false; });
             obj.RemixUI(true);
         }
 
@@ -133,7 +133,7 @@ namespace SpaceEngine.UI
         {
             Logger.Log("UICore.OnSceneWillBeLoadedNow: OnSceneWillBeLoadedNow!");
 
-            Panels.ForEach((panel) => { panel.FromThisScene = false; });
+            Panels.ForEach(panel => { panel.FromThisScene = false; });
 
             RemixUI(true);
         }

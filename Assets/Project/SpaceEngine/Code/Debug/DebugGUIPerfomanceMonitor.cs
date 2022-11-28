@@ -73,21 +73,21 @@ namespace SpaceEngine.Debugging
             {
                 GUILayout.BeginVertical();
 
-                for (int i = 0; i < counters.Count; i++)
+                for (var i = 0; i < counters.Count; i++)
                 {
                     var counter = counters[i];
 
-                    GUILayoutExtensions.VerticalBoxed(string.Format("{0}", counter.Name), GUISkin, () =>
+                    GUILayoutExtensions.VerticalBoxed($"{counter.Name}", GUISkin, () =>
                     {
                         GUILayoutExtensions.VerticalBoxed("", GUISkin, () =>
                         {
                             GUILayoutExtensions.Horizontal(() =>
                             {
-                                GUILayoutExtensions.LabelWithSpace(string.Format("Total: {0}", counter.Time / 1000.0f), -8);
-                                GUILayoutExtensions.LabelWithSpace(string.Format("Average: {0}", counter.Average / 1000.0f), -8);
-                                GUILayoutExtensions.LabelWithSpace(string.Format("Last: {0}", counter.Last / 1000.0f), -8);
-                                GUILayoutExtensions.LabelWithSpace(string.Format("Max: {0}", counter.Max / 1000.0f), -8);
-                                GUILayoutExtensions.LabelWithSpace(string.Format("Count: {0}", counter.Count), -8);
+                                GUILayoutExtensions.LabelWithSpace($"Total: {counter.Time / 1000.0f}", -8);
+                                GUILayoutExtensions.LabelWithSpace($"Average: {counter.Average / 1000.0f}", -8);
+                                GUILayoutExtensions.LabelWithSpace($"Last: {counter.Last / 1000.0f}", -8);
+                                GUILayoutExtensions.LabelWithSpace($"Max: {counter.Max / 1000.0f}", -8);
+                                GUILayoutExtensions.LabelWithSpace($"Count: {counter.Count}", -8);
                             });
                         }, GUILayout.Width(debugInfoDrawBounds.width - 45));
                     }, GUILayout.Width(debugInfoDrawBounds.width - 40));

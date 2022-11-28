@@ -50,7 +50,7 @@ namespace SpaceEngine.Environment.Sun
     {
         private readonly CachedComponent<Sun> SunCachedComponent = new CachedComponent<Sun>();
 
-        public Sun SunComponent { get { return SunCachedComponent.Component; } }
+        public Sun SunComponent => SunCachedComponent.Component;
 
         public Atmosphere Atmosphere;
 

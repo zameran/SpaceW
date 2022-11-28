@@ -54,7 +54,7 @@ namespace SpaceEngine.Tests
 
             if (TestMesh != null && TestMaterial != null)
             {
-                for (int i = 0; i < 128; i++)
+                for (var i = 0; i < 128; i++)
                 {
                     var position = Random.insideUnitSphere * 100;
                     var rotation = Random.rotationUniform;

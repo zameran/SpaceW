@@ -67,8 +67,8 @@ namespace SpaceEngine.Core.Preprocess.Terrain
             x = Mathf.Max(Mathf.Min(x, Width), 0);
             y = Mathf.Max(Mathf.Min(y, Height), 0);
 
-            int tx = Mathf.Min(x, Width - 1) / TileSize;
-            int ty = Mathf.Min(y, Height - 1) / TileSize;
+            var tx = Mathf.Min(x, Width - 1) / TileSize;
+            var ty = Mathf.Min(y, Height - 1) / TileSize;
 
             x = (x == Width ? TileSize : x % TileSize) + 2;
             y = (y == Height ? TileSize : y % TileSize) + 2;
@@ -84,8 +84,8 @@ namespace SpaceEngine.Core.Preprocess.Terrain
             x = Mathf.Max(Mathf.Min(x, Width - 1), 0);
             y = Mathf.Max(Mathf.Min(y, Height - 1), 0);
 
-            int tx = x / TileSize;
-            int ty = y / TileSize;
+            var tx = x / TileSize;
+            var ty = y / TileSize;
 
             x = x % TileSize + 2;
             y = y % TileSize + 2;

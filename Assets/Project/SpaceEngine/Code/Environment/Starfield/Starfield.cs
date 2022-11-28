@@ -184,7 +184,7 @@ namespace SpaceEngine.Environment.Startfield
 
             using (var reader = new BinaryReader(new MemoryStream(binaryDataFile.bytes)))
             {
-                for (int i = 0; i < numberOfStars - 1; i++)
+                for (var i = 0; i < numberOfStars - 1; i++)
                 {
                     var star = new StarfieldStar();
                     var starSize = StarsDistance / 100 * StarsScale;
@@ -213,7 +213,7 @@ namespace SpaceEngine.Environment.Startfield
 
             var mesh = new Mesh();
             mesh.CombineMeshes(starsCIs.ToArray());
-            mesh.name = string.Format("StarfieldMesh_({0})", Random.Range(float.MinValue, float.MaxValue));
+            mesh.name = $"StarfieldMesh_({Random.Range(float.MinValue, float.MaxValue)})";
             mesh.bounds = new Bounds(Vector3.zero, new Vector3(1e8f, 1e8f, 1e8f));
             mesh.hideFlags = HideFlags.DontSave;
 

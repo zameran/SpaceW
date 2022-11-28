@@ -10,7 +10,7 @@ namespace SpaceEngine.UI
         [SerializeField]
         private float transitionTime = .5f;
 
-        protected float TransitionTime { get { return transitionTime; } }
+        protected float TransitionTime => transitionTime;
 
         protected CanvasGroup canvasGroup;
 

@@ -27,7 +27,7 @@ namespace SpaceEngine.Core.Preprocess.Terrain
         /// The width and height must be multiples of this size.
         /// </summary>
         [SerializeField]
-        private Vector2 TileSize { get { return new Vector2(Width, Height); } }
+        private Vector2 TileSize => new Vector2(Width, Height);
 
         [SerializeField]
         private bool IgnoreSizeRatio = true;
@@ -47,8 +47,8 @@ namespace SpaceEngine.Core.Preprocess.Terrain
 
             if (!IgnoreSizeRatio)
             {
-                if (Width % (int)TileSize.x != 0) { throw new InvalidParameterException(string.Format("Tile size must be divisable by width! W:{0}; S:{1}; W%S:{2}", Width, TileSize, Width % TileSize.x)); }
-                if (Height % (int)TileSize.y != 0) { throw new InvalidParameterException(string.Format("Tile size must be divisable by height! H:{0}; S:{1}; H%S:{2}", Height, TileSize, Height % TileSize.y)); }
+                if (Width % (int)TileSize.x != 0) { throw new InvalidParameterException($"Tile size must be dividable by width! W:{Width}; S:{TileSize}; W%S:{Width % TileSize.x}"); }
+                if (Height % (int)TileSize.y != 0) { throw new InvalidParameterException($"Tile size must be dividable by height! H:{Height}; S:{TileSize}; H%S:{Height % TileSize.y}"); }
             }
 
             Cache = new DictionaryQueue<Id, Tile>(new EqualityComparerID());
@@ -79,9 +79,9 @@ namespace SpaceEngine.Core.Preprocess.Terrain
         {
             var values = new float[(int)TileSize.x * (int)TileSize.y * Channels];
 
-            for (int j = 0; j < (int)TileSize.y; ++j)
+            for (var j = 0; j < (int)TileSize.y; ++j)
             {
-                for (int i = 0; i < (int)TileSize.x; ++i)
+                for (var i = 0; i < (int)TileSize.x; ++i)
                 {
                     var value = GetValue(tx + i, ty + j);
                     var offset = (i + j * (int)TileSize.x) * Channels;
@@ -155,8 +155,8 @@ namespace SpaceEngine.Core.Preprocess.Terrain
             x = Mathf.Max(Mathf.Min(x, Width - 1), 0);
             y = Mathf.Max(Mathf.Min(y, Height - 1), 0);
 
-            int tx = x / (int)TileSize.x;
-            int ty = y / (int)TileSize.y;
+            var tx = x / (int)TileSize.x;
+            var ty = y / (int)TileSize.y;
 
             x = x % (int)TileSize.x;
             y = y % (int)TileSize.y;

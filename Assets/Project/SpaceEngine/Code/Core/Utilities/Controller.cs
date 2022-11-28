@@ -73,7 +73,7 @@ namespace SpaceEngine.Core.Utilities
 
         public TerrainView View { get; private set; }
 
-        private DebugGUISwitcher DebugGUISwitcherInstance { get { return DebugGUISwitcher.Instance as DebugGUISwitcher; } }
+        private DebugGUISwitcher DebugGUISwitcherInstance => DebugGUISwitcher.Instance as DebugGUISwitcher;
 
         #region NodeSlave<Controller>
 
@@ -101,7 +101,7 @@ namespace SpaceEngine.Core.Utilities
             MouseButtons();
             MouseMotion();
 
-            double dt = Time.deltaTime * 1000.0;
+            var dt = Time.deltaTime * 1000.0;
 
             // If animation requried interpolate from start to end position
             // NOTE : has not been tested and not currently used

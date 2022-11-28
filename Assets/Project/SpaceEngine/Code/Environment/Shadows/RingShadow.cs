@@ -45,7 +45,7 @@ namespace SpaceEngine.Environment.Shadows
     {
         private readonly CachedComponent<Ring> RingCachedComponent = new CachedComponent<Ring>();
 
-        public Ring RingComponent { get { return RingCachedComponent.Component; }}
+        public Ring RingComponent => RingCachedComponent.Component;
 
         [HideInInspector]
         public Texture Texture;
