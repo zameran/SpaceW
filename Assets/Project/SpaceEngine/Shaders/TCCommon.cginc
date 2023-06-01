@@ -32,7 +32,7 @@
 
 /*
  * Author: Vladimir Romanyuk
- * Modified and ported to Unity by Denis Ovchinnikov 2015-2018
+ * Modified and ported to Unity by Denis Ovchinnikov 2015-2023
  */
 
 // NOTE:

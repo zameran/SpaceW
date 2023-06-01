@@ -1,6 +1,6 @@
 /* Procedural planet generator.
  *
- * Copyright (C) 2015-2018 Denis Ovchinnikov
+ * Copyright (C) 2015-2023 Denis Ovchinnikov
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -54,7 +54,7 @@
  /*
  * Authors: Eric Bruneton, Antoine Begault, Guillaume Piolat.
  * Modified and ported to Unity by Justin Hawkins 2014
- * Modified by Denis Ovchinnikov 2015-2018
+ * Modified by Denis Ovchinnikov 2015-2023
  */
 
 #define OCEAN_BRDF
