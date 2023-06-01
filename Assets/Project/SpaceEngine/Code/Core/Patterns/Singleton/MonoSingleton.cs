@@ -12,42 +12,44 @@ namespace SpaceEngine.Core.Patterns.Singleton
     {
         protected static bool UnsaveSingleton = false;
 
-        private static T instance;
-
-        private static object @lock = new object();
+        private static T m_Instance;
+        private static readonly object m_LockObject = new();
 
         public static T Instance
         {
             get
             {
-                if (ApplicationIsQuitting)
+                if (IsApplicationQuitting)
                 {
                     Debug.LogWarning($"Singleton: Instance '{typeof(T).Name}' already destroyed on application quit. Won't create again - returning null.");
 
                     return null;
                 }
 
-                lock (@lock)
+                lock (m_LockObject)
                 {
-                    if (UnsaveSingleton) return instance;
-
-                    if (instance == null)
+                    if (UnsaveSingleton)
                     {
-                        var instances = FindObjectsOfType(typeof(T)).ToList();
+                        return m_Instance;
+                    }
 
-                        instance = (T)instances.FirstOrDefault();
+                    if (m_Instance == null)
+                    {
+                        var instances = FindObjectsByType<T>(FindObjectsSortMode.InstanceID).ToList();
+
+                        m_Instance = (T)instances.FirstOrDefault();
 
                         if (instances.Count > 1)
                         {
                             Debug.LogError($"Singleton: Something went really wrong - there should never be more than 1 singleton! Found count: {instances.Count}");
 
-                            return instance;
+                            return m_Instance;
                         }
 
-                        if (instance == null)
+                        if (m_Instance == null)
                         {
                             var singleton = new GameObject();
-                            instance = singleton.AddComponent<T>();
+                            m_Instance = singleton.AddComponent<T>();
                             singleton.name = $"{typeof(T).Name}_(MonoSingleton)";
 
                             DontDestroyOnLoad(singleton);
@@ -56,17 +58,17 @@ namespace SpaceEngine.Core.Patterns.Singleton
                         }
                         else
                         {
-                            Debug.Log($"Singleton: Using instance already created: {instance.gameObject.name}");
+                            Debug.Log($"Singleton: Using instance already created: {m_Instance.gameObject.name}");
                         }
                     }
 
-                    return instance;
+                    return m_Instance;
                 }
             }
-            protected set => instance = value;
+            protected set => m_Instance = value;
         }
 
-        public static bool ApplicationIsQuitting { get; private set; }
+        public static bool IsApplicationQuitting { get; private set; }
 
         protected virtual bool UnstableSingleton()
         {
@@ -82,7 +84,10 @@ namespace SpaceEngine.Core.Patterns.Singleton
         /// </summary>
         protected virtual void OnDestroy()
         {
-            if (UnstableSingleton()) ApplicationIsQuitting = true;
+            if (UnstableSingleton())
+            {
+                IsApplicationQuitting = true;
+            }
         }
     }
 }

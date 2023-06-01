@@ -103,13 +103,13 @@ namespace SpaceEngine.Helpers
         /// <returns>Returns the <see cref="Camera"/>'s projection <see cref="Matrix4x4"/>.</returns>
         public static Matrix4x4 GetCameraToScreen(this Camera camera, bool useFix = true)
         {
-#if UNITY_GL_PROJECTION_MATRIX
+            #if UNITY_GL_PROJECTION_MATRIX
             var projectionMatrix = camera.projectionMatrix;
 
             projectionMatrix = GL.GetGPUProjectionMatrix(projectionMatrix, useFix);
 
             return projectionMatrix;
-#elif SE_PROJECTION_MATRIX
+            #elif SE_PROJECTION_MATRIX
             var projectionMatrix = camera.projectionMatrix;
 
             if (!useFix) return projectionMatrix;
@@ -136,9 +136,9 @@ namespace SpaceEngine.Helpers
             }
 
             return projectionMatrix;
-#else
+            #else
             return camera.projectionMatrix;
-#endif
+            #endif
         }
 
         public static Matrix4x4 GetScreenToCamera(this Camera camera)
@@ -161,17 +161,23 @@ namespace SpaceEngine.Helpers
 
         public static bool IsDeferred(this Camera camera)
         {
-            return camera.actualRenderingPath == (RenderingPath.DeferredLighting | RenderingPath.DeferredShading);
+            return camera.actualRenderingPath == (RenderingPath.DeferredShading);
         }
 
         public static int GetAntiAliasing(this Camera camera)
         {
             var antiAliasing = QualitySettings.antiAliasing;
 
-            if (antiAliasing == 0) { antiAliasing = 1; }
+            if (antiAliasing == 0)
+            {
+                antiAliasing = 1;
+            }
 
             // Reset aa value to 1 in case camera is in DeferredLighting or DeferredShading Rendering Path
-            if (camera.IsDeferred()) { antiAliasing = 1; }
+            if (camera.IsDeferred())
+            {
+                antiAliasing = 1;
+            }
 
             return antiAliasing;
         }

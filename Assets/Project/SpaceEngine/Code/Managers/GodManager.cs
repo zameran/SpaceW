@@ -120,9 +120,9 @@ public class GodManager : MonoSingleton<GodManager>
         InitQuadMesh();
         InitOceanScreenGridMeshes();
 
-        Bodies = FindObjectsOfType<Body>();
-        Starfields = FindObjectsOfType<Starfield>();
-        Sunglares = FindObjectsOfType<SunGlare>();
+        Bodies = FindObjectsByType<Body>(FindObjectsSortMode.InstanceID);
+        Starfields = FindObjectsByType<Starfield>(FindObjectsSortMode.InstanceID);
+        Sunglares = FindObjectsByType<SunGlare>(FindObjectsSortMode.InstanceID);
 
         CreateOrthoNoise();
     }
@@ -229,8 +229,8 @@ public class GodManager : MonoSingleton<GodManager>
 
         if (cameraPosition.sqrMagnitude > 500000.0)
         {
-            var suns = FindObjectsOfType<Sun>();
-            var bodies = FindObjectsOfType<CelestialBody>();
+            var suns = FindObjectsByType<Sun>(FindObjectsSortMode.InstanceID);
+            var bodies = FindObjectsByType<CelestialBody>(FindObjectsSortMode.InstanceID);
 
             foreach (var sun in suns)
             {

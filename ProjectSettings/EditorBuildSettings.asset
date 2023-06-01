@@ -7,10 +7,12 @@ EditorBuildSettings:
   m_Scenes:
   - enabled: 1
     path: Assets/Project/SpaceEngine/Scenes/Init.unity
-    guid: 00000000000000000000000000000000
+    guid: 15968d0c7547bfc46b913712cf6c1b18
   - enabled: 1
     path: Assets/Project/SpaceEngine/Scenes/MainMenu.unity
-    guid: 00000000000000000000000000000000
+    guid: b2535068719783647b8c2fe9f9da11d6
   - enabled: 1
     path: Assets/Project/SpaceEngine/Scenes/Scene.unity
-    guid: 00000000000000000000000000000000
+    guid: 0b8461b9745722344b07397701f5ece6
+  m_configObjects: {}
+  m_UseUCBPForAssetBundles: 0

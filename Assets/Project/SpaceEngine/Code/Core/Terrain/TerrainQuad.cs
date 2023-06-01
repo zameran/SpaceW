@@ -136,7 +136,7 @@ namespace SpaceEngine.Core.Terrain
         public Matrix4x4d FlatCorners { get; private set; }
 
         /// <summary>
-        /// Screen space quad veritcals.
+        /// Screen space quad verticals.
         /// </summary>
         public Matrix4x4d FlatVerticals { get; private set; }
 
