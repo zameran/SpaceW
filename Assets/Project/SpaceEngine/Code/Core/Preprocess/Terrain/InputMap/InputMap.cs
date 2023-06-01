@@ -1,3 +1,38 @@
+#region License
+// Procedural planet generator.
+//  
+// Copyright (C) 2015-2023 Denis Ovchinnikov [zameran] 
+// All rights reserved.
+// 
+// Redistribution and use in source and binary forms, with or without
+// modification, are permitted provided that the following conditions
+// are met:
+// 1. Redistributions of source code must retain the above copyright
+//    notice, this list of conditions and the following disclaimer.
+// 2. Redistributions in binary form must reproduce the above copyright
+//    notice, this list of conditions and the following disclaimer in the
+//    documentation and/or other materials provided with the distribution.
+// 3. Neither the name of the copyright holders nor the names of its
+//    contributors may be used to endorse or promote products derived from
+//    this software without specific prior written permission.
+// 
+// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+// AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+// IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+// ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE
+// LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+// CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+// SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+// INTERRUPTION)HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+// CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+// ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF
+// THE POSSIBILITY OF SUCH DAMAGE.
+// 
+// Creation Date: 2017.03.28
+// Creation Time: 2:18 PM
+// Creator: zameran
+#endregion
+
 using SpaceEngine.Core.Containers;
 using SpaceEngine.Core.Exceptions;
 
@@ -27,7 +62,7 @@ namespace SpaceEngine.Core.Preprocess.Terrain
         /// The width and height must be multiples of this size.
         /// </summary>
         [SerializeField]
-        private Vector2 TileSize { get { return new Vector2(Width, Height); } }
+        private Vector2 TileSize => new Vector2(Width, Height);
 
         [SerializeField]
         private bool IgnoreSizeRatio = true;
@@ -47,8 +82,8 @@ namespace SpaceEngine.Core.Preprocess.Terrain
 
             if (!IgnoreSizeRatio)
             {
-                if (Width % (int)TileSize.x != 0) { throw new InvalidParameterException(string.Format("Tile size must be divisable by width! W:{0}; S:{1}; W%S:{2}", Width, TileSize, Width % TileSize.x)); }
-                if (Height % (int)TileSize.y != 0) { throw new InvalidParameterException(string.Format("Tile size must be divisable by height! H:{0}; S:{1}; H%S:{2}", Height, TileSize, Height % TileSize.y)); }
+                if (Width % (int)TileSize.x != 0) { throw new InvalidParameterException($"Tile size must be dividable by width! W:{Width}; S:{TileSize}; W%S:{Width % TileSize.x}"); }
+                if (Height % (int)TileSize.y != 0) { throw new InvalidParameterException($"Tile size must be dividable by height! H:{Height}; S:{TileSize}; H%S:{Height % TileSize.y}"); }
             }
 
             Cache = new DictionaryQueue<Id, Tile>(new EqualityComparerID());
@@ -79,9 +114,9 @@ namespace SpaceEngine.Core.Preprocess.Terrain
         {
             var values = new float[(int)TileSize.x * (int)TileSize.y * Channels];
 
-            for (int j = 0; j < (int)TileSize.y; ++j)
+            for (var j = 0; j < (int)TileSize.y; ++j)
             {
-                for (int i = 0; i < (int)TileSize.x; ++i)
+                for (var i = 0; i < (int)TileSize.x; ++i)
                 {
                     var value = GetValue(tx + i, ty + j);
                     var offset = (i + j * (int)TileSize.x) * Channels;
@@ -155,8 +190,8 @@ namespace SpaceEngine.Core.Preprocess.Terrain
             x = Mathf.Max(Mathf.Min(x, Width - 1), 0);
             y = Mathf.Max(Mathf.Min(y, Height - 1), 0);
 
-            int tx = x / (int)TileSize.x;
-            int ty = y / (int)TileSize.y;
+            var tx = x / (int)TileSize.x;
+            var ty = y / (int)TileSize.y;
 
             x = x % (int)TileSize.x;
             y = y % (int)TileSize.y;

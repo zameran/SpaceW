@@ -1,7 +1,7 @@
 ﻿#region License
 // Procedural planet generator.
 //  
-// Copyright (C) 2015-2018 Denis Ovchinnikov [zameran] 
+// Copyright (C) 2015-2023 Denis Ovchinnikov [zameran] 
 // All rights reserved.
 // 
 // Redistribution and use in source and binary forms, with or without
@@ -33,6 +33,8 @@
 // Creator: zameran
 #endregion
 
+using SpaceEngine.Helpers;
+
 using UnityEngine;
 using UnityEngine.Rendering;
 
@@ -52,7 +54,7 @@ namespace SpaceEngine.Tests
 
             if (TestMesh != null && TestMaterial != null)
             {
-                for (int i = 0; i < 128; i++)
+                for (var i = 0; i < 128; i++)
                 {
                     var position = Random.insideUnitSphere * 100;
                     var rotation = Random.rotationUniform;

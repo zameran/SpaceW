@@ -333,7 +333,7 @@ namespace SpaceEngine.Core.Utilities
             {
                 InnerException = ex;
 
-                Debug.LogError(string.Format("Task: {0}\n{1}", ex.Message, ex.StackTrace));
+                Debug.LogError($"Task: {ex.Message}\n{ex.StackTrace}");
 
                 GotoState(RunningState.Error);
             }

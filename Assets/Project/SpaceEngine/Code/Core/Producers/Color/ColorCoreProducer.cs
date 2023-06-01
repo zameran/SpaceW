@@ -1,7 +1,7 @@
 ﻿#region License
 // Procedural planet generator.
 //  
-// Copyright (C) 2015-2018 Denis Ovchinnikov [zameran] 
+// Copyright (C) 2015-2023 Denis Ovchinnikov [zameran] 
 // All rights reserved.
 // 
 // Redistribution and use in source and binary forms, with or without
@@ -76,12 +76,12 @@ namespace SpaceEngine.Core
 
             if (tileSize != normalsTileSize)
             {
-                throw new InvalidParameterException("Tile size must equal normals tile size" + string.Format(": {0}-{1}", tileSize, normalsTileSize));
+                throw new InvalidParameterException($"Tile size must equal normals tile size: {tileSize}-{normalsTileSize}");
             }
 
             if (tileSize != elevationTileSize)
             {
-                throw new InvalidParameterException("Tile size must equal elevation tile size" + string.Format(": {0}-{1}", tileSize, elevationTileSize));
+                throw new InvalidParameterException($"Tile size must equal elevation tile size: {tileSize}-{elevationTileSize}");
             }
 
             if (GetBorder() != NormalsProducer.GetBorder())
@@ -119,14 +119,12 @@ namespace SpaceEngine.Core
 
             GPUTileStorage.GPUSlot normalsGpuSlot = null;
 
-            if (normalsTile != null)
-                normalsGpuSlot = normalsTile.GetSlot(0) as GPUTileStorage.GPUSlot;
+            if (normalsTile != null) normalsGpuSlot = normalsTile.GetSlot(0) as GPUTileStorage.GPUSlot;
             else { throw new MissingTileException("Find normals tile failed"); }
 
             GPUTileStorage.GPUSlot elevationGpuSlot = null;
 
-            if (elevationTile != null)
-                elevationGpuSlot = elevationTile.GetSlot(0) as GPUTileStorage.GPUSlot;
+            if (elevationTile != null) elevationGpuSlot = elevationTile.GetSlot(0) as GPUTileStorage.GPUSlot;
             else { throw new MissingTileException("Find elevation tile failed"); }
 
             if (gpuSlot == null) { throw new NullReferenceException("gpuSlot"); }

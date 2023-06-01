@@ -1,7 +1,7 @@
 #region License
 // Procedural planet generator.
 // 
-// Copyright (C) 2015-2018 Denis Ovchinnikov [zameran] 
+// Copyright (C) 2015-2023 Denis Ovchinnikov [zameran] 
 // All rights reserved.
 // 
 // Redistribution and use in source and binary forms, with or without
@@ -40,6 +40,8 @@ using SpaceEngine.Core.Patterns.Strategy.Renderable;
 using SpaceEngine.Core.Patterns.Strategy.Uniformed;
 using SpaceEngine.Enums;
 using SpaceEngine.Environment.Shadows;
+using SpaceEngine.Helpers;
+using SpaceEngine.Tools;
 
 using System.Collections.Generic;
 
@@ -190,7 +192,7 @@ namespace SpaceEngine.Environment.Rings
             if (Segments == null) return;
             if (Segments.Count == 0) return;
 
-            for (int i = 0; i < Segments.Count; i++)
+            for (var i = 0; i < Segments.Count; i++)
             {
                 if (Segments[i] != null)
                 {
@@ -284,16 +286,13 @@ namespace SpaceEngine.Environment.Rings
         {
             if (lightCount > 0)
             {
-                var keyword = "LIGHT_" + lightCount;
+                var keyword = $"LIGHT_{lightCount}";
 
                 for (var i = keywordLists.Length - 1; i >= 0; i--)
                 {
                     var keywordList = keywordLists[i];
 
-                    if (keywordList != null)
-                    {
-                        keywordList.Add(keyword);
-                    }
+                    keywordList?.Add(keyword);
                 }
             }
         }
@@ -302,16 +301,13 @@ namespace SpaceEngine.Environment.Rings
         {
             if (shadowCount > 0)
             {
-                var keyword = "SHADOW_" + shadowCount;
+                var keyword = $"SHADOW_{shadowCount}";
 
                 for (var i = keywordLists.Length - 1; i >= 0; i--)
                 {
                     var keywordList = keywordLists[i];
 
-                    if (keywordList != null)
-                    {
-                        keywordList.Add(keyword);
-                    }
+                    keywordList?.Add(keyword);
                 }
             }
         }

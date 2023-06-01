@@ -1,7 +1,7 @@
 ﻿#region License
 // Procedural planet generator.
 // 
-// Copyright (C) 2015-2018 Denis Ovchinnikov [zameran] 
+// Copyright (C) 2015-2023 Denis Ovchinnikov [zameran] 
 // All rights reserved.
 // 
 // Redistribution and use in source and binary forms, with or without
@@ -34,6 +34,7 @@
 #endregion
 
 using SpaceEngine.Core.Patterns.Strategy.Renderable;
+using SpaceEngine.Helpers;
 
 using UnityEngine;
 using UnityEngine.Rendering;

@@ -1,7 +1,7 @@
 ﻿#region License
 // Procedural planet generator.
 //  
-// Copyright (C) 2015-2018 Denis Ovchinnikov [zameran] 
+// Copyright (C) 2015-2023 Denis Ovchinnikov [zameran] 
 // All rights reserved.
 // 
 // Redistribution and use in source and binary forms, with or without
@@ -56,24 +56,20 @@ namespace SpaceEngine.Core.Debugging
             private readonly double MicroSecPerTick = 1000000D / Frequency;
 
             /// <summary>
-            /// Constuctor.
+            /// Constructor.
             /// </summary>
             public MicroStopwatch()
             {
                 if (!IsHighResolution)
                 {
-                    throw new Exception("On this system the high-resolution " +
-                                        "performance counter is not available");
+                    throw new Exception("On this system the high-resolution - performance counter is not available");
                 }
             }
 
             /// <summary>
             /// Wasted time.
             /// </summary>
-            public long ElapsedMicroseconds
-            {
-                get { return (long)(ElapsedTicks * MicroSecPerTick); }
-            }
+            public long ElapsedMicroseconds => (long)(ElapsedTicks * MicroSecPerTick);
         }
 
         /// <summary>
@@ -107,7 +103,7 @@ namespace SpaceEngine.Core.Debugging
 
             public void Dispose()
             {
-                PerformanceMonitor.IncrementCounter(name, ElapsedMicroseconds);
+                IncrementCounter(name, ElapsedMicroseconds);
             }
         }
 
@@ -144,10 +140,7 @@ namespace SpaceEngine.Core.Debugging
             /// <summary>
             /// Average time of counter.
             /// </summary>
-            public float Average
-            {
-                get { return Time / (float)Count; }
-            }
+            public float Average => Time / (float)Count;
 
             /// <summary>
             /// Constructor of counter class.
@@ -230,9 +223,7 @@ namespace SpaceEngine.Core.Debugging
         {
             lock (counters)
             {
-                Counter counter;
-
-                if (counters.TryGetValue(name, out counter))
+                if (counters.TryGetValue(name, out var counter))
                 {
                     counter.Increment(ms);
                 }

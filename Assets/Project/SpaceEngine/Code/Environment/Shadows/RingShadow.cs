@@ -1,7 +1,7 @@
 ﻿#region License
 // Procedural planet generator.
 // 
-// Copyright (C) 2015-2018 Denis Ovchinnikov [zameran] 
+// Copyright (C) 2015-2023 Denis Ovchinnikov [zameran] 
 // All rights reserved.
 // 
 // Redistribution and use in source and binary forms, with or without
@@ -34,6 +34,8 @@
 #endregion
 
 using SpaceEngine.Environment.Rings;
+using SpaceEngine.Helpers;
+
 using UnityEngine;
 
 namespace SpaceEngine.Environment.Shadows
@@ -43,7 +45,7 @@ namespace SpaceEngine.Environment.Shadows
     {
         private readonly CachedComponent<Ring> RingCachedComponent = new CachedComponent<Ring>();
 
-        public Ring RingComponent { get { return RingCachedComponent.Component; }}
+        public Ring RingComponent => RingCachedComponent.Component;
 
         [HideInInspector]
         public Texture Texture;

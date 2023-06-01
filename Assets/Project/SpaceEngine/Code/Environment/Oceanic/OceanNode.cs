@@ -1,7 +1,7 @@
 ﻿#region License
 // Procedural planet generator.
 // 
-// Copyright (C) 2015-2018 Denis Ovchinnikov [zameran] 
+// Copyright (C) 2015-2023 Denis Ovchinnikov [zameran] 
 // All rights reserved.
 // 
 // Redistribution and use in source and binary forms, with or without
@@ -43,6 +43,8 @@ using SpaceEngine.Core.Patterns.Strategy.Renderable;
 using SpaceEngine.Core.Patterns.Strategy.Uniformed;
 using SpaceEngine.Enums;
 using SpaceEngine.Environment.Atmospheric;
+using SpaceEngine.Helpers;
+using SpaceEngine.Tools;
 
 using System;
 using System.Collections;
@@ -104,7 +106,7 @@ namespace SpaceEngine.Environment.Oceanic
         /// </summary>
         public bool DrawOcean { get; protected set; }
 
-        public Vector3d Origin { get { return ParentBody != null ? ParentBody.Origin : transform.position; } }
+        public Vector3d Origin => ParentBody != null ? ParentBody.Origin : transform.position;
 
         protected const string FFT_KEYWORD = "OCEAN_FFT";
         protected const string WHITECAPS_KEYWORD = "OCEAN_WHITECAPS";
@@ -249,24 +251,24 @@ namespace SpaceEngine.Environment.Oceanic
 
         #region Eventit
 
-        public bool isEventit { get; set; }
+        public bool IsEventit { get; set; }
 
         public void Eventit()
         {
-            if (isEventit) return;
+            if (IsEventit) return;
 
             EventManager.BodyEvents.OnAtmosphereBaked.OnEvent += OnAtmosphereBaked;
 
-            isEventit = true;
+            IsEventit = true;
         }
 
         public void UnEventit()
         {
-            if (!isEventit) return;
+            if (!IsEventit) return;
 
             EventManager.BodyEvents.OnAtmosphereBaked.OnEvent -= OnAtmosphereBaked;
 
-            isEventit = false;
+            IsEventit = false;
         }
 
         #endregion

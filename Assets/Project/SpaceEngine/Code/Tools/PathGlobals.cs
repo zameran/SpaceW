@@ -1,7 +1,7 @@
 ﻿#region License
 // Procedural planet generator.
 // 
-// Copyright (C) 2015-2018 Denis Ovchinnikov [zameran] 
+// Copyright (C) 2015-2023 Denis Ovchinnikov [zameran] 
 // All rights reserved.
 // 
 // Redistribution and use in source and binary forms, with or without
@@ -37,24 +37,27 @@ using System.IO;
 
 using UnityEngine;
 
-public static class PathGlobals
+namespace SpaceEngine.Tools
 {
-    public const string GlobalConfigFolderName = "Config";
-    public const string GlobalModFolderName = "Mods";
-
-    public static string GlobalConfigFolderPath { get { return Path.GetFullPath(GlobalRootPath + GlobalConfigFolderName); } }
-
-    public static string GlobalModFolderPath { get { return Path.GetFullPath(GlobalRootPath + GlobalModFolderName); } }
-
-    public static string GlobalRootPath { get { return Path.GetFullPath(Application.dataPath + "/../"); } }
-
-    public static string GlobalConfigFolderPathEditor(string dataPath)
+    public static class PathGlobals
     {
-        return Path.GetFullPath(dataPath + "/../" + GlobalConfigFolderName);
-    }
+        public const string GlobalConfigFolderName = "Config";
+        public const string GlobalModFolderName = "Mods";
 
-    public static string GlobalModFolderPathEditor(string dataPath)
-    {
-        return Path.GetFullPath(dataPath + "/../" + GlobalModFolderName);
+        public static string GlobalConfigFolderPath => Path.GetFullPath(GlobalRootPath + GlobalConfigFolderName);
+
+        public static string GlobalModFolderPath => Path.GetFullPath(GlobalRootPath + GlobalModFolderName);
+
+        public static string GlobalRootPath => Path.GetFullPath($"{Application.dataPath}/../");
+
+        public static string GlobalConfigFolderPathEditor(string dataPath)
+        {
+            return Path.GetFullPath($"{dataPath}/../{GlobalConfigFolderName}");
+        }
+
+        public static string GlobalModFolderPathEditor(string dataPath)
+        {
+            return Path.GetFullPath($"{dataPath}/../{GlobalModFolderName}");
+        }
     }
 }

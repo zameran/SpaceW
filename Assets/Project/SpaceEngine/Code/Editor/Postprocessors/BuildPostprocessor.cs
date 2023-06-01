@@ -30,6 +30,8 @@
  */
 #endregion
 
+using SpaceEngine.Tools;
+
 using System.IO;
 
 using UnityEditor;
@@ -49,7 +51,7 @@ namespace SpaceEngine.Postprocessors
 
             if (string.IsNullOrEmpty(fileName)) { Debug.Log("BuildPostprocessor.OnPostprocessBuild: Can't find exe!"); return; }
 
-            var dataPath = pathToBuiltProject.Remove(pathToBuiltProject.Length - fileName.Length, fileName.Length) + fileNameWithoutExtension + "_Data";
+            var dataPath = $"{pathToBuiltProject.Remove(pathToBuiltProject.Length - fileName.Length, fileName.Length)}{fileNameWithoutExtension}_Data";
 
             // TODO : Other platforms support...
             if (target == BuildTarget.StandaloneWindows || target == BuildTarget.StandaloneWindows64)

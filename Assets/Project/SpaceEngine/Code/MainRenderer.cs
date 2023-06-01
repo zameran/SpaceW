@@ -1,7 +1,7 @@
 ﻿#region License
 // Procedural planet generator.
 // 
-// Copyright (C) 2015-2018 Denis Ovchinnikov [zameran] 
+// Copyright (C) 2015-2023 Denis Ovchinnikov [zameran] 
 // All rights reserved.
 // 
 // Redistribution and use in source and binary forms, with or without
@@ -34,6 +34,7 @@
 #endregion
 
 using SpaceEngine.Core.Bodies;
+using SpaceEngine.Core.Patterns.Singleton;
 
 using System;
 using System.Collections.Generic;
@@ -79,7 +80,7 @@ public sealed class MainRenderer : MonoSingleton<MainRenderer>
 
     private void Update()
     {
-        if (Input.GetKey(KeyCode.J) || ZSort) ComposeOutputRender();
+        if (Input.GetKey(KeyCode.J) || ZSort) SortBodies();
     }
 
     private void OnEnable()
@@ -97,7 +98,7 @@ public sealed class MainRenderer : MonoSingleton<MainRenderer>
         
     }
 
-    public void ComposeOutputRender()
+    public void SortBodies()
     {
         Array.Sort(GodManager.Instance.Bodies, Comparer);
 
@@ -105,18 +106,18 @@ public sealed class MainRenderer : MonoSingleton<MainRenderer>
         // NOTE : Maybe several near hi-priority bodies can be exist or something another. This is space - all is possible...
         //-----------------------------------------------------------------------------
         var highPriorityBody = GodManager.Instance.ActiveBody;
-        var bodyies = GodManager.Instance.Bodies;
+        var bodies = GodManager.Instance.Bodies;
 
-        if (highPriorityBody == null || bodyies == null) return;
+        if (highPriorityBody == null || bodies == null) return;
 
         highPriorityBody.RenderQueueOffset = 5;
         if (highPriorityBody.Atmosphere != null) highPriorityBody.Atmosphere.RenderQueueOffset = 6;
         if (highPriorityBody.Ocean != null) highPriorityBody.Ocean.RenderQueueOffset = 7;
         if (highPriorityBody.Ring != null) highPriorityBody.Ring.RenderQueueOffset = 4;
 
-        for (var i = 1; i < bodyies.Length; i++)
+        for (var i = 1; i < bodies.Length; i++)
         {
-            var lowPriorityBody = bodyies[i];
+            var lowPriorityBody = bodies[i];
 
             lowPriorityBody.RenderQueueOffset = 1;
             if (lowPriorityBody.Atmosphere != null) lowPriorityBody.Atmosphere.RenderQueueOffset = 2;

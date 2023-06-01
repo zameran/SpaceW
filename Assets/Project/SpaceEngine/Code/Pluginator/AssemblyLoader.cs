@@ -1,7 +1,7 @@
 ﻿#region License
 // Procedural planet generator.
 // 
-// Copyright (C) 2015-2018 Denis Ovchinnikov [zameran] 
+// Copyright (C) 2015-2023 Denis Ovchinnikov [zameran] 
 // All rights reserved.
 // 
 // Redistribution and use in source and binary forms, with or without
@@ -36,7 +36,9 @@
 using SpaceEngine.Core.Debugging;
 using SpaceEngine.Core.Patterns.Strategy.Eventit;
 using SpaceEngine.Enums;
+using SpaceEngine.Helpers;
 using SpaceEngine.Pluginator.Attributes;
+using SpaceEngine.Tools;
 
 using System;
 using System.Collections.Generic;
@@ -56,8 +58,8 @@ namespace SpaceEngine.Pluginator
     {
         private bool Loaded = false;
 
-        public int TotalDetected = 0;
-        public int TotalLoaded = 0;
+        [HideInInspector] public int TotalDetected = 0;
+        [HideInInspector] public int TotalLoaded = 0;
 
         public List<AssemblyExternal> ExternalAssemblies = new List<AssemblyExternal>();
 
@@ -104,24 +106,24 @@ namespace SpaceEngine.Pluginator
 
         #region Eventit
 
-        public bool isEventit { get; set; }
+        public bool IsEventit { get; set; }
 
         public void Eventit()
         {
-            if (isEventit) return;
+            if (IsEventit) return;
 
             SceneManager.activeSceneChanged += OnActiveSceneChanged;
 
-            isEventit = true;
+            IsEventit = true;
         }
 
         public void UnEventit()
         {
-            if (!isEventit) return;
+            if (!IsEventit) return;
 
             SceneManager.activeSceneChanged -= OnActiveSceneChanged;
 
-            isEventit = false;
+            IsEventit = false;
         }
 
         #endregion
@@ -137,7 +139,7 @@ namespace SpaceEngine.Pluginator
 
         protected override void Pass()
         {
-            Logger.Log(string.Format("AssemblyLoader.Pass: AssemblyLoader Initiated at scene: {0}", (EntryPoint)SceneManager.GetActiveScene().buildIndex));
+            Logger.Log($"AssemblyLoader.Pass: AssemblyLoader Initiated at scene: {(EntryPoint)SceneManager.GetActiveScene().buildIndex}");
 
             if (!Loaded)
             {
@@ -168,12 +170,12 @@ namespace SpaceEngine.Pluginator
             }
             catch (Exception ex)
             {
-                Logger.LogError(string.Format("AssemblyLoader.DetectAssembies: Exception: {0}", ex.Message));
+                Logger.LogError($"AssemblyLoader.DetectAssembies: Exception: {ex.Message}");
             }
 
             TotalDetected = allPaths.Count;
 
-            Logger.Log(string.Format("AssemblyLoader.DetectAssembies: Assembies Detected: {0}", allPaths.Count));
+            Logger.Log($"AssemblyLoader.DetectAssembies: Assembies Detected: {allPaths.Count}");
         }
 
         private void DetectAndLoadAssemblies()
@@ -193,7 +195,7 @@ namespace SpaceEngine.Pluginator
 
                 if (attrbutes == null || attrbutes.Length == 0)
                 {
-                    Logger.LogError(string.Format("AssemblyLoader.LoadAssembly: This is not an adddon assembly! {0}", path));
+                    Logger.LogError($"AssemblyLoader.LoadAssembly: This is not an adddon assembly! {path}");
                 }
                 else
                 {
@@ -211,7 +213,7 @@ namespace SpaceEngine.Pluginator
             }
             catch (Exception ex)
             {
-                Logger.LogError(string.Format("AssemblyLoader.LoadAssembly: LoadAssembly Exception: {0}", ex.Message));
+                Logger.LogError($"AssemblyLoader.LoadAssembly: LoadAssembly Exception: {ex.Message}");
             }
         }
 
@@ -237,21 +239,21 @@ namespace SpaceEngine.Pluginator
         {
             var counter = externalAssemblies.Sum(assembly => assembly.Types.SelectMany(kvp => kvp.Value).Count(v => FirePlugin(v, level)));
 
-            Logger.Log(string.Format("AssemblyLoader.FirePlugins: {0} plugins fired at scene: {1}", counter, level));
+            Logger.Log($"AssemblyLoader.FirePlugins: {counter} plugins fired at scene: {level}");
         }
 
         private void FirePlugins(List<AssemblyExternal> externalAssemblies)
         {
             var counter = externalAssemblies.Sum(assembly => assembly.Types.SelectMany(kvp => kvp.Value).Count(v => FirePlugin(v)));
 
-            Logger.Log(string.Format("AssemblyLoader.FirePlugins: {0} plugins fired at scene: {1}", counter, (EntryPoint)SceneManager.GetActiveScene().buildIndex));
+            Logger.Log($"AssemblyLoader.FirePlugins: {counter} plugins fired at scene: {(EntryPoint)SceneManager.GetActiveScene().buildIndex}");
         }
 
         private void FireHotPlugin(AssemblyExternal assembly)
         {
             var counter = assembly.Types.SelectMany(kvp => kvp.Value).Count(v => FirePlugin(v, 0));
 
-            Logger.Log(string.Format("AssemblyLoader.FirePlugins: {0} plugins fired at scene: {1}", counter, (EntryPoint)SceneManager.GetActiveScene().buildIndex));
+            Logger.Log($"AssemblyLoader.FirePlugins: {counter} plugins fired at scene: {(EntryPoint)SceneManager.GetActiveScene().buildIndex}");
         }
 
         private bool FirePlugin(Type type, int level)
@@ -262,7 +264,7 @@ namespace SpaceEngine.Pluginator
             {
                 if ((int)atr.EntryPoint == level)
                 {
-                    GameObject go = new GameObject(type.Name);
+                    var go = new GameObject(type.Name);
                     go.transform.position = Vector3.zero;
                     go.transform.rotation = Quaternion.identity;
                     go.AddComponent(type);
@@ -283,7 +285,7 @@ namespace SpaceEngine.Pluginator
             {
                 if (atr.EntryPoint == currentScene)
                 {
-                    GameObject go = new GameObject(type.Name);
+                    var go = new GameObject(type.Name);
                     go.transform.position = Vector3.zero;
                     go.transform.rotation = Quaternion.identity;
                     go.AddComponent(type);

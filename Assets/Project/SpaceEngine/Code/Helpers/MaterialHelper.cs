@@ -1,7 +1,7 @@
 ﻿#region License
 // Procedural planet generator.
 // 
-// Copyright (C) 2015-2018 Denis Ovchinnikov [zameran] 
+// Copyright (C) 2015-2023 Denis Ovchinnikov [zameran] 
 // All rights reserved.
 // 
 // Redistribution and use in source and binary forms, with or without
@@ -35,28 +35,31 @@
 
 using UnityEngine;
 
-/// <summary>
-/// Class - extensions holder for a <see cref="Material"/>.
-/// </summary>
-public static class MaterialHelper
+namespace SpaceEngine.Helpers
 {
-    public static Material CreateTemp(Shader shader, string name)
+    /// <summary>
+    /// Class - extensions holder for a <see cref="Material"/>.
+    /// </summary>
+    public static class MaterialHelper
     {
-        var material = new Material(shader)
+        public static Material CreateTemp(Shader shader, string name)
         {
-            name = string.Format("{0}(Instance){1}", name, Random.Range(float.MinValue, float.MaxValue)),
-            hideFlags = HideFlags.HideAndDontSave
-        };
+            var material = new Material(shader)
+            {
+                name = $"{name}(Instance){Random.Range(float.MinValue, float.MaxValue)}",
+                hideFlags = HideFlags.HideAndDontSave
+            };
 
-        return material;
-    }
+            return material;
+        }
 
-    public static Material CreateTemp(Shader shader, string name, int renderingQueue)
-    {
-        var material = CreateTemp(shader, name);
+        public static Material CreateTemp(Shader shader, string name, int renderingQueue)
+        {
+            var material = CreateTemp(shader, name);
 
-        material.renderQueue = renderingQueue;
+            material.renderQueue = renderingQueue;
 
-        return material;
+            return material;
+        }
     }
 }

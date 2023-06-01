@@ -1,7 +1,7 @@
 ﻿#region License
 // Procedural planet generator.
 // 
-// Copyright (C) 2015-2018 Denis Ovchinnikov [zameran] 
+// Copyright (C) 2015-2023 Denis Ovchinnikov [zameran] 
 // All rights reserved.
 // 
 // Redistribution and use in source and binary forms, with or without
@@ -33,54 +33,59 @@
 // Creator: zameran
 #endregion
 
+using SpaceEngine.Helpers;
+
 using UnityEngine;
 
-public static class UVFactory
+namespace SpaceEngine.Tools
 {
-    public static Vector2 GetSgtSphericalUV(Vector3 vertex)
+    public static class UVFactory
     {
-        return VectorHelper.CartesianToPolarUV(vertex);
-    }
-
-    public static Vector2 GetSurfaceUV(int detail, int col, int row)
-    {
-        return new Vector2((float)row / detail, (float)col / detail);
-    }
-
-    public static Vector2 GetContinuousUV(int detail, int col, int row, float uvResolution, float uvStartX, float uvStartY)
-    {
-        return new Vector2(uvStartX + ((float)row / (detail - 1)) * uvResolution,
-                          (uvStartY + ((float)col / (detail - 1)) * uvResolution));
-    }
-
-    public static Vector2 GetSphericalUV(int detail, int col, int row, Vector3 vertex, bool staticX, bool staticY)
-    {
-        Vector2 uv = new Vector2();
-
-        uv.x = -(Mathf.Atan2(vertex.x, vertex.z) / (2f * Mathf.PI) + 0.5f);
-        uv.y = (Mathf.Asin(vertex.y) / Mathf.PI + .5f);
-
-        if (staticX)
+        public static Vector2 GetSgtSphericalUV(Vector3 vertex)
         {
-            if (vertex.x < 0)
-            {
-                if ((row == detail - 1) && vertex.z > -0.01f && vertex.z < 0.01f) uv.x = 0;
-                if ((row == 0) && vertex.z > -0.01f && vertex.z < 0.01f) uv.x = 1;
-            }
+            return VectorHelper.CartesianToPolarUV(vertex);
         }
-        else if (staticY)
+
+        public static Vector2 GetSurfaceUV(int detail, int col, int row)
         {
-            if (vertex.y > 0)
-            {
-                if ((col == detail - 1) && vertex.x < 0 && vertex.z > -0.01f && vertex.z < 0.01f) uv.x = 0;
-                if ((col == 0) && vertex.x < 0 && vertex.z > -0.01f && vertex.z < 0.01f) uv.x = 1;
-            }
-            else
-            {
-                if ((col == detail - 1) && vertex.x < 0 && vertex.z > -0.01f && vertex.z < 0.01f) uv.x = 1;
-                if ((col == 0) && vertex.x < 0 && vertex.z < 0.01f && vertex.z > -0.01f) uv.x = 0;
-            }
+            return new Vector2((float)row / detail, (float)col / detail);
         }
-        return uv;
+
+        public static Vector2 GetContinuousUV(int detail, int col, int row, float uvResolution, float uvStartX, float uvStartY)
+        {
+            return new Vector2(uvStartX + ((float)row / (detail - 1)) * uvResolution,
+                              (uvStartY + ((float)col / (detail - 1)) * uvResolution));
+        }
+
+        public static Vector2 GetSphericalUV(int detail, int col, int row, Vector3 vertex, bool staticX, bool staticY)
+        {
+            var uv = new Vector2();
+
+            uv.x = -(Mathf.Atan2(vertex.x, vertex.z) / (2f * Mathf.PI) + 0.5f);
+            uv.y = (Mathf.Asin(vertex.y) / Mathf.PI + .5f);
+
+            if (staticX)
+            {
+                if (vertex.x < 0)
+                {
+                    if ((row == detail - 1) && vertex.z > -0.01f && vertex.z < 0.01f) uv.x = 0;
+                    if ((row == 0) && vertex.z > -0.01f && vertex.z < 0.01f) uv.x = 1;
+                }
+            }
+            else if (staticY)
+            {
+                if (vertex.y > 0)
+                {
+                    if ((col == detail - 1) && vertex.x < 0 && vertex.z > -0.01f && vertex.z < 0.01f) uv.x = 0;
+                    if ((col == 0) && vertex.x < 0 && vertex.z > -0.01f && vertex.z < 0.01f) uv.x = 1;
+                }
+                else
+                {
+                    if ((col == detail - 1) && vertex.x < 0 && vertex.z > -0.01f && vertex.z < 0.01f) uv.x = 1;
+                    if ((col == 0) && vertex.x < 0 && vertex.z < 0.01f && vertex.z > -0.01f) uv.x = 0;
+                }
+            }
+            return uv;
+        }
     }
 }

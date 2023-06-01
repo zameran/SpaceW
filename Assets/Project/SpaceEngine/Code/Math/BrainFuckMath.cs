@@ -1,7 +1,7 @@
 ﻿#region License
 // Procedural planet generator.
 // 
-// Copyright (C) 2015-2018 Denis Ovchinnikov [zameran] 
+// Copyright (C) 2015-2023 Denis Ovchinnikov [zameran] 
 // All rights reserved.
 // 
 // Redistribution and use in source and binary forms, with or without
@@ -32,7 +32,6 @@
 // Creation Time: Undefined
 // Creator: zameran
 #endregion
-
 
 using SpaceEngine.Core.Numerics.Vectors;
 using System;
@@ -105,7 +104,7 @@ public static class BrainFuckMath
     public static double Wrap(double value, double min, double max)
     {
         if (NearlyEqual(min, max)) return min;
-        if (min > max) throw new ArgumentException(string.Format("Argument min {0} should be less or equal to argument max {1}", min, max), "min");
+        if (min > max) throw new ArgumentException($"Argument min {min} should be less or equal to argument max {max}", "min");
 
         var rangeSize = max - min;
 
@@ -152,10 +151,10 @@ public static class BrainFuckMath
             return 0.5M;
         else
         {
-            decimal prev = CalculateK(lodLevel - 1);
-            decimal summ = 1.0M;
+            var prev = CalculateK(lodLevel - 1);
+            var summ = 1.0M;
 
-            for (int i = 0; i < lodLevel; i++)
+            for (var i = 0; i < lodLevel; i++)
             {
                 summ = summ / 2.0M;
             }
@@ -172,10 +171,10 @@ public static class BrainFuckMath
         else if (lodLevel == 1)
             return 7.5M;
 
-        decimal prev1 = CalculateJ(lodLevel - 1);
-        decimal prev2 = CalculateJ(lodLevel - 2);
+        var prev1 = CalculateJ(lodLevel - 1);
+        var prev2 = CalculateJ(lodLevel - 2);
 
-        decimal summ = Math.Abs(prev1 - prev2) / 2.0M;
+        var summ = Math.Abs(prev1 - prev2) / 2.0M;
 
         return prev1 + summ;
     }

@@ -1,7 +1,7 @@
 ﻿#region License
 // Procedural planet generator.
 // 
-// Copyright (C) 2015-2018 Denis Ovchinnikov [zameran] 
+// Copyright (C) 2015-2023 Denis Ovchinnikov [zameran] 
 // All rights reserved.
 // 
 // Redistribution and use in source and binary forms, with or without
@@ -45,7 +45,7 @@ namespace SpaceEngine.Cameras
     {
         private readonly CachedComponent<Camera> CameraCachedComponent = new CachedComponent<Camera>();
 
-        public Camera CameraComponent { get { return CameraCachedComponent.Component; } }
+        public Camera CameraComponent => CameraCachedComponent.Component;
 
         public bool Controllable = true;
 
@@ -59,7 +59,7 @@ namespace SpaceEngine.Cameras
 
         public Vector3 WorldCameraPosition { get; protected set; }
 
-        private DebugGUISwitcher DebugGUISwitcherInstance { get { return DebugGUISwitcher.Instance as DebugGUISwitcher; } }
+        private DebugGUISwitcher DebugGUISwitcherInstance => DebugGUISwitcher.Instance as DebugGUISwitcher;
 
         public bool MouseOverUI { get { if (DebugGUISwitcherInstance != null) return DebugGUISwitcherInstance.MouseOverGUI; else return false; } }
 

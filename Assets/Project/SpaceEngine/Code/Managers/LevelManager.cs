@@ -1,7 +1,7 @@
 ﻿#region License
 // Procedural planet generator.
 //  
-// Copyright (C) 2015-2018 Denis Ovchinnikov [zameran] 
+// Copyright (C) 2015-2023 Denis Ovchinnikov [zameran] 
 // All rights reserved.
 // 
 // Redistribution and use in source and binary forms, with or without
@@ -33,7 +33,9 @@
 // Creator: zameran
 #endregion
 
+using SpaceEngine.Core.Patterns.Singleton;
 using SpaceEngine.Enums;
+using SpaceEngine.Tools;
 using SpaceEngine.UI.Panels;
 
 using System;
@@ -74,7 +76,7 @@ namespace SpaceEngine.Managers
 
             if (InjectedWaiter != null) yield return InjectedWaiter;
 
-            if (OnDone != null) OnDone();
+            OnDone?.Invoke();
         }
 
         public AsyncOperation UnloadScene(EntryPoint sceneName)
@@ -169,7 +171,7 @@ namespace SpaceEngine.Managers
             }
             catch (Exception ex)
             {
-                Debug.LogError("LevelManager.LoadScene: Exception!\n" + ex.Message);
+                Debug.LogError($"LevelManager.LoadScene: Exception!\n{ex.Message}");
             }
 
             return null;

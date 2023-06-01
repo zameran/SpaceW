@@ -1,7 +1,7 @@
 ﻿#region License
 // Procedural planet generator.
 //  
-// Copyright (C) 2015-2018 Denis Ovchinnikov [zameran] 
+// Copyright (C) 2015-2023 Denis Ovchinnikov [zameran] 
 // All rights reserved.
 // 
 // Redistribution and use in source and binary forms, with or without
@@ -32,6 +32,8 @@
 // Creation Time: 5:04 PM
 // Creator: zameran
 #endregion
+
+using SpaceEngine.Tools;
 
 using System;
 using System.Collections.Generic;
@@ -136,17 +138,17 @@ namespace SpaceEngine.Core.Debugging
 
         public static string Colored(this string message, string colorCode)
         {
-            return string.Format("<color={0}>{1}</color>", colorCode, message);
+            return $"<color={colorCode}>{message}</color>";
         }
 
         public static string Bold(this string message)
         {
-            return string.Format("<b>{0}</b>", message);
+            return $"<b>{message}</b>";
         }
 
         public static string Italic(this string message)
         {
-            return string.Format("<i>{0}</i>", message);
+            return $"<i>{message}</i>";
         }
 
         public static string ToRGBHex(Color color)
@@ -156,12 +158,12 @@ namespace SpaceEngine.Core.Debugging
 
         public static string FormatForConsole(string categoryColorCode, string typeColorCode, string categoryString, string typeString, object obj)
         {
-            return string.Format("{0} : {1} : {2}", Colored(string.Format("[{0}]", typeString.ToUpper()), typeColorCode), Colored(string.Format("[{0}]", categoryString.ToUpper()), categoryColorCode), obj);
+            return $"{Colored($"[{typeString.ToUpper()}]", typeColorCode)} : {Colored($"[{categoryString.ToUpper()}]", categoryColorCode)} : {obj}";
         }
 
         public static string FormatForFile(DateTime timeStamp, string categoryString, string typeString, object obj)
         {
-            return string.Format("[{0:H:mm:ss}] : [{1}] : [{2}] : {3}", timeStamp, typeString.ToUpper(), categoryString.ToUpper(), obj);
+            return $"[{timeStamp:H:mm:ss}] : [{typeString.ToUpper()}] : [{categoryString.ToUpper()}] : {obj}";
         }
 
         #endregion
@@ -196,18 +198,14 @@ namespace SpaceEngine.Core.Debugging
 
         public static void Log(object obj)
         {
-            LoggerCategory loggerCategory;
-
-            Detect(out loggerCategory);
+            Detect(out var loggerCategory);
 
             PrintToLog(obj, LogType.Log, loggerCategory);
         }
 
         public static void LogWarning(object obj)
         {
-            LoggerCategory loggerCategory;
-
-            Detect(out loggerCategory);
+            Detect(out var loggerCategory);
 
             PrintToLog(obj, LogType.Warning, loggerCategory);
         }
@@ -219,9 +217,7 @@ namespace SpaceEngine.Core.Debugging
 
         public static void LogError(object obj)
         {
-            LoggerCategory loggerCategory;
-
-            Detect(out loggerCategory);
+            Detect(out var loggerCategory);
 
             // NOTE : Override...
             DebuggerActive = true;

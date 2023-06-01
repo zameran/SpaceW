@@ -23,7 +23,7 @@
 		CGPROGRAM
 		#pragma surface surf Standard fullforwardshadows vertex:vert exclude_path:deferred exclude_path:prepass noambient novertexlights nolightmap nodynlightmap nodirlightmap nofog nometa nolppv noshadowmask
 		#pragma target 5.0
-		#pragma only_renderers d3d11 glcore
+		#pragma only_renderers d3d11 glcore metal
 
 		struct Input 
 		{

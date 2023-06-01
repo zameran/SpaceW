@@ -1,4 +1,39 @@
-﻿using SpaceEngine.Core.Debugging;
+﻿#region License
+// Procedural planet generator.
+// 
+// Copyright (C) 2015-2023 Denis Ovchinnikov [zameran] 
+// All rights reserved.
+// 
+// Redistribution and use in source and binary forms, with or without
+// modification, are permitted provided that the following conditions
+// are met:
+// 1. Redistributions of source code must retain the above copyright
+//    notice, this list of conditions and the following disclaimer.
+// 2. Redistributions in binary form must reproduce the above copyright
+//    notice, this list of conditions and the following disclaimer in the
+//    documentation and/or other materials provided with the distribution.
+// 3. Neither the name of the copyright holders nor the names of its
+//    contributors may be used to endorse or promote products derived from
+//    this software without specific prior written permission.
+// 
+// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+// AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+// IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+// ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE
+// LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+// CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+// SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+// INTERRUPTION)HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+// CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+// ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF
+// THE POSSIBILITY OF SUCH DAMAGE.
+// 
+// Creation Date: Undefined
+// Creation Time: Undefined
+// Creator: zameran
+#endregion
+
+using SpaceEngine.Core.Debugging;
 using SpaceEngine.Core.Patterns.Strategy.Eventit;
 using SpaceEngine.Enums;
 
@@ -15,7 +50,7 @@ namespace SpaceEngine.UI
     [UseLogger(LoggerCategory.InGameUI)]
     public class UICore : MonoBehaviour, IEventit
     {
-        public GameObject Root { get { return this.gameObject; } }
+        public GameObject Root => this.gameObject;
 
         public List<UIPanel> Panels { get { return this.GetComponentsInChildren<UIPanel>().Where(x => x.transform.parent == transform).ToList(); } }
 
@@ -35,7 +70,7 @@ namespace SpaceEngine.UI
             }
             else
             {
-                Panels.ForEach((panel) =>
+                Panels.ForEach(panel =>
                 {
                     panel.transform.SetParent(Instance.gameObject.transform);
 
@@ -59,7 +94,7 @@ namespace SpaceEngine.UI
         {
             if (forceDestroyAllPanels)
             {
-                Panels.ForEach((panel) =>
+                Panels.ForEach(panel =>
                 {
                     if (!panel.Immune && !panel.FromThisScene)
                     {
@@ -73,11 +108,11 @@ namespace SpaceEngine.UI
 
         #region IEventit
 
-        public bool isEventit { get; set; }
+        public bool IsEventit { get; set; }
 
         public void Eventit()
         {
-            if (isEventit) return;
+            if (IsEventit) return;
 
             EventManager.UIEvents.AllAdditiveUILoaded.OnEvent += OnAllAdditiveUILoaded;
             EventManager.UIEvents.UIRemixed.OnEvent += OnUIRemixed;
@@ -85,12 +120,12 @@ namespace SpaceEngine.UI
             EventManager.BaseEvents.OnSceneLoaded.OnEvent += OnLevelLoaded;
             EventManager.BaseEvents.OnSceneWillBeLoadedNow.OnEvent += OnSceneWillBeLoadedNow;
 
-            isEventit = true;
+            IsEventit = true;
         }
 
         public void UnEventit()
         {
-            if (!isEventit) return;
+            if (!IsEventit) return;
 
             EventManager.UIEvents.AllAdditiveUILoaded.OnEvent -= OnAllAdditiveUILoaded;
             EventManager.UIEvents.UIRemixed.OnEvent -= OnUIRemixed;
@@ -98,7 +133,7 @@ namespace SpaceEngine.UI
             EventManager.BaseEvents.OnSceneLoaded.OnEvent -= OnLevelLoaded;
             EventManager.BaseEvents.OnSceneWillBeLoadedNow.OnEvent -= OnSceneWillBeLoadedNow;
 
-            isEventit = false;
+            IsEventit = false;
         }
 
         #endregion
@@ -113,7 +148,7 @@ namespace SpaceEngine.UI
 
         private void OnAllAdditiveUILoaded()
         {
-            var loadingScreenPanel = Panels.Find((panel) => panel.gameObject.name == "Loading Panel");
+            var loadingScreenPanel = Panels.Find(panel => panel.gameObject.name == "Loading Panel");
 
             if (loadingScreenPanel != null)
             {
@@ -125,7 +160,7 @@ namespace SpaceEngine.UI
         {
             Logger.Log("UICore.OnUIRemixed: UI remixed!");
 
-            obj.Panels.ForEach((panel) => { panel.FromThisScene = false; });
+            obj.Panels.ForEach(panel => { panel.FromThisScene = false; });
             obj.RemixUI(true);
         }
 
@@ -133,7 +168,7 @@ namespace SpaceEngine.UI
         {
             Logger.Log("UICore.OnSceneWillBeLoadedNow: OnSceneWillBeLoadedNow!");
 
-            Panels.ForEach((panel) => { panel.FromThisScene = false; });
+            Panels.ForEach(panel => { panel.FromThisScene = false; });
 
             RemixUI(true);
         }

@@ -1,3 +1,38 @@
+#region License
+// Procedural planet generator.
+//  
+// Copyright (C) 2015-2023 Denis Ovchinnikov [zameran] 
+// All rights reserved.
+// 
+// Redistribution and use in source and binary forms, with or without
+// modification, are permitted provided that the following conditions
+// are met:
+// 1. Redistributions of source code must retain the above copyright
+//    notice, this list of conditions and the following disclaimer.
+// 2. Redistributions in binary form must reproduce the above copyright
+//    notice, this list of conditions and the following disclaimer in the
+//    documentation and/or other materials provided with the distribution.
+// 3. Neither the name of the copyright holders nor the names of its
+//    contributors may be used to endorse or promote products derived from
+//    this software without specific prior written permission.
+// 
+// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+// AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+// IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+// ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE
+// LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+// CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+// SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+// INTERRUPTION)HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+// CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+// ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF
+// THE POSSIBILITY OF SUCH DAMAGE.
+// 
+// Creation Date: 2017.03.28
+// Creation Time: 2:18 PM
+// Creator: zameran
+#endregion
+
 using SpaceEngine.Core.Debugging;
 
 using System;
@@ -69,18 +104,14 @@ namespace SpaceEngine.Core.Preprocess.Terrain
 
             if (!Directory.Exists(TempFolder)) { Directory.CreateDirectory(TempFolder); }
 
-            Logger.Log(string.Format("ColorMipmap.ctor: BaseLevelSize: {0}; TileSize: {1}; Border: {2}; MaxLevel: {3}; Channels: {4}", BaseLevelSize,
-                                                                                                                                       Size,
-                                                                                                                                       Border,
-                                                                                                                                       MaxLevel,
-                                                                                                                                       Channels));
+            Logger.Log($"ColorMipmap.ctor: BaseLevelSize: {BaseLevelSize}; TileSize: {Size}; Border: {Border}; MaxLevel: {MaxLevel}; Channels: {Channels}");
         }
 
         public void Compute()
         {
             BuildBaseLevelTiles();
 
-            for (int level = MaxLevel - 1; level >= 0; --level)
+            for (var level = MaxLevel - 1; level >= 0; --level)
             {
                 BuildMipmapLevel(level);
             }
@@ -92,10 +123,10 @@ namespace SpaceEngine.Core.Preprocess.Terrain
 
             var tilesCount = ((1 << (MaxLevel * 2 + 2)) - 1) / 3;
 
-            Logger.Log(string.Format("ColorMipmap.Generate: tiles count: {0}", tilesCount));
+            Logger.Log($"ColorMipmap.Generate: tiles count: {tilesCount}");
 
-            long[] offsets = new long[tilesCount * 2];
-            byte[] byteArray = new byte[(7 * 4) + (offsets.Length * 8)];
+            var offsets = new long[tilesCount * 2];
+            var byteArray = new byte[(7 * 4) + (offsets.Length * 8)];
             long offset = byteArray.Length;
 
             using (Stream stream = new FileStream(file, FileMode.Create))
@@ -104,7 +135,7 @@ namespace SpaceEngine.Core.Preprocess.Terrain
                 stream.Write(byteArray, 0, byteArray.Length);
             }
 
-            for (int l = 0; l <= MaxLevel; ++l)
+            for (var l = 0; l <= MaxLevel; ++l)
             {
                 ProduceTilesLebeguesOrder(l, 0, 0, 0, ref offset, offsets, file);
             }
@@ -126,12 +157,12 @@ namespace SpaceEngine.Core.Preprocess.Terrain
 
             ConstantTileIDs.Clear();
 
-            Logger.Log(string.Format("ColorMipmap.Generate: Saved file path: {0} ", file));
+            Logger.Log($"ColorMipmap.Generate: Saved file path: {file} ");
         }
 
         private string FilePath(string tempFolder, string name, int level, int tx, int ty)
         {
-            return string.Format("{0}/{1}-{2}-{3}-{4}.raw", tempFolder, name, level, tx, ty);
+            return $"{tempFolder}/{name}-{level}-{tx}-{ty}.raw";
         }
 
         private void SaveTile(string name, int level, int tx, int ty, byte[] tile)
@@ -144,7 +175,7 @@ namespace SpaceEngine.Core.Preprocess.Terrain
             var fileName = FilePath(TempFolder, name, level, tx, ty);
 
             var fileInfo = new FileInfo(fileName);
-            if (fileInfo == null) throw new FileNotFoundException(string.Format("Could not read tile: {0}", fileName));
+            if (fileInfo == null) throw new FileNotFoundException($"Could not read tile: {fileName}");
 
             using (Stream stream = fileInfo.OpenRead())
             {
@@ -160,7 +191,7 @@ namespace SpaceEngine.Core.Preprocess.Terrain
 
             LoadTile("Base", CurrentLevel, tx, ty, data);
 
-            for (int i = 0; i < size; i++)
+            for (var i = 0; i < size; i++)
             {
                 outputTileData[i] = (float)data[i];
             }
@@ -170,19 +201,19 @@ namespace SpaceEngine.Core.Preprocess.Terrain
 
         private void BuildBaseLevelTiles()
         {
-            int tilesCount = BaseLevelSize / Size;
+            var tilesCount = BaseLevelSize / Size;
 
-            Logger.Log(string.Format("ColorMipmap.BuildBaseLevelTiles: Build mipmap level: {0}!", MaxLevel));
+            Logger.Log($"ColorMipmap.BuildBaseLevelTiles: Build mipmap level: {MaxLevel}!");
 
-            for (int ty = 0; ty < tilesCount; ++ty)
+            for (var ty = 0; ty < tilesCount; ++ty)
             {
-                for (int tx = 0; tx < tilesCount; ++tx)
+                for (var tx = 0; tx < tilesCount; ++tx)
                 {
                     var offset = (int)0;
 
-                    for (int j = -Border; j < Size + Border; ++j)
+                    for (var j = -Border; j < Size + Border; ++j)
                     {
-                        for (int i = -Border; i < Size + Border; ++i)
+                        for (var i = -Border; i < Size + Border; ++i)
                         {
                             var color = ColorFunction.GetValue(tx * Size + i, ty * Size + j) * 255.0f;
 
@@ -215,29 +246,29 @@ namespace SpaceEngine.Core.Preprocess.Terrain
         {
             var tilesCount = 1 << level;
 
-            Logger.Log(string.Format("ColorMipmap.BuildMipmapLevel: Build mipmap level: {0}!", level));
+            Logger.Log($"ColorMipmap.BuildMipmapLevel: Build mipmap level: {level}!");
 
             CurrentLevel = level + 1;
 
             Reset(Size << CurrentLevel, Size << CurrentLevel, Size);
 
-            for (int ty = 0; ty < tilesCount; ++ty)
+            for (var ty = 0; ty < tilesCount; ++ty)
             {
-                for (int tx = 0; tx < tilesCount; ++tx)
+                for (var tx = 0; tx < tilesCount; ++tx)
                 {
                     var offset = (int)0;
 
-                    for (int j = -Border; j < Size + Border; ++j)
+                    for (var j = -Border; j < Size + Border; ++j)
                     {
-                        for (int i = -Border; i < Size + Border; ++i)
+                        for (var i = -Border; i < Size + Border; ++i)
                         {
-                            int ix = 2 * (tx * Size + i);
-                            int iy = 2 * (ty * Size + j);
+                            var ix = 2 * (tx * Size + i);
+                            var iy = 2 * (ty * Size + j);
 
-                            Vector4 c1 = GetTileColor(ix, iy);
-                            Vector4 c2 = GetTileColor(ix + 1, iy);
-                            Vector4 c3 = GetTileColor(ix, iy + 1);
-                            Vector4 c4 = GetTileColor(ix + 1, iy + 1);
+                            var c1 = GetTileColor(ix, iy);
+                            var c2 = GetTileColor(ix + 1, iy);
+                            var c3 = GetTileColor(ix, iy + 1);
+                            var c4 = GetTileColor(ix + 1, iy + 1);
 
                             TileData[offset++] = (byte)Mathf.Round((c1.x + c2.x + c3.x + c4.x) / 4.0f);
 
@@ -253,17 +284,17 @@ namespace SpaceEngine.Core.Preprocess.Terrain
 
                             if (Channels > 3)
                             {
-                                float w1 = Mathf.Max(2.0f * c1.w - 255.0f, 0.0f);
-                                float n1 = Mathf.Max(255.0f - 2.0f * c1.w, 0.0f);
-                                float w2 = Mathf.Max(2.0f * c2.w - 255.0f, 0.0f);
-                                float n2 = Mathf.Max(255.0f - 2.0f * c2.w, 0.0f);
-                                float w3 = Mathf.Max(2.0f * c3.w - 255.0f, 0.0f);
-                                float n3 = Mathf.Max(255.0f - 2.0f * c3.w, 0.0f);
-                                float w4 = Mathf.Max(2.0f * c4.w - 255.0f, 0.0f);
-                                float n4 = Mathf.Max(255.0f - 2.0f * c4.w, 0.0f);
+                                var w1 = Mathf.Max(2.0f * c1.w - 255.0f, 0.0f);
+                                var n1 = Mathf.Max(255.0f - 2.0f * c1.w, 0.0f);
+                                var w2 = Mathf.Max(2.0f * c2.w - 255.0f, 0.0f);
+                                var n2 = Mathf.Max(255.0f - 2.0f * c2.w, 0.0f);
+                                var w3 = Mathf.Max(2.0f * c3.w - 255.0f, 0.0f);
+                                var n3 = Mathf.Max(255.0f - 2.0f * c3.w, 0.0f);
+                                var w4 = Mathf.Max(2.0f * c4.w - 255.0f, 0.0f);
+                                var n4 = Mathf.Max(255.0f - 2.0f * c4.w, 0.0f);
 
-                                byte w = (byte)Mathf.Round((w1 + w2 + w3 + w4) / 4.0f);
-                                byte n = (byte)Mathf.Round((n1 + n2 + n3 + n4) / 4.0f);
+                                var w = (byte)Mathf.Round((w1 + w2 + w3 + w4) / 4.0f);
+                                var n = (byte)Mathf.Round((n1 + n2 + n3 + n4) / 4.0f);
 
                                 TileData[offset++] = (byte)(127 + w / 2 - n / 2);
                             }
@@ -327,15 +358,15 @@ namespace SpaceEngine.Core.Preprocess.Terrain
 
                 Left.ProduceRawTile(level, txp, typ);
 
-                for (int y = 0; y < tileWidth; ++y)
+                for (var y = 0; y < tileWidth; ++y)
                 {
-                    for (int x = 0; x < Border; ++x)
+                    for (var x = 0; x < Border; ++x)
                     {
                         int xp, yp;
 
                         Rotation(LeftR, tileWidth, Size - x, y, out xp, out yp);
 
-                        for (int c = 0; c < Channels; ++c)
+                        for (var c = 0; c < Channels; ++c)
                         {
                             TileData[(x + y * tileWidth) * Channels + c] = Left.TileData[(xp + yp * tileWidth) * Channels + c];
                         }
@@ -351,15 +382,15 @@ namespace SpaceEngine.Core.Preprocess.Terrain
 
                 Right.ProduceRawTile(level, txp, typ);
 
-                for (int y = 0; y < tileWidth; ++y)
+                for (var y = 0; y < tileWidth; ++y)
                 {
-                    for (int x = Size + Border; x < tileWidth; ++x)
+                    for (var x = Size + Border; x < tileWidth; ++x)
                     {
                         int xp, yp;
 
                         Rotation(RightR, tileWidth, x - Size, y, out xp, out yp);
 
-                        for (int c = 0; c < Channels; ++c)
+                        for (var c = 0; c < Channels; ++c)
                         {
                             TileData[(x + y * tileWidth) * Channels + c] = Right.TileData[(xp + yp * tileWidth) * Channels + c];
                         }
@@ -375,15 +406,15 @@ namespace SpaceEngine.Core.Preprocess.Terrain
 
                 Bottom.ProduceRawTile(level, txp, typ);
 
-                for (int y = 0; y < Border; ++y)
+                for (var y = 0; y < Border; ++y)
                 {
-                    for (int x = 0; x < tileWidth; ++x)
+                    for (var x = 0; x < tileWidth; ++x)
                     {
                         int xp, yp;
 
                         Rotation(BottomR, tileWidth, x, Size - y, out xp, out yp);
 
-                        for (int c = 0; c < Channels; ++c)
+                        for (var c = 0; c < Channels; ++c)
                         {
                             TileData[(x + y * tileWidth) * Channels + c] = Bottom.TileData[(xp + yp * tileWidth) * Channels + c];
                         }
@@ -399,15 +430,15 @@ namespace SpaceEngine.Core.Preprocess.Terrain
 
                 Top.ProduceRawTile(level, txp, typ);
 
-                for (int y = Size + Border; y < tileWidth; ++y)
+                for (var y = Size + Border; y < tileWidth; ++y)
                 {
-                    for (int x = 0; x < tileWidth; ++x)
+                    for (var x = 0; x < tileWidth; ++x)
                     {
                         int xp, yp;
 
                         Rotation(TopR, tileWidth, x, y - Size, out xp, out yp);
 
-                        for (int c = 0; c < Channels; ++c)
+                        for (var c = 0; c < Channels; ++c)
                         {
                             TileData[(x + y * tileWidth) * Channels + c] = Top.TileData[(xp + yp * tileWidth) * Channels + c];
                         }
@@ -417,10 +448,10 @@ namespace SpaceEngine.Core.Preprocess.Terrain
 
             if (tx == 0 && ty == 0 && Border > 0 && Left != null && Bottom != null)
             {
-                for (int c = 0; c < Channels; ++c)
+                for (var c = 0; c < Channels; ++c)
                 {
-                    int x1 = Border;
-                    int y1 = Border;
+                    var x1 = Border;
+                    var y1 = Border;
                     int x2;
                     int y2;
                     int x3;
@@ -432,11 +463,11 @@ namespace SpaceEngine.Core.Preprocess.Terrain
                     int corner1 = TileData[(x1 + y1 * tileWidth) * Channels + c];
                     int corner2 = Left.TileData[(x2 + y2 * tileWidth) * Channels + c];
                     int corner3 = Bottom.TileData[(x3 + y3 * tileWidth) * Channels + c];
-                    int corner = (corner1 + corner2 + corner3) / 3;
+                    var corner = (corner1 + corner2 + corner3) / 3;
 
-                    for (int y = 0; y < 2 * Border; ++y)
+                    for (var y = 0; y < 2 * Border; ++y)
                     {
-                        for (int x = 0; x < 2 * Border; ++x)
+                        for (var x = 0; x < 2 * Border; ++x)
                         {
                             TileData[(x + y * tileWidth) * Channels + c] = (byte)corner;
                         }
@@ -446,10 +477,10 @@ namespace SpaceEngine.Core.Preprocess.Terrain
 
             if (tx == tilesCount - 1 && ty == 0 && Border > 0 && Right != null && Bottom != null)
             {
-                for (int c = 0; c < Channels; ++c)
+                for (var c = 0; c < Channels; ++c)
                 {
-                    int x1 = tileWidth - 1 - Border;
-                    int y1 = Border;
+                    var x1 = tileWidth - 1 - Border;
+                    var y1 = Border;
                     int x2;
                     int y2;
                     int x3;
@@ -461,11 +492,11 @@ namespace SpaceEngine.Core.Preprocess.Terrain
                     int corner1 = TileData[(x1 + y1 * tileWidth) * Channels + c];
                     int corner2 = Right.TileData[(x2 + y2 * tileWidth) * Channels + c];
                     int corner3 = Bottom.TileData[(x3 + y3 * tileWidth) * Channels + c];
-                    int corner = (corner1 + corner2 + corner3) / 3;
+                    var corner = (corner1 + corner2 + corner3) / 3;
 
-                    for (int y = 0; y < 2 * Border; ++y)
+                    for (var y = 0; y < 2 * Border; ++y)
                     {
-                        for (int x = Size; x < tileWidth; ++x)
+                        for (var x = Size; x < tileWidth; ++x)
                         {
                             TileData[(x + y * tileWidth) * Channels + c] = (byte)corner;
                         }
@@ -475,10 +506,10 @@ namespace SpaceEngine.Core.Preprocess.Terrain
 
             if (tx == 0 && ty == tilesCount - 1 && Border > 0 && Left != null && Top != null)
             {
-                for (int c = 0; c < Channels; ++c)
+                for (var c = 0; c < Channels; ++c)
                 {
-                    int x1 = Border;
-                    int y1 = tileWidth - 1 - Border;
+                    var x1 = Border;
+                    var y1 = tileWidth - 1 - Border;
                     int x2;
                     int y2;
                     int x3;
@@ -490,11 +521,11 @@ namespace SpaceEngine.Core.Preprocess.Terrain
                     int corner1 = TileData[(x1 + y1 * tileWidth) * Channels + c];
                     int corner2 = Left.TileData[(x2 + y2 * tileWidth) * Channels + c];
                     int corner3 = Top.TileData[(x3 + y3 * tileWidth) * Channels + c];
-                    int corner = (corner1 + corner2 + corner3) / 3;
+                    var corner = (corner1 + corner2 + corner3) / 3;
 
-                    for (int y = Size; y < tileWidth; ++y)
+                    for (var y = Size; y < tileWidth; ++y)
                     {
-                        for (int x = 0; x < 2 * Border; ++x)
+                        for (var x = 0; x < 2 * Border; ++x)
                         {
                             TileData[(x + y * tileWidth) * Channels + c] = (byte)corner;
                         }
@@ -504,10 +535,10 @@ namespace SpaceEngine.Core.Preprocess.Terrain
 
             if (tx == tilesCount - 1 && ty == tilesCount - 1 && Border > 0 && Right != null && Top != null)
             {
-                for (int c = 0; c < Channels; ++c)
+                for (var c = 0; c < Channels; ++c)
                 {
-                    int x1 = tileWidth - 1 - Border;
-                    int y1 = tileWidth - 1 - Border;
+                    var x1 = tileWidth - 1 - Border;
+                    var y1 = tileWidth - 1 - Border;
                     int x2;
                     int y2;
                     int x3;
@@ -519,11 +550,11 @@ namespace SpaceEngine.Core.Preprocess.Terrain
                     int corner1 = TileData[(x1 + y1 * tileWidth) * Channels + c];
                     int corner2 = Right.TileData[(x2 + y2 * tileWidth) * Channels + c];
                     int corner3 = Top.TileData[(x3 + y3 * tileWidth) * Channels + c];
-                    int corner = (corner1 + corner2 + corner3) / 3;
+                    var corner = (corner1 + corner2 + corner3) / 3;
 
-                    for (int y = Size; y < tileWidth; ++y)
+                    for (var y = Size; y < tileWidth; ++y)
                     {
-                        for (int x = Size; x < tileWidth; ++x)
+                        for (var x = Size; x < tileWidth; ++x)
                         {
                             TileData[(x + y * tileWidth) * Channels + c] = (byte)corner;
                         }
@@ -534,7 +565,7 @@ namespace SpaceEngine.Core.Preprocess.Terrain
 
         private void ProduceTile(int level, int tx, int ty, ref long offset, long[] offsets, string file)
         {
-            Logger.Log(string.Format("ColorMipmap.ProduceTile: Producing tile {0}:{1}:{2}!", level, tx, ty));
+            Logger.Log($"ColorMipmap.ProduceTile: Producing tile {level}:{tx}:{ty}!");
 
             ProduceTile(level, tx, ty);
 
@@ -542,7 +573,7 @@ namespace SpaceEngine.Core.Preprocess.Terrain
             var isConstant = true;
             var constantValue = TileData[0];
 
-            for (int i = 1; i < (Size + 2 * Border) * (Size + 2 * Border); ++i)
+            for (var i = 1; i < (Size + 2 * Border) * (Size + 2 * Border); ++i)
             {
                 if (TileData[i] != TileData[i - 1])
                 {

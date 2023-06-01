@@ -1,7 +1,7 @@
 ﻿#region License
 // Procedural planet generator.
 //  
-// Copyright (C) 2015-2018 Denis Ovchinnikov [zameran] 
+// Copyright (C) 2015-2023 Denis Ovchinnikov [zameran] 
 // All rights reserved.
 // 
 // Redistribution and use in source and binary forms, with or without
@@ -34,6 +34,8 @@
 // 
 #endregion
 
+using SpaceEngine.Helpers;
+
 using System.Collections.Generic;
 using System.Linq;
 
@@ -45,24 +47,28 @@ namespace SpaceEngine.Core.Bodies
     {              
         #region ICelestialBody
 
-        public float Radius { get { return Size; } set { Size = value; } }
+        public float Radius
+        {
+            get => Size;
+            set => Size = value;
+        }
 
         public override List<string> GetKeywords()
         {
             var keywords = new List<string>();
 
-            var lightCount = Suns.Count((sun) => sun != null && sun.gameObject.activeInHierarchy);
-            var alteastOneLight = lightCount != 0;
+            var lightCount = Suns.Count(sun => sun != null && sun.gameObject.activeInHierarchy);
+            var leastOneLight = lightCount != 0;
 
-            if (alteastOneLight)
+            if (leastOneLight)
             {
-                keywords.Add(string.Format("LIGHT_{0}", lightCount));
+                keywords.Add($"LIGHT_{lightCount}");
 
-                var shadowsCount = ShadowCasters.Count((shadow) => shadow != null && Helper.Enabled(shadow));
+                var shadowsCount = ShadowCasters.Count(shadow => shadow != null && Helper.Enabled(shadow));
 
                 if (shadowsCount > 0 && GodManager.Instance.Planetshadows)
                 {
-                    keywords.Add(string.Format("SHADOW_{0}", shadowsCount));
+                    keywords.Add($"SHADOW_{shadowsCount}");
                 }
                 else
                 {
@@ -81,7 +87,7 @@ namespace SpaceEngine.Core.Bodies
             }
             else
             {
-                keywords.Add(GodManager.Instance.Eclipses && alteastOneLight ? "ECLIPSES_ON" : "ECLIPSES_OFF");
+                keywords.Add(GodManager.Instance.Eclipses && leastOneLight ? "ECLIPSES_ON" : "ECLIPSES_OFF");
             }
 
             if (ShineCasters.Count == 0)
@@ -90,7 +96,7 @@ namespace SpaceEngine.Core.Bodies
             }
             else
             {
-                keywords.Add(GodManager.Instance.Planetshine && alteastOneLight ? "SHINE_ON" : "SHINE_OFF");
+                keywords.Add(GodManager.Instance.Planetshine && leastOneLight ? "SHINE_ON" : "SHINE_OFF");
             }
 
             if (Ring != null)
@@ -112,14 +118,7 @@ namespace SpaceEngine.Core.Bodies
 
             if (Atmosphere != null)
             {
-                if (AtmosphereEnabled)
-                {
-                    keywords.Add("ATMOSPHERE_ON");
-                }
-                else
-                {
-                    keywords.Add("ATMOSPHERE_OFF");
-                }
+                keywords.Add(AtmosphereEnabled ? "ATMOSPHERE_ON" : "ATMOSPHERE_OFF");
 
                 if (Ocean != null)
                 {

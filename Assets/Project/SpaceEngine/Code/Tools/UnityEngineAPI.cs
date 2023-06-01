@@ -1,7 +1,7 @@
 ﻿#region License
 // Procedural planet generator.
 // 
-// Copyright (C) 2015-2018 Denis Ovchinnikov [zameran] 
+// Copyright (C) 2015-2023 Denis Ovchinnikov [zameran] 
 // All rights reserved.
 // 
 // Redistribution and use in source and binary forms, with or without
@@ -38,18 +38,27 @@ using System.Reflection;
 
 using UnityEngine;
 
-public class UnityEngineAPI
+namespace SpaceEngine.Tools
 {
-    public static void InvokeAPI<T>(string MethodName, BindingFlags BillingAtr, object obj = null, params object[] MethodParams) where T : class
+    public static class UnityEngineAPI
     {
-        try
+        public static void InvokeAPI<T>(string methodName, BindingFlags billingAtr, object obj = null, params object[] methodParams) where T : class
         {
-            Type type = typeof(T);
-            MethodInfo method = type.GetMethod(MethodName, BillingAtr);
+            try
+            {
+                var type = typeof(T);
+                var method = type.GetMethod(methodName, billingAtr);
 
-            method.Invoke(obj, MethodParams);
+                if (method != null) method.Invoke(obj, methodParams);
+                else Debug.LogWarning("UnityEngineAPI.InvokeAPI: Unable to find target method! Aborting!...");
+            }
+            catch (Exception ex)
+            {
+                Debug.LogException(ex, null);
+            }
+            finally
+            {
+            }
         }
-        catch (Exception ex) { Debug.LogError("UnityEngineAPI.InvokeAPI: Exception!" + "\n" + ex.Message + "\n" + ex.StackTrace); }
-        finally { }
     }
 }

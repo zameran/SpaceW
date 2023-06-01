@@ -33,6 +33,8 @@
 // Creator: zameran
 #endregion
 
+using SpaceEngine.Tools;
+
 using System.Reflection;
 
 using UnityEditor;
@@ -42,15 +44,16 @@ public class ShaderCompiler : EditorWindow
 {
     public Shader shader;
 
-    public int mode = 1;
-    public int customPlatformsMask = 262143;
-
-    public bool includeAllVariants = true;
+    private int mode = 1;
+    private int externPlatformsMask = 262143;
+    private bool includeAllVariants = true;
+    private bool preprocessOnly = false;
+    private bool stripLineDirectives = false;
 
     [MenuItem("SpaceEngine/ShaderCompiler")]
     public static void Init()
     {
-        ShaderCompiler window = (ShaderCompiler)EditorWindow.GetWindow(typeof(ShaderCompiler));
+        var window = (ShaderCompiler)GetWindow(typeof(ShaderCompiler));
         window.autoRepaintOnSceneChange = true;
     }
 
@@ -63,19 +66,33 @@ public class ShaderCompiler : EditorWindow
         mode = EditorGUILayout.IntField(mode);
 
         GUILayout.Label("Select shader compilation custom platforms masks: ");
-        customPlatformsMask = EditorGUILayout.IntField(customPlatformsMask);
+        externPlatformsMask = EditorGUILayout.IntField(externPlatformsMask);
 
         GUILayout.Label("Should compiled shader contain all shader variants?");
         includeAllVariants = EditorGUILayout.Toggle(includeAllVariants);
+
+        GUILayout.Label("Preprocess Only?");
+        preprocessOnly = EditorGUILayout.Toggle(preprocessOnly);
+
+        GUILayout.Label("Strip Line Directives?");
+        stripLineDirectives = EditorGUILayout.Toggle(stripLineDirectives);
 
         if (shader != null)
         {
             if (GUILayout.Button("Compile..."))
             {
-                UnityEngineAPI.InvokeAPI<ShaderUtil>("OpenCompiledShader", 
-                                                     BindingFlags.Static | BindingFlags.NonPublic, 
-                                                     null, 
-                                                     new object[] { shader, mode, customPlatformsMask, true });
+                UnityEngineAPI.InvokeAPI<ShaderUtil>("OpenCompiledShader",
+                    BindingFlags.Static | BindingFlags.NonPublic,
+                    null,
+                    new object[]
+                    {
+                        shader,
+                        mode,
+                        externPlatformsMask,
+                        includeAllVariants,
+                        preprocessOnly,
+                        stripLineDirectives
+                    });
             }
         }
         else

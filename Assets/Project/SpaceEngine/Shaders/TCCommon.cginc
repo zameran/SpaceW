@@ -32,7 +32,7 @@
 
 /*
  * Author: Vladimir Romanyuk
- * Modified and ported to Unity by Denis Ovchinnikov 2015-2018
+ * Modified and ported to Unity by Denis Ovchinnikov 2015-2023
  */
 
 // NOTE:
@@ -142,6 +142,12 @@ uniform float noiseRidgeSmooth;// = 0.0001;
 //-----------------------------------------------------------------------------
 #if !defined (MATH)
 #include "Math.cginc"
+#endif
+//-----------------------------------------------------------------------------
+
+//-----------------------------------------------------------------------------
+#if !defined (HLSL_SUPPORT_INCLUDED)
+#include <HLSLSupport.cginc>
 #endif
 //-----------------------------------------------------------------------------
 

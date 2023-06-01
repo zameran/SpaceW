@@ -1,6 +1,6 @@
 ﻿/* Procedural planet generator.
  *
- * Copyright (C) 2015-2018 Denis Ovchinnikov
+ * Copyright (C) 2015-2023 Denis Ovchinnikov
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -61,7 +61,7 @@
 /*
  * Author: Eric Bruneton
  * Modified and ported to Unity by Justin Hawkins 2014
- * Modified by Denis Ovchinnikov 2015-2018
+ * Modified by Denis Ovchinnikov 2015-2023
  */
 
 Shader "SpaceEngine/Planet/Atmosphere"
@@ -100,7 +100,7 @@ Shader "SpaceEngine/Planet/Atmosphere"
 			#include "SpaceAtmosphere.cginc"
 
 			#pragma target 5.0
-			#pragma only_renderers d3d11 glcore
+			#pragma only_renderers d3d11 glcore metal
 			#pragma vertex vert
 			#pragma fragment frag
 

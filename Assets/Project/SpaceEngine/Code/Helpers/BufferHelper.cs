@@ -1,7 +1,7 @@
 ﻿#region License
 // Procedural planet generator.
 // 
-// Copyright (C) 2015-2018 Denis Ovchinnikov [zameran] 
+// Copyright (C) 2015-2023 Denis Ovchinnikov [zameran] 
 // All rights reserved.
 // 
 // Redistribution and use in source and binary forms, with or without
@@ -35,59 +35,62 @@
 
 using UnityEngine;
 
-/// <summary>
-/// Class - extensions holder for a <see cref="ComputeBuffer"/>.
-/// </summary>
-public static class BufferHelper
+namespace SpaceEngine.Helpers
 {
-    public static void ReleaseBuffers(params ComputeBuffer[] buffers)
+    /// <summary>
+    /// Class - extensions holder for a <see cref="ComputeBuffer"/>.
+    /// </summary>
+    public static class BufferHelper
     {
-        for (int i = 0; i < buffers.Length; i++)
+        public static void ReleaseBuffers(params ComputeBuffer[] buffers)
         {
-            if (buffers[i] != null)
+            for (var i = 0; i < buffers.Length; i++)
             {
-                buffers[i].Release();
+                if (buffers[i] != null)
+                {
+                    buffers[i].Release();
+                }
             }
         }
-    }
 
-    public static void DisposeBuffers(params ComputeBuffer[] buffers)
-    {
-        for (int i = 0; i < buffers.Length; i++)
+        public static void DisposeBuffers(params ComputeBuffer[] buffers)
         {
-            if (buffers[i] != null)
+            for (var i = 0; i < buffers.Length; i++)
             {
-                buffers[i].Dispose();
+                if (buffers[i] != null)
+                {
+                    buffers[i].Dispose();
+                }
             }
         }
-    }
 
-    public static void ReleaseAndDisposeBuffer(this ComputeBuffer buffer)
-    {
-        if (buffer != null)
+        public static void ReleaseAndDisposeBuffer(this ComputeBuffer buffer)
         {
-            buffer.Release();
-            buffer.Dispose();
-        }
-    }
-
-    public static void ReleaseAndDisposeBuffers(params ComputeBuffer[] buffers)
-    {
-        for (int i = 0; i < buffers.Length; i++)
-        {
-            if (buffers[i] != null)
+            if (buffer != null)
             {
-                buffers[i].Release();
-                buffers[i].Dispose();
+                buffer.Release();
+                buffer.Dispose();
             }
         }
-    }
 
-    public static void TransferData<T>(ComputeBuffer from, ComputeBuffer to)
-    {
-        var data = new T[from.count];
+        public static void ReleaseAndDisposeBuffers(params ComputeBuffer[] buffers)
+        {
+            for (var i = 0; i < buffers.Length; i++)
+            {
+                if (buffers[i] != null)
+                {
+                    buffers[i].Release();
+                    buffers[i].Dispose();
+                }
+            }
+        }
 
-        from.GetData(data);
-        to.SetData(data);
+        public static void TransferData<T>(ComputeBuffer from, ComputeBuffer to)
+        {
+            var data = new T[from.count];
+
+            from.GetData(data);
+            to.SetData(data);
+        }
     }
 }

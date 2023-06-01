@@ -1,7 +1,7 @@
 #region License
 // Procedural planet generator.
 // 
-// Copyright (C) 2015-2018 Denis Ovchinnikov [zameran] 
+// Copyright (C) 2015-2023 Denis Ovchinnikov [zameran] 
 // All rights reserved.
 // 
 // Redistribution and use in source and binary forms, with or without
@@ -160,9 +160,9 @@ namespace SpaceEngine.Debugging
             AddFPSAt(14, 48);
             AddFPSAt(14, 93);
 
-            for (int x = 0; x < graphTexture.width; ++x)
+            for (var x = 0; x < graphTexture.width; ++x)
             {
-                for (int y = 0; y < 7; ++y)
+                for (var y = 0; y < 7; ++y)
                 {
                     if (x < 95 && y < 5)
                     {
@@ -204,12 +204,12 @@ namespace SpaceEngine.Debugging
         {
             yExtern = startY;
 
-            for (int y = 0; y < 4; y++)
+            for (var y = 0; y < 4; y++)
             {
                 xExtern = startX;
                 yOffset = y * 11;
 
-                for (int x = 0; x < 11; x++)
+                for (var x = 0; x < 11; x++)
                 {
                     textOverlayMask[yExtern, xExtern] = fpsBits[yOffset + x];
                     xExtern++;
@@ -228,12 +228,12 @@ namespace SpaceEngine.Debugging
 
             yExtern = startY;
 
-            for (int y = 0; y < 5; y++)
+            for (var y = 0; y < 5; y++)
             {
                 xExtern = startX;
                 yOffset = y * 39;
 
-                for (int x = startAt; x < xLength; x++)
+                for (var x = startAt; x < xLength; x++)
                 {
                     if (num != -1 && numberBits[yOffset + x] == 1)
                     {
@@ -342,7 +342,7 @@ namespace SpaceEngine.Debugging
 
             maxFrame = 0.0f;
 
-            for (int x = 0; x < frameHistoryLength; ++x)
+            for (var x = 0; x < frameHistoryLength; ++x)
             {
                 totalSeconds = dtHistory[0, x];
 
@@ -367,7 +367,7 @@ namespace SpaceEngine.Debugging
                 x1 = i * graphMultiply + xOff;
                 x2 = (i + 1) * graphMultiply + xOff;
 
-                for (int j = 0; j < fpsVals.Length; j++)
+                for (var j = 0; j < fpsVals.Length; j++)
                 {
                     y1 = j < fpsVals.Length - 1 ? fpsVals[j + 1] * graphMultiply + yOff : yOff;
                     y2 = fpsVals[j] * graphMultiply + yOff;
@@ -417,7 +417,7 @@ namespace SpaceEngine.Debugging
             x1 = 28 * graphMultiply + xOff;
             x2 = graphSizeMin * graphMultiply + xOff;
 
-            for (int i = 0; i < lineY.Length; i++)
+            for (var i = 0; i < lineY.Length; i++)
             {
                 y1 = lineY[i] * graphMultiply + yOff;
                 y2 = (lineY[i] + 1) * graphMultiply + yOff;
@@ -433,7 +433,7 @@ namespace SpaceEngine.Debugging
 
             x2 = 27 * graphMultiply + xOff;
 
-            for (int i = 0; i < lineY.Length; i++)
+            for (var i = 0; i < lineY.Length; i++)
             {
                 y1 = lineY2[i] * graphMultiply + yOff;
                 y2 = (lineY2[i] + 9) * graphMultiply + yOff;
@@ -445,7 +445,7 @@ namespace SpaceEngine.Debugging
             }
 
             // Add Key Boxes
-            for (int i = 0; i < keyOffX.Length; i++)
+            for (var i = 0; i < keyOffX.Length; i++)
             {
                 x1 = keyOffX[i] * graphMultiply + xOff + 1 * graphMultiply;
                 x2 = (keyOffX[i] + 4) * graphMultiply + xOff + 1 * graphMultiply;
@@ -459,7 +459,7 @@ namespace SpaceEngine.Debugging
                 GL.Vertex3(x2, y1, 0);
             }
 
-            for (int i = 0; i < keyOffX.Length; i++)
+            for (var i = 0; i < keyOffX.Length; i++)
             {
                 x1 = keyOffX[i] * graphMultiply + xOff;
                 x2 = (keyOffX[i] + 4) * graphMultiply + xOff;
@@ -475,9 +475,9 @@ namespace SpaceEngine.Debugging
 
             GL.Color(Color.white);
 
-            for (int x = 0; x < graphTexture.width; ++x)
+            for (var x = 0; x < graphTexture.width; ++x)
             {
-                for (int y = 0; y < graphHeight; ++y)
+                for (var y = 0; y < graphHeight; ++y)
                 {
                     // Draw Text
                     if (textOverlayMask[y, x] == 1)
@@ -495,9 +495,9 @@ namespace SpaceEngine.Debugging
                 }
             }
 
-            for (int x = 0; x < 9; ++x)
+            for (var x = 0; x < 9; ++x)
             {
-                for (int y = 0; y < 4; ++y)
+                for (var y = 0; y < 4; ++y)
                 {
                     if (mbBits[y * 9 + x] == 1)
                     {
@@ -534,7 +534,7 @@ namespace SpaceEngine.Debugging
                 AddNumberAt(5, 23, (int)((fps / 10) % 10), true);
                 AddNumberAt(9, 23, (int)(fps % 10), false);
 
-                float mem = (GC.GetTotalMemory(true)) / 1000000.0f;
+                var mem = (GC.GetTotalMemory(true)) / 1000000.0f;
 
                 if (mem < 1.0)
                 {

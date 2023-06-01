@@ -1,7 +1,7 @@
 ﻿#region License
 // Procedural planet generator.
 // 
-// Copyright (C) 2015-2018 Denis Ovchinnikov [zameran] 
+// Copyright (C) 2015-2023 Denis Ovchinnikov [zameran] 
 // All rights reserved.
 // 
 // Redistribution and use in source and binary forms, with or without
@@ -40,9 +40,9 @@ using SpaceEngine.Core.Patterns.Strategy.Eventit;
 using SpaceEngine.Core.Patterns.Strategy.Reanimator;
 using SpaceEngine.Core.Patterns.Strategy.Renderable;
 using SpaceEngine.Core.Patterns.Strategy.Uniformed;
-using SpaceEngine.Core.Preprocess.Atmospehre;
-
+using SpaceEngine.Core.Preprocess.Atmosphere;
 using SpaceEngine.Enums;
+using SpaceEngine.Helpers;
 
 using System.ComponentModel;
 
@@ -57,10 +57,7 @@ namespace SpaceEngine.Environment.Atmospheric
 
         public AtmosphereBase Value
         {
-            get
-            {
-                return _value;
-            }
+            get => _value;
             set
             {
                 var to = value;
@@ -70,7 +67,7 @@ namespace SpaceEngine.Environment.Atmospheric
                 {
                     _value = value;
 
-                    OnPropertyChanged(string.Format("AtmosphereBase_{0}_{1}", from, to));
+                    OnPropertyChanged($"AtmosphereBase_{from}_{to}");
                 }
                 else
                 {
@@ -84,7 +81,9 @@ namespace SpaceEngine.Environment.Atmospheric
     {
         private readonly AtmosphereBaseProperty AtmosphereBaseProperty = new AtmosphereBaseProperty();
 
-        public AtmosphereBase AtmosphereBase { get { return AtmosphereBaseProperty.Value; } set { AtmosphereBaseProperty.Value = value; } }
+        public AtmosphereBase AtmosphereBase { get => AtmosphereBaseProperty.Value;
+            set => AtmosphereBaseProperty.Value = value;
+        }
 
         public AnimationCurve FadeCurve = new AnimationCurve(new Keyframe[] { new Keyframe(0.0f, 0.0f),
                                                                               new Keyframe(0.25f, 1.0f),
@@ -117,7 +116,7 @@ namespace SpaceEngine.Environment.Atmospheric
         public EngineRenderQueue RenderQueue = EngineRenderQueue.Transparent;
         public int RenderQueueOffset = 0;
 
-        public Mesh AtmosphereMesh { get { return GodManager.Instance.AtmosphereMesh; } }
+        public Mesh AtmosphereMesh => GodManager.Instance.AtmosphereMesh;
 
         public bool LostFocusForceRebake = false;
 
@@ -125,35 +124,35 @@ namespace SpaceEngine.Environment.Atmospheric
 
         public PreProcessAtmosphere AtmosphereBaker = null;
 
-        public Vector3 Origin { get { return ParentBody != null ? ParentBody.transform.position : Vector3.zero; } }
-        public float Radius { get { return ParentBody != null ? ParentBody.Size : 0.0f; } }
+        public Vector3 Origin => ParentBody != null ? ParentBody.transform.position : Vector3.zero;
+        public float Radius => ParentBody != null ? ParentBody.Size : 0.0f;
 
         #region Eventit
 
-        public bool isEventit { get; set; }
+        public bool IsEventit { get; set; }
 
         public void Eventit()
         {
-            if (isEventit) return;
+            if (IsEventit) return;
 
             AtmosphereBaseProperty.PropertyChanged += AtmosphereBasePropertyOnPropertyChanged;
 
             EventManager.BodyEvents.OnAtmosphereBaked.OnEvent += OnAtmosphereBaked;
             EventManager.BodyEvents.OnAtmospherePresetChanged.OnEvent += OnAtmospherePresetChanged;
 
-            isEventit = true;
+            IsEventit = true;
         }
 
         public void UnEventit()
         {
-            if (!isEventit) return;
+            if (!IsEventit) return;
 
             AtmosphereBaseProperty.PropertyChanged -= AtmosphereBasePropertyOnPropertyChanged;
 
             EventManager.BodyEvents.OnAtmosphereBaked.OnEvent -= OnAtmosphereBaked;
             EventManager.BodyEvents.OnAtmospherePresetChanged.OnEvent -= OnAtmospherePresetChanged;
 
-            isEventit = false;
+            IsEventit = false;
         }
 
         #endregion
@@ -207,6 +206,8 @@ namespace SpaceEngine.Environment.Atmospheric
 
         public override void InitNode()
         {
+            if (AtmosphereBaker == null) AtmosphereBaker = GetComponentInChildren<PreProcessAtmosphere>();
+            
             PushPreset(AtmosphereParameters.Get(AtmosphereBase));
 
             Bake();
@@ -235,8 +236,6 @@ namespace SpaceEngine.Environment.Atmospheric
         protected override void Awake()
         {
             base.Awake();
-
-            if (AtmosphereBaker == null) AtmosphereBaker = GetComponentInChildren<PreProcessAtmosphere>();
         }
 
         protected override void Start()

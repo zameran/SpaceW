@@ -1,7 +1,7 @@
 ﻿#region License
 // Procedural planet generator.
 //  
-// Copyright (C) 2015-2018 Denis Ovchinnikov [zameran] 
+// Copyright (C) 2015-2023 Denis Ovchinnikov [zameran] 
 // All rights reserved.
 // 
 // Redistribution and use in source and binary forms, with or without
@@ -34,6 +34,7 @@
 #endregion
 
 using SpaceEngine.Managers;
+using SpaceEngine.Tools;
 
 using UnityEngine;
 
@@ -72,11 +73,11 @@ namespace SpaceEngine.Debugging
                 {
                     GUILayout.BeginVertical();
 
-                    for (int i = 0; i < sequence.Count; i++)
+                    for (var i = 0; i < sequence.Count; i++)
                     {
                         var entry = sequence[i];
 
-                        GUILayoutExtensions.VerticalBoxed(string.Format("{0}", entry.Name), GUISkin, () =>
+                        GUILayoutExtensions.VerticalBoxed($"{entry.Name}", GUISkin, () =>
                         {
                             if (true)
                             {

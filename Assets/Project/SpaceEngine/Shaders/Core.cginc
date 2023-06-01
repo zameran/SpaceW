@@ -1,6 +1,6 @@
 // Procedural planet generator.
 // 
-// Copyright (C) 2015-2018 Denis Ovchinnikov [zameran] 
+// Copyright (C) 2015-2023 Denis Ovchinnikov [zameran] 
 // All rights reserved.
 // 
 // Redistribution and use in source and binary forms, with or without
@@ -32,12 +32,16 @@
 // Creator: zameran
 
 // NOTE : If you wanna use this file as include, please provide special defines before (defines, that provided after include doesn't taken in to the account) :
-// CORE_PORDUCER_ADDITIONAL_UV
+// CORE_PRODUCER_ADDITIONAL_UV
 
 #define CORE
 
 #if !defined (TCCOMMON)
 #include "TCCommon.cginc"
+#endif
+
+#if !defined (HLSL_SUPPORT_INCLUDED)
+#include <HLSLSupport.cginc>
 #endif
 
 //-----------------------------------------------------------------------------
@@ -270,7 +274,7 @@ struct VertexProducerOutput
 	float4 position : SV_POSITION;
 	float2 uv0 : TEXCOORD0;
 
-	#if defined(CORE_PORDUCER_ADDITIONAL_UV)
+	#if defined(CORE_PRODUCER_ADDITIONAL_UV)
 		float2 uv1 : TEXCOORD1;
 	#endif
 };
@@ -282,7 +286,7 @@ struct VertexProducerOutput
 #define CORE_PRODUCER_VERTEX_PROGRAM_BODY_ADDITIONAL_UV(scale) \
 	o.uv1 = v.texcoord.xy * scale; \
 
-#if defined(CORE_PORDUCER_ADDITIONAL_UV)
+#if defined(CORE_PRODUCER_ADDITIONAL_UV)
 	#define CORE_PRODUCER_VERTEX_PROGRAM(scale) \
 		void vert(in VertexProducerInput v, out VertexProducerOutput o) \
 		{ \
@@ -467,7 +471,7 @@ float4x4 SampleCoarseLevelHeights(sampler2D coarseLevelSampler, float2 uv, float
 //-----------------------------------------------------------------------------
 #define CORE_LOG_DEPTH
 
-//#define CORE_WRITE_TO_DEPTH	// NOTE : Control switch...
+// #define CORE_WRITE_TO_DEPTH	// NOTE : Control switch...
 // Outerra approach...
 // TODO : DirectX/OpenGL switch...
 // TODO : Finish it...

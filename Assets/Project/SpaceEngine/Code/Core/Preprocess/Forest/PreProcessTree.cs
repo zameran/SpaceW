@@ -1,8 +1,45 @@
-﻿using SpaceEngine.Core.Numerics;
+﻿#region License
+// Procedural planet generator.
+//  
+// Copyright (C) 2015-2023 Denis Ovchinnikov [zameran] 
+// All rights reserved.
+// 
+// Redistribution and use in source and binary forms, with or without
+// modification, are permitted provided that the following conditions
+// are met:
+// 1. Redistributions of source code must retain the above copyright
+//    notice, this list of conditions and the following disclaimer.
+// 2. Redistributions in binary form must reproduce the above copyright
+//    notice, this list of conditions and the following disclaimer in the
+//    documentation and/or other materials provided with the distribution.
+// 3. Neither the name of the copyright holders nor the names of its
+//    contributors may be used to endorse or promote products derived from
+//    this software without specific prior written permission.
+// 
+// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+// AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+// IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+// ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE
+// LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+// CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+// SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+// INTERRUPTION)HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+// CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+// ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF
+// THE POSSIBILITY OF SUCH DAMAGE.
+// 
+// Creation Date: 2017.03.28
+// Creation Time: 2:18 PM
+// Creator: zameran
+#endregion
+
+using SpaceEngine.Core.Numerics;
 using SpaceEngine.Core.Numerics.Matrices;
 using SpaceEngine.Core.Numerics.Shapes;
 using SpaceEngine.Core.Numerics.Vectors;
-using SpaceEngine.Core.Utilities;
+using SpaceEngine.Helpers;
+using SpaceEngine.Tools;
+using SpaceEngine.Utilities;
 
 using System;
 using System.Collections;
@@ -51,7 +88,7 @@ namespace SpaceEngine.Core.Preprocess.Forest
             //CalculateAO();
             CalculateViews();
 
-            Debug.Log(string.Format("PreProcessTree.Start: Computation time: {0} s", (Time.realtimeSinceStartup - startTime)));
+            Debug.Log($"PreProcessTree.Start: Computation time: {(Time.realtimeSinceStartup - startTime)} s");
         }
 
         private void Update()
@@ -69,26 +106,17 @@ namespace SpaceEngine.Core.Preprocess.Forest
 
         private void Swap(ref int a, ref int b)
         {
-            var c = a;
-
-            a = b;
-            b = c;
+            (a, b) = (b, a);
         }
 
         private void Swap(ref float a, ref float b)
         {
-            var c = a;
-
-            a = b;
-            b = c;
+            (a, b) = (b, a);
         }
 
         private void Swap(ref double a, ref double b)
         {
-            var c = a;
-
-            a = b;
-            b = c;
+            (a, b) = (b, a);
         }
 
         private void CalculateMesh()
@@ -121,20 +149,20 @@ namespace SpaceEngine.Core.Preprocess.Forest
         {
             Debug.Log("Precomputing AO Started...");
 
-            int GRIDRES_AO = 128;
-            int N_AO = 2;
+            var GRIDRES_AO = 128;
+            var N_AO = 2;
 
             var options = new ParallelOptions { MaxDegreeOfParallelism = 4 };
 
-            float[] buf = new float[GRIDRES_AO * GRIDRES_AO * GRIDRES_AO * 4];
+            var buf = new float[GRIDRES_AO * GRIDRES_AO * GRIDRES_AO * 4];
 
-            for (int i = 0; i < GRIDRES_AO; ++i)
+            for (var i = 0; i < GRIDRES_AO; ++i)
             {
-                for (int j = 0; j < GRIDRES_AO; ++j)
+                for (var j = 0; j < GRIDRES_AO; ++j)
                 {
-                    for (int k = 0; k < GRIDRES_AO; ++k)
+                    for (var k = 0; k < GRIDRES_AO; ++k)
                     {
-                        int off = i + j * GRIDRES_AO + k * GRIDRES_AO * GRIDRES_AO;
+                        var off = i + j * GRIDRES_AO + k * GRIDRES_AO * GRIDRES_AO;
 
                         buf[4 * off] = 0;
                         buf[4 * off + 1] = 0;
@@ -147,11 +175,11 @@ namespace SpaceEngine.Core.Preprocess.Forest
             var indices = PreProcessMesh.GetIndices(0);
             var vertices = PreProcessMesh.vertices;
 
-            for (int ni = 0; ni < indices.Length; ni += 3)
+            for (var ni = 0; ni < indices.Length; ni += 3)
             {
-                int a = indices[ni];
-                int b = indices[ni + 1];
-                int c = indices[ni + 2];
+                var a = indices[ni];
+                var b = indices[ni + 1];
+                var c = indices[ni + 2];
 
                 float x1 = vertices[a].x, y1 = vertices[a].y, z1 = vertices[a].z;
                 float x2 = vertices[b].x, y2 = vertices[b].y, z2 = vertices[b].z;
@@ -174,18 +202,22 @@ namespace SpaceEngine.Core.Preprocess.Forest
                 if (l12 > l23 && l12 > l31)
                 {
                     Swap(ref a, ref c);
-                    Swap(ref x1, ref x3); Swap(ref y1, ref y3); Swap(ref z1, ref z3);
+                    Swap(ref x1, ref x3);
+                    Swap(ref y1, ref y3);
+                    Swap(ref z1, ref z3);
                     Swap(ref l12, ref l23);
                 }
                 else if (l31 > l12 && l31 > l23)
                 {
                     Swap(ref a, ref b);
-                    Swap(ref x1, ref x2); Swap(ref y1, ref y2); Swap(ref z1, ref z2);
+                    Swap(ref x1, ref x2);
+                    Swap(ref y1, ref y2);
+                    Swap(ref z1, ref z2);
                     Swap(ref l31, ref l23);
                 }
 
-                int n12 = (int)(Math.Ceiling(l12 * GRIDRES_AO) * 2.0);
-                int n13 = (int)(Math.Ceiling(l31 * GRIDRES_AO) * 2.0);
+                var n12 = (int)(Math.Ceiling(l12 * GRIDRES_AO) * 2.0);
+                var n13 = (int)(Math.Ceiling(l31 * GRIDRES_AO) * 2.0);
 
                 Parallel.For(0, n12 - 1, i =>
                 {
@@ -201,13 +233,13 @@ namespace SpaceEngine.Core.Preprocess.Forest
                             var y = y1 + u * (y2 - y1) + v * (y3 - y1);
                             var z = z1 + u * (z2 - z1) + v * (z3 - z1);
 
-                            int ix = (int)(x * GRIDRES_AO);
-                            int iy = (int)(y * GRIDRES_AO);
-                            int iz = (int)(z * GRIDRES_AO);
+                            var ix = (int)(x * GRIDRES_AO);
+                            var iy = (int)(y * GRIDRES_AO);
+                            var iz = (int)(z * GRIDRES_AO);
 
                             if (ix >= 0 && ix < GRIDRES_AO && iy >= 0 && iy < GRIDRES_AO && iz >= 0 && iz < GRIDRES_AO)
                             {
-                                int off = 4 * (ix + iy * GRIDRES_AO + iz * GRIDRES_AO * GRIDRES_AO);
+                                var off = 4 * (ix + iy * GRIDRES_AO + iz * GRIDRES_AO * GRIDRES_AO);
 
                                 buf[off] = 255;
                                 buf[off + 1] = 255;
@@ -221,15 +253,15 @@ namespace SpaceEngine.Core.Preprocess.Forest
 
             Debug.Log("Precomputing AO Mesh Passed...");
 
-            double[] vocc = new double[GRIDRES_AO * GRIDRES_AO * GRIDRES_AO];
+            var vocc = new double[GRIDRES_AO * GRIDRES_AO * GRIDRES_AO];
 
-            for (int i = 0; i < GRIDRES_AO * GRIDRES_AO * GRIDRES_AO; ++i)
+            for (var i = 0; i < GRIDRES_AO * GRIDRES_AO * GRIDRES_AO; ++i)
             {
                 vocc[i] = 1.0;
             }
 
-            double zmax = Math.Abs(Z);
-            double zmin = -Math.Abs(Z);
+            var zmax = Math.Abs(Z);
+            var zmin = -Math.Abs(Z);
 
             Parallel.For(0, N_AO - 1, options, i =>
             {
@@ -242,16 +274,16 @@ namespace SpaceEngine.Core.Preprocess.Forest
                     var dphi = 1.0 / (4 * N_AO) * 2.0 * Math.PI;
                     var docc = Math.Cos(theta) * Math.Sin(theta) * dtheta * dphi / Math.PI;
 
-                    if ((i * 4 * N_AO + j) % 4 == 0) Debug.Log(string.Format("Precomputing AO Step {0} of {1}", i * 4 * N_AO + j, 4 * N_AO * N_AO));
+                    if ((i * 4 * N_AO + j) % 4 == 0) Debug.Log($"Precomputing AO Step {i * 4 * N_AO + j} of {4 * N_AO * N_AO}");
 
-                    Vector3d uz = new Vector3d(Math.Cos(phi) * Math.Sin(theta), Math.Sin(phi) * Math.Sin(theta), Math.Cos(theta));
-                    Vector3d ux = uz.z.EpsilonEquals(1.0, 0.0000001) ? new Vector3d(1.0, 0.0, 0.0) : new Vector3d(-uz.y, uz.x, 0.0).Normalized();
-                    Vector3d uy = uz.Cross(ux);
+                    var uz = new Vector3d(Math.Cos(phi) * Math.Sin(theta), Math.Sin(phi) * Math.Sin(theta), Math.Cos(theta));
+                    var ux = uz.z.EpsilonEquals(1.0, 0.0000001) ? new Vector3d(1.0, 0.0, 0.0) : new Vector3d(-uz.y, uz.x, 0.0).Normalized();
+                    var uy = uz.Cross(ux);
 
-                    Matrix3x3d toView = new Matrix3x3d(ux.x, ux.y, ux.z, uy.x, uy.y, uy.z, uz.x, uz.y, uz.z);
-                    Matrix3x3d toVol = new Matrix3x3d(ux.x, uy.x, uz.x, ux.y, uy.y, uz.y, ux.z, uy.z, uz.z);
+                    var toView = new Matrix3x3d(ux.x, ux.y, ux.z, uy.x, uy.y, uy.z, uz.x, uz.y, uz.z);
+                    var toVol = new Matrix3x3d(ux.x, uy.x, uz.x, ux.y, uy.y, uz.y, ux.z, uy.z, uz.z);
 
-                    Box3d b = new Box3d();
+                    var b = new Box3d();
                     b = b.Enlarge(toView * new Vector3d(-1.0, -1.0, zmin));
                     b = b.Enlarge(toView * new Vector3d(+1.0, -1.0, zmin));
                     b = b.Enlarge(toView * new Vector3d(-1.0, +1.0, zmin));
@@ -261,31 +293,34 @@ namespace SpaceEngine.Core.Preprocess.Forest
                     b = b.Enlarge(toView * new Vector3d(-1.0, +1.0, zmax));
                     b = b.Enlarge(toView * new Vector3d(+1.0, +1.0, zmax));
 
-                    int nx = (int)((b.Max.x - b.Min.x) * GRIDRES_AO / 2);
-                    int ny = (int)((b.Max.y - b.Min.y) * GRIDRES_AO / 2);
-                    int nz = (int)((b.Max.z - b.Min.z) * GRIDRES_AO / 2);
+                    var nx = (int)((b.Max.x - b.Min.x) * GRIDRES_AO / 2);
+                    var ny = (int)((b.Max.y - b.Min.y) * GRIDRES_AO / 2);
+                    var nz = (int)((b.Max.z - b.Min.z) * GRIDRES_AO / 2);
 
-                    int[] occ = new int[nx * ny * nz];
-                    for (int v = 0; v < nx * ny * nz; ++v) { occ[v] = 0; }
+                    var occ = new int[nx * ny * nz];
+                    for (var v = 0; v < nx * ny * nz; ++v)
+                    {
+                        occ[v] = 0;
+                    }
 
-                    for (int iz = nz - 1; iz >= 0; --iz)
+                    for (var iz = nz - 1; iz >= 0; --iz)
                     {
                         var z = b.Min.z + (iz + 0.5) / nz * (b.Max.z - b.Min.z);
 
-                        for (int iy = 0; iy < ny; ++iy)
+                        for (var iy = 0; iy < ny; ++iy)
                         {
                             var y = b.Min.y + (iy + 0.5) / ny * (b.Max.y - b.Min.y);
 
-                            for (int ix = 0; ix < nx; ++ix)
+                            for (var ix = 0; ix < nx; ++ix)
                             {
                                 var x = b.Min.x + (ix + 0.5) / nx * (b.Max.x - b.Min.x);
 
-                                Vector3d p = toVol * new Vector3d(x, y, z);
+                                var p = toVol * new Vector3d(x, y, z);
 
-                                int val = 0;
-                                int vx = (int)((p.x + 1.0) / 2.0 * GRIDRES_AO);
-                                int vy = (int)((p.y + 1.0) / 2.0 * GRIDRES_AO);
-                                int vz = (int)((p.z + 1.0) / 2.0 * GRIDRES_AO);
+                                var val = 0;
+                                var vx = (int)((p.x + 1.0) / 2.0 * GRIDRES_AO);
+                                var vy = (int)((p.y + 1.0) / 2.0 * GRIDRES_AO);
+                                var vz = (int)((p.z + 1.0) / 2.0 * GRIDRES_AO);
 
                                 if (vx >= 0 && vx < GRIDRES_AO && vy >= 0 && vy < GRIDRES_AO && vz >= 0 && vz < GRIDRES_AO)
                                 {
@@ -314,15 +349,15 @@ namespace SpaceEngine.Core.Preprocess.Forest
                             {
                                 var z = -1.0 + (iz + 0.5) / GRIDRES_AO * 2.0;
 
-                                Vector3d p = toView * new Vector3d(x, y, z);
+                                var p = toView * new Vector3d(x, y, z);
 
-                                int vx = (int)((p.x - b.Min.x) / (b.Max.x - b.Min.x) * nx);
-                                int vy = (int)((p.y - b.Min.y) / (b.Max.y - b.Min.y) * ny);
-                                int vz = (int)((p.z - b.Min.z) / (b.Max.z - b.Min.z) * nz);
+                                var vx = (int)((p.x - b.Min.x) / (b.Max.x - b.Min.x) * nx);
+                                var vy = (int)((p.y - b.Min.y) / (b.Max.y - b.Min.y) * ny);
+                                var vz = (int)((p.z - b.Min.z) / (b.Max.z - b.Min.z) * nz);
 
                                 if (vx >= 0 && vx < nx && vy >= 0 && vy < ny && vz >= 0 && vz < nz)
                                 {
-                                    int occN = occ[vx + vy * nx + vz * nx * ny];
+                                    var occN = occ[vx + vy * nx + vz * nx * ny];
 
                                     if (occN > 6)
                                     {
@@ -335,13 +370,13 @@ namespace SpaceEngine.Core.Preprocess.Forest
                 });
             });
 
-            for (int i = 0; i < GRIDRES_AO; ++i)
+            for (var i = 0; i < GRIDRES_AO; ++i)
             {
-                for (int j = 0; j < GRIDRES_AO; ++j)
+                for (var j = 0; j < GRIDRES_AO; ++j)
                 {
-                    for (int k = 0; k < GRIDRES_AO; ++k)
+                    for (var k = 0; k < GRIDRES_AO; ++k)
                     {
-                        int off = i + j * GRIDRES_AO + k * GRIDRES_AO * GRIDRES_AO;
+                        var off = i + j * GRIDRES_AO + k * GRIDRES_AO * GRIDRES_AO;
 
                         if (buf[4 * off + 3].EpsilonEquals(255.0f))
                         {
@@ -373,28 +408,28 @@ namespace SpaceEngine.Core.Preprocess.Forest
         {
             yield return Yielders.EndOfFrame; // Finish previous frame...
 
-            List<string> viewsLines = new List<string>();
-            Dictionary<int, Texture2D> viewsBilboards = new Dictionary<int, Texture2D>();
+            var viewsLines = new List<string>();
+            var viewsBilboards = new Dictionary<int, Texture2D>();
 
-            int total = 2 * (N_VIEWS * N_VIEWS + N_VIEWS) + 1;
-            int current = 0;
+            var total = 2 * (N_VIEWS * N_VIEWS + N_VIEWS) + 1;
+            var current = 0;
 
-            double zmax = Math.Abs(Z);
-            double zmin = -Math.Abs(Z);
+            var zmax = Math.Abs(Z);
+            var zmin = -Math.Abs(Z);
 
-            for (int i = -N_VIEWS; i <= N_VIEWS; i++)
+            for (var i = -N_VIEWS; i <= N_VIEWS; i++)
             {
-                for (int j = -N_VIEWS + Math.Abs(i); j <= N_VIEWS - Math.Abs(i); ++j)
+                for (var j = -N_VIEWS + Math.Abs(i); j <= N_VIEWS - Math.Abs(i); ++j)
                 {
-                    double x = (i + j) / (double)N_VIEWS;
-                    double y = (j - i) / (double)N_VIEWS;
-                    double angle = 90.0 - Math.Max(Math.Abs(x), Math.Abs(y)) * 90.0;
-                    double alpha = x.EpsilonEquals(0.0, 0.00000001) && y.EpsilonEquals(0.0, 0.00000001) ? 0.0f : Math.Atan2(y, x) / Math.PI * 180.0;
+                    var x = (i + j) / (double)N_VIEWS;
+                    var y = (j - i) / (double)N_VIEWS;
+                    var angle = 90.0 - Math.Max(Math.Abs(x), Math.Abs(y)) * 90.0;
+                    var alpha = x.EpsilonEquals(0.0, 0.00000001) && y.EpsilonEquals(0.0, 0.00000001) ? 0.0f : Math.Atan2(y, x) / Math.PI * 180.0;
 
-                    Matrix4x4d cameraToWorld = Matrix4x4d.RotateX(90) * Matrix4x4d.RotateX(angle);
-                    Matrix4x4d worldToCamera = cameraToWorld.Inverse();
+                    var cameraToWorld = Matrix4x4d.RotateX(90) * Matrix4x4d.RotateX(angle);
+                    var worldToCamera = cameraToWorld.Inverse();
 
-                    Box3d b = new Box3d();
+                    var b = new Box3d();
                     b = b.Enlarge((worldToCamera * new Vector4d(-1.0, -1.0, zmin, 1.0)).xyz);
                     b = b.Enlarge((worldToCamera * new Vector4d(+1.0, -1.0, zmin, 1.0)).xyz);
                     b = b.Enlarge((worldToCamera * new Vector4d(-1.0, +1.0, zmin, 1.0)).xyz);
@@ -404,16 +439,16 @@ namespace SpaceEngine.Core.Preprocess.Forest
                     b = b.Enlarge((worldToCamera * new Vector4d(-1.0, +1.0, zmax, 1.0)).xyz);
                     b = b.Enlarge((worldToCamera * new Vector4d(+1.0, +1.0, zmax, 1.0)).xyz);
 
-                    Matrix4x4d c2s = Matrix4x4d.Ortho(b.Max.x, b.Min.x, b.Max.y, b.Min.y, -2.0 * b.Max.z, -2.0 * b.Min.z + S);
-                    Matrix4x4d w2s = c2s * worldToCamera * Matrix4x4d.RotateZ(-90 - alpha);
+                    var c2s = Matrix4x4d.Ortho(b.Max.x, b.Min.x, b.Max.y, b.Min.y, -2.0 * b.Max.z, -2.0 * b.Min.z + S);
+                    var w2s = c2s * worldToCamera * Matrix4x4d.RotateZ(-90 - alpha);
 
-                    Vector3d dir = ((Matrix4x4d.RotateZ(90 + alpha) * cameraToWorld) * new Vector4d(0.0, 0.0, 1.0, 0.0)).xyz;
+                    var dir = ((Matrix4x4d.RotateZ(90 + alpha) * cameraToWorld) * new Vector4d(0.0, 0.0, 1.0, 0.0)).xyz;
 
                     ViewMaterial.SetTexture("colorSampler", TreeSampler);
                     ViewMaterial.SetVector("dir", dir.ToVector3());
                     ViewMaterial.SetMatrix("worldToScreen", w2s.ToMatrix4x4());
 
-                    Camera.main.projectionMatrix = w2s.ToMatrix4x4();
+                    if (Camera.main != null) Camera.main.projectionMatrix = w2s.ToMatrix4x4();
 
                     ViewMaterial.SetPass(0);
                     Graphics.DrawMeshNow(PreProcessMesh, Matrix4x4.TRS(Vector3.zero, Quaternion.identity, Vector3.one));
@@ -436,22 +471,20 @@ namespace SpaceEngine.Core.Preprocess.Forest
 
                     current++;
 
-                    Debug.Log(string.Format("Precomputing Views Step {0} of {1} : View {2}", current, total, view));
+                    Debug.Log($"Precomputing Views Step {current} of {total} : View {view}");
 
-                    viewsLines.Add(string.Format("{0}f,{1}f,{2}f,{3}f,{4}f,{5}f,{6}f,{7}f,{8}f,", (float)w2s.m[0, 0], (float)w2s.m[0, 1], (float)w2s.m[0, 2],
-                                                                                                  (float)w2s.m[1, 0], (float)w2s.m[1, 1], (float)w2s.m[1, 2],
-                                                                                                  (float)w2s.m[2, 0], (float)w2s.m[2, 1], (float)w2s.m[2, 2]));
+                    viewsLines.Add($"{(float)w2s.m[0, 0]}f,{(float)w2s.m[0, 1]}f,{(float)w2s.m[0, 2]}f,{(float)w2s.m[1, 0]}f,{(float)w2s.m[1, 1]}f,{(float)w2s.m[1, 2]}f,{(float)w2s.m[2, 0]}f,{(float)w2s.m[2, 1]}f,{(float)w2s.m[2, 2]}f,");
                 }
             }
 
-            if (callback != null) callback(viewsLines, viewsBilboards);
+            callback?.Invoke(viewsLines, viewsBilboards);
         }
 
         private void CalculateViews()
         {
             Debug.Log("Precomputing Views Started...");
 
-            StreamWriter file = new StreamWriter(ApplicationDataPath + "/Resources/Preprocess/Forest/Views.txt");
+            var file = new StreamWriter($"{ApplicationDataPath}/Resources/Preprocess/Forest/Views.txt");
 
             StartCoroutine(CalculateViewsRoutine((lines, billboards) =>
             {
@@ -462,7 +495,7 @@ namespace SpaceEngine.Core.Preprocess.Forest
 
                 foreach (var billboard in billboards)
                 {
-                    File.WriteAllBytes(ApplicationDataPath + DestinationFolder + string.Format("TestTree/{0}-{1}", "Trees3D", billboard.Key) + ".png", billboard.Value.EncodeToPNG());
+                    File.WriteAllBytes($"{ApplicationDataPath}{DestinationFolder}TestTree/Trees3D-{billboard.Key}.png", billboard.Value.EncodeToPNG());
                 }
 
                 file.Flush();

@@ -1,7 +1,7 @@
 ﻿#region License
 // Procedural planet generator.
 // 
-// Copyright (C) 2015-2018 Denis Ovchinnikov [zameran] 
+// Copyright (C) 2015-2023 Denis Ovchinnikov [zameran] 
 // All rights reserved.
 // 
 // Redistribution and use in source and binary forms, with or without
@@ -95,24 +95,24 @@ public class UserInterface : MonoBehaviour, IEventit
 
     #region Eventit
 
-    public bool isEventit { get; set; }
+    public bool IsEventit { get; set; }
 
     public void Eventit()
     {
-        if (isEventit) return;
+        if (IsEventit) return;
 
         SceneManager.activeSceneChanged += OnActiveSceneChanged;
 
-        isEventit = true;
+        IsEventit = true;
     }
 
     public void UnEventit()
     {
-        if (!isEventit) return;
+        if (!IsEventit) return;
 
         SceneManager.activeSceneChanged -= OnActiveSceneChanged;
 
-        isEventit = false;
+        IsEventit = false;
     }
 
     #endregion

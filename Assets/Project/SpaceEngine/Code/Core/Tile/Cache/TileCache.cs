@@ -1,4 +1,39 @@
-﻿using SpaceEngine.Core.Containers;
+﻿#region License
+// Procedural planet generator.
+//  
+// Copyright (C) 2015-2023 Denis Ovchinnikov [zameran] 
+// All rights reserved.
+// 
+// Redistribution and use in source and binary forms, with or without
+// modification, are permitted provided that the following conditions
+// are met:
+// 1. Redistributions of source code must retain the above copyright
+//    notice, this list of conditions and the following disclaimer.
+// 2. Redistributions in binary form must reproduce the above copyright
+//    notice, this list of conditions and the following disclaimer in the
+//    documentation and/or other materials provided with the distribution.
+// 3. Neither the name of the copyright holders nor the names of its
+//    contributors may be used to endorse or promote products derived from
+//    this software without specific prior written permission.
+// 
+// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+// AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+// IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+// ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE
+// LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+// CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+// SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+// INTERRUPTION)HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+// CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+// ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF
+// THE POSSIBILITY OF SUCH DAMAGE.
+// 
+// Creation Date: 2017.03.28
+// Creation Time: 2:18 PM
+// Creator: zameran
+#endregion
+
+using SpaceEngine.Core.Containers;
 using SpaceEngine.Core.Exceptions;
 using SpaceEngine.Core.Tile.Producer;
 using SpaceEngine.Core.Tile.Storage;
@@ -34,7 +69,7 @@ namespace SpaceEngine.Core.Tile.Cache
         /// <summary>
         /// Next local identifier to be used for a <see cref="TileProducer"/> using this cache.
         /// </summary>
-        public int NextProducerId { get { return nextProducerId++; } }
+        public int NextProducerId => nextProducerId++;
 
         /// <summary>
         /// The total number of slots managed by the <see cref="Storage.TileStorage"/> attached to the cache.
@@ -50,7 +85,7 @@ namespace SpaceEngine.Core.Tile.Cache
         /// <summary>
         /// The length of tiles data storage.
         /// </summary>
-        public int TileStorageLength { get { return TileStorage.Length; } }
+        public int TileStorageLength => TileStorage.Length;
 
         /// <summary>
         /// The tiles currently in use. 
@@ -59,7 +94,7 @@ namespace SpaceEngine.Core.Tile.Cache
         /// </summary>
         private Dictionary<Tile.TId, Tile> UsedTiles;
 
-        public int UsedTilesCount { get { return UsedTiles.Count; } }
+        public int UsedTilesCount => UsedTiles.Count;
 
         /// <summary>
         /// The unused tiles. 
@@ -70,7 +105,7 @@ namespace SpaceEngine.Core.Tile.Cache
         /// </summary>
         public DictionaryQueue<Tile.TId, Tile> UnusedTiles;
 
-        public int UnusedTilesCount { get { return UnusedTiles.Count(); } }
+        public int UnusedTilesCount => UnusedTiles.Count();
 
         /// <summary>
         /// The producers that use this <see cref="TileCache"/>. Maps local producer identifiers to actual producers.
@@ -107,9 +142,18 @@ namespace SpaceEngine.Core.Tile.Cache
 
         public void InsertProducer(int id, TileProducer producer)
         {
+            //Debug.Log(string.Format("TileCache: Producer {0} inserted in to cache with ID: {1}", producer.name, id));
+            
+            if (Producers == null)
+            {
+                Debug.LogWarning($"TileCache: Still not Initialized, but used! {producer.name}");
+                
+                return;
+            }
+            
             if (Producers.ContainsKey(id))
             {
-                Debug.Log(string.Format("TileCache: Producer with {0} already inserted!", id));
+                Debug.Log($"TileCache: Producer with {id} already inserted!");
             }
             else
             {
@@ -126,7 +170,7 @@ namespace SpaceEngine.Core.Tile.Cache
         {
             if (i >= TileStorageLength)
             {
-                Debug.Log(string.Format("TileCache: Tile storage at location {0} does not exist!", i));
+                Debug.Log($"TileCache: Tile storage at location {i} does not exist!");
             }
 
             return TileStorage[i];
@@ -199,7 +243,7 @@ namespace SpaceEngine.Core.Tile.Cache
             // If this producer id does not exist can not create tile.
             if (!Producers.ContainsKey(producerId))
             {
-                Debug.Log(string.Format("TileCache.GetTile: Producer {0} not been inserted into cache!", producerId));
+                Debug.Log($"TileCache.GetTile: Producer with ID: {producerId} not been inserted into cache!");
                 return null;
             }
 
@@ -233,7 +277,7 @@ namespace SpaceEngine.Core.Tile.Cache
                     // If a free slot is not found then program has must abort. Try setting the cache capacity to higher value.
                     if (slot == null)
                     {
-                        throw new CacheCapacityException("No more free slots found. Insufficient storage capacity for cache " + name);
+                        throw new CacheCapacityException($"No more free slots found. Insufficient storage capacity for cache {name}");
                     }
                 }
                 else

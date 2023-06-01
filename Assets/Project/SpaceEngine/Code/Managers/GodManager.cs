@@ -1,7 +1,7 @@
 ﻿#region License
 // Procedural planet generator.
 // 
-// Copyright (C) 2015-2018 Denis Ovchinnikov [zameran] 
+// Copyright (C) 2015-2023 Denis Ovchinnikov [zameran] 
 // All rights reserved.
 // 
 // Redistribution and use in source and binary forms, with or without
@@ -35,11 +35,14 @@
 
 using SpaceEngine.Cameras;
 using SpaceEngine.Core.Bodies;
+using SpaceEngine.Core.Patterns.Singleton;
 using SpaceEngine.Core.Utilities;
 using SpaceEngine.Enums;
+using SpaceEngine.Environment.Startfield;
 using SpaceEngine.Environment.Sun;
+using SpaceEngine.Helpers;
 using SpaceEngine.SciptableObjects;
-using SpaceEngine.Startfield;
+using SpaceEngine.Tools;
 
 using System.Linq;
 
@@ -64,23 +67,15 @@ public class GodManager : MonoSingleton<GodManager>
 
     public Body ActiveBody { get { return Bodies.FirstOrDefault(body => Helper.Enabled(body)); } }
 
-    public ComputeShader WriteData { get { return GSCS.WriteData; } }
-    public ComputeShader ReadData { get { return GSCS.ReadData; } }
+    public ComputeShader WriteData => GSCS.WriteData;
+    public ComputeShader ReadData => GSCS.ReadData;
 
-    public ComputeShader CopyInscatter1 { get { return GSCS.CopyInscatter1; } }
-    public ComputeShader CopyInscatterN { get { return GSCS.CopyInscatterN; } }
-    public ComputeShader CopyIrradiance { get { return GSCS.CopyIrradiance; } }
-    public ComputeShader Inscatter1 { get { return GSCS.Inscatter1; } }
-    public ComputeShader InscatterN { get { return GSCS.InscatterN; } }
-    public ComputeShader InscatterS { get { return GSCS.InscatterS; } }
-    public ComputeShader Irradiance1 { get { return GSCS.Irradiance1; } }
-    public ComputeShader IrradianceN { get { return GSCS.IrradianceN; } }
-    public ComputeShader Transmittance { get { return GSCS.Transmittance; } }
-    public ComputeShader Variance { get { return GSCS.Variance; } }
+    public ComputeShader Precompute => GSCS.Precompute;
+    public ComputeShader Variance => GSCS.Variance;
 
-    public Shader FourierShader { get { return GSCS.Fourier; } }
+    public Shader FourierShader => GSCS.Fourier;
 
-    public bool UsesReversedZBuffer { get { return SystemInfo.usesReversedZBuffer; } }
+    public bool UsesReversedZBuffer => SystemInfo.usesReversedZBuffer;
 
     /// <summary>
     /// This is the fourier transform size, must pow2 number. Recommend no higher or lower than 64, 128 or 256.
@@ -100,7 +95,7 @@ public class GodManager : MonoSingleton<GodManager>
     /// <summary>
     /// The size of each tile. For tiles made of raster data, this size is the tile width in pixels (the tile height is supposed equal to the tile width).
     /// </summary>
-    public int TileSize { get { return GridResolution * 4; } }
+    public int TileSize => GridResolution * 4;
 
     // TODO : Make these settings switching event based. To avoid constant every-frame checkings...
     public bool Eclipses = true;
@@ -125,9 +120,9 @@ public class GodManager : MonoSingleton<GodManager>
         InitQuadMesh();
         InitOceanScreenGridMeshes();
 
-        Bodies = FindObjectsOfType<Body>();
-        Starfields = FindObjectsOfType<Starfield>();
-        Sunglares = FindObjectsOfType<SunGlare>();
+        Bodies = FindObjectsByType<Body>(FindObjectsSortMode.InstanceID);
+        Starfields = FindObjectsByType<Starfield>(FindObjectsSortMode.InstanceID);
+        Sunglares = FindObjectsByType<SunGlare>(FindObjectsSortMode.InstanceID);
 
         CreateOrthoNoise();
     }
@@ -234,8 +229,8 @@ public class GodManager : MonoSingleton<GodManager>
 
         if (cameraPosition.sqrMagnitude > 500000.0)
         {
-            var suns = FindObjectsOfType<Sun>();
-            var bodies = FindObjectsOfType<CelestialBody>();
+            var suns = FindObjectsByType<Sun>(FindObjectsSortMode.InstanceID);
+            var bodies = FindObjectsByType<CelestialBody>(FindObjectsSortMode.InstanceID);
 
             foreach (var sun in suns)
             {

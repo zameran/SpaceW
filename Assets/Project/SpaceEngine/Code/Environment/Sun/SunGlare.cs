@@ -1,7 +1,7 @@
 ﻿#region License
 // Procedural planet generator.
 // 
-// Copyright (C) 2015-2018 Denis Ovchinnikov [zameran] 
+// Copyright (C) 2015-2023 Denis Ovchinnikov [zameran] 
 // All rights reserved.
 // 
 // Redistribution and use in source and binary forms, with or without
@@ -38,7 +38,9 @@ using SpaceEngine.Core.Patterns.Strategy.Renderable;
 using SpaceEngine.Core.Patterns.Strategy.Uniformed;
 using SpaceEngine.Enums;
 using SpaceEngine.Environment.Atmospheric;
+using SpaceEngine.Helpers;
 using SpaceEngine.SciptableObjects;
+using SpaceEngine.Tools;
 
 using UnityEngine;
 
@@ -48,7 +50,7 @@ namespace SpaceEngine.Environment.Sun
     {
         private readonly CachedComponent<Sun> SunCachedComponent = new CachedComponent<Sun>();
 
-        public Sun SunComponent { get { return SunCachedComponent.Component; } }
+        public Sun SunComponent => SunCachedComponent.Component;
 
         public Atmosphere Atmosphere;
 

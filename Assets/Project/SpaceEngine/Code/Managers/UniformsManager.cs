@@ -1,7 +1,7 @@
 ﻿#region License
 // Procedural planet generator.
 // 
-// Copyright (C) 2015-2018 Denis Ovchinnikov [zameran] 
+// Copyright (C) 2015-2023 Denis Ovchinnikov [zameran] 
 // All rights reserved.
 // 
 // Redistribution and use in source and binary forms, with or without
@@ -34,6 +34,7 @@
 #endregion
 
 using SpaceEngine.Core.Debugging;
+using SpaceEngine.Core.Patterns.Singleton;
 using SpaceEngine.Core.Patterns.Strategy.Uniformed;
 
 using UnityEngine;
@@ -149,7 +150,7 @@ public class UniformsManager : MonoSingleton<UniformsManager>, IUniformed, IUnif
         if (target == null) return;
         if (kernels == null || kernels.Length == 0) { Debug.Log("UniformsManager: Kernels array problem!"); return; }
 
-        for (int i = 0; i < kernels.Length; i++)
+        for (var i = 0; i < kernels.Length; i++)
         {
             SetUniforms(target, i);
         }
@@ -218,10 +219,10 @@ public class UniformsManager : MonoSingleton<UniformsManager>, IUniformed, IUnif
 
     public Texture2D LoadTextureFromResources(string textureName)
     {
-        var path = "Textures/" + textureName;
+        var path = $"Textures/{textureName}";
         var textureResource = Resources.Load(path, typeof(Texture2D)) as Texture2D;
 
-        if (textureResource == null) { Logger.Log(string.Format("UniformsManager.LoadTextureFromResources: Failed to load texture from {0}", path)); }
+        if (textureResource == null) { Logger.Log($"UniformsManager.LoadTextureFromResources: Failed to load texture from {path}"); }
 
         return textureResource;
     }

@@ -1,7 +1,7 @@
 ﻿#region License
 // Procedural planet generator.
 //  
-// Copyright (C) 2015-2018 Denis Ovchinnikov [zameran] 
+// Copyright (C) 2015-2023 Denis Ovchinnikov [zameran] 
 // All rights reserved.
 // 
 // Redistribution and use in source and binary forms, with or without
@@ -35,6 +35,7 @@
 
 using SpaceEngine.Core.Storage;
 using SpaceEngine.Core.Tile.Storage;
+using SpaceEngine.Tools;
 
 using System;
 using System.Linq;
@@ -51,14 +52,9 @@ namespace SpaceEngine.Debugging
 
         private bool ShowContents = false;
 
-        private Rect ContentsInfoBounds
-        {
-            get
-            {
-                return new Rect(debugInfoBounds.x + debugInfoBounds.width + 10, 
-                                debugInfoBounds.y, ContentsWindowSize, ContentsWindowSize);
-            }
-        }
+        private Rect ContentsInfoBounds =>
+            new Rect(debugInfoBounds.x + debugInfoBounds.width + 10, 
+                debugInfoBounds.y, ContentsWindowSize, ContentsWindowSize);
 
         protected override void Awake()
         {
@@ -128,7 +124,7 @@ namespace SpaceEngine.Debugging
                 {
                     if (tileStorages.Count == 0)
                     {
-                        GUILayoutExtensions.LabelWithSpace(string.Format("Active body doesn't have any storages of provided type {0}", typeof(T).Name));
+                        GUILayoutExtensions.LabelWithSpace($"Active body doesn't have any storages of provided type {typeof(T).Name}");
                     }
                     else
                     {
@@ -185,13 +181,13 @@ namespace SpaceEngine.Debugging
                 {
                     if (tileStorages.Count == 0)
                     {
-                        GUILayoutExtensions.LabelWithSpace(string.Format("Active body doesn't have any storages of provided type {0}", typeof(T).Name));
+                        GUILayoutExtensions.LabelWithSpace($"Active body doesn't have any storages of provided type {typeof(T).Name}");
                     }
                     else
                     {
-                        GUILayoutExtensions.LabelWithSpace(string.Format("{0} Count: {1}", prefix, tileStorages.Count));
-                        GUILayoutExtensions.LabelWithSpace(string.Format("{0} Total Capacity: {1}", prefix, tileStorages.Sum((storage) => storage.Capacity)));
-                        GUILayoutExtensions.LabelWithSpace(string.Format("{0} Total Free: {1}", prefix, tileStorages.Sum((storage) => storage.FreeSlotsCount)));
+                        GUILayoutExtensions.LabelWithSpace($"{prefix} Count: {tileStorages.Count}");
+                        GUILayoutExtensions.LabelWithSpace($"{prefix} Total Capacity: {tileStorages.Sum(storage => storage.Capacity)}");
+                        GUILayoutExtensions.LabelWithSpace($"{prefix} Total Free: {tileStorages.Sum(storage => storage.FreeSlotsCount)}");
                     }
 
                     GUILayoutExtensions.SpacingSeparator();

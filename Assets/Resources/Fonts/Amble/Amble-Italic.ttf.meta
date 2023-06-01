@@ -1,15 +1,15 @@
 fileFormatVersion: 2
 guid: 6c95de0b1f8bd78419ecd0e20068084a
-timeCreated: 1458993835
-licenseType: Pro
 TrueTypeFontImporter:
-  serializedVersion: 3
+  externalObjects: {}
+  serializedVersion: 4
   fontSize: 11
   forceTextureCase: -2
-  characterSpacing: 1
-  characterPadding: 0
+  characterSpacing: 0
+  characterPadding: 1
   includeFontData: 1
-  fontNames: []
+  fontNames:
+  - Amble
   fallbackFontReferences:
   - {fileID: 12800000, guid: b59eef72a315c1241a2d4af4a57c02ca, type: 3}
   - {fileID: 12800000, guid: 39e62596fe86bc546b839ebd8720fc73, type: 3}
@@ -21,6 +21,8 @@ TrueTypeFontImporter:
   customCharacters: 
   fontRenderingMode: 0
   ascentCalculationMode: 1
+  useLegacyBoundsCalculation: 0
+  shouldRoundAdvanceValue: 1
   userData: 
   assetBundleName: 
   assetBundleVariant: 

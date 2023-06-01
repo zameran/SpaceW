@@ -1,7 +1,7 @@
 ﻿#region License
 // Procedural planet generator.
 //  
-// Copyright (C) 2015-2018 Denis Ovchinnikov [zameran] 
+// Copyright (C) 2015-2023 Denis Ovchinnikov [zameran] 
 // All rights reserved.
 //  
 // Redistribution and use in source and binary forms, with or without
@@ -48,15 +48,7 @@ namespace SpaceEngine.SciptableObjects
         public ComputeShader ReadData;
 
         [Header("Atmosphere Precomputation")]
-        public ComputeShader CopyInscatter1;
-        public ComputeShader CopyInscatterN;
-        public ComputeShader CopyIrradiance;
-        public ComputeShader Inscatter1;
-        public ComputeShader InscatterN;
-        public ComputeShader InscatterS;
-        public ComputeShader Irradiance1;
-        public ComputeShader IrradianceN;
-        public ComputeShader Transmittance;
+        public ComputeShader Precompute;
 
         [Header("Ocean Precomputation")]
         public Shader Fourier;

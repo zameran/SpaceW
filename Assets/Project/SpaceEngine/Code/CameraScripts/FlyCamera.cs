@@ -1,7 +1,7 @@
 #region License
 // Procedural planet generator.
 // 
-// Copyright (C) 2015-2018 Denis Ovchinnikov [zameran] 
+// Copyright (C) 2015-2023 Denis Ovchinnikov [zameran] 
 // All rights reserved.
 // 
 // Redistribution and use in source and binary forms, with or without
@@ -35,6 +35,7 @@
 
 using SpaceEngine.Core.Bodies;
 using SpaceEngine.Core.Numerics.Vectors;
+using SpaceEngine.Helpers;
 
 using System.ComponentModel;
 
@@ -54,10 +55,14 @@ namespace SpaceEngine.Cameras
             Far
         }
 
-        public Body Body { get { return GodManager.Instance.ActiveBody; } }
+        public Body Body => GodManager.Instance.ActiveBody;
 
-        public float NearClipPlane { get { return CameraComponent.nearClipPlane; } set { CameraComponent.nearClipPlane = value; } }
-        public float FarClipPlane { get { return CameraComponent.farClipPlane; } set { CameraComponent.farClipPlane = value; } }
+        public float NearClipPlane { get => CameraComponent.nearClipPlane;
+            set => CameraComponent.nearClipPlane = value;
+        }
+        public float FarClipPlane { get => CameraComponent.farClipPlane;
+            set => CameraComponent.farClipPlane = value;
+        }
 
         public ClipPlanesControl ClipPlanesControlType = ClipPlanesControl.NearFar;
 
@@ -89,7 +94,7 @@ namespace SpaceEngine.Cameras
             UpdateDistances();
             UpdateClipPlanes();
 
-            MainRenderer.Instance.ComposeOutputRender();
+            MainRenderer.Instance.SortBodies();
         }
 
         protected override void Update()

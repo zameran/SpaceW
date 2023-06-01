@@ -1,7 +1,7 @@
 ﻿#region License
 // Procedural planet generator.
 // 
-// Copyright (C) 2015-2018 Denis Ovchinnikov [zameran] 
+// Copyright (C) 2015-2023 Denis Ovchinnikov [zameran] 
 // All rights reserved.
 // 
 // Redistribution and use in source and binary forms, with or without
@@ -36,283 +36,286 @@
 using UnityEngine;
 using UnityEngine.Rendering;
 
-public static class RTExtensions
+namespace SpaceEngine.Tools
 {
-    public static RenderTexture CreateRTexture(int size)
+    public static class RTExtensions
     {
-        var rt = new RenderTexture(size, size, 24, RenderTextureFormat.ARGB32)
+        public static RenderTexture CreateRTexture(int size)
         {
-            enableRandomWrite = true
-        };
+            var rt = new RenderTexture(size, size, 24, RenderTextureFormat.ARGB32)
+            {
+                enableRandomWrite = true
+            };
 
-        rt.SetName();
-        rt.Create();
+            rt.SetName();
+            rt.Create();
 
-        return rt;
-    }
+            return rt;
+        }
 
-    public static RenderTexture CreateRTexture(int size, int depth)
-    {
-        var rt = new RenderTexture(size, size, depth, RenderTextureFormat.ARGB32)
+        public static RenderTexture CreateRTexture(int size, int depth)
         {
-            enableRandomWrite = true
-        };
+            var rt = new RenderTexture(size, size, depth, RenderTextureFormat.ARGB32)
+            {
+                enableRandomWrite = true
+            };
 
-        rt.SetName();
-        rt.Create();
+            rt.SetName();
+            rt.Create();
 
-        return rt;
-    }
+            return rt;
+        }
 
-    public static RenderTexture CreateCubeRTexture(int size, int depth, HideFlags flags)
-    {
-        var rt = new RenderTexture(size, size, depth, RenderTextureFormat.ARGB32)
+        public static RenderTexture CreateCubeRTexture(int size, int depth, HideFlags flags)
         {
-            enableRandomWrite = true,
-            dimension = TextureDimension.Cube,
-            hideFlags = flags
-        };
+            var rt = new RenderTexture(size, size, depth, RenderTextureFormat.ARGB32)
+            {
+                enableRandomWrite = true,
+                dimension = TextureDimension.Cube,
+                hideFlags = flags
+            };
 
-        rt.SetName();
-        rt.Create();
+            rt.SetName();
+            rt.Create();
 
-        return rt;
-    }
+            return rt;
+        }
 
-    public static RenderTexture CreateRTexture(int size, int depth, RenderTextureFormat format)
-    {
-        var rt = new RenderTexture(size, size, depth, format)
+        public static RenderTexture CreateRTexture(int size, int depth, RenderTextureFormat format)
         {
-            enableRandomWrite = true
-        };
+            var rt = new RenderTexture(size, size, depth, format)
+            {
+                enableRandomWrite = true
+            };
 
-        rt.SetName();
-        rt.Create();
+            rt.SetName();
+            rt.Create();
 
-        return rt;
-    }
+            return rt;
+        }
 
-    public static RenderTexture CreateRTexture(int size, int depth, RenderTextureFormat format, FilterMode fm, TextureWrapMode twm)
-    {
-        var rt = new RenderTexture(size, size, depth, format)
+        public static RenderTexture CreateRTexture(int size, int depth, RenderTextureFormat format, FilterMode fm, TextureWrapMode twm)
         {
-            enableRandomWrite = true,
-            filterMode = fm,
-            wrapMode = twm
-        };
+            var rt = new RenderTexture(size, size, depth, format)
+            {
+                enableRandomWrite = true,
+                filterMode = fm,
+                wrapMode = twm
+            };
 
-        rt.SetName();
-        rt.Create();
+            rt.SetName();
+            rt.Create();
 
-        return rt;
-    }
+            return rt;
+        }
 
-    public static RenderTexture CreateRTexture(int size, int depth, RenderTextureFormat format, FilterMode fm, TextureWrapMode twm, int volumeDepth)
-    {
-        var rt = new RenderTexture(size, size, depth, format)
+        public static RenderTexture CreateRTexture(int size, int depth, RenderTextureFormat format, FilterMode fm, TextureWrapMode twm, int volumeDepth)
         {
-            enableRandomWrite = true,
-            filterMode = fm,
-            wrapMode = twm,
-            useMipMap = false,
-            dimension = UnityEngine.Rendering.TextureDimension.Tex3D,
-            volumeDepth = volumeDepth
-        };
+            var rt = new RenderTexture(size, size, depth, format)
+            {
+                enableRandomWrite = true,
+                filterMode = fm,
+                wrapMode = twm,
+                useMipMap = false,
+                dimension = UnityEngine.Rendering.TextureDimension.Tex3D,
+                volumeDepth = volumeDepth
+            };
 
-        rt.SetName();
-        rt.Create();
+            rt.SetName();
+            rt.Create();
 
-        return rt;
-    }
+            return rt;
+        }
 
-    public static RenderTexture CreateRTexture(int size, int depth, RenderTextureFormat format, FilterMode fm, TextureWrapMode twm, bool usemm, int al)
-    {
-        var rt = new RenderTexture(size, size, depth, format)
+        public static RenderTexture CreateRTexture(int size, int depth, RenderTextureFormat format, FilterMode fm, TextureWrapMode twm, bool usemm, int al)
         {
-            enableRandomWrite = true,
-            filterMode = fm,
-            wrapMode = twm,
-            useMipMap = usemm,
-            anisoLevel = al
-        };
+            var rt = new RenderTexture(size, size, depth, format)
+            {
+                enableRandomWrite = true,
+                filterMode = fm,
+                wrapMode = twm,
+                useMipMap = usemm,
+                anisoLevel = al
+            };
 
-        rt.SetName();
-        rt.Create();
+            rt.SetName();
+            rt.Create();
 
-        return rt;
-    }
+            return rt;
+        }
 
-    public static RenderTexture CreateRTexture(int size, int depth, RenderTextureFormat format, FilterMode fm, TextureWrapMode twm, bool usemm, bool erw, int al)
-    {
-        var rt = new RenderTexture(size, size, depth, format)
+        public static RenderTexture CreateRTexture(int size, int depth, RenderTextureFormat format, FilterMode fm, TextureWrapMode twm, bool usemm, bool erw, int al)
         {
-            enableRandomWrite = erw,
-            filterMode = fm,
-            wrapMode = twm,
-            useMipMap = usemm,
-            anisoLevel = al
-        };
+            var rt = new RenderTexture(size, size, depth, format)
+            {
+                enableRandomWrite = erw,
+                filterMode = fm,
+                wrapMode = twm,
+                useMipMap = usemm,
+                anisoLevel = al
+            };
 
-        rt.SetName();
-        rt.Create();
+            rt.SetName();
+            rt.Create();
 
-        return rt;
-    }
+            return rt;
+        }
 
-    public static RenderTexture CreateRTexture(int size, int depth, RenderTextureFormat format, FilterMode fm, TextureWrapMode twm, bool usemm, int al, bool pot)
-    {
-        var rt = new RenderTexture(size, size, depth, format)
+        public static RenderTexture CreateRTexture(int size, int depth, RenderTextureFormat format, FilterMode fm, TextureWrapMode twm, bool usemm, int al, bool pot)
         {
-            enableRandomWrite = true,
-            filterMode = fm,
-            wrapMode = twm,
-            useMipMap = usemm,
-            anisoLevel = al,
-            isPowerOfTwo = pot
-        };
+            var rt = new RenderTexture(size, size, depth, format)
+            {
+                enableRandomWrite = true,
+                filterMode = fm,
+                wrapMode = twm,
+                useMipMap = usemm,
+                anisoLevel = al,
+                isPowerOfTwo = pot
+            };
 
-        rt.SetName();
-        rt.Create();
+            rt.SetName();
+            rt.Create();
 
-        return rt;
-    }
+            return rt;
+        }
 
-    public static RenderTexture CreateRTexture(Vector2 size)
-    {
-        var rt = new RenderTexture((int)size.x, (int)size.y, 24, RenderTextureFormat.ARGB32)
+        public static RenderTexture CreateRTexture(Vector2 size)
         {
-            enableRandomWrite = true
-        };
+            var rt = new RenderTexture((int)size.x, (int)size.y, 24, RenderTextureFormat.ARGB32)
+            {
+                enableRandomWrite = true
+            };
 
-        rt.SetName();
-        rt.Create();
+            rt.SetName();
+            rt.Create();
 
-        return rt;
-    }
+            return rt;
+        }
 
-    public static RenderTexture CreateRTexture(Vector2 size, int depth)
-    {
-        var rt = new RenderTexture((int)size.x, (int)size.y, depth, RenderTextureFormat.ARGB32)
+        public static RenderTexture CreateRTexture(Vector2 size, int depth)
         {
-            enableRandomWrite = true
-        };
+            var rt = new RenderTexture((int)size.x, (int)size.y, depth, RenderTextureFormat.ARGB32)
+            {
+                enableRandomWrite = true
+            };
 
-        rt.SetName();
-        rt.Create();
+            rt.SetName();
+            rt.Create();
 
-        return rt;
-    }
+            return rt;
+        }
 
-    public static RenderTexture CreateRTexture(Vector2 size, int depth, RenderTextureFormat format)
-    {
-        var rt = new RenderTexture((int)size.x, (int)size.y, depth, format)
+        public static RenderTexture CreateRTexture(Vector2 size, int depth, RenderTextureFormat format)
         {
-            enableRandomWrite = true
-        };
+            var rt = new RenderTexture((int)size.x, (int)size.y, depth, format)
+            {
+                enableRandomWrite = true
+            };
 
-        rt.SetName();
-        rt.Create();
+            rt.SetName();
+            rt.Create();
 
-        return rt;
-    }
+            return rt;
+        }
 
-    public static RenderTexture CreateRTexture(Vector2 size, int depth, RenderTextureFormat format, FilterMode fm, TextureWrapMode twm)
-    {
-        var rt = new RenderTexture((int)size.x, (int)size.y, depth, format)
+        public static RenderTexture CreateRTexture(Vector2 size, int depth, RenderTextureFormat format, FilterMode fm, TextureWrapMode twm)
         {
-            enableRandomWrite = true,
-            filterMode = fm,
-            wrapMode = twm
-        };
+            var rt = new RenderTexture((int)size.x, (int)size.y, depth, format)
+            {
+                enableRandomWrite = true,
+                filterMode = fm,
+                wrapMode = twm
+            };
 
-        rt.SetName();
-        rt.Create();
+            rt.SetName();
+            rt.Create();
 
-        return rt;
-    }
+            return rt;
+        }
 
-    public static RenderTexture CreateRTexture(Vector2 size, int depth, RenderTextureFormat format, FilterMode fm, TextureWrapMode twm, int volumeDepth)
-    {
-        var rt = new RenderTexture((int)size.x, (int)size.y, depth, format)
+        public static RenderTexture CreateRTexture(Vector2 size, int depth, RenderTextureFormat format, FilterMode fm, TextureWrapMode twm, int volumeDepth)
         {
-            enableRandomWrite = true,
-            filterMode = fm,
-            wrapMode = twm,
-            useMipMap = false,
-            dimension = UnityEngine.Rendering.TextureDimension.Tex3D,
-            volumeDepth = volumeDepth
-        };
+            var rt = new RenderTexture((int)size.x, (int)size.y, depth, format)
+            {
+                enableRandomWrite = true,
+                filterMode = fm,
+                wrapMode = twm,
+                useMipMap = false,
+                dimension = UnityEngine.Rendering.TextureDimension.Tex3D,
+                volumeDepth = volumeDepth
+            };
 
-        rt.SetName();
-        rt.Create();
+            rt.SetName();
+            rt.Create();
 
-        return rt;
-    }
+            return rt;
+        }
 
-    public static RenderTexture CreateRTexture(Vector2 size, int depth, RenderTextureFormat format, FilterMode fm, TextureWrapMode twm, bool usemm, int al)
-    {
-        var rt = new RenderTexture((int)size.x, (int)size.y, depth, format)
+        public static RenderTexture CreateRTexture(Vector2 size, int depth, RenderTextureFormat format, FilterMode fm, TextureWrapMode twm, bool usemm, int al)
         {
-            enableRandomWrite = true,
-            filterMode = fm,
-            wrapMode = twm,
-            useMipMap = usemm,
-            anisoLevel = al
-        };
+            var rt = new RenderTexture((int)size.x, (int)size.y, depth, format)
+            {
+                enableRandomWrite = true,
+                filterMode = fm,
+                wrapMode = twm,
+                useMipMap = usemm,
+                anisoLevel = al
+            };
 
-        rt.SetName();
-        rt.Create();
+            rt.SetName();
+            rt.Create();
 
-        return rt;
-    }
+            return rt;
+        }
 
-    public static RenderTexture CreateRTexture(Vector2 size, int depth, RenderTextureFormat format, FilterMode fm, TextureWrapMode twm, bool usemm, bool erw, int al)
-    {
-        var rt = new RenderTexture((int)size.x, (int)size.y, depth, format)
+        public static RenderTexture CreateRTexture(Vector2 size, int depth, RenderTextureFormat format, FilterMode fm, TextureWrapMode twm, bool usemm, bool erw, int al)
         {
-            enableRandomWrite = erw,
-            filterMode = fm,
-            wrapMode = twm,
-            useMipMap = usemm,
-            anisoLevel = al
-        };
+            var rt = new RenderTexture((int)size.x, (int)size.y, depth, format)
+            {
+                enableRandomWrite = erw,
+                filterMode = fm,
+                wrapMode = twm,
+                useMipMap = usemm,
+                anisoLevel = al
+            };
 
-        rt.SetName();
-        rt.Create();
+            rt.SetName();
+            rt.Create();
 
-        return rt;
-    }
+            return rt;
+        }
 
-    public static RenderTexture CreateRTexture(Vector2 size, int depth, RenderTextureFormat format, FilterMode fm, TextureWrapMode twm, bool usemm, int al, bool pot)
-    {
-        var rt = new RenderTexture((int)size.x, (int)size.y, depth, format)
+        public static RenderTexture CreateRTexture(Vector2 size, int depth, RenderTextureFormat format, FilterMode fm, TextureWrapMode twm, bool usemm, int al, bool pot)
         {
-            enableRandomWrite = true,
-            filterMode = fm,
-            wrapMode = twm,
-            useMipMap = usemm,
-            anisoLevel = al,
-            isPowerOfTwo = pot
-        };
+            var rt = new RenderTexture((int)size.x, (int)size.y, depth, format)
+            {
+                enableRandomWrite = true,
+                filterMode = fm,
+                wrapMode = twm,
+                useMipMap = usemm,
+                anisoLevel = al,
+                isPowerOfTwo = pot
+            };
 
-        rt.SetName();
-        rt.Create();
+            rt.SetName();
+            rt.Create();
 
-        return rt;
-    }
+            return rt;
+        }
 
-    public static void ReleaseAndDestroy(this RenderTexture rt)
-    {
-        // NOTE : Can be a problem here...
-        if (RenderTexture.active == rt) RenderTexture.active = null;
+        public static void ReleaseAndDestroy(this RenderTexture rt)
+        {
+            // NOTE : Can be a problem here...
+            if (RenderTexture.active == rt) RenderTexture.active = null;
 
-        rt.Release();
+            rt.Release();
 
-        Object.DestroyImmediate(rt);
-    }
+            Object.DestroyImmediate(rt);
+        }
 
-    public static void SetName(this RenderTexture rt, string name = "Temp GPU RTexture")
-    {
-        rt.name = name;
+        public static void SetName(this RenderTexture rt, string name = "Temp GPU RTexture")
+        {
+            rt.name = name;
+        }
     }
 }

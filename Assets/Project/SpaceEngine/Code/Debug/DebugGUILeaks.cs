@@ -1,7 +1,7 @@
 #region License
 // Procedural planet generator.
 // 
-// Copyright (C) 2015-2018 Denis Ovchinnikov [zameran] 
+// Copyright (C) 2015-2023 Denis Ovchinnikov [zameran] 
 // All rights reserved.
 // 
 // Redistribution and use in source and binary forms, with or without
@@ -33,6 +33,8 @@
 // Creator: zameran
 #endregion
 
+using SpaceEngine.Tools;
+
 using System;
 using System.Collections.Generic;
 
@@ -55,14 +57,14 @@ namespace SpaceEngine.Debugging
         {
             base.Start();
 
-            Objects = FindObjectsOfType(typeof(Object));
+            Objects = FindObjectsByType<Object>(FindObjectsSortMode.InstanceID);
         }
 
         private void FixedUpdate()
         {
             if (Time.frameCount % 64 == 0)
             {
-                Objects = FindObjectsOfType(typeof(Object));
+                Objects = FindObjectsByType<Object>(FindObjectsSortMode.InstanceID);
             }
         }
 
@@ -100,15 +102,15 @@ namespace SpaceEngine.Debugging
 
                 #endregion
 
-                var entryies = new List<KeyValuePair<Type, int>>(dictionary);
+                var entries = new List<KeyValuePair<Type, int>>(dictionary);
 
-                entryies.Sort((firstPair, nextPair) => nextPair.Value.CompareTo((firstPair.Value)));
+                entries.Sort((firstPair, nextPair) => nextPair.Value.CompareTo((firstPair.Value)));
 
                 GUILayout.BeginVertical();
 
-                for (int i = 0; i < entryies.Count; i++)
+                for (var i = 0; i < entries.Count; i++)
                 {
-                    var entry = entryies[i];
+                    var entry = entries[i];
 
                     GUILayoutExtensions.HorizontalBoxed("", GUISkin, () =>
                     {

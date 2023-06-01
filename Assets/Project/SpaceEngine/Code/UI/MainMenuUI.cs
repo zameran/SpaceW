@@ -1,7 +1,7 @@
 ﻿#region License
 // Procedural planet generator.
 // 
-// Copyright (C) 2015-2018 Denis Ovchinnikov [zameran] 
+// Copyright (C) 2015-2023 Denis Ovchinnikov [zameran] 
 // All rights reserved.
 // 
 // Redistribution and use in source and binary forms, with or without
@@ -36,6 +36,7 @@
 using DG.Tweening;
 
 using SpaceEngine.Enums;
+using SpaceEngine.Helpers;
 using SpaceEngine.Managers;
 using SpaceEngine.Pluginator;
 using SpaceEngine.UI;
@@ -68,7 +69,7 @@ public sealed class MainMenuUI : UserInterface, IUserInterface
         {
             if (loader.ExternalAssemblies.Count != 0)
             {
-                for (int i = 0; i < loader.ExternalAssemblies.Count; i++)
+                for (var i = 0; i < loader.ExternalAssemblies.Count; i++)
                 {
                     var assembly = loader.ExternalAssemblies[i];
 
@@ -76,7 +77,7 @@ public sealed class MainMenuUI : UserInterface, IUserInterface
                         AddToScrollView(addonsItemPrefab, addonsScrollView, assembly.Name, assembly.Version);
                     else
                     {
-                        Debug.LogError(string.Format("MainMenuUI: {0} assembly is null!", i));
+                        Debug.LogError($"MainMenuUI: {i} assembly is null!");
                     }
                 }
             }
@@ -90,7 +91,7 @@ public sealed class MainMenuUI : UserInterface, IUserInterface
             addonsShowToggle.interactable = (loader != null);
 
         if (addonsCounterText != null)
-            addonsCounterText.text = addonsCounterText.text + " " + ((loader == null) ? "0" : loader.ExternalAssemblies.Count.ToString());
+            addonsCounterText.text = $"{addonsCounterText.text} {((loader == null) ? "0" : loader.ExternalAssemblies.Count.ToString())}";
     }
 
     public void LoadScene()
@@ -104,11 +105,11 @@ public sealed class MainMenuUI : UserInterface, IUserInterface
 
     public void AddToScrollView(GameObject item, ScrollRect scrollView, string name = "", string version = "")
     {
-        GameObject createdItem = Instantiate(item);
+        var createdItem = Instantiate(item);
         createdItem.transform.SetParent(scrollView.content.transform);
         createdItem.transform.localScale = Vector3.one; //Must have.
 
-        AddonItemUI aiUI = createdItem.GetComponent<AddonItemUI>();
+        var aiUI = createdItem.GetComponent<AddonItemUI>();
         aiUI.SetCaption(aiUI.addonNameText, name);
         aiUI.SetCaption(aiUI.addonVersionText, version);
     }

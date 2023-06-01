@@ -1,7 +1,7 @@
 ﻿#region License
 // Procedural planet generator.
 // 
-// Copyright (C) 2015-2018 Denis Ovchinnikov [zameran] 
+// Copyright (C) 2015-2023 Denis Ovchinnikov [zameran] 
 // All rights reserved.
 // 
 // Redistribution and use in source and binary forms, with or without
@@ -33,16 +33,16 @@
 // Creator: zameran
 #endregion
 
-
-using SpaceEngine.Core.Utilities;
 using SpaceEngine.Environment.Atmospheric;
+using SpaceEngine.Tools;
+using SpaceEngine.Utilities;
 
 using System;
 using System.Collections;
 
 using UnityEngine;
 
-namespace SpaceEngine.Core.Preprocess.Atmospehre
+namespace SpaceEngine.Core.Preprocess.Atmosphere
 {
     public sealed class PreProcessAtmosphere : MonoBehaviour
     {
@@ -76,15 +76,7 @@ namespace SpaceEngine.Core.Preprocess.Atmospehre
         public RenderTexture irradianceT_Read, irradianceT_Write, inscatterT_Read, inscatterT_Write;
         public RenderTexture deltaET, deltaSRT, deltaSMT, deltaJT;
 
-        public ComputeShader CopyInscatter1 { get { return GodManager.Instance.CopyInscatter1; } }
-        public ComputeShader CopyInscatterN { get { return GodManager.Instance.CopyInscatterN; } }
-        public ComputeShader CopyIrradiance { get { return GodManager.Instance.CopyIrradiance; } }
-        public ComputeShader Inscatter1 { get { return GodManager.Instance.Inscatter1; } }
-        public ComputeShader InscatterN { get { return GodManager.Instance.InscatterN; } }
-        public ComputeShader InscatterS { get { return GodManager.Instance.InscatterS; } }
-        public ComputeShader Irradiance1 { get { return GodManager.Instance.Irradiance1; } }
-        public ComputeShader IrradianceN { get { return GodManager.Instance.IrradianceN; } }
-        public ComputeShader Transmittance { get { return GodManager.Instance.Transmittance; } }
+        public ComputeShader Precompute => GodManager.Instance.Precompute;
 
         int step, order;
 
@@ -133,7 +125,7 @@ namespace SpaceEngine.Core.Preprocess.Atmospehre
 
             if (ClearAfterBake) CollectGarbage(false, true);
 
-            if (callback != null) callback();
+            callback?.Invoke();
         }
 
         private IEnumerator DoWorkCoroutine(AtmosphereParameters AP, Action callback)
@@ -156,7 +148,7 @@ namespace SpaceEngine.Core.Preprocess.Atmospehre
 
             if (ClearAfterBake) CollectGarbage(false, true);
 
-            if (callback != null) callback();
+            callback?.Invoke();
         }
 
         private void OnDestroy()
@@ -211,15 +203,7 @@ namespace SpaceEngine.Core.Preprocess.Atmospehre
 
         public void SetParametersForAll(AtmosphereParameters AP)
         {
-            SetParameters(CopyInscatter1, AP);
-            SetParameters(CopyInscatterN, AP);
-            SetParameters(CopyIrradiance, AP);
-            SetParameters(Inscatter1, AP);
-            SetParameters(InscatterN, AP);
-            SetParameters(InscatterS, AP);
-            SetParameters(Irradiance1, AP);
-            SetParameters(IrradianceN, AP);
-            SetParameters(Transmittance, AP);
+            SetParameters(Precompute, AP);
         }
 
         public void ClearAll()
@@ -232,43 +216,53 @@ namespace SpaceEngine.Core.Preprocess.Atmospehre
 
         public void Calculate(AtmosphereParameters AP)
         {
+            var copyInscatter1Kernel = Precompute.FindKernel("CopyInscatter1");
+            var copyInscatterNKernel = Precompute.FindKernel("CopyInscatterN");
+            var copyIrradianceKernel = Precompute.FindKernel("CopyIrradiance");
+            var inscatter1Kernel = Precompute.FindKernel("Inscatter1");
+            var inscatterNKernel = Precompute.FindKernel("InscatterN");
+            var inscatterSKernel = Precompute.FindKernel("InscatterS");
+            var irradiance1Kernel = Precompute.FindKernel("Irradiance1");
+            var irradianceNKernel = Precompute.FindKernel("IrradianceN");
+            var transmittanceKernel = Precompute.FindKernel("Transmittance");
+
             if (step == 0)
             {
                 // computes transmittance texture T (line 1 in algorithm 4.1)
-                Transmittance.SetTexture(0, "transmittanceWrite", transmittanceT);
-                Transmittance.Dispatch(0, AtmosphereConstants.TRANSMITTANCE_W / NUM_THREADS, AtmosphereConstants.TRANSMITTANCE_H / NUM_THREADS, 1);
+                Precompute.SetTexture(transmittanceKernel, "transmittanceWrite", transmittanceT);
+                Precompute.Dispatch(transmittanceKernel, AtmosphereConstants.TRANSMITTANCE_W / NUM_THREADS, AtmosphereConstants.TRANSMITTANCE_H / NUM_THREADS, 1);
             }
             else if (step == 1)
             {
                 // computes irradiance texture deltaE (line 2 in algorithm 4.1)
-                Irradiance1.SetTexture(0, "transmittanceRead", transmittanceT);
-                Irradiance1.SetTexture(0, "deltaEWrite", deltaET);
-                Irradiance1.Dispatch(0, AtmosphereConstants.SKY_W / NUM_THREADS, AtmosphereConstants.SKY_H / NUM_THREADS, 1);
+                Precompute.SetTexture(irradiance1Kernel, "transmittanceRead", transmittanceT);
+                Precompute.SetTexture(irradiance1Kernel, "deltaEWrite", deltaET);
+                Precompute.Dispatch(irradiance1Kernel, AtmosphereConstants.SKY_W / NUM_THREADS, AtmosphereConstants.SKY_H / NUM_THREADS, 1);
             }
             else if (step == 2)
             {
                 // computes single scattering texture deltaS (line 3 in algorithm 4.1)
                 // Rayleigh and Mie separated in deltaSR + deltaSM
-                Inscatter1.SetTexture(0, "transmittanceRead", transmittanceT);
-                Inscatter1.SetTexture(0, "deltaSRWrite", deltaSRT);
-                Inscatter1.SetTexture(0, "deltaSMWrite", deltaSMT);
+                Precompute.SetTexture(inscatter1Kernel, "transmittanceRead", transmittanceT);
+                Precompute.SetTexture(inscatter1Kernel, "deltaSRWrite", deltaSRT);
+                Precompute.SetTexture(inscatter1Kernel, "deltaSMWrite", deltaSMT);
 
                 //The inscatter calc's can be quite demanding for some cards so process 
                 //the calc's in layers instead of the whole 3D data set.
-                for (int i = 0; i < AtmosphereConstants.RES_R; i++)
+                for (var i = 0; i < AtmosphereConstants.RES_R; i++)
                 {
-                    Inscatter1.SetInt("layer", i);
-                    Inscatter1.Dispatch(0, (AtmosphereConstants.RES_MU_S * AtmosphereConstants.RES_NU) / NUM_THREADS, AtmosphereConstants.RES_MU / NUM_THREADS, 1);
+                    Precompute.SetInt("layer", i);
+                    Precompute.Dispatch(inscatter1Kernel, (AtmosphereConstants.RES_MU_S * AtmosphereConstants.RES_NU) / NUM_THREADS, AtmosphereConstants.RES_MU / NUM_THREADS, 1);
                 }
             }
             else if (step == 3)
             {
                 // copies deltaE into irradiance texture E (line 4 in algorithm 4.1)
-                CopyIrradiance.SetFloat("k", 0.0f);
-                CopyIrradiance.SetTexture(0, "deltaERead", deltaET);
-                CopyIrradiance.SetTexture(0, "irradianceRead", irradianceT_Read);
-                CopyIrradiance.SetTexture(0, "irradianceWrite", irradianceT_Write);
-                CopyIrradiance.Dispatch(0, AtmosphereConstants.SKY_W / NUM_THREADS, AtmosphereConstants.SKY_H / NUM_THREADS, 1);
+                Precompute.SetFloat("k", 0.0f);
+                Precompute.SetTexture(copyIrradianceKernel, "deltaERead", deltaET);
+                Precompute.SetTexture(copyIrradianceKernel, "irradianceRead", irradianceT_Read);
+                Precompute.SetTexture(copyIrradianceKernel, "irradianceWrite", irradianceT_Write);
+                Precompute.Dispatch(copyIrradianceKernel, AtmosphereConstants.SKY_W / NUM_THREADS, AtmosphereConstants.SKY_H / NUM_THREADS, 1);
 
                 //Swap irradianceT_Read - irradianceT_Write
                 RTUtility.Swap(ref irradianceT_Read, ref irradianceT_Write);
@@ -276,16 +270,16 @@ namespace SpaceEngine.Core.Preprocess.Atmospehre
             else if (step == 4)
             {
                 // copies deltaS into inscatter texture S (line 5 in algorithm 4.1)
-                CopyInscatter1.SetTexture(0, "deltaSRRead", deltaSRT);
-                CopyInscatter1.SetTexture(0, "deltaSMRead", deltaSMT);
-                CopyInscatter1.SetTexture(0, "inscatterWrite", inscatterT_Write);
+                Precompute.SetTexture(copyInscatter1Kernel, "deltaSRRead", deltaSRT);
+                Precompute.SetTexture(copyInscatter1Kernel, "deltaSMRead", deltaSMT);
+                Precompute.SetTexture(copyInscatter1Kernel, "inscatterWrite", inscatterT_Write);
 
                 //The inscatter calc's can be quite demanding for some cards so process 
                 //the calc's in layers instead of the whole 3D data set.
-                for (int i = 0; i < AtmosphereConstants.RES_R; i++)
+                for (var i = 0; i < AtmosphereConstants.RES_R; i++)
                 {
-                    CopyInscatter1.SetInt("layer", i);
-                    CopyInscatter1.Dispatch(0, (AtmosphereConstants.RES_MU_S * AtmosphereConstants.RES_NU) / NUM_THREADS, AtmosphereConstants.RES_MU / NUM_THREADS, 1);
+                    Precompute.SetInt("layer", i);
+                    Precompute.Dispatch(copyInscatter1Kernel, (AtmosphereConstants.RES_MU_S * AtmosphereConstants.RES_NU) / NUM_THREADS, AtmosphereConstants.RES_MU / NUM_THREADS, 1);
                 }
 
                 //Swap inscatterT_Write - inscatterT_Read
@@ -299,53 +293,53 @@ namespace SpaceEngine.Core.Preprocess.Atmospehre
                 //INSCATTER_SPHERICAL_INTEGRAL_SAMPLES = 8 - limit for GTX 430.
 
                 // computes deltaJ (line 7 in algorithm 4.1)
-                InscatterS.SetInt("first", (order == 2) ? 1 : 0);
-                InscatterS.SetTexture(0, "transmittanceRead", transmittanceT);
-                InscatterS.SetTexture(0, "deltaERead", deltaET);
-                InscatterS.SetTexture(0, "deltaSRRead", deltaSRT);
-                InscatterS.SetTexture(0, "deltaSMRead", deltaSMT);
-                InscatterS.SetTexture(0, "deltaJWrite", deltaJT);
+                Precompute.SetInt("first", (order == 2) ? 1 : 0);
+                Precompute.SetTexture(inscatterSKernel, "transmittanceRead", transmittanceT);
+                Precompute.SetTexture(inscatterSKernel, "deltaERead", deltaET);
+                Precompute.SetTexture(inscatterSKernel, "deltaSRRead", deltaSRT);
+                Precompute.SetTexture(inscatterSKernel, "deltaSMRead", deltaSMT);
+                Precompute.SetTexture(inscatterSKernel, "deltaJWrite", deltaJT);
 
                 //The inscatter calc's can be quite demanding for some cards so process 
                 //the calc's in layers instead of the whole 3D data set.
-                for (int i = 0; i < AtmosphereConstants.RES_R; i++)
+                for (var i = 0; i < AtmosphereConstants.RES_R; i++)
                 {
-                    InscatterS.SetInt("layer", i);
-                    InscatterS.Dispatch(0, (AtmosphereConstants.RES_MU_S * AtmosphereConstants.RES_NU) / NUM_THREADS, AtmosphereConstants.RES_MU / NUM_THREADS, 1);
+                    Precompute.SetInt("layer", i);
+                    Precompute.Dispatch(inscatterSKernel, (AtmosphereConstants.RES_MU_S * AtmosphereConstants.RES_NU) / NUM_THREADS, AtmosphereConstants.RES_MU / NUM_THREADS, 1);
                 }
             }
             else if (step == 6)
             {
                 // computes deltaE (line 8 in algorithm 4.1)
-                IrradianceN.SetInt("first", (order == 2) ? 1 : 0);
-                IrradianceN.SetTexture(0, "deltaSRRead", deltaSRT);
-                IrradianceN.SetTexture(0, "deltaSMRead", deltaSMT);
-                IrradianceN.SetTexture(0, "deltaEWrite", deltaET);
-                IrradianceN.Dispatch(0, AtmosphereConstants.SKY_W / NUM_THREADS, AtmosphereConstants.SKY_H / NUM_THREADS, 1);
+                Precompute.SetInt("first", (order == 2) ? 1 : 0);
+                Precompute.SetTexture(irradianceNKernel, "deltaSRRead", deltaSRT);
+                Precompute.SetTexture(irradianceNKernel, "deltaSMRead", deltaSMT);
+                Precompute.SetTexture(irradianceNKernel, "deltaEWrite", deltaET);
+                Precompute.Dispatch(irradianceNKernel, AtmosphereConstants.SKY_W / NUM_THREADS, AtmosphereConstants.SKY_H / NUM_THREADS, 1);
             }
             else if (step == 7)
             {
                 // computes deltaS (line 9 in algorithm 4.1)
-                InscatterN.SetTexture(0, "transmittanceRead", transmittanceT);
-                InscatterN.SetTexture(0, "deltaJRead", deltaJT);
-                InscatterN.SetTexture(0, "deltaSRWrite", deltaSRT);
+                Precompute.SetTexture(inscatterNKernel, "transmittanceRead", transmittanceT);
+                Precompute.SetTexture(inscatterNKernel, "deltaJRead", deltaJT);
+                Precompute.SetTexture(inscatterNKernel, "deltaSRWrite", deltaSRT);
 
                 //The inscatter calc's can be quite demanding for some cards so process 
                 //the calc's in layers instead of the whole 3D data set.
-                for (int i = 0; i < AtmosphereConstants.RES_R; i++)
+                for (var i = 0; i < AtmosphereConstants.RES_R; i++)
                 {
-                    InscatterN.SetInt("layer", i);
-                    InscatterN.Dispatch(0, (AtmosphereConstants.RES_MU_S * AtmosphereConstants.RES_NU) / NUM_THREADS, AtmosphereConstants.RES_MU / NUM_THREADS, 1);
+                    Precompute.SetInt("layer", i);
+                    Precompute.Dispatch(inscatterNKernel, (AtmosphereConstants.RES_MU_S * AtmosphereConstants.RES_NU) / NUM_THREADS, AtmosphereConstants.RES_MU / NUM_THREADS, 1);
                 }
             }
             else if (step == 8)
             {
                 // adds deltaE into irradiance texture E (line 10 in algorithm 4.1)
-                CopyIrradiance.SetFloat("k", 1.0f);
-                CopyIrradiance.SetTexture(0, "deltaERead", deltaET);
-                CopyIrradiance.SetTexture(0, "irradianceRead", irradianceT_Read);
-                CopyIrradiance.SetTexture(0, "irradianceWrite", irradianceT_Write);
-                CopyIrradiance.Dispatch(0, AtmosphereConstants.SKY_W / NUM_THREADS, AtmosphereConstants.SKY_H / NUM_THREADS, 1);
+                Precompute.SetFloat("k", 1.0f);
+                Precompute.SetTexture(copyIrradianceKernel, "deltaERead", deltaET);
+                Precompute.SetTexture(copyIrradianceKernel, "irradianceRead", irradianceT_Read);
+                Precompute.SetTexture(copyIrradianceKernel, "irradianceWrite", irradianceT_Write);
+                Precompute.Dispatch(copyIrradianceKernel, AtmosphereConstants.SKY_W / NUM_THREADS, AtmosphereConstants.SKY_H / NUM_THREADS, 1);
 
                 //Swap irradianceT_Read - irradianceT_Write
                 RTUtility.Swap(ref irradianceT_Read, ref irradianceT_Write);
@@ -353,16 +347,16 @@ namespace SpaceEngine.Core.Preprocess.Atmospehre
             else if (step == 9)
             {
                 // adds deltaS into inscatter texture S (line 11 in algorithm 4.1)
-                CopyInscatterN.SetTexture(0, "deltaSRead", deltaSRT);
-                CopyInscatterN.SetTexture(0, "inscatterRead", inscatterT_Read);
-                CopyInscatterN.SetTexture(0, "inscatterWrite", inscatterT_Write);
+                Precompute.SetTexture(copyInscatterNKernel, "deltaSRead", deltaSRT);
+                Precompute.SetTexture(copyInscatterNKernel, "inscatterRead", inscatterT_Read);
+                Precompute.SetTexture(copyInscatterNKernel, "inscatterWrite", inscatterT_Write);
 
                 //The inscatter calc's can be quite demanding for some cards so process 
                 //the calc's in layers instead of the whole 3D data set.
-                for (int i = 0; i < AtmosphereConstants.RES_R; i++)
+                for (var i = 0; i < AtmosphereConstants.RES_R; i++)
                 {
-                    CopyInscatterN.SetInt("layer", i);
-                    CopyInscatterN.Dispatch(0, (AtmosphereConstants.RES_MU_S * AtmosphereConstants.RES_NU) / NUM_THREADS, AtmosphereConstants.RES_MU / NUM_THREADS, 1);
+                    Precompute.SetInt("layer", i);
+                    Precompute.Dispatch(copyInscatterNKernel, (AtmosphereConstants.RES_MU_S * AtmosphereConstants.RES_NU) / NUM_THREADS, AtmosphereConstants.RES_MU / NUM_THREADS, 1);
                 }
 
                 //Swap inscatterT_Read - inscatterT_Write

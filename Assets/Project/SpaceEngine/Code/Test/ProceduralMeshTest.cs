@@ -1,7 +1,7 @@
 ﻿#region License
 // Procedural planet generator.
 // 
-// Copyright (C) 2015-2018 Denis Ovchinnikov [zameran] 
+// Copyright (C) 2015-2023 Denis Ovchinnikov [zameran] 
 // All rights reserved.
 // 
 // Redistribution and use in source and binary forms, with or without
@@ -34,22 +34,25 @@
 
 #endregion
 
-using SpaceEngine.Tests;
+using SpaceEngine.Helpers;
+using SpaceEngine.Tools;
 
-public class ProceduralMeshTest : DrawMeshTest
+namespace SpaceEngine.Tests
 {
-    public bool IsSubdivided = false;
-
-    private void Start()
+    public class ProceduralMeshTest : DrawMeshTest
     {
-        mesh = MeshFactory.SetupRingSegmentMesh(4, 8, 8.0f, 16.0f, 1.0f);
+        public bool IsSubdivided = false;
 
-        if (IsSubdivided) MeshHelper.SubdivisionHelper.Subdivide4(mesh);
-    }
+        private void Start()
+        {
+            mesh = MeshFactory.SetupRingSegmentMesh(4, 8, 8.0f, 16.0f, 1.0f);
 
-    private void OnDestroy()
-    {
-        if (mesh != null)
-            Helper.Destroy(mesh);
+            if (IsSubdivided) MeshHelper.SubdivisionHelper.Subdivide4(mesh);
+        }
+
+        private void OnDestroy()
+        {
+            if (mesh != null) Helper.Destroy(mesh);
+        }
     }
 }

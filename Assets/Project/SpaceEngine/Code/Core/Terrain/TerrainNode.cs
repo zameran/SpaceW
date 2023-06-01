@@ -1,4 +1,39 @@
-﻿using SpaceEngine.Core.Bodies;
+﻿#region License
+// Procedural planet generator.
+//  
+// Copyright (C) 2015-2023 Denis Ovchinnikov [zameran] 
+// All rights reserved.
+// 
+// Redistribution and use in source and binary forms, with or without
+// modification, are permitted provided that the following conditions
+// are met:
+// 1. Redistributions of source code must retain the above copyright
+//    notice, this list of conditions and the following disclaimer.
+// 2. Redistributions in binary form must reproduce the above copyright
+//    notice, this list of conditions and the following disclaimer in the
+//    documentation and/or other materials provided with the distribution.
+// 3. Neither the name of the copyright holders nor the names of its
+//    contributors may be used to endorse or promote products derived from
+//    this software without specific prior written permission.
+// 
+// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+// AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+// IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+// ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE
+// LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+// CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+// SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+// INTERRUPTION)HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+// CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+// ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF
+// THE POSSIBILITY OF SUCH DAMAGE.
+// 
+// Creation Date: 2017.03.28
+// Creation Time: 2:18 PM
+// Creator: zameran
+#endregion
+
+using SpaceEngine.Core.Bodies;
 using SpaceEngine.Core.Numerics.Matrices;
 using SpaceEngine.Core.Numerics.Shapes;
 using SpaceEngine.Core.Numerics.Vectors;
@@ -6,6 +41,7 @@ using SpaceEngine.Core.Patterns.Strategy.Uniformed;
 using SpaceEngine.Core.Terrain.Deformation;
 using SpaceEngine.Core.Tile.Producer;
 using SpaceEngine.Core.Tile.Samplers;
+using SpaceEngine.Helpers;
 
 using System;
 using System.Collections.Generic;
@@ -201,7 +237,7 @@ namespace SpaceEngine.Core.Terrain
             TerrainMaterial = MaterialHelper.CreateTemp(ParentBody.ColorShader, "TerrainNode");
 
             FaceToLocal = Matrix4x4d.identity;
-
+            
             // NOTE : Body shape dependent...
             var celestialBody = ParentBody as CelestialBody;
             var faces = new Vector3d[] { new Vector3d(0, 0, 0), new Vector3d(90, 0, 0), new Vector3d(90, 90, 0), new Vector3d(90, 180, 0), new Vector3d(90, 270, 0), new Vector3d(0, 180, 180) };
@@ -211,12 +247,11 @@ namespace SpaceEngine.Core.Terrain
             if (Face - 1 >= 0 && Face - 1 < 6) { FaceToLocal = Matrix4x4d.Rotate(faces[Face - 1]); }
             if (celestialBody == null) { throw new Exception("Wow! Celestial body isn't Celestial?!"); }
 
-            LocalToWorld = Matrix4x4d.ToMatrix4x4d(celestialBody.transform.localToWorldMatrix) * FaceToLocal;
+            LocalToWorld = Matrix4x4d.ToMatrix4x4d(transform.localToWorldMatrix) * FaceToLocal;
+
             Deformation = new DeformationSpherical(celestialBody.Size);
 
-            TangentFrameToWorld = new Matrix3x3d(LocalToWorld.m[0, 0], LocalToWorld.m[0, 1], LocalToWorld.m[0, 2],
-                                                 LocalToWorld.m[1, 0], LocalToWorld.m[1, 1], LocalToWorld.m[1, 2],
-                                                 LocalToWorld.m[2, 0], LocalToWorld.m[2, 1], LocalToWorld.m[2, 2]);
+            TangentFrameToWorld = LocalToWorld.ToMatrix3x3d();
 
             InitUniforms(TerrainMaterial);
 
@@ -234,20 +269,35 @@ namespace SpaceEngine.Core.Terrain
             {
                 lastProducer.IsLastInSequence = true;
 
-                Debug.Log(string.Format("TerrainNode: {0} probably last in generation sequence, but maybe accidentally not marked as. Fixed!", lastProducer.name));
+                Debug.Log($"TerrainNode: {lastProducer.name} probably last in generation sequence, but maybe accidentally not marked as. Fixed!");
             }
         }
 
+        public void RotateNode(Vector3d euler)
+        {
+            var faces = new Vector3d[]
+            {
+                new Vector3d(0, 0, 0), 
+                new Vector3d(90, 0, 0), 
+                new Vector3d(90, 90, 0), 
+                new Vector3d(90, 180, 0), 
+                new Vector3d(90, 270, 0), 
+                new Vector3d(0, 180, 180)
+            };
+            
+            if (Face - 1 >= 0 && Face - 1 < 6) { FaceToLocal = Matrix4x4d.Rotate(faces[Face - 1] + euler); }
+
+            UpdateNode();
+        }
+        
         public override void UpdateNode()
         {
             TerrainMaterial.renderQueue = (int)ParentBody.RenderQueue + ParentBody.RenderQueueOffset;
 
             // NOTE : Body shape dependent...
-            LocalToWorld = Matrix4x4d.ToMatrix4x4d(ParentBody.transform.localToWorldMatrix) * FaceToLocal;
+            LocalToWorld = Matrix4x4d.ToMatrix4x4d(transform.localToWorldMatrix) * FaceToLocal;
 
-            TangentFrameToWorld = new Matrix3x3d(LocalToWorld.m[0, 0], LocalToWorld.m[0, 1], LocalToWorld.m[0, 2],
-                                                 LocalToWorld.m[1, 0], LocalToWorld.m[1, 1], LocalToWorld.m[1, 2],
-                                                 LocalToWorld.m[2, 0], LocalToWorld.m[2, 1], LocalToWorld.m[2, 2]);
+            TangentFrameToWorld = LocalToWorld.ToMatrix3x3d();
 
             LocalToCamera = GodManager.Instance.View.WorldToCameraMatrix * LocalToWorld;
             LocalToScreen = GodManager.Instance.View.CameraToScreenMatrix * LocalToCamera;
@@ -468,8 +518,10 @@ namespace SpaceEngine.Core.Terrain
                 {
                     // If the a leaf quad needs to be drawn but its tiles are not ready, then this will draw the next parent tile instead that is ready.
                     // Because of the current set up all tiles always have there tasks run on the frame they are generated, so this section of code is never reached.
+                    #if SE_DEBUG
                     Debug.LogWarning(string.Format("Looks like rendering false start! {0}:{1}:{2}", quad.Level, quad.Tx, quad.Ty));
-
+                    #endif
+                    
                     for (var i = 0; i < SamplersSuitable.Count; ++i)
                     {
                         // Set the unifroms needed to draw the texture for this sampler
@@ -535,7 +587,7 @@ namespace SpaceEngine.Core.Terrain
 
             if (samplers.Count > 255)
             {
-                Debug.LogWarning(string.Format("TerrainNode: Toomuch samplers! {0}; Only first 255 will be taken!", samplers.Count));
+                Debug.LogWarning($"TerrainNode: Toomuch samplers! {samplers.Count}; Only first 255 will be taken!");
 
                 Samplers = samplers.GetRange(0, 255);
 
@@ -559,7 +611,7 @@ namespace SpaceEngine.Core.Terrain
 
             if (samplersSuitable.Count > 255)
             {
-                Debug.LogWarning(string.Format("TerrainNode: Toomuch suitable samplers! {0}; Only first 255 will be taken!", samplersSuitable.Count));
+                Debug.LogWarning($"TerrainNode: Toomuch suitable samplers! {samplersSuitable.Count}; Only first 255 will be taken!");
 
                 Samplers = samplersSuitable.GetRange(0, 255);
 

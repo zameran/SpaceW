@@ -1,7 +1,7 @@
 ﻿#region License
 // Procedural planet generator.
 //  
-// Copyright (C) 2015-2018 Denis Ovchinnikov [zameran] 
+// Copyright (C) 2015-2023 Denis Ovchinnikov [zameran] 
 // All rights reserved.
 //  
 // Redistribution and use in source and binary forms, with or without
@@ -33,6 +33,8 @@
 // Creator: zameran
 #endregion
 
+using SpaceEngine.Helpers;
+
 using System;
 
 using UnityEngine;
@@ -55,7 +57,7 @@ namespace SpaceEngine.Core.Utilities.Gradients
         public bool NonLinear = true;
 
         /// <inheritdoc />
-        protected override Vector2 Size { get { return new Vector2(256, 32); } }
+        protected override Vector2 Size => new Vector2(256, 32);
 
         public MaterialTableGradientLut() : base() { }
 

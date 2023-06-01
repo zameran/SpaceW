@@ -1,4 +1,39 @@
-using SpaceEngine.Core.Utilities;
+#region License
+// Procedural planet generator.
+// 
+// Copyright (C) 2015-2023 Denis Ovchinnikov [zameran] 
+// All rights reserved.
+// 
+// Redistribution and use in source and binary forms, with or without
+// modification, are permitted provided that the following conditions
+// are met:
+// 1. Redistributions of source code must retain the above copyright
+//    notice, this list of conditions and the following disclaimer.
+// 2. Redistributions in binary form must reproduce the above copyright
+//    notice, this list of conditions and the following disclaimer in the
+//    documentation and/or other materials provided with the distribution.
+// 3. Neither the name of the copyright holders nor the names of its
+//    contributors may be used to endorse or promote products derived from
+//    this software without specific prior written permission.
+// 
+// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+// AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+// IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+// ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE
+// LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+// CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+// SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+// INTERRUPTION)HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+// CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+// ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF
+// THE POSSIBILITY OF SUCH DAMAGE.
+// 
+// Creation Date: Undefined
+// Creation Time: Undefined
+// Creator: zameran
+#endregion
+
+using SpaceEngine.Utilities;
 
 using System;
 
@@ -73,16 +108,16 @@ namespace UnityEngine
 
         private void ComputeButterflyLookupTable()
         {
-            for (int i = 0; i < Passes; i++)
+            for (var i = 0; i < Passes; i++)
             {
                 var nBlocks = (int)Mathf.Pow(2, Passes - 1 - i);
                 var nHInputs = (int)Mathf.Pow(2, i);
 
                 ButterFlyLookupTable[i] = Make1DTex(i);
 
-                for (int j = 0; j < nBlocks; j++)
+                for (var j = 0; j < nBlocks; j++)
                 {
-                    for (int k = 0; k < nHInputs; k++)
+                    for (var k = 0; k < nHInputs; k++)
                     {
                         int i1, i2, j1, j2;
 
@@ -107,7 +142,7 @@ namespace UnityEngine
                     }
                 }
 
-                ButterFlyLookupTable[i].name = string.Format("ButterFlyLookupTable_{0}_{1}", i, Random.Range(float.MinValue, float.MaxValue));
+                ButterFlyLookupTable[i].name = $"ButterFlyLookupTable_{i}_{Random.Range(float.MinValue, float.MaxValue)}";
                 ButterFlyLookupTable[i].Apply();
             }
         }
@@ -120,9 +155,9 @@ namespace UnityEngine
             var pass1 = new RenderTexture[] { data0[1] };
 
             int i;
-            int idx = 0;
+            var idx = 0;
             int idx1;
-            int j = 0;
+            var j = 0;
 
             for (i = 0; i < Passes; i++, j++)
             {
@@ -168,9 +203,9 @@ namespace UnityEngine
             var pass1 = new RenderTexture[] { data0[1], data1[1] };
 
             int i;
-            int idx = 0;
+            var idx = 0;
             int idx1;
-            int j = 0;
+            var j = 0;
 
             for (i = 0; i < Passes; i++, j++)
             {
@@ -218,9 +253,9 @@ namespace UnityEngine
             var pass1 = new RenderTexture[] { data0[1], data1[1], data2[1] };
 
             int i;
-            int idx = 0;
+            var idx = 0;
             int idx1;
-            int j = 0;
+            var j = 0;
 
             for (i = 0; i < Passes; i++, j++)
             {
@@ -270,8 +305,8 @@ namespace UnityEngine
             var pass1 = new RenderTexture[] { data0[1], data1[1], data2[1], data3[1] };
 
             int i;
-            int idx = 0; int idx1;
-            int j = 0;
+            var idx = 0; int idx1;
+            var j = 0;
 
             for (i = 0; i < Passes; i++, j++)
             {

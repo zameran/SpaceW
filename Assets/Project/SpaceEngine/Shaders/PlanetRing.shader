@@ -1,6 +1,6 @@
 ﻿// Procedural planet generator.
 // 
-// Copyright (C) 2015-2018 Denis Ovchinnikov [zameran] 
+// Copyright (C) 2015-2023 Denis Ovchinnikov [zameran] 
 // All rights reserved.
 // 
 // Redistribution and use in source and binary forms, with or without
@@ -255,7 +255,7 @@ Shader "SpaceEngine/Planet/Ring"
 			
 			CGPROGRAM
 			#pragma target 5.0
-			#pragma only_renderers d3d11 glcore
+			#pragma only_renderers d3d11 glcore metal
 			#pragma vertex vert
 			#pragma fragment frag
 

@@ -1,7 +1,7 @@
 ﻿#region License
 // Procedural planet generator.
 // 
-// Copyright (C) 2015-2018 Denis Ovchinnikov [zameran] 
+// Copyright (C) 2015-2023 Denis Ovchinnikov [zameran] 
 // All rights reserved.
 // 
 // Redistribution and use in source and binary forms, with or without
@@ -34,6 +34,8 @@
 #endregion
 
 using SpaceEngine.Core.Bodies;
+using SpaceEngine.Helpers;
+using SpaceEngine.Tools;
 
 using UnityEngine;
 
@@ -41,7 +43,7 @@ namespace SpaceEngine.Debugging
 {
     public sealed class DebugGUIBodyInfo : DebugGUI
     {
-        public Body Body { get { return GodManager.Instance.ActiveBody; } }
+        public Body Body => GodManager.Instance.ActiveBody;
 
         protected override void Awake()
         {

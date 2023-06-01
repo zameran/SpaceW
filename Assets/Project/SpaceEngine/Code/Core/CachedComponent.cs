@@ -1,7 +1,7 @@
 ﻿#region License
 // Procedural planet generator.
 //  
-// Copyright (C) 2015-2018 Denis Ovchinnikov [zameran] 
+// Copyright (C) 2015-2023 Denis Ovchinnikov [zameran] 
 // All rights reserved.
 // 
 // Redistribution and use in source and binary forms, with or without
@@ -45,7 +45,7 @@ public class CachedComponent<T> where T : Component
         Component = null;
     }
 
-    public T Component { get; set; }
+    public T Component { get; protected set; }
 
     public void TryInit(MonoBehaviour mb)
     {
@@ -57,5 +57,17 @@ public class CachedComponent<T> where T : Component
         if (mb.transform.parent == null) return;
 
         Component = mb.transform.parent.GetComponent<T>();
+    }
+	
+	public void TryInitAdd(MonoBehaviour mb)
+    {
+        var component = mb.GetComponent<T>();
+
+        if (component == null)
+        {
+            component = mb.gameObject.AddComponent<T>();
+        }
+
+        Component = component;
     }
 }

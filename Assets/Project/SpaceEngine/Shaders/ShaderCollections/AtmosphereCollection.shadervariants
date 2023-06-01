@@ -3,205 +3,205 @@
 --- !u!200 &20000000
 ShaderVariantCollection:
   m_ObjectHideFlags: 0
-  m_PrefabParentObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 0}
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
   m_Name: AtmosphereCollection
   m_Shaders:
-    data:
-      first: {fileID: 4800000, guid: e591e3c9700c3b243a782b059c2d6d0b, type: 3}
-      second:
-        variants:
-        - keywords: 
-          passType: 0
-        - keywords: ECLIPSES_ON LIGHT_1 SHINE_ON
-          passType: 0
-        - keywords: ECLIPSES_OFF LIGHT_1 SHINE_ON
-          passType: 0
-        - keywords: ECLIPSES_ON LIGHT_1 SHINE_OFF
-          passType: 0
-        - keywords: ECLIPSES_OFF LIGHT_1 SHINE_OFF
-          passType: 0
-        - keywords: ECLIPSES_ON LIGHT_2 SHINE_ON
-          passType: 0
-        - keywords: ECLIPSES_OFF LIGHT_2 SHINE_ON
-          passType: 0
-        - keywords: ECLIPSES_ON LIGHT_2 SHINE_OFF
-          passType: 0
-        - keywords: ECLIPSES_OFF LIGHT_2 SHINE_OFF
-          passType: 0
-        - keywords: ECLIPSES_ON LIGHT_3 SHINE_ON
-          passType: 0
-        - keywords: ECLIPSES_OFF LIGHT_3 SHINE_ON
-          passType: 0
-        - keywords: ECLIPSES_ON LIGHT_3 SHINE_OFF
-          passType: 0
-        - keywords: ECLIPSES_OFF LIGHT_3 SHINE_OFF
-          passType: 0
-        - keywords: ECLIPSES_ON LIGHT_4 SHINE_ON
-          passType: 0
-        - keywords: ECLIPSES_OFF LIGHT_4 SHINE_ON
-          passType: 0
-        - keywords: ECLIPSES_ON LIGHT_4 SHINE_OFF
-          passType: 0
-        - keywords: ECLIPSES_OFF LIGHT_4 SHINE_OFF
-          passType: 0
-        - keywords: ECLIPSES_ON LIGHT_1 SHADOW_1 SHINE_ON
-          passType: 0
-        - keywords: ECLIPSES_OFF LIGHT_1 SHADOW_1 SHINE_ON
-          passType: 0
-        - keywords: ECLIPSES_ON LIGHT_1 SHADOW_1 SHINE_OFF
-          passType: 0
-        - keywords: ECLIPSES_OFF LIGHT_1 SHADOW_1 SHINE_OFF
-          passType: 0
-        - keywords: ECLIPSES_ON LIGHT_2 SHADOW_1 SHINE_ON
-          passType: 0
-        - keywords: ECLIPSES_OFF LIGHT_2 SHADOW_1 SHINE_ON
-          passType: 0
-        - keywords: ECLIPSES_ON LIGHT_2 SHADOW_1 SHINE_OFF
-          passType: 0
-        - keywords: ECLIPSES_OFF LIGHT_2 SHADOW_1 SHINE_OFF
-          passType: 0
-        - keywords: ECLIPSES_ON LIGHT_3 SHADOW_1 SHINE_ON
-          passType: 0
-        - keywords: ECLIPSES_OFF LIGHT_3 SHADOW_1 SHINE_ON
-          passType: 0
-        - keywords: ECLIPSES_ON LIGHT_3 SHADOW_1 SHINE_OFF
-          passType: 0
-        - keywords: ECLIPSES_OFF LIGHT_3 SHADOW_1 SHINE_OFF
-          passType: 0
-        - keywords: ECLIPSES_ON LIGHT_4 SHADOW_1 SHINE_ON
-          passType: 0
-        - keywords: ECLIPSES_OFF LIGHT_4 SHADOW_1 SHINE_ON
-          passType: 0
-        - keywords: ECLIPSES_ON LIGHT_4 SHADOW_1 SHINE_OFF
-          passType: 0
-        - keywords: ECLIPSES_OFF LIGHT_4 SHADOW_1 SHINE_OFF
-          passType: 0
-        - keywords: ECLIPSES_ON LIGHT_1 SHADOW_2 SHINE_ON
-          passType: 0
-        - keywords: ECLIPSES_OFF LIGHT_1 SHADOW_2 SHINE_ON
-          passType: 0
-        - keywords: ECLIPSES_ON LIGHT_1 SHADOW_2 SHINE_OFF
-          passType: 0
-        - keywords: ECLIPSES_OFF LIGHT_1 SHADOW_2 SHINE_OFF
-          passType: 0
-        - keywords: ECLIPSES_ON LIGHT_2 SHADOW_2 SHINE_ON
-          passType: 0
-        - keywords: ECLIPSES_OFF LIGHT_2 SHADOW_2 SHINE_ON
-          passType: 0
-        - keywords: ECLIPSES_ON LIGHT_2 SHADOW_2 SHINE_OFF
-          passType: 0
-        - keywords: ECLIPSES_OFF LIGHT_2 SHADOW_2 SHINE_OFF
-          passType: 0
-        - keywords: ECLIPSES_ON LIGHT_3 SHADOW_2 SHINE_ON
-          passType: 0
-        - keywords: ECLIPSES_OFF LIGHT_3 SHADOW_2 SHINE_ON
-          passType: 0
-        - keywords: ECLIPSES_ON LIGHT_3 SHADOW_2 SHINE_OFF
-          passType: 0
-        - keywords: ECLIPSES_OFF LIGHT_3 SHADOW_2 SHINE_OFF
-          passType: 0
-        - keywords: ECLIPSES_ON LIGHT_4 SHADOW_2 SHINE_ON
-          passType: 0
-        - keywords: ECLIPSES_OFF LIGHT_4 SHADOW_2 SHINE_ON
-          passType: 0
-        - keywords: ECLIPSES_ON LIGHT_4 SHADOW_2 SHINE_OFF
-          passType: 0
-        - keywords: ECLIPSES_OFF LIGHT_4 SHADOW_2 SHINE_OFF
-          passType: 0
-        - keywords: ECLIPSES_ON LIGHT_1 SHADOW_3 SHINE_ON
-          passType: 0
-        - keywords: ECLIPSES_OFF LIGHT_1 SHADOW_3 SHINE_ON
-          passType: 0
-        - keywords: ECLIPSES_ON LIGHT_1 SHADOW_3 SHINE_OFF
-          passType: 0
-        - keywords: ECLIPSES_OFF LIGHT_1 SHADOW_3 SHINE_OFF
-          passType: 0
-        - keywords: ECLIPSES_ON LIGHT_2 SHADOW_3 SHINE_ON
-          passType: 0
-        - keywords: ECLIPSES_OFF LIGHT_2 SHADOW_3 SHINE_ON
-          passType: 0
-        - keywords: ECLIPSES_ON LIGHT_2 SHADOW_3 SHINE_OFF
-          passType: 0
-        - keywords: ECLIPSES_OFF LIGHT_2 SHADOW_3 SHINE_OFF
-          passType: 0
-        - keywords: ECLIPSES_ON LIGHT_3 SHADOW_3 SHINE_ON
-          passType: 0
-        - keywords: ECLIPSES_OFF LIGHT_3 SHADOW_3 SHINE_ON
-          passType: 0
-        - keywords: ECLIPSES_ON LIGHT_3 SHADOW_3 SHINE_OFF
-          passType: 0
-        - keywords: ECLIPSES_OFF LIGHT_3 SHADOW_3 SHINE_OFF
-          passType: 0
-        - keywords: ECLIPSES_ON LIGHT_4 SHADOW_3 SHINE_ON
-          passType: 0
-        - keywords: ECLIPSES_OFF LIGHT_4 SHADOW_3 SHINE_ON
-          passType: 0
-        - keywords: ECLIPSES_ON LIGHT_4 SHADOW_3 SHINE_OFF
-          passType: 0
-        - keywords: ECLIPSES_OFF LIGHT_4 SHADOW_3 SHINE_OFF
-          passType: 0
-        - keywords: ECLIPSES_ON LIGHT_1 SHADOW_4 SHINE_ON
-          passType: 0
-        - keywords: ECLIPSES_OFF LIGHT_1 SHADOW_4 SHINE_ON
-          passType: 0
-        - keywords: ECLIPSES_ON LIGHT_1 SHADOW_4 SHINE_OFF
-          passType: 0
-        - keywords: ECLIPSES_OFF LIGHT_1 SHADOW_4 SHINE_OFF
-          passType: 0
-        - keywords: ECLIPSES_ON LIGHT_2 SHADOW_4 SHINE_ON
-          passType: 0
-        - keywords: ECLIPSES_OFF LIGHT_2 SHADOW_4 SHINE_ON
-          passType: 0
-        - keywords: ECLIPSES_ON LIGHT_2 SHADOW_4 SHINE_OFF
-          passType: 0
-        - keywords: ECLIPSES_OFF LIGHT_2 SHADOW_4 SHINE_OFF
-          passType: 0
-        - keywords: ECLIPSES_ON LIGHT_3 SHADOW_4 SHINE_ON
-          passType: 0
-        - keywords: ECLIPSES_OFF LIGHT_3 SHADOW_4 SHINE_ON
-          passType: 0
-        - keywords: ECLIPSES_ON LIGHT_3 SHADOW_4 SHINE_OFF
-          passType: 0
-        - keywords: ECLIPSES_OFF LIGHT_3 SHADOW_4 SHINE_OFF
-          passType: 0
-        - keywords: ECLIPSES_ON LIGHT_4 SHADOW_4 SHINE_ON
-          passType: 0
-        - keywords: ECLIPSES_OFF LIGHT_4 SHADOW_4 SHINE_ON
-          passType: 0
-        - keywords: ECLIPSES_ON LIGHT_4 SHADOW_4 SHINE_OFF
-          passType: 0
-        - keywords: ECLIPSES_OFF LIGHT_4 SHADOW_4 SHINE_OFF
-          passType: 0
-        - keywords: ECLIPSES_ON LIGHT_1 SHADOW_0 SHINE_ON
-          passType: 0
-        - keywords: ECLIPSES_OFF LIGHT_1 SHADOW_0 SHINE_ON
-          passType: 0
-        - keywords: ECLIPSES_ON LIGHT_1 SHADOW_0 SHINE_OFF
-          passType: 0
-        - keywords: ECLIPSES_OFF LIGHT_1 SHADOW_0 SHINE_OFF
-          passType: 0
-        - keywords: ECLIPSES_ON LIGHT_2 SHADOW_0 SHINE_ON
-          passType: 0
-        - keywords: ECLIPSES_OFF LIGHT_2 SHADOW_0 SHINE_ON
-          passType: 0
-        - keywords: ECLIPSES_ON LIGHT_2 SHADOW_0 SHINE_OFF
-          passType: 0
-        - keywords: ECLIPSES_OFF LIGHT_2 SHADOW_0 SHINE_OFF
-          passType: 0
-        - keywords: ECLIPSES_ON LIGHT_3 SHADOW_0 SHINE_ON
-          passType: 0
-        - keywords: ECLIPSES_OFF LIGHT_3 SHADOW_0 SHINE_ON
-          passType: 0
-        - keywords: ECLIPSES_ON LIGHT_3 SHADOW_0 SHINE_OFF
-          passType: 0
-        - keywords: ECLIPSES_OFF LIGHT_3 SHADOW_0 SHINE_OFF
-          passType: 0
-        - keywords: ECLIPSES_ON LIGHT_4 SHADOW_0 SHINE_ON
-          passType: 0
-        - keywords: ECLIPSES_OFF LIGHT_4 SHADOW_0 SHINE_ON
-          passType: 0
-        - keywords: ECLIPSES_ON LIGHT_4 SHADOW_0 SHINE_OFF
-          passType: 0
-        - keywords: ECLIPSES_OFF LIGHT_4 SHADOW_0 SHINE_OFF
-          passType: 0
+  - first: {fileID: 4800000, guid: e591e3c9700c3b243a782b059c2d6d0b, type: 3}
+    second:
+      variants:
+      - keywords: 
+        passType: 0
+      - keywords: ECLIPSES_OFF LIGHT_1 SHADOW_0 SHINE_OFF
+        passType: 0
+      - keywords: ECLIPSES_OFF LIGHT_1 SHADOW_0 SHINE_ON
+        passType: 0
+      - keywords: ECLIPSES_OFF LIGHT_1 SHADOW_1 SHINE_OFF
+        passType: 0
+      - keywords: ECLIPSES_OFF LIGHT_1 SHADOW_1 SHINE_ON
+        passType: 0
+      - keywords: ECLIPSES_OFF LIGHT_1 SHADOW_2 SHINE_OFF
+        passType: 0
+      - keywords: ECLIPSES_OFF LIGHT_1 SHADOW_2 SHINE_ON
+        passType: 0
+      - keywords: ECLIPSES_OFF LIGHT_1 SHADOW_3 SHINE_OFF
+        passType: 0
+      - keywords: ECLIPSES_OFF LIGHT_1 SHADOW_3 SHINE_ON
+        passType: 0
+      - keywords: ECLIPSES_OFF LIGHT_1 SHADOW_4 SHINE_OFF
+        passType: 0
+      - keywords: ECLIPSES_OFF LIGHT_1 SHADOW_4 SHINE_ON
+        passType: 0
+      - keywords: ECLIPSES_OFF LIGHT_1 SHINE_OFF
+        passType: 0
+      - keywords: ECLIPSES_OFF LIGHT_1 SHINE_ON
+        passType: 0
+      - keywords: ECLIPSES_OFF LIGHT_2 SHADOW_0 SHINE_OFF
+        passType: 0
+      - keywords: ECLIPSES_OFF LIGHT_2 SHADOW_0 SHINE_ON
+        passType: 0
+      - keywords: ECLIPSES_OFF LIGHT_2 SHADOW_1 SHINE_OFF
+        passType: 0
+      - keywords: ECLIPSES_OFF LIGHT_2 SHADOW_1 SHINE_ON
+        passType: 0
+      - keywords: ECLIPSES_OFF LIGHT_2 SHADOW_2 SHINE_OFF
+        passType: 0
+      - keywords: ECLIPSES_OFF LIGHT_2 SHADOW_2 SHINE_ON
+        passType: 0
+      - keywords: ECLIPSES_OFF LIGHT_2 SHADOW_3 SHINE_OFF
+        passType: 0
+      - keywords: ECLIPSES_OFF LIGHT_2 SHADOW_3 SHINE_ON
+        passType: 0
+      - keywords: ECLIPSES_OFF LIGHT_2 SHADOW_4 SHINE_OFF
+        passType: 0
+      - keywords: ECLIPSES_OFF LIGHT_2 SHADOW_4 SHINE_ON
+        passType: 0
+      - keywords: ECLIPSES_OFF LIGHT_2 SHINE_OFF
+        passType: 0
+      - keywords: ECLIPSES_OFF LIGHT_2 SHINE_ON
+        passType: 0
+      - keywords: ECLIPSES_OFF LIGHT_3 SHADOW_0 SHINE_OFF
+        passType: 0
+      - keywords: ECLIPSES_OFF LIGHT_3 SHADOW_0 SHINE_ON
+        passType: 0
+      - keywords: ECLIPSES_OFF LIGHT_3 SHADOW_1 SHINE_OFF
+        passType: 0
+      - keywords: ECLIPSES_OFF LIGHT_3 SHADOW_1 SHINE_ON
+        passType: 0
+      - keywords: ECLIPSES_OFF LIGHT_3 SHADOW_2 SHINE_OFF
+        passType: 0
+      - keywords: ECLIPSES_OFF LIGHT_3 SHADOW_2 SHINE_ON
+        passType: 0
+      - keywords: ECLIPSES_OFF LIGHT_3 SHADOW_3 SHINE_OFF
+        passType: 0
+      - keywords: ECLIPSES_OFF LIGHT_3 SHADOW_3 SHINE_ON
+        passType: 0
+      - keywords: ECLIPSES_OFF LIGHT_3 SHADOW_4 SHINE_OFF
+        passType: 0
+      - keywords: ECLIPSES_OFF LIGHT_3 SHADOW_4 SHINE_ON
+        passType: 0
+      - keywords: ECLIPSES_OFF LIGHT_3 SHINE_OFF
+        passType: 0
+      - keywords: ECLIPSES_OFF LIGHT_3 SHINE_ON
+        passType: 0
+      - keywords: ECLIPSES_OFF LIGHT_4 SHADOW_0 SHINE_OFF
+        passType: 0
+      - keywords: ECLIPSES_OFF LIGHT_4 SHADOW_0 SHINE_ON
+        passType: 0
+      - keywords: ECLIPSES_OFF LIGHT_4 SHADOW_1 SHINE_OFF
+        passType: 0
+      - keywords: ECLIPSES_OFF LIGHT_4 SHADOW_1 SHINE_ON
+        passType: 0
+      - keywords: ECLIPSES_OFF LIGHT_4 SHADOW_2 SHINE_OFF
+        passType: 0
+      - keywords: ECLIPSES_OFF LIGHT_4 SHADOW_2 SHINE_ON
+        passType: 0
+      - keywords: ECLIPSES_OFF LIGHT_4 SHADOW_3 SHINE_OFF
+        passType: 0
+      - keywords: ECLIPSES_OFF LIGHT_4 SHADOW_3 SHINE_ON
+        passType: 0
+      - keywords: ECLIPSES_OFF LIGHT_4 SHADOW_4 SHINE_OFF
+        passType: 0
+      - keywords: ECLIPSES_OFF LIGHT_4 SHADOW_4 SHINE_ON
+        passType: 0
+      - keywords: ECLIPSES_OFF LIGHT_4 SHINE_OFF
+        passType: 0
+      - keywords: ECLIPSES_OFF LIGHT_4 SHINE_ON
+        passType: 0
+      - keywords: ECLIPSES_ON LIGHT_1 SHADOW_0 SHINE_OFF
+        passType: 0
+      - keywords: ECLIPSES_ON LIGHT_1 SHADOW_0 SHINE_ON
+        passType: 0
+      - keywords: ECLIPSES_ON LIGHT_1 SHADOW_1 SHINE_OFF
+        passType: 0
+      - keywords: ECLIPSES_ON LIGHT_1 SHADOW_1 SHINE_ON
+        passType: 0
+      - keywords: ECLIPSES_ON LIGHT_1 SHADOW_2 SHINE_OFF
+        passType: 0
+      - keywords: ECLIPSES_ON LIGHT_1 SHADOW_2 SHINE_ON
+        passType: 0
+      - keywords: ECLIPSES_ON LIGHT_1 SHADOW_3 SHINE_OFF
+        passType: 0
+      - keywords: ECLIPSES_ON LIGHT_1 SHADOW_3 SHINE_ON
+        passType: 0
+      - keywords: ECLIPSES_ON LIGHT_1 SHADOW_4 SHINE_OFF
+        passType: 0
+      - keywords: ECLIPSES_ON LIGHT_1 SHADOW_4 SHINE_ON
+        passType: 0
+      - keywords: ECLIPSES_ON LIGHT_1 SHINE_OFF
+        passType: 0
+      - keywords: ECLIPSES_ON LIGHT_1 SHINE_ON
+        passType: 0
+      - keywords: ECLIPSES_ON LIGHT_2 SHADOW_0 SHINE_OFF
+        passType: 0
+      - keywords: ECLIPSES_ON LIGHT_2 SHADOW_0 SHINE_ON
+        passType: 0
+      - keywords: ECLIPSES_ON LIGHT_2 SHADOW_1 SHINE_OFF
+        passType: 0
+      - keywords: ECLIPSES_ON LIGHT_2 SHADOW_1 SHINE_ON
+        passType: 0
+      - keywords: ECLIPSES_ON LIGHT_2 SHADOW_2 SHINE_OFF
+        passType: 0
+      - keywords: ECLIPSES_ON LIGHT_2 SHADOW_2 SHINE_ON
+        passType: 0
+      - keywords: ECLIPSES_ON LIGHT_2 SHADOW_3 SHINE_OFF
+        passType: 0
+      - keywords: ECLIPSES_ON LIGHT_2 SHADOW_3 SHINE_ON
+        passType: 0
+      - keywords: ECLIPSES_ON LIGHT_2 SHADOW_4 SHINE_OFF
+        passType: 0
+      - keywords: ECLIPSES_ON LIGHT_2 SHADOW_4 SHINE_ON
+        passType: 0
+      - keywords: ECLIPSES_ON LIGHT_2 SHINE_OFF
+        passType: 0
+      - keywords: ECLIPSES_ON LIGHT_2 SHINE_ON
+        passType: 0
+      - keywords: ECLIPSES_ON LIGHT_3 SHADOW_0 SHINE_OFF
+        passType: 0
+      - keywords: ECLIPSES_ON LIGHT_3 SHADOW_0 SHINE_ON
+        passType: 0
+      - keywords: ECLIPSES_ON LIGHT_3 SHADOW_1 SHINE_OFF
+        passType: 0
+      - keywords: ECLIPSES_ON LIGHT_3 SHADOW_1 SHINE_ON
+        passType: 0
+      - keywords: ECLIPSES_ON LIGHT_3 SHADOW_2 SHINE_OFF
+        passType: 0
+      - keywords: ECLIPSES_ON LIGHT_3 SHADOW_2 SHINE_ON
+        passType: 0
+      - keywords: ECLIPSES_ON LIGHT_3 SHADOW_3 SHINE_OFF
+        passType: 0
+      - keywords: ECLIPSES_ON LIGHT_3 SHADOW_3 SHINE_ON
+        passType: 0
+      - keywords: ECLIPSES_ON LIGHT_3 SHADOW_4 SHINE_OFF
+        passType: 0
+      - keywords: ECLIPSES_ON LIGHT_3 SHADOW_4 SHINE_ON
+        passType: 0
+      - keywords: ECLIPSES_ON LIGHT_3 SHINE_OFF
+        passType: 0
+      - keywords: ECLIPSES_ON LIGHT_3 SHINE_ON
+        passType: 0
+      - keywords: ECLIPSES_ON LIGHT_4 SHADOW_0 SHINE_OFF
+        passType: 0
+      - keywords: ECLIPSES_ON LIGHT_4 SHADOW_0 SHINE_ON
+        passType: 0
+      - keywords: ECLIPSES_ON LIGHT_4 SHADOW_1 SHINE_OFF
+        passType: 0
+      - keywords: ECLIPSES_ON LIGHT_4 SHADOW_1 SHINE_ON
+        passType: 0
+      - keywords: ECLIPSES_ON LIGHT_4 SHADOW_2 SHINE_OFF
+        passType: 0
+      - keywords: ECLIPSES_ON LIGHT_4 SHADOW_2 SHINE_ON
+        passType: 0
+      - keywords: ECLIPSES_ON LIGHT_4 SHADOW_3 SHINE_OFF
+        passType: 0
+      - keywords: ECLIPSES_ON LIGHT_4 SHADOW_3 SHINE_ON
+        passType: 0
+      - keywords: ECLIPSES_ON LIGHT_4 SHADOW_4 SHINE_OFF
+        passType: 0
+      - keywords: ECLIPSES_ON LIGHT_4 SHADOW_4 SHINE_ON
+        passType: 0
+      - keywords: ECLIPSES_ON LIGHT_4 SHINE_OFF
+        passType: 0
+      - keywords: ECLIPSES_ON LIGHT_4 SHINE_ON
+        passType: 0

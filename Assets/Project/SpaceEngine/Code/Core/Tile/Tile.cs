@@ -1,4 +1,39 @@
-﻿using SpaceEngine.Core.Tile.Storage;
+﻿#region License
+// Procedural planet generator.
+//  
+// Copyright (C) 2015-2023 Denis Ovchinnikov [zameran] 
+// All rights reserved.
+// 
+// Redistribution and use in source and binary forms, with or without
+// modification, are permitted provided that the following conditions
+// are met:
+// 1. Redistributions of source code must retain the above copyright
+//    notice, this list of conditions and the following disclaimer.
+// 2. Redistributions in binary form must reproduce the above copyright
+//    notice, this list of conditions and the following disclaimer in the
+//    documentation and/or other materials provided with the distribution.
+// 3. Neither the name of the copyright holders nor the names of its
+//    contributors may be used to endorse or promote products derived from
+//    this software without specific prior written permission.
+// 
+// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+// AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+// IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+// ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE
+// LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+// CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+// SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+// INTERRUPTION)HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+// CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+// ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF
+// THE POSSIBILITY OF SUCH DAMAGE.
+// 
+// Creation Date: 2017.03.28
+// Creation Time: 2:18 PM
+// Creator: zameran
+#endregion
+
+using SpaceEngine.Core.Tile.Storage;
 using SpaceEngine.Core.Tile.Tasks;
 
 using System.Collections.Generic;
@@ -72,7 +107,7 @@ namespace SpaceEngine.Core.Tile
 
             public override string ToString()
             {
-                return string.Format("({0}, {1}, {2})", Level, Tx, Ty);
+                return $"({Level}, {Tx}, {Ty})";
             }
         }
 
@@ -124,7 +159,7 @@ namespace SpaceEngine.Core.Tile
 
             public override string ToString()
             {
-                return string.Format("({0}, {1})", ProducerId, TileId);
+                return $"({ProducerId}, {TileId})";
             }
         }
 
@@ -202,7 +237,7 @@ namespace SpaceEngine.Core.Tile
         /// </summary>
         public CreateTileTask Task { get; private set; }
 
-        public List<TileStorage.Slot> Slot { get { return Task.Slot; } }
+        public List<TileStorage.Slot> Slot => Task.Slot;
 
         public Id ID { get; private set; }
 
@@ -230,7 +265,7 @@ namespace SpaceEngine.Core.Tile
         {
             if (i >= Task.Slot.Count)
             {
-                Debug.Log(string.Format("Tile: Slot at location {0} does not exist!", i));
+                Debug.Log($"Tile: Slot at location {i} does not exist!");
             }
 
             return Task.Slot[i];

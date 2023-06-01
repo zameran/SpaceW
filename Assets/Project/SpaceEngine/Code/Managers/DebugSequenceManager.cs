@@ -1,7 +1,7 @@
 ﻿#region License
 // Procedural planet generator.
 //  
-// Copyright (C) 2015-2018 Denis Ovchinnikov [zameran] 
+// Copyright (C) 2015-2023 Denis Ovchinnikov [zameran] 
 // All rights reserved.
 // 
 // Redistribution and use in source and binary forms, with or without
@@ -32,6 +32,8 @@
 // Creation Time: 12:38 AM
 // Creator: zameran
 #endregion
+
+using SpaceEngine.Core.Patterns.Singleton;
 
 using System;
 using System.Collections.Generic;
@@ -119,7 +121,7 @@ namespace SpaceEngine.Managers
                 {
                     var sequenceEntry = Sequence[i];
 
-                    stringBuilder.AppendLine(string.Format("{0}:{1}", sequenceEntry.Name, sequenceEntry.TimeSinceStartup));
+                    stringBuilder.AppendLine($"{sequenceEntry.Name}:{sequenceEntry.TimeSinceStartup}");
                 }
 
                 UnityEngine.Debug.Log(stringBuilder.ToString());
