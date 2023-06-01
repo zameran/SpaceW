@@ -286,6 +286,8 @@ namespace SpaceEngine.Mathematics
             31 : 15.0 / 14,999999993015080690383911131 | 0,9999999995343387126922607421
             32 : 15.0 / 14,999999996507540345191955564 | 0,9999999997671693563461303710
             */
+            
+            // 0.5 + (1 - pow(0.5, lodLevel)) - possible formula
 
             //So. We have exponential modifier... And pretty stupid code, yeah, i knew it. WTF!?
             //Too small numbers... So. Solution is planet radius scaling. 1 unit = 1 million unity units, then i simply gonna "scale" the overhaul planet.
