@@ -1,4 +1,5 @@
 ﻿#region License
+
 // Procedural planet generator.
 //  
 // Copyright (C) 2015-2023 Denis Ovchinnikov [zameran] 
@@ -31,6 +32,7 @@
 // Creation Date: 2017.03.26
 // Creation Time: 9:05 AM
 // Creator: zameran
+
 #endregion
 
 using UnityEngine;
@@ -39,6 +41,5 @@ namespace SpaceEngine.Core.Preprocess.Terrain.Function
 {
     public interface IColorFunction2D : IFunction2D<Vector4>
     {
-
     }
 }

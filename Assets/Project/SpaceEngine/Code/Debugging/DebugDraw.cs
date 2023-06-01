@@ -1,4 +1,5 @@
 ﻿#region License
+
 // Procedural planet generator.
 // 
 // Copyright (C) 2015-2023 Denis Ovchinnikov [zameran] 
@@ -31,32 +32,29 @@
 // Creation Date: Undefined
 // Creation Time: Undefined
 // Creator: zameran
+
 #endregion
 
+using System;
 using SpaceEngine.Helpers;
 using UnityEngine;
 
 namespace SpaceEngine.Debugging
 {
     /// <summary>
-    /// This class provides default behaviour of all <see cref="GL"/>-based debug drawings.
+    ///     This class provides default behaviour of all <see cref="GL" />-based debug drawings.
     /// </summary>
     public abstract class DebugDraw : MonoBehaviour, IDebug
     {
-        public Shader lineShader = null;
-        public Material lineMaterial = null;
+        public Shader lineShader;
+        public Material lineMaterial;
 
         protected virtual void Start()
         {
             if (lineMaterial == null)
+            {
                 CreateLineMaterial();
-        }
-
-        protected virtual void OnPostRender()
-        {
-            if (lineMaterial == null) CreateLineMaterial();
-
-            Draw();
+            }
         }
 
         protected virtual void OnDestroy()
@@ -64,9 +62,22 @@ namespace SpaceEngine.Debugging
             Helper.Destroy(lineMaterial);
         }
 
+        protected virtual void OnPostRender()
+        {
+            if (lineMaterial == null)
+            {
+                CreateLineMaterial();
+            }
+
+            Draw();
+        }
+
         protected virtual void CreateLineMaterial()
         {
-            if (lineShader == null) throw new System.NullReferenceException("Line Shader is null!");
+            if (lineShader == null)
+            {
+                throw new NullReferenceException("Line Shader is null!");
+            }
 
             if (!lineMaterial)
             {

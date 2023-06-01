@@ -1,4 +1,5 @@
 ﻿#region License
+
 // Procedural planet generator.
 // 
 // Copyright (C) 2015-2023 Denis Ovchinnikov [zameran] 
@@ -31,6 +32,7 @@
 // Creation Date: Undefined
 // Creation Time: Undefined
 // Creator: zameran
+
 #endregion
 
 using System;
@@ -51,22 +53,27 @@ namespace SpaceEngine.Pluginator
         {
             get
             {
-                if (instance == null) { Logger.LogError("Loader.Instance.get: Loader Instance get fail!"); }
+                if (instance == null)
+                {
+                    Logger.LogError("Loader.Instance.get: Loader Instance get fail!");
+                }
+
                 return instance;
             }
             private set
             {
-                if (value != null) instance = value;
-                else Logger.LogError("Loader.Instance.set: Loader Instance set fail!");
+                if (value != null)
+                {
+                    instance = value;
+                }
+                else
+                {
+                    Logger.LogError("Loader.Instance.set: Loader Instance set fail!");
+                }
             }
         }
 
         public static int Step { get; private set; }
-
-        protected virtual void Start()
-        {
-
-        }
 
         protected virtual void Awake()
         {
@@ -75,14 +82,16 @@ namespace SpaceEngine.Pluginator
             Step = 0;
         }
 
+        protected virtual void Start()
+        {
+        }
+
         protected virtual void Update()
         {
-
         }
 
         protected virtual void OnGUI()
         {
-
         }
 
         protected virtual void Pass()

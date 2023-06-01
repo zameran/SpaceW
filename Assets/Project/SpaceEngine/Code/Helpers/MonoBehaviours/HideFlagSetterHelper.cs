@@ -1,4 +1,5 @@
 ﻿#region License
+
 // Procedural planet generator.
 // 
 // Copyright (C) 2015-2023 Denis Ovchinnikov [zameran] 
@@ -31,6 +32,7 @@
 // Creation Date: Undefined
 // Creation Time: Undefined
 // Creator: zameran
+
 #endregion
 
 using UnityEngine;
@@ -49,6 +51,7 @@ namespace SpaceEngine.Helpers.MonoBehaviours
             if (obj == null)
             {
                 Debug.LogError("HideFlagSetterHelper.SetFlag: Obj is null!");
+
                 return;
             }
 

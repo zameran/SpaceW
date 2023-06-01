@@ -1,4 +1,5 @@
 ﻿#region License
+
 // Procedural planet generator.
 //  
 // Copyright (C) 2015-2023 Denis Ovchinnikov [zameran] 
@@ -31,6 +32,7 @@
 // Creation Date: 2017.02.23
 // Creation Time: 4:46 PM
 // Creator: zameran
+
 #endregion
 
 using System;
@@ -76,7 +78,10 @@ namespace SpaceEngine.Core.Producers.Elevation
         {
             var gpuSlot = slot[0] as GPUTileStorage.GPUSlot;
 
-            if (gpuSlot == null) { throw new NullReferenceException("gpuSlot"); }
+            if (gpuSlot == null)
+            {
+                throw new NullReferenceException("gpuSlot");
+            }
 
             var tileWidth = gpuSlot.Owner.TileSize;
             var tileSize = tileWidth - (1 + GetBorder() * 2);
@@ -90,20 +95,29 @@ namespace SpaceEngine.Core.Producers.Elevation
 
             if (upsample)
             {
-                if (parentTile != null) parentGpuSlot = parentTile.GetSlot(0) as GPUTileStorage.GPUSlot;
-                else { throw new MissingTileException($"Find parent tile failed! {level - 1}:{tx / 2}-{ty / 2}"); }
+                if (parentTile != null)
+                {
+                    parentGpuSlot = parentTile.GetSlot(0) as GPUTileStorage.GPUSlot;
+                }
+                else
+                {
+                    throw new MissingTileException($"Find parent tile failed! {level - 1}:{tx / 2}-{ty / 2}");
+                }
             }
 
-            if (parentGpuSlot == null && upsample) { throw new NullReferenceException("parentGpuSlot"); }
+            if (parentGpuSlot == null && upsample)
+            {
+                throw new NullReferenceException("parentGpuSlot");
+            }
 
             if (upsample)
             {
                 var parentTexture = parentGpuSlot.Texture;
 
-                var dx = (float)(tx % 2) * (float)(tileSize / 2.0f);
-                var dy = (float)(ty % 2) * (float)(tileSize / 2.0f);
+                var dx = tx % 2 * (tileSize / 2.0f);
+                var dy = ty % 2 * (tileSize / 2.0f);
 
-                var coarseLevelOSL = new Vector4(dx / (float)parentTexture.width, dy / (float)parentTexture.height, 1.0f / (float)parentTexture.width, 0.0f);
+                var coarseLevelOSL = new Vector4(dx / parentTexture.width, dy / parentTexture.height, 1.0f / parentTexture.width, 0.0f);
 
                 ElevationMaterial.SetTexture("_CoarseLevelSampler", parentTexture);
                 ElevationMaterial.SetVector("_CoarseLevelOSL", coarseLevelOSL);
@@ -115,9 +129,9 @@ namespace SpaceEngine.Core.Producers.Elevation
             }
 
             var tileWSD = Vector4.zero;
-            tileWSD.x = (float)tileWidth;
-            tileWSD.y = (float)rootQuadSize / (float)(1 << level) / (float)tileSize;
-            tileWSD.z = (float)tileSize / (float)(TerrainNode.ParentBody.GridResolution - 1);
+            tileWSD.x = tileWidth;
+            tileWSD.y = (float)rootQuadSize / (1 << level) / tileSize;
+            tileWSD.z = tileSize / (float)(TerrainNode.ParentBody.GridResolution - 1);
             tileWSD.w = 0.0f;
 
             var tileScreenSize = (0.5 + (float)GetBorder()) / (tileWSD.x - 1 - (float)GetBorder() * 2);
@@ -135,8 +149,15 @@ namespace SpaceEngine.Core.Producers.Elevation
             ElevationMaterial.SetVector("_Offset", offset.ToVector4());
             ElevationMaterial.SetMatrix("_LocalToWorld", TerrainNode.FaceToLocal.ToMatrix4x4());
 
-            if (TerrainNode.ParentBody.TCCPS != null) TerrainNode.ParentBody.TCCPS.SetUniforms(ElevationMaterial);
-            if (TerrainNode.ParentBody.TCCPS != null) TerrainNode.ParentBody.TCCPS.ToggleKeywords(ElevationMaterial);
+            if (TerrainNode.ParentBody.TCCPS != null)
+            {
+                TerrainNode.ParentBody.TCCPS.SetUniforms(ElevationMaterial);
+            }
+
+            if (TerrainNode.ParentBody.TCCPS != null)
+            {
+                TerrainNode.ParentBody.TCCPS.ToggleKeywords(ElevationMaterial);
+            }
 
             Graphics.Blit(null, gpuSlot.Texture, ElevationMaterial);
 

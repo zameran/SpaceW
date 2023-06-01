@@ -66,26 +66,26 @@ float3 _Light4Direction;
 
 float ComputeMiePhase(float cosTheta, float miePhaseAnisotropy)
 {
-	float squareAniso = miePhaseAnisotropy * miePhaseAnisotropy;
+    float squareAniso = miePhaseAnisotropy * miePhaseAnisotropy;
 
-	float Num = 1.5 * (1.0 + cosTheta * cosTheta) * (1.0 - squareAniso);
-	float Den = (8.0 + squareAniso) * pow(abs(1.0 + squareAniso - 2.0 * miePhaseAnisotropy * cosTheta), 1.5);
-	
-	return Num / Den;
+    float Num = 1.5 * (1.0 + cosTheta * cosTheta) * (1.0 - squareAniso);
+    float Den = (8.0 + squareAniso) * pow(abs(1.0 + squareAniso - 2.0 * miePhaseAnisotropy * cosTheta), 1.5);
+
+    return Num / Den;
 }
 
 float MiePhase(float angle, float4 mie)
 {
-	return ComputeMiePhase(mie.y, mie.y) / pow(mie.z - mie.x * angle, mie.w);
+    return ComputeMiePhase(mie.y, mie.y) / pow(mie.z - mie.x * angle, mie.w);
 }
 #endif
 //----------------------------------------------------------------------------
 
 //----------------------------------------------------------------------------
 #if SHADOW_1 || SHADOW_2 || SHADOW_3 || SHADOW_4
-float4x4  _Shadow1Matrix;
+float4x4 _Shadow1Matrix;
 sampler2D _Shadow1Texture;
-float     _Shadow1Ratio;
+float _Shadow1Ratio;
 
 #if SHADOW_2
 float4x4  _Shadow2Matrix;
@@ -105,52 +105,52 @@ sampler2D _Shadow4Texture;
 float     _Shadow4Ratio;
 #endif
 
-float4 ShadowColor(float4x4 shadowMatrix, sampler2D shadowSampler, float shadowRatio,  float4 worldPoint)
+float4 ShadowColor(float4x4 shadowMatrix, sampler2D shadowSampler, float shadowRatio, float4 worldPoint)
 {
-	float4 shadowPoint = mul(shadowMatrix, worldPoint);
-	float4 shadow = 0;
-	float2 shadowMag = length(shadowPoint.xy);
-	
-	shadowMag = 1.0f - (1.0f - shadowMag) * shadowRatio;
+    float4 shadowPoint = mul(shadowMatrix, worldPoint);
+    float4 shadow = 0;
+    float2 shadowMag = length(shadowPoint.xy);
 
-	#ifdef SHADOW_BLUR
-		shadow = Blur(shadowSampler, shadowMag, 0.00015f);
-	#else
+    shadowMag = 1.0f - (1.0f - shadowMag) * shadowRatio;
+
+    #ifdef SHADOW_BLUR
+    shadow = Blur(shadowSampler, shadowMag, 0.00015f);
+    #else
 		shadow = tex2Dlod(shadowSampler, float4(shadowMag.xy, 0.0, 0.0));
-	#endif
-	
-	shadow += shadowPoint.z < 0.0f ? 1.0f : 0.0f;
-	shadow = saturate(shadow);
+    #endif
 
-	return shadow;
+    shadow += shadowPoint.z < 0.0f ? 1.0f : 0.0f;
+    shadow = saturate(shadow);
+
+    return shadow;
 }
 
 float4 ShadowColor(float4 worldPoint)
 {
-	float4 color = ShadowColor(_Shadow1Matrix, _Shadow1Texture, _Shadow1Ratio, worldPoint);
-	
-	#if SHADOW_2
+    float4 color = ShadowColor(_Shadow1Matrix, _Shadow1Texture, _Shadow1Ratio, worldPoint);
+
+    #if SHADOW_2
 		color *= ShadowColor(_Shadow2Matrix, _Shadow2Texture, _Shadow2Ratio, worldPoint);
-	#endif
+    #endif
 
-	#if SHADOW_3
+    #if SHADOW_3
 		color *= ShadowColor(_Shadow3Matrix, _Shadow3Texture, _Shadow3Ratio, worldPoint);
-	#endif
+    #endif
 
-	#if SHADOW_4
+    #if SHADOW_4
 		color *= ShadowColor(_Shadow4Matrix, _Shadow4Texture, _Shadow4Ratio, worldPoint);
-	#endif
-	
-	color.a = 1.0;
+    #endif
 
-	return color;
+    color.a = 1.0;
+
+    return color;
 }
 
 float4 ShadowOuterColor(float3 d, float3 WCP, float3 origin, float Rt)
 {
-	float interSectPt = IntersectOuterSphereInverted(WCP, d, origin, Rt);
+    float interSectPt = IntersectOuterSphereInverted(WCP, d, origin, Rt);
 
-	return interSectPt != -1.0 ? ShadowColor(float4(WCP + d * interSectPt, 1.0)) : 1.0;
+    return interSectPt != -1.0 ? ShadowColor(float4(WCP + d * interSectPt, 1.0)) : 1.0;
 }
 #endif
 //----------------------------------------------------------------------------

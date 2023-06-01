@@ -1,4 +1,5 @@
 #region License
+
 // Procedural planet generator.
 // 
 // Copyright (C) 2015-2023 Denis Ovchinnikov [zameran] 
@@ -31,6 +32,7 @@
 // Creation Date: Undefined
 // Creation Time: Undefined
 // Creator: zameran
+
 #endregion
 
 using System;
@@ -45,8 +47,8 @@ using Object = UnityEngine.Object;
 namespace SpaceEngine.Helpers
 {
     /// <summary>
-    /// Class - extensions holder for a various stuff, such as 
-    /// <see cref="Object"/>, <see cref="Vector3"/>, <see cref="Material"/>, <see cref="GameObject"/> and special math.
+    ///     Class - extensions holder for a various stuff, such as
+    ///     <see cref="UnityEngine.Object" />, <see cref="Vector3" />, <see cref="Material" />, <see cref="GameObject" /> and special math.
     /// </summary>
     public static class Helper
     {
@@ -75,7 +77,7 @@ namespace SpaceEngine.Helpers
 
         public static bool Enabled<T>(T b) where T : Behaviour
         {
-            return b != null && b.enabled == true && b.gameObject.activeInHierarchy == true;
+            return b != null && b.enabled && b.gameObject.activeInHierarchy;
         }
 
         public static bool Enabled(GameObject b)
@@ -178,7 +180,10 @@ namespace SpaceEngine.Helpers
             if (t != null)
             {
                 #if UNITY_EDITOR
-                if (Application.isPlaying == false && t.localRotation == q) return;
+                if (Application.isPlaying == false && t.localRotation == q)
+                {
+                    return;
+                }
                 #endif
                 t.localRotation = q;
             }
@@ -208,7 +213,7 @@ namespace SpaceEngine.Helpers
             {
                 while (array.Count < size)
                 {
-                    array.Add(newT != null ? newT(array.Count) : default(T));
+                    array.Add(newT != null ? newT(array.Count) : default);
                 }
 
                 while (array.Count > size)
@@ -222,9 +227,15 @@ namespace SpaceEngine.Helpers
 
         public static bool ArraysEqual<T>(T[] a, List<T> b)
         {
-            if (a == null || b == null) return false;
+            if (a == null || b == null)
+            {
+                return false;
+            }
 
-            if (a.Length != b.Count) return false;
+            if (a.Length != b.Count)
+            {
+                return false;
+            }
 
             var comparer = EqualityComparer<T>.Default;
 
@@ -348,7 +359,10 @@ namespace SpaceEngine.Helpers
 
         public static void SetKeywords(Material m, List<string> keywords, bool checkShaderKeywords = false)
         {
-            if (keywords == null) return;
+            if (keywords == null)
+            {
+                return;
+            }
 
             if (checkShaderKeywords)
             {
@@ -367,13 +381,27 @@ namespace SpaceEngine.Helpers
         {
             if (state)
             {
-                if (target.IsKeywordEnabled(disabledKeyword)) target.DisableKeyword(disabledKeyword);
-                if (!target.IsKeywordEnabled(enabledKeyword)) target.EnableKeyword(enabledKeyword);
+                if (target.IsKeywordEnabled(disabledKeyword))
+                {
+                    target.DisableKeyword(disabledKeyword);
+                }
+
+                if (!target.IsKeywordEnabled(enabledKeyword))
+                {
+                    target.EnableKeyword(enabledKeyword);
+                }
             }
             else
             {
-                if (target.IsKeywordEnabled(enabledKeyword)) target.DisableKeyword(enabledKeyword);
-                if (!target.IsKeywordEnabled(disabledKeyword)) target.EnableKeyword(disabledKeyword);
+                if (target.IsKeywordEnabled(enabledKeyword))
+                {
+                    target.DisableKeyword(enabledKeyword);
+                }
+
+                if (!target.IsKeywordEnabled(disabledKeyword))
+                {
+                    target.EnableKeyword(disabledKeyword);
+                }
             }
         }
 
@@ -385,12 +413,18 @@ namespace SpaceEngine.Helpers
 
         public static void EnableKeyword(Material target, string keyword)
         {
-            if (!target.IsKeywordEnabled(keyword)) target.EnableKeyword(keyword);
+            if (!target.IsKeywordEnabled(keyword))
+            {
+                target.EnableKeyword(keyword);
+            }
         }
 
         public static void DisableKeyword(Material target, string keyword)
         {
-            if (target.IsKeywordEnabled(keyword)) target.DisableKeyword(keyword);
+            if (target.IsKeywordEnabled(keyword))
+            {
+                target.DisableKeyword(keyword);
+            }
         }
 
         public static Color Brighten(Color color, float brightness)
@@ -412,9 +446,9 @@ namespace SpaceEngine.Helpers
         }
 
         public static void CalculateLight(Light light, Vector3 center, Transform directionTransform, Transform positionTransform,
-            ref Vector3 position,
-            ref Vector3 direction,
-            ref Color color)
+                                          ref Vector3 position,
+                                          ref Vector3 direction,
+                                          ref Color color)
         {
             if (light != null)
             {
@@ -457,7 +491,7 @@ namespace SpaceEngine.Helpers
                 {
                     var light = lights[i - 1];
 
-                    if (Enabled(light) == true && light.intensity > 0.0f && lightCount < maxLights)
+                    if (Enabled(light) && light.intensity > 0.0f && lightCount < maxLights)
                     {
                         var prefix = $"_Light{++lightCount}";
                         var direction = default(Vector3);
@@ -494,7 +528,7 @@ namespace SpaceEngine.Helpers
                 {
                     var shadow = shadows[i - 1];
 
-                    if (Enabled(shadow) == true && shadow.CalculateShadow() == true && shadowCount < maxShadows)
+                    if (Enabled(shadow) && shadow.CalculateShadow() && shadowCount < maxShadows)
                     {
                         var prefix = $"_Shadow{++shadowCount}";
 
@@ -526,7 +560,7 @@ namespace SpaceEngine.Helpers
                 {
                     var shadow = shadows[i - 1];
 
-                    if (Enabled(shadow) == true && shadow.CalculateShadow() == true && shadowCount < maxShadows)
+                    if (Enabled(shadow) && shadow.CalculateShadow() && shadowCount < maxShadows)
                     {
                         var prefix = $"_Shadow{++shadowCount}";
 
@@ -578,11 +612,11 @@ namespace SpaceEngine.Helpers
         }
 
         public static Texture2D CreateTempTexture2D(int width,
-            int height,
-            TextureFormat format = TextureFormat.ARGB32,
-            bool mips = false,
-            bool linear = false,
-            bool recordUndo = true)
+                                                    int height,
+                                                    TextureFormat format = TextureFormat.ARGB32,
+                                                    bool mips = false,
+                                                    bool linear = false,
+                                                    bool recordUndo = true)
         {
             var texture2D = new Texture2D(width, height, format, mips, linear);
 

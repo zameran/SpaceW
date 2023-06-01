@@ -1,4 +1,5 @@
 ﻿#region License
+
 // Procedural planet generator.
 //  
 // Copyright (C) 2015-2023 Denis Ovchinnikov [zameran] 
@@ -31,6 +32,7 @@
 // Creation Date: 2017.03.28
 // Creation Time: 2:18 PM
 // Creator: zameran
+
 #endregion
 
 using System;
@@ -45,136 +47,181 @@ using UnityEngine;
 // NOTE : Maybe some sort of Strategy pattern.
 namespace SpaceEngine.Core.Terrain
 {
-    /// <summary> 
-    /// A quad in a terrain quadtree. The quadtree is subdivided based only on the current viewer position.  
-    /// All quads are subdivided if they meet the subdivision criterion, even if they are outside the view frustum.  
-    /// The quad visibility is stored in <see cref="Visibility"/>.  
-    /// It can be used in <see cref="Tile.Samplers.TileSampler"/> to decide whether or not data must be produced for invisible tiles  
-    /// (we recall that the terrain quadtree itself does not store any terrain data). 
+    /// <summary>
+    ///     A quad in a terrain quadtree. The quadtree is subdivided based only on the current viewer position.
+    ///     All quads are subdivided if they meet the subdivision criterion, even if they are outside the view frustum.
+    ///     The quad visibility is stored in <see cref="Visibility" />.
+    ///     It can be used in <see cref="Tile.Samplers.TileSampler" /> to decide whether or not data must be produced for invisible tiles
+    ///     (we recall that the terrain quadtree itself does not store any terrain data).
     /// </summary>
     public class TerrainQuad : IEquatable<TerrainQuad>
     {
-        public SerializableGuid GUID { get; private set; }
-
-        /// <summary> 
-        /// The <see cref="TerrainNode"/> to which this terrain quadtree belongs. 
-        /// </summary> 
-        public TerrainNode Owner { get; private set; }
-
-        /// <summary> 
-        /// The parent quad of this quad. 
-        /// </summary> 
-        public TerrainQuad Parent { get; private set; }
-
-        /// <summary> 
-        /// The level of this quad in the quadtree (0 for the root). 
-        /// </summary> 
-        public int Level { get; private set; }
-
-        /// <summary> 
-        /// The quadtree x coordinate of this quad at <see cref="Level"/>. [0, 2 ^ <see cref="Level"/> - 1] 
-        /// </summary> 
-        public int Tx { get; private set; }
-
-        /// <summary> 
-        /// The quadtree y coordinate of this quad at <see cref="Level"/>. [0, 2 ^ <see cref="Level"/> - 1] 
-        /// </summary> 
-        public int Ty { get; private set; }
-
-        /// <summary> 
-        /// The physical x coordinate of the lower left corner of this quad (in local space). 
-        /// </summary> 
-        public double Ox { get; private set; }
-
-        /// <summary> 
-        /// The physical y coordinate of the lower left corner of this quad (in local space). 
-        /// </summary> 
-        public double Oy { get; private set; }
-
-        /// <summary> 
-        /// The physical size of this quad (in local space). 
-        /// </summary> 
-        public double Length { get; private set; }
-
         /// <summary>
-        /// The physical size of this quad divided by two (in local space).
-        /// </summary>
-        public double LengthHalf { get; private set; }
-
-        /// <summary> 
-        /// Local bounding box. 
-        /// </summary> 
-        public Box3d LocalBox { get; private set; }
-
-        /// <summary>
-        /// Should the quad be drawn?
-        /// </summary>
-        public bool Drawable { get; set; }
-
-        /// <summary>
-        /// The minimum terrain elevation inside this quad. This field must be updated manually by users 
-        /// (the <see cref="Tile.Samplers.TileSamplerZ"/> class can do this for you).
-        /// </summary>
-        public float ZMin { get; set; }
-
-        /// <summary>
-        /// The maximum terrain elevation inside this quad. This field must be updated manually by users 
-        /// (the <see cref="Tile.Samplers.TileSamplerZ"/> class can do this for you).
-        /// </summary>
-        public float ZMax { get; set; }
-
-        /// <summary>
-        /// The four subquads of this quad. If this quad is not subdivided, the four values are NULL. 
-        /// The subquads are stored in the following order: [BottomLeft, BottomRight, TopLeft, TopRight].
+        ///     The four subquads of this quad. If this quad is not subdivided, the four values are NULL.
+        ///     The subquads are stored in the following order: [BottomLeft, BottomRight, TopLeft, TopRight].
         /// </summary>
         [NonSerialized]
         public TerrainQuad[] Children = new TerrainQuad[4];
 
         /// <summary>
-        /// The visibility of the bounding box of this quad from the current viewer position. 
-        /// The bounding box is computed using <see cref="ZMin"/> and <see cref="ZMax"/>, 
-        /// which must therefore be up to date to get a correct culling of quads out of the view frustum. 
-        /// This visibility only takes frustum culling into account.
+        ///     Creates a new <see cref="TerrainQuad" />
+        /// </summary>
+        /// <param name="owner">The <see cref="TerrainNode" /> to which the terrain quadtree belongs.</param>
+        /// <param name="parent">The <see cref="TerrainQuad" /> parent of this quad.</param>
+        /// <param name="tx">The logical x coordinate of this quad.</param>
+        /// <param name="ty">The logical y coordinate of this quad.</param>
+        /// <param name="ox">The physical x coordinate of the lower left corner of this quad.</param>
+        /// <param name="oy">The physical y coordinate of the lower left corner of this quad.</param>
+        /// <param name="length">The physical size of this quad.</param>
+        /// <param name="zmin">The minimum terrain elevation inside this quad.</param>
+        /// <param name="zmax">The maximum terrain elevation inside this quad.</param>
+        public TerrainQuad(TerrainNode owner, TerrainQuad parent, int tx, int ty, double ox, double oy, double length, float zmin, float zmax)
+        {
+            GUID = Guid.NewGuid();
+
+            Owner = owner;
+            Parent = parent;
+            Level = Parent == null ? 0 : Parent.Level + 1;
+            Tx = tx;
+            Ty = ty;
+            Ox = ox;
+            Oy = oy;
+            ZMax = zmax;
+            ZMin = zmin;
+            Length = length;
+            LengthHalf = length / 2.0;
+            LocalBox = new Box3d(Ox, Ox + Length, Oy, Oy + Length, ZMin, ZMax);
+            DeformedOffset = new Vector4((float)Ox, (float)Oy, (float)Length, Level);
+
+            DeformedBox = new Vector3d[4];
+            DeformedBox[0] = Owner.Deformation.LocalToDeformed(LocalBox.Min.x, LocalBox.Min.y, LocalBox.Min.z);
+            DeformedBox[1] = Owner.Deformation.LocalToDeformed(LocalBox.Max.x, LocalBox.Min.y, LocalBox.Min.z);
+            DeformedBox[2] = Owner.Deformation.LocalToDeformed(LocalBox.Max.x, LocalBox.Max.y, LocalBox.Min.z);
+            DeformedBox[3] = Owner.Deformation.LocalToDeformed(LocalBox.Min.x, LocalBox.Max.y, LocalBox.Min.z);
+
+            Order = new byte[4];
+            Order[0] = 0;
+            Order[1] = 1;
+            Order[2] = 2;
+            Order[3] = 3;
+
+            CalculateMatrices(ox, oy, length, owner.ParentBody.Size);
+        }
+
+        public SerializableGuid GUID { get; }
+
+        /// <summary>
+        ///     The <see cref="TerrainNode" /> to which this terrain quadtree belongs.
+        /// </summary>
+        public TerrainNode Owner { get; }
+
+        /// <summary>
+        ///     The parent quad of this quad.
+        /// </summary>
+        public TerrainQuad Parent { get; }
+
+        /// <summary>
+        ///     The level of this quad in the quadtree (0 for the root).
+        /// </summary>
+        public int Level { get; }
+
+        /// <summary>
+        ///     The quadtree x coordinate of this quad at <see cref="Level" />. [0, 2 ^ <see cref="Level" /> - 1]
+        /// </summary>
+        public int Tx { get; }
+
+        /// <summary>
+        ///     The quadtree y coordinate of this quad at <see cref="Level" />. [0, 2 ^ <see cref="Level" /> - 1]
+        /// </summary>
+        public int Ty { get; }
+
+        /// <summary>
+        ///     The physical x coordinate of the lower left corner of this quad (in local space).
+        /// </summary>
+        public double Ox { get; }
+
+        /// <summary>
+        ///     The physical y coordinate of the lower left corner of this quad (in local space).
+        /// </summary>
+        public double Oy { get; }
+
+        /// <summary>
+        ///     The physical size of this quad (in local space).
+        /// </summary>
+        public double Length { get; }
+
+        /// <summary>
+        ///     The physical size of this quad divided by two (in local space).
+        /// </summary>
+        public double LengthHalf { get; }
+
+        /// <summary>
+        ///     Local bounding box.
+        /// </summary>
+        public Box3d LocalBox { get; }
+
+        /// <summary>
+        ///     Should the quad be drawn?
+        /// </summary>
+        public bool Drawable { get; set; }
+
+        /// <summary>
+        ///     The minimum terrain elevation inside this quad. This field must be updated manually by users
+        ///     (the <see cref="Tile.Samplers.TileSamplerZ" /> class can do this for you).
+        /// </summary>
+        public float ZMin { get; set; }
+
+        /// <summary>
+        ///     The maximum terrain elevation inside this quad. This field must be updated manually by users
+        ///     (the <see cref="Tile.Samplers.TileSamplerZ" /> class can do this for you).
+        /// </summary>
+        public float ZMax { get; set; }
+
+        /// <summary>
+        ///     The visibility of the bounding box of this quad from the current viewer position.
+        ///     The bounding box is computed using <see cref="ZMin" /> and <see cref="ZMax" />,
+        ///     which must therefore be up to date to get a correct culling of quads out of the view frustum.
+        ///     This visibility only takes frustum culling into account.
         /// </summary>
         public Frustum3d.VISIBILITY Visibility { get; private set; }
 
-        /// <summary> 
-        /// The bounding box of this quad is occluded by the bounding boxes of the quads in front of it? 
-        /// </summary> 
+        /// <summary>
+        ///     The bounding box of this quad is occluded by the bounding boxes of the quads in front of it?
+        /// </summary>
         public bool Occluded { get; private set; }
 
         /// <summary>
-        /// This quad is visible?
+        ///     This quad is visible?
         /// </summary>
         public bool IsVisible => Visibility != Frustum3d.VISIBILITY.INVISIBLE;
 
         /// <summary>
-        /// This quad is not subdivided?
+        ///     This quad is not subdivided?
         /// </summary>
         public bool IsLeaf => Children[0] == null || Children == null;
 
         /// <summary>
-        /// Deformed space quad corners.
+        ///     Deformed space quad corners.
         /// </summary>
         public Matrix4x4d DeformedCorners { get; private set; }
 
         /// <summary>
-        /// Deformed space quad verticals.
+        ///     Deformed space quad verticals.
         /// </summary>
         public Matrix4x4d DeformedVerticals { get; private set; }
 
         /// <summary>
-        /// Screen space quad corners.
+        ///     Screen space quad corners.
         /// </summary>
         public Matrix4x4d FlatCorners { get; private set; }
 
         /// <summary>
-        /// Screen space quad verticals.
+        ///     Screen space quad verticals.
         /// </summary>
         public Matrix4x4d FlatVerticals { get; private set; }
 
         /// <summary>
-        /// Tangent frame to world matrix.
+        ///     Tangent frame to world matrix.
         /// </summary>
         public Matrix3x3d TangentFrameToWorld { get; private set; }
 
@@ -182,12 +229,12 @@ namespace SpaceEngine.Core.Terrain
 
         public Vector4d Lengths { get; private set; }
 
-        public Vector3d[] DeformedBox { get; private set; }
+        public Vector3d[] DeformedBox { get; }
 
-        public byte[] Order { get; private set; }
+        public byte[] Order { get; }
 
         /// <summary>
-        /// Vector to handle <see cref="Ox"/>, <see cref="Oy"/>, <see cref="Length"/> and <see cref="Level"/> values.
+        ///     Vector to handle <see cref="Ox" />, <see cref="Oy" />, <see cref="Length" /> and <see cref="Level" /> values.
         /// </summary>
         public Vector4 DeformedOffset { get; private set; }
 
@@ -239,53 +286,8 @@ namespace SpaceEngine.Core.Terrain
             CalculateTangetFrameToWorld(Center);
         }
 
-        /// <summary> 
-        /// Creates a new <see cref="TerrainQuad"/> 
-        /// </summary> 
-        /// <param name="owner">The <see cref="TerrainNode"/> to which the terrain quadtree belongs.</param> 
-        /// <param name="parent">The <see cref="TerrainQuad"/> parent of this quad.</param> 
-        /// <param name="tx">The logical x coordinate of this quad.</param> 
-        /// <param name="ty">The logical y coordinate of this quad.</param> 
-        /// <param name="ox">The physical x coordinate of the lower left corner of this quad.</param> 
-        /// <param name="oy">The physical y coordinate of the lower left corner of this quad.</param> 
-        /// <param name="length">The physical size of this quad.</param> 
-        /// <param name="zmin">The minimum terrain elevation inside this quad.</param> 
-        /// <param name="zmax">The maximum terrain elevation inside this quad.</param> 
-        public TerrainQuad(TerrainNode owner, TerrainQuad parent, int tx, int ty, double ox, double oy, double length, float zmin, float zmax)
-        {
-            GUID = Guid.NewGuid();
-
-            Owner = owner;
-            Parent = parent;
-            Level = (Parent == null) ? 0 : Parent.Level + 1;
-            Tx = tx;
-            Ty = ty;
-            Ox = ox;
-            Oy = oy;
-            ZMax = zmax;
-            ZMin = zmin;
-            Length = length;
-            LengthHalf = length / 2.0;
-            LocalBox = new Box3d(Ox, Ox + Length, Oy, Oy + Length, ZMin, ZMax);
-            DeformedOffset = new Vector4((float)Ox, (float)Oy, (float)Length, Level);
-
-            DeformedBox = new Vector3d[4];
-            DeformedBox[0] = Owner.Deformation.LocalToDeformed(LocalBox.Min.x, LocalBox.Min.y, LocalBox.Min.z);
-            DeformedBox[1] = Owner.Deformation.LocalToDeformed(LocalBox.Max.x, LocalBox.Min.y, LocalBox.Min.z);
-            DeformedBox[2] = Owner.Deformation.LocalToDeformed(LocalBox.Max.x, LocalBox.Max.y, LocalBox.Min.z);
-            DeformedBox[3] = Owner.Deformation.LocalToDeformed(LocalBox.Min.x, LocalBox.Max.y, LocalBox.Min.z);
-
-            Order = new byte[4];
-            Order[0] = 0;
-            Order[1] = 1;
-            Order[2] = 2;
-            Order[3] = 3;
-
-            CalculateMatrices(ox, oy, length, owner.ParentBody.Size);
-        }
-
         /// <summary>
-        /// The child with specified index.
+        ///     The child with specified index.
         /// </summary>
         /// <param name="i">Index of the child.</param>
         /// <returns>Returns the child with specified index.</returns>
@@ -295,7 +297,7 @@ namespace SpaceEngine.Core.Terrain
         }
 
         /// <summary>
-        /// The number of quads in the tree below this quad.
+        ///     The number of quads in the tree below this quad.
         /// </summary>
         /// <returns>Returns the number of quads in the tree below this quad.</returns>
         public int GetSize()
@@ -306,14 +308,12 @@ namespace SpaceEngine.Core.Terrain
             {
                 return s;
             }
-            else
-            {
-                return s + Children[0].GetSize() + Children[1].GetSize() + Children[2].GetSize() + Children[3].GetSize();
-            }
+
+            return s + Children[0].GetSize() + Children[1].GetSize() + Children[2].GetSize() + Children[3].GetSize();
         }
 
         /// <summary>
-        /// The depth of the tree below this quad.
+        ///     The depth of the tree below this quad.
         /// </summary>
         /// <returns>Returns the depth of the tree below this quad.</returns>
         public int GetDepth()
@@ -322,10 +322,8 @@ namespace SpaceEngine.Core.Terrain
             {
                 return Level;
             }
-            else
-            {
-                return Mathf.Max(Mathf.Max(Children[0].GetDepth(), Children[1].GetDepth()), Mathf.Max(Children[2].GetDepth(), Children[3].GetDepth()));
-            }
+
+            return Mathf.Max(Mathf.Max(Children[0].GetDepth(), Children[1].GetDepth()), Mathf.Max(Children[2].GetDepth(), Children[3].GetDepth()));
         }
 
         public void Destroy()
@@ -341,7 +339,7 @@ namespace SpaceEngine.Core.Terrain
         }
 
         /// <summary>
-        /// Recalculates and updates critical variables, required for proper rendering.
+        ///     Recalculates and updates critical variables, required for proper rendering.
         /// </summary>
         public void UpdateMatrices()
         {
@@ -359,15 +357,15 @@ namespace SpaceEngine.Core.Terrain
         }
 
         /// <summary>
-        /// Subdivides or unsubdivides this quad based on the current viewer distance to this quad, relatively to its size. 
-        /// This method uses the current viewer position provided by the <see cref="TerrainNode"/> to which this <see cref="QuadTree"/> belongs.
+        ///     Subdivides or unsubdivides this quad based on the current viewer distance to this quad, relatively to its size.
+        ///     This method uses the current viewer position provided by the <see cref="TerrainNode" /> to which this <see cref="QuadTree" /> belongs.
         /// </summary>
         public void UpdateLOD()
         {
             // TODO : AddOccluder/IsOccluded Threading!!!
             // TODO : BOTTLENECK!
 
-            var visibility = (Parent == null) ? Frustum3d.VISIBILITY.PARTIALLY : Parent.Visibility;
+            var visibility = Parent == null ? Frustum3d.VISIBILITY.PARTIALLY : Parent.Visibility;
 
             if (visibility == Frustum3d.VISIBILITY.PARTIALLY)
             {
@@ -389,12 +387,12 @@ namespace SpaceEngine.Core.Terrain
                     Visibility = Frustum3d.VISIBILITY.INVISIBLE;
                 }
             }
-            
+
             var ground = Owner.ParentBody.HeightZ;
             var distance = Owner.GetCameraDistance(LocalBox, Math.Max(0.0, ground));
 
             //if ((Owner.SplitInvisibleQuads || Visibility != Frustum3d.VISIBILITY.INVISIBLE) && distance < Length * Owner.SplitDistance && Level < Owner.MaxLevel)
-            if ((Owner.SplitInvisibleQuads || Visibility != Frustum3d.VISIBILITY.INVISIBLE) && (distance < Length * Owner.SplitDistance && Level < Owner.MaxLevel) || (Level < Owner.MinLevel))
+            if (((Owner.SplitInvisibleQuads || Visibility != Frustum3d.VISIBILITY.INVISIBLE) && distance < Length * Owner.SplitDistance && Level < Owner.MaxLevel) || Level < Owner.MinLevel)
             {
                 if (IsLeaf)
                 {
@@ -409,7 +407,7 @@ namespace SpaceEngine.Core.Terrain
                 Children[Order[3]].UpdateLOD();
 
                 // We compute a more precise occlusion for the next frame (see above), by combining the occlusion status of the child nodes.
-                Occluded = (Children[0].Occluded && Children[1].Occluded && Children[2].Occluded && Children[3].Occluded);
+                Occluded = Children[0].Occluded && Children[1].Occluded && Children[2].Occluded && Children[3].Occluded;
             }
             else
             {
@@ -470,7 +468,7 @@ namespace SpaceEngine.Core.Terrain
         }
 
         /// <summary>
-        /// Creates the four subquads of this quad.
+        ///     Creates the four subquads of this quad.
         /// </summary>
         private void Subdivide()
         {
@@ -480,13 +478,19 @@ namespace SpaceEngine.Core.Terrain
             Children[3] = new TerrainQuad(Owner, this, 2 * Tx + 1, 2 * Ty + 1, Ox + LengthHalf, Oy + LengthHalf, LengthHalf, ZMin, ZMax);
         }
 
-        public void DrawQuadOutline(Camera camera, Material lineMaterial, Color lineColor, int [,] order = null)
+        public void DrawQuadOutline(Camera camera, Material lineMaterial, Color lineColor, int[,] order = null)
         {
-            if (order == null) return;
+            if (order == null)
+            {
+                return;
+            }
 
             if (IsLeaf)
             {
-                if (Visibility == Frustum3d.VISIBILITY.INVISIBLE) return;
+                if (Visibility == Frustum3d.VISIBILITY.INVISIBLE)
+                {
+                    return;
+                }
 
                 var verts = new Vector3[8];
                 var isMaximumLevel = Level == Owner.MaxLevel;
@@ -560,7 +564,7 @@ namespace SpaceEngine.Core.Terrain
         /// <inheritdoc />
         public override bool Equals(object obj)
         {
-            return obj != null && (obj.GetType() == GetType() && Equals(obj as TerrainQuad));
+            return obj != null && obj.GetType() == GetType() && Equals(obj as TerrainQuad);
         }
 
         /// <inheritdoc />

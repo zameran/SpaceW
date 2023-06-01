@@ -1,4 +1,5 @@
 ﻿#region License
+
 // Procedural planet generator.
 //  
 // Copyright (C) 2015-2023 Denis Ovchinnikov [zameran] 
@@ -31,6 +32,7 @@
 // Creation Date: 2017.05.02
 // Creation Time: 7:50 PM
 // Creator: zameran
+
 #endregion
 
 using System.Collections;
@@ -48,6 +50,23 @@ namespace SpaceEngine.UI.PanelSystem.Panels
         [SerializeField]
         private Image UIIcon;
 
+        private void Update()
+        {
+            if (!gameObject.activeInHierarchy)
+            {
+                return;
+            }
+
+            var text = "Loading";
+
+            for (var i = 0; i <= Time.time % 3; i++)
+            {
+                text += ".";
+            }
+
+            UIText.text = text;
+        }
+
         public static void Show()
         {
             LevelManager.Instance.InjectWaiter(Instance.StartCoroutine(Instance.WatingRoutine()));
@@ -58,20 +77,6 @@ namespace SpaceEngine.UI.PanelSystem.Panels
         public static void Hide()
         {
             HideInternal();
-        }
-
-        private void Update()
-        {
-            if (!gameObject.activeInHierarchy) return;
-
-            var text = "Loading";
-
-            for (var i = 0; i <= Time.time % 3; i++)
-            {
-                text += ".";
-            }
-
-            UIText.text = text;
         }
 
         private IEnumerator WatingRoutine()

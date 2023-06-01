@@ -1,4 +1,5 @@
 ﻿#region License
+
 // Procedural planet generator.
 // 
 // Copyright (C) 2015-2023 Denis Ovchinnikov [zameran] 
@@ -31,6 +32,7 @@
 // Creation Date: Undefined
 // Creation Time: Undefined
 // Creator: zameran
+
 #endregion
 
 using SpaceEngine.Helpers;
@@ -41,8 +43,8 @@ namespace SpaceEngine.Debugging
 {
     public sealed class DebugDrawTerrainNode : DebugDraw
     {
-        private readonly int[,] ORDER = new int[,] { { 1, 0 }, { 2, 3 }, { 0, 2 }, { 3, 1 } };
-        private readonly Color[] Colors = new Color[] { Color.blue, Color.red, Color.yellow, Color.green, Color.magenta, Color.cyan };
+        private readonly Color[] Colors = { Color.blue, Color.red, Color.yellow, Color.green, Color.magenta, Color.cyan };
+        private readonly int[,] ORDER = { { 1, 0 }, { 2, 3 }, { 0, 2 }, { 3, 1 } };
 
         protected override void Start()
         {
@@ -63,7 +65,10 @@ namespace SpaceEngine.Debugging
         {
             var target = GodManager.Instance.ActiveBody;
 
-            if (target == null) return;
+            if (target == null)
+            {
+                return;
+            }
 
             for (var i = 0; i < target.TerrainNodes.Count; i++)
             {

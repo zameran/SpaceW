@@ -1,4 +1,5 @@
 ﻿#region License
+
 // Procedural planet generator.
 //  
 // Copyright (C) 2015-2023 Denis Ovchinnikov [zameran] 
@@ -31,12 +32,13 @@
 // Creation Date: 2017.03.23
 // Creation Time: 5:14 PM
 // Creator: zameran
+
 #endregion
 
 namespace SpaceEngine.Core.Patterns.Strategy
 {
     /// <summary>
-    /// This interface should be implemented in all things, that's gonna be rendered with <see cref="UnityEngine.Graphics"/> class methods.
+    ///     This interface should be implemented in all things, that's gonna be rendered with <see cref="UnityEngine.Graphics" /> class methods.
     /// </summary>
     /// <typeparam name="T">Generic class type.</typeparam>
     public interface IRenderable<T> where T : class

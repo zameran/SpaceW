@@ -1,4 +1,5 @@
 #region License
+
 // Procedural planet generator.
 //  
 // Copyright (C) 2015-2023 Denis Ovchinnikov [zameran] 
@@ -31,6 +32,7 @@
 // Creation Date: 2017.03.28
 // Creation Time: 2:18 PM
 // Creator: zameran
+
 #endregion
 
 using System;
@@ -41,6 +43,14 @@ namespace SpaceEngine.Core.Noise
     public static class VoronoiNoise
     {
         [Serializable]
+        public enum CombineFunction
+        {
+            d0,
+            d1,
+            d2
+        }
+
+        [Serializable]
         public enum DistanceFunction
         {
             EUCLIDIAN,
@@ -48,13 +58,8 @@ namespace SpaceEngine.Core.Noise
             CHEBYSHEV
         }
 
-        [Serializable]
-        public enum CombineFunction
-        {
-            d0,
-            d1,
-            d2
-        }
+        private const uint OFFSET_BASIS = 2166136261;
+        private const uint FNV_PRIME = 16777619;
 
         public static float CellNoise(Vector3 position, float seed, DistanceFunction distanceFunction = DistanceFunction.EUCLIDIAN, CombineFunction combineFunction = CombineFunction.d0)
         {
@@ -99,7 +104,7 @@ namespace SpaceEngine.Core.Noise
                         var cubeY = evalCubeY + j;
                         var cubeZ = evalCubeZ + k;
 
-                        var lastRandom = LCGRandom(Hash((uint)(cubeX + seed), (uint)(cubeY), (uint)(cubeZ)));
+                        var lastRandom = LCGRandom(Hash((uint)(cubeX + seed), (uint)cubeY, (uint)cubeZ));
 
                         const uint numberFeaturePoints = 1;
 
@@ -114,9 +119,9 @@ namespace SpaceEngine.Core.Noise
                             lastRandom = LCGRandom(lastRandom);
                             randomDiff.z = (float)lastRandom / 0x100000000;
 
-                            featurePoint.x = randomDiff.x + (float)cubeX;
-                            featurePoint.y = randomDiff.y + (float)cubeY;
-                            featurePoint.z = randomDiff.z + (float)cubeZ;
+                            featurePoint.x = randomDiff.x + cubeX;
+                            featurePoint.y = randomDiff.y + cubeY;
+                            featurePoint.z = randomDiff.z + cubeZ;
 
                             switch (distanceFunction)
                             {
@@ -208,12 +213,18 @@ namespace SpaceEngine.Core.Noise
 
             for (var i = arr.Length - 1; i >= 0; i--)
             {
-                if (value > arr[i]) break;
+                if (value > arr[i])
+                {
+                    break;
+                }
 
                 temp = arr[i];
                 arr[i] = value;
 
-                if (i + 1 < arr.Length) arr[i + 1] = temp;
+                if (i + 1 < arr.Length)
+                {
+                    arr[i + 1] = temp;
+                }
             }
         }
 
@@ -222,17 +233,14 @@ namespace SpaceEngine.Core.Noise
             return (uint)((1103515245u * lastValue + 12345u) % 0x100000000u);
         }
 
-        private const uint OFFSET_BASIS = 2166136261;
-        private const uint FNV_PRIME = 16777619;
-
         private static uint Hash(uint i, uint j, uint k)
         {
-            return (uint)((((((OFFSET_BASIS ^ (uint)i) * FNV_PRIME) ^ (uint)j) * FNV_PRIME) ^ (uint)k) * FNV_PRIME);
+            return (((((OFFSET_BASIS ^ i) * FNV_PRIME) ^ j) * FNV_PRIME) ^ k) * FNV_PRIME;
         }
 
         private static uint Hash(uint i, uint j)
         {
-            return (uint)((((OFFSET_BASIS ^ (uint)i) * FNV_PRIME) ^ (uint)j) * FNV_PRIME);
+            return (((OFFSET_BASIS ^ i) * FNV_PRIME) ^ j) * FNV_PRIME;
         }
     }
 }

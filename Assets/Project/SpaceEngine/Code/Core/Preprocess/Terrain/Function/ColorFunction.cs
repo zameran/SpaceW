@@ -1,4 +1,5 @@
 ﻿#region License
+
 // Procedural planet generator.
 //  
 // Copyright (C) 2015-2023 Denis Ovchinnikov [zameran] 
@@ -31,6 +32,7 @@
 // Creation Date: 2017.03.28
 // Creation Time: 2:18 PM
 // Creator: zameran
+
 #endregion
 
 using System;
@@ -40,9 +42,8 @@ namespace SpaceEngine.Core.Preprocess.Terrain.Function
 {
     public class PlaneColorFunction : IColorFunction2D
     {
-        InputMap.InputMap Source;
-
-        int DestinationSize;
+        private readonly int DestinationSize;
+        private readonly InputMap.InputMap Source;
 
         public PlaneColorFunction(InputMap.InputMap source, int destinationSize)
         {
@@ -52,7 +53,7 @@ namespace SpaceEngine.Core.Preprocess.Terrain.Function
 
         public Vector4 GetValue(int x, int y)
         {
-            return SampleColor((float)x / (float)DestinationSize * (float)Source.Width, (float)y / (float)DestinationSize * (float)Source.Height);
+            return SampleColor(x / (float)DestinationSize * Source.Width, y / (float)DestinationSize * Source.Height);
         }
 
         private Vector4 SampleColor(float x, float y)
@@ -72,12 +73,12 @@ namespace SpaceEngine.Core.Preprocess.Terrain.Function
             var c4 = Source.Get(ix + 1, iy + 1);
 
             var color = new Vector4
-            (
-                (c1.x * cx + c2.x * x) * cy + (c3.x * cx + c4.x * x) * y,
-                (c1.y * cx + c2.y * x) * cy + (c3.y * cx + c4.y * x) * y,
-                (c1.z * cx + c2.z * x) * cy + (c3.z * cx + c4.z * x) * y,
-                (c1.w * cx + c2.w * x) * cy + (c3.w * cx + c4.w * x) * y
-            );
+                (
+                 (c1.x * cx + c2.x * x) * cy + (c3.x * cx + c4.x * x) * y,
+                 (c1.y * cx + c2.y * x) * cy + (c3.y * cx + c4.y * x) * y,
+                 (c1.z * cx + c2.z * x) * cy + (c3.z * cx + c4.z * x) * y,
+                 (c1.w * cx + c2.w * x) * cy + (c3.w * cx + c4.w * x) * y
+                );
 
             return color;
         }
@@ -85,11 +86,10 @@ namespace SpaceEngine.Core.Preprocess.Terrain.Function
 
     public class SphericalColorFunction : IColorFunction2D
     {
-        InputMap.InputMap Source;
+        private readonly int DestinationSize;
 
-        Projection Projection;
-
-        int DestinationSize;
+        private readonly Projection Projection;
+        private readonly InputMap.InputMap Source;
 
         public SphericalColorFunction(InputMap.InputMap source, Projection projection, int destinationSize)
         {
@@ -130,12 +130,12 @@ namespace SpaceEngine.Core.Preprocess.Terrain.Function
             var c4 = Source.Get((ilon + Source.Width + 1) % Source.Width, ilat + 1);
 
             var color = new Vector4
-            (
-                (float)((c1.x * clon + c2.x * lon) * clat + (c3.x * clon + c4.x * lon) * lat),
-                (float)((c1.y * clon + c2.y * lon) * clat + (c3.y * clon + c4.y * lon) * lat),
-                (float)((c1.z * clon + c2.z * lon) * clat + (c3.z * clon + c4.z * lon) * lat),
-                (float)((c1.w * clon + c2.w * lon) * clat + (c3.w * clon + c4.w * lon) * lat)
-            );
+                (
+                 (float)((c1.x * clon + c2.x * lon) * clat + (c3.x * clon + c4.x * lon) * lat),
+                 (float)((c1.y * clon + c2.y * lon) * clat + (c3.y * clon + c4.y * lon) * lat),
+                 (float)((c1.z * clon + c2.z * lon) * clat + (c3.z * clon + c4.z * lon) * lat),
+                 (float)((c1.w * clon + c2.w * lon) * clat + (c3.w * clon + c4.w * lon) * lat)
+                );
 
             return color;
         }

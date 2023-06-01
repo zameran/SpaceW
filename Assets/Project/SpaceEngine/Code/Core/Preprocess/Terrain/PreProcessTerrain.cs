@@ -1,4 +1,5 @@
 #region License
+
 // Procedural planet generator.
 //  
 // Copyright (C) 2015-2023 Denis Ovchinnikov [zameran] 
@@ -31,11 +32,9 @@
 // Creation Date: 2017.03.28
 // Creation Time: 2:18 PM
 // Creator: zameran
+
 #endregion
 
-#if UNITY_EDITOR
-using UnityEditor;
-#endif
 using System;
 using System.IO;
 using SpaceEngine.Core.Debugging;
@@ -46,6 +45,9 @@ using SpaceEngine.Core.Producers.Ortho;
 using SpaceEngine.Core.Producers.Residual;
 using UnityEngine;
 using Logger = SpaceEngine.Core.Debugging.Logger;
+#if UNITY_EDITOR
+using UnityEditor;
+#endif
 
 namespace SpaceEngine.Core.Preprocess.Terrain
 {
@@ -69,44 +71,47 @@ namespace SpaceEngine.Core.Preprocess.Terrain
         }
 
         [SerializeField]
-        MODE Mode = MODE.NONE;
-        
-        [SerializeField]
-        TYPE Type = TYPE.NONE;
+        private MODE Mode = MODE.NONE;
 
         [SerializeField]
-        string TempFolder = "/Resources/Preprocess/Textures/Terrain/Tmp";
+        private TYPE Type = TYPE.NONE;
 
         [SerializeField]
-        string DestinationFolder = "/Resources/Preprocess/Textures/Terrain";
+        private string TempFolder = "/Resources/Preprocess/Textures/Terrain/Tmp";
 
         [SerializeField]
-        string FileName = "DEM";
+        private string DestinationFolder = "/Resources/Preprocess/Textures/Terrain";
 
         [SerializeField]
-        int DestinationTileSize = 96;
+        private string FileName = "DEM";
 
         [SerializeField]
-        int DestinationMinTileSize = 96;
+        private int DestinationTileSize = 96;
 
         [SerializeField]
-        int DestinationMaxLevel = 2;
+        private int DestinationMinTileSize = 96;
 
         [SerializeField]
-        int DestinationChannels = 3;
+        private int DestinationMaxLevel = 2;
 
         [SerializeField]
-        bool DeleteTempOnFinish = true;
+        private int DestinationChannels = 3;
 
-        InputMap.InputMap Source;
+        [SerializeField]
+        private bool DeleteTempOnFinish = true;
 
         private string ApplicationDataPath = "";
+
+        private InputMap.InputMap Source;
 
         private void Start()
         {
             Source = GetComponent<InputMap.InputMap>();
 
-            if (Source == null) { throw new NullReferenceException("Input map is null. Have you added a Input map component to PreProcess game object?"); }
+            if (Source == null)
+            {
+                throw new NullReferenceException("Input map is null. Have you added a Input map component to PreProcess game object?");
+            }
 
             ApplicationDataPath = Application.dataPath;
 
@@ -116,12 +121,15 @@ namespace SpaceEngine.Core.Preprocess.Terrain
                 {
                     case (int)MODE.HEIGHT:
                         PreprocessDem();
+
                         break;
                     case (int)MODE.COLOR:
                         PreprocessOrtho();
+
                         break;
                     default:
                         Logger.LogWarning("PreProcessTerrain.Start: Nothing to produce/precompute!");
+
                         break;
                 }
             }
@@ -140,52 +148,60 @@ namespace SpaceEngine.Core.Preprocess.Terrain
                     }
                 }
 
-#if UNITY_EDITOR
+                #if UNITY_EDITOR
                 AssetDatabase.Refresh();
-#endif
+                #endif
             }
         }
 
-        void PreprocessDem()
+        private void PreprocessDem()
         {
             switch ((int)Type)
             {
                 case (int)TYPE.PLANE:
                     PreprocessPlaneDem(Source, ApplicationDataPath + TempFolder, ApplicationDataPath + DestinationFolder);
+
                     break;
                 case (int)TYPE.SPHERICAL:
                     PreprocessSphericalDem(Source, ApplicationDataPath + TempFolder, ApplicationDataPath + DestinationFolder);
+
                     break;
                 default:
                     Logger.LogWarning("PreProcessTerrain.Preprocess: Nothing to produce/precompute!");
+
                     break;
             }
         }
 
-        void PreprocessOrtho()
+        private void PreprocessOrtho()
         {
             switch ((int)Type)
             {
                 case (int)TYPE.PLANE:
                     PreprocessPlaneOrtho(Source, ApplicationDataPath + TempFolder, ApplicationDataPath + DestinationFolder);
+
                     break;
                 case (int)TYPE.SPHERICAL:
                     throw new NotImplementedException();
                 default:
                     Logger.LogWarning("PreProcessTerrain.Preprocess: Nothing to produce/precompute!");
+
                     break;
             }
         }
 
         /// <summary>
-        /// Preprocess a map into files that can be used with a <see cref="ResidualProducer"/>.
+        ///     Preprocess a map into files that can be used with a <see cref="ResidualProducer" />.
         /// </summary>
         /// <param name="source">The map to be preprocessed.</param>
         /// <param name="tempFolder">Where temporary files must be saved.</param>
         /// <param name="destinationFolder">Where the precomputed file must be saved.</param>
-        void PreprocessPlaneDem(InputMap.InputMap source, string tempFolder, string destinationFolder)
+        private void PreprocessPlaneDem(InputMap.InputMap source, string tempFolder, string destinationFolder)
         {
-            if (DestinationTileSize % DestinationMinTileSize != 0) { throw new InvalidParameterException("DestinationTileSize must be a multiple of DestinationMinTileSize!"); }
+            if (DestinationTileSize % DestinationMinTileSize != 0)
+            {
+                throw new InvalidParameterException("DestinationTileSize must be a multiple of DestinationMinTileSize!");
+            }
 
             var startTime = Time.realtimeSinceStartup;
             var destinationSize = DestinationTileSize << DestinationMaxLevel;
@@ -196,12 +212,15 @@ namespace SpaceEngine.Core.Preprocess.Terrain
             mipmap.Compute();
             mipmap.Generate(0, 0, 0, $"{destinationFolder}/{FileName}.dat");
 
-            Logger.Log($"PreProcessTerrain.PreprocessPlaneDem: Computation time: {(Time.realtimeSinceStartup - startTime)} s");
+            Logger.Log($"PreProcessTerrain.PreprocessPlaneDem: Computation time: {Time.realtimeSinceStartup - startTime} s");
         }
 
-        void PreprocessSphericalDem(InputMap.InputMap source, string tempFolder, string destinationFolder)
+        private void PreprocessSphericalDem(InputMap.InputMap source, string tempFolder, string destinationFolder)
         {
-            if (DestinationTileSize % DestinationMinTileSize != 0) { throw new InvalidParameterException("DestinationTileSize must be a multiple of DestinationMinTileSize!"); }
+            if (DestinationTileSize % DestinationMinTileSize != 0)
+            {
+                throw new InvalidParameterException("DestinationTileSize must be a multiple of DestinationMinTileSize!");
+            }
 
             var startTime = Time.realtimeSinceStartup;
             var destinationSize = DestinationTileSize << DestinationMaxLevel;
@@ -222,23 +241,29 @@ namespace SpaceEngine.Core.Preprocess.Terrain
 
             HeightMipmap.SetCube(mipmap1, mipmap2, mipmap3, mipmap4, mipmap5, mipmap6);
 
-            mipmap1.Compute(); mipmap1.Generate(0, 0, 0, $"{destinationFolder}/{FileName}1.dat");
-            mipmap2.Compute(); mipmap2.Generate(0, 0, 0, $"{destinationFolder}/{FileName}2.dat");
-            mipmap3.Compute(); mipmap3.Generate(0, 0, 0, $"{destinationFolder}/{FileName}3.dat");
-            mipmap4.Compute(); mipmap4.Generate(0, 0, 0, $"{destinationFolder}/{FileName}4.dat");
-            mipmap5.Compute(); mipmap5.Generate(0, 0, 0, $"{destinationFolder}/{FileName}5.dat");
-            mipmap6.Compute(); mipmap6.Generate(0, 0, 0, $"{destinationFolder}/{FileName}6.dat");
+            mipmap1.Compute();
+            mipmap1.Generate(0, 0, 0, $"{destinationFolder}/{FileName}1.dat");
+            mipmap2.Compute();
+            mipmap2.Generate(0, 0, 0, $"{destinationFolder}/{FileName}2.dat");
+            mipmap3.Compute();
+            mipmap3.Generate(0, 0, 0, $"{destinationFolder}/{FileName}3.dat");
+            mipmap4.Compute();
+            mipmap4.Generate(0, 0, 0, $"{destinationFolder}/{FileName}4.dat");
+            mipmap5.Compute();
+            mipmap5.Generate(0, 0, 0, $"{destinationFolder}/{FileName}5.dat");
+            mipmap6.Compute();
+            mipmap6.Generate(0, 0, 0, $"{destinationFolder}/{FileName}6.dat");
 
-            Logger.Log($"PreProcessTerrain.PreprocessDem: Computation time: {(Time.realtimeSinceStartup - startTime)} s");
+            Logger.Log($"PreProcessTerrain.PreprocessDem: Computation time: {Time.realtimeSinceStartup - startTime} s");
         }
 
         /// <summary>
-        /// Preprocess a map into files that can be used with a <see cref="OrthoCPUProducer"/>.
+        ///     Preprocess a map into files that can be used with a <see cref="OrthoCPUProducer" />.
         /// </summary>
         /// <param name="source">The map to be preprocessed.</param>
         /// <param name="tempFolder">Where temporary files must be saved.</param>
         /// <param name="destinationFolder">Where the precomputed file must be saved.</param>
-        void PreprocessPlaneOrtho(InputMap.InputMap source, string tempFolder, string destinationFolder)
+        private void PreprocessPlaneOrtho(InputMap.InputMap source, string tempFolder, string destinationFolder)
         {
             var startTime = Time.realtimeSinceStartup;
             var destinationSize = DestinationTileSize << DestinationMaxLevel;
@@ -249,7 +274,7 @@ namespace SpaceEngine.Core.Preprocess.Terrain
             mipmap.Compute();
             mipmap.Generate(0, 0, 0, $"{destinationFolder}/{FileName}.dat");
 
-            Logger.Log($"PreProcessTerrain.PreprocessPlaneOrtho: Computation time: {(Time.realtimeSinceStartup - startTime)} s");
+            Logger.Log($"PreProcessTerrain.PreprocessPlaneOrtho: Computation time: {Time.realtimeSinceStartup - startTime} s");
         }
     }
 }

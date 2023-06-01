@@ -4,8 +4,8 @@ using UnityEngine;
 namespace SpaceEngine.Core.Patterns.Singleton
 {
     /// <summary>
-    /// Be aware this will not prevent a non singleton constructor such as: <code>T instance = new T();</code>
-    /// To prevent that, add protected parameterless constructor to your singleton class.
+    ///     Be aware this will not prevent a non singleton constructor such as: <code>T instance = new T();</code>
+    ///     To prevent that, add protected parameterless constructor to your singleton class.
     /// </summary>
     public class MonoSingleton<T> : MonoBehaviour where T : MonoBehaviour
     {
@@ -36,7 +36,7 @@ namespace SpaceEngine.Core.Patterns.Singleton
                     {
                         var instances = FindObjectsByType<T>(FindObjectsSortMode.InstanceID).ToList();
 
-                        m_Instance = (T)instances.FirstOrDefault();
+                        m_Instance = instances.FirstOrDefault();
 
                         if (instances.Count > 1)
                         {
@@ -69,17 +69,12 @@ namespace SpaceEngine.Core.Patterns.Singleton
 
         public static bool IsApplicationQuitting { get; private set; }
 
-        protected virtual bool UnstableSingleton()
-        {
-            return false;
-        }
-
         /// <summary>
-        /// When Unity quits, it destroys objects in a random order.
-        /// In principle, a Singleton is only destroyed when application quits.
-        /// If any script calls Instance after it have been destroyed, 
-        /// it will create a buggy ghost object that will stay on the Editor scene even after stopping playing the Application.
-        /// So, this was made to be sure we're not creating that buggy ghost object.
+        ///     When Unity quits, it destroys objects in a random order.
+        ///     In principle, a Singleton is only destroyed when application quits.
+        ///     If any script calls Instance after it have been destroyed,
+        ///     it will create a buggy ghost object that will stay on the Editor scene even after stopping playing the Application.
+        ///     So, this was made to be sure we're not creating that buggy ghost object.
         /// </summary>
         protected virtual void OnDestroy()
         {
@@ -87,6 +82,11 @@ namespace SpaceEngine.Core.Patterns.Singleton
             {
                 IsApplicationQuitting = true;
             }
+        }
+
+        protected virtual bool UnstableSingleton()
+        {
+            return false;
         }
     }
 }

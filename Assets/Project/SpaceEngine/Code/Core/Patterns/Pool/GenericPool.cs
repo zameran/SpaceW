@@ -1,4 +1,5 @@
 ﻿#region License
+
 // Procedural planet generator.
 //  
 // Copyright (C) 2015-2023 Denis Ovchinnikov [zameran] 
@@ -31,6 +32,7 @@
 // Creation Date: 2017.09.16
 // Creation Time: 1:27 AM
 // Creator: zameran
+
 #endregion
 
 using System;
@@ -40,15 +42,10 @@ namespace SpaceEngine.Core.Patterns.Pool
 {
     public class GenericPool<TKey, TValue> where TValue : IGenericPoolObject<TKey>
     {
-        public int MaxInstances { get; protected set; }
-
-        public virtual int InctanceCount => Vault.Count;
-        public virtual int CacheCount => Cache.Count;
-
         public delegate bool Compare<in T>(T value) where T : TValue;
+        protected Dictionary<Type, List<TValue>> Cache;
 
         protected Dictionary<TKey, List<TValue>> Vault;
-        protected Dictionary<Type, List<TValue>> Cache;
 
         public GenericPool(int maxInstance)
         {
@@ -56,6 +53,11 @@ namespace SpaceEngine.Core.Patterns.Pool
             Vault = new Dictionary<TKey, List<TValue>>();
             Cache = new Dictionary<Type, List<TValue>>();
         }
+
+        public int MaxInstances { get; protected set; }
+
+        public virtual int InctanceCount => Vault.Count;
+        public virtual int CacheCount => Cache.Count;
 
         public virtual bool CanPush()
         {
@@ -70,13 +72,19 @@ namespace SpaceEngine.Core.Patterns.Pool
             {
                 value.OnPush();
 
-                if (!Vault.ContainsKey(groupKey)) { Vault.Add(groupKey, new List<TValue>()); }
+                if (!Vault.ContainsKey(groupKey))
+                {
+                    Vault.Add(groupKey, new List<TValue>());
+                }
 
                 Vault[groupKey].Add(value);
 
                 var type = value.GetType();
 
-                if (!Cache.ContainsKey(type)) { Cache.Add(type, new List<TValue>()); }
+                if (!Cache.ContainsKey(type))
+                {
+                    Cache.Add(type, new List<TValue>());
+                }
 
                 Cache[type].Add(value);
 
@@ -172,7 +180,6 @@ namespace SpaceEngine.Core.Patterns.Pool
             return result;
         }
 
-
         public virtual bool Contains(TKey groupKey)
         {
             return Vault.ContainsKey(groupKey);
@@ -194,7 +201,10 @@ namespace SpaceEngine.Core.Patterns.Pool
             {
                 Vault[groupKey].RemoveAt(idx);
 
-                if (Vault[groupKey].Count == 0) { Vault.Remove(groupKey); }
+                if (Vault[groupKey].Count == 0)
+                {
+                    Vault.Remove(groupKey);
+                }
             }
         }
 
@@ -204,7 +214,10 @@ namespace SpaceEngine.Core.Patterns.Pool
             {
                 Cache[type].Remove(value);
 
-                if (Cache[type].Count == 0) { Cache.Remove(type); }
+                if (Cache[type].Count == 0)
+                {
+                    Cache.Remove(type);
+                }
             }
         }
     }

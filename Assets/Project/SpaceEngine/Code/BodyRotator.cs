@@ -1,4 +1,5 @@
 ﻿#region License
+
 // Procedural planet generator.
 //  
 // Copyright (C) 2015-2023 Denis Ovchinnikov [zameran] 
@@ -31,6 +32,7 @@
 // Creation Date: 2018.03.20
 // Creation Time: 12:42 PM
 // Creator: zameran
+
 #endregion
 
 using SpaceEngine.Core;
@@ -43,15 +45,14 @@ namespace SpaceEngine
     [RequireComponent(typeof(Body))]
     public class BodyRotator : MonoBehaviour
     {
-        private readonly CachedComponent<Body> BodyCachedComponent = new CachedComponent<Body>();
-
-        public Body BodyComponent => BodyCachedComponent.Component;
-
         public Vector3 RotationAxis = Vector3.up;
 
         public float RotationSpeed = 0.25f;
 
-        public Transform Rotator = null;
+        public Transform Rotator;
+        private readonly CachedComponent<Body> BodyCachedComponent = new();
+
+        public Body BodyComponent => BodyCachedComponent.Component;
 
         private void Start()
         {
@@ -62,7 +63,7 @@ namespace SpaceEngine
         {
             var terrainNodes = BodyComponent.TerrainNodes;
             var euler = RotationAxis * (RotationSpeed * Time.deltaTime);
-            
+
             if (Rotator == null)
             {
                 for (var terrainNodeIndex = 0; terrainNodeIndex < terrainNodes.Count; terrainNodeIndex++)
@@ -73,13 +74,13 @@ namespace SpaceEngine
                     terrainNode.transform.Rotate(euler);
                     terrainNode.RotateNode(euler);
                     // NOTE : Perform our transformation action...
-                    terrainNode.TerrainQuadRoot.UpdateMatrices();                                 
+                    terrainNode.TerrainQuadRoot.UpdateMatrices();
                     // NOTE : Recalculate and update critical variables, required for proper rendering.
                 }
             }
             else
             {
-                Rotator.transform.Rotate(euler);           
+                Rotator.transform.Rotate(euler);
                 // NOTE : Perform our transformation action...
 
                 for (var terrainNodeIndex = 0; terrainNodeIndex < terrainNodes.Count; terrainNodeIndex++)
@@ -87,7 +88,7 @@ namespace SpaceEngine
                     var terrainNode = terrainNodes[terrainNodeIndex];
 
                     terrainNode.RotateNode(euler);
-                    terrainNode.TerrainQuadRoot.UpdateMatrices();                                  
+                    terrainNode.TerrainQuadRoot.UpdateMatrices();
                     // NOTE : Recalculate and update critical variables, required for proper rendering.
                 }
             }

@@ -1,4 +1,5 @@
 ﻿#region License
+
 // Procedural planet generator.
 // 
 // Copyright (C) 2015-2023 Denis Ovchinnikov [zameran] 
@@ -31,6 +32,7 @@
 // Creation Date: Undefined
 // Creation Time: Undefined
 // Creator: zameran
+
 #endregion
 
 using System;
@@ -38,14 +40,14 @@ using SpaceEngine.Enums;
 
 namespace SpaceEngine.Pluginator.Attributes
 {
-    [AttributeUsage(AttributeTargets.Class, AllowMultiple = false, Inherited = true)]
+    [AttributeUsage(AttributeTargets.Class)]
     public sealed class SpaceAddonMonoBehaviour : Attribute
     {
-        public readonly EntryPoint @EntryPoint;
+        public readonly EntryPoint EntryPoint;
 
         public bool StartupOnce;
 
-        public SpaceAddonMonoBehaviour(EntryPoint @EntryPoint, bool StartupOnce)
+        public SpaceAddonMonoBehaviour(EntryPoint EntryPoint, bool StartupOnce)
         {
             this.EntryPoint = EntryPoint;
 

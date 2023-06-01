@@ -1,4 +1,5 @@
 ﻿#region License
+
 // Procedural planet generator.
 // 
 // Copyright (C) 2015-2023 Denis Ovchinnikov [zameran] 
@@ -31,6 +32,7 @@
 // Creation Date: Undefined
 // Creation Time: Undefined
 // Creator: zameran
+
 #endregion
 
 using SpaceEngine.Core.Debugging;
@@ -41,25 +43,112 @@ using Logger = SpaceEngine.Core.Debugging.Logger;
 
 namespace SpaceEngine.Managers
 {
-    [ExecutionOrder(-9997)] 
+    [ExecutionOrder(-9997)]
     [UseLogger(LoggerCategory.Core)]
-
     public class UniformsManager : MonoSingleton<UniformsManager>, IUniformed, IUniformed<Material>, IUniformed<ComputeShader>
     {
-        public Texture2D PermSampler = null;
-        public Texture2D PermGradSampler = null;
-        public Texture2D PermSamplerGL = null;
-        public Texture2D PermGradSamplerGL = null;
-        public Texture2D PlanetAtlas = null;
-        public Texture2D PlanetNoiseMap = null;
-        public Texture2D PlanetColorMap = null;
+        public Texture2D PermSampler;
+        public Texture2D PermGradSampler;
+        public Texture2D PermSamplerGL;
+        public Texture2D PermGradSamplerGL;
+        public Texture2D PlanetAtlas;
+        public Texture2D PlanetNoiseMap;
+        public Texture2D PlanetColorMap;
 
-        public Texture2D QuadTexture1 = null;
-        public Texture2D QuadTexture2 = null;
-        public Texture2D QuadTexture3 = null;
-        public Texture2D QuadTexture4 = null;
+        public Texture2D QuadTexture1;
+        public Texture2D QuadTexture2;
+        public Texture2D QuadTexture3;
+        public Texture2D QuadTexture4;
 
-        public bool OverrideDefaultNoiseParameters = false;
+        public bool OverrideDefaultNoiseParameters;
+
+        private void Awake()
+        {
+            Instance = this;
+
+            LoadAndInit();
+
+            InitUniforms();
+        }
+
+        private void Update()
+        {
+            if (Input.GetKey(KeyCode.H))
+            {
+                InitUniforms();
+            }
+
+            SetUniforms();
+        }
+
+        #region IUniformed
+
+        public void InitSetUniforms()
+        {
+        }
+
+        #endregion
+
+        public void UpdateUniforms(Material mat)
+        {
+            SetUniforms(mat);
+        }
+
+        public void UpdateUniforms(ComputeShader cs, int kernel)
+        {
+            SetUniforms(cs, kernel);
+        }
+
+        public void LoadAndInit()
+        {
+            if (PermSampler == null)
+            {
+                PermSampler = LoadTextureFromResources("Noise/PerlinPerm2D");
+            }
+
+            if (PermGradSampler == null)
+            {
+                PermGradSampler = LoadTextureFromResources("Noise/PerlinGrad2D");
+            }
+
+            if (PermSamplerGL == null)
+            {
+                PermSamplerGL = LoadTextureFromResources("Noise/PerlinPerm2D_GL");
+            }
+
+            if (PermGradSamplerGL == null)
+            {
+                PermGradSamplerGL = LoadTextureFromResources("Noise/PerlinGrad2D_GL");
+            }
+
+            if (PlanetAtlas == null)
+            {
+                PlanetAtlas = LoadTextureFromResources("PlanetAtlas");
+            }
+
+            if (PlanetColorMap == null)
+            {
+                PlanetColorMap = LoadTextureFromResources("PlanetColorHumanityToTemp");
+            }
+
+            if (PlanetNoiseMap == null)
+            {
+                PlanetNoiseMap = LoadTextureFromResources("Terrain/DetailNormalmap");
+            }
+        }
+
+        public Texture2D LoadTextureFromResources(string textureName)
+        {
+            var path = $"Textures/{textureName}";
+            var textureResource = Resources.Load(path, typeof(Texture2D)) as Texture2D;
+
+            if (textureResource == null)
+            {
+                Logger.Log($"UniformsManager.LoadTextureFromResources: Failed to load texture from {path}");
+            }
+
+            return textureResource;
+        }
 
         #region IUniformed
 
@@ -94,7 +183,10 @@ namespace SpaceEngine.Managers
         {
             Shader.SetGlobalFloat("_RealTime", Time.realtimeSinceStartup);
 
-            if (GodManager.Instance.View == null) return;
+            if (GodManager.Instance.View == null)
+            {
+                return;
+            }
 
             Shader.SetGlobalMatrix("_Globals_WorldToCamera", GodManager.Instance.View.WorldToCameraMatrix.ToMatrix4x4());
             Shader.SetGlobalMatrix("_Globals_CameraToWorld", GodManager.Instance.View.CameraToWorldMatrix.ToMatrix4x4());
@@ -109,12 +201,17 @@ namespace SpaceEngine.Managers
 
         public void InitUniforms(Material target)
         {
-            if (target == null) return;
+            if (target == null)
+            {
+            }
         }
 
         public void SetUniforms(Material target)
         {
-            if (target == null) return;
+            if (target == null)
+            {
+                return;
+            }
 
             target.SetTexture("PermSampler", PermSampler);
             target.SetTexture("PermGradSampler", PermGradSampler);
@@ -138,17 +235,25 @@ namespace SpaceEngine.Managers
 
         public void InitUniforms(ComputeShader target)
         {
-            if (target == null) return;
+            if (target == null)
+            {
+            }
         }
 
         public void SetUniforms(ComputeShader target)
         {
-            if (target == null) return;
+            if (target == null)
+            {
+            }
         }
 
         public void SetUniforms(ComputeShader target, params int[] kernels)
         {
-            if (target == null) return;
+            if (target == null)
+            {
+                return;
+            }
+
             if (kernels == null || kernels.Length == 0)
             {
                 Debug.Log("UniformsManager: Kernels array problem!");
@@ -164,7 +269,10 @@ namespace SpaceEngine.Managers
 
         public void SetUniforms(ComputeShader target, int kernel)
         {
-            if (target == null) return;
+            if (target == null)
+            {
+                return;
+            }
 
             target.SetTexture(kernel, "PermSampler", PermSampler);
             target.SetTexture(kernel, "PermGradSampler", PermGradSampler);
@@ -176,64 +284,5 @@ namespace SpaceEngine.Managers
         }
 
         #endregion
-
-        #region IUniformed
-
-        public void InitSetUniforms()
-        {
-
-        }
-
-        #endregion
-
-        private void Awake()
-        {
-            Instance = this;
-
-            LoadAndInit();
-
-            InitUniforms();
-        }
-
-        private void Update()
-        {
-            if (Input.GetKey(KeyCode.H)) InitUniforms();
-
-            SetUniforms();
-        }
-
-        public void UpdateUniforms(Material mat)
-        {
-            SetUniforms(mat);
-        }
-
-        public void UpdateUniforms(ComputeShader cs, int kernel)
-        {
-            SetUniforms(cs, kernel);
-        }
-
-        public void LoadAndInit()
-        {
-            if (PermSampler == null) PermSampler = LoadTextureFromResources("Noise/PerlinPerm2D");
-            if (PermGradSampler == null) PermGradSampler = LoadTextureFromResources("Noise/PerlinGrad2D");
-            if (PermSamplerGL == null) PermSamplerGL = LoadTextureFromResources("Noise/PerlinPerm2D_GL");
-            if (PermGradSamplerGL == null) PermGradSamplerGL = LoadTextureFromResources("Noise/PerlinGrad2D_GL");
-            if (PlanetAtlas == null) PlanetAtlas = LoadTextureFromResources("PlanetAtlas");
-            if (PlanetColorMap == null) PlanetColorMap = LoadTextureFromResources("PlanetColorHumanityToTemp");
-            if (PlanetNoiseMap == null) PlanetNoiseMap = LoadTextureFromResources("Terrain/DetailNormalmap");
-        }
-
-        public Texture2D LoadTextureFromResources(string textureName)
-        {
-            var path = $"Textures/{textureName}";
-            var textureResource = Resources.Load(path, typeof(Texture2D)) as Texture2D;
-
-            if (textureResource == null)
-            {
-                Logger.Log($"UniformsManager.LoadTextureFromResources: Failed to load texture from {path}");
-            }
-
-            return textureResource;
-        }
     }
 }

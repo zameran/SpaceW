@@ -1,4 +1,5 @@
 ﻿#region License
+
 // Procedural planet generator.
 // 
 // Copyright (C) 2015-2023 Denis Ovchinnikov [zameran] 
@@ -31,6 +32,7 @@
 // Creation Date: Undefined
 // Creation Time: Undefined
 // Creator: zameran
+
 #endregion
 
 using System;
@@ -53,23 +55,25 @@ namespace SpaceEngine.Pluginator
     [UseLogger(LoggerCategory.Data)]
     public sealed class AssemblyLoader : Loader, IEventit
     {
-        private bool Loaded = false;
+        [HideInInspector]
+        public int TotalDetected;
 
-        [HideInInspector] public int TotalDetected = 0;
-        [HideInInspector] public int TotalLoaded = 0;
+        [HideInInspector]
+        public int TotalLoaded;
 
-        public List<AssemblyExternal> ExternalAssemblies = new List<AssemblyExternal>();
-
-        protected override void Start()
-        {
-            base.Start();
-        }
+        public List<AssemblyExternal> ExternalAssemblies = new();
+        private bool Loaded;
 
         protected override void Awake()
         {
             base.Awake();
 
             Pass();
+        }
+
+        protected override void Start()
+        {
+            base.Start();
         }
 
         protected override void Update()
@@ -80,6 +84,37 @@ namespace SpaceEngine.Pluginator
         protected override void OnGUI()
         {
             base.OnGUI();
+        }
+
+        #region Events
+
+        private void OnActiveSceneChanged(Scene arg0, Scene arg1)
+        {
+            if (SceneManager.GetActiveScene().buildIndex != (int)EntryPoint.Init && Loaded)
+            {
+                FirePlugins(ExternalAssemblies);
+            }
+        }
+
+        #endregion
+
+        protected override void Pass()
+        {
+            Logger.Log($"AssemblyLoader.Pass: AssemblyLoader Initiated at scene: {(EntryPoint)SceneManager.GetActiveScene().buildIndex}");
+
+            if (!Loaded)
+            {
+                DetectAndLoadAssemblies();
+                Loaded = true;
+            }
+
+            if (SceneManager.GetActiveScene().buildIndex == (int)EntryPoint.Init && Loaded)
+                //Delay((TotalDetected + 1) * 2, () => { SceneManager.LoadScene((int)EntryPoint.MainMenu); });
+            {
+                SceneManager.LoadScene((int)EntryPoint.MainMenu);
+            }
+
+            base.Pass();
         }
 
         #region Subscribtion/Unsubscription
@@ -107,7 +142,10 @@ namespace SpaceEngine.Pluginator
 
         public void Eventit()
         {
-            if (IsEventit) return;
+            if (IsEventit)
+            {
+                return;
+            }
 
             SceneManager.activeSceneChanged += OnActiveSceneChanged;
 
@@ -116,7 +154,10 @@ namespace SpaceEngine.Pluginator
 
         public void UnEventit()
         {
-            if (!IsEventit) return;
+            if (!IsEventit)
+            {
+                return;
+            }
 
             SceneManager.activeSceneChanged -= OnActiveSceneChanged;
 
@@ -124,34 +165,6 @@ namespace SpaceEngine.Pluginator
         }
 
         #endregion
-
-        #region Events
-
-        private void OnActiveSceneChanged(Scene arg0, Scene arg1)
-        {
-            if (SceneManager.GetActiveScene().buildIndex != (int)EntryPoint.Init && Loaded) FirePlugins(ExternalAssemblies);
-        }
-
-        #endregion
-
-        protected override void Pass()
-        {
-            Logger.Log($"AssemblyLoader.Pass: AssemblyLoader Initiated at scene: {(EntryPoint)SceneManager.GetActiveScene().buildIndex}");
-
-            if (!Loaded)
-            {
-                DetectAndLoadAssemblies();
-                Loaded = true;
-            }
-
-            if (SceneManager.GetActiveScene().buildIndex == (int)EntryPoint.Init && Loaded)
-            {
-                //Delay((TotalDetected + 1) * 2, () => { SceneManager.LoadScene((int)EntryPoint.MainMenu); });
-                SceneManager.LoadScene((int)EntryPoint.MainMenu);
-            }
-
-            base.Pass();
-        }
 
         #region AssemblyLoader Logic
 
@@ -295,7 +308,7 @@ namespace SpaceEngine.Pluginator
         }
 
         /// <summary>
-        /// Search for spectial type classes, contains special attribute in target assembly.
+        ///     Search for spectial type classes, contains special attribute in target assembly.
         /// </summary>
         /// <typeparam name="TReturn">Generic type. Return type.</typeparam>
         /// <typeparam name="TAttribute">Generic type. Attribute type.</typeparam>
@@ -314,7 +327,9 @@ namespace SpaceEngine.Pluginator
                     var atr = AttributeHelper.GetTypeAttribute<TAttribute>(type);
 
                     if (atr != null)
+                    {
                         output.Add(type as TReturn);
+                    }
                 }
             }
 

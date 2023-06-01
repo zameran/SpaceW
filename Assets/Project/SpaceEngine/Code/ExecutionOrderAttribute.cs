@@ -1,4 +1,5 @@
 ﻿#region License
+
 // Procedural planet generator.
 // 
 // Copyright (C) 2015-2023 Denis Ovchinnikov [zameran] 
@@ -31,23 +32,24 @@
 // Creation Date: Undefined
 // Creation Time: Undefined
 // Creator: zameran
+
 #endregion
 
 using System;
-using UnityEngine;
-#if UNITY_EDITOR
+using System.Linq;
 using System.IO;
 using System.Collections.Generic;
+#if UNITY_EDITOR
 using UnityEditor;
+using UnityEngine;
 #endif
 
 namespace SpaceEngine
 {
-    [AttributeUsage(AttributeTargets.Class, Inherited = false, AllowMultiple = false)]
-
+    [AttributeUsage(AttributeTargets.Class, Inherited = false)]
     internal sealed class ExecutionOrderAttribute : Attribute
     {
-        public readonly int ExecutionOrder = 0;
+        private readonly int ExecutionOrder;
 
         public ExecutionOrderAttribute(int executionOrder)
         {
@@ -74,7 +76,10 @@ namespace SpaceEngine
             {
                 var attributes = item.GetCustomAttributes(type, false);
 
-                if (attributes.Length != 1) continue;
+                if (attributes.Length != 1)
+                {
+                    continue;
+                }
 
                 var attribute = attributes[0] as ExecutionOrderAttribute;
 
@@ -112,17 +117,7 @@ namespace SpaceEngine
                 scripts.Add(script, attribute);
             }
 
-            var changed = false;
-
-            foreach (var item in scripts)
-            {
-                if (MonoImporter.GetExecutionOrder(item.Key) != item.Value.ExecutionOrder)
-                {
-                    changed = true;
-
-                    break;
-                }
-            }
+            var changed = scripts.Any(item => MonoImporter.GetExecutionOrder(item.Key) != item.Value.ExecutionOrder);
 
             if (changed)
             {
@@ -137,7 +132,10 @@ namespace SpaceEngine
                         MonoImporter.SetExecutionOrder(item.Key, item.Value.ExecutionOrder);
                     }
 
-                    if (cancelled) break;
+                    if (cancelled)
+                    {
+                        break;
+                    }
                 }
             }
 

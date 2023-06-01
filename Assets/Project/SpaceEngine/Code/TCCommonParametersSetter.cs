@@ -1,4 +1,5 @@
 ﻿#region License
+
 // Procedural planet generator.
 // 
 // Copyright (C) 2015-2023 Denis Ovchinnikov [zameran] 
@@ -31,6 +32,7 @@
 // Creation Date: Undefined
 // Creation Time: Undefined
 // Creator: zameran
+
 #endregion
 
 using System.Collections.Generic;
@@ -87,9 +89,9 @@ namespace SpaceEngine
 
         public Vector2 InvSize;
 
-        public bool AutoUpdate = false;
+        public bool AutoUpdate;
 
-        public MaterialTableGradientLut MaterialTable = new MaterialTableGradientLut();
+        public MaterialTableGradientLut MaterialTable = new();
 
         public TCEngine Engine = TCEngine.TC_PLANET;
 
@@ -103,9 +105,20 @@ namespace SpaceEngine
             MaterialTable.DestroyLut();
         }
 
+        #region IUniformed
+
+        public void InitSetUniforms()
+        {
+        }
+
+        #endregion
+
         public void UpdateMaterialTable<T>(T target) where T : Material
         {
-            if (!Application.isPlaying) return;
+            if (!Application.isPlaying)
+            {
+                return;
+            }
 
             if (MaterialTable == null)
             {
@@ -113,7 +126,7 @@ namespace SpaceEngine
 
                 MaterialTable = new MaterialTableGradientLut();
 
-                UpdateMaterialTable<T>(target);
+                UpdateMaterialTable(target);
             }
             else
             {
@@ -130,7 +143,10 @@ namespace SpaceEngine
 
         public void UpdateMaterialTable(MaterialPropertyBlock target)
         {
-            if (!Application.isPlaying) return;
+            if (!Application.isPlaying)
+            {
+                return;
+            }
 
             if (MaterialTable == null)
             {
@@ -155,24 +171,29 @@ namespace SpaceEngine
 
         public void ToggleKeywords<T>(T target) where T : Material
         {
-            Helper.SetKeywords(target, new List<string>() { Engine.ToString() }, false);
+            Helper.SetKeywords(target, new List<string> { Engine.ToString() });
         }
 
         public void ClearKeywords<T>(T target) where T : Material
         {
-            Helper.SetKeywords(target, new List<string>() { }, false);
+            Helper.SetKeywords(target, new List<string>());
         }
 
         #region IUniformed<Material>
 
         public void InitUniforms(Material target)
         {
-            if (target == null) return;
+            if (target == null)
+            {
+            }
         }
 
         public void SetUniforms(MaterialPropertyBlock target)
         {
-            if (target == null) return;
+            if (target == null)
+            {
+                return;
+            }
 
             UpdateMaterialTable(target);
 
@@ -211,7 +232,10 @@ namespace SpaceEngine
 
         public void SetUniforms(Material target)
         {
-            if (target == null) return;
+            if (target == null)
+            {
+                return;
+            }
 
             UpdateMaterialTable(target);
 
@@ -246,15 +270,6 @@ namespace SpaceEngine
             target.SetVector("cycloneParams", cycloneParams);
 
             target.SetVector("InvSize", InvSize);
-        }
-
-        #endregion
-
-        #region IUniformed
-
-        public void InitSetUniforms()
-        {
-
         }
 
         #endregion

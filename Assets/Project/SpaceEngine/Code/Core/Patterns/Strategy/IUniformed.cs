@@ -1,4 +1,5 @@
 ﻿#region License
+
 // Procedural planet generator.
 // 
 // Copyright (C) 2015-2023 Denis Ovchinnikov [zameran] 
@@ -31,13 +32,14 @@
 // Creation Date: Undefined
 // Creation Time: Undefined
 // Creator: zameran
+
 #endregion
 
 namespace SpaceEngine.Core.Patterns.Strategy
 {
     /// <summary>
-    /// This interface should be implemented in all things, that's gonna manipulate with 
-    /// <see cref="UnityEngine.Material"/> and <see cref="UnityEngine.Shader"/>, or <see cref="UnityEngine.MaterialPropertyBlock"/> uniforms.
+    ///     This interface should be implemented in all things, that's gonna manipulate with
+    ///     <see cref="UnityEngine.Material" /> and <see cref="UnityEngine.Shader" />, or <see cref="UnityEngine.MaterialPropertyBlock" /> uniforms.
     /// </summary>
     public interface IUniformed
     {

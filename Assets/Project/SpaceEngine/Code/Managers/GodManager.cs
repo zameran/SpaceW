@@ -1,4 +1,5 @@
 ﻿#region License
+
 // Procedural planet generator.
 // 
 // Copyright (C) 2015-2023 Denis Ovchinnikov [zameran] 
@@ -31,6 +32,7 @@
 // Creation Date: Undefined
 // Creation Time: Undefined
 // Creator: zameran
+
 #endregion
 
 using System.Linq;
@@ -65,10 +67,36 @@ namespace SpaceEngine.Managers
 
         public GenerationShadersCoreSettings GSCS;
 
-        public Body ActiveBody
+        /// <summary>
+        ///     This is the fourier transform size, must pow2 number. Recommend no higher or lower than 64, 128 or 256.
+        /// </summary>
+        public int FourierGridSize = 64;
+
+        /// <summary>
+        ///     Quad mesh resolution in vertices.
+        /// </summary>
+        public int GridResolution = 25;
+
+        /// <summary>
+        ///     Size of each grid in the projected grid. (number of pixels on screen).
+        /// </summary>
+        public int OceanGridResolution = 4;
+
+        // TODO : Make these settings switching event based. To avoid constant every-frame checkings...
+        public bool Eclipses = true;
+        public bool Planetshadows = true;
+        public bool Planetshine = true;
+        public bool OceanSkyReflections = true;
+        public bool DelayedCalculations;
+        public bool FloatingOrigin;
+
+        public Texture2D[] NoiseTextures;
+
+        protected GodManager()
         {
-            get { return Bodies.FirstOrDefault(body => Helper.Enabled(body)); }
         }
+
+        public Body ActiveBody => Bodies.FirstOrDefault(body => Helper.Enabled(body));
 
         public ComputeShader WriteData => GSCS.WriteData;
         public ComputeShader ReadData => GSCS.ReadData;
@@ -81,38 +109,9 @@ namespace SpaceEngine.Managers
         public bool UsesReversedZBuffer => SystemInfo.usesReversedZBuffer;
 
         /// <summary>
-        /// This is the fourier transform size, must pow2 number. Recommend no higher or lower than 64, 128 or 256.
-        /// </summary>
-        public int FourierGridSize = 64;
-
-        /// <summary>
-        /// Quad mesh resolution in vertices.
-        /// </summary>
-        public int GridResolution = 25;
-
-        /// <summary>
-        /// Size of each grid in the projected grid. (number of pixels on screen).
-        /// </summary>
-        public int OceanGridResolution = 4;
-
-        /// <summary>
-        /// The size of each tile. For tiles made of raster data, this size is the tile width in pixels (the tile height is supposed equal to the tile width).
+        ///     The size of each tile. For tiles made of raster data, this size is the tile width in pixels (the tile height is supposed equal to the tile width).
         /// </summary>
         public int TileSize => GridResolution * 4;
-
-        // TODO : Make these settings switching event based. To avoid constant every-frame checkings...
-        public bool Eclipses = true;
-        public bool Planetshadows = true;
-        public bool Planetshine = true;
-        public bool OceanSkyReflections = true;
-        public bool DelayedCalculations = false;
-        public bool FloatingOrigin = false;
-
-        public Texture2D[] NoiseTextures;
-
-        protected GodManager()
-        {
-        }
 
         private void Awake()
         {
@@ -149,7 +148,10 @@ namespace SpaceEngine.Managers
                 {
                     var noiseTexture = NoiseTextures[noiseTextureIndex];
 
-                    if (noiseTexture != null) Helper.Destroy(noiseTexture);
+                    if (noiseTexture != null)
+                    {
+                        Helper.Destroy(noiseTexture);
+                    }
                 }
             }
 
@@ -164,7 +166,7 @@ namespace SpaceEngine.Managers
 
         private void InitQuadMesh()
         {
-            QuadMesh = MeshFactory.MakePlane(GridResolution, MeshFactory.PLANE.XY, true, false, false);
+            QuadMesh = MeshFactory.MakePlane(GridResolution, MeshFactory.PLANE.XY, true, false);
             QuadMesh.bounds = new Bounds(Vector3.zero, new Vector3(1e8f, 1e8f, 1e8f));
         }
 
@@ -182,7 +184,7 @@ namespace SpaceEngine.Managers
             // The number of meshes need to make a grid of this resolution
             if (NX * NY > MAX_VERTS)
             {
-                gridsCount += (NX * NY) / MAX_VERTS;
+                gridsCount += NX * NY / MAX_VERTS;
             }
 
             OceanScreenMeshGrids = new Mesh[gridsCount];
@@ -193,7 +195,7 @@ namespace SpaceEngine.Managers
             {
                 NY = Screen.height / gridsCount / OceanGridResolution;
 
-                OceanScreenMeshGrids[i] = MeshFactory.MakeOceanPlane(NX, NY, (float)i / (float)gridsCount, 1.0f / (float)gridsCount);
+                OceanScreenMeshGrids[i] = MeshFactory.MakeOceanPlane(NX, NY, i / (float)gridsCount, 1.0f / gridsCount);
                 OceanScreenMeshGrids[i].bounds = new Bounds(Vector3.zero, new Vector3(1e8f, 1e8f, 1e8f));
             }
         }
@@ -220,7 +222,10 @@ namespace SpaceEngine.Managers
 
         private void UpdateView()
         {
-            if (View == null) return;
+            if (View == null)
+            {
+                return;
+            }
 
             View.UpdateMatrices();
             View.UpdateVectors();
@@ -228,7 +233,10 @@ namespace SpaceEngine.Managers
 
         private void UpdateWorldShift()
         {
-            if (FloatingOrigin == false) return;
+            if (FloatingOrigin == false)
+            {
+                return;
+            }
 
             var cameraPosition = View.transform.position;
 
@@ -257,7 +265,10 @@ namespace SpaceEngine.Managers
                     }
                 }
 
-                if (View.transform.parent == null) View.transform.position -= cameraPosition;
+                if (View.transform.parent == null)
+                {
+                    View.transform.position -= cameraPosition;
+                }
             }
         }
 
@@ -268,7 +279,7 @@ namespace SpaceEngine.Managers
 
             NoiseTextures = new Texture2D[6];
 
-            var layers = new int[] { 0, 1, 3, 5, 7, 15 };
+            var layers = new[] { 0, 1, 3, 5, 7, 15 };
             var rand = 1234567;
 
             Random.InitState(0);

@@ -1,4 +1,5 @@
 ﻿#region License
+
 // Procedural planet generator.
 //  
 // Copyright (C) 2015-2023 Denis Ovchinnikov [zameran] 
@@ -31,6 +32,7 @@
 // Creation Date: 2017.03.28
 // Creation Time: 2:18 PM
 // Creator: zameran
+
 #endregion
 
 using System;
@@ -47,36 +49,36 @@ namespace SpaceEngine.Core.Producers.Ortho
     public class OrthoCPUProducer : TileProducer
     {
         /// <summary>
-        /// The name of the file containing the tiles to load.
+        ///     The name of the file containing the tiles to load.
         /// </summary>
         [SerializeField]
-        string FileName = "/Resources/Preprocess/Textures/Terrain/Color.dat";
+        private string FileName = "/Resources/Preprocess/Textures/Terrain/Color.dat";
 
         /// <summary>
-        /// The number of components per pixel in the tiles to load.
+        ///     The number of components per pixel in the tiles to load.
         /// </summary>
         [HideInInspector]
         public int Channels;
 
         /// <summary>
-        /// The size of the tiles to load, without borders. A tile contains [(tileSize + 4) * (tileSize + 4) * channels] samples.
+        ///     The size in pixels of the border around each tile. A tile contains [(tileSize + 4) * (tileSize + 4) * channels] samples.
         /// </summary>
-        int TileSize;
+        private int Border;
 
         /// <summary>
-        /// The size in pixels of the border around each tile. A tile contains [(tileSize + 4) * (tileSize + 4) * channels] samples.
+        ///     The maximum level of the stored tiles on disk (inclusive).
         /// </summary>
-        int Border;
+        private int MaxLevel;
 
         /// <summary>
-        /// The maximum level of the stored tiles on disk (inclusive).
+        ///     The offsets of each tile on disk, relatively to offset, for each tile id
         /// </summary>
-        int MaxLevel;
+        private long[] Offsets;
 
         /// <summary>
-        /// The offsets of each tile on disk, relatively to offset, for each tile id
+        ///     The size of the tiles to load, without borders. A tile contains [(tileSize + 4) * (tileSize + 4) * channels] samples.
         /// </summary>
-        long[] Offsets;
+        private int TileSize;
 
         public override void InitNode()
         {

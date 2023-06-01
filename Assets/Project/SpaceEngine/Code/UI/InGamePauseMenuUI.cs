@@ -1,4 +1,5 @@
 ﻿#region License
+
 // Procedural planet generator.
 // 
 // Copyright (C) 2015-2023 Denis Ovchinnikov [zameran] 
@@ -31,6 +32,7 @@
 // Creation Date: Undefined
 // Creation Time: Undefined
 // Creator: zameran
+
 #endregion
 
 using DG.Tweening;
@@ -45,7 +47,7 @@ namespace SpaceEngine.UI
 {
     public sealed class InGamePauseMenuUI : UserInterface, IUserInterface
     {
-        private bool Paused = false;
+        private bool Paused;
 
         private void Update()
         {

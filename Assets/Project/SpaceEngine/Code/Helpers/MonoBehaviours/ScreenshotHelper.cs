@@ -1,4 +1,5 @@
 ﻿#region License
+
 // Procedural planet generator.
 // 
 // Copyright (C) 2015-2023 Denis Ovchinnikov [zameran] 
@@ -31,11 +32,9 @@
 // Creation Date: Undefined
 // Creation Time: Undefined
 // Creator: zameran
+
 #endregion
 
-#if UNITY_EDITOR
-using UnityEditor;
-#endif
 using System;
 using System.IO;
 using SpaceEngine.Core.Debugging;
@@ -43,6 +42,10 @@ using SpaceEngine.Core.Patterns.Singleton;
 using SpaceEngine.Tools;
 using UnityEngine;
 using Logger = SpaceEngine.Core.Debugging.Logger;
+using Random = UnityEngine.Random;
+#if UNITY_EDITOR
+using UnityEditor;
+#endif
 
 namespace SpaceEngine.Helpers.MonoBehaviours
 {
@@ -65,12 +68,12 @@ namespace SpaceEngine.Helpers.MonoBehaviours
         public ScreenshotFormat Format = ScreenshotFormat.PNG;
 
         [HideInInspector]
-        public bool KeyPressed = false;
-
-        public Vector2 ScreenSize => new Vector2(Screen.width, Screen.height);
-        public Vector2 ScreenShotSize => ScreenSize * SuperSize;
+        public bool KeyPressed;
 
         private RenderTexture Buffer;
+
+        public Vector2 ScreenSize => new(Screen.width, Screen.height);
+        public Vector2 ScreenShotSize => ScreenSize * SuperSize;
 
         private void Awake()
         {
@@ -79,65 +82,15 @@ namespace SpaceEngine.Helpers.MonoBehaviours
 
         private void Start()
         {
-
         }
 
         private void Update()
         {
-
         }
 
         private void LateUpdate()
         {
             KeyPressed |= Input.GetKeyDown(Key);
-        }
-
-        private static Texture2D GetRTPixels(RenderTexture rt)
-        {
-            var currentActiveRT = RenderTexture.active;
-
-            RenderTexture.active = rt;
-
-            var texture = new Texture2D(rt.width, rt.height);
-
-            texture.ReadPixels(new Rect(0, 0, texture.width, texture.height), 0, 0);
-
-            RenderTexture.active = currentActiveRT;
-
-            return texture;
-        }
-
-        private void SaveScreenshot(Texture2D screenShotTexture, string fileName = "Screenshot")
-        {
-            if (screenShotTexture != null)
-            {
-                var filePath = $"{Application.dataPath}/{fileName}_{DateTime.Now:yy.MM.dd-hh.mm.ss}_{(int)UnityEngine.Random.Range(0.0f, 100.0f)}";
-                var fileExtension = Format.ToString().ToLower();
-                var outputFileName = $"{filePath}.{fileExtension}";
-                
-                switch (Format)
-                {
-                    case ScreenshotFormat.JPG:
-                        File.WriteAllBytes(outputFileName, screenShotTexture.EncodeToJPG(100));
-                        break;
-                    case ScreenshotFormat.PNG:
-                        File.WriteAllBytes(outputFileName, screenShotTexture.EncodeToPNG());
-                        break;
-                    case ScreenshotFormat.TGA:
-                        File.WriteAllBytes(outputFileName, screenShotTexture.EncodeToTGA());
-                        break;
-                    default:
-                        throw new ArgumentOutOfRangeException();
-                }
-
-                Logger.Log($"ScreenshotHelper.SaveScreenshot: Screenshot Saved. {filePath}");
-
-    #if UNITY_EDITOR
-                AssetDatabase.Refresh();
-    #endif
-            }
-            else
-                Logger.LogError("ScreenshotHelper.SaveScreenshot: screenShotTexture is null!");
         }
 
         private void OnRenderImage(RenderTexture source, RenderTexture destination)
@@ -160,6 +113,59 @@ namespace SpaceEngine.Helpers.MonoBehaviours
             }
 
             Graphics.Blit(source, destination);
+        }
+
+        private static Texture2D GetRTPixels(RenderTexture rt)
+        {
+            var currentActiveRT = RenderTexture.active;
+
+            RenderTexture.active = rt;
+
+            var texture = new Texture2D(rt.width, rt.height);
+
+            texture.ReadPixels(new Rect(0, 0, texture.width, texture.height), 0, 0);
+
+            RenderTexture.active = currentActiveRT;
+
+            return texture;
+        }
+
+        private void SaveScreenshot(Texture2D screenShotTexture, string fileName = "Screenshot")
+        {
+            if (screenShotTexture != null)
+            {
+                var filePath = $"{Application.dataPath}/{fileName}_{DateTime.Now:yy.MM.dd-hh.mm.ss}_{(int)Random.Range(0.0f, 100.0f)}";
+                var fileExtension = Format.ToString().ToLower();
+                var outputFileName = $"{filePath}.{fileExtension}";
+
+                switch (Format)
+                {
+                    case ScreenshotFormat.JPG:
+                        File.WriteAllBytes(outputFileName, screenShotTexture.EncodeToJPG(100));
+
+                        break;
+                    case ScreenshotFormat.PNG:
+                        File.WriteAllBytes(outputFileName, screenShotTexture.EncodeToPNG());
+
+                        break;
+                    case ScreenshotFormat.TGA:
+                        File.WriteAllBytes(outputFileName, screenShotTexture.EncodeToTGA());
+
+                        break;
+                    default:
+                        throw new ArgumentOutOfRangeException();
+                }
+
+                Logger.Log($"ScreenshotHelper.SaveScreenshot: Screenshot Saved. {filePath}");
+
+                #if UNITY_EDITOR
+                AssetDatabase.Refresh();
+                #endif
+            }
+            else
+            {
+                Logger.LogError("ScreenshotHelper.SaveScreenshot: screenShotTexture is null!");
+            }
         }
     }
 }

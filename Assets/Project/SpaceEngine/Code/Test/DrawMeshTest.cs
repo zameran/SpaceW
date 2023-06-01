@@ -1,4 +1,5 @@
 ﻿#region License
+
 // Procedural planet generator.
 // 
 // Copyright (C) 2015-2023 Denis Ovchinnikov [zameran] 
@@ -31,6 +32,7 @@
 // Creation Date: 2016.05.19
 // Creation Time: 21:42
 // Creator: zameran
+
 #endregion
 
 using SpaceEngine.Helpers;
@@ -46,7 +48,10 @@ namespace SpaceEngine.Test
 
         private void Update()
         {
-            if (mesh == null || material == null) return;
+            if (mesh == null || material == null)
+            {
+                return;
+            }
 
             Graphics.DrawMesh(mesh, Matrix4x4.identity, material, 0, CameraHelper.Main());
         }

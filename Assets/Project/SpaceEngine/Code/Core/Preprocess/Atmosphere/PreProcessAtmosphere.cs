@@ -1,4 +1,5 @@
 ﻿#region License
+
 // Procedural planet generator.
 // 
 // Copyright (C) 2015-2023 Denis Ovchinnikov [zameran] 
@@ -31,6 +32,7 @@
 // Creation Date: Undefined
 // Creation Time: Undefined
 // Creator: zameran
+
 #endregion
 
 using System;
@@ -46,11 +48,11 @@ namespace SpaceEngine.Core.Preprocess.Atmosphere
     public sealed class PreProcessAtmosphere : MonoBehaviour
     {
         /// <summary>
-        /// Behaviour of atmosphere baker.
-        /// <see cref="NONE"/> is none!
-        /// <see cref="TO_RAM"/> is runtime baking in to the RAM.
-        /// <see cref="TO_HDD"/> is on call baking in to the HDD.
-        /// <see cref="TO_HDD_DEBUG"/> is the same as <see cref="TO_HDD"/>, but additional debug textures will be saved.
+        ///     Behaviour of atmosphere baker.
+        ///     <see cref="NONE" /> is none!
+        ///     <see cref="TO_RAM" /> is runtime baking in to the RAM.
+        ///     <see cref="TO_HDD" /> is on call baking in to the HDD.
+        ///     <see cref="TO_HDD_DEBUG" /> is the same as <see cref="TO_HDD" />, but additional debug textures will be saved.
         /// </summary>
         [Serializable]
         public enum AtmosphereBakeMode
@@ -61,6 +63,9 @@ namespace SpaceEngine.Core.Preprocess.Atmosphere
             TO_HDD_DEBUG
         }
 
+        private const int NUM_THREADS = 8;
+        private const int WAIT_FRAMES = 4;
+
         public AtmosphereBakeMode BakeMode = AtmosphereBakeMode.TO_RAM;
         public RenderTextureFormat Format = RenderTextureFormat.ARGBFloat;
         public TextureWrapMode WrapMode = TextureWrapMode.Clamp;
@@ -68,22 +73,19 @@ namespace SpaceEngine.Core.Preprocess.Atmosphere
         public bool ClearAfterBake = true;
         public bool UseCoroutine = true;
 
-        private const int NUM_THREADS = 8;
-        private const int WAIT_FRAMES = 4;
-
         public RenderTexture transmittanceT;
         public RenderTexture irradianceT_Read, irradianceT_Write, inscatterT_Read, inscatterT_Write;
         public RenderTexture deltaET, deltaSRT, deltaSMT, deltaJT;
 
-        public ComputeShader Precompute => GodManager.Instance.Precompute;
-
-        int step, order;
-
         [HideInInspector]
-        public bool finished = false;
+        public bool finished;
 
         [SerializeField]
-        string DestinationFolder = "/Resources/Preprocess/Textures/Atmosphere";
+        private string DestinationFolder = "/Resources/Preprocess/Textures/Atmosphere";
+
+        private int step, order;
+
+        public ComputeShader Precompute => GodManager.Instance.Precompute;
 
         private void Awake()
         {
@@ -93,12 +95,21 @@ namespace SpaceEngine.Core.Preprocess.Atmosphere
             }
         }
 
+        private void OnDestroy()
+        {
+            CollectGarbage();
+        }
+
         public void Bake(AtmosphereParameters AP, Action callback)
         {
             if (UseCoroutine)
+            {
                 StartCoroutine(DoWorkCoroutine(AP, callback));
+            }
             else
+            {
                 DoWork(AP, callback);
+            }
         }
 
         private void Prepare(AtmosphereParameters AP)
@@ -122,7 +133,10 @@ namespace SpaceEngine.Core.Preprocess.Atmosphere
                 Calculate(AP);
             }
 
-            if (ClearAfterBake) CollectGarbage(false, true);
+            if (ClearAfterBake)
+            {
+                CollectGarbage(false, true);
+            }
 
             callback?.Invoke();
         }
@@ -145,32 +159,63 @@ namespace SpaceEngine.Core.Preprocess.Atmosphere
                 }
             }
 
-            if (ClearAfterBake) CollectGarbage(false, true);
+            if (ClearAfterBake)
+            {
+                CollectGarbage(false, true);
+            }
 
             callback?.Invoke();
-        }
-
-        private void OnDestroy()
-        {
-            CollectGarbage();
         }
 
         public void CollectGarbage(bool all = true, bool afterBake = false)
         {
             if (all)
             {
-                if (transmittanceT != null) transmittanceT.ReleaseAndDestroy();
-                if (irradianceT_Read != null) irradianceT_Read.ReleaseAndDestroy();
-                if (inscatterT_Read != null) inscatterT_Read.ReleaseAndDestroy();
+                if (transmittanceT != null)
+                {
+                    transmittanceT.ReleaseAndDestroy();
+                }
+
+                if (irradianceT_Read != null)
+                {
+                    irradianceT_Read.ReleaseAndDestroy();
+                }
+
+                if (inscatterT_Read != null)
+                {
+                    inscatterT_Read.ReleaseAndDestroy();
+                }
             }
 
-            if (irradianceT_Write != null) irradianceT_Write.ReleaseAndDestroy();
-            if (inscatterT_Write != null) inscatterT_Write.ReleaseAndDestroy();
+            if (irradianceT_Write != null)
+            {
+                irradianceT_Write.ReleaseAndDestroy();
+            }
 
-            if (deltaET != null) deltaET.ReleaseAndDestroy();
-            if (deltaSRT != null) deltaSRT.ReleaseAndDestroy();
-            if (deltaSMT != null) deltaSMT.ReleaseAndDestroy();
-            if (deltaJT != null) deltaJT.ReleaseAndDestroy();
+            if (inscatterT_Write != null)
+            {
+                inscatterT_Write.ReleaseAndDestroy();
+            }
+
+            if (deltaET != null)
+            {
+                deltaET.ReleaseAndDestroy();
+            }
+
+            if (deltaSRT != null)
+            {
+                deltaSRT.ReleaseAndDestroy();
+            }
+
+            if (deltaSMT != null)
+            {
+                deltaSMT.ReleaseAndDestroy();
+            }
+
+            if (deltaJT != null)
+            {
+                deltaJT.ReleaseAndDestroy();
+            }
 
             if (afterBake)
             {
@@ -251,7 +296,7 @@ namespace SpaceEngine.Core.Preprocess.Atmosphere
                 for (var i = 0; i < AtmosphereConstants.RES_R; i++)
                 {
                     Precompute.SetInt("layer", i);
-                    Precompute.Dispatch(inscatter1Kernel, (AtmosphereConstants.RES_MU_S * AtmosphereConstants.RES_NU) / NUM_THREADS, AtmosphereConstants.RES_MU / NUM_THREADS, 1);
+                    Precompute.Dispatch(inscatter1Kernel, AtmosphereConstants.RES_MU_S * AtmosphereConstants.RES_NU / NUM_THREADS, AtmosphereConstants.RES_MU / NUM_THREADS, 1);
                 }
             }
             else if (step == 3)
@@ -278,7 +323,7 @@ namespace SpaceEngine.Core.Preprocess.Atmosphere
                 for (var i = 0; i < AtmosphereConstants.RES_R; i++)
                 {
                     Precompute.SetInt("layer", i);
-                    Precompute.Dispatch(copyInscatter1Kernel, (AtmosphereConstants.RES_MU_S * AtmosphereConstants.RES_NU) / NUM_THREADS, AtmosphereConstants.RES_MU / NUM_THREADS, 1);
+                    Precompute.Dispatch(copyInscatter1Kernel, AtmosphereConstants.RES_MU_S * AtmosphereConstants.RES_NU / NUM_THREADS, AtmosphereConstants.RES_MU / NUM_THREADS, 1);
                 }
 
                 //Swap inscatterT_Write - inscatterT_Read
@@ -292,7 +337,7 @@ namespace SpaceEngine.Core.Preprocess.Atmosphere
                 //INSCATTER_SPHERICAL_INTEGRAL_SAMPLES = 8 - limit for GTX 430.
 
                 // computes deltaJ (line 7 in algorithm 4.1)
-                Precompute.SetInt("first", (order == 2) ? 1 : 0);
+                Precompute.SetInt("first", order == 2 ? 1 : 0);
                 Precompute.SetTexture(inscatterSKernel, "transmittanceRead", transmittanceT);
                 Precompute.SetTexture(inscatterSKernel, "deltaERead", deltaET);
                 Precompute.SetTexture(inscatterSKernel, "deltaSRRead", deltaSRT);
@@ -304,13 +349,13 @@ namespace SpaceEngine.Core.Preprocess.Atmosphere
                 for (var i = 0; i < AtmosphereConstants.RES_R; i++)
                 {
                     Precompute.SetInt("layer", i);
-                    Precompute.Dispatch(inscatterSKernel, (AtmosphereConstants.RES_MU_S * AtmosphereConstants.RES_NU) / NUM_THREADS, AtmosphereConstants.RES_MU / NUM_THREADS, 1);
+                    Precompute.Dispatch(inscatterSKernel, AtmosphereConstants.RES_MU_S * AtmosphereConstants.RES_NU / NUM_THREADS, AtmosphereConstants.RES_MU / NUM_THREADS, 1);
                 }
             }
             else if (step == 6)
             {
                 // computes deltaE (line 8 in algorithm 4.1)
-                Precompute.SetInt("first", (order == 2) ? 1 : 0);
+                Precompute.SetInt("first", order == 2 ? 1 : 0);
                 Precompute.SetTexture(irradianceNKernel, "deltaSRRead", deltaSRT);
                 Precompute.SetTexture(irradianceNKernel, "deltaSMRead", deltaSMT);
                 Precompute.SetTexture(irradianceNKernel, "deltaEWrite", deltaET);
@@ -328,7 +373,7 @@ namespace SpaceEngine.Core.Preprocess.Atmosphere
                 for (var i = 0; i < AtmosphereConstants.RES_R; i++)
                 {
                     Precompute.SetInt("layer", i);
-                    Precompute.Dispatch(inscatterNKernel, (AtmosphereConstants.RES_MU_S * AtmosphereConstants.RES_NU) / NUM_THREADS, AtmosphereConstants.RES_MU / NUM_THREADS, 1);
+                    Precompute.Dispatch(inscatterNKernel, AtmosphereConstants.RES_MU_S * AtmosphereConstants.RES_NU / NUM_THREADS, AtmosphereConstants.RES_MU / NUM_THREADS, 1);
                 }
             }
             else if (step == 8)
@@ -355,7 +400,7 @@ namespace SpaceEngine.Core.Preprocess.Atmosphere
                 for (var i = 0; i < AtmosphereConstants.RES_R; i++)
                 {
                     Precompute.SetInt("layer", i);
-                    Precompute.Dispatch(copyInscatterNKernel, (AtmosphereConstants.RES_MU_S * AtmosphereConstants.RES_NU) / NUM_THREADS, AtmosphereConstants.RES_MU / NUM_THREADS, 1);
+                    Precompute.Dispatch(copyInscatterNKernel, AtmosphereConstants.RES_MU_S * AtmosphereConstants.RES_NU / NUM_THREADS, AtmosphereConstants.RES_MU / NUM_THREADS, 1);
                 }
 
                 //Swap inscatterT_Read - inscatterT_Write
@@ -375,7 +420,7 @@ namespace SpaceEngine.Core.Preprocess.Atmosphere
 
                     RTUtility.SaveAsRaw(AtmosphereConstants.TRANSMITTANCE_W * AtmosphereConstants.TRANSMITTANCE_H, CBUtility.Channels.RGB, "/transmittance", DestinationFolder, transmittanceT, readDataShader);
                     RTUtility.SaveAsRaw(AtmosphereConstants.SKY_W * AtmosphereConstants.SKY_H, CBUtility.Channels.RGB, "/irradiance", DestinationFolder, irradianceT_Read, readDataShader);
-                    RTUtility.SaveAsRaw((AtmosphereConstants.RES_MU_S * AtmosphereConstants.RES_NU) * AtmosphereConstants.RES_MU * AtmosphereConstants.RES_R, CBUtility.Channels.RGB, "/inscatter", DestinationFolder, inscatterT_Read, readDataShader);
+                    RTUtility.SaveAsRaw(AtmosphereConstants.RES_MU_S * AtmosphereConstants.RES_NU * AtmosphereConstants.RES_MU * AtmosphereConstants.RES_R, CBUtility.Channels.RGB, "/inscatter", DestinationFolder, inscatterT_Read, readDataShader);
 
                     if (BakeMode == AtmosphereBakeMode.TO_HDD_DEBUG)
                     {
@@ -395,7 +440,10 @@ namespace SpaceEngine.Core.Preprocess.Atmosphere
 
         public void SetParameters(ComputeShader cs, AtmosphereParameters AP)
         {
-            if (cs == null) return;
+            if (cs == null)
+            {
+                return;
+            }
 
             cs.SetFloat("Rg", AP.bRg);
             cs.SetFloat("Rt", AP.bRt);

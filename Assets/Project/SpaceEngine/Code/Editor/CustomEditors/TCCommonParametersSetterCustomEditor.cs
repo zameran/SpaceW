@@ -1,4 +1,5 @@
 ﻿#region License
+
 // Procedural planet generator.
 // 
 // Copyright (C) 2015-2023 Denis Ovchinnikov [zameran] 
@@ -31,6 +32,7 @@
 // Creation Date: Undefined
 // Creation Time: Undefined
 // Creator: zameran
+
 #endregion
 
 using System;
@@ -44,11 +46,6 @@ namespace SpaceEngine.Editor.CustomEditors
     [CustomEditor(typeof(TCCommonParametersSetter))]
     public sealed class TCCommonParametersSetterEditor : UnityEditor.Editor
     {
-        private enum Tab
-        {
-            Main, Noise, Texturing, Clouds, Nature, Montes, Dunes, Hills, Canyons, Rivers, Cracks, Craters, Volcanoes, Mare, Venus
-        }
-
         private Tab currentTab = Tab.Main;
         private Tab prevTab = Tab.Main;
 
@@ -68,7 +65,10 @@ namespace SpaceEngine.Editor.CustomEditors
             EditorGUILayout.PropertyField(materialTableProperty, true, null);
             EditorGUILayout.PropertyField(engineProperty, true, null);
 
-            if (EditorGUI.EndChangeCheck()) serializedTarget.ApplyModifiedProperties();
+            if (EditorGUI.EndChangeCheck())
+            {
+                serializedTarget.ApplyModifiedProperties();
+            }
 
             EditorGUILayout.Space();
         }
@@ -127,16 +127,15 @@ namespace SpaceEngine.Editor.CustomEditors
             setter.cloudsParams2.z = EditorGUILayout.Slider("stripeFluct ", setter.cloudsParams2.z, -1.0f, 1.0f);
             setter.cloudsParams2.w = EditorGUILayout.Slider("cloudsCoverage ", setter.cloudsParams2.w, 0.0f, 1.0f);
 
-
             setter.cloudsParams1.x = EditorGUILayout.Slider("cloudsFreq ", setter.cloudsParams1.x, 0.0f, 1000.0f);
-            setter.cloudsParams1.y = (float)Mathf.RoundToInt(EditorGUILayout.Slider("cloudsOctaves ", setter.cloudsParams1.y, 0.0f, 6.0f));
+            setter.cloudsParams1.y = Mathf.RoundToInt(EditorGUILayout.Slider("cloudsOctaves ", setter.cloudsParams1.y, 0.0f, 6.0f));
             setter.cloudsParams1.z = EditorGUILayout.Slider("stripeZones ", setter.cloudsParams1.z, 0.0f, 10.0f);
             setter.cloudsParams1.w = EditorGUILayout.Slider("stripeMagn ", setter.cloudsParams1.w, 0.0f, 100.0f);
 
             setter.cycloneParams.x = EditorGUILayout.Slider("cycloneMagn ", setter.cycloneParams.x, 0.0f, 100.0f);
             setter.cycloneParams.y = EditorGUILayout.Slider("cycloneFreq ", setter.cycloneParams.y, 0.0f, 1000.0f);
             setter.cycloneParams.z = EditorGUILayout.Slider("cycloneDensity ", setter.cycloneParams.z, 0.0f, 2.0f);
-            setter.cycloneParams.w = (float)Mathf.RoundToInt(EditorGUILayout.Slider("cycloneOctaves ", setter.cycloneParams.w, 0.0f, 6.0f));
+            setter.cycloneParams.w = Mathf.RoundToInt(EditorGUILayout.Slider("cycloneOctaves ", setter.cycloneParams.w, 0.0f, 6.0f));
         }
 
         private void DrawGUIForNature(TCCommonParametersSetter setter)
@@ -191,14 +190,14 @@ namespace SpaceEngine.Editor.CustomEditors
             setter.riversParams.x = EditorGUILayout.Slider("riversMagn ", setter.riversParams.x, 0.0f, 100.0f);
             setter.riversParams.y = EditorGUILayout.Slider("riversFreq ", setter.riversParams.y, 0.0f, 1000.0f);
             setter.riversParams.z = EditorGUILayout.Slider("riversSin ", setter.riversParams.z, 0.0f, 10.0f);
-            setter.riversParams.w = (float)Mathf.RoundToInt(EditorGUILayout.Slider("riversOctaves ", setter.riversParams.w, 0.0f, 5.0f));
+            setter.riversParams.w = Mathf.RoundToInt(EditorGUILayout.Slider("riversOctaves ", setter.riversParams.w, 0.0f, 5.0f));
         }
 
         private void DrawGUIForCracks(TCCommonParametersSetter setter)
         {
             setter.cracksParams.x = EditorGUILayout.Slider("cracksMagn ", setter.cracksParams.x, 0.0f, 100.0f);
             setter.cracksParams.y = EditorGUILayout.Slider("cracksFreq ", setter.cracksParams.y, 0.0f, 1000.0f);
-            setter.cracksParams.z = (float)Mathf.RoundToInt(EditorGUILayout.Slider("cracksOctaves ", setter.cracksParams.z, 0.0f, 15.0f));
+            setter.cracksParams.z = Mathf.RoundToInt(EditorGUILayout.Slider("cracksOctaves ", setter.cracksParams.z, 0.0f, 15.0f));
         }
 
         private void DrawGUIForCraters(TCCommonParametersSetter setter)
@@ -206,7 +205,7 @@ namespace SpaceEngine.Editor.CustomEditors
             setter.craterParams.x = EditorGUILayout.Slider("craterMagn ", setter.craterParams.x, 0.0f, 10000.0f);
             setter.craterParams.y = EditorGUILayout.Slider("craterFreq ", setter.craterParams.y, 0.0f, 1000.0f);
             setter.craterParams.z = EditorGUILayout.Slider("craterSqrtDensity ", setter.craterParams.z, 0.0f, 2.0f);
-            setter.craterParams.w = (float)Mathf.RoundToInt(EditorGUILayout.Slider("craterOctaves ", setter.craterParams.w, 0.0f, 20.0f));
+            setter.craterParams.w = Mathf.RoundToInt(EditorGUILayout.Slider("craterOctaves ", setter.craterParams.w, 0.0f, 20.0f));
             setter.cracksParams.w = EditorGUILayout.Slider("craterRayedFactor ", setter.cracksParams.w, 0.0f, 1.0f);
         }
 
@@ -215,7 +214,7 @@ namespace SpaceEngine.Editor.CustomEditors
             setter.volcanoParams1.x = EditorGUILayout.Slider("volcanoMagn ", setter.volcanoParams1.x, 0.0f, 100.0f);
             setter.volcanoParams1.y = EditorGUILayout.Slider("volcanoFreq ", setter.volcanoParams1.y, 0.0f, 1000.0f);
             setter.volcanoParams1.z = EditorGUILayout.Slider("volcanoDensity ", setter.volcanoParams1.z, 0.0f, 2.0f);
-            setter.volcanoParams1.w = (float)Mathf.RoundToInt(EditorGUILayout.Slider("volcanoOctaves ", setter.volcanoParams1.w, 0.0f, 5.0f));
+            setter.volcanoParams1.w = Mathf.RoundToInt(EditorGUILayout.Slider("volcanoOctaves ", setter.volcanoParams1.w, 0.0f, 5.0f));
 
             setter.volcanoParams2.x = EditorGUILayout.Slider("volcanoActivity ", setter.volcanoParams2.x, 0.0f, 2.0f);
             setter.volcanoParams2.y = EditorGUILayout.Slider("volcanoFlows ", setter.volcanoParams2.y, -1.0f, 1.0f);
@@ -274,48 +273,63 @@ namespace SpaceEngine.Editor.CustomEditors
             {
                 case Tab.Main:
                     DrawGUIForMain(setter);
+
                     break;
                 case Tab.Noise:
                     DrawGUIForNoise(setter);
+
                     break;
                 case Tab.Texturing:
                     DrawGUIForTexturing(setter);
+
                     break;
                 case Tab.Clouds:
                     DrawGUIForClouds(setter);
+
                     break;
                 case Tab.Nature:
                     DrawGUIForNature(setter);
+
                     break;
                 case Tab.Montes:
                     DrawGUIForMontes(setter);
+
                     break;
                 case Tab.Dunes:
                     DrawGUIForDunes(setter);
+
                     break;
                 case Tab.Hills:
                     DrawGUIForHills(setter);
+
                     break;
                 case Tab.Canyons:
                     DrawGUIForCanyons(setter);
+
                     break;
                 case Tab.Rivers:
                     DrawGUIForRivers(setter);
+
                     break;
                 case Tab.Cracks:
                     DrawGUIForCracks(setter);
+
                     break;
                 case Tab.Craters:
                     DrawGUIForCraters(setter);
+
                     break;
                 case Tab.Volcanoes:
                     DrawGUIForVolcanoes(setter);
+
                     break;
                 case Tab.Mare:
                     DrawGUIForMare(setter);
+
                     break;
                 case Tab.Venus:
                     DrawGUIForVenus(setter);
+
                     break;
             }
 
@@ -325,6 +339,25 @@ namespace SpaceEngine.Editor.CustomEditors
 
                 EditorSceneManager.MarkSceneDirty(currentScene);
             }
+        }
+
+        private enum Tab
+        {
+            Main,
+            Noise,
+            Texturing,
+            Clouds,
+            Nature,
+            Montes,
+            Dunes,
+            Hills,
+            Canyons,
+            Rivers,
+            Cracks,
+            Craters,
+            Volcanoes,
+            Mare,
+            Venus
         }
     }
 }

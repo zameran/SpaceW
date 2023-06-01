@@ -1,4 +1,5 @@
 ﻿#region License
+
 // Procedural planet generator.
 // 
 // Copyright (C) 2015-2023 Denis Ovchinnikov [zameran] 
@@ -31,6 +32,7 @@
 // Creation Date: Undefined
 // Creation Time: Undefined
 // Creator: zameran
+
 #endregion
 
 using SpaceEngine.Core;
@@ -43,11 +45,10 @@ namespace SpaceEngine.Cameras
     [RequireComponent(typeof(Camera))]
     public abstract class GameCamera : MonoBehaviour, ICamera
     {
-        private readonly CachedComponent<Camera> CameraCachedComponent = new CachedComponent<Camera>();
+        public bool Controllable = true;
+        private readonly CachedComponent<Camera> CameraCachedComponent = new();
 
         public Camera CameraComponent => CameraCachedComponent.Component;
-
-        public bool Controllable = true;
 
         // NOTE : A big problem can be here with a float precision, because matrices provided as is.
         // NOTE : If matrices calculation will be provided, i.e from spherical coordinates around the body (Somesort of 'Body Space').
@@ -61,7 +62,18 @@ namespace SpaceEngine.Cameras
 
         private DebugGUISwitcher DebugGUISwitcherInstance => DebugGUISwitcher.Instance as DebugGUISwitcher;
 
-        public bool MouseOverUI { get { if (DebugGUISwitcherInstance != null) return DebugGUISwitcherInstance.MouseOverGUI; else return false; } }
+        public bool MouseOverUI
+        {
+            get
+            {
+                if (DebugGUISwitcherInstance != null)
+                {
+                    return DebugGUISwitcherInstance.MouseOverGUI;
+                }
+
+                return false;
+            }
+        }
 
         protected virtual void Start()
         {
@@ -74,12 +86,10 @@ namespace SpaceEngine.Cameras
 
         protected virtual void Update()
         {
-
         }
 
         protected virtual void FixedUpdate()
         {
-
         }
 
         protected abstract void Init();
@@ -91,9 +101,14 @@ namespace SpaceEngine.Cameras
         protected float ClampAngle(float angle, float min, float max)
         {
             if (angle < -360)
+            {
                 angle += 360;
+            }
+
             if (angle > 360)
+            {
                 angle -= 360;
+            }
 
             return Mathf.Clamp(angle, min, max);
         }

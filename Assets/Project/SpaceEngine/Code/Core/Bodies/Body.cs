@@ -1,4 +1,5 @@
 ﻿#region License
+
 // Procedural planet generator.
 //  
 // Copyright (C) 2015-2023 Denis Ovchinnikov [zameran] 
@@ -31,6 +32,7 @@
 // Creation Date: 2017.03.28
 // Creation Time: 2:17 PM
 // Creator: zameran
+
 #endregion
 
 using System.Collections.Generic;
@@ -57,11 +59,11 @@ namespace SpaceEngine.Core.Bodies
         public Ring Ring;
 
         public EngineRenderQueue RenderQueue = EngineRenderQueue.Geometry;
-        public int RenderQueueOffset = 0;
+        public int RenderQueueOffset;
 
         public float SizeOffset = 10.0f;
 
-        public bool DrawGizmos = false;
+        public bool DrawGizmos;
         public bool UpdateLOD = true;
 
         public bool AtmosphereEnabled = true;
@@ -69,22 +71,38 @@ namespace SpaceEngine.Core.Bodies
         public bool RingEnabled = true;
         public bool TerrainEnabled = true;
 
-        public int GridResolution => GodManager.Instance.GridResolution;
-
         public float Amplitude = 32.0f;
         public float Frequency = 64.0f;
 
-        public Mesh QuadMesh => GodManager.Instance.QuadMesh;
-
         public Shader ColorShader;
 
-        public List<TileStorage> Storages = new List<TileStorage>();
-        public List<TerrainNode> TerrainNodes = new List<TerrainNode>(6);
+        public List<TileStorage> Storages = new();
+        public List<TerrainNode> TerrainNodes = new(6);
 
         [HideInInspector]
-        public double HeightZ = 0;
+        public double HeightZ;
 
         public float Size = 6360000.0f;
+
+        public TCCommonParametersSetter TCCPS;
+        public List<Sun> Suns = new(4);
+        public List<Shadow> ShadowCasters = new(4);
+        public List<Body> EclipseCasters = new(4);
+        public List<Body> ShineCasters = new(4);
+        public List<Color> ShineColors = new(4) { XKCDColors.Bluish, XKCDColors.Bluish, XKCDColors.Bluish, XKCDColors.Bluish };
+        private Matrix4x4 occludersMatrix1 = Matrix4x4.zero;
+
+        private Matrix4x4 shineColorsMatrix1 = Matrix4x4.zero;
+        private Matrix4x4 shineOccludersMatrix1 = Matrix4x4.zero;
+        private Matrix4x4 shineOccludersMatrix2 = Matrix4x4.zero;
+        private Matrix4x4 shineParameters1 = Matrix4x4.zero;
+        private Matrix4x4 sunColorsMatrix1 = Matrix4x4.zero;
+        private Matrix4x4 sunDirectionsMatrix1 = Matrix4x4.zero;
+        private Matrix4x4 sunPositionsMatrix1 = Matrix4x4.zero;
+
+        public int GridResolution => GodManager.Instance.GridResolution;
+
+        public Mesh QuadMesh => GodManager.Instance.QuadMesh;
 
         public Vector3 Offset { get; set; }
 
@@ -94,46 +112,112 @@ namespace SpaceEngine.Core.Bodies
             set => transform.position = value;
         }
 
-        public TCCommonParametersSetter TCCPS = null;
-
         public MaterialPropertyBlock MPB { get; set; }
 
         public List<string> Keywords { get; set; }
-        public List<Sun> Suns = new List<Sun>(4);
-        public List<Shadow> ShadowCasters = new List<Shadow>(4);
-        public List<Body> EclipseCasters = new List<Body>(4);
-        public List<Body> ShineCasters = new List<Body>(4);
-        public List<Color> ShineColors = new List<Color>(4) { XKCDColors.Bluish, XKCDColors.Bluish, XKCDColors.Bluish, XKCDColors.Bluish };
 
-        private Matrix4x4 shineColorsMatrix1 = Matrix4x4.zero;
-        private Matrix4x4 shineOccludersMatrix1 = Matrix4x4.zero;
-        private Matrix4x4 shineOccludersMatrix2 = Matrix4x4.zero;
-        private Matrix4x4 shineParameters1 = Matrix4x4.zero;
-        private Matrix4x4 occludersMatrix1 = Matrix4x4.zero;
-        private Matrix4x4 sunColorsMatrix1 = Matrix4x4.zero;
-        private Matrix4x4 sunPositionsMatrix1 = Matrix4x4.zero;
-        private Matrix4x4 sunDirectionsMatrix1 = Matrix4x4.zero;
-
-        #region Eventit
-
-        public bool IsEventit { get; set; }
-
-        public void Eventit()
+        protected virtual void OnApplicationFocus(bool focusStatus)
         {
-            if (IsEventit) return;
+            if (focusStatus != true)
+            {
+                return;
+            }
 
-            EventManager.BodyEvents.OnSamplersChanged.OnEvent += OnSamplersChanged;
+            Reanimate();
 
-            IsEventit = true;
+            if (Atmosphere != null)
+            {
+                Atmosphere.Reanimate();
+            }
+
+            if (Ocean != null)
+            {
+                Ocean.Reanimate();
+            }
+
+            if (Ring != null)
+            {
+                Ring.Reanimate();
+            }
         }
 
-        public void UnEventit()
+        #region IReanimateable
+
+        public virtual void Reanimate()
         {
-            if (!IsEventit) return;
+            for (var i = 0; i < Mathf.Min(4, Suns.Count); i++)
+            {
+                if (Suns[i] != null)
+                {
+                    var sunGlareComponent = Suns[i].GetComponent<SunGlare>();
 
-            EventManager.BodyEvents.OnSamplersChanged.OnEvent -= OnSamplersChanged;
+                    if (sunGlareComponent != null)
+                    {
+                        sunGlareComponent.InitSetUniforms();
+                    }
+                }
+            }
 
-            IsEventit = false;
+            foreach (var terrainNode in TerrainNodes)
+            {
+                if (Helper.Enabled(terrainNode))
+                {
+                    InitUniforms(terrainNode.TerrainMaterial);
+                    SetUniforms(terrainNode.TerrainMaterial);
+                }
+            }
+        }
+
+        #endregion
+
+        #region IRenderable
+
+        public virtual void Render(int layer = 8)
+        {
+            if (Atmosphere != null)
+            {
+                if (AtmosphereEnabled)
+                {
+                    Atmosphere.Render();
+                }
+            }
+
+            if (Ocean != null)
+            {
+                if (OceanEnabled)
+                {
+                    Ocean.Render();
+                }
+            }
+
+            if (Ring != null)
+            {
+                if (RingEnabled)
+                {
+                    Ring.Render();
+                }
+            }
+
+            if (TerrainEnabled)
+            {
+                for (var i = 0; i < TerrainNodes.Count; i++)
+                {
+                    if (Helper.Enabled(TerrainNodes[i]))
+                    {
+                        DrawTerrain(TerrainNodes[i], layer);
+                    }
+                }
+            }
+        }
+
+        #endregion
+
+        #region IUniformed
+
+        public virtual void InitSetUniforms()
+        {
+            InitUniforms(MPB);
+            SetUniforms(MPB);
         }
 
         #endregion
@@ -144,6 +228,58 @@ namespace SpaceEngine.Core.Bodies
         {
             node.CollectSamplers();
             node.CollectSamplersSuitable();
+        }
+
+        #endregion
+
+        public virtual List<string> GetKeywords()
+        {
+            var keywords = new List<string>();
+
+            return keywords;
+        }
+
+        private void DrawTerrain(TerrainNode node, int layer)
+        {
+            // So, if doesn't have any samplers - do anything...
+            if (node.Samplers.Count == 0 || node.SamplersSuitable.Count == 0)
+            {
+                return;
+            }
+
+            // Find all the quads in the terrain node that need to be drawn
+            node.FindDrawableQuads(node.TerrainQuadRoot);
+
+            // The draw them
+            node.DrawQuads(node.TerrainQuadRoot, QuadMesh, MPB, layer);
+        }
+
+        #region Eventit
+
+        public bool IsEventit { get; set; }
+
+        public void Eventit()
+        {
+            if (IsEventit)
+            {
+                return;
+            }
+
+            EventManager.BodyEvents.OnSamplersChanged.OnEvent += OnSamplersChanged;
+
+            IsEventit = true;
+        }
+
+        public void UnEventit()
+        {
+            if (!IsEventit)
+            {
+                return;
+            }
+
+            EventManager.BodyEvents.OnSamplersChanged.OnEvent -= OnSamplersChanged;
+
+            IsEventit = false;
         }
 
         #endregion
@@ -167,7 +303,9 @@ namespace SpaceEngine.Core.Bodies
             if (Atmosphere != null)
             {
                 if (Atmosphere.ParentBody == null)
+                {
                     Atmosphere.ParentBody = this;
+                }
 
                 Atmosphere.InitNode();
             }
@@ -175,7 +313,9 @@ namespace SpaceEngine.Core.Bodies
             if (Ocean != null)
             {
                 if (Ocean.ParentBody == null)
+                {
                     Ocean.ParentBody = this;
+                }
 
                 Ocean.InitNode();
             }
@@ -183,7 +323,9 @@ namespace SpaceEngine.Core.Bodies
             if (Ring != null)
             {
                 if (Ring.ParentBody == null)
+                {
                     Ring.ParentBody = this;
+                }
 
                 Ring.InitNode();
             }
@@ -278,14 +420,20 @@ namespace SpaceEngine.Core.Bodies
 
         public virtual void InitUniforms(Material target)
         {
-            if (target == null) return;
+            if (target == null)
+            {
+                return;
+            }
 
             Helper.SetKeywords(target, Keywords);
         }
 
         public virtual void SetUniforms(Material target)
         {
-            if (target == null) return;
+            if (target == null)
+            {
+                return;
+            }
 
             Helper.SetKeywords(target, Keywords);
         }
@@ -296,7 +444,10 @@ namespace SpaceEngine.Core.Bodies
 
         public virtual void InitUniforms(MaterialPropertyBlock target)
         {
-            if (target == null) return;
+            if (target == null)
+            {
+                return;
+            }
 
             if (Atmosphere != null)
             {
@@ -319,7 +470,10 @@ namespace SpaceEngine.Core.Bodies
             //_Deform_ScreenQuadVericals
             //_Deform_TangentFrameToWorld
 
-            if (target == null) return;
+            if (target == null)
+            {
+                return;
+            }
 
             SetEclipses(target);
             SetShine(target);
@@ -351,92 +505,14 @@ namespace SpaceEngine.Core.Bodies
 
         #endregion
 
-        #region IUniformed
-
-        public virtual void InitSetUniforms()
-        {
-            InitUniforms(MPB);
-            SetUniforms(MPB);
-        }
-
-        #endregion
-
-        #region IReanimateable
-
-        public virtual void Reanimate()
-        {
-            for (var i = 0; i < Mathf.Min(4, Suns.Count); i++)
-            {
-                if (Suns[i] != null)
-                {
-                    var sunGlareComponent = Suns[i].GetComponent<SunGlare>();
-
-                    if (sunGlareComponent != null)
-                    {
-                        sunGlareComponent.InitSetUniforms();
-                    }
-                }
-            }
-
-            foreach (var terrainNode in TerrainNodes)
-            {
-                if (Helper.Enabled(terrainNode))
-                {
-                    InitUniforms(terrainNode.TerrainMaterial);
-                    SetUniforms(terrainNode.TerrainMaterial);
-                }
-            }
-        }
-
-        #endregion
-
-        #region IRenderable
-
-        public virtual void Render(int layer = 8)
-        {
-            if (Atmosphere != null)
-            {
-                if (AtmosphereEnabled)
-                {
-                    Atmosphere.Render();
-                }
-            }
-
-            if (Ocean != null)
-            {
-                if (OceanEnabled)
-                {
-                    Ocean.Render();
-                }
-            }
-
-            if (Ring != null)
-            {
-                if (RingEnabled)
-                {
-                    Ring.Render();
-                }
-            }
-
-            if (TerrainEnabled)
-            {
-                for (var i = 0; i < TerrainNodes.Count; i++)
-                {
-                    if (Helper.Enabled(TerrainNodes[i]))
-                    {
-                        DrawTerrain(TerrainNodes[i], layer);
-                    }
-                }
-            }
-        }
-
-        #endregion
-
         #region AdditionalUniforms
 
         public void SetShine(Material mat)
         {
-            if (!GodManager.Instance.Planetshine) return;
+            if (!GodManager.Instance.Planetshine)
+            {
+                return;
+            }
 
             CalculateShine(ref shineOccludersMatrix1, ref shineOccludersMatrix2, ref shineColorsMatrix1, ref shineParameters1);
 
@@ -448,7 +524,10 @@ namespace SpaceEngine.Core.Bodies
 
         public void SetShine(MaterialPropertyBlock block)
         {
-            if (!GodManager.Instance.Planetshine) return;
+            if (!GodManager.Instance.Planetshine)
+            {
+                return;
+            }
 
             CalculateShine(ref shineOccludersMatrix1, ref shineOccludersMatrix2, ref shineColorsMatrix1, ref shineParameters1);
 
@@ -460,7 +539,10 @@ namespace SpaceEngine.Core.Bodies
 
         public void SetEclipses(Material mat)
         {
-            if (!GodManager.Instance.Eclipses) return;
+            if (!GodManager.Instance.Eclipses)
+            {
+                return;
+            }
 
             CalculateEclipses(ref occludersMatrix1);
 
@@ -469,7 +551,10 @@ namespace SpaceEngine.Core.Bodies
 
         public void SetEclipses(MaterialPropertyBlock block)
         {
-            if (!GodManager.Instance.Eclipses) return;
+            if (!GodManager.Instance.Eclipses)
+            {
+                return;
+            }
 
             CalculateEclipses(ref occludersMatrix1);
 
@@ -478,7 +563,10 @@ namespace SpaceEngine.Core.Bodies
 
         public void SetSuns(Material mat)
         {
-            if (mat == null) return;
+            if (mat == null)
+            {
+                return;
+            }
 
             mat.SetFloat("_Sun_Intensity", 100.0f);
 
@@ -491,7 +579,10 @@ namespace SpaceEngine.Core.Bodies
 
         public void SetSuns(MaterialPropertyBlock block)
         {
-            if (block == null) return;
+            if (block == null)
+            {
+                return;
+            }
 
             block.SetFloat("_Sun_Intensity", 100.0f);
 
@@ -527,7 +618,7 @@ namespace SpaceEngine.Core.Bodies
                 soc1.SetRow(i, VectorHelper.MakeFrom((shineCaster.transform.position - Origin).normalized, 1.0f));
                 soc2.SetRow(i, VectorHelper.MakeFrom((Origin - shineCaster.transform.position).normalized, 1.0f));
 
-                sc1.SetRow(i, VectorHelper.FromColor(Helper.Enabled(shineCaster) ? ShineColors[i] : new Color(0, 0, 0, 0)));
+                sc1.SetRow(i, (Helper.Enabled(shineCaster) ? ShineColors[i] : new Color(0, 0, 0, 0)).FromColor());
 
                 sp1.SetRow(i, new Vector4(0.0f, 0.0f, 0.0f, distance));
             }
@@ -544,7 +635,7 @@ namespace SpaceEngine.Core.Bodies
                     break;
                 }
 
-                if ((EclipseCasters[i] as CelestialBody) == null)
+                if (EclipseCasters[i] as CelestialBody == null)
                 {
                     Debug.Log("Atmosphere: Eclipse caster should be a planet!");
 
@@ -583,7 +674,7 @@ namespace SpaceEngine.Core.Bodies
 
         public float CalculateUmbraLength(float planetDiameter, float sunDiameter, float distance)
         {
-            return -Mathf.Abs((planetDiameter * distance) / (sunDiameter - planetDiameter));
+            return -Mathf.Abs(planetDiameter * distance / (sunDiameter - planetDiameter));
         }
 
         public float CalculateUmbraSubtendedAngle(float planetDiameter, float umbraLength)
@@ -603,7 +694,10 @@ namespace SpaceEngine.Core.Bodies
         #if UNITY_EDITOR
         private void OnDrawGizmosSelected()
         {
-            if (DrawGizmos == false) return;
+            if (DrawGizmos == false)
+            {
+                return;
+            }
 
             for (var i = 0; i < Mathf.Min(4, Suns.Count); i++)
             {
@@ -626,7 +720,10 @@ namespace SpaceEngine.Core.Bodies
 
         private void OnDrawGizmos()
         {
-            if (DrawGizmos == false) return;
+            if (DrawGizmos == false)
+            {
+                return;
+            }
 
             var radius = Size;
 
@@ -641,7 +738,7 @@ namespace SpaceEngine.Core.Bodies
 
                 Gizmos.color = Color.yellow;
                 Gizmos.DrawWireSphere(Suns[i].transform.position, sunRadius);
-                Gizmos.DrawRay(Suns[i].transform.position, (direction / umbraLength) * -sunToPlanetDistance);
+                Gizmos.DrawRay(Suns[i].transform.position, direction / umbraLength * -sunToPlanetDistance);
 
                 Gizmos.color = Color.red;
                 Gizmos.DrawRay(Origin, direction);
@@ -662,35 +759,5 @@ namespace SpaceEngine.Core.Bodies
         #endif
 
         #endregion
-
-        protected virtual void OnApplicationFocus(bool focusStatus)
-        {
-            if (focusStatus != true) return;
-
-            Reanimate();
-
-            if (Atmosphere != null) Atmosphere.Reanimate();
-            if (Ocean != null) Ocean.Reanimate();
-            if (Ring != null) Ring.Reanimate();
-        }
-
-        public virtual List<string> GetKeywords()
-        {
-            var keywords = new List<string>();
-
-            return keywords;
-        }
-
-        private void DrawTerrain(TerrainNode node, int layer)
-        {
-            // So, if doesn't have any samplers - do anything...
-            if (node.Samplers.Count == 0 || node.SamplersSuitable.Count == 0) return;
-
-            // Find all the quads in the terrain node that need to be drawn
-            node.FindDrawableQuads(node.TerrainQuadRoot);
-
-            // The draw them
-            node.DrawQuads(node.TerrainQuadRoot, QuadMesh, MPB, layer);
-        }
     }
 }

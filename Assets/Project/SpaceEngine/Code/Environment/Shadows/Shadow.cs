@@ -1,4 +1,5 @@
 ﻿#region License
+
 // Procedural planet generator.
 // 
 // Copyright (C) 2015-2023 Denis Ovchinnikov [zameran] 
@@ -31,6 +32,7 @@
 // Creation Date: Undefined
 // Creation Time: Undefined
 // Creator: zameran
+
 #endregion
 
 using SpaceEngine.Helpers;
@@ -46,16 +48,15 @@ namespace SpaceEngine.Environment.Shadows
 
         public float Ratio;
 
-        public abstract Texture GetTexture();
-
         protected virtual void Start()
         {
-
         }
+
+        public abstract Texture GetTexture();
 
         public virtual bool CalculateShadow()
         {
-            if (Helper.Enabled(Light) == true && Light.intensity > 0.0f)
+            if (Helper.Enabled(Light) && Light.intensity > 0.0f)
             {
                 return true;
             }

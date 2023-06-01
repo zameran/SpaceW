@@ -1,4 +1,5 @@
 ﻿#region License
+
 // Procedural planet generator.
 // 
 // Copyright (C) 2015-2023 Denis Ovchinnikov [zameran] 
@@ -31,8 +32,10 @@
 // Creation Date: Undefined
 // Creation Time: Undefined
 // Creator: zameran
+
 #endregion
 
+using System;
 using SpaceEngine.Enums;
 using SpaceEngine.Managers;
 using SpaceEngine.Tools;
@@ -67,10 +70,7 @@ namespace SpaceEngine.Debugging
             {
                 GUILayoutExtensions.VerticalBoxed("", GUISkin, () =>
                 {
-                    GUILayoutExtensions.VerticalBoxed("Fragment HDR Mode: ", GUISkin, () =>
-                    {
-                        GodManager.Instance.HDRMode = (FragmentHDR)GUILayout.SelectionGrid((int)GodManager.Instance.HDRMode, System.Enum.GetNames(typeof(FragmentHDR)), 2);
-                    });
+                    GUILayoutExtensions.VerticalBoxed("Fragment HDR Mode: ", GUISkin, () => { GodManager.Instance.HDRMode = (FragmentHDR)GUILayout.SelectionGrid((int)GodManager.Instance.HDRMode, Enum.GetNames(typeof(FragmentHDR)), 2); });
 
                     GUILayoutExtensions.SpacingSeparator();
 

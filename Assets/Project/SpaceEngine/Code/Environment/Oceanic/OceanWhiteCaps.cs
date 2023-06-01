@@ -1,4 +1,5 @@
 ﻿#region License
+
 // Procedural planet generator.
 // 
 // Copyright (C) 2015-2023 Denis Ovchinnikov [zameran] 
@@ -31,6 +32,7 @@
 // Creation Date: Undefined
 // Creation Time: Undefined
 // Creator: zameran
+
 #endregion
 
 using SpaceEngine.Core.Bodies;
@@ -43,7 +45,7 @@ using UnityEngine;
 namespace SpaceEngine.Environment.Oceanic
 {
     /// <summary>
-    /// Extend the OceanFFT node to also generate ocean white caps.
+    ///     Extend the OceanFFT node to also generate ocean white caps.
     /// </summary>
     public class OceanWhiteCaps : OceanFFT
     {
@@ -65,12 +67,12 @@ namespace SpaceEngine.Environment.Oceanic
         [Range(0.0f, 1.0f)]
         protected float WhiteCapStrength = 0.1f;
 
+        protected RenderTexture Foam0;
+        protected RenderTexture Foam1;
+
         protected RenderTexture[] FourierBuffer5;
         protected RenderTexture[] FourierBuffer6;
         protected RenderTexture[] FourierBuffer7;
-
-        protected RenderTexture Foam0;
-        protected RenderTexture Foam1;
 
         #region OceanNode
 
@@ -80,86 +82,6 @@ namespace SpaceEngine.Environment.Oceanic
             base.UpdateKeywords(target);
 
             Helper.ToggleKeyword(OceanMaterial, WHITECAPS_KEYWORD, FFT_KEYWORD);
-        }
-
-        #endregion
-
-        #region Node
-
-        public override void InitNode()
-        {
-            base.InitNode();
-
-            if (InitJacobiansMaterial == null)
-            {
-                Debug.Log("OceanWhiteCaps: Init jacobians material is null! Trying to find it out...");
-                InitJacobiansMaterial = MaterialHelper.CreateTemp(Shader.Find("SpaceEngine/Ocean/InitJacobians"), "InitJacobians");
-            }
-
-            if (WhiteCapsPrecomputeMaterial == null)
-            {
-                Debug.Log("OceanWhiteCaps: White caps precompute material is null! Trying to find it out...");
-                WhiteCapsPrecomputeMaterial = MaterialHelper.CreateTemp(Shader.Find("SpaceEngine/Ocean/WhiteCapsPrecompute"), "WhiteCapsPrecompute");
-            }
-
-            InitJacobiansMaterial.SetTexture("_Spectrum01", Spectrum01);
-            InitJacobiansMaterial.SetTexture("_Spectrum23", Spectrum23);
-            InitJacobiansMaterial.SetTexture("_WTable", WTable);
-            InitJacobiansMaterial.SetVector("_Offset", Offset);
-            InitJacobiansMaterial.SetVector("_InverseGridSizes", InverseGridSizes);
-        }
-
-        public override void UpdateNode()
-        {
-            if (DrawOcean == true)
-            {
-                Fourier.PeformFFT(FourierBuffer5, FourierBuffer6, FourierBuffer7);
-
-                WhiteCapsPrecomputeMaterial.SetTexture("_Map5", FourierBuffer5[IDX]);
-                WhiteCapsPrecomputeMaterial.SetTexture("_Map6", FourierBuffer6[IDX]);
-                WhiteCapsPrecomputeMaterial.SetTexture("_Map7", FourierBuffer7[IDX]);
-                WhiteCapsPrecomputeMaterial.SetVector("_Choppyness", Choppyness);
-
-                var buffers = new RenderTexture[] { Foam0, Foam1 };
-
-                RTUtility.MultiTargetBlit(buffers, WhiteCapsPrecomputeMaterial);
-
-                OceanMaterial.SetFloat("_Ocean_WhiteCapStr", WhiteCapStrength);
-                OceanMaterial.SetTexture("_Ocean_Foam0", Foam0);
-                OceanMaterial.SetTexture("_Ocean_Foam1", Foam1);
-            }
-
-            base.UpdateNode();
-        }
-
-        protected override void Awake()
-        {
-            base.Awake();
-        }
-
-        protected override void Start()
-        {
-            base.Start();
-        }
-
-        protected override void Update()
-        {
-            base.Update();
-        }
-
-        protected override void OnDestroy()
-        {
-            base.OnDestroy();
-
-            if (Foam0 != null) Foam0.Release();
-            if (Foam1 != null) Foam1.Release();
-
-            for (var i = 0; i < 2; i++)
-            {
-                if (FourierBuffer5 != null) if (FourierBuffer5[i] != null) FourierBuffer5[i].Release();
-                if (FourierBuffer6 != null) if (FourierBuffer6[i] != null) FourierBuffer6[i].Release();
-                if (FourierBuffer7 != null) if (FourierBuffer7[i] != null) FourierBuffer7[i].Release();
-            }
         }
 
         #endregion
@@ -200,9 +122,9 @@ namespace SpaceEngine.Environment.Oceanic
             Foam1.mipMapBias = FoamMipmapBias;
 
             // These textures are used to perform the fourier transform
-            CreateBuffer(out FourierBuffer5, format, "Jacobians XX");// Jacobians XX
-            CreateBuffer(out FourierBuffer6, format, "Jacobians YY");// Jacobians YY
-            CreateBuffer(out FourierBuffer7, format, "Jacobians XY");// Jacobians XY
+            CreateBuffer(out FourierBuffer5, format, "Jacobians XX"); // Jacobians XX
+            CreateBuffer(out FourierBuffer6, format, "Jacobians YY"); // Jacobians YY
+            CreateBuffer(out FourierBuffer7, format, "Jacobians XY"); // Jacobians XY
 
             // Make sure the base textures are also created
             base.CreateRenderTextures();
@@ -213,9 +135,116 @@ namespace SpaceEngine.Environment.Oceanic
             base.InitWaveSpectrum();
 
             // Init jacobians (5,6,7)
-            var buffers567 = new RenderTexture[] { FourierBuffer5[1], FourierBuffer6[1], FourierBuffer7[1] };
+            var buffers567 = new[] { FourierBuffer5[1], FourierBuffer6[1], FourierBuffer7[1] };
 
             RTUtility.MultiTargetBlit(buffers567, InitJacobiansMaterial);
         }
+
+        #region Node
+
+        public override void InitNode()
+        {
+            base.InitNode();
+
+            if (InitJacobiansMaterial == null)
+            {
+                Debug.Log("OceanWhiteCaps: Init jacobians material is null! Trying to find it out...");
+                InitJacobiansMaterial = MaterialHelper.CreateTemp(Shader.Find("SpaceEngine/Ocean/InitJacobians"), "InitJacobians");
+            }
+
+            if (WhiteCapsPrecomputeMaterial == null)
+            {
+                Debug.Log("OceanWhiteCaps: White caps precompute material is null! Trying to find it out...");
+                WhiteCapsPrecomputeMaterial = MaterialHelper.CreateTemp(Shader.Find("SpaceEngine/Ocean/WhiteCapsPrecompute"), "WhiteCapsPrecompute");
+            }
+
+            InitJacobiansMaterial.SetTexture("_Spectrum01", Spectrum01);
+            InitJacobiansMaterial.SetTexture("_Spectrum23", Spectrum23);
+            InitJacobiansMaterial.SetTexture("_WTable", WTable);
+            InitJacobiansMaterial.SetVector("_Offset", Offset);
+            InitJacobiansMaterial.SetVector("_InverseGridSizes", InverseGridSizes);
+        }
+
+        public override void UpdateNode()
+        {
+            if (DrawOcean)
+            {
+                Fourier.PeformFFT(FourierBuffer5, FourierBuffer6, FourierBuffer7);
+
+                WhiteCapsPrecomputeMaterial.SetTexture("_Map5", FourierBuffer5[IDX]);
+                WhiteCapsPrecomputeMaterial.SetTexture("_Map6", FourierBuffer6[IDX]);
+                WhiteCapsPrecomputeMaterial.SetTexture("_Map7", FourierBuffer7[IDX]);
+                WhiteCapsPrecomputeMaterial.SetVector("_Choppyness", Choppyness);
+
+                var buffers = new[] { Foam0, Foam1 };
+
+                RTUtility.MultiTargetBlit(buffers, WhiteCapsPrecomputeMaterial);
+
+                OceanMaterial.SetFloat("_Ocean_WhiteCapStr", WhiteCapStrength);
+                OceanMaterial.SetTexture("_Ocean_Foam0", Foam0);
+                OceanMaterial.SetTexture("_Ocean_Foam1", Foam1);
+            }
+
+            base.UpdateNode();
+        }
+
+        protected override void Awake()
+        {
+            base.Awake();
+        }
+
+        protected override void Start()
+        {
+            base.Start();
+        }
+
+        protected override void Update()
+        {
+            base.Update();
+        }
+
+        protected override void OnDestroy()
+        {
+            base.OnDestroy();
+
+            if (Foam0 != null)
+            {
+                Foam0.Release();
+            }
+
+            if (Foam1 != null)
+            {
+                Foam1.Release();
+            }
+
+            for (var i = 0; i < 2; i++)
+            {
+                if (FourierBuffer5 != null)
+                {
+                    if (FourierBuffer5[i] != null)
+                    {
+                        FourierBuffer5[i].Release();
+                    }
+                }
+
+                if (FourierBuffer6 != null)
+                {
+                    if (FourierBuffer6[i] != null)
+                    {
+                        FourierBuffer6[i].Release();
+                    }
+                }
+
+                if (FourierBuffer7 != null)
+                {
+                    if (FourierBuffer7[i] != null)
+                    {
+                        FourierBuffer7[i].Release();
+                    }
+                }
+            }
+        }
+
+        #endregion
     }
 }

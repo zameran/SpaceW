@@ -1,4 +1,5 @@
 ﻿#region License
+
 // Procedural planet generator.
 //  
 // Copyright (C) 2015-2023 Denis Ovchinnikov [zameran] 
@@ -31,6 +32,7 @@
 // Creation Date: 2017.03.28
 // Creation Time: 2:18 PM
 // Creator: zameran
+
 #endregion
 
 using SpaceEngine.Core.Tile.Storage;
@@ -40,33 +42,10 @@ using UnityEngine;
 namespace SpaceEngine.Core.Storage
 {
     /// <summary>
-    /// A tile storage that can contain compute buffers.
+    ///     A tile storage that can contain compute buffers.
     /// </summary>
     public class CBTileStorage : TileStorage
     {
-        /// <summary>
-        /// A slot managed by a CBTileStorage containing the buffer.
-        /// </summary>
-        public class CBSlot : Slot
-        {
-            public ComputeBuffer Buffer { get; private set; }
-
-            public ComputeBuffer GetBuffer()
-            {
-                return Buffer;
-            }
-
-            public override void Release()
-            {
-                BufferHelper.ReleaseAndDisposeBuffers(Buffer);
-            }
-
-            public CBSlot(TileStorage owner, ComputeBuffer buffer) : base(owner)
-            {
-                Buffer = buffer;
-            }
-        }
-
         public DATA_TYPE DataType = DATA_TYPE.FLOAT;
 
         public int Channels = 1;
@@ -90,12 +69,15 @@ namespace SpaceEngine.Core.Storage
                 {
                     case DATA_TYPE.FLOAT:
                         buffer = new ComputeBuffer(TileSize, sizeof(float) * Channels, ComputeBufferType);
+
                         break;
                     case DATA_TYPE.INT:
                         buffer = new ComputeBuffer(TileSize, sizeof(int) * Channels, ComputeBufferType);
+
                         break;
                     case DATA_TYPE.BYTE:
                         buffer = new ComputeBuffer(TileSize, sizeof(byte) * Channels, ComputeBufferType);
+
                         break;
                     case DATA_TYPE.SHORT:
                     default:
@@ -111,6 +93,29 @@ namespace SpaceEngine.Core.Storage
                 var slot = new CBSlot(this, buffer);
 
                 AddSlot(i, slot);
+            }
+        }
+
+        /// <summary>
+        ///     A slot managed by a CBTileStorage containing the buffer.
+        /// </summary>
+        public class CBSlot : Slot
+        {
+            public CBSlot(TileStorage owner, ComputeBuffer buffer) : base(owner)
+            {
+                Buffer = buffer;
+            }
+
+            public ComputeBuffer Buffer { get; }
+
+            public ComputeBuffer GetBuffer()
+            {
+                return Buffer;
+            }
+
+            public override void Release()
+            {
+                BufferHelper.ReleaseAndDisposeBuffers(Buffer);
             }
         }
     }

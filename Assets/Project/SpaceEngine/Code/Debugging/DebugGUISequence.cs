@@ -1,4 +1,5 @@
 ﻿#region License
+
 // Procedural planet generator.
 //  
 // Copyright (C) 2015-2023 Denis Ovchinnikov [zameran] 
@@ -31,6 +32,7 @@
 // Creation Date: 2017.03.06
 // Creation Time: 12:51 AM
 // Creator: zameran
+
 #endregion
 
 using SpaceEngine.Managers;
@@ -60,11 +62,17 @@ namespace SpaceEngine.Debugging
 
         protected override void UI(int id)
         {
-            if (DebugSequenceManager.Instance == null) return;
+            if (DebugSequenceManager.Instance == null)
+            {
+                return;
+            }
 
             var sequence = DebugSequenceManager.Instance.Sequence;
 
-            if (sequence == null) return;
+            if (sequence == null)
+            {
+                return;
+            }
 
             if (sequence.Count != 0)
             {
@@ -84,20 +92,11 @@ namespace SpaceEngine.Debugging
                                 {
                                     GUILayoutExtensions.Vertical(() =>
                                     {
-                                        GUILayoutExtensions.Horizontal(() =>
-                                        {
-                                            GUILayoutExtensions.LabelWithFlexibleSpace("Time: ", entry.Time);
-                                        });
+                                        GUILayoutExtensions.Horizontal(() => { GUILayoutExtensions.LabelWithFlexibleSpace("Time: ", entry.Time); });
 
-                                        GUILayoutExtensions.Horizontal(() =>
-                                        {
-                                            GUILayoutExtensions.LabelWithFlexibleSpace("Time Since Startup: ", entry.TimeSinceStartup);
-                                        });
+                                        GUILayoutExtensions.Horizontal(() => { GUILayoutExtensions.LabelWithFlexibleSpace("Time Since Startup: ", entry.TimeSinceStartup); });
 
-                                        GUILayoutExtensions.Horizontal(() =>
-                                        {
-                                            GUILayoutExtensions.LabelWithFlexibleSpace("Frame: ", entry.Frame);
-                                        });
+                                        GUILayoutExtensions.Horizontal(() => { GUILayoutExtensions.LabelWithFlexibleSpace("Frame: ", entry.Frame); });
                                     });
                                 }, GUILayout.Width(debugInfoBounds.width - 45));
                             }

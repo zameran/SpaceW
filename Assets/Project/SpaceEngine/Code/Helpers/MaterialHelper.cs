@@ -1,4 +1,5 @@
 ﻿#region License
+
 // Procedural planet generator.
 // 
 // Copyright (C) 2015-2023 Denis Ovchinnikov [zameran] 
@@ -31,6 +32,7 @@
 // Creation Date: Undefined
 // Creation Time: Undefined
 // Creator: zameran
+
 #endregion
 
 using UnityEngine;
@@ -38,7 +40,7 @@ using UnityEngine;
 namespace SpaceEngine.Helpers
 {
     /// <summary>
-    /// Class - extensions holder for a <see cref="Material"/>.
+    ///     Class - extensions holder for a <see cref="Material" />.
     /// </summary>
     public static class MaterialHelper
     {

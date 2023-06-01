@@ -1,4 +1,5 @@
 ﻿#region License
+
 // Procedural planet generator.
 // 
 // Copyright (C) 2015-2023 Denis Ovchinnikov [zameran] 
@@ -31,6 +32,7 @@
 // Creation Date: Undefined
 // Creation Time: Undefined
 // Creator: zameran
+
 #endregion
 
 using System;
@@ -41,7 +43,7 @@ using UnityEngine;
 namespace SpaceEngine.Helpers
 {
     /// <summary>
-    /// Class - extensions holder for a <see cref="Vector2"/>, <see cref="Vector3"/> and <see cref="Vector4"/>.
+    ///     Class - extensions holder for a <see cref="Vector2" />, <see cref="Vector3" /> and <see cref="Vector4" />.
     /// </summary>
     public static class VectorHelper
     {
@@ -61,7 +63,7 @@ namespace SpaceEngine.Helpers
         }
 
         /// <summary>
-        /// Inverse of Y component of normalized target vector.
+        ///     Inverse of Y component of normalized target vector.
         /// </summary>
         /// <param name="v">Target.</param>
         /// <returns>Vector with inversed Y component.</returns>
@@ -71,7 +73,7 @@ namespace SpaceEngine.Helpers
         }
 
         /// <summary>
-        /// Inverse of Y component of normalized target vector.
+        ///     Inverse of Y component of normalized target vector.
         /// </summary>
         /// <param name="v">Target.</param>
         /// <returns>Vector with inversed Y component.</returns>
@@ -153,19 +155,18 @@ namespace SpaceEngine.Helpers
             var dY2Half = dY2 * 0.5f;
             var dZ2Half = dZ2 * 0.5f;
 
-            point.x = point.x * Mathf.Sqrt(1f - dY2Half - dZ2Half + (dY2 * dZ2) * (1f / 3f));
-            point.y = point.y * Mathf.Sqrt(1f - dZ2Half - dX2Half + (dZ2 * dX2) * (1f / 3f));
-            point.z = point.z * Mathf.Sqrt(1f - dX2Half - dY2Half + (dX2 * dY2) * (1f / 3f));
+            point.x = point.x * Mathf.Sqrt(1f - dY2Half - dZ2Half + dY2 * dZ2 * (1f / 3f));
+            point.y = point.y * Mathf.Sqrt(1f - dZ2Half - dX2Half + dZ2 * dX2 * (1f / 3f));
+            point.z = point.z * Mathf.Sqrt(1f - dX2Half - dY2Half + dX2 * dY2 * (1f / 3f));
 
             return point;
         }
 
-
         public static Vector3 Plane3Intersect(Plane p1, Plane p2, Plane p3)
         {
-            return ((-p1.distance * Vector3.Cross(p2.normal, p3.normal)) +
-                    (-p2.distance * Vector3.Cross(p3.normal, p1.normal)) +
-                    (-p3.distance * Vector3.Cross(p1.normal, p2.normal))) / (Vector3.Dot(p1.normal, Vector3.Cross(p2.normal, p3.normal)));
+            return (-p1.distance * Vector3.Cross(p2.normal, p3.normal) +
+                    -p2.distance * Vector3.Cross(p3.normal, p1.normal) +
+                    -p3.distance * Vector3.Cross(p1.normal, p2.normal)) / Vector3.Dot(p1.normal, Vector3.Cross(p2.normal, p3.normal));
         }
 
         public static Vector3 RoundToInt(this Vector3 v)
@@ -197,7 +198,12 @@ namespace SpaceEngine.Helpers
 
         public static Vector3 Max(params Vector3[] vectors)
         {
-            if (vectors == null || vectors.Length == 0) { Debug.Log("VectorHelper.Max: Problem!"); return Vector3.zero; }
+            if (vectors == null || vectors.Length == 0)
+            {
+                Debug.Log("VectorHelper.Max: Problem!");
+
+                return Vector3.zero;
+            }
 
             var max = new Vector3(-9e37f, -9e37f, -9e37f);
 
@@ -206,7 +212,12 @@ namespace SpaceEngine.Helpers
 
         public static Vector3 Min(params Vector3[] vectors)
         {
-            if (vectors == null || vectors.Length == 0) { Debug.Log("VectorHelper.Min: Problem!"); return Vector3.zero; }
+            if (vectors == null || vectors.Length == 0)
+            {
+                Debug.Log("VectorHelper.Min: Problem!");
+
+                return Vector3.zero;
+            }
 
             var min = new Vector3(9e37f, 9e37f, 9e37f);
 
@@ -235,7 +246,7 @@ namespace SpaceEngine.Helpers
 
         public static bool OneOfIsBiggerThan(this Vector3 v, float value)
         {
-            return (v.x >= value || v.y >= value || v.z >= value);
+            return v.x >= value || v.y >= value || v.z >= value;
         }
     }
 }

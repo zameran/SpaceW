@@ -1,4 +1,5 @@
 #region License
+
 // Procedural planet generator.
 // 
 // Copyright (C) 2015-2023 Denis Ovchinnikov [zameran] 
@@ -31,6 +32,7 @@
 // Creation Date: Undefined
 // Creation Time: Undefined
 // Creator: zameran
+
 #endregion
 
 using System.Collections.Generic;
@@ -47,10 +49,11 @@ namespace SpaceEngine.Environment.Rings
 {
     public class Ring : NodeSlave<Ring>, IUniformed<Material>, IReanimateable, IRenderable<Ring>
     {
+        public static List<string> Keywords = new();
         public Body ParentBody;
 
-        public List<Light> Lights = new List<Light>();
-        public List<Shadow> Shadows = new List<Shadow>();
+        public List<Light> Lights = new();
+        public List<Shadow> Shadows = new();
 
         public Texture DiffuseTexture;
         public Texture NoiseTexture;
@@ -78,14 +81,132 @@ namespace SpaceEngine.Environment.Rings
         public float InversedCameraPixelSize = 0.0000001f;
         public float Density = 1.0f;
 
-        public List<RingSegment> Segments = new List<RingSegment>();
-
-        public static List<string> Keywords = new List<string>();
+        public List<RingSegment> Segments = new();
 
         public Shader RingShader;
         public Material RingMaterial;
 
         public Mesh RingSegmentMesh;
+
+        private void OnEnable()
+        {
+            for (var i = Segments.Count - 1; i >= 0; i--)
+            {
+                var segment = Segments[i];
+
+                if (segment != null)
+                {
+                    segment.gameObject.SetActive(true);
+                }
+            }
+        }
+
+        private void OnDisable()
+        {
+            for (var i = Segments.Count - 1; i >= 0; i--)
+            {
+                var segment = Segments[i];
+
+                if (segment != null)
+                {
+                    segment.gameObject.SetActive(false);
+                }
+            }
+        }
+
+        #region Gizmos
+
+        #if UNITY_EDITOR
+        protected virtual void OnDrawGizmosSelected()
+        {
+            Gizmos.matrix = transform.localToWorldMatrix;
+
+            Helper.DrawCircle(Vector3.zero, Vector3.up, InnerRadius);
+            Helper.DrawCircle(Vector3.zero, Vector3.up, OuterRadius);
+        }
+        #endif
+
+        #endregion
+
+        #region IReanimateable
+
+        public void Reanimate()
+        {
+            InitUniforms(RingMaterial);
+        }
+
+        #endregion
+
+        #region IRenderable
+
+        public void Render(int layer = 11)
+        {
+            if (Segments == null)
+            {
+                return;
+            }
+
+            if (Segments.Count == 0)
+            {
+                return;
+            }
+
+            for (var i = 0; i < Segments.Count; i++)
+            {
+                if (Segments[i] != null)
+                {
+                    Segments[i].Render(layer);
+                }
+            }
+        }
+
+        #endregion
+
+        public void SetLightsAndShadows(Material mat)
+        {
+            if (mat == null)
+            {
+                return;
+            }
+
+            var lightCount = Helper.WriteLights(Lights, 4, transform.position, null, null, mat);
+            var shadowCount = Helper.WriteShadows(Shadows, 4, mat);
+
+            WriteLightKeywords(lightCount, Keywords);
+            WriteShadowKeywords(shadowCount, Keywords);
+
+            Helper.SetKeywords(mat, Keywords);
+        }
+
+        public void SetShadows(Material mat, List<Shadow> shadows)
+        {
+            if (mat == null)
+            {
+                return;
+            }
+
+            Helper.WriteShadows(shadows, 4, mat);
+        }
+
+        public void SetShadows(MaterialPropertyBlock block, List<Shadow> shadows)
+        {
+            if (block == null)
+            {
+                return;
+            }
+
+            Helper.WriteShadows(shadows, 4, block);
+        }
+
+        private void InitMaterial()
+        {
+            RingMaterial = MaterialHelper.CreateTemp(RingShader, "Ring", (int)RenderQueue);
+        }
+
+        private void InitMesh()
+        {
+            RingSegmentMesh = MeshFactory.SetupRingSegmentMesh(SegmentCount, SegmentDetail, RadiusDetail, InnerRadius, OuterRadius, BoundsShift);
+        }
 
         #region NodeSlave<Ring>
 
@@ -142,7 +263,10 @@ namespace SpaceEngine.Environment.Rings
 
         public void InitUniforms(Material target)
         {
-            if (target == null) return;
+            if (target == null)
+            {
+                return;
+            }
 
             target.SetTexture("DiffuseMap", DiffuseTexture);
             target.SetTexture("NoiseMap", NoiseTexture);
@@ -150,11 +274,14 @@ namespace SpaceEngine.Environment.Rings
 
         public void SetUniforms(Material target)
         {
-            if (target == null) return;
+            if (target == null)
+            {
+                return;
+            }
 
             SetLightsAndShadows(target);
 
-            target.SetVector("RingsParams", new Vector2((OuterRadius - InnerRadius), 1.0f / Thickness));
+            target.SetVector("RingsParams", new Vector2(OuterRadius - InnerRadius, 1.0f / Thickness));
 
             target.SetColor("AmbientColor", AmbientColor);
 
@@ -171,110 +298,6 @@ namespace SpaceEngine.Environment.Rings
         }
 
         #endregion
-
-        #region IReanimateable
-
-        public void Reanimate()
-        {
-            InitUniforms(RingMaterial);
-        }
-
-        #endregion
-
-        #region IRenderable
-
-        public void Render(int layer = 11)
-        {
-            if (Segments == null) return;
-            if (Segments.Count == 0) return;
-
-            for (var i = 0; i < Segments.Count; i++)
-            {
-                if (Segments[i] != null)
-                {
-                    Segments[i].Render(layer);
-                }
-            }
-        }
-
-        #endregion
-
-        private void OnEnable()
-        {
-            for (var i = Segments.Count - 1; i >= 0; i--)
-            {
-                var segment = Segments[i];
-
-                if (segment != null)
-                {
-                    segment.gameObject.SetActive(true);
-                }
-            }
-        }
-
-        private void OnDisable()
-        {
-            for (var i = Segments.Count - 1; i >= 0; i--)
-            {
-                var segment = Segments[i];
-
-                if (segment != null)
-                {
-                    segment.gameObject.SetActive(false);
-                }
-            }
-        }
-
-        #region Gizmos
-
-    #if UNITY_EDITOR
-        protected virtual void OnDrawGizmosSelected()
-        {
-            Gizmos.matrix = transform.localToWorldMatrix;
-
-            Helper.DrawCircle(Vector3.zero, Vector3.up, InnerRadius);
-            Helper.DrawCircle(Vector3.zero, Vector3.up, OuterRadius);
-        }
-    #endif
-
-        #endregion
-
-        public void SetLightsAndShadows(Material mat)
-        {
-            if (mat == null) return;
-
-            var lightCount = Helper.WriteLights(Lights, 4, transform.position, null, null, mat);
-            var shadowCount = Helper.WriteShadows(Shadows, 4, mat);
-
-            WriteLightKeywords(lightCount, Keywords);
-            WriteShadowKeywords(shadowCount, Keywords);
-
-            Helper.SetKeywords(mat, Keywords);
-        }
-
-        public void SetShadows(Material mat, List<Shadow> shadows)
-        {
-            if (mat == null) return;
-
-            Helper.WriteShadows(shadows, 4, mat);
-        }
-
-        public void SetShadows(MaterialPropertyBlock block, List<Shadow> shadows)
-        {
-            if (block == null) return;
-
-            Helper.WriteShadows(shadows, 4, block);
-        }
-
-        private void InitMaterial()
-        {
-            RingMaterial = MaterialHelper.CreateTemp(RingShader, "Ring", (int)RenderQueue);
-        }
-
-        private void InitMesh()
-        {
-            RingSegmentMesh = MeshFactory.SetupRingSegmentMesh(SegmentCount, SegmentDetail, RadiusDetail, InnerRadius, OuterRadius, BoundsShift);
-        }
 
         #region Special Stuff
 

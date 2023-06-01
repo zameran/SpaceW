@@ -1,4 +1,5 @@
 ﻿#region License
+
 // Procedural planet generator.
 // 
 // Copyright (C) 2015-2023 Denis Ovchinnikov [zameran] 
@@ -31,6 +32,7 @@
 // Creation Date: Undefined
 // Creation Time: Undefined
 // Creator: zameran
+
 #endregion
 
 using SpaceEngine.Core.Patterns.Strategy;
@@ -48,9 +50,20 @@ namespace SpaceEngine.Environment.Rings
 
         public void Render(int layer = 0)
         {
-            if (Ring == null) return;
-            if (Ring.RingSegmentMesh == null) return;
-            if (Ring.RingMaterial == null) return;
+            if (Ring == null)
+            {
+                return;
+            }
+
+            if (Ring.RingSegmentMesh == null)
+            {
+                return;
+            }
+
+            if (Ring.RingMaterial == null)
+            {
+                return;
+            }
 
             var segmentTRS = Matrix4x4.TRS(Ring.transform.position, transform.rotation, Vector3.one);
 

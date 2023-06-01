@@ -1,4 +1,5 @@
 ﻿#region License
+
 // Procedural planet generator.
 // 
 // Copyright (C) 2015-2023 Denis Ovchinnikov [zameran] 
@@ -31,6 +32,7 @@
 // Creation Date: Undefined
 // Creation Time: Undefined
 // Creator: zameran
+
 #endregion
 
 using System;
@@ -48,25 +50,7 @@ namespace SpaceEngine
     {
         public bool ZSort = true;
 
-        private BodySort Comparer = null;
-
-        public class BodySort : IComparer<Body>
-        {
-            int IComparer<Body>.Compare(Body a, Body b)
-            {
-                if (a == null || b == null) return 0;
-
-                var D2A = Vector3.Distance(GodManager.Instance.View.WorldCameraPosition, a.Origin) - a.Size;
-                var D2B = Vector3.Distance(GodManager.Instance.View.WorldCameraPosition, b.Origin) - b.Size;
-
-                if (D2A > D2B)
-                    return 1;
-                if (D2A < D2B)
-                    return -1;
-                else
-                    return 0;
-            }
-        }
+        private BodySort Comparer;
 
         private void Awake()
         {
@@ -76,27 +60,26 @@ namespace SpaceEngine
 
         private void Start()
         {
-
         }
 
         private void Update()
         {
-            if (Input.GetKey(KeyCode.J) || ZSort) SortBodies();
+            if (Input.GetKey(KeyCode.J) || ZSort)
+            {
+                SortBodies();
+            }
         }
 
         private void OnEnable()
         {
-
         }
 
         private void OnDisable()
         {
-
         }
 
         private void OnPostRender()
         {
-
         }
 
         public void SortBodies()
@@ -109,23 +92,74 @@ namespace SpaceEngine
             var highPriorityBody = GodManager.Instance.ActiveBody;
             var bodies = GodManager.Instance.Bodies;
 
-            if (highPriorityBody == null || bodies == null) return;
+            if (highPriorityBody == null || bodies == null)
+            {
+                return;
+            }
 
             highPriorityBody.RenderQueueOffset = 5;
-            if (highPriorityBody.Atmosphere != null) highPriorityBody.Atmosphere.RenderQueueOffset = 6;
-            if (highPriorityBody.Ocean != null) highPriorityBody.Ocean.RenderQueueOffset = 7;
-            if (highPriorityBody.Ring != null) highPriorityBody.Ring.RenderQueueOffset = 4;
+            if (highPriorityBody.Atmosphere != null)
+            {
+                highPriorityBody.Atmosphere.RenderQueueOffset = 6;
+            }
+
+            if (highPriorityBody.Ocean != null)
+            {
+                highPriorityBody.Ocean.RenderQueueOffset = 7;
+            }
+
+            if (highPriorityBody.Ring != null)
+            {
+                highPriorityBody.Ring.RenderQueueOffset = 4;
+            }
 
             for (var i = 1; i < bodies.Length; i++)
             {
                 var lowPriorityBody = bodies[i];
 
                 lowPriorityBody.RenderQueueOffset = 1;
-                if (lowPriorityBody.Atmosphere != null) lowPriorityBody.Atmosphere.RenderQueueOffset = 2;
-                if (lowPriorityBody.Ocean != null) lowPriorityBody.Ocean.RenderQueueOffset = 3;
-                if (lowPriorityBody.Ring != null) lowPriorityBody.Ring.RenderQueueOffset = 0;
+                if (lowPriorityBody.Atmosphere != null)
+                {
+                    lowPriorityBody.Atmosphere.RenderQueueOffset = 2;
+                }
+
+                if (lowPriorityBody.Ocean != null)
+                {
+                    lowPriorityBody.Ocean.RenderQueueOffset = 3;
+                }
+
+                if (lowPriorityBody.Ring != null)
+                {
+                    lowPriorityBody.Ring.RenderQueueOffset = 0;
+                }
             }
             //-----------------------------------------------------------------------------
+        }
+
+        public class BodySort : IComparer<Body>
+        {
+            int IComparer<Body>.Compare(Body a, Body b)
+            {
+                if (a == null || b == null)
+                {
+                    return 0;
+                }
+
+                var D2A = Vector3.Distance(GodManager.Instance.View.WorldCameraPosition, a.Origin) - a.Size;
+                var D2B = Vector3.Distance(GodManager.Instance.View.WorldCameraPosition, b.Origin) - b.Size;
+
+                if (D2A > D2B)
+                {
+                    return 1;
+                }
+
+                if (D2A < D2B)
+                {
+                    return -1;
+                }
+
+                return 0;
+            }
         }
     }
 }

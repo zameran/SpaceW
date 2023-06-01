@@ -1,4 +1,5 @@
 ﻿#region License
+
 // Procedural planet generator.
 //  
 // Copyright (C) 2015-2023 Denis Ovchinnikov [zameran] 
@@ -31,6 +32,7 @@
 // Creation Date: 2017.02.21
 // Creation Time: 2:24 PM
 // Creator: zameran
+
 #endregion
 
 using System.ComponentModel;
@@ -39,6 +41,5 @@ namespace SpaceEngine.Core.Patterns.PropertyNotification
 {
     public interface IPropertyNotification : INotifyPropertyChanged
     {
-
     }
 }

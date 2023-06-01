@@ -1,4 +1,5 @@
 ﻿#region License
+
 // Procedural planet generator.
 // 
 // Copyright (C) 2015-2023 Denis Ovchinnikov [zameran] 
@@ -31,6 +32,7 @@
 // Creation Date: Undefined
 // Creation Time: Undefined
 // Creator: zameran
+
 #endregion
 
 using System;
@@ -59,7 +61,7 @@ namespace SpaceEngine.Environment.Starfield
         public Mesh StarfieldMesh;
 
         public EngineRenderQueue RenderQueue = EngineRenderQueue.Background;
-        public int RenderQueueOffset = 0;
+        public int RenderQueueOffset;
 
         private readonly Vector4[] Tab =
         {
@@ -67,6 +69,103 @@ namespace SpaceEngine.Environment.Starfield
             new Vector2(0.922739035f, -0.122108860f), new Vector2(0.800630175f, -0.088956800f), new Vector2(0.711673375f, 0.158864420f),
             new Vector2(0.870537795f, 0.085484560f), new Vector2(0.956022355f, -0.058114540f)
         };
+
+        #region IRenderable
+
+        public void Render(int layer = 0)
+        {
+            if (StarfieldMesh == null)
+            {
+                return;
+            }
+
+            var starfieldTRS = transform.localToWorldMatrix;
+
+            Graphics.DrawMesh(StarfieldMesh, starfieldTRS, StarfieldMaterial, layer, CameraHelper.Main(), 0, null, ShadowCastingMode.Off, false);
+        }
+
+        #endregion
+
+        public void InitMesh()
+        {
+            StarfieldMesh = CreateStarfieldMesh();
+        }
+
+        public void InitMaterials()
+        {
+            if (StarfieldMaterial == null)
+            {
+                StarfieldMaterial = MaterialHelper.CreateTemp(StarfieldShader, "Starfield");
+            }
+        }
+
+        private Mesh CreateStarfieldMesh()
+        {
+            const int numberOfStars = 9110;
+
+            var binaryDataFile = Resources.Load("Binary/Stars", typeof(TextAsset)) as TextAsset;
+
+            if (binaryDataFile == null)
+            {
+                Debug.Log("Starfield: Binary data file reading error!");
+
+                return null;
+            }
+
+            var starsCIs = new List<CombineInstance>();
+
+            using (var reader = new BinaryReader(new MemoryStream(binaryDataFile.bytes)))
+            {
+                for (var i = 0; i < numberOfStars - 1; i++)
+                {
+                    var star = new StarfieldStar();
+                    var starSize = StarsDistance / 100 * StarsScale;
+
+                    // NOTE : Swap Z and Y...
+                    star.Position = new Vector3(reader.ReadSingle(), reader.ReadSingle(), reader.ReadSingle());
+                    star.Color = new Vector4(reader.ReadSingle(), reader.ReadSingle(), reader.ReadSingle(), 0);
+
+                    star.Position = Vector3.Scale(star.Position, new Vector3(-1.0f, 1.0f, -1.0f));
+                    star.Color.w = new Vector3(star.Color.x, star.Color.y, star.Color.z).magnitude;
+
+                    if (star.Color.w > 5.7f)
+                    {
+                        star.Color = Vector4.Normalize(star.Color) * 0.5f;
+                    }
+
+                    var ci = new CombineInstance
+                    {
+                        mesh = MeshFactory.MakeBillboardQuad(starSize),
+                        transform = MatrixHelper.BillboardMatrix(star.Position * StarsDistance)
+                    };
+
+                    ci.mesh.colors = new Color[] { star.Color, star.Color, star.Color, star.Color };
+
+                    starsCIs.Add(ci);
+                }
+            }
+
+            var mesh = new Mesh();
+            mesh.CombineMeshes(starsCIs.ToArray());
+            mesh.name = $"StarfieldMesh_({Random.Range(float.MinValue, float.MaxValue)})";
+            mesh.bounds = new Bounds(Vector3.zero, new Vector3(1e8f, 1e8f, 1e8f));
+            mesh.hideFlags = HideFlags.DontSave;
+
+            #region Cleanup
+
+            foreach (var ci in starsCIs)
+            {
+                Helper.Destroy(ci.mesh);
+            }
+
+            starsCIs.Clear();
+
+            GC.Collect();
+
+            #endregion
+
+            return mesh;
+        }
 
         #region Node
 
@@ -117,12 +216,17 @@ namespace SpaceEngine.Environment.Starfield
 
         public void InitUniforms(Material target)
         {
-            if (target == null) return;
+            if (target == null)
+            {
+            }
         }
 
         public void SetUniforms(Material target)
         {
-            if (target == null) return;
+            if (target == null)
+            {
+                return;
+            }
 
             target.SetFloat("_StarIntensity", StarIntensity);
             target.SetMatrix("_RotationMatrix", Matrix4x4.identity);
@@ -137,96 +241,5 @@ namespace SpaceEngine.Environment.Starfield
         }
 
         #endregion
-
-        #region IRenderable
-
-        public void Render(int layer = 0)
-        {
-            if (StarfieldMesh == null) return;
-
-            var starfieldTRS = transform.localToWorldMatrix;
-
-            Graphics.DrawMesh(StarfieldMesh, starfieldTRS, StarfieldMaterial, layer, CameraHelper.Main(), 0, null, ShadowCastingMode.Off, false);
-        }
-
-        #endregion
-
-        public void InitMesh()
-        {
-            StarfieldMesh = CreateStarfieldMesh();
-        }
-
-        public void InitMaterials()
-        {
-            if (StarfieldMaterial == null)
-            {
-                StarfieldMaterial = MaterialHelper.CreateTemp(StarfieldShader, "Starfield");
-            }
-        }
-
-        private Mesh CreateStarfieldMesh()
-        {
-            const int numberOfStars = 9110;
-
-            var binaryDataFile = Resources.Load("Binary/Stars", typeof(TextAsset)) as TextAsset;
-
-            if (binaryDataFile == null)
-            {
-                Debug.Log("Starfield: Binary data file reading error!");
-                return null;
-            }
-
-            var starsCIs = new List<CombineInstance>();
-
-            using (var reader = new BinaryReader(new MemoryStream(binaryDataFile.bytes)))
-            {
-                for (var i = 0; i < numberOfStars - 1; i++)
-                {
-                    var star = new StarfieldStar();
-                    var starSize = StarsDistance / 100 * StarsScale;
-
-                    // NOTE : Swap Z and Y...
-                    star.Position = new Vector3(reader.ReadSingle(), reader.ReadSingle(), reader.ReadSingle());
-                    star.Color = new Vector4(reader.ReadSingle(), reader.ReadSingle(), reader.ReadSingle(), 0);
-
-                    star.Position = Vector3.Scale(star.Position, new Vector3(-1.0f, 1.0f, -1.0f));
-                    star.Color.w = new Vector3(star.Color.x, star.Color.y, star.Color.z).magnitude;
-
-                    if (star.Color.w > 5.7f)
-                        star.Color = Vector4.Normalize(star.Color) * 0.5f;
-
-                    var ci = new CombineInstance
-                    {
-                        mesh = MeshFactory.MakeBillboardQuad(starSize),
-                        transform = MatrixHelper.BillboardMatrix(star.Position * StarsDistance)
-                    };
-
-                    ci.mesh.colors = new Color[] { star.Color, star.Color, star.Color, star.Color };
-
-                    starsCIs.Add(ci);
-                }
-            }
-
-            var mesh = new Mesh();
-            mesh.CombineMeshes(starsCIs.ToArray());
-            mesh.name = $"StarfieldMesh_({Random.Range(float.MinValue, float.MaxValue)})";
-            mesh.bounds = new Bounds(Vector3.zero, new Vector3(1e8f, 1e8f, 1e8f));
-            mesh.hideFlags = HideFlags.DontSave;
-
-            #region Cleanup
-
-            foreach (var ci in starsCIs)
-            {
-                Helper.Destroy(ci.mesh);
-            }
-
-            starsCIs.Clear();
-
-            GC.Collect();
-
-            #endregion
-
-            return mesh;
-        }
     }
 }

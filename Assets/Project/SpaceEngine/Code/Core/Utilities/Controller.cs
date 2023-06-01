@@ -1,4 +1,5 @@
 ﻿#region License
+
 // Procedural planet generator.
 //  
 // Copyright (C) 2015-2023 Denis Ovchinnikov [zameran] 
@@ -31,6 +32,7 @@
 // Creation Date: 2017.03.28
 // Creation Time: 2:18 PM
 // Creator: zameran
+
 #endregion
 
 using System;
@@ -43,120 +45,72 @@ using UnityEngine;
 namespace SpaceEngine.Core.Utilities
 {
     /// <summary>
-    /// Controller used to collect user input and move the view (<see cref="TerrainView"/> or <see cref="PlanetView"/>)
-    /// Provides smooth interpolation from the views current to new position.
+    ///     Controller used to collect user input and move the view (<see cref="TerrainView" /> or <see cref="PlanetView" />)
+    ///     Provides smooth interpolation from the views current to new position.
     /// </summary>
     public class Controller : NodeSlave<Controller>
     {
         [SerializeField]
-        double MoveSpeed = 1e-3;
+        private double MoveSpeed = 1e-3;
 
         [SerializeField]
-        double TurnSpeed = 5e-3;
+        private double TurnSpeed = 5e-3;
 
         [SerializeField]
-        double ZoomSpeed = 1.0;
+        private double ZoomSpeed = 1.0;
 
         [SerializeField]
-        double ScrollWheelSpeed = 2.0f;
+        private double ScrollWheelSpeed = 2.0f;
 
         [SerializeField]
-        double RotateSpeed = 0.1;
+        private double RotateSpeed = 0.1;
 
         [SerializeField]
-        double DragSpeed = 0.01;
+        private double DragSpeed = 0.01;
 
         /// <summary>
-        /// Use exponential damping to go to target positions?
+        ///     Use exponential damping to go to target positions?
         /// </summary>
         [SerializeField]
-        bool Smooth = true;
-
-        bool ScrollIn;
-        bool ScrollOut;
-        bool NearPressed;
-        bool FarPressed;
-        bool ForwardPressed;
-        bool BackwardPressed;
-        bool LeftPressed;
-        bool RightPressed;
-        bool LeftMousePressed;
-        bool RightMousePressed;
-
-        bool Initialized;
+        private bool Smooth = true;
 
         /// <summary>
-        /// The target position manipulated by the user via the mouse and keyboard.
+        ///     The target position manipulated by the user via the mouse and keyboard.
         /// </summary>
         [HideInInspector]
         public TerrainView.Position TargetPosition;
 
-        /// <summary>
-        /// Start position for an animation between two positions.
-        /// </summary>
-        TerrainView.Position StartPosition;
-
-        /// <summary>
-        /// End position for an animation between two positions.
-        /// </summary>
-        TerrainView.Position EndPosition;
-
-        Vector3d PreviousMousePos;
-
         private double AnimationValue = -1.0;
+        private bool BackwardPressed;
+
+        /// <summary>
+        ///     End position for an animation between two positions.
+        /// </summary>
+        private TerrainView.Position EndPosition;
+
+        private bool FarPressed;
+        private bool ForwardPressed;
+
+        private bool Initialized;
+        private bool LeftMousePressed;
+        private bool LeftPressed;
+        private bool NearPressed;
+
+        private Vector3d PreviousMousePos;
+        private bool RightMousePressed;
+        private bool RightPressed;
+
+        private bool ScrollIn;
+        private bool ScrollOut;
+
+        /// <summary>
+        ///     Start position for an animation between two positions.
+        /// </summary>
+        private TerrainView.Position StartPosition;
 
         public TerrainView View { get; private set; }
 
         private DebugGUISwitcher DebugGUISwitcherInstance => DebugGUISwitcher.Instance as DebugGUISwitcher;
-
-        #region NodeSlave<Controller>
-
-        public override void InitNode()
-        {
-            View = GetComponent<TerrainView>();
-
-            TargetPosition = new TerrainView.Position();
-            StartPosition = new TerrainView.Position();
-            EndPosition = new TerrainView.Position();
-            PreviousMousePos = new Vector3d(Input.mousePosition);
-        }
-
-        public override void UpdateNode()
-        {
-            if (!Initialized)
-            {
-                GetPosition(TargetPosition);
-
-                Initialized = true;
-            }
-
-            KeyDown();
-            MouseWheel();
-            MouseButtons();
-            MouseMotion();
-
-            var dt = Time.deltaTime * 1000.0;
-
-            // If animation requried interpolate from start to end position
-            // NOTE : has not been tested and not currently used
-            if (AnimationValue >= 0.0)
-            {
-                AnimationValue = View.Interpolate(StartPosition, EndPosition, AnimationValue);
-
-                if (BrainFuckMath.NearlyEqual(AnimationValue, 1.0))
-                {
-                    GetPosition(TargetPosition);
-
-                    AnimationValue = -1.0;
-                }
-            }
-            else
-            {
-                UpdateController(dt);
-            }
-        }
-
-        #endregion
 
         private void UpdateController(double dt)
         {
@@ -220,7 +174,6 @@ namespace SpaceEngine.Core.Utilities
             {
                 SetPosition(TargetPosition);
             }
-
         }
 
         private double Mix(double x, double y, double t)
@@ -268,7 +221,10 @@ namespace SpaceEngine.Core.Utilities
             FarPressed = Input.GetKey(KeyCode.PageDown);
             NearPressed = Input.GetKey(KeyCode.PageUp);
 
-            if (Input.GetKey(KeyCode.LeftControl) || Input.GetKey(KeyCode.RightControl)) return;
+            if (Input.GetKey(KeyCode.LeftControl) || Input.GetKey(KeyCode.RightControl))
+            {
+                return;
+            }
 
             ForwardPressed = Input.GetKey(KeyCode.UpArrow) || Input.GetKey(KeyCode.W);
             BackwardPressed = Input.GetKey(KeyCode.DownArrow) || Input.GetKey(KeyCode.S);
@@ -278,7 +234,10 @@ namespace SpaceEngine.Core.Utilities
 
         private void MouseWheel()
         {
-            if (DebugGUISwitcherInstance.MouseOverGUI) return;
+            if (DebugGUISwitcherInstance.MouseOverGUI)
+            {
+                return;
+            }
 
             ScrollIn = false;
             ScrollOut = false;
@@ -296,7 +255,10 @@ namespace SpaceEngine.Core.Utilities
 
         private void MouseButtons()
         {
-            if (DebugGUISwitcherInstance.MouseOverGUI) return;
+            if (DebugGUISwitcherInstance.MouseOverGUI)
+            {
+                return;
+            }
 
             LeftMousePressed = Input.GetMouseButton(0);
             RightMousePressed = Input.GetMouseButton(1);
@@ -304,7 +266,10 @@ namespace SpaceEngine.Core.Utilities
 
         private void MouseMotion()
         {
-            if (DebugGUISwitcherInstance.MouseOverGUI) return;
+            if (DebugGUISwitcherInstance.MouseOverGUI)
+            {
+                return;
+            }
 
             if (LeftMousePressed && Input.GetKey(KeyCode.LeftControl))
             {
@@ -331,10 +296,58 @@ namespace SpaceEngine.Core.Utilities
             }
             else if (RightMousePressed)
             {
-
             }
 
             PreviousMousePos = new Vector3d(Input.mousePosition);
         }
+
+        #region NodeSlave<Controller>
+
+        public override void InitNode()
+        {
+            View = GetComponent<TerrainView>();
+
+            TargetPosition = new TerrainView.Position();
+            StartPosition = new TerrainView.Position();
+            EndPosition = new TerrainView.Position();
+            PreviousMousePos = new Vector3d(Input.mousePosition);
+        }
+
+        public override void UpdateNode()
+        {
+            if (!Initialized)
+            {
+                GetPosition(TargetPosition);
+
+                Initialized = true;
+            }
+
+            KeyDown();
+            MouseWheel();
+            MouseButtons();
+            MouseMotion();
+
+            var dt = Time.deltaTime * 1000.0;
+
+            // If animation requried interpolate from start to end position
+            // NOTE : has not been tested and not currently used
+            if (AnimationValue >= 0.0)
+            {
+                AnimationValue = View.Interpolate(StartPosition, EndPosition, AnimationValue);
+
+                if (BrainFuckMath.NearlyEqual(AnimationValue, 1.0))
+                {
+                    GetPosition(TargetPosition);
+
+                    AnimationValue = -1.0;
+                }
+            }
+            else
+            {
+                UpdateController(dt);
+            }
+        }
+
+        #endregion
     }
 }

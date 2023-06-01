@@ -1,4 +1,5 @@
 ﻿#region License
+
 // Procedural planet generator.
 // 
 // Copyright (C) 2015-2023 Denis Ovchinnikov [zameran] 
@@ -31,6 +32,7 @@
 // Creation Date: Undefined
 // Creation Time: Undefined
 // Creator: zameran
+
 #endregion
 
 using System.Collections;
@@ -44,12 +46,11 @@ namespace SpaceEngine.UI.PanelSystem
     [RequireComponent(typeof(CanvasGroup))]
     public class UIPanel : UIBehaviour
     {
-        public bool IsShown { get; set; }
         public bool IsShownByDefault;
 
-        public bool Immune = false;
+        public bool Immune;
         public bool FromThisScene = true;
-        public bool Overlay = false;
+        public bool Overlay;
 
         public UnityEvent OnShow;
         public UnityEvent OnHide;
@@ -59,9 +60,10 @@ namespace SpaceEngine.UI.PanelSystem
         public UnityEvent OnBeforeHide;
 
         private CanvasGroup canvasGroup;
-        protected Coroutine routine;
 
         private bool hideAfter;
+        protected Coroutine routine;
+        public bool IsShown { get; set; }
 
         protected override void Awake()
         {
@@ -74,7 +76,10 @@ namespace SpaceEngine.UI.PanelSystem
 
         public void Show(float duration = 0.0f)
         {
-            if (IsShown) return;
+            if (IsShown)
+            {
+                return;
+            }
 
             if (routine != null)
             {
@@ -89,6 +94,7 @@ namespace SpaceEngine.UI.PanelSystem
             if (!IsShown)
             {
                 hideAfter = true;
+
                 return;
             }
 

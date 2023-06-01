@@ -1,4 +1,5 @@
 ﻿#region License
+
 // Procedural planet generator.
 //  
 // Copyright (C) 2015-2023 Denis Ovchinnikov [zameran] 
@@ -31,6 +32,7 @@
 // Creation Date: 2017.03.28
 // Creation Time: 2:18 PM
 // Creator: zameran
+
 #endregion
 
 using System.Collections.Generic;
@@ -39,23 +41,23 @@ using SpaceEngine.Core.Tile.Storage;
 namespace SpaceEngine.Core.Tile.Layer
 {
     /// <summary>
-    /// An abstract layer for a <see cref="Producer.TileProducer"/>. 
-    /// Some tile producers can be customized with layers modifying the default tile production algorithm.
-    /// For these kind of producers, each method of this class is called during the corresponding method in the <see cref="Producer.TileProducer"/>. 
-    /// The default implementation of these methods in this class is empty.
+    ///     An abstract layer for a <see cref="Producer.TileProducer" />.
+    ///     Some tile producers can be customized with layers modifying the default tile production algorithm.
+    ///     For these kind of producers, each method of this class is called during the corresponding method in the <see cref="Producer.TileProducer" />.
+    ///     The default implementation of these methods in this class is empty.
     /// </summary>
     public abstract class TileLayer : NodeSlave<TileLayer>
     {
+        public abstract void DoCreateTile(int level, int tx, int ty, List<TileStorage.Slot> slot);
+
         #region NodeSlave<TileLayer>
 
         public override void InitNode()
         {
-
         }
 
         public override void UpdateNode()
         {
-
         }
 
         protected override void Awake()
@@ -79,7 +81,5 @@ namespace SpaceEngine.Core.Tile.Layer
         }
 
         #endregion
-
-        public abstract void DoCreateTile(int level, int tx, int ty, List<TileStorage.Slot> slot);
     }
 }

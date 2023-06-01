@@ -1,4 +1,5 @@
 ﻿#region License
+
 // Procedural planet generator.
 //  
 // Copyright (C) 2015-2023 Denis Ovchinnikov [zameran] 
@@ -31,6 +32,7 @@
 // Creation Date: 2017.03.28
 // Creation Time: 2:18 PM
 // Creator: zameran
+
 #endregion
 
 using SpaceEngine.Core.Tile.Storage;
@@ -41,33 +43,10 @@ using UnityEngine;
 namespace SpaceEngine.Core.Storage
 {
     /// <summary>
-    /// A TileStorage that stores tiles in 2D textures.
+    ///     A TileStorage that stores tiles in 2D textures.
     /// </summary>
     public class GPUTileStorage : TileStorage
     {
-        /// <summary>
-        /// A slot managed by a GPUTileStorage containing the texture.
-        /// </summary>
-        public class GPUSlot : Slot
-        {
-            public RenderTexture Texture { get; private set; }
-
-            public override void Release()
-            {
-                Texture.ReleaseAndDestroy();
-            }
-
-            public override void Clear()
-            {
-                RTUtility.ClearColor(Texture);
-            }
-
-            public GPUSlot(TileStorage owner, RenderTexture texture) : base(owner)
-            {
-                Texture = texture;
-            }
-        }
-
         public RenderTextureFormat Format = RenderTextureFormat.ARGB32;
 
         public TextureWrapMode WrapMode = TextureWrapMode.Clamp;
@@ -97,6 +76,29 @@ namespace SpaceEngine.Core.Storage
                 var slot = new GPUSlot(this, texture);
 
                 AddSlot(i, slot);
+            }
+        }
+
+        /// <summary>
+        ///     A slot managed by a GPUTileStorage containing the texture.
+        /// </summary>
+        public class GPUSlot : Slot
+        {
+            public GPUSlot(TileStorage owner, RenderTexture texture) : base(owner)
+            {
+                Texture = texture;
+            }
+
+            public RenderTexture Texture { get; }
+
+            public override void Release()
+            {
+                Texture.ReleaseAndDestroy();
+            }
+
+            public override void Clear()
+            {
+                RTUtility.ClearColor(Texture);
             }
         }
     }

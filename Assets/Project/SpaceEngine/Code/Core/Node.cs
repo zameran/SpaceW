@@ -1,4 +1,5 @@
 ﻿#region License
+
 // Procedural planet generator.
 //  
 // Copyright (C) 2015-2023 Denis Ovchinnikov [zameran] 
@@ -31,6 +32,7 @@
 // Creation Date: 2017.01.10
 // Creation Time: 14:09
 // Creator: zameran
+
 #endregion
 
 using SpaceEngine.Managers;
@@ -39,24 +41,26 @@ using UnityEngine;
 namespace SpaceEngine.Core
 {
     /// <summary>
-    /// Class-wrapper around default <see cref="MonoBehaviour"/> for special purposes of space engine.
-    /// <remarks>
-    /// Various stuff should be destroyed in <see cref="OnDestroy"/>!
-    /// </remarks>
+    ///     Class-wrapper around default <see cref="MonoBehaviour" /> for special purposes of space engine.
+    ///     <remarks>
+    ///         Various stuff should be destroyed in <see cref="OnDestroy" />!
+    ///     </remarks>
     /// </summary>
     /// <typeparam name="T">Generic.</typeparam>
     public abstract class Node<T> : MonoBehaviour where T : class
     {
         protected virtual void Awake()
         {
-
         }
 
         protected virtual void Start()
         {
             InitNode();
 
-            if (DebugSequenceManager.Instance != null) DebugSequenceManager.Instance.DebugSequence(this);
+            if (DebugSequenceManager.Instance != null)
+            {
+                DebugSequenceManager.Instance.DebugSequence(this);
+            }
         }
 
         protected virtual void Update()
@@ -66,17 +70,16 @@ namespace SpaceEngine.Core
 
         protected virtual void OnDestroy()
         {
-
         }
 
         /// <summary>
-        /// This method will be automatically called in <see cref="Start"/>.
-        /// Use this for initialization.
+        ///     This method will be automatically called in <see cref="Start" />.
+        ///     Use this for initialization.
         /// </summary>
         protected abstract void InitNode();
 
         /// <summary>
-        /// This method will be automatically called in <see cref="Update"/>.
+        ///     This method will be automatically called in <see cref="Update" />.
         /// </summary>
         protected abstract void UpdateNode();
     }

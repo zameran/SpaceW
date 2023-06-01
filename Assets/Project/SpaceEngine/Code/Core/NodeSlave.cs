@@ -1,4 +1,5 @@
 ﻿#region License
+
 // Procedural planet generator.
 //  
 // Copyright (C) 2015-2023 Denis Ovchinnikov [zameran] 
@@ -31,6 +32,7 @@
 // Creation Date: 2017.09.24
 // Creation Time: 12:10 PM
 // Creator: zameran
+
 #endregion
 
 using SpaceEngine.Managers;
@@ -39,45 +41,45 @@ using UnityEngine;
 namespace SpaceEngine.Core
 {
     /// <summary>
-    /// Class-wrapper around default <see cref="MonoBehaviour"/> for special purposes of space engine.
-    /// This class is somewhat extension to default <see cref="Node{T}"/>. The only difference is that:
-    /// <see cref="InitNode"/> and <see cref="UpdateNode"/> will not be called from <see cref="Start"/> and <see cref="Update"/>.
-    /// So, this node should be updated from parent one.
-    /// <remarks>
-    /// Various stuff should be destroyed in <see cref="OnDestroy"/>!
-    /// </remarks>
+    ///     Class-wrapper around default <see cref="MonoBehaviour" /> for special purposes of space engine.
+    ///     This class is somewhat extension to default <see cref="Node{T}" />. The only difference is that:
+    ///     <see cref="InitNode" /> and <see cref="UpdateNode" /> will not be called from <see cref="Start" /> and <see cref="Update" />.
+    ///     So, this node should be updated from parent one.
+    ///     <remarks>
+    ///         Various stuff should be destroyed in <see cref="OnDestroy" />!
+    ///     </remarks>
     /// </summary>
     /// <typeparam name="T">Generic.</typeparam>
     public abstract class NodeSlave<T> : MonoBehaviour where T : MonoBehaviour
     {
         protected virtual void Awake()
         {
-
         }
 
         protected virtual void Start()
         {
-            if (DebugSequenceManager.Instance != null) DebugSequenceManager.Instance.DebugSequence(this);
+            if (DebugSequenceManager.Instance != null)
+            {
+                DebugSequenceManager.Instance.DebugSequence(this);
+            }
         }
 
         protected virtual void Update()
         {
-
         }
 
         protected virtual void OnDestroy()
         {
-
         }
 
         /// <summary>
-        /// This method will be automatically called in <see cref="Start"/>.
-        /// Use this for initialization.
+        ///     This method will be automatically called in <see cref="Start" />.
+        ///     Use this for initialization.
         /// </summary>
         public abstract void InitNode();
 
         /// <summary>
-        /// This method will be automatically called in <see cref="Update"/>.
+        ///     This method will be automatically called in <see cref="Update" />.
         /// </summary>
         public abstract void UpdateNode();
     }

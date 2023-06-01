@@ -43,41 +43,38 @@
 // TODO : Fix gas giants! Looks like some shit with points...
 float HeightMapCloudsGasGiant(float3 ppoint)
 {
-	if (cloudsLayer == 0.0)
-	{
-		return HeightMapCloudsGasGiantCore(ppoint);
-	}
-	else
-	{
-		return 0.0;
-	}
+    if (cloudsLayer == 0.0)
+    {
+        return HeightMapCloudsGasGiantCore(ppoint);
+    }
+    return 0.0;
 }
+
 //-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
 float HeightMapFogGasGiant(float3 ppoint)
 {
-	return 0.75 + 0.3 * Noise(ppoint * float3(0.2, 6.0, 0.2));
+    return 0.75 + 0.3 * Noise(ppoint * float3(0.2, 6.0, 0.2));
 }
 
 float4 ColorMapCloudsGasGiant(float3 ppoint, float height, float slope)
 {
-	if (cloudsLayer == 0.0)
-	{
-		float3 color = height * GetGasGiantCloudsColor(height).rgb;
+    if (cloudsLayer == 0.0)
+    {
+        float3 color = height * GetGasGiantCloudsColor(height).rgb;
 
-		return float4(color, 5.0 * dot(color.rgb, float3(0.299, 0.587, 0.114)));
-	}
-	else
-	{
-		return float4(HeightMapFogGasGiant(ppoint) * GetGasGiantCloudsColor(1.0).rgb, 1.0);
-	}
+        return float4(color, 5.0 * dot(color.rgb, float3(0.299, 0.587, 0.114)));
+    }
+    return float4(HeightMapFogGasGiant(ppoint) * GetGasGiantCloudsColor(1.0).rgb, 1.0);
 }
+
 //-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
 float4 GlowMapCloudsGasGiant(float3 ppoint, float height, float slope)
 {
-	return float4(UnitToColor24(log((1.0 - 0.2 * height) * surfTemperature) * 0.188 + 0.1316), 1.0);
+    return float4(UnitToColor24(log((1.0 - 0.2 * height) * surfTemperature) * 0.188 + 0.1316), 1.0);
 }
+
 //-----------------------------------------------------------------------------

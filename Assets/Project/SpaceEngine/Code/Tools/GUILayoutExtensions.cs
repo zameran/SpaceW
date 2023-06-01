@@ -1,4 +1,5 @@
 ﻿#region License
+
 // Procedural planet generator.
 // 
 // Copyright (C) 2015-2023 Denis Ovchinnikov [zameran] 
@@ -31,6 +32,7 @@
 // Creation Date: Undefined
 // Creation Time: Undefined
 // Creator: zameran
+
 #endregion
 
 using System;
@@ -79,11 +81,17 @@ namespace SpaceEngine.Tools
 
         public static void SliderWithField(object caption, float leftValue, float rightValue, ref float value, string pattern = "0.0", int textFieldWidth = 75, bool inline = false)
         {
-            if (!inline) GUILayout.Label(caption.ToString());
+            if (!inline)
+            {
+                GUILayout.Label(caption.ToString());
+            }
 
             GUILayout.BeginHorizontal();
 
-            if (inline) GUILayout.Label(caption.ToString(), GUILayout.ExpandWidth(false));
+            if (inline)
+            {
+                GUILayout.Label(caption.ToString(), GUILayout.ExpandWidth(false));
+            }
 
             value = float.Parse(Field(ref value, pattern, textFieldWidth));
             value = GUILayout.HorizontalSlider(value, leftValue, rightValue);
@@ -94,11 +102,17 @@ namespace SpaceEngine.Tools
 
         public static void SliderWithField(object caption, int leftValue, int rightValue, ref int value, string pattern = "0", int textFieldWidth = 75, bool inline = false)
         {
-            if (!inline) GUILayout.Label(caption.ToString());
+            if (!inline)
+            {
+                GUILayout.Label(caption.ToString());
+            }
 
             GUILayout.BeginHorizontal();
 
-            if (inline) GUILayout.Label(caption.ToString(), GUILayout.ExpandWidth(false));
+            if (inline)
+            {
+                GUILayout.Label(caption.ToString(), GUILayout.ExpandWidth(false));
+            }
 
             value = int.Parse(Field(ref value, pattern, textFieldWidth));
             value = Mathf.FloorToInt(GUILayout.HorizontalSlider(value, leftValue, rightValue));
@@ -115,8 +129,15 @@ namespace SpaceEngine.Tools
 
             value = float.Parse(Field(ref value, pattern, textFieldWidth));
 
-            if (GUILayout.Button("+", GUILayout.Width(20))) { value += controlStep; }
-            if (GUILayout.Button("-", GUILayout.Width(20))) { value -= controlStep; }
+            if (GUILayout.Button("+", GUILayout.Width(20)))
+            {
+                value += controlStep;
+            }
+
+            if (GUILayout.Button("-", GUILayout.Width(20)))
+            {
+                value -= controlStep;
+            }
 
             value = GUILayout.HorizontalSlider(value, leftValue, rightValue);
             value = Mathf.Clamp(value, leftValue, rightValue);
@@ -132,8 +153,15 @@ namespace SpaceEngine.Tools
 
             value = int.Parse(Field(ref value, pattern, textFieldWidth));
 
-            if (GUILayout.Button("+", GUILayout.Width(20))) { value += controlStep; }
-            if (GUILayout.Button("-", GUILayout.Width(20))) { value -= controlStep; }
+            if (GUILayout.Button("+", GUILayout.Width(20)))
+            {
+                value += controlStep;
+            }
+
+            if (GUILayout.Button("-", GUILayout.Width(20)))
+            {
+                value -= controlStep;
+            }
 
             value = Mathf.FloorToInt(GUILayout.HorizontalSlider(value, leftValue, rightValue));
             value = Mathf.Clamp(value, leftValue, rightValue);
@@ -180,7 +208,10 @@ namespace SpaceEngine.Tools
         {
             GUILayout.BeginVertical(caption, skin.box, options);
             {
-                if (!string.IsNullOrWhiteSpace(caption)) { BoxedPreHeader(); }
+                if (!string.IsNullOrWhiteSpace(caption))
+                {
+                    BoxedPreHeader();
+                }
 
                 body?.Invoke();
             }
@@ -213,7 +244,7 @@ namespace SpaceEngine.Tools
             {
                 VerticalBoxed("", skin, () =>
                 {
-                    LabelWithSpace(message, -8);
+                    LabelWithSpace(message);
 
                     SpacingSeparator();
                 });

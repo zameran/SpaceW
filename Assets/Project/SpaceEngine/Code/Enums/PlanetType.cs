@@ -1,4 +1,5 @@
 ﻿#region License
+
 // Procedural planet generator.
 // 
 // Copyright (C) 2015-2023 Denis Ovchinnikov [zameran] 
@@ -31,12 +32,13 @@
 // Creation Date: Undefined
 // Creation Time: Undefined
 // Creator: zameran
+
 #endregion
 
 namespace SpaceEngine.Enums
 {
     /// <summary>
-    /// Space body type description enumerator for using in generator.
+    ///     Space body type description enumerator for using in generator.
     /// </summary>
     public enum BodyType
     {

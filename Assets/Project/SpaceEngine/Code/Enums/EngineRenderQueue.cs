@@ -1,4 +1,5 @@
 ﻿#region License
+
 // Procedural planet generator.
 // 
 // Copyright (C) 2015-2023 Denis Ovchinnikov [zameran] 
@@ -31,11 +32,12 @@
 // Creation Date: Undefined
 // Creation Time: Undefined
 // Creator: zameran
+
 #endregion
 
 namespace SpaceEngine.Enums
 {
-    public enum EngineRenderQueue : int
+    public enum EngineRenderQueue
     {
         Background = 1000,
         Geometry = 2000,

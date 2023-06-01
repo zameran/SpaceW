@@ -1,4 +1,5 @@
 ﻿#region License
+
 // Procedural planet generator.
 //  
 // Copyright (C) 2015-2023 Denis Ovchinnikov [zameran] 
@@ -31,6 +32,7 @@
 // Creation Date: 2017.03.28
 // Creation Time: 2:18 PM
 // Creator: zameran
+
 #endregion
 
 using SpaceEngine.Core.Terrain;
@@ -39,12 +41,12 @@ using UnityEngine;
 namespace SpaceEngine.Core.Tile.Filter
 {
     /// <summary>
-    /// A filter to decide whether a texture tile must be produced or not for a given quad.
+    ///     A filter to decide whether a texture tile must be produced or not for a given quad.
     /// </summary>
     public abstract class TileFilter : MonoBehaviour
     {
         /// <summary>
-        /// A texture tile must be produced for the given quad?
+        ///     A texture tile must be produced for the given quad?
         /// </summary>
         /// <param name="quad">Quad.</param>
         /// <returns>Returns 'True' if a texture tile must be produced for the given quad.</returns>

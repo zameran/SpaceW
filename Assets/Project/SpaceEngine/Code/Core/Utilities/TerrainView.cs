@@ -1,4 +1,5 @@
 ﻿#region License
+
 // Procedural planet generator.
 //  
 // Copyright (C) 2015-2023 Denis Ovchinnikov [zameran] 
@@ -31,71 +32,41 @@
 // Creation Date: 2017.03.28
 // Creation Time: 2:18 PM
 // Creator: zameran
+
 #endregion
 
 using System;
 using SpaceEngine.Cameras;
+using SpaceEngine.Core.Numerics;
 using SpaceEngine.Core.Numerics.Matrices;
 using SpaceEngine.Core.Numerics.Vectors;
 using SpaceEngine.Helpers;
 using UnityEngine;
-using Functions = SpaceEngine.Core.Numerics.Functions;
 
 namespace SpaceEngine.Core.Utilities
 {
     /// <summary>
-    /// A view for flat terrains. The camera position is specified from a "look at" position (<see cref="Position.X"/>, <see cref="Position.Y"/>) on ground, 
-    /// with a distance <see cref="Position.Distance"/> between camera and this position, 
-    /// and two angles (<see cref="Position.Theta"/>, <see cref="Position.Phi"/>) for the direction of this vector.
+    ///     A view for flat terrains. The camera position is specified from a "look at" position (<see cref="Position.X" />, <see cref="Position.Y" />) on ground,
+    ///     with a distance <see cref="Position.Distance" /> between camera and this position,
+    ///     and two angles (<see cref="Position.Theta" />, <see cref="Position.Phi" />) for the direction of this vector.
     /// </summary>
     [RequireComponent(typeof(Camera))]
     [RequireComponent(typeof(Controller))]
     public class TerrainView : GameCamera
     {
-        [Serializable]
-        public class Position
-        {
-            /// <summary>
-            /// The x coordinate of the point the camera is looking at on the ground.
-            /// For a planet these are the longtitudes.
-            /// </summary>
-            public double X;
-
-            /// <summary>
-            /// The y coordinate of the point the camera is looking at on the ground.
-            /// For a planet these are the latitudes.
-            /// </summary>
-            public double Y;
-
-            /// <summary>
-            /// The zenith angle of the vector between the "look at" point and the camera.
-            /// </summary>
-            public double Theta;
-
-            /// <summary>
-            /// The azimuth angle of the vector between the "look at" point and the camera.
-            /// </summary>
-            public double Phi;
-
-            /// <summary>
-            /// The distance between the "look at" point and the camera.
-            /// </summary>
-            public double Distance;
-        };
-
-        private readonly CachedComponent<Controller> ControllerCachedComponent = new CachedComponent<Controller>();
-
-        public Controller ControllerComponent => ControllerCachedComponent.Component;
-
         [SerializeField]
         public Position position;
+
+        [HideInInspector]
+        public Vector3d worldPosition;
+
+        private readonly CachedComponent<Controller> ControllerCachedComponent = new();
+
+        public Controller ControllerComponent => ControllerCachedComponent.Component;
 
         public Vector3d CameraDirection { get; protected set; }
 
         public double GroundHeight { get; set; }
-
-        [HideInInspector]
-        public Vector3d worldPosition;
 
         public virtual Vector3d GetLookAtPosition()
         {
@@ -108,7 +79,7 @@ namespace SpaceEngine.Core.Utilities
         }
 
         /// <summary>
-        /// Any contraints you need on the position are applied here.
+        ///     Any contraints you need on the position are applied here.
         /// </summary>
         public virtual void Constrain()
         {
@@ -160,7 +131,7 @@ namespace SpaceEngine.Core.Utilities
             var tp = CalculatelongitudeLatitudeVector(position.Theta, position.Phi);
 
             var cx = px * tp.z + py * tp.w;
-            var cy = (px * -1.0) * tp.w * tp.x + py * tp.z * tp.x + pz * tp.y;
+            var cy = px * -1.0 * tp.w * tp.x + py * tp.z * tp.x + pz * tp.y;
             var cz = px * tp.w * tp.y - py * tp.z * tp.y + pz * tp.x;
 
             worldPosition = po + cz * position.Distance;
@@ -205,7 +176,7 @@ namespace SpaceEngine.Core.Utilities
         }
 
         /// <summary>
-        /// Moves the "look at" point so that <see cref="oldp"/> appears at the position of <see cref="p"/> on screen.
+        ///     Moves the "look at" point so that <see cref="oldp" /> appears at the position of <see cref="p" /> on screen.
         /// </summary>
         /// <param name="oldp"></param>
         /// <param name="p"></param>
@@ -247,7 +218,7 @@ namespace SpaceEngine.Core.Utilities
         }
 
         /// <summary>
-        /// A direction interpolated between the two given directions.
+        ///     A direction interpolated between the two given directions.
         /// </summary>
         /// <param name="slon">Start longitude.</param>
         /// <param name="slat">Start latitude.</param>
@@ -264,6 +235,37 @@ namespace SpaceEngine.Core.Utilities
 
             lat = Functions.Safe_Asin(v.z);
             lon = Math.Atan2(v.y, v.x);
+        }
+
+        [Serializable]
+        public class Position
+        {
+            /// <summary>
+            ///     The x coordinate of the point the camera is looking at on the ground.
+            ///     For a planet these are the longtitudes.
+            /// </summary>
+            public double X;
+
+            /// <summary>
+            ///     The y coordinate of the point the camera is looking at on the ground.
+            ///     For a planet these are the latitudes.
+            /// </summary>
+            public double Y;
+
+            /// <summary>
+            ///     The zenith angle of the vector between the "look at" point and the camera.
+            /// </summary>
+            public double Theta;
+
+            /// <summary>
+            ///     The azimuth angle of the vector between the "look at" point and the camera.
+            /// </summary>
+            public double Phi;
+
+            /// <summary>
+            ///     The distance between the "look at" point and the camera.
+            /// </summary>
+            public double Distance;
         }
     }
 }

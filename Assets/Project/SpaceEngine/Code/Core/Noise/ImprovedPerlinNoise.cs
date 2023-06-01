@@ -1,4 +1,5 @@
 #region License
+
 // Procedural planet generator.
 // 
 // Copyright (C) 2015-2023 Denis Ovchinnikov [zameran] 
@@ -31,6 +32,7 @@
 // Creation Date: Undefined
 // Creation Time: Undefined
 // Creator: zameran
+
 #endregion
 
 using System;
@@ -45,12 +47,17 @@ namespace SpaceEngine.Core.Noise
     {
         private const short SIZE = 256;
 
-        private readonly int[] Permutation = new int[SIZE + SIZE];
+        private static float[] GRADIENT2 =
+        {
+            0, 1, 1, 1, 1, 0, 1, -1, 0, -1, -1, -1, -1, 0, -1, 1
+        };
 
-        public Texture2D PermutationTable1D { get; private set; }
-        public Texture2D PermutationTable2D { get; private set; }
-        public Texture2D Gradient2D { get; private set; }
-        public Texture2D Gradient3D { get; private set; }
+        private static float[] GRADIENT3 =
+        {
+            1, 1, 0, -1, 1, 0, 1, -1, 0, -1, -1, 0, 1, 0, 1, -1, 0, 1, 1, 0, -1, -1, 0, -1, 0, 1, 1, 0, -1, 1, 0, 1, -1, 0, -1, -1, 1, 1, 0, 0, -1, 1, -1, 1, 0, 0, -1, -1
+        };
+
+        private readonly int[] Permutation = new int[SIZE + SIZE];
 
         public ImprovedPerlinNoise(int seed)
         {
@@ -76,8 +83,12 @@ namespace SpaceEngine.Core.Noise
             {
                 Permutation[SIZE + i] = Permutation[i];
             }
-
         }
+
+        public Texture2D PermutationTable1D { get; private set; }
+        public Texture2D PermutationTable2D { get; private set; }
+        public Texture2D Gradient2D { get; private set; }
+        public Texture2D Gradient3D { get; private set; }
 
         public void LoadResourcesFor2DNoise()
         {
@@ -91,9 +102,12 @@ namespace SpaceEngine.Core.Noise
             LoadGradient3D();
         }
 
-        void LoadPermTable1D()
+        private void LoadPermTable1D()
         {
-            if (PermutationTable1D) return;
+            if (PermutationTable1D)
+            {
+                return;
+            }
 
             PermutationTable1D = Helper.CreateTempTexture2D(SIZE, 1, TextureFormat.Alpha8, false, true, false);
             PermutationTable1D.filterMode = FilterMode.Point;
@@ -107,9 +121,12 @@ namespace SpaceEngine.Core.Noise
             PermutationTable1D.Apply();
         }
 
-        void LoadPermTable2D()
+        private void LoadPermTable2D()
         {
-            if (PermutationTable2D) return;
+            if (PermutationTable2D)
+            {
+                return;
+            }
 
             PermutationTable2D = Helper.CreateTempTexture2D(SIZE, SIZE, TextureFormat.ARGB32, false, true, false);
             PermutationTable2D.filterMode = FilterMode.Point;
@@ -127,16 +144,19 @@ namespace SpaceEngine.Core.Noise
                     var BA = Permutation[B];
                     var BB = Permutation[B + 1];
 
-                    PermutationTable2D.SetPixel(x, y, new Color((float)AA / 255.0f, (float)AB / 255.0f, (float)BA / 255.0f, (float)BB / 255.0f));
+                    PermutationTable2D.SetPixel(x, y, new Color(AA / 255.0f, AB / 255.0f, BA / 255.0f, BB / 255.0f));
                 }
             }
 
             PermutationTable2D.Apply();
         }
 
-        void LoadGradient2D()
+        private void LoadGradient2D()
         {
-            if (Gradient2D) return;
+            if (Gradient2D)
+            {
+                return;
+            }
 
             Gradient2D = Helper.CreateTempTexture2D(8, 1, TextureFormat.RGB24, false, true, false);
             Gradient2D.filterMode = FilterMode.Point;
@@ -151,12 +171,14 @@ namespace SpaceEngine.Core.Noise
             }
 
             Gradient2D.Apply();
-
         }
 
-        void LoadGradient3D()
+        private void LoadGradient3D()
         {
-            if (Gradient3D) return;
+            if (Gradient3D)
+            {
+                return;
+            }
 
             Gradient3D = Helper.CreateTempTexture2D(SIZE, 1, TextureFormat.RGB24, false, true, false);
             Gradient3D.filterMode = FilterMode.Point;
@@ -174,17 +196,6 @@ namespace SpaceEngine.Core.Noise
             }
 
             Gradient3D.Apply();
-
         }
-
-        private static float[] GRADIENT2 = new float[]
-        {
-            0, 1, 1, 1, 1, 0, 1, -1, 0, -1, -1, -1, -1, 0, -1, 1,
-        };
-
-        private static float[] GRADIENT3 = new float[]
-        {
-            1, 1, 0, -1, 1, 0, 1, -1, 0, -1, -1, 0, 1, 0, 1, -1, 0, 1, 1, 0, -1, -1, 0, -1, 0, 1, 1, 0, -1, 1, 0, 1, -1, 0, -1, -1, 1, 1, 0, 0, -1, 1, -1, 1, 0, 0, -1, -1,
-        };
     }
 }

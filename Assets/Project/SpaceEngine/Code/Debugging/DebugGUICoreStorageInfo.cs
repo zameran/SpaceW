@@ -1,4 +1,5 @@
 ﻿#region License
+
 // Procedural planet generator.
 //  
 // Copyright (C) 2015-2023 Denis Ovchinnikov [zameran] 
@@ -31,6 +32,7 @@
 // Creation Date: 2017.03.03
 // Creation Time: 6:31 AM
 // Creator: zameran
+
 #endregion
 
 using System;
@@ -45,14 +47,13 @@ namespace SpaceEngine.Debugging
 {
     public class DebugGUICoreStorageInfo : DebugGUI
     {
+        public float ContentsWindowSize = 512.0f;
         private Vector2 ContentsScrollPosition = Vector2.zero;
 
-        public float ContentsWindowSize = 512.0f;
-
-        private bool ShowContents = false;
+        private bool ShowContents;
 
         private Rect ContentsInfoBounds =>
-            new Rect(debugInfoBounds.x + debugInfoBounds.width + 10, 
+            new(debugInfoBounds.x + debugInfoBounds.width + 10,
                 debugInfoBounds.y, ContentsWindowSize, ContentsWindowSize);
 
         protected override void Awake()
@@ -79,13 +80,7 @@ namespace SpaceEngine.Debugging
 
         protected override void UI(int id)
         {
-            GUILayoutExtensions.VerticalBoxed("Controls: ", GUISkin, () =>
-            {
-                GUILayoutExtensions.VerticalBoxed("", GUISkin, () =>
-                {
-                    ShowContents = GUILayout.Toggle(ShowContents, " Show Storage Contents?");
-                });
-            });
+            GUILayoutExtensions.VerticalBoxed("Controls: ", GUISkin, () => { GUILayoutExtensions.VerticalBoxed("", GUISkin, () => { ShowContents = GUILayout.Toggle(ShowContents, " Show Storage Contents?"); }); });
 
             GUILayoutExtensions.SpacingSeparator();
 
@@ -112,8 +107,19 @@ namespace SpaceEngine.Debugging
         protected void DrawStorageContents<T>(string prefix = "Storage") where T : TileStorage
         {
             var body = GodManager.Instance.ActiveBody;
-            if (body == null) { GUILayoutExtensions.DrawBadHolder(prefix, "No Body!?", GUISkin); return; }
-            if (body.Storages == null) { GUILayoutExtensions.DrawBadHolder(prefix, "No Storages!?", GUISkin); return; }
+            if (body == null)
+            {
+                GUILayoutExtensions.DrawBadHolder(prefix, "No Body!?", GUISkin);
+
+                return;
+            }
+
+            if (body.Storages == null)
+            {
+                GUILayoutExtensions.DrawBadHolder(prefix, "No Storages!?", GUISkin);
+
+                return;
+            }
 
             var tileStorages = body.Storages.Where(storage => storage is T).ToList();
 
@@ -150,7 +156,10 @@ namespace SpaceEngine.Debugging
                                         {
                                             var slot = slots[x, y] as GPUTileStorage.GPUSlot;
 
-                                            if (slot != null) GUILayout.Label(slot.Texture, ImageLabelStyle, GUILayout.Width(64), GUILayout.Height(64));
+                                            if (slot != null)
+                                            {
+                                                GUILayout.Label(slot.Texture, ImageLabelStyle, GUILayout.Width(64), GUILayout.Height(64));
+                                            }
                                         }
 
                                         GUILayout.EndHorizontal();
@@ -161,6 +170,7 @@ namespace SpaceEngine.Debugging
                             }
                         }
                     }
+
                     GUILayoutExtensions.SpacingSeparator();
                 }, GUILayout.Width(debugInfoBounds.width - 45));
             }, GUILayout.Width(debugInfoBounds.width - 40));
@@ -169,8 +179,19 @@ namespace SpaceEngine.Debugging
         protected void DrawStorageInfo<T>(string prefix = "Storage") where T : TileStorage
         {
             var body = GodManager.Instance.ActiveBody;
-            if (body == null) { GUILayoutExtensions.DrawBadHolder(prefix, "No Body!?", GUISkin); return; }
-            if (body.Storages == null) { GUILayoutExtensions.DrawBadHolder(prefix, "No Storages!?", GUISkin); return; }
+            if (body == null)
+            {
+                GUILayoutExtensions.DrawBadHolder(prefix, "No Body!?", GUISkin);
+
+                return;
+            }
+
+            if (body.Storages == null)
+            {
+                GUILayoutExtensions.DrawBadHolder(prefix, "No Storages!?", GUISkin);
+
+                return;
+            }
 
             var tileStorages = body.Storages.Where(storage => storage is T).ToList();
 

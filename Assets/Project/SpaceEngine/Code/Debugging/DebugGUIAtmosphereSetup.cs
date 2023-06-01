@@ -1,4 +1,5 @@
 ﻿#region License
+
 // Procedural planet generator.
 //  
 // Copyright (C) 2015-2023 Denis Ovchinnikov [zameran] 
@@ -31,6 +32,7 @@
 // Creation Date: 2017.09.10
 // Creation Time: 5:04 PM
 // Creator: zameran
+
 #endregion
 
 using System;
@@ -48,52 +50,20 @@ namespace SpaceEngine.Debugging
     // NOTE : Parameters copy stuff with events looks pretty messy. So. I don't give a fuck - this is a developer GUI.
     public class DebugGUIAtmosphereSetup : DebugGUI, IEventit
     {
-        private readonly AtmosphereBaseProperty AtmosphereBaseProperty = new AtmosphereBaseProperty();
+        public AtmosphereParameters AtmosphereParameters = AtmosphereParameters.Default;
 
-        private AtmosphereBase AtmosphereBase { get => AtmosphereBaseProperty.Value;
+        public bool PresetChanged;
+        private readonly AtmosphereBaseProperty AtmosphereBaseProperty = new();
+
+        private AtmosphereBase AtmosphereBase
+        {
+            get => AtmosphereBaseProperty.Value;
             set => AtmosphereBaseProperty.Value = value;
         }
 
         public Body Body => GodManager.Instance.ActiveBody;
 
         public Atmosphere Atmosphere => Body.Atmosphere;
-
-        public AtmosphereParameters AtmosphereParameters = AtmosphereParameters.Default;
-
-        public bool PresetChanged = false;
-
-        #region Eventit
-
-        public bool IsEventit { get; set; }
-
-        public void Eventit()
-        {
-            if (IsEventit) return;
-
-            AtmosphereBaseProperty.PropertyChanged += AtmosphereBasePropertyOnPropertyChanged;
-
-            IsEventit = true;
-        }
-
-        public void UnEventit()
-        {
-            if (!IsEventit) return;
-
-            AtmosphereBaseProperty.PropertyChanged -= AtmosphereBasePropertyOnPropertyChanged;
-
-            IsEventit = false;
-        }
-
-        #endregion
-
-        #region Events
-
-        private void AtmosphereBasePropertyOnPropertyChanged(object sender, PropertyChangedEventArgs e)
-        {
-            PresetChanged = true;
-        }
-
-        #endregion
 
         protected override void Awake()
         {
@@ -119,13 +89,28 @@ namespace SpaceEngine.Debugging
             GUILayout.Window(0, debugInfoBounds, UI, "Atmosphere Setup");
         }
 
+        #region Events
+
+        private void AtmosphereBasePropertyOnPropertyChanged(object sender, PropertyChangedEventArgs e)
+        {
+            PresetChanged = true;
+        }
+
+        #endregion
+
         protected override void UI(int id)
         {
             GUILayoutExtensions.VerticalBoxed("Controls: ", GUISkin, () =>
             {
                 GUILayoutExtensions.VerticalBoxed("", GUISkin, () =>
                 {
-                    DrawApplyButton(() => { if (Body != null && Atmosphere != null) Atmosphere.Bake(); });
+                    DrawApplyButton(() =>
+                    {
+                        if (Body != null && Atmosphere != null)
+                        {
+                            Atmosphere.Bake();
+                        }
+                    });
                 });
             });
 
@@ -141,17 +126,14 @@ namespace SpaceEngine.Debugging
                     {
                         GUILayoutExtensions.VerticalBoxed("", GUISkin, () =>
                         {
-                            GUILayoutExtensions.VerticalBoxed("Preset: ", GUISkin, () =>
-                            {
-                                Atmosphere.AtmosphereBase = (AtmosphereBase)GUILayout.SelectionGrid((int)Atmosphere.AtmosphereBase, Enum.GetNames(typeof(AtmosphereBase)), 2);
-                            });
+                            GUILayoutExtensions.VerticalBoxed("Preset: ", GUISkin, () => { Atmosphere.AtmosphereBase = (AtmosphereBase)GUILayout.SelectionGrid((int)Atmosphere.AtmosphereBase, Enum.GetNames(typeof(AtmosphereBase)), 2); });
 
                             GUILayoutExtensions.SpacingSeparator();
 
                             GUILayoutExtensions.VerticalBoxed("Artifact fixers: ", GUISkin, () =>
                             {
-                                GUILayoutExtensions.SliderWithField("Radius Hold (Terrain Radius)", 0.0f, 2048.0f, ref Atmosphere.RadiusHold, "0.00", 75);
-                                GUILayoutExtensions.SliderWithField("Aerial Radius (Perspective Offset)", 0.0f, 4096.0f, ref Atmosphere.AerialPerspectiveOffset, "0.00", 75);
+                                GUILayoutExtensions.SliderWithField("Radius Hold (Terrain Radius)", 0.0f, 2048.0f, ref Atmosphere.RadiusHold, "0.00");
+                                GUILayoutExtensions.SliderWithField("Aerial Radius (Perspective Offset)", 0.0f, 4096.0f, ref Atmosphere.AerialPerspectiveOffset, "0.00");
                                 GUILayoutExtensions.SliderWithFieldAndControls("Horizon Fix Eps", 0.0f, 1.0f, ref Atmosphere.HorizonFixEps, "0.00000", 75, 0.00025f);
                                 GUILayoutExtensions.SliderWithFieldAndControls("Mie Fade Fix", 0.0f, 1.0f, ref Atmosphere.MieFadeFix, "0.0000", 75, 0.0025f);
                             });
@@ -172,10 +154,7 @@ namespace SpaceEngine.Debugging
                     {
                         GUILayoutExtensions.VerticalBoxed("Bake parameters: ", GUISkin, () =>
                         {
-                            GUILayoutExtensions.VerticalBoxed("Copy from preset: ", GUISkin, () =>
-                            {
-                                AtmosphereBase = (AtmosphereBase)GUILayout.SelectionGrid((int)AtmosphereBase, Enum.GetNames(typeof(AtmosphereBase)), 2);
-                            });
+                            GUILayoutExtensions.VerticalBoxed("Copy from preset: ", GUISkin, () => { AtmosphereBase = (AtmosphereBase)GUILayout.SelectionGrid((int)AtmosphereBase, Enum.GetNames(typeof(AtmosphereBase)), 2); });
 
                             GUILayoutExtensions.SpacingSeparator();
 
@@ -194,19 +173,19 @@ namespace SpaceEngine.Debugging
 
                             PresetChanged = false;
 
-                            GUILayoutExtensions.SliderWithField("Mie G: ", 0.0f, 1.0f, ref mieG, "0.0000", textFieldWidth: 100);
-                            GUILayoutExtensions.SliderWithFieldAndControls("Air density (HR At half-height in KM): ", 0.0f, 256.0f, ref hr, "0.00", textFieldWidth: 100, controlStep: 1.0f);
-                            GUILayoutExtensions.SliderWithFieldAndControls("Particle density (HM At half-height in KM): ", 0.0f, 256.0f, ref hm, "0.00", textFieldWidth: 100, controlStep: 1.0f);
-                            GUILayoutExtensions.SliderWithField("Average Ground Reflectance: ", 0.0f, 1.0f, ref agr, "0.0000", textFieldWidth: 100);
-                            GUILayoutExtensions.SliderWithField("Rg (Planet Radius in KM): ", 0.0f, 63600.0f, ref rg, "0.00000", textFieldWidth: 100);
-                            GUILayoutExtensions.SliderWithField("Rt (Atmosphere Top Radius in KM): ", rg, 63600.0f, ref rt, "0.00000", textFieldWidth: 100);
-                            GUILayoutExtensions.SliderWithField("Rl (Planet Bottom Radius in KM): ", rt, 63600.0f, ref rl, "0.00000", textFieldWidth: 100);
+                            GUILayoutExtensions.SliderWithField("Mie G: ", 0.0f, 1.0f, ref mieG, "0.0000", 100);
+                            GUILayoutExtensions.SliderWithFieldAndControls("Air density (HR At half-height in KM): ", 0.0f, 256.0f, ref hr, "0.00", 100);
+                            GUILayoutExtensions.SliderWithFieldAndControls("Particle density (HM At half-height in KM): ", 0.0f, 256.0f, ref hm, "0.00", 100);
+                            GUILayoutExtensions.SliderWithField("Average Ground Reflectance: ", 0.0f, 1.0f, ref agr, "0.0000", 100);
+                            GUILayoutExtensions.SliderWithField("Rg (Planet Radius in KM): ", 0.0f, 63600.0f, ref rg, "0.00000", 100);
+                            GUILayoutExtensions.SliderWithField("Rt (Atmosphere Top Radius in KM): ", rg, 63600.0f, ref rt, "0.00000", 100);
+                            GUILayoutExtensions.SliderWithField("Rl (Planet Bottom Radius in KM): ", rt, 63600.0f, ref rl, "0.00000", 100);
 
-                            GUILayoutExtensions.DrawVectorWithSlidersAndFields(ref betaR, 0.0f, 1.0f, GUISkin, "Beta R (Rayliegh Scattering)", "0.0000", textFieldWidth: 100);
-                            GUILayoutExtensions.DrawVectorWithSlidersAndFields(ref betaM, 0.0f, 1.0f, GUISkin, "Beta M (Mie Scattering)", "0.0000", textFieldWidth: 100);
-                            GUILayoutExtensions.DrawVectorWithSlidersAndFields(ref betaE, 0.0f, 1.0f, GUISkin, "Beta E (Extinction Scattering)", "0.0000", textFieldWidth: 100);
+                            GUILayoutExtensions.DrawVectorWithSlidersAndFields(ref betaR, 0.0f, 1.0f, GUISkin, "Beta R (Rayliegh Scattering)", "0.0000");
+                            GUILayoutExtensions.DrawVectorWithSlidersAndFields(ref betaM, 0.0f, 1.0f, GUISkin, "Beta M (Mie Scattering)", "0.0000");
+                            GUILayoutExtensions.DrawVectorWithSlidersAndFields(ref betaE, 0.0f, 1.0f, GUISkin, "Beta E (Extinction Scattering)", "0.0000");
 
-                            parameters = new AtmosphereParameters(mieG, hr, hm, agr, betaR, betaM, betaE, rg, rt, rl, rg, rt, rl, SCALE: 1.0f);
+                            parameters = new AtmosphereParameters(mieG, hr, hm, agr, betaR, betaM, betaE, rg, rt, rl, rg, rt, rl, 1.0f);
 
                             AtmosphereParameters = new AtmosphereParameters(parameters);
                             Atmosphere.PushPreset(parameters);
@@ -237,5 +216,35 @@ namespace SpaceEngine.Debugging
                 action?.Invoke();
             }
         }
+
+        #region Eventit
+
+        public bool IsEventit { get; set; }
+
+        public void Eventit()
+        {
+            if (IsEventit)
+            {
+                return;
+            }
+
+            AtmosphereBaseProperty.PropertyChanged += AtmosphereBasePropertyOnPropertyChanged;
+
+            IsEventit = true;
+        }
+
+        public void UnEventit()
+        {
+            if (!IsEventit)
+            {
+                return;
+            }
+
+            AtmosphereBaseProperty.PropertyChanged -= AtmosphereBasePropertyOnPropertyChanged;
+
+            IsEventit = false;
+        }
+
+        #endregion
     }
 }

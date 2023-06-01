@@ -1,4 +1,5 @@
 #region License
+
 //
 // Procedural planet renderer.
 // Copyright (c) 2008-2011 INRIA
@@ -21,6 +22,7 @@
 //
 // Authors: Justin Hawkins 2014.
 // Modified by Denis Ovchinnikov 2015-2017
+
 #endregion
 
 using System;
@@ -41,10 +43,14 @@ namespace SpaceEngine.Utilities
             GL.LoadOrtho();
 
             GL.Begin(GL.QUADS);
-            GL.TexCoord2(0.0f, 0.0f); GL.Vertex3(0.0f, 0.0f, 0.1f);
-            GL.TexCoord2(1.0f, 0.0f); GL.Vertex3(1.0f, 0.0f, 0.1f);
-            GL.TexCoord2(1.0f, 1.0f); GL.Vertex3(1.0f, 1.0f, 0.1f);
-            GL.TexCoord2(0.0f, 1.0f); GL.Vertex3(0.0f, 1.0f, 0.1f);
+            GL.TexCoord2(0.0f, 0.0f);
+            GL.Vertex3(0.0f, 0.0f, 0.1f);
+            GL.TexCoord2(1.0f, 0.0f);
+            GL.Vertex3(1.0f, 0.0f, 0.1f);
+            GL.TexCoord2(1.0f, 1.0f);
+            GL.Vertex3(1.0f, 1.0f, 0.1f);
+            GL.TexCoord2(0.0f, 1.0f);
+            GL.Vertex3(0.0f, 1.0f, 0.1f);
             GL.End();
 
             GL.PopMatrix();
@@ -62,10 +68,14 @@ namespace SpaceEngine.Utilities
             mat.SetPass(pass);
 
             GL.Begin(GL.QUADS);
-            GL.TexCoord2(0.0f, 0.0f); GL.Vertex3(0.0f, 0.0f, 0.1f);
-            GL.TexCoord2(1.0f, 0.0f); GL.Vertex3(1.0f, 0.0f, 0.1f);
-            GL.TexCoord2(1.0f, 1.0f); GL.Vertex3(1.0f, 1.0f, 0.1f);
-            GL.TexCoord2(0.0f, 1.0f); GL.Vertex3(0.0f, 1.0f, 0.1f);
+            GL.TexCoord2(0.0f, 0.0f);
+            GL.Vertex3(0.0f, 0.0f, 0.1f);
+            GL.TexCoord2(1.0f, 0.0f);
+            GL.Vertex3(1.0f, 0.0f, 0.1f);
+            GL.TexCoord2(1.0f, 1.0f);
+            GL.Vertex3(1.0f, 1.0f, 0.1f);
+            GL.TexCoord2(0.0f, 1.0f);
+            GL.Vertex3(0.0f, 1.0f, 0.1f);
             GL.End();
 
             GL.PopMatrix();
@@ -79,10 +89,14 @@ namespace SpaceEngine.Utilities
             GL.LoadOrtho();
 
             GL.Begin(GL.QUADS);
-            GL.TexCoord2(rect.x, rect.y); GL.Vertex3(rect.x, rect.y, 0.1f);
-            GL.TexCoord2(rect.x + rect.width, rect.y); GL.Vertex3(rect.x + rect.width, rect.y, 0.1f);
-            GL.TexCoord2(rect.x + rect.width, rect.y + rect.height); GL.Vertex3(rect.x + rect.width, rect.y + rect.height, 0.1f);
-            GL.TexCoord2(rect.x, rect.y + rect.height); GL.Vertex3(rect.x, rect.y + rect.height, 0.1f);
+            GL.TexCoord2(rect.x, rect.y);
+            GL.Vertex3(rect.x, rect.y, 0.1f);
+            GL.TexCoord2(rect.x + rect.width, rect.y);
+            GL.Vertex3(rect.x + rect.width, rect.y, 0.1f);
+            GL.TexCoord2(rect.x + rect.width, rect.y + rect.height);
+            GL.Vertex3(rect.x + rect.width, rect.y + rect.height, 0.1f);
+            GL.TexCoord2(rect.x, rect.y + rect.height);
+            GL.Vertex3(rect.x, rect.y + rect.height, 0.1f);
             GL.End();
 
             GL.PopMatrix();
@@ -100,10 +114,14 @@ namespace SpaceEngine.Utilities
             mat.SetPass(pass);
 
             GL.Begin(GL.QUADS);
-            GL.TexCoord2(rect.x, rect.y); GL.Vertex3(rect.x, rect.y, 0.1f);
-            GL.TexCoord2(rect.x + rect.width, rect.y); GL.Vertex3(rect.x + rect.width, rect.y, 0.1f);
-            GL.TexCoord2(rect.x + rect.width, rect.y + rect.height); GL.Vertex3(rect.x + rect.width, rect.y + rect.height, 0.1f);
-            GL.TexCoord2(rect.x, rect.y + rect.height); GL.Vertex3(rect.x, rect.y + rect.height, 0.1f);
+            GL.TexCoord2(rect.x, rect.y);
+            GL.Vertex3(rect.x, rect.y, 0.1f);
+            GL.TexCoord2(rect.x + rect.width, rect.y);
+            GL.Vertex3(rect.x + rect.width, rect.y, 0.1f);
+            GL.TexCoord2(rect.x + rect.width, rect.y + rect.height);
+            GL.Vertex3(rect.x + rect.width, rect.y + rect.height, 0.1f);
+            GL.TexCoord2(rect.x, rect.y + rect.height);
+            GL.Vertex3(rect.x, rect.y + rect.height, 0.1f);
             GL.End();
 
             GL.PopMatrix();
@@ -114,7 +132,9 @@ namespace SpaceEngine.Utilities
             var rb = new RenderBuffer[des.Length];
 
             for (var i = 0; i < des.Length; i++)
+            {
                 rb[i] = des[i].colorBuffer;
+            }
 
             Graphics.SetRenderTarget(rb, des[0].depthBuffer);
 
@@ -124,10 +144,14 @@ namespace SpaceEngine.Utilities
             mat.SetPass(pass);
 
             GL.Begin(GL.QUADS);
-            GL.TexCoord2(0.0f, 0.0f); GL.Vertex3(0.0f, 0.0f, 0.1f);
-            GL.TexCoord2(1.0f, 0.0f); GL.Vertex3(1.0f, 0.0f, 0.1f);
-            GL.TexCoord2(1.0f, 1.0f); GL.Vertex3(1.0f, 1.0f, 0.1f);
-            GL.TexCoord2(0.0f, 1.0f); GL.Vertex3(0.0f, 1.0f, 0.1f);
+            GL.TexCoord2(0.0f, 0.0f);
+            GL.Vertex3(0.0f, 0.0f, 0.1f);
+            GL.TexCoord2(1.0f, 0.0f);
+            GL.Vertex3(1.0f, 0.0f, 0.1f);
+            GL.TexCoord2(1.0f, 1.0f);
+            GL.Vertex3(1.0f, 1.0f, 0.1f);
+            GL.TexCoord2(0.0f, 1.0f);
+            GL.Vertex3(0.0f, 1.0f, 0.1f);
             GL.End();
 
             GL.PopMatrix();
@@ -143,10 +167,14 @@ namespace SpaceEngine.Utilities
             mat.SetPass(pass);
 
             GL.Begin(GL.QUADS);
-            GL.TexCoord2(0.0f, 0.0f); GL.Vertex3(0.0f, 0.0f, 0.1f);
-            GL.TexCoord2(1.0f, 0.0f); GL.Vertex3(1.0f, 0.0f, 0.1f);
-            GL.TexCoord2(1.0f, 1.0f); GL.Vertex3(1.0f, 1.0f, 0.1f);
-            GL.TexCoord2(0.0f, 1.0f); GL.Vertex3(0.0f, 1.0f, 0.1f);
+            GL.TexCoord2(0.0f, 0.0f);
+            GL.Vertex3(0.0f, 0.0f, 0.1f);
+            GL.TexCoord2(1.0f, 0.0f);
+            GL.Vertex3(1.0f, 0.0f, 0.1f);
+            GL.TexCoord2(1.0f, 1.0f);
+            GL.Vertex3(1.0f, 1.0f, 0.1f);
+            GL.TexCoord2(0.0f, 1.0f);
+            GL.Vertex3(0.0f, 1.0f, 0.1f);
             GL.End();
 
             GL.PopMatrix();
@@ -222,7 +250,10 @@ namespace SpaceEngine.Utilities
 
         public static void Destroy(RenderTexture[] texs)
         {
-            if (texs == null) return;
+            if (texs == null)
+            {
+                return;
+            }
 
             for (var i = 0; i < texs.Length; i++)
             {
@@ -265,20 +296,26 @@ namespace SpaceEngine.Utilities
                     color.r = data[(x + y * width) * channelsSize + 0];
 
                     if (channelsSize > 1)
+                    {
                         color.g = data[(x + y * width) * channelsSize + 1];
+                    }
 
                     if (channelsSize > 2)
+                    {
                         color.b = data[(x + y * width) * channelsSize + 2];
+                    }
 
                     if (channelsSize > 3)
+                    {
                         color.a = data[(x + y * width) * channelsSize + 3];
+                    }
 
                     texture.SetPixel(x, y, color * scale);
                 }
             }
 
             texture.Apply();
-            
+
             File.WriteAllBytes($"{Application.dataPath}{filePath}{fileName}.png", texture.EncodeToPNG());
 
             buffer.Release();
@@ -306,17 +343,21 @@ namespace SpaceEngine.Utilities
                     color.r = data[(x + y * width) * channelsSize + 0];
 
                     if (channelsSize > 1)
+                    {
                         color.g = data[(x + y * width) * channelsSize + 1];
+                    }
 
                     if (channelsSize > 2)
+                    {
                         color.b = data[(x + y * width) * channelsSize + 2];
+                    }
 
                     texture.SetPixel(x, y, color * scale);
                 }
             }
 
             texture.Apply();
-            
+
             File.WriteAllBytes($"{Application.dataPath}{filePath}{fileName}.png", texture.EncodeToPNG());
 
             buffer.Release();

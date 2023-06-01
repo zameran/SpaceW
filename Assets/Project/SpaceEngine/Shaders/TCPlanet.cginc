@@ -42,67 +42,69 @@
 //-----------------------------------------------------------------------------
 float HeightMapPlanet(float3 ppoint)
 {
-	float3 p = ppoint * mainFreq + Randomize;
+    float3 p = ppoint * mainFreq + Randomize;
 
-	float total = 0;
-	float latitude = 0;
+    float total = 0;
+    float latitude = 0;
 
-	if (tidalLock <= 0.0)
-	{
-		latitude = abs(normalize(ppoint).y);
-		latitude += 0.15 * (Fbm(ppoint * 0.007 + Randomize) - 1.0);
-		latitude = saturate(latitude);
-	}
-	else
-	{
-		latitude = 1.0 - normalize(ppoint).z;
-		latitude += 0.15 * (Fbm(ppoint * 0.007 + Randomize) - 1.0);
-		latitude = saturate(latitude);
-	}
+    if (tidalLock <= 0.0)
+    {
+        latitude = abs(normalize(ppoint).y);
+        latitude += 0.15 * (Fbm(ppoint * 0.007 + Randomize) - 1.0);
+        latitude = saturate(latitude);
+    }
+    else
+    {
+        latitude = 1.0 - normalize(ppoint).z;
+        latitude += 0.15 * (Fbm(ppoint * 0.007 + Randomize) - 1.0);
+        latitude = saturate(latitude);
+    }
 
-	float t0 = Fbm(p * 0.75, 4);
-	//float height = t0 + pow(2.0, RidgedMultifractalExtra(p, 18, 1, 1.75, 0.6));
-	//float height = t0 + pow(2.0, SimplexRidgedMultifractal(p, 18, 2, 0.5));
-	float height = t0 + pow(4.0, SimplexRidgedMultifractal(p, 18, 2, 0.5));
-	//float height = t0 + SimplexRidgedMultifractal(p, 18, 2, 0.5);
+    float t0 = Fbm(p * 0.75, 4);
+    //float height = t0 + pow(2.0, RidgedMultifractalExtra(p, 18, 1, 1.75, 0.6));
+    //float height = t0 + pow(2.0, SimplexRidgedMultifractal(p, 18, 2, 0.5));
+    float height = t0 + pow(4.0, SimplexRidgedMultifractal(p, 18, 2, 0.5));
+    //float height = t0 + SimplexRidgedMultifractal(p, 18, 2, 0.5);
 
-	height = height + height * saturate(Cell2Noise(p * 0.5 * FiltNoise3D(p * 1.25, 1.0)));
+    height = height + height * saturate(Cell2Noise(p * 0.5 * FiltNoise3D(p * 1.25, 1.0)));
 
-	float terraceLayers = max(iNoise(p, 1.0) * 4.0, 3.0);
-	terraceLayers += Fbm(p * 5.41, 4);
+    float terraceLayers = max(iNoise(p, 1.0) * 4.0, 3.0);
+    terraceLayers += Fbm(p * 5.41, 4);
 
-	height = GetTerraced(height, terraceLayers);
+    height = GetTerraced(height, terraceLayers);
 
-	total = height;
+    total = height;
 
-	float iceCap = saturate((latitude / latIceCaps - 1.0) * 50.0 * 1);
-	total = total * 1 + icecapHeight * smoothstep(0.0, 1.0, iceCap);
+    float iceCap = saturate((latitude / latIceCaps - 1.0) * 50.0 * 1);
+    total = total * 1 + icecapHeight * smoothstep(0.0, 1.0, iceCap);
 
-	return total - 1.5;
+    return total - 1.5;
 }
+
 //-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
 float4 ColorMapPlanet(float3 ppoint, float height, float slope)
 {
-	Surface surf;
+    Surface surf;
 
-	float3 p = ppoint * mainFreq + Randomize;
-	float3 pp = (ppoint + Randomize) * (0.0005 * hillsFreq / (hillsMagn * hillsMagn));
+    float3 p = ppoint * mainFreq + Randomize;
+    float3 pp = (ppoint + Randomize) * (0.0005 * hillsFreq / (hillsMagn * hillsMagn));
 
-	float vary = 0;
-	float fr = 0.20 * (1.5 - RidgedMultifractal(pp,         2.0, 4)) +
-			   0.05 * (1.5 - RidgedMultifractal(pp * 10.0,  2.0, 4)) +
-			   0.02 * (1.5 - RidgedMultifractal(pp * 100.0, 2.0, 4));
+    float vary = 0;
+    float fr = 0.20 * (1.5 - RidgedMultifractal(pp, 2.0, 4)) +
+        0.05 * (1.5 - RidgedMultifractal(pp * 10.0, 2.0, 4)) +
+        0.02 * (1.5 - RidgedMultifractal(pp * 100.0, 2.0, 4));
 
-	p = ppoint * (colorDistFreq * 0.005) + float3(fr, fr, fr);
-	p += Fbm3D(p * 0.38, 4) * 1.2;
-	p = ppoint * colorDistFreq * 0.371;
-	p += Fbm3D(p * 0.5, 5) * 1.2;
-	vary = (Fbm(p, 5) + 0.7) * 0.7;
+    p = ppoint * (colorDistFreq * 0.005) + float3(fr, fr, fr);
+    p += Fbm3D(p * 0.38, 4) * 1.2;
+    p = ppoint * colorDistFreq * 0.371;
+    p += Fbm3D(p * 0.5, 5) * 1.2;
+    vary = (Fbm(p, 5) + 0.7) * 0.7;
 
-	surf = GetSurfaceColor(height, slope, vary);
+    surf = GetSurfaceColor(height, slope, vary);
 
-	return surf.color;
+    return surf.color;
 }
+
 //-----------------------------------------------------------------------------

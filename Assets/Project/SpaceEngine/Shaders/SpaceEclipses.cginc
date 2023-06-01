@@ -48,77 +48,79 @@ uniform float _ExtinctionGroundFade;
 
 float EclipseValue(float lightRadius, float casterRadius, float dist)
 {
-	float sumRadius = lightRadius + casterRadius;
+    float sumRadius = lightRadius + casterRadius;
 
-	// No intersection
-	//UNITY_BRANCH
-	// TODO : 'use of potentially uninitialized variable (EclipseValue)'
-	if (dist >= sumRadius) return 0.0;
+    // No intersection
+    //UNITY_BRANCH
+    // TODO : 'use of potentially uninitialized variable (EclipseValue)'
+    if (dist >= sumRadius) return 0.0;
 
-	float minRadius;
-	float maxPhase;
+    float minRadius;
+    float maxPhase;
 
-	UNITY_BRANCH
-	if (lightRadius < casterRadius)
-	{
-		minRadius = lightRadius;
-		maxPhase = 1.0;
-	}
-	else
-	{
-		minRadius = casterRadius;
+    UNITY_BRANCH
+    if (lightRadius < casterRadius)
+    {
+        minRadius = lightRadius;
+        maxPhase = 1.0;
+    }
+    else
+    {
+        minRadius = casterRadius;
 
-		UNITY_BRANCH
-		if (lightRadius < 0.001)
-			maxPhase = (casterRadius * casterRadius) / (lightRadius * lightRadius);
-		else
-			maxPhase = (1.0 - cos(casterRadius)) / (1.0 - cos(lightRadius));
-	}
+        UNITY_BRANCH
+        if (lightRadius < 0.001)
+            maxPhase = (casterRadius * casterRadius) / (lightRadius * lightRadius);
+        else
+            maxPhase = (1.0 - cos(casterRadius)) / (1.0 - cos(lightRadius));
+    }
 
-	// Full intersection
-	UNITY_BRANCH
-	if (dist <= max(lightRadius, casterRadius) - minRadius) return maxPhase;
+    // Full intersection
+    UNITY_BRANCH
+    if (dist <= max(lightRadius, casterRadius) - minRadius)
+        return maxPhase;
 
-	float diff = abs(lightRadius - casterRadius);
+    float diff = abs(lightRadius - casterRadius);
 
-	// Partial intersection
-	return maxPhase * smoothstep(0.0, 1.0, 1.0 - clamp((dist - diff) / (sumRadius - diff), 0.0, 1.0));
+    // Partial intersection
+    return maxPhase * smoothstep(0.0, 1.0, 1.0 - clamp((dist - diff) / (sumRadius - diff), 0.0, 1.0));
 }
 
 float EclipseShadow(float3 worldPos, float3 lightVec, float lightAngularRadius)
 {
-	// TODO : Fix eclipse mirror around (Planet2Light-Light2Planet) plane...
-	float3 lightCasterPos = 0;
+    // TODO : Fix eclipse mirror around (Planet2Light-Light2Planet) plane...
+    float3 lightCasterPos = 0;
 
-	float lightCasterInvDist = 0;
-	float casterAngularRadius = 0;
-	float lightToCasterAngle = 0;
-	float shadow = 1.0;
+    float lightCasterInvDist = 0;
+    float casterAngularRadius = 0;
+    float lightToCasterAngle = 0;
+    float shadow = 1.0;
 
-	UNITY_UNROLL
-	for (int i = 0; i < 4; ++i)
-	{
-		if (_Sky_LightOccluders_1[i].w <= 0.0) { break; }
+    UNITY_UNROLL
+    for (int i = 0; i < 4; ++i)
+    {
+        if (_Sky_LightOccluders_1[i].w <= 0.0) { break; }
 
-		lightCasterPos = _Sky_LightOccluders_1[i].xyz - worldPos;
+        lightCasterPos = _Sky_LightOccluders_1[i].xyz - worldPos;
 
-		lightCasterInvDist  = rsqrt(dot(lightCasterPos, lightCasterPos));
-		casterAngularRadius = asin(clamp(_Sky_LightOccluders_1[i].w * lightCasterInvDist, 0.0, 1.0));
-		lightToCasterAngle  = acos(clamp(dot(lightVec, lightCasterPos * lightCasterInvDist), 0.0, 1.0));
+        lightCasterInvDist = rsqrt(dot(lightCasterPos, lightCasterPos));
+        casterAngularRadius = asin(clamp(_Sky_LightOccluders_1[i].w * lightCasterInvDist, 0.0, 1.0));
+        lightToCasterAngle = acos(clamp(dot(lightVec, lightCasterPos * lightCasterInvDist), 0.0, 1.0));
 
-		shadow *= clamp(1.0 - EclipseValue(lightAngularRadius, casterAngularRadius, lightToCasterAngle), 0.0, 1.0);
-	}
+        shadow *= clamp(1.0 - EclipseValue(lightAngularRadius, casterAngularRadius, lightToCasterAngle), 0.0, 1.0);
+    }
 
-	return shadow;
+    return shadow;
 }
 
 float EclipseOuterShadow(float3 lightVec, float lightAngularRadius, float3 d, float3 camera, float3 origin, float Rt)
 {
-	// TODO : Switch in sphere - out sphere.
-	float interSectPt = IntersectOuterSphere(camera, d, origin, Rt);
+    // TODO : Switch in sphere - out sphere.
+    float interSectPt = IntersectOuterSphere(camera, d, origin, Rt);
 
-	return interSectPt != -1 ? EclipseShadow(camera + d * interSectPt, lightVec, lightAngularRadius) : 1.0;
+    return interSectPt != -1 ? EclipseShadow(camera + d * interSectPt, lightVec, lightAngularRadius) : 1.0;
 }
+
 //-----------------------------------------------------------------------------
 
 #elif (ECLIPSES_METHOD == 1)
@@ -131,7 +133,7 @@ float EclipseValue(float3 worldPos, float3 worldLightPos,float3 occluderSpherePo
 	float3 lightDistance = length(lightDirection);				// Light distance...
 
 	lightDirection = lightDirection / lightDistance;			// Post fake normalization....
-			   
+
 	// Computation of level of shadowing...
 	float3 sphereDirection = float3(occluderSpherePosition - worldPos);  // Occluder sphere....
 	float sphereDistance = length(sphereDirection);
@@ -178,16 +180,17 @@ float EclipseOuterShadow(float3 lightVec, float lightAngularRadius, float3 d, fl
 //-----------------------------------------------------------------------------
 float4 GroundFade(float fade, float4 value)
 {
-	return 1.0f * fade + (1.0f - fade) * value;
+    return 1.0f * fade + (1.0f - fade) * value;
 }
 
 float3 GroundFade(float fade, float3 extinction, float4 value)
 {
-	return 1.0f * fade + (1.0f - fade) * extinction * value.xyz;
+    return 1.0f * fade + (1.0f - fade) * extinction * value.xyz;
 }
 
 float4 BrightnessContrast(float brightness, float contrast, float4 value)
 {
-	return (value - 1.0) * contrast + 1.0 + brightness;
+    return (value - 1.0) * contrast + 1.0 + brightness;
 }
+
 //-----------------------------------------------------------------------------

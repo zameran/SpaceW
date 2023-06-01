@@ -1,4 +1,5 @@
 ﻿#region License
+
 // Procedural planet generator.
 //  
 // Copyright (C) 2015-2023 Denis Ovchinnikov [zameran] 
@@ -31,6 +32,7 @@
 // Creation Date: 2017.05.02
 // Creation Time: 7:43 PM
 // Creator: zameran
+
 #endregion
 
 using UnityEngine;

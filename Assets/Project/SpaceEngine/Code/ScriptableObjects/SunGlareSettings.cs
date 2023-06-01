@@ -1,4 +1,5 @@
 ﻿#region License
+
 // Procedural planet generator.
 //  
 // Copyright (C) 2015-2023 Denis Ovchinnikov [zameran] 
@@ -31,6 +32,7 @@
 // Creation Date: 2017.01.25
 // Creation Time: 10:46 AM
 // Creator: zameran
+
 #endregion
 
 using System;
@@ -45,22 +47,24 @@ namespace SpaceEngine.ScriptableObjects
     {
         [Header("Textures")]
         public Texture2D SunSpikes;
+
         public Texture2D SunFlare;
         public Texture2D SunGhost1;
         public Texture2D SunGhost2;
         public Texture2D SunGhost3;
 
         [Header("Settings")]
-        public Vector3 FlareSettings = new Vector3(0.45f, 1.0f, 0.85f);
-        public Vector3 SpikesSettings = new Vector3(0.6f, 1.0f, 1.0f);
+        public Vector3 FlareSettings = new(0.45f, 1.0f, 0.85f);
 
-        public List<Vector4> Ghost1SettingsList = new List<Vector4>
+        public Vector3 SpikesSettings = new(0.6f, 1.0f, 1.0f);
+
+        public List<Vector4> Ghost1SettingsList = new()
         {
             new Vector4(0.54f, 0.65f, 2.3f, 0.5f),
             new Vector4(0.54f, 1.0f, 6.0f, 0.7f)
         };
 
-        public List<Vector4> Ghost2SettingsList = new List<Vector4>
+        public List<Vector4> Ghost2SettingsList = new()
         {
             new Vector4(0.135f, 1.0f, 3.0f, 0.9f),
             new Vector4(0.054f, 1.0f, 8.0f, 1.1f),
@@ -68,7 +72,7 @@ namespace SpaceEngine.ScriptableObjects
             new Vector4(0.054f, 1.0f, 5.0f, 1.5f)
         };
 
-        public List<Vector4> Ghost3SettingsList = new List<Vector4>
+        public List<Vector4> Ghost3SettingsList = new()
         {
             new Vector4(0.135f, 1.0f, 3.0f, 0.9f),
             new Vector4(0.054f, 1.0f, 8.0f, 1.1f),

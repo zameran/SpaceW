@@ -1,4 +1,5 @@
 ﻿#region License
+
 /* Procedural planet generator.
  *
  * Copyright (C) 2015-2017 Denis Ovchinnikov
@@ -28,6 +29,7 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF
  * THE POSSIBILITY OF SUCH DAMAGE.
  */
+
 #endregion
 
 using System.IO;
@@ -46,7 +48,12 @@ namespace SpaceEngine.Editor.Postprocessors
             var fileName = Path.GetFileName(pathToBuiltProject);
             var fileNameWithoutExtension = Path.GetFileNameWithoutExtension(pathToBuiltProject);
 
-            if (string.IsNullOrEmpty(fileName)) { Debug.Log("BuildPostprocessor.OnPostprocessBuild: Can't find exe!"); return; }
+            if (string.IsNullOrEmpty(fileName))
+            {
+                Debug.Log("BuildPostprocessor.OnPostprocessBuild: Can't find exe!");
+
+                return;
+            }
 
             var dataPath = $"{pathToBuiltProject.Remove(pathToBuiltProject.Length - fileName.Length, fileName.Length)}{fileNameWithoutExtension}_Data";
 
@@ -55,12 +62,19 @@ namespace SpaceEngine.Editor.Postprocessors
             {
                 var pureBuildPath = Path.GetDirectoryName(pathToBuiltProject);
 
-                if (string.IsNullOrEmpty(pureBuildPath)) { Debug.Log("BuildPostprocessor.OnPostprocessBuild: Can't find pure build path!"); return; }
+                if (string.IsNullOrEmpty(pureBuildPath))
+                {
+                    Debug.Log("BuildPostprocessor.OnPostprocessBuild: Can't find pure build path!");
+
+                    return;
+                }
 
                 foreach (var path in Directory.GetFiles(pureBuildPath, "*Log*.txt"))
                 {
                     if (File.Exists(path))
+                    {
                         File.Delete(path);
+                    }
                 }
             }
 

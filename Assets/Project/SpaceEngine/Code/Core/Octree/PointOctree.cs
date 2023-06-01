@@ -1,4 +1,5 @@
 ﻿#region License
+
 // Procedural planet generator.
 //  
 // Copyright (C) 2015-2023 Denis Ovchinnikov [zameran] 
@@ -31,6 +32,7 @@
 // Creation Date: 2017.05.31
 // Creation Time: 12:52 AM
 // Creator: zameran
+
 #endregion
 
 using System;
@@ -42,27 +44,22 @@ namespace SpaceEngine.Core.Octree
     public class PointOctree<TType> where TType : struct, IEquatable<TType>
     {
         /// <summary>
-        /// The total amount of objects currently in the tree.
-        /// </summary>
-        public int Count { get; private set; }
-
-        /// <summary>
-        /// Root node of the octree.
-        /// </summary>
-        PointOctreeNode<TType> RootNode;
-
-        /// <summary>
-        /// Size that the octree was on creation.
+        ///     Size that the octree was on creation.
         /// </summary>
         private readonly float InitialSize;
 
         /// <summary>
-        /// Minimum side length.
+        ///     Minimum side length.
         /// </summary>
-        readonly float MinSize;
+        private readonly float MinSize;
 
         /// <summary>
-        /// Constructor.
+        ///     Root node of the octree.
+        /// </summary>
+        private PointOctreeNode<TType> RootNode;
+
+        /// <summary>
+        ///     Constructor.
         /// </summary>
         /// <param name="initialWorldSize">Size of the sides of the initial node. The octree will never shrink smaller than this.</param>
         /// <param name="initialWorldPos">Position of the centre of the initial node.</param>
@@ -83,7 +80,12 @@ namespace SpaceEngine.Core.Octree
         }
 
         /// <summary>
-        /// Add an object.
+        ///     The total amount of objects currently in the tree.
+        /// </summary>
+        public int Count { get; private set; }
+
+        /// <summary>
+        ///     Add an object.
         /// </summary>
         /// <param name="obj">Object to add.</param>
         /// <param name="position">Position of the object.</param>
@@ -108,8 +110,8 @@ namespace SpaceEngine.Core.Octree
         }
 
         /// <summary>
-        /// Remove an object. 
-        /// Makes the assumption that the object only exists once in the tree.
+        ///     Remove an object.
+        ///     Makes the assumption that the object only exists once in the tree.
         /// </summary>
         /// <param name="obj">Object to remove.</param>
         /// <returns>True if the object was removed successfully.</returns>
@@ -129,8 +131,8 @@ namespace SpaceEngine.Core.Octree
         }
 
         /// <summary>
-        /// Return objects that are within <paramref name="maxDistance"/> of the specified <paramref name="ray"/>.
-        /// If none, returns an empty array (not null).
+        ///     Return objects that are within <paramref name="maxDistance" /> of the specified <paramref name="ray" />.
+        ///     If none, returns an empty array (not null).
         /// </summary>
         /// <param name="ray">The ray. Passing as ref to improve performance since it won't have to be copied.</param>
         /// <param name="maxDistance">Maximum distance from the ray to consider.</param>
@@ -145,8 +147,8 @@ namespace SpaceEngine.Core.Octree
         }
 
         /// <summary>
-        /// Return objects that are within <paramref name="maxDistance"/> of the specified <paramref name="position"/>.
-        /// If none, returns an empty array (not null).
+        ///     Return objects that are within <paramref name="maxDistance" /> of the specified <paramref name="position" />.
+        ///     If none, returns an empty array (not null).
         /// </summary>
         /// <param name="position">Position.</param>
         /// <param name="maxDistance">Maximum distance from the ray to consider.</param>
@@ -161,8 +163,8 @@ namespace SpaceEngine.Core.Octree
         }
 
         /// <summary>
-        /// Return nodes that are within <paramref name="maxDistance"/> of the specified <paramref name="position"/>.
-        /// If none, returns an empty array (not null).
+        ///     Return nodes that are within <paramref name="maxDistance" /> of the specified <paramref name="position" />.
+        ///     If none, returns an empty array (not null).
         /// </summary>
         /// <param name="position">Position.</param>
         /// <param name="maxDistance">Maximum distance from the ray to consider.</param>
@@ -177,7 +179,7 @@ namespace SpaceEngine.Core.Octree
         }
 
         /// <summary>
-        /// Return all nodes recursively.
+        ///     Return all nodes recursively.
         /// </summary>
         /// <returns>All nodes in list.</returns>
         public List<PointOctreeNode<TType>> GetNodes()
@@ -190,8 +192,8 @@ namespace SpaceEngine.Core.Octree
         }
 
         /// <summary>
-        /// Draws node boundaries visually for debugging.
-        /// Must be called from OnDrawGizmos externally. See also: DrawAllObjects.
+        ///     Draws node boundaries visually for debugging.
+        ///     Must be called from OnDrawGizmos externally. See also: DrawAllObjects.
         /// </summary>
         public void DrawAllBounds()
         {
@@ -199,8 +201,8 @@ namespace SpaceEngine.Core.Octree
         }
 
         /// <summary>
-        /// Draws the bounds of all objects in the tree visually for debugging.
-        /// Must be called from OnDrawGizmos externally. See also: DrawAllBounds.
+        ///     Draws the bounds of all objects in the tree visually for debugging.
+        ///     Must be called from OnDrawGizmos externally. See also: DrawAllBounds.
         /// </summary>
         public void DrawAllObjects()
         {
@@ -213,7 +215,7 @@ namespace SpaceEngine.Core.Octree
         }
 
         /// <summary>
-        /// Grow the octree to fit in all objects.
+        ///     Grow the octree to fit in all objects.
         /// </summary>
         /// <param name="direction">Direction to grow.</param>
         public void Grow(Vector3 direction)
@@ -246,11 +248,11 @@ namespace SpaceEngine.Core.Octree
                 {
                     xDirection = i % 2 == 0 ? (sbyte)-1 : (sbyte)1;
                     yDirection = i > 3 ? (sbyte)-1 : (sbyte)1;
-                    zDirection = (i < 2 || (i > 3 && i < 6)) ? (sbyte)-1 : (sbyte)1;
+                    zDirection = i < 2 || (i > 3 && i < 6) ? (sbyte)-1 : (sbyte)1;
 
                     children[i] = new PointOctreeNode<TType>(RootNode.SideLength, MinSize, newCenter + new Vector3(xDirection * half,
-                                                                                               yDirection * half,
-                                                                                               zDirection * half));
+                                                                                                                   yDirection * half,
+                                                                                                                   zDirection * half));
                 }
             }
 
@@ -258,7 +260,7 @@ namespace SpaceEngine.Core.Octree
         }
 
         /// <summary>
-        /// Shrink the octree if possible, else leave it the same.
+        ///     Shrink the octree if possible, else leave it the same.
         /// </summary>
         public void Shrink()
         {
@@ -271,8 +273,8 @@ namespace SpaceEngine.Core.Octree
         }
 
         /// <summary>
-        /// Used when growing the octree. 
-        /// Works out where the old root node would fit inside a new, larger root node.
+        ///     Used when growing the octree.
+        ///     Works out where the old root node would fit inside a new, larger root node.
         /// </summary>
         /// <param name="xDir">X direction of growth [1 || -1].</param>
         /// <param name="yDir">Y direction of growth [1 || -1].</param>
@@ -282,8 +284,15 @@ namespace SpaceEngine.Core.Octree
         {
             var result = xDir > 0 ? (byte)1 : (byte)0;
 
-            if (yDir < 0) result += 4;
-            if (zDir > 0) result += 2;
+            if (yDir < 0)
+            {
+                result += 4;
+            }
+
+            if (zDir > 0)
+            {
+                result += 2;
+            }
 
             return result;
         }

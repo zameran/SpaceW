@@ -1,4 +1,5 @@
 ﻿#region License
+
 // Procedural planet generator.
 //  
 // Copyright (C) 2015-2023 Denis Ovchinnikov [zameran] 
@@ -31,12 +32,12 @@
 // Creation Date: 2018.01.19
 // Creation Time: 2:20 AM
 // Creator: zameran
+
 #endregion
 
 namespace SpaceEngine.Debugging
 {
     public interface IDebugClickableThrough
     {
-        
     }
 }

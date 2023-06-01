@@ -1,4 +1,5 @@
 ﻿#region License
+
 // Procedural planet generator.
 // 
 // Copyright (C) 2015-2023 Denis Ovchinnikov [zameran] 
@@ -31,6 +32,7 @@
 // Creation Date: Undefined
 // Creation Time: Undefined
 // Creator: zameran
+
 #endregion
 
 #define UNITY_GL_PROJECTION_MATRIX
@@ -44,7 +46,7 @@ using UnityEngine.Rendering;
 namespace SpaceEngine.Helpers
 {
     /// <summary>
-    /// Class - extensions holder for a <see cref="Camera"/>.
+    ///     Class - extensions holder for a <see cref="Camera" />.
     /// </summary>
     public static class CameraHelper
     {
@@ -64,10 +66,10 @@ namespace SpaceEngine.Helpers
         }
 
         /// <summary>
-        /// Find a <see cref="Camera"/> in <see cref="GameObject"/>'s components with specified name.
+        ///     Find a <see cref="Camera" /> in <see cref="GameObject" />'s components with specified name.
         /// </summary>
-        /// <param name="gameObjectName">Target <see cref="GameObject"/> name to search in.</param>
-        /// <returns>Returns a <see cref="Camera"/> component from existing <see cref="GameObject"/>'s components.</returns>
+        /// <param name="gameObjectName">Target <see cref="GameObject" /> name to search in.</param>
+        /// <returns>Returns a <see cref="Camera" /> component from existing <see cref="GameObject" />'s components.</returns>
         public static Camera FindCamera(string gameObjectName = "Camera")
         {
             var mainCamera = Main();
@@ -78,7 +80,9 @@ namespace SpaceEngine.Helpers
                 var resultCameraComponent = resultCameraGameObject.GetComponent<Camera>();
 
                 if (resultCameraComponent != null)
+                {
                     return resultCameraComponent;
+                }
             }
 
             return null;
@@ -95,11 +99,11 @@ namespace SpaceEngine.Helpers
         }
 
         /// <summary>
-        /// Get <see cref="Camera"/>'s projection <see cref="Matrix4x4"/>.
+        ///     Get <see cref="Camera" />'s projection <see cref="Matrix4x4" />.
         /// </summary>
-        /// <param name="camera">Target <see cref="Camera"/>.</param>
+        /// <param name="camera">Target <see cref="Camera" />.</param>
         /// <param name="useFix">Render in to texture?</param>
-        /// <returns>Returns the <see cref="Camera"/>'s projection <see cref="Matrix4x4"/>.</returns>
+        /// <returns>Returns the <see cref="Camera" />'s projection <see cref="Matrix4x4" />.</returns>
         public static Matrix4x4 GetCameraToScreen(this Camera camera, bool useFix = true)
         {
             #if UNITY_GL_PROJECTION_MATRIX
@@ -160,7 +164,7 @@ namespace SpaceEngine.Helpers
 
         public static bool IsDeferred(this Camera camera)
         {
-            return camera.actualRenderingPath == (RenderingPath.DeferredShading);
+            return camera.actualRenderingPath == RenderingPath.DeferredShading;
         }
 
         public static int GetAntiAliasing(this Camera camera)

@@ -1,4 +1,5 @@
 ﻿#region License
+
 // Procedural planet generator.
 //  
 // Copyright (C) 2015-2023 Denis Ovchinnikov [zameran] 
@@ -31,9 +32,9 @@
 // Creation Date: 2017.03.28
 // Creation Time: 2:18 PM
 // Creator: zameran
+
 #endregion
 
-using System;
 using System.Collections.Generic;
 using SpaceEngine.Core.Containers;
 using SpaceEngine.Core.Patterns.Singleton;
@@ -42,38 +43,8 @@ namespace SpaceEngine.Core.Utilities
 {
     public class Schedular : MonoSingleton<Schedular>
     {
-        public abstract class Task
-        {
-            public class EqualityComparer : IEqualityComparer<Task>
-            {
-                public bool Equals(Task t1, Task t2)
-                {
-                    return ReferenceEquals(t1, t2);
-                }
-
-                public int GetHashCode(Task t)
-                {
-                    return t.GetHashCode();
-                }
-            }
-
-            public bool IsDone { get; protected set; }
-
-            public Task()
-            {
-
-            }
-
-            public abstract void Run();
-
-            public virtual void Finish()
-            {
-                IsDone = true;
-            }
-        }
-
-        Task.EqualityComparer Comparer;
-        SetQueue<Task> TaskQueue;
+        private Task.EqualityComparer Comparer;
+        private SetQueue<Task> TaskQueue;
 
         private void Awake()
         {
@@ -85,10 +56,15 @@ namespace SpaceEngine.Core.Utilities
 
         public void Add(Task task)
         {
-            if (task.IsDone) return;
+            if (task.IsDone)
+            {
+                return;
+            }
 
             if (!TaskQueue.Contains(task))
+            {
                 TaskQueue.AddLast(task);
+            }
         }
 
         public bool HasTask(Task task)
@@ -98,7 +74,7 @@ namespace SpaceEngine.Core.Utilities
 
         public void Run()
         {
-            var task = (TaskQueue.Empty()) ? null : TaskQueue.First();
+            var task = TaskQueue.Empty() ? null : TaskQueue.First();
 
             while (task != null)
             {
@@ -107,9 +83,38 @@ namespace SpaceEngine.Core.Utilities
                 TaskQueue.Remove(task);
 
                 if (TaskQueue.Empty())
+                {
                     task = null;
+                }
                 else
+                {
                     task = TaskQueue.First();
+                }
+            }
+        }
+
+        public abstract class Task
+        {
+            public bool IsDone { get; protected set; }
+
+            public abstract void Run();
+
+            public virtual void Finish()
+            {
+                IsDone = true;
+            }
+
+            public class EqualityComparer : IEqualityComparer<Task>
+            {
+                public bool Equals(Task t1, Task t2)
+                {
+                    return ReferenceEquals(t1, t2);
+                }
+
+                public int GetHashCode(Task t)
+                {
+                    return t.GetHashCode();
+                }
             }
         }
     }

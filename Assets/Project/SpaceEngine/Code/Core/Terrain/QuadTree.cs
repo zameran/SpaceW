@@ -1,4 +1,5 @@
 ﻿#region License
+
 // Procedural planet generator.
 //  
 // Copyright (C) 2015-2023 Denis Ovchinnikov [zameran] 
@@ -31,6 +32,7 @@
 // Creation Date: 2017.03.28
 // Creation Time: 2:18 PM
 // Creator: zameran
+
 #endregion
 
 using SpaceEngine.Core.Tile.Samplers;
@@ -38,40 +40,40 @@ using SpaceEngine.Core.Tile.Samplers;
 namespace SpaceEngine.Core.Terrain
 {
     /// <summary>
-    /// An internal quadtree to store the texture tile associated with each terrain quad.
+    ///     An internal quadtree to store the texture tile associated with each terrain quad.
     /// </summary>
     public class QuadTree
     {
         /// <summary>
-        /// Is a tile is needed for this quad?
+        ///     The subquads of this quad.
+        /// </summary>
+        public QuadTree[] Children = new QuadTree[4];
+
+        /// <summary>
+        ///     Is a tile is needed for this quad?
         /// </summary>
         public bool IsNeedTile;
 
         /// <summary>
-        /// The ParentTree quad of this quad.
+        ///     The ParentTree quad of this quad.
         /// </summary>
         public QuadTree ParentTree;
 
         /// <summary>
-        /// The texture tile associated with this quad.
+        ///     The texture tile associated with this quad.
         /// </summary>
         public Tile.Tile Tile;
-
-        /// <summary>
-        /// The subquads of this quad.
-        /// </summary>
-        public QuadTree[] Children = new QuadTree[4];
-
-        public bool IsLeaf => Children[0] == null; // NOTE : Use LINQ.All/Any(child => child == null) to 100% ensure in childs unexistance, but too slow.
 
         public QuadTree(QuadTree parentTree)
         {
             ParentTree = parentTree;
         }
 
+        public bool IsLeaf => Children[0] == null; // NOTE : Use LINQ.All/Any(child => child == null) to 100% ensure in childs unexistance, but too slow.
+
         /// <summary>
-        /// Deletes All trees subelements.
-        /// Releases all the corresponding texture tiles.
+        ///     Deletes All trees subelements.
+        ///     Releases all the corresponding texture tiles.
         /// </summary>
         /// <param name="owner">Owner of quad.</param>
         public void RecursiveDeleteChildren(TileSampler owner)
@@ -87,8 +89,8 @@ namespace SpaceEngine.Core.Terrain
         }
 
         /// <summary>
-        /// Deletes this tree and all its subelements. 
-        /// Releases all the corresponding texture tiles.
+        ///     Deletes this tree and all its subelements.
+        ///     Releases all the corresponding texture tiles.
         /// </summary>
         /// <param name="owner"></param>
         public void RecursiveDelete(ref TileSampler owner)

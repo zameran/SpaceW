@@ -1,4 +1,5 @@
 ﻿#region License
+
 // Procedural planet generator.
 // 
 // Copyright (C) 2015-2023 Denis Ovchinnikov [zameran] 
@@ -31,6 +32,7 @@
 // Creation Date: Undefined
 // Creation Time: Undefined
 // Creator: zameran
+
 #endregion
 
 using System;
@@ -41,6 +43,22 @@ namespace SpaceEngine.Tools
 {
     public static class Yielders
     {
+        private static readonly Dictionary<float, WaitForSeconds> TimeIntervals = new(100, new FloatComparer());
+
+        public static WaitForEndOfFrame EndOfFrame { get; } = new();
+
+        public static WaitForFixedUpdate FixedUpdate { get; } = new();
+
+        public static WaitForSeconds Get(float seconds)
+        {
+            if (!TimeIntervals.TryGetValue(seconds, out var wfs))
+            {
+                TimeIntervals.Add(seconds, wfs = new WaitForSeconds(seconds));
+            }
+
+            return wfs;
+        }
+
         private class FloatComparer : IEqualityComparer<float>
         {
             bool IEqualityComparer<float>.Equals(float x, float y)
@@ -52,20 +70,6 @@ namespace SpaceEngine.Tools
             {
                 return obj.GetHashCode();
             }
-        }
-
-        private static readonly Dictionary<float, WaitForSeconds> TimeIntervals = new(100, new FloatComparer());
-
-        public static WaitForEndOfFrame EndOfFrame { get; } = new();
-
-        public static WaitForFixedUpdate FixedUpdate { get; } = new();
-
-        public static WaitForSeconds Get(float seconds)
-        {
-            if (!TimeIntervals.TryGetValue(seconds, out var wfs))
-                TimeIntervals.Add(seconds, wfs = new WaitForSeconds(seconds));
-
-            return wfs;
         }
     }
 }

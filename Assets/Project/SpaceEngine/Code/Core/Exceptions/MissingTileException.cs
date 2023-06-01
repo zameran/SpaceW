@@ -1,4 +1,5 @@
 ﻿#region License
+
 // Procedural planet generator.
 //  
 // Copyright (C) 2015-2023 Denis Ovchinnikov [zameran] 
@@ -31,6 +32,7 @@
 // Creation Date: 2017.03.28
 // Creation Time: 2:18 PM
 // Creator: zameran
+
 #endregion
 
 using System;
@@ -41,17 +43,14 @@ namespace SpaceEngine.Core.Exceptions
     {
         public MissingTileException()
         {
-
         }
 
         public MissingTileException(string message) : base(message)
         {
-
         }
 
         public MissingTileException(string message, Exception inner) : base(message, inner)
         {
-
         }
     }
 }

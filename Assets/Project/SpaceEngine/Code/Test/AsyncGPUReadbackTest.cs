@@ -1,4 +1,5 @@
 ﻿#region License
+
 // Procedural planet generator.
 //  
 // Copyright (C) 2015-2023 Denis Ovchinnikov [zameran] 
@@ -31,6 +32,7 @@
 // Creation Date: 2018.03.15
 // Creation Time: 5:23 PM
 // Creator: zameran
+
 #endregion
 
 using SpaceEngine.Core;
@@ -44,18 +46,9 @@ namespace SpaceEngine.Test
     [RequireComponent(typeof(Camera))]
     public class AsyncGPUReadbackTest : MonoBehaviour
     {
-        private readonly CachedComponent<Camera> CameraCachedComponent = new CachedComponent<Camera>();
+        private readonly CachedComponent<Camera> CameraCachedComponent = new();
 
         public Camera CameraComponent => CameraCachedComponent.Component;
-
-        #region Test Stuff
-
-        public int TestTextureSize = 1024;
-        public bool ComputationDone = true;
-        public RenderTexture TestTexture;
-        public ComputeShader TestComputeShader;
-
-        #endregion
 
         private void Start()
         {
@@ -66,7 +59,20 @@ namespace SpaceEngine.Test
 
         private void OnDestroy()
         {
-            if (TestTexture != null) TestTexture.ReleaseAndDestroy();
+            if (TestTexture != null)
+            {
+                TestTexture.ReleaseAndDestroy();
+            }
+        }
+
+        private void OnGUI()
+        {
+            if (TestTexture == null || !TestTexture.IsCreated())
+            {
+                return;
+            }
+
+            GUI.DrawTexture(new Rect(0, 0, 512, 512), TestTexture, ScaleMode.ScaleToFit, false);
         }
 
         private void OnRenderImage(RenderTexture source, RenderTexture destination)
@@ -90,11 +96,13 @@ namespace SpaceEngine.Test
             Graphics.Blit(source, destination);
         }
 
-        private void OnGUI()
-        {
-            if (TestTexture == null || !TestTexture.IsCreated()) return;
+        #region Test Stuff
 
-            GUI.DrawTexture(new Rect(0, 0, 512, 512), TestTexture, ScaleMode.ScaleToFit, false);
-        }
+        public int TestTextureSize = 1024;
+        public bool ComputationDone = true;
+        public RenderTexture TestTexture;
+        public ComputeShader TestComputeShader;
+
+        #endregion
     }
 }

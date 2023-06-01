@@ -1,4 +1,5 @@
 ﻿#region License
+
 // Procedural planet generator.
 // 
 // Copyright (C) 2015-2023 Denis Ovchinnikov [zameran] 
@@ -31,6 +32,7 @@
 // Creation Date: Undefined
 // Creation Time: Undefined
 // Creator: zameran
+
 #endregion
 
 using System;
@@ -44,25 +46,25 @@ namespace SpaceEngine.Environment.Atmospheric
     public struct AtmosphereParameters
     {
         /// <summary>
-        /// Asymmetry factor for the mie phase function.
-        /// A higher number meands more light is scattered in the forward direction.
+        ///     Asymmetry factor for the mie phase function.
+        ///     A higher number meands more light is scattered in the forward direction.
         /// </summary>
         public float MIE_G;
 
         /// <summary>
-        /// Half height for the atmosphere air density.
-        /// This is the height in km that half the particles are found below.
+        ///     Half height for the atmosphere air density.
+        ///     This is the height in km that half the particles are found below.
         /// </summary>
         public float HR;
 
         /// <summary>
-        /// Half height for the atmosphere particle density.
-        /// This is the height in km that half the particles are found below.
+        ///     Half height for the atmosphere particle density.
+        ///     This is the height in km that half the particles are found below.
         /// </summary>
         public float HM;
 
         /// <summary>
-        /// Average ground reflecrance.
+        ///     Average ground reflecrance.
         /// </summary>
         public float AVERAGE_GROUND_REFLECTANCE;
 
@@ -79,7 +81,7 @@ namespace SpaceEngine.Environment.Atmospheric
         public float bRl;
 
         /// <summary>
-        /// Scale factor of atmosphere.
+        ///     Scale factor of atmosphere.
         /// </summary>
         public float SCALE;
 
@@ -137,26 +139,8 @@ namespace SpaceEngine.Environment.Atmospheric
             this.SCALE = SCALE;
         }
 
-        public static AtmosphereParameters Get(AtmosphereBase preset)
-        {
-            switch (preset)
-            {
-                case AtmosphereBase.Default: return Default;
-                case AtmosphereBase.Earth: return Earth;
-                case AtmosphereBase.Venus: return Venus;
-                case AtmosphereBase.Mars: return Mars;
-                case AtmosphereBase.Jupiter: return Jupiter;
-                case AtmosphereBase.Titan: return Titan;
-                case AtmosphereBase.Neptune: return Neptune;
-                case AtmosphereBase.Sun: return Sun;
-                case AtmosphereBase.Pluto: return Pluto;
-                case AtmosphereBase.Custom: return Default;
-                default: { Debug.Log($"AtmosphereParameters: Get({preset}) fail!"); return new AtmosphereParameters(Default); }
-            }
-        }
-
         public static AtmosphereParameters Default =>
-            new AtmosphereParameters(0.8f, 8.0f, 2.0f, 0.1f,
+            new(0.8f, 8.0f, 2.0f, 0.1f,
                 new Vector4(0.0058f, 0.0135f, 0.0331f, 0.0f),
                 new Vector4(0.0040f, 0.0040f, 0.0040f, 0.0f),
                 new Vector4(0.0040f, 0.0040f, 0.0040f, 0.0f),
@@ -165,7 +149,7 @@ namespace SpaceEngine.Environment.Atmospheric
                 1.0f);
 
         public static AtmosphereParameters Earth =>
-            new AtmosphereParameters(0.85f, 8.0f, 1.0f, 0.1f,
+            new(0.85f, 8.0f, 1.0f, 0.1f,
                 new Vector4(0.0128f, 0.0305f, 0.0731f, 0.0f),
                 new Vector4(0.0040f, 0.0040f, 0.0040f, 0.0f),
                 new Vector4(0.0040f, 0.0040f, 0.0040f, 0.0f),
@@ -174,7 +158,7 @@ namespace SpaceEngine.Environment.Atmospheric
                 1.0f);
 
         public static AtmosphereParameters Venus =>
-            new AtmosphereParameters(0.6f, 12.0f, 8.0f, 0.1f,
+            new(0.6f, 12.0f, 8.0f, 0.1f,
                 new Vector4(0.010f, 0.008f, 0.004f, 0.0f),
                 new Vector4(0.005f, 0.004f, 0.002f, 0.0f),
                 new Vector4(0.005f, 0.004f, 0.002f, 0.0f),
@@ -183,7 +167,7 @@ namespace SpaceEngine.Environment.Atmospheric
                 1.0f);
 
         public static AtmosphereParameters Mars =>
-            new AtmosphereParameters(0.4f, 8.0f, 2.0f, 0.1f,
+            new(0.4f, 8.0f, 2.0f, 0.1f,
                 new Vector4(0.0213f, 0.0168f, 0.0113f, 0.0f),
                 new Vector4(0.0085f, 0.0067f, 0.0045f, 0.0f),
                 new Vector4(0.0040f, 0.0040f, 0.0040f, 0.0f),
@@ -192,7 +176,7 @@ namespace SpaceEngine.Environment.Atmospheric
                 1.0f);
 
         public static AtmosphereParameters Jupiter =>
-            new AtmosphereParameters(0.8f, 12.0f, 2.0f, 0.1f,
+            new(0.8f, 12.0f, 2.0f, 0.1f,
                 new Vector4(0.0117f, 0.0135f, 0.0180f, 0.0f),
                 new Vector4(0.0040f, 0.0040f, 0.0040f, 0.0f),
                 new Vector4(0.0040f, 0.0040f, 0.0040f, 0.0f),
@@ -201,7 +185,7 @@ namespace SpaceEngine.Environment.Atmospheric
                 1.0f);
 
         public static AtmosphereParameters Titan =>
-            new AtmosphereParameters(0.0f, 10.0f, 8.0f, 0.1f,
+            new(0.0f, 10.0f, 8.0f, 0.1f,
                 new Vector4(0.0040f, 0.0040f, 0.0100f, 0.0f),
                 new Vector4(0.0010f, 0.0100f, 0.0600f, 0.0f),
                 new Vector4(0.0010f, 0.0100f, 0.0600f, 0.0f),
@@ -210,7 +194,7 @@ namespace SpaceEngine.Environment.Atmospheric
                 1.0f);
 
         public static AtmosphereParameters Neptune =>
-            new AtmosphereParameters(0.6f, 8.0f, 4.5f, 0.1f,
+            new(0.6f, 8.0f, 4.5f, 0.1f,
                 new Vector4(0.0058f, 0.0135f, 0.0331f, 0.0f),
                 new Vector4(0.00058f, 0.0027f, 0.1f, 0.0f),
                 new Vector4(0.00058f, 0.00027f, 0.005f, 0.0f),
@@ -219,7 +203,7 @@ namespace SpaceEngine.Environment.Atmospheric
                 1.0f);
 
         public static AtmosphereParameters Sun =>
-            new AtmosphereParameters(0.6f, 10.0f, 2.0f, 0.1f,
+            new(0.6f, 10.0f, 2.0f, 0.1f,
                 new Vector4(0.004f, 0.004f, 0.004f, 0.0f),
                 new Vector4(0.004f, 0.004f, 0.004f, 0.0f),
                 new Vector4(0.004f, 0.004f, 0.004f, 0.0f),
@@ -228,12 +212,45 @@ namespace SpaceEngine.Environment.Atmospheric
                 1.0f);
 
         public static AtmosphereParameters Pluto =>
-            new AtmosphereParameters(0.6f, 12.0f, 8.0f, 0.1f,
+            new(0.6f, 12.0f, 8.0f, 0.1f,
                 new Vector4(0.001f, 0.001f, 0.001f),
                 new Vector4(0.004f, 0.0045f, 0.006f),
                 new Vector4(0.001f, 0.001f, 0.001f),
                 2400.0f, 2460.0f, 2470.0f,
                 2400.0f, 2460.0f, 2470.0f,
                 1.0f);
+
+        public static AtmosphereParameters Get(AtmosphereBase preset)
+        {
+            switch (preset)
+            {
+                case AtmosphereBase.Default:
+                    return Default;
+                case AtmosphereBase.Earth:
+                    return Earth;
+                case AtmosphereBase.Venus:
+                    return Venus;
+                case AtmosphereBase.Mars:
+                    return Mars;
+                case AtmosphereBase.Jupiter:
+                    return Jupiter;
+                case AtmosphereBase.Titan:
+                    return Titan;
+                case AtmosphereBase.Neptune:
+                    return Neptune;
+                case AtmosphereBase.Sun:
+                    return Sun;
+                case AtmosphereBase.Pluto:
+                    return Pluto;
+                case AtmosphereBase.Custom:
+                    return Default;
+                default:
+                {
+                    Debug.Log($"AtmosphereParameters: Get({preset}) fail!");
+
+                    return new AtmosphereParameters(Default);
+                }
+            }
+        }
     }
 }

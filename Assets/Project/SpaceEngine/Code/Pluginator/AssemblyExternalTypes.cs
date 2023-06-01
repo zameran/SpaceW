@@ -1,4 +1,5 @@
 ﻿#region License
+
 // Procedural planet generator.
 // 
 // Copyright (C) 2015-2023 Denis Ovchinnikov [zameran] 
@@ -31,6 +32,7 @@
 // Creation Date: Undefined
 // Creation Time: Undefined
 // Creator: zameran
+
 #endregion
 
 using System;
@@ -39,7 +41,7 @@ using System.Collections.Generic;
 namespace SpaceEngine.Pluginator
 {
     /// <summary>
-    /// Dictionary wrapper, contains <see cref="Type"/> as key and <see cref="List{T}"/> with generic type of <see cref="Type"/>
+    ///     Dictionary wrapper, contains <see cref="Type" /> as key and <see cref="List{T}" /> with generic type of <see cref="Type" />
     /// </summary>
     public sealed class AssemblyExternalTypes : Dictionary<Type, List<Type>>
     {

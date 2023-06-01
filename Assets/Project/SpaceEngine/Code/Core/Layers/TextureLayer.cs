@@ -1,4 +1,5 @@
 ﻿#region License
+
 // Procedural planet generator.
 //  
 // Copyright (C) 2015-2023 Denis Ovchinnikov [zameran] 
@@ -31,6 +32,7 @@
 // Creation Date: 2017.03.28
 // Creation Time: 2:18 PM
 // Creator: zameran
+
 #endregion
 
 using System;
@@ -46,22 +48,74 @@ using UnityEngine;
 namespace SpaceEngine.Core.Layers
 {
     /// <summary>
-    /// This layer modifies the tile of it's <see cref="TileProducer"/> 
-    /// by applying special 'filter' into the tiles, produced by another <see cref="TileProducer"/>, after they have been transformed via a GPU Program.
+    ///     This layer modifies the tile of it's <see cref="TileProducer" />
+    ///     by applying special 'filter' into the tiles, produced by another <see cref="TileProducer" />, after they have been transformed via a GPU Program.
     /// </summary>
     public class TextureLayer : TileLayer
     {
         public GameObject SourceProducerGameObject;
 
-        private TileProducer SourceProducer;
-
         public GameObject TargetProducerGameObject;
-
-        private TileProducer TargetProducer;
 
         public Material LayerMaterial;
 
+        private TileProducer SourceProducer;
+
+        private TileProducer TargetProducer;
+
         private RenderTexture TargetTextureBuffer;
+
+        public override void DoCreateTile(int level, int tx, int ty, List<TileStorage.Slot> slot)
+        {
+            var gpuSlot = slot[0] as GPUTileStorage.GPUSlot;
+
+            if (gpuSlot == null)
+            {
+                throw new NullReferenceException("gpuSlot");
+            }
+
+            if (TargetTextureBuffer == null)
+            {
+                TargetTextureBuffer = new RenderTexture(gpuSlot.Texture.descriptor);
+            }
+
+            GPUTileStorage.GPUSlot sourceGpuSlot = null;
+
+            var sourceTile = SourceProducer.FindTile(level, tx, ty, false, true);
+
+            if (sourceTile != null)
+            {
+                sourceGpuSlot = sourceTile.GetSlot(0) as GPUTileStorage.GPUSlot;
+            }
+            else
+            {
+                throw new MissingTileException("Find source producer tile failed");
+            }
+
+            if (sourceGpuSlot == null)
+            {
+                throw new MissingTileException("Find source tile failed");
+            }
+
+            var coords = Vector3.forward;
+            var targetSize = TargetProducer.Cache.GetStorage(0).TileSize;
+            var sourceSize = SourceProducer.Cache.GetStorage(0).TileSize;
+
+            if (targetSize == sourceSize - 1)
+            {
+                coords.x = 1.0f / sourceSize;
+                coords.y = 1.0f / sourceSize;
+                coords.z = 1.0f - coords.x;
+            }
+
+            Graphics.Blit(gpuSlot.Texture, TargetTextureBuffer);
+
+            LayerMaterial.SetTexture("_Target", TargetTextureBuffer);
+            LayerMaterial.SetTexture("_Source", sourceGpuSlot.Texture);
+            LayerMaterial.SetVector("_Coords", coords);
+
+            Graphics.Blit(null, gpuSlot.Texture, LayerMaterial);
+        }
 
         #region NodeSlave<TileLayer>
 
@@ -71,16 +125,29 @@ namespace SpaceEngine.Core.Layers
 
             if (SourceProducerGameObject != null)
             {
-                if (SourceProducer == null) { SourceProducer = SourceProducerGameObject.GetComponent<TileProducer>(); }
+                if (SourceProducer == null)
+                {
+                    SourceProducer = SourceProducerGameObject.GetComponent<TileProducer>();
+                }
             }
 
             if (TargetProducerGameObject != null)
             {
-                if (TargetProducer == null) { TargetProducer = TargetProducerGameObject.GetComponent<TileProducer>(); }
+                if (TargetProducer == null)
+                {
+                    TargetProducer = TargetProducerGameObject.GetComponent<TileProducer>();
+                }
             }
 
-            if (SourceProducer == null) { throw new NullReferenceException("Source producer is null!"); }
-            if (TargetProducer == null) { throw new NullReferenceException("Target producer is null!"); }
+            if (SourceProducer == null)
+            {
+                throw new NullReferenceException("Source producer is null!");
+            }
+
+            if (TargetProducer == null)
+            {
+                throw new NullReferenceException("Target producer is null!");
+            }
 
             var targetSize = TargetProducer.Cache.GetStorage(0).TileSize;
             var sourceSize = SourceProducer.Cache.GetStorage(0).TileSize;
@@ -119,47 +186,12 @@ namespace SpaceEngine.Core.Layers
         {
             base.OnDestroy();
 
-            if (TargetTextureBuffer != null) TargetTextureBuffer.ReleaseAndDestroy();
+            if (TargetTextureBuffer != null)
+            {
+                TargetTextureBuffer.ReleaseAndDestroy();
+            }
         }
 
         #endregion
-
-        public override void DoCreateTile(int level, int tx, int ty, List<TileStorage.Slot> slot)
-        {
-            var gpuSlot = slot[0] as GPUTileStorage.GPUSlot;
-
-            if (gpuSlot == null) { throw new NullReferenceException("gpuSlot"); }
-
-            if (TargetTextureBuffer == null) { TargetTextureBuffer = new RenderTexture(gpuSlot.Texture.descriptor); }
-
-            GPUTileStorage.GPUSlot sourceGpuSlot = null;
-
-            var sourceTile = SourceProducer.FindTile(level, tx, ty, false, true);
-
-            if (sourceTile != null)
-                sourceGpuSlot = sourceTile.GetSlot(0) as GPUTileStorage.GPUSlot;
-            else { throw new MissingTileException("Find source producer tile failed"); }
-
-            if (sourceGpuSlot == null) { throw new MissingTileException("Find source tile failed"); }
-
-            var coords = Vector3.forward;
-            var targetSize = TargetProducer.Cache.GetStorage(0).TileSize;
-            var sourceSize = SourceProducer.Cache.GetStorage(0).TileSize;
-
-            if (targetSize == sourceSize - 1)
-            {
-                coords.x = 1.0f / (float)sourceSize;
-                coords.y = 1.0f / (float)sourceSize;
-                coords.z = 1.0f - coords.x;
-            }
-
-            Graphics.Blit(gpuSlot.Texture, TargetTextureBuffer);
-
-            LayerMaterial.SetTexture("_Target", TargetTextureBuffer);
-            LayerMaterial.SetTexture("_Source", sourceGpuSlot.Texture);
-            LayerMaterial.SetVector("_Coords", coords);
-
-            Graphics.Blit(null, gpuSlot.Texture, LayerMaterial);
-        }
     }
 }

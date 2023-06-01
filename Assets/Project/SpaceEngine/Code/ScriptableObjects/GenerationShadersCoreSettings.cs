@@ -1,4 +1,5 @@
 ﻿#region License
+
 // Procedural planet generator.
 //  
 // Copyright (C) 2015-2023 Denis Ovchinnikov [zameran] 
@@ -31,6 +32,7 @@
 // Creation Date: 2017.09.04
 // Creation Time: 7:29 PM
 // Creator: zameran
+
 #endregion
 
 using System;
@@ -44,6 +46,7 @@ namespace SpaceEngine.ScriptableObjects
     {
         [Header("I/O")]
         public ComputeShader WriteData;
+
         public ComputeShader ReadData;
 
         [Header("Atmosphere Precomputation")]
@@ -51,6 +54,7 @@ namespace SpaceEngine.ScriptableObjects
 
         [Header("Ocean Precomputation")]
         public Shader Fourier;
+
         public ComputeShader Variance;
     }
 }

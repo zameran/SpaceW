@@ -1,4 +1,5 @@
 ﻿#region License
+
 // Procedural planet generator.
 //  
 // Copyright (C) 2015-2023 Denis Ovchinnikov [zameran] 
@@ -31,6 +32,7 @@
 // Creation Date: 2017.03.28
 // Creation Time: 2:18 PM
 // Creator: zameran
+
 #endregion
 
 using System;
@@ -49,9 +51,9 @@ namespace SpaceEngine.Core.Producers.Normal
     {
         public GameObject ElevationProducerGameObject;
 
-        private TileProducer ElevationProducer;
-
         public Material NormalsMaterial;
+
+        private TileProducer ElevationProducer;
 
         public override void InitNode()
         {
@@ -59,7 +61,10 @@ namespace SpaceEngine.Core.Producers.Normal
 
             if (ElevationProducerGameObject != null)
             {
-                if (ElevationProducer == null) { ElevationProducer = ElevationProducerGameObject.GetComponent<TileProducer>(); }
+                if (ElevationProducer == null)
+                {
+                    ElevationProducer = ElevationProducerGameObject.GetComponent<TileProducer>();
+                }
             }
 
             var tileSize = Cache.GetStorage(0).TileSize;
@@ -98,24 +103,37 @@ namespace SpaceEngine.Core.Producers.Normal
 
             GPUTileStorage.GPUSlot elevationGpuSlot = null;
 
-            if (elevationTile != null) elevationGpuSlot = elevationTile.GetSlot(0) as GPUTileStorage.GPUSlot;
-            else { throw new MissingTileException("Find elevation tile failed"); }
+            if (elevationTile != null)
+            {
+                elevationGpuSlot = elevationTile.GetSlot(0) as GPUTileStorage.GPUSlot;
+            }
+            else
+            {
+                throw new MissingTileException("Find elevation tile failed");
+            }
 
-            if (gpuSlot == null) { throw new NullReferenceException("gpuSlot"); }
-            if (elevationGpuSlot == null) { throw new NullReferenceException("elevationGpuSlot"); }
+            if (gpuSlot == null)
+            {
+                throw new NullReferenceException("gpuSlot");
+            }
+
+            if (elevationGpuSlot == null)
+            {
+                throw new NullReferenceException("elevationGpuSlot");
+            }
 
             var tileWidth = gpuSlot.Owner.TileSize;
             var elevationTex = elevationGpuSlot.Texture;
-            var elevationOSL = new Vector4(0.25f / (float)elevationTex.width, 0.25f / (float)elevationTex.height, 1.0f / (float)elevationTex.width, 0.0f);
+            var elevationOSL = new Vector4(0.25f / elevationTex.width, 0.25f / elevationTex.height, 1.0f / elevationTex.width, 0.0f);
 
             var D = TerrainNode.TerrainQuadRoot.Length;
             var R = D / 2.0;
 
             // NOTE : Body shape dependent...
-            var x0 = (double)(tx) / (double)(1 << level) * D - R;
-            var x1 = (double)(tx + 1) / (double)(1 << level) * D - R;
-            var y0 = (double)(ty) / (double)(1 << level) * D - R;
-            var y1 = (double)(ty + 1) / (double)(1 << level) * D - R;
+            var x0 = tx / (double)(1 << level) * D - R;
+            var x1 = (tx + 1) / (double)(1 << level) * D - R;
+            var y0 = ty / (double)(1 << level) * D - R;
+            var y1 = (ty + 1) / (double)(1 << level) * D - R;
 
             var p0 = new Vector3d(x0, y0, R);
             var p1 = new Vector3d(x1, y0, R);
@@ -133,7 +151,7 @@ namespace SpaceEngine.Core.Producers.Normal
 
             var deformedCorners = new Matrix4x4d(v0.x * R - vc.x * R, v1.x * R - vc.x * R, v2.x * R - vc.x * R, v3.x * R - vc.x * R,
                                                  v0.y * R - vc.y * R, v1.y * R - vc.y * R, v2.y * R - vc.y * R, v3.y * R - vc.y * R,
-                                                 v0.z * R - vc.z * R, v1.z * R - vc.z * R, v2.z * R - vc.z * R, v3.z * R - vc.z * R, 
+                                                 v0.z * R - vc.z * R, v1.z * R - vc.z * R, v2.z * R - vc.z * R, v3.z * R - vc.z * R,
                                                  1.0, 1.0, 1.0, 1.0);
 
             var deformedVerticals = new Matrix4x4d(v0.x, v1.x, v2.x, v3.x, v0.y, v1.y, v2.y, v3.y, v0.z, v1.z, v2.z, v3.z, 0.0, 0.0, 0.0, 0.0);
@@ -147,13 +165,13 @@ namespace SpaceEngine.Core.Producers.Normal
             NormalsMaterial.SetMatrix("_PatchCorners", deformedCorners.ToMatrix4x4());
             NormalsMaterial.SetMatrix("_PatchVerticals", deformedVerticals.ToMatrix4x4());
             NormalsMaterial.SetVector("_PatchCornerNorms", new Vector4((float)l0, (float)l1, (float)l2, (float)l3));
-            NormalsMaterial.SetVector("_Deform", new Vector4((float)x0, (float)y0, (float)D / (float)(1 << level), (float)R));
+            NormalsMaterial.SetVector("_Deform", new Vector4((float)x0, (float)y0, (float)D / (1 << level), (float)R));
             NormalsMaterial.SetMatrix("_WorldToTangentFrame", worldToTangentFrame.ToMatrix4x4());
 
-            NormalsMaterial.SetVector("_TileSD", new Vector2((float)tileWidth, (float)(tileWidth - 1) / (float)(TerrainNode.ParentBody.GridResolution - 1)));
+            NormalsMaterial.SetVector("_TileSD", new Vector2(tileWidth, (tileWidth - 1) / (float)(TerrainNode.ParentBody.GridResolution - 1)));
             NormalsMaterial.SetTexture("_ElevationSampler", elevationTex);
             NormalsMaterial.SetVector("_ElevationOSL", elevationOSL);
-            NormalsMaterial.SetFloat("_Level", (float)(1 << level) / 2.0f);
+            NormalsMaterial.SetFloat("_Level", (1 << level) / 2.0f);
 
             Graphics.Blit(null, gpuSlot.Texture, NormalsMaterial);
 

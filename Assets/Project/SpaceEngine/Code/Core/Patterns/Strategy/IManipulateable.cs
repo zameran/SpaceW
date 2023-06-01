@@ -1,4 +1,5 @@
 ﻿#region License
+
 // Procedural planet generator.
 //  
 // Copyright (C) 2015-2023 Denis Ovchinnikov [zameran] 
@@ -31,23 +32,24 @@
 // Creation Date: 2018.03.21
 // Creation Time: 12:19 PM
 // Creator: zameran
+
 #endregion
 
 namespace SpaceEngine.Core.Patterns.Strategy
 {
     /// <summary>
-    /// This interface should be implemented in all things, that's gonna be moved, rotated or scaled externaly, 
-    /// while using custom (special, unique) matrices or vectors, wich sould be updated, if transform is changed for proper rendering.
+    ///     This interface should be implemented in all things, that's gonna be moved, rotated or scaled externaly,
+    ///     while using custom (special, unique) matrices or vectors, wich sould be updated, if transform is changed for proper rendering.
     /// </summary>
     public interface IManipulateable
     {
         /// <summary>
-        /// Updates necessary matrices for proper rendering.
+        ///     Updates necessary matrices for proper rendering.
         /// </summary>
         void UpdateMatrices();
 
         /// <summary>
-        /// Updates necessary vectors for proper rendering.
+        ///     Updates necessary vectors for proper rendering.
         /// </summary>
         void UpdateVectors();
     }

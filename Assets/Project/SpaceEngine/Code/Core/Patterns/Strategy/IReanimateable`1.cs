@@ -1,4 +1,5 @@
 ﻿#region License
+
 // Procedural planet generator.
 //  
 // Copyright (C) 2015-2023 Denis Ovchinnikov [zameran] 
@@ -31,13 +32,14 @@
 // Creation Date: 2017.02.22
 // Creation Time: 6:27 PM
 // Creator: zameran
+
 #endregion
 
 namespace SpaceEngine.Core.Patterns.Strategy
 {
     /// <summary>
-    /// Interface provides some generic strategy methods for a special 
-    /// <see cref="UnityEngine.Material"/> and <see cref="UnityEngine.Shader"/>, or <see cref="UnityEngine.MaterialPropertyBlock"/> uniforms behaviour.
+    ///     Interface provides some generic strategy methods for a special
+    ///     <see cref="UnityEngine.Material" /> and <see cref="UnityEngine.Shader" />, or <see cref="UnityEngine.MaterialPropertyBlock" /> uniforms behaviour.
     /// </summary>
     /// <typeparam name="T">Generic.</typeparam>
     public interface IReanimateable<T> : IReanimateable

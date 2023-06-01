@@ -27,7 +27,7 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF
  * THE POSSIBILITY OF SUCH DAMAGE.
  */
- 
+
 /*
  * Proland: a procedural landscape rendering library.
  * Copyright (c) 2008-2011 INRIA
@@ -51,11 +51,11 @@
  * You can obtain a specific license from Inria: proland-licensing@inria.fr.
  */
 
- /*
- * Authors: Eric Bruneton, Antoine Begault, Guillaume Piolat.
- * Modified and ported to Unity by Justin Hawkins 2014
- * Modified by Denis Ovchinnikov 2015-2023
- */
+/*
+* Authors: Eric Bruneton, Antoine Begault, Guillaume Piolat.
+* Modified and ported to Unity by Justin Hawkins 2014
+* Modified by Denis Ovchinnikov 2015-2023
+*/
 
 #define OCEAN_DISPLACEMENT
 
@@ -69,51 +69,51 @@ uniform float3 _SphereDirection;
 uniform float _CosTheta;
 uniform float _SinTheta;
 
-float2 OceanPos(float4 vert, float4x4 stoc, out float t, out float3 cameraDir, out float3 oceanDir) 
+float2 OceanPos(float4 vert, float4x4 stoc, out float t, out float3 cameraDir, out float3 oceanDir)
 {
-	float h = _Ocean_CameraPos.z;
-	float4 v = float4(vert.x, vert.y, 0.0, 1.0);
+    float h = _Ocean_CameraPos.z;
+    float4 v = float4(vert.x, vert.y, 0.0, 1.0);
 
-	cameraDir = normalize(mul(stoc, v).xyz);											// Direction in camera space
-	
-	float3 n1 = cross(_SphereDirection, cameraDir);										// Normal to plane containing direction to planet and vertex view direction
-	float3 n2 = normalize(cross(n1, _SphereDirection));									// Upwards vector in plane space, plane containing CamO and cameraDir
+    cameraDir = normalize(mul(stoc, v).xyz); // Direction in camera space
 
-	float3 hor = _CosTheta * _SphereDirection + _SinTheta * n2;
- 
-	cameraDir = ((dot(n1, cross(hor, cameraDir)) > 0.0) && (h > 0)) ? hor : cameraDir;	// Checking if view direction is above the horizon
-	oceanDir = mul(_Ocean_CameraToOcean, float4(cameraDir, 0.0)).xyz;
+    float3 n1 = cross(_SphereDirection, cameraDir); // Normal to plane containing direction to planet and vertex view direction
+    float3 n2 = normalize(cross(n1, _SphereDirection)); // Upwards vector in plane space, plane containing CamO and cameraDir
 
-	float dz = oceanDir.z;
-	float radius = _Ocean_Radius;
-	
-	float b = dz * (h + radius);
-	float c = h * (h + 2.0 * radius);
-	float tSphere = - b - sqrt(max(b * b - c, 0.0));
-	float tApprox = - h / dz * (1.0 + h / (2.0 * radius) * (1.0 - dz * dz));
+    float3 hor = _CosTheta * _SphereDirection + _SinTheta * n2;
 
-	t = abs((tApprox - tSphere) * dz) < 1.0 ? tApprox : tSphere;
+    cameraDir = ((dot(n1, cross(hor, cameraDir)) > 0.0) && (h > 0)) ? hor : cameraDir; // Checking if view direction is above the horizon
+    oceanDir = mul(_Ocean_CameraToOcean, float4(cameraDir, 0.0)).xyz;
 
-	return _Ocean_CameraPos.xy + t * oceanDir.xy;
+    float dz = oceanDir.z;
+    float radius = _Ocean_Radius;
+
+    float b = dz * (h + radius);
+    float c = h * (h + 2.0 * radius);
+    float tSphere = -b - sqrt(max(b * b - c, 0.0));
+    float tApprox = -h / dz * (1.0 + h / (2.0 * radius) * (1.0 - dz * dz));
+
+    t = abs((tApprox - tSphere) * dz) < 1.0 ? tApprox : tSphere;
+
+    return _Ocean_CameraPos.xy + t * oceanDir.xy;
 }
 
-float2 OceanPos(float4 vert, float4x4 stoc) 
+float2 OceanPos(float4 vert, float4x4 stoc)
 {
-	float t;
-	float3 cameraDir;
-	float3 oceanDir;
+    float t;
+    float3 cameraDir;
+    float3 oceanDir;
 
-	return OceanPos(vert, stoc, t, cameraDir, oceanDir);
+    return OceanPos(vert, stoc, t, cameraDir, oceanDir);
 }
 
 float4 Tex2DGrad(sampler2D tex, float2 uv, float2 dx, float2 dy, float2 texSize)
 {
-	//Sampling a texture by derivatives is unsupported in vert shaders in Unity but if you
-	//can manually calculate the derivates you can reproduce its effect using tex2Dlod 
-	float2 px = texSize.x * dx;
-	float2 py = texSize.y * dy;
+    //Sampling a texture by derivatives is unsupported in vert shaders in Unity but if you
+    //can manually calculate the derivates you can reproduce its effect using tex2Dlod 
+    float2 px = texSize.x * dx;
+    float2 py = texSize.y * dy;
 
-	float lod = 0.5 * log2(max(dot(px, px), dot(py, py)));
+    float lod = 0.5 * log2(max(dot(px, px), dot(py, py)));
 
-	return tex2Dlod(tex, float4(uv, 0.0, lod));
+    return tex2Dlod(tex, float4(uv, 0.0, lod));
 }

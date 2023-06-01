@@ -1,4 +1,5 @@
 ﻿#region License
+
 // Procedural planet generator.
 //  
 // Copyright (C) 2015-2023 Denis Ovchinnikov [zameran] 
@@ -31,6 +32,7 @@
 // Creation Date: 2018.03.15
 // Creation Time: 4:01 PM
 // Creator: zameran
+
 #endregion
 
 using System;
@@ -45,20 +47,6 @@ namespace SpaceEngine.Managers
 {
     public class AsyncGPUManager : MonoSingleton<AsyncGPUManager>
     {
-        public struct AsyncGPUReadbackRequestEntry<TType> where TType : struct
-        {
-            public AsyncGPUReadbackRequest Request;
-            public int Layer;
-            public Action<NativeArray<TType>> Callback;
-
-            public AsyncGPUReadbackRequestEntry(AsyncGPUReadbackRequest request, int layer, Action<NativeArray<TType>> callback)
-            {
-                Request = request;
-                Callback = callback;
-                Layer = layer;
-            }
-        }
-
         private Queue<AsyncGPUReadbackRequest> Entries;
 
         public bool CanEnqueue => Entries.Count < 32;
@@ -101,55 +89,96 @@ namespace SpaceEngine.Managers
             base.OnDestroy();
         }
 
+        public struct AsyncGPUReadbackRequestEntry<TType> where TType : struct
+        {
+            public AsyncGPUReadbackRequest Request;
+            public int Layer;
+            public Action<NativeArray<TType>> Callback;
+
+            public AsyncGPUReadbackRequestEntry(AsyncGPUReadbackRequest request, int layer, Action<NativeArray<TType>> callback)
+            {
+                Request = request;
+                Callback = callback;
+                Layer = layer;
+            }
+        }
+
         #region API
 
         private bool EnqueueCheck()
         {
             var canEnqueue = CanEnqueue;
 
-            if (canEnqueue == false) Debug.LogWarning("AsyncGPUManager.EnqueueCheck: Too many requests! Can't proceed for now...");
+            if (canEnqueue == false)
+            {
+                Debug.LogWarning("AsyncGPUManager.EnqueueCheck: Too many requests! Can't proceed for now...");
+            }
 
             return canEnqueue;
         }
 
         public void Enqueue(ComputeBuffer src, Action<AsyncGPUReadbackRequest> callback = null)
         {
-            if (EnqueueCheck()) Entries.Enqueue(AsyncGPUReadback.Request(src, callback));
+            if (EnqueueCheck())
+            {
+                Entries.Enqueue(AsyncGPUReadback.Request(src, callback));
+            }
         }
 
         public void Enqueue(ComputeBuffer src, int size, int offset, Action<AsyncGPUReadbackRequest> callback = null)
         {
-            if (EnqueueCheck()) Entries.Enqueue(AsyncGPUReadback.Request(src, size, offset, callback));
+            if (EnqueueCheck())
+            {
+                Entries.Enqueue(AsyncGPUReadback.Request(src, size, offset, callback));
+            }
         }
 
         public void Enqueue(Texture src, int mipIndex = 0, Action<AsyncGPUReadbackRequest> callback = null)
         {
-            if (EnqueueCheck()) Entries.Enqueue(AsyncGPUReadback.Request(src, mipIndex, callback));
+            if (EnqueueCheck())
+            {
+                Entries.Enqueue(AsyncGPUReadback.Request(src, mipIndex, callback));
+            }
         }
 
         public void Enqueue(Texture src, int mipIndex, GraphicsFormat destinationFormat, Action<AsyncGPUReadbackRequest> callback = null)
         {
-            if (EnqueueCheck()) Entries.Enqueue(AsyncGPUReadback.Request(src, mipIndex, destinationFormat, callback));
+            if (EnqueueCheck())
+            {
+                Entries.Enqueue(AsyncGPUReadback.Request(src, mipIndex, destinationFormat, callback));
+            }
         }
 
         public void Enqueue(Texture src, int mipIndex, TextureFormat destinationFormat, Action<AsyncGPUReadbackRequest> callback = null)
         {
-            if (EnqueueCheck()) Entries.Enqueue(AsyncGPUReadback.Request(src, mipIndex, destinationFormat, callback));
+            if (EnqueueCheck())
+            {
+                Entries.Enqueue(AsyncGPUReadback.Request(src, mipIndex, destinationFormat, callback));
+            }
         }
 
         public void Enqueue(Texture src, int mipIndex, int x, int width, int y, int height, int z, int depth, Action<AsyncGPUReadbackRequest> callback = null)
         {
-            if (EnqueueCheck()) Entries.Enqueue(AsyncGPUReadback.Request(src, mipIndex, x, width, y, height, z, depth, callback));
+            if (EnqueueCheck())
+            {
+                Entries.Enqueue(AsyncGPUReadback.Request(src, mipIndex, x, width, y, height, z, depth, callback));
+            }
         }
 
         public void Enqueue(Texture src, int mipIndex, int x, int width, int y, int height, int z, int depth, GraphicsFormat destinationFormat, Action<AsyncGPUReadbackRequest> callback = null)
         {
-            if (EnqueueCheck()) Entries.Enqueue(AsyncGPUReadback.Request(src, mipIndex, x, width, y, height, z, depth, destinationFormat, callback));
+            if (EnqueueCheck())
+            {
+                Entries.Enqueue(AsyncGPUReadback.Request(src, mipIndex, x, width, y, height, z, depth, destinationFormat, callback));
+            }
         }
 
         public void Enqueue(Texture src, int mipIndex, int x, int width, int y, int height, int z, int depth, TextureFormat destinationFormat, Action<AsyncGPUReadbackRequest> callback = null)
         {
-            if (EnqueueCheck()) Entries.Enqueue(AsyncGPUReadback.Request(src, mipIndex, x, width, y, height, z, depth, destinationFormat, callback));
+            if (EnqueueCheck())
+            {
+                Entries.Enqueue(AsyncGPUReadback.Request(src, mipIndex, x, width, y, height, z, depth, destinationFormat, callback));
+            }
         }
 
         #endregion

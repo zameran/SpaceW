@@ -1,4 +1,5 @@
 ﻿#region License
+
 // Procedural planet generator.
 // 
 // Copyright (C) 2015-2017 Denis Ovchinnikov [zameran] 
@@ -31,6 +32,7 @@
 // Creation Date: Undefined
 // Creation Time: Undefined
 // Creator: zameran
+
 #endregion
 
 using UnityEngine;
@@ -41,23 +43,27 @@ namespace SpaceEngine.Utilities.MonoBehaviours
     // NOTE : Looks like works good even with 'Graphics Jobs' option enabled after [Unity 2017 Windows x86/x64]
     public class Wireframe : MonoBehaviour
     {
-        public bool Enabled = false;
+        public bool Enabled;
 
         private void LateUpdate()
         {
             if (Input.GetKeyDown(KeyCode.Slash))
+            {
                 Enabled = !Enabled;
-        }
-
-        private void OnPreRender()
-        {
-            if (Enabled)
-                GL.wireframe = true;
+            }
         }
 
         private void OnPostRender()
         {
             GL.wireframe = false;
+        }
+
+        private void OnPreRender()
+        {
+            if (Enabled)
+            {
+                GL.wireframe = true;
+            }
         }
     }
 }

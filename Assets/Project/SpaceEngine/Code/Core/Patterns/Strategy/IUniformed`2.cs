@@ -1,4 +1,5 @@
 ﻿#region License
+
 // Procedural planet generator.
 // 
 // Copyright (C) 2015-2023 Denis Ovchinnikov [zameran] 
@@ -31,22 +32,29 @@
 // Creation Date: Undefined
 // Creation Time: Undefined
 // Creator: zameran
+
 #endregion
 
 namespace SpaceEngine.Core.Patterns.Strategy
 {
     /// <summary>
-    /// This interface should be implemented in all things, that's gonna manipulate with 
-    /// <see cref="UnityEngine.Material"/> and <see cref="UnityEngine.Shader"/>, or <see cref="UnityEngine.MaterialPropertyBlock"/> uniforms.
-    /// Targets for manipulations is a generic type.
-    /// Two targets at the same time!
-    /// <remarks>
-    /// This interface slightly different: <see cref="IUniformed{T}.InitSetUniforms"/>. It's done, 
-    /// because class can implement sequence of <see cref="IUniformed{T}"/> and <see cref="IUniformed{T, U}"/>
-    /// </remarks>
+    ///     This interface should be implemented in all things, that's gonna manipulate with
+    ///     <see cref="UnityEngine.Material" /> and <see cref="UnityEngine.Shader" />, or <see cref="UnityEngine.MaterialPropertyBlock" /> uniforms.
+    ///     Targets for manipulations is a generic type.
+    ///     Two targets at the same time!
+    ///     <remarks>
+    ///         This interface slightly different: <see cref="IUniformed{T}.InitSetUniforms" />. It's done,
+    ///         because class can implement sequence of <see cref="IUniformed{T}" /> and <see cref="IUniformed{T, U}" />
+    ///     </remarks>
     /// </summary>
-    /// <typeparam name="T">Generic. <example><see cref="UnityEngine.Material"/> or <see cref="UnityEngine.Shader"/>.</example></typeparam>
-    /// <typeparam name="U">Generic. <example><see cref="UnityEngine.Material"/> or <see cref="UnityEngine.Shader"/>.</example></typeparam>
+    /// <typeparam name="T">
+    ///     Generic.
+    ///     <example><see cref="UnityEngine.Material" /> or <see cref="UnityEngine.Shader" />.</example>
+    /// </typeparam>
+    /// <typeparam name="U">
+    ///     Generic.
+    ///     <example><see cref="UnityEngine.Material" /> or <see cref="UnityEngine.Shader" />.</example>
+    /// </typeparam>
     public interface IUniformed<in T, in U> where T : class where U : class
     {
         void InitUniforms(T target0, U target1);

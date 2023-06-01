@@ -1,4 +1,5 @@
 ﻿#region License
+
 // Procedural planet generator.
 // 
 // Copyright (C) 2015-2023 Denis Ovchinnikov [zameran] 
@@ -31,17 +32,18 @@
 // Creation Date: Undefined
 // Creation Time: Undefined
 // Creator: zameran
+
 #endregion
 
 namespace SpaceEngine.Environment.Atmospheric
 {
     public static class AtmosphereConstants
     {
-        public const int TRANSMITTANCE_INTEGRAL_SAMPLES = 256;          //500
-        public const int INSCATTER_INTEGRAL_SAMPLES = 32;               //50
-        public const int IRRADIANCE_INTEGRAL_SAMPLES = 16;              //32
-        public const int IRRADIANCE_INTEGRAL_SAMPLES_HALF = 8;          //16
-        public const int INSCATTER_SPHERICAL_INTEGRAL_SAMPLES = 4;      //16
+        public const int TRANSMITTANCE_INTEGRAL_SAMPLES = 256; //500
+        public const int INSCATTER_INTEGRAL_SAMPLES = 32; //50
+        public const int IRRADIANCE_INTEGRAL_SAMPLES = 16; //32
+        public const int IRRADIANCE_INTEGRAL_SAMPLES_HALF = 8; //16
+        public const int INSCATTER_SPHERICAL_INTEGRAL_SAMPLES = 4; //16
 
         public const int TRANSMITTANCE_W = 256;
         public const int TRANSMITTANCE_H = 64;

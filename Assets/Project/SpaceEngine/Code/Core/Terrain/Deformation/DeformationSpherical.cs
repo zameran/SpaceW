@@ -1,4 +1,5 @@
 ﻿#region License
+
 // Procedural planet generator.
 //  
 // Copyright (C) 2015-2023 Denis Ovchinnikov [zameran] 
@@ -31,36 +32,37 @@
 // Creation Date: 2017.03.28
 // Creation Time: 2:18 PM
 // Creator: zameran
+
 #endregion
 
 using System;
+using SpaceEngine.Core.Numerics;
 using SpaceEngine.Core.Numerics.Matrices;
 using SpaceEngine.Core.Numerics.Shapes;
 using SpaceEngine.Core.Numerics.Vectors;
 using UnityEngine;
-using Functions = SpaceEngine.Core.Numerics.Functions;
 
 namespace SpaceEngine.Core.Terrain.Deformation
 {
     /// <summary>
-    /// A Deformation of space transforming planes to spheres. This deformation
-    /// transforms the plane z=0 into a sphere of radius R centered at (0,0,-R).
-    /// The plane z=h is transformed into the sphere of radius R+h. The
-    /// deformation of p=(x,y,z) in local space is q=(R+z) P /\norm P\norm,
-    /// where P=(x,y,R).
-    /// See <see cref="DeformationBase"/> class for more info.
+    ///     A Deformation of space transforming planes to spheres. This deformation
+    ///     transforms the plane z=0 into a sphere of radius R centered at (0,0,-R).
+    ///     The plane z=h is transformed into the sphere of radius R+h. The
+    ///     deformation of p=(x,y,z) in local space is q=(R+z) P /\norm P\norm,
+    ///     where P=(x,y,R).
+    ///     See <see cref="DeformationBase" /> class for more info.
     /// </summary>
     public class DeformationSpherical : DeformationBase
     {
-        /// <summary>
-        /// The radius of the sphere into which the plane z = 0 must be deformed.
-        /// </summary>
-        public double R { get; protected set; }
-
         public DeformationSpherical(double R)
         {
             this.R = R;
         }
+
+        /// <summary>
+        ///     The radius of the sphere into which the plane z = 0 must be deformed.
+        /// </summary>
+        public double R { get; protected set; }
 
         public override Vector3d LocalToDeformed(double x, double y, double z)
         {
@@ -93,8 +95,8 @@ namespace SpaceEngine.Core.Terrain.Deformation
             var c1 = c0 * R / l;
 
             return new Matrix4x4d((point.y * point.y + r2) * c1, -point.x * point.y * c1, point.x * c0, R * point.x * c0,
-                                   -point.x * point.y * c1, (point.x * point.x + r2) * c1, point.y * c0, R * point.y * c0,
-                                   -point.x * R * c1, -point.y * R * c1, R * c0, (r2) * c0, 0.0, 0.0, 0.0, 1.0);
+                                  -point.x * point.y * c1, (point.x * point.x + r2) * c1, point.y * c0, R * point.y * c0,
+                                  -point.x * R * c1, -point.y * R * c1, R * c0, r2 * c0, 0.0, 0.0, 0.0, 1.0);
         }
 
         public override Vector3d DeformedToLocal(Vector3d deformedPoint)
@@ -145,7 +147,7 @@ namespace SpaceEngine.Core.Terrain.Deformation
                 return Box2d.infinity;
             }
 
-            var k = (1.0 - deformedRadius * deformedRadius / (2.0 * R * R)) * (new Vector3d(point.x, point.y, R)).Magnitude();
+            var k = (1.0 - deformedRadius * deformedRadius / (2.0 * R * R)) * new Vector3d(point.x, point.y, R).Magnitude();
             var A = k * k - point.x * point.x;
             var B = k * k - point.y * point.y;
             var C = -2.0 * point.x * point.y;
@@ -191,19 +193,39 @@ namespace SpaceEngine.Core.Terrain.Deformation
             var f = Math.Sqrt(dx * dx + dy * dy + dz * dz) / (localBox.Min.z + R);
 
             var v0 = GetClipVisibility(node.DeformedFrustumPlanes[0], deformedBox, f);
-            if (v0 == Frustum3d.VISIBILITY.INVISIBLE) { return Frustum3d.VISIBILITY.INVISIBLE; }
+
+            if (v0 == Frustum3d.VISIBILITY.INVISIBLE)
+            {
+                return Frustum3d.VISIBILITY.INVISIBLE;
+            }
 
             var v1 = GetClipVisibility(node.DeformedFrustumPlanes[1], deformedBox, f);
-            if (v1 == Frustum3d.VISIBILITY.INVISIBLE) { return Frustum3d.VISIBILITY.INVISIBLE; }
+
+            if (v1 == Frustum3d.VISIBILITY.INVISIBLE)
+            {
+                return Frustum3d.VISIBILITY.INVISIBLE;
+            }
 
             var v2 = GetClipVisibility(node.DeformedFrustumPlanes[2], deformedBox, f);
-            if (v2 == Frustum3d.VISIBILITY.INVISIBLE) { return Frustum3d.VISIBILITY.INVISIBLE; }
+
+            if (v2 == Frustum3d.VISIBILITY.INVISIBLE)
+            {
+                return Frustum3d.VISIBILITY.INVISIBLE;
+            }
 
             var v3 = GetClipVisibility(node.DeformedFrustumPlanes[3], deformedBox, f);
-            if (v3 == Frustum3d.VISIBILITY.INVISIBLE) { return Frustum3d.VISIBILITY.INVISIBLE; }
+
+            if (v3 == Frustum3d.VISIBILITY.INVISIBLE)
+            {
+                return Frustum3d.VISIBILITY.INVISIBLE;
+            }
 
             var v4 = GetClipVisibility(node.DeformedFrustumPlanes[4], deformedBox, f);
-            if (v4 == Frustum3d.VISIBILITY.INVISIBLE) { return Frustum3d.VISIBILITY.INVISIBLE; }
+
+            if (v4 == Frustum3d.VISIBILITY.INVISIBLE)
+            {
+                return Frustum3d.VISIBILITY.INVISIBLE;
+            }
 
             var lSq = node.DeformedCameraPosition.SqrMagnitude();
             var rm = R + Math.Min(0.0, localBox.Min.z);
@@ -211,12 +233,16 @@ namespace SpaceEngine.Core.Terrain.Deformation
             var rmSq = rm * rm;
             var rMSq = rM * rM;
 
-            var farPlane = new Vector4d(node.DeformedCameraPosition.x, 
-                                        node.DeformedCameraPosition.y, 
+            var farPlane = new Vector4d(node.DeformedCameraPosition.x,
+                                        node.DeformedCameraPosition.y,
                                         node.DeformedCameraPosition.z, Math.Sqrt((lSq - rmSq) * (rMSq - rmSq)) - rmSq);
 
             var v5 = GetClipVisibility(farPlane, deformedBox, f);
-            if (v5 == Frustum3d.VISIBILITY.INVISIBLE) { return Frustum3d.VISIBILITY.INVISIBLE; }
+
+            if (v5 == Frustum3d.VISIBILITY.INVISIBLE)
+            {
+                return Frustum3d.VISIBILITY.INVISIBLE;
+            }
 
             if (v0 == Frustum3d.VISIBILITY.FULLY && v1 == Frustum3d.VISIBILITY.FULLY &&
                 v2 == Frustum3d.VISIBILITY.FULLY && v3 == Frustum3d.VISIBILITY.FULLY &&
@@ -233,19 +259,19 @@ namespace SpaceEngine.Core.Terrain.Deformation
             var o = b[0].x * clip.x + b[0].y * clip.y + b[0].z * clip.z;
             var p = o + clip.w > 0.0;
 
-            if ((o * f + clip.w > 0.0) == p)
+            if (o * f + clip.w > 0.0 == p)
             {
                 o = b[1].x * clip.x + b[1].y * clip.y + b[1].z * clip.z;
 
-                if ((o + clip.w > 0.0) == p && (o * f + clip.w > 0.0) == p)
+                if (o + clip.w > 0.0 == p && o * f + clip.w > 0.0 == p)
                 {
                     o = b[2].x * clip.x + b[2].y * clip.y + b[2].z * clip.z;
 
-                    if ((o + clip.w > 0.0) == p && (o * f + clip.w > 0.0) == p)
+                    if (o + clip.w > 0.0 == p && o * f + clip.w > 0.0 == p)
                     {
                         o = b[3].x * clip.x + b[3].y * clip.y + b[3].z * clip.z;
 
-                        return (o + clip.w > 0.0) == p && (o * f + clip.w > 0.0) == p ? (p ? Frustum3d.VISIBILITY.FULLY : Frustum3d.VISIBILITY.INVISIBLE) : Frustum3d.VISIBILITY.PARTIALLY;
+                        return o + clip.w > 0.0 == p && o * f + clip.w > 0.0 == p ? p ? Frustum3d.VISIBILITY.FULLY : Frustum3d.VISIBILITY.INVISIBLE : Frustum3d.VISIBILITY.PARTIALLY;
                     }
                 }
             }
@@ -267,7 +293,10 @@ namespace SpaceEngine.Core.Terrain.Deformation
 
         public override void SetUniforms(TerrainNode node, Material target)
         {
-            if (target == null || node == null) return;
+            if (target == null || node == null)
+            {
+                return;
+            }
 
             base.SetUniforms(node, target);
 

@@ -42,69 +42,70 @@
 //-----------------------------------------------------------------------------
 float HeightMapSun(float3 ppoint)
 {
-	// Flows
-	float3 p = ppoint * colorDistFreq + Randomize;
-	float3 dist = 2.5 * Fbm3D(p * 0.5, 5);
-	float flows = Fbm(p * 7.5 + dist, 3);
+    // Flows
+    float3 p = ppoint * colorDistFreq + Randomize;
+    float3 dist = 2.5 * Fbm3D(p * 0.5, 5);
+    float flows = Fbm(p * 7.5 + dist, 3);
 
-	// Granularity
-	noiseOctaves = 5;
-	p = ppoint * hillsFreq + Randomize;
-	dist = dunesMagn * Fbm3D(p * 0.2);
-	float2 cell = Cell3Noise2(p + dist);
-	float gran = smoothstep(0.1, 1.0, sqrt(abs(cell.y - cell.x))) - 0.5;
+    // Granularity
+    noiseOctaves = 5;
+    p = ppoint * hillsFreq + Randomize;
+    dist = dunesMagn * Fbm3D(p * 0.2);
+    float2 cell = Cell3Noise2(p + dist);
+    float gran = smoothstep(0.1, 1.0, sqrt(abs(cell.y - cell.x))) - 0.5;
 
-	// Solar spots
-	float botMask = 1.0;
-	float filMask = 0.0;
-	float filaments = 0.0;
+    // Solar spots
+    float botMask = 1.0;
+    float filMask = 0.0;
+    float filaments = 0.0;
 
-	if (mareSqrtDensity > 0.01)
-	{
-		noiseOctaves = 5;
-		SolarSpotsHeightNoise(ppoint, botMask, filMask, filaments);
-	}
+    if (mareSqrtDensity > 0.01)
+    {
+        noiseOctaves = 5;
+        SolarSpotsHeightNoise(ppoint, botMask, filMask, filaments);
+    }
 
-	const float surfHeight = 1.0;
-	const float filHeight  = 0.6;
-	const float spotHeight = 0.5;
+    const float surfHeight = 1.0;
+    const float filHeight = 0.6;
+    const float spotHeight = 0.5;
 
-	//return (flows * 0.1 + gran * (1.0 - filMask)) * lerp(spotHeight, surfHeight, botMask) + filMask * lerp(spotHeight, filHeight, filaments);
-	//return (0.8 + flows * 0.1) * botMask + gran * 0.03 * (1.0 - filMask) + saturate(filaments) * 0.1 * filMask;
-	return (0.8 + flows * 0.1) * colorDistMagn * botMask + gran * hillsMagn * (1.0 - filMask) + saturate(filaments) * 0.1 * hillsMagn * filMask;
+    //return (flows * 0.1 + gran * (1.0 - filMask)) * lerp(spotHeight, surfHeight, botMask) + filMask * lerp(spotHeight, filHeight, filaments);
+    //return (0.8 + flows * 0.1) * botMask + gran * 0.03 * (1.0 - filMask) + saturate(filaments) * 0.1 * filMask;
+    return (0.8 + flows * 0.1) * colorDistMagn * botMask + gran * hillsMagn * (1.0 - filMask) + saturate(filaments) * 0.1 * hillsMagn * filMask;
 }
 
 float GlowMapSun(float3 ppoint)
 {
-	// Flows
-	float3 p = ppoint * colorDistFreq + Randomize;
-	float3 dist = 2.5 * Fbm3D(p * 0.5, 5);
-	float flows = Fbm(p * 7.5 + dist, 3);
+    // Flows
+    float3 p = ppoint * colorDistFreq + Randomize;
+    float3 dist = 2.5 * Fbm3D(p * 0.5, 5);
+    float flows = Fbm(p * 7.5 + dist, 3);
 
-	// Granularity
-	noiseOctaves = 5;
-	p = ppoint * hillsFreq + Randomize;
-	dist = dunesMagn * Fbm3D(p * 0.2);
-	float2 cell = Cell3Noise2(p + dist);
-	float gran = smoothstep(0.1, 1.0, sqrt(abs(cell.y - cell.x)));
+    // Granularity
+    noiseOctaves = 5;
+    p = ppoint * hillsFreq + Randomize;
+    dist = dunesMagn * Fbm3D(p * 0.2);
+    float2 cell = Cell3Noise2(p + dist);
+    float gran = smoothstep(0.1, 1.0, sqrt(abs(cell.y - cell.x)));
 
-	// Solar spots
-	float botMask   = 1.0;
-	float filMask   = 0.0;
-	float filaments = 0.0;
+    // Solar spots
+    float botMask = 1.0;
+    float filMask = 0.0;
+    float filaments = 0.0;
 
-	if (mareSqrtDensity > 0.01)
-	{
-		noiseOctaves = 5;
-		SolarSpotsTempNoise(ppoint, botMask, filMask, filaments);
-	}
+    if (mareSqrtDensity > 0.01)
+    {
+        noiseOctaves = 5;
+        SolarSpotsTempNoise(ppoint, botMask, filMask, filaments);
+    }
 
-	float granTopTemp = colorParams.z;
-	float granBotTemp = colorParams.w;
-	float surfTemp = 1.0;
-	float filTemp  = granTopTemp;
-	float spotTemp = granBotTemp;
+    float granTopTemp = colorParams.z;
+    float granBotTemp = colorParams.w;
+    float surfTemp = 1.0;
+    float filTemp = granTopTemp;
+    float spotTemp = granBotTemp;
 
-	return (flows * 0.1 + lerp(granBotTemp, granTopTemp, gran) * (1.0 - filMask)) * lerp(spotTemp, surfTemp, botMask) + filMask * lerp(spotTemp, filTemp, filaments);
+    return (flows * 0.1 + lerp(granBotTemp, granTopTemp, gran) * (1.0 - filMask)) * lerp(spotTemp, surfTemp, botMask) + filMask * lerp(spotTemp, filTemp, filaments);
 }
+
 //-----------------------------------------------------------------------------

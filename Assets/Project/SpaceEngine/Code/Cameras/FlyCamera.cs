@@ -1,4 +1,5 @@
 #region License
+
 // Procedural planet generator.
 // 
 // Copyright (C) 2015-2023 Denis Ovchinnikov [zameran] 
@@ -31,6 +32,7 @@
 // Creation Date: Undefined
 // Creation Time: Undefined
 // Creator: zameran
+
 #endregion
 
 using System.ComponentModel;
@@ -54,6 +56,26 @@ namespace SpaceEngine.Cameras
             Far
         }
 
+        public ClipPlanesControl ClipPlanesControlType = ClipPlanesControl.NearFar;
+
+        public float Speed = 1.0f;
+        public float RotationSpeed = 1.0f;
+
+        private bool Aligned;
+
+        private float CurrentSpeed;
+        private float DistanceToAlign;
+        private float DistanceToCore;
+        private float FarClipPlaneCache;
+        private float NearClipPlaneCache;
+
+        private Ray RayScreen;
+        private Vector3 Rotation = Vector3.zero;
+        private bool Supercruise;
+        private Quaternion TargetRotation = Quaternion.identity;
+
+        private Vector3 Velocity = Vector3.zero;
+
         public Body Body => GodManager.Instance.ActiveBody;
 
         public float NearClipPlane
@@ -68,39 +90,6 @@ namespace SpaceEngine.Cameras
             set => CameraComponent.farClipPlane = value;
         }
 
-        public ClipPlanesControl ClipPlanesControlType = ClipPlanesControl.NearFar;
-
-        public float Speed = 1.0f;
-        public float RotationSpeed = 1.0f;
-
-        private Vector3 Velocity = Vector3.zero;
-        private Vector3 Rotation = Vector3.zero;
-        private Quaternion TargetRotation = Quaternion.identity;
-
-        private float CurrentSpeed;
-        private float DistanceToAlign;
-        private float DistanceToCore;
-        private float NearClipPlaneCache;
-        private float FarClipPlaneCache;
-
-        private bool Aligned = false;
-        private bool Supercruise = false;
-
-        private Ray RayScreen;
-
-        protected override void Init()
-        {
-            NearClipPlaneCache = NearClipPlane;
-            FarClipPlaneCache = FarClipPlane;
-
-            Rotation = new Vector3(transform.eulerAngles.x, transform.eulerAngles.y, 0); // NOTE : Prevent crazy rotation on start...
-
-            UpdateDistances();
-            UpdateClipPlanes();
-
-            MainRenderer.Instance.SortBodies();
-        }
-
         protected override void Update()
         {
             base.Update();
@@ -113,7 +102,7 @@ namespace SpaceEngine.Cameras
                 {
                     RayScreen = CameraComponent.ScreenPointToRay(Input.mousePosition);
 
-                    var gravityVector = (RayScreen.origin + RayScreen.direction * 10.0f) - transform.position;
+                    var gravityVector = RayScreen.origin + RayScreen.direction * 10.0f - transform.position;
 
                     TargetRotation = Quaternion.LookRotation(gravityVector, transform.up);
                     Rotation.z = 0;
@@ -173,13 +162,24 @@ namespace SpaceEngine.Cameras
                 CurrentSpeed = Speed;
 
                 if (Input.GetKey(KeyCode.LeftShift))
+                {
                     CurrentSpeed = Speed * 10f;
+                }
+
                 if (Input.GetKey(KeyCode.LeftControl))
+                {
                     CurrentSpeed = Speed * 100f;
+                }
+
                 if (Input.GetKey(KeyCode.LeftShift) && Input.GetKey(KeyCode.LeftControl))
+                {
                     CurrentSpeed = Speed * 1000f;
+                }
+
                 if (Input.GetKey(KeyCode.LeftAlt))
+                {
                     CurrentSpeed = Speed / 10f;
+                }
 
                 if (!MouseOverUI)
                 {
@@ -187,7 +187,10 @@ namespace SpaceEngine.Cameras
                     Speed = Mathf.Clamp(Speed, 1.0f, 100000000.0f);
                 }
 
-                if (Supercruise) CurrentSpeed *= 1000.0f;
+                if (Supercruise)
+                {
+                    CurrentSpeed *= 1000.0f;
+                }
 
                 transform.Translate(Velocity * CurrentSpeed);
             }
@@ -200,6 +203,19 @@ namespace SpaceEngine.Cameras
             UpdateDistances();
             UpdateClipPlanes();
             UpdatePseudoCollision();
+        }
+
+        protected override void Init()
+        {
+            NearClipPlaneCache = NearClipPlane;
+            FarClipPlaneCache = FarClipPlane;
+
+            Rotation = new Vector3(transform.eulerAngles.x, transform.eulerAngles.y, 0); // NOTE : Prevent crazy rotation on start...
+
+            UpdateDistances();
+            UpdateClipPlanes();
+
+            MainRenderer.Instance.SortBodies();
         }
 
         private void UpdatePseudoCollision()
@@ -247,7 +263,7 @@ namespace SpaceEngine.Cameras
         private void UpdateClipPlanes()
         {
             // NOTE : Body's shape dependent...
-            var h = Body != null ? (DistanceToCore - Body.Size - (float)Body.HeightZ) : 1.0f;
+            var h = Body != null ? DistanceToCore - Body.Size - (float)Body.HeightZ : 1.0f;
 
             if (h < 1.0f)
             {
@@ -328,10 +344,13 @@ namespace SpaceEngine.Cameras
 
         private void RotateAround(bool staticRotation = false)
         {
-            var mouseX = (Input.GetAxis("Mouse Y") * 480.0f) / CameraComponent.pixelWidth;
-            var mouseY = (Input.GetAxis("Mouse X") * 440.0f) / CameraComponent.pixelHeight;
+            var mouseX = Input.GetAxis("Mouse Y") * 480.0f / CameraComponent.pixelWidth;
+            var mouseY = Input.GetAxis("Mouse X") * 440.0f / CameraComponent.pixelHeight;
 
-            if (staticRotation) Rotation = Vector3.zero;
+            if (staticRotation)
+            {
+                Rotation = Vector3.zero;
+            }
 
             Rotation.x += mouseX;
             Rotation.y -= mouseY;
@@ -390,8 +409,8 @@ namespace SpaceEngine.Cameras
             var currentRotation = Quaternion.Euler(rotationVector + TargetRotation.eulerAngles);
             var currentPosition = currentRotation * distanceVector + origin;
 
-            transform.rotation = Quaternion.Slerp(transform.rotation, currentRotation, (Time.deltaTime * rotationSpeed) * 10.0f);
-            transform.position = Vector3.Slerp(transform.position, currentPosition, (Time.deltaTime * rotationSpeed) * 5.0f);
+            transform.rotation = Quaternion.Slerp(transform.rotation, currentRotation, Time.deltaTime * rotationSpeed * 10.0f);
+            transform.position = Vector3.Slerp(transform.position, currentPosition, Time.deltaTime * rotationSpeed * 5.0f);
         }
     }
 }

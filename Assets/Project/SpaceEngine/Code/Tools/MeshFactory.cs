@@ -1,4 +1,5 @@
 ﻿#region License
+
 // Procedural planet generator.
 // 
 // Copyright (C) 2015-2023 Denis Ovchinnikov [zameran] 
@@ -31,6 +32,7 @@
 // Creation Date: Undefined
 // Creation Time: Undefined
 // Creator: zameran
+
 #endregion
 
 using System;
@@ -44,7 +46,12 @@ namespace SpaceEngine.Tools
 {
     public static class MeshFactory
     {
-        public enum PLANE { XY, XZ, YZ }
+        public enum PLANE
+        {
+            XY,
+            XZ,
+            YZ
+        }
 
         public static Mesh MakeOceanPlane(int w, int h, float offset, float scale)
         {
@@ -73,11 +80,11 @@ namespace SpaceEngine.Tools
                 {
                     indices[index++] = x + y * w;
                     indices[index++] = x + (y + 1) * w;
-                    indices[index++] = (x + 1) + y * w;
+                    indices[index++] = x + 1 + y * w;
 
                     indices[index++] = x + (y + 1) * w;
-                    indices[index++] = (x + 1) + (y + 1) * w;
-                    indices[index++] = (x + 1) + y * w;
+                    indices[index++] = x + 1 + (y + 1) * w;
+                    indices[index++] = x + 1 + y * w;
                 }
             }
 
@@ -95,7 +102,10 @@ namespace SpaceEngine.Tools
 
         public static Mesh MakePlane(int detail, PLANE plane, bool clampedUV, bool reversedIndices, bool generateBorders = false)
         {
-            if (detail >= 255) { throw new ArgumentOutOfRangeException("detail", detail, "Detail can't be bigger or equal to 255!"); }
+            if (detail >= 255)
+            {
+                throw new ArgumentOutOfRangeException("detail", detail, "Detail can't be bigger or equal to 255!");
+            }
 
             var borders = generateBorders ? detail * 4 : 0;
 
@@ -118,14 +128,17 @@ namespace SpaceEngine.Tools
                         case (int)PLANE.XY:
                             vertex = new Vector3(uv.x, uv.y, 0.0f);
                             normal = new Vector3(0.0f, 0.0f, 1.0f);
+
                             break;
                         case (int)PLANE.XZ:
                             vertex = new Vector3(uv.x, 0.0f, uv.y);
                             normal = new Vector3(0.0f, 1.0f, 0.0f);
+
                             break;
                         case (int)PLANE.YZ:
                             vertex = new Vector3(0.0f, uv.x, uv.y);
                             normal = new Vector3(1.0f, 0.0f, 0.0f);
+
                             break;
                     }
 
@@ -143,21 +156,21 @@ namespace SpaceEngine.Tools
                     {
                         indices.Add(x + y * detail);
                         indices.Add(x + (y + 1) * detail);
-                        indices.Add((x + 1) + y * detail);
+                        indices.Add(x + 1 + y * detail);
 
                         indices.Add(x + (y + 1) * detail);
-                        indices.Add((x + 1) + (y + 1) * detail);
-                        indices.Add((x + 1) + y * detail);
+                        indices.Add(x + 1 + (y + 1) * detail);
+                        indices.Add(x + 1 + y * detail);
                     }
                     else
                     {
                         indices.Add(x + y * detail);
-                        indices.Add((x + 1) + y * detail);
+                        indices.Add(x + 1 + y * detail);
                         indices.Add(x + (y + 1) * detail);
 
                         indices.Add(x + (y + 1) * detail);
-                        indices.Add((x + 1) + y * detail);
-                        indices.Add((x + 1) + (y + 1) * detail);
+                        indices.Add(x + 1 + y * detail);
+                        indices.Add(x + 1 + (y + 1) * detail);
                     }
                 }
             }
@@ -296,7 +309,7 @@ namespace SpaceEngine.Tools
             var uvs = new List<Vector2>();
             var indices = new List<int>();
 
-            var angleTotal = (Mathf.PI * 2.0f) / segmentCount;
+            var angleTotal = Mathf.PI * 2.0f / segmentCount;
             var angleStep = angleTotal / segmentDetail;
             var coordStep = 1.0f / segmentDetail;
 
@@ -371,7 +384,7 @@ namespace SpaceEngine.Tools
 
             var slices = segmentDetail + 1;
             var rings = radiusDetail + 1;
-            var yawStep = (Mathf.PI * 2.0f) / segmentCount / segmentDetail;
+            var yawStep = Mathf.PI * 2.0f / segmentCount / segmentDetail;
             var sliceStep = 1.0f / segmentDetail;
             var ringStep = 1.0f / radiusDetail;
 
@@ -454,10 +467,10 @@ namespace SpaceEngine.Tools
 
             Vector2[] uv =
             {
-                new Vector2(0, 1),
-                new Vector2(1, 1),
-                new Vector2(0, 0),
-                new Vector2(1, 0)
+                new(0, 1),
+                new(1, 1),
+                new(0, 0),
+                new(1, 0)
             };
 
             var triangles = new[]
@@ -547,7 +560,7 @@ namespace SpaceEngine.Tools
 
                 Vector3.OrthoNormalize(ref n, ref t);
 
-                tangents.Add(VectorHelper.MakeFrom(t, (Vector3.Dot(Vector3.Cross(n, t), tan2[vertexIndex]) < 0.0f) ? -1.0f : 1.0f));
+                tangents.Add(VectorHelper.MakeFrom(t, Vector3.Dot(Vector3.Cross(n, t), tan2[vertexIndex]) < 0.0f ? -1.0f : 1.0f));
             }
 
             theMesh.SetTangents(tangents);
@@ -555,20 +568,6 @@ namespace SpaceEngine.Tools
 
         public static class IcoSphere
         {
-            private struct TriangleIndices
-            {
-                public readonly int v1;
-                public readonly int v2;
-                public readonly int v3;
-
-                public TriangleIndices(int v1, int v2, int v3)
-                {
-                    this.v1 = v1;
-                    this.v2 = v2;
-                    this.v3 = v3;
-                }
-            }
-
             private static int GetMiddlePoint(int p1, int p2, ref List<Vector3> vertices, ref Dictionary<long, int> cache, float radius)
             {
                 var firstIsSmaller = p1 < p2;
@@ -579,16 +578,20 @@ namespace SpaceEngine.Tools
                 var key = (smallerIndex << 32) + greaterIndex;
 
                 int ret;
-                if (cache.TryGetValue(key, out ret)) { return ret; }
+
+                if (cache.TryGetValue(key, out ret))
+                {
+                    return ret;
+                }
 
                 var point1 = vertices[p1];
                 var point2 = vertices[p2];
                 var middle = new Vector3
-                (
-                    (point1.x + point2.x) / 2.0f,
-                    (point1.y + point2.y) / 2.0f,
-                    (point1.z + point2.z) / 2.0f
-                );
+                    (
+                     (point1.x + point2.x) / 2.0f,
+                     (point1.y + point2.y) / 2.0f,
+                     (point1.z + point2.z) / 2.0f
+                    );
 
                 var i = vertices.Count;
 
@@ -704,6 +707,20 @@ namespace SpaceEngine.Tools
                 mesh.hideFlags = HideFlags.DontSave;
 
                 return mesh;
+            }
+
+            private struct TriangleIndices
+            {
+                public readonly int v1;
+                public readonly int v2;
+                public readonly int v3;
+
+                public TriangleIndices(int v1, int v2, int v3)
+                {
+                    this.v1 = v1;
+                    this.v2 = v2;
+                    this.v3 = v3;
+                }
             }
         }
     }

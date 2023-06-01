@@ -1,4 +1,5 @@
 ﻿#region License
+
 // Procedural planet generator.
 // 
 // Copyright (C) 2015-2023 Denis Ovchinnikov [zameran] 
@@ -31,6 +32,7 @@
 // Creation Date: Undefined
 // Creation Time: Undefined
 // Creator: zameran
+
 #endregion
 
 using System.Linq;
@@ -43,21 +45,23 @@ namespace SpaceEngine.Debugging
     {
         public GUISkin GUISkin;
 
+        public bool ShowAdditionalInfo = true;
+        public bool ShowDebugGUIBounds;
+
         public GUIStyle BoldLabelStyle { get; private set; }
         public GUIStyle ImageLabelStyle { get; private set; }
 
-        public bool ShowAdditionalInfo = true;
-        public bool ShowDebugGUIBounds = false;
-
         public Vector2 MousePosition { get; private set; }
 
-        public bool AtLeastOneEnabled { get { return SwitchableComponents.Any(gui => gui.enabled == true); } }
+        public bool AtLeastOneEnabled => SwitchableComponents.Any(gui => gui.enabled);
 
         public bool MouseOverGUIHotControl => GUIUtility.hotControl != 0;
 
-        public bool MouseOverGUIRect { get { return DrawAbleComponents.Any(gui => gui.isActiveAndEnabled && gui.debugInfoDrawBounds.Contains(MousePosition) && !ClickableThroughComponents.Contains(gui)); } }
+        public bool MouseOverGUIRect => DrawAbleComponents.Any(gui => gui.isActiveAndEnabled && gui.debugInfoDrawBounds.Contains(MousePosition) && !ClickableThroughComponents.Contains(gui));
 
         public bool MouseOverGUI => MouseOverGUIHotControl || MouseOverGUIRect;
+
+        protected override KeyCode SwitchKey => KeyCode.F5;
 
         protected override void Update()
         {
@@ -74,11 +78,23 @@ namespace SpaceEngine.Debugging
                 var labelStyle = GUI.skin.FindStyle("label");
                 var labelImage = GUI.skin.FindStyle("label_image");
 
-                if (labelBoldStyle != null) BoldLabelStyle = labelBoldStyle;
-                else if (labelStyle != null) BoldLabelStyle = labelStyle;
+                if (labelBoldStyle != null)
+                {
+                    BoldLabelStyle = labelBoldStyle;
+                }
+                else if (labelStyle != null)
+                {
+                    BoldLabelStyle = labelStyle;
+                }
 
-                if (labelImage != null) ImageLabelStyle = labelImage;
-                else if (labelStyle != null) ImageLabelStyle = labelStyle;
+                if (labelImage != null)
+                {
+                    ImageLabelStyle = labelImage;
+                }
+                else if (labelStyle != null)
+                {
+                    ImageLabelStyle = labelStyle;
+                }
             }
 
             if (ShowAdditionalInfo && !AtLeastOneEnabled)
@@ -90,7 +106,5 @@ namespace SpaceEngine.Debugging
                 });
             }
         }
-
-        protected override KeyCode SwitchKey => KeyCode.F5;
     }
 }

@@ -54,11 +54,11 @@
  * You can obtain a specific license from Inria: proland-licensing@inria.fr.
  */
 
- /*
- * Authors: Eric Bruneton, Antoine Begault, Guillaume Piolat.
- * Modified and ported to Unity by Justin Hawkins 2014
- * Modified by Denis Ovchinnikov 2015-2023
- */
+/*
+* Authors: Eric Bruneton, Antoine Begault, Guillaume Piolat.
+* Modified and ported to Unity by Justin Hawkins 2014
+* Modified by Denis Ovchinnikov 2015-2023
+*/
 
 #if !defined (MATH)
 #include "../Math.cginc"
@@ -77,7 +77,7 @@ float _VarianceSize;
 
 RWTexture3D<float> des;
 
-float GetSlopeVariances(float2 k, float A, float B, float C, float2 spectrumSample) 
+float GetSlopeVariances(float2 k, float A, float B, float C, float2 spectrumSample)
 {
     float w = 1.0 - exp(A * k.x * k.x + B * k.x * k.y + C * k.y * k.y);
     float2 kw = k * w;
@@ -86,14 +86,14 @@ float GetSlopeVariances(float2 k, float A, float B, float C, float2 spectrumSamp
 }
 
 [numthreads(4,4,4)]
-void CSMain (uint3 id : SV_DispatchThreadID)
+void CSMain(uint3 id : SV_DispatchThreadID)
 {
     const float SCALE = 10.0;
-    
+
     float a = id.x;
     float b = id.y;
     float c = id.z;
-    
+
     float A = pow(a / (_VarianceSize - 1.0), 4.0) * SCALE;
     float C = pow(c / (_VarianceSize - 1.0), 4.0) * SCALE;
     float B = (2.0 * b / (_VarianceSize - 1.0) - 1.0) * sqrt(A * C);
@@ -101,22 +101,22 @@ void CSMain (uint3 id : SV_DispatchThreadID)
     A = -0.5 * A;
     B = -B;
     C = -0.5 * C;
-    
+
     float slopeVariances = _SlopeVarianceDelta;
-    
+
     int size = _Size;
 
-    for (int x = 0; x < size; x++) 
+    for (int x = 0; x < size; x++)
     {
         for (int y = 0; y < size; y++)
-         {
+        {
             int i = x >= _Size / 2.0 ? x - size : x;
             int j = y >= _Size / 2.0 ? y - size : y;
 
             float2 k = M_PI2 * float2(i, j);
 
-            float4 spectrum01 = _Spectrum01[uint2(x,y)];
-            float4 spectrum23 = _Spectrum23[uint2(x,y)];
+            float4 spectrum01 = _Spectrum01[uint2(x, y)];
+            float4 spectrum23 = _Spectrum23[uint2(x, y)];
 
             slopeVariances += GetSlopeVariances(k / _GridSizes.x, A, B, C, spectrum01.xy);
             slopeVariances += GetSlopeVariances(k / _GridSizes.y, A, B, C, spectrum01.zw);
@@ -124,6 +124,6 @@ void CSMain (uint3 id : SV_DispatchThreadID)
             slopeVariances += GetSlopeVariances(k / _GridSizes.w, A, B, C, spectrum23.zw);
         }
     }
-     
+
     des[id] = slopeVariances;
 }

@@ -1,4 +1,5 @@
 ﻿#region License
+
 // Procedural planet generator.
 //  
 // Copyright (C) 2015-2023 Denis Ovchinnikov [zameran] 
@@ -31,6 +32,7 @@
 // Creation Date: 2017.02.24
 // Creation Time: 11:18 AM
 // Creator: zameran
+
 #endregion
 
 using System.Collections.Generic;

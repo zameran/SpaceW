@@ -1,4 +1,5 @@
 ﻿#region License
+
 // Procedural planet generator.
 //  
 // Copyright (C) 2015-2023 Denis Ovchinnikov [zameran] 
@@ -31,6 +32,7 @@
 // Creation Date: 2017.03.16
 // Creation Time: 2:47 PM
 // Creator: zameran
+
 #endregion
 
 using SpaceEngine.Tools;
@@ -40,7 +42,12 @@ namespace SpaceEngine.Debugging
 {
     public class DebugGUIInfo : DebugGUI
     {
-        private readonly string[] InputInfo = new string[]
+        private readonly string[] InfoAdditional =
+        {
+            "WARNING! Float precision!"
+        };
+
+        private readonly string[] InputInfo =
         {
             "Mouse Scrollwheel to control speed.",
             "Left mouse button to orientation.",
@@ -60,11 +67,6 @@ namespace SpaceEngine.Debugging
             "ESC to pause."
         };
 
-        private readonly string[] InfoAdditional = new string[]
-        {
-            "WARNING! Float precision!"
-        };
-
         protected override void OnGUI()
         {
             base.OnGUI();
@@ -76,23 +78,11 @@ namespace SpaceEngine.Debugging
         {
             ScrollPosition = GUILayout.BeginScrollView(ScrollPosition, false, true);
 
-            GUILayoutExtensions.VerticalBoxed("Input info: ", GUISkin, () =>
-            {
-                GUILayoutExtensions.VerticalBoxed("", GUISkin, () =>
-                {
-                    DrawLabelLines(InputInfo);
-                });
-            });
+            GUILayoutExtensions.VerticalBoxed("Input info: ", GUISkin, () => { GUILayoutExtensions.VerticalBoxed("", GUISkin, () => { DrawLabelLines(InputInfo); }); });
 
             GUILayoutExtensions.SpacingSeparator();
 
-            GUILayoutExtensions.VerticalBoxed("Additional info: ", GUISkin, () =>
-            {
-                GUILayoutExtensions.VerticalBoxed("", GUISkin, () =>
-                {
-                    DrawLabelLines(InfoAdditional);
-                });
-            });
+            GUILayoutExtensions.VerticalBoxed("Additional info: ", GUISkin, () => { GUILayoutExtensions.VerticalBoxed("", GUISkin, () => { DrawLabelLines(InfoAdditional); }); });
 
             GUILayoutExtensions.SpacingSeparator();
 

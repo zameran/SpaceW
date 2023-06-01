@@ -1,4 +1,5 @@
 ﻿#region License
+
 // Procedural planet generator.
 //  
 // Copyright (C) 2015-2023 Denis Ovchinnikov [zameran] 
@@ -31,6 +32,7 @@
 // Creation Date: 2017.03.28
 // Creation Time: 2:18 PM
 // Creator: zameran
+
 #endregion
 
 using System;
@@ -43,10 +45,10 @@ namespace SpaceEngine.Core.Preprocess.Terrain.InputMap
         public Texture2D Texture;
 
         [SerializeField]
-        private bool FlipX = false;
+        private bool FlipX;
 
         [SerializeField]
-        private bool FlipY = false;
+        private bool FlipY;
 
         public override int Width => Texture.width;
 
@@ -57,15 +59,25 @@ namespace SpaceEngine.Core.Preprocess.Terrain.InputMap
         /// <inheritdoc />
         protected override void Awake()
         {
-            if (Texture == null) { throw new NullReferenceException("Please, provide an input map! Current input is null!"); }
+            if (Texture == null)
+            {
+                throw new NullReferenceException("Please, provide an input map! Current input is null!");
+            }
 
             base.Awake();
         }
 
         public override Vector4 GetValue(int x, int y)
         {
-            if (FlipX) x = Width - x - 1;
-            if (FlipY) y = Height - y - 1;
+            if (FlipX)
+            {
+                x = Width - x - 1;
+            }
+
+            if (FlipY)
+            {
+                y = Height - y - 1;
+            }
 
             return Texture.GetPixel(x, y);
         }

@@ -1,4 +1,5 @@
 ﻿#region License
+
 // Procedural planet generator.
 //  
 // Copyright (C) 2015-2023 Denis Ovchinnikov [zameran] 
@@ -31,6 +32,7 @@
 // Creation Date: 2017.05.31
 // Creation Time: 12:52 AM
 // Creator: zameran
+
 #endregion
 
 using System;
@@ -43,66 +45,42 @@ namespace SpaceEngine.Core.Octree
     public class PointOctreeNode<TType> where TType : struct, IEquatable<TType>
     {
         /// <summary>
-        /// Center of this node.
-        /// </summary>
-        public Vector3 Center { get; private set; }
-
-        /// <summary>
-        /// Length of the sides of this node.
-        /// </summary>
-        public float SideLength { get; private set; }
-
-        /// <summary>
-        /// Minimum size for a node in this octree.
-        /// </summary>
-        private float MinSize;
-
-        /// <summary>
-        /// Bounding box that represents this node.
-        /// </summary>
-        private Bounds Bounds = default(Bounds);
-
-        /// <summary>
-        /// Objects in this node.
-        /// </summary>
-        private readonly List<OctreeObject> Objects = new List<OctreeObject>();
-
-        /// <summary>
-        /// Child nodes.
-        /// </summary>
-        private PointOctreeNode<TType>[] Children = null;
-
-        /// <summary>
-        /// Bounds of potential children to this node.
-        /// </summary>
-        private Bounds[] ChildBounds;
-
-        /// <summary>
-        /// Split limit, count to handle until split.
+        ///     Split limit, count to handle until split.
         /// </summary>
         private const int NUM_OBJECTS_ALLOWED = 8;
 
         /// <summary>
-        /// For reverting the bounds size after temporary changes.
+        ///     Objects in this node.
+        /// </summary>
+        private readonly List<OctreeObject> Objects = new();
+
+        /// <summary>
+        ///     For reverting the bounds size after temporary changes.
         /// </summary>
         private Vector3 ActualBoundsSize;
 
         /// <summary>
-        /// This node is not splitted?
+        ///     Bounding box that represents this node.
         /// </summary>
-        public bool IsLeaf => Children == null;
+        private Bounds Bounds;
 
         /// <summary>
-        /// An object in the octree.
+        ///     Bounds of potential children to this node.
         /// </summary>
-        protected class OctreeObject
-        {
-            public TType Object;
-            public Vector3 Position;
-        }
+        private Bounds[] ChildBounds;
 
         /// <summary>
-        /// Constructor.
+        ///     Child nodes.
+        /// </summary>
+        private PointOctreeNode<TType>[] Children;
+
+        /// <summary>
+        ///     Minimum size for a node in this octree.
+        /// </summary>
+        private float MinSize;
+
+        /// <summary>
+        ///     Constructor.
         /// </summary>
         /// <param name="baseLengthVal">Length of this node, not taking looseness into account.</param>
         /// <param name="minSizeVal">Minimum size of nodes in this octree.</param>
@@ -113,14 +91,32 @@ namespace SpaceEngine.Core.Octree
         }
 
         /// <summary>
-        /// Add an object.
+        ///     Center of this node.
+        /// </summary>
+        public Vector3 Center { get; private set; }
+
+        /// <summary>
+        ///     Length of the sides of this node.
+        /// </summary>
+        public float SideLength { get; private set; }
+
+        /// <summary>
+        ///     This node is not splitted?
+        /// </summary>
+        public bool IsLeaf => Children == null;
+
+        /// <summary>
+        ///     Add an object.
         /// </summary>
         /// <param name="obj">Object to add.</param>
         /// <param name="position">Position of the object.</param>
         /// <returns></returns>
         public bool Add(TType obj, Vector3 position)
         {
-            if (!Encapsulates(Bounds, position)) { return false; }
+            if (!Encapsulates(Bounds, position))
+            {
+                return false;
+            }
 
             SubAdd(obj, position);
 
@@ -128,7 +124,7 @@ namespace SpaceEngine.Core.Octree
         }
 
         /// <summary>
-        /// Remove an object. Makes the assumption that the object only exists once in the tree.
+        ///     Remove an object. Makes the assumption that the object only exists once in the tree.
         /// </summary>
         /// <param name="obj">Object to remove.</param>
         /// <returns>True if the object was removed successfully.</returns>
@@ -152,13 +148,16 @@ namespace SpaceEngine.Core.Octree
                 {
                     removed = Children[i].Remove(obj);
 
-                    if (removed) break;
+                    if (removed)
+                    {
+                        break;
+                    }
                 }
             }
 
             if (removed && !IsLeaf)
-            {
                 // Check if we should merge nodes now that we've removed an item...
+            {
                 if (ShouldMerge())
                 {
                     Merge();
@@ -169,7 +168,7 @@ namespace SpaceEngine.Core.Octree
         }
 
         /// <summary>
-        /// Return objects that are within <paramref name="maxDistance"/> of the specified ray.
+        ///     Return objects that are within <paramref name="maxDistance" /> of the specified ray.
         /// </summary>
         /// <param name="ray">The ray.</param>
         /// <param name="maxDistance">Maximum distance from the ray to consider.</param>
@@ -185,7 +184,10 @@ namespace SpaceEngine.Core.Octree
 
             Bounds.size = ActualBoundsSize;
 
-            if (!intersected) return;
+            if (!intersected)
+            {
+                return;
+            }
 
             // Check against any objects in this node...
             for (var i = 0; i < Objects.Count; i++)
@@ -207,7 +209,7 @@ namespace SpaceEngine.Core.Octree
         }
 
         /// <summary>
-        /// Return objects that are within <paramref name="maxDistance"/> of the specified <paramref name="position"/>.
+        ///     Return objects that are within <paramref name="maxDistance" /> of the specified <paramref name="position" />.
         /// </summary>
         /// <param name="position">Position.</param>
         /// <param name="maxDistance">Maximum distance from the position to consider.</param>
@@ -234,7 +236,7 @@ namespace SpaceEngine.Core.Octree
         }
 
         /// <summary>
-        /// Return nodes that are within <paramref name="maxDistance"/> of the specified <paramref name="position"/>.
+        ///     Return nodes that are within <paramref name="maxDistance" /> of the specified <paramref name="position" />.
         /// </summary>
         /// <param name="position">Position.</param>
         /// <param name="maxDistance">Maximum distance from the position to consider.</param>
@@ -257,9 +259,9 @@ namespace SpaceEngine.Core.Octree
         }
 
         /// <summary>
-        /// Return all nodes recursively.
+        ///     Return all nodes recursively.
         /// </summary>
-        /// <param name="result">List of all nodes in <see cref="PointOctree{T}"/></param>
+        /// <param name="result">List of all nodes in <see cref="PointOctree{T}" /></param>
         public void GetNodes(ref List<PointOctreeNode<TType>> result)
         {
             result.Add(this);
@@ -274,7 +276,7 @@ namespace SpaceEngine.Core.Octree
         }
 
         /// <summary>
-        /// Return node containing objects.
+        ///     Return node containing objects.
         /// </summary>
         /// <returns>Containing objects.</returns>
         public IEnumerable<TType> GetNodeObjects()
@@ -283,7 +285,7 @@ namespace SpaceEngine.Core.Octree
         }
 
         /// <summary>
-        /// Set the 8 children of this octree.
+        ///     Set the 8 children of this octree.
         /// </summary>
         /// <param name="childOctrees">The 8 new child nodes.</param>
         public void SetChildren(ref PointOctreeNode<TType>[] childOctrees)
@@ -299,7 +301,7 @@ namespace SpaceEngine.Core.Octree
         }
 
         /// <summary>
-        /// Draws node boundaries visually for debugging.
+        ///     Draws node boundaries visually for debugging.
         /// </summary>
         /// <param name="depth">Used for recurcive calls to this method.</param>
         public void DrawAllBounds(float depth = 0)
@@ -326,7 +328,7 @@ namespace SpaceEngine.Core.Octree
         }
 
         /// <summary>
-        /// Draws the bounds of all objects in the tree visually for debugging.
+        ///     Draws the bounds of all objects in the tree visually for debugging.
         /// </summary>
         public void DrawAllObjects()
         {
@@ -352,7 +354,10 @@ namespace SpaceEngine.Core.Octree
 
         public void DrawNodeOutline(Camera camera, Material lineMaterial, int[][] order = null)
         {
-            if (order == null) return;
+            if (order == null)
+            {
+                return;
+            }
 
             if (IsLeaf)
             {
@@ -408,18 +413,25 @@ namespace SpaceEngine.Core.Octree
         }
 
         /// <summary>
-        /// We can shrink the octree if:
-        /// - This node is >= double <see cref="minLength"/> in length...
-        /// - All objects in the root node are within one octant...
-        /// - This node doesn't have children, or does but 7/8 children are empty...
-        /// We can also shrink it? if there are no objects left at all.
+        ///     We can shrink the octree if:
+        ///     - This node is >= double <see cref="minLength" /> in length...
+        ///     - All objects in the root node are within one octant...
+        ///     - This node doesn't have children, or does but 7/8 children are empty...
+        ///     We can also shrink it? if there are no objects left at all.
         /// </summary>
         /// <param name="minLength">Minimum dimensions of a node in this octree.</param>
         /// <returns>The new root, or the existing one if we didn't shrink.</returns>
         public PointOctreeNode<TType> ShrinkIfPossible(float minLength)
         {
-            if (SideLength < (2 * minLength)) { return this; }
-            if (Objects.Count == 0 && Children.Length == 0) { return this; }
+            if (SideLength < 2 * minLength)
+            {
+                return this;
+            }
+
+            if (Objects.Count == 0 && Children.Length == 0)
+            {
+                return this;
+            }
 
             // Check objects in root...
             var bestFit = -1;
@@ -486,14 +498,12 @@ namespace SpaceEngine.Core.Octree
             {
                 return totalCount;
             }
-            else
-            {
-                return totalCount + Children.Sum(child => child.NodesCount());
-            }
+
+            return totalCount + Children.Sum(child => child.NodesCount());
         }
 
         /// <summary>
-        /// Set values for this node. 
+        ///     Set values for this node.
         /// </summary>
         /// <param name="baseLengthVal">Length of this node, not taking looseness into account.</param>
         /// <param name="minSizeVal">Minimum size of nodes in this octree.</param>
@@ -523,14 +533,14 @@ namespace SpaceEngine.Core.Octree
         }
 
         /// <summary>
-        /// Recursive counterpart for <see cref="Add"/> method.
+        ///     Recursive counterpart for <see cref="Add" /> method.
         /// </summary>
         /// <param name="obj">Object to add.</param>
         /// <param name="objPos">Position of the object.</param>
         private void SubAdd(TType obj, Vector3 objPos)
         {
             // We know it fits at this level if we've got this far. Just add if few objects are here, or children would be below min size.
-            if (Objects.Count < NUM_OBJECTS_ALLOWED || (SideLength / 2) < MinSize)
+            if (Objects.Count < NUM_OBJECTS_ALLOWED || SideLength / 2 < MinSize)
             {
                 Objects.Add(new OctreeObject { Object = obj, Position = objPos });
             }
@@ -571,7 +581,7 @@ namespace SpaceEngine.Core.Octree
         }
 
         /// <summary>
-        /// Splits the octree into eight children.
+        ///     Splits the octree into eight children.
         /// </summary>
         private void Split()
         {
@@ -590,9 +600,9 @@ namespace SpaceEngine.Core.Octree
         }
 
         /// <summary>
-        /// Merge all children into this node - the opposite of Split.
-        /// We only have to check one level down since a merge will never happen if the children already have children,
-        /// since that won't happen unless there are already too many objects to merge.
+        ///     Merge all children into this node - the opposite of Split.
+        ///     We only have to check one level down since a merge will never happen if the children already have children,
+        ///     since that won't happen unless there are already too many objects to merge.
         /// </summary>
         private void Merge()
         {
@@ -615,7 +625,7 @@ namespace SpaceEngine.Core.Octree
         }
 
         /// <summary>
-        /// Checks if outerBounds encapsulates the given point.
+        ///     Checks if outerBounds encapsulates the given point.
         /// </summary>
         /// <param name="outerBounds">Outer bounds.</param>
         /// <param name="point">Point.</param>
@@ -626,7 +636,7 @@ namespace SpaceEngine.Core.Octree
         }
 
         /// <summary>
-        /// Find which child node this object would be most likely to fit in.
+        ///     Find which child node this object would be most likely to fit in.
         /// </summary>
         /// <param name="objPos">The object's position.</param>
         /// <returns>One of the eight child octants.</returns>
@@ -636,7 +646,7 @@ namespace SpaceEngine.Core.Octree
         }
 
         /// <summary>
-        /// Checks if there are few enough objects in this node and its children that the children should all be merged into this.
+        ///     Checks if there are few enough objects in this node and its children that the children should all be merged into this.
         /// </summary>
         /// <returns>True there are less or the same abount of objects in this and its children than numObjectsAllowed.</returns>
         private bool ShouldMerge()
@@ -648,8 +658,8 @@ namespace SpaceEngine.Core.Octree
                 foreach (var child in Children)
                 {
                     if (!child.IsLeaf)
-                    {
                         // If any of the *children* have children, there are definitely too many to merge, or the child woudl have been merged already...
+                    {
                         return false;
                     }
 
@@ -662,13 +672,19 @@ namespace SpaceEngine.Core.Octree
 
         public bool HasAnyObjects()
         {
-            if (Objects.Count > 0) return true;
+            if (Objects.Count > 0)
+            {
+                return true;
+            }
 
             if (!IsLeaf)
             {
                 for (byte i = 0; i < 8; i++)
                 {
-                    if (Children[i].HasAnyObjects()) return true;
+                    if (Children[i].HasAnyObjects())
+                    {
+                        return true;
+                    }
                 }
             }
 
@@ -676,7 +692,7 @@ namespace SpaceEngine.Core.Octree
         }
 
         /// <summary>
-        /// Distance from the point to the closest point of the ray.
+        ///     Distance from the point to the closest point of the ray.
         /// </summary>
         /// <param name="ray">The ray.</param>
         /// <param name="point">The point to check distance from the ray.</param>
@@ -684,6 +700,15 @@ namespace SpaceEngine.Core.Octree
         public static float DistanceToRay(Ray ray, Vector3 point)
         {
             return Vector3.Cross(ray.direction, point - ray.origin).magnitude;
+        }
+
+        /// <summary>
+        ///     An object in the octree.
+        /// </summary>
+        protected class OctreeObject
+        {
+            public TType Object;
+            public Vector3 Position;
         }
     }
 }

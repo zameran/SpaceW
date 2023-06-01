@@ -1,4 +1,5 @@
 ﻿#region License
+
 // Procedural planet generator.
 //  
 // Copyright (C) 2015-2023 Denis Ovchinnikov [zameran] 
@@ -31,6 +32,7 @@
 // Creation Date: 2017.10.22
 // Creation Time: 3:14 PM
 // Creator: zameran
+
 #endregion
 
 using SpaceEngine.Tools;
@@ -58,7 +60,7 @@ namespace SpaceEngine.Debugging
             base.OnGUI();
 
             debugInfoDrawBounds = new Rect(Screen.width - debugInfoBounds.x - debugInfoBounds.width,
-                Screen.height - debugInfoBounds.y - debugInfoBounds.height, debugInfoBounds.width, debugInfoBounds.height);
+                                           Screen.height - debugInfoBounds.y - debugInfoBounds.height, debugInfoBounds.width, debugInfoBounds.height);
 
             GUILayout.Window(9999, debugInfoDrawBounds, UI, "Developer Panel");
         }

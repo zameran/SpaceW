@@ -1,4 +1,5 @@
 ﻿#region License
+
 // Procedural planet generator.
 //  
 // Copyright (C) 2015-2023 Denis Ovchinnikov [zameran] 
@@ -31,6 +32,7 @@
 // Creation Date: 2017.05.03
 // Creation Time: 5:24 PM
 // Creator: zameran
+
 #endregion
 
 using System.Collections.Generic;
@@ -42,9 +44,9 @@ namespace SpaceEngine.Debugging
 {
     public abstract class DebugSwitcher<T> : MonoSingleton<DebugSwitcher<T>>, IDebugSwitcher where T : MonoBehaviour
     {
-        public List<T> SwitchableComponents = new List<T>(255);
-        public List<T> DrawAbleComponents = new List<T>(255);
-        public List<T> ClickableThroughComponents = new List<T>(255);
+        public List<T> SwitchableComponents = new(255);
+        public List<T> DrawAbleComponents = new(255);
+        public List<T> ClickableThroughComponents = new(255);
 
         public bool DisableAllOnStart = true;
 
@@ -80,7 +82,10 @@ namespace SpaceEngine.Debugging
             // NOTE : If GUI element implements IDebugClickableThrough interface - leave it here, in special list... 
             ClickableThroughComponents.RemoveAll(x => !typeof(IDebugClickableThrough).IsInstanceOfType(x));
 
-            if (DisableAllOnStart) ToogleAll(SwitchableComponents, false);
+            if (DisableAllOnStart)
+            {
+                ToogleAll(SwitchableComponents, false);
+            }
         }
 
         protected virtual void Update()
@@ -91,6 +96,7 @@ namespace SpaceEngine.Debugging
                 {
                     State = 0;
                     ToogleAll(SwitchableComponents, false);
+
                     return;
                 }
 

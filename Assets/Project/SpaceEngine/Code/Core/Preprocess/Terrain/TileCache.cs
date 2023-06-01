@@ -1,4 +1,5 @@
 #region License
+
 // Procedural planet generator.
 //  
 // Copyright (C) 2015-2023 Denis Ovchinnikov [zameran] 
@@ -31,6 +32,7 @@
 // Creation Date: 2017.03.28
 // Creation Time: 2:18 PM
 // Creator: zameran
+
 #endregion
 
 using SpaceEngine.Core.Containers;
@@ -39,17 +41,11 @@ using UnityEngine;
 namespace SpaceEngine.Core.Preprocess.Terrain
 {
     /// <summary>
-    /// Abstract tile cache for working with special <see cref="Tile"/> class in preprocessing.
+    ///     Abstract tile cache for working with special <see cref="Tile" /> class in preprocessing.
     /// </summary>
     public abstract class TileCache
     {
-        public int Width { get; protected set; }
-        public int Height { get; protected set; }
-        public int TileSize { get; protected set; }
-        public int Channels { get; protected set; }
-        public int Capacity { get; protected set; }
-
-        private DictionaryQueue<int, Tile> Cache;
+        private readonly DictionaryQueue<int, Tile> Cache;
 
         public TileCache(int width, int height, int tileSize, int channels, int capacity = 20)
         {
@@ -62,6 +58,12 @@ namespace SpaceEngine.Core.Preprocess.Terrain
             Cache = new DictionaryQueue<int, Tile>();
         }
 
+        public int Width { get; protected set; }
+        public int Height { get; protected set; }
+        public int TileSize { get; protected set; }
+        public int Channels { get; protected set; }
+        public int Capacity { get; protected set; }
+
         protected abstract float[] ReadTile(int tx, int ty);
 
         protected float[] GetTile(int tx, int ty)
@@ -73,8 +75,8 @@ namespace SpaceEngine.Core.Preprocess.Terrain
                 var data = ReadTile(tx, ty);
 
                 if (Cache.Count() == Capacity)
-                {
                     // Vvict least recently used tile if cache is full
+                {
                     Cache.RemoveFirst();
                 }
 
@@ -108,9 +110,9 @@ namespace SpaceEngine.Core.Preprocess.Terrain
             y = (y == Height ? TileSize : y % TileSize) + 2;
 
             var data = GetTile(tx, ty);
-            var offset = (x + y * (TileSize + 5));
+            var offset = x + y * (TileSize + 5);
 
-            return (float)data[offset];
+            return data[offset];
         }
 
         public virtual Vector4 GetTileColor(int x, int y)

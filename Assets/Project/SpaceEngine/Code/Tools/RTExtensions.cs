@@ -1,4 +1,5 @@
 ﻿#region License
+
 // Procedural planet generator.
 // 
 // Copyright (C) 2015-2023 Denis Ovchinnikov [zameran] 
@@ -31,6 +32,7 @@
 // Creation Date: Undefined
 // Creation Time: Undefined
 // Creator: zameran
+
 #endregion
 
 using UnityEngine;
@@ -306,7 +308,10 @@ namespace SpaceEngine.Tools
         public static void ReleaseAndDestroy(this RenderTexture rt)
         {
             // NOTE : Can be a problem here...
-            if (RenderTexture.active == rt) RenderTexture.active = null;
+            if (RenderTexture.active == rt)
+            {
+                RenderTexture.active = null;
+            }
 
             rt.Release();
 

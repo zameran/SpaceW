@@ -1,4 +1,5 @@
 ﻿#region License
+
 // Procedural planet generator.
 // 
 // Copyright (C) 2015-2017 Denis Ovchinnikov [zameran] 
@@ -31,6 +32,7 @@
 // Creation Date: Undefined
 // Creation Time: Undefined
 // Creator: zameran
+
 #endregion
 
 using System.Reflection;
@@ -42,57 +44,40 @@ namespace SpaceEngine.Editor
 {
     public class ShaderCompiler : EditorWindow
     {
-        public Shader shader;
-
-        private int mode = 1;
-        private int externPlatformsMask = 262143;
-        private bool includeAllVariants = true;
-        private bool preprocessOnly = false;
-        private bool stripLineDirectives = false;
-
-        [MenuItem("SpaceEngine/ShaderCompiler")]
-        public static void Init()
-        {
-            var window = (ShaderCompiler)GetWindow(typeof(ShaderCompiler));
-            window.autoRepaintOnSceneChange = true;
-        }
+        private int m_ExternPlatformsMask = 262143;
+        private bool m_IncludeAllVariants = true;
+        private int m_Mode = 1;
+        private bool m_PreprocessOnly;
+        private Shader m_Shader;
+        private bool m_StripLineDirectives;
 
         public void OnGUI()
         {
             GUILayout.Label("Select shader to compile: ");
-            shader = (Shader)EditorGUILayout.ObjectField(shader, typeof(Shader), false);
+            m_Shader = (Shader)EditorGUILayout.ObjectField(m_Shader, typeof(Shader), false);
 
             GUILayout.Label("Select shader compilation mode: ");
-            mode = EditorGUILayout.IntField(mode);
+            m_Mode = EditorGUILayout.IntField(m_Mode);
 
             GUILayout.Label("Select shader compilation custom platforms masks: ");
-            externPlatformsMask = EditorGUILayout.IntField(externPlatformsMask);
+            m_ExternPlatformsMask = EditorGUILayout.IntField(m_ExternPlatformsMask);
 
             GUILayout.Label("Should compiled shader contain all shader variants?");
-            includeAllVariants = EditorGUILayout.Toggle(includeAllVariants);
+            m_IncludeAllVariants = EditorGUILayout.Toggle(m_IncludeAllVariants);
 
             GUILayout.Label("Preprocess Only?");
-            preprocessOnly = EditorGUILayout.Toggle(preprocessOnly);
+            m_PreprocessOnly = EditorGUILayout.Toggle(m_PreprocessOnly);
 
             GUILayout.Label("Strip Line Directives?");
-            stripLineDirectives = EditorGUILayout.Toggle(stripLineDirectives);
+            m_StripLineDirectives = EditorGUILayout.Toggle(m_StripLineDirectives);
 
-            if (shader != null)
+            if (m_Shader != null)
             {
                 if (GUILayout.Button("Compile..."))
                 {
                     UnityEngineAPI.InvokeAPI<ShaderUtil>("OpenCompiledShader",
-                        BindingFlags.Static | BindingFlags.NonPublic,
-                        null,
-                        new object[]
-                        {
-                            shader,
-                            mode,
-                            externPlatformsMask,
-                            includeAllVariants,
-                            preprocessOnly,
-                            stripLineDirectives
-                        });
+                                                         BindingFlags.Static | BindingFlags.NonPublic,
+                                                         null, m_Shader, m_Mode, m_ExternPlatformsMask, m_IncludeAllVariants, m_PreprocessOnly, m_StripLineDirectives);
                 }
             }
             else
@@ -100,8 +85,14 @@ namespace SpaceEngine.Editor
                 EditorGUILayout.HelpBox("Nothing to compile! - Select shader to work with...", MessageType.Warning);
             }
 
-            EditorGUILayout.HelpBox("This utility simply calls Unity's Internal Core OpenCompiledShader method...\n" +
-                                    "See Shader Inspector - It have the same button!", MessageType.Info);
+            EditorGUILayout.HelpBox("This utility simply calls Unity's Internal Core OpenCompiledShader method...\n See Shader Inspector - It have the same button!", MessageType.Info);
+        }
+
+        [MenuItem("SpaceEngine/ShaderCompiler")]
+        public static void Init()
+        {
+            var window = (ShaderCompiler)GetWindow(typeof(ShaderCompiler));
+            window.autoRepaintOnSceneChange = true;
         }
     }
 }

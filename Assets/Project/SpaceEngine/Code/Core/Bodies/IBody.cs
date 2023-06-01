@@ -1,4 +1,5 @@
 ﻿#region License
+
 // Procedural planet generator.
 //  
 // Copyright (C) 2015-2023 Denis Ovchinnikov [zameran] 
@@ -31,6 +32,7 @@
 // Creation Date: 2017.03.28
 // Creation Time: 2:18 PM
 // Creator: zameran
+
 #endregion
 
 using System;
@@ -46,10 +48,9 @@ namespace SpaceEngine.Core.Bodies
     }
 
     /// <summary>
-    /// This interface should be implemented in all things, that's gonna be in space.
+    ///     This interface should be implemented in all things, that's gonna be in space.
     /// </summary>
     public interface IBody
     {
-
     }
 }

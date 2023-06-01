@@ -1,4 +1,5 @@
 ﻿#region License
+
 // Procedural planet generator.
 //  
 // Copyright (C) 2015-2023 Denis Ovchinnikov [zameran] 
@@ -31,6 +32,7 @@
 // Creation Date: 2017.05.02
 // Creation Time: 5:45 PM
 // Creator: zameran
+
 #endregion
 
 using System;
@@ -42,25 +44,21 @@ using System.Reflection;
 namespace SpaceEngine.Helpers
 {
     /// <summary>
-    /// Extension class for working with <see cref="Attribute"/>.
-    /// Contains some helpful methods to working with attributes.
-    /// 
-    /// <see cref="AttributeHelper"/> is a collection of methods developed 
-    /// to help retrieve <see cref="Attribute"/> information for Types and methods in C# through Reflection.
-    /// 
-    /// <see cref="AttributeHelper"/> uses caching to rise up speed of access.
+    ///     Extension class for working with <see cref="Attribute" />.
+    ///     Contains some helpful methods to working with attributes.
+    ///     <see cref="AttributeHelper" /> is a collection of methods developed
+    ///     to help retrieve <see cref="Attribute" /> information for Types and methods in C# through Reflection.
+    ///     <see cref="AttributeHelper" /> uses caching to rise up speed of access.
     /// </summary>
     public static class AttributeHelper
     {
-        private static readonly Dictionary<object, List<Attribute>> _attributeCache = new Dictionary<object, List<Attribute>>();
-
         /// <summary>
-        /// <see cref="Attribute"/> cache. Readonly.
+        ///     <see cref="Attribute" /> cache. Readonly.
         /// </summary>
-        public static Dictionary<object, List<Attribute>> AttributeCache => _attributeCache;
+        public static Dictionary<object, List<Attribute>> AttributeCache { get; } = new();
 
         /// <summary>
-        /// Gets all attributes of type.
+        ///     Gets all attributes of type.
         /// </summary>
         /// <typeparam name="TType">Type.</typeparam>
         /// <returns>Returns list, that contains all attributes of defined type.</returns>
@@ -70,7 +68,7 @@ namespace SpaceEngine.Helpers
         }
 
         /// <summary>
-        /// Gets all attributes of type.
+        ///     Gets all attributes of type.
         /// </summary>
         /// <param name="type">Type.</param>
         /// <returns>Returns list, that contains all attributes of defined type.</returns>
@@ -96,17 +94,17 @@ namespace SpaceEngine.Helpers
 
         public static TAttributeType GetTypeAttribute<TAttributeType>(Type type, Func<TAttributeType, bool> predicate = null)
         {
-            return GetTypeAttributes<TAttributeType>(type, predicate).FirstOrDefault();
+            return GetTypeAttributes(type, predicate).FirstOrDefault();
         }
 
         public static bool HasTypeAttribute<TType, TAttributeType>(Func<TAttributeType, bool> predicate = null)
         {
-            return HasTypeAttribute<TAttributeType>(typeof(TType), predicate);
+            return HasTypeAttribute(typeof(TType), predicate);
         }
 
         public static bool HasTypeAttribute<TAttributeType>(Type type, Func<TAttributeType, bool> predicate = null)
         {
-            return GetTypeAttribute<TAttributeType>(type, predicate) != null;
+            return GetTypeAttribute(type, predicate) != null;
         }
 
         public static List<Attribute> GetMemberAttributes<TType>(Expression<Func<TType, object>> action)
@@ -116,12 +114,12 @@ namespace SpaceEngine.Helpers
 
         public static List<TAttributeType> GetMemberAttributes<TType, TAttributeType>(Expression<Func<TType, object>> action, Func<TAttributeType, bool> predicate = null) where TAttributeType : Attribute
         {
-            return GetMemberAttributes<TAttributeType>(GetMember(action), predicate);
+            return GetMemberAttributes(GetMember(action), predicate);
         }
 
         public static TAttributeType GetMemberAttribute<TType, TAttributeType>(Expression<Func<TType, object>> action, Func<TAttributeType, bool> predicate = null) where TAttributeType : Attribute
         {
-            return GetMemberAttribute<TAttributeType>(GetMember(action), predicate);
+            return GetMemberAttribute(GetMember(action), predicate);
         }
 
         public static bool HasMemberAttribute<TType, TAttributeType>(Expression<Func<TType, object>> action, Func<TAttributeType, bool> predicate = null) where TAttributeType : Attribute
@@ -141,12 +139,12 @@ namespace SpaceEngine.Helpers
 
         public static TAttributeType GetMemberAttribute<TAttributeType>(this MemberInfo memberInfo, Func<TAttributeType, bool> predicate = null) where TAttributeType : Attribute
         {
-            return GetMemberAttributes<TAttributeType>(memberInfo, predicate).FirstOrDefault();
+            return GetMemberAttributes(memberInfo, predicate).FirstOrDefault();
         }
 
         public static bool HasMemberAttribute<TAttributeType>(this MemberInfo memberInfo, Func<TAttributeType, bool> predicate = null) where TAttributeType : Attribute
         {
-            return memberInfo.GetMemberAttribute<TAttributeType>(predicate) != null;
+            return memberInfo.GetMemberAttribute(predicate) != null;
         }
 
         private static IEnumerable<TType> Where<X, TType>(this IEnumerable<X> list)
@@ -161,7 +159,7 @@ namespace SpaceEngine.Helpers
 
         private static List<Attribute> LockAndGetAttributes(object key, Func<object, object[]> retrieveValue)
         {
-            return LockAndGet<object, List<Attribute>>(_attributeCache, key, mi => retrieveValue(mi).Cast<Attribute>().ToList());
+            return LockAndGet(AttributeCache, key, mi => retrieveValue(mi).Cast<Attribute>().ToList());
         }
 
         private static TValue LockAndGet<TKey, TValue>(Dictionary<TKey, TValue> dictionary, TKey key, Func<TKey, TValue> retrieveValue)

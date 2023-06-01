@@ -1,4 +1,5 @@
 ﻿#region License
+
 // Procedural planet generator.
 //  
 // Copyright (C) 2015-2023 Denis Ovchinnikov [zameran] 
@@ -31,6 +32,7 @@
 // Creation Date: 2017.03.28
 // Creation Time: 2:18 PM
 // Creator: zameran
+
 #endregion
 
 using System;
@@ -50,58 +52,47 @@ namespace SpaceEngine.Core.Producers.Ortho
 {
     public class OrthoProducer : TileProducer
     {
-        public class Uniforms
-        {
-            public int tileWSD, coarseLevelSampler, coarseLevelOSL;
-            public int noiseSampler, noiseUVLH, noiseColor;
-            public int noiseRootColor;
-            public int residualOSH, residualSampler;
-
-            public Uniforms()
-            {
-                tileWSD = Shader.PropertyToID("_TileWSD");
-                coarseLevelSampler = Shader.PropertyToID("_CoarseLevelSampler");
-                coarseLevelOSL = Shader.PropertyToID("_CoarseLevelOSL");
-                noiseSampler = Shader.PropertyToID("_NoiseSampler");
-                noiseUVLH = Shader.PropertyToID("_NoiseUVLH");
-                noiseColor = Shader.PropertyToID("_NoiseColor");
-                noiseRootColor = Shader.PropertyToID("_NoiseRootColor");
-                residualOSH = Shader.PropertyToID("_ResidualOSH");
-                residualSampler = Shader.PropertyToID("_ResidualSampler");
-            }
-        }
+        [SerializeField]
+        private GameObject OrthoCpuProducerGameObject;
 
         [SerializeField]
-        GameObject OrthoCpuProducerGameObject;
-
-        OrthoCPUProducer OrthoCPUProducer;
+        private Material UpSampleMaterial;
 
         [SerializeField]
-        Material UpSampleMaterial;
+        private UnityEngine.Color RootNoiseColor = new(0.5f, 0.5f, 0.5f, 0.5f);
 
         [SerializeField]
-        UnityEngine.Color RootNoiseColor = new UnityEngine.Color(0.5f, 0.5f, 0.5f, 0.5f);
-
-        [SerializeField]
-        UnityEngine.Color NoiseColor = new UnityEngine.Color(1.0f, 1.0f, 1.0f, 1.0f);
+        private UnityEngine.Color NoiseColor = new(1.0f, 1.0f, 1.0f, 1.0f);
 
         /// <summary>
-        /// Maximum quadtree level, or -1 to allow any level.
+        ///     Maximum quadtree level, or -1 to allow any level.
         /// </summary>
         [SerializeField]
-        int MaxLevel = -1;
+        private int MaxLevel = -1;
 
         [SerializeField]
-        bool HSV = true;
+        private bool HSV = true;
 
         [SerializeField]
-        float[] NoiseAmplitudes = new float[] { 0, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255 };
+        private float[] NoiseAmplitudes = { 0, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255 };
 
-        Uniforms uniforms;
+        private PerlinNoise Noise;
 
-        PerlinNoise Noise;
+        private OrthoCPUProducer OrthoCPUProducer;
 
-        Texture2D ResidualTexture;
+        private Texture2D ResidualTexture;
+
+        private Uniforms uniforms;
+
+        protected override void OnDestroy()
+        {
+            base.OnDestroy();
+
+            if (ResidualTexture != null)
+            {
+                Helper.Destroy(ResidualTexture);
+            }
+        }
 
         public override void InitNode()
         {
@@ -109,7 +100,10 @@ namespace SpaceEngine.Core.Producers.Ortho
 
             if (OrthoCpuProducerGameObject != null)
             {
-                if (OrthoCPUProducer == null) { OrthoCPUProducer = OrthoCpuProducerGameObject.GetComponent<OrthoCPUProducer>(); }
+                if (OrthoCPUProducer == null)
+                {
+                    OrthoCPUProducer = OrthoCpuProducerGameObject.GetComponent<OrthoCPUProducer>();
+                }
             }
 
             var tileSize = Cache.GetStorage(0).TileSize;
@@ -133,13 +127,6 @@ namespace SpaceEngine.Core.Producers.Ortho
             ResidualTexture.filterMode = FilterMode.Point;
         }
 
-        protected override void OnDestroy()
-        {
-            base.OnDestroy();
-
-            if (ResidualTexture != null) Helper.Destroy(ResidualTexture);
-        }
-
         public override int GetBorder()
         {
             return 2;
@@ -147,7 +134,7 @@ namespace SpaceEngine.Core.Producers.Ortho
 
         public override bool HasTile(int level, int tx, int ty)
         {
-            return (MaxLevel == -1 || level <= MaxLevel);
+            return MaxLevel == -1 || level <= MaxLevel;
         }
 
         public override void DoCreateTile(int level, int tx, int ty, List<TileStorage.Slot> slot)
@@ -160,14 +147,14 @@ namespace SpaceEngine.Core.Producers.Ortho
             }
 
             var tileWidth = gpuSlot.Owner.TileSize;
-            var tileSize = tileWidth - (GetBorder() * 2);
+            var tileSize = tileWidth - GetBorder() * 2;
 
             var rootQuadSize = TerrainNode.TerrainQuadRoot.Length;
 
             var tileWSD = Vector4.zero;
-            tileWSD.x = (float)tileWidth;
-            tileWSD.y = (float)rootQuadSize / (float)(1 << level) / (float)tileSize;
-            tileWSD.z = (float)tileSize / (float)(TerrainNode.ParentBody.GridResolution - 1);
+            tileWSD.x = tileWidth;
+            tileWSD.y = (float)rootQuadSize / (1 << level) / tileSize;
+            tileWSD.z = tileSize / (float)(TerrainNode.ParentBody.GridResolution - 1);
             tileWSD.w = 0.0f;
 
             GPUTileStorage.GPUSlot parentGpuSlot = null;
@@ -176,11 +163,20 @@ namespace SpaceEngine.Core.Producers.Ortho
             {
                 var parentTile = FindTile(level - 1, tx / 2, ty / 2, false, true);
 
-                if (parentTile != null) parentGpuSlot = parentTile.GetSlot(0) as GPUTileStorage.GPUSlot;
-                else { throw new MissingTileException($"Find parent tile failed! {level - 1}:{tx / 2}-{ty / 2}"); }
+                if (parentTile != null)
+                {
+                    parentGpuSlot = parentTile.GetSlot(0) as GPUTileStorage.GPUSlot;
+                }
+                else
+                {
+                    throw new MissingTileException($"Find parent tile failed! {level - 1}:{tx / 2}-{ty / 2}");
+                }
             }
 
-            if (parentGpuSlot == null && level > 0) { throw new NullReferenceException("parentGpuSlot"); }
+            if (parentGpuSlot == null && level > 0)
+            {
+                throw new NullReferenceException("parentGpuSlot");
+            }
 
             UpSampleMaterial.SetVector(uniforms.tileWSD, tileWSD);
 
@@ -190,10 +186,10 @@ namespace SpaceEngine.Core.Producers.Ortho
 
                 UpSampleMaterial.SetTexture(uniforms.coarseLevelSampler, tex);
 
-                var dx = (float)(tx % 2) * (float)(tileSize / 2.0f);
-                var dy = (float)(ty % 2) * (float)(tileSize / 2.0f);
+                var dx = tx % 2 * (tileSize / 2.0f);
+                var dy = ty % 2 * (tileSize / 2.0f);
 
-                var coarseLevelOSL = new Vector4((dx + 0.5f) / (float)tex.width, (dy + 0.5f) / (float)tex.height, 1.0f / (float)tex.width, 0.0f);
+                var coarseLevelOSL = new Vector4((dx + 0.5f) / tex.width, (dy + 0.5f) / tex.height, 1.0f / tex.width, 0.0f);
 
                 UpSampleMaterial.SetVector(uniforms.coarseLevelOSL, coarseLevelOSL);
             }
@@ -232,9 +228,20 @@ namespace SpaceEngine.Core.Producers.Ortho
                     {
                         color.r = data[(x + y * tileWidth) * channels];
 
-                        if (channels > 1) color.g = data[(x + y * tileWidth) * channels + 1];
-                        if (channels > 2) color.b = data[(x + y * tileWidth) * channels + 2];
-                        if (channels > 3) color.a = data[(x + y * tileWidth) * channels + 3];
+                        if (channels > 1)
+                        {
+                            color.g = data[(x + y * tileWidth) * channels + 1];
+                        }
+
+                        if (channels > 2)
+                        {
+                            color.b = data[(x + y * tileWidth) * channels + 2];
+                        }
+
+                        if (channels > 3)
+                        {
+                            color.a = data[(x + y * tileWidth) * channels + 3];
+                        }
 
                         ResidualTexture.SetPixel(x, y, color);
                     }
@@ -243,7 +250,7 @@ namespace SpaceEngine.Core.Producers.Ortho
                 ResidualTexture.Apply();
 
                 UpSampleMaterial.SetTexture(uniforms.residualSampler, ResidualTexture);
-                UpSampleMaterial.SetVector(uniforms.residualOSH, new Vector4(0.5f / (float)tileWidth, 0.5f / (float)tileWidth, 1.0f / (float)tileWidth, 0.0f));
+                UpSampleMaterial.SetVector(uniforms.residualOSH, new Vector4(0.5f / tileWidth, 0.5f / tileWidth, 1.0f / tileWidth, 0.0f));
             }
             else
             {
@@ -262,15 +269,15 @@ namespace SpaceEngine.Core.Producers.Ortho
                     var offset = 1 << level;
                     var bottomB = Noise.Noise(tx + 0.5f, ty + offset) > 0.0f ? 1 : 0;
                     var rightB = (tx == offset - 1 ? Noise.Noise(ty + offset + 0.5f, offset) : Noise.Noise(tx + 1.0f, ty + offset + 0.5f)) > 0.0f ? 2 : 0;
-                    var topB = (ty == offset - 1 ? Noise.Noise((3.0f * offset - 1.0f - tx) + 0.5f, offset) : Noise.Noise(tx + 0.5f, ty + offset + 1.0f)) > 0.0f ? 4 : 0;
-                    var leftB = (tx == 0 ? Noise.Noise((4.0f * offset - 1.0f - ty) + 0.5f, offset) : Noise.Noise(tx, ty + offset + 0.5f)) > 0.0f ? 8 : 0;
+                    var topB = (ty == offset - 1 ? Noise.Noise(3.0f * offset - 1.0f - tx + 0.5f, offset) : Noise.Noise(tx + 0.5f, ty + offset + 1.0f)) > 0.0f ? 4 : 0;
+                    var leftB = (tx == 0 ? Noise.Noise(4.0f * offset - 1.0f - ty + 0.5f, offset) : Noise.Noise(tx, ty + offset + 0.5f)) > 0.0f ? 8 : 0;
                     noiseL = bottomB + rightB + topB + leftB;
                 }
                 else if (TerrainNode.Face == 6)
                 {
                     var offset = 1 << level;
-                    var bottomB = (ty == 0 ? Noise.Noise((3.0f * offset - 1.0f - tx) + 0.5f, 0) : Noise.Noise(tx + 0.5f, ty - offset)) > 0.0f ? 1 : 0;
-                    var rightB = (tx == offset - 1.0f ? Noise.Noise((2.0f * offset - 1.0f - ty) + 0.5f, 0) : Noise.Noise(tx + 1.0f, ty - offset + 0.5f)) > 0.0f ? 2 : 0;
+                    var bottomB = (ty == 0 ? Noise.Noise(3.0f * offset - 1.0f - tx + 0.5f, 0) : Noise.Noise(tx + 0.5f, ty - offset)) > 0.0f ? 1 : 0;
+                    var rightB = (tx == offset - 1.0f ? Noise.Noise(2.0f * offset - 1.0f - ty + 0.5f, 0) : Noise.Noise(tx + 1.0f, ty - offset + 0.5f)) > 0.0f ? 2 : 0;
                     var topB = Noise.Noise(tx + 0.5f, ty - offset + 1.0f) > 0.0f ? 4 : 0;
                     var leftB = (tx == 0 ? Noise.Noise(3.0f * offset + ty + 0.5f, 0) : Noise.Noise(tx, ty - offset + 0.5f)) > 0.0f ? 8 : 0;
                     noiseL = bottomB + rightB + topB + leftB;
@@ -286,10 +293,10 @@ namespace SpaceEngine.Core.Producers.Ortho
                 }
             }
 
-            var noiseRs = new int[] { 0, 0, 1, 0, 2, 0, 1, 0, 3, 3, 1, 3, 2, 2, 1, 0 };
+            var noiseRs = new[] { 0, 0, 1, 0, 2, 0, 1, 0, 3, 3, 1, 3, 2, 2, 1, 0 };
             var noiseR = noiseRs[noiseL];
 
-            var noiseLs = new int[] { 0, 1, 1, 2, 1, 3, 2, 4, 1, 2, 3, 4, 2, 4, 4, 5 };
+            var noiseLs = new[] { 0, 1, 1, 2, 1, 3, 2, 4, 1, 2, 3, 4, 2, 4, 4, 5 };
             noiseL = noiseLs[noiseL];
 
             UpSampleMaterial.SetTexture(uniforms.noiseSampler, GodManager.Instance.NoiseTextures[noiseL]);
@@ -313,11 +320,31 @@ namespace SpaceEngine.Core.Producers.Ortho
                 do
                 {
                     yield return Yielders.EndOfFrame;
-                }
-                while (FindTile(level - 1, tx / 2, ty / 2, false, true) == null);
+                } while (FindTile(level - 1, tx / 2, ty / 2, false, true) == null);
             }
 
             yield return base.DoCreateTileCoroutine(level, tx, ty, slot, callback);
+        }
+
+        public class Uniforms
+        {
+            public int noiseRootColor;
+            public int noiseSampler, noiseUVLH, noiseColor;
+            public int residualOSH, residualSampler;
+            public int tileWSD, coarseLevelSampler, coarseLevelOSL;
+
+            public Uniforms()
+            {
+                tileWSD = Shader.PropertyToID("_TileWSD");
+                coarseLevelSampler = Shader.PropertyToID("_CoarseLevelSampler");
+                coarseLevelOSL = Shader.PropertyToID("_CoarseLevelOSL");
+                noiseSampler = Shader.PropertyToID("_NoiseSampler");
+                noiseUVLH = Shader.PropertyToID("_NoiseUVLH");
+                noiseColor = Shader.PropertyToID("_NoiseColor");
+                noiseRootColor = Shader.PropertyToID("_NoiseRootColor");
+                residualOSH = Shader.PropertyToID("_ResidualOSH");
+                residualSampler = Shader.PropertyToID("_ResidualSampler");
+            }
         }
     }
 }

@@ -1,4 +1,5 @@
 ﻿#region License
+
 // Procedural planet generator.
 // 
 // Copyright (C) 2015-2023 Denis Ovchinnikov [zameran] 
@@ -31,15 +32,15 @@
 // Creation Date: Undefined
 // Creation Time: Undefined
 // Creator: zameran
+
 #endregion
 
 namespace SpaceEngine.Debugging
 {
     /// <summary>
-    /// This interface should be implemented in all things, that's gonna be helpful in debugging.
+    ///     This interface should be implemented in all things, that's gonna be helpful in debugging.
     /// </summary>
     internal interface IDebug
     {
-
     }
 }

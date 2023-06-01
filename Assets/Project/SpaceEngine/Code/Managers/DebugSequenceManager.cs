@@ -1,4 +1,5 @@
 ﻿#region License
+
 // Procedural planet generator.
 //  
 // Copyright (C) 2015-2023 Denis Ovchinnikov [zameran] 
@@ -31,6 +32,7 @@
 // Creation Date: 2017.03.06
 // Creation Time: 12:38 AM
 // Creator: zameran
+
 #endregion
 
 using System;
@@ -46,6 +48,38 @@ namespace SpaceEngine.Managers
     [Serializable]
     public class SequenceEntry
     {
+        public SequenceEntry(string name)
+        {
+            Name = name;
+
+            Time = UnityEngine.Time.time;
+            TimeSinceStartup = UnityEngine.Time.realtimeSinceStartup;
+
+            Frame = UnityEngine.Time.frameCount;
+        }
+
+        public string Name { get; set; }
+
+        public float Time { get; private set; }
+        public float TimeSinceStartup { get; private set; }
+
+        public int Frame { get; private set; }
+
+        public override bool Equals(object obj)
+        {
+            if (obj is not SequenceEntry p)
+            {
+                return false;
+            }
+
+            return Name == p.Name && Frame == p.Frame;
+        }
+
+        public override int GetHashCode()
+        {
+            return Name.GetHashCode() ^ (TimeSinceStartup.GetHashCode() + Frame.GetHashCode());
+        }
+
         public class Sort : IComparer<SequenceEntry>
         {
             int IComparer<SequenceEntry>.Compare(SequenceEntry a, SequenceEntry b)
@@ -68,42 +102,10 @@ namespace SpaceEngine.Managers
                 return 0;
             }
         }
-
-        public string Name { get; set; }
-
-        public float Time { get; private set; }
-        public float TimeSinceStartup { get; private set; }
-
-        public int Frame { get; private set; }
-
-        public SequenceEntry(string name)
-        {
-            Name = name;
-
-            Time = UnityEngine.Time.time;
-            TimeSinceStartup = UnityEngine.Time.realtimeSinceStartup;
-
-            Frame = UnityEngine.Time.frameCount;
-        }
-
-        public override bool Equals(object obj)
-        {
-            if (obj is not SequenceEntry p)
-            {
-                return false;
-            }
-
-            return (Name == p.Name) && (Frame == p.Frame);
-        }
-
-        public override int GetHashCode()
-        {
-            return Name.GetHashCode() ^ TimeSinceStartup.GetHashCode() + Frame.GetHashCode();
-        }
     }
 
     /// <summary>
-    /// Manager for a special debug. Some <see cref="MonoBehaviour"/>s can be added to the debug sequence and sorted via call timestamp.
+    ///     Manager for a special debug. Some <see cref="MonoBehaviour" />s can be added to the debug sequence and sorted via call timestamp.
     /// </summary>
     public class DebugSequenceManager : MonoSingleton<DebugSequenceManager>
     {
@@ -139,7 +141,7 @@ namespace SpaceEngine.Managers
         }
 
         /// <summary>
-        /// Add a <see cref="MonoBehaviour"/> to the debug sequence.
+        ///     Add a <see cref="MonoBehaviour" /> to the debug sequence.
         /// </summary>
         /// <param name="owner">Owner.</param>
         /// <param name="stackFrameOffset">Stack from offset for a method, which will be added.</param>

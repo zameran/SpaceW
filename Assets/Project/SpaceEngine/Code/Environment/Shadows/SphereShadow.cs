@@ -1,4 +1,5 @@
 ﻿#region License
+
 // Procedural planet generator.
 // 
 // Copyright (C) 2015-2023 Denis Ovchinnikov [zameran] 
@@ -31,6 +32,7 @@
 // Creation Date: Undefined
 // Creation Time: Undefined
 // Creator: zameran
+
 #endregion
 
 using SpaceEngine.Core.Utilities.Gradients;
@@ -44,10 +46,52 @@ namespace SpaceEngine.Environment.Shadows
         public float InnerRadius = 1.0f;
         public float OuterRadius = 2.0f;
 
-        public PenumbraGradientLut Penumbra = new PenumbraGradientLut();
+        public PenumbraGradientLut Penumbra = new();
+        private readonly float[] magnitudes = new float[3];
 
-        readonly Vector3[] vectors = new Vector3[3];
-        readonly float[] magnitudes = new float[3];
+        private readonly Vector3[] vectors = new Vector3[3];
+
+        protected virtual void Awake()
+        {
+            Penumbra.GenerateLut();
+        }
+
+        protected virtual void OnDestroy()
+        {
+            Helper.Destroy(Penumbra.Lut);
+
+            Penumbra.DestroyLut();
+        }
+
+        #region Gizmos
+
+        #if UNITY_EDITOR
+        protected virtual void OnDrawGizmosSelected()
+        {
+            if (Helper.Enabled(this))
+            {
+                Gizmos.color = Color.red;
+                Gizmos.DrawRay(transform.position, transform.right * OuterRadius * 1.5f);
+                Gizmos.DrawRay(transform.position, transform.up * OuterRadius * 1.5f);
+                Gizmos.DrawRay(transform.position, transform.forward * OuterRadius * 1.5f);
+                Gizmos.color = Color.white;
+
+                Gizmos.matrix = transform.localToWorldMatrix;
+
+                Gizmos.DrawWireSphere(Vector3.zero, InnerRadius);
+                Gizmos.DrawWireSphere(Vector3.zero, OuterRadius);
+
+                if (CalculateShadow())
+                {
+                    Gizmos.matrix = Matrix.inverse;
+
+                    Gizmos.DrawWireCube(new Vector3(0, 0, 5), new Vector3(2, 2, 10));
+                }
+            }
+        }
+        #endif
+
+        #endregion
 
         public override Texture GetTexture()
         {
@@ -58,7 +102,7 @@ namespace SpaceEngine.Environment.Shadows
 
         public override bool CalculateShadow()
         {
-            if (base.CalculateShadow() == true)
+            if (base.CalculateShadow())
             {
                 var direction = default(Vector3);
                 var position = default(Vector3);
@@ -89,48 +133,6 @@ namespace SpaceEngine.Environment.Shadows
 
             return false;
         }
-
-        protected virtual void Awake()
-        {
-            Penumbra.GenerateLut();
-        }
-
-        protected virtual void OnDestroy()
-        {
-            Helper.Destroy(Penumbra.Lut);
-
-            Penumbra.DestroyLut();
-        }
-
-        #region Gizmos
-
-    #if UNITY_EDITOR
-        protected virtual void OnDrawGizmosSelected()
-        {
-            if (Helper.Enabled(this) == true)
-            {
-                Gizmos.color = Color.red;
-                Gizmos.DrawRay(transform.position, transform.right * OuterRadius * 1.5f);
-                Gizmos.DrawRay(transform.position, transform.up * OuterRadius * 1.5f);
-                Gizmos.DrawRay(transform.position, transform.forward * OuterRadius * 1.5f);
-                Gizmos.color = Color.white;
-
-                Gizmos.matrix = transform.localToWorldMatrix;
-
-                Gizmos.DrawWireSphere(Vector3.zero, InnerRadius);
-                Gizmos.DrawWireSphere(Vector3.zero, OuterRadius);
-
-                if (CalculateShadow() == true)
-                {
-                    Gizmos.matrix = Matrix.inverse;
-
-                    Gizmos.DrawWireCube(new Vector3(0, 0, 5), new Vector3(2, 2, 10));
-                }
-            }
-        }
-    #endif
-
-        #endregion
 
         private void SetVector(int index, Vector3 vector)
         {

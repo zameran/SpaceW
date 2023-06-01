@@ -2,18 +2,19 @@
 #define USESAVEPOW
 //-----------------------------------------------------------------------------
 
-uniform sampler2D	PermSampler;		// 3d
-uniform sampler2D	PermGradSampler;	// 3d
+uniform sampler2D PermSampler; // 3d
+uniform sampler2D PermGradSampler; // 3d
 
 //-----------------------------------------------------------------------------
 inline float SavePow(float f, float p)
 {
-    #ifdef USESAVEPOW 
-        return pow(abs(f), p);
+    #ifdef USESAVEPOW
+    return pow(abs(f), p);
     #else
         return pow(f, p);
     #endif
 }
+
 //-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
@@ -68,6 +69,7 @@ float Noise(float3 p)
 
     return k0 + k1 * ff.x + k2 * ff.y + k3 * ff.z + k4 * ff.x * ff.y + k5 * ff.y * ff.z + k6 * ff.z * ff.x + k7 * ff.x * ff.y * ff.z;
 }
+
 //-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
@@ -89,7 +91,7 @@ float4 NoiseDeriv(float3 p)
     // NOTE : I FUCKING DID IT! I FIX DAT FORMULA FOR 3D!
     // Solution is "+ P.z"
     float4 AA = tex2Dlod(PermSampler, float4(P.xy, 0.0, 0.0)) + P.z; // <- Here!
-	
+
     float a = dot(tex2Dlod(PermGradSampler, AA.x).rgb, p);
     float b = dot(tex2Dlod(PermGradSampler, AA.z).rgb, p + float3(-1.0, 0.0, 0.0));
     float c = dot(tex2Dlod(PermGradSampler, AA.y).rgb, p + float3(0.0, -1.0, 0.0));
@@ -99,13 +101,13 @@ float4 NoiseDeriv(float3 p)
     float g = dot(tex2Dlod(PermGradSampler, AA.y + one).rgb, p + float3(0.0, -1.0, -1.0));
     float h = dot(tex2Dlod(PermGradSampler, AA.w + one).rgb, p + float3(-1.0, -1.0, -1.0));
 
-    float k0 =  a;
-    float k1 =  b - a;
-    float k2 =  c - a;
-    float k3 =  e - a;
-    float k4 =  a - b - c + d;
-    float k5 =  a - c - e + g;
-    float k6 =  a - b - e + f;
+    float k0 = a;
+    float k1 = b - a;
+    float k2 = c - a;
+    float k3 = e - a;
+    float k4 = a - b - c + d;
+    float k5 = a - c - e + g;
+    float k6 = a - b - e + f;
     float k7 = -a + b + c - d + e - f - g + h;
 
     return float4(df.x * (k1 + k4 * ff.y + k6 * ff.z + k7 * ff.y * ff.z),
@@ -113,6 +115,7 @@ float4 NoiseDeriv(float3 p)
                   df.z * (k3 + k6 * ff.x + k5 * ff.y + k7 * ff.x * ff.y),
                   k0 + k1 * ff.x + k2 * ff.y + k3 * ff.z + k4 * ff.x * ff.y + k5 * ff.y * ff.z + k6 * ff.z * ff.x + k7 * ff.x * ff.y * ff.z);
 }
+
 //-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
@@ -160,7 +163,7 @@ float SwissFbm(float3 ppoint, float gain, float warp, float noiseLacunarity, int
     float amp = 1.0f;
     float3 deriv = float3(0.0f, 0.0f, 0.0f);
 
-    for(int i = 0; i < noiseOctaves; ++i)
+    for (int i = 0; i < noiseOctaves; ++i)
     {
         float4 n = NoiseDeriv((ppoint + warp * deriv) * freq);
         sum += amp * (0.5f - abs(n.w));
@@ -183,7 +186,7 @@ float RidgedMultifractal(float3 ppoint, float gain, float noiseOffset, float noi
     {
         weight = saturate(signal * gain);
         signal = Noise(ppoint * frequency);
-        signal = noiseOffset - sqrt(noiseRidgeSmooth + signal*signal);
+        signal = noiseOffset - sqrt(noiseRidgeSmooth + signal * signal);
         signal *= signal * weight;
         summ += signal * SavePow(frequency, -noiseH);
         frequency *= noiseLacunarity;

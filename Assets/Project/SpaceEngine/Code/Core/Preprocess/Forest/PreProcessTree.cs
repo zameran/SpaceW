@@ -1,4 +1,5 @@
 ﻿#region License
+
 // Procedural planet generator.
 //  
 // Copyright (C) 2015-2023 Denis Ovchinnikov [zameran] 
@@ -31,6 +32,7 @@
 // Creation Date: 2017.03.28
 // Creation Time: 2:18 PM
 // Creator: zameran
+
 #endregion
 
 using System;
@@ -70,10 +72,10 @@ namespace SpaceEngine.Core.Preprocess.Forest
         public double Z = 1.0;
         public double S = 1.0;
 
-        private Mesh PreProcessMesh;
+        private string ApplicationDataPath = "";
         private RenderTexture PreProcessAORT;
 
-        private string ApplicationDataPath = "";
+        private Mesh PreProcessMesh;
 
         private void Start()
         {
@@ -87,12 +89,11 @@ namespace SpaceEngine.Core.Preprocess.Forest
             //CalculateAO();
             CalculateViews();
 
-            Debug.Log($"PreProcessTree.Start: Computation time: {(Time.realtimeSinceStartup - startTime)} s");
+            Debug.Log($"PreProcessTree.Start: Computation time: {Time.realtimeSinceStartup - startTime} s");
         }
 
         private void Update()
         {
-
         }
 
         private void OnDestroy()
@@ -100,7 +101,10 @@ namespace SpaceEngine.Core.Preprocess.Forest
             Helper.Destroy(ViewMaterial);
             Helper.Destroy(PreProcessMesh);
 
-            if (PreProcessAORT != null) PreProcessAORT.ReleaseAndDestroy();
+            if (PreProcessAORT != null)
+            {
+                PreProcessAORT.ReleaseAndDestroy();
+            }
         }
 
         private void Swap(ref int a, ref int b)
@@ -124,7 +128,7 @@ namespace SpaceEngine.Core.Preprocess.Forest
 
             foreach (var treeMesh in TreeMeshes)
             {
-                var ci = new CombineInstance()
+                var ci = new CombineInstance
                 {
                     mesh = treeMesh,
                     transform = Matrix4x4.TRS(Vector3.zero, Quaternion.identity, Vector3.one)
@@ -267,13 +271,16 @@ namespace SpaceEngine.Core.Preprocess.Forest
                 var theta = (i + 0.5) / N_AO * Math.PI / 2.0;
                 var dtheta = 1.0 / N_AO * Math.PI / 2.0;
 
-                Parallel.For(0, (4 * N_AO) - 1, options, j =>
+                Parallel.For(0, 4 * N_AO - 1, options, j =>
                 {
                     var phi = (j + 0.5) / (4 * N_AO) * 2.0 * Math.PI;
                     var dphi = 1.0 / (4 * N_AO) * 2.0 * Math.PI;
                     var docc = Math.Cos(theta) * Math.Sin(theta) * dtheta * dphi / Math.PI;
 
-                    if ((i * 4 * N_AO + j) % 4 == 0) Debug.Log($"Precomputing AO Step {i * 4 * N_AO + j} of {4 * N_AO * N_AO}");
+                    if ((i * 4 * N_AO + j) % 4 == 0)
+                    {
+                        Debug.Log($"Precomputing AO Step {i * 4 * N_AO + j} of {4 * N_AO * N_AO}");
+                    }
 
                     var uz = new Vector3d(Math.Cos(phi) * Math.Sin(theta), Math.Sin(phi) * Math.Sin(theta), Math.Cos(theta));
                     var ux = uz.z.EpsilonEquals(1.0, 0.0000001) ? new Vector3d(1.0, 0.0, 0.0) : new Vector3d(-uz.y, uz.x, 0.0).Normalized();
@@ -441,13 +448,16 @@ namespace SpaceEngine.Core.Preprocess.Forest
                     var c2s = Matrix4x4d.Ortho(b.Max.x, b.Min.x, b.Max.y, b.Min.y, -2.0 * b.Max.z, -2.0 * b.Min.z + S);
                     var w2s = c2s * worldToCamera * Matrix4x4d.RotateZ(-90 - alpha);
 
-                    var dir = ((Matrix4x4d.RotateZ(90 + alpha) * cameraToWorld) * new Vector4d(0.0, 0.0, 1.0, 0.0)).xyz;
+                    var dir = (Matrix4x4d.RotateZ(90 + alpha) * cameraToWorld * new Vector4d(0.0, 0.0, 1.0, 0.0)).xyz;
 
                     ViewMaterial.SetTexture("colorSampler", TreeSampler);
                     ViewMaterial.SetVector("dir", dir.ToVector3());
                     ViewMaterial.SetMatrix("worldToScreen", w2s.ToMatrix4x4());
 
-                    if (Camera.main != null) Camera.main.projectionMatrix = w2s.ToMatrix4x4();
+                    if (Camera.main != null)
+                    {
+                        Camera.main.projectionMatrix = w2s.ToMatrix4x4();
+                    }
 
                     ViewMaterial.SetPass(0);
                     Graphics.DrawMeshNow(PreProcessMesh, Matrix4x4.TRS(Vector3.zero, Quaternion.identity, Vector3.one));

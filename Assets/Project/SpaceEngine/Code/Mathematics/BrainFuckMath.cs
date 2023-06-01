@@ -1,4 +1,5 @@
 ﻿#region License
+
 // Procedural planet generator.
 // 
 // Copyright (C) 2015-2023 Denis Ovchinnikov [zameran] 
@@ -31,6 +32,7 @@
 // Creation Date: Undefined
 // Creation Time: Undefined
 // Creator: zameran
+
 #endregion
 
 using System;
@@ -41,7 +43,7 @@ using UnityEngine;
 namespace SpaceEngine.Mathematics
 {
     /// <summary>
-    /// Class with strange-magic math stuff.
+    ///     Class with strange-magic math stuff.
     /// </summary>
     public static class BrainFuckMath
     {
@@ -50,7 +52,7 @@ namespace SpaceEngine.Mathematics
         {
             var indexOf = Array.IndexOf(Enum.GetValues(typeof(QuadPosition)), quadPosition);
 
-            var s = (sign[indexOf] == 1) ? -r : r;
+            var s = sign[indexOf] == 1 ? -r : r;
             var v = axis[indexOf];
 
             var output = new Vector3(v == 0 ? s : 0.0f, v == 1 ? s : 0.0f, v == 2 ? s : 0.0f);
@@ -73,10 +75,10 @@ namespace SpaceEngine.Mathematics
         }
 
         [Obsolete("Was used in old core...")]
-        public static Vector3 ApplyBitMask(Vector3 mask, float leftValue, float rightvalue)
+        public static Vector3 ApplyBitMask(Vector3 mask, float leftValue, float rightValue)
         {
             // NOTE : So, i have mask vector with only [1.0 or -1.0] values and i will set 'left' or 'right' stuff to components.
-            return new Vector3(mask.x < 0 ? leftValue : rightvalue, mask.y < 0 ? leftValue : rightvalue, mask.z < 0 ? leftValue : rightvalue);
+            return new Vector3(mask.x < 0 ? leftValue : rightValue, mask.y < 0 ? leftValue : rightValue, mask.z < 0 ? leftValue : rightValue);
         }
 
         public static bool NearlyEqual(float a, float b, float precision = 0.00001f) // Use 5 digits after dot.
@@ -85,8 +87,12 @@ namespace SpaceEngine.Mathematics
             var absB = Math.Abs(b);
             var difference = Math.Abs(a - b);
 
-            if (a * b == 0) return difference < (precision * precision);
-            else return difference / (absA + absB) < precision;
+            if (a * b == 0)
+            {
+                return difference < precision * precision;
+            }
+
+            return difference / (absA + absB) < precision;
         }
 
         public static bool NearlyEqual(double a, double b, double precision = 0.00000000001) // Use 10 digits after dot.
@@ -95,8 +101,12 @@ namespace SpaceEngine.Mathematics
             var absB = Math.Abs(b);
             var difference = Math.Abs(a - b);
 
-            if (a * b == 0) return difference < (precision * precision);
-            else return difference / (absA + absB) < precision;
+            if (a * b == 0)
+            {
+                return difference < precision * precision;
+            }
+
+            return difference / (absA + absB) < precision;
         }
 
         public static bool AlmostEquals(this float a, float b, float precision = 0.00001f) // Use 5 digits after dot.
@@ -106,81 +116,110 @@ namespace SpaceEngine.Mathematics
 
         public static double Wrap(double value, double min, double max)
         {
-            if (NearlyEqual(min, max)) return min;
+            if (NearlyEqual(min, max))
+            {
+                return min;
+            }
 
-            if (min > max) throw new ArgumentException($"Argument min {min} should be less or equal to argument max {max}", "min");
+            if (min > max)
+            {
+                throw new ArgumentException($"Argument min {min} should be less or equal to argument max {max}", nameof(min));
+            }
 
             var rangeSize = max - min;
 
-            return (min + (value - min) - (rangeSize * Math.Floor((value - min) / rangeSize)));
+            return min + (value - min) - rangeSize * Math.Floor((value - min) / rangeSize);
         }
 
         [Obsolete("Was used in old core...")]
         public static void DefineAxis(ref bool staticX, ref bool staticY, ref bool staticZ, Vector3 size)
         {
             if (AlmostEquals(size.x, 0.0f))
+            {
                 staticX = true;
+            }
             else if (AlmostEquals(size.y, 0.0f))
+            {
                 staticY = true;
+            }
             else if (AlmostEquals(size.z, 0.0f))
+            {
                 staticZ = true;
+            }
         }
 
         [Obsolete("Was used in old core...")]
         public static void LockAxis(ref float tempAxisValue, ref Vector3 temp, bool staticX, bool staticY, bool staticZ)
         {
             if (staticX)
+            {
                 tempAxisValue = temp.x;
+            }
             else if (staticY)
+            {
                 tempAxisValue = temp.y;
+            }
             else if (staticZ)
+            {
                 tempAxisValue = temp.z;
+            }
         }
 
         [Obsolete("Was used in old core...")]
         public static void UnlockAxis(ref Vector3 temp, ref float tempAxisValue, bool staticX, bool staticY, bool staticZ)
         {
             if (staticX)
+            {
                 temp.x = tempAxisValue;
+            }
             else if (staticY)
+            {
                 temp.y = tempAxisValue;
+            }
             else if (staticZ)
+            {
                 temp.z = tempAxisValue;
+            }
         }
 
         [Obsolete("Was used in old core...")]
         public static decimal CalculateK(int lodLevel)
         {
             if (lodLevel == 1)
-                return 0.5M;
-            else
             {
-                var prev = CalculateK(lodLevel - 1);
-                var summ = 1.0M;
-
-                for (var i = 0; i < lodLevel; i++)
-                {
-                    summ = summ / 2.0M;
-                }
-
-                return prev + summ;
+                return 0.5M;
             }
+
+            var prev = CalculateK(lodLevel - 1);
+            var sum = 1.0M;
+
+            for (var i = 0; i < lodLevel; i++)
+            {
+                sum = sum / 2.0M;
+            }
+
+            return prev + sum;
         }
 
         [Obsolete("Was used in old core...")]
         public static decimal CalculateJ(int lodLevel)
         {
             if (lodLevel == 0)
+            {
                 return 15.0M;
-            else if (lodLevel == 1)
+            }
+
+            if (lodLevel == 1)
+            {
                 return 7.5M;
+            }
 
             var prev1 = CalculateJ(lodLevel - 1);
             var prev2 = CalculateJ(lodLevel - 2);
 
-            var summ = Math.Abs(prev1 - prev2) / 2.0M;
+            var sum = Math.Abs(prev1 - prev2) / 2.0M;
 
-            return prev1 + summ;
+            return prev1 + sum;
         }
 
         [Obsolete("Was used in old core...")]
@@ -248,46 +287,76 @@ namespace SpaceEngine.Mathematics
             32 : 15.0 / 14,999999996507540345191955564 | 0,9999999997671693563461303710
             */
 
-            //So. We have exponential modifier... WTF!?
-            //Fuck dat shit. 7 LOD level more than i need. fuck. dat.
-            //Too small numbers... So. Solution is planet radius scaling. 1 unit = 1 milion unity units,
-            //then i simply gonna "scale" the overhaul planet.
+            //So. We have exponential modifier... And pretty stupid code, yeah, i knew it. WTF!?
+            //Too small numbers... So. Solution is planet radius scaling. 1 unit = 1 million unity units, then i simply gonna "scale" the overhaul planet.
 
             //WARNING!!! Magic! Ya, it works...
             if (lodLevel >= 1)
             {
                 if (lodLevel == 1)
-                    temp = LinearInterpolate(temp, Multiply(patchCubeCenter, (15.0 / 7.5)), 0.5); //0.5
+                {
+                    temp = LinearInterpolate(temp, Multiply(patchCubeCenter, 15.0 / 7.5), 0.5); //0.5
+                }
                 else if (lodLevel == 2)
-                    temp = LinearInterpolate(temp, Multiply(patchCubeCenter, (15.0 / 11.25)), 0.75); //0.5 + 0.5 / 2.0
+                {
+                    temp = LinearInterpolate(temp, Multiply(patchCubeCenter, 15.0 / 11.25), 0.75); //0.5 + 0.5 / 2.0
+                }
                 else if (lodLevel == 3)
-                    temp = LinearInterpolate(temp, Multiply(patchCubeCenter, (15.0 / 13.125)), 0.875); //0.75 + ((0.5 / 2.0) / 2.0)
+                {
+                    temp = LinearInterpolate(temp, Multiply(patchCubeCenter, 15.0 / 13.125), 0.875); //0.75 + ((0.5 / 2.0) / 2.0)
+                }
                 else if (lodLevel == 4)
-                    temp = LinearInterpolate(temp, Multiply(patchCubeCenter, (15.0 / 14.0625)), 0.9375); //0.875 + (((0.5 / 2.0) / 2.0) / 2.0)
+                {
+                    temp = LinearInterpolate(temp, Multiply(patchCubeCenter, 15.0 / 14.0625), 0.9375); //0.875 + (((0.5 / 2.0) / 2.0) / 2.0)
+                }
                 else if (lodLevel == 5)
-                    temp = LinearInterpolate(temp, Multiply(patchCubeCenter, (15.0 / 14.53125)), 0.96875); //0.9375 + ((((0.5 / 2.0) / 2.0) / 2.0) / 2.0)
+                {
+                    temp = LinearInterpolate(temp, Multiply(patchCubeCenter, 15.0 / 14.53125), 0.96875); //0.9375 + ((((0.5 / 2.0) / 2.0) / 2.0) / 2.0)
+                }
                 else if (lodLevel == 6)
-                    temp = LinearInterpolate(temp, Multiply(patchCubeCenter, (15.0 / 14.765625)), 0.984375); //0.96875 + (((((0.5 / 2.0) / 2.0) / 2.0) / 2.0) / 2.0)
+                {
+                    temp = LinearInterpolate(temp, Multiply(patchCubeCenter, 15.0 / 14.765625), 0.984375); //0.96875 + (((((0.5 / 2.0) / 2.0) / 2.0) / 2.0) / 2.0)
+                }
                 else if (lodLevel == 7) //Experimental!
-                    temp = LinearInterpolate(temp, Multiply(patchCubeCenter, (15.0 / 14.8828125)), 0.9921875); //0.984375 + ((((((0.5 / 2.0) / 2.0) / 2.0) / 2.0) / 2.0) / 2.0)
+                {
+                    temp = LinearInterpolate(temp, Multiply(patchCubeCenter, 15.0 / 14.8828125), 0.9921875); //0.984375 + ((((((0.5 / 2.0) / 2.0) / 2.0) / 2.0) / 2.0) / 2.0)
+                }
                 else if (lodLevel == 8) //Experimental!
-                    temp = LinearInterpolate(temp, Multiply(patchCubeCenter, (15.0 / 14.94140625)), 0.99609375); //0.9921875 + (((((((0.5 / 2.0) / 2.0) / 2.0) / 2.0) / 2.0) / 2.0) / 2.0)
+                {
+                    temp = LinearInterpolate(temp, Multiply(patchCubeCenter, 15.0 / 14.94140625), 0.99609375); //0.9921875 + (((((((0.5 / 2.0) / 2.0) / 2.0) / 2.0) / 2.0) / 2.0) / 2.0)
+                }
                 else if (lodLevel == 9) //Experimental! Maybe float precision have place on small planet radius!
-                    temp = LinearInterpolate(temp, Multiply(patchCubeCenter, (15.0 / 14.970703125)), 0.998046875); //0.99609375 + ((((((((0.5 / 2.0) / 2.0) / 2.0) / 2.0) / 2.0) / 2.0) / 2.0) / 2.0)
+                {
+                    temp = LinearInterpolate(temp, Multiply(patchCubeCenter, 15.0 / 14.970703125), 0.998046875); //0.99609375 + ((((((((0.5 / 2.0) / 2.0) / 2.0) / 2.0) / 2.0) / 2.0) / 2.0) / 2.0)
+                }
                 else if (lodLevel == 10) //Sooooo deep... what i'am doing?
-                    temp = LinearInterpolate(temp, Multiply(patchCubeCenter, (15.0 / 14.9853515625)), 0.9990234375); //0.998046875 + (((((((((0.5 / 2.0) / 2.0) / 2.0) / 2.0) / 2.0) / 2.0) / 2.0) / 2.0) / 2.0)
+                {
+                    temp = LinearInterpolate(temp, Multiply(patchCubeCenter, 15.0 / 14.9853515625), 0.9990234375); //0.998046875 + (((((((((0.5 / 2.0) / 2.0) / 2.0) / 2.0) / 2.0) / 2.0) / 2.0) / 2.0) / 2.0)
+                }
                 else if (lodLevel == 11) //WHY?!
-                    temp = LinearInterpolate(temp, Multiply(patchCubeCenter, (15.0 / 14.99267578125)), 0.99951171875); //0.9990234375 + ((((((((((0.5 / 2.0) / 2.0) / 2.0) / 2.0) / 2.0) / 2.0) / 2.0) / 2.0) / 2.0) / 2.0)
+                {
+                    temp = LinearInterpolate(temp, Multiply(patchCubeCenter, 15.0 / 14.99267578125), 0.99951171875); //0.9990234375 + ((((((((((0.5 / 2.0) / 2.0) / 2.0) / 2.0) / 2.0) / 2.0) / 2.0) / 2.0) / 2.0) / 2.0)
+                }
                 else if (lodLevel == 12) //NOOOOO! STOP IT! STOP THIS!
-                    temp = LinearInterpolate(temp, Multiply(patchCubeCenter, (15.0 / 14.996337890625)), 0.999755859375); //0.99951171875 + (((((((((((0.5 / 2.0) / 2.0) / 2.0) / 2.0) / 2.0) / 2.0) / 2.0) / 2.0) / 2.0) / 2.0) / 2.0)
+                {
+                    temp = LinearInterpolate(temp, Multiply(patchCubeCenter, 15.0 / 14.996337890625), 0.999755859375); //0.99951171875 + (((((((((((0.5 / 2.0) / 2.0) / 2.0) / 2.0) / 2.0) / 2.0) / 2.0) / 2.0) / 2.0) / 2.0) / 2.0)
+                }
                 else if (lodLevel == 13) //Only qbit science can save us...
-                    temp = LinearInterpolate(temp, Multiply(patchCubeCenter, (15.0 / 14.9981689453125)), 0.9998779296875);
+                {
+                    temp = LinearInterpolate(temp, Multiply(patchCubeCenter, 15.0 / 14.9981689453125), 0.9998779296875);
+                }
                 else if (lodLevel == 14)
-                    temp = LinearInterpolate(temp, Multiply(patchCubeCenter, (15.0 / 14.99908447265625)), 0.99993896484375);
+                {
+                    temp = LinearInterpolate(temp, Multiply(patchCubeCenter, 15.0 / 14.99908447265625), 0.99993896484375);
+                }
                 else if (lodLevel == 15)
-                    temp = LinearInterpolate(temp, Multiply(patchCubeCenter, (15.0 / 14.999542236328125)), 0.999969482421875);
+                {
+                    temp = LinearInterpolate(temp, Multiply(patchCubeCenter, 15.0 / 14.999542236328125), 0.999969482421875);
+                }
                 else if (lodLevel == 16)
-                    temp = LinearInterpolate(temp, Multiply(patchCubeCenter, (15.0 / 14.9997711181640625)), 0.9999847412109375);
+                {
+                    temp = LinearInterpolate(temp, Multiply(patchCubeCenter, 15.0 / 14.9997711181640625), 0.9999847412109375);
+                }
             }
             //End of magic here.
         }

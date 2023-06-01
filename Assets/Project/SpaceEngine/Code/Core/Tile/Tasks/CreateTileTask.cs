@@ -1,4 +1,5 @@
 ﻿#region License
+
 // Procedural planet generator.
 //  
 // Copyright (C) 2015-2023 Denis Ovchinnikov [zameran] 
@@ -31,6 +32,7 @@
 // Creation Date: 2017.03.28
 // Creation Time: 2:18 PM
 // Creator: zameran
+
 #endregion
 
 using System.Collections.Generic;
@@ -43,36 +45,11 @@ using UnityEngine;
 namespace SpaceEngine.Core.Tile.Tasks
 {
     /// <summary>
-    /// The task that creates the tiles. 
-    /// The task calles the producers <see cref="TileProducer.DoCreateTile"/> function and the data created is stored in the slot.
+    ///     The task that creates the tiles.
+    ///     The task calles the producers <see cref="TileProducer.DoCreateTile" /> function and the data created is stored in the slot.
     /// </summary>
     public class CreateTileTask : Schedular.Task
     {
-        /// <summary>
-        /// The <see cref="TileProducer"/> that created this task.
-        /// </summary>
-        public TileProducer Owner { get; protected set; }
-
-        /// <summary>
-        /// The level of the tile to create.
-        /// </summary>
-        public int Level { get; protected set; }
-
-        /// <summary>
-        /// The quadtree x coordinate of the tile to create.
-        /// </summary>
-        public int Tx { get; protected set; }
-
-        /// <summary>
-        /// The quadtree y coordinate of the tile to create.
-        /// </summary>
-        public int Ty { get; protected set; }
-
-        /// <summary>
-        /// Where the created tile data must be stored.
-        /// </summary>
-        public List<TileStorage.Slot> Slot { get; protected set; }
-
         public CreateTileTask(TileProducer owner, int level, int tx, int ty, List<TileStorage.Slot> slot)
         {
             Owner = owner;
@@ -81,6 +58,31 @@ namespace SpaceEngine.Core.Tile.Tasks
             Ty = ty;
             Slot = slot;
         }
+
+        /// <summary>
+        ///     The <see cref="TileProducer" /> that created this task.
+        /// </summary>
+        public TileProducer Owner { get; protected set; }
+
+        /// <summary>
+        ///     The level of the tile to create.
+        /// </summary>
+        public int Level { get; protected set; }
+
+        /// <summary>
+        ///     The quadtree x coordinate of the tile to create.
+        /// </summary>
+        public int Tx { get; protected set; }
+
+        /// <summary>
+        ///     The quadtree y coordinate of the tile to create.
+        /// </summary>
+        public int Ty { get; protected set; }
+
+        /// <summary>
+        ///     Where the created tile data must be stored.
+        /// </summary>
+        public List<TileStorage.Slot> Slot { get; protected set; }
 
         public override void Run()
         {

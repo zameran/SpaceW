@@ -1,4 +1,5 @@
 ﻿#region License
+
 // Procedural planet generator.
 // 
 // Copyright (C) 2015-2023 Denis Ovchinnikov [zameran] 
@@ -31,6 +32,7 @@
 // Creation Date: Undefined
 // Creation Time: Undefined
 // Creator: zameran
+
 #endregion
 
 using System;
@@ -46,32 +48,32 @@ namespace SpaceEngine.Managers
 {
     public static class EventManager
     {
-        public static BaseEvents BaseEvents = new BaseEvents();
+        public static BaseEvents BaseEvents = new();
 
-        public static BodyEvents BodyEvents = new BodyEvents();
+        public static BodyEvents BodyEvents = new();
 
-        public static UIEvents UIEvents = new UIEvents();
+        public static UIEvents UIEvents = new();
     }
 
     public sealed class BaseEvents
     {
-        public EventHolder<EntryPoint, LoadSceneMode> OnSceneWillBeLoadedNow = new EventHolder<EntryPoint, LoadSceneMode>();
-        public EventHolder<EntryPoint, LoadSceneMode> OnSceneWillBeLoaded = new EventHolder<EntryPoint, LoadSceneMode>();
-        public EventHolder<EntryPoint, LoadSceneMode> OnSceneLoaded = new EventHolder<EntryPoint, LoadSceneMode>();
+        public EventHolder<EntryPoint, LoadSceneMode> OnSceneLoaded = new();
+        public EventHolder<EntryPoint, LoadSceneMode> OnSceneWillBeLoaded = new();
+        public EventHolder<EntryPoint, LoadSceneMode> OnSceneWillBeLoadedNow = new();
     }
 
     public sealed class BodyEvents
     {
-        public EventHolder<Body, Atmosphere> OnAtmosphereBaked = new EventHolder<Body, Atmosphere>();
-        public EventHolder<Body, Atmosphere, AtmosphereBase> OnAtmospherePresetChanged = new EventHolder<Body, Atmosphere, AtmosphereBase>();
+        public EventHolder<Body, Atmosphere> OnAtmosphereBaked = new();
+        public EventHolder<Body, Atmosphere, AtmosphereBase> OnAtmospherePresetChanged = new();
 
-        public EventHolder<Body, TerrainNode> OnSamplersChanged = new EventHolder<Body, TerrainNode>();
+        public EventHolder<Body, TerrainNode> OnSamplersChanged = new();
     }
 
     public sealed class UIEvents
     {
-        public EventHolder AllAdditiveUILoaded = new EventHolder();
-        public EventHolder<UICore> UIRemixed = new EventHolder<UICore>();
+        public EventHolder AllAdditiveUILoaded = new();
+        public EventHolder<UICore> UIRemixed = new();
     }
 
     #region Event Holders

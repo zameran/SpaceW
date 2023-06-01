@@ -1,4 +1,5 @@
 ﻿#region License
+
 // Procedural planet generator.
 //  
 // Copyright (C) 2015-2023 Denis Ovchinnikov [zameran] 
@@ -31,6 +32,7 @@
 // Creation Date: 2017.05.17
 // Creation Time: 2:03 AM
 // Creator: zameran
+
 #endregion
 
 using System;
@@ -43,16 +45,20 @@ namespace SpaceEngine.Core.Utilities.Gradients
     public class ColorMaterialTableGradientLut : GradientLut
     {
         /// <summary>
-        /// Should <see cref="GradientLut.Lut"/> be inverted along X axis?
+        ///     Should <see cref="GradientLut.Lut" /> be inverted along X axis?
         /// </summary>
-        public bool ReverseX = false;
+        public bool ReverseX;
+
+        public ColorMaterialTableGradientLut()
+        {
+        }
+
+        public ColorMaterialTableGradientLut(Gradient gradient) : base(gradient)
+        {
+        }
 
         /// <inheritdoc />
-        protected override Vector2 Size => new Vector2(256, 32);
-
-        public ColorMaterialTableGradientLut() : base() { }
-
-        public ColorMaterialTableGradientLut(Gradient gradient) : base(gradient) { }
+        protected override Vector2 Size => new(256, 32);
 
         /// <inheritdoc />
         public override void CalculateLut()
@@ -61,8 +67,8 @@ namespace SpaceEngine.Core.Utilities.Gradients
             {
                 for (ushort y = 0; y < Lut.height; y++)
                 {
-                    var t = (x / Size.x);
-                    var gradientColor = Gradient.Evaluate(ReverseX ? (1.0f - t) : t);
+                    var t = x / Size.x;
+                    var gradientColor = Gradient.Evaluate(ReverseX ? 1.0f - t : t);
 
                     Lut.SetPixel(x, y, gradientColor);
                 }
@@ -74,7 +80,10 @@ namespace SpaceEngine.Core.Utilities.Gradients
         /// <inheritdoc />
         public override void DestroyLut()
         {
-            if (Lut != null) Helper.Destroy(Lut);
+            if (Lut != null)
+            {
+                Helper.Destroy(Lut);
+            }
         }
     }
 }

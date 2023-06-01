@@ -27,7 +27,7 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF
  * THE POSSIBILITY OF SUCH DAMAGE.
  */
- 
+
 /*
  * Proland: a procedural landscape rendering library.
  * Copyright (c) 2008-2011 INRIA
@@ -51,11 +51,11 @@
  * You can obtain a specific license from Inria: proland-licensing@inria.fr.
  */
 
- /*
- * Authors: Eric Bruneton, Antoine Begault, Guillaume Piolat.
- * Modified and ported to Unity by Justin Hawkins 2014
- * Modified by Denis Ovchinnikov 2015-2023
- */
+/*
+* Authors: Eric Bruneton, Antoine Begault, Guillaume Piolat.
+* Modified and ported to Unity by Justin Hawkins 2014
+* Modified by Denis Ovchinnikov 2015-2023
+*/
 
 #define OCEAN_BRDF
 
@@ -84,126 +84,126 @@ uniform sampler2D _Ocean_Map4;
 uniform sampler2D _Ocean_Foam0;
 uniform sampler2D _Ocean_Foam1;
 
-float MeanFresnel(float cosThetaV, float sigmaV) 
+float MeanFresnel(float cosThetaV, float sigmaV)
 {
-	return pow(1.0 - cosThetaV, 5.0 * exp(-2.69 * sigmaV)) / (1.0 + 22.7 * pow(sigmaV, 1.5));
+    return pow(1.0 - cosThetaV, 5.0 * exp(-2.69 * sigmaV)) / (1.0 + 22.7 * pow(sigmaV, 1.5));
 }
 
-float MeanFresnel(float3 V, float3 N, float sigmaSq) 
+float MeanFresnel(float3 V, float3 N, float sigmaSq)
 {
-	return MeanFresnel(dot(V, N), sqrt(sigmaSq));
+    return MeanFresnel(dot(V, N), sqrt(sigmaSq));
 }
 
 // L, V, N in world space
-float ReflectedSunRadiance(float3 L, float3 V, float3 N, float sigmaSq) 
+float ReflectedSunRadiance(float3 L, float3 V, float3 N, float sigmaSq)
 {
-	float3 H = normalize(L + V);
+    float3 H = normalize(L + V);
 
-	float hn = dot(H, N);
-	float p = exp(-2.0 * ((1.0 - hn * hn) / sigmaSq) / (1.0 + hn)) / (M_PI4 * sigmaSq);
+    float hn = dot(H, N);
+    float p = exp(-2.0 * ((1.0 - hn * hn) / sigmaSq) / (1.0 + hn)) / (M_PI4 * sigmaSq);
 
-	float c = 1.0 - dot(V, H);
-	float c2 = c * c;
-	float fresnel = 0.02 + 0.98 * c2 * c2 * c;
+    float c = 1.0 - dot(V, H);
+    float c2 = c * c;
+    float fresnel = 0.02 + 0.98 * c2 * c2 * c;
 
-	float zL = dot(L, N);
-	float zV = dot(V, N);
-	zL = max(zL,0.01);
-	zV = max(zV,0.01);
+    float zL = dot(L, N);
+    float zV = dot(V, N);
+    zL = max(zL, 0.01);
+    zV = max(zV, 0.01);
 
-	// brdf times cos(thetaL)
-	return zL <= 0.0 ? 0.0 : max(fresnel * p * sqrt(abs(zL / zV)), 0.0);
+    // brdf times cos(thetaL)
+    return zL <= 0.0 ? 0.0 : max(fresnel * p * sqrt(abs(zL / zV)), 0.0);
 }
 
-float2 U(float2 zeta, float3 V) 
+float2 U(float2 zeta, float3 V)
 {
-	float3 F = normalize(float3(-zeta, 1.0));
-	float3 R = 2.0 * dot(F, V) * F - V;
+    float3 F = normalize(float3(-zeta, 1.0));
+    float3 R = 2.0 * dot(F, V) * F - V;
 
-	return -R.xy / (1.0 + R.z);
+    return -R.xy / (1.0 + R.z);
 }
 
 // V, N, sunDir in world space
-float3 ReflectedSkyRadiance(sampler2D skymap, float3 V, float3 N, float sigmaSq, float3 sunDir) 
+float3 ReflectedSkyRadiance(sampler2D skymap, float3 V, float3 N, float sigmaSq, float3 sunDir)
 {
-	float3 result = float3(0.0, 0.0, 0.0);
+    float3 result = float3(0.0, 0.0, 0.0);
 
-	float2 zeta0 = -N.xy / N.z;
-	float2 tau0 = U(zeta0, V);
+    float2 zeta0 = -N.xy / N.z;
+    float2 tau0 = U(zeta0, V);
 
-	const float n = 1.0 / 1.1;
+    const float n = 1.0 / 1.1;
 
-	float2 JX = (U(zeta0 + float2(0.01, 0.0), V) - tau0) / 0.01 * n * sqrt(sigmaSq);
-	float2 JY = (U(zeta0 + float2(0.0, 0.01), V) - tau0) / 0.01 * n * sqrt(sigmaSq);
-	
-	result = tex2D(skymap, (tau0 * 0.5 / 1.1 + 0.5), JX, JY).rgb;
+    float2 JX = (U(zeta0 + float2(0.01, 0.0), V) - tau0) / 0.01 * n * sqrt(sigmaSq);
+    float2 JY = (U(zeta0 + float2(0.0, 0.01), V) - tau0) / 0.01 * n * sqrt(sigmaSq);
 
-	result *= 0.02 + 0.98 * MeanFresnel(V, N, sigmaSq);
+    result = tex2D(skymap, (tau0 * 0.5 / 1.1 + 0.5), JX, JY).rgb;
 
-	return result;
+    result *= 0.02 + 0.98 * MeanFresnel(V, N, sigmaSq);
+
+    return result;
 }
 
-float RefractedSeaRadiance(float fresnel) 
+float RefractedSeaRadiance(float fresnel)
 {
-	return 0.98 * (1.0 - fresnel);
+    return 0.98 * (1.0 - fresnel);
 }
 
-float RefractedSeaRadiance(float3 V, float3 N, float sigmaSq) 
+float RefractedSeaRadiance(float3 V, float3 N, float sigmaSq)
 {
-	return RefractedSeaRadiance(MeanFresnel(V, N, sigmaSq));
+    return RefractedSeaRadiance(MeanFresnel(V, N, sigmaSq));
 }
 
-float erf(float x) 
+float erf(float x)
 {
-	const float a  = 0.140012;
+    const float a = 0.140012;
 
-	float x2 = x * x;
-	float ax2 = a * x2;
+    float x2 = x * x;
+    float ax2 = a * x2;
 
-	return sign(x) * sqrt(1.0 - exp(-x2 * (4.0 / M_PI + ax2) / (1.0 + ax2)));
+    return sign(x) * sqrt(1.0 - exp(-x2 * (4.0 / M_PI + ax2) / (1.0 + ax2)));
 }
 
-float WhitecapCoverage(float epsilon, float mu, float sigma2) 
+float WhitecapCoverage(float epsilon, float mu, float sigma2)
 {
-	return 0.5 * erf((0.5 * sqrt(2.0) * (epsilon - mu) * (1.0 / sqrt(sigma2)))) + 0.5;
+    return 0.5 * erf((0.5 * sqrt(2.0) * (epsilon - mu) * (1.0 / sqrt(sigma2)))) + 0.5;
 }
 
-float3 ReflectedSky(float3 V, float3 N, float3 sunDir, float3 earthP) 
+float3 ReflectedSky(float3 V, float3 N, float3 sunDir, float3 earthP)
 {
-	float3 result = float3(0.0, 0.0, 0.0);
-	float3 reflectedAngle = reflect(-V, N);
+    float3 result = float3(0.0, 0.0, 0.0);
+    float3 reflectedAngle = reflect(-V, N);
 
-	reflectedAngle.z = max(reflectedAngle.z, 0.0);	// Hack to avoid unsightly black pixels from downwards reflections
-	result = SkyRadianceSimple(earthP, reflectedAngle, sunDir);
+    reflectedAngle.z = max(reflectedAngle.z, 0.0); // Hack to avoid unsightly black pixels from downwards reflections
+    result = SkyRadianceSimple(earthP, reflectedAngle, sunDir);
 
-	return result;
+    return result;
 }
 
-void CalculateRadiances(in float3 V, in float3 N, in float3 L, 
-						in float3 earthP, in float3 seaColor, in float3 sunL, in float3 skyE, 
-						in float sigmaSq, in float fresnel,
-						out float3 Lsky, out float3 Lsun, out float3 Lsea)
+void CalculateRadiances(in float3 V, in float3 N, in float3 L,
+                        in float3 earthP, in float3 seaColor, in float3 sunL, in float3 skyE,
+                        in float sigmaSq, in float fresnel,
+                        out float3 Lsky, out float3 Lsun, out float3 Lsea)
 {
-	#if OCEAN_SKY_REFLECTIONS_ON
-		Lsky = fresnel * ReflectedSky(V, N, L, earthP);
-		Lsun = ReflectedSunRadiance(L, V, N, sigmaSq) * sunL;
-		Lsea = RefractedSeaRadiance(fresnel) * seaColor * (skyE / M_PI);
-	#else
+    #if OCEAN_SKY_REFLECTIONS_ON
+    Lsky = fresnel * ReflectedSky(V, N, L, earthP);
+    Lsun = ReflectedSunRadiance(L, V, N, sigmaSq) * sunL;
+    Lsea = RefractedSeaRadiance(fresnel) * seaColor * (skyE / M_PI);
+    #else
 		Lsky = skyE * fresnel / M_PI;
 		Lsun = ReflectedSunRadiance(L, V, N, sigmaSq) * sunL;
 		Lsea = (1.0 - fresnel) * seaColor * skyE / M_PI;
-	#endif
+    #endif
 }
 
-float3 OceanRadiance(float3 L, float3 V, float3 N, float sigmaSq, float3 sunL, float3 skyE, float3 seaColor, float3 earthP) 
+float3 OceanRadiance(float3 L, float3 V, float3 N, float sigmaSq, float3 sunL, float3 skyE, float3 seaColor, float3 earthP)
 {
-	float fresnel = MeanFresnel(V, N, sigmaSq);
+    float fresnel = MeanFresnel(V, N, sigmaSq);
 
-	float3 Lsky = 0;
-	float3 Lsun = 0;
-	float3 Lsea = 0;
+    float3 Lsky = 0;
+    float3 Lsun = 0;
+    float3 Lsea = 0;
 
-	CalculateRadiances(V, N, L, earthP, seaColor, sunL, skyE, sigmaSq, fresnel, Lsky, Lsun, Lsea);
+    CalculateRadiances(V, N, L, earthP, seaColor, sunL, skyE, sigmaSq, fresnel, Lsky, Lsun, Lsea);
 
-	return Lsun + Lsky + Lsea;
+    return Lsun + Lsky + Lsea;
 }

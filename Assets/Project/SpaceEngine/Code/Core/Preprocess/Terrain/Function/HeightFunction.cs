@@ -1,4 +1,5 @@
 ﻿#region License
+
 // Procedural planet generator.
 //  
 // Copyright (C) 2015-2023 Denis Ovchinnikov [zameran] 
@@ -31,6 +32,7 @@
 // Creation Date: 2017.03.28
 // Creation Time: 2:18 PM
 // Creator: zameran
+
 #endregion
 
 using System;
@@ -40,9 +42,8 @@ namespace SpaceEngine.Core.Preprocess.Terrain.Function
 {
     public class PlaneHeightFunction : IHeightFunction2D
     {
-        InputMap.InputMap Source;
-
-        int DestinationSize;
+        private readonly int DestinationSize;
+        private readonly InputMap.InputMap Source;
 
         public PlaneHeightFunction(InputMap.InputMap source, int destinationSize)
         {
@@ -52,7 +53,7 @@ namespace SpaceEngine.Core.Preprocess.Terrain.Function
 
         public float GetValue(int x, int y)
         {
-            return SampleHeight((float)x / (float)DestinationSize * (float)Source.Width, (float)y / (float)DestinationSize * (float)Source.Height);
+            return SampleHeight(x / (float)DestinationSize * Source.Width, y / (float)DestinationSize * Source.Height);
         }
 
         private float SampleHeight(float x, float y)
@@ -76,11 +77,10 @@ namespace SpaceEngine.Core.Preprocess.Terrain.Function
 
     public class SphericalHeightFunction : IHeightFunction2D
     {
-        InputMap.InputMap Source;
+        private readonly int DestinationSize;
 
-        Projection Projection;
-
-        int DestinationSize;
+        private readonly Projection Projection;
+        private readonly InputMap.InputMap Source;
 
         public SphericalHeightFunction(InputMap.InputMap source, Projection projection, int destinationSize)
         {

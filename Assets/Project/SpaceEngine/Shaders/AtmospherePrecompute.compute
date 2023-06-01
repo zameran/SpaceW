@@ -57,11 +57,11 @@ RWTexture2D<float4> deltaEWrite;
 #pragma kernel CopyInscatter1
 
 [numthreads(NUM_THREADS, NUM_THREADS, 1)]
-void CopyInscatter1 (uint3 id : SV_DispatchThreadID)
+void CopyInscatter1(uint3 id : SV_DispatchThreadID)
 {
-    float4 ray = deltaSRRead[uint3(id.xy, layer)]; 
-    float4 mie = deltaSMRead[uint3(id.xy, layer)]; 
-    
+    float4 ray = deltaSRRead[uint3(id.xy, layer)];
+    float4 mie = deltaSMRead[uint3(id.xy, layer)];
+
     // store only red component of single Mie scattering (cf. 'Angular precision') 
     inscatterWrite[uint3(id.xy, layer)] = float4(ray.rgb, mie.r);
 }
@@ -70,99 +70,99 @@ void CopyInscatter1 (uint3 id : SV_DispatchThreadID)
 #pragma kernel CopyInscatterN
 
 [numthreads(NUM_THREADS, NUM_THREADS, 1)]
-void CopyInscatterN (uint3 id : SV_DispatchThreadID)
+void CopyInscatterN(uint3 id : SV_DispatchThreadID)
 {
     float4 dhdH;
-    float mu, muS, nu, r;  
-    float2 coords = float2(id.xy) + 0.5; 
-    
-    GetLayer(layer, r, dhdH); 
-    GetMuMuSNu(coords, r, dhdH, mu, muS, nu); 
-    
+    float mu, muS, nu, r;
+    float2 coords = float2(id.xy) + 0.5;
+
+    GetLayer(layer, r, dhdH);
+    GetMuMuSNu(coords, r, dhdH, mu, muS, nu);
+
     uint3 idx = uint3(id.xy, layer);
-    
-    inscatterWrite[idx] = inscatterRead[idx] + float4(deltaSRead[idx].rgb / PhaseFunctionR(nu), 0.0); 
+
+    inscatterWrite[idx] = inscatterRead[idx] + float4(deltaSRead[idx].rgb / PhaseFunctionR(nu), 0.0);
 }
 
 #pragma kernel CopyIrradiance
 
 [numthreads(NUM_THREADS, NUM_THREADS, 1)]
-void CopyIrradiance (uint3 id : SV_DispatchThreadID)
+void CopyIrradiance(uint3 id : SV_DispatchThreadID)
 {
-	// k=0 for line 4, k=1 for line 10
-	irradianceWrite[id.xy] = irradianceRead[id.xy] + k * deltaERead[id.xy];  
+    // k=0 for line 4, k=1 for line 10
+    irradianceWrite[id.xy] = irradianceRead[id.xy] + k * deltaERead[id.xy];
 }
 
 // computes single scattering (line 3 in algorithm 4.1)
 #pragma kernel Inscatter1
 
-void Integrand(float r, float mu, float muS, float nu, float t, out float3 ray, out float3 mie) 
-{ 
-    ray = float3(0.0, 0.0, 0.0); 
-    mie = float3(0.0, 0.0, 0.0); 
-
-    float ri = sqrt(r * r + t * t + 2.0 * r * mu * t); 
-    float muSi = (nu * t + muS * r) / ri; 
-
-    ri = max(Rg, ri); 
-
-    if (muSi >= -sqrt(1.0 - Rg * Rg / (ri * ri))) 
-    { 
-        float3 ti = Transmittance(r, mu, t) * Transmittance(ri, muSi); 
-
-        ray = exp(-(ri - Rg) / HR) * ti; 
-        mie = exp(-(ri - Rg) / HM) * ti; 
-    } 
-} 
-
-void Inscatter(float r, float mu, float muS, float nu, out float3 ray, out float3 mie) 
-{ 
-    ray = float3(0.0, 0.0, 0.0); 
+void Integrand(float r, float mu, float muS, float nu, float t, out float3 ray, out float3 mie)
+{
+    ray = float3(0.0, 0.0, 0.0);
     mie = float3(0.0, 0.0, 0.0);
 
-    float dx = Limit(r, mu) / float(INSCATTER_INTEGRAL_SAMPLES); 
-    float xi = 0.0; 
+    float ri = sqrt(r * r + t * t + 2.0 * r * mu * t);
+    float muSi = (nu * t + muS * r) / ri;
 
-    float3 rayi; 
-    float3 miei; 
+    ri = max(Rg, ri);
 
-    Integrand(r, mu, muS, nu, 0.0, rayi, miei); 
-    
-    for (int i = 1; i <= INSCATTER_INTEGRAL_SAMPLES; ++i) 
-    { 
-        float xj = float(i) * dx; 
-        float3 rayj; 
-        float3 miej; 
-        Integrand(r, mu, muS, nu, xj, rayj, miej); 
-        
-        ray += (rayi + rayj) / 2.0 * dx; 
-        mie += (miei + miej) / 2.0 * dx; 
-        xi = xj; 
-        rayi = rayj; 
-        miei = miej; 
-    } 
-    
-    ray *= betaR.xyz; 
-    mie *= betaMSca.xyz; 
-} 
+    if (muSi >= -sqrt(1.0 - Rg * Rg / (ri * ri)))
+    {
+        float3 ti = Transmittance(r, mu, t) * Transmittance(ri, muSi);
+
+        ray = exp(-(ri - Rg) / HR) * ti;
+        mie = exp(-(ri - Rg) / HM) * ti;
+    }
+}
+
+void Inscatter(float r, float mu, float muS, float nu, out float3 ray, out float3 mie)
+{
+    ray = float3(0.0, 0.0, 0.0);
+    mie = float3(0.0, 0.0, 0.0);
+
+    float dx = Limit(r, mu) / float(INSCATTER_INTEGRAL_SAMPLES);
+    float xi = 0.0;
+
+    float3 rayi;
+    float3 miei;
+
+    Integrand(r, mu, muS, nu, 0.0, rayi, miei);
+
+    for (int i = 1; i <= INSCATTER_INTEGRAL_SAMPLES; ++i)
+    {
+        float xj = float(i) * dx;
+        float3 rayj;
+        float3 miej;
+        Integrand(r, mu, muS, nu, xj, rayj, miej);
+
+        ray += (rayi + rayj) / 2.0 * dx;
+        mie += (miei + miej) / 2.0 * dx;
+        xi = xj;
+        rayi = rayj;
+        miei = miej;
+    }
+
+    ray *= betaR.xyz;
+    mie *= betaMSca.xyz;
+}
 
 [numthreads(NUM_THREADS, NUM_THREADS, 1)]
-void Inscatter1 (uint3 id : SV_DispatchThreadID)
+void Inscatter1(uint3 id : SV_DispatchThreadID)
 {
-    float3 ray; 
+    float3 ray;
     float3 mie;
 
     float4 dhdH;
 
     float mu, muS, nu, r;
 
-    float2 coords = float2(id.xy) + 0.5; 
-    
-    GetLayer(layer, r, dhdH); 
-    GetMuMuSNu(coords, r, dhdH, mu, muS, nu); 
-    
-    Inscatter(r, mu, muS, nu, ray, mie); 
-    
+    float2 coords = float2(id.xy) + 0.5;
+
+    GetLayer(layer, r, dhdH);
+    GetMuMuSNu(coords, r, dhdH, mu, muS, nu);
+
+    Inscatter(r, mu, muS, nu, ray, mie);
+
     // store separately Rayleigh and Mie contributions, WITHOUT the phase function factor 
     // (cf 'Angular precision') 
     deltaSRWrite[uint3(id.xy, layer)] = float4(ray, 0.0);
@@ -172,268 +172,267 @@ void Inscatter1 (uint3 id : SV_DispatchThreadID)
 // computes higher order scattering (line 9 in algorithm 4.1)
 #pragma kernel InscatterN
 
-float3 Integrand(float r, float mu, float muS, float nu, float t) 
-{ 
-    float ri = sqrt(r * r + t * t + 2.0 * r * mu * t); 
-    float mui = (r * mu + t) / ri; 
-    float muSi = (nu * t + muS * r) / ri; 
+float3 Integrand(float r, float mu, float muS, float nu, float t)
+{
+    float ri = sqrt(r * r + t * t + 2.0 * r * mu * t);
+    float mui = (r * mu + t) / ri;
+    float muSi = (nu * t + muS * r) / ri;
 
-    return Texture4D(deltaJRead, ri, mui, muSi, nu).rgb * Transmittance(r, mu, t); 
-} 
- 
-float3 Inscatter(float r, float mu, float muS, float nu) 
-{ 
-    float3 raymie = float3(0.0, 0.0, 0.0); 
+    return Texture4D(deltaJRead, ri, mui, muSi, nu).rgb * Transmittance(r, mu, t);
+}
 
-    float dx = Limit(r, mu) / float(INSCATTER_INTEGRAL_SAMPLES); 
-    float xi = 0.0; 
+float3 Inscatter(float r, float mu, float muS, float nu)
+{
+    float3 raymie = float3(0.0, 0.0, 0.0);
 
-    float3 raymiei = Integrand(r, mu, muS, nu, 0.0); 
-    
-    for (int i = 1; i <= INSCATTER_INTEGRAL_SAMPLES; ++i) 
-    { 
-        float xj = float(i) * dx; 
+    float dx = Limit(r, mu) / float(INSCATTER_INTEGRAL_SAMPLES);
+    float xi = 0.0;
 
-        float3 raymiej = Integrand(r, mu, muS, nu, xj); 
+    float3 raymiei = Integrand(r, mu, muS, nu, 0.0);
 
-        raymie += (raymiei + raymiej) / 2.0 * dx; 
-        xi = xj; 
-        raymiei = raymiej; 
-    } 
-    
-    return raymie; 
-} 
+    for (int i = 1; i <= INSCATTER_INTEGRAL_SAMPLES; ++i)
+    {
+        float xj = float(i) * dx;
+
+        float3 raymiej = Integrand(r, mu, muS, nu, xj);
+
+        raymie += (raymiei + raymiej) / 2.0 * dx;
+        xi = xj;
+        raymiei = raymiej;
+    }
+
+    return raymie;
+}
 
 [numthreads(NUM_THREADS, NUM_THREADS, 1)]
-void InscatterN (uint3 id : SV_DispatchThreadID)
+void InscatterN(uint3 id : SV_DispatchThreadID)
 {
     float4 dhdH;
-    float mu, muS, nu, r; 
-    float2 coords = float2(id.xy) + 0.5;  
-    
-    GetLayer(layer, r, dhdH); 
-    GetMuMuSNu(coords, r, dhdH, mu, muS, nu); 
+    float mu, muS, nu, r;
+    float2 coords = float2(id.xy) + 0.5;
 
-    deltaSRWrite[uint3(id.xy,layer)] = float4(Inscatter(r, mu, muS, nu), 0.0);
+    GetLayer(layer, r, dhdH);
+    GetMuMuSNu(coords, r, dhdH, mu, muS, nu);
+
+    deltaSRWrite[uint3(id.xy, layer)] = float4(Inscatter(r, mu, muS, nu), 0.0);
 }
 
 // computes deltaJ (line 7 in algorithm 4.1)
 #pragma kernel InscatterS
- 
-void Inscatter(float r, float mu, float muS, float nu, out float3 raymie) 
-{ 
-	float dphi = M_PI / float(INSCATTER_SPHERICAL_INTEGRAL_SAMPLES); 
-	float dtheta = M_PI / float(INSCATTER_SPHERICAL_INTEGRAL_SAMPLES);
 
-	r = clamp(r, Rg, Rt); 
-	mu = clamp(mu, -1.0, 1.0); 
-	muS = clamp(muS, -1.0, 1.0); 
+void Inscatter(float r, float mu, float muS, float nu, out float3 raymie)
+{
+    float dphi = M_PI / float(INSCATTER_SPHERICAL_INTEGRAL_SAMPLES);
+    float dtheta = M_PI / float(INSCATTER_SPHERICAL_INTEGRAL_SAMPLES);
 
-	float var = sqrt(1.0 - mu * mu) * sqrt(1.0 - muS * muS); 
+    r = clamp(r, Rg, Rt);
+    mu = clamp(mu, -1.0, 1.0);
+    muS = clamp(muS, -1.0, 1.0);
 
-	nu = clamp(nu, muS * mu - var, muS * mu + var); 
- 
-	float cthetamin = -sqrt(1.0 - (Rg / r) * (Rg / r)); 
- 
-	float3 v = float3(sqrt(1.0 - mu * mu), 0.0, mu); 
-	float sx = v.x == 0.0 ? 0.0 : (nu - muS * mu) / v.x; 
-	float3 s = float3(sx, sqrt(max(0.0, 1.0 - sx * sx - muS * muS)), muS); 
- 
-	raymie = float3(0.0, 0.0, 0.0); 
- 
-	// integral over 4.PI around x with two nested loops over w directions (theta,phi) -- Eq (7) 
-	for (int itheta = 0; itheta < INSCATTER_SPHERICAL_INTEGRAL_SAMPLES; ++itheta) 
-	{ 
-		float theta = (float(itheta) + 0.5) * dtheta; 
-		float ctheta = cos(theta); 
- 
-		float greflectance = 0.0; 
-		float dground = 0.0; 
-		float3 gtransp = float3(0.0, 0.0, 0.0);
-		 
-		if (ctheta < cthetamin) 
-		{ 	// if ground visible in direction w 
-			// compute transparency gtransp between x and ground 
-			greflectance = AVERAGE_GROUND_REFLECTANCE / M_PI; 
-			dground = -r * ctheta - sqrt(r * r * (ctheta * ctheta - 1.0) + Rg * Rg); 
-			gtransp = Transmittance(Rg, -(r * ctheta + dground) / Rg, dground); 
-		} 
- 
-		for (int iphi = 0; iphi < 2 * INSCATTER_SPHERICAL_INTEGRAL_SAMPLES; ++iphi) 
-		{ 
-			float phi = (float(iphi) + 0.5) * dphi; 
-			float dw = dtheta * dphi * sin(theta); 
-			float3 w = float3(cos(phi) * sin(theta), sin(phi) * sin(theta), ctheta); 
- 
-			float nu1 = dot(s, w); 
-			float nu2 = dot(v, w); 
-			float pr2 = PhaseFunctionR(nu2); 
-			float pm2 = PhaseFunctionM(nu2); 
- 
-			// compute irradiance received at ground in direction w (if ground visible) =deltaE 
-			float3 gnormal = (float3(0.0, 0.0, r) + dground * w) / Rg; 
-			float3 girradiance = Irradiance(deltaERead, Rg, dot(gnormal, s)); 
- 
-			float3 raymie1; // light arriving at x from direction w 
- 
-			// first term = light reflected from the ground and attenuated before reaching x, =T.alpha/PI.deltaE 
-			raymie1 = greflectance * girradiance * gtransp; 
- 
-			// second term = inscattered light, =deltaS 
-			if (first == 1) 
-			{ 
-				// first iteration is special because Rayleigh and Mie were stored separately, 
-				// without the phase functions factors; they must be reintroduced here 
-				float pr1 = PhaseFunctionR(nu1); 
-				float pm1 = PhaseFunctionM(nu1); 
+    float var = sqrt(1.0 - mu * mu) * sqrt(1.0 - muS * muS);
 
-				//Here Nvidia GTX 430 driver will crash.
-				//If only ray1 or mie1 calculated - slow, but all is alright.
-				//But if both - driver crash.
-				//INSCATTER_SPHERICAL_INTEGRAL_SAMPLES = 8 - limit for GTX 430.
-				float3 ray1 = Texture4D(deltaSRRead, r, w.z, muS, nu1).rgb; 
-				float3 mie1 = Texture4D(deltaSMRead, r, w.z, muS, nu1).rgb; 
+    nu = clamp(nu, muS * mu - var, muS * mu + var);
 
-				raymie1 += ray1 * pr1 + mie1 * pm1; 
-			} 
-			else 
-			{ 
-				raymie1 += Texture4D(deltaSRRead, r, w.z, muS, nu1).rgb; 
-			} 
- 
-			// light coming from direction w and scattered in direction v 
-			// = light arriving at x from direction w (raymie1) * SUM(scattering coefficient * phaseFunction) 
-			// see Eq (7) 
-			raymie += raymie1 * (betaR.xyz * exp(-(r - Rg) / HR) * pr2 + betaMSca.xyz * exp(-(r - Rg) / HM) * pm2) * dw; 
-		} 
-	}
-	// output raymie = J[T.alpha/PI.deltaE + deltaS] (line 7 in algorithm 4.1) 
-} 
+    float cthetamin = -sqrt(1.0 - (Rg / r) * (Rg / r));
+
+    float3 v = float3(sqrt(1.0 - mu * mu), 0.0, mu);
+    float sx = v.x == 0.0 ? 0.0 : (nu - muS * mu) / v.x;
+    float3 s = float3(sx, sqrt(max(0.0, 1.0 - sx * sx - muS * muS)), muS);
+
+    raymie = float3(0.0, 0.0, 0.0);
+
+    // integral over 4.PI around x with two nested loops over w directions (theta,phi) -- Eq (7) 
+    for (int itheta = 0; itheta < INSCATTER_SPHERICAL_INTEGRAL_SAMPLES; ++itheta)
+    {
+        float theta = (float(itheta) + 0.5) * dtheta;
+        float ctheta = cos(theta);
+
+        float greflectance = 0.0;
+        float dground = 0.0;
+        float3 gtransp = float3(0.0, 0.0, 0.0);
+
+        if (ctheta < cthetamin)
+        {
+            // if ground visible in direction w 
+            // compute transparency gtransp between x and ground 
+            greflectance = AVERAGE_GROUND_REFLECTANCE / M_PI;
+            dground = -r * ctheta - sqrt(r * r * (ctheta * ctheta - 1.0) + Rg * Rg);
+            gtransp = Transmittance(Rg, -(r * ctheta + dground) / Rg, dground);
+        }
+
+        for (int iphi = 0; iphi < 2 * INSCATTER_SPHERICAL_INTEGRAL_SAMPLES; ++iphi)
+        {
+            float phi = (float(iphi) + 0.5) * dphi;
+            float dw = dtheta * dphi * sin(theta);
+            float3 w = float3(cos(phi) * sin(theta), sin(phi) * sin(theta), ctheta);
+
+            float nu1 = dot(s, w);
+            float nu2 = dot(v, w);
+            float pr2 = PhaseFunctionR(nu2);
+            float pm2 = PhaseFunctionM(nu2);
+
+            // compute irradiance received at ground in direction w (if ground visible) =deltaE 
+            float3 gnormal = (float3(0.0, 0.0, r) + dground * w) / Rg;
+            float3 girradiance = Irradiance(deltaERead, Rg, dot(gnormal, s));
+
+            float3 raymie1; // light arriving at x from direction w 
+
+            // first term = light reflected from the ground and attenuated before reaching x, =T.alpha/PI.deltaE 
+            raymie1 = greflectance * girradiance * gtransp;
+
+            // second term = inscattered light, =deltaS 
+            if (first == 1)
+            {
+                // first iteration is special because Rayleigh and Mie were stored separately, 
+                // without the phase functions factors; they must be reintroduced here 
+                float pr1 = PhaseFunctionR(nu1);
+                float pm1 = PhaseFunctionM(nu1);
+
+                //Here Nvidia GTX 430 driver will crash.
+                //If only ray1 or mie1 calculated - slow, but all is alright.
+                //But if both - driver crash.
+                //INSCATTER_SPHERICAL_INTEGRAL_SAMPLES = 8 - limit for GTX 430.
+                float3 ray1 = Texture4D(deltaSRRead, r, w.z, muS, nu1).rgb;
+                float3 mie1 = Texture4D(deltaSMRead, r, w.z, muS, nu1).rgb;
+
+                raymie1 += ray1 * pr1 + mie1 * pm1;
+            }
+            else
+            {
+                raymie1 += Texture4D(deltaSRRead, r, w.z, muS, nu1).rgb;
+            }
+
+            // light coming from direction w and scattered in direction v 
+            // = light arriving at x from direction w (raymie1) * SUM(scattering coefficient * phaseFunction) 
+            // see Eq (7) 
+            raymie += raymie1 * (betaR.xyz * exp(-(r - Rg) / HR) * pr2 + betaMSca.xyz * exp(-(r - Rg) / HM) * pm2) * dw;
+        }
+    }
+    // output raymie = J[T.alpha/PI.deltaE + deltaS] (line 7 in algorithm 4.1) 
+}
 
 [numthreads(NUM_THREADS, NUM_THREADS, 1)]
-void InscatterS (uint3 id : SV_DispatchThreadID)
+void InscatterS(uint3 id : SV_DispatchThreadID)
 {
-	float3 raymie = 0; 
+    float3 raymie = 0;
 
-	float4 dhdH;
+    float4 dhdH;
 
-	float mu, muS, nu, r;  
+    float mu, muS, nu, r;
 
-	float2 coords = float2(id.xy) + 0.5; 
-	
-	GetLayer(layer, r, dhdH); 
-	GetMuMuSNu(coords, r, dhdH, mu, muS, nu); 
-	
-	Inscatter(r, mu, muS, nu, raymie); 
+    float2 coords = float2(id.xy) + 0.5;
 
-	deltaJWrite[uint3(id.xy,layer)] = float4(raymie, 0.0);
+    GetLayer(layer, r, dhdH);
+    GetMuMuSNu(coords, r, dhdH, mu, muS, nu);
+
+    Inscatter(r, mu, muS, nu, raymie);
+
+    deltaJWrite[uint3(id.xy, layer)] = float4(raymie, 0.0);
 }
 
 // computes ground irradiance due to direct sunlight E[L0] (line 2 in algorithm 4.1)
 #pragma kernel Irradiance1
 
 [numthreads(NUM_THREADS, NUM_THREADS, 1)]
-void Irradiance1 (uint3 id : SV_DispatchThreadID)
+void Irradiance1(uint3 id : SV_DispatchThreadID)
 {
-    float r, muS; 
-    float2 coords = float2(id.xy) + 0.5; 
-    
-    GetIrradianceRMuS(coords, r, muS); 
-    
-    deltaEWrite[id.xy] = float4(Transmittance(r, muS) * max(muS, 0.0), 0.0); 
+    float r, muS;
+    float2 coords = float2(id.xy) + 0.5;
+
+    GetIrradianceRMuS(coords, r, muS);
+
+    deltaEWrite[id.xy] = float4(Transmittance(r, muS) * max(muS, 0.0), 0.0);
 }
 
 // computes ground irradiance due to skylight E[deltaS] (line 8 in algorithm 4.1)
 #pragma kernel IrradianceN
 
 [numthreads(NUM_THREADS, NUM_THREADS, 1)]
-void IrradianceN (uint3 id : SV_DispatchThreadID)
+void IrradianceN(uint3 id : SV_DispatchThreadID)
 {
-	float r, muS;
+    float r, muS;
 
-	float2 coords = float2(id.xy) + 0.5; 
-	
-	GetIrradianceRMuS(coords, r, muS); 
-	
-	float3 s = float3(sqrt(max(1.0 - muS * muS, 0.0)), 0.0, muS); 
- 
-	float3 result = float3(0.0, 0.0, 0.0); 
+    float2 coords = float2(id.xy) + 0.5;
 
-	// integral over 2.PI around x with two nested loops over w directions (theta,phi) -- Eq (15) 
+    GetIrradianceRMuS(coords, r, muS);
 
-	float dphi = M_PI / float(IRRADIANCE_INTEGRAL_SAMPLES); 
-	float dtheta = M_PI / float(IRRADIANCE_INTEGRAL_SAMPLES); 
+    float3 s = float3(sqrt(max(1.0 - muS * muS, 0.0)), 0.0, muS);
 
-	for (int iphi = 0; iphi < 2 * IRRADIANCE_INTEGRAL_SAMPLES; ++iphi) 
-	{ 
-		float phi = (float(iphi) + 0.5) * dphi; 
+    float3 result = float3(0.0, 0.0, 0.0);
 
-		for (int itheta = 0; itheta < IRRADIANCE_INTEGRAL_SAMPLES_HALF; ++itheta) 
-		{ 
+    // integral over 2.PI around x with two nested loops over w directions (theta,phi) -- Eq (15) 
 
-			float theta = (float(itheta) + 0.5) * dtheta; 
-			float dw = dtheta * dphi * sin(theta); 
+    float dphi = M_PI / float(IRRADIANCE_INTEGRAL_SAMPLES);
+    float dtheta = M_PI / float(IRRADIANCE_INTEGRAL_SAMPLES);
 
-			float3 w = float3(cos(phi) * sin(theta), sin(phi) * sin(theta), cos(theta)); 
+    for (int iphi = 0; iphi < 2 * IRRADIANCE_INTEGRAL_SAMPLES; ++iphi)
+    {
+        float phi = (float(iphi) + 0.5) * dphi;
 
-			float nu = dot(s, w); 
+        for (int itheta = 0; itheta < IRRADIANCE_INTEGRAL_SAMPLES_HALF; ++itheta)
+        {
+            float theta = (float(itheta) + 0.5) * dtheta;
+            float dw = dtheta * dphi * sin(theta);
 
-			if (first == 1) 
-			{ 
-				// first iteration is special because Rayleigh and Mie were stored separately, 
-				// without the phase functions factors; they must be reintroduced here 
-				float pr1 = PhaseFunctionR(nu); 
-				float pm1 = PhaseFunctionM(nu); 
+            float3 w = float3(cos(phi) * sin(theta), sin(phi) * sin(theta), cos(theta));
 
-				float3 ray1 = Texture4D(deltaSRRead, r, w.z, muS, nu).rgb; 
-				float3 mie1 = Texture4D(deltaSMRead, r, w.z, muS, nu).rgb; 
+            float nu = dot(s, w);
 
-				result += (ray1 * pr1 + mie1 * pm1) * w.z * dw; 
-			} 
-			else 
-			{ 
-				result += Texture4D(deltaSRRead, r, w.z, muS, nu).rgb * w.z * dw; 
+            if (first == 1)
+            {
+                // first iteration is special because Rayleigh and Mie were stored separately, 
+                // without the phase functions factors; they must be reintroduced here 
+                float pr1 = PhaseFunctionR(nu);
+                float pm1 = PhaseFunctionM(nu);
 
-			} 
-		} 
-	} 
+                float3 ray1 = Texture4D(deltaSRRead, r, w.z, muS, nu).rgb;
+                float3 mie1 = Texture4D(deltaSMRead, r, w.z, muS, nu).rgb;
 
-	deltaEWrite[id.xy] = float4(result, 1.0); 
+                result += (ray1 * pr1 + mie1 * pm1) * w.z * dw;
+            }
+            else
+            {
+                result += Texture4D(deltaSRRead, r, w.z, muS, nu).rgb * w.z * dw;
+            }
+        }
+    }
+
+    deltaEWrite[id.xy] = float4(result, 1.0);
 }
 
 // computes transmittance table T using Eq (5)
 
 #pragma kernel Transmittance
 
-float OpticalDepth(float H, float r, float mu) 
-{ 
-	float result = 0.0; 
-	float dx = Limit(r, mu) / float(TRANSMITTANCE_INTEGRAL_SAMPLES); 
-	float xi = 0.0; 
-	float yi = exp(-(r - Rg) / H); 
-	
-	for (int i = 1; i <= TRANSMITTANCE_INTEGRAL_SAMPLES; ++i) 
-	{ 
-		float xj = float(i) * dx; 
-		float yj = exp(-(sqrt(r * r + xj * xj + 2.0 * xj * r * mu) - Rg) / H); 
+float OpticalDepth(float H, float r, float mu)
+{
+    float result = 0.0;
+    float dx = Limit(r, mu) / float(TRANSMITTANCE_INTEGRAL_SAMPLES);
+    float xi = 0.0;
+    float yi = exp(-(r - Rg) / H);
 
-		result += (yi + yj) / 2.0 * dx; 
+    for (int i = 1; i <= TRANSMITTANCE_INTEGRAL_SAMPLES; ++i)
+    {
+        float xj = float(i) * dx;
+        float yj = exp(-(sqrt(r * r + xj * xj + 2.0 * xj * r * mu) - Rg) / H);
 
-		xi = xj; 
-		yi = yj; 
-	}
-	 
-	return mu < -sqrt(1.0 - (Rg / r) * (Rg / r)) ? 1e9 : result; 
-} 
+        result += (yi + yj) / 2.0 * dx;
+
+        xi = xj;
+        yi = yj;
+    }
+
+    return mu < -sqrt(1.0 - (Rg / r) * (Rg / r)) ? 1e9 : result;
+}
 
 [numthreads(NUM_THREADS, NUM_THREADS, 1)]
-void Transmittance (uint3 id : SV_DispatchThreadID)
+void Transmittance(uint3 id : SV_DispatchThreadID)
 {
-	float r, muS; 
+    float r, muS;
 
-	GetTransmittanceRMu(float2(id.xy), r, muS); 
-	
-	float4 depth = betaR * OpticalDepth(HR, r, muS) + betaMEx * OpticalDepth(HM, r, muS); 
+    GetTransmittanceRMu(float2(id.xy), r, muS);
 
-	transmittanceWrite[id.xy] = exp(-depth); // Eq (5);
+    float4 depth = betaR * OpticalDepth(HR, r, muS) + betaMEx * OpticalDepth(HM, r, muS);
+
+    transmittanceWrite[id.xy] = exp(-depth); // Eq (5);
 }

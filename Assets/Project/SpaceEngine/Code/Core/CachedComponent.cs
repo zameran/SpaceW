@@ -1,4 +1,5 @@
 ﻿#region License
+
 // Procedural planet generator.
 //  
 // Copyright (C) 2015-2023 Denis Ovchinnikov [zameran] 
@@ -31,6 +32,7 @@
 // Creation Date: 2017.01.21
 // Creation Time: 5:36 PM
 // Creator: zameran
+
 #endregion
 
 using System;
@@ -55,11 +57,14 @@ namespace SpaceEngine.Core
 
         public void TryInitFromParent(MonoBehaviour mb)
         {
-            if (mb.transform.parent == null) return;
+            if (mb.transform.parent == null)
+            {
+                return;
+            }
 
             Component = mb.transform.parent.GetComponent<T>();
         }
-	
+
         public void TryInitAdd(MonoBehaviour mb)
         {
             var component = mb.GetComponent<T>();

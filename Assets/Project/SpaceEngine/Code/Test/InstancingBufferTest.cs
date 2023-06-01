@@ -1,4 +1,5 @@
 ﻿#region License
+
 // Procedural planet generator.
 //  
 // Copyright (C) 2015-2023 Denis Ovchinnikov [zameran] 
@@ -31,6 +32,7 @@
 // Creation Date: 2017.05.04
 // Creation Time: 1:46 PM
 // Creator: zameran
+
 #endregion
 
 using System.Collections.Generic;
@@ -44,14 +46,37 @@ namespace SpaceEngine.Test
 
         public Mesh TestMesh;
 
-        public MaterialPropertyBlock MPB;
-
         [Range(1, 1024)]
         public int Count = 128;
 
         public bool PerFrameInstancesUpdate = true;
 
-        public readonly List<Matrix4x4> TRSs = new List<Matrix4x4>();
+        public readonly List<Matrix4x4> TRSs = new();
+
+        public MaterialPropertyBlock MPB;
+
+        private void Start()
+        {
+            MPB = new MaterialPropertyBlock();
+
+            CalculateInstancesData();
+        }
+
+        private void Update()
+        {
+            if (TestMesh != null && TestMaterial != null)
+            {
+                if (PerFrameInstancesUpdate)
+                {
+                    CalculateInstancesData();
+                }
+
+                for (var i = 0; i < Count; i++)
+                {
+                    Graphics.DrawMesh(TestMesh, TRSs[i], TestMaterial, 0, Camera.main, 0, MPB);
+                }
+            }
+        }
 
         protected void CalculateInstancesData()
         {
@@ -70,26 +95,6 @@ namespace SpaceEngine.Test
                 MPB.SetColor("_Color", new Color(r, g, b));
 
                 TRSs.Add(Matrix4x4.TRS(position, rotation, Vector3.one));
-            }
-        }
-
-        private void Start()
-        {
-            MPB = new MaterialPropertyBlock();
-
-            CalculateInstancesData();
-        }
-
-        private void Update()
-        {
-            if (TestMesh != null && TestMaterial != null)
-            {
-                if (PerFrameInstancesUpdate == true) CalculateInstancesData();
-
-                for (var i = 0; i < Count; i++)
-                {
-                    Graphics.DrawMesh(TestMesh, TRSs[i], TestMaterial, 0, Camera.main, 0, MPB);
-                }
             }
         }
     }

@@ -1,4 +1,5 @@
 ﻿#region License
+
 // Procedural planet generator.
 //  
 // Copyright (C) 2015-2023 Denis Ovchinnikov [zameran] 
@@ -31,11 +32,13 @@
 // Creation Date: 2017.05.02
 // Creation Time: 5:04 PM
 // Creator: zameran
+
 #endregion
 
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
 using SpaceEngine.Tools;
 using UnityEngine;
 using Debug = UnityEngine.Debug;
@@ -72,7 +75,7 @@ namespace SpaceEngine.Core.Debugging
 
     public sealed class LoggerPalette
     {
-        private readonly Dictionary<LoggerCategory, Color> CategoryPalette = new Dictionary<LoggerCategory, Color>
+        private readonly Dictionary<LoggerCategory, Color> CategoryPalette = new()
         {
             { LoggerCategory.None, XKCDColors.Grey },
             { LoggerCategory.Important, XKCDColors.Amber },
@@ -91,7 +94,7 @@ namespace SpaceEngine.Core.Debugging
             { LoggerCategory.Graphics, XKCDColors.BrightRed }
         };
 
-        private readonly Dictionary<LogType, Color> TypePalette = new Dictionary<LogType, Color>
+        private readonly Dictionary<LogType, Color> TypePalette = new()
         {
             { LogType.Log, XKCDColors.Greyish },
             { LogType.Warning, XKCDColors.Yellow },
@@ -125,45 +128,11 @@ namespace SpaceEngine.Core.Debugging
     public static class Logger
     {
         #if UNITY_EDITOR
-        private static readonly LoggerPalette Palette = new LoggerPalette();
+        private static readonly LoggerPalette Palette = new();
         #endif
         private static readonly LoggerCategory DefaultLoggerCategory = LoggerCategory.Other;
 
         private static bool DebuggerActive;
-
-        #region API
-
-        public static string Colored(this string message, string colorCode)
-        {
-            return $"<color={colorCode}>{message}</color>";
-        }
-
-        public static string Bold(this string message)
-        {
-            return $"<b>{message}</b>";
-        }
-
-        public static string Italic(this string message)
-        {
-            return $"<i>{message}</i>";
-        }
-
-        public static string ToRGBHex(Color color)
-        {
-            return XKCDColors.ColorTranslator.ToRGBHex(color);
-        }
-
-        public static string FormatForConsole(string categoryColorCode, string typeColorCode, string categoryString, string typeString, object obj)
-        {
-            return $"{Colored($"[{typeString.ToUpper()}]", typeColorCode)} : {Colored($"[{categoryString.ToUpper()}]", categoryColorCode)} : {obj}";
-        }
-
-        public static string FormatForFile(DateTime timeStamp, string categoryString, string typeString, object obj)
-        {
-            return $"[{timeStamp:H:mm:ss}] : [{typeString.ToUpper()}] : [{categoryString.ToUpper()}] : {obj}";
-        }
-
-        #endregion
 
         private static void Detect(out LoggerCategory loggerCategory)
         {
@@ -241,7 +210,7 @@ namespace SpaceEngine.Core.Debugging
 
             try
             {
-                using (var outputStream = System.IO.File.AppendText(System.IO.Path.GetFullPath($"{Application.dataPath}/../Log.log")))
+                using (var outputStream = File.AppendText(Path.GetFullPath($"{Application.dataPath}/../Log.log")))
                 {
                     outputStream.WriteLine(obj);
                     outputStream.Flush();
@@ -256,5 +225,39 @@ namespace SpaceEngine.Core.Debugging
             #endif
             Debug.Log(obj);
         }
+
+        #region API
+
+        public static string Colored(this string message, string colorCode)
+        {
+            return $"<color={colorCode}>{message}</color>";
+        }
+
+        public static string Bold(this string message)
+        {
+            return $"<b>{message}</b>";
+        }
+
+        public static string Italic(this string message)
+        {
+            return $"<i>{message}</i>";
+        }
+
+        public static string ToRGBHex(Color color)
+        {
+            return XKCDColors.ColorTranslator.ToRGBHex(color);
+        }
+
+        public static string FormatForConsole(string categoryColorCode, string typeColorCode, string categoryString, string typeString, object obj)
+        {
+            return $"{Colored($"[{typeString.ToUpper()}]", typeColorCode)} : {Colored($"[{categoryString.ToUpper()}]", categoryColorCode)} : {obj}";
+        }
+
+        public static string FormatForFile(DateTime timeStamp, string categoryString, string typeString, object obj)
+        {
+            return $"[{timeStamp:H:mm:ss}] : [{typeString.ToUpper()}] : [{categoryString.ToUpper()}] : {obj}";
+        }
+
+        #endregion
     }
 }

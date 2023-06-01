@@ -1,4 +1,5 @@
 ﻿#region License
+
 // Procedural planet generator.
 // 
 // Copyright (C) 2015-2023 Denis Ovchinnikov [zameran] 
@@ -31,6 +32,7 @@
 // Creation Date: Undefined
 // Creation Time: Undefined
 // Creator: zameran
+
 #endregion
 
 using System.Collections.Generic;
@@ -48,13 +50,12 @@ namespace SpaceEngine.UI.PanelSystem
     [UseLogger(LoggerCategory.InGameUI)]
     public class UICore : MonoBehaviour, IEventit
     {
+        private static UICore Instance;
+
+        public bool ForceDestroyAllPanels;
         public GameObject Root => gameObject;
 
-        public List<UIPanel> Panels { get { return GetComponentsInChildren<UIPanel>().Where(x => x.transform.parent == transform).ToList(); } }
-
-        public bool ForceDestroyAllPanels = false;
-
-        private static UICore Instance = null;
+        public List<UIPanel> Panels => GetComponentsInChildren<UIPanel>().Where(x => x.transform.parent == transform).ToList();
 
         private void Awake()
         {
@@ -110,7 +111,10 @@ namespace SpaceEngine.UI.PanelSystem
 
         public void Eventit()
         {
-            if (IsEventit) return;
+            if (IsEventit)
+            {
+                return;
+            }
 
             EventManager.UIEvents.AllAdditiveUILoaded.OnEvent += OnAllAdditiveUILoaded;
             EventManager.UIEvents.UIRemixed.OnEvent += OnUIRemixed;
@@ -123,7 +127,10 @@ namespace SpaceEngine.UI.PanelSystem
 
         public void UnEventit()
         {
-            if (!IsEventit) return;
+            if (!IsEventit)
+            {
+                return;
+            }
 
             EventManager.UIEvents.AllAdditiveUILoaded.OnEvent -= OnAllAdditiveUILoaded;
             EventManager.UIEvents.UIRemixed.OnEvent -= OnUIRemixed;
@@ -141,7 +148,9 @@ namespace SpaceEngine.UI.PanelSystem
         private void OnLevelLoaded(EntryPoint scene, LoadSceneMode mode)
         {
             if (mode == LoadSceneMode.Single)
+            {
                 RemixUI(ForceDestroyAllPanels);
+            }
         }
 
         private void OnAllAdditiveUILoaded()
@@ -150,7 +159,7 @@ namespace SpaceEngine.UI.PanelSystem
 
             if (loadingScreenPanel != null)
             {
-                loadingScreenPanel.Hide(0);
+                loadingScreenPanel.Hide();
             }
         }
 

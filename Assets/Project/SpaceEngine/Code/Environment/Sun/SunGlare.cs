@@ -1,4 +1,5 @@
 ﻿#region License
+
 // Procedural planet generator.
 // 
 // Copyright (C) 2015-2023 Denis Ovchinnikov [zameran] 
@@ -31,6 +32,7 @@
 // Creation Date: Undefined
 // Creation Time: Undefined
 // Creator: zameran
+
 #endregion
 
 using SpaceEngine.Core;
@@ -47,14 +49,9 @@ namespace SpaceEngine.Environment.Sun
 {
     public sealed class SunGlare : Node<SunGlare>, IUniformed<Material>, IRenderable<SunGlare>
     {
-        private readonly CachedComponent<Sun> SunCachedComponent = new CachedComponent<Sun>();
-
-        public Sun SunComponent => SunCachedComponent.Component;
-
         public Atmosphere Atmosphere;
 
         public Shader SunGlareShader;
-        private Material SunGlareMaterial;
 
         public SunGlareSettings Settings;
 
@@ -66,50 +63,104 @@ namespace SpaceEngine.Environment.Sun
         public bool InitUniformsInUpdate = true;
         public bool UseRadiance = true;
 
-        private bool UseAtmosphereColors = false;
+        public AnimationCurve FadeCurve = new(new Keyframe(0.0f, 0.0f), new Keyframe(1.0f, 1.0f), new Keyframe(10.0f, 0.0f));
 
-        private Vector3 SunViewPortPosition = Vector3.zero;
-
-        private float Scale = 1;
+        private readonly CachedComponent<Sun> SunCachedComponent = new();
         private float Fade = 1;
-
-        public AnimationCurve FadeCurve = new AnimationCurve(new Keyframe[] { new Keyframe(0.0f, 0.0f),
-                                                                              new Keyframe(1.0f, 1.0f),
-                                                                              new Keyframe(10.0f, 0.0f) });
-
-        private Mesh SunGlareMesh;
 
         private Matrix4x4 Ghost1Settings = Matrix4x4.zero;
         private Matrix4x4 Ghost2Settings = Matrix4x4.zero;
         private Matrix4x4 Ghost3Settings = Matrix4x4.zero;
 
+        private float Scale = 1;
+        private Material SunGlareMaterial;
+
+        private Mesh SunGlareMesh;
+
+        private Vector3 SunViewPortPosition = Vector3.zero;
+
+        private bool UseAtmosphereColors;
+
+        public Sun SunComponent => SunCachedComponent.Component;
+
+        #region IRenderable
+
+        public void Render(int layer = 12)
+        {
+            if (SunGlareMesh == null)
+            {
+                return;
+            }
+
+            var activeBody = GodManager.Instance.ActiveBody;
+
+            if (activeBody == null)
+            {
+                return;
+            }
+
+            if (activeBody.Atmosphere == null)
+            {
+                return;
+            }
+
+            Atmosphere = activeBody.AtmosphereEnabled ? GodManager.Instance.ActiveBody.Atmosphere : null;
+
+            var mpb = GodManager.Instance.ActiveBody.MPB;
+
+            if (SunViewPortPosition.z > 0)
+            {
+                SunGlareMaterial.renderQueue = (int)RenderQueue + RenderQueueOffset;
+
+                Graphics.DrawMesh(SunGlareMesh, Vector3.zero, Quaternion.identity, SunGlareMaterial, layer, CameraHelper.Main(), 0, mpb, false, false);
+            }
+        }
+
+        #endregion
+
         #region Node
 
         protected override void InitNode()
         {
-            if (Settings == null) return;
+            if (Settings == null)
+            {
+                return;
+            }
 
             SunGlareMaterial = MaterialHelper.CreateTemp(SunGlareShader, "Sunglare", (int)RenderQueue);
 
-            SunGlareMesh = MeshFactory.MakePlane(8, MeshFactory.PLANE.XY, false, false, false);
+            SunGlareMesh = MeshFactory.MakePlane(8, MeshFactory.PLANE.XY, false, false);
             SunGlareMesh.bounds = new Bounds(Vector4.zero, new Vector3(9e37f, 9e37f, 9e37f));
 
             for (var i = 0; i < Settings.Ghost1SettingsList.Count; i++)
+            {
                 Ghost1Settings.SetRow(i, Settings.Ghost1SettingsList[i]);
+            }
 
             for (var i = 0; i < Settings.Ghost2SettingsList.Count; i++)
+            {
                 Ghost2Settings.SetRow(i, Settings.Ghost2SettingsList[i]);
+            }
 
             for (var i = 0; i < Settings.Ghost3SettingsList.Count; i++)
+            {
                 Ghost3Settings.SetRow(i, Settings.Ghost3SettingsList[i]);
+            }
 
             InitUniforms(SunGlareMaterial);
         }
 
         protected override void UpdateNode()
         {
-            if (Settings == null) return;
-            if (GodManager.Instance.View == null) return;
+            if (Settings == null)
+            {
+                return;
+            }
+
+            if (GodManager.Instance.View == null)
+            {
+                return;
+            }
 
             SunGlareMaterial.renderQueue = (int)RenderQueue + RenderQueueOffset;
 
@@ -119,13 +170,19 @@ namespace SpaceEngine.Environment.Sun
             SunViewPortPosition = CameraHelper.Main().WorldToViewportPoint(SunComponent.transform.position);
 
             // NOTE : So, looks like i should invert it here...
-            if (GodManager.Instance.UsesReversedZBuffer) SunViewPortPosition.y = 1.0f - SunViewPortPosition.y;
+            if (GodManager.Instance.UsesReversedZBuffer)
+            {
+                SunViewPortPosition.y = 1.0f - SunViewPortPosition.y;
+            }
 
             Scale = distance / Magnitude;
             Fade = FadeCurve.Evaluate(Mathf.Clamp(Scale, 0.0f, 100.0f));
             //Fade = FadeCurve.Evaluate(Mathf.Clamp01(VectorHelper.AngularRadius(SunComponent.transform.position, CameraHelper.Main().transform.position, 250000.0f)));
 
-            if (InitUniformsInUpdate) InitUniforms(SunGlareMaterial);
+            if (InitUniformsInUpdate)
+            {
+                InitUniforms(SunGlareMaterial);
+            }
 
             UseAtmosphereColors = Atmosphere != null;
 
@@ -166,7 +223,10 @@ namespace SpaceEngine.Environment.Sun
 
         public void InitUniforms(Material target)
         {
-            if (target == null) return;
+            if (target == null)
+            {
+                return;
+            }
 
             target.SetTexture("sunSpikes", Settings.SunSpikes);
             target.SetTexture("sunFlare", Settings.SunFlare);
@@ -180,12 +240,18 @@ namespace SpaceEngine.Environment.Sun
             target.SetMatrix("ghost2Settings", Ghost2Settings);
             target.SetMatrix("ghost3Settings", Ghost2Settings);
 
-            if (Atmosphere != null) Atmosphere.ParentBody.InitUniforms(target);
+            if (Atmosphere != null)
+            {
+                Atmosphere.ParentBody.InitUniforms(target);
+            }
         }
 
         public void SetUniforms(Material target)
         {
-            if (target == null) return;
+            if (target == null)
+            {
+                return;
+            }
 
             target.SetFloat("useRadiance", UseRadiance ? 1.0f : 0.0f);
             target.SetFloat("useAtmosphereColors", UseAtmosphereColors ? 1.0f : 0.0f);
@@ -198,38 +264,16 @@ namespace SpaceEngine.Environment.Sun
             target.SetFloat("sunGlareScale", Scale);
             target.SetFloat("sunGlareFade", Fade);
 
-            if (Atmosphere != null) Atmosphere.ParentBody.SetUniforms(target);
+            if (Atmosphere != null)
+            {
+                Atmosphere.ParentBody.SetUniforms(target);
+            }
         }
 
         public void InitSetUniforms()
         {
             InitUniforms(SunGlareMaterial);
             SetUniforms(SunGlareMaterial);
-        }
-
-        #endregion
-
-        #region IRenderable
-
-        public void Render(int layer = 12)
-        {
-            if (SunGlareMesh == null) return;
-
-            var activeBody = GodManager.Instance.ActiveBody;
-
-            if (activeBody == null) return;
-            if (activeBody.Atmosphere == null) return;
-
-            Atmosphere = activeBody.AtmosphereEnabled ? GodManager.Instance.ActiveBody.Atmosphere : null;
-
-            var mpb = GodManager.Instance.ActiveBody.MPB;
-
-            if (SunViewPortPosition.z > 0)
-            {
-                SunGlareMaterial.renderQueue = (int)RenderQueue + RenderQueueOffset;
-
-                Graphics.DrawMesh(SunGlareMesh, Vector3.zero, Quaternion.identity, SunGlareMaterial, layer, CameraHelper.Main(), 0, mpb, false, false);
-            }
         }
 
         #endregion

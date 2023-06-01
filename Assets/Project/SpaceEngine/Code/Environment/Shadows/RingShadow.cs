@@ -1,4 +1,5 @@
 ﻿#region License
+
 // Procedural planet generator.
 // 
 // Copyright (C) 2015-2023 Denis Ovchinnikov [zameran] 
@@ -31,6 +32,7 @@
 // Creation Date: Undefined
 // Creation Time: Undefined
 // Creator: zameran
+
 #endregion
 
 using SpaceEngine.Core;
@@ -43,10 +45,6 @@ namespace SpaceEngine.Environment.Shadows
     [ExecuteInEditMode]
     public class RingShadow : Shadow
     {
-        private readonly CachedComponent<Ring> RingCachedComponent = new CachedComponent<Ring>();
-
-        public Ring RingComponent => RingCachedComponent.Component;
-
         [HideInInspector]
         public Texture Texture;
 
@@ -55,6 +53,47 @@ namespace SpaceEngine.Environment.Shadows
 
         [HideInInspector]
         public float OuterRadius = 2.0f;
+
+        private readonly CachedComponent<Ring> RingCachedComponent = new();
+
+        public Ring RingComponent => RingCachedComponent.Component;
+
+        protected override void Start()
+        {
+            RingCachedComponent.TryInit(this);
+
+            base.Start();
+        }
+
+        private void OnDestroy()
+        {
+        }
+
+        #region Gizmos
+
+        #if UNITY_EDITOR
+        protected virtual void OnDrawGizmosSelected()
+        {
+            if (Helper.Enabled(this))
+            {
+                Gizmos.DrawRay(transform.position, transform.up * OuterRadius);
+
+                Gizmos.matrix = transform.localToWorldMatrix;
+
+                Helper.DrawCircle(Vector3.zero, Vector3.right * InnerRadius, Vector3.forward * InnerRadius);
+                Helper.DrawCircle(Vector3.zero, Vector3.right * OuterRadius, Vector3.forward * OuterRadius);
+
+                if (CalculateShadow())
+                {
+                    Gizmos.matrix = Matrix.inverse;
+
+                    Gizmos.DrawWireCube(new Vector3(0, 0, 5), new Vector3(2, 2, 10));
+                }
+            }
+        }
+        #endif
+
+        #endregion
 
         public override Texture GetTexture()
         {
@@ -68,13 +107,16 @@ namespace SpaceEngine.Environment.Shadows
                 RingCachedComponent.TryInit(this);
             }
 
-            if (base.CalculateShadow() == true)
+            if (base.CalculateShadow())
             {
-                if (RingComponent == null) return false;
+                if (RingComponent == null)
+                {
+                    return false;
+                }
 
                 if (GetTexture() != null)
                 {
-                    if (Helper.Enabled(RingComponent) == true)
+                    if (Helper.Enabled(RingComponent))
                     {
                         InnerRadius = RingComponent.InnerRadius;
                         OuterRadius = RingComponent.OuterRadius;
@@ -109,44 +151,5 @@ namespace SpaceEngine.Environment.Shadows
 
             return false;
         }
-
-        protected override void Start()
-        {
-            RingCachedComponent.TryInit(this);
-
-            base.Start();
-        }
-
-        private void OnDestroy()
-        {
-
-        }
-
-
-        #region Gizmos
-
-#if UNITY_EDITOR
-        protected virtual void OnDrawGizmosSelected()
-        {
-            if (Helper.Enabled(this) == true)
-            {
-                Gizmos.DrawRay(transform.position, transform.up * OuterRadius);
-
-                Gizmos.matrix = transform.localToWorldMatrix;
-
-                Helper.DrawCircle(Vector3.zero, Vector3.right * InnerRadius, Vector3.forward * InnerRadius);
-                Helper.DrawCircle(Vector3.zero, Vector3.right * OuterRadius, Vector3.forward * OuterRadius);
-
-                if (CalculateShadow() == true)
-                {
-                    Gizmos.matrix = Matrix.inverse;
-
-                    Gizmos.DrawWireCube(new Vector3(0, 0, 5), new Vector3(2, 2, 10));
-                }
-            }
-        }
-#endif
-
-        #endregion
     }
 }

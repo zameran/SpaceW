@@ -1,4 +1,5 @@
 #region License
+
 // Procedural planet generator.
 //  
 // Copyright (C) 2015-2023 Denis Ovchinnikov [zameran] 
@@ -31,6 +32,7 @@
 // Creation Date: 2017.03.28
 // Creation Time: 2:18 PM
 // Creator: zameran
+
 #endregion
 
 using System;
@@ -40,9 +42,9 @@ namespace SpaceEngine.Core.Noise
 {
     public class PerlinNoise
     {
-        private static int[] Permutation;
+        private static readonly int[] Permutation;
 
-        private static int[] Table =
+        private static readonly int[] Table =
         {
             15, 131, 91, 90, 13, 95, 201, 194, 96, 7, 53, 233, 140, 30, 225, 69, 36, 103, 142, 6, 8, 99, 21, 37, 240, 10, 23, 120, 190, 148, 0, 247, 94, 234, 75, 197, 26, 62, 203, 32, 252, 219, 57, 117,
             35, 11, 87, 33, 177, 149, 88, 237, 56, 20, 174, 136, 175, 125, 171, 168, 74, 68, 134, 48, 165, 71, 139, 27, 77, 166, 231, 111, 146, 158, 83, 133, 229, 60, 122, 230, 211, 220, 41, 105, 55,
@@ -207,8 +209,8 @@ namespace SpaceEngine.Core.Noise
             var noise = k0 + k1 * u + k2 * v + k3 * w + k4 * u * v + k5 * v * w + k6 * w * u + k7 * u * v * w;
 
             return new Vector4((float)noise, (float)(du * (k1 + k4 * v + k6 * w + k7 * v * w)),
-                (float)(dv * (k2 + k5 * w + k4 * u + k7 * w * u)),
-                (float)(dw * (k3 + k6 * u + k5 * v + k7 * u * v)));
+                               (float)(dv * (k2 + k5 * w + k4 * u + k7 * w * u)),
+                               (float)(dw * (k3 + k6 * u + k5 * v + k7 * u * v)));
         }
 
         private static int FastFloor(double x)
@@ -231,7 +233,10 @@ namespace SpaceEngine.Core.Noise
             var h = hash & 15;
             var grad = 1.0 + (h & 7);
 
-            if ((h & 8) != 0) grad = -grad;
+            if ((h & 8) != 0)
+            {
+                grad = -grad;
+            }
 
             return grad * x;
         }
@@ -244,7 +249,6 @@ namespace SpaceEngine.Core.Noise
 
             return ((h & 1) != 0 ? -u : u) + ((h & 2) != 0 ? -2.0 * v : 2.0 * v);
         }
-
 
         private static double Gradient(int hash, double x, double y, double z)
         {

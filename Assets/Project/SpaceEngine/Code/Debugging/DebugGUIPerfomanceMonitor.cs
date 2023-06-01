@@ -1,4 +1,5 @@
 ﻿#region License
+
 // Procedural planet generator.
 // 
 // Copyright (C) 2015-2023 Denis Ovchinnikov [zameran] 
@@ -31,6 +32,7 @@
 // Creation Date: Undefined
 // Creation Time: Undefined
 // Creator: zameran
+
 #endregion
 
 using SpaceEngine.Core.Debugging;
@@ -66,7 +68,12 @@ namespace SpaceEngine.Debugging
         protected override void UI(int id)
         {
             var counters = PerformanceMonitor.Counters;
-            if (counters == null || counters.Count == 0) { GUILayoutExtensions.DrawBadHolder("Perfomance stats: ", "No Data!?", GUISkin); return; }
+            if (counters == null || counters.Count == 0)
+            {
+                GUILayoutExtensions.DrawBadHolder("Perfomance stats: ", "No Data!?", GUISkin);
+
+                return;
+            }
 
             ScrollPosition = GUILayout.BeginScrollView(ScrollPosition, false, true);
             {
@@ -82,11 +89,11 @@ namespace SpaceEngine.Debugging
                         {
                             GUILayoutExtensions.Horizontal(() =>
                             {
-                                GUILayoutExtensions.LabelWithSpace($"Total: {counter.Time / 1000.0f}", -8);
-                                GUILayoutExtensions.LabelWithSpace($"Average: {counter.Average / 1000.0f}", -8);
-                                GUILayoutExtensions.LabelWithSpace($"Last: {counter.Last / 1000.0f}", -8);
-                                GUILayoutExtensions.LabelWithSpace($"Max: {counter.Max / 1000.0f}", -8);
-                                GUILayoutExtensions.LabelWithSpace($"Count: {counter.Count}", -8);
+                                GUILayoutExtensions.LabelWithSpace($"Total: {counter.Time / 1000.0f}");
+                                GUILayoutExtensions.LabelWithSpace($"Average: {counter.Average / 1000.0f}");
+                                GUILayoutExtensions.LabelWithSpace($"Last: {counter.Last / 1000.0f}");
+                                GUILayoutExtensions.LabelWithSpace($"Max: {counter.Max / 1000.0f}");
+                                GUILayoutExtensions.LabelWithSpace($"Count: {counter.Count}");
                             });
                         }, GUILayout.Width(debugInfoDrawBounds.width - 45));
                     }, GUILayout.Width(debugInfoDrawBounds.width - 40));

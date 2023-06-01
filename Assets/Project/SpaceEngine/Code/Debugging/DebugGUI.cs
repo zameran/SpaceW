@@ -1,4 +1,5 @@
 ﻿#region License
+
 // Procedural planet generator.
 // 
 // Copyright (C) 2015-2023 Denis Ovchinnikov [zameran] 
@@ -31,6 +32,7 @@
 // Creation Date: Undefined
 // Creation Time: Undefined
 // Creator: zameran
+
 #endregion
 
 using SpaceEngine.Core;
@@ -39,30 +41,34 @@ using UnityEngine;
 namespace SpaceEngine.Debugging
 {
     /// <summary>
-    /// This class provides default behaviour of all <see cref="GUI"/>-based debug panels.
+    ///     This class provides default behaviour of all <see cref="GUI" />-based debug panels.
     /// </summary>
     public abstract class DebugGUI : MonoBehaviour, IDebug
     {
-        private readonly CachedComponent<DebugGUISwitcher> SwitcherCachedComponent = new CachedComponent<DebugGUISwitcher>();
-
-        public DebugGUISwitcher SwitcherComponent => SwitcherCachedComponent.Component;
-
-        public Rect debugInfoBounds = new Rect(10, 10, 500, 500);
+        public Rect debugInfoBounds = new(10, 10, 500, 500);
 
         // NOTE : Use this variable for runtime 'debugInfoBounds' manipulation...
         [HideInInspector]
-        public Rect debugInfoDrawBounds = new Rect(10, 10, 500, 500);
+        public Rect debugInfoDrawBounds = new(10, 10, 500, 500);
 
         [HideInInspector]
         public Vector2 ScrollPosition = Vector2.zero;
+
+        private readonly CachedComponent<DebugGUISwitcher> SwitcherCachedComponent = new();
+
+        public DebugGUISwitcher SwitcherComponent => SwitcherCachedComponent.Component;
 
         public GUISkin GUISkin
         {
             get
             {
                 if (SwitcherComponent != null)
+                {
                     if (SwitcherComponent.GUISkin != null)
+                    {
                         return SwitcherComponent.GUISkin;
+                    }
+                }
 
                 return GUI.skin;
             }
@@ -73,7 +79,9 @@ namespace SpaceEngine.Debugging
             get
             {
                 if (SwitcherComponent != null)
+                {
                     return SwitcherComponent.BoldLabelStyle;
+                }
 
                 return null;
             }
@@ -84,7 +92,9 @@ namespace SpaceEngine.Debugging
             get
             {
                 if (SwitcherComponent != null)
+                {
                     return SwitcherComponent.ImageLabelStyle;
+                }
 
                 return null;
             }
@@ -92,7 +102,6 @@ namespace SpaceEngine.Debugging
 
         protected virtual void Awake()
         {
-
         }
 
         protected virtual void Start()

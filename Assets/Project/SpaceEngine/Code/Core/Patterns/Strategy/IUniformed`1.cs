@@ -1,4 +1,5 @@
 ﻿#region License
+
 // Procedural planet generator.
 // 
 // Copyright (C) 2015-2023 Denis Ovchinnikov [zameran] 
@@ -31,16 +32,20 @@
 // Creation Date: Undefined
 // Creation Time: Undefined
 // Creator: zameran
+
 #endregion
 
 namespace SpaceEngine.Core.Patterns.Strategy
 {
     /// <summary>
-    /// This interface should be implemented in all things, that's gonna manipulate with 
-    /// <see cref="UnityEngine.Material"/> and <see cref="UnityEngine.Shader"/>, or <see cref="UnityEngine.MaterialPropertyBlock"/> uniforms.
-    /// Target for manipulations is a generic type.
+    ///     This interface should be implemented in all things, that's gonna manipulate with
+    ///     <see cref="UnityEngine.Material" /> and <see cref="UnityEngine.Shader" />, or <see cref="UnityEngine.MaterialPropertyBlock" /> uniforms.
+    ///     Target for manipulations is a generic type.
     /// </summary>
-    /// <typeparam name="T">Generic. <example><see cref="UnityEngine.Material"/> or <see cref="UnityEngine.Shader"/>.</example></typeparam>
+    /// <typeparam name="T">
+    ///     Generic.
+    ///     <example><see cref="UnityEngine.Material" /> or <see cref="UnityEngine.Shader" />.</example>
+    /// </typeparam>
     public interface IUniformed<in T> where T : class
     {
         void InitUniforms(T target);

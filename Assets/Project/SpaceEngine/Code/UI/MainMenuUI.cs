@@ -1,4 +1,5 @@
 ﻿#region License
+
 // Procedural planet generator.
 // 
 // Copyright (C) 2015-2023 Denis Ovchinnikov [zameran] 
@@ -31,6 +32,7 @@
 // Creation Date: Undefined
 // Creation Time: Undefined
 // Creator: zameran
+
 #endregion
 
 using DG.Tweening;
@@ -46,7 +48,7 @@ namespace SpaceEngine.UI
 {
     public sealed class MainMenuUI : UserInterface, IUserInterface
     {
-        public AssemblyLoader loader = null;
+        public AssemblyLoader loader;
 
         public CanvasRenderer addonsCanvasRenderer;
         public Toggle addonsShowToggle;
@@ -56,7 +58,10 @@ namespace SpaceEngine.UI
 
         private void Awake()
         {
-            if (loader == null) loader = Loader.Instance as AssemblyLoader;
+            if (loader == null)
+            {
+                loader = Loader.Instance as AssemblyLoader;
+            }
 
             InitUI();
         }
@@ -74,24 +79,26 @@ namespace SpaceEngine.UI
                         var assembly = loader.ExternalAssemblies[i];
 
                         if (assembly != null)
+                        {
                             AddToScrollView(addonsItemPrefab, addonsScrollView, assembly.Name, assembly.Version);
+                        }
                         else
                         {
                             Debug.LogError($"MainMenuUI: {i} assembly is null!");
                         }
                     }
                 }
-                else
-                {
-
-                }
             }
 
             if (addonsShowToggle != null)
-                addonsShowToggle.interactable = (loader != null);
+            {
+                addonsShowToggle.interactable = loader != null;
+            }
 
             if (addonsCounterText != null)
-                addonsCounterText.text = $"{addonsCounterText.text} {((loader == null) ? "0" : loader.ExternalAssemblies.Count.ToString())}";
+            {
+                addonsCounterText.text = $"{addonsCounterText.text} {(loader == null ? "0" : loader.ExternalAssemblies.Count.ToString())}";
+            }
         }
 
         public void LoadScene()

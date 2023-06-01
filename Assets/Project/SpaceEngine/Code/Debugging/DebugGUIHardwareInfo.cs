@@ -1,4 +1,5 @@
 #region License
+
 // Procedural planet generator.
 // 
 // Copyright (C) 2015-2023 Denis Ovchinnikov [zameran] 
@@ -31,6 +32,7 @@
 // Creation Date: Undefined
 // Creation Time: Undefined
 // Creator: zameran
+
 #endregion
 
 using System;
@@ -68,7 +70,10 @@ namespace SpaceEngine.Debugging
             {
                 GUILayoutExtensions.VerticalBoxed("", GUISkin, () =>
                 {
-                    if (GUILayout.Button("Update")) HardwareInfo.Get();
+                    if (GUILayout.Button("Update"))
+                    {
+                        HardwareInfo.Get();
+                    }
                 });
             });
 
@@ -80,46 +85,46 @@ namespace SpaceEngine.Debugging
             {
                 GUILayoutExtensions.VerticalBoxed("", GUISkin, () =>
                 {
-                    GUILayoutExtensions.LabelWithSpace($"Device Type: {HardwareInfo.deviceType}", -8);
-                    GUILayoutExtensions.LabelWithSpace($"Operation System: {HardwareInfo.operatingSystem}", -8);
-                    GUILayoutExtensions.LabelWithSpace($"Unity Version: {HardwareInfo.unityVersion}", -8);
-                    GUILayoutExtensions.LabelWithSpace($"Graphics Device: {HardwareInfo.graphicsDeviceName}", -8);
-                    GUILayoutExtensions.LabelWithSpace($"Graphics Device API: {HardwareInfo.graphicsDeviceVersion}", -8);
-                    GUILayoutExtensions.LabelWithSpace($"Graphics Device ID: {HardwareInfo.graphicsDeviceID}", -8);
-                    GUILayoutExtensions.LabelWithSpace($"Graphics Memory Size: {HardwareInfo.graphicsMemorySize}", -8);
-                    GUILayoutExtensions.LabelWithSpace($"Supported Shader Level: {HardwareInfo.graphicsShaderLevel}", -8);
+                    GUILayoutExtensions.LabelWithSpace($"Device Type: {HardwareInfo.deviceType}");
+                    GUILayoutExtensions.LabelWithSpace($"Operation System: {HardwareInfo.operatingSystem}");
+                    GUILayoutExtensions.LabelWithSpace($"Unity Version: {HardwareInfo.unityVersion}");
+                    GUILayoutExtensions.LabelWithSpace($"Graphics Device: {HardwareInfo.graphicsDeviceName}");
+                    GUILayoutExtensions.LabelWithSpace($"Graphics Device API: {HardwareInfo.graphicsDeviceVersion}");
+                    GUILayoutExtensions.LabelWithSpace($"Graphics Device ID: {HardwareInfo.graphicsDeviceID}");
+                    GUILayoutExtensions.LabelWithSpace($"Graphics Memory Size: {HardwareInfo.graphicsMemorySize}");
+                    GUILayoutExtensions.LabelWithSpace($"Supported Shader Level: {HardwareInfo.graphicsShaderLevel}");
 
-                    GUILayoutExtensions.LabelWithSpace($"CPU: {HardwareInfo.processorType}", -8);
-                    GUILayoutExtensions.LabelWithSpace($"CPU Cores Count (Threads Count): {HardwareInfo.processorCount}", -8);
-                    GUILayoutExtensions.LabelWithSpace($"CPU Current Frequency: {HardwareInfo.processorFrequency}Hz", -8);
+                    GUILayoutExtensions.LabelWithSpace($"CPU: {HardwareInfo.processorType}");
+                    GUILayoutExtensions.LabelWithSpace($"CPU Cores Count (Threads Count): {HardwareInfo.processorCount}");
+                    GUILayoutExtensions.LabelWithSpace($"CPU Current Frequency: {HardwareInfo.processorFrequency}Hz");
 
-                    GUILayoutExtensions.LabelWithSpace($"RAM: {HardwareInfo.systemMemorySize}", -8);
+                    GUILayoutExtensions.LabelWithSpace($"RAM: {HardwareInfo.systemMemorySize}");
 
-                    GUILayoutExtensions.LabelWithSpace($"Maximum Texture Size: {HardwareInfo.maxTextureSize}", -8);
-                    GUILayoutExtensions.LabelWithSpace($"Non-Power-Of-Two Texture Support: {HardwareInfo.npotSupport}", -8);
+                    GUILayoutExtensions.LabelWithSpace($"Maximum Texture Size: {HardwareInfo.maxTextureSize}");
+                    GUILayoutExtensions.LabelWithSpace($"Non-Power-Of-Two Texture Support: {HardwareInfo.npotSupport}");
 
-                    GUILayoutExtensions.LabelWithSpace($"RenderTextures: {true}", -8);
-                    GUILayoutExtensions.LabelWithSpace($"Graphics Multithreading: {HardwareInfo.graphicsMultiThreaded}", -8);
+                    GUILayoutExtensions.LabelWithSpace($"RenderTextures: {true}");
+                    GUILayoutExtensions.LabelWithSpace($"Graphics Multithreading: {HardwareInfo.graphicsMultiThreaded}");
 
-                    GUILayoutExtensions.LabelWithSpace($"Supports ComputeShaders: {HardwareInfo.supportsComputeShaders}", -8);
-                    GUILayoutExtensions.LabelWithSpace($"Supports 3DTextures: {HardwareInfo.supports3DTextures}", -8);
-                    GUILayoutExtensions.LabelWithSpace($"Supports 2DArrayTextures: {HardwareInfo.supports2DArrayTextures}", -8);
-                    GUILayoutExtensions.LabelWithSpace($"Supports 3DRenderTextures: {HardwareInfo.supports3DRenderTextures}", -8);
-                    GUILayoutExtensions.LabelWithSpace($"Supports CubemapArrayTextures: {HardwareInfo.supportsCubemapArrayTextures}", -8);
-                    GUILayoutExtensions.LabelWithSpace($"Supports RawShadowDepthSampling: {HardwareInfo.supportsRawShadowDepthSampling}", -8);
-                    GUILayoutExtensions.LabelWithSpace($"Supports MotionVectors: {HardwareInfo.supportsMotionVectors}", -8);
-                    GUILayoutExtensions.LabelWithSpace($"Supports HardwareQuadTopology: {HardwareInfo.supportsHardwareQuadTopology}", -8);
-                    GUILayoutExtensions.LabelWithSpace($"Supports 32bitsIndexBuffer: {HardwareInfo.supports32bitsIndexBuffer}", -8);
-                    GUILayoutExtensions.LabelWithSpace($"Supports SparseTextures: {HardwareInfo.supportsSparseTextures}", -8);
-                    GUILayoutExtensions.LabelWithSpace($"Supports AsyncCompute: {HardwareInfo.supportsAsyncCompute}", -8);
-                    GUILayoutExtensions.LabelWithSpace($"Supports GPUFence: {HardwareInfo.supportsGPUFence}", -8);
-                    GUILayoutExtensions.LabelWithSpace($"Supports AsyncGPUReadback: {HardwareInfo.supportsAsyncGPUReadback}", -8);
-                    
-                    GUILayoutExtensions.LabelWithSpace($"Supports Audio: {HardwareInfo.supportsAudio}", -8);
-                    GUILayoutExtensions.LabelWithSpace($"Supports Shadows: {HardwareInfo.supportsShadows}", -8);
-                    GUILayoutExtensions.LabelWithSpace($"Supports Instancing: {HardwareInfo.supportsInstancing}", -8);
-                    GUILayoutExtensions.LabelWithSpace($"Supports Graphics Fence: {HardwareInfo.supportsGraphicsFence}", -8);
-                    
+                    GUILayoutExtensions.LabelWithSpace($"Supports ComputeShaders: {HardwareInfo.supportsComputeShaders}");
+                    GUILayoutExtensions.LabelWithSpace($"Supports 3DTextures: {HardwareInfo.supports3DTextures}");
+                    GUILayoutExtensions.LabelWithSpace($"Supports 2DArrayTextures: {HardwareInfo.supports2DArrayTextures}");
+                    GUILayoutExtensions.LabelWithSpace($"Supports 3DRenderTextures: {HardwareInfo.supports3DRenderTextures}");
+                    GUILayoutExtensions.LabelWithSpace($"Supports CubemapArrayTextures: {HardwareInfo.supportsCubemapArrayTextures}");
+                    GUILayoutExtensions.LabelWithSpace($"Supports RawShadowDepthSampling: {HardwareInfo.supportsRawShadowDepthSampling}");
+                    GUILayoutExtensions.LabelWithSpace($"Supports MotionVectors: {HardwareInfo.supportsMotionVectors}");
+                    GUILayoutExtensions.LabelWithSpace($"Supports HardwareQuadTopology: {HardwareInfo.supportsHardwareQuadTopology}");
+                    GUILayoutExtensions.LabelWithSpace($"Supports 32bitsIndexBuffer: {HardwareInfo.supports32bitsIndexBuffer}");
+                    GUILayoutExtensions.LabelWithSpace($"Supports SparseTextures: {HardwareInfo.supportsSparseTextures}");
+                    GUILayoutExtensions.LabelWithSpace($"Supports AsyncCompute: {HardwareInfo.supportsAsyncCompute}");
+                    GUILayoutExtensions.LabelWithSpace($"Supports GPUFence: {HardwareInfo.supportsGPUFence}");
+                    GUILayoutExtensions.LabelWithSpace($"Supports AsyncGPUReadback: {HardwareInfo.supportsAsyncGPUReadback}");
+
+                    GUILayoutExtensions.LabelWithSpace($"Supports Audio: {HardwareInfo.supportsAudio}");
+                    GUILayoutExtensions.LabelWithSpace($"Supports Shadows: {HardwareInfo.supportsShadows}");
+                    GUILayoutExtensions.LabelWithSpace($"Supports Instancing: {HardwareInfo.supportsInstancing}");
+                    GUILayoutExtensions.LabelWithSpace($"Supports Graphics Fence: {HardwareInfo.supportsGraphicsFence}");
+
                     GUILayoutExtensions.SpacingSeparator();
                 });
             });
@@ -130,7 +135,7 @@ namespace SpaceEngine.Debugging
             {
                 GUILayoutExtensions.VerticalBoxed("", GUISkin, () =>
                 {
-                    DrawSupportedFormats<RenderTextureFormat>(HardwareInfo.RenderTextureFormats, "RenderTexture");
+                    DrawSupportedFormats(HardwareInfo.RenderTextureFormats, "RenderTexture");
 
                     GUILayoutExtensions.SpacingSeparator();
                 });
@@ -142,7 +147,7 @@ namespace SpaceEngine.Debugging
             {
                 GUILayoutExtensions.VerticalBoxed("", GUISkin, () =>
                 {
-                    DrawSupportedFormats<TextureFormat>(HardwareInfo.TextureFormats, "Texture");
+                    DrawSupportedFormats(HardwareInfo.TextureFormats, "Texture");
 
                     GUILayoutExtensions.SpacingSeparator();
                 });
@@ -155,13 +160,14 @@ namespace SpaceEngine.Debugging
 
         private void DrawSupportedFormats<TFormatType>(Dictionary<TFormatType, HardwareInfo.SupportState> formats, string prefix = "null") where TFormatType : struct, IConvertible
         {
-            if (!typeof(TFormatType).IsEnum) { throw new ArgumentException("Only 'enum' types as T allowed!"); }
+            if (!typeof(TFormatType).IsEnum)
+            {
+                throw new ArgumentException("Only 'enum' types as T allowed!");
+            }
+
             if (formats == null || formats.Count == 0)
             {
-                GUILayoutExtensions.HorizontalBoxed("", GUISkin, () =>
-                {
-                    GUILayoutExtensions.LabelWithFlexibleSpace("No Data!", "No Info!");
-                });
+                GUILayoutExtensions.HorizontalBoxed("", GUISkin, () => { GUILayoutExtensions.LabelWithFlexibleSpace("No Data!", "No Info!"); });
 
                 return;
             }
@@ -174,16 +180,7 @@ namespace SpaceEngine.Debugging
                 var tempColor = GUI.color;
                 var actualColor = HardwareInfo.SupportStateToColor(supportState);
 
-                GUILayoutExtensions.DrawWithColor(() =>
-                {
-                    GUILayoutExtensions.HorizontalBoxed("", GUISkin, () =>
-                    {
-                        GUILayoutExtensions.DrawWithColor(() =>
-                        {
-                            GUILayoutExtensions.LabelWithFlexibleSpace($"{prefix}.{format}", supportState.ToString());
-                        }, tempColor);
-                    });
-                }, actualColor);
+                GUILayoutExtensions.DrawWithColor(() => { GUILayoutExtensions.HorizontalBoxed("", GUISkin, () => { GUILayoutExtensions.DrawWithColor(() => { GUILayoutExtensions.LabelWithFlexibleSpace($"{prefix}.{format}", supportState.ToString()); }, tempColor); }); }, actualColor);
             }
         }
     }
@@ -195,7 +192,7 @@ namespace SpaceEngine.Debugging
             None,
             Supported,
             Unsupported,
-            Obsolete,
+            Obsolete
         }
 
         public static string deviceType;
@@ -273,12 +270,12 @@ namespace SpaceEngine.Debugging
             supportsSparseTextures = GetSupportState(SystemInfo.supportsSparseTextures);
             supportsAsyncCompute = GetSupportState(SystemInfo.supportsAsyncCompute);
             supportsGPUFence = GetSupportState(SystemInfo.supportsGraphicsFence);
-            supportsAsyncGPUReadback = GetSupportState(SystemInfo.supportsAsyncGPUReadback);       
+            supportsAsyncGPUReadback = GetSupportState(SystemInfo.supportsAsyncGPUReadback);
             supportsAudio = GetSupportState(SystemInfo.supportsAudio);
             supportsShadows = GetSupportState(SystemInfo.supportsShadows);
             supportsInstancing = GetSupportState(SystemInfo.supportsInstancing);
             supportsGraphicsFence = GetSupportState(SystemInfo.supportsGraphicsFence);
-            
+
             graphicsMultiThreaded = SystemInfo.graphicsMultiThreaded;
             usesReversedZBuffer = SystemInfo.usesReversedZBuffer;
 
@@ -298,21 +295,20 @@ namespace SpaceEngine.Debugging
             }
 
             foreach (var format in texuteFormats)
-            {
                 // NOTE : Some elements of TextureFormat enum marked with ObsoleteAttribute, but Enum.GetValues returns it all...
+            {
                 if (GetAttributeOfType<ObsoleteAttribute>(format) == null)
                 {
                     var supports = SystemInfo.SupportsTextureFormat(format);
-                    
+
                     // NOTE : Workaround around unity's shit...
-                    if ((format == TextureFormat.ASTC_4x4 || 
+                    if ((format == TextureFormat.ASTC_4x4 ||
                          format == TextureFormat.ASTC_5x5 ||
                          format == TextureFormat.ASTC_6x6 ||
                          format == TextureFormat.ASTC_8x8 ||
                          format == TextureFormat.ASTC_10x10 ||
                          format == TextureFormat.ASTC_12x12) && TextureFormats.ContainsKey(format))
                     {
-                        
                     }
                     else
                     {
@@ -336,32 +332,38 @@ namespace SpaceEngine.Debugging
             var memberInfos = type.GetMember(enumVal.ToString());
             var customAttributes = memberInfos[0].GetCustomAttributes(typeof(T), false);
 
-            return (customAttributes.Length > 0) ? (T)customAttributes[0] : null;
+            return customAttributes.Length > 0 ? (T)customAttributes[0] : null;
         }
 
         public static SupportState GetSupportState(bool? supported)
         {
-            if (supported == null) return SupportState.Obsolete;
+            if (supported == null)
+            {
+                return SupportState.Obsolete;
+            }
 
             if (supported.Value)
             {
                 return SupportState.Supported;
             }
-            else
-            {
-                return SupportState.Unsupported;
-            }
+
+            return SupportState.Unsupported;
         }
 
         public static Color SupportStateToColor(SupportState value)
         {
             switch (value)
             {
-                case SupportState.None: return Color.black;
-                case SupportState.Supported: return Color.green;
-                case SupportState.Unsupported: return Color.red;
-                case SupportState.Obsolete: return Color.magenta;
-                default: return Color.white;
+                case SupportState.None:
+                    return Color.black;
+                case SupportState.Supported:
+                    return Color.green;
+                case SupportState.Unsupported:
+                    return Color.red;
+                case SupportState.Obsolete:
+                    return Color.magenta;
+                default:
+                    return Color.white;
             }
         }
     }

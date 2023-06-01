@@ -1,4 +1,5 @@
 ﻿#region License
+
 // Procedural planet generator.
 // 
 // Copyright (C) 2015-2023 Denis Ovchinnikov [zameran] 
@@ -31,6 +32,7 @@
 // Creation Date: Undefined
 // Creation Time: Undefined
 // Creator: zameran
+
 #endregion
 
 using SpaceEngine.Core;
@@ -53,13 +55,34 @@ namespace SpaceEngine.Environment.Cloudsphere
         public Material CloudMaterial;
 
         public EngineRenderQueue RenderQueue = EngineRenderQueue.Transparent;
-        public int RenderQueueOffset = 0;
+        public int RenderQueueOffset;
 
         public float Radius;
         public float Height;
 
         [Range(0.0f, 1.0f)]
         public float TransmittanceOffset = 0.625f;
+
+        #region IRenderable
+
+        public void Render(int layer = 0)
+        {
+            if (CloudsphereMesh == null)
+            {
+                return;
+            }
+
+            var cloudsTRS = Matrix4x4.TRS(ParentBody.transform.position, transform.rotation, Vector3.one * (Radius + Height));
+
+            Graphics.DrawMesh(CloudsphereMesh, cloudsTRS, CloudMaterial, layer, CameraHelper.Main(), 0, ParentBody.MPB, ShadowCastingMode.Off, false);
+        }
+
+        #endregion
+
+        public void InitMaterials()
+        {
+            CloudMaterial = MaterialHelper.CreateTemp(CloudShader, "Cloudsphere", (int)RenderQueue);
+        }
 
         #region Node
 
@@ -106,7 +129,10 @@ namespace SpaceEngine.Environment.Cloudsphere
 
         public void InitUniforms(Material target)
         {
-            if (target == null) return;
+            if (target == null)
+            {
+                return;
+            }
 
             ParentBody.InitUniforms(target);
 
@@ -115,7 +141,10 @@ namespace SpaceEngine.Environment.Cloudsphere
 
         public void SetUniforms(Material target)
         {
-            if (target == null) return;
+            if (target == null)
+            {
+                return;
+            }
 
             ParentBody.SetUniforms(target);
 
@@ -129,23 +158,5 @@ namespace SpaceEngine.Environment.Cloudsphere
         }
 
         #endregion
-
-        #region IRenderable
-
-        public void Render(int layer = 0)
-        {
-            if (CloudsphereMesh == null) return;
-
-            var cloudsTRS = Matrix4x4.TRS(ParentBody.transform.position, transform.rotation, Vector3.one * (Radius + Height));
-
-            Graphics.DrawMesh(CloudsphereMesh, cloudsTRS, CloudMaterial, layer, CameraHelper.Main(), 0, ParentBody.MPB, ShadowCastingMode.Off, false);
-        }
-
-        #endregion
-
-        public void InitMaterials()
-        {
-            CloudMaterial = MaterialHelper.CreateTemp(CloudShader, "Cloudsphere", (int)RenderQueue);
-        }
     }
 }

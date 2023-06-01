@@ -1,4 +1,5 @@
 ﻿#region License
+
 // Procedural planet generator.
 //  
 // Copyright (C) 2015-2023 Denis Ovchinnikov [zameran] 
@@ -31,6 +32,7 @@
 // Creation Date: 2017.05.17
 // Creation Time: 1:57 AM
 // Creator: zameran
+
 #endregion
 
 using SpaceEngine.Helpers;
@@ -43,23 +45,10 @@ namespace SpaceEngine.Core.Utilities.Gradients
 
     public abstract class GradientLut
     {
-        public Gradient Gradient = new Gradient();
-
-        /// <summary>
-        /// The lut texture, generated from <see cref="Gradient"/>
-        /// </summary>
-        public Texture2D Lut { get; protected set; }
-
-        /// <summary>
-        /// Size of lut texture in pixels.
-        /// <see cref="Vector2.x"/> is width.
-        /// <see cref="Vector2.y"/> is height.
-        /// </summary>
-        protected abstract Vector2 Size { get; }
+        public Gradient Gradient = new();
 
         public GradientLut()
         {
-            
         }
 
         public GradientLut(Gradient gradient)
@@ -68,7 +57,19 @@ namespace SpaceEngine.Core.Utilities.Gradients
         }
 
         /// <summary>
-        /// Generates the <see cref="Lut"/>.
+        ///     The lut texture, generated from <see cref="Gradient" />
+        /// </summary>
+        public Texture2D Lut { get; protected set; }
+
+        /// <summary>
+        ///     Size of lut texture in pixels.
+        ///     <see cref="Vector2.x" /> is width.
+        ///     <see cref="Vector2.y" /> is height.
+        /// </summary>
+        protected abstract Vector2 Size { get; }
+
+        /// <summary>
+        ///     Generates the <see cref="Lut" />.
         /// </summary>
         public virtual void GenerateLut()
         {
@@ -84,12 +85,12 @@ namespace SpaceEngine.Core.Utilities.Gradients
         }
 
         /// <summary>
-        /// Calculates the <see cref="Gradient"/> data in to the <see cref="Lut"/>.
+        ///     Calculates the <see cref="Gradient" /> data in to the <see cref="Lut" />.
         /// </summary>
         public abstract void CalculateLut();
 
         /// <summary>
-        /// Destroy the <see cref="Lut"/>.
+        ///     Destroy the <see cref="Lut" />.
         /// </summary>
         public abstract void DestroyLut();
     }

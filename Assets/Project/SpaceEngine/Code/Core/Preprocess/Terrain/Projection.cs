@@ -1,4 +1,5 @@
 ﻿#region License
+
 // Procedural planet generator.
 //  
 // Copyright (C) 2015-2023 Denis Ovchinnikov [zameran] 
@@ -31,6 +32,7 @@
 // Creation Date: 2017.09.28
 // Creation Time: 11:18 AM
 // Creator: zameran
+
 #endregion
 
 using System;
@@ -43,8 +45,8 @@ namespace SpaceEngine.Core.Preprocess.Terrain
     {
         public static void Projection1(int x, int y, int w, out double sx, out double sy, out double sz)
         {
-            var xl = (Math.Max((double)Math.Min(x, w), 0.0)) / w * 2.0 - 1.0;
-            var yl = (Math.Max((double)Math.Min(y, w), 0.0)) / w * 2.0 - 1.0;
+            var xl = Math.Max(Math.Min(x, w), 0.0) / w * 2.0 - 1.0;
+            var yl = Math.Max(Math.Min(y, w), 0.0) / w * 2.0 - 1.0;
             var l = Math.Sqrt(xl * xl + yl * yl + 1.0);
 
             sx = xl / l;
@@ -54,8 +56,8 @@ namespace SpaceEngine.Core.Preprocess.Terrain
 
         public static void Projection2(int x, int y, int w, out double sx, out double sy, out double sz)
         {
-            var xl = (Math.Max((double)Math.Min(x, w), 0.0)) / w * 2.0 - 1.0;
-            var yl = (Math.Max((double)Math.Min(y, w), 0.0)) / w * 2.0 - 1.0;
+            var xl = Math.Max(Math.Min(x, w), 0.0) / w * 2.0 - 1.0;
+            var yl = Math.Max(Math.Min(y, w), 0.0) / w * 2.0 - 1.0;
             var l = Math.Sqrt(xl * xl + yl * yl + 1.0);
 
             sx = xl / l;
@@ -65,8 +67,8 @@ namespace SpaceEngine.Core.Preprocess.Terrain
 
         public static void Projection3(int x, int y, int w, out double sx, out double sy, out double sz)
         {
-            var xl = (Math.Max((double)Math.Min(x, w), 0.0)) / w * 2.0 - 1.0;
-            var yl = (Math.Max((double)Math.Min(y, w), 0.0)) / w * 2.0 - 1.0;
+            var xl = Math.Max(Math.Min(x, w), 0.0) / w * 2.0 - 1.0;
+            var yl = Math.Max(Math.Min(y, w), 0.0) / w * 2.0 - 1.0;
             var l = Math.Sqrt(xl * xl + yl * yl + 1.0);
 
             sx = 1.0 / l;
@@ -76,8 +78,8 @@ namespace SpaceEngine.Core.Preprocess.Terrain
 
         public static void Projection4(int x, int y, int w, out double sx, out double sy, out double sz)
         {
-            var xl = (Math.Max((double)Math.Min(x, w), 0.0)) / w * 2.0 - 1.0;
-            var yl = (Math.Max((double)Math.Min(y, w), 0.0)) / w * 2.0 - 1.0;
+            var xl = Math.Max(Math.Min(x, w), 0.0) / w * 2.0 - 1.0;
+            var yl = Math.Max(Math.Min(y, w), 0.0) / w * 2.0 - 1.0;
             var l = Math.Sqrt(xl * xl + yl * yl + 1.0);
 
             sx = -xl / l;
@@ -87,8 +89,8 @@ namespace SpaceEngine.Core.Preprocess.Terrain
 
         public static void Projection5(int x, int y, int w, out double sx, out double sy, out double sz)
         {
-            var xl = (Math.Max((double)Math.Min(x, w), 0.0)) / w * 2.0 - 1.0;
-            var yl = (Math.Max((double)Math.Min(y, w), 0.0)) / w * 2.0 - 1.0;
+            var xl = Math.Max(Math.Min(x, w), 0.0) / w * 2.0 - 1.0;
+            var yl = Math.Max(Math.Min(y, w), 0.0) / w * 2.0 - 1.0;
             var l = Math.Sqrt(xl * xl + yl * yl + 1.0);
 
             sx = -1.0 / l;
@@ -98,8 +100,8 @@ namespace SpaceEngine.Core.Preprocess.Terrain
 
         public static void Projection6(int x, int y, int w, out double sx, out double sy, out double sz)
         {
-            var xl = (Math.Max((double)Math.Min(x, w), 0.0)) / w * 2.0 - 1.0;
-            var yl = (Math.Max((double)Math.Min(y, w), 0.0)) / w * 2.0 - 1.0;
+            var xl = Math.Max(Math.Min(x, w), 0.0) / w * 2.0 - 1.0;
+            var yl = Math.Max(Math.Min(y, w), 0.0) / w * 2.0 - 1.0;
             var l = Math.Sqrt(xl * xl + yl * yl + 1.0);
 
             sx = xl / l;
@@ -109,8 +111,8 @@ namespace SpaceEngine.Core.Preprocess.Terrain
 
         public static void Projection1f(int x, int y, int w, out double sx, out double sy, out double sz)
         {
-            var xl = ((double)x / (double)w) * 2.0 - 1.0;
-            var yl = ((double)y / (double)w) * 2.0 - 1.0;
+            var xl = x / (double)w * 2.0 - 1.0;
+            var yl = y / (double)w * 2.0 - 1.0;
             var l = Math.Sqrt(xl * xl + yl * yl + 1.0);
 
             sx = xl / l;
@@ -120,8 +122,8 @@ namespace SpaceEngine.Core.Preprocess.Terrain
 
         public static void Projection2f(int x, int y, int w, out double sx, out double sy, out double sz)
         {
-            var xl = ((double)x / (double)w) * 2.0 - 1.0;
-            var yl = ((double)y / (double)w) * 2.0 - 1.0;
+            var xl = x / (double)w * 2.0 - 1.0;
+            var yl = y / (double)w * 2.0 - 1.0;
             var l = Math.Sqrt(xl * xl + yl * yl + 1.0);
 
             sx = xl / l;
@@ -131,8 +133,8 @@ namespace SpaceEngine.Core.Preprocess.Terrain
 
         public static void Projection3f(int x, int y, int w, out double sx, out double sy, out double sz)
         {
-            var xl = ((double)x / (double)w) * 2.0 - 1.0;
-            var yl = ((double)y / (double)w) * 2.0 - 1.0;
+            var xl = x / (double)w * 2.0 - 1.0;
+            var yl = y / (double)w * 2.0 - 1.0;
             var l = Math.Sqrt(xl * xl + yl * yl + 1.0);
 
             sx = 1.0 / l;
@@ -142,8 +144,8 @@ namespace SpaceEngine.Core.Preprocess.Terrain
 
         public static void Projection4f(int x, int y, int w, out double sx, out double sy, out double sz)
         {
-            var xl = ((double)x / (double)w) * 2.0 - 1.0;
-            var yl = ((double)y / (double)w) * 2.0 - 1.0;
+            var xl = x / (double)w * 2.0 - 1.0;
+            var yl = y / (double)w * 2.0 - 1.0;
             var l = Math.Sqrt(xl * xl + yl * yl + 1.0);
 
             sx = -xl / l;
@@ -153,8 +155,8 @@ namespace SpaceEngine.Core.Preprocess.Terrain
 
         public static void Projection5f(int x, int y, int w, out double sx, out double sy, out double sz)
         {
-            var xl = ((double)x / (double)w) * 2.0 - 1.0;
-            var yl = ((double)y / (double)w) * 2.0 - 1.0;
+            var xl = x / (double)w * 2.0 - 1.0;
+            var yl = y / (double)w * 2.0 - 1.0;
             var l = Math.Sqrt(xl * xl + yl * yl + 1.0);
 
             sx = -1.0 / l;
@@ -164,8 +166,8 @@ namespace SpaceEngine.Core.Preprocess.Terrain
 
         public static void Projection6f(int x, int y, int w, out double sx, out double sy, out double sz)
         {
-            var xl = ((double)x / (double)w) * 2.0 - 1.0;
-            var yl = ((double)y / (double)w) * 2.0 - 1.0;
+            var xl = x / (double)w * 2.0 - 1.0;
+            var yl = y / (double)w * 2.0 - 1.0;
             var l = Math.Sqrt(xl * xl + yl * yl + 1.0);
 
             sx = xl / l;

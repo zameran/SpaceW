@@ -1,4 +1,5 @@
 ﻿#region License
+
 // Procedural planet generator.
 //  
 // Copyright (C) 2015-2023 Denis Ovchinnikov [zameran] 
@@ -31,6 +32,7 @@
 // Creation Date: 2017.05.02
 // Creation Time: 5:41 PM
 // Creator: zameran
+
 #endregion
 
 using System;
@@ -41,157 +43,17 @@ using System.Linq;
 namespace SpaceEngine.Core.Debugging
 {
     /// <summary>
-    /// Class for method execution time measuring.
+    ///     Class for method execution time measuring.
     /// </summary>
     public sealed class PerformanceMonitor
     {
         /// <summary>
-        /// Microstopwatch class represents a Stopwatch analog with some additions.
-        /// </summary>
-        public class MicroStopwatch : Stopwatch
-        {
-            /// <summary>
-            /// Tic.
-            /// </summary>
-            private readonly double MicroSecPerTick = 1000000D / Frequency;
-
-            /// <summary>
-            /// Constructor.
-            /// </summary>
-            public MicroStopwatch()
-            {
-                if (!IsHighResolution)
-                {
-                    throw new Exception("On this system the high-resolution - performance counter is not available");
-                }
-            }
-
-            /// <summary>
-            /// Wasted time.
-            /// </summary>
-            public long ElapsedMicroseconds => (long)(ElapsedTicks * MicroSecPerTick);
-        }
-
-        /// <summary>
-        /// Simple timer class.
-        /// </summary>
-        /// <example>
-        /// <code>
-        /// using (new Timer("Timer Name"))
-        /// {
-        ///     //...
-        /// }
-        /// </code>
-        /// </example>
-        public sealed class Timer : MicroStopwatch, IDisposable
-        {
-            /// <summary>
-            /// Name of timer.
-            /// </summary>
-            private readonly string name;
-
-            /// <summary>
-            /// Constructor.
-            /// </summary>
-            /// <param name="name">Name of timer.</param>
-            public Timer(string name)
-            {
-                this.name = name;
-
-                Start();
-            }
-
-            public void Dispose()
-            {
-                IncrementCounter(name, ElapsedMicroseconds);
-            }
-        }
-
-        /// <summary>
-        /// Counter class.
-        /// </summary>
-        public class Counter : IComparable<Counter>
-        {
-            /// <summary>
-            /// Name of counter.
-            /// </summary>
-            public string Name { get; private set; }
-
-            /// <summary>
-            /// Time of counter.
-            /// </summary>
-            public long Time { get; private set; }
-
-            /// <summary>
-            /// Last time of counter.
-            /// </summary>
-            public long Last { get; private set; }
-
-            /// <summary>
-            /// Max value of counter.
-            /// </summary>
-            public long Max { get; private set; }
-
-            /// <summary>
-            /// Count of counters.
-            /// </summary>
-            public int Count { get; private set; }
-
-            /// <summary>
-            /// Average time of counter.
-            /// </summary>
-            public float Average => Time / (float)Count;
-
-            /// <summary>
-            /// Constructor of counter class.
-            /// </summary>
-            /// <param name="name">Name.</param>
-            /// <param name="time">Time.</param>
-            public Counter(string name, long time)
-            {
-                Name = name;
-
-                Time = time;
-                Last = time;
-                Max = time;
-                Count = 1;
-            }
-
-            /// <summary>
-            /// Counter increment im ms.
-            /// </summary>
-            /// <param name="ms"></param>
-            public void Increment(long ms)
-            {
-                Time += ms;
-                Last = ms;
-
-                if (ms > Max)
-                {
-                    Max = ms;
-                }
-
-                Count++;
-            }
-
-            /// <summary>
-            /// Comparer.
-            /// </summary>
-            /// <param name="other">Counter compare to.</param>
-            /// <returns></returns>
-            public int CompareTo(Counter other)
-            {
-                return string.Compare(Name, other.Name, StringComparison.Ordinal);
-            }
-        }
-
-        /// <summary>
-        /// Counter dictionary.
+        ///     Counter dictionary.
         /// </summary>
         private static readonly Dictionary<string, Counter> counters;
 
         /// <summary>
-        /// Constructor.
+        ///     Constructor.
         /// </summary>
         static PerformanceMonitor()
         {
@@ -199,7 +61,7 @@ namespace SpaceEngine.Core.Debugging
         }
 
         /// <summary>
-        /// Returns all counters in List.
+        ///     Returns all counters in List.
         /// </summary>
         public static List<Counter> Counters
         {
@@ -215,7 +77,7 @@ namespace SpaceEngine.Core.Debugging
         }
 
         /// <summary>
-        /// Incr. of counter with defined name to defined ms.
+        ///     Incr. of counter with defined name to defined ms.
         /// </summary>
         /// <param name="name">Name of counter inct. to.</param>
         /// <param name="ms">Count of ms to incr..</param>
@@ -235,13 +97,153 @@ namespace SpaceEngine.Core.Debugging
         }
 
         /// <summary>
-        /// Dictionary of counter clean up method.
+        ///     Dictionary of counter clean up method.
         /// </summary>
         public static void Clear()
         {
             lock (counters)
             {
                 counters.Clear();
+            }
+        }
+
+        /// <summary>
+        ///     Microstopwatch class represents a Stopwatch analog with some additions.
+        /// </summary>
+        public class MicroStopwatch : Stopwatch
+        {
+            /// <summary>
+            ///     Tic.
+            /// </summary>
+            private readonly double MicroSecPerTick = 1000000D / Frequency;
+
+            /// <summary>
+            ///     Constructor.
+            /// </summary>
+            public MicroStopwatch()
+            {
+                if (!IsHighResolution)
+                {
+                    throw new Exception("On this system the high-resolution - performance counter is not available");
+                }
+            }
+
+            /// <summary>
+            ///     Wasted time.
+            /// </summary>
+            public long ElapsedMicroseconds => (long)(ElapsedTicks * MicroSecPerTick);
+        }
+
+        /// <summary>
+        ///     Simple timer class.
+        /// </summary>
+        /// <example>
+        ///     <code>
+        /// using (new Timer("Timer Name"))
+        /// {
+        ///     //...
+        /// }
+        /// </code>
+        /// </example>
+        public sealed class Timer : MicroStopwatch, IDisposable
+        {
+            /// <summary>
+            ///     Name of timer.
+            /// </summary>
+            private readonly string name;
+
+            /// <summary>
+            ///     Constructor.
+            /// </summary>
+            /// <param name="name">Name of timer.</param>
+            public Timer(string name)
+            {
+                this.name = name;
+
+                Start();
+            }
+
+            public void Dispose()
+            {
+                IncrementCounter(name, ElapsedMicroseconds);
+            }
+        }
+
+        /// <summary>
+        ///     Counter class.
+        /// </summary>
+        public class Counter : IComparable<Counter>
+        {
+            /// <summary>
+            ///     Constructor of counter class.
+            /// </summary>
+            /// <param name="name">Name.</param>
+            /// <param name="time">Time.</param>
+            public Counter(string name, long time)
+            {
+                Name = name;
+
+                Time = time;
+                Last = time;
+                Max = time;
+                Count = 1;
+            }
+
+            /// <summary>
+            ///     Name of counter.
+            /// </summary>
+            public string Name { get; }
+
+            /// <summary>
+            ///     Time of counter.
+            /// </summary>
+            public long Time { get; private set; }
+
+            /// <summary>
+            ///     Last time of counter.
+            /// </summary>
+            public long Last { get; private set; }
+
+            /// <summary>
+            ///     Max value of counter.
+            /// </summary>
+            public long Max { get; private set; }
+
+            /// <summary>
+            ///     Count of counters.
+            /// </summary>
+            public int Count { get; private set; }
+
+            /// <summary>
+            ///     Average time of counter.
+            /// </summary>
+            public float Average => Time / (float)Count;
+
+            /// <summary>
+            ///     Comparer.
+            /// </summary>
+            /// <param name="other">Counter compare to.</param>
+            /// <returns></returns>
+            public int CompareTo(Counter other)
+            {
+                return string.Compare(Name, other.Name, StringComparison.Ordinal);
+            }
+
+            /// <summary>
+            ///     Counter increment im ms.
+            /// </summary>
+            /// <param name="ms"></param>
+            public void Increment(long ms)
+            {
+                Time += ms;
+                Last = ms;
+
+                if (ms > Max)
+                {
+                    Max = ms;
+                }
+
+                Count++;
             }
         }
     }

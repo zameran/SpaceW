@@ -143,76 +143,76 @@ uniform float4x4 _Sky_ShineOccluders_2;
 uniform float4x4 _Sky_ShineColors_1;
 uniform float4x4 _Sky_ShineParameters_1;
 
-float2 GetTransmittanceUV(float r, float mu) 
+float2 GetTransmittanceUV(float r, float mu)
 {
-	float uR, uMu;
+    float uR, uMu;
 
-	#if defined(INSCATTER_NON_LINEAR)
-		uR = sqrt((r - Rg) / (Rt - Rg));
-		uMu = atan((mu + 0.15) / (1.0 + 0.15) * tan(1.5)) / 1.5;
-	#else
+    #if defined(INSCATTER_NON_LINEAR)
+    uR = sqrt((r - Rg) / (Rt - Rg));
+    uMu = atan((mu + 0.15) / (1.0 + 0.15) * tan(1.5)) / 1.5;
+    #else
 		uR = (r - Rg) / (Rt - Rg);
 		uMu = (mu + 0.15) / (1.0 + 0.15);
-	#endif
+    #endif
 
-	return float2(uMu, uR);
+    return float2(uMu, uR);
 }
 
-void GetTransmittanceRMu(float2 coord, out float r, out float muS) 
+void GetTransmittanceRMu(float2 coord, out float r, out float muS)
 {
-	r = coord.y / TRANSMITTANCE_H;
-	muS = coord.x / TRANSMITTANCE_W;
+    r = coord.y / TRANSMITTANCE_H;
+    muS = coord.x / TRANSMITTANCE_W;
 
-	#if defined(INSCATTER_NON_LINEAR)
-		r = Rg + (r * r) * (Rt - Rg);
-		muS = -0.15 + tan(1.5 * muS) / tan(1.5) * (1.0 + 0.15);
-	#else
+    #if defined(INSCATTER_NON_LINEAR)
+    r = Rg + (r * r) * (Rt - Rg);
+    muS = -0.15 + tan(1.5 * muS) / tan(1.5) * (1.0 + 0.15);
+    #else
 		r = Rg + r * (Rt - Rg);
 		muS = -0.15 + muS * (1.0 + 0.15);
-	#endif
+    #endif
 }
 
-float2 GetIrradianceUV(float r, float muS) 
+float2 GetIrradianceUV(float r, float muS)
 {
-	float uR = (r - Rg) / (Rt - Rg);
-	float uMuS = (muS + 0.2) / (1.0 + 0.2);
+    float uR = (r - Rg) / (Rt - Rg);
+    float uMuS = (muS + 0.2) / (1.0 + 0.2);
 
-	return float2(uMuS, uR);
+    return float2(uMuS, uR);
 }
 
-void GetIrradianceRMuS(float2 coord, out float r, out float muS) 
+void GetIrradianceRMuS(float2 coord, out float r, out float muS)
 {
-	r = Rg + (coord.y - 0.5) / (SKY_H - 1.0) * (Rt - Rg);
-	muS = -0.2 + (coord.x - 0.5) / (SKY_W - 1.0) * (1.0 + 0.2);
+    r = Rg + (coord.y - 0.5) / (SKY_H - 1.0) * (Rt - Rg);
+    muS = -0.2 + (coord.x - 0.5) / (SKY_W - 1.0) * (1.0 + 0.2);
 }
 
 float4 Texture4D(sampler3D table, float r, float mu, float muS, float nu)
 {
-	float H = sqrt(Rt * Rt - Rg * Rg);
-	float rho = sqrt(r * r - Rg * Rg);
+    float H = sqrt(Rt * Rt - Rg * Rg);
+    float rho = sqrt(r * r - Rg * Rg);
 
-	#if defined(INSCATTER_NON_LINEAR)
-		float rmu = r * mu;
-		float delta = rmu * rmu - r * r + Rg * Rg;
-		float4 cst = rmu < 0.0 && delta > 0.0 ? float4(1.0, 0.0, 0.0, 0.5 - 0.5 / RES_MU) : float4(-1.0, H * H, H, 0.5 + 0.5 / RES_MU);
-		float uR = 0.5 / RES_R + rho / H * (1.0 - 1.0 / float(RES_R));
-		float uMu = cst.w + (rmu * cst.x + sqrt(delta + cst.y)) / (rho + cst.z) * (0.5 - 1.0 / RES_MU);
-		// paper formula
-		//float uMuS = 0.5 / float(RES_MU_S) + max((1.0 - exp(-3.0 * muS - 0.6)) / (1.0 - exp(-3.6)), 0.0) * (1.0 - 1.0 / float(RES_MU_S));
-		// better formula
-		float uMuS = 0.5 / RES_MU_S + (atan(max(muS, -0.1975) * tan(1.26 * 1.1)) / 1.1 + (1.0 - 0.26)) * 0.5 * (1.0 - 1.0 / RES_MU_S);
-	#else
+    #if defined(INSCATTER_NON_LINEAR)
+    float rmu = r * mu;
+    float delta = rmu * rmu - r * r + Rg * Rg;
+    float4 cst = rmu < 0.0 && delta > 0.0 ? float4(1.0, 0.0, 0.0, 0.5 - 0.5 / RES_MU) : float4(-1.0, H * H, H, 0.5 + 0.5 / RES_MU);
+    float uR = 0.5 / RES_R + rho / H * (1.0 - 1.0 / float(RES_R));
+    float uMu = cst.w + (rmu * cst.x + sqrt(delta + cst.y)) / (rho + cst.z) * (0.5 - 1.0 / RES_MU);
+    // paper formula
+    //float uMuS = 0.5 / float(RES_MU_S) + max((1.0 - exp(-3.0 * muS - 0.6)) / (1.0 - exp(-3.6)), 0.0) * (1.0 - 1.0 / float(RES_MU_S));
+    // better formula
+    float uMuS = 0.5 / RES_MU_S + (atan(max(muS, -0.1975) * tan(1.26 * 1.1)) / 1.1 + (1.0 - 0.26)) * 0.5 * (1.0 - 1.0 / RES_MU_S);
+    #else
 		float uR = 0.5 / RES_R + rho / H * (1.0 - 1.0 / RES_R);
 		float uMu = 0.5 / RES_MU + (mu + 1.0) / 2.0 * (1.0 - 1.0 / RES_MU);
 		float uMuS = 0.5 / RES_MU_S + max(muS + 0.2, 0.0) / 1.2 * (1.0 - 1.0 / RES_MU_S);
-	#endif
+    #endif
 
-	float _lerp = (nu + 1.0) / 2.0 * (RES_NU - 1.0);
-	float uNu = floor(_lerp);
-	_lerp = _lerp - uNu;
+    float _lerp = (nu + 1.0) / 2.0 * (RES_NU - 1.0);
+    float uNu = floor(_lerp);
+    _lerp = _lerp - uNu;
 
-	return tex3Dlod(table, float4((uNu + uMuS) / RES_NU, uMu, uR, 0)) * (1.0 - _lerp) +
-		   tex3Dlod(table, float4((uNu + uMuS + 1.0) / RES_NU, uMu, uR, 0)) * _lerp;
+    return tex3Dlod(table, float4((uNu + uMuS) / RES_NU, uMu, uR, 0)) * (1.0 - _lerp) +
+        tex3Dlod(table, float4((uNu + uMuS + 1.0) / RES_NU, uMu, uR, 0)) * _lerp;
 }
 
 // ----------------------------------------------------------------------------
@@ -221,143 +221,143 @@ float4 Texture4D(sampler3D table, float r, float mu, float muS, float nu)
 
 // nearest intersection of ray r,mu with ground or top atmosphere boundary
 // mu=cos(ray zenith angle at ray origin)
-float Limit(float r, float mu) 
+float Limit(float r, float mu)
 {
-	float dout = -r * mu + sqrt(r * r * (mu * mu - 1.0) + RL * RL);
-	float delta2 = r * r * (mu * mu - 1.0) + Rg * Rg;
+    float dout = -r * mu + sqrt(r * r * (mu * mu - 1.0) + RL * RL);
+    float delta2 = r * r * (mu * mu - 1.0) + Rg * Rg;
 
-	UNITY_BRANCH
-	if (delta2 >= 0.0) 
-	{
-		float din = -r * mu - sqrt(delta2);
+    UNITY_BRANCH
+    if (delta2 >= 0.0)
+    {
+        float din = -r * mu - sqrt(delta2);
 
-		UNITY_BRANCH
-		if (din >= 0.0) 
-		{
-			dout = min(dout, din);
-		}
-	}
+        UNITY_BRANCH
+        if (din >= 0.0)
+        {
+            dout = min(dout, din);
+        }
+    }
 
-	return dout;
+    return dout;
 }
 
 // optical depth for ray (r,mu) of length d, using analytic formula
 // (mu=cos(view zenith angle)), intersections with ground ignored
 // H=height scale of exponential density function
-float OpticalDepth(float H, float r, float mu, float d) 
+float OpticalDepth(float H, float r, float mu, float d)
 {
-	float a = sqrt((0.5 / H) * r);
-	float2 a01 = a * float2(mu, mu + d / r);
-	float2 a01s = sign(a01);
-	float2 a01sq = a01 * a01;
-	float x = a01s.y > a01s.x ? exp(a01sq.x) : 0.0;
-	float2 y = a01s / (2.3193 * abs(a01) + sqrt(1.52 * a01sq + 4.0)) * float2(1.0, exp(-d / H * (d / (2.0 * r) + mu)));
+    float a = sqrt((0.5 / H) * r);
+    float2 a01 = a * float2(mu, mu + d / r);
+    float2 a01s = sign(a01);
+    float2 a01sq = a01 * a01;
+    float x = a01s.y > a01s.x ? exp(a01sq.x) : 0.0;
+    float2 y = a01s / (2.3193 * abs(a01) + sqrt(1.52 * a01sq + 4.0)) * float2(1.0, exp(-d / H * (d / (2.0 * r) + mu)));
 
-	return sqrt((M_PI2 * H) * r) * exp((Rg - r) / H) * (x + dot(y, float2(1.0, -1.0)));
+    return sqrt((M_PI2 * H) * r) * exp((Rg - r) / H) * (x + dot(y, float2(1.0, -1.0)));
 }
 
 // transmittance(=transparency) of atmosphere for infinite ray (r,mu)
 // (mu=cos(view zenith angle)), intersections with ground ignored
-float3 Transmittance(float r, float mu) 
+float3 Transmittance(float r, float mu)
 {
-	float2 uv = GetTransmittanceUV(r, mu);
+    float2 uv = GetTransmittanceUV(r, mu);
 
-	return tex2Dlod(_Sky_Transmittance, float4(uv, 0.0, 0.0)).rgb;
+    return tex2Dlod(_Sky_Transmittance, float4(uv, 0.0, 0.0)).rgb;
 }
 
 // transmittance(=transparency) of atmosphere for ray (r,mu) of length d
 // (mu=cos(view zenith angle)), intersections with ground ignored
 // uses analytic formula instead of transmittance texture
-float3 AnalyticTransmittance(float r, float mu, float d) 
+float3 AnalyticTransmittance(float r, float mu, float d)
 {
-	return exp(- betaR * OpticalDepth(HR, r, mu, d) - betaMEx * OpticalDepth(HM, r, mu, d));
+    return exp(-betaR * OpticalDepth(HR, r, mu, d) - betaMEx * OpticalDepth(HM, r, mu, d));
 }
 
 // transmittance(=transparency) of atmosphere for infinite ray (r,mu)
 // (mu=cos(view zenith angle)), or zero if ray intersects ground
-float3 TransmittanceWithShadow(float r, float mu) 
+float3 TransmittanceWithShadow(float r, float mu)
 {
-	return mu < -sqrt(1.0 - (Rg / r) * (Rg / r)) ? float3(0.0, 0.0, 0.0) : lerp(float3(1.0, 1.0, 1.0), Transmittance(r, mu), density);
+    return mu < -sqrt(1.0 - (Rg / r) * (Rg / r)) ? float3(0.0, 0.0, 0.0) : lerp(float3(1.0, 1.0, 1.0), Transmittance(r, mu), density);
 }
 
 // transmittance(=transparency) of atmosphere between x and x0
 // assume segment x,x0 not intersecting ground
 // r=||x||, mu=cos(zenith angle of [x,x0) ray at x), v=unit direction vector of [x,x0) ray
-float3 Transmittance(float r, float mu, float3 v, float3 x0) 
+float3 Transmittance(float r, float mu, float3 v, float3 x0)
 {
-	float3 result;
+    float3 result;
 
-	float r1 = length(x0);
-	float mu1 = dot(x0, v) / r;
+    float r1 = length(x0);
+    float mu1 = dot(x0, v) / r;
 
-	UNITY_BRANCH
-	if (mu > 0.0) 
-	{
-		result = min(Transmittance(r, mu) / Transmittance(r1, mu1), 1.0);
-	} 
-	else 
-	{
-		result = min(Transmittance(r1, -mu1) / Transmittance(r, -mu), 1.0);
-	}
+    UNITY_BRANCH
+    if (mu > 0.0)
+    {
+        result = min(Transmittance(r, mu) / Transmittance(r1, mu1), 1.0);
+    }
+    else
+    {
+        result = min(Transmittance(r1, -mu1) / Transmittance(r, -mu), 1.0);
+    }
 
-	return lerp(float3(1.0, 1.0, 1.0), result, density);
+    return lerp(float3(1.0, 1.0, 1.0), result, density);
 }
 
 // transmittance(=transparency) of atmosphere between x and x0
 // assume segment x,x0 not intersecting ground
 // d = distance between x and x0, mu=cos(zenith angle of [x,x0) ray at x)
-float3 Transmittance(float r, float mu, float d) 
+float3 Transmittance(float r, float mu, float d)
 {
-	float3 result;
+    float3 result;
 
-	float r1 = sqrt(r * r + d * d + 2.0 * r * mu * d);
-	float mu1 = (r * mu + d) / r1;
+    float r1 = sqrt(r * r + d * d + 2.0 * r * mu * d);
+    float mu1 = (r * mu + d) / r1;
 
-	UNITY_BRANCH
-	if (mu > 0.0) 
-	{
-		result = min(Transmittance(r, mu) / Transmittance(r1, mu1), 1.0);
-	} 
-	else 
-	{
-		result = min(Transmittance(r1, -mu1) / Transmittance(r, -mu), 1.0);
-	}
+    UNITY_BRANCH
+    if (mu > 0.0)
+    {
+        result = min(Transmittance(r, mu) / Transmittance(r1, mu1), 1.0);
+    }
+    else
+    {
+        result = min(Transmittance(r1, -mu1) / Transmittance(r, -mu), 1.0);
+    }
 
-	return lerp(float3(1.0, 1.0, 1.0), result, density);
+    return lerp(float3(1.0, 1.0, 1.0), result, density);
 }
 
-float3 Irradiance(sampler2D samp, float r, float muS) 
+float3 Irradiance(sampler2D samp, float r, float muS)
 {
-	float2 uv = GetIrradianceUV(r, muS);
+    float2 uv = GetIrradianceUV(r, muS);
 
-	return tex2Dlod(samp, float4(uv, 0.0, 0.0)).rgb;
+    return tex2Dlod(samp, float4(uv, 0.0, 0.0)).rgb;
 }
 
 // Rayleigh phase function
-float PhaseFunctionR(float mu) 
+float PhaseFunctionR(float mu)
 {
-	return (3.0 / M_PI16) * (1.0 + mu * mu);
+    return (3.0 / M_PI16) * (1.0 + mu * mu);
 }
 
 // Mie phase function
-float PhaseFunctionM(float mu) 
+float PhaseFunctionM(float mu)
 {
-	return 1.5 * 1.0 / M_PI4 * (1.0 - mieG * mieG) * pow(1.0 + (mieG * mieG) - 2.0 * mieG * mu, -3.0 / 2.0) * (1.0 + mu * mu) / (2.0 + mieG * mieG);
+    return 1.5 * 1.0 / M_PI4 * (1.0 - mieG * mieG) * pow(1.0 + (mieG * mieG) - 2.0 * mieG * mu, -3.0 / 2.0) * (1.0 + mu * mu) / (2.0 + mieG * mieG);
 }
 
 // approximated single Mie scattering (cf. approximate Cm in paragraph "Angular precision")
-float3 GetMie(float4 rayMie) 
+float3 GetMie(float4 rayMie)
 {
-	return rayMie.rgb * rayMie.w / max(rayMie.r, 1e-4) * (betaR.r / betaR);
+    return rayMie.rgb * rayMie.w / max(rayMie.r, 1e-4) * (betaR.r / betaR);
 }
 
-inline float SQRT(float f, float err) 
+inline float SQRT(float f, float err)
 {
-	#if defined(OPTIMIZE)
-		return sqrt(f);
-	#else
+    #if defined(OPTIMIZE)
+    return sqrt(f);
+    #else
 		return f >= 0.0 ? sqrt(f) : err;
-	#endif
+    #endif
 }
 
 // ----------------------------------------------------------------------------
@@ -367,27 +367,27 @@ inline float SQRT(float f, float err)
 // incident sun light at given position (radiance)
 // r=length(x)
 // muS=dot(x,s) / r
-float3 SunRadiance(float r, float muS) 
+float3 SunRadiance(float r, float muS)
 {
-	#if defined(ATMO_SUN_ONLY) || defined(ATMO_FULL)
-		return TransmittanceWithShadow(r, muS) * _Sun_Intensity;
-	#elif defined(ATMO_NONE)
+    #if defined(ATMO_SUN_ONLY) || defined(ATMO_FULL)
+    return TransmittanceWithShadow(r, muS) * _Sun_Intensity;
+    #elif defined(ATMO_NONE)
 		return _Sun_Intensity.xxx;
-	#else
+    #else
 		return float3(0.0, 0.0, 0.0);
-	#endif
+    #endif
 }
 
 // incident sky light at given position, integrated over the hemisphere (irradiance)
 // r=length(x)
 // muS=dot(x,s) / r
-float3 SkyIrradiance(float r, float muS) 
+float3 SkyIrradiance(float r, float muS)
 {
-	#if defined(ATMO_SKY_ONLY) || defined(ATMO_FULL)
-		return Irradiance(_Sky_Irradiance, r, muS) * _Sun_Intensity;
-	#else
+    #if defined(ATMO_SKY_ONLY) || defined(ATMO_FULL)
+    return Irradiance(_Sky_Irradiance, r, muS) * _Sun_Intensity;
+    #else
 		return float3(0.0, 0.0, 0.0);
-	#endif
+    #endif
 }
 
 // single scattered sunlight between two points
@@ -397,63 +397,63 @@ float3 SkyIrradiance(float r, float muS)
 // return scattered light
 float3 SkyRadiance(float3 camera, float3 viewdir, float3 sundir, float shaftWidth)
 {
-	#if defined(ATMO_INSCATTER_ONLY) || defined(ATMO_FULL)
-		float3 result = float3(0.0, 0.0, 0.0);
-	
-		camera /= scale;
-		camera += viewdir * max(shaftWidth, 0.0);
+    #if defined(ATMO_INSCATTER_ONLY) || defined(ATMO_FULL)
+    float3 result = float3(0.0, 0.0, 0.0);
 
-		float r = length(camera);
-		float rMu = dot(camera, viewdir);
-		float mu = rMu / r;
-		float r0 = r;
-		float mu0 = mu;
+    camera /= scale;
+    camera += viewdir * max(shaftWidth, 0.0);
 
-		float deltaSq = SQRT(rMu * rMu - r * r + Rt * Rt, 1e30);
-		float din = max(-rMu - deltaSq, 0.0);
+    float r = length(camera);
+    float rMu = dot(camera, viewdir);
+    float mu = rMu / r;
+    float r0 = r;
+    float mu0 = mu;
 
-		UNITY_BRANCH
-		if (din > 0.0) 
-		{
-			camera += din * viewdir;
-			rMu += din;
-			mu = rMu / Rt;
-			r = Rt;
-		}
+    float deltaSq = SQRT(rMu * rMu - r * r + Rt * Rt, 1e30);
+    float din = max(-rMu - deltaSq, 0.0);
 
-		UNITY_BRANCH
-		if (r <= Rt) 
-		{
-			float nu = dot(viewdir, sundir);
-			float muS = dot(camera, sundir) / r;
+    UNITY_BRANCH
+    if (din > 0.0)
+    {
+        camera += din * viewdir;
+        rMu += din;
+        mu = rMu / Rt;
+        r = Rt;
+    }
 
-			float4 inScatter = Texture4D(_Sky_Inscatter, r, rMu / r, muS, nu);
+    UNITY_BRANCH
+    if (r <= Rt)
+    {
+        float nu = dot(viewdir, sundir);
+        float muS = dot(camera, sundir) / r;
 
-			UNITY_BRANCH
-			if (shaftWidth > 0.0) 
-			{
-				UNITY_BRANCH
-				if (mu > 0.0) 
-				{
-					inScatter *= min(Transmittance(r0, mu0) / Transmittance(r, mu), 1.0).rgbr;
-				} 
-				else 
-				{
-					inScatter *= min(Transmittance(r, -mu) / Transmittance(r0, -mu0), 1.0).rgbr;
-				}
-			}
+        float4 inScatter = Texture4D(_Sky_Inscatter, r, rMu / r, muS, nu);
 
-			float3 inScatterM = GetMie(inScatter);
-			float phase = PhaseFunctionR(nu);
-			float phaseM = PhaseFunctionM(nu);
+        UNITY_BRANCH
+        if (shaftWidth > 0.0)
+        {
+            UNITY_BRANCH
+            if (mu > 0.0)
+            {
+                inScatter *= min(Transmittance(r0, mu0) / Transmittance(r, mu), 1.0).rgbr;
+            }
+            else
+            {
+                inScatter *= min(Transmittance(r, -mu) / Transmittance(r0, -mu0), 1.0).rgbr;
+            }
+        }
 
-			result = inScatter.rgb * phase + inScatterM * phaseM;
-		} 
+        float3 inScatterM = GetMie(inScatter);
+        float phase = PhaseFunctionR(nu);
+        float phaseM = PhaseFunctionM(nu);
 
-		return result * _Sun_Intensity;
-	#else
+        result = inScatter.rgb * phase + inScatterM * phaseM;
+    }
+
+    return result * _Sun_Intensity;
+    #else
 		return float3(0.0, 0.0, 0.0);
-	#endif
+    #endif
 }
 
 // single scattered sunlight between two points
@@ -463,254 +463,254 @@ float3 SkyRadiance(float3 camera, float3 viewdir, float3 sundir, float shaftWidt
 // return scattered light and extinction coefficient
 float3 SkyRadiance(float3 camera, float3 viewdir, float3 sundir, out float3 extinction, float shaftWidth)
 {
-	#if defined(ATMO_INSCATTER_ONLY) || defined(ATMO_FULL)
-		float3 result = float3(0.0, 0.0, 0.0);
-		extinction = float3(1.0, 1.0, 1.0);
-	
-		camera /= scale;
-		camera += viewdir * max(shaftWidth, 0.0);
+    #if defined(ATMO_INSCATTER_ONLY) || defined(ATMO_FULL)
+    float3 result = float3(0.0, 0.0, 0.0);
+    extinction = float3(1.0, 1.0, 1.0);
 
-		float r = length(camera);
-		float rMu = dot(camera, viewdir);
-		float mu = rMu / r;
-		float r0 = r;
-		float mu0 = mu;
+    camera /= scale;
+    camera += viewdir * max(shaftWidth, 0.0);
 
-		float deltaSq = SQRT(rMu * rMu - r * r + Rt * Rt, 1e30);
-		float din = max(-rMu - deltaSq, 0.0);
+    float r = length(camera);
+    float rMu = dot(camera, viewdir);
+    float mu = rMu / r;
+    float r0 = r;
+    float mu0 = mu;
 
-		UNITY_BRANCH
-		if (din > 0.0) 
-		{
-			camera += din * viewdir;
-			rMu += din;
-			mu = rMu / Rt;
-			r = Rt;
-		}
+    float deltaSq = SQRT(rMu * rMu - r * r + Rt * Rt, 1e30);
+    float din = max(-rMu - deltaSq, 0.0);
 
-		UNITY_BRANCH
-		if (r <= Rt) 
-		{
-			float nu = dot(viewdir, sundir);
-			float muS = dot(camera, sundir) / r;
+    UNITY_BRANCH
+    if (din > 0.0)
+    {
+        camera += din * viewdir;
+        rMu += din;
+        mu = rMu / Rt;
+        r = Rt;
+    }
 
-			float4 inScatter = Texture4D(_Sky_Inscatter, r, rMu / r, muS, nu);
+    UNITY_BRANCH
+    if (r <= Rt)
+    {
+        float nu = dot(viewdir, sundir);
+        float muS = dot(camera, sundir) / r;
 
-			UNITY_BRANCH
-			if (shaftWidth > 0.0) 
-			{
-				UNITY_BRANCH
-				if (mu > 0.0) 
-				{
-					inScatter *= min(Transmittance(r0, mu0) / Transmittance(r, mu), 1.0).rgbr;
-				} 
-				else 
-				{
-					inScatter *= min(Transmittance(r, -mu) / Transmittance(r0, -mu0), 1.0).rgbr;
-				}
-			}
+        float4 inScatter = Texture4D(_Sky_Inscatter, r, rMu / r, muS, nu);
 
-			extinction = Transmittance(r, mu);
+        UNITY_BRANCH
+        if (shaftWidth > 0.0)
+        {
+            UNITY_BRANCH
+            if (mu > 0.0)
+            {
+                inScatter *= min(Transmittance(r0, mu0) / Transmittance(r, mu), 1.0).rgbr;
+            }
+            else
+            {
+                inScatter *= min(Transmittance(r, -mu) / Transmittance(r0, -mu0), 1.0).rgbr;
+            }
+        }
 
-			float3 inScatterM = GetMie(inScatter);
-			float phase = PhaseFunctionR(nu);
-			float phaseM = PhaseFunctionM(nu);
+        extinction = Transmittance(r, mu);
 
-			result = inScatter.rgb * phase + inScatterM * phaseM;
-		} 
+        float3 inScatterM = GetMie(inScatter);
+        float phase = PhaseFunctionR(nu);
+        float phaseM = PhaseFunctionM(nu);
 
-		return result * _Sun_Intensity;
-	#else
+        result = inScatter.rgb * phase + inScatterM * phaseM;
+    }
+
+    return result * _Sun_Intensity;
+    #else
 		extinction = float3(1.0, 1.0, 1.0);
 
 		return float3(0.0, 0.0, 0.0);
-	#endif
+    #endif
 }
 
 float3 SkyRadianceSimple(float3 camera, float3 viewdir, float3 sundir)
 {
-	float3 result = float3(0.0, 0.0, 0.0);
-	
-	Rt = Rg + (Rt - Rg) * 1.0;
-	
-	viewdir = normalize(viewdir);
+    float3 result = float3(0.0, 0.0, 0.0);
 
-	float r = length(camera);
-	float rMu = dot(camera, viewdir);
-	float deltaSq = SQRT(rMu * rMu - r * r + Rt * Rt, 0.000001);
-	float din = max(-rMu - deltaSq, 0.0);
+    Rt = Rg + (Rt - Rg) * 1.0;
 
-	UNITY_BRANCH
-	if (din > 0.0)
-	{
-		camera += din * viewdir;
-		rMu += din;
-		r = Rt;
-	}
-	
-	float nu = dot(viewdir, sundir);
-	float muS = dot(camera, sundir) / r;
-	
-	float4 inScatter = Texture4D(_Sky_Inscatter, r, rMu / r, muS, nu);
-	
-	UNITY_BRANCH
-	if (r <= Rt) 
-	{
-		float3 inScatterM = GetMie(inScatter);
-		float phase = PhaseFunctionR(nu);
-		float phaseM = PhaseFunctionM(nu);
+    viewdir = normalize(viewdir);
 
-		result = inScatter.rgb * phase + inScatterM * phaseM;
-	}    
-	else
-	{
-		result = float3(0.0, 0.0, 0.0);
-	} 
-	
-	return result * _Sun_Intensity;
+    float r = length(camera);
+    float rMu = dot(camera, viewdir);
+    float deltaSq = SQRT(rMu * rMu - r * r + Rt * Rt, 0.000001);
+    float din = max(-rMu - deltaSq, 0.0);
+
+    UNITY_BRANCH
+    if (din > 0.0)
+    {
+        camera += din * viewdir;
+        rMu += din;
+        r = Rt;
+    }
+
+    float nu = dot(viewdir, sundir);
+    float muS = dot(camera, sundir) / r;
+
+    float4 inScatter = Texture4D(_Sky_Inscatter, r, rMu / r, muS, nu);
+
+    UNITY_BRANCH
+    if (r <= Rt)
+    {
+        float3 inScatterM = GetMie(inScatter);
+        float phase = PhaseFunctionR(nu);
+        float phaseM = PhaseFunctionM(nu);
+
+        result = inScatter.rgb * phase + inScatterM * phaseM;
+    }
+    else
+    {
+        result = float3(0.0, 0.0, 0.0);
+    }
+
+    return result * _Sun_Intensity;
 }
 
-float3 InScatteringShine(float3 camera, float3 ppoint, float3 sunDir, out float3 extinction, float shaftWidth, float scaleCoeff) 
+float3 InScatteringShine(float3 camera, float3 ppoint, float3 sunDir, out float3 extinction, float shaftWidth, float scaleCoeff)
 {
-	float3 result = float3(0.0, 0.0, 0.0);
+    float3 result = float3(0.0, 0.0, 0.0);
 
-	extinction = float3(1.0, 1.0, 1.0);
+    extinction = float3(1.0, 1.0, 1.0);
 
-	float3 viewdir = ppoint - camera;
-	float d = length(viewdir) * scaleCoeff;
+    float3 viewdir = ppoint - camera;
+    float d = length(viewdir) * scaleCoeff;
 
-	viewdir = viewdir / d;
+    viewdir = viewdir / d;
 
-	Rt = Rg + (Rt - Rg) * 1.0;
-	viewdir = normalize(viewdir);
+    Rt = Rg + (Rt - Rg) * 1.0;
+    viewdir = normalize(viewdir);
 
-	float r = length(camera) * scaleCoeff;
+    float r = length(camera) * scaleCoeff;
 
-	UNITY_BRANCH
-	if (r < 0.9 * Rg) 
-	{
-		camera.y += Rg;
-		ppoint.y += Rg;
-		r = length(camera) * scaleCoeff;
-	}
+    UNITY_BRANCH
+    if (r < 0.9 * Rg)
+    {
+        camera.y += Rg;
+        ppoint.y += Rg;
+        r = length(camera) * scaleCoeff;
+    }
 
-	float rMu = dot(camera, viewdir);
-	float mu = rMu / r;
-	float r0 = r;
-	float mu0 = mu;
-	float muExtinction=mu;
+    float rMu = dot(camera, viewdir);
+    float mu = rMu / r;
+    float r0 = r;
+    float mu0 = mu;
+    float muExtinction = mu;
 
-	ppoint -= viewdir * clamp(shaftWidth, 0.0, d);
+    ppoint -= viewdir * clamp(shaftWidth, 0.0, d);
 
-	float deltaSq = SQRT(rMu * rMu - r * r + Rt * Rt, 0.000001);
+    float deltaSq = SQRT(rMu * rMu - r * r + Rt * Rt, 0.000001);
 
-	float din = max(-rMu - deltaSq, 0.0);
+    float din = max(-rMu - deltaSq, 0.0);
 
-	UNITY_BRANCH
-	if (din > 0.0 && din < d)
-	{
-		camera += din * viewdir;
-		rMu += din;
-		mu = rMu / Rt;
-		r = Rt;
-		d -= din;
-	}
-	
-	UNITY_BRANCH
-	if (r <= Rt)
-	{ 
-		float nu = dot(viewdir, sunDir);
-		float muS = dot(camera, sunDir) / r;
-		float4 inScatter;
+    UNITY_BRANCH
+    if (din > 0.0 && din < d)
+    {
+        camera += din * viewdir;
+        rMu += din;
+        mu = rMu / Rt;
+        r = Rt;
+        d -= din;
+    }
 
-		UNITY_BRANCH
-		if (r < Rg + 1600.0) 
-		{
-			float f = (Rg + 1600.0) / r;
+    UNITY_BRANCH
+    if (r <= Rt)
+    {
+        float nu = dot(viewdir, sunDir);
+        float muS = dot(camera, sunDir) / r;
+        float4 inScatter;
 
-			r = r * f;
-			rMu = rMu * f;
-			ppoint = ppoint * f;
-		}
+        UNITY_BRANCH
+        if (r < Rg + 1600.0)
+        {
+            float f = (Rg + 1600.0) / r;
 
-		float r1 = length(ppoint);
-		float rMu1 = dot(ppoint, viewdir);
-		float mu1 = rMu1 / r1;
-		float muS1 = dot(ppoint, sunDir) / r1;
+            r = r * f;
+            rMu = rMu * f;
+            ppoint = ppoint * f;
+        }
 
-		extinction = min(AnalyticTransmittance(r, mu, d), 1.0);
+        float r1 = length(ppoint);
+        float rMu1 = dot(ppoint, viewdir);
+        float mu1 = rMu1 / r1;
+        float muS1 = dot(ppoint, sunDir) / r1;
 
-		float4 inScatter0 = Texture4D(_Sky_Inscatter, r, mu, muS, nu);
-		float4 inScatter1 = Texture4D(_Sky_Inscatter, r1, mu1, muS1, nu);
-		inScatter = max(inScatter0 - inScatter1 * extinction.rgbr, 0.0);
+        extinction = min(AnalyticTransmittance(r, mu, d), 1.0);
 
-		inScatter.w *= smoothstep(0.00, 0.02, muS);
+        float4 inScatter0 = Texture4D(_Sky_Inscatter, r, mu, muS, nu);
+        float4 inScatter1 = Texture4D(_Sky_Inscatter, r1, mu1, muS1, nu);
+        inScatter = max(inScatter0 - inScatter1 * extinction.rgbr, 0.0);
 
-		float3 inScatterM = GetMie(inScatter);
-		float phase = PhaseFunctionR(nu);
-		float phaseM = PhaseFunctionM(nu);
+        inScatter.w *= smoothstep(0.00, 0.02, muS);
 
-		result = inScatter.rgb * phase + inScatterM * phaseM;
-	}
-	else
-	{
-		result = float3(0.0, 0.0, 0.0);
-	}
+        float3 inScatterM = GetMie(inScatter);
+        float phase = PhaseFunctionR(nu);
+        float phaseM = PhaseFunctionM(nu);
 
-	return result * _Sun_Intensity;
+        result = inScatter.rgb * phase + inScatterM * phaseM;
+    }
+    else
+    {
+        result = float3(0.0, 0.0, 0.0);
+    }
+
+    return result * _Sun_Intensity;
 }
 
 float3 SkyShineRadiance(float3 worldPosition, float3 viewdir)
 {
-	float3 radiance = 0;
-	float3 occluderDirection = 0;
-	float3 occluderOppositeDirection = 0;
+    float3 radiance = 0;
+    float3 occluderDirection = 0;
+    float3 occluderOppositeDirection = 0;
 
-	float intensity = 1;
+    float intensity = 1;
 
-	UNITY_UNROLL
-	for (int i = 0; i < 4; ++i)
-	{
-		if (_Sky_ShineColors_1[i].w <= 0) break;
+    UNITY_UNROLL
+    for (int i = 0; i < 4; ++i)
+    {
+        if (_Sky_ShineColors_1[i].w <= 0) break;
 
-		// NOTE : Hm... oppisite direction without origin offset looks better... Test case.
+        // NOTE : Hm... oppisite direction without origin offset looks better... Test case.
 
-		occluderDirection = normalize(_Sky_ShineOccluders_1[i].xyz - worldPosition);			// Occluder direction with origin offset...
-		//occluderOppositeDirection = normalize(_Sky_ShineOccluders_2[i].xyz - worldPosition);	// Occluder opposite direction...
-		occluderOppositeDirection = _Sky_ShineOccluders_2[i].xyz;								// Occluder opposite direction with origin offset...
-		intensity = 0.57 * max((dot(occluderDirection, occluderOppositeDirection) - _Sky_ShineParameters_1[i].w), 0);
+        occluderDirection = normalize(_Sky_ShineOccluders_1[i].xyz - worldPosition); // Occluder direction with origin offset...
+        //occluderOppositeDirection = normalize(_Sky_ShineOccluders_2[i].xyz - worldPosition);	// Occluder opposite direction...
+        occluderOppositeDirection = _Sky_ShineOccluders_2[i].xyz; // Occluder opposite direction with origin offset...
+        intensity = 0.57 * max((dot(occluderDirection, occluderOppositeDirection) - _Sky_ShineParameters_1[i].w), 0);
 
-		radiance += SkyRadiance(worldPosition, viewdir, _Sky_ShineOccluders_1[i].xyz, 0.0);
-		radiance *= _Sky_ShineColors_1[i].xyz * _Sky_ShineColors_1[i].w * intensity;
-	}
+        radiance += SkyRadiance(worldPosition, viewdir, _Sky_ShineOccluders_1[i].xyz, 0.0);
+        radiance *= _Sky_ShineColors_1[i].xyz * _Sky_ShineColors_1[i].w * intensity;
+    }
 
-	return radiance;
+    return radiance;
 }
 
 void SunRadianceAndSkyIrradiance(float3 worldP, float3 worldN, float3 worldS, out float3 sunL, out float3 skyE)
 {
-	worldP /= scale;
+    worldP /= scale;
 
-	float r = length(worldP);
+    float r = length(worldP);
 
-	UNITY_BRANCH
-	if (r < 0.9 * Rg) 
-	{
-		worldP.z += Rg;
-		r = length(worldP);
-	}
+    UNITY_BRANCH
+    if (r < 0.9 * Rg)
+    {
+        worldP.z += Rg;
+        r = length(worldP);
+    }
 
-	float3 worldV = worldP / r; // vertical vector
-	float muS = dot(worldV, worldS);
+    float3 worldV = worldP / r; // vertical vector
+    float muS = dot(worldV, worldS);
 
-	//float sunOcclusion = 1.0;// - sunShadow;
-	sunL = SunRadiance(r, muS) * 1.0;// * sunOcclusion;
+    //float sunOcclusion = 1.0;// - sunShadow;
+    sunL = SunRadiance(r, muS) * 1.0; // * sunOcclusion;
 
-	// ambient occlusion due only to slope, does not take self shadowing into account
-	float skyOcclusion = (1.0 + dot(worldV, worldN)) * 0.5;
-	// factor 2.0 - hack to increase sky contribution (numerical simulation of
-	// "precompued atmospheric scattering" gives less luminance than in reality)
-	skyE = 2.0 * SkyIrradiance(r, muS) * skyOcclusion;
+    // ambient occlusion due only to slope, does not take self shadowing into account
+    float skyOcclusion = (1.0 + dot(worldV, worldN)) * 0.5;
+    // factor 2.0 - hack to increase sky contribution (numerical simulation of
+    // "precompued atmospheric scattering" gives less luminance than in reality)
+    skyE = 2.0 * SkyIrradiance(r, muS) * skyOcclusion;
 }
 
 // single scattered sunlight between two points
@@ -718,134 +718,134 @@ void SunRadianceAndSkyIrradiance(float3 worldP, float3 worldN, float3 worldS, ou
 // ppoint=point on the ground
 // sundir=unit vector towards the sun
 // return scattered light and extinction coefficient
-float4 InScattering(float3 camera, float3 ppoint, float3 sundir, out float3 extinction, float shaftWidth) 
+float4 InScattering(float3 camera, float3 ppoint, float3 sundir, out float3 extinction, float shaftWidth)
 {
-	#if defined(ATMO_INSCATTER_ONLY) || defined(ATMO_FULL)
-		camera /= scale;
-		ppoint /= scale;
+    #if defined(ATMO_INSCATTER_ONLY) || defined(ATMO_FULL)
+    camera /= scale;
+    ppoint /= scale;
 
-		float4 result;
-		float3 viewdir = ppoint - camera;
-		float d = length(viewdir);
-		viewdir = viewdir / d;
-	
-		float r = length(camera);
+    float4 result;
+    float3 viewdir = ppoint - camera;
+    float d = length(viewdir);
+    viewdir = viewdir / d;
 
-		UNITY_BRANCH
-		if (r < 0.9 * Rg) 
-		{
-			camera.z += Rg;
-			ppoint.z += Rg;
-			r = length(camera);
-		}
-	
-		float rMu = dot(camera, viewdir);
-		float mu = rMu / r;
-		float r0 = r;
-		float mu0 = mu;
-		ppoint -= viewdir * clamp(shaftWidth, 0.0, d);
+    float r = length(camera);
 
-		float deltaSq = SQRT(rMu * rMu - r * r + Rt * Rt, 1e30);
-		float din = max(-rMu - deltaSq, 0.0);
+    UNITY_BRANCH
+    if (r < 0.9 * Rg)
+    {
+        camera.z += Rg;
+        ppoint.z += Rg;
+        r = length(camera);
+    }
 
-		UNITY_BRANCH
-		if (din > 0.0 && din < d) 
-		{
-			camera += din * viewdir;
-			rMu += din;
-			mu = rMu / Rt;
-			r = Rt;
-			d -= din;
-		}
+    float rMu = dot(camera, viewdir);
+    float mu = rMu / r;
+    float r0 = r;
+    float mu0 = mu;
+    ppoint -= viewdir * clamp(shaftWidth, 0.0, d);
 
-		UNITY_BRANCH
-		if (r <= Rt) 
-		{
-			float nu = dot(viewdir, sundir);
-			float muS = dot(camera, sundir) / r;
+    float deltaSq = SQRT(rMu * rMu - r * r + Rt * Rt, 1e30);
+    float din = max(-rMu - deltaSq, 0.0);
 
-			float4 inScatter;
+    UNITY_BRANCH
+    if (din > 0.0 && din < d)
+    {
+        camera += din * viewdir;
+        rMu += din;
+        mu = rMu / Rt;
+        r = Rt;
+        d -= din;
+    }
 
-			UNITY_BRANCH
-			if (r < Rg + _Aerial_Perspective_Offset) // 2000.0
-			{
-				// avoids imprecision problems in aerial perspective near ground
-				float f = (Rg + _Aerial_Perspective_Offset) / r;
-				r = r * f;
-				rMu = rMu * f;
-				ppoint = ppoint * f;
-			}
+    UNITY_BRANCH
+    if (r <= Rt)
+    {
+        float nu = dot(viewdir, sundir);
+        float muS = dot(camera, sundir) / r;
 
-			float r1 = length(ppoint);
-			float rMu1 = dot(ppoint, viewdir);
-			float mu1 = rMu1 / r1;
-			float muS1 = dot(ppoint, sundir) / r1;
+        float4 inScatter;
 
-			#if defined(ANALYTIC_TRANSMITTANCE)
-				extinction = min(AnalyticTransmittance(r, mu, d), 1.0);
-			#else
+        UNITY_BRANCH
+        if (r < Rg + _Aerial_Perspective_Offset) // 2000.0
+        {
+            // avoids imprecision problems in aerial perspective near ground
+            float f = (Rg + _Aerial_Perspective_Offset) / r;
+            r = r * f;
+            rMu = rMu * f;
+            ppoint = ppoint * f;
+        }
+
+        float r1 = length(ppoint);
+        float rMu1 = dot(ppoint, viewdir);
+        float mu1 = rMu1 / r1;
+        float muS1 = dot(ppoint, sundir) / r1;
+
+        #if defined(ANALYTIC_TRANSMITTANCE)
+        extinction = min(AnalyticTransmittance(r, mu, d), 1.0);
+        #else
 				extinction = (mu > 0) ? min(Transmittance(r, mu) / Transmittance(r1, mu1), 1.0) : 
 										min(Transmittance(r1, -mu1) / Transmittance(r, -mu), 1.0);
-			#endif
+        #endif
 
-			#if defined(HORIZON_HACK)
-				float lim = -sqrt(1.0 - (Rg / r) * (Rg / r));
+        #if defined(HORIZON_HACK)
+        float lim = -sqrt(1.0 - (Rg / r) * (Rg / r));
 
-				UNITY_BRANCH
-				if (abs(mu - lim) < _Sky_HorizonFixEps) // 0.004
-				{
-					// avoids imprecision problems near horizon by interpolating between two points above and below horizon
-					float a = ((mu - lim) + _Sky_HorizonFixEps) / (2.0 * _Sky_HorizonFixEps);
+        UNITY_BRANCH
+        if (abs(mu - lim) < _Sky_HorizonFixEps) // 0.004
+        {
+            // avoids imprecision problems near horizon by interpolating between two points above and below horizon
+            float a = ((mu - lim) + _Sky_HorizonFixEps) / (2.0 * _Sky_HorizonFixEps);
 
-					mu = lim - _Sky_HorizonFixEps;
-					r1 = sqrt(r * r + d * d + 2.0 * r * d * mu);
-					mu1 = (r * mu + d) / r1;
-					float4 inScatter0 = Texture4D(_Sky_Inscatter, r, mu, muS, nu);
-					float4 inScatter1 = Texture4D(_Sky_Inscatter, r1, mu1, muS1, nu);
-					float4 inScatterA = max(inScatter0 - inScatter1 * extinction.rgbr, 0.0);
+            mu = lim - _Sky_HorizonFixEps;
+            r1 = sqrt(r * r + d * d + 2.0 * r * d * mu);
+            mu1 = (r * mu + d) / r1;
+            float4 inScatter0 = Texture4D(_Sky_Inscatter, r, mu, muS, nu);
+            float4 inScatter1 = Texture4D(_Sky_Inscatter, r1, mu1, muS1, nu);
+            float4 inScatterA = max(inScatter0 - inScatter1 * extinction.rgbr, 0.0);
 
-					mu = lim + _Sky_HorizonFixEps;
-					r1 = sqrt(r * r + d * d + 2.0 * r * d * mu);
-					mu1 = (r * mu + d) / r1;
-					inScatter0 = Texture4D(_Sky_Inscatter, r, mu, muS, nu);
-					inScatter1 = Texture4D(_Sky_Inscatter, r1, mu1, muS1, nu);
-					float4 inScatterB = max(inScatter0 - inScatter1 * extinction.rgbr, 0.0);
+            mu = lim + _Sky_HorizonFixEps;
+            r1 = sqrt(r * r + d * d + 2.0 * r * d * mu);
+            mu1 = (r * mu + d) / r1;
+            inScatter0 = Texture4D(_Sky_Inscatter, r, mu, muS, nu);
+            inScatter1 = Texture4D(_Sky_Inscatter, r1, mu1, muS1, nu);
+            float4 inScatterB = max(inScatter0 - inScatter1 * extinction.rgbr, 0.0);
 
-					inScatter = lerp(inScatterA, inScatterB, a);
-				} 
-				else 
-				{
-					float4 inScatter0 = Texture4D(_Sky_Inscatter, r, mu, muS, nu);
-					float4 inScatter1 = Texture4D(_Sky_Inscatter, r1, mu1, muS1, nu);
-					inScatter = max(inScatter0 - inScatter1 * extinction.rgbr, 0.0);
-				}
-			#else
+            inScatter = lerp(inScatterA, inScatterB, a);
+        }
+        else
+        {
+            float4 inScatter0 = Texture4D(_Sky_Inscatter, r, mu, muS, nu);
+            float4 inScatter1 = Texture4D(_Sky_Inscatter, r1, mu1, muS1, nu);
+            inScatter = max(inScatter0 - inScatter1 * extinction.rgbr, 0.0);
+        }
+        #else
 				float4 inScatter0 = Texture4D(_Sky_Inscatter, r, mu, muS, nu);
 				float4 inScatter1 = Texture4D(_Sky_Inscatter, r1, mu1, muS1, nu);
 				inScatter = max(inScatter0 - inScatter1 * extinction.rgbr, 0.0);
-			#endif
+        #endif
 
-			// cancels inscatter when sun hidden by mountains
-			// TODO: smoothstep values depend on horizon angle in sun direction
-			//inScatter.w *= smoothstep(0.035, 0.07, muS);
+        // cancels inscatter when sun hidden by mountains
+        // TODO: smoothstep values depend on horizon angle in sun direction
+        //inScatter.w *= smoothstep(0.035, 0.07, muS);
 
-			// avoids imprecision problems in Mie scattering when sun is below horizon
-			inScatter.w *= smoothstep(0.00, _Sky_MieFadeFix, muS); // 0.02
-			
-			float4 inScatterM = float4(GetMie(inScatter), 1.0);
-			float phase = PhaseFunctionR(nu);
-			float phaseM = PhaseFunctionM(nu);
-			result = inScatter * phase + inScatterM * phaseM;
-		}
-		else 
-		{
-			result = float4(0.0, 0.0, 0.0, 0.0);
-			extinction = float3(1.0, 1.0, 1.0);
-		}
+        // avoids imprecision problems in Mie scattering when sun is below horizon
+        inScatter.w *= smoothstep(0.00, _Sky_MieFadeFix, muS); // 0.02
 
-		return result * _Sun_Intensity;
-	#else
+        float4 inScatterM = float4(GetMie(inScatter), 1.0);
+        float phase = PhaseFunctionR(nu);
+        float phaseM = PhaseFunctionM(nu);
+        result = inScatter * phase + inScatterM * phaseM;
+    }
+    else
+    {
+        result = float4(0.0, 0.0, 0.0, 0.0);
+        extinction = float3(1.0, 1.0, 1.0);
+    }
+
+    return result * _Sun_Intensity;
+    #else
 		extinction = float3(1.0, 1.0, 1.0);
 		return float4(0.0, 0.0, 0.0, 0.0);
-	#endif
+    #endif
 }

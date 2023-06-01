@@ -1,4 +1,5 @@
 ﻿#region License
+
 // Procedural planet generator.
 // 
 // Copyright (C) 2015-2023 Denis Ovchinnikov [zameran] 
@@ -31,6 +32,7 @@
 // Creation Date: 2016.05.16
 // Creation Time: 18:58
 // Creator: zameran
+
 #endregion
 
 using SpaceEngine.Helpers;
@@ -43,13 +45,13 @@ namespace SpaceEngine.Tools.MonoBehaviours
     {
         public int cubemapSize = 128;
 
-        public bool oneFacePerFrame = false;
+        public bool oneFacePerFrame;
 
         public LayerMask layerMask;
 
-        private Camera renderCamera;
-
         public RenderTexture cubeRenderTexture;
+
+        private Camera renderCamera;
 
         private void Start()
         {
@@ -75,14 +77,20 @@ namespace SpaceEngine.Tools.MonoBehaviours
         {
             DestroyImmediate(renderCamera);
 
-            if (cubeRenderTexture != null) cubeRenderTexture.ReleaseAndDestroy();
+            if (cubeRenderTexture != null)
+            {
+                cubeRenderTexture.ReleaseAndDestroy();
+            }
         }
 
         public void UpdateCubemap(int faceMask)
         {
             var mainCamera = CameraHelper.Main();
 
-            if (mainCamera == null) return;
+            if (mainCamera == null)
+            {
+                return;
+            }
 
             if (!renderCamera)
             {

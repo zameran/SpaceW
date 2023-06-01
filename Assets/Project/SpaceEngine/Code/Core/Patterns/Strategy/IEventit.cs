@@ -1,4 +1,5 @@
 ﻿#region License
+
 // Procedural planet generator.
 //  
 // Copyright (C) 2015-2023 Denis Ovchinnikov [zameran] 
@@ -31,6 +32,7 @@
 // Creation Date: 2017.11.21
 // Creation Time: 1:09 AM
 // Creator: zameran
+
 #endregion
 
 using SpaceEngine.Managers;
@@ -38,8 +40,8 @@ using SpaceEngine.Managers;
 namespace SpaceEngine.Core.Patterns.Strategy
 {
     /// <summary>
-    /// Interface provides some strategy methods for a subscription/un-subscription to particular events.
-    /// Use this to work with <see cref="EventManager"/>.
+    ///     Interface provides some strategy methods for a subscription/un-subscription to particular events.
+    ///     Use this to work with <see cref="EventManager" />.
     /// </summary>
     public interface IEventit
     {

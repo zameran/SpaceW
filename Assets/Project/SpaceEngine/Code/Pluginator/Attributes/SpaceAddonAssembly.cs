@@ -1,4 +1,5 @@
 ﻿#region License
+
 // Procedural planet generator.
 // 
 // Copyright (C) 2015-2023 Denis Ovchinnikov [zameran] 
@@ -31,13 +32,14 @@
 // Creation Date: Undefined
 // Creation Time: Undefined
 // Creator: zameran
+
 #endregion
 
 using System;
 
 namespace SpaceEngine.Pluginator.Attributes
 {
-    [AttributeUsage(AttributeTargets.Assembly, AllowMultiple = false, Inherited = false)]
+    [AttributeUsage(AttributeTargets.Assembly)]
     public sealed class SpaceAddonAssembly : Attribute
     {
         public readonly string Name;

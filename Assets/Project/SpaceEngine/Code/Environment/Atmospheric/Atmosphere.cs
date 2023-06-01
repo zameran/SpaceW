@@ -1,4 +1,5 @@
 ﻿#region License
+
 // Procedural planet generator.
 // 
 // Copyright (C) 2015-2023 Denis Ovchinnikov [zameran] 
@@ -31,6 +32,7 @@
 // Creation Date: Undefined
 // Creation Time: Undefined
 // Creator: zameran
+
 #endregion
 
 using System.ComponentModel;
@@ -65,25 +67,13 @@ namespace SpaceEngine.Environment.Atmospheric
 
                     OnPropertyChanged($"AtmosphereBase_{from}_{to}");
                 }
-                else
-                {
-                    return;
-                }
             }
         }
     }
 
     public sealed class Atmosphere : NodeSlave<Atmosphere>, IEventit, IUniformed<MaterialPropertyBlock>, IReanimateable, IRenderable<Atmosphere>
     {
-        private readonly AtmosphereBaseProperty AtmosphereBaseProperty = new AtmosphereBaseProperty();
-
-        public AtmosphereBase AtmosphereBase { get => AtmosphereBaseProperty.Value;
-            set => AtmosphereBaseProperty.Value = value;
-        }
-
-        public AnimationCurve FadeCurve = new AnimationCurve(new Keyframe[] { new Keyframe(0.0f, 0.0f),
-                                                                              new Keyframe(0.25f, 1.0f),
-                                                                              new Keyframe(1.0f, 1.0f) });
+        public AnimationCurve FadeCurve = new(new Keyframe(0.0f, 0.0f), new Keyframe(0.25f, 1.0f), new Keyframe(1.0f, 1.0f));
 
         public Body ParentBody;
 
@@ -93,7 +83,8 @@ namespace SpaceEngine.Environment.Atmospheric
         public float Density = 1.0f;
 
         [Tooltip("1/3 or 1/2 from Planet.TerrainMaxHeight")]
-        public float RadiusHold = 0.0f;
+        public float RadiusHold;
+
         public float Height = 100.0f;
         public float Scale = 1.0f;
         public float Fade = 1.0f;
@@ -110,18 +101,103 @@ namespace SpaceEngine.Environment.Atmospheric
         public Material SkyMaterial;
 
         public EngineRenderQueue RenderQueue = EngineRenderQueue.Transparent;
-        public int RenderQueueOffset = 0;
+        public int RenderQueueOffset;
 
-        public Mesh AtmosphereMesh => GodManager.Instance.AtmosphereMesh;
+        public bool LostFocusForceRebake;
 
-        public bool LostFocusForceRebake = false;
+        public PreProcessAtmosphere AtmosphereBaker;
+        private readonly AtmosphereBaseProperty AtmosphereBaseProperty = new();
 
         private AtmosphereParameters AtmosphereParameters;
 
-        public PreProcessAtmosphere AtmosphereBaker = null;
+        public AtmosphereBase AtmosphereBase
+        {
+            get => AtmosphereBaseProperty.Value;
+            set => AtmosphereBaseProperty.Value = value;
+        }
+
+        public Mesh AtmosphereMesh => GodManager.Instance.AtmosphereMesh;
 
         public Vector3 Origin => ParentBody != null ? ParentBody.transform.position : Vector3.zero;
         public float Radius => ParentBody != null ? ParentBody.Size : 0.0f;
+
+        public void OnApplicationFocus(bool focusStatus)
+        {
+            if (focusStatus && LostFocusForceRebake)
+            {
+                Bake();
+            }
+        }
+
+        #region IReanimateable
+
+        public void Reanimate()
+        {
+            if (ParentBody != null)
+            {
+                InitUniforms(ParentBody.MPB);
+                SetUniforms(ParentBody.MPB);
+
+                ParentBody.InitUniforms(SkyMaterial);
+                ParentBody.SetUniforms(SkyMaterial);
+            }
+            else
+            {
+                Debug.Log("Atmosphere: Reanimation fail!");
+            }
+        }
+
+        #endregion
+
+        #region IRenderable
+
+        public void Render(int layer = 9)
+        {
+            if (AtmosphereMesh == null)
+            {
+                return;
+            }
+
+            var atmosphereTRS = Matrix4x4.TRS(ParentBody.transform.position, transform.rotation, Vector3.one * (Radius + Height));
+
+            Graphics.DrawMesh(AtmosphereMesh, atmosphereTRS, SkyMaterial, layer, CameraHelper.Main(), 0, ParentBody.MPB, ShadowCastingMode.Off, false);
+        }
+
+        #endregion
+
+        #region IUniformed
+
+        public void InitSetUniforms()
+        {
+            // ...
+        }
+
+        #endregion
+
+        public AtmosphereParameters PopPreset()
+        {
+            return AtmosphereParameters;
+        }
+
+        public void PushPreset(AtmosphereParameters ap)
+        {
+            AtmosphereParameters = new AtmosphereParameters(ap);
+
+            AtmosphereParameters.Rg = Radius - RadiusHold;
+            AtmosphereParameters.Rt = Radius + Height - RadiusHold;
+            AtmosphereParameters.Rl = Radius + Height * 1.05f - RadiusHold;
+            AtmosphereParameters.SCALE = Scale;
+        }
+
+        public void Bake()
+        {
+            AtmosphereBaker.Bake(AtmosphereParameters, () => { EventManager.BodyEvents.OnAtmosphereBaked.Invoke(ParentBody, this); });
+        }
+
+        public void InitMaterials()
+        {
+            SkyMaterial = MaterialHelper.CreateTemp(SkyShader, "Sky");
+        }
 
         #region Eventit
 
@@ -129,7 +205,10 @@ namespace SpaceEngine.Environment.Atmospheric
 
         public void Eventit()
         {
-            if (IsEventit) return;
+            if (IsEventit)
+            {
+                return;
+            }
 
             AtmosphereBaseProperty.PropertyChanged += AtmosphereBasePropertyOnPropertyChanged;
 
@@ -141,7 +220,10 @@ namespace SpaceEngine.Environment.Atmospheric
 
         public void UnEventit()
         {
-            if (!IsEventit) return;
+            if (!IsEventit)
+            {
+                return;
+            }
 
             AtmosphereBaseProperty.PropertyChanged -= AtmosphereBasePropertyOnPropertyChanged;
 
@@ -165,12 +247,14 @@ namespace SpaceEngine.Environment.Atmospheric
             if (body == null)
             {
                 Debug.Log("Atmosphere: OnAtmosphereBaked body is null!");
+
                 return;
             }
 
             if (atmosphere == null)
             {
                 Debug.Log("Atmosphere: OnAtmosphereBaked atmosphere is null!");
+
                 return;
             }
 
@@ -183,12 +267,14 @@ namespace SpaceEngine.Environment.Atmospheric
             if (body == null)
             {
                 Debug.Log("Atmosphere: OnAtmospherePresetChanged body is null!");
+
                 return;
             }
 
             if (atmosphere == null)
             {
                 Debug.Log("Atmosphere: OnAtmospherePresetChanged atmosphere is null!");
+
                 return;
             }
 
@@ -202,8 +288,11 @@ namespace SpaceEngine.Environment.Atmospheric
 
         public override void InitNode()
         {
-            if (AtmosphereBaker == null) AtmosphereBaker = GetComponentInChildren<PreProcessAtmosphere>();
-            
+            if (AtmosphereBaker == null)
+            {
+                AtmosphereBaker = GetComponentInChildren<PreProcessAtmosphere>();
+            }
+
             PushPreset(AtmosphereParameters.Get(AtmosphereBase));
 
             Bake();
@@ -218,8 +307,8 @@ namespace SpaceEngine.Environment.Atmospheric
             SkyMaterial.renderQueue = (int)RenderQueue + RenderQueueOffset;
 
             AtmosphereParameters.Rg = Radius - RadiusHold;
-            AtmosphereParameters.Rt = (Radius + Height) - RadiusHold;
-            AtmosphereParameters.Rl = (Radius + Height * 1.01666667f) - RadiusHold;
+            AtmosphereParameters.Rt = Radius + Height - RadiusHold;
+            AtmosphereParameters.Rl = Radius + Height * 1.01666667f - RadiusHold;
             AtmosphereParameters.SCALE = Scale;
 
             var fadeValue = Mathf.Clamp01(VectorHelper.AngularRadius(Origin, GodManager.Instance.View.WorldCameraPosition, Radius));
@@ -261,7 +350,10 @@ namespace SpaceEngine.Environment.Atmospheric
 
         public void InitUniforms(MaterialPropertyBlock target)
         {
-            if (target == null) return;
+            if (target == null)
+            {
+                return;
+            }
 
             target.SetFloat("TRANSMITTANCE_W", AtmosphereConstants.TRANSMITTANCE_W);
             target.SetFloat("TRANSMITTANCE_H", AtmosphereConstants.TRANSMITTANCE_H);
@@ -278,7 +370,10 @@ namespace SpaceEngine.Environment.Atmospheric
 
         public void SetUniforms(MaterialPropertyBlock target)
         {
-            if (target == null) return;
+            if (target == null)
+            {
+                return;
+            }
 
             target.SetFloat("fade", Fade);
             target.SetFloat("density", Density);
@@ -297,9 +392,20 @@ namespace SpaceEngine.Environment.Atmospheric
             target.SetFloat("_Aerial_Perspective_Offset", AerialPerspectiveOffset);
             target.SetFloat("_ExtinctionGroundFade", ExtinctionGroundFade);
 
-            if (AtmosphereBaker.transmittanceT != null) target.SetTexture("_Sky_Transmittance", AtmosphereBaker.transmittanceT);
-            if (AtmosphereBaker.inscatterT_Read != null) target.SetTexture("_Sky_Inscatter", AtmosphereBaker.inscatterT_Read);
-            if (AtmosphereBaker.irradianceT_Read != null) target.SetTexture("_Sky_Irradiance", AtmosphereBaker.irradianceT_Read);
+            if (AtmosphereBaker.transmittanceT != null)
+            {
+                target.SetTexture("_Sky_Transmittance", AtmosphereBaker.transmittanceT);
+            }
+
+            if (AtmosphereBaker.inscatterT_Read != null)
+            {
+                target.SetTexture("_Sky_Inscatter", AtmosphereBaker.inscatterT_Read);
+            }
+
+            if (AtmosphereBaker.irradianceT_Read != null)
+            {
+                target.SetTexture("_Sky_Irradiance", AtmosphereBaker.irradianceT_Read);
+            }
 
             target.SetVector("_Atmosphere_WorldCameraPosition", GodManager.Instance.View.WorldCameraPosition - Origin);
             target.SetVector("_Atmosphere_Origin", -Origin);
@@ -310,81 +416,5 @@ namespace SpaceEngine.Environment.Atmospheric
         }
 
         #endregion
-
-        #region IUniformed
-
-        public void InitSetUniforms()
-        {
-            // ...
-        }
-
-        #endregion
-
-        #region IReanimateable
-
-        public void Reanimate()
-        {
-            if (ParentBody != null)
-            {
-                InitUniforms(ParentBody.MPB);
-                SetUniforms(ParentBody.MPB);
-
-                ParentBody.InitUniforms(SkyMaterial);
-                ParentBody.SetUniforms(SkyMaterial);
-            }
-            else
-                Debug.Log("Atmosphere: Reanimation fail!");
-        }
-
-        #endregion
-
-        #region IRenderable
-
-        public void Render(int layer = 9)
-        {
-            if (AtmosphereMesh == null) return;
-
-            var atmosphereTRS = Matrix4x4.TRS(ParentBody.transform.position, transform.rotation, Vector3.one * (Radius + Height));
-
-            Graphics.DrawMesh(AtmosphereMesh, atmosphereTRS, SkyMaterial, layer, CameraHelper.Main(), 0, ParentBody.MPB, ShadowCastingMode.Off, false);
-        }
-
-        #endregion
-
-        public AtmosphereParameters PopPreset()
-        {
-            return AtmosphereParameters;
-        }
-
-        public void PushPreset(AtmosphereParameters ap)
-        {
-            AtmosphereParameters = new AtmosphereParameters(ap);
-
-            AtmosphereParameters.Rg = Radius - RadiusHold;
-            AtmosphereParameters.Rt = (Radius + Height) - RadiusHold;
-            AtmosphereParameters.Rl = (Radius + Height * 1.05f) - RadiusHold;
-            AtmosphereParameters.SCALE = Scale;
-        }
-
-        public void Bake()
-        {
-            AtmosphereBaker.Bake(AtmosphereParameters, () =>
-            {
-                EventManager.BodyEvents.OnAtmosphereBaked.Invoke(ParentBody, this);
-            });
-        }
-
-        public void OnApplicationFocus(bool focusStatus)
-        {
-            if (focusStatus == true && LostFocusForceRebake == true)
-            {
-                Bake();
-            }
-        }
-
-        public void InitMaterials()
-        {
-            SkyMaterial = MaterialHelper.CreateTemp(SkyShader, "Sky");
-        }
     }
 }

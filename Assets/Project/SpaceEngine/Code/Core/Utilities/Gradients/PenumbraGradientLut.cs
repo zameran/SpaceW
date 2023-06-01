@@ -1,4 +1,5 @@
 ﻿#region License
+
 // Procedural planet generator.
 //  
 // Copyright (C) 2015-2023 Denis Ovchinnikov [zameran] 
@@ -31,6 +32,7 @@
 // Creation Date: 2017.05.31
 // Creation Time: 5:16 PM
 // Creator: zameran
+
 #endregion
 
 using System;
@@ -42,19 +44,23 @@ namespace SpaceEngine.Core.Utilities.Gradients
     [Serializable]
     public class PenumbraGradientLut : GradientLut
     {
-        public Gradient BrighnessGradient = new Gradient();
+        public Gradient BrighnessGradient = new();
 
         /// <summary>
-        /// Should <see cref="GradientLut.Lut"/> be inverted along X axis?
+        ///     Should <see cref="GradientLut.Lut" /> be inverted along X axis?
         /// </summary>
-        public bool ReverseX = false;
+        public bool ReverseX;
+
+        public PenumbraGradientLut()
+        {
+        }
+
+        public PenumbraGradientLut(Gradient gradient) : base(gradient)
+        {
+        }
 
         /// <inheritdoc />
-        protected override Vector2 Size => new Vector2(1, 64);
-
-        public PenumbraGradientLut() : base() { }
-
-        public PenumbraGradientLut(Gradient gradient) : base(gradient) { }
+        protected override Vector2 Size => new(1, 64);
 
         /// <inheritdoc />
         public override void CalculateLut()
@@ -62,8 +68,8 @@ namespace SpaceEngine.Core.Utilities.Gradients
             for (var y = 0; y < Lut.height; y++)
             {
                 var t = y / (float)Lut.height;
-                var a = BrighnessGradient.Evaluate(ReverseX ? (1.0f - t) : t);
-                var b = Gradient.Evaluate(ReverseX ? (1.0f - t) : t);
+                var a = BrighnessGradient.Evaluate(ReverseX ? 1.0f - t : t);
+                var b = Gradient.Evaluate(ReverseX ? 1.0f - t : t);
                 var c = a * b;
 
                 c.a = c.grayscale;
@@ -83,7 +89,10 @@ namespace SpaceEngine.Core.Utilities.Gradients
         /// <inheritdoc />
         public override void DestroyLut()
         {
-            if (Lut != null) Helper.Destroy(Lut);
+            if (Lut != null)
+            {
+                Helper.Destroy(Lut);
+            }
         }
     }
 }

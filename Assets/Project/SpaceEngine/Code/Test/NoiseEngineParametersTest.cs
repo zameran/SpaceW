@@ -1,4 +1,5 @@
 ﻿#region License
+
 // Procedural planet generator.
 // 
 // Copyright (C) 2015-2023 Denis Ovchinnikov [zameran] 
@@ -31,6 +32,7 @@
 // Creation Date: 2016.05.16
 // Creation Time: 12:30
 // Creator: zameran
+
 #endregion
 
 using UnityEngine;
@@ -46,7 +48,10 @@ namespace SpaceEngine.Test
 
         private void Update()
         {
-            if (TCCPS == null) return;
+            if (TCCPS == null)
+            {
+                return;
+            }
 
             TCCPS.SetUniforms(material);
         }

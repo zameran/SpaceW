@@ -1,4 +1,5 @@
 #region License
+
 // Procedural planet generator.
 // 
 // Copyright (C) 2015-2023 Denis Ovchinnikov [zameran] 
@@ -31,6 +32,7 @@
 // Creation Date: Undefined
 // Creation Time: Undefined
 // Creator: zameran
+
 #endregion
 
 using System;
@@ -78,7 +80,10 @@ namespace SpaceEngine.Debugging
             {
                 #region Do Magic
 
-                if (Objects == null) return;
+                if (Objects == null)
+                {
+                    return;
+                }
 
                 var dictionary = new Dictionary<Type, int>();
 
@@ -101,7 +106,7 @@ namespace SpaceEngine.Debugging
 
                 var entries = new List<KeyValuePair<Type, int>>(dictionary);
 
-                entries.Sort((firstPair, nextPair) => nextPair.Value.CompareTo((firstPair.Value)));
+                entries.Sort((firstPair, nextPair) => nextPair.Value.CompareTo(firstPair.Value));
 
                 GUILayout.BeginVertical();
 
@@ -109,10 +114,7 @@ namespace SpaceEngine.Debugging
                 {
                     var entry = entries[i];
 
-                    GUILayoutExtensions.HorizontalBoxed("", GUISkin, () =>
-                    {
-                        GUILayoutExtensions.LabelWithFlexibleSpace(entry.Key.FullName, entry.Value.ToString());
-                    });
+                    GUILayoutExtensions.HorizontalBoxed("", GUISkin, () => { GUILayoutExtensions.LabelWithFlexibleSpace(entry.Key.FullName, entry.Value.ToString()); });
                 }
 
                 GUILayout.Space(10);

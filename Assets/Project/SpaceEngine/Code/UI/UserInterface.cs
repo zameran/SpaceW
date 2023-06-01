@@ -1,4 +1,5 @@
 ﻿#region License
+
 // Procedural planet generator.
 // 
 // Copyright (C) 2015-2023 Denis Ovchinnikov [zameran] 
@@ -31,6 +32,7 @@
 // Creation Date: Undefined
 // Creation Time: Undefined
 // Creator: zameran
+
 #endregion
 
 using System;
@@ -45,6 +47,15 @@ namespace SpaceEngine.UI
     public class UserInterface : MonoBehaviour, IEventit
     {
         public GameObject Controllable;
+
+        #region Events
+
+        private void OnActiveSceneChanged(Scene arg0, Scene arg1)
+        {
+            UnFreezeTime();
+        }
+
+        #endregion
 
         #region API
 
@@ -99,7 +110,10 @@ namespace SpaceEngine.UI
 
         public void Eventit()
         {
-            if (IsEventit) return;
+            if (IsEventit)
+            {
+                return;
+            }
 
             SceneManager.activeSceneChanged += OnActiveSceneChanged;
 
@@ -108,20 +122,14 @@ namespace SpaceEngine.UI
 
         public void UnEventit()
         {
-            if (!IsEventit) return;
+            if (!IsEventit)
+            {
+                return;
+            }
 
             SceneManager.activeSceneChanged -= OnActiveSceneChanged;
 
             IsEventit = false;
-        }
-
-        #endregion
-
-        #region Events
-
-        private void OnActiveSceneChanged(Scene arg0, Scene arg1)
-        {
-            UnFreezeTime();
         }
 
         #endregion

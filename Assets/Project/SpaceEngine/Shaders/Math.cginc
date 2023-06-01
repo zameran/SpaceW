@@ -61,111 +61,112 @@
 #define M_SQRT5 2.2360679775
 #endif
 
-float2 Complex(float2 z) 
+float2 Complex(float2 z)
 {
-	return float2(-z.y, z.x); // returns i times z (complex number)
+    return float2(-z.y, z.x); // returns i times z (complex number)
 }
 
-float2 GetSpectrum(float t, float w, float2 s0, float2 s0c) 
+float2 GetSpectrum(float t, float w, float2 s0, float2 s0c)
 {
-	float c = cos(w * t);
-	float s = sin(w * t);
+    float c = cos(w * t);
+    float s = sin(w * t);
 
-	return float2((s0.x + s0c.x) * c - (s0.y + s0c.y) * s, (s0.x - s0c.x) * s + (s0.y - s0c.y) * c);
+    return float2((s0.x + s0c.x) * c - (s0.y + s0c.y) * s, (s0.x - s0c.x) * s + (s0.y - s0c.y) * c);
 }
 
 float IntersectInnerSphere(float3 p1, float3 d, float3 p3, float r)
 {
-	float a = dot(d, d);
-	float b = 2.0 * dot(d, p1 - p3);
-	float c = dot(p3, p3) + dot(p1, p1) - 2.0 * dot(p3, p1) - r * r;
-	float test = b * b - 4.0 * a * c;
+    float a = dot(d, d);
+    float b = 2.0 * dot(d, p1 - p3);
+    float c = dot(p3, p3) + dot(p1, p1) - 2.0 * dot(p3, p1) - r * r;
+    float test = b * b - 4.0 * a * c;
 
-	if (test < 0) return -1.0;
+    if (test < 0) return -1.0;
 
-	float u = (-b - sqrt(test)) / (2.0 * a);	
-								
-	return u;
+    float u = (-b - sqrt(test)) / (2.0 * a);
+
+    return u;
 }
 
 float IntersectOuterSphere(float3 p1, float3 d, float3 p3, float r)
 {
-	// p1 starting point
-	// d look direction
-	// p3 is the sphere center
+    // p1 starting point
+    // d look direction
+    // p3 is the sphere center
 
-	float a = dot(d, d);
-	float b = 2.0 * dot(d, p1 - p3);
-	float c = dot(p3, p3) + dot(p1, p1) - 2.0 * dot(p3, p1) - r * r;
-	float test = b * b - 4.0 * a * c;
+    float a = dot(d, d);
+    float b = 2.0 * dot(d, p1 - p3);
+    float c = dot(p3, p3) + dot(p1, p1) - 2.0 * dot(p3, p1) - r * r;
+    float test = b * b - 4.0 * a * c;
 
-	if (test < 0) return -1.0;
+    if (test < 0) return -1.0;
 
-	float u = (-b - sqrt(test)) / (2.0 * a);
+    float u = (-b - sqrt(test)) / (2.0 * a);
 
-	u = (u < 0) ? (-b + sqrt(test)) / (2.0 * a) : u;
-			
-	return u;
+    u = (u < 0) ? (-b + sqrt(test)) / (2.0 * a) : u;
+
+    return u;
 }
 
 float IntersectOuterSphereInverted(float3 p1, float3 d, float3 p3, float r)
 {
-	// p1 starting point
-	// d look direction
-	// p3 is the sphere center
+    // p1 starting point
+    // d look direction
+    // p3 is the sphere center
 
-	float a = dot(d, d);
-	float b = 2.0 * dot(d, p1 - p3);
-	float c = dot(p3, p3) + dot(p1, p1) - 2.0 * dot(p3, p1) - r * r;
-	float test = b * b - 4.0 * a * c;
+    float a = dot(d, d);
+    float b = 2.0 * dot(d, p1 - p3);
+    float c = dot(p3, p3) + dot(p1, p1) - 2.0 * dot(p3, p1) - r * r;
+    float test = b * b - 4.0 * a * c;
 
-	if (test < 0) return -1.0;
-			
-	return (-b + sqrt(test)) / (2.0 * a);
+    if (test < 0) return -1.0;
+
+    return (-b + sqrt(test)) / (2.0 * a);
 }
 
 float4 Blur(sampler2D inputTexture, float2 inputUV, float inputStep = 0.00015f)
 {
-	float2 blurCoordinates[5];
+    float2 blurCoordinates[5];
 
-	blurCoordinates[0] = inputUV.xy;
-	blurCoordinates[1] = inputUV.xy + inputStep * 1.407333;
-	blurCoordinates[2] = inputUV.xy - inputStep * 1.407333;
-	blurCoordinates[3] = inputUV.xy + inputStep * 3.294215;
-	blurCoordinates[4] = inputUV.xy - inputStep * 3.294215;
+    blurCoordinates[0] = inputUV.xy;
+    blurCoordinates[1] = inputUV.xy + inputStep * 1.407333;
+    blurCoordinates[2] = inputUV.xy - inputStep * 1.407333;
+    blurCoordinates[3] = inputUV.xy + inputStep * 3.294215;
+    blurCoordinates[4] = inputUV.xy - inputStep * 3.294215;
 
-	float4 bluredColor = float4(0.0, 0.0, 0.0, 0.0);
+    float4 bluredColor = float4(0.0, 0.0, 0.0, 0.0);
 
-	bluredColor += tex2Dlod(inputTexture, float4(blurCoordinates[0], 0.0, 0.0)) * 0.204164;
-	bluredColor += tex2Dlod(inputTexture, float4(blurCoordinates[1], 0.0, 0.0)) * 0.304005;
-	bluredColor += tex2Dlod(inputTexture, float4(blurCoordinates[2], 0.0, 0.0)) * 0.304005;
-	bluredColor += tex2Dlod(inputTexture, float4(blurCoordinates[3], 0.0, 0.0)) * 0.093913;
-	bluredColor += tex2Dlod(inputTexture, float4(blurCoordinates[4], 0.0, 0.0)) * 0.093913;
+    bluredColor += tex2Dlod(inputTexture, float4(blurCoordinates[0], 0.0, 0.0)) * 0.204164;
+    bluredColor += tex2Dlod(inputTexture, float4(blurCoordinates[1], 0.0, 0.0)) * 0.304005;
+    bluredColor += tex2Dlod(inputTexture, float4(blurCoordinates[2], 0.0, 0.0)) * 0.304005;
+    bluredColor += tex2Dlod(inputTexture, float4(blurCoordinates[3], 0.0, 0.0)) * 0.093913;
+    bluredColor += tex2Dlod(inputTexture, float4(blurCoordinates[4], 0.0, 0.0)) * 0.093913;
 
-	return bluredColor;
+    return bluredColor;
 }
 
 //-----------------------------------------------------------------------------
 // Curves by iq. http://www.iquilezles.org/www/articles/functions/functions.htm
 inline float impulse(float k, float x)
 {
-	float h = k * x;
+    float h = k * x;
 
-	return h * exp(1.0 - h);
+    return h * exp(1.0 - h);
 }
 
 inline float expstep(float x, float k, float n)
 {
-	return exp(-k * pow(x, n));
+    return exp(-k * pow(x, n));
 }
 
 inline float parabola(float x, float k)
 {
-	return pow(4.0 * x * (1.0 - x), k);
+    return pow(4.0 * x * (1.0 - x), k);
 }
-	
+
 inline float powercurve(float x, float a, float b)
 {
-	return (pow(a + b, a + b) / (pow(a, a) * pow(b, b))) * pow(x, a) * pow(1.0 - x, b);
+    return (pow(a + b, a + b) / (pow(a, a) * pow(b, b))) * pow(x, a) * pow(1.0 - x, b);
 }
+
 //-----------------------------------------------------------------------------

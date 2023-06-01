@@ -1,4 +1,5 @@
 ﻿#region License
+
 // Procedural planet generator.
 //  
 // Copyright (C) 2015-2023 Denis Ovchinnikov [zameran] 
@@ -32,6 +33,7 @@
 // Creation Time: 10:45 PM
 // Creator: zameran
 // 
+
 #endregion
 
 using System.Collections.Generic;
@@ -43,7 +45,30 @@ using UnityEngine;
 namespace SpaceEngine.Core.Bodies
 {
     public class CelestialBody : Body, ICelestialBody
-    {              
+    {
+        protected override void OnApplicationFocus(bool focusStatus)
+        {
+            base.OnApplicationFocus(focusStatus);
+        }
+
+        #region IReanimateable
+
+        public override void Reanimate()
+        {
+            base.Reanimate();
+        }
+
+        #endregion
+
+        #region IRenderable
+
+        public override void Render(int layer = 8)
+        {
+            base.Render(layer);
+        }
+
+        #endregion
+
         #region ICelestialBody
 
         public float Radius
@@ -167,15 +192,6 @@ namespace SpaceEngine.Core.Bodies
 
         #endregion
 
-        #region IReanimateable
-
-        public override void Reanimate()
-        {
-            base.Reanimate();
-        }
-
-        #endregion
-
         #region Node
 
         protected override void InitNode()
@@ -211,19 +227,5 @@ namespace SpaceEngine.Core.Bodies
         }
 
         #endregion
-
-        #region IRenderable
-
-        public override void Render(int layer = 8)
-        {
-            base.Render(layer);
-        }
-
-        #endregion
-
-        protected override void OnApplicationFocus(bool focusStatus)
-        {
-            base.OnApplicationFocus(focusStatus);
-        }
     }
 }

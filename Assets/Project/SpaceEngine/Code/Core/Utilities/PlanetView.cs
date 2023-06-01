@@ -1,4 +1,5 @@
 ﻿#region License
+
 // Procedural planet generator.
 //  
 // Copyright (C) 2015-2023 Denis Ovchinnikov [zameran] 
@@ -31,21 +32,22 @@
 // Creation Date: 2017.03.28
 // Creation Time: 2:18 PM
 // Creator: zameran
+
 #endregion
 
 using System;
+using SpaceEngine.Core.Numerics;
 using SpaceEngine.Core.Numerics.Matrices;
 using SpaceEngine.Core.Numerics.Vectors;
 using SpaceEngine.Managers;
 using UnityEngine;
-using Functions = SpaceEngine.Core.Numerics.Functions;
 
 namespace SpaceEngine.Core.Utilities
 {
     /// <summary>
-    /// A <see cref="TerrainView"/> for spherical terrains. 
-    /// This subclass interprets the <see cref="TerrainView.Position.X"/> and <see cref="TerrainView.Position.Y"/> fields as longitudes and latitudes on the planet,
-    /// and considers <see cref="TerrainView.Position.Theta"/> and <see cref="TerrainView.Position.Phi"/> as relative to the tangent plane at the point.
+    ///     A <see cref="TerrainView" /> for spherical terrains.
+    ///     This subclass interprets the <see cref="TerrainView.Position.X" /> and <see cref="TerrainView.Position.Y" /> fields as longitudes and latitudes on the planet,
+    ///     and considers <see cref="TerrainView.Position.Theta" /> and <see cref="TerrainView.Position.Phi" /> as relative to the tangent plane at the point.
     /// </summary>
     [RequireComponent(typeof(Camera))]
     public class PlanetView : TerrainView
@@ -53,6 +55,13 @@ namespace SpaceEngine.Core.Utilities
         public double Radius { get; set; }
 
         public Vector3d Origin => GodManager.Instance.ActiveBody.Origin;
+
+        protected override void Start()
+        {
+            base.Start();
+
+            Constrain();
+        }
 
         public override double GetHeight()
         {
@@ -74,13 +83,6 @@ namespace SpaceEngine.Core.Utilities
             position.Distance = Math.Max(0.1, position.Distance);
         }
 
-        protected override void Start()
-        {
-            base.Start();
-
-            Constrain();
-        }
-
         protected override void SetWorldToCameraMatrix()
         {
             // NOTE : co - x; so - y; ca - z; sa - w;
@@ -95,7 +97,7 @@ namespace SpaceEngine.Core.Utilities
             var tp = CalculatelongitudeLatitudeVector(position.Theta, position.Phi);
 
             var cx = px * tp.z + py * tp.w;
-            var cy = (px * -1.0) * tp.w * tp.x + py * tp.z * tp.x + pz * tp.y;
+            var cy = px * -1.0 * tp.w * tp.x + py * tp.z * tp.x + pz * tp.y;
             var cz = px * tp.w * tp.y - py * tp.z * tp.y + pz * tp.x;
 
             worldPosition = po + cz * position.Distance;

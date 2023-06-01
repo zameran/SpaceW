@@ -1,4 +1,5 @@
 ﻿#region License
+
 // Procedural planet generator.
 // 
 // Copyright (C) 2015-2023 Denis Ovchinnikov [zameran] 
@@ -31,6 +32,7 @@
 // Creation Date: Undefined
 // Creation Time: Undefined
 // Creator: zameran
+
 #endregion
 
 using DG.Tweening;
@@ -44,9 +46,9 @@ namespace SpaceEngine.UI.PanelSystem
         [SerializeField]
         private float transitionTime = .5f;
 
-        protected float TransitionTime => transitionTime;
-
         protected CanvasGroup canvasGroup;
+
+        protected float TransitionTime => transitionTime;
 
         protected virtual void Awake()
         {
@@ -62,10 +64,7 @@ namespace SpaceEngine.UI.PanelSystem
 
         protected static void HideInternal(UIOverlay overlay)
         {
-            DOTween.To(() => overlay.canvasGroup.alpha, value => overlay.canvasGroup.alpha = value, 0, overlay.TransitionTime).OnComplete(() =>
-            {
-                overlay.canvasGroup.blocksRaycasts = false;
-            });
+            DOTween.To(() => overlay.canvasGroup.alpha, value => overlay.canvasGroup.alpha = value, 0, overlay.TransitionTime).OnComplete(() => { overlay.canvasGroup.blocksRaycasts = false; });
         }
     }
 

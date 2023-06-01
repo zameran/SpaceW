@@ -1,4 +1,5 @@
 ﻿#region License
+
 // Procedural planet generator.
 //  
 // Copyright (C) 2015-2023 Denis Ovchinnikov [zameran] 
@@ -31,6 +32,7 @@
 // Creation Date: 2017.03.28
 // Creation Time: 2:18 PM
 // Creator: zameran
+
 #endregion
 
 using System;
@@ -42,42 +44,28 @@ using Logger = SpaceEngine.Core.Debugging.Logger;
 namespace SpaceEngine.Core.Preprocess.Terrain.InputMap
 {
     /// <summary>
-    /// Used to load data from a raw file. The file maybe 8 or 16 bit.
-    /// If the file is 16 bit it may have a mac or windows byte order.
-    /// If the file is large the option of caching maybe enabed so only the tiles that are need are loaded from the file. 
-    /// This is slower but will allow files that are larger than the maximum memory of the system to be processed.
+    ///     Used to load data from a raw file. The file maybe 8 or 16 bit.
+    ///     If the file is 16 bit it may have a mac or windows byte order.
+    ///     If the file is large the option of caching maybe enabed so only the tiles that are need are loaded from the file.
+    ///     This is slower but will allow files that are larger than the maximum memory of the system to be processed.
     /// </summary>
     [UseLogger(LoggerCategory.Core)]
     public class RawInputMap : InputMap
     {
-        [Serializable]
-        private enum BYTE_ORDER
-        {
-            WINDOWS,
-            MAC
-        };
-
-        [Serializable]
-        private enum BYTES
-        {
-            BIT16,
-            BIT8
-        };
-
         /// <summary>
-        /// The width of this map.
+        ///     The width of this map.
         /// </summary>
         [SerializeField]
-        int width;
+        private int width;
 
         /// <summary>
-        /// The height of this map.
+        ///     The height of this map.
         /// </summary>
         [SerializeField]
-        int height;
+        private int height;
 
         /// <summary>
-        /// The number of components per pixel of this map.
+        ///     The number of components per pixel of this map.
         /// </summary>
         [SerializeField]
         private int channels;
@@ -92,17 +80,17 @@ namespace SpaceEngine.Core.Preprocess.Terrain.InputMap
         private BYTES Bytes = BYTES.BIT16;
 
         [SerializeField]
-        private bool UseCaching = false;
+        private bool UseCaching;
 
-        float[] Data;
+        private string ApplicationDataPath = "";
+
+        private float[] Data;
 
         public override int Width => width;
 
         public override int Height => height;
 
         public override int Channels => channels;
-
-        private string ApplicationDataPath = "";
 
         protected override void Awake()
         {
@@ -135,9 +123,20 @@ namespace SpaceEngine.Core.Preprocess.Terrain.InputMap
 
             value.x = Data[(x + y * width) * Channels + 0];
 
-            if (Channels > 1) value.y = Data[(x + y * width) * Channels + 1];
-            if (Channels > 2) value.z = Data[(x + y * width) * Channels + 2];
-            if (Channels > 3) value.w = Data[(x + y * width) * Channels + 3];
+            if (Channels > 1)
+            {
+                value.y = Data[(x + y * width) * Channels + 1];
+            }
+
+            if (Channels > 2)
+            {
+                value.z = Data[(x + y * width) * Channels + 2];
+            }
+
+            if (Channels > 3)
+            {
+                value.w = Data[(x + y * width) * Channels + 3];
+            }
 
             return value;
         }
@@ -145,58 +144,56 @@ namespace SpaceEngine.Core.Preprocess.Terrain.InputMap
         public override float[] GetValues(int tx, int ty)
         {
             if (!UseCaching)
-            {
                 // If caching not used load all data into memory.
+            {
                 return base.GetValues(tx, ty);
             }
-            else
+
+            // If caching is used load only the tile needed into memory.
+            var tileSize = GetTileSize();
+
+            var values = new float[(int)tileSize.x * (int)tileSize.y * Channels];
+            var strip = new float[(int)tileSize.x * Channels];
+
+            for (var j = 0; j < (int)tileSize.y; ++j)
             {
-                // If caching is used load only the tile needed into memory.
-                var tileSize = GetTileSize();
+                // The index into the file that the current strip can be found at
+                var idx = (tx + (ty + j) * (long)width) * Channels;
 
-                var values = new float[(int)tileSize.x * (int)tileSize.y * Channels];
-                var strip = new float[(int)tileSize.x * Channels];
-
-                for (var j = 0; j < (int)tileSize.y; ++j)
+                // The data for a 2D map can be accessed in the file in contiguous strips
+                if (Bytes == BYTES.BIT8)
                 {
-                    // The index into the file that the current strip can be found at
-                    var idx = (long)((long)tx + (long)(ty + j) * (long)width) * (long)Channels;
-
-                    // The data for a 2D map can be accessed in the file in contiguous strips
-                    if (Bytes == BYTES.BIT8)
-                    {
-                        LoadStrip8(ApplicationDataPath + FileName, idx, strip);
-                    }
-                    else if (Bytes == BYTES.BIT16)
-                    {
-                        LoadStrip16(ApplicationDataPath + FileName, (tx + (ty + j) * width) * Channels * 2, strip, ByteOrder == BYTE_ORDER.MAC);
-                    }
-
-                    for (var i = 0; i < (int)tileSize.x; ++i)
-                    {
-                        var offset = (i + j * (int)tileSize.x) * Channels;
-
-                        values[offset] = strip[i * Channels + 0];
-
-                        if (Channels > 1)
-                        {
-                            values[offset + 1] = strip[i * Channels + 1];
-                        }
-
-                        if (Channels > 2)
-                        {
-                            values[offset + 2] = strip[i * Channels + 2];
-                        }
-
-                        if (Channels > 3)
-                        {
-                            values[offset + 3] = strip[i * Channels + 3];
-                        }
-                    }
+                    LoadStrip8(ApplicationDataPath + FileName, idx, strip);
+                }
+                else if (Bytes == BYTES.BIT16)
+                {
+                    LoadStrip16(ApplicationDataPath + FileName, (tx + (ty + j) * width) * Channels * 2, strip, ByteOrder == BYTE_ORDER.MAC);
                 }
 
-                return values;
+                for (var i = 0; i < (int)tileSize.x; ++i)
+                {
+                    var offset = (i + j * (int)tileSize.x) * Channels;
+
+                    values[offset] = strip[i * Channels + 0];
+
+                    if (Channels > 1)
+                    {
+                        values[offset + 1] = strip[i * Channels + 1];
+                    }
+
+                    if (Channels > 2)
+                    {
+                        values[offset + 2] = strip[i * Channels + 2];
+                    }
+
+                    if (Channels > 3)
+                    {
+                        values[offset + 3] = strip[i * Channels + 3];
+                    }
+                }
             }
+
+            return values;
         }
 
         private void LoadRawFile8(string path)
@@ -215,7 +212,7 @@ namespace SpaceEngine.Core.Preprocess.Terrain.InputMap
 
             for (long x = 0; x < size; x++)
             {
-                Data[x] = (float)data[x] / 255.0f;
+                Data[x] = data[x] / 255.0f;
             }
         }
 
@@ -236,7 +233,7 @@ namespace SpaceEngine.Core.Preprocess.Terrain.InputMap
             for (long x = 0, i = 0; x < size; x++)
             {
                 // Extract 16 bit data and normalize.
-                Data[x] = (bigendian) ? (data[i++] * 256.0f + data[i++]) : (data[i++] + data[i++] * 256.0f);
+                Data[x] = bigendian ? data[i++] * 256.0f + data[i++] : data[i++] + data[i++] * 256.0f;
                 Data[x] /= 65535.0f;
             }
         }
@@ -253,7 +250,7 @@ namespace SpaceEngine.Core.Preprocess.Terrain.InputMap
 
             for (var x = 0; x < strip.Length; x++)
             {
-                strip[x] = (float)data[x] / 255.0f;
+                strip[x] = data[x] / 255.0f;
             }
         }
 
@@ -270,9 +267,23 @@ namespace SpaceEngine.Core.Preprocess.Terrain.InputMap
             for (int x = 0, i = 0; x < strip.Length; x++)
             {
                 // Extract 16 bit data and normalize.
-                strip[x] = (bigendian) ? (data[i++] * 256.0f + data[i++]) : (data[i++] + data[i++] * 256.0f);
+                strip[x] = bigendian ? data[i++] * 256.0f + data[i++] : data[i++] + data[i++] * 256.0f;
                 strip[x] /= 65535.0f;
             }
+        }
+
+        [Serializable]
+        private enum BYTE_ORDER
+        {
+            WINDOWS,
+            MAC
+        }
+
+        [Serializable]
+        private enum BYTES
+        {
+            BIT16,
+            BIT8
         }
     }
 }

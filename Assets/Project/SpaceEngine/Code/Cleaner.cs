@@ -1,4 +1,5 @@
 ﻿#region License
+
 // Procedural planet generator.
 // 
 // Copyright (C) 2015-2023 Denis Ovchinnikov [zameran] 
@@ -31,6 +32,7 @@
 // Creation Date: Undefined
 // Creation Time: Undefined
 // Creator: zameran
+
 #endregion
 
 using System.IO;
@@ -46,7 +48,9 @@ namespace SpaceEngine
             foreach (var file in Directory.GetFiles(PathGlobals.GlobalRootPath, "*Log*.log"))
             {
                 if (File.Exists(file))
+                {
                     File.Delete(file);
+                }
             }
         }
     }

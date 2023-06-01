@@ -1,4 +1,5 @@
 ﻿#region License
+
 // Procedural planet generator.
 //  
 // Copyright (C) 2015-2023 Denis Ovchinnikov [zameran] 
@@ -31,6 +32,7 @@
 // Creation Date: 2017.03.16
 // Creation Time: 3:09 PM
 // Creator: zameran
+
 #endregion
 
 using System;
@@ -46,13 +48,13 @@ namespace SpaceEngine.Managers
 {
     public class LevelManager : MonoSingleton<LevelManager>
     {
-        private Coroutine InjectedWaiter;
-
         public enum SceneLoadType
         {
             Async,
             Default
         }
+
+        private Coroutine InjectedWaiter;
 
         private void Awake()
         {
@@ -60,6 +62,17 @@ namespace SpaceEngine.Managers
 
             SceneManager.sceneLoaded += OnSceneLoaded;
         }
+
+        #region Events
+
+        private void OnSceneLoaded(Scene loadedScene, LoadSceneMode mode)
+        {
+            EventManager.BaseEvents.OnSceneLoaded.Invoke((EntryPoint)Enum.Parse(typeof(EntryPoint), loadedScene.name, true), mode);
+
+            LoadingPanel.Hide();
+        }
+
+        #endregion
 
         #region API
 
@@ -72,7 +85,10 @@ namespace SpaceEngine.Managers
         {
             yield return Yielders.Get(delay);
 
-            if (InjectedWaiter != null) yield return InjectedWaiter;
+            if (InjectedWaiter != null)
+            {
+                yield return InjectedWaiter;
+            }
 
             OnDone?.Invoke();
         }
@@ -134,12 +150,12 @@ namespace SpaceEngine.Managers
         #endregion
 
         /// <summary>
-        /// Load special defined scene with specified Load Type and Mode.
+        ///     Load special defined scene with specified Load Type and Mode.
         /// </summary>
         /// <param name="sceneName">Special scene.</param>
         /// <param name="sceneLoadType">Load Type.</param>
         /// <param name="loadSceneMode">Load Mode.</param>
-        /// <param name="fireEvent">Should <see cref="EventManager.BaseEvents"/> event be called during loading?</param>
+        /// <param name="fireEvent">Should <see cref="EventManager.BaseEvents" /> event be called during loading?</param>
         /// <returns>Returns AsyncOperation, if Load Type is Async.</returns>
         private AsyncOperation LoadSceneInternal(EntryPoint sceneName, SceneLoadType sceneLoadType, LoadSceneMode loadSceneMode, bool fireEvent = true)
         {
@@ -161,9 +177,11 @@ namespace SpaceEngine.Managers
                         return SceneManager.LoadSceneAsync(sceneNameParsed, loadSceneMode);
                     case SceneLoadType.Default:
                         SceneManager.LoadScene(sceneNameParsed, loadSceneMode);
+
                         return null;
                     default:
                         SceneManager.LoadScene(sceneNameParsed, loadSceneMode);
+
                         return null;
                 }
             }
@@ -173,17 +191,6 @@ namespace SpaceEngine.Managers
             }
 
             return null;
-        }
-
-        #endregion
-
-        #region Events
-
-        private void OnSceneLoaded(Scene loadedScene, LoadSceneMode mode)
-        {
-            EventManager.BaseEvents.OnSceneLoaded.Invoke((EntryPoint)Enum.Parse(typeof(EntryPoint), loadedScene.name, true), mode);
-
-            LoadingPanel.Hide();
         }
 
         #endregion

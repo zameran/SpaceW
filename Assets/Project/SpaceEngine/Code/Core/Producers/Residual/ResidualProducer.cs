@@ -1,4 +1,5 @@
 ﻿#region License
+
 // Procedural planet generator.
 //  
 // Copyright (C) 2015-2023 Denis Ovchinnikov [zameran] 
@@ -31,6 +32,7 @@
 // Creation Date: 2017.03.28
 // Creation Time: 2:18 PM
 // Creator: zameran
+
 #endregion
 
 using System;
@@ -45,66 +47,66 @@ using UnityEngine;
 namespace SpaceEngine.Core.Producers.Residual
 {
     /// <summary>
-    /// A TileProducer to load elevation residuals from disk to CPU memory.
+    ///     A TileProducer to load elevation residuals from disk to CPU memory.
     /// </summary>
     public class ResidualProducer : TileProducer
     {
         /// <summary>
-        /// The name of the file containing the residual tiles to load.
+        ///     The name of the file containing the residual tiles to load.
         /// </summary>
         [SerializeField]
-        string FileName = "/Resources/Preprocess/Textures/Terrain/Height.dat";
+        private string FileName = "/Resources/Preprocess/Textures/Terrain/Height.dat";
 
         [SerializeField]
-        float ZScale = 1.0f;
+        private float ZScale = 1.0f;
 
         /// <summary>
-        /// The size of the tiles whose level (on disk) is at least <see cref="MinLevel"/>.
-        /// This size does not include the borders. A tile contains (TileSize + 5) * (TileSize + 5) samples.
+        ///     The stored tiles level that must be considered as the root level in this producer. Must be less than or equal to <see cref="MinLevel" />.
         /// </summary>
-        int ResidualTileSize;
+        private int DeltaLevel;
 
         /// <summary>
-        /// The level of the root of the tile pyramid managed by this producer in the global set of tile pyramids describing a terrain.
+        ///     The maximum level of the stored tiles on disk (inclusive, and relatively to rootLevel).
         /// </summary>
-        int RootLevel;
+        private int MaxLevel;
+
+        private float[] MaxR;
 
         /// <summary>
-        /// The stored tiles level that must be considered as the root level in this producer. Must be less than or equal to <see cref="MinLevel"/>.
+        ///     The stored tile level of the first tile of size TileSize.
         /// </summary>
-        int DeltaLevel;
+        private int MinLevel;
 
         /// <summary>
-        /// The logical x coordinate of the root of the tile pyramid managed by this producer in the global set of tile pyramids describing a terrain.
+        ///     The offsets of each tile on disk, relatively to offset, for each tile id <see cref="GetTileId" />
         /// </summary>
-        int RootTx;
+        private long[] Offsets;
 
         /// <summary>
-        /// The logical y coordinate of the root of the tile pyramid managed by this producer in the global set of tile pyramids describing a terrain.
+        ///     The size of the tiles whose level (on disk) is at least <see cref="MinLevel" />.
+        ///     This size does not include the borders. A tile contains (TileSize + 5) * (TileSize + 5) samples.
         /// </summary>
-        int RootTy;
+        private int ResidualTileSize;
 
         /// <summary>
-        /// The stored tile level of the first tile of size TileSize.
+        ///     The level of the root of the tile pyramid managed by this producer in the global set of tile pyramids describing a terrain.
         /// </summary>
-        int MinLevel;
+        private int RootLevel;
 
         /// <summary>
-        /// The maximum level of the stored tiles on disk (inclusive, and relatively to rootLevel).
+        ///     The logical x coordinate of the root of the tile pyramid managed by this producer in the global set of tile pyramids describing a terrain.
         /// </summary>
-        int MaxLevel;
+        private int RootTx;
 
         /// <summary>
-        /// A scaling factor to be applied to all residuals read from disk.
+        ///     The logical y coordinate of the root of the tile pyramid managed by this producer in the global set of tile pyramids describing a terrain.
         /// </summary>
-        float Scale;
+        private int RootTy;
 
         /// <summary>
-        /// The offsets of each tile on disk, relatively to offset, for each tile id <see cref="GetTileId"/>
+        ///     A scaling factor to be applied to all residuals read from disk.
         /// </summary>
-        long[] Offsets;
-
-        float[] MaxR;
+        private float Scale;
 
         public override void InitNode()
         {
@@ -161,7 +163,10 @@ namespace SpaceEngine.Core.Producers.Residual
             DeltaLevel = RootLevel == 0 ? DeltaLevel : 0;
             Scale = Scale * ZScale;
 
-            if (DeltaLevel > MinLevel) { throw new InvalidParameterException("Delta level can not be greater than min level!"); }
+            if (DeltaLevel > MinLevel)
+            {
+                throw new InvalidParameterException("Delta level can not be greater than min level!");
+            }
 
             var tilesCount = MinLevel + ((1 << (Mathf.Max(MaxLevel - MinLevel, 0) * 2 + 2)) - 1) / 3;
 
@@ -197,22 +202,22 @@ namespace SpaceEngine.Core.Producers.Residual
             {
                 return level;
             }
-            else
-            {
-                var levelLength = Mathf.Max(level - MinLevel, 0);
 
-                return MinLevel + tx + ty * (1 << levelLength) + ((1 << (2 * levelLength)) - 1) / 3;
-            }
+            var levelLength = Mathf.Max(level - MinLevel, 0);
+
+            return MinLevel + tx + ty * (1 << levelLength) + ((1 << (2 * levelLength)) - 1) / 3;
         }
 
         public override bool HasTile(int level, int tx, int ty)
         {
             var levelLength = level + DeltaLevel - RootLevel;
 
-            if (levelLength >= 0 && (tx >> levelLength) == RootTx && (ty >> levelLength) == RootTy)
+            if (levelLength >= 0 && tx >> levelLength == RootTx && ty >> levelLength == RootTy)
             {
                 if (levelLength <= MaxLevel)
+                {
                     return true;
+                }
             }
 
             return false;
@@ -222,7 +227,10 @@ namespace SpaceEngine.Core.Producers.Residual
         {
             var levelLength = level + DeltaLevel - RootLevel;
 
-            if (!(levelLength >= 0 && (tx >> levelLength) == RootTx && (ty >> levelLength) == RootTy)) { return; }
+            if (!(levelLength >= 0 && tx >> levelLength == RootTx && ty >> levelLength == RootTy))
+            {
+                return;
+            }
 
             level = levelLength;
             tx = tx - (RootTx << level);
@@ -230,7 +238,10 @@ namespace SpaceEngine.Core.Producers.Residual
 
             var cpuSlot = slot[0] as CPUTileStorage.CPUSlot<float>;
 
-            if (cpuSlot == null) { throw new NullReferenceException("cpuSlot"); }
+            if (cpuSlot == null)
+            {
+                throw new NullReferenceException("cpuSlot");
+            }
 
             cpuSlot.ClearData();
 
@@ -265,9 +276,9 @@ namespace SpaceEngine.Core.Producers.Residual
                 for (var i = 0; i < tileSize; ++i)
                 {
                     var offset = 2 * (i + j * tileSize);
-                    var value = (short)((short)data[offset + 1] << 8 | data[offset]);
+                    var value = (short)((data[offset + 1] << 8) | data[offset]);
 
-                    result[i + j * (ResidualTileSize + 5)] = (float)value / (float)short.MaxValue * MaxR[level] * Scale;
+                    result[i + j * (ResidualTileSize + 5)] = value / (float)short.MaxValue * MaxR[level] * Scale;
                 }
             }
         }

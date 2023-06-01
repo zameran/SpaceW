@@ -1,4 +1,5 @@
 #region License
+
 // Procedural planet generator.
 // 
 // Copyright (C) 2015-2023 Denis Ovchinnikov [zameran] 
@@ -31,6 +32,7 @@
 // Creation Date: Undefined
 // Creation Time: Undefined
 // Creator: zameran
+
 #endregion
 
 using System;
@@ -42,16 +44,13 @@ namespace SpaceEngine.Environment.Oceanic
 {
     public class FourierGPU
     {
-        const int PASS_X_1 = 0, PASS_Y_1 = 1;
-        const int PASS_X_2 = 2, PASS_Y_2 = 3;
-        const int PASS_X_3 = 4, PASS_Y_3 = 5;
-        const int PASS_X_4 = 6, PASS_Y_4 = 7;
+        private const int PASS_X_1 = 0, PASS_Y_1 = 1;
+        private const int PASS_X_2 = 2, PASS_Y_2 = 3;
+        private const int PASS_X_3 = 4, PASS_Y_3 = 5;
+        private const int PASS_X_4 = 6, PASS_Y_4 = 7;
 
-        public int Size { get; private set; }
-        public int Passes { get; private set; }
-
-        readonly Texture2D[] ButterFlyLookupTable = null;
-        readonly Material FourierMaterial;
+        private readonly Texture2D[] ButterFlyLookupTable;
+        private readonly Material FourierMaterial;
 
         public FourierGPU(int size, Shader shader)
         {
@@ -70,14 +69,17 @@ namespace SpaceEngine.Environment.Oceanic
             FourierMaterial = new Material(shader);
 
             Size = size; // Must be pow2 num
-            Passes = (int)(Mathf.Log((float)size) / Mathf.Log(2.0f));
+            Passes = (int)(Mathf.Log(size) / Mathf.Log(2.0f));
 
             ButterFlyLookupTable = new Texture2D[Passes];
 
             ComputeButterflyLookupTable();
 
-            FourierMaterial.SetFloat("_Size", (float)size);
+            FourierMaterial.SetFloat("_Size", size);
         }
+
+        public int Size { get; }
+        public int Passes { get; }
 
         private int BitReverse(int i)
         {
@@ -87,7 +89,7 @@ namespace SpaceEngine.Environment.Oceanic
 
             while (M != 0)
             {
-                var j = ((i & M) > M - 1) ? 1 : 0;
+                var j = (i & M) > M - 1 ? 1 : 0;
                 Sum += j * W;
                 W *= 2;
                 M /= 2;
@@ -137,9 +139,8 @@ namespace SpaceEngine.Environment.Oceanic
                             j2 = i2;
                         }
 
-                        ButterFlyLookupTable[i].SetPixel(i1, 0, new Color((float)j1 / 255.0f, (float)j2 / 255.0f, (float)(k * nBlocks) / 255.0f, 0));
-                        ButterFlyLookupTable[i].SetPixel(i2, 0, new Color((float)j1 / 255.0f, (float)j2 / 255.0f, (float)(k * nBlocks) / 255.0f, 1));
-
+                        ButterFlyLookupTable[i].SetPixel(i1, 0, new Color(j1 / 255.0f, j2 / 255.0f, k * nBlocks / 255.0f, 0));
+                        ButterFlyLookupTable[i].SetPixel(i2, 0, new Color(j1 / 255.0f, j2 / 255.0f, k * nBlocks / 255.0f, 1));
                     }
                 }
 
@@ -150,10 +151,13 @@ namespace SpaceEngine.Environment.Oceanic
 
         public int PeformFFT(RenderTexture[] data0)
         {
-            if (ButterFlyLookupTable == null) return -1;
+            if (ButterFlyLookupTable == null)
+            {
+                return -1;
+            }
 
-            var pass0 = new RenderTexture[] { data0[0] };
-            var pass1 = new RenderTexture[] { data0[1] };
+            var pass0 = new[] { data0[0] };
+            var pass1 = new[] { data0[1] };
 
             int i;
             var idx = 0;
@@ -170,9 +174,13 @@ namespace SpaceEngine.Environment.Oceanic
                 FourierMaterial.SetTexture("_ReadBuffer0", data0[idx1]);
 
                 if (idx == 0)
-                    RTUtility.MultiTargetBlit(pass0, FourierMaterial, PASS_X_1);
+                {
+                    RTUtility.MultiTargetBlit(pass0, FourierMaterial);
+                }
                 else
-                    RTUtility.MultiTargetBlit(pass1, FourierMaterial, PASS_X_1);
+                {
+                    RTUtility.MultiTargetBlit(pass1, FourierMaterial);
+                }
             }
 
             for (i = 0; i < Passes; i++, j++)
@@ -185,9 +193,13 @@ namespace SpaceEngine.Environment.Oceanic
                 FourierMaterial.SetTexture("_ReadBuffer0", data0[idx1]);
 
                 if (idx == 0)
+                {
                     RTUtility.MultiTargetBlit(pass0, FourierMaterial, PASS_Y_1);
+                }
                 else
+                {
                     RTUtility.MultiTargetBlit(pass1, FourierMaterial, PASS_Y_1);
+                }
             }
 
             return idx;
@@ -195,13 +207,18 @@ namespace SpaceEngine.Environment.Oceanic
 
         public int PeformFFT(RenderTexture[] data0, RenderTexture[] data1)
         {
-            if (ButterFlyLookupTable == null) return -1;
+            if (ButterFlyLookupTable == null)
+            {
+                return -1;
+            }
 
             if (SystemInfo.supportedRenderTargetCount < 2)
+            {
                 throw new InvalidOperationException("System does not support at least 2 render targets");
+            }
 
-            var pass0 = new RenderTexture[] { data0[0], data1[0] };
-            var pass1 = new RenderTexture[] { data0[1], data1[1] };
+            var pass0 = new[] { data0[0], data1[0] };
+            var pass1 = new[] { data0[1], data1[1] };
 
             int i;
             var idx = 0;
@@ -219,9 +236,13 @@ namespace SpaceEngine.Environment.Oceanic
                 FourierMaterial.SetTexture("_ReadBuffer1", data1[idx1]);
 
                 if (idx == 0)
+                {
                     RTUtility.MultiTargetBlit(pass0, FourierMaterial, PASS_X_2);
+                }
                 else
+                {
                     RTUtility.MultiTargetBlit(pass1, FourierMaterial, PASS_X_2);
+                }
             }
 
             for (i = 0; i < Passes; i++, j++)
@@ -235,9 +256,13 @@ namespace SpaceEngine.Environment.Oceanic
                 FourierMaterial.SetTexture("_ReadBuffer1", data1[idx1]);
 
                 if (idx == 0)
+                {
                     RTUtility.MultiTargetBlit(pass0, FourierMaterial, PASS_Y_2);
+                }
                 else
+                {
                     RTUtility.MultiTargetBlit(pass1, FourierMaterial, PASS_Y_2);
+                }
             }
 
             return idx;
@@ -245,13 +270,18 @@ namespace SpaceEngine.Environment.Oceanic
 
         public int PeformFFT(RenderTexture[] data0, RenderTexture[] data1, RenderTexture[] data2)
         {
-            if (ButterFlyLookupTable == null) return -1;
+            if (ButterFlyLookupTable == null)
+            {
+                return -1;
+            }
 
             if (SystemInfo.supportedRenderTargetCount < 3)
+            {
                 throw new InvalidOperationException("System does not support at least 3 render targets");
+            }
 
-            var pass0 = new RenderTexture[] { data0[0], data1[0], data2[0] };
-            var pass1 = new RenderTexture[] { data0[1], data1[1], data2[1] };
+            var pass0 = new[] { data0[0], data1[0], data2[0] };
+            var pass1 = new[] { data0[1], data1[1], data2[1] };
 
             int i;
             var idx = 0;
@@ -270,9 +300,13 @@ namespace SpaceEngine.Environment.Oceanic
                 FourierMaterial.SetTexture("_ReadBuffer2", data2[idx1]);
 
                 if (idx == 0)
+                {
                     RTUtility.MultiTargetBlit(pass0, FourierMaterial, PASS_X_3);
+                }
                 else
+                {
                     RTUtility.MultiTargetBlit(pass1, FourierMaterial, PASS_X_3);
+                }
             }
 
             for (i = 0; i < Passes; i++, j++)
@@ -287,9 +321,13 @@ namespace SpaceEngine.Environment.Oceanic
                 FourierMaterial.SetTexture("_ReadBuffer2", data2[idx1]);
 
                 if (idx == 0)
+                {
                     RTUtility.MultiTargetBlit(pass0, FourierMaterial, PASS_Y_3);
+                }
                 else
+                {
                     RTUtility.MultiTargetBlit(pass1, FourierMaterial, PASS_Y_3);
+                }
             }
 
             return idx;
@@ -297,16 +335,22 @@ namespace SpaceEngine.Environment.Oceanic
 
         public int PeformFFT(RenderTexture[] data0, RenderTexture[] data1, RenderTexture[] data2, RenderTexture[] data3)
         {
-            if (ButterFlyLookupTable == null) return -1;
+            if (ButterFlyLookupTable == null)
+            {
+                return -1;
+            }
 
             if (SystemInfo.supportedRenderTargetCount < 4)
+            {
                 throw new InvalidOperationException("System does not support at least 4 render targets");
+            }
 
-            var pass0 = new RenderTexture[] { data0[0], data1[0], data2[0], data3[0] };
-            var pass1 = new RenderTexture[] { data0[1], data1[1], data2[1], data3[1] };
+            var pass0 = new[] { data0[0], data1[0], data2[0], data3[0] };
+            var pass1 = new[] { data0[1], data1[1], data2[1], data3[1] };
 
             int i;
-            var idx = 0; int idx1;
+            var idx = 0;
+            int idx1;
             var j = 0;
 
             for (i = 0; i < Passes; i++, j++)
@@ -322,9 +366,13 @@ namespace SpaceEngine.Environment.Oceanic
                 FourierMaterial.SetTexture("_ReadBuffer3", data3[idx1]);
 
                 if (idx == 0)
+                {
                     RTUtility.MultiTargetBlit(pass0, FourierMaterial, PASS_X_4);
+                }
                 else
+                {
                     RTUtility.MultiTargetBlit(pass1, FourierMaterial, PASS_X_4);
+                }
             }
 
             for (i = 0; i < Passes; i++, j++)
@@ -340,9 +388,13 @@ namespace SpaceEngine.Environment.Oceanic
                 FourierMaterial.SetTexture("_ReadBuffer3", data3[idx1]);
 
                 if (idx == 0)
+                {
                     RTUtility.MultiTargetBlit(pass0, FourierMaterial, PASS_Y_4);
+                }
                 else
+                {
                     RTUtility.MultiTargetBlit(pass1, FourierMaterial, PASS_Y_4);
+                }
             }
 
             return idx;
