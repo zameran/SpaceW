@@ -25,13 +25,13 @@ If there enough people willing, then, perhaps, i will compose a comprehensive wi
 * Low Unity's internals integration.
 
 ## Current Engine version support ##
-* Unity 2018.1.0b7 (Windows)
-* Unity 5.6.0b3 (Linux)
+* Unity 2023.1.0b18
 
 ## Current OS/API support ##
-* Windows/Linux/Ubuntu/Mac
-* DirectX 11 [Shader Model 5.0]
+* Windows/Linux/Ubuntu/Mac(Intel/M1/M2)
+* DirectX 11-12 [Shader Model 5.0]
 * OpenGL 4.3 and higher [Experimental and early WIP]
+* Vulkan [Not Tested]
 
 ### Install ###
 * RTFM and JRTI.
