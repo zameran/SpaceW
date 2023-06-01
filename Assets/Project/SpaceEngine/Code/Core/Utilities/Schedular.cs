@@ -33,11 +33,10 @@
 // Creator: zameran
 #endregion
 
-using SpaceEngine.Core.Containers;
-using SpaceEngine.Core.Patterns.Singleton;
-
 using System;
 using System.Collections.Generic;
+using SpaceEngine.Core.Containers;
+using SpaceEngine.Core.Patterns.Singleton;
 
 namespace SpaceEngine.Core.Utilities
 {
@@ -49,7 +48,7 @@ namespace SpaceEngine.Core.Utilities
             {
                 public bool Equals(Task t1, Task t2)
                 {
-                    return Object.ReferenceEquals(t1, t2);
+                    return ReferenceEquals(t1, t2);
                 }
 
                 public int GetHashCode(Task t)

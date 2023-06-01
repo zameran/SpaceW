@@ -33,19 +33,17 @@
 // Creator: zameran
 #endregion
 
+using System;
+using System.Collections.Generic;
 using SpaceEngine.Core.Exceptions;
 using SpaceEngine.Core.Numerics.Matrices;
 using SpaceEngine.Core.Numerics.Vectors;
 using SpaceEngine.Core.Storage;
 using SpaceEngine.Core.Tile.Producer;
 using SpaceEngine.Core.Tile.Storage;
-
-using System;
-using System.Collections.Generic;
-
 using UnityEngine;
 
-namespace SpaceEngine.Core
+namespace SpaceEngine.Core.Producers.Normal
 {
     public class NormalsCoreProducer : TileProducer
     {

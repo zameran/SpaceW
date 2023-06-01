@@ -35,7 +35,6 @@
 
 using System;
 using System.Reflection;
-
 using UnityEngine;
 
 namespace SpaceEngine.Tools
@@ -49,8 +48,14 @@ namespace SpaceEngine.Tools
                 var type = typeof(T);
                 var method = type.GetMethod(methodName, billingAtr);
 
-                if (method != null) method.Invoke(obj, methodParams);
-                else Debug.LogWarning("UnityEngineAPI.InvokeAPI: Unable to find target method! Aborting!...");
+                if (method != null)
+                {
+                    method.Invoke(obj, methodParams);
+                }
+                else
+                {
+                    Debug.LogWarning("UnityEngineAPI.InvokeAPI: Unable to find target method! Aborting!...");
+                }
             }
             catch (Exception ex)
             {
@@ -58,6 +63,7 @@ namespace SpaceEngine.Tools
             }
             finally
             {
+                Debug.Log($"[{methodName}] invoked! [{billingAtr.ToString()}]");
             }
         }
     }

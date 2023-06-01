@@ -33,19 +33,15 @@
 // Creator: zameran
 #endregion
 
-using SpaceEngine.Core.Debugging;
-using SpaceEngine.Core.Patterns.Singleton;
-using SpaceEngine.Tools;
-
-using System;
-using System.IO;
-
 #if UNITY_EDITOR
 using UnityEditor;
 #endif
-
+using System;
+using System.IO;
+using SpaceEngine.Core.Debugging;
+using SpaceEngine.Core.Patterns.Singleton;
+using SpaceEngine.Tools;
 using UnityEngine;
-
 using Logger = SpaceEngine.Core.Debugging.Logger;
 
 namespace SpaceEngine.Helpers.MonoBehaviours

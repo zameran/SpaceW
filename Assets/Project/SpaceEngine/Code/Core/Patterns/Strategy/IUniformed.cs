@@ -33,7 +33,7 @@
 // Creator: zameran
 #endregion
 
-namespace SpaceEngine.Core.Patterns.Strategy.Uniformed
+namespace SpaceEngine.Core.Patterns.Strategy
 {
     /// <summary>
     /// This interface should be implemented in all things, that's gonna manipulate with 

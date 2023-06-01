@@ -34,7 +34,6 @@
 #endregion
 
 using SpaceEngine.Core.Terrain;
-
 using UnityEngine;
 
 namespace SpaceEngine.Core.Tile.Filter

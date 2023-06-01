@@ -1,6 +1,6 @@
 ﻿#region License
 // Procedural planet generator.
-// 
+//  
 // Copyright (C) 2015-2023 Denis Ovchinnikov [zameran] 
 // All rights reserved.
 // 
@@ -28,53 +28,52 @@
 // ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF
 // THE POSSIBILITY OF SUCH DAMAGE.
 // 
-// Creation Date: Undefined
-// Creation Time: Undefined
+// Creation Date: 2017.01.25
+// Creation Time: 10:46 AM
 // Creator: zameran
 #endregion
 
-using SpaceEngine.Helpers;
-
+using System;
+using System.Collections.Generic;
 using UnityEngine;
 
-namespace SpaceEngine.Debugging
+namespace SpaceEngine.ScriptableObjects
 {
-    /// <summary>
-    /// This class provides default behaviour of all <see cref="GL"/>-based debug drawings.
-    /// </summary>
-    public abstract class DebugDraw : MonoBehaviour, IDebug
+    [Serializable]
+    [CreateAssetMenu(fileName = "SunGlareSettings", menuName = "Create SunGlare Settings")]
+    public class SunGlareSettings : ScriptableObject
     {
-        public Shader lineShader = null;
-        public Material lineMaterial = null;
+        [Header("Textures")]
+        public Texture2D SunSpikes;
+        public Texture2D SunFlare;
+        public Texture2D SunGhost1;
+        public Texture2D SunGhost2;
+        public Texture2D SunGhost3;
 
-        protected virtual void Start()
+        [Header("Settings")]
+        public Vector3 FlareSettings = new Vector3(0.45f, 1.0f, 0.85f);
+        public Vector3 SpikesSettings = new Vector3(0.6f, 1.0f, 1.0f);
+
+        public List<Vector4> Ghost1SettingsList = new List<Vector4>
         {
-            if (lineMaterial == null)
-                CreateLineMaterial();
-        }
+            new Vector4(0.54f, 0.65f, 2.3f, 0.5f),
+            new Vector4(0.54f, 1.0f, 6.0f, 0.7f)
+        };
 
-        protected virtual void OnPostRender()
+        public List<Vector4> Ghost2SettingsList = new List<Vector4>
         {
-            if (lineMaterial == null) CreateLineMaterial();
+            new Vector4(0.135f, 1.0f, 3.0f, 0.9f),
+            new Vector4(0.054f, 1.0f, 8.0f, 1.1f),
+            new Vector4(0.054f, 1.0f, 4.0f, 1.3f),
+            new Vector4(0.054f, 1.0f, 5.0f, 1.5f)
+        };
 
-            Draw();
-        }
-
-        protected virtual void OnDestroy()
+        public List<Vector4> Ghost3SettingsList = new List<Vector4>
         {
-            Helper.Destroy(lineMaterial);
-        }
-
-        protected virtual void CreateLineMaterial()
-        {
-            if (lineShader == null) throw new System.NullReferenceException("Line Shader is null!");
-
-            if (!lineMaterial)
-            {
-                lineMaterial = MaterialHelper.CreateTemp(lineShader, "Line");
-            }
-        }
-
-        protected abstract void Draw();
+            new Vector4(0.135f, 1.0f, 3.0f, 0.9f),
+            new Vector4(0.054f, 1.0f, 8.0f, 1.1f),
+            new Vector4(0.054f, 1.0f, 4.0f, 1.3f),
+            new Vector4(0.054f, 1.0f, 5.0f, 1.5f)
+        };
     }
 }

@@ -33,22 +33,19 @@
 // Creator: zameran
 #endregion
 
-using SpaceEngine.Core.Debugging;
-using SpaceEngine.Core.Patterns.Strategy.Eventit;
-using SpaceEngine.Enums;
-using SpaceEngine.Helpers;
-using SpaceEngine.Pluginator.Attributes;
-using SpaceEngine.Tools;
-
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
-
+using SpaceEngine.Core.Debugging;
+using SpaceEngine.Core.Patterns.Strategy;
+using SpaceEngine.Enums;
+using SpaceEngine.Helpers;
+using SpaceEngine.Pluginator.Attributes;
+using SpaceEngine.Tools;
 using UnityEngine;
 using UnityEngine.SceneManagement;
-
 using Logger = SpaceEngine.Core.Debugging.Logger;
 
 namespace SpaceEngine.Pluginator

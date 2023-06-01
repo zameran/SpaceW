@@ -34,11 +34,10 @@
 #endregion
 
 using SpaceEngine.Helpers;
-
 using UnityEngine;
 using UnityEngine.Rendering;
 
-namespace SpaceEngine.Tests
+namespace SpaceEngine.Test
 {
     public class CommandBufferTest : MonoBehaviour
     {

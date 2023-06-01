@@ -33,74 +33,75 @@
 // Creator: zameran
 #endregion
 
-using SpaceEngine.Tools;
-
 using System.Reflection;
-
+using SpaceEngine.Tools;
 using UnityEditor;
 using UnityEngine;
 
-public class ShaderCompiler : EditorWindow
+namespace SpaceEngine.Editor
 {
-    public Shader shader;
-
-    private int mode = 1;
-    private int externPlatformsMask = 262143;
-    private bool includeAllVariants = true;
-    private bool preprocessOnly = false;
-    private bool stripLineDirectives = false;
-
-    [MenuItem("SpaceEngine/ShaderCompiler")]
-    public static void Init()
+    public class ShaderCompiler : EditorWindow
     {
-        var window = (ShaderCompiler)GetWindow(typeof(ShaderCompiler));
-        window.autoRepaintOnSceneChange = true;
-    }
+        public Shader shader;
 
-    public void OnGUI()
-    {
-        GUILayout.Label("Select shader to compile: ");
-        shader = (Shader)EditorGUILayout.ObjectField(shader, typeof(Shader), false);
+        private int mode = 1;
+        private int externPlatformsMask = 262143;
+        private bool includeAllVariants = true;
+        private bool preprocessOnly = false;
+        private bool stripLineDirectives = false;
 
-        GUILayout.Label("Select shader compilation mode: ");
-        mode = EditorGUILayout.IntField(mode);
-
-        GUILayout.Label("Select shader compilation custom platforms masks: ");
-        externPlatformsMask = EditorGUILayout.IntField(externPlatformsMask);
-
-        GUILayout.Label("Should compiled shader contain all shader variants?");
-        includeAllVariants = EditorGUILayout.Toggle(includeAllVariants);
-
-        GUILayout.Label("Preprocess Only?");
-        preprocessOnly = EditorGUILayout.Toggle(preprocessOnly);
-
-        GUILayout.Label("Strip Line Directives?");
-        stripLineDirectives = EditorGUILayout.Toggle(stripLineDirectives);
-
-        if (shader != null)
+        [MenuItem("SpaceEngine/ShaderCompiler")]
+        public static void Init()
         {
-            if (GUILayout.Button("Compile..."))
+            var window = (ShaderCompiler)GetWindow(typeof(ShaderCompiler));
+            window.autoRepaintOnSceneChange = true;
+        }
+
+        public void OnGUI()
+        {
+            GUILayout.Label("Select shader to compile: ");
+            shader = (Shader)EditorGUILayout.ObjectField(shader, typeof(Shader), false);
+
+            GUILayout.Label("Select shader compilation mode: ");
+            mode = EditorGUILayout.IntField(mode);
+
+            GUILayout.Label("Select shader compilation custom platforms masks: ");
+            externPlatformsMask = EditorGUILayout.IntField(externPlatformsMask);
+
+            GUILayout.Label("Should compiled shader contain all shader variants?");
+            includeAllVariants = EditorGUILayout.Toggle(includeAllVariants);
+
+            GUILayout.Label("Preprocess Only?");
+            preprocessOnly = EditorGUILayout.Toggle(preprocessOnly);
+
+            GUILayout.Label("Strip Line Directives?");
+            stripLineDirectives = EditorGUILayout.Toggle(stripLineDirectives);
+
+            if (shader != null)
             {
-                UnityEngineAPI.InvokeAPI<ShaderUtil>("OpenCompiledShader",
-                    BindingFlags.Static | BindingFlags.NonPublic,
-                    null,
-                    new object[]
-                    {
-                        shader,
-                        mode,
-                        externPlatformsMask,
-                        includeAllVariants,
-                        preprocessOnly,
-                        stripLineDirectives
-                    });
+                if (GUILayout.Button("Compile..."))
+                {
+                    UnityEngineAPI.InvokeAPI<ShaderUtil>("OpenCompiledShader",
+                        BindingFlags.Static | BindingFlags.NonPublic,
+                        null,
+                        new object[]
+                        {
+                            shader,
+                            mode,
+                            externPlatformsMask,
+                            includeAllVariants,
+                            preprocessOnly,
+                            stripLineDirectives
+                        });
+                }
             }
-        }
-        else
-        {
-            EditorGUILayout.HelpBox("Nothing to compile! - Select shader to work with...", MessageType.Warning);
-        }
+            else
+            {
+                EditorGUILayout.HelpBox("Nothing to compile! - Select shader to work with...", MessageType.Warning);
+            }
 
-        EditorGUILayout.HelpBox("This utility simply calls Unity's Internal Core OpenCompiledShader method...\n" +
-                                "See Shader Inspector - It have the same button!", MessageType.Info);
+            EditorGUILayout.HelpBox("This utility simply calls Unity's Internal Core OpenCompiledShader method...\n" +
+                                    "See Shader Inspector - It have the same button!", MessageType.Info);
+        }
     }
 }

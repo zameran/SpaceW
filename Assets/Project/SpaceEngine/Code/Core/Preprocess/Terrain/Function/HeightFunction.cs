@@ -34,21 +34,20 @@
 #endregion
 
 using System;
-
 using UnityEngine;
 
-namespace SpaceEngine.Core.Preprocess.Terrain
+namespace SpaceEngine.Core.Preprocess.Terrain.Function
 {
     public class PlaneHeightFunction : IHeightFunction2D
     {
-        InputMap Source;
+        InputMap.InputMap Source;
 
         int DestinationSize;
 
-        public PlaneHeightFunction(InputMap source, int destinationSize)
+        public PlaneHeightFunction(InputMap.InputMap source, int destinationSize)
         {
-            this.Source = source;
-            this.DestinationSize = destinationSize;
+            Source = source;
+            DestinationSize = destinationSize;
         }
 
         public float GetValue(int x, int y)
@@ -77,17 +76,17 @@ namespace SpaceEngine.Core.Preprocess.Terrain
 
     public class SphericalHeightFunction : IHeightFunction2D
     {
-        InputMap Source;
+        InputMap.InputMap Source;
 
         Projection Projection;
 
         int DestinationSize;
 
-        public SphericalHeightFunction(InputMap source, Projection projection, int destinationSize)
+        public SphericalHeightFunction(InputMap.InputMap source, Projection projection, int destinationSize)
         {
-            this.Source = source;
-            this.Projection = projection;
-            this.DestinationSize = destinationSize;
+            Source = source;
+            Projection = projection;
+            DestinationSize = destinationSize;
         }
 
         public float GetValue(int x, int y)

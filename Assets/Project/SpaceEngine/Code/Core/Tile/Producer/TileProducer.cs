@@ -33,6 +33,9 @@
 // Creator: zameran
 #endregion
 
+using System;
+using System.Collections;
+using System.Collections.Generic;
 using SpaceEngine.Core.Terrain;
 using SpaceEngine.Core.Tile.Cache;
 using SpaceEngine.Core.Tile.Filter;
@@ -41,11 +44,6 @@ using SpaceEngine.Core.Tile.Samplers;
 using SpaceEngine.Core.Tile.Storage;
 using SpaceEngine.Core.Tile.Tasks;
 using SpaceEngine.Tools;
-
-using System;
-using System.Collections;
-using System.Collections.Generic;
-
 using UnityEngine;
 
 namespace SpaceEngine.Core.Tile.Producer
@@ -291,7 +289,7 @@ namespace SpaceEngine.Core.Tile.Producer
                 }
             }
 
-            this.DoCreateTile(level, tx, ty, slot); // Do our work...
+            DoCreateTile(level, tx, ty, slot); // Do our work...
 
             yield return Yielders.EndOfFrame;
 

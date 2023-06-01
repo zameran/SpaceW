@@ -33,20 +33,19 @@
 // Creator: zameran
 #endregion
 
-using SpaceEngine.Core.Numerics;
-using SpaceEngine.Core.Numerics.Matrices;
-using SpaceEngine.Core.Numerics.Shapes;
-using SpaceEngine.Core.Numerics.Vectors;
-using SpaceEngine.Helpers;
-using SpaceEngine.Tools;
-using SpaceEngine.Utilities;
-
 using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
-
+using SpaceEngine.Core.Numerics;
+using SpaceEngine.Core.Numerics.Matrices;
+using SpaceEngine.Core.Numerics.Shapes;
+using SpaceEngine.Core.Numerics.Vectors;
+using SpaceEngine.Helpers;
+using SpaceEngine.Managers;
+using SpaceEngine.Tools;
+using SpaceEngine.Utilities;
 using UnityEngine;
 
 #pragma warning disable 0219, 0414

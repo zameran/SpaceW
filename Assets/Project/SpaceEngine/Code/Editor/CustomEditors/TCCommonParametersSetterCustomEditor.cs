@@ -34,17 +34,15 @@
 #endregion
 
 using System;
-
 using UnityEditor;
 using UnityEditor.SceneManagement;
-
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
-namespace SpaceEngine.CustomEditors
+namespace SpaceEngine.Editor.CustomEditors
 {
     [CustomEditor(typeof(TCCommonParametersSetter))]
-    public sealed class TCCommonParametersSetterEditor : Editor
+    public sealed class TCCommonParametersSetterEditor : UnityEditor.Editor
     {
         private enum Tab
         {

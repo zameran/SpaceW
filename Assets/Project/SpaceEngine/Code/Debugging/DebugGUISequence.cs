@@ -35,7 +35,6 @@
 
 using SpaceEngine.Managers;
 using SpaceEngine.Tools;
-
 using UnityEngine;
 
 namespace SpaceEngine.Debugging

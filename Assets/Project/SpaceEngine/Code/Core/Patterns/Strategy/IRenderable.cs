@@ -33,7 +33,7 @@
 // Creator: zameran
 #endregion
 
-namespace SpaceEngine.Core.Patterns.Strategy.Renderable
+namespace SpaceEngine.Core.Patterns.Strategy
 {
     /// <summary>
     /// This interface should be implemented in all things, that's gonna be rendered with <see cref="UnityEngine.Graphics"/> class methods.

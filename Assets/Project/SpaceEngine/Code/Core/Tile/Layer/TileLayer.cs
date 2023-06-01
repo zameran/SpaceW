@@ -33,9 +33,8 @@
 // Creator: zameran
 #endregion
 
-using SpaceEngine.Core.Tile.Storage;
-
 using System.Collections.Generic;
+using SpaceEngine.Core.Tile.Storage;
 
 namespace SpaceEngine.Core.Tile.Layer
 {

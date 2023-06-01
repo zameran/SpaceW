@@ -33,26 +33,24 @@
 // Creator: zameran
 #endregion
 
-using SpaceEngine.Core.Debugging;
-using SpaceEngine.Core.Patterns.Strategy.Eventit;
-using SpaceEngine.Enums;
-
 using System.Collections.Generic;
 using System.Linq;
-
+using SpaceEngine.Core.Debugging;
+using SpaceEngine.Core.Patterns.Strategy;
+using SpaceEngine.Enums;
+using SpaceEngine.Managers;
 using UnityEngine;
 using UnityEngine.SceneManagement;
-
 using Logger = SpaceEngine.Core.Debugging.Logger;
 
-namespace SpaceEngine.UI
+namespace SpaceEngine.UI.PanelSystem
 {
     [UseLogger(LoggerCategory.InGameUI)]
     public class UICore : MonoBehaviour, IEventit
     {
-        public GameObject Root => this.gameObject;
+        public GameObject Root => gameObject;
 
-        public List<UIPanel> Panels { get { return this.GetComponentsInChildren<UIPanel>().Where(x => x.transform.parent == transform).ToList(); } }
+        public List<UIPanel> Panels { get { return GetComponentsInChildren<UIPanel>().Where(x => x.transform.parent == transform).ToList(); } }
 
         public bool ForceDestroyAllPanels = false;
 
@@ -79,7 +77,7 @@ namespace SpaceEngine.UI
                     panel.GetComponent<RectTransform>().offsetMin = Vector2.zero;
                 });
 
-                DestroyImmediate(this.gameObject);
+                DestroyImmediate(gameObject);
             }
         }
 

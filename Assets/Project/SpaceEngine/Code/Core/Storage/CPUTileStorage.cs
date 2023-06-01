@@ -34,7 +34,6 @@
 #endregion
 
 using SpaceEngine.Core.Tile.Storage;
-
 using UnityEngine;
 
 namespace SpaceEngine.Core.Storage

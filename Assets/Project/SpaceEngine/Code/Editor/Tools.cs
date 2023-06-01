@@ -37,11 +37,11 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using SpaceEngine.Tools;
 using UnityEditor;
 using UnityEngine;
-using SpaceEngine.Tools;
 
-namespace Core.Editor
+namespace SpaceEngine.Editor
 {
     public static class Tools
     {

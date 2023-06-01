@@ -33,10 +33,8 @@
 // Creator: zameran
 #endregion
 
-using SpaceEngine.Core.Patterns.Strategy.Eventit;
-using SpaceEngine.Core.Patterns.Strategy.Reanimator;
-using SpaceEngine.Core.Patterns.Strategy.Renderable;
-using SpaceEngine.Core.Patterns.Strategy.Uniformed;
+using System.Collections.Generic;
+using SpaceEngine.Core.Patterns.Strategy;
 using SpaceEngine.Core.Terrain;
 using SpaceEngine.Core.Tile.Storage;
 using SpaceEngine.Enums;
@@ -46,10 +44,8 @@ using SpaceEngine.Environment.Rings;
 using SpaceEngine.Environment.Shadows;
 using SpaceEngine.Environment.Sun;
 using SpaceEngine.Helpers;
+using SpaceEngine.Managers;
 using SpaceEngine.Tools;
-
-using System.Collections.Generic;
-
 using UnityEngine;
 
 namespace SpaceEngine.Core.Bodies
@@ -514,7 +510,12 @@ namespace SpaceEngine.Core.Bodies
         {
             for (var i = 0; i < Mathf.Min(4, ShineCasters.Count); i++)
             {
-                if (ShineCasters[i] == null) { Debug.Log("Atmosphere: Shine problem!"); break; }
+                if (ShineCasters[i] == null)
+                {
+                    Debug.Log("Atmosphere: Shine problem!");
+
+                    break;
+                }
 
                 var shineCaster = ShineCasters[i];
 
@@ -536,8 +537,19 @@ namespace SpaceEngine.Core.Bodies
         {
             for (var i = 0; i < Mathf.Min(4, EclipseCasters.Count); i++)
             {
-                if (EclipseCasters[i] == null) { Debug.Log("Atmosphere: Eclipse caster problem!"); break; }
-                if ((EclipseCasters[i] as CelestialBody) == null) { Debug.Log("Atmosphere: Eclipse caster should be a planet!"); break; }
+                if (EclipseCasters[i] == null)
+                {
+                    Debug.Log("Atmosphere: Eclipse caster problem!");
+
+                    break;
+                }
+
+                if ((EclipseCasters[i] as CelestialBody) == null)
+                {
+                    Debug.Log("Atmosphere: Eclipse caster should be a planet!");
+
+                    break;
+                }
 
                 var eclipseCaster = EclipseCasters[i];
 
@@ -549,7 +561,12 @@ namespace SpaceEngine.Core.Bodies
         {
             for (var i = 0; i < Mathf.Min(4, Suns.Count); i++)
             {
-                if (Suns[i] == null) { Debug.Log("Atmosphere: Sun calculation problem!"); break; }
+                if (Suns[i] == null)
+                {
+                    Debug.Log("Atmosphere: Sun calculation problem!");
+
+                    break;
+                }
 
                 var sun = Suns[i];
 
@@ -583,7 +600,7 @@ namespace SpaceEngine.Core.Bodies
 
         #region Gizmos
 
-#if UNITY_EDITOR
+        #if UNITY_EDITOR
         private void OnDrawGizmosSelected()
         {
             if (DrawGizmos == false) return;
@@ -642,7 +659,7 @@ namespace SpaceEngine.Core.Bodies
                 Gizmos.DrawLine(currentPosition + Vector3.right * radius, transform.InverseTransformVector(Origin + direction) + Vector3.right * radius);
             }
         }
-#endif
+        #endif
 
         #endregion
 

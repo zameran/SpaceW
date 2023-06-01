@@ -33,14 +33,12 @@
 // Creator: zameran
 #endregion
 
-using SpaceEngine.Managers;
-
 using System.Collections;
-
+using SpaceEngine.Managers;
 using UnityEngine;
 using UnityEngine.UI;
 
-namespace SpaceEngine.UI.Panels
+namespace SpaceEngine.UI.PanelSystem.Panels
 {
     public class LoadingPanel : UIOverlay<LoadingPanel>
     {

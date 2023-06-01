@@ -30,16 +30,13 @@
  */
 #endregion
 
-using SpaceEngine.Tools;
-
 using System.IO;
-
+using SpaceEngine.Tools;
 using UnityEditor;
 using UnityEditor.Callbacks;
+using UnityEngine;
 
-using Debug = UnityEngine.Debug;
-
-namespace SpaceEngine.Postprocessors
+namespace SpaceEngine.Editor.Postprocessors
 {
     public sealed class BuildPostprocessor
     {

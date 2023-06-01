@@ -33,13 +33,10 @@
 // Creator: zameran
 #endregion
 
-using SpaceEngine.Core.Patterns.Singleton;
-
 using System;
 using System.Collections.Generic;
-
+using SpaceEngine.Core.Patterns.Singleton;
 using Unity.Collections;
-
 using UnityEngine;
 using UnityEngine.Experimental.Rendering;
 using UnityEngine.Rendering;

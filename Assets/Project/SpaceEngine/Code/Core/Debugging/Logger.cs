@@ -33,14 +33,11 @@
 // Creator: zameran
 #endregion
 
-using SpaceEngine.Tools;
-
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-
+using SpaceEngine.Tools;
 using UnityEngine;
-
 using Debug = UnityEngine.Debug;
 
 namespace SpaceEngine.Core.Debugging
@@ -70,7 +67,7 @@ namespace SpaceEngine.Core.Debugging
 
         Warning = 1,
         Exception = 2,
-        Error= 3
+        Error = 3
     }
 
     public sealed class LoggerPalette
@@ -127,9 +124,9 @@ namespace SpaceEngine.Core.Debugging
     // NOTE : Do not use in threading!
     public static class Logger
     {
-#if UNITY_EDITOR
+        #if UNITY_EDITOR
         private static readonly LoggerPalette Palette = new LoggerPalette();
-#endif
+        #endif
         private static readonly LoggerCategory DefaultLoggerCategory = LoggerCategory.Other;
 
         private static bool DebuggerActive;
@@ -176,9 +173,7 @@ namespace SpaceEngine.Core.Debugging
 
             if (frameType != null)
             {
-                var loggerClassAttributes = frameType.GetCustomAttributes(typeof(UseLogger), true) as UseLogger[];
-
-                if (loggerClassAttributes != null && loggerClassAttributes.Length != 0)
+                if (frameType.GetCustomAttributes(typeof(UseLogger), true) is UseLogger[] loggerClassAttributes && loggerClassAttributes.Length != 0)
                 {
                     loggerCategory = loggerClassAttributes[0].LoggerCategory;
                     DebuggerActive = true;
@@ -212,7 +207,9 @@ namespace SpaceEngine.Core.Debugging
 
         public static void LogException(object obj)
         {
-            throw new NotImplementedException();
+            Detect(out var loggerCategory);
+
+            PrintToLog(obj, LogType.Exception, loggerCategory);
         }
 
         public static void LogError(object obj)
@@ -237,14 +234,14 @@ namespace SpaceEngine.Core.Debugging
             var typeString = logType.ToString();
             var categoryString = loggerCategory.ToString();
 
-#if UNITY_EDITOR
+            #if UNITY_EDITOR
             obj = FormatForConsole(ToRGBHex(Palette.GetColorFromCategory(loggerCategory)), ToRGBHex(Palette.GetColorFromType(logType)), categoryString, typeString, obj);
-#elif UNITY_STANDALONE
+            #elif UNITY_STANDALONE
             obj = FormatForFile(DateTime.Now, categoryString, typeString, obj);
 
             try
             {
-                using (var outputStream = System.IO.File.AppendText(System.IO.Path.GetFullPath(string.Format("{0}/../Log.log", Application.dataPath))))
+                using (var outputStream = System.IO.File.AppendText(System.IO.Path.GetFullPath($"{Application.dataPath}/../Log.log")))
                 {
                     outputStream.WriteLine(obj);
                     outputStream.Flush();
@@ -255,11 +252,8 @@ namespace SpaceEngine.Core.Debugging
             {
                 Debug.LogException(ex);
             }
-            finally
-            {
-                
-            }
-#endif
+
+            #endif
             Debug.Log(obj);
         }
     }

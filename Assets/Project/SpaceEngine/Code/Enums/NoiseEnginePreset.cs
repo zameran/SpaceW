@@ -33,13 +33,16 @@
 // Creator: zameran
 #endregion
 
-public enum NoiseEnginePreset : uint
+namespace SpaceEngine.Enums
 {
-    Asteroid = 0,
-    Terra = 1,
-    Gasgiant = 2,
-    Sun = 3,
-    Clouds = 4,
-    CloudsGasGiant = 5,
-    Moon = 6
+    public enum NoiseEnginePreset : uint
+    {
+        Asteroid = 0,
+        Terra = 1,
+        Gasgiant = 2,
+        Sun = 3,
+        Clouds = 4,
+        CloudsGasGiant = 5,
+        Moon = 6
+    }
 }

@@ -33,345 +33,351 @@
 // Creator: zameran
 #endregion
 
+using System.Linq;
 using SpaceEngine.Cameras;
 using SpaceEngine.Core.Bodies;
 using SpaceEngine.Core.Patterns.Singleton;
 using SpaceEngine.Core.Utilities;
 using SpaceEngine.Enums;
-using SpaceEngine.Environment.Startfield;
+using SpaceEngine.Environment.Starfield;
 using SpaceEngine.Environment.Sun;
 using SpaceEngine.Helpers;
-using SpaceEngine.SciptableObjects;
+using SpaceEngine.ScriptableObjects;
 using SpaceEngine.Tools;
-
-using System.Linq;
-
 using UnityEngine;
 
-[ExecutionOrder(-9998)]
-public class GodManager : MonoSingleton<GodManager>
+namespace SpaceEngine.Managers
 {
-    public GameCamera View;
-
-    public Mesh AtmosphereMesh;
-    public Mesh[] OceanScreenMeshGrids;
-    public Mesh QuadMesh;
-
-    public Body[] Bodies;
-    public Starfield[] Starfields;
-    public SunGlare[] Sunglares;
-
-    public FragmentHDR HDRMode = FragmentHDR.ProlandOptimized;
-
-    public GenerationShadersCoreSettings GSCS;
-
-    public Body ActiveBody { get { return Bodies.FirstOrDefault(body => Helper.Enabled(body)); } }
-
-    public ComputeShader WriteData => GSCS.WriteData;
-    public ComputeShader ReadData => GSCS.ReadData;
-
-    public ComputeShader Precompute => GSCS.Precompute;
-    public ComputeShader Variance => GSCS.Variance;
-
-    public Shader FourierShader => GSCS.Fourier;
-
-    public bool UsesReversedZBuffer => SystemInfo.usesReversedZBuffer;
-
-    /// <summary>
-    /// This is the fourier transform size, must pow2 number. Recommend no higher or lower than 64, 128 or 256.
-    /// </summary>
-    public int FourierGridSize = 64;
-
-    /// <summary>
-    /// Quad mesh resolution in vertices.
-    /// </summary>
-    public int GridResolution = 25;
-
-    /// <summary>
-    /// Size of each grid in the projected grid. (number of pixels on screen).
-    /// </summary>
-    public int OceanGridResolution = 4;
-
-    /// <summary>
-    /// The size of each tile. For tiles made of raster data, this size is the tile width in pixels (the tile height is supposed equal to the tile width).
-    /// </summary>
-    public int TileSize => GridResolution * 4;
-
-    // TODO : Make these settings switching event based. To avoid constant every-frame checkings...
-    public bool Eclipses = true;
-    public bool Planetshadows = true;
-    public bool Planetshine = true;
-    public bool OceanSkyReflections = true;
-    public bool DelayedCalculations = false;
-    public bool FloatingOrigin = false;
-
-    public Texture2D[] NoiseTextures;
-
-    protected GodManager() { }
-
-    private void Awake()
+    [ExecutionOrder(-9998)]
+    public class GodManager : MonoSingleton<GodManager>
     {
-        UnsaveSingleton = true;
-        Instance = this;
+        public GameCamera View;
 
-        InitOceanFourier();
+        public Mesh AtmosphereMesh;
+        public Mesh[] OceanScreenMeshGrids;
+        public Mesh QuadMesh;
 
-        InitAtmosphereMesh();
-        InitQuadMesh();
-        InitOceanScreenGridMeshes();
+        public Body[] Bodies;
+        public Starfield[] Starfields;
+        public SunGlare[] Sunglares;
 
-        Bodies = FindObjectsByType<Body>(FindObjectsSortMode.InstanceID);
-        Starfields = FindObjectsByType<Starfield>(FindObjectsSortMode.InstanceID);
-        Sunglares = FindObjectsByType<SunGlare>(FindObjectsSortMode.InstanceID);
+        public FragmentHDR HDRMode = FragmentHDR.ProlandOptimized;
 
-        CreateOrthoNoise();
-    }
+        public GenerationShadersCoreSettings GSCS;
 
-    private void Update()
-    {
-        UpdateWorldShift();
-        UpdateView();
-    }
-
-    protected override void OnDestroy()
-    {
-        Helper.Destroy(AtmosphereMesh);
-        Helper.Destroy(QuadMesh);
-
-        if (NoiseTextures != null)
+        public Body ActiveBody
         {
-            for (var noiseTextureIndex = 0; noiseTextureIndex < NoiseTextures.Length; noiseTextureIndex++)
+            get { return Bodies.FirstOrDefault(body => Helper.Enabled(body)); }
+        }
+
+        public ComputeShader WriteData => GSCS.WriteData;
+        public ComputeShader ReadData => GSCS.ReadData;
+
+        public ComputeShader Precompute => GSCS.Precompute;
+        public ComputeShader Variance => GSCS.Variance;
+
+        public Shader FourierShader => GSCS.Fourier;
+
+        public bool UsesReversedZBuffer => SystemInfo.usesReversedZBuffer;
+
+        /// <summary>
+        /// This is the fourier transform size, must pow2 number. Recommend no higher or lower than 64, 128 or 256.
+        /// </summary>
+        public int FourierGridSize = 64;
+
+        /// <summary>
+        /// Quad mesh resolution in vertices.
+        /// </summary>
+        public int GridResolution = 25;
+
+        /// <summary>
+        /// Size of each grid in the projected grid. (number of pixels on screen).
+        /// </summary>
+        public int OceanGridResolution = 4;
+
+        /// <summary>
+        /// The size of each tile. For tiles made of raster data, this size is the tile width in pixels (the tile height is supposed equal to the tile width).
+        /// </summary>
+        public int TileSize => GridResolution * 4;
+
+        // TODO : Make these settings switching event based. To avoid constant every-frame checkings...
+        public bool Eclipses = true;
+        public bool Planetshadows = true;
+        public bool Planetshine = true;
+        public bool OceanSkyReflections = true;
+        public bool DelayedCalculations = false;
+        public bool FloatingOrigin = false;
+
+        public Texture2D[] NoiseTextures;
+
+        protected GodManager()
+        {
+        }
+
+        private void Awake()
+        {
+            UnsaveSingleton = true;
+            Instance = this;
+
+            InitOceanFourier();
+
+            InitAtmosphereMesh();
+            InitQuadMesh();
+            InitOceanScreenGridMeshes();
+
+            Bodies = FindObjectsByType<Body>(FindObjectsSortMode.InstanceID);
+            Starfields = FindObjectsByType<Starfield>(FindObjectsSortMode.InstanceID);
+            Sunglares = FindObjectsByType<SunGlare>(FindObjectsSortMode.InstanceID);
+
+            CreateOrthoNoise();
+        }
+
+        private void Update()
+        {
+            UpdateWorldShift();
+            UpdateView();
+        }
+
+        protected override void OnDestroy()
+        {
+            Helper.Destroy(AtmosphereMesh);
+            Helper.Destroy(QuadMesh);
+
+            if (NoiseTextures != null)
             {
-                var noiseTexture = NoiseTextures[noiseTextureIndex];
-
-                if (noiseTexture != null) Helper.Destroy(noiseTexture);
-            }
-        }
-
-        base.OnDestroy();
-    }
-
-    private void InitAtmosphereMesh()
-    {
-        AtmosphereMesh = MeshFactory.IcoSphere.Create();
-        AtmosphereMesh.bounds = new Bounds(Vector3.zero, new Vector3(1e8f, 1e8f, 1e8f));
-    }
-
-    private void InitQuadMesh()
-    {
-        QuadMesh = MeshFactory.MakePlane(GridResolution, MeshFactory.PLANE.XY, true, false, false);
-        QuadMesh.bounds = new Bounds(Vector3.zero, new Vector3(1e8f, 1e8f, 1e8f));
-    }
-
-    private void InitOceanScreenGridMeshes()
-    {
-        OceanGridResolution = Mathf.Max(1, OceanGridResolution);
-
-        // The number of squares in the grid on the x and y axis
-        var NX = Screen.width / OceanGridResolution;
-        var NY = Screen.height / OceanGridResolution;
-        var gridsCount = 1;
-
-        const int MAX_VERTS = 65000;
-
-        // The number of meshes need to make a grid of this resolution
-        if (NX * NY > MAX_VERTS)
-        {
-            gridsCount += (NX * NY) / MAX_VERTS;
-        }
-
-        OceanScreenMeshGrids = new Mesh[gridsCount];
-
-        // Make the meshes. The end product will be a grid of verts that cover the screen on the x and y axis with the z depth at 0. 
-        // This grid is then projected as the ocean by the shader
-        for (var i = 0; i < gridsCount; i++)
-        {
-            NY = Screen.height / gridsCount / OceanGridResolution;
-
-            OceanScreenMeshGrids[i] = MeshFactory.MakeOceanPlane(NX, NY, (float)i / (float)gridsCount, 1.0f / (float)gridsCount);
-            OceanScreenMeshGrids[i].bounds = new Bounds(Vector3.zero, new Vector3(1e8f, 1e8f, 1e8f));
-        }
-    }
-
-    private void InitOceanFourier()
-    {
-        if (FourierGridSize > 256)
-        {
-            Debug.Log("GodManager.InitOceanFourier: Fourier grid size must not be greater than 256, changing to 256...");
-            FourierGridSize = 256;
-        }
-
-        if (!Mathf.IsPowerOfTwo(FourierGridSize))
-        {
-            Debug.Log("GodManager.InitOceanFourier: Fourier grid size must be pow2 number, changing to nearest pow2 number...");
-            FourierGridSize = Mathf.NextPowerOfTwo(FourierGridSize);
-        }
-    }
-
-    public void UpdateSchedularWrapper()
-    {
-        Schedular.Instance.Run();
-    }
-
-    private void UpdateView()
-    {
-        if (View == null) return;
-
-        View.UpdateMatrices();
-        View.UpdateVectors();
-    }
-
-    private void UpdateWorldShift()
-    {
-        if (FloatingOrigin == false) return;
-
-        var cameraPosition = View.transform.position;
-
-        if (cameraPosition.sqrMagnitude > 500000.0)
-        {
-            var suns = FindObjectsByType<Sun>(FindObjectsSortMode.InstanceID);
-            var bodies = FindObjectsByType<CelestialBody>(FindObjectsSortMode.InstanceID);
-
-            foreach (var sun in suns)
-            {
-                var sunTransform = sun.transform;
-
-                if (sunTransform.parent == null)
+                for (var noiseTextureIndex = 0; noiseTextureIndex < NoiseTextures.Length; noiseTextureIndex++)
                 {
-                    sun.transform.position -= cameraPosition;
+                    var noiseTexture = NoiseTextures[noiseTextureIndex];
+
+                    if (noiseTexture != null) Helper.Destroy(noiseTexture);
                 }
             }
 
-            foreach (var body in bodies)
-            {
-                var bodyTransform = body.transform;
-
-                if (bodyTransform.parent == null)
-                {
-                    body.Origin -= cameraPosition;
-                }
-            }
-
-            if (View.transform.parent == null) View.transform.position -= cameraPosition;
+            base.OnDestroy();
         }
-    }
 
-    private void CreateOrthoNoise()
-    {
-        var tileWidth = TileSize;
-        var color = new Color();
-
-        NoiseTextures = new Texture2D[6];
-
-        var layers = new int[] { 0, 1, 3, 5, 7, 15 };
-        var rand = 1234567;
-
-        Random.InitState(0);
-
-        for (var nl = 0; nl < 6; ++nl)
+        private void InitAtmosphereMesh()
         {
-            var layer = layers[nl];
+            AtmosphereMesh = MeshFactory.IcoSphere.Create();
+            AtmosphereMesh.bounds = new Bounds(Vector3.zero, new Vector3(1e8f, 1e8f, 1e8f));
+        }
 
-            NoiseTextures[nl] = new Texture2D(tileWidth, tileWidth, TextureFormat.ARGB32, false, true);
+        private void InitQuadMesh()
+        {
+            QuadMesh = MeshFactory.MakePlane(GridResolution, MeshFactory.PLANE.XY, true, false, false);
+            QuadMesh.bounds = new Bounds(Vector3.zero, new Vector3(1e8f, 1e8f, 1e8f));
+        }
 
-            // Corners
-            for (var j = 0; j < tileWidth; ++j)
+        private void InitOceanScreenGridMeshes()
+        {
+            OceanGridResolution = Mathf.Max(1, OceanGridResolution);
+
+            // The number of squares in the grid on the x and y axis
+            var NX = Screen.width / OceanGridResolution;
+            var NY = Screen.height / OceanGridResolution;
+            var gridsCount = 1;
+
+            const int MAX_VERTS = 65000;
+
+            // The number of meshes need to make a grid of this resolution
+            if (NX * NY > MAX_VERTS)
             {
-                for (var i = 0; i < tileWidth; ++i)
-                {
-                    NoiseTextures[nl].SetPixel(i, j, new Color(0.5f, 0.5f, 0.5f, 0.5f));
-                }
+                gridsCount += (NX * NY) / MAX_VERTS;
             }
 
-            // Bottom border
-            Random.InitState((layer & 1) == 0 ? 7654321 : 5647381);
+            OceanScreenMeshGrids = new Mesh[gridsCount];
 
-            for (var v = 2; v < 4; ++v)
+            // Make the meshes. The end product will be a grid of verts that cover the screen on the x and y axis with the z depth at 0. 
+            // This grid is then projected as the ocean by the shader
+            for (var i = 0; i < gridsCount; i++)
             {
-                for (var h = 4; h < tileWidth - 4; ++h)
+                NY = Screen.height / gridsCount / OceanGridResolution;
+
+                OceanScreenMeshGrids[i] = MeshFactory.MakeOceanPlane(NX, NY, (float)i / (float)gridsCount, 1.0f / (float)gridsCount);
+                OceanScreenMeshGrids[i].bounds = new Bounds(Vector3.zero, new Vector3(1e8f, 1e8f, 1e8f));
+            }
+        }
+
+        private void InitOceanFourier()
+        {
+            if (FourierGridSize > 256)
+            {
+                Debug.Log("GodManager.InitOceanFourier: Fourier grid size must not be greater than 256, changing to 256...");
+                FourierGridSize = 256;
+            }
+
+            if (!Mathf.IsPowerOfTwo(FourierGridSize))
+            {
+                Debug.Log("GodManager.InitOceanFourier: Fourier grid size must be pow2 number, changing to nearest pow2 number...");
+                FourierGridSize = Mathf.NextPowerOfTwo(FourierGridSize);
+            }
+        }
+
+        public void UpdateSchedularWrapper()
+        {
+            Schedular.Instance.Run();
+        }
+
+        private void UpdateView()
+        {
+            if (View == null) return;
+
+            View.UpdateMatrices();
+            View.UpdateVectors();
+        }
+
+        private void UpdateWorldShift()
+        {
+            if (FloatingOrigin == false) return;
+
+            var cameraPosition = View.transform.position;
+
+            if (cameraPosition.sqrMagnitude > 500000.0)
+            {
+                var suns = FindObjectsByType<Sun>(FindObjectsSortMode.InstanceID);
+                var bodies = FindObjectsByType<CelestialBody>(FindObjectsSortMode.InstanceID);
+
+                foreach (var sun in suns)
                 {
-                    for (var c = 0; c < 4; ++c)
+                    var sunTransform = sun.transform;
+
+                    if (sunTransform.parent == null)
                     {
-                        color[c] = Random.value;
+                        sun.transform.position -= cameraPosition;
                     }
-
-                    NoiseTextures[nl].SetPixel(h, v, color);
-                    NoiseTextures[nl].SetPixel(tileWidth - 1 - h, 3 - v, color);
                 }
+
+                foreach (var body in bodies)
+                {
+                    var bodyTransform = body.transform;
+
+                    if (bodyTransform.parent == null)
+                    {
+                        body.Origin -= cameraPosition;
+                    }
+                }
+
+                if (View.transform.parent == null) View.transform.position -= cameraPosition;
             }
+        }
 
-            // Right border
-            Random.InitState((layer & 2) == 0 ? 7654321 : 5647381);
+        private void CreateOrthoNoise()
+        {
+            var tileWidth = TileSize;
+            var color = new Color();
 
-            for (var h = tileWidth - 3; h >= tileWidth - 4; --h)
+            NoiseTextures = new Texture2D[6];
+
+            var layers = new int[] { 0, 1, 3, 5, 7, 15 };
+            var rand = 1234567;
+
+            Random.InitState(0);
+
+            for (var nl = 0; nl < 6; ++nl)
             {
+                var layer = layers[nl];
+
+                NoiseTextures[nl] = new Texture2D(tileWidth, tileWidth, TextureFormat.ARGB32, false, true);
+
+                // Corners
+                for (var j = 0; j < tileWidth; ++j)
+                {
+                    for (var i = 0; i < tileWidth; ++i)
+                    {
+                        NoiseTextures[nl].SetPixel(i, j, new Color(0.5f, 0.5f, 0.5f, 0.5f));
+                    }
+                }
+
+                // Bottom border
+                Random.InitState((layer & 1) == 0 ? 7654321 : 5647381);
+
+                for (var v = 2; v < 4; ++v)
+                {
+                    for (var h = 4; h < tileWidth - 4; ++h)
+                    {
+                        for (var c = 0; c < 4; ++c)
+                        {
+                            color[c] = Random.value;
+                        }
+
+                        NoiseTextures[nl].SetPixel(h, v, color);
+                        NoiseTextures[nl].SetPixel(tileWidth - 1 - h, 3 - v, color);
+                    }
+                }
+
+                // Right border
+                Random.InitState((layer & 2) == 0 ? 7654321 : 5647381);
+
+                for (var h = tileWidth - 3; h >= tileWidth - 4; --h)
+                {
+                    for (var v = 4; v < tileWidth - 4; ++v)
+                    {
+                        for (var c = 0; c < 4; ++c)
+                        {
+                            color[c] = Random.value;
+                        }
+
+                        NoiseTextures[nl].SetPixel(h, v, color);
+                        NoiseTextures[nl].SetPixel(2 * tileWidth - 5 - h, tileWidth - 1 - v, color);
+                    }
+                }
+
+                // Top border
+                Random.InitState((layer & 4) == 0 ? 7654321 : 5647381);
+
+                for (var v = tileWidth - 2; v < tileWidth; ++v)
+                {
+                    for (var h = 4; h < tileWidth - 4; ++h)
+                    {
+                        for (var c = 0; c < 4; ++c)
+                        {
+                            color[c] = Random.value;
+                        }
+
+                        NoiseTextures[nl].SetPixel(h, v, color);
+                        NoiseTextures[nl].SetPixel(tileWidth - 1 - h, 2 * tileWidth - 5 - v, color);
+                    }
+                }
+
+                // Left border
+                Random.InitState((layer & 8) == 0 ? 7654321 : 5647381);
+
+                for (var h = 1; h >= 0; --h)
+                {
+                    for (var v = 4; v < tileWidth - 4; ++v)
+                    {
+                        for (var c = 0; c < 4; ++c)
+                        {
+                            color[c] = Random.value;
+                        }
+
+                        NoiseTextures[nl].SetPixel(h, v, color);
+                        NoiseTextures[nl].SetPixel(3 - h, tileWidth - 1 - v, color);
+                    }
+                }
+
+                // Center
+                Random.InitState(rand);
+
                 for (var v = 4; v < tileWidth - 4; ++v)
                 {
-                    for (var c = 0; c < 4; ++c)
+                    for (var h = 4; h < tileWidth - 4; ++h)
                     {
-                        color[c] = Random.value;
+                        for (var c = 0; c < 4; ++c)
+                        {
+                            color[c] = Random.value;
+                        }
+
+                        NoiseTextures[nl].SetPixel(h, v, color);
                     }
-
-                    NoiseTextures[nl].SetPixel(h, v, color);
-                    NoiseTextures[nl].SetPixel(2 * tileWidth - 5 - h, tileWidth - 1 - v, color);
                 }
+
+                //randomize for next texture
+                rand = (rand * 1103515245 + 12345) & 0x7FFFFFFF;
+
+                NoiseTextures[nl].name = string.Format("OrthoNoise_{0}x{0}_{1}", tileWidth, nl);
+                NoiseTextures[nl].Apply();
             }
-
-            // Top border
-            Random.InitState((layer & 4) == 0 ? 7654321 : 5647381);
-
-            for (var v = tileWidth - 2; v < tileWidth; ++v)
-            {
-                for (var h = 4; h < tileWidth - 4; ++h)
-                {
-                    for (var c = 0; c < 4; ++c)
-                    {
-                        color[c] = Random.value;
-                    }
-
-                    NoiseTextures[nl].SetPixel(h, v, color);
-                    NoiseTextures[nl].SetPixel(tileWidth - 1 - h, 2 * tileWidth - 5 - v, color);
-                }
-            }
-
-            // Left border
-            Random.InitState((layer & 8) == 0 ? 7654321 : 5647381);
-
-            for (var h = 1; h >= 0; --h)
-            {
-                for (var v = 4; v < tileWidth - 4; ++v)
-                {
-                    for (var c = 0; c < 4; ++c)
-                    {
-                        color[c] = Random.value;
-                    }
-
-                    NoiseTextures[nl].SetPixel(h, v, color);
-                    NoiseTextures[nl].SetPixel(3 - h, tileWidth - 1 - v, color);
-                }
-            }
-
-            // Center
-            Random.InitState(rand);
-
-            for (var v = 4; v < tileWidth - 4; ++v)
-            {
-                for (var h = 4; h < tileWidth - 4; ++h)
-                {
-                    for (var c = 0; c < 4; ++c)
-                    {
-                        color[c] = Random.value;
-                    }
-
-                    NoiseTextures[nl].SetPixel(h, v, color);
-                }
-            }
-
-            //randomize for next texture
-            rand = (rand * 1103515245 + 12345) & 0x7FFFFFFF;
-
-            NoiseTextures[nl].name = string.Format("OrthoNoise_{0}x{0}_{1}", tileWidth, nl);
-            NoiseTextures[nl].Apply();
         }
     }
 }

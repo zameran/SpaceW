@@ -33,9 +33,8 @@
 // Creator: zameran
 #endregion
 
-using SpaceEngine.Enums;
-
 using System;
+using SpaceEngine.Enums;
 
 namespace SpaceEngine.Pluginator.Attributes
 {

@@ -33,14 +33,11 @@
 // Creator: zameran
 #endregion
 
-using SpaceEngine.Core.Debugging;
-using SpaceEngine.Tools;
-
 using System;
 using System.Collections;
-
+using SpaceEngine.Core.Debugging;
+using SpaceEngine.Tools;
 using UnityEngine;
-
 using Logger = SpaceEngine.Core.Debugging.Logger;
 
 namespace SpaceEngine.Pluginator

@@ -1,7 +1,6 @@
 using System;
 using System.Collections;
 using System.Threading;
-
 using UnityEngine;
 
 namespace SpaceEngine.Core.Utilities

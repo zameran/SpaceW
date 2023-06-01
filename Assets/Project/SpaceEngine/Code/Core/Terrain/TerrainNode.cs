@@ -33,23 +33,21 @@
 // Creator: zameran
 #endregion
 
+using System;
+using System.Collections.Generic;
+using System.Linq;
 using SpaceEngine.Core.Bodies;
 using SpaceEngine.Core.Numerics.Matrices;
 using SpaceEngine.Core.Numerics.Shapes;
 using SpaceEngine.Core.Numerics.Vectors;
-using SpaceEngine.Core.Patterns.Strategy.Uniformed;
+using SpaceEngine.Core.Patterns.Strategy;
 using SpaceEngine.Core.Terrain.Deformation;
 using SpaceEngine.Core.Tile.Producer;
 using SpaceEngine.Core.Tile.Samplers;
 using SpaceEngine.Helpers;
-
-using System;
-using System.Collections.Generic;
-using System.Linq;
-
+using SpaceEngine.Managers;
 using UnityEngine;
 using UnityEngine.Rendering;
-
 using Functions = SpaceEngine.Core.Numerics.Functions;
 
 namespace SpaceEngine.Core.Terrain

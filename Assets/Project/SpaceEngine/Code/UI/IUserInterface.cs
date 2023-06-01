@@ -33,7 +33,10 @@
 // Creator: zameran
 #endregion
 
-public interface IUserInterface
+namespace SpaceEngine.UI
 {
+    public interface IUserInterface
+    {
 
+    }
 }

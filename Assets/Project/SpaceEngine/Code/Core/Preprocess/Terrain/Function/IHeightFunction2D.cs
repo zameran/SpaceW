@@ -33,7 +33,7 @@
 // Creator: zameran
 #endregion
 
-namespace SpaceEngine.Core.Preprocess.Terrain
+namespace SpaceEngine.Core.Preprocess.Terrain.Function
 {
     public interface IHeightFunction2D : IFunction2D<float>
     {

@@ -34,7 +34,6 @@
 #endregion
 
 using System;
-
 using UnityEngine;
 
 namespace SpaceEngine.Tools

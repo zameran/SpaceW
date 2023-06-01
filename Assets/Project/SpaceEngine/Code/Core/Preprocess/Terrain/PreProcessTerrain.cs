@@ -33,18 +33,18 @@
 // Creator: zameran
 #endregion
 
-using SpaceEngine.Core.Debugging;
-using SpaceEngine.Core.Exceptions;
-
-using System;
-using System.IO;
-
 #if UNITY_EDITOR
 using UnityEditor;
 #endif
-
+using System;
+using System.IO;
+using SpaceEngine.Core.Debugging;
+using SpaceEngine.Core.Exceptions;
+using SpaceEngine.Core.Preprocess.Terrain.Function;
+using SpaceEngine.Core.Preprocess.Terrain.Mipmap;
+using SpaceEngine.Core.Producers.Ortho;
+using SpaceEngine.Core.Producers.Residual;
 using UnityEngine;
-
 using Logger = SpaceEngine.Core.Debugging.Logger;
 
 namespace SpaceEngine.Core.Preprocess.Terrain
@@ -98,13 +98,13 @@ namespace SpaceEngine.Core.Preprocess.Terrain
         [SerializeField]
         bool DeleteTempOnFinish = true;
 
-        InputMap Source;
+        InputMap.InputMap Source;
 
         private string ApplicationDataPath = "";
 
         private void Start()
         {
-            Source = GetComponent<InputMap>();
+            Source = GetComponent<InputMap.InputMap>();
 
             if (Source == null) { throw new NullReferenceException("Input map is null. Have you added a Input map component to PreProcess game object?"); }
 
@@ -183,7 +183,7 @@ namespace SpaceEngine.Core.Preprocess.Terrain
         /// <param name="source">The map to be preprocessed.</param>
         /// <param name="tempFolder">Where temporary files must be saved.</param>
         /// <param name="destinationFolder">Where the precomputed file must be saved.</param>
-        void PreprocessPlaneDem(InputMap source, string tempFolder, string destinationFolder)
+        void PreprocessPlaneDem(InputMap.InputMap source, string tempFolder, string destinationFolder)
         {
             if (DestinationTileSize % DestinationMinTileSize != 0) { throw new InvalidParameterException("DestinationTileSize must be a multiple of DestinationMinTileSize!"); }
 
@@ -199,7 +199,7 @@ namespace SpaceEngine.Core.Preprocess.Terrain
             Logger.Log($"PreProcessTerrain.PreprocessPlaneDem: Computation time: {(Time.realtimeSinceStartup - startTime)} s");
         }
 
-        void PreprocessSphericalDem(InputMap source, string tempFolder, string destinationFolder)
+        void PreprocessSphericalDem(InputMap.InputMap source, string tempFolder, string destinationFolder)
         {
             if (DestinationTileSize % DestinationMinTileSize != 0) { throw new InvalidParameterException("DestinationTileSize must be a multiple of DestinationMinTileSize!"); }
 
@@ -238,7 +238,7 @@ namespace SpaceEngine.Core.Preprocess.Terrain
         /// <param name="source">The map to be preprocessed.</param>
         /// <param name="tempFolder">Where temporary files must be saved.</param>
         /// <param name="destinationFolder">Where the precomputed file must be saved.</param>
-        void PreprocessPlaneOrtho(InputMap source, string tempFolder, string destinationFolder)
+        void PreprocessPlaneOrtho(InputMap.InputMap source, string tempFolder, string destinationFolder)
         {
             var startTime = Time.realtimeSinceStartup;
             var destinationSize = DestinationTileSize << DestinationMaxLevel;

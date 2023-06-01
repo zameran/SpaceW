@@ -34,10 +34,9 @@
 #endregion
 
 using System;
-
 using UnityEngine;
 
-namespace SpaceEngine.SciptableObjects
+namespace SpaceEngine.ScriptableObjects
 {
     [Serializable]
     [CreateAssetMenu(fileName = "GenerationShadersCoreSettings", menuName = "Create Generation Shaders Core Settings")]

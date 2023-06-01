@@ -33,15 +33,13 @@
 // Creator: zameran
 #endregion
 
-using SpaceEngine.Tools;
-
 using System.Collections;
-
+using SpaceEngine.Tools;
 using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.EventSystems;
 
-namespace SpaceEngine.UI
+namespace SpaceEngine.UI.PanelSystem
 {
     [RequireComponent(typeof(CanvasGroup))]
     public class UIPanel : UIBehaviour

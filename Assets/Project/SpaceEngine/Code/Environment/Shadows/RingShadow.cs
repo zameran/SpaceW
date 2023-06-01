@@ -33,9 +33,9 @@
 // Creator: zameran
 #endregion
 
+using SpaceEngine.Core;
 using SpaceEngine.Environment.Rings;
 using SpaceEngine.Helpers;
-
 using UnityEngine;
 
 namespace SpaceEngine.Environment.Shadows

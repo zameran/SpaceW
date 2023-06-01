@@ -35,15 +35,13 @@
 
 using SpaceEngine.Core;
 using SpaceEngine.Core.Bodies;
-using SpaceEngine.Core.Patterns.Strategy.Renderable;
-using SpaceEngine.Core.Patterns.Strategy.Uniformed;
+using SpaceEngine.Core.Patterns.Strategy;
 using SpaceEngine.Enums;
 using SpaceEngine.Helpers;
-
 using UnityEngine;
 using UnityEngine.Rendering;
 
-namespace SpaceEngine.AtmosphericScattering.Cloudsphere
+namespace SpaceEngine.Environment.Cloudsphere
 {
     public class Cloudsphere : Node<Cloudsphere>, IUniformed<Material>, IRenderable<Cloudsphere>
     {

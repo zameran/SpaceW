@@ -34,7 +34,6 @@
 #endregion
 
 using SpaceEngine.Helpers;
-
 using UnityEngine;
 
 namespace SpaceEngine.Environment.Shadows

@@ -33,20 +33,21 @@
 // Creator: zameran
 #endregion
 
-using SpaceEngine.Tools;
-
 using System.IO;
-
+using SpaceEngine.Tools;
 using UnityEngine;
 
-public sealed class Cleaner : MonoBehaviour
+namespace SpaceEngine
 {
-    private void Awake()
+    public sealed class Cleaner : MonoBehaviour
     {
-        foreach (var file in Directory.GetFiles(PathGlobals.GlobalRootPath, "*Log*.log"))
+        private void Awake()
         {
-            if (File.Exists(file))
-                File.Delete(file);
+            foreach (var file in Directory.GetFiles(PathGlobals.GlobalRootPath, "*Log*.log"))
+            {
+                if (File.Exists(file))
+                    File.Delete(file);
+            }
         }
     }
 }

@@ -35,9 +35,7 @@
 
 using System;
 using System.Diagnostics;
-
 using UnityEngine;
-
 using Debug = UnityEngine.Debug;
 
 namespace SpaceEngine.Debugging
@@ -129,7 +127,9 @@ namespace SpaceEngine.Debugging
         void Awake()
         {
             if (gameObject.GetComponent<Camera>() == null)
+            {
                 Debug.LogWarning("DebugDrawFPSGraph: FPS Graph needs to be attached to a Camera object!");
+            }
 
             CreateLineMaterial();
 

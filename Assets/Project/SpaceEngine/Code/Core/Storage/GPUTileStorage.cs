@@ -36,7 +36,6 @@
 using SpaceEngine.Core.Tile.Storage;
 using SpaceEngine.Tools;
 using SpaceEngine.Utilities;
-
 using UnityEngine;
 
 namespace SpaceEngine.Core.Storage

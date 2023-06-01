@@ -34,13 +34,16 @@
 #endregion
 
 using SpaceEngine.Helpers;
-
+using SpaceEngine.Managers;
 using UnityEngine;
 
 namespace SpaceEngine.Debugging
 {
-    public sealed class DebugDrawFrustumView : DebugDraw
+    public sealed class DebugDrawTerrainNode : DebugDraw
     {
+        private readonly int[,] ORDER = new int[,] { { 1, 0 }, { 2, 3 }, { 0, 2 }, { 3, 1 } };
+        private readonly Color[] Colors = new Color[] { Color.blue, Color.red, Color.yellow, Color.green, Color.magenta, Color.cyan };
+
         protected override void Start()
         {
             base.Start();
@@ -58,47 +61,17 @@ namespace SpaceEngine.Debugging
 
         protected override void Draw()
         {
-            var nearCorners = new Vector3[4]; // Approx'd nearplane corners
-            var farCorners = new Vector3[4]; // Approx'd farplane corners
-            var frustumPlanes = GeometryUtility.CalculateFrustumPlanes(GodManager.Instance.View.ScreenToCameraMatrix.ToMatrix4x4()); // NOTE : CameraToScreen
+            var target = GodManager.Instance.ActiveBody;
 
-            var tempFrustumPlane = frustumPlanes[1];
-            frustumPlanes[1] = frustumPlanes[2];
-            frustumPlanes[2] = tempFrustumPlane; // Swap [1] and [2] so the order is better for the loop
+            if (target == null) return;
 
-            GL.PushMatrix();
-            GL.LoadIdentity();
-            GL.MultMatrix(CameraHelper.Main().worldToCameraMatrix);
-            GL.LoadProjectionMatrix(CameraHelper.Main().projectionMatrix);
-
-            lineMaterial.renderQueue = 5000;
-            lineMaterial.SetPass(0);
-
-            GL.Begin(GL.LINES);
-
-            for (var i = 0; i < 4; i++)
+            for (var i = 0; i < target.TerrainNodes.Count; i++)
             {
-                nearCorners[i] = VectorHelper.Plane3Intersect(frustumPlanes[4], frustumPlanes[i], frustumPlanes[(i + 1) % 4]); // Near corners on the created projection matrix
-                farCorners[i] = VectorHelper.Plane3Intersect(frustumPlanes[5], frustumPlanes[i], frustumPlanes[(i + 1) % 4]); // Far corners on the created projection matrix
+                var q = target.TerrainNodes[i];
+                var root = q.TerrainQuadRoot;
+
+                root?.DrawQuadOutline(CameraHelper.Main(), lineMaterial, Colors[q.Face % 6], ORDER);
             }
-
-            for (var i = 0; i < 4; i++)
-            {
-                GL.Color(Color.red);
-                GL.Vertex3(nearCorners[i].x, nearCorners[i].y, nearCorners[i].z);
-                GL.Vertex3(nearCorners[(i + 1) % 4].x, nearCorners[(i + 1) % 4].y, nearCorners[(i + 1) % 4].z);
-
-                GL.Color(Color.blue);
-                GL.Vertex3(farCorners[i].x, farCorners[i].y, farCorners[i].z);
-                GL.Vertex3(farCorners[(i + 1) % 4].x, farCorners[(i + 1) % 4].y, farCorners[(i + 1) % 4].z);
-
-                GL.Color(Color.green);
-                GL.Vertex3(nearCorners[i].x, nearCorners[i].y, nearCorners[i].z);
-                GL.Vertex3(farCorners[i].x, farCorners[i].y, farCorners[i].z);
-            }
-
-            GL.End();
-            GL.PopMatrix();
         }
     }
 }

@@ -34,13 +34,12 @@
 #endregion
 
 using SpaceEngine.Environment.Atmospheric;
-
 using UnityEditor;
 
-namespace SpaceEngine.CustomEditors
+namespace SpaceEngine.Editor.CustomEditors
 {
     [CustomEditor(typeof(Atmosphere))]
-    public sealed class AtmosphereCustomEditor : Editor
+    public sealed class AtmosphereCustomEditor : UnityEditor.Editor
     {
         public override void OnInspectorGUI()
         {

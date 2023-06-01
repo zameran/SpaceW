@@ -37,7 +37,7 @@
 using SpaceEngine.Helpers;
 using SpaceEngine.Tools;
 
-namespace SpaceEngine.Tests
+namespace SpaceEngine.Test
 {
     public class ProceduralMeshTest : DrawMeshTest
     {

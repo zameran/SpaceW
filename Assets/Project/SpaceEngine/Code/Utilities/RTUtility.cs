@@ -25,10 +25,8 @@
 
 using System;
 using System.IO;
-
 using UnityEngine;
 using UnityEngine.Rendering;
-
 using Object = UnityEngine.Object;
 
 namespace SpaceEngine.Utilities

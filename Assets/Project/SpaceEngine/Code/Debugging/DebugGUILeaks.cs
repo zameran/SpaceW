@@ -1,4 +1,4 @@
-﻿#region License
+#region License
 // Procedural planet generator.
 // 
 // Copyright (C) 2015-2023 Denis Ovchinnikov [zameran] 
@@ -33,17 +33,17 @@
 // Creator: zameran
 #endregion
 
-using SpaceEngine.Core.Bodies;
-using SpaceEngine.Helpers;
+using System;
+using System.Collections.Generic;
 using SpaceEngine.Tools;
-
 using UnityEngine;
+using Object = UnityEngine.Object;
 
 namespace SpaceEngine.Debugging
 {
-    public sealed class DebugGUIBodyInfo : DebugGUI
+    public sealed class DebugGUILeaks : DebugGUI
     {
-        public Body Body => GodManager.Instance.ActiveBody;
+        public Object[] Objects;
 
         protected override void Awake()
         {
@@ -53,67 +53,71 @@ namespace SpaceEngine.Debugging
         protected override void Start()
         {
             base.Start();
+
+            Objects = FindObjectsByType<Object>(FindObjectsSortMode.InstanceID);
+        }
+
+        private void FixedUpdate()
+        {
+            if (Time.frameCount % 64 == 0)
+            {
+                Objects = FindObjectsByType<Object>(FindObjectsSortMode.InstanceID);
+            }
         }
 
         protected override void OnGUI()
         {
             base.OnGUI();
 
-            GUILayout.Window(0, debugInfoBounds, UI, "Body Info");
+            GUILayout.Window(0, debugInfoBounds, UI, "Leaks Info");
         }
 
         protected override void UI(int id)
         {
-            ScrollPosition = GUILayout.BeginScrollView(ScrollPosition, false, true);
-
-            if (Body != null && Helper.Enabled(Body))
+            ScrollPosition = GUILayout.BeginScrollView(ScrollPosition, false, true, GUILayout.Width(debugInfoBounds.width), GUILayout.Height(debugInfoBounds.height));
             {
-                GUILayoutExtensions.VerticalBoxed("Body parameters: ", GUISkin, () =>
+                #region Do Magic
+
+                if (Objects == null) return;
+
+                var dictionary = new Dictionary<Type, int>();
+
+                for (var i = 0; i < Objects.Length; i++)
                 {
-                    GUILayoutExtensions.VerticalBoxed("", GUISkin, () =>
+                    var obj = Objects[i];
+                    var key = obj.GetType();
+
+                    if (dictionary.ContainsKey(key))
                     {
-                        if (Body.TCCPS != null)
-                        {
-                            var materialTable = Body.TCCPS.MaterialTable;
-
-                            if (materialTable != null && materialTable.Lut != null)
-                            {
-                                GUILayout.Label("Material Table: ");
-                                GUILayoutExtensions.VerticalBoxed("", GUISkin, () =>
-                                {
-                                    GUILayoutExtensions.Horizontal(() =>
-                                    {
-                                        GUILayout.Label(materialTable.Lut);
-                                    });
-                                });
-                            }
-                        }
-                    });
-                });
-
-                GUILayoutExtensions.SpacingSeparator();
-
-                if (Body.Ocean != null && Body.OceanEnabled && Helper.Enabled(Body.Ocean))
-                {
-                    GUILayoutExtensions.VerticalBoxed("Ocean parameters: ", GUISkin, () =>
+                        dictionary[key]++;
+                    }
+                    else
                     {
-                        GUILayoutExtensions.VerticalBoxed("", GUISkin, () =>
-                        {
-                            GUILayoutExtensions.SliderWithField("Level: ", 0.0f, 5.0f, ref Body.Ocean.OceanLevel);
-                            GUILayoutExtensions.SliderWithField("Z Min: ", 0.0f, 50000.0f, ref Body.Ocean.ZMin);
-                        });
-                    });
+                        dictionary[key] = 1;
+                    }
+                }
 
-                    GUILayoutExtensions.SpacingSeparator();
-                }
-                else
+                #endregion
+
+                var entries = new List<KeyValuePair<Type, int>>(dictionary);
+
+                entries.Sort((firstPair, nextPair) => nextPair.Value.CompareTo((firstPair.Value)));
+
+                GUILayout.BeginVertical();
+
+                for (var i = 0; i < entries.Count; i++)
                 {
-                    GUILayoutExtensions.DrawBadHolder("Ocean parameters: ", "No Ocean!?", GUISkin);
+                    var entry = entries[i];
+
+                    GUILayoutExtensions.HorizontalBoxed("", GUISkin, () =>
+                    {
+                        GUILayoutExtensions.LabelWithFlexibleSpace(entry.Key.FullName, entry.Value.ToString());
+                    });
                 }
-            }
-            else
-            {
-                GUILayoutExtensions.DrawBadHolder("Body parameters: ", "No Body!?", GUISkin);
+
+                GUILayout.Space(10);
+
+                GUILayout.EndVertical();
             }
 
             GUILayout.EndScrollView();

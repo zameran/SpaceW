@@ -33,15 +33,13 @@
 // Creator: zameran
 #endregion
 
-using SpaceEngine.Core.Patterns.Strategy.Uniformed;
+using System;
+using System.Collections.Generic;
+using SpaceEngine.Core.Patterns.Strategy;
 using SpaceEngine.Core.Storage;
 using SpaceEngine.Core.Terrain;
 using SpaceEngine.Core.Tile.Producer;
 using SpaceEngine.Core.Utilities;
-
-using System;
-using System.Collections.Generic;
-
 using UnityEngine;
 
 namespace SpaceEngine.Core.Tile.Samplers

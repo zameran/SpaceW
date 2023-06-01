@@ -33,13 +33,11 @@
 // Creator: zameran
 #endregion
 
+using System.Collections.Generic;
 using SpaceEngine.Core.Containers;
 using SpaceEngine.Core.Exceptions;
 using SpaceEngine.Core.Tile.Producer;
 using SpaceEngine.Core.Tile.Storage;
-
-using System.Collections.Generic;
-
 using UnityEngine;
 
 namespace SpaceEngine.Core.Tile.Cache

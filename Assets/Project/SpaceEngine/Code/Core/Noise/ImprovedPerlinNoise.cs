@@ -33,12 +33,9 @@
 // Creator: zameran
 #endregion
 
-using SpaceEngine.Helpers;
-
 using System;
-
+using SpaceEngine.Helpers;
 using UnityEngine;
-
 using Random = UnityEngine.Random;
 
 namespace SpaceEngine.Core.Noise
@@ -98,7 +95,7 @@ namespace SpaceEngine.Core.Noise
         {
             if (PermutationTable1D) return;
 
-            PermutationTable1D = Helper.CreateTempTeture2D(SIZE, 1, TextureFormat.Alpha8, false, true, false);
+            PermutationTable1D = Helper.CreateTempTexture2D(SIZE, 1, TextureFormat.Alpha8, false, true, false);
             PermutationTable1D.filterMode = FilterMode.Point;
             PermutationTable1D.wrapMode = TextureWrapMode.Repeat;
 
@@ -114,7 +111,7 @@ namespace SpaceEngine.Core.Noise
         {
             if (PermutationTable2D) return;
 
-            PermutationTable2D = Helper.CreateTempTeture2D(SIZE, SIZE, TextureFormat.ARGB32, false, true, false);
+            PermutationTable2D = Helper.CreateTempTexture2D(SIZE, SIZE, TextureFormat.ARGB32, false, true, false);
             PermutationTable2D.filterMode = FilterMode.Point;
             PermutationTable2D.wrapMode = TextureWrapMode.Repeat;
 
@@ -141,7 +138,7 @@ namespace SpaceEngine.Core.Noise
         {
             if (Gradient2D) return;
 
-            Gradient2D = Helper.CreateTempTeture2D(8, 1, TextureFormat.RGB24, false, true, false);
+            Gradient2D = Helper.CreateTempTexture2D(8, 1, TextureFormat.RGB24, false, true, false);
             Gradient2D.filterMode = FilterMode.Point;
             Gradient2D.wrapMode = TextureWrapMode.Repeat;
 
@@ -161,7 +158,7 @@ namespace SpaceEngine.Core.Noise
         {
             if (Gradient3D) return;
 
-            Gradient3D = Helper.CreateTempTeture2D(SIZE, 1, TextureFormat.RGB24, false, true, false);
+            Gradient3D = Helper.CreateTempTexture2D(SIZE, 1, TextureFormat.RGB24, false, true, false);
             Gradient3D.filterMode = FilterMode.Point;
             Gradient3D.wrapMode = TextureWrapMode.Repeat;
 

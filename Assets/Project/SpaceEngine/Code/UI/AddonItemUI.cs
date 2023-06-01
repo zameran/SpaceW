@@ -36,20 +36,23 @@
 using UnityEngine;
 using UnityEngine.UI;
 
-public sealed class AddonItemUI : MonoBehaviour
+namespace SpaceEngine.UI
 {
-    public Text addonNameText;
-    public Text addonVersionText;
-
-    public void SetCaption(Text textHandler, string caption)
+    public sealed class AddonItemUI : MonoBehaviour
     {
-        if (textHandler != null)
+        public Text addonNameText;
+        public Text addonVersionText;
+
+        public void SetCaption(Text textHandler, string caption)
         {
-            textHandler.text = caption;
-        }
-        else
-        {
-            Debug.LogError($"AddonItemUI.SetCaption: Can't set caption to [{caption}]! Provided texHandler is null!");
+            if (textHandler != null)
+            {
+                textHandler.text = caption;
+            }
+            else
+            {
+                Debug.LogError($"AddonItemUI.SetCaption: Can't set caption to [{caption}]! Provided texHandler is null!");
+            }
         }
     }
 }

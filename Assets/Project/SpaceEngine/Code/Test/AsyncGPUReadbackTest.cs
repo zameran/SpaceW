@@ -33,13 +33,13 @@
 // Creator: zameran
 #endregion
 
+using SpaceEngine.Core;
 using SpaceEngine.Managers;
 using SpaceEngine.Tools;
 using SpaceEngine.Utilities;
-
 using UnityEngine;
 
-namespace SpaceEngine.Tests
+namespace SpaceEngine.Test
 {
     [RequireComponent(typeof(Camera))]
     public class AsyncGPUReadbackTest : MonoBehaviour

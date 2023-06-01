@@ -35,16 +35,19 @@
 
 using System;
 
-/// <summary>
-/// Quad position [Orientation] relative to planet center.
-/// </summary>
-[Obsolete("Was used in old core...")]
-public enum QuadPosition : byte
+namespace SpaceEngine.Enums
 {
-    Top,        //0
-    Bottom,     //1
-    Left,       //2
-    Right,      //3
-    Front,      //4
-    Back        //5
+    /// <summary>
+    /// Quad position [Orientation] relative to planet center.
+    /// </summary>
+    [Obsolete("Was used in old core...")]
+    public enum QuadPosition : byte
+    {
+        Top, //0
+        Bottom, //1
+        Left, //2
+        Right, //3
+        Front, //4
+        Back //5
+    }
 }

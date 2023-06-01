@@ -25,7 +25,6 @@
 
 using System;
 using System.IO;
-
 using UnityEngine;
 
 namespace SpaceEngine.Utilities
@@ -280,7 +279,7 @@ namespace SpaceEngine.Utilities
             for (int x = 0, i = 0; x < size; x++, i += 4)
             {
                 //Convert 4 bytes to 1 32 bit float
-                map[x] = System.BitConverter.ToSingle(data, i);
+                map[x] = BitConverter.ToSingle(data, i);
             }
 
             return true;

@@ -33,11 +33,9 @@
 // Creator: zameran
 #endregion
 
-using SpaceEngine.Core.Numerics.Vectors;
-
 using System;
 using System.Linq;
-
+using SpaceEngine.Core.Numerics.Vectors;
 using UnityEngine;
 
 namespace SpaceEngine.Helpers

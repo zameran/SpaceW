@@ -33,97 +33,99 @@
 // Creator: zameran
 #endregion
 
-using SpaceEngine.Core.Bodies;
-using SpaceEngine.Core.Patterns.Singleton;
-
 using System;
 using System.Collections.Generic;
-
+using SpaceEngine.Core.Bodies;
+using SpaceEngine.Core.Patterns.Singleton;
+using SpaceEngine.Managers;
 using UnityEngine;
 
-[ExecutionOrder(-9996)]
-[RequireComponent(typeof(Camera))]
-public sealed class MainRenderer : MonoSingleton<MainRenderer>
+namespace SpaceEngine
 {
-    public bool ZSort = true;
-
-    private BodySort Comparer = null;
-
-    public class BodySort : IComparer<Body>
+    [ExecutionOrder(-9996)]
+    [RequireComponent(typeof(Camera))]
+    public sealed class MainRenderer : MonoSingleton<MainRenderer>
     {
-        int IComparer<Body>.Compare(Body a, Body b)
+        public bool ZSort = true;
+
+        private BodySort Comparer = null;
+
+        public class BodySort : IComparer<Body>
         {
-            if (a == null || b == null) return 0;
+            int IComparer<Body>.Compare(Body a, Body b)
+            {
+                if (a == null || b == null) return 0;
 
-            var D2A = Vector3.Distance(GodManager.Instance.View.WorldCameraPosition, a.Origin) - a.Size;
-            var D2B = Vector3.Distance(GodManager.Instance.View.WorldCameraPosition, b.Origin) - b.Size;
+                var D2A = Vector3.Distance(GodManager.Instance.View.WorldCameraPosition, a.Origin) - a.Size;
+                var D2B = Vector3.Distance(GodManager.Instance.View.WorldCameraPosition, b.Origin) - b.Size;
 
-            if (D2A > D2B)
-                return 1;
-            if (D2A < D2B)
-                return -1;
-            else
-                return 0;
+                if (D2A > D2B)
+                    return 1;
+                if (D2A < D2B)
+                    return -1;
+                else
+                    return 0;
+            }
         }
-    }
 
-    private void Awake()
-    {
-        Instance = this;
-        Comparer = new BodySort();
-    }
-
-    private void Start()
-    {
-
-    }
-
-    private void Update()
-    {
-        if (Input.GetKey(KeyCode.J) || ZSort) SortBodies();
-    }
-
-    private void OnEnable()
-    {
-
-    }
-
-    private void OnDisable()
-    {
-
-    }
-
-    private void OnPostRender()
-    {
-        
-    }
-
-    public void SortBodies()
-    {
-        Array.Sort(GodManager.Instance.Bodies, Comparer);
-
-        // TODO : Find a way to properly sort the space bodies...
-        // NOTE : Maybe several near hi-priority bodies can be exist or something another. This is space - all is possible...
-        //-----------------------------------------------------------------------------
-        var highPriorityBody = GodManager.Instance.ActiveBody;
-        var bodies = GodManager.Instance.Bodies;
-
-        if (highPriorityBody == null || bodies == null) return;
-
-        highPriorityBody.RenderQueueOffset = 5;
-        if (highPriorityBody.Atmosphere != null) highPriorityBody.Atmosphere.RenderQueueOffset = 6;
-        if (highPriorityBody.Ocean != null) highPriorityBody.Ocean.RenderQueueOffset = 7;
-        if (highPriorityBody.Ring != null) highPriorityBody.Ring.RenderQueueOffset = 4;
-
-        for (var i = 1; i < bodies.Length; i++)
+        private void Awake()
         {
-            var lowPriorityBody = bodies[i];
-
-            lowPriorityBody.RenderQueueOffset = 1;
-            if (lowPriorityBody.Atmosphere != null) lowPriorityBody.Atmosphere.RenderQueueOffset = 2;
-            if (lowPriorityBody.Ocean != null) lowPriorityBody.Ocean.RenderQueueOffset = 3;
-            if (lowPriorityBody.Ring != null) lowPriorityBody.Ring.RenderQueueOffset = 0;
+            Instance = this;
+            Comparer = new BodySort();
         }
-        //-----------------------------------------------------------------------------
+
+        private void Start()
+        {
+
+        }
+
+        private void Update()
+        {
+            if (Input.GetKey(KeyCode.J) || ZSort) SortBodies();
+        }
+
+        private void OnEnable()
+        {
+
+        }
+
+        private void OnDisable()
+        {
+
+        }
+
+        private void OnPostRender()
+        {
+
+        }
+
+        public void SortBodies()
+        {
+            Array.Sort(GodManager.Instance.Bodies, Comparer);
+
+            // TODO : Find a way to properly sort the space bodies...
+            // NOTE : Maybe several near hi-priority bodies can be exist or something another. This is space - all is possible...
+            //-----------------------------------------------------------------------------
+            var highPriorityBody = GodManager.Instance.ActiveBody;
+            var bodies = GodManager.Instance.Bodies;
+
+            if (highPriorityBody == null || bodies == null) return;
+
+            highPriorityBody.RenderQueueOffset = 5;
+            if (highPriorityBody.Atmosphere != null) highPriorityBody.Atmosphere.RenderQueueOffset = 6;
+            if (highPriorityBody.Ocean != null) highPriorityBody.Ocean.RenderQueueOffset = 7;
+            if (highPriorityBody.Ring != null) highPriorityBody.Ring.RenderQueueOffset = 4;
+
+            for (var i = 1; i < bodies.Length; i++)
+            {
+                var lowPriorityBody = bodies[i];
+
+                lowPriorityBody.RenderQueueOffset = 1;
+                if (lowPriorityBody.Atmosphere != null) lowPriorityBody.Atmosphere.RenderQueueOffset = 2;
+                if (lowPriorityBody.Ocean != null) lowPriorityBody.Ocean.RenderQueueOffset = 3;
+                if (lowPriorityBody.Ring != null) lowPriorityBody.Ring.RenderQueueOffset = 0;
+            }
+            //-----------------------------------------------------------------------------
+        }
     }
 }

@@ -33,12 +33,11 @@
 // Creator: zameran
 #endregion
 
+using System.Collections.Generic;
 using SpaceEngine.Core.Tile.Producer;
 using SpaceEngine.Core.Tile.Storage;
 using SpaceEngine.Core.Utilities;
-
-using System.Collections.Generic;
-
+using SpaceEngine.Managers;
 using UnityEngine;
 
 namespace SpaceEngine.Core.Tile.Tasks
@@ -98,7 +97,7 @@ namespace SpaceEngine.Core.Tile.Tasks
                 Owner.StartCoroutine(Owner.DoCreateTileCoroutine(Level, Tx, Ty, Slot, () =>
                 {
                     // Manualy finish the particular tile creation task.
-                    this.Finish();
+                    Finish();
                 }));
 
                 // So, task will be finished in the end of coroutine...

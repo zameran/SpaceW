@@ -33,12 +33,11 @@
 // Creator: zameran
 #endregion
 
+using System.ComponentModel;
 using SpaceEngine.Core.Bodies;
 using SpaceEngine.Core.Numerics.Vectors;
 using SpaceEngine.Helpers;
-
-using System.ComponentModel;
-
+using SpaceEngine.Managers;
 using UnityEngine;
 
 namespace SpaceEngine.Cameras
@@ -57,10 +56,15 @@ namespace SpaceEngine.Cameras
 
         public Body Body => GodManager.Instance.ActiveBody;
 
-        public float NearClipPlane { get => CameraComponent.nearClipPlane;
+        public float NearClipPlane
+        {
+            get => CameraComponent.nearClipPlane;
             set => CameraComponent.nearClipPlane = value;
         }
-        public float FarClipPlane { get => CameraComponent.farClipPlane;
+
+        public float FarClipPlane
+        {
+            get => CameraComponent.farClipPlane;
             set => CameraComponent.farClipPlane = value;
         }
 
@@ -245,7 +249,10 @@ namespace SpaceEngine.Cameras
             // NOTE : Body's shape dependent...
             var h = Body != null ? (DistanceToCore - Body.Size - (float)Body.HeightZ) : 1.0f;
 
-            if (h < 1.0f) { h = 1.0f; }
+            if (h < 1.0f)
+            {
+                h = 1.0f;
+            }
 
             var calculatedNearClipPlane = Body != null ? CalculateNearClipPlane(h) : NearClipPlaneCache;
             var calculatedFarClipPlane = Body != null ? CalculateFarClipPlane(h) : FarClipPlaneCache;
@@ -255,26 +262,39 @@ namespace SpaceEngine.Cameras
                 case ClipPlanesControl.None:
                 {
                     // NOTE : What?!
-                } break;
+                }
+
+                    break;
                 case ClipPlanesControl.Constant:
                 {
                     NearClipPlane = NearClipPlaneCache;
                     FarClipPlane = FarClipPlaneCache;
-                } break;
+                }
+
+                    break;
                 case ClipPlanesControl.NearFar:
                 {
                     NearClipPlane = calculatedNearClipPlane;
                     FarClipPlane = calculatedFarClipPlane;
-                } break;
+                }
+
+                    break;
                 case ClipPlanesControl.Near:
                 {
                     NearClipPlane = calculatedNearClipPlane;
-                } break;
+                }
+
+                    break;
                 case ClipPlanesControl.Far:
                 {
                     FarClipPlane = calculatedFarClipPlane;
-                } break;
-                default: { throw new InvalidEnumArgumentException(); }
+                }
+
+                    break;
+                default:
+                {
+                    throw new InvalidEnumArgumentException();
+                }
             }
         }
 

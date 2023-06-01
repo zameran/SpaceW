@@ -33,14 +33,12 @@
 // Creator: zameran
 #endregion
 
+using System;
 using SpaceEngine.Core.Numerics.Matrices;
 using SpaceEngine.Core.Numerics.Shapes;
 using SpaceEngine.Core.Numerics.Vectors;
 using SpaceEngine.Core.Types;
 using SpaceEngine.Tools;
-
-using System;
-
 using UnityEngine;
 
 // TODO : Create a special interface for transformation manipulations. This interface should oblige objects to recalculate critical variables, required for proper rendering.
@@ -562,7 +560,7 @@ namespace SpaceEngine.Core.Terrain
         /// <inheritdoc />
         public override bool Equals(object obj)
         {
-            return obj != null && (obj.GetType() == this.GetType() && Equals(obj as TerrainQuad));
+            return obj != null && (obj.GetType() == GetType() && Equals(obj as TerrainQuad));
         }
 
         /// <inheritdoc />

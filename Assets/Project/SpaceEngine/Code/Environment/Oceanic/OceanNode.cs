@@ -33,23 +33,19 @@
 // Creator: zameran
 #endregion
 
+using System;
+using System.Collections;
+using System.Linq;
 using SpaceEngine.Core;
 using SpaceEngine.Core.Bodies;
 using SpaceEngine.Core.Numerics.Matrices;
 using SpaceEngine.Core.Numerics.Vectors;
-using SpaceEngine.Core.Patterns.Strategy.Eventit;
-using SpaceEngine.Core.Patterns.Strategy.Reanimator;
-using SpaceEngine.Core.Patterns.Strategy.Renderable;
-using SpaceEngine.Core.Patterns.Strategy.Uniformed;
+using SpaceEngine.Core.Patterns.Strategy;
 using SpaceEngine.Enums;
 using SpaceEngine.Environment.Atmospheric;
 using SpaceEngine.Helpers;
+using SpaceEngine.Managers;
 using SpaceEngine.Tools;
-
-using System;
-using System.Collections;
-using System.Linq;
-
 using UnityEngine;
 using UnityEngine.Rendering;
 

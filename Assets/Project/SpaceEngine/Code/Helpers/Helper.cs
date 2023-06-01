@@ -33,14 +33,12 @@
 // Creator: zameran
 #endregion
 
-using SpaceEngine.Environment.Shadows;
-
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-
+using SpaceEngine.Environment.Shadows;
+using SpaceEngine.Mathematics;
 using UnityEngine;
-
 using Debug = UnityEngine.Debug;
 using Object = UnityEngine.Object;
 
@@ -60,7 +58,7 @@ namespace SpaceEngine.Helpers
 
             var executionTime = Time.realtimeSinceStartup - time;
 
-            Debug.Log($"[Benchmark.{label}] : Execution time: {executionTime.ToString("f6")}ms");
+            Debug.Log($"[Benchmark.{label}] : Execution time: {executionTime:f6}ms");
         }
 
         public static void MeasureNative(string label = "Method", Action ToMeasure = null)
@@ -72,7 +70,7 @@ namespace SpaceEngine.Helpers
 
             watch.Stop();
 
-            Debug.Log($"[Benchmark.{label}] : Execution time: {watch.Elapsed.TotalMilliseconds.ToString("f6")}ms");
+            Debug.Log($"[Benchmark.{label}] : Execution time: {watch.Elapsed.TotalMilliseconds:f6}ms");
         }
 
         public static bool Enabled<T>(T b) where T : Behaviour
@@ -122,7 +120,7 @@ namespace SpaceEngine.Helpers
 
         public static float Divide(float a, float b)
         {
-            return !BrainFuckMath.AlmostEquals(b, 0.0f) ? a / b : 0.0f;
+            return !b.AlmostEquals(0.0f) ? a / b : 0.0f;
         }
 
         public static float DampenFactor(float dampening, float elapsed)
@@ -179,9 +177,9 @@ namespace SpaceEngine.Helpers
         {
             if (t != null)
             {
-#if UNITY_EDITOR
+                #if UNITY_EDITOR
                 if (Application.isPlaying == false && t.localRotation == q) return;
-#endif
+                #endif
                 t.localRotation = q;
             }
         }
@@ -266,7 +264,10 @@ namespace SpaceEngine.Helpers
                     clone = Object.Instantiate(source, localPosition, localRotation);
                 }
 
-                if (keepName == true) clone.name = source.name;
+                if (keepName)
+                {
+                    clone.name = source.name;
+                }
 
                 return clone;
             }
@@ -281,12 +282,16 @@ namespace SpaceEngine.Helpers
 
         public static GameObject CreateGameObject(string name, Transform parent, Vector3 localPosition, Quaternion localRotation, Vector3 localScale)
         {
-            var gameObject = new GameObject(name);
-
-            gameObject.transform.parent = parent;
-            gameObject.transform.localPosition = localPosition;
-            gameObject.transform.localRotation = localRotation;
-            gameObject.transform.localScale = localScale;
+            var gameObject = new GameObject(name)
+            {
+                transform =
+                {
+                    parent = parent,
+                    localPosition = localPosition,
+                    localRotation = localRotation,
+                    localScale = localScale
+                }
+            };
 
             return gameObject;
         }
@@ -421,9 +426,11 @@ namespace SpaceEngine.Helpers
                 {
                     case LightType.Point:
                         direction = Vector3.Normalize(position - center);
+
                         break;
                     case LightType.Directional: // NOTE : Fix directions for directional light...
                         position = center + direction * (position - center).magnitude;
+
                         break;
                 }
 
@@ -570,7 +577,7 @@ namespace SpaceEngine.Helpers
             return matrix;
         }
 
-        public static Texture2D CreateTempTeture2D(int width,
+        public static Texture2D CreateTempTexture2D(int width,
             int height,
             TextureFormat format = TextureFormat.ARGB32,
             bool mips = false,
@@ -584,7 +591,7 @@ namespace SpaceEngine.Helpers
             return texture2D;
         }
 
-#if UNITY_EDITOR
+        #if UNITY_EDITOR
         public static void DrawSphere(Vector3 center, Vector3 right, Vector3 up, Vector3 forward, int resolution = 32)
         {
             DrawCircle(center, right, up, resolution);
@@ -616,6 +623,6 @@ namespace SpaceEngine.Helpers
 
             DrawCircle(center, right, forward, resolution);
         }
-#endif
+        #endif
     }
 }

@@ -33,7 +33,7 @@
 // Creator: zameran
 #endregion
 
-namespace SpaceEngine.Core.Patterns.Strategy.Manipulator
+namespace SpaceEngine.Core.Patterns.Strategy
 {
     /// <summary>
     /// This interface should be implemented in all things, that's gonna be moved, rotated or scaled externaly, 

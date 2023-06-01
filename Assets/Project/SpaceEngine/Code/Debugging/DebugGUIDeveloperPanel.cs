@@ -1,9 +1,9 @@
 ﻿#region License
 // Procedural planet generator.
-// 
+//  
 // Copyright (C) 2015-2023 Denis Ovchinnikov [zameran] 
 // All rights reserved.
-// 
+//  
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions
 // are met:
@@ -15,7 +15,7 @@
 // 3. Neither the name of the copyright holders nor the names of its
 //    contributors may be used to endorse or promote products derived from
 //    this software without specific prior written permission.
-// 
+//  
 // THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
 // AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
 // IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -27,20 +27,21 @@
 // CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
 // ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF
 // THE POSSIBILITY OF SUCH DAMAGE.
-// 
-// Creation Date: Undefined
-// Creation Time: Undefined
+//  
+// Creation Date: 2017.10.22
+// Creation Time: 3:14 PM
 // Creator: zameran
 #endregion
 
-using SpaceEngine.Core.Debugging;
 using SpaceEngine.Tools;
-
 using UnityEngine;
+#if UNITY_EDITOR
+using UnityEditor;
+#endif
 
 namespace SpaceEngine.Debugging
 {
-    public sealed class DebugGUIPerfomanceMonitor : DebugGUI
+    public sealed class DebugGUIDeveloperPanel : DebugGUI, IDebugAlwaysVisible
     {
         protected override void Awake()
         {
@@ -56,51 +57,34 @@ namespace SpaceEngine.Debugging
         {
             base.OnGUI();
 
-            debugInfoDrawBounds.width = Screen.width - 20;
+            debugInfoDrawBounds = new Rect(Screen.width - debugInfoBounds.x - debugInfoBounds.width,
+                Screen.height - debugInfoBounds.y - debugInfoBounds.height, debugInfoBounds.width, debugInfoBounds.height);
 
-            using (new PerformanceMonitor.Timer("Repfomance Monitor OnGUI"))
-            {
-                GUI.Window(0, debugInfoDrawBounds, UI, "Perfomance Monitor (in milliseconds)");
-            }
+            GUILayout.Window(9999, debugInfoDrawBounds, UI, "Developer Panel");
         }
 
         protected override void UI(int id)
         {
-            var counters = PerformanceMonitor.Counters;
-            if (counters == null || counters.Count == 0) { GUILayoutExtensions.DrawBadHolder("Perfomance stats: ", "No Data!?", GUISkin); return; }
-
-            ScrollPosition = GUILayout.BeginScrollView(ScrollPosition, false, true);
+            GUILayoutExtensions.VerticalBoxed("Actions: ", GUISkin, () =>
             {
-                GUILayout.BeginVertical();
-
-                for (var i = 0; i < counters.Count; i++)
+                if (GUILayout.Button("Quit"))
                 {
-                    var counter = counters[i];
-
-                    GUILayoutExtensions.VerticalBoxed($"{counter.Name}", GUISkin, () =>
-                    {
-                        GUILayoutExtensions.VerticalBoxed("", GUISkin, () =>
-                        {
-                            GUILayoutExtensions.Horizontal(() =>
-                            {
-                                GUILayoutExtensions.LabelWithSpace($"Total: {counter.Time / 1000.0f}", -8);
-                                GUILayoutExtensions.LabelWithSpace($"Average: {counter.Average / 1000.0f}", -8);
-                                GUILayoutExtensions.LabelWithSpace($"Last: {counter.Last / 1000.0f}", -8);
-                                GUILayoutExtensions.LabelWithSpace($"Max: {counter.Max / 1000.0f}", -8);
-                                GUILayoutExtensions.LabelWithSpace($"Count: {counter.Count}", -8);
-                            });
-                        }, GUILayout.Width(debugInfoDrawBounds.width - 45));
-                    }, GUILayout.Width(debugInfoDrawBounds.width - 40));
+                    Quit();
                 }
-
-                GUILayoutExtensions.SpacingSeparator();
-
-                GUILayout.EndVertical();
-            }
-
-            GUILayoutExtensions.SpacingSeparator();
-
-            GUILayout.EndScrollView();
+            });
         }
+
+        #region API
+
+        private void Quit()
+        {
+            Application.Quit();
+
+            #if UNITY_EDITOR
+            EditorApplication.isPlaying = false;
+            #endif
+        }
+
+        #endregion
     }
 }

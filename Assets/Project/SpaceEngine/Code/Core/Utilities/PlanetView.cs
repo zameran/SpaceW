@@ -33,13 +33,11 @@
 // Creator: zameran
 #endregion
 
+using System;
 using SpaceEngine.Core.Numerics.Matrices;
 using SpaceEngine.Core.Numerics.Vectors;
-
-using System;
-
+using SpaceEngine.Managers;
 using UnityEngine;
-
 using Functions = SpaceEngine.Core.Numerics.Functions;
 
 namespace SpaceEngine.Core.Utilities
@@ -135,8 +133,8 @@ namespace SpaceEngine.Core.Utilities
             var lat = Functions.Safe_Asin(position.z);
             var lon = Math.Atan2(position.y, position.x);
 
-            base.position.X -= (lon - oldlon) * speed * Math.Max(1.0, worldPosition.Magnitude() - Radius);
-            base.position.Y -= (lat - oldlat) * speed * Math.Max(1.0, worldPosition.Magnitude() - Radius);
+            this.position.X -= (lon - oldlon) * speed * Math.Max(1.0, worldPosition.Magnitude() - Radius);
+            this.position.Y -= (lat - oldlat) * speed * Math.Max(1.0, worldPosition.Magnitude() - Radius);
         }
 
         public override void MoveForward(double distance)

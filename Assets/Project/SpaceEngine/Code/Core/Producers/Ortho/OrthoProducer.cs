@@ -33,21 +33,20 @@
 // Creator: zameran
 #endregion
 
+using System;
+using System.Collections;
+using System.Collections.Generic;
 using SpaceEngine.Core.Exceptions;
 using SpaceEngine.Core.Noise;
 using SpaceEngine.Core.Storage;
 using SpaceEngine.Core.Tile.Producer;
 using SpaceEngine.Core.Tile.Storage;
 using SpaceEngine.Helpers;
+using SpaceEngine.Managers;
 using SpaceEngine.Tools;
-
-using System;
-using System.Collections;
-using System.Collections.Generic;
-
 using UnityEngine;
 
-namespace SpaceEngine.Core
+namespace SpaceEngine.Core.Producers.Ortho
 {
     public class OrthoProducer : TileProducer
     {
@@ -81,10 +80,10 @@ namespace SpaceEngine.Core
         Material UpSampleMaterial;
 
         [SerializeField]
-        Color RootNoiseColor = new Color(0.5f, 0.5f, 0.5f, 0.5f);
+        UnityEngine.Color RootNoiseColor = new UnityEngine.Color(0.5f, 0.5f, 0.5f, 0.5f);
 
         [SerializeField]
-        Color NoiseColor = new Color(1.0f, 1.0f, 1.0f, 1.0f);
+        UnityEngine.Color NoiseColor = new UnityEngine.Color(1.0f, 1.0f, 1.0f, 1.0f);
 
         /// <summary>
         /// Maximum quadtree level, or -1 to allow any level.

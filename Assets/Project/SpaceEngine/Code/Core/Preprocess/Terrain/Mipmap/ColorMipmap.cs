@@ -33,17 +33,15 @@
 // Creator: zameran
 #endregion
 
-using SpaceEngine.Core.Debugging;
-
 using System;
 using System.Collections.Generic;
 using System.IO;
-
+using SpaceEngine.Core.Debugging;
+using SpaceEngine.Core.Preprocess.Terrain.Function;
 using UnityEngine;
-
 using Logger = SpaceEngine.Core.Debugging.Logger;
 
-namespace SpaceEngine.Core.Preprocess.Terrain
+namespace SpaceEngine.Core.Preprocess.Terrain.Mipmap
 {
     [UseLogger(LoggerCategory.Core)]
     public class ColorMipmap : TileCache
@@ -87,13 +85,13 @@ namespace SpaceEngine.Core.Preprocess.Terrain
 
             var size = BaseLevelSize;
 
-            while (size > this.Size)
+            while (size > Size)
             {
                 MaxLevel += 1;
                 size /= 2;
             }
 
-            TileData = new byte[(this.Size + 2 * this.Border) * (this.Size + 2 * this.Border) * Channels];
+            TileData = new byte[(Size + 2 * Border) * (Size + 2 * Border) * Channels];
 
             ConstantTileIDs = new Dictionary<int, int>();
 

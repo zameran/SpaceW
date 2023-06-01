@@ -35,10 +35,9 @@
 
 using System;
 using System.Runtime.InteropServices;
-
 using UnityEngine;
 
-namespace SpaceEngine.Environment.Startfield
+namespace SpaceEngine.Environment.Starfield
 {
     [Serializable]
     [StructLayout(LayoutKind.Sequential)]

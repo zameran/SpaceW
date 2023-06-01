@@ -41,7 +41,7 @@ namespace SpaceEngine
     {
         private void OnEnable()
         {
-            DontDestroyOnLoad(this.gameObject);
+            DontDestroyOnLoad(gameObject);
         }
     }
 }

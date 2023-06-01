@@ -34,47 +34,48 @@
 #endregion
 
 using DG.Tweening;
-
 using SpaceEngine.Enums;
 using SpaceEngine.Helpers;
 using SpaceEngine.Managers;
 using SpaceEngine.Tools;
-using SpaceEngine.UI;
-
+using SpaceEngine.UI.PanelSystem;
 using UnityEngine;
 
-public sealed class InGamePauseMenuUI : UserInterface, IUserInterface
+namespace SpaceEngine.UI
 {
-    private bool Paused = false;
-
-    private void Update()
+    public sealed class InGamePauseMenuUI : UserInterface, IUserInterface
     {
-        if (Input.GetKeyDown(KeyCode.Escape))
-        {
-            Paused = !Paused;
+        private bool Paused = false;
 
-            if (Paused)
+        private void Update()
+        {
+            if (Input.GetKeyDown(KeyCode.Escape))
             {
-                GetComponent<UIPanel>().Show(0.25f);
-            }
-            else
-            {
-                GetComponent<UIPanel>().Hide(0.25f);
+                Paused = !Paused;
+
+                if (Paused)
+                {
+                    GetComponent<UIPanel>().Show(0.25f);
+                }
+                else
+                {
+                    GetComponent<UIPanel>().Hide(0.25f);
+                }
             }
         }
-    }
 
-    public void LoadMainMenuScene()
-    {
-        LoadScene(EntryPoint.MainMenu);
-    }
+        public void LoadMainMenuScene()
+        {
+            LoadScene(EntryPoint.MainMenu);
+        }
 
-    public void LoadScene(EntryPoint ep)
-    {
-        LevelManager.Instance.LoadSceneDelayed(ep, 0.5f);
+        public void LoadScene(EntryPoint ep)
+        {
+            LevelManager.Instance.LoadSceneDelayed(ep, 0.5f);
 
-        GetComponent<UIPanel>().Hide(0.5f);
+            GetComponent<UIPanel>().Hide(0.5f);
 
-        DOTween.To(() => CameraHelper.Main().backgroundColor, value => CameraHelper.Main().backgroundColor = value, XKCDColors.ColorTranslator.FromHtml("#00000005"), 1.0f);
+            DOTween.To(() => CameraHelper.Main().backgroundColor, value => CameraHelper.Main().backgroundColor = value, XKCDColors.ColorTranslator.FromHtml("#00000005"), 1.0f);
+        }
     }
 }

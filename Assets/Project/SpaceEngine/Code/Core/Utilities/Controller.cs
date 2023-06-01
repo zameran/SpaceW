@@ -33,12 +33,11 @@
 // Creator: zameran
 #endregion
 
+using System;
 using SpaceEngine.Core.Numerics.Vectors;
 using SpaceEngine.Debugging;
 using SpaceEngine.Helpers;
-
-using System;
-
+using SpaceEngine.Mathematics;
 using UnityEngine;
 
 namespace SpaceEngine.Core.Utilities

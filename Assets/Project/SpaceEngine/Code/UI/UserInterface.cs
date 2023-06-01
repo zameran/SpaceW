@@ -33,96 +33,97 @@
 // Creator: zameran
 #endregion
 
-using SpaceEngine.Core.Patterns.Strategy.Eventit;
+using System;
+using SpaceEngine.Core.Patterns.Strategy;
 using SpaceEngine.Enums;
 using SpaceEngine.Managers;
-
-using System;
-
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
-public class UserInterface : MonoBehaviour, IEventit
+namespace SpaceEngine.UI
 {
-    public GameObject Controllable;
-
-    #region API
-
-    public void FreezeTime()
+    public class UserInterface : MonoBehaviour, IEventit
     {
-        Time.timeScale = 0.001f;
+        public GameObject Controllable;
+
+        #region API
+
+        public void FreezeTime()
+        {
+            Time.timeScale = 0.001f;
+        }
+
+        public void UnFreezeTime()
+        {
+            Time.timeScale = 1.0f;
+        }
+
+        public void LoadScene(string sceneName)
+        {
+            LevelManager.Instance.LoadScene((EntryPoint)Enum.Parse(typeof(EntryPoint), sceneName));
+        }
+
+        public void Quit()
+        {
+            #if UNITY_EDITOR
+            Debug.Break();
+            #else
+            Application.Quit();
+            #endif
+        }
+
+        #endregion
+
+        #region Subscribtion/Unsubscription
+
+        protected void OnEnable()
+        {
+            Eventit();
+        }
+
+        protected void OnDisable()
+        {
+            UnEventit();
+        }
+
+        protected void OnDestroy()
+        {
+            UnEventit();
+        }
+
+        #endregion
+
+        #region Eventit
+
+        public bool IsEventit { get; set; }
+
+        public void Eventit()
+        {
+            if (IsEventit) return;
+
+            SceneManager.activeSceneChanged += OnActiveSceneChanged;
+
+            IsEventit = true;
+        }
+
+        public void UnEventit()
+        {
+            if (!IsEventit) return;
+
+            SceneManager.activeSceneChanged -= OnActiveSceneChanged;
+
+            IsEventit = false;
+        }
+
+        #endregion
+
+        #region Events
+
+        private void OnActiveSceneChanged(Scene arg0, Scene arg1)
+        {
+            UnFreezeTime();
+        }
+
+        #endregion
     }
-
-    public void UnFreezeTime()
-    {
-        Time.timeScale = 1.0f;
-    }
-
-    public void LoadScene(string sceneName)
-    {
-        LevelManager.Instance.LoadScene((EntryPoint)Enum.Parse(typeof(EntryPoint), sceneName));
-    }
-
-    public void Quit()
-    {
-#if UNITY_EDITOR
-        Debug.Break();
-#else
-        Application.Quit();
-#endif
-    }
-
-    #endregion
-
-    #region Subscribtion/Unsubscription
-
-    protected void OnEnable()
-    {
-        Eventit();
-    }
-
-    protected void OnDisable()
-    {
-        UnEventit();
-    }
-
-    protected void OnDestroy()
-    {
-        UnEventit();
-    }
-
-    #endregion
-
-    #region Eventit
-
-    public bool IsEventit { get; set; }
-
-    public void Eventit()
-    {
-        if (IsEventit) return;
-
-        SceneManager.activeSceneChanged += OnActiveSceneChanged;
-
-        IsEventit = true;
-    }
-
-    public void UnEventit()
-    {
-        if (!IsEventit) return;
-
-        SceneManager.activeSceneChanged -= OnActiveSceneChanged;
-
-        IsEventit = false;
-    }
-
-    #endregion
-
-    #region Events
-
-    private void OnActiveSceneChanged(Scene arg0, Scene arg1)
-    {
-        UnFreezeTime();
-    }
-
-    #endregion
 }

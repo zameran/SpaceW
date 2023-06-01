@@ -34,10 +34,9 @@
 #endregion
 
 using SpaceEngine.Helpers;
-
 using UnityEngine;
 
-namespace SpaceEngine.Tests
+namespace SpaceEngine.Test
 {
     public class DrawMeshTest : MonoBehaviour
     {

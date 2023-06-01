@@ -33,11 +33,9 @@
 // Creator: zameran
 #endregion
 
-using SpaceEngine.Core.Patterns.Singleton;
-
 using System.Collections.Generic;
 using System.Linq;
-
+using SpaceEngine.Core.Patterns.Singleton;
 using UnityEngine;
 
 namespace SpaceEngine.Debugging

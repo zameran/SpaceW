@@ -33,16 +33,15 @@
 // Creator: zameran
 #endregion
 
+using System;
+using System.Collections.Generic;
 using SpaceEngine.Core.Containers;
 using SpaceEngine.Core.Numerics.Vectors;
 using SpaceEngine.Core.Storage;
 using SpaceEngine.Core.Terrain;
 using SpaceEngine.Helpers;
+using SpaceEngine.Managers;
 using SpaceEngine.Utilities;
-
-using System;
-using System.Collections.Generic;
-
 using UnityEngine;
 
 namespace SpaceEngine.Core.Tile.Samplers
@@ -67,7 +66,7 @@ namespace SpaceEngine.Core.Tile.Samplers
 
             public QuadTreeZ(QuadTree parent, TerrainQuad terrainQuad) : base(parent)
             {
-                this.TerrainQuad = terrainQuad;
+                TerrainQuad = terrainQuad;
 
                 ReadBack = false;
             }

@@ -33,18 +33,14 @@
 // Creator: zameran
 #endregion
 
+using System.Collections.Generic;
 using SpaceEngine.Core;
 using SpaceEngine.Core.Bodies;
-using SpaceEngine.Core.Patterns.Strategy.Reanimator;
-using SpaceEngine.Core.Patterns.Strategy.Renderable;
-using SpaceEngine.Core.Patterns.Strategy.Uniformed;
+using SpaceEngine.Core.Patterns.Strategy;
 using SpaceEngine.Enums;
 using SpaceEngine.Environment.Shadows;
 using SpaceEngine.Helpers;
 using SpaceEngine.Tools;
-
-using System.Collections.Generic;
-
 using UnityEngine;
 
 namespace SpaceEngine.Environment.Rings

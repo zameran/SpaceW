@@ -38,7 +38,6 @@ using SpaceEngine.Environment.Atmospheric;
 using SpaceEngine.Helpers;
 using SpaceEngine.Tools;
 using SpaceEngine.Utilities;
-
 using UnityEngine;
 
 namespace SpaceEngine.Environment.Oceanic

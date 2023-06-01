@@ -117,7 +117,7 @@ namespace SpaceEngine.Tools
                 filterMode = fm,
                 wrapMode = twm,
                 useMipMap = false,
-                dimension = UnityEngine.Rendering.TextureDimension.Tex3D,
+                dimension = TextureDimension.Tex3D,
                 volumeDepth = volumeDepth
             };
 
@@ -241,7 +241,7 @@ namespace SpaceEngine.Tools
                 filterMode = fm,
                 wrapMode = twm,
                 useMipMap = false,
-                dimension = UnityEngine.Rendering.TextureDimension.Tex3D,
+                dimension = TextureDimension.Tex3D,
                 volumeDepth = volumeDepth
             };
 

@@ -34,40 +34,42 @@
 #endregion
 
 using System;
-
 using UnityEngine;
 
-[Serializable]
-public class CachedComponent<T> where T : Component
+namespace SpaceEngine.Core
 {
-    public CachedComponent()
+    [Serializable]
+    public class CachedComponent<T> where T : Component
     {
-        Component = null;
-    }
-
-    public T Component { get; protected set; }
-
-    public void TryInit(MonoBehaviour mb)
-    {
-        Component = mb.GetComponent<T>();
-    }
-
-    public void TryInitFromParent(MonoBehaviour mb)
-    {
-        if (mb.transform.parent == null) return;
-
-        Component = mb.transform.parent.GetComponent<T>();
-    }
-	
-	public void TryInitAdd(MonoBehaviour mb)
-    {
-        var component = mb.GetComponent<T>();
-
-        if (component == null)
+        public CachedComponent()
         {
-            component = mb.gameObject.AddComponent<T>();
+            Component = null;
         }
 
-        Component = component;
+        public T Component { get; protected set; }
+
+        public void TryInit(MonoBehaviour mb)
+        {
+            Component = mb.GetComponent<T>();
+        }
+
+        public void TryInitFromParent(MonoBehaviour mb)
+        {
+            if (mb.transform.parent == null) return;
+
+            Component = mb.transform.parent.GetComponent<T>();
+        }
+	
+        public void TryInitAdd(MonoBehaviour mb)
+        {
+            var component = mb.GetComponent<T>();
+
+            if (component == null)
+            {
+                component = mb.gameObject.AddComponent<T>();
+            }
+
+            Component = component;
+        }
     }
 }

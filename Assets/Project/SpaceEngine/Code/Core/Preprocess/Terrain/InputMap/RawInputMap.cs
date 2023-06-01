@@ -33,16 +33,13 @@
 // Creator: zameran
 #endregion
 
-using SpaceEngine.Core.Debugging;
-
 using System;
 using System.IO;
-
+using SpaceEngine.Core.Debugging;
 using UnityEngine;
-
 using Logger = SpaceEngine.Core.Debugging.Logger;
 
-namespace SpaceEngine.Core.Preprocess.Terrain
+namespace SpaceEngine.Core.Preprocess.Terrain.InputMap
 {
     /// <summary>
     /// Used to load data from a raw file. The file maybe 8 or 16 bit.

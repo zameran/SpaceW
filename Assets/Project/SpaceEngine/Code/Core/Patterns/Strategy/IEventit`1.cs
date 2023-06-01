@@ -33,7 +33,9 @@
 // Creator: zameran
 #endregion
 
-namespace SpaceEngine.Core.Patterns.Strategy.Eventit
+using SpaceEngine.Managers;
+
+namespace SpaceEngine.Core.Patterns.Strategy
 {
     /// <summary>
     /// Interface provides some generic strategy methods for a subscription/unsubscription to particular events.

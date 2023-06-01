@@ -45,7 +45,7 @@ namespace SpaceEngine.Pluginator
     {
         public AssemblyExternalTypes(Type type, List<Type> value)
         {
-            this.Add(type, value);
+            Add(type, value);
         }
     }
 }

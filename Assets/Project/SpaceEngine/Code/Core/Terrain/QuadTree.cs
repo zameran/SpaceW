@@ -66,7 +66,7 @@ namespace SpaceEngine.Core.Terrain
 
         public QuadTree(QuadTree parentTree)
         {
-            this.ParentTree = parentTree;
+            ParentTree = parentTree;
         }
 
         /// <summary>

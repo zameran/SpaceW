@@ -33,10 +33,8 @@
 // Creator: zameran
 #endregion
 
-using SpaceEngine.Helpers;
-
 using System;
-
+using SpaceEngine.Helpers;
 using UnityEngine;
 
 namespace SpaceEngine.Core.Utilities.Gradients

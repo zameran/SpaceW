@@ -33,11 +33,12 @@
 // Creator: zameran
 #endregion
 
-using SpaceEngine.Utilities;
-
 using System;
+using SpaceEngine.Utilities;
+using UnityEngine;
+using Random = UnityEngine.Random;
 
-namespace UnityEngine
+namespace SpaceEngine.Environment.Oceanic
 {
     public class FourierGPU
     {

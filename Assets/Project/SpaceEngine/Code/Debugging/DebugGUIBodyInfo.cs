@@ -33,15 +33,18 @@
 // Creator: zameran
 #endregion
 
-using SpaceEngine.Enums;
+using SpaceEngine.Core.Bodies;
+using SpaceEngine.Helpers;
+using SpaceEngine.Managers;
 using SpaceEngine.Tools;
-
 using UnityEngine;
 
 namespace SpaceEngine.Debugging
 {
-    public sealed class DebugGUISettings : DebugGUI
+    public sealed class DebugGUIBodyInfo : DebugGUI
     {
+        public Body Body => GodManager.Instance.ActiveBody;
+
         protected override void Awake()
         {
             base.Awake();
@@ -56,35 +59,62 @@ namespace SpaceEngine.Debugging
         {
             base.OnGUI();
 
-            GUILayout.Window(0, debugInfoBounds, UI, "Settings");
+            GUILayout.Window(0, debugInfoBounds, UI, "Body Info");
         }
 
         protected override void UI(int id)
         {
             ScrollPosition = GUILayout.BeginScrollView(ScrollPosition, false, true);
 
-            GUILayoutExtensions.VerticalBoxed("Rendering parameters: ", GUISkin, () =>
+            if (Body != null && Helper.Enabled(Body))
             {
-                GUILayoutExtensions.VerticalBoxed("", GUISkin, () =>
+                GUILayoutExtensions.VerticalBoxed("Body parameters: ", GUISkin, () =>
                 {
-                    GUILayoutExtensions.VerticalBoxed("Fragment HDR Mode: ", GUISkin, () =>
+                    GUILayoutExtensions.VerticalBoxed("", GUISkin, () =>
                     {
-                        GodManager.Instance.HDRMode = (FragmentHDR)GUILayout.SelectionGrid((int)GodManager.Instance.HDRMode, System.Enum.GetNames(typeof(FragmentHDR)), 2);
+                        if (Body.TCCPS != null)
+                        {
+                            var materialTable = Body.TCCPS.MaterialTable;
+
+                            if (materialTable != null && materialTable.Lut != null)
+                            {
+                                GUILayout.Label("Material Table: ");
+                                GUILayoutExtensions.VerticalBoxed("", GUISkin, () =>
+                                {
+                                    GUILayoutExtensions.Horizontal(() =>
+                                    {
+                                        GUILayout.Label(materialTable.Lut);
+                                    });
+                                });
+                            }
+                        }
+                    });
+                });
+
+                GUILayoutExtensions.SpacingSeparator();
+
+                if (Body.Ocean != null && Body.OceanEnabled && Helper.Enabled(Body.Ocean))
+                {
+                    GUILayoutExtensions.VerticalBoxed("Ocean parameters: ", GUISkin, () =>
+                    {
+                        GUILayoutExtensions.VerticalBoxed("", GUISkin, () =>
+                        {
+                            GUILayoutExtensions.SliderWithField("Level: ", 0.0f, 5.0f, ref Body.Ocean.OceanLevel);
+                            GUILayoutExtensions.SliderWithField("Z Min: ", 0.0f, 50000.0f, ref Body.Ocean.ZMin);
+                        });
                     });
 
                     GUILayoutExtensions.SpacingSeparator();
-
-                    GUILayoutExtensions.VerticalBoxed("Features: ", GUISkin, () =>
-                    {
-                        GodManager.Instance.Eclipses = GUILayout.Toggle(GodManager.Instance.Eclipses, " - Eclipses?");
-                        GodManager.Instance.Planetshadows = GUILayout.Toggle(GodManager.Instance.Planetshadows, " - Planetshadows?");
-                        GodManager.Instance.Planetshine = GUILayout.Toggle(GodManager.Instance.Planetshine, " - Planetshine?");
-                        GodManager.Instance.OceanSkyReflections = GUILayout.Toggle(GodManager.Instance.OceanSkyReflections, " - Ocean Sky Reflections?");
-                    });
-                });
-            });
-
-            GUILayoutExtensions.SpacingSeparator();
+                }
+                else
+                {
+                    GUILayoutExtensions.DrawBadHolder("Ocean parameters: ", "No Ocean!?", GUISkin);
+                }
+            }
+            else
+            {
+                GUILayoutExtensions.DrawBadHolder("Body parameters: ", "No Body!?", GUISkin);
+            }
 
             GUILayout.EndScrollView();
         }

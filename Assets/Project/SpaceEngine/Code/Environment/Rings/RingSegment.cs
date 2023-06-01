@@ -33,9 +33,8 @@
 // Creator: zameran
 #endregion
 
-using SpaceEngine.Core.Patterns.Strategy.Renderable;
+using SpaceEngine.Core.Patterns.Strategy;
 using SpaceEngine.Helpers;
-
 using UnityEngine;
 using UnityEngine.Rendering;
 

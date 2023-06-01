@@ -33,12 +33,10 @@
 // Creator: zameran
 #endregion
 
+using System;
 using SpaceEngine.Core.Numerics.Matrices;
 using SpaceEngine.Core.Numerics.Shapes;
 using SpaceEngine.Core.Numerics.Vectors;
-
-using System;
-
 using UnityEngine;
 
 namespace SpaceEngine.Core.Terrain.Deformation

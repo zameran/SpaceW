@@ -33,13 +33,12 @@
 // Creator: zameran
 #endregion
 
-using SpaceEngine.Environment.Atmospheric;
-using SpaceEngine.Tools;
-using SpaceEngine.Utilities;
-
 using System;
 using System.Collections;
-
+using SpaceEngine.Environment.Atmospheric;
+using SpaceEngine.Managers;
+using SpaceEngine.Tools;
+using SpaceEngine.Utilities;
 using UnityEngine;
 
 namespace SpaceEngine.Core.Preprocess.Atmosphere

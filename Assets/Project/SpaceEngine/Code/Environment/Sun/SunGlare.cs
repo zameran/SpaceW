@@ -34,14 +34,13 @@
 #endregion
 
 using SpaceEngine.Core;
-using SpaceEngine.Core.Patterns.Strategy.Renderable;
-using SpaceEngine.Core.Patterns.Strategy.Uniformed;
+using SpaceEngine.Core.Patterns.Strategy;
 using SpaceEngine.Enums;
 using SpaceEngine.Environment.Atmospheric;
 using SpaceEngine.Helpers;
-using SpaceEngine.SciptableObjects;
+using SpaceEngine.Managers;
+using SpaceEngine.ScriptableObjects;
 using SpaceEngine.Tools;
-
 using UnityEngine;
 
 namespace SpaceEngine.Environment.Sun

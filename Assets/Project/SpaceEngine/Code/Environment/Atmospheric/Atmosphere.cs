@@ -33,19 +33,15 @@
 // Creator: zameran
 #endregion
 
+using System.ComponentModel;
 using SpaceEngine.Core;
 using SpaceEngine.Core.Bodies;
 using SpaceEngine.Core.Patterns.PropertyNotification;
-using SpaceEngine.Core.Patterns.Strategy.Eventit;
-using SpaceEngine.Core.Patterns.Strategy.Reanimator;
-using SpaceEngine.Core.Patterns.Strategy.Renderable;
-using SpaceEngine.Core.Patterns.Strategy.Uniformed;
+using SpaceEngine.Core.Patterns.Strategy;
 using SpaceEngine.Core.Preprocess.Atmosphere;
 using SpaceEngine.Enums;
 using SpaceEngine.Helpers;
-
-using System.ComponentModel;
-
+using SpaceEngine.Managers;
 using UnityEngine;
 using UnityEngine.Rendering;
 

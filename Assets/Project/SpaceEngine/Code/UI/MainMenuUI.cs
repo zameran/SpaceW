@@ -34,91 +34,92 @@
 #endregion
 
 using DG.Tweening;
-
 using SpaceEngine.Enums;
 using SpaceEngine.Helpers;
 using SpaceEngine.Managers;
 using SpaceEngine.Pluginator;
-using SpaceEngine.UI;
-
+using SpaceEngine.UI.PanelSystem;
 using UnityEngine;
 using UnityEngine.UI;
 
-public sealed class MainMenuUI : UserInterface, IUserInterface
+namespace SpaceEngine.UI
 {
-    public AssemblyLoader loader = null;
-
-    public CanvasRenderer addonsCanvasRenderer;
-    public Toggle addonsShowToggle;
-    public Text addonsCounterText;
-    public ScrollRect addonsScrollView;
-    public GameObject addonsItemPrefab;
-
-    private void Awake()
+    public sealed class MainMenuUI : UserInterface, IUserInterface
     {
-        if (loader == null) loader = Loader.Instance as AssemblyLoader;
+        public AssemblyLoader loader = null;
 
-        InitUI();
-    }
+        public CanvasRenderer addonsCanvasRenderer;
+        public Toggle addonsShowToggle;
+        public Text addonsCounterText;
+        public ScrollRect addonsScrollView;
+        public GameObject addonsItemPrefab;
 
-    public void InitUI()
-    {
-        ShowAddonsToggle_OnValueChanged(addonsShowToggle);
-
-        if (loader != null)
+        private void Awake()
         {
-            if (loader.ExternalAssemblies.Count != 0)
-            {
-                for (var i = 0; i < loader.ExternalAssemblies.Count; i++)
-                {
-                    var assembly = loader.ExternalAssemblies[i];
+            if (loader == null) loader = Loader.Instance as AssemblyLoader;
 
-                    if (assembly != null)
-                        AddToScrollView(addonsItemPrefab, addonsScrollView, assembly.Name, assembly.Version);
-                    else
-                    {
-                        Debug.LogError($"MainMenuUI: {i} assembly is null!");
-                    }
-                }
-            }
-            else
-            {
-
-            }
+            InitUI();
         }
 
-        if (addonsShowToggle != null)
-            addonsShowToggle.interactable = (loader != null);
-
-        if (addonsCounterText != null)
-            addonsCounterText.text = $"{addonsCounterText.text} {((loader == null) ? "0" : loader.ExternalAssemblies.Count.ToString())}";
-    }
-
-    public void LoadScene()
-    {
-        LevelManager.Instance.LoadSceneDelayed(EntryPoint.Scene, 0.5f);
-
-        GetComponent<UIPanel>().Hide(0.5f);
-
-        DOTween.To(() => CameraHelper.Main().backgroundColor, value => CameraHelper.Main().backgroundColor = value, Color.black, 1.0f);
-    }
-
-    public void AddToScrollView(GameObject item, ScrollRect scrollView, string name = "", string version = "")
-    {
-        var createdItem = Instantiate(item);
-        createdItem.transform.SetParent(scrollView.content.transform);
-        createdItem.transform.localScale = Vector3.one; //Must have.
-
-        var aiUI = createdItem.GetComponent<AddonItemUI>();
-        aiUI.SetCaption(aiUI.addonNameText, name);
-        aiUI.SetCaption(aiUI.addonVersionText, version);
-    }
-
-    public void ShowAddonsToggle_OnValueChanged(Toggle t)
-    {
-        if (addonsScrollView != null && t != null)
+        public void InitUI()
         {
-            addonsScrollView.gameObject.SetActive(!t.isOn);
+            ShowAddonsToggle_OnValueChanged(addonsShowToggle);
+
+            if (loader != null)
+            {
+                if (loader.ExternalAssemblies.Count != 0)
+                {
+                    for (var i = 0; i < loader.ExternalAssemblies.Count; i++)
+                    {
+                        var assembly = loader.ExternalAssemblies[i];
+
+                        if (assembly != null)
+                            AddToScrollView(addonsItemPrefab, addonsScrollView, assembly.Name, assembly.Version);
+                        else
+                        {
+                            Debug.LogError($"MainMenuUI: {i} assembly is null!");
+                        }
+                    }
+                }
+                else
+                {
+
+                }
+            }
+
+            if (addonsShowToggle != null)
+                addonsShowToggle.interactable = (loader != null);
+
+            if (addonsCounterText != null)
+                addonsCounterText.text = $"{addonsCounterText.text} {((loader == null) ? "0" : loader.ExternalAssemblies.Count.ToString())}";
+        }
+
+        public void LoadScene()
+        {
+            LevelManager.Instance.LoadSceneDelayed(EntryPoint.Scene, 0.5f);
+
+            GetComponent<UIPanel>().Hide(0.5f);
+
+            DOTween.To(() => CameraHelper.Main().backgroundColor, value => CameraHelper.Main().backgroundColor = value, Color.black, 1.0f);
+        }
+
+        public void AddToScrollView(GameObject item, ScrollRect scrollView, string name = "", string version = "")
+        {
+            var createdItem = Instantiate(item);
+            createdItem.transform.SetParent(scrollView.content.transform);
+            createdItem.transform.localScale = Vector3.one; //Must have.
+
+            var aiUI = createdItem.GetComponent<AddonItemUI>();
+            aiUI.SetCaption(aiUI.addonNameText, name);
+            aiUI.SetCaption(aiUI.addonVersionText, version);
+        }
+
+        public void ShowAddonsToggle_OnValueChanged(Toggle t)
+        {
+            if (addonsScrollView != null && t != null)
+            {
+                addonsScrollView.gameObject.SetActive(!t.isOn);
+            }
         }
     }
 }

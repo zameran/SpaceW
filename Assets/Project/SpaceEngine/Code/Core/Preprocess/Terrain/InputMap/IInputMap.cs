@@ -35,7 +35,7 @@
 
 using UnityEngine;
 
-namespace SpaceEngine.Core.Preprocess.Terrain
+namespace SpaceEngine.Core.Preprocess.Terrain.InputMap
 {
     public interface IInputMap
     {

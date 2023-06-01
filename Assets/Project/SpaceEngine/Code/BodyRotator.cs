@@ -33,8 +33,8 @@
 // Creator: zameran
 #endregion
 
+using SpaceEngine.Core;
 using SpaceEngine.Core.Bodies;
-
 using UnityEngine;
 
 namespace SpaceEngine

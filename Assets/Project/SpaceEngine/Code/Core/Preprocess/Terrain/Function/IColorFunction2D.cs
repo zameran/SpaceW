@@ -35,7 +35,7 @@
 
 using UnityEngine;
 
-namespace SpaceEngine.Core.Preprocess.Terrain
+namespace SpaceEngine.Core.Preprocess.Terrain.Function
 {
     public interface IColorFunction2D : IFunction2D<Vector4>
     {

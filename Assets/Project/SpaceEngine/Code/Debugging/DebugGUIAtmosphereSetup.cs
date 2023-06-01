@@ -33,15 +33,14 @@
 // Creator: zameran
 #endregion
 
-using SpaceEngine.Core.Bodies;
-using SpaceEngine.Core.Patterns.Strategy.Eventit;
-using SpaceEngine.Environment.Atmospheric;
-using SpaceEngine.Helpers;
-using SpaceEngine.Tools;
-
 using System;
 using System.ComponentModel;
-
+using SpaceEngine.Core.Bodies;
+using SpaceEngine.Core.Patterns.Strategy;
+using SpaceEngine.Environment.Atmospheric;
+using SpaceEngine.Helpers;
+using SpaceEngine.Managers;
+using SpaceEngine.Tools;
 using UnityEngine;
 
 namespace SpaceEngine.Debugging

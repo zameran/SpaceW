@@ -34,7 +34,6 @@
 #endregion
 
 using SpaceEngine.Helpers;
-
 using UnityEngine;
 
 namespace SpaceEngine.Core.Utilities.Gradients
@@ -77,7 +76,7 @@ namespace SpaceEngine.Core.Utilities.Gradients
             {
                 DestroyLut();
 
-                Lut = Helper.CreateTempTeture2D((int)Size.x, (int)Size.y, TextureFormat.ARGB32, false, false, false);
+                Lut = Helper.CreateTempTexture2D((int)Size.x, (int)Size.y, TextureFormat.ARGB32, false, false, false);
                 Lut.wrapMode = TextureWrapMode.Repeat;
             }
 

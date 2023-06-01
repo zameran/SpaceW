@@ -34,7 +34,6 @@
 #endregion
 
 using SpaceEngine.Core.Containers;
-
 using UnityEngine;
 
 namespace SpaceEngine.Core.Preprocess.Terrain

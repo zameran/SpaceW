@@ -1,4 +1,4 @@
-#region License
+﻿#region License
 // Procedural planet generator.
 // 
 // Copyright (C) 2015-2023 Denis Ovchinnikov [zameran] 
@@ -33,21 +33,14 @@
 // Creator: zameran
 #endregion
 
+using SpaceEngine.Core.Debugging;
 using SpaceEngine.Tools;
-
-using System;
-using System.Collections.Generic;
-
 using UnityEngine;
-
-using Object = UnityEngine.Object;
 
 namespace SpaceEngine.Debugging
 {
-    public sealed class DebugGUILeaks : DebugGUI
+    public sealed class DebugGUIPerfomanceMonitor : DebugGUI
     {
-        public Object[] Objects;
-
         protected override void Awake()
         {
             base.Awake();
@@ -56,72 +49,55 @@ namespace SpaceEngine.Debugging
         protected override void Start()
         {
             base.Start();
-
-            Objects = FindObjectsByType<Object>(FindObjectsSortMode.InstanceID);
-        }
-
-        private void FixedUpdate()
-        {
-            if (Time.frameCount % 64 == 0)
-            {
-                Objects = FindObjectsByType<Object>(FindObjectsSortMode.InstanceID);
-            }
         }
 
         protected override void OnGUI()
         {
             base.OnGUI();
 
-            GUILayout.Window(0, debugInfoBounds, UI, "Leaks Info");
+            debugInfoDrawBounds.width = Screen.width - 20;
+
+            using (new PerformanceMonitor.Timer("Repfomance Monitor OnGUI"))
+            {
+                GUI.Window(0, debugInfoDrawBounds, UI, "Perfomance Monitor (in milliseconds)");
+            }
         }
 
         protected override void UI(int id)
         {
-            ScrollPosition = GUILayout.BeginScrollView(ScrollPosition, false, true, GUILayout.Width(debugInfoBounds.width), GUILayout.Height(debugInfoBounds.height));
+            var counters = PerformanceMonitor.Counters;
+            if (counters == null || counters.Count == 0) { GUILayoutExtensions.DrawBadHolder("Perfomance stats: ", "No Data!?", GUISkin); return; }
+
+            ScrollPosition = GUILayout.BeginScrollView(ScrollPosition, false, true);
             {
-                #region Do Magic
-
-                if (Objects == null) return;
-
-                var dictionary = new Dictionary<Type, int>();
-
-                for (var i = 0; i < Objects.Length; i++)
-                {
-                    var obj = Objects[i];
-                    var key = obj.GetType();
-
-                    if (dictionary.ContainsKey(key))
-                    {
-                        dictionary[key]++;
-                    }
-                    else
-                    {
-                        dictionary[key] = 1;
-                    }
-                }
-
-                #endregion
-
-                var entries = new List<KeyValuePair<Type, int>>(dictionary);
-
-                entries.Sort((firstPair, nextPair) => nextPair.Value.CompareTo((firstPair.Value)));
-
                 GUILayout.BeginVertical();
 
-                for (var i = 0; i < entries.Count; i++)
+                for (var i = 0; i < counters.Count; i++)
                 {
-                    var entry = entries[i];
+                    var counter = counters[i];
 
-                    GUILayoutExtensions.HorizontalBoxed("", GUISkin, () =>
+                    GUILayoutExtensions.VerticalBoxed($"{counter.Name}", GUISkin, () =>
                     {
-                        GUILayoutExtensions.LabelWithFlexibleSpace(entry.Key.FullName, entry.Value.ToString());
-                    });
+                        GUILayoutExtensions.VerticalBoxed("", GUISkin, () =>
+                        {
+                            GUILayoutExtensions.Horizontal(() =>
+                            {
+                                GUILayoutExtensions.LabelWithSpace($"Total: {counter.Time / 1000.0f}", -8);
+                                GUILayoutExtensions.LabelWithSpace($"Average: {counter.Average / 1000.0f}", -8);
+                                GUILayoutExtensions.LabelWithSpace($"Last: {counter.Last / 1000.0f}", -8);
+                                GUILayoutExtensions.LabelWithSpace($"Max: {counter.Max / 1000.0f}", -8);
+                                GUILayoutExtensions.LabelWithSpace($"Count: {counter.Count}", -8);
+                            });
+                        }, GUILayout.Width(debugInfoDrawBounds.width - 45));
+                    }, GUILayout.Width(debugInfoDrawBounds.width - 40));
                 }
 
-                GUILayout.Space(10);
+                GUILayoutExtensions.SpacingSeparator();
 
                 GUILayout.EndVertical();
             }
+
+            GUILayoutExtensions.SpacingSeparator();
 
             GUILayout.EndScrollView();
         }

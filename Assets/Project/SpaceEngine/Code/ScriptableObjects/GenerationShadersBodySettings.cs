@@ -3,7 +3,7 @@
 //  
 // Copyright (C) 2015-2023 Denis Ovchinnikov [zameran] 
 // All rights reserved.
-//  
+// 
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions
 // are met:
@@ -15,7 +15,7 @@
 // 3. Neither the name of the copyright holders nor the names of its
 //    contributors may be used to endorse or promote products derived from
 //    this software without specific prior written permission.
-//  
+// 
 // THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
 // AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
 // IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -27,63 +27,29 @@
 // CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
 // ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF
 // THE POSSIBILITY OF SUCH DAMAGE.
-//  
-// Creation Date: 2017.10.22
-// Creation Time: 3:14 PM
+// 
+// Creation Date: 2017.03.03
+// Creation Time: 12:25 PM
 // Creator: zameran
 #endregion
 
-using SpaceEngine.Tools;
-
-#if UNITY_EDITOR
-using UnityEditor;
-#endif
-
+using System;
+using System.Collections.Generic;
 using UnityEngine;
 
-namespace SpaceEngine.Debugging
+namespace SpaceEngine.ScriptableObjects
 {
-    public sealed class DebugGUIDeveloperPanel : DebugGUI, IDebugAlwaysVisible
+    [Serializable]
+    [CreateAssetMenu(fileName = "GenerationShadersBodySettings", menuName = "Create Generation Shaders Body Settings")]
+    public class GenerationShadersBodySettings : ScriptableObject
     {
-        protected override void Awake()
-        {
-            base.Awake();
-        }
+        [Header("Elevation")]
+        public List<Shader> ElevationShaders;
 
-        protected override void Start()
-        {
-            base.Start();
-        }
+        [Header("Normals")]
+        public List<Shader> NormalsShaders;
 
-        protected override void OnGUI()
-        {
-            base.OnGUI();
-
-            debugInfoDrawBounds = new Rect(Screen.width - debugInfoBounds.x - debugInfoBounds.width,
-                                           Screen.height - debugInfoBounds.y - debugInfoBounds.height, debugInfoBounds.width, debugInfoBounds.height);
-
-            GUILayout.Window(9999, debugInfoDrawBounds, UI, "Developer Panel");
-        }
-
-        protected override void UI(int id)
-        {
-            GUILayoutExtensions.VerticalBoxed("Actions: ", GUISkin, () =>
-            {
-                if (GUILayout.Button("Quit")) { Quit(); }
-            });
-        }
-
-        #region API
-
-        private void Quit()
-        {
-            Application.Quit();
-
-#if UNITY_EDITOR
-            EditorApplication.isPlaying = false;
-#endif
-        }
-
-        #endregion
+        [Header("Ortho")]
+        public List<Shader> OrthoShaders;
     }
 }

@@ -34,21 +34,20 @@
 #endregion
 
 using System;
-
 using UnityEngine;
 
-namespace SpaceEngine.Core.Preprocess.Terrain
+namespace SpaceEngine.Core.Preprocess.Terrain.Function
 {
     public class PlaneColorFunction : IColorFunction2D
     {
-        InputMap Source;
+        InputMap.InputMap Source;
 
         int DestinationSize;
 
-        public PlaneColorFunction(InputMap source, int destinationSize)
+        public PlaneColorFunction(InputMap.InputMap source, int destinationSize)
         {
-            this.Source = source;
-            this.DestinationSize = destinationSize;
+            Source = source;
+            DestinationSize = destinationSize;
         }
 
         public Vector4 GetValue(int x, int y)
@@ -86,17 +85,17 @@ namespace SpaceEngine.Core.Preprocess.Terrain
 
     public class SphericalColorFunction : IColorFunction2D
     {
-        InputMap Source;
+        InputMap.InputMap Source;
 
         Projection Projection;
 
         int DestinationSize;
 
-        public SphericalColorFunction(InputMap source, Projection projection, int destinationSize)
+        public SphericalColorFunction(InputMap.InputMap source, Projection projection, int destinationSize)
         {
-            this.Source = source;
-            this.Projection = projection;
-            this.DestinationSize = destinationSize;
+            Source = source;
+            Projection = projection;
+            DestinationSize = destinationSize;
         }
 
         public Vector4 GetValue(int x, int y)

@@ -34,10 +34,9 @@
 #endregion
 
 using DG.Tweening;
-
 using UnityEngine;
 
-namespace SpaceEngine.UI
+namespace SpaceEngine.UI.PanelSystem
 {
     [RequireComponent(typeof(CanvasGroup))]
     public abstract class UIOverlay : MonoBehaviour

@@ -35,7 +35,6 @@
 
 using System;
 using System.Runtime.InteropServices;
-
 using UnityEngine;
 
 namespace SpaceEngine.Environment.Atmospheric
@@ -86,26 +85,26 @@ namespace SpaceEngine.Environment.Atmospheric
 
         public AtmosphereParameters(AtmosphereParameters from)
         {
-            this.MIE_G = from.MIE_G;
+            MIE_G = from.MIE_G;
 
-            this.HR = from.HR;
-            this.HM = from.HM;
+            HR = from.HR;
+            HM = from.HM;
 
-            this.AVERAGE_GROUND_REFLECTANCE = from.AVERAGE_GROUND_REFLECTANCE;
+            AVERAGE_GROUND_REFLECTANCE = from.AVERAGE_GROUND_REFLECTANCE;
 
-            this.BETA_R = from.BETA_R;
-            this.BETA_MSca = from.BETA_MSca;
-            this.BETA_MEx = from.BETA_MEx;
+            BETA_R = from.BETA_R;
+            BETA_MSca = from.BETA_MSca;
+            BETA_MEx = from.BETA_MEx;
 
-            this.Rg = from.Rg;
-            this.Rt = from.Rt;
-            this.Rl = from.Rl;
+            Rg = from.Rg;
+            Rt = from.Rt;
+            Rl = from.Rl;
 
-            this.bRg = from.bRg;
-            this.bRt = from.bRt;
-            this.bRl = from.bRl;
+            bRg = from.bRg;
+            bRt = from.bRt;
+            bRl = from.bRl;
 
-            this.SCALE = from.SCALE;
+            SCALE = from.SCALE;
         }
 
         public AtmosphereParameters(float MIE_G, float HR, float HM, float AVERAGE_GROUND_REFLECTANCE,

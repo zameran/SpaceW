@@ -33,45 +33,60 @@
 // Creator: zameran
 #endregion
 
-using SpaceEngine.Helpers;
-
+using SpaceEngine.Enums;
+using SpaceEngine.Managers;
+using SpaceEngine.Tools;
 using UnityEngine;
 
 namespace SpaceEngine.Debugging
 {
-    public sealed class DebugDrawTerrainNode : DebugDraw
+    public sealed class DebugGUISettings : DebugGUI
     {
-        private readonly int[,] ORDER = new int[,] { { 1, 0 }, { 2, 3 }, { 0, 2 }, { 3, 1 } };
-        private readonly Color[] Colors = new Color[] { Color.blue, Color.red, Color.yellow, Color.green, Color.magenta, Color.cyan };
+        protected override void Awake()
+        {
+            base.Awake();
+        }
 
         protected override void Start()
         {
             base.Start();
         }
 
-        protected override void OnPostRender()
+        protected override void OnGUI()
         {
-            base.OnPostRender();
+            base.OnGUI();
+
+            GUILayout.Window(0, debugInfoBounds, UI, "Settings");
         }
 
-        protected override void CreateLineMaterial()
+        protected override void UI(int id)
         {
-            base.CreateLineMaterial();
-        }
+            ScrollPosition = GUILayout.BeginScrollView(ScrollPosition, false, true);
 
-        protected override void Draw()
-        {
-            var target = GodManager.Instance.ActiveBody;
-
-            if (target == null) return;
-
-            for (var i = 0; i < target.TerrainNodes.Count; i++)
+            GUILayoutExtensions.VerticalBoxed("Rendering parameters: ", GUISkin, () =>
             {
-                var q = target.TerrainNodes[i];
-                var root = q.TerrainQuadRoot;
+                GUILayoutExtensions.VerticalBoxed("", GUISkin, () =>
+                {
+                    GUILayoutExtensions.VerticalBoxed("Fragment HDR Mode: ", GUISkin, () =>
+                    {
+                        GodManager.Instance.HDRMode = (FragmentHDR)GUILayout.SelectionGrid((int)GodManager.Instance.HDRMode, System.Enum.GetNames(typeof(FragmentHDR)), 2);
+                    });
 
-                root?.DrawQuadOutline(CameraHelper.Main(), lineMaterial, Colors[q.Face % 6], ORDER);
-            }
+                    GUILayoutExtensions.SpacingSeparator();
+
+                    GUILayoutExtensions.VerticalBoxed("Features: ", GUISkin, () =>
+                    {
+                        GodManager.Instance.Eclipses = GUILayout.Toggle(GodManager.Instance.Eclipses, " - Eclipses?");
+                        GodManager.Instance.Planetshadows = GUILayout.Toggle(GodManager.Instance.Planetshadows, " - Planetshadows?");
+                        GodManager.Instance.Planetshine = GUILayout.Toggle(GodManager.Instance.Planetshine, " - Planetshine?");
+                        GodManager.Instance.OceanSkyReflections = GUILayout.Toggle(GodManager.Instance.OceanSkyReflections, " - Ocean Sky Reflections?");
+                    });
+                });
+            });
+
+            GUILayoutExtensions.SpacingSeparator();
+
+            GUILayout.EndScrollView();
         }
     }
 }

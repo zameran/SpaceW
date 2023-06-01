@@ -33,18 +33,16 @@
 // Creator: zameran
 #endregion
 
+using System;
+using System.Collections.Generic;
+using System.IO;
 using SpaceEngine.Core.Exceptions;
 using SpaceEngine.Core.Storage;
 using SpaceEngine.Core.Tile.Producer;
 using SpaceEngine.Core.Tile.Storage;
-
-using System;
-using System.Collections.Generic;
-using System.IO;
-
 using UnityEngine;
 
-namespace SpaceEngine.Core
+namespace SpaceEngine.Core.Producers.Ortho
 {
     public class OrthoCPUProducer : TileProducer
     {

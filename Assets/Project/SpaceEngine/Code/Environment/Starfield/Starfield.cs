@@ -33,23 +33,19 @@
 // Creator: zameran
 #endregion
 
-using SpaceEngine.Core;
-using SpaceEngine.Core.Patterns.Strategy.Renderable;
-using SpaceEngine.Core.Patterns.Strategy.Uniformed;
-using SpaceEngine.Enums;
-using SpaceEngine.Helpers;
-using SpaceEngine.Tools;
-
 using System;
 using System.Collections.Generic;
 using System.IO;
-
+using SpaceEngine.Core;
+using SpaceEngine.Core.Patterns.Strategy;
+using SpaceEngine.Enums;
+using SpaceEngine.Helpers;
+using SpaceEngine.Tools;
 using UnityEngine;
 using UnityEngine.Rendering;
-
 using Random = UnityEngine.Random;
 
-namespace SpaceEngine.Environment.Startfield
+namespace SpaceEngine.Environment.Starfield
 {
     public class Starfield : Node<Starfield>, IUniformed<Material>, IRenderable<Starfield>
     {

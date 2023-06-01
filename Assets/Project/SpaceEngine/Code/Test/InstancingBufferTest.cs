@@ -34,10 +34,9 @@
 #endregion
 
 using System.Collections.Generic;
-
 using UnityEngine;
 
-namespace SpaceEngine.Tests
+namespace SpaceEngine.Test
 {
     public class InstancingBufferTest : MonoBehaviour
     {

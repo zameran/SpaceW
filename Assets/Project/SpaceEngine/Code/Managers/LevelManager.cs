@@ -33,14 +33,12 @@
 // Creator: zameran
 #endregion
 
+using System;
+using System.Collections;
 using SpaceEngine.Core.Patterns.Singleton;
 using SpaceEngine.Enums;
 using SpaceEngine.Tools;
-using SpaceEngine.UI.Panels;
-
-using System;
-using System.Collections;
-
+using SpaceEngine.UI.PanelSystem.Panels;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 

@@ -34,7 +34,6 @@
 #endregion
 
 using SpaceEngine.Managers;
-
 using UnityEngine;
 
 namespace SpaceEngine.Core
@@ -57,7 +56,7 @@ namespace SpaceEngine.Core
         {
             InitNode();
 
-            if (DebugSequenceManager.Instance != null) DebugSequenceManager.Instance.Debug(this);
+            if (DebugSequenceManager.Instance != null) DebugSequenceManager.Instance.DebugSequence(this);
         }
 
         protected virtual void Update()

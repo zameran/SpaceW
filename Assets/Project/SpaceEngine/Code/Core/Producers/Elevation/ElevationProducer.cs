@@ -33,21 +33,20 @@
 // Creator: zameran
 #endregion
 
+using System;
+using System.Collections.Generic;
 using SpaceEngine.Core.Exceptions;
 using SpaceEngine.Core.Numerics.Vectors;
 using SpaceEngine.Core.Storage;
 using SpaceEngine.Core.Tile.Producer;
 using SpaceEngine.Core.Tile.Storage;
 using SpaceEngine.Helpers;
+using SpaceEngine.Managers;
 using SpaceEngine.Tools;
 using SpaceEngine.Utilities;
-
-using System;
-using System.Collections.Generic;
-
 using UnityEngine;
 
-namespace SpaceEngine.Core
+namespace SpaceEngine.Core.Producers.Elevation
 {
     /// <summary>
     /// Creates the elevations data for the terrain from perlin noise.

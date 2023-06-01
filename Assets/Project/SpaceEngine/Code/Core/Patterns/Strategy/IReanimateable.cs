@@ -33,7 +33,7 @@
 // Creator: zameran
 #endregion
 
-namespace SpaceEngine.Core.Patterns.Strategy.Reanimator
+namespace SpaceEngine.Core.Patterns.Strategy
 {
     /// <summary>
     /// Interface provides some strategy methods for a special 

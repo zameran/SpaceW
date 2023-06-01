@@ -33,9 +33,9 @@
 // Creator: zameran
 #endregion
 
+using SpaceEngine.Core;
 using SpaceEngine.Core.Numerics.Matrices;
 using SpaceEngine.Debugging;
-
 using UnityEngine;
 
 namespace SpaceEngine.Cameras

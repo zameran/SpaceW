@@ -33,14 +33,13 @@
 // Creator: zameran
 #endregion
 
-using SpaceEngine.Core.Patterns.Singleton;
-
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Text;
-
+using SpaceEngine.Core.Patterns.Singleton;
 using UnityEngine;
+using Debug = UnityEngine.Debug;
 
 namespace SpaceEngine.Managers
 {
@@ -51,14 +50,22 @@ namespace SpaceEngine.Managers
         {
             int IComparer<SequenceEntry>.Compare(SequenceEntry a, SequenceEntry b)
             {
-                if (a == null || b == null) return 0;
+                if (a == null || b == null)
+                {
+                    return 0;
+                }
 
                 if (a.TimeSinceStartup > b.TimeSinceStartup)
+                {
                     return 1;
+                }
+
                 if (a.TimeSinceStartup < b.TimeSinceStartup)
+                {
                     return -1;
-                else
-                    return 0;
+                }
+
+                return 0;
             }
         }
 
@@ -81,9 +88,10 @@ namespace SpaceEngine.Managers
 
         public override bool Equals(object obj)
         {
-            var p = obj as SequenceEntry;
-
-            if (p == null) return false;
+            if (obj is not SequenceEntry p)
+            {
+                return false;
+            }
 
             return (Name == p.Name) && (Frame == p.Frame);
         }
@@ -99,10 +107,10 @@ namespace SpaceEngine.Managers
     /// </summary>
     public class DebugSequenceManager : MonoSingleton<DebugSequenceManager>
     {
-        public List<SequenceEntry> Sequence = new List<SequenceEntry>();
-        public List<SequenceEntry> NestedSequence = new List<SequenceEntry>();
+        public List<SequenceEntry> Sequence = new();
+        public List<SequenceEntry> NestedSequence = new();
 
-        public SequenceEntry.Sort Sorter = new SequenceEntry.Sort();
+        private readonly SequenceEntry.Sort Sorter = new();
 
         private void Awake()
         {
@@ -124,7 +132,7 @@ namespace SpaceEngine.Managers
                     stringBuilder.AppendLine($"{sequenceEntry.Name}:{sequenceEntry.TimeSinceStartup}");
                 }
 
-                UnityEngine.Debug.Log(stringBuilder.ToString());
+                Debug.Log(stringBuilder.ToString());
             }
 
             #endregion
@@ -134,15 +142,19 @@ namespace SpaceEngine.Managers
         /// Add a <see cref="MonoBehaviour"/> to the debug sequence.
         /// </summary>
         /// <param name="owner">Owner.</param>
-        /// <param name="stackFrameOffset">Stack fram offset for a method, wich will be added.</param>
-        public void Debug(MonoBehaviour owner, int stackFrameOffset = 1)
+        /// <param name="stackFrameOffset">Stack from offset for a method, which will be added.</param>
+        public void DebugSequence(MonoBehaviour owner, int stackFrameOffset = 1)
         {
-            var entry = new SequenceEntry(string.Format("{0} [{1}:{2}.{3}]", owner.gameObject.name, 
-                                                                             owner.name, 
-                                                                             owner.GetType().Name, new StackTrace().GetFrame(stackFrameOffset).GetMethod().Name));
+            var entry = new SequenceEntry($"{owner.gameObject.name} [{owner.name}:{owner.GetType().Name}.{new StackTrace().GetFrame(stackFrameOffset).GetMethod().Name}]");
 
-            if (Sequence.Contains(entry)) { NestedSequence.Add(entry); }
-            else Sequence.Add(entry);
+            if (Sequence.Contains(entry))
+            {
+                NestedSequence.Add(entry);
+            }
+            else
+            {
+                Sequence.Add(entry);
+            }
 
             Sequence.Sort(Sorter);
             NestedSequence.Sort(Sorter);

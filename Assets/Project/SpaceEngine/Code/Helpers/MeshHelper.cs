@@ -34,7 +34,6 @@
 #endregion
 
 using System.Collections.Generic;
-
 using UnityEngine;
 
 namespace SpaceEngine.Helpers
@@ -266,7 +265,7 @@ namespace SpaceEngine.Helpers
 
         public static Mesh DuplicateMesh(Mesh mesh)
         {
-            return UnityEngine.Object.Instantiate(mesh);
+            return Object.Instantiate(mesh);
         }
     }
 }

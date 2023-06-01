@@ -33,11 +33,9 @@
 // Creator: zameran
 #endregion
 
+using System.Collections.Generic;
 using SpaceEngine.Core.Tile.Storage;
 using SpaceEngine.Core.Tile.Tasks;
-
-using System.Collections.Generic;
-
 using UnityEngine;
 
 namespace SpaceEngine.Core.Tile

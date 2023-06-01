@@ -34,10 +34,9 @@
 #endregion
 
 using System;
-
 using UnityEngine;
 
-namespace SpaceEngine.Core.Preprocess.Terrain
+namespace SpaceEngine.Core.Preprocess.Terrain.InputMap
 {
     public class TextureInputMap : InputMap
     {

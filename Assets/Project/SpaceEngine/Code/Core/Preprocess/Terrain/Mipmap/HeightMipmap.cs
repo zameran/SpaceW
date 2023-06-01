@@ -33,16 +33,15 @@
 // Creator: zameran
 #endregion
 
-using SpaceEngine.Core.Debugging;
-
 using System;
 using System.IO;
-
+using SpaceEngine.Core.Debugging;
+using SpaceEngine.Core.Preprocess.Terrain.Function;
+using SpaceEngine.Mathematics;
 using UnityEngine;
-
 using Logger = SpaceEngine.Core.Debugging.Logger;
 
-namespace SpaceEngine.Core.Preprocess.Terrain
+namespace SpaceEngine.Core.Preprocess.Terrain.Mipmap
 {
     [UseLogger(LoggerCategory.Core)]
     public class HeightMipmap : TileCache
@@ -399,13 +398,13 @@ namespace SpaceEngine.Core.Preprocess.Terrain
 
         protected void GetTile(int level, int tx, int ty, float[] tile)
         {
-            var tileSize = Mathf.Min(TopLevelSize << level, this.Size);
+            var tileSize = Mathf.Min(TopLevelSize << level, Size);
 
             for (var j = 0; j <= tileSize + 4; ++j)
             {
                 for (var i = 0; i <= tileSize + 4; ++i)
                 {
-                    tile[i + j * (this.Size + 5)] = GetTileHeight(i + tileSize * tx - 2, j + tileSize * ty - 2) / Scale;
+                    tile[i + j * (Size + 5)] = GetTileHeight(i + tileSize * tx - 2, j + tileSize * ty - 2) / Scale;
                 }
             }
         }
@@ -542,10 +541,10 @@ namespace SpaceEngine.Core.Preprocess.Terrain
             maxR = 0.0f;
             meanR = 0.0f;
 
-            var tileSize = Mathf.Min(TopLevelSize << level, this.Size);
+            var tileSize = Mathf.Min(TopLevelSize << level, Size);
             var px = 1 + (tx % 2) * tileSize / 2;
             var py = 1 + (ty % 2) * tileSize / 2;
-            var n = this.Size + 5;
+            var n = Size + 5;
 
             for (var j = 0; j <= tileSize + 4; ++j)
             {
@@ -618,10 +617,10 @@ namespace SpaceEngine.Core.Preprocess.Terrain
         {
             maxError = 0.0f;
 
-            var tileSize = Mathf.Min(TopLevelSize << level, this.Size);
+            var tileSize = Mathf.Min(TopLevelSize << level, Size);
             var px = 1 + (tx % 2) * tileSize / 2;
             var py = 1 + (ty % 2) * tileSize / 2;
-            var n = this.Size + 5;
+            var n = Size + 5;
 
             for (var j = 0; j <= tileSize + 4; ++j)
             {
@@ -689,7 +688,7 @@ namespace SpaceEngine.Core.Preprocess.Terrain
 
         private void ProduceTile(int level, int tx, int ty, ref long offset, long[] offsets, string file)
         {
-            var tileSize = Mathf.Min(TopLevelSize << level, this.Size);
+            var tileSize = Mathf.Min(TopLevelSize << level, Size);
 
             Logger.Log($"HeightMipmap.ProduceTile: Producing tile {level}:{tx}:{ty}!");
 

@@ -33,59 +33,62 @@
 // Creator: zameran
 #endregion
 
-/// <summary>
-/// Space body type description enumerator for using in generator.
-/// </summary>
-public enum BodyType
+namespace SpaceEngine.Enums
 {
-    HotSelena,
-    WarmSelena,
-    CalidSelena,
-    TemperateSelena,
-    CoolSelena,
-    ColdSelena,
-    FrozenSelena,
+    /// <summary>
+    /// Space body type description enumerator for using in generator.
+    /// </summary>
+    public enum BodyType
+    {
+        HotSelena,
+        WarmSelena,
+        CalidSelena,
+        TemperateSelena,
+        CoolSelena,
+        ColdSelena,
+        FrozenSelena,
 
-    CoolIcy,
-    ColdIcy,
-    FrozenIcy,
+        CoolIcy,
+        ColdIcy,
+        FrozenIcy,
 
-    HotDesert,
-    WarmDesert,
-    CalidDesert,
-    TemperateDesert,
-    CoolDesert,
-    ColdDesert,
+        HotDesert,
+        WarmDesert,
+        CalidDesert,
+        TemperateDesert,
+        CoolDesert,
+        ColdDesert,
 
-    CalidTerra,
-    TemperateTerra,
-    CoolTerra,
+        CalidTerra,
+        TemperateTerra,
+        CoolTerra,
 
-    WarmOceania,
-    CalidOceania,
-    TemperateOceania,
-    CoolOceania,
+        WarmOceania,
+        CalidOceania,
+        TemperateOceania,
+        CoolOceania,
 
-    CoolTitan,
-    ColdTitan,
-    FrozenTitan,
+        CoolTitan,
+        ColdTitan,
+        FrozenTitan,
 
-    HotNeptune,
-    WarmNeptune,
-    CalidNeptune,
-    TemperateNeptune,
-    CoolNeptune,
-    ColdNeptune,
-    FrozenNeptune,
+        HotNeptune,
+        WarmNeptune,
+        CalidNeptune,
+        TemperateNeptune,
+        CoolNeptune,
+        ColdNeptune,
+        FrozenNeptune,
 
-    HotJupiter,
-    WarmJupiter,
-    CalidJupiter,
-    TemperateJupiter,
-    CoolJupiter,
-    ColdJupiter,
-    FrozenJupiter,
+        HotJupiter,
+        WarmJupiter,
+        CalidJupiter,
+        TemperateJupiter,
+        CoolJupiter,
+        ColdJupiter,
+        FrozenJupiter,
 
-    Asteroid,
-    Comet
+        Asteroid,
+        Comet
+    }
 }

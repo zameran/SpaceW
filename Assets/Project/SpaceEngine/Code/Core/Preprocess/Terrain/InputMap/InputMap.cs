@@ -35,13 +35,11 @@
 
 using SpaceEngine.Core.Containers;
 using SpaceEngine.Core.Exceptions;
-
 using UnityEngine;
-
 using EqualityComparerID = SpaceEngine.Core.Tile.Tile.EqualityComparerID;
 using Id = SpaceEngine.Core.Tile.Tile.Id;
 
-namespace SpaceEngine.Core.Preprocess.Terrain
+namespace SpaceEngine.Core.Preprocess.Terrain.InputMap
 {
     /// <summary>
     /// An abstract raster data map. A map is a 2D array of pixels, whose values can come from anywhere (this depends on how you implement the <see cref="GetValue"/> method). 

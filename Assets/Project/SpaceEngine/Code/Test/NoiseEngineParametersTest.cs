@@ -35,7 +35,7 @@
 
 using UnityEngine;
 
-namespace SpaceEngine.Tests
+namespace SpaceEngine.Test
 {
     [ExecuteInEditMode]
     public sealed class NoiseEngineParametersTest : MonoBehaviour
